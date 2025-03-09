@@ -126,11 +126,11 @@ function args_run() {
 						});
 					}
 					else {
-						kinc_log(tr("Invalid export directory"));
+						iron_log(tr("Invalid export directory"));
 					}
 				}
 				else {
-					kinc_log(tr("Invalid texture type"));
+					iron_log(tr("Invalid texture type"));
 				}
 			}
 
@@ -143,7 +143,7 @@ function args_run() {
 					export_mesh_run(args_export_mesh_path + path_sep + f, null, false);
 				}
 				else {
-					kinc_log(tr("Invalid export directory"));
+					iron_log(tr("Invalid export directory"));
 				}
 			}
 
@@ -153,7 +153,7 @@ function args_run() {
 			}
 
 			if (args_background) {
-				kinc_stop();
+				iron_stop();
 			}
 		});
 	}

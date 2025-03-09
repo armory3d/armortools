@@ -52,15 +52,15 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			}
 			let m: slot_layer_t = layers_new_mask(false, context_raw.layer);
 			app_notify_on_next_frame(function (m: slot_layer_t) {
-				iron_g4_begin(m.texpaint);
-				kinc_g5_set_pipeline(pipes_colorid_to_mask);
+				_iron_g4_begin(m.texpaint);
+				iron_g5_set_pipeline(pipes_colorid_to_mask);
 				let rt: render_target_t = map_get(render_path_render_targets, "texpaint_colorid");
-				iron_g4_set_texture(pipes_texpaint_colorid, rt._image);
-				iron_g4_set_texture(pipes_tex_colorid, project_get_image(project_assets[context_raw.colorid_handle.position]));
-				kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
-				kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
+				_iron_g4_set_texture(pipes_texpaint_colorid, rt._image);
+				_iron_g4_set_texture(pipes_tex_colorid, project_get_image(project_assets[context_raw.colorid_handle.position]));
+				iron_g4_set_vertex_buffer(const_data_screen_aligned_vb);
+				iron_g4_set_index_buffer(const_data_screen_aligned_ib);
 				iron_g4_draw_indexed_vertices();
-				iron_g4_end();
+				_iron_g4_end();
 				context_raw.colorid_picked = false;
 				ui_toolbar_handle.redraws = 1;
 				ui_header_handle.redraws = 1;
@@ -178,7 +178,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			tr("Object ID"),
 			tr("Vertex Color"),
 		];
-		if (kinc_g5_raytrace_supported()) {
+		if (iron_g5_raytrace_supported()) {
 			array_push(bakes, tr("Lightmap"));
 			array_push(bakes, tr("Bent Normal"));
 			array_push(bakes, tr("Thickness"));
@@ -189,7 +189,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 
 		context_raw.bake_type = ui_combo(bake_handle, bakes, tr("Bake"));
 
-		if (!kinc_g5_raytrace_supported()) {
+		if (!iron_g5_raytrace_supported()) {
 			context_raw.bake_type += 1; // Offset for removed AO
 		}
 
@@ -338,7 +338,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			context_raw.brush_scale = ui_slider(brush_scale_handle, tr("UV Scale"), 0.01, 5.0, true);
 			if (brush_scale_handle.changed) {
 				if (context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT) {
-					let current: kinc_g5_texture_t = _g2_current;
+					let current: iron_g5_texture_t = _g2_current;
 					g2_end();
 					util_render_make_decal_preview();
 					g2_begin(current);
@@ -423,7 +423,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			ui._w = w;
 
 			if (h.changed) {
-				let current: kinc_g5_texture_t = _g2_current;
+				let current: iron_g5_texture_t = _g2_current;
 				g2_end();
 				util_render_make_text_preview();
 				util_render_make_decal_preview();
@@ -436,7 +436,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			ui_combo(context_raw.fill_type_handle, fill_mode_combo, tr("Fill Mode"));
 			if (context_raw.fill_type_handle.changed) {
 				if (context_raw.fill_type_handle.position == fill_type_t.FACE) {
-					let current: kinc_g5_texture_t = _g2_current;
+					let current: iron_g5_texture_t = _g2_current;
 					g2_end();
 					// cache_uv_map();
 					util_uv_cache_triangle_map();

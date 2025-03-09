@@ -31,7 +31,7 @@ function lz4_encode(b: buffer_t): buffer_t {
 	let ibuf: u8_array_t = b;
 	let ilen: u32 = ibuf.length;
 	if (ilen >= 0x7e000000) {
-		kinc_log("LZ4 range error");
+		iron_log("LZ4 range error");
 		return null;
 	}
 

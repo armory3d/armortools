@@ -37,9 +37,9 @@ typedef struct {
 	int computeOffset;
 } ConstantLocation5Impl;
 
-typedef struct kinc_g5_sampler_impl {
+typedef struct iron_g5_sampler_impl {
 	int a;
-} kinc_g5_sampler_impl_t;
+} iron_g5_sampler_impl_t;
 
 struct WGPUShaderModuleImpl;
 
@@ -53,6 +53,6 @@ typedef struct {
 	int indexCount;
 } CommandList5Impl;
 
-typedef struct kinc_g5_compute_shader_impl {
+typedef struct iron_g5_compute_shader_impl {
 	int nothing;
-} kinc_g5_compute_shader_impl;
+} iron_g5_compute_shader_impl;

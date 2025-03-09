@@ -494,9 +494,9 @@ size_t _gc_stop() {
 }
 
 size_t _gc_run() {
-	// double t = kinc_time();
+	// double t = iron_time();
 	gc_mark();
 	size_t collected = gc_sweep();
-	// kinc_log("gc took %fms, freed %db.\n", (kinc_time() - t) * 1000, collected);
+	// iron_log("gc took %fms, freed %db.\n", (iron_time() - t) * 1000, collected);
 	return collected;
 }

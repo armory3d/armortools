@@ -175,7 +175,7 @@ function make_material_parse_paint_material(bake_previews: bool = true) {
 	}
 
 	if (bake_previews) {
-		let current: kinc_g5_texture_t = _g2_current;
+		let current: iron_g5_texture_t = _g2_current;
 		let g2_in_use: bool = _g2_in_use;
 		if (g2_in_use) g2_end();
 		make_material_bake_node_previews();
@@ -255,8 +255,8 @@ function make_material_bake_node_previews() {
 	for (let i: i32 = 0; i < keys.length; ++i) {
 		let key: string = keys[i];
 		if (array_index_of(context_raw.node_previews_used, key) == -1) {
-			let image: kinc_g5_texture_t = map_get(context_raw.node_previews, key);
-			app_notify_on_next_frame(function (image: kinc_g5_texture_t) {
+			let image: iron_g5_texture_t = map_get(context_raw.node_previews, key);
+			app_notify_on_next_frame(function (image: iron_g5_texture_t) {
 				iron_unload_image(image);
 			}, image);
 			map_delete(context_raw.node_previews, key);
@@ -286,7 +286,7 @@ function make_material_traverse_nodes(nodes: ui_node_t[], group: ui_node_canvas_
 function make_material_bake_node_preview(node: ui_node_t, group: ui_node_canvas_t, parents: ui_node_t[]) {
 	if (node.type == "BLUR") {
 		let id: string = parser_material_node_name(node, parents);
-		let image: kinc_g5_texture_t = map_get(context_raw.node_previews, id);
+		let image: iron_g5_texture_t = map_get(context_raw.node_previews, id);
 		array_push(context_raw.node_previews_used, id);
 		let res_x: i32 = math_floor(config_get_texture_res_x() / 4);
 		let res_y: i32 = math_floor(config_get_texture_res_y() / 4);
@@ -304,7 +304,7 @@ function make_material_bake_node_preview(node: ui_node_t, group: ui_node_canvas_
 	}
 	else if (node.type == "DIRECT_WARP") {
 		let id: string = parser_material_node_name(node, parents);
-		let image: kinc_g5_texture_t = map_get(context_raw.node_previews, id);
+		let image: iron_g5_texture_t = map_get(context_raw.node_previews, id);
 		array_push(context_raw.node_previews_used, id);
 		let res_x: i32 = math_floor(config_get_texture_res_x());
 		let res_y: i32 = math_floor(config_get_texture_res_y());
@@ -320,7 +320,7 @@ function make_material_bake_node_preview(node: ui_node_t, group: ui_node_canvas_
 	}
 	else if (node.type == "BAKE_CURVATURE") {
 		let id: string = parser_material_node_name(node, parents);
-		let image: kinc_g5_texture_t = map_get(context_raw.node_previews, id);
+		let image: iron_g5_texture_t = map_get(context_raw.node_previews, id);
 		array_push(context_raw.node_previews_used, id);
 		let res_x: i32 = math_floor(config_get_texture_res_x());
 		let res_y: i32 = math_floor(config_get_texture_res_y());

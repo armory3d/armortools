@@ -5,30 +5,30 @@
 #include <unistd.h>
 #include <wchar.h>
 
-void kinc_mutex_init(kinc_mutex_t *mutex) {
+void iron_mutex_init(iron_mutex_t *mutex) {
 	pthread_mutexattr_t attr;
 	pthread_mutexattr_init(&attr);
 	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
 	pthread_mutex_init(&mutex->impl.mutex, &attr);
 }
 
-void kinc_mutex_destroy(kinc_mutex_t *mutex) {
+void iron_mutex_destroy(iron_mutex_t *mutex) {
 	pthread_mutex_destroy(&mutex->impl.mutex);
 }
 
-bool kinc_mutex_try_to_lock(kinc_mutex_t *mutex) {
+bool iron_mutex_try_to_lock(iron_mutex_t *mutex) {
 	return pthread_mutex_trylock(&mutex->impl.mutex) == 0;
 }
 
-void kinc_mutex_lock(kinc_mutex_t *mutex) {
+void iron_mutex_lock(iron_mutex_t *mutex) {
 	pthread_mutex_lock(&mutex->impl.mutex);
 }
 
-void kinc_mutex_unlock(kinc_mutex_t *mutex) {
+void iron_mutex_unlock(iron_mutex_t *mutex) {
 	pthread_mutex_unlock(&mutex->impl.mutex);
 }
 
-#if !defined(KINC_IOS) && !defined(KINC_MACOS)
+#if !defined(IRON_IOS) && !defined(IRON_MACOS)
 
 struct thread_start {
 	void (*thread)(void *param);
@@ -46,7 +46,7 @@ static void *ThreadProc(void *arg) {
 	return NULL;
 }
 
-void kinc_thread_init(kinc_thread_t *t, void (*thread)(void *param), void *param) {
+void iron_thread_init(iron_thread_t *t, void (*thread)(void *param), void *param) {
 	t->impl.param = param;
 	t->impl.thread = thread;
 	pthread_attr_t attr;
@@ -67,20 +67,20 @@ void kinc_thread_init(kinc_thread_t *t, void (*thread)(void *param), void *param
 	pthread_attr_destroy(&attr);
 }
 
-void kinc_thread_wait_and_destroy(kinc_thread_t *thread) {
+void iron_thread_wait_and_destroy(iron_thread_t *thread) {
 	int ret;
 	do {
 		ret = pthread_join(thread->impl.pthread, NULL);
 	} while (ret != 0);
 }
 
-bool kinc_thread_try_to_destroy(kinc_thread_t *thread) {
+bool iron_thread_try_to_destroy(iron_thread_t *thread) {
 	return pthread_join(thread->impl.pthread, NULL) == 0;
 }
 
-void kinc_threads_init() {}
+void iron_threads_init() {}
 
-void kinc_threads_quit() {}
+void iron_threads_quit() {}
 
 // Alternatively _GNU_SOURCE can be defined to make
 // the headers declare it but let's not make it too
@@ -88,14 +88,14 @@ void kinc_threads_quit() {}
 int pthread_setname_np(pthread_t thread, const char *name);
 #endif
 
-void kinc_thread_set_name(const char *name) {
-#if !defined(KINC_IOS) && !defined(KINC_MACOS)
+void iron_thread_set_name(const char *name) {
+#if !defined(IRON_IOS) && !defined(IRON_MACOS)
 	pthread_setname_np(pthread_self(), name);
 #else
 	pthread_setname_np(name);
 #endif
 }
 
-void kinc_thread_sleep(int milliseconds) {
+void iron_thread_sleep(int milliseconds) {
 	usleep(1000 * (useconds_t)milliseconds);
 }

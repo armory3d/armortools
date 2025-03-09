@@ -146,32 +146,32 @@ static void winerror(HRESULT result) {
 		FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, dw,
 		               MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&buffer, 0, NULL);
 
-		kinc_error("Error: %s", buffer);
+		iron_error("Error: %s", buffer);
 	}
 	else {
 
-		kinc_error("Unknown Windows error, return value was 0x%x.", result);
+		iron_error("Unknown Windows error, return value was 0x%x.", result);
 
 	}
 }
 
-void kinc_microsoft_affirm(HRESULT result) {
+void iron_microsoft_affirm(HRESULT result) {
 	if (result != S_OK) {
 		winerror(result);
 	}
 }
 
-void kinc_microsoft_affirm_message(HRESULT result, const char *format, ...) {
+void iron_microsoft_affirm_message(HRESULT result, const char *format, ...) {
 
 }
 
-void kinc_microsoft_format(const char *format, va_list args, wchar_t *buffer) {
+void iron_microsoft_format(const char *format, va_list args, wchar_t *buffer) {
 	char cbuffer[4096];
 	vsprintf(cbuffer, format, args);
 	MultiByteToWideChar(CP_UTF8, 0, cbuffer, -1, buffer, 4096);
 }
 
-#ifdef KINC_NO_CLIB
+#ifdef IRON_NO_CLIB
 #ifndef NDEBUG
 void _wassert(wchar_t const *message, wchar_t const *filename, unsigned line) {
 	__debugbreak();
@@ -263,7 +263,7 @@ static BOOL CALLBACK EnumerationCallback(HMONITOR monitor, HDC hdc_unused, LPREC
 	return TRUE;
 }
 
-void kinc_display_init() {
+void iron_display_init() {
 	if (display_initialized) {
 		return;
 	}
@@ -276,22 +276,22 @@ void kinc_display_init() {
 	display_initialized = true;
 }
 
-int kinc_windows_get_display_for_monitor(struct HMONITOR__ *monitor) {
+int iron_windows_get_display_for_monitor(struct HMONITOR__ *monitor) {
 	for (int i = 0; i < MAXIMUM_DISPLAYS; ++i) {
 		if (displays[i].monitor == monitor) {
 			return i;
 		}
 	}
 
-	kinc_error("Display for monitor not found");
+	iron_error("Display for monitor not found");
 	return -1;
 }
 
-int kinc_count_displays() {
+int iron_count_displays() {
 	return screen_counter;
 }
 
-int kinc_primary_display() {
+int iron_primary_display() {
 	for (int i = 0; i < MAXIMUM_DISPLAYS; ++i) {
 		DisplayData *display = &displays[i];
 
@@ -300,15 +300,15 @@ int kinc_primary_display() {
 		}
 	}
 
-	kinc_error("No primary display defined");
+	iron_error("No primary display defined");
 	return -1;
 }
 
-kinc_display_mode_t kinc_display_available_mode(int display_index, int mode_index) {
+iron_display_mode_t iron_display_available_mode(int display_index, int mode_index) {
 	DEVMODEA dev_mode = {0};
 	dev_mode.dmSize = sizeof(DEVMODEA);
 	EnumDisplaySettingsA(displays[display_index].name, mode_index, &dev_mode);
-	kinc_display_mode_t mode;
+	iron_display_mode_t mode;
 	mode.x = displays[display_index].x;
 	mode.y = displays[display_index].y;
 	mode.width = dev_mode.dmPelsWidth;
@@ -319,7 +319,7 @@ kinc_display_mode_t kinc_display_available_mode(int display_index, int mode_inde
 	return mode;
 }
 
-int kinc_display_count_available_modes(int display_index) {
+int iron_display_count_available_modes(int display_index) {
 	DEVMODEA dev_mode = {0};
 	dev_mode.dmSize = sizeof(DEVMODEA);
 	int i = 0;
@@ -328,7 +328,7 @@ int kinc_display_count_available_modes(int display_index) {
 	return i;
 }
 
-bool kinc_windows_set_display_mode(int display_index, int width, int height, int bpp, int frequency) {
+bool iron_windows_set_display_mode(int display_index, int width, int height, int bpp, int frequency) {
 	DisplayData *display = &displays[display_index];
 	display->mode_changed = true;
 	DEVMODEA mode = {0};
@@ -350,32 +350,32 @@ bool kinc_windows_set_display_mode(int display_index, int width, int height, int
 	return success;
 }
 
-void kinc_windows_restore_display(int display) {
+void iron_windows_restore_display(int display) {
 	if (displays[display].mode_changed) {
 		ChangeDisplaySettingsA(&original_modes[display], 0);
 	}
 }
 
-void kinc_windows_restore_displays() {
+void iron_windows_restore_displays() {
 	for (int i = 0; i < MAXIMUM_DISPLAYS; ++i) {
-		kinc_windows_restore_display(i);
+		iron_windows_restore_display(i);
 	}
 }
 
-bool kinc_display_available(int display_index) {
+bool iron_display_available(int display_index) {
 	if (display_index < 0 || display_index >= MAXIMUM_DISPLAYS) {
 		return false;
 	}
 	return displays[display_index].available;
 }
 
-const char *kinc_display_name(int display_index) {
+const char *iron_display_name(int display_index) {
 	return displays[display_index].name;
 }
 
-kinc_display_mode_t kinc_display_current_mode(int display_index) {
+iron_display_mode_t iron_display_current_mode(int display_index) {
 	DisplayData *display = &displays[display_index];
-	kinc_display_mode_t mode;
+	iron_display_mode_t mode;
 	mode.x = display->x;
 	mode.y = display->y;
 	mode.width = display->width;
@@ -386,49 +386,49 @@ kinc_display_mode_t kinc_display_current_mode(int display_index) {
 	return mode;
 }
 
-void kinc_internal_mouse_lock() {
-	kinc_mouse_hide();
-	HWND handle = kinc_windows_window_handle();
+void iron_internal_mouse_lock() {
+	iron_mouse_hide();
+	HWND handle = iron_windows_window_handle();
 	SetCapture(handle);
 	RECT rect;
 	GetWindowRect(handle, &rect);
 	ClipCursor(&rect);
 }
 
-void kinc_internal_mouse_unlock(void) {
-	kinc_mouse_show();
+void iron_internal_mouse_unlock(void) {
+	iron_mouse_show();
 	ReleaseCapture();
 	ClipCursor(NULL);
 }
 
-bool kinc_mouse_can_lock(void) {
+bool iron_mouse_can_lock(void) {
 	return true;
 }
 
-void kinc_mouse_show() {
+void iron_mouse_show() {
 	// Work around the internal counter of ShowCursor
 	while (ShowCursor(true) < 0) {
 	}
 }
 
-void kinc_mouse_hide() {
+void iron_mouse_hide() {
 	// Work around the internal counter of ShowCursor
 	while (ShowCursor(false) >= 0) {
 	}
 }
 
-void kinc_mouse_set_position(int x, int y) {
+void iron_mouse_set_position(int x, int y) {
 	POINT point;
 	point.x = x;
 	point.y = y;
-	ClientToScreen(kinc_windows_window_handle(), &point);
+	ClientToScreen(iron_windows_window_handle(), &point);
 	SetCursorPos(point.x, point.y);
 }
 
-void kinc_mouse_get_position(int *x, int *y) {
+void iron_mouse_get_position(int *x, int *y) {
 	POINT point;
 	GetCursorPos(&point);
-	ScreenToClient(kinc_windows_window_handle(), &point);
+	ScreenToClient(iron_windows_window_handle(), &point);
 	*x = point.x;
 	*y = point.y;
 }
@@ -437,7 +437,7 @@ void kinc_mouse_get_position(int *x, int *y) {
 
 __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
 __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
-void kinc_internal_resize(int width, int height);
+void iron_internal_resize(int width, int height);
 
 typedef BOOL(WINAPI *GetPointerInfoType)(UINT32 pointerId, POINTER_INFO *pointerInfo);
 static GetPointerInfoType MyGetPointerInfo = NULL;
@@ -448,7 +448,7 @@ static EnableNonClientDpiScalingType MyEnableNonClientDpiScaling = NULL;
 
 #define MAX_TOUCH_POINTS 10
 
-#define KINC_DINPUT_MAX_COUNT 8
+#define IRON_DINPUT_MAX_COUNT 8
 
 struct touchpoint {
 	int sysID;
@@ -497,132 +497,132 @@ static void ReleaseTouchIndex(int dwID) {
 
 static void initKeyTranslation() {
 	for (int i = 0; i < 256; ++i)
-		keyTranslated[i] = KINC_KEY_UNKNOWN;
+		keyTranslated[i] = IRON_KEY_UNKNOWN;
 
-	keyTranslated[VK_BACK] = KINC_KEY_BACKSPACE;
-	keyTranslated[VK_TAB] = KINC_KEY_TAB;
-	keyTranslated[VK_CLEAR] = KINC_KEY_CLEAR;
-	keyTranslated[VK_RETURN] = KINC_KEY_RETURN;
-	keyTranslated[VK_SHIFT] = KINC_KEY_SHIFT;
-	keyTranslated[VK_CONTROL] = KINC_KEY_CONTROL;
-	keyTranslated[VK_MENU] = KINC_KEY_ALT;
-	keyTranslated[VK_PAUSE] = KINC_KEY_PAUSE;
-	keyTranslated[VK_CAPITAL] = KINC_KEY_CAPS_LOCK;
-	keyTranslated[VK_KANA] = KINC_KEY_KANA;
-	keyTranslated[VK_HANGUL] = KINC_KEY_HANGUL;
-	keyTranslated[VK_JUNJA] = KINC_KEY_JUNJA;
-	keyTranslated[VK_FINAL] = KINC_KEY_FINAL;
-	keyTranslated[VK_HANJA] = KINC_KEY_HANJA;
-	keyTranslated[VK_KANJI] = KINC_KEY_KANJI;
-	keyTranslated[VK_ESCAPE] = KINC_KEY_ESCAPE;
-	keyTranslated[VK_SPACE] = KINC_KEY_SPACE;
-	keyTranslated[VK_PRIOR] = KINC_KEY_PAGE_UP;
-	keyTranslated[VK_NEXT] = KINC_KEY_PAGE_DOWN;
-	keyTranslated[VK_END] = KINC_KEY_END;
-	keyTranslated[VK_HOME] = KINC_KEY_HOME;
-	keyTranslated[VK_LEFT] = KINC_KEY_LEFT;
-	keyTranslated[VK_UP] = KINC_KEY_UP;
-	keyTranslated[VK_RIGHT] = KINC_KEY_RIGHT;
-	keyTranslated[VK_DOWN] = KINC_KEY_DOWN;
-	keyTranslated[VK_PRINT] = KINC_KEY_PRINT;
-	keyTranslated[VK_INSERT] = KINC_KEY_INSERT;
-	keyTranslated[VK_DELETE] = KINC_KEY_DELETE;
-	keyTranslated[VK_HELP] = KINC_KEY_HELP;
-	keyTranslated[0x30] = KINC_KEY_0;
-	keyTranslated[0x31] = KINC_KEY_1;
-	keyTranslated[0x32] = KINC_KEY_2;
-	keyTranslated[0x33] = KINC_KEY_3;
-	keyTranslated[0x34] = KINC_KEY_4;
-	keyTranslated[0x35] = KINC_KEY_5;
-	keyTranslated[0x36] = KINC_KEY_6;
-	keyTranslated[0x37] = KINC_KEY_7;
-	keyTranslated[0x38] = KINC_KEY_8;
-	keyTranslated[0x39] = KINC_KEY_9;
-	keyTranslated[0x41] = KINC_KEY_A;
-	keyTranslated[0x42] = KINC_KEY_B;
-	keyTranslated[0x43] = KINC_KEY_C;
-	keyTranslated[0x44] = KINC_KEY_D;
-	keyTranslated[0x45] = KINC_KEY_E;
-	keyTranslated[0x46] = KINC_KEY_F;
-	keyTranslated[0x47] = KINC_KEY_G;
-	keyTranslated[0x48] = KINC_KEY_H;
-	keyTranslated[0x49] = KINC_KEY_I;
-	keyTranslated[0x4A] = KINC_KEY_J;
-	keyTranslated[0x4B] = KINC_KEY_K;
-	keyTranslated[0x4C] = KINC_KEY_L;
-	keyTranslated[0x4D] = KINC_KEY_M;
-	keyTranslated[0x4E] = KINC_KEY_N;
-	keyTranslated[0x4F] = KINC_KEY_O;
-	keyTranslated[0x50] = KINC_KEY_P;
-	keyTranslated[0x51] = KINC_KEY_Q;
-	keyTranslated[0x52] = KINC_KEY_R;
-	keyTranslated[0x53] = KINC_KEY_S;
-	keyTranslated[0x54] = KINC_KEY_T;
-	keyTranslated[0x55] = KINC_KEY_U;
-	keyTranslated[0x56] = KINC_KEY_V;
-	keyTranslated[0x57] = KINC_KEY_W;
-	keyTranslated[0x58] = KINC_KEY_X;
-	keyTranslated[0x59] = KINC_KEY_Y;
-	keyTranslated[0x5A] = KINC_KEY_Z;
-	keyTranslated[VK_LWIN] = KINC_KEY_WIN;
-	keyTranslated[VK_RWIN] = KINC_KEY_WIN;
-	keyTranslated[VK_APPS] = KINC_KEY_CONTEXT_MENU;
-	keyTranslated[VK_NUMPAD0] = KINC_KEY_NUMPAD_0;
-	keyTranslated[VK_NUMPAD1] = KINC_KEY_NUMPAD_1;
-	keyTranslated[VK_NUMPAD2] = KINC_KEY_NUMPAD_2;
-	keyTranslated[VK_NUMPAD3] = KINC_KEY_NUMPAD_3;
-	keyTranslated[VK_NUMPAD4] = KINC_KEY_NUMPAD_4;
-	keyTranslated[VK_NUMPAD5] = KINC_KEY_NUMPAD_5;
-	keyTranslated[VK_NUMPAD6] = KINC_KEY_NUMPAD_6;
-	keyTranslated[VK_NUMPAD7] = KINC_KEY_NUMPAD_7;
-	keyTranslated[VK_NUMPAD8] = KINC_KEY_NUMPAD_8;
-	keyTranslated[VK_NUMPAD9] = KINC_KEY_NUMPAD_9;
-	keyTranslated[VK_MULTIPLY] = KINC_KEY_MULTIPLY;
-	keyTranslated[VK_ADD] = KINC_KEY_ADD;
-	keyTranslated[VK_SUBTRACT] = KINC_KEY_SUBTRACT;
-	keyTranslated[VK_DECIMAL] = KINC_KEY_DECIMAL;
-	keyTranslated[VK_DIVIDE] = KINC_KEY_DIVIDE;
-	keyTranslated[VK_F1] = KINC_KEY_F1;
-	keyTranslated[VK_F2] = KINC_KEY_F2;
-	keyTranslated[VK_F3] = KINC_KEY_F3;
-	keyTranslated[VK_F4] = KINC_KEY_F4;
-	keyTranslated[VK_F5] = KINC_KEY_F5;
-	keyTranslated[VK_F6] = KINC_KEY_F6;
-	keyTranslated[VK_F7] = KINC_KEY_F7;
-	keyTranslated[VK_F8] = KINC_KEY_F8;
-	keyTranslated[VK_F9] = KINC_KEY_F9;
-	keyTranslated[VK_F10] = KINC_KEY_F10;
-	keyTranslated[VK_F11] = KINC_KEY_F11;
-	keyTranslated[VK_F12] = KINC_KEY_F12;
-	keyTranslated[VK_F13] = KINC_KEY_F13;
-	keyTranslated[VK_F14] = KINC_KEY_F14;
-	keyTranslated[VK_F15] = KINC_KEY_F15;
-	keyTranslated[VK_F16] = KINC_KEY_F16;
-	keyTranslated[VK_F17] = KINC_KEY_F17;
-	keyTranslated[VK_F18] = KINC_KEY_F18;
-	keyTranslated[VK_F19] = KINC_KEY_F19;
-	keyTranslated[VK_F20] = KINC_KEY_F20;
-	keyTranslated[VK_F21] = KINC_KEY_F21;
-	keyTranslated[VK_F22] = KINC_KEY_F22;
-	keyTranslated[VK_F23] = KINC_KEY_F23;
-	keyTranslated[VK_F24] = KINC_KEY_F24;
-	keyTranslated[VK_NUMLOCK] = KINC_KEY_NUM_LOCK;
-	keyTranslated[VK_SCROLL] = KINC_KEY_SCROLL_LOCK;
-	keyTranslated[VK_LSHIFT] = KINC_KEY_SHIFT;
-	keyTranslated[VK_RSHIFT] = KINC_KEY_SHIFT;
-	keyTranslated[VK_LCONTROL] = KINC_KEY_CONTROL;
-	keyTranslated[VK_RCONTROL] = KINC_KEY_CONTROL;
-	keyTranslated[VK_OEM_1] = KINC_KEY_SEMICOLON;
-	keyTranslated[VK_OEM_PLUS] = KINC_KEY_PLUS;
-	keyTranslated[VK_OEM_COMMA] = KINC_KEY_COMMA;
-	keyTranslated[VK_OEM_MINUS] = KINC_KEY_HYPHEN_MINUS;
-	keyTranslated[VK_OEM_PERIOD] = KINC_KEY_PERIOD;
-	keyTranslated[VK_OEM_2] = KINC_KEY_SLASH;
-	keyTranslated[VK_OEM_3] = KINC_KEY_BACK_QUOTE;
-	keyTranslated[VK_OEM_4] = KINC_KEY_OPEN_BRACKET;
-	keyTranslated[VK_OEM_5] = KINC_KEY_BACK_SLASH;
-	keyTranslated[VK_OEM_6] = KINC_KEY_CLOSE_BRACKET;
-	keyTranslated[VK_OEM_7] = KINC_KEY_QUOTE;
+	keyTranslated[VK_BACK] = IRON_KEY_BACKSPACE;
+	keyTranslated[VK_TAB] = IRON_KEY_TAB;
+	keyTranslated[VK_CLEAR] = IRON_KEY_CLEAR;
+	keyTranslated[VK_RETURN] = IRON_KEY_RETURN;
+	keyTranslated[VK_SHIFT] = IRON_KEY_SHIFT;
+	keyTranslated[VK_CONTROL] = IRON_KEY_CONTROL;
+	keyTranslated[VK_MENU] = IRON_KEY_ALT;
+	keyTranslated[VK_PAUSE] = IRON_KEY_PAUSE;
+	keyTranslated[VK_CAPITAL] = IRON_KEY_CAPS_LOCK;
+	keyTranslated[VK_KANA] = IRON_KEY_KANA;
+	keyTranslated[VK_HANGUL] = IRON_KEY_HANGUL;
+	keyTranslated[VK_JUNJA] = IRON_KEY_JUNJA;
+	keyTranslated[VK_FINAL] = IRON_KEY_FINAL;
+	keyTranslated[VK_HANJA] = IRON_KEY_HANJA;
+	keyTranslated[VK_KANJI] = IRON_KEY_KANJI;
+	keyTranslated[VK_ESCAPE] = IRON_KEY_ESCAPE;
+	keyTranslated[VK_SPACE] = IRON_KEY_SPACE;
+	keyTranslated[VK_PRIOR] = IRON_KEY_PAGE_UP;
+	keyTranslated[VK_NEXT] = IRON_KEY_PAGE_DOWN;
+	keyTranslated[VK_END] = IRON_KEY_END;
+	keyTranslated[VK_HOME] = IRON_KEY_HOME;
+	keyTranslated[VK_LEFT] = IRON_KEY_LEFT;
+	keyTranslated[VK_UP] = IRON_KEY_UP;
+	keyTranslated[VK_RIGHT] = IRON_KEY_RIGHT;
+	keyTranslated[VK_DOWN] = IRON_KEY_DOWN;
+	keyTranslated[VK_PRINT] = IRON_KEY_PRINT;
+	keyTranslated[VK_INSERT] = IRON_KEY_INSERT;
+	keyTranslated[VK_DELETE] = IRON_KEY_DELETE;
+	keyTranslated[VK_HELP] = IRON_KEY_HELP;
+	keyTranslated[0x30] = IRON_KEY_0;
+	keyTranslated[0x31] = IRON_KEY_1;
+	keyTranslated[0x32] = IRON_KEY_2;
+	keyTranslated[0x33] = IRON_KEY_3;
+	keyTranslated[0x34] = IRON_KEY_4;
+	keyTranslated[0x35] = IRON_KEY_5;
+	keyTranslated[0x36] = IRON_KEY_6;
+	keyTranslated[0x37] = IRON_KEY_7;
+	keyTranslated[0x38] = IRON_KEY_8;
+	keyTranslated[0x39] = IRON_KEY_9;
+	keyTranslated[0x41] = IRON_KEY_A;
+	keyTranslated[0x42] = IRON_KEY_B;
+	keyTranslated[0x43] = IRON_KEY_C;
+	keyTranslated[0x44] = IRON_KEY_D;
+	keyTranslated[0x45] = IRON_KEY_E;
+	keyTranslated[0x46] = IRON_KEY_F;
+	keyTranslated[0x47] = IRON_KEY_G;
+	keyTranslated[0x48] = IRON_KEY_H;
+	keyTranslated[0x49] = IRON_KEY_I;
+	keyTranslated[0x4A] = IRON_KEY_J;
+	keyTranslated[0x4B] = IRON_KEY_K;
+	keyTranslated[0x4C] = IRON_KEY_L;
+	keyTranslated[0x4D] = IRON_KEY_M;
+	keyTranslated[0x4E] = IRON_KEY_N;
+	keyTranslated[0x4F] = IRON_KEY_O;
+	keyTranslated[0x50] = IRON_KEY_P;
+	keyTranslated[0x51] = IRON_KEY_Q;
+	keyTranslated[0x52] = IRON_KEY_R;
+	keyTranslated[0x53] = IRON_KEY_S;
+	keyTranslated[0x54] = IRON_KEY_T;
+	keyTranslated[0x55] = IRON_KEY_U;
+	keyTranslated[0x56] = IRON_KEY_V;
+	keyTranslated[0x57] = IRON_KEY_W;
+	keyTranslated[0x58] = IRON_KEY_X;
+	keyTranslated[0x59] = IRON_KEY_Y;
+	keyTranslated[0x5A] = IRON_KEY_Z;
+	keyTranslated[VK_LWIN] = IRON_KEY_WIN;
+	keyTranslated[VK_RWIN] = IRON_KEY_WIN;
+	keyTranslated[VK_APPS] = IRON_KEY_CONTEXT_MENU;
+	keyTranslated[VK_NUMPAD0] = IRON_KEY_NUMPAD_0;
+	keyTranslated[VK_NUMPAD1] = IRON_KEY_NUMPAD_1;
+	keyTranslated[VK_NUMPAD2] = IRON_KEY_NUMPAD_2;
+	keyTranslated[VK_NUMPAD3] = IRON_KEY_NUMPAD_3;
+	keyTranslated[VK_NUMPAD4] = IRON_KEY_NUMPAD_4;
+	keyTranslated[VK_NUMPAD5] = IRON_KEY_NUMPAD_5;
+	keyTranslated[VK_NUMPAD6] = IRON_KEY_NUMPAD_6;
+	keyTranslated[VK_NUMPAD7] = IRON_KEY_NUMPAD_7;
+	keyTranslated[VK_NUMPAD8] = IRON_KEY_NUMPAD_8;
+	keyTranslated[VK_NUMPAD9] = IRON_KEY_NUMPAD_9;
+	keyTranslated[VK_MULTIPLY] = IRON_KEY_MULTIPLY;
+	keyTranslated[VK_ADD] = IRON_KEY_ADD;
+	keyTranslated[VK_SUBTRACT] = IRON_KEY_SUBTRACT;
+	keyTranslated[VK_DECIMAL] = IRON_KEY_DECIMAL;
+	keyTranslated[VK_DIVIDE] = IRON_KEY_DIVIDE;
+	keyTranslated[VK_F1] = IRON_KEY_F1;
+	keyTranslated[VK_F2] = IRON_KEY_F2;
+	keyTranslated[VK_F3] = IRON_KEY_F3;
+	keyTranslated[VK_F4] = IRON_KEY_F4;
+	keyTranslated[VK_F5] = IRON_KEY_F5;
+	keyTranslated[VK_F6] = IRON_KEY_F6;
+	keyTranslated[VK_F7] = IRON_KEY_F7;
+	keyTranslated[VK_F8] = IRON_KEY_F8;
+	keyTranslated[VK_F9] = IRON_KEY_F9;
+	keyTranslated[VK_F10] = IRON_KEY_F10;
+	keyTranslated[VK_F11] = IRON_KEY_F11;
+	keyTranslated[VK_F12] = IRON_KEY_F12;
+	keyTranslated[VK_F13] = IRON_KEY_F13;
+	keyTranslated[VK_F14] = IRON_KEY_F14;
+	keyTranslated[VK_F15] = IRON_KEY_F15;
+	keyTranslated[VK_F16] = IRON_KEY_F16;
+	keyTranslated[VK_F17] = IRON_KEY_F17;
+	keyTranslated[VK_F18] = IRON_KEY_F18;
+	keyTranslated[VK_F19] = IRON_KEY_F19;
+	keyTranslated[VK_F20] = IRON_KEY_F20;
+	keyTranslated[VK_F21] = IRON_KEY_F21;
+	keyTranslated[VK_F22] = IRON_KEY_F22;
+	keyTranslated[VK_F23] = IRON_KEY_F23;
+	keyTranslated[VK_F24] = IRON_KEY_F24;
+	keyTranslated[VK_NUMLOCK] = IRON_KEY_NUM_LOCK;
+	keyTranslated[VK_SCROLL] = IRON_KEY_SCROLL_LOCK;
+	keyTranslated[VK_LSHIFT] = IRON_KEY_SHIFT;
+	keyTranslated[VK_RSHIFT] = IRON_KEY_SHIFT;
+	keyTranslated[VK_LCONTROL] = IRON_KEY_CONTROL;
+	keyTranslated[VK_RCONTROL] = IRON_KEY_CONTROL;
+	keyTranslated[VK_OEM_1] = IRON_KEY_SEMICOLON;
+	keyTranslated[VK_OEM_PLUS] = IRON_KEY_PLUS;
+	keyTranslated[VK_OEM_COMMA] = IRON_KEY_COMMA;
+	keyTranslated[VK_OEM_MINUS] = IRON_KEY_HYPHEN_MINUS;
+	keyTranslated[VK_OEM_PERIOD] = IRON_KEY_PERIOD;
+	keyTranslated[VK_OEM_2] = IRON_KEY_SLASH;
+	keyTranslated[VK_OEM_3] = IRON_KEY_BACK_QUOTE;
+	keyTranslated[VK_OEM_4] = IRON_KEY_OPEN_BRACKET;
+	keyTranslated[VK_OEM_5] = IRON_KEY_BACK_SLASH;
+	keyTranslated[VK_OEM_6] = IRON_KEY_CLOSE_BRACKET;
+	keyTranslated[VK_OEM_7] = IRON_KEY_QUOTE;
 }
 
 static bool detectGamepad = true;
@@ -645,14 +645,14 @@ static int cursor = 0;
 static HCURSOR cursors[NUM_CURSORS];
 static bool bg_erased = false;
 
-void kinc_mouse_set_cursor(int set_cursor) {
+void iron_mouse_set_cursor(int set_cursor) {
 	cursor = set_cursor >= NUM_CURSORS ? 0 : set_cursor;
 	if (cursors_initialized) {
 		SetCursor(cursors[cursor]);
 	}
 }
 
-LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	DWORD pointerId;
 	POINTER_INFO pointerInfo = {0};
 	POINTER_PEN_INFO penInfo = {0};
@@ -682,14 +682,14 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 	case WM_SIZE: {
 		int width = LOWORD(lParam);
 		int height = HIWORD(lParam);
-		kinc_internal_resize(width, height);
-		kinc_internal_call_resize_callback(width, height);
+		iron_internal_resize(width, height);
+		iron_internal_call_resize_callback(width, height);
 		break;
 	}
 	case WM_CLOSE: {
-		if (kinc_internal_call_close_callback()) {
-			kinc_window_destroy();
-			kinc_stop();
+		if (iron_internal_call_close_callback()) {
+			iron_window_destroy();
+			iron_stop();
 			return 0;
 		}
 		return 0;
@@ -702,12 +702,12 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 	}
 	case WM_ACTIVATE:
 		if (LOWORD(wParam) == WA_ACTIVE || LOWORD(wParam) == WA_CLICKACTIVE) {
-			kinc_internal_mouse_window_activated();
-			kinc_internal_foreground_callback();
+			iron_internal_mouse_window_activated();
+			iron_internal_foreground_callback();
 		}
 		else {
-			kinc_internal_mouse_window_deactivated();
-			kinc_internal_background_callback();
+			iron_internal_mouse_window_deactivated();
+			iron_internal_background_callback();
 #ifdef HANDLE_ALT_ENTER
 			altDown = false;
 #endif
@@ -719,7 +719,7 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 	case WM_MOUSEMOVE:
 		mouseX = GET_X_LPARAM(lParam);
 		mouseY = GET_Y_LPARAM(lParam);
-		kinc_internal_mouse_trigger_move(mouseX, mouseY);
+		iron_internal_mouse_trigger_move(mouseX, mouseY);
 		break;
 	case WM_CREATE:
 		cursors[0] = LoadCursor(0, IDC_ARROW);
@@ -748,51 +748,51 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		}
 		break;
 	case WM_LBUTTONDOWN:
-		if (!kinc_mouse_is_locked())
+		if (!iron_mouse_is_locked())
 			SetCapture(hWnd);
 		mouseX = GET_X_LPARAM(lParam);
 		mouseY = GET_Y_LPARAM(lParam);
-		kinc_internal_mouse_trigger_press(0, mouseX, mouseY);
+		iron_internal_mouse_trigger_press(0, mouseX, mouseY);
 		break;
 	case WM_LBUTTONUP:
-		if (!kinc_mouse_is_locked())
+		if (!iron_mouse_is_locked())
 			ReleaseCapture();
 		mouseX = GET_X_LPARAM(lParam);
 		mouseY = GET_Y_LPARAM(lParam);
-		kinc_internal_mouse_trigger_release(0, mouseX, mouseY);
+		iron_internal_mouse_trigger_release(0, mouseX, mouseY);
 		break;
 	case WM_RBUTTONDOWN:
 		mouseX = GET_X_LPARAM(lParam);
 		mouseY = GET_Y_LPARAM(lParam);
-		kinc_internal_mouse_trigger_press(1, mouseX, mouseY);
+		iron_internal_mouse_trigger_press(1, mouseX, mouseY);
 		break;
 	case WM_RBUTTONUP:
 		mouseX = GET_X_LPARAM(lParam);
 		mouseY = GET_Y_LPARAM(lParam);
-		kinc_internal_mouse_trigger_release(1, mouseX, mouseY);
+		iron_internal_mouse_trigger_release(1, mouseX, mouseY);
 		break;
 	case WM_MBUTTONDOWN:
 		mouseX = GET_X_LPARAM(lParam);
 		mouseY = GET_Y_LPARAM(lParam);
-		kinc_internal_mouse_trigger_press(2, mouseX, mouseY);
+		iron_internal_mouse_trigger_press(2, mouseX, mouseY);
 		break;
 	case WM_MBUTTONUP:
 		mouseX = GET_X_LPARAM(lParam);
 		mouseY = GET_Y_LPARAM(lParam);
-		kinc_internal_mouse_trigger_release(2, mouseX, mouseY);
+		iron_internal_mouse_trigger_release(2, mouseX, mouseY);
 		break;
 	case WM_XBUTTONDOWN:
 		mouseX = GET_X_LPARAM(lParam);
 		mouseY = GET_Y_LPARAM(lParam);
-		kinc_internal_mouse_trigger_press(HIWORD(wParam) + 2, mouseX, mouseY);
+		iron_internal_mouse_trigger_press(HIWORD(wParam) + 2, mouseX, mouseY);
 		break;
 	case WM_XBUTTONUP:
 		mouseX = GET_X_LPARAM(lParam);
 		mouseY = GET_Y_LPARAM(lParam);
-		kinc_internal_mouse_trigger_release(HIWORD(wParam) + 2, mouseX, mouseY);
+		iron_internal_mouse_trigger_release(HIWORD(wParam) + 2, mouseX, mouseY);
 		break;
 	case WM_MOUSEWHEEL:
-		kinc_internal_mouse_trigger_scroll(GET_WHEEL_DELTA_WPARAM(wParam) / -120);
+		iron_internal_mouse_trigger_scroll(GET_WHEEL_DELTA_WPARAM(wParam) / -120);
 		break;
 	case WM_POINTERDOWN:
 		pointerId = GET_POINTERID_WPARAM(wParam);
@@ -800,7 +800,7 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		if (pointerInfo.pointerType == PT_PEN) {
 			MyGetPointerPenInfo(pointerId, &penInfo);
 			ScreenToClient(hWnd, &pointerInfo.ptPixelLocation);
-			kinc_internal_pen_trigger_press(pointerInfo.ptPixelLocation.x, pointerInfo.ptPixelLocation.y,
+			iron_internal_pen_trigger_press(pointerInfo.ptPixelLocation.x, pointerInfo.ptPixelLocation.y,
 			                                penInfo.pressure / 1024.0f);
 		}
 		break;
@@ -810,7 +810,7 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		if (pointerInfo.pointerType == PT_PEN) {
 			MyGetPointerPenInfo(pointerId, &penInfo);
 			ScreenToClient(hWnd, &pointerInfo.ptPixelLocation);
-			kinc_internal_pen_trigger_release(pointerInfo.ptPixelLocation.x, pointerInfo.ptPixelLocation.y,
+			iron_internal_pen_trigger_release(pointerInfo.ptPixelLocation.x, pointerInfo.ptPixelLocation.y,
 			                                  penInfo.pressure / 1024.0f);
 		}
 		break;
@@ -820,7 +820,7 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		if (pointerInfo.pointerType == PT_PEN) {
 			MyGetPointerPenInfo(pointerId, &penInfo);
 			ScreenToClient(hWnd, &pointerInfo.ptPixelLocation);
-			kinc_internal_pen_trigger_move(pointerInfo.ptPixelLocation.x, pointerInfo.ptPixelLocation.y,
+			iron_internal_pen_trigger_move(pointerInfo.ptPixelLocation.x, pointerInfo.ptPixelLocation.y,
 			                               penInfo.pressure / 1024.0f);
 		}
 		break;
@@ -842,7 +842,7 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 						if (ti.dwFlags & TOUCHEVENTF_UP) {
 							tindex = GetTouchIndex(ti.dwID);
 							ReleaseTouchIndex(ti.dwID);
-							kinc_internal_surface_trigger_touch_end(tindex, ptInput.x, ptInput.y);
+							iron_internal_surface_trigger_touch_end(tindex, ptInput.x, ptInput.y);
 						}
 						else {
 							bool touchExisits = GetTouchIndex(ti.dwID) != -1;
@@ -852,13 +852,13 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 									if (touchPoints[tindex].x != ptInput.x || touchPoints[tindex].y != ptInput.y) {
 										touchPoints[tindex].x = ptInput.x;
 										touchPoints[tindex].y = ptInput.y;
-										kinc_internal_surface_trigger_move(tindex, ptInput.x, ptInput.y);
+										iron_internal_surface_trigger_move(tindex, ptInput.x, ptInput.y);
 									}
 								}
 								else {
 									touchPoints[tindex].x = ptInput.x;
 									touchPoints[tindex].y = ptInput.y;
-									kinc_internal_surface_trigger_touch_start(tindex, ptInput.x, ptInput.y);
+									iron_internal_surface_trigger_touch_start(tindex, ptInput.x, ptInput.y);
 								}
 							}
 						}
@@ -882,17 +882,17 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		if (!keyPressed[wParam]) {
 			keyPressed[wParam] = true;
 
-			if (keyTranslated[wParam] == KINC_KEY_CONTROL) {
+			if (keyTranslated[wParam] == IRON_KEY_CONTROL) {
 				controlDown = true;
 			}
 #ifdef HANDLE_ALT_ENTER
-			else if (keyTranslated[wParam] == KINC_KEY_ALT) {
+			else if (keyTranslated[wParam] == IRON_KEY_ALT) {
 				altDown = true;
 			}
 #endif
 			else {
-				if (controlDown && keyTranslated[wParam] == KINC_KEY_X) {
-					char *text = kinc_internal_cut_callback();
+				if (controlDown && keyTranslated[wParam] == IRON_KEY_X) {
+					char *text = iron_internal_cut_callback();
 					if (text != NULL) {
 						wchar_t wtext[4096];
 						MultiByteToWideChar(CP_UTF8, 0, text, -1, wtext, 4096);
@@ -908,8 +908,8 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 					}
 				}
 
-				if (controlDown && keyTranslated[wParam] == KINC_KEY_C) {
-					char *text = kinc_internal_copy_callback();
+				if (controlDown && keyTranslated[wParam] == IRON_KEY_C) {
+					char *text = iron_internal_copy_callback();
 					if (text != NULL) {
 						wchar_t wtext[4096];
 						MultiByteToWideChar(CP_UTF8, 0, text, -1, wtext, 4096);
@@ -925,7 +925,7 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 					}
 				}
 
-				if (controlDown && keyTranslated[wParam] == KINC_KEY_V) {
+				if (controlDown && keyTranslated[wParam] == IRON_KEY_V) {
 					if (IsClipboardFormatAvailable(CF_UNICODETEXT)) {
 						OpenClipboard(hWnd);
 						HANDLE handle = GetClipboardData(CF_UNICODETEXT);
@@ -934,7 +934,7 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 							if (wtext != NULL) {
 								char text[4096];
 								WideCharToMultiByte(CP_UTF8, 0, wtext, -1, text, 4096, NULL, NULL);
-								kinc_internal_paste_callback(text);
+								iron_internal_paste_callback(text);
 								GlobalUnlock(handle);
 							}
 						}
@@ -943,53 +943,53 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 				}
 
 #ifdef HANDLE_ALT_ENTER
-				if (altDown && keyTranslated[wParam] == KINC_KEY_RETURN) {
-					if (kinc_window_get_mode() == KINC_WINDOW_MODE_WINDOW) {
-						last_window_width = kinc_window_width();
-						last_window_height = kinc_window_height();
-						last_window_x = kinc_window_x();
-						last_window_y = kinc_window_y();
-						kinc_window_change_mode(KINC_WINDOW_MODE_FULLSCREEN);
+				if (altDown && keyTranslated[wParam] == IRON_KEY_RETURN) {
+					if (iron_window_get_mode() == IRON_WINDOW_MODE_WINDOW) {
+						last_window_width = iron_window_width();
+						last_window_height = iron_window_height();
+						last_window_x = iron_window_x();
+						last_window_y = iron_window_y();
+						iron_window_change_mode(IRON_WINDOW_MODE_FULLSCREEN);
 					}
 					else {
-						kinc_window_change_mode(KINC_WINDOW_MODE_WINDOW);
+						iron_window_change_mode(IRON_WINDOW_MODE_WINDOW);
 						if (last_window_width > 0 && last_window_height > 0) {
-							kinc_window_resize(last_window_width, last_window_height);
+							iron_window_resize(last_window_width, last_window_height);
 						}
 						if (last_window_x > INT_MIN && last_window_y > INT_MIN) {
-							kinc_window_move(last_window_x, last_window_y);
+							iron_window_move(last_window_x, last_window_y);
 						}
 					}
 				}
 #endif
 			}
 			// No auto-repeat
-			kinc_internal_keyboard_trigger_key_down(keyTranslated[wParam]);
+			iron_internal_keyboard_trigger_key_down(keyTranslated[wParam]);
 		}
 		// Auto-repeat
-		// kinc_internal_keyboard_trigger_key_down(keyTranslated[wParam]);
+		// iron_internal_keyboard_trigger_key_down(keyTranslated[wParam]);
 		break;
 	case WM_KEYUP:
 	case WM_SYSKEYUP:
 		keyPressed[wParam] = false;
 
-		if (keyTranslated[wParam] == KINC_KEY_CONTROL) {
+		if (keyTranslated[wParam] == IRON_KEY_CONTROL) {
 			controlDown = false;
 		}
 #ifdef HANDLE_ALT_ENTER
-		if (keyTranslated[wParam] == KINC_KEY_ALT) {
+		if (keyTranslated[wParam] == IRON_KEY_ALT) {
 			altDown = false;
 		}
 #endif
 
-		kinc_internal_keyboard_trigger_key_up(keyTranslated[wParam]);
+		iron_internal_keyboard_trigger_key_up(keyTranslated[wParam]);
 		break;
 	case WM_CHAR:
 		switch (wParam) {
 		case 0x1B: // escape
 			break;
 		default:
-			kinc_internal_keyboard_trigger_key_press((unsigned)wParam);
+			iron_internal_keyboard_trigger_key_press((unsigned)wParam);
 			break;
 		}
 		break;
@@ -1025,7 +1025,7 @@ LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		for (unsigned i = 0; i < count; ++i) {
 			wchar_t filePath[260];
 			if (DragQueryFileW(hDrop, i, filePath, 260)) {
-				kinc_internal_drop_files_callback(filePath);
+				iron_internal_drop_files_callback(filePath);
 			}
 		}
 		DragFinish(hDrop);
@@ -1059,10 +1059,10 @@ void loadXInput() {
 }
 
 static IDirectInput8W *di_instance = NULL;
-static IDirectInputDevice8W *di_pads[KINC_DINPUT_MAX_COUNT];
-static DIJOYSTATE2 di_padState[KINC_DINPUT_MAX_COUNT];
-static DIJOYSTATE2 di_lastPadState[KINC_DINPUT_MAX_COUNT];
-static DIDEVCAPS di_deviceCaps[KINC_DINPUT_MAX_COUNT];
+static IDirectInputDevice8W *di_pads[IRON_DINPUT_MAX_COUNT];
+static DIJOYSTATE2 di_padState[IRON_DINPUT_MAX_COUNT];
+static DIJOYSTATE2 di_lastPadState[IRON_DINPUT_MAX_COUNT];
+static DIDEVCAPS di_deviceCaps[IRON_DINPUT_MAX_COUNT];
 static int padCount = 0;
 
 static void cleanupPad(int padIndex) {
@@ -1153,7 +1153,7 @@ static BOOL IsXInputDevice(const GUID *pGuidProductFromDirectInput) {
 					// If it does, then get the VID/PID from var.bstrVal
 					DWORD dwPid = 0, dwVid = 0;
 					WCHAR *strVid = wcsstr(var.bstrVal, L"VID_");
-#ifndef KINC_NO_CLIB
+#ifndef IRON_NO_CLIB
 					if (strVid && swscanf(strVid, L"VID_%4X", &dwVid) != 1) {
 						dwVid = 0;
 					}
@@ -1195,7 +1195,7 @@ LCleanup:
 }
 
 static void cleanupDirectInput() {
-	for (int padIndex = 0; padIndex < KINC_DINPUT_MAX_COUNT; ++padIndex) {
+	for (int padIndex = 0; padIndex < IRON_DINPUT_MAX_COUNT; ++padIndex) {
 		cleanupPad(padIndex);
 	}
 
@@ -1219,7 +1219,7 @@ static BOOL CALLBACK enumerateJoystickAxesCallback(LPCDIDEVICEOBJECTINSTANCEW dd
 	HRESULT hr = di_pads[padCount]->lpVtbl->SetProperty(di_pads[padCount], DIPROP_RANGE, &propertyRange.diph);
 
 	if (FAILED(hr)) {
-		kinc_log("DirectInput8 / Pad%i / SetProperty() failed (HRESULT=0x%x)", padCount, hr);
+		iron_log("DirectInput8 / Pad%i / SetProperty() failed (HRESULT=0x%x)", padCount, hr);
 		return DIENUM_STOP;
 	}
 
@@ -1252,35 +1252,35 @@ static BOOL CALLBACK enumerateJoysticksCallback(LPCDIDEVICEINSTANCEW ddi, LPVOID
 						hr = di_pads[padCount]->lpVtbl->GetDeviceState(di_pads[padCount], sizeof(DIJOYSTATE2), &di_padState[padCount]);
 
 						if (SUCCEEDED(hr)) {
-							kinc_log("DirectInput8 / Pad%i / initialized", padCount);
+							iron_log("DirectInput8 / Pad%i / initialized", padCount);
 						}
 						else {
-							kinc_log("DirectInput8 / Pad%i / GetDeviceState() failed (HRESULT=0x%x)", padCount, hr);
+							iron_log("DirectInput8 / Pad%i / GetDeviceState() failed (HRESULT=0x%x)", padCount, hr);
 						}
 					}
 					else {
-						kinc_log("DirectInput8 / Pad%i / Acquire() failed (HRESULT=0x%x)", padCount, hr);
+						iron_log("DirectInput8 / Pad%i / Acquire() failed (HRESULT=0x%x)", padCount, hr);
 						cleanupPad(padCount);
 					}
 				}
 				else {
-					kinc_log("DirectInput8 / Pad%i / EnumObjects(DIDFT_AXIS) failed (HRESULT=0x%x)", padCount, hr);
+					iron_log("DirectInput8 / Pad%i / EnumObjects(DIDFT_AXIS) failed (HRESULT=0x%x)", padCount, hr);
 					cleanupPad(padCount);
 				}
 			}
 			else {
-				kinc_log("DirectInput8 / Pad%i / GetCapabilities() failed (HRESULT=0x%x)", padCount, hr);
+				iron_log("DirectInput8 / Pad%i / GetCapabilities() failed (HRESULT=0x%x)", padCount, hr);
 				cleanupPad(padCount);
 			}
 		}
 		else {
-			kinc_log("DirectInput8 / Pad%i / SetDataFormat() failed (HRESULT=0x%x)", padCount, hr);
+			iron_log("DirectInput8 / Pad%i / SetDataFormat() failed (HRESULT=0x%x)", padCount, hr);
 			cleanupPad(padCount);
 		}
 
 		++padCount;
 
-		if (padCount >= KINC_DINPUT_MAX_COUNT) {
+		if (padCount >= IRON_DINPUT_MAX_COUNT) {
 			return DIENUM_STOP;
 		}
 	}
@@ -1291,10 +1291,10 @@ static BOOL CALLBACK enumerateJoysticksCallback(LPCDIDEVICEINSTANCEW ddi, LPVOID
 static void initializeDirectInput() {
 	HINSTANCE hinstance = GetModuleHandleW(NULL);
 
-	memset(&di_pads, 0, sizeof(IDirectInputDevice8) * KINC_DINPUT_MAX_COUNT);
-	memset(&di_padState, 0, sizeof(DIJOYSTATE2) * KINC_DINPUT_MAX_COUNT);
-	memset(&di_lastPadState, 0, sizeof(DIJOYSTATE2) * KINC_DINPUT_MAX_COUNT);
-	memset(&di_deviceCaps, 0, sizeof(DIDEVCAPS) * KINC_DINPUT_MAX_COUNT);
+	memset(&di_pads, 0, sizeof(IDirectInputDevice8) * IRON_DINPUT_MAX_COUNT);
+	memset(&di_padState, 0, sizeof(DIJOYSTATE2) * IRON_DINPUT_MAX_COUNT);
+	memset(&di_lastPadState, 0, sizeof(DIJOYSTATE2) * IRON_DINPUT_MAX_COUNT);
+	memset(&di_deviceCaps, 0, sizeof(DIDEVCAPS) * IRON_DINPUT_MAX_COUNT);
 
 	HRESULT hr = DirectInput8Create(hinstance, DIRECTINPUT_VERSION, &IID_IDirectInput8W, (void **)&di_instance, NULL);
 
@@ -1308,7 +1308,7 @@ static void initializeDirectInput() {
 		}
 	}
 	else {
-		kinc_log("DirectInput8Create failed (HRESULT=0x%x)", hr);
+		iron_log("DirectInput8Create failed (HRESULT=0x%x)", hr);
 	}
 }
 
@@ -1341,7 +1341,7 @@ bool handleDirectInputPad(int padIndex) {
 			}
 
 			if (*now != *last) {
-				kinc_internal_gamepad_trigger_axis(padIndex, axisIndex, *now / 32768.0f);
+				iron_internal_gamepad_trigger_axis(padIndex, axisIndex, *now / 32768.0f);
 			}
 		}
 
@@ -1350,7 +1350,7 @@ bool handleDirectInputPad(int padIndex) {
 			BYTE *last = &di_lastPadState[padIndex].rgbButtons[buttonIndex];
 
 			if (*now != *last) {
-				kinc_internal_gamepad_trigger_button(padIndex, buttonIndex, *now / 255.0f);
+				iron_internal_gamepad_trigger_button(padIndex, buttonIndex, *now / 255.0f);
 			}
 		}
 
@@ -1369,16 +1369,16 @@ bool handleDirectInputPad(int padIndex) {
 			bool lastRight = (*last == 9000 || *last == 4500 || *last == 13500);
 
 			if (up != lastUp) {
-				kinc_internal_gamepad_trigger_button(padIndex, 12, up ? 1.0f : 0.0f);
+				iron_internal_gamepad_trigger_button(padIndex, 12, up ? 1.0f : 0.0f);
 			}
 			if (down != lastDown) {
-				kinc_internal_gamepad_trigger_button(padIndex, 13, down ? 1.0f : 0.0f);
+				iron_internal_gamepad_trigger_button(padIndex, 13, down ? 1.0f : 0.0f);
 			}
 			if (left != lastLeft) {
-				kinc_internal_gamepad_trigger_button(padIndex, 14, left ? 1.0f : 0.0f);
+				iron_internal_gamepad_trigger_button(padIndex, 14, left ? 1.0f : 0.0f);
 			}
 			if (right != lastRight) {
-				kinc_internal_gamepad_trigger_button(padIndex, 15, right ? 1.0f : 0.0f);
+				iron_internal_gamepad_trigger_button(padIndex, 15, right ? 1.0f : 0.0f);
 			}
 		}
 
@@ -1415,7 +1415,7 @@ static bool isDirectInputGamepad(int gamepad) {
 	return hr == S_OK;
 }
 
-const char *kinc_gamepad_vendor(int gamepad) {
+const char *iron_gamepad_vendor(int gamepad) {
 	if (isXInputGamepad(gamepad)) {
 		return "Microsoft";
 	}
@@ -1424,7 +1424,7 @@ const char *kinc_gamepad_vendor(int gamepad) {
 	}
 }
 
-const char *kinc_gamepad_product_name(int gamepad) {
+const char *iron_gamepad_product_name(int gamepad) {
 	if (isXInputGamepad(gamepad)) {
 		return "Xbox 360 Controller";
 	}
@@ -1433,7 +1433,7 @@ const char *kinc_gamepad_product_name(int gamepad) {
 	}
 }
 
-bool kinc_internal_handle_messages() {
+bool iron_internal_handle_messages() {
 	MSG message;
 
 	while (PeekMessageW(&message, 0, 0, 0, PM_REMOVE)) {
@@ -1443,7 +1443,7 @@ bool kinc_internal_handle_messages() {
 
 	if (InputGetState != NULL && (detectGamepad || gamepadFound)) {
 		detectGamepad = false;
-		for (DWORD i = 0; i < KINC_DINPUT_MAX_COUNT; ++i) {
+		for (DWORD i = 0; i < IRON_DINPUT_MAX_COUNT; ++i) {
 			XINPUT_STATE state;
 			memset(&state, 0, sizeof(XINPUT_STATE));
 			DWORD dwResult = InputGetState(i, &state);
@@ -1460,7 +1460,7 @@ bool kinc_internal_handle_messages() {
 				newaxes[5] = state.Gamepad.bRightTrigger / 255.0f;
 				for (int i2 = 0; i2 < 6; ++i2) {
 					if (axes[i * 6 + i2] != newaxes[i2]) {
-						kinc_internal_gamepad_trigger_axis(i, i2, newaxes[i2]);
+						iron_internal_gamepad_trigger_axis(i, i2, newaxes[i2]);
 						axes[i * 6 + i2] = newaxes[i2];
 					}
 				}
@@ -1483,7 +1483,7 @@ bool kinc_internal_handle_messages() {
 				newbuttons[15] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) ? 1.0f : 0.0f;
 				for (int i2 = 0; i2 < 16; ++i2) {
 					if (buttons[i * 16 + i2] != newbuttons[i2]) {
-						kinc_internal_gamepad_trigger_button(i, i2, newbuttons[i2]);
+						iron_internal_gamepad_trigger_button(i, i2, newbuttons[i2]);
 						buttons[i * 16 + i2] = newbuttons[i2];
 					}
 				}
@@ -1502,19 +1502,19 @@ bool kinc_internal_handle_messages() {
 static bool keyboardshown = false;
 static char language[3] = {0};
 
-void kinc_keyboard_show() {
+void iron_keyboard_show() {
 	keyboardshown = true;
 }
 
-void kinc_keyboard_hide() {
+void iron_keyboard_hide() {
 	keyboardshown = false;
 }
 
-bool kinc_keyboard_active() {
+bool iron_keyboard_active() {
 	return keyboardshown;
 }
 
-void kinc_load_url(const char *url) {
+void iron_load_url(const char *url) {
 #define WURL_SIZE 1024
 #define HTTP "http://"
 #define HTTPS "https://"
@@ -1524,7 +1524,7 @@ void kinc_load_url(const char *url) {
 		INT_PTR ret = (INT_PTR)ShellExecuteW(NULL, L"open", wurl, NULL, NULL, SW_SHOWNORMAL);
 		// According to ShellExecuteW's documentation return values > 32 indicate a success.
 		if (ret <= 32) {
-			kinc_log("Error opening url %s", url);
+			iron_log("Error opening url %s", url);
 		}
 	}
 #undef HTTPS
@@ -1532,9 +1532,9 @@ void kinc_load_url(const char *url) {
 #undef WURL_SIZE
 }
 
-void kinc_set_keep_screen_on(bool on) {}
+void iron_set_keep_screen_on(bool on) {}
 
-const char *kinc_language() {
+const char *iron_language() {
 	wchar_t wlanguage[3] = {0};
 
 	if (GetLocaleInfoEx(LOCALE_NAME_USER_DEFAULT, LOCALE_SISO639LANGNAME, wlanguage, 3)) {
@@ -1544,15 +1544,15 @@ const char *kinc_language() {
 	return "en";
 }
 
-const char *kinc_system_id() {
+const char *iron_system_id() {
 	return "Windows";
 }
 
 static bool co_initialized = false;
 
-void kinc_windows_co_initialize(void) {
+void iron_windows_co_initialize(void) {
 	if (!co_initialized) {
-		kinc_microsoft_affirm(CoInitializeEx(0, COINIT_MULTITHREADED));
+		iron_microsoft_affirm(CoInitializeEx(0, COINIT_MULTITHREADED));
 		co_initialized = true;
 	}
 }
@@ -1561,7 +1561,7 @@ static wchar_t savePathw[2048] = {0};
 static char savePath[2048] = {0};
 
 static void findSavePath() {
-	kinc_windows_co_initialize();
+	iron_windows_co_initialize();
 	IKnownFolderManager *folders = NULL;
 	CoCreateInstance(&CLSID_KnownFolderManager, NULL, CLSCTX_INPROC_SERVER, &IID_IKnownFolderManager, (LPVOID *)&folders);
 	IKnownFolder *folder = NULL;
@@ -1573,7 +1573,7 @@ static void findSavePath() {
 	wcscpy(savePathw, path);
 	wcscat(savePathw, L"\\");
 	wchar_t name[1024];
-	MultiByteToWideChar(CP_UTF8, 0, kinc_application_name(), -1, name, 1024);
+	MultiByteToWideChar(CP_UTF8, 0, iron_application_name(), -1, name, 1024);
 	wcscat(savePathw, name);
 	wcscat(savePathw, L"\\");
 
@@ -1585,7 +1585,7 @@ static void findSavePath() {
 	folders->lpVtbl->Release(folders);
 }
 
-const char *kinc_internal_save_path() {
+const char *iron_internal_save_path() {
 	if (savePath[0] == 0)
 		findSavePath();
 	return savePath;
@@ -1595,15 +1595,15 @@ static const char *videoFormats[] = {"ogv", NULL};
 static LARGE_INTEGER frequency;
 static LARGE_INTEGER startCount;
 
-const char **kinc_video_formats() {
+const char **iron_video_formats() {
 	return videoFormats;
 }
 
-bool kinc_gamepad_connected(int num) {
+bool iron_gamepad_connected(int num) {
 	return isXInputGamepad(num) || isDirectInputGamepad(num);
 }
 
-void kinc_gamepad_rumble(int gamepad, float left, float right) {
+void iron_gamepad_rumble(int gamepad, float left, float right) {
 	if (isXInputGamepad(gamepad)) {
 		XINPUT_VIBRATION vibration;
 		memset(&vibration, 0, sizeof(XINPUT_VIBRATION));
@@ -1613,23 +1613,23 @@ void kinc_gamepad_rumble(int gamepad, float left, float right) {
 	}
 }
 
-double kinc_frequency() {
+double iron_frequency() {
 	return (double)frequency.QuadPart;
 }
 
-kinc_ticks_t kinc_timestamp(void) {
+iron_ticks_t iron_timestamp(void) {
 	LARGE_INTEGER stamp;
 	QueryPerformanceCounter(&stamp);
 	return stamp.QuadPart - startCount.QuadPart;
 }
 
-double kinc_time(void) {
+double iron_time(void) {
 	LARGE_INTEGER stamp;
 	QueryPerformanceCounter(&stamp);
 	return (double)(stamp.QuadPart - startCount.QuadPart) / (double)frequency.QuadPart;
 }
 
-#if !defined(KINC_NO_MAIN) && !defined(KINC_NO_CLIB)
+#if !defined(IRON_NO_MAIN) && !defined(IRON_NO_CLIB)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	int ret = kickstart(__argc, __argv);
 	if (ret != 0) {
@@ -1651,7 +1651,7 @@ typedef BOOL(__stdcall *MiniDumpWriteDumpType)(IN HANDLE hProcess, IN DWORD Proc
 static MiniDumpWriteDumpType MyMiniDumpWriteDump;
 
 static LONG __stdcall MyCrashHandlerExceptionFilter(EXCEPTION_POINTERS *pEx) {
-	HANDLE file = CreateFileA("kinc.dmp", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	HANDLE file = CreateFileA("iron.dmp", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (file != INVALID_HANDLE_VALUE) {
 		MINIDUMP_EXCEPTION_INFORMATION stMDEI;
 		stMDEI.ThreadId = GetCurrentThreadId();
@@ -1671,7 +1671,7 @@ static void init_crash_handler() {
 	}
 }
 
-void kinc_init(const char *name, int width, int height, kinc_window_options_t *win) {
+void iron_init(const char *name, int width, int height, iron_window_options_t *win) {
 	init_crash_handler();
 
 	// Pen functions are only in Windows 8 and later, so load them dynamically
@@ -1690,7 +1690,7 @@ void kinc_init(const char *name, int width, int height, kinc_window_options_t *w
 		touchPoints[i].y = -1;
 	}
 
-	kinc_display_init();
+	iron_display_init();
 
 	QueryPerformanceCounter(&startCount);
 	QueryPerformanceFrequency(&frequency);
@@ -1699,10 +1699,10 @@ void kinc_init(const char *name, int width, int height, kinc_window_options_t *w
 		keyPressed[i] = false;
 	}
 
-	kinc_set_app_name(name);
-	kinc_window_options_t defaultWin;
+	iron_set_app_name(name);
+	iron_window_options_t defaultWin;
 	if (win == NULL) {
-		kinc_window_options_set_defaults(&defaultWin);
+		iron_window_options_set_defaults(&defaultWin);
 		win = &defaultWin;
 	}
 	win->width = width;
@@ -1711,25 +1711,25 @@ void kinc_init(const char *name, int width, int height, kinc_window_options_t *w
 		win->title = name;
 	}
 
-	kinc_g5_internal_init();
+	iron_g5_internal_init();
 
-	kinc_window_create(win);
+	iron_window_create(win);
 	loadXInput();
 	initializeDirectInput();
 }
 
-void kinc_internal_shutdown() {
-	kinc_windows_hide_windows();
-	kinc_internal_shutdown_callback();
-	kinc_windows_destroy_windows();
-	kinc_g5_internal_destroy();
-	kinc_windows_restore_displays();
+void iron_internal_shutdown() {
+	iron_windows_hide_windows();
+	iron_internal_shutdown_callback();
+	iron_windows_destroy_windows();
+	iron_g5_internal_destroy();
+	iron_windows_restore_displays();
 }
 
-void kinc_copy_to_clipboard(const char *text) {
+void iron_copy_to_clipboard(const char *text) {
 	wchar_t wtext[4096];
 	MultiByteToWideChar(CP_UTF8, 0, text, -1, wtext, 4096);
-	OpenClipboard(kinc_windows_window_handle(0));
+	OpenClipboard(iron_windows_window_handle(0));
 	EmptyClipboard();
 	size_t size = (wcslen(wtext) + 1) * sizeof(wchar_t);
 	HANDLE handle = GlobalAlloc(GMEM_MOVEABLE, size);
@@ -1740,7 +1740,7 @@ void kinc_copy_to_clipboard(const char *text) {
 	CloseClipboard();
 }
 
-int kinc_cpu_cores(void) {
+int iron_cpu_cores(void) {
 	SYSTEM_LOGICAL_PROCESSOR_INFORMATION info[1024];
 	DWORD returnLength = sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION) * 1024;
 	BOOL success = GetLogicalProcessorInformation(&info[0], &returnLength);
@@ -1766,7 +1766,7 @@ int kinc_cpu_cores(void) {
 	return proper_cpu_count;
 }
 
-int kinc_hardware_threads(void) {
+int iron_hardware_threads(void) {
 	SYSTEM_INFO sysinfo;
 	GetSystemInfo(&sysinfo);
 	return sysinfo.dwNumberOfProcessors;
@@ -1781,7 +1781,7 @@ typedef unsigned long DWORD;
 #ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
 #define DWMWA_USE_IMMERSIVE_DARK_MODE 20
 #endif
-struct HWND__ *kinc_windows_window_handle();
+struct HWND__ *iron_windows_window_handle();
 // Enable visual styles for ui controls
 #pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
@@ -1798,17 +1798,17 @@ typedef struct {
 	void *closeCallbackData;
 } WindowData;
 
-LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 #define MAXIMUM_WINDOWS 1
 static WindowData windows[MAXIMUM_WINDOWS] = {0};
 
-const wchar_t *windowClassName = L"KoreWindow";
+const wchar_t *windowClassName = L"IronWindow";
 
 static void RegisterWindowClass(HINSTANCE hInstance, const wchar_t *className) {
 	WNDCLASSEXW wc = {sizeof(WNDCLASSEXA),
 	                  CS_OWNDC /*CS_CLASSDC*/,
-	                  KoreWindowsMessageProcedure,
+	                  IronWindowsMessageProcedure,
 	                  0L,
 	                  0L,
 	                  hInstance,
@@ -1824,19 +1824,19 @@ static void RegisterWindowClass(HINSTANCE hInstance, const wchar_t *className) {
 static DWORD getStyle(int features) {
 	DWORD style = WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP;
 
-	if ((features & KINC_WINDOW_FEATURE_RESIZEABLE) && ((features & KINC_WINDOW_FEATURE_BORDERLESS) == 0)) {
+	if ((features & IRON_WINDOW_FEATURE_RESIZEABLE) && ((features & IRON_WINDOW_FEATURE_BORDERLESS) == 0)) {
 		style |= WS_SIZEBOX;
 	}
 
-	if (features & KINC_WINDOW_FEATURE_MAXIMIZABLE) {
+	if (features & IRON_WINDOW_FEATURE_MAXIMIZABLE) {
 		style |= WS_MAXIMIZEBOX;
 	}
 
-	if (features & KINC_WINDOW_FEATURE_MINIMIZABLE) {
+	if (features & IRON_WINDOW_FEATURE_MINIMIZABLE) {
 		style |= WS_MINIMIZEBOX;
 	}
 
-	if ((features & KINC_WINDOW_FEATURE_BORDERLESS) == 0) {
+	if ((features & IRON_WINDOW_FEATURE_BORDERLESS) == 0) {
 		style |= WS_CAPTION | WS_SYSMENU;
 	}
 
@@ -1846,69 +1846,69 @@ static DWORD getStyle(int features) {
 static DWORD getExStyle(int features) {
 	DWORD exStyle = WS_EX_APPWINDOW;
 
-	if ((features & KINC_WINDOW_FEATURE_BORDERLESS) == 0) {
+	if ((features & IRON_WINDOW_FEATURE_BORDERLESS) == 0) {
 		exStyle |= WS_EX_WINDOWEDGE;
 	}
 
-	if (features & KINC_WINDOW_FEATURE_ON_TOP) {
+	if (features & IRON_WINDOW_FEATURE_ON_TOP) {
 		exStyle |= WS_EX_TOPMOST;
 	}
 
 	return exStyle;
 }
 
-int kinc_window_x() {
+int iron_window_x() {
 	RECT rect;
 	GetWindowRect(windows[0].handle, &rect);
 	windows[0].x = rect.left;
 	return windows[0].x;
 }
 
-int kinc_window_y() {
+int iron_window_y() {
 	RECT rect;
 	GetWindowRect(windows[0].handle, &rect);
 	windows[0].y = rect.top;
 	return windows[0].y;
 }
 
-int kinc_window_width() {
+int iron_window_width() {
 	RECT rect;
 	GetClientRect(windows[0].handle, &rect);
 	return rect.right;
 }
 
-int kinc_window_height() {
+int iron_window_height() {
 	RECT rect;
 	GetClientRect(windows[0].handle, &rect);
 	return rect.bottom;
 }
 
-static DWORD getDwStyle(kinc_window_mode_t mode, int features) {
+static DWORD getDwStyle(iron_window_mode_t mode, int features) {
 	switch (mode) {
-	case KINC_WINDOW_MODE_FULLSCREEN:
+	case IRON_WINDOW_MODE_FULLSCREEN:
 		return WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP;
-	case KINC_WINDOW_MODE_WINDOW:
+	case IRON_WINDOW_MODE_WINDOW:
 	default:
 		return getStyle(features);
 	}
 }
 
-static DWORD getDwExStyle(kinc_window_mode_t mode, int features) {
+static DWORD getDwExStyle(iron_window_mode_t mode, int features) {
 	switch (mode) {
-	case KINC_WINDOW_MODE_FULLSCREEN:
+	case IRON_WINDOW_MODE_FULLSCREEN:
 		return WS_EX_APPWINDOW;
-	case KINC_WINDOW_MODE_WINDOW:
+	case IRON_WINDOW_MODE_WINDOW:
 	default:
 		return getExStyle(features);
 	}
 }
 
-static void createWindow(const wchar_t *title, int x, int y, int width, int height, int bpp, int frequency, int features, kinc_window_mode_t windowMode,
+static void createWindow(const wchar_t *title, int x, int y, int width, int height, int bpp, int frequency, int features, iron_window_mode_t windowMode,
                         int target_display_index) {
 	HINSTANCE inst = GetModuleHandleW(NULL);
 	RegisterWindowClass(inst, windowClassName);
 
-	int display_index = target_display_index == -1 ? kinc_primary_display() : target_display_index;
+	int display_index = target_display_index == -1 ? iron_primary_display() : target_display_index;
 
 	RECT WindowRect;
 	WindowRect.left = 0;
@@ -1918,7 +1918,7 @@ static void createWindow(const wchar_t *title, int x, int y, int width, int heig
 
 	AdjustWindowRectEx(&WindowRect, getDwStyle(windowMode, features), FALSE, getDwExStyle(windowMode, features));
 
-	kinc_display_mode_t display_mode = kinc_display_current_mode(display_index);
+	iron_display_mode_t display_mode = iron_display_current_mode(display_index);
 
 	int dstx = display_mode.x;
 	int dsty = display_mode.y;
@@ -1926,13 +1926,13 @@ static void createWindow(const wchar_t *title, int x, int y, int width, int heig
 	int dsth = height;
 
 	switch (windowMode) {
-	case KINC_WINDOW_MODE_WINDOW:
+	case IRON_WINDOW_MODE_WINDOW:
 		dstx += x < 0 ? (display_mode.width - width) / 2 : x;
 		dsty += y < 0 ? (display_mode.height - height) / 2 : y;
 		dstw = WindowRect.right - WindowRect.left;
 		dsth = WindowRect.bottom - WindowRect.top;
 		break;
-	case KINC_WINDOW_MODE_FULLSCREEN:
+	case IRON_WINDOW_MODE_FULLSCREEN:
 		dstw = display_mode.width;
 		dsth = display_mode.height;
 		break;
@@ -1960,28 +1960,28 @@ static void createWindow(const wchar_t *title, int x, int y, int width, int heig
 	DWORD cbdata = 4 * sizeof(char);
 	RegGetValueW(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", L"AppsUseLightTheme", RRF_RT_REG_DWORD, NULL, vdata, &cbdata);
 	BOOL use_dark_mode = (int)(vdata[3] << 24 | vdata[2] << 16 | vdata[1] << 8 | vdata[0]) != 1;
-	DwmSetWindowAttribute(kinc_windows_window_handle(0), DWMWA_USE_IMMERSIVE_DARK_MODE, &use_dark_mode, sizeof(use_dark_mode));
+	DwmSetWindowAttribute(iron_windows_window_handle(0), DWMWA_USE_IMMERSIVE_DARK_MODE, &use_dark_mode, sizeof(use_dark_mode));
 }
 
-void kinc_window_resize(int width, int height) {
+void iron_window_resize(int width, int height) {
 	WindowData *win = &windows[0];
 	win->manualWidth = width;
 	win->manualHeight = height;
 	switch (win->mode) {
-	case KINC_WINDOW_MODE_WINDOW: {
+	case IRON_WINDOW_MODE_WINDOW: {
 		RECT rect;
 		rect.left = 0;
 		rect.top = 0;
 		rect.right = width;
 		rect.bottom = height;
-		AdjustWindowRectEx(&rect, getDwStyle((kinc_window_mode_t)win->mode, win->features), FALSE, getDwExStyle((kinc_window_mode_t)win->mode, win->features));
-		SetWindowPos(win->handle, NULL, kinc_window_x(), kinc_window_y(), rect.right - rect.left, rect.bottom - rect.top, 0);
+		AdjustWindowRectEx(&rect, getDwStyle((iron_window_mode_t)win->mode, win->features), FALSE, getDwExStyle((iron_window_mode_t)win->mode, win->features));
+		SetWindowPos(win->handle, NULL, iron_window_x(), iron_window_y(), rect.right - rect.left, rect.bottom - rect.top, 0);
 		break;
 	}
 	}
 }
 
-void kinc_window_move(int x, int y) {
+void iron_window_move(int x, int y) {
 	WindowData *win = &windows[0];
 
 	if (win->mode != 0) {
@@ -1994,42 +1994,42 @@ void kinc_window_move(int x, int y) {
 	RECT rect;
 	rect.left = 0;
 	rect.top = 0;
-	rect.right = kinc_window_width();
-	rect.bottom = kinc_window_height();
-	AdjustWindowRectEx(&rect, getDwStyle((kinc_window_mode_t)win->mode, win->features), FALSE, getDwExStyle((kinc_window_mode_t)win->mode, win->features));
+	rect.right = iron_window_width();
+	rect.bottom = iron_window_height();
+	AdjustWindowRectEx(&rect, getDwStyle((iron_window_mode_t)win->mode, win->features), FALSE, getDwExStyle((iron_window_mode_t)win->mode, win->features));
 
 	SetWindowPos(win->handle, NULL, x, y, rect.right - rect.left, rect.bottom - rect.top, 0);
 }
 
-void kinc_window_change_features(int features) {
+void iron_window_change_features(int features) {
 	WindowData *win = &windows[0];
 	win->features = features;
 	SetWindowLongW(win->handle, GWL_STYLE, getStyle(features));
 	SetWindowLongW(win->handle, GWL_EXSTYLE, getExStyle(features));
 
-	HWND on_top = (features & KINC_WINDOW_FEATURE_ON_TOP) ? HWND_TOPMOST : HWND_NOTOPMOST;
+	HWND on_top = (features & IRON_WINDOW_FEATURE_ON_TOP) ? HWND_TOPMOST : HWND_NOTOPMOST;
 	SetWindowPos(win->handle, on_top, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED);
 
-	kinc_window_show();
+	iron_window_show();
 }
 
-void kinc_window_change_mode(kinc_window_mode_t mode) {
+void iron_window_change_mode(iron_window_mode_t mode) {
 	WindowData *win = &windows[0];
-	int display_index = kinc_window_display();
-	kinc_display_mode_t display_mode = kinc_display_current_mode(display_index);
+	int display_index = iron_window_display();
+	iron_display_mode_t display_mode = iron_display_current_mode(display_index);
 	switch (mode) {
-	case KINC_WINDOW_MODE_WINDOW: {
-		kinc_windows_restore_display(display_index);
-		kinc_window_change_features(win->features);
-		kinc_window_show();
+	case IRON_WINDOW_MODE_WINDOW: {
+		iron_windows_restore_display(display_index);
+		iron_window_change_features(win->features);
+		iron_window_show();
 		break;
 	}
-	case KINC_WINDOW_MODE_FULLSCREEN: {
-		kinc_windows_restore_display(display_index);
+	case IRON_WINDOW_MODE_FULLSCREEN: {
+		iron_windows_restore_display(display_index);
 		SetWindowLongW(win->handle, GWL_STYLE, WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP);
 		SetWindowLongW(win->handle, GWL_EXSTYLE, WS_EX_APPWINDOW);
 		SetWindowPos(win->handle, NULL, display_mode.x, display_mode.y, display_mode.width, display_mode.height, 0);
-		kinc_window_show();
+		iron_window_show();
 		break;
 	}
 	}
@@ -2037,20 +2037,20 @@ void kinc_window_change_mode(kinc_window_mode_t mode) {
 	DragAcceptFiles(win->handle, true);
 }
 
-kinc_window_mode_t kinc_window_get_mode() {
-	return (kinc_window_mode_t)windows[0].mode;
+iron_window_mode_t iron_window_get_mode() {
+	return (iron_window_mode_t)windows[0].mode;
 }
 
-void kinc_window_destroy() {
+void iron_window_destroy() {
 	WindowData *win = &windows[0];
 	if (win->handle != NULL) {
-		kinc_g5_internal_destroy_window();
+		iron_g5_internal_destroy_window();
 		DestroyWindow(win->handle);
 		win->handle = NULL;
 	}
 }
 
-void kinc_windows_hide_windows(void) {
+void iron_windows_hide_windows(void) {
 	for (int i = 0; i < MAXIMUM_WINDOWS; ++i) {
 		if (windows[i].handle != NULL) {
 			ShowWindow(windows[i].handle, SW_HIDE);
@@ -2059,34 +2059,34 @@ void kinc_windows_hide_windows(void) {
 	}
 }
 
-void kinc_windows_destroy_windows(void) {
+void iron_windows_destroy_windows(void) {
 	for (int i = 0; i < MAXIMUM_WINDOWS; ++i) {
-		kinc_window_destroy(i);
+		iron_window_destroy(i);
 	}
 	UnregisterClassW(windowClassName, GetModuleHandleW(NULL));
 }
 
-void kinc_window_show() {
+void iron_window_show() {
 	ShowWindow(windows[0].handle, SW_SHOWDEFAULT);
 	UpdateWindow(windows[0].handle);
 }
 
-void kinc_window_hide() {
+void iron_window_hide() {
 	ShowWindow(windows[0].handle, SW_HIDE);
 	UpdateWindow(windows[0].handle);
 }
 
-void kinc_window_set_title(const char *title) {
+void iron_window_set_title(const char *title) {
 	wchar_t buffer[1024];
 	MultiByteToWideChar(CP_UTF8, 0, title, -1, buffer, 1024);
 	SetWindowTextW(windows[0].handle, buffer);
 }
 
-void kinc_window_create(kinc_window_options_t *win) {
-	kinc_window_options_t defaultWin;
+void iron_window_create(iron_window_options_t *win) {
+	iron_window_options_t defaultWin;
 
 	if (win == NULL) {
-		kinc_window_options_set_defaults(&defaultWin);
+		iron_window_options_set_defaults(&defaultWin);
 		win = &defaultWin;
 	}
 
@@ -2102,38 +2102,38 @@ void kinc_window_create(kinc_window_options_t *win) {
 
 	bool vsync = win->vsync;
 
-	kinc_g4_internal_init_window(win->depth_bits, vsync);
+	iron_g4_internal_init_window(win->depth_bits, vsync);
 
 	if (win->visible) {
-		kinc_window_show();
+		iron_window_show();
 	}
 }
 
-void kinc_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {
+void iron_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {
 	windows[0].resizeCallback = callback;
 	windows[0].resizeCallbackData = data;
 }
 
-void kinc_window_set_close_callback(bool (*callback)(void *data), void *data) {
+void iron_window_set_close_callback(bool (*callback)(void *data), void *data) {
 	windows[0].closeCallback = callback;
 	windows[0].closeCallbackData = data;
 }
 
-int kinc_window_display() {
-	return kinc_windows_get_display_for_monitor(MonitorFromWindow(windows[0].handle, MONITOR_DEFAULTTOPRIMARY));
+int iron_window_display() {
+	return iron_windows_get_display_for_monitor(MonitorFromWindow(windows[0].handle, MONITOR_DEFAULTTOPRIMARY));
 }
 
-struct HWND__ *kinc_windows_window_handle() {
+struct HWND__ *iron_windows_window_handle() {
 	return windows[0].handle;
 }
 
-void kinc_internal_call_resize_callback(int width, int height) {
+void iron_internal_call_resize_callback(int width, int height) {
 	if (windows[0].resizeCallback != NULL) {
 		windows[0].resizeCallback(width, height, windows[0].resizeCallbackData);
 	}
 }
 
-bool kinc_internal_call_close_callback() {
+bool iron_internal_call_close_callback() {
 	if (windows[0].closeCallback != NULL) {
 		return windows[0].closeCallback(windows[0].closeCallbackData);
 	}

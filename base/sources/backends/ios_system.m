@@ -50,11 +50,11 @@ static int removeTouch(void *touch) {
 
 static GLint backingWidth, backingHeight;
 
-int kinc_window_width() {
+int iron_window_width() {
 	return backingWidth;
 }
 
-int kinc_window_height() {
+int iron_window_height() {
 	return backingHeight;
 }
 
@@ -69,7 +69,7 @@ int kinc_window_height() {
 	float x = point.x * self.contentScaleFactor;
 	float y = point.y * self.contentScaleFactor;
 	// Pencil hover
-	kinc_internal_pen_trigger_move(0, x, y, 0.0);
+	iron_internal_pen_trigger_move(0, x, y, 0.0);
 }
 
 - (id)initWithFrame:(CGRect)frame {
@@ -106,7 +106,7 @@ int kinc_window_height() {
 - (void)end {
 }
 
-void kinc_internal_call_resize_callback(int width, int height);
+void iron_internal_call_resize_callback(int width, int height);
 
 - (void)layoutSubviews {
 	backingWidth = self.frame.size.width * self.contentScaleFactor;
@@ -115,7 +115,7 @@ void kinc_internal_call_resize_callback(int width, int height);
 	CAMetalLayer *metalLayer = (CAMetalLayer *)self.layer;
 	metalLayer.drawableSize = CGSizeMake(backingWidth, backingHeight);
 
-	kinc_internal_call_resize_callback(backingWidth, backingHeight);
+	iron_internal_call_resize_callback(backingWidth, backingHeight);
 }
 
 - (void)dealloc {
@@ -131,12 +131,12 @@ void kinc_internal_call_resize_callback(int width, int height);
 			float x = point.x * self.contentScaleFactor;
 			float y = point.y * self.contentScaleFactor;
 			if (index == 0) {
-				kinc_internal_mouse_trigger_press(0, event.buttonMask == UIEventButtonMaskSecondary ? 1 : 0, x, y);
+				iron_internal_mouse_trigger_press(0, event.buttonMask == UIEventButtonMaskSecondary ? 1 : 0, x, y);
 			}
-			kinc_internal_surface_trigger_touch_start(index, x, y);
+			iron_internal_surface_trigger_touch_start(index, x, y);
 
 			if (touch.type == UITouchTypePencil) {
-				kinc_internal_pen_trigger_press(0, x, y, 0.0);
+				iron_internal_pen_trigger_press(0, x, y, 0.0);
 			}
 		}
 	}
@@ -150,9 +150,9 @@ void kinc_internal_call_resize_callback(int width, int height);
 			float x = point.x * self.contentScaleFactor;
 			float y = point.y * self.contentScaleFactor;
 			if (index == 0) {
-				kinc_internal_mouse_trigger_move(0, x, y);
+				iron_internal_mouse_trigger_move(0, x, y);
 			}
-			kinc_internal_surface_trigger_move(index, x, y);
+			iron_internal_surface_trigger_move(index, x, y);
 		}
 	}
 }
@@ -163,7 +163,7 @@ void kinc_internal_call_resize_callback(int width, int height);
 			CGPoint point = [touch locationInView:self];
 			float x = point.x * self.contentScaleFactor;
 			float y = point.y * self.contentScaleFactor;
-			kinc_internal_pen_trigger_move(0, x, y, touch.force);
+			iron_internal_pen_trigger_move(0, x, y, touch.force);
 		}
 	}
 }
@@ -176,12 +176,12 @@ void kinc_internal_call_resize_callback(int width, int height);
 			float x = point.x * self.contentScaleFactor;
 			float y = point.y * self.contentScaleFactor;
 			if (index == 0) {
-				kinc_internal_mouse_trigger_release(0, event.buttonMask == UIEventButtonMaskSecondary ? 1 : 0, x, y);
+				iron_internal_mouse_trigger_release(0, event.buttonMask == UIEventButtonMaskSecondary ? 1 : 0, x, y);
 			}
-			kinc_internal_surface_trigger_touch_end(index, x, y);
+			iron_internal_surface_trigger_touch_end(index, x, y);
 
 			if (touch.type == UITouchTypePencil) {
-				kinc_internal_pen_trigger_release(0, x, y, 0.0);
+				iron_internal_pen_trigger_release(0, x, y, 0.0);
 			}
 		}
 	}
@@ -195,12 +195,12 @@ void kinc_internal_call_resize_callback(int width, int height);
 			float x = point.x * self.contentScaleFactor;
 			float y = point.y * self.contentScaleFactor;
 			if (index == 0) {
-				kinc_internal_mouse_trigger_release(0, event.buttonMask == UIEventButtonMaskSecondary ? 1 : 0, x, y);
+				iron_internal_mouse_trigger_release(0, event.buttonMask == UIEventButtonMaskSecondary ? 1 : 0, x, y);
 			}
-			kinc_internal_surface_trigger_touch_end(index, x, y);
+			iron_internal_surface_trigger_touch_end(index, x, y);
 
 			if (touch.type == UITouchTypePencil) {
-				kinc_internal_pen_trigger_release(0, x, y, 0.0);
+				iron_internal_pen_trigger_release(0, x, y, 0.0);
 			}
 		}
 	}
@@ -228,59 +228,59 @@ static bool shiftDown = false;
 		if (ch == 8212)
 			ch = '_';
 		if (ch == L'\n') {
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_RETURN);
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_RETURN);
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_RETURN);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_RETURN);
 			return;
 		}
 
 		if (ch == L'.') {
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_PERIOD);
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_PERIOD);
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_PERIOD);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_PERIOD);
 		}
 		else if (ch == L'%') {
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_PERCENT);
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_PERCENT);
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_PERCENT);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_PERCENT);
 		}
 		else if (ch == L'(') {
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_OPEN_PAREN);
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_OPEN_PAREN);
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_OPEN_PAREN);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_OPEN_PAREN);
 		}
 		else if (ch == L'&') {
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_AMPERSAND);
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_AMPERSAND);
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_AMPERSAND);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_AMPERSAND);
 		}
 		else if (ch == L'$') {
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_DOLLAR);
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_DOLLAR);
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_DOLLAR);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_DOLLAR);
 		}
 		else if (ch == L'#') {
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_HASH);
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_HASH);
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_HASH);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_HASH);
 		}
 		else if (ch >= L'a' && ch <= L'z') {
 			if (shiftDown) {
-				kinc_internal_keyboard_trigger_key_up(KINC_KEY_SHIFT);
+				iron_internal_keyboard_trigger_key_up(IRON_KEY_SHIFT);
 				shiftDown = false;
 			}
-			kinc_internal_keyboard_trigger_key_down(ch + KINC_KEY_A - L'a');
-			kinc_internal_keyboard_trigger_key_up(ch + KINC_KEY_A - L'a');
+			iron_internal_keyboard_trigger_key_down(ch + IRON_KEY_A - L'a');
+			iron_internal_keyboard_trigger_key_up(ch + IRON_KEY_A - L'a');
 		}
 		else {
 			if (!shiftDown) {
-				kinc_internal_keyboard_trigger_key_down(KINC_KEY_SHIFT);
+				iron_internal_keyboard_trigger_key_down(IRON_KEY_SHIFT);
 				shiftDown = true;
 			}
-			kinc_internal_keyboard_trigger_key_down(ch + KINC_KEY_A - L'A');
-			kinc_internal_keyboard_trigger_key_up(ch + KINC_KEY_A - L'A');
+			iron_internal_keyboard_trigger_key_down(ch + IRON_KEY_A - L'A');
+			iron_internal_keyboard_trigger_key_up(ch + IRON_KEY_A - L'A');
 		}
 
-		kinc_internal_keyboard_trigger_key_press(ch);
+		iron_internal_keyboard_trigger_key_press(ch);
 	}
 }
 
 - (void)deleteBackward {
-	kinc_internal_keyboard_trigger_key_down(KINC_KEY_BACKSPACE);
-	kinc_internal_keyboard_trigger_key_up(KINC_KEY_BACKSPACE);
+	iron_internal_keyboard_trigger_key_down(IRON_KEY_BACKSPACE);
+	iron_internal_keyboard_trigger_key_up(IRON_KEY_BACKSPACE);
 }
 
 - (BOOL)canBecomeFirstResponder {
@@ -288,7 +288,7 @@ static bool shiftDown = false;
 }
 
 - (void)onKeyboardHide:(NSNotification *)notification {
-	kinc_keyboard_hide();
+	iron_keyboard_hide();
 }
 
 - (CAMetalLayer *)metalLayer {
@@ -382,14 +382,14 @@ void importFile(NSURL *url) {
 	[[NSFileManager defaultManager] copyItemAtPath:url.path toPath:filePath error:nil];
 	CFURLStopAccessingSecurityScopedResource(cfurl);
 	wchar_t *wpath = (wchar_t *)[filePath cStringUsingEncoding:NSUTF32LittleEndianStringEncoding];
-	kinc_internal_drop_files_callback(wpath);
+	iron_internal_drop_files_callback(wpath);
 }
 
 - (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentAtURL:(NSURL *)url {
 	// wchar_t *filePath = (wchar_t *)[url.path cStringUsingEncoding:NSUTF32LittleEndianStringEncoding];
 	// CFURLRef cfurl = (__bridge CFURLRef)url;
 	// CFURLStartAccessingSecurityScopedResource(cfurl);
-	// kinc_internal_drop_files_callback(filePath);
+	// iron_internal_drop_files_callback(filePath);
 	// CFURLStopAccessingSecurityScopedResource(cfurl);
 	importFile(url);
 }
@@ -398,8 +398,8 @@ void importFile(NSURL *url) {
 	CGPoint point = [session locationInView:self.view];
 	float x = point.x * glView.contentScaleFactor;
 	float y = point.y * glView.contentScaleFactor;
-	kinc_internal_mouse_trigger_move(0, x, y);
-	kinc_internal_surface_trigger_move(0, x, y);
+	iron_internal_mouse_trigger_move(0, x, y);
+	iron_internal_surface_trigger_move(0, x, y);
 
 	for (UIDragItem *item in session.items) {
 		[item.itemProvider loadInPlaceFileRepresentationForTypeIdentifier:item.itemProvider.registeredTypeIdentifiers[0] completionHandler:^(NSURL * _Nullable url, BOOL isInPlace, NSError * _Nullable error) {
@@ -419,7 +419,7 @@ void importFile(NSURL *url) {
 
 @end
 
-@implementation KoreAppDelegate
+@implementation IronAppDelegate
 
 static UIWindow *window;
 static GLViewController *glViewController;
@@ -458,69 +458,69 @@ void loadURL(const char *url) {
 	return YES;
 }
 
-void KoreUpdateKeyboard(void);
+void IronUpdateKeyboard(void);
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
 	[glViewController setVisible:YES];
-	kinc_internal_foreground_callback();
+	iron_internal_foreground_callback();
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
-	kinc_internal_resume_callback();
+	iron_internal_resume_callback();
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application {
-	kinc_internal_pause_callback();
+	iron_internal_pause_callback();
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
 	[glViewController setVisible:NO];
-	kinc_internal_background_callback();
+	iron_internal_background_callback();
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {
-	kinc_internal_shutdown_callback();
+	iron_internal_shutdown_callback();
 }
 
 @end
 
-void kinc_display_init(void) {}
+void iron_display_init(void) {}
 
-kinc_display_mode_t kinc_display_available_mode(int display, int mode) {
-	kinc_display_mode_t dm;
-	dm.width = kinc_window_width();
-	dm.height = kinc_window_height();
+iron_display_mode_t iron_display_available_mode(int display, int mode) {
+	iron_display_mode_t dm;
+	dm.width = iron_window_width();
+	dm.height = iron_window_height();
 	dm.frequency = 60;
 	dm.bits_per_pixel = 32;
 	return dm;
 }
 
-int kinc_display_count_available_modes(int display) {
+int iron_display_count_available_modes(int display) {
 	return 1;
 }
 
-bool kinc_display_available(int display) {
+bool iron_display_available(int display) {
 	return true;
 }
 
-const char *kinc_display_name(int display) {
+const char *iron_display_name(int display) {
 	return "Display";
 }
 
-kinc_display_mode_t kinc_display_current_mode(int display) {
-	kinc_display_mode_t dm;
-	dm.width = kinc_window_width();
-	dm.height = kinc_window_height();
+iron_display_mode_t iron_display_current_mode(int display) {
+	iron_display_mode_t dm;
+	dm.width = iron_window_width();
+	dm.height = iron_window_height();
 	dm.frequency = (int)[[UIScreen mainScreen] maximumFramesPerSecond];
 	dm.bits_per_pixel = 32;
 	return dm;
 }
 
-int kinc_count_displays(void) {
+int iron_count_displays(void) {
 	return 1;
 }
 
-int kinc_primary_display(void) {
+int iron_primary_display(void) {
 	return 0;
 }
 
@@ -528,23 +528,23 @@ int kinc_primary_display(void) {
 
 @end
 
-void kinc_internal_mouse_lock(void) {}
+void iron_internal_mouse_lock(void) {}
 
-void kinc_internal_mouse_unlock(void) {}
+void iron_internal_mouse_unlock(void) {}
 
-bool kinc_mouse_can_lock(void) {
+bool iron_mouse_can_lock(void) {
 	return false;
 }
 
-void kinc_mouse_show(void) {}
+void iron_mouse_show(void) {}
 
-void kinc_mouse_hide(void) {}
+void iron_mouse_hide(void) {}
 
-void kinc_mouse_set_position(int x, int y) {}
+void iron_mouse_set_position(int x, int y) {}
 
-void kinc_mouse_get_position(int *x, int *y) {}
+void iron_mouse_get_position(int *x, int *y) {}
 
-void kinc_mouse_set_cursor(int cursor_index) {}
+void iron_mouse_set_cursor(int cursor_index) {}
 
 bool withAutoreleasepool(bool (*f)(void)) {
 	@autoreleasepool {
@@ -558,7 +558,7 @@ const char *iphonegetresourcepath(void) {
 	return [[[NSBundle mainBundle] resourcePath] cStringUsingEncoding:1];
 }
 
-bool kinc_internal_handle_messages(void) {
+bool iron_internal_handle_messages(void) {
 	SInt32 result;
 	do {
 		result = CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, TRUE);
@@ -566,34 +566,34 @@ bool kinc_internal_handle_messages(void) {
 	return true;
 }
 
-void kinc_set_keep_screen_on(bool on) {}
+void iron_set_keep_screen_on(bool on) {}
 
 void showKeyboard(void);
 void hideKeyboard(void);
 
-void kinc_keyboard_show(void) {
+void iron_keyboard_show(void) {
 	keyboardshown = true;
 	showKeyboard();
 }
 
-void kinc_keyboard_hide(void) {
+void iron_keyboard_hide(void) {
 	keyboardshown = false;
 	hideKeyboard();
 }
 
-bool kinc_keyboard_active(void) {
+bool iron_keyboard_active(void) {
 	return keyboardshown;
 }
 
 void loadURL(const char *url);
 
-void kinc_load_url(const char *url) {
+void iron_load_url(const char *url) {
 	loadURL(url);
 }
 
 static char language[3];
 
-const char *kinc_language(void) {
+const char *iron_language(void) {
 	NSString *nsstr = [[NSLocale preferredLanguages] objectAtIndex:0];
 	const char *lang = [nsstr UTF8String];
 	language[0] = lang[0];
@@ -602,7 +602,7 @@ const char *kinc_language(void) {
 	return language;
 }
 
-void KoreUpdateKeyboard(void) {
+void IronUpdateKeyboard(void) {
 	if (keyboardshown) {
 		hideKeyboard();
 		showKeyboard();
@@ -612,16 +612,16 @@ void KoreUpdateKeyboard(void) {
 	}
 }
 
-void kinc_internal_shutdown(void) {}
+void iron_internal_shutdown(void) {}
 
-void kinc_init(const char *name, int width, int height, struct kinc_window_options *win) {
-	kinc_window_options_t defaultWin;
+void iron_init(const char *name, int width, int height, struct iron_window_options *win) {
+	iron_window_options_t defaultWin;
 	if (win == NULL) {
-		kinc_window_options_set_defaults(&defaultWin);
+		iron_window_options_set_defaults(&defaultWin);
 		win = &defaultWin;
 	}
-	kinc_g5_internal_init();
-	kinc_g4_internal_init_window(win->depth_bits, true);
+	iron_g5_internal_init();
+	iron_g4_internal_init_window(win->depth_bits, true);
 }
 
 void endGL(void);
@@ -632,7 +632,7 @@ void swapBuffersiOS(void) {
 
 static char sysid[512];
 
-const char *kinc_system_id(void) {
+const char *iron_system_id(void) {
 	const char *name = [[[UIDevice currentDevice] name] UTF8String];
 	const char *vendorId = [[[[UIDevice currentDevice] identifierForVendor] UUIDString] UTF8String];
 	strcpy(sysid, name);
@@ -644,7 +644,7 @@ const char *kinc_system_id(void) {
 static const char *getSavePath(void) {
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
 	NSString *resolvedPath = [paths objectAtIndex:0];
-	NSString *appName = [NSString stringWithUTF8String:kinc_application_name()];
+	NSString *appName = [NSString stringWithUTF8String:iron_application_name()];
 	resolvedPath = [resolvedPath stringByAppendingPathComponent:appName];
 
 	NSFileManager *fileMgr = [[NSFileManager alloc] init];
@@ -656,46 +656,46 @@ static const char *getSavePath(void) {
 	return [resolvedPath cStringUsingEncoding:1];
 }
 
-const char *kinc_internal_save_path(void) {
+const char *iron_internal_save_path(void) {
 	return getSavePath();
 }
 
 static const char *videoFormats[] = {"mp4", NULL};
 
-const char **kinc_video_formats(void) {
+const char **iron_video_formats(void) {
 	return videoFormats;
 }
 
-double kinc_frequency(void) {
+double iron_frequency(void) {
 	mach_timebase_info_data_t info;
 	mach_timebase_info(&info);
 	return (double)info.denom / (double)info.numer / 1e-9;
 }
 
-kinc_ticks_t kinc_timestamp(void) {
-	kinc_ticks_t time = mach_absolute_time();
+iron_ticks_t iron_timestamp(void) {
+	iron_ticks_t time = mach_absolute_time();
 	return time;
 }
 
-const char *kinc_gamepad_vendor(int gamepad) {
+const char *iron_gamepad_vendor(int gamepad) {
 	return "nobody";
 }
 
-const char *kinc_gamepad_product_name(int gamepad) {
+const char *iron_gamepad_product_name(int gamepad) {
 	return "none";
 }
 
-bool kinc_gamepad_connected(int num) {
+bool iron_gamepad_connected(int num) {
 	return true;
 }
 
-void kinc_gamepad_rumble(int gamepad, float left, float right) {}
+void iron_gamepad_rumble(int gamepad, float left, float right) {}
 
 int main(int argc, char *argv[]) {
 	int retVal = 0;
 	@autoreleasepool {
-		[KoreAppDelegate description]; // otherwise removed by the linker
-		retVal = UIApplicationMain(argc, argv, nil, @"KoreAppDelegate");
+		[IronAppDelegate description]; // otherwise removed by the linker
+		retVal = UIApplicationMain(argc, argv, nil, @"IronAppDelegate");
 	}
 	return retVal;
 }
@@ -703,49 +703,49 @@ int main(int argc, char *argv[]) {
 static void (*resizeCallback)(int x, int y, void *data) = NULL;
 static void *resizeCallbackData = NULL;
 
-int kinc_window_x() {
+int iron_window_x() {
 	return 0;
 }
 
-int kinc_window_y() {
+int iron_window_y() {
 	return 0;
 }
 
-void kinc_window_resize(int width, int height) {}
+void iron_window_resize(int width, int height) {}
 
-void kinc_window_move(int x, int y) {}
+void iron_window_move(int x, int y) {}
 
-void kinc_window_change_features(int features) {}
+void iron_window_change_features(int features) {}
 
-void kinc_window_change_mode(kinc_window_mode_t mode) {}
+void iron_window_change_mode(iron_window_mode_t mode) {}
 
-void kinc_window_destroy() {}
+void iron_window_destroy() {}
 
-void kinc_window_show() {}
+void iron_window_show() {}
 
-void kinc_window_hide() {}
+void iron_window_hide() {}
 
-void kinc_window_set_title(const char *title) {}
+void iron_window_set_title(const char *title) {}
 
-void kinc_window_create(kinc_window_options_t *win) {}
+void iron_window_create(iron_window_options_t *win) {}
 
-void kinc_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {
+void iron_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {
 	resizeCallback = callback;
 	resizeCallbackData = data;
 }
 
-void kinc_internal_call_resize_callback(int width, int height) {
+void iron_internal_call_resize_callback(int width, int height) {
 	if (resizeCallback != NULL) {
 		resizeCallback(width, height, resizeCallbackData);
 	}
 }
 
-void kinc_window_set_close_callback(bool (*callback)(void *), void *data) {}
+void iron_window_set_close_callback(bool (*callback)(void *), void *data) {}
 
-kinc_window_mode_t kinc_window_get_mode() {
-	return KINC_WINDOW_MODE_FULLSCREEN;
+iron_window_mode_t iron_window_get_mode() {
+	return IRON_WINDOW_MODE_FULLSCREEN;
 }
 
-int kinc_window_display() {
+int iron_window_display() {
 	return 0;
 }

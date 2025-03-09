@@ -24,14 +24,14 @@ function app_w(): i32 {
 	if (app_on_w != null) {
 		return app_on_w();
 	}
-	return kinc_window_width();
+	return iron_window_width();
 }
 
 function app_h(): i32 {
 	if (app_on_h != null) {
 		return app_on_h();
 	}
-	return kinc_window_height();
+	return iron_window_height();
 }
 
 function app_x(): i32 {

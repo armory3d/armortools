@@ -206,9 +206,9 @@ static bool pnpoly(float v0x, float v0y, float v1x, float v1y, float v2x, float 
 	return c;
 }
 
-kinc_vector4_t calc_normal(kinc_vector4_t a, kinc_vector4_t b, kinc_vector4_t c) {
-	kinc_vector4_t cb = vec4_sub(c, b);
-	kinc_vector4_t ab = vec4_sub(a, b);
+iron_vector4_t calc_normal(iron_vector4_t a, iron_vector4_t b, iron_vector4_t c) {
+	iron_vector4_t cb = vec4_sub(c, b);
+	iron_vector4_t ab = vec4_sub(a, b);
 	cb = vec4_cross(cb, ab);
 	cb = vec4_norm(cb);
 	return cb;
@@ -344,7 +344,7 @@ raw_mesh_t *obj_parse(buffer_t *file_bytes, char split_code, uint64_t start_pos,
 					nz = nor_temp.buffer[(na[0] - _nind_off) * 3 + 2];
 				}
 				else {
-					kinc_vector4_t n = calc_normal(
+					iron_vector4_t n = calc_normal(
 						vec4_create(pos_temp.buffer[(va[0] - _vind_off) * 3], pos_temp.buffer[(va[0] - _vind_off) * 3 + 1], pos_temp.buffer[(va[0] - _vind_off) * 3 + 2], 1.0f),
 						vec4_create(pos_temp.buffer[(va[1] - _vind_off) * 3], pos_temp.buffer[(va[1] - _vind_off) * 3 + 1], pos_temp.buffer[(va[1] - _vind_off) * 3 + 2], 1.0f),
 						vec4_create(pos_temp.buffer[(va[2] - _vind_off) * 3], pos_temp.buffer[(va[2] - _vind_off) * 3 + 1], pos_temp.buffer[(va[2] - _vind_off) * 3 + 2], 1.0f)
@@ -524,7 +524,7 @@ raw_mesh_t *obj_parse(buffer_t *file_bytes, char split_code, uint64_t start_pos,
 			int i1 = part->inda->buffer[i * 3    ];
 			int i2 = part->inda->buffer[i * 3 + 1];
 			int i3 = part->inda->buffer[i * 3 + 2];
-			kinc_vector4_t n = calc_normal(
+			iron_vector4_t n = calc_normal(
 				vec4_create(part->posa->buffer[i1 * 4], part->posa->buffer[i1 * 4 + 1], part->posa->buffer[i1 * 4 + 2], 1.0),
 				vec4_create(part->posa->buffer[i2 * 4], part->posa->buffer[i2 * 4 + 1], part->posa->buffer[i2 * 4 + 2], 1.0),
 				vec4_create(part->posa->buffer[i3 * 4], part->posa->buffer[i3 * 4 + 1], part->posa->buffer[i3 * 4 + 2], 1.0)

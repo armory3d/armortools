@@ -32,8 +32,8 @@ function ui_menu_render() {
 
 	// First draw out of screen, then align the menu based on menu height
 	if (ui_menu_show_first) {
-		ui_menu_x -= kinc_window_width() * 2;
-		ui_menu_y -= kinc_window_height() * 2;
+		ui_menu_x -= iron_window_width() * 2;
+		ui_menu_y -= iron_window_height() * 2;
 	}
 
 	ui_begin_region(ui, ui_menu_x, ui_menu_y, menu_w);
@@ -122,7 +122,7 @@ function ui_menu_render() {
 
 			ui_menu_separator(ui);
 			if (ui_menu_button(tr("Exit"))) {
-				kinc_stop();
+				iron_stop();
 			}
 		}
 		else if (ui_menu_category == menu_category_t.EDIT) {
@@ -243,7 +243,7 @@ function ui_menu_render() {
 			///if (is_paint || is_sculpt)
 			context_raw.draw_wireframe = ui_check(context_raw.wireframe_handle, " " + tr("Wireframe"));
 			if (context_raw.wireframe_handle.changed) {
-				let current: kinc_g5_texture_t = _g2_current;
+				let current: iron_g5_texture_t = _g2_current;
 				g2_end();
 				util_uv_cache_uv_map();
 				g2_begin(current);
@@ -312,7 +312,7 @@ function ui_menu_render() {
 			];
 			let shortcuts: string[] = ["l", "b", "n", "o", "r", "m", "a", "h", "e", "s", "t", "1", "2", "3", "4"];
 
-			if (kinc_g5_raytrace_supported()) {
+			if (iron_g5_raytrace_supported()) {
 				array_push(modes, tr("Path Traced"));
 				array_push(shortcuts, "p");
 			}
@@ -437,16 +437,16 @@ function ui_menu_render() {
 			}
 			if (ui_menu_button(tr("Report Bug"))) {
 				///if (arm_macos || arm_ios) // Limited url length
-				file_load_url("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + kinc_system_id());
+				file_load_url("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id());
 				///else
-				file_load_url("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + kinc_system_id() + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A");
+				file_load_url("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id() + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A");
 				///end
 			}
 			if (ui_menu_button(tr("Request Feature"))) {
 				///if (arm_macos || arm_ios) // Limited url length
-				file_load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + kinc_system_id());
+				file_load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id());
 				///else
-				file_load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + kinc_system_id() + "*%0A%0A**Feature description:**%0A%0A");
+				file_load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id() + "*%0A%0A**Feature description:**%0A%0A");
 				///end
 			}
 			ui_menu_separator(ui);
@@ -489,12 +489,12 @@ function ui_menu_render() {
 			if (ui_menu_button(tr("About..."))) {
 
 				let msg: string = manifest_title + ".org - v" + manifest_version + " (" + config_get_date() + ") - " + config_get_sha() + "\n";
-				msg += kinc_system_id() + " - " + strings_graphics_api();
+				msg += iron_system_id() + " - " + strings_graphics_api();
 
 				///if arm_windows
 				let save: string;
 				if (path_is_protected()) {
-					save = kinc_internal_save_path();
+					save = iron_internal_save_path();
 				}
 				else {
 					save = path_data();
@@ -528,7 +528,7 @@ function ui_menu_render() {
 					let tab_vertical: bool = config_raw.touch_ui;
 					if (ui_tab(ui_handle(__ID__), tr("About"), tab_vertical)) {
 
-						let img: kinc_g5_texture_t = data_get_image("badge.k");
+						let img: iron_g5_texture_t = data_get_image("badge.k");
 						_ui_image(img);
 						_ui_end_element();
 
@@ -542,7 +542,7 @@ function ui_menu_render() {
 
 						///if (arm_windows || arm_linux || arm_macos)
 						if (ui_button(tr("Copy"))) {
-							kinc_copy_to_clipboard(_ui_menu_render_msg);
+							iron_copy_to_clipboard(_ui_menu_render_msg);
 						}
 						///else
 						_ui_end_element();
@@ -572,8 +572,8 @@ function ui_menu_render() {
 	if (ui_menu_show_first) {
 		ui_menu_show_first = false;
 		ui_menu_h = ui._y - ui_menu_y;
-		ui_menu_x += kinc_window_width() * 2;
-		ui_menu_y += kinc_window_height() * 2;
+		ui_menu_x += iron_window_width() * 2;
+		ui_menu_y += iron_window_height() * 2;
 		ui_menu_fit_to_screen();
 		ui_menu_render(); // Render at correct position now
 	}
@@ -602,20 +602,20 @@ function ui_menu_draw(commands: (ui: ui_t)=>void = null, x: i32 = -1, y: i32 = -
 function ui_menu_fit_to_screen() {
 	// Prevent the menu going out of screen
 	let menu_w: f32 = base_default_element_w * ui_SCALE(base_ui_menu) * 2.3;
-	if (ui_menu_x + menu_w > kinc_window_width()) {
+	if (ui_menu_x + menu_w > iron_window_width()) {
 		if (ui_menu_x - menu_w > 0) {
 			ui_menu_x = math_floor(ui_menu_x - menu_w);
 		}
 		else {
-			ui_menu_x = math_floor(kinc_window_width() - menu_w);
+			ui_menu_x = math_floor(iron_window_width() - menu_w);
 		}
 	}
-	if (ui_menu_y + ui_menu_h > kinc_window_height()) {
+	if (ui_menu_y + ui_menu_h > iron_window_height()) {
 		if (ui_menu_y - ui_menu_h > 0) {
 			ui_menu_y = math_floor(ui_menu_y - ui_menu_h);
 		}
 		else {
-			ui_menu_y = kinc_window_height() - ui_menu_h;
+			ui_menu_y = iron_window_height() - ui_menu_h;
 		}
 		ui_menu_x += 1; // Move out of mouse focus
 	}

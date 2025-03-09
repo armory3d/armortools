@@ -24,7 +24,7 @@ function shader_data_parse(file: string, name: string): shader_data_t {
 	let format: scene_t = data_get_scene_raw(file);
 	let raw: shader_data_t = shader_data_get_raw_by_name(format.shader_datas, name);
 	if (raw == null) {
-		kinc_log("Shader data '" + name + "' not found!");
+		iron_log("Shader data '" + name + "' not found!");
 		return null;
 	}
 	return shader_data_create(raw);
@@ -211,10 +211,10 @@ function shader_context_parse_vertex_struct(raw: shader_context_t) {
 
 function shader_context_delete(raw: shader_context_t) {
 	if (raw._.pipe_state.fragment_shader != null) {
-		kinc_g5_shader_destroy(raw._.pipe_state.fragment_shader);
+		iron_g5_shader_destroy(raw._.pipe_state.fragment_shader);
 	}
 	if (raw._.pipe_state.vertex_shader != null) {
-		kinc_g5_shader_destroy(raw._.pipe_state.vertex_shader);
+		iron_g5_shader_destroy(raw._.pipe_state.vertex_shader);
 	}
 	iron_g4_delete_pipeline(raw._.pipe_state);
 }

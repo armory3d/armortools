@@ -1,5 +1,5 @@
 
-#ifdef KINC_A2
+#ifdef IRON_A2
 
 #include <iron_audio.h>
 #include <iron_system.h>
@@ -68,7 +68,7 @@ DEFINE_GUID(CLSID_MMDeviceEnumerator, 0xBCDE0395, 0xE52F, 0x467C, 0x8E, 0x3D, 0x
 #endif
 
 // based on the implementation in soloud and Microsoft sample code
-static kinc_a2_buffer_t a2_buffer;
+static iron_a2_buffer_t a2_buffer;
 
 static IMMDeviceEnumerator *deviceEnumerator;
 static IMMDevice *device;
@@ -82,7 +82,7 @@ static WAVEFORMATEX *closestFormat;
 static WAVEFORMATEX *format;
 static uint32_t samples_per_second = 44100;
 
-uint32_t kinc_a2_samples_per_second(void) {
+uint32_t iron_a2_samples_per_second(void) {
 	return samples_per_second;
 }
 
@@ -102,7 +102,7 @@ static bool initDefaultDevice() {
 		bufferEndEvent = 0;
 	}
 
-	kinc_log("Initializing a new default audio device.");
+	iron_log("Initializing a new default audio device.");
 
 	HRESULT hr = deviceEnumerator->lpVtbl->GetDefaultAudioEndpoint(deviceEnumerator, eRender, eConsole, &device);
 	if (hr == S_OK) {
@@ -124,7 +124,7 @@ static bool initDefaultDevice() {
 
 		HRESULT supported = audioClient->lpVtbl->IsFormatSupported(audioClient, AUDCLNT_SHAREMODE_SHARED, format, &closestFormat);
 		if (supported == S_FALSE) {
-			kinc_log("Falling back to the system's preferred WASAPI mix format.", supported);
+			iron_log("Falling back to the system's preferred WASAPI mix format.", supported);
 			if (closestFormat != NULL) {
 				format = closestFormat;
 			}
@@ -135,29 +135,29 @@ static bool initDefaultDevice() {
 		HRESULT result =
 		    audioClient->lpVtbl->Initialize(audioClient, AUDCLNT_SHAREMODE_SHARED, AUDCLNT_STREAMFLAGS_EVENTCALLBACK, 40 * 1000 * 10, 0, format, 0);
 		if (result != S_OK) {
-			kinc_log("Could not initialize WASAPI audio, going silent (error code 0x%x).", result);
+			iron_log("Could not initialize WASAPI audio, going silent (error code 0x%x).", result);
 			return false;
 		}
 
 		uint32_t old_samples_per_second = samples_per_second;
 		samples_per_second = format->nSamplesPerSec;
 		if (samples_per_second != old_samples_per_second) {
-			kinc_a2_internal_sample_rate_callback();
+			iron_a2_internal_sample_rate_callback();
 		}
 		a2_buffer.channel_count = 2;
 
 		bufferFrames = 0;
-		kinc_microsoft_affirm(audioClient->lpVtbl->GetBufferSize(audioClient, &bufferFrames));
-		kinc_microsoft_affirm(audioClient->lpVtbl->GetService(audioClient, &IID_IAudioRenderClient, (void **)&renderClient));
+		iron_microsoft_affirm(audioClient->lpVtbl->GetBufferSize(audioClient, &bufferFrames));
+		iron_microsoft_affirm(audioClient->lpVtbl->GetService(audioClient, &IID_IAudioRenderClient, (void **)&renderClient));
 
 		bufferEndEvent = CreateEvent(0, FALSE, FALSE, 0);
 
-		kinc_microsoft_affirm(audioClient->lpVtbl->SetEventHandle(audioClient, bufferEndEvent));
+		iron_microsoft_affirm(audioClient->lpVtbl->SetEventHandle(audioClient, bufferEndEvent));
 
 		return true;
 	}
 	else {
-		kinc_log("Could not initialize WASAPI audio.");
+		iron_log("Could not initialize WASAPI audio.");
 		return false;
 	}
 }
@@ -208,7 +208,7 @@ static void submitBuffer(unsigned frames) {
 		return;
 	}
 
-	if (kinc_a2_internal_callback(&a2_buffer, frames)) {
+	if (iron_a2_internal_callback(&a2_buffer, frames)) {
 		if (format->wFormatTag == WAVE_FORMAT_PCM) {
 			for (UINT32 i = 0; i < frames; ++i) {
 				copyS16Sample((int16_t *)&buffer[i * format->nBlockAlign], (int16_t *)&buffer[i * format->nBlockAlign + 2]);
@@ -255,16 +255,16 @@ static DWORD WINAPI audioThread(LPVOID ignored) {
 	return 0;
 }
 
-void kinc_windows_co_initialize(void);
+void iron_windows_co_initialize(void);
 
 static bool initialized = false;
 
-void kinc_a2_init() {
+void iron_a2_init() {
 	if (initialized) {
 		return;
 	}
 
-	kinc_a2_internal_init();
+	iron_a2_internal_init();
 	initialized = true;
 
 	a2_buffer.read_location = 0;
@@ -276,15 +276,15 @@ void kinc_a2_init() {
 
 	audioProcessingDoneEvent = CreateEvent(0, FALSE, FALSE, 0);
 
-	kinc_windows_co_initialize();
-	kinc_microsoft_affirm(CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL, &IID_IMMDeviceEnumerator, (void **)&deviceEnumerator));
+	iron_windows_co_initialize();
+	iron_microsoft_affirm(CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL, &IID_IMMDeviceEnumerator, (void **)&deviceEnumerator));
 
 	if (initDefaultDevice()) {
 		CreateThread(0, 65536, audioThread, NULL, 0, 0);
 	}
 }
 
-void kinc_a2_update() {}
+void iron_a2_update() {}
 
 #define SAFE_RELEASE(punk)                                                                                                                                     \
 	if ((punk) != NULL) {                                                                                                                                      \
@@ -292,7 +292,7 @@ void kinc_a2_update() {}
 		(punk) = NULL;                                                                                                                                         \
 	}
 
-void kinc_a2_shutdown() {
+void iron_a2_shutdown() {
 	// Wait for last data in buffer to play before stopping.
 	// Sleep((DWORD)(hnsActualDuration/REFTIMES_PER_MILLISEC/2));
 

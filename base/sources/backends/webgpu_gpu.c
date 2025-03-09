@@ -18,15 +18,15 @@ WGPUDevice device;
 WGPUQueue queue;
 WGPUSwapChain swapChain;
 
-void kinc_g5_internal_destroy_window() {}
+void iron_g5_internal_destroy_window() {}
 
-void kinc_g5_internal_destroy() {}
+void iron_g5_internal_destroy() {}
 
-void kinc_g5_internal_init() {}
+void iron_g5_internal_init() {}
 
-void kinc_g5_internal_init_window(int depthBufferBits, bool vsync) {
-	newRenderTargetWidth = renderTargetWidth = kinc_width();
-	newRenderTargetHeight = renderTargetHeight = kinc_height();
+void iron_g5_internal_init_window(int depthBufferBits, bool vsync) {
+	newRenderTargetWidth = renderTargetWidth = iron_width();
+	newRenderTargetHeight = renderTargetHeight = iron_height();
 
 	device = emscripten_webgpu_get_device();
 	queue = wgpuDeviceGetQueue(device);
@@ -45,43 +45,43 @@ void kinc_g5_internal_init_window(int depthBufferBits, bool vsync) {
 	memset(&scDesc, 0, sizeof(scDesc));
 	scDesc.usage = WGPUTextureUsage_RenderAttachment;
 	scDesc.format = WGPUTextureFormat_BGRA8Unorm;
-	scDesc.width = kinc_width();
-	scDesc.height = kinc_height();
+	scDesc.width = iron_width();
+	scDesc.height = iron_height();
 	scDesc.presentMode = WGPUPresentMode_Fifo;
 	swapChain = wgpuDeviceCreateSwapChain(device, surface, &scDesc);
 }
 
-void kinc_g5_begin(kinc_g5_texture_t *renderTarget) {}
+void iron_g5_begin(iron_g5_texture_t *renderTarget) {}
 
-void kinc_g5_end() {}
+void iron_g5_end() {}
 
-bool kinc_g5_swap_buffers() {
+bool iron_g5_swap_buffers() {
 	return true;
 }
 
-void kinc_g5_flush() {}
+void iron_g5_flush() {}
 
-bool kinc_g5_raytrace_supported() {
+bool iron_g5_raytrace_supported() {
 	return false;
 }
 
 extern WGPUDevice device;
 
-kinc_g5_vertex_buffer_t *kinc_g5_internal_current_vertex_buffer = NULL;
+iron_g5_vertex_buffer_t *iron_g5_internal_current_vertex_buffer = NULL;
 
-void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int count, kinc_g5_vertex_structure_t *structure, bool gpuMemory) {
+void iron_g5_vertex_buffer_init(iron_g5_vertex_buffer_t *buffer, int count, iron_g5_vertex_structure_t *structure, bool gpuMemory) {
 	buffer->impl.count = count;
 	buffer->impl.stride = 0;
 	for (int i = 0; i < structure->size; ++i) {
-		buffer->impl.stride += kinc_g5_vertex_data_size(structure->elements[i].data);
+		buffer->impl.stride += iron_g5_vertex_data_size(structure->elements[i].data);
 	}
 }
 
-void kinc_g5_vertex_buffer_destroy(kinc_g5_vertex_buffer_t *buffer) {
+void iron_g5_vertex_buffer_destroy(iron_g5_vertex_buffer_t *buffer) {
 
 }
 
-float *kinc_g5_vertex_buffer_lock_all(kinc_g5_vertex_buffer_t *buffer) {
+float *iron_g5_vertex_buffer_lock_all(iron_g5_vertex_buffer_t *buffer) {
 	WGPUBufferDescriptor bDesc;
 	memset(&bDesc, 0, sizeof(bDesc));
 	bDesc.size = buffer->impl.count * buffer->impl.stride * sizeof(float);
@@ -91,96 +91,96 @@ float *kinc_g5_vertex_buffer_lock_all(kinc_g5_vertex_buffer_t *buffer) {
 	return wgpuBufferGetMappedRange(buffer->impl.buffer, 0, bDesc.size);
 }
 
-float *kinc_g5_vertex_buffer_lock(kinc_g5_vertex_buffer_t *buffer, int start, int count) {
+float *iron_g5_vertex_buffer_lock(iron_g5_vertex_buffer_t *buffer, int start, int count) {
 	return NULL;
 }
 
-void kinc_g5_vertex_buffer_unlock_all(kinc_g5_vertex_buffer_t *buffer) {
+void iron_g5_vertex_buffer_unlock_all(iron_g5_vertex_buffer_t *buffer) {
 	wgpuBufferUnmap(buffer->impl.buffer);
 }
 
-void kinc_g5_vertex_buffer_unlock(kinc_g5_vertex_buffer_t* buffer, int count) {
+void iron_g5_vertex_buffer_unlock(iron_g5_vertex_buffer_t* buffer, int count) {
 
 }
 
-int kinc_g5_vertex_buffer_count(kinc_g5_vertex_buffer_t *buffer) {
+int iron_g5_vertex_buffer_count(iron_g5_vertex_buffer_t *buffer) {
 	return buffer->impl.count;
 }
 
-int kinc_g5_vertex_buffer_stride(kinc_g5_vertex_buffer_t *buffer) {
+int iron_g5_vertex_buffer_stride(iron_g5_vertex_buffer_t *buffer) {
 	return buffer->impl.stride;
 }
 
-bool kinc_g5_transpose_mat = false;
+bool iron_g5_transpose_mat = false;
 
-void kinc_g5_constant_buffer_init(kinc_g5_constant_buffer_t *buffer, int size) {
-
-}
-
-void kinc_g5_constant_buffer_destroy(kinc_g5_constant_buffer_t *buffer) {}
-
-void kinc_g5_constant_buffer_lock_all(kinc_g5_constant_buffer_t *buffer) {
-	kinc_g5_constant_buffer_lock(buffer, 0, kinc_g5_constant_buffer_size(buffer));
-}
-
-void kinc_g5_constant_buffer_lock(kinc_g5_constant_buffer_t *buffer, int start, int count) {}
-
-void kinc_g5_constant_buffer_unlock(kinc_g5_constant_buffer_t *buffer) {
+void iron_g5_constant_buffer_init(iron_g5_constant_buffer_t *buffer, int size) {
 
 }
 
-int kinc_g5_constant_buffer_size(kinc_g5_constant_buffer_t *buffer) {
+void iron_g5_constant_buffer_destroy(iron_g5_constant_buffer_t *buffer) {}
+
+void iron_g5_constant_buffer_lock_all(iron_g5_constant_buffer_t *buffer) {
+	iron_g5_constant_buffer_lock(buffer, 0, iron_g5_constant_buffer_size(buffer));
+}
+
+void iron_g5_constant_buffer_lock(iron_g5_constant_buffer_t *buffer, int start, int count) {}
+
+void iron_g5_constant_buffer_unlock(iron_g5_constant_buffer_t *buffer) {
+
+}
+
+int iron_g5_constant_buffer_size(iron_g5_constant_buffer_t *buffer) {
 	return 0;
 }
 
-kinc_g5_index_buffer_t *kinc_g5_internal_current_index_buffer = NULL;
+iron_g5_index_buffer_t *iron_g5_internal_current_index_buffer = NULL;
 
-void kinc_g5_index_buffer_init(kinc_g5_index_buffer_t *buffer, int count, bool gpuMemory) {
+void iron_g5_index_buffer_init(iron_g5_index_buffer_t *buffer, int count, bool gpuMemory) {
 	buffer->impl.count = count;
 }
 
-void kinc_g5_index_buffer_destroy(kinc_g5_index_buffer_t *buffer) {
+void iron_g5_index_buffer_destroy(iron_g5_index_buffer_t *buffer) {
 
 }
 
-static int kinc_g5_internal_index_buffer_stride(kinc_g5_index_buffer_t *buffer) {
+static int iron_g5_internal_index_buffer_stride(iron_g5_index_buffer_t *buffer) {
 	return 4;
 }
 
-void *kinc_g5_index_buffer_lock_all(kinc_g5_index_buffer_t *buffer) {
-	kinc_g5_index_buffer_lock(buffer, 0, kinc_g5_index_buffer_count(buffer));
+void *iron_g5_index_buffer_lock_all(iron_g5_index_buffer_t *buffer) {
+	iron_g5_index_buffer_lock(buffer, 0, iron_g5_index_buffer_count(buffer));
 }
 
-void *kinc_g5_index_buffer_lock(kinc_g5_index_buffer_t *buffer, int start, int count) {
+void *iron_g5_index_buffer_lock(iron_g5_index_buffer_t *buffer, int start, int count) {
 	WGPUBufferDescriptor bDesc;
 	memset(&bDesc, 0, sizeof(bDesc));
-	bDesc.size = count * kinc_g5_internal_index_buffer_stride(buffer);
+	bDesc.size = count * iron_g5_internal_index_buffer_stride(buffer);
 	bDesc.usage = WGPUBufferUsage_Index | WGPUBufferUsage_CopyDst;
 	bDesc.mappedAtCreation = true;
 	buffer->impl.buffer = wgpuDeviceCreateBuffer(device, &bDesc);
-	return wgpuBufferGetMappedRange(buffer->impl.buffer, start * kinc_g5_internal_index_buffer_stride(buffer), bDesc.size);
+	return wgpuBufferGetMappedRange(buffer->impl.buffer, start * iron_g5_internal_index_buffer_stride(buffer), bDesc.size);
 }
 
-void kinc_g5_index_buffer_unlock_all(kinc_g5_index_buffer_t *buffer) {
+void iron_g5_index_buffer_unlock_all(iron_g5_index_buffer_t *buffer) {
 	wgpuBufferUnmap(buffer->impl.buffer);
 }
 
-void kinc_g5_index_buffer_unlock(kinc_g5_index_buffer_t *buffer, int count) {
-	kinc_g5_index_buffer_unlock_all(buffer);
+void iron_g5_index_buffer_unlock(iron_g5_index_buffer_t *buffer, int count) {
+	iron_g5_index_buffer_unlock_all(buffer);
 }
 
-void kinc_g5_internal_index_buffer_set(kinc_g5_index_buffer_t *buffer) {
+void iron_g5_internal_index_buffer_set(iron_g5_index_buffer_t *buffer) {
 
 }
 
-int kinc_g5_index_buffer_count(kinc_g5_index_buffer_t *buffer) {
+int iron_g5_index_buffer_count(iron_g5_index_buffer_t *buffer) {
 	return buffer->impl.count;
 }
 
-void kinc_g5_texture_init(kinc_g5_texture_t *texture, int width, int height, kinc_image_format_t format) {
+void iron_g5_texture_init(iron_g5_texture_t *texture, int width, int height, iron_image_format_t format) {
 	// WGPUExtent3D size = {};
-	// size.width = kinc_width();
-	// size.height = kinc_height();
+	// size.width = iron_width();
+	// size.height = iron_height();
 	// size.depth = 1;
 
 	// WGPUTextureDescriptor tDesc = {};
@@ -203,52 +203,52 @@ void kinc_g5_texture_init(kinc_g5_texture_t *texture, int width, int height, kin
 	texture->data = NULL;
 }
 
-void kinc_g5_texture_init_from_bytes(kinc_g5_texture_t *texture, void *data, int width, int height, kinc_image_format_t format) {}
-void kinc_g5_texture_init_from_encoded_data(kinc_g5_texture_t *texture, void *data, int size, const char *format, bool readable) {}
-void kinc_g5_texture_init_from_data(kinc_g5_texture_t *texture, void *data, int width, int height, int format, bool readable) {}
-void kinc_g5_texture_init_non_sampled_access(kinc_g5_texture_t *texture, int width, int height, kinc_image_format_t format) {}
-void kinc_g5_texture_destroy(kinc_g5_texture_t *texture) {}
+void iron_g5_texture_init_from_bytes(iron_g5_texture_t *texture, void *data, int width, int height, iron_image_format_t format) {}
+void iron_g5_texture_init_from_encoded_data(iron_g5_texture_t *texture, void *data, int size, const char *format, bool readable) {}
+void iron_g5_texture_init_from_data(iron_g5_texture_t *texture, void *data, int width, int height, int format, bool readable) {}
+void iron_g5_texture_init_non_sampled_access(iron_g5_texture_t *texture, int width, int height, iron_image_format_t format) {}
+void iron_g5_texture_destroy(iron_g5_texture_t *texture) {}
 
-int kinc_g5_texture_stride(kinc_g5_texture_t *texture) {
+int iron_g5_texture_stride(iron_g5_texture_t *texture) {
 	return 32;
 }
 
-void kinc_g5_texture_generate_mipmaps(kinc_g5_texture_t *texture, int levels) {}
+void iron_g5_texture_generate_mipmaps(iron_g5_texture_t *texture, int levels) {}
 
-void kinc_g5_texture_set_mipmap(kinc_g5_texture_t *texture, kinc_g5_texture_t *mipmap, int level) {}
+void iron_g5_texture_set_mipmap(iron_g5_texture_t *texture, iron_g5_texture_t *mipmap, int level) {}
 
-void kinc_g5_render_target_init(kinc_g5_texture_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits) {
+void iron_g5_render_target_init(iron_g5_texture_t *target, int width, int height, iron_image_format_t format, int depthBufferBits) {
     target->width = target->width = width;
 	target->height = target->height = height;
-	target->state = KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
+	target->state = IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
 	target->data = NULL;
 	target->_uploaded = true;
 }
 
-void kinc_g5_render_target_init_framebuffer(kinc_g5_texture_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits) {}
+void iron_g5_render_target_init_framebuffer(iron_g5_texture_t *target, int width, int height, iron_image_format_t format, int depthBufferBits) {}
 
-void kinc_g5_render_target_set_depth_from(kinc_g5_texture_t *renderTarget, kinc_g5_texture_t *source) {}
+void iron_g5_render_target_set_depth_from(iron_g5_texture_t *renderTarget, iron_g5_texture_t *source) {}
 
-void kinc_g5_render_target_get_pixels(kinc_g5_texture_t *renderTarget, uint8_t *data) {}
+void iron_g5_render_target_get_pixels(iron_g5_texture_t *renderTarget, uint8_t *data) {}
 
 extern WGPUDevice device;
 
-void kinc_g5_pipeline_init(kinc_g5_pipeline_t *pipe) {
-	kinc_g5_internal_pipeline_init(pipe);
-	kinc_g5_internal_pipeline_set_defaults(pipe);
+void iron_g5_pipeline_init(iron_g5_pipeline_t *pipe) {
+	iron_g5_internal_pipeline_init(pipe);
+	iron_g5_internal_pipeline_set_defaults(pipe);
 }
 
-kinc_g5_constant_location_t kinc_g5_pipeline_get_constant_location(kinc_g5_pipeline_t *pipe, const char* name) {
-	kinc_g5_constant_location_t location;
+iron_g5_constant_location_t iron_g5_pipeline_get_constant_location(iron_g5_pipeline_t *pipe, const char* name) {
+	iron_g5_constant_location_t location;
 	return location;
 }
 
-kinc_g5_texture_unit_t kinc_g5_pipeline_get_texture_unit(kinc_g5_pipeline_t *pipe, const char *name) {
-	kinc_g5_texture_unit_t unit;
+iron_g5_texture_unit_t iron_g5_pipeline_get_texture_unit(iron_g5_pipeline_t *pipe, const char *name) {
+	iron_g5_texture_unit_t unit;
 	return unit;
 }
 
-void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
+void iron_g5_pipeline_compile(iron_g5_pipeline_t *pipe) {
 	WGPUColorTargetState csDesc;
 	memset(&csDesc, 0, sizeof(csDesc));
 	csDesc.format = WGPUTextureFormat_BGRA8Unorm;
@@ -274,27 +274,27 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 	for (int i = 0; i < pipe->input_layout->size; ++i) {
 		vaDesc[i].shaderLocation = i;
 		vaDesc[i].offset = offset;
-		offset += kinc_g5_vertex_data_size(pipe->input_layout->elements[i].data);
+		offset += iron_g5_vertex_data_size(pipe->input_layout->elements[i].data);
 		switch (pipe->input_layout->elements[i].data) {
-		case KINC_G5_VERTEX_DATA_F32_1X:
+		case IRON_G5_VERTEX_DATA_F32_1X:
 			vaDesc[i].format = WGPUVertexFormat_Float32;
 			break;
-		case KINC_G5_VERTEX_DATA_F32_2X:
+		case IRON_G5_VERTEX_DATA_F32_2X:
 			vaDesc[i].format = WGPUVertexFormat_Float32x2;
 			break;
-		case KINC_G5_VERTEX_DATA_F32_3X:
+		case IRON_G5_VERTEX_DATA_F32_3X:
 			vaDesc[i].format = WGPUVertexFormat_Float32x3;
 			break;
-		case KINC_G5_VERTEX_DATA_F32_4X:
+		case IRON_G5_VERTEX_DATA_F32_4X:
 			vaDesc[i].format = WGPUVertexFormat_Float32x4;
 			break;
-		case KINC_G5_VERTEX_DATA_U8_4X_NORM:
+		case IRON_G5_VERTEX_DATA_U8_4X_NORM:
 			vaDesc[i].format = WGPUVertexFormat_Unorm8x4;
 			break;
-		case KINC_G5_VERTEX_DATA_I16_2X_NORM:
+		case IRON_G5_VERTEX_DATA_I16_2X_NORM:
 			vaDesc[i].format = WGPUVertexFormat_Snorm16x2;
 			break;
-		case KINC_G5_VERTEX_DATA_I16_4X_NORM:
+		case IRON_G5_VERTEX_DATA_I16_4X_NORM:
 			vaDesc[i].format = WGPUVertexFormat_Snorm16x4;
 			break;
 		}
@@ -347,11 +347,11 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 	pipe->impl.pipeline = wgpuDeviceCreateRenderPipeline(device, &rpDesc);
 }
 
-void kinc_g5_sampler_init(kinc_g5_sampler_t *sampler, const kinc_g5_sampler_options_t *options) {}
+void iron_g5_sampler_init(iron_g5_sampler_t *sampler, const iron_g5_sampler_options_t *options) {}
 
-void kinc_g5_sampler_destroy(kinc_g5_sampler_t *sampler) {}
+void iron_g5_sampler_destroy(iron_g5_sampler_t *sampler) {}
 
-void kinc_g5_shader_init(kinc_g5_shader_t *shader, const void *source, size_t length, kinc_g5_shader_type_t type) {
+void iron_g5_shader_init(iron_g5_shader_t *shader, const void *source, size_t length, iron_g5_shader_type_t type) {
 	WGPUShaderModuleSPIRVDescriptor smSpirvDesc;
 	memset(&smSpirvDesc, 0, sizeof(smSpirvDesc));
 	smSpirvDesc.chain.sType = WGPUSType_ShaderModuleSPIRVDescriptor;
@@ -363,7 +363,7 @@ void kinc_g5_shader_init(kinc_g5_shader_t *shader, const void *source, size_t le
 	shader->impl.module = wgpuDeviceCreateShaderModule(device, &smDesc);
 }
 
-void kinc_g5_shader_destroy(kinc_g5_shader_t *shader) {}
+void iron_g5_shader_destroy(iron_g5_shader_t *shader) {}
 
 
 
@@ -377,11 +377,11 @@ extern WGPUDevice device;
 extern WGPUQueue queue;
 extern WGPUSwapChain swapChain;
 
-void kinc_g5_command_list_init(kinc_g5_command_list_t *list) {}
+void iron_g5_command_list_init(iron_g5_command_list_t *list) {}
 
-void kinc_g5_command_list_destroy(kinc_g5_command_list_t *list) {}
+void iron_g5_command_list_destroy(iron_g5_command_list_t *list) {}
 
-void kinc_g5_command_list_begin(kinc_g5_command_list_t *list) {
+void iron_g5_command_list_begin(iron_g5_command_list_t *list) {
 	WGPUCommandEncoderDescriptor ceDesc;
 	memset(&ceDesc, 0, sizeof(ceDesc));
 	list->impl.encoder = wgpuDeviceCreateCommandEncoder(device, &ceDesc);
@@ -402,7 +402,7 @@ void kinc_g5_command_list_begin(kinc_g5_command_list_t *list) {
 	list->impl.pass = wgpuCommandEncoderBeginRenderPass(list->impl.encoder, &passDesc);
 }
 
-void kinc_g5_command_list_end(kinc_g5_command_list_t *list) {
+void iron_g5_command_list_end(iron_g5_command_list_t *list) {
 	wgpuRenderPassEncoderEnd(list->impl.pass);
 
 	WGPUCommandBufferDescriptor cbDesc;
@@ -411,101 +411,101 @@ void kinc_g5_command_list_end(kinc_g5_command_list_t *list) {
 	wgpuQueueSubmit(queue, 1, &commands);
 }
 
-void kinc_g5_command_list_clear(kinc_g5_command_list_t *list, struct kinc_g5_texture *renderTarget, unsigned flags, unsigned color, float depth) {
+void iron_g5_command_list_clear(iron_g5_command_list_t *list, struct iron_g5_texture *renderTarget, unsigned flags, unsigned color, float depth) {
 
 }
 
-void kinc_g5_command_list_render_target_to_framebuffer_barrier(kinc_g5_command_list_t *list, struct kinc_g5_texture *renderTarget) {}
-void kinc_g5_command_list_framebuffer_to_render_target_barrier(kinc_g5_command_list_t *list, struct kinc_g5_texture *renderTarget) {}
-void kinc_g5_command_list_texture_to_render_target_barrier(kinc_g5_command_list_t *list, struct kinc_g5_texture *renderTarget) {}
-void kinc_g5_command_list_render_target_to_texture_barrier(kinc_g5_command_list_t *list, struct kinc_g5_texture *renderTarget) {}
+void iron_g5_command_list_render_target_to_framebuffer_barrier(iron_g5_command_list_t *list, struct iron_g5_texture *renderTarget) {}
+void iron_g5_command_list_framebuffer_to_render_target_barrier(iron_g5_command_list_t *list, struct iron_g5_texture *renderTarget) {}
+void iron_g5_command_list_texture_to_render_target_barrier(iron_g5_command_list_t *list, struct iron_g5_texture *renderTarget) {}
+void iron_g5_command_list_render_target_to_texture_barrier(iron_g5_command_list_t *list, struct iron_g5_texture *renderTarget) {}
 
-void kinc_g5_command_list_draw_indexed_vertices(kinc_g5_command_list_t *list) {
+void iron_g5_command_list_draw_indexed_vertices(iron_g5_command_list_t *list) {
 	wgpuRenderPassEncoderDrawIndexed(list->impl.pass, list->impl.indexCount, 1, 0, 0, 0);
 }
 
-void kinc_g5_command_list_draw_indexed_vertices_from_to(kinc_g5_command_list_t *list, int start, int count) {
+void iron_g5_command_list_draw_indexed_vertices_from_to(iron_g5_command_list_t *list, int start, int count) {
 
 }
 
-void kinc_g5_command_list_viewport(kinc_g5_command_list_t *list, int x, int y, int width, int height) {
+void iron_g5_command_list_viewport(iron_g5_command_list_t *list, int x, int y, int width, int height) {
 
 }
 
-void kinc_g5_command_list_scissor(kinc_g5_command_list_t *list, int x, int y, int width, int height) {
+void iron_g5_command_list_scissor(iron_g5_command_list_t *list, int x, int y, int width, int height) {
 
 }
 
-void kinc_g5_command_list_disable_scissor(kinc_g5_command_list_t *list) {}
+void iron_g5_command_list_disable_scissor(iron_g5_command_list_t *list) {}
 
-void kinc_g5_command_list_set_pipeline(kinc_g5_command_list_t *list, struct kinc_g5_pipeline *pipeline) {
+void iron_g5_command_list_set_pipeline(iron_g5_command_list_t *list, struct iron_g5_pipeline *pipeline) {
 	wgpuRenderPassEncoderSetPipeline(list->impl.pass, pipeline->impl.pipeline);
 }
 
-void kinc_g5_command_list_set_pipeline_layout(kinc_g5_command_list_t *list) {}
+void iron_g5_command_list_set_pipeline_layout(iron_g5_command_list_t *list) {}
 
-void kinc_g5_command_list_set_vertex_buffer(kinc_g5_command_list_t *list, struct kinc_g5_vertex_buffer *buffer) {
-	uint64_t size = (kinc_g5_vertex_buffer_count(buffer)) * kinc_g5_vertex_buffer_stride(buffer);
+void iron_g5_command_list_set_vertex_buffer(iron_g5_command_list_t *list, struct iron_g5_vertex_buffer *buffer) {
+	uint64_t size = (iron_g5_vertex_buffer_count(buffer)) * iron_g5_vertex_buffer_stride(buffer);
 	wgpuRenderPassEncoderSetVertexBuffer(list->impl.pass, 0, buffer->impl.buffer, 0, size);
 }
 
-void kinc_g5_command_list_set_index_buffer(kinc_g5_command_list_t *list, struct kinc_g5_index_buffer *buffer) {
-	list->impl.indexCount = kinc_g5_index_buffer_count(buffer);
-	uint64_t size = kinc_g5_index_buffer_count(buffer) * sizeof(int);
+void iron_g5_command_list_set_index_buffer(iron_g5_command_list_t *list, struct iron_g5_index_buffer *buffer) {
+	list->impl.indexCount = iron_g5_index_buffer_count(buffer);
+	uint64_t size = iron_g5_index_buffer_count(buffer) * sizeof(int);
 	wgpuRenderPassEncoderSetIndexBuffer(list->impl.pass, buffer->impl.buffer, WGPUIndexFormat_Uint32, 0, size);
 }
 
-void kinc_g5_command_list_set_render_targets(kinc_g5_command_list_t *list, struct kinc_g5_texture **targets, int count) {
+void iron_g5_command_list_set_render_targets(iron_g5_command_list_t *list, struct iron_g5_texture **targets, int count) {
 
 }
 
-void kinc_g5_command_list_upload_index_buffer(kinc_g5_command_list_t *list, struct kinc_g5_index_buffer *buffer) {}
-void kinc_g5_command_list_upload_vertex_buffer(kinc_g5_command_list_t *list, struct kinc_g5_vertex_buffer *buffer) {}
-void kinc_g5_command_list_upload_texture(kinc_g5_command_list_t *list, struct kinc_g5_texture *texture) {}
-void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list, kinc_g5_texture_t *render_target, uint8_t *data) {}
+void iron_g5_command_list_upload_index_buffer(iron_g5_command_list_t *list, struct iron_g5_index_buffer *buffer) {}
+void iron_g5_command_list_upload_vertex_buffer(iron_g5_command_list_t *list, struct iron_g5_vertex_buffer *buffer) {}
+void iron_g5_command_list_upload_texture(iron_g5_command_list_t *list, struct iron_g5_texture *texture) {}
+void iron_g5_command_list_get_render_target_pixels(iron_g5_command_list_t *list, iron_g5_texture_t *render_target, uint8_t *data) {}
 
-void kinc_g5_command_list_execute(kinc_g5_command_list_t *list) {
-
-}
-
-void kinc_g5_command_list_wait_for_execution_to_finish(kinc_g5_command_list_t *list) {
+void iron_g5_command_list_execute(iron_g5_command_list_t *list) {
 
 }
 
-void kinc_g5_command_list_set_vertex_constant_buffer(kinc_g5_command_list_t *list, struct kinc_g5_constant_buffer *buffer, int offset, size_t size) {
+void iron_g5_command_list_wait_for_execution_to_finish(iron_g5_command_list_t *list) {
 
 }
 
-void kinc_g5_command_list_set_fragment_constant_buffer(kinc_g5_command_list_t *list, struct kinc_g5_constant_buffer *buffer, int offset, size_t size) {
+void iron_g5_command_list_set_vertex_constant_buffer(iron_g5_command_list_t *list, struct iron_g5_constant_buffer *buffer, int offset, size_t size) {
 
 }
 
-void kinc_g5_command_list_set_compute_constant_buffer(kinc_g5_command_list_t *list, struct kinc_g5_constant_buffer *buffer, int offset, size_t size) {
+void iron_g5_command_list_set_fragment_constant_buffer(iron_g5_command_list_t *list, struct iron_g5_constant_buffer *buffer, int offset, size_t size) {
 
 }
 
-void kinc_g5_command_list_set_texture(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *texture) {
+void iron_g5_command_list_set_compute_constant_buffer(iron_g5_command_list_t *list, struct iron_g5_constant_buffer *buffer, int offset, size_t size) {
 
 }
 
-void kinc_g5_command_list_set_sampler(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_sampler_t *sampler) {}
+void iron_g5_command_list_set_texture(iron_g5_command_list_t *list, iron_g5_texture_unit_t unit, iron_g5_texture_t *texture) {
 
-void kinc_g5_command_list_set_texture_from_render_target_depth(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *renderTarget) {}
+}
 
-void kinc_g5_command_list_set_compute_shader(kinc_g5_command_list_t *list, kinc_g5_compute_shader *shader) {}
+void iron_g5_command_list_set_sampler(iron_g5_command_list_t *list, iron_g5_texture_unit_t unit, iron_g5_sampler_t *sampler) {}
 
-void kinc_g5_command_list_compute(kinc_g5_command_list_t *list, int x, int y, int z) {}
+void iron_g5_command_list_set_texture_from_render_target_depth(iron_g5_command_list_t *list, iron_g5_texture_unit_t unit, iron_g5_texture_t *renderTarget) {}
 
-void kinc_g5_compute_shader_init(kinc_g5_compute_shader *shader, void *source, int length) {}
+void iron_g5_command_list_set_compute_shader(iron_g5_command_list_t *list, iron_g5_compute_shader *shader) {}
 
-void kinc_g5_compute_shader_destroy(kinc_g5_compute_shader *shader) {}
+void iron_g5_command_list_compute(iron_g5_command_list_t *list, int x, int y, int z) {}
 
-kinc_g5_constant_location_t kinc_g5_compute_shader_get_constant_location(kinc_g5_compute_shader *shader, const char *name) {
-	kinc_g5_constant_location_t location = {0};
+void iron_g5_compute_shader_init(iron_g5_compute_shader *shader, void *source, int length) {}
+
+void iron_g5_compute_shader_destroy(iron_g5_compute_shader *shader) {}
+
+iron_g5_constant_location_t iron_g5_compute_shader_get_constant_location(iron_g5_compute_shader *shader, const char *name) {
+	iron_g5_constant_location_t location = {0};
 	return location;
 }
 
-kinc_g5_texture_unit_t kinc_g5_compute_shader_get_texture_unit(kinc_g5_compute_shader *shader, const char *name) {
-	kinc_g5_texture_unit_t unit = {0};
+iron_g5_texture_unit_t iron_g5_compute_shader_get_texture_unit(iron_g5_compute_shader *shader, const char *name) {
+	iron_g5_texture_unit_t unit = {0};
 	return unit;
 }

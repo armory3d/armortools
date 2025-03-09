@@ -13,13 +13,13 @@
 // 	void *sound;
 // 	void *androidVideo;
 // 	int id;
-// 	kinc_g5_texture_t image;
+// 	iron_g5_texture_t image;
 // 	double lastTime;
 // 	int myWidth;
 // 	int myHeight;
-// } kinc_video_impl_t;
+// } iron_video_impl_t;
 
-// typedef struct kinc_internal_video_sound_stream {
+// typedef struct iron_internal_video_sound_stream {
 // 	void *audioTrackOutput;
 // 	float *buffer;
 // 	int bufferSize;
@@ -27,10 +27,10 @@
 // 	int bufferReadPosition;
 // 	uint64_t read;
 // 	uint64_t written;
-// } kinc_internal_video_sound_stream_t;
+// } iron_internal_video_sound_stream_t;
 
-// void kinc_internal_video_sound_stream_init(kinc_internal_video_sound_stream_t *stream, int channel_count, int frequency);
-// void kinc_internal_video_sound_stream_destroy(kinc_internal_video_sound_stream_t *stream);
-// void kinc_internal_video_sound_stream_insert_data(kinc_internal_video_sound_stream_t *stream, float *data, int sample_count);
-// float *kinc_internal_video_sound_stream_next_frame(kinc_internal_video_sound_stream_t *stream);
-// bool kinc_internal_video_sound_stream_ended(kinc_internal_video_sound_stream_t *stream);
+// void iron_internal_video_sound_stream_init(iron_internal_video_sound_stream_t *stream, int channel_count, int frequency);
+// void iron_internal_video_sound_stream_destroy(iron_internal_video_sound_stream_t *stream);
+// void iron_internal_video_sound_stream_insert_data(iron_internal_video_sound_stream_t *stream, float *data, int sample_count);
+// float *iron_internal_video_sound_stream_next_frame(iron_internal_video_sound_stream_t *stream);
+// bool iron_internal_video_sound_stream_ended(iron_internal_video_sound_stream_t *stream);

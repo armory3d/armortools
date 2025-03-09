@@ -9,14 +9,14 @@ let config_button_spacing: string = config_default_button_spacing;
 function config_load() {
 	let path: string = "";
 	if (path_is_protected()) {
-		path += kinc_internal_save_path();
+		path += iron_internal_save_path();
 	}
 	path += "config.json";
 	let blob: buffer_t = data_get_blob(path);
 
 	///if arm_linux
 	if (blob == null) { // Protected directory
-		blob = data_get_blob(kinc_internal_save_path() + "config.json");
+		blob = data_get_blob(iron_internal_save_path() + "config.json");
 	}
 	///end
 
@@ -31,7 +31,7 @@ function config_save() {
 	// when running from protected path like "Program Files"
 	let path: string = "";
 	if (path_is_protected()) {
-		path += kinc_internal_save_path();
+		path += iron_internal_save_path();
 	}
 	else {
 		path += path_data();
@@ -108,7 +108,7 @@ function config_save() {
 
 	///if arm_linux // Protected directory
 	if (!file_exists(path)) {
-		iron_file_save_bytes(kinc_internal_save_path() + "config.json", buffer, 0);
+		iron_file_save_bytes(iron_internal_save_path() + "config.json", buffer, 0);
 	}
 	///end
 }
@@ -191,7 +191,7 @@ function config_get_date(): string {
 	return v.date;
 }
 
-function config_get_options(): kinc_window_options_t {
+function config_get_options(): iron_window_options_t {
 	let window_mode: window_mode_t = config_raw.window_mode == 0 ? window_mode_t.WINDOWED : window_mode_t.FULLSCREEN;
 	let features: window_features_t = window_features_t.NONE;
 	if (config_raw.window_resizable) {
@@ -204,7 +204,7 @@ function config_get_options(): kinc_window_options_t {
 		features |= window_features_t.MINIMIZABLE;
 	}
 	let title: string = "untitled - " + manifest_title;
-	let ops: kinc_window_options_t = {
+	let ops: iron_window_options_t = {
 		title: title,
 		width: config_raw.window_w,
 		height: config_raw.window_h,
@@ -253,7 +253,7 @@ function config_apply() {
 	config_save();
 	context_raw.ddirty = 2;
 
-	let current: kinc_g5_texture_t = _g2_current;
+	let current: iron_g5_texture_t = _g2_current;
 	let g2_in_use: bool = _g2_in_use;
 	if (g2_in_use) g2_end();
 	render_path_base_apply_config();

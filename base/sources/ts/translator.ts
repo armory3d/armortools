@@ -59,7 +59,7 @@ function translator_load_translations(new_locale: string) {
 	}
 
 	if (new_locale == "system") {
-		config_raw.locale = kinc_language();
+		config_raw.locale = iron_language();
 	}
 
 	// Check whether the requested or detected locale is available
@@ -111,8 +111,8 @@ function translator_load_translations(new_locale: string) {
 
 	if (cjk) {
 		if (path_is_protected()) {
-			_translator_load_translations_cjk_font_path = kinc_internal_save_path();
-			_translator_load_translations_cjk_font_disk_path = kinc_internal_save_path();
+			_translator_load_translations_cjk_font_path = iron_internal_save_path();
+			_translator_load_translations_cjk_font_disk_path = iron_internal_save_path();
 		}
 		else {
 			_translator_load_translations_cjk_font_path = "";

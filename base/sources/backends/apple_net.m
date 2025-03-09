@@ -2,8 +2,8 @@
 
 #import <Foundation/Foundation.h>
 
-void kinc_http_request(const char *url, const char *path, const char *data, int port, bool secure, int method, const char *header,
-                       kinc_http_callback_t callback, void *callbackdata) {
+void iron_http_request(const char *url, const char *path, const char *data, int port, bool secure, int method, const char *header,
+                       iron_http_callback_t callback, void *callbackdata) {
 	NSString *urlstring = secure ? @"https://" : @"http://";
 	urlstring = [urlstring stringByAppendingString:[NSString stringWithUTF8String:url]];
 	urlstring = [urlstring stringByAppendingString:@":"];
@@ -24,16 +24,16 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 	}
 
 	switch (method) {
-	case KINC_HTTP_GET:
+	case IRON_HTTP_GET:
 		request.HTTPMethod = @"GET";
 		break;
-	case KINC_HTTP_POST:
+	case IRON_HTTP_POST:
 		request.HTTPMethod = @"POST";
 		break;
-	case KINC_HTTP_PUT:
+	case IRON_HTTP_PUT:
 		request.HTTPMethod = @"PUT";
 		break;
-	case KINC_HTTP_DELETE:
+	case IRON_HTTP_DELETE:
 		request.HTTPMethod = @"DELETE";
 		break;
 	}

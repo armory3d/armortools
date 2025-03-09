@@ -7,10 +7,10 @@ let console_progress_text: string = null;
 
 function console_draw_toast(s: string) {
 	draw_set_color(0x55000000);
-	draw_filled_rect(0, 0, kinc_window_width(), kinc_window_height());
+	draw_filled_rect(0, 0, iron_window_width(), iron_window_height());
 	let scale: f32 = ui_SCALE(base_get_uis()[0]);
-	let x: f32 = kinc_window_width() / 2;
-	let y: f32 = kinc_window_height() - 200 * scale;
+	let x: f32 = iron_window_width() / 2;
+	let y: f32 = iron_window_height() - 200 * scale;
 	draw_filled_rect(x - 200 * scale, y, 400 * scale, 80 * scale);
 	g2_set_font(base_font, math_floor(22 * scale));
 	draw_set_color(0xffffffff);
@@ -78,7 +78,7 @@ function console_log(s: string) {
 }
 
 function console_trace(s: string) {
-	kinc_log(s);
+	iron_log(s);
 	base_redraw_console();
 	array_insert(console_last_traces, 0, s);
 	if (console_last_traces.length > 100) {

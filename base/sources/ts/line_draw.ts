@@ -4,14 +4,14 @@ let line_draw_strength: f32 = 0.005;
 let line_draw_mat: mat4_t = mat4_nan();
 let line_draw_dim: vec4_t = vec4_nan();
 
-let line_draw_vertex_buffer: kinc_g5_vertex_buffer_t;
-let line_draw_index_buffer: kinc_g5_index_buffer_t;
-let line_draw_pipeline: kinc_g5_pipeline_t = null;
-let line_draw_overlay_pipeline: kinc_g5_pipeline_t = null;
+let line_draw_vertex_buffer: iron_g5_vertex_buffer_t;
+let line_draw_index_buffer: iron_g5_index_buffer_t;
+let line_draw_pipeline: iron_g5_pipeline_t = null;
+let line_draw_overlay_pipeline: iron_g5_pipeline_t = null;
 
 let line_draw_vp: mat4_t;
-let line_draw_vp_loc: kinc_g5_constant_location_t;
-let line_draw_color_loc: kinc_g5_constant_location_t;
+let line_draw_vp_loc: iron_g5_constant_location_t;
+let line_draw_color_loc: iron_g5_constant_location_t;
 
 let line_draw_vb_data: buffer_t;
 let line_draw_ib_data: u32_array_t;
@@ -40,7 +40,7 @@ let line_draw_camera_look: vec4_t = vec4_create();
 
 function line_draw_init() {
 	if (line_draw_pipeline == null) {
-		let structure: kinc_g5_vertex_structure_t = g4_vertex_struct_create();
+		let structure: iron_g5_vertex_structure_t = g4_vertex_struct_create();
 		g4_vertex_struct_add(structure, "pos", vertex_data_t.F32_3X);
 		line_draw_pipeline = iron_g4_create_pipeline();
 		line_draw_pipeline.input_layout = structure;
@@ -62,7 +62,7 @@ function line_draw_init() {
 		line_draw_index_buffer = iron_g4_create_index_buffer(line_draw_max_indices);
 	}
 	if (line_draw_overlay_pipeline == null) {
-		let structure: kinc_g5_vertex_structure_t = g4_vertex_struct_create();
+		let structure: iron_g5_vertex_structure_t = g4_vertex_struct_create();
 		g4_vertex_struct_add(structure, "pos", vertex_data_t.F32_3X);
 		line_draw_overlay_pipeline = iron_g4_create_pipeline();
 		line_draw_overlay_pipeline.input_layout = structure;
@@ -227,17 +227,17 @@ function line_draw_begin() {
 }
 
 function line_draw_end(overlay: bool = false) {
-	kinc_g4_vertex_buffer_unlock_all(line_draw_vertex_buffer);
-	kinc_g4_index_buffer_unlock_all(line_draw_index_buffer);
+	iron_g4_vertex_buffer_unlock_all(line_draw_vertex_buffer);
+	iron_g4_index_buffer_unlock_all(line_draw_index_buffer);
 
-	kinc_g4_set_vertex_buffer(line_draw_vertex_buffer);
-	kinc_g4_set_index_buffer(line_draw_index_buffer);
-	kinc_g5_set_pipeline(overlay ? line_draw_overlay_pipeline : line_draw_pipeline);
+	iron_g4_set_vertex_buffer(line_draw_vertex_buffer);
+	iron_g4_set_index_buffer(line_draw_index_buffer);
+	iron_g5_set_pipeline(overlay ? line_draw_overlay_pipeline : line_draw_pipeline);
 	let camera: camera_object_t = scene_camera;
 	line_draw_vp = mat4_clone(camera.v);
 	line_draw_vp = mat4_mult_mat(line_draw_vp, camera.p);
-	iron_g4_set_matrix4(line_draw_vp_loc, line_draw_vp);
-	iron_g4_set_float3(line_draw_color_loc,
+	_iron_g4_set_matrix4(line_draw_vp_loc, line_draw_vp);
+	_iron_g4_set_float3(line_draw_color_loc,
 		color_get_rb(line_draw_color) / 255,
 		color_get_gb(line_draw_color) / 255,
 		color_get_bb(line_draw_color) / 255
@@ -245,8 +245,8 @@ function line_draw_end(overlay: bool = false) {
 	iron_g4_draw_indexed_vertices(0, line_draw_lines * 6);
 }
 
-let _shape_draw_sphere_vb: kinc_g5_vertex_buffer_t = null;
-let _shape_draw_sphere_ib: kinc_g5_index_buffer_t = null;
+let _shape_draw_sphere_vb: iron_g5_vertex_buffer_t = null;
+let _shape_draw_sphere_ib: iron_g5_index_buffer_t = null;
 
 function shape_draw_sphere(mat: mat4_t) {
 	line_draw_init();
@@ -256,7 +256,7 @@ function shape_draw_sphere(mat: mat4_t) {
     	let md: mesh_data_t = sphere.data;
 
 		let posa: i16_array_t = md.vertex_arrays[0].values;
-		let structure: kinc_g5_vertex_structure_t = g4_vertex_struct_create();
+		let structure: iron_g5_vertex_structure_t = g4_vertex_struct_create();
 		g4_vertex_struct_add(structure, "pos", vertex_data_t.F32_3X);
 		_shape_draw_sphere_vb = iron_g4_create_vertex_buffer(posa.length, structure, usage_t.STATIC);
 		let data: buffer_t = iron_g4_lock_vertex_buffer(_shape_draw_sphere_vb);
@@ -265,21 +265,21 @@ function shape_draw_sphere(mat: mat4_t) {
 			buffer_set_f32(data, (i * 3 + 1) * 4, posa[i * 4 + 1] / 32767);
 			buffer_set_f32(data, (i * 3 + 2) * 4, posa[i * 4 + 2] / 32767);
 		}
-		kinc_g4_vertex_buffer_unlock_all(_shape_draw_sphere_vb);
+		iron_g4_vertex_buffer_unlock_all(_shape_draw_sphere_vb);
 		_shape_draw_sphere_ib = md._.index_buffers[0];
 	}
 
-	kinc_g4_set_vertex_buffer(_shape_draw_sphere_vb);
-	kinc_g4_set_index_buffer(_shape_draw_sphere_ib);
-	kinc_g5_set_pipeline(line_draw_overlay_pipeline);
+	iron_g4_set_vertex_buffer(_shape_draw_sphere_vb);
+	iron_g4_set_index_buffer(_shape_draw_sphere_ib);
+	iron_g5_set_pipeline(line_draw_overlay_pipeline);
 	let camera: camera_object_t = scene_camera;
 	line_draw_vp = mat4_clone(mat);
 	let f: f32 = line_draw_strength * 50;
 	line_draw_vp = mat4_scale(line_draw_vp, vec4_create(f, f, f));
 	line_draw_vp = mat4_mult_mat(line_draw_vp, camera.v);
 	line_draw_vp = mat4_mult_mat(line_draw_vp, camera.p);
-	iron_g4_set_matrix4(line_draw_vp_loc, line_draw_vp);
-	iron_g4_set_float3(line_draw_color_loc,
+	_iron_g4_set_matrix4(line_draw_vp_loc, line_draw_vp);
+	_iron_g4_set_float3(line_draw_color_loc,
 		color_get_rb(line_draw_color) / 255,
 		color_get_gb(line_draw_color) / 255,
 		color_get_bb(line_draw_color) / 255

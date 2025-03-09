@@ -325,7 +325,7 @@ function box_preferences_show() {
 				config_raw.undo_steps = math_floor(context_raw.undo_handle.value = 1);
 			}
 			if (context_raw.undo_handle.changed) {
-				let current: kinc_g5_texture_t = _g2_current;
+				let current: iron_g5_texture_t = _g2_current;
 				g2_end();
 
 				if (history_undo_layers != null) {

@@ -14,7 +14,7 @@
 
 static ui_nodes_t *current_nodes = NULL;
 static bool ui_nodes_elements_baked = false;
-static kinc_g5_texture_t ui_socket_image;
+static iron_g5_texture_t ui_socket_image;
 static bool ui_box_select = false;
 static int ui_box_select_x = 0;
 static int ui_box_select_y = 0;
@@ -236,11 +236,11 @@ int ui_get_socket_id(ui_node_array_t *nodes) {
 
 void ui_nodes_bake_elements() {
 	if (ui_socket_image.width != 0) {
-		kinc_g5_texture_destroy(&ui_socket_image);
+		iron_g5_texture_destroy(&ui_socket_image);
 	}
-	kinc_g5_render_target_init(&ui_socket_image, 24, 24, KINC_IMAGE_FORMAT_RGBA32, 0);
+	iron_g5_render_target_init(&ui_socket_image, 24, 24, IRON_IMAGE_FORMAT_RGBA32, 0);
 	draw_set_render_target(&ui_socket_image);
-	kinc_g5_clear(0x00000000, 0, KINC_G5_CLEAR_COLOR);
+	iron_g5_clear(0x00000000, 0, IRON_G5_CLEAR_COLOR);
 
 	draw_set_color(0xff111111);
 	draw_filled_circle(12, 12, 11, 0);
@@ -1225,7 +1225,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 	}
 
 	// Select all nodes
-	if (current->is_ctrl_down && current->key_code == KINC_KEY_A && !current->is_typing) {
+	if (current->is_ctrl_down && current->key_code == IRON_KEY_A && !current->is_typing) {
 		current_nodes->nodes_selected_id->length = 0;
 		for (int i = 0; i < canvas->nodes->length; ++i) {
 			add_to_selection(canvas->nodes->buffer[i]);

@@ -1,7 +1,7 @@
 
-#ifdef KINC_A2
+#ifdef IRON_A2
 
-#include <kinc/audio2/audio.h>
+#include <iron_audio.h>
 
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static kinc_a2_buffer_t a2_buffer;
+static iron_a2_buffer_t a2_buffer;
 
 static SLObjectItf engineObject;
 static SLEngineItf engineEngine;
@@ -32,7 +32,7 @@ static void copySample(void *buffer) {
 }
 
 static void bqPlayerCallback(SLAndroidSimpleBufferQueueItf caller, void *context) {
-	if (kinc_a2_internal_callback(&a2_buffer, AUDIO_BUFFER_SIZE / 2)) {
+	if (iron_a2_internal_callback(&a2_buffer, AUDIO_BUFFER_SIZE / 2)) {
 		for (int i = 0; i < AUDIO_BUFFER_SIZE; i += 2) {
 			copySample(&tempBuffer[i]);
 		}
@@ -45,12 +45,12 @@ static void bqPlayerCallback(SLAndroidSimpleBufferQueueItf caller, void *context
 
 static bool initialized = false;
 
-void kinc_a2_init() {
+void iron_a2_init() {
 	if (initialized) {
 		return;
 	}
 
-	kinc_a2_internal_init();
+	iron_a2_internal_init();
 	initialized = true;
 
 	a2_buffer.read_location = 0;
@@ -111,9 +111,9 @@ void resumeAudio() {
 	SLresult result = (*bqPlayerPlay)->SetPlayState(bqPlayerPlay, SL_PLAYSTATE_PLAYING);
 }
 
-void kinc_a2_update() {}
+void iron_a2_update() {}
 
-void kinc_a2_shutdown() {
+void iron_a2_shutdown() {
 	if (bqPlayerObject != NULL) {
 		(*bqPlayerObject)->Destroy(bqPlayerObject);
 		bqPlayerObject = NULL;
@@ -131,7 +131,7 @@ void kinc_a2_shutdown() {
 	}
 }
 
-uint32_t kinc_a2_samples_per_second(void) {
+uint32_t iron_a2_samples_per_second(void) {
 	return 44100;
 }
 

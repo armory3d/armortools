@@ -188,19 +188,19 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	let geom: mesh_data_t = plane.data;
 
 	render_path_set_target("");
-	kinc_g5_set_pipeline(pipes_cursor);
+	iron_g5_set_pipeline(pipes_cursor);
 	let gbuffer0: render_target_t = map_get(render_path_render_targets, "gbuffer0");
 	iron_g4_set_texture_depth(pipes_cursor_gbufferd, gbuffer0._image);
-	iron_g4_set_float2(pipes_cursor_mouse, mx, my);
-	iron_g4_set_float2(pipes_cursor_tex_step, 1 / gbuffer0._image.width, 1 / gbuffer0._image.height);
-	iron_g4_set_float(pipes_cursor_radius, radius);
+	_iron_g4_set_float2(pipes_cursor_mouse, mx, my);
+	_iron_g4_set_float2(pipes_cursor_tex_step, 1 / gbuffer0._image.width, 1 / gbuffer0._image.height);
+	_iron_g4_set_float(pipes_cursor_radius, radius);
 	let right: vec4_t = vec4_norm(camera_object_right_world(scene_camera));
-	iron_g4_set_float3(pipes_cursor_camera_right, right.x, right.y, right.z);
-	iron_g4_set_float3(pipes_cursor_tint, tint_r, tint_g, tint_b);
-	iron_g4_set_matrix4(pipes_cursor_vp, scene_camera.vp);
+	_iron_g4_set_float3(pipes_cursor_camera_right, right.x, right.y, right.z);
+	_iron_g4_set_float3(pipes_cursor_tint, tint_r, tint_g, tint_b);
+	_iron_g4_set_matrix4(pipes_cursor_vp, scene_camera.vp);
 	let help_mat: mat4_t = mat4_identity();
 	help_mat = mat4_inv(scene_camera.vp);
-	iron_g4_set_matrix4(pipes_cursor_inv_vp, help_mat);
+	_iron_g4_set_matrix4(pipes_cursor_inv_vp, help_mat);
 	///if (arm_metal || arm_vulkan)
 	let vs: vertex_element_t[] = [
 		{
@@ -208,14 +208,14 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 			data: "short2norm"
 		}
 	];
-	kinc_g4_set_vertex_buffer(mesh_data_get(geom, vs));
+	iron_g4_set_vertex_buffer(mesh_data_get(geom, vs));
 	///else
-	kinc_g4_set_vertex_buffer(geom._.vertex_buffer);
+	iron_g4_set_vertex_buffer(geom._.vertex_buffer);
 	///end
-	kinc_g4_set_index_buffer(geom._.index_buffers[0]);
+	iron_g4_set_index_buffer(geom._.index_buffers[0]);
 	iron_g4_draw_indexed_vertices();
 
-	kinc_g4_disable_scissor();
+	iron_g4_disable_scissor();
 	render_path_end();
 }
 
@@ -263,7 +263,7 @@ function render_path_paint_draw() {
 }
 
 function render_path_paint_bind_layers() {
-	let image: kinc_g5_texture_t = null;
+	let image: iron_g5_texture_t = null;
 	let nodes: ui_nodes_t = ui_nodes_get_nodes();
 	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
 	if (nodes.nodes_selected_id.length > 0) {

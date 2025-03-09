@@ -45,16 +45,16 @@ struct dx_window {
 	bool vsync;
 };
 
-struct kinc_g5_pipeline;
-struct kinc_g5_texture;
-struct kinc_g5_sampler;
+struct iron_g5_pipeline;
+struct iron_g5_texture;
+struct iron_g5_sampler;
 
-#define KINC_INTERNAL_G5_TEXTURE_COUNT 16
+#define IRON_INTERNAL_G5_TEXTURE_COUNT 16
 
 typedef struct {
 	struct ID3D12CommandAllocator *_commandAllocator;
 	struct ID3D12GraphicsCommandList *_commandList;
-	struct kinc_g5_pipeline *_currentPipeline;
+	struct iron_g5_pipeline *_currentPipeline;
 	int _indexCount;
 	bool open;
 
@@ -64,8 +64,8 @@ typedef struct {
 	struct ID3D12Fence *fence;
 	HANDLE fence_event;
 
-	struct kinc_g5_texture *currentTextures[KINC_INTERNAL_G5_TEXTURE_COUNT];
-	struct kinc_g5_sampler *current_samplers[KINC_INTERNAL_G5_TEXTURE_COUNT];
+	struct iron_g5_texture *currentTextures[IRON_INTERNAL_G5_TEXTURE_COUNT];
+	struct iron_g5_sampler *current_samplers[IRON_INTERNAL_G5_TEXTURE_COUNT];
 
 	int heapIndex;
 	struct ID3D12DescriptorHeap *srvHeap;
@@ -78,25 +78,25 @@ typedef struct {
 	uint32_t size;
 	uint8_t columns;
 	uint8_t rows;
-} kinc_compute_internal_shader_constant_t;
+} iron_compute_internal_shader_constant_t;
 
 typedef struct {
 	uint32_t hash;
 	uint32_t index;
-} kinc_internal_hash_index_t;
+} iron_internal_hash_index_t;
 
-typedef struct kinc_g5_compute_shader_impl {
-	kinc_compute_internal_shader_constant_t constants[64];
+typedef struct iron_g5_compute_shader_impl {
+	iron_compute_internal_shader_constant_t constants[64];
 	int constantsSize;
-	kinc_internal_hash_index_t attributes[64];
-	kinc_internal_hash_index_t textures[64];
+	iron_internal_hash_index_t attributes[64];
+	iron_internal_hash_index_t textures[64];
 	uint8_t *data;
 	int length;
 	struct ID3D12Buffer *constantBuffer;
 	struct ID3D12PipelineState *pso;
-} kinc_g5_compute_shader_impl;
+} iron_g5_compute_shader_impl;
 
-struct kinc_g5_shader;
+struct iron_g5_shader;
 
 struct ID3D12PipelineState;
 struct ID3D12GraphicsCommandList;
@@ -132,14 +132,14 @@ typedef struct {
 	int nothing;
 } AttributeLocation5Impl;
 
-struct kinc_g5_pipeline;
-struct kinc_g5_command_list;
+struct iron_g5_pipeline;
+struct iron_g5_command_list;
 
-void kinc_g5_internal_setConstants(struct kinc_g5_command_list *commandList, struct kinc_g5_pipeline *pipeline);
+void iron_g5_internal_setConstants(struct iron_g5_command_list *commandList, struct iron_g5_pipeline *pipeline);
 
-typedef struct kinc_g5_sampler_impl {
+typedef struct iron_g5_sampler_impl {
 	struct ID3D12DescriptorHeap *sampler_heap;
-} kinc_g5_sampler_impl_t;
+} iron_g5_sampler_impl_t;
 
 typedef struct {
 	char name[64];
@@ -168,7 +168,7 @@ typedef struct {
 	int length;
 } Shader5Impl;
 
-uint32_t kinc_internal_hash_name(unsigned char *str);
+uint32_t iron_internal_hash_name(unsigned char *str);
 
 struct ID3D12Resource;
 struct ID3D12DescriptorHeap;
@@ -200,11 +200,11 @@ typedef struct {
 	int framebuffer_index;
 } Texture5Impl;
 
-struct kinc_g5_texture;
-struct kinc_g5_command_list;
+struct iron_g5_texture;
+struct iron_g5_command_list;
 
-void kinc_g5_internal_set_textures(struct kinc_g5_command_list *commandList);
-void kinc_g5_internal_texture_set(struct kinc_g5_command_list *commandList, struct kinc_g5_texture *texture, int unit);
+void iron_g5_internal_set_textures(struct iron_g5_command_list *commandList);
+void iron_g5_internal_texture_set(struct iron_g5_command_list *commandList, struct iron_g5_texture *texture, int unit);
 
 struct ID3D12Resource;
 
@@ -247,9 +247,9 @@ typedef struct {
 	int last_count;
 } IndexBuffer5Impl;
 
-struct kinc_g5_index_buffer;
+struct iron_g5_index_buffer;
 
-void kinc_g5_internal_index_buffer_upload(struct kinc_g5_index_buffer *buffer, struct ID3D12GraphicsCommandList *commandList);
+void iron_g5_internal_index_buffer_upload(struct iron_g5_index_buffer *buffer, struct ID3D12GraphicsCommandList *commandList);
 
 struct ID3D12StateObject;
 struct ID3D12Resource;
@@ -259,9 +259,9 @@ typedef struct {
 	struct ID3D12Resource *raygen_shader_table;
 	struct ID3D12Resource *miss_shader_table;
 	struct ID3D12Resource *hitgroup_shader_table;
-} kinc_g5_raytrace_pipeline_impl_t;
+} iron_g5_raytrace_pipeline_impl_t;
 
 typedef struct {
 	struct ID3D12Resource *bottom_level_accel[16];
 	struct ID3D12Resource *top_level_accel;
-} kinc_g5_raytrace_acceleration_structure_impl_t;
+} iron_g5_raytrace_acceleration_structure_impl_t;

@@ -3,89 +3,89 @@
 #include <iron_global.h>
 #include <stdbool.h>
 
-#define KINC_HTTP_GET 0
-#define KINC_HTTP_POST 1
-#define KINC_HTTP_PUT 2
-#define KINC_HTTP_DELETE 3
+#define IRON_HTTP_GET 0
+#define IRON_HTTP_POST 1
+#define IRON_HTTP_PUT 2
+#define IRON_HTTP_DELETE 3
 
-typedef void (*kinc_http_callback_t)(int error, int response, const char *body, void *callbackdata);
+typedef void (*iron_http_callback_t)(int error, int response, const char *body, void *callbackdata);
 
-void kinc_http_request(const char *url, const char *path, const char *data, int port, bool secure, int method, const char *header,
-                                 kinc_http_callback_t callback, void *callbackdata);
+void iron_http_request(const char *url, const char *path, const char *data, int port, bool secure, int method, const char *header,
+                                 iron_http_callback_t callback, void *callbackdata);
 
-// typedef enum kinc_socket_protocol {
-// 	KINC_SOCKET_PROTOCOL_UDP,
-// 	KINC_SOCKET_PROTOCOL_TCP
-// } kinc_socket_protocol_t;
+// typedef enum iron_socket_protocol {
+// 	IRON_SOCKET_PROTOCOL_UDP,
+// 	IRON_SOCKET_PROTOCOL_TCP
+// } iron_socket_protocol_t;
 
-// typedef enum kinc_socket_family {
-// 	KINC_SOCKET_FAMILY_IP4,
-// 	KINC_SOCKET_FAMILY_IP6
-// } kinc_socket_family_t;
+// typedef enum iron_socket_family {
+// 	IRON_SOCKET_FAMILY_IP4,
+// 	IRON_SOCKET_FAMILY_IP6
+// } iron_socket_family_t;
 
-// #ifdef KINC_WINDOWS
+// #ifdef IRON_WINDOWS
 // typedef unsigned __int64 UINT_PTR, *PUINT_PTR;
 // typedef UINT_PTR SOCKET;
 // #endif
 
-// typedef struct kinc_socket {
-// #ifdef KINC_WINDOWS
+// typedef struct iron_socket {
+// #ifdef IRON_WINDOWS
 // 	SOCKET handle;
 // #else
 // 	int handle;
 // #endif
 // 	uint32_t host;
 // 	uint32_t port;
-// 	kinc_socket_protocol_t protocol;
-// 	kinc_socket_family_t family;
+// 	iron_socket_protocol_t protocol;
+// 	iron_socket_family_t family;
 // 	bool connected;
-// } kinc_socket_t;
+// } iron_socket_t;
 
-// typedef struct kinc_socket_options {
+// typedef struct iron_socket_options {
 // 	bool non_blocking;
 // 	bool broadcast;
 // 	bool tcp_no_delay;
-// } kinc_socket_options_t;
+// } iron_socket_options_t;
 
-// void kinc_socket_options_set_defaults(kinc_socket_options_t *options);
-// void kinc_socket_init(kinc_socket_t *socket);
-// bool kinc_socket_set(kinc_socket_t *socket, const char *host, int port, kinc_socket_family_t family, kinc_socket_protocol_t protocol);
-// void kinc_socket_destroy(kinc_socket_t *socket);
-// bool kinc_socket_open(kinc_socket_t *socket, kinc_socket_options_t *options);
-// bool kinc_socket_select(kinc_socket_t *socket, uint32_t waittime, bool read, bool write);
+// void iron_socket_options_set_defaults(iron_socket_options_t *options);
+// void iron_socket_init(iron_socket_t *socket);
+// bool iron_socket_set(iron_socket_t *socket, const char *host, int port, iron_socket_family_t family, iron_socket_protocol_t protocol);
+// void iron_socket_destroy(iron_socket_t *socket);
+// bool iron_socket_open(iron_socket_t *socket, iron_socket_options_t *options);
+// bool iron_socket_select(iron_socket_t *socket, uint32_t waittime, bool read, bool write);
 
 // /*Typically these are server actions.*/
-// bool kinc_socket_bind(kinc_socket_t *socket);
-// bool kinc_socket_listen(kinc_socket_t *socket, int backlog);
-// bool kinc_socket_accept(kinc_socket_t *socket, kinc_socket_t *new_socket, unsigned *remote_address, unsigned *remote_port);
+// bool iron_socket_bind(iron_socket_t *socket);
+// bool iron_socket_listen(iron_socket_t *socket, int backlog);
+// bool iron_socket_accept(iron_socket_t *socket, iron_socket_t *new_socket, unsigned *remote_address, unsigned *remote_port);
 
 // /*Typically this is a client action.*/
-// bool kinc_socket_connect(kinc_socket_t *socket);
+// bool iron_socket_connect(iron_socket_t *socket);
 
-// int kinc_socket_send(kinc_socket_t *socket, const uint8_t *data, int size);
-// int kinc_socket_send_address(kinc_socket_t *socket, unsigned address, int port, const uint8_t *data, int size);
-// int kinc_socket_send_url(kinc_socket_t *socket, const char *url, int port, const uint8_t *data, int size);
-// int kinc_socket_receive(kinc_socket_t *socket, uint8_t *data, int maxSize, unsigned *from_address, unsigned *from_port);
+// int iron_socket_send(iron_socket_t *socket, const uint8_t *data, int size);
+// int iron_socket_send_address(iron_socket_t *socket, unsigned address, int port, const uint8_t *data, int size);
+// int iron_socket_send_url(iron_socket_t *socket, const char *url, int port, const uint8_t *data, int size);
+// int iron_socket_receive(iron_socket_t *socket, uint8_t *data, int maxSize, unsigned *from_address, unsigned *from_port);
 
-// unsigned kinc_url_to_int(const char *url, int port);
+// unsigned iron_url_to_int(const char *url, int port);
 
-// #ifdef KINC_IMPLEMENTATION_ROOT
-// #define KINC_IMPLEMENTATION
+// #ifdef IRON_IMPLEMENTATION_ROOT
+// #define IRON_IMPLEMENTATION
 // #endif
 
-// #ifdef KINC_IMPLEMENTATION
+// #ifdef IRON_IMPLEMENTATION
 
-// #undef KINC_IMPLEMENTATION
+// #undef IRON_IMPLEMENTATION
 // #include <stb_sprintf.h>
 // #include <iron_system.h>
-// #define KINC_IMPLEMENTATION
+// #define IRON_IMPLEMENTATION
 
 // #include <errno.h>
 // #include <stdbool.h>
 // #include <stdio.h>
 // #include <string.h>
 
-// #if defined(KINC_WINDOWS)
+// #if defined(IRON_WINDOWS)
 
 // // Windows 7
 // #define WINVER 0x0601
@@ -132,7 +132,7 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 
 // #include <Ws2tcpip.h>
 // #include <winsock2.h>
-// #elif defined(KINC_POSIX)
+// #elif defined(IRON_POSIX)
 // #include <arpa/inet.h> // for inet_addr()
 // #include <ctype.h>
 // #include <fcntl.h>
@@ -144,13 +144,13 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // #include <unistd.h>
 // #endif
 
-// #if defined(KINC_POSIX)
+// #if defined(IRON_POSIX)
 // #include <sys/select.h>
 // #endif
 
 // static int counter = 0;
 
-// #if defined(KINC_WINDOWS) || defined(KINC_POSIX)
+// #if defined(IRON_WINDOWS) || defined(IRON_POSIX)
 // // Important: Must be cleaned with freeaddrinfo(address) later if the result is 0 in order to prevent memory leaks
 // static int resolveAddress(const char *url, int port, struct addrinfo **result) {
 // 	struct addrinfo hints = {0};
@@ -165,14 +165,14 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // }
 // #endif
 
-// bool kinc_socket_bind(kinc_socket_t *sock) {
-// #if defined(KINC_WINDOWS) || defined(KINC_POSIX)
+// bool iron_socket_bind(iron_socket_t *sock) {
+// #if defined(IRON_WINDOWS) || defined(IRON_POSIX)
 // 	struct sockaddr_in address;
-// 	address.sin_family = sock->family == KINC_SOCKET_FAMILY_IP4 ? AF_INET : AF_INET6;
+// 	address.sin_family = sock->family == IRON_SOCKET_FAMILY_IP4 ? AF_INET : AF_INET6;
 // 	address.sin_addr.s_addr = sock->host;
 // 	address.sin_port = sock->port;
 // 	if (bind(sock->handle, (const struct sockaddr *)&address, sizeof(struct sockaddr_in)) < 0) {
-// 		kinc_error("Could not bind socket: %s", strerror(errno));
+// 		iron_error("Could not bind socket: %s", strerror(errno));
 // 		return false;
 // 	}
 // 	return true;
@@ -181,24 +181,24 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // #endif
 // }
 
-// void kinc_socket_options_set_defaults(kinc_socket_options_t *options) {
+// void iron_socket_options_set_defaults(iron_socket_options_t *options) {
 // 	options->non_blocking = true;
 // 	options->broadcast = false;
 // 	options->tcp_no_delay = false;
 // }
 
-// void kinc_socket_init(kinc_socket_t *sock) {
+// void iron_socket_init(iron_socket_t *sock) {
 // 	sock->handle = 0;
 
-// #if defined(KINC_WINDOWS) || defined(KINC_POSIX)
+// #if defined(IRON_WINDOWS) || defined(IRON_POSIX)
 // 	sock->host = INADDR_ANY;
 // 	sock->port = htons((unsigned short)8080);
-// 	sock->protocol = KINC_SOCKET_PROTOCOL_TCP;
-// 	sock->family = KINC_SOCKET_FAMILY_IP4;
+// 	sock->protocol = IRON_SOCKET_PROTOCOL_TCP;
+// 	sock->family = IRON_SOCKET_FAMILY_IP4;
 // #endif
 // 	sock->connected = false;
 
-// #if defined(KINC_WINDOWS)
+// #if defined(IRON_WINDOWS)
 // 	if (counter == 0) {
 // 		WSADATA WsaData;
 // 		WSAStartup(MAKEWORD(2, 2), &WsaData);
@@ -207,76 +207,76 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // 	++counter;
 // }
 
-// bool kinc_socket_open(kinc_socket_t *sock, struct kinc_socket_options *options) {
-// #if defined(KINC_WINDOWS) || defined(KINC_POSIX)
+// bool iron_socket_open(iron_socket_t *sock, struct iron_socket_options *options) {
+// #if defined(IRON_WINDOWS) || defined(IRON_POSIX)
 // 	switch (sock->protocol) {
-// 	case KINC_SOCKET_PROTOCOL_UDP:
-// 		sock->handle = socket(sock->family == KINC_SOCKET_FAMILY_IP4 ? AF_INET : AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
+// 	case IRON_SOCKET_PROTOCOL_UDP:
+// 		sock->handle = socket(sock->family == IRON_SOCKET_FAMILY_IP4 ? AF_INET : AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
 // 		break;
-// 	case KINC_SOCKET_PROTOCOL_TCP:
-// 		sock->handle = socket(sock->family == KINC_SOCKET_FAMILY_IP4 ? AF_INET : AF_INET6, SOCK_STREAM, IPPROTO_TCP);
+// 	case IRON_SOCKET_PROTOCOL_TCP:
+// 		sock->handle = socket(sock->family == IRON_SOCKET_FAMILY_IP4 ? AF_INET : AF_INET6, SOCK_STREAM, IPPROTO_TCP);
 // 		break;
 // 	default:
-// 		kinc_error("Unsupported socket protocol.");
+// 		iron_error("Unsupported socket protocol.");
 // 		return false;
 // 	}
 
 // 	if (sock->handle <= 0) {
-// 		kinc_error("Could not create socket.");
-// #if defined(KINC_WINDOWS)
+// 		iron_error("Could not create socket.");
+// #if defined(IRON_WINDOWS)
 // 		int errorCode = WSAGetLastError();
 // 		switch (errorCode) {
 // 		case (WSANOTINITIALISED):
-// 			kinc_error("A successful WSAStartup call must occur before using this function.");
+// 			iron_error("A successful WSAStartup call must occur before using this function.");
 // 			break;
 // 		case (WSAENETDOWN):
-// 			kinc_error("The network subsystem or the associated service provider has failed.");
+// 			iron_error("The network subsystem or the associated service provider has failed.");
 // 			break;
 // 		case (WSAEAFNOSUPPORT):
-// 			kinc_error(
+// 			iron_error(
 // 			         "The specified address family is not supported.For example, an application tried to create a socket for the AF_IRDA address "
 // 			         "family but an infrared adapter and device driver is not installed on the local computer.");
 // 			break;
 // 		case (WSAEINPROGRESS):
-// 			kinc_error(
+// 			iron_error(
 // 			         "A blocking Windows Sockets 1.1 call is in progress, or the service provider is still processing a callback function.");
 // 			break;
 // 		case (WSAEMFILE):
-// 			kinc_error("No more socket descriptors are available.");
+// 			iron_error("No more socket descriptors are available.");
 // 			break;
 // 		case (WSAEINVAL):
-// 			kinc_error(
+// 			iron_error(
 // 			         "An invalid argument was supplied.This error is returned if the af parameter is set to AF_UNSPEC and the type and protocol "
 // 			         "parameter are unspecified.");
 // 			break;
 // 		case (WSAENOBUFS):
-// 			kinc_error("No buffer space is available.The socket cannot be created.");
+// 			iron_error("No buffer space is available.The socket cannot be created.");
 // 			break;
 // 		case (WSAEPROTONOSUPPORT):
-// 			kinc_error("The specified protocol is not supported.");
+// 			iron_error("The specified protocol is not supported.");
 // 			break;
 // 		case (WSAEPROTOTYPE):
-// 			kinc_error("The specified protocol is the wrong type for this socket.");
+// 			iron_error("The specified protocol is the wrong type for this socket.");
 // 			break;
 // 		case (WSAEPROVIDERFAILEDINIT):
-// 			kinc_error(
+// 			iron_error(
 // 			         "The service provider failed to initialize.This error is returned if a layered service provider(LSP) or namespace provider was "
 // 			         "improperly installed or the provider fails to operate correctly.");
 // 			break;
 // 		case (WSAESOCKTNOSUPPORT):
-// 			kinc_error("The specified socket type is not supported in this address family.");
+// 			iron_error("The specified socket type is not supported in this address family.");
 // 			break;
 // 		case (WSAEINVALIDPROVIDER):
-// 			kinc_error("The service provider returned a version other than 2.2.");
+// 			iron_error("The service provider returned a version other than 2.2.");
 // 			break;
 // 		case (WSAEINVALIDPROCTABLE):
-// 			kinc_error("The service provider returned an invalid or incomplete procedure table to the WSPStartup.");
+// 			iron_error("The service provider returned an invalid or incomplete procedure table to the WSPStartup.");
 // 			break;
 // 		default:
-// 			kinc_error("Unknown error.");
+// 			iron_error("Unknown error.");
 // 		}
-// #elif defined(KINC_POSIX)
-// 		kinc_error("%s", strerror(errno));
+// #elif defined(IRON_POSIX)
+// 		iron_error("%s", strerror(errno));
 // #endif
 // 		return false;
 // 	}
@@ -284,36 +284,36 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 
 // 	if (options) {
 // 		if (options->non_blocking) {
-// #if defined(KINC_WINDOWS)
+// #if defined(IRON_WINDOWS)
 // 			DWORD value = 1;
 // 			if (ioctlsocket(sock->handle, FIONBIO, &value) != 0) {
-// 				kinc_error("Could not set non-blocking mode.");
+// 				iron_error("Could not set non-blocking mode.");
 // 				return false;
 // 			}
-// #elif defined(KINC_POSIX)
+// #elif defined(IRON_POSIX)
 // 			int value = 1;
 // 			if (fcntl(sock->handle, F_SETFL, O_NONBLOCK, value) == -1) {
-// 				kinc_error("Could not set non-blocking mode.");
+// 				iron_error("Could not set non-blocking mode.");
 // 				return false;
 // 			}
 // #endif
 // 		}
 
 // 		if (options->broadcast) {
-// #if defined(KINC_WINDOWS) || defined(KINC_POSIX)
+// #if defined(IRON_WINDOWS) || defined(IRON_POSIX)
 // 			int value = 1;
 // 			if (setsockopt(sock->handle, SOL_SOCKET, SO_BROADCAST, (const char *)&value, sizeof(value)) < 0) {
-// 				kinc_error("Could not set broadcast mode.");
+// 				iron_error("Could not set broadcast mode.");
 // 				return false;
 // 			}
 // #endif
 // 		}
 
 // 		if (options->tcp_no_delay) {
-// #if defined(KINC_WINDOWS) || defined(KINC_POSIX)
+// #if defined(IRON_WINDOWS) || defined(IRON_POSIX)
 // 			int value = 1;
 // 			if (setsockopt(sock->handle, IPPROTO_TCP, TCP_NODELAY, (const char *)&value, sizeof(value)) != 0) {
-// 				kinc_error("Could not set no-delay mode.");
+// 				iron_error("Could not set no-delay mode.");
 // 				return false;
 // 			}
 // #endif
@@ -323,25 +323,25 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // 	return true;
 // }
 
-// void kinc_socket_destroy(kinc_socket_t *sock) {
-// #if defined(KINC_WINDOWS)
+// void iron_socket_destroy(iron_socket_t *sock) {
+// #if defined(IRON_WINDOWS)
 // 	closesocket(sock->handle);
-// #elif defined(KINC_POSIX)
+// #elif defined(IRON_POSIX)
 // 	close(sock->handle);
 // #endif
 
-// 	memset(sock, 0, sizeof(kinc_socket_t));
+// 	memset(sock, 0, sizeof(iron_socket_t));
 
 // 	--counter;
-// #if defined(KINC_WINDOWS)
+// #if defined(IRON_WINDOWS)
 // 	if (counter == 0) {
 // 		WSACleanup();
 // 	}
 // #endif
 // }
 
-// bool kinc_socket_select(kinc_socket_t *sock, uint32_t waittime, bool read, bool write) {
-// #if (defined(KINC_WINDOWS) || defined(KINC_POSIX))
+// bool iron_socket_select(iron_socket_t *sock, uint32_t waittime, bool read, bool write) {
+// #if (defined(IRON_WINDOWS) || defined(IRON_POSIX))
 // 	fd_set r_fds, w_fds;
 // 	struct timeval timeout;
 
@@ -355,7 +355,7 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // 	timeout.tv_usec = 0;
 
 // 	if (select(0, &r_fds, &w_fds, NULL, &timeout) < 0) {
-// 		kinc_error("kinc_socket_select didn't work: %s", strerror(errno));
+// 		iron_error("iron_socket_select didn't work: %s", strerror(errno));
 // 		return false;
 // 	}
 
@@ -369,7 +369,7 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // 		return FD_ISSET(sock->handle, &w_fds);
 // 	}
 // 	else {
-// 		kinc_error("Calling kinc_socket_select with both read and write set to false is useless.");
+// 		iron_error("Calling iron_socket_select with both read and write set to false is useless.");
 // 		return false;
 // 	}
 // #else
@@ -377,8 +377,8 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // #endif
 // }
 
-// bool kinc_socket_set(kinc_socket_t *sock, const char *host, int port, kinc_socket_family_t family, kinc_socket_protocol_t protocol) {
-// #if defined(KINC_WINDOWS) || defined(KINC_POSIX)
+// bool iron_socket_set(iron_socket_t *sock, const char *host, int port, iron_socket_family_t family, iron_socket_protocol_t protocol) {
+// #if defined(IRON_WINDOWS) || defined(IRON_POSIX)
 
 // 	sock->family = family;
 // 	sock->protocol = protocol;
@@ -387,11 +387,11 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // 	if (host == NULL)
 // 		return true;
 
-// 	if (isdigit(host[0]) || (family == KINC_SOCKET_FAMILY_IP6 && host[4] == ':')) { // Is IPv4 or IPv6 string
+// 	if (isdigit(host[0]) || (family == IRON_SOCKET_FAMILY_IP6 && host[4] == ':')) { // Is IPv4 or IPv6 string
 // 		struct in_addr addr;
 
-// 		if (inet_pton(sock->family == KINC_SOCKET_FAMILY_IP4 ? AF_INET : AF_INET6, host, &addr) == 0) {
-// 			kinc_error("Invalid %s address: %s\n", sock->family == KINC_SOCKET_FAMILY_IP4 ? "IPv4" : "IPv6", host);
+// 		if (inet_pton(sock->family == IRON_SOCKET_FAMILY_IP4 ? AF_INET : AF_INET6, host, &addr) == 0) {
+// 			iron_error("Invalid %s address: %s\n", sock->family == IRON_SOCKET_FAMILY_IP4 ? "IPv4" : "IPv6", host);
 // 			return false;
 // 		}
 // 		sock->host = addr.s_addr;
@@ -401,10 +401,10 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // 		struct addrinfo *address = NULL;
 // 		int res = resolveAddress(host, port, &address);
 // 		if (res != 0) {
-// 			kinc_error("Could not resolve address.");
+// 			iron_error("Could not resolve address.");
 // 			return false;
 // 		}
-// #if defined(KINC_POSIX)
+// #if defined(IRON_POSIX)
 // 		sock->host = ((struct sockaddr_in *)address->ai_addr)->sin_addr.s_addr;
 // #else
 // 		sock->host = ((struct sockaddr_in *)address->ai_addr)->sin_addr.S_un.S_addr;
@@ -418,8 +418,8 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // #endif
 // }
 
-// bool kinc_socket_listen(kinc_socket_t *socket, int backlog) {
-// #if defined(KINC_WINDOWS) || defined(KINC_POSIX)
+// bool iron_socket_listen(iron_socket_t *socket, int backlog) {
+// #if defined(IRON_WINDOWS) || defined(IRON_POSIX)
 // 	int res = listen(socket->handle, backlog);
 // 	return (res == 0);
 // #else
@@ -427,11 +427,11 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // #endif
 // }
 
-// bool kinc_socket_accept(kinc_socket_t *sock, kinc_socket_t *newSocket, unsigned *remoteAddress, unsigned *remotePort) {
-// #if defined(KINC_WINDOWS)
+// bool iron_socket_accept(iron_socket_t *sock, iron_socket_t *newSocket, unsigned *remoteAddress, unsigned *remotePort) {
+// #if defined(IRON_WINDOWS)
 // 	typedef int socklen_t;
 // #endif
-// #if defined(KINC_WINDOWS) || defined(KINC_POSIX)
+// #if defined(IRON_WINDOWS) || defined(IRON_POSIX)
 // 	struct sockaddr_in addr;
 // 	socklen_t addrLength = sizeof(addr);
 // 	newSocket->handle = accept(sock->handle, (struct sockaddr *)&addr, &addrLength);
@@ -452,10 +452,10 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // #endif
 // }
 
-// bool kinc_socket_connect(kinc_socket_t *sock) {
-// #if defined(KINC_WINDOWS) || defined(KINC_POSIX)
+// bool iron_socket_connect(iron_socket_t *sock) {
+// #if defined(IRON_WINDOWS) || defined(IRON_POSIX)
 // 	struct sockaddr_in addr;
-// 	addr.sin_family = sock->family == KINC_SOCKET_FAMILY_IP4 ? AF_INET : AF_INET6;
+// 	addr.sin_family = sock->family == IRON_SOCKET_FAMILY_IP4 ? AF_INET : AF_INET6;
 // 	addr.sin_addr.s_addr = sock->host;
 // 	addr.sin_port = sock->port;
 
@@ -466,33 +466,33 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // #endif
 // }
 
-// int kinc_socket_send(kinc_socket_t *sock, const uint8_t *data, int size) {
-// #if defined(KINC_WINDOWS)
+// int iron_socket_send(iron_socket_t *sock, const uint8_t *data, int size) {
+// #if defined(IRON_WINDOWS)
 // 	typedef int socklen_t;
 // #endif
-// #if defined(KINC_WINDOWS) || defined(KINC_POSIX)
-// 	if (sock->protocol == KINC_SOCKET_PROTOCOL_UDP) {
+// #if defined(IRON_WINDOWS) || defined(IRON_POSIX)
+// 	if (sock->protocol == IRON_SOCKET_PROTOCOL_UDP) {
 // 		struct sockaddr_in addr;
-// 		addr.sin_family = sock->family == KINC_SOCKET_FAMILY_IP4 ? AF_INET : AF_INET6;
+// 		addr.sin_family = sock->family == IRON_SOCKET_FAMILY_IP4 ? AF_INET : AF_INET6;
 // 		addr.sin_addr.s_addr = sock->host;
 // 		addr.sin_port = sock->port;
 
 // 		size_t sent = sendto(sock->handle, (const char *)data, size, 0, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
 // 		if (sent != size) {
-// 			kinc_error("Could not send packet.");
+// 			iron_error("Could not send packet.");
 // 			return -1;
 // 		}
 // 		return (int)sent;
 // 	}
 // 	else {
 // 		if (!sock->connected) {
-// 			kinc_error("Call kinc_sockect_connect/bind before send/recv can be called for TCP sockets.");
+// 			iron_error("Call iron_sockect_connect/bind before send/recv can be called for TCP sockets.");
 // 			return -1;
 // 		}
 
 // 		size_t sent = send(sock->handle, (const char *)data, size, 0);
 // 		if (sent != size) {
-// 			kinc_error("Could not send packet.");
+// 			iron_error("Could not send packet.");
 // 		}
 // 		return (int)sent;
 // 	}
@@ -501,8 +501,8 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // #endif
 // }
 
-// int kinc_socket_send_address(kinc_socket_t *sock, unsigned address, int port, const uint8_t *data, int size) {
-// #if defined(KINC_WINDOWS) || defined(KINC_POSIX)
+// int iron_socket_send_address(iron_socket_t *sock, unsigned address, int port, const uint8_t *data, int size) {
+// #if defined(IRON_WINDOWS) || defined(IRON_POSIX)
 // 	struct sockaddr_in addr;
 // 	addr.sin_family = AF_INET;
 // 	addr.sin_addr.s_addr = htonl(address);
@@ -510,7 +510,7 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 
 // 	size_t sent = sendto(sock->handle, (const char *)data, size, 0, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
 // 	if (sent != size) {
-// 		kinc_error("Could not send packet.");
+// 		iron_error("Could not send packet.");
 // 	}
 // 	return (int)sent;
 // #else
@@ -518,18 +518,18 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // #endif
 // }
 
-// int kinc_socket_send_url(kinc_socket_t *sock, const char *url, int port, const uint8_t *data, int size) {
-// #if defined(KINC_WINDOWS) || defined(KINC_POSIX)
+// int iron_socket_send_url(iron_socket_t *sock, const char *url, int port, const uint8_t *data, int size) {
+// #if defined(IRON_WINDOWS) || defined(IRON_POSIX)
 // 	struct addrinfo *address = NULL;
 // 	int res = resolveAddress(url, port, &address);
 // 	if (res != 0) {
-// 		kinc_error("Could not resolve address.");
+// 		iron_error("Could not resolve address.");
 // 		return 0;
 // 	}
 
 // 	size_t sent = sendto(sock->handle, (const char *)data, size, 0, address->ai_addr, sizeof(struct sockaddr_in));
 // 	if (sent != size) {
-// 		kinc_error("Could not send packet.");
+// 		iron_error("Could not send packet.");
 // 	}
 // 	freeaddrinfo(address);
 // 	return (int)sent;
@@ -538,14 +538,14 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // #endif
 // }
 
-// int kinc_socket_receive(kinc_socket_t *sock, uint8_t *data, int maxSize, unsigned *fromAddress, unsigned *fromPort) {
-// #if defined(KINC_WINDOWS)
+// int iron_socket_receive(iron_socket_t *sock, uint8_t *data, int maxSize, unsigned *fromAddress, unsigned *fromPort) {
+// #if defined(IRON_WINDOWS)
 // 	typedef int socklen_t;
 // 	typedef int ssize_t;
 // #endif
-// #if defined(KINC_WINDOWS) || defined(KINC_POSIX)
+// #if defined(IRON_WINDOWS) || defined(IRON_POSIX)
 
-// 	if (sock->protocol == KINC_SOCKET_PROTOCOL_UDP) {
+// 	if (sock->protocol == IRON_SOCKET_PROTOCOL_UDP) {
 // 		struct sockaddr_in from;
 // 		socklen_t fromLength = sizeof(from);
 // 		ssize_t bytes = recvfrom(sock->handle, (char *)data, maxSize, 0, (struct sockaddr *)&from, &fromLength);
@@ -559,7 +559,7 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // 	else {
 
 // 		if (!sock->connected) {
-// 			kinc_error("Call kinc_sockect_connect/bind before send/recv can be called for TCP sockets.");
+// 			iron_error("Call iron_sockect_connect/bind before send/recv can be called for TCP sockets.");
 // 			return -1;
 // 		}
 // 		ssize_t bytes = recv(sock->handle, (char *)data, maxSize, 0);
@@ -572,12 +572,12 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 // #endif
 // }
 
-// unsigned kinc_url_to_int(const char *url, int port) {
-// #if defined(KINC_WINDOWS)
+// unsigned iron_url_to_int(const char *url, int port) {
+// #if defined(IRON_WINDOWS)
 // 	struct addrinfo *address = NULL;
 // 	int res = resolveAddress(url, port, &address);
 // 	if (res != 0) {
-// 		kinc_error("Could not resolve address.");
+// 		iron_error("Could not resolve address.");
 // 		return -1;
 // 	}
 

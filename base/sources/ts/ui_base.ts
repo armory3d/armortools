@@ -591,7 +591,7 @@ function ui_base_update() {
 
 					let shortcuts: string[] = ["l", "b", "n", "o", "r", "m", "a", "h", "e", "s", "t", "1", "2", "3", "4"];
 
-					if (kinc_g5_raytrace_supported()) {
+					if (iron_g5_raytrace_supported()) {
 						array_push(modes, tr("Path Traced"));
 						array_push(shortcuts, "p");
 					}
@@ -659,8 +659,8 @@ function ui_base_update() {
 				if (config_raw.layout[layout_size_t.NODES_W] < 32) {
 					config_raw.layout[layout_size_t.NODES_W] = 32;
 				}
-				else if (config_raw.layout[layout_size_t.NODES_W] > kinc_window_width() * 0.7) {
-					config_raw.layout[layout_size_t.NODES_W] = math_floor(kinc_window_width() * 0.7);
+				else if (config_raw.layout[layout_size_t.NODES_W] > iron_window_width() * 0.7) {
+					config_raw.layout[layout_size_t.NODES_W] = math_floor(iron_window_width() * 0.7);
 				}
 			}
 			else { // UINodes / UIView2D ratio
@@ -675,7 +675,7 @@ function ui_base_update() {
 		}
 		else if (ui_base_border_handle == ui_base_hwnds[tab_area_t.STATUS]) {
 			let my: i32 = math_floor(mouse_movement_y);
-			if (config_raw.layout[layout_size_t.STATUS_H] - my >= ui_status_default_status_h * config_raw.window_scale && config_raw.layout[layout_size_t.STATUS_H] - my < kinc_window_height() * 0.7) {
+			if (config_raw.layout[layout_size_t.STATUS_H] - my >= ui_status_default_status_h * config_raw.window_scale && config_raw.layout[layout_size_t.STATUS_H] - my < iron_window_height() * 0.7) {
 				config_raw.layout[layout_size_t.STATUS_H] -= my;
 			}
 		}
@@ -685,8 +685,8 @@ function ui_base_update() {
 				if (config_raw.layout[layout_size_t.SIDEBAR_W] < ui_base_sidebar_mini_w) {
 					config_raw.layout[layout_size_t.SIDEBAR_W] = ui_base_sidebar_mini_w;
 				}
-				else if (config_raw.layout[layout_size_t.SIDEBAR_W] > kinc_window_width() - ui_base_sidebar_mini_w) {
-					config_raw.layout[layout_size_t.SIDEBAR_W] = kinc_window_width() - ui_base_sidebar_mini_w;
+				else if (config_raw.layout[layout_size_t.SIDEBAR_W] > iron_window_width() - ui_base_sidebar_mini_w) {
+					config_raw.layout[layout_size_t.SIDEBAR_W] = iron_window_width() - ui_base_sidebar_mini_w;
 				}
 			}
 			else {
@@ -1082,14 +1082,14 @@ function ui_base_update_ui() {
 				continue;
 			}
 
-			let target: kinc_g5_texture_t = l.texpaint_preview;
+			let target: iron_g5_texture_t = l.texpaint_preview;
 			if (target == null) {
 				continue;
 			}
 
-			let source: kinc_g5_texture_t = l.texpaint;
+			let source: iron_g5_texture_t = l.texpaint;
 			g2_begin(target);
-			kinc_g5_clear(0x00000000);
+			iron_g5_clear(0x00000000);
 			// draw_set_pipeline(l.is_mask() ? pipes_copy8 : pipes_copy);
 			draw_set_pipeline(pipes_copy); // texpaint_preview is always RGBA32 for now
 			draw_scaled_image(source, 0, 0, target.width, target.height);
@@ -1104,12 +1104,12 @@ function ui_base_update_ui() {
 		// Update layer preview
 		let l: slot_layer_t = context_raw.layer;
 
-		let target: kinc_g5_texture_t = l.texpaint_preview;
+		let target: iron_g5_texture_t = l.texpaint_preview;
 		if (target != null) {
 
-			let source: kinc_g5_texture_t = l.texpaint;
+			let source: iron_g5_texture_t = l.texpaint;
 			g2_begin(target);
-			kinc_g5_clear(0x00000000);
+			iron_g5_clear(0x00000000);
 			// draw_set_pipeline(raw.layer.is_mask() ? pipes_copy8 : pipes_copy);
 			draw_set_pipeline(pipes_copy); // texpaint_preview is always RGBA32 for now
 			draw_scaled_image(source, 0, 0, target.width, target.height);
@@ -1167,7 +1167,7 @@ function ui_base_render() {
 		g2_begin(null);
 	}
 
-	if (!ui_base_show || kinc_window_width() == 0 || kinc_window_height() == 0) {
+	if (!ui_base_show || iron_window_width() == 0 || iron_window_height() == 0) {
 		return;
 	}
 
@@ -1208,7 +1208,7 @@ function ui_base_draw_sidebar() {
 	// Tabs
 	let mini: bool = config_raw.layout[layout_size_t.SIDEBAR_W] <= ui_base_sidebar_mini_w;
 	let expand_button_offset: i32 = config_raw.touch_ui ? math_floor(ui_ELEMENT_H(ui_base_ui) + ui_ELEMENT_OFFSET(ui_base_ui)) : 0;
-	ui_base_tabx = kinc_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W];
+	ui_base_tabx = iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W];
 
 	let _SCROLL_W: i32 = ui_base_ui.ops.theme.SCROLL_W;
 	if (mini) {
@@ -1235,7 +1235,7 @@ function ui_base_draw_sidebar() {
 	if (config_raw.touch_ui) {
 		let width: i32 = config_raw.layout[layout_size_t.SIDEBAR_W];
 		let height: i32 = math_floor(ui_ELEMENT_H(ui_base_ui) + ui_ELEMENT_OFFSET(ui_base_ui));
-		if (ui_window(ui_handle(__ID__), kinc_window_width() - width, kinc_window_height() - height, width, height + 1)) {
+		if (ui_window(ui_handle(__ID__), iron_window_width() - width, iron_window_height() - height, width, height + 1)) {
 			ui_base_ui._w = width;
 			let _BUTTON_H: i32 = ui_base_ui.ops.theme.BUTTON_H;
 			let _BUTTON_COL: i32 = ui_base_ui.ops.theme.BUTTON_COL;
@@ -1253,7 +1253,7 @@ function ui_base_draw_sidebar() {
 	// Expand button
 	if (config_raw.layout[layout_size_t.SIDEBAR_W] == 0) {
 		let width: i32 = math_floor(g2_font_width(ui_base_ui.ops.font, ui_base_ui.font_size, "<<") + 25 * ui_SCALE(ui_base_ui));
-		if (ui_window(ui_base_hminimized, kinc_window_width() - width, 0, width, math_floor(ui_ELEMENT_H(ui_base_ui) + ui_ELEMENT_OFFSET(ui_base_ui) + 1))) {
+		if (ui_window(ui_base_hminimized, iron_window_width() - width, 0, width, math_floor(ui_ELEMENT_H(ui_base_ui) + ui_ELEMENT_OFFSET(ui_base_ui) + 1))) {
 			ui_base_ui._w = width;
 			let _BUTTON_H: i32 = ui_base_ui.ops.theme.BUTTON_H;
 			let _BUTTON_COL: i32 = ui_base_ui.ops.theme.BUTTON_COL;
@@ -1295,8 +1295,8 @@ function ui_base_render_cursor() {
 
 	// Radius being scaled
 	if (context_raw.brush_locked) {
-		mx += context_raw.lock_started_x - kinc_window_width() / 2;
-		my += context_raw.lock_started_y - kinc_window_height() / 2;
+		mx += context_raw.lock_started_x - iron_window_width() / 2;
+		my += context_raw.lock_started_y - iron_window_height() / 2;
 	}
 
 	if (context_raw.brush_stencil_image != null &&
@@ -1338,16 +1338,16 @@ function ui_base_render_cursor() {
 
 	// Show picked material next to cursor
 	if (context_raw.tool == workspace_tool_t.PICKER && context_raw.picker_select_material && context_raw.color_picker_callback == null) {
-		let img: kinc_g5_texture_t = context_raw.material.image_icon;
+		let img: iron_g5_texture_t = context_raw.material.image_icon;
 		draw_image(img, mx + 10, my + 10);
 	}
 	if (context_raw.tool == workspace_tool_t.PICKER && context_raw.color_picker_callback != null) {
-		let img: kinc_g5_texture_t = resource_get("icons.k");
+		let img: iron_g5_texture_t = resource_get("icons.k");
 		let rect: rect_t = resource_tile50(img, workspace_tool_t.PICKER, 0);
 		draw_sub_image(img, mx + 10, my + 10, rect.x, rect.y, rect.w, rect.h);
 	}
 
-	let cursor_img: kinc_g5_texture_t = resource_get("cursor.k");
+	let cursor_img: iron_g5_texture_t = resource_get("cursor.k");
 	let psize: i32 = math_floor(182 * (context_raw.brush_radius * context_raw.brush_nodes_radius) * ui_SCALE(ui_base_ui));
 
 	// Clone source cursor
@@ -1370,8 +1370,8 @@ function ui_base_render_cursor() {
 
 				// Radius being scaled
 				if (context_raw.brush_locked) {
-					context_raw.decal_x += (context_raw.lock_started_x - kinc_window_width() / 2) / base_w();
-					context_raw.decal_y += (context_raw.lock_started_y - kinc_window_height() / 2) / base_h();
+					context_raw.decal_x += (context_raw.lock_started_x - iron_window_width() / 2) / base_w();
+					context_raw.decal_y += (context_raw.lock_started_y - iron_window_height() / 2) / base_h();
 				}
 			}
 

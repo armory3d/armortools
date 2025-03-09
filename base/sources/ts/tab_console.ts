@@ -49,7 +49,7 @@ function tab_console_draw(htab: ui_handle_t) {
 		///if (arm_windows || arm_linux || arm_macos)
 		if (ui_button(tr("Copy"))) {
 			let str: string = string_array_join(console_last_traces, "\n");
-			kinc_copy_to_clipboard(str);
+			iron_copy_to_clipboard(str);
 		}
 		///end
 

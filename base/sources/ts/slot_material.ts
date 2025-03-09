@@ -2,8 +2,8 @@
 type slot_material_t = {
 	nodes?: ui_nodes_t;
 	canvas?: ui_node_canvas_t;
-	image?: kinc_g5_texture_t;
-	image_icon?: kinc_g5_texture_t;
+	image?: iron_g5_texture_t;
+	image_icon?: iron_g5_texture_t;
 	preview_ready?: bool;
 	data?: material_data_t;
 	id?: i32;

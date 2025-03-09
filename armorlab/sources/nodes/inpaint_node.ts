@@ -5,11 +5,11 @@ type inpaint_node_t = {
 	base?: logic_node_t;
 };
 
-let inpaint_node_image: kinc_g5_texture_t = null;
-let inpaint_node_mask: kinc_g5_texture_t = null;
-let inpaint_node_result: kinc_g5_texture_t = null;
+let inpaint_node_image: iron_g5_texture_t = null;
+let inpaint_node_mask: iron_g5_texture_t = null;
+let inpaint_node_result: iron_g5_texture_t = null;
 
-let inpaint_node_temp: kinc_g5_texture_t = null;
+let inpaint_node_temp: iron_g5_texture_t = null;
 let inpaint_node_prompt: string = "";
 let inpaint_node_strength: f32 = 0.5;
 let inpaint_node_auto: bool = true;
@@ -33,9 +33,9 @@ function inpaint_node_init() {
 	if (inpaint_node_mask == null) {
 		inpaint_node_mask = iron_g4_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 		app_notify_on_next_frame(function () {
-			iron_g4_begin(inpaint_node_mask);
-			kinc_g5_clear(color_from_floats(1.0, 1.0, 1.0, 1.0));
-			iron_g4_end();
+			_iron_g4_begin(inpaint_node_mask);
+			iron_g5_clear(color_from_floats(1.0, 1.0, 1.0, 1.0));
+			_iron_g4_end();
 		});
 	}
 
@@ -68,8 +68,8 @@ function inpaint_node_button(node_id: i32) {
 	}
 }
 
-function inpaint_node_get_as_image(self: inpaint_node_t, from: i32): kinc_g5_texture_t {
-	let source: kinc_g5_texture_t = logic_node_input_get_as_image(self.base.inputs[0]);
+function inpaint_node_get_as_image(self: inpaint_node_t, from: i32): iron_g5_texture_t {
+	let source: iron_g5_texture_t = logic_node_input_get_as_image(self.base.inputs[0]);
 	console_progress(tr("Processing") + " - " + tr("Inpaint"));
 
 	g2_begin(inpaint_node_image);
@@ -84,26 +84,26 @@ function inpaint_node_get_as_image(self: inpaint_node_t, from: i32): kinc_g5_tex
 	}
 }
 
-function inpaint_node_get_cached_image(self: inpaint_node_t): kinc_g5_texture_t {
+function inpaint_node_get_cached_image(self: inpaint_node_t): iron_g5_texture_t {
 	app_notify_on_next_frame(function (self: inpaint_node_t) {
-		let source: kinc_g5_texture_t = logic_node_input_get_as_image(self.base.inputs[0]);
-		iron_g4_begin(inpaint_node_image);
-		kinc_g5_set_pipeline(pipes_inpaint_preview);
-		iron_g4_set_texture(pipes_tex0_inpaint_preview, source);
-		iron_g4_set_texture(pipes_texa_inpaint_preview, inpaint_node_mask);
-		kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
-		kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
+		let source: iron_g5_texture_t = logic_node_input_get_as_image(self.base.inputs[0]);
+		_iron_g4_begin(inpaint_node_image);
+		iron_g5_set_pipeline(pipes_inpaint_preview);
+		_iron_g4_set_texture(pipes_tex0_inpaint_preview, source);
+		_iron_g4_set_texture(pipes_texa_inpaint_preview, inpaint_node_mask);
+		iron_g4_set_vertex_buffer(const_data_screen_aligned_vb);
+		iron_g4_set_index_buffer(const_data_screen_aligned_ib);
 		iron_g4_draw_indexed_vertices();
-		iron_g4_end();
+		_iron_g4_end();
 	}, self);
 	return inpaint_node_image;
 }
 
-function inpaint_node_get_target(): kinc_g5_texture_t {
+function inpaint_node_get_target(): iron_g5_texture_t {
 	return inpaint_node_mask;
 }
 
-function inpaint_node_texsynth_inpaint(image: kinc_g5_texture_t, tiling: bool, mask: kinc_g5_texture_t): kinc_g5_texture_t {
+function inpaint_node_texsynth_inpaint(image: iron_g5_texture_t, tiling: bool, mask: iron_g5_texture_t): iron_g5_texture_t {
 	let w: i32 = config_get_texture_res_x();
 	let h: i32 = config_get_texture_res_y();
 
@@ -116,7 +116,7 @@ function inpaint_node_texsynth_inpaint(image: kinc_g5_texture_t, tiling: bool, m
 	return inpaint_node_result;
 }
 
-function inpaint_node_sd_inpaint(image: kinc_g5_texture_t, mask: kinc_g5_texture_t): kinc_g5_texture_t {
+function inpaint_node_sd_inpaint(image: iron_g5_texture_t, mask: iron_g5_texture_t): iron_g5_texture_t {
 	inpaint_node_init();
 
 	let bytes_img: buffer_t = iron_g4_get_texture_pixels(mask);

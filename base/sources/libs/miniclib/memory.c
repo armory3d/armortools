@@ -1,6 +1,6 @@
 #include "stdlib.h"
 
-#ifdef KINC_WASM
+#ifdef IRON_WASM
 __attribute__((import_module("imports"), import_name("js_fprintf"))) void js_fprintf(const char *format);
 
 #define HEAP_SIZE 1024 * 1024 * 8
@@ -8,11 +8,11 @@ static unsigned char heap[HEAP_SIZE];
 static size_t heap_top = 4;
 #endif
 
-#ifdef KINC_WASM
-__attribute__((export_name("malloc"))) 
+#ifdef IRON_WASM
+__attribute__((export_name("malloc")))
 #endif
 void *malloc(size_t size) {
-#ifdef KINC_WASM
+#ifdef IRON_WASM
 	// Align to 4 bytes to make js typed arrays work
 	if (size % 4 != 0) {
 		size += 4 - size % 4;

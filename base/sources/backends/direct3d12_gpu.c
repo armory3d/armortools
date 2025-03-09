@@ -75,7 +75,7 @@ struct dx_ctx {
 
 static struct dx_ctx dx_ctx = {0};
 
-inline struct dx_window *kinc_dx_current_window() {
+inline struct dx_window *iron_dx_current_window() {
 	return &dx_ctx.windows[0];
 }
 
@@ -97,26 +97,26 @@ static ID3D12CommandAllocator *initCommandAllocator;
 struct RenderEnvironment createDeviceAndSwapChainHelper(D3D_FEATURE_LEVEL minimumFeatureLevel, const struct DXGI_SWAP_CHAIN_DESC *swapChainDesc) {
 	struct RenderEnvironment result = {0};
 
-	kinc_microsoft_affirm(D3D12CreateDevice(NULL, minimumFeatureLevel, &IID_ID3D12Device, &result.device));
+	iron_microsoft_affirm(D3D12CreateDevice(NULL, minimumFeatureLevel, &IID_ID3D12Device, &result.device));
 
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 
-	kinc_microsoft_affirm(result.device->lpVtbl->CreateCommandQueue(result.device, &queueDesc, &IID_ID3D12CommandQueue, &result.queue));
+	iron_microsoft_affirm(result.device->lpVtbl->CreateCommandQueue(result.device, &queueDesc, &IID_ID3D12CommandQueue, &result.queue));
 
 	IDXGIFactory4 *dxgiFactory;
-	kinc_microsoft_affirm(CreateDXGIFactory1(&IID_IDXGIFactory4, &dxgiFactory));
+	iron_microsoft_affirm(CreateDXGIFactory1(&IID_IDXGIFactory4, &dxgiFactory));
 
 	DXGI_SWAP_CHAIN_DESC swapChainDescCopy = *swapChainDesc;
-	kinc_microsoft_affirm(dxgiFactory->lpVtbl->CreateSwapChain(dxgiFactory, (IUnknown *)result.queue, &swapChainDescCopy, &result.swapChain));
+	iron_microsoft_affirm(dxgiFactory->lpVtbl->CreateSwapChain(dxgiFactory, (IUnknown *)result.queue, &swapChainDescCopy, &result.swapChain));
 
 	return result;
 }
 
 static void waitForFence(ID3D12Fence *fence, UINT64 completionValue, HANDLE waitEvent) {
 	if (fence->lpVtbl->GetCompletedValue(fence) < completionValue) {
-		kinc_microsoft_affirm(fence->lpVtbl->SetEventOnCompletion(fence, completionValue, waitEvent));
+		iron_microsoft_affirm(fence->lpVtbl->SetEventOnCompletion(fence, completionValue, waitEvent));
 		WaitForSingleObject(waitEvent, INFINITE);
 	}
 }
@@ -171,7 +171,7 @@ static void createDeviceAndSwapChain(struct dx_window *window) {
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapChainDesc.BufferDesc.Width = window->width;
 	swapChainDesc.BufferDesc.Height = window->height;
-	swapChainDesc.OutputWindow = kinc_windows_window_handle();
+	swapChainDesc.OutputWindow = iron_windows_window_handle();
 	swapChainDesc.SampleDesc.Count = 1;
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	swapChainDesc.Windowed = true;
@@ -192,7 +192,7 @@ static void createRootSignature() {
 
 	D3D12_DESCRIPTOR_RANGE range;
 	range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	range.NumDescriptors = (UINT)KINC_INTERNAL_G5_TEXTURE_COUNT;
+	range.NumDescriptors = (UINT)IRON_INTERNAL_G5_TEXTURE_COUNT;
 	range.BaseShaderRegister = 0;
 	range.RegisterSpace = 0;
 	range.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -203,7 +203,7 @@ static void createRootSignature() {
 
 	D3D12_DESCRIPTOR_RANGE range2;
 	range2.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
-	range2.NumDescriptors = (UINT)KINC_INTERNAL_G5_TEXTURE_COUNT;
+	range2.NumDescriptors = (UINT)IRON_INTERNAL_G5_TEXTURE_COUNT;
 	range2.BaseShaderRegister = 0;
 	range2.RegisterSpace = 0;
 	range2.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -222,8 +222,8 @@ static void createRootSignature() {
 	parameters[3].Descriptor.ShaderRegister = 0;
 	parameters[3].Descriptor.RegisterSpace = 0;
 
-	D3D12_STATIC_SAMPLER_DESC samplers[KINC_INTERNAL_G5_TEXTURE_COUNT * 2];
-	for (int i = 0; i < KINC_INTERNAL_G5_TEXTURE_COUNT; ++i) {
+	D3D12_STATIC_SAMPLER_DESC samplers[IRON_INTERNAL_G5_TEXTURE_COUNT * 2];
+	for (int i = 0; i < IRON_INTERNAL_G5_TEXTURE_COUNT; ++i) {
 		samplers[i].ShaderRegister = i;
 		samplers[i].Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
 		samplers[i].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -238,7 +238,7 @@ static void createRootSignature() {
 		samplers[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 		samplers[i].RegisterSpace = 0;
 	}
-	for (int i = KINC_INTERNAL_G5_TEXTURE_COUNT; i < KINC_INTERNAL_G5_TEXTURE_COUNT * 2; ++i) {
+	for (int i = IRON_INTERNAL_G5_TEXTURE_COUNT; i < IRON_INTERNAL_G5_TEXTURE_COUNT * 2; ++i) {
 		samplers[i].ShaderRegister = i;
 		samplers[i].Filter = D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT;
 		samplers[i].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -261,7 +261,7 @@ static void createRootSignature() {
 	descRootSignature.pStaticSamplers = NULL;
 	descRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
-	kinc_microsoft_affirm(D3D12SerializeRootSignature(&descRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &rootBlob, &errorBlob));
+	iron_microsoft_affirm(D3D12SerializeRootSignature(&descRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &rootBlob, &errorBlob));
 	device->lpVtbl->CreateRootSignature(device, 0, rootBlob->lpVtbl->GetBufferPointer(rootBlob), rootBlob->lpVtbl->GetBufferSize(rootBlob), &IID_ID3D12RootSignature,
 	                                    &globalRootSignature);
 }
@@ -274,7 +274,7 @@ static void createComputeRootSignature() {
 
 	D3D12_DESCRIPTOR_RANGE range;
 	range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	range.NumDescriptors = (UINT)KINC_INTERNAL_G5_TEXTURE_COUNT;
+	range.NumDescriptors = (UINT)IRON_INTERNAL_G5_TEXTURE_COUNT;
 	range.BaseShaderRegister = 0;
 	range.RegisterSpace = 0;
 	range.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -285,7 +285,7 @@ static void createComputeRootSignature() {
 
 	D3D12_DESCRIPTOR_RANGE uav_range;
 	uav_range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
-	uav_range.NumDescriptors = (UINT)KINC_INTERNAL_G5_TEXTURE_COUNT;
+	uav_range.NumDescriptors = (UINT)IRON_INTERNAL_G5_TEXTURE_COUNT;
 	uav_range.BaseShaderRegister = 0;
 	uav_range.RegisterSpace = 0;
 	uav_range.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -296,7 +296,7 @@ static void createComputeRootSignature() {
 
 	D3D12_DESCRIPTOR_RANGE range2;
 	range2.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
-	range2.NumDescriptors = (UINT)KINC_INTERNAL_G5_TEXTURE_COUNT;
+	range2.NumDescriptors = (UINT)IRON_INTERNAL_G5_TEXTURE_COUNT;
 	range2.BaseShaderRegister = 0;
 	range2.RegisterSpace = 0;
 	range2.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -310,8 +310,8 @@ static void createComputeRootSignature() {
 	parameters[3].Descriptor.ShaderRegister = 0;
 	parameters[3].Descriptor.RegisterSpace = 0;
 
-	D3D12_STATIC_SAMPLER_DESC samplers[KINC_INTERNAL_G5_TEXTURE_COUNT * 2];
-	for (int i = 0; i < KINC_INTERNAL_G5_TEXTURE_COUNT; ++i) {
+	D3D12_STATIC_SAMPLER_DESC samplers[IRON_INTERNAL_G5_TEXTURE_COUNT * 2];
+	for (int i = 0; i < IRON_INTERNAL_G5_TEXTURE_COUNT; ++i) {
 		samplers[i].ShaderRegister = i;
 		samplers[i].Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
 		samplers[i].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -326,7 +326,7 @@ static void createComputeRootSignature() {
 		samplers[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 		samplers[i].RegisterSpace = 0;
 	}
-	for (int i = KINC_INTERNAL_G5_TEXTURE_COUNT; i < KINC_INTERNAL_G5_TEXTURE_COUNT * 2; ++i) {
+	for (int i = IRON_INTERNAL_G5_TEXTURE_COUNT; i < IRON_INTERNAL_G5_TEXTURE_COUNT * 2; ++i) {
 		samplers[i].ShaderRegister = i;
 		samplers[i].Filter = D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT;
 		samplers[i].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -349,7 +349,7 @@ static void createComputeRootSignature() {
 	descRootSignature.pStaticSamplers = NULL;
 	descRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
-	kinc_microsoft_affirm(D3D12SerializeRootSignature(&descRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &rootBlob, &errorBlob));
+	iron_microsoft_affirm(D3D12SerializeRootSignature(&descRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &rootBlob, &errorBlob));
 	device->lpVtbl->CreateRootSignature(device, 0, rootBlob->lpVtbl->GetBufferPointer(rootBlob), rootBlob->lpVtbl->GetBufferSize(rootBlob), &IID_ID3D12RootSignature,
 	                                    &globalComputeRootSignature);
 
@@ -393,7 +393,7 @@ static void shutdown() {
 }
 
 static void initWindow(struct dx_window *window) {
-	HWND hwnd = kinc_windows_window_handle();
+	HWND hwnd = iron_windows_window_handle();
 
 	DXGI_SWAP_CHAIN_DESC swapChainDesc;
 	ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
@@ -401,38 +401,38 @@ static void initWindow(struct dx_window *window) {
 	swapChainDesc.BufferCount = QUEUE_SLOT_COUNT;
 	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	swapChainDesc.BufferDesc.Width = kinc_window_width();
-	swapChainDesc.BufferDesc.Height = kinc_window_height();
+	swapChainDesc.BufferDesc.Width = iron_window_width();
+	swapChainDesc.BufferDesc.Height = iron_window_height();
 	swapChainDesc.OutputWindow = hwnd;
 	swapChainDesc.SampleDesc.Count = 1;
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	swapChainDesc.Windowed = true;
 
 	IDXGIFactory4 *dxgiFactory = NULL;
-	kinc_microsoft_affirm(CreateDXGIFactory1(&IID_IDXGIFactory4, &dxgiFactory));
+	iron_microsoft_affirm(CreateDXGIFactory1(&IID_IDXGIFactory4, &dxgiFactory));
 
-	kinc_microsoft_affirm(dxgiFactory->lpVtbl->CreateSwapChain(dxgiFactory, (IUnknown *)commandQueue, &swapChainDesc, &window->swapChain));
+	iron_microsoft_affirm(dxgiFactory->lpVtbl->CreateSwapChain(dxgiFactory, (IUnknown *)commandQueue, &swapChainDesc, &window->swapChain));
 
 	setupSwapChain(window);
 }
 
-void kinc_g5_internal_destroy_window() {}
+void iron_g5_internal_destroy_window() {}
 
-void kinc_g5_internal_destroy() {
+void iron_g5_internal_destroy() {
 	if (device) {
 		device->lpVtbl->Release(device);
 		device = NULL;
 	}
 }
 
-void kinc_g5_internal_init() {
+void iron_g5_internal_init() {
 #ifdef _DEBUG
 	ID3D12Debug *debugController = NULL;
 	if (D3D12GetDebugInterface(&IID_ID3D12Debug, &debugController) == S_OK) {
 		debugController->lpVtbl->EnableDebugLayer(debugController);
 	}
 #endif
-	kinc_microsoft_affirm(D3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, &IID_ID3D12Device, &device));
+	iron_microsoft_affirm(D3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, &IID_ID3D12Device, &device));
 
 	createRootSignature();
 	createComputeRootSignature();
@@ -441,7 +441,7 @@ void kinc_g5_internal_init() {
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 
-	kinc_microsoft_affirm(device->lpVtbl->CreateCommandQueue(device, &queueDesc, &IID_ID3D12CommandQueue, &commandQueue));
+	iron_microsoft_affirm(device->lpVtbl->CreateCommandQueue(device, &queueDesc, &IID_ID3D12CommandQueue, &commandQueue));
 
 	device->lpVtbl->CreateFence(device, 0, D3D12_FENCE_FLAG_NONE, &IID_ID3D12Fence, &uploadFence);
 
@@ -464,21 +464,21 @@ void kinc_g5_internal_init() {
 	CloseHandle(waitEvent);
 }
 
-void kinc_g5_internal_init_window(int depthBufferBits, bool verticalSync) {
+void iron_g5_internal_init_window(int depthBufferBits, bool verticalSync) {
 	struct dx_window *window = &dx_ctx.windows[0];
 	window->vsync = verticalSync;
-	window->width = window->new_width = kinc_window_width();
-	window->height = window->new_height = kinc_window_height();
+	window->width = window->new_width = iron_window_width();
+	window->height = window->new_height = iron_window_height();
 	initWindow(window);
 }
 
-int kinc_g5_max_bound_textures(void) {
+int iron_g5_max_bound_textures(void) {
 	return D3D12_COMMONSHADER_SAMPLER_SLOT_COUNT;
 }
 
 static bool began = false;
 
-void kinc_g5_begin(kinc_g5_texture_t *renderTarget) {
+void iron_g5_begin(iron_g5_texture_t *renderTarget) {
 	if (began)
 		return;
 	began = true;
@@ -489,7 +489,7 @@ void kinc_g5_begin(kinc_g5_texture_t *renderTarget) {
 
 	if (window->new_width != window->width || window->new_height != window->height) {
 
-		kinc_microsoft_affirm(window->swapChain->lpVtbl->ResizeBuffers(window->swapChain, QUEUE_SLOT_COUNT, window->new_width, window->new_height, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
+		iron_microsoft_affirm(window->swapChain->lpVtbl->ResizeBuffers(window->swapChain, QUEUE_SLOT_COUNT, window->new_width, window->new_height, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
 
 		setupSwapChain(window);
 		window->width = window->new_width;
@@ -512,34 +512,34 @@ void kinc_g5_begin(kinc_g5_texture_t *renderTarget) {
 	// commandList->ClearDepthStencilView(GetCPUDescriptorHandle(depthStencilDescriptorHeap), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 }
 
-void kinc_g5_end() {
+void iron_g5_end() {
 	began = false;
 }
 
-void kinc_g5_internal_resize(int, int);
+void iron_g5_internal_resize(int, int);
 
-void kinc_internal_resize(int width, int height) {
+void iron_internal_resize(int width, int height) {
 	if (width == 0 || height == 0)
 		return;
 	struct dx_window *window = &dx_ctx.windows[0];
 	window->new_width = width;
 	window->new_height = height;
-	kinc_g5_internal_resize(width, height);
+	iron_g5_internal_resize(width, height);
 }
 
-bool kinc_g5_swap_buffers() {
+bool iron_g5_swap_buffers() {
 	for (int i = 0; i < MAXIMUM_WINDOWS; i++) {
 		struct dx_window *window = &dx_ctx.windows[i];
 		if (window->swapChain) {
-			kinc_microsoft_affirm(window->swapChain->lpVtbl->Present(window->swapChain, window->vsync, 0));
+			iron_microsoft_affirm(window->swapChain->lpVtbl->Present(window->swapChain, window->vsync, 0));
 		}
 	}
 	return true;
 }
 
-void kinc_g5_flush() {}
+void iron_g5_flush() {}
 
-bool kinc_g5_raytrace_supported() {
+bool iron_g5_raytrace_supported() {
 	D3D12_FEATURE_DATA_D3D12_OPTIONS5 options;
 	if (device->lpVtbl->CheckFeatureSupport(device, D3D12_FEATURE_D3D12_OPTIONS5, &options, sizeof(options)) == S_OK) {
 		return options.RaytracingTier >= D3D12_RAYTRACING_TIER_1_0;
@@ -547,7 +547,7 @@ bool kinc_g5_raytrace_supported() {
 	return false;
 }
 
-void createHeaps(kinc_g5_command_list_t *list);
+void createHeaps(iron_g5_command_list_t *list);
 
 static int formatSize(DXGI_FORMAT format) {
 	switch (format) {
@@ -564,7 +564,7 @@ static int formatSize(DXGI_FORMAT format) {
 	}
 }
 
-void kinc_g5_command_list_init(struct kinc_g5_command_list *list) {
+void iron_g5_command_list_init(struct iron_g5_command_list *list) {
 #ifndef NDEBUG
 	list->impl.open = false;
 #endif
@@ -580,7 +580,7 @@ void kinc_g5_command_list_init(struct kinc_g5_command_list *list) {
 
 	list->impl.current_full_scissor.left = -1;
 
-	for (int i = 0; i < KINC_INTERNAL_G5_TEXTURE_COUNT; ++i) {
+	for (int i = 0; i < IRON_INTERNAL_G5_TEXTURE_COUNT; ++i) {
 		list->impl.currentTextures[i] = NULL;
 		list->impl.current_samplers[i] = NULL;
 	}
@@ -588,11 +588,11 @@ void kinc_g5_command_list_init(struct kinc_g5_command_list *list) {
 	createHeaps(list);
 }
 
-void kinc_g5_command_list_destroy(struct kinc_g5_command_list *list) {}
+void iron_g5_command_list_destroy(struct iron_g5_command_list *list) {}
 
-void kinc_g5_internal_reset_textures(struct kinc_g5_command_list *list);
+void iron_g5_internal_reset_textures(struct iron_g5_command_list *list);
 
-void kinc_g5_command_list_begin(struct kinc_g5_command_list *list) {
+void iron_g5_command_list_begin(struct iron_g5_command_list *list) {
 	assert(!list->impl.open);
 
 	compute_pipeline_set = false;
@@ -603,14 +603,14 @@ void kinc_g5_command_list_begin(struct kinc_g5_command_list *list) {
 		list->impl._commandList->lpVtbl->Reset(list->impl._commandList, list->impl._commandAllocator, NULL);
 	}
 
-	kinc_g5_internal_reset_textures(list);
+	iron_g5_internal_reset_textures(list);
 
 #ifndef NDEBUG
 	list->impl.open = true;
 #endif
 }
 
-void kinc_g5_command_list_end(struct kinc_g5_command_list *list) {
+void iron_g5_command_list_end(struct iron_g5_command_list *list) {
 	assert(list->impl.open);
 
 	list->impl._commandList->lpVtbl->Close(list->impl._commandList);
@@ -620,10 +620,10 @@ void kinc_g5_command_list_end(struct kinc_g5_command_list *list) {
 #endif
 }
 
-void kinc_g5_command_list_clear(struct kinc_g5_command_list *list, kinc_g5_texture_t *renderTarget, unsigned flags, unsigned color, float depth) {
+void iron_g5_command_list_clear(struct iron_g5_command_list *list, iron_g5_texture_t *renderTarget, unsigned flags, unsigned color, float depth) {
 	assert(list->impl.open);
 
-	if (flags & KINC_G5_CLEAR_COLOR) {
+	if (flags & IRON_G5_CLEAR_COLOR) {
 		float clearColor[] = {((color & 0x00ff0000) >> 16) / 255.0f, ((color & 0x0000ff00) >> 8) / 255.0f, (color & 0x000000ff) / 255.0f,
 		                      ((color & 0xff000000) >> 24) / 255.0f};
 
@@ -637,7 +637,7 @@ void kinc_g5_command_list_clear(struct kinc_g5_command_list *list, kinc_g5_textu
 		                                                       0,
 		                                               NULL);
 	}
-	if (flags & KINC_G5_CLEAR_DEPTH) {
+	if (flags & IRON_G5_CLEAR_DEPTH) {
 		D3D12_CLEAR_FLAGS d3dflags = D3D12_CLEAR_FLAG_DEPTH;
 
 		if (renderTarget->impl.depthStencilDescriptorHeap != NULL) {
@@ -652,7 +652,7 @@ void kinc_g5_command_list_clear(struct kinc_g5_command_list *list, kinc_g5_textu
 	}
 }
 
-void kinc_g5_command_list_render_target_to_framebuffer_barrier(struct kinc_g5_command_list *list, kinc_g5_texture_t *renderTarget) {
+void iron_g5_command_list_render_target_to_framebuffer_barrier(struct iron_g5_command_list *list, iron_g5_texture_t *renderTarget) {
 	assert(list->impl.open);
 
 	D3D12_RESOURCE_BARRIER barrier;
@@ -666,7 +666,7 @@ void kinc_g5_command_list_render_target_to_framebuffer_barrier(struct kinc_g5_co
 	list->impl._commandList->lpVtbl->ResourceBarrier(list->impl._commandList, 1, &barrier);
 }
 
-void kinc_g5_command_list_framebuffer_to_render_target_barrier(struct kinc_g5_command_list *list, kinc_g5_texture_t *renderTarget) {
+void iron_g5_command_list_framebuffer_to_render_target_barrier(struct iron_g5_command_list *list, iron_g5_texture_t *renderTarget) {
 	assert(list->impl.open);
 
 	D3D12_RESOURCE_BARRIER barrier;
@@ -680,7 +680,7 @@ void kinc_g5_command_list_framebuffer_to_render_target_barrier(struct kinc_g5_co
 	list->impl._commandList->lpVtbl->ResourceBarrier(list->impl._commandList, 1, &barrier);
 }
 
-void kinc_g5_command_list_texture_to_render_target_barrier(struct kinc_g5_command_list *list, kinc_g5_texture_t *renderTarget) {
+void iron_g5_command_list_texture_to_render_target_barrier(struct iron_g5_command_list *list, iron_g5_texture_t *renderTarget) {
 	assert(list->impl.open);
 
 	D3D12_RESOURCE_BARRIER barrier;
@@ -694,7 +694,7 @@ void kinc_g5_command_list_texture_to_render_target_barrier(struct kinc_g5_comman
 	list->impl._commandList->lpVtbl->ResourceBarrier(list->impl._commandList, 1, &barrier);
 }
 
-void kinc_g5_command_list_render_target_to_texture_barrier(struct kinc_g5_command_list *list, kinc_g5_texture_t *renderTarget) {
+void iron_g5_command_list_render_target_to_texture_barrier(struct iron_g5_command_list *list, iron_g5_texture_t *renderTarget) {
 	assert(list->impl.open);
 
 	D3D12_RESOURCE_BARRIER barrier;
@@ -708,32 +708,32 @@ void kinc_g5_command_list_render_target_to_texture_barrier(struct kinc_g5_comman
 	list->impl._commandList->lpVtbl->ResourceBarrier(list->impl._commandList, 1, &barrier);
 }
 
-void kinc_g5_command_list_set_vertex_constant_buffer(struct kinc_g5_command_list *list, kinc_g5_constant_buffer_t *buffer, int offset, size_t size) {
+void iron_g5_command_list_set_vertex_constant_buffer(struct iron_g5_command_list *list, iron_g5_constant_buffer_t *buffer, int offset, size_t size) {
 	assert(list->impl.open);
 	list->impl._commandList->lpVtbl->SetGraphicsRootConstantBufferView(list->impl._commandList, 2, buffer->impl.constant_buffer->lpVtbl->GetGPUVirtualAddress(buffer->impl.constant_buffer) + offset);
 }
 
-void kinc_g5_command_list_set_fragment_constant_buffer(struct kinc_g5_command_list *list, kinc_g5_constant_buffer_t *buffer, int offset, size_t size) {
+void iron_g5_command_list_set_fragment_constant_buffer(struct iron_g5_command_list *list, iron_g5_constant_buffer_t *buffer, int offset, size_t size) {
 	assert(list->impl.open);
 	list->impl._commandList->lpVtbl->SetGraphicsRootConstantBufferView(list->impl._commandList, 3, buffer->impl.constant_buffer->lpVtbl->GetGPUVirtualAddress(buffer->impl.constant_buffer) + offset);
 }
 
-void kinc_g5_command_list_set_compute_constant_buffer(struct kinc_g5_command_list *list, kinc_g5_constant_buffer_t *buffer, int offset, size_t size) {
+void iron_g5_command_list_set_compute_constant_buffer(struct iron_g5_command_list *list, iron_g5_constant_buffer_t *buffer, int offset, size_t size) {
 	assert(list->impl.open);
 	list->impl._commandList->lpVtbl->SetComputeRootConstantBufferView(list->impl._commandList, 3, buffer->impl.constant_buffer->lpVtbl->GetGPUVirtualAddress(buffer->impl.constant_buffer) + offset);
 }
 
-void kinc_g5_command_list_draw_indexed_vertices(struct kinc_g5_command_list *list) {
-	kinc_g5_command_list_draw_indexed_vertices_from_to(list, 0, list->impl._indexCount);
+void iron_g5_command_list_draw_indexed_vertices(struct iron_g5_command_list *list) {
+	iron_g5_command_list_draw_indexed_vertices_from_to(list, 0, list->impl._indexCount);
 }
 
-void kinc_g5_command_list_draw_indexed_vertices_from_to(struct kinc_g5_command_list *list, int start, int count) {
+void iron_g5_command_list_draw_indexed_vertices_from_to(struct iron_g5_command_list *list, int start, int count) {
 	assert(list->impl.open);
 	list->impl._commandList->lpVtbl->IASetPrimitiveTopology(list->impl._commandList, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	list->impl._commandList->lpVtbl->DrawIndexedInstanced(list->impl._commandList, count, 1, start, 0, 0);
 }
 
-void kinc_g5_command_list_execute(kinc_g5_command_list_t *list) {
+void iron_g5_command_list_execute(iron_g5_command_list_t *list) {
 	assert(!list->impl.open);
 
 	ID3D12CommandList *commandLists[] = {(ID3D12CommandList *)list->impl._commandList};
@@ -742,15 +742,15 @@ void kinc_g5_command_list_execute(kinc_g5_command_list_t *list) {
 	commandQueue->lpVtbl->Signal(commandQueue, list->impl.fence, ++list->impl.fence_value);
 }
 
-void kinc_g5_command_list_wait_for_execution_to_finish(kinc_g5_command_list_t *list) {
+void iron_g5_command_list_wait_for_execution_to_finish(iron_g5_command_list_t *list) {
 	waitForFence(list->impl.fence, list->impl.fence_value, list->impl.fence_event);
 }
 
-bool kinc_g5_non_pow2_textures_supported(void) {
+bool iron_g5_non_pow2_textures_supported(void) {
 	return true;
 }
 
-void kinc_g5_command_list_viewport(struct kinc_g5_command_list *list, int x, int y, int width, int height) {
+void iron_g5_command_list_viewport(struct iron_g5_command_list *list, int x, int y, int width, int height) {
 	assert(list->impl.open);
 
 	D3D12_VIEWPORT viewport;
@@ -763,7 +763,7 @@ void kinc_g5_command_list_viewport(struct kinc_g5_command_list *list, int x, int
 	list->impl._commandList->lpVtbl->RSSetViewports(list->impl._commandList, 1, &viewport);
 }
 
-void kinc_g5_command_list_scissor(struct kinc_g5_command_list *list, int x, int y, int width, int height) {
+void iron_g5_command_list_scissor(struct iron_g5_command_list *list, int x, int y, int width, int height) {
 	assert(list->impl.open);
 
 	D3D12_RECT scissor;
@@ -774,7 +774,7 @@ void kinc_g5_command_list_scissor(struct kinc_g5_command_list *list, int x, int 
 	list->impl._commandList->lpVtbl->RSSetScissorRects(list->impl._commandList, 1, &scissor);
 }
 
-void kinc_g5_command_list_disable_scissor(struct kinc_g5_command_list *list) {
+void iron_g5_command_list_disable_scissor(struct iron_g5_command_list *list) {
 	assert(list->impl.open);
 
 	if (list->impl.current_full_scissor.left >= 0) {
@@ -784,49 +784,49 @@ void kinc_g5_command_list_disable_scissor(struct kinc_g5_command_list *list) {
 		D3D12_RECT scissor;
 		scissor.left = 0;
 		scissor.top = 0;
-		scissor.right = kinc_window_width();
-		scissor.bottom = kinc_window_height();
+		scissor.right = iron_window_width();
+		scissor.bottom = iron_window_height();
 		list->impl._commandList->lpVtbl->RSSetScissorRects(list->impl._commandList, 1, &scissor);
 	}
 }
 
-void kinc_g5_command_list_set_pipeline(struct kinc_g5_command_list *list, kinc_g5_pipeline_t *pipeline) {
+void iron_g5_command_list_set_pipeline(struct iron_g5_command_list *list, iron_g5_pipeline_t *pipeline) {
 	assert(list->impl.open);
 
 	list->impl._currentPipeline = pipeline;
 	list->impl._commandList->lpVtbl->SetPipelineState(list->impl._commandList, pipeline->impl.pso);
 	compute_pipeline_set = false;
 
-	for (int i = 0; i < KINC_INTERNAL_G5_TEXTURE_COUNT; ++i) {
+	for (int i = 0; i < IRON_INTERNAL_G5_TEXTURE_COUNT; ++i) {
 		list->impl.currentTextures[i] = NULL;
 	}
-	kinc_g5_internal_setConstants(list, list->impl._currentPipeline);
+	iron_g5_internal_setConstants(list, list->impl._currentPipeline);
 }
 
-void kinc_g5_command_list_set_vertex_buffer(struct kinc_g5_command_list *list, kinc_g5_vertex_buffer_t *buffer) {
+void iron_g5_command_list_set_vertex_buffer(struct iron_g5_command_list *list, iron_g5_vertex_buffer_t *buffer) {
 	assert(list->impl.open);
 
 	D3D12_VERTEX_BUFFER_VIEW *views = (D3D12_VERTEX_BUFFER_VIEW *)alloca(sizeof(D3D12_VERTEX_BUFFER_VIEW) * 1);
 	ZeroMemory(views, sizeof(D3D12_VERTEX_BUFFER_VIEW) * 1);
 
 	views[0].BufferLocation = buffer->impl.uploadBuffer->lpVtbl->GetGPUVirtualAddress(buffer->impl.uploadBuffer);
-	views[0].SizeInBytes = (kinc_g5_vertex_buffer_count(buffer)) * kinc_g5_vertex_buffer_stride(buffer);
-	views[0].StrideInBytes = kinc_g5_vertex_buffer_stride(buffer);
+	views[0].SizeInBytes = (iron_g5_vertex_buffer_count(buffer)) * iron_g5_vertex_buffer_stride(buffer);
+	views[0].StrideInBytes = iron_g5_vertex_buffer_stride(buffer);
 
 	list->impl._commandList->lpVtbl->IASetVertexBuffers(list->impl._commandList, 0, 1, views);
 }
 
-void kinc_g5_command_list_set_index_buffer(struct kinc_g5_command_list *list, kinc_g5_index_buffer_t *buffer) {
+void iron_g5_command_list_set_index_buffer(struct iron_g5_command_list *list, iron_g5_index_buffer_t *buffer) {
 	assert(list->impl.open);
 
-	list->impl._indexCount = kinc_g5_index_buffer_count(buffer);
+	list->impl._indexCount = iron_g5_index_buffer_count(buffer);
 	list->impl._commandList->lpVtbl->IASetIndexBuffer(list->impl._commandList, (D3D12_INDEX_BUFFER_VIEW *) & buffer->impl.index_buffer_view);
 }
 
-void kinc_g5_command_list_set_render_targets(struct kinc_g5_command_list *list, kinc_g5_texture_t **targets, int count) {
+void iron_g5_command_list_set_render_targets(struct iron_g5_command_list *list, iron_g5_texture_t **targets, int count) {
 	assert(list->impl.open);
 
-	kinc_g5_texture_t *render_target = targets[0];
+	iron_g5_texture_t *render_target = targets[0];
 
 	D3D12_CPU_DESCRIPTOR_HANDLE target_descriptors[16];
 	for (int i = 0; i < count; ++i) {
@@ -851,14 +851,14 @@ void kinc_g5_command_list_set_render_targets(struct kinc_g5_command_list *list, 
 	list->impl.current_full_scissor = render_target->impl.scissor;
 }
 
-void kinc_g5_command_list_upload_vertex_buffer(kinc_g5_command_list_t *list, struct kinc_g5_vertex_buffer *buffer) {}
+void iron_g5_command_list_upload_vertex_buffer(iron_g5_command_list_t *list, struct iron_g5_vertex_buffer *buffer) {}
 
-void kinc_g5_command_list_upload_index_buffer(kinc_g5_command_list_t *list, kinc_g5_index_buffer_t *buffer) {
+void iron_g5_command_list_upload_index_buffer(iron_g5_command_list_t *list, iron_g5_index_buffer_t *buffer) {
 	assert(list->impl.open);
-	kinc_g5_internal_index_buffer_upload(buffer, list->impl._commandList);
+	iron_g5_internal_index_buffer_upload(buffer, list->impl._commandList);
 }
 
-void kinc_g5_command_list_upload_texture(kinc_g5_command_list_t *list, kinc_g5_texture_t *texture) {
+void iron_g5_command_list_upload_texture(iron_g5_command_list_t *list, iron_g5_texture_t *texture) {
 	assert(list->impl.open);
 
 	{
@@ -910,7 +910,7 @@ static int d3d12_textureAlignment() {
 	return D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
 }
 
-void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list, kinc_g5_texture_t *render_target, uint8_t *data) {
+void iron_g5_command_list_get_render_target_pixels(iron_g5_command_list_t *list, iron_g5_texture_t *render_target, uint8_t *data) {
 	assert(list->impl.open);
 
 	D3D12_RESOURCE_DESC desc;
@@ -990,10 +990,10 @@ void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list,
 		list->impl._commandList->lpVtbl->ResourceBarrier(list->impl._commandList, 1, &barrier);
 	}
 
-	kinc_g5_command_list_end(list);
-	kinc_g5_command_list_execute(list);
-	kinc_g5_command_list_wait_for_execution_to_finish(list);
-	kinc_g5_command_list_begin(list);
+	iron_g5_command_list_end(list);
+	iron_g5_command_list_execute(list);
+	iron_g5_command_list_wait_for_execution_to_finish(list);
+	iron_g5_command_list_begin(list);
 
 	// Read buffer
 	void *p;
@@ -1002,60 +1002,60 @@ void kinc_g5_command_list_get_render_target_pixels(kinc_g5_command_list_t *list,
 	render_target->impl.renderTargetReadback->lpVtbl->Unmap(render_target->impl.renderTargetReadback, 0, NULL);
 }
 
-void kinc_g5_internal_set_compute_constants(kinc_g5_command_list_t *commandList);
+void iron_g5_internal_set_compute_constants(iron_g5_command_list_t *commandList);
 
-void kinc_g5_command_list_set_compute_shader(kinc_g5_command_list_t *list, kinc_g5_compute_shader *shader) {
+void iron_g5_command_list_set_compute_shader(iron_g5_command_list_t *list, iron_g5_compute_shader *shader) {
 	list->impl._commandList->lpVtbl->SetPipelineState(list->impl._commandList, shader->impl.pso);
 	compute_pipeline_set = true;
 
-	for (int i = 0; i < KINC_INTERNAL_G5_TEXTURE_COUNT; ++i) {
+	for (int i = 0; i < IRON_INTERNAL_G5_TEXTURE_COUNT; ++i) {
 		list->impl.currentTextures[i] = NULL;
 	}
-	kinc_g5_internal_set_compute_constants(list);
+	iron_g5_internal_set_compute_constants(list);
 }
 
-void kinc_g5_command_list_compute(kinc_g5_command_list_t *list, int x, int y, int z) {
+void iron_g5_command_list_compute(iron_g5_command_list_t *list, int x, int y, int z) {
 	assert(list->impl.open);
 	list->impl._commandList->lpVtbl->Dispatch(list->impl._commandList, x, y, z);
 }
 
-void kinc_g5_internal_sampler_set(kinc_g5_command_list_t *list, kinc_g5_sampler_t *sampler, int unit);
+void iron_g5_internal_sampler_set(iron_g5_command_list_t *list, iron_g5_sampler_t *sampler, int unit);
 
-void kinc_g5_command_list_set_sampler(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_sampler_t *sampler) {
-	if (unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT] >= 0) {
-		kinc_g5_internal_sampler_set(list, sampler, unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT]);
+void iron_g5_command_list_set_sampler(iron_g5_command_list_t *list, iron_g5_texture_unit_t unit, iron_g5_sampler_t *sampler) {
+	if (unit.stages[IRON_G5_SHADER_TYPE_FRAGMENT] >= 0) {
+		iron_g5_internal_sampler_set(list, sampler, unit.stages[IRON_G5_SHADER_TYPE_FRAGMENT]);
 	}
-	else if (unit.stages[KINC_G5_SHADER_TYPE_VERTEX] >= 0) {
-		kinc_g5_internal_sampler_set(list, sampler, unit.stages[KINC_G5_SHADER_TYPE_VERTEX]);
+	else if (unit.stages[IRON_G5_SHADER_TYPE_VERTEX] >= 0) {
+		iron_g5_internal_sampler_set(list, sampler, unit.stages[IRON_G5_SHADER_TYPE_VERTEX]);
 	}
-	kinc_g5_internal_set_textures(list);
+	iron_g5_internal_set_textures(list);
 }
 
-void kinc_g5_command_list_set_texture(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *texture) {
-	if (unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT] >= 0) {
-		texture->impl.stage = unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT];
+void iron_g5_command_list_set_texture(iron_g5_command_list_t *list, iron_g5_texture_unit_t unit, iron_g5_texture_t *texture) {
+	if (unit.stages[IRON_G5_SHADER_TYPE_FRAGMENT] >= 0) {
+		texture->impl.stage = unit.stages[IRON_G5_SHADER_TYPE_FRAGMENT];
 	}
-	else if (unit.stages[KINC_G5_SHADER_TYPE_VERTEX] >= 0) {
-		texture->impl.stage = unit.stages[KINC_G5_SHADER_TYPE_VERTEX];
+	else if (unit.stages[IRON_G5_SHADER_TYPE_VERTEX] >= 0) {
+		texture->impl.stage = unit.stages[IRON_G5_SHADER_TYPE_VERTEX];
 	}
-	else if (unit.stages[KINC_G5_SHADER_TYPE_COMPUTE] >= 0) {
-		texture->impl.stage = unit.stages[KINC_G5_SHADER_TYPE_COMPUTE];
+	else if (unit.stages[IRON_G5_SHADER_TYPE_COMPUTE] >= 0) {
+		texture->impl.stage = unit.stages[IRON_G5_SHADER_TYPE_COMPUTE];
 	}
 	list->impl.currentTextures[texture->impl.stage] = texture;
-	kinc_g5_internal_set_textures(list);
+	iron_g5_internal_set_textures(list);
 }
 
-void kinc_g5_command_list_set_texture_from_render_target_depth(kinc_g5_command_list_t *list, kinc_g5_texture_unit_t unit, kinc_g5_texture_t *texture) {
-	if (unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT] >= 0) {
-		texture->impl.stage_depth = unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT];
+void iron_g5_command_list_set_texture_from_render_target_depth(iron_g5_command_list_t *list, iron_g5_texture_unit_t unit, iron_g5_texture_t *texture) {
+	if (unit.stages[IRON_G5_SHADER_TYPE_FRAGMENT] >= 0) {
+		texture->impl.stage_depth = unit.stages[IRON_G5_SHADER_TYPE_FRAGMENT];
 	}
-	else if (unit.stages[KINC_G5_SHADER_TYPE_VERTEX] >= 0) {
-		texture->impl.stage_depth = unit.stages[KINC_G5_SHADER_TYPE_VERTEX];
+	else if (unit.stages[IRON_G5_SHADER_TYPE_VERTEX] >= 0) {
+		texture->impl.stage_depth = unit.stages[IRON_G5_SHADER_TYPE_VERTEX];
 	}
 	list->impl.currentTextures[texture->impl.stage_depth] = texture;
 }
 
-void kinc_g5_compute_shader_init(kinc_g5_compute_shader *shader, void *_data, int length) {
+void iron_g5_compute_shader_init(iron_g5_compute_shader *shader, void *_data, int length) {
 	unsigned index = 0;
 	uint8_t *data = (uint8_t *)_data;
 
@@ -1068,7 +1068,7 @@ void kinc_g5_compute_shader_init(kinc_g5_compute_shader *shader, void *_data, in
 			if (name[i2] == 0)
 				break;
 		}
-		shader->impl.attributes[i].hash = kinc_internal_hash_name(name);
+		shader->impl.attributes[i].hash = iron_internal_hash_name(name);
 		shader->impl.attributes[i].index = data[index++];
 	}
 
@@ -1081,7 +1081,7 @@ void kinc_g5_compute_shader_init(kinc_g5_compute_shader *shader, void *_data, in
 			if (name[i2] == 0)
 				break;
 		}
-		shader->impl.textures[i].hash = kinc_internal_hash_name(name);
+		shader->impl.textures[i].hash = iron_internal_hash_name(name);
 		shader->impl.textures[i].index = data[index++];
 	}
 
@@ -1095,8 +1095,8 @@ void kinc_g5_compute_shader_init(kinc_g5_compute_shader *shader, void *_data, in
 			if (name[i2] == 0)
 				break;
 		}
-		kinc_compute_internal_shader_constant_t constant;
-		constant.hash = kinc_internal_hash_name(name);
+		iron_compute_internal_shader_constant_t constant;
+		constant.hash = iron_internal_hash_name(name);
 		memcpy(&constant.offset, &data[index], sizeof(constant.offset));
 		index += 4;
 		memcpy(&constant.size, &data[index], sizeof(constant.size));
@@ -1122,22 +1122,22 @@ void kinc_g5_compute_shader_init(kinc_g5_compute_shader *shader, void *_data, in
 	HRESULT hr = device->lpVtbl->CreateComputePipelineState(device , &desc, &IID_ID3D12PipelineState, &shader->impl.pso);
 
 	if (hr != S_OK) {
-		kinc_log("Could not initialize compute shader.");
+		iron_log("Could not initialize compute shader.");
 		return;
 	}
 
-	// kinc_microsoft_affirm(device->CreateBuffer(&CD3D11_BUFFER_DESC(getMultipleOf16(shader->impl.constantsSize), D3D11_BIND_CONSTANT_BUFFER), nullptr,
+	// iron_microsoft_affirm(device->CreateBuffer(&CD3D11_BUFFER_DESC(getMultipleOf16(shader->impl.constantsSize), D3D11_BIND_CONSTANT_BUFFER), nullptr,
 	// &shader->impl.constantBuffer));
 }
 
-void kinc_g5_compute_shader_destroy(kinc_g5_compute_shader *shader) {
+void iron_g5_compute_shader_destroy(iron_g5_compute_shader *shader) {
 	if (shader->impl.pso != NULL) {
 		shader->impl.pso->lpVtbl->Release(shader->impl.pso);
 		shader->impl.pso = NULL;
 	}
 }
 
-static kinc_compute_internal_shader_constant_t *findComputeConstant(kinc_compute_internal_shader_constant_t *constants, uint32_t hash) {
+static iron_compute_internal_shader_constant_t *findComputeConstant(iron_compute_internal_shader_constant_t *constants, uint32_t hash) {
 	for (int i = 0; i < 64; ++i) {
 		if (constants[i].hash == hash) {
 			return &constants[i];
@@ -1146,7 +1146,7 @@ static kinc_compute_internal_shader_constant_t *findComputeConstant(kinc_compute
 	return NULL;
 }
 
-static kinc_internal_hash_index_t *findComputeTextureUnit(kinc_internal_hash_index_t *units, uint32_t hash) {
+static iron_internal_hash_index_t *findComputeTextureUnit(iron_internal_hash_index_t *units, uint32_t hash) {
 	for (int i = 0; i < 64; ++i) {
 		if (units[i].hash == hash) {
 			return &units[i];
@@ -1155,12 +1155,12 @@ static kinc_internal_hash_index_t *findComputeTextureUnit(kinc_internal_hash_ind
 	return NULL;
 }
 
-kinc_g5_constant_location_t kinc_g5_compute_shader_get_constant_location(kinc_g5_compute_shader *shader, const char *name) {
-	kinc_g5_constant_location_t location = {0};
+iron_g5_constant_location_t iron_g5_compute_shader_get_constant_location(iron_g5_compute_shader *shader, const char *name) {
+	iron_g5_constant_location_t location = {0};
 
-	uint32_t hash = kinc_internal_hash_name((unsigned char *)name);
+	uint32_t hash = iron_internal_hash_name((unsigned char *)name);
 
-	kinc_compute_internal_shader_constant_t *constant = findComputeConstant(shader->impl.constants, hash);
+	iron_compute_internal_shader_constant_t *constant = findComputeConstant(shader->impl.constants, hash);
 	if (constant == NULL) {
 		location.impl.computeOffset = 0;
 		location.impl.computeSize = 0;
@@ -1171,13 +1171,13 @@ kinc_g5_constant_location_t kinc_g5_compute_shader_get_constant_location(kinc_g5
 	}
 
 	if (location.impl.computeSize == 0) {
-		kinc_log("Uniform %s not found.", name);
+		iron_log("Uniform %s not found.", name);
 	}
 
 	return location;
 }
 
-kinc_g5_texture_unit_t kinc_g5_compute_shader_get_texture_unit(kinc_g5_compute_shader *shader, const char *name) {
+iron_g5_texture_unit_t iron_g5_compute_shader_get_texture_unit(iron_g5_compute_shader *shader, const char *name) {
 	char unitName[64];
 	int unitOffset = 0;
 	size_t len = strlen(name);
@@ -1189,55 +1189,55 @@ kinc_g5_texture_unit_t kinc_g5_compute_shader_get_texture_unit(kinc_g5_compute_s
 		unitName[len - 3] = 0;                       // Strip array from name
 	}
 
-	uint32_t hash = kinc_internal_hash_name((unsigned char *)unitName);
+	uint32_t hash = iron_internal_hash_name((unsigned char *)unitName);
 
-	kinc_g5_texture_unit_t unit;
-	for (int i = 0; i < KINC_G5_SHADER_TYPE_COUNT; ++i) {
+	iron_g5_texture_unit_t unit;
+	for (int i = 0; i < IRON_G5_SHADER_TYPE_COUNT; ++i) {
 		unit.stages[i] = -1;
 	}
-	kinc_internal_hash_index_t *computeUnit = findComputeTextureUnit(shader->impl.textures, hash);
+	iron_internal_hash_index_t *computeUnit = findComputeTextureUnit(shader->impl.textures, hash);
 	if (computeUnit == NULL) {
 #ifndef NDEBUG
 		static int notFoundCount = 0;
 		if (notFoundCount < 10) {
-			kinc_log("Sampler %s not found.", unitName);
+			iron_log("Sampler %s not found.", unitName);
 			++notFoundCount;
 		}
 		else if (notFoundCount == 10) {
-			kinc_log("Giving up on sampler not found messages.", unitName);
+			iron_log("Giving up on sampler not found messages.", unitName);
 			++notFoundCount;
 		}
 #endif
 	}
 	else {
-		unit.stages[KINC_G5_SHADER_TYPE_COMPUTE] = computeUnit->index + unitOffset;
+		unit.stages[IRON_G5_SHADER_TYPE_COMPUTE] = computeUnit->index + unitOffset;
 	}
 	return unit;
 }
 
-void kinc_g5_internal_setConstants(kinc_g5_command_list_t *commandList, kinc_g5_pipeline_t *pipeline) {
+void iron_g5_internal_setConstants(iron_g5_command_list_t *commandList, iron_g5_pipeline_t *pipeline) {
 	commandList->impl._commandList->lpVtbl->SetGraphicsRootSignature(commandList->impl._commandList, globalRootSignature);
 
 	if (pipeline->impl.textures > 0) {
-		kinc_g5_internal_set_textures(commandList);
+		iron_g5_internal_set_textures(commandList);
 	}
 }
 
-void kinc_g5_internal_set_compute_constants(kinc_g5_command_list_t *commandList) {
+void iron_g5_internal_set_compute_constants(iron_g5_command_list_t *commandList) {
 
 	commandList->impl._commandList->lpVtbl->SetComputeRootSignature(commandList->impl._commandList, globalComputeRootSignature);
 
 	//if (pipeline->impl.textures > 0) {
-		kinc_g5_internal_set_textures(commandList);
+		iron_g5_internal_set_textures(commandList);
 	//}
 }
 
-void kinc_g5_pipeline_init(kinc_g5_pipeline_t *pipe) {
-	kinc_g5_internal_pipeline_set_defaults(pipe);
-	kinc_g5_internal_pipeline_init(pipe);
+void iron_g5_pipeline_init(iron_g5_pipeline_t *pipe) {
+	iron_g5_internal_pipeline_set_defaults(pipe);
+	iron_g5_internal_pipeline_init(pipe);
 }
 
-void kinc_g5_pipeline_destroy(kinc_g5_pipeline_t *pipe) {
+void iron_g5_pipeline_destroy(iron_g5_pipeline_t *pipe) {
 	if (pipe->impl.pso != NULL) {
 		pipe->impl.pso->lpVtbl->Release(pipe->impl.pso);
 		pipe->impl.pso = NULL;
@@ -1246,7 +1246,7 @@ void kinc_g5_pipeline_destroy(kinc_g5_pipeline_t *pipe) {
 
 #define MAX_SHADER_THING 32
 
-static ShaderConstant findConstant(kinc_g5_shader_t *shader, const char *name) {
+static ShaderConstant findConstant(iron_g5_shader_t *shader, const char *name) {
 	if (shader != NULL) {
 		for (int i = 0; i < MAX_SHADER_THING; ++i) {
 			if (strcmp(shader->impl.constants[i].name, name) == 0) {
@@ -1262,7 +1262,7 @@ static ShaderConstant findConstant(kinc_g5_shader_t *shader, const char *name) {
 	return constant;
 }
 
-static ShaderTexture findTexture(kinc_g5_shader_t *shader, const char *name) {
+static ShaderTexture findTexture(iron_g5_shader_t *shader, const char *name) {
 	for (int i = 0; i < MAX_SHADER_THING; ++i) {
 		if (strcmp(shader->impl.textures[i].name, name) == 0) {
 			return shader->impl.textures[i];
@@ -1275,7 +1275,7 @@ static ShaderTexture findTexture(kinc_g5_shader_t *shader, const char *name) {
 	return texture;
 }
 
-static ShaderAttribute findAttribute(kinc_g5_shader_t *shader, const char *name) {
+static ShaderAttribute findAttribute(iron_g5_shader_t *shader, const char *name) {
 	for (int i = 0; i < MAX_SHADER_THING; ++i) {
 		if (strcmp(shader->impl.attributes[i].name, name) == 0) {
 			return shader->impl.attributes[i];
@@ -1288,8 +1288,8 @@ static ShaderAttribute findAttribute(kinc_g5_shader_t *shader, const char *name)
 	return attribute;
 }
 
-kinc_g5_constant_location_t kinc_g5_pipeline_get_constant_location(struct kinc_g5_pipeline *pipe, const char *name) {
-	kinc_g5_constant_location_t location;
+iron_g5_constant_location_t iron_g5_pipeline_get_constant_location(struct iron_g5_pipeline *pipe, const char *name) {
+	iron_g5_constant_location_t location;
 
 	{
 		ShaderConstant constant = findConstant(pipe->vertex_shader, name);
@@ -1309,48 +1309,48 @@ kinc_g5_constant_location_t kinc_g5_pipeline_get_constant_location(struct kinc_g
 	return location;
 }
 
-kinc_g5_texture_unit_t kinc_g5_pipeline_get_texture_unit(kinc_g5_pipeline_t *pipe, const char *name) {
-	kinc_g5_texture_unit_t unit;
-	for (int i = 0; i < KINC_G5_SHADER_TYPE_COUNT; ++i) {
+iron_g5_texture_unit_t iron_g5_pipeline_get_texture_unit(iron_g5_pipeline_t *pipe, const char *name) {
+	iron_g5_texture_unit_t unit;
+	for (int i = 0; i < IRON_G5_SHADER_TYPE_COUNT; ++i) {
 		unit.stages[i] = -1;
 	}
 
 	ShaderTexture vertexTexture = findTexture(pipe->vertex_shader, name);
 	if (vertexTexture.texture != -1) {
-		unit.stages[KINC_G5_SHADER_TYPE_VERTEX] = vertexTexture.texture;
+		unit.stages[IRON_G5_SHADER_TYPE_VERTEX] = vertexTexture.texture;
 	}
 	else {
 		ShaderTexture fragmentTexture = findTexture(pipe->fragment_shader, name);
-		unit.stages[KINC_G5_SHADER_TYPE_FRAGMENT] = fragmentTexture.texture;
+		unit.stages[IRON_G5_SHADER_TYPE_FRAGMENT] = fragmentTexture.texture;
 	}
 	return unit;
 }
 
-static D3D12_BLEND convert_blend_factor(kinc_g5_blending_factor_t factor) {
+static D3D12_BLEND convert_blend_factor(iron_g5_blending_factor_t factor) {
 	switch (factor) {
-	case KINC_G5_BLEND_ONE:
+	case IRON_G5_BLEND_ONE:
 		return D3D12_BLEND_ONE;
-	case KINC_G5_BLEND_ZERO:
+	case IRON_G5_BLEND_ZERO:
 		return D3D12_BLEND_ZERO;
-	case KINC_G5_BLEND_SOURCE_ALPHA:
+	case IRON_G5_BLEND_SOURCE_ALPHA:
 		return D3D12_BLEND_SRC_ALPHA;
-	case KINC_G5_BLEND_DEST_ALPHA:
+	case IRON_G5_BLEND_DEST_ALPHA:
 		return D3D12_BLEND_DEST_ALPHA;
-	case KINC_G5_BLEND_INV_SOURCE_ALPHA:
+	case IRON_G5_BLEND_INV_SOURCE_ALPHA:
 		return D3D12_BLEND_INV_SRC_ALPHA;
-	case KINC_G5_BLEND_INV_DEST_ALPHA:
+	case IRON_G5_BLEND_INV_DEST_ALPHA:
 		return D3D12_BLEND_INV_DEST_ALPHA;
-	case KINC_G5_BLEND_SOURCE_COLOR:
+	case IRON_G5_BLEND_SOURCE_COLOR:
 		return D3D12_BLEND_SRC_COLOR;
-	case KINC_G5_BLEND_DEST_COLOR:
+	case IRON_G5_BLEND_DEST_COLOR:
 		return D3D12_BLEND_DEST_COLOR;
-	case KINC_G5_BLEND_INV_SOURCE_COLOR:
+	case IRON_G5_BLEND_INV_SOURCE_COLOR:
 		return D3D12_BLEND_INV_SRC_COLOR;
-	case KINC_G5_BLEND_INV_DEST_COLOR:
+	case IRON_G5_BLEND_INV_DEST_COLOR:
 		return D3D12_BLEND_INV_DEST_COLOR;
-	case KINC_G5_BLEND_CONSTANT:
+	case IRON_G5_BLEND_CONSTANT:
 		return D3D12_BLEND_BLEND_FACTOR;
-	case KINC_G5_BLEND_INV_CONSTANT:
+	case IRON_G5_BLEND_INV_CONSTANT:
 		return D3D12_BLEND_INV_BLEND_FACTOR;
 	default:
 		assert(false);
@@ -1358,17 +1358,17 @@ static D3D12_BLEND convert_blend_factor(kinc_g5_blending_factor_t factor) {
 	}
 }
 
-static D3D12_BLEND_OP convert_blend_operation(kinc_g5_blending_operation_t op) {
+static D3D12_BLEND_OP convert_blend_operation(iron_g5_blending_operation_t op) {
 	switch (op) {
-	case KINC_G5_BLENDOP_ADD:
+	case IRON_G5_BLENDOP_ADD:
 		return D3D12_BLEND_OP_ADD;
-	case KINC_G5_BLENDOP_SUBTRACT:
+	case IRON_G5_BLENDOP_SUBTRACT:
 		return D3D12_BLEND_OP_SUBTRACT;
-	case KINC_G5_BLENDOP_REVERSE_SUBTRACT:
+	case IRON_G5_BLENDOP_REVERSE_SUBTRACT:
 		return D3D12_BLEND_OP_REV_SUBTRACT;
-	case KINC_G5_BLENDOP_MIN:
+	case IRON_G5_BLENDOP_MIN:
 		return D3D12_BLEND_OP_MIN;
-	case KINC_G5_BLENDOP_MAX:
+	case IRON_G5_BLENDOP_MAX:
 		return D3D12_BLEND_OP_MAX;
 	default:
 		assert(false);
@@ -1376,61 +1376,61 @@ static D3D12_BLEND_OP convert_blend_operation(kinc_g5_blending_operation_t op) {
 	}
 }
 
-static D3D12_CULL_MODE convert_cull_mode(kinc_g5_cull_mode_t cull_mode) {
+static D3D12_CULL_MODE convert_cull_mode(iron_g5_cull_mode_t cull_mode) {
 	switch (cull_mode) {
-	case KINC_G5_CULL_MODE_CLOCKWISE:
+	case IRON_G5_CULL_MODE_CLOCKWISE:
 		return D3D12_CULL_MODE_FRONT;
-	case KINC_G5_CULL_MODE_COUNTERCLOCKWISE:
+	case IRON_G5_CULL_MODE_COUNTERCLOCKWISE:
 		return D3D12_CULL_MODE_BACK;
-	case KINC_G5_CULL_MODE_NEVER:
+	case IRON_G5_CULL_MODE_NEVER:
 	default:
 		return D3D12_CULL_MODE_NONE;
 	}
 }
 
-static D3D12_COMPARISON_FUNC convert_compare_mode(kinc_g5_compare_mode_t compare) {
+static D3D12_COMPARISON_FUNC convert_compare_mode(iron_g5_compare_mode_t compare) {
 	switch (compare) {
 	default:
-	case KINC_G5_COMPARE_MODE_ALWAYS:
+	case IRON_G5_COMPARE_MODE_ALWAYS:
 		return D3D12_COMPARISON_FUNC_ALWAYS;
-	case KINC_G5_COMPARE_MODE_NEVER:
+	case IRON_G5_COMPARE_MODE_NEVER:
 		return D3D12_COMPARISON_FUNC_NEVER;
-	case KINC_G5_COMPARE_MODE_EQUAL:
+	case IRON_G5_COMPARE_MODE_EQUAL:
 		return D3D12_COMPARISON_FUNC_EQUAL;
-	case KINC_G5_COMPARE_MODE_NOT_EQUAL:
+	case IRON_G5_COMPARE_MODE_NOT_EQUAL:
 		return D3D12_COMPARISON_FUNC_NOT_EQUAL;
-	case KINC_G5_COMPARE_MODE_LESS:
+	case IRON_G5_COMPARE_MODE_LESS:
 		return D3D12_COMPARISON_FUNC_LESS;
-	case KINC_G5_COMPARE_MODE_LESS_EQUAL:
+	case IRON_G5_COMPARE_MODE_LESS_EQUAL:
 		return D3D12_COMPARISON_FUNC_LESS_EQUAL;
-	case KINC_G5_COMPARE_MODE_GREATER:
+	case IRON_G5_COMPARE_MODE_GREATER:
 		return D3D12_COMPARISON_FUNC_GREATER;
-	case KINC_G5_COMPARE_MODE_GREATER_EQUAL:
+	case IRON_G5_COMPARE_MODE_GREATER_EQUAL:
 		return D3D12_COMPARISON_FUNC_GREATER_EQUAL;
 	}
 }
 
-static DXGI_FORMAT convert_format(kinc_image_format_t format) {
+static DXGI_FORMAT convert_format(iron_image_format_t format) {
 	switch (format) {
-	case KINC_IMAGE_FORMAT_RGBA128:
+	case IRON_IMAGE_FORMAT_RGBA128:
 		return DXGI_FORMAT_R32G32B32A32_FLOAT;
-	case KINC_IMAGE_FORMAT_RGBA64:
+	case IRON_IMAGE_FORMAT_RGBA64:
 		return DXGI_FORMAT_R16G16B16A16_FLOAT;
-	case KINC_IMAGE_FORMAT_R32:
+	case IRON_IMAGE_FORMAT_R32:
 		return DXGI_FORMAT_R32_FLOAT;
-	case KINC_IMAGE_FORMAT_R16:
+	case IRON_IMAGE_FORMAT_R16:
 		return DXGI_FORMAT_R16_FLOAT;
-	case KINC_IMAGE_FORMAT_R8:
+	case IRON_IMAGE_FORMAT_R8:
 		return DXGI_FORMAT_R8_UNORM;
-	case KINC_IMAGE_FORMAT_RGBA32:
+	case IRON_IMAGE_FORMAT_RGBA32:
 	default:
 		return DXGI_FORMAT_R8G8B8A8_UNORM;
 	}
 }
 
-static void set_blend_state(D3D12_BLEND_DESC *blend_desc, kinc_g5_pipeline_t *pipe, int target) {
-	blend_desc->RenderTarget[target].BlendEnable = pipe->blend_source != KINC_G5_BLEND_ONE || pipe->blend_destination != KINC_G5_BLEND_ZERO ||
-	                                               pipe->alpha_blend_source != KINC_G5_BLEND_ONE || pipe->alpha_blend_destination != KINC_G5_BLEND_ZERO;
+static void set_blend_state(D3D12_BLEND_DESC *blend_desc, iron_g5_pipeline_t *pipe, int target) {
+	blend_desc->RenderTarget[target].BlendEnable = pipe->blend_source != IRON_G5_BLEND_ONE || pipe->blend_destination != IRON_G5_BLEND_ZERO ||
+	                                               pipe->alpha_blend_source != IRON_G5_BLEND_ONE || pipe->alpha_blend_destination != IRON_G5_BLEND_ZERO;
 	blend_desc->RenderTarget[target].SrcBlend = convert_blend_factor(pipe->blend_source);
 	blend_desc->RenderTarget[target].DestBlend = convert_blend_factor(pipe->blend_destination);
 	blend_desc->RenderTarget[target].BlendOp = convert_blend_operation(pipe->blend_operation);
@@ -1444,7 +1444,7 @@ static void set_blend_state(D3D12_BLEND_DESC *blend_desc, kinc_g5_pipeline_t *pi
 	      (pipe->color_write_mask_alpha[target] ? D3D12_COLOR_WRITE_ENABLE_ALPHA : 0);
 }
 
-void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
+void iron_g5_pipeline_compile(iron_g5_pipeline_t *pipe) {
 	int vertexAttributeCount = pipe->input_layout->size;
 
 	D3D12_INPUT_ELEMENT_DESC *vertexDesc = (D3D12_INPUT_ELEMENT_DESC *)alloca(sizeof(D3D12_INPUT_ELEMENT_DESC) * vertexAttributeCount);
@@ -1459,25 +1459,25 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 		vertexDesc[i].InstanceDataStepRate = 0;
 
 		switch (pipe->input_layout->elements[i].data) {
-		case KINC_G5_VERTEX_DATA_F32_1X:
+		case IRON_G5_VERTEX_DATA_F32_1X:
 			vertexDesc[i].Format = DXGI_FORMAT_R32_FLOAT;
 			break;
-		case KINC_G5_VERTEX_DATA_F32_2X:
+		case IRON_G5_VERTEX_DATA_F32_2X:
 			vertexDesc[i].Format = DXGI_FORMAT_R32G32_FLOAT;
 			break;
-		case KINC_G5_VERTEX_DATA_F32_3X:
+		case IRON_G5_VERTEX_DATA_F32_3X:
 			vertexDesc[i].Format = DXGI_FORMAT_R32G32B32_FLOAT;
 			break;
-		case KINC_G5_VERTEX_DATA_F32_4X:
+		case IRON_G5_VERTEX_DATA_F32_4X:
 			vertexDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 			break;
-		case KINC_G5_VERTEX_DATA_U8_4X_NORM:
+		case IRON_G5_VERTEX_DATA_U8_4X_NORM:
 			vertexDesc[i].Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 			break;
-		case KINC_G5_VERTEX_DATA_I16_2X_NORM:
+		case IRON_G5_VERTEX_DATA_I16_2X_NORM:
 			vertexDesc[i].Format = DXGI_FORMAT_R16G16_SNORM;
 			break;
-		case KINC_G5_VERTEX_DATA_I16_4X_NORM:
+		case IRON_G5_VERTEX_DATA_I16_4X_NORM:
 			vertexDesc[i].Format = DXGI_FORMAT_R16G16B16A16_SNORM;
 			break;
 		default:
@@ -1562,7 +1562,7 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 	psoDesc.DepthStencilState.FrontFace = defaultStencilOp;
 	psoDesc.DepthStencilState.BackFace = defaultStencilOp;
 
-	psoDesc.DepthStencilState.DepthEnable = pipe->depth_mode != KINC_G5_COMPARE_MODE_ALWAYS;
+	psoDesc.DepthStencilState.DepthEnable = pipe->depth_mode != IRON_G5_COMPARE_MODE_ALWAYS;
 	psoDesc.DepthStencilState.DepthWriteMask = pipe->depth_write ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO;
 	psoDesc.DepthStencilState.DepthFunc = convert_compare_mode(pipe->depth_mode);
 	psoDesc.DepthStencilState.StencilEnable = false;
@@ -1573,19 +1573,19 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipe) {
 
 	hr = device->lpVtbl->CreateGraphicsPipelineState(device , &psoDesc, &IID_ID3D12PipelineState, &pipe->impl.pso);
 	if (hr != S_OK) {
-		kinc_log("Could not create pipeline.");
+		iron_log("Could not create pipeline.");
 	}
 }
 
-static D3D12_TEXTURE_ADDRESS_MODE convert_texture_addressing(kinc_g5_texture_addressing_t addressing) {
+static D3D12_TEXTURE_ADDRESS_MODE convert_texture_addressing(iron_g5_texture_addressing_t addressing) {
 	switch (addressing) {
-	case KINC_G5_TEXTURE_ADDRESSING_REPEAT:
+	case IRON_G5_TEXTURE_ADDRESSING_REPEAT:
 		return D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	case KINC_G5_TEXTURE_ADDRESSING_MIRROR:
+	case IRON_G5_TEXTURE_ADDRESSING_MIRROR:
 		return D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
-	case KINC_G5_TEXTURE_ADDRESSING_CLAMP:
+	case IRON_G5_TEXTURE_ADDRESSING_CLAMP:
 		return D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
-	case KINC_G5_TEXTURE_ADDRESSING_BORDER:
+	case IRON_G5_TEXTURE_ADDRESSING_BORDER:
 		return D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 	default:
 		assert(false);
@@ -1593,51 +1593,51 @@ static D3D12_TEXTURE_ADDRESS_MODE convert_texture_addressing(kinc_g5_texture_add
 	}
 }
 
-static D3D12_FILTER convert_filter(kinc_g5_texture_filter_t minification, kinc_g5_texture_filter_t magnification, kinc_g5_mipmap_filter_t mipmap) {
+static D3D12_FILTER convert_filter(iron_g5_texture_filter_t minification, iron_g5_texture_filter_t magnification, iron_g5_mipmap_filter_t mipmap) {
 	switch (minification) {
-	case KINC_G5_TEXTURE_FILTER_POINT:
+	case IRON_G5_TEXTURE_FILTER_POINT:
 		switch (magnification) {
-		case KINC_G5_TEXTURE_FILTER_POINT:
+		case IRON_G5_TEXTURE_FILTER_POINT:
 			switch (mipmap) {
-			case KINC_G5_MIPMAP_FILTER_NONE:
-			case KINC_G5_MIPMAP_FILTER_POINT:
+			case IRON_G5_MIPMAP_FILTER_NONE:
+			case IRON_G5_MIPMAP_FILTER_POINT:
 				return D3D12_FILTER_MIN_MAG_MIP_POINT;
-			case KINC_G5_MIPMAP_FILTER_LINEAR:
+			case IRON_G5_MIPMAP_FILTER_LINEAR:
 				return D3D12_FILTER_MIN_MAG_POINT_MIP_LINEAR;
 			}
-		case KINC_G5_TEXTURE_FILTER_LINEAR:
+		case IRON_G5_TEXTURE_FILTER_LINEAR:
 			switch (mipmap) {
-			case KINC_G5_MIPMAP_FILTER_NONE:
-			case KINC_G5_MIPMAP_FILTER_POINT:
+			case IRON_G5_MIPMAP_FILTER_NONE:
+			case IRON_G5_MIPMAP_FILTER_POINT:
 				return D3D12_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT;
-			case KINC_G5_MIPMAP_FILTER_LINEAR:
+			case IRON_G5_MIPMAP_FILTER_LINEAR:
 				return D3D12_FILTER_MIN_POINT_MAG_MIP_LINEAR;
 			}
-		case KINC_G5_TEXTURE_FILTER_ANISOTROPIC:
+		case IRON_G5_TEXTURE_FILTER_ANISOTROPIC:
 			return D3D12_FILTER_ANISOTROPIC;
 		}
-	case KINC_G5_TEXTURE_FILTER_LINEAR:
+	case IRON_G5_TEXTURE_FILTER_LINEAR:
 		switch (magnification) {
-		case KINC_G5_TEXTURE_FILTER_POINT:
+		case IRON_G5_TEXTURE_FILTER_POINT:
 			switch (mipmap) {
-			case KINC_G5_MIPMAP_FILTER_NONE:
-			case KINC_G5_MIPMAP_FILTER_POINT:
+			case IRON_G5_MIPMAP_FILTER_NONE:
+			case IRON_G5_MIPMAP_FILTER_POINT:
 				return D3D12_FILTER_MIN_LINEAR_MAG_MIP_POINT;
-			case KINC_G5_MIPMAP_FILTER_LINEAR:
+			case IRON_G5_MIPMAP_FILTER_LINEAR:
 				return D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 			}
-		case KINC_G5_TEXTURE_FILTER_LINEAR:
+		case IRON_G5_TEXTURE_FILTER_LINEAR:
 			switch (mipmap) {
-			case KINC_G5_MIPMAP_FILTER_NONE:
-			case KINC_G5_MIPMAP_FILTER_POINT:
+			case IRON_G5_MIPMAP_FILTER_NONE:
+			case IRON_G5_MIPMAP_FILTER_POINT:
 				return D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT;
-			case KINC_G5_MIPMAP_FILTER_LINEAR:
+			case IRON_G5_MIPMAP_FILTER_LINEAR:
 				return D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 			}
-		case KINC_G5_TEXTURE_FILTER_ANISOTROPIC:
+		case IRON_G5_TEXTURE_FILTER_ANISOTROPIC:
 			return D3D12_FILTER_ANISOTROPIC;
 		}
-	case KINC_G5_TEXTURE_FILTER_ANISOTROPIC:
+	case IRON_G5_TEXTURE_FILTER_ANISOTROPIC:
 		return D3D12_FILTER_ANISOTROPIC;
 	}
 
@@ -1645,7 +1645,7 @@ static D3D12_FILTER convert_filter(kinc_g5_texture_filter_t minification, kinc_g
 	return D3D12_FILTER_MIN_MAG_MIP_POINT;
 }
 
-void kinc_g5_sampler_init(kinc_g5_sampler_t *sampler, const kinc_g5_sampler_options_t *options) {
+void iron_g5_sampler_init(iron_g5_sampler_t *sampler, const iron_g5_sampler_options_t *options) {
 	D3D12_DESCRIPTOR_HEAP_DESC descHeapSampler = {};
 	descHeapSampler.NumDescriptors = 2;
 	descHeapSampler.Type = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
@@ -1668,9 +1668,9 @@ void kinc_g5_sampler_init(kinc_g5_sampler_t *sampler, const kinc_g5_sampler_opti
 	device->lpVtbl->CreateSampler(device, &samplerDesc, handle);
 }
 
-void kinc_g5_sampler_destroy(kinc_g5_sampler_t *sampler) {}
+void iron_g5_sampler_destroy(iron_g5_sampler_t *sampler) {}
 
-void kinc_g5_shader_init(kinc_g5_shader_t *shader, const void *_data, size_t length, kinc_g5_shader_type_t type) {
+void iron_g5_shader_init(iron_g5_shader_t *shader, const void *_data, size_t length, iron_g5_shader_type_t type) {
 	memset(shader->impl.constants, 0, sizeof(shader->impl.constants));
 	memset(shader->impl.attributes, 0, sizeof(shader->impl.attributes));
 	memset(shader->impl.textures, 0, sizeof(shader->impl.textures));
@@ -1728,12 +1728,12 @@ void kinc_g5_shader_init(kinc_g5_shader_t *shader, const void *_data, size_t len
 	memcpy(shader->impl.data, &data[index], shader->impl.length);
 }
 
-void kinc_g5_shader_destroy(kinc_g5_shader_t *shader) {
+void iron_g5_shader_destroy(iron_g5_shader_t *shader) {
 	free(shader->impl.data);
 }
 
 // djb2
-uint32_t kinc_internal_hash_name(unsigned char *str) {
+uint32_t iron_internal_hash_name(unsigned char *str) {
 	unsigned long hash = 5381;
 	int c;
 	while ((c = *str++)) {
@@ -1744,8 +1744,8 @@ uint32_t kinc_internal_hash_name(unsigned char *str) {
 
 static const int heapSize = 1024;
 
-void kinc_g5_internal_reset_textures(struct kinc_g5_command_list *list) {
-	for (int i = 0; i < KINC_INTERNAL_G5_TEXTURE_COUNT; ++i) {
+void iron_g5_internal_reset_textures(struct iron_g5_command_list *list) {
+	for (int i = 0; i < IRON_INTERNAL_G5_TEXTURE_COUNT; ++i) {
 		list->impl.currentTextures[i] = NULL;
 		list->impl.current_samplers[i] = NULL;
 	}
@@ -1760,48 +1760,48 @@ static inline UINT64 GetRequiredIntermediateSize(ID3D12Resource *destinationReso
 	return requiredSize;
 }
 
-static DXGI_FORMAT convertImageFormat(kinc_image_format_t format) {
+static DXGI_FORMAT convertImageFormat(iron_image_format_t format) {
 	switch (format) {
-	case KINC_IMAGE_FORMAT_RGBA128:
+	case IRON_IMAGE_FORMAT_RGBA128:
 		return DXGI_FORMAT_R32G32B32A32_FLOAT;
-	case KINC_IMAGE_FORMAT_RGBA64:
+	case IRON_IMAGE_FORMAT_RGBA64:
 		return DXGI_FORMAT_R16G16B16A16_FLOAT;
-	case KINC_IMAGE_FORMAT_R8:
+	case IRON_IMAGE_FORMAT_R8:
 		return DXGI_FORMAT_R8_UNORM;
-	case KINC_IMAGE_FORMAT_BGRA32:
+	case IRON_IMAGE_FORMAT_BGRA32:
 		return DXGI_FORMAT_B8G8R8A8_UNORM;
-	case KINC_IMAGE_FORMAT_RGBA32:
+	case IRON_IMAGE_FORMAT_RGBA32:
 		return DXGI_FORMAT_R8G8B8A8_UNORM;
 	default:
 		return DXGI_FORMAT_R8G8B8A8_UNORM;
 	}
 }
 
-static int formatByteSize(kinc_image_format_t format) {
+static int formatByteSize(iron_image_format_t format) {
 	switch (format) {
-	case KINC_IMAGE_FORMAT_RGBA128:
+	case IRON_IMAGE_FORMAT_RGBA128:
 		return 16;
-	case KINC_IMAGE_FORMAT_RGBA64:
+	case IRON_IMAGE_FORMAT_RGBA64:
 		return 8;
-	case KINC_IMAGE_FORMAT_R8:
+	case IRON_IMAGE_FORMAT_R8:
 		return 1;
-	case KINC_IMAGE_FORMAT_R16:
+	case IRON_IMAGE_FORMAT_R16:
 		return 2;
-	case KINC_IMAGE_FORMAT_BGRA32:
-	case KINC_IMAGE_FORMAT_RGBA32:
-	case KINC_IMAGE_FORMAT_R32:
+	case IRON_IMAGE_FORMAT_BGRA32:
+	case IRON_IMAGE_FORMAT_RGBA32:
+	case IRON_IMAGE_FORMAT_R32:
 		return 4;
 	default:
 		return 4;
 	}
 }
 
-void kinc_g5_internal_set_textures(kinc_g5_command_list_t *list) {
+void iron_g5_internal_set_textures(iron_g5_command_list_t *list) {
 	if (list->impl.currentTextures[0] != NULL) {
 		int srvStep = device->lpVtbl->GetDescriptorHandleIncrementSize(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		int samplerStep = device->lpVtbl->GetDescriptorHandleIncrementSize(device, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 
-		if (list->impl.heapIndex + KINC_INTERNAL_G5_TEXTURE_COUNT >= heapSize) {
+		if (list->impl.heapIndex + IRON_INTERNAL_G5_TEXTURE_COUNT >= heapSize) {
 			list->impl.heapIndex = 0;
 		}
 
@@ -1812,7 +1812,7 @@ void kinc_g5_internal_set_textures(kinc_g5_command_list_t *list) {
 		srvGpu.ptr += list->impl.heapIndex * srvStep;
 		samplerGpu.ptr += list->impl.heapIndex * samplerStep;
 
-		for (int i = 0; i < KINC_INTERNAL_G5_TEXTURE_COUNT; ++i) {
+		for (int i = 0; i < IRON_INTERNAL_G5_TEXTURE_COUNT; ++i) {
 			if (list->impl.currentTextures[i] != NULL && list->impl.current_samplers[i] != NULL) {
 				ID3D12DescriptorHeap *samplerDescriptorHeap = list->impl.current_samplers[i]->impl.sampler_heap;
 
@@ -1858,7 +1858,7 @@ void kinc_g5_internal_set_textures(kinc_g5_command_list_t *list) {
 	}
 }
 
-void createHeaps(kinc_g5_command_list_t *list) {
+void createHeaps(iron_g5_command_list_t *list) {
 	D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
 	heapDesc.NumDescriptors = heapSize;
 	heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -1872,9 +1872,9 @@ void createHeaps(kinc_g5_command_list_t *list) {
 	device->lpVtbl->CreateDescriptorHeap(device, &samplerHeapDesc, &IID_ID3D12DescriptorHeap, &list->impl.samplerHeap);
 }
 
-void kinc_memory_emergency();
+void iron_memory_emergency();
 
-void kinc_g5_texture_init_from_bytes(kinc_g5_texture_t *texture, void *data, int width, int height, kinc_image_format_t format) {
+void iron_g5_texture_init_from_bytes(iron_g5_texture_t *texture, void *data, int width, int height, iron_image_format_t format) {
 	memset(&texture->impl, 0, sizeof(texture->impl));
 	texture->impl.stage = 0;
 	texture->impl.stage_depth = -1;
@@ -1884,7 +1884,7 @@ void kinc_g5_texture_init_from_bytes(kinc_g5_texture_t *texture, void *data, int
 	texture->_uploaded = false;
 	texture->format = format;
 	texture->data = data;
-	texture->state = KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
+	texture->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
 	texture->framebuffer_index = -1;
 	texture->impl.renderTarget = NULL;
 
@@ -1916,7 +1916,7 @@ void kinc_g5_texture_init_from_bytes(kinc_g5_texture_t *texture, void *data, int
 	                                                 NULL, &IID_ID3D12Resource, &texture->impl.image);
 	if (result != S_OK) {
 		for (int i = 0; i < 10; ++i) {
-			kinc_memory_emergency();
+			iron_memory_emergency();
 			result = device->lpVtbl->CreateCommittedResource(device, &heapPropertiesDefault, D3D12_HEAP_FLAG_NONE, &resourceDescTex,
 			                                                 D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 			                                         NULL, &IID_ID3D12Resource, &texture->impl.image);
@@ -1952,7 +1952,7 @@ void kinc_g5_texture_init_from_bytes(kinc_g5_texture_t *texture, void *data, int
 	                                         &IID_ID3D12Resource, &texture->impl.uploadImage);
 	if (result != S_OK) {
 		for (int i = 0; i < 10; ++i) {
-			kinc_memory_emergency();
+			iron_memory_emergency();
 			result = device->lpVtbl->CreateCommittedResource(device, &heapPropertiesUpload, D3D12_HEAP_FLAG_NONE, &resourceDescBuffer,
 			                                                 D3D12_RESOURCE_STATE_GENERIC_READ, NULL,
 			                                         &IID_ID3D12Resource, &texture->impl.uploadImage);
@@ -1966,7 +1966,7 @@ void kinc_g5_texture_init_from_bytes(kinc_g5_texture_t *texture, void *data, int
 
 	BYTE *pixel;
 	texture->impl.uploadImage->lpVtbl->Map(texture->impl.uploadImage, 0, NULL, (void **)&pixel);
-	int pitch = kinc_g5_texture_stride(texture);
+	int pitch = iron_g5_texture_stride(texture);
 	for (int y = 0; y < texture->height; ++y) {
 		memcpy(&pixel[y * pitch], &((uint8_t *)data)[y * texture->width * formatSize], texture->width * formatSize);
 	}
@@ -1995,7 +1995,7 @@ void kinc_g5_texture_init_from_bytes(kinc_g5_texture_t *texture, void *data, int
 	device->lpVtbl->CreateShaderResourceView(device, texture->impl.image, &shaderResourceViewDesc, handle);
 }
 
-void create_texture(struct kinc_g5_texture *texture, int width, int height, kinc_image_format_t format, D3D12_RESOURCE_FLAGS flags) {
+void create_texture(struct iron_g5_texture *texture, int width, int height, iron_image_format_t format, D3D12_RESOURCE_FLAGS flags) {
 	memset(&texture->impl, 0, sizeof(texture->impl));
 	texture->impl.stage = 0;
 	texture->impl.stage_depth = -1;
@@ -2033,7 +2033,7 @@ void create_texture(struct kinc_g5_texture *texture, int width, int height, kinc
 	                                                 NULL, &IID_ID3D12Resource, &texture->impl.image);
 	if (result != S_OK) {
 		for (int i = 0; i < 10; ++i) {
-			kinc_memory_emergency();
+			iron_memory_emergency();
 			result = device->lpVtbl->CreateCommittedResource(device, &heapPropertiesDefault, D3D12_HEAP_FLAG_NONE, &resourceDescTex,
 			                                                 D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 			                                         NULL, &IID_ID3D12Resource, &texture->impl.image);
@@ -2069,7 +2069,7 @@ void create_texture(struct kinc_g5_texture *texture, int width, int height, kinc
 	                                         &IID_ID3D12Resource, &texture->impl.uploadImage);
 	if (result != S_OK) {
 		for (int i = 0; i < 10; ++i) {
-			kinc_memory_emergency();
+			iron_memory_emergency();
 			result = device->lpVtbl->CreateCommittedResource(device, &heapPropertiesUpload, D3D12_HEAP_FLAG_NONE, &resourceDescBuffer,
 			                                                 D3D12_RESOURCE_STATE_GENERIC_READ, NULL,
 			                                         &IID_ID3D12Resource, &texture->impl.uploadImage);
@@ -2105,20 +2105,20 @@ void create_texture(struct kinc_g5_texture *texture, int width, int height, kinc
 	device->lpVtbl->CreateShaderResourceView(device, texture->impl.image, &shaderResourceViewDesc, handle);
 }
 
-void kinc_g5_texture_init(struct kinc_g5_texture *texture, int width, int height, kinc_image_format_t format) {
+void iron_g5_texture_init(struct iron_g5_texture *texture, int width, int height, iron_image_format_t format) {
 	create_texture(texture, width, height, format, D3D12_RESOURCE_FLAG_NONE);
 	texture->_uploaded = true;
-	texture->state = KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
+	texture->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
 	texture->format = format;
 }
 
-void kinc_g5_texture_init_non_sampled_access(struct kinc_g5_texture *texture, int width, int height, kinc_image_format_t format) {
+void iron_g5_texture_init_non_sampled_access(struct iron_g5_texture *texture, int width, int height, iron_image_format_t format) {
 	create_texture(texture, width, height, format, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
 	texture->_uploaded = true;
-	texture->state = KINC_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
+	texture->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
 }
 
-void kinc_g5_texture_destroy(kinc_g5_texture_t *render_target) {
+void iron_g5_texture_destroy(iron_g5_texture_t *render_target) {
 	if (render_target->impl.framebuffer_index >= 0) {
 		framebuffer_count -= 1;
 	}
@@ -2144,24 +2144,24 @@ void kinc_g5_texture_destroy(kinc_g5_texture_t *render_target) {
 	}
 }
 
-void kinc_g5_internal_texture_unmipmap(struct kinc_g5_texture *texture) {
+void iron_g5_internal_texture_unmipmap(struct iron_g5_texture *texture) {
 	texture->impl.mipmap = false;
 }
 
-void kinc_g5_internal_sampler_set(kinc_g5_command_list_t *list, kinc_g5_sampler_t *sampler, int unit) {
+void iron_g5_internal_sampler_set(iron_g5_command_list_t *list, iron_g5_sampler_t *sampler, int unit) {
 	if (unit < 0)
 		return;
 
 	list->impl.current_samplers[unit] = sampler;
 }
 
-int kinc_g5_texture_stride(struct kinc_g5_texture *texture) {
+int iron_g5_texture_stride(struct iron_g5_texture *texture) {
 	return texture->impl.stride;
 }
 
-void kinc_g5_texture_generate_mipmaps(struct kinc_g5_texture *texture, int levels) {}
+void iron_g5_texture_generate_mipmaps(struct iron_g5_texture *texture, int levels) {}
 
-void kinc_g5_texture_set_mipmap(struct kinc_g5_texture *texture, struct kinc_g5_texture *mipmap, int level) {}
+void iron_g5_texture_set_mipmap(struct iron_g5_texture *texture, struct iron_g5_texture *mipmap, int level) {}
 
 static void WaitForFence(ID3D12Fence *fence, UINT64 completionValue, HANDLE waitEvent) {
 	if (fence->lpVtbl->GetCompletedValue(fence) < completionValue) {
@@ -2183,27 +2183,27 @@ static void createRenderTargetView(ID3D12Resource *renderTarget, ID3D12Descripto
 	device->lpVtbl->CreateRenderTargetView(device, renderTarget, &viewDesc, handle);
 }
 
-static DXGI_FORMAT convertFormat(kinc_image_format_t format) {
+static DXGI_FORMAT convertFormat(iron_image_format_t format) {
 	switch (format) {
-	case KINC_IMAGE_FORMAT_RGBA128:
+	case IRON_IMAGE_FORMAT_RGBA128:
 		return DXGI_FORMAT_R32G32B32A32_FLOAT;
-	case KINC_IMAGE_FORMAT_RGBA64:
+	case IRON_IMAGE_FORMAT_RGBA64:
 		return DXGI_FORMAT_R16G16B16A16_FLOAT;
-	case KINC_IMAGE_FORMAT_R32:
+	case IRON_IMAGE_FORMAT_R32:
 		return DXGI_FORMAT_R32_FLOAT;
-	case KINC_IMAGE_FORMAT_R16:
+	case IRON_IMAGE_FORMAT_R16:
 		return DXGI_FORMAT_R16_FLOAT;
-	case KINC_IMAGE_FORMAT_R8:
+	case IRON_IMAGE_FORMAT_R8:
 		return DXGI_FORMAT_R8_UNORM;
-	case KINC_IMAGE_FORMAT_RGBA32:
+	case IRON_IMAGE_FORMAT_RGBA32:
 	default:
 		return DXGI_FORMAT_R8G8B8A8_UNORM;
 	}
 }
 
-void kinc_memory_emergency();
+void iron_memory_emergency();
 
-static void render_target_init(kinc_g5_texture_t *render_target, int width, int height, kinc_image_format_t format, int depthBufferBits, int framebuffer_index) {
+static void render_target_init(iron_g5_texture_t *render_target, int width, int height, iron_image_format_t format, int depthBufferBits, int framebuffer_index) {
 	render_target->width = render_target->width = width;
 	render_target->height = render_target->height = height;
 	render_target->impl.stage = 0;
@@ -2247,11 +2247,11 @@ static void render_target_init(kinc_g5_texture_t *render_target, int width, int 
 	heapDesc.NumDescriptors = 1;
 	heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	kinc_microsoft_affirm(device->lpVtbl->CreateDescriptorHeap(device , &heapDesc, &IID_ID3D12DescriptorHeap, &render_target->impl.renderTargetDescriptorHeap));
+	iron_microsoft_affirm(device->lpVtbl->CreateDescriptorHeap(device , &heapDesc, &IID_ID3D12DescriptorHeap, &render_target->impl.renderTargetDescriptorHeap));
 
 	if (framebuffer_index >= 0) {
-		IDXGISwapChain *swapChain = kinc_dx_current_window()->swapChain;
-		kinc_microsoft_affirm(swapChain->lpVtbl->GetBuffer(swapChain, framebuffer_index, &IID_ID3D12Resource, &render_target->impl.renderTarget));
+		IDXGISwapChain *swapChain = iron_dx_current_window()->swapChain;
+		iron_microsoft_affirm(swapChain->lpVtbl->GetBuffer(swapChain, framebuffer_index, &IID_ID3D12Resource, &render_target->impl.renderTarget));
 		wchar_t buffer[128];
 		wsprintf(buffer, L"Backbuffer (index %i)", framebuffer_index);
 		render_target->impl.renderTarget->lpVtbl->SetName(render_target->impl.renderTarget, buffer);
@@ -2263,7 +2263,7 @@ static void render_target_init(kinc_g5_texture_t *render_target, int width, int 
 		                                                 &clearValue, &IID_ID3D12Resource, &render_target->impl.renderTarget);
 		if (result != S_OK) {
 			for (int i = 0; i < 10; ++i) {
-				kinc_memory_emergency();
+				iron_memory_emergency();
 				result = device->lpVtbl->CreateCommittedResource(device, &heapProperties, D3D12_HEAP_FLAG_NONE, &texResourceDesc, D3D12_RESOURCE_STATE_RENDER_TARGET,
 				                                         &clearValue, &IID_ID3D12Resource, &render_target->impl.renderTarget);
 				if (result == S_OK) {
@@ -2292,7 +2292,7 @@ static void render_target_init(kinc_g5_texture_t *render_target, int width, int 
 	descriptorHeapDesc.NodeMask = 0;
 	descriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 
-	kinc_microsoft_affirm(device->lpVtbl->CreateDescriptorHeap(device, &descriptorHeapDesc, &IID_ID3D12DescriptorHeap, &render_target->impl.srvDescriptorHeap));
+	iron_microsoft_affirm(device->lpVtbl->CreateDescriptorHeap(device, &descriptorHeapDesc, &IID_ID3D12DescriptorHeap, &render_target->impl.srvDescriptorHeap));
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
 	ZeroMemory(&shaderResourceViewDesc, sizeof(shaderResourceViewDesc));
@@ -2314,7 +2314,7 @@ static void render_target_init(kinc_g5_texture_t *render_target, int width, int 
 		dsvHeapDesc.NumDescriptors = 1;
 		dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
 		dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		kinc_microsoft_affirm(device->lpVtbl->CreateDescriptorHeap(device, &dsvHeapDesc, &IID_ID3D12DescriptorHeap, &render_target->impl.depthStencilDescriptorHeap));
+		iron_microsoft_affirm(device->lpVtbl->CreateDescriptorHeap(device, &dsvHeapDesc, &IID_ID3D12DescriptorHeap, &render_target->impl.depthStencilDescriptorHeap));
 
 		D3D12_RESOURCE_DESC depthTexture;
 		depthTexture.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -2346,7 +2346,7 @@ static void render_target_init(kinc_g5_texture_t *render_target, int width, int 
 		                                                 &IID_ID3D12Resource, &render_target->impl.depthStencilTexture);
 		if (result != S_OK) {
 			for (int i = 0; i < 10; ++i) {
-				kinc_memory_emergency();
+				iron_memory_emergency();
 				result = device->lpVtbl->CreateCommittedResource(device, &heapProperties, D3D12_HEAP_FLAG_NONE, &depthTexture, D3D12_RESOURCE_STATE_DEPTH_WRITE,
 				                                                 &clearValue,
 				                                         &IID_ID3D12Resource, &render_target->impl.depthStencilTexture);
@@ -2367,7 +2367,7 @@ static void render_target_init(kinc_g5_texture_t *render_target, int width, int 
 		srvDepthHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		srvDepthHeapDesc.NodeMask = 0;
 		srvDepthHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		kinc_microsoft_affirm(device->lpVtbl->CreateDescriptorHeap(device, &srvDepthHeapDesc, &IID_ID3D12DescriptorHeap, &render_target->impl.srvDepthDescriptorHeap));
+		iron_microsoft_affirm(device->lpVtbl->CreateDescriptorHeap(device, &srvDepthHeapDesc, &IID_ID3D12DescriptorHeap, &render_target->impl.srvDepthDescriptorHeap));
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC srvDepthViewDesc;
 		ZeroMemory(&srvDepthViewDesc, sizeof(srvDepthViewDesc));
@@ -2401,33 +2401,33 @@ static void render_target_init(kinc_g5_texture_t *render_target, int width, int 
 	render_target->impl.viewport.MaxDepth = 1.0f;
 }
 
-void kinc_g5_render_target_init(kinc_g5_texture_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits) {
+void iron_g5_render_target_init(iron_g5_texture_t *target, int width, int height, iron_image_format_t format, int depthBufferBits) {
 	render_target_init(target, width, height, format, depthBufferBits, -1);
 	target->_uploaded = true;
-	target->state = KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
+	target->state = IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
 }
 
-void kinc_g5_render_target_init_framebuffer(kinc_g5_texture_t *target, int width, int height, kinc_image_format_t format, int depthBufferBits) {
+void iron_g5_render_target_init_framebuffer(iron_g5_texture_t *target, int width, int height, iron_image_format_t format, int depthBufferBits) {
 	render_target_init(target, width, height, format, depthBufferBits, framebuffer_count);
 	framebuffer_count += 1;
 	target->_uploaded = true;
-	target->state = KINC_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
+	target->state = IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
 }
 
-void kinc_g5_render_target_set_depth_from(kinc_g5_texture_t *render_target, kinc_g5_texture_t *source) {
+void iron_g5_render_target_set_depth_from(iron_g5_texture_t *render_target, iron_g5_texture_t *source) {
 	render_target->impl.depthStencilDescriptorHeap = source->impl.depthStencilDescriptorHeap;
 	render_target->impl.srvDepthDescriptorHeap = source->impl.srvDepthDescriptorHeap;
 	render_target->impl.depthStencilTexture = source->impl.depthStencilTexture;
 }
 
-kinc_g5_vertex_buffer_t *_current_vertex_buffer = NULL;
+iron_g5_vertex_buffer_t *_current_vertex_buffer = NULL;
 
-void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int count, kinc_g5_vertex_structure_t *structure, bool gpuMemory) {
+void iron_g5_vertex_buffer_init(iron_g5_vertex_buffer_t *buffer, int count, iron_g5_vertex_structure_t *structure, bool gpuMemory) {
 	buffer->impl.myCount = count;
 
 	buffer->impl.myStride = 0;
 	for (int i = 0; i < structure->size; ++i) {
-		buffer->impl.myStride += kinc_g5_vertex_data_size(structure->elements[i].data);
+		buffer->impl.myStride += iron_g5_vertex_data_size(structure->elements[i].data);
 	}
 
 	int uploadBufferSize = buffer->impl.myStride * buffer->impl.myCount;
@@ -2460,19 +2460,19 @@ void kinc_g5_vertex_buffer_init(kinc_g5_vertex_buffer_t *buffer, int count, kinc
 	buffer->impl.view.StrideInBytes = buffer->impl.myStride;
 
 	buffer->impl.lastStart = 0;
-	buffer->impl.lastCount = kinc_g5_vertex_buffer_count(buffer);
+	buffer->impl.lastCount = iron_g5_vertex_buffer_count(buffer);
 }
 
-void kinc_g5_vertex_buffer_destroy(kinc_g5_vertex_buffer_t *buffer) {
+void iron_g5_vertex_buffer_destroy(iron_g5_vertex_buffer_t *buffer) {
 	// buffer->impl.vertexBuffer->lpVtbl->Release();
 	buffer->impl.uploadBuffer->lpVtbl->Release(buffer->impl.uploadBuffer);
 }
 
-float *kinc_g5_vertex_buffer_lock_all(kinc_g5_vertex_buffer_t *buffer) {
-	return kinc_g5_vertex_buffer_lock(buffer, 0, kinc_g5_vertex_buffer_count(buffer));
+float *iron_g5_vertex_buffer_lock_all(iron_g5_vertex_buffer_t *buffer) {
+	return iron_g5_vertex_buffer_lock(buffer, 0, iron_g5_vertex_buffer_count(buffer));
 }
 
-float *kinc_g5_vertex_buffer_lock(kinc_g5_vertex_buffer_t *buffer, int start, int count) {
+float *iron_g5_vertex_buffer_lock(iron_g5_vertex_buffer_t *buffer, int start, int count) {
 	buffer->impl.lastStart = start;
 	buffer->impl.lastCount = count;
 
@@ -2487,36 +2487,36 @@ float *kinc_g5_vertex_buffer_lock(kinc_g5_vertex_buffer_t *buffer, int start, in
 	return (float *)bytes;
 }
 
-void kinc_g5_vertex_buffer_unlock_all(kinc_g5_vertex_buffer_t *buffer) {
+void iron_g5_vertex_buffer_unlock_all(iron_g5_vertex_buffer_t *buffer) {
 	D3D12_RANGE range;
 	range.Begin = buffer->impl.lastStart * buffer->impl.myStride;
 	range.End = (buffer->impl.lastStart + buffer->impl.lastCount) * buffer->impl.myStride;
 	buffer->impl.uploadBuffer->lpVtbl->Unmap(buffer->impl.uploadBuffer, 0, &range);
 }
 
-void kinc_g5_vertex_buffer_unlock(kinc_g5_vertex_buffer_t *buffer, int count) {
+void iron_g5_vertex_buffer_unlock(iron_g5_vertex_buffer_t *buffer, int count) {
 	D3D12_RANGE range;
 	range.Begin = buffer->impl.lastStart * buffer->impl.myStride;
 	range.End = (buffer->impl.lastStart + count) * buffer->impl.myStride;
 	buffer->impl.uploadBuffer->lpVtbl->Unmap(buffer->impl.uploadBuffer, 0, &range);
 }
 
-int kinc_g5_internal_vertex_buffer_set(kinc_g5_vertex_buffer_t *buffer) {
+int iron_g5_internal_vertex_buffer_set(iron_g5_vertex_buffer_t *buffer) {
 	_current_vertex_buffer = buffer;
 	return 0;
 }
 
-int kinc_g5_vertex_buffer_count(kinc_g5_vertex_buffer_t *buffer) {
+int iron_g5_vertex_buffer_count(iron_g5_vertex_buffer_t *buffer) {
 	return buffer->impl.myCount;
 }
 
-int kinc_g5_vertex_buffer_stride(kinc_g5_vertex_buffer_t *buffer) {
+int iron_g5_vertex_buffer_stride(iron_g5_vertex_buffer_t *buffer) {
 	return buffer->impl.myStride;
 }
 
-bool kinc_g5_transpose_mat = false;
+bool iron_g5_transpose_mat = false;
 
-void kinc_g5_constant_buffer_init(kinc_g5_constant_buffer_t *buffer, int size) {
+void iron_g5_constant_buffer_init(iron_g5_constant_buffer_t *buffer, int size) {
 	buffer->impl.mySize = size;
 	buffer->data = NULL;
 
@@ -2540,7 +2540,7 @@ void kinc_g5_constant_buffer_init(kinc_g5_constant_buffer_t *buffer, int size) {
 	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 	resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-	kinc_microsoft_affirm(device->lpVtbl->CreateCommittedResource(device , &heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc,
+	iron_microsoft_affirm(device->lpVtbl->CreateCommittedResource(device , &heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc,
 	                                                              D3D12_RESOURCE_STATE_GENERIC_READ, NULL,
 	                                                      &IID_ID3D12Resource, &buffer->impl.constant_buffer));
 
@@ -2550,15 +2550,15 @@ void kinc_g5_constant_buffer_init(kinc_g5_constant_buffer_t *buffer, int size) {
 	buffer->impl.constant_buffer->lpVtbl->Unmap(buffer->impl.constant_buffer, 0, NULL);
 }
 
-void kinc_g5_constant_buffer_destroy(kinc_g5_constant_buffer_t *buffer) {
+void iron_g5_constant_buffer_destroy(iron_g5_constant_buffer_t *buffer) {
 	buffer->impl.constant_buffer->lpVtbl->Release(buffer->impl.constant_buffer);
 }
 
-void kinc_g5_constant_buffer_lock_all(kinc_g5_constant_buffer_t *buffer) {
-	kinc_g5_constant_buffer_lock(buffer, 0, kinc_g5_constant_buffer_size(buffer));
+void iron_g5_constant_buffer_lock_all(iron_g5_constant_buffer_t *buffer) {
+	iron_g5_constant_buffer_lock(buffer, 0, iron_g5_constant_buffer_size(buffer));
 }
 
-void kinc_g5_constant_buffer_lock(kinc_g5_constant_buffer_t *buffer, int start, int count) {
+void iron_g5_constant_buffer_lock(iron_g5_constant_buffer_t *buffer, int start, int count) {
 	buffer->impl.lastStart = start;
 	buffer->impl.lastCount = count;
 	D3D12_RANGE range;
@@ -2569,7 +2569,7 @@ void kinc_g5_constant_buffer_lock(kinc_g5_constant_buffer_t *buffer, int start, 
 	buffer->data = &p[start];
 }
 
-void kinc_g5_constant_buffer_unlock(kinc_g5_constant_buffer_t *buffer) {
+void iron_g5_constant_buffer_unlock(iron_g5_constant_buffer_t *buffer) {
 	D3D12_RANGE range;
 	range.Begin = buffer->impl.lastStart;
 	range.End = range.Begin + buffer->impl.lastCount;
@@ -2577,11 +2577,11 @@ void kinc_g5_constant_buffer_unlock(kinc_g5_constant_buffer_t *buffer) {
 	buffer->data = NULL;
 }
 
-int kinc_g5_constant_buffer_size(kinc_g5_constant_buffer_t *buffer) {
+int iron_g5_constant_buffer_size(iron_g5_constant_buffer_t *buffer) {
 	return buffer->impl.mySize;
 }
 
-void kinc_g5_index_buffer_init(kinc_g5_index_buffer_t *buffer, int count, bool gpuMemory) {
+void iron_g5_index_buffer_init(iron_g5_index_buffer_t *buffer, int count, bool gpuMemory) {
 	buffer->impl.count = count;
 	buffer->impl.gpu_memory = gpuMemory;
 
@@ -2607,7 +2607,7 @@ void kinc_g5_index_buffer_init(kinc_g5_index_buffer_t *buffer, int count, bool g
 	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 	resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-	kinc_microsoft_affirm(device->lpVtbl->CreateCommittedResource(device , &heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc,
+	iron_microsoft_affirm(device->lpVtbl->CreateCommittedResource(device , &heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc,
 	                                                              D3D12_RESOURCE_STATE_GENERIC_READ, NULL,
 	                                                      &IID_ID3D12Resource, &buffer->impl.upload_buffer));
 
@@ -2619,7 +2619,7 @@ void kinc_g5_index_buffer_init(kinc_g5_index_buffer_t *buffer, int count, bool g
 		heapProperties.CreationNodeMask = 1;
 		heapProperties.VisibleNodeMask = 1;
 
-		kinc_microsoft_affirm(device->lpVtbl->CreateCommittedResource(device , &heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc,
+		iron_microsoft_affirm(device->lpVtbl->CreateCommittedResource(device , &heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc,
 			D3D12_RESOURCE_STATE_COMMON, NULL,
 		                                                      &IID_ID3D12Resource, &buffer->impl.index_buffer));
 
@@ -2632,10 +2632,10 @@ void kinc_g5_index_buffer_init(kinc_g5_index_buffer_t *buffer, int count, bool g
 	buffer->impl.index_buffer_view.Format = DXGI_FORMAT_R32_UINT;
 
 	buffer->impl.last_start = 0;
-	buffer->impl.last_count = kinc_g5_index_buffer_count(buffer);
+	buffer->impl.last_count = iron_g5_index_buffer_count(buffer);
 }
 
-void kinc_g5_index_buffer_destroy(kinc_g5_index_buffer_t *buffer) {
+void iron_g5_index_buffer_destroy(iron_g5_index_buffer_t *buffer) {
 	if (buffer->impl.index_buffer != NULL) {
 		buffer->impl.index_buffer->lpVtbl->Release(buffer->impl.index_buffer);
 		buffer->impl.index_buffer = NULL;
@@ -2645,46 +2645,46 @@ void kinc_g5_index_buffer_destroy(kinc_g5_index_buffer_t *buffer) {
 	buffer->impl.upload_buffer = NULL;
 }
 
-static int kinc_g5_internal_index_buffer_stride(kinc_g5_index_buffer_t *buffer) {
+static int iron_g5_internal_index_buffer_stride(iron_g5_index_buffer_t *buffer) {
 	return 4;
 }
 
-void *kinc_g5_index_buffer_lock_all(kinc_g5_index_buffer_t *buffer) {
-	return kinc_g5_index_buffer_lock(buffer, 0, kinc_g5_index_buffer_count(buffer));
+void *iron_g5_index_buffer_lock_all(iron_g5_index_buffer_t *buffer) {
+	return iron_g5_index_buffer_lock(buffer, 0, iron_g5_index_buffer_count(buffer));
 }
 
-void *kinc_g5_index_buffer_lock(kinc_g5_index_buffer_t *buffer, int start, int count) {
+void *iron_g5_index_buffer_lock(iron_g5_index_buffer_t *buffer, int start, int count) {
 	buffer->impl.last_start = start;
 	buffer->impl.last_count = count;
 
 	D3D12_RANGE range;
-	range.Begin = start * kinc_g5_internal_index_buffer_stride(buffer);
-	range.End = (start + count) * kinc_g5_internal_index_buffer_stride(buffer);
+	range.Begin = start * iron_g5_internal_index_buffer_stride(buffer);
+	range.End = (start + count) * iron_g5_internal_index_buffer_stride(buffer);
 
 	void *p;
 	buffer->impl.upload_buffer->lpVtbl->Map(buffer->impl.upload_buffer, 0, &range, &p);
 	byte *bytes = (byte *)p;
-	bytes += start * kinc_g5_internal_index_buffer_stride(buffer);
+	bytes += start * iron_g5_internal_index_buffer_stride(buffer);
 	return bytes;
 }
 
-void kinc_g5_index_buffer_unlock_all(kinc_g5_index_buffer_t *buffer) {
+void iron_g5_index_buffer_unlock_all(iron_g5_index_buffer_t *buffer) {
 	D3D12_RANGE range;
-	range.Begin = buffer->impl.last_start * kinc_g5_internal_index_buffer_stride(buffer);
-	range.End = (buffer->impl.last_start + buffer->impl.last_count) * kinc_g5_internal_index_buffer_stride(buffer);
+	range.Begin = buffer->impl.last_start * iron_g5_internal_index_buffer_stride(buffer);
+	range.End = (buffer->impl.last_start + buffer->impl.last_count) * iron_g5_internal_index_buffer_stride(buffer);
 
 	buffer->impl.upload_buffer->lpVtbl->Unmap(buffer->impl.upload_buffer, 0, &range);
 }
 
-void kinc_g5_index_buffer_unlock(kinc_g5_index_buffer_t *buffer, int count) {
+void iron_g5_index_buffer_unlock(iron_g5_index_buffer_t *buffer, int count) {
 	D3D12_RANGE range;
-	range.Begin = buffer->impl.last_start * kinc_g5_internal_index_buffer_stride(buffer);
-	range.End = (buffer->impl.last_start + count) * kinc_g5_internal_index_buffer_stride(buffer);
+	range.Begin = buffer->impl.last_start * iron_g5_internal_index_buffer_stride(buffer);
+	range.End = (buffer->impl.last_start + count) * iron_g5_internal_index_buffer_stride(buffer);
 
 	buffer->impl.upload_buffer->lpVtbl->Unmap(buffer->impl.upload_buffer, 0, &range);
 }
 
-void kinc_g5_internal_index_buffer_upload(kinc_g5_index_buffer_t *buffer, ID3D12GraphicsCommandList *commandList) {
+void iron_g5_internal_index_buffer_upload(iron_g5_index_buffer_t *buffer, ID3D12GraphicsCommandList *commandList) {
 	if (!buffer->impl.gpu_memory)
 		return;
 
@@ -2701,7 +2701,7 @@ void kinc_g5_internal_index_buffer_upload(kinc_g5_index_buffer_t *buffer, ID3D12
 	commandList->lpVtbl->ResourceBarrier(commandList, 1, barriers);
 }
 
-int kinc_g5_index_buffer_count(kinc_g5_index_buffer_t *buffer) {
+int iron_g5_index_buffer_count(iron_g5_index_buffer_t *buffer) {
 	return buffer->impl.count;
 }
 
@@ -2711,7 +2711,7 @@ static const wchar_t *closesthit_shader_name = L"closesthit";
 static const wchar_t *miss_shader_name = L"miss";
 
 typedef struct inst {
-	kinc_matrix4x4_t m;
+	iron_matrix4x4_t m;
 	int i;
 } inst_t;
 
@@ -2719,9 +2719,9 @@ static ID3D12Device5 *dxrDevice = NULL;
 static ID3D12GraphicsCommandList4 *dxrCommandList = NULL;
 static ID3D12RootSignature *dxrRootSignature = NULL;
 static ID3D12DescriptorHeap *descriptorHeap = NULL;
-static kinc_g5_raytrace_acceleration_structure_t *accel;
-static kinc_g5_raytrace_pipeline_t *pipeline;
-static kinc_g5_texture_t *output = NULL;
+static iron_g5_raytrace_acceleration_structure_t *accel;
+static iron_g5_raytrace_pipeline_t *pipeline;
+static iron_g5_texture_t *output = NULL;
 static D3D12_CPU_DESCRIPTOR_HANDLE outputCpuDescriptor;
 static D3D12_GPU_DESCRIPTOR_HANDLE outputDescriptorHandle;
 static D3D12_GPU_DESCRIPTOR_HANDLE vbgpuDescriptorHandle;
@@ -2736,16 +2736,16 @@ static D3D12_GPU_DESCRIPTOR_HANDLE texrankgpuDescriptorHandle;
 static int descriptorsAllocated = 0;
 static UINT descriptorSize;
 
-static kinc_g5_vertex_buffer_t *vb[16];
-static kinc_g5_vertex_buffer_t *vb_last[16];
-static kinc_g5_index_buffer_t *ib[16];
+static iron_g5_vertex_buffer_t *vb[16];
+static iron_g5_vertex_buffer_t *vb_last[16];
+static iron_g5_index_buffer_t *ib[16];
 static int vb_count = 0;
 static int vb_count_last = 0;
 static inst_t instances[1024];
 static int instances_count = 0;
 
-void kinc_g5_raytrace_pipeline_init(kinc_g5_raytrace_pipeline_t *pipeline, kinc_g5_command_list_t *command_list, void *ray_shader, int ray_shader_size,
-                                 kinc_g5_constant_buffer_t *constant_buffer) {
+void iron_g5_raytrace_pipeline_init(iron_g5_raytrace_pipeline_t *pipeline, iron_g5_command_list_t *command_list, void *ray_shader, int ray_shader_size,
+                                 iron_g5_constant_buffer_t *constant_buffer) {
 	output = NULL;
 	descriptorsAllocated = 0;
 	pipeline->_constant_buffer = constant_buffer;
@@ -3061,14 +3061,14 @@ void kinc_g5_raytrace_pipeline_init(kinc_g5_raytrace_pipeline_t *pipeline, kinc_
 	    handle.ptr + (INT64)(descriptorHeapIndex) * (UINT64)(descriptorSize);
 }
 
-void kinc_g5_raytrace_pipeline_destroy(kinc_g5_raytrace_pipeline_t *pipeline) {
+void iron_g5_raytrace_pipeline_destroy(iron_g5_raytrace_pipeline_t *pipeline) {
 	pipeline->impl.dxr_state->lpVtbl->Release(pipeline->impl.dxr_state);
 	pipeline->impl.raygen_shader_table->lpVtbl->Release(pipeline->impl.raygen_shader_table);
 	pipeline->impl.miss_shader_table->lpVtbl->Release(pipeline->impl.miss_shader_table);
 	pipeline->impl.hitgroup_shader_table->lpVtbl->Release(pipeline->impl.hitgroup_shader_table);
 }
 
-UINT create_srv_vb(kinc_g5_vertex_buffer_t *vb, UINT numElements, UINT elementSize) {
+UINT create_srv_vb(iron_g5_vertex_buffer_t *vb, UINT numElements, UINT elementSize) {
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -3102,7 +3102,7 @@ UINT create_srv_vb(kinc_g5_vertex_buffer_t *vb, UINT numElements, UINT elementSi
 	return descriptorIndex;
 }
 
-UINT create_srv_ib(kinc_g5_index_buffer_t *ib, UINT numElements, UINT elementSize) {
+UINT create_srv_ib(iron_g5_index_buffer_t *ib, UINT numElements, UINT elementSize) {
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -3135,13 +3135,13 @@ UINT create_srv_ib(kinc_g5_index_buffer_t *ib, UINT numElements, UINT elementSiz
 	return descriptorIndex;
 }
 
-void kinc_g5_raytrace_acceleration_structure_init(kinc_g5_raytrace_acceleration_structure_t *accel) {
+void iron_g5_raytrace_acceleration_structure_init(iron_g5_raytrace_acceleration_structure_t *accel) {
 	vb_count = 0;
 	instances_count = 0;
 }
 
-void kinc_g5_raytrace_acceleration_structure_add(kinc_g5_raytrace_acceleration_structure_t *accel, kinc_g5_vertex_buffer_t *_vb, kinc_g5_index_buffer_t *_ib,
-	kinc_matrix4x4_t _transform) {
+void iron_g5_raytrace_acceleration_structure_add(iron_g5_raytrace_acceleration_structure_t *accel, iron_g5_vertex_buffer_t *_vb, iron_g5_index_buffer_t *_ib,
+	iron_matrix4x4_t _transform) {
 
 	int vb_i = -1;
 	for (int i = 0; i < vb_count; ++i) {
@@ -3162,18 +3162,18 @@ void kinc_g5_raytrace_acceleration_structure_add(kinc_g5_raytrace_acceleration_s
 	instances_count++;
 }
 
-void _kinc_g5_raytrace_acceleration_structure_destroy_bottom(kinc_g5_raytrace_acceleration_structure_t *accel) {
+void _iron_g5_raytrace_acceleration_structure_destroy_bottom(iron_g5_raytrace_acceleration_structure_t *accel) {
 	for (int i = 0; i < vb_count_last; ++i) {
 		accel->impl.bottom_level_accel[i]->lpVtbl->Release(accel->impl.bottom_level_accel[i]);
 	}
 }
 
-void _kinc_g5_raytrace_acceleration_structure_destroy_top(kinc_g5_raytrace_acceleration_structure_t *accel) {
+void _iron_g5_raytrace_acceleration_structure_destroy_top(iron_g5_raytrace_acceleration_structure_t *accel) {
 	accel->impl.top_level_accel->lpVtbl->Release(accel->impl.top_level_accel);
 }
 
-void kinc_g5_raytrace_acceleration_structure_build(kinc_g5_raytrace_acceleration_structure_t *accel, kinc_g5_command_list_t *command_list,
-	kinc_g5_vertex_buffer_t *_vb_full, kinc_g5_index_buffer_t *_ib_full) {
+void iron_g5_raytrace_acceleration_structure_build(iron_g5_raytrace_acceleration_structure_t *accel, iron_g5_command_list_t *command_list,
+	iron_g5_vertex_buffer_t *_vb_full, iron_g5_index_buffer_t *_ib_full) {
 
 	bool build_bottom = false;
 	for (int i = 0; i < 16; ++i) {
@@ -3185,9 +3185,9 @@ void kinc_g5_raytrace_acceleration_structure_build(kinc_g5_raytrace_acceleration
 
 	if (vb_count_last > 0) {
 		if (build_bottom) {
-			_kinc_g5_raytrace_acceleration_structure_destroy_bottom(accel);
+			_iron_g5_raytrace_acceleration_structure_destroy_bottom(accel);
 		}
-		_kinc_g5_raytrace_acceleration_structure_destroy_top(accel);
+		_iron_g5_raytrace_acceleration_structure_destroy_top(accel);
 	}
 
 	vb_count_last = vb_count;
@@ -3196,7 +3196,7 @@ void kinc_g5_raytrace_acceleration_structure_build(kinc_g5_raytrace_acceleration
 		return;
 	}
 
-	descriptorsAllocated = 1; // 1 descriptor already allocated in kinc_g5_raytrace_pipeline_init
+	descriptorsAllocated = 1; // 1 descriptor already allocated in iron_g5_raytrace_pipeline_init
 
 	#ifdef is_forge
 	create_srv_ib(_ib_full, _ib_full->impl.count, 0);
@@ -3409,21 +3409,21 @@ void kinc_g5_raytrace_acceleration_structure_build(kinc_g5_raytrace_acceleration
 	command_list->impl._commandList->lpVtbl->ResourceBarrier(command_list->impl._commandList, 1, &barrier);
 	dxrCommandList->lpVtbl->BuildRaytracingAccelerationStructure(dxrCommandList, &topLevelBuildDesc, 0, NULL);
 
-	kinc_g5_command_list_end(command_list);
-	kinc_g5_command_list_execute(command_list);
-	kinc_g5_command_list_wait_for_execution_to_finish(command_list);
-	kinc_g5_command_list_begin(command_list);
+	iron_g5_command_list_end(command_list);
+	iron_g5_command_list_execute(command_list);
+	iron_g5_command_list_wait_for_execution_to_finish(command_list);
+	iron_g5_command_list_begin(command_list);
 
 	scratchResource->lpVtbl->Release(scratchResource);
 	instanceDescs->lpVtbl->Release(instanceDescs);
 }
 
-void kinc_g5_raytrace_acceleration_structure_destroy(kinc_g5_raytrace_acceleration_structure_t *accel) {
+void iron_g5_raytrace_acceleration_structure_destroy(iron_g5_raytrace_acceleration_structure_t *accel) {
 	// accel->impl.bottom_level_accel->Release();
 	// accel->impl.top_level_accel->Release();
 }
 
-void kinc_g5_raytrace_set_textures(kinc_g5_texture_t *texpaint0, kinc_g5_texture_t *texpaint1, kinc_g5_texture_t *texpaint2, kinc_g5_texture_t *texenv, kinc_g5_texture_t *texsobol, kinc_g5_texture_t *texscramble, kinc_g5_texture_t *texrank) {
+void iron_g5_raytrace_set_textures(iron_g5_texture_t *texpaint0, iron_g5_texture_t *texpaint1, iron_g5_texture_t *texpaint2, iron_g5_texture_t *texenv, iron_g5_texture_t *texsobol, iron_g5_texture_t *texscramble, iron_g5_texture_t *texrank) {
 	D3D12_CPU_DESCRIPTOR_HANDLE handle;
 	descriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(descriptorHeap, &handle);
 
@@ -3481,15 +3481,15 @@ void kinc_g5_raytrace_set_textures(kinc_g5_texture_t *texpaint0, kinc_g5_texture
 	texrankgpuDescriptorHandle.ptr = ghandle.ptr + 11 * (UINT64)(descriptorSize);
 }
 
-void kinc_g5_raytrace_set_acceleration_structure(kinc_g5_raytrace_acceleration_structure_t *_accel) {
+void iron_g5_raytrace_set_acceleration_structure(iron_g5_raytrace_acceleration_structure_t *_accel) {
 	accel = _accel;
 }
 
-void kinc_g5_raytrace_set_pipeline(kinc_g5_raytrace_pipeline_t *_pipeline) {
+void iron_g5_raytrace_set_pipeline(iron_g5_raytrace_pipeline_t *_pipeline) {
 	pipeline = _pipeline;
 }
 
-void kinc_g5_raytrace_set_target(kinc_g5_texture_t *_output) {
+void iron_g5_raytrace_set_target(iron_g5_texture_t *_output) {
 	if (_output != output) {
 		_output->impl.renderTarget->lpVtbl->Release(_output->impl.renderTarget);
 		_output->impl.renderTargetDescriptorHeap->lpVtbl->Release(_output->impl.renderTargetDescriptorHeap);
@@ -3560,7 +3560,7 @@ void kinc_g5_raytrace_set_target(kinc_g5_texture_t *_output) {
 	output = _output;
 }
 
-void kinc_g5_raytrace_dispatch_rays(kinc_g5_command_list_t *command_list) {
+void iron_g5_raytrace_dispatch_rays(iron_g5_command_list_t *command_list) {
 	command_list->impl._commandList->lpVtbl->SetComputeRootSignature(command_list->impl._commandList, dxrRootSignature);
 
 	// Bind the heaps, acceleration structure and dispatch rays

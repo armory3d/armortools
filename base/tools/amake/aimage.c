@@ -18,7 +18,7 @@ typedef struct image {
     int width;
     int height;
     bool is_hdr;
-} kinc_g5_texture_t;
+} iron_g5_texture_t;
 
 static bool ends_with(const char *s, const char *end) {
 	size_t len_s = strlen(s);
@@ -26,21 +26,21 @@ static bool ends_with(const char *s, const char *end) {
 	return strncmp(s + len_s - len_end, end, len_end) == 0;
 }
 
-static kinc_g5_texture_t read_png_jpg(const char *filename) {
+static iron_g5_texture_t read_png_jpg(const char *filename) {
     int width, height, n;
     char *data = stbi_load(filename, &width, &height, &n, 4);
-    kinc_g5_texture_t img = { .data = data, .width = width, .height = height, .is_hdr = false };
+    iron_g5_texture_t img = { .data = data, .width = width, .height = height, .is_hdr = false };
     return img;
 }
 
-static kinc_g5_texture_t read_hdr(const char *filename) {
+static iron_g5_texture_t read_hdr(const char *filename) {
 	int width, height, n;
     float *data = stbi_loadf(filename, &width, &height, &n, 4);
-    kinc_g5_texture_t img = { .data = data, .width = width, .height = height, .is_hdr = true };
+    iron_g5_texture_t img = { .data = data, .width = width, .height = height, .is_hdr = true };
     return img;
 }
 
-static void *scale_image(kinc_g5_texture_t img, int width, int height) {
+static void *scale_image(iron_g5_texture_t img, int width, int height) {
     unsigned char *scaled = malloc(width * height * 4);
     stbir_resize_uint8_generic(img.data, img.width, img.height, img.width * 4, scaled, width, height, width * 4, 4, 3, 0,
                                STBIR_EDGE_CLAMP, STBIR_FILTER_BOX, STBIR_COLORSPACE_SRGB, 0);
@@ -72,7 +72,7 @@ static void write_ico_entry(FILE *file, int width, int height, int size, int off
 }
 
 void export_ico(const char *from, const char *to) {
-    kinc_g5_texture_t img = read_png_jpg(from);
+    iron_g5_texture_t img = read_png_jpg(from);
     FILE *file = fopen(to, "wb");
 
     unsigned char *data256 = scale_image(img, 256, 256);
@@ -115,7 +115,7 @@ void export_ico(const char *from, const char *to) {
 }
 
 void export_png(const char *from, const char *to, int width, int height) {
-    kinc_g5_texture_t img = read_png_jpg(from);
+    iron_g5_texture_t img = read_png_jpg(from);
 
     if (width > 0 && height > 0) {
         unsigned char *scaled = scale_image(img, width, height);
@@ -151,7 +151,7 @@ static void write_k(int width, int height, const char *format, char *data, int s
 }
 
 void export_k(const char *from, const char *to) {
-    kinc_g5_texture_t img;
+    iron_g5_texture_t img;
 	if (ends_with(from, ".hdr")) {
 		img = read_hdr(from);
     }

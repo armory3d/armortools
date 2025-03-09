@@ -3,7 +3,7 @@ function camera_data_parse(name: string, id: string): camera_data_t {
 	let format: scene_t = data_get_scene_raw(name);
 	let raw: camera_data_t = camera_data_get_raw_by_name(format.camera_datas, id);
 	if (raw == null) {
-		kinc_log("Camera data '" + id + "' not found!");
+		iron_log("Camera data '" + id + "' not found!");
 	}
 	return raw;
 }

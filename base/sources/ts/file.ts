@@ -97,7 +97,7 @@ function file_start(path: string) {
 }
 
 function file_load_url(url: string) {
-	kinc_load_url(url);
+	iron_load_url(url);
 }
 
 function file_delete(path: string) {
@@ -112,7 +112,7 @@ function file_download(url: string, dst_path: string, done: (url: string)=>void,
 	///if (arm_windows || arm_macos || arm_ios || arm_android)
 	let fdd: file_download_data_t = { dst_path: dst_path, done: done };
 	map_set(_file_download_map, url, fdd);
-	iron_http_request(url, size, function (url: string, ab: buffer_t) {
+	_iron_http_request(url, size, function (url: string, ab: buffer_t) {
 		let fdd: file_download_data_t = map_get(_file_download_map, url);
 		if (ab != null) {
 			iron_file_save_bytes(fdd.dst_path, ab, 0);
@@ -131,7 +131,7 @@ function file_download(url: string, dst_path: string, done: (url: string)=>void,
 function file_download_bytes(url: string, done: (url: string, ab: buffer_t)=>void) {
 	let save: string;
 	if (path_is_protected()) {
-		save = kinc_internal_save_path();
+		save = iron_internal_save_path();
 	}
 	else {
 		save = path_data() + path_sep;
@@ -155,7 +155,7 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 	///end
 	let dest: string;
 	if (path_is_protected()) {
-		dest = kinc_internal_save_path();
+		dest = iron_internal_save_path();
 	}
 	else {
 		dest = iron_get_files_location() + path_sep;
@@ -168,7 +168,7 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 		///else
 		let p: string;
 		if (path_is_protected()) {
-			p = kinc_internal_save_path();
+			p = iron_internal_save_path();
 		}
 		else {
 			p = path_working_dir() + path_sep;
@@ -203,7 +203,7 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 		///else
 		let p: string;
 		if (path_is_protected()) {
-			p = kinc_internal_save_path();
+			p = iron_internal_save_path();
 		}
 		else {
 			p = path_working_dir() + path_sep;

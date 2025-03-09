@@ -3,44 +3,44 @@
 #include <iron_global.h>
 #include <stdint.h>
 
-#define KINC_PI 3.141592654
-#define KINC_TAU 6.283185307
+#define IRON_PI 3.141592654
+#define IRON_TAU 6.283185307
 
-float kinc_cot(float x);
-float kinc_round(float value);
-float kinc_abs(float value);
-float kinc_min(float a, float b);
-float kinc_max(float a, float b);
-int kinc_mini(int a, int b);
-int kinc_maxi(int a, int b);
-float kinc_clamp(float value, float minValue, float maxValue);
+float iron_cot(float x);
+float iron_round(float value);
+float iron_abs(float value);
+float iron_min(float a, float b);
+float iron_max(float a, float b);
+int iron_mini(int a, int b);
+int iron_maxi(int a, int b);
+float iron_clamp(float value, float minValue, float maxValue);
 
-typedef struct kinc_vector2 {
+typedef struct iron_vector2 {
 	float x;
 	float y;
-} kinc_vector2_t;
+} iron_vector2_t;
 
-typedef struct kinc_vector3 {
-	float x;
-	float y;
-	float z;
-} kinc_vector3_t;
-
-typedef struct kinc_vector4 {
+typedef struct iron_vector3 {
 	float x;
 	float y;
 	float z;
-	float w;
-} kinc_vector4_t;
+} iron_vector3_t;
 
-typedef struct kinc_quaternion {
+typedef struct iron_vector4 {
 	float x;
 	float y;
 	float z;
 	float w;
-} kinc_quaternion_t;
+} iron_vector4_t;
 
-typedef union kinc_matrix3x3 {
+typedef struct iron_quaternion {
+	float x;
+	float y;
+	float z;
+	float w;
+} iron_quaternion_t;
+
+typedef union iron_matrix3x3 {
 	float m[3 * 3];
 	struct {
 		float m00;
@@ -53,20 +53,20 @@ typedef union kinc_matrix3x3 {
 		float m21;
 		float m22;
 	};
-} kinc_matrix3x3_t;
+} iron_matrix3x3_t;
 
-float kinc_matrix3x3_get(kinc_matrix3x3_t *matrix, int x, int y);
-void kinc_matrix3x3_set(kinc_matrix3x3_t *matrix, int x, int y, float value);
-void kinc_matrix3x3_transpose(kinc_matrix3x3_t *matrix);
-kinc_matrix3x3_t kinc_matrix3x3_identity(void);
-kinc_matrix3x3_t kinc_matrix3x3_rotation_x(float alpha);
-kinc_matrix3x3_t kinc_matrix3x3_rotation_y(float alpha);
-kinc_matrix3x3_t kinc_matrix3x3_rotation_z(float alpha);
-kinc_matrix3x3_t kinc_matrix3x3_translation(float x, float y);
-kinc_matrix3x3_t kinc_matrix3x3_multiply(kinc_matrix3x3_t *a, kinc_matrix3x3_t *b);
-kinc_vector3_t kinc_matrix3x3_multiply_vector(kinc_matrix3x3_t *a, kinc_vector3_t b);
+float iron_matrix3x3_get(iron_matrix3x3_t *matrix, int x, int y);
+void iron_matrix3x3_set(iron_matrix3x3_t *matrix, int x, int y, float value);
+void iron_matrix3x3_transpose(iron_matrix3x3_t *matrix);
+iron_matrix3x3_t iron_matrix3x3_identity(void);
+iron_matrix3x3_t iron_matrix3x3_rotation_x(float alpha);
+iron_matrix3x3_t iron_matrix3x3_rotation_y(float alpha);
+iron_matrix3x3_t iron_matrix3x3_rotation_z(float alpha);
+iron_matrix3x3_t iron_matrix3x3_translation(float x, float y);
+iron_matrix3x3_t iron_matrix3x3_multiply(iron_matrix3x3_t *a, iron_matrix3x3_t *b);
+iron_vector3_t iron_matrix3x3_multiply_vector(iron_matrix3x3_t *a, iron_vector3_t b);
 
-typedef union kinc_matrix4x4 {
+typedef union iron_matrix4x4 {
 	float m[4 * 4];
 	struct {
 		float m00;
@@ -86,16 +86,16 @@ typedef union kinc_matrix4x4 {
 		float m32;
 		float m33;
 	};
-} kinc_matrix4x4_t;
+} iron_matrix4x4_t;
 
-float kinc_matrix4x4_get(kinc_matrix4x4_t *matrix, int x, int y);
-void kinc_matrix4x4_set(kinc_matrix4x4_t *matrix, int x, int y, float value);
-void kinc_matrix4x4_transpose(kinc_matrix4x4_t *matrix);
-kinc_matrix4x4_t kinc_matrix4x4_multiply(kinc_matrix4x4_t *a, kinc_matrix4x4_t *b);
+float iron_matrix4x4_get(iron_matrix4x4_t *matrix, int x, int y);
+void iron_matrix4x4_set(iron_matrix4x4_t *matrix, int x, int y, float value);
+void iron_matrix4x4_transpose(iron_matrix4x4_t *matrix);
+iron_matrix4x4_t iron_matrix4x4_multiply(iron_matrix4x4_t *a, iron_matrix4x4_t *b);
 
-void kinc_color_components(uint32_t color, float *red, float *green, float *blue, float *alpha);
+void iron_color_components(uint32_t color, float *red, float *green, float *blue, float *alpha);
 
-void kinc_random_init(int64_t seed);
-int64_t kinc_random_get(void);
-int64_t kinc_random_get_max(int64_t max);
-int64_t kinc_random_get_in(int64_t min, int64_t max);
+void iron_random_init(int64_t seed);
+int64_t iron_random_get(void);
+int64_t iron_random_get_max(int64_t max);
+int64_t iron_random_get_in(int64_t min, int64_t max);

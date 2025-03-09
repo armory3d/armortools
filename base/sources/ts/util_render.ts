@@ -3,8 +3,8 @@ let util_render_material_preview_size: i32 = 256;
 let util_render_decal_preview_size: i32 = 512;
 let util_render_layer_preview_size: i32 = 200;
 let util_render_font_preview_size: i32 = 200;
-let util_render_screen_aligned_full_vb: kinc_g5_vertex_buffer_t = null;
-let util_render_screen_aligned_full_ib: kinc_g5_index_buffer_t = null;
+let util_render_screen_aligned_full_vb: iron_g5_vertex_buffer_t = null;
+let util_render_screen_aligned_full_ib: iron_g5_index_buffer_t = null;
 
 function util_render_make_material_preview() {
 	context_raw.material_preview = true;
@@ -79,7 +79,7 @@ function util_render_make_material_preview() {
 }
 
 function util_render_make_decal_preview() {
-	let current: kinc_g5_texture_t = _g2_current;
+	let current: iron_g5_texture_t = _g2_current;
 	let g2_in_use: bool = _g2_in_use;
 	if (g2_in_use) g2_end();
 
@@ -143,7 +143,7 @@ function util_render_make_decal_preview() {
 }
 
 function util_render_make_text_preview() {
-	let current: kinc_g5_texture_t = _g2_current;
+	let current: iron_g5_texture_t = _g2_current;
 	let g2_in_use: bool = _g2_in_use;
 	if (g2_in_use) g2_end();
 
@@ -168,7 +168,7 @@ function util_render_make_text_preview() {
 		///end
 	}
 	g2_begin(context_raw.text_tool_image);
-	kinc_g5_clear(0xff000000);
+	iron_g5_clear(0xff000000);
 	g2_set_font(font, font_size);
 	draw_set_color(0xffffffff);
 	draw_string(text, tex_w / 2 - text_w / 2, tex_w / 2 - text_h / 2);
@@ -178,7 +178,7 @@ function util_render_make_text_preview() {
 }
 
 function util_render_make_font_preview() {
-	let current: kinc_g5_texture_t = _g2_current;
+	let current: iron_g5_texture_t = _g2_current;
 	let g2_in_use: bool = _g2_in_use;
 	if (g2_in_use) g2_end();
 
@@ -192,7 +192,7 @@ function util_render_make_font_preview() {
 		context_raw.font.image = iron_g4_create_render_target(tex_w, tex_w, tex_format_t.RGBA32);
 	}
 	g2_begin(context_raw.font.image);
-	kinc_g5_clear(0x00000000);
+	iron_g5_clear(0x00000000);
 	g2_set_font(font, font_size);
 	draw_set_color(0xffffffff);
 	draw_string(text, tex_w / 2 - text_w / 2, tex_w / 2 - text_h / 2);
@@ -207,7 +207,7 @@ function util_render_make_brush_preview() {
 		return;
 	}
 
-	let current: kinc_g5_texture_t = _g2_current;
+	let current: iron_g5_texture_t = _g2_current;
 	let g2_in_use: bool = _g2_in_use;
 	if (g2_in_use) g2_end();
 
@@ -365,9 +365,9 @@ function util_render_make_brush_preview() {
 
 	// Scale layer down to to image preview
 	l = render_path_paint_live_layer;
-	let target: kinc_g5_texture_t = context_raw.brush.image;
+	let target: iron_g5_texture_t = context_raw.brush.image;
 	g2_begin(target);
-	kinc_g5_clear(0x00000000);
+	iron_g5_clear(0x00000000);
 	draw_set_pipeline(pipes_copy);
 	draw_scaled_image(l.texpaint, 0, 0, target.width, target.height);
 	draw_set_pipeline(null);
@@ -388,7 +388,7 @@ function util_render_make_brush_preview() {
 	if (g2_in_use) g2_begin(current);
 }
 
-function util_render_make_node_preview(canvas: ui_node_canvas_t, node: ui_node_t, image: kinc_g5_texture_t, group: ui_node_canvas_t = null, parents: ui_node_t[] = null) {
+function util_render_make_node_preview(canvas: ui_node_canvas_t, node: ui_node_t, image: iron_g5_texture_t, group: ui_node_canvas_t = null, parents: ui_node_t[] = null) {
 	let res: parse_node_preview_result_t = make_material_parse_node_preview_material(node, group, parents);
 	if (res == null || res.scon == null) {
 		return;
@@ -402,16 +402,16 @@ function util_render_make_node_preview(canvas: ui_node_canvas_t, node: ui_node_t
 	context_raw.paint_object.base.transform.scale_world = 3.0;
 	transform_build_matrix(context_raw.paint_object.base.transform);
 
-	iron_g4_begin(image);
-	kinc_g5_set_pipeline(res.scon._.pipe_state);
+	_iron_g4_begin(image);
+	iron_g5_set_pipeline(res.scon._.pipe_state);
 	let empty: string[] = [""];
 	uniforms_set_context_consts(res.scon, empty);
 	uniforms_set_obj_consts(res.scon, context_raw.paint_object.base);
 	uniforms_set_material_consts(res.scon, res.mcon);
-	kinc_g4_set_vertex_buffer(util_render_screen_aligned_full_vb);
-	kinc_g4_set_index_buffer(util_render_screen_aligned_full_ib);
+	iron_g4_set_vertex_buffer(util_render_screen_aligned_full_vb);
+	iron_g4_set_index_buffer(util_render_screen_aligned_full_ib);
 	iron_g4_draw_indexed_vertices();
-	iron_g4_end();
+	_iron_g4_end();
 
 	context_raw.paint_object.base.transform.scale_world = _scale_world;
 	transform_build_matrix(context_raw.paint_object.base.transform);
@@ -458,22 +458,22 @@ function util_render_create_screen_aligned_full_data() {
 	let indices: u32[] = [0, 1, 2];
 
 	// Mandatory vertex data names and sizes
-	let structure: kinc_g5_vertex_structure_t = g4_vertex_struct_create();
+	let structure: iron_g5_vertex_structure_t = g4_vertex_struct_create();
 	g4_vertex_struct_add(structure, "pos", vertex_data_t.I16_4X_NORM);
 	g4_vertex_struct_add(structure, "nor", vertex_data_t.I16_2X_NORM);
 	g4_vertex_struct_add(structure, "tex", vertex_data_t.I16_2X_NORM);
 	g4_vertex_struct_add(structure, "col", vertex_data_t.I16_4X_NORM);
-	util_render_screen_aligned_full_vb = iron_g4_create_vertex_buffer(math_floor(data.length / math_floor(kinc_g5_vertex_struct_size(structure) / 2)), structure, usage_t.STATIC);
+	util_render_screen_aligned_full_vb = iron_g4_create_vertex_buffer(math_floor(data.length / math_floor(iron_g5_vertex_struct_size(structure) / 2)), structure, usage_t.STATIC);
 	let vertices: buffer_t = iron_g4_lock_vertex_buffer(util_render_screen_aligned_full_vb);
 	for (let i: i32 = 0; i < math_floor((vertices.length) / 2); ++i) {
 		buffer_set_i16(vertices, i * 2, data[i]);
 	}
-	kinc_g4_vertex_buffer_unlock_all(util_render_screen_aligned_full_vb);
+	iron_g4_vertex_buffer_unlock_all(util_render_screen_aligned_full_vb);
 
 	util_render_screen_aligned_full_ib = iron_g4_create_index_buffer(indices.length);
 	let id: u32_array_t = iron_g4_lock_index_buffer(util_render_screen_aligned_full_ib);
 	for (let i: i32 = 0; i < id.length; ++i) {
 		id[i] = indices[i];
 	}
-	kinc_g4_index_buffer_unlock_all(util_render_screen_aligned_full_ib);
+	iron_g4_index_buffer_unlock_all(util_render_screen_aligned_full_ib);
 }

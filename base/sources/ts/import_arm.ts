@@ -186,7 +186,7 @@ function import_arm_run_project(path: string) {
 	context_raw.merged_object.base.visible = true;
 
 	///if (is_paint || is_sculpt)
-	let tex: kinc_g5_texture_t = project_layers[0].texpaint;
+	let tex: iron_g5_texture_t = project_layers[0].texpaint;
 	if (tex.width != config_get_texture_res_x() || tex.height != config_get_texture_res_y()) {
 		if (history_undo_layers != null) {
 			for (let i: i32 = 0; i < history_undo_layers.length; ++i) {
@@ -196,16 +196,16 @@ function import_arm_run_project(path: string) {
 		}
 		let rts: map_t<string, render_target_t> = render_path_render_targets;
 		let blend0: render_target_t = map_get(rts, "texpaint_blend0");
-		let _texpaint_blend0: kinc_g5_texture_t = blend0._image;
-		app_notify_on_next_frame(function (_texpaint_blend0: kinc_g5_texture_t) {
+		let _texpaint_blend0: iron_g5_texture_t = blend0._image;
+		app_notify_on_next_frame(function (_texpaint_blend0: iron_g5_texture_t) {
 			iron_unload_image(_texpaint_blend0);
 		}, _texpaint_blend0);
 		blend0.width = config_get_texture_res_x();
 		blend0.height = config_get_texture_res_y();
 		blend0._image = iron_g4_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8, 0);
 		let blend1: render_target_t = map_get(rts, "texpaint_blend1");
-		let _texpaint_blend1: kinc_g5_texture_t = blend1._image;
-		app_notify_on_next_frame(function (_texpaint_blend1: kinc_g5_texture_t) {
+		let _texpaint_blend1: iron_g5_texture_t = blend1._image;
+		app_notify_on_next_frame(function (_texpaint_blend1: iron_g5_texture_t) {
 			iron_unload_image(_texpaint_blend1);
 		}, _texpaint_blend1);
 		blend1.width = config_get_texture_res_x();
@@ -238,9 +238,9 @@ function import_arm_run_project(path: string) {
 		array_push(project_layers, l);
 
 		if (!is_group) {
-			let _texpaint: kinc_g5_texture_t = null;
-			let _texpaint_nor: kinc_g5_texture_t = null;
-			let _texpaint_pack: kinc_g5_texture_t = null;
+			let _texpaint: iron_g5_texture_t = null;
+			let _texpaint_nor: iron_g5_texture_t = null;
+			let _texpaint_pack: iron_g5_texture_t = null;
 
 			if (is_mask) {
 				_texpaint = iron_g4_create_texture_from_bytes(lz4_decode(ld.texpaint, ld.res * ld.res * 4), ld.res, ld.res, tex_format_t.RGBA32);
@@ -301,18 +301,18 @@ function import_arm_run_project(path: string) {
 			l.paint_subs = ld.paint_subs;
 			///end
 
-			app_notify_on_next_frame(function (_texpaint: kinc_g5_texture_t) {
+			app_notify_on_next_frame(function (_texpaint: iron_g5_texture_t) {
 				iron_unload_image(_texpaint);
 			}, _texpaint);
 
 			///if is_paint
 			if (_texpaint_nor != null) {
-				app_notify_on_next_frame(function (_texpaint_nor: kinc_g5_texture_t) {
+				app_notify_on_next_frame(function (_texpaint_nor: iron_g5_texture_t) {
 					iron_unload_image(_texpaint_nor);
 				}, _texpaint_nor);
 			}
 			if (_texpaint_pack != null) {
-				app_notify_on_next_frame(function (_texpaint_pack: kinc_g5_texture_t) {
+				app_notify_on_next_frame(function (_texpaint_pack: iron_g5_texture_t) {
 					iron_unload_image(_texpaint_pack);
 				}, _texpaint_pack);
 			}
@@ -633,7 +633,7 @@ function import_arm_make_pink(abs: string) {
 	b[1] = 0;
 	b[2] = 255;
 	b[3] = 255;
-	let pink: kinc_g5_texture_t = iron_g4_create_texture_from_bytes(b, 1, 1);
+	let pink: iron_g5_texture_t = iron_g4_create_texture_from_bytes(b, 1, 1);
 	map_set(data_cached_images, abs, pink);
 }
 
@@ -674,7 +674,7 @@ function import_arm_unpack_asset(project: project_format_t, abs: string, file: s
 			if (!project_packed_asset_exists(project_raw.packed_assets, pa.name)) {
 				array_push(project_raw.packed_assets, pa);
 			}
-			let image: kinc_g5_texture_t = iron_g4_create_texture_from_encoded_bytes(pa.bytes, ends_with(pa.name, ".jpg") ? ".jpg" : ".png");
+			let image: iron_g5_texture_t = iron_g4_create_texture_from_encoded_bytes(pa.bytes, ends_with(pa.name, ".jpg") ? ".jpg" : ".png");
 			map_set(data_cached_images, abs, image);
 			break;
 		}

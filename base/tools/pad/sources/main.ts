@@ -23,7 +23,7 @@ let minimap_w: i32 = 150;
 let minimap_h: i32 = 0;
 let minimap_box_h: i32 = 0;
 let minimap_scrolling: bool = false;
-let minimap: kinc_g5_texture_t = null;
+let minimap: iron_g5_texture_t = null;
 let window_header_h: i32 = 0;
 
 function drop_files(path: string) {
@@ -50,13 +50,13 @@ function encode_storage(): string {
 
 function shutdown() {
 	let storage_string: string = sys_string_to_buffer(encode_storage());
-	iron_file_save_bytes(kinc_internal_save_path() + "/config.json", storage_string, 0);
+	iron_file_save_bytes(iron_internal_save_path() + "/config.json", storage_string, 0);
 }
 
 function main() {
-	kinc_set_app_name("ArmorPad");
+	iron_set_app_name("ArmorPad");
 
-	let blob_storage: buffer_t = iron_load_blob(kinc_internal_save_path() + "/config.json");
+	let blob_storage: buffer_t = iron_load_blob(iron_internal_save_path() + "/config.json");
 	if (blob_storage == null) {
 		storage = {};
 		storage.project = "";
@@ -76,7 +76,7 @@ function main() {
 
 	text_handle.text = storage.text;
 
-	let ops: kinc_window_options_t = {
+	let ops: iron_window_options_t = {
 		title: "ArmorPad",
 		x: storage.window_x,
 		y: storage.window_y,
@@ -117,7 +117,7 @@ function main() {
 	ui_text_area_scroll_past_end = true;
 
 	sys_notify_on_frames(render);
-	iron_set_drop_files_callback(drop_files);
+	_iron_set_drop_files_callback(drop_files);
 	iron_set_application_state_callback(null, null, null, null, shutdown);
 }
 
@@ -180,17 +180,17 @@ function list_folder(path: string) {
 }
 
 function render() {
-	storage.window_w = kinc_window_width();
-	storage.window_h = kinc_window_height();
-	storage.window_x = kinc_window_x();
-	storage.window_y = kinc_window_y();
+	storage.window_w = iron_window_width();
+	storage.window_h = iron_window_height();
+	storage.window_x = iron_window_x();
+	storage.window_y = iron_window_y();
 	if (ui.input_dx != 0 || ui.input_dy != 0) {
 		iron_set_mouse_cursor(0); // Arrow
 	}
 
 	ui_begin(ui);
 
-	if (ui_window(sidebar_handle, 0, 0, storage.sidebar_w, kinc_window_height(), false)) {
+	if (ui_window(sidebar_handle, 0, 0, storage.sidebar_w, iron_window_height(), false)) {
 		if (storage.project != "") {
 			list_folder(storage.project);
 		}
@@ -199,12 +199,12 @@ function render() {
 		}
 	}
 
-	ui_fill(kinc_window_width() - minimap_w, 0, minimap_w, UI_ELEMENT_H() + UI_ELEMENT_OFFSET() + 1, theme.SEPARATOR_COL);
-	ui_fill(storage.sidebar_w, 0, 1, kinc_window_height(), theme.SEPARATOR_COL);
+	ui_fill(iron_window_width() - minimap_w, 0, minimap_w, UI_ELEMENT_H() + UI_ELEMENT_OFFSET() + 1, theme.SEPARATOR_COL);
+	ui_fill(storage.sidebar_w, 0, 1, iron_window_height(), theme.SEPARATOR_COL);
 
 	let editor_updated: bool = false;
 
-	if (ui_window(editor_handle, storage.sidebar_w + 1, 0, kinc_window_width() - storage.sidebar_w - minimap_w, kinc_window_height(), false)) {
+	if (ui_window(editor_handle, storage.sidebar_w + 1, 0, iron_window_width() - storage.sidebar_w - minimap_w, iron_window_height(), false)) {
 		editor_updated = true;
 		let htab: ui_handle_t = ui_handle(__ID__);
 		let file_name: string = substring(storage.file, string_last_index_of(storage.file, "/") + 1, storage.file.length);
@@ -241,7 +241,7 @@ function render() {
 	}
 
 	// Minimap controls
-	let minimap_x: i32 = kinc_window_width() - minimap_w;
+	let minimap_x: i32 = iron_window_width() - minimap_w;
 	let minimap_y: i32 = window_header_h + 1;
 	let redraw: bool = false;
 	if (ui.input_started && hit_test(ui.input_x, ui.input_y, minimap_x + 5, minimap_y, minimap_w, minimap_h)) {
@@ -312,8 +312,8 @@ function build_project() {
 }
 
 function draw_minimap() {
-	if (minimap_h != kinc_window_height()) {
-		minimap_h = kinc_window_height();
+	if (minimap_h != iron_window_height()) {
+		minimap_h = iron_window_height();
 		if (minimap != null) {
 			iron_unload_image(minimap);
 		}
@@ -321,7 +321,7 @@ function draw_minimap() {
 	}
 
 	g2_begin(minimap);
-	kinc_g5_clear(theme.SEPARATOR_COL);
+	iron_g5_clear(theme.SEPARATOR_COL);
 	draw_set_color(0xff333333);
 	let lines: string[] = string_split(storage.text, "\n");
 	let minimap_full_h: i32 = lines.length * 2;
@@ -349,7 +349,7 @@ function draw_minimap() {
 	// Current position
 	let visible_area: i32 = out_of_screen > 0 ? minimap_h : minimap_full_h;
 	draw_set_color(0x11ffffff);
-	minimap_box_h = math_floor((kinc_window_height() - window_header_h) / UI_ELEMENT_H() * 2);
+	minimap_box_h = math_floor((iron_window_height() - window_header_h) / UI_ELEMENT_H() * 2);
 	draw_filled_rect(0, scroll_progress * visible_area, minimap_w, minimap_box_h);
 	g2_end();
 }

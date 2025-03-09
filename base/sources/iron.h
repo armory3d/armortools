@@ -26,7 +26,7 @@
 #include "iron_ui.h"
 #include "iron_ui_nodes.h"
 #include "iron_draw.h"
-#ifdef KINC_WINDOWS
+#ifdef IRON_WINDOWS
 #include <Windows.h>
 #endif
 #ifdef WITH_AUDIO
@@ -37,9 +37,9 @@
 #endif
 #ifdef WITH_ONNX
 #include <onnxruntime_c_api.h>
-#ifdef KINC_WINDOWS
+#ifdef IRON_WINDOWS
 #include <dml_provider_factory.h>
-#elif defined(KINC_MACOS)
+#elif defined(IRON_MACOS)
 #include <coreml_provider_factory.h>
 #endif
 const OrtApi *ort = NULL;
@@ -130,7 +130,7 @@ char *js_call(void *p) {
 
 #ifdef WITH_EMBED
 buffer_t *embed_get(char *key) {
-	#ifdef KINC_WINDOWS
+	#ifdef IRON_WINDOWS
 	key = string_replace_all(key, "\\", "/");
 	#endif
 	for (int i = 0; i < embed_count; ++i) {
@@ -196,9 +196,9 @@ int last_window_height = 0;
 char temp_string[1024 * 32];
 char temp_string_vs[1024 * 128];
 char temp_string_fs[1024 * 128];
-#ifdef KINC_WINDOWS
+#ifdef IRON_WINDOWS
 wchar_t temp_wstring[1024 * 32];
-struct HWND__ *kinc_windows_window_handle();
+struct HWND__ *iron_windows_window_handle();
 #endif
 
 void (*iron_update)(void);
@@ -240,15 +240,15 @@ char *_substring(char *s, int32_t start, int32_t end) {
 int kickstart(int argc, char **argv) {
 	_argc = argc;
 	_argv = argv;
-#ifdef KINC_ANDROID
+#ifdef IRON_ANDROID
 	char *bindir = "/";
-#elif defined(KINC_IOS)
+#elif defined(IRON_IOS)
 	char *bindir = "";
 #else
 	char *bindir = argv[0];
 #endif
 
-#ifdef KINC_WINDOWS // Handle non-ascii path
+#ifdef IRON_WINDOWS // Handle non-ascii path
 	HMODULE hmodule = GetModuleHandleW(NULL);
 	GetModuleFileNameW(hmodule, temp_wstring, 1024);
 	WideCharToMultiByte(CP_UTF8, 0, temp_wstring, -1, temp_string, 4096, NULL, NULL);
@@ -273,18 +273,18 @@ int kickstart(int argc, char **argv) {
 		}
 	}
 
-#if !defined(KINC_MACOS) && !defined(KINC_IOS)
-	kinc_internal_set_files_location(assetsdir);
+#if !defined(IRON_MACOS) && !defined(IRON_IOS)
+	iron_internal_set_files_location(assetsdir);
 #endif
 
-	kinc_threads_init();
-	kinc_display_init();
+	iron_threads_init();
+	iron_display_init();
 
 	gc_start(&argc);
 	_kickstart();
 
 	#ifdef WITH_AUDIO
-	kinc_a2_shutdown();
+	iron_a2_shutdown();
 	#endif
 	#ifdef WITH_ONNX
 	if (ort != NULL) {
@@ -323,7 +323,7 @@ string_t *iron_get_arg(i32 index) {
 #endif
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
-#ifdef KINC_DIRECT3D12
+#ifdef IRON_DIRECT3D12
 #include <d3d12.h>
 extern bool waitAfterNextDraw;
 #endif
@@ -333,10 +333,10 @@ extern bool waitAfterNextDraw;
 #endif
 #ifdef WITH_NFD
 #include <nfd.h>
-#elif defined(KINC_ANDROID)
+#elif defined(IRON_ANDROID)
 #include "android_file_dialog.h"
 #include "android_http_request.h"
-#elif defined(KINC_IOS)
+#elif defined(IRON_IOS)
 #include <wchar.h>
 #include <ios_file_dialog.h>
 #endif
@@ -359,36 +359,36 @@ unsigned char *iron_deflate_raw(unsigned char *data, int data_len, int *out_len,
 #define SINFL_IMPLEMENTATION
 #include "sinfl.h"
 #endif
-#if defined(IDLE_SLEEP) && !defined(KINC_WINDOWS)
+#if defined(IDLE_SLEEP) && !defined(IRON_WINDOWS)
 #include <unistd.h>
 #endif
 
-#ifdef KINC_MACOS
+#ifdef IRON_MACOS
 const char *macgetresourcepath();
 #endif
-#ifdef KINC_IOS
+#ifdef IRON_IOS
 const char *iphonegetresourcepath();
 #endif
 
-#if defined(KINC_IOS) || defined(KINC_ANDROID)
+#if defined(IRON_IOS) || defined(IRON_ANDROID)
 char mobile_title[1024];
 #endif
 
-#if defined(KINC_VULKAN) && defined(KRAFIX_LIBRARY)
+#if defined(IRON_VULKAN) && defined(KRAFIX_LIBRARY)
 int krafix_compile(const char *source, char *output, int *length, const char *targetlang, const char *system, const char *shadertype, int version);
 #endif
 
-extern kinc_g5_command_list_t commandList;
-static kinc_g5_constant_buffer_t constant_buffer;
-static kinc_g5_texture_t *render_target;
-static kinc_g5_raytrace_pipeline_t rt_pipeline;
-static kinc_g5_raytrace_acceleration_structure_t accel;
+extern iron_g5_command_list_t commandList;
+static iron_g5_constant_buffer_t constant_buffer;
+static iron_g5_texture_t *render_target;
+static iron_g5_raytrace_pipeline_t rt_pipeline;
+static iron_g5_raytrace_acceleration_structure_t accel;
 static bool raytrace_created = false;
 static bool raytrace_accel_created = false;
 const int constant_buffer_size = 24;
 
 void _update(void *data) {
-	#ifdef KINC_WINDOWS
+	#ifdef IRON_WINDOWS
 	if (in_background && ++paused_frames > 3) {
 		Sleep(1);
 		return;
@@ -396,18 +396,18 @@ void _update(void *data) {
 	#endif
 
 	#ifdef IDLE_SLEEP
-	if (last_window_width != kinc_window_width() || last_window_height != kinc_window_height()) {
-		last_window_width = kinc_window_width();
-		last_window_height = kinc_window_height();
+	if (last_window_width != iron_window_width() || last_window_height != iron_window_height()) {
+		last_window_width = iron_window_width();
+		last_window_height = iron_window_height();
 		paused_frames = 0;
 	}
-	#if defined(KINC_IOS) || defined(KINC_ANDROID)
+	#if defined(IRON_IOS) || defined(IRON_ANDROID)
 	const int start_sleep = 1200;
 	#else
 	const int start_sleep = 120;
 	#endif
 	if (++paused_frames > start_sleep && !input_down) {
-		#ifdef KINC_WINDOWS
+		#ifdef IRON_WINDOWS
 		Sleep(1);
 		#else
 		usleep(1000);
@@ -420,13 +420,13 @@ void _update(void *data) {
 	#endif
 
 	#ifdef WITH_AUDIO
-	kinc_a2_update();
+	iron_a2_update();
 	#endif
 
-	kinc_g4_begin();
+	iron_g4_begin();
 	iron_update();
-	kinc_g4_end();
-	kinc_g5_swap_buffers();
+	iron_g4_end();
+	iron_g5_swap_buffers();
 }
 
 char *_copy(void *data) {
@@ -557,7 +557,7 @@ void _mouse_wheel(int delta, void *data) {
 void _touch_move(int index, int x, int y) {
 	iron_touch_move(index, x, y);
 
-	#if defined(KINC_ANDROID) || defined(KINC_IOS)
+	#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	for (int i = 0; i < ui_instances_count; ++i) {
 		ui_touch_move(ui_instances[i], index, x, y);
 	}
@@ -571,7 +571,7 @@ void _touch_move(int index, int x, int y) {
 void _touch_down(int index, int x, int y) {
 	iron_touch_down(index, x, y);
 
-	#if defined(KINC_ANDROID) || defined(KINC_IOS)
+	#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	for (int i = 0; i < ui_instances_count; ++i) {
 		ui_touch_down(ui_instances[i], index, x, y);
 	}
@@ -586,7 +586,7 @@ void _touch_down(int index, int x, int y) {
 void _touch_up(int index, int x, int y) {
 	iron_touch_up(index, x, y);
 
-	#if defined(KINC_ANDROID) || defined(KINC_IOS)
+	#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	for (int i = 0; i < ui_instances_count; ++i) {
 		ui_touch_up(ui_instances[i], index, x, y);
 	}
@@ -654,16 +654,16 @@ void _gamepad_button(int gamepad, int button, float value, void *data) {
 
 void _drop_files(wchar_t *file_path, void *data) {
 // Update mouse position
-#ifdef KINC_WINDOWS
+#ifdef IRON_WINDOWS
 	POINT p;
 	GetCursorPos(&p);
-	ScreenToClient(kinc_windows_window_handle(), &p);
+	ScreenToClient(iron_windows_window_handle(), &p);
 	_mouse_move(p.x, p.y, 0, 0, NULL);
 #endif
 
 	char buffer[1024];
 
-#ifdef KINC_WINDOWS
+#ifdef IRON_WINDOWS
 	WideCharToMultiByte(CP_UTF8, 0, file_path, wcslen(file_path), buffer, sizeof(buffer), NULL, NULL);
 #else
 	wcstombs(buffer, file_path, sizeof(buffer));
@@ -783,56 +783,56 @@ i32 color_set_ab(i32 c, u8 i) {
 	return (i << 24) | (color_get_rb(c) << 16) | (color_get_gb(c) << 8) | color_get_bb(c);
 }
 
-void iron_init(kinc_window_options_t *ops) {
+void _iron_init(iron_window_options_t *ops) {
 	ops->display_index = -1;
 	ops->visible = enable_window;
 	ops->color_bits = 32;
 	ops->depth_bits = ops->use_depth ? 24 : 0;
-	kinc_init(ops->title, ops->width, ops->height, ops);
-	kinc_random_init((int)(kinc_time() * 1000));
+	iron_init(ops->title, ops->width, ops->height, ops);
+	iron_random_init((int)(iron_time() * 1000));
 
-	#ifdef KINC_WINDOWS
-	// Maximized window has x < -1, prevent window centering done by kinc
+	#ifdef IRON_WINDOWS
+	// Maximized window has x < -1, prevent window centering
 	if (ops->x < -1 && ops->y < -1) {
-		kinc_window_move(ops->x, ops->y);
+		iron_window_move(ops->x, ops->y);
 	}
 	#endif
 
 	#ifdef WITH_AUDIO
-	kinc_a1_init();
-	kinc_a2_init();
+	iron_a1_init();
+	iron_a2_init();
 	#endif
 
-	#ifdef KINC_ANDROID
+	#ifdef IRON_ANDROID
 	android_check_permissions();
 	#endif
 }
 
-void iron_set_update_callback(void (*callback)(void)) {
+void _iron_set_update_callback(void (*callback)(void)) {
 	iron_update = callback;
-	kinc_set_update_callback(_update, NULL);
+	iron_set_update_callback(_update, NULL);
 }
 
-void iron_set_drop_files_callback(void (*callback)(char *)) {
+void _iron_set_drop_files_callback(void (*callback)(char *)) {
 	iron_drop_files = callback;
-	kinc_set_drop_files_callback(_drop_files, NULL);
+	iron_set_drop_files_callback(_drop_files, NULL);
 }
 
 void iron_set_cut_copy_paste_callback(char *(*on_cut)(void *), char *(*on_copy)(void *), void (*on_paste)(char *, void *)) {
-	kinc_set_cut_callback(_cut, NULL);
-	kinc_set_copy_callback(_copy, NULL);
-	kinc_set_paste_callback(_paste, NULL);
+	iron_set_cut_callback(_cut, NULL);
+	iron_set_copy_callback(_copy, NULL);
+	iron_set_paste_callback(_paste, NULL);
 	iron_cut = on_cut;
 	iron_copy = on_copy;
 	iron_paste = on_paste;
 }
 
 void iron_set_application_state_callback(void (*on_foreground)(void), void (*on_resume)(void), void (*on_pause)(void), void (*on_background)(void), void (*on_shutdown)(void)) {
-	kinc_set_foreground_callback(on_foreground != NULL ? _foreground : NULL, NULL);
-	kinc_set_resume_callback(on_resume != NULL ? _resume : NULL, NULL);
-	kinc_set_pause_callback(on_pause != NULL ? _pause : NULL, NULL);
-	kinc_set_background_callback(on_background != NULL ? _background : NULL, NULL);
-	kinc_set_shutdown_callback(on_shutdown != NULL ? _shutdown : NULL, NULL);
+	iron_set_foreground_callback(on_foreground != NULL ? _foreground : NULL, NULL);
+	iron_set_resume_callback(on_resume != NULL ? _resume : NULL, NULL);
+	iron_set_pause_callback(on_pause != NULL ? _pause : NULL, NULL);
+	iron_set_background_callback(on_background != NULL ? _background : NULL, NULL);
+	iron_set_shutdown_callback(on_shutdown != NULL ? _shutdown : NULL, NULL);
 	iron_foreground = on_foreground;
 	iron_resume = on_resume;
 	iron_pause = on_pause;
@@ -842,147 +842,147 @@ void iron_set_application_state_callback(void (*on_foreground)(void), void (*on_
 
 void iron_set_keyboard_down_callback(void (*callback)(int)) {
 	iron_key_down = callback;
-	kinc_keyboard_set_key_down_callback(_key_down, NULL);
+	iron_keyboard_set_key_down_callback(_key_down, NULL);
 }
 
 void iron_set_keyboard_up_callback(void (*callback)(int)) {
 	iron_key_up = callback;
-	kinc_keyboard_set_key_up_callback(_key_up, NULL);
+	iron_keyboard_set_key_up_callback(_key_up, NULL);
 }
 
 void iron_set_keyboard_press_callback(void (*callback)(int)) {
 	iron_key_press = callback;
-	kinc_keyboard_set_key_press_callback(_key_press, NULL);
+	iron_keyboard_set_key_press_callback(_key_press, NULL);
 }
 
 void iron_set_mouse_down_callback(void (*callback)(int, int, int)) {
 	iron_mouse_down = callback;
-	kinc_mouse_set_press_callback(_mouse_down, NULL);
+	iron_mouse_set_press_callback(_mouse_down, NULL);
 }
 
 void iron_set_mouse_up_callback(void (*callback)(int, int, int)) {
 	iron_mouse_up = callback;
-	kinc_mouse_set_release_callback(_mouse_up, NULL);
+	iron_mouse_set_release_callback(_mouse_up, NULL);
 }
 
 void iron_set_mouse_move_callback(void (*callback)(int, int, int, int)) {
 	iron_mouse_move = callback;
-	kinc_mouse_set_move_callback(_mouse_move, NULL);
+	iron_mouse_set_move_callback(_mouse_move, NULL);
 }
 
 void iron_set_mouse_wheel_callback(void (*callback)(int)) {
 	iron_mouse_wheel = callback;
-	kinc_mouse_set_scroll_callback(_mouse_wheel, NULL);
+	iron_mouse_set_scroll_callback(_mouse_wheel, NULL);
 }
 
 void iron_set_touch_down_callback(void (*callback)(int, int, int)) {
 	iron_touch_down = callback;
-	kinc_surface_set_touch_start_callback(_touch_down);
+	iron_surface_set_touch_start_callback(_touch_down);
 }
 
 void iron_set_touch_up_callback(void (*callback)(int, int, int)) {
 	iron_touch_up = callback;
-	kinc_surface_set_touch_end_callback(_touch_up);
+	iron_surface_set_touch_end_callback(_touch_up);
 }
 
 void iron_set_touch_move_callback(void (*callback)(int, int, int)) {
 	iron_touch_move = callback;
-	kinc_surface_set_move_callback(_touch_move);
+	iron_surface_set_move_callback(_touch_move);
 }
 
 void iron_set_pen_down_callback(void (*callback)(int, int, float)) {
 	iron_pen_down = callback;
-	kinc_pen_set_press_callback(_pen_down);
+	iron_pen_set_press_callback(_pen_down);
 }
 
 void iron_set_pen_up_callback(void (*callback)(int, int, float)) {
 	iron_pen_up = callback;
-	kinc_pen_set_release_callback(_pen_up);
+	iron_pen_set_release_callback(_pen_up);
 }
 
 void iron_set_pen_move_callback(void (*callback)(int, int, float)) {
 	iron_pen_move = callback;
-	kinc_pen_set_move_callback(_pen_move);
+	iron_pen_set_move_callback(_pen_move);
 }
 
 void iron_set_gamepad_axis_callback(void (*callback)(int, int, float)) {
 	iron_gamepad_axis = callback;
-	kinc_gamepad_set_axis_callback(_gamepad_axis, NULL);
+	iron_gamepad_set_axis_callback(_gamepad_axis, NULL);
 }
 
 void iron_set_gamepad_button_callback(void (*callback)(int, int, float)) {
 	iron_gamepad_button = callback;
-	kinc_gamepad_set_button_callback(_gamepad_button, NULL);
+	iron_gamepad_set_button_callback(_gamepad_button, NULL);
 }
 
 void iron_show_mouse(bool show) {
-	show ? kinc_mouse_show() : kinc_mouse_hide();
+	show ? iron_mouse_show() : iron_mouse_hide();
 }
 
 void iron_show_keyboard(bool show) {
-	show ? kinc_keyboard_show() : kinc_keyboard_hide();
+	show ? iron_keyboard_show() : iron_keyboard_hide();
 }
 
 any iron_g4_create_index_buffer(i32 count) {
-	kinc_g5_index_buffer_t *buffer = (kinc_g5_index_buffer_t *)malloc(sizeof(kinc_g5_index_buffer_t));
-	kinc_g5_index_buffer_init(buffer, count, KINC_G4_USAGE_STATIC);
+	iron_g5_index_buffer_t *buffer = (iron_g5_index_buffer_t *)malloc(sizeof(iron_g5_index_buffer_t));
+	iron_g5_index_buffer_init(buffer, count, IRON_G4_USAGE_STATIC);
 	return buffer;
 }
 
-void iron_g4_delete_index_buffer(kinc_g5_index_buffer_t *buffer) {
-	kinc_g5_index_buffer_destroy(buffer);
+void iron_g4_delete_index_buffer(iron_g5_index_buffer_t *buffer) {
+	iron_g5_index_buffer_destroy(buffer);
 	free(buffer);
 }
 
-u32_array_t *iron_g4_lock_index_buffer(kinc_g5_index_buffer_t *buffer) {
-	void *vertices = kinc_g5_index_buffer_lock_all(buffer);
+u32_array_t *iron_g4_lock_index_buffer(iron_g5_index_buffer_t *buffer) {
+	void *vertices = iron_g5_index_buffer_lock_all(buffer);
 	u32_array_t *ar = (u32_array_t *)malloc(sizeof(u32_array_t));
 	ar->buffer = vertices;
-	ar->length = kinc_g5_index_buffer_count(buffer);
+	ar->length = iron_g5_index_buffer_count(buffer);
 	return ar;
 }
 
-any iron_g4_create_vertex_buffer(i32 count, kinc_g5_vertex_structure_t *structure, i32 usage) {
-	kinc_g4_vertex_buffer_t *buffer = (kinc_g4_vertex_buffer_t *)malloc(sizeof(kinc_g4_vertex_buffer_t));
-	kinc_g4_vertex_buffer_init(buffer, count, structure, (kinc_g4_usage_t)usage);
+any iron_g4_create_vertex_buffer(i32 count, iron_g5_vertex_structure_t *structure, i32 usage) {
+	iron_g4_vertex_buffer_t *buffer = (iron_g4_vertex_buffer_t *)malloc(sizeof(iron_g4_vertex_buffer_t));
+	iron_g4_vertex_buffer_init(buffer, count, structure, (iron_g4_usage_t)usage);
 	return buffer;
 }
 
-void iron_g4_delete_vertex_buffer(kinc_g4_vertex_buffer_t *buffer) {
-	kinc_g4_vertex_buffer_destroy(buffer);
+void iron_g4_delete_vertex_buffer(iron_g4_vertex_buffer_t *buffer) {
+	iron_g4_vertex_buffer_destroy(buffer);
 	free(buffer);
 }
 
-buffer_t *iron_g4_lock_vertex_buffer(kinc_g4_vertex_buffer_t *buffer) {
-	float *vertices = kinc_g4_vertex_buffer_lock_all(buffer);
+buffer_t *iron_g4_lock_vertex_buffer(iron_g4_vertex_buffer_t *buffer) {
+	float *vertices = iron_g4_vertex_buffer_lock_all(buffer);
 	buffer_t *b = (buffer_t *)malloc(sizeof(buffer_t));
 	b->buffer = vertices;
-	b->length = kinc_g4_vertex_buffer_count(buffer) * kinc_g4_vertex_buffer_stride(buffer);
+	b->length = iron_g4_vertex_buffer_count(buffer) * iron_g4_vertex_buffer_stride(buffer);
 	return b;
 }
 
 void iron_g4_draw_indexed_vertices(i32 start, i32 count) {
-	#ifdef KINC_DIRECT3D12
-	// TODO: Prevent heapIndex overflow in g5_texture.c.h/kinc_g5_internal_set_textures
+	#ifdef IRON_DIRECT3D12
+	// TODO: Prevent heapIndex overflow in g5_texture.c.h/iron_g5_internal_set_textures
 	waitAfterNextDraw = true;
 	#endif
 	if (count < 0) {
-		kinc_g5_draw_indexed_vertices();
+		iron_g5_draw_indexed_vertices();
 	}
 	else {
-		kinc_g5_draw_indexed_vertices_from_to(start, count);
+		iron_g5_draw_indexed_vertices_from_to(start, count);
 	}
 }
 
-kinc_g5_shader_t *iron_g4_create_shader(buffer_t *data, i32 shader_type) {
-	kinc_g5_shader_t *shader = (kinc_g5_shader_t *)malloc(sizeof(kinc_g5_shader_t));
-	kinc_g5_shader_init(shader, data->buffer, data->length, (kinc_g5_shader_type_t)shader_type);
+iron_g5_shader_t *iron_g4_create_shader(buffer_t *data, i32 shader_type) {
+	iron_g5_shader_t *shader = (iron_g5_shader_t *)malloc(sizeof(iron_g5_shader_t));
+	iron_g5_shader_init(shader, data->buffer, data->length, (iron_g5_shader_type_t)shader_type);
 	return shader;
 }
 
-kinc_g5_shader_t *iron_g4_create_shader_from_source(string_t *source, kinc_g5_shader_type_t shader_type) {
-	kinc_g5_shader_t *shader = NULL;
-	char *temp_string_s = shader_type == KINC_G5_SHADER_TYPE_VERTEX ? temp_string_vs : temp_string_fs;
+iron_g5_shader_t *iron_g4_create_shader_from_source(string_t *source, iron_g5_shader_type_t shader_type) {
+	iron_g5_shader_t *shader = NULL;
+	char *temp_string_s = shader_type == IRON_G5_SHADER_TYPE_VERTEX ? temp_string_vs : temp_string_fs;
 
 #ifdef WITH_D3DCOMPILER
 
@@ -992,9 +992,9 @@ kinc_g5_shader_t *iron_g4_create_shader_from_source(string_t *source, kinc_g5_sh
 	ID3DBlob *shader_buffer;
 	UINT flags = D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_SKIP_VALIDATION;
 	HRESULT hr = D3DCompile(temp_string_s, strlen(source) + 1, NULL, NULL, NULL, "main",
-		shader_type == KINC_G5_SHADER_TYPE_VERTEX ? "vs_5_0" : "ps_5_0", flags, 0, &shader_buffer, &error_message);
+		shader_type == IRON_G5_SHADER_TYPE_VERTEX ? "vs_5_0" : "ps_5_0", flags, 0, &shader_buffer, &error_message);
 	if (hr != S_OK) {
-		kinc_log("%s", (char *)error_message->lpVtbl->GetBufferPointer(error_message));
+		iron_log("%s", (char *)error_message->lpVtbl->GetBufferPointer(error_message));
 		return NULL;
 	}
 
@@ -1005,7 +1005,7 @@ kinc_g5_shader_t *iron_g4_create_shader_from_source(string_t *source, kinc_g5_sh
 	char *file = malloc(size * 2);
 	int output_len = 0;
 
-	if (shader_type == KINC_G5_SHADER_TYPE_VERTEX) {
+	if (shader_type == IRON_G5_SHADER_TYPE_VERTEX) {
 		bool has_bone = strstr(temp_string_s, " bone :") != NULL;
 		bool has_col = strstr(temp_string_s, " col :") != NULL;
 		bool has_nor = strstr(temp_string_s, " nor :") != NULL;
@@ -1106,56 +1106,56 @@ kinc_g5_shader_t *iron_g4_create_shader_from_source(string_t *source, kinc_g5_sh
 	shader_buffer->lpVtbl->Release(shader_buffer);
 	reflector->lpVtbl->Release(reflector);
 
-	shader = (kinc_g5_shader_t *)malloc(sizeof(kinc_g5_shader_t));
-	kinc_g5_shader_init(shader, file, (int)output_len, shader_type);
+	shader = (iron_g5_shader_t *)malloc(sizeof(iron_g5_shader_t));
+	iron_g5_shader_init(shader, file, (int)output_len, shader_type);
 	free(file);
 
-	#elif defined(KINC_METAL)
+	#elif defined(IRON_METAL)
 
 	strcpy(temp_string_s, "// my_main\n");
 	strcat(temp_string_s, source);
-	shader = (kinc_g5_shader_t *)malloc(sizeof(kinc_g5_shader_t));
-	kinc_g5_shader_init(shader, temp_string_s, strlen(temp_string_s), shader_type);
+	shader = (iron_g5_shader_t *)malloc(sizeof(iron_g5_shader_t));
+	iron_g5_shader_init(shader, temp_string_s, strlen(temp_string_s), shader_type);
 
-	#elif defined(KINC_VULKAN) && defined(KRAFIX_LIBRARY)
+	#elif defined(IRON_VULKAN) && defined(KRAFIX_LIBRARY)
 
 	char *output = malloc(1024 * 1024);
 	int length;
-	krafix_compile(source, output, &length, "spirv", "windows", shader_type == KINC_G5_SHADER_TYPE_VERTEX ? "vert" : "frag", -1);
-	shader = (kinc_g5_shader_t *)malloc(sizeof(kinc_g5_shader_t));
-	kinc_g5_shader_init(shader, output, length, shader_type);
+	krafix_compile(source, output, &length, "spirv", "windows", shader_type == IRON_G5_SHADER_TYPE_VERTEX ? "vert" : "frag", -1);
+	shader = (iron_g5_shader_t *)malloc(sizeof(iron_g5_shader_t));
+	iron_g5_shader_init(shader, output, length, shader_type);
 
 	#endif
 
 	return shader;
 }
 
-kinc_g5_pipeline_t *iron_g4_create_pipeline() {
-	kinc_g5_pipeline_t *pipeline = (kinc_g5_pipeline_t *)malloc(sizeof(kinc_g5_pipeline_t));
-	kinc_g5_pipeline_init(pipeline);
+iron_g5_pipeline_t *iron_g4_create_pipeline() {
+	iron_g5_pipeline_t *pipeline = (iron_g5_pipeline_t *)malloc(sizeof(iron_g5_pipeline_t));
+	iron_g5_pipeline_init(pipeline);
 	return pipeline;
 }
 
-void iron_g4_delete_pipeline(kinc_g5_pipeline_t *pipeline) {
-	kinc_g5_pipeline_destroy(pipeline);
+void iron_g4_delete_pipeline(iron_g5_pipeline_t *pipeline) {
+	iron_g5_pipeline_destroy(pipeline);
 	free(pipeline);
 }
 
-void iron_g4_compile_pipeline(kinc_g5_pipeline_t *pipeline) {
-	kinc_g5_pipeline_compile(pipeline);
+void iron_g4_compile_pipeline(iron_g5_pipeline_t *pipeline) {
+	iron_g5_pipeline_compile(pipeline);
 }
 
-bool _load_image(kinc_file_reader_t *reader, const char *filename, unsigned char **output, int *width, int *height, kinc_image_format_t *format) {
-	*format = KINC_IMAGE_FORMAT_RGBA32;
-	int size = (int)kinc_file_reader_size(reader);
+bool _load_image(iron_file_reader_t *reader, const char *filename, unsigned char **output, int *width, int *height, iron_image_format_t *format) {
+	*format = IRON_IMAGE_FORMAT_RGBA32;
+	int size = (int)iron_file_reader_size(reader);
 	bool success = true;
 	unsigned char *data = (unsigned char *)malloc(size);
-	kinc_file_reader_read(reader, data, size);
-	kinc_file_reader_close(reader);
+	iron_file_reader_read(reader, data, size);
+	iron_file_reader_close(reader);
 
 	if (ends_with(filename, "k")) {
-		*width = kinc_read_s32le(data);
-		*height = kinc_read_s32le(data + 4);
+		*width = iron_read_s32le(data);
+		*height = iron_read_s32le(data + 4);
 		char fourcc[5];
 		fourcc[0] = data[8];
 		fourcc[1] = data[9];
@@ -1172,9 +1172,9 @@ bool _load_image(kinc_file_reader_t *reader, const char *filename, unsigned char
 			int output_size = *width * *height * 16;
 			*output = (unsigned char *)malloc(output_size);
 			LZ4_decompress_safe((char *)(data + 12), (char *)*output, compressed_size, output_size);
-			*format = KINC_IMAGE_FORMAT_RGBA128;
+			*format = IRON_IMAGE_FORMAT_RGBA128;
 
-			#ifdef KINC_IOS // No RGBA128 filtering, convert to RGBA64
+			#ifdef IRON_IOS // No RGBA128 filtering, convert to RGBA64
 			uint32_t *_output32 = (uint32_t *)*output;
 			unsigned char *_output = (unsigned char *)malloc(output_size / 2);
 			uint16_t *_output16 = (uint16_t *)_output;
@@ -1182,7 +1182,7 @@ bool _load_image(kinc_file_reader_t *reader, const char *filename, unsigned char
 				uint32_t x = *((uint32_t *)&_output32[i]);
 				_output16[i] = ((x >> 16) & 0x8000) | ((((x & 0x7f800000) - 0x38000000) >> 13) & 0x7c00) | ((x >> 13) & 0x03ff);
 			}
-			*format = KINC_IMAGE_FORMAT_RGBA64;
+			*format = IRON_IMAGE_FORMAT_RGBA64;
 			free(*output);
 			*output = _output;
 			#endif
@@ -1195,16 +1195,16 @@ bool _load_image(kinc_file_reader_t *reader, const char *filename, unsigned char
 		int comp;
 		*output = (unsigned char *)stbi_loadf_from_memory(data, size, width, height, &comp, 4);
 		if (*output == NULL) {
-			kinc_error(stbi_failure_reason());
+			iron_error(stbi_failure_reason());
 			success = false;
 		}
-		*format = KINC_IMAGE_FORMAT_RGBA128;
+		*format = IRON_IMAGE_FORMAT_RGBA128;
 	}
 	else { // jpg, png, ..
 		int comp;
 		*output = stbi_load_from_memory(data, size, width, height, &comp, 4);
 		if (*output == NULL) {
-			kinc_error(stbi_failure_reason());
+			iron_error(stbi_failure_reason());
 			success = false;
 		}
 	}
@@ -1212,32 +1212,32 @@ bool _load_image(kinc_file_reader_t *reader, const char *filename, unsigned char
 	return success;
 }
 
-kinc_g5_texture_t *iron_g4_create_texture_from_encoded_bytes(buffer_t *data, string_t *format, bool readable);
+iron_g5_texture_t *iron_g4_create_texture_from_encoded_bytes(buffer_t *data, string_t *format, bool readable);
 
-kinc_g5_texture_t *iron_load_image(string_t *file, bool readable) {
+iron_g5_texture_t *iron_load_image(string_t *file, bool readable) {
 	#ifdef WITH_EMBED
 	buffer_t *b = embed_get(file);
 	if (b != NULL) {
-		kinc_g5_texture_t *texture = iron_g4_create_texture_from_encoded_bytes(b, ".k", readable);
+		iron_g5_texture_t *texture = iron_g4_create_texture_from_encoded_bytes(b, ".k", readable);
 		return texture;
 	}
 	#endif
 
-	kinc_file_reader_t reader;
-	if (!kinc_file_reader_open(&reader, file, KINC_FILE_TYPE_ASSET)) {
+	iron_file_reader_t reader;
+	if (!iron_file_reader_open(&reader, file, IRON_FILE_TYPE_ASSET)) {
 		return NULL;
 	}
 
 	unsigned char *image_data;
 	int image_width;
 	int image_height;
-	kinc_image_format_t image_format;
+	iron_image_format_t image_format;
 	if (!_load_image(&reader, file, &image_data, &image_width, &image_height, &image_format)) {
 		return NULL;
 	}
 
-	kinc_g5_texture_t *texture = (kinc_g5_texture_t *)malloc(sizeof(kinc_g5_texture_t));
-	kinc_g5_texture_init_from_bytes(texture, image_data, image_width, image_height, image_format);
+	iron_g5_texture_t *texture = (iron_g5_texture_t *)malloc(sizeof(iron_g5_texture_t));
+	iron_g5_texture_init_from_bytes(texture, image_data, image_width, image_height, image_format);
 	if (!readable) {
 		free(image_data);
 	}
@@ -1245,9 +1245,9 @@ kinc_g5_texture_t *iron_load_image(string_t *file, bool readable) {
 	return texture;
 }
 
-void iron_unload_image(kinc_g5_texture_t *image) {
+void iron_unload_image(iron_g5_texture_t *image) {
 	if (image != NULL) {
-		kinc_g5_texture_destroy(image);
+		iron_g5_texture_destroy(image);
 		// free(image);
 	}
 }
@@ -1255,7 +1255,7 @@ void iron_unload_image(kinc_g5_texture_t *image) {
 #ifdef WITH_AUDIO
 
 any iron_load_sound(string_t *file) {
-	kinc_a1_sound_t *sound = kinc_a1_sound_create(file);
+	iron_a1_sound_t *sound = iron_a1_sound_create(file);
 	return sound;
 }
 
@@ -1269,131 +1269,131 @@ buffer_t *iron_load_blob(string_t *file) {
 	}
 	#endif
 
-	kinc_file_reader_t reader;
-	if (!kinc_file_reader_open(&reader, file, KINC_FILE_TYPE_ASSET)) {
+	iron_file_reader_t reader;
+	if (!iron_file_reader_open(&reader, file, IRON_FILE_TYPE_ASSET)) {
 		return NULL;
 	}
-	uint32_t reader_size = (uint32_t)kinc_file_reader_size(&reader);
+	uint32_t reader_size = (uint32_t)iron_file_reader_size(&reader);
 	buffer_t *buffer = buffer_create(reader_size);
-	kinc_file_reader_read(&reader, buffer->buffer, reader_size);
-	kinc_file_reader_close(&reader);
+	iron_file_reader_read(&reader, buffer->buffer, reader_size);
+	iron_file_reader_close(&reader);
 	return buffer;
 }
 
-kinc_g5_constant_location_t *iron_g4_get_constant_location(kinc_g5_pipeline_t *pipeline, string_t *name) {
-	kinc_g5_constant_location_t location = kinc_g5_pipeline_get_constant_location(pipeline, name);
-	kinc_g5_constant_location_t *location_copy = (kinc_g5_constant_location_t *)malloc(sizeof(kinc_g5_constant_location_t));
-	memcpy(location_copy, &location, sizeof(kinc_g5_constant_location_t)); // TODO
+iron_g5_constant_location_t *iron_g4_get_constant_location(iron_g5_pipeline_t *pipeline, string_t *name) {
+	iron_g5_constant_location_t location = iron_g5_pipeline_get_constant_location(pipeline, name);
+	iron_g5_constant_location_t *location_copy = (iron_g5_constant_location_t *)malloc(sizeof(iron_g5_constant_location_t));
+	memcpy(location_copy, &location, sizeof(iron_g5_constant_location_t)); // TODO
 	return location_copy;
 }
 
-kinc_g5_texture_unit_t *iron_g4_get_texture_unit(kinc_g5_pipeline_t *pipeline, string_t *name) {
-	kinc_g5_texture_unit_t unit = kinc_g5_pipeline_get_texture_unit(pipeline, name);
-	kinc_g5_texture_unit_t *unit_copy = (kinc_g5_texture_unit_t *)malloc(sizeof(kinc_g5_texture_unit_t));
-	memcpy(unit_copy, &unit, sizeof(kinc_g5_texture_unit_t)); // TODO
+iron_g5_texture_unit_t *iron_g4_get_texture_unit(iron_g5_pipeline_t *pipeline, string_t *name) {
+	iron_g5_texture_unit_t unit = iron_g5_pipeline_get_texture_unit(pipeline, name);
+	iron_g5_texture_unit_t *unit_copy = (iron_g5_texture_unit_t *)malloc(sizeof(iron_g5_texture_unit_t));
+	memcpy(unit_copy, &unit, sizeof(iron_g5_texture_unit_t)); // TODO
 	return unit_copy;
 }
 
-void iron_g4_set_texture(kinc_g5_texture_unit_t *unit, kinc_g5_texture_t *texture) {
-	kinc_g4_set_texture(*unit, texture);
+void _iron_g4_set_texture(iron_g5_texture_unit_t *unit, iron_g5_texture_t *texture) {
+	iron_g4_set_texture(*unit, texture);
 }
 
-void iron_g4_set_texture_depth(kinc_g5_texture_unit_t *unit, kinc_g5_texture_t *render_target) {
-	kinc_g4_render_target_use_depth_as_texture(render_target, *unit);
+void iron_g4_set_texture_depth(iron_g5_texture_unit_t *unit, iron_g5_texture_t *render_target) {
+	iron_g4_render_target_use_depth_as_texture(render_target, *unit);
 }
 
-void iron_g4_set_texture_parameters(kinc_g5_texture_unit_t *unit, i32 u_addr, i32 v_addr, i32 min_filter, i32 mag_filter, i32 mip_filter) {
-	kinc_g4_set_texture_addressing(*unit, KINC_G4_TEXTURE_DIRECTION_U, (kinc_g4_texture_addressing_t)u_addr);
-	kinc_g4_set_texture_addressing(*unit, KINC_G4_TEXTURE_DIRECTION_V, (kinc_g4_texture_addressing_t)v_addr);
-	kinc_g4_set_texture_minification_filter(*unit, (kinc_g4_texture_filter_t)min_filter);
-	kinc_g4_set_texture_magnification_filter(*unit, (kinc_g4_texture_filter_t)mag_filter);
-	kinc_g4_set_texture_mipmap_filter(*unit, (kinc_g4_mipmap_filter_t)mip_filter);
+void iron_g4_set_texture_parameters(iron_g5_texture_unit_t *unit, i32 u_addr, i32 v_addr, i32 min_filter, i32 mag_filter, i32 mip_filter) {
+	iron_g4_set_texture_addressing(*unit, IRON_G4_TEXTURE_DIRECTION_U, (iron_g4_texture_addressing_t)u_addr);
+	iron_g4_set_texture_addressing(*unit, IRON_G4_TEXTURE_DIRECTION_V, (iron_g4_texture_addressing_t)v_addr);
+	iron_g4_set_texture_minification_filter(*unit, (iron_g4_texture_filter_t)min_filter);
+	iron_g4_set_texture_magnification_filter(*unit, (iron_g4_texture_filter_t)mag_filter);
+	iron_g4_set_texture_mipmap_filter(*unit, (iron_g4_mipmap_filter_t)mip_filter);
 }
 
-void iron_g4_set_bool(kinc_g5_constant_location_t *location, bool value) {
-	kinc_g4_set_bool(*location, value != 0);
+void _iron_g4_set_bool(iron_g5_constant_location_t *location, bool value) {
+	iron_g4_set_bool(*location, value != 0);
 }
 
-void iron_g4_set_int(kinc_g5_constant_location_t *location, i32 value) {
-	kinc_g4_set_int(*location, value);
+void _iron_g4_set_int(iron_g5_constant_location_t *location, i32 value) {
+	iron_g4_set_int(*location, value);
 }
 
-void iron_g4_set_float(kinc_g5_constant_location_t *location, f32 value) {
-	kinc_g4_set_float(*location, value);
+void _iron_g4_set_float(iron_g5_constant_location_t *location, f32 value) {
+	iron_g4_set_float(*location, value);
 }
 
-void iron_g4_set_float2(kinc_g5_constant_location_t *location, f32 value1, f32 value2) {
-	kinc_g4_set_float2(*location, value1, value2);
+void _iron_g4_set_float2(iron_g5_constant_location_t *location, f32 value1, f32 value2) {
+	iron_g4_set_float2(*location, value1, value2);
 }
 
-void iron_g4_set_float3(kinc_g5_constant_location_t *location, f32 value1, f32 value2, f32 value3) {
-	kinc_g4_set_float3(*location, value1, value2, value3);
+void _iron_g4_set_float3(iron_g5_constant_location_t *location, f32 value1, f32 value2, f32 value3) {
+	iron_g4_set_float3(*location, value1, value2, value3);
 }
 
-void iron_g4_set_float4(kinc_g5_constant_location_t *location, f32 value1, f32 value2, f32 value3, f32 value4) {
-	kinc_g4_set_float4(*location, value1, value2, value3, value4);
+void _iron_g4_set_float4(iron_g5_constant_location_t *location, f32 value1, f32 value2, f32 value3, f32 value4) {
+	iron_g4_set_float4(*location, value1, value2, value3, value4);
 }
 
-void iron_g4_set_floats(kinc_g5_constant_location_t *location, f32_array_t *values) {
-	kinc_g4_set_floats(*location, (float *)values->buffer, values->length);
+void _iron_g4_set_floats(iron_g5_constant_location_t *location, f32_array_t *values) {
+	iron_g4_set_floats(*location, (float *)values->buffer, values->length);
 }
 
-void iron_g4_set_matrix4(kinc_g5_constant_location_t *location, mat4_t m) {
-	kinc_g4_set_matrix4(*location, &m);
+void _iron_g4_set_matrix4(iron_g5_constant_location_t *location, mat4_t m) {
+	iron_g4_set_matrix4(*location, &m);
 }
 
-void iron_g4_set_matrix3(kinc_g5_constant_location_t *location, mat3_t m) {
-	kinc_g4_set_matrix3(*location, &m);
+void _iron_g4_set_matrix3(iron_g5_constant_location_t *location, mat3_t m) {
+	iron_g4_set_matrix3(*location, &m);
 }
 
 void iron_set_window_title(string_t *title) {
-	kinc_window_set_title(title);
-	#if defined(KINC_IOS) || defined(KINC_ANDROID)
+	iron_window_set_title(title);
+	#if defined(IRON_IOS) || defined(IRON_ANDROID)
 	strcpy(mobile_title, title);
 	#endif
 }
 
 void iron_set_window_mode(i32 mode) {
-	kinc_window_change_mode((kinc_window_mode_t)mode);
+	iron_window_change_mode((iron_window_mode_t)mode);
 }
 
 i32 iron_screen_dpi() {
-	return kinc_display_current_mode(kinc_primary_display()).pixels_per_inch;
+	return iron_display_current_mode(iron_primary_display()).pixels_per_inch;
 }
 
 i32 iron_display_width(i32 index) {
-	return kinc_display_current_mode(index).width;
+	return iron_display_current_mode(index).width;
 }
 
 i32 iron_display_height(i32 index) {
-	return kinc_display_current_mode(index).height;
+	return iron_display_current_mode(index).height;
 }
 
 i32 iron_display_x(i32 index) {
-	return kinc_display_current_mode(index).x;
+	return iron_display_current_mode(index).x;
 }
 
 i32 iron_display_y(i32 index) {
-	return kinc_display_current_mode(index).y;
+	return iron_display_current_mode(index).y;
 }
 
 i32 iron_display_frequency(i32 index) {
-	return kinc_display_current_mode(index).frequency;
+	return iron_display_current_mode(index).frequency;
 }
 
 bool iron_display_is_primary(i32 index) {
-	return index == kinc_primary_display();
+	return index == iron_primary_display();
 }
 
-kinc_g5_texture_t *iron_g4_create_render_target(i32 width, i32 height, i32 format, i32 depth_buffer_bits) {
-	kinc_g5_texture_t *render_target = (kinc_g5_texture_t *)malloc(sizeof(kinc_g5_texture_t));
-	kinc_g5_render_target_init(render_target, width, height, (kinc_image_format_t)format, depth_buffer_bits);
+iron_g5_texture_t *iron_g4_create_render_target(i32 width, i32 height, i32 format, i32 depth_buffer_bits) {
+	iron_g5_texture_t *render_target = (iron_g5_texture_t *)malloc(sizeof(iron_g5_texture_t));
+	iron_g5_render_target_init(render_target, width, height, (iron_image_format_t)format, depth_buffer_bits);
 	render_target->buffer = NULL;
 	return render_target;
 }
 
-kinc_g5_texture_t *iron_g4_create_texture_from_bytes(buffer_t *data, i32 width, i32 height, i32 format, bool readable) {
-	kinc_g5_texture_t *texture = (kinc_g5_texture_t *)malloc(sizeof(kinc_g5_texture_t));
+iron_g5_texture_t *iron_g4_create_texture_from_bytes(buffer_t *data, i32 width, i32 height, i32 format, bool readable) {
+	iron_g5_texture_t *texture = (iron_g5_texture_t *)malloc(sizeof(iron_g5_texture_t));
 	texture->buffer = NULL;
 	void *image_data;
 	if (readable) {
@@ -1403,24 +1403,24 @@ kinc_g5_texture_t *iron_g4_create_texture_from_bytes(buffer_t *data, i32 width, 
 	else {
 		image_data = data->buffer;
 	}
-	kinc_g5_texture_init_from_bytes(texture, image_data, width, height, (kinc_image_format_t)format);
+	iron_g5_texture_init_from_bytes(texture, image_data, width, height, (iron_image_format_t)format);
 	return texture;
 }
 
-kinc_g5_texture_t *iron_g4_create_texture_from_encoded_bytes(buffer_t *data, string_t *format, bool readable) {
-	kinc_g5_texture_t *texture = (kinc_g5_texture_t *)malloc(sizeof(kinc_g5_texture_t));
+iron_g5_texture_t *iron_g4_create_texture_from_encoded_bytes(buffer_t *data, string_t *format, bool readable) {
+	iron_g5_texture_t *texture = (iron_g5_texture_t *)malloc(sizeof(iron_g5_texture_t));
 	texture->buffer = NULL;
 
 	unsigned char *content_data = (unsigned char *)data->buffer;
 	int content_length = (int)data->length;
 	unsigned char *image_data;
-	kinc_image_format_t image_format;
+	iron_image_format_t image_format;
 	int image_width;
 	int image_height;
 
 	if (ends_with(format, "k")) {
-		image_width = kinc_read_s32le(content_data);
-		image_height = kinc_read_s32le(content_data + 4);
+		image_width = iron_read_s32le(content_data);
+		image_height = iron_read_s32le(content_data + 4);
 		char fourcc[5];
 		fourcc[0] = content_data[8];
 		fourcc[1] = content_data[9];
@@ -1432,27 +1432,27 @@ kinc_g5_texture_t *iron_g4_create_texture_from_encoded_bytes(buffer_t *data, str
 			int output_size = image_width * image_height * 4;
 			image_data = (unsigned char *)malloc(output_size);
 			LZ4_decompress_safe((char *)content_data + 12, (char *)image_data, compressed_size, output_size);
-			image_format = KINC_IMAGE_FORMAT_RGBA32;
+			image_format = IRON_IMAGE_FORMAT_RGBA32;
 		}
 		else if (strcmp(fourcc, "LZ4F") == 0) {
 			int output_size = image_width * image_height * 16;
 			image_data = (unsigned char *)malloc(output_size);
 			LZ4_decompress_safe((char *)content_data + 12, (char *)image_data, compressed_size, output_size);
-			image_format = KINC_IMAGE_FORMAT_RGBA128;
+			image_format = IRON_IMAGE_FORMAT_RGBA128;
 		}
 	}
 	else if (ends_with(format, "hdr")) {
 		int comp;
 		image_data = (unsigned char *)stbi_loadf_from_memory(content_data, content_length, &image_width, &image_height, &comp, 4);
-		image_format = KINC_IMAGE_FORMAT_RGBA128;
+		image_format = IRON_IMAGE_FORMAT_RGBA128;
 	}
 	else { // jpg, png, ..
 		int comp;
 		image_data = stbi_load_from_memory(content_data, content_length, &image_width, &image_height, &comp, 4);
-		image_format = KINC_IMAGE_FORMAT_RGBA32;
+		image_format = IRON_IMAGE_FORMAT_RGBA32;
 	}
 
-	kinc_g5_texture_init_from_bytes(texture, image_data, image_width, image_height, image_format);
+	iron_g5_texture_init_from_bytes(texture, image_data, image_width, image_height, image_format);
 	if (!readable) {
 		free(image_data);;
 	}
@@ -1460,25 +1460,25 @@ kinc_g5_texture_t *iron_g4_create_texture_from_encoded_bytes(buffer_t *data, str
 	return texture;
 }
 
-int _format_byte_size(kinc_image_format_t format) {
+int _format_byte_size(iron_image_format_t format) {
 	switch (format) {
-	case KINC_IMAGE_FORMAT_RGBA128:
+	case IRON_IMAGE_FORMAT_RGBA128:
 		return 16;
-	case KINC_IMAGE_FORMAT_RGBA64:
+	case IRON_IMAGE_FORMAT_RGBA64:
 		return 8;
-	case KINC_IMAGE_FORMAT_R8:
+	case IRON_IMAGE_FORMAT_R8:
 		return 1;
-	case KINC_IMAGE_FORMAT_R16:
+	case IRON_IMAGE_FORMAT_R16:
 		return 2;
-	case KINC_IMAGE_FORMAT_BGRA32:
-	case KINC_IMAGE_FORMAT_RGBA32:
-	case KINC_IMAGE_FORMAT_R32:
+	case IRON_IMAGE_FORMAT_BGRA32:
+	case IRON_IMAGE_FORMAT_RGBA32:
+	case IRON_IMAGE_FORMAT_R32:
 	default:
 		return 4;
 	}
 }
 
-buffer_t *iron_g4_get_texture_pixels(kinc_g5_texture_t *image) {
+buffer_t *iron_g4_get_texture_pixels(iron_g5_texture_t *image) {
 	if (image->buffer == NULL) {
 		image->buffer = malloc(sizeof(buffer_t));
 		image->buffer->buffer = NULL;
@@ -1491,13 +1491,13 @@ buffer_t *iron_g4_get_texture_pixels(kinc_g5_texture_t *image) {
 		}
 
 		uint8_t *b = (uint8_t *)image->buffer->buffer;
-		kinc_g5_render_target_get_pixels(image, b);
+		iron_g5_render_target_get_pixels(image, b);
 
 		// Release staging texture immediately to save memory
-		#ifdef KINC_DIRECT3D12
+		#ifdef IRON_DIRECT3D12
 		image->impl.renderTargetReadback->lpVtbl->Release(image->impl.renderTargetReadback);
 		image->impl.renderTargetReadback = NULL;
-		#elif defined(KINC_METAL)
+		#elif defined(IRON_METAL)
 		// id<MTLTexture> texReadback = (__bridge_transfer id<MTLTexture>)image->impl._texReadback;
 		// texReadback = nil;
 		// image->impl._texReadback = NULL;
@@ -1509,44 +1509,44 @@ buffer_t *iron_g4_get_texture_pixels(kinc_g5_texture_t *image) {
 	return image->buffer;
 }
 
-void iron_g4_set_mipmaps(kinc_g5_texture_t *texture, any_array_t *mipmaps) {
+void iron_g4_set_mipmaps(iron_g5_texture_t *texture, any_array_t *mipmaps) {
 	for (int32_t i = 0; i < mipmaps->length; ++i) {
-		kinc_g5_texture_t *img = mipmaps->buffer[i];
-		kinc_g5_texture_t *img_tex = img;
-		kinc_g5_texture_set_mipmap(texture, img_tex, i + 1);
+		iron_g5_texture_t *img = mipmaps->buffer[i];
+		iron_g5_texture_t *img_tex = img;
+		iron_g5_texture_set_mipmap(texture, img_tex, i + 1);
 	}
 }
 
-void iron_g4_begin(kinc_g5_texture_t *render_target, any_array_t *additional) {
+void _iron_g4_begin(iron_g5_texture_t *render_target, any_array_t *additional) {
 	if (render_target == NULL) {
-		kinc_g4_restore_render_target();
+		iron_g4_restore_render_target();
 	}
 	else {
-		kinc_g5_texture_t *rt = (kinc_g5_texture_t *)render_target;
+		iron_g5_texture_t *rt = (iron_g5_texture_t *)render_target;
 		int32_t length = 1;
-		kinc_g5_texture_t *render_targets[8] = { rt, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+		iron_g5_texture_t *render_targets[8] = { rt, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 		if (additional != NULL) {
 			length = additional->length + 1;
 			if (length > 8) {
 				length = 8;
 			}
 			for (int32_t i = 1; i < length; ++i) {
-				kinc_g5_texture_t *img = additional->buffer[i - 1];
-				kinc_g5_texture_t *art = (kinc_g5_texture_t *)img;
+				iron_g5_texture_t *img = additional->buffer[i - 1];
+				iron_g5_texture_t *art = (iron_g5_texture_t *)img;
 				render_targets[i] = art;
 			}
 		}
-		kinc_g4_set_render_targets(render_targets, length);
+		iron_g4_set_render_targets(render_targets, length);
 	}
 }
 
-void iron_g4_end() {
+void _iron_g4_end() {
 }
 
 void iron_g4_swap_buffers() {
-	kinc_g4_end();
-	kinc_g5_swap_buffers();
-	kinc_g4_begin();
+	iron_g4_end();
+	iron_g5_swap_buffers();
+	iron_g4_begin();
 }
 
 void iron_file_save_bytes(string_t *path, buffer_t *bytes, u64 length) {
@@ -1555,7 +1555,7 @@ void iron_file_save_bytes(string_t *path, buffer_t *bytes, u64 length) {
 		byte_length = (u64)bytes->length;
 	}
 
-	#ifdef KINC_WINDOWS
+	#ifdef IRON_WINDOWS
 	MultiByteToWideChar(CP_UTF8, 0, path, -1, temp_wstring, 1024);
 	FILE *file = _wfopen(temp_wstring, L"wb");
 	#else
@@ -1569,13 +1569,13 @@ void iron_file_save_bytes(string_t *path, buffer_t *bytes, u64 length) {
 }
 
 i32 iron_sys_command(string_t *cmd) {
-	#ifdef KINC_WINDOWS
+	#ifdef IRON_WINDOWS
 	int wlen = MultiByteToWideChar(CP_UTF8, 0, cmd, -1, NULL, 0);
 	wchar_t *wstr = malloc(sizeof(wchar_t) * wlen);
 	MultiByteToWideChar(CP_UTF8, 0, cmd, -1, wstr, wlen);
 	int result = _wsystem(wstr);
 	free(wstr);
-	#elif defined(KINC_IOS)
+	#elif defined(IRON_IOS)
 	int result = 0;
 	#else
 	int result = system(cmd);
@@ -1584,22 +1584,22 @@ i32 iron_sys_command(string_t *cmd) {
 }
 
 string_t *iron_get_files_location() {
-	#ifdef KINC_MACOS
+	#ifdef IRON_MACOS
 	char path[1024];
 	strcpy(path, macgetresourcepath());
 	strcat(path, "/");
-	strcat(path, KINC_OUTDIR);
+	strcat(path, IRON_OUTDIR);
 	strcat(path, "/");
 	return path;
-	#elif defined(KINC_IOS)
+	#elif defined(IRON_IOS)
 	char path[1024];
 	strcpy(path, iphonegetresourcepath());
 	strcat(path, "/");
-	strcat(path, KINC_OUTDIR);
+	strcat(path, IRON_OUTDIR);
 	strcat(path, "/");
 	return path;
 	#else
-	return kinc_internal_get_files_location();
+	return iron_internal_get_files_location();
 	#endif
 }
 
@@ -1621,7 +1621,7 @@ void _http_callback(int error, int response, const char *body, void *callback_da
 	free(cbd);
 }
 
-void iron_http_request(string_t *url, i32 size, void (*callback)(char *, buffer_t *)) {
+void _iron_http_request(string_t *url, i32 size, void (*callback)(char *, buffer_t *)) {
 	_callback_data_t *cbd = malloc(sizeof(_callback_data_t));
 	cbd->size = size;
 	strcpy(cbd->url, url);
@@ -1649,23 +1649,23 @@ void iron_http_request(string_t *url, i32 size, void (*callback)(char *, buffer_
 		url_path[j] = curl[i + 8 + j];
 	}
 	url_path[j] = 0;
-	#ifdef KINC_ANDROID // TODO: move to Kinc
+	#ifdef IRON_ANDROID // TODO: move to iron
 	android_http_request(curl, url_path, NULL, 443, true, 0, NULL, &_http_callback, cbd);
-	#elif defined(KINC_LINUX)
+	#elif defined(IRON_LINUX)
 	// TODO
 	#else
-	kinc_http_request(url_base, url_path, NULL, 443, true, 0, NULL, &_http_callback, cbd);
+	iron_http_request(url_base, url_path, NULL, 443, true, 0, NULL, &_http_callback, cbd);
 	#endif
 }
 
 bool _window_close_callback(void *data) {
-	#ifdef KINC_WINDOWS
+	#ifdef IRON_WINDOWS
 	bool save = false;
 	wchar_t title[1024];
-	GetWindowTextW(kinc_windows_window_handle(), title, sizeof(title));
+	GetWindowTextW(iron_windows_window_handle(), title, sizeof(title));
 	bool dirty = wcsstr(title, L"* - ArmorPaint") != NULL;
 	if (dirty) {
-		int res = MessageBox(kinc_windows_window_handle(), L"Project has been modified, save changes?", L"Save Changes?", MB_YESNOCANCEL | MB_ICONEXCLAMATION);
+		int res = MessageBox(iron_windows_window_handle(), L"Project has been modified, save changes?", L"Save Changes?", MB_YESNOCANCEL | MB_ICONEXCLAMATION);
 		if (res == IDYES) {
 			save = true;
 		}
@@ -1687,12 +1687,12 @@ bool _window_close_callback(void *data) {
 void iron_set_save_and_quit_callback(void (*callback)(bool)) {
 	iron_save_and_quit = callback;
 	save_and_quit_callback_set = true;
-	kinc_window_set_close_callback(_window_close_callback, NULL);
+	iron_window_set_close_callback(_window_close_callback, NULL);
 }
 
 void iron_set_mouse_cursor(i32 id) {
-	kinc_mouse_set_cursor(id);
-	#ifdef KINC_WINDOWS
+	iron_mouse_set_cursor(id);
+	#ifdef IRON_WINDOWS
 	// Set hand icon for drag even when mouse button is pressed
 	if (id == 1) {
 		SetCursor(LoadCursor(NULL, IDC_HAND));
@@ -1743,7 +1743,7 @@ char *iron_save_dialog(char *filter_list, char *default_path) {
 	return NULL;
 }
 
-#elif defined(KINC_ANDROID)
+#elif defined(IRON_ANDROID)
 
 char_ptr_array_t *iron_open_dialog(char *filter_list, char *default_path, bool open_multiple) {
 	AndroidFileDialogOpen();
@@ -1756,7 +1756,7 @@ char *iron_save_dialog(char *filter_list, char *default_path) {
 	return temp_string;
 }
 
-#elif defined(KINC_IOS)
+#elif defined(IRON_IOS)
 
 char_ptr_array_t *iron_open_dialog(char *filter_list, char *default_path, bool open_multiple) {
 	// Once finished drop_files callback is called
@@ -1787,7 +1787,7 @@ char *iron_read_directory(char *path) {
 			break;
 		}
 
-		#ifdef KINC_WINDOWS
+		#ifdef IRON_WINDOWS
 		char file_path[512];
 		strcpy(file_path, path);
 		strcat(file_path, "\\");
@@ -1807,18 +1807,18 @@ char *iron_read_directory(char *path) {
 }
 
 bool iron_file_exists(char *path) {
-	kinc_file_reader_t reader;
-	if (kinc_file_reader_open(&reader, path, KINC_FILE_TYPE_ASSET)) {
-		kinc_file_reader_close(&reader);
+	iron_file_reader_t reader;
+	if (iron_file_reader_open(&reader, path, IRON_FILE_TYPE_ASSET)) {
+		iron_file_reader_close(&reader);
 		return true;
 	}
 	return false;
 }
 
 void iron_delete_file(char *path) {
-	#ifdef KINC_IOS
+	#ifdef IRON_IOS
 	IOSDeleteFile(path);
-	#elif defined(KINC_WINDOWS)
+	#elif defined(IRON_WINDOWS)
 	char cmd[1024];
 	strcpy(cmd, "del /f \"");
 	strcat(cmd, path);
@@ -1887,7 +1887,7 @@ void _write_image(char *path, buffer_t *bytes, i32 w, i32 h, i32 format, int ima
 		comp = 3;
 		pixels = (unsigned char *)malloc(w * h * comp);
 		for (int i = 0; i < w * h; ++i) {
-			#if defined(KINC_METAL) || defined(KINC_VULKAN)
+			#if defined(IRON_METAL) || defined(IRON_VULKAN)
 			pixels[i * 3    ] = rgba[i * 4 + 2];
 			pixels[i * 3 + 1] = rgba[i * 4 + 1];
 			pixels[i * 3 + 2] = rgba[i * 4    ];
@@ -1902,7 +1902,7 @@ void _write_image(char *path, buffer_t *bytes, i32 w, i32 h, i32 format, int ima
 		comp = 1;
 		pixels = (unsigned char *)malloc(w * h * comp);
 		int off = format - 3;
-		#if defined(KINC_METAL) || defined(KINC_VULKAN)
+		#if defined(IRON_METAL) || defined(IRON_VULKAN)
 		off = 2 - off;
 		#endif
 		for (int i = 0; i < w * h; ++i) {
@@ -2108,18 +2108,18 @@ buffer_t *iron_ml_inference(buffer_t *model, any_array_t *tensors, any_array_t *
 		ort->SetInterOpNumThreads(ort_session_options, 8);
 
 		if (use_gpu) {
-			#ifdef KINC_WINDOWS
+			#ifdef IRON_WINDOWS
 			ort->SetSessionExecutionMode(ort_session_options, ORT_SEQUENTIAL);
 			ort->DisableMemPattern(ort_session_options);
 			onnx_status = OrtSessionOptionsAppendExecutionProvider_DML(ort_session_options, 0);
-			#elif defined(KINC_LINUX)
+			#elif defined(IRON_LINUX)
 			// onnx_status = OrtSessionOptionsAppendExecutionProvider_CUDA(ort_session_options, 0);
-			#elif defined(KINC_MACOS)
+			#elif defined(IRON_MACOS)
 			onnx_status = OrtSessionOptionsAppendExecutionProvider_CoreML(ort_session_options, 0);
 			#endif
 			if (onnx_status != NULL) {
 				const char *msg = ort->GetErrorMessage(onnx_status);
-				kinc_error("%s", msg);
+				iron_error("%s", msg);
 				ort->ReleaseStatus(onnx_status);
 			}
 		}
@@ -2134,7 +2134,7 @@ buffer_t *iron_ml_inference(buffer_t *model, any_array_t *tensors, any_array_t *
 		onnx_status = ort->CreateSessionFromArray(ort_env, model->buffer, (int)model->length, ort_session_options, &session);
 		if (onnx_status != NULL) {
 			const char* msg = ort->GetErrorMessage(onnx_status);
-			kinc_error("%s", msg);
+			iron_error("%s", msg);
 			ort->ReleaseStatus(onnx_status);
 		}
 	}
@@ -2185,7 +2185,7 @@ buffer_t *iron_ml_inference(buffer_t *model, any_array_t *tensors, any_array_t *
 	onnx_status = ort->Run(session, NULL, input_node_names, input_tensors, length, &output_node_name, 1, &output_tensor);
 	if (onnx_status != NULL) {
 		const char* msg = ort->GetErrorMessage(onnx_status);
-		kinc_error("%s", msg);
+		iron_error("%s", msg);
 		ort->ReleaseStatus(onnx_status);
 	}
 	float *float_array;
@@ -2236,51 +2236,51 @@ void iron_ml_unload() {
 
 void iron_raytrace_init(buffer_t *shader) {
 	if (raytrace_created) {
-		kinc_g5_constant_buffer_destroy(&constant_buffer);
-		kinc_g5_raytrace_pipeline_destroy(&rt_pipeline);
+		iron_g5_constant_buffer_destroy(&constant_buffer);
+		iron_g5_raytrace_pipeline_destroy(&rt_pipeline);
 	}
 	raytrace_created = true;
-	kinc_g5_constant_buffer_init(&constant_buffer, constant_buffer_size * 4);
-	kinc_g5_raytrace_pipeline_init(&rt_pipeline, &commandList, shader->buffer, (int)shader->length, &constant_buffer);
+	iron_g5_constant_buffer_init(&constant_buffer, constant_buffer_size * 4);
+	iron_g5_raytrace_pipeline_init(&rt_pipeline, &commandList, shader->buffer, (int)shader->length, &constant_buffer);
 }
 
 void iron_raytrace_as_init() {
 	if (raytrace_accel_created) {
-		kinc_g5_raytrace_acceleration_structure_destroy(&accel);
+		iron_g5_raytrace_acceleration_structure_destroy(&accel);
 	}
 	raytrace_accel_created = true;
-	kinc_g5_raytrace_acceleration_structure_init(&accel);
+	iron_g5_raytrace_acceleration_structure_init(&accel);
 }
 
-void iron_raytrace_as_add(kinc_g4_vertex_buffer_t *vb, kinc_g5_index_buffer_t *ib, kinc_matrix4x4_t transform) {
-	kinc_g5_vertex_buffer_t *vertex_buffer = &vb->impl._buffer;
-	kinc_g5_raytrace_acceleration_structure_add(&accel, vertex_buffer, ib, transform);
+void iron_raytrace_as_add(iron_g4_vertex_buffer_t *vb, iron_g5_index_buffer_t *ib, iron_matrix4x4_t transform) {
+	iron_g5_vertex_buffer_t *vertex_buffer = &vb->impl._buffer;
+	iron_g5_raytrace_acceleration_structure_add(&accel, vertex_buffer, ib, transform);
 }
 
-void iron_raytrace_as_build(kinc_g4_vertex_buffer_t *vb_full, kinc_g5_index_buffer_t *ib_full) {
-	kinc_g5_raytrace_acceleration_structure_build(&accel, &commandList, &vb_full->impl._buffer, ib_full);
+void iron_raytrace_as_build(iron_g4_vertex_buffer_t *vb_full, iron_g5_index_buffer_t *ib_full) {
+	iron_g5_raytrace_acceleration_structure_build(&accel, &commandList, &vb_full->impl._buffer, ib_full);
 }
 
-void iron_raytrace_set_textures(kinc_g5_texture_t *tex0, kinc_g5_texture_t *tex1, kinc_g5_texture_t *tex2, kinc_g5_texture_t *texenv, kinc_g5_texture_t *texsobol, kinc_g5_texture_t *texscramble, kinc_g5_texture_t *texrank) {
-	kinc_g5_texture_t *texpaint0;
-	kinc_g5_texture_t *texpaint1;
-	kinc_g5_texture_t *texpaint2;
+void iron_raytrace_set_textures(iron_g5_texture_t *tex0, iron_g5_texture_t *tex1, iron_g5_texture_t *tex2, iron_g5_texture_t *texenv, iron_g5_texture_t *texsobol, iron_g5_texture_t *texscramble, iron_g5_texture_t *texrank) {
+	iron_g5_texture_t *texpaint0;
+	iron_g5_texture_t *texpaint1;
+	iron_g5_texture_t *texpaint2;
 
-	// kinc_g5_texture_t *texpaint0_image = tex0;
-	// kinc_g5_texture_t *texpaint0_tex = texpaint0_image;
-	// kinc_g5_texture_t *texpaint0_rt = texpaint0_image->render_target_;
+	// iron_g5_texture_t *texpaint0_image = tex0;
+	// iron_g5_texture_t *texpaint0_tex = texpaint0_image;
+	// iron_g5_texture_t *texpaint0_rt = texpaint0_image->render_target_;
 
 	// if (texpaint0_tex != NULL) {
-	// 	kinc_g5_texture_t *texture = texpaint0_tex;
+	// 	iron_g5_texture_t *texture = texpaint0_tex;
 	// 	if (!texture->_uploaded) {
-	// 		kinc_g5_command_list_upload_texture(&commandList, texture);
+	// 		iron_g5_command_list_upload_texture(&commandList, texture);
 	// 		texture->_uploaded = true;
 	// 	}
-	// 	texpaint0 = (kinc_g5_texture_t *)malloc(sizeof(kinc_g5_texture_t));
-	// 	#ifdef KINC_DIRECT3D12
+	// 	texpaint0 = (iron_g5_texture_t *)malloc(sizeof(iron_g5_texture_t));
+	// 	#ifdef IRON_DIRECT3D12
 	// 	texpaint0->impl.srvDescriptorHeap = texture->impl.srvDescriptorHeap;
 	// 	#endif
-	// 	#ifdef KINC_VULKAN
+	// 	#ifdef IRON_VULKAN
 	// 	texpaint0->impl.view = texture->impl.view;
 	// 	#endif
 	// }
@@ -2288,21 +2288,21 @@ void iron_raytrace_set_textures(kinc_g5_texture_t *tex0, kinc_g5_texture_t *tex1
 	// 	texpaint0 = texpaint0_rt;
 	// }
 
-	// kinc_g5_texture_t *texpaint1_image = tex1;
-	// kinc_g5_texture_t *texpaint1_tex = texpaint1_image;
-	// kinc_g5_texture_t *texpaint1_rt = texpaint1_image->render_target_;
+	// iron_g5_texture_t *texpaint1_image = tex1;
+	// iron_g5_texture_t *texpaint1_tex = texpaint1_image;
+	// iron_g5_texture_t *texpaint1_rt = texpaint1_image->render_target_;
 
 	// if (texpaint1_tex != NULL) {
-	// 	kinc_g5_texture_t *texture = texpaint1_tex;
+	// 	iron_g5_texture_t *texture = texpaint1_tex;
 	// 	if (!texture->_uploaded) {
-	// 		kinc_g5_command_list_upload_texture(&commandList, texture);
+	// 		iron_g5_command_list_upload_texture(&commandList, texture);
 	// 		texture->_uploaded = true;
 	// 	}
-	// 	texpaint1 = (kinc_g5_texture_t *)malloc(sizeof(kinc_g5_texture_t));
-	// 	#ifdef KINC_DIRECT3D12
+	// 	texpaint1 = (iron_g5_texture_t *)malloc(sizeof(iron_g5_texture_t));
+	// 	#ifdef IRON_DIRECT3D12
 	// 	texpaint1->impl.srvDescriptorHeap = texture->impl.srvDescriptorHeap;
 	// 	#endif
-	// 	#ifdef KINC_VULKAN
+	// 	#ifdef IRON_VULKAN
 	// 	texpaint1->impl.view = texture->impl.view;
 	// 	#endif
 	// }
@@ -2310,21 +2310,21 @@ void iron_raytrace_set_textures(kinc_g5_texture_t *tex0, kinc_g5_texture_t *tex1
 	// 	texpaint1 = texpaint1_rt;
 	// }
 
-	// kinc_g5_texture_t *texpaint2_image = tex2;
-	// kinc_g5_texture_t *texpaint2_tex = texpaint2_image;
-	// kinc_g5_texture_t *texpaint2_rt = texpaint2_image->render_target_;
+	// iron_g5_texture_t *texpaint2_image = tex2;
+	// iron_g5_texture_t *texpaint2_tex = texpaint2_image;
+	// iron_g5_texture_t *texpaint2_rt = texpaint2_image->render_target_;
 
 	// if (texpaint2_tex != NULL) {
-	// 	kinc_g5_texture_t *texture = (kinc_g5_texture_t *)texpaint2_tex;
+	// 	iron_g5_texture_t *texture = (iron_g5_texture_t *)texpaint2_tex;
 	// 	if (!texture->_uploaded) {
-	// 		kinc_g5_command_list_upload_texture(&commandList, texture);
+	// 		iron_g5_command_list_upload_texture(&commandList, texture);
 	// 		texture->_uploaded = true;
 	// 	}
-	// 	texpaint2 = (kinc_g5_texture_t *)malloc(sizeof(kinc_g5_texture_t));
-	// 	#ifdef KINC_DIRECT3D12
+	// 	texpaint2 = (iron_g5_texture_t *)malloc(sizeof(iron_g5_texture_t));
+	// 	#ifdef IRON_DIRECT3D12
 	// 	texpaint2->impl.srvDescriptorHeap = texture->impl.srvDescriptorHeap;
 	// 	#endif
-	// 	#ifdef KINC_VULKAN
+	// 	#ifdef IRON_VULKAN
 	// 	texpaint2->impl.view = texture->impl.view;
 	// 	#endif
 	// }
@@ -2337,23 +2337,23 @@ void iron_raytrace_set_textures(kinc_g5_texture_t *tex0, kinc_g5_texture_t *tex1
 	texpaint2 = tex2;
 
 	if (!texenv->_uploaded) {
-		kinc_g5_command_list_upload_texture(&commandList, texenv);
+		iron_g5_command_list_upload_texture(&commandList, texenv);
 		texenv->_uploaded = true;
 	}
 	if (!texsobol->_uploaded) {
-		kinc_g5_command_list_upload_texture(&commandList, texsobol);
+		iron_g5_command_list_upload_texture(&commandList, texsobol);
 		texsobol->_uploaded = true;
 	}
 	if (!texscramble->_uploaded) {
-		kinc_g5_command_list_upload_texture(&commandList, texscramble);
+		iron_g5_command_list_upload_texture(&commandList, texscramble);
 		texscramble->_uploaded = true;
 	}
 	if (!texrank->_uploaded) {
-		kinc_g5_command_list_upload_texture(&commandList, texrank);
+		iron_g5_command_list_upload_texture(&commandList, texrank);
 		texrank->_uploaded = true;
 	}
 
-	kinc_g5_raytrace_set_textures(texpaint0, texpaint1, texpaint2, texenv, texsobol, texscramble, texrank);
+	iron_g5_raytrace_set_textures(texpaint0, texpaint1, texpaint2, texenv, texsobol, texscramble, texrank);
 
 	// if (texpaint0_tex != NULL) {
 	// 	free(texpaint0);
@@ -2366,18 +2366,18 @@ void iron_raytrace_set_textures(kinc_g5_texture_t *tex0, kinc_g5_texture_t *tex1
 	// }
 }
 
-void iron_raytrace_dispatch_rays(kinc_g5_texture_t *render_target, buffer_t *buffer) {
+void iron_raytrace_dispatch_rays(iron_g5_texture_t *render_target, buffer_t *buffer) {
 	float *cb = (float *)buffer->buffer;
-	kinc_g5_constant_buffer_lock_all(&constant_buffer);
+	iron_g5_constant_buffer_lock_all(&constant_buffer);
 	for (int i = 0; i < constant_buffer_size; ++i) {
-		kinc_g5_constant_buffer_set_float(&constant_buffer, i * 4, cb[i]);
+		iron_g5_constant_buffer_set_float(&constant_buffer, i * 4, cb[i]);
 	}
-	kinc_g5_constant_buffer_unlock(&constant_buffer);
+	iron_g5_constant_buffer_unlock(&constant_buffer);
 
-	kinc_g5_raytrace_set_acceleration_structure(&accel);
-	kinc_g5_raytrace_set_pipeline(&rt_pipeline);
-	kinc_g5_raytrace_set_target(render_target);
-	kinc_g5_raytrace_dispatch_rays(&commandList);
+	iron_g5_raytrace_set_acceleration_structure(&accel);
+	iron_g5_raytrace_set_pipeline(&rt_pipeline);
+	iron_g5_raytrace_set_target(render_target);
+	iron_g5_raytrace_dispatch_rays(&commandList);
 }
 
 #endif

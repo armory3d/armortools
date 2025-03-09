@@ -1,5 +1,5 @@
 
-let _tab_textures_draw_img: kinc_g5_texture_t;
+let _tab_textures_draw_img: iron_g5_texture_t;
 let _tab_textures_draw_path: string;
 let _tab_textures_draw_asset: asset_t;
 let _tab_textures_draw_i: i32;
@@ -40,10 +40,10 @@ function tab_textures_draw(htab: ui_handle_t) {
 		if (project_assets.length > 0) {
 
 			///if (is_paint || is_sculpt)
-			let statusw: i32 = kinc_window_width() - ui_toolbar_w - config_raw.layout[layout_size_t.SIDEBAR_W];
+			let statusw: i32 = iron_window_width() - ui_toolbar_w - config_raw.layout[layout_size_t.SIDEBAR_W];
 			///end
 			///if is_lab
-			let statusw: i32 = kinc_window_width();
+			let statusw: i32 = iron_window_width();
 			///end
 
 			let slotw: i32 = math_floor(52 * ui_SCALE(ui));
@@ -78,7 +78,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 					}
 
 					let asset: asset_t = project_assets[i];
-					let img: kinc_g5_texture_t = project_get_image(asset);
+					let img: iron_g5_texture_t = project_get_image(asset);
 					if (img == null) {
 						let empty_rt: render_target_t = map_get(render_path_render_targets, "empty_black");
 						img = empty_rt._image;
@@ -140,14 +140,14 @@ function tab_textures_draw(htab: ui_handle_t) {
 									_tab_textures_draw_path = path;
 
 									app_notify_on_next_frame(function () {
-										let img: kinc_g5_texture_t = _tab_textures_draw_img;
-										let target: kinc_g5_texture_t = iron_g4_create_render_target(tab_textures_to_pow2(img.width), tab_textures_to_pow2(img.height));
+										let img: iron_g5_texture_t = _tab_textures_draw_img;
+										let target: iron_g5_texture_t = iron_g4_create_render_target(tab_textures_to_pow2(img.width), tab_textures_to_pow2(img.height));
 										g2_begin(target);
 										draw_set_pipeline(pipes_copy);
 										draw_scaled_image(img, 0, 0, target.width, target.height);
 										draw_set_pipeline(null);
 										g2_end();
-										app_notify_on_next_frame(function (target: kinc_g5_texture_t) {
+										app_notify_on_next_frame(function (target: iron_g5_texture_t) {
 											let path: string = _tab_textures_draw_path;
 											let f: string = ui_files_filename;
 											if (f == "") {
@@ -220,7 +220,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 			}
 		}
 		else {
-			let img: kinc_g5_texture_t = resource_get("icons.k");
+			let img: iron_g5_texture_t = resource_get("icons.k");
 			let r: rect_t = resource_tile50(img, 0, 1);
 			_ui_image(img, ui.ops.theme.BUTTON_COL, r.h, r.x, r.y, r.w, r.h);
 			if (ui.is_hovered) {

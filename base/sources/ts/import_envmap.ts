@@ -1,21 +1,21 @@
 
-let import_envmap_pipeline: kinc_g5_pipeline_t = null;
-let import_envmap_params_loc: kinc_g5_constant_location_t;
+let import_envmap_pipeline: iron_g5_pipeline_t = null;
+let import_envmap_params_loc: iron_g5_constant_location_t;
 let import_envmap_params: vec4_t = vec4_create();
 let import_envmap_n: vec4_t = vec4_create();
-let import_envmap_radiance_loc: kinc_g5_texture_unit_t;
-let import_envmap_radiance: kinc_g5_texture_t = null;
-let import_envmap_radiance_cpu: kinc_g5_texture_t = null;
-let import_envmap_mips: kinc_g5_texture_t[] = null;
-let import_envmap_mips_cpu: kinc_g5_texture_t[] = null;
+let import_envmap_radiance_loc: iron_g5_texture_unit_t;
+let import_envmap_radiance: iron_g5_texture_t = null;
+let import_envmap_radiance_cpu: iron_g5_texture_t = null;
+let import_envmap_mips: iron_g5_texture_t[] = null;
+let import_envmap_mips_cpu: iron_g5_texture_t[] = null;
 
-function import_envmap_run(path: string, image: kinc_g5_texture_t) {
+function import_envmap_run(path: string, image: iron_g5_texture_t) {
 	// Init
 	if (import_envmap_pipeline == null) {
 		import_envmap_pipeline = iron_g4_create_pipeline();
 		import_envmap_pipeline.vertex_shader = sys_get_shader("pass.vert");
 		import_envmap_pipeline.fragment_shader = sys_get_shader("prefilter_envmap.frag");
-		let vs: kinc_g5_vertex_structure_t = g4_vertex_struct_create();
+		let vs: iron_g5_vertex_structure_t = g4_vertex_struct_create();
 		g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
 		import_envmap_pipeline.input_layout = vs;
 		import_envmap_pipeline.color_attachment_count = 1;
@@ -43,8 +43,8 @@ function import_envmap_run(path: string, image: kinc_g5_texture_t) {
 
 	let radiance_pixels: buffer_t = iron_g4_get_texture_pixels(import_envmap_radiance);
 	if (import_envmap_radiance_cpu != null) {
-		let _radiance_cpu: kinc_g5_texture_t = import_envmap_radiance_cpu;
-		app_notify_on_next_frame(function (_radiance_cpu: kinc_g5_texture_t) {
+		let _radiance_cpu: iron_g5_texture_t = import_envmap_radiance_cpu;
+		app_notify_on_next_frame(function (_radiance_cpu: iron_g5_texture_t) {
 			iron_unload_image(_radiance_cpu);
 		}, _radiance_cpu);
 	}
@@ -53,8 +53,8 @@ function import_envmap_run(path: string, image: kinc_g5_texture_t) {
 	// Radiance
 	if (import_envmap_mips_cpu != null) {
 		for (let i: i32 = 0; i < import_envmap_mips_cpu.length; ++i) {
-			let mip: kinc_g5_texture_t = import_envmap_mips_cpu[i];
-			app_notify_on_next_frame(function (mip: kinc_g5_texture_t) {
+			let mip: iron_g5_texture_t = import_envmap_mips_cpu[i];
+			app_notify_on_next_frame(function (mip: iron_g5_texture_t) {
 				///if (!arm_direct3d12) // TODO: crashes after 50+ imports
 				iron_unload_image(mip);
 				///end
@@ -86,16 +86,16 @@ function import_envmap_run(path: string, image: kinc_g5_texture_t) {
 	project_raw.envmap = path;
 }
 
-function import_envmap_get_radiance_mip(mip: kinc_g5_texture_t, level: i32, radiance: kinc_g5_texture_t) {
-	iron_g4_begin(mip);
-	kinc_g4_set_vertex_buffer(const_data_screen_aligned_vb);
-	kinc_g4_set_index_buffer(const_data_screen_aligned_ib);
-	kinc_g5_set_pipeline(import_envmap_pipeline);
+function import_envmap_get_radiance_mip(mip: iron_g5_texture_t, level: i32, radiance: iron_g5_texture_t) {
+	_iron_g4_begin(mip);
+	iron_g4_set_vertex_buffer(const_data_screen_aligned_vb);
+	iron_g4_set_index_buffer(const_data_screen_aligned_ib);
+	iron_g5_set_pipeline(import_envmap_pipeline);
 	import_envmap_params.x = 0.1 + level / 8;
-	iron_g4_set_float4(import_envmap_params_loc, import_envmap_params.x, import_envmap_params.y, import_envmap_params.z, import_envmap_params.w);
-	iron_g4_set_texture(import_envmap_radiance_loc, radiance);
+	_iron_g4_set_float4(import_envmap_params_loc, import_envmap_params.x, import_envmap_params.y, import_envmap_params.z, import_envmap_params.w);
+	_iron_g4_set_texture(import_envmap_radiance_loc, radiance);
 	iron_g4_draw_indexed_vertices();
-	iron_g4_end();
+	_iron_g4_end();
 }
 
 function import_envmap_reverse_equirect(x: f32, y: f32): vec4_t {

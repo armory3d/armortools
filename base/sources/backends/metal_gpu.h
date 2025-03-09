@@ -5,24 +5,24 @@
 
 #pragma once
 
-struct kinc_g5_index_buffer;
+struct iron_g5_index_buffer;
 
 typedef struct {
-	struct kinc_g5_index_buffer *current_index_buffer;
+	struct iron_g5_index_buffer *current_index_buffer;
 } CommandList5Impl;
 
-typedef struct kinc_g5_compute_shader_impl {
+typedef struct iron_g5_compute_shader_impl {
 	char name[1024];
 	void *_function;
 	void *_pipeline;
 	void *_reflection;
-} kinc_g5_compute_shader_impl;
+} iron_g5_compute_shader_impl;
 
-struct kinc_g5_shader;
+struct iron_g5_shader;
 
 typedef struct {
-	struct kinc_g5_shader *vertex_shader;
-	struct kinc_g5_shader *fragment_shader;
+	struct iron_g5_shader *vertex_shader;
+	struct iron_g5_shader *fragment_shader;
 	void *_pipeline;
 	void *_pipelineDepth;
 	void *_reflection;
@@ -40,9 +40,9 @@ typedef struct {
 	int computeOffset;
 } ConstantLocation5Impl;
 
-typedef struct kinc_g5_sampler_impl {
+typedef struct iron_g5_sampler_impl {
 	void *sampler;
-} kinc_g5_sampler_impl_t;
+} iron_g5_sampler_impl_t;
 
 typedef struct {
 	char name[1024];
@@ -51,11 +51,11 @@ typedef struct {
 
 typedef struct {
 	void *_raytracingPipeline;
-} kinc_g5_raytrace_pipeline_impl_t;
+} iron_g5_raytrace_pipeline_impl_t;
 
 typedef struct {
 	void *_accelerationStructure;
-} kinc_g5_raytrace_acceleration_structure_impl_t;
+} iron_g5_raytrace_acceleration_structure_impl_t;
 
 typedef struct {
 	int index;

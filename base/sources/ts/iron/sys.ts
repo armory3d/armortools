@@ -17,9 +17,9 @@ let _sys_drop_files_listeners: sys_string_callback_t[] = [];
 
 let _sys_start_time: f32;
 let _sys_window_title: string;
-let _sys_shaders: map_t<string, kinc_g5_shader_t> = map_create();
+let _sys_shaders: map_t<string, iron_g5_shader_t> = map_create();
 
-declare type kinc_window_options_t = {
+declare type iron_window_options_t = {
 	title?: string;
 	x?: i32;
 	y?: i32;
@@ -38,10 +38,10 @@ declare type kinc_window_options_t = {
 	depth_bits?: i32;
 };
 
-function sys_start(ops: kinc_window_options_t) {
-	iron_init(ops);
+function sys_start(ops: iron_window_options_t) {
+	_iron_init(ops);
 
-	_sys_start_time = kinc_time();
+	_sys_start_time = iron_time();
 	draw_init(
 		iron_load_blob(data_path() + "draw_image.vert" + sys_shader_ext()),
 		iron_load_blob(data_path() + "draw_image.frag" + sys_shader_ext()),
@@ -50,8 +50,8 @@ function sys_start(ops: kinc_window_options_t) {
 		iron_load_blob(data_path() + "draw_text.vert" + sys_shader_ext()),
 		iron_load_blob(data_path() + "draw_text.frag" + sys_shader_ext())
 	);
-	iron_set_update_callback(sys_render_callback);
-	iron_set_drop_files_callback(sys_drop_files_callback);
+	_iron_set_update_callback(sys_render_callback);
+	_iron_set_drop_files_callback(sys_drop_files_callback);
 	iron_set_application_state_callback(sys_foreground_callback, sys_resume_callback, sys_pause_callback, sys_background_callback, sys_shutdown_callback);
 	iron_set_keyboard_down_callback(sys_keyboard_down_callback);
 	iron_set_keyboard_up_callback(sys_keyboard_up_callback);
@@ -142,7 +142,7 @@ function sys_drop_files(file_path: string) {
 }
 
 function sys_time(): f32 {
-	return kinc_time() - _sys_start_time;
+	return iron_time() - _sys_start_time;
 }
 
 function sys_render_callback() {
@@ -251,7 +251,7 @@ function sys_title_set(value: string) {
 }
 
 function sys_display_primary_id(): i32 {
-	for (let i: i32 = 0; i < kinc_count_displays(); ++i) {
+	for (let i: i32 = 0; i < iron_count_displays(); ++i) {
 		if (iron_display_is_primary(i)) {
 			return i;
 		}
@@ -293,8 +293,8 @@ function sys_shader_ext(): string {
 	///end
 }
 
-function sys_get_shader(name: string): kinc_g5_shader_t {
-	let shader: kinc_g5_shader_t = map_get(_sys_shaders, name);
+function sys_get_shader(name: string): iron_g5_shader_t {
+	let shader: iron_g5_shader_t = map_get(_sys_shaders, name);
 	if (shader == null) {
 		shader = iron_g4_create_shader(
 			iron_load_blob(data_path() + name + sys_shader_ext()),
@@ -315,7 +315,7 @@ function sound_create(sound_: any): sound_t {
 }
 
 function sound_unload(raw: sound_t) {
-	kinc_a1_sound_destroy(raw.sound_);
+	iron_a1_sound_destroy(raw.sound_);
 }
 ///end
 

@@ -2,38 +2,38 @@
 // Red triangle test
 // ../../../make --graphics vulkan --run
 
-let pipeline: kinc_g5_pipeline_t;
+let pipeline: iron_g5_pipeline_t;
 let vb: any;
 let ib: any;
 
 function render() {
-	iron_g4_begin(null, null);
+	_iron_g4_begin(null, null);
 
 	let flags: i32 = 0;
 	flags |= 1; // Color
 	flags |= 2; // Depth
-	kinc_g5_clear(0xff000000, 1.0, flags);
+	iron_g5_clear(0xff000000, 1.0, flags);
 
-	kinc_g5_set_pipeline(pipeline);
-	kinc_g4_set_vertex_buffer(vb);
-	kinc_g4_set_index_buffer(ib);
+	iron_g5_set_pipeline(pipeline);
+	iron_g4_set_vertex_buffer(vb);
+	iron_g4_set_index_buffer(ib);
 	iron_g4_draw_indexed_vertices(0, -1);
 
-	iron_g4_end();
+	_iron_g4_end();
 }
 
 function main() {
 	let resizable: i32 = 1;
 	let minimizable: i32 = 2;
 	let maximizable: i32 = 4;
-	iron_init("Iron", 640, 480, true, 0, resizable | minimizable | maximizable, -1, -1, 60);
+	_iron_init("Iron", 640, 480, true, 0, resizable | minimizable | maximizable, -1, -1, 60);
 
 	pipeline = iron_g4_create_pipeline();
 	let f32_3x: vertex_data_t = vertex_data_t.F32_3X;
-	let elem: kinc_g5_vertex_element_t = { name: "pos", data: f32_3x };
-	let elems: kinc_g5_vertex_element_t[] = [elem];
+	let elem: iron_g5_vertex_element_t = { name: "pos", data: f32_3x };
+	let elems: iron_g5_vertex_element_t[] = [elem];
 
-	let structure0: kinc_g5_vertex_structure_t = { elements: elems };
+	let structure0: iron_g5_vertex_structure_t = { elements: elems };
 
 	let vs_buffer: buffer_t = iron_load_blob("./data/test.vert.spirv");
 	let fs_buffer: buffer_t = iron_load_blob("./data/test.frag.spirv");
@@ -76,14 +76,14 @@ function main() {
 	for (let i: i32 = 0; i < vertices.length; i++) {
 		buffer_set_f32(vb_data, i * 4, vertices[i]);
 	}
-	kinc_g4_vertex_buffer_unlock_all(vb);
+	iron_g4_vertex_buffer_unlock_all(vb);
 
 	ib = iron_g4_create_index_buffer(indices.length);
 	let ib_data: u32_array_t = iron_g4_lock_index_buffer(ib);
 	for (let i: i32 = 0; i < indices.length; i++) {
 		ib_data[i] = indices[i];
 	}
-	kinc_g4_index_buffer_unlock_all(ib);
+	iron_g4_index_buffer_unlock_all(ib);
 
-	iron_set_update_callback(render);
+	_iron_set_update_callback(render);
 }

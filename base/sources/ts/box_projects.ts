@@ -1,7 +1,7 @@
 
 let box_projects_htab: ui_handle_t = ui_handle_create();
 let box_projects_hsearch: ui_handle_t = ui_handle_create();
-let box_projects_icon_map: map_t<string, kinc_g5_texture_t> = null;
+let box_projects_icon_map: map_t<string, iron_g5_texture_t> = null;
 
 let _box_projects_path: string;
 let _box_projects_icon_path: string;
@@ -69,7 +69,7 @@ function box_projects_tab(ui: ui_t) {
 		ui_separator(3, false);
 
 		let slotw: i32 = math_floor(150 * ui_SCALE(ui));
-		let num: i32 = math_floor(kinc_window_width() / slotw);
+		let num: i32 = math_floor(iron_window_width() / slotw);
 		if (num == 0) {
 			return;
 		}
@@ -113,9 +113,9 @@ function box_projects_tab(ui: ui_t) {
 				if (box_projects_icon_map == null) {
 					box_projects_icon_map = map_create();
 				}
-				let icon: kinc_g5_texture_t = map_get(box_projects_icon_map, icon_path);
+				let icon: iron_g5_texture_t = map_get(box_projects_icon_map, icon_path);
 				if (icon == null) {
-					let image: kinc_g5_texture_t = data_get_image(icon_path);
+					let image: iron_g5_texture_t = data_get_image(icon_path);
 					icon = image;
 					map_set(box_projects_icon_map, icon_path, icon);
 				}
@@ -209,7 +209,7 @@ function box_projects_recent_tab(ui: ui_t) {
 			}
 
 			if (ui_button(file, ui_align_t.LEFT) && file_exists(path)) {
-				let current: kinc_g5_texture_t = _g2_current;
+				let current: iron_g5_texture_t = _g2_current;
 				let g2_in_use: bool = _g2_in_use;
 				if (g2_in_use) g2_end();
 
@@ -241,7 +241,7 @@ function box_projects_recent_tab(ui: ui_t) {
 }
 
 function box_projects_draw_badge(ui: ui_t) {
-	let img: kinc_g5_texture_t = data_get_image("badge.k");
+	let img: iron_g5_texture_t = data_get_image("badge.k");
 	_ui_image(img);
 	_ui_end_element();
 }
@@ -261,10 +261,10 @@ function box_projects_get_started_tab(ui: ui_t) {
 }
 
 function box_projects_align_to_fullscreen() {
-	ui_box_modalw = math_floor(kinc_window_width() / ui_SCALE(base_ui_box));
-	ui_box_modalh = math_floor(kinc_window_height() / ui_SCALE(base_ui_box));
-	let appw: i32 = kinc_window_width();
-	let apph: i32 = kinc_window_height();
+	ui_box_modalw = math_floor(iron_window_width() / ui_SCALE(base_ui_box));
+	ui_box_modalh = math_floor(iron_window_height() / ui_SCALE(base_ui_box));
+	let appw: i32 = iron_window_width();
+	let apph: i32 = iron_window_height();
 	let mw: i32 = appw;
 	let mh: i32 = apph;
 	ui_box_hwnd.drag_x = math_floor(-appw / 2 + mw / 2);

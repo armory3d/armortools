@@ -473,7 +473,7 @@ void ui_end_element() {
 void ui_resize(ui_handle_t *handle, int w, int h) {
 	handle->redraws = 2;
 	if (handle->texture.width != 0) {
-		kinc_g5_texture_destroy(&handle->texture);
+		iron_g5_texture_destroy(&handle->texture);
 	}
 	if (w < 1) {
 		w = 1;
@@ -481,7 +481,7 @@ void ui_resize(ui_handle_t *handle, int w, int h) {
 	if (h < 1) {
 		h = 1;
 	}
-	kinc_g5_render_target_init(&handle->texture, w, h, KINC_IMAGE_FORMAT_RGBA32, 0);
+	iron_g5_render_target_init(&handle->texture, w, h, IRON_IMAGE_FORMAT_RGBA32, 0);
 }
 
 bool ui_input_in_rect(float x, float y, float w, float h) {
@@ -497,10 +497,10 @@ bool ui_input_changed() {
 void ui_end_input() {
 	if (ui_on_tab_drop != NULL && current->drag_tab_handle != NULL) {
 		if (current->input_dx != 0 || current->input_dy != 0) {
-			kinc_mouse_set_cursor(1); // Hand
+			iron_mouse_set_cursor(1); // Hand
 		}
 		if (current->input_released) {
-			kinc_mouse_set_cursor(0); // Default
+			iron_mouse_set_cursor(0); // Default
 			current->drag_tab_handle = NULL;
 		}
 	}
@@ -514,13 +514,13 @@ void ui_end_input() {
 	current->input_dy = 0;
 	current->input_wheel_delta = 0;
 	current->pen_in_use = false;
-	if (ui_key_repeat && current->is_key_down && kinc_time() - ui_key_repeat_time > 0.05) {
-		if (current->key_code == KINC_KEY_BACKSPACE || current->key_code == KINC_KEY_DELETE || current->key_code == KINC_KEY_LEFT || current->key_code == KINC_KEY_RIGHT || current->key_code == KINC_KEY_UP || current->key_code == KINC_KEY_DOWN) {
-			ui_key_repeat_time = kinc_time();
+	if (ui_key_repeat && current->is_key_down && iron_time() - ui_key_repeat_time > 0.05) {
+		if (current->key_code == IRON_KEY_BACKSPACE || current->key_code == IRON_KEY_DELETE || current->key_code == IRON_KEY_LEFT || current->key_code == IRON_KEY_RIGHT || current->key_code == IRON_KEY_UP || current->key_code == IRON_KEY_DOWN) {
+			ui_key_repeat_time = iron_time();
 			current->is_key_pressed = true;
 		}
 	}
-	if (ui_touch_hold && current->input_down && current->input_x == current->input_started_x && current->input_y == current->input_started_y && current->input_started_time > 0 && kinc_time() - current->input_started_time > 0.7) {
+	if (ui_touch_hold && current->input_down && current->input_x == current->input_started_x && current->input_y == current->input_started_y && current->input_started_time > 0 && iron_time() - current->input_started_time > 0.7) {
 		current->touch_hold_activated = true;
 		current->input_released_r = true;
 		current->input_started_time = 0;
@@ -581,7 +581,7 @@ void ui_draw_tooltip_text(bool bind_global_g) {
 			tooltip_w = line_tooltip_w;
 		}
 	}
-	current->tooltip_x = fmin(current->tooltip_x, kinc_window_width() - tooltip_w - 20);
+	current->tooltip_x = fmin(current->tooltip_x, iron_window_width() - tooltip_w - 20);
 	if (bind_global_g) draw_restore_render_target();
 	float font_height = draw_font_height(current->ops->font, current->font_size);
 	float off = 0;
@@ -614,8 +614,8 @@ void ui_draw_tooltip_image(bool bind_global_g) {
 		w = current->tooltip_img_max_width;
 	}
 	float h = current->tooltip_img->height * (w / current->tooltip_img->width);
-	current->tooltip_x = fmin(current->tooltip_x, kinc_window_width() - w - 20);
-	current->tooltip_y = fmin(current->tooltip_y, kinc_window_height() - h - 20);
+	current->tooltip_x = fmin(current->tooltip_x, iron_window_width() - w - 20);
+	current->tooltip_y = fmin(current->tooltip_y, iron_window_height() - h - 20);
 	if (bind_global_g) {
 		draw_restore_render_target();
 	}
@@ -652,8 +652,8 @@ void ui_draw_tooltip(bool bind_global_g) {
 		draw_set_font(current->ops->font, current->font_size * 2.0);
 		float x_off = draw_string_width(current->ops->font, current->font_size * 2.0, current->text_selected) / 2.0;
 		float y_off = draw_font_height(current->ops->font, current->font_size * 2.0) / 2.0;
-		float x = kinc_window_width() / 2.0;
-		float y = kinc_window_height() / 3.0;
+		float x = iron_window_width() / 2.0;
+		float y = iron_window_height() / 3.0;
 		draw_set_color(theme->BUTTON_COL);
 		draw_filled_rect(x - x_off, y - y_off, x_off * 2.0, y_off * 2.0);
 		draw_set_color(theme->TEXT_COL);
@@ -668,9 +668,9 @@ void ui_draw_tooltip(bool bind_global_g) {
 		if (!current->tooltip_shown) {
 			current->tooltip_shown = true;
 			current->tooltip_x = current->input_x;
-			current->tooltip_time = kinc_time();
+			current->tooltip_time = iron_time();
 		}
-		if (!current->tooltip_wait && kinc_time() - current->tooltip_time > UI_TOOLTIP_DELAY()) {
+		if (!current->tooltip_wait && iron_time() - current->tooltip_time > UI_TOOLTIP_DELAY()) {
 			if (current->tooltip_img != NULL) {
 				ui_draw_tooltip_image(bind_global_g);
 			}
@@ -693,7 +693,7 @@ void ui_draw_combo(bool begin /*= true*/) {
 
 	float combo_h = (current->combo_selected_texts->length + (current->combo_selected_label != NULL ? 1 : 0) + (current->combo_search_bar ? 1 : 0)) * UI_ELEMENT_H();
 	float dist_top = current->combo_selected_y - combo_h - UI_ELEMENT_H() - current->window_border_top;
-	float dist_bottom = kinc_window_height() - current->window_border_bottom - (current->combo_selected_y + combo_h );
+	float dist_bottom = iron_window_height() - current->window_border_bottom - (current->combo_selected_y + combo_h );
 	bool unroll_up = dist_bottom < 0 && dist_bottom < dist_top;
 
 	ui_begin_region(current, current->combo_selected_x, current->combo_selected_y, current->combo_selected_w);
@@ -707,8 +707,8 @@ void ui_draw_combo(bool begin /*= true*/) {
 	}
 
 	if (current->is_key_pressed || current->input_wheel_delta != 0) {
-		int arrow_up = current->is_key_pressed && current->key_code == (unroll_up ? KINC_KEY_DOWN : KINC_KEY_UP);
-		int arrow_down = current->is_key_pressed && current->key_code == (unroll_up ? KINC_KEY_UP : KINC_KEY_DOWN);
+		int arrow_up = current->is_key_pressed && current->key_code == (unroll_up ? IRON_KEY_DOWN : IRON_KEY_UP);
+		int arrow_down = current->is_key_pressed && current->key_code == (unroll_up ? IRON_KEY_UP : IRON_KEY_DOWN);
 		int wheel_up = (unroll_up && current->input_wheel_delta > 0) || (!unroll_up && current->input_wheel_delta < 0);
 		int wheel_down = (unroll_up && current->input_wheel_delta < 0) || (!unroll_up && current->input_wheel_delta > 0);
 		if ((arrow_up || wheel_up) && current->combo_to_submit > 0) {
@@ -771,7 +771,7 @@ void ui_draw_combo(bool begin /*= true*/) {
 	int _BUTTON_COL = theme->BUTTON_COL;
 	int _ELEMENT_OFFSET = theme->ELEMENT_OFFSET;
 	theme->ELEMENT_OFFSET = 0;
-	float unroll_right = current->_x + current->combo_selected_w * 2.0 < kinc_window_width() - current->window_border_right ? 1 : -1;
+	float unroll_right = current->_x + current->combo_selected_w * 2.0 < iron_window_width() - current->window_border_right ? 1 : -1;
 	bool reset_position = false;
 	char search[512];
 	search[0] = '\0';
@@ -789,7 +789,7 @@ void ui_draw_combo(bool begin /*= true*/) {
 			ui_combo_first = true; // Keep combo open
 		}
 		if (ui_combo_first) {
-			#if !defined(KINC_ANDROID) && !defined(KINC_IOS)
+			#if !defined(IRON_ANDROID) && !defined(IRON_IOS)
 			ui_start_text_edit(ui_combo_search_handle, UI_ALIGN_LEFT); // Focus search bar
 			#endif
 		}
@@ -823,7 +823,7 @@ void ui_draw_combo(bool begin /*= true*/) {
 			}
 			break;
 		}
-		if (current->_y + UI_ELEMENT_H() > kinc_window_height() - current->window_border_bottom || current->_y - UI_ELEMENT_H() * 2 < current->window_border_top) {
+		if (current->_y + UI_ELEMENT_H() > iron_window_height() - current->window_border_bottom || current->_y - UI_ELEMENT_H() * 2 < current->window_border_top) {
 			current->_x += current->combo_selected_w * unroll_right; // Next column
 			current->_y = current->combo_selected_y;
 		}
@@ -863,24 +863,24 @@ void ui_draw_combo(bool begin /*= true*/) {
 
 void ui_bake_elements() {
 	if (current->check_select_image.width != 0) {
-		kinc_g5_texture_destroy(&current->check_select_image);
+		iron_g5_texture_destroy(&current->check_select_image);
 	}
 	float r = UI_CHECK_SELECT_SIZE();
-	kinc_g5_render_target_init(&current->check_select_image, r, r, KINC_IMAGE_FORMAT_RGBA32, 0);
+	iron_g5_render_target_init(&current->check_select_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
 	draw_set_render_target(&current->check_select_image);
-	kinc_g5_clear(0x00000000, 0, KINC_G5_CLEAR_COLOR);
+	iron_g5_clear(0x00000000, 0, IRON_G5_CLEAR_COLOR);
 	draw_set_color(0xffffffff);
 	draw_line(0, r / 2.0, r / 2.0 - 2.0 * UI_SCALE(), r - 2.0 * UI_SCALE(), 2.0 * UI_SCALE());
 	draw_line(r / 2.0 - 3.0 * UI_SCALE(), r - 3.0 * UI_SCALE(), r / 2.0 + 5.0 * UI_SCALE(), r - 11.0 * UI_SCALE(), 2.0 * UI_SCALE());
 	draw_end();
 
 	if (current->radio_image.width != 0) {
-		kinc_g5_texture_destroy(&current->radio_image);
+		iron_g5_texture_destroy(&current->radio_image);
 	}
 	r = UI_CHECK_SIZE();
-	kinc_g5_render_target_init(&current->radio_image, r, r, KINC_IMAGE_FORMAT_RGBA32, 0);
+	iron_g5_render_target_init(&current->radio_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
 	draw_set_render_target(&current->radio_image);
-	kinc_g5_clear(0x00000000, 0, KINC_G5_CLEAR_COLOR);
+	iron_g5_clear(0x00000000, 0, IRON_G5_CLEAR_COLOR);
 	draw_set_color(0xffaaaaaa);
 	draw_filled_circle(r / 2.0, r / 2.0, r / 2.0, 0);
 	draw_set_color(0xffffffff);
@@ -888,12 +888,12 @@ void ui_bake_elements() {
 	draw_end();
 
 	if (current->radio_select_image.width != 0) {
-		kinc_g5_texture_destroy(&current->radio_select_image);
+		iron_g5_texture_destroy(&current->radio_select_image);
 	}
 	r = UI_CHECK_SELECT_SIZE();
-	kinc_g5_render_target_init(&current->radio_select_image, r, r, KINC_IMAGE_FORMAT_RGBA32, 0);
+	iron_g5_render_target_init(&current->radio_select_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
 	draw_set_render_target(&current->radio_select_image);
-	kinc_g5_clear(0x00000000, 0, KINC_G5_CLEAR_COLOR);
+	iron_g5_clear(0x00000000, 0, IRON_G5_CLEAR_COLOR);
 	draw_set_color(0xffaaaaaa);
 	draw_filled_circle(r / 2.0, r / 2.0, 4.5 * UI_SCALE(), 0);
 	draw_set_color(0xffffffff);
@@ -902,22 +902,22 @@ void ui_bake_elements() {
 
 	if (theme->ROUND_CORNERS) {
 		if (current->filled_round_corner_image.width != 0) {
-			kinc_g5_texture_destroy(&current->filled_round_corner_image);
+			iron_g5_texture_destroy(&current->filled_round_corner_image);
 		}
 		r = 4.0 * UI_SCALE();
-		kinc_g5_render_target_init(&current->filled_round_corner_image, r, r, KINC_IMAGE_FORMAT_RGBA32, 0);
+		iron_g5_render_target_init(&current->filled_round_corner_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
 		draw_set_render_target(&current->filled_round_corner_image);
-		kinc_g5_clear(0x00000000, 0, KINC_G5_CLEAR_COLOR);
+		iron_g5_clear(0x00000000, 0, IRON_G5_CLEAR_COLOR);
 		draw_set_color(0xffffffff);
 		draw_filled_circle(r, r, r, 0);
 		draw_end();
 
 		if (current->round_corner_image.width != 0) {
-			kinc_g5_texture_destroy(&current->round_corner_image);
+			iron_g5_texture_destroy(&current->round_corner_image);
 		}
-		kinc_g5_render_target_init(&current->round_corner_image, r, r, KINC_IMAGE_FORMAT_RGBA32, 0);
+		iron_g5_render_target_init(&current->round_corner_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
 		draw_set_render_target(&current->round_corner_image);
-		kinc_g5_clear(0x00000000, 0, KINC_G5_CLEAR_COLOR);
+		iron_g5_clear(0x00000000, 0, IRON_G5_CLEAR_COLOR);
 		draw_set_color(0xffffffff);
 		draw_circle(r, r, r, 0, 1);
 		draw_end();
@@ -980,7 +980,7 @@ void ui_start_text_edit(ui_handle_t *handle, int align) {
 	}
 	current->tab_pressed_handle = handle;
 	current->highlight_anchor = current->highlight_on_select ? 0 : current->cursor_x;
-	kinc_keyboard_show();
+	iron_keyboard_show();
 }
 
 void ui_submit_text_edit() {
@@ -1003,7 +1003,7 @@ void ui_deselect_text(ui_t *ui) {
 	if (ui->current_window != NULL) {
 		ui->current_window->redraws = 2;
 	}
-	kinc_keyboard_hide();
+	iron_keyboard_hide();
 	ui->highlight_anchor = ui->cursor_x;
 	if (ui_on_deselect_text != NULL) {
 		ui_on_deselect_text();
@@ -1042,17 +1042,17 @@ void ui_update_text_edit(int align, bool editable, bool live_update) {
 	char text[256];
 	strcpy(text, current->text_selected);
 	if (current->is_key_pressed) { // Process input
-		if (current->key_code == KINC_KEY_LEFT) { // Move cursor
+		if (current->key_code == IRON_KEY_LEFT) { // Move cursor
 			if (current->cursor_x > 0) {
 				current->cursor_x--;
 			}
 		}
-		else if (current->key_code == KINC_KEY_RIGHT) {
+		else if (current->key_code == IRON_KEY_RIGHT) {
 			if (current->cursor_x < strlen(text)) {
 				current->cursor_x++;
 			}
 		}
-		else if (editable && current->key_code == KINC_KEY_BACKSPACE) { // Remove char
+		else if (editable && current->key_code == IRON_KEY_BACKSPACE) { // Remove char
 			if (current->cursor_x > 0 && current->highlight_anchor == current->cursor_x) {
 				ui_remove_char_at(text, current->cursor_x - 1);
 				current->cursor_x--;
@@ -1067,7 +1067,7 @@ void ui_update_text_edit(int align, bool editable, bool live_update) {
 				ui_remove_chars_at(text, current->cursor_x, count);
 			}
 		}
-		else if (editable && current->key_code == KINC_KEY_DELETE) {
+		else if (editable && current->key_code == IRON_KEY_DELETE) {
 			if (current->highlight_anchor == current->cursor_x) {
 				ui_remove_char_at(text, current->cursor_x);
 			}
@@ -1081,22 +1081,22 @@ void ui_update_text_edit(int align, bool editable, bool live_update) {
 				ui_remove_chars_at(text, current->cursor_x, count);
 			}
 		}
-		else if (current->key_code == KINC_KEY_RETURN) { // Deselect
+		else if (current->key_code == IRON_KEY_RETURN) { // Deselect
 			ui_deselect_text(current);
 		}
-		else if (current->key_code == KINC_KEY_ESCAPE) { // Cancel
+		else if (current->key_code == IRON_KEY_ESCAPE) { // Cancel
 			strcpy(current->text_selected, current->text_selected_handle->text);
 			ui_deselect_text(current);
 		}
-		else if (current->key_code == KINC_KEY_TAB && current->tab_switch_enabled && !current->is_ctrl_down) { // Next field
+		else if (current->key_code == IRON_KEY_TAB && current->tab_switch_enabled && !current->is_ctrl_down) { // Next field
 			current->tab_pressed = true;
 			ui_deselect_text(current);
 			current->key_code = 0;
 		}
-		else if (current->key_code == KINC_KEY_HOME) {
+		else if (current->key_code == IRON_KEY_HOME) {
 			current->cursor_x = 0;
 		}
-		else if (current->key_code == KINC_KEY_END) {
+		else if (current->key_code == IRON_KEY_END) {
 			current->cursor_x = strlen(text);
 		}
 		else if (current->is_ctrl_down && current->is_a_down) { // Select all
@@ -1104,20 +1104,20 @@ void ui_update_text_edit(int align, bool editable, bool live_update) {
 			current->highlight_anchor = 0;
 		}
 		else if (editable && // Write
-				 current->key_code != KINC_KEY_SHIFT &&
-				 current->key_code != KINC_KEY_CAPS_LOCK &&
-				 current->key_code != KINC_KEY_CONTROL &&
-				 current->key_code != KINC_KEY_META &&
-				 current->key_code != KINC_KEY_ALT &&
-				 current->key_code != KINC_KEY_UP &&
-				 current->key_code != KINC_KEY_DOWN &&
+				 current->key_code != IRON_KEY_SHIFT &&
+				 current->key_code != IRON_KEY_CAPS_LOCK &&
+				 current->key_code != IRON_KEY_CONTROL &&
+				 current->key_code != IRON_KEY_META &&
+				 current->key_code != IRON_KEY_ALT &&
+				 current->key_code != IRON_KEY_UP &&
+				 current->key_code != IRON_KEY_DOWN &&
 				 current->key_char >= 32) {
 			ui_remove_chars_at(text, current->highlight_anchor, current->cursor_x - current->highlight_anchor);
 			ui_insert_char_at(text, current->highlight_anchor, current->key_char);
 
 			current->cursor_x = current->cursor_x + 1 > strlen(text) ? strlen(text) : current->cursor_x + 1;
 		}
-		bool selecting = current->is_shift_down && (current->key_code == KINC_KEY_LEFT || current->key_code == KINC_KEY_RIGHT || current->key_code == KINC_KEY_SHIFT);
+		bool selecting = current->is_shift_down && (current->key_code == IRON_KEY_LEFT || current->key_code == IRON_KEY_RIGHT || current->key_code == IRON_KEY_SHIFT);
 		// isCtrlDown && isAltDown is the condition for AltGr was pressed
 		// AltGr is part of the German keyboard layout and part of key combinations like AltGr + e -> €
 		if (!selecting && (!current->is_ctrl_down || (current->is_ctrl_down && current->is_alt_down))) {
@@ -1502,7 +1502,7 @@ void ui_end_sticky() {
 	draw_end();
 	current->sticky = false;
 	current->scissor = true;
-	kinc_g4_scissor(0, current->_y, current->_window_w, current->_window_h - current->_y);
+	iron_g4_scissor(0, current->_y, current->_window_w, current->_window_h - current->_y);
 	current->window_header_h += current->_y - current->window_header_h;
 	current->_y += current->current_window->scroll_offset;
 	current->is_hovered = false;
@@ -1517,7 +1517,7 @@ void ui_end_window(bool bind_global_g) {
 	if (handle->redraws > 0 || current->is_scrolling) {
 		if (current->scissor) {
 			current->scissor = false;
-			kinc_g4_disable_scissor();
+			iron_g4_disable_scissor();
 		}
 
 		if (current->tab_count > 0) {
@@ -1681,10 +1681,10 @@ bool _ui_window(ui_handle_t *handle, int x, int y, int w, int h, bool drag) {
 	current->tab_count = 0;
 
 	if (theme->FILL_WINDOW_BG) {
-		kinc_g5_clear(theme->WINDOW_BG_COL, 0, KINC_G5_CLEAR_COLOR);
+		iron_g5_clear(theme->WINDOW_BG_COL, 0, IRON_G5_CLEAR_COLOR);
 	}
 	else {
-		kinc_g5_clear(0x00000000, 0, KINC_G5_CLEAR_COLOR);
+		iron_g5_clear(0x00000000, 0, IRON_G5_CLEAR_COLOR);
 		draw_set_color(theme->WINDOW_BG_COL);
 		draw_filled_rect(current->_x, current->_y - handle->scroll_offset, handle->last_max_x, handle->last_max_y);
 	}
@@ -1709,7 +1709,7 @@ bool _ui_window(ui_handle_t *handle, int x, int y, int w, int h, bool drag) {
 	return true;
 }
 
-bool ui_button(char *text, int align, char *label/*, kinc_g5_texture_t *icon, int sx, int sy, int sw, int sh*/) {
+bool ui_button(char *text, int align, char *label/*, iron_g5_texture_t *icon, int sx, int sy, int sw, int sh*/) {
 	if (!ui_is_visible(UI_ELEMENT_H())) {
 		ui_end_element();
 		return false;
@@ -1843,22 +1843,22 @@ bool ui_panel(ui_handle_t *handle, char *text, bool is_tree, bool filled) {
 }
 
 static int image_width(void *image) {
-	return ((kinc_g5_texture_t *)image)->width;
+	return ((iron_g5_texture_t *)image)->width;
 }
 
 static int image_height(void *image) {
-	return ((kinc_g5_texture_t *)image)->height;
+	return ((iron_g5_texture_t *)image)->height;
 }
 
 static void _draw_scaled_image(void *image, float dx, float dy, float dw, float dh) {
-	draw_scaled_texture((kinc_g5_texture_t *)image, dx, dy, dw, dh);
+	draw_scaled_texture((iron_g5_texture_t *)image, dx, dy, dw, dh);
 }
 
 static void _draw_scaled_sub_image(void *image, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
-	draw_scaled_sub_texture((kinc_g5_texture_t *)image, sx, sy, sw, sh, dx, dy, dw, dh);
+	draw_scaled_sub_texture((iron_g5_texture_t *)image, sx, sy, sw, sh, dx, dy, dw, dh);
 }
 
-int ui_sub_image(kinc_g5_texture_t *image, uint32_t tint, int h, int sx, int sy, int sw, int sh) {
+int ui_sub_image(iron_g5_texture_t *image, uint32_t tint, int h, int sx, int sy, int sw, int sh) {
 	float iw = (sw > 0 ? sw : image_width(image)) * UI_SCALE();
 	float ih = (sh > 0 ? sh : image_height(image)) * UI_SCALE();
 	float w = fmin(iw, current->_w);
@@ -1929,7 +1929,7 @@ int ui_sub_image(kinc_g5_texture_t *image, uint32_t tint, int h, int sx, int sy,
 	return started ? UI_STATE_STARTED : released ? UI_STATE_RELEASED : down ? UI_STATE_DOWN : hover ? UI_STATE_HOVERED : UI_STATE_IDLE;
 }
 
-int ui_image(kinc_g5_texture_t *image, uint32_t tint, int h) {
+int ui_image(iron_g5_texture_t *image, uint32_t tint, int h) {
 	return ui_sub_image(image, tint, h, 0, 0, image_width(image), image_height(image));
 }
 
@@ -2156,7 +2156,7 @@ float ui_slider(ui_handle_t *handle, char *text, float from, float to, bool fill
 		handle->changed = false;
 	}
 
-	#if !defined(KINC_ANDROID) && !defined(KINC_IOS)
+	#if !defined(IRON_ANDROID) && !defined(IRON_IOS)
 	if (handle == current->scroll_handle && current->input_dx != 0) { // Scroll
 	#else
 	if (handle == current->scroll_handle) { // Scroll
@@ -2240,7 +2240,7 @@ void ui_tooltip(char *text) {
 	current->tooltip_y = current->_y + current->_window_y;
 }
 
-void ui_tooltip_image(kinc_g5_texture_t *image, int max_width) {
+void ui_tooltip_image(iron_g5_texture_t *image, int max_width) {
 	current->tooltip_img = image;
 	current->tooltip_img_max_width = max_width;
 	current->tooltip_invert_y = current->image_invert_y;
@@ -2281,8 +2281,8 @@ void ui_mouse_down(ui_t *ui, int button, int x, int y) {
 	else {
 		ui->input_started_r = ui->input_down_r = true;
 	}
-	ui->input_started_time = kinc_time();
-	#if defined(KINC_ANDROID) || defined(KINC_IOS)
+	ui->input_started_time = iron_time();
+	#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	ui_set_input_position(ui, x, y);
 	#endif
 	ui->input_started_x = x;
@@ -2290,7 +2290,7 @@ void ui_mouse_down(ui_t *ui, int button, int x, int y) {
 }
 
 void ui_mouse_move(ui_t *ui, int x, int y, int movement_x, int movement_y) {
-	#if !defined(KINC_ANDROID) && !defined(KINC_IOS)
+	#if !defined(IRON_ANDROID) && !defined(IRON_IOS)
 	ui_set_input_position(ui, x, y);
 	#endif
 }
@@ -2329,7 +2329,7 @@ void ui_mouse_up(ui_t *ui, int button, int x, int y) {
 	else {
 		ui->input_down_r = false;
 	}
-	#if defined(KINC_ANDROID) || defined(KINC_IOS)
+	#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	ui_set_input_position(ui, x, y);
 	#endif
 	ui_deselect_text(ui);
@@ -2340,7 +2340,7 @@ void ui_mouse_wheel(ui_t *ui, int delta) {
 }
 
 void ui_pen_down(ui_t *ui, int x, int y, float pressure) {
-	#if defined(KINC_ANDROID) || defined(KINC_IOS)
+	#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	return;
 	#endif
 
@@ -2348,7 +2348,7 @@ void ui_pen_down(ui_t *ui, int x, int y, float pressure) {
 }
 
 void ui_pen_up(ui_t *ui, int x, int y, float pressure) {
-	#if defined(KINC_ANDROID) || defined(KINC_IOS)
+	#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	return;
 	#endif
 
@@ -2362,7 +2362,7 @@ void ui_pen_up(ui_t *ui, int x, int y, float pressure) {
 }
 
 void ui_pen_move(ui_t *ui, int x, int y, float pressure) {
-	#if defined(KINC_IOS)
+	#if defined(IRON_IOS)
 	// Listen to pen hover if no other input is active
 	if (pressure == 0.0) {
 		if (!ui->input_down && !ui->input_down_r) {
@@ -2372,7 +2372,7 @@ void ui_pen_move(ui_t *ui, int x, int y, float pressure) {
 	}
 	#endif
 
-	#if defined(KINC_ANDROID) || defined(KINC_IOS)
+	#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	return;
 	#endif
 
@@ -2383,23 +2383,23 @@ void ui_key_down(ui_t *ui, int key_code) {
 	ui->key_code = key_code;
 	ui->is_key_pressed = true;
 	ui->is_key_down = true;
-	ui_key_repeat_time = kinc_time() + 0.4;
+	ui_key_repeat_time = iron_time() + 0.4;
 	switch (key_code) {
-		case KINC_KEY_SHIFT: ui->is_shift_down = true; break;
-		case KINC_KEY_CONTROL: ui->is_ctrl_down = true; break;
-		#ifdef KINC_DARWIN
-		case KINC_KEY_META: ui->is_ctrl_down = true; break;
+		case IRON_KEY_SHIFT: ui->is_shift_down = true; break;
+		case IRON_KEY_CONTROL: ui->is_ctrl_down = true; break;
+		#ifdef IRON_DARWIN
+		case IRON_KEY_META: ui->is_ctrl_down = true; break;
 		#endif
-		case KINC_KEY_ALT: ui->is_alt_down = true; break;
-		case KINC_KEY_BACKSPACE: ui->is_backspace_down = true; break;
-		case KINC_KEY_DELETE: ui->is_delete_down = true; break;
-		case KINC_KEY_ESCAPE: ui->is_escape_down = true; break;
-		case KINC_KEY_RETURN: ui->is_return_down = true; break;
-		case KINC_KEY_TAB: ui->is_tab_down = true; break;
-		case KINC_KEY_A: ui->is_a_down = true; break;
-		case KINC_KEY_SPACE: ui->key_char = ' '; break;
+		case IRON_KEY_ALT: ui->is_alt_down = true; break;
+		case IRON_KEY_BACKSPACE: ui->is_backspace_down = true; break;
+		case IRON_KEY_DELETE: ui->is_delete_down = true; break;
+		case IRON_KEY_ESCAPE: ui->is_escape_down = true; break;
+		case IRON_KEY_RETURN: ui->is_return_down = true; break;
+		case IRON_KEY_TAB: ui->is_tab_down = true; break;
+		case IRON_KEY_A: ui->is_a_down = true; break;
+		case IRON_KEY_SPACE: ui->key_char = ' '; break;
 		#ifdef UI_ANDROID_RMB // Detect right mouse button on Android..
-		case KINC_KEY_BACK: if (!ui->input_down_r) ui_mouse_down(ui, 1, ui->input_x, ui->input_y); break;
+		case IRON_KEY_BACK: if (!ui->input_down_r) ui_mouse_down(ui, 1, ui->input_x, ui->input_y); break;
 		#endif
 	}
 }
@@ -2407,20 +2407,20 @@ void ui_key_down(ui_t *ui, int key_code) {
 void ui_key_up(ui_t *ui, int key_code) {
 	ui->is_key_down = false;
 	switch (key_code) {
-		case KINC_KEY_SHIFT: ui->is_shift_down = false; break;
-		case KINC_KEY_CONTROL: ui->is_ctrl_down = false; break;
-		#ifdef KINC_DARWIN
-		case KINC_KEY_META: ui->is_ctrl_down = false; break;
+		case IRON_KEY_SHIFT: ui->is_shift_down = false; break;
+		case IRON_KEY_CONTROL: ui->is_ctrl_down = false; break;
+		#ifdef IRON_DARWIN
+		case IRON_KEY_META: ui->is_ctrl_down = false; break;
 		#endif
-		case KINC_KEY_ALT: ui->is_alt_down = false; break;
-		case KINC_KEY_BACKSPACE: ui->is_backspace_down = false; break;
-		case KINC_KEY_DELETE: ui->is_delete_down = false; break;
-		case KINC_KEY_ESCAPE: ui->is_escape_down = false; break;
-		case KINC_KEY_RETURN: ui->is_return_down = false; break;
-		case KINC_KEY_TAB: ui->is_tab_down = false; break;
-		case KINC_KEY_A: ui->is_a_down = false; break;
+		case IRON_KEY_ALT: ui->is_alt_down = false; break;
+		case IRON_KEY_BACKSPACE: ui->is_backspace_down = false; break;
+		case IRON_KEY_DELETE: ui->is_delete_down = false; break;
+		case IRON_KEY_ESCAPE: ui->is_escape_down = false; break;
+		case IRON_KEY_RETURN: ui->is_return_down = false; break;
+		case IRON_KEY_TAB: ui->is_tab_down = false; break;
+		case IRON_KEY_A: ui->is_a_down = false; break;
 		#ifdef UI_ANDROID_RMB
-		case KINC_KEY_BACK: ui_mouse_down(ui, 1, ui->input_x, ui->input_y); break;
+		case IRON_KEY_BACK: ui_mouse_down(ui, 1, ui->input_x, ui->input_y); break;
 		#endif
 	}
 }
@@ -2430,7 +2430,7 @@ void ui_key_press(ui_t *ui, unsigned key_char) {
 	ui->is_key_pressed = true;
 }
 
-#if defined(KINC_ANDROID) || defined(KINC_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 static float ui_pinch_distance = 0.0;
 static float ui_pinch_total = 0.0;
 static bool ui_pinch_started = false;
@@ -2622,7 +2622,7 @@ char *ui_file_browser(ui_handle_t *handle, bool folders_only) {
 
 	char cmd[64];
 	strcpy(cmd, "ls ");
-	const char *system_id = kinc_system_id();
+	const char *system_id = iron_system_id();
 	if (strcmp(system_id, "Windows") == 0) {
 		strcpy(cmd, "dir /b ");
 		if (folders_only) {
@@ -2637,7 +2637,7 @@ char *ui_file_browser(ui_handle_t *handle, bool folders_only) {
 	}
 
 	char save[256];
-	strcpy(save, kinc_internal_get_files_location());
+	strcpy(save, iron_internal_get_files_location());
 	strcat(save, sep);
 	strcat(save, data_path);
 	strcat(save, "dir.txt");
@@ -2652,15 +2652,15 @@ char *ui_file_browser(ui_handle_t *handle, bool folders_only) {
 	}
 	strcpy(last_path, handle->text);
 
-	kinc_file_reader_t reader;
-	if (!kinc_file_reader_open(&reader, save, KINC_FILE_TYPE_ASSET)) {
+	iron_file_reader_t reader;
+	if (!iron_file_reader_open(&reader, save, IRON_FILE_TYPE_ASSET)) {
 		return NULL;
 	}
-	int reader_size = (int)kinc_file_reader_size(&reader);
+	int reader_size = (int)iron_file_reader_size(&reader);
 
 	char str[2048]; // reader_size
-	kinc_file_reader_read(&reader, str, reader_size);
-	kinc_file_reader_close(&reader);
+	iron_file_reader_read(&reader, str, reader_size);
+	iron_file_reader_close(&reader);
 
 	// Up directory
 	int i1 = strstr(handle->text, "/") - handle->text;
@@ -3163,7 +3163,7 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 			strcpy(handle->text, line);
 			current->submit_text_handle = NULL;
 			ui_text_input(handle, show_label ? label : "", align, editable, false);
-			if (key_pressed && current->key_code != KINC_KEY_RETURN && current->key_code != KINC_KEY_ESCAPE) { // Edit text
+			if (key_pressed && current->key_code != IRON_KEY_RETURN && current->key_code != IRON_KEY_ESCAPE) { // Edit text
 				int line_pos = ui_line_pos(lines, i);
 				ui_remove_chars_at(lines, line_pos, strlen(line));
 				strcpy(line, current->text_selected);
@@ -3203,18 +3203,18 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 
 	if (key_pressed) {
 		// Move cursor vertically
-		if (current->key_code == KINC_KEY_DOWN && handle->position < line_count - 1) {
+		if (current->key_code == IRON_KEY_DOWN && handle->position < line_count - 1) {
 			handle_line_select(current, handle);
 			handle->position++;
 			scroll_align(current, handle);
 		}
-		if (current->key_code == KINC_KEY_UP && handle->position > 0) {
+		if (current->key_code == IRON_KEY_UP && handle->position > 0) {
 			handle_line_select(current, handle);
 			handle->position--;
 			scroll_align(current, handle);
 		}
 		// New line
-		if (editable && current->key_code == KINC_KEY_RETURN && !word_wrap) {
+		if (editable && current->key_code == IRON_KEY_RETURN && !word_wrap) {
 			handle->position++;
 			ui_insert_char_at(lines, ui_line_pos(lines, handle->position - 1) + current->cursor_x, '\n');
 			ui_start_text_edit(handle, UI_ALIGN_LEFT);
@@ -3222,7 +3222,7 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 			scroll_align(current, handle);
 		}
 		// Delete line
-		if (editable && current->key_code == KINC_KEY_BACKSPACE && cursor_start_x == 0 && handle->position > 0) {
+		if (editable && current->key_code == IRON_KEY_BACKSPACE && cursor_start_x == 0 && handle->position > 0) {
 			handle->position--;
 			current->cursor_x = current->highlight_anchor = strlen(ui_extract_line(lines, handle->position));
 			ui_remove_chars_at(lines, ui_line_pos(lines, handle->position + 1) - 1, 1); // Remove '\n' of the previous line

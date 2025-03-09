@@ -1,5 +1,5 @@
 
-#ifdef KINC_A2
+#ifdef IRON_A2
 
 #include <iron_audio.h>
 #include <alsa/asoundlib.h>
@@ -11,7 +11,7 @@
 
 // apt-get install libasound2-dev
 
-kinc_a2_buffer_t a2_buffer;
+iron_a2_buffer_t a2_buffer;
 
 pthread_t threadid;
 bool audioRunning = false;
@@ -20,7 +20,7 @@ short buf[4096 * 4];
 
 static unsigned int samples_per_second = 44100;
 
-uint32_t kinc_a2_samples_per_second(void) {
+uint32_t iron_a2_samples_per_second(void) {
 	return samples_per_second;
 }
 
@@ -37,7 +37,7 @@ void copySample(void *buffer) {
 
 int playback_callback(snd_pcm_sframes_t nframes) {
 	int err = 0;
-	if (kinc_a2_internal_callback(&a2_buffer, nframes)) {
+	if (iron_a2_internal_callback(&a2_buffer, nframes)) {
 		int ni = 0;
 		while (ni < nframes) {
 			int i = 0;
@@ -207,12 +207,12 @@ void *doAudio(void *arg) {
 
 static bool initialized = false;
 
-void kinc_a2_init() {
+void iron_a2_init() {
 	if (initialized) {
 		return;
 	}
 
-	kinc_a2_internal_init();
+	iron_a2_internal_init();
 	initialized = true;
 
 	a2_buffer.read_location = 0;
@@ -226,9 +226,9 @@ void kinc_a2_init() {
 	pthread_create(&threadid, NULL, &doAudio, NULL);
 }
 
-void kinc_a2_update() {}
+void iron_a2_update() {}
 
-void kinc_a2_shutdown() {
+void iron_a2_shutdown() {
 	audioRunning = false;
 }
 

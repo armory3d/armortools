@@ -1,8 +1,8 @@
 
 function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t[] = null): slot_layer_t {
-	let texpaint: kinc_g5_texture_t = context_raw.brush_output_node_inst.texpaint;
-	let texpaint_nor: kinc_g5_texture_t = context_raw.brush_output_node_inst.texpaint_nor;
-	let texpaint_pack: kinc_g5_texture_t = context_raw.brush_output_node_inst.texpaint_pack;
+	let texpaint: iron_g5_texture_t = context_raw.brush_output_node_inst.texpaint;
+	let texpaint_nor: iron_g5_texture_t = context_raw.brush_output_node_inst.texpaint_nor;
+	let texpaint_pack: iron_g5_texture_t = context_raw.brush_output_node_inst.texpaint_pack;
 
 	let nodes: ui_nodes_t = ui_nodes_get_nodes();
 	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
@@ -45,7 +45,7 @@ function layers_ext_on_resized() {
 
 	if (photo_to_pbr_node_images != null) {
 		for (let i: i32 = 0; i < photo_to_pbr_node_images.length; ++i) {
-			let image: kinc_g5_texture_t = photo_to_pbr_node_images[i];
+			let image: iron_g5_texture_t = photo_to_pbr_node_images[i];
 			iron_unload_image(image);
 		}
 		photo_to_pbr_node_images = null;

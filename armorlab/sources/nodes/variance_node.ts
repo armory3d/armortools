@@ -3,8 +3,8 @@ type variance_node_t = {
 	base?: logic_node_t;
 };
 
-let variance_node_temp: kinc_g5_texture_t = null;
-let variance_node_image: kinc_g5_texture_t = null;
+let variance_node_temp: iron_g5_texture_t = null;
+let variance_node_image: iron_g5_texture_t = null;
 let variance_node_inst: variance_node_t = null;
 let variance_node_prompt: string = "";
 
@@ -33,11 +33,11 @@ function variance_node_button(node_id: i32) {
 	node.buttons[0].height = string_split(variance_node_prompt, "\n").length;
 }
 
-function variance_node_get_as_image(self: variance_node_t, from: i32): kinc_g5_texture_t {
+function variance_node_get_as_image(self: variance_node_t, from: i32): iron_g5_texture_t {
 	let node: float_node_t = variance_node_inst.base.inputs[1].node;
 	let strength: f32 = node.value;
 
-	let source: kinc_g5_texture_t = logic_node_input_get_as_image(variance_node_inst.base.inputs[0]);
+	let source: iron_g5_texture_t = logic_node_input_get_as_image(variance_node_inst.base.inputs[0]);
 	g2_begin(variance_node_temp);
 	draw_scaled_image(source, 0, 0, 512, 512);
 	g2_end();
@@ -83,7 +83,7 @@ function variance_node_get_as_image(self: variance_node_t, from: i32): kinc_g5_t
 	return variance_node_image;
 }
 
-function variance_node_get_cached_image(self: variance_node_t): kinc_g5_texture_t {
+function variance_node_get_cached_image(self: variance_node_t): iron_g5_texture_t {
 	return variance_node_image;
 }
 

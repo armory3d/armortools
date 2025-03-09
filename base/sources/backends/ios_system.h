@@ -4,7 +4,7 @@
 #import <QuartzCore/CAMetalLayer.h>
 #import <CoreMotion/CMMotionManager.h>
 
-struct kinc_g5_texture;
+struct iron_g5_texture;
 
 @interface GLView : UIView <UIKeyInput> {
 @private
@@ -45,7 +45,7 @@ struct kinc_g5_texture;
 
 @class GLView;
 
-@interface KoreAppDelegate : NSObject <UIApplicationDelegate> {
+@interface IronAppDelegate : NSObject <UIApplicationDelegate> {
 }
 
 @end

@@ -3,11 +3,11 @@ type photo_to_pbr_node_t = {
 	base?: logic_node_t;
 };
 
-let photo_to_pbr_node_temp: kinc_g5_texture_t = null;
-let photo_to_pbr_node_images: kinc_g5_texture_t[] = null;
+let photo_to_pbr_node_temp: iron_g5_texture_t = null;
+let photo_to_pbr_node_images: iron_g5_texture_t[] = null;
 let photo_to_pbr_node_model_names: string[] = ["base", "occlusion", "roughness", "metallic", "normal", "height"];
 
-let photo_to_pbr_node_cached_source: kinc_g5_texture_t = null;
+let photo_to_pbr_node_cached_source: iron_g5_texture_t = null;
 let photo_to_pbr_node_border_w: i32 = 64;
 let photo_to_pbr_node_tile_w: i32 = 2048;
 let photo_to_pbr_node_tile_with_border_w: i32 = photo_to_pbr_node_tile_w + photo_to_pbr_node_border_w * 2;
@@ -35,9 +35,9 @@ function photo_to_pbr_node_init() {
 	}
 }
 
-function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): kinc_g5_texture_t {
+function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): iron_g5_texture_t {
 
-	let source: kinc_g5_texture_t;
+	let source: iron_g5_texture_t;
 	if (photo_to_pbr_node_cached_source != null) {
 		source = photo_to_pbr_node_cached_source;
 	}
@@ -153,11 +153,11 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): k
 		}
 		///end
 
-		let temp2: kinc_g5_texture_t = iron_g4_create_texture_from_bytes(u8a, photo_to_pbr_node_tile_w, photo_to_pbr_node_tile_w);
+		let temp2: iron_g5_texture_t = iron_g4_create_texture_from_bytes(u8a, photo_to_pbr_node_tile_w, photo_to_pbr_node_tile_w);
 		g2_begin(photo_to_pbr_node_images[from]);
 		draw_image(temp2, x * photo_to_pbr_node_tile_w, y * photo_to_pbr_node_tile_w);
 		g2_end();
-		app_notify_on_next_frame(function(temp2: kinc_g5_texture_t) {
+		app_notify_on_next_frame(function(temp2: iron_g5_texture_t) {
 			iron_unload_image(temp2);
 		}, temp2);
 	}

@@ -2,8 +2,8 @@
 type slot_brush_t = {
 	nodes?: ui_nodes_t;
 	canvas?: ui_node_canvas_t;
-	image?: kinc_g5_texture_t; // 200px
-	image_icon?: kinc_g5_texture_t; // 50px
+	image?: iron_g5_texture_t; // 200px
+	image_icon?: iron_g5_texture_t; // 50px
 	preview_ready?: bool;
 	id?: i32;
 };

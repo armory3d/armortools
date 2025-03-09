@@ -3,7 +3,7 @@
 ///include "../../sources/libs/asim/asim.h"
 
 function main() {
-	let ops: kinc_window_options_t = {
+	let ops: iron_window_options_t = {
 		title: "Empty",
 		width: 1280,
 		height: 720,

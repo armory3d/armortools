@@ -12,7 +12,7 @@ type mesh_object_t = {
 	prev_matrix?: mat4_t;
 };
 
-let _mesh_object_last_pipeline: kinc_g5_pipeline_t = null;
+let _mesh_object_last_pipeline: iron_g5_pipeline_t = null;
 let _mesh_object_material_contexts: material_context_t[] = [];
 let _mesh_object_shader_contexts: shader_context_t[] = [];
 
@@ -172,7 +172,7 @@ function mesh_object_render(raw: mesh_object_t, context: string, bind_params: st
 
 		// Uniforms
 		if (scontext._.pipe_state != _mesh_object_last_pipeline) {
-			kinc_g5_set_pipeline(scontext._.pipe_state);
+			iron_g5_set_pipeline(scontext._.pipe_state);
 			_mesh_object_last_pipeline = scontext._.pipe_state;
 		}
 		uniforms_set_context_consts(scontext, bind_params);
@@ -181,8 +181,8 @@ function mesh_object_render(raw: mesh_object_t, context: string, bind_params: st
 			uniforms_set_material_consts(scontext, material_contexts[mi]);
 		}
 
-		kinc_g4_set_vertex_buffer(mesh_data_get(raw.data, elems));
-		kinc_g4_set_index_buffer(raw.data._.index_buffers[i]);
+		iron_g4_set_vertex_buffer(mesh_data_get(raw.data, elems));
+		iron_g4_set_index_buffer(raw.data._.index_buffers[i]);
 		iron_g4_draw_indexed_vertices();
 	}
 

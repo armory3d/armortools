@@ -1,4 +1,4 @@
-package tech.kinc
+package org.armory3d
 
 import android.app.NativeActivity
 import android.content.Context
@@ -34,9 +34,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import kotlin.math.log
 
-class KincActivity: NativeActivity(), KeyEvent.Callback {
+class IronActivity: NativeActivity(), KeyEvent.Callback {
 	companion object {
-		var instance: KincActivity? = null
+		var instance: IronActivity? = null
 
 		@JvmStatic
 		fun showKeyboard() {
@@ -111,9 +111,9 @@ class KincActivity: NativeActivity(), KeyEvent.Callback {
 			}
 		}
 
-		class MyHandler(private val kincActivity: KincActivity) : Handler() {
+		class MyHandler(private val ironActivity: IronActivity) : Handler() {
 			override fun handleMessage(msg: Message) {
-				kincActivity.hideSystemUI()
+				ironActivity.hideSystemUI()
 			}
 		}
 
@@ -181,11 +181,11 @@ class KincActivity: NativeActivity(), KeyEvent.Callback {
     }
 
 	override fun onKeyMultiple(keyCode: Int, count: Int, event: KeyEvent): Boolean {
-		this.nativeKincKeyPress(event.characters)
+		this.nativeIronKeyPress(event.characters)
 		return false
 	}
 
-	private external fun nativeKincKeyPress(chars: String)
+	private external fun nativeIronKeyPress(chars: String)
 
 	private external fun onAndroidFilePicked(pickedPath: String)
 	private external fun getMobileTitle(): String

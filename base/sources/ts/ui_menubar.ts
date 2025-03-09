@@ -125,10 +125,10 @@ function ui_menubar_draw_tab_header() {
 
 	let nodesw: i32 = (ui_nodes_show || ui_view2d_show) ? config_raw.layout[layout_size_t.NODES_W] : 0;
 	///if (is_paint || is_sculpt)
-	let ww: i32 = kinc_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - ui_menubar_w - nodesw;
+	let ww: i32 = iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - ui_menubar_w - nodesw;
 	panel_x = (app_x() - item_w) + ui_menubar_w;
 	///else
-	let ww: i32 = kinc_window_width() - ui_menubar_w - nodesw;
+	let ww: i32 = iron_window_width() - ui_menubar_w - nodesw;
 	panel_x = (app_x()) + ui_menubar_w;
 	///end
 
@@ -231,7 +231,7 @@ function ui_menubar_icon_button(ui: ui_t, i: i32, j: i32): bool {
 	let col: u32 = ui.ops.theme.WINDOW_BG_COL;
 	let light: bool = col > 0xff666666 ;
 	let icon_accent: i32 = light ? 0xff666666 : 0xffaaaaaa;
-	let img: kinc_g5_texture_t = resource_get("icons.k");
+	let img: iron_g5_texture_t = resource_get("icons.k");
 	let rect: rect_t = resource_tile50(img, i, j);
 	return _ui_image(img, icon_accent, -1.0, rect.x, rect.y, rect.w, rect.h) == ui_state_t.RELEASED;
 }

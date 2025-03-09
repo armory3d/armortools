@@ -3150,7 +3150,7 @@ class Project {
 	}
 }
 
-function export_koremake_project() {
+function export_amake_project() {
 	console.log('Creating ' + goptions.target + ' project files.');
 
 	let project = Project.create(".");
@@ -3217,7 +3217,7 @@ function compile_project(make, project) {
 function main() {
 	console.log('Using Iron from ' + irondir);
 	goptions.build_path = goptions.debug ? 'Debug' : 'Release';
-	let project = export_koremake_project();
+	let project = export_amake_project();
 
 	let project_name = project.get_safe_name();
 	if (goptions.compile && project_name !== '') {

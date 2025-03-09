@@ -1,10 +1,10 @@
-package tech.kinc
+package org.armory3d
 
 import android.graphics.SurfaceTexture
 import android.graphics.SurfaceTexture.OnFrameAvailableListener
 import android.opengl.GLES20
 
-class KincMovieTexture: OnFrameAvailableListener {
+class IronMovieTexture: OnFrameAvailableListener {
 	private val GL_TEXTURE_EXTERNAL_OES: Int = 0x8D65
 
 	var textureId: Int = 0
@@ -53,7 +53,7 @@ class KincMovieTexture: OnFrameAvailableListener {
 		}
 		return ret
 	}
-	
+
 	override fun onFrameAvailable(surface: SurfaceTexture) {
 		if (surfaceTexture == surface) {
 			updateTexture = true

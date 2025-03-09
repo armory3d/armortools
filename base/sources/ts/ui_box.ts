@@ -28,8 +28,8 @@ function ui_box_render() {
 		let in_use: bool = ui.combo_selected_handle != null;
 		let is_escape: bool = keyboard_started("escape");
 		if (ui_box_draws > 2 && (ui.input_released || is_escape) && !in_use && !ui.is_typing) {
-			let appw: i32 = kinc_window_width();
-			let apph: i32 = kinc_window_height();
+			let appw: i32 = iron_window_width();
+			let apph: i32 = iron_window_height();
 			let mw: i32 = math_floor(ui_box_modalw * ui_SCALE(ui));
 			let mh: i32 = math_floor(ui_box_modalh * ui_SCALE(ui));
 			let left: f32 = (appw / 2 - mw / 2) + ui_box_hwnd.drag_x;
@@ -50,14 +50,14 @@ function ui_box_render() {
 		///else
 		draw_set_color(color_from_floats(0, 0, 0, 0.5));
 		///end
-		draw_filled_rect(0, 0, kinc_window_width(), kinc_window_height());
+		draw_filled_rect(0, 0, iron_window_width(), iron_window_height());
 	}
 
 	g2_end();
 
 	let ui: ui_t = base_ui_box;
-	let appw: i32 = kinc_window_width();
-	let apph: i32 = kinc_window_height();
+	let appw: i32 = iron_window_width();
+	let apph: i32 = iron_window_height();
 	let mw: i32 = math_floor(ui_box_modalw * ui_SCALE(ui));
 	let mh: i32 = math_floor(ui_box_modalh * ui_SCALE(ui));
 	if (mw > appw) {
@@ -102,7 +102,7 @@ function ui_box_render() {
 
 				///if (arm_windows || arm_linux || arm_macos)
 				if (ui_box_copyable && ui_button(tr("Copy"))) {
-					kinc_copy_to_clipboard(ui_box_text);
+					iron_copy_to_clipboard(ui_box_text);
 				}
 				///end
 				if (ui_button(tr("OK"))) {
@@ -176,7 +176,7 @@ function ui_box_tween_in() {
 	let a: tween_anim_t = { target: ADDRESS(ui_box_tween_alpha), to: 0.5, duration: 0.2, ease: ease_t.EXPO_OUT };
 	tween_to(a);
 
-	ui_box_hwnd.drag_y = math_floor(kinc_window_height() / 2);
+	ui_box_hwnd.drag_y = math_floor(iron_window_height() / 2);
 	a = { target: ADDRESS(ui_box_hwnd.drag_y), to: 0.0, duration: 0.2, ease: ease_t.EXPO_OUT, tick: ui_box_tween_tick };
 	tween_to(a);
 }
@@ -185,7 +185,7 @@ function ui_box_tween_out() {
 	let a: tween_anim_t = { target: ADDRESS(ui_box_tween_alpha), to: 0.0, duration: 0.2, ease: ease_t.EXPO_IN, done: ui_box_hide_internal };
 	tween_to(a);
 
-	a = { target: ADDRESS(ui_box_hwnd.drag_y), to: kinc_window_height() / 2, duration: 0.2, ease: ease_t.EXPO_IN };
+	a = { target: ADDRESS(ui_box_hwnd.drag_y), to: iron_window_height() / 2, duration: 0.2, ease: ease_t.EXPO_IN };
 	tween_to(a);
 }
 
@@ -196,7 +196,7 @@ function ui_box_tween_tick() {
 function ui_box_window_border(ui: ui_t) {
 	if (ui.scissor) {
 		ui.scissor = false;
-		kinc_g4_disable_scissor();
+		iron_g4_disable_scissor();
 	}
 	// Border
 	draw_set_color(ui.ops.theme.SEPARATOR_COL);

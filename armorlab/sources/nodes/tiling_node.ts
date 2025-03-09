@@ -1,10 +1,10 @@
 
 type tiling_node_t = {
 	base?: logic_node_t;
-	result?: kinc_g5_texture_t;
+	result?: iron_g5_texture_t;
 };
 
-let tiling_node_image: kinc_g5_texture_t = null;
+let tiling_node_image: iron_g5_texture_t = null;
 let tiling_node_prompt: string = "";
 let tiling_node_strength: f32 = 0.5;
 let tiling_node_auto: bool = true;
@@ -43,8 +43,8 @@ function tiling_node_button(node_id: i32) {
 	}
 }
 
-function tiling_node_get_as_image(self: tiling_node_t, from: i32): kinc_g5_texture_t {
-	let source: kinc_g5_texture_t = logic_node_input_get_as_image(self.base.inputs[0]);
+function tiling_node_get_as_image(self: tiling_node_t, from: i32): iron_g5_texture_t {
+	let source: iron_g5_texture_t = logic_node_input_get_as_image(self.base.inputs[0]);
 	g2_begin(tiling_node_image);
 	draw_scaled_image(source, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
 	g2_end();
@@ -60,13 +60,13 @@ function tiling_node_get_as_image(self: tiling_node_t, from: i32): kinc_g5_textu
 	return self.result;
 }
 
-function tiling_node_get_cached_image(self: tiling_node_t): kinc_g5_texture_t {
+function tiling_node_get_cached_image(self: tiling_node_t): iron_g5_texture_t {
 	return self.result;
 }
 
-function tiling_node_sd_tiling(image: kinc_g5_texture_t, seed: i32): kinc_g5_texture_t {
+function tiling_node_sd_tiling(image: iron_g5_texture_t, seed: i32): iron_g5_texture_t {
 	text_to_photo_node_tiling = false;
-	let tile: kinc_g5_texture_t = iron_g4_create_render_target(512, 512);
+	let tile: iron_g5_texture_t = iron_g4_create_render_target(512, 512);
 	g2_begin(tile);
 	draw_scaled_image(image, -256, -256, 512, 512);
 	draw_scaled_image(image, 256, -256, 512, 512);
@@ -92,7 +92,7 @@ function tiling_node_sd_tiling(image: kinc_g5_texture_t, seed: i32): kinc_g5_tex
 	// 		u8a[y * 512 + x] = 0;
 	// 	}
 	// }
-	let mask: kinc_g5_texture_t = iron_g4_create_texture_from_bytes(u8a, 512, 512, tex_format_t.R8);
+	let mask: iron_g5_texture_t = iron_g4_create_texture_from_bytes(u8a, 512, 512, tex_format_t.R8);
 
 	inpaint_node_prompt = tiling_node_prompt;
 	inpaint_node_strength = tiling_node_strength;

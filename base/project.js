@@ -162,7 +162,7 @@ if (!flags.lite) {
 		add_gpu_backend("direct3d12");
 		project.add_define("_CRT_SECURE_NO_WARNINGS");
 		project.add_define("_WINSOCK_DEPRECATED_NO_WARNINGS");
-		project.add_define("KINC_DIRECT3D12");
+		project.add_define("IRON_DIRECT3D12");
 		project.add_lib("dxguid");
 		project.add_lib("dsound");
 		project.add_lib("dinput8");
@@ -178,7 +178,7 @@ if (!flags.lite) {
 		add_thread_backend("apple");
 		add_gpu_backend("metal");
 		project.add_cfiles("sources/backends/data/mac.plist");
-		project.add_define("KINC_METAL");
+		project.add_define("IRON_METAL");
 		project.add_lib("Metal");
 		project.add_lib("MetalKit");
 		project.add_lib("IOKit");
@@ -198,7 +198,7 @@ if (!flags.lite) {
 		add_gpu_backend("metal");
 		project.add_cfiles("sources/backends/data/ios.plist");
 		project.add_cfiles("sources/backends/data/LaunchScreen.storyboard");
-		project.add_define("KINC_METAL");
+		project.add_define("IRON_METAL");
 		project.add_lib("Metal");
 		project.add_lib("UIKit");
 		project.add_lib("Foundation");
@@ -217,9 +217,9 @@ if (!flags.lite) {
 		add_net_backend("posix");
 		add_thread_backend("posix");
 		add_gpu_backend("vulkan");
-		project.add_define("KINC_ANDROID");
-		project.add_define("KINC_VULKAN");
-		project.add_define("KINC_ANDROID_API=24");
+		project.add_define("IRON_ANDROID");
+		project.add_define("IRON_VULKAN");
+		project.add_define("IRON_ANDROID_API=24");
 		project.add_define("VK_USE_PLATFORM_ANDROID_KHR");
 		project.add_lib("vulkan");
 		project.add_lib("log");
@@ -234,15 +234,15 @@ if (!flags.lite) {
 		add_thread_backend("wasm");
 		add_gpu_backend("webgpu");
 		project.add_cfiles("sources/libs/miniclib/**");
-		project.add_define("KINC_WASM");
-		project.add_define("KINC_WEBGPU");
+		project.add_define("IRON_WASM");
+		project.add_define("IRON_WEBGPU");
 		project.add_include_dir("miniclib");
 	}
 	else if (platform === "linux") {
 		add_sys_backend("linux");
 		add_thread_backend("posix");
 		add_gpu_backend("vulkan");
-		project.add_define("KINC_VULKAN");
+		project.add_define("IRON_VULKAN");
 		project.add_define("_POSIX_C_SOURCE=200112L");
 		project.add_define("_XOPEN_SOURCE=600");
 		project.add_lib("asound");
@@ -268,8 +268,8 @@ project.add_define("IRON_C_PATH=\"" + os_cwd() + "/build/iron.c" + "\"");
 project.add_define("EMBED_H_PATH=\"" + os_cwd() + "/build/embed.h" + "\"");
 
 if (flags.with_audio) {
-	project.add_define("KINC_A1");
-	project.add_define("KINC_A2");
+	project.add_define("IRON_A1");
+	project.add_define("IRON_A2");
 	project.add_define("WITH_AUDIO");
 	project.add_define("arm_audio");
 	project.add_cfiles("sources/libs/stb_vorbis.c");

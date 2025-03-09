@@ -1,5 +1,5 @@
 
-#ifdef KINC_A2
+#ifdef IRON_A2
 
 #import <AudioToolbox/AudioToolbox.h>
 #import <Foundation/Foundation.h>
@@ -12,9 +12,9 @@
 
 #define kOutputBus 0
 
-static kinc_internal_video_sound_stream_t *video = NULL;
+static iron_internal_video_sound_stream_t *video = NULL;
 
-void iosPlayVideoSoundStream(kinc_internal_video_sound_stream_t *v) {
+void iosPlayVideoSoundStream(iron_internal_video_sound_stream_t *v) {
 	video = v;
 }
 
@@ -35,7 +35,7 @@ static AudioComponentInstance audioUnit;
 static bool isFloat = false;
 static bool isInterleaved = true;
 
-static kinc_a2_buffer_t a2_buffer;
+static iron_a2_buffer_t a2_buffer;
 
 static void copySample(void *buffer, void *secondary_buffer) {
 	float left_value = *(float *)&a2_buffer.channels[0][a2_buffer.read_location];
@@ -46,12 +46,12 @@ static void copySample(void *buffer, void *secondary_buffer) {
 	}
 
 	if (video != NULL) {
-		float *frame = kinc_internal_video_sound_stream_next_frame(video);
+		float *frame = iron_internal_video_sound_stream_next_frame(video);
 		left_value += frame[0];
-		left_value = kinc_max(kinc_min(left_value, 1.0f), -1.0f);
+		left_value = iron_max(iron_min(left_value, 1.0f), -1.0f);
 		right_value += frame[1];
-		right_value = kinc_max(kinc_min(right_value, 1.0f), -1.0f);
-		if (kinc_internal_video_sound_stream_ended(video)) {
+		right_value = iron_max(iron_min(right_value, 1.0f), -1.0f);
+		if (iron_internal_video_sound_stream_ended(video)) {
 			video = NULL;
 		}
 	}
@@ -80,7 +80,7 @@ static void copySample(void *buffer, void *secondary_buffer) {
 
 static OSStatus renderInput(void *inRefCon, AudioUnitRenderActionFlags *ioActionFlags, const AudioTimeStamp *inTimeStamp, UInt32 inBusNumber,
                             UInt32 inNumberFrames, AudioBufferList *outOutputData) {
-	kinc_a2_internal_callback(&a2_buffer, inNumberFrames);
+	iron_a2_internal_callback(&a2_buffer, inNumberFrames);
 	if (isInterleaved) {
 		if (isFloat) {
 			float *output = (float *)outOutputData->mBuffers[0].mData;
@@ -125,18 +125,18 @@ static void sampleRateListener(void *inRefCon, AudioUnit inUnit, AudioUnitProper
 
 	if (samples_per_second != (uint32_t)sampleRate) {
 		samples_per_second = (uint32_t)sampleRate;
-		kinc_a2_internal_sample_rate_callback();
+		iron_a2_internal_sample_rate_callback();
 	}
 }
 
 static bool initialized = false;
 
-void kinc_a2_init(void) {
+void iron_a2_init(void) {
 	if (initialized) {
 		return;
 	}
 
-	kinc_a2_internal_init();
+	iron_a2_internal_init();
 	initialized = true;
 
 	a2_buffer.read_location = 0;
@@ -197,7 +197,7 @@ void kinc_a2_init(void) {
 
 	if (samples_per_second != (uint32_t)deviceFormat.mSampleRate) {
 		samples_per_second = (uint32_t)deviceFormat.mSampleRate;
-		kinc_a2_internal_sample_rate_callback();
+		iron_a2_internal_sample_rate_callback();
 	}
 
 	AURenderCallbackStruct callbackStruct;
@@ -208,9 +208,9 @@ void kinc_a2_init(void) {
 	soundPlaying = true;
 }
 
-void kinc_a2_update(void) {}
+void iron_a2_update(void) {}
 
-void kinc_a2_shutdown(void) {
+void iron_a2_shutdown(void) {
 	if (!initialized)
 		return;
 	if (!soundPlaying)
@@ -221,7 +221,7 @@ void kinc_a2_shutdown(void) {
 	soundPlaying = false;
 }
 
-uint32_t kinc_a2_samples_per_second(void) {
+uint32_t iron_a2_samples_per_second(void) {
 	return samples_per_second;
 }
 

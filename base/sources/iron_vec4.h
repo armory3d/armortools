@@ -1,11 +1,11 @@
 #pragma once
 
-#define mat4_t kinc_matrix4x4_t
-#define mat3_t kinc_matrix3x3_t
-#define quat_t kinc_quaternion_t
-#define vec4_t kinc_vector4_t
-#define vec3_t kinc_vector3_t
-#define vec2_t kinc_vector2_t
+#define mat4_t iron_matrix4x4_t
+#define mat3_t iron_matrix3x3_t
+#define quat_t iron_quaternion_t
+#define vec4_t iron_vector4_t
+#define vec3_t iron_vector3_t
+#define vec2_t iron_vector2_t
 
 #include <iron_math.h>
 #include "iron_mat4.h"

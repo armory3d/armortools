@@ -7,14 +7,14 @@
 
 static const wchar_t *convert(int method) {
 	switch (method) {
-	case KINC_HTTP_GET:
+	case IRON_HTTP_GET:
 	default:
 		return L"GET";
-	case KINC_HTTP_POST:
+	case IRON_HTTP_POST:
 		return L"POST";
-	case KINC_HTTP_PUT:
+	case IRON_HTTP_PUT:
 		return L"PUT";
-	case KINC_HTTP_DELETE:
+	case IRON_HTTP_DELETE:
 		return L"DELETE";
 	}
 }
@@ -22,11 +22,11 @@ static const wchar_t *convert(int method) {
 static char *returnData = NULL;
 static int returnDataSize = 0;
 
-void kinc_http_request(const char *url, const char *path, const char *data, int port, bool secure, int method, const char *header,
-                       kinc_http_callback_t callback, void *callbackdata) {
+void iron_http_request(const char *url, const char *path, const char *data, int port, bool secure, int method, const char *header,
+                       iron_http_callback_t callback, void *callbackdata) {
 	// based on https://docs.microsoft.com/en-us/windows/desktop/winhttp/winhttp-sessions-overview
 
-	HINTERNET hSession = WinHttpOpen(L"WinHTTP via Kore/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
+	HINTERNET hSession = WinHttpOpen(L"WinHTTP via Iron/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
 
 	HINTERNET hConnect = NULL;
 	if (hSession) {
@@ -64,14 +64,14 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 		do {
 			dwSize = 0;
 			if (!WinHttpQueryDataAvailable(hRequest, &dwSize)) {
-				kinc_error("Error %d in WinHttpQueryDataAvailable.\n", GetLastError());
+				iron_error("Error %d in WinHttpQueryDataAvailable.\n", GetLastError());
 			}
 
 			if ((int)dwSize + 1 > returnDataSize - returnDataIndex) {
 				int newReturnDataSize = (returnDataIndex + dwSize + 1) * 2;
 				char *newReturnData = (char *)malloc(newReturnDataSize);
 				if (newReturnData == 0) {
-					kinc_error("Out of memory\n");
+					iron_error("Out of memory\n");
 				}
 				memcpy(newReturnData, returnData, returnDataSize);
 				returnDataSize = newReturnDataSize;
@@ -80,7 +80,7 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 
 			DWORD dwDownloaded = 0;
 			if (!WinHttpReadData(hRequest, (LPVOID)(&returnData[returnDataIndex]), dwSize, &dwDownloaded)) {
-				kinc_error("Error %d in WinHttpReadData.\n", GetLastError());
+				iron_error("Error %d in WinHttpReadData.\n", GetLastError());
 			}
 			returnDataIndex += dwSize;
 		} while (dwSize > 0);
@@ -93,7 +93,7 @@ void kinc_http_request(const char *url, const char *path, const char *data, int 
 	returnData[returnDataIndex] = 0;
 
 	if (!bResults) {
-		kinc_error("Error %d has occurred.\n", GetLastError());
+		iron_error("Error %d has occurred.\n", GetLastError());
 	}
 
 	if (hRequest) {

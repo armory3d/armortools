@@ -11,7 +11,7 @@ declare type draw_font_t = {
 	index?: i32;
 };
 
-let _g2_current: kinc_g5_texture_t = null;
+let _g2_current: iron_g5_texture_t = null;
 let _g2_in_use: bool = false;
 let _g2_font_glyphs: i32[] = _g2_make_glyphs(32, 127);
 let _g2_font_glyphs_last: i32[] = _g2_font_glyphs;
@@ -50,10 +50,10 @@ function _g2_make_glyphs(start: i32, end: i32): i32[] {
 	return ar;
 }
 
-function g2_begin(render_target: kinc_g5_texture_t = null) {
+function g2_begin(render_target: iron_g5_texture_t = null) {
 	if (_g2_in_use && !_g2_thrown) {
 		_g2_thrown = true;
-		kinc_log("End before you begin");
+		iron_log("End before you begin");
 	}
 	_g2_in_use = true;
 	_g2_current = render_target;
@@ -71,7 +71,7 @@ function g2_begin(render_target: kinc_g5_texture_t = null) {
 function g2_end() {
 	if (!_g2_in_use && !_g2_thrown) {
 		_g2_thrown = true;
-		kinc_log("Begin before you end");
+		iron_log("Begin before you end");
 	}
 	_g2_in_use = false;
 	_g2_current = null;

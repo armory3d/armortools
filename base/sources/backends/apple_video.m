@@ -12,7 +12,7 @@
 // extern const char *iphonegetresourcepath(void);
 // extern const char *macgetresourcepath(void);
 
-// void kinc_internal_video_sound_stream_init(kinc_internal_video_sound_stream_t *stream, int channel_count, int frequency) {
+// void iron_internal_video_sound_stream_init(iron_internal_video_sound_stream_t *stream, int channel_count, int frequency) {
 // 	stream->bufferSize = 1024 * 100;
 // 	stream->bufferReadPosition = 0;
 // 	stream->bufferWritePosition = 0;
@@ -21,11 +21,11 @@
 // 	stream->buffer = (float *)malloc(stream->bufferSize * sizeof(float));
 // }
 
-// void kinc_internal_video_sound_stream_destroy(kinc_internal_video_sound_stream_t *stream) {
+// void iron_internal_video_sound_stream_destroy(iron_internal_video_sound_stream_t *stream) {
 // 	free(stream->buffer);
 // }
 
-// void kinc_internal_video_sound_stream_insert_data(kinc_internal_video_sound_stream_t *stream, float *data, int sample_count) {
+// void iron_internal_video_sound_stream_insert_data(iron_internal_video_sound_stream_t *stream, float *data, int sample_count) {
 // 	for (int i = 0; i < sample_count; ++i) {
 // 		float value = data[i]; // / 32767.0;
 // 		stream->buffer[stream->bufferWritePosition++] = value;
@@ -38,33 +38,33 @@
 
 // static float samples[2] = {0};
 
-// float *kinc_internal_video_sound_stream_next_frame(kinc_internal_video_sound_stream_t *stream) {
+// float *iron_internal_video_sound_stream_next_frame(iron_internal_video_sound_stream_t *stream) {
 // 	++stream->read;
 // 	if (stream->written <= stream->read) {
-// 		kinc_log("Out of audio\n");
+// 		iron_log("Out of audio\n");
 // 		return 0;
 // 	}
 
 // 	if (stream->bufferReadPosition >= stream->bufferSize) {
 // 		stream->bufferReadPosition = 0;
-// 		kinc_log("buffer read back - %i\n", (int)(stream->written - stream->read));
+// 		iron_log("buffer read back - %i\n", (int)(stream->written - stream->read));
 // 	}
 // 	samples[0] = stream->buffer[stream->bufferReadPosition++];
 
 // 	if (stream->bufferReadPosition >= stream->bufferSize) {
 // 		stream->bufferReadPosition = 0;
-// 		kinc_log("buffer read back - %i\n", (int)(stream->written - stream->read));
+// 		iron_log("buffer read back - %i\n", (int)(stream->written - stream->read));
 // 	}
 // 	samples[1] = stream->buffer[stream->bufferReadPosition++];
 
 // 	return samples;
 // }
 
-// bool kinc_internal_video_sound_stream_ended(kinc_internal_video_sound_stream_t *stream) {
+// bool iron_internal_video_sound_stream_ended(iron_internal_video_sound_stream_t *stream) {
 // 	return false;
 // }
 
-// static void load(kinc_video_t *video, double startTime) {
+// static void load(iron_video_t *video, double startTime) {
 // 	video->impl.videoStart = startTime;
 // 	AVURLAsset *asset = [[AVURLAsset alloc] initWithURL:video->impl.url options:nil];
 // 	video->impl.videoAsset = asset;
@@ -115,23 +115,23 @@
 // 	if (video->impl.myHeight < 0)
 // 		video->impl.myHeight = [videoTrack naturalSize].height;
 // 	int framerate = [videoTrack nominalFrameRate];
-// 	kinc_log("Framerate: %i\n", framerate);
+// 	iron_log("Framerate: %i\n", framerate);
 // 	video->impl.next = video->impl.videoStart;
 // 	video->impl.audioTime = video->impl.videoStart * 44100;
 // }
 
-// void kinc_video_init(kinc_video_t *video, const char *filename) {
+// void iron_video_init(iron_video_t *video, const char *filename) {
 // 	video->impl.playing = false;
 // 	video->impl.sound = NULL;
 // 	video->impl.image_initialized = false;
 // 	char name[2048];
-// #ifdef KINC_IOS
+// #ifdef IRON_IOS
 // 	strcpy(name, iphonegetresourcepath());
 // #else
 // 	strcpy(name, macgetresourcepath());
 // #endif
 // 	strcat(name, "/");
-// 	strcat(name, KINC_OUTDIR);
+// 	strcat(name, IRON_OUTDIR);
 // 	strcat(name, "/");
 // 	strcat(name, filename);
 // 	video->impl.url = [NSURL fileURLWithPath:[NSString stringWithUTF8String:name]];
@@ -142,57 +142,57 @@
 // 	load(video, 0);
 // }
 
-// void kinc_video_destroy(kinc_video_t *video) {
-// 	kinc_video_stop(video);
+// void iron_video_destroy(iron_video_t *video) {
+// 	iron_video_stop(video);
 // }
 
-// #ifdef KINC_IOS
-// void iosPlayVideoSoundStream(kinc_internal_video_sound_stream_t *video);
+// #ifdef IRON_IOS
+// void iosPlayVideoSoundStream(iron_internal_video_sound_stream_t *video);
 // void iosStopVideoSoundStream(void);
 // #else
-// void macPlayVideoSoundStream(kinc_internal_video_sound_stream_t *video);
+// void macPlayVideoSoundStream(iron_internal_video_sound_stream_t *video);
 // void macStopVideoSoundStream(void);
 // #endif
 
-// void kinc_video_play(kinc_video_t *video, bool loop) {
+// void iron_video_play(iron_video_t *video, bool loop) {
 // 	AVAssetReader *reader = video->impl.assetReader;
 // 	[reader startReading];
 
-// 	kinc_internal_video_sound_stream_t *stream = (kinc_internal_video_sound_stream_t *)malloc(sizeof(kinc_internal_video_sound_stream_t));
-// 	kinc_internal_video_sound_stream_init(stream, 2, 44100);
+// 	iron_internal_video_sound_stream_t *stream = (iron_internal_video_sound_stream_t *)malloc(sizeof(iron_internal_video_sound_stream_t));
+// 	iron_internal_video_sound_stream_init(stream, 2, 44100);
 // 	video->impl.sound = stream;
-// #ifdef KINC_IOS
-// 	iosPlayVideoSoundStream((kinc_internal_video_sound_stream_t *)video->impl.sound);
+// #ifdef IRON_IOS
+// 	iosPlayVideoSoundStream((iron_internal_video_sound_stream_t *)video->impl.sound);
 // #else
-// 	macPlayVideoSoundStream((kinc_internal_video_sound_stream_t *)video->impl.sound);
+// 	macPlayVideoSoundStream((iron_internal_video_sound_stream_t *)video->impl.sound);
 // #endif
 
 // 	video->impl.playing = true;
-// 	video->impl.start = kinc_time() - video->impl.videoStart;
+// 	video->impl.start = iron_time() - video->impl.videoStart;
 // 	video->impl.loop = loop;
 // }
 
-// void kinc_video_pause(kinc_video_t *video) {
+// void iron_video_pause(iron_video_t *video) {
 // 	video->impl.playing = false;
 // 	if (video->impl.sound != NULL) {
 // // Mixer::stop(sound);
-// #ifdef KINC_IOS
+// #ifdef IRON_IOS
 // 		iosStopVideoSoundStream();
 // #else
 // 		macStopVideoSoundStream();
 // #endif
-// 		kinc_internal_video_sound_stream_destroy((kinc_internal_video_sound_stream_t *)video->impl.sound);
+// 		iron_internal_video_sound_stream_destroy((iron_internal_video_sound_stream_t *)video->impl.sound);
 // 		free(video->impl.sound);
 // 		video->impl.sound = NULL;
 // 	}
 // }
 
-// void kinc_video_stop(kinc_video_t *video) {
-// 	kinc_video_pause(video);
+// void iron_video_stop(iron_video_t *video) {
+// 	iron_video_pause(video);
 // 	video->impl.finished = true;
 // }
 
-// static void updateImage(kinc_video_t *video) {
+// static void updateImage(iron_video_t *video) {
 // 	if (!video->impl.playing)
 // 		return;
 
@@ -213,10 +213,10 @@
 
 // 				buffer = [videoOutput copyNextSampleBuffer];
 
-// 				video->impl.start = kinc_time() - video->impl.videoStart;
+// 				video->impl.start = iron_time() - video->impl.videoStart;
 // 			}
 // 			else {
-// 				kinc_video_stop(video);
+// 				iron_video_stop(video);
 // 				return;
 // 			}
 // 		}
@@ -228,13 +228,13 @@
 // 			CGSize size = CVImageBufferGetDisplaySize(pixelBuffer);
 // 			video->impl.myWidth = size.width;
 // 			video->impl.myHeight = size.height;
-// 			kinc_g5_texture_init(&video->impl.image, kinc_video_width(video), kinc_video_height(video), KINC_IMAGE_FORMAT_BGRA32);
+// 			iron_g5_texture_init(&video->impl.image, iron_video_width(video), iron_video_height(video), IRON_IMAGE_FORMAT_BGRA32);
 // 			video->impl.image_initialized = true;
 // 		}
 
 // 		if (pixelBuffer != NULL) {
 // 			CVPixelBufferLockBaseAddress(pixelBuffer, 0);
-// 			// kinc_g4_texture_upload(&video->impl.image, (uint8_t *)CVPixelBufferGetBaseAddress(pixelBuffer), (int)(CVPixelBufferGetBytesPerRow(pixelBuffer)));
+// 			// iron_g4_texture_upload(&video->impl.image, (uint8_t *)CVPixelBufferGetBaseAddress(pixelBuffer), (int)(CVPixelBufferGetBytesPerRow(pixelBuffer)));
 // 			CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
 // 		}
 // 		CFRelease(buffer);
@@ -253,13 +253,13 @@
 // 			                                                        kCMSampleBufferFlag_AudioBufferList_Assure16ByteAlignment, &blockBufferOut);
 // 			for (int bufferCount = 0; bufferCount < audioBufferList.mNumberBuffers; ++bufferCount) {
 // 				float *samples = (float *)audioBufferList.mBuffers[bufferCount].mData;
-// 				kinc_internal_video_sound_stream_t *sound = (kinc_internal_video_sound_stream_t *)video->impl.sound;
+// 				iron_internal_video_sound_stream_t *sound = (iron_internal_video_sound_stream_t *)video->impl.sound;
 // 				if (video->impl.audioTime / 44100.0 > video->impl.next - 0.1) {
-// 					kinc_internal_video_sound_stream_insert_data(sound, samples, (int)numSamplesInBuffer * 2);
+// 					iron_internal_video_sound_stream_insert_data(sound, samples, (int)numSamplesInBuffer * 2);
 // 				}
 // 				else {
 // 					// Send some data anyway because the buffers are huge
-// 					kinc_internal_video_sound_stream_insert_data(sound, samples, (int)numSamplesInBuffer);
+// 					iron_internal_video_sound_stream_insert_data(sound, samples, (int)numSamplesInBuffer);
 // 				}
 // 				video->impl.audioTime += numSamplesInBuffer;
 // 			}
@@ -269,37 +269,37 @@
 // 	}
 // }
 
-// void kinc_video_update(kinc_video_t *video, double time) {
+// void iron_video_update(iron_video_t *video, double time) {
 // 	if (video->impl.playing && time >= video->impl.start + video->impl.next) {
 // 		updateImage(video);
 // 	}
 // }
 
-// int kinc_video_width(kinc_video_t *video) {
+// int iron_video_width(iron_video_t *video) {
 // 	return video->impl.myWidth;
 // }
 
-// int kinc_video_height(kinc_video_t *video) {
+// int iron_video_height(iron_video_t *video) {
 // 	return video->impl.myHeight;
 // }
 
-// kinc_g5_texture_t *kinc_video_current_image(kinc_video_t *video) {
-// 	kinc_video_update(video, kinc_time());
+// iron_g5_texture_t *iron_video_current_image(iron_video_t *video) {
+// 	iron_video_update(video, iron_time());
 // 	return &video->impl.image;
 // }
 
-// double kinc_video_duration(kinc_video_t *video) {
+// double iron_video_duration(iron_video_t *video) {
 // 	return video->impl.duration;
 // }
 
-// bool kinc_video_finished(kinc_video_t *video) {
+// bool iron_video_finished(iron_video_t *video) {
 // 	return video->impl.finished;
 // }
 
-// bool kinc_video_paused(kinc_video_t *video) {
+// bool iron_video_paused(iron_video_t *video) {
 // 	return !video->impl.playing;
 // }
 
-// double kinc_video_position(kinc_video_t *video) {
+// double iron_video_position(iron_video_t *video) {
 // 	return video->impl.next - video->impl.start;
 // }

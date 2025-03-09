@@ -28,36 +28,36 @@ static bool cmd = false;
 
 - (void)flagsChanged:(NSEvent *)theEvent {
 	if (shift) {
-		kinc_internal_keyboard_trigger_key_up(KINC_KEY_SHIFT);
+		iron_internal_keyboard_trigger_key_up(IRON_KEY_SHIFT);
 		shift = false;
 	}
 	if (ctrl) {
-		kinc_internal_keyboard_trigger_key_up(KINC_KEY_CONTROL);
+		iron_internal_keyboard_trigger_key_up(IRON_KEY_CONTROL);
 		ctrl = false;
 	}
 	if (alt) {
-		kinc_internal_keyboard_trigger_key_up(KINC_KEY_ALT);
+		iron_internal_keyboard_trigger_key_up(IRON_KEY_ALT);
 		alt = false;
 	}
 	if (cmd) {
-		kinc_internal_keyboard_trigger_key_up(KINC_KEY_META);
+		iron_internal_keyboard_trigger_key_up(IRON_KEY_META);
 		cmd = false;
 	}
 
 	if ([theEvent modifierFlags] & NSShiftKeyMask) {
-		kinc_internal_keyboard_trigger_key_down(KINC_KEY_SHIFT);
+		iron_internal_keyboard_trigger_key_down(IRON_KEY_SHIFT);
 		shift = true;
 	}
 	if ([theEvent modifierFlags] & NSControlKeyMask) {
-		kinc_internal_keyboard_trigger_key_down(KINC_KEY_CONTROL);
+		iron_internal_keyboard_trigger_key_down(IRON_KEY_CONTROL);
 		ctrl = true;
 	}
 	if ([theEvent modifierFlags] & NSAlternateKeyMask) {
-		kinc_internal_keyboard_trigger_key_down(KINC_KEY_ALT);
+		iron_internal_keyboard_trigger_key_down(IRON_KEY_ALT);
 		alt = true;
 	}
 	if ([theEvent modifierFlags] & NSCommandKeyMask) {
-		kinc_internal_keyboard_trigger_key_down(KINC_KEY_META);
+		iron_internal_keyboard_trigger_key_down(IRON_KEY_META);
 		cmd = true;
 	}
 }
@@ -70,75 +70,75 @@ static bool cmd = false;
 		unichar ch = [characters characterAtIndex:0];
 		switch (ch) { // keys that exist in keydown and keypress events
 		case 59:
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_SEMICOLON);
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_SEMICOLON);
 			break;
 		case 91:
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_OPEN_BRACKET);
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_OPEN_BRACKET);
 			break;
 		case 93:
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_CLOSE_BRACKET);
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_CLOSE_BRACKET);
 			break;
 		case 39:
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_QUOTE);
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_QUOTE);
 			break;
 		case 92:
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_BACK_SLASH);
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_BACK_SLASH);
 			break;
 		case 44:
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_COMMA);
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_COMMA);
 			break;
 		case 46:
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_PERIOD);
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_PERIOD);
 			break;
 		case 47:
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_SLASH);
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_SLASH);
 			break;
 		case 96:
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_BACK_QUOTE);
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_BACK_QUOTE);
 			break;
 		case 32:
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_SPACE);
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_SPACE);
 			break;
 		case 45: // we need breaks because EQUALS triggered too for some reason
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_HYPHEN_MINUS);
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_HYPHEN_MINUS);
 			break;
 		case 61:
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_EQUALS);
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_EQUALS);
 			break;
 		}
 		switch (ch) {
 		case NSRightArrowFunctionKey:
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_RIGHT);
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_RIGHT);
 			break;
 		case NSLeftArrowFunctionKey:
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_LEFT);
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_LEFT);
 			break;
 		case NSUpArrowFunctionKey:
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_UP);
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_UP);
 			break;
 		case NSDownArrowFunctionKey:
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_DOWN);
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_DOWN);
 			break;
 		case 27:
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_ESCAPE);
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_ESCAPE);
 			break;
 		case NSEnterCharacter:
 		case NSNewlineCharacter:
 		case NSCarriageReturnCharacter:
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_RETURN);
-			kinc_internal_keyboard_trigger_key_press('\n');
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_RETURN);
+			iron_internal_keyboard_trigger_key_press('\n');
 			break;
 		case 0x7f:
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_BACKSPACE);
-			kinc_internal_keyboard_trigger_key_press('\x08');
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_BACKSPACE);
+			iron_internal_keyboard_trigger_key_press('\x08');
 			break;
 		case 9:
-			kinc_internal_keyboard_trigger_key_down(KINC_KEY_TAB);
-			kinc_internal_keyboard_trigger_key_press('\t');
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_TAB);
+			iron_internal_keyboard_trigger_key_press('\t');
 			break;
 		default:
 			if (ch == 'x' && [theEvent modifierFlags] & NSCommandKeyMask) {
-				char *text = kinc_internal_cut_callback();
+				char *text = iron_internal_cut_callback();
 				if (text != NULL) {
 					NSPasteboard *board = [NSPasteboard generalPasteboard];
 					[board clearContents];
@@ -146,7 +146,7 @@ static bool cmd = false;
 				}
 			}
 			if (ch == 'c' && [theEvent modifierFlags] & NSCommandKeyMask) {
-				char *text = kinc_internal_copy_callback();
+				char *text = iron_internal_copy_callback();
 				if (text != NULL) {
 					NSPasteboard *board = [NSPasteboard generalPasteboard];
 					[board clearContents];
@@ -159,19 +159,19 @@ static bool cmd = false;
 				if (data != nil) {
 					char charData[4096];
 					strcpy(charData, [data UTF8String]);
-					kinc_internal_paste_callback(charData);
+					iron_internal_paste_callback(charData);
 				}
 			}
 			if (ch >= L'a' && ch <= L'z') {
-				kinc_internal_keyboard_trigger_key_down(ch - L'a' + KINC_KEY_A);
+				iron_internal_keyboard_trigger_key_down(ch - L'a' + IRON_KEY_A);
 			}
 			else if (ch >= L'A' && ch <= L'Z') {
-				kinc_internal_keyboard_trigger_key_down(ch - L'A' + KINC_KEY_A);
+				iron_internal_keyboard_trigger_key_down(ch - L'A' + IRON_KEY_A);
 			}
 			else if (ch >= L'0' && ch <= L'9') {
-				kinc_internal_keyboard_trigger_key_down(ch - L'0' + KINC_KEY_0);
+				iron_internal_keyboard_trigger_key_down(ch - L'0' + IRON_KEY_0);
 			}
-			kinc_internal_keyboard_trigger_key_press(ch);
+			iron_internal_keyboard_trigger_key_press(ch);
 			break;
 		}
 	}
@@ -183,76 +183,76 @@ static bool cmd = false;
 		unichar ch = [characters characterAtIndex:0];
 		switch (ch) {
 		case 59:
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_SEMICOLON);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_SEMICOLON);
 			break;
 		case 91:
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_OPEN_BRACKET);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_OPEN_BRACKET);
 			break;
 		case 93:
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_CLOSE_BRACKET);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_CLOSE_BRACKET);
 			break;
 		case 39:
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_QUOTE);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_QUOTE);
 			break;
 		case 92:
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_BACK_SLASH);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_BACK_SLASH);
 			break;
 		case 44:
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_COMMA);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_COMMA);
 			break;
 		case 46:
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_PERIOD);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_PERIOD);
 			break;
 		case 47:
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_SLASH);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_SLASH);
 			break;
 		case 96:
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_BACK_QUOTE);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_BACK_QUOTE);
 			break;
 		case 45:
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_HYPHEN_MINUS);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_HYPHEN_MINUS);
 			break;
 		case 61:
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_EQUALS);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_EQUALS);
 			break;
 		case NSRightArrowFunctionKey:
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_RIGHT);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_RIGHT);
 			break;
 		case NSLeftArrowFunctionKey:
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_LEFT);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_LEFT);
 			break;
 		case NSUpArrowFunctionKey:
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_UP);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_UP);
 			break;
 		case NSDownArrowFunctionKey:
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_DOWN);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_DOWN);
 			break;
 		case 27:
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_ESCAPE);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_ESCAPE);
 			break;
 		case NSEnterCharacter:
 		case NSNewlineCharacter:
 		case NSCarriageReturnCharacter:
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_RETURN);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_RETURN);
 			break;
 		case 0x7f:
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_BACKSPACE);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_BACKSPACE);
 			break;
 		case 9:
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_TAB);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_TAB);
 			break;
 		case 32:
-			kinc_internal_keyboard_trigger_key_up(KINC_KEY_SPACE);
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_SPACE);
 			break;
 		default:
 			if (ch >= L'a' && ch <= L'z') {
-				kinc_internal_keyboard_trigger_key_up(ch - L'a' + KINC_KEY_A);
+				iron_internal_keyboard_trigger_key_up(ch - L'a' + IRON_KEY_A);
 			}
 			else if (ch >= L'A' && ch <= L'Z') {
-				kinc_internal_keyboard_trigger_key_up(ch - L'A' + KINC_KEY_A);
+				iron_internal_keyboard_trigger_key_up(ch - L'A' + IRON_KEY_A);
 			}
 			else if (ch >= L'0' && ch <= L'9') {
-				kinc_internal_keyboard_trigger_key_up(ch - L'0' + KINC_KEY_0);
+				iron_internal_keyboard_trigger_key_up(ch - L'0' + IRON_KEY_0);
 			}
 			break;
 		}
@@ -268,7 +268,7 @@ static int getMouseX(NSEvent *event) {
 static int getMouseY(NSEvent *event) {
 	NSWindow *window = [[NSApplication sharedApplication] mainWindow];
 	float scale = [window backingScaleFactor];
-	return (int)(kinc_height() - [event locationInWindow].y * scale);
+	return (int)(iron_height() - [event locationInWindow].y * scale);
 }
 
 static bool controlKeyMouseButton = false;
@@ -276,71 +276,71 @@ static bool controlKeyMouseButton = false;
 - (void)mouseDown:(NSEvent *)theEvent {
 	if ([theEvent modifierFlags] & NSControlKeyMask) {
 		controlKeyMouseButton = true;
-		kinc_internal_mouse_trigger_press(1, getMouseX(theEvent), getMouseY(theEvent));
+		iron_internal_mouse_trigger_press(1, getMouseX(theEvent), getMouseY(theEvent));
 	}
 	else {
 		controlKeyMouseButton = false;
-		kinc_internal_mouse_trigger_press(0, getMouseX(theEvent), getMouseY(theEvent));
+		iron_internal_mouse_trigger_press(0, getMouseX(theEvent), getMouseY(theEvent));
 	}
 
 	if ([theEvent subtype] == NSTabletPointEventSubtype) {
-		kinc_internal_pen_trigger_press(getMouseX(theEvent), getMouseY(theEvent), theEvent.pressure);
+		iron_internal_pen_trigger_press(getMouseX(theEvent), getMouseY(theEvent), theEvent.pressure);
 	}
 }
 
 - (void)mouseUp:(NSEvent *)theEvent {
 	if (controlKeyMouseButton) {
-		kinc_internal_mouse_trigger_release(1, getMouseX(theEvent), getMouseY(theEvent));
+		iron_internal_mouse_trigger_release(1, getMouseX(theEvent), getMouseY(theEvent));
 	}
 	else {
-		kinc_internal_mouse_trigger_release(0, getMouseX(theEvent), getMouseY(theEvent));
+		iron_internal_mouse_trigger_release(0, getMouseX(theEvent), getMouseY(theEvent));
 	}
 	controlKeyMouseButton = false;
 
 	if ([theEvent subtype] == NSTabletPointEventSubtype) {
-		kinc_internal_pen_trigger_release(getMouseX(theEvent), getMouseY(theEvent), theEvent.pressure);
+		iron_internal_pen_trigger_release(getMouseX(theEvent), getMouseY(theEvent), theEvent.pressure);
 	}
 }
 
 - (void)mouseMoved:(NSEvent *)theEvent {
-	kinc_internal_mouse_trigger_move(getMouseX(theEvent), getMouseY(theEvent));
+	iron_internal_mouse_trigger_move(getMouseX(theEvent), getMouseY(theEvent));
 }
 
 - (void)mouseDragged:(NSEvent *)theEvent {
-	kinc_internal_mouse_trigger_move(getMouseX(theEvent), getMouseY(theEvent));
+	iron_internal_mouse_trigger_move(getMouseX(theEvent), getMouseY(theEvent));
 
 	if ([theEvent subtype] == NSTabletPointEventSubtype) {
-		kinc_internal_pen_trigger_move(getMouseX(theEvent), getMouseY(theEvent), theEvent.pressure);
+		iron_internal_pen_trigger_move(getMouseX(theEvent), getMouseY(theEvent), theEvent.pressure);
 	}
 }
 
 - (void)rightMouseDown:(NSEvent *)theEvent {
-	kinc_internal_mouse_trigger_press(1, getMouseX(theEvent), getMouseY(theEvent));
+	iron_internal_mouse_trigger_press(1, getMouseX(theEvent), getMouseY(theEvent));
 }
 
 - (void)rightMouseUp:(NSEvent *)theEvent {
-	kinc_internal_mouse_trigger_release(1, getMouseX(theEvent), getMouseY(theEvent));
+	iron_internal_mouse_trigger_release(1, getMouseX(theEvent), getMouseY(theEvent));
 }
 
 - (void)rightMouseDragged:(NSEvent *)theEvent {
-	kinc_internal_mouse_trigger_move(getMouseX(theEvent), getMouseY(theEvent));
+	iron_internal_mouse_trigger_move(getMouseX(theEvent), getMouseY(theEvent));
 }
 
 - (void)otherMouseDown:(NSEvent *)theEvent {
-	kinc_internal_mouse_trigger_press(2, getMouseX(theEvent), getMouseY(theEvent));
+	iron_internal_mouse_trigger_press(2, getMouseX(theEvent), getMouseY(theEvent));
 }
 
 - (void)otherMouseUp:(NSEvent *)theEvent {
-	kinc_internal_mouse_trigger_release(2, getMouseX(theEvent), getMouseY(theEvent));
+	iron_internal_mouse_trigger_release(2, getMouseX(theEvent), getMouseY(theEvent));
 }
 
 - (void)otherMouseDragged:(NSEvent *)theEvent {
-	kinc_internal_mouse_trigger_move(getMouseX(theEvent), getMouseY(theEvent));
+	iron_internal_mouse_trigger_move(getMouseX(theEvent), getMouseY(theEvent));
 }
 
 - (void)scrollWheel:(NSEvent *)theEvent {
 	int delta = [theEvent deltaY];
-	kinc_internal_mouse_trigger_scroll(-delta);
+	iron_internal_mouse_trigger_scroll(-delta);
 }
 
 - (NSDragOperation)draggingEntered:(id<NSDraggingInfo>)sender {
@@ -360,7 +360,7 @@ static bool controlKeyMouseButton = false;
 	if ([[pboard types] containsObject:NSURLPboardType]) {
 		NSURL *fileURL = [NSURL URLFromPasteboard:pboard];
 		wchar_t *filePath = (wchar_t *)[fileURL.path cStringUsingEncoding:NSUTF32LittleEndianStringEncoding];
-		kinc_internal_drop_files_callback(filePath);
+		iron_internal_drop_files_callback(filePath);
 	}
 	return YES;
 }
@@ -422,7 +422,7 @@ static bool controlKeyMouseButton = false;
 
 @end
 
-void kinc_copy_to_clipboard(const char *text) {
+void iron_copy_to_clipboard(const char *text) {
 	NSPasteboard *board = [NSPasteboard generalPasteboard];
 	[board clearContents];
 	[board setString:[NSString stringWithUTF8String:text] forType:NSStringPboardType];
@@ -443,63 +443,63 @@ static bool debugButtonInput = false;
 static void logButton(int buttonIndex, bool pressed) {
 	switch (buttonIndex) {
 	case 0:
-		kinc_log("A Pressed %i", pressed);
+		iron_log("A Pressed %i", pressed);
 		break;
 
 	case 1:
-		kinc_log("B Pressed %i", pressed);
+		iron_log("B Pressed %i", pressed);
 		break;
 
 	case 2:
-		kinc_log("X Pressed %i", pressed);
+		iron_log("X Pressed %i", pressed);
 		break;
 
 	case 3:
-		kinc_log("Y Pressed %i", pressed);
+		iron_log("Y Pressed %i", pressed);
 		break;
 
 	case 4:
-		kinc_log("Lb Pressed %i", pressed);
+		iron_log("Lb Pressed %i", pressed);
 		break;
 
 	case 5:
-		kinc_log("Rb Pressed %i", pressed);
+		iron_log("Rb Pressed %i", pressed);
 		break;
 
 	case 6:
-		kinc_log("Left Stick Pressed %i", pressed);
+		iron_log("Left Stick Pressed %i", pressed);
 		break;
 
 	case 7:
-		kinc_log("Right Stick Pressed %i", pressed);
+		iron_log("Right Stick Pressed %i", pressed);
 		break;
 
 	case 8:
-		kinc_log("Start Pressed %i", pressed);
+		iron_log("Start Pressed %i", pressed);
 		break;
 
 	case 9:
-		kinc_log("Back Pressed %i", pressed);
+		iron_log("Back Pressed %i", pressed);
 		break;
 
 	case 10:
-		kinc_log("Home Pressed %i", pressed);
+		iron_log("Home Pressed %i", pressed);
 		break;
 
 	case 11:
-		kinc_log("Up Pressed %i", pressed);
+		iron_log("Up Pressed %i", pressed);
 		break;
 
 	case 12:
-		kinc_log("Down Pressed %i", pressed);
+		iron_log("Down Pressed %i", pressed);
 		break;
 
 	case 13:
-		kinc_log("Left Pressed %i", pressed);
+		iron_log("Left Pressed %i", pressed);
 		break;
 
 	case 14:
-		kinc_log("Right Pressed %i", pressed);
+		iron_log("Right Pressed %i", pressed);
 		break;
 
 	default:
@@ -512,27 +512,27 @@ static bool debugAxisInput = false;
 static void logAxis(int axisIndex) {
 	switch (axisIndex) {
 	case 0:
-		kinc_log("Left stick X");
+		iron_log("Left stick X");
 		break;
 
 	case 1:
-		kinc_log("Left stick Y");
+		iron_log("Left stick Y");
 		break;
 
 	case 2:
-		kinc_log("Right stick X");
+		iron_log("Right stick X");
 		break;
 
 	case 3:
-		kinc_log("Right stick Y");
+		iron_log("Right stick Y");
 		break;
 
 	case 4:
-		kinc_log("Left trigger");
+		iron_log("Left trigger");
 		break;
 
 	case 5:
-		kinc_log("Right trigger");
+		iron_log("Right trigger");
 		break;
 
 	default:
@@ -549,7 +549,7 @@ static void cstringFromCFStringRef(CFStringRef string, char *cstr, size_t clen) 
 	if (string != NULL) {
 		char temp[256];
 		if (CFStringGetCString(string, temp, 256, kCFStringEncodingUTF8)) {
-			temp[kinc_mini(255, (int)(clen - 1))] = '\0';
+			temp[iron_mini(255, (int)(clen - 1))] = '\0';
 			strncpy(cstr, temp, clen);
 		}
 	}
@@ -603,7 +603,7 @@ void HIDGamepad_bind(struct HIDGamepad *gamepad, IOHIDDeviceRef inDeviceRef, int
 		cstringFromCFStringRef(productRef, gamepad->hidDeviceProduct, sizeof(gamepad->hidDeviceProduct));
 	}
 
-	kinc_log("HIDGamepad.bind: <%p> idx:%d [0x%x:0x%x] [%s] [%s]", inDeviceRef, gamepad->padIndex, gamepad->hidDeviceVendorID,
+	iron_log("HIDGamepad.bind: <%p> idx:%d [0x%x:0x%x] [%s] [%s]", inDeviceRef, gamepad->padIndex, gamepad->hidDeviceVendorID,
 	         gamepad->hidDeviceProductID, gamepad->hidDeviceVendor, gamepad->hidDeviceProduct);
 }
 
@@ -664,7 +664,7 @@ static void initDeviceElements(struct HIDGamepad *gamepad, CFArrayRef elements) 
 }
 
 void HIDGamepad_unbind(struct HIDGamepad *gamepad) {
-	kinc_log("HIDGamepad.unbind: idx:%d [0x%x:0x%x] [%s] [%s]", gamepad->padIndex, gamepad->hidDeviceVendorID, gamepad->hidDeviceProductID,
+	iron_log("HIDGamepad.unbind: idx:%d [0x%x:0x%x] [%s] [%s]", gamepad->padIndex, gamepad->hidDeviceVendorID, gamepad->hidDeviceProductID,
 	         gamepad->hidDeviceVendor, gamepad->hidDeviceProduct);
 
 	if (gamepad->hidQueueRef) {
@@ -705,7 +705,7 @@ static void buttonChanged(struct HIDGamepad *gamepad, IOHIDElementRef elementRef
 	double max = IOHIDElementGetLogicalMax(elementRef);
 	double normalize = (rawValue - min) / (max - min);
 
-	kinc_internal_gamepad_trigger_button(gamepad->padIndex, buttonIndex, normalize);
+	iron_internal_gamepad_trigger_button(gamepad->padIndex, buttonIndex, normalize);
 
 	if (debugButtonInput)
 		logButton(buttonIndex, (normalize != 0));
@@ -724,7 +724,7 @@ static void axisChanged(struct HIDGamepad *gamepad, IOHIDElementRef elementRef, 
 	if (axisIndex % 2 == 1)
 		normalize = -normalize;
 
-	kinc_internal_gamepad_trigger_axis(gamepad->padIndex, axisIndex, normalize);
+	iron_internal_gamepad_trigger_axis(gamepad->padIndex, axisIndex, normalize);
 
 	if (debugAxisInput)
 		logAxis(axisIndex);
@@ -764,11 +764,11 @@ static void valueAvailableCallback(void *inContext, IOReturn inResult, void *inS
 	} while (1);
 }
 
-const char *kinc_gamepad_vendor(int gamepad) {
+const char *iron_gamepad_vendor(int gamepad) {
 	return "unknown";
 }
 
-const char *kinc_gamepad_product_name(int gamepad) {
+const char *iron_gamepad_product_name(int gamepad) {
 	return "unknown";
 }
 
@@ -808,7 +808,7 @@ static int initHIDManager(struct HIDManager *manager) {
 			addMatchingArray(manager, matchingCFArrayRef, matchingCFDictRef);
 		}
 		else {
-			kinc_error("%s: CFArrayCreateMutable failed.", __PRETTY_FUNCTION__);
+			iron_error("%s: CFArrayCreateMutable failed.", __PRETTY_FUNCTION__);
 			return -1;
 		}
 
@@ -859,17 +859,17 @@ CFMutableDictionaryRef createDeviceMatchingDictionary(struct HIDManager *manager
 						CFRelease(usageCFNumberRef);
 					}
 					else {
-						kinc_error("%s: CFNumberCreate(usage) failed.", __PRETTY_FUNCTION__);
+						iron_error("%s: CFNumberCreate(usage) failed.", __PRETTY_FUNCTION__);
 					}
 				}
 			}
 			else {
-				kinc_error("%s: CFNumberCreate(usage page) failed.", __PRETTY_FUNCTION__);
+				iron_error("%s: CFNumberCreate(usage page) failed.", __PRETTY_FUNCTION__);
 			}
 		}
 	}
 	else {
-		kinc_error("%s: CFDictionaryCreateMutable failed.", __PRETTY_FUNCTION__);
+		iron_error("%s: CFDictionaryCreateMutable failed.", __PRETTY_FUNCTION__);
 	}
 	return result;
 }
@@ -882,7 +882,7 @@ void deviceConnected(void *inContext, IOReturn inResult, void *inSender, IOHIDDe
 	// Find an empty slot in the devices list and add the new device there
 	// TODO: does this need to be made thread safe?
 	struct HIDManagerDeviceRecord *device = &manager->devices[0];
-	for (int i = 0; i < KINC_MAX_HID_DEVICES; ++i, ++device) {
+	for (int i = 0; i < IRON_MAX_HID_DEVICES; ++i, ++device) {
 		if (!device->connected) {
 			device->connected = true;
 			device->device = inIOHIDDeviceRef;
@@ -899,7 +899,7 @@ void deviceRemoved(void *inContext, IOReturn inResult, void *inSender, IOHIDDevi
 
 	// TODO: does this need to be made thread safe?
 	struct HIDManagerDeviceRecord *device = &manager->devices[0];
-	for (int i = 0; i < KINC_MAX_HID_DEVICES; ++i, ++device) {
+	for (int i = 0; i < IRON_MAX_HID_DEVICES; ++i, ++device) {
 		// TODO: is comparing IOHIDDeviceRef to match devices safe? Is there a better way?
 		if (device->connected && device->device == inIOHIDDeviceRef) {
 			device->connected = false;
@@ -912,12 +912,12 @@ void deviceRemoved(void *inContext, IOReturn inResult, void *inSender, IOHIDDevi
 
 #define maxDisplays 10
 
-int kinc_count_displays(void) {
+int iron_count_displays(void) {
 	NSArray *screens = [NSScreen screens];
 	return (int)[screens count];
 }
 
-int kinc_primary_display(void) {
+int iron_primary_display(void) {
 	NSArray *screens = [NSScreen screens];
 	NSScreen *mainScreen = [NSScreen mainScreen];
 	for (int i = 0; i < maxDisplays; ++i) {
@@ -928,10 +928,10 @@ int kinc_primary_display(void) {
 	return -1;
 }
 
-void kinc_display_init(void) {}
+void iron_display_init(void) {}
 
-kinc_display_mode_t kinc_display_available_mode(int display, int mode) {
-	kinc_display_mode_t dm;
+iron_display_mode_t iron_display_available_mode(int display, int mode) {
+	iron_display_mode_t dm;
 	dm.width = 800;
 	dm.height = 600;
 	dm.frequency = 60;
@@ -939,23 +939,23 @@ kinc_display_mode_t kinc_display_available_mode(int display, int mode) {
 	return dm;
 }
 
-int kinc_display_count_available_modes(int display) {
+int iron_display_count_available_modes(int display) {
 	return 1;
 }
 
-bool kinc_display_available(int display) {
+bool iron_display_available(int display) {
 	return true;
 }
 
-const char *kinc_display_name(int display) {
+const char *iron_display_name(int display) {
 	return "Display";
 }
 
-kinc_display_mode_t kinc_display_current_mode(int display) {
+iron_display_mode_t iron_display_current_mode(int display) {
 	NSArray *screens = [NSScreen screens];
 	NSScreen *screen = screens[display];
 	NSRect screenRect = [screen frame];
-	kinc_display_mode_t dm;
+	iron_display_mode_t dm;
 	dm.width = screenRect.size.width;
 	dm.height = screenRect.size.height;
 	dm.frequency = 60;
@@ -971,31 +971,31 @@ kinc_display_mode_t kinc_display_current_mode(int display) {
 	return dm;
 }
 
-NSWindow *kinc_get_mac_window_handle();
+NSWindow *iron_get_mac_window_handle();
 
-void kinc_internal_mouse_lock() {
-	kinc_mouse_hide();
+void iron_internal_mouse_lock() {
+	iron_mouse_hide();
 }
 
-void kinc_internal_mouse_unlock(void) {
-	kinc_mouse_show();
+void iron_internal_mouse_unlock(void) {
+	iron_mouse_show();
 }
 
-bool kinc_mouse_can_lock(void) {
+bool iron_mouse_can_lock(void) {
 	return true;
 }
 
-void kinc_mouse_show(void) {
+void iron_mouse_show(void) {
 	CGDisplayShowCursor(kCGDirectMainDisplay);
 }
 
-void kinc_mouse_hide(void) {
+void iron_mouse_hide(void) {
 	CGDisplayHideCursor(kCGDirectMainDisplay);
 }
 
-void kinc_mouse_set_position(int x, int y) {
+void iron_mouse_set_position(int x, int y) {
 
-	NSWindow *window = kinc_get_mac_window_handle();
+	NSWindow *window = iron_get_mac_window_handle();
 	float scale = [window backingScaleFactor];
 	NSRect rect = [[NSScreen mainScreen] frame];
 
@@ -1007,64 +1007,64 @@ void kinc_mouse_set_position(int x, int y) {
 	CGAssociateMouseAndMouseCursorPosition(true);
 }
 
-void kinc_mouse_get_position(int *x, int *y) {
-	NSWindow *window = kinc_get_mac_window_handle();
+void iron_mouse_get_position(int *x, int *y) {
+	NSWindow *window = iron_get_mac_window_handle();
 	NSPoint point = [window mouseLocationOutsideOfEventStream];
 	*x = (int)point.x;
 	*y = (int)point.y;
 }
 
-void kinc_mouse_set_cursor(int cursor_index) {}
+void iron_mouse_set_cursor(int cursor_index) {}
 
 static int mouseX, mouseY;
 static bool keyboardShown = false;
 
-void Kinc_Mouse_GetPosition(int *x, int *y) {
+void Iron_Mouse_GetPosition(int *x, int *y) {
 	*x = mouseX;
 	*y = mouseY;
 }
 
-void kinc_keyboard_show(void) {
+void iron_keyboard_show(void) {
 	keyboardShown = true;
 }
 
-void kinc_keyboard_hide(void) {
+void iron_keyboard_hide(void) {
 	keyboardShown = false;
 }
 
-bool kinc_keyboard_active(void) {
+bool iron_keyboard_active(void) {
 	return keyboardShown;
 }
 
-const char *kinc_system_id(void) {
+const char *iron_system_id(void) {
 	return "macOS";
 }
 
 static const char *videoFormats[] = {"ogv", NULL};
 
-const char **kinc_video_formats(void) {
+const char **iron_video_formats(void) {
 	return videoFormats;
 }
 
-void kinc_set_keep_screen_on(bool on) {}
+void iron_set_keep_screen_on(bool on) {}
 
 #include <mach/mach_time.h>
 
-double kinc_frequency(void) {
+double iron_frequency(void) {
 	mach_timebase_info_data_t info;
 	mach_timebase_info(&info);
 	return (double)info.denom / (double)info.numer / 1e-9;
 }
 
-kinc_ticks_t kinc_timestamp(void) {
+iron_ticks_t iron_timestamp(void) {
 	return mach_absolute_time();
 }
 
-bool kinc_gamepad_connected(int num) {
+bool iron_gamepad_connected(int num) {
 	return true;
 }
 
-void kinc_gamepad_rumble(int gamepad, float left, float right) {}
+void iron_gamepad_rumble(int gamepad, float left, float right) {}
 
 bool withAutoreleasepool(bool (*f)(void)) {
 	@autoreleasepool {
@@ -1078,12 +1078,12 @@ const char *macgetresourcepath(void) {
 	return [[[NSBundle mainBundle] resourcePath] cStringUsingEncoding:NSUTF8StringEncoding];
 }
 
-@interface KincApplication : NSApplication {
+@interface IronApplication : NSApplication {
 }
 - (void)terminate:(id)sender;
 @end
 
-@interface KincAppDelegate : NSObject <NSWindowDelegate> {
+@interface IronAppDelegate : NSObject <NSWindowDelegate> {
 }
 - (void)windowWillClose:(NSNotification *)notification;
 - (void)windowDidResize:(NSNotification *)notification;
@@ -1096,7 +1096,7 @@ const char *macgetresourcepath(void) {
 static NSApplication *myapp;
 static NSWindow *window;
 static BasicOpenGLView *view;
-static KincAppDelegate *delegate;
+static IronAppDelegate *delegate;
 static struct HIDManager *hidManager;
 
 CAMetalLayer *getMetalLayer(void) {
@@ -1115,7 +1115,7 @@ id getMetalQueue(void) {
 	return [view metalQueue];
 }
 
-bool kinc_internal_handle_messages(void) {
+bool iron_internal_handle_messages(void) {
 	NSEvent *event = [myapp nextEventMatchingMask:NSAnyEventMask
 	                                    untilDate:[NSDate distantPast]
 	                                       inMode:NSDefaultRunLoopMode
@@ -1135,21 +1135,21 @@ bool kinc_internal_handle_messages(void) {
 void swapBuffersMac() {
 }
 
-static void createWindow(kinc_window_options_t *options) {
+static void createWindow(iron_window_options_t *options) {
 	int width = options->width / [[NSScreen mainScreen] backingScaleFactor];
 	int height = options->height / [[NSScreen mainScreen] backingScaleFactor];
 	int styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable;
-	if ((options->features & KINC_WINDOW_FEATURE_RESIZEABLE) || (options->features & KINC_WINDOW_FEATURE_MAXIMIZABLE)) {
+	if ((options->features & IRON_WINDOW_FEATURE_RESIZEABLE) || (options->features & IRON_WINDOW_FEATURE_MAXIMIZABLE)) {
 		styleMask |= NSWindowStyleMaskResizable;
 	}
-	if (options->features & KINC_WINDOW_FEATURE_MINIMIZABLE) {
+	if (options->features & IRON_WINDOW_FEATURE_MINIMIZABLE) {
 		styleMask |= NSWindowStyleMaskMiniaturizable;
 	}
 
 	view = [[BasicOpenGLView alloc] initWithFrame:NSMakeRect(0, 0, width, height)];
 	[view registerForDraggedTypes:[NSArray arrayWithObjects:NSURLPboardType, nil]];
 	window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, width, height) styleMask:styleMask backing:NSBackingStoreBuffered defer:TRUE];
-	delegate = [KincAppDelegate alloc];
+	delegate = [IronAppDelegate alloc];
 	[window setDelegate:delegate];
 	[window setTitle:[NSString stringWithCString:options->title encoding:NSUTF8StringEncoding]];
 	[window setAcceptsMouseMovedEvents:YES];
@@ -1161,21 +1161,21 @@ static void createWindow(kinc_window_options_t *options) {
 
 	[window makeKeyAndOrderFront:nil];
 
-	if (options->mode == KINC_WINDOW_MODE_FULLSCREEN) {
+	if (options->mode == IRON_WINDOW_MODE_FULLSCREEN) {
 		[window toggleFullScreen:nil];
 		windows[0].fullscreen = true;
 	}
 }
 
-void kinc_window_change_window_mode(kinc_window_mode_t mode) {
+void iron_window_change_window_mode(iron_window_mode_t mode) {
 	switch (mode) {
-	case KINC_WINDOW_MODE_WINDOW:
+	case IRON_WINDOW_MODE_WINDOW:
 		if (windows[0].fullscreen) {
 			[window toggleFullScreen:nil];
 			windows[0].fullscreen = false;
 		}
 		break;
-	case KINC_WINDOW_MODE_FULLSCREEN:
+	case IRON_WINDOW_MODE_FULLSCREEN:
 		if (!windows[0].fullscreen) {
 			[window toggleFullScreen:nil];
 			windows[0].fullscreen = true;
@@ -1184,7 +1184,7 @@ void kinc_window_change_window_mode(kinc_window_mode_t mode) {
 	}
 }
 
-void kinc_window_set_close_callback(bool (*callback)(void *), void *data) {
+void iron_window_set_close_callback(bool (*callback)(void *), void *data) {
 	windows[0].closeCallback = callback;
 	windows[0].closeCallbackData = data;
 }
@@ -1205,9 +1205,9 @@ static void addMenubar(void) {
 	[NSApp setMainMenu:menubar];
 }
 
-void kinc_init(const char *name, int width, int height, kinc_window_options_t *win) {
+void iron_init(const char *name, int width, int height, iron_window_options_t *win) {
 	@autoreleasepool {
-		myapp = [KincApplication sharedApplication];
+		myapp = [IronApplication sharedApplication];
 		[myapp finishLaunching];
 		[[NSRunningApplication currentApplication] activateWithOptions:(NSApplicationActivateAllWindows | NSApplicationActivateIgnoringOtherApps)];
 		NSApp.activationPolicy = NSApplicationActivationPolicyRegular;
@@ -1217,9 +1217,9 @@ void kinc_init(const char *name, int width, int height, kinc_window_options_t *w
 		addMenubar();
 	}
 
-	kinc_window_options_t defaultWindowOptions;
+	iron_window_options_t defaultWindowOptions;
 	if (win == NULL) {
-		kinc_window_options_set_defaults(&defaultWindowOptions);
+		iron_window_options_set_defaults(&defaultWindowOptions);
 		win = &defaultWindowOptions;
 	}
 
@@ -1230,33 +1230,33 @@ void kinc_init(const char *name, int width, int height, kinc_window_options_t *w
 	}
 
 	createWindow(win);
-	kinc_g5_internal_init();
-	kinc_g4_internal_init_window(win->depth_bits, true);
+	iron_g5_internal_init();
+	iron_g4_internal_init_window(win->depth_bits, true);
 }
 
-int kinc_window_width() {
+int iron_window_width() {
 	NSWindow *window = windows[0].handle;
 	float scale = [window backingScaleFactor];
 	return [[window contentView] frame].size.width * scale;
 }
 
-int kinc_window_height() {
+int iron_window_height() {
 	NSWindow *window = windows[0].handle;
 	float scale = [window backingScaleFactor];
 	return [[window contentView] frame].size.height * scale;
 }
 
-NSWindow *kinc_get_mac_window_handle() {
+NSWindow *iron_get_mac_window_handle() {
 	return windows[0].handle;
 }
 
-void kinc_load_url(const char *url) {
+void iron_load_url(const char *url) {
 	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:[NSString stringWithUTF8String:url]]];
 }
 
 static char language[3];
 
-const char *kinc_language(void) {
+const char *iron_language(void) {
 	NSString *nsstr = [[NSLocale preferredLanguages] objectAtIndex:0];
 	const char *lang = [nsstr UTF8String];
 	language[0] = lang[0];
@@ -1265,12 +1265,12 @@ const char *kinc_language(void) {
 	return language;
 }
 
-void kinc_internal_shutdown(void) {}
+void iron_internal_shutdown(void) {}
 
 static const char *getSavePath(void) {
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
 	NSString *resolvedPath = [paths objectAtIndex:0];
-	NSString *appName = [NSString stringWithUTF8String:kinc_application_name()];
+	NSString *appName = [NSString stringWithUTF8String:iron_application_name()];
 	resolvedPath = [resolvedPath stringByAppendingPathComponent:appName];
 
 	NSFileManager *fileMgr = [[NSFileManager alloc] init];
@@ -1282,25 +1282,25 @@ static const char *getSavePath(void) {
 	return [resolvedPath cStringUsingEncoding:NSUTF8StringEncoding];
 }
 
-const char *kinc_internal_save_path(void) {
+const char *iron_internal_save_path(void) {
 	return getSavePath();
 }
 
-#ifndef KINC_NO_MAIN
+#ifndef IRON_NO_MAIN
 int main(int argc, char **argv) {
 	return kickstart(argc, argv);
 }
 #endif
 
-@implementation KincApplication
+@implementation IronApplication
 
 - (void)terminate:(id)sender {
-	kinc_stop();
+	iron_stop();
 }
 
 @end
 
-@implementation KincAppDelegate
+@implementation IronAppDelegate
 - (BOOL)windowShouldClose:(NSWindow *)sender {
 	if (windows[0].closeCallback != NULL) {
 		if (windows[0].closeCallback(windows[0].closeCallbackData)) {
@@ -1314,7 +1314,7 @@ int main(int argc, char **argv) {
 }
 
 - (void)windowWillClose:(NSNotification *)notification {
-	kinc_stop();
+	iron_stop();
 }
 
 - (void)windowDidResize:(NSNotification *)notification {
@@ -1327,59 +1327,59 @@ int main(int argc, char **argv) {
 }
 
 - (void)windowWillMiniaturize:(NSNotification *)notification {
-	kinc_internal_background_callback();
+	iron_internal_background_callback();
 }
 
 - (void)windowDidDeminiaturize:(NSNotification *)notification {
-	kinc_internal_foreground_callback();
+	iron_internal_foreground_callback();
 }
 
 - (void)windowDidResignMain:(NSNotification *)notification {
-	kinc_internal_pause_callback();
+	iron_internal_pause_callback();
 }
 
 - (void)windowDidBecomeMain:(NSNotification *)notification {
-	kinc_internal_resume_callback();
+	iron_internal_resume_callback();
 }
 
 @end
 
-int kinc_window_x() {
+int iron_window_x() {
 	return 0;
 }
 
-int kinc_window_y() {
+int iron_window_y() {
 	return 0;
 }
 
-void kinc_window_resize(int width, int height) {}
+void iron_window_resize(int width, int height) {}
 
-void kinc_window_move(int x, int y) {}
+void iron_window_move(int x, int y) {}
 
-void kinc_window_change_features(int features) {}
+void iron_window_change_features(int features) {}
 
-void kinc_window_change_mode(kinc_window_mode_t mode) {}
+void iron_window_change_mode(iron_window_mode_t mode) {}
 
-void kinc_window_destroy() {}
+void iron_window_destroy() {}
 
-void kinc_window_show() {}
+void iron_window_show() {}
 
-void kinc_window_hide() {}
+void iron_window_hide() {}
 
-void kinc_window_set_title(const char *title) {}
+void iron_window_set_title(const char *title) {}
 
-void kinc_window_create(kinc_window_options_t *win) {
+void iron_window_create(iron_window_options_t *win) {
 }
 
-void kinc_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {
+void iron_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {
 	windows[0].resizeCallback = callback;
 	windows[0].resizeCallbackData = data;
 }
 
-kinc_window_mode_t kinc_window_get_mode() {
-	return KINC_WINDOW_MODE_WINDOW;
+iron_window_mode_t iron_window_get_mode() {
+	return IRON_WINDOW_MODE_WINDOW;
 }
 
-int kinc_window_display() {
+int iron_window_display() {
 	return 0;
 }

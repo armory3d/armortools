@@ -7,7 +7,7 @@ let project_asset_id: i32 = 0;
 let project_mesh_assets: string[] = [];
 let project_material_groups: node_group_t[] = [];
 let project_paint_objects: mesh_object_t[] = null;
-let project_asset_map: map_t<i32, any> = map_create(); // kinc_g5_texture_t | font_t
+let project_asset_map: map_t<i32, any> = map_create(); // iron_g5_texture_t | font_t
 let project_mesh_list: string[] = null;
 
 let project_materials: slot_material_t[] = null;
@@ -45,7 +45,7 @@ function project_open() {
 			return;
 		}
 
-		let current: kinc_g5_texture_t = _g2_current;
+		let current: iron_g5_texture_t = _g2_current;
 		let g2_in_use: bool = _g2_in_use;
 		if (g2_in_use) g2_end();
 
@@ -62,7 +62,7 @@ function project_save(save_and_quit: bool = false) {
 		document_directory = substring(document_directory, 0, document_directory.length - 8); // Strip /"untitled"
 		project_filepath = document_directory + "/" + sys_title() + ".arm";
 		///elseif arm_android
-		project_filepath = kinc_internal_save_path() + "/" + sys_title() + ".arm";
+		project_filepath = iron_internal_save_path() + "/" + sys_title() + ".arm";
 		///else
 		project_save_as(save_and_quit);
 		return;
@@ -79,7 +79,7 @@ function project_save(save_and_quit: bool = false) {
 	app_notify_on_init(function () {
 		export_arm_run_project();
 		if (_project_save_and_quit) {
-			kinc_stop();
+			iron_stop();
 		}
 	});
 }
@@ -226,7 +226,7 @@ function project_new(reset_layers: bool = true) {
 	let n: string = context_raw.project_type == project_model_t.ROUNDED_CUBE ? ".Cube" : "Tessellated";
 	let md: mesh_data_t = data_get_mesh("Scene", n);
 
-	let current: kinc_g5_texture_t = _g2_current;
+	let current: iron_g5_texture_t = _g2_current;
 	let g2_in_use: bool = _g2_in_use;
 	if (g2_in_use) g2_end();
 
@@ -640,7 +640,7 @@ function project_reimport_texture(asset: asset_t) {
 	}
 }
 
-function project_get_image(asset: asset_t): kinc_g5_texture_t {
+function project_get_image(asset: asset_t): iron_g5_texture_t {
 	return asset != null ? map_get(project_asset_map, asset.id) : null;
 }
 

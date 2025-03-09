@@ -1509,8 +1509,8 @@ function write_kickstart() {
 		out("\n");
 	}
 	out("\t_main();\n");
-	out("\t#ifndef NO_KINC_START\n");
-	out("\tkinc_start();\n");
+	out("\t#ifndef NO_IRON_START\n");
+	out("\tiron_start();\n");
 	out("\t#endif\n");
 	out("}\n\n");
 }

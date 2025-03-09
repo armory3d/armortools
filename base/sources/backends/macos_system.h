@@ -8,7 +8,7 @@
 #include <IOKit/hid/IOHIDKeys.h>
 #include <IOKit/hid/IOHIDManager.h>
 
-struct kinc_g5_texture;
+struct iron_g5_texture;
 
 @interface BasicOpenGLView : MTKView {
 @private
@@ -65,9 +65,7 @@ void HIDGamepad_destroy(struct HIDGamepad *gamepad);
 void HIDGamepad_bind(struct HIDGamepad *gamepad, IOHIDDeviceRef deviceRef, int padIndex);
 void HIDGamepad_unbind(struct HIDGamepad *gamepad);
 
-// Maximum number of devices supported
-// Corresponds to size of Kore::Gamepad array
-static const int KINC_MAX_HID_DEVICES = 12;
+static const int IRON_MAX_HID_DEVICES = 12;
 
 // Slots to hold details on connected devices
 struct HIDManagerDeviceRecord {
@@ -78,7 +76,7 @@ struct HIDManagerDeviceRecord {
 
 struct HIDManager {
 	IOHIDManagerRef managerRef;
-	struct HIDManagerDeviceRecord devices[KINC_MAX_HID_DEVICES];
+	struct HIDManagerDeviceRecord devices[IRON_MAX_HID_DEVICES];
 };
 
 void HIDManager_init(struct HIDManager *manager);

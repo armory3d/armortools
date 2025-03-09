@@ -9,7 +9,7 @@
 #include <iron_system.h>
 #include <iron_string.h>
 #include "iron_vec2.h"
-#ifdef KINC_DIRECT3D12
+#ifdef IRON_DIRECT3D12
 extern bool waitAfterNextDraw;
 #endif
 
@@ -19,34 +19,34 @@ extern bool waitAfterNextDraw;
 draw_font_t *draw_font = NULL;
 int draw_font_size;
 
-static kinc_matrix4x4_t draw_projection_matrix;
+static iron_matrix4x4_t draw_projection_matrix;
 static bool draw_bilinear_filter = true;
 static uint32_t draw_color = 0;
 static bool draw_is_render_target = false;
-static kinc_g5_pipeline_t *draw_last_pipeline = NULL;
-static kinc_g5_pipeline_t *draw_custom_pipeline = NULL;
-static kinc_matrix3x3_t draw_transform;
+static iron_g5_pipeline_t *draw_last_pipeline = NULL;
+static iron_g5_pipeline_t *draw_custom_pipeline = NULL;
+static iron_matrix3x3_t draw_transform;
 
-static kinc_g4_vertex_buffer_t image_vertex_buffer;
-static kinc_g5_index_buffer_t image_index_buffer;
-static kinc_g5_shader_t image_vert_shader;
-static kinc_g5_shader_t image_frag_shader;
-static kinc_g5_pipeline_t image_pipeline;
-static kinc_g5_texture_unit_t image_tex_unit;
-static kinc_g5_constant_location_t image_proj_loc;
+static iron_g4_vertex_buffer_t image_vertex_buffer;
+static iron_g5_index_buffer_t image_index_buffer;
+static iron_g5_shader_t image_vert_shader;
+static iron_g5_shader_t image_frag_shader;
+static iron_g5_pipeline_t image_pipeline;
+static iron_g5_texture_unit_t image_tex_unit;
+static iron_g5_constant_location_t image_proj_loc;
 static float *image_rect_verts = NULL;
 static int image_buffer_index = 0;
 static int image_buffer_start = 0;
-static kinc_g5_texture_t *image_last_texture = NULL;
+static iron_g5_texture_t *image_last_texture = NULL;
 
-static kinc_g4_vertex_buffer_t colored_rect_vertex_buffer;
-static kinc_g5_index_buffer_t colored_rect_index_buffer;
-static kinc_g4_vertex_buffer_t colored_tris_vertex_buffer;
-static kinc_g5_index_buffer_t colored_tris_index_buffer;
-static kinc_g5_shader_t colored_vert_shader;
-static kinc_g5_shader_t colored_frag_shader;
-static kinc_g5_pipeline_t colored_pipeline;
-static kinc_g5_constant_location_t colored_proj_loc;
+static iron_g4_vertex_buffer_t colored_rect_vertex_buffer;
+static iron_g5_index_buffer_t colored_rect_index_buffer;
+static iron_g4_vertex_buffer_t colored_tris_vertex_buffer;
+static iron_g5_index_buffer_t colored_tris_index_buffer;
+static iron_g5_shader_t colored_vert_shader;
+static iron_g5_shader_t colored_frag_shader;
+static iron_g5_pipeline_t colored_pipeline;
+static iron_g5_constant_location_t colored_proj_loc;
 static float *colored_rect_verts = NULL;
 static float *colored_tris_verts = NULL;
 static int colored_rect_buffer_index = 0;
@@ -54,18 +54,18 @@ static int colored_rect_buffer_start = 0;
 static int colored_tris_buffer_index = 0;
 static int colored_tris_buffer_start = 0;
 
-static kinc_g4_vertex_buffer_t text_vertex_buffer;
-static kinc_g5_index_buffer_t text_index_buffer;
-static kinc_g5_shader_t text_vert_shader;
-static kinc_g5_shader_t text_frag_shader;
-static kinc_g5_pipeline_t text_pipeline;
-static kinc_g5_pipeline_t text_pipeline_rt;
-static kinc_g5_texture_unit_t text_tex_unit;
-static kinc_g5_constant_location_t text_proj_loc;
+static iron_g4_vertex_buffer_t text_vertex_buffer;
+static iron_g5_index_buffer_t text_index_buffer;
+static iron_g5_shader_t text_vert_shader;
+static iron_g5_shader_t text_frag_shader;
+static iron_g5_pipeline_t text_pipeline;
+static iron_g5_pipeline_t text_pipeline_rt;
+static iron_g5_texture_unit_t text_tex_unit;
+static iron_g5_constant_location_t text_proj_loc;
 static float *text_rect_verts = NULL;
 static int text_buffer_index = 0;
 static int text_buffer_start = 0;
-static kinc_g5_texture_t *text_last_texture = NULL;
+static iron_g5_texture_t *text_last_texture = NULL;
 
 static int *draw_font_glyph_blocks = NULL;
 static int *draw_font_glyphs = NULL;
@@ -78,11 +78,11 @@ void draw_colored_rect_end(bool tris_done);
 void draw_colored_tris_end(bool rects_done);
 void draw_text_end(void);
 
-kinc_matrix4x4_t draw_matrix4x4_orthogonal_projection(float left, float right, float bottom, float top, float zn, float zf) {
+iron_matrix4x4_t draw_matrix4x4_orthogonal_projection(float left, float right, float bottom, float top, float zn, float zf) {
 	float tx = -(right + left) / (right - left);
 	float ty = -(top + bottom) / (top - bottom);
 	float tz = -(zf + zn) / (zf - zn);
-	return (kinc_matrix4x4_t) {
+	return (iron_matrix4x4_t) {
 		2.0f / (right - left), 0.0f, 0.0f, 0.0f,
 		0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
 		0.0f, 0.0f, -2.0f / (zf - zn), 0.0f,
@@ -90,78 +90,78 @@ kinc_matrix4x4_t draw_matrix4x4_orthogonal_projection(float left, float right, f
 	};
 }
 
-void draw_matrix3x3_multquad(kinc_matrix3x3_t *m, float qx, float qy, float qw, float qh, kinc_vector2_t *out) {
-	kinc_float32x4_t xx = kinc_float32x4_load(qx, qx, qx + qw, qx + qw);
-	kinc_float32x4_t yy = kinc_float32x4_load(qy + qh, qy, qy, qy + qh);
+void draw_matrix3x3_multquad(iron_matrix3x3_t *m, float qx, float qy, float qw, float qh, iron_vector2_t *out) {
+	iron_float32x4_t xx = iron_float32x4_load(qx, qx, qx + qw, qx + qw);
+	iron_float32x4_t yy = iron_float32x4_load(qy + qh, qy, qy, qy + qh);
 
-	kinc_float32x4_t m00 = kinc_float32x4_load_all(m->m[0]);
-	kinc_float32x4_t m01 = kinc_float32x4_load_all(m->m[1]);
-	kinc_float32x4_t m02 = kinc_float32x4_load_all(m->m[2]);
-	kinc_float32x4_t m10 = kinc_float32x4_load_all(m->m[3]);
-	kinc_float32x4_t m11 = kinc_float32x4_load_all(m->m[4]);
-	kinc_float32x4_t m12 = kinc_float32x4_load_all(m->m[5]);
-	kinc_float32x4_t m20 = kinc_float32x4_load_all(m->m[6]);
-	kinc_float32x4_t m21 = kinc_float32x4_load_all(m->m[7]);
-	kinc_float32x4_t m22 = kinc_float32x4_load_all(m->m[8]);
+	iron_float32x4_t m00 = iron_float32x4_load_all(m->m[0]);
+	iron_float32x4_t m01 = iron_float32x4_load_all(m->m[1]);
+	iron_float32x4_t m02 = iron_float32x4_load_all(m->m[2]);
+	iron_float32x4_t m10 = iron_float32x4_load_all(m->m[3]);
+	iron_float32x4_t m11 = iron_float32x4_load_all(m->m[4]);
+	iron_float32x4_t m12 = iron_float32x4_load_all(m->m[5]);
+	iron_float32x4_t m20 = iron_float32x4_load_all(m->m[6]);
+	iron_float32x4_t m21 = iron_float32x4_load_all(m->m[7]);
+	iron_float32x4_t m22 = iron_float32x4_load_all(m->m[8]);
 
-	kinc_float32x4_t w = kinc_float32x4_add(kinc_float32x4_add(kinc_float32x4_mul(m02, xx), kinc_float32x4_mul(m12, yy)), m22);
-	kinc_float32x4_t px = kinc_float32x4_div(kinc_float32x4_add(kinc_float32x4_add(kinc_float32x4_mul(m00, xx), kinc_float32x4_mul(m10, yy)), m20), w);
-	kinc_float32x4_t py = kinc_float32x4_div(kinc_float32x4_add(kinc_float32x4_add(kinc_float32x4_mul(m01, xx), kinc_float32x4_mul(m11, yy)), m21), w);
+	iron_float32x4_t w = iron_float32x4_add(iron_float32x4_add(iron_float32x4_mul(m02, xx), iron_float32x4_mul(m12, yy)), m22);
+	iron_float32x4_t px = iron_float32x4_div(iron_float32x4_add(iron_float32x4_add(iron_float32x4_mul(m00, xx), iron_float32x4_mul(m10, yy)), m20), w);
+	iron_float32x4_t py = iron_float32x4_div(iron_float32x4_add(iron_float32x4_add(iron_float32x4_mul(m01, xx), iron_float32x4_mul(m11, yy)), m21), w);
 
-	out[0] = (kinc_vector2_t){kinc_float32x4_get(px, 0), kinc_float32x4_get(py, 0)};
-	out[1] = (kinc_vector2_t){kinc_float32x4_get(px, 1), kinc_float32x4_get(py, 1)};
-	out[2] = (kinc_vector2_t){kinc_float32x4_get(px, 2), kinc_float32x4_get(py, 2)};
-	out[3] = (kinc_vector2_t){kinc_float32x4_get(px, 3), kinc_float32x4_get(py, 3)};
+	out[0] = (iron_vector2_t){iron_float32x4_get(px, 0), iron_float32x4_get(py, 0)};
+	out[1] = (iron_vector2_t){iron_float32x4_get(px, 1), iron_float32x4_get(py, 1)};
+	out[2] = (iron_vector2_t){iron_float32x4_get(px, 2), iron_float32x4_get(py, 2)};
+	out[3] = (iron_vector2_t){iron_float32x4_get(px, 3), iron_float32x4_get(py, 3)};
 }
 
-kinc_vector2_t draw_matrix3x3_multvec(kinc_matrix3x3_t *m, kinc_vector2_t v) {
+iron_vector2_t draw_matrix3x3_multvec(iron_matrix3x3_t *m, iron_vector2_t v) {
 	float w = m->m[2] * v.x + m->m[5] * v.y + m->m[8] * 1.0f;
 	float x = (m->m[0] * v.x + m->m[3] * v.y + m->m[6] * 1.0f) / w;
 	float y = (m->m[1] * v.x + m->m[4] * v.y + m->m[7] * 1.0f) / w;
-	return (kinc_vector2_t){x, y};
+	return (iron_vector2_t){x, y};
 }
 
-void draw_internal_set_projection_matrix(kinc_g5_texture_t *target) {
+void draw_internal_set_projection_matrix(iron_g5_texture_t *target) {
 	if (target != NULL) {
 		draw_projection_matrix = draw_matrix4x4_orthogonal_projection(0.0f, (float)target->width, (float)target->height, 0.0f, 0.1f, 1000.0f);
 	}
 	else {
-		draw_projection_matrix = draw_matrix4x4_orthogonal_projection(0.0f, (float)kinc_window_width(), (float)kinc_window_height(), 0.0f, 0.1f, 1000.0f);
+		draw_projection_matrix = draw_matrix4x4_orthogonal_projection(0.0f, (float)iron_window_width(), (float)iron_window_height(), 0.0f, 0.1f, 1000.0f);
 	}
 }
 
 void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_vert, buffer_t *colored_frag, buffer_t *text_vert, buffer_t *text_frag) {
 	draw_internal_set_projection_matrix(NULL);
-	draw_transform = kinc_matrix3x3_identity();
+	draw_transform = iron_matrix3x3_identity();
 
 	// Image painter
-	kinc_g5_shader_init(&image_vert_shader, image_vert->buffer, image_vert->length, KINC_G5_SHADER_TYPE_VERTEX);
-	kinc_g5_shader_init(&image_frag_shader, image_frag->buffer, image_frag->length, KINC_G5_SHADER_TYPE_FRAGMENT);
+	iron_g5_shader_init(&image_vert_shader, image_vert->buffer, image_vert->length, IRON_G5_SHADER_TYPE_VERTEX);
+	iron_g5_shader_init(&image_frag_shader, image_frag->buffer, image_frag->length, IRON_G5_SHADER_TYPE_FRAGMENT);
 
 	{
-		kinc_g5_vertex_structure_t structure;
-		kinc_g5_vertex_structure_init(&structure);
-		kinc_g5_vertex_structure_add(&structure, "pos", KINC_G5_VERTEX_DATA_F32_3X);
-		kinc_g5_vertex_structure_add(&structure, "tex", KINC_G5_VERTEX_DATA_F32_2X);
-		kinc_g5_vertex_structure_add(&structure, "col", KINC_G5_VERTEX_DATA_U8_4X_NORM);
-		kinc_g5_pipeline_init(&image_pipeline);
+		iron_g5_vertex_structure_t structure;
+		iron_g5_vertex_structure_init(&structure);
+		iron_g5_vertex_structure_add(&structure, "pos", IRON_G5_VERTEX_DATA_F32_3X);
+		iron_g5_vertex_structure_add(&structure, "tex", IRON_G5_VERTEX_DATA_F32_2X);
+		iron_g5_vertex_structure_add(&structure, "col", IRON_G5_VERTEX_DATA_U8_4X_NORM);
+		iron_g5_pipeline_init(&image_pipeline);
 		image_pipeline.input_layout = &structure;
 		image_pipeline.vertex_shader = &image_vert_shader;
 		image_pipeline.fragment_shader = &image_frag_shader;
-		image_pipeline.blend_source = KINC_G5_BLEND_ONE;
-		image_pipeline.blend_destination = KINC_G5_BLEND_INV_SOURCE_ALPHA;
-		image_pipeline.alpha_blend_source = KINC_G5_BLEND_ONE;
-		image_pipeline.alpha_blend_destination = KINC_G5_BLEND_INV_SOURCE_ALPHA;
-		kinc_g5_pipeline_compile(&image_pipeline);
+		image_pipeline.blend_source = IRON_G5_BLEND_ONE;
+		image_pipeline.blend_destination = IRON_G5_BLEND_INV_SOURCE_ALPHA;
+		image_pipeline.alpha_blend_source = IRON_G5_BLEND_ONE;
+		image_pipeline.alpha_blend_destination = IRON_G5_BLEND_INV_SOURCE_ALPHA;
+		iron_g5_pipeline_compile(&image_pipeline);
 
-		image_tex_unit = kinc_g5_pipeline_get_texture_unit(&image_pipeline, "tex");
-		image_proj_loc = kinc_g5_pipeline_get_constant_location(&image_pipeline, "P");
+		image_tex_unit = iron_g5_pipeline_get_texture_unit(&image_pipeline, "tex");
+		image_proj_loc = iron_g5_pipeline_get_constant_location(&image_pipeline, "P");
 
-		kinc_g4_vertex_buffer_init(&image_vertex_buffer, DRAW_BUFFER_SIZE * 4, &structure, KINC_G4_USAGE_DYNAMIC);
-		image_rect_verts = kinc_g4_vertex_buffer_lock_all(&image_vertex_buffer);
+		iron_g4_vertex_buffer_init(&image_vertex_buffer, DRAW_BUFFER_SIZE * 4, &structure, IRON_G4_USAGE_DYNAMIC);
+		image_rect_verts = iron_g4_vertex_buffer_lock_all(&image_vertex_buffer);
 
-		kinc_g5_index_buffer_init(&image_index_buffer, DRAW_BUFFER_SIZE * 3 * 2, true);
-		int *indices = kinc_g5_index_buffer_lock_all(&image_index_buffer);
+		iron_g5_index_buffer_init(&image_index_buffer, DRAW_BUFFER_SIZE * 3 * 2, true);
+		int *indices = iron_g5_index_buffer_lock_all(&image_index_buffer);
 		for (int i = 0; i < DRAW_BUFFER_SIZE; ++i) {
 			indices[i * 3 * 2 + 0] = i * 4 + 0;
 			indices[i * 3 * 2 + 1] = i * 4 + 1;
@@ -170,36 +170,36 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_ver
 			indices[i * 3 * 2 + 4] = i * 4 + 2;
 			indices[i * 3 * 2 + 5] = i * 4 + 3;
 		}
-		kinc_g4_index_buffer_unlock_all(&image_index_buffer);
+		iron_g4_index_buffer_unlock_all(&image_index_buffer);
 	}
 
 	// Colored painter
-	kinc_g5_shader_init(&colored_vert_shader, colored_vert->buffer, colored_vert->length, KINC_G5_SHADER_TYPE_VERTEX);
-	kinc_g5_shader_init(&colored_frag_shader, colored_frag->buffer, colored_frag->length, KINC_G5_SHADER_TYPE_FRAGMENT);
+	iron_g5_shader_init(&colored_vert_shader, colored_vert->buffer, colored_vert->length, IRON_G5_SHADER_TYPE_VERTEX);
+	iron_g5_shader_init(&colored_frag_shader, colored_frag->buffer, colored_frag->length, IRON_G5_SHADER_TYPE_FRAGMENT);
 
 	{
-		kinc_g5_vertex_structure_t structure;
-		kinc_g5_vertex_structure_init(&structure);
-		kinc_g5_vertex_structure_add(&structure, "pos", KINC_G5_VERTEX_DATA_F32_3X);
-		kinc_g5_vertex_structure_add(&structure, "col", KINC_G5_VERTEX_DATA_U8_4X_NORM);
-		kinc_g5_pipeline_init(&colored_pipeline);
+		iron_g5_vertex_structure_t structure;
+		iron_g5_vertex_structure_init(&structure);
+		iron_g5_vertex_structure_add(&structure, "pos", IRON_G5_VERTEX_DATA_F32_3X);
+		iron_g5_vertex_structure_add(&structure, "col", IRON_G5_VERTEX_DATA_U8_4X_NORM);
+		iron_g5_pipeline_init(&colored_pipeline);
 		colored_pipeline.input_layout = &structure;
 		colored_pipeline.vertex_shader = &colored_vert_shader;
 		colored_pipeline.fragment_shader = &colored_frag_shader;
-		// colored_pipeline.blend_source = KINC_G5_BLEND_ONE;
-		colored_pipeline.blend_source = KINC_G5_BLEND_SOURCE_ALPHA;
-		colored_pipeline.blend_destination = KINC_G5_BLEND_INV_SOURCE_ALPHA;
-		colored_pipeline.alpha_blend_source = KINC_G5_BLEND_ONE;
-		colored_pipeline.alpha_blend_destination = KINC_G5_BLEND_INV_SOURCE_ALPHA;
-		kinc_g5_pipeline_compile(&colored_pipeline);
+		// colored_pipeline.blend_source = IRON_G5_BLEND_ONE;
+		colored_pipeline.blend_source = IRON_G5_BLEND_SOURCE_ALPHA;
+		colored_pipeline.blend_destination = IRON_G5_BLEND_INV_SOURCE_ALPHA;
+		colored_pipeline.alpha_blend_source = IRON_G5_BLEND_ONE;
+		colored_pipeline.alpha_blend_destination = IRON_G5_BLEND_INV_SOURCE_ALPHA;
+		iron_g5_pipeline_compile(&colored_pipeline);
 
-		colored_proj_loc = kinc_g5_pipeline_get_constant_location(&colored_pipeline, "P");
+		colored_proj_loc = iron_g5_pipeline_get_constant_location(&colored_pipeline, "P");
 
-		kinc_g4_vertex_buffer_init(&colored_rect_vertex_buffer, DRAW_BUFFER_SIZE * 4, &structure, KINC_G4_USAGE_DYNAMIC);
-		colored_rect_verts = kinc_g4_vertex_buffer_lock_all(&colored_rect_vertex_buffer);
+		iron_g4_vertex_buffer_init(&colored_rect_vertex_buffer, DRAW_BUFFER_SIZE * 4, &structure, IRON_G4_USAGE_DYNAMIC);
+		colored_rect_verts = iron_g4_vertex_buffer_lock_all(&colored_rect_vertex_buffer);
 
-		kinc_g5_index_buffer_init(&colored_rect_index_buffer, DRAW_BUFFER_SIZE * 3 * 2, true);
-		int *indices = kinc_g5_index_buffer_lock_all(&colored_rect_index_buffer);
+		iron_g5_index_buffer_init(&colored_rect_index_buffer, DRAW_BUFFER_SIZE * 3 * 2, true);
+		int *indices = iron_g5_index_buffer_lock_all(&colored_rect_index_buffer);
 		for (int i = 0; i < DRAW_BUFFER_SIZE; ++i) {
 			indices[i * 3 * 2 + 0] = i * 4 + 0;
 			indices[i * 3 * 2 + 1] = i * 4 + 1;
@@ -208,59 +208,59 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_ver
 			indices[i * 3 * 2 + 4] = i * 4 + 2;
 			indices[i * 3 * 2 + 5] = i * 4 + 3;
 		}
-		kinc_g4_index_buffer_unlock_all(&colored_rect_index_buffer);
+		iron_g4_index_buffer_unlock_all(&colored_rect_index_buffer);
 
-		kinc_g4_vertex_buffer_init(&colored_tris_vertex_buffer, DRAW_BUFFER_SIZE * 3, &structure, KINC_G4_USAGE_DYNAMIC);
-		colored_tris_verts = kinc_g4_vertex_buffer_lock_all(&colored_tris_vertex_buffer);
+		iron_g4_vertex_buffer_init(&colored_tris_vertex_buffer, DRAW_BUFFER_SIZE * 3, &structure, IRON_G4_USAGE_DYNAMIC);
+		colored_tris_verts = iron_g4_vertex_buffer_lock_all(&colored_tris_vertex_buffer);
 
-		kinc_g5_index_buffer_init(&colored_tris_index_buffer, DRAW_BUFFER_SIZE * 3, true);
-		indices = kinc_g5_index_buffer_lock_all(&colored_tris_index_buffer);
+		iron_g5_index_buffer_init(&colored_tris_index_buffer, DRAW_BUFFER_SIZE * 3, true);
+		indices = iron_g5_index_buffer_lock_all(&colored_tris_index_buffer);
 		for (int i = 0; i < DRAW_BUFFER_SIZE; ++i) {
 			indices[i * 3 + 0] = i * 3 + 0;
 			indices[i * 3 + 1] = i * 3 + 1;
 			indices[i * 3 + 2] = i * 3 + 2;
 		}
-		kinc_g4_index_buffer_unlock_all(&colored_tris_index_buffer);
+		iron_g4_index_buffer_unlock_all(&colored_tris_index_buffer);
 	}
 
 	// Text painter
-	kinc_g5_shader_init(&text_vert_shader, text_vert->buffer, text_vert->length, KINC_G5_SHADER_TYPE_VERTEX);
-	kinc_g5_shader_init(&text_frag_shader, text_frag->buffer, text_frag->length, KINC_G5_SHADER_TYPE_FRAGMENT);
+	iron_g5_shader_init(&text_vert_shader, text_vert->buffer, text_vert->length, IRON_G5_SHADER_TYPE_VERTEX);
+	iron_g5_shader_init(&text_frag_shader, text_frag->buffer, text_frag->length, IRON_G5_SHADER_TYPE_FRAGMENT);
 
 	{
-		kinc_g5_vertex_structure_t structure;
-		kinc_g5_vertex_structure_init(&structure);
-		kinc_g5_vertex_structure_add(&structure, "pos", KINC_G5_VERTEX_DATA_F32_3X);
-		kinc_g5_vertex_structure_add(&structure, "tex", KINC_G5_VERTEX_DATA_F32_2X);
-		kinc_g5_vertex_structure_add(&structure, "col", KINC_G5_VERTEX_DATA_U8_4X_NORM);
+		iron_g5_vertex_structure_t structure;
+		iron_g5_vertex_structure_init(&structure);
+		iron_g5_vertex_structure_add(&structure, "pos", IRON_G5_VERTEX_DATA_F32_3X);
+		iron_g5_vertex_structure_add(&structure, "tex", IRON_G5_VERTEX_DATA_F32_2X);
+		iron_g5_vertex_structure_add(&structure, "col", IRON_G5_VERTEX_DATA_U8_4X_NORM);
 
-		kinc_g5_pipeline_init(&text_pipeline);
+		iron_g5_pipeline_init(&text_pipeline);
 		text_pipeline.input_layout = &structure;
 		text_pipeline.vertex_shader = &text_vert_shader;
 		text_pipeline.fragment_shader = &text_frag_shader;
-		text_pipeline.blend_source = KINC_G5_BLEND_SOURCE_ALPHA;
-		text_pipeline.blend_destination = KINC_G5_BLEND_INV_SOURCE_ALPHA;
-		text_pipeline.alpha_blend_source = KINC_G5_BLEND_SOURCE_ALPHA;
-		text_pipeline.alpha_blend_destination = KINC_G5_BLEND_INV_SOURCE_ALPHA;
-		kinc_g5_pipeline_compile(&text_pipeline);
-		text_tex_unit = kinc_g5_pipeline_get_texture_unit(&text_pipeline, "tex");
-		text_proj_loc = kinc_g5_pipeline_get_constant_location(&text_pipeline, "P");
+		text_pipeline.blend_source = IRON_G5_BLEND_SOURCE_ALPHA;
+		text_pipeline.blend_destination = IRON_G5_BLEND_INV_SOURCE_ALPHA;
+		text_pipeline.alpha_blend_source = IRON_G5_BLEND_SOURCE_ALPHA;
+		text_pipeline.alpha_blend_destination = IRON_G5_BLEND_INV_SOURCE_ALPHA;
+		iron_g5_pipeline_compile(&text_pipeline);
+		text_tex_unit = iron_g5_pipeline_get_texture_unit(&text_pipeline, "tex");
+		text_proj_loc = iron_g5_pipeline_get_constant_location(&text_pipeline, "P");
 
-		kinc_g5_pipeline_init(&text_pipeline_rt);
+		iron_g5_pipeline_init(&text_pipeline_rt);
 		text_pipeline_rt.input_layout = &structure;
 		text_pipeline_rt.vertex_shader = &text_vert_shader;
 		text_pipeline_rt.fragment_shader = &text_frag_shader;
-		text_pipeline_rt.blend_source = KINC_G5_BLEND_SOURCE_ALPHA;
-		text_pipeline_rt.blend_destination = KINC_G5_BLEND_INV_SOURCE_ALPHA;
-		text_pipeline_rt.alpha_blend_source = KINC_G5_BLEND_ONE;
-		text_pipeline_rt.alpha_blend_destination = KINC_G5_BLEND_INV_SOURCE_ALPHA;
-		kinc_g5_pipeline_compile(&text_pipeline_rt);
+		text_pipeline_rt.blend_source = IRON_G5_BLEND_SOURCE_ALPHA;
+		text_pipeline_rt.blend_destination = IRON_G5_BLEND_INV_SOURCE_ALPHA;
+		text_pipeline_rt.alpha_blend_source = IRON_G5_BLEND_ONE;
+		text_pipeline_rt.alpha_blend_destination = IRON_G5_BLEND_INV_SOURCE_ALPHA;
+		iron_g5_pipeline_compile(&text_pipeline_rt);
 
-		kinc_g4_vertex_buffer_init(&text_vertex_buffer, DRAW_BUFFER_SIZE * 4, &structure, KINC_G4_USAGE_DYNAMIC);
-		text_rect_verts = kinc_g4_vertex_buffer_lock_all(&text_vertex_buffer);
+		iron_g4_vertex_buffer_init(&text_vertex_buffer, DRAW_BUFFER_SIZE * 4, &structure, IRON_G4_USAGE_DYNAMIC);
+		text_rect_verts = iron_g4_vertex_buffer_lock_all(&text_vertex_buffer);
 
-		kinc_g5_index_buffer_init(&text_index_buffer, DRAW_BUFFER_SIZE * 3 * 2, true);
-		int *indices = kinc_g5_index_buffer_lock_all(&text_index_buffer);
+		iron_g5_index_buffer_init(&text_index_buffer, DRAW_BUFFER_SIZE * 3 * 2, true);
+		int *indices = iron_g5_index_buffer_lock_all(&text_index_buffer);
 		for (int i = 0; i < DRAW_BUFFER_SIZE; ++i) {
 			indices[i * 3 * 2 + 0] = i * 4 + 0;
 			indices[i * 3 * 2 + 1] = i * 4 + 1;
@@ -269,7 +269,7 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_ver
 			indices[i * 3 * 2 + 4] = i * 4 + 2;
 			indices[i * 3 * 2 + 5] = i * 4 + 3;
 		}
-		kinc_g4_index_buffer_unlock_all(&text_index_buffer);
+		iron_g4_index_buffer_unlock_all(&text_index_buffer);
 	}
 }
 
@@ -322,32 +322,32 @@ void draw_set_image_rect_colors(uint32_t color) {
 
 void draw_image_buffer(bool end) {
 	if (image_buffer_index - image_buffer_start == 0) return;
-	kinc_g4_vertex_buffer_unlock(&image_vertex_buffer, (image_buffer_index - image_buffer_start) * 4);
-	kinc_g5_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : &image_pipeline);
-	kinc_g4_set_matrix4(image_proj_loc, &draw_projection_matrix);
-	kinc_g4_set_vertex_buffer(&image_vertex_buffer);
-	kinc_g4_set_index_buffer(&image_index_buffer);
-	kinc_g4_set_texture(image_tex_unit, image_last_texture);
-	kinc_g4_set_texture_addressing(image_tex_unit, KINC_G4_TEXTURE_DIRECTION_U, KINC_G4_TEXTURE_ADDRESSING_CLAMP);
-	kinc_g4_set_texture_addressing(image_tex_unit, KINC_G4_TEXTURE_DIRECTION_V, KINC_G4_TEXTURE_ADDRESSING_CLAMP);
-	// kinc_g4_set_texture_mipmap_filter(image_tex_unit, draw_bilinear_filter ? KINC_G4_MIPMAP_FILTER_LINEAR : KINC_G4_MIPMAP_FILTER_NONE);
-	kinc_g4_set_texture_mipmap_filter(image_tex_unit, KINC_G4_MIPMAP_FILTER_NONE);
-	kinc_g4_set_texture_minification_filter(image_tex_unit, draw_bilinear_filter ? KINC_G4_TEXTURE_FILTER_LINEAR : KINC_G4_TEXTURE_FILTER_POINT);
-	kinc_g4_set_texture_magnification_filter(image_tex_unit, draw_bilinear_filter ? KINC_G4_TEXTURE_FILTER_LINEAR : KINC_G4_TEXTURE_FILTER_POINT);
-	kinc_g5_draw_indexed_vertices_from_to(image_buffer_start * 2 * 3, (image_buffer_index - image_buffer_start) * 2 * 3);
+	iron_g4_vertex_buffer_unlock(&image_vertex_buffer, (image_buffer_index - image_buffer_start) * 4);
+	iron_g5_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : &image_pipeline);
+	iron_g4_set_matrix4(image_proj_loc, &draw_projection_matrix);
+	iron_g4_set_vertex_buffer(&image_vertex_buffer);
+	iron_g4_set_index_buffer(&image_index_buffer);
+	iron_g4_set_texture(image_tex_unit, image_last_texture);
+	iron_g4_set_texture_addressing(image_tex_unit, IRON_G4_TEXTURE_DIRECTION_U, IRON_G4_TEXTURE_ADDRESSING_CLAMP);
+	iron_g4_set_texture_addressing(image_tex_unit, IRON_G4_TEXTURE_DIRECTION_V, IRON_G4_TEXTURE_ADDRESSING_CLAMP);
+	// iron_g4_set_texture_mipmap_filter(image_tex_unit, draw_bilinear_filter ? IRON_G4_MIPMAP_FILTER_LINEAR : IRON_G4_MIPMAP_FILTER_NONE);
+	iron_g4_set_texture_mipmap_filter(image_tex_unit, IRON_G4_MIPMAP_FILTER_NONE);
+	iron_g4_set_texture_minification_filter(image_tex_unit, draw_bilinear_filter ? IRON_G4_TEXTURE_FILTER_LINEAR : IRON_G4_TEXTURE_FILTER_POINT);
+	iron_g4_set_texture_magnification_filter(image_tex_unit, draw_bilinear_filter ? IRON_G4_TEXTURE_FILTER_LINEAR : IRON_G4_TEXTURE_FILTER_POINT);
+	iron_g5_draw_indexed_vertices_from_to(image_buffer_start * 2 * 3, (image_buffer_index - image_buffer_start) * 2 * 3);
 
 	if (end || image_buffer_index + 1 >= DRAW_BUFFER_SIZE) {
 		image_buffer_start = 0;
 		image_buffer_index = 0;
-		image_rect_verts = kinc_g4_vertex_buffer_lock(&image_vertex_buffer, 0, DRAW_BUFFER_SIZE * 4);
+		image_rect_verts = iron_g4_vertex_buffer_lock(&image_vertex_buffer, 0, DRAW_BUFFER_SIZE * 4);
 	}
 	else {
 		image_buffer_start = image_buffer_index;
-		image_rect_verts = kinc_g4_vertex_buffer_lock(&image_vertex_buffer, image_buffer_start * 4, (DRAW_BUFFER_SIZE - image_buffer_start) * 4);
+		image_rect_verts = iron_g4_vertex_buffer_lock(&image_vertex_buffer, image_buffer_start * 4, (DRAW_BUFFER_SIZE - image_buffer_start) * 4);
 	}
 }
 
-void draw_scaled_sub_texture(kinc_g5_texture_t *tex, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
+void draw_scaled_sub_texture(iron_g5_texture_t *tex, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
 	draw_colored_end();
 	draw_text_end();
 	if (image_buffer_start + image_buffer_index + 1 >= DRAW_BUFFER_SIZE ||
@@ -357,7 +357,7 @@ void draw_scaled_sub_texture(kinc_g5_texture_t *tex, float sx, float sy, float s
 
 	draw_set_image_rect_tex_coords(sx / tex->width, sy / tex->height, (sx + sw) / tex->width, (sy + sh) / tex->height);
 	draw_set_image_rect_colors(draw_color);
-	kinc_vector2_t p[4];
+	iron_vector2_t p[4];
 	draw_matrix3x3_multquad(&draw_transform, dx, dy, dw, dh, p);
 	draw_set_image_rect_verts(p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y, p[3].x, p[3].y);
 
@@ -365,34 +365,34 @@ void draw_scaled_sub_texture(kinc_g5_texture_t *tex, float sx, float sy, float s
 	image_last_texture = tex;
 }
 
-void draw_scaled_texture(kinc_g5_texture_t *tex, float dx, float dy, float dw, float dh) {
+void draw_scaled_texture(iron_g5_texture_t *tex, float dx, float dy, float dw, float dh) {
 	draw_scaled_sub_texture(tex, 0, 0, (float)tex->width, (float)tex->height, dx, dy, dw, dh);
 }
 
-void draw_sub_texture(kinc_g5_texture_t *tex, float sx, float sy, float sw, float sh, float x, float y) {
+void draw_sub_texture(iron_g5_texture_t *tex, float sx, float sy, float sw, float sh, float x, float y) {
 	draw_scaled_sub_texture(tex, sx, sy, sw, sh, x, y, sw, sh);
 }
 
-void draw_texture(kinc_g5_texture_t *tex, float x, float y) {
+void draw_texture(iron_g5_texture_t *tex, float x, float y) {
 	draw_scaled_sub_texture(tex, 0, 0, (float)tex->width, (float)tex->height, x, y, (float)tex->width, (float)tex->height);
 }
 
-void draw_scaled_sub_image(kinc_g5_texture_t *image, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
-	#ifdef KINC_DIRECT3D12
+void draw_scaled_sub_image(iron_g5_texture_t *image, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
+	#ifdef IRON_DIRECT3D12
 	waitAfterNextDraw = true;
 	#endif
 	draw_scaled_sub_texture(image, sx, sy, sw, sh, dx, dy, dw, dh);
 }
 
-void draw_scaled_image(kinc_g5_texture_t *tex, float dx, float dy, float dw, float dh) {
+void draw_scaled_image(iron_g5_texture_t *tex, float dx, float dy, float dw, float dh) {
 	draw_scaled_sub_image(tex, 0, 0, (float)tex->width, (float)tex->height, dx, dy, dw, dh);
 }
 
-void draw_sub_image(kinc_g5_texture_t *tex, float sx, float sy, float sw, float sh, float x, float y) {
+void draw_sub_image(iron_g5_texture_t *tex, float sx, float sy, float sw, float sh, float x, float y) {
 	draw_scaled_sub_image(tex, sx, sy, sw, sh, x, y, sw, sh);
 }
 
-void draw_image(kinc_g5_texture_t *tex, float x, float y) {
+void draw_image(iron_g5_texture_t *tex, float x, float y) {
 	draw_scaled_sub_image(tex, 0, 0, (float)tex->width, (float)tex->height, x, y, (float)tex->width, (float)tex->height);
 }
 
@@ -431,21 +431,21 @@ void draw_colored_rect_draw_buffer(bool tris_done) {
 
 	if (!tris_done) draw_colored_tris_end(true);
 
-	kinc_g4_vertex_buffer_unlock(&colored_rect_vertex_buffer, (colored_rect_buffer_index - colored_rect_buffer_start) * 4);
-	kinc_g5_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : &colored_pipeline);
-	kinc_g4_set_matrix4(colored_proj_loc, &draw_projection_matrix);
-	kinc_g4_set_vertex_buffer(&colored_rect_vertex_buffer);
-	kinc_g4_set_index_buffer(&colored_rect_index_buffer);
-	kinc_g5_draw_indexed_vertices_from_to(colored_rect_buffer_start * 2 * 3, (colored_rect_buffer_index - colored_rect_buffer_start) * 2 * 3);
+	iron_g4_vertex_buffer_unlock(&colored_rect_vertex_buffer, (colored_rect_buffer_index - colored_rect_buffer_start) * 4);
+	iron_g5_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : &colored_pipeline);
+	iron_g4_set_matrix4(colored_proj_loc, &draw_projection_matrix);
+	iron_g4_set_vertex_buffer(&colored_rect_vertex_buffer);
+	iron_g4_set_index_buffer(&colored_rect_index_buffer);
+	iron_g5_draw_indexed_vertices_from_to(colored_rect_buffer_start * 2 * 3, (colored_rect_buffer_index - colored_rect_buffer_start) * 2 * 3);
 
 	if (colored_rect_buffer_index + 1 >= DRAW_BUFFER_SIZE) {
 		colored_rect_buffer_start = 0;
 		colored_rect_buffer_index = 0;
-		colored_rect_verts = kinc_g4_vertex_buffer_lock(&colored_rect_vertex_buffer, 0, DRAW_BUFFER_SIZE * 4);
+		colored_rect_verts = iron_g4_vertex_buffer_lock(&colored_rect_vertex_buffer, 0, DRAW_BUFFER_SIZE * 4);
 	}
 	else {
 		colored_rect_buffer_start = colored_rect_buffer_index;
-		colored_rect_verts = kinc_g4_vertex_buffer_lock(&colored_rect_vertex_buffer, colored_rect_buffer_start * 4, (DRAW_BUFFER_SIZE - colored_rect_buffer_start) * 4);
+		colored_rect_verts = iron_g4_vertex_buffer_lock(&colored_rect_vertex_buffer, colored_rect_buffer_start * 4, (DRAW_BUFFER_SIZE - colored_rect_buffer_start) * 4);
 	}
 }
 
@@ -479,21 +479,21 @@ void draw_colored_tris_draw_buffer(bool rect_done) {
 
 	if (!rect_done) draw_colored_rect_end(true);
 
-	kinc_g4_vertex_buffer_unlock(&colored_tris_vertex_buffer, (colored_tris_buffer_index - colored_tris_buffer_start) * 3);
-	kinc_g5_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : &colored_pipeline);
-	kinc_g4_set_matrix4(colored_proj_loc, &draw_projection_matrix);
-	kinc_g4_set_vertex_buffer(&colored_tris_vertex_buffer);
-	kinc_g4_set_index_buffer(&colored_tris_index_buffer);
-	kinc_g5_draw_indexed_vertices_from_to(colored_tris_buffer_start * 3, (colored_tris_buffer_index - colored_tris_buffer_start) * 3);
+	iron_g4_vertex_buffer_unlock(&colored_tris_vertex_buffer, (colored_tris_buffer_index - colored_tris_buffer_start) * 3);
+	iron_g5_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : &colored_pipeline);
+	iron_g4_set_matrix4(colored_proj_loc, &draw_projection_matrix);
+	iron_g4_set_vertex_buffer(&colored_tris_vertex_buffer);
+	iron_g4_set_index_buffer(&colored_tris_index_buffer);
+	iron_g5_draw_indexed_vertices_from_to(colored_tris_buffer_start * 3, (colored_tris_buffer_index - colored_tris_buffer_start) * 3);
 
 	if (colored_tris_buffer_index + 1 >= DRAW_BUFFER_SIZE) {
 		colored_tris_buffer_start = 0;
 		colored_tris_buffer_index = 0;
-		colored_tris_verts = kinc_g4_vertex_buffer_lock(&colored_tris_vertex_buffer, 0, DRAW_BUFFER_SIZE * 3);
+		colored_tris_verts = iron_g4_vertex_buffer_lock(&colored_tris_vertex_buffer, 0, DRAW_BUFFER_SIZE * 3);
 	}
 	else {
 		colored_tris_buffer_start = colored_tris_buffer_index;
-		colored_tris_verts = kinc_g4_vertex_buffer_lock(&colored_tris_vertex_buffer, colored_tris_buffer_start * 3, (DRAW_BUFFER_SIZE - colored_tris_buffer_start) * 3);
+		colored_tris_verts = iron_g4_vertex_buffer_lock(&colored_tris_vertex_buffer, colored_tris_buffer_start * 3, (DRAW_BUFFER_SIZE - colored_tris_buffer_start) * 3);
 	}
 }
 
@@ -513,9 +513,9 @@ void draw_filled_triangle(float x0, float y0, float x1, float y1, float x2, floa
 
 	draw_colored_tris_set_colors(draw_color);
 
-	kinc_vector2_t p0 = draw_matrix3x3_multvec(&draw_transform, (kinc_vector2_t){x0, y0}); // Bottom-left
-	kinc_vector2_t p1 = draw_matrix3x3_multvec(&draw_transform, (kinc_vector2_t){x1, y1}); // Top-left
-	kinc_vector2_t p2 = draw_matrix3x3_multvec(&draw_transform, (kinc_vector2_t){x2, y2}); // Top-right
+	iron_vector2_t p0 = draw_matrix3x3_multvec(&draw_transform, (iron_vector2_t){x0, y0}); // Bottom-left
+	iron_vector2_t p1 = draw_matrix3x3_multvec(&draw_transform, (iron_vector2_t){x1, y1}); // Top-left
+	iron_vector2_t p2 = draw_matrix3x3_multvec(&draw_transform, (iron_vector2_t){x2, y2}); // Top-right
 	draw_colored_tris_set_verts(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
 
 	++colored_tris_buffer_index;
@@ -529,7 +529,7 @@ void draw_filled_rect(float x, float y, float width, float height) {
 
 	draw_colored_rect_set_colors(draw_color);
 
-	kinc_vector2_t p[4];
+	iron_vector2_t p[4];
 	draw_matrix3x3_multquad(&draw_transform, x, y, width, height, p);
 	draw_colored_rect_set_verts(p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y, p[3].x, p[3].y);
 
@@ -545,12 +545,12 @@ void draw_rect(float x, float y, float width, float height, float strength) {
 }
 
 void draw_line(float x0, float y0, float x1, float y1, float strength) {
-	kinc_vector2_t vec;
+	iron_vector2_t vec;
 	if (y1 == y0) {
-		vec = (kinc_vector2_t){0.0f, -1.0f};
+		vec = (iron_vector2_t){0.0f, -1.0f};
 	}
 	else {
-		vec = (kinc_vector2_t){1.0f, -(x1 - x0) / (y1 - y0)};
+		vec = (iron_vector2_t){1.0f, -(x1 - x0) / (y1 - y0)};
 	}
 
 	float current_length = sqrtf(vec.x * vec.x + vec.y * vec.y);
@@ -560,10 +560,10 @@ void draw_line(float x0, float y0, float x1, float y1, float strength) {
 		vec.y *= mul;
 	}
 
-	kinc_vector2_t p0 = (kinc_vector2_t){x0 + 0.5f * vec.x, y0 + 0.5f * vec.y};
-	kinc_vector2_t p1 = (kinc_vector2_t){x1 + 0.5f * vec.x, y1 + 0.5f * vec.y};
-	kinc_vector2_t p2 = (kinc_vector2_t){p0.x - vec.x, p0.y - vec.y};
-	kinc_vector2_t p3 = (kinc_vector2_t){p1.x - vec.x, p1.y - vec.y};
+	iron_vector2_t p0 = (iron_vector2_t){x0 + 0.5f * vec.x, y0 + 0.5f * vec.y};
+	iron_vector2_t p1 = (iron_vector2_t){x1 + 0.5f * vec.x, y1 + 0.5f * vec.y};
+	iron_vector2_t p2 = (iron_vector2_t){p0.x - vec.x, p0.y - vec.y};
+	iron_vector2_t p3 = (iron_vector2_t){p1.x - vec.x, p1.y - vec.y};
 	draw_filled_triangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
 	draw_filled_triangle(p2.x, p2.y, p1.x, p1.y, p3.x, p3.y);
 }
@@ -644,27 +644,27 @@ void draw_text_set_rect_colors(uint32_t color) {
 
 void draw_text_draw_buffer(bool end) {
 	if (text_buffer_index - text_buffer_start == 0) return;
-	kinc_g4_vertex_buffer_unlock(&text_vertex_buffer, text_buffer_index * 4);
-	kinc_g5_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : draw_is_render_target ? &text_pipeline_rt : &text_pipeline);
-	kinc_g4_set_matrix4(text_proj_loc, &draw_projection_matrix);
-	kinc_g4_set_vertex_buffer(&text_vertex_buffer);
-	kinc_g4_set_index_buffer(&text_index_buffer);
-	kinc_g4_set_texture(text_tex_unit, text_last_texture);
-	kinc_g4_set_texture_addressing(text_tex_unit, KINC_G4_TEXTURE_DIRECTION_U, KINC_G4_TEXTURE_ADDRESSING_CLAMP);
-	kinc_g4_set_texture_addressing(text_tex_unit, KINC_G4_TEXTURE_DIRECTION_V, KINC_G4_TEXTURE_ADDRESSING_CLAMP);
-	kinc_g4_set_texture_mipmap_filter(text_tex_unit, KINC_G4_MIPMAP_FILTER_NONE);
-	kinc_g4_set_texture_minification_filter(text_tex_unit, draw_bilinear_filter ? KINC_G4_TEXTURE_FILTER_LINEAR : KINC_G4_TEXTURE_FILTER_POINT);
-	kinc_g4_set_texture_magnification_filter(text_tex_unit, draw_bilinear_filter ? KINC_G4_TEXTURE_FILTER_LINEAR : KINC_G4_TEXTURE_FILTER_POINT);
-	kinc_g5_draw_indexed_vertices_from_to(text_buffer_start * 2 * 3, (text_buffer_index - text_buffer_start) * 2 * 3);
+	iron_g4_vertex_buffer_unlock(&text_vertex_buffer, text_buffer_index * 4);
+	iron_g5_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : draw_is_render_target ? &text_pipeline_rt : &text_pipeline);
+	iron_g4_set_matrix4(text_proj_loc, &draw_projection_matrix);
+	iron_g4_set_vertex_buffer(&text_vertex_buffer);
+	iron_g4_set_index_buffer(&text_index_buffer);
+	iron_g4_set_texture(text_tex_unit, text_last_texture);
+	iron_g4_set_texture_addressing(text_tex_unit, IRON_G4_TEXTURE_DIRECTION_U, IRON_G4_TEXTURE_ADDRESSING_CLAMP);
+	iron_g4_set_texture_addressing(text_tex_unit, IRON_G4_TEXTURE_DIRECTION_V, IRON_G4_TEXTURE_ADDRESSING_CLAMP);
+	iron_g4_set_texture_mipmap_filter(text_tex_unit, IRON_G4_MIPMAP_FILTER_NONE);
+	iron_g4_set_texture_minification_filter(text_tex_unit, draw_bilinear_filter ? IRON_G4_TEXTURE_FILTER_LINEAR : IRON_G4_TEXTURE_FILTER_POINT);
+	iron_g4_set_texture_magnification_filter(text_tex_unit, draw_bilinear_filter ? IRON_G4_TEXTURE_FILTER_LINEAR : IRON_G4_TEXTURE_FILTER_POINT);
+	iron_g5_draw_indexed_vertices_from_to(text_buffer_start * 2 * 3, (text_buffer_index - text_buffer_start) * 2 * 3);
 
 	if (end || text_buffer_index + 1 >= DRAW_BUFFER_SIZE) {
 		text_buffer_start = 0;
 		text_buffer_index = 0;
-		text_rect_verts = kinc_g4_vertex_buffer_lock(&text_vertex_buffer, 0, DRAW_BUFFER_SIZE * 4);
+		text_rect_verts = iron_g4_vertex_buffer_lock(&text_vertex_buffer, 0, DRAW_BUFFER_SIZE * 4);
 	}
 	else {
 		text_buffer_start = text_buffer_index;
-		text_rect_verts = kinc_g4_vertex_buffer_lock(&text_vertex_buffer, text_buffer_start * 4, (DRAW_BUFFER_SIZE - text_buffer_start) * 4);
+		text_rect_verts = iron_g4_vertex_buffer_lock(&text_vertex_buffer, text_buffer_start * 4, (DRAW_BUFFER_SIZE - text_buffer_start) * 4);
 	}
 }
 
@@ -680,7 +680,7 @@ typedef struct draw_font_aligned_quad {
 typedef struct draw_font_image {
 	float m_size;
 	stbtt_bakedchar *chars;
-	kinc_g5_texture_t *tex;
+	iron_g5_texture_t *tex;
 	int width, height, first_unused_y;
 	float baseline, descent, line_gap;
 } draw_font_image_t;
@@ -796,13 +796,13 @@ bool draw_font_load(draw_font_t *font, int size) {
 	img->height = height;
 	img->chars = baked;
 	img->first_unused_y = status;
-	img->tex = (kinc_g5_texture_t *)malloc(sizeof(kinc_g5_texture_t));
-	kinc_g5_texture_init_from_bytes(img->tex, pixels, width, height, KINC_IMAGE_FORMAT_R8);
+	img->tex = (iron_g5_texture_t *)malloc(sizeof(iron_g5_texture_t));
+	iron_g5_texture_init_from_bytes(img->tex, pixels, width, height, IRON_IMAGE_FORMAT_R8);
 	free(pixels);
 	return true;
 }
 
-kinc_g5_texture_t *draw_font_get_texture(draw_font_t *font, int size) {
+iron_g5_texture_t *draw_font_get_texture(draw_font_t *font, int size) {
 	draw_font_image_t *img = draw_font_get_image_internal(font, size);
 	return img->tex;
 }
@@ -860,7 +860,7 @@ void draw_string(const char *text, float x, float y) {
 	draw_colored_end();
 
 	draw_font_image_t *img = draw_font_get_image_internal(draw_font, draw_font_size);
-	kinc_g5_texture_t *tex = img->tex;
+	iron_g5_texture_t *tex = img->tex;
 
 	if (text_last_texture != NULL && tex != text_last_texture) draw_text_draw_buffer(false);
 	text_last_texture = tex;
@@ -878,7 +878,7 @@ void draw_string(const char *text, float x, float y) {
 			draw_text_set_rect_colors(draw_color);
 			draw_text_set_rect_tex_coords(q.s0, q.t0, q.s1, q.t1);
 
-			kinc_vector2_t p[4];
+			iron_vector2_t p[4];
 			draw_matrix3x3_multquad(&draw_transform, q.x0, q.y0, q.x1 - q.x0, q.y1 - q.y0, p);
 			draw_text_set_rect_verts(p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y, p[3].x, p[3].y);
 
@@ -934,8 +934,8 @@ void draw_font_13(draw_font_t *font, void *blob) {
 	img->width = 128;
 	img->height = 128;
 	img->first_unused_y = 0;
-	img->tex = (kinc_g5_texture_t *)malloc(sizeof(kinc_g5_texture_t));
-	kinc_g5_texture_init_from_bytes(img->tex, (void *)iron_font_13_pixels, 128, 128, KINC_IMAGE_FORMAT_R8);
+	img->tex = (iron_g5_texture_t *)malloc(sizeof(iron_g5_texture_t));
+	iron_g5_texture_init_from_bytes(img->tex, (void *)iron_font_13_pixels, 128, 128, IRON_IMAGE_FORMAT_R8);
 
 	stbtt_bakedchar *baked = (stbtt_bakedchar *)malloc(95 * sizeof(stbtt_bakedchar));
 	for (int i = 0; i < 95; ++i) {
@@ -1070,7 +1070,7 @@ uint32_t draw_get_color() {
 	return draw_color;
 }
 
-void draw_set_pipeline(kinc_g5_pipeline_t *pipeline) {
+void draw_set_pipeline(iron_g5_pipeline_t *pipeline) {
 	if (pipeline == draw_last_pipeline) return;
 	draw_last_pipeline = pipeline;
 	draw_end(); // flush
@@ -1078,9 +1078,9 @@ void draw_set_pipeline(kinc_g5_pipeline_t *pipeline) {
 }
 
 void draw_set_transform(buffer_t *matrix) {
-	kinc_matrix3x3_t *m = matrix != NULL ? (kinc_matrix3x3_t *)matrix->buffer : NULL;
+	iron_matrix3x3_t *m = matrix != NULL ? (iron_matrix3x3_t *)matrix->buffer : NULL;
 	if (m == NULL) {
-		draw_transform = kinc_matrix3x3_identity();
+		draw_transform = iron_matrix3x3_identity();
 	}
 	else {
 		for (int i = 0; i < 3 * 3; ++i) {
@@ -1106,16 +1106,16 @@ void draw_restore_render_target(void) {
 	draw_is_render_target = false;
 	draw_end();
 	draw_begin();
-	kinc_g4_restore_render_target();
+	iron_g4_restore_render_target();
 	draw_internal_set_projection_matrix(NULL);
 }
 
-void draw_set_render_target(kinc_g5_texture_t *target) {
+void draw_set_render_target(iron_g5_texture_t *target) {
 	draw_is_render_target = true;
 	draw_end();
 	draw_begin();
-	kinc_g5_texture_t *render_targets[1] = { target };
-	kinc_g4_set_render_targets(render_targets, 1);
+	iron_g5_texture_t *render_targets[1] = { target };
+	iron_g4_set_render_targets(render_targets, 1);
 	draw_internal_set_projection_matrix(target);
 }
 
@@ -1149,7 +1149,7 @@ void draw_inner_line(float x1, float y1, float x2, float y2, float strength) {
 		side = x2 - x1 > 0 ? 1 : 0;
 	}
 
-	kinc_vector2_t vec;
+	iron_vector2_t vec;
 	if (y2 == y1) {
 		vec = vec2_create(0, -1);
 	}
@@ -1157,10 +1157,10 @@ void draw_inner_line(float x1, float y1, float x2, float y2, float strength) {
 		vec = vec2_create(1, -(x2 - x1) / (y2 - y1));
 	}
 	vec = vec2_set_len(vec, strength);
-	kinc_vector2_t p1 = {x1 + side * vec.x, y1 + side * vec.y};
-	kinc_vector2_t p2 = {x2 + side * vec.x, y2 + side * vec.y};
-	kinc_vector2_t p3 = vec2_sub(p1, vec);
-	kinc_vector2_t p4 = vec2_sub(p2, vec);
+	iron_vector2_t p1 = {x1 + side * vec.x, y1 + side * vec.y};
+	iron_vector2_t p2 = {x2 + side * vec.x, y2 + side * vec.y};
+	iron_vector2_t p3 = vec2_sub(p1, vec);
+	iron_vector2_t p4 = vec2_sub(p2, vec);
 	draw_filled_triangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
 	draw_filled_triangle(p3.x, p3.y, p2.x, p2.y, p4.x, p4.y);
 }

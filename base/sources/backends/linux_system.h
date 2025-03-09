@@ -11,17 +11,17 @@
 #define MAXIMUM_WINDOWS 1
 #define MAXIMUM_DISPLAYS 16
 
-struct kinc_x11_window {
+struct iron_x11_window {
 	int display_index;
 	int width;
 	int height;
-	kinc_window_mode_t mode;
+	iron_window_mode_t mode;
 	Window window;
 	XIM xInputMethod;
 	XIC xInputContext;
 };
 
-struct kinc_x11_display {
+struct iron_x11_display {
 	int index;
 	int current_mode;
 	int num_modes;
@@ -36,12 +36,12 @@ struct kinc_x11_display {
 	RRCrtc crtc;
 };
 
-struct kinc_x11_mouse {
+struct iron_x11_mouse {
 	int x;
 	int y;
 };
 
-struct kinc_x11_atoms {
+struct iron_x11_atoms {
 	Atom XdndAware;
 	Atom XdndDrop;
 	Atom XdndEnter;
@@ -83,7 +83,7 @@ struct kinc_x11_atoms {
 	Atom JOYSTICK;
 };
 
-struct kinc_x11_libs {
+struct iron_x11_libs {
 	void *X11;
 	void *Xcursor;
 	void *Xi;
@@ -91,7 +91,7 @@ struct kinc_x11_libs {
 	void *Xrandr;
 };
 
-struct kinc_x11_procs {
+struct iron_x11_procs {
 	Display *(*XOpenDisplay)(const char *name);
 	Status (*XInternAtoms)(Display *display, char **names, int count, Bool only_if_exists, Atom *atoms_return);
 	int (*XCloseDisplay)(Display *display);
@@ -170,23 +170,23 @@ struct x11_pen_device {
 
 struct x11_context {
 	Display *display;
-	struct kinc_x11_libs libs;
-	struct kinc_x11_atoms atoms;
-	struct kinc_x11_mouse mouse;
+	struct iron_x11_libs libs;
+	struct iron_x11_atoms atoms;
+	struct iron_x11_mouse mouse;
 
 	struct x11_pen_device pen;
 	struct x11_pen_device eraser;
 
-	struct kinc_x11_window windows[MAXIMUM_WINDOWS];
+	struct iron_x11_window windows[MAXIMUM_WINDOWS];
 	int num_displays;
-	struct kinc_x11_display displays[MAXIMUM_DISPLAYS];
+	struct iron_x11_display displays[MAXIMUM_DISPLAYS];
 };
 
-struct kinc_x11_procs xlib;
+struct iron_x11_procs xlib;
 struct x11_context x11_ctx;
 
-void kinc_copy_to_clipboard(const char *text);
+void iron_copy_to_clipboard(const char *text);
 
-void kinc_linux_initHIDGamepads();
-void kinc_linux_updateHIDGamepads();
-void kinc_linux_closeHIDGamepads();
+void iron_linux_initHIDGamepads();
+void iron_linux_updateHIDGamepads();
+void iron_linux_closeHIDGamepads();

@@ -6,7 +6,7 @@ let _uniforms_vec: vec4_t = vec4_create();
 let _uniforms_vec2: vec4_t = vec4_create();
 let _uniforms_quat: quat_t = quat_create();
 
-let uniforms_tex_links: (o: object_t, md: material_data_t, s: string)=>kinc_g5_texture_t = null;
+let uniforms_tex_links: (o: object_t, md: material_data_t, s: string)=>iron_g5_texture_t = null;
 let uniforms_mat4_links: (o: object_t, md: material_data_t, s: string)=>mat4_t = null;
 let uniforms_vec4_links: (o: object_t, md: material_data_t, s: string)=>vec4_t = null;
 let uniforms_vec3_links: (o: object_t, md: material_data_t, s: string)=>vec4_t = null;
@@ -57,20 +57,20 @@ function uniforms_set_context_consts(context: shader_context_t, bind_params: str
 			}
 
 			if (char_at(tulink, 0) == "$") { // Link to embedded data
-				iron_g4_set_texture(context._.tex_units[j], map_get(scene_embedded, substring(tulink, 1, tulink.length)));
+				_iron_g4_set_texture(context._.tex_units[j], map_get(scene_embedded, substring(tulink, 1, tulink.length)));
 				iron_g4_set_texture_parameters(context._.tex_units[j], tex_addressing_t.REPEAT, tex_addressing_t.REPEAT, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.NONE);
 			}
 			else if (tulink == "_envmap_radiance") {
 				let w: world_data_t = scene_world;
 				if (w != null) {
-					iron_g4_set_texture(context._.tex_units[j], w._.radiance);
+					_iron_g4_set_texture(context._.tex_units[j], w._.radiance);
 					iron_g4_set_texture_parameters(context._.tex_units[j], tex_addressing_t.REPEAT, tex_addressing_t.REPEAT, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.LINEAR);
 				}
 			}
 			else if (tulink == "_envmap") {
 				let w: world_data_t = scene_world;
 				if (w != null) {
-					iron_g4_set_texture(context._.tex_units[j], w._.envmap);
+					_iron_g4_set_texture(context._.tex_units[j], w._.envmap);
 					iron_g4_set_texture_parameters(context._.tex_units[j], tex_addressing_t.REPEAT, tex_addressing_t.REPEAT, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.NONE);
 				}
 			}
@@ -96,11 +96,11 @@ function uniforms_set_obj_consts(context: shader_context_t, object: object_t) {
 					continue;
 				}
 
-				let image: kinc_g5_texture_t = uniforms_tex_links(object, current_material(object), tu.link);
+				let image: iron_g5_texture_t = uniforms_tex_links(object, current_material(object), tu.link);
 				if (image != null) {
 					ends_with(tu.link, "_depth") ?
 						iron_g4_set_texture_depth(context._.tex_units[j], image) :
-						iron_g4_set_texture(context._.tex_units[j], image);
+						_iron_g4_set_texture(context._.tex_units[j], image);
 					iron_g4_set_texture_parameters(context._.tex_units[j], tex_addressing_t.REPEAT, tex_addressing_t.REPEAT, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.NONE);
 				}
 			}
@@ -122,7 +122,7 @@ function uniforms_bind_render_target(rt: render_target_t, context: shader_contex
 				iron_g4_set_texture_depth(context._.tex_units[j], rt._image); // sampler2D
 			}
 			else {
-				iron_g4_set_texture(context._.tex_units[j], rt._image); // sampler2D
+				_iron_g4_set_texture(context._.tex_units[j], rt._image); // sampler2D
 			}
 
 			if (rt.mipmaps) {
@@ -153,7 +153,7 @@ function uniforms_bind_render_target(rt: render_target_t, context: shader_contex
 	}
 }
 
-function uniforms_set_context_const(location: kinc_g5_constant_location_t, c: shader_const_t): bool {
+function uniforms_set_context_const(location: iron_g5_constant_location_t, c: shader_const_t): bool {
 	if (c.link == null) {
 		return true;
 	}
@@ -191,7 +191,7 @@ function uniforms_set_context_const(location: kinc_g5_constant_location_t, c: sh
 			return false;
 		}
 
-		iron_g4_set_matrix4(location, m);
+		_iron_g4_set_matrix4(location, m);
 		return true;
 	}
 	else if (c.type == "vec4") {
@@ -202,10 +202,10 @@ function uniforms_set_context_const(location: kinc_g5_constant_location_t, c: sh
 		// }
 
 		if (!vec4_isnan(v)) {
-			iron_g4_set_float4(location, v.x, v.y, v.z, v.w);
+			_iron_g4_set_float4(location, v.x, v.y, v.z, v.w);
 		}
 		else {
-			iron_g4_set_float4(location, 0, 0, 0, 0);
+			_iron_g4_set_float4(location, 0, 0, 0, 0);
 		}
 		return true;
 	}
@@ -223,10 +223,10 @@ function uniforms_set_context_const(location: kinc_g5_constant_location_t, c: sh
 		}
 
 		if (!vec4_isnan(v)) {
-			iron_g4_set_float3(location, v.x, v.y, v.z);
+			_iron_g4_set_float3(location, v.x, v.y, v.z);
 		}
 		else {
-			iron_g4_set_float3(location, 0.0, 0.0, 0.0);
+			_iron_g4_set_float3(location, 0.0, 0.0, 0.0);
 		}
 		return true;
 	}
@@ -292,10 +292,10 @@ function uniforms_set_context_const(location: kinc_g5_constant_location_t, c: sh
 		}
 
 		if (!vec4_isnan(v)) {
-			iron_g4_set_float2(location, v.x, v.y);
+			_iron_g4_set_float2(location, v.x, v.y);
 		}
 		else {
-			iron_g4_set_float2(location, 0.0, 0.0);
+			_iron_g4_set_float2(location, 0.0, 0.0);
 		}
 		return true;
 	}
@@ -312,7 +312,7 @@ function uniforms_set_context_const(location: kinc_g5_constant_location_t, c: sh
 			return false;
 		}
 
-		iron_g4_set_float(location, f);
+		_iron_g4_set_float(location, f);
 		return true;
 	}
 	else if (c.type == "floats") {
@@ -323,7 +323,7 @@ function uniforms_set_context_const(location: kinc_g5_constant_location_t, c: sh
 		}
 
 		if (fa != null) {
-			iron_g4_set_floats(location, fa);
+			_iron_g4_set_floats(location, fa);
 			return true;
 		}
 	}
@@ -338,13 +338,13 @@ function uniforms_set_context_const(location: kinc_g5_constant_location_t, c: sh
 			return false;
 		}
 
-		iron_g4_set_int(location, i);
+		_iron_g4_set_int(location, i);
 		return true;
 	}
 	return false;
 }
 
-function uniforms_set_obj_const(obj: object_t, loc: kinc_g5_constant_location_t, c: shader_const_t) {
+function uniforms_set_obj_const(obj: object_t, loc: iron_g5_constant_location_t, c: shader_const_t) {
 	if (c.link == null) {
 		return;
 	}
@@ -379,7 +379,7 @@ function uniforms_set_obj_const(obj: object_t, loc: kinc_g5_constant_location_t,
 		if (mat4_isnan(m)) {
 			return;
 		}
-		iron_g4_set_matrix4(loc, m);
+		_iron_g4_set_matrix4(loc, m);
 	}
 	else if (c.type == "mat3") {
 		let m: mat3_t = mat3_nan();
@@ -396,7 +396,7 @@ function uniforms_set_obj_const(obj: object_t, loc: kinc_g5_constant_location_t,
 		if (mat3_isnan(m)) {
 			return;
 		}
-		iron_g4_set_matrix3(loc, m);
+		_iron_g4_set_matrix3(loc, m);
 	}
 	else if (c.type == "vec4") {
 		let v: vec4_t = vec4_nan();
@@ -408,7 +408,7 @@ function uniforms_set_obj_const(obj: object_t, loc: kinc_g5_constant_location_t,
 		if (vec4_isnan(v)) {
 			return;
 		}
-		iron_g4_set_float4(loc, v.x, v.y, v.z, v.w);
+		_iron_g4_set_float4(loc, v.x, v.y, v.z, v.w);
 	}
 	else if (c.type == "vec3") {
 		let v: vec4_t = vec4_nan();
@@ -430,7 +430,7 @@ function uniforms_set_obj_const(obj: object_t, loc: kinc_g5_constant_location_t,
 		if (vec4_isnan(v)) {
 			return;
 		}
-		iron_g4_set_float3(loc, v.x, v.y, v.z);
+		_iron_g4_set_float3(loc, v.x, v.y, v.z);
 	}
 	else if (c.type == "vec2") {
 		let v: vec2_t = vec2_nan();
@@ -442,7 +442,7 @@ function uniforms_set_obj_const(obj: object_t, loc: kinc_g5_constant_location_t,
 		if (vec2_isnan(v)) {
 			return;
 		}
-		iron_g4_set_float2(loc, v.x, v.y);
+		_iron_g4_set_float2(loc, v.x, v.y);
 	}
 	else if (c.type == "float") {
 		let f: f32 = f32_nan();
@@ -469,7 +469,7 @@ function uniforms_set_obj_const(obj: object_t, loc: kinc_g5_constant_location_t,
 		if (f32_isnan(f)) {
 			return;
 		}
-		iron_g4_set_float(loc, f);
+		_iron_g4_set_float(loc, f);
 	}
 	else if (c.type == "floats") {
 		let fa: f32_array_t = null;
@@ -488,7 +488,7 @@ function uniforms_set_obj_const(obj: object_t, loc: kinc_g5_constant_location_t,
 		if (fa == null) {
 			return;
 		}
-		iron_g4_set_floats(loc, fa);
+		_iron_g4_set_floats(loc, fa);
 	}
 	else if (c.type == "int") {
 		let i: i32 = INT_MAX;
@@ -504,7 +504,7 @@ function uniforms_set_obj_const(obj: object_t, loc: kinc_g5_constant_location_t,
 			return;
 		}
 
-		iron_g4_set_int(loc, i);
+		_iron_g4_set_int(loc, i);
 	}
 }
 
@@ -536,7 +536,7 @@ function uniforms_set_material_consts(context: shader_context_t, material_contex
 			for (let j: i32 = 0; j < context._.tex_units.length; ++j) {
 				let sname: string = context.texture_units[j].name;
 				if (mname == sname) {
-					iron_g4_set_texture(context._.tex_units[j], material_context._.textures[i]);
+					_iron_g4_set_texture(context._.tex_units[j], material_context._.textures[i]);
 					// After texture sampler have been assigned, set texture parameters
 					material_context_set_tex_params(material_context, i, context, j);
 					break;
@@ -556,23 +556,23 @@ function current_material(object: object_t): material_data_t {
 	return null;
 }
 
-function uniforms_set_material_const(location: kinc_g5_constant_location_t, shader_const: shader_const_t, material_const: bind_const_t) {
+function uniforms_set_material_const(location: iron_g5_constant_location_t, shader_const: shader_const_t, material_const: bind_const_t) {
 	if (shader_const.type == "vec4") {
-		iron_g4_set_float4(location, material_const.vec[0], material_const.vec[1], material_const.vec[2], material_const.vec[3]);
+		_iron_g4_set_float4(location, material_const.vec[0], material_const.vec[1], material_const.vec[2], material_const.vec[3]);
 	}
 	else if (shader_const.type == "vec3") {
-		iron_g4_set_float3(location, material_const.vec[0], material_const.vec[1], material_const.vec[2]);
+		_iron_g4_set_float3(location, material_const.vec[0], material_const.vec[1], material_const.vec[2]);
 	}
 	else if (shader_const.type == "vec2") {
-		iron_g4_set_float2(location, material_const.vec[0], material_const.vec[1]);
+		_iron_g4_set_float2(location, material_const.vec[0], material_const.vec[1]);
 	}
 	else if (shader_const.type == "float") {
-		iron_g4_set_float(location,  material_const.vec[0]);
+		_iron_g4_set_float(location,  material_const.vec[0]);
 	}
 	else if (shader_const.type == "bool") {
-		iron_g4_set_bool(location, material_const.vec[0] > 0.0);
+		_iron_g4_set_bool(location, material_const.vec[0] > 0.0);
 	}
 	else if (shader_const.type == "int") {
-		iron_g4_set_int(location, math_floor(material_const.vec[0]));
+		_iron_g4_set_int(location, math_floor(material_const.vec[0]));
 	}
 }

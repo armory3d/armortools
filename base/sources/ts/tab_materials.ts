@@ -80,8 +80,8 @@ function tab_materials_draw_slots(mini: bool) {
 				}
 				continue;
 			}
-			let img: kinc_g5_texture_t = ui_SCALE(ui) > 1 ? project_materials[i].image : project_materials[i].image_icon;
-			let img_full: kinc_g5_texture_t = project_materials[i].image;
+			let img: iron_g5_texture_t = ui_SCALE(ui) > 1 ? project_materials[i].image : project_materials[i].image_icon;
+			let img_full: iron_g5_texture_t = project_materials[i].image;
 
 			// Highligh selected
 			if (context_raw.material == project_materials[i]) {

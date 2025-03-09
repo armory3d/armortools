@@ -20,13 +20,13 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keep public class tech.kinc.KincActivity {
+-keep public class org.armory3d.IronActivity {
     public <methods>;
 }
--keep public class tech.kinc.KincMoviePlayer {
+-keep public class org.armory3d.IronMoviePlayer {
     public <methods>;
 }
--keep public class tech.kinc.KincMovieTexture {
+-keep public class org.armory3d.IronMovieTexture {
     public <methods>;
 }
 -keepclasseswithmembernames,includedescriptorclasses class * {

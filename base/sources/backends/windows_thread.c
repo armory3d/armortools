@@ -1,9 +1,9 @@
 #include <iron_thread.h>
 #include <Windows.h>
 
-void kinc_threads_init() {}
+void iron_threads_init() {}
 
-void kinc_threads_quit() {}
+void iron_threads_quit() {}
 
 struct thread_start {
 	void (*thread)(void *param);
@@ -20,7 +20,7 @@ static DWORD WINAPI ThreadProc(LPVOID arg) {
 	return 0;
 }
 
-void kinc_thread_init(kinc_thread_t *thread, void (*func)(void *param), void *param) {
+void iron_thread_init(iron_thread_t *thread, void (*func)(void *param), void *param) {
 	thread->impl.func = func;
 	thread->impl.param = param;
 
@@ -33,12 +33,12 @@ void kinc_thread_init(kinc_thread_t *thread, void (*func)(void *param), void *pa
 	thread->impl.handle = CreateThread(0, 65536, ThreadProc, (LPVOID)start_index, 0, 0);
 }
 
-void kinc_thread_wait_and_destroy(kinc_thread_t *thread) {
+void iron_thread_wait_and_destroy(iron_thread_t *thread) {
 	WaitForSingleObject(thread->impl.handle, INFINITE);
 	CloseHandle(thread->impl.handle);
 }
 
-bool kinc_thread_try_to_destroy(kinc_thread_t *thread) {
+bool iron_thread_try_to_destroy(iron_thread_t *thread) {
 	DWORD code;
 	GetExitCodeThread(thread->impl.handle, &code);
 	if (code != STILL_ACTIVE) {
@@ -52,7 +52,7 @@ typedef HRESULT(WINAPI *SetThreadDescriptionType)(HANDLE hThread, PCWSTR lpThrea
 static SetThreadDescriptionType MySetThreadDescription = NULL;
 static bool set_thread_description_loaded = false;
 
-void kinc_thread_set_name(const char *name) {
+void iron_thread_set_name(const char *name) {
 	if (!set_thread_description_loaded) {
 		HMODULE kernel32 = LoadLibraryA("kernel32.dll");
 		MySetThreadDescription = (SetThreadDescriptionType)GetProcAddress(kernel32, "SetThreadDescription");
@@ -66,26 +66,26 @@ void kinc_thread_set_name(const char *name) {
 	}
 }
 
-void kinc_thread_sleep(int milliseconds) {
+void iron_thread_sleep(int milliseconds) {
 	Sleep(milliseconds);
 }
 
-void kinc_mutex_init(kinc_mutex_t *mutex) {
+void iron_mutex_init(iron_mutex_t *mutex) {
 	InitializeCriticalSection((LPCRITICAL_SECTION)&mutex->impl.criticalSection);
 }
 
-void kinc_mutex_destroy(kinc_mutex_t *mutex) {
+void iron_mutex_destroy(iron_mutex_t *mutex) {
 	DeleteCriticalSection((LPCRITICAL_SECTION)&mutex->impl.criticalSection);
 }
 
-void kinc_mutex_lock(kinc_mutex_t *mutex) {
+void iron_mutex_lock(iron_mutex_t *mutex) {
 	EnterCriticalSection((LPCRITICAL_SECTION)&mutex->impl.criticalSection);
 }
 
-bool kinc_mutex_try_to_lock(kinc_mutex_t *mutex) {
+bool iron_mutex_try_to_lock(iron_mutex_t *mutex) {
 	return TryEnterCriticalSection((LPCRITICAL_SECTION)&mutex->impl.criticalSection);
 }
 
-void kinc_mutex_unlock(kinc_mutex_t *mutex) {
+void iron_mutex_unlock(iron_mutex_t *mutex) {
 	LeaveCriticalSection((LPCRITICAL_SECTION)&mutex->impl.criticalSection);
 }

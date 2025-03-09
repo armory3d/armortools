@@ -94,16 +94,16 @@ function mouse_released(button: string = "left"): bool {
 }
 
 function mouse_lock() {
-	if (kinc_mouse_can_lock()) {
-		kinc_mouse_lock();
+	if (iron_mouse_can_lock()) {
+		iron_mouse_lock();
 		mouse_locked = true;
 		mouse_hidden = true;
 	}
 }
 
 function mouse_unlock() {
-	if (kinc_mouse_can_lock()) {
-		kinc_mouse_unlock();
+	if (iron_mouse_can_lock()) {
+		iron_mouse_unlock();
 		mouse_locked = false;
 		mouse_hidden = false;
 	}

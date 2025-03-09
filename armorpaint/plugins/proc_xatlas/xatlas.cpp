@@ -10060,7 +10060,7 @@ extern "C" {
 #include <iron_obj.h>
 
 void proc_xatlas_unwrap(raw_mesh_t *mesh) {
-	double t = kinc_time();
+	double t = iron_time();
 	int vertex_count = mesh->posa->length / 4;
 	float *pa = (float *)malloc(sizeof(float) * vertex_count * 3);
 	float *na = (float *)malloc(sizeof(float) * vertex_count * 3);
@@ -10126,7 +10126,7 @@ void proc_xatlas_unwrap(raw_mesh_t *mesh) {
 	free(pa);
 	free(na);
 
-	kinc_log("Unwrapped in %fs.\n", kinc_time() - t);
+	iron_log("Unwrapped in %fs.\n", iron_time() - t);
 }
 
 #ifdef __cplusplus

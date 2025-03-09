@@ -1,5 +1,5 @@
 
-#ifdef KINC_A2
+#ifdef IRON_A2
 
 #include <CoreAudio/AudioHardware.h>
 #include <CoreServices/CoreServices.h>
@@ -8,9 +8,9 @@
 #include <iron_system.h>
 #include <stdio.h>
 
-static kinc_internal_video_sound_stream_t *video = NULL;
+static iron_internal_video_sound_stream_t *video = NULL;
 
-void macPlayVideoSoundStream(kinc_internal_video_sound_stream_t *v) {
+void macPlayVideoSoundStream(iron_internal_video_sound_stream_t *v) {
 	video = v;
 }
 
@@ -20,7 +20,7 @@ void macStopVideoSoundStream(void) {
 
 static void affirm(OSStatus err) {
 	if (err != kAudioHardwareNoError) {
-		kinc_error("Error: %i\n", err);
+		iron_error("Error: %i\n", err);
 	}
 }
 
@@ -34,11 +34,11 @@ static AudioObjectPropertyAddress address;
 
 static AudioDeviceIOProcID theIOProcID = NULL;
 
-static kinc_a2_buffer_t a2_buffer;
+static iron_a2_buffer_t a2_buffer;
 
 static uint32_t samples_per_second = 44100;
 
-uint32_t kinc_a2_samples_per_second(void) {
+uint32_t iron_a2_samples_per_second(void) {
 	return samples_per_second;
 }
 
@@ -58,10 +58,10 @@ static OSStatus appIOProc(AudioDeviceID inDevice, const AudioTimeStamp *inNow, c
 	affirm(AudioObjectGetPropertyData(device, &address, 0, NULL, &size, &deviceFormat));
 	if (samples_per_second != (int)deviceFormat.mSampleRate) {
 		samples_per_second = (int)deviceFormat.mSampleRate;
-		kinc_a2_internal_sample_rate_callback();
+		iron_a2_internal_sample_rate_callback();
 	}
 	int num_frames = deviceBufferSize / deviceFormat.mBytesPerFrame;
-	kinc_a2_internal_callback(&a2_buffer, num_frames);
+	iron_a2_internal_callback(&a2_buffer, num_frames);
 	float *output = (float *)outOutputData->mBuffers[0].mData;
 	for (int i = 0; i < num_frames; ++i) {
 		copySample(output);
@@ -72,12 +72,12 @@ static OSStatus appIOProc(AudioDeviceID inDevice, const AudioTimeStamp *inNow, c
 
 static bool initialized = false;
 
-void kinc_a2_init(void) {
+void iron_a2_init(void) {
 	if (initialized) {
 		return;
 	}
 
-	kinc_a2_internal_init();
+	iron_a2_internal_init();
 	initialized = true;
 
 	a2_buffer.read_location = 0;
@@ -102,7 +102,7 @@ void kinc_a2_init(void) {
 	address.mScope = kAudioDevicePropertyScopeOutput;
 	affirm(AudioObjectGetPropertyData(device, &address, 0, NULL, &size, &deviceBufferSize));
 
-	kinc_log("deviceBufferSize = %i\n", deviceBufferSize);
+	iron_log("deviceBufferSize = %i\n", deviceBufferSize);
 
 	size = sizeof(AudioStreamBasicDescription);
 	address.mSelector = kAudioDevicePropertyStreamFormat;
@@ -111,29 +111,29 @@ void kinc_a2_init(void) {
 	affirm(AudioObjectGetPropertyData(device, &address, 0, NULL, &size, &deviceFormat));
 
 	if (deviceFormat.mFormatID != kAudioFormatLinearPCM) {
-		kinc_error("mFormatID !=  kAudioFormatLinearPCM\n");
+		iron_error("mFormatID !=  kAudioFormatLinearPCM\n");
 		return;
 	}
 
 	if (!(deviceFormat.mFormatFlags & kLinearPCMFormatFlagIsFloat)) {
-		kinc_error("Only works with float format.\n");
+		iron_error("Only works with float format.\n");
 		return;
 	}
 
 	if (samples_per_second != (int)deviceFormat.mSampleRate) {
 		samples_per_second = (int)deviceFormat.mSampleRate;
-		kinc_a2_internal_sample_rate_callback();
+		iron_a2_internal_sample_rate_callback();
 	}
 
 	initialized = true;
 
-	kinc_log("mSampleRate = %g\n", deviceFormat.mSampleRate);
-	kinc_log("mFormatFlags = %08X\n", (unsigned int)deviceFormat.mFormatFlags);
-	kinc_log("mBytesPerPacket = %d\n", (unsigned int)deviceFormat.mBytesPerPacket);
-	kinc_log("mFramesPerPacket = %d\n", (unsigned int)deviceFormat.mFramesPerPacket);
-	kinc_log("mChannelsPerFrame = %d\n", (unsigned int)deviceFormat.mChannelsPerFrame);
-	kinc_log("mBytesPerFrame = %d\n", (unsigned int)deviceFormat.mBytesPerFrame);
-	kinc_log("mBitsPerChannel = %d\n", (unsigned int)deviceFormat.mBitsPerChannel);
+	iron_log("mSampleRate = %g\n", deviceFormat.mSampleRate);
+	iron_log("mFormatFlags = %08X\n", (unsigned int)deviceFormat.mFormatFlags);
+	iron_log("mBytesPerPacket = %d\n", (unsigned int)deviceFormat.mBytesPerPacket);
+	iron_log("mFramesPerPacket = %d\n", (unsigned int)deviceFormat.mFramesPerPacket);
+	iron_log("mChannelsPerFrame = %d\n", (unsigned int)deviceFormat.mChannelsPerFrame);
+	iron_log("mBytesPerFrame = %d\n", (unsigned int)deviceFormat.mBytesPerFrame);
+	iron_log("mBitsPerChannel = %d\n", (unsigned int)deviceFormat.mBitsPerChannel);
 
 	if (soundPlaying)
 		return;
@@ -144,9 +144,9 @@ void kinc_a2_init(void) {
 	soundPlaying = true;
 }
 
-void kinc_a2_update(void) {}
+void iron_a2_update(void) {}
 
-void kinc_a2_shutdown(void) {
+void iron_a2_shutdown(void) {
 	if (!initialized)
 		return;
 	if (!soundPlaying)

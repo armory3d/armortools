@@ -6,19 +6,19 @@
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
 
-#define KINC_INTERNAL_NAMED_NUMBER_COUNT 32
+#define IRON_INTERNAL_NAMED_NUMBER_COUNT 32
 
 typedef struct {
 	char name[256];
 	uint32_t number;
-} kinc_internal_named_number;
+} iron_internal_named_number;
 
 typedef struct {
 	uint32_t hash;
 	uint32_t index;
-} kinc_internal_hash_index_t;
+} iron_internal_hash_index_t;
 
-uint32_t kinc_internal_hash_name(unsigned char *str);
+uint32_t iron_internal_hash_name(unsigned char *str);
 
 struct vk_funs {
 	PFN_vkGetPhysicalDeviceSurfaceSupportKHR fpGetPhysicalDeviceSurfaceSupportKHR;
@@ -110,15 +110,15 @@ typedef struct {
 	VkFence fence;
 } CommandList5Impl;
 
-typedef struct kinc_g5_compute_shader_impl {
-	kinc_internal_named_number locations[KINC_INTERNAL_NAMED_NUMBER_COUNT];
-	kinc_internal_named_number texture_bindings[KINC_INTERNAL_NAMED_NUMBER_COUNT];
-	kinc_internal_named_number offsets[KINC_INTERNAL_NAMED_NUMBER_COUNT];
+typedef struct iron_g5_compute_shader_impl {
+	iron_internal_named_number locations[IRON_INTERNAL_NAMED_NUMBER_COUNT];
+	iron_internal_named_number texture_bindings[IRON_INTERNAL_NAMED_NUMBER_COUNT];
+	iron_internal_named_number offsets[IRON_INTERNAL_NAMED_NUMBER_COUNT];
 
 	VkPipelineLayout pipeline_layout;
 	VkPipeline pipeline;
 	VkShaderModule shader_module;
-} kinc_g5_compute_shader_impl;
+} iron_g5_compute_shader_impl;
 
 typedef struct PipelineState5Impl_s {
 	const char **textures;
@@ -130,12 +130,12 @@ typedef struct PipelineState5Impl_s {
 	VkShaderModule vert_shader_module;
 	VkShaderModule frag_shader_module;
 
-	kinc_internal_named_number vertexLocations[KINC_INTERNAL_NAMED_NUMBER_COUNT];
-	kinc_internal_named_number fragmentLocations[KINC_INTERNAL_NAMED_NUMBER_COUNT];
-	kinc_internal_named_number vertexTextureBindings[KINC_INTERNAL_NAMED_NUMBER_COUNT];
-	kinc_internal_named_number fragmentTextureBindings[KINC_INTERNAL_NAMED_NUMBER_COUNT];
-	kinc_internal_named_number vertexOffsets[KINC_INTERNAL_NAMED_NUMBER_COUNT];
-	kinc_internal_named_number fragmentOffsets[KINC_INTERNAL_NAMED_NUMBER_COUNT];
+	iron_internal_named_number vertexLocations[IRON_INTERNAL_NAMED_NUMBER_COUNT];
+	iron_internal_named_number fragmentLocations[IRON_INTERNAL_NAMED_NUMBER_COUNT];
+	iron_internal_named_number vertexTextureBindings[IRON_INTERNAL_NAMED_NUMBER_COUNT];
+	iron_internal_named_number fragmentTextureBindings[IRON_INTERNAL_NAMED_NUMBER_COUNT];
+	iron_internal_named_number vertexOffsets[IRON_INTERNAL_NAMED_NUMBER_COUNT];
+	iron_internal_named_number fragmentOffsets[IRON_INTERNAL_NAMED_NUMBER_COUNT];
 
 	VkPipelineLayout pipeline_layout;
 } PipelineState5Impl;
@@ -160,9 +160,9 @@ typedef struct {
 	int length;
 } Shader5Impl;
 
-typedef struct kinc_g5_sampler_impl {
+typedef struct iron_g5_sampler_impl {
 	VkSampler sampler;
-} kinc_g5_sampler_impl_t;
+} iron_g5_sampler_impl_t;
 
 typedef struct {
 	VkImageLayout imageLayout;
@@ -218,7 +218,7 @@ typedef struct {
 	VkMemoryAllocateInfo mem_alloc;
 } IndexBuffer5Impl;
 
-#ifndef KINC_ANDROID
+#ifndef IRON_ANDROID
 
 typedef struct {
 	VkPipeline pipeline;
@@ -228,7 +228,7 @@ typedef struct {
 	VkBuffer raygen_shader_binding_table;
 	VkBuffer miss_shader_binding_table;
 	VkBuffer hit_shader_binding_table;
-} kinc_g5_raytrace_pipeline_impl_t;
+} iron_g5_raytrace_pipeline_impl_t;
 
 typedef struct {
 	VkAccelerationStructureKHR top_level_acceleration_structure;
@@ -242,6 +242,6 @@ typedef struct {
 	VkDeviceMemory top_level_mem;
 	VkBuffer instances_buffer;
 	VkDeviceMemory instances_mem;
-} kinc_g5_raytrace_acceleration_structure_impl_t;
+} iron_g5_raytrace_acceleration_structure_impl_t;
 
 #endif

@@ -25,15 +25,15 @@
 #include <linux/joystick.h>
 #include <sys/ioctl.h>
 
-bool kinc_x11_init();
+bool iron_x11_init();
 
-void kinc_display_init() {
+void iron_display_init() {
 	static bool display_initialized = false;
 	if (display_initialized) {
 		return;
 	}
 
-	kinc_x11_init();
+	iron_x11_init();
 
 	int eventBase;
 	int errorBase;
@@ -51,7 +51,7 @@ void kinc_display_init() {
 
 	for (int i = 0; i < screen_resources->noutput; i++) {
 		if (i >= MAXIMUM_DISPLAYS) {
-			kinc_error("Too many screens (maximum %i)", MAXIMUM_DISPLAYS);
+			iron_error("Too many screens (maximum %i)", MAXIMUM_DISPLAYS);
 			break;
 		}
 
@@ -63,7 +63,7 @@ void kinc_display_init() {
 
 		XRRCrtcInfo *crtc_info = xlib.XRRGetCrtcInfo(x11_ctx.display, screen_resources, output_info->crtc);
 
-		struct kinc_x11_display *display = &x11_ctx.displays[x11_ctx.num_displays++];
+		struct iron_x11_display *display = &x11_ctx.displays[x11_ctx.num_displays++];
 		display->index = i;
 		strncpy(display->name, output_info->name, sizeof(display->name));
 		display->x = crtc_info->x;
@@ -86,11 +86,11 @@ void kinc_display_init() {
 	display_initialized = true;
 }
 
-kinc_display_mode_t kinc_display_available_mode(int display_index, int mode_index) {
+iron_display_mode_t iron_display_available_mode(int display_index, int mode_index) {
 	if (display_index >= MAXIMUM_DISPLAYS)
 		display_index = 0;
-	struct kinc_x11_display *display = &x11_ctx.displays[display_index];
-	kinc_display_mode_t mode;
+	struct iron_x11_display *display = &x11_ctx.displays[display_index];
+	iron_display_mode_t mode;
 	mode.x = 0;
 	mode.y = 0;
 	mode.width = display->width;
@@ -104,14 +104,14 @@ kinc_display_mode_t kinc_display_available_mode(int display_index, int mode_inde
 
 	XRROutputInfo *output_info = xlib.XRRGetOutputInfo(x11_ctx.display, screen_resources, screen_resources->outputs[display->index]);
 	if (output_info->connection != RR_Connected || output_info->crtc == None) {
-		kinc_error("Display %i not connected.", display_index);
+		iron_error("Display %i not connected.", display_index);
 		xlib.XRRFreeOutputInfo(output_info);
 		xlib.XRRFreeScreenResources(screen_resources);
 		return mode;
 	}
 
 	if (mode_index >= output_info->nmode) {
-		kinc_error("Invalid mode index %i.", mode_index);
+		iron_error("Invalid mode index %i.", mode_index);
 	}
 
 	RRMode rr_mode = output_info->modes[mode_index];
@@ -144,17 +144,17 @@ kinc_display_mode_t kinc_display_available_mode(int display_index, int mode_inde
 	return mode;
 }
 
-int kinc_display_count_available_modes(int display_index) {
+int iron_display_count_available_modes(int display_index) {
 	if (display_index >= MAXIMUM_DISPLAYS)
 		display_index = 0;
-	struct kinc_x11_display *display = &x11_ctx.displays[display_index];
+	struct iron_x11_display *display = &x11_ctx.displays[display_index];
 
 	Window root_window = RootWindow(x11_ctx.display, DefaultScreen(x11_ctx.display));
 	XRRScreenResources *screen_resources = xlib.XRRGetScreenResourcesCurrent(x11_ctx.display, root_window);
 
 	XRROutputInfo *output_info = xlib.XRRGetOutputInfo(x11_ctx.display, screen_resources, screen_resources->outputs[display->index]);
 	if (output_info->connection != RR_Connected || output_info->crtc == None) {
-		kinc_error("Display %i not connected.", display_index);
+		iron_error("Display %i not connected.", display_index);
 		xlib.XRRFreeOutputInfo(output_info);
 		xlib.XRRFreeScreenResources(screen_resources);
 		return 0;
@@ -166,25 +166,25 @@ int kinc_display_count_available_modes(int display_index) {
 	return num_modes;
 }
 
-bool kinc_display_available(int display_index) {
+bool iron_display_available(int display_index) {
 	if (display_index >= MAXIMUM_DISPLAYS) {
 		return false;
 	}
 	return x11_ctx.displays[display_index].output != None;
 }
 
-const char *kinc_display_name(int display_index) {
+const char *iron_display_name(int display_index) {
 	if (display_index >= MAXIMUM_DISPLAYS) {
 		return "";
 	}
 	return x11_ctx.displays[display_index].name;
 }
 
-kinc_display_mode_t kinc_display_current_mode(int display_index) {
+iron_display_mode_t iron_display_current_mode(int display_index) {
 	if (display_index >= MAXIMUM_DISPLAYS)
 		display_index = 0;
-	struct kinc_x11_display *display = &x11_ctx.displays[display_index];
-	kinc_display_mode_t mode;
+	struct iron_x11_display *display = &x11_ctx.displays[display_index];
+	iron_display_mode_t mode;
 	mode.x = 0;
 	mode.y = 0;
 	mode.width = display->width;
@@ -198,7 +198,7 @@ kinc_display_mode_t kinc_display_current_mode(int display_index) {
 
 	XRROutputInfo *output_info = xlib.XRRGetOutputInfo(x11_ctx.display, screen_resources, screen_resources->outputs[display->index]);
 	if (output_info->connection != RR_Connected || output_info->crtc == None) {
-		kinc_error("Display %i not connected.", display_index);
+		iron_error("Display %i not connected.", display_index);
 		xlib.XRRFreeOutputInfo(output_info);
 		xlib.XRRFreeScreenResources(screen_resources);
 		return mode;
@@ -237,7 +237,7 @@ kinc_display_mode_t kinc_display_current_mode(int display_index) {
 	return mode;
 }
 
-int kinc_primary_display(void) {
+int iron_primary_display(void) {
 	for (int i = 0; i < x11_ctx.num_displays; i++) {
 		if (x11_ctx.displays[i].primary) {
 			return i;
@@ -246,7 +246,7 @@ int kinc_primary_display(void) {
 	return 0;
 }
 
-int kinc_count_displays(void) {
+int iron_count_displays(void) {
 	return x11_ctx.num_displays;
 }
 
@@ -260,36 +260,36 @@ struct MwmHints {
 };
 #define MWM_HINTS_DECORATIONS (1L << 1)
 
-int kinc_window_x() {
+int iron_window_x() {
 	return 0;
 }
 
-int kinc_window_y() {
+int iron_window_y() {
 	return 0;
 }
 
-int kinc_window_width() {
+int iron_window_width() {
 	return x11_ctx.windows[0].width;
 }
 
-int kinc_window_height() {
+int iron_window_height() {
 	return x11_ctx.windows[0].height;
 }
 
-void kinc_window_resize(int width, int height) {
-	struct kinc_x11_window *window = &x11_ctx.windows[0];
+void iron_window_resize(int width, int height) {
+	struct iron_x11_window *window = &x11_ctx.windows[0];
 	xlib.XResizeWindow(x11_ctx.display, window->window, width, height);
 }
 
-void kinc_window_move(int x, int y) {
-	struct kinc_x11_window *window = &x11_ctx.windows[0];
+void iron_window_move(int x, int y) {
+	struct iron_x11_window *window = &x11_ctx.windows[0];
 	xlib.XMoveWindow(x11_ctx.display, window->window, x, y);
 }
 
-void kinc_window_change_features(int features) {}
+void iron_window_change_features(int features) {}
 
-void kinc_window_change_mode(kinc_window_mode_t mode) {
-	struct kinc_x11_window *window = &x11_ctx.windows[0];
+void iron_window_change_mode(iron_window_mode_t mode) {
+	struct iron_x11_window *window = &x11_ctx.windows[0];
 	if (mode == window->mode) {
 		return;
 	}
@@ -297,18 +297,18 @@ void kinc_window_change_mode(kinc_window_mode_t mode) {
 	bool fullscreen = false;
 
 	switch (mode) {
-	case KINC_WINDOW_MODE_WINDOW:
-		if (window->mode == KINC_WINDOW_MODE_FULLSCREEN) {
-			window->mode = KINC_WINDOW_MODE_WINDOW;
+	case IRON_WINDOW_MODE_WINDOW:
+		if (window->mode == IRON_WINDOW_MODE_FULLSCREEN) {
+			window->mode = IRON_WINDOW_MODE_WINDOW;
 			fullscreen = false;
 		}
 		else {
 			return;
 		}
 		break;
-	case KINC_WINDOW_MODE_FULLSCREEN:
-		if (window->mode == KINC_WINDOW_MODE_WINDOW) {
-			window->mode = KINC_WINDOW_MODE_FULLSCREEN;
+	case IRON_WINDOW_MODE_FULLSCREEN:
+		if (window->mode == IRON_WINDOW_MODE_WINDOW) {
+			window->mode = IRON_WINDOW_MODE_FULLSCREEN;
 			fullscreen = true;
 		}
 		else {
@@ -334,36 +334,36 @@ void kinc_window_change_mode(kinc_window_mode_t mode) {
 	xlib.XFlush(x11_ctx.display);
 }
 
-int kinc_window_display() {
-	struct kinc_x11_window *window = &x11_ctx.windows[0];
+int iron_window_display() {
+	struct iron_x11_window *window = &x11_ctx.windows[0];
 	return window->display_index;
 }
 
-void kinc_window_destroy() {
-	kinc_g5_internal_destroy_window();
+void iron_window_destroy() {
+	iron_g5_internal_destroy_window();
 
 	xlib.XFlush(x11_ctx.display);
-	struct kinc_x11_window *window = &x11_ctx.windows[0];
+	struct iron_x11_window *window = &x11_ctx.windows[0];
 	xlib.XDestroyIC(window->xInputContext);
 	xlib.XCloseIM(window->xInputMethod);
 	xlib.XDestroyWindow(x11_ctx.display, window->window);
 	xlib.XFlush(x11_ctx.display);
-	*window = (struct kinc_x11_window){0};
+	*window = (struct iron_x11_window){0};
 }
 
-void kinc_window_show() {
-	struct kinc_x11_window *window = &x11_ctx.windows[0];
+void iron_window_show() {
+	struct iron_x11_window *window = &x11_ctx.windows[0];
 	xlib.XMapWindow(x11_ctx.display, window->window);
 }
 
-void kinc_window_hide() {
-	struct kinc_x11_window *window = &x11_ctx.windows[0];
+void iron_window_hide() {
+	struct iron_x11_window *window = &x11_ctx.windows[0];
 	xlib.XUnmapWindow(x11_ctx.display, window->window);
 }
 
-void kinc_window_set_title(const char *_title) {
+void iron_window_set_title(const char *_title) {
 	const char *title = _title == NULL ? "" : _title;
-	struct kinc_x11_window *window = &x11_ctx.windows[0];
+	struct iron_x11_window *window = &x11_ctx.windows[0];
 	xlib.XChangeProperty(x11_ctx.display, window->window, x11_ctx.atoms.NET_WM_NAME, x11_ctx.atoms.UTF8_STRING, 8, PropModeReplace, (unsigned char *)title,
 	                     strlen(title));
 
@@ -373,8 +373,8 @@ void kinc_window_set_title(const char *_title) {
 	xlib.XFlush(x11_ctx.display);
 }
 
-void kinc_window_create(kinc_window_options_t *win) {
-	struct kinc_x11_window *window = &x11_ctx.windows[0];
+void iron_window_create(iron_window_options_t *win) {
+	struct iron_x11_window *window = &x11_ctx.windows[0];
 	window->width = win->width;
 	window->height = win->height;
 
@@ -392,11 +392,11 @@ void kinc_window_create(kinc_window_options_t *win) {
 	                                    InputOutput, visual, CWBorderPixel | CWColormap | CWEventMask, &set_window_attribs);
 
 	static char nameClass[256];
-	static const char *nameClassAddendum = "_KincApplication";
-	strncpy(nameClass, kinc_application_name(), sizeof(nameClass) - strlen(nameClassAddendum) - 1);
+	static const char *nameClassAddendum = "_IronApplication";
+	strncpy(nameClass, iron_application_name(), sizeof(nameClass) - strlen(nameClassAddendum) - 1);
 	strcat(nameClass, nameClassAddendum);
 	char resNameBuffer[256];
-	strncpy(resNameBuffer, kinc_application_name(), 256);
+	strncpy(resNameBuffer, iron_application_name(), 256);
 	XClassHint classHint = {.res_name = resNameBuffer, .res_class = nameClass};
 	xlib.XSetClassHint(x11_ctx.display, window->window, &classHint);
 
@@ -405,8 +405,8 @@ void kinc_window_create(kinc_window_options_t *win) {
 	window->xInputContext = xlib.XCreateIC(window->xInputMethod, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, window->window, NULL);
 	xlib.XSetICFocus(window->xInputContext);
 
-	window->mode = KINC_WINDOW_MODE_WINDOW;
-	kinc_window_change_mode(win->mode);
+	window->mode = IRON_WINDOW_MODE_WINDOW;
+	iron_window_change_mode(win->mode);
 
 	xlib.XMapWindow(x11_ctx.display, window->window);
 
@@ -414,7 +414,7 @@ void kinc_window_create(kinc_window_options_t *win) {
 	xlib.XChangeProperty(x11_ctx.display, window->window, x11_ctx.atoms.XdndAware, XA_ATOM, 32, PropModeReplace, (unsigned char *)&XdndVersion, 1);
 	xlib.XSetWMProtocols(x11_ctx.display, window->window, &x11_ctx.atoms.WM_DELETE_WINDOW, 1);
 
-	kinc_window_set_title(win->title);
+	iron_window_set_title(win->title);
 
 	if (x11_ctx.pen.id != -1) {
 		xlib.XSelectExtensionEvent(x11_ctx.display, window->window, &x11_ctx.pen.motionClass, 1);
@@ -424,7 +424,7 @@ void kinc_window_create(kinc_window_options_t *win) {
 		xlib.XSelectExtensionEvent(x11_ctx.display, window->window, &x11_ctx.eraser.motionClass, 1);
 	}
 
-	kinc_g4_internal_init_window(win->depth_bits, win->vsync);
+	iron_g4_internal_init_window(win->depth_bits, win->vsync);
 }
 
 static struct {
@@ -433,41 +433,41 @@ static struct {
 	void *ppi_data;
 	bool (*close_callback)(void *data);
 	void *close_data;
-} kinc_internal_window_callbacks[16];
+} iron_internal_window_callbacks[16];
 
-void kinc_window_set_resize_callback(void (*callback)(int width, int height, void *data), void *data) {
-	kinc_internal_window_callbacks[0].resize_callback = callback;
-	kinc_internal_window_callbacks[0].resize_data = data;
+void iron_window_set_resize_callback(void (*callback)(int width, int height, void *data), void *data) {
+	iron_internal_window_callbacks[0].resize_callback = callback;
+	iron_internal_window_callbacks[0].resize_data = data;
 }
 
-void kinc_internal_call_resize_callback(int width, int height) {
-	if (kinc_internal_window_callbacks[0].resize_callback != NULL) {
-		kinc_internal_window_callbacks[0].resize_callback(width, height, kinc_internal_window_callbacks[0].resize_data);
+void iron_internal_call_resize_callback(int width, int height) {
+	if (iron_internal_window_callbacks[0].resize_callback != NULL) {
+		iron_internal_window_callbacks[0].resize_callback(width, height, iron_internal_window_callbacks[0].resize_data);
 	}
 }
 
-void kinc_window_set_close_callback(bool (*callback)(void *data), void *data) {
-	kinc_internal_window_callbacks[0].close_callback = callback;
-	kinc_internal_window_callbacks[0].close_data = data;
+void iron_window_set_close_callback(bool (*callback)(void *data), void *data) {
+	iron_internal_window_callbacks[0].close_callback = callback;
+	iron_internal_window_callbacks[0].close_data = data;
 }
 
-bool kinc_internal_call_close_callback() {
-	if (kinc_internal_window_callbacks[0].close_callback != NULL) {
-		return kinc_internal_window_callbacks[0].close_callback(kinc_internal_window_callbacks[0].close_data);
+bool iron_internal_call_close_callback() {
+	if (iron_internal_window_callbacks[0].close_callback != NULL) {
+		return iron_internal_window_callbacks[0].close_callback(iron_internal_window_callbacks[0].close_data);
 	}
 	else {
 		return true;
 	}
 }
 
-kinc_window_mode_t kinc_window_get_mode() {
+iron_window_mode_t iron_window_get_mode() {
 	return x11_ctx.windows[0].mode;
 }
 
 #define Button6 6
 #define Button7 7
 
-struct kinc_x11_procs xlib = {0};
+struct iron_x11_procs xlib = {0};
 struct x11_context x11_ctx = {0};
 
 static size_t clipboardStringSize = 1024;
@@ -475,7 +475,7 @@ static char *clipboardString = NULL;
 
 char buffer[1024];
 
-void kinc_internal_resize(int width, int height);
+void iron_internal_resize(int width, int height);
 static void init_pen_device(XDeviceInfo *info, struct x11_pen_device *pen, bool eraser);
 
 static void load_lib(void **lib, const char *name) {
@@ -495,13 +495,13 @@ static void load_lib(void **lib, const char *name) {
 	}
 }
 
-int kinc_x11_error_handler(Display *display, XErrorEvent *error_event) {
+int iron_x11_error_handler(Display *display, XErrorEvent *error_event) {
 	xlib.XGetErrorText(display, error_event->error_code, buffer, 1024);
-	kinc_error("X Error: %s", buffer);
+	iron_error("X Error: %s", buffer);
 	return 0;
 }
 
-bool kinc_x11_init() {
+bool iron_x11_init() {
 #undef LOAD_LIB
 #undef LOAD_FUN
 #define LOAD_LIB(name)                                                                                                                                         \
@@ -509,7 +509,7 @@ bool kinc_x11_init() {
 		load_lib(&x11_ctx.libs.name, #name);                                                                                                                   \
                                                                                                                                                                \
 		if (x11_ctx.libs.name == NULL) {                                                                                                                       \
-			kinc_error("Failed to load lib%s.so", #name);                                                                                  \
+			iron_error("Failed to load lib%s.so", #name);                                                                                  \
 			return false;                                                                                                                                      \
 		}                                                                                                                                                      \
 	}                                                                                                                                                          \
@@ -528,7 +528,7 @@ bool kinc_x11_init() {
 #define LOAD_FUN(lib, symbol)                                                                                                                                  \
 	xlib.symbol = dlsym(x11_ctx.libs.lib, #symbol);                                                                                                            \
 	if (xlib.symbol == NULL) {                                                                                                                                 \
-		kinc_error("Did not find symbol %s in library %s.", #symbol, #lib);                                                                \
+		iron_error("Did not find symbol %s in library %s.", #symbol, #lib);                                                                \
 	}
 	LOAD_FUN(X11, XOpenDisplay)
 	LOAD_FUN(X11, XCloseDisplay)
@@ -599,7 +599,7 @@ bool kinc_x11_init() {
 		return false;
 	}
 
-	xlib.XSetErrorHandler(kinc_x11_error_handler);
+	xlib.XSetErrorHandler(iron_x11_error_handler);
 
 	// this should be kept in sync with the x11_atoms struct
 	static char *atom_names[] = {
@@ -643,7 +643,7 @@ bool kinc_x11_init() {
 	    XI_JOYSTICK,
 	};
 
-	assert((sizeof atom_names / sizeof atom_names[0]) == (sizeof(struct kinc_x11_atoms) / sizeof(Atom)));
+	assert((sizeof atom_names / sizeof atom_names[0]) == (sizeof(struct iron_x11_atoms) / sizeof(Atom)));
 	xlib.XInternAtoms(x11_ctx.display, atom_names, sizeof atom_names / sizeof atom_names[0], False, (Atom *)&x11_ctx.atoms);
 	clipboardString = (char *)malloc(clipboardStringSize);
 
@@ -686,14 +686,14 @@ static void init_pen_device(XDeviceInfo *info, struct x11_pen_device *pen, bool 
 			pen->id = info->id;
 			DeviceMotionNotify(device, pen->motionEvent, pen->motionClass);
 			if (eraser) {
-				pen->press = kinc_internal_eraser_trigger_press;
-				pen->move = kinc_internal_eraser_trigger_move;
-				pen->release = kinc_internal_eraser_trigger_release;
+				pen->press = iron_internal_eraser_trigger_press;
+				pen->move = iron_internal_eraser_trigger_move;
+				pen->release = iron_internal_eraser_trigger_release;
 			}
 			else {
-				pen->press = kinc_internal_pen_trigger_press;
-				pen->move = kinc_internal_pen_trigger_move;
-				pen->release = kinc_internal_pen_trigger_release;
+				pen->press = iron_internal_pen_trigger_press;
+				pen->move = iron_internal_pen_trigger_move;
+				pen->release = iron_internal_pen_trigger_release;
 			}
 			return;
 		}
@@ -702,7 +702,7 @@ static void init_pen_device(XDeviceInfo *info, struct x11_pen_device *pen, bool 
 	xlib.XCloseDevice(x11_ctx.display, device);
 }
 
-static void check_pen_device(struct kinc_x11_window *window, XEvent *event, struct x11_pen_device *pen) {
+static void check_pen_device(struct iron_x11_window *window, XEvent *event, struct x11_pen_device *pen) {
 	if (event->type == pen->motionEvent) {
 		XDeviceMotionEvent *motion = (XDeviceMotionEvent *)(event);
 		if (motion->deviceid == pen->id) {
@@ -721,7 +721,7 @@ static void check_pen_device(struct kinc_x11_window *window, XEvent *event, stru
 	}
 }
 
-struct kinc_x11_window *window_from_window(Window window) {
+struct iron_x11_window *window_from_window(Window window) {
 	for (int i = 0; i < MAXIMUM_WINDOWS; i++) {
 		if (x11_ctx.windows[i].window == window) {
 			return &x11_ctx.windows[i];
@@ -730,16 +730,16 @@ struct kinc_x11_window *window_from_window(Window window) {
 	return NULL;
 }
 
-void kinc_vulkan_get_instance_extensions(const char **names, int *index, int max) {
+void iron_vulkan_get_instance_extensions(const char **names, int *index, int max) {
 	assert(*index + 1 < max);
 	names[(*index)++] = VK_KHR_XLIB_SURFACE_EXTENSION_NAME;
 }
 
-VkBool32 kinc_vulkan_get_physical_device_presentation_support(VkPhysicalDevice physicalDevice, uint32_t queueFamilyIndex) {
+VkBool32 iron_vulkan_get_physical_device_presentation_support(VkPhysicalDevice physicalDevice, uint32_t queueFamilyIndex) {
 	return vkGetPhysicalDeviceXlibPresentationSupportKHR(physicalDevice, queueFamilyIndex, x11_ctx.display,
 	                                                     DefaultVisual(x11_ctx.display, DefaultScreen(x11_ctx.display))->visualid);
 }
-VkResult kinc_vulkan_create_surface(VkInstance instance, VkSurfaceKHR *surface) {
+VkResult iron_vulkan_create_surface(VkInstance instance, VkSurfaceKHR *surface) {
 	VkXlibSurfaceCreateInfoKHR info = {0};
 	info.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
 	info.pNext = NULL;
@@ -758,7 +758,7 @@ static bool _handle_messages() {
 		XEvent event;
 		xlib.XNextEvent(x11_ctx.display, &event);
 		Window window = event.xclient.window;
-		struct kinc_x11_window *k_window = window_from_window(window);
+		struct iron_x11_window *k_window = window_from_window(window);
 		if (k_window == NULL) {
 			continue;
 		}
@@ -781,7 +781,7 @@ static bool _handle_messages() {
 			if (!controlDown && !xlib.XFilterEvent(&event, window) && !isIgnoredKeySym) {
 
 				if (wcConverted) {
-					kinc_internal_keyboard_trigger_key_press(wchar);
+					iron_internal_keyboard_trigger_key_press(wchar);
 				}
 			}
 
@@ -791,9 +791,9 @@ static bool _handle_messages() {
 				continue;
 			}
 
-#define KEY(xkey, korekey)                                                                                                                                     \
+#define KEY(xkey, ironkey)                                                                                                                                     \
 	case xkey:                                                                                                                                                 \
-		kinc_internal_keyboard_trigger_key_down(korekey);                                                                                                      \
+		iron_internal_keyboard_trigger_key_down(ironkey);                                                                                                      \
 		break;
 
 			KeySym ksKey = xlib.XkbKeycodeToKeysym(x11_ctx.display, event.xkey.keycode, 0, 0);
@@ -806,15 +806,15 @@ static bool _handle_messages() {
 			}
 			else if (controlDown && (ksKey == XK_c || ksKey == XK_C)) {
 				xlib.XSetSelectionOwner(x11_ctx.display, x11_ctx.atoms.CLIPBOARD, window, CurrentTime);
-				char *text = kinc_internal_copy_callback();
+				char *text = iron_internal_copy_callback();
 				if (text != NULL)
-					kinc_copy_to_clipboard(text);
+					iron_copy_to_clipboard(text);
 			}
 			else if (controlDown && (ksKey == XK_x || ksKey == XK_X)) {
 				xlib.XSetSelectionOwner(x11_ctx.display, x11_ctx.atoms.CLIPBOARD, window, CurrentTime);
-				char *text = kinc_internal_cut_callback();
+				char *text = iron_internal_cut_callback();
 				if (text != NULL)
-					kinc_copy_to_clipboard(text);
+					iron_copy_to_clipboard(text);
 			}
 
 			if (event.xkey.keycode == ignoreKeycode) {
@@ -829,136 +829,136 @@ static bool _handle_messages() {
 			}
 
 			switch (ksKey) {
-				KEY(XK_Right, KINC_KEY_RIGHT)
-				KEY(XK_Left, KINC_KEY_LEFT)
-				KEY(XK_Up, KINC_KEY_UP)
-				KEY(XK_Down, KINC_KEY_DOWN)
-				KEY(XK_space, KINC_KEY_SPACE)
-				KEY(XK_BackSpace, KINC_KEY_BACKSPACE)
-				KEY(XK_Tab, KINC_KEY_TAB)
-				KEY(XK_Return, KINC_KEY_RETURN)
-				KEY(XK_Shift_L, KINC_KEY_SHIFT)
-				KEY(XK_Shift_R, KINC_KEY_SHIFT)
-				KEY(XK_Control_L, KINC_KEY_CONTROL)
-				KEY(XK_Control_R, KINC_KEY_CONTROL)
-				KEY(XK_Alt_L, KINC_KEY_ALT)
-				KEY(XK_Alt_R, KINC_KEY_ALT)
-				KEY(XK_Delete, KINC_KEY_DELETE)
-				KEY(XK_comma, KINC_KEY_COMMA)
-				KEY(XK_period, KINC_KEY_PERIOD)
-				KEY(XK_bracketleft, KINC_KEY_OPEN_BRACKET)
-				KEY(XK_bracketright, KINC_KEY_CLOSE_BRACKET)
-				KEY(XK_braceleft, KINC_KEY_OPEN_CURLY_BRACKET)
-				KEY(XK_braceright, KINC_KEY_CLOSE_CURLY_BRACKET)
-				KEY(XK_parenleft, KINC_KEY_OPEN_PAREN)
-				KEY(XK_parenright, KINC_KEY_CLOSE_PAREN)
-				KEY(XK_backslash, KINC_KEY_BACK_SLASH)
-				KEY(XK_apostrophe, KINC_KEY_QUOTE)
-				KEY(XK_colon, KINC_KEY_COLON)
-				KEY(XK_semicolon, KINC_KEY_SEMICOLON)
-				KEY(XK_minus, KINC_KEY_HYPHEN_MINUS)
-				KEY(XK_underscore, KINC_KEY_UNDERSCORE)
-				KEY(XK_slash, KINC_KEY_SLASH)
-				KEY(XK_bar, KINC_KEY_PIPE)
-				KEY(XK_question, KINC_KEY_QUESTIONMARK)
-				KEY(XK_less, KINC_KEY_LESS_THAN)
-				KEY(XK_greater, KINC_KEY_GREATER_THAN)
-				KEY(XK_asterisk, KINC_KEY_ASTERISK)
-				KEY(XK_ampersand, KINC_KEY_AMPERSAND)
-				KEY(XK_asciicircum, KINC_KEY_CIRCUMFLEX)
-				KEY(XK_percent, KINC_KEY_PERCENT)
-				KEY(XK_dollar, KINC_KEY_DOLLAR)
-				KEY(XK_numbersign, KINC_KEY_HASH)
-				KEY(XK_at, KINC_KEY_AT)
-				KEY(XK_exclam, KINC_KEY_EXCLAMATION)
-				KEY(XK_equal, KINC_KEY_EQUALS)
-				KEY(XK_plus, KINC_KEY_ADD)
-				KEY(XK_quoteleft, KINC_KEY_BACK_QUOTE)
-				KEY(XK_quotedbl, KINC_KEY_DOUBLE_QUOTE)
-				KEY(XK_asciitilde, KINC_KEY_TILDE)
-				KEY(XK_Pause, KINC_KEY_PAUSE)
-				KEY(XK_Scroll_Lock, KINC_KEY_SCROLL_LOCK)
-				KEY(XK_Home, KINC_KEY_HOME)
-				KEY(XK_Page_Up, KINC_KEY_PAGE_UP)
-				KEY(XK_Page_Down, KINC_KEY_PAGE_DOWN)
-				KEY(XK_End, KINC_KEY_END)
-				KEY(XK_Insert, KINC_KEY_INSERT)
-				KEY(XK_KP_Enter, KINC_KEY_RETURN)
-				KEY(XK_KP_Multiply, KINC_KEY_MULTIPLY)
-				KEY(XK_KP_Add, KINC_KEY_ADD)
-				KEY(XK_KP_Subtract, KINC_KEY_SUBTRACT)
-				KEY(XK_KP_Decimal, KINC_KEY_DECIMAL)
-				KEY(XK_KP_Divide, KINC_KEY_DIVIDE)
-				KEY(XK_KP_0, KINC_KEY_NUMPAD_0)
-				KEY(XK_KP_1, KINC_KEY_NUMPAD_1)
-				KEY(XK_KP_2, KINC_KEY_NUMPAD_2)
-				KEY(XK_KP_3, KINC_KEY_NUMPAD_3)
-				KEY(XK_KP_4, KINC_KEY_NUMPAD_4)
-				KEY(XK_KP_5, KINC_KEY_NUMPAD_5)
-				KEY(XK_KP_6, KINC_KEY_NUMPAD_6)
-				KEY(XK_KP_7, KINC_KEY_NUMPAD_7)
-				KEY(XK_KP_8, KINC_KEY_NUMPAD_8)
-				KEY(XK_KP_9, KINC_KEY_NUMPAD_9)
-				KEY(XK_KP_Insert, KINC_KEY_INSERT)
-				KEY(XK_KP_Delete, KINC_KEY_DELETE)
-				KEY(XK_KP_End, KINC_KEY_END)
-				KEY(XK_KP_Home, KINC_KEY_HOME)
-				KEY(XK_KP_Left, KINC_KEY_LEFT)
-				KEY(XK_KP_Up, KINC_KEY_UP)
-				KEY(XK_KP_Right, KINC_KEY_RIGHT)
-				KEY(XK_KP_Down, KINC_KEY_DOWN)
-				KEY(XK_KP_Page_Up, KINC_KEY_PAGE_UP)
-				KEY(XK_KP_Page_Down, KINC_KEY_PAGE_DOWN)
-				KEY(XK_Menu, KINC_KEY_CONTEXT_MENU)
-				KEY(XK_a, KINC_KEY_A)
-				KEY(XK_b, KINC_KEY_B)
-				KEY(XK_c, KINC_KEY_C)
-				KEY(XK_d, KINC_KEY_D)
-				KEY(XK_e, KINC_KEY_E)
-				KEY(XK_f, KINC_KEY_F)
-				KEY(XK_g, KINC_KEY_G)
-				KEY(XK_h, KINC_KEY_H)
-				KEY(XK_i, KINC_KEY_I)
-				KEY(XK_j, KINC_KEY_J)
-				KEY(XK_k, KINC_KEY_K)
-				KEY(XK_l, KINC_KEY_L)
-				KEY(XK_m, KINC_KEY_M)
-				KEY(XK_n, KINC_KEY_N)
-				KEY(XK_o, KINC_KEY_O)
-				KEY(XK_p, KINC_KEY_P)
-				KEY(XK_q, KINC_KEY_Q)
-				KEY(XK_r, KINC_KEY_R)
-				KEY(XK_s, KINC_KEY_S)
-				KEY(XK_t, KINC_KEY_T)
-				KEY(XK_u, KINC_KEY_U)
-				KEY(XK_v, KINC_KEY_V)
-				KEY(XK_w, KINC_KEY_W)
-				KEY(XK_x, KINC_KEY_X)
-				KEY(XK_y, KINC_KEY_Y)
-				KEY(XK_z, KINC_KEY_Z)
-				KEY(XK_1, KINC_KEY_1)
-				KEY(XK_2, KINC_KEY_2)
-				KEY(XK_3, KINC_KEY_3)
-				KEY(XK_4, KINC_KEY_4)
-				KEY(XK_5, KINC_KEY_5)
-				KEY(XK_6, KINC_KEY_6)
-				KEY(XK_7, KINC_KEY_7)
-				KEY(XK_8, KINC_KEY_8)
-				KEY(XK_9, KINC_KEY_9)
-				KEY(XK_0, KINC_KEY_0)
-				KEY(XK_Escape, KINC_KEY_ESCAPE)
-				KEY(XK_F1, KINC_KEY_F1)
-				KEY(XK_F2, KINC_KEY_F2)
-				KEY(XK_F3, KINC_KEY_F3)
-				KEY(XK_F4, KINC_KEY_F4)
-				KEY(XK_F5, KINC_KEY_F5)
-				KEY(XK_F6, KINC_KEY_F6)
-				KEY(XK_F7, KINC_KEY_F7)
-				KEY(XK_F8, KINC_KEY_F8)
-				KEY(XK_F9, KINC_KEY_F9)
-				KEY(XK_F10, KINC_KEY_F10)
-				KEY(XK_F11, KINC_KEY_F11)
-				KEY(XK_F12, KINC_KEY_F12)
+				KEY(XK_Right, IRON_KEY_RIGHT)
+				KEY(XK_Left, IRON_KEY_LEFT)
+				KEY(XK_Up, IRON_KEY_UP)
+				KEY(XK_Down, IRON_KEY_DOWN)
+				KEY(XK_space, IRON_KEY_SPACE)
+				KEY(XK_BackSpace, IRON_KEY_BACKSPACE)
+				KEY(XK_Tab, IRON_KEY_TAB)
+				KEY(XK_Return, IRON_KEY_RETURN)
+				KEY(XK_Shift_L, IRON_KEY_SHIFT)
+				KEY(XK_Shift_R, IRON_KEY_SHIFT)
+				KEY(XK_Control_L, IRON_KEY_CONTROL)
+				KEY(XK_Control_R, IRON_KEY_CONTROL)
+				KEY(XK_Alt_L, IRON_KEY_ALT)
+				KEY(XK_Alt_R, IRON_KEY_ALT)
+				KEY(XK_Delete, IRON_KEY_DELETE)
+				KEY(XK_comma, IRON_KEY_COMMA)
+				KEY(XK_period, IRON_KEY_PERIOD)
+				KEY(XK_bracketleft, IRON_KEY_OPEN_BRACKET)
+				KEY(XK_bracketright, IRON_KEY_CLOSE_BRACKET)
+				KEY(XK_braceleft, IRON_KEY_OPEN_CURLY_BRACKET)
+				KEY(XK_braceright, IRON_KEY_CLOSE_CURLY_BRACKET)
+				KEY(XK_parenleft, IRON_KEY_OPEN_PAREN)
+				KEY(XK_parenright, IRON_KEY_CLOSE_PAREN)
+				KEY(XK_backslash, IRON_KEY_BACK_SLASH)
+				KEY(XK_apostrophe, IRON_KEY_QUOTE)
+				KEY(XK_colon, IRON_KEY_COLON)
+				KEY(XK_semicolon, IRON_KEY_SEMICOLON)
+				KEY(XK_minus, IRON_KEY_HYPHEN_MINUS)
+				KEY(XK_underscore, IRON_KEY_UNDERSCORE)
+				KEY(XK_slash, IRON_KEY_SLASH)
+				KEY(XK_bar, IRON_KEY_PIPE)
+				KEY(XK_question, IRON_KEY_QUESTIONMARK)
+				KEY(XK_less, IRON_KEY_LESS_THAN)
+				KEY(XK_greater, IRON_KEY_GREATER_THAN)
+				KEY(XK_asterisk, IRON_KEY_ASTERISK)
+				KEY(XK_ampersand, IRON_KEY_AMPERSAND)
+				KEY(XK_asciicircum, IRON_KEY_CIRCUMFLEX)
+				KEY(XK_percent, IRON_KEY_PERCENT)
+				KEY(XK_dollar, IRON_KEY_DOLLAR)
+				KEY(XK_numbersign, IRON_KEY_HASH)
+				KEY(XK_at, IRON_KEY_AT)
+				KEY(XK_exclam, IRON_KEY_EXCLAMATION)
+				KEY(XK_equal, IRON_KEY_EQUALS)
+				KEY(XK_plus, IRON_KEY_ADD)
+				KEY(XK_quoteleft, IRON_KEY_BACK_QUOTE)
+				KEY(XK_quotedbl, IRON_KEY_DOUBLE_QUOTE)
+				KEY(XK_asciitilde, IRON_KEY_TILDE)
+				KEY(XK_Pause, IRON_KEY_PAUSE)
+				KEY(XK_Scroll_Lock, IRON_KEY_SCROLL_LOCK)
+				KEY(XK_Home, IRON_KEY_HOME)
+				KEY(XK_Page_Up, IRON_KEY_PAGE_UP)
+				KEY(XK_Page_Down, IRON_KEY_PAGE_DOWN)
+				KEY(XK_End, IRON_KEY_END)
+				KEY(XK_Insert, IRON_KEY_INSERT)
+				KEY(XK_KP_Enter, IRON_KEY_RETURN)
+				KEY(XK_KP_Multiply, IRON_KEY_MULTIPLY)
+				KEY(XK_KP_Add, IRON_KEY_ADD)
+				KEY(XK_KP_Subtract, IRON_KEY_SUBTRACT)
+				KEY(XK_KP_Decimal, IRON_KEY_DECIMAL)
+				KEY(XK_KP_Divide, IRON_KEY_DIVIDE)
+				KEY(XK_KP_0, IRON_KEY_NUMPAD_0)
+				KEY(XK_KP_1, IRON_KEY_NUMPAD_1)
+				KEY(XK_KP_2, IRON_KEY_NUMPAD_2)
+				KEY(XK_KP_3, IRON_KEY_NUMPAD_3)
+				KEY(XK_KP_4, IRON_KEY_NUMPAD_4)
+				KEY(XK_KP_5, IRON_KEY_NUMPAD_5)
+				KEY(XK_KP_6, IRON_KEY_NUMPAD_6)
+				KEY(XK_KP_7, IRON_KEY_NUMPAD_7)
+				KEY(XK_KP_8, IRON_KEY_NUMPAD_8)
+				KEY(XK_KP_9, IRON_KEY_NUMPAD_9)
+				KEY(XK_KP_Insert, IRON_KEY_INSERT)
+				KEY(XK_KP_Delete, IRON_KEY_DELETE)
+				KEY(XK_KP_End, IRON_KEY_END)
+				KEY(XK_KP_Home, IRON_KEY_HOME)
+				KEY(XK_KP_Left, IRON_KEY_LEFT)
+				KEY(XK_KP_Up, IRON_KEY_UP)
+				KEY(XK_KP_Right, IRON_KEY_RIGHT)
+				KEY(XK_KP_Down, IRON_KEY_DOWN)
+				KEY(XK_KP_Page_Up, IRON_KEY_PAGE_UP)
+				KEY(XK_KP_Page_Down, IRON_KEY_PAGE_DOWN)
+				KEY(XK_Menu, IRON_KEY_CONTEXT_MENU)
+				KEY(XK_a, IRON_KEY_A)
+				KEY(XK_b, IRON_KEY_B)
+				KEY(XK_c, IRON_KEY_C)
+				KEY(XK_d, IRON_KEY_D)
+				KEY(XK_e, IRON_KEY_E)
+				KEY(XK_f, IRON_KEY_F)
+				KEY(XK_g, IRON_KEY_G)
+				KEY(XK_h, IRON_KEY_H)
+				KEY(XK_i, IRON_KEY_I)
+				KEY(XK_j, IRON_KEY_J)
+				KEY(XK_k, IRON_KEY_K)
+				KEY(XK_l, IRON_KEY_L)
+				KEY(XK_m, IRON_KEY_M)
+				KEY(XK_n, IRON_KEY_N)
+				KEY(XK_o, IRON_KEY_O)
+				KEY(XK_p, IRON_KEY_P)
+				KEY(XK_q, IRON_KEY_Q)
+				KEY(XK_r, IRON_KEY_R)
+				KEY(XK_s, IRON_KEY_S)
+				KEY(XK_t, IRON_KEY_T)
+				KEY(XK_u, IRON_KEY_U)
+				KEY(XK_v, IRON_KEY_V)
+				KEY(XK_w, IRON_KEY_W)
+				KEY(XK_x, IRON_KEY_X)
+				KEY(XK_y, IRON_KEY_Y)
+				KEY(XK_z, IRON_KEY_Z)
+				KEY(XK_1, IRON_KEY_1)
+				KEY(XK_2, IRON_KEY_2)
+				KEY(XK_3, IRON_KEY_3)
+				KEY(XK_4, IRON_KEY_4)
+				KEY(XK_5, IRON_KEY_5)
+				KEY(XK_6, IRON_KEY_6)
+				KEY(XK_7, IRON_KEY_7)
+				KEY(XK_8, IRON_KEY_8)
+				KEY(XK_9, IRON_KEY_9)
+				KEY(XK_0, IRON_KEY_0)
+				KEY(XK_Escape, IRON_KEY_ESCAPE)
+				KEY(XK_F1, IRON_KEY_F1)
+				KEY(XK_F2, IRON_KEY_F2)
+				KEY(XK_F3, IRON_KEY_F3)
+				KEY(XK_F4, IRON_KEY_F4)
+				KEY(XK_F5, IRON_KEY_F5)
+				KEY(XK_F6, IRON_KEY_F6)
+				KEY(XK_F7, IRON_KEY_F7)
+				KEY(XK_F8, IRON_KEY_F8)
+				KEY(XK_F9, IRON_KEY_F9)
+				KEY(XK_F10, IRON_KEY_F10)
+				KEY(XK_F11, IRON_KEY_F11)
+				KEY(XK_F12, IRON_KEY_F12)
 			}
 			break;
 #undef KEY
@@ -982,9 +982,9 @@ static bool _handle_messages() {
 			char c;
 			xlib.XLookupString(key, &c, 1, &keysym, NULL);
 
-#define KEY(xkey, korekey)                                                                                                                                     \
+#define KEY(xkey, ironkey)                                                                                                                                     \
 	case xkey:                                                                                                                                                 \
-		kinc_internal_keyboard_trigger_key_up(korekey);                                                                                                        \
+		iron_internal_keyboard_trigger_key_up(ironkey);                                                                                                        \
 		break;
 
 			KeySym ksKey = xlib.XkbKeycodeToKeysym(x11_ctx.display, event.xkey.keycode, 0, 0);
@@ -1002,137 +1002,137 @@ static bool _handle_messages() {
 			}
 
 			switch (ksKey) {
-				KEY(XK_Right, KINC_KEY_RIGHT)
-				KEY(XK_Left, KINC_KEY_LEFT)
-				KEY(XK_Up, KINC_KEY_UP)
-				KEY(XK_Down, KINC_KEY_DOWN)
-				KEY(XK_space, KINC_KEY_SPACE)
-				KEY(XK_BackSpace, KINC_KEY_BACKSPACE)
-				KEY(XK_Tab, KINC_KEY_TAB)
-				KEY(XK_Return, KINC_KEY_RETURN)
-				KEY(XK_Shift_L, KINC_KEY_SHIFT)
-				KEY(XK_Shift_R, KINC_KEY_SHIFT)
-				KEY(XK_Control_L, KINC_KEY_CONTROL)
-				KEY(XK_Control_R, KINC_KEY_CONTROL)
-				KEY(XK_Alt_L, KINC_KEY_ALT)
-				KEY(XK_ISO_Prev_Group, KINC_KEY_ALT) //// XK_ISO_Prev_Group received instead of XK_Alt_L?
-				KEY(XK_Alt_R, KINC_KEY_ALT)
-				KEY(XK_Delete, KINC_KEY_DELETE)
-				KEY(XK_comma, KINC_KEY_COMMA)
-				KEY(XK_period, KINC_KEY_PERIOD)
-				KEY(XK_bracketleft, KINC_KEY_OPEN_BRACKET)
-				KEY(XK_bracketright, KINC_KEY_CLOSE_BRACKET)
-				KEY(XK_braceleft, KINC_KEY_OPEN_CURLY_BRACKET)
-				KEY(XK_braceright, KINC_KEY_CLOSE_CURLY_BRACKET)
-				KEY(XK_parenleft, KINC_KEY_OPEN_PAREN)
-				KEY(XK_parenright, KINC_KEY_CLOSE_PAREN)
-				KEY(XK_backslash, KINC_KEY_BACK_SLASH)
-				KEY(XK_apostrophe, KINC_KEY_QUOTE)
-				KEY(XK_colon, KINC_KEY_COLON)
-				KEY(XK_semicolon, KINC_KEY_SEMICOLON)
-				KEY(XK_minus, KINC_KEY_HYPHEN_MINUS)
-				KEY(XK_underscore, KINC_KEY_UNDERSCORE)
-				KEY(XK_slash, KINC_KEY_SLASH)
-				KEY(XK_bar, KINC_KEY_PIPE)
-				KEY(XK_question, KINC_KEY_QUESTIONMARK)
-				KEY(XK_less, KINC_KEY_LESS_THAN)
-				KEY(XK_greater, KINC_KEY_GREATER_THAN)
-				KEY(XK_asterisk, KINC_KEY_ASTERISK)
-				KEY(XK_ampersand, KINC_KEY_AMPERSAND)
-				KEY(XK_asciicircum, KINC_KEY_CIRCUMFLEX)
-				KEY(XK_percent, KINC_KEY_PERCENT)
-				KEY(XK_dollar, KINC_KEY_DOLLAR)
-				KEY(XK_numbersign, KINC_KEY_HASH)
-				KEY(XK_at, KINC_KEY_AT)
-				KEY(XK_exclam, KINC_KEY_EXCLAMATION)
-				KEY(XK_equal, KINC_KEY_EQUALS)
-				KEY(XK_plus, KINC_KEY_ADD)
-				KEY(XK_quoteleft, KINC_KEY_BACK_QUOTE)
-				KEY(XK_quotedbl, KINC_KEY_DOUBLE_QUOTE)
-				KEY(XK_asciitilde, KINC_KEY_TILDE)
-				KEY(XK_Pause, KINC_KEY_PAUSE)
-				KEY(XK_Scroll_Lock, KINC_KEY_SCROLL_LOCK)
-				KEY(XK_Home, KINC_KEY_HOME)
-				KEY(XK_Page_Up, KINC_KEY_PAGE_UP)
-				KEY(XK_Page_Down, KINC_KEY_PAGE_DOWN)
-				KEY(XK_End, KINC_KEY_END)
-				KEY(XK_Insert, KINC_KEY_INSERT)
-				KEY(XK_KP_Enter, KINC_KEY_RETURN)
-				KEY(XK_KP_Multiply, KINC_KEY_MULTIPLY)
-				KEY(XK_KP_Add, KINC_KEY_ADD)
-				KEY(XK_KP_Subtract, KINC_KEY_SUBTRACT)
-				KEY(XK_KP_Decimal, KINC_KEY_DECIMAL)
-				KEY(XK_KP_Divide, KINC_KEY_DIVIDE)
-				KEY(XK_KP_0, KINC_KEY_NUMPAD_0)
-				KEY(XK_KP_1, KINC_KEY_NUMPAD_1)
-				KEY(XK_KP_2, KINC_KEY_NUMPAD_2)
-				KEY(XK_KP_3, KINC_KEY_NUMPAD_3)
-				KEY(XK_KP_4, KINC_KEY_NUMPAD_4)
-				KEY(XK_KP_5, KINC_KEY_NUMPAD_5)
-				KEY(XK_KP_6, KINC_KEY_NUMPAD_6)
-				KEY(XK_KP_7, KINC_KEY_NUMPAD_7)
-				KEY(XK_KP_8, KINC_KEY_NUMPAD_8)
-				KEY(XK_KP_9, KINC_KEY_NUMPAD_9)
-				KEY(XK_KP_Insert, KINC_KEY_INSERT)
-				KEY(XK_KP_Delete, KINC_KEY_DELETE)
-				KEY(XK_KP_End, KINC_KEY_END)
-				KEY(XK_KP_Home, KINC_KEY_HOME)
-				KEY(XK_KP_Left, KINC_KEY_LEFT)
-				KEY(XK_KP_Up, KINC_KEY_UP)
-				KEY(XK_KP_Right, KINC_KEY_RIGHT)
-				KEY(XK_KP_Down, KINC_KEY_DOWN)
-				KEY(XK_KP_Page_Up, KINC_KEY_PAGE_UP)
-				KEY(XK_KP_Page_Down, KINC_KEY_PAGE_DOWN)
-				KEY(XK_Menu, KINC_KEY_CONTEXT_MENU)
-				KEY(XK_a, KINC_KEY_A)
-				KEY(XK_b, KINC_KEY_B)
-				KEY(XK_c, KINC_KEY_C)
-				KEY(XK_d, KINC_KEY_D)
-				KEY(XK_e, KINC_KEY_E)
-				KEY(XK_f, KINC_KEY_F)
-				KEY(XK_g, KINC_KEY_G)
-				KEY(XK_h, KINC_KEY_H)
-				KEY(XK_i, KINC_KEY_I)
-				KEY(XK_j, KINC_KEY_J)
-				KEY(XK_k, KINC_KEY_K)
-				KEY(XK_l, KINC_KEY_L)
-				KEY(XK_m, KINC_KEY_M)
-				KEY(XK_n, KINC_KEY_N)
-				KEY(XK_o, KINC_KEY_O)
-				KEY(XK_p, KINC_KEY_P)
-				KEY(XK_q, KINC_KEY_Q)
-				KEY(XK_r, KINC_KEY_R)
-				KEY(XK_s, KINC_KEY_S)
-				KEY(XK_t, KINC_KEY_T)
-				KEY(XK_u, KINC_KEY_U)
-				KEY(XK_v, KINC_KEY_V)
-				KEY(XK_w, KINC_KEY_W)
-				KEY(XK_x, KINC_KEY_X)
-				KEY(XK_y, KINC_KEY_Y)
-				KEY(XK_z, KINC_KEY_Z)
-				KEY(XK_1, KINC_KEY_1)
-				KEY(XK_2, KINC_KEY_2)
-				KEY(XK_3, KINC_KEY_3)
-				KEY(XK_4, KINC_KEY_4)
-				KEY(XK_5, KINC_KEY_5)
-				KEY(XK_6, KINC_KEY_6)
-				KEY(XK_7, KINC_KEY_7)
-				KEY(XK_8, KINC_KEY_8)
-				KEY(XK_9, KINC_KEY_9)
-				KEY(XK_0, KINC_KEY_0)
-				KEY(XK_Escape, KINC_KEY_ESCAPE)
-				KEY(XK_F1, KINC_KEY_F1)
-				KEY(XK_F2, KINC_KEY_F2)
-				KEY(XK_F3, KINC_KEY_F3)
-				KEY(XK_F4, KINC_KEY_F4)
-				KEY(XK_F5, KINC_KEY_F5)
-				KEY(XK_F6, KINC_KEY_F6)
-				KEY(XK_F7, KINC_KEY_F7)
-				KEY(XK_F8, KINC_KEY_F8)
-				KEY(XK_F9, KINC_KEY_F9)
-				KEY(XK_F10, KINC_KEY_F10)
-				KEY(XK_F11, KINC_KEY_F11)
-				KEY(XK_F12, KINC_KEY_F12)
+				KEY(XK_Right, IRON_KEY_RIGHT)
+				KEY(XK_Left, IRON_KEY_LEFT)
+				KEY(XK_Up, IRON_KEY_UP)
+				KEY(XK_Down, IRON_KEY_DOWN)
+				KEY(XK_space, IRON_KEY_SPACE)
+				KEY(XK_BackSpace, IRON_KEY_BACKSPACE)
+				KEY(XK_Tab, IRON_KEY_TAB)
+				KEY(XK_Return, IRON_KEY_RETURN)
+				KEY(XK_Shift_L, IRON_KEY_SHIFT)
+				KEY(XK_Shift_R, IRON_KEY_SHIFT)
+				KEY(XK_Control_L, IRON_KEY_CONTROL)
+				KEY(XK_Control_R, IRON_KEY_CONTROL)
+				KEY(XK_Alt_L, IRON_KEY_ALT)
+				KEY(XK_ISO_Prev_Group, IRON_KEY_ALT) //// XK_ISO_Prev_Group received instead of XK_Alt_L?
+				KEY(XK_Alt_R, IRON_KEY_ALT)
+				KEY(XK_Delete, IRON_KEY_DELETE)
+				KEY(XK_comma, IRON_KEY_COMMA)
+				KEY(XK_period, IRON_KEY_PERIOD)
+				KEY(XK_bracketleft, IRON_KEY_OPEN_BRACKET)
+				KEY(XK_bracketright, IRON_KEY_CLOSE_BRACKET)
+				KEY(XK_braceleft, IRON_KEY_OPEN_CURLY_BRACKET)
+				KEY(XK_braceright, IRON_KEY_CLOSE_CURLY_BRACKET)
+				KEY(XK_parenleft, IRON_KEY_OPEN_PAREN)
+				KEY(XK_parenright, IRON_KEY_CLOSE_PAREN)
+				KEY(XK_backslash, IRON_KEY_BACK_SLASH)
+				KEY(XK_apostrophe, IRON_KEY_QUOTE)
+				KEY(XK_colon, IRON_KEY_COLON)
+				KEY(XK_semicolon, IRON_KEY_SEMICOLON)
+				KEY(XK_minus, IRON_KEY_HYPHEN_MINUS)
+				KEY(XK_underscore, IRON_KEY_UNDERSCORE)
+				KEY(XK_slash, IRON_KEY_SLASH)
+				KEY(XK_bar, IRON_KEY_PIPE)
+				KEY(XK_question, IRON_KEY_QUESTIONMARK)
+				KEY(XK_less, IRON_KEY_LESS_THAN)
+				KEY(XK_greater, IRON_KEY_GREATER_THAN)
+				KEY(XK_asterisk, IRON_KEY_ASTERISK)
+				KEY(XK_ampersand, IRON_KEY_AMPERSAND)
+				KEY(XK_asciicircum, IRON_KEY_CIRCUMFLEX)
+				KEY(XK_percent, IRON_KEY_PERCENT)
+				KEY(XK_dollar, IRON_KEY_DOLLAR)
+				KEY(XK_numbersign, IRON_KEY_HASH)
+				KEY(XK_at, IRON_KEY_AT)
+				KEY(XK_exclam, IRON_KEY_EXCLAMATION)
+				KEY(XK_equal, IRON_KEY_EQUALS)
+				KEY(XK_plus, IRON_KEY_ADD)
+				KEY(XK_quoteleft, IRON_KEY_BACK_QUOTE)
+				KEY(XK_quotedbl, IRON_KEY_DOUBLE_QUOTE)
+				KEY(XK_asciitilde, IRON_KEY_TILDE)
+				KEY(XK_Pause, IRON_KEY_PAUSE)
+				KEY(XK_Scroll_Lock, IRON_KEY_SCROLL_LOCK)
+				KEY(XK_Home, IRON_KEY_HOME)
+				KEY(XK_Page_Up, IRON_KEY_PAGE_UP)
+				KEY(XK_Page_Down, IRON_KEY_PAGE_DOWN)
+				KEY(XK_End, IRON_KEY_END)
+				KEY(XK_Insert, IRON_KEY_INSERT)
+				KEY(XK_KP_Enter, IRON_KEY_RETURN)
+				KEY(XK_KP_Multiply, IRON_KEY_MULTIPLY)
+				KEY(XK_KP_Add, IRON_KEY_ADD)
+				KEY(XK_KP_Subtract, IRON_KEY_SUBTRACT)
+				KEY(XK_KP_Decimal, IRON_KEY_DECIMAL)
+				KEY(XK_KP_Divide, IRON_KEY_DIVIDE)
+				KEY(XK_KP_0, IRON_KEY_NUMPAD_0)
+				KEY(XK_KP_1, IRON_KEY_NUMPAD_1)
+				KEY(XK_KP_2, IRON_KEY_NUMPAD_2)
+				KEY(XK_KP_3, IRON_KEY_NUMPAD_3)
+				KEY(XK_KP_4, IRON_KEY_NUMPAD_4)
+				KEY(XK_KP_5, IRON_KEY_NUMPAD_5)
+				KEY(XK_KP_6, IRON_KEY_NUMPAD_6)
+				KEY(XK_KP_7, IRON_KEY_NUMPAD_7)
+				KEY(XK_KP_8, IRON_KEY_NUMPAD_8)
+				KEY(XK_KP_9, IRON_KEY_NUMPAD_9)
+				KEY(XK_KP_Insert, IRON_KEY_INSERT)
+				KEY(XK_KP_Delete, IRON_KEY_DELETE)
+				KEY(XK_KP_End, IRON_KEY_END)
+				KEY(XK_KP_Home, IRON_KEY_HOME)
+				KEY(XK_KP_Left, IRON_KEY_LEFT)
+				KEY(XK_KP_Up, IRON_KEY_UP)
+				KEY(XK_KP_Right, IRON_KEY_RIGHT)
+				KEY(XK_KP_Down, IRON_KEY_DOWN)
+				KEY(XK_KP_Page_Up, IRON_KEY_PAGE_UP)
+				KEY(XK_KP_Page_Down, IRON_KEY_PAGE_DOWN)
+				KEY(XK_Menu, IRON_KEY_CONTEXT_MENU)
+				KEY(XK_a, IRON_KEY_A)
+				KEY(XK_b, IRON_KEY_B)
+				KEY(XK_c, IRON_KEY_C)
+				KEY(XK_d, IRON_KEY_D)
+				KEY(XK_e, IRON_KEY_E)
+				KEY(XK_f, IRON_KEY_F)
+				KEY(XK_g, IRON_KEY_G)
+				KEY(XK_h, IRON_KEY_H)
+				KEY(XK_i, IRON_KEY_I)
+				KEY(XK_j, IRON_KEY_J)
+				KEY(XK_k, IRON_KEY_K)
+				KEY(XK_l, IRON_KEY_L)
+				KEY(XK_m, IRON_KEY_M)
+				KEY(XK_n, IRON_KEY_N)
+				KEY(XK_o, IRON_KEY_O)
+				KEY(XK_p, IRON_KEY_P)
+				KEY(XK_q, IRON_KEY_Q)
+				KEY(XK_r, IRON_KEY_R)
+				KEY(XK_s, IRON_KEY_S)
+				KEY(XK_t, IRON_KEY_T)
+				KEY(XK_u, IRON_KEY_U)
+				KEY(XK_v, IRON_KEY_V)
+				KEY(XK_w, IRON_KEY_W)
+				KEY(XK_x, IRON_KEY_X)
+				KEY(XK_y, IRON_KEY_Y)
+				KEY(XK_z, IRON_KEY_Z)
+				KEY(XK_1, IRON_KEY_1)
+				KEY(XK_2, IRON_KEY_2)
+				KEY(XK_3, IRON_KEY_3)
+				KEY(XK_4, IRON_KEY_4)
+				KEY(XK_5, IRON_KEY_5)
+				KEY(XK_6, IRON_KEY_6)
+				KEY(XK_7, IRON_KEY_7)
+				KEY(XK_8, IRON_KEY_8)
+				KEY(XK_9, IRON_KEY_9)
+				KEY(XK_0, IRON_KEY_0)
+				KEY(XK_Escape, IRON_KEY_ESCAPE)
+				KEY(XK_F1, IRON_KEY_F1)
+				KEY(XK_F2, IRON_KEY_F2)
+				KEY(XK_F3, IRON_KEY_F3)
+				KEY(XK_F4, IRON_KEY_F4)
+				KEY(XK_F5, IRON_KEY_F5)
+				KEY(XK_F6, IRON_KEY_F6)
+				KEY(XK_F7, IRON_KEY_F7)
+				KEY(XK_F8, IRON_KEY_F8)
+				KEY(XK_F9, IRON_KEY_F9)
+				KEY(XK_F10, IRON_KEY_F10)
+				KEY(XK_F11, IRON_KEY_F11)
+				KEY(XK_F12, IRON_KEY_F12)
 			}
 			break;
 #undef KEY
@@ -1142,13 +1142,13 @@ static bool _handle_messages() {
 
 			switch (button->button) {
 			case Button1:
-				kinc_internal_mouse_trigger_press(0, button->x, button->y);
+				iron_internal_mouse_trigger_press(0, button->x, button->y);
 				break;
 			case Button2:
-				kinc_internal_mouse_trigger_press(2, button->x, button->y);
+				iron_internal_mouse_trigger_press(2, button->x, button->y);
 				break;
 			case Button3:
-				kinc_internal_mouse_trigger_press(1, button->x, button->y);
+				iron_internal_mouse_trigger_press(1, button->x, button->y);
 				break;
 			// buttons 4-7 are for mouse wheel events because why not
 			case Button4:
@@ -1157,7 +1157,7 @@ static bool _handle_messages() {
 			case Button7:
 				break;
 			default:
-				kinc_internal_mouse_trigger_press(button->button - Button1 - 4, button->x, button->y);
+				iron_internal_mouse_trigger_press(button->button - Button1 - 4, button->x, button->y);
 				break;
 			}
 			break;
@@ -1167,42 +1167,42 @@ static bool _handle_messages() {
 
 			switch (button->button) {
 			case Button1:
-				kinc_internal_mouse_trigger_release(0, button->x, button->y);
+				iron_internal_mouse_trigger_release(0, button->x, button->y);
 				break;
 			case Button2:
-				kinc_internal_mouse_trigger_release(2, button->x, button->y);
+				iron_internal_mouse_trigger_release(2, button->x, button->y);
 				break;
 			case Button3:
-				kinc_internal_mouse_trigger_release(1, button->x, button->y);
+				iron_internal_mouse_trigger_release(1, button->x, button->y);
 				break;
 			// Button4 and Button5 provide mouse wheel events because why not
 			case Button4:
-				kinc_internal_mouse_trigger_scroll(-1);
+				iron_internal_mouse_trigger_scroll(-1);
 				break;
 			case Button5:
-				kinc_internal_mouse_trigger_scroll(1);
+				iron_internal_mouse_trigger_scroll(1);
 				break;
-			// button 6 and 7 seem to be horizontal scrolling, which is not exposed in Kinc's api at the moment
+			// button 6 and 7 seem to be horizontal scrolling, which is not exposed in Iron's api at the moment
 			case Button6:
 			case Button7:
 				break;
 			default:
-				kinc_internal_mouse_trigger_release(button->button - Button1 - 4, button->x, button->y);
+				iron_internal_mouse_trigger_release(button->button - Button1 - 4, button->x, button->y);
 				break;
 			}
 			break;
 		}
 		case MotionNotify: {
 			XMotionEvent *motion = (XMotionEvent *)&event;
-			kinc_internal_mouse_trigger_move(motion->x, motion->y);
+			iron_internal_mouse_trigger_move(motion->x, motion->y);
 			break;
 		}
 		case ConfigureNotify: {
 			if (event.xconfigure.width != k_window->width || event.xconfigure.height != k_window->height) {
 				k_window->width = event.xconfigure.width;
 				k_window->height = event.xconfigure.height;
-				kinc_internal_resize(event.xconfigure.width, event.xconfigure.height);
-				kinc_internal_call_resize_callback(event.xconfigure.width, event.xconfigure.height);
+				iron_internal_resize(event.xconfigure.width, event.xconfigure.height);
+				iron_internal_call_resize_callback(event.xconfigure.width, event.xconfigure.height);
 			}
 			break;
 		}
@@ -1228,9 +1228,9 @@ static bool _handle_messages() {
 				                       event.xclient.data.l[2]);
 			}
 			else if (event.xclient.data.l[0] == x11_ctx.atoms.WM_DELETE_WINDOW) {
-				if (kinc_internal_call_close_callback()) {
-					kinc_window_destroy();
-					kinc_stop();
+				if (iron_internal_call_close_callback()) {
+					iron_window_destroy();
+					iron_stop();
 				}
 			}
 		}; break;
@@ -1241,7 +1241,7 @@ static bool _handle_messages() {
 				int resbits;
 				xlib.XGetWindowProperty(x11_ctx.display, window, x11_ctx.atoms.XSEL_DATA, 0, LONG_MAX / 4, False, AnyPropertyType, &x11_ctx.atoms.UTF8_STRING,
 				                        &resbits, &ressize, &restail, (unsigned char **)&result);
-				kinc_internal_paste_callback(result);
+				iron_internal_paste_callback(result);
 				xlib.XFree(result);
 			}
 			else if (event.xselection.property == x11_ctx.atoms.XdndSelection) {
@@ -1259,7 +1259,7 @@ static bool _handle_messages() {
 						wchar_t filePath[len + 1];
 						mbstowcs(filePath, buffer, len);
 						filePath[len] = 0;
-						kinc_internal_drop_files_callback(filePath + 7); // Strip file://
+						iron_internal_drop_files_callback(filePath + 7); // Strip file://
 						pos += 2;                                        // Avoid \n
 						len = 0;
 					}
@@ -1300,13 +1300,13 @@ static bool _handle_messages() {
 		case Expose:
 			break;
 		case FocusIn: {
-			kinc_internal_foreground_callback();
+			iron_internal_foreground_callback();
 			break;
 		}
 		case FocusOut: {
 			controlDown = false;
 			ignoreKeycode = 0;
-			kinc_internal_background_callback();
+			iron_internal_background_callback();
 			break;
 		}
 		case LeaveNotify:
@@ -1319,31 +1319,31 @@ static bool _handle_messages() {
 	return true;
 }
 
-bool kinc_internal_handle_messages() {
+bool iron_internal_handle_messages() {
 	if (!_handle_messages()) {
 		return false;
 	}
 
-	kinc_linux_updateHIDGamepads();
+	iron_linux_updateHIDGamepads();
 
 	return true;
 }
 
-const char *kinc_system_id() {
+const char *iron_system_id() {
 	return "Linux";
 }
 
-void kinc_set_keep_screen_on(bool on) {}
+void iron_set_keep_screen_on(bool on) {}
 
-void kinc_keyboard_show() {}
+void iron_keyboard_show() {}
 
-void kinc_keyboard_hide() {}
+void iron_keyboard_hide() {}
 
-bool kinc_keyboard_active() {
+bool iron_keyboard_active() {
 	return true;
 }
 
-void kinc_load_url(const char *url) {
+void iron_load_url(const char *url) {
 #define MAX_COMMAND_BUFFER_SIZE 256
 #define HTTP "http://"
 #define HTTPS "https://"
@@ -1352,7 +1352,7 @@ void kinc_load_url(const char *url) {
 		snprintf(openUrlCommand, MAX_COMMAND_BUFFER_SIZE, "xdg-open %s", url);
 		int err = system(openUrlCommand);
 		if (err != 0) {
-			kinc_log("Error opening url %s", url);
+			iron_log("Error opening url %s", url);
 		}
 	}
 #undef HTTPS
@@ -1360,14 +1360,14 @@ void kinc_load_url(const char *url) {
 #undef MAX_COMMAND_BUFFER_SIZE
 }
 
-const char *kinc_language() {
+const char *iron_language() {
 	return "en";
 }
 
 static char save[2000];
 static bool saveInitialized = false;
 
-const char *kinc_internal_save_path() {
+const char *iron_internal_save_path() {
 	// first check for an existing directory in $HOME
 	// if one exists, use it, else create one in $XDG_DATA_HOME
 	// See: https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
@@ -1380,7 +1380,7 @@ const char *kinc_internal_save_path() {
 
 		strcpy(save, homedir);
 		strcat(save, "/.");
-		strcat(save, kinc_application_name());
+		strcat(save, iron_application_name());
 		strcat(save, "/");
 		struct stat st;
 		if (stat(save, &st) == 0) {
@@ -1401,11 +1401,11 @@ const char *kinc_internal_save_path() {
 					strcat(save, "/");
 				}
 			}
-			strcat(save, kinc_application_name());
+			strcat(save, iron_application_name());
 			strcat(save, "/");
 			int res = mkdir(save, 0700);
 			if (res != 0 && errno != EEXIST) {
-				kinc_error("Could not create save directory '%s'. Error %d", save, errno);
+				iron_error("Could not create save directory '%s'. Error %d", save, errno);
 			}
 		}
 
@@ -1416,38 +1416,38 @@ const char *kinc_internal_save_path() {
 
 static const char *videoFormats[] = {"ogv", NULL};
 
-const char **kinc_video_formats() {
+const char **iron_video_formats() {
 	return videoFormats;
 }
 
-double kinc_frequency(void) {
+double iron_frequency(void) {
 	return 1000000.0;
 }
 
 static struct timeval start;
 
-kinc_ticks_t kinc_timestamp(void) {
+iron_ticks_t iron_timestamp(void) {
 	struct timeval now;
 	gettimeofday(&now, NULL);
 	now.tv_sec -= start.tv_sec;
 	now.tv_usec -= start.tv_usec;
-	return (kinc_ticks_t)now.tv_sec * 1000000 + (kinc_ticks_t)now.tv_usec;
+	return (iron_ticks_t)now.tv_sec * 1000000 + (iron_ticks_t)now.tv_usec;
 }
 
-void kinc_init(const char *name, int width, int height, kinc_window_options_t *win) {
-	kinc_linux_initHIDGamepads();
+void iron_init(const char *name, int width, int height, iron_window_options_t *win) {
+	iron_linux_initHIDGamepads();
 
 	gettimeofday(&start, NULL);
-	kinc_x11_init();
-	kinc_display_init();
+	iron_x11_init();
+	iron_display_init();
 
-	kinc_set_app_name(name);
+	iron_set_app_name(name);
 
-	kinc_g5_internal_init();
+	iron_g5_internal_init();
 
-	kinc_window_options_t defaultWin;
+	iron_window_options_t defaultWin;
 	if (win == NULL) {
-		kinc_window_options_set_defaults(&defaultWin);
+		iron_window_options_set_defaults(&defaultWin);
 		win = &defaultWin;
 	}
 	win->width = width;
@@ -1456,24 +1456,24 @@ void kinc_init(const char *name, int width, int height, kinc_window_options_t *w
 		win->title = name;
 	}
 
-	kinc_window_create(win);
+	iron_window_create(win);
 }
 
-void kinc_internal_shutdown() {
-	kinc_g5_internal_destroy();
-	kinc_linux_closeHIDGamepads();
+void iron_internal_shutdown() {
+	iron_g5_internal_destroy();
+	iron_linux_closeHIDGamepads();
 	free(clipboardString);
 	xlib.XCloseDisplay(x11_ctx.display);
-	kinc_internal_shutdown_callback();
+	iron_internal_shutdown_callback();
 }
 
-#ifndef KINC_NO_MAIN
+#ifndef IRON_NO_MAIN
 int main(int argc, char **argv) {
 	return kickstart(argc, argv);
 }
 #endif
 
-void kinc_copy_to_clipboard(const char *text) {
+void iron_copy_to_clipboard(const char *text) {
 	size_t textLength = strlen(text);
 	if (textLength >= clipboardStringSize) {
 		free(clipboardString);
@@ -1495,7 +1495,7 @@ static int parse_number_at_end_of_line(char *line) {
 	return num;
 }
 
-int kinc_cpu_cores(void) {
+int iron_cpu_cores(void) {
 	char line[1024];
 	FILE *file = fopen("/proc/cpuinfo", "r");
 
@@ -1553,160 +1553,160 @@ int kinc_cpu_cores(void) {
 	};
 }
 
-int kinc_hardware_threads(void) {
+int iron_hardware_threads(void) {
 	return sysconf(_SC_NPROCESSORS_ONLN);
 }
 
-int xkb_to_kinc(xkb_keysym_t symbol) {
-#define KEY(xkb, kinc)                                                                                                                                         \
+int xkb_to_iron(xkb_keysym_t symbol) {
+#define KEY(xkb, iron)                                                                                                                                         \
 	case xkb:                                                                                                                                                  \
-		return kinc;
+		return iron;
 	switch (symbol) {
-		KEY(XKB_KEY_Right, KINC_KEY_RIGHT)
-		KEY(XKB_KEY_Left, KINC_KEY_LEFT)
-		KEY(XKB_KEY_Up, KINC_KEY_UP)
-		KEY(XKB_KEY_Down, KINC_KEY_DOWN)
-		KEY(XKB_KEY_space, KINC_KEY_SPACE)
-		KEY(XKB_KEY_BackSpace, KINC_KEY_BACKSPACE)
-		KEY(XKB_KEY_Tab, KINC_KEY_TAB)
-		KEY(XKB_KEY_Return, KINC_KEY_RETURN)
-		KEY(XKB_KEY_Shift_L, KINC_KEY_SHIFT)
-		KEY(XKB_KEY_Shift_R, KINC_KEY_SHIFT)
-		KEY(XKB_KEY_Control_L, KINC_KEY_CONTROL)
-		KEY(XKB_KEY_Control_R, KINC_KEY_CONTROL)
-		KEY(XKB_KEY_Alt_L, KINC_KEY_ALT)
-		KEY(XKB_KEY_Alt_R, KINC_KEY_ALT)
-		KEY(XKB_KEY_Delete, KINC_KEY_DELETE)
-		KEY(XKB_KEY_comma, KINC_KEY_COMMA)
-		KEY(XKB_KEY_period, KINC_KEY_PERIOD)
-		KEY(XKB_KEY_bracketleft, KINC_KEY_OPEN_BRACKET)
-		KEY(XKB_KEY_bracketright, KINC_KEY_CLOSE_BRACKET)
-		KEY(XKB_KEY_braceleft, KINC_KEY_OPEN_CURLY_BRACKET)
-		KEY(XKB_KEY_braceright, KINC_KEY_CLOSE_CURLY_BRACKET)
-		KEY(XKB_KEY_parenleft, KINC_KEY_OPEN_PAREN)
-		KEY(XKB_KEY_parenright, KINC_KEY_CLOSE_PAREN)
-		KEY(XKB_KEY_backslash, KINC_KEY_BACK_SLASH)
-		KEY(XKB_KEY_apostrophe, KINC_KEY_QUOTE)
-		KEY(XKB_KEY_colon, KINC_KEY_COLON)
-		KEY(XKB_KEY_semicolon, KINC_KEY_SEMICOLON)
-		KEY(XKB_KEY_minus, KINC_KEY_HYPHEN_MINUS)
-		KEY(XKB_KEY_underscore, KINC_KEY_UNDERSCORE)
-		KEY(XKB_KEY_slash, KINC_KEY_SLASH)
-		KEY(XKB_KEY_bar, KINC_KEY_PIPE)
-		KEY(XKB_KEY_question, KINC_KEY_QUESTIONMARK)
-		KEY(XKB_KEY_less, KINC_KEY_LESS_THAN)
-		KEY(XKB_KEY_greater, KINC_KEY_GREATER_THAN)
-		KEY(XKB_KEY_asterisk, KINC_KEY_ASTERISK)
-		KEY(XKB_KEY_ampersand, KINC_KEY_AMPERSAND)
-		KEY(XKB_KEY_asciicircum, KINC_KEY_CIRCUMFLEX)
-		KEY(XKB_KEY_percent, KINC_KEY_PERCENT)
-		KEY(XKB_KEY_dollar, KINC_KEY_DOLLAR)
-		KEY(XKB_KEY_numbersign, KINC_KEY_HASH)
-		KEY(XKB_KEY_at, KINC_KEY_AT)
-		KEY(XKB_KEY_exclam, KINC_KEY_EXCLAMATION)
-		KEY(XKB_KEY_equal, KINC_KEY_EQUALS)
-		KEY(XKB_KEY_plus, KINC_KEY_ADD)
-		KEY(XKB_KEY_quoteleft, KINC_KEY_BACK_QUOTE)
-		KEY(XKB_KEY_quotedbl, KINC_KEY_DOUBLE_QUOTE)
-		KEY(XKB_KEY_asciitilde, KINC_KEY_TILDE)
-		KEY(XKB_KEY_Pause, KINC_KEY_PAUSE)
-		KEY(XKB_KEY_Scroll_Lock, KINC_KEY_SCROLL_LOCK)
-		KEY(XKB_KEY_Home, KINC_KEY_HOME)
-		KEY(XKB_KEY_Page_Up, KINC_KEY_PAGE_UP)
-		KEY(XKB_KEY_Page_Down, KINC_KEY_PAGE_DOWN)
-		KEY(XKB_KEY_End, KINC_KEY_END)
-		KEY(XKB_KEY_Insert, KINC_KEY_INSERT)
-		KEY(XKB_KEY_KP_Enter, KINC_KEY_RETURN)
-		KEY(XKB_KEY_KP_Multiply, KINC_KEY_MULTIPLY)
-		KEY(XKB_KEY_KP_Add, KINC_KEY_ADD)
-		KEY(XKB_KEY_KP_Subtract, KINC_KEY_SUBTRACT)
-		KEY(XKB_KEY_KP_Decimal, KINC_KEY_DECIMAL)
-		KEY(XKB_KEY_KP_Divide, KINC_KEY_DIVIDE)
-		KEY(XKB_KEY_KP_0, KINC_KEY_NUMPAD_0)
-		KEY(XKB_KEY_KP_1, KINC_KEY_NUMPAD_1)
-		KEY(XKB_KEY_KP_2, KINC_KEY_NUMPAD_2)
-		KEY(XKB_KEY_KP_3, KINC_KEY_NUMPAD_3)
-		KEY(XKB_KEY_KP_4, KINC_KEY_NUMPAD_4)
-		KEY(XKB_KEY_KP_5, KINC_KEY_NUMPAD_5)
-		KEY(XKB_KEY_KP_6, KINC_KEY_NUMPAD_6)
-		KEY(XKB_KEY_KP_7, KINC_KEY_NUMPAD_7)
-		KEY(XKB_KEY_KP_8, KINC_KEY_NUMPAD_8)
-		KEY(XKB_KEY_KP_9, KINC_KEY_NUMPAD_9)
-		KEY(XKB_KEY_KP_Insert, KINC_KEY_INSERT)
-		KEY(XKB_KEY_KP_Delete, KINC_KEY_DELETE)
-		KEY(XKB_KEY_KP_End, KINC_KEY_END)
-		KEY(XKB_KEY_KP_Home, KINC_KEY_HOME)
-		KEY(XKB_KEY_KP_Left, KINC_KEY_LEFT)
-		KEY(XKB_KEY_KP_Up, KINC_KEY_UP)
-		KEY(XKB_KEY_KP_Right, KINC_KEY_RIGHT)
-		KEY(XKB_KEY_KP_Down, KINC_KEY_DOWN)
-		KEY(XKB_KEY_KP_Page_Up, KINC_KEY_PAGE_UP)
-		KEY(XKB_KEY_KP_Page_Down, KINC_KEY_PAGE_DOWN)
-		KEY(XKB_KEY_Menu, KINC_KEY_CONTEXT_MENU)
-		KEY(XKB_KEY_a, KINC_KEY_A)
-		KEY(XKB_KEY_b, KINC_KEY_B)
-		KEY(XKB_KEY_c, KINC_KEY_C)
-		KEY(XKB_KEY_d, KINC_KEY_D)
-		KEY(XKB_KEY_e, KINC_KEY_E)
-		KEY(XKB_KEY_f, KINC_KEY_F)
-		KEY(XKB_KEY_g, KINC_KEY_G)
-		KEY(XKB_KEY_h, KINC_KEY_H)
-		KEY(XKB_KEY_i, KINC_KEY_I)
-		KEY(XKB_KEY_j, KINC_KEY_J)
-		KEY(XKB_KEY_k, KINC_KEY_K)
-		KEY(XKB_KEY_l, KINC_KEY_L)
-		KEY(XKB_KEY_m, KINC_KEY_M)
-		KEY(XKB_KEY_n, KINC_KEY_N)
-		KEY(XKB_KEY_o, KINC_KEY_O)
-		KEY(XKB_KEY_p, KINC_KEY_P)
-		KEY(XKB_KEY_q, KINC_KEY_Q)
-		KEY(XKB_KEY_r, KINC_KEY_R)
-		KEY(XKB_KEY_s, KINC_KEY_S)
-		KEY(XKB_KEY_t, KINC_KEY_T)
-		KEY(XKB_KEY_u, KINC_KEY_U)
-		KEY(XKB_KEY_v, KINC_KEY_V)
-		KEY(XKB_KEY_w, KINC_KEY_W)
-		KEY(XKB_KEY_x, KINC_KEY_X)
-		KEY(XKB_KEY_y, KINC_KEY_Y)
-		KEY(XKB_KEY_z, KINC_KEY_Z)
-		KEY(XKB_KEY_1, KINC_KEY_1)
-		KEY(XKB_KEY_2, KINC_KEY_2)
-		KEY(XKB_KEY_3, KINC_KEY_3)
-		KEY(XKB_KEY_4, KINC_KEY_4)
-		KEY(XKB_KEY_5, KINC_KEY_5)
-		KEY(XKB_KEY_6, KINC_KEY_6)
-		KEY(XKB_KEY_7, KINC_KEY_7)
-		KEY(XKB_KEY_8, KINC_KEY_8)
-		KEY(XKB_KEY_9, KINC_KEY_9)
-		KEY(XKB_KEY_0, KINC_KEY_0)
-		KEY(XKB_KEY_Escape, KINC_KEY_ESCAPE)
-		KEY(XKB_KEY_F1, KINC_KEY_F1)
-		KEY(XKB_KEY_F2, KINC_KEY_F2)
-		KEY(XKB_KEY_F3, KINC_KEY_F3)
-		KEY(XKB_KEY_F4, KINC_KEY_F4)
-		KEY(XKB_KEY_F5, KINC_KEY_F5)
-		KEY(XKB_KEY_F6, KINC_KEY_F6)
-		KEY(XKB_KEY_F7, KINC_KEY_F7)
-		KEY(XKB_KEY_F8, KINC_KEY_F8)
-		KEY(XKB_KEY_F9, KINC_KEY_F9)
-		KEY(XKB_KEY_F10, KINC_KEY_F10)
-		KEY(XKB_KEY_F11, KINC_KEY_F11)
-		KEY(XKB_KEY_F12, KINC_KEY_F12)
+		KEY(XKB_KEY_Right, IRON_KEY_RIGHT)
+		KEY(XKB_KEY_Left, IRON_KEY_LEFT)
+		KEY(XKB_KEY_Up, IRON_KEY_UP)
+		KEY(XKB_KEY_Down, IRON_KEY_DOWN)
+		KEY(XKB_KEY_space, IRON_KEY_SPACE)
+		KEY(XKB_KEY_BackSpace, IRON_KEY_BACKSPACE)
+		KEY(XKB_KEY_Tab, IRON_KEY_TAB)
+		KEY(XKB_KEY_Return, IRON_KEY_RETURN)
+		KEY(XKB_KEY_Shift_L, IRON_KEY_SHIFT)
+		KEY(XKB_KEY_Shift_R, IRON_KEY_SHIFT)
+		KEY(XKB_KEY_Control_L, IRON_KEY_CONTROL)
+		KEY(XKB_KEY_Control_R, IRON_KEY_CONTROL)
+		KEY(XKB_KEY_Alt_L, IRON_KEY_ALT)
+		KEY(XKB_KEY_Alt_R, IRON_KEY_ALT)
+		KEY(XKB_KEY_Delete, IRON_KEY_DELETE)
+		KEY(XKB_KEY_comma, IRON_KEY_COMMA)
+		KEY(XKB_KEY_period, IRON_KEY_PERIOD)
+		KEY(XKB_KEY_bracketleft, IRON_KEY_OPEN_BRACKET)
+		KEY(XKB_KEY_bracketright, IRON_KEY_CLOSE_BRACKET)
+		KEY(XKB_KEY_braceleft, IRON_KEY_OPEN_CURLY_BRACKET)
+		KEY(XKB_KEY_braceright, IRON_KEY_CLOSE_CURLY_BRACKET)
+		KEY(XKB_KEY_parenleft, IRON_KEY_OPEN_PAREN)
+		KEY(XKB_KEY_parenright, IRON_KEY_CLOSE_PAREN)
+		KEY(XKB_KEY_backslash, IRON_KEY_BACK_SLASH)
+		KEY(XKB_KEY_apostrophe, IRON_KEY_QUOTE)
+		KEY(XKB_KEY_colon, IRON_KEY_COLON)
+		KEY(XKB_KEY_semicolon, IRON_KEY_SEMICOLON)
+		KEY(XKB_KEY_minus, IRON_KEY_HYPHEN_MINUS)
+		KEY(XKB_KEY_underscore, IRON_KEY_UNDERSCORE)
+		KEY(XKB_KEY_slash, IRON_KEY_SLASH)
+		KEY(XKB_KEY_bar, IRON_KEY_PIPE)
+		KEY(XKB_KEY_question, IRON_KEY_QUESTIONMARK)
+		KEY(XKB_KEY_less, IRON_KEY_LESS_THAN)
+		KEY(XKB_KEY_greater, IRON_KEY_GREATER_THAN)
+		KEY(XKB_KEY_asterisk, IRON_KEY_ASTERISK)
+		KEY(XKB_KEY_ampersand, IRON_KEY_AMPERSAND)
+		KEY(XKB_KEY_asciicircum, IRON_KEY_CIRCUMFLEX)
+		KEY(XKB_KEY_percent, IRON_KEY_PERCENT)
+		KEY(XKB_KEY_dollar, IRON_KEY_DOLLAR)
+		KEY(XKB_KEY_numbersign, IRON_KEY_HASH)
+		KEY(XKB_KEY_at, IRON_KEY_AT)
+		KEY(XKB_KEY_exclam, IRON_KEY_EXCLAMATION)
+		KEY(XKB_KEY_equal, IRON_KEY_EQUALS)
+		KEY(XKB_KEY_plus, IRON_KEY_ADD)
+		KEY(XKB_KEY_quoteleft, IRON_KEY_BACK_QUOTE)
+		KEY(XKB_KEY_quotedbl, IRON_KEY_DOUBLE_QUOTE)
+		KEY(XKB_KEY_asciitilde, IRON_KEY_TILDE)
+		KEY(XKB_KEY_Pause, IRON_KEY_PAUSE)
+		KEY(XKB_KEY_Scroll_Lock, IRON_KEY_SCROLL_LOCK)
+		KEY(XKB_KEY_Home, IRON_KEY_HOME)
+		KEY(XKB_KEY_Page_Up, IRON_KEY_PAGE_UP)
+		KEY(XKB_KEY_Page_Down, IRON_KEY_PAGE_DOWN)
+		KEY(XKB_KEY_End, IRON_KEY_END)
+		KEY(XKB_KEY_Insert, IRON_KEY_INSERT)
+		KEY(XKB_KEY_KP_Enter, IRON_KEY_RETURN)
+		KEY(XKB_KEY_KP_Multiply, IRON_KEY_MULTIPLY)
+		KEY(XKB_KEY_KP_Add, IRON_KEY_ADD)
+		KEY(XKB_KEY_KP_Subtract, IRON_KEY_SUBTRACT)
+		KEY(XKB_KEY_KP_Decimal, IRON_KEY_DECIMAL)
+		KEY(XKB_KEY_KP_Divide, IRON_KEY_DIVIDE)
+		KEY(XKB_KEY_KP_0, IRON_KEY_NUMPAD_0)
+		KEY(XKB_KEY_KP_1, IRON_KEY_NUMPAD_1)
+		KEY(XKB_KEY_KP_2, IRON_KEY_NUMPAD_2)
+		KEY(XKB_KEY_KP_3, IRON_KEY_NUMPAD_3)
+		KEY(XKB_KEY_KP_4, IRON_KEY_NUMPAD_4)
+		KEY(XKB_KEY_KP_5, IRON_KEY_NUMPAD_5)
+		KEY(XKB_KEY_KP_6, IRON_KEY_NUMPAD_6)
+		KEY(XKB_KEY_KP_7, IRON_KEY_NUMPAD_7)
+		KEY(XKB_KEY_KP_8, IRON_KEY_NUMPAD_8)
+		KEY(XKB_KEY_KP_9, IRON_KEY_NUMPAD_9)
+		KEY(XKB_KEY_KP_Insert, IRON_KEY_INSERT)
+		KEY(XKB_KEY_KP_Delete, IRON_KEY_DELETE)
+		KEY(XKB_KEY_KP_End, IRON_KEY_END)
+		KEY(XKB_KEY_KP_Home, IRON_KEY_HOME)
+		KEY(XKB_KEY_KP_Left, IRON_KEY_LEFT)
+		KEY(XKB_KEY_KP_Up, IRON_KEY_UP)
+		KEY(XKB_KEY_KP_Right, IRON_KEY_RIGHT)
+		KEY(XKB_KEY_KP_Down, IRON_KEY_DOWN)
+		KEY(XKB_KEY_KP_Page_Up, IRON_KEY_PAGE_UP)
+		KEY(XKB_KEY_KP_Page_Down, IRON_KEY_PAGE_DOWN)
+		KEY(XKB_KEY_Menu, IRON_KEY_CONTEXT_MENU)
+		KEY(XKB_KEY_a, IRON_KEY_A)
+		KEY(XKB_KEY_b, IRON_KEY_B)
+		KEY(XKB_KEY_c, IRON_KEY_C)
+		KEY(XKB_KEY_d, IRON_KEY_D)
+		KEY(XKB_KEY_e, IRON_KEY_E)
+		KEY(XKB_KEY_f, IRON_KEY_F)
+		KEY(XKB_KEY_g, IRON_KEY_G)
+		KEY(XKB_KEY_h, IRON_KEY_H)
+		KEY(XKB_KEY_i, IRON_KEY_I)
+		KEY(XKB_KEY_j, IRON_KEY_J)
+		KEY(XKB_KEY_k, IRON_KEY_K)
+		KEY(XKB_KEY_l, IRON_KEY_L)
+		KEY(XKB_KEY_m, IRON_KEY_M)
+		KEY(XKB_KEY_n, IRON_KEY_N)
+		KEY(XKB_KEY_o, IRON_KEY_O)
+		KEY(XKB_KEY_p, IRON_KEY_P)
+		KEY(XKB_KEY_q, IRON_KEY_Q)
+		KEY(XKB_KEY_r, IRON_KEY_R)
+		KEY(XKB_KEY_s, IRON_KEY_S)
+		KEY(XKB_KEY_t, IRON_KEY_T)
+		KEY(XKB_KEY_u, IRON_KEY_U)
+		KEY(XKB_KEY_v, IRON_KEY_V)
+		KEY(XKB_KEY_w, IRON_KEY_W)
+		KEY(XKB_KEY_x, IRON_KEY_X)
+		KEY(XKB_KEY_y, IRON_KEY_Y)
+		KEY(XKB_KEY_z, IRON_KEY_Z)
+		KEY(XKB_KEY_1, IRON_KEY_1)
+		KEY(XKB_KEY_2, IRON_KEY_2)
+		KEY(XKB_KEY_3, IRON_KEY_3)
+		KEY(XKB_KEY_4, IRON_KEY_4)
+		KEY(XKB_KEY_5, IRON_KEY_5)
+		KEY(XKB_KEY_6, IRON_KEY_6)
+		KEY(XKB_KEY_7, IRON_KEY_7)
+		KEY(XKB_KEY_8, IRON_KEY_8)
+		KEY(XKB_KEY_9, IRON_KEY_9)
+		KEY(XKB_KEY_0, IRON_KEY_0)
+		KEY(XKB_KEY_Escape, IRON_KEY_ESCAPE)
+		KEY(XKB_KEY_F1, IRON_KEY_F1)
+		KEY(XKB_KEY_F2, IRON_KEY_F2)
+		KEY(XKB_KEY_F3, IRON_KEY_F3)
+		KEY(XKB_KEY_F4, IRON_KEY_F4)
+		KEY(XKB_KEY_F5, IRON_KEY_F5)
+		KEY(XKB_KEY_F6, IRON_KEY_F6)
+		KEY(XKB_KEY_F7, IRON_KEY_F7)
+		KEY(XKB_KEY_F8, IRON_KEY_F8)
+		KEY(XKB_KEY_F9, IRON_KEY_F9)
+		KEY(XKB_KEY_F10, IRON_KEY_F10)
+		KEY(XKB_KEY_F11, IRON_KEY_F11)
+		KEY(XKB_KEY_F12, IRON_KEY_F12)
 	default:
-		return KINC_KEY_UNKNOWN;
+		return IRON_KEY_UNKNOWN;
 	}
 #undef KEY
 }
 
 static bool mouse_hidden = false;
 
-void kinc_internal_mouse_lock() {
-	kinc_mouse_hide();
-	int width = kinc_window_width();
-	int height = kinc_window_height();
+void iron_internal_mouse_lock() {
+	iron_mouse_hide();
+	int width = iron_window_width();
+	int height = iron_window_height();
 
 	int x, y;
-	kinc_mouse_get_position(&x, &y);
+	iron_mouse_get_position(&x, &y);
 
 	// Guess the new position of X and Y
 	int newX = x;
@@ -1731,27 +1731,27 @@ void kinc_internal_mouse_lock() {
 	}
 
 	// Force the mouse to stay inside the window
-	kinc_mouse_set_position(newX, newY);
+	iron_mouse_set_position(newX, newY);
 }
 
-void kinc_internal_mouse_unlock() {
-	kinc_mouse_show();
+void iron_internal_mouse_unlock() {
+	iron_mouse_show();
 }
 
-bool kinc_mouse_can_lock(void) {
+bool iron_mouse_can_lock(void) {
 	return true;
 }
 
-void kinc_mouse_show() {
-	struct kinc_x11_window *window = &x11_ctx.windows[0];
+void iron_mouse_show() {
+	struct iron_x11_window *window = &x11_ctx.windows[0];
 	if (mouse_hidden) {
 		xlib.XUndefineCursor(x11_ctx.display, window->window);
 		mouse_hidden = false;
 	}
 }
 
-void kinc_mouse_hide() {
-	struct kinc_x11_window *window = &x11_ctx.windows[0];
+void iron_mouse_hide() {
+	struct iron_x11_window *window = &x11_ctx.windows[0];
 	if (!mouse_hidden) {
 		XColor col;
 		col.pixel = 0;
@@ -1769,8 +1769,8 @@ void kinc_mouse_hide() {
 	}
 }
 
-void kinc_mouse_set_cursor(int cursor_index) {
-	struct kinc_x11_window *window = &x11_ctx.windows[0];
+void iron_mouse_set_cursor(int cursor_index) {
+	struct iron_x11_window *window = &x11_ctx.windows[0];
 	if (!mouse_hidden) {
 		Cursor cursor;
 		switch (cursor_index) {
@@ -1840,15 +1840,15 @@ void kinc_mouse_set_cursor(int cursor_index) {
 	}
 }
 
-void kinc_mouse_set_position(int x, int y) {
-	struct kinc_x11_window *window = &x11_ctx.windows[0];
+void iron_mouse_set_position(int x, int y) {
+	struct iron_x11_window *window = &x11_ctx.windows[0];
 
 	xlib.XWarpPointer(x11_ctx.display, None, window->window, 0, 0, 0, 0, x, y);
 	xlib.XFlush(x11_ctx.display); // Flushes the output buffer, therefore updates the cursor's position.
 }
 
-void kinc_mouse_get_position(int *x, int *y) {
-	struct kinc_x11_window *window = &x11_ctx.windows[0];
+void iron_mouse_get_position(int *x, int *y) {
+	struct iron_x11_window *window = &x11_ctx.windows[0];
 	Window inwin;
 	Window inchildwin;
 	int rootx, rooty;
@@ -1880,7 +1880,7 @@ static void HIDGamepad_open(struct HIDGamepad *pad) {
 		}
 		pad->name[0] = 0;
 		// snprintf(pad->name, sizeof(pad->name), "%s(%s)", buf, pad->gamepad_dev_name); // TODO: valgrind error
-		kinc_internal_gamepad_trigger_connect(pad->idx);
+		iron_internal_gamepad_trigger_connect(pad->idx);
 	}
 }
 
@@ -1897,7 +1897,7 @@ static void HIDGamepad_init(struct HIDGamepad *pad, int index) {
 
 static void HIDGamepad_close(struct HIDGamepad *pad) {
 	if (pad->connected) {
-		kinc_internal_gamepad_trigger_disconnect(pad->idx);
+		iron_internal_gamepad_trigger_disconnect(pad->idx);
 		close(pad->file_descriptor);
 		pad->file_descriptor = -1;
 		pad->connected = false;
@@ -1907,11 +1907,11 @@ static void HIDGamepad_close(struct HIDGamepad *pad) {
 void HIDGamepad_processEvent(struct HIDGamepad *pad, struct js_event e) {
 	switch (e.type) {
 	case JS_EVENT_BUTTON:
-		kinc_internal_gamepad_trigger_button(pad->idx, e.number, e.value);
+		iron_internal_gamepad_trigger_button(pad->idx, e.number, e.value);
 		break;
 	case JS_EVENT_AXIS: {
 		float value = e.number % 2 == 0 ? e.value : -e.value;
-		kinc_internal_gamepad_trigger_axis(pad->idx, e.number, value / 32767.0f);
+		iron_internal_gamepad_trigger_axis(pad->idx, e.number, value / 32767.0f);
 		break;
 	}
 	default:
@@ -1935,7 +1935,7 @@ struct HIDGamepadUdevHelper {
 
 static struct HIDGamepadUdevHelper udev_helper;
 
-static struct HIDGamepad gamepads[KINC_GAMEPAD_MAX_COUNT];
+static struct HIDGamepad gamepads[IRON_GAMEPAD_MAX_COUNT];
 
 static void HIDGamepadUdevHelper_openOrCloseGamepad(struct HIDGamepadUdevHelper *helper, struct udev_device *dev) {
 	const char *action = udev_device_get_action(dev);
@@ -2013,34 +2013,34 @@ static void HIDGamepadUdevHelper_close(struct HIDGamepadUdevHelper *helper) {
 	udev_unref(helper->udevPtr);
 }
 
-void kinc_linux_initHIDGamepads() {
-	for (int i = 0; i < KINC_GAMEPAD_MAX_COUNT; ++i) {
+void iron_linux_initHIDGamepads() {
+	for (int i = 0; i < IRON_GAMEPAD_MAX_COUNT; ++i) {
 		HIDGamepad_init(&gamepads[i], i);
 	}
 	HIDGamepadUdevHelper_init(&udev_helper);
 }
 
-void kinc_linux_updateHIDGamepads() {
+void iron_linux_updateHIDGamepads() {
 	HIDGamepadUdevHelper_update(&udev_helper);
-	for (int i = 0; i < KINC_GAMEPAD_MAX_COUNT; ++i) {
+	for (int i = 0; i < IRON_GAMEPAD_MAX_COUNT; ++i) {
 		HIDGamepad_update(&gamepads[i]);
 	}
 }
 
-void kinc_linux_closeHIDGamepads() {
+void iron_linux_closeHIDGamepads() {
 	HIDGamepadUdevHelper_close(&udev_helper);
 }
 
-const char *kinc_gamepad_vendor(int gamepad) {
+const char *iron_gamepad_vendor(int gamepad) {
 	return "Linux gamepad";
 }
 
-const char *kinc_gamepad_product_name(int gamepad) {
-	return gamepad >= 0 && gamepad < KINC_GAMEPAD_MAX_COUNT ? gamepads[gamepad].name : "";
+const char *iron_gamepad_product_name(int gamepad) {
+	return gamepad >= 0 && gamepad < IRON_GAMEPAD_MAX_COUNT ? gamepads[gamepad].name : "";
 }
 
-bool kinc_gamepad_connected(int gamepad) {
-	return gamepad >= 0 && gamepad < KINC_GAMEPAD_MAX_COUNT && gamepads[gamepad].connected;
+bool iron_gamepad_connected(int gamepad) {
+	return gamepad >= 0 && gamepad < IRON_GAMEPAD_MAX_COUNT && gamepads[gamepad].connected;
 }
 
-void kinc_gamepad_rumble(int gamepad, float left, float right) {}
+void iron_gamepad_rumble(int gamepad, float left, float right) {}
