@@ -248,9 +248,9 @@ function slot_layer_clear(raw: slot_layer_t, base_color: i32 = 0x00000000, base_
 	iron_g5_clear(base_color); // Base
 	_iron_g4_end();
 	if (base_image != null) {
-		g2_begin(raw.texpaint);
+		draw_begin(raw.texpaint);
 		draw_scaled_image(base_image, 0, 0, raw.texpaint.width, raw.texpaint.height);
-		g2_end();
+		draw_end();
 	}
 
 	if (slot_layer_is_layer(raw)) {
@@ -268,11 +268,11 @@ function slot_layer_clear(raw: slot_layer_t, base_color: i32 = 0x00000000, base_
 
 function slot_layer_invert_mask(raw: slot_layer_t) {
 	let inverted: iron_g5_texture_t = iron_g4_create_render_target(raw.texpaint.width, raw.texpaint.height, tex_format_t.RGBA32);
-	g2_begin(inverted);
+	draw_begin(inverted);
 	draw_set_pipeline(pipes_invert8);
 	draw_image(raw.texpaint, 0, 0);
 	draw_set_pipeline(null);
-	g2_end();
+	draw_end();
 	let _texpaint: iron_g5_texture_t = raw.texpaint;
 	app_notify_on_next_frame(function (_texpaint: iron_g5_texture_t) {
 		iron_unload_image(_texpaint);
@@ -306,43 +306,43 @@ function slot_layer_duplicate(raw: slot_layer_t): slot_layer_t {
 	array_insert(layers, i, l);
 
 	if (slot_layer_is_layer(raw)) {
-		g2_begin(l.texpaint);
+		draw_begin(l.texpaint);
 		draw_set_pipeline(pipes_copy);
 		draw_image(raw.texpaint, 0, 0);
 		draw_set_pipeline(null);
-		g2_end();
+		draw_end();
 
 		if (l.texpaint_nor != null) {
-			g2_begin(l.texpaint_nor);
+			draw_begin(l.texpaint_nor);
 			draw_set_pipeline(pipes_copy);
 			draw_image(raw.texpaint_nor, 0, 0);
 			draw_set_pipeline(null);
-			g2_end();
+			draw_end();
 		}
 
 		if (l.texpaint_pack != null) {
-			g2_begin(l.texpaint_pack);
+			draw_begin(l.texpaint_pack);
 			draw_set_pipeline(pipes_copy);
 			draw_image(raw.texpaint_pack, 0, 0);
 			draw_set_pipeline(null);
-			g2_end();
+			draw_end();
 		}
 	}
 	else if (slot_layer_is_mask(raw)) {
-		g2_begin(l.texpaint);
+		draw_begin(l.texpaint);
 		draw_set_pipeline(pipes_copy8);
 		draw_image(raw.texpaint, 0, 0);
 		draw_set_pipeline(null);
-		g2_end();
+		draw_end();
 	}
 
 	if (l.texpaint_preview != null) {
-		g2_begin(l.texpaint_preview);
+		draw_begin(l.texpaint_preview);
 		iron_g5_clear(0x00000000);
 		draw_set_pipeline(pipes_copy);
 		draw_scaled_image(raw.texpaint_preview, 0, 0, raw.texpaint_preview.width, raw.texpaint_preview.height);
 		draw_set_pipeline(null);
-		g2_end();
+		draw_end();
 	}
 
 	l.visible = raw.visible;
@@ -385,32 +385,32 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 
 		let _texpaint: iron_g5_texture_t = raw.texpaint;
 		raw.texpaint = iron_g4_create_render_target(res_x, res_y, format);
-		g2_begin(raw.texpaint);
+		draw_begin(raw.texpaint);
 		draw_set_pipeline(pipes_copy);
 		draw_scaled_image(_texpaint, 0, 0, res_x, res_y);
 		draw_set_pipeline(null);
-		g2_end();
+		draw_end();
 
 		let _texpaint_nor: iron_g5_texture_t = raw.texpaint_nor;
 		if (raw.texpaint_nor != null) {
 			raw.texpaint_nor = iron_g4_create_render_target(res_x, res_y, format);
 
-			g2_begin(raw.texpaint_nor);
+			draw_begin(raw.texpaint_nor);
 			draw_set_pipeline(pipes_copy);
 			draw_scaled_image(_texpaint_nor, 0, 0, res_x, res_y);
 			draw_set_pipeline(null);
-			g2_end();
+			draw_end();
 		}
 
 		let _texpaint_pack: iron_g5_texture_t = raw.texpaint_pack;
 		if (raw.texpaint_pack != null) {
 			raw.texpaint_pack = iron_g4_create_render_target(res_x, res_y, format);
 
-			g2_begin(raw.texpaint_pack);
+			draw_begin(raw.texpaint_pack);
 			draw_set_pipeline(pipes_copy);
 			draw_scaled_image(_texpaint_pack, 0, 0, res_x, res_y);
 			draw_set_pipeline(null);
-			g2_end();
+			draw_end();
 		}
 
 		app_notify_on_next_frame(function (_texpaint: iron_g5_texture_t) {
@@ -446,11 +446,11 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 		let _texpaint: iron_g5_texture_t = raw.texpaint;
 		raw.texpaint = iron_g4_create_render_target(res_x, res_y, tex_format_t.RGBA32);
 
-		g2_begin(raw.texpaint);
+		draw_begin(raw.texpaint);
 		draw_set_pipeline(pipes_copy8);
 		draw_scaled_image(_texpaint, 0, 0, res_x, res_y);
 		draw_set_pipeline(null);
-		g2_end();
+		draw_end();
 
 		app_notify_on_next_frame(function (_texpaint: iron_g5_texture_t) {
 			iron_unload_image(_texpaint);

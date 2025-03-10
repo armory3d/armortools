@@ -147,9 +147,9 @@ function app_render() {
 
 function app_render_2d() {
 	if (app_on_renders_2d.length > 0) {
-		g2_begin();
+		draw_begin();
 		_app_run_callbacks(app_on_renders_2d);
-		g2_end();
+		draw_end();
 	}
 }
 

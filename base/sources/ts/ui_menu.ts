@@ -243,10 +243,10 @@ function ui_menu_render() {
 			///if (is_paint || is_sculpt)
 			context_raw.draw_wireframe = ui_check(context_raw.wireframe_handle, " " + tr("Wireframe"));
 			if (context_raw.wireframe_handle.changed) {
-				let current: iron_g5_texture_t = _g2_current;
-				g2_end();
+				let current: iron_g5_texture_t = _draw_current;
+				draw_end();
 				util_uv_cache_uv_map();
-				g2_begin(current);
+				draw_begin(current);
 				make_material_parse_mesh_material();
 			}
 			///end

@@ -156,11 +156,11 @@ function make_material_parse_paint_material(bake_previews: bool = true) {
 	}
 
 	if (bake_previews) {
-		let current: iron_g5_texture_t = _g2_current;
-		let g2_in_use: bool = _g2_in_use;
-		if (g2_in_use) g2_end();
+		let current: iron_g5_texture_t = _draw_current;
+		let g2_in_use: bool = _draw_in_use;
+		if (g2_in_use) draw_end();
 		make_material_bake_node_previews();
-		if (g2_in_use) g2_begin(current);
+		if (g2_in_use) draw_begin(current);
 	}
 
 	let m: material_data_t = project_materials[0].data;

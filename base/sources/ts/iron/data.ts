@@ -147,7 +147,7 @@ function data_get_font(file: string): draw_font_t {
 	}
 
 	let blob: buffer_t = iron_load_blob(data_resolve_path(file));
-	let b: draw_font_t = g2_font_create(blob);
+	let b: draw_font_t = { buf: blob, index: 0 };
 	map_set(data_cached_fonts, file, b);
 	data_assets_loaded++;
 	return b;
@@ -207,7 +207,7 @@ function data_delete_font(handle: string) {
 	if (font == null) {
 		return;
 	}
-	g2_font_unload(font);
+	draw_font_destroy(font);
 	map_delete(data_cached_fonts, handle);
 }
 
@@ -270,7 +270,7 @@ function data_delete_all() {
 	let cached_fonts_keys: string[] = map_keys(data_cached_fonts);
 	for (let i: i32 = 0; i < cached_fonts_keys.length; ++i) {
 		let c: draw_font_t = map_get(data_cached_fonts, cached_fonts_keys[i]);
-		g2_font_unload(c);
+		draw_font_destroy(c);
 	}
 	data_cached_fonts = map_create();
 }

@@ -57,7 +57,7 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): i
 		let x: i32 = i % tiles_x;
 		let y: i32 = math_floor(i / tiles_x);
 
-		g2_begin(photo_to_pbr_node_temp);
+		draw_begin(photo_to_pbr_node_temp);
 		draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w, -config_get_texture_res_x(), config_get_texture_res_y());
 		draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w, config_get_texture_res_x(), -config_get_texture_res_y());
 		draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w, -config_get_texture_res_x(), -config_get_texture_res_y());
@@ -65,7 +65,7 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): i
 		draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w + photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w + photo_to_pbr_node_tile_w, -config_get_texture_res_x(), config_get_texture_res_y());
 		draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w + photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w + photo_to_pbr_node_tile_w, config_get_texture_res_x(), -config_get_texture_res_y());
 		draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w, config_get_texture_res_x(), config_get_texture_res_y());
-		g2_end();
+		draw_end();
 
 		let bytes_img: buffer_t = iron_g4_get_texture_pixels(photo_to_pbr_node_temp);
 		let u8a: buffer_t = bytes_img;
@@ -154,9 +154,9 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): i
 		///end
 
 		let temp2: iron_g5_texture_t = iron_g4_create_texture_from_bytes(u8a, photo_to_pbr_node_tile_w, photo_to_pbr_node_tile_w);
-		g2_begin(photo_to_pbr_node_images[from]);
+		draw_begin(photo_to_pbr_node_images[from]);
 		draw_image(temp2, x * photo_to_pbr_node_tile_w, y * photo_to_pbr_node_tile_w);
-		g2_end();
+		draw_end();
 		app_notify_on_next_frame(function(temp2: iron_g5_texture_t) {
 			iron_unload_image(temp2);
 		}, temp2);

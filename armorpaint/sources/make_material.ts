@@ -175,11 +175,11 @@ function make_material_parse_paint_material(bake_previews: bool = true) {
 	}
 
 	if (bake_previews) {
-		let current: iron_g5_texture_t = _g2_current;
-		let g2_in_use: bool = _g2_in_use;
-		if (g2_in_use) g2_end();
+		let current: iron_g5_texture_t = _draw_current;
+		let g2_in_use: bool = _draw_in_use;
+		if (g2_in_use) draw_end();
 		make_material_bake_node_previews();
-		if (g2_in_use) g2_begin(current);
+		if (g2_in_use) draw_begin(current);
 	}
 
 	let m: material_data_t = project_materials[0].data;
@@ -367,9 +367,9 @@ function make_material_bake_node_preview(node: ui_node_t, group: ui_node_canvas_
 		let rts: map_t<string, render_target_t> = render_path_render_targets;
 		let texpaint_live: render_target_t = map_get(rts, "texpaint_live");
 
-		g2_begin(image);
+		draw_begin(image);
 		draw_image(texpaint_live._image, 0, 0);
-		g2_end();
+		draw_end();
 	}
 }
 

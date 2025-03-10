@@ -177,14 +177,14 @@ function export_arm_run_project() {
 	let tex: iron_g5_texture_t = rt._image;
 	let mesh_icon: iron_g5_texture_t = iron_g4_create_render_target(256, 256);
 	let r: f32 = app_w() / app_h();
-	g2_begin(mesh_icon);
+	draw_begin(mesh_icon);
 	draw_scaled_image(tex, -(256 * r - 256) / 2, 0, 256 * r, 256);
-	g2_end();
+	draw_end();
 
 	///if arm_metal
 	// Flush command list
-	g2_begin(mesh_icon);
-	g2_end();
+	draw_begin(mesh_icon);
+	draw_end();
 	///end
 
 	let mesh_icon_pixels: buffer_t = iron_g4_get_texture_pixels(mesh_icon);
@@ -488,9 +488,9 @@ function export_arm_pack_assets(raw: project_format_t, assets: asset_t[]) {
 		if (!project_packed_asset_exists(raw.packed_assets, assets[i].file)) {
 			let image: iron_g5_texture_t = project_get_image(assets[i]);
 			let temp: iron_g5_texture_t = iron_g4_create_render_target(image.width, image.height);
-			g2_begin(temp);
+			draw_begin(temp);
 			draw_image(image, 0, 0);
-			g2_end();
+			draw_end();
 			array_push(temp_images, temp);
 			let pa: packed_asset_t = {
 				name: assets[i].file,

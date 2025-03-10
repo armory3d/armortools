@@ -89,7 +89,7 @@ function ui_view2d_render() {
 		ui_view2d_hwnd.redraws = 2; // Paint was active
 	}
 
-	g2_end();
+	draw_end();
 
 	// Cache grid
 	if (ui_view2d_grid_redraw) {
@@ -177,18 +177,18 @@ function ui_view2d_render() {
 			}
 
 			if (ui_view2d_layer_mode == view_2d_layer_mode_t.VISIBLE) {
-				let current: iron_g5_texture_t = _g2_current;
-				let g2_in_use: bool = _g2_in_use;
-				if (g2_in_use) g2_end();
+				let current: iron_g5_texture_t = _draw_current;
+				let g2_in_use: bool = _draw_in_use;
+				if (g2_in_use) draw_end();
 				layer = layers_flatten();
-				if (g2_in_use) g2_begin(current);
+				if (g2_in_use) draw_begin(current);
 			}
 			else if (slot_layer_is_group(layer)) {
-				let current: iron_g5_texture_t = _g2_current;
-				let g2_in_use: bool = _g2_in_use;
-				if (g2_in_use) g2_end();
+				let current: iron_g5_texture_t = _draw_current;
+				let g2_in_use: bool = _draw_in_use;
+				if (g2_in_use) draw_end();
 				layer = layers_flatten(false, slot_layer_get_children(layer));
-				if (g2_in_use) g2_begin(current);
+				if (g2_in_use) draw_begin(current);
 			}
 
 			tex =
@@ -259,9 +259,9 @@ function ui_view2d_render() {
 				app_notify_on_next_frame(function () {
 					let rt: render_target_t = map_get(render_path_render_targets, "texpaint_picker");
 					let texpaint_picker: iron_g5_texture_t = rt._image;
-					g2_begin(texpaint_picker);
+					draw_begin(texpaint_picker);
 					draw_scaled_image(_ui_view2d_render_tex, -_ui_view2d_render_x, -_ui_view2d_render_y, _ui_view2d_render_tw, _ui_view2d_render_th);
-					g2_end();
+					draw_end();
 					let a: buffer_t = iron_g4_get_texture_pixels(texpaint_picker);
 					///if (arm_metal || arm_vulkan)
 					let i0: i32 = 2;
@@ -309,7 +309,7 @@ function ui_view2d_render() {
 		let text: string = h.text;
 		///end
 
-		ui_view2d_ui._w = math_floor(math_min(g2_font_width(ui_view2d_ui.ops.font, ui_view2d_ui.font_size, text) + 15 * ui_SCALE(ui_view2d_ui), 100 * ui_SCALE(ui_view2d_ui)));
+		ui_view2d_ui._w = math_floor(math_min(draw_string_width(ui_view2d_ui.ops.font, ui_view2d_ui.font_size, text) + 15 * ui_SCALE(ui_view2d_ui), 100 * ui_SCALE(ui_view2d_ui)));
 
 		if (ui_view2d_type == view_2d_type_t.ASSET) {
 			let asset: asset_t = context_raw.texture;
@@ -418,7 +418,7 @@ function ui_view2d_render() {
 		///end
 	}
 	ui_end();
-	g2_begin(null);
+	draw_begin(null);
 }
 
 function ui_view2d_update() {

@@ -225,9 +225,9 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 		if (l1masks != null && !bake_material) {
 			if (l1masks.length > 1) {
 				layers_make_temp_mask_img();
-				g2_begin(pipes_temp_mask_image);
+				draw_begin(pipes_temp_mask_image);
 				iron_g5_clear(0x00000000);
-				g2_end();
+				draw_end();
 				let l1: slot_layer_t = {
 					texpaint: pipes_temp_mask_image
 				};
@@ -242,11 +242,11 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 		}
 
 		if (l1.paint_base) {
-			g2_begin(layers_temp_image); // Copy to temp
+			draw_begin(layers_temp_image); // Copy to temp
 			draw_set_pipeline(pipes_copy);
 			draw_image(layers_expa, 0, 0);
 			draw_set_pipeline(null);
-			g2_end();
+			draw_end();
 
 			_iron_g4_begin(layers_expa);
 			iron_g5_set_pipeline(pipes_merge);
@@ -263,11 +263,11 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 		}
 
 		if (l1.paint_nor) {
-			g2_begin(layers_temp_image);
+			draw_begin(layers_temp_image);
 			draw_set_pipeline(pipes_copy);
 			draw_image(layers_expb, 0, 0);
 			draw_set_pipeline(null);
-			g2_end();
+			draw_end();
 
 			_iron_g4_begin(layers_expb);
 			iron_g5_set_pipeline(pipes_merge);
@@ -284,11 +284,11 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 		}
 
 		if (l1.paint_occ || l1.paint_rough || l1.paint_met || l1.paint_height) {
-			g2_begin(layers_temp_image);
+			draw_begin(layers_temp_image);
 			draw_set_pipeline(pipes_copy);
 			draw_image(layers_expc, 0, 0);
 			draw_set_pipeline(null);
-			g2_end();
+			draw_end();
 
 			if (l1.paint_occ && l1.paint_rough && l1.paint_met && l1.paint_height) {
 				layers_commands_merge_pack(pipes_merge, layers_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask, l1.paint_height_blend ? -3 : -1);
@@ -303,12 +303,12 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 
 	///if arm_metal
 	// Flush command list
-	g2_begin(layers_expa);
-	g2_end();
-	g2_begin(layers_expb);
-	g2_end();
-	g2_begin(layers_expc);
-	g2_end();
+	draw_begin(layers_expa);
+	draw_end();
+	draw_begin(layers_expb);
+	draw_end();
+	draw_begin(layers_expc);
+	draw_end();
 	///end
 	///end
 

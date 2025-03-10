@@ -668,8 +668,8 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 		if (!is_typing) {
 			if (i < 9 && operator_shortcut(map_get(config_keymap, "select_layer"), shortcut_type_t.DOWN)) {
 				let number: string = i32_to_string(i + 1) ;
-				let width: i32 = g2_font_width(ui.ops.font, ui.font_size, number) + 10;
-				let height: i32 = g2_font_height(ui.ops.font, ui.font_size);
+				let width: i32 = draw_string_width(ui.ops.font, ui.font_size, number) + 10;
+				let height: i32 = draw_font_height(ui.ops.font, ui.font_size);
 				draw_set_color(ui.ops.theme.TEXT_COL);
 				draw_filled_rect(uix, uiy, width, height);
 				draw_set_color(ui.ops.theme.BUTTON_COL);
@@ -1006,11 +1006,11 @@ function tab_layers_make_mask_preview_rgba32(l: slot_layer_t) {
 		tab_layers_l = l;
 		app_notify_on_init(function () {
 			let l: slot_layer_t = tab_layers_l;
-			g2_begin(context_raw.mask_preview_rgba32);
+			draw_begin(context_raw.mask_preview_rgba32);
 			draw_set_pipeline(ui_view2d_pipe);
 			_iron_g4_set_int(ui_view2d_channel_loc, 1);
 			draw_image(l.texpaint_preview, 0, 0);
-			g2_end();
+			draw_end();
 			draw_set_pipeline(null);
 		});
 	}

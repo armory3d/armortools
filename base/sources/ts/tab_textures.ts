@@ -142,11 +142,11 @@ function tab_textures_draw(htab: ui_handle_t) {
 									app_notify_on_next_frame(function () {
 										let img: iron_g5_texture_t = _tab_textures_draw_img;
 										let target: iron_g5_texture_t = iron_g4_create_render_target(tab_textures_to_pow2(img.width), tab_textures_to_pow2(img.height));
-										g2_begin(target);
+										draw_begin(target);
 										draw_set_pipeline(pipes_copy);
 										draw_scaled_image(img, 0, 0, target.width, target.height);
 										draw_set_pipeline(null);
-										g2_end();
+										draw_end();
 										app_notify_on_next_frame(function (target: iron_g5_texture_t) {
 											let path: string = _tab_textures_draw_path;
 											let f: string = ui_files_filename;

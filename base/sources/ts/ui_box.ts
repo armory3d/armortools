@@ -53,7 +53,7 @@ function ui_box_render() {
 		draw_filled_rect(0, 0, iron_window_width(), iron_window_height());
 	}
 
-	g2_end();
+	draw_end();
 
 	let ui: ui_t = base_ui_box;
 	let appw: i32 = iron_window_width();
@@ -123,7 +123,7 @@ function ui_box_render() {
 		ui_end();
 	}
 
-	g2_begin(null);
+	draw_begin(null);
 
 	ui_box_draws++;
 }

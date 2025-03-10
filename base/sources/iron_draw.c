@@ -1,14 +1,14 @@
 #include "iron_draw.h"
-#include "const_data.h"
-
 #include <math.h>
-#include <iron_gpu.h>
-#include <iron_file.h>
-#include <iron_simd.h>
-#include <iron_math.h>
-#include <iron_system.h>
-#include <iron_string.h>
+#include "const_data.h"
+#include "iron_gpu.h"
+#include "iron_file.h"
+#include "iron_simd.h"
+#include "iron_math.h"
+#include "iron_system.h"
+#include "iron_string.h"
 #include "iron_vec2.h"
+#include "iron_gc.h"
 #ifdef IRON_DIRECT3D12
 extern bool waitAfterNextDraw;
 #endif
@@ -18,14 +18,16 @@ extern bool waitAfterNextDraw;
 
 draw_font_t *draw_font = NULL;
 int draw_font_size;
+iron_g5_texture_t *_draw_current = NULL;
+bool _draw_in_use = false;
 
 static iron_matrix4x4_t draw_projection_matrix;
 static bool draw_bilinear_filter = true;
 static uint32_t draw_color = 0;
-static bool draw_is_render_target = false;
 static iron_g5_pipeline_t *draw_last_pipeline = NULL;
 static iron_g5_pipeline_t *draw_custom_pipeline = NULL;
 static iron_matrix3x3_t draw_transform;
+static bool _draw_thrown = false;
 
 static iron_g4_vertex_buffer_t image_vertex_buffer;
 static iron_g5_index_buffer_t image_index_buffer;
@@ -67,10 +69,9 @@ static int text_buffer_index = 0;
 static int text_buffer_start = 0;
 static iron_g5_texture_t *text_last_texture = NULL;
 
-static int *draw_font_glyph_blocks = NULL;
-static int *draw_font_glyphs = NULL;
-static int draw_font_num_glyph_blocks = -1;
-static int draw_font_num_glyphs = -1;
+static i32_array_t *draw_font_glyph_blocks = NULL;
+static i32_array_t *draw_font_glyphs = NULL;
+static int draw_glyphs_version = 0;
 
 void draw_image_end(void);
 void draw_colored_end(void);
@@ -273,8 +274,25 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_ver
 	}
 }
 
-void draw_begin(void) {
+static void _draw_begin() {
 	draw_set_color(0xffffffff);
+}
+
+void draw_begin(iron_g5_texture_t *render_target) {
+	if (_draw_in_use && !_draw_thrown) {
+		_draw_thrown = true;
+		iron_log("End before you begin");
+	}
+	_draw_in_use = true;
+
+	_draw_begin();
+
+	if (render_target != NULL) {
+		draw_set_render_target(render_target);
+	}
+	else {
+		draw_restore_render_target();
+	}
 }
 
 void draw_set_image_rect_verts(float btlx, float btly, float tplx, float tply, float tprx, float tpry, float btrx, float btry) {
@@ -645,7 +663,7 @@ void draw_text_set_rect_colors(uint32_t color) {
 void draw_text_draw_buffer(bool end) {
 	if (text_buffer_index - text_buffer_start == 0) return;
 	iron_g4_vertex_buffer_unlock(&text_vertex_buffer, text_buffer_index * 4);
-	iron_g5_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : draw_is_render_target ? &text_pipeline_rt : &text_pipeline);
+	iron_g5_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : _draw_current != NULL ? &text_pipeline_rt : &text_pipeline);
 	iron_g4_set_matrix4(text_proj_loc, &draw_projection_matrix);
 	iron_g4_set_vertex_buffer(&text_vertex_buffer);
 	iron_g4_set_index_buffer(&text_index_buffer);
@@ -695,7 +713,9 @@ draw_font_image_t *draw_font_get_image_internal(draw_font_t *font, int size) {
 }
 
 static inline bool draw_prepare_font_load_internal(draw_font_t *font, int size) {
-	if (draw_font_get_image_internal(font, size) != NULL) return false; // Nothing to do
+	if (draw_font_get_image_internal(font, size) != NULL) {
+		return false; // Nothing to do
+	}
 
 	// Resize images array if necessary
 	if (font->m_capacity <= font->m_images_len) {
@@ -765,7 +785,7 @@ bool draw_font_load(draw_font_t *font, int size) {
 	font->m_images_len += 1;
 	int width = 64;
 	int height = 32;
-	stbtt_bakedchar *baked = (stbtt_bakedchar *)malloc(draw_font_num_glyphs * sizeof(stbtt_bakedchar));
+	stbtt_bakedchar *baked = (stbtt_bakedchar *)malloc(draw_font_glyphs->length * sizeof(stbtt_bakedchar));
 	unsigned char *pixels = NULL;
 
 	int status = -1;
@@ -780,7 +800,9 @@ bool draw_font_load(draw_font_t *font, int size) {
 			pixels = (unsigned char *)realloc(pixels, width * height);
 		if (pixels == NULL)
 			return false;
-		status = stbtt_BakeFontBitmapArr(font->blob, font->offset, (float)size, pixels, width, height, draw_font_glyphs, draw_font_num_glyphs, baked);
+		status = stbtt_BakeFontBitmapArr(
+			font->blob, font->offset, (float)size, pixels, width, height,
+			draw_font_glyphs->buffer, draw_font_glyphs->length, baked);
 	}
 
 	stbtt_fontinfo info;
@@ -807,24 +829,24 @@ iron_g5_texture_t *draw_font_get_texture(draw_font_t *font, int size) {
 	return img->tex;
 }
 
-int draw_font_get_char_index_internal(draw_font_image_t *img, int char_index) {
-	if (draw_font_num_glyphs <= 0) {
+int draw_font_get_char_index_internal(int char_index) {
+	if (draw_font_glyphs->length <= 0) {
 		return 0;
 	}
-	int offset = draw_font_glyph_blocks[0];
+	int offset = draw_font_glyph_blocks->buffer[0];
 	if (char_index < offset) {
 		return 0;
 	}
 
-	for (int i = 1; i < draw_font_num_glyph_blocks / 2; ++i) {
-		int prev_end = draw_font_glyph_blocks[i * 2 - 1];
-		int start = draw_font_glyph_blocks[i * 2];
+	for (int i = 1; i < draw_font_glyph_blocks->length / 2; ++i) {
+		int prev_end = draw_font_glyph_blocks->buffer[i * 2 - 1];
+		int start = draw_font_glyph_blocks->buffer[i * 2];
 		if (char_index > start - 1) {
 			offset += start - 1 - prev_end;
 		}
 	}
 
-	if (char_index - offset >= draw_font_num_glyphs) {
+	if (char_index - offset >= draw_font_glyphs->length) {
 		return 0;
 	}
 	return char_index - offset;
@@ -832,8 +854,10 @@ int draw_font_get_char_index_internal(draw_font_image_t *img, int char_index) {
 
 bool draw_font_get_baked_quad(draw_font_t *font, int size, draw_font_aligned_quad_t *q, int char_code, float xpos, float ypos) {
 	draw_font_image_t *img = draw_font_get_image_internal(font, size);
-	int char_index = draw_font_get_char_index_internal(img, char_code);
-	if (char_index >= draw_font_num_glyphs) return false;
+	int char_index = draw_font_get_char_index_internal(char_code);
+	if (char_index >= draw_font_glyphs->length) {
+		return false;
+	}
 	float ipw = 1.0f / (float)img->width;
 	float iph = 1.0f / (float)img->height;
 	stbtt_bakedchar b = img->chars[char_index];
@@ -888,37 +912,34 @@ void draw_string(const char *text, float x, float y) {
 	}
 }
 
-void draw_font_default_glyphs() {
-	draw_font_num_glyphs = 127 - 32;
-	draw_font_glyphs = (int *)malloc(draw_font_num_glyphs * sizeof(int));
-	for (int i = 32; i < 127; ++i) draw_font_glyphs[i - 32] = i;
-	draw_font_num_glyph_blocks = 2;
-	draw_font_glyph_blocks = (int *)malloc(draw_font_num_glyph_blocks * sizeof(int));
-	draw_font_glyph_blocks[0] = 32;
-	draw_font_glyph_blocks[1] = 126;
-}
-
-void draw_font_init(draw_font_t *font, void *blob, int font_index) {
+void draw_font_init(draw_font_t *font) {
 	if (draw_font_glyphs == NULL) {
-		draw_font_default_glyphs();
+		draw_font_init_glyphs(32, 127);
 	}
 
-	font->blob = blob;
-	font->images = NULL;
-	font->m_images_len = 0;
-	font->m_capacity = 0;
-	font->offset = stbtt_GetFontOffsetForIndex(font->blob, font_index);
-	if (font->offset == -1) {
-		font->offset = stbtt_GetFontOffsetForIndex(font->blob, 0);
+	if (font->glyphs_version != draw_glyphs_version) {
+		font->glyphs_version = draw_glyphs_version;
+		font->blob = font->buf->buffer;
+		font->images = NULL;
+		font->m_images_len = 0;
+		font->m_capacity = 0;
+		font->offset = stbtt_GetFontOffsetForIndex(font->blob, font->index);
+		if (font->offset == -1) {
+			font->offset = stbtt_GetFontOffsetForIndex(font->blob, 0);
+		}
 	}
 }
 
-void draw_font_13(draw_font_t *font, void *blob) {
+void draw_font_destroy(draw_font_t *font) {
+	font->buf = NULL;
+}
+
+void draw_font_13(draw_font_t *font) {
 	if (draw_font_glyphs == NULL) {
-		draw_font_default_glyphs();
+		draw_font_init_glyphs(32, 127);
 	}
 
-	font->blob = blob;
+	font->blob = font->buf->buffer;
 	font->images = NULL;
 	font->m_images_len = 0;
 	font->m_capacity = 0;
@@ -950,29 +971,37 @@ void draw_font_13(draw_font_t *font, void *blob) {
 	img->chars = baked;
 }
 
-bool draw_font_has_glyph(int glyph) {
-	for (int i = 0; i < draw_font_num_glyphs; ++i) {
-		if (draw_font_glyphs[i] == glyph) {
-			return true;
-		}
+void draw_font_init_glyphs(int from, int to) {
+	gc_unroot(draw_font_glyphs);
+	gc_unroot(draw_font_glyph_blocks);
+
+	draw_font_glyphs = i32_array_create(to - from);
+	for (int i = from; i < to; ++i) {
+		draw_font_glyphs->buffer[i - from] = i;
 	}
-	return false;
+	draw_font_glyph_blocks = i32_array_create(2);
+	draw_font_glyph_blocks->buffer[0] = from;
+	draw_font_glyph_blocks->buffer[1] = to - 1;
+	draw_glyphs_version++;
+
+	gc_root(draw_font_glyphs);
+	gc_root(draw_font_glyph_blocks);
 }
 
-void _draw_font_set_glyphs(int *glyphs, int count) {
-	free(draw_font_glyphs);
-	draw_font_num_glyphs = count;
-	draw_font_glyphs = (int *)malloc(draw_font_num_glyphs * sizeof(int));
+bool draw_font_has_glyph(int glyph) {
+	return i32_array_index_of(draw_font_glyphs, glyph) > -1;
+}
+
+void draw_font_build_glyphs() {
+	i32_array_sort(draw_font_glyphs, NULL);
 
 	int blocks = 1;
-	draw_font_glyphs[0] = glyphs[0];
-	int next_char = glyphs[0] + 1;
+	int next_char = draw_font_glyphs->buffer[0] + 1;
 	int pos = 1;
-	while (pos < count) {
-		draw_font_glyphs[pos] = glyphs[pos];
-		if (glyphs[pos] != next_char) {
+	while (pos < draw_font_glyphs->length) {
+		if (draw_font_glyphs->buffer[pos] != next_char) {
 			++blocks;
-			next_char = glyphs[pos] + 1;
+			next_char = draw_font_glyphs->buffer[pos] + 1;
 		}
 		else {
 			++next_char;
@@ -980,36 +1009,31 @@ void _draw_font_set_glyphs(int *glyphs, int count) {
 		++pos;
 	}
 
-	draw_font_num_glyph_blocks = 2 * blocks;
-	draw_font_glyph_blocks = (int *)malloc(draw_font_num_glyph_blocks * sizeof(int));
-	draw_font_glyph_blocks[0] = glyphs[0];
-	next_char = glyphs[0] + 1;
+	gc_unroot(draw_font_glyph_blocks);
+	draw_font_glyph_blocks = i32_array_create(2 * blocks);
+	gc_root(draw_font_glyph_blocks);
+
+	draw_font_glyph_blocks->buffer[0] = draw_font_glyphs->buffer[0];
+	next_char = draw_font_glyphs->buffer[0] + 1;
 	pos = 1;
-	for (int i = 1; i < count; ++i) {
-		if (glyphs[i] != next_char) {
-			draw_font_glyph_blocks[pos * 2 - 1] = glyphs[i - 1];
-			draw_font_glyph_blocks[pos * 2] = glyphs[i];
+	for (int i = 1; i < draw_font_glyphs->length; ++i) {
+		if (draw_font_glyphs->buffer[i] != next_char) {
+			draw_font_glyph_blocks->buffer[pos * 2 - 1] = draw_font_glyphs->buffer[i - 1];
+			draw_font_glyph_blocks->buffer[pos * 2] = draw_font_glyphs->buffer[i];
 			++pos;
-			next_char = glyphs[i] + 1;
+			next_char = draw_font_glyphs->buffer[i] + 1;
 		}
 		else {
 			++next_char;
 		}
 	}
-	draw_font_glyph_blocks[blocks * 2 - 1] = glyphs[count - 1];
-}
-
-void draw_font_set_glyphs(i32_array_t *glyphs) {
-	_draw_font_set_glyphs(glyphs->buffer, glyphs->length);
+	draw_font_glyph_blocks->buffer[blocks * 2 - 1] = draw_font_glyphs->buffer[draw_font_glyphs->length - 1];
+	draw_glyphs_version++;
 }
 
 void draw_font_add_glyph(int glyph) {
-	// TODO: slow
-	draw_font_num_glyphs++;
-	int *font_glyphs = (int *)malloc(draw_font_num_glyphs * sizeof(int));
-	for (int i = 0; i < draw_font_num_glyphs - 1; ++i) font_glyphs[i] = draw_font_glyphs[i];
-	font_glyphs[draw_font_num_glyphs - 1] = glyph;
-	_draw_font_set_glyphs(font_glyphs, draw_font_num_glyphs);
+	i32_array_push(draw_font_glyphs, glyph);
+	draw_font_build_glyphs();
 }
 
 int draw_font_count(draw_font_t *font) {
@@ -1022,7 +1046,7 @@ int draw_font_height(draw_font_t *font, int font_size) {
 }
 
 float draw_font_get_char_width_internal(draw_font_image_t *img, int char_index) {
-	int i = draw_font_get_char_index_internal(img, char_index);
+	int i = draw_font_get_char_index_internal(char_index);
 	return img->chars[i].xadvance;
 }
 
@@ -1056,10 +1080,19 @@ void draw_text_end(void) {
 	text_last_texture = NULL;
 }
 
-void draw_end(void) {
+static void _draw_end(void) {
 	draw_image_end();
 	draw_colored_end();
 	draw_text_end();
+}
+
+void draw_end(void) {
+	if (!_draw_in_use && !_draw_thrown) {
+		_draw_thrown = true;
+		iron_log("Begin before you end");
+	}
+	_draw_in_use = false;
+	_draw_end();
 }
 
 void draw_set_color(uint32_t color) {
@@ -1071,49 +1104,50 @@ uint32_t draw_get_color() {
 }
 
 void draw_set_pipeline(iron_g5_pipeline_t *pipeline) {
-	if (pipeline == draw_last_pipeline) return;
+	if (pipeline == draw_last_pipeline) {
+		return;
+	}
 	draw_last_pipeline = pipeline;
-	draw_end(); // flush
+	_draw_end(); // flush
 	draw_custom_pipeline = pipeline;
 }
 
-void draw_set_transform(buffer_t *matrix) {
-	iron_matrix3x3_t *m = matrix != NULL ? (iron_matrix3x3_t *)matrix->buffer : NULL;
-	if (m == NULL) {
+void draw_set_transform(mat3_t matrix) {
+	if (mat3_isnan(matrix)) {
 		draw_transform = iron_matrix3x3_identity();
 	}
 	else {
-		for (int i = 0; i < 3 * 3; ++i) {
-			draw_transform.m[i] = m->m[i];
-		}
+		draw_transform = matrix;
 	}
 }
 
 bool draw_set_font(draw_font_t *font, int size) {
-	draw_end(); // flush
+	_draw_end(); // flush
 	draw_font = font;
 	draw_font_size = size;
 	return draw_font_load(font, size);
 }
 
 void draw_set_bilinear_filter(bool bilinear) {
-	if (draw_bilinear_filter == bilinear) return;
-	draw_end(); // flush
+	if (draw_bilinear_filter == bilinear) {
+		return;
+	}
+	_draw_end(); // flush
 	draw_bilinear_filter = bilinear;
 }
 
 void draw_restore_render_target(void) {
-	draw_is_render_target = false;
-	draw_end();
-	draw_begin();
+	_draw_current = NULL;
+	_draw_end();
+	_draw_begin();
 	iron_g4_restore_render_target();
 	draw_internal_set_projection_matrix(NULL);
 }
 
 void draw_set_render_target(iron_g5_texture_t *target) {
-	draw_is_render_target = true;
-	draw_end();
-	draw_begin();
+	_draw_current = target;
+	_draw_end();
+	_draw_begin();
 	iron_g5_texture_t *render_targets[1] = { target };
 	iron_g4_set_render_targets(render_targets, 1);
 	draw_internal_set_projection_matrix(target);

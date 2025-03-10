@@ -244,36 +244,36 @@ function import_arm_run_project(path: string) {
 
 			if (is_mask) {
 				_texpaint = iron_g4_create_texture_from_bytes(lz4_decode(ld.texpaint, ld.res * ld.res * 4), ld.res, ld.res, tex_format_t.RGBA32);
-				g2_begin(l.texpaint);
+				draw_begin(l.texpaint);
 				// draw_set_pipeline(pipes_copy8);
 				draw_set_pipeline(project.is_bgra ? pipes_copy_bgra : pipes_copy); // Full bits for undo support, R8 is used
 				draw_image(_texpaint, 0, 0);
 				draw_set_pipeline(null);
-				g2_end();
+				draw_end();
 			}
 			else { // Layer
 				// TODO: create render target from bytes
 				_texpaint = iron_g4_create_texture_from_bytes(lz4_decode(ld.texpaint, ld.res * ld.res * 4 * bytes_per_pixel), ld.res, ld.res, format);
-				g2_begin(l.texpaint);
+				draw_begin(l.texpaint);
 				draw_set_pipeline(project.is_bgra ? pipes_copy_bgra : pipes_copy);
 				draw_image(_texpaint, 0, 0);
 				draw_set_pipeline(null);
-				g2_end();
+				draw_end();
 
 				///if is_paint
 				_texpaint_nor = iron_g4_create_texture_from_bytes(lz4_decode(ld.texpaint_nor, ld.res * ld.res * 4 * bytes_per_pixel), ld.res, ld.res, format);
-				g2_begin(l.texpaint_nor);
+				draw_begin(l.texpaint_nor);
 				draw_set_pipeline(project.is_bgra ? pipes_copy_bgra : pipes_copy);
 				draw_image(_texpaint_nor, 0, 0);
 				draw_set_pipeline(null);
-				g2_end();
+				draw_end();
 
 				_texpaint_pack = iron_g4_create_texture_from_bytes(lz4_decode(ld.texpaint_pack, ld.res * ld.res * 4 * bytes_per_pixel), ld.res, ld.res, format);
-				g2_begin(l.texpaint_pack);
+				draw_begin(l.texpaint_pack);
 				draw_set_pipeline(project.is_bgra ? pipes_copy_bgra : pipes_copy);
 				draw_image(_texpaint_pack, 0, 0);
 				draw_set_pipeline(null);
-				g2_end();
+				draw_end();
 				///end
 			}
 

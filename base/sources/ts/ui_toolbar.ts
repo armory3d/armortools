@@ -130,7 +130,7 @@ function ui_toolbar_render_ui() {
 			ui.ops.theme.ELEMENT_H = math_floor(ui.ops.theme.ELEMENT_H * 1.5);
 			ui.ops.theme.BUTTON_H = ui.ops.theme.ELEMENT_H;
 			ui.ops.theme.BUTTON_COL = ui.ops.theme.WINDOW_BG_COL;
-			let font_height: i32 = g2_font_height(ui.ops.font, ui.font_size);
+			let font_height: i32 = draw_font_height(ui.ops.font, ui.font_size);
 			ui.font_offset_y = (ui_ELEMENT_H(ui) - font_height) / 2;
 			let _w: i32 = ui._w;
 			ui._w = ui_toolbar_w;

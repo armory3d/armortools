@@ -50,9 +50,9 @@ function upscale_node_do_tile(source: iron_g5_texture_t): iron_g5_texture_t {
 		iron_unload_image(upscale_node_temp);
 	}
 	upscale_node_temp = iron_g4_create_render_target(size1w, size1h);
-	g2_begin(upscale_node_temp);
+	draw_begin(upscale_node_temp);
 	draw_scaled_image(source, 0, 0, size1w, size1h);
-	g2_end();
+	draw_end();
 
 	let bytes_img: buffer_t = iron_g4_get_texture_pixels(upscale_node_temp);
 	let u8a: u8_array_t = bytes_img;
@@ -105,7 +105,7 @@ function upscale_node_esrgan(source: iron_g5_texture_t): iron_g5_texture_t {
 		let tile_source: iron_g5_texture_t = iron_g4_create_render_target(tile_size + 32 * 2, tile_size + 32 * 2);
 		for (let x: i32 = 0; x < math_floor(size1w / tile_size); ++x) {
 			for (let y: i32 = 0; y < math_floor(size1h / tile_size); ++y) {
-				g2_begin(tile_source);
+				draw_begin(tile_source);
 				draw_scaled_image(source, 32 - x * tile_size, 32 - y * tile_size, -source.width, source.height);
 				draw_scaled_image(source, 32 - x * tile_size, 32 - y * tile_size, source.width, -source.height);
 				draw_scaled_image(source, 32 - x * tile_size, 32 - y * tile_size, -source.width, -source.height);
@@ -113,11 +113,11 @@ function upscale_node_esrgan(source: iron_g5_texture_t): iron_g5_texture_t {
 				draw_scaled_image(source, 32 - x * tile_size + tile_size, 32 - y * tile_size + tile_size, -source.width, source.height);
 				draw_scaled_image(source, 32 - x * tile_size + tile_size, 32 - y * tile_size + tile_size, source.width, -source.height);
 				draw_scaled_image(source, 32 - x * tile_size, 32 - y * tile_size, source.width, source.height);
-				g2_end();
+				draw_end();
 				let tile_result: iron_g5_texture_t = upscale_node_do_tile(tile_source);
-				g2_begin(result);
+				draw_begin(result);
 				draw_sub_image(tile_result, x * tile_size2x, y * tile_size2x, 64, 64, tile_size2x, tile_size2x);
-				g2_end();
+				draw_end();
 				iron_unload_image(tile_result);
 			}
 		}

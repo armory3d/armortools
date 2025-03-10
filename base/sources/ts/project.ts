@@ -45,13 +45,13 @@ function project_open() {
 			return;
 		}
 
-		let current: iron_g5_texture_t = _g2_current;
-		let g2_in_use: bool = _g2_in_use;
-		if (g2_in_use) g2_end();
+		let current: iron_g5_texture_t = _draw_current;
+		let g2_in_use: bool = _draw_in_use;
+		if (g2_in_use) draw_end();
 
 		import_arm_run_project(path);
 
-		if (g2_in_use) g2_begin(current);
+		if (g2_in_use) draw_begin(current);
 	});
 }
 
@@ -226,9 +226,9 @@ function project_new(reset_layers: bool = true) {
 	let n: string = context_raw.project_type == project_model_t.ROUNDED_CUBE ? ".Cube" : "Tessellated";
 	let md: mesh_data_t = data_get_mesh("Scene", n);
 
-	let current: iron_g5_texture_t = _g2_current;
-	let g2_in_use: bool = _g2_in_use;
-	if (g2_in_use) g2_end();
+	let current: iron_g5_texture_t = _draw_current;
+	let g2_in_use: bool = _draw_in_use;
+	if (g2_in_use) draw_end();
 
 	///if is_paint
 	context_raw.picker_mask_handle.position = picker_mask_t.NONE;
@@ -316,7 +316,7 @@ function project_new(reset_layers: bool = true) {
 		app_notify_on_init(layers_init);
 	}
 
-	if (g2_in_use) g2_begin(current);
+	if (g2_in_use) draw_begin(current);
 
 	context_raw.saved_envmap = null;
 	context_raw.envmap_loaded = false;

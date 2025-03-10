@@ -325,8 +325,8 @@ function box_preferences_show() {
 				config_raw.undo_steps = math_floor(context_raw.undo_handle.value = 1);
 			}
 			if (context_raw.undo_handle.changed) {
-				let current: iron_g5_texture_t = _g2_current;
-				g2_end();
+				let current: iron_g5_texture_t = _draw_current;
+				draw_end();
 
 				if (history_undo_layers != null) {
 					while (history_undo_layers.length < config_raw.undo_steps) {
@@ -341,7 +341,7 @@ function box_preferences_show() {
 				}
 
 				history_reset();
-				g2_begin(current);
+				draw_begin(current);
 			}
 
 			///if is_paint

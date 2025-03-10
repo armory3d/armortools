@@ -116,8 +116,8 @@ function tab_materials_draw_slots(mini: bool) {
 			if (!is_typing) {
 				if (i < 9 && operator_shortcut(map_get(config_keymap, "select_material"), shortcut_type_t.DOWN)) {
 					let number: string = i32_to_string(i + 1);
-					let width: i32 = g2_font_width(ui.ops.font, ui.font_size, number) + 10;
-					let height: i32 = g2_font_height(ui.ops.font, ui.font_size);
+					let width: i32 = draw_string_width(ui.ops.font, ui.font_size, number) + 10;
+					let height: i32 = draw_font_height(ui.ops.font, ui.font_size);
 					draw_set_color(ui.ops.theme.TEXT_COL);
 					draw_filled_rect(uix, uiy, width, height);
 					draw_set_color(ui.ops.theme.BUTTON_COL);

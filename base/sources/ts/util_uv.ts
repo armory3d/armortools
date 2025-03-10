@@ -34,7 +34,7 @@ function util_uv_cache_uv_map() {
 
 	let texa: i16_array_t = mesh.vertex_arrays[2].values;
 	let inda: u32_array_t = mesh.index_arrays[0].values;
-	g2_begin(util_uv_uvmap);
+	draw_begin(util_uv_uvmap);
 	iron_g5_clear(0x00000000);
 	draw_set_color(0xffffffff);
 	let strength: f32 = res_x > 2048 ? 2.0 : 1.0;
@@ -50,7 +50,7 @@ function util_uv_cache_uv_map() {
 		draw_line_aa(x2, y2, x3, y3, strength);
 		draw_line_aa(x3, y3, x1, y1, strength);
 	}
-	g2_end();
+	draw_end();
 }
 
 function util_uv_cache_triangle_map() {
@@ -73,7 +73,7 @@ function util_uv_cache_triangle_map() {
 	let mesh: mesh_data_t = merged;
 	let texa: i16_array_t = mesh.vertex_arrays[2].values;
 	let inda: u32_array_t = mesh.index_arrays[0].values;
-	g2_begin(util_uv_trianglemap);
+	draw_begin(util_uv_trianglemap);
 	iron_g5_clear(0xff000000);
 	let f: f32 = (1 / 32767) * util_uv_trianglemap.width;
 	let color: i32 = 0xff000001;
@@ -89,7 +89,7 @@ function util_uv_cache_triangle_map() {
 		let y3: f32 = (texa[inda[i * 3 + 2] * 2 + 1]) * f;
 		draw_filled_triangle(x1, y1, x2, y2, x3, y3);
 	}
-	g2_end();
+	draw_end();
 }
 
 function util_uv_cache_dilate_map() {

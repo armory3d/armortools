@@ -35,9 +35,9 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 		if (l1masks != null) {
 			if (l1masks.length > 1) {
 				layers_make_temp_mask_img();
-				g2_begin(pipes_temp_mask_image);
+				draw_begin(pipes_temp_mask_image);
 				iron_g5_clear(0x00000000);
-				g2_end();
+				draw_end();
 				let l1: slot_layer_t = { texpaint: pipes_temp_mask_image };
 				for (let i: i32 = 0; i < l1masks.length; ++i) {
 					layers_merge_layer(l1, l1masks[i]);
@@ -50,19 +50,19 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 		}
 
 		if (l1.paint_base) {
-			g2_begin(layers_temp_image); // Copy to temp
+			draw_begin(layers_temp_image); // Copy to temp
 			draw_set_pipeline(pipes_copy);
 			draw_image(layers_expa, 0, 0);
 			draw_set_pipeline(null);
-			g2_end();
+			draw_end();
 
 			///if is_forge
 			// Do not multiply basecol by alpha
-			g2_begin(layers_expa); // Copy to temp
+			draw_begin(layers_expa); // Copy to temp
 			draw_set_pipeline(pipes_copy);
 			draw_image(l1.texpaint, 0, 0);
 			draw_set_pipeline(null);
-			g2_end();
+			draw_end();
 			///else
 			_iron_g4_begin(layers_expa);
 			iron_g5_set_pipeline(pipes_merge);
@@ -80,11 +80,11 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 		}
 
 		if (l1.paint_nor) {
-			g2_begin(layers_temp_image);
+			draw_begin(layers_temp_image);
 			draw_set_pipeline(pipes_copy);
 			draw_image(layers_expb, 0, 0);
 			draw_set_pipeline(null);
-			g2_end();
+			draw_end();
 
 			_iron_g4_begin(layers_expb);
 			iron_g5_set_pipeline(pipes_merge);
@@ -101,11 +101,11 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 		}
 
 		if (l1.paint_occ || l1.paint_rough || l1.paint_met || l1.paint_height) {
-			g2_begin(layers_temp_image);
+			draw_begin(layers_temp_image);
 			draw_set_pipeline(pipes_copy);
 			draw_image(layers_expc, 0, 0);
 			draw_set_pipeline(null);
-			g2_end();
+			draw_end();
 
 			if (l1.paint_occ && l1.paint_rough && l1.paint_met && l1.paint_height) {
 				layers_commands_merge_pack(pipes_merge, layers_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask, l1.paint_height_blend ? -3 : -1);
@@ -126,12 +126,12 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 
 	///if arm_metal
 	// Flush command list
-	g2_begin(layers_expa);
-	g2_end();
-	g2_begin(layers_expb);
-	g2_end();
-	g2_begin(layers_expc);
-	g2_end();
+	draw_begin(layers_expa);
+	draw_end();
+	draw_begin(layers_expb);
+	draw_end();
+	draw_begin(layers_expc);
+	draw_end();
 	///end
 
 	let l0: slot_layer_t = {
@@ -143,11 +143,11 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 	// Merge height map into normal map
 	if (height_to_normal && make_material_height_used) {
 
-		g2_begin(layers_temp_image);
+		draw_begin(layers_temp_image);
 		draw_set_pipeline(pipes_copy);
 		draw_image(l0.texpaint_nor, 0, 0);
 		draw_set_pipeline(null);
-		g2_end();
+		draw_end();
 
 		_iron_g4_begin(l0.texpaint_nor);
 		iron_g5_set_pipeline(pipes_merge);

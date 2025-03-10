@@ -79,9 +79,9 @@ function util_render_make_material_preview() {
 }
 
 function util_render_make_decal_preview() {
-	let current: iron_g5_texture_t = _g2_current;
-	let g2_in_use: bool = _g2_in_use;
-	if (g2_in_use) g2_end();
+	let current: iron_g5_texture_t = _draw_current;
+	let g2_in_use: bool = _draw_in_use;
+	if (g2_in_use) draw_end();
 
 	if (context_raw.decal_image == null) {
 		context_raw.decal_image = iron_g4_create_render_target(util_render_decal_preview_size, util_render_decal_preview_size);
@@ -139,19 +139,19 @@ function util_render_make_decal_preview() {
 	make_material_parse_mesh_material();
 	context_raw.ddirty = 1; // Refresh depth for decal paint
 
-	if (g2_in_use) g2_begin(current);
+	if (g2_in_use) draw_begin(current);
 }
 
 function util_render_make_text_preview() {
-	let current: iron_g5_texture_t = _g2_current;
-	let g2_in_use: bool = _g2_in_use;
-	if (g2_in_use) g2_end();
+	let current: iron_g5_texture_t = _draw_current;
+	let g2_in_use: bool = _draw_in_use;
+	if (g2_in_use) draw_end();
 
 	let text: string = context_raw.text_tool_text;
 	let font: draw_font_t = context_raw.font.font;
 	let font_size: i32 = util_render_font_preview_size;
-	let text_w: i32 = math_floor(g2_font_width(font, font_size, text));
-	let text_h: i32 = math_floor(g2_font_height(font, font_size));
+	let text_w: i32 = math_floor(draw_string_width(font, font_size, text));
+	let text_h: i32 = math_floor(draw_font_height(font, font_size));
 	let tex_w: i32 = text_w + 32;
 	if (tex_w < 512) {
 		tex_w = 512;
@@ -167,39 +167,39 @@ function util_render_make_text_preview() {
 		context_raw.text_tool_image = iron_g4_create_render_target(tex_w, tex_w, tex_format_t.R8);
 		///end
 	}
-	g2_begin(context_raw.text_tool_image);
+	draw_begin(context_raw.text_tool_image);
 	iron_g5_clear(0xff000000);
-	g2_set_font(font, font_size);
+	draw_set_font(font, font_size);
 	draw_set_color(0xffffffff);
 	draw_string(text, tex_w / 2 - text_w / 2, tex_w / 2 - text_h / 2);
-	g2_end();
+	draw_end();
 
-	if (g2_in_use) g2_begin(current);
+	if (g2_in_use) draw_begin(current);
 }
 
 function util_render_make_font_preview() {
-	let current: iron_g5_texture_t = _g2_current;
-	let g2_in_use: bool = _g2_in_use;
-	if (g2_in_use) g2_end();
+	let current: iron_g5_texture_t = _draw_current;
+	let g2_in_use: bool = _draw_in_use;
+	if (g2_in_use) draw_end();
 
 	let text: string = "Abg";
 	let font: draw_font_t = context_raw.font.font;
 	let font_size: i32 = util_render_font_preview_size;
-	let text_w: i32 = math_floor(g2_font_width(font, font_size, text)) + 8;
-	let text_h: i32 = math_floor(g2_font_height(font, font_size)) + 8;
+	let text_w: i32 = math_floor(draw_string_width(font, font_size, text)) + 8;
+	let text_h: i32 = math_floor(draw_font_height(font, font_size)) + 8;
 	let tex_w: i32 = text_w + 32;
 	if (context_raw.font.image == null) {
 		context_raw.font.image = iron_g4_create_render_target(tex_w, tex_w, tex_format_t.RGBA32);
 	}
-	g2_begin(context_raw.font.image);
+	draw_begin(context_raw.font.image);
 	iron_g5_clear(0x00000000);
-	g2_set_font(font, font_size);
+	draw_set_font(font, font_size);
 	draw_set_color(0xffffffff);
 	draw_string(text, tex_w / 2 - text_w / 2, tex_w / 2 - text_h / 2);
-	g2_end();
+	draw_end();
 	context_raw.font.preview_ready = true;
 
-	if (g2_in_use) g2_begin(current);
+	if (g2_in_use) draw_begin(current);
 }
 
 function util_render_make_brush_preview() {
@@ -207,9 +207,9 @@ function util_render_make_brush_preview() {
 		return;
 	}
 
-	let current: iron_g5_texture_t = _g2_current;
-	let g2_in_use: bool = _g2_in_use;
-	if (g2_in_use) g2_end();
+	let current: iron_g5_texture_t = _draw_current;
+	let g2_in_use: bool = _draw_in_use;
+	if (g2_in_use) draw_end();
 
 	context_raw.material_preview = true;
 
@@ -366,12 +366,12 @@ function util_render_make_brush_preview() {
 	// Scale layer down to to image preview
 	l = render_path_paint_live_layer;
 	let target: iron_g5_texture_t = context_raw.brush.image;
-	g2_begin(target);
+	draw_begin(target);
 	iron_g5_clear(0x00000000);
 	draw_set_pipeline(pipes_copy);
 	draw_scaled_image(l.texpaint, 0, 0, target.width, target.height);
 	draw_set_pipeline(null);
-	g2_end();
+	draw_end();
 
 	// Scale image preview down to to icon
 	let texpreview: render_target_t = map_get(render_path_render_targets, "texpreview");
@@ -385,7 +385,7 @@ function util_render_make_brush_preview() {
 	context_raw.brush.preview_ready = true;
 	context_raw.brush_blend_dirty = true;
 
-	if (g2_in_use) g2_begin(current);
+	if (g2_in_use) draw_begin(current);
 }
 
 function util_render_make_node_preview(canvas: ui_node_canvas_t, node: ui_node_t, image: iron_g5_texture_t, group: ui_node_canvas_t = null, parents: ui_node_t[] = null) {

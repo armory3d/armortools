@@ -543,15 +543,15 @@ function context_set_layer(l: slot_layer_t) {
 	context_raw.layer = l;
 	ui_header_handle.redraws = 2;
 
-	let current: iron_g5_texture_t = _g2_current;
-	let g2_in_use: bool = _g2_in_use;
-	if (g2_in_use) g2_end();
+	let current: iron_g5_texture_t = _draw_current;
+	let g2_in_use: bool = _draw_in_use;
+	if (g2_in_use) draw_end();
 
 	layers_set_object_mask();
 	make_material_parse_mesh_material();
 	make_material_parse_paint_material();
 
-	if (g2_in_use) g2_begin(current);
+	if (g2_in_use) draw_begin(current);
 
 	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 	ui_view2d_hwnd.redraws = 2;

@@ -92,7 +92,7 @@ function main() {
 	sys_start(ops);
 
 	let font: draw_font_t = data_get_font("font_mono.ttf");
-	g2_font_init(font);
+	draw_font_init(font);
 
 	theme = {};
 	ui_theme_default(theme);
@@ -267,9 +267,9 @@ function render() {
 	}
 
 	if (minimap != null) {
-		g2_begin();
+		draw_begin();
 		draw_image(minimap, minimap_x, minimap_y);
-		g2_end();
+		draw_end();
 	}
 
 	if (editor_updated) {
@@ -320,7 +320,7 @@ function draw_minimap() {
 		minimap = iron_g4_create_render_target(minimap_w, minimap_h);
 	}
 
-	g2_begin(minimap);
+	draw_begin(minimap);
 	iron_g5_clear(theme.SEPARATOR_COL);
 	draw_set_color(0xff333333);
 	let lines: string[] = string_split(storage.text, "\n");
@@ -351,7 +351,7 @@ function draw_minimap() {
 	draw_set_color(0x11ffffff);
 	minimap_box_h = math_floor((iron_window_height() - window_header_h) / UI_ELEMENT_H() * 2);
 	draw_filled_rect(0, scroll_progress * visible_area, minimap_w, minimap_box_h);
-	g2_end();
+	draw_end();
 }
 
 function hit_test(mx: f32, my: f32, x: f32, y: f32, w: f32, h: f32): bool {

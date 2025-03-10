@@ -296,7 +296,7 @@ declare function iron_get_files_location(): string;
 declare function _iron_http_request(url: string, size: i32, callback: (url: string, _: buffer_t)=>void): void;
 
 declare function draw_init(image_vert: buffer_t, image_frag: buffer_t, colored_vert: buffer_t, colored_frag: buffer_t, text_vert: buffer_t, text_frag: buffer_t): void;
-declare function draw_begin(): void;
+declare function draw_begin(render_target: iron_g5_texture_t = null): void;
 declare function draw_end(): void;
 declare function draw_scaled_sub_image(image: iron_g5_texture_t, sx: f32, sy: f32, sw: f32, sh: f32, dx: f32, dy: f32, dw: f32, dh: f32): void;
 declare function draw_sub_image(image: iron_g5_texture_t, x: f32, y: f32, sx: f32, sy: f32, sw: f32, sh: f32): void;
@@ -308,24 +308,35 @@ declare function draw_rect(x: f32, y: f32, width: f32, height: f32, strength: f3
 declare function draw_line(x0: f32, y0: f32, x1: f32, y1: f32, strength: f32 = 1.0): void;
 declare function draw_line_aa(x0: f32, y0: f32, x1: f32, y1: f32, strength: f32 = 1.0): void;
 declare function draw_string(text: string, x: f32, y: f32): void;
-declare function draw_set_font(font: any, size: i32): bool;
-declare function draw_font_init(font: any, buf: any, font_index: i32): void;
-declare function draw_font_13(font: any, buf: any): any;
-declare function draw_font_set_glyphs(glyphs: i32[]): void;
-declare function draw_font_count(font: any): i32;
-declare function draw_font_height(font: any, size: i32): i32;
-declare function draw_string_width(font: any, size: i32, text: string): i32;
+declare function draw_set_font(font: draw_font_t, size: i32): bool;
+declare function draw_font_init(font: draw_font_t): void;
+declare function draw_font_destroy(font: draw_font_t): void;
+declare function draw_font_13(font: draw_font_t): any;
+declare function draw_font_has_glyph(glyph: i32): bool;
+declare function draw_font_add_glyph(glyph: i32): void;
+declare function draw_font_init_glyphs(from: i32, to: i32): void;
+declare function draw_font_count(font: draw_font_t): i32;
+declare function draw_font_height(font: draw_font_t, size: i32): i32;
+declare function draw_string_width(font: draw_font_t, size: i32, text: string): i32;
 declare function draw_set_bilinear_filter(bilinear: bool): void;
-declare function draw_restore_render_target(): void;
-declare function draw_set_render_target(render_target: any): void;
 declare function draw_set_color(color: i32): void;
 declare function draw_set_pipeline(pipeline: any): void;
-declare function draw_set_transform(matrix: buffer_t): void;
+declare function draw_set_transform(matrix: mat3_t): void;
 declare function draw_filled_circle(cx: f32, cy: f32, radius: f32, segments: i32 = 0): void;
 declare function draw_circle(cx: f32, cy: f32, radius: f32, segments: i32 = 0, strength: f32 = 1.0): void;
 declare function draw_cubic_bezier(x: f32[], y: f32[], segments: i32 = 20, strength: f32 = 1.0): void;
 declare let draw_font: draw_font_t;
 declare let draw_font_size: i32;
+
+declare type draw_font_t = {
+	blob?: any; // unsigned char *
+	images?: any; // draw_font_image_t *
+	m_capacity?: i32;
+	m_images_len?: i32;
+	offset?: 32;
+	buf?: buffer_t;
+	index?: i32;
+};
 
 declare function iron_set_save_and_quit_callback(callback: (save: bool)=>void): void;
 declare function iron_set_mouse_cursor(id: i32): void;

@@ -209,13 +209,13 @@ function box_projects_recent_tab(ui: ui_t) {
 			}
 
 			if (ui_button(file, ui_align_t.LEFT) && file_exists(path)) {
-				let current: iron_g5_texture_t = _g2_current;
-				let g2_in_use: bool = _g2_in_use;
-				if (g2_in_use) g2_end();
+				let current: iron_g5_texture_t = _draw_current;
+				let g2_in_use: bool = _draw_in_use;
+				if (g2_in_use) draw_end();
 
 				import_arm_run_project(path);
 
-				if (g2_in_use) g2_begin(current);
+				if (g2_in_use) draw_begin(current);
 				ui_box_hide();
 			}
 			if (ui.is_hovered) {

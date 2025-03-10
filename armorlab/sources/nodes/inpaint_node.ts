@@ -72,9 +72,9 @@ function inpaint_node_get_as_image(self: inpaint_node_t, from: i32): iron_g5_tex
 	let source: iron_g5_texture_t = logic_node_input_get_as_image(self.base.inputs[0]);
 	console_progress(tr("Processing") + " - " + tr("Inpaint"));
 
-	g2_begin(inpaint_node_image);
+	draw_begin(inpaint_node_image);
 	draw_scaled_image(source, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
-	g2_end();
+	draw_end();
 
 	if (inpaint_node_auto) {
 		return inpaint_node_texsynth_inpaint(inpaint_node_image, false, inpaint_node_mask);
@@ -144,10 +144,10 @@ function inpaint_node_sd_inpaint(image: iron_g5_texture_t, mask: iron_g5_texture
 				}
 			}
 
-			g2_begin(inpaint_node_temp);
+			draw_begin(inpaint_node_temp);
 			// g2_drawImage(image, -x * 512, -y * 512);
 			draw_scaled_image(image, 0, 0, 512, 512);
-			g2_end();
+			draw_end();
 
 			bytes_img = iron_g4_get_texture_pixels(inpaint_node_temp);
 			let u8a: buffer_t = bytes_img;

@@ -29,9 +29,9 @@ function layers_init() {
 	let texpaint: render_target_t = map_get(render_path_render_targets, "texpaint");
 	let texpaint_nor: render_target_t = map_get(render_path_render_targets, "texpaint_nor");
 	let texpaint_pack: render_target_t = map_get(render_path_render_targets, "texpaint_pack");
-	g2_begin(texpaint._image);
+	draw_begin(texpaint._image);
 	draw_scaled_image(resource_get("placeholder.k"), 0, 0, config_get_texture_res_x(), config_get_texture_res_y()); // Base
-	g2_end();
+	draw_end();
 	_iron_g4_begin(texpaint_nor._image);
 	iron_g5_clear(color_from_floats(0.5, 0.5, 1.0, 0.0)); // Nor
 	_iron_g4_end();
@@ -248,11 +248,11 @@ function layers_apply_mask(l: slot_layer_t, m: slot_layer_t) {
 	layers_make_temp_img();
 
 	// Copy layer to temp
-	g2_begin(layers_temp_image);
+	draw_begin(layers_temp_image);
 	draw_set_pipeline(pipes_copy);
 	draw_image(l.texpaint, 0, 0);
 	draw_set_pipeline(null);
-	g2_end();
+	draw_end();
 
 	// Apply mask
 	_iron_g4_begin(l.texpaint);
@@ -306,8 +306,8 @@ function layers_update_fill_layers() {
 			render_path_paint_live_layer = slot_layer_create("_live");
 		}
 
-		current = _g2_current;
-		if (current != null) g2_end();
+		current = _draw_current;
+		if (current != null) draw_end();
 
 		context_raw.tool = workspace_tool_t.FILL;
 		context_raw.fill_type_handle.position = fill_type_t.OBJECT;
@@ -322,7 +322,7 @@ function layers_update_fill_layers() {
 		context_raw.pdirty = 0;
 		context_raw.rdirty = 2;
 
-		if (current != null) g2_begin(current);
+		if (current != null) draw_begin(current);
 		return;
 	}
 
@@ -342,9 +342,9 @@ function layers_update_fill_layers() {
 	}
 
 	if (has_fill_layer || has_fill_mask) {
-		current = _g2_current;
+		current = _draw_current;
 		if (current != null) {
-			g2_end();
+			draw_end();
 		}
 		context_raw.pdirty = 1;
 		context_raw.tool = workspace_tool_t.FILL;
@@ -389,7 +389,7 @@ function layers_update_fill_layers() {
 		context_raw.ddirty = 2;
 		context_raw.rdirty = 2;
 		context_raw.layers_preview_dirty = true; // Repaint all layer previews as multiple layers might have changed.
-		if (current != null) g2_begin(current);
+		if (current != null) draw_begin(current);
 		context_raw.layer = _layer;
 		layers_set_object_mask();
 		context_raw.tool = _tool;
@@ -399,9 +399,9 @@ function layers_update_fill_layers() {
 }
 
 function layers_update_fill_layer(parse_paint: bool = true) {
-	let current: iron_g5_texture_t = _g2_current;
-	let g2_in_use: bool = _g2_in_use;
-	if (g2_in_use) g2_end();
+	let current: iron_g5_texture_t = _draw_current;
+	let g2_in_use: bool = _draw_in_use;
+	if (g2_in_use) draw_end();
 
 	let _tool: workspace_tool_t = context_raw.tool;
 	let _fill_type: i32 = context_raw.fill_type_handle.position;
@@ -420,7 +420,7 @@ function layers_update_fill_layer(parse_paint: bool = true) {
 	context_raw.rdirty = 2;
 	context_raw.tool = _tool;
 	context_raw.fill_type_handle.position = _fill_type;
-	if (g2_in_use) g2_begin(current);
+	if (g2_in_use) draw_begin(current);
 }
 
 function layers_set_object_mask() {
@@ -711,11 +711,11 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 
 	layers_make_temp_img();
 
-	g2_begin(layers_temp_image); // Copy to temp
+	draw_begin(layers_temp_image); // Copy to temp
 	draw_set_pipeline(pipes_copy);
 	draw_image(l0.texpaint, 0, 0);
 	draw_set_pipeline(null);
-	g2_end();
+	draw_end();
 
 	let empty_rt: render_target_t = map_get(render_path_render_targets, "empty_white");
 	let empty: iron_g5_texture_t = empty_rt._image;
@@ -758,11 +758,11 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 		}
 
 		if (l0.texpaint_nor != null) {
-			g2_begin(layers_temp_image);
+			draw_begin(layers_temp_image);
 			draw_set_pipeline(pipes_copy);
 			draw_image(l0.texpaint_nor, 0, 0);
 			draw_set_pipeline(null);
-			g2_end();
+			draw_end();
 
 			if (l1.paint_nor) {
 				_iron_g4_begin(l0.texpaint_nor);
@@ -781,11 +781,11 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 		}
 
 		if (l0.texpaint_pack != null) {
-			g2_begin(layers_temp_image);
+			draw_begin(layers_temp_image);
 			draw_set_pipeline(pipes_copy);
 			draw_image(l0.texpaint_pack, 0, 0);
 			draw_set_pipeline(null);
-			g2_end();
+			draw_end();
 
 			if (l1.paint_occ || l1.paint_rough || l1.paint_met || l1.paint_height) {
 				if (l1.paint_occ && l1.paint_rough && l1.paint_met && l1.paint_height) {

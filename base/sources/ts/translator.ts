@@ -99,12 +99,9 @@ function translator_load_translations(new_locale: string) {
 			i += l;
 
 			// Assume cjk in the > 1119 range
-			if (codepoint > 1119 && array_index_of(_g2_font_glyphs, codepoint) == -1) {
-				if (!cjk) {
-					_g2_font_glyphs = _g2_make_glyphs(32, 127);
-					cjk = true;
-				}
-				array_push(_g2_font_glyphs, codepoint);
+			if (codepoint > 1119 && !draw_font_has_glyph(codepoint)) {
+				cjk = true;
+				draw_font_add_glyph(codepoint);
 			}
 		}
 	}
@@ -146,8 +143,6 @@ function translator_load_translations(new_locale: string) {
 }
 
 function translator_init_font(cjk: bool, font_path: string, font_scale: f32) {
-	i32_array_sort(_g2_font_glyphs, null);
-
 	_translator_init_font_cjk = cjk;
 	_translator_init_font_font_path = font_path;
 	_translator_init_font_font_scale = font_scale;
@@ -161,8 +156,11 @@ function translator_init_font(cjk: bool, font_path: string, font_scale: f32) {
 
 		let f: draw_font_t = data_get_font(font_path);
 		if (cjk) {
-			let font_index: i32 = map_get(translator_cjk_font_indices, config_raw.locale) != -1 ? map_get(translator_cjk_font_indices, config_raw.locale) : 0;
-			g2_font_set_font_index(f, font_index);
+			let font_index: i32 = map_get(translator_cjk_font_indices, config_raw.locale) != -1 ?
+				map_get(translator_cjk_font_indices, config_raw.locale) : 0;
+			f.index = font_index;
+			f.glyphs_version = 0;
+			draw_font_init(f);
 		}
 		base_font = f;
 		// Scale up the font size and elements width a bit
@@ -179,14 +177,14 @@ function translator_init_font(cjk: bool, font_path: string, font_scale: f32) {
 
 function translator_extended_glyphs() {
 	// Basic Latin + Latin-1 Supplement + Latin Extended-A
-	_g2_font_glyphs = _g2_make_glyphs(32, 383);
+	draw_font_init_glyphs(32, 383);
 	// + Greek
 	for (let i: i32 = 880; i < 1023; ++i) {
-		array_push(_g2_font_glyphs, i);
+		draw_font_add_glyph(i);
 	}
 	// + Cyrillic
 	for (let i: i32 = 1024; i < 1119; ++i) {
-		array_push(_g2_font_glyphs, i);
+		draw_font_add_glyph(i);
 	}
 }
 

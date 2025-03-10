@@ -38,9 +38,9 @@ function variance_node_get_as_image(self: variance_node_t, from: i32): iron_g5_t
 	let strength: f32 = node.value;
 
 	let source: iron_g5_texture_t = logic_node_input_get_as_image(variance_node_inst.base.inputs[0]);
-	g2_begin(variance_node_temp);
+	draw_begin(variance_node_temp);
 	draw_scaled_image(source, 0, 0, 512, 512);
-	g2_end();
+	draw_end();
 
 	let bytes_img: buffer_t = iron_g4_get_texture_pixels(variance_node_temp);
 	let u8a: u8_array_t = bytes_img;

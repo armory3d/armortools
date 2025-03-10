@@ -47,34 +47,34 @@ function ui_nodes_ext_run() {
 
 	if (texbase != null) {
 		let texpaint: render_target_t = map_get(render_path_render_targets, "texpaint");
-		g2_begin(texpaint._image);
+		draw_begin(texpaint._image);
 		draw_scaled_image(texbase, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
-		g2_end();
+		draw_end();
 	}
 
 	if (texnor != null) {
 		let texpaint_nor: render_target_t = map_get(render_path_render_targets, "texpaint_nor");
-		g2_begin(texpaint_nor._image);
+		draw_begin(texpaint_nor._image);
 		draw_scaled_image(texnor, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
-		g2_end();
+		draw_end();
 	}
 
 	let texpaint_pack: render_target_t = map_get(render_path_render_targets, "texpaint_pack");
 
 	if (texocc != null) {
-		g2_begin(texpaint_pack._image);
+		draw_begin(texpaint_pack._image);
 		draw_set_pipeline(pipes_copy_r);
 		draw_scaled_image(texocc, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
 		draw_set_pipeline(null);
-		g2_end();
+		draw_end();
 	}
 
 	if (texrough != null) {
-		g2_begin(texpaint_pack._image);
+		draw_begin(texpaint_pack._image);
 		draw_set_pipeline(pipes_copy_g);
 		draw_scaled_image(texrough, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
 		draw_set_pipeline(null);
-		g2_end();
+		draw_end();
 	}
 
 	if (texheight != null) {

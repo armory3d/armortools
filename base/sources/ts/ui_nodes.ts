@@ -737,7 +737,7 @@ function ui_nodes_draw_grid(zoom: f32): iron_g5_texture_t {
 	}
 
 	let grid: iron_g5_texture_t = iron_g4_create_render_target(w, h);
-	g2_begin(grid);
+	draw_begin(grid);
 	iron_g5_clear(ui_nodes_ui.ops.theme.SEPARATOR_COL);
 
 	let sep_col: i32 = ui_nodes_ui.ops.theme.SEPARATOR_COL;
@@ -769,7 +769,7 @@ function ui_nodes_draw_grid(zoom: f32): iron_g5_texture_t {
 		draw_line(i * step, 0, i * step, h);
 	}
 
-	g2_end();
+	draw_end();
 	return grid;
 }
 
@@ -864,7 +864,7 @@ function ui_nodes_render() {
 
 	ui_nodes_ui.input_enabled = base_ui_enabled;
 
-	g2_end();
+	draw_end();
 
 	if (ui_nodes_grid_redraw) {
 		if (ui_nodes_grid != null) {
@@ -1137,7 +1137,7 @@ function ui_nodes_render() {
 		// Editable canvas name
 		let h: ui_handle_t = ui_handle(__ID__);
 		h.text = c.name;
-		ui_nodes_ui._w = math_floor(math_min(g2_font_width(ui_nodes_ui.ops.font, ui_nodes_ui.font_size, h.text) + 15 * ui_SCALE(ui_nodes_ui), 100 * ui_SCALE(ui_nodes_ui)));
+		ui_nodes_ui._w = math_floor(math_min(draw_string_width(ui_nodes_ui.ops.font, ui_nodes_ui.font_size, h.text) + 15 * ui_SCALE(ui_nodes_ui), 100 * ui_SCALE(ui_nodes_ui)));
 		let new_name: string = ui_text_input(h, "");
 		ui_nodes_ui._x += ui_nodes_ui._w + 3;
 		ui_nodes_ui._y = 2 + start_y;
@@ -1249,7 +1249,7 @@ function ui_nodes_render() {
 
 	ui_end(!ui_nodes_show_menu);
 
-	g2_begin(null);
+	draw_begin(null);
 
 	if (ui_nodes_show_menu) {
 		///if (is_paint || is_sculpt)

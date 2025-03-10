@@ -35,11 +35,11 @@ function import_envmap_run(path: string, image: iron_g5_texture_t) {
 	}
 
 	// Down-scale to 1024x512
-	g2_begin(import_envmap_radiance);
+	draw_begin(import_envmap_radiance);
 	draw_set_pipeline(pipes_copy128);
 	draw_scaled_image(image, 0, 0, 1024, 512);
 	draw_set_pipeline(null);
-	g2_end();
+	draw_end();
 
 	let radiance_pixels: buffer_t = iron_g4_get_texture_pixels(import_envmap_radiance);
 	if (import_envmap_radiance_cpu != null) {

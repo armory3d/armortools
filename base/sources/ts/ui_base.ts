@@ -1088,13 +1088,13 @@ function ui_base_update_ui() {
 			}
 
 			let source: iron_g5_texture_t = l.texpaint;
-			g2_begin(target);
+			draw_begin(target);
 			iron_g5_clear(0x00000000);
 			// draw_set_pipeline(l.is_mask() ? pipes_copy8 : pipes_copy);
 			draw_set_pipeline(pipes_copy); // texpaint_preview is always RGBA32 for now
 			draw_scaled_image(source, 0, 0, target.width, target.height);
 			draw_set_pipeline(null);
-			g2_end();
+			draw_end();
 		}
 		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 	}
@@ -1108,13 +1108,13 @@ function ui_base_update_ui() {
 		if (target != null) {
 
 			let source: iron_g5_texture_t = l.texpaint;
-			g2_begin(target);
+			draw_begin(target);
 			iron_g5_clear(0x00000000);
 			// draw_set_pipeline(raw.layer.is_mask() ? pipes_copy8 : pipes_copy);
 			draw_set_pipeline(pipes_copy); // texpaint_preview is always RGBA32 for now
 			draw_scaled_image(source, 0, 0, target.width, target.height);
 			draw_set_pipeline(null);
-			g2_end();
+			draw_end();
 			ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 		}
 	}
@@ -1156,7 +1156,7 @@ function ui_base_update_ui() {
 function ui_base_render() {
 	if (!ui_base_show && config_raw.touch_ui) {
 		ui_base_ui.input_enabled = true;
-		g2_end();
+		draw_end();
 		ui_begin(ui_base_ui);
 		if (ui_window(ui_handle(__ID__), 0, 0, 150, math_floor(ui_ELEMENT_H(ui_base_ui) + ui_ELEMENT_OFFSET(ui_base_ui) + 1))) {
 			if (ui_button(tr("Close"))) {
@@ -1164,7 +1164,7 @@ function ui_base_render() {
 			}
 		}
 		ui_end();
-		g2_begin(null);
+		draw_begin(null);
 	}
 
 	if (!ui_base_show || iron_window_width() == 0 || iron_window_height() == 0) {
@@ -1186,7 +1186,7 @@ function ui_base_render() {
 		ui_base_htabs[i].position = config_raw.layout_tabs[i];
 	}
 
-	g2_end();
+	draw_end();
 	ui_begin(ui_base_ui);
 
 	///if (is_paint || is_sculpt)
@@ -1201,7 +1201,7 @@ function ui_base_render() {
 	///end
 
 	ui_end();
-	g2_begin(null);
+	draw_begin(null);
 }
 
 function ui_base_draw_sidebar() {
@@ -1252,7 +1252,7 @@ function ui_base_draw_sidebar() {
 
 	// Expand button
 	if (config_raw.layout[layout_size_t.SIDEBAR_W] == 0) {
-		let width: i32 = math_floor(g2_font_width(ui_base_ui.ops.font, ui_base_ui.font_size, "<<") + 25 * ui_SCALE(ui_base_ui));
+		let width: i32 = math_floor(draw_string_width(ui_base_ui.ops.font, ui_base_ui.font_size, "<<") + 25 * ui_SCALE(ui_base_ui));
 		if (ui_window(ui_base_hminimized, iron_window_width() - width, 0, width, math_floor(ui_ELEMENT_H(ui_base_ui) + ui_ELEMENT_OFFSET(ui_base_ui) + 1))) {
 			ui_base_ui._w = width;
 			let _BUTTON_H: i32 = ui_base_ui.ops.theme.BUTTON_H;
@@ -1312,9 +1312,9 @@ function ui_base_render_cursor() {
 			let angle: f32 = context_raw.brush_stencil_angle;
 			let cx: f32 = r.x + r.w / 2;
 			let cy: f32 = r.y + r.h / 2;
-			g2_set_transformation(mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(-angle)), mat3_translation(-cx, -cy)));
+			draw_set_transform(mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(-angle)), mat3_translation(-cx, -cy)));
 			draw_scaled_image(context_raw.brush_stencil_image, r.x, r.y, r.w, r.h);
-			g2_set_transformation(mat3_nan());
+			draw_set_transform(mat3_nan());
 			draw_set_color(0xffffffff);
 		}
 		let transform: bool = operator_shortcut(map_get(config_keymap, "stencil_transform"), shortcut_type_t.DOWN);
@@ -1330,9 +1330,9 @@ function ui_base_render_cursor() {
 			let angle: f32 = context_raw.brush_stencil_angle;
 			let cx: f32 = r.x + r.w / 2;
 			let cy: f32 = r.y + r.h / 2;
-			g2_set_transformation(mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(-angle)), mat3_translation(-cx, -cy)));
+			draw_set_transform(mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(-angle)), mat3_translation(-cx, -cy)));
 			draw_filled_circle(r.x + r.w / 2, r.y - 4, 8);
-			g2_set_transformation(mat3_nan());
+			draw_set_transform(mat3_nan());
 		}
 	}
 
@@ -1388,9 +1388,9 @@ function ui_base_render_cursor() {
 				let angle: f32 = (context_raw.brush_angle + context_raw.brush_nodes_angle) * (math_pi() / 180);
 				let cx: f32 = decalx + psizex / 2;
 				let cy: f32 = decaly + psizey / 2;
-				g2_set_transformation(mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(angle)), mat3_translation(-cx, -cy)));
+				draw_set_transform(mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(angle)), mat3_translation(-cx, -cy)));
 				draw_scaled_image(context_raw.decal_image, decalx, decaly, psizex, psizey);
-				g2_set_transformation(mat3_nan());
+				draw_set_transform(mat3_nan());
 				draw_set_color(0xffffffff);
 			}
 		}

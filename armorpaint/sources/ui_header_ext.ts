@@ -338,10 +338,10 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			context_raw.brush_scale = ui_slider(brush_scale_handle, tr("UV Scale"), 0.01, 5.0, true);
 			if (brush_scale_handle.changed) {
 				if (context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT) {
-					let current: iron_g5_texture_t = _g2_current;
-					g2_end();
+					let current: iron_g5_texture_t = _draw_current;
+					draw_end();
 					util_render_make_decal_preview();
-					g2_begin(current);
+					draw_begin(current);
 				}
 			}
 
@@ -423,11 +423,11 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			ui._w = w;
 
 			if (h.changed) {
-				let current: iron_g5_texture_t = _g2_current;
-				g2_end();
+				let current: iron_g5_texture_t = _draw_current;
+				draw_end();
 				util_render_make_text_preview();
 				util_render_make_decal_preview();
-				g2_begin(current);
+				draw_begin(current);
 			}
 		}
 
@@ -436,11 +436,11 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			ui_combo(context_raw.fill_type_handle, fill_mode_combo, tr("Fill Mode"));
 			if (context_raw.fill_type_handle.changed) {
 				if (context_raw.fill_type_handle.position == fill_type_t.FACE) {
-					let current: iron_g5_texture_t = _g2_current;
-					g2_end();
+					let current: iron_g5_texture_t = _draw_current;
+					draw_end();
 					// cache_uv_map();
 					util_uv_cache_triangle_map();
-					g2_begin(current);
+					draw_begin(current);
 					// wireframe_handle.selected = draw_wireframe = true;
 				}
 				make_material_parse_paint_material();

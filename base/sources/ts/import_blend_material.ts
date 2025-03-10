@@ -30,13 +30,13 @@ function import_blend_material_run(path: string) {
 
 function _import_blend_material() {
 
-	let current: iron_g5_texture_t = _g2_current;
-	let g2_in_use: bool = _g2_in_use;
-	if (g2_in_use) g2_end();
+	let current: iron_g5_texture_t = _draw_current;
+	let g2_in_use: bool = _draw_in_use;
+	if (g2_in_use) draw_end();
 
 	console_toast(tr("Baking material"));
 
-	if (g2_in_use) g2_begin(current);
+	if (g2_in_use) draw_begin(current);
 
 	app_notify_on_init(function () {
 

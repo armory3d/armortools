@@ -207,20 +207,20 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 									app_notify_on_init(function (data: draw_cloud_icon_data_t) {
 										let icon: iron_g5_texture_t = iron_g4_create_render_target(data.image.width, data.image.height);
 										if (ends_with(data.f, ".arm")) { // Used for material sphere alpha cutout
-											g2_begin(icon);
+											draw_begin(icon);
 
 											///if (is_paint || is_sculpt)
 											draw_image(project_materials[0].image, 0, 0);
 											///end
 										}
 										else {
-											g2_begin(icon);
+											draw_begin(icon);
 											iron_g5_clear(0xffffffff);
 										}
 										draw_set_pipeline(pipes_copy_rgb);
 										draw_image(data.image, 0, 0);
 										draw_set_pipeline(null);
-										g2_end();
+										draw_end();
 
 										map_set(ui_files_icon_map, _ui_files_file_browser_handle.text + path_sep + data.f, icon);
 										ui_base_hwnds[tab_area_t.STATUS].redraws = 3;
@@ -389,7 +389,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 			ui._y += slotw * 0.75;
 			let label0: string = (ui_files_show_extensions || string_index_of(f, ".") <= 0) ? f : substring(f, 0, string_last_index_of(f, "."));
 			let label1: string = "";
-			while (label0.length > 0 && g2_font_width(ui.ops.font, ui.font_size, label0) > ui._w - 6) { // 2 line split
+			while (label0.length > 0 && draw_string_width(ui.ops.font, ui.font_size, label0) > ui._w - 6) { // 2 line split
 				label1 = char_at(label0, label0.length - 1) + label1;
 				label0 = substring(label0, 0, label0.length - 1);
 			}
@@ -402,12 +402,12 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 			}
 			if (label1 != "") { // Second line
 				ui._x = _x;
-				ui._y += g2_font_height(ui.ops.font, ui.font_size);
+				ui._y += draw_font_height(ui.ops.font, ui.font_size);
 				ui_text(label1, ui_align_t.CENTER);
 				if (ui.is_hovered) {
 					ui_tooltip(label0 + label1);
 				}
-				ui._y -= g2_font_height(ui.ops.font, ui.font_size);
+				ui._y -= draw_font_height(ui.ops.font, ui.font_size);
 			}
 
 			ui._y -= slotw * 0.75;
@@ -432,12 +432,12 @@ function ui_files_make_icon (args: ui_files_make_icon_t) {
 	let sw: i32 = image.width > image.height ? w : math_floor(1.0 * image.width / image.height * w);
 	let sh: i32 = image.width > image.height ? math_floor(1.0 * image.height / image.width * w) : w;
 	let icon: iron_g5_texture_t = iron_g4_create_render_target(sw, sh);
-	g2_begin(icon);
+	draw_begin(icon);
 	iron_g5_clear(0xffffffff);
 	draw_set_pipeline(pipes_copy_rgb);
 	draw_scaled_image(image, 0, 0, sw, sh);
 	draw_set_pipeline(null);
-	g2_end();
+	draw_end();
 	map_set(ui_files_icon_map, args.shandle, icon);
 	ui_base_hwnds[tab_area_t.STATUS].redraws = 3;
 	data_delete_image(args.shandle); // The big image is not needed anymore

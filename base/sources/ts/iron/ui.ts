@@ -131,14 +131,14 @@ function _ui_tooltip_image(image: iron_g5_texture_t, max_width: i32 = 0) {
 }
 
 function ui_window(handle: ui_handle_t, x: i32, y: i32, w: i32, h: i32, drag: bool = false): bool {
-	_g2_current = ADDRESS(handle.texture);
-	_g2_in_use = true;
+	_draw_current = ADDRESS(handle.texture);
+	_draw_in_use = true;
 	return _ui_window(handle, x, y, w, h, drag);
 }
 
 function ui_end(last: bool = true) {
-	_g2_current = null;
-	_g2_in_use = false;
+	_draw_current = null;
+	_draw_in_use = false;
 	_ui_end(last);
 }
 
@@ -228,7 +228,7 @@ function ui_get_socket(nodes: ui_node_t[], id: i32): ui_node_socket_t {
 }
 
 function ui_set_font(raw: ui_t, font: draw_font_t) {
-	g2_font_init(font); // Make sure font_ is ready
+	draw_font_init(font); // Make sure font is ready
 	raw.ops.font = font;
 }
 

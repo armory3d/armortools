@@ -86,11 +86,10 @@ function base_init() {
 
 	// Baked font for fast startup
 	if (config_raw.locale == "en") {
-		draw_font_13(base_font, base_font.buf.buffer);
-		base_font.glyphs = _g2_font_glyphs;
+		draw_font_13(base_font);
 	}
 	else {
-		g2_font_init(base_font);
+		draw_font_init(base_font);
 	}
 
 	base_color_wheel = image_color_wheel;
