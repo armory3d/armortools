@@ -32,7 +32,7 @@ let ui_nodes_last_node_selected_id: i32 = -1;
 let ui_nodes_release_link: bool = false;
 let ui_nodes_is_node_menu_op: bool = false;
 
-let ui_nodes_grid: iron_g5_texture_t = null;
+let ui_nodes_grid: iron_gpu_texture_t = null;
 let ui_nodes_grid_redraw: bool = true;
 let ui_nodes_grid_cell_w: i32 = 200;
 let ui_nodes_grid_small_cell_w: i32 = 40;
@@ -715,7 +715,7 @@ function ui_nodes_get_node_y(): i32 {
 	return math_floor((mouse_y - ui_nodes_wy - ui_nodes_PAN_Y()) / ui_nodes_SCALE());
 }
 
-function ui_nodes_draw_grid(zoom: f32): iron_g5_texture_t {
+function ui_nodes_draw_grid(zoom: f32): iron_gpu_texture_t {
 	let ww: i32 = config_raw.layout[layout_size_t.NODES_W];
 
 	///if (is_paint || is_sculpt)
@@ -736,9 +736,9 @@ function ui_nodes_draw_grid(zoom: f32): iron_g5_texture_t {
 		h = 1;
 	}
 
-	let grid: iron_g5_texture_t = iron_g4_create_render_target(w, h);
+	let grid: iron_gpu_texture_t = gpu_create_render_target(w, h);
 	draw_begin(grid);
-	iron_g5_clear(ui_nodes_ui.ops.theme.SEPARATOR_COL);
+	iron_gpu_clear(ui_nodes_ui.ops.theme.SEPARATOR_COL);
 
 	let sep_col: i32 = ui_nodes_ui.ops.theme.SEPARATOR_COL;
 	let line_primary: i32 = sep_col - 0x00050505;
@@ -1056,7 +1056,7 @@ function ui_nodes_render() {
 
 		// Node previews
 		if (config_raw.node_preview && nodes.nodes_selected_id.length > 0) {
-			let img: iron_g5_texture_t = null;
+			let img: iron_gpu_texture_t = null;
 			let sel: ui_node_t = ui_get_node(c.nodes, nodes.nodes_selected_id[0]);
 
 			///if (is_paint || is_sculpt)
@@ -1106,7 +1106,7 @@ function ui_nodes_render() {
 				///if (is_paint || is_sculpt)
 				if (single_channel) {
 					draw_set_pipeline(ui_view2d_pipe);
-					_iron_g4_set_int(ui_view2d_channel_loc, 1);
+					_gpu_set_int(ui_view2d_channel_loc, 1);
 				}
 				///end
 
@@ -1587,7 +1587,7 @@ function ui_nodes_make_node_preview() {
 	}
 
 	if (context_raw.node_preview == null) {
-		context_raw.node_preview = iron_g4_create_render_target(util_render_material_preview_size, util_render_material_preview_size);
+		context_raw.node_preview = gpu_create_render_target(util_render_material_preview_size, util_render_material_preview_size);
 	}
 
 	context_raw.node_preview_dirty = false;

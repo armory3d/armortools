@@ -85,8 +85,8 @@ void iron_init(const char *name, int width, int height, iron_window_options_t *w
 	iron_internal_window_width = width;
 	iron_internal_window_height = height;
 
-	iron_g5_internal_init();
-	iron_g4_internal_init_window(win->depth_bits, true);
+	iron_gpu_internal_init();
+	gpu_internal_init_window(win->depth_bits, true);
 }
 
 bool iron_internal_handle_messages() {

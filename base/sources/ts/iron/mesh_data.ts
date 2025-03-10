@@ -104,10 +104,10 @@ function mesh_data_create(raw: mesh_data_t): mesh_data_t {
 	return raw;
 }
 
-function mesh_data_get_vertex_struct(vertex_arrays: vertex_array_t[]): iron_g5_vertex_structure_t {
-	let structure: iron_g5_vertex_structure_t = g4_vertex_struct_create();
+function mesh_data_get_vertex_struct(vertex_arrays: vertex_array_t[]): iron_gpu_vertex_structure_t {
+	let structure: iron_gpu_vertex_structure_t = gpu_vertex_struct_create();
 	for (let i: i32 = 0; i < vertex_arrays.length; ++i) {
-		g4_vertex_struct_add(structure, vertex_arrays[i].attrib, mesh_data_get_vertex_data(vertex_arrays[i].data));
+		gpu_vertex_struct_add(structure, vertex_arrays[i].attrib, mesh_data_get_vertex_data(vertex_arrays[i].data));
 	}
 	return structure;
 }
@@ -165,13 +165,13 @@ function mesh_data_get_vertex_array(raw: mesh_data_t, name: string): vertex_arra
 	return null;
 }
 
-function mesh_data_get(raw: mesh_data_t, vs: vertex_element_t[]): iron_g5_vertex_buffer_t {
+function mesh_data_get(raw: mesh_data_t, vs: vertex_element_t[]): iron_gpu_vertex_buffer_t {
 	let key: string = "";
 	for (let i: i32 = 0; i < vs.length; ++i) {
 		let e: vertex_element_t = vs[i];
 		key += e.name;
 	}
-	let vb: iron_g5_vertex_buffer_t = map_get(raw._.vertex_buffer_map, key);
+	let vb: iron_gpu_vertex_buffer_t = map_get(raw._.vertex_buffer_map, key);
 	if (vb == null) {
 		let vertex_arrays: vertex_array_t[] = [];
 		let has_tex: bool = false;
@@ -196,12 +196,12 @@ function mesh_data_get(raw: mesh_data_t, vs: vertex_element_t[]): iron_g5_vertex
 		let positions: vertex_array_t = mesh_data_get_vertex_array(raw, "pos");
 		let uvs: vertex_array_t = mesh_data_get_vertex_array(raw, "tex");
 		let cols: vertex_array_t = mesh_data_get_vertex_array(raw, "col");
-		let vstruct: iron_g5_vertex_structure_t = mesh_data_get_vertex_struct(vertex_arrays);
+		let vstruct: iron_gpu_vertex_structure_t = mesh_data_get_vertex_struct(vertex_arrays);
 		let size: i32 = mesh_data_get_vertex_size(positions.data);
-		vb = iron_g4_create_vertex_buffer(math_floor(positions.values.length / size), vstruct, usage_t.STATIC);
-		raw._.vertices = iron_g4_lock_vertex_buffer(vb);
+		vb = gpu_create_vertex_buffer(math_floor(positions.values.length / size), vstruct, usage_t.STATIC);
+		raw._.vertices = gpu_lock_vertex_buffer(vb);
 		mesh_data_build_vertices(raw._.vertices, vertex_arrays, 0, has_tex && uvs == null, tex_offset);
-		iron_g4_vertex_buffer_unlock_all(vb);
+		gpu_vertex_buffer_unlock_all(vb);
 		map_set(raw._.vertex_buffer_map, key, vb);
 		if (has_tex && uvs == null) {
 			iron_log("Geometry " + raw.name + " is missing UV map");
@@ -220,14 +220,14 @@ function mesh_data_build(raw: mesh_data_t) {
 
 	let positions: vertex_array_t = mesh_data_get_vertex_array(raw, "pos");
 	let size: i32 = mesh_data_get_vertex_size(positions.data);
-	raw._.vertex_buffer = iron_g4_create_vertex_buffer(math_floor(positions.values.length / size), raw._.structure, usage_t.STATIC);
-	raw._.vertices = iron_g4_lock_vertex_buffer(raw._.vertex_buffer);
+	raw._.vertex_buffer = gpu_create_vertex_buffer(math_floor(positions.values.length / size), raw._.structure, usage_t.STATIC);
+	raw._.vertices = gpu_lock_vertex_buffer(raw._.vertex_buffer);
 	mesh_data_build_vertices(raw._.vertices, raw.vertex_arrays);
-	iron_g4_vertex_buffer_unlock_all(raw._.vertex_buffer);
+	gpu_vertex_buffer_unlock_all(raw._.vertex_buffer);
 
 	let struct_str: string = "";
 	for (let i: i32 = 0; i < raw._.structure.size; ++i) {
-		let e: iron_g5_vertex_element_t = ADDRESS(ARRAY_ACCESS(raw._.structure.elements, i));
+		let e: iron_gpu_vertex_element_t = ADDRESS(ARRAY_ACCESS(raw._.structure.elements, i));
 		struct_str += e.name;
 	}
 	map_set(raw._.vertex_buffer_map, struct_str, raw._.vertex_buffer);
@@ -239,14 +239,14 @@ function mesh_data_build(raw: mesh_data_t) {
 		if (id.length == 0) {
 			continue;
 		}
-		let index_buffer: iron_g5_index_buffer_t = iron_g4_create_index_buffer(id.length);
+		let index_buffer: iron_gpu_index_buffer_t = gpu_create_index_buffer(id.length);
 
-		let indices_array: u32_array_t = iron_g4_lock_index_buffer(index_buffer);
+		let indices_array: u32_array_t = gpu_lock_index_buffer(index_buffer);
 		for (let i: i32 = 0; i < indices_array.length; ++i) {
 			indices_array[i] = id[i];
 		}
 
-		iron_g4_index_buffer_unlock_all(index_buffer);
+		gpu_index_buffer_unlock_all(index_buffer);
 		array_push(raw._.index_buffers, index_buffer);
 	}
 
@@ -340,13 +340,13 @@ function mesh_data_calculate_aabb(raw: mesh_data_t): vec4_t {
 function mesh_data_delete(raw: mesh_data_t) {
 	let vertex_buffer_keys: string[] = map_keys(raw._.vertex_buffer_map);
 	for (let i: i32 = 0; i < vertex_buffer_keys.length; ++i) {
-		let buf: iron_g5_vertex_buffer_t = map_get(raw._.vertex_buffer_map, vertex_buffer_keys[i]);
+		let buf: iron_gpu_vertex_buffer_t = map_get(raw._.vertex_buffer_map, vertex_buffer_keys[i]);
 		if (buf != null) {
-			iron_g4_delete_vertex_buffer(buf);
+			gpu_delete_vertex_buffer(buf);
 		}
 	}
 	for (let i: i32 = 0; i < raw._.index_buffers.length; ++i) {
-		let buf: iron_g5_index_buffer_t = raw._.index_buffers[i];
-		iron_g4_delete_index_buffer(buf);
+		let buf: iron_gpu_index_buffer_t = raw._.index_buffers[i];
+		gpu_delete_index_buffer(buf);
 	}
 }

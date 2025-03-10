@@ -1,14 +1,14 @@
 
-let util_uv_uvmap: iron_g5_texture_t = null;
+let util_uv_uvmap: iron_gpu_texture_t = null;
 let util_uv_uvmap_cached: bool = false;
-let util_uv_trianglemap: iron_g5_texture_t = null;
+let util_uv_trianglemap: iron_gpu_texture_t = null;
 let util_uv_trianglemap_cached: bool = false;
-let util_uv_dilatemap: iron_g5_texture_t = null;
+let util_uv_dilatemap: iron_gpu_texture_t = null;
 let util_uv_dilatemap_cached: bool = false;
-let util_uv_uvislandmap: iron_g5_texture_t = null;
+let util_uv_uvislandmap: iron_gpu_texture_t = null;
 let util_uv_uvislandmap_cached: bool = false;
 let util_uv_dilate_bytes: buffer_t = null;
-let util_uv_pipe_dilate: iron_g5_pipeline_t = null;
+let util_uv_pipe_dilate: iron_gpu_pipeline_t = null;
 
 function util_uv_cache_uv_map() {
 	if (util_uv_uvmap != null && (util_uv_uvmap.width != config_get_texture_res_x() || util_uv_uvmap.height != config_get_texture_res_y())) {
@@ -24,7 +24,7 @@ function util_uv_cache_uv_map() {
 	let res_x: i32 = config_get_texture_res_x();
 	let res_y: i32 = config_get_texture_res_y();
 	if (util_uv_uvmap == null) {
-		util_uv_uvmap = iron_g4_create_render_target(res_x, res_y);
+		util_uv_uvmap = gpu_create_render_target(res_x, res_y);
 	}
 
 	util_uv_uvmap_cached = true;
@@ -35,7 +35,7 @@ function util_uv_cache_uv_map() {
 	let texa: i16_array_t = mesh.vertex_arrays[2].values;
 	let inda: u32_array_t = mesh.index_arrays[0].values;
 	draw_begin(util_uv_uvmap);
-	iron_g5_clear(0x00000000);
+	iron_gpu_clear(0x00000000);
 	draw_set_color(0xffffffff);
 	let strength: f32 = res_x > 2048 ? 2.0 : 1.0;
 	let f: f32 = (1 / 32767) * util_uv_uvmap.width;
@@ -65,7 +65,7 @@ function util_uv_cache_triangle_map() {
 	}
 
 	if (util_uv_trianglemap == null) {
-		util_uv_trianglemap = iron_g4_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
+		util_uv_trianglemap = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
 	}
 
 	util_uv_trianglemap_cached = true;
@@ -74,7 +74,7 @@ function util_uv_cache_triangle_map() {
 	let texa: i16_array_t = mesh.vertex_arrays[2].values;
 	let inda: u32_array_t = mesh.index_arrays[0].values;
 	draw_begin(util_uv_trianglemap);
-	iron_g5_clear(0xff000000);
+	iron_gpu_clear(0xff000000);
 	let f: f32 = (1 / 32767) * util_uv_trianglemap.width;
 	let color: i32 = 0xff000001;
 	for (let i: i32 = 0; i < math_floor(inda.length / 3); ++i) {
@@ -102,26 +102,26 @@ function util_uv_cache_dilate_map() {
 	if (util_uv_dilatemap_cached) return;
 
 	if (util_uv_dilatemap == null) {
-		util_uv_dilatemap = iron_g4_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
+		util_uv_dilatemap = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 	}
 
 	if (util_uv_pipe_dilate == null) {
-		util_uv_pipe_dilate = iron_g4_create_pipeline();
+		util_uv_pipe_dilate = gpu_create_pipeline();
 		util_uv_pipe_dilate.vertex_shader = sys_get_shader("dilate_map.vert");
 		util_uv_pipe_dilate.fragment_shader = sys_get_shader("dilate_map.frag");
-		let vs: iron_g5_vertex_structure_t = g4_vertex_struct_create();
+		let vs: iron_gpu_vertex_structure_t = gpu_vertex_struct_create();
 		///if (arm_metal || arm_vulkan)
-		g4_vertex_struct_add(vs, "tex", vertex_data_t.I16_2X_NORM);
+		gpu_vertex_struct_add(vs, "tex", vertex_data_t.I16_2X_NORM);
 		///else
-		g4_vertex_struct_add(vs, "pos", vertex_data_t.I16_4X_NORM);
-		g4_vertex_struct_add(vs, "nor", vertex_data_t.I16_2X_NORM);
-		g4_vertex_struct_add(vs, "tex", vertex_data_t.I16_2X_NORM);
+		gpu_vertex_struct_add(vs, "pos", vertex_data_t.I16_4X_NORM);
+		gpu_vertex_struct_add(vs, "nor", vertex_data_t.I16_2X_NORM);
+		gpu_vertex_struct_add(vs, "tex", vertex_data_t.I16_2X_NORM);
 		///end
 		util_uv_pipe_dilate.input_layout = vs;
 		util_uv_pipe_dilate.depth_write = false;
 		util_uv_pipe_dilate.depth_mode = compare_mode_t.ALWAYS;
 		ARRAY_ACCESS(util_uv_pipe_dilate.color_attachment, 0) = tex_format_t.R8;
-		iron_g4_compile_pipeline(util_uv_pipe_dilate);
+		gpu_compile_pipeline(util_uv_pipe_dilate);
 		// dilate_tex_unpack = getConstantLocation(pipeDilate, "tex_unpack");
 	}
 
@@ -130,9 +130,9 @@ function util_uv_cache_dilate_map() {
 		mask = context_raw.layer_filter;
 	}
 	let geom: mesh_data_t = mask == 0 && context_raw.merged_object != null ? context_raw.merged_object.data : context_raw.paint_object.data;
-	_iron_g4_begin(util_uv_dilatemap);
-	iron_g5_clear(0x00000000);
-	iron_g5_set_pipeline(util_uv_pipe_dilate);
+	_gpu_begin(util_uv_dilatemap);
+	iron_gpu_clear(0x00000000);
+	iron_gpu_set_pipeline(util_uv_pipe_dilate);
 	///if (arm_metal || arm_vulkan)
 	let vs: vertex_element_t[] = [
 		{
@@ -140,13 +140,13 @@ function util_uv_cache_dilate_map() {
 			data: "short2norm"
 		}
 	];
-	iron_g4_set_vertex_buffer(mesh_data_get(geom, vs));
+	gpu_set_vertex_buffer(mesh_data_get(geom, vs));
 	///else
-	iron_g4_set_vertex_buffer(geom._.vertex_buffer);
+	gpu_set_vertex_buffer(geom._.vertex_buffer);
 	///end
-	iron_g4_set_index_buffer(geom._.index_buffers[0]);
-	iron_g4_draw_indexed_vertices();
-	_iron_g4_end();
+	gpu_set_index_buffer(geom._.index_buffers[0]);
+	gpu_draw_indexed_vertices();
+	_gpu_end();
 	util_uv_dilatemap_cached = true;
 	util_uv_dilate_bytes = null;
 }
@@ -179,7 +179,7 @@ function _util_uv_check(cx: i32, cy: i32, w: i32, h: i32, r: i32, view: buffer_t
 function util_uv_cache_uv_island_map() {
 	util_uv_cache_dilate_map();
 	if (util_uv_dilate_bytes == null) {
-		util_uv_dilate_bytes = iron_g4_get_texture_pixels(util_uv_dilatemap);
+		util_uv_dilate_bytes = gpu_get_texture_pixels(util_uv_dilatemap);
 	}
 	util_render_pick_pos_nor_tex();
 	let w: i32 = 2048; // config_get_texture_res_x()
@@ -200,6 +200,6 @@ function util_uv_cache_uv_island_map() {
 	if (util_uv_uvislandmap != null) {
 		iron_unload_image(util_uv_uvislandmap);
 	}
-	util_uv_uvislandmap = iron_g4_create_texture_from_bytes(bytes, w, h, tex_format_t.R8);
+	util_uv_uvislandmap = gpu_create_texture_from_bytes(bytes, w, h, tex_format_t.R8);
 	util_uv_uvislandmap_cached = true;
 }

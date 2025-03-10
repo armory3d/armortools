@@ -473,7 +473,7 @@ void ui_end_element() {
 void ui_resize(ui_handle_t *handle, int w, int h) {
 	handle->redraws = 2;
 	if (handle->texture.width != 0) {
-		iron_g5_texture_destroy(&handle->texture);
+		iron_gpu_texture_destroy(&handle->texture);
 	}
 	if (w < 1) {
 		w = 1;
@@ -481,7 +481,7 @@ void ui_resize(ui_handle_t *handle, int w, int h) {
 	if (h < 1) {
 		h = 1;
 	}
-	iron_g5_render_target_init(&handle->texture, w, h, IRON_IMAGE_FORMAT_RGBA32, 0);
+	iron_gpu_render_target_init(&handle->texture, w, h, IRON_IMAGE_FORMAT_RGBA32, 0);
 }
 
 bool ui_input_in_rect(float x, float y, float w, float h) {
@@ -863,24 +863,24 @@ void ui_draw_combo(bool begin /*= true*/) {
 
 void ui_bake_elements() {
 	if (current->check_select_image.width != 0) {
-		iron_g5_texture_destroy(&current->check_select_image);
+		iron_gpu_texture_destroy(&current->check_select_image);
 	}
 	float r = UI_CHECK_SELECT_SIZE();
-	iron_g5_render_target_init(&current->check_select_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
+	iron_gpu_render_target_init(&current->check_select_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
 	draw_set_render_target(&current->check_select_image);
-	iron_g5_clear(0x00000000, 0, IRON_G5_CLEAR_COLOR);
+	iron_gpu_clear(0x00000000, 0, IRON_GPU_CLEAR_COLOR);
 	draw_set_color(0xffffffff);
 	draw_line(0, r / 2.0, r / 2.0 - 2.0 * UI_SCALE(), r - 2.0 * UI_SCALE(), 2.0 * UI_SCALE());
 	draw_line(r / 2.0 - 3.0 * UI_SCALE(), r - 3.0 * UI_SCALE(), r / 2.0 + 5.0 * UI_SCALE(), r - 11.0 * UI_SCALE(), 2.0 * UI_SCALE());
 	draw_end();
 
 	if (current->radio_image.width != 0) {
-		iron_g5_texture_destroy(&current->radio_image);
+		iron_gpu_texture_destroy(&current->radio_image);
 	}
 	r = UI_CHECK_SIZE();
-	iron_g5_render_target_init(&current->radio_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
+	iron_gpu_render_target_init(&current->radio_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
 	draw_set_render_target(&current->radio_image);
-	iron_g5_clear(0x00000000, 0, IRON_G5_CLEAR_COLOR);
+	iron_gpu_clear(0x00000000, 0, IRON_GPU_CLEAR_COLOR);
 	draw_set_color(0xffaaaaaa);
 	draw_filled_circle(r / 2.0, r / 2.0, r / 2.0, 0);
 	draw_set_color(0xffffffff);
@@ -888,12 +888,12 @@ void ui_bake_elements() {
 	draw_end();
 
 	if (current->radio_select_image.width != 0) {
-		iron_g5_texture_destroy(&current->radio_select_image);
+		iron_gpu_texture_destroy(&current->radio_select_image);
 	}
 	r = UI_CHECK_SELECT_SIZE();
-	iron_g5_render_target_init(&current->radio_select_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
+	iron_gpu_render_target_init(&current->radio_select_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
 	draw_set_render_target(&current->radio_select_image);
-	iron_g5_clear(0x00000000, 0, IRON_G5_CLEAR_COLOR);
+	iron_gpu_clear(0x00000000, 0, IRON_GPU_CLEAR_COLOR);
 	draw_set_color(0xffaaaaaa);
 	draw_filled_circle(r / 2.0, r / 2.0, 4.5 * UI_SCALE(), 0);
 	draw_set_color(0xffffffff);
@@ -902,22 +902,22 @@ void ui_bake_elements() {
 
 	if (theme->ROUND_CORNERS) {
 		if (current->filled_round_corner_image.width != 0) {
-			iron_g5_texture_destroy(&current->filled_round_corner_image);
+			iron_gpu_texture_destroy(&current->filled_round_corner_image);
 		}
 		r = 4.0 * UI_SCALE();
-		iron_g5_render_target_init(&current->filled_round_corner_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
+		iron_gpu_render_target_init(&current->filled_round_corner_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
 		draw_set_render_target(&current->filled_round_corner_image);
-		iron_g5_clear(0x00000000, 0, IRON_G5_CLEAR_COLOR);
+		iron_gpu_clear(0x00000000, 0, IRON_GPU_CLEAR_COLOR);
 		draw_set_color(0xffffffff);
 		draw_filled_circle(r, r, r, 0);
 		draw_end();
 
 		if (current->round_corner_image.width != 0) {
-			iron_g5_texture_destroy(&current->round_corner_image);
+			iron_gpu_texture_destroy(&current->round_corner_image);
 		}
-		iron_g5_render_target_init(&current->round_corner_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
+		iron_gpu_render_target_init(&current->round_corner_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
 		draw_set_render_target(&current->round_corner_image);
-		iron_g5_clear(0x00000000, 0, IRON_G5_CLEAR_COLOR);
+		iron_gpu_clear(0x00000000, 0, IRON_GPU_CLEAR_COLOR);
 		draw_set_color(0xffffffff);
 		draw_circle(r, r, r, 0, 1);
 		draw_end();
@@ -1502,7 +1502,7 @@ void ui_end_sticky() {
 	draw_end();
 	current->sticky = false;
 	current->scissor = true;
-	iron_g4_scissor(0, current->_y, current->_window_w, current->_window_h - current->_y);
+	gpu_scissor(0, current->_y, current->_window_w, current->_window_h - current->_y);
 	current->window_header_h += current->_y - current->window_header_h;
 	current->_y += current->current_window->scroll_offset;
 	current->is_hovered = false;
@@ -1517,7 +1517,7 @@ void ui_end_window(bool bind_global_g) {
 	if (handle->redraws > 0 || current->is_scrolling) {
 		if (current->scissor) {
 			current->scissor = false;
-			iron_g4_disable_scissor();
+			gpu_disable_scissor();
 		}
 
 		if (current->tab_count > 0) {
@@ -1681,10 +1681,10 @@ bool _ui_window(ui_handle_t *handle, int x, int y, int w, int h, bool drag) {
 	current->tab_count = 0;
 
 	if (theme->FILL_WINDOW_BG) {
-		iron_g5_clear(theme->WINDOW_BG_COL, 0, IRON_G5_CLEAR_COLOR);
+		iron_gpu_clear(theme->WINDOW_BG_COL, 0, IRON_GPU_CLEAR_COLOR);
 	}
 	else {
-		iron_g5_clear(0x00000000, 0, IRON_G5_CLEAR_COLOR);
+		iron_gpu_clear(0x00000000, 0, IRON_GPU_CLEAR_COLOR);
 		draw_set_color(theme->WINDOW_BG_COL);
 		draw_filled_rect(current->_x, current->_y - handle->scroll_offset, handle->last_max_x, handle->last_max_y);
 	}
@@ -1709,7 +1709,7 @@ bool _ui_window(ui_handle_t *handle, int x, int y, int w, int h, bool drag) {
 	return true;
 }
 
-bool ui_button(char *text, int align, char *label/*, iron_g5_texture_t *icon, int sx, int sy, int sw, int sh*/) {
+bool ui_button(char *text, int align, char *label/*, iron_gpu_texture_t *icon, int sx, int sy, int sw, int sh*/) {
 	if (!ui_is_visible(UI_ELEMENT_H())) {
 		ui_end_element();
 		return false;
@@ -1843,22 +1843,22 @@ bool ui_panel(ui_handle_t *handle, char *text, bool is_tree, bool filled) {
 }
 
 static int image_width(void *image) {
-	return ((iron_g5_texture_t *)image)->width;
+	return ((iron_gpu_texture_t *)image)->width;
 }
 
 static int image_height(void *image) {
-	return ((iron_g5_texture_t *)image)->height;
+	return ((iron_gpu_texture_t *)image)->height;
 }
 
 static void _draw_scaled_image(void *image, float dx, float dy, float dw, float dh) {
-	draw_scaled_texture((iron_g5_texture_t *)image, dx, dy, dw, dh);
+	draw_scaled_texture((iron_gpu_texture_t *)image, dx, dy, dw, dh);
 }
 
 static void _draw_scaled_sub_image(void *image, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
-	draw_scaled_sub_texture((iron_g5_texture_t *)image, sx, sy, sw, sh, dx, dy, dw, dh);
+	draw_scaled_sub_texture((iron_gpu_texture_t *)image, sx, sy, sw, sh, dx, dy, dw, dh);
 }
 
-int ui_sub_image(iron_g5_texture_t *image, uint32_t tint, int h, int sx, int sy, int sw, int sh) {
+int ui_sub_image(iron_gpu_texture_t *image, uint32_t tint, int h, int sx, int sy, int sw, int sh) {
 	float iw = (sw > 0 ? sw : image_width(image)) * UI_SCALE();
 	float ih = (sh > 0 ? sh : image_height(image)) * UI_SCALE();
 	float w = fmin(iw, current->_w);
@@ -1929,7 +1929,7 @@ int ui_sub_image(iron_g5_texture_t *image, uint32_t tint, int h, int sx, int sy,
 	return started ? UI_STATE_STARTED : released ? UI_STATE_RELEASED : down ? UI_STATE_DOWN : hover ? UI_STATE_HOVERED : UI_STATE_IDLE;
 }
 
-int ui_image(iron_g5_texture_t *image, uint32_t tint, int h) {
+int ui_image(iron_gpu_texture_t *image, uint32_t tint, int h) {
 	return ui_sub_image(image, tint, h, 0, 0, image_width(image), image_height(image));
 }
 
@@ -2240,7 +2240,7 @@ void ui_tooltip(char *text) {
 	current->tooltip_y = current->_y + current->_window_y;
 }
 
-void ui_tooltip_image(iron_g5_texture_t *image, int max_width) {
+void ui_tooltip_image(iron_gpu_texture_t *image, int max_width) {
 	current->tooltip_img = image;
 	current->tooltip_img_max_width = max_width;
 	current->tooltip_invert_y = current->image_invert_y;

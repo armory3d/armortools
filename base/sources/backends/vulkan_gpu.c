@@ -23,21 +23,21 @@ static void command_list_should_wait_for_framebuffer(void);
 static VkDescriptorSetLayout compute_descriptor_layout;
 static int framebuffer_count = 0;
 
-extern iron_g5_texture_t *vulkan_textures[16];
+extern iron_gpu_texture_t *vulkan_textures[16];
 VkDescriptorSet getDescriptorSet(void);
 static VkDescriptorSet get_compute_descriptor_set(void);
 void setImageLayout(VkCommandBuffer _buffer, VkImage image, VkImageAspectFlags aspectMask, VkImageLayout oldImageLayout, VkImageLayout newImageLayout);
 
 VkRenderPassBeginInfo currentRenderPassBeginInfo;
 VkPipeline currentVulkanPipeline;
-iron_g5_texture_t *currentRenderTargets[8] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+iron_gpu_texture_t *currentRenderTargets[8] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 
 static bool onBackBuffer = false;
 static uint32_t lastVertexConstantBufferOffset = 0;
 static uint32_t lastFragmentConstantBufferOffset = 0;
 static uint32_t lastComputeConstantBufferOffset = 0;
-static iron_g5_pipeline_t *current_pipeline = NULL;
-static iron_g5_compute_shader *current_compute_shader = NULL;
+static iron_gpu_pipeline_t *current_pipeline = NULL;
+static iron_gpu_compute_shader *current_compute_shader = NULL;
 static int mrtIndex = 0;
 static VkFramebuffer mrtFramebuffer[16];
 static VkRenderPass mrtRenderPass[16];
@@ -50,7 +50,7 @@ static VkShaderModule create_shader_module(const void *code, size_t size);
 static VkDescriptorPool compute_descriptor_pool;
 
 VkDescriptorSetLayout desc_layout;
-extern iron_g5_texture_t *vulkan_textures[16];
+extern iron_gpu_texture_t *vulkan_textures[16];
 extern uint32_t swapchainImageCount;
 extern uint32_t current_buffer;
 
@@ -114,7 +114,7 @@ struct vk_context vk_ctx = {0};
 void iron_vulkan_get_instance_extensions(const char **extensions, int *index, int max);
 VkBool32 iron_vulkan_get_physical_device_presentation_support(VkPhysicalDevice physicalDevice, uint32_t queueFamilyIndex);
 VkResult iron_vulkan_create_surface(VkInstance instance, VkSurfaceKHR *surface);
-void iron_g5_internal_resize(int, int);
+void iron_gpu_internal_resize(int, int);
 
 #define GET_INSTANCE_PROC_ADDR(instance, entrypoint)                                                                                                           \
 	{                                                                                                                                                          \
@@ -130,7 +130,7 @@ void create_descriptor_layout(void);
 static void create_compute_descriptor_layout(void);
 void set_image_layout(VkImage image, VkImageAspectFlags aspectMask, VkImageLayout old_image_layout, VkImageLayout new_image_layout);
 
-iron_g5_texture_t *vulkan_textures[16] = {
+iron_gpu_texture_t *vulkan_textures[16] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
@@ -188,7 +188,7 @@ void iron_internal_resize(int width, int height) {
 		window->height = height;
 	}
 
-	iron_g5_internal_resize(width, height);
+	iron_gpu_internal_resize(width, height);
 }
 
 VkSwapchainKHR cleanup_swapchain() {
@@ -670,7 +670,7 @@ static bool find_layer(VkLayerProperties *layers, int layer_count, const char *w
 	return false;
 }
 
-void iron_g5_internal_init() {
+void iron_gpu_internal_init() {
 	VkResult err;
 	uint32_t instance_layer_count = 0;
 
@@ -877,7 +877,7 @@ void iron_g5_internal_init() {
 	// Allows negative viewport height to flip viewport
 	wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_MAINTENANCE1_EXTENSION_NAME;
 
-	if (iron_g5_raytrace_supported()) {
+	if (iron_gpu_raytrace_supported()) {
 		wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME;
 		wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME;
 		wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME;
@@ -1012,7 +1012,7 @@ void iron_g5_internal_init() {
 		VkPhysicalDeviceRayTracingPipelineFeaturesKHR rayTracingPipelineExt = {0};
 		VkPhysicalDeviceAccelerationStructureFeaturesKHR rayTracingAccelerationStructureExt = {0};
 		VkPhysicalDeviceBufferDeviceAddressFeatures bufferDeviceAddressExt = {0};
-		if (iron_g5_raytrace_supported()) {
+		if (iron_gpu_raytrace_supported()) {
 			rayTracingPipelineExt.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
 			rayTracingPipelineExt.pNext = NULL;
 			rayTracingPipelineExt.rayTracingPipeline = VK_TRUE;
@@ -1060,19 +1060,19 @@ void iron_g5_internal_init() {
 	assert(!err);
 }
 
-void iron_g5_internal_destroy() {}
+void iron_gpu_internal_destroy() {}
 
 void iron_vulkan_init_window() {
 	// this function is used in the android backend
 	struct vk_window *window = &vk_ctx.windows[0];
 
 	// delay swapchain/surface recreation
-	// otherwise trouble ensues due to G4onG5 backend ending the command list in iron_g4_begin
+	// otherwise trouble ensues due to G4onG5 backend ending the command list in gpu_begin
 	window->resized = true;
 	window->surface_destroyed = true;
 }
 
-void iron_g5_internal_init_window(int depthBufferBits, bool vsync) {
+void iron_gpu_internal_init_window(int depthBufferBits, bool vsync) {
 	struct vk_window *window = &vk_ctx.windows[0];
 
 	window->depth_bits = depthBufferBits;
@@ -1120,10 +1120,10 @@ void iron_g5_internal_init_window(int depthBufferBits, bool vsync) {
 	create_render_target_render_pass(window);
 
 	began = false;
-	iron_g5_begin(NULL);
+	iron_gpu_begin(NULL);
 }
 
-void iron_g5_internal_destroy_window() {
+void iron_gpu_internal_destroy_window() {
 	struct vk_window *window = &vk_ctx.windows[0];
 	VkSwapchainKHR swapchain = cleanup_swapchain();
 	destroy_render_target_pass(window);
@@ -1131,11 +1131,11 @@ void iron_g5_internal_destroy_window() {
 	vk.fpDestroySurfaceKHR(vk_ctx.instance, window->surface, NULL);
 }
 
-bool iron_g5_swap_buffers() {
+bool iron_gpu_swap_buffers() {
 	return true;
 }
 
-void iron_g5_begin(iron_g5_texture_t *renderTarget) {
+void iron_gpu_begin(iron_gpu_texture_t *renderTarget) {
 	struct vk_window *window = &vk_ctx.windows[0];
 
 	if (began) {
@@ -1168,7 +1168,7 @@ void iron_g5_begin(iron_g5_texture_t *renderTarget) {
 	while (err != VK_SUCCESS && err != VK_SUBOPTIMAL_KHR);
 }
 
-void iron_g5_end() {
+void iron_gpu_end() {
 	VkPresentInfoKHR present = {0};
 	present.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 	present.pNext = NULL;
@@ -1198,7 +1198,7 @@ void iron_g5_end() {
 	began = false;
 }
 
-void iron_g5_flush() {
+void iron_gpu_flush() {
 	vkDeviceWaitIdle(vk_ctx.device);
 }
 
@@ -1217,7 +1217,7 @@ bool iron_vulkan_internal_get_size(int *width, int *height) {
 	}
 }
 
-bool iron_g5_raytrace_supported() {
+bool iron_gpu_raytrace_supported() {
 #ifdef IRON_ANDROID
 	return false;
 #else
@@ -1225,14 +1225,14 @@ bool iron_g5_raytrace_supported() {
 #endif
 }
 
-int iron_g5_max_bound_textures(void) {
+int iron_gpu_max_bound_textures(void) {
 	VkPhysicalDeviceProperties props;
 	vkGetPhysicalDeviceProperties(vk_ctx.gpu, &props);
 	return props.limits.maxPerStageDescriptorSamplers;
 }
 
 
-static void endPass(iron_g5_command_list_t *list) {
+static void endPass(iron_gpu_command_list_t *list) {
 	if (in_render_pass) {
 		vkCmdEndRenderPass(list->impl._buffer);
 		in_render_pass = false;
@@ -1389,7 +1389,7 @@ void flush_init_cmd() {
 	vk_ctx.setup_cmd = VK_NULL_HANDLE;
 }
 
-void set_viewport_and_scissor(iron_g5_command_list_t *list) {
+void set_viewport_and_scissor(iron_gpu_command_list_t *list) {
 	VkViewport viewport;
 	memset(&viewport, 0, sizeof(viewport));
 	VkRect2D scissor;
@@ -1424,7 +1424,7 @@ void set_viewport_and_scissor(iron_g5_command_list_t *list) {
 	vkCmdSetScissor(list->impl._buffer, 0, 1, &scissor);
 }
 
-void iron_g5_command_list_init(iron_g5_command_list_t *list) {
+void iron_gpu_command_list_init(iron_gpu_command_list_t *list) {
 	VkCommandBufferAllocateInfo cmd = {0};
 	cmd.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	cmd.pNext = NULL;
@@ -1445,12 +1445,12 @@ void iron_g5_command_list_init(iron_g5_command_list_t *list) {
 	list->impl._indexCount = 0;
 }
 
-void iron_g5_command_list_destroy(iron_g5_command_list_t *list) {
+void iron_gpu_command_list_destroy(iron_gpu_command_list_t *list) {
 	vkFreeCommandBuffers(vk_ctx.device, vk_ctx.cmd_pool, 1, &list->impl._buffer);
 	vkDestroyFence(vk_ctx.device, list->impl.fence, NULL);
 }
 
-void iron_g5_command_list_begin(iron_g5_command_list_t *list) {
+void iron_gpu_command_list_begin(iron_gpu_command_list_t *list) {
 	VkResult err = vkWaitForFences(vk_ctx.device, 1, &list->impl.fence, VK_TRUE, UINT64_MAX);
 	assert(!err);
 
@@ -1522,7 +1522,7 @@ void iron_g5_command_list_begin(iron_g5_command_list_t *list) {
 	mrtIndex = 0;
 }
 
-void iron_g5_command_list_end(iron_g5_command_list_t *list) {
+void iron_gpu_command_list_end(iron_gpu_command_list_t *list) {
 	vkCmdEndRenderPass(list->impl._buffer);
 
 	VkImageMemoryBarrier prePresentBarrier = {0};
@@ -1548,7 +1548,7 @@ void iron_g5_command_list_end(iron_g5_command_list_t *list) {
 	assert(!err);
 }
 
-void iron_g5_command_list_clear(iron_g5_command_list_t *list, struct iron_g5_texture *renderTarget, unsigned flags, unsigned color, float depth) {
+void iron_gpu_command_list_clear(iron_gpu_command_list_t *list, struct iron_gpu_texture *renderTarget, unsigned flags, unsigned color, float depth) {
 	VkClearRect clearRect = {0};
 	clearRect.rect.offset.x = 0;
 	clearRect.rect.offset.y = 0;
@@ -1559,7 +1559,7 @@ void iron_g5_command_list_clear(iron_g5_command_list_t *list, struct iron_g5_tex
 
 	int count = 0;
 	VkClearAttachment attachments[2];
-	if (flags & IRON_G5_CLEAR_COLOR) {
+	if (flags & IRON_GPU_CLEAR_COLOR) {
 		VkClearColorValue clearColor = {0};
 		clearColor.float32[0] = ((color & 0x00ff0000) >> 16) / 255.0f;
 		clearColor.float32[1] = ((color & 0x0000ff00) >> 8) / 255.0f;
@@ -1570,7 +1570,7 @@ void iron_g5_command_list_clear(iron_g5_command_list_t *list, struct iron_g5_tex
 		attachments[count].clearValue.color = clearColor;
 		count++;
 	}
-	if ((flags & IRON_G5_CLEAR_DEPTH) && renderTarget->impl.depthBufferBits > 0) {
+	if ((flags & IRON_GPU_CLEAR_DEPTH) && renderTarget->impl.depthBufferBits > 0) {
 		attachments[count].aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 		attachments[count].clearValue.depthStencil.depth = depth;
 		attachments[count].clearValue.depthStencil.stencil = 0;
@@ -1579,19 +1579,19 @@ void iron_g5_command_list_clear(iron_g5_command_list_t *list, struct iron_g5_tex
 	vkCmdClearAttachments(list->impl._buffer, count, attachments, 1, &clearRect);
 }
 
-void iron_g5_command_list_render_target_to_framebuffer_barrier(iron_g5_command_list_t *list, struct iron_g5_texture *renderTarget) {}
+void iron_gpu_command_list_render_target_to_framebuffer_barrier(iron_gpu_command_list_t *list, struct iron_gpu_texture *renderTarget) {}
 
-void iron_g5_command_list_framebuffer_to_render_target_barrier(iron_g5_command_list_t *list, struct iron_g5_texture *renderTarget) {}
+void iron_gpu_command_list_framebuffer_to_render_target_barrier(iron_gpu_command_list_t *list, struct iron_gpu_texture *renderTarget) {}
 
-void iron_g5_command_list_draw_indexed_vertices(iron_g5_command_list_t *list) {
-	iron_g5_command_list_draw_indexed_vertices_from_to(list, 0, list->impl._indexCount);
+void iron_gpu_command_list_draw_indexed_vertices(iron_gpu_command_list_t *list) {
+	iron_gpu_command_list_draw_indexed_vertices_from_to(list, 0, list->impl._indexCount);
 }
 
-void iron_g5_command_list_draw_indexed_vertices_from_to(iron_g5_command_list_t *list, int start, int count) {
+void iron_gpu_command_list_draw_indexed_vertices_from_to(iron_gpu_command_list_t *list, int start, int count) {
 	vkCmdDrawIndexed(list->impl._buffer, count, 1, start, 0, 0);
 }
 
-void iron_g5_command_list_viewport(iron_g5_command_list_t *list, int x, int y, int width, int height) {
+void iron_gpu_command_list_viewport(iron_gpu_command_list_t *list, int x, int y, int width, int height) {
 	VkViewport viewport;
 	memset(&viewport, 0, sizeof(viewport));
 	viewport.x = (float)x;
@@ -1603,7 +1603,7 @@ void iron_g5_command_list_viewport(iron_g5_command_list_t *list, int x, int y, i
 	vkCmdSetViewport(list->impl._buffer, 0, 1, &viewport);
 }
 
-void iron_g5_command_list_scissor(iron_g5_command_list_t *list, int x, int y, int width, int height) {
+void iron_gpu_command_list_scissor(iron_gpu_command_list_t *list, int x, int y, int width, int height) {
 	VkRect2D scissor;
 	memset(&scissor, 0, sizeof(scissor));
 	scissor.extent.width = width;
@@ -1613,7 +1613,7 @@ void iron_g5_command_list_scissor(iron_g5_command_list_t *list, int x, int y, in
 	vkCmdSetScissor(list->impl._buffer, 0, 1, &scissor);
 }
 
-void iron_g5_command_list_disable_scissor(iron_g5_command_list_t *list) {
+void iron_gpu_command_list_disable_scissor(iron_gpu_command_list_t *list) {
 	VkRect2D scissor;
 	memset(&scissor, 0, sizeof(scissor));
 	if (currentRenderTargets[0] == NULL || currentRenderTargets[0]->framebuffer_index >= 0) {
@@ -1627,7 +1627,7 @@ void iron_g5_command_list_disable_scissor(iron_g5_command_list_t *list) {
 	vkCmdSetScissor(list->impl._buffer, 0, 1, &scissor);
 }
 
-void iron_g5_command_list_set_pipeline(iron_g5_command_list_t *list, struct iron_g5_pipeline *pipeline) {
+void iron_gpu_command_list_set_pipeline(iron_gpu_command_list_t *list, struct iron_gpu_pipeline *pipeline) {
 	current_pipeline = pipeline;
 	lastVertexConstantBufferOffset = 0;
 	lastFragmentConstantBufferOffset = 0;
@@ -1642,7 +1642,7 @@ void iron_g5_command_list_set_pipeline(iron_g5_command_list_t *list, struct iron
 	}
 }
 
-void iron_g5_command_list_set_vertex_buffer(iron_g5_command_list_t *list, struct iron_g5_vertex_buffer *vertexBuffer) {
+void iron_gpu_command_list_set_vertex_buffer(iron_gpu_command_list_t *list, struct iron_gpu_vertex_buffer *vertexBuffer) {
 	VkBuffer buffers[1];
 	VkDeviceSize offsets[1];
 	buffers[0] = vertexBuffer->impl.buf;
@@ -1650,12 +1650,12 @@ void iron_g5_command_list_set_vertex_buffer(iron_g5_command_list_t *list, struct
 	vkCmdBindVertexBuffers(list->impl._buffer, 0, 1, buffers, offsets);
 }
 
-void iron_g5_command_list_set_index_buffer(iron_g5_command_list_t *list, struct iron_g5_index_buffer *indexBuffer) {
-	list->impl._indexCount = iron_g5_index_buffer_count(indexBuffer);
+void iron_gpu_command_list_set_index_buffer(iron_gpu_command_list_t *list, struct iron_gpu_index_buffer *indexBuffer) {
+	list->impl._indexCount = iron_gpu_index_buffer_count(indexBuffer);
 	vkCmdBindIndexBuffer(list->impl._buffer, indexBuffer->impl.buf, 0, VK_INDEX_TYPE_UINT32);
 }
 
-void iron_internal_restore_render_target(iron_g5_command_list_t *list, struct iron_g5_texture *target) {
+void iron_internal_restore_render_target(iron_gpu_command_list_t *list, struct iron_gpu_texture *target) {
 	VkViewport viewport;
 	memset(&viewport, 0, sizeof(viewport));
 	viewport.x = 0;
@@ -1711,7 +1711,7 @@ void iron_internal_restore_render_target(iron_g5_command_list_t *list, struct ir
 	}
 }
 
-void iron_g5_command_list_set_render_targets(iron_g5_command_list_t *list, struct iron_g5_texture **targets, int count) {
+void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, struct iron_gpu_texture **targets, int count) {
 	for (int i = 0; i < count; ++i) {
 		currentRenderTargets[i] = targets[i];
 	}
@@ -1893,13 +1893,13 @@ void iron_g5_command_list_set_render_targets(iron_g5_command_list_t *list, struc
 	}
 }
 
-void iron_g5_command_list_upload_index_buffer(iron_g5_command_list_t *list, struct iron_g5_index_buffer *buffer) {}
+void iron_gpu_command_list_upload_index_buffer(iron_gpu_command_list_t *list, struct iron_gpu_index_buffer *buffer) {}
 
-void iron_g5_command_list_upload_vertex_buffer(iron_g5_command_list_t *list, struct iron_g5_vertex_buffer *buffer) {}
+void iron_gpu_command_list_upload_vertex_buffer(iron_gpu_command_list_t *list, struct iron_gpu_vertex_buffer *buffer) {}
 
-void iron_g5_command_list_upload_texture(iron_g5_command_list_t *list, struct iron_g5_texture *texture) {}
+void iron_gpu_command_list_upload_texture(iron_gpu_command_list_t *list, struct iron_gpu_texture *texture) {}
 
-void iron_g5_command_list_get_render_target_pixels(iron_g5_command_list_t *list, iron_g5_texture_t *render_target, uint8_t *data) {
+void iron_gpu_command_list_get_render_target_pixels(iron_gpu_command_list_t *list, iron_gpu_texture_t *render_target, uint8_t *data) {
 	VkFormat format = render_target->impl.format;
 	int format_bytes_size = format_size(format);
 
@@ -1956,10 +1956,10 @@ void iron_g5_command_list_get_render_target_pixels(iron_g5_command_list_t *list,
 	vkCmdBeginRenderPass(list->impl._buffer, &currentRenderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 	in_render_pass = true;
 
-	iron_g5_command_list_end(list);
-	iron_g5_command_list_execute(list);
-	iron_g5_command_list_wait_for_execution_to_finish(list);
-	iron_g5_command_list_begin(list);
+	iron_gpu_command_list_end(list);
+	iron_gpu_command_list_execute(list);
+	iron_gpu_command_list_wait_for_execution_to_finish(list);
+	iron_gpu_command_list_begin(list);
 
 	// Read buffer
 	void *p;
@@ -1968,19 +1968,19 @@ void iron_g5_command_list_get_render_target_pixels(iron_g5_command_list_t *list,
 	vkUnmapMemory(vk_ctx.device, render_target->impl.readback_memory);
 }
 
-void iron_g5_command_list_texture_to_render_target_barrier(iron_g5_command_list_t *list, struct iron_g5_texture *renderTarget) {
+void iron_gpu_command_list_texture_to_render_target_barrier(iron_gpu_command_list_t *list, struct iron_gpu_texture *renderTarget) {
 	// render-passes are used to transition render-targets
 }
 
-void iron_g5_command_list_render_target_to_texture_barrier(iron_g5_command_list_t *list, struct iron_g5_texture *renderTarget) {
+void iron_gpu_command_list_render_target_to_texture_barrier(iron_gpu_command_list_t *list, struct iron_gpu_texture *renderTarget) {
 	// render-passes are used to transition render-targets
 }
 
-void iron_g5_command_list_set_vertex_constant_buffer(iron_g5_command_list_t *list, struct iron_g5_constant_buffer *buffer, int offset, size_t size) {
+void iron_gpu_command_list_set_vertex_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_constant_buffer *buffer, int offset, size_t size) {
 	lastVertexConstantBufferOffset = offset;
 }
 
-void iron_g5_command_list_set_fragment_constant_buffer(iron_g5_command_list_t *list, struct iron_g5_constant_buffer *buffer, int offset, size_t size) {
+void iron_gpu_command_list_set_fragment_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_constant_buffer *buffer, int offset, size_t size) {
 	lastFragmentConstantBufferOffset = offset;
 
 	VkDescriptorSet descriptor_set = getDescriptorSet();
@@ -1988,7 +1988,7 @@ void iron_g5_command_list_set_fragment_constant_buffer(iron_g5_command_list_t *l
 	vkCmdBindDescriptorSets(list->impl._buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, current_pipeline->impl.pipeline_layout, 0, 1, &descriptor_set, 2, offsets);
 }
 
-void iron_g5_command_list_set_compute_constant_buffer(iron_g5_command_list_t *list, struct iron_g5_constant_buffer *buffer, int offset, size_t size) {
+void iron_gpu_command_list_set_compute_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_constant_buffer *buffer, int offset, size_t size) {
 	lastComputeConstantBufferOffset = offset;
 
 	VkDescriptorSet descriptor_set = get_compute_descriptor_set();
@@ -2001,7 +2001,7 @@ static void command_list_should_wait_for_framebuffer(void) {
 	wait_for_framebuffer = true;
 }
 
-void iron_g5_command_list_execute(iron_g5_command_list_t *list) {
+void iron_gpu_command_list_execute(iron_gpu_command_list_t *list) {
 	// Make sure the previous execution is done, so we can reuse the fence
 	// Not optimal of course
 	VkResult err = vkWaitForFences(vk_ctx.device, 1, &list->impl.fence, VK_TRUE, UINT64_MAX);
@@ -2037,46 +2037,46 @@ void iron_g5_command_list_execute(iron_g5_command_list_t *list) {
 	assert(!err);
 }
 
-void iron_g5_command_list_wait_for_execution_to_finish(iron_g5_command_list_t *list) {
+void iron_gpu_command_list_wait_for_execution_to_finish(iron_gpu_command_list_t *list) {
 	VkResult err = vkWaitForFences(vk_ctx.device, 1, &list->impl.fence, VK_TRUE, UINT64_MAX);
 	assert(!err);
 }
 
-void iron_g5_command_list_set_sampler(iron_g5_command_list_t *list, iron_g5_texture_unit_t unit, iron_g5_sampler_t *sampler) {
-	if (unit.stages[IRON_G5_SHADER_TYPE_FRAGMENT] >= 0) {
-		vulkan_samplers[unit.stages[IRON_G5_SHADER_TYPE_FRAGMENT]] = sampler->impl.sampler;
+void iron_gpu_command_list_set_sampler(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_sampler_t *sampler) {
+	if (unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT] >= 0) {
+		vulkan_samplers[unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT]] = sampler->impl.sampler;
 	}
 }
 
-void iron_g5_command_list_set_texture(iron_g5_command_list_t *list, iron_g5_texture_unit_t unit, iron_g5_texture_t *texture) {
-	if (unit.stages[IRON_G5_SHADER_TYPE_FRAGMENT] >= 0) {
-		texture->impl.stage = unit.stages[IRON_G5_SHADER_TYPE_FRAGMENT];
-		vulkan_textures[unit.stages[IRON_G5_SHADER_TYPE_FRAGMENT]] = texture;
+void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *texture) {
+	if (unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT] >= 0) {
+		texture->impl.stage = unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT];
+		vulkan_textures[unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT]] = texture;
 	}
-	else if (unit.stages[IRON_G5_SHADER_TYPE_VERTEX] >= 0) {
-		texture->impl.stage = unit.stages[IRON_G5_SHADER_TYPE_VERTEX];
-		vulkan_textures[unit.stages[IRON_G5_SHADER_TYPE_VERTEX]] = texture;
-	}
-}
-
-void iron_g5_command_list_set_texture_from_render_target_depth(iron_g5_command_list_t *list, iron_g5_texture_unit_t unit, iron_g5_texture_t *target) {
-	if (unit.stages[IRON_G5_SHADER_TYPE_FRAGMENT] >= 0) {
-		target->impl.stage_depth = unit.stages[IRON_G5_SHADER_TYPE_FRAGMENT];
-		vulkan_textures[unit.stages[IRON_G5_SHADER_TYPE_FRAGMENT]] = target;
-	}
-	else if (unit.stages[IRON_G5_SHADER_TYPE_VERTEX] >= 0) {
-		target->impl.stage_depth = unit.stages[IRON_G5_SHADER_TYPE_VERTEX];
-		vulkan_textures[unit.stages[IRON_G5_SHADER_TYPE_VERTEX]] = target;
+	else if (unit.stages[IRON_GPU_SHADER_TYPE_VERTEX] >= 0) {
+		texture->impl.stage = unit.stages[IRON_GPU_SHADER_TYPE_VERTEX];
+		vulkan_textures[unit.stages[IRON_GPU_SHADER_TYPE_VERTEX]] = texture;
 	}
 }
 
-void iron_g5_command_list_set_compute_shader(iron_g5_command_list_t *list, iron_g5_compute_shader *shader) {
+void iron_gpu_command_list_set_texture_from_render_target_depth(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *target) {
+	if (unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT] >= 0) {
+		target->impl.stage_depth = unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT];
+		vulkan_textures[unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT]] = target;
+	}
+	else if (unit.stages[IRON_GPU_SHADER_TYPE_VERTEX] >= 0) {
+		target->impl.stage_depth = unit.stages[IRON_GPU_SHADER_TYPE_VERTEX];
+		vulkan_textures[unit.stages[IRON_GPU_SHADER_TYPE_VERTEX]] = target;
+	}
+}
+
+void iron_gpu_command_list_set_compute_shader(iron_gpu_command_list_t *list, iron_gpu_compute_shader *shader) {
 	current_compute_shader = shader;
 	vkCmdBindPipeline(list->impl._buffer, VK_PIPELINE_BIND_POINT_COMPUTE, shader->impl.pipeline);
 	//**vkCmdBindDescriptorSets(list->impl._buffer, VK_PIPELINE_BIND_POINT_COMPUTE, shader->impl.pipeline_layout, 0, 1, &shader->impl.descriptor_set, 0, 0);
 }
 
-void iron_g5_command_list_compute(iron_g5_command_list_t *list, int x, int y, int z) {
+void iron_gpu_command_list_compute(iron_gpu_command_list_t *list, int x, int y, int z) {
 	if (in_render_pass) {
 		vkCmdEndRenderPass(list->impl._buffer);
 		in_render_pass = false;
@@ -2092,7 +2092,7 @@ void iron_g5_command_list_compute(iron_g5_command_list_t *list, int x, int y, in
 		++render_target_count;
 	}
 	if (render_target_count > 0) {
-		iron_g5_command_list_set_render_targets(list, currentRenderTargets, render_target_count);
+		iron_gpu_command_list_set_render_targets(list, currentRenderTargets, render_target_count);
 	}
 }
 
@@ -2149,7 +2149,7 @@ static void create_compute_descriptor_layout(void) {
 	assert(!err);
 }
 
-void iron_g5_compute_shader_init(iron_g5_compute_shader *shader, void *_data, int length) {
+void iron_gpu_compute_shader_init(iron_gpu_compute_shader *shader, void *_data, int length) {
 	memset(shader->impl.locations, 0, sizeof(iron_internal_named_number) * IRON_INTERNAL_NAMED_NUMBER_COUNT);
 	memset(shader->impl.offsets, 0, sizeof(iron_internal_named_number) * IRON_INTERNAL_NAMED_NUMBER_COUNT);
 	memset(shader->impl.texture_bindings, 0, sizeof(iron_internal_named_number) * IRON_INTERNAL_NAMED_NUMBER_COUNT);
@@ -2187,17 +2187,17 @@ void iron_g5_compute_shader_init(iron_g5_compute_shader *shader, void *_data, in
 	vkDestroyShaderModule(vk_ctx.device, shader->impl.shader_module, NULL);
 }
 
-void iron_g5_compute_shader_destroy(iron_g5_compute_shader *shader) {}
+void iron_gpu_compute_shader_destroy(iron_gpu_compute_shader *shader) {}
 
-iron_g5_constant_location_t iron_g5_compute_shader_get_constant_location(iron_g5_compute_shader *shader, const char *name) {
-	iron_g5_constant_location_t location = {0};
+iron_gpu_constant_location_t iron_gpu_compute_shader_get_constant_location(iron_gpu_compute_shader *shader, const char *name) {
+	iron_gpu_constant_location_t location = {0};
 
 	uint32_t hash = iron_internal_hash_name((unsigned char *)name);
 
 	return location;
 }
 
-iron_g5_texture_unit_t iron_g5_compute_shader_get_texture_unit(iron_g5_compute_shader *shader, const char *name) {
+iron_gpu_texture_unit_t iron_gpu_compute_shader_get_texture_unit(iron_gpu_compute_shader *shader, const char *name) {
 	char unitName[64];
 	int unitOffset = 0;
 	size_t len = strlen(name);
@@ -2211,11 +2211,11 @@ iron_g5_texture_unit_t iron_g5_compute_shader_get_texture_unit(iron_g5_compute_s
 
 	uint32_t hash = iron_internal_hash_name((unsigned char *)unitName);
 
-	iron_g5_texture_unit_t unit;
-	for (int i = 0; i < IRON_G5_SHADER_TYPE_COUNT; ++i) {
+	iron_gpu_texture_unit_t unit;
+	for (int i = 0; i < IRON_GPU_SHADER_TYPE_COUNT; ++i) {
 		unit.stages[i] = -1;
 	}
-	unit.stages[IRON_G5_SHADER_TYPE_COMPUTE] = 0;
+	unit.stages[IRON_GPU_SHADER_TYPE_COMPUTE] = 0;
 
 	return unit;
 }
@@ -2415,12 +2415,12 @@ static VkShaderModule create_shader_module(const void *code, size_t size) {
 	return module;
 }
 
-static VkShaderModule prepare_vs(VkShaderModule *vert_shader_module, iron_g5_shader_t *vertex_shader) {
+static VkShaderModule prepare_vs(VkShaderModule *vert_shader_module, iron_gpu_shader_t *vertex_shader) {
 	*vert_shader_module = create_shader_module(vertex_shader->impl.source, vertex_shader->impl.length);
 	return *vert_shader_module;
 }
 
-static VkShaderModule prepare_fs(VkShaderModule *frag_shader_module, iron_g5_shader_t *fragment_shader) {
+static VkShaderModule prepare_fs(VkShaderModule *frag_shader_module, iron_gpu_shader_t *fragment_shader) {
 	*frag_shader_module = create_shader_module(fragment_shader->impl.source, fragment_shader->impl.length);
 	return *frag_shader_module;
 }
@@ -2443,19 +2443,19 @@ static VkFormat convert_format(iron_image_format_t format) {
 	}
 }
 
-void iron_g5_pipeline_init(iron_g5_pipeline_t *pipeline) {
-	iron_g5_internal_pipeline_init(pipeline);
-	iron_g5_internal_pipeline_set_defaults(pipeline);
+void iron_gpu_pipeline_init(iron_gpu_pipeline_t *pipeline) {
+	iron_gpu_internal_pipeline_init(pipeline);
+	iron_gpu_internal_pipeline_set_defaults(pipeline);
 }
 
-void iron_g5_pipeline_destroy(iron_g5_pipeline_t *pipeline) {
+void iron_gpu_pipeline_destroy(iron_gpu_pipeline_t *pipeline) {
 	vkDestroyPipeline(vk_ctx.device, pipeline->impl.framebuffer_pipeline, NULL);
 	vkDestroyPipeline(vk_ctx.device, pipeline->impl.rendertarget_pipeline, NULL);
 	vkDestroyPipelineLayout(vk_ctx.device, pipeline->impl.pipeline_layout, NULL);
 }
 
-iron_g5_constant_location_t iron_g5_pipeline_get_constant_location(iron_g5_pipeline_t *pipeline, const char *name) {
-	iron_g5_constant_location_t location;
+iron_gpu_constant_location_t iron_gpu_pipeline_get_constant_location(iron_gpu_pipeline_t *pipeline, const char *name) {
+	iron_gpu_constant_location_t location;
 	location.impl.vertexOffset = -1;
 	location.impl.fragmentOffset = -1;
 	location.impl.computeOffset = -1;
@@ -2468,9 +2468,9 @@ iron_g5_constant_location_t iron_g5_pipeline_get_constant_location(iron_g5_pipel
 	return location;
 }
 
-iron_g5_texture_unit_t iron_g5_pipeline_get_texture_unit(iron_g5_pipeline_t *pipeline, const char *name) {
-	iron_g5_texture_unit_t unit;
-	for (int i = 0; i < IRON_G5_SHADER_TYPE_COUNT; ++i) {
+iron_gpu_texture_unit_t iron_gpu_pipeline_get_texture_unit(iron_gpu_pipeline_t *pipeline, const char *name) {
+	iron_gpu_texture_unit_t unit;
+	for (int i = 0; i < IRON_GPU_SHADER_TYPE_COUNT; ++i) {
 		unit.stages[i] = -1;
 	}
 
@@ -2478,77 +2478,77 @@ iron_g5_texture_unit_t iron_g5_pipeline_get_texture_unit(iron_g5_pipeline_t *pip
 	assert(number == -1 || number >= 2); // something wrong with the SPIR-V when this triggers
 
 	if (number >= 0) {
-		unit.stages[IRON_G5_SHADER_TYPE_VERTEX] = number - 2;
+		unit.stages[IRON_GPU_SHADER_TYPE_VERTEX] = number - 2;
 	}
 	else {
 		number = find_number(pipeline->impl.fragmentTextureBindings, name);
 		if (number >= 0) {
-			unit.stages[IRON_G5_SHADER_TYPE_FRAGMENT] = number - 2;
+			unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT] = number - 2;
 		}
 	}
 
 	return unit;
 }
 
-static VkCullModeFlagBits convert_cull_mode(iron_g5_cull_mode_t cull_mode) {
+static VkCullModeFlagBits convert_cull_mode(iron_gpu_cull_mode_t cull_mode) {
 	switch (cull_mode) {
-	case IRON_G5_CULL_MODE_CLOCKWISE:
+	case IRON_GPU_CULL_MODE_CLOCKWISE:
 		return VK_CULL_MODE_BACK_BIT;
-	case IRON_G5_CULL_MODE_COUNTERCLOCKWISE:
+	case IRON_GPU_CULL_MODE_COUNTERCLOCKWISE:
 		return VK_CULL_MODE_FRONT_BIT;
-	case IRON_G5_CULL_MODE_NEVER:
+	case IRON_GPU_CULL_MODE_NEVER:
 	default:
 		return VK_CULL_MODE_NONE;
 	}
 }
 
-static VkCompareOp convert_compare_mode(iron_g5_compare_mode_t compare) {
+static VkCompareOp convert_compare_mode(iron_gpu_compare_mode_t compare) {
 	switch (compare) {
 	default:
-	case IRON_G5_COMPARE_MODE_ALWAYS:
+	case IRON_GPU_COMPARE_MODE_ALWAYS:
 		return VK_COMPARE_OP_ALWAYS;
-	case IRON_G5_COMPARE_MODE_NEVER:
+	case IRON_GPU_COMPARE_MODE_NEVER:
 		return VK_COMPARE_OP_NEVER;
-	case IRON_G5_COMPARE_MODE_EQUAL:
+	case IRON_GPU_COMPARE_MODE_EQUAL:
 		return VK_COMPARE_OP_EQUAL;
-	case IRON_G5_COMPARE_MODE_NOT_EQUAL:
+	case IRON_GPU_COMPARE_MODE_NOT_EQUAL:
 		return VK_COMPARE_OP_NOT_EQUAL;
-	case IRON_G5_COMPARE_MODE_LESS:
+	case IRON_GPU_COMPARE_MODE_LESS:
 		return VK_COMPARE_OP_LESS;
-	case IRON_G5_COMPARE_MODE_LESS_EQUAL:
+	case IRON_GPU_COMPARE_MODE_LESS_EQUAL:
 		return VK_COMPARE_OP_LESS_OR_EQUAL;
-	case IRON_G5_COMPARE_MODE_GREATER:
+	case IRON_GPU_COMPARE_MODE_GREATER:
 		return VK_COMPARE_OP_GREATER;
-	case IRON_G5_COMPARE_MODE_GREATER_EQUAL:
+	case IRON_GPU_COMPARE_MODE_GREATER_EQUAL:
 		return VK_COMPARE_OP_GREATER_OR_EQUAL;
 	}
 }
 
-static VkBlendFactor convert_blend_factor(iron_g5_blending_factor_t factor) {
+static VkBlendFactor convert_blend_factor(iron_gpu_blending_factor_t factor) {
 	switch (factor) {
-	case IRON_G5_BLEND_ONE:
+	case IRON_GPU_BLEND_ONE:
 		return VK_BLEND_FACTOR_ONE;
-	case IRON_G5_BLEND_ZERO:
+	case IRON_GPU_BLEND_ZERO:
 		return VK_BLEND_FACTOR_ZERO;
-	case IRON_G5_BLEND_SOURCE_ALPHA:
+	case IRON_GPU_BLEND_SOURCE_ALPHA:
 		return VK_BLEND_FACTOR_SRC_ALPHA;
-	case IRON_G5_BLEND_DEST_ALPHA:
+	case IRON_GPU_BLEND_DEST_ALPHA:
 		return VK_BLEND_FACTOR_DST_ALPHA;
-	case IRON_G5_BLEND_INV_SOURCE_ALPHA:
+	case IRON_GPU_BLEND_INV_SOURCE_ALPHA:
 		return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-	case IRON_G5_BLEND_INV_DEST_ALPHA:
+	case IRON_GPU_BLEND_INV_DEST_ALPHA:
 		return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
-	case IRON_G5_BLEND_SOURCE_COLOR:
+	case IRON_GPU_BLEND_SOURCE_COLOR:
 		return VK_BLEND_FACTOR_SRC_COLOR;
-	case IRON_G5_BLEND_DEST_COLOR:
+	case IRON_GPU_BLEND_DEST_COLOR:
 		return VK_BLEND_FACTOR_DST_COLOR;
-	case IRON_G5_BLEND_INV_SOURCE_COLOR:
+	case IRON_GPU_BLEND_INV_SOURCE_COLOR:
 		return VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
-	case IRON_G5_BLEND_INV_DEST_COLOR:
+	case IRON_GPU_BLEND_INV_DEST_COLOR:
 		return VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
-	case IRON_G5_BLEND_CONSTANT:
+	case IRON_GPU_BLEND_CONSTANT:
 		return VK_BLEND_FACTOR_CONSTANT_COLOR;
-	case IRON_G5_BLEND_INV_CONSTANT:
+	case IRON_GPU_BLEND_INV_CONSTANT:
 		return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
 	default:
 		assert(false);
@@ -2556,17 +2556,17 @@ static VkBlendFactor convert_blend_factor(iron_g5_blending_factor_t factor) {
 	}
 }
 
-static VkBlendOp convert_blend_operation(iron_g5_blending_operation_t op) {
+static VkBlendOp convert_blend_operation(iron_gpu_blending_operation_t op) {
 	switch (op) {
-	case IRON_G5_BLENDOP_ADD:
+	case IRON_GPU_BLENDOP_ADD:
 		return VK_BLEND_OP_ADD;
-	case IRON_G5_BLENDOP_SUBTRACT:
+	case IRON_GPU_BLENDOP_SUBTRACT:
 		return VK_BLEND_OP_SUBTRACT;
-	case IRON_G5_BLENDOP_REVERSE_SUBTRACT:
+	case IRON_GPU_BLENDOP_REVERSE_SUBTRACT:
 		return VK_BLEND_OP_REVERSE_SUBTRACT;
-	case IRON_G5_BLENDOP_MIN:
+	case IRON_GPU_BLENDOP_MIN:
 		return VK_BLEND_OP_MIN;
-	case IRON_G5_BLENDOP_MAX:
+	case IRON_GPU_BLENDOP_MAX:
 		return VK_BLEND_OP_MAX;
 	default:
 		assert(false);
@@ -2574,7 +2574,7 @@ static VkBlendOp convert_blend_operation(iron_g5_blending_operation_t op) {
 	}
 }
 
-void iron_g5_pipeline_compile(iron_g5_pipeline_t *pipeline) {
+void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipeline) {
 	memset(pipeline->impl.vertexLocations, 0, sizeof(iron_internal_named_number) * IRON_INTERNAL_NAMED_NUMBER_COUNT);
 	memset(pipeline->impl.vertexOffsets, 0, sizeof(iron_internal_named_number) * IRON_INTERNAL_NAMED_NUMBER_COUNT);
 	memset(pipeline->impl.fragmentLocations, 0, sizeof(iron_internal_named_number) * IRON_INTERNAL_NAMED_NUMBER_COUNT);
@@ -2631,33 +2631,33 @@ void iron_g5_pipeline_compile(iron_g5_pipeline_t *pipeline) {
 	uint32_t attr = 0;
 	uint32_t offset = 0;
 	for (int i = 0; i < pipeline->input_layout->size; ++i) {
-		iron_g5_vertex_element_t element = pipeline->input_layout->elements[i];
+		iron_gpu_vertex_element_t element = pipeline->input_layout->elements[i];
 
 		vi_attrs[attr].binding = 0;
 		vi_attrs[attr].location = find_number(pipeline->impl.vertexLocations, element.name);
 		vi_attrs[attr].offset = offset;
-		offset += iron_g5_vertex_data_size(element.data);
+		offset += iron_gpu_vertex_data_size(element.data);
 
 		switch (element.data) {
-		case IRON_G5_VERTEX_DATA_F32_1X:
+		case IRON_GPU_VERTEX_DATA_F32_1X:
 			vi_attrs[attr].format = VK_FORMAT_R32_SFLOAT;
 			break;
-		case IRON_G5_VERTEX_DATA_F32_2X:
+		case IRON_GPU_VERTEX_DATA_F32_2X:
 			vi_attrs[attr].format = VK_FORMAT_R32G32_SFLOAT;
 			break;
-		case IRON_G5_VERTEX_DATA_F32_3X:
+		case IRON_GPU_VERTEX_DATA_F32_3X:
 			vi_attrs[attr].format = VK_FORMAT_R32G32B32_SFLOAT;
 			break;
-		case IRON_G5_VERTEX_DATA_F32_4X:
+		case IRON_GPU_VERTEX_DATA_F32_4X:
 			vi_attrs[attr].format = VK_FORMAT_R32G32B32A32_SFLOAT;
 			break;
-		case IRON_G5_VERTEX_DATA_U8_4X_NORM:
+		case IRON_GPU_VERTEX_DATA_U8_4X_NORM:
 			vi_attrs[attr].format = VK_FORMAT_R8G8B8A8_UNORM;
 			break;
-		case IRON_G5_VERTEX_DATA_I16_2X_NORM:
+		case IRON_GPU_VERTEX_DATA_I16_2X_NORM:
 			vi_attrs[attr].format = VK_FORMAT_R16G16_SNORM;
 			break;
-		case IRON_G5_VERTEX_DATA_I16_4X_NORM:
+		case IRON_GPU_VERTEX_DATA_I16_4X_NORM:
 			vi_attrs[attr].format = VK_FORMAT_R16G16B16A16_SNORM;
 			break;
 		}
@@ -2691,10 +2691,10 @@ void iron_g5_pipeline_compile(iron_g5_pipeline_t *pipeline) {
 			(pipeline->color_write_mask_green[i] ? VK_COLOR_COMPONENT_G_BIT : 0) |
 		    (pipeline->color_write_mask_blue[i] ? VK_COLOR_COMPONENT_B_BIT : 0) |
 			(pipeline->color_write_mask_alpha[i] ? VK_COLOR_COMPONENT_A_BIT : 0);
-		att_state[i].blendEnable = pipeline->blend_source != IRON_G5_BLEND_ONE ||
-								   pipeline->blend_destination != IRON_G5_BLEND_ZERO ||
-		                           pipeline->alpha_blend_source != IRON_G5_BLEND_ONE ||
-								   pipeline->alpha_blend_destination != IRON_G5_BLEND_ZERO;
+		att_state[i].blendEnable = pipeline->blend_source != IRON_GPU_BLEND_ONE ||
+								   pipeline->blend_destination != IRON_GPU_BLEND_ZERO ||
+		                           pipeline->alpha_blend_source != IRON_GPU_BLEND_ONE ||
+								   pipeline->alpha_blend_destination != IRON_GPU_BLEND_ZERO;
 		att_state[i].srcColorBlendFactor = convert_blend_factor(pipeline->blend_source);
 		att_state[i].dstColorBlendFactor = convert_blend_factor(pipeline->blend_destination);
 		att_state[i].colorBlendOp = convert_blend_operation(pipeline->blend_operation);
@@ -2714,7 +2714,7 @@ void iron_g5_pipeline_compile(iron_g5_pipeline_t *pipeline) {
 
 	memset(&ds, 0, sizeof(ds));
 	ds.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-	ds.depthTestEnable = pipeline->depth_mode != IRON_G5_COMPARE_MODE_ALWAYS;
+	ds.depthTestEnable = pipeline->depth_mode != IRON_GPU_COMPARE_MODE_ALWAYS;
 	ds.depthWriteEnable = pipeline->depth_write;
 	ds.depthCompareOp = convert_compare_mode(pipeline->depth_mode);
 	ds.depthBoundsTestEnable = VK_FALSE;
@@ -3264,7 +3264,7 @@ static VkDescriptorSet get_compute_descriptor_set() {
 	return descriptor_set;
 }
 
-void iron_g5_shader_init(iron_g5_shader_t *shader, const void *source, size_t length, iron_g5_shader_type_t type) {
+void iron_gpu_shader_init(iron_gpu_shader_t *shader, const void *source, size_t length, iron_gpu_shader_type_t type) {
 	shader->impl.length = (int)length;
 	shader->impl.id = 0;
 	shader->impl.source = (char *)malloc(length + 1);
@@ -3274,22 +3274,22 @@ void iron_g5_shader_init(iron_g5_shader_t *shader, const void *source, size_t le
 	shader->impl.source[length] = 0;
 }
 
-void iron_g5_shader_destroy(iron_g5_shader_t *shader) {
+void iron_gpu_shader_destroy(iron_gpu_shader_t *shader) {
 	free(shader->impl.source);
 	shader->impl.source = NULL;
 }
 
-static VkCompareOp convert_compare_mode(iron_g5_compare_mode_t compare);
+static VkCompareOp convert_compare_mode(iron_gpu_compare_mode_t compare);
 
-static VkSamplerAddressMode convert_addressing(iron_g5_texture_addressing_t mode) {
+static VkSamplerAddressMode convert_addressing(iron_gpu_texture_addressing_t mode) {
 	switch (mode) {
-	case IRON_G5_TEXTURE_ADDRESSING_REPEAT:
+	case IRON_GPU_TEXTURE_ADDRESSING_REPEAT:
 		return VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	case IRON_G5_TEXTURE_ADDRESSING_BORDER:
+	case IRON_GPU_TEXTURE_ADDRESSING_BORDER:
 		return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-	case IRON_G5_TEXTURE_ADDRESSING_CLAMP:
+	case IRON_GPU_TEXTURE_ADDRESSING_CLAMP:
 		return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-	case IRON_G5_TEXTURE_ADDRESSING_MIRROR:
+	case IRON_GPU_TEXTURE_ADDRESSING_MIRROR:
 		return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
 	default:
 		assert(false);
@@ -3297,12 +3297,12 @@ static VkSamplerAddressMode convert_addressing(iron_g5_texture_addressing_t mode
 	}
 }
 
-static VkSamplerMipmapMode convert_mipmap_mode(iron_g5_mipmap_filter_t filter) {
+static VkSamplerMipmapMode convert_mipmap_mode(iron_gpu_mipmap_filter_t filter) {
 	switch (filter) {
-	case IRON_G5_MIPMAP_FILTER_NONE:
-	case IRON_G5_MIPMAP_FILTER_POINT:
+	case IRON_GPU_MIPMAP_FILTER_NONE:
+	case IRON_GPU_MIPMAP_FILTER_POINT:
 		return VK_SAMPLER_MIPMAP_MODE_NEAREST;
-	case IRON_G5_MIPMAP_FILTER_LINEAR:
+	case IRON_GPU_MIPMAP_FILTER_LINEAR:
 		return VK_SAMPLER_MIPMAP_MODE_LINEAR;
 	default:
 		assert(false);
@@ -3310,13 +3310,13 @@ static VkSamplerMipmapMode convert_mipmap_mode(iron_g5_mipmap_filter_t filter) {
 	}
 }
 
-static VkFilter convert_texture_filter(iron_g5_texture_filter_t filter) {
+static VkFilter convert_texture_filter(iron_gpu_texture_filter_t filter) {
 	switch (filter) {
-	case IRON_G5_TEXTURE_FILTER_POINT:
+	case IRON_GPU_TEXTURE_FILTER_POINT:
 		return VK_FILTER_NEAREST;
-	case IRON_G5_TEXTURE_FILTER_LINEAR:
+	case IRON_GPU_TEXTURE_FILTER_LINEAR:
 		return VK_FILTER_LINEAR;
-	case IRON_G5_TEXTURE_FILTER_ANISOTROPIC:
+	case IRON_GPU_TEXTURE_FILTER_ANISOTROPIC:
 		return VK_FILTER_LINEAR; // ?
 	default:
 		assert(false);
@@ -3324,7 +3324,7 @@ static VkFilter convert_texture_filter(iron_g5_texture_filter_t filter) {
 	}
 }
 
-void iron_g5_sampler_init(iron_g5_sampler_t *sampler, const iron_g5_sampler_options_t *options) {
+void iron_gpu_sampler_init(iron_gpu_sampler_t *sampler, const iron_gpu_sampler_options_t *options) {
 	VkSamplerCreateInfo info = {0};
 	info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 	info.pNext = NULL;
@@ -3340,7 +3340,7 @@ void iron_g5_sampler_init(iron_g5_sampler_t *sampler, const iron_g5_sampler_opti
 	info.minFilter = convert_texture_filter(options->minification_filter);
 
 	info.anisotropyEnable =
-	    (options->magnification_filter == IRON_G5_TEXTURE_FILTER_ANISOTROPIC || options->minification_filter == IRON_G5_TEXTURE_FILTER_ANISOTROPIC);
+	    (options->magnification_filter == IRON_GPU_TEXTURE_FILTER_ANISOTROPIC || options->minification_filter == IRON_GPU_TEXTURE_FILTER_ANISOTROPIC);
 	info.maxAnisotropy = 1;
 
 	info.maxLod = 32;
@@ -3349,7 +3349,7 @@ void iron_g5_sampler_init(iron_g5_sampler_t *sampler, const iron_g5_sampler_opti
 	vkCreateSampler(vk_ctx.device, &info, NULL, &sampler->impl.sampler);
 }
 
-void iron_g5_sampler_destroy(iron_g5_sampler_t *sampler) {
+void iron_gpu_sampler_destroy(iron_gpu_sampler_t *sampler) {
 	vkDestroySampler(vk_ctx.device, sampler->impl.sampler, NULL);
 }
 
@@ -3538,7 +3538,7 @@ static int format_byte_size(iron_image_format_t format) {
 	}
 }
 
-static void update_stride(iron_g5_texture_t *texture) {
+static void update_stride(iron_gpu_texture_t *texture) {
 	VkImageSubresource subres = {0};
 	subres.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	subres.mipLevel = 0;
@@ -3550,7 +3550,7 @@ static void update_stride(iron_g5_texture_t *texture) {
 	texture->impl.stride = (int)layout.rowPitch;
 }
 
-void iron_g5_texture_init_from_bytes(iron_g5_texture_t *texture, void *data, int width, int height, iron_image_format_t format) {
+void iron_gpu_texture_init_from_bytes(iron_gpu_texture_t *texture, void *data, int width, int height, iron_image_format_t format) {
 	texture->width = width;
 	texture->height = height;
 	texture->_uploaded = false;
@@ -3642,7 +3642,7 @@ void iron_g5_texture_init_from_bytes(iron_g5_texture_t *texture, void *data, int
 	assert(!err);
 }
 
-void iron_g5_texture_init(iron_g5_texture_t *texture, int width, int height, iron_image_format_t format) {
+void iron_gpu_texture_init(iron_gpu_texture_t *texture, int width, int height, iron_image_format_t format) {
 	texture->width = width;
 	texture->height = height;
 	texture->_uploaded = true;
@@ -3690,7 +3690,7 @@ void iron_g5_texture_init(iron_g5_texture_t *texture, int width, int height, iro
 	assert(!err);
 }
 
-void iron_g5_texture_init_non_sampled_access(iron_g5_texture_t *texture, int width, int height, iron_image_format_t format) {
+void iron_gpu_texture_init_non_sampled_access(iron_gpu_texture_t *texture, int width, int height, iron_image_format_t format) {
 	texture->width = width;
 	texture->height = height;
 
@@ -3731,7 +3731,7 @@ void iron_g5_texture_init_non_sampled_access(iron_g5_texture_t *texture, int wid
 	assert(!err);
 }
 
-void iron_g5_texture_destroy(iron_g5_texture_t *target) {
+void iron_gpu_texture_destroy(iron_gpu_texture_t *target) {
 	if (target->framebuffer_index >= 0) {
 		framebuffer_count -= 1;
 	}
@@ -3751,15 +3751,15 @@ void iron_g5_texture_destroy(iron_g5_texture_t *target) {
 	}
 }
 
-void iron_g5_internal_texture_set(iron_g5_texture_t *texture, int unit) {}
+void iron_gpu_internal_texture_set(iron_gpu_texture_t *texture, int unit) {}
 
-int iron_g5_texture_stride(iron_g5_texture_t *texture) {
+int iron_gpu_texture_stride(iron_gpu_texture_t *texture) {
 	return texture->impl.stride;
 }
 
-void iron_g5_texture_generate_mipmaps(iron_g5_texture_t *texture, int levels) {}
+void iron_gpu_texture_generate_mipmaps(iron_gpu_texture_t *texture, int levels) {}
 
-void iron_g5_texture_set_mipmap(iron_g5_texture_t *texture, iron_g5_texture_t *mipmap, int level) {
+void iron_gpu_texture_set_mipmap(iron_gpu_texture_t *texture, iron_gpu_texture_t *mipmap, int level) {
     // VkBuffer staging_buffer;
     // VkDeviceMemory staging_buffer_mem;
 
@@ -3887,7 +3887,7 @@ void setImageLayout(VkCommandBuffer _buffer, VkImage image, VkImageAspectFlags a
 	vkCmdPipelineBarrier(_buffer, srcStageFlags, dstStageFlags, 0, 0, NULL, 0, NULL, 1, &imageMemoryBarrier);
 }
 
-static void render_target_init(iron_g5_texture_t *target, int width, int height, iron_image_format_t format, int depthBufferBits, int framebuffer_index) {
+static void render_target_init(iron_gpu_texture_t *target, int width, int height, iron_image_format_t format, int depthBufferBits, int framebuffer_index) {
 	target->framebuffer_index = framebuffer_index;
 	target->width = width;
 	target->height = height;
@@ -4062,7 +4062,7 @@ static void render_target_init(iron_g5_texture_t *target, int width, int height,
 	}
 }
 
-void iron_g5_render_target_init(iron_g5_texture_t *target, int width, int height, iron_image_format_t format, int depthBufferBits) {
+void iron_gpu_render_target_init(iron_gpu_texture_t *target, int width, int height, iron_image_format_t format, int depthBufferBits) {
 	render_target_init(target, width, height, format, depthBufferBits, -1);
 	target->width = width;
 	target->height = height;
@@ -4070,12 +4070,12 @@ void iron_g5_render_target_init(iron_g5_texture_t *target, int width, int height
 	target->_uploaded = true;
 }
 
-void iron_g5_render_target_init_framebuffer(iron_g5_texture_t *target, int width, int height, iron_image_format_t format, int depthBufferBits) {
+void iron_gpu_render_target_init_framebuffer(iron_gpu_texture_t *target, int width, int height, iron_image_format_t format, int depthBufferBits) {
 	render_target_init(target, width, height, format, depthBufferBits, framebuffer_count);
 	framebuffer_count += 1;
 }
 
-void iron_g5_render_target_set_depth_from(iron_g5_texture_t *target, iron_g5_texture_t *source) {
+void iron_gpu_render_target_set_depth_from(iron_gpu_texture_t *target, iron_gpu_texture_t *source) {
 	target->impl.depthImage = source->impl.depthImage;
 	target->impl.depthMemory = source->impl.depthMemory;
 	target->impl.depthView = source->impl.depthView;
@@ -4111,12 +4111,12 @@ void iron_g5_render_target_set_depth_from(iron_g5_texture_t *target, iron_g5_tex
 	}
 }
 
-void iron_g5_vertex_buffer_init(iron_g5_vertex_buffer_t *buffer, int vertexCount, iron_g5_vertex_structure_t *structure, bool gpuMemory) {
+void iron_gpu_vertex_buffer_init(iron_gpu_vertex_buffer_t *buffer, int vertexCount, iron_gpu_vertex_structure_t *structure, bool gpuMemory) {
 	buffer->impl.myCount = vertexCount;
 	buffer->impl.myStride = 0;
 	for (int i = 0; i < structure->size; ++i) {
-		iron_g5_vertex_element_t element = structure->elements[i];
-		buffer->impl.myStride += iron_g5_vertex_data_size(element.data);
+		iron_gpu_vertex_element_t element = structure->elements[i];
+		buffer->impl.myStride += iron_gpu_vertex_data_size(element.data);
 	}
 
 	VkBufferCreateInfo buf_info = {0};
@@ -4125,7 +4125,7 @@ void iron_g5_vertex_buffer_init(iron_g5_vertex_buffer_t *buffer, int vertexCount
 	buf_info.size = vertexCount * buffer->impl.myStride;
 	buf_info.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
 
-	if (iron_g5_raytrace_supported()) {
+	if (iron_gpu_raytrace_supported()) {
 		buf_info.usage |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
 		buf_info.usage |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 		buf_info.usage |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
@@ -4157,7 +4157,7 @@ void iron_g5_vertex_buffer_init(iron_g5_vertex_buffer_t *buffer, int vertexCount
 	assert(pass);
 
 	VkMemoryAllocateFlagsInfo memory_allocate_flags_info = {0};
-	if (iron_g5_raytrace_supported()) {
+	if (iron_gpu_raytrace_supported()) {
 		memory_allocate_flags_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO;
 		memory_allocate_flags_info.flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR;
 		buffer->impl.mem_alloc.pNext = &memory_allocate_flags_info;
@@ -4170,48 +4170,48 @@ void iron_g5_vertex_buffer_init(iron_g5_vertex_buffer_t *buffer, int vertexCount
 	assert(!err);
 }
 
-static void unset_vertex_buffer(iron_g5_vertex_buffer_t *buffer) {
+static void unset_vertex_buffer(iron_gpu_vertex_buffer_t *buffer) {
 
 }
 
-void iron_g5_vertex_buffer_destroy(iron_g5_vertex_buffer_t *buffer) {
+void iron_gpu_vertex_buffer_destroy(iron_gpu_vertex_buffer_t *buffer) {
 	unset_vertex_buffer(buffer);
 	vkFreeMemory(vk_ctx.device, buffer->impl.mem, NULL);
 	vkDestroyBuffer(vk_ctx.device, buffer->impl.buf, NULL);
 }
 
-float *iron_g5_vertex_buffer_lock_all(iron_g5_vertex_buffer_t *buffer) {
-	return iron_g5_vertex_buffer_lock(buffer, 0, buffer->impl.myCount);
+float *iron_gpu_vertex_buffer_lock_all(iron_gpu_vertex_buffer_t *buffer) {
+	return iron_gpu_vertex_buffer_lock(buffer, 0, buffer->impl.myCount);
 }
 
-float *iron_g5_vertex_buffer_lock(iron_g5_vertex_buffer_t *buffer, int start, int count) {
+float *iron_gpu_vertex_buffer_lock(iron_gpu_vertex_buffer_t *buffer, int start, int count) {
 	VkResult err =
 	    vkMapMemory(vk_ctx.device, buffer->impl.mem, start * buffer->impl.myStride, count * buffer->impl.myStride, 0, (void **)&buffer->impl.data);
 	assert(!err);
 	return buffer->impl.data;
 }
 
-void iron_g5_vertex_buffer_unlock_all(iron_g5_vertex_buffer_t *buffer) {
+void iron_gpu_vertex_buffer_unlock_all(iron_gpu_vertex_buffer_t *buffer) {
 	vkUnmapMemory(vk_ctx.device, buffer->impl.mem);
 }
 
-void iron_g5_vertex_buffer_unlock(iron_g5_vertex_buffer_t *buffer, int count) {
+void iron_gpu_vertex_buffer_unlock(iron_gpu_vertex_buffer_t *buffer, int count) {
 	vkUnmapMemory(vk_ctx.device, buffer->impl.mem);
 }
 
-int iron_g5_internal_vertex_buffer_set(iron_g5_vertex_buffer_t *buffer) {
+int iron_gpu_internal_vertex_buffer_set(iron_gpu_vertex_buffer_t *buffer) {
 	return 0;
 }
 
-int iron_g5_vertex_buffer_count(iron_g5_vertex_buffer_t *buffer) {
+int iron_gpu_vertex_buffer_count(iron_gpu_vertex_buffer_t *buffer) {
 	return buffer->impl.myCount;
 }
 
-int iron_g5_vertex_buffer_stride(iron_g5_vertex_buffer_t *buffer) {
+int iron_gpu_vertex_buffer_stride(iron_gpu_vertex_buffer_t *buffer) {
 	return buffer->impl.myStride;
 }
 
-bool iron_g5_transpose_mat = true;
+bool iron_gpu_transpose_mat = true;
 
 static void createUniformBuffer(VkBuffer *buf, VkMemoryAllocateInfo *mem_alloc, VkDeviceMemory *mem, VkDescriptorBufferInfo *buffer_info, int size) {
 	VkBufferCreateInfo buf_info;
@@ -4219,7 +4219,7 @@ static void createUniformBuffer(VkBuffer *buf, VkMemoryAllocateInfo *mem_alloc, 
 	buf_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 	buf_info.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 
-	if (iron_g5_raytrace_supported()) {
+	if (iron_gpu_raytrace_supported()) {
 		buf_info.usage |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 	}
 
@@ -4249,7 +4249,7 @@ static void createUniformBuffer(VkBuffer *buf, VkMemoryAllocateInfo *mem_alloc, 
 	buffer_info->range = size;
 }
 
-void iron_g5_constant_buffer_init(iron_g5_constant_buffer_t *buffer, int size) {
+void iron_gpu_constant_buffer_init(iron_gpu_constant_buffer_t *buffer, int size) {
 	buffer->impl.mySize = size;
 	buffer->data = NULL;
 
@@ -4273,33 +4273,33 @@ void iron_g5_constant_buffer_init(iron_g5_constant_buffer_t *buffer, int size) {
 	vkUnmapMemory(vk_ctx.device, buffer->impl.mem);
 }
 
-void iron_g5_constant_buffer_destroy(iron_g5_constant_buffer_t *buffer) {
+void iron_gpu_constant_buffer_destroy(iron_gpu_constant_buffer_t *buffer) {
 	vkFreeMemory(vk_ctx.device, buffer->impl.mem, NULL);
 	vkDestroyBuffer(vk_ctx.device, buffer->impl.buf, NULL);
 }
 
-void iron_g5_constant_buffer_lock_all(iron_g5_constant_buffer_t *buffer) {
-	iron_g5_constant_buffer_lock(buffer, 0, iron_g5_constant_buffer_size(buffer));
+void iron_gpu_constant_buffer_lock_all(iron_gpu_constant_buffer_t *buffer) {
+	iron_gpu_constant_buffer_lock(buffer, 0, iron_gpu_constant_buffer_size(buffer));
 }
 
-void iron_g5_constant_buffer_lock(iron_g5_constant_buffer_t *buffer, int start, int count) {
+void iron_gpu_constant_buffer_lock(iron_gpu_constant_buffer_t *buffer, int start, int count) {
 	VkResult err = vkMapMemory(vk_ctx.device, buffer->impl.mem, start, count, 0, (void **)&buffer->data);
 	assert(!err);
 }
 
-void iron_g5_constant_buffer_unlock(iron_g5_constant_buffer_t *buffer) {
+void iron_gpu_constant_buffer_unlock(iron_gpu_constant_buffer_t *buffer) {
 	vkUnmapMemory(vk_ctx.device, buffer->impl.mem);
 	buffer->data = NULL;
 }
 
-int iron_g5_constant_buffer_size(iron_g5_constant_buffer_t *buffer) {
+int iron_gpu_constant_buffer_size(iron_gpu_constant_buffer_t *buffer) {
 	return buffer->impl.mySize;
 }
 
-static void unset(iron_g5_index_buffer_t *buffer) {
+static void unset(iron_gpu_index_buffer_t *buffer) {
 }
 
-void iron_g5_index_buffer_init(iron_g5_index_buffer_t *buffer, int indexCount, bool gpuMemory) {
+void iron_gpu_index_buffer_init(iron_gpu_index_buffer_t *buffer, int indexCount, bool gpuMemory) {
 	buffer->impl.count = indexCount;
 
 	VkBufferCreateInfo buf_info = {0};
@@ -4308,7 +4308,7 @@ void iron_g5_index_buffer_init(iron_g5_index_buffer_t *buffer, int indexCount, b
 	buf_info.size = indexCount * sizeof(uint32_t);
 	buf_info.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
 
-	if (iron_g5_raytrace_supported()) {
+	if (iron_gpu_raytrace_supported()) {
 		buf_info.usage |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
 		buf_info.usage |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 		buf_info.usage |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
@@ -4336,7 +4336,7 @@ void iron_g5_index_buffer_init(iron_g5_index_buffer_t *buffer, int indexCount, b
 	assert(pass);
 
 	VkMemoryAllocateFlagsInfo memory_allocate_flags_info = {0};
-	if (iron_g5_raytrace_supported()) {
+	if (iron_gpu_raytrace_supported()) {
 		memory_allocate_flags_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO;
 		memory_allocate_flags_info.flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR;
 		buffer->impl.mem_alloc.pNext = &memory_allocate_flags_info;
@@ -4349,36 +4349,36 @@ void iron_g5_index_buffer_init(iron_g5_index_buffer_t *buffer, int indexCount, b
 	assert(!err);
 }
 
-void iron_g5_index_buffer_destroy(iron_g5_index_buffer_t *buffer) {
+void iron_gpu_index_buffer_destroy(iron_gpu_index_buffer_t *buffer) {
 	unset(buffer);
 	vkFreeMemory(vk_ctx.device, buffer->impl.mem, NULL);
 	vkDestroyBuffer(vk_ctx.device, buffer->impl.buf, NULL);
 }
 
-static int iron_g5_internal_index_buffer_stride(iron_g5_index_buffer_t *buffer) {
+static int iron_gpu_internal_index_buffer_stride(iron_gpu_index_buffer_t *buffer) {
 	return 4;
 }
 
-void *iron_g5_index_buffer_lock_all(iron_g5_index_buffer_t *buffer) {
-	return iron_g5_index_buffer_lock(buffer, 0, iron_g5_index_buffer_count(buffer));
+void *iron_gpu_index_buffer_lock_all(iron_gpu_index_buffer_t *buffer) {
+	return iron_gpu_index_buffer_lock(buffer, 0, iron_gpu_index_buffer_count(buffer));
 }
 
-void *iron_g5_index_buffer_lock(iron_g5_index_buffer_t *buffer, int start, int count) {
+void *iron_gpu_index_buffer_lock(iron_gpu_index_buffer_t *buffer, int start, int count) {
 	uint8_t *data;
 	VkResult err = vkMapMemory(vk_ctx.device, buffer->impl.mem, 0, buffer->impl.mem_alloc.allocationSize, 0, (void **)&data);
 	assert(!err);
-	return &data[start * iron_g5_internal_index_buffer_stride(buffer)];
+	return &data[start * iron_gpu_internal_index_buffer_stride(buffer)];
 }
 
-void iron_g5_index_buffer_unlock_all(iron_g5_index_buffer_t *buffer) {
+void iron_gpu_index_buffer_unlock_all(iron_gpu_index_buffer_t *buffer) {
 	vkUnmapMemory(vk_ctx.device, buffer->impl.mem);
 }
 
-void iron_g5_index_buffer_unlock(iron_g5_index_buffer_t *buffer, int count) {
-	iron_g5_index_buffer_unlock_all(buffer);
+void iron_gpu_index_buffer_unlock(iron_gpu_index_buffer_t *buffer, int count) {
+	iron_gpu_index_buffer_unlock_all(buffer);
 }
 
-int iron_g5_index_buffer_count(iron_g5_index_buffer_t *buffer) {
+int iron_gpu_index_buffer_count(iron_gpu_index_buffer_t *buffer) {
 	return buffer->impl.count;
 }
 
@@ -4402,19 +4402,19 @@ typedef struct inst {
 } inst_t;
 
 static VkDescriptorPool raytrace_descriptor_pool;
-static iron_g5_raytrace_acceleration_structure_t *accel;
-static iron_g5_raytrace_pipeline_t *pipeline;
-static iron_g5_texture_t *output = NULL;
-static iron_g5_texture_t *texpaint0;
-static iron_g5_texture_t *texpaint1;
-static iron_g5_texture_t *texpaint2;
-static iron_g5_texture_t *texenv;
-static iron_g5_texture_t *texsobol;
-static iron_g5_texture_t *texscramble;
-static iron_g5_texture_t *texrank;
-static iron_g5_vertex_buffer_t *vb[16];
-static iron_g5_vertex_buffer_t *vb_last[16];
-static iron_g5_index_buffer_t *ib[16];
+static iron_gpu_raytrace_acceleration_structure_t *accel;
+static iron_gpu_raytrace_pipeline_t *pipeline;
+static iron_gpu_texture_t *output = NULL;
+static iron_gpu_texture_t *texpaint0;
+static iron_gpu_texture_t *texpaint1;
+static iron_gpu_texture_t *texpaint2;
+static iron_gpu_texture_t *texenv;
+static iron_gpu_texture_t *texsobol;
+static iron_gpu_texture_t *texscramble;
+static iron_gpu_texture_t *texrank;
+static iron_gpu_vertex_buffer_t *vb[16];
+static iron_gpu_vertex_buffer_t *vb_last[16];
+static iron_gpu_index_buffer_t *ib[16];
 static int vb_count = 0;
 static int vb_count_last = 0;
 static inst_t instances[1024];
@@ -4434,8 +4434,8 @@ static PFN_vkCmdBuildAccelerationStructuresKHR _vkCmdBuildAccelerationStructures
 static PFN_vkDestroyAccelerationStructureKHR _vkDestroyAccelerationStructureKHR = NULL;
 static PFN_vkCmdTraceRaysKHR _vkCmdTraceRaysKHR = NULL;
 
-void iron_g5_raytrace_pipeline_init(iron_g5_raytrace_pipeline_t *pipeline, iron_g5_command_list_t *command_list, void *ray_shader, int ray_shader_size,
-                                 iron_g5_constant_buffer_t *constant_buffer) {
+void iron_gpu_raytrace_pipeline_init(iron_gpu_raytrace_pipeline_t *pipeline, iron_gpu_command_list_t *command_list, void *ray_shader, int ray_shader_size,
+                                 iron_gpu_constant_buffer_t *constant_buffer) {
 	output = NULL;
 	pipeline->_constant_buffer = constant_buffer;
 
@@ -4750,7 +4750,7 @@ void iron_g5_raytrace_pipeline_init(iron_g5_raytrace_pipeline_t *pipeline, iron_
 	}
 }
 
-void iron_g5_raytrace_pipeline_destroy(iron_g5_raytrace_pipeline_t *pipeline) {
+void iron_gpu_raytrace_pipeline_destroy(iron_gpu_raytrace_pipeline_t *pipeline) {
 	vkDestroyPipeline(vk_ctx.device, pipeline->impl.pipeline, NULL);
 	vkDestroyPipelineLayout(vk_ctx.device, pipeline->impl.pipeline_layout, NULL);
 	vkDestroyDescriptorSetLayout(vk_ctx.device, pipeline->impl.descriptor_set_layout, NULL);
@@ -4764,7 +4764,7 @@ uint64_t get_buffer_device_address(VkBuffer buffer) {
 	return _vkGetBufferDeviceAddressKHR(vk_ctx.device, &buffer_device_address_info);
 }
 
-void iron_g5_raytrace_acceleration_structure_init(iron_g5_raytrace_acceleration_structure_t *accel) {
+void iron_gpu_raytrace_acceleration_structure_init(iron_gpu_raytrace_acceleration_structure_t *accel) {
 	_vkGetBufferDeviceAddressKHR = (void *)vkGetDeviceProcAddr(vk_ctx.device, "vkGetBufferDeviceAddressKHR");
 	_vkCreateAccelerationStructureKHR = (void *)vkGetDeviceProcAddr(vk_ctx.device, "vkCreateAccelerationStructureKHR");
 	_vkGetAccelerationStructureDeviceAddressKHR = (void *)vkGetDeviceProcAddr(vk_ctx.device, "vkGetAccelerationStructureDeviceAddressKHR");
@@ -4774,7 +4774,7 @@ void iron_g5_raytrace_acceleration_structure_init(iron_g5_raytrace_acceleration_
 	instances_count = 0;
 }
 
-void iron_g5_raytrace_acceleration_structure_add(iron_g5_raytrace_acceleration_structure_t *accel, iron_g5_vertex_buffer_t *_vb, iron_g5_index_buffer_t *_ib,
+void iron_gpu_raytrace_acceleration_structure_add(iron_gpu_raytrace_acceleration_structure_t *accel, iron_gpu_vertex_buffer_t *_vb, iron_gpu_index_buffer_t *_ib,
 	iron_matrix4x4_t _transform) {
 
 	int vb_i = -1;
@@ -4796,7 +4796,7 @@ void iron_g5_raytrace_acceleration_structure_add(iron_g5_raytrace_acceleration_s
 	instances_count++;
 }
 
-void _iron_g5_raytrace_acceleration_structure_destroy_bottom(iron_g5_raytrace_acceleration_structure_t *accel) {
+void _iron_gpu_raytrace_acceleration_structure_destroy_bottom(iron_gpu_raytrace_acceleration_structure_t *accel) {
 	_vkDestroyAccelerationStructureKHR = (void *)vkGetDeviceProcAddr(vk_ctx.device, "vkDestroyAccelerationStructureKHR");
 	for (int i = 0; i < vb_count_last; ++i) {
 		_vkDestroyAccelerationStructureKHR(vk_ctx.device, accel->impl.bottom_level_acceleration_structure[i], NULL);
@@ -4805,7 +4805,7 @@ void _iron_g5_raytrace_acceleration_structure_destroy_bottom(iron_g5_raytrace_ac
 	}
 }
 
-void _iron_g5_raytrace_acceleration_structure_destroy_top(iron_g5_raytrace_acceleration_structure_t *accel) {
+void _iron_gpu_raytrace_acceleration_structure_destroy_top(iron_gpu_raytrace_acceleration_structure_t *accel) {
 	_vkDestroyAccelerationStructureKHR = (void *)vkGetDeviceProcAddr(vk_ctx.device, "vkDestroyAccelerationStructureKHR");
 	_vkDestroyAccelerationStructureKHR(vk_ctx.device, accel->impl.top_level_acceleration_structure, NULL);
 	vkFreeMemory(vk_ctx.device, accel->impl.top_level_mem, NULL);
@@ -4814,8 +4814,8 @@ void _iron_g5_raytrace_acceleration_structure_destroy_top(iron_g5_raytrace_accel
 	vkDestroyBuffer(vk_ctx.device, accel->impl.instances_buffer, NULL);
 }
 
-void iron_g5_raytrace_acceleration_structure_build(iron_g5_raytrace_acceleration_structure_t *accel, iron_g5_command_list_t *command_list,
-	iron_g5_vertex_buffer_t *_vb_full, iron_g5_index_buffer_t *_ib_full) {
+void iron_gpu_raytrace_acceleration_structure_build(iron_gpu_raytrace_acceleration_structure_t *accel, iron_gpu_command_list_t *command_list,
+	iron_gpu_vertex_buffer_t *_vb_full, iron_gpu_index_buffer_t *_ib_full) {
 
 	bool build_bottom = false;
 	for (int i = 0; i < 16; ++i) {
@@ -4827,9 +4827,9 @@ void iron_g5_raytrace_acceleration_structure_build(iron_g5_raytrace_acceleration
 
 	if (vb_count_last > 0) {
 		if (build_bottom) {
-			_iron_g5_raytrace_acceleration_structure_destroy_bottom(accel);
+			_iron_gpu_raytrace_acceleration_structure_destroy_bottom(accel);
 		}
-		_iron_g5_raytrace_acceleration_structure_destroy_top(accel);
+		_iron_gpu_raytrace_acceleration_structure_destroy_top(accel);
 	}
 
 	vb_count_last = vb_count;
@@ -5349,7 +5349,7 @@ void iron_g5_raytrace_acceleration_structure_build(iron_g5_raytrace_acceleration
 	}
 }
 
-void iron_g5_raytrace_acceleration_structure_destroy(iron_g5_raytrace_acceleration_structure_t *accel) {
+void iron_gpu_raytrace_acceleration_structure_destroy(iron_gpu_raytrace_acceleration_structure_t *accel) {
 	// _vkDestroyAccelerationStructureKHR = (void *)vkGetDeviceProcAddr(vk_ctx.device, "vkDestroyAccelerationStructureKHR");
 	// for (int i = 0; i < vb_count; ++i) {
 	// 	_vkDestroyAccelerationStructureKHR(vk_ctx.device, accel->impl.bottom_level_acceleration_structure[i], NULL);
@@ -5363,7 +5363,7 @@ void iron_g5_raytrace_acceleration_structure_destroy(iron_g5_raytrace_accelerati
 	// vkDestroyBuffer(vk_ctx.device, accel->impl.instances_buffer, NULL);
 }
 
-void iron_g5_raytrace_set_textures(iron_g5_texture_t *_texpaint0, iron_g5_texture_t *_texpaint1, iron_g5_texture_t *_texpaint2, iron_g5_texture_t *_texenv, iron_g5_texture_t *_texsobol, iron_g5_texture_t *_texscramble, iron_g5_texture_t *_texrank) {
+void iron_gpu_raytrace_set_textures(iron_gpu_texture_t *_texpaint0, iron_gpu_texture_t *_texpaint1, iron_gpu_texture_t *_texpaint2, iron_gpu_texture_t *_texenv, iron_gpu_texture_t *_texsobol, iron_gpu_texture_t *_texscramble, iron_gpu_texture_t *_texrank) {
 	texpaint0 = _texpaint0;
 	texpaint1 = _texpaint1;
 	texpaint2 = _texpaint2;
@@ -5373,15 +5373,15 @@ void iron_g5_raytrace_set_textures(iron_g5_texture_t *_texpaint0, iron_g5_textur
 	texrank = _texrank;
 }
 
-void iron_g5_raytrace_set_acceleration_structure(iron_g5_raytrace_acceleration_structure_t *_accel) {
+void iron_gpu_raytrace_set_acceleration_structure(iron_gpu_raytrace_acceleration_structure_t *_accel) {
 	accel = _accel;
 }
 
-void iron_g5_raytrace_set_pipeline(iron_g5_raytrace_pipeline_t *_pipeline) {
+void iron_gpu_raytrace_set_pipeline(iron_gpu_raytrace_pipeline_t *_pipeline) {
 	pipeline = _pipeline;
 }
 
-void iron_g5_raytrace_set_target(iron_g5_texture_t *_output) {
+void iron_gpu_raytrace_set_target(iron_gpu_texture_t *_output) {
 	if (_output != output) {
 		vkDestroyImage(vk_ctx.device, _output->impl.image, NULL);
 
@@ -5435,7 +5435,7 @@ void iron_g5_raytrace_set_target(iron_g5_texture_t *_output) {
 	output = _output;
 }
 
-void iron_g5_raytrace_dispatch_rays(iron_g5_command_list_t *command_list) {
+void iron_gpu_raytrace_dispatch_rays(iron_gpu_command_list_t *command_list) {
 	VkWriteDescriptorSetAccelerationStructureKHR descriptor_acceleration_structure_info = {0};
 	descriptor_acceleration_structure_info.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
 	descriptor_acceleration_structure_info.accelerationStructureCount = 1;

@@ -20,11 +20,11 @@ type context_t = {
 	color_picker_callback?: (sc: swatch_color_t)=>void;
 
 	default_irradiance?: f32_array_t;
-	default_radiance?: iron_g5_texture_t;
-	default_radiance_mipmaps?: iron_g5_texture_t[];
-	saved_envmap?: iron_g5_texture_t;
-	empty_envmap?: iron_g5_texture_t;
-	preview_envmap?: iron_g5_texture_t;
+	default_radiance?: iron_gpu_texture_t;
+	default_radiance_mipmaps?: iron_gpu_texture_t[];
+	saved_envmap?: iron_gpu_texture_t;
+	empty_envmap?: iron_gpu_texture_t;
+	preview_envmap?: iron_gpu_texture_t;
 	envmap_loaded?: bool;
 	show_envmap?: bool;
 	show_envmap_handle?: ui_handle_t;
@@ -105,11 +105,11 @@ type context_t = {
 	layer_preview_dirty?: bool;
 	layers_preview_dirty?: bool;
 	node_preview_dirty?: bool;
-	node_preview?: iron_g5_texture_t;
-	node_previews?: map_t<string, iron_g5_texture_t>;
+	node_preview?: iron_gpu_texture_t;
+	node_previews?: map_t<string, iron_gpu_texture_t>;
 	node_previews_used?: string[];
 	node_preview_name?: string;
-	mask_preview_rgba32?: iron_g5_texture_t;
+	mask_preview_rgba32?: iron_gpu_texture_t;
 	mask_preview_last?: slot_layer_t;
 
 	colorid_picked?: bool;
@@ -138,7 +138,7 @@ type context_t = {
 	colorid_handle?: ui_handle_t;
 	layers_export?: export_mode_t;
 
-	decal_image?: iron_g5_texture_t;
+	decal_image?: iron_gpu_texture_t;
 	decal_preview?: bool;
 	decal_x?: f32;
 	decal_y?: f32;
@@ -146,7 +146,7 @@ type context_t = {
 	cache_draws?: bool;
 	write_icon_on_export?: bool;
 
-	text_tool_image?: iron_g5_texture_t;
+	text_tool_image?: iron_gpu_texture_t;
 	text_tool_text?: string;
 	particle_material?: material_data_t;
 
@@ -181,9 +181,9 @@ type context_t = {
 
 	brush_nodes_radius?: f32;
 	brush_nodes_opacity?: f32;
-	brush_mask_image?: iron_g5_texture_t;
+	brush_mask_image?: iron_gpu_texture_t;
 	brush_mask_image_is_alpha?: bool;
-	brush_stencil_image?: iron_g5_texture_t;
+	brush_stencil_image?: iron_gpu_texture_t;
 	brush_stencil_image_is_alpha?: bool;
 	brush_stencil_x?: f32;
 	brush_stencil_y?: f32;
@@ -543,7 +543,7 @@ function context_set_layer(l: slot_layer_t) {
 	context_raw.layer = l;
 	ui_header_handle.redraws = 2;
 
-	let current: iron_g5_texture_t = _draw_current;
+	let current: iron_gpu_texture_t = _draw_current;
 	let g2_in_use: bool = _draw_in_use;
 	if (g2_in_use) draw_end();
 

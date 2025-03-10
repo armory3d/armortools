@@ -846,7 +846,7 @@ static void cmd(struct android_app *app, int32_t cmd) {
 			}
 			else {
 				initDisplay();
-				iron_g5_swap_buffers();
+				iron_gpu_swap_buffers();
 			}
 
 			updateAppForegroundStatus(true, appIsForeground);
@@ -1213,8 +1213,8 @@ void iron_init(const char *name, int width, int height, struct iron_window_optio
 	win->width = width;
 	win->height = height;
 
-	iron_g5_internal_init();
-	iron_g4_internal_init_window(win->depth_bits, true);
+	iron_gpu_internal_init();
+	gpu_internal_init_window(win->depth_bits, true);
 
 	iron_internal_gamepad_trigger_connect(0);
 }

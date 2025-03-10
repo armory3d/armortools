@@ -7,10 +7,10 @@ let render_path_raytrace_first: bool = true;
 let render_path_raytrace_f32a: f32_array_t = f32_array_create(24);
 let render_path_raytrace_help_mat: mat4_t = mat4_identity();
 let render_path_raytrace_transform: mat4_t;
-let render_path_raytrace_vb: iron_g5_vertex_buffer_t;
-let render_path_raytrace_ib: iron_g5_index_buffer_t;
+let render_path_raytrace_vb: iron_gpu_vertex_buffer_t;
+let render_path_raytrace_ib: iron_gpu_index_buffer_t;
 
-let render_path_raytrace_last_envmap: iron_g5_texture_t = null;
+let render_path_raytrace_last_envmap: iron_gpu_texture_t = null;
 let render_path_raytrace_is_bake: bool = false;
 
 ///if arm_direct3d12
@@ -21,7 +21,7 @@ let render_path_raytrace_ext: string = ".metal";
 let render_path_raytrace_ext: string = ".spirv";
 ///end
 
-let render_path_raytrace_last_texpaint: iron_g5_texture_t = null;
+let render_path_raytrace_last_texpaint: iron_gpu_texture_t = null;
 
 function render_path_raytrace_init() {
 }
@@ -45,14 +45,14 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	}
 
 	let probe: world_data_t = scene_world;
-	let saved_envmap: iron_g5_texture_t = context_raw.show_envmap_blur ? probe._.radiance_mipmaps[0] : context_raw.saved_envmap;
+	let saved_envmap: iron_gpu_texture_t = context_raw.show_envmap_blur ? probe._.radiance_mipmaps[0] : context_raw.saved_envmap;
 
 	if (render_path_raytrace_last_envmap != saved_envmap) {
 		render_path_raytrace_last_envmap = saved_envmap;
 
-		let bnoise_sobol: iron_g5_texture_t = map_get(scene_embedded, "bnoise_sobol.k");
-		let bnoise_scramble: iron_g5_texture_t = map_get(scene_embedded, "bnoise_scramble.k");
-		let bnoise_rank: iron_g5_texture_t = map_get(scene_embedded, "bnoise_rank.k");
+		let bnoise_sobol: iron_gpu_texture_t = map_get(scene_embedded, "bnoise_sobol.k");
+		let bnoise_scramble: iron_gpu_texture_t = map_get(scene_embedded, "bnoise_scramble.k");
+		let bnoise_rank: iron_gpu_texture_t = map_get(scene_embedded, "bnoise_rank.k");
 
 		let l: slot_layer_t = layers_flatten(true);
 		iron_raytrace_set_textures(l.texpaint, l.texpaint_nor, l.texpaint_pack, saved_envmap, bnoise_sobol, bnoise_scramble, bnoise_rank);
@@ -63,9 +63,9 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	if (l.texpaint != render_path_raytrace_last_texpaint) {
 		render_path_raytrace_last_texpaint = l.texpaint;
 
-		let bnoise_sobol: iron_g5_texture_t = map_get(scene_embedded, "bnoise_sobol.k");
-		let bnoise_scramble: iron_g5_texture_t = map_get(scene_embedded, "bnoise_scramble.k");
-		let bnoise_rank: iron_g5_texture_t = map_get(scene_embedded, "bnoise_rank.k");
+		let bnoise_sobol: iron_gpu_texture_t = map_get(scene_embedded, "bnoise_sobol.k");
+		let bnoise_scramble: iron_gpu_texture_t = map_get(scene_embedded, "bnoise_scramble.k");
+		let bnoise_rank: iron_gpu_texture_t = map_get(scene_embedded, "bnoise_rank.k");
 
 		iron_raytrace_set_textures(l.texpaint, l.texpaint_nor, l.texpaint_pack, saved_envmap, bnoise_sobol, bnoise_scramble, bnoise_rank);
 	}
@@ -168,8 +168,8 @@ function render_path_raytrace_raytrace_init(shader_name: string, build: bool = t
 		iron_raytrace_as_add(render_path_raytrace_vb, render_path_raytrace_ib, render_path_raytrace_transform);
 		///end
 
-		let vb_full: iron_g5_vertex_buffer_t = context_raw.merged_object.data._.vertex_buffer;
-		let ib_full: iron_g5_index_buffer_t = context_raw.merged_object.data._.index_buffers[0];
+		let vb_full: iron_gpu_vertex_buffer_t = context_raw.merged_object.data._.vertex_buffer;
+		let ib_full: iron_gpu_index_buffer_t = context_raw.merged_object.data._.index_buffers[0];
 
 		iron_raytrace_as_build(vb_full, ib_full);
 	}

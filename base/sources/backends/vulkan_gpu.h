@@ -110,7 +110,7 @@ typedef struct {
 	VkFence fence;
 } CommandList5Impl;
 
-typedef struct iron_g5_compute_shader_impl {
+typedef struct iron_gpu_compute_shader_impl {
 	iron_internal_named_number locations[IRON_INTERNAL_NAMED_NUMBER_COUNT];
 	iron_internal_named_number texture_bindings[IRON_INTERNAL_NAMED_NUMBER_COUNT];
 	iron_internal_named_number offsets[IRON_INTERNAL_NAMED_NUMBER_COUNT];
@@ -118,7 +118,7 @@ typedef struct iron_g5_compute_shader_impl {
 	VkPipelineLayout pipeline_layout;
 	VkPipeline pipeline;
 	VkShaderModule shader_module;
-} iron_g5_compute_shader_impl;
+} iron_gpu_compute_shader_impl;
 
 typedef struct PipelineState5Impl_s {
 	const char **textures;
@@ -160,9 +160,9 @@ typedef struct {
 	int length;
 } Shader5Impl;
 
-typedef struct iron_g5_sampler_impl {
+typedef struct iron_gpu_sampler_impl {
 	VkSampler sampler;
-} iron_g5_sampler_impl_t;
+} iron_gpu_sampler_impl_t;
 
 typedef struct {
 	VkImageLayout imageLayout;
@@ -228,7 +228,7 @@ typedef struct {
 	VkBuffer raygen_shader_binding_table;
 	VkBuffer miss_shader_binding_table;
 	VkBuffer hit_shader_binding_table;
-} iron_g5_raytrace_pipeline_impl_t;
+} iron_gpu_raytrace_pipeline_impl_t;
 
 typedef struct {
 	VkAccelerationStructureKHR top_level_acceleration_structure;
@@ -242,6 +242,6 @@ typedef struct {
 	VkDeviceMemory top_level_mem;
 	VkBuffer instances_buffer;
 	VkDeviceMemory instances_mem;
-} iron_g5_raytrace_acceleration_structure_impl_t;
+} iron_gpu_raytrace_acceleration_structure_impl_t;
 
 #endif

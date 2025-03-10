@@ -27,15 +27,15 @@ typedef struct draw_font {
 } draw_font_t;
 
 void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_vert, buffer_t *colored_frag, buffer_t *text_vert, buffer_t *text_frag);
-void draw_begin(iron_g5_texture_t *target);
-void draw_scaled_sub_image(iron_g5_texture_t *img, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh);
-void draw_scaled_sub_texture(iron_g5_texture_t *tex, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh);
-void draw_scaled_image(iron_g5_texture_t *tex, float dx, float dy, float dw, float dh);
-void draw_sub_image(iron_g5_texture_t *tex, float sx, float sy, float sw, float sh, float x, float y);
-void draw_image(iron_g5_texture_t *tex, float x, float y);
-void draw_scaled_texture(iron_g5_texture_t *tex, float dx, float dy, float dw, float dh);
-void draw_sub_texture(iron_g5_texture_t *tex, float sx, float sy, float sw, float sh, float x, float y);
-void draw_texture(iron_g5_texture_t *tex, float x, float y);
+void draw_begin(iron_gpu_texture_t *target);
+void draw_scaled_sub_image(iron_gpu_texture_t *img, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh);
+void draw_scaled_sub_texture(iron_gpu_texture_t *tex, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh);
+void draw_scaled_image(iron_gpu_texture_t *tex, float dx, float dy, float dw, float dh);
+void draw_sub_image(iron_gpu_texture_t *tex, float sx, float sy, float sw, float sh, float x, float y);
+void draw_image(iron_gpu_texture_t *tex, float x, float y);
+void draw_scaled_texture(iron_gpu_texture_t *tex, float dx, float dy, float dw, float dh);
+void draw_sub_texture(iron_gpu_texture_t *tex, float sx, float sy, float sw, float sh, float x, float y);
+void draw_texture(iron_gpu_texture_t *tex, float x, float y);
 void draw_filled_triangle(float x0, float y0, float x1, float y1, float x2, float y2);
 void draw_filled_rect(float x, float y, float width, float height);
 void draw_rect(float x, float y, float width, float height, float strength);
@@ -45,7 +45,7 @@ void draw_string(const char *text, float x, float y);
 void draw_end(void);
 void draw_set_color(uint32_t color);
 uint32_t draw_get_color();
-void draw_set_pipeline(iron_g5_pipeline_t *pipeline);
+void draw_set_pipeline(iron_gpu_pipeline_t *pipeline);
 void draw_set_transform(mat3_t matrix);
 bool draw_set_font(draw_font_t *font, int size);
 void draw_font_init(draw_font_t *font);
@@ -60,7 +60,7 @@ float draw_sub_string_width(draw_font_t *font, int font_size, const char *text, 
 int draw_string_width(draw_font_t *font, int font_size, const char *text);
 void draw_set_bilinear_filter(bool bilinear);
 void draw_restore_render_target(void);
-void draw_set_render_target(iron_g5_texture_t *target);
+void draw_set_render_target(iron_gpu_texture_t *target);
 
 void draw_filled_circle(float cx, float cy, float radius, int segments);
 void draw_circle(float cx, float cy, float radius, int segments, float strength);
@@ -68,5 +68,5 @@ void draw_cubic_bezier(f32_array_t *x, f32_array_t *y, int segments, float stren
 
 extern int draw_font_size;
 extern draw_font_t *draw_font;
-extern iron_g5_texture_t *_draw_current;
+extern iron_gpu_texture_t *_draw_current;
 extern bool _draw_in_use;

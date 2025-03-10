@@ -122,11 +122,11 @@ function ui_nodes_PAN_Y(): f32 {
 	return UI_NODES_PAN_Y();
 }
 
-function _ui_image(image: iron_g5_texture_t, tint: i32 = 0xffffffff, h: f32 = -1.0, sx: i32 = 0, sy: i32 = 0, sw: i32 = 0, sh: i32 = 0): ui_state_t {
+function _ui_image(image: iron_gpu_texture_t, tint: i32 = 0xffffffff, h: f32 = -1.0, sx: i32 = 0, sy: i32 = 0, sw: i32 = 0, sh: i32 = 0): ui_state_t {
 	return ui_sub_image(image, tint, h, sx, sy, sw, sh);
 }
 
-function _ui_tooltip_image(image: iron_g5_texture_t, max_width: i32 = 0) {
+function _ui_tooltip_image(image: iron_gpu_texture_t, max_width: i32 = 0) {
 	return ui_tooltip_image(image, max_width);
 }
 
@@ -309,7 +309,7 @@ declare function ui_draw_string(text: string, x_offset: f32, y_offset: f32, alig
 declare function ui_next_node_id(nodes: ui_node_t[]): i32;
 declare function ui_node_canvas(nodes: ui_nodes_t, canvas: ui_node_canvas_t): void;
 
-declare type iron_g5_texture_t = {
+declare type iron_gpu_texture_t = {
 	width: i32;
 	height: i32;
 };
@@ -372,7 +372,7 @@ declare type ui_handle_t = {
 	color: u32;
 	value: f32;
 	text: string;
-	// iron_g5_texture_t texture;
+	// iron_gpu_texture_t texture;
 	redraws: i32;
 	scroll_offset: f32;
 	scroll_enabled: bool;
@@ -391,8 +391,8 @@ declare type ui_options_t = {
 	font?: draw_font_t;
 	theme?: ui_theme_t;
 	scale_factor?: f32;
-	color_wheel?: iron_g5_texture_t;
-	black_white_gradient?: iron_g5_texture_t;
+	color_wheel?: iron_gpu_texture_t;
+	black_white_gradient?: iron_gpu_texture_t;
 };
 
 declare type ui_coloring_t = {

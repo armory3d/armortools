@@ -1,7 +1,7 @@
 
 type rgb_node_t = {
 	base?: logic_node_t;
-	image?: iron_g5_texture_t;
+	image?: iron_gpu_texture_t;
 	raw?: ui_node_t;
 };
 
@@ -14,7 +14,7 @@ function rgb_node_create(raw: ui_node_t, args: f32_array_t): rgb_node_t {
 	return n;
 }
 
-function rgb_node_get_as_image(self: rgb_node_t, from: i32): iron_g5_texture_t {
+function rgb_node_get_as_image(self: rgb_node_t, from: i32): iron_gpu_texture_t {
 	if (self.image != null) {
 		app_notify_on_next_frame(function (self: rgb_node_t) {
 			iron_unload_image(self.image);
@@ -29,11 +29,11 @@ function rgb_node_get_as_image(self: rgb_node_t, from: i32): iron_g5_texture_t {
 	f32a[2] = default_value[2];
 	f32a[3] = default_value[3];
 	let buf: buffer_t = buffer_create_from_raw(f32a.buffer, f32a.length * 4);
-	self.image = iron_g4_create_texture_from_bytes(buf, 1, 1, tex_format_t.RGBA128);
+	self.image = gpu_create_texture_from_bytes(buf, 1, 1, tex_format_t.RGBA128);
 	return self.image;
 }
 
-function rgb_node_get_cached_image(self: rgb_node_t): iron_g5_texture_t {
+function rgb_node_get_cached_image(self: rgb_node_t): iron_gpu_texture_t {
 	self.base.get_as_image(self, 0);
 	return self.image;
 }

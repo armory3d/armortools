@@ -88,7 +88,7 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 		}
 
 		if (apply_disp) {
-			// let height: buffer_t = iron_g4_get_texture_pixels(layers[0].texpaint_pack);
+			// let height: buffer_t = gpu_get_texture_pixels(layers[0].texpaint_pack);
 			// let res: i32 = layers[0].texpaint_pack.width;
 			// let strength: f32 = 0.1;
 			// for (let i: i32 = 0; i < len; ++i) {

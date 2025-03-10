@@ -8,7 +8,7 @@ let data_cached_worlds: map_t<string, world_data_t> = map_create();
 let data_cached_shaders: map_t<string, shader_data_t> = map_create();
 
 let data_cached_blobs: map_t<string, buffer_t> = map_create();
-let data_cached_images: map_t<string, iron_g5_texture_t> = map_create();
+let data_cached_images: map_t<string, iron_gpu_texture_t> = map_create();
 let data_cached_videos: map_t<string, video_t> = map_create();
 let data_cached_fonts: map_t<string, draw_font_t> = map_create();
 ///if arm_audio
@@ -109,8 +109,8 @@ function data_get_blob(file: string): buffer_t {
 	return b;
 }
 
-function data_get_image(file: string, readable: bool = false): iron_g5_texture_t {
-	let cached: iron_g5_texture_t = map_get(data_cached_images, file);
+function data_get_image(file: string, readable: bool = false): iron_gpu_texture_t {
+	let cached: iron_gpu_texture_t = map_get(data_cached_images, file);
 	if (cached != null) {
 		return cached;
 	}
@@ -120,7 +120,7 @@ function data_get_image(file: string, readable: bool = false): iron_g5_texture_t
 		return null;
 	}
 
-	let b: iron_g5_texture_t = image_;
+	let b: iron_gpu_texture_t = image_;
 	map_set(data_cached_images, file, b);
 	data_assets_loaded++;
 	return b;
@@ -185,7 +185,7 @@ function data_delete_blob(handle: string) {
 }
 
 function data_delete_image(handle: string) {
-	let image: iron_g5_texture_t = map_get(data_cached_images, handle);
+	let image: iron_gpu_texture_t = map_get(data_cached_images, handle);
 	if (image == null) {
 		return;
 	}
@@ -246,7 +246,7 @@ function data_delete_all() {
 
 	let cached_images_keys: string[] = map_keys(data_cached_images);
 	for (let i: i32 = 0; i < cached_images_keys.length; ++i) {
-		let c: iron_g5_texture_t = map_get(data_cached_images, cached_images_keys[i]);
+		let c: iron_gpu_texture_t = map_get(data_cached_images, cached_images_keys[i]);
 		iron_unload_image(c);
 	}
 	data_cached_images = map_create();

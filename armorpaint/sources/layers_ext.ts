@@ -7,18 +7,18 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 	layers_make_export_img();
 
 	let empty_rt: render_target_t = map_get(render_path_render_targets, "empty_white");
-	let empty: iron_g5_texture_t = empty_rt._image;
+	let empty: iron_gpu_texture_t = empty_rt._image;
 
 	// Clear export layer
-	_iron_g4_begin(layers_expa);
-	iron_g5_clear(color_from_floats(0.0, 0.0, 0.0, 0.0));
-	_iron_g4_end();
-	_iron_g4_begin(layers_expb);
-	iron_g5_clear(color_from_floats(0.5, 0.5, 1.0, 0.0));
-	_iron_g4_end();
-	_iron_g4_begin(layers_expc);
-	iron_g5_clear(color_from_floats(1.0, 0.0, 0.0, 0.0));
-	_iron_g4_end();
+	_gpu_begin(layers_expa);
+	iron_gpu_clear(color_from_floats(0.0, 0.0, 0.0, 0.0));
+	_gpu_end();
+	_gpu_begin(layers_expb);
+	iron_gpu_clear(color_from_floats(0.5, 0.5, 1.0, 0.0));
+	_gpu_end();
+	_gpu_begin(layers_expc);
+	iron_gpu_clear(color_from_floats(1.0, 0.0, 0.0, 0.0));
+	_gpu_end();
 
 	// Flatten layers
 	for (let i: i32 = 0; i < layers.length; ++i) {
@@ -30,13 +30,13 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 			continue;
 		}
 
-		let mask: iron_g5_texture_t = empty;
+		let mask: iron_gpu_texture_t = empty;
 		let l1masks: slot_layer_t[] = slot_layer_get_masks(l1);
 		if (l1masks != null) {
 			if (l1masks.length > 1) {
 				layers_make_temp_mask_img();
 				draw_begin(pipes_temp_mask_image);
-				iron_g5_clear(0x00000000);
+				iron_gpu_clear(0x00000000);
 				draw_end();
 				let l1: slot_layer_t = { texpaint: pipes_temp_mask_image };
 				for (let i: i32 = 0; i < l1masks.length; ++i) {
@@ -64,18 +64,18 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 			draw_set_pipeline(null);
 			draw_end();
 			///else
-			_iron_g4_begin(layers_expa);
-			iron_g5_set_pipeline(pipes_merge);
-			_iron_g4_set_texture(pipes_tex0, l1.texpaint);
-			_iron_g4_set_texture(pipes_tex1, empty);
-			_iron_g4_set_texture(pipes_texmask, mask);
-			_iron_g4_set_texture(pipes_texa, layers_temp_image);
-			_iron_g4_set_float(pipes_opac, slot_layer_get_opacity(l1));
-			_iron_g4_set_int(pipes_blending, layers.length > 1 ? l1.blending : 0);
-			iron_g4_set_vertex_buffer(const_data_screen_aligned_vb);
-			iron_g4_set_index_buffer(const_data_screen_aligned_ib);
-			iron_g4_draw_indexed_vertices();
-			_iron_g4_end();
+			_gpu_begin(layers_expa);
+			iron_gpu_set_pipeline(pipes_merge);
+			_gpu_set_texture(pipes_tex0, l1.texpaint);
+			_gpu_set_texture(pipes_tex1, empty);
+			_gpu_set_texture(pipes_texmask, mask);
+			_gpu_set_texture(pipes_texa, layers_temp_image);
+			_gpu_set_float(pipes_opac, slot_layer_get_opacity(l1));
+			_gpu_set_int(pipes_blending, layers.length > 1 ? l1.blending : 0);
+			gpu_set_vertex_buffer(const_data_screen_aligned_vb);
+			gpu_set_index_buffer(const_data_screen_aligned_ib);
+			gpu_draw_indexed_vertices();
+			_gpu_end();
 			///end
 		}
 
@@ -86,18 +86,18 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 			draw_set_pipeline(null);
 			draw_end();
 
-			_iron_g4_begin(layers_expb);
-			iron_g5_set_pipeline(pipes_merge);
-			_iron_g4_set_texture(pipes_tex0, l1.texpaint);
-			_iron_g4_set_texture(pipes_tex1, l1.texpaint_nor);
-			_iron_g4_set_texture(pipes_texmask, mask);
-			_iron_g4_set_texture(pipes_texa, layers_temp_image);
-			_iron_g4_set_float(pipes_opac, slot_layer_get_opacity(l1));
-			_iron_g4_set_int(pipes_blending, l1.paint_nor_blend ? -2 : -1);
-			iron_g4_set_vertex_buffer(const_data_screen_aligned_vb);
-			iron_g4_set_index_buffer(const_data_screen_aligned_ib);
-			iron_g4_draw_indexed_vertices();
-			_iron_g4_end();
+			_gpu_begin(layers_expb);
+			iron_gpu_set_pipeline(pipes_merge);
+			_gpu_set_texture(pipes_tex0, l1.texpaint);
+			_gpu_set_texture(pipes_tex1, l1.texpaint_nor);
+			_gpu_set_texture(pipes_texmask, mask);
+			_gpu_set_texture(pipes_texa, layers_temp_image);
+			_gpu_set_float(pipes_opac, slot_layer_get_opacity(l1));
+			_gpu_set_int(pipes_blending, l1.paint_nor_blend ? -2 : -1);
+			gpu_set_vertex_buffer(const_data_screen_aligned_vb);
+			gpu_set_index_buffer(const_data_screen_aligned_ib);
+			gpu_draw_indexed_vertices();
+			_gpu_end();
 		}
 
 		if (l1.paint_occ || l1.paint_rough || l1.paint_met || l1.paint_height) {
@@ -149,18 +149,18 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 		draw_set_pipeline(null);
 		draw_end();
 
-		_iron_g4_begin(l0.texpaint_nor);
-		iron_g5_set_pipeline(pipes_merge);
-		_iron_g4_set_texture(pipes_tex0, layers_temp_image);
-		_iron_g4_set_texture(pipes_tex1, l0.texpaint_pack);
-		_iron_g4_set_texture(pipes_texmask, empty);
-		_iron_g4_set_texture(pipes_texa, empty);
-		_iron_g4_set_float(pipes_opac, 1.0);
-		_iron_g4_set_int(pipes_blending, -4);
-		iron_g4_set_vertex_buffer(const_data_screen_aligned_vb);
-		iron_g4_set_index_buffer(const_data_screen_aligned_ib);
-		iron_g4_draw_indexed_vertices();
-		_iron_g4_end();
+		_gpu_begin(l0.texpaint_nor);
+		iron_gpu_set_pipeline(pipes_merge);
+		_gpu_set_texture(pipes_tex0, layers_temp_image);
+		_gpu_set_texture(pipes_tex1, l0.texpaint_pack);
+		_gpu_set_texture(pipes_texmask, empty);
+		_gpu_set_texture(pipes_texa, empty);
+		_gpu_set_float(pipes_opac, 1.0);
+		_gpu_set_int(pipes_blending, -4);
+		gpu_set_vertex_buffer(const_data_screen_aligned_vb);
+		gpu_set_index_buffer(const_data_screen_aligned_ib);
+		gpu_draw_indexed_vertices();
+		_gpu_end();
 	}
 
 	return l0;

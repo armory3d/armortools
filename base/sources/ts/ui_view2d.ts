@@ -1,6 +1,6 @@
 
-let ui_view2d_pipe: iron_g5_pipeline_t;
-let ui_view2d_channel_loc: iron_g5_constant_location_t;
+let ui_view2d_pipe: iron_gpu_pipeline_t;
+let ui_view2d_channel_loc: iron_gpu_constant_location_t;
 let ui_view2d_text_input_hover: bool = false;
 let ui_view2d_uvmap_show: bool = false;
 let ui_view2d_tex_type: paint_tex_t = paint_tex_t.BASE;
@@ -22,29 +22,29 @@ let ui_view2d_pan_y: f32 = 0.0;
 let ui_view2d_pan_scale: f32 = 1.0;
 let ui_view2d_tiled_show: bool = false;
 let ui_view2d_controls_down: bool = false;
-let _ui_view2d_render_tex: iron_g5_texture_t;
+let _ui_view2d_render_tex: iron_gpu_texture_t;
 let _ui_view2d_render_x: f32;
 let _ui_view2d_render_y: f32;
 let _ui_view2d_render_tw: f32;
 let _ui_view2d_render_th: f32;
-let ui_view2d_grid: iron_g5_texture_t = null;
+let ui_view2d_grid: iron_gpu_texture_t = null;
 let ui_view2d_grid_redraw: bool = true;
 
 function ui_view2d_init() {
 	///if (is_paint || is_sculpt)
-	ui_view2d_pipe = iron_g4_create_pipeline();
+	ui_view2d_pipe = gpu_create_pipeline();
 	ui_view2d_pipe.vertex_shader = sys_get_shader("layer_view.vert");
 	ui_view2d_pipe.fragment_shader = sys_get_shader("layer_view.frag");
-	let vs: iron_g5_vertex_structure_t = g4_vertex_struct_create();
-	g4_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
-	g4_vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
-	g4_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
+	let vs: iron_gpu_vertex_structure_t = gpu_vertex_struct_create();
+	gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
+	gpu_vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
+	gpu_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
 	ui_view2d_pipe.input_layout = vs;
 	ui_view2d_pipe.blend_source = blend_factor_t.BLEND_ONE;
 	ui_view2d_pipe.blend_destination = blend_factor_t.BLEND_ZERO;
 	ARRAY_ACCESS(ui_view2d_pipe.color_write_mask_alpha, 0) = false;
-	iron_g4_compile_pipeline(ui_view2d_pipe);
-	ui_view2d_channel_loc = iron_g4_get_constant_location(ui_view2d_pipe, "channel");
+	gpu_compile_pipeline(ui_view2d_pipe);
+	ui_view2d_channel_loc = gpu_get_constant_location(ui_view2d_pipe, "channel");
 	///end
 
 	let scale: f32 = config_raw.window_scale;
@@ -139,7 +139,7 @@ function ui_view2d_render() {
 		draw_image(ui_view2d_grid, x, y);
 
 		// Texture
-		let tex: iron_g5_texture_t = null;
+		let tex: iron_gpu_texture_t = null;
 
 		let l: slot_layer_t = context_raw.layer;
 		let channel: i32 = 0;
@@ -177,14 +177,14 @@ function ui_view2d_render() {
 			}
 
 			if (ui_view2d_layer_mode == view_2d_layer_mode_t.VISIBLE) {
-				let current: iron_g5_texture_t = _draw_current;
+				let current: iron_gpu_texture_t = _draw_current;
 				let g2_in_use: bool = _draw_in_use;
 				if (g2_in_use) draw_end();
 				layer = layers_flatten();
 				if (g2_in_use) draw_begin(current);
 			}
 			else if (slot_layer_is_group(layer)) {
-				let current: iron_g5_texture_t = _draw_current;
+				let current: iron_gpu_texture_t = _draw_current;
 				let g2_in_use: bool = _draw_in_use;
 				if (g2_in_use) draw_end();
 				layer = layers_flatten(false, slot_layer_get_children(layer));
@@ -223,7 +223,7 @@ function ui_view2d_render() {
 				if (!context_raw.texture_filter) {
 					draw_set_bilinear_filter(false);
 				}
-				_iron_g4_set_int(ui_view2d_channel_loc, channel);
+				_gpu_set_int(ui_view2d_channel_loc, channel);
 			}
 			///end
 
@@ -258,11 +258,11 @@ function ui_view2d_render() {
 
 				app_notify_on_next_frame(function () {
 					let rt: render_target_t = map_get(render_path_render_targets, "texpaint_picker");
-					let texpaint_picker: iron_g5_texture_t = rt._image;
+					let texpaint_picker: iron_gpu_texture_t = rt._image;
 					draw_begin(texpaint_picker);
 					draw_scaled_image(_ui_view2d_render_tex, -_ui_view2d_render_x, -_ui_view2d_render_y, _ui_view2d_render_tw, _ui_view2d_render_th);
 					draw_end();
-					let a: buffer_t = iron_g4_get_texture_pixels(texpaint_picker);
+					let a: buffer_t = gpu_get_texture_pixels(texpaint_picker);
 					///if (arm_metal || arm_vulkan)
 					let i0: i32 = 2;
 					let i1: i32 = 1;
@@ -410,7 +410,7 @@ function ui_view2d_render() {
 		// Picked position
 		///if (is_paint || is_sculpt)
 		if (context_raw.tool == workspace_tool_t.PICKER && (ui_view2d_type == view_2d_type_t.LAYER || ui_view2d_type == view_2d_type_t.ASSET)) {
-			let cursor_img: iron_g5_texture_t = resource_get("cursor.k");
+			let cursor_img: iron_gpu_texture_t = resource_get("cursor.k");
 			let hsize: f32 = 16 * ui_SCALE(ui_view2d_ui);
 			let size: f32 = hsize * 2;
 			draw_scaled_image(cursor_img, tx + tw * context_raw.uvx_picked - hsize, ty + th * context_raw.uvy_picked - hsize, size, size);

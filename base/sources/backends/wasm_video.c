@@ -18,7 +18,7 @@ int iron_video_height(iron_video_t *video) {
 	return 256;
 }
 
-iron_g5_texture_t *iron_video_current_image(iron_video_t *video) {
+iron_gpu_texture_t *iron_video_current_image(iron_video_t *video) {
 	return NULL;
 }
 

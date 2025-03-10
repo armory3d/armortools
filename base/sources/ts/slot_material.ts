@@ -2,8 +2,8 @@
 type slot_material_t = {
 	nodes?: ui_nodes_t;
 	canvas?: ui_node_canvas_t;
-	image?: iron_g5_texture_t;
-	image_icon?: iron_g5_texture_t;
+	image?: iron_gpu_texture_t;
+	image_icon?: iron_gpu_texture_t;
 	preview_ready?: bool;
 	data?: material_data_t;
 	id?: i32;
@@ -45,8 +45,8 @@ function slot_material_create(m: material_data_t = null, c: ui_node_canvas_t = n
 
 	let w: i32 = util_render_material_preview_size;
 	let w_icon: i32 = 50;
-	raw.image = iron_g4_create_render_target(w, w);
-	raw.image_icon = iron_g4_create_render_target(w_icon, w_icon);
+	raw.image = gpu_create_render_target(w, w);
+	raw.image_icon = gpu_create_render_target(w_icon, w_icon);
 
 	if (c == null) {
 		if (slot_material_default_canvas == null) { // Synchronous

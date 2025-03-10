@@ -13,7 +13,7 @@ function image_texture_node_create(raw: ui_node_t, args: f32_array_t): image_tex
 	return n;
 }
 
-function image_texture_node_get_as_image(self: image_texture_node_t, from: i32): iron_g5_texture_t {
+function image_texture_node_get_as_image(self: image_texture_node_t, from: i32): iron_gpu_texture_t {
 	if (project_assets.length == 0) {
 		return null;
 	}
@@ -22,8 +22,8 @@ function image_texture_node_get_as_image(self: image_texture_node_t, from: i32):
 	return project_get_image(asset);
 }
 
-function image_texture_node_get_cached_image(self: image_texture_node_t): iron_g5_texture_t {
-	let image: iron_g5_texture_t = self.base.get_as_image(self, 0);
+function image_texture_node_get_cached_image(self: image_texture_node_t): iron_gpu_texture_t {
+	let image: iron_gpu_texture_t = self.base.get_as_image(self, 0);
 	return image;
 }
 

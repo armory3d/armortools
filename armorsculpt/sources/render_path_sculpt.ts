@@ -29,13 +29,13 @@ function render_path_sculpt_commands() {
     mesh_object_get_contexts(project_paint_objects[0], "paint", mats, material_contexts, shader_contexts);
 
     let cc_context: shader_context_t = shader_contexts[0];
-    iron_g5_set_pipeline(cc_context._.pipe_state);
+    iron_gpu_set_pipeline(cc_context._.pipe_state);
     uniforms_set_context_consts(cc_context,_render_path_bind_params);
     uniforms_set_obj_consts(cc_context, project_paint_objects[0].base);
     uniforms_set_material_consts(cc_context, material_contexts[0]);
-    iron_g4_set_vertex_buffer(const_data_screen_aligned_vb);
-    iron_g4_set_index_buffer(const_data_screen_aligned_ib);
-    iron_g4_draw_indexed_vertices();
+    gpu_set_vertex_buffer(const_data_screen_aligned_vb);
+    gpu_set_index_buffer(const_data_screen_aligned_ib);
+    gpu_draw_indexed_vertices();
     render_path_end();
 }
 

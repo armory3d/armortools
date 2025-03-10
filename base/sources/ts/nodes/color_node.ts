@@ -2,7 +2,7 @@
 type color_node_t = {
 	base?: logic_node_t;
 	value?: vec4_t;
-	image?: iron_g5_texture_t;
+	image?: iron_gpu_texture_t;
 };
 
 function color_node_create(raw: ui_node_t, args: f32_array_t): color_node_t {
@@ -29,7 +29,7 @@ function color_node_get(self: color_node_t, from: i32): logic_node_value_t {
 	}
 }
 
-function color_node_get_as_image(self: color_node_t, from: i32): iron_g5_texture_t {
+function color_node_get_as_image(self: color_node_t, from: i32): iron_gpu_texture_t {
 	if (self.base.inputs.length > 0) {
 		return logic_node_input_get_as_image(self.base.inputs[0]);
 	}
@@ -41,7 +41,7 @@ function color_node_get_as_image(self: color_node_t, from: i32): iron_g5_texture
 	buffer_set_f32(b, 4, self.value.y);
 	buffer_set_f32(b, 8, self.value.z);
 	buffer_set_f32(b, 12, self.value.w);
-	self.image = iron_g4_create_texture_from_bytes(b, 1, 1, tex_format_t.RGBA128);
+	self.image = gpu_create_texture_from_bytes(b, 1, 1, tex_format_t.RGBA128);
 	return self.image;
 }
 

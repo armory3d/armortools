@@ -23,7 +23,7 @@ let minimap_w: i32 = 150;
 let minimap_h: i32 = 0;
 let minimap_box_h: i32 = 0;
 let minimap_scrolling: bool = false;
-let minimap: iron_g5_texture_t = null;
+let minimap: iron_gpu_texture_t = null;
 let window_header_h: i32 = 0;
 
 function drop_files(path: string) {
@@ -317,11 +317,11 @@ function draw_minimap() {
 		if (minimap != null) {
 			iron_unload_image(minimap);
 		}
-		minimap = iron_g4_create_render_target(minimap_w, minimap_h);
+		minimap = gpu_create_render_target(minimap_w, minimap_h);
 	}
 
 	draw_begin(minimap);
-	iron_g5_clear(theme.SEPARATOR_COL);
+	iron_gpu_clear(theme.SEPARATOR_COL);
 	draw_set_color(0xff333333);
 	let lines: string[] = string_split(storage.text, "\n");
 	let minimap_full_h: i32 = lines.length * 2;

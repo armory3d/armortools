@@ -140,10 +140,10 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 				render_path_draw_meshes("paint");
 				let picker0: render_target_t = map_get(render_path_render_targets, "texpaint_posnortex_picker0");
 				let picker1: render_target_t = map_get(render_path_render_targets, "texpaint_posnortex_picker1");
-				let texpaint_posnortex_picker0: iron_g5_texture_t = picker0._image;
-				let texpaint_posnortex_picker1: iron_g5_texture_t = picker1._image;
-				let a: buffer_t = iron_g4_get_texture_pixels(texpaint_posnortex_picker0);
-				let b: buffer_t = iron_g4_get_texture_pixels(texpaint_posnortex_picker1);
+				let texpaint_posnortex_picker0: iron_gpu_texture_t = picker0._image;
+				let texpaint_posnortex_picker1: iron_gpu_texture_t = picker1._image;
+				let a: buffer_t = gpu_get_texture_pixels(texpaint_posnortex_picker0);
+				let b: buffer_t = gpu_get_texture_pixels(texpaint_posnortex_picker1);
 				context_raw.posx_picked = buffer_get_f32(a, 0);
 				context_raw.posy_picked = buffer_get_f32(a, 4);
 				context_raw.posz_picked = buffer_get_f32(a, 8);
@@ -177,10 +177,10 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 				let texpaint_nor_picker: render_target_t = map_get(render_path_render_targets, "texpaint_nor_picker");
 				let texpaint_pack_picker: render_target_t = map_get(render_path_render_targets, "texpaint_pack_picker");
 				let texpaint_uv_picker: render_target_t = map_get(render_path_render_targets, "texpaint_uv_picker");
-				let a: buffer_t = iron_g4_get_texture_pixels(texpaint_picker._image);
-				let b: buffer_t = iron_g4_get_texture_pixels(texpaint_nor_picker._image);
-				let c: buffer_t = iron_g4_get_texture_pixels(texpaint_pack_picker._image);
-				let d: buffer_t = iron_g4_get_texture_pixels(texpaint_uv_picker._image);
+				let a: buffer_t = gpu_get_texture_pixels(texpaint_picker._image);
+				let b: buffer_t = gpu_get_texture_pixels(texpaint_nor_picker._image);
+				let c: buffer_t = gpu_get_texture_pixels(texpaint_pack_picker._image);
+				let d: buffer_t = gpu_get_texture_pixels(texpaint_uv_picker._image);
 
 				if (context_raw.color_picker_callback != null) {
 					context_raw.color_picker_callback(context_raw.picked_color);
@@ -439,20 +439,20 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	let geom: mesh_data_t = plane.data;
 
 	render_path_set_target("");
-	iron_g5_set_pipeline(pipes_cursor);
+	iron_gpu_set_pipeline(pipes_cursor);
 	let rt: render_target_t = map_get(render_path_render_targets, "gbuffer0");
-	let gbuffer0: iron_g5_texture_t = rt._image;
-	iron_g4_set_texture_depth(pipes_cursor_gbufferd, gbuffer0);
-	_iron_g4_set_float2(pipes_cursor_mouse, mx, my);
-	_iron_g4_set_float2(pipes_cursor_tex_step, 1 / gbuffer0.width, 1 / gbuffer0.height);
-	_iron_g4_set_float(pipes_cursor_radius, radius);
+	let gbuffer0: iron_gpu_texture_t = rt._image;
+	gpu_set_texture_depth(pipes_cursor_gbufferd, gbuffer0);
+	_gpu_set_float2(pipes_cursor_mouse, mx, my);
+	_gpu_set_float2(pipes_cursor_tex_step, 1 / gbuffer0.width, 1 / gbuffer0.height);
+	_gpu_set_float(pipes_cursor_radius, radius);
 	let right: vec4_t = vec4_norm(camera_object_right_world(scene_camera));
-	_iron_g4_set_float3(pipes_cursor_camera_right, right.x, right.y, right.z);
-	_iron_g4_set_float3(pipes_cursor_tint, tint_r, tint_g, tint_b);
-	_iron_g4_set_matrix4(pipes_cursor_vp, scene_camera.vp);
+	_gpu_set_float3(pipes_cursor_camera_right, right.x, right.y, right.z);
+	_gpu_set_float3(pipes_cursor_tint, tint_r, tint_g, tint_b);
+	_gpu_set_matrix4(pipes_cursor_vp, scene_camera.vp);
 	let help_mat: mat4_t = mat4_identity();
 	help_mat = mat4_inv(scene_camera.vp);
-	_iron_g4_set_matrix4(pipes_cursor_inv_vp, help_mat);
+	_gpu_set_matrix4(pipes_cursor_inv_vp, help_mat);
 	///if (arm_metal || arm_vulkan)
 	let vs: vertex_element_t[] = [
 		{
@@ -460,14 +460,14 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 			data: "short2norm"
 		}
 	];
-	iron_g4_set_vertex_buffer(mesh_data_get(geom, vs));
+	gpu_set_vertex_buffer(mesh_data_get(geom, vs));
 	///else
-	iron_g4_set_vertex_buffer(geom._.vertex_buffer);
+	gpu_set_vertex_buffer(geom._.vertex_buffer);
 	///end
-	iron_g4_set_index_buffer(geom._.index_buffers[0]);
-	iron_g4_draw_indexed_vertices();
+	gpu_set_index_buffer(geom._.index_buffers[0]);
+	gpu_draw_indexed_vertices();
 
-	iron_g4_disable_scissor();
+	gpu_disable_scissor();
 	render_path_end();
 }
 

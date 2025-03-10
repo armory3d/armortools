@@ -5,7 +5,7 @@ let base_is_resizing: bool = false;
 let base_drag_asset: asset_t = null;
 let base_drag_swatch: swatch_color_t = null;
 let base_drag_file: string = null;
-let base_drag_file_icon: iron_g5_texture_t = null;
+let base_drag_file_icon: iron_gpu_texture_t = null;
 let base_drag_tint: i32 = 0xffffffff;
 let base_drag_size: i32 = -1;
 let base_drag_rect: rect_t = null;
@@ -16,8 +16,8 @@ let base_drop_x: f32 = 0.0;
 let base_drop_y: f32 = 0.0;
 let base_font: draw_font_t = null;
 let base_theme: ui_theme_t;
-let base_color_wheel: iron_g5_texture_t;
-let base_color_wheel_gradient: iron_g5_texture_t;
+let base_color_wheel: iron_gpu_texture_t;
+let base_color_wheel_gradient: iron_gpu_texture_t;
 let base_ui_box: ui_t;
 let base_ui_menu: ui_t;
 let base_default_element_w: i32 = 100;
@@ -70,8 +70,8 @@ function base_init() {
 	iron_set_save_and_quit_callback(base_save_and_quit_callback);
 
 	let font: draw_font_t = data_get_font("font.ttf");
-	let image_color_wheel: iron_g5_texture_t = data_get_image("color_wheel.k");
-	let image_color_wheel_gradient: iron_g5_texture_t = data_get_image("color_wheel_gradient.k");
+	let image_color_wheel: iron_gpu_texture_t = data_get_image("color_wheel.k");
+	let image_color_wheel_gradient: iron_gpu_texture_t = data_get_image("color_wheel_gradient.k");
 
 	base_font = font;
 	config_load_theme(config_raw.theme, false);
@@ -366,7 +366,7 @@ function base_update() {
 			}
 			else if (context_in_viewport()) {
 				if (ends_with(to_lower_case(base_drag_asset.file), ".hdr")) {
-					let image: iron_g5_texture_t = project_get_image(base_drag_asset);
+					let image: iron_gpu_texture_t = project_get_image(base_drag_asset);
 					import_envmap_run(base_drag_asset.file, image);
 				}
 			}
@@ -503,14 +503,14 @@ function base_handle_drop_paths() {
 }
 
 function base_get_drag_background(): rect_t {
-	let icons: iron_g5_texture_t = resource_get("icons.k");
+	let icons: iron_gpu_texture_t = resource_get("icons.k");
 	if (base_drag_layer != null && !slot_layer_is_group(base_drag_layer) && base_drag_layer.fill_layer == null) {
 		return resource_tile50(icons, 4, 1);
 	}
 	return null;
 }
 
-function base_get_drag_image(): iron_g5_texture_t {
+function base_get_drag_image(): iron_gpu_texture_t {
 	base_drag_tint = 0xffffffff;
 	base_drag_size = -1;
 	base_drag_rect = null;
@@ -526,7 +526,7 @@ function base_get_drag_image(): iron_g5_texture_t {
 		if (base_drag_file_icon != null) {
 			return base_drag_file_icon;
 		}
-		let icons: iron_g5_texture_t = resource_get("icons.k");
+		let icons: iron_gpu_texture_t = resource_get("icons.k");
 		base_drag_rect = string_index_of(base_drag_file, ".") > 0 ? resource_tile50(icons, 3, 1) : resource_tile50(icons, 2, 1);
 		base_drag_tint = ui_base_ui.ops.theme.HIGHLIGHT_COL;
 		return icons;
@@ -536,7 +536,7 @@ function base_get_drag_image(): iron_g5_texture_t {
 		return base_drag_material.image_icon;
 	}
 	if (base_drag_layer != null && slot_layer_is_group(base_drag_layer)) {
-		let icons: iron_g5_texture_t = resource_get("icons.k");
+		let icons: iron_gpu_texture_t = resource_get("icons.k");
 		let folder_closed: rect_t = resource_tile50(icons, 2, 1);
 		let folder_open: rect_t = resource_tile50(icons, 8, 1);
 		base_drag_rect = base_drag_layer.show_panel ? folder_open : folder_closed;
@@ -584,7 +584,7 @@ function base_render() {
 
 	if (base_is_dragging) {
 		iron_set_mouse_cursor(1); // Hand
-		let img: iron_g5_texture_t = base_get_drag_image();
+		let img: iron_gpu_texture_t = base_get_drag_image();
 		let scale_factor: f32 = ui_SCALE(ui_base_ui);
 		let size: f32 = (base_drag_size == -1 ? 50 : base_drag_size) * scale_factor;
 		let ratio: f32 = size / img.width;

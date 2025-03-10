@@ -3,8 +3,8 @@ type logic_node_t = {
 	inputs?: logic_node_input_t[];
 	outputs?: logic_node_t[][];
 	get?: (self: any, from: i32)=>logic_node_value_t;
-	get_as_image?: (self: any, from: i32)=>iron_g5_texture_t;
-	get_cached_image?: (self: any)=>iron_g5_texture_t;
+	get_as_image?: (self: any, from: i32)=>iron_gpu_texture_t;
+	get_cached_image?: (self: any)=>iron_gpu_texture_t;
 	set?: (self: any, value: f32_array_t)=>void;
 	ext?: logic_node_ext_t;
 };
@@ -47,14 +47,14 @@ function logic_node_get(self: logic_node_t, from: i32): any {
 	return null;
 }
 
-function logic_node_get_as_image(self: logic_node_t, from: i32): iron_g5_texture_t {
+function logic_node_get_as_image(self: logic_node_t, from: i32): iron_gpu_texture_t {
 	if (self.get_as_image != null) {
 		return self.get_as_image(self.ext, from);
 	}
 	return null;
 }
 
-function logic_node_get_cached_image(self: logic_node_t): iron_g5_texture_t {
+function logic_node_get_cached_image(self: logic_node_t): iron_gpu_texture_t {
 	if (self.get_cached_image != null) {
 		return self.get_cached_image(self.ext);
 	}
@@ -78,7 +78,7 @@ function logic_node_input_get(self: logic_node_input_t): logic_node_value_t {
 	return logic_node_get(self.node.base, self.from);
 }
 
-function logic_node_input_get_as_image(self: logic_node_input_t): iron_g5_texture_t {
+function logic_node_input_get_as_image(self: logic_node_input_t): iron_gpu_texture_t {
 	return logic_node_get_as_image(self.node.base, self.from);
 }
 

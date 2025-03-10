@@ -79,28 +79,28 @@ function material_context_create(raw: material_context_t): material_context_t {
 				continue;
 			}
 
-			let image: iron_g5_texture_t = data_get_image(tex.file, false);
+			let image: iron_gpu_texture_t = data_get_image(tex.file, false);
 			array_push(raw._.textures, image);
 
 			// Set mipmaps
 			if (tex.mipmaps != null) {
-				let mipmaps: iron_g5_texture_t[] = [];
+				let mipmaps: iron_gpu_texture_t[] = [];
 				while (mipmaps.length < tex.mipmaps.length) {
 					array_push(mipmaps, null);
 				}
 
 				for (let j: i32 = 0; j < tex.mipmaps.length; ++j) {
 					let name: string = tex.mipmaps[j];
-					let mipimg: iron_g5_texture_t = data_get_image(name);
+					let mipimg: iron_gpu_texture_t = data_get_image(name);
 					mipmaps[j] = mipimg;
 				}
 
-				iron_g4_set_mipmaps(image, mipmaps);
+				gpu_set_mipmaps(image, mipmaps);
 				tex.mipmaps = null;
 				tex.generate_mipmaps = false;
 			}
 			else if (tex.generate_mipmaps == true && image != null) {
-				iron_g5_texture_generate_mipmaps(image, 1000);
+				iron_gpu_texture_generate_mipmaps(image, 1000);
 				tex.mipmaps = null;
 				tex.generate_mipmaps = false;
 			}

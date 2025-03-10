@@ -231,7 +231,7 @@ function ui_menubar_icon_button(ui: ui_t, i: i32, j: i32): bool {
 	let col: u32 = ui.ops.theme.WINDOW_BG_COL;
 	let light: bool = col > 0xff666666 ;
 	let icon_accent: i32 = light ? 0xff666666 : 0xffaaaaaa;
-	let img: iron_g5_texture_t = resource_get("icons.k");
+	let img: iron_gpu_texture_t = resource_get("icons.k");
 	let rect: rect_t = resource_tile50(img, i, j);
 	return _ui_image(img, icon_accent, -1.0, rect.x, rect.y, rect.w, rect.h) == ui_state_t.RELEASED;
 }

@@ -1,8 +1,8 @@
 
 function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t[] = null): slot_layer_t {
-	let texpaint: iron_g5_texture_t = context_raw.brush_output_node_inst.texpaint;
-	let texpaint_nor: iron_g5_texture_t = context_raw.brush_output_node_inst.texpaint_nor;
-	let texpaint_pack: iron_g5_texture_t = context_raw.brush_output_node_inst.texpaint_pack;
+	let texpaint: iron_gpu_texture_t = context_raw.brush_output_node_inst.texpaint;
+	let texpaint_nor: iron_gpu_texture_t = context_raw.brush_output_node_inst.texpaint_nor;
+	let texpaint_pack: iron_gpu_texture_t = context_raw.brush_output_node_inst.texpaint_pack;
 
 	let nodes: ui_nodes_t = ui_nodes_get_nodes();
 	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
@@ -25,15 +25,15 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 function layers_ext_on_resized() {
 	iron_unload_image(context_raw.brush_output_node_inst.texpaint);
 	let texpaint_rt: render_target_t = map_get(render_path_render_targets, "texpaint");
-	context_raw.brush_output_node_inst.texpaint = texpaint_rt._image = iron_g4_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
+	context_raw.brush_output_node_inst.texpaint = texpaint_rt._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
 
 	iron_unload_image(context_raw.brush_output_node_inst.texpaint_nor);
 	let texpaint_nor_rt: render_target_t = map_get(render_path_render_targets, "texpaint_nor");
-	context_raw.brush_output_node_inst.texpaint_nor = texpaint_nor_rt._image = iron_g4_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
+	context_raw.brush_output_node_inst.texpaint_nor = texpaint_nor_rt._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
 
 	iron_unload_image(context_raw.brush_output_node_inst.texpaint_pack);
 	let texpaint_pack_rt: render_target_t = map_get(render_path_render_targets, "texpaint_pack");
-	context_raw.brush_output_node_inst.texpaint_pack = texpaint_pack_rt._image = iron_g4_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
+	context_raw.brush_output_node_inst.texpaint_pack = texpaint_pack_rt._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
 
 	if (inpaint_node_image != null) {
 		iron_unload_image(inpaint_node_image);
@@ -45,7 +45,7 @@ function layers_ext_on_resized() {
 
 	if (photo_to_pbr_node_images != null) {
 		for (let i: i32 = 0; i < photo_to_pbr_node_images.length; ++i) {
-			let image: iron_g5_texture_t = photo_to_pbr_node_images[i];
+			let image: iron_gpu_texture_t = photo_to_pbr_node_images[i];
 			iron_unload_image(image);
 		}
 		photo_to_pbr_node_images = null;
@@ -60,11 +60,11 @@ function layers_ext_on_resized() {
 
 	let texpaint_blend0_rt: render_target_t = map_get(render_path_render_targets, "texpaint_blend0");
 	iron_unload_image(texpaint_blend0_rt._image);
-	texpaint_blend0_rt._image = iron_g4_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
+	texpaint_blend0_rt._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 
 	let texpaint_blend1_rt: render_target_t = map_get(render_path_render_targets, "texpaint_blend1");
 	iron_unload_image(texpaint_blend1_rt._image);
-	texpaint_blend1_rt._image = iron_g4_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
+	texpaint_blend1_rt._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 
 	if (map_get(render_path_render_targets, "texpaint_node") != null) {
 		map_delete(render_path_render_targets, "texpaint_node");

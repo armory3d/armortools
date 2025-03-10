@@ -1,6 +1,6 @@
 
 type slot_font_t = {
-	image?: iron_g5_texture_t; // 200px
+	image?: iron_gpu_texture_t; // 200px
 	preview_ready?: bool;
 	id?: i32;
 	font?: draw_font_t;

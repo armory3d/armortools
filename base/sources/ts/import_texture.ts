@@ -1,7 +1,7 @@
 
 type import_texture_data_t = {
 	path: string;
-	image: iron_g5_texture_t;
+	image: iron_gpu_texture_t;
 };
 
 function import_texture_run(path: string, hdr_as_envmap: bool = true) {
@@ -18,7 +18,7 @@ function import_texture_run(path: string, hdr_as_envmap: bool = true) {
 		if (a.file == path) {
 			// Set as envmap
 			if (hdr_as_envmap && ends_with(to_lower_case(path), ".hdr")) {
-				let image: iron_g5_texture_t = data_get_image(path);
+				let image: iron_gpu_texture_t = data_get_image(path);
 				let itd: import_texture_data_t = { path: path, image: image };
 				app_notify_on_next_frame(function (itd: import_texture_data_t) { // Make sure file browser process did finish
 					import_envmap_run(itd.path, itd.image);
@@ -30,9 +30,9 @@ function import_texture_run(path: string, hdr_as_envmap: bool = true) {
 	}
 
 	let ext: string = substring(path, string_last_index_of(path, ".") + 1, path.length);
-	let importer: any = map_get(path_texture_importers, ext); // JSValue -> (s: string)=>iron_g5_texture_t
+	let importer: any = map_get(path_texture_importers, ext); // JSValue -> (s: string)=>iron_gpu_texture_t
 	let cached: bool = map_get(data_cached_images, path) != null; // Already loaded or pink texture for missing file
-	let image: iron_g5_texture_t;
+	let image: iron_gpu_texture_t;
 	if (importer == null || cached) {
 		image = import_texture_default_importer(path);
 	}
@@ -62,6 +62,6 @@ function import_texture_run(path: string, hdr_as_envmap: bool = true) {
 	}
 }
 
-function import_texture_default_importer(path: string): iron_g5_texture_t {
+function import_texture_default_importer(path: string): iron_gpu_texture_t {
 	return data_get_image(path);
 }

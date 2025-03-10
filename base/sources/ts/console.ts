@@ -19,7 +19,7 @@ function console_draw_toast(s: string) {
 
 function _console_toast_render(s: string) {
 	console_draw_toast(s);
-	iron_g4_swap_buffers();
+	gpu_swap_buffers();
 	app_remove_render_2d(_console_toast_render);
 }
 
@@ -27,7 +27,7 @@ function console_toast(s: string) {
 	// Show a popup message
 	app_notify_on_render_2d(_console_toast_render, s);
 	console_trace(s);
-	iron_g4_swap_buffers();
+	gpu_swap_buffers();
 }
 
 function console_draw_progress() {
@@ -53,7 +53,7 @@ function console_progress(s: string) {
 	draw_end();
 	app_render();
 	draw_begin();
-	iron_g4_swap_buffers();
+	gpu_swap_buffers();
 	///end
 }
 

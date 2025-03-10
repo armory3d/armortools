@@ -15,7 +15,7 @@ function world_data_parse(name: string, id: string): world_data_t {
 	let irr: f32_array_t = world_data_set_irradiance(raw);
 	raw._.irradiance = irr;
 	if (raw.radiance != null) {
-		let rad: iron_g5_texture_t = data_get_image(raw.radiance);
+		let rad: iron_gpu_texture_t = data_get_image(raw.radiance);
 		raw._.radiance = rad;
 		while (raw._.radiance_mipmaps.length < raw.radiance_mipmaps) {
 			array_push(raw._.radiance_mipmaps, null);
@@ -25,10 +25,10 @@ function world_data_parse(name: string, id: string): world_data_t {
 		let base: string = substring(raw.radiance, 0, dot);
 
 		for (let i: i32 = 0; i < raw.radiance_mipmaps; ++i) {
-			let mipimg: iron_g5_texture_t = data_get_image(base + "_" + i + ext, true);
+			let mipimg: iron_gpu_texture_t = data_get_image(base + "_" + i + ext, true);
 			raw._.radiance_mipmaps[i] = mipimg;
 		}
-		iron_g4_set_mipmaps(raw._.radiance, raw._.radiance_mipmaps);
+		gpu_set_mipmaps(raw._.radiance, raw._.radiance_mipmaps);
 	}
 
 	return raw;
@@ -73,7 +73,7 @@ function world_data_set_irradiance(raw: world_data_t): f32_array_t {
 
 function world_data_load_envmap(raw: world_data_t) {
 	if (raw.envmap != null) {
-		let image: iron_g5_texture_t = data_get_image(raw.envmap);
+		let image: iron_gpu_texture_t = data_get_image(raw.envmap);
 		raw._.envmap = image;
 	}
 }

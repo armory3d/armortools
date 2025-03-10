@@ -7,7 +7,7 @@ let project_asset_id: i32 = 0;
 let project_mesh_assets: string[] = [];
 let project_material_groups: node_group_t[] = [];
 let project_paint_objects: mesh_object_t[] = null;
-let project_asset_map: map_t<i32, any> = map_create(); // iron_g5_texture_t | font_t
+let project_asset_map: map_t<i32, any> = map_create(); // iron_gpu_texture_t | font_t
 let project_mesh_list: string[] = null;
 
 let project_materials: slot_material_t[] = null;
@@ -45,7 +45,7 @@ function project_open() {
 			return;
 		}
 
-		let current: iron_g5_texture_t = _draw_current;
+		let current: iron_gpu_texture_t = _draw_current;
 		let g2_in_use: bool = _draw_in_use;
 		if (g2_in_use) draw_end();
 
@@ -226,7 +226,7 @@ function project_new(reset_layers: bool = true) {
 	let n: string = context_raw.project_type == project_model_t.ROUNDED_CUBE ? ".Cube" : "Tessellated";
 	let md: mesh_data_t = data_get_mesh("Scene", n);
 
-	let current: iron_g5_texture_t = _draw_current;
+	let current: iron_gpu_texture_t = _draw_current;
 	let g2_in_use: bool = _draw_in_use;
 	if (g2_in_use) draw_end();
 
@@ -640,7 +640,7 @@ function project_reimport_texture(asset: asset_t) {
 	}
 }
 
-function project_get_image(asset: asset_t): iron_g5_texture_t {
+function project_get_image(asset: asset_t): iron_gpu_texture_t {
 	return asset != null ? map_get(project_asset_map, asset.id) : null;
 }
 

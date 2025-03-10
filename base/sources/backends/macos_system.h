@@ -8,7 +8,7 @@
 #include <IOKit/hid/IOHIDKeys.h>
 #include <IOKit/hid/IOHIDManager.h>
 
-struct iron_g5_texture;
+struct iron_gpu_texture;
 
 @interface BasicOpenGLView : MTKView {
 @private

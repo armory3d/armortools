@@ -340,7 +340,7 @@ int iron_window_display() {
 }
 
 void iron_window_destroy() {
-	iron_g5_internal_destroy_window();
+	iron_gpu_internal_destroy_window();
 
 	xlib.XFlush(x11_ctx.display);
 	struct iron_x11_window *window = &x11_ctx.windows[0];
@@ -424,7 +424,7 @@ void iron_window_create(iron_window_options_t *win) {
 		xlib.XSelectExtensionEvent(x11_ctx.display, window->window, &x11_ctx.eraser.motionClass, 1);
 	}
 
-	iron_g4_internal_init_window(win->depth_bits, win->vsync);
+	gpu_internal_init_window(win->depth_bits, win->vsync);
 }
 
 static struct {
@@ -1443,7 +1443,7 @@ void iron_init(const char *name, int width, int height, iron_window_options_t *w
 
 	iron_set_app_name(name);
 
-	iron_g5_internal_init();
+	iron_gpu_internal_init();
 
 	iron_window_options_t defaultWin;
 	if (win == NULL) {
@@ -1460,7 +1460,7 @@ void iron_init(const char *name, int width, int height, iron_window_options_t *w
 }
 
 void iron_internal_shutdown() {
-	iron_g5_internal_destroy();
+	iron_gpu_internal_destroy();
 	iron_linux_closeHIDGamepads();
 	free(clipboardString);
 	xlib.XCloseDisplay(x11_ctx.display);

@@ -60,7 +60,7 @@ function tab_fonts_draw(htab: ui_handle_t) {
 					}
 					continue;
 				}
-				let img: iron_g5_texture_t = project_fonts[i].image;
+				let img: iron_gpu_texture_t = project_fonts[i].image;
 
 				if (context_raw.font == project_fonts[i]) {
 					// ui_fill(1, -2, img.width + 3, img.height + 3, ui.ops.theme.HIGHLIGHT_COL); // TODO
@@ -80,7 +80,7 @@ function tab_fonts_draw(htab: ui_handle_t) {
 				let state: ui_state_t = ui_state_t.IDLE;
 				if (project_fonts[i].preview_ready) {
 					// draw_set_pipeline(pipe); // L8
-					// _iron_g4_set_int(channel_location, 1);
+					// _gpu_set_int(channel_location, 1);
 					state = _ui_image(img);
 					// draw_set_pipeline(null);
 				}

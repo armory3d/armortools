@@ -228,13 +228,13 @@
 // 			CGSize size = CVImageBufferGetDisplaySize(pixelBuffer);
 // 			video->impl.myWidth = size.width;
 // 			video->impl.myHeight = size.height;
-// 			iron_g5_texture_init(&video->impl.image, iron_video_width(video), iron_video_height(video), IRON_IMAGE_FORMAT_BGRA32);
+// 			iron_gpu_texture_init(&video->impl.image, iron_video_width(video), iron_video_height(video), IRON_IMAGE_FORMAT_BGRA32);
 // 			video->impl.image_initialized = true;
 // 		}
 
 // 		if (pixelBuffer != NULL) {
 // 			CVPixelBufferLockBaseAddress(pixelBuffer, 0);
-// 			// iron_g4_texture_upload(&video->impl.image, (uint8_t *)CVPixelBufferGetBaseAddress(pixelBuffer), (int)(CVPixelBufferGetBytesPerRow(pixelBuffer)));
+// 			// gpu_texture_upload(&video->impl.image, (uint8_t *)CVPixelBufferGetBaseAddress(pixelBuffer), (int)(CVPixelBufferGetBytesPerRow(pixelBuffer)));
 // 			CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
 // 		}
 // 		CFRelease(buffer);
@@ -283,7 +283,7 @@
 // 	return video->impl.myHeight;
 // }
 
-// iron_g5_texture_t *iron_video_current_image(iron_video_t *video) {
+// iron_gpu_texture_t *iron_video_current_image(iron_video_t *video) {
 // 	iron_video_update(video, iron_time());
 // 	return &video->impl.image;
 // }

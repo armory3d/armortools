@@ -9,7 +9,7 @@
 #include "nanosvgrast.h"
 
 #include "iron_array.h"
-void *iron_g4_create_texture_from_bytes(void *buffer, int width, int height, int format);
+void *gpu_create_texture_from_bytes(void *buffer, int width, int height, int format);
 
 void *io_svg_parse(char *buf) {
 	NSVGimage *image = nsvgParse(buf, "px", 96.0f);
@@ -24,5 +24,5 @@ void *io_svg_parse(char *buf) {
 	buffer_t *b = malloc(sizeof(buffer_t));
 	b->buffer = pixels;
 	b->length = b->capacity = w * h * 4;
-	return iron_g4_create_texture_from_bytes(b, w, h, 0);
+	return gpu_create_texture_from_bytes(b, w, h, 0);
 }

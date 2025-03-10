@@ -3,8 +3,8 @@ type variance_node_t = {
 	base?: logic_node_t;
 };
 
-let variance_node_temp: iron_g5_texture_t = null;
-let variance_node_image: iron_g5_texture_t = null;
+let variance_node_temp: iron_gpu_texture_t = null;
+let variance_node_image: iron_gpu_texture_t = null;
 let variance_node_inst: variance_node_t = null;
 let variance_node_prompt: string = "";
 
@@ -22,7 +22,7 @@ function variance_node_create(raw: ui_node_t, args: f32_array_t): variance_node_
 
 function variance_node_init() {
 	if (variance_node_temp == null) {
-		variance_node_temp = iron_g4_create_render_target(512, 512);
+		variance_node_temp = gpu_create_render_target(512, 512);
 	}
 }
 
@@ -33,16 +33,16 @@ function variance_node_button(node_id: i32) {
 	node.buttons[0].height = string_split(variance_node_prompt, "\n").length;
 }
 
-function variance_node_get_as_image(self: variance_node_t, from: i32): iron_g5_texture_t {
+function variance_node_get_as_image(self: variance_node_t, from: i32): iron_gpu_texture_t {
 	let node: float_node_t = variance_node_inst.base.inputs[1].node;
 	let strength: f32 = node.value;
 
-	let source: iron_g5_texture_t = logic_node_input_get_as_image(variance_node_inst.base.inputs[0]);
+	let source: iron_gpu_texture_t = logic_node_input_get_as_image(variance_node_inst.base.inputs[0]);
 	draw_begin(variance_node_temp);
 	draw_scaled_image(source, 0, 0, 512, 512);
 	draw_end();
 
-	let bytes_img: buffer_t = iron_g4_get_texture_pixels(variance_node_temp);
+	let bytes_img: buffer_t = gpu_get_texture_pixels(variance_node_temp);
 	let u8a: u8_array_t = bytes_img;
 	let f32a: f32_array_t = f32_array_create(3 * 512 * 512);
 	for (let i: i32 = 0; i < (512 * 512); ++i) {
@@ -83,7 +83,7 @@ function variance_node_get_as_image(self: variance_node_t, from: i32): iron_g5_t
 	return variance_node_image;
 }
 
-function variance_node_get_cached_image(self: variance_node_t): iron_g5_texture_t {
+function variance_node_get_cached_image(self: variance_node_t): iron_gpu_texture_t {
 	return variance_node_image;
 }
 

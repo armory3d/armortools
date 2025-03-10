@@ -2,7 +2,7 @@
 type vector_node_t = {
 	base?: logic_node_t;
 	value?: vec4_t;
-	image?: iron_g5_texture_t;
+	image?: iron_gpu_texture_t;
 };
 
 function vector_node_create(raw: ui_node_t, args: f32_array_t): vector_node_t {
@@ -33,7 +33,7 @@ function vector_node_get(self: vector_node_t, from: i32): logic_node_value_t {
 	return v;
 }
 
-function vector_node_get_as_image(self: vector_node_t, from: i32): iron_g5_texture_t {
+function vector_node_get_as_image(self: vector_node_t, from: i32): iron_gpu_texture_t {
 	// let x: f32 = logic_node_input_get(self.base.inputs[0]);
 	// let y: f32 = logic_node_input_get(self.base.inputs[1]);
 	// let z: f32 = logic_node_input_get(self.base.inputs[2]);
@@ -48,7 +48,7 @@ function vector_node_get_as_image(self: vector_node_t, from: i32): iron_g5_textu
 	buffer_set_f32(b, 4, n1.value);
 	buffer_set_f32(b, 8, n2.value);
 	buffer_set_f32(b, 12, 1.0);
-	self.image = iron_g4_create_texture_from_bytes(b, 1, 1, tex_format_t.RGBA128);
+	self.image = gpu_create_texture_from_bytes(b, 1, 1, tex_format_t.RGBA128);
 	return self.image;
 }
 

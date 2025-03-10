@@ -67,9 +67,9 @@ function shader_context_create(raw: shader_context_t): shader_context_t {
 
 function shader_context_compile(raw: shader_context_t): shader_context_t {
 	if (raw._.pipe_state != null) {
-		iron_g4_delete_pipeline(raw._.pipe_state);
+		gpu_delete_pipeline(raw._.pipe_state);
 	}
-	raw._.pipe_state = iron_g4_create_pipeline();
+	raw._.pipe_state = gpu_create_pipeline();
 	raw._.constants = [];
 	raw._.tex_units = [];
 
@@ -133,8 +133,8 @@ function shader_context_compile(raw: shader_context_t): shader_context_t {
 
 	// Shaders
 	if (raw.shader_from_source) {
-		raw._.pipe_state.vertex_shader = iron_g4_create_shader_from_source(raw.vertex_shader, shader_type_t.VERTEX);
-		raw._.pipe_state.fragment_shader = iron_g4_create_shader_from_source(raw.fragment_shader, shader_type_t.FRAGMENT);
+		raw._.pipe_state.vertex_shader = gpu_create_shader_from_source(raw.vertex_shader, shader_type_t.VERTEX);
+		raw._.pipe_state.fragment_shader = gpu_create_shader_from_source(raw.fragment_shader, shader_type_t.FRAGMENT);
 
 		// Shader compile error
 		if (raw._.pipe_state.vertex_shader == null || raw._.pipe_state.fragment_shader == null) {
@@ -149,9 +149,9 @@ function shader_context_compile(raw: shader_context_t): shader_context_t {
 		///else // Load shaders manually
 
 		let vs_buffer: buffer_t = data_get_blob(raw.vertex_shader + shader_data_ext());
-		raw._.pipe_state.vertex_shader = iron_g4_create_shader(vs_buffer, shader_type_t.VERTEX);
+		raw._.pipe_state.vertex_shader = gpu_create_shader(vs_buffer, shader_type_t.VERTEX);
 		let fs_buffer: buffer_t = data_get_blob(raw.fragment_shader + shader_data_ext());
-		raw._.pipe_state.fragment_shader = iron_g4_create_shader(fs_buffer, shader_type_t.FRAGMENT);
+		raw._.pipe_state.fragment_shader = gpu_create_shader(fs_buffer, shader_type_t.FRAGMENT);
 		///end
 	}
 
@@ -159,7 +159,7 @@ function shader_context_compile(raw: shader_context_t): shader_context_t {
 }
 
 function shader_context_finish_compile(raw: shader_context_t): shader_context_t {
-	iron_g4_compile_pipeline(raw._.pipe_state);
+	gpu_compile_pipeline(raw._.pipe_state);
 
 	if (raw.constants != null) {
 		for (let i: i32 = 0; i < raw.constants.length; ++i) {
@@ -201,22 +201,22 @@ function shader_context_parse_data(data: string): vertex_data_t {
 }
 
 function shader_context_parse_vertex_struct(raw: shader_context_t) {
-	raw._.structure = g4_vertex_struct_create();
+	raw._.structure = gpu_vertex_struct_create();
 
 	for (let i: i32 = 0; i < raw.vertex_elements.length; ++i) {
 		let elem: vertex_element_t = raw.vertex_elements[i];
-		g4_vertex_struct_add(raw._.structure, elem.name, shader_context_parse_data(elem.data));
+		gpu_vertex_struct_add(raw._.structure, elem.name, shader_context_parse_data(elem.data));
 	}
 }
 
 function shader_context_delete(raw: shader_context_t) {
 	if (raw._.pipe_state.fragment_shader != null) {
-		iron_g5_shader_destroy(raw._.pipe_state.fragment_shader);
+		iron_gpu_shader_destroy(raw._.pipe_state.fragment_shader);
 	}
 	if (raw._.pipe_state.vertex_shader != null) {
-		iron_g5_shader_destroy(raw._.pipe_state.vertex_shader);
+		iron_gpu_shader_destroy(raw._.pipe_state.vertex_shader);
 	}
-	iron_g4_delete_pipeline(raw._.pipe_state);
+	gpu_delete_pipeline(raw._.pipe_state);
 }
 
 function shader_context_get_compare_mode(s: string): compare_mode_t {
@@ -344,18 +344,18 @@ function shader_context_get_tex_format(s: string): tex_format_t {
 }
 
 function shader_context_add_const(raw: shader_context_t, c: shader_const_t) {
-	array_push(raw._.constants, iron_g4_get_constant_location(raw._.pipe_state, c.name));
+	array_push(raw._.constants, gpu_get_constant_location(raw._.pipe_state, c.name));
 }
 
 function shader_context_add_tex(raw: shader_context_t, tu: tex_unit_t) {
-	let unit: any = iron_g4_get_texture_unit(raw._.pipe_state, tu.name);
+	let unit: any = gpu_get_texture_unit(raw._.pipe_state, tu.name);
 	array_push(raw._.tex_units, unit);
 }
 
 function shader_context_set_tex_params(raw: shader_context_t, unit_index: i32, tex: bind_tex_t) {
 	// This function is called for samplers set using material context
 	let unit: any = raw._.tex_units[unit_index];
-	iron_g4_set_texture_parameters(unit,
+	gpu_set_texture_parameters(unit,
 		tex.u_addressing == null ? tex_addressing_t.REPEAT : shader_context_get_tex_addresing(tex.u_addressing),
 		tex.v_addressing == null ? tex_addressing_t.REPEAT : shader_context_get_tex_addresing(tex.v_addressing),
 		tex.min_filter == null ? tex_filter_t.LINEAR : shader_context_get_tex_filter(tex.min_filter),
