@@ -1507,12 +1507,12 @@ void ui_init(ui_t *ui, ui_options_t *ops) {
 		gc_root(ui_combo_search_handle);
 	}
 	if (_ui_row2 == NULL) {
-		_ui_row2 = f32_array_create_from_raw((float[]){1.0 / 2.0,1.0 / 2.0,}, 2);
-		_ui_row3 = f32_array_create_from_raw((float[]){1.0 / 3.0,1.0 / 3.0,1.0 / 3.0,}, 3);
-		_ui_row4 = f32_array_create_from_raw((float[]){1.0 / 4.0,1.0 / 4.0,1.0 / 4.0,1.0 / 4.0,}, 4);
-		_ui_row5 = f32_array_create_from_raw((float[]){1.0 / 5.0,1.0 / 5.0,1.0 / 5.0,1.0 / 5.0,1.0 / 5.0,}, 5);
-		_ui_row6 = f32_array_create_from_raw((float[]){1.0 / 6.0,1.0 / 6.0,1.0 / 6.0,1.0 / 6.0,1.0 / 6.0,1.0 / 6.0,}, 6);
-		_ui_row7 = f32_array_create_from_raw((float[]){1.0 / 7.0,1.0 / 7.0,1.0 / 7.0,1.0 / 7.0,1.0 / 7.0,1.0 / 7.0,1.0 / 7.0,}, 7);
+		_ui_row2 = f32_array_create_from_raw((float[]){1.0 / 2.0, 1.0 / 2.0}, 2);
+		_ui_row3 = f32_array_create_from_raw((float[]){1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0}, 3);
+		_ui_row4 = f32_array_create_from_raw((float[]){1.0 / 4.0, 1.0 / 4.0, 1.0 / 4.0, 1.0 / 4.0}, 4);
+		_ui_row5 = f32_array_create_from_raw((float[]){1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0, 1.0 / 5.0}, 5);
+		_ui_row6 = f32_array_create_from_raw((float[]){1.0 / 6.0, 1.0 / 6.0, 1.0 / 6.0, 1.0 / 6.0, 1.0 / 6.0, 1.0 / 6.0}, 6);
+		_ui_row7 = f32_array_create_from_raw((float[]){1.0 / 7.0, 1.0 / 7.0, 1.0 / 7.0, 1.0 / 7.0, 1.0 / 7.0, 1.0 / 7.0, 1.0 / 7.0}, 7);
 		gc_root(_ui_row2);
 		gc_root(_ui_row3);
 		gc_root(_ui_row4);
