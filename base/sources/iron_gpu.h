@@ -92,7 +92,7 @@ typedef enum {
 	GPU_MIPMAP_FILTER_LINEAR // linear texture filter + linear mip filter -> trilinear filter
 } gpu_mipmap_filter_t;
 
-typedef enum gpu_usage {
+typedef enum {
     GPU_USAGE_STATIC,
     GPU_USAGE_DYNAMIC,
     GPU_USAGE_READABLE

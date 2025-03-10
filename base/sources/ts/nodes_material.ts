@@ -3999,7 +3999,7 @@ function nodes_material_vector_curves_button(node_id: i32) {
 	// Preview
 	let axis: i32 = ui_nest(ui_nest(nhandle, 0), 1).position;
 	let val: f32[] = but.default_value;
-	ui._y += ui_nodes_LINE_H() * 5;
+	ui._y += UI_LINE_H() * 5;
 
 	let num: i32 = val[96 + axis];
 
@@ -4064,13 +4064,13 @@ function nodes_material_color_ramp_button(node_id: i32) {
 
 	// Preview
 	let vals: f32[] = but.default_value; // [r, g, b, a, pos, r, g, b, a, pos, ..]
-	let sw: f32 = ui._w / ui_nodes_SCALE();
+	let sw: f32 = ui._w / UI_NODES_SCALE();
 	for (let i: i32 = 0; i < vals.length / 5; ++i) {
 		let pos: f32 = vals[i * 5 + 4];
 		let col: i32 = color_from_floats(vals[i * 5 + 0], vals[i * 5 + 1], vals[i * 5 + 2], 1.0);
-		ui_fill(pos * sw, 0, (1.0 - pos) * sw, ui_nodes_LINE_H() - 2 * ui_nodes_SCALE(), col);
+		ui_fill(pos * sw, 0, (1.0 - pos) * sw, UI_LINE_H() - 2 * UI_NODES_SCALE(), col);
 	}
-	ui._y += ui_nodes_LINE_H();
+	ui._y += UI_LINE_H();
 	// Edit
 	let ihandle: ui_handle_t = ui_nest(ui_nest(nhandle, 0), 2);
 	let row: f32[] = [1 / 4, 1 / 4, 2 / 4];
@@ -4117,8 +4117,8 @@ function nodes_material_color_ramp_button(node_id: i32) {
 	let chandle: ui_handle_t = ui_nest(ui_nest(nhandle, 0), 4);
 	chandle.color = color_from_floats(vals[i * 5 + 0], vals[i * 5 + 1], vals[i * 5 + 2], 1.0);
 	if (ui_text("", ui_align_t.RIGHT, chandle.color) == ui_state_t.STARTED) {
-		let rx: f32 = nx + ui._w - ui_nodes_p(37);
-		let ry: f32 = ny - ui_nodes_p(5);
+		let rx: f32 = nx + ui._w - ui_p(37);
+		let ry: f32 = ny - ui_p(5);
 		nodes._input_started = ui.input_started = false;
 		ui_nodes_rgba_popup(chandle, vals.buffer + i * 5, math_floor(rx), math_floor(ry + ui_ELEMENT_H(ui)));
 	}

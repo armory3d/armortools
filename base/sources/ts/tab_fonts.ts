@@ -129,7 +129,7 @@ function tab_fonts_draw(htab: ui_handle_t) {
 						});
 					}
 					else {
-						_ui_tooltip_image(img);
+						ui_tooltip_image(img);
 						ui_tooltip(project_fonts[i].name);
 					}
 				}

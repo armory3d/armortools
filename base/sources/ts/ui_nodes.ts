@@ -88,15 +88,15 @@ function ui_viewnodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 	let link_drag: ui_node_link_t = ui_get_link(links, link_drag_id);
 	let nodes: ui_node_t[] = ui_nodes_get_canvas(true).nodes;
 	let node: ui_node_t = ui_get_node(nodes, link_drag.from_id > -1 ? link_drag.from_id : link_drag.to_id);
-	let link_x: i32 = ui_nodes_ui._window_x + ui_nodes_NODE_X(node);
-	let link_y: i32 = ui_nodes_ui._window_y + ui_nodes_NODE_Y(node);
+	let link_x: i32 = ui_nodes_ui._window_x + UI_NODE_X(node);
+	let link_y: i32 = ui_nodes_ui._window_y + UI_NODE_Y(node);
 	if (link_drag.from_id > -1) {
-		link_x += ui_nodes_NODE_W(node);
-		link_y += ui_nodes_OUTPUT_Y(node.outputs.length, link_drag.from_socket);
+		link_x += UI_NODE_W(node);
+		link_y += UI_OUTPUT_Y(node.outputs.length, link_drag.from_socket);
 	}
 	else {
 		link_y += ui_nodes_INPUT_Y(ui_nodes_get_canvas(true), node.inputs, link_drag.to_socket) +
-			ui_nodes_OUTPUTS_H(node.outputs.length) + ui_nodes_BUTTONS_H(node);
+			UI_OUTPUTS_H(node.outputs.length) + UI_BUTTONS_H(node);
 	}
 
 	if (math_abs(mouse_x - link_x) > 5 || math_abs(mouse_y - link_y) > 5) { // Link length
@@ -286,7 +286,11 @@ function ui_viewnodes_on_canvas_released() {
 		let selected: ui_node_t = null;
 		for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
 			let node: ui_node_t = canvas.nodes[i];
-			if (ui_input_in_rect(ui_nodes_ui._window_x + ui_nodes_NODE_X(node), ui_nodes_ui._window_y + ui_nodes_NODE_Y(node), ui_nodes_NODE_W(node), ui_nodes_NODE_H(canvas, node))) {
+			if (ui_input_in_rect(
+					ui_nodes_ui._window_x + UI_NODE_X(node),
+					ui_nodes_ui._window_y + UI_NODE_Y(node),
+					UI_NODE_W(node),
+					UI_NODE_H(canvas, node))) {
 				selected = node;
 				break;
 			}
@@ -381,7 +385,7 @@ function ui_viewnodes_on_canvas_released() {
 		let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
 		for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
 			let node: ui_node_t = canvas.nodes[i];
-			if (ui_input_in_rect(ui_nodes_ui._window_x + ui_nodes_NODE_X(node), ui_nodes_ui._window_y + ui_nodes_NODE_Y(node), ui_nodes_NODE_W(node), ui_nodes_NODE_H(canvas, node))) {
+			if (ui_input_in_rect(ui_nodes_ui._window_x + UI_NODE_X(node), ui_nodes_ui._window_y + UI_NODE_Y(node), UI_NODE_W(node), UI_NODE_H(canvas, node))) {
 				if (nodes.nodes_selected_id.length > 0 && node.id == nodes.nodes_selected_id[0]) {
 					ui_view2d_hwnd.redraws = 2;
 					if (time_time() - context_raw.select_time < 0.25) ui_base_show_2d_view(view_2d_type_t.NODE);
@@ -708,11 +712,11 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 }
 
 function ui_nodes_get_node_x(): i32 {
-	return math_floor((mouse_x - ui_nodes_wx - ui_nodes_PAN_X()) / ui_nodes_SCALE());
+	return math_floor((mouse_x - ui_nodes_wx - UI_NODES_PAN_X()) / UI_NODES_SCALE());
 }
 
 function ui_nodes_get_node_y(): i32 {
-	return math_floor((mouse_y - ui_nodes_wy - ui_nodes_PAN_Y()) / ui_nodes_SCALE());
+	return math_floor((mouse_y - ui_nodes_wy - UI_NODES_PAN_Y()) / UI_NODES_SCALE());
 }
 
 function ui_nodes_draw_grid(zoom: f32): iron_gpu_texture_t {
@@ -948,8 +952,8 @@ function ui_nodes_render() {
 		// Grid
 		draw_set_color(0xffffffff);
 		let step: f32 = ui_nodes_grid_cell_w * nodes.zoom;
-		let x: f32 = math_fmod(ui_nodes_PAN_X(), step) - step;
-		let y: f32 = math_fmod(ui_nodes_PAN_Y(), step) - step;
+		let x: f32 = math_fmod(UI_NODES_PAN_X(), step) - step;
+		let y: f32 = math_fmod(UI_NODES_PAN_Y(), step) - step;
 		draw_image(ui_nodes_grid, x, y);
 
 		// Undo

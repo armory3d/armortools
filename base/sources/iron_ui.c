@@ -40,6 +40,13 @@ void (*ui_on_tab_drop)(ui_handle_t *, int, ui_handle_t *, int) = NULL; // Tab re
 float js_eval(char *str);
 #endif
 
+f32_array_t *_ui_row2 = NULL;
+f32_array_t *_ui_row3 = NULL;
+f32_array_t *_ui_row4 = NULL;
+f32_array_t *_ui_row5 = NULL;
+f32_array_t *_ui_row6 = NULL;
+f32_array_t *_ui_row7 = NULL;
+
 float UI_SCALE() {
 	return current->ops->scale_factor;
 }
@@ -431,6 +438,30 @@ void ui_row(f32_array_t *ratios) {
 	current->x_before_split = current->_x;
 	current->w_before_split = current->_w;
 	current->_w = ui_get_ratio(ratios->buffer[current->current_ratio], current->_w);
+}
+
+void ui_row2() {
+	ui_row(_ui_row2);
+}
+
+void ui_row3() {
+	ui_row(_ui_row3);
+}
+
+void ui_row4() {
+	ui_row(_ui_row4);
+}
+
+void ui_row5() {
+	ui_row(_ui_row5);
+}
+
+void ui_row6() {
+	ui_row(_ui_row6);
+}
+
+void ui_row7() {
+	ui_row(_ui_row7);
 }
 
 void ui_indent() {
@@ -1474,6 +1505,20 @@ void ui_init(ui_t *ui, ui_options_t *ops) {
 	if (ui_combo_search_handle == NULL) {
 		ui_combo_search_handle = ui_handle_create();
 		gc_root(ui_combo_search_handle);
+	}
+	if (_ui_row2 == NULL) {
+		_ui_row2 = f32_array_create_from_raw((float[]){1.0 / 2.0,1.0 / 2.0,}, 2);
+		_ui_row3 = f32_array_create_from_raw((float[]){1.0 / 3.0,1.0 / 3.0,1.0 / 3.0,}, 3);
+		_ui_row4 = f32_array_create_from_raw((float[]){1.0 / 4.0,1.0 / 4.0,1.0 / 4.0,1.0 / 4.0,}, 4);
+		_ui_row5 = f32_array_create_from_raw((float[]){1.0 / 5.0,1.0 / 5.0,1.0 / 5.0,1.0 / 5.0,1.0 / 5.0,}, 5);
+		_ui_row6 = f32_array_create_from_raw((float[]){1.0 / 6.0,1.0 / 6.0,1.0 / 6.0,1.0 / 6.0,1.0 / 6.0,1.0 / 6.0,}, 6);
+		_ui_row7 = f32_array_create_from_raw((float[]){1.0 / 7.0,1.0 / 7.0,1.0 / 7.0,1.0 / 7.0,1.0 / 7.0,1.0 / 7.0,1.0 / 7.0,}, 7);
+		gc_root(_ui_row2);
+		gc_root(_ui_row3);
+		gc_root(_ui_row4);
+		gc_root(_ui_row5);
+		gc_root(_ui_row6);
+		gc_root(_ui_row7);
 	}
 }
 
@@ -3263,3 +3308,36 @@ bool _ui_menu_button(char *text) {
 	current->_w = draw_string_width(current->ops->font, current->font_size, text) + 25.0 * UI_SCALE();
 	return ui_button(text, UI_ALIGN_CENTER, "");
 }
+
+const char *ui_theme_keys[] = {
+	"WINDOW_BG_COL",
+	"HOVER_COL",
+	"ACCENT_COL",
+	"BUTTON_COL",
+	"PRESSED_COL",
+	"TEXT_COL",
+	"LABEL_COL",
+	"SEPARATOR_COL",
+	"HIGHLIGHT_COL",
+	"FONT_SIZE",
+	"ELEMENT_W",
+	"ELEMENT_H",
+	"ELEMENT_OFFSET",
+	"ARROW_SIZE",
+	"BUTTON_H",
+	"CHECK_SIZE",
+	"CHECK_SELECT_SIZE",
+	"SCROLL_W",
+	"SCROLL_MINI_W",
+	"TEXT_OFFSET",
+	"TAB_W",
+	"FILL_WINDOW_BG",
+	"FILL_BUTTON_BG",
+	"LINK_STYLE",
+	"FULL_TABS",
+	"ROUND_CORNERS",
+	"SHADOWS",
+	"VIEWPORT_COL"
+};
+
+int ui_theme_keys_count = sizeof(ui_theme_keys) / sizeof(ui_theme_keys[0]);

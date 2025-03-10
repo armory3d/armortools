@@ -8,18 +8,29 @@
 #include "iron_draw.h"
 #include "iron_armpack.h"
 
-#define UI_LAYOUT_VERTICAL 0
-#define UI_LAYOUT_HORIZONTAL 1
-#define UI_ALIGN_LEFT 0
-#define UI_ALIGN_CENTER 1
-#define UI_ALIGN_RIGHT 2
-#define UI_STATE_IDLE 0
-#define UI_STATE_STARTED 1
-#define UI_STATE_DOWN 2
-#define UI_STATE_RELEASED 3
-#define UI_STATE_HOVERED 4
-#define UI_LINK_STYLE_LINE 0
-#define UI_LINK_STYLE_CUBIC_BEZIER 1
+typedef enum {
+	UI_LAYOUT_VERTICAL,
+	UI_LAYOUT_HORIZONTAL
+} _ui_layout_t;
+
+typedef enum {
+	UI_ALIGN_LEFT,
+	UI_ALIGN_CENTER,
+	UI_ALIGN_RIGHT
+} _ui_align_t;
+
+typedef enum {
+	UI_STATE_IDLE,
+	UI_STATE_STARTED,
+	UI_STATE_DOWN,
+	UI_STATE_RELEASED,
+	UI_STATE_HOVERED
+} _ui_state_t;
+
+typedef enum {
+	UI_LINK_STYLE_LINE,
+	UI_LINK_STYLE_CUBIC_BEZIER
+} _ui_link_style_t;
 
 typedef struct ui_theme {
 	int WINDOW_BG_COL;
@@ -277,6 +288,12 @@ bool ui_radio(ui_handle_t *handle, int position, char *text, char *label);
 int ui_combo(ui_handle_t *handle, char_ptr_array_t *texts, char *label, bool show_label, int align, bool search_bar);
 float ui_slider(ui_handle_t *handle, char *text, float from, float to, bool filled, float precision, bool display_value, int align, bool text_edit);
 void ui_row(f32_array_t *ratios);
+void ui_row2();
+void ui_row3();
+void ui_row4();
+void ui_row5();
+void ui_row6();
+void ui_row7();
 void ui_separator(int h, bool fill);
 void ui_tooltip(char *text);
 void ui_tooltip_image(iron_gpu_texture_t *image, int max_width);
@@ -361,6 +378,8 @@ extern void (*ui_on_border_hover)(ui_handle_t *, int);
 extern void (*ui_on_text_hover)(void);
 extern void (*ui_on_deselect_text)(void);
 extern void (*ui_on_tab_drop)(ui_handle_t *, int, ui_handle_t *, int);
+extern const char *ui_theme_keys[];
+extern int ui_theme_keys_count;
 
 float ui_float_input(ui_handle_t *handle, char *label, int align, float precision);
 char *ui_file_browser(ui_handle_t *handle, bool folders_only);

@@ -117,7 +117,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 					let is_packed: bool = project_raw.packed_assets != null && project_packed_asset_exists(project_raw.packed_assets, asset.file);
 
 					if (ui.is_hovered) {
-						_ui_tooltip_image(img, 256);
+						ui_tooltip_image(img, 256);
 						if (is_packed) {
 							ui_tooltip(asset.name + " " + tr("(packed)"));
 						}

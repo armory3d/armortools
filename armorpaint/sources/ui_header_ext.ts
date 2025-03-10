@@ -24,7 +24,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			}
 			_ui_image(project_get_image(project_assets[cid]));
 			if (ui.is_hovered) {
-				_ui_tooltip_image(project_get_image(project_assets[cid]), 256);
+				ui_tooltip_image(project_get_image(project_assets[cid]), 256);
 			}
 		}
 		if (ui_button(tr("Import"))) {

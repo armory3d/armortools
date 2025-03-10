@@ -248,8 +248,8 @@ function box_preferences_show() {
 			// Theme fields
 			let hlist: ui_handle_t = ui_handle(__ID__);
 			let u32_theme: u32_ptr = base_theme;
-			for (let i: i32 = 0; i < ui_theme_keys.length; ++i) {
-				let key: string = ui_theme_keys[i];
+			for (let i: i32 = 0; i < ui_theme_keys_count; ++i) {
+				let key: string = ARRAY_ACCESS(ui_theme_keys, i);
 				let h: ui_handle_t = ui_nest(hlist, i);
 				let val: u32 = DEREFERENCE(u32_theme + i);
 				let is_hex: bool = ends_with(key, "_COL");
@@ -908,8 +908,8 @@ function box_preferences_set_scale() {
 function box_preferences_theme_to_json(theme: ui_theme_t): string {
 	json_encode_begin();
 	let u32_theme: u32_ptr = theme;
-	for (let i: i32 = 0; i < ui_theme_keys.length; ++i) {
-		let key: string = ui_theme_keys[i];
+	for (let i: i32 = 0; i < ui_theme_keys_count; ++i) {
+		let key: string = ARRAY_ACCESS(ui_theme_keys, i);
 		let val: u32 = DEREFERENCE(u32_theme + i);
 		json_encode_i32(key, val);
 	}

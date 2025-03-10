@@ -243,7 +243,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 					}
 					state = _ui_image(icon, 0xffffffff, w * ui_SCALE(ui));
 					if (ui.is_hovered) {
-						_ui_tooltip_image(icon);
+						ui_tooltip_image(icon);
 						ui_tooltip(f);
 					}
 					generic = false;
@@ -296,7 +296,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 					}
 					state = _ui_image(icon, 0xffffffff, w * ui_SCALE(ui));
 					if (ui.is_hovered) {
-						_ui_tooltip_image(icon);
+						ui_tooltip_image(icon);
 						ui_tooltip(f);
 					}
 					generic = false;

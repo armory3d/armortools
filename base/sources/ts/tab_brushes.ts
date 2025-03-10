@@ -133,7 +133,7 @@ function tab_brushes_draw(htab: ui_handle_t) {
 						});
 					}
 					else {
-						_ui_tooltip_image(img_full);
+						ui_tooltip_image(img_full);
 						ui_tooltip(project_brushes[i].canvas.name);
 					}
 				}
