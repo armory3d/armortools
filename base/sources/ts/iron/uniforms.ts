@@ -303,7 +303,7 @@ function uniforms_set_context_const(location: iron_gpu_constant_location_t, c: s
 		let f: f32 = 0.0;
 
 		if (c.link == "_time") {
-			f = time_time();
+			f = sys_time();
 		}
 		else if (c.link == "_aspect_ratio_window") {
 			f = app_w() / app_h();

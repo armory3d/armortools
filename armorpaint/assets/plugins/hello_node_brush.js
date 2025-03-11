@@ -51,7 +51,7 @@ nodes_brush_category_add(category_name, armpack_encode(node_list));
 
 // Brush node
 parser_logic_custom_nodes_set(node_type, function(node, from) {
-	return Math.sin(time_time() * node.inputs[0].get(0));
+	return Math.sin(sys_time() * node.inputs[0].get(0));
 });
 
 // Cleanup

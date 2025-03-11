@@ -1126,16 +1126,16 @@ function ui_base_update_ui() {
 	// Two-finger tap to undo, three-finger tap to redo
 	if (context_in_viewport() && config_raw.touch_ui) {
 		if (mouse_started("middle")) {
-			ui_base_redo_tap_time = time_time();
+			ui_base_redo_tap_time = sys_time();
 		}
 		else if (mouse_started("right")) {
-			ui_base_undo_tap_time = time_time();
+			ui_base_undo_tap_time = sys_time();
 		}
-		else if (mouse_released("middle") && time_time() - ui_base_redo_tap_time < 0.1) {
+		else if (mouse_released("middle") && sys_time() - ui_base_redo_tap_time < 0.1) {
 			ui_base_redo_tap_time = ui_base_undo_tap_time = 0;
 			redo_pressed = true;
 		}
-		else if (mouse_released("right") && time_time() - ui_base_undo_tap_time < 0.1) {
+		else if (mouse_released("right") && sys_time() - ui_base_undo_tap_time < 0.1) {
 			ui_base_redo_tap_time = ui_base_undo_tap_time = 0;
 			undo_pressed = true;
 		}
@@ -1268,11 +1268,11 @@ function ui_base_draw_sidebar() {
 		}
 	}
 	else if (ui_base_htabs[tab_area_t.SIDEBAR0].changed && ui_base_htabs[tab_area_t.SIDEBAR0].position == context_raw.last_htab0_pos) {
-		if (time_time() - context_raw.select_time < 0.25) {
+		if (sys_time() - context_raw.select_time < 0.25) {
 			context_raw.maximized_sidebar_width = config_raw.layout[layout_size_t.SIDEBAR_W];
 			config_raw.layout[layout_size_t.SIDEBAR_W] = 0;
 		}
-		context_raw.select_time = time_time();
+		context_raw.select_time = sys_time();
 	}
 	context_raw.last_htab0_pos = ui_base_htabs[tab_area_t.SIDEBAR0].position;
 }

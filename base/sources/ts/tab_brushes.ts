@@ -76,10 +76,10 @@ function tab_brushes_draw(htab: ui_handle_t) {
 					if (context_raw.brush != project_brushes[i]) {
 						context_select_brush(i);
 					}
-					if (time_time() - context_raw.select_time < 0.25) {
+					if (sys_time() - context_raw.select_time < 0.25) {
 						ui_base_show_brush_nodes();
 					}
-					context_raw.select_time = time_time();
+					context_raw.select_time = sys_time();
 					// app_drag_off_x = -(mouse_x - uix - ui._windowX - 3);
 					// app_drag_off_y = -(mouse_y - uiy - ui._windowY + 1);
 					// app_drag_brush = raw.brush;

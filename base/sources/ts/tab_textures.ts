@@ -92,10 +92,10 @@ function tab_textures_draw(htab: ui_handle_t) {
 						base_drag_asset = asset;
 						context_raw.texture = asset;
 
-						if (time_time() - context_raw.select_time < 0.25) {
+						if (sys_time() - context_raw.select_time < 0.25) {
 							ui_base_show_2d_view(view_2d_type_t.ASSET);
 						}
-						context_raw.select_time = time_time();
+						context_raw.select_time = sys_time();
 						ui_view2d_hwnd.redraws = 2;
 					}
 

@@ -65,8 +65,8 @@ function render_path_render_frame() {
 	_render_path_last_w = app_w();
 	_render_path_last_h = app_h();
 
-	_render_path_frame_time = time_time() -_render_path_last_frame_time;
-	_render_path_last_frame_time = time_time();
+	_render_path_frame_time = sys_time() -_render_path_last_frame_time;
+	_render_path_last_frame_time = sys_time();
 
 	render_path_current_w = app_w();
 	render_path_current_h = app_h();

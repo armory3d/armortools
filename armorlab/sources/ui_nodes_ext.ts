@@ -35,7 +35,7 @@ function ui_nodes_ext_run() {
 
 	console_progress(tr("Processing"));
 
-	let timer: f32 = time_time();
+	let timer: f32 = sys_time();
 	parser_logic_parse(project_canvas);
 
 	photo_to_pbr_node_cached_source = null;
@@ -118,7 +118,7 @@ function ui_nodes_ext_run() {
 		}
 	}
 
-	let t: f32 = time_time() - timer;
+	let t: f32 = sys_time() - timer;
 	console_log("Processing finished in " + t);
 	iron_ml_unload();
 

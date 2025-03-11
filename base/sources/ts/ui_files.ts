@@ -361,7 +361,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 				}
 
 				ui_files_selected = i;
-				if (time_time() - context_raw.select_time < 0.25) {
+				if (sys_time() - context_raw.select_time < 0.25) {
 					base_drag_file = null;
 					base_drag_file_icon = null;
 					base_is_dragging = false;
@@ -381,7 +381,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 					}
 					ui_files_selected = -1;
 				}
-				context_raw.select_time = time_time();
+				context_raw.select_time = sys_time();
 			}
 
 			// Label

@@ -358,8 +358,8 @@ function keyboard_end_frame() {
 		array_splice(keyboard_keys_frame, 0, keyboard_keys_frame.length);
 	}
 
-	if (time_time() - keyboard_repeat_time > 0.05) {
-		keyboard_repeat_time = time_time();
+	if (sys_time() - keyboard_repeat_time > 0.05) {
+		keyboard_repeat_time = sys_time();
 		keyboard_repeat_key = true;
 	}
 	else {
@@ -660,7 +660,7 @@ function keyboard_down_listener(code: key_code_t) {
 	array_push(keyboard_keys_frame, s);
 	map_set(keyboard_keys_started, s, true);
 	map_set(keyboard_keys_down, s, true);
-	keyboard_repeat_time = time_time() + 0.4;
+	keyboard_repeat_time = sys_time() + 0.4;
 
 	///if arm_android_rmb // Detect right mouse button on Android..
 	if (code == key_code_t.BACK) {

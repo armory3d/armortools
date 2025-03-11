@@ -12,7 +12,7 @@ function time_node_create(raw: ui_node_t, args: f32_array_t): time_node_t {
 
 function time_node_get(self: time_node_t, from: i32): logic_node_value_t {
 	if (from == 0) {
-		let v: logic_node_value_t = { _f32: time_time() };
+		let v: logic_node_value_t = { _f32: sys_time() };
 		return v;
 	}
 	else if (from == 1) {

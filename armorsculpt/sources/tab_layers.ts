@@ -263,8 +263,8 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 				tab_layers_set_drag_layer(context_raw.layer, -(mouse_x - uix - ui._window_x - 3), -(mouse_y - uiy - ui._window_y + 1));
 			}
 			else if (ui.input_released) {
-				if (time_time() - context_raw.select_time > 0.2) {
-					context_raw.select_time = time_time();
+				if (sys_time() - context_raw.select_time > 0.2) {
+					context_raw.select_time = sys_time();
 				}
 			}
 			else if (ui.input_released_r) {
@@ -275,7 +275,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 
 		let state: ui_state_t = ui_text(l.name);
 		if (state == ui_state_t.RELEASED) {
-			let td: f32 = time_time() - context_raw.select_time;
+			let td: f32 = sys_time() - context_raw.select_time;
 			if (td < 0.2 && td > 0.0) {
 				tab_layers_layer_name_edit = l.id;
 				tab_layers_layer_name_handle.text = l.name;

@@ -139,12 +139,12 @@ function tab_materials_draw_slots(mini: bool) {
 				base_drag_off_y = -(mouse_y - uiy - ui._window_y + 1);
 				base_drag_material = context_raw.material;
 				// Double click to show nodes
-				if (time_time() - context_raw.select_time < 0.25) {
+				if (sys_time() - context_raw.select_time < 0.25) {
 					ui_base_show_material_nodes();
 					base_drag_material = null;
 					base_is_dragging = false;
 				}
-				context_raw.select_time = time_time();
+				context_raw.select_time = sys_time();
 			}
 
 			// Context menu

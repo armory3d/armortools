@@ -14,11 +14,7 @@ function time_real_delta(): f32 {
 	return _time_real_delta;
 }
 
-function time_time(): f32 {
-	return sys_time();
-}
-
 function time_update() {
-	_time_real_delta = time_time() - _time_last;
-	_time_last = time_time();
+	_time_real_delta = sys_time() - _time_last;
+	_time_last = sys_time();
 }
