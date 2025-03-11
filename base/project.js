@@ -273,16 +273,6 @@ if (flags.with_eval) {
 	project.add_define("WITH_EVAL");
 	project.add_cfiles("sources/libs/quickjs-amalgam.c");
 	project.add_define("QJS_BUILD_LIBC");
-	// if (platform === "linux") {
-	// 	project.add_lib("m");
-	// 	project.add_define("_GNU_SOURCE");
-	// 	project.add_define("environ=__environ");
-	// 	project.add_define("sighandler_t=__sighandler_t");
-	// }
-	// else if (platform === "windows") {
-	// 	project.add_define("WIN32_LEAN_AND_MEAN");
-	// 	project.add_define("_WIN32_WINNT=0x0602");
-	// }
 }
 
 if (flags.with_iron) {
