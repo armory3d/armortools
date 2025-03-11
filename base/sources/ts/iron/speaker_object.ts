@@ -26,7 +26,7 @@ function speaker_object_create(data: speaker_data_t): speaker_object_t {
 	}
 
 	raw.sound = data_get_sound(data.sound);
-	app_notify_on_init(_speaker_object_create_on_init, raw);
+	sys_notify_on_init(_speaker_object_create_on_init, raw);
 	return raw;
 }
 
@@ -52,7 +52,7 @@ function speaker_object_play(raw: speaker_object_t) {
 	if (channel != null) {
 		array_push(raw.channels, channel);
 		if (raw.data.attenuation > 0 && raw.channels.length == 1) {
-			app_notify_on_update(speaker_object_update, raw);
+			sys_notify_on_update(speaker_object_update, raw);
 		}
 	}
 }
@@ -84,7 +84,7 @@ function speaker_object_update(raw: speaker_object_t) {
 		// }
 	}
 	if (raw.channels.length == 0) {
-		app_remove_update(speaker_object_update);
+		sys_remove_update(speaker_object_update);
 		return;
 	}
 

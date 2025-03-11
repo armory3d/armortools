@@ -20,12 +20,12 @@ function console_draw_toast(s: string) {
 function _console_toast_render(s: string) {
 	console_draw_toast(s);
 	gpu_swap_buffers();
-	app_remove_render_2d(_console_toast_render);
+	sys_remove_render_2d(_console_toast_render);
 }
 
 function console_toast(s: string) {
 	// Show a popup message
-	app_notify_on_render_2d(_console_toast_render, s);
+	sys_notify_on_render_2d(_console_toast_render, s);
 	console_trace(s);
 	gpu_swap_buffers();
 }
@@ -37,10 +37,10 @@ function console_draw_progress() {
 function console_progress(s: string) {
 	// Keep popup message displayed until s == null
 	if (s == null) {
-		app_remove_render_2d(console_draw_progress);
+		sys_remove_render_2d(console_draw_progress);
 	}
 	else if (console_progress_text == null) {
-		app_notify_on_render_2d(console_draw_progress);
+		sys_notify_on_render_2d(console_draw_progress);
 	}
 	if (s != null) {
 		console_trace(s);
@@ -51,7 +51,7 @@ function console_progress(s: string) {
 	///if (!arm_vulkan) // TODO
 	ui_end_input();
 	draw_end();
-	app_render();
+	sys_render();
 	draw_begin();
 	gpu_swap_buffers();
 	///end

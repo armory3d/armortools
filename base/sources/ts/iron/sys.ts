@@ -7,6 +7,11 @@ type sys_string_callback_t = {
 	f?: (s: string)=>void;
 };
 
+type callback_t = {
+	f?: (data?: any)=>void;
+	data?: any;
+};
+
 let _sys_render_listeners: sys_callback_t[] = [];
 let _sys_foreground_listeners: sys_callback_t[] = [];
 let _sys_resume_listeners: sys_callback_t[] = [];
@@ -340,3 +345,239 @@ enum window_mode_t {
 	WINDOWED,
 	FULLSCREEN,
 }
+
+let _sys_on_resets: callback_t[] = [];
+let _sys_on_next_frames: callback_t[] = [];
+let _sys_on_end_frames: callback_t[] = [];
+let _sys_on_inits: callback_t[] = [];
+let _sys_on_updates: callback_t[] = [];
+let _sys_on_renders: callback_t[] = [];
+let _sys_on_renders_2d: callback_t[] = [];
+let _sys_pause_updates: bool = false;
+let _sys_lastw: i32 = -1;
+let _sys_lasth: i32 = -1;
+let sys_on_resize: ()=>void = null;
+let sys_on_w: ()=>i32 = null;
+let sys_on_h: ()=>i32 = null;
+let sys_on_x: ()=>i32 = null;
+let sys_on_y: ()=>i32 = null;
+
+function sys_w(): i32 {
+	if (sys_on_w != null) {
+		return sys_on_w();
+	}
+	return iron_window_width();
+}
+
+function sys_h(): i32 {
+	if (sys_on_h != null) {
+		return sys_on_h();
+	}
+	return iron_window_height();
+}
+
+function sys_x(): i32 {
+	if (sys_on_x != null) {
+		return sys_on_x();
+	}
+	return 0;
+}
+
+function sys_y(): i32 {
+	if (sys_on_y != null) {
+		return sys_on_y();
+	}
+	return 0;
+}
+
+function sys_init() {
+	sys_notify_on_frames(sys_render);
+}
+
+function sys_reset() {
+	_sys_on_next_frames = [];
+	_sys_on_end_frames = [];
+	_sys_on_inits = [];
+	_sys_on_updates = [];
+	_sys_on_renders = [];
+	_sys_on_renders_2d = [];
+	for (let i: i32 = 0; i < _sys_on_resets.length; ++i) {
+		let cb: callback_t = _sys_on_resets[i];
+		cb.f(cb.data);
+	}
+}
+
+function _sys_run_callbacks(cbs: callback_t[]) {
+	for (let i: i32 = 0; i < cbs.length; ++i) {
+		let cb: callback_t = cbs[i];
+		cb.f(cb.data);
+	}
+}
+
+function sys_update() {
+	if (!_scene_ready) {
+		return;
+	}
+	if (_sys_pause_updates) {
+		return;
+	}
+
+	if (_sys_on_next_frames.length > 0) {
+		_sys_run_callbacks(_sys_on_next_frames);
+		array_splice(_sys_on_next_frames, 0, _sys_on_next_frames.length);
+	}
+
+	scene_update_frame();
+
+	let i: i32 = 0;
+	let l: i32 = _sys_on_updates.length;
+	while (i < l) {
+		if (_sys_on_inits.length > 0) {
+			_sys_run_callbacks(_sys_on_inits);
+			array_splice(_sys_on_inits, 0, _sys_on_inits.length);
+		}
+
+		let cb: callback_t = _sys_on_updates[i];
+		cb.f(cb.data);
+
+		// Account for removed traits
+		if (l <= _sys_on_updates.length) {
+			i++;
+		}
+		else {
+			l = _sys_on_updates.length;
+		}
+	}
+
+	_sys_run_callbacks(_sys_on_end_frames);
+
+	// Rebuild projection on window resize
+	if (_sys_lastw == -1) {
+		_sys_lastw = sys_w();
+		_sys_lasth = sys_h();
+	}
+	if (_sys_lastw != sys_w() || _sys_lasth != sys_h()) {
+		if (sys_on_resize != null) {
+			sys_on_resize();
+		}
+		else if (scene_camera != null) {
+			camera_object_build_proj(scene_camera);
+		}
+	}
+	_sys_lastw = sys_w();
+	_sys_lasth = sys_h();
+}
+
+let _sys_time_last: f32 = 0.0;
+let _sys_time_real_delta: f32 = 0.0;
+let _sys_time_frequency: i32 = -1;
+
+function sys_delta(): f32 {
+	if (_sys_time_frequency < 0) {
+		_sys_time_frequency = sys_display_frequency();
+	}
+	return (1 / _sys_time_frequency);
+}
+
+function sys_real_delta(): f32 {
+	return _sys_time_real_delta;
+}
+
+function sys_render() {
+	sys_update();
+
+	_sys_time_real_delta = sys_time() - _sys_time_last;
+	_sys_time_last = sys_time();
+
+	if (!_scene_ready) {
+		sys_render_2d();
+		return;
+	}
+
+	if (_sys_on_inits.length > 0) {
+		_sys_run_callbacks(_sys_on_inits);
+		array_splice(_sys_on_inits, 0, _sys_on_inits.length);
+	}
+
+	scene_render_frame();
+	_sys_run_callbacks(_sys_on_renders);
+	sys_render_2d();
+}
+
+function sys_render_2d() {
+	if (_sys_on_renders_2d.length > 0) {
+		draw_begin();
+		_sys_run_callbacks(_sys_on_renders_2d);
+		draw_end();
+	}
+}
+
+function _callback_create(f: (data?: any)=>void, data: any): callback_t {
+	let cb: callback_t = {};
+	cb.f = f;
+	cb.data = data;
+	return cb;
+}
+
+// Hooks
+function sys_notify_on_init(f: (data?: any)=>void, data: any = null) {
+	array_push(_sys_on_inits, _callback_create(f, data));
+}
+
+function sys_notify_on_update(f: (data?: any)=>void, data: any = null) {
+	array_push(_sys_on_updates, _callback_create(f, data));
+}
+
+function sys_notify_on_render(f: (data?: any)=>void, data: any = null) {
+	array_push(_sys_on_renders, _callback_create(f, data));
+}
+
+function sys_notify_on_render_2d(f: (data?: any)=>void, data: any = null) {
+	array_push(_sys_on_renders_2d, _callback_create(f, data));
+}
+
+function sys_notify_on_reset(f: (data?: any)=>void, data: any = null) {
+	array_push(_sys_on_resets, _callback_create(f, data));
+}
+
+function sys_notify_on_next_frame(f: (data?: any)=>void, data: any = null) {
+	array_push(_sys_on_next_frames, _callback_create(f, data));
+}
+
+function sys_notify_on_end_frame(f: (data?: any)=>void, data: any = null) {
+	array_push(_sys_on_end_frames, _callback_create(f, data));
+}
+
+function _sys_remove_callback(ar: callback_t[], f: (data?: any)=>void) {
+	for (let i: i32 = 0; i < ar.length; ++i) {
+		if (ar[i].f == f) {
+			array_splice(ar, i, 1);
+			break;
+		}
+	}
+}
+
+function sys_remove_init(f: (data?: any)=>void) {
+	_sys_remove_callback(_sys_on_inits, f);
+}
+
+function sys_remove_update(f: (data?: any)=>void) {
+	_sys_remove_callback(_sys_on_updates, f);
+}
+
+function sys_remove_render(f: (data?: any)=>void) {
+	_sys_remove_callback(_sys_on_renders, f);
+}
+
+function sys_remove_render_2d(f: (data?: any)=>void) {
+	_sys_remove_callback(_sys_on_renders_2d, f);
+}
+
+function sys_remove_reset(f: (data?: any)=>void) {
+	_sys_remove_callback(_sys_on_resets, f);
+}
+
+function sys_remove_end_frame(f: (data?: any)=>void) {
+	_sys_remove_callback(_sys_on_end_frames, f);
+}
+

@@ -43,7 +43,7 @@ function ui_toolbar_draw_tool(i: i32, ui: ui_t, img: iron_gpu_texture_t, icon_ac
 	let image_state: ui_state_t = _ui_image(img, icon_accent, -1.0, rect.x, rect.y, rect.w, rect.h);
 	if (image_state == ui_state_t.STARTED) {
 		_ui_toolbar_i = i;
-		app_notify_on_next_frame(function() {
+		sys_notify_on_next_frame(function() {
 			context_select_tool(_ui_toolbar_i);
 		});
 	}

@@ -55,8 +55,8 @@ function util_render_make_material_preview() {
 	render_path_commands = _commands;
 
 	context_raw.material_preview = false;
-	_render_path_last_w = app_w();
-	_render_path_last_h = app_h();
+	_render_path_last_w = sys_w();
+	_render_path_last_h = sys_h();
 
 	// Restore
 	sphere.base.visible = false;
@@ -120,8 +120,8 @@ function util_render_make_decal_preview() {
 	render_path_commands = _commands;
 
 	context_raw.decal_preview = false;
-	_render_path_last_w = app_w();
-	_render_path_last_h = app_h();
+	_render_path_last_w = sys_w();
+	_render_path_last_h = sys_h();
 
 	// Restore
 	plane.base.visible = false;
@@ -343,7 +343,7 @@ function util_render_make_brush_preview() {
 	context_raw.layer = _layer;
 	context_raw.material = _material;
 	context_raw.tool = _tool;
-	app_notify_on_init(function () {
+	sys_notify_on_init(function () {
 		make_material_parse_paint_material(false);
 	});
 

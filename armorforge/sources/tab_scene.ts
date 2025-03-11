@@ -40,7 +40,7 @@ function tab_scene_import_mesh_done() {
 		tab_scene_select_object(mo);
 	}
 
-	app_notify_on_next_frame(function() {
+	sys_notify_on_next_frame(function() {
 		util_mesh_merge();
 		tab_scene_select_object(context_raw.selected_object.ext);
 		tab_scene_sort();
@@ -141,7 +141,7 @@ function tab_scene_new_object(mesh_name: string) {
 	map_set(data_cached_meshes, md._.handle, md);
 	array_push(project_paint_objects, mo);
 	tab_scene_import_mesh_done();
-	app_notify_on_next_frame(function(mo: mesh_object_t) {
+	sys_notify_on_next_frame(function(mo: mesh_object_t) {
 		tab_scene_select_object(mo);
 	}, mo);
 }

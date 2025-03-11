@@ -29,7 +29,7 @@ function ui_header_render_ui() {
 	let ww: i32 = iron_window_width() - ui_toolbar_w - config_raw.layout[layout_size_t.SIDEBAR_W] - nodesw;
 	///end
 
-	if (ui_window(ui_header_handle, app_x(), ui_header_h, ww, ui_header_h)) {
+	if (ui_window(ui_header_handle, sys_x(), ui_header_h, ww, ui_header_h)) {
 		ui._y += 2;
 		ui_header_draw_tool_properties(ui);
 	}

@@ -137,7 +137,7 @@ function box_preferences_show() {
 			if (ui_button(tr("Restore")) && !ui_menu_show) {
 				ui_menu_draw(function (ui: ui_t) {
 					if (ui_menu_button(tr("Confirm"))) {
-						app_notify_on_init(function (ui: ui_t) {
+						sys_notify_on_init(function (ui: ui_t) {
 							ui.ops.theme.ELEMENT_H = base_default_element_h;
 							config_restore();
 							box_preferences_set_scale();
@@ -159,7 +159,7 @@ function box_preferences_show() {
 						ui_files_show("json", false, false, function (path: string) {
 							let b: buffer_t = data_get_blob(path);
 							let raw: config_t = json_parse(sys_buffer_to_string(b));
-							app_notify_on_init(function (raw: config_t) {
+							sys_notify_on_init(function (raw: config_t) {
 								_box_preferences_ui.ops.theme.ELEMENT_H = base_default_element_h;
 								config_import_from(raw);
 								box_preferences_set_scale();

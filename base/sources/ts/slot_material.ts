@@ -70,7 +70,7 @@ function slot_material_create(m: material_data_t = null, c: ui_node_canvas_t = n
 }
 
 function slot_material_unload(raw: slot_material_t) {
-	app_notify_on_next_frame(function (raw: slot_material_t) {
+	sys_notify_on_next_frame(function (raw: slot_material_t) {
 		iron_unload_image(raw.image);
 		iron_unload_image(raw.image_icon);
 	}, raw);

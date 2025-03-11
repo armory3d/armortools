@@ -204,7 +204,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 									let f: string = map_get(ui_files_icon_file_map, icon_file);
 									let data: draw_cloud_icon_data_t = make_draw_cloud_icon_data(f, image);
 
-									app_notify_on_init(function (data: draw_cloud_icon_data_t) {
+									sys_notify_on_init(function (data: draw_cloud_icon_data_t) {
 										let icon: iron_gpu_texture_t = gpu_create_render_target(data.image.width, data.image.height);
 										if (ends_with(data.f, ".arm")) { // Used for material sphere alpha cutout
 											draw_begin(icon);
@@ -321,7 +321,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 						shandle: shandle,
 						w: w
 					};
-					app_notify_on_init(ui_files_make_icon, args);
+					sys_notify_on_init(ui_files_make_icon, args);
 				}
 				if (icon != null) {
 					if (i == ui_files_selected) {

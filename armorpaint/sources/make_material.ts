@@ -256,7 +256,7 @@ function make_material_bake_node_previews() {
 		let key: string = keys[i];
 		if (array_index_of(context_raw.node_previews_used, key) == -1) {
 			let image: iron_gpu_texture_t = map_get(context_raw.node_previews, key);
-			app_notify_on_next_frame(function (image: iron_gpu_texture_t) {
+			sys_notify_on_next_frame(function (image: iron_gpu_texture_t) {
 				iron_unload_image(image);
 			}, image);
 			map_delete(context_raw.node_previews, key);
@@ -532,7 +532,7 @@ function make_material_get_displace_strength(): f32 {
 }
 
 function make_material_delete_context(c: shader_context_t) {
-	app_notify_on_next_frame(function (c: shader_context_t) { // Ensure pipeline is no longer in use
+	sys_notify_on_next_frame(function (c: shader_context_t) { // Ensure pipeline is no longer in use
 		shader_context_delete(c);
 	}, c);
 }

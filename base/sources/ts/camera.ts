@@ -14,25 +14,25 @@ function camera_update() {
 	let camera: camera_object_t = scene_camera;
 
 	if (mouse_view_x() < 0 ||
-		mouse_view_x() > app_w() ||
+		mouse_view_x() > sys_w() ||
 		mouse_view_y() < 0 ||
-		mouse_view_y() > app_h()) {
+		mouse_view_y() > sys_h()) {
 
 		if (config_raw.wrap_mouse && camera_controls_down) {
 			if (mouse_view_x() < 0) {
-				mouse_x = mouse_last_x = app_x() + app_w();
+				mouse_x = mouse_last_x = sys_x() + sys_w();
 				iron_mouse_set_position(math_floor(mouse_x), math_floor(mouse_y));
 			}
-			else if (mouse_view_x() > app_w()) {
-				mouse_x = mouse_last_x = app_x();
+			else if (mouse_view_x() > sys_w()) {
+				mouse_x = mouse_last_x = sys_x();
 				iron_mouse_set_position(math_floor(mouse_x), math_floor(mouse_y));
 			}
 			else if (mouse_view_y() < 0) {
-				mouse_y = mouse_last_y = app_y() + app_h();
+				mouse_y = mouse_last_y = sys_y() + sys_h();
 				iron_mouse_set_position(math_floor(mouse_x), math_floor(mouse_y));
 			}
-			else if (mouse_view_y() > app_h()) {
-				mouse_y = mouse_last_y = app_y();
+			else if (mouse_view_y() > sys_h()) {
+				mouse_y = mouse_last_y = sys_y();
 				iron_mouse_set_position(math_floor(mouse_x), math_floor(mouse_y));
 			}
 		}
@@ -125,7 +125,7 @@ function camera_update() {
 		}
 
 		if (move_forward || move_backward || strafe_right || strafe_left || strafe_up || strafe_down) {
-			camera_ease += time_delta() * 15;
+			camera_ease += sys_delta() * 15;
 			if (camera_ease > 1.0) {
 				camera_ease = 1.0;
 			}
@@ -152,14 +152,14 @@ function camera_update() {
 			}
 		}
 		else {
-			camera_ease -= time_delta() * 20.0 * camera_ease;
+			camera_ease -= sys_delta() * 20.0 * camera_ease;
 			if (camera_ease < 0.0) {
 				camera_ease = 0.0;
 			}
 		}
 
 
-		let d: f32 = time_delta() * fast * camera_ease * 2.0 * ((move_forward || move_backward) ? config_raw.camera_zoom_speed : config_raw.camera_pan_speed);
+		let d: f32 = sys_delta() * fast * camera_ease * 2.0 * ((move_forward || move_backward) ? config_raw.camera_zoom_speed : config_raw.camera_pan_speed);
 		if (d > 0.0) {
 			transform_move(camera.base.transform, camera_dir, d);
 			if (context_raw.camera_type == camera_type_t.ORTHOGRAPHIC) {

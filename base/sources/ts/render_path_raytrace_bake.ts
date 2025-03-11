@@ -60,7 +60,7 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 		render_path_set_target("baketex0", additional);
 		render_path_draw_meshes("paint");
 		context_raw.bake_type = _bake_type;
-		app_notify_on_next_frame(parse_paint_material);
+		sys_notify_on_next_frame(parse_paint_material);
 
 		render_path_raytrace_first = true;
 		render_path_raytrace_raytrace_init(render_path_raytrace_bake_get_bake_shader_name(), rebuild, true);
@@ -123,7 +123,7 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 
 		render_path_raytrace_bake_rays_pix = render_path_raytrace_frame * samples_per_frame;
 		render_path_raytrace_bake_rays_counter += samples_per_frame;
-		render_path_raytrace_bake_rays_timer += time_real_delta();
+		render_path_raytrace_bake_rays_timer += sys_real_delta();
 		if (render_path_raytrace_bake_rays_timer >= 1) {
 			render_path_raytrace_bake_rays_sec = render_path_raytrace_bake_rays_counter;
 			render_path_raytrace_bake_rays_timer = 0;

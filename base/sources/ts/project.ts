@@ -76,7 +76,7 @@ function project_save(save_and_quit: bool = false) {
 
 	_project_save_and_quit = save_and_quit;
 
-	app_notify_on_init(function () {
+	sys_notify_on_init(function () {
 		export_arm_run_project();
 		if (_project_save_and_quit) {
 			iron_stop();
@@ -202,8 +202,8 @@ function project_new(reset_layers: bool = true) {
 			raw = import_mesh_raw_mesh(mesh);
 
 			///if is_sculpt
-			app_notify_on_next_frame(function (mesh: raw_mesh_t) {
-				app_notify_on_init(function (mesh: raw_mesh_t) {
+			sys_notify_on_next_frame(function (mesh: raw_mesh_t) {
+				sys_notify_on_init(function (mesh: raw_mesh_t) {
 					import_mesh_pack_to_texture(mesh);
 				}, mesh);
 			}, mesh);
@@ -309,11 +309,11 @@ function project_new(reset_layers: bool = true) {
 		array_push(project_layers, layer);
 		context_set_layer(layer);
 		if (aspect_ratio_changed) {
-			app_notify_on_init(layers_resize);
+			sys_notify_on_init(layers_resize);
 		}
 		///end
 
-		app_notify_on_init(layers_init);
+		sys_notify_on_init(layers_init);
 	}
 
 	if (g2_in_use) draw_begin(current);
@@ -385,7 +385,7 @@ function project_import_brush() {
 			// Parse brush
 			make_material_parse_brush();
 			ui_nodes_hwnd.redraws = 2;
-			app_notify_on_init(util_render_make_brush_preview);
+			sys_notify_on_init(util_render_make_brush_preview);
 		}
 		// Import from project file
 		else {
@@ -617,7 +617,7 @@ function project_reimport_texture_load(path: string, asset: asset_t) {
 	}
 	///end
 
-	app_notify_on_next_frame(function () {
+	sys_notify_on_next_frame(function () {
 		make_material_parse_paint_material();
 
 		///if (is_paint || is_sculpt)

@@ -229,7 +229,7 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 		else {
 
 			let texpaint: string = "texpaint" + tid;
-			if (context_raw.tool == workspace_tool_t.BAKE && context_raw.brush_time == time_delta()) {
+			if (context_raw.tool == workspace_tool_t.BAKE && context_raw.brush_time == sys_delta()) {
 				// Clear to black on bake start
 				render_path_set_target(texpaint);
 				render_path_clear_target(0xff000000);
@@ -377,8 +377,8 @@ function render_path_paint_commands_live_brush() {
 	let _x: f32 = context_raw.paint_vec.x;
 	let _y: f32 = context_raw.paint_vec.y;
 	if (context_raw.brush_locked) {
-		context_raw.paint_vec.x = (context_raw.lock_started_x - app_x()) / app_w();
-		context_raw.paint_vec.y = (context_raw.lock_started_y - app_y()) / app_h();
+		context_raw.paint_vec.x = (context_raw.lock_started_x - sys_x()) / sys_w();
+		context_raw.paint_vec.y = (context_raw.lock_started_y - sys_y()) / sys_h();
 	}
 	let _last_x: f32 = context_raw.last_paint_vec_x;
 	let _last_y: f32 = context_raw.last_paint_vec_y;
@@ -427,8 +427,8 @@ function render_path_paint_commands_cursor() {
 	let mx: f32 = context_raw.paint_vec.x;
 	let my: f32 = 1.0 - context_raw.paint_vec.y;
 	if (context_raw.brush_locked) {
-		mx = (context_raw.lock_started_x - app_x()) / app_w();
-		my = 1.0 - (context_raw.lock_started_y - app_y()) / app_h();
+		mx = (context_raw.lock_started_x - sys_x()) / sys_w();
+		my = 1.0 - (context_raw.lock_started_y - sys_y()) / sys_h();
 	}
 	let radius: f32 = decal_mask ? context_raw.brush_decal_mask_radius : context_raw.brush_radius;
 	render_path_paint_draw_cursor(mx, my, context_raw.brush_nodes_radius * radius / 3.4);
@@ -605,7 +605,7 @@ function _render_path_paint_deriv() {
 	if (render_path_paint_push_undo_last) {
 		history_paint();
 	}
-	app_notify_on_init(_render_path_paint_final);
+	sys_notify_on_init(_render_path_paint_final);
 }
 
 function render_path_paint_is_rt_bake(): bool {
@@ -672,10 +672,10 @@ function render_path_paint_draw() {
 					context_select_paint_object(_paint_object);
 
 					if (context_raw.bake_type == bake_type_t.DERIVATIVE) {
-						app_notify_on_init(_render_path_paint_deriv);
+						sys_notify_on_init(_render_path_paint_deriv);
 					}
 					else {
-						app_notify_on_init(_render_path_paint_final);
+						sys_notify_on_init(_render_path_paint_final);
 					}
 				}
 			}
@@ -761,7 +761,7 @@ function render_path_paint_set_plane_mesh() {
 
 	let tw: f32 = 0.95 * ui_view2d_pan_scale;
 	let tx: f32 = ui_view2d_pan_x / ui_view2d_ww;
-	let ty: f32 = ui_view2d_pan_y / app_h();
+	let ty: f32 = ui_view2d_pan_y / sys_h();
 	m = mat4_identity();
 	m = mat4_scale(m, vec4_create(tw, tw, 1));
 	m = mat4_set_loc(m, vec4_create(tx, ty, 0));

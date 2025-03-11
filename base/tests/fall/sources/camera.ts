@@ -35,7 +35,7 @@ function camera_update() {
         }
     }
 
-    let d: f32 = time_delta() * speed * fast;
+    let d: f32 = sys_delta() * speed * fast;
     if (d > 0.0) {
         transform_move(camera.base.transform, dir, d);
     }

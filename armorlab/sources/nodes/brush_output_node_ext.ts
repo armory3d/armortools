@@ -73,7 +73,7 @@ function brush_output_node_get_as_image(self: brush_output_node_t, from: i32): i
 function brush_output_node_parse_inputs() {
 	if (!context_raw.registered) {
 		context_raw.registered = true;
-		app_notify_on_update(brush_output_node_update);
+		sys_notify_on_update(brush_output_node_update);
 	}
 
 	context_raw.paint_vec = context_raw.coords;
@@ -131,20 +131,20 @@ function brush_output_node_run(from: i32) {
 }
 
 function brush_output_node_update() {
-	let paint_x: f32 = mouse_view_x() / app_w();
-	let paint_y: f32 = mouse_view_y() / app_h();
+	let paint_x: f32 = mouse_view_x() / sys_w();
+	let paint_y: f32 = mouse_view_y() / sys_h();
 	if (mouse_started()) {
-		context_raw.start_x = mouse_view_x() / app_w();
-		context_raw.start_y = mouse_view_y() / app_h();
+		context_raw.start_x = mouse_view_x() / sys_w();
+		context_raw.start_y = mouse_view_y() / sys_h();
 	}
 
 	if (pen_down()) {
-		paint_x = pen_view_x() / app_w();
-		paint_y = pen_view_y() / app_h();
+		paint_x = pen_view_x() / sys_w();
+		paint_y = pen_view_y() / sys_h();
 	}
 	if (pen_started()) {
-		context_raw.start_x = pen_view_x() / app_w();
-		context_raw.start_y = pen_view_y() / app_h();
+		context_raw.start_x = pen_view_x() / sys_w();
+		context_raw.start_y = pen_view_y() / sys_h();
 	}
 
 	if (operator_shortcut(map_get(config_keymap, "brush_ruler") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN)) {

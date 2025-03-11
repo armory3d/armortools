@@ -148,7 +148,7 @@ function translator_init_font(cjk: bool, font_path: string, font_scale: f32) {
 	_translator_init_font_font_scale = font_scale;
 
 	// Load and assign font with cjk characters
-	app_notify_on_init(function () {
+	sys_notify_on_init(function () {
 
 		let cjk: bool = _translator_init_font_cjk;
 		let font_path: string = _translator_init_font_font_path;

@@ -3,14 +3,14 @@
 #define VALIDATE
 #endif
 
-#include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
 #include <assert.h>
 #include <malloc.h>
 #include <memory.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 #include <iron_gpu.h>
 #include <iron_math.h>
 #include <iron_system.h>
@@ -19,28 +19,38 @@
 static VkSemaphore framebuffer_available;
 static VkSemaphore relay_semaphore;
 static bool wait_for_relay = false;
-static void command_list_should_wait_for_framebuffer(void);
 static VkDescriptorSetLayout compute_descriptor_layout;
 static int framebuffer_count = 0;
 
-extern iron_gpu_texture_t *vulkan_textures[16];
-VkDescriptorSet getDescriptorSet(void);
+iron_gpu_texture_t *vulkan_textures[16] = {
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+};
+
+VkSampler vulkan_samplers[16] = {
+	VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE,
+	VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE,
+    VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE,
+	VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE
+};
+
+VkDescriptorSet get_descriptor_set(void);
 static VkDescriptorSet get_compute_descriptor_set(void);
 void setImageLayout(VkCommandBuffer _buffer, VkImage image, VkImageAspectFlags aspectMask, VkImageLayout oldImageLayout, VkImageLayout newImageLayout);
 
-VkRenderPassBeginInfo currentRenderPassBeginInfo;
-VkPipeline currentVulkanPipeline;
-iron_gpu_texture_t *currentRenderTargets[8] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+VkRenderPassBeginInfo current_render_pass_begin_info;
+VkPipeline current_vulkan_pipeline;
+iron_gpu_texture_t *current_render_targets[8] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 
-static bool onBackBuffer = false;
-static uint32_t lastVertexConstantBufferOffset = 0;
-static uint32_t lastFragmentConstantBufferOffset = 0;
-static uint32_t lastComputeConstantBufferOffset = 0;
+static bool on_back_buffer = false;
+static uint32_t last_vertex_constant_buffer_offset = 0;
+static uint32_t last_fragment_constant_buffer_offset = 0;
+static uint32_t last_compute_constant_buffer_offset = 0;
 static iron_gpu_pipeline_t *current_pipeline = NULL;
 static iron_gpu_compute_shader *current_compute_shader = NULL;
-static int mrtIndex = 0;
-static VkFramebuffer mrtFramebuffer[16];
-static VkRenderPass mrtRenderPass[16];
+static int mrt_index = 0;
+static VkFramebuffer mrt_framebuffer[16];
+static VkRenderPass mrt_render_pass[16];
 
 static bool in_render_pass = false;
 static bool wait_for_framebuffer = false;
@@ -50,11 +60,10 @@ static VkShaderModule create_shader_module(const void *code, size_t size);
 static VkDescriptorPool compute_descriptor_pool;
 
 VkDescriptorSetLayout desc_layout;
-extern iron_gpu_texture_t *vulkan_textures[16];
-extern uint32_t swapchainImageCount;
-extern uint32_t current_buffer;
 
 static VkDescriptorPool descriptor_pool;
+
+bool iron_gpu_transpose_mat = true;
 
 struct indexed_name {
 	uint32_t id;
@@ -69,8 +78,8 @@ struct indexed_index {
 #define MAX_THINGS 256
 static struct indexed_name names[MAX_THINGS];
 static uint32_t names_size = 0;
-static struct indexed_name memberNames[MAX_THINGS];
-static uint32_t memberNames_size = 0;
+static struct indexed_name member_names[MAX_THINGS];
+static uint32_t member_names_size = 0;
 static struct indexed_index locs[MAX_THINGS];
 static uint32_t locs_size = 0;
 static struct indexed_index bindings[MAX_THINGS];
@@ -93,10 +102,7 @@ static int descriptor_sets_count = 0;
 static struct descriptor_set compute_descriptor_sets[MAX_DESCRIPTOR_SETS] = {0};
 static int compute_descriptor_sets_count = 0;
 
-bool use_staging_buffer = false;
-
 void set_image_layout(VkImage image, VkImageAspectFlags aspectMask, VkImageLayout old_image_layout, VkImageLayout new_image_layout);
-
 
 // djb2
 uint32_t iron_internal_hash_name(unsigned char *str) {
@@ -129,18 +135,6 @@ void iron_gpu_internal_resize(int, int);
 void create_descriptor_layout(void);
 static void create_compute_descriptor_layout(void);
 void set_image_layout(VkImage image, VkImageAspectFlags aspectMask, VkImageLayout old_image_layout, VkImageLayout new_image_layout);
-
-iron_gpu_texture_t *vulkan_textures[16] = {
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
-};
-
-VkSampler vulkan_samplers[16] = {
-	VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE,
-	VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE,
-    VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE,
-	VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE
-};
 
 static bool began = false;
 static VkPhysicalDeviceProperties gpu_props;
@@ -187,7 +181,6 @@ void iron_internal_resize(int width, int height) {
 		window->width = width;
 		window->height = height;
 	}
-
 	iron_gpu_internal_resize(width, height);
 }
 
@@ -1148,7 +1141,7 @@ void iron_gpu_begin(iron_gpu_texture_t *renderTarget) {
 	}
 
 	// Get the index of the next available swapchain image:
-	command_list_should_wait_for_framebuffer();
+	wait_for_framebuffer = true;
 	VkResult err = -1;
 	do {
 		err = vk.fpAcquireNextImageKHR(vk_ctx.device, window->swapchain, UINT64_MAX, framebuffer_available, VK_NULL_HANDLE, &window->current_image);
@@ -1232,7 +1225,7 @@ int iron_gpu_max_bound_textures(void) {
 }
 
 
-static void endPass(iron_gpu_command_list_t *list) {
+static void end_pass(iron_gpu_command_list_t *list) {
 	if (in_render_pass) {
 		vkCmdEndRenderPass(list->impl._buffer);
 		in_render_pass = false;
@@ -1395,7 +1388,7 @@ void set_viewport_and_scissor(iron_gpu_command_list_t *list) {
 	VkRect2D scissor;
 	memset(&scissor, 0, sizeof(scissor));
 
-	if (currentRenderTargets[0] == NULL || currentRenderTargets[0]->framebuffer_index >= 0) {
+	if (current_render_targets[0] == NULL || current_render_targets[0]->framebuffer_index >= 0) {
 		viewport.x = 0;
 		viewport.y = (float)iron_window_height();
 		viewport.width = (float)iron_window_width();
@@ -1409,13 +1402,13 @@ void set_viewport_and_scissor(iron_gpu_command_list_t *list) {
 	}
 	else {
 		viewport.x = 0;
-		viewport.y = (float)currentRenderTargets[0]->height;
-		viewport.width = (float)currentRenderTargets[0]->width;
-		viewport.height = -(float)currentRenderTargets[0]->height;
+		viewport.y = (float)current_render_targets[0]->height;
+		viewport.width = (float)current_render_targets[0]->width;
+		viewport.height = -(float)current_render_targets[0]->height;
 		viewport.minDepth = (float)0.0f;
 		viewport.maxDepth = (float)1.0f;
-		scissor.extent.width = currentRenderTargets[0]->width;
-		scissor.extent.height = currentRenderTargets[0]->height;
+		scissor.extent.width = current_render_targets[0]->width;
+		scissor.extent.height = current_render_targets[0]->height;
 		scissor.offset.x = 0;
 		scissor.offset.y = 0;
 	}
@@ -1508,18 +1501,18 @@ void iron_gpu_command_list_begin(iron_gpu_command_list_t *list) {
 	                     pmemory_barrier);
 
 	vkCmdBeginRenderPass(list->impl._buffer, &rp_begin, VK_SUBPASS_CONTENTS_INLINE);
-	currentRenderPassBeginInfo = rp_begin;
+	current_render_pass_begin_info = rp_begin;
 	in_render_pass = true;
 
 	set_viewport_and_scissor(list);
 
-	onBackBuffer = true;
+	on_back_buffer = true;
 
-	for (int i = 0; i < mrtIndex; ++i) {
-		vkDestroyFramebuffer(vk_ctx.device, mrtFramebuffer[i], NULL);
-		vkDestroyRenderPass(vk_ctx.device, mrtRenderPass[i], NULL);
+	for (int i = 0; i < mrt_index; ++i) {
+		vkDestroyFramebuffer(vk_ctx.device, mrt_framebuffer[i], NULL);
+		vkDestroyRenderPass(vk_ctx.device, mrt_render_pass[i], NULL);
 	}
-	mrtIndex = 0;
+	mrt_index = 0;
 }
 
 void iron_gpu_command_list_end(iron_gpu_command_list_t *list) {
@@ -1616,28 +1609,28 @@ void iron_gpu_command_list_scissor(iron_gpu_command_list_t *list, int x, int y, 
 void iron_gpu_command_list_disable_scissor(iron_gpu_command_list_t *list) {
 	VkRect2D scissor;
 	memset(&scissor, 0, sizeof(scissor));
-	if (currentRenderTargets[0] == NULL || currentRenderTargets[0]->framebuffer_index >= 0) {
+	if (current_render_targets[0] == NULL || current_render_targets[0]->framebuffer_index >= 0) {
 		scissor.extent.width = iron_window_width();
 		scissor.extent.height = iron_window_height();
 	}
 	else {
-		scissor.extent.width = currentRenderTargets[0]->width;
-		scissor.extent.height = currentRenderTargets[0]->height;
+		scissor.extent.width = current_render_targets[0]->width;
+		scissor.extent.height = current_render_targets[0]->height;
 	}
 	vkCmdSetScissor(list->impl._buffer, 0, 1, &scissor);
 }
 
 void iron_gpu_command_list_set_pipeline(iron_gpu_command_list_t *list, struct iron_gpu_pipeline *pipeline) {
 	current_pipeline = pipeline;
-	lastVertexConstantBufferOffset = 0;
-	lastFragmentConstantBufferOffset = 0;
+	last_vertex_constant_buffer_offset = 0;
+	last_fragment_constant_buffer_offset = 0;
 
-	if (onBackBuffer) {
-		currentVulkanPipeline = current_pipeline->impl.framebuffer_pipeline;
+	if (on_back_buffer) {
+		current_vulkan_pipeline = current_pipeline->impl.framebuffer_pipeline;
 		vkCmdBindPipeline(list->impl._buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, current_pipeline->impl.framebuffer_pipeline);
 	}
 	else {
-		currentVulkanPipeline = current_pipeline->impl.rendertarget_pipeline;
+		current_vulkan_pipeline = current_pipeline->impl.rendertarget_pipeline;
 		vkCmdBindPipeline(list->impl._buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, current_pipeline->impl.rendertarget_pipeline);
 	}
 }
@@ -1673,14 +1666,14 @@ void iron_internal_restore_render_target(iron_gpu_command_list_t *list, struct i
 	scissor.offset.y = 0;
 	vkCmdSetScissor(list->impl._buffer, 0, 1, &scissor);
 
-	if (onBackBuffer && in_render_pass) {
+	if (on_back_buffer && in_render_pass) {
 		return;
 	}
 
-	endPass(list);
+	end_pass(list);
 
-	currentRenderTargets[0] = NULL;
-	onBackBuffer = true;
+	current_render_targets[0] = NULL;
+	on_back_buffer = true;
 
 	VkClearValue clear_values[2];
 	memset(clear_values, 0, sizeof(VkClearValue) * 2);
@@ -1702,21 +1695,21 @@ void iron_internal_restore_render_target(iron_gpu_command_list_t *list, struct i
 	rp_begin.clearValueCount = 2;
 	rp_begin.pClearValues = clear_values;
 	vkCmdBeginRenderPass(list->impl._buffer, &rp_begin, VK_SUBPASS_CONTENTS_INLINE);
-	currentRenderPassBeginInfo = rp_begin;
+	current_render_pass_begin_info = rp_begin;
 	in_render_pass = true;
 
 	if (current_pipeline != NULL) {
-		currentVulkanPipeline = current_pipeline->impl.framebuffer_pipeline;
+		current_vulkan_pipeline = current_pipeline->impl.framebuffer_pipeline;
 		vkCmdBindPipeline(list->impl._buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, current_pipeline->impl.framebuffer_pipeline);
 	}
 }
 
 void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, struct iron_gpu_texture **targets, int count) {
 	for (int i = 0; i < count; ++i) {
-		currentRenderTargets[i] = targets[i];
+		current_render_targets[i] = targets[i];
 	}
 	for (int i = count; i < 8; ++i) {
-		currentRenderTargets[i] = NULL;
+		current_render_targets[i] = NULL;
 	}
 
 	if (targets[0]->framebuffer_index >= 0) {
@@ -1724,9 +1717,9 @@ void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, str
 		return;
 	}
 
-	endPass(list);
+	end_pass(list);
 
-	onBackBuffer = false;
+	on_back_buffer = false;
 
 	VkClearValue clear_values[9];
 	memset(clear_values, 0, sizeof(VkClearValue));
@@ -1836,7 +1829,7 @@ void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, str
 		rp_info.dependencyCount = 2;
 		rp_info.pDependencies = dependencies;
 
-		VkResult err = vkCreateRenderPass(vk_ctx.device, &rp_info, NULL, &mrtRenderPass[mrtIndex]);
+		VkResult err = vkCreateRenderPass(vk_ctx.device, &rp_info, NULL, &mrt_render_pass[mrt_index]);
 		assert(!err);
 
 		VkImageView attachmentsViews[9];
@@ -1850,23 +1843,23 @@ void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, str
 		VkFramebufferCreateInfo fbufCreateInfo = {0};
 		fbufCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 		fbufCreateInfo.pNext = NULL;
-		fbufCreateInfo.renderPass = mrtRenderPass[mrtIndex];
+		fbufCreateInfo.renderPass = mrt_render_pass[mrt_index];
 		fbufCreateInfo.attachmentCount = targets[0]->impl.depthBufferBits > 0 ? count + 1 : count;
 		fbufCreateInfo.pAttachments = attachmentsViews;
 		fbufCreateInfo.width = targets[0]->width;
 		fbufCreateInfo.height = targets[0]->height;
 		fbufCreateInfo.layers = 1;
 
-		err = vkCreateFramebuffer(vk_ctx.device, &fbufCreateInfo, NULL, &mrtFramebuffer[mrtIndex]);
+		err = vkCreateFramebuffer(vk_ctx.device, &fbufCreateInfo, NULL, &mrt_framebuffer[mrt_index]);
 		assert(!err);
 
-		rp_begin.renderPass = mrtRenderPass[mrtIndex];
-		rp_begin.framebuffer = mrtFramebuffer[mrtIndex];
-		mrtIndex++;
+		rp_begin.renderPass = mrt_render_pass[mrt_index];
+		rp_begin.framebuffer = mrt_framebuffer[mrt_index];
+		mrt_index++;
 	}
 
 	vkCmdBeginRenderPass(list->impl._buffer, &rp_begin, VK_SUBPASS_CONTENTS_INLINE);
-	currentRenderPassBeginInfo = rp_begin;
+	current_render_pass_begin_info = rp_begin;
 	in_render_pass = true;
 
 	VkViewport viewport;
@@ -1888,7 +1881,7 @@ void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, str
 	vkCmdSetScissor(list->impl._buffer, 0, 1, &scissor);
 
 	if (current_pipeline != NULL) {
-		currentVulkanPipeline = current_pipeline->impl.rendertarget_pipeline;
+		current_vulkan_pipeline = current_pipeline->impl.rendertarget_pipeline;
 		vkCmdBindPipeline(list->impl._buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, current_pipeline->impl.rendertarget_pipeline);
 	}
 }
@@ -1953,7 +1946,7 @@ void iron_gpu_command_list_get_render_target_pixels(iron_gpu_command_list_t *lis
 
 	setImageLayout(list->impl._buffer, render_target->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 	               VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-	vkCmdBeginRenderPass(list->impl._buffer, &currentRenderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBeginRenderPass(list->impl._buffer, &current_render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 	in_render_pass = true;
 
 	iron_gpu_command_list_end(list);
@@ -1977,28 +1970,24 @@ void iron_gpu_command_list_render_target_to_texture_barrier(iron_gpu_command_lis
 }
 
 void iron_gpu_command_list_set_vertex_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_constant_buffer *buffer, int offset, size_t size) {
-	lastVertexConstantBufferOffset = offset;
+	last_vertex_constant_buffer_offset = offset;
 }
 
 void iron_gpu_command_list_set_fragment_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_constant_buffer *buffer, int offset, size_t size) {
-	lastFragmentConstantBufferOffset = offset;
+	last_fragment_constant_buffer_offset = offset;
 
-	VkDescriptorSet descriptor_set = getDescriptorSet();
-	uint32_t offsets[2] = {lastVertexConstantBufferOffset, lastFragmentConstantBufferOffset};
+	VkDescriptorSet descriptor_set = get_descriptor_set();
+	uint32_t offsets[2] = {last_vertex_constant_buffer_offset, last_fragment_constant_buffer_offset};
 	vkCmdBindDescriptorSets(list->impl._buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, current_pipeline->impl.pipeline_layout, 0, 1, &descriptor_set, 2, offsets);
 }
 
 void iron_gpu_command_list_set_compute_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_constant_buffer *buffer, int offset, size_t size) {
-	lastComputeConstantBufferOffset = offset;
+	last_compute_constant_buffer_offset = offset;
 
 	VkDescriptorSet descriptor_set = get_compute_descriptor_set();
-	uint32_t offsets[2] = {lastComputeConstantBufferOffset, lastComputeConstantBufferOffset};
+	uint32_t offsets[2] = {last_compute_constant_buffer_offset, last_compute_constant_buffer_offset};
 	vkCmdBindDescriptorSets(list->impl._buffer, VK_PIPELINE_BIND_POINT_COMPUTE, current_compute_shader->impl.pipeline_layout, 0, 1, &descriptor_set, 2,
 	                        offsets);
-}
-
-static void command_list_should_wait_for_framebuffer(void) {
-	wait_for_framebuffer = true;
 }
 
 void iron_gpu_command_list_execute(iron_gpu_command_list_t *list) {
@@ -2073,7 +2062,6 @@ void iron_gpu_command_list_set_texture_from_render_target_depth(iron_gpu_command
 void iron_gpu_command_list_set_compute_shader(iron_gpu_command_list_t *list, iron_gpu_compute_shader *shader) {
 	current_compute_shader = shader;
 	vkCmdBindPipeline(list->impl._buffer, VK_PIPELINE_BIND_POINT_COMPUTE, shader->impl.pipeline);
-	//**vkCmdBindDescriptorSets(list->impl._buffer, VK_PIPELINE_BIND_POINT_COMPUTE, shader->impl.pipeline_layout, 0, 1, &shader->impl.descriptor_set, 0, 0);
 }
 
 void iron_gpu_command_list_compute(iron_gpu_command_list_t *list, int x, int y, int z) {
@@ -2086,13 +2074,13 @@ void iron_gpu_command_list_compute(iron_gpu_command_list_t *list, int x, int y, 
 
 	int render_target_count = 0;
 	for (int i = 0; i < 8; ++i) {
-		if (currentRenderTargets[i] == NULL) {
+		if (current_render_targets[i] == NULL) {
 			break;
 		}
 		++render_target_count;
 	}
 	if (render_target_count > 0) {
-		iron_gpu_command_list_set_render_targets(list, currentRenderTargets, render_target_count);
+		iron_gpu_command_list_set_render_targets(list, current_render_targets, render_target_count);
 	}
 }
 
@@ -2191,9 +2179,7 @@ void iron_gpu_compute_shader_destroy(iron_gpu_compute_shader *shader) {}
 
 iron_gpu_constant_location_t iron_gpu_compute_shader_get_constant_location(iron_gpu_compute_shader *shader, const char *name) {
 	iron_gpu_constant_location_t location = {0};
-
 	uint32_t hash = iron_internal_hash_name((unsigned char *)name);
-
 	return location;
 }
 
@@ -2253,8 +2239,6 @@ static void set_number(iron_internal_named_number *named_numbers, const char *na
 			return;
 		}
 	}
-
-	assert(false);
 }
 
 static void add_name(uint32_t id, char *name) {
@@ -2273,15 +2257,15 @@ static char *find_name(uint32_t id) {
 }
 
 static void add_member_name(uint32_t id, char *name) {
-	memberNames[memberNames_size].id = id;
-	memberNames[memberNames_size].name = name;
-	++memberNames_size;
+	member_names[member_names_size].id = id;
+	member_names[member_names_size].name = name;
+	++member_names_size;
 }
 
 static char *find_member_name(uint32_t id) {
-	for (uint32_t i = 0; i < memberNames_size; ++i) {
-		if (memberNames[i].id == id) {
-			return memberNames[i].name;
+	for (uint32_t i = 0; i < member_names_size; ++i) {
+		if (member_names[i].id == id) {
+			return member_names[i].name;
 		}
 	}
 	return NULL;
@@ -2308,7 +2292,7 @@ static void add_offset(uint32_t id, uint32_t offset) {
 static void parse_shader(uint32_t *shader_source, int shader_length, iron_internal_named_number *locations, iron_internal_named_number *textureBindings,
                          iron_internal_named_number *uniformOffsets) {
 	names_size = 0;
-	memberNames_size = 0;
+	member_names_size = 0;
 	locs_size = 0;
 	bindings_size = 0;
 	offsets_size = 0;
@@ -2425,19 +2409,22 @@ static VkShaderModule prepare_fs(VkShaderModule *frag_shader_module, iron_gpu_sh
 	return *frag_shader_module;
 }
 
-static VkFormat convert_format(iron_image_format_t format) {
+static VkFormat convert_image_format(iron_image_format_t format) {
 	switch (format) {
 	case IRON_IMAGE_FORMAT_RGBA128:
 		return VK_FORMAT_R32G32B32A32_SFLOAT;
 	case IRON_IMAGE_FORMAT_RGBA64:
 		return VK_FORMAT_R16G16B16A16_SFLOAT;
-	case IRON_IMAGE_FORMAT_R32:
-		return VK_FORMAT_R32_SFLOAT;
-	case IRON_IMAGE_FORMAT_R16:
-		return VK_FORMAT_R16_SFLOAT;
 	case IRON_IMAGE_FORMAT_R8:
 		return VK_FORMAT_R8_UNORM;
+	case IRON_IMAGE_FORMAT_R16:
+		return VK_FORMAT_R16_SFLOAT;
+	case IRON_IMAGE_FORMAT_R32:
+		return VK_FORMAT_R32_SFLOAT;
+	case IRON_IMAGE_FORMAT_BGRA32:
+		return VK_FORMAT_B8G8R8A8_UNORM;
 	case IRON_IMAGE_FORMAT_RGBA32:
+		return VK_FORMAT_R8G8B8A8_UNORM;
 	default:
 		return VK_FORMAT_B8G8R8A8_UNORM;
 	}
@@ -2759,7 +2746,7 @@ void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipeline) {
 
 	VkAttachmentDescription attachments[9];
 	for (int i = 0; i < pipeline->color_attachment_count; ++i) {
-		attachments[i].format = convert_format(pipeline->color_attachment[i]);
+		attachments[i].format = convert_image_format(pipeline->color_attachment[i]);
 		attachments[i].samples = VK_SAMPLE_COUNT_1_BIT;
 		attachments[i].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachments[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -2949,9 +2936,7 @@ static int write_tex_descs(VkDescriptorImageInfo *tex_descs) {
 
 static bool textures_changed(struct descriptor_set *set) {
 	VkDescriptorImageInfo tex_desc[16];
-
 	write_tex_descs(tex_desc);
-
 	return memcmp(&tex_desc, &set->tex_desc, sizeof(tex_desc)) != 0;
 }
 
@@ -2983,7 +2968,7 @@ void reuse_descriptor_sets(void) {
 	}
 }
 
-VkDescriptorSet getDescriptorSet() {
+VkDescriptorSet get_descriptor_set() {
 	int id = calc_descriptor_id();
 	for (int i = 0; i < descriptor_sets_count; ++i) {
 		if (descriptor_sets[i].id == id) {
@@ -3279,8 +3264,6 @@ void iron_gpu_shader_destroy(iron_gpu_shader_t *shader) {
 	shader->impl.source = NULL;
 }
 
-static VkCompareOp convert_compare_mode(iron_gpu_compare_mode_t compare);
-
 static VkSamplerAddressMode convert_addressing(iron_gpu_texture_addressing_t mode) {
 	switch (mode) {
 	case IRON_GPU_TEXTURE_ADDRESSING_REPEAT:
@@ -3292,7 +3275,6 @@ static VkSamplerAddressMode convert_addressing(iron_gpu_texture_addressing_t mod
 	case IRON_GPU_TEXTURE_ADDRESSING_MIRROR:
 		return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
 	default:
-		assert(false);
 		return VK_SAMPLER_ADDRESS_MODE_REPEAT;
 	}
 }
@@ -3305,7 +3287,6 @@ static VkSamplerMipmapMode convert_mipmap_mode(iron_gpu_mipmap_filter_t filter) 
 	case IRON_GPU_MIPMAP_FILTER_LINEAR:
 		return VK_SAMPLER_MIPMAP_MODE_LINEAR;
 	default:
-		assert(false);
 		return VK_SAMPLER_MIPMAP_MODE_NEAREST;
 	}
 }
@@ -3319,7 +3300,6 @@ static VkFilter convert_texture_filter(iron_gpu_texture_filter_t filter) {
 	case IRON_GPU_TEXTURE_FILTER_ANISOTROPIC:
 		return VK_FILTER_LINEAR; // ?
 	default:
-		assert(false);
 		return VK_FILTER_NEAREST;
 	}
 }
@@ -3499,45 +3479,6 @@ static void prepare_texture_image(uint8_t *tex_colors, uint32_t width, uint32_t 
 	set_image_layout(tex_obj->image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, tex_obj->imageLayout);
 }
 
-static VkFormat convert_image_format(iron_image_format_t format) {
-	switch (format) {
-	case IRON_IMAGE_FORMAT_RGBA128:
-		return VK_FORMAT_R32G32B32A32_SFLOAT;
-	case IRON_IMAGE_FORMAT_RGBA64:
-		return VK_FORMAT_R16G16B16A16_SFLOAT;
-	case IRON_IMAGE_FORMAT_R8:
-		return VK_FORMAT_R8_UNORM;
-	case IRON_IMAGE_FORMAT_R16:
-		return VK_FORMAT_R16_SFLOAT;
-	case IRON_IMAGE_FORMAT_R32:
-		return VK_FORMAT_R32_SFLOAT;
-	case IRON_IMAGE_FORMAT_BGRA32:
-		return VK_FORMAT_B8G8R8A8_UNORM;
-	case IRON_IMAGE_FORMAT_RGBA32:
-		return VK_FORMAT_R8G8B8A8_UNORM;
-	default:
-		return VK_FORMAT_B8G8R8A8_UNORM;
-	}
-}
-
-static int format_byte_size(iron_image_format_t format) {
-	switch (format) {
-	case IRON_IMAGE_FORMAT_RGBA128:
-		return 16;
-	case IRON_IMAGE_FORMAT_RGBA64:
-		return 8;
-	case IRON_IMAGE_FORMAT_R16:
-		return 2;
-	case IRON_IMAGE_FORMAT_R8:
-		return 1;
-	case IRON_IMAGE_FORMAT_BGRA32:
-	case IRON_IMAGE_FORMAT_RGBA32:
-	case IRON_IMAGE_FORMAT_R32:
-	default:
-		return 4;
-	}
-}
-
 static void update_stride(iron_gpu_texture_t *texture) {
 	VkImageSubresource subres = {0};
 	subres.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -3567,7 +3508,7 @@ void iron_gpu_texture_init_from_bytes(iron_gpu_texture_t *texture, void *data, i
 
 	vkGetPhysicalDeviceFormatProperties(vk_ctx.gpu, tex_format, &props);
 
-	if ((props.linearTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT) && !use_staging_buffer) {
+	if (props.linearTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT) {
 		// Device can texture using linear textures
 		prepare_texture_image((uint8_t *)data, (uint32_t)width, (uint32_t)height, &texture->impl, VK_IMAGE_TILING_LINEAR,
 		                      VK_IMAGE_USAGE_SAMPLED_BIT /*| VK_IMAGE_USAGE_STORAGE_BIT*/, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &texture->impl.deviceSize,
@@ -3613,9 +3554,6 @@ void iron_gpu_texture_init_from_bytes(iron_gpu_texture_t *texture, void *data, i
 		vkDestroyImage(vk_ctx.device, staging_texture.image, NULL);
 		vkFreeMemory(vk_ctx.device, staging_texture.mem, NULL);
 
-	}
-	else {
-		assert(!"No support for B8G8R8A8_UNORM as texture image format");
 	}
 
 	update_stride(texture);
@@ -3831,8 +3769,6 @@ void iron_gpu_texture_set_mipmap(iron_gpu_texture_t *texture, iron_gpu_texture_t
     // texture->_uploaded = true;
 }
 
-void setup_init_cmd();
-
 void setImageLayout(VkCommandBuffer _buffer, VkImage image, VkImageAspectFlags aspectMask, VkImageLayout oldImageLayout, VkImageLayout newImageLayout) {
 	VkImageMemoryBarrier imageMemoryBarrier = {0};
 	imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -3892,7 +3828,7 @@ static void render_target_init(iron_gpu_texture_t *target, int width, int height
 	target->width = width;
 	target->height = height;
 	target->data = NULL;
-	target->impl.format = convert_format(format);
+	target->impl.format = convert_image_format(format);
 	target->impl.depthBufferBits = depthBufferBits;
 	target->impl.stage = 0;
 	target->impl.stage_depth = -1;
@@ -4211,9 +4147,7 @@ int iron_gpu_vertex_buffer_stride(iron_gpu_vertex_buffer_t *buffer) {
 	return buffer->impl.myStride;
 }
 
-bool iron_gpu_transpose_mat = true;
-
-static void createUniformBuffer(VkBuffer *buf, VkMemoryAllocateInfo *mem_alloc, VkDeviceMemory *mem, VkDescriptorBufferInfo *buffer_info, int size) {
+static void create_uniform_buffer(VkBuffer *buf, VkMemoryAllocateInfo *mem_alloc, VkDeviceMemory *mem, VkDescriptorBufferInfo *buffer_info, int size) {
 	VkBufferCreateInfo buf_info;
 	memset(&buf_info, 0, sizeof(buf_info));
 	buf_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -4253,7 +4187,7 @@ void iron_gpu_constant_buffer_init(iron_gpu_constant_buffer_t *buffer, int size)
 	buffer->impl.mySize = size;
 	buffer->data = NULL;
 
-	createUniformBuffer(&buffer->impl.buf, &buffer->impl.mem_alloc, &buffer->impl.mem, &buffer->impl.buffer_info, size);
+	create_uniform_buffer(&buffer->impl.buf, &buffer->impl.mem_alloc, &buffer->impl.mem, &buffer->impl.buffer_info, size);
 
 	// buffer hack
 	if (vk_ctx.vertex_uniform_buffer == NULL) {
@@ -4294,9 +4228,6 @@ void iron_gpu_constant_buffer_unlock(iron_gpu_constant_buffer_t *buffer) {
 
 int iron_gpu_constant_buffer_size(iron_gpu_constant_buffer_t *buffer) {
 	return buffer->impl.mySize;
-}
-
-static void unset(iron_gpu_index_buffer_t *buffer) {
 }
 
 void iron_gpu_index_buffer_init(iron_gpu_index_buffer_t *buffer, int indexCount, bool gpuMemory) {
@@ -4350,7 +4281,7 @@ void iron_gpu_index_buffer_init(iron_gpu_index_buffer_t *buffer, int indexCount,
 }
 
 void iron_gpu_index_buffer_destroy(iron_gpu_index_buffer_t *buffer) {
-	unset(buffer);
+	// unset(buffer);
 	vkFreeMemory(vk_ctx.device, buffer->impl.mem, NULL);
 	vkDestroyBuffer(vk_ctx.device, buffer->impl.buf, NULL);
 }
@@ -4382,12 +4313,7 @@ int iron_gpu_index_buffer_count(iron_gpu_index_buffer_t *buffer) {
 	return buffer->impl.count;
 }
 
-
 #ifndef IRON_ANDROID
-
-extern VkRenderPassBeginInfo currentRenderPassBeginInfo;
-extern VkFramebuffer *framebuffers;
-extern uint32_t current_buffer;
 
 static const int INDEX_RAYGEN = 0;
 static const int INDEX_MISS = 1;
@@ -5652,7 +5578,7 @@ void iron_gpu_raytrace_dispatch_rays(iron_gpu_command_list_t *command_list) {
 	_vkCmdTraceRaysKHR(command_list->impl._buffer, &raygen_shader_sbt_entry, &miss_shader_sbt_entry, &hit_shader_sbt_entry, &callable_shader_sbt_entry,
 	                   output->width, output->height, 1);
 
-	vkCmdBeginRenderPass(command_list->impl._buffer, &currentRenderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBeginRenderPass(command_list->impl._buffer, &current_render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 }
 
 #endif

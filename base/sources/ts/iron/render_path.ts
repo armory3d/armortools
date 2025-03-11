@@ -55,21 +55,21 @@ function render_path_ready(): bool {
 }
 
 function render_path_render_frame() {
-	if (!render_path_ready() ||_render_path_paused || app_w() == 0 || app_h() == 0) {
+	if (!render_path_ready() ||_render_path_paused || sys_w() == 0 || sys_h() == 0) {
 		return;
 	}
 
-	if (_render_path_last_w > 0 && (_render_path_last_w != app_w() ||_render_path_last_h != app_h())) {
+	if (_render_path_last_w > 0 && (_render_path_last_w != sys_w() ||_render_path_last_h != sys_h())) {
 		render_path_resize();
 	}
-	_render_path_last_w = app_w();
-	_render_path_last_h = app_h();
+	_render_path_last_w = sys_w();
+	_render_path_last_h = sys_h();
 
 	_render_path_frame_time = sys_time() -_render_path_last_frame_time;
 	_render_path_last_frame_time = sys_time();
 
-	render_path_current_w = app_w();
-	render_path_current_h = app_h();
+	render_path_current_w = sys_w();
+	render_path_current_h = sys_h();
 	_render_path_meshes_sorted = false;
 
 	render_path_commands();
@@ -80,11 +80,11 @@ function render_path_render_frame() {
 function render_path_set_target(target: string, additional: string[] = null) {
 	if (target == "") { // Framebuffer
 		_render_path_current_target = null;
-		render_path_current_w = app_w();
-		render_path_current_h = app_h();
+		render_path_current_w = sys_w();
+		render_path_current_h = sys_h();
 		render_path_begin();
-		render_path_set_current_viewport(app_w(), app_h());
-		render_path_set_current_scissor(app_w(), app_h());
+		render_path_set_current_viewport(sys_w(), sys_h());
+		render_path_set_current_scissor(sys_w(), sys_h());
 	}
 	else { // Render target
 		let rt: render_target_t = map_get(render_path_render_targets, target);
@@ -130,11 +130,11 @@ function render_path_end() {
 }
 
 function render_path_set_current_viewport(view_w: i32, view_h: i32) {
-	gpu_viewport(app_x(),render_path_current_h - (view_h - app_y()), view_w, view_h);
+	gpu_viewport(sys_x(),render_path_current_h - (view_h - sys_y()), view_w, view_h);
 }
 
 function render_path_set_current_scissor(view_w: i32, view_h: i32) {
-	gpu_scissor(app_x(),render_path_current_h - (view_h - app_y()), view_w, view_h);
+	gpu_scissor(sys_x(),render_path_current_h - (view_h - sys_y()), view_w, view_h);
 	_render_path_scissor_set = true;
 }
 
@@ -323,7 +323,7 @@ function render_path_resize() {
 		let rt: render_target_t = map_get(render_path_render_targets, render_targets_keys[i]);
 		if (rt != null && rt.width == 0) {
 			let _image: iron_gpu_texture_t = rt._image;
-			app_notify_on_init(_render_path_resize_on_init, _image);
+			sys_notify_on_init(_render_path_resize_on_init, _image);
 			rt._image = render_path_create_image(rt, rt._depth_buffer_bits);
 		}
 	}
@@ -384,8 +384,8 @@ function render_path_create_target(t: render_target_t): render_target_t {
 }
 
 function render_path_create_image(t: render_target_t, depth_buffer_bits: i32): iron_gpu_texture_t {
-	let width: i32 = t.width == 0 ? app_w() : t.width;
-	let height: i32 = t.height == 0 ? app_h() : t.height;
+	let width: i32 = t.width == 0 ? sys_w() : t.width;
+	let height: i32 = t.height == 0 ? sys_h() : t.height;
 	width = math_floor(width * t.scale);
 	height = math_floor(height * t.scale);
 	if (width < 1) {

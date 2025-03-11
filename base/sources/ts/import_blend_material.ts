@@ -38,7 +38,7 @@ function _import_blend_material() {
 
 	if (g2_in_use) draw_begin(current);
 
-	app_notify_on_init(function () {
+	sys_notify_on_init(function () {
 
 		let save: string;
 		if (path_is_protected()) {

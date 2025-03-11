@@ -10,8 +10,8 @@ function base_ext_render() {
 
 		base_init_undo_layers();
 
-		app_notify_on_next_frame(function () {
-			app_notify_on_next_frame(function () {
+		sys_notify_on_next_frame(function () {
+			sys_notify_on_next_frame(function () {
 				context_raw.project_type = project_model_t.SPHERE;
 				project_new();
 			});

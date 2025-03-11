@@ -16,7 +16,7 @@ function compass_render() {
 	let _visible: bool = compass.base.visible;
 	let _parent: object_t = compass.base.parent;
 	let crot: quat_t = cam.base.transform.rot;
-	let ratio: f32 = app_w() / app_h();
+	let ratio: f32 = sys_w() / sys_h();
 	let _P: mat4_t = cam.p;
 	cam.p = mat4_ortho(-8 * ratio, 8 * ratio, -8, 8, -2, 2);
 	compass.base.visible = true;
@@ -79,14 +79,14 @@ function compass_update() {
     }
     _compass_hovered = null;
 
-	let x: f32 = mouse_view_x() / app_w();
-	let y: f32 = mouse_view_y() / app_h();
+	let x: f32 = mouse_view_x() / sys_w();
+	let y: f32 = mouse_view_y() / sys_h();
 	let hover: bool = x > 0.9 && x < 1.0 && y < 0.14 && y > 0.0;
 	if (hover) {
 
         compass_init_hitbox();
 
-        let ratio: f32 = app_w() / app_h();
+        let ratio: f32 = sys_w() / sys_h();
         let _P: mat4_t = scene_camera.p;
 	    scene_camera.p = mat4_ortho(-8 * ratio, 8 * ratio, -8, 8, -2, 2);
 

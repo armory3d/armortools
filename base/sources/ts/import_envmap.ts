@@ -44,7 +44,7 @@ function import_envmap_run(path: string, image: iron_gpu_texture_t) {
 	let radiance_pixels: buffer_t = gpu_get_texture_pixels(import_envmap_radiance);
 	if (import_envmap_radiance_cpu != null) {
 		let _radiance_cpu: iron_gpu_texture_t = import_envmap_radiance_cpu;
-		app_notify_on_next_frame(function (_radiance_cpu: iron_gpu_texture_t) {
+		sys_notify_on_next_frame(function (_radiance_cpu: iron_gpu_texture_t) {
 			iron_unload_image(_radiance_cpu);
 		}, _radiance_cpu);
 	}
@@ -54,7 +54,7 @@ function import_envmap_run(path: string, image: iron_gpu_texture_t) {
 	if (import_envmap_mips_cpu != null) {
 		for (let i: i32 = 0; i < import_envmap_mips_cpu.length; ++i) {
 			let mip: iron_gpu_texture_t = import_envmap_mips_cpu[i];
-			app_notify_on_next_frame(function (mip: iron_gpu_texture_t) {
+			sys_notify_on_next_frame(function (mip: iron_gpu_texture_t) {
 				///if (!arm_direct3d12) // TODO: crashes after 50+ imports
 				iron_unload_image(mip);
 				///end

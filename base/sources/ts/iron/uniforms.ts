@@ -306,7 +306,7 @@ function uniforms_set_context_const(location: iron_gpu_constant_location_t, c: s
 			f = sys_time();
 		}
 		else if (c.link == "_aspect_ratio_window") {
-			f = app_w() / app_h();
+			f = sys_w() / sys_h();
 		}
 		else {
 			return false;

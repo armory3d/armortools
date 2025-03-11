@@ -73,7 +73,7 @@ function layers_ext_on_resized() {
 		map_delete(render_path_render_targets, "texpaint_node_target");
 	}
 
-	app_notify_on_next_frame(function () {
+	sys_notify_on_next_frame(function () {
 		layers_init();
 	});
 

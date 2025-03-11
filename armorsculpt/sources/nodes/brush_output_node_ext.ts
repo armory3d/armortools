@@ -78,8 +78,8 @@ function brush_output_node_run(self: brush_output_node_t, from: i32) {
 	// Do not paint over floating toolbar
 	if (context_is_floating_toolbar()) {
 		let w: i32 = ui_toolbar_get_x() + ui_toolbar_get_w();
-		left += w / app_w();
-		top += w / app_h();
+		left += w / sys_w();
+		top += w / sys_h();
 	}
 
 	// First time init

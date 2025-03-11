@@ -197,7 +197,7 @@ function import_arm_run_project(path: string) {
 		let rts: map_t<string, render_target_t> = render_path_render_targets;
 		let blend0: render_target_t = map_get(rts, "texpaint_blend0");
 		let _texpaint_blend0: iron_gpu_texture_t = blend0._image;
-		app_notify_on_next_frame(function (_texpaint_blend0: iron_gpu_texture_t) {
+		sys_notify_on_next_frame(function (_texpaint_blend0: iron_gpu_texture_t) {
 			iron_unload_image(_texpaint_blend0);
 		}, _texpaint_blend0);
 		blend0.width = config_get_texture_res_x();
@@ -205,7 +205,7 @@ function import_arm_run_project(path: string) {
 		blend0._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8, 0);
 		let blend1: render_target_t = map_get(rts, "texpaint_blend1");
 		let _texpaint_blend1: iron_gpu_texture_t = blend1._image;
-		app_notify_on_next_frame(function (_texpaint_blend1: iron_gpu_texture_t) {
+		sys_notify_on_next_frame(function (_texpaint_blend1: iron_gpu_texture_t) {
 			iron_unload_image(_texpaint_blend1);
 		}, _texpaint_blend1);
 		blend1.width = config_get_texture_res_x();
@@ -301,18 +301,18 @@ function import_arm_run_project(path: string) {
 			l.paint_subs = ld.paint_subs;
 			///end
 
-			app_notify_on_next_frame(function (_texpaint: iron_gpu_texture_t) {
+			sys_notify_on_next_frame(function (_texpaint: iron_gpu_texture_t) {
 				iron_unload_image(_texpaint);
 			}, _texpaint);
 
 			///if is_paint
 			if (_texpaint_nor != null) {
-				app_notify_on_next_frame(function (_texpaint_nor: iron_gpu_texture_t) {
+				sys_notify_on_next_frame(function (_texpaint_nor: iron_gpu_texture_t) {
 					iron_unload_image(_texpaint_nor);
 				}, _texpaint_nor);
 			}
 			if (_texpaint_pack != null) {
-				app_notify_on_next_frame(function (_texpaint_pack: iron_gpu_texture_t) {
+				sys_notify_on_next_frame(function (_texpaint_pack: iron_gpu_texture_t) {
 					iron_unload_image(_texpaint_pack);
 				}, _texpaint_pack);
 			}
@@ -421,7 +421,7 @@ function import_arm_run_mesh(raw: project_format_t) {
 		util_mesh_merge();
 		viewport_scale_to_bounds();
 	}
-	app_notify_on_init(layers_init);
+	sys_notify_on_init(layers_init);
 	history_reset();
 }
 
@@ -494,7 +494,7 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 		}
 	}
 
-	app_notify_on_init(function (imported: slot_material_t[]) {
+	sys_notify_on_init(function (imported: slot_material_t[]) {
 		for (let i: i32 = 0; i < imported.length; ++i) {
 			let m: slot_material_t = imported[i];
 			context_set_material(m);
@@ -584,7 +584,7 @@ function import_arm_run_brush_from_project(project: project_format_t, path: stri
 		array_push(imported, context_raw.brush);
 	}
 
-	app_notify_on_init(function (imported: slot_brush_t[]) {
+	sys_notify_on_init(function (imported: slot_brush_t[]) {
 		for (let i: i32 = 0; i < imported.length; ++i) {
 			let b: slot_brush_t = imported[i];
 			context_set_brush(b);

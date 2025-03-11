@@ -5,11 +5,11 @@ function main() {
 	iron_set_app_name(manifest_title);
 	config_load();
 
-	app_on_resize = base_on_resize;
-	app_on_w = base_w;
-	app_on_h = base_h;
-	app_on_x = base_x;
-	app_on_y = base_y;
+	sys_on_resize = base_on_resize;
+	sys_on_w = base_w;
+	sys_on_h = base_h;
+	sys_on_x = base_x;
+	sys_on_y = base_y;
 
 	config_init();
 	context_init();
@@ -18,7 +18,7 @@ function main() {
 		base_init_layout();
 	}
 	iron_set_app_name(manifest_title);
-	app_init();
+	sys_init();
 	scene_set_active("Scene");
 	uniforms_ext_init();
 	render_path_base_init();

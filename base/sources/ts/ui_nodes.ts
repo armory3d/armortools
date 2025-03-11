@@ -161,7 +161,7 @@ function ui_viewnodes_on_socket_released(socket_id: i32) {
 			_ui_nodes_on_socket_released_socket = socket;
 			_ui_nodes_on_socket_released_node = node;
 
-			app_notify_on_next_frame(function () {
+			sys_notify_on_next_frame(function () {
 				ui_menu_draw(function (ui: ui_t) {
 
 					let socket: ui_node_socket_t = _ui_nodes_on_socket_released_socket;
@@ -184,7 +184,7 @@ function ui_viewnodes_on_socket_released(socket_id: i32) {
 							_ui_nodes_hval0.value = socket.default_value[0];
 						}
 
-						app_notify_on_next_frame(function () {
+						sys_notify_on_next_frame(function () {
 							ui_end_input();
 
 							ui_box_show_custom(function (ui: ui_t) {
@@ -321,7 +321,7 @@ function ui_viewnodes_on_canvas_released() {
 					selected.type == "brush_output_node";
 				ui_menu.enabled = !is_protected;
 				if (ui_menu_button(tr("Cut"), "ctrl+x")) {
-					app_notify_on_next_frame(function () {
+					sys_notify_on_next_frame(function () {
 						ui_nodes_hwnd.redraws = 2;
 						ui_is_copy = true;
 						ui_is_cut = true;
@@ -329,14 +329,14 @@ function ui_viewnodes_on_canvas_released() {
 					});
 				}
 				if (ui_menu_button(tr("Copy"), "ctrl+c")) {
-					app_notify_on_next_frame(function () {
+					sys_notify_on_next_frame(function () {
 						ui_is_copy = true;
 						ui_nodes_is_node_menu_op = true;
 					});
 				}
 				ui_menu.enabled = ui_clipboard != "";
 				if (ui_menu_button(tr("Paste"), "ctrl+v")) {
-					app_notify_on_next_frame(function () {
+					sys_notify_on_next_frame(function () {
 						ui_nodes_hwnd.redraws = 2;
 						ui_is_paste = true;
 						ui_nodes_is_node_menu_op = true;
@@ -344,14 +344,14 @@ function ui_viewnodes_on_canvas_released() {
 				}
 				ui_menu.enabled = !is_protected;
 				if (ui_menu_button(tr("Delete"), "delete")) {
-					app_notify_on_next_frame(function () {
+					sys_notify_on_next_frame(function () {
 						ui_nodes_hwnd.redraws = 2;
 						ui_nodes_ui.is_delete_down = true;
 						ui_nodes_is_node_menu_op = true;
 					});
 				}
 				if (ui_menu_button(tr("Duplicate"))) {
-					app_notify_on_next_frame(function () {
+					sys_notify_on_next_frame(function () {
 						ui_nodes_hwnd.redraws = 2;
 						ui_is_copy = true;
 						ui_is_paste = true;
@@ -542,15 +542,15 @@ function ui_nodes_update() {
 	}
 
 	///if (is_paint || is_sculpt)
-	ui_nodes_wx = math_floor(app_w()) + ui_toolbar_w;
+	ui_nodes_wx = math_floor(sys_w()) + ui_toolbar_w;
 	///end
 	///if is_lab
-	ui_nodes_wx = math_floor(app_w());
+	ui_nodes_wx = math_floor(sys_w());
 	///end
 	ui_nodes_wy = ui_header_h * 2;
 
 	if (ui_view2d_show) {
-		ui_nodes_wy += app_h() - config_raw.layout[layout_size_t.NODES_H];
+		ui_nodes_wy += sys_h() - config_raw.layout[layout_size_t.NODES_H];
 	}
 
 	let ww: i32 = config_raw.layout[layout_size_t.NODES_W];
@@ -728,7 +728,7 @@ function ui_nodes_draw_grid(zoom: f32): iron_gpu_texture_t {
 	}
 	///end
 
-	let wh: i32 = app_h();
+	let wh: i32 = sys_h();
 	let step: f32 = ui_nodes_grid_cell_w * zoom;
 	let mult: i32 = 5 * ui_SCALE(ui_nodes_ui);
 	let w: i32 = math_floor(ww + step * mult);
@@ -892,10 +892,10 @@ function ui_nodes_render() {
 	ui_nodes_ww = config_raw.layout[layout_size_t.NODES_W];
 
 	///if (is_paint || is_sculpt)
-	ui_nodes_wx = math_floor(app_w()) + ui_toolbar_w;
+	ui_nodes_wx = math_floor(sys_w()) + ui_toolbar_w;
 	///end
 	///if is_lab
-	ui_nodes_wx = math_floor(app_w());
+	ui_nodes_wx = math_floor(sys_w());
 	///end
 
 	ui_nodes_wy = 0;
@@ -908,14 +908,14 @@ function ui_nodes_render() {
 	///end
 
 	let ew: i32 = math_floor(ui_ELEMENT_W(ui_nodes_ui) * 0.7);
-	ui_nodes_wh = app_h();
+	ui_nodes_wh = sys_h();
 	if (config_raw.layout[layout_size_t.HEADER] == 1) {
 		ui_nodes_wh += ui_header_h * 2;
 	}
 
 	if (ui_view2d_show) {
 		ui_nodes_wh = config_raw.layout[layout_size_t.NODES_H];
-		ui_nodes_wy = app_h() - config_raw.layout[layout_size_t.NODES_H] + ui_header_h;
+		ui_nodes_wy = sys_h() - config_raw.layout[layout_size_t.NODES_H] + ui_header_h;
 		if (config_raw.layout[layout_size_t.HEADER] == 1) {
 			ui_nodes_wy += ui_header_h;
 		}
@@ -1232,7 +1232,7 @@ function ui_nodes_render() {
 				ui_nodes_node_search_x = ui_nodes_ui._window_x + ui_nodes_ui._x;
 				ui_nodes_node_search_y = ui_nodes_ui._window_y + ui_nodes_ui._y;
 				// Allow for node menu to be closed first
-				app_notify_on_init(function() {
+				sys_notify_on_init(function() {
 					ui_nodes_node_search(math_floor(ui_nodes_node_search_x), math_floor(ui_nodes_node_search_y));
 				});
 			}

@@ -108,7 +108,7 @@ function _import_mesh_make_mesh(mesh: raw_mesh_t) {
 			slot_layer_unload(l);
 		}
 		layers_new_layer(false);
-		app_notify_on_init(layers_init);
+		sys_notify_on_init(layers_init);
 		history_reset();
 	}
 
@@ -124,9 +124,9 @@ function _import_mesh_make_mesh(mesh: raw_mesh_t) {
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 
 	// Wait for add_mesh calls to finish
-	app_notify_on_init(import_mesh_finish_import);
+	sys_notify_on_init(import_mesh_finish_import);
 
-	app_notify_on_next_frame(function (mesh: raw_mesh_t) {
+	sys_notify_on_next_frame(function (mesh: raw_mesh_t) {
 		import_mesh_pack_to_texture(mesh);
 	}, mesh);
 }

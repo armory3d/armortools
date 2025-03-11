@@ -64,9 +64,9 @@ function ui_view2d_render() {
 	ui_view2d_ww = config_raw.layout[layout_size_t.NODES_W];
 
 	///if (is_paint || is_sculpt)
-	ui_view2d_wx = math_floor(app_w()) + ui_toolbar_w;
+	ui_view2d_wx = math_floor(sys_w()) + ui_toolbar_w;
 	///else
-	ui_view2d_wx = math_floor(app_w());
+	ui_view2d_wx = math_floor(sys_w());
 	///end
 
 	ui_view2d_wy = 0;
@@ -256,7 +256,7 @@ function ui_view2d_render() {
 				_ui_view2d_render_tw = tw;
 				_ui_view2d_render_th = th;
 
-				app_notify_on_next_frame(function () {
+				sys_notify_on_next_frame(function () {
 					let rt: render_target_t = map_get(render_path_render_targets, "texpaint_picker");
 					let texpaint_picker: iron_gpu_texture_t = rt._image;
 					draw_begin(texpaint_picker);
@@ -505,7 +505,7 @@ function ui_view2d_update() {
 	let border: i32 = 32;
 	let tw: f32 = ui_view2d_ww * 0.95 * ui_view2d_pan_scale;
 	let tx: f32 = ui_view2d_ww / 2 - tw / 2 + ui_view2d_pan_x;
-	let hh: f32 = app_h();
+	let hh: f32 = sys_h();
 	let ty: f32 = hh / 2 - tw / 2 + ui_view2d_pan_y;
 
 	if (tx + border >  ui_view2d_ww) {

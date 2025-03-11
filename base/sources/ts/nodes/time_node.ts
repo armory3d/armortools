@@ -16,7 +16,7 @@ function time_node_get(self: time_node_t, from: i32): logic_node_value_t {
 		return v;
 	}
 	else if (from == 1) {
-		let v: logic_node_value_t = { _f32: time_delta() };
+		let v: logic_node_value_t = { _f32: sys_delta() };
 		return v;
 	}
 	else {

@@ -20,7 +20,7 @@ function import_texture_run(path: string, hdr_as_envmap: bool = true) {
 			if (hdr_as_envmap && ends_with(to_lower_case(path), ".hdr")) {
 				let image: iron_gpu_texture_t = data_get_image(path);
 				let itd: import_texture_data_t = { path: path, image: image };
-				app_notify_on_next_frame(function (itd: import_texture_data_t) { // Make sure file browser process did finish
+				sys_notify_on_next_frame(function (itd: import_texture_data_t) { // Make sure file browser process did finish
 					import_envmap_run(itd.path, itd.image);
 				}, itd);
 			}
@@ -56,7 +56,7 @@ function import_texture_run(path: string, hdr_as_envmap: bool = true) {
 	// Set as envmap
 	if (hdr_as_envmap && ends_with(to_lower_case(path), ".hdr")) {
 		let itd: import_texture_data_t = { path: path, image: image };
-		app_notify_on_next_frame(function (itd: import_texture_data_t) { // Make sure file browser process did finish
+		sys_notify_on_next_frame(function (itd: import_texture_data_t) { // Make sure file browser process did finish
 			import_envmap_run(itd.path, itd.image);
 		}, itd);
 	}

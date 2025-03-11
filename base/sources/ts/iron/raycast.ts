@@ -19,8 +19,8 @@ function raycast_get_ray(input_x: f32, input_y: f32, camera: camera_object_t): r
 
 	// Get 3D point form screen coords
 	// Set two vectors with opposing z values
-	start.x = (input_x / app_w()) * 2.0 - 1.0;
-	start.y = -((input_y / app_h()) * 2.0 - 1.0);
+	start.x = (input_x / sys_w()) * 2.0 - 1.0;
+	start.y = -((input_y / sys_h()) * 2.0 - 1.0);
 	start.z = -1.0;
 	end.x = start.x;
 	end.y = start.y;

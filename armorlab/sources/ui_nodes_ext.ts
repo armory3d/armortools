@@ -8,7 +8,7 @@ function ui_nodes_ext_delay_idle_sleep() {
 function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 	let ui: ui_t = ui_nodes_ui;
 	if (ui_button(tr("Run"))) {
-		// app_notify_on_init(function() {
+		// sys_notify_on_init(function() {
 			ui_nodes_ext_run();
 		// });
 	}
@@ -31,7 +31,7 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 }
 
 function ui_nodes_ext_run() {
-	app_notify_on_render_2d(ui_nodes_ext_delay_idle_sleep);
+	sys_notify_on_render_2d(ui_nodes_ext_delay_idle_sleep);
 
 	console_progress(tr("Processing"));
 
@@ -124,7 +124,7 @@ function ui_nodes_ext_run() {
 
 	console_progress(null);
 	context_raw.ddirty = 2;
-	app_remove_render_2d(ui_nodes_ext_delay_idle_sleep);
+	sys_remove_render_2d(ui_nodes_ext_delay_idle_sleep);
 
 	render_path_raytrace_ready = false;
 }

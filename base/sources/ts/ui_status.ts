@@ -18,7 +18,7 @@ function ui_status_render_ui() {
 
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
 
-	if (ui_window(ui_base_hwnds[tab_area_t.STATUS], app_x(), iron_window_height() - statush, ui_status_width(), statush)) {
+	if (ui_window(ui_base_hwnds[tab_area_t.STATUS], sys_x(), iron_window_height() - statush, ui_status_width(), statush)) {
 		ui._y += 2;
 
 		// Border

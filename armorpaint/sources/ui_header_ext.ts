@@ -51,7 +51,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 				context_set_layer(context_raw.layer.parent);
 			}
 			let m: slot_layer_t = layers_new_mask(false, context_raw.layer);
-			app_notify_on_next_frame(function (m: slot_layer_t) {
+			sys_notify_on_next_frame(function (m: slot_layer_t) {
 				_gpu_begin(m.texpaint);
 				iron_gpu_set_pipeline(pipes_colorid_to_mask);
 				let rt: render_target_t = map_get(render_path_render_targets, "texpaint_colorid");
@@ -153,7 +153,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 		if (!baking && ui_button(tr("Bake"))) {
 			context_raw.pdirty = rt_bake ? context_raw.bake_samples : 1;
 			context_raw.rdirty = 3;
-			app_notify_on_next_frame(function () {
+			sys_notify_on_next_frame(function () {
 				context_raw.layer_preview_dirty = true;
 			});
 			ui_base_hwnds[0].redraws = 2;

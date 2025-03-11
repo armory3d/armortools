@@ -139,7 +139,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 								ui_files_show("png", true, false, function (path: string) {
 									_tab_textures_draw_path = path;
 
-									app_notify_on_next_frame(function () {
+									sys_notify_on_next_frame(function () {
 										let img: iron_gpu_texture_t = _tab_textures_draw_img;
 										let target: iron_gpu_texture_t = gpu_create_render_target(tab_textures_to_pow2(img.width), tab_textures_to_pow2(img.height));
 										draw_begin(target);
@@ -147,7 +147,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 										draw_scaled_image(img, 0, 0, target.width, target.height);
 										draw_set_pipeline(null);
 										draw_end();
-										app_notify_on_next_frame(function (target: iron_gpu_texture_t) {
+										sys_notify_on_next_frame(function (target: iron_gpu_texture_t) {
 											let path: string = _tab_textures_draw_path;
 											let f: string = ui_files_filename;
 											if (f == "") {
@@ -168,14 +168,14 @@ function tab_textures_draw(htab: ui_handle_t) {
 
 							///if (is_paint || is_sculpt)
 							if (ui_menu_button(tr("To Mask"))) {
-								app_notify_on_next_frame(function () {
+								sys_notify_on_next_frame(function () {
 									layers_create_image_mask(_tab_textures_draw_asset);
 								});
 							}
 							///end
 
 							if (ui_menu_button(tr("Set as Envmap"))) {
-								app_notify_on_next_frame(function () {
+								sys_notify_on_next_frame(function () {
 									import_envmap_run(_tab_textures_draw_asset.file, _tab_textures_draw_img);
 								});
 							}
@@ -280,7 +280,7 @@ function tab_textures_delete_texture(asset: asset_t) {
 	map_delete(project_asset_map, asset.id);
 	array_splice(project_assets, i, 1);
 	array_splice(project_asset_names, i, 1);
-	app_notify_on_next_frame(function () {
+	sys_notify_on_next_frame(function () {
 		make_material_parse_paint_material();
 
 		///if (is_paint || is_sculpt)

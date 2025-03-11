@@ -52,7 +52,7 @@ function tilesheet_update(self: tilesheet_t) {
 		return;
 	}
 
-	self.time += time_real_delta();
+	self.time += sys_real_delta();
 
 	let frame_time: f32 = 1 / self.raw.framerate;
 	let frames_to_advance: i32 = 0;

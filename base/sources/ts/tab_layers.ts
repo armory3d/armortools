@@ -105,7 +105,7 @@ function tab_layers_button_new(text: string) {
 				l = context_raw.layer;
 
 				let m: slot_layer_t = layers_new_mask(false, l);
-				app_notify_on_next_frame(function (m: slot_layer_t) {
+				sys_notify_on_next_frame(function (m: slot_layer_t) {
 					slot_layer_clear(m, 0x00000000);
 				}, m);
 				context_raw.layer_preview_dirty = true;
@@ -119,7 +119,7 @@ function tab_layers_button_new(text: string) {
 				l = context_raw.layer;
 
 				let m: slot_layer_t = layers_new_mask(false, l);
-				app_notify_on_next_frame(function (m: slot_layer_t) {
+				sys_notify_on_next_frame(function (m: slot_layer_t) {
 					slot_layer_clear(m, 0xffffffff);
 				}, m);
 				context_raw.layer_preview_dirty = true;
@@ -133,7 +133,7 @@ function tab_layers_button_new(text: string) {
 				l = context_raw.layer;
 
 				let m: slot_layer_t = layers_new_mask(false, l);
-				app_notify_on_init(function (m: slot_layer_t) {
+				sys_notify_on_init(function (m: slot_layer_t) {
 					slot_layer_to_fill_layer(m);
 				}, m);
 				context_raw.layer_preview_dirty = true;
@@ -421,7 +421,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 							 ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
 		if (in_focus && ui.is_delete_down && tab_layers_can_delete(context_raw.layer)) {
 			ui.is_delete_down = false;
-			app_notify_on_init(function () {
+			sys_notify_on_init(function () {
 				tab_layers_delete_layer(context_raw.layer);
 			});
 		}
@@ -500,7 +500,7 @@ function tab_layers_combo_object(ui: ui_t, l: slot_layer_t, label: bool = false)
 		context_set_layer(l);
 		make_material_parse_mesh_material();
 		if (l.fill_layer != null) { // Fill layer
-			app_notify_on_init(function (l: slot_layer_t) {
+			sys_notify_on_init(function (l: slot_layer_t) {
 				context_raw.material = l.fill_layer;
 				slot_layer_clear(l);
 				layers_update_fill_layers();
@@ -764,14 +764,14 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			let to_paint_string: string = slot_layer_is_layer(l) ? tr("To Paint Layer") : tr("To Paint Mask");
 
 			if (l.fill_layer == null && ui_menu_button(to_fill_string)) {
-				app_notify_on_init(function () {
+				sys_notify_on_init(function () {
 					let l: slot_layer_t = tab_layers_l;
 					slot_layer_is_layer(l) ? history_to_fill_layer() : history_to_fill_mask();
 					slot_layer_to_fill_layer(l);
 				});
 			}
 			if (l.fill_layer != null && ui_menu_button(to_paint_string)) {
-				app_notify_on_init(function () {
+				sys_notify_on_init(function () {
 					let l: slot_layer_t = tab_layers_l;
 					slot_layer_is_layer(l) ? history_to_paint_layer() : history_to_paint_mask();
 					slot_layer_to_paint_layer(l);
@@ -781,7 +781,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 
 		ui.enabled = tab_layers_can_delete(l);
 		if (ui_menu_button(tr("Delete"), "delete")) {
-			app_notify_on_init(function () {
+			sys_notify_on_init(function () {
 				tab_layers_delete_layer(context_raw.layer);
 			});
 		}
@@ -789,7 +789,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 
 		if (l.fill_layer == null && ui_menu_button(tr("Clear"))) {
 			context_set_layer(l);
-			app_notify_on_init(function () {
+			sys_notify_on_init(function () {
 				let l: slot_layer_t = tab_layers_l;
 				if (!slot_layer_is_group(l)) {
 					history_clear_layer();
@@ -808,7 +808,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			});
 		}
 		if (slot_layer_is_mask(l) && l.fill_layer == null && ui_menu_button(tr("Invert"))) {
-			app_notify_on_init(function () {
+			sys_notify_on_init(function () {
 				let l: slot_layer_t = tab_layers_l;
 				context_set_layer(l);
 				history_invert_mask();
@@ -816,7 +816,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			});
 		}
 		if (slot_layer_is_mask(l) && ui_menu_button(tr("Apply"))) {
-			app_notify_on_init(function () {
+			sys_notify_on_init(function () {
 				let l: slot_layer_t = tab_layers_l;
 				context_raw.layer = l;
 				history_apply_mask();
@@ -827,14 +827,14 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			});
 		}
 		if (slot_layer_is_group(l) && ui_menu_button(tr("Merge Group"))) {
-			app_notify_on_init(function () {
+			sys_notify_on_init(function () {
 				let l: slot_layer_t = tab_layers_l;
 				layers_merge_group(l);
 			});
 		}
 		ui.enabled = tab_layers_can_merge_down(l);
 		if (ui_menu_button(tr("Merge Down"))) {
-			app_notify_on_init(function () {
+			sys_notify_on_init(function () {
 				let l: slot_layer_t = tab_layers_l;
 				context_set_layer(l);
 				history_merge_layers();
@@ -844,7 +844,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 		}
 		ui.enabled = true;
 		if (ui_menu_button(tr("Duplicate"))) {
-			app_notify_on_init(function () {
+			sys_notify_on_init(function () {
 				let l: slot_layer_t = tab_layers_l;
 				context_set_layer(l);
 				history_duplicate_layer();
@@ -895,7 +895,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			ui_inline_radio(base_bits_handle, bits_items, ui_align_t.LEFT);
 			///end
 			if (base_bits_handle.changed) {
-				app_notify_on_init(layers_set_bits);
+				sys_notify_on_init(layers_set_bits);
 				ui_menu_keep_open = true;
 			}
 		}
@@ -908,7 +908,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			if (scale_handle.changed) {
 				context_set_material(l.fill_layer);
 				context_set_layer(l);
-				app_notify_on_init(function () {
+				sys_notify_on_init(function () {
 					layers_update_fill_layers();
 				});
 				ui_menu_keep_open = true;
@@ -922,7 +922,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 				context_set_material(l.fill_layer);
 				context_set_layer(l);
 				make_material_parse_paint_material();
-				app_notify_on_init(function () {
+				sys_notify_on_init(function () {
 					layers_update_fill_layers();
 				});
 				ui_menu_keep_open = true;
@@ -937,7 +937,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 				context_set_material(l.fill_layer);
 				context_set_layer(l);
 				make_material_parse_paint_material();
-				app_notify_on_init(function () {
+				sys_notify_on_init(function () {
 					layers_update_fill_layers();
 				});
 				ui_menu_keep_open = true;
@@ -1004,7 +1004,7 @@ function tab_layers_make_mask_preview_rgba32(l: slot_layer_t) {
 	if (context_raw.mask_preview_last != l) {
 		context_raw.mask_preview_last = l;
 		tab_layers_l = l;
-		app_notify_on_init(function () {
+		sys_notify_on_init(function () {
 			let l: slot_layer_t = tab_layers_l;
 			draw_begin(context_raw.mask_preview_rgba32);
 			draw_set_pipeline(ui_view2d_pipe);

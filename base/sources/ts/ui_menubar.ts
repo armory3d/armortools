@@ -16,11 +16,11 @@ function ui_menubar_render_ui() {
 	let ui: ui_t = ui_base_ui;
 
 	let item_w: i32 = ui_toolbar_get_w();
-	let panel_x: i32 = app_x();
+	let panel_x: i32 = sys_x();
 
 	///if (is_paint || is_sculpt)
 	if (config_raw.layout[layout_size_t.HEADER] == 1) {
-		panel_x = app_x() - item_w;
+		panel_x = sys_x() - item_w;
 	}
 	///end
 
@@ -44,7 +44,7 @@ function ui_menubar_render_ui() {
 				console_toast(tr("Saving project"));
 				project_save();
 				///end
-				app_notify_on_next_frame(function () {
+				sys_notify_on_next_frame(function () {
 					box_projects_show();
 				});
 			}
@@ -121,15 +121,15 @@ function ui_menubar_draw_tab_header() {
 	let ui: ui_t = ui_base_ui;
 
 	let item_w: i32 = ui_toolbar_get_w();
-	let panel_x: i32 = app_x();
+	let panel_x: i32 = sys_x();
 
 	let nodesw: i32 = (ui_nodes_show || ui_view2d_show) ? config_raw.layout[layout_size_t.NODES_W] : 0;
 	///if (is_paint || is_sculpt)
 	let ww: i32 = iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - ui_menubar_w - nodesw;
-	panel_x = (app_x() - item_w) + ui_menubar_w;
+	panel_x = (sys_x() - item_w) + ui_menubar_w;
 	///else
 	let ww: i32 = iron_window_width() - ui_menubar_w - nodesw;
-	panel_x = (app_x()) + ui_menubar_w;
+	panel_x = (sys_x()) + ui_menubar_w;
 	///end
 
 	if (ui_window(ui_menubar_workspace_handle, panel_x, 0, ww, ui_header_h)) {

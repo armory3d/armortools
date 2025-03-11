@@ -128,7 +128,7 @@ function object_setup_animation_super(raw: object_t, oactions: scene_t[] = null)
 	// Parented to bone
 	///if arm_skin
 	if (raw.raw.anim != null && raw.raw.anim.parent_bone != null) {
-		app_notify_on_init(_object_setup_animation_on_init, raw);
+		sys_notify_on_init(_object_setup_animation_on_init, raw);
 	}
 	///end
 	// object_t actions

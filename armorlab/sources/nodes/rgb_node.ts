@@ -16,7 +16,7 @@ function rgb_node_create(raw: ui_node_t, args: f32_array_t): rgb_node_t {
 
 function rgb_node_get_as_image(self: rgb_node_t, from: i32): iron_gpu_texture_t {
 	if (self.image != null) {
-		app_notify_on_next_frame(function (self: rgb_node_t) {
+		sys_notify_on_next_frame(function (self: rgb_node_t) {
 			iron_unload_image(self.image);
 		}, self);
 	}

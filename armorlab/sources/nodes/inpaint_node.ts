@@ -32,7 +32,7 @@ function inpaint_node_init() {
 
 	if (inpaint_node_mask == null) {
 		inpaint_node_mask = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
-		app_notify_on_next_frame(function () {
+		sys_notify_on_next_frame(function () {
 			_gpu_begin(inpaint_node_mask);
 			iron_gpu_clear(color_from_floats(1.0, 1.0, 1.0, 1.0));
 			_gpu_end();
@@ -85,7 +85,7 @@ function inpaint_node_get_as_image(self: inpaint_node_t, from: i32): iron_gpu_te
 }
 
 function inpaint_node_get_cached_image(self: inpaint_node_t): iron_gpu_texture_t {
-	app_notify_on_next_frame(function (self: inpaint_node_t) {
+	sys_notify_on_next_frame(function (self: inpaint_node_t) {
 		let source: iron_gpu_texture_t = logic_node_input_get_as_image(self.base.inputs[0]);
 		_gpu_begin(inpaint_node_image);
 		iron_gpu_set_pipeline(pipes_inpaint_preview);

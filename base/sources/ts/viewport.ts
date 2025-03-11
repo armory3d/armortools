@@ -85,8 +85,8 @@ function viewport_update_camera_type(camera_type: i32) {
 		let f: f32 = cam.data.fov * vec4_len(mat4_get_loc(cam.base.transform.world)) / 2.5;
 		f32a[0] = -2 * f;
 		f32a[1] =  2 * f;
-		f32a[2] = -2 * f * (app_h() / app_w());
-		f32a[3] =  2 * f * (app_h() / app_w());
+		f32a[2] = -2 * f * (sys_h() / sys_w());
+		f32a[3] =  2 * f * (sys_h() / sys_w());
 		cam.data.ortho = f32a;
 	}
 	camera_object_build_proj(cam);

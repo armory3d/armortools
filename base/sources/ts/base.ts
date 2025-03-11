@@ -121,16 +121,16 @@ function base_init() {
 	ui_view2d_init();
 	base_ext_init();
 
-	app_notify_on_update(base_update);
-	app_notify_on_render_2d(ui_view2d_render);
-	app_notify_on_update(ui_view2d_update);
-	app_notify_on_render_2d(ui_base_render_cursor);
-	app_notify_on_update(ui_nodes_update);
-	app_notify_on_render_2d(ui_nodes_render);
-	app_notify_on_update(ui_base_update);
-	app_notify_on_render_2d(ui_base_render);
-	app_notify_on_update(camera_update);
-	app_notify_on_render_2d(base_render);
+	sys_notify_on_update(base_update);
+	sys_notify_on_render_2d(ui_view2d_render);
+	sys_notify_on_update(ui_view2d_update);
+	sys_notify_on_render_2d(ui_base_render_cursor);
+	sys_notify_on_update(ui_nodes_update);
+	sys_notify_on_render_2d(ui_nodes_render);
+	sys_notify_on_update(ui_base_update);
+	sys_notify_on_render_2d(ui_base_render);
+	sys_notify_on_update(camera_update);
+	sys_notify_on_render_2d(base_render);
 
 	base_appx = ui_toolbar_w;
 	base_appy = ui_header_h;
@@ -266,8 +266,8 @@ function base_resize() {
 
 	let cam: camera_object_t = scene_camera;
 	if (cam.data.ortho != null) {
-		cam.data.ortho[2] = -2 * (app_h() / app_w());
-		cam.data.ortho[3] =  2 * (app_h() / app_w());
+		cam.data.ortho[2] = -2 * (sys_h() / sys_w());
+		cam.data.ortho[3] =  2 * (sys_h() / sys_w());
 	}
 	camera_object_build_proj(cam);
 
@@ -330,7 +330,7 @@ function base_update() {
 		// Touch and hold to activate dragging
 		if (base_drag_start < 0.2) {
 			if (has_drag && mouse_down()) {
-				base_drag_start += time_real_delta();
+				base_drag_start += sys_real_delta();
 			}
 			else {
 				base_drag_start = 0;
@@ -755,14 +755,14 @@ function base_init_layout() {
 	array_push(new_layout, math_floor(iron_window_height() / 2)); // LayoutSidebarH1
 
 	///if arm_ios
-	array_push(new_layout, show2d ? math_floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.473) : math_floor(app_w() * 0.473)); // LayoutNodesW
+	array_push(new_layout, show2d ? math_floor((sys_w() + raw.layout[layout_size_t.NODES_W]) * 0.473) : math_floor(sys_w() * 0.473)); // LayoutNodesW
 	///elseif arm_android
-	array_push(new_layout, show2d ? math_floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.473) : math_floor(app_w() * 0.473));
+	array_push(new_layout, show2d ? math_floor((sys_w() + raw.layout[layout_size_t.NODES_W]) * 0.473) : math_floor(sys_w() * 0.473));
 	///else
-	array_push(new_layout, show2d ? math_floor((app_w() + raw.layout[layout_size_t.NODES_W]) * 0.515) : math_floor(app_w() * 0.515)); // Align with ui header controls
+	array_push(new_layout, show2d ? math_floor((sys_w() + raw.layout[layout_size_t.NODES_W]) * 0.515) : math_floor(sys_w() * 0.515)); // Align with ui header controls
 	///end
 
-	array_push(new_layout, math_floor(app_h() / 2)); // LayoutNodesH
+	array_push(new_layout, math_floor(sys_h() / 2)); // LayoutNodesH
 	array_push(new_layout, math_floor(ui_status_default_status_h * raw.window_scale)); // LayoutStatusH
 
 	///if (arm_android || arm_ios)

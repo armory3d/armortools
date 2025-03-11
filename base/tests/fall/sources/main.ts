@@ -16,8 +16,8 @@ function main() {
 		use_depth: true
 	};
 	sys_start(ops);
-	app_init();
-	app_ready();
+	sys_init();
+	ready();
 }
 
 function render_commands() {
@@ -26,7 +26,7 @@ function render_commands() {
 	render_path_draw_meshes("mesh");
 }
 
-function app_ready() {
+function ready() {
 	render_path_commands = render_commands;
 
 	let scene: scene_t = {
@@ -138,7 +138,7 @@ function scene_ready() {
 	t.rot = quat_from_to(vec4_create(0, 0, 1), vec4_create(0, -1, 0));
 	transform_build_matrix(t);
 
-	app_notify_on_update(scene_update);
+	sys_notify_on_update(scene_update);
 
 	let cube: object_t = scene_get_child("Cube");
 	let mesh: mesh_object_t = cube.ext;

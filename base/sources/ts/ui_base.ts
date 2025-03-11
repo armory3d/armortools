@@ -190,7 +190,7 @@ function ui_base_init() {
 	project_paint_objects = [context_raw.paint_object];
 
 	if (project_filepath == "") {
-		app_notify_on_init(layers_init);
+		sys_notify_on_init(layers_init);
 	}
 
 	context_raw.project_objects = [];
@@ -267,7 +267,7 @@ function ui_base_update() {
 			box_export_show_textures();
 		}
 		else {
-			app_notify_on_init(function () {
+			sys_notify_on_init(function () {
 				export_texture_run(context_raw.texture_export_path);
 			});
 		}
@@ -517,7 +517,7 @@ function ui_base_update() {
 		///end
 
 		// Viewpoint
-		if (mouse_view_x() < app_w()) {
+		if (mouse_view_x() < sys_w()) {
 			if (operator_shortcut(map_get(config_keymap, "view_reset"))) {
 				viewport_reset();
 				viewport_scale_to_bounds();
@@ -668,8 +668,8 @@ function ui_base_update() {
 				if (config_raw.layout[layout_size_t.NODES_H] < 32) {
 					config_raw.layout[layout_size_t.NODES_H] = 32;
 				}
-				else if (config_raw.layout[layout_size_t.NODES_H] > app_h() * 0.95) {
-					config_raw.layout[layout_size_t.NODES_H] = math_floor(app_h() * 0.95);
+				else if (config_raw.layout[layout_size_t.NODES_H] > sys_h() * 0.95) {
+					config_raw.layout[layout_size_t.NODES_H] = math_floor(sys_h() * 0.95);
 				}
 			}
 		}
@@ -770,7 +770,7 @@ function ui_base_view_top() {
 	let is_typing: bool = ui_base_ui.is_typing || ui_view2d_ui.is_typing || ui_nodes_ui.is_typing;
 
 	if (context_in_paint_area() && !is_typing) {
-		if (mouse_view_x() < app_w()) {
+		if (mouse_view_x() < sys_w()) {
 			viewport_set_view(0, 0, 1, 0, 0, 0);
 		}
 	}
@@ -861,7 +861,7 @@ function ui_base_get_brush_stencil_rect(): rect_t {
 
 function ui_base_update_ui() {
 	if (console_message_timer > 0) {
-		console_message_timer -= time_delta();
+		console_message_timer -= sys_delta();
 		if (console_message_timer <= 0) {
 			ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 		}
@@ -1003,17 +1003,17 @@ function ui_base_update_ui() {
 	if (down) {
 		let mx: i32 = mouse_view_x();
 		let my: i32 = mouse_view_y();
-		let ww: i32 = app_w();
+		let ww: i32 = sys_w();
 
 		if (context_raw.paint2d) {
-			mx -= app_w();
+			mx -= sys_w();
 			ww = ui_view2d_ww;
 		}
 
 		if (mx < ww &&
-			mx > app_x() &&
-			my < app_h() &&
-			my > app_y()) {
+			mx > sys_x() &&
+			my < sys_h() &&
+			my > sys_y()) {
 
 			if (set_clone_source) {
 				context_raw.clone_start_x = mx;
@@ -1035,7 +1035,7 @@ function ui_base_update_ui() {
 
 					if (context_raw.tool == workspace_tool_t.CLONE && context_raw.clone_start_x >= 0.0) { // Clone delta
 						context_raw.clone_delta_x = (context_raw.clone_start_x - mx) / ww;
-						context_raw.clone_delta_y = (context_raw.clone_start_y - my) / app_h();
+						context_raw.clone_delta_y = (context_raw.clone_start_y - my) / sys_h();
 						context_raw.clone_start_x = -1;
 					}
 					else if (context_raw.tool == workspace_tool_t.FILL && context_raw.fill_type_handle.position == fill_type_t.UV_ISLAND) {
@@ -1043,7 +1043,7 @@ function ui_base_update_ui() {
 					}
 				}
 
-				context_raw.brush_time += time_delta();
+				context_raw.brush_time += sys_delta();
 
 				if (context_raw.run_brush != null) {
 					context_raw.run_brush(context_raw.brush_output_node_inst, 0);
@@ -1064,7 +1064,7 @@ function ui_base_update_ui() {
 
 		// New color id picked, update fill layer
 		if (context_raw.tool == workspace_tool_t.COLORID && context_raw.layer.fill_layer != null) {
-			app_notify_on_next_frame(function () {
+			sys_notify_on_next_frame(function () {
 				layers_update_fill_layer();
 				make_material_parse_paint_material(false);
 			});
@@ -1353,7 +1353,7 @@ function ui_base_render_cursor() {
 	// Clone source cursor
 	if (context_raw.tool == workspace_tool_t.CLONE && !keyboard_down("alt") && (mouse_down() || pen_down())) {
 		draw_set_color(0x66ffffff);
-		draw_scaled_image(cursor_img, mx + context_raw.clone_delta_x * app_w() - psize / 2, my + context_raw.clone_delta_y * app_h() - psize / 2, psize, psize);
+		draw_scaled_image(cursor_img, mx + context_raw.clone_delta_x * sys_w() - psize / 2, my + context_raw.clone_delta_y * sys_h() - psize / 2, psize, psize);
 		draw_set_color(0xffffffff);
 	}
 

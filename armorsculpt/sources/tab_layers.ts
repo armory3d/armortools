@@ -290,7 +290,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 		// 	let _init() = function () {
 		// 		delete_layer(context_raw.layer);
 		// 	}
-		// 	app_notify_on_init(_init);
+		// 	sys_notify_on_init(_init);
 		// }
 	}
 	ui._y -= center;

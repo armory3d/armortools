@@ -98,7 +98,7 @@ function scene_update_frame() {
 	///if arm_anim
 	for (let i: i32 = 0; i < scene_animations.length; ++i) {
 		let anim: anim_raw_t = scene_animations[i];
-		anim_update(anim, time_delta());
+		anim_update(anim, sys_delta());
 	}
 	///end
 	for (let i: i32 = 0; i < scene_empties.length; ++i) {

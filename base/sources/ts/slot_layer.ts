@@ -184,17 +184,17 @@ function slot_layer_unload(raw: slot_layer_t) {
 	let _texpaint_pack: iron_gpu_texture_t = raw.texpaint_pack;
 	let _texpaint_preview: iron_gpu_texture_t = raw.texpaint_preview;
 
-	app_notify_on_next_frame(function (_texpaint: iron_gpu_texture_t) {
+	sys_notify_on_next_frame(function (_texpaint: iron_gpu_texture_t) {
 		iron_unload_image(_texpaint);
 	}, _texpaint);
 
 	if (_texpaint_nor != null) {
-		app_notify_on_next_frame(function (_texpaint_nor: iron_gpu_texture_t) {
+		sys_notify_on_next_frame(function (_texpaint_nor: iron_gpu_texture_t) {
 			iron_unload_image(_texpaint_nor);
 		}, _texpaint_nor);
 	}
 	if (_texpaint_pack != null) {
-		app_notify_on_next_frame(function (_texpaint_pack: iron_gpu_texture_t) {
+		sys_notify_on_next_frame(function (_texpaint_pack: iron_gpu_texture_t) {
 			iron_unload_image(_texpaint_pack);
 		}, _texpaint_pack);
 	}
@@ -274,7 +274,7 @@ function slot_layer_invert_mask(raw: slot_layer_t) {
 	draw_set_pipeline(null);
 	draw_end();
 	let _texpaint: iron_gpu_texture_t = raw.texpaint;
-	app_notify_on_next_frame(function (_texpaint: iron_gpu_texture_t) {
+	sys_notify_on_next_frame(function (_texpaint: iron_gpu_texture_t) {
 		iron_unload_image(_texpaint);
 	}, _texpaint);
 	let rt: render_target_t = map_get(render_path_render_targets, "texpaint" + raw.id);
@@ -413,18 +413,18 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 			draw_end();
 		}
 
-		app_notify_on_next_frame(function (_texpaint: iron_gpu_texture_t) {
+		sys_notify_on_next_frame(function (_texpaint: iron_gpu_texture_t) {
 			iron_unload_image(_texpaint);
 		}, _texpaint);
 
 		if (_texpaint_nor != null) {
-			app_notify_on_next_frame(function (_texpaint_nor: iron_gpu_texture_t) {
+			sys_notify_on_next_frame(function (_texpaint_nor: iron_gpu_texture_t) {
 				iron_unload_image(_texpaint_nor);
 			}, _texpaint_nor);
 		}
 
 		if (_texpaint_pack != null) {
-			app_notify_on_next_frame(function (_texpaint_pack: iron_gpu_texture_t) {
+			sys_notify_on_next_frame(function (_texpaint_pack: iron_gpu_texture_t) {
 				iron_unload_image(_texpaint_pack);
 			}, _texpaint_pack);
 		}
@@ -452,7 +452,7 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 		draw_set_pipeline(null);
 		draw_end();
 
-		app_notify_on_next_frame(function (_texpaint: iron_gpu_texture_t) {
+		sys_notify_on_next_frame(function (_texpaint: iron_gpu_texture_t) {
 			iron_unload_image(_texpaint);
 		}, _texpaint);
 
@@ -465,7 +465,7 @@ function slot_layer_to_fill_layer(raw: slot_layer_t) {
 	context_set_layer(raw);
 	raw.fill_layer = context_raw.material;
 	layers_update_fill_layer();
-	app_notify_on_next_frame(function () {
+	sys_notify_on_next_frame(function () {
 		make_material_parse_paint_material();
 		context_raw.layer_preview_dirty = true;
 		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;

@@ -138,7 +138,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 					if (ui_menu_button(tr("Set as Envmap"))) {
 
 						import_asset_run(file, -1.0, -1.0, true, true, function () {
-							app_notify_on_next_frame(function () {
+							sys_notify_on_next_frame(function () {
 								let file: string = _tab_browser_draw_file;
 
 								let asset_index: i32 = -1;
@@ -158,7 +158,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 					///if (is_paint || is_sculpt)
 					if (ui_menu_button(tr("Set as Mask"))) {
 						import_asset_run(file, -1.0, -1.0, true, true, function () {
-							app_notify_on_next_frame(function () {
+							sys_notify_on_next_frame(function () {
 								let file: string = _tab_browser_draw_file;
 
 								let asset_index: i32 = -1;
@@ -179,7 +179,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 					///if is_paint
 					if (ui_menu_button(tr("Set as Color ID Map"))) {
 						import_asset_run(file, -1.0, -1.0, true, true, function () {
-							app_notify_on_next_frame(function () {
+							sys_notify_on_next_frame(function () {
 								let file: string = _tab_browser_draw_file;
 
 								let asset_index: i32 = -1;
@@ -211,7 +211,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 
 		if (tab_browser_known) {
 			let path: string = tab_browser_hpath.text;
-			app_notify_on_init(function (path: string) {
+			sys_notify_on_init(function (path: string) {
 				import_asset_run(path);
 			}, path);
 			tab_browser_hpath.text = substring(tab_browser_hpath.text, 0, string_last_index_of(tab_browser_hpath.text, path_sep));

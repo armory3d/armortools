@@ -127,7 +127,7 @@ function _import_mesh_make_mesh(mesh: raw_mesh_t) {
 
 	let handle: string = context_raw.paint_object.data._.handle;
 	if (handle != "SceneSphere" && handle != "ScenePlane") {
-		app_notify_on_init(function(md: mesh_data_t) {
+		sys_notify_on_init(function(md: mesh_data_t) {
 			mesh_data_delete(md);
 		}, context_raw.paint_object.data);
 	}
@@ -156,17 +156,17 @@ function _import_mesh_make_mesh(mesh: raw_mesh_t) {
 			slot_layer_unload(l);
 		}
 		layers_new_layer(false);
-		app_notify_on_init(layers_init);
+		sys_notify_on_init(layers_init);
 		history_reset();
 	}
 	///end
 
 	// Wait for add_mesh calls to finish
 	if (import_mesh_meshes_to_unwrap != null) {
-		app_notify_on_next_frame(import_mesh_finish_import);
+		sys_notify_on_next_frame(import_mesh_finish_import);
 	}
 	else {
-		app_notify_on_init(import_mesh_finish_import);
+		sys_notify_on_init(import_mesh_finish_import);
 	}
 }
 

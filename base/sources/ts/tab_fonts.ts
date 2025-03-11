@@ -92,7 +92,7 @@ function tab_fonts_draw(htab: ui_handle_t) {
 					if (context_raw.font != project_fonts[i]) {
 						_tab_fonts_draw_i = i;
 
-						app_notify_on_init(function () {
+						sys_notify_on_init(function () {
 							let i: i32 = _tab_fonts_draw_i;
 
 							context_select_font(i);
@@ -119,7 +119,7 @@ function tab_fonts_draw(htab: ui_handle_t) {
 					if (img == null) {
 						_tab_fonts_draw_i = i;
 
-						app_notify_on_init(function () {
+						sys_notify_on_init(function () {
 							let i: i32 = _tab_fonts_draw_i;
 
 							let _font: slot_font_t = context_raw.font;
@@ -161,7 +161,7 @@ function tab_fonts_draw(htab: ui_handle_t) {
 }
 
 function tab_fonts_delete_font(font: slot_font_t) {
-	app_notify_on_init(function (font: slot_font_t) {
+	sys_notify_on_init(function (font: slot_font_t) {
 		let i: i32 = array_index_of(project_fonts, font);
 		context_select_font(i == project_fonts.length - 1 ? i - 1 : i + 1);
 		data_delete_font(project_fonts[i].file);

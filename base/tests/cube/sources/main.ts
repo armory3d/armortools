@@ -13,8 +13,8 @@ function main() {
 		vsync: true
 	};
 	sys_start(ops);
-	app_init();
-	app_ready();
+	sys_init();
+	ready();
 }
 
 function render_commands() {
@@ -23,7 +23,7 @@ function render_commands() {
 	render_path_draw_meshes("mesh");
 }
 
-function app_ready() {
+function ready() {
 	render_path_commands = render_commands;
 
 	let scene: scene_t = {
@@ -124,7 +124,7 @@ function scene_ready() {
 	transform_build_matrix(t);
 
 	// Rotate cube
-	app_notify_on_update(spin_cube);
+	sys_notify_on_update(spin_cube);
 }
 
 function spin_cube() {

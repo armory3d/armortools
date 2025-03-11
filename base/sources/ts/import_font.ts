@@ -27,7 +27,7 @@ function import_font_run(path: string) {
 		array_push(font_slots, font_slot);
 	}
 
-	app_notify_on_init(function (font_slots: slot_font_t[]) {
+	sys_notify_on_init(function (font_slots: slot_font_t[]) {
 		for (let i: i32 = 0; i < font_slots.length; ++i) {
 			let f: slot_font_t = font_slots[i];
 			context_raw.font = f;

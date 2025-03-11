@@ -176,8 +176,8 @@ function render_path_paint_commands_cursor() {
 	let mx: f32 = context_raw.paint_vec.x;
 	let my: f32 = 1.0 - context_raw.paint_vec.y;
 	if (context_raw.brush_locked) {
-		mx = (context_raw.lock_started_x - app_x()) / app_w();
-		my = 1.0 - (context_raw.lock_started_y - app_y()) / app_h();
+		mx = (context_raw.lock_started_x - sys_x()) / sys_w();
+		my = 1.0 - (context_raw.lock_started_y - sys_y()) / sys_h();
 	}
 	let radius: f32 = context_raw.brush_radius;
 	render_path_paint_draw_cursor(mx, my, radius / 3.4);

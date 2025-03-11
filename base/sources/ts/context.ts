@@ -490,7 +490,7 @@ function context_set_material(m: slot_material_t) {
 
 	let decal: bool = context_is_decal();
 	if (decal) {
-		app_notify_on_next_frame(util_render_make_decal_preview);
+		sys_notify_on_next_frame(util_render_make_decal_preview);
 	}
 }
 
@@ -644,12 +644,12 @@ function context_in_paint_area(): bool {
 	return context_in_viewport();
 	///end
 
-	let right: i32 = app_w();
+	let right: i32 = sys_w();
 	if (ui_view2d_show) {
 		right += ui_view2d_ww;
 	}
 	return mouse_view_x() > 0 && mouse_view_x() < right &&
-		   mouse_view_y() > 0 && mouse_view_y() < app_h();
+		   mouse_view_y() > 0 && mouse_view_y() < sys_h();
 }
 
 function context_in_layers(): bool {
@@ -778,7 +778,7 @@ function context_set_render_path() {
 	else {
 		render_path_commands = render_path_deferred_commands;
 	}
-	app_notify_on_init(make_material_parse_mesh_material);
+	sys_notify_on_init(make_material_parse_mesh_material);
 }
 
 function context_enable_import_plugin(file: string): bool {

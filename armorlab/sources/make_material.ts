@@ -112,7 +112,7 @@ function make_material_get_displace_strength(): f32 {
 }
 
 function make_material_delete_context(c: shader_context_t) {
-	app_notify_on_next_frame(function (c: shader_context_t) { // Ensure pipeline is no longer in use
+	sys_notify_on_next_frame(function (c: shader_context_t) { // Ensure pipeline is no longer in use
 		shader_context_delete(c);
 	}, c);
 }
