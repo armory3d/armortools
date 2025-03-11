@@ -2018,7 +2018,7 @@ class AndroidExporter extends Exporter {
 		for (let dir of project.getJavaDirs()) {
 			javasources += '"' + path_relative(path_join(outdir, 'app'), path_resolve(from, dir)).replace(/\\/g, '/') + '", ';
 		}
-		javasources += '"' + path_join(irondir, 'sources', 'backends', 'android', 'java').replace(/\\/g, '/') + '"';
+		javasources += '"' + path_join(irondir, 'sources', 'backends', 'data', 'android_java').replace(/\\/g, '/') + '"';
 		gradle = gradle.replace(/{javasources}/g, javasources);
 		fs_writefile(path_join(outdir, 'app', 'build.gradle.kts'), gradle);
 	}

@@ -4313,8 +4313,6 @@ int iron_gpu_index_buffer_count(iron_gpu_index_buffer_t *buffer) {
 	return buffer->impl.count;
 }
 
-#ifndef IRON_ANDROID
-
 static const int INDEX_RAYGEN = 0;
 static const int INDEX_MISS = 1;
 static const int INDEX_CLOSEST_HIT = 2;
@@ -5580,5 +5578,3 @@ void iron_gpu_raytrace_dispatch_rays(iron_gpu_command_list_t *command_list) {
 
 	vkCmdBeginRenderPass(command_list->impl._buffer, &current_render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 }
-
-#endif

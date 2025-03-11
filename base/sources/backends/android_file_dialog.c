@@ -3,7 +3,7 @@
 #include <jni.h>
 #include <string.h>
 #include <stdlib.h>
-#include <android_native_app_glue.h>
+#include "android_native_app_glue.h"
 #include <sys/stat.h>
 #include <sys/types.h>
 

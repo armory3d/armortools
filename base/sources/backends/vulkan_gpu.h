@@ -218,8 +218,6 @@ typedef struct {
 	VkMemoryAllocateInfo mem_alloc;
 } IndexBuffer5Impl;
 
-#ifndef IRON_ANDROID
-
 typedef struct {
 	VkPipeline pipeline;
 	VkPipelineLayout pipeline_layout;
@@ -243,5 +241,3 @@ typedef struct {
 	VkBuffer instances_buffer;
 	VkDeviceMemory instances_mem;
 } iron_gpu_raytrace_acceleration_structure_impl_t;
-
-#endif

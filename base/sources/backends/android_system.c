@@ -1,10 +1,12 @@
 
-#include <android_system.h>
+#include "android_system.h"
 #include <iron_system.h>
 #define EGL_NO_PLATFORM_SPECIFIC_TYPES
 #include <EGL/egl.h>
 #include <iron_gpu.h>
-#include <android_native_app_glue.h>
+#include <android/sensor.h>
+#include <android/window.h>
+#include "android_native_app_glue.h"
 #include <iron_thread.h>
 #include <iron_video.h>
 #include <unistd.h>
@@ -204,10 +206,10 @@ static void touchInput(AInputEvent *event) {
 	case AMOTION_EVENT_ACTION_DOWN:
 	case AMOTION_EVENT_ACTION_POINTER_DOWN:
 		if (id == 0) {
-			iron_internal_mouse_trigger_press(0, 0, x, y);
+			iron_internal_mouse_trigger_press(0, x, y);
 		}
 		if (isPenEvent(event)) {
-			iron_internal_pen_trigger_press(0, x, y, AMotionEvent_getPressure(event, index));
+			iron_internal_pen_trigger_press(x, y, AMotionEvent_getPressure(event, index));
 		}
 		iron_internal_surface_trigger_touch_start(id, x, y);
 		break;
@@ -219,10 +221,10 @@ static void touchInput(AInputEvent *event) {
 			x = AMotionEvent_getX(event, i);
 			y = AMotionEvent_getY(event, i);
 			if (id == 0) {
-				iron_internal_mouse_trigger_move(0, x, y);
+				iron_internal_mouse_trigger_move(x, y);
 			}
 			if (isPenEvent(event)) {
-				iron_internal_pen_trigger_move(0, x, y, AMotionEvent_getPressure(event, index));
+				iron_internal_pen_trigger_move(x, y, AMotionEvent_getPressure(event, index));
 			}
 			iron_internal_surface_trigger_move(id, x, y);
 		}
@@ -231,17 +233,17 @@ static void touchInput(AInputEvent *event) {
 	case AMOTION_EVENT_ACTION_CANCEL:
 	case AMOTION_EVENT_ACTION_POINTER_UP:
 		if (id == 0) {
-			iron_internal_mouse_trigger_release(0, 0, x, y);
+			iron_internal_mouse_trigger_release(0, x, y);
 		}
 		if (isPenEvent(event)) {
-			iron_internal_pen_trigger_release(0, x, y, AMotionEvent_getPressure(event, index));
+			iron_internal_pen_trigger_release(x, y, AMotionEvent_getPressure(event, index));
 		}
 		iron_internal_surface_trigger_touch_end(id, x, y);
 		break;
 	case AMOTION_EVENT_ACTION_SCROLL:
 		if (id == 0) {
 			float scroll = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_VSCROLL, 0);
-			iron_internal_mouse_trigger_scroll(0, -(int)scroll);
+			iron_internal_mouse_trigger_scroll(-(int)scroll);
 		}
 		break;
 	}
@@ -879,12 +881,12 @@ static void cmd(struct android_app *app, int32_t cmd) {
 		break;
 	case APP_CMD_RESUME:
 		iron_internal_resume_callback();
-		resumeAudio();
+		//resumeAudio();
 		paused = false;
 		break;
 	case APP_CMD_PAUSE:
 		iron_internal_pause_callback();
-		pauseAudio();
+		//pauseAudio();
 		paused = true;
 		break;
 	case APP_CMD_STOP:
@@ -1114,7 +1116,7 @@ bool iron_internal_handle_messages(void) {
 		int32_t width = iron_android_width();
 		int32_t height = iron_android_height();
 #ifdef IRON_VULKAN
-		iron_internal_resize(0, width, height);
+		iron_internal_resize(width, height);
 #endif
 		iron_internal_call_resize_callback(width, height);
 	}
@@ -1172,7 +1174,7 @@ void android_main(struct android_app *application) {
 	app = application;
 	activity = application->activity;
 	initAndroidFileReader();
-	IronAndroidVideoInit();
+	//IronAndroidVideoInit();
 	IronAndroidKeyboardInit();
 	application->onAppCmd = cmd;
 	application->onInputEvent = input;

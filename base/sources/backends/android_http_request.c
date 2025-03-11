@@ -2,7 +2,7 @@
 #include <iron_system.h>
 #include <jni.h>
 #include <string.h>
-#include <android_native_app_glue.h>
+#include "android_native_app_glue.h"
 
 ANativeActivity *iron_android_get_activity(void);
 jclass iron_android_find_class(JNIEnv *env, const char *name);
