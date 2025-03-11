@@ -271,7 +271,8 @@ if (flags.with_audio) {
 
 if (flags.with_eval) {
 	project.add_define("WITH_EVAL");
-	project.add_cfiles("sources/libs/quickjs/*.c");
+	project.add_cfiles("sources/libs/quickjs-amalgam.c");
+	project.add_define("QJS_BUILD_LIBC");
 	if (platform === "linux") {
 		project.add_lib("m");
 		project.add_define("_GNU_SOURCE");

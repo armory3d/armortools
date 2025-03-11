@@ -2,8 +2,8 @@
 
 #include <string.h>
 #include <stdbool.h>
-#include "quickjs/quickjs.h"
-#include "quickjs/quickjs-libc.h"
+#include "quickjs.h"
+#include "quickjs-libc.h"
 
 extern JSRuntime *js_runtime;
 extern JSContext *js_ctx;

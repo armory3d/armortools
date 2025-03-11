@@ -19,7 +19,7 @@ let project = new Project("amake");
 }
 
 project.add_include_dir("../../sources/libs");
-project.add_cfiles("../../sources/libs/quickjs/*.c");
+project.add_cfiles("../../sources/libs/quickjs-amalgam.c");
 project.add_cfiles("main.c");
 project.add_cfiles("aimage.c");
 

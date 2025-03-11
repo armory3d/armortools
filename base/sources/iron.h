@@ -52,8 +52,8 @@ int _argc;
 char **_argv;
 
 #ifdef WITH_EVAL
-#include "quickjs/quickjs.h"
-#include "quickjs/quickjs-libc.h"
+#include "quickjs.h"
+#include "quickjs-libc.h"
 JSRuntime *js_runtime = NULL;
 JSContext *js_ctx;
 #ifdef WITH_PLUGINS

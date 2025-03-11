@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include "quickjs/quickjs.h"
-#include "quickjs/quickjs-libc.h"
+#include "quickjs.h"
+#include "quickjs-libc.h"
 
 #ifdef _WIN32
 #include <Windows.h>
