@@ -334,11 +334,11 @@ extern bool waitAfterNextDraw;
 #ifdef WITH_NFD
 #include <nfd.h>
 #elif defined(IRON_ANDROID)
-#include "android_file_dialog.h"
-#include "android_http_request.h"
+#include "backends/android_file_dialog.h"
+#include "backends/android_http_request.h"
 #elif defined(IRON_IOS)
 #include <wchar.h>
-#include <ios_file_dialog.h>
+#include "backends/ios_file_dialog.h"
 #endif
 #ifdef WITH_IMAGE_WRITE
 #ifdef WITH_COMPRESS

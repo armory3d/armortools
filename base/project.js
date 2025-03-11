@@ -192,6 +192,7 @@ if (!flags.lite) {
 		add_gpu_backend("metal");
 		project.add_cfiles("sources/backends/data/ios.plist");
 		project.add_cfiles("sources/backends/data/LaunchScreen.storyboard");
+		project.add_cfiles("sources/backends/ios_file_dialog.m");
 		project.add_define("IRON_METAL");
 		project.add_lib("Metal");
 		project.add_lib("UIKit");
@@ -211,6 +212,7 @@ if (!flags.lite) {
 		add_net_backend("posix");
 		add_thread_backend("posix");
 		add_gpu_backend("vulkan");
+		project.add_cfiles("sources/backends/android_file_dialog.c");
 		project.add_define("IRON_ANDROID");
 		project.add_define("IRON_VULKAN");
 		project.add_define("IRON_ANDROID_API=24");

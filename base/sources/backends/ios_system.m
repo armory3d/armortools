@@ -69,7 +69,7 @@ int iron_window_height() {
 	float x = point.x * self.contentScaleFactor;
 	float y = point.y * self.contentScaleFactor;
 	// Pencil hover
-	iron_internal_pen_trigger_move(0, x, y, 0.0);
+	iron_internal_pen_trigger_move(x, y, 0.0);
 }
 
 - (id)initWithFrame:(CGRect)frame {
@@ -131,12 +131,12 @@ void iron_internal_call_resize_callback(int width, int height);
 			float x = point.x * self.contentScaleFactor;
 			float y = point.y * self.contentScaleFactor;
 			if (index == 0) {
-				iron_internal_mouse_trigger_press(0, event.buttonMask == UIEventButtonMaskSecondary ? 1 : 0, x, y);
+				iron_internal_mouse_trigger_press(event.buttonMask == UIEventButtonMaskSecondary ? 1 : 0, x, y);
 			}
 			iron_internal_surface_trigger_touch_start(index, x, y);
 
 			if (touch.type == UITouchTypePencil) {
-				iron_internal_pen_trigger_press(0, x, y, 0.0);
+				iron_internal_pen_trigger_press(x, y, 0.0);
 			}
 		}
 	}
@@ -150,7 +150,7 @@ void iron_internal_call_resize_callback(int width, int height);
 			float x = point.x * self.contentScaleFactor;
 			float y = point.y * self.contentScaleFactor;
 			if (index == 0) {
-				iron_internal_mouse_trigger_move(0, x, y);
+				iron_internal_mouse_trigger_move(x, y);
 			}
 			iron_internal_surface_trigger_move(index, x, y);
 		}
@@ -163,7 +163,7 @@ void iron_internal_call_resize_callback(int width, int height);
 			CGPoint point = [touch locationInView:self];
 			float x = point.x * self.contentScaleFactor;
 			float y = point.y * self.contentScaleFactor;
-			iron_internal_pen_trigger_move(0, x, y, touch.force);
+			iron_internal_pen_trigger_move(x, y, touch.force);
 		}
 	}
 }
@@ -176,12 +176,12 @@ void iron_internal_call_resize_callback(int width, int height);
 			float x = point.x * self.contentScaleFactor;
 			float y = point.y * self.contentScaleFactor;
 			if (index == 0) {
-				iron_internal_mouse_trigger_release(0, event.buttonMask == UIEventButtonMaskSecondary ? 1 : 0, x, y);
+				iron_internal_mouse_trigger_release(event.buttonMask == UIEventButtonMaskSecondary ? 1 : 0, x, y);
 			}
 			iron_internal_surface_trigger_touch_end(index, x, y);
 
 			if (touch.type == UITouchTypePencil) {
-				iron_internal_pen_trigger_release(0, x, y, 0.0);
+				iron_internal_pen_trigger_release(x, y, 0.0);
 			}
 		}
 	}
@@ -195,12 +195,12 @@ void iron_internal_call_resize_callback(int width, int height);
 			float x = point.x * self.contentScaleFactor;
 			float y = point.y * self.contentScaleFactor;
 			if (index == 0) {
-				iron_internal_mouse_trigger_release(0, event.buttonMask == UIEventButtonMaskSecondary ? 1 : 0, x, y);
+				iron_internal_mouse_trigger_release(event.buttonMask == UIEventButtonMaskSecondary ? 1 : 0, x, y);
 			}
 			iron_internal_surface_trigger_touch_end(index, x, y);
 
 			if (touch.type == UITouchTypePencil) {
-				iron_internal_pen_trigger_release(0, x, y, 0.0);
+				iron_internal_pen_trigger_release(x, y, 0.0);
 			}
 		}
 	}
@@ -398,7 +398,7 @@ void importFile(NSURL *url) {
 	CGPoint point = [session locationInView:self.view];
 	float x = point.x * glView.contentScaleFactor;
 	float y = point.y * glView.contentScaleFactor;
-	iron_internal_mouse_trigger_move(0, x, y);
+	iron_internal_mouse_trigger_move(x, y);
 	iron_internal_surface_trigger_move(0, x, y);
 
 	for (UIDragItem *item in session.items) {
