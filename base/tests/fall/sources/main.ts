@@ -1,6 +1,6 @@
 // ../../../make --graphics vulkan --run
 
-///include "../../sources/libs/asim/asim.h"
+///include "../../sources/libs/asim.h"
 
 function main() {
 	let ops: iron_window_options_t = {

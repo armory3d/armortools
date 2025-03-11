@@ -70,7 +70,7 @@ if (!flags.lite) {
 	}
 
 	if (flags.physics) {
-		project.add_cfiles("sources/libs/asim/asim.c");
+		project.add_cfiles("sources/libs/asim.c");
 		project.add_define("arm_physics");
 	}
 
@@ -273,16 +273,16 @@ if (flags.with_eval) {
 	project.add_define("WITH_EVAL");
 	project.add_cfiles("sources/libs/quickjs-amalgam.c");
 	project.add_define("QJS_BUILD_LIBC");
-	if (platform === "linux") {
-		project.add_lib("m");
-		project.add_define("_GNU_SOURCE");
-		project.add_define("environ=__environ");
-		project.add_define("sighandler_t=__sighandler_t");
-	}
-	else if (platform === "windows") {
-		project.add_define("WIN32_LEAN_AND_MEAN");
-		project.add_define("_WIN32_WINNT=0x0602");
-	}
+	// if (platform === "linux") {
+	// 	project.add_lib("m");
+	// 	project.add_define("_GNU_SOURCE");
+	// 	project.add_define("environ=__environ");
+	// 	project.add_define("sighandler_t=__sighandler_t");
+	// }
+	// else if (platform === "windows") {
+	// 	project.add_define("WIN32_LEAN_AND_MEAN");
+	// 	project.add_define("_WIN32_WINNT=0x0602");
+	// }
 }
 
 if (flags.with_iron) {
@@ -315,14 +315,8 @@ else if (platform === "ios") {
 
 if (flags.with_nfd && (platform === "windows" || platform === "linux" || platform === "macos")) {
 	project.add_define("WITH_NFD");
-	project.add_include_dir("sources/libs/nfd");
-	project.add_cfiles("sources/libs/nfd/nfd_common.c");
-
-	if (platform === "windows") {
-		project.add_cfiles("sources/libs/nfd/nfd_win.cpp");
-	}
-	else if (platform === "linux") {
-		project.add_cfiles("sources/libs/nfd/nfd_gtk.c");
+	project.add_cfiles("sources/libs/nfd.c");
+	if (platform === "linux") {
 		project.add_include_dir("/usr/include/gtk-3.0");
 		project.add_include_dir("/usr/include/glib-2.0");
 		project.add_include_dir("/usr/lib/x86_64-linux-gnu/glib-2.0/include");
@@ -337,8 +331,8 @@ if (flags.with_nfd && (platform === "windows" || platform === "linux" || platfor
 		project.add_lib("gobject-2.0");
 		project.add_lib("glib-2.0");
 	}
-	else {
-		project.add_cfiles("sources/libs/nfd/nfd_cocoa.m");
+	else if (platform == "macos") {
+		project.add_cfiles("sources/libs/nfd.m");
 	}
 }
 

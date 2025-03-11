@@ -1,9 +1,528 @@
-/*
-  Native File Dialog
+// This software is provided 'as-is', without any express or implied
+// warranty.  In no event will the authors be held liable for any damages
+// arising from the use of this software.
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+// 1. The origin of this software must not be misrepresented; you must not
+//    claim that you wrote the original software. If you use this software
+//    in a product, an acknowledgment in the product documentation would be
+//    appreciated but is not required.
+// 2. Altered source versions must be plainly marked as such, and must not be
+//    misrepresented as being the original software.
+// 3. This notice may not be removed or altered from any source distribution.
+// https://github.com/mlabbe/nativefiledialog
 
-  http://www.frogtoss.com/labs
- */
+#include <stdlib.h>
+#include <assert.h>
+#include <string.h>
+#include <stdio.h>
+#include "nfd.h"
+#include "../iron_global.h"
 
+static char g_errorstr[NFD_MAX_STRLEN] = {0};
+
+/* public routines */
+
+const char *NFD_GetError( void )
+{
+    return g_errorstr;
+}
+
+size_t NFD_PathSet_GetCount( const nfdpathset_t *pathset )
+{
+    assert(pathset);
+    return pathset->count;
+}
+
+nfdchar_t *NFD_PathSet_GetPath( const nfdpathset_t *pathset, size_t num )
+{
+    assert(pathset);
+    assert(num < pathset->count);
+
+    return pathset->buf + pathset->indices[num];
+}
+
+void NFD_PathSet_Free( nfdpathset_t *pathset )
+{
+    assert(pathset);
+    NFDi_Free( pathset->indices );
+    NFDi_Free( pathset->buf );
+}
+
+/* internal routines */
+
+void *NFDi_Malloc( size_t bytes )
+{
+    void *ptr = malloc(bytes);
+    if ( !ptr )
+        NFDi_SetError("NFDi_Malloc failed.");
+
+    return ptr;
+}
+
+void NFDi_Free( void *ptr )
+{
+    assert(ptr);
+    free(ptr);
+}
+
+void NFDi_SetError( const char *msg )
+{
+    int bTruncate = NFDi_SafeStrncpy( g_errorstr, msg, NFD_MAX_STRLEN );
+    assert( !bTruncate );  _NFD_UNUSED(bTruncate);
+}
+
+
+int NFDi_SafeStrncpy( char *dst, const char *src, size_t maxCopy )
+{
+    size_t n = maxCopy;
+    char *d = dst;
+
+    assert( src );
+    assert( dst );
+
+    while ( n > 0 && *src != '\0' )
+    {
+        *d++ = *src++;
+        --n;
+    }
+
+    /* Truncation case -
+       terminate string and return true */
+    if ( n == 0 )
+    {
+        dst[maxCopy-1] = '\0';
+        return 1;
+    }
+
+    /* No truncation.  Append a single NULL and return. */
+    *d = '\0';
+    return 0;
+}
+
+
+/* adapted from microutf8 */
+int32_t NFDi_UTF8_Strlen( const nfdchar_t *str )
+{
+	/* This function doesn't properly check validity of UTF-8 character
+	sequence, it is supposed to use only with valid UTF-8 strings. */
+
+	int32_t character_count = 0;
+	int32_t i = 0; /* Counter used to iterate over string. */
+	nfdchar_t maybe_bom[4];
+
+	/* If there is UTF-8 BOM ignore it. */
+	if (strlen(str) > 2)
+	{
+		strncpy(maybe_bom, str, 3);
+		maybe_bom[3] = 0;
+		if (strcmp(maybe_bom, (nfdchar_t*)NFD_UTF8_BOM) == 0)
+			i += 3;
+	}
+
+	while(str[i])
+	{
+		if (str[i] >> 7 == 0)
+        {
+            /* If bit pattern begins with 0 we have ascii character. */
+			++character_count;
+        }
+		else if (str[i] >> 6 == 3)
+        {
+		/* If bit pattern begins with 11 it is beginning of UTF-8 byte sequence. */
+			++character_count;
+        }
+		else if (str[i] >> 6 == 2)
+			;		/* If bit pattern begins with 10 it is middle of utf-8 byte sequence. */
+		else
+        {
+            /* In any other case this is not valid UTF-8. */
+			return -1;
+        }
+		++i;
+	}
+
+	return character_count;
+}
+
+int NFDi_IsFilterSegmentChar( char ch )
+{
+    return (ch==','||ch==';'||ch=='\0');
+}
+
+#ifdef IRON_LINUX
+
+#include <gtk/gtk.h>
+
+const char INIT_FAIL_MSG[] = "gtk_init_check failed to initilaize GTK+";
+
+static void AddTypeToFilterName( const char *typebuf, char *filterName, size_t bufsize )
+{
+    const char SEP[] = ", ";
+
+    size_t len = strlen(filterName);
+    if ( len != 0 )
+    {
+        strncat( filterName, SEP, bufsize - len - 1 );
+        len += strlen(SEP);
+    }
+
+    strncat( filterName, typebuf, bufsize - len - 1 );
+}
+
+static void AddFiltersToDialog( GtkWidget *dialog, const char *filterList )
+{
+    GtkFileFilter *filter;
+    char typebuf[NFD_MAX_STRLEN] = {0};
+    const char *p_filterList = filterList;
+    char *p_typebuf = typebuf;
+    char filterName[NFD_MAX_STRLEN] = {0};
+
+    if ( !filterList || strlen(filterList) == 0 )
+        return;
+
+    filter = gtk_file_filter_new();
+    while ( 1 )
+    {
+
+        if ( NFDi_IsFilterSegmentChar(*p_filterList) )
+        {
+            char typebufWildcard[NFD_MAX_STRLEN];
+            /* add another type to the filter */
+            assert( strlen(typebuf) > 0 );
+            assert( strlen(typebuf) < NFD_MAX_STRLEN-1 );
+
+            snprintf( typebufWildcard, NFD_MAX_STRLEN, "*.%s", typebuf );
+            AddTypeToFilterName( typebuf, filterName, NFD_MAX_STRLEN );
+
+            gtk_file_filter_add_pattern( filter, typebufWildcard );
+
+            p_typebuf = typebuf;
+            memset( typebuf, 0, sizeof(char) * NFD_MAX_STRLEN );
+        }
+
+        if ( *p_filterList == ';' || *p_filterList == '\0' )
+        {
+            /* end of filter -- add it to the dialog */
+
+            gtk_file_filter_set_name( filter, filterName );
+            gtk_file_chooser_add_filter( GTK_FILE_CHOOSER(dialog), filter );
+
+            filterName[0] = '\0';
+
+            if ( *p_filterList == '\0' )
+                break;
+
+            filter = gtk_file_filter_new();
+        }
+
+        if ( !NFDi_IsFilterSegmentChar( *p_filterList ) )
+        {
+            *p_typebuf = *p_filterList;
+            p_typebuf++;
+        }
+
+        p_filterList++;
+    }
+
+    /* always append a wildcard option to the end*/
+
+    filter = gtk_file_filter_new();
+    gtk_file_filter_set_name( filter, "*.*" );
+    gtk_file_filter_add_pattern( filter, "*" );
+    gtk_file_chooser_add_filter( GTK_FILE_CHOOSER(dialog), filter );
+}
+
+static void SetDefaultPath( GtkWidget *dialog, const char *defaultPath )
+{
+    if ( !defaultPath || strlen(defaultPath) == 0 )
+        return;
+
+    /* GTK+ manual recommends not specifically setting the default path.
+       We do it anyway in order to be consistent across platforms.
+
+       If consistency with the native OS is preferred, this is the line
+       to comment out. -ml */
+    gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER(dialog), defaultPath );
+}
+
+static nfdresult_t AllocPathSet( GSList *fileList, nfdpathset_t *pathSet )
+{
+    size_t bufSize = 0;
+    GSList *node;
+    nfdchar_t *p_buf;
+    size_t count = 0;
+
+    assert(fileList);
+    assert(pathSet);
+
+    pathSet->count = (size_t)g_slist_length( fileList );
+    assert( pathSet->count > 0 );
+
+    pathSet->indices = NFDi_Malloc( sizeof(size_t)*pathSet->count );
+    if ( !pathSet->indices )
+    {
+        return NFD_ERROR;
+    }
+
+    /* count the total space needed for buf */
+    for ( node = fileList; node; node = node->next )
+    {
+        assert(node->data);
+        bufSize += strlen( (const gchar*)node->data ) + 1;
+    }
+
+    pathSet->buf = NFDi_Malloc( sizeof(nfdchar_t) * bufSize );
+
+    /* fill buf */
+    p_buf = pathSet->buf;
+    for ( node = fileList; node; node = node->next )
+    {
+        nfdchar_t *path = (nfdchar_t*)(node->data);
+        size_t byteLen = strlen(path)+1;
+        ptrdiff_t index;
+
+        memcpy( p_buf, path, byteLen );
+        g_free(node->data);
+
+        index = p_buf - pathSet->buf;
+        assert( index >= 0 );
+        pathSet->indices[count] = (size_t)index;
+
+        p_buf += byteLen;
+        ++count;
+    }
+
+    g_slist_free( fileList );
+
+    return NFD_OKAY;
+}
+
+static void WaitForCleanup(void)
+{
+    while (gtk_events_pending())
+        gtk_main_iteration();
+}
+
+/* public */
+
+nfdresult_t NFD_OpenDialog( const nfdchar_t *filterList,
+                            const nfdchar_t *defaultPath,
+                            nfdchar_t **outPath )
+{
+    GtkWidget *dialog;
+    nfdresult_t result;
+
+    if ( !gtk_init_check( NULL, NULL ) )
+    {
+        NFDi_SetError(INIT_FAIL_MSG);
+        return NFD_ERROR;
+    }
+
+    dialog = gtk_file_chooser_dialog_new( "Open File",
+                                          NULL,
+                                          GTK_FILE_CHOOSER_ACTION_OPEN,
+                                          "_Cancel", GTK_RESPONSE_CANCEL,
+                                          "_Open", GTK_RESPONSE_ACCEPT,
+                                          NULL );
+
+    /* Build the filter list */
+    AddFiltersToDialog(dialog, filterList);
+
+    /* Set the default path */
+    SetDefaultPath(dialog, defaultPath);
+
+    result = NFD_CANCEL;
+    if ( gtk_dialog_run( GTK_DIALOG(dialog) ) == GTK_RESPONSE_ACCEPT )
+    {
+        char *filename;
+
+        filename = gtk_file_chooser_get_filename( GTK_FILE_CHOOSER(dialog) );
+
+        {
+            size_t len = strlen(filename);
+            *outPath = NFDi_Malloc( len + 1 );
+            memcpy( *outPath, filename, len + 1 );
+            if ( !*outPath )
+            {
+                g_free( filename );
+                gtk_widget_destroy(dialog);
+                return NFD_ERROR;
+            }
+        }
+        g_free( filename );
+
+        result = NFD_OKAY;
+    }
+
+    WaitForCleanup();
+    gtk_widget_destroy(dialog);
+    WaitForCleanup();
+
+    return result;
+}
+
+
+nfdresult_t NFD_OpenDialogMultiple( const nfdchar_t *filterList,
+                                    const nfdchar_t *defaultPath,
+                                    nfdpathset_t *outPaths )
+{
+    GtkWidget *dialog;
+    nfdresult_t result;
+
+    if ( !gtk_init_check( NULL, NULL ) )
+    {
+        NFDi_SetError(INIT_FAIL_MSG);
+        return NFD_ERROR;
+    }
+
+    dialog = gtk_file_chooser_dialog_new( "Open Files",
+                                          NULL,
+                                          GTK_FILE_CHOOSER_ACTION_OPEN,
+                                          "_Cancel", GTK_RESPONSE_CANCEL,
+                                          "_Open", GTK_RESPONSE_ACCEPT,
+                                          NULL );
+    gtk_file_chooser_set_select_multiple( GTK_FILE_CHOOSER(dialog), TRUE );
+
+    /* Build the filter list */
+    AddFiltersToDialog(dialog, filterList);
+
+    /* Set the default path */
+    SetDefaultPath(dialog, defaultPath);
+
+    result = NFD_CANCEL;
+    if ( gtk_dialog_run( GTK_DIALOG(dialog) ) == GTK_RESPONSE_ACCEPT )
+    {
+        GSList *fileList = gtk_file_chooser_get_filenames( GTK_FILE_CHOOSER(dialog) );
+        if ( AllocPathSet( fileList, outPaths ) == NFD_ERROR )
+        {
+            gtk_widget_destroy(dialog);
+            return NFD_ERROR;
+        }
+
+        result = NFD_OKAY;
+    }
+
+    WaitForCleanup();
+    gtk_widget_destroy(dialog);
+    WaitForCleanup();
+
+    return result;
+}
+
+nfdresult_t NFD_SaveDialog( const nfdchar_t *filterList,
+                            const nfdchar_t *defaultPath,
+                            nfdchar_t **outPath )
+{
+    GtkWidget *dialog;
+    nfdresult_t result;
+
+    if ( !gtk_init_check( NULL, NULL ) )
+    {
+        NFDi_SetError(INIT_FAIL_MSG);
+        return NFD_ERROR;
+    }
+
+    dialog = gtk_file_chooser_dialog_new( "Save File",
+                                          NULL,
+                                          GTK_FILE_CHOOSER_ACTION_SAVE,
+                                          "_Cancel", GTK_RESPONSE_CANCEL,
+                                          "_Save", GTK_RESPONSE_ACCEPT,
+                                          NULL );
+    gtk_file_chooser_set_do_overwrite_confirmation( GTK_FILE_CHOOSER(dialog), TRUE );
+
+    /* Build the filter list */
+    AddFiltersToDialog(dialog, filterList);
+
+    /* Set the default path */
+    SetDefaultPath(dialog, defaultPath);
+
+    result = NFD_CANCEL;
+    if ( gtk_dialog_run( GTK_DIALOG(dialog) ) == GTK_RESPONSE_ACCEPT )
+    {
+        char *filename;
+        filename = gtk_file_chooser_get_filename( GTK_FILE_CHOOSER(dialog) );
+
+        {
+            size_t len = strlen(filename);
+            *outPath = NFDi_Malloc( len + 1 );
+            memcpy( *outPath, filename, len + 1 );
+            if ( !*outPath )
+            {
+                g_free( filename );
+                gtk_widget_destroy(dialog);
+                return NFD_ERROR;
+            }
+        }
+        g_free(filename);
+
+        result = NFD_OKAY;
+    }
+
+    WaitForCleanup();
+    gtk_widget_destroy(dialog);
+    WaitForCleanup();
+
+    return result;
+}
+
+nfdresult_t NFD_PickFolder(const nfdchar_t *defaultPath,
+    nfdchar_t **outPath)
+{
+    GtkWidget *dialog;
+    nfdresult_t result;
+
+    if (!gtk_init_check(NULL, NULL))
+    {
+        NFDi_SetError(INIT_FAIL_MSG);
+        return NFD_ERROR;
+    }
+
+    dialog = gtk_file_chooser_dialog_new( "Select folder",
+                                          NULL,
+                                          GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+                                          "_Cancel", GTK_RESPONSE_CANCEL,
+                                          "_Select", GTK_RESPONSE_ACCEPT,
+                                          NULL );
+    gtk_file_chooser_set_do_overwrite_confirmation( GTK_FILE_CHOOSER(dialog), TRUE );
+
+
+    /* Set the default path */
+    SetDefaultPath(dialog, defaultPath);
+
+    result = NFD_CANCEL;
+    if ( gtk_dialog_run( GTK_DIALOG(dialog) ) == GTK_RESPONSE_ACCEPT )
+    {
+        char *filename;
+        filename = gtk_file_chooser_get_filename( GTK_FILE_CHOOSER(dialog) );
+
+        {
+            size_t len = strlen(filename);
+            *outPath = NFDi_Malloc( len + 1 );
+            memcpy( *outPath, filename, len + 1 );
+            if ( !*outPath )
+            {
+                g_free( filename );
+                gtk_widget_destroy(dialog);
+                return NFD_ERROR;
+            }
+        }
+        g_free(filename);
+
+        result = NFD_OKAY;
+    }
+
+    WaitForCleanup();
+    gtk_widget_destroy(dialog);
+    WaitForCleanup();
+
+    return result;
+}
+
+#endif
+
+#ifdef IRON_WINDOWS
 
 #ifdef __MINGW32__
 // Explicitly setting NTDDI version, this is necessary for the MinGW compiler
@@ -25,8 +544,6 @@
 #include <assert.h>
 #include <windows.h>
 #include <shobjidl.h>
-#include "nfd_common.h"
-
 
 #define COM_INITFLAGS ::COINIT_APARTMENTTHREADED | ::COINIT_DISABLE_OLE1DDE
 
@@ -58,10 +575,10 @@ static void COMUninit(HRESULT coResult)
 // allocs the space in outPath -- call free()
 static void CopyWCharToNFDChar( const wchar_t *inStr, nfdchar_t **outStr )
 {
-    int inStrCharacterCount = static_cast<int>(wcslen(inStr)); 
+    int inStrCharacterCount = static_cast<int>(wcslen(inStr));
     int bytesNeeded = WideCharToMultiByte( CP_UTF8, 0,
                                            inStr, inStrCharacterCount,
-                                           NULL, 0, NULL, NULL );    
+                                           NULL, 0, NULL, NULL );
     assert( bytesNeeded );
     bytesNeeded += 1;
 
@@ -109,14 +626,14 @@ static void CopyNFDCharToWChar( const nfdchar_t *inStr, wchar_t **outStr )
     int inStrByteCount = static_cast<int>(strlen(inStr));
     int charsNeeded = MultiByteToWideChar(CP_UTF8, 0,
                                           inStr, inStrByteCount,
-                                          NULL, 0 );    
+                                          NULL, 0 );
     assert( charsNeeded );
     assert( !*outStr );
     charsNeeded += 1; // terminator
-    
-    *outStr = (wchar_t*)NFDi_Malloc( charsNeeded * sizeof(wchar_t) );    
+
+    *outStr = (wchar_t*)NFDi_Malloc( charsNeeded * sizeof(wchar_t) );
     if ( !*outStr )
-        return;        
+        return;
 
     int ret = MultiByteToWideChar(CP_UTF8, 0,
                                   inStr, inStrByteCount,
@@ -131,13 +648,12 @@ static void CopyNFDCharToWChar( const nfdchar_t *inStr, wchar_t **outStr )
 #endif
 }
 
-
 /* ext is in format "jpg", no wildcards or separators */
 static int AppendExtensionToSpecBuf( const char *ext, char *specBuf, size_t specBufLen )
 {
     const char SEP[] = ";";
     assert( specBufLen > strlen(ext)+3 );
-    
+
     if ( strlen(specBuf) > 0 )
     {
         strncat( specBuf, SEP, specBufLen - strlen(specBuf) - 1 );
@@ -148,7 +664,7 @@ static int AppendExtensionToSpecBuf( const char *ext, char *specBuf, size_t spec
     int bytesWritten = sprintf_s( extWildcard, NFD_MAX_STRLEN, "*.%s", ext );
     assert( bytesWritten == (int)(strlen(ext)+2) );
     _NFD_UNUSED(bytesWritten);
-    
+
     strncat( specBuf, extWildcard, specBufLen - strlen(specBuf) - 1 );
 
     return NFD_OKAY;
@@ -168,7 +684,7 @@ static nfdresult_t AddFiltersToDialog( ::IFileDialog *fileOpenDialog, const char
     {
         if ( *p_filterList == ';' )
             ++filterCount;
-    }    
+    }
 
     assert(filterCount);
     if ( !filterCount )
@@ -196,12 +712,12 @@ static nfdresult_t AddFiltersToDialog( ::IFileDialog *fileOpenDialog, const char
 
     char specbuf[NFD_MAX_STRLEN] = {0}; /* one per semicolon */
 
-    while ( 1 ) 
+    while ( 1 )
     {
         if ( NFDi_IsFilterSegmentChar(*p_filterList) )
         {
             /* append a type to the specbuf (pending filter) */
-            AppendExtensionToSpecBuf( typebuf, specbuf, NFD_MAX_STRLEN );            
+            AppendExtensionToSpecBuf( typebuf, specbuf, NFD_MAX_STRLEN );
 
             p_typebuf = typebuf;
             memset( typebuf, 0, sizeof(char)*NFD_MAX_STRLEN );
@@ -210,10 +726,10 @@ static nfdresult_t AddFiltersToDialog( ::IFileDialog *fileOpenDialog, const char
         if ( *p_filterList == ';' || *p_filterList == '\0' )
         {
             /* end of filter -- add it to specList */
-                                
+
             CopyNFDCharToWChar( specbuf, (wchar_t**)&specList[specIdx].pszName );
             CopyNFDCharToWChar( specbuf, (wchar_t**)&specList[specIdx].pszSpec );
-                        
+
             memset( specbuf, 0, sizeof(char)*NFD_MAX_STRLEN );
             ++specIdx;
             if ( specIdx == filterCount )
@@ -232,7 +748,7 @@ static nfdresult_t AddFiltersToDialog( ::IFileDialog *fileOpenDialog, const char
     /* Add wildcard */
     specList[specIdx].pszSpec = WILDCARD;
     specList[specIdx].pszName = WILDCARD;
-    
+
     fileOpenDialog->SetFileTypes( filterCount+1, specList );
 
     /* free speclist */
@@ -240,7 +756,7 @@ static nfdresult_t AddFiltersToDialog( ::IFileDialog *fileOpenDialog, const char
     {
         NFDi_Free( (void*)specList[i].pszSpec );
     }
-    NFDi_Free( specList );    
+    NFDi_Free( specList );
 
     return NFD_OKAY;
 }
@@ -251,7 +767,7 @@ static nfdresult_t AllocPathSet( IShellItemArray *shellItems, nfdpathset_t *path
 
     assert(shellItems);
     assert(pathSet);
-    
+
     // How many items in shellItems?
     DWORD numShellItems;
     HRESULT result = shellItems->GetCount(&numShellItems);
@@ -298,7 +814,7 @@ static nfdresult_t AllocPathSet( IShellItemArray *shellItems, nfdpathset_t *path
 
         // Calculate length of name with UTF-8 encoding
         bufSize += GetUTF8ByteCountForWChar( name );
-        
+
         CoTaskMemFree(name);
     }
 
@@ -339,13 +855,12 @@ static nfdresult_t AllocPathSet( IShellItemArray *shellItems, nfdpathset_t *path
         ptrdiff_t index = p_buf - pathSet->buf;
         assert( index >= 0 );
         pathSet->indices[i] = static_cast<size_t>(index);
-        
-        p_buf += bytesWritten; 
+
+        p_buf += bytesWritten;
     }
-     
+
     return NFD_OKAY;
 }
-
 
 static nfdresult_t SetDefaultPath( IFileDialog *dialog, const char *defaultPath )
 {
@@ -371,18 +886,17 @@ static nfdresult_t SetDefaultPath( IFileDialog *dialog, const char *defaultPath 
         NFDi_Free( defaultPathW );
         return NFD_ERROR;
     }
-    
+
     // Could also call SetDefaultFolder(), but this guarantees defaultPath -- more consistency across API.
     dialog->SetFolder( folder );
 
     NFDi_Free( defaultPathW );
     folder->Release();
-    
+
     return NFD_OKAY;
 }
 
 /* public */
-
 
 nfdresult_t NFD_OpenDialog( const nfdchar_t *filterList,
                             const nfdchar_t *defaultPath,
@@ -390,20 +904,20 @@ nfdresult_t NFD_OpenDialog( const nfdchar_t *filterList,
 {
     nfdresult_t nfdResult = NFD_ERROR;
 
-    
+
     HRESULT coResult = COMInit();
     if (!COMIsInitialized(coResult))
-    {        
+    {
         NFDi_SetError("Could not initialize COM.");
         return nfdResult;
     }
 
     // Create dialog
-    ::IFileOpenDialog *fileOpenDialog(NULL);    
+    ::IFileOpenDialog *fileOpenDialog(NULL);
     HRESULT result = ::CoCreateInstance(::CLSID_FileOpenDialog, NULL,
                                         CLSCTX_ALL, ::IID_IFileOpenDialog,
                                         reinterpret_cast<void**>(&fileOpenDialog) );
-                                
+
     if ( !SUCCEEDED(result) )
     {
         NFDi_SetError("Could not create dialog.");
@@ -420,7 +934,7 @@ nfdresult_t NFD_OpenDialog( const nfdchar_t *filterList,
     if ( !SetDefaultPath( fileOpenDialog, defaultPath ) )
     {
         goto end;
-    }    
+    }
 
     // Show the dialog.
     result = fileOpenDialog->Show(NULL);
@@ -470,7 +984,7 @@ end:
         fileOpenDialog->Release();
 
     COMUninit(coResult);
-    
+
     return nfdResult;
 }
 
@@ -484,16 +998,16 @@ nfdresult_t NFD_OpenDialogMultiple( const nfdchar_t *filterList,
     HRESULT coResult = COMInit();
     if (!COMIsInitialized(coResult))
     {
-        NFDi_SetError("Could not initialize COM.");        
+        NFDi_SetError("Could not initialize COM.");
         return nfdResult;
     }
 
     // Create dialog
-    ::IFileOpenDialog *fileOpenDialog(NULL);    
+    ::IFileOpenDialog *fileOpenDialog(NULL);
     HRESULT result = ::CoCreateInstance(::CLSID_FileOpenDialog, NULL,
                                         CLSCTX_ALL, ::IID_IFileOpenDialog,
                                         reinterpret_cast<void**>(&fileOpenDialog) );
-                                
+
     if ( !SUCCEEDED(result) )
     {
         fileOpenDialog = NULL;
@@ -527,7 +1041,7 @@ nfdresult_t NFD_OpenDialogMultiple( const nfdchar_t *filterList,
         NFDi_SetError("Could not set options.");
         goto end;
     }
- 
+
     // Show the dialog.
     result = fileOpenDialog->Show(NULL);
     if ( SUCCEEDED(result) )
@@ -539,7 +1053,7 @@ nfdresult_t NFD_OpenDialogMultiple( const nfdchar_t *filterList,
             NFDi_SetError("Could not get shell items.");
             goto end;
         }
-        
+
         if ( AllocPathSet( shellItems, outPaths ) == NFD_ERROR )
         {
             shellItems->Release();
@@ -564,7 +1078,7 @@ end:
         fileOpenDialog->Release();
 
     COMUninit(coResult);
-    
+
     return nfdResult;
 }
 
@@ -578,11 +1092,11 @@ nfdresult_t NFD_SaveDialog( const nfdchar_t *filterList,
     if (!COMIsInitialized(coResult))
     {
         NFDi_SetError("Could not initialize COM.");
-        return nfdResult;        
+        return nfdResult;
     }
-    
+
     // Create dialog
-    ::IFileSaveDialog *fileSaveDialog(NULL);    
+    ::IFileSaveDialog *fileSaveDialog(NULL);
     HRESULT result = ::CoCreateInstance(::CLSID_FileSaveDialog, NULL,
                                         CLSCTX_ALL, ::IID_IFileSaveDialog,
                                         reinterpret_cast<void**>(&fileSaveDialog) );
@@ -648,17 +1162,15 @@ nfdresult_t NFD_SaveDialog( const nfdchar_t *filterList,
         NFDi_SetError("File dialog box show failed.");
         nfdResult = NFD_ERROR;
     }
-    
+
 end:
     if ( fileSaveDialog )
         fileSaveDialog->Release();
 
     COMUninit(coResult);
-    
+
     return nfdResult;
 }
-
-
 
 nfdresult_t NFD_PickFolder(const nfdchar_t *defaultPath,
     nfdchar_t **outPath)
@@ -680,7 +1192,7 @@ nfdresult_t NFD_PickFolder(const nfdchar_t *defaultPath,
                                       CLSCTX_ALL,
                                       IID_PPV_ARGS(&fileDialog));
     if ( !SUCCEEDED(result) )
-    {        
+    {
         NFDi_SetError("CoCreateInstance for CLSID_FileOpenDialog failed.");
         goto end;
     }
@@ -725,7 +1237,7 @@ nfdresult_t NFD_PickFolder(const nfdchar_t *defaultPath,
         result = shellItem->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &path);
         if ( !SUCCEEDED(result) )
         {
-            NFDi_SetError("GetDisplayName for IShellItem failed.");            
+            NFDi_SetError("GetDisplayName for IShellItem failed.");
             shellItem->Release();
             goto end;
         }
@@ -760,3 +1272,5 @@ nfdresult_t NFD_PickFolder(const nfdchar_t *defaultPath,
 
     return nfdResult;
 }
+
+#endif

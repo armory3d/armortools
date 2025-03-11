@@ -1,7 +1,7 @@
 
 ///if arm_physics
 
-///include "../libs/asim/asim.h"
+///include "../libs/asim.h"
 
 declare function asim_world_create(): void;
 declare function asim_world_destroy(): void;

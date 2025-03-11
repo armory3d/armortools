@@ -1,7 +1,7 @@
 
 ///if arm_physics
 
-///include "../libs/asim/asim.h"
+///include "../libs/asim.h"
 
 declare function asim_body_create(shape: i32, mass: f32, dimx: f32, dimy: f32, dimz: f32, x: f32, y: f32, z: f32, triangles: f32[]): any;
 declare function asim_body_apply_impulse(body: any, x: f32, y: f32, z: f32): void;
