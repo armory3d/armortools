@@ -63,7 +63,6 @@
 
 ID3D12Device *device = NULL;
 static ID3D12RootSignature *globalRootSignature = NULL;
-static ID3D12RootSignature *globalComputeRootSignature = NULL;
 // extern ID3D12GraphicsCommandList* commandList;
 static int framebuffer_count = 0;
 
@@ -78,8 +77,6 @@ static struct dx_ctx dx_ctx = {0};
 inline struct dx_window *iron_dx_current_window() {
 	return &dx_ctx.windows[0];
 }
-
-static bool compute_pipeline_set = false;
 
 ID3D12CommandQueue *commandQueue;
 
@@ -266,100 +263,9 @@ static void createRootSignature() {
 	                                    &globalRootSignature);
 }
 
-static void createComputeRootSignature() {
-	ID3DBlob *rootBlob;
-	ID3DBlob *errorBlob;
-
-	D3D12_ROOT_PARAMETER parameters[4] = {};
-
-	D3D12_DESCRIPTOR_RANGE range;
-	range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	range.NumDescriptors = (UINT)IRON_INTERNAL_G5_TEXTURE_COUNT;
-	range.BaseShaderRegister = 0;
-	range.RegisterSpace = 0;
-	range.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-	parameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	parameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-	parameters[0].DescriptorTable.NumDescriptorRanges = 1;
-	parameters[0].DescriptorTable.pDescriptorRanges = &range;
-
-	D3D12_DESCRIPTOR_RANGE uav_range;
-	uav_range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
-	uav_range.NumDescriptors = (UINT)IRON_INTERNAL_G5_TEXTURE_COUNT;
-	uav_range.BaseShaderRegister = 0;
-	uav_range.RegisterSpace = 0;
-	uav_range.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-	parameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	parameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-	parameters[1].DescriptorTable.NumDescriptorRanges = 1;
-	parameters[1].DescriptorTable.pDescriptorRanges = &uav_range;
-
-	D3D12_DESCRIPTOR_RANGE range2;
-	range2.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
-	range2.NumDescriptors = (UINT)IRON_INTERNAL_G5_TEXTURE_COUNT;
-	range2.BaseShaderRegister = 0;
-	range2.RegisterSpace = 0;
-	range2.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-	parameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	parameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-	parameters[2].DescriptorTable.NumDescriptorRanges = 1;
-	parameters[2].DescriptorTable.pDescriptorRanges = &range2;
-
-	parameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	parameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-	parameters[3].Descriptor.ShaderRegister = 0;
-	parameters[3].Descriptor.RegisterSpace = 0;
-
-	D3D12_STATIC_SAMPLER_DESC samplers[IRON_INTERNAL_G5_TEXTURE_COUNT * 2];
-	for (int i = 0; i < IRON_INTERNAL_G5_TEXTURE_COUNT; ++i) {
-		samplers[i].ShaderRegister = i;
-		samplers[i].Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
-		samplers[i].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		samplers[i].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		samplers[i].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		samplers[i].MipLODBias = 0;
-		samplers[i].MaxAnisotropy = 16;
-		samplers[i].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
-		samplers[i].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
-		samplers[i].MinLOD = 0.0f;
-		samplers[i].MaxLOD = D3D12_FLOAT32_MAX;
-		samplers[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-		samplers[i].RegisterSpace = 0;
-	}
-	for (int i = IRON_INTERNAL_G5_TEXTURE_COUNT; i < IRON_INTERNAL_G5_TEXTURE_COUNT * 2; ++i) {
-		samplers[i].ShaderRegister = i;
-		samplers[i].Filter = D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT;
-		samplers[i].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		samplers[i].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		samplers[i].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		samplers[i].MipLODBias = 0;
-		samplers[i].MaxAnisotropy = 16;
-		samplers[i].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
-		samplers[i].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
-		samplers[i].MinLOD = 0.0f;
-		samplers[i].MaxLOD = D3D12_FLOAT32_MAX;
-		samplers[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-		samplers[i].RegisterSpace = 0;
-	}
-
-	D3D12_ROOT_SIGNATURE_DESC descRootSignature;
-	descRootSignature.NumParameters = 4;
-	descRootSignature.pParameters = parameters;
-	descRootSignature.NumStaticSamplers = 0;
-	descRootSignature.pStaticSamplers = NULL;
-	descRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-
-	iron_microsoft_affirm(D3D12SerializeRootSignature(&descRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &rootBlob, &errorBlob));
-	device->lpVtbl->CreateRootSignature(device, 0, rootBlob->lpVtbl->GetBufferPointer(rootBlob), rootBlob->lpVtbl->GetBufferSize(rootBlob), &IID_ID3D12RootSignature,
-	                                    &globalComputeRootSignature);
-
-	// createSamplersAndHeaps();
-}
-
 static void initialize(struct dx_window *window) {
 	createDeviceAndSwapChain(window);
 	createRootSignature();
-	createComputeRootSignature();
 
 	device->lpVtbl->CreateFence(device, 0, D3D12_FENCE_FLAG_NONE, &IID_ID3D12Fence, &uploadFence);
 
@@ -435,7 +341,6 @@ void iron_gpu_internal_init() {
 	iron_microsoft_affirm(D3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, &IID_ID3D12Device, &device));
 
 	createRootSignature();
-	createComputeRootSignature();
 
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
@@ -595,8 +500,6 @@ void iron_gpu_internal_reset_textures(struct iron_gpu_command_list *list);
 void iron_gpu_command_list_begin(struct iron_gpu_command_list *list) {
 	assert(!list->impl.open);
 
-	compute_pipeline_set = false;
-
 	if (list->impl.fence_value > 0) {
 		waitForFence(list->impl.fence, list->impl.fence_value, list->impl.fence_event);
 		list->impl._commandAllocator->lpVtbl->Reset(list->impl._commandAllocator);
@@ -718,11 +621,6 @@ void iron_gpu_command_list_set_fragment_constant_buffer(struct iron_gpu_command_
 	list->impl._commandList->lpVtbl->SetGraphicsRootConstantBufferView(list->impl._commandList, 3, buffer->impl.constant_buffer->lpVtbl->GetGPUVirtualAddress(buffer->impl.constant_buffer) + offset);
 }
 
-void iron_gpu_command_list_set_compute_constant_buffer(struct iron_gpu_command_list *list, iron_gpu_constant_buffer_t *buffer, int offset, size_t size) {
-	assert(list->impl.open);
-	list->impl._commandList->lpVtbl->SetComputeRootConstantBufferView(list->impl._commandList, 3, buffer->impl.constant_buffer->lpVtbl->GetGPUVirtualAddress(buffer->impl.constant_buffer) + offset);
-}
-
 void iron_gpu_command_list_draw_indexed_vertices(struct iron_gpu_command_list *list) {
 	iron_gpu_command_list_draw_indexed_vertices_from_to(list, 0, list->impl._indexCount);
 }
@@ -795,7 +693,6 @@ void iron_gpu_command_list_set_pipeline(struct iron_gpu_command_list *list, iron
 
 	list->impl._currentPipeline = pipeline;
 	list->impl._commandList->lpVtbl->SetPipelineState(list->impl._commandList, pipeline->impl.pso);
-	compute_pipeline_set = false;
 
 	for (int i = 0; i < IRON_INTERNAL_G5_TEXTURE_COUNT; ++i) {
 		list->impl.currentTextures[i] = NULL;
@@ -1002,23 +899,6 @@ void iron_gpu_command_list_get_render_target_pixels(iron_gpu_command_list_t *lis
 	render_target->impl.renderTargetReadback->lpVtbl->Unmap(render_target->impl.renderTargetReadback, 0, NULL);
 }
 
-void iron_gpu_internal_set_compute_constants(iron_gpu_command_list_t *commandList);
-
-void iron_gpu_command_list_set_compute_shader(iron_gpu_command_list_t *list, iron_gpu_compute_shader *shader) {
-	list->impl._commandList->lpVtbl->SetPipelineState(list->impl._commandList, shader->impl.pso);
-	compute_pipeline_set = true;
-
-	for (int i = 0; i < IRON_INTERNAL_G5_TEXTURE_COUNT; ++i) {
-		list->impl.currentTextures[i] = NULL;
-	}
-	iron_gpu_internal_set_compute_constants(list);
-}
-
-void iron_gpu_command_list_compute(iron_gpu_command_list_t *list, int x, int y, int z) {
-	assert(list->impl.open);
-	list->impl._commandList->lpVtbl->Dispatch(list->impl._commandList, x, y, z);
-}
-
 void iron_gpu_internal_sampler_set(iron_gpu_command_list_t *list, iron_gpu_sampler_t *sampler, int unit);
 
 void iron_gpu_command_list_set_sampler(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_sampler_t *sampler) {
@@ -1038,9 +918,6 @@ void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, iron_gpu_t
 	else if (unit.stages[IRON_GPU_SHADER_TYPE_VERTEX] >= 0) {
 		texture->impl.stage = unit.stages[IRON_GPU_SHADER_TYPE_VERTEX];
 	}
-	else if (unit.stages[IRON_GPU_SHADER_TYPE_COMPUTE] >= 0) {
-		texture->impl.stage = unit.stages[IRON_GPU_SHADER_TYPE_COMPUTE];
-	}
 	list->impl.currentTextures[texture->impl.stage] = texture;
 	iron_gpu_internal_set_textures(list);
 }
@@ -1055,181 +932,12 @@ void iron_gpu_command_list_set_texture_from_render_target_depth(iron_gpu_command
 	list->impl.currentTextures[texture->impl.stage_depth] = texture;
 }
 
-void iron_gpu_compute_shader_init(iron_gpu_compute_shader *shader, void *_data, int length) {
-	unsigned index = 0;
-	uint8_t *data = (uint8_t *)_data;
-
-	memset(&shader->impl.attributes, 0, sizeof(shader->impl.attributes));
-	int attributesCount = data[index++];
-	for (int i = 0; i < attributesCount; ++i) {
-		unsigned char name[256];
-		for (unsigned i2 = 0; i2 < 255; ++i2) {
-			name[i2] = data[index++];
-			if (name[i2] == 0)
-				break;
-		}
-		shader->impl.attributes[i].hash = iron_internal_hash_name(name);
-		shader->impl.attributes[i].index = data[index++];
-	}
-
-	memset(&shader->impl.textures, 0, sizeof(shader->impl.textures));
-	uint8_t texCount = data[index++];
-	for (unsigned i = 0; i < texCount; ++i) {
-		unsigned char name[256];
-		for (unsigned i2 = 0; i2 < 255; ++i2) {
-			name[i2] = data[index++];
-			if (name[i2] == 0)
-				break;
-		}
-		shader->impl.textures[i].hash = iron_internal_hash_name(name);
-		shader->impl.textures[i].index = data[index++];
-	}
-
-	memset(&shader->impl.constants, 0, sizeof(shader->impl.constants));
-	uint8_t constantCount = data[index++];
-	shader->impl.constantsSize = 0;
-	for (unsigned i = 0; i < constantCount; ++i) {
-		unsigned char name[256];
-		for (unsigned i2 = 0; i2 < 255; ++i2) {
-			name[i2] = data[index++];
-			if (name[i2] == 0)
-				break;
-		}
-		iron_compute_internal_shader_constant_t constant;
-		constant.hash = iron_internal_hash_name(name);
-		memcpy(&constant.offset, &data[index], sizeof(constant.offset));
-		index += 4;
-		memcpy(&constant.size, &data[index], sizeof(constant.size));
-		index += 4;
-		constant.columns = data[index];
-		index += 1;
-		constant.rows = data[index];
-		index += 1;
-
-		shader->impl.constants[i] = constant;
-		shader->impl.constantsSize = constant.offset + constant.size;
-	}
-
-	shader->impl.length = (int)(length - index);
-	shader->impl.data = (uint8_t *)malloc(shader->impl.length);
-	assert(shader->impl.data != NULL);
-	memcpy(shader->impl.data, &data[index], shader->impl.length);
-
-	D3D12_COMPUTE_PIPELINE_STATE_DESC desc = {0};
-	desc.CS.BytecodeLength = shader->impl.length;
-	desc.CS.pShaderBytecode = shader->impl.data;
-	desc.pRootSignature = globalComputeRootSignature;
-	HRESULT hr = device->lpVtbl->CreateComputePipelineState(device , &desc, &IID_ID3D12PipelineState, &shader->impl.pso);
-
-	if (hr != S_OK) {
-		iron_log("Could not initialize compute shader.");
-		return;
-	}
-
-	// iron_microsoft_affirm(device->CreateBuffer(&CD3D11_BUFFER_DESC(getMultipleOf16(shader->impl.constantsSize), D3D11_BIND_CONSTANT_BUFFER), nullptr,
-	// &shader->impl.constantBuffer));
-}
-
-void iron_gpu_compute_shader_destroy(iron_gpu_compute_shader *shader) {
-	if (shader->impl.pso != NULL) {
-		shader->impl.pso->lpVtbl->Release(shader->impl.pso);
-		shader->impl.pso = NULL;
-	}
-}
-
-static iron_compute_internal_shader_constant_t *findComputeConstant(iron_compute_internal_shader_constant_t *constants, uint32_t hash) {
-	for (int i = 0; i < 64; ++i) {
-		if (constants[i].hash == hash) {
-			return &constants[i];
-		}
-	}
-	return NULL;
-}
-
-static iron_internal_hash_index_t *findComputeTextureUnit(iron_internal_hash_index_t *units, uint32_t hash) {
-	for (int i = 0; i < 64; ++i) {
-		if (units[i].hash == hash) {
-			return &units[i];
-		}
-	}
-	return NULL;
-}
-
-iron_gpu_constant_location_t iron_gpu_compute_shader_get_constant_location(iron_gpu_compute_shader *shader, const char *name) {
-	iron_gpu_constant_location_t location = {0};
-
-	uint32_t hash = iron_internal_hash_name((unsigned char *)name);
-
-	iron_compute_internal_shader_constant_t *constant = findComputeConstant(shader->impl.constants, hash);
-	if (constant == NULL) {
-		location.impl.computeOffset = 0;
-		location.impl.computeSize = 0;
-	}
-	else {
-		location.impl.computeOffset = constant->offset;
-		location.impl.computeSize = constant->size;
-	}
-
-	if (location.impl.computeSize == 0) {
-		iron_log("Uniform %s not found.", name);
-	}
-
-	return location;
-}
-
-iron_gpu_texture_unit_t iron_gpu_compute_shader_get_texture_unit(iron_gpu_compute_shader *shader, const char *name) {
-	char unitName[64];
-	int unitOffset = 0;
-	size_t len = strlen(name);
-	if (len > 63)
-		len = 63;
-	strncpy(unitName, name, len + 1);
-	if (unitName[len - 1] == ']') {                  // Check for array - mySampler[2]
-		unitOffset = (int)(unitName[len - 2] - '0'); // Array index is unit offset
-		unitName[len - 3] = 0;                       // Strip array from name
-	}
-
-	uint32_t hash = iron_internal_hash_name((unsigned char *)unitName);
-
-	iron_gpu_texture_unit_t unit;
-	for (int i = 0; i < IRON_GPU_SHADER_TYPE_COUNT; ++i) {
-		unit.stages[i] = -1;
-	}
-	iron_internal_hash_index_t *computeUnit = findComputeTextureUnit(shader->impl.textures, hash);
-	if (computeUnit == NULL) {
-#ifndef NDEBUG
-		static int notFoundCount = 0;
-		if (notFoundCount < 10) {
-			iron_log("Sampler %s not found.", unitName);
-			++notFoundCount;
-		}
-		else if (notFoundCount == 10) {
-			iron_log("Giving up on sampler not found messages.", unitName);
-			++notFoundCount;
-		}
-#endif
-	}
-	else {
-		unit.stages[IRON_GPU_SHADER_TYPE_COMPUTE] = computeUnit->index + unitOffset;
-	}
-	return unit;
-}
-
 void iron_gpu_internal_setConstants(iron_gpu_command_list_t *commandList, iron_gpu_pipeline_t *pipeline) {
 	commandList->impl._commandList->lpVtbl->SetGraphicsRootSignature(commandList->impl._commandList, globalRootSignature);
 
 	if (pipeline->impl.textures > 0) {
 		iron_gpu_internal_set_textures(commandList);
 	}
-}
-
-void iron_gpu_internal_set_compute_constants(iron_gpu_command_list_t *commandList) {
-
-	commandList->impl._commandList->lpVtbl->SetComputeRootSignature(commandList->impl._commandList, globalComputeRootSignature);
-
-	//if (pipeline->impl.textures > 0) {
-		iron_gpu_internal_set_textures(commandList);
-	//}
 }
 
 void iron_gpu_pipeline_init(iron_gpu_pipeline_t *pipe) {
@@ -1302,9 +1010,6 @@ iron_gpu_constant_location_t iron_gpu_pipeline_get_constant_location(struct iron
 		location.impl.fragmentOffset = constant.offset;
 		location.impl.fragmentSize = constant.size;
 	}
-
-	location.impl.computeOffset = 0;
-	location.impl.computeSize = 0;
 
 	return location;
 }
@@ -1846,15 +1551,8 @@ void iron_gpu_internal_set_textures(iron_gpu_command_list_t *list) {
 
 		ID3D12DescriptorHeap *heaps[2] = {list->impl.srvHeap, list->impl.samplerHeap};
 		list->impl._commandList->lpVtbl->SetDescriptorHeaps(list->impl._commandList, 2, heaps);
-		if (compute_pipeline_set) {
-			list->impl._commandList->lpVtbl->SetComputeRootDescriptorTable(list->impl._commandList, 0, srvGpu);
-			list->impl._commandList->lpVtbl->SetComputeRootDescriptorTable(list->impl._commandList, 1, srvGpu);
-			list->impl._commandList->lpVtbl->SetComputeRootDescriptorTable(list->impl._commandList, 2, samplerGpu);
-		}
-		else {
-			list->impl._commandList->lpVtbl->SetGraphicsRootDescriptorTable(list->impl._commandList, 0, srvGpu);
-			list->impl._commandList->lpVtbl->SetGraphicsRootDescriptorTable(list->impl._commandList, 1, samplerGpu);
-		}
+		list->impl._commandList->lpVtbl->SetGraphicsRootDescriptorTable(list->impl._commandList, 0, srvGpu);
+		list->impl._commandList->lpVtbl->SetGraphicsRootDescriptorTable(list->impl._commandList, 1, samplerGpu);
 	}
 }
 

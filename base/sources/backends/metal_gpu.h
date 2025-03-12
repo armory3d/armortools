@@ -3,20 +3,11 @@
 #include <iron_gpu.h>
 #include <iron_math.h>
 
-#pragma once
-
 struct iron_gpu_index_buffer;
 
 typedef struct {
 	struct iron_gpu_index_buffer *current_index_buffer;
 } CommandList5Impl;
-
-typedef struct iron_gpu_compute_shader_impl {
-	char name[1024];
-	void *_function;
-	void *_pipeline;
-	void *_reflection;
-} iron_gpu_compute_shader_impl;
 
 struct iron_gpu_shader;
 
@@ -31,13 +22,8 @@ typedef struct {
 } PipelineState5Impl;
 
 typedef struct {
-	int a;
-} ComputePipelineState5Impl;
-
-typedef struct {
 	int vertexOffset;
 	int fragmentOffset;
-	int computeOffset;
 } ConstantLocation5Impl;
 
 typedef struct iron_gpu_sampler_impl {

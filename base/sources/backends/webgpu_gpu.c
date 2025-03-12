@@ -480,10 +480,6 @@ void iron_gpu_command_list_set_fragment_constant_buffer(iron_gpu_command_list_t 
 
 }
 
-void iron_gpu_command_list_set_compute_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_constant_buffer *buffer, int offset, size_t size) {
-
-}
-
 void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *texture) {
 
 }
@@ -491,21 +487,3 @@ void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, iron_gpu_t
 void iron_gpu_command_list_set_sampler(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_sampler_t *sampler) {}
 
 void iron_gpu_command_list_set_texture_from_render_target_depth(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *renderTarget) {}
-
-void iron_gpu_command_list_set_compute_shader(iron_gpu_command_list_t *list, iron_gpu_compute_shader *shader) {}
-
-void iron_gpu_command_list_compute(iron_gpu_command_list_t *list, int x, int y, int z) {}
-
-void iron_gpu_compute_shader_init(iron_gpu_compute_shader *shader, void *source, int length) {}
-
-void iron_gpu_compute_shader_destroy(iron_gpu_compute_shader *shader) {}
-
-iron_gpu_constant_location_t iron_gpu_compute_shader_get_constant_location(iron_gpu_compute_shader *shader, const char *name) {
-	iron_gpu_constant_location_t location = {0};
-	return location;
-}
-
-iron_gpu_texture_unit_t iron_gpu_compute_shader_get_texture_unit(iron_gpu_compute_shader *shader, const char *name) {
-	iron_gpu_texture_unit_t unit = {0};
-	return unit;
-}

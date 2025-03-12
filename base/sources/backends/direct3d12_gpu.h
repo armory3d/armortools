@@ -74,27 +74,8 @@ typedef struct {
 
 typedef struct {
 	uint32_t hash;
-	uint32_t offset;
-	uint32_t size;
-	uint8_t columns;
-	uint8_t rows;
-} iron_compute_internal_shader_constant_t;
-
-typedef struct {
-	uint32_t hash;
 	uint32_t index;
 } iron_internal_hash_index_t;
-
-typedef struct iron_gpu_compute_shader_impl {
-	iron_compute_internal_shader_constant_t constants[64];
-	int constantsSize;
-	iron_internal_hash_index_t attributes[64];
-	iron_internal_hash_index_t textures[64];
-	uint8_t *data;
-	int length;
-	struct ID3D12Buffer *constantBuffer;
-	struct ID3D12PipelineState *pso;
-} iron_gpu_compute_shader_impl;
 
 struct iron_gpu_shader;
 
@@ -109,17 +90,10 @@ typedef struct {
 } PipelineState5Impl;
 
 typedef struct {
-	struct ID3D12PipelineState *pso;
-	int textures;
-} ComputePipelineState5Impl;
-
-typedef struct {
 	int vertexOffset;
 	uint32_t vertexSize;
 	int fragmentOffset;
 	uint32_t fragmentSize;
-	int computeOffset;
-	uint32_t computeSize;
 	int geometryOffset;
 	uint32_t geometrySize;
 	int tessEvalOffset;

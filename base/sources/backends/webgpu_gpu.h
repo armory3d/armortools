@@ -28,13 +28,8 @@ typedef struct {
 } PipelineState5Impl;
 
 typedef struct {
-	WGPUComputePipeline pipeline;
-} ComputePipelineState5Impl;
-
-typedef struct {
 	int vertexOffset;
 	int fragmentOffset;
-	int computeOffset;
 } ConstantLocation5Impl;
 
 typedef struct iron_gpu_sampler_impl {
@@ -52,7 +47,3 @@ typedef struct {
 	WGPURenderPassEncoder pass;
 	int indexCount;
 } CommandList5Impl;
-
-typedef struct iron_gpu_compute_shader_impl {
-	int nothing;
-} iron_gpu_compute_shader_impl;

@@ -19,7 +19,6 @@
 static VkSemaphore framebuffer_available;
 static VkSemaphore relay_semaphore;
 static bool wait_for_relay = false;
-static VkDescriptorSetLayout compute_descriptor_layout;
 static int framebuffer_count = 0;
 
 iron_gpu_texture_t *vulkan_textures[16] = {
@@ -35,7 +34,6 @@ VkSampler vulkan_samplers[16] = {
 };
 
 VkDescriptorSet get_descriptor_set(void);
-static VkDescriptorSet get_compute_descriptor_set(void);
 
 VkRenderPassBeginInfo current_render_pass_begin_info;
 VkPipeline current_vulkan_pipeline;
@@ -45,9 +43,7 @@ iron_gpu_texture_t *current_render_targets[8] = {
 
 static uint32_t last_vertex_constant_buffer_offset = 0;
 static uint32_t last_fragment_constant_buffer_offset = 0;
-static uint32_t last_compute_constant_buffer_offset = 0;
 static iron_gpu_pipeline_t *current_pipeline = NULL;
-static iron_gpu_compute_shader *current_compute_shader = NULL;
 static int mrt_index = 0;
 static VkFramebuffer mrt_framebuffer[16];
 static VkRenderPass mrt_render_pass[16];
@@ -57,7 +53,6 @@ static bool in_render_pass = false;
 static bool wait_for_framebuffer = false;
 bool iron_gpu_transpose_mat = true;
 
-static VkDescriptorPool compute_descriptor_pool;
 VkDescriptorSetLayout desc_layout;
 static VkDescriptorPool descriptor_pool;
 
@@ -95,11 +90,6 @@ struct descriptor_set {
 static struct descriptor_set descriptor_sets[MAX_DESCRIPTOR_SETS] = {0};
 static int descriptor_sets_count = 0;
 
-static struct descriptor_set compute_descriptor_sets[MAX_DESCRIPTOR_SETS] = {0};
-static int compute_descriptor_sets_count = 0;
-
-
-
 struct vk_funs vk = {0};
 struct vk_context vk_ctx = {0};
 
@@ -117,7 +107,6 @@ void iron_gpu_internal_resize(int, int);
 	}
 
 void create_descriptor_layout(void);
-static void create_compute_descriptor_layout(void);
 
 static bool began = false;
 static VkPhysicalDeviceProperties gpu_props;
@@ -1107,7 +1096,6 @@ void iron_gpu_internal_init() {
 	err = vkCreateCommandPool(vk_ctx.device, &cmd_pool_info, NULL, &vk_ctx.cmd_pool);
 
 	create_descriptor_layout();
-	create_compute_descriptor_layout();
 	assert(!err);
 
 	VkSemaphoreCreateInfo semInfo = {0};
@@ -1256,7 +1244,6 @@ void iron_gpu_end() {
 	}
 
 	reuse_descriptor_sets();
-	reuse_compute_descriptor_sets();
 	began = false;
 }
 
@@ -1921,15 +1908,6 @@ void iron_gpu_command_list_set_fragment_constant_buffer(iron_gpu_command_list_t 
 	vkCmdBindDescriptorSets(list->impl._buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, current_pipeline->impl.pipeline_layout, 0, 1, &descriptor_set, 2, offsets);
 }
 
-void iron_gpu_command_list_set_compute_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_constant_buffer *buffer, int offset, size_t size) {
-	last_compute_constant_buffer_offset = offset;
-
-	VkDescriptorSet descriptor_set = get_compute_descriptor_set();
-	uint32_t offsets[2] = {last_compute_constant_buffer_offset, last_compute_constant_buffer_offset};
-	vkCmdBindDescriptorSets(list->impl._buffer, VK_PIPELINE_BIND_POINT_COMPUTE, current_compute_shader->impl.pipeline_layout, 0, 1, &descriptor_set, 2,
-	                        offsets);
-}
-
 void iron_gpu_command_list_execute(iron_gpu_command_list_t *list) {
 	// Make sure the previous execution is done, so we can reuse the fence
 	// Not optimal of course
@@ -1996,31 +1974,6 @@ void iron_gpu_command_list_set_texture_from_render_target_depth(iron_gpu_command
 	else if (unit.stages[IRON_GPU_SHADER_TYPE_VERTEX] >= 0) {
 		target->impl.stage_depth = unit.stages[IRON_GPU_SHADER_TYPE_VERTEX];
 		vulkan_textures[unit.stages[IRON_GPU_SHADER_TYPE_VERTEX]] = target;
-	}
-}
-
-void iron_gpu_command_list_set_compute_shader(iron_gpu_command_list_t *list, iron_gpu_compute_shader *shader) {
-	current_compute_shader = shader;
-	vkCmdBindPipeline(list->impl._buffer, VK_PIPELINE_BIND_POINT_COMPUTE, shader->impl.pipeline);
-}
-
-void iron_gpu_command_list_compute(iron_gpu_command_list_t *list, int x, int y, int z) {
-	if (in_render_pass) {
-		vkCmdEndRenderPass(list->impl._buffer);
-		in_render_pass = false;
-	}
-
-	vkCmdDispatch(list->impl._buffer, x, y, z);
-
-	int render_target_count = 0;
-	for (int i = 0; i < 8; ++i) {
-		if (current_render_targets[i] == NULL) {
-			break;
-		}
-		++render_target_count;
-	}
-	if (render_target_count > 0) {
-		iron_gpu_command_list_set_render_targets(list, current_render_targets, render_target_count);
 	}
 }
 
@@ -2217,128 +2170,6 @@ static VkShaderModule create_shader_module(const void *code, size_t size) {
 	return module;
 }
 
-static void create_compute_descriptor_layout(void) {
-	VkDescriptorSetLayoutBinding layoutBindings[18];
-	memset(layoutBindings, 0, sizeof(layoutBindings));
-
-	layoutBindings[0].binding = 0;
-	layoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
-	layoutBindings[0].descriptorCount = 1;
-	layoutBindings[0].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
-	layoutBindings[0].pImmutableSamplers = NULL;
-
-	layoutBindings[1].binding = 1;
-	layoutBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
-	layoutBindings[1].descriptorCount = 1;
-	layoutBindings[1].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
-	layoutBindings[1].pImmutableSamplers = NULL;
-
-	for (int i = 2; i < 18; ++i) {
-		layoutBindings[i].binding = i;
-		layoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-		layoutBindings[i].descriptorCount = 1;
-		layoutBindings[i].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
-		layoutBindings[i].pImmutableSamplers = NULL;
-	}
-
-	VkDescriptorSetLayoutCreateInfo descriptor_layout = {0};
-	descriptor_layout.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	descriptor_layout.pNext = NULL;
-	descriptor_layout.bindingCount = 18;
-	descriptor_layout.pBindings = layoutBindings;
-
-	VkResult err = vkCreateDescriptorSetLayout(vk_ctx.device, &descriptor_layout, NULL, &compute_descriptor_layout);
-	assert(!err);
-
-	VkDescriptorPoolSize typeCounts[2];
-	memset(typeCounts, 0, sizeof(typeCounts));
-
-	typeCounts[0].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
-	typeCounts[0].descriptorCount = 2 * 1024;
-
-	typeCounts[1].type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-	typeCounts[1].descriptorCount = 16 * 1024;
-
-	VkDescriptorPoolCreateInfo pool_info = {0};
-	pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-	pool_info.pNext = NULL;
-	pool_info.maxSets = 1024;
-	pool_info.poolSizeCount = 2;
-	pool_info.pPoolSizes = typeCounts;
-
-	err = vkCreateDescriptorPool(vk_ctx.device, &pool_info, NULL, &compute_descriptor_pool);
-	assert(!err);
-}
-
-void iron_gpu_compute_shader_init(iron_gpu_compute_shader *shader, void *_data, int length) {
-	memset(shader->impl.locations, 0, sizeof(iron_internal_named_number) * IRON_INTERNAL_NAMED_NUMBER_COUNT);
-	memset(shader->impl.offsets, 0, sizeof(iron_internal_named_number) * IRON_INTERNAL_NAMED_NUMBER_COUNT);
-	memset(shader->impl.texture_bindings, 0, sizeof(iron_internal_named_number) * IRON_INTERNAL_NAMED_NUMBER_COUNT);
-	parse_shader((uint32_t *)_data, length, shader->impl.locations, shader->impl.texture_bindings, shader->impl.offsets);
-
-	VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo = {0};
-	pPipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pPipelineLayoutCreateInfo.pNext = NULL;
-	pPipelineLayoutCreateInfo.setLayoutCount = 1;
-	pPipelineLayoutCreateInfo.pSetLayouts = &compute_descriptor_layout;
-
-	VkResult err = vkCreatePipelineLayout(vk_ctx.device, &pPipelineLayoutCreateInfo, NULL, &shader->impl.pipeline_layout);
-	assert(!err);
-
-	VkComputePipelineCreateInfo pipeline_info = {0};
-
-	memset(&pipeline_info, 0, sizeof(pipeline_info));
-	pipeline_info.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
-	pipeline_info.layout = shader->impl.pipeline_layout;
-
-	VkPipelineShaderStageCreateInfo shader_stage;
-	memset(&shader_stage, 0, sizeof(VkPipelineShaderStageCreateInfo));
-
-	shader_stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-	shader_stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
-	shader->impl.shader_module = create_shader_module(_data, (size_t)length);
-	shader_stage.module = shader->impl.shader_module;
-	shader_stage.pName = "main";
-
-	pipeline_info.stage = shader_stage;
-
-	err = vkCreateComputePipelines(vk_ctx.device, VK_NULL_HANDLE, 1, &pipeline_info, NULL, &shader->impl.pipeline);
-	assert(!err);
-
-	vkDestroyShaderModule(vk_ctx.device, shader->impl.shader_module, NULL);
-}
-
-void iron_gpu_compute_shader_destroy(iron_gpu_compute_shader *shader) {}
-
-iron_gpu_constant_location_t iron_gpu_compute_shader_get_constant_location(iron_gpu_compute_shader *shader, const char *name) {
-	iron_gpu_constant_location_t location = {0};
-	uint32_t hash = iron_hash_djb2((unsigned char *)name);
-	return location;
-}
-
-iron_gpu_texture_unit_t iron_gpu_compute_shader_get_texture_unit(iron_gpu_compute_shader *shader, const char *name) {
-	char unitName[64];
-	int unitOffset = 0;
-	size_t len = strlen(name);
-	if (len > 63)
-		len = 63;
-	strncpy(unitName, name, len + 1);
-	if (unitName[len - 1] == ']') {                  // Check for array - mySampler[2]
-		unitOffset = (int)(unitName[len - 2] - '0'); // Array index is unit offset
-		unitName[len - 3] = 0;                       // Strip array from name
-	}
-
-	uint32_t hash = iron_hash_djb2((unsigned char *)unitName);
-
-	iron_gpu_texture_unit_t unit;
-	for (int i = 0; i < IRON_GPU_SHADER_TYPE_COUNT; ++i) {
-		unit.stages[i] = -1;
-	}
-	unit.stages[IRON_GPU_SHADER_TYPE_COMPUTE] = 0;
-
-	return unit;
-}
-
 static VkShaderModule prepare_vs(VkShaderModule *vert_shader_module, iron_gpu_shader_t *vertex_shader) {
 	*vert_shader_module = create_shader_module(vertex_shader->impl.source, vertex_shader->impl.length);
 	return *vert_shader_module;
@@ -2385,7 +2216,6 @@ iron_gpu_constant_location_t iron_gpu_pipeline_get_constant_location(iron_gpu_pi
 	iron_gpu_constant_location_t location;
 	location.impl.vertexOffset = -1;
 	location.impl.fragmentOffset = -1;
-	location.impl.computeOffset = -1;
 	if (has_number(pipeline->impl.vertexOffsets, name)) {
 		location.impl.vertexOffset = find_number(pipeline->impl.vertexOffsets, name);
 	}
@@ -2840,19 +2670,6 @@ int calc_descriptor_id(void) {
 	return 1 | (texture_count << 1) | ((uniform_buffer ? 1 : 0) << 8);
 }
 
-int calc_compute_descriptor_id(void) {
-	int texture_count = 0;
-	for (int i = 0; i < 16; ++i) {
-		if (vulkan_textures[i] != NULL) {
-			texture_count++;
-		}
-	}
-
-	bool uniform_buffer = vk_ctx.compute_uniform_buffer != NULL;
-
-	return 1 | (texture_count << 1) | ((uniform_buffer ? 1 : 0) << 8);
-}
-
 static int write_tex_descs(VkDescriptorImageInfo *tex_descs) {
 	memset(tex_descs, 0, sizeof(VkDescriptorImageInfo) * 16);
 
@@ -3016,175 +2833,6 @@ VkDescriptorSet get_descriptor_set() {
 	descriptor_sets[descriptor_sets_count].set = descriptor_set;
 	write_tex_descs(descriptor_sets[descriptor_sets_count].tex_desc);
 	descriptor_sets_count += 1;
-
-	return descriptor_set;
-}
-
-static int write_compute_tex_descs(VkDescriptorImageInfo *tex_descs) {
-	memset(tex_descs, 0, sizeof(VkDescriptorImageInfo) * 16);
-
-	int texture_count = 0;
-	for (int i = 0; i < 16; ++i) {
-		if (vulkan_textures[i] != NULL) {
-			tex_descs[i].sampler = vulkan_samplers[i];
-			if (vulkan_textures[i]->impl.stage_depth == i) {
-				tex_descs[i].imageView = vulkan_textures[i]->impl.depthView;
-				vulkan_textures[i]->impl.stage_depth = -1;
-			}
-			else {
-				tex_descs[i].imageView = vulkan_textures[i]->impl.view;
-			}
-			texture_count++;
-		}
-		tex_descs[i].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-	}
-	return texture_count;
-}
-
-static bool compute_textures_changed(struct descriptor_set *set) {
-	VkDescriptorImageInfo tex_desc[16];
-
-	write_compute_tex_descs(tex_desc);
-
-	return memcmp(&tex_desc, &set->tex_desc, sizeof(tex_desc)) != 0;
-}
-
-static void update_compute_textures(struct descriptor_set *set) {
-	memset(&set->tex_desc, 0, sizeof(set->tex_desc));
-
-	int texture_count = write_compute_tex_descs(set->tex_desc);
-
-	VkWriteDescriptorSet writes[16];
-	memset(&writes, 0, sizeof(writes));
-
-	for (int i = 0; i < 16; ++i) {
-		writes[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		writes[i].dstSet = set->set;
-		writes[i].dstBinding = i + 2;
-		writes[i].descriptorCount = 1;
-		writes[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-		writes[i].pImageInfo = &set->tex_desc[i];
-	}
-
-	if (vulkan_textures[0] != NULL) {
-		vkUpdateDescriptorSets(vk_ctx.device, texture_count, writes, 0, NULL);
-	}
-}
-
-void reuse_compute_descriptor_sets(void) {
-	for (int i = 0; i < compute_descriptor_sets_count; ++i) {
-		compute_descriptor_sets[i].in_use = false;
-	}
-}
-
-static VkDescriptorSet get_compute_descriptor_set() {
-	int id = calc_compute_descriptor_id();
-	for (int i = 0; i < compute_descriptor_sets_count; ++i) {
-		if (compute_descriptor_sets[i].id == id) {
-			if (!compute_descriptor_sets[i].in_use) {
-				compute_descriptor_sets[i].in_use = true;
-				update_compute_textures(&compute_descriptor_sets[i]);
-				return compute_descriptor_sets[i].set;
-			}
-			else {
-				if (!compute_textures_changed(&compute_descriptor_sets[i])) {
-					return compute_descriptor_sets[i].set;
-				}
-			}
-		}
-	}
-
-	VkDescriptorSetAllocateInfo alloc_info = {0};
-	alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-	alloc_info.pNext = NULL;
-	alloc_info.descriptorPool = descriptor_pool;
-	alloc_info.descriptorSetCount = 1;
-	alloc_info.pSetLayouts = &compute_descriptor_layout;
-	VkDescriptorSet descriptor_set;
-	VkResult err = vkAllocateDescriptorSets(vk_ctx.device, &alloc_info, &descriptor_set);
-	assert(!err);
-
-	VkDescriptorBufferInfo buffer_descs[2];
-
-	memset(&buffer_descs, 0, sizeof(buffer_descs));
-
-	if (vk_ctx.compute_uniform_buffer != NULL) {
-		buffer_descs[0].buffer = *vk_ctx.compute_uniform_buffer;
-	}
-	buffer_descs[0].offset = 0;
-	buffer_descs[0].range = 256 * sizeof(float);
-
-	if (vk_ctx.compute_uniform_buffer != NULL) {
-		buffer_descs[1].buffer = *vk_ctx.compute_uniform_buffer;
-	}
-	buffer_descs[1].offset = 0;
-	buffer_descs[1].range = 256 * sizeof(float);
-
-	VkDescriptorImageInfo tex_desc[16];
-	memset(&tex_desc, 0, sizeof(tex_desc));
-
-	int texture_count = 0;
-	for (int i = 0; i < 16; ++i) {
-		if (vulkan_textures[i] != NULL) {
-			tex_desc[i].sampler = vulkan_samplers[i];
-			if (vulkan_textures[i]->impl.stage_depth == i) {
-				tex_desc[i].imageView = vulkan_textures[i]->impl.depthView;
-				vulkan_textures[i]->impl.stage_depth = -1;
-			}
-			else {
-				tex_desc[i].imageView = vulkan_textures[i]->impl.view;
-			}
-			texture_count++;
-		}
-		tex_desc[i].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-	}
-
-	VkWriteDescriptorSet writes[18];
-	memset(&writes, 0, sizeof(writes));
-
-	writes[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	writes[0].dstSet = descriptor_set;
-	writes[0].dstBinding = 0;
-	writes[0].descriptorCount = 1;
-	writes[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
-	writes[0].pBufferInfo = &buffer_descs[0];
-
-	writes[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	writes[1].dstSet = descriptor_set;
-	writes[1].dstBinding = 1;
-	writes[1].descriptorCount = 1;
-	writes[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
-	writes[1].pBufferInfo = &buffer_descs[1];
-
-	for (int i = 2; i < 18; ++i) {
-		writes[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		writes[i].dstSet = descriptor_set;
-		writes[i].dstBinding = i;
-		writes[i].descriptorCount = 1;
-		writes[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-		writes[i].pImageInfo = &tex_desc[i - 2];
-	}
-
-	if (vulkan_textures[0] != NULL) {
-		if (vk_ctx.compute_uniform_buffer != NULL) {
-			vkUpdateDescriptorSets(vk_ctx.device, 2 + texture_count, writes, 0, NULL);
-		}
-		else {
-			vkUpdateDescriptorSets(vk_ctx.device, texture_count, writes + 2, 0, NULL);
-		}
-	}
-	else {
-		if (vk_ctx.compute_uniform_buffer != NULL) {
-			vkUpdateDescriptorSets(vk_ctx.device, 2, writes, 0, NULL);
-		}
-	}
-
-	assert(compute_descriptor_sets_count + 1 < MAX_DESCRIPTOR_SETS);
-	compute_descriptor_sets[compute_descriptor_sets_count].id = id;
-	compute_descriptor_sets[compute_descriptor_sets_count].in_use = true;
-	compute_descriptor_sets[compute_descriptor_sets_count].set = descriptor_set;
-	write_tex_descs(compute_descriptor_sets[compute_descriptor_sets_count].tex_desc);
-	compute_descriptor_sets_count += 1;
 
 	return descriptor_set;
 }
@@ -4074,9 +3722,6 @@ void iron_gpu_constant_buffer_init(iron_gpu_constant_buffer_t *buffer, int size)
 	}
 	else if (vk_ctx.fragment_uniform_buffer == NULL) {
 		vk_ctx.fragment_uniform_buffer = &buffer->impl.buf;
-	}
-	else if (vk_ctx.compute_uniform_buffer == NULL) {
-		vk_ctx.compute_uniform_buffer = &buffer->impl.buf;
 	}
 
 	void *p;

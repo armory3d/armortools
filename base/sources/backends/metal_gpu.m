@@ -9,7 +9,6 @@
 
 static id<MTLCommandBuffer> command_buffer = nil;
 static id<MTLRenderCommandEncoder> render_command_encoder = nil;
-static id<MTLComputeCommandEncoder> compute_command_encoder = nil;
 
 static void start_render_pass(void);
 static void end_render_pass(void);
@@ -472,12 +471,6 @@ void iron_gpu_command_list_set_fragment_constant_buffer(iron_gpu_command_list_t 
 	[encoder setFragmentBuffer:buf offset:offset atIndex:0];
 }
 
-void iron_gpu_command_list_set_compute_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_constant_buffer *buffer, int offset, size_t size) {
-	assert(compute_command_encoder != nil);
-	id<MTLBuffer> buf = (__bridge id<MTLBuffer>)buffer->impl._buffer;
-	[compute_command_encoder setBuffer:buf offset:offset atIndex:1];
-}
-
 void iron_gpu_command_list_render_target_to_texture_barrier(iron_gpu_command_list_t *list, struct iron_gpu_texture *renderTarget) {
 }
 
@@ -485,16 +478,11 @@ void iron_gpu_command_list_texture_to_render_target_barrier(iron_gpu_command_lis
 
 void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *texture) {
 	id<MTLTexture> tex = (__bridge id<MTLTexture>)texture->impl._tex;
-	if (compute_command_encoder != nil) {
-		[compute_command_encoder setTexture:tex atIndex:unit.stages[IRON_GPU_SHADER_TYPE_COMPUTE]];
+	if (unit.stages[IRON_GPU_SHADER_TYPE_VERTEX] >= 0) {
+		[render_command_encoder setVertexTexture:tex atIndex:unit.stages[IRON_GPU_SHADER_TYPE_VERTEX]];
 	}
-	else {
-		if (unit.stages[IRON_GPU_SHADER_TYPE_VERTEX] >= 0) {
-			[render_command_encoder setVertexTexture:tex atIndex:unit.stages[IRON_GPU_SHADER_TYPE_VERTEX]];
-		}
-		if (unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT] >= 0) {
-			[render_command_encoder setFragmentTexture:tex atIndex:unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT]];
-		}
+	if (unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT] >= 0) {
+		[render_command_encoder setFragmentTexture:tex atIndex:unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT]];
 	}
 }
 
@@ -519,140 +507,6 @@ void iron_gpu_command_list_set_sampler(iron_gpu_command_list_t *list, iron_gpu_t
 	if (unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT] >= 0) {
 		[encoder setFragmentSamplerState:mtl_sampler atIndex:unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT]];
 	}
-}
-
-void iron_gpu_command_list_set_compute_shader(iron_gpu_command_list_t *list, iron_gpu_compute_shader *shader) {
-	if (compute_command_encoder == nil) {
-		end_render_pass();
-		compute_command_encoder = [command_buffer computeCommandEncoder];
-	}
-
-	id<MTLComputePipelineState> pipeline = (__bridge id<MTLComputePipelineState>)shader->impl._pipeline;
-	[compute_command_encoder setComputePipelineState:pipeline];
-}
-
-void iron_gpu_command_list_compute(iron_gpu_command_list_t *list, int x, int y, int z) {
-	assert(compute_command_encoder != nil);
-
-	MTLSize perGrid;
-	perGrid.width = x;
-	perGrid.height = y;
-	perGrid.depth = z;
-	MTLSize perGroup;
-	perGroup.width = 16;
-	perGroup.height = 16;
-	perGroup.depth = 1;
-	[compute_command_encoder dispatchThreadgroups:perGrid threadsPerThreadgroup:perGroup];
-
-	[compute_command_encoder endEncoding];
-
-	compute_command_encoder = nil;
-
-	start_render_pass();
-}
-
-void iron_gpu_compute_shader_init(iron_gpu_compute_shader *shader, void *_data, int length) {
-	shader->impl.name[0] = 0;
-
-	{
-		uint8_t *data = (uint8_t *)_data;
-		if (length > 1 && data[0] == '>') {
-			memcpy(shader->impl.name, data + 1, length - 1);
-			shader->impl.name[length - 1] = 0;
-		}
-		else {
-			for (int i = 3; i < length; ++i) {
-				if (data[i] == '\n') {
-					shader->impl.name[i - 3] = 0;
-					break;
-				}
-				else {
-					shader->impl.name[i - 3] = data[i];
-				}
-			}
-		}
-	}
-
-	char *data = (char *)_data;
-	id<MTLLibrary> library = nil;
-	if (length > 1 && data[0] == '>') {
-		library = getMetalLibrary();
-	}
-	else {
-		id<MTLDevice> device = getMetalDevice();
-		library = [device newLibraryWithSource:[[NSString alloc] initWithBytes:data length:length encoding:NSUTF8StringEncoding] options:nil error:nil];
-	}
-	id<MTLFunction> function = [library newFunctionWithName:[NSString stringWithCString:shader->impl.name encoding:NSUTF8StringEncoding]];
-	assert(function != nil);
-	shader->impl._function = (__bridge_retained void *)function;
-
-	id<MTLDevice> device = getMetalDevice();
-	MTLComputePipelineReflection *reflection = nil;
-	NSError *error = nil;
-	shader->impl._pipeline = (__bridge_retained void *)[device newComputePipelineStateWithFunction:function
-	                                                                                       options:MTLPipelineOptionBufferTypeInfo
-	                                                                                    reflection:&reflection
-	                                                                                         error:&error];
-	if (error != nil)
-		NSLog(@"%@", [error localizedDescription]);
-	assert(shader->impl._pipeline != NULL && !error);
-	shader->impl._reflection = (__bridge_retained void *)reflection;
-}
-
-void iron_gpu_compute_shader_destroy(iron_gpu_compute_shader *shader) {
-	id<MTLFunction> function = (__bridge_transfer id<MTLFunction>)shader->impl._function;
-	function = nil;
-	shader->impl._function = NULL;
-
-	id<MTLComputePipelineState> pipeline = (__bridge_transfer id<MTLComputePipelineState>)shader->impl._pipeline;
-	pipeline = nil;
-	shader->impl._pipeline = NULL;
-
-	MTLComputePipelineReflection *reflection = (__bridge_transfer MTLComputePipelineReflection *)shader->impl._reflection;
-	reflection = nil;
-	shader->impl._reflection = NULL;
-}
-
-iron_gpu_constant_location_t iron_gpu_compute_shader_get_constant_location(iron_gpu_compute_shader *shader, const char *name) {
-	iron_gpu_constant_location_t location;
-	location.impl.vertexOffset = -1;
-	location.impl.fragmentOffset = -1;
-	location.impl.computeOffset = -1;
-
-	MTLComputePipelineReflection *reflection = (__bridge MTLComputePipelineReflection *)shader->impl._reflection;
-
-	for (MTLArgument *arg in reflection.arguments) {
-		if (arg.type == MTLArgumentTypeBuffer && [arg.name isEqualToString:@"uniforms"]) {
-			if ([arg bufferDataType] == MTLDataTypeStruct) {
-				MTLStructType *structObj = [arg bufferStructType];
-				for (MTLStructMember *member in structObj.members) {
-					if (strcmp([[member name] UTF8String], name) == 0) {
-						location.impl.computeOffset = (int)[member offset];
-						break;
-					}
-				}
-			}
-			break;
-		}
-	}
-
-	return location;
-}
-
-iron_gpu_texture_unit_t iron_gpu_compute_shader_get_texture_unit(iron_gpu_compute_shader *shader, const char *name) {
-	iron_gpu_texture_unit_t unit;
-	for (int i = 0; i < IRON_GPU_SHADER_TYPE_COUNT; ++i) {
-		unit.stages[i] = -1;
-	}
-
-	MTLComputePipelineReflection *reflection = (__bridge MTLComputePipelineReflection *)shader->impl._reflection;
-	for (MTLArgument *arg in reflection.arguments) {
-		if ([arg type] == MTLArgumentTypeTexture && strcmp([[arg name] UTF8String], name) == 0) {
-			unit.stages[IRON_GPU_SHADER_TYPE_COMPUTE] = (int)[arg index];
-		}
-	}
-
-	return unit;
 }
 
 static MTLBlendFactor convert_blending_factor(iron_gpu_blending_factor_t factor) {
@@ -920,7 +774,6 @@ iron_gpu_constant_location_t iron_gpu_pipeline_get_constant_location(iron_gpu_pi
 	iron_gpu_constant_location_t location;
 	location.impl.vertexOffset = -1;
 	location.impl.fragmentOffset = -1;
-	location.impl.computeOffset = -1;
 
 	MTLRenderPipelineReflection *reflection = (__bridge MTLRenderPipelineReflection *)pipeline->impl._reflection;
 

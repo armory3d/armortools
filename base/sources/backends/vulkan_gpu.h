@@ -89,7 +89,6 @@ struct vk_context {
 	// buffer hack
 	VkBuffer *vertex_uniform_buffer;
 	VkBuffer *fragment_uniform_buffer;
-	VkBuffer *compute_uniform_buffer;
 
 #ifdef VALIDATE
 	bool validation_found;
@@ -102,23 +101,12 @@ extern struct vk_context vk_ctx;
 
 extern void flush_init_cmd(void);
 extern void reuse_descriptor_sets(void);
-extern void reuse_compute_descriptor_sets(void);
 
 typedef struct {
 	int _indexCount;
 	VkCommandBuffer _buffer;
 	VkFence fence;
 } CommandList5Impl;
-
-typedef struct iron_gpu_compute_shader_impl {
-	iron_internal_named_number locations[IRON_INTERNAL_NAMED_NUMBER_COUNT];
-	iron_internal_named_number texture_bindings[IRON_INTERNAL_NAMED_NUMBER_COUNT];
-	iron_internal_named_number offsets[IRON_INTERNAL_NAMED_NUMBER_COUNT];
-
-	VkPipelineLayout pipeline_layout;
-	VkPipeline pipeline;
-	VkShaderModule shader_module;
-} iron_gpu_compute_shader_impl;
 
 typedef struct PipelineState5Impl_s {
 	const char **textures;
@@ -140,14 +128,9 @@ typedef struct PipelineState5Impl_s {
 	VkPipelineLayout pipeline_layout;
 } PipelineState5Impl;
 
-typedef struct ComputePipelineState5Impl_t {
-	int a;
-} ComputePipelineState5Impl;
-
 typedef struct {
 	int vertexOffset;
 	int fragmentOffset;
-	int computeOffset;
 } ConstantLocation5Impl;
 
 typedef struct {

@@ -31,7 +31,6 @@ bool waitAfterNextDraw = false;
 
 static iron_gpu_constant_buffer_t vertexConstantBuffer;
 static iron_gpu_constant_buffer_t fragmentConstantBuffer;
-static iron_gpu_constant_buffer_t computeConstantBuffer;
 static int constantBufferIndex = 0;
 
 static struct {
@@ -44,7 +43,6 @@ static struct {
 
 typedef struct render_state {
 	iron_gpu_pipeline_t *pipeline;
-	iron_gpu_compute_shader *compute_shader;
 
 	iron_gpu_index_buffer_t *index_buffer;
 	iron_gpu_vertex_buffer_t *vertex_buffer;
@@ -71,7 +69,6 @@ typedef struct render_state {
 
 	uint8_t vertex_constant_data[CONSTANT_BUFFER_SIZE];
 	uint8_t fragment_constant_data[CONSTANT_BUFFER_SIZE];
-	uint8_t compute_constant_data[CONSTANT_BUFFER_SIZE];
 } render_state;
 
 static render_state current_state;
@@ -107,7 +104,6 @@ void gpu_internal_init_window(int depthBufferBits, bool vsync) {
 	}
 	iron_gpu_constant_buffer_init(&vertexConstantBuffer, CONSTANT_BUFFER_SIZE * CONSTANT_BUFFER_MULTIPLY);
 	iron_gpu_constant_buffer_init(&fragmentConstantBuffer, CONSTANT_BUFFER_SIZE * CONSTANT_BUFFER_MULTIPLY);
-	iron_gpu_constant_buffer_init(&computeConstantBuffer, CONSTANT_BUFFER_SIZE * CONSTANT_BUFFER_MULTIPLY);
 
 	// to support doing work after gpu_end and before gpu_begin
 	iron_gpu_command_list_begin(&commandList);
@@ -133,22 +129,15 @@ static void iron_internal_start_draw(bool compute) {
 	if ((constantBufferIndex + 1) >= CONSTANT_BUFFER_MULTIPLY || waitAfterNextDraw) {
 		memcpy(current_state.vertex_constant_data, vertexConstantBuffer.data, CONSTANT_BUFFER_SIZE);
 		memcpy(current_state.fragment_constant_data, fragmentConstantBuffer.data, CONSTANT_BUFFER_SIZE);
-		memcpy(current_state.compute_constant_data, computeConstantBuffer.data, CONSTANT_BUFFER_SIZE);
 	}
 	iron_gpu_constant_buffer_unlock(&vertexConstantBuffer);
 	iron_gpu_constant_buffer_unlock(&fragmentConstantBuffer);
-	iron_gpu_constant_buffer_unlock(&computeConstantBuffer);
 
 	iron_gpu_internal_set_samplers(current_state.texture_count, current_state.texture_units);
 	iron_gpu_internal_set_samplers(current_state.depth_render_target_count, current_state.depth_render_target_units);
 
-	if (compute) {
-		iron_gpu_command_list_set_compute_constant_buffer(&commandList, &computeConstantBuffer, constantBufferIndex * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
-	}
-	else {
-		iron_gpu_command_list_set_vertex_constant_buffer(&commandList, &vertexConstantBuffer, constantBufferIndex * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
-		iron_gpu_command_list_set_fragment_constant_buffer(&commandList, &fragmentConstantBuffer, constantBufferIndex * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
-	}
+	iron_gpu_command_list_set_vertex_constant_buffer(&commandList, &vertexConstantBuffer, constantBufferIndex * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
+	iron_gpu_command_list_set_fragment_constant_buffer(&commandList, &fragmentConstantBuffer, constantBufferIndex * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
 }
 
 static void iron_internal_end_draw(bool compute) {
@@ -172,9 +161,6 @@ static void iron_internal_end_draw(bool compute) {
 
 		if (current_state.pipeline != NULL) {
 			iron_gpu_command_list_set_pipeline(&commandList, current_state.pipeline);
-		}
-		if (current_state.compute_shader != NULL) {
-			iron_gpu_command_list_set_compute_shader(&commandList, current_state.compute_shader);
 		}
 		if (current_state.index_buffer != NULL) {
 			iron_gpu_command_list_set_index_buffer(&commandList, current_state.index_buffer);
@@ -202,16 +188,13 @@ static void iron_internal_end_draw(bool compute) {
 
 		iron_gpu_constant_buffer_lock(&vertexConstantBuffer, 0, CONSTANT_BUFFER_SIZE);
 		iron_gpu_constant_buffer_lock(&fragmentConstantBuffer, 0, CONSTANT_BUFFER_SIZE);
-		iron_gpu_constant_buffer_lock(&computeConstantBuffer, 0, CONSTANT_BUFFER_SIZE);
 
 		memcpy(vertexConstantBuffer.data, current_state.vertex_constant_data, CONSTANT_BUFFER_SIZE);
 		memcpy(fragmentConstantBuffer.data, current_state.fragment_constant_data, CONSTANT_BUFFER_SIZE);
-		memcpy(computeConstantBuffer.data, current_state.compute_constant_data, CONSTANT_BUFFER_SIZE);
 	}
 	else {
 		iron_gpu_constant_buffer_lock(&vertexConstantBuffer, constantBufferIndex * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
 		iron_gpu_constant_buffer_lock(&fragmentConstantBuffer, constantBufferIndex * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
-		iron_gpu_constant_buffer_lock(&computeConstantBuffer, constantBufferIndex * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
 	}
 }
 
@@ -271,7 +254,6 @@ void gpu_begin() {
 	windows[0].current_render_target_count = 1;
 
 	current_state.pipeline = NULL;
-	current_state.compute_shader = NULL;
 	current_state.index_buffer = NULL;
 	current_state.vertex_buffer = NULL;
 	current_state.viewport_set = false;
@@ -316,7 +298,6 @@ void gpu_disable_scissor(void) {
 void gpu_end() {
 	iron_gpu_constant_buffer_unlock(&vertexConstantBuffer);
 	iron_gpu_constant_buffer_unlock(&fragmentConstantBuffer);
-	iron_gpu_constant_buffer_unlock(&computeConstantBuffer);
 
 	iron_gpu_command_list_render_target_to_framebuffer_barrier(&commandList, &windows[0].framebuffers[windows[0].currentBuffer]);
 	iron_gpu_command_list_end(&commandList);
@@ -333,8 +314,6 @@ void gpu_set_int(iron_gpu_constant_location_t location, int value) {
 		iron_gpu_constant_buffer_set_int(&vertexConstantBuffer, location.impl.vertexOffset, value);
 	if (location.impl.fragmentOffset >= 0)
 		iron_gpu_constant_buffer_set_int(&fragmentConstantBuffer, location.impl.fragmentOffset, value);
-	if (location.impl.computeOffset >= 0)
-		iron_gpu_constant_buffer_set_int(&computeConstantBuffer, location.impl.computeOffset, value);
 }
 
 void gpu_set_int2(iron_gpu_constant_location_t location, int value1, int value2) {
@@ -342,8 +321,6 @@ void gpu_set_int2(iron_gpu_constant_location_t location, int value1, int value2)
 		iron_gpu_constant_buffer_set_int2(&vertexConstantBuffer, location.impl.vertexOffset, value1, value2);
 	if (location.impl.fragmentOffset >= 0)
 		iron_gpu_constant_buffer_set_int2(&fragmentConstantBuffer, location.impl.fragmentOffset, value1, value2);
-	if (location.impl.computeOffset >= 0)
-		iron_gpu_constant_buffer_set_int2(&computeConstantBuffer, location.impl.computeOffset, value1, value2);
 }
 
 void gpu_set_int3(iron_gpu_constant_location_t location, int value1, int value2, int value3) {
@@ -351,8 +328,6 @@ void gpu_set_int3(iron_gpu_constant_location_t location, int value1, int value2,
 		iron_gpu_constant_buffer_set_int3(&vertexConstantBuffer, location.impl.vertexOffset, value1, value2, value3);
 	if (location.impl.fragmentOffset >= 0)
 		iron_gpu_constant_buffer_set_int3(&fragmentConstantBuffer, location.impl.fragmentOffset, value1, value2, value3);
-	if (location.impl.computeOffset >= 0)
-		iron_gpu_constant_buffer_set_int3(&computeConstantBuffer, location.impl.computeOffset, value1, value2, value3);
 }
 
 void gpu_set_int4(iron_gpu_constant_location_t location, int value1, int value2, int value3, int value4) {
@@ -360,8 +335,6 @@ void gpu_set_int4(iron_gpu_constant_location_t location, int value1, int value2,
 		iron_gpu_constant_buffer_set_int4(&vertexConstantBuffer, location.impl.vertexOffset, value1, value2, value3, value4);
 	if (location.impl.fragmentOffset >= 0)
 		iron_gpu_constant_buffer_set_int4(&fragmentConstantBuffer, location.impl.fragmentOffset, value1, value2, value3, value4);
-	if (location.impl.computeOffset >= 0)
-		iron_gpu_constant_buffer_set_int4(&computeConstantBuffer, location.impl.computeOffset, value1, value2, value3, value4);
 }
 
 void gpu_set_ints(iron_gpu_constant_location_t location, int *values, int count) {
@@ -369,8 +342,6 @@ void gpu_set_ints(iron_gpu_constant_location_t location, int *values, int count)
 		iron_gpu_constant_buffer_set_ints(&vertexConstantBuffer, location.impl.vertexOffset, values, count);
 	if (location.impl.fragmentOffset >= 0)
 		iron_gpu_constant_buffer_set_ints(&fragmentConstantBuffer, location.impl.fragmentOffset, values, count);
-	if (location.impl.computeOffset >= 0)
-		iron_gpu_constant_buffer_set_ints(&computeConstantBuffer, location.impl.computeOffset, values, count);
 }
 
 void gpu_set_float(iron_gpu_constant_location_t location, float value) {
@@ -378,8 +349,6 @@ void gpu_set_float(iron_gpu_constant_location_t location, float value) {
 		iron_gpu_constant_buffer_set_float(&vertexConstantBuffer, location.impl.vertexOffset, value);
 	if (location.impl.fragmentOffset >= 0)
 		iron_gpu_constant_buffer_set_float(&fragmentConstantBuffer, location.impl.fragmentOffset, value);
-	if (location.impl.computeOffset >= 0)
-		iron_gpu_constant_buffer_set_float(&computeConstantBuffer, location.impl.computeOffset, value);
 }
 
 void gpu_set_float2(iron_gpu_constant_location_t location, float value1, float value2) {
@@ -387,8 +356,6 @@ void gpu_set_float2(iron_gpu_constant_location_t location, float value1, float v
 		iron_gpu_constant_buffer_set_float2(&vertexConstantBuffer, location.impl.vertexOffset, value1, value2);
 	if (location.impl.fragmentOffset >= 0)
 		iron_gpu_constant_buffer_set_float2(&fragmentConstantBuffer, location.impl.fragmentOffset, value1, value2);
-	if (location.impl.computeOffset >= 0)
-		iron_gpu_constant_buffer_set_float2(&computeConstantBuffer, location.impl.computeOffset, value1, value2);
 }
 
 void gpu_set_float3(iron_gpu_constant_location_t location, float value1, float value2, float value3) {
@@ -396,8 +363,6 @@ void gpu_set_float3(iron_gpu_constant_location_t location, float value1, float v
 		iron_gpu_constant_buffer_set_float3(&vertexConstantBuffer, location.impl.vertexOffset, value1, value2, value3);
 	if (location.impl.fragmentOffset >= 0)
 		iron_gpu_constant_buffer_set_float3(&fragmentConstantBuffer, location.impl.fragmentOffset, value1, value2, value3);
-	if (location.impl.computeOffset >= 0)
-		iron_gpu_constant_buffer_set_float3(&computeConstantBuffer, location.impl.computeOffset, value1, value2, value3);
 }
 
 void gpu_set_float4(iron_gpu_constant_location_t location, float value1, float value2, float value3, float value4) {
@@ -405,8 +370,6 @@ void gpu_set_float4(iron_gpu_constant_location_t location, float value1, float v
 		iron_gpu_constant_buffer_set_float4(&vertexConstantBuffer, location.impl.vertexOffset, value1, value2, value3, value4);
 	if (location.impl.fragmentOffset >= 0)
 		iron_gpu_constant_buffer_set_float4(&fragmentConstantBuffer, location.impl.fragmentOffset, value1, value2, value3, value4);
-	if (location.impl.computeOffset >= 0)
-		iron_gpu_constant_buffer_set_float4(&computeConstantBuffer, location.impl.computeOffset, value1, value2, value3, value4);
 }
 
 void gpu_set_floats(iron_gpu_constant_location_t location, float *values, int count) {
@@ -414,8 +377,6 @@ void gpu_set_floats(iron_gpu_constant_location_t location, float *values, int co
 		iron_gpu_constant_buffer_set_floats(&vertexConstantBuffer, location.impl.vertexOffset, values, count);
 	if (location.impl.fragmentOffset >= 0)
 		iron_gpu_constant_buffer_set_floats(&fragmentConstantBuffer, location.impl.fragmentOffset, values, count);
-	if (location.impl.computeOffset >= 0)
-		iron_gpu_constant_buffer_set_floats(&computeConstantBuffer, location.impl.computeOffset, values, count);
 }
 
 void gpu_set_bool(iron_gpu_constant_location_t location, bool value) {
@@ -423,8 +384,6 @@ void gpu_set_bool(iron_gpu_constant_location_t location, bool value) {
 		iron_gpu_constant_buffer_set_bool(&vertexConstantBuffer, location.impl.vertexOffset, value);
 	if (location.impl.fragmentOffset >= 0)
 		iron_gpu_constant_buffer_set_bool(&fragmentConstantBuffer, location.impl.fragmentOffset, value);
-	if (location.impl.computeOffset >= 0)
-		iron_gpu_constant_buffer_set_bool(&computeConstantBuffer, location.impl.computeOffset, value);
 }
 
 void gpu_set_matrix4(iron_gpu_constant_location_t location, iron_matrix4x4_t *value) {
@@ -432,8 +391,6 @@ void gpu_set_matrix4(iron_gpu_constant_location_t location, iron_matrix4x4_t *va
 		iron_gpu_constant_buffer_set_matrix4(&vertexConstantBuffer, location.impl.vertexOffset, value);
 	if (location.impl.fragmentOffset >= 0)
 		iron_gpu_constant_buffer_set_matrix4(&fragmentConstantBuffer, location.impl.fragmentOffset, value);
-	if (location.impl.computeOffset >= 0)
-		iron_gpu_constant_buffer_set_matrix4(&computeConstantBuffer, location.impl.computeOffset, value);
 }
 
 void gpu_set_matrix3(iron_gpu_constant_location_t location, iron_matrix3x3_t *value) {
@@ -441,8 +398,6 @@ void gpu_set_matrix3(iron_gpu_constant_location_t location, iron_matrix3x3_t *va
 		iron_gpu_constant_buffer_set_matrix3(&vertexConstantBuffer, location.impl.vertexOffset, value);
 	if (location.impl.fragmentOffset >= 0)
 		iron_gpu_constant_buffer_set_matrix3(&fragmentConstantBuffer, location.impl.fragmentOffset, value);
-	if (location.impl.computeOffset >= 0)
-		iron_gpu_constant_buffer_set_matrix3(&computeConstantBuffer, location.impl.computeOffset, value);
 }
 
 void gpu_set_texture_addressing(iron_gpu_texture_unit_t unit, gpu_texture_direction_t dir, gpu_texture_addressing_t addressing) {
@@ -582,17 +537,6 @@ void gpu_render_target_use_depth_as_texture(iron_gpu_texture_t *render_target, i
 	}
 
 	iron_gpu_command_list_set_texture_from_render_target_depth(&commandList, g5_unit, render_target);
-}
-
-void iron_gpu_set_compute_shader(iron_gpu_compute_shader *shader) {
-	current_state.compute_shader = shader;
-	iron_gpu_command_list_set_compute_shader(&commandList, shader);
-}
-
-void gpu_compute(int x, int y, int z) {
-	iron_internal_start_draw(true);
-	iron_gpu_command_list_compute(&commandList, x, y, z);
-	iron_internal_end_draw(true);
 }
 
 void iron_gpu_render_target_get_pixels(iron_gpu_texture_t *render_target, uint8_t *data) {
