@@ -206,7 +206,6 @@ void iron_gpu_texture_init(iron_gpu_texture_t *texture, int width, int height, i
 void iron_gpu_texture_init_from_bytes(iron_gpu_texture_t *texture, void *data, int width, int height, iron_image_format_t format) {}
 void iron_gpu_texture_init_from_encoded_data(iron_gpu_texture_t *texture, void *data, int size, const char *format, bool readable) {}
 void iron_gpu_texture_init_from_data(iron_gpu_texture_t *texture, void *data, int width, int height, int format, bool readable) {}
-void iron_gpu_texture_init_non_sampled_access(iron_gpu_texture_t *texture, int width, int height, iron_image_format_t format) {}
 void iron_gpu_texture_destroy(iron_gpu_texture_t *texture) {}
 
 int iron_gpu_texture_stride(iron_gpu_texture_t *texture) {

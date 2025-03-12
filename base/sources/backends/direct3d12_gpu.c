@@ -1437,16 +1437,6 @@ void iron_gpu_shader_destroy(iron_gpu_shader_t *shader) {
 	free(shader->impl.data);
 }
 
-// djb2
-uint32_t iron_internal_hash_name(unsigned char *str) {
-	unsigned long hash = 5381;
-	int c;
-	while ((c = *str++)) {
-		hash = hash * 33 ^ c;
-	}
-	return hash;
-}
-
 static const int heapSize = 1024;
 
 void iron_gpu_internal_reset_textures(struct iron_gpu_command_list *list) {
@@ -1808,12 +1798,6 @@ void iron_gpu_texture_init(struct iron_gpu_texture *texture, int width, int heig
 	texture->_uploaded = true;
 	texture->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
 	texture->format = format;
-}
-
-void iron_gpu_texture_init_non_sampled_access(struct iron_gpu_texture *texture, int width, int height, iron_image_format_t format) {
-	create_texture(texture, width, height, format, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
-	texture->_uploaded = true;
-	texture->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
 }
 
 void iron_gpu_texture_destroy(iron_gpu_texture_t *render_target) {

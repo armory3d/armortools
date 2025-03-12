@@ -1264,16 +1264,6 @@ void iron_gpu_texture_init_from_bytes(iron_gpu_texture_t *texture, void *data, i
 	     bytesPerImage:iron_gpu_texture_stride(texture) * texture->height];
 }
 
-void iron_gpu_texture_init_non_sampled_access(iron_gpu_texture_t *texture, int width, int height, iron_image_format_t format) {
-	texture->width = width;
-	texture->height = height;
-	texture->format = format;
-	texture->impl.data = malloc(width * height * (format == IRON_IMAGE_FORMAT_R8 ? 1 : 4));
-	texture->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
-	texture->framebuffer_index = -1;
-	create(texture, width, height, format, true);
-}
-
 void iron_gpu_texture_destroy(iron_gpu_texture_t *target) {
 	id<MTLTexture> tex = (__bridge_transfer id<MTLTexture>)target->impl._tex;
 	tex = nil;

@@ -190,7 +190,6 @@ void iron_gpu_vertex_structure_add(iron_gpu_vertex_structure_t *structure, const
 
 void iron_gpu_texture_init(iron_gpu_texture_t *texture, int width, int height, iron_image_format_t format);
 void iron_gpu_texture_init_from_bytes(iron_gpu_texture_t *texture, void *data, int width, int height, iron_image_format_t format);
-void iron_gpu_texture_init_non_sampled_access(iron_gpu_texture_t *texture, int width, int height, iron_image_format_t format);
 void iron_gpu_texture_destroy(iron_gpu_texture_t *texture);
 void iron_gpu_texture_generate_mipmaps(iron_gpu_texture_t *texture, int levels);
 void iron_gpu_texture_set_mipmap(iron_gpu_texture_t *texture, iron_gpu_texture_t *mipmap, int level);

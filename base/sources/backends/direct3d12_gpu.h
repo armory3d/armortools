@@ -142,8 +142,6 @@ typedef struct {
 	int length;
 } Shader5Impl;
 
-uint32_t iron_internal_hash_name(unsigned char *str);
-
 struct ID3D12Resource;
 struct ID3D12DescriptorHeap;
 struct ID3D12GraphicsCommandList;
