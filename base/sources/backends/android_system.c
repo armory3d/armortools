@@ -147,8 +147,7 @@ VkResult iron_vulkan_create_surface(VkInstance instance, VkSurfaceKHR *surface) 
 	return vkCreateAndroidSurfaceKHR(instance, &createInfo, NULL, surface);
 }
 
-void iron_vulkan_get_instance_extensions(const char **names, int *index, int max) {
-	assert(*index + 1 < max);
+void iron_vulkan_get_instance_extensions(const char **names, int *index) {
 	names[(*index)++] = VK_KHR_ANDROID_SURFACE_EXTENSION_NAME;
 }
 

@@ -228,3 +228,12 @@ int64_t iron_random_get_in(int64_t min, int64_t max) {
 	int64_t value = iron_random_get();
 	return (value < -LLONG_MAX ? LLONG_MAX : llabs(value)) % (max + 1 - min) + min;
 }
+
+uint32_t iron_hash_djb2(unsigned char *str) {
+	unsigned long hash = 5381;
+	int c;
+	while ((c = *str++)) {
+		hash = hash * 33 ^ c;
+	}
+	return hash;
+}

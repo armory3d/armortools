@@ -730,8 +730,7 @@ struct iron_x11_window *window_from_window(Window window) {
 	return NULL;
 }
 
-void iron_vulkan_get_instance_extensions(const char **names, int *index, int max) {
-	assert(*index + 1 < max);
+void iron_vulkan_get_instance_extensions(const char **names, int *index) {
 	names[(*index)++] = VK_KHR_XLIB_SURFACE_EXTENSION_NAME;
 }
 

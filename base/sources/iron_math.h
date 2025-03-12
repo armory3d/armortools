@@ -99,3 +99,5 @@ void iron_random_init(int64_t seed);
 int64_t iron_random_get(void);
 int64_t iron_random_get_max(int64_t max);
 int64_t iron_random_get_in(int64_t min, int64_t max);
+
+uint32_t iron_hash_djb2(unsigned char *str);
