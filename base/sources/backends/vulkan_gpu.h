@@ -49,10 +49,8 @@ struct vk_funs {
 	PFN_vkDestroySwapchainKHR fpDestroySwapchainKHR;
 	PFN_vkGetSwapchainImagesKHR fpGetSwapchainImagesKHR;
 	PFN_vkDestroySurfaceKHR fpDestroySurfaceKHR;
-
 	PFN_vkCreateDebugUtilsMessengerEXT fpCreateDebugUtilsMessengerEXT;
 	PFN_vkDestroyDebugUtilsMessengerEXT fpDestroyDebugUtilsMessengerEXT;
-
 	PFN_vkQueuePresentKHR fpQueuePresentKHR;
 	PFN_vkAcquireNextImageKHR fpAcquireNextImageKHR;
 };
@@ -66,29 +64,21 @@ struct vk_depth {
 struct vk_window {
 	int width;
 	int height;
-
 	bool resized;
 	bool surface_destroyed;
-
 	int depth_bits;
-
 	bool vsynced;
-
 	uint32_t current_image;
-
 	VkSurfaceKHR surface;
 	VkSurfaceFormatKHR format;
-
 	VkSwapchainKHR swapchain;
 	uint32_t image_count;
 	VkImage *images;
 	VkImageView *views;
 	VkFramebuffer *framebuffers;
-
 	VkRenderPass framebuffer_render_pass;
 	VkRenderPass rendertarget_render_pass;
 	VkRenderPass rendertarget_render_pass_with_depth;
-
 	struct vk_depth depth;
 };
 
@@ -118,7 +108,6 @@ struct vk_context {
 
 extern struct vk_funs vk;
 extern struct vk_context vk_ctx;
-
 extern void flush_init_cmd(void);
 extern void reuse_descriptor_sets(void);
 
@@ -126,9 +115,9 @@ typedef struct {
 	int _indexCount;
 	VkCommandBuffer _buffer;
 	VkFence fence;
-} CommandList5Impl;
+} gpu_command_list_impl_t;
 
-typedef struct PipelineState5Impl_s {
+typedef struct gpu_pipeline_impl {
 	const char **textures;
 	int *textureValues;
 	int textureCount;
@@ -146,26 +135,22 @@ typedef struct PipelineState5Impl_s {
 	iron_internal_named_number fragmentOffsets[IRON_INTERNAL_NAMED_NUMBER_COUNT];
 
 	VkPipelineLayout pipeline_layout;
-} PipelineState5Impl;
+} gpu_pipeline_impl_t;
 
 typedef struct {
 	int vertexOffset;
 	int fragmentOffset;
-} ConstantLocation5Impl;
-
-typedef struct {
-	int nothing;
-} AttributeLocation5Impl;
+} gpu_constant_location_impl_t;
 
 typedef struct {
 	unsigned id;
 	char *source;
 	int length;
-} Shader5Impl;
+} gpu_shader_impl_t;
 
 typedef struct iron_gpu_sampler_impl {
 	VkSampler sampler;
-} iron_gpu_sampler_impl_t;
+} gpu_sampler_impl_t;
 
 typedef struct {
 	VkImageLayout imageLayout;
@@ -191,7 +176,17 @@ typedef struct {
 	int stage;
 	int stage_depth;
 
-} Texture5Impl;
+} gpu_texture_impl_t;
+
+typedef struct {
+	VkBuffer buf;
+	VkDescriptorBufferInfo buffer_info;
+	VkMemoryAllocateInfo mem_alloc;
+	VkDeviceMemory mem;
+	int lastStart;
+	int lastCount;
+	int mySize;
+} gpu_constant_buffer_impl_t;
 
 typedef struct {
 	float *data;
@@ -202,24 +197,14 @@ typedef struct {
 
 	VkBuffer buf;
 	VkDeviceMemory mem;
-} VertexBuffer5Impl;
-
-typedef struct {
-	VkBuffer buf;
-	VkDescriptorBufferInfo buffer_info;
-	VkMemoryAllocateInfo mem_alloc;
-	VkDeviceMemory mem;
-	int lastStart;
-	int lastCount;
-	int mySize;
-} ConstantBuffer5Impl;
+} gpu_vertex_buffer_impl_t;
 
 typedef struct {
 	int count;
 	VkBuffer buf;
 	VkDeviceMemory mem;
 	VkMemoryAllocateInfo mem_alloc;
-} IndexBuffer5Impl;
+} gpu_index_buffer_impl_t;
 
 typedef struct {
 	VkPipeline pipeline;
@@ -229,7 +214,7 @@ typedef struct {
 	VkBuffer raygen_shader_binding_table;
 	VkBuffer miss_shader_binding_table;
 	VkBuffer hit_shader_binding_table;
-} iron_gpu_raytrace_pipeline_impl_t;
+} gpu_raytrace_pipeline_impl_t;
 
 typedef struct {
 	VkAccelerationStructureKHR top_level_acceleration_structure;
@@ -243,4 +228,4 @@ typedef struct {
 	VkDeviceMemory top_level_mem;
 	VkBuffer instances_buffer;
 	VkDeviceMemory instances_mem;
-} iron_gpu_raytrace_acceleration_structure_impl_t;
+} gpu_raytrace_acceleration_structure_impl_t;

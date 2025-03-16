@@ -29,7 +29,7 @@ static iron_gpu_pipeline_t *draw_custom_pipeline = NULL;
 static iron_matrix3x3_t draw_transform;
 static bool _draw_thrown = false;
 
-static gpu_vertex_buffer_t image_vertex_buffer;
+static iron_gpu_vertex_buffer_t image_vertex_buffer;
 static iron_gpu_index_buffer_t image_index_buffer;
 static iron_gpu_shader_t image_vert_shader;
 static iron_gpu_shader_t image_frag_shader;
@@ -41,9 +41,9 @@ static int image_buffer_index = 0;
 static int image_buffer_start = 0;
 static iron_gpu_texture_t *image_last_texture = NULL;
 
-static gpu_vertex_buffer_t colored_rect_vertex_buffer;
+static iron_gpu_vertex_buffer_t colored_rect_vertex_buffer;
 static iron_gpu_index_buffer_t colored_rect_index_buffer;
-static gpu_vertex_buffer_t colored_tris_vertex_buffer;
+static iron_gpu_vertex_buffer_t colored_tris_vertex_buffer;
 static iron_gpu_index_buffer_t colored_tris_index_buffer;
 static iron_gpu_shader_t colored_vert_shader;
 static iron_gpu_shader_t colored_frag_shader;
@@ -56,7 +56,7 @@ static int colored_rect_buffer_start = 0;
 static int colored_tris_buffer_index = 0;
 static int colored_tris_buffer_start = 0;
 
-static gpu_vertex_buffer_t text_vertex_buffer;
+static iron_gpu_vertex_buffer_t text_vertex_buffer;
 static iron_gpu_index_buffer_t text_index_buffer;
 static iron_gpu_shader_t text_vert_shader;
 static iron_gpu_shader_t text_frag_shader;

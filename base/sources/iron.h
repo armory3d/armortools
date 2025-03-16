@@ -943,17 +943,17 @@ u32_array_t *gpu_lock_index_buffer(iron_gpu_index_buffer_t *buffer) {
 }
 
 any gpu_create_vertex_buffer(i32 count, iron_gpu_vertex_structure_t *structure, i32 usage) {
-	gpu_vertex_buffer_t *buffer = (gpu_vertex_buffer_t *)malloc(sizeof(gpu_vertex_buffer_t));
+	iron_gpu_vertex_buffer_t *buffer = (iron_gpu_vertex_buffer_t *)malloc(sizeof(iron_gpu_vertex_buffer_t));
 	gpu_vertex_buffer_init(buffer, count, structure, (gpu_usage_t)usage);
 	return buffer;
 }
 
-void gpu_delete_vertex_buffer(gpu_vertex_buffer_t *buffer) {
+void gpu_delete_vertex_buffer(iron_gpu_vertex_buffer_t *buffer) {
 	gpu_vertex_buffer_destroy(buffer);
 	free(buffer);
 }
 
-buffer_t *gpu_lock_vertex_buffer(gpu_vertex_buffer_t *buffer) {
+buffer_t *gpu_lock_vertex_buffer(iron_gpu_vertex_buffer_t *buffer) {
 	float *vertices = gpu_vertex_buffer_lock_all(buffer);
 	buffer_t *b = (buffer_t *)malloc(sizeof(buffer_t));
 	b->buffer = vertices;
@@ -2252,13 +2252,12 @@ void iron_raytrace_as_init() {
 	iron_gpu_raytrace_acceleration_structure_init(&accel);
 }
 
-void iron_raytrace_as_add(gpu_vertex_buffer_t *vb, iron_gpu_index_buffer_t *ib, iron_matrix4x4_t transform) {
-	iron_gpu_vertex_buffer_t *vertex_buffer = &vb->impl._buffer;
-	iron_gpu_raytrace_acceleration_structure_add(&accel, vertex_buffer, ib, transform);
+void iron_raytrace_as_add(struct iron_gpu_vertex_buffer *vb, iron_gpu_index_buffer_t *ib, iron_matrix4x4_t transform) {
+	iron_gpu_raytrace_acceleration_structure_add(&accel, vb, ib, transform);
 }
 
-void iron_raytrace_as_build(gpu_vertex_buffer_t *vb_full, iron_gpu_index_buffer_t *ib_full) {
-	iron_gpu_raytrace_acceleration_structure_build(&accel, &commandList, &vb_full->impl._buffer, ib_full);
+void iron_raytrace_as_build(struct iron_gpu_vertex_buffer *vb_full, iron_gpu_index_buffer_t *ib_full) {
+	iron_gpu_raytrace_acceleration_structure_build(&accel, &commandList, vb_full, ib_full);
 }
 
 void iron_raytrace_set_textures(iron_gpu_texture_t *tex0, iron_gpu_texture_t *tex1, iron_gpu_texture_t *tex2, iron_gpu_texture_t *texenv, iron_gpu_texture_t *texsobol, iron_gpu_texture_t *texscramble, iron_gpu_texture_t *texrank) {

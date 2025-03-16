@@ -45,7 +45,7 @@ typedef struct render_state {
 	iron_gpu_pipeline_t *pipeline;
 
 	iron_gpu_index_buffer_t *index_buffer;
-	iron_gpu_vertex_buffer_t *vertex_buffer;
+	gpu_vertex_buffer_impl_t *vertex_buffer;
 
 	bool viewport_set;
 	int viewport_x;
@@ -461,8 +461,8 @@ void gpu_set_render_targets(iron_gpu_texture_t **targets, int count) {
 	current_state.scissor_set = false;
 }
 
-void gpu_set_vertex_buffer(gpu_vertex_buffer_t *buffer) {
-	iron_gpu_vertex_buffer_t *vb = &buffer->impl._buffer[buffer->impl._currentIndex];
+void gpu_set_vertex_buffer(iron_gpu_vertex_buffer_t *buffer) {
+	gpu_vertex_buffer_impl_t *vb = &buffer->_buffer[buffer->_currentIndex];
 	current_state.vertex_buffer = vb;
 	iron_gpu_command_list_set_vertex_buffer(&commandList, vb);
 }
@@ -563,55 +563,55 @@ void iron_gpu_vertex_structure_add(iron_gpu_vertex_structure_t *structure, const
 	structure->size++;
 }
 
-void gpu_vertex_buffer_init(gpu_vertex_buffer_t *buffer, int count, iron_gpu_vertex_structure_t *structure, gpu_usage_t usage) {
-	buffer->impl._multiple = usage == GPU_USAGE_STATIC ? 1 : 2;
-	buffer->impl._currentIndex = 0;
-	buffer->impl.myCount = count;
-	for (int i = 0; i < buffer->impl._multiple; ++i) {
-		iron_gpu_vertex_buffer_init(&buffer->impl._buffer[i], count, structure, usage == GPU_USAGE_STATIC);
+void gpu_vertex_buffer_init(iron_gpu_vertex_buffer_t *buffer, int count, iron_gpu_vertex_structure_t *structure, gpu_usage_t usage) {
+	buffer->_multiple = usage == GPU_USAGE_STATIC ? 1 : 2;
+	buffer->_currentIndex = 0;
+	buffer->myCount = count;
+	for (int i = 0; i < buffer->_multiple; ++i) {
+		iron_gpu_vertex_buffer_init(&buffer->_buffer[i], count, structure, usage == GPU_USAGE_STATIC);
 	}
 }
 
-void gpu_vertex_buffer_destroy(gpu_vertex_buffer_t *buffer) {
-	for (int i = 0; i < buffer->impl._multiple; ++i) {
-		iron_gpu_vertex_buffer_destroy(&buffer->impl._buffer[i]);
+void gpu_vertex_buffer_destroy(iron_gpu_vertex_buffer_t *buffer) {
+	for (int i = 0; i < buffer->_multiple; ++i) {
+		iron_gpu_vertex_buffer_destroy(&buffer->_buffer[i]);
 	}
 }
 
-static void iron_internal_prepare_lock(gpu_vertex_buffer_t *buffer) {
-	++buffer->impl._currentIndex;
-	if (buffer->impl._currentIndex >= buffer->impl._multiple - 1) {
+static void iron_internal_prepare_lock(iron_gpu_vertex_buffer_t *buffer) {
+	++buffer->_currentIndex;
+	if (buffer->_currentIndex >= buffer->_multiple - 1) {
 		waitAfterNextDraw = true;
 	}
-	if (buffer->impl._currentIndex >= buffer->impl._multiple) {
-		buffer->impl._currentIndex = 0;
+	if (buffer->_currentIndex >= buffer->_multiple) {
+		buffer->_currentIndex = 0;
 	}
 }
 
-float *gpu_vertex_buffer_lock_all(gpu_vertex_buffer_t *buffer) {
+float *gpu_vertex_buffer_lock_all(iron_gpu_vertex_buffer_t *buffer) {
 	iron_internal_prepare_lock(buffer);
-	return iron_gpu_vertex_buffer_lock_all(&buffer->impl._buffer[buffer->impl._currentIndex]);
+	return iron_gpu_vertex_buffer_lock_all(&buffer->_buffer[buffer->_currentIndex]);
 }
 
-float *gpu_vertex_buffer_lock(gpu_vertex_buffer_t *buffer, int start, int count) {
+float *gpu_vertex_buffer_lock(iron_gpu_vertex_buffer_t *buffer, int start, int count) {
 	iron_internal_prepare_lock(buffer);
-	return iron_gpu_vertex_buffer_lock(&buffer->impl._buffer[buffer->impl._currentIndex], start, count);
+	return iron_gpu_vertex_buffer_lock(&buffer->_buffer[buffer->_currentIndex], start, count);
 }
 
-void gpu_vertex_buffer_unlock_all(gpu_vertex_buffer_t *buffer) {
-	iron_gpu_vertex_buffer_unlock_all(&buffer->impl._buffer[buffer->impl._currentIndex]);
+void gpu_vertex_buffer_unlock_all(iron_gpu_vertex_buffer_t *buffer) {
+	iron_gpu_vertex_buffer_unlock_all(&buffer->_buffer[buffer->_currentIndex]);
 }
 
-void gpu_vertex_buffer_unlock(gpu_vertex_buffer_t *buffer, int count) {
-	iron_gpu_vertex_buffer_unlock(&buffer->impl._buffer[buffer->impl._currentIndex], count);
+void gpu_vertex_buffer_unlock(iron_gpu_vertex_buffer_t *buffer, int count) {
+	iron_gpu_vertex_buffer_unlock(&buffer->_buffer[buffer->_currentIndex], count);
 }
 
-int gpu_vertex_buffer_count(gpu_vertex_buffer_t *buffer) {
-	return buffer->impl.myCount;
+int gpu_vertex_buffer_count(iron_gpu_vertex_buffer_t *buffer) {
+	return buffer->myCount;
 }
 
-int gpu_vertex_buffer_stride(gpu_vertex_buffer_t *buffer) {
-	return iron_gpu_vertex_buffer_stride(&buffer->impl._buffer[buffer->impl._currentIndex]);
+int gpu_vertex_buffer_stride(iron_gpu_vertex_buffer_t *buffer) {
+	return iron_gpu_vertex_buffer_stride(&buffer->_buffer[buffer->_currentIndex]);
 }
 
 void iron_gpu_constant_buffer_set_int(iron_gpu_constant_buffer_t *buffer, int offset, int value) {

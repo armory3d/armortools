@@ -8,42 +8,42 @@ typedef struct {
 	WGPUBuffer buffer;
 	int count;
 	int stride;
-} VertexBuffer5Impl;
+} gpu_vertex_buffer_impl_t;
 
 typedef struct {
 	WGPUBuffer buffer;
-} ConstantBuffer5Impl;
+} gpu_constant_buffer_impl_t;
 
 typedef struct {
 	WGPUBuffer buffer;
 	int count;
-} IndexBuffer5Impl;
+} gpu_index_buffer_impl_t;
 
 typedef struct {
 	WGPUTexture texture;
-} Texture5Impl;
+} gpu_texture_impl_t;
 
 typedef struct {
 	WGPURenderPipeline pipeline;
-} PipelineState5Impl;
+} gpu_pipeline_impl_t;
 
 typedef struct {
 	int vertexOffset;
 	int fragmentOffset;
-} ConstantLocation5Impl;
+} gpu_constant_location_impl_t;
 
 typedef struct iron_gpu_sampler_impl {
 	int a;
-} iron_gpu_sampler_impl_t;
+} gpu_sampler_impl_t;
 
 struct WGPUShaderModuleImpl;
 
 typedef struct {
 	WGPUShaderModule module;
-} Shader5Impl;
+} gpu_shader_impl_t;
 
 typedef struct {
 	WGPUCommandEncoder encoder;
 	WGPURenderPassEncoder pass;
 	int indexCount;
-} CommandList5Impl;
+} gpu_command_list_impl_t;

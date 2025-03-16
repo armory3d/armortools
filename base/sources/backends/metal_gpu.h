@@ -7,7 +7,7 @@ struct iron_gpu_index_buffer;
 
 typedef struct {
 	struct iron_gpu_index_buffer *current_index_buffer;
-} CommandList5Impl;
+} gpu_command_list_impl_t;
 
 struct iron_gpu_shader;
 
@@ -19,29 +19,29 @@ typedef struct {
 	void *_reflection;
 	void *_depthStencil;
 	void *_depthStencilNone;
-} PipelineState5Impl;
+} gpu_pipeline_impl_t;
 
 typedef struct {
 	int vertexOffset;
 	int fragmentOffset;
-} ConstantLocation5Impl;
+} gpu_constant_location_impl_t;
 
 typedef struct iron_gpu_sampler_impl {
 	void *sampler;
-} iron_gpu_sampler_impl_t;
+} gpu_sampler_impl_t;
 
 typedef struct {
 	char name[1024];
 	void *mtlFunction;
-} Shader5Impl;
+} gpu_shader_impl_t;
 
 typedef struct {
 	void *_raytracingPipeline;
-} iron_gpu_raytrace_pipeline_impl_t;
+} gpu_raytrace_pipeline_impl_t;
 
 typedef struct {
 	void *_accelerationStructure;
-} iron_gpu_raytrace_acceleration_structure_impl_t;
+} gpu_raytrace_acceleration_structure_impl_t;
 
 typedef struct {
 	int index;
@@ -55,7 +55,7 @@ typedef struct {
 
 	void *_texReadback;
 	void *_depthTex;
-} Texture5Impl;
+} gpu_texture_impl_t;
 
 typedef struct {
 	int myCount;
@@ -64,14 +64,14 @@ typedef struct {
 	bool gpuMemory;
 	int lastStart;
 	int lastCount;
-} VertexBuffer5Impl;
+} gpu_vertex_buffer_impl_t;
 
 typedef struct {
 	void *_buffer;
 	int lastStart;
 	int lastCount;
 	int mySize;
-} ConstantBuffer5Impl;
+} gpu_constant_buffer_impl_t;
 
 typedef struct {
 	void *metal_buffer;
@@ -79,4 +79,4 @@ typedef struct {
 	bool gpu_memory;
 	int last_start;
 	int last_count;
-} IndexBuffer5Impl;
+} gpu_index_buffer_impl_t;

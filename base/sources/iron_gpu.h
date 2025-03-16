@@ -48,7 +48,7 @@ typedef struct iron_gpu_texture {
 
 	buffer_t *buffer;
 
-	Texture5Impl impl;
+	gpu_texture_impl_t impl;
 } iron_gpu_texture_t;
 
 int iron_gpu_max_bound_textures(void);
@@ -201,45 +201,36 @@ void iron_gpu_render_target_init(iron_gpu_texture_t *target, int width, int heig
 void iron_gpu_render_target_init_framebuffer(iron_gpu_texture_t *target, int width, int height, iron_image_format_t format, int depthBufferBits);
 void iron_gpu_render_target_set_depth_from(iron_gpu_texture_t *target, iron_gpu_texture_t *source);
 
-typedef struct iron_gpu_vertex_buffer {
-	VertexBuffer5Impl impl;
-} iron_gpu_vertex_buffer_t;
-
-typedef struct {
+typedef struct gpu_vertex_buffer {
 	int myCount;
-	iron_gpu_vertex_buffer_t _buffer[2];
 	int _currentIndex;
 	int _multiple;
-} gpu_vertex_buffer_impl_t;
+	gpu_vertex_buffer_impl_t _buffer[2];
+} iron_gpu_vertex_buffer_t;
 
-typedef struct gpu_vertex_buffer {
-	gpu_vertex_buffer_impl_t impl;
-} gpu_vertex_buffer_t;
+void iron_gpu_vertex_buffer_init(gpu_vertex_buffer_impl_t *buffer, int count, iron_gpu_vertex_structure_t *structure, bool gpu_memory);
+void iron_gpu_vertex_buffer_destroy(gpu_vertex_buffer_impl_t *buffer);
+float *iron_gpu_vertex_buffer_lock_all(gpu_vertex_buffer_impl_t *buffer);
+float *iron_gpu_vertex_buffer_lock(gpu_vertex_buffer_impl_t *buffer, int start, int count);
+void iron_gpu_vertex_buffer_unlock_all(gpu_vertex_buffer_impl_t *buffer);
+void iron_gpu_vertex_buffer_unlock(gpu_vertex_buffer_impl_t *buffer, int count);
+int iron_gpu_vertex_buffer_count(gpu_vertex_buffer_impl_t *buffer);
+int iron_gpu_vertex_buffer_stride(gpu_vertex_buffer_impl_t *buffer);
+int iron_gpu_internal_vertex_buffer_set(gpu_vertex_buffer_impl_t *buffer);
 
-void iron_gpu_vertex_buffer_init(iron_gpu_vertex_buffer_t *buffer, int count, iron_gpu_vertex_structure_t *structure, bool gpu_memory);
-void iron_gpu_vertex_buffer_destroy(iron_gpu_vertex_buffer_t *buffer);
-float *iron_gpu_vertex_buffer_lock_all(iron_gpu_vertex_buffer_t *buffer);
-float *iron_gpu_vertex_buffer_lock(iron_gpu_vertex_buffer_t *buffer, int start, int count);
-void iron_gpu_vertex_buffer_unlock_all(iron_gpu_vertex_buffer_t *buffer);
-void iron_gpu_vertex_buffer_unlock(iron_gpu_vertex_buffer_t *buffer, int count);
-int iron_gpu_vertex_buffer_count(iron_gpu_vertex_buffer_t *buffer);
-int iron_gpu_vertex_buffer_stride(iron_gpu_vertex_buffer_t *buffer);
-
-int iron_gpu_internal_vertex_buffer_set(iron_gpu_vertex_buffer_t *buffer);
-
-void gpu_vertex_buffer_init(gpu_vertex_buffer_t *buffer, int count, iron_gpu_vertex_structure_t *structure, gpu_usage_t usage);
-void gpu_vertex_buffer_destroy(gpu_vertex_buffer_t *buffer);
-float *gpu_vertex_buffer_lock_all(gpu_vertex_buffer_t *buffer);
-float *gpu_vertex_buffer_lock(gpu_vertex_buffer_t *buffer, int start, int count);
-void gpu_vertex_buffer_unlock_all(gpu_vertex_buffer_t *buffer);
-void gpu_vertex_buffer_unlock(gpu_vertex_buffer_t *buffer, int count);
-int gpu_vertex_buffer_count(gpu_vertex_buffer_t *buffer);
-int gpu_vertex_buffer_stride(gpu_vertex_buffer_t *buffer);
-void gpu_set_vertex_buffer(gpu_vertex_buffer_t *buffer);
+void gpu_vertex_buffer_init(iron_gpu_vertex_buffer_t *buffer, int count, iron_gpu_vertex_structure_t *structure, gpu_usage_t usage);
+void gpu_vertex_buffer_destroy(iron_gpu_vertex_buffer_t *buffer);
+float *gpu_vertex_buffer_lock_all(iron_gpu_vertex_buffer_t *buffer);
+float *gpu_vertex_buffer_lock(iron_gpu_vertex_buffer_t *buffer, int start, int count);
+void gpu_vertex_buffer_unlock_all(iron_gpu_vertex_buffer_t *buffer);
+void gpu_vertex_buffer_unlock(iron_gpu_vertex_buffer_t *buffer, int count);
+int gpu_vertex_buffer_count(iron_gpu_vertex_buffer_t *buffer);
+int gpu_vertex_buffer_stride(iron_gpu_vertex_buffer_t *buffer);
+void gpu_set_vertex_buffer(iron_gpu_vertex_buffer_t *buffer);
 
 typedef struct iron_gpu_constant_buffer {
 	uint8_t *data;
-	ConstantBuffer5Impl impl;
+	gpu_constant_buffer_impl_t impl;
 } iron_gpu_constant_buffer_t;
 
 void iron_gpu_constant_buffer_init(iron_gpu_constant_buffer_t *buffer, int size);
@@ -265,7 +256,7 @@ void iron_gpu_constant_buffer_set_matrix4(iron_gpu_constant_buffer_t *buffer, in
 extern bool iron_gpu_transpose_mat;
 
 typedef struct iron_gpu_index_buffer {
-	IndexBuffer5Impl impl;
+	gpu_index_buffer_impl_t impl;
 } iron_gpu_index_buffer_t;
 
 void iron_gpu_index_buffer_init(iron_gpu_index_buffer_t *buffer, int count, bool gpu_memory);
@@ -342,7 +333,7 @@ typedef enum iron_gpu_mipmap_filter {
 } iron_gpu_mipmap_filter_t;
 
 typedef struct iron_gpu_constant_location {
-	ConstantLocation5Impl impl;
+	gpu_constant_location_impl_t impl;
 } iron_gpu_constant_location_t;
 
 typedef struct iron_gpu_texture_unit {
@@ -350,7 +341,7 @@ typedef struct iron_gpu_texture_unit {
 } iron_gpu_texture_unit_t;
 
 typedef struct iron_gpu_shader {
-	Shader5Impl impl;
+	gpu_shader_impl_t impl;
 } iron_gpu_shader_t;
 
 typedef struct iron_gpu_pipeline {
@@ -379,7 +370,7 @@ typedef struct iron_gpu_pipeline {
 	int color_attachment_count;
 	int depth_attachment_bits;
 
-	PipelineState5Impl impl;
+	gpu_pipeline_impl_t impl;
 } iron_gpu_pipeline_t;
 
 typedef struct iron_gpu_sampler_options {
@@ -393,7 +384,7 @@ typedef struct iron_gpu_sampler_options {
 } iron_gpu_sampler_options_t;
 
 typedef struct iron_gpu_sampler {
-	iron_gpu_sampler_impl_t impl;
+	gpu_sampler_impl_t impl;
 } iron_gpu_sampler_t;
 
 void iron_gpu_pipeline_init(iron_gpu_pipeline_t *pipeline);
@@ -412,15 +403,15 @@ void iron_gpu_sampler_destroy(iron_gpu_sampler_t *sampler);
 
 void iron_gpu_internal_pipeline_set_defaults(iron_gpu_pipeline_t *pipeline);
 
+struct iron_gpu_pipeline;
+struct iron_gpu_texture;
+struct iron_gpu_command_list;
 struct iron_gpu_constant_buffer;
 struct iron_gpu_index_buffer;
 struct iron_gpu_vertex_buffer;
-struct iron_gpu_pipeline;
-struct iron_gpu_texture;
-struct iron_gpu_texture;
 
 typedef struct iron_gpu_command_list {
-	CommandList5Impl impl;
+	gpu_command_list_impl_t impl;
 } iron_gpu_command_list_t;
 
 void iron_gpu_command_list_init(iron_gpu_command_list_t *list);
@@ -438,7 +429,7 @@ void iron_gpu_command_list_viewport(iron_gpu_command_list_t *list, int x, int y,
 void iron_gpu_command_list_scissor(iron_gpu_command_list_t *list, int x, int y, int width, int height);
 void iron_gpu_command_list_disable_scissor(iron_gpu_command_list_t *list);
 void iron_gpu_command_list_set_pipeline(iron_gpu_command_list_t *list, struct iron_gpu_pipeline *pipeline);
-void iron_gpu_command_list_set_vertex_buffer(iron_gpu_command_list_t *list, struct iron_gpu_vertex_buffer *buffer);
+void iron_gpu_command_list_set_vertex_buffer(iron_gpu_command_list_t *list, gpu_vertex_buffer_impl_t *buffer);
 void iron_gpu_command_list_set_index_buffer(iron_gpu_command_list_t *list, struct iron_gpu_index_buffer *buffer);
 void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, struct iron_gpu_texture **targets, int count);
 void iron_gpu_command_list_upload_index_buffer(iron_gpu_command_list_t *list, struct iron_gpu_index_buffer *buffer);
@@ -455,20 +446,13 @@ void iron_gpu_command_list_set_sampler(iron_gpu_command_list_t *list, iron_gpu_t
 
 void iron_gpu_render_target_get_pixels(iron_gpu_texture_t *render_target, uint8_t *data);
 
-struct iron_gpu_command_list;
-struct iron_gpu_constant_buffer;
-struct iron_gpu_index_buffer;
-struct iron_gpu_texture;
-struct iron_gpu_texture;
-struct iron_gpu_vertex_buffer;
-
 typedef struct iron_gpu_raytrace_pipeline {
 	struct iron_gpu_constant_buffer *_constant_buffer;
-	iron_gpu_raytrace_pipeline_impl_t impl;
+	gpu_raytrace_pipeline_impl_t impl;
 } iron_gpu_raytrace_pipeline_t;
 
 typedef struct iron_gpu_raytrace_acceleration_structure {
-	iron_gpu_raytrace_acceleration_structure_impl_t impl;
+	gpu_raytrace_acceleration_structure_impl_t impl;
 } iron_gpu_raytrace_acceleration_structure_t;
 
 bool iron_gpu_raytrace_supported(void);

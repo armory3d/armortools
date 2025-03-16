@@ -70,7 +70,7 @@ typedef struct {
 	int heapIndex;
 	struct ID3D12DescriptorHeap *srvHeap;
 	struct ID3D12DescriptorHeap *samplerHeap;
-} CommandList5Impl;
+} gpu_command_list_impl_t;
 
 typedef struct {
 	uint32_t hash;
@@ -87,7 +87,7 @@ struct ID3D12DescriptorHeap;
 typedef struct {
 	struct ID3D12PipelineState *pso;
 	int textures;
-} PipelineState5Impl;
+} gpu_pipeline_impl_t;
 
 typedef struct {
 	int vertexOffset;
@@ -100,11 +100,7 @@ typedef struct {
 	uint32_t tessEvalSize;
 	int tessControlOffset;
 	uint32_t tessControlSize;
-} ConstantLocation5Impl;
-
-typedef struct {
-	int nothing;
-} AttributeLocation5Impl;
+} gpu_constant_location_impl_t;
 
 struct iron_gpu_pipeline;
 struct iron_gpu_command_list;
@@ -113,7 +109,7 @@ void iron_gpu_internal_setConstants(struct iron_gpu_command_list *commandList, s
 
 typedef struct iron_gpu_sampler_impl {
 	struct ID3D12DescriptorHeap *sampler_heap;
-} iron_gpu_sampler_impl_t;
+} gpu_sampler_impl_t;
 
 typedef struct {
 	char name[64];
@@ -140,7 +136,7 @@ typedef struct {
 	void *shader;
 	uint8_t *data;
 	int length;
-} Shader5Impl;
+} gpu_shader_impl_t;
 
 struct ID3D12Resource;
 struct ID3D12DescriptorHeap;
@@ -170,7 +166,7 @@ typedef struct {
 	// int stage;
 	int stage_depth;
 	int framebuffer_index;
-} Texture5Impl;
+} gpu_texture_impl_t;
 
 struct iron_gpu_texture;
 struct iron_gpu_command_list;
@@ -194,14 +190,14 @@ typedef struct {
 	int myStride;
 	int lastStart;
 	int lastCount;
-} VertexBuffer5Impl;
+} gpu_vertex_buffer_impl_t;
 
 typedef struct {
 	struct ID3D12Resource *constant_buffer;
 	int lastStart;
 	int lastCount;
 	int mySize;
-} ConstantBuffer5Impl;
+} gpu_constant_buffer_impl_t;
 
 struct D3D12IindexBufferView {
 	__int64 BufferLocation;
@@ -217,7 +213,7 @@ typedef struct {
 	bool gpu_memory;
 	int last_start;
 	int last_count;
-} IndexBuffer5Impl;
+} gpu_index_buffer_impl_t;
 
 struct iron_gpu_index_buffer;
 
@@ -231,9 +227,9 @@ typedef struct {
 	struct ID3D12Resource *raygen_shader_table;
 	struct ID3D12Resource *miss_shader_table;
 	struct ID3D12Resource *hitgroup_shader_table;
-} iron_gpu_raytrace_pipeline_impl_t;
+} gpu_raytrace_pipeline_impl_t;
 
 typedef struct {
 	struct ID3D12Resource *bottom_level_accel[16];
 	struct ID3D12Resource *top_level_accel;
-} iron_gpu_raytrace_acceleration_structure_impl_t;
+} gpu_raytrace_acceleration_structure_impl_t;
