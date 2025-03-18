@@ -136,35 +136,6 @@ enum tagPOINTER_INPUT_TYPE {
 
 #define S_OK ((HRESULT)0L)
 
-static void winerror(HRESULT result) {
-	LPVOID buffer = NULL;
-	DWORD dw = GetLastError();
-
-	__debugbreak();
-
-	if (dw != 0) {
-		FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, dw,
-		               MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&buffer, 0, NULL);
-
-		iron_error("Error: %s", buffer);
-	}
-	else {
-
-		iron_error("Unknown Windows error, return value was 0x%x.", result);
-
-	}
-}
-
-void iron_microsoft_affirm(HRESULT result) {
-	if (result != S_OK) {
-		winerror(result);
-	}
-}
-
-void iron_microsoft_affirm_message(HRESULT result, const char *format, ...) {
-
-}
-
 void iron_microsoft_format(const char *format, va_list args, wchar_t *buffer) {
 	char cbuffer[4096];
 	vsprintf(cbuffer, format, args);
@@ -1552,7 +1523,7 @@ static bool co_initialized = false;
 
 void iron_windows_co_initialize(void) {
 	if (!co_initialized) {
-		iron_microsoft_affirm(CoInitializeEx(0, COINIT_MULTITHREADED));
+		CoInitializeEx(0, COINIT_MULTITHREADED);
 		co_initialized = true;
 	}
 }

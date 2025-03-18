@@ -7,8 +7,6 @@ typedef long HRESULT;
 struct HMONITOR__;
 struct HWND__;
 
-void iron_microsoft_affirm(HRESULT result);
-void iron_microsoft_affirm_message(HRESULT result, const char *format, ...);
 void iron_microsoft_format(const char *format, va_list args, wchar_t *buffer);
 
 int iron_windows_get_display_for_monitor(struct HMONITOR__ *monitor);

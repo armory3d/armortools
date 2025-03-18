@@ -3,12 +3,24 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define QUEUE_SLOT_COUNT 2
+#define IRON_INTERNAL_G5_TEXTURE_COUNT 16
+
 struct ID3D12CommandAllocator;
 struct ID3D12GraphicsCommandList;
 struct ID3D12Fence;
 struct ID3D12Resource;
 struct ID3D12DescriptorHeap;
 struct IDXGISwapChain;
+struct ID3D12PipelineState;
+struct ID3D12RootSignature;
+struct ID3D12StateObject;
+struct iron_gpu_pipeline;
+struct iron_gpu_texture;
+struct iron_gpu_sampler;
+struct iron_gpu_shader;
+struct iron_gpu_command_list;
+struct iron_gpu_buffer;
 
 typedef void *HANDLE;
 typedef unsigned __int64 UINT64;
@@ -29,8 +41,6 @@ struct D3D12Rect {
 	long bottom;
 };
 
-#define QUEUE_SLOT_COUNT 2
-
 struct dx_window {
 	struct IDXGISwapChain *swapChain;
 	UINT64 current_fence_value;
@@ -44,12 +54,6 @@ struct dx_window {
 	int current_backbuffer;
 	bool vsync;
 };
-
-struct iron_gpu_pipeline;
-struct iron_gpu_texture;
-struct iron_gpu_sampler;
-
-#define IRON_INTERNAL_G5_TEXTURE_COUNT 16
 
 typedef struct {
 	struct ID3D12CommandAllocator *_commandAllocator;
@@ -73,18 +77,6 @@ typedef struct {
 } gpu_command_list_impl_t;
 
 typedef struct {
-	uint32_t hash;
-	uint32_t index;
-} iron_internal_hash_index_t;
-
-struct iron_gpu_shader;
-
-struct ID3D12PipelineState;
-struct ID3D12GraphicsCommandList;
-struct ID3D12RootSignature;
-struct ID3D12DescriptorHeap;
-
-typedef struct {
 	struct ID3D12PipelineState *pso;
 	int textures;
 } gpu_pipeline_impl_t;
@@ -94,18 +86,7 @@ typedef struct {
 	uint32_t vertexSize;
 	int fragmentOffset;
 	uint32_t fragmentSize;
-	int geometryOffset;
-	uint32_t geometrySize;
-	int tessEvalOffset;
-	uint32_t tessEvalSize;
-	int tessControlOffset;
-	uint32_t tessControlSize;
 } gpu_constant_location_impl_t;
-
-struct iron_gpu_pipeline;
-struct iron_gpu_command_list;
-
-void iron_gpu_internal_setConstants(struct iron_gpu_command_list *commandList, struct iron_gpu_pipeline *pipeline);
 
 typedef struct iron_gpu_sampler_impl {
 	struct ID3D12DescriptorHeap *sampler_heap;
@@ -138,14 +119,6 @@ typedef struct {
 	int length;
 } gpu_shader_impl_t;
 
-struct ID3D12Resource;
-struct ID3D12DescriptorHeap;
-struct ID3D12GraphicsCommandList;
-
-typedef struct {
-	int unit;
-} TextureUnit5Impl;
-
 typedef struct {
 	bool mipmap;
 	int stage;
@@ -157,24 +130,15 @@ typedef struct {
 	struct ID3D12Resource *renderTarget;
 	struct ID3D12Resource *renderTargetReadback;
 	struct ID3D12DescriptorHeap *renderTargetDescriptorHeap;
-	// struct ID3D12DescriptorHeap *srvDescriptorHeap;
 	struct ID3D12DescriptorHeap *depthStencilDescriptorHeap;
 	struct ID3D12DescriptorHeap *srvDepthDescriptorHeap;
 	struct ID3D12Resource *depthStencilTexture;
 	struct D3D12Viewport viewport;
 	struct D3D12Rect scissor;
-	// int stage;
+
 	int stage_depth;
 	int framebuffer_index;
 } gpu_texture_impl_t;
-
-struct iron_gpu_texture;
-struct iron_gpu_command_list;
-
-void iron_gpu_internal_set_textures(struct iron_gpu_command_list *commandList);
-void iron_gpu_internal_texture_set(struct iron_gpu_command_list *commandList, struct iron_gpu_texture *texture, int unit);
-
-struct ID3D12Resource;
 
 struct D3D12VertexBufferView {
 	__int64 BufferLocation;
@@ -206,15 +170,7 @@ typedef struct {
 
 	struct ID3D12Resource *constant_buffer;
 	int mySize;
-
 } gpu_buffer_impl_t;
-
-struct iron_gpu_buffer;
-
-void iron_gpu_internal_index_buffer_upload(struct iron_gpu_buffer *buffer, struct ID3D12GraphicsCommandList *commandList);
-
-struct ID3D12StateObject;
-struct ID3D12Resource;
 
 typedef struct {
 	struct ID3D12StateObject *dxr_state;

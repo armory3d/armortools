@@ -13,11 +13,6 @@ typedef struct {
 	uint32_t number;
 } iron_internal_named_number;
 
-typedef struct {
-	uint32_t hash;
-	uint32_t index;
-} iron_internal_hash_index_t;
-
 struct indexed_name {
 	uint32_t id;
 	char *name;

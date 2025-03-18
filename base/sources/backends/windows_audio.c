@@ -147,12 +147,12 @@ static bool initDefaultDevice() {
 		a2_buffer.channel_count = 2;
 
 		bufferFrames = 0;
-		iron_microsoft_affirm(audioClient->lpVtbl->GetBufferSize(audioClient, &bufferFrames));
-		iron_microsoft_affirm(audioClient->lpVtbl->GetService(audioClient, &IID_IAudioRenderClient, (void **)&renderClient));
+		audioClient->lpVtbl->GetBufferSize(audioClient, &bufferFrames);
+		audioClient->lpVtbl->GetService(audioClient, &IID_IAudioRenderClient, (void **)&renderClient);
 
 		bufferEndEvent = CreateEvent(0, FALSE, FALSE, 0);
 
-		iron_microsoft_affirm(audioClient->lpVtbl->SetEventHandle(audioClient, bufferEndEvent));
+		audioClient->lpVtbl->SetEventHandle(audioClient, bufferEndEvent);
 
 		return true;
 	}
@@ -277,7 +277,7 @@ void iron_a2_init() {
 	audioProcessingDoneEvent = CreateEvent(0, FALSE, FALSE, 0);
 
 	iron_windows_co_initialize();
-	iron_microsoft_affirm(CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL, &IID_IMMDeviceEnumerator, (void **)&deviceEnumerator));
+	CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL, &IID_IMMDeviceEnumerator, (void **)&deviceEnumerator);
 
 	if (initDefaultDevice()) {
 		CreateThread(0, 65536, audioThread, NULL, 0, 0);

@@ -44,11 +44,6 @@ typedef struct {
 } gpu_raytrace_acceleration_structure_impl_t;
 
 typedef struct {
-	int index;
-	bool vertex;
-} TextureUnit5Impl;
-
-typedef struct {
 	void *_tex;
 	void *data;
 	bool has_mipmaps;

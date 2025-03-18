@@ -3106,8 +3106,6 @@ void iron_gpu_texture_destroy(iron_gpu_texture_t *target) {
 	}
 }
 
-void iron_gpu_internal_texture_set(iron_gpu_texture_t *texture, int unit) {}
-
 int iron_gpu_texture_stride(iron_gpu_texture_t *texture) {
 	return texture->impl.stride;
 }

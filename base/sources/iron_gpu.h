@@ -51,7 +51,7 @@ typedef struct iron_gpu_texture {
 	gpu_texture_impl_t impl;
 } iron_gpu_texture_t;
 
-typedef struct gpu_buffer {
+typedef struct iron_gpu_buffer {
 	int myCount;
 	uint8_t *data;
 	gpu_buffer_impl_t impl;
@@ -414,11 +414,11 @@ void iron_gpu_command_list_set_pipeline(iron_gpu_command_list_t *list, struct ir
 void iron_gpu_command_list_set_vertex_buffer(iron_gpu_command_list_t *list, iron_gpu_buffer_t *buffer);
 void iron_gpu_command_list_set_index_buffer(iron_gpu_command_list_t *list, iron_gpu_buffer_t *buffer);
 void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, struct iron_gpu_texture **targets, int count);
-void iron_gpu_command_list_upload_index_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer);
+void iron_gpu_command_list_upload_index_buffer(iron_gpu_command_list_t *list, iron_gpu_buffer_t *buffer);
 void iron_gpu_command_list_upload_vertex_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer);
 void iron_gpu_command_list_upload_texture(iron_gpu_command_list_t *list, struct iron_gpu_texture *texture);
-void iron_gpu_command_list_set_vertex_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer, int offset, size_t size);
-void iron_gpu_command_list_set_fragment_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer, int offset, size_t size);
+void iron_gpu_command_list_set_vertex_constant_buffer(iron_gpu_command_list_t *list, iron_gpu_buffer_t *buffer, int offset, size_t size);
+void iron_gpu_command_list_set_fragment_constant_buffer(iron_gpu_command_list_t *list, iron_gpu_buffer_t *buffer, int offset, size_t size);
 void iron_gpu_command_list_execute(iron_gpu_command_list_t *list);
 void iron_gpu_command_list_wait_for_execution_to_finish(iron_gpu_command_list_t *list);
 void iron_gpu_command_list_get_render_target_pixels(iron_gpu_command_list_t *list, struct iron_gpu_texture *render_target, uint8_t *data);
