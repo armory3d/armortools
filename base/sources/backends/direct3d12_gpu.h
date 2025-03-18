@@ -60,7 +60,6 @@ typedef struct {
 	struct ID3D12GraphicsCommandList *_commandList;
 	struct iron_gpu_pipeline *_currentPipeline;
 	int _indexCount;
-	bool open;
 
 	struct D3D12Rect current_full_scissor;
 

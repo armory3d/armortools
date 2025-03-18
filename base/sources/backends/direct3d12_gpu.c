@@ -1,115 +1,236 @@
 #include <iron_global.h>
 
-#define WINVER 0x0601
-#ifdef _WIN32_WINNT
-#undef _WIN32_WINNT
-#endif
-#define _WIN32_WINNT 0x0601
-#define NOATOM
-#define NOCLIPBOARD
-#define NOCOLOR
-#define NOCOMM
-#define NOCTLMGR
-#define NODEFERWINDOWPOS
-#define NODRAWTEXT
-#define NOGDI
-#define NOGDICAPMASKS
-#define NOHELP
-#define NOICONS
-#define NOKANJI
-#define NOKEYSTATES
-#define NOMB
-#define NOMCX
-#define NOMEMMGR
-#define NOMENUS
-#define NOMETAFILE
-#define NOMINMAX
-#define NONLS
-#define NOOPENFILE
-#define NOPROFILER
-#define NORASTEROPS
-#define NOSCROLL
-#define NOSERVICE
-#define NOSHOWWINDOW
-#define NOSOUND
-#define NOSYSCOMMANDS
-#define NOSYSMETRICS
-#define NOTEXTMETRIC
-#define NOVIRTUALKEYCODES
-#define NOWH
-#define NOWINMESSAGES
-#define NOWINOFFSETS
-#define NOWINSTYLES
 #define WIN32_LEAN_AND_MEAN
-
 #define MAX_SHADER_THING 32
+#define HEAP_SIZE 1024
 
 #include <stdbool.h>
 #include <malloc.h>
 #include <math.h>
 #include <d3d12.h>
 #include <dxgi.h>
+#include <dxgi1_4.h>
 #include <iron_gpu.h>
 #include <iron_system.h>
 #include <iron_math.h>
-#include <dxgi1_4.h>
 #include <backends/windows_system.h>
 
 void iron_gpu_internal_resize(int, int);
 void iron_memory_emergency();
 
-ID3D12Device *device = NULL;
 static ID3D12RootSignature *globalRootSignature = NULL;
 static int framebuffer_count = 0;
 static bool began = false;
 bool iron_gpu_transpose_mat = false;
 
-struct dx_ctx {
-	struct dx_window windows[1];
-};
-static struct dx_ctx dx_ctx = {0};
+struct dx_window windows[1];
+ID3D12Device *device = NULL;
+ID3D12CommandQueue *queue;
 
-ID3D12CommandQueue *commandQueue;
-
-struct RenderEnvironment {
-	ID3D12Device *device;
-	ID3D12CommandQueue *queue;
-	IDXGISwapChain *swapChain;
-};
-
-static ID3D12Fence *uploadFence;
+static ID3D12Fence *upload_fence;
 static ID3D12GraphicsCommandList *initCommandList;
 static ID3D12CommandAllocator *initCommandAllocator;
-static const int heapSize = 1024;
 
-struct RenderEnvironment createDeviceAndSwapChainHelper(D3D_FEATURE_LEVEL minimumFeatureLevel, const struct DXGI_SWAP_CHAIN_DESC *swapChainDesc) {
-	struct RenderEnvironment result = {0};
-	D3D12CreateDevice(NULL, minimumFeatureLevel, &IID_ID3D12Device, &result.device);
-
-	D3D12_COMMAND_QUEUE_DESC queueDesc = {
-		.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE,
-		.Type = D3D12_COMMAND_LIST_TYPE_DIRECT,
-	};
-
-	result.device->lpVtbl->CreateCommandQueue(result.device, &queueDesc, &IID_ID3D12CommandQueue, &result.queue);
-
-	IDXGIFactory4 *dxgiFactory;
-	CreateDXGIFactory1(&IID_IDXGIFactory4, &dxgiFactory);
-
-	DXGI_SWAP_CHAIN_DESC swapChainDescCopy = *swapChainDesc;
-	dxgiFactory->lpVtbl->CreateSwapChain(dxgiFactory, (IUnknown *)result.queue, &swapChainDescCopy, &result.swapChain);
-
-	return result;
+static D3D12_BLEND convert_blend_factor(iron_gpu_blending_factor_t factor) {
+	switch (factor) {
+	case IRON_GPU_BLEND_ONE:
+		return D3D12_BLEND_ONE;
+	case IRON_GPU_BLEND_ZERO:
+		return D3D12_BLEND_ZERO;
+	case IRON_GPU_BLEND_SOURCE_ALPHA:
+		return D3D12_BLEND_SRC_ALPHA;
+	case IRON_GPU_BLEND_DEST_ALPHA:
+		return D3D12_BLEND_DEST_ALPHA;
+	case IRON_GPU_BLEND_INV_SOURCE_ALPHA:
+		return D3D12_BLEND_INV_SRC_ALPHA;
+	case IRON_GPU_BLEND_INV_DEST_ALPHA:
+		return D3D12_BLEND_INV_DEST_ALPHA;
+	case IRON_GPU_BLEND_SOURCE_COLOR:
+		return D3D12_BLEND_SRC_COLOR;
+	case IRON_GPU_BLEND_DEST_COLOR:
+		return D3D12_BLEND_DEST_COLOR;
+	case IRON_GPU_BLEND_INV_SOURCE_COLOR:
+		return D3D12_BLEND_INV_SRC_COLOR;
+	case IRON_GPU_BLEND_INV_DEST_COLOR:
+		return D3D12_BLEND_INV_DEST_COLOR;
+	case IRON_GPU_BLEND_CONSTANT:
+		return D3D12_BLEND_BLEND_FACTOR;
+	case IRON_GPU_BLEND_INV_CONSTANT:
+		return D3D12_BLEND_INV_BLEND_FACTOR;
+	}
 }
 
-static void waitForFence(ID3D12Fence *fence, UINT64 completionValue, HANDLE waitEvent) {
+static D3D12_BLEND_OP convert_blend_operation(iron_gpu_blending_operation_t op) {
+	switch (op) {
+	case IRON_GPU_BLENDOP_ADD:
+		return D3D12_BLEND_OP_ADD;
+	case IRON_GPU_BLENDOP_SUBTRACT:
+		return D3D12_BLEND_OP_SUBTRACT;
+	case IRON_GPU_BLENDOP_REVERSE_SUBTRACT:
+		return D3D12_BLEND_OP_REV_SUBTRACT;
+	case IRON_GPU_BLENDOP_MIN:
+		return D3D12_BLEND_OP_MIN;
+	case IRON_GPU_BLENDOP_MAX:
+		return D3D12_BLEND_OP_MAX;
+	}
+}
+
+static D3D12_CULL_MODE convert_cull_mode(iron_gpu_cull_mode_t cull_mode) {
+	switch (cull_mode) {
+	case IRON_GPU_CULL_MODE_CLOCKWISE:
+		return D3D12_CULL_MODE_FRONT;
+	case IRON_GPU_CULL_MODE_COUNTERCLOCKWISE:
+		return D3D12_CULL_MODE_BACK;
+	case IRON_GPU_CULL_MODE_NEVER:
+	default:
+		return D3D12_CULL_MODE_NONE;
+	}
+}
+
+static D3D12_COMPARISON_FUNC convert_compare_mode(iron_gpu_compare_mode_t compare) {
+	switch (compare) {
+	default:
+	case IRON_GPU_COMPARE_MODE_ALWAYS:
+		return D3D12_COMPARISON_FUNC_ALWAYS;
+	case IRON_GPU_COMPARE_MODE_NEVER:
+		return D3D12_COMPARISON_FUNC_NEVER;
+	case IRON_GPU_COMPARE_MODE_EQUAL:
+		return D3D12_COMPARISON_FUNC_EQUAL;
+	case IRON_GPU_COMPARE_MODE_NOT_EQUAL:
+		return D3D12_COMPARISON_FUNC_NOT_EQUAL;
+	case IRON_GPU_COMPARE_MODE_LESS:
+		return D3D12_COMPARISON_FUNC_LESS;
+	case IRON_GPU_COMPARE_MODE_LESS_EQUAL:
+		return D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	case IRON_GPU_COMPARE_MODE_GREATER:
+		return D3D12_COMPARISON_FUNC_GREATER;
+	case IRON_GPU_COMPARE_MODE_GREATER_EQUAL:
+		return D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+	}
+}
+
+static DXGI_FORMAT convert_format(iron_image_format_t format) {
+	switch (format) {
+	case IRON_IMAGE_FORMAT_RGBA128:
+		return DXGI_FORMAT_R32G32B32A32_FLOAT;
+	case IRON_IMAGE_FORMAT_RGBA64:
+		return DXGI_FORMAT_R16G16B16A16_FLOAT;
+	case IRON_IMAGE_FORMAT_R32:
+		return DXGI_FORMAT_R32_FLOAT;
+	case IRON_IMAGE_FORMAT_R16:
+		return DXGI_FORMAT_R16_FLOAT;
+	case IRON_IMAGE_FORMAT_R8:
+		return DXGI_FORMAT_R8_UNORM;
+	case IRON_IMAGE_FORMAT_RGBA32:
+	default:
+		return DXGI_FORMAT_R8G8B8A8_UNORM;
+	}
+}
+
+static D3D12_TEXTURE_ADDRESS_MODE convert_texture_addressing(iron_gpu_texture_addressing_t addressing) {
+	switch (addressing) {
+	case IRON_GPU_TEXTURE_ADDRESSING_REPEAT:
+		return D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	case IRON_GPU_TEXTURE_ADDRESSING_MIRROR:
+		return D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+	case IRON_GPU_TEXTURE_ADDRESSING_CLAMP:
+		return D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	case IRON_GPU_TEXTURE_ADDRESSING_BORDER:
+		return D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	}
+}
+
+static D3D12_FILTER convert_filter(iron_gpu_texture_filter_t minification, iron_gpu_texture_filter_t magnification, iron_gpu_mipmap_filter_t mipmap) {
+	switch (minification) {
+	case IRON_GPU_TEXTURE_FILTER_POINT:
+		switch (magnification) {
+		case IRON_GPU_TEXTURE_FILTER_POINT:
+			switch (mipmap) {
+			case IRON_GPU_MIPMAP_FILTER_NONE:
+			case IRON_GPU_MIPMAP_FILTER_POINT:
+				return D3D12_FILTER_MIN_MAG_MIP_POINT;
+			case IRON_GPU_MIPMAP_FILTER_LINEAR:
+				return D3D12_FILTER_MIN_MAG_POINT_MIP_LINEAR;
+			}
+		case IRON_GPU_TEXTURE_FILTER_LINEAR:
+			switch (mipmap) {
+			case IRON_GPU_MIPMAP_FILTER_NONE:
+			case IRON_GPU_MIPMAP_FILTER_POINT:
+				return D3D12_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT;
+			case IRON_GPU_MIPMAP_FILTER_LINEAR:
+				return D3D12_FILTER_MIN_POINT_MAG_MIP_LINEAR;
+			}
+		case IRON_GPU_TEXTURE_FILTER_ANISOTROPIC:
+			return D3D12_FILTER_ANISOTROPIC;
+		}
+	case IRON_GPU_TEXTURE_FILTER_LINEAR:
+		switch (magnification) {
+		case IRON_GPU_TEXTURE_FILTER_POINT:
+			switch (mipmap) {
+			case IRON_GPU_MIPMAP_FILTER_NONE:
+			case IRON_GPU_MIPMAP_FILTER_POINT:
+				return D3D12_FILTER_MIN_LINEAR_MAG_MIP_POINT;
+			case IRON_GPU_MIPMAP_FILTER_LINEAR:
+				return D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+			}
+		case IRON_GPU_TEXTURE_FILTER_LINEAR:
+			switch (mipmap) {
+			case IRON_GPU_MIPMAP_FILTER_NONE:
+			case IRON_GPU_MIPMAP_FILTER_POINT:
+				return D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+			case IRON_GPU_MIPMAP_FILTER_LINEAR:
+				return D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+			}
+		case IRON_GPU_TEXTURE_FILTER_ANISOTROPIC:
+			return D3D12_FILTER_ANISOTROPIC;
+		}
+	case IRON_GPU_TEXTURE_FILTER_ANISOTROPIC:
+		return D3D12_FILTER_ANISOTROPIC;
+	}
+}
+
+static int formatSize(DXGI_FORMAT format) {
+	switch (format) {
+	case DXGI_FORMAT_R32G32B32A32_FLOAT:
+		return 16;
+	case DXGI_FORMAT_R16G16B16A16_FLOAT:
+		return 8;
+	case DXGI_FORMAT_R16_FLOAT:
+		return 2;
+	case DXGI_FORMAT_R8_UNORM:
+		return 1;
+	default:
+		return 4;
+	}
+}
+
+static int formatByteSize(iron_image_format_t format) {
+	switch (format) {
+	case IRON_IMAGE_FORMAT_RGBA128:
+		return 16;
+	case IRON_IMAGE_FORMAT_RGBA64:
+		return 8;
+	case IRON_IMAGE_FORMAT_R8:
+		return 1;
+	case IRON_IMAGE_FORMAT_R16:
+		return 2;
+	case IRON_IMAGE_FORMAT_BGRA32:
+	case IRON_IMAGE_FORMAT_RGBA32:
+	case IRON_IMAGE_FORMAT_R32:
+		return 4;
+	default:
+		return 4;
+	}
+}
+
+static void wait_for_fence(ID3D12Fence *fence, UINT64 completionValue, HANDLE waitEvent) {
 	if (fence->lpVtbl->GetCompletedValue(fence) < completionValue) {
 		fence->lpVtbl->SetEventOnCompletion(fence, completionValue, waitEvent);
 		WaitForSingleObject(waitEvent, INFINITE);
 	}
 }
 
-void setupSwapChain(struct dx_window *window) {
+void setup_swapchain(struct dx_window *window) {
 	D3D12_RESOURCE_DESC depthTexture = {
 		.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D,
 		.Alignment = 0,
@@ -147,7 +268,7 @@ void setupSwapChain(struct dx_window *window) {
 	}
 }
 
-static void createRootSignature() {
+static void create_root_signature() {
 	ID3DBlob *rootBlob;
 	ID3DBlob *errorBlob;
 
@@ -242,34 +363,35 @@ void iron_gpu_internal_destroy() {
 }
 
 void iron_gpu_internal_init() {
-#ifdef _DEBUG
+	#ifdef _DEBUG
 	ID3D12Debug *debugController = NULL;
 	if (D3D12GetDebugInterface(&IID_ID3D12Debug, &debugController) == S_OK) {
 		debugController->lpVtbl->EnableDebugLayer(debugController);
 	}
-#endif
+	#endif
+
 	D3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, &IID_ID3D12Device, &device);
 
-	createRootSignature();
+	create_root_signature();
 
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {
 		.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE,
 		.Type = D3D12_COMMAND_LIST_TYPE_DIRECT,
 	};
 
-	device->lpVtbl->CreateCommandQueue(device, &queueDesc, &IID_ID3D12CommandQueue, &commandQueue);
-	device->lpVtbl->CreateFence(device, 0, D3D12_FENCE_FLAG_NONE, &IID_ID3D12Fence, &uploadFence);
+	device->lpVtbl->CreateCommandQueue(device, &queueDesc, &IID_ID3D12CommandQueue, &queue);
+	device->lpVtbl->CreateFence(device, 0, D3D12_FENCE_FLAG_NONE, &IID_ID3D12Fence, &upload_fence);
 	device->lpVtbl->CreateCommandAllocator(device, D3D12_COMMAND_LIST_TYPE_DIRECT, &IID_ID3D12CommandAllocator, &initCommandAllocator);
 	device->lpVtbl->CreateCommandList(device, 0, D3D12_COMMAND_LIST_TYPE_DIRECT, initCommandAllocator, NULL, &IID_ID3D12CommandList, &initCommandList);
 
 	initCommandList->lpVtbl->Close(initCommandList);
 
 	ID3D12CommandList *commandLists[] = {(ID3D12CommandList *)initCommandList};
-	commandQueue->lpVtbl->ExecuteCommandLists(commandQueue, 1, commandLists);
-	commandQueue->lpVtbl->Signal(commandQueue, uploadFence, 1);
+	queue->lpVtbl->ExecuteCommandLists(queue, 1, commandLists);
+	queue->lpVtbl->Signal(queue, upload_fence, 1);
 
 	HANDLE waitEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	waitForFence(uploadFence, 1, waitEvent);
+	wait_for_fence(upload_fence, 1, waitEvent);
 
 	initCommandAllocator->lpVtbl->Reset(initCommandAllocator);
 	initCommandList->lpVtbl->Release(initCommandList); // check me
@@ -279,7 +401,7 @@ void iron_gpu_internal_init() {
 }
 
 void iron_gpu_internal_init_window(int depthBufferBits, bool vsync) {
-	struct dx_window *window = &dx_ctx.windows[0];
+	struct dx_window *window = &windows[0];
 	window->vsync = vsync;
 	window->width = window->new_width = iron_window_width();
 	window->height = window->new_height = iron_window_height();
@@ -300,9 +422,9 @@ void iron_gpu_internal_init_window(int depthBufferBits, bool vsync) {
 
 	IDXGIFactory4 *dxgiFactory = NULL;
 	CreateDXGIFactory1(&IID_IDXGIFactory4, &dxgiFactory);
-	dxgiFactory->lpVtbl->CreateSwapChain(dxgiFactory, (IUnknown *)commandQueue, &swapChainDesc, &window->swapChain);
+	dxgiFactory->lpVtbl->CreateSwapChain(dxgiFactory, (IUnknown *)queue, &swapChainDesc, &window->swapChain);
 
-	setupSwapChain(window);
+	setup_swapchain(window);
 }
 
 int iron_gpu_max_bound_textures(void) {
@@ -315,22 +437,22 @@ void iron_gpu_begin(iron_gpu_texture_t *renderTarget) {
 	}
 	began = true;
 
-	struct dx_window *window = &dx_ctx.windows[0];
+	struct dx_window *window = &windows[0];
 	window->current_backbuffer = (window->current_backbuffer + 1) % QUEUE_SLOT_COUNT;
 	if (window->new_width != window->width || window->new_height != window->height) {
 		window->swapChain->lpVtbl->ResizeBuffers(window->swapChain, QUEUE_SLOT_COUNT, window->new_width, window->new_height, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
-		setupSwapChain(window);
+		setup_swapchain(window);
 		window->width = window->new_width;
 		window->height = window->new_height;
 		window->current_backbuffer = 0;
 	}
 
 	const UINT64 fenceValue = window->current_fence_value;
-	commandQueue->lpVtbl->Signal(commandQueue, window->frame_fences[window->current_backbuffer], fenceValue);
+	queue->lpVtbl->Signal(queue, window->frame_fences[window->current_backbuffer], fenceValue);
 	window->fence_values[window->current_backbuffer] = fenceValue;
 	++window->current_fence_value;
 
-	waitForFence(window->frame_fences[window->current_backbuffer], window->fence_values[window->current_backbuffer],
+	wait_for_fence(window->frame_fences[window->current_backbuffer], window->fence_values[window->current_backbuffer],
 				 window->frame_fence_events[window->current_backbuffer]);
 }
 
@@ -342,14 +464,14 @@ void iron_internal_resize(int width, int height) {
 	if (width == 0 || height == 0) {
 		return;
 	}
-	struct dx_window *window = &dx_ctx.windows[0];
+	struct dx_window *window = &windows[0];
 	window->new_width = width;
 	window->new_height = height;
 	iron_gpu_internal_resize(width, height);
 }
 
 bool iron_gpu_swap_buffers() {
-	struct dx_window *window = &dx_ctx.windows[0];
+	struct dx_window *window = &windows[0];
 	if (window->swapChain) {
 		window->swapChain->lpVtbl->Present(window->swapChain, window->vsync, 0);
 	}
@@ -364,26 +486,7 @@ bool iron_gpu_raytrace_supported() {
 	return false;
 }
 
-static int formatSize(DXGI_FORMAT format) {
-	switch (format) {
-	case DXGI_FORMAT_R32G32B32A32_FLOAT:
-		return 16;
-	case DXGI_FORMAT_R16G16B16A16_FLOAT:
-		return 8;
-	case DXGI_FORMAT_R16_FLOAT:
-		return 2;
-	case DXGI_FORMAT_R8_UNORM:
-		return 1;
-	default:
-		return 4;
-	}
-}
-
 void iron_gpu_command_list_init(struct iron_gpu_command_list *list) {
-#ifndef NDEBUG
-	list->impl.open = false;
-#endif
-
 	device->lpVtbl->CreateCommandAllocator(device, D3D12_COMMAND_LIST_TYPE_DIRECT, &IID_ID3D12CommandAllocator, &list->impl._commandAllocator);
 	device->lpVtbl->CreateCommandList(device, 0, D3D12_COMMAND_LIST_TYPE_DIRECT, list->impl._commandAllocator, NULL, &IID_ID3D12CommandList, &list->impl._commandList);
 
@@ -401,14 +504,14 @@ void iron_gpu_command_list_init(struct iron_gpu_command_list *list) {
 
 	// Create heaps
 	D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {
-		.NumDescriptors = heapSize,
+		.NumDescriptors = HEAP_SIZE,
 		.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
 		.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
 	};
 	device->lpVtbl->CreateDescriptorHeap(device, &heapDesc, &IID_ID3D12DescriptorHeap, &list->impl.srvHeap);
 
 	D3D12_DESCRIPTOR_HEAP_DESC samplerHeapDesc = {
-		.NumDescriptors = heapSize,
+		.NumDescriptors = HEAP_SIZE,
 		.Type = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
 		.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
 	};
@@ -426,24 +529,16 @@ void iron_gpu_internal_reset_textures(struct iron_gpu_command_list *list) {
 
 void iron_gpu_command_list_begin(struct iron_gpu_command_list *list) {
 	if (list->impl.fence_value > 0) {
-		waitForFence(list->impl.fence, list->impl.fence_value, list->impl.fence_event);
+		wait_for_fence(list->impl.fence, list->impl.fence_value, list->impl.fence_event);
 		list->impl._commandAllocator->lpVtbl->Reset(list->impl._commandAllocator);
 		list->impl._commandList->lpVtbl->Reset(list->impl._commandList, list->impl._commandAllocator, NULL);
 	}
 
 	iron_gpu_internal_reset_textures(list);
-
-#ifndef NDEBUG
-	list->impl.open = true;
-#endif
 }
 
 void iron_gpu_command_list_end(struct iron_gpu_command_list *list) {
 	list->impl._commandList->lpVtbl->Close(list->impl._commandList);
-
-#ifndef NDEBUG
-	list->impl.open = false;
-#endif
 }
 
 void iron_gpu_command_list_clear(struct iron_gpu_command_list *list, iron_gpu_texture_t *renderTarget, unsigned flags, unsigned color, float depth) {
@@ -534,12 +629,12 @@ void iron_gpu_command_list_draw_indexed_vertices_from_to(struct iron_gpu_command
 
 void iron_gpu_command_list_execute(iron_gpu_command_list_t *list) {
 	ID3D12CommandList *commandLists[] = {(ID3D12CommandList *)list->impl._commandList};
-	commandQueue->lpVtbl->ExecuteCommandLists(commandQueue, 1, commandLists);
-	commandQueue->lpVtbl->Signal(commandQueue, list->impl.fence, ++list->impl.fence_value);
+	queue->lpVtbl->ExecuteCommandLists(queue, 1, commandLists);
+	queue->lpVtbl->Signal(queue, list->impl.fence, ++list->impl.fence_value);
 }
 
 void iron_gpu_command_list_wait_for_execution_to_finish(iron_gpu_command_list_t *list) {
-	waitForFence(list->impl.fence, list->impl.fence_value, list->impl.fence_event);
+	wait_for_fence(list->impl.fence, list->impl.fence_value, list->impl.fence_event);
 }
 
 void iron_gpu_command_list_viewport(struct iron_gpu_command_list *list, int x, int y, int width, int height) {
@@ -584,7 +679,7 @@ void iron_gpu_internal_set_textures(iron_gpu_command_list_t *list) {
 		int srvStep = device->lpVtbl->GetDescriptorHandleIncrementSize(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		int samplerStep = device->lpVtbl->GetDescriptorHandleIncrementSize(device, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 
-		if (list->impl.heapIndex + IRON_INTERNAL_G5_TEXTURE_COUNT >= heapSize) {
+		if (list->impl.heapIndex + IRON_INTERNAL_G5_TEXTURE_COUNT >= HEAP_SIZE) {
 			list->impl.heapIndex = 0;
 		}
 
@@ -974,183 +1069,6 @@ iron_gpu_texture_unit_t iron_gpu_pipeline_get_texture_unit(iron_gpu_pipeline_t *
 		unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT] = fragmentTexture.texture;
 	}
 	return unit;
-}
-
-static D3D12_BLEND convert_blend_factor(iron_gpu_blending_factor_t factor) {
-	switch (factor) {
-	case IRON_GPU_BLEND_ONE:
-		return D3D12_BLEND_ONE;
-	case IRON_GPU_BLEND_ZERO:
-		return D3D12_BLEND_ZERO;
-	case IRON_GPU_BLEND_SOURCE_ALPHA:
-		return D3D12_BLEND_SRC_ALPHA;
-	case IRON_GPU_BLEND_DEST_ALPHA:
-		return D3D12_BLEND_DEST_ALPHA;
-	case IRON_GPU_BLEND_INV_SOURCE_ALPHA:
-		return D3D12_BLEND_INV_SRC_ALPHA;
-	case IRON_GPU_BLEND_INV_DEST_ALPHA:
-		return D3D12_BLEND_INV_DEST_ALPHA;
-	case IRON_GPU_BLEND_SOURCE_COLOR:
-		return D3D12_BLEND_SRC_COLOR;
-	case IRON_GPU_BLEND_DEST_COLOR:
-		return D3D12_BLEND_DEST_COLOR;
-	case IRON_GPU_BLEND_INV_SOURCE_COLOR:
-		return D3D12_BLEND_INV_SRC_COLOR;
-	case IRON_GPU_BLEND_INV_DEST_COLOR:
-		return D3D12_BLEND_INV_DEST_COLOR;
-	case IRON_GPU_BLEND_CONSTANT:
-		return D3D12_BLEND_BLEND_FACTOR;
-	case IRON_GPU_BLEND_INV_CONSTANT:
-		return D3D12_BLEND_INV_BLEND_FACTOR;
-	}
-}
-
-static D3D12_BLEND_OP convert_blend_operation(iron_gpu_blending_operation_t op) {
-	switch (op) {
-	case IRON_GPU_BLENDOP_ADD:
-		return D3D12_BLEND_OP_ADD;
-	case IRON_GPU_BLENDOP_SUBTRACT:
-		return D3D12_BLEND_OP_SUBTRACT;
-	case IRON_GPU_BLENDOP_REVERSE_SUBTRACT:
-		return D3D12_BLEND_OP_REV_SUBTRACT;
-	case IRON_GPU_BLENDOP_MIN:
-		return D3D12_BLEND_OP_MIN;
-	case IRON_GPU_BLENDOP_MAX:
-		return D3D12_BLEND_OP_MAX;
-	}
-}
-
-static D3D12_CULL_MODE convert_cull_mode(iron_gpu_cull_mode_t cull_mode) {
-	switch (cull_mode) {
-	case IRON_GPU_CULL_MODE_CLOCKWISE:
-		return D3D12_CULL_MODE_FRONT;
-	case IRON_GPU_CULL_MODE_COUNTERCLOCKWISE:
-		return D3D12_CULL_MODE_BACK;
-	case IRON_GPU_CULL_MODE_NEVER:
-	default:
-		return D3D12_CULL_MODE_NONE;
-	}
-}
-
-static D3D12_COMPARISON_FUNC convert_compare_mode(iron_gpu_compare_mode_t compare) {
-	switch (compare) {
-	default:
-	case IRON_GPU_COMPARE_MODE_ALWAYS:
-		return D3D12_COMPARISON_FUNC_ALWAYS;
-	case IRON_GPU_COMPARE_MODE_NEVER:
-		return D3D12_COMPARISON_FUNC_NEVER;
-	case IRON_GPU_COMPARE_MODE_EQUAL:
-		return D3D12_COMPARISON_FUNC_EQUAL;
-	case IRON_GPU_COMPARE_MODE_NOT_EQUAL:
-		return D3D12_COMPARISON_FUNC_NOT_EQUAL;
-	case IRON_GPU_COMPARE_MODE_LESS:
-		return D3D12_COMPARISON_FUNC_LESS;
-	case IRON_GPU_COMPARE_MODE_LESS_EQUAL:
-		return D3D12_COMPARISON_FUNC_LESS_EQUAL;
-	case IRON_GPU_COMPARE_MODE_GREATER:
-		return D3D12_COMPARISON_FUNC_GREATER;
-	case IRON_GPU_COMPARE_MODE_GREATER_EQUAL:
-		return D3D12_COMPARISON_FUNC_GREATER_EQUAL;
-	}
-}
-
-static DXGI_FORMAT convert_format(iron_image_format_t format) {
-	switch (format) {
-	case IRON_IMAGE_FORMAT_RGBA128:
-		return DXGI_FORMAT_R32G32B32A32_FLOAT;
-	case IRON_IMAGE_FORMAT_RGBA64:
-		return DXGI_FORMAT_R16G16B16A16_FLOAT;
-	case IRON_IMAGE_FORMAT_R32:
-		return DXGI_FORMAT_R32_FLOAT;
-	case IRON_IMAGE_FORMAT_R16:
-		return DXGI_FORMAT_R16_FLOAT;
-	case IRON_IMAGE_FORMAT_R8:
-		return DXGI_FORMAT_R8_UNORM;
-	case IRON_IMAGE_FORMAT_RGBA32:
-	default:
-		return DXGI_FORMAT_R8G8B8A8_UNORM;
-	}
-}
-
-static D3D12_TEXTURE_ADDRESS_MODE convert_texture_addressing(iron_gpu_texture_addressing_t addressing) {
-	switch (addressing) {
-	case IRON_GPU_TEXTURE_ADDRESSING_REPEAT:
-		return D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	case IRON_GPU_TEXTURE_ADDRESSING_MIRROR:
-		return D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
-	case IRON_GPU_TEXTURE_ADDRESSING_CLAMP:
-		return D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
-	case IRON_GPU_TEXTURE_ADDRESSING_BORDER:
-		return D3D12_TEXTURE_ADDRESS_MODE_BORDER;
-	}
-}
-
-static D3D12_FILTER convert_filter(iron_gpu_texture_filter_t minification, iron_gpu_texture_filter_t magnification, iron_gpu_mipmap_filter_t mipmap) {
-	switch (minification) {
-	case IRON_GPU_TEXTURE_FILTER_POINT:
-		switch (magnification) {
-		case IRON_GPU_TEXTURE_FILTER_POINT:
-			switch (mipmap) {
-			case IRON_GPU_MIPMAP_FILTER_NONE:
-			case IRON_GPU_MIPMAP_FILTER_POINT:
-				return D3D12_FILTER_MIN_MAG_MIP_POINT;
-			case IRON_GPU_MIPMAP_FILTER_LINEAR:
-				return D3D12_FILTER_MIN_MAG_POINT_MIP_LINEAR;
-			}
-		case IRON_GPU_TEXTURE_FILTER_LINEAR:
-			switch (mipmap) {
-			case IRON_GPU_MIPMAP_FILTER_NONE:
-			case IRON_GPU_MIPMAP_FILTER_POINT:
-				return D3D12_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT;
-			case IRON_GPU_MIPMAP_FILTER_LINEAR:
-				return D3D12_FILTER_MIN_POINT_MAG_MIP_LINEAR;
-			}
-		case IRON_GPU_TEXTURE_FILTER_ANISOTROPIC:
-			return D3D12_FILTER_ANISOTROPIC;
-		}
-	case IRON_GPU_TEXTURE_FILTER_LINEAR:
-		switch (magnification) {
-		case IRON_GPU_TEXTURE_FILTER_POINT:
-			switch (mipmap) {
-			case IRON_GPU_MIPMAP_FILTER_NONE:
-			case IRON_GPU_MIPMAP_FILTER_POINT:
-				return D3D12_FILTER_MIN_LINEAR_MAG_MIP_POINT;
-			case IRON_GPU_MIPMAP_FILTER_LINEAR:
-				return D3D12_FILTER_MIN_MAG_MIP_LINEAR;
-			}
-		case IRON_GPU_TEXTURE_FILTER_LINEAR:
-			switch (mipmap) {
-			case IRON_GPU_MIPMAP_FILTER_NONE:
-			case IRON_GPU_MIPMAP_FILTER_POINT:
-				return D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT;
-			case IRON_GPU_MIPMAP_FILTER_LINEAR:
-				return D3D12_FILTER_MIN_MAG_MIP_LINEAR;
-			}
-		case IRON_GPU_TEXTURE_FILTER_ANISOTROPIC:
-			return D3D12_FILTER_ANISOTROPIC;
-		}
-	case IRON_GPU_TEXTURE_FILTER_ANISOTROPIC:
-		return D3D12_FILTER_ANISOTROPIC;
-	}
-}
-
-static int formatByteSize(iron_image_format_t format) {
-	switch (format) {
-	case IRON_IMAGE_FORMAT_RGBA128:
-		return 16;
-	case IRON_IMAGE_FORMAT_RGBA64:
-		return 8;
-	case IRON_IMAGE_FORMAT_R8:
-		return 1;
-	case IRON_IMAGE_FORMAT_R16:
-		return 2;
-	case IRON_IMAGE_FORMAT_BGRA32:
-	case IRON_IMAGE_FORMAT_RGBA32:
-	case IRON_IMAGE_FORMAT_R32:
-		return 4;
-	default:
-		return 4;
-	}
 }
 
 static void set_blend_state(D3D12_BLEND_DESC *blend_desc, iron_gpu_pipeline_t *pipe, int target) {
@@ -1718,7 +1636,7 @@ static void render_target_init(iron_gpu_texture_t *render_target, int width, int
 	device->lpVtbl->CreateDescriptorHeap(device, &heapDesc, &IID_ID3D12DescriptorHeap, &render_target->impl.renderTargetDescriptorHeap);
 
 	if (framebuffer_index >= 0) {
-		IDXGISwapChain *swapChain = dx_ctx.windows[0].swapChain;
+		IDXGISwapChain *swapChain = windows[0].swapChain;
 		swapChain->lpVtbl->GetBuffer(swapChain, framebuffer_index, &IID_ID3D12Resource, &render_target->impl.renderTarget);
 		wchar_t buffer[128];
 		wsprintf(buffer, L"Backbuffer (index %i)", framebuffer_index);
