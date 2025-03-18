@@ -654,7 +654,7 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 		}
 		if (l.fill_layer == null && slot_layer_is_mask(l)) {
 			draw_set_pipeline(ui_view2d_pipe);
-			_gpu_set_int(ui_view2d_channel_loc, 1);
+			gpu_set_int(ui_view2d_channel_loc, 1);
 		}
 
 		let state: ui_state_t = _ui_image(icon, 0xffffffff, icon_h);
@@ -1008,7 +1008,7 @@ function tab_layers_make_mask_preview_rgba32(l: slot_layer_t) {
 			let l: slot_layer_t = tab_layers_l;
 			draw_begin(context_raw.mask_preview_rgba32);
 			draw_set_pipeline(ui_view2d_pipe);
-			_gpu_set_int(ui_view2d_channel_loc, 1);
+			gpu_set_int(ui_view2d_channel_loc, 1);
 			draw_image(l.texpaint_preview, 0, 0);
 			draw_end();
 			draw_set_pipeline(null);

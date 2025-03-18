@@ -257,8 +257,8 @@ function layers_apply_mask(l: slot_layer_t, m: slot_layer_t) {
 	// Apply mask
 	_gpu_begin(l.texpaint);
 	iron_gpu_set_pipeline(pipes_apply_mask);
-	_gpu_set_texture(pipes_tex0_mask, layers_temp_image);
-	_gpu_set_texture(pipes_texa_mask, m.texpaint);
+	gpu_set_texture(pipes_tex0_mask, layers_temp_image);
+	gpu_set_texture(pipes_texa_mask, m.texpaint);
 	gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 	gpu_set_index_buffer(const_data_screen_aligned_ib);
 	gpu_draw_indexed_vertices();
@@ -268,12 +268,12 @@ function layers_apply_mask(l: slot_layer_t, m: slot_layer_t) {
 function layers_commands_merge_pack(pipe: iron_gpu_pipeline_t, i0: iron_gpu_texture_t, i1: iron_gpu_texture_t, i1pack: iron_gpu_texture_t, i1mask_opacity: f32, i1texmask: iron_gpu_texture_t, i1blending: i32 = -1) {
 	_gpu_begin(i0);
 	iron_gpu_set_pipeline(pipe);
-	_gpu_set_texture(pipes_tex0, i1);
-	_gpu_set_texture(pipes_tex1, i1pack);
-	_gpu_set_texture(pipes_texmask, i1texmask);
-	_gpu_set_texture(pipes_texa, layers_temp_image);
-	_gpu_set_float(pipes_opac, i1mask_opacity);
-	_gpu_set_int(pipes_blending, i1blending);
+	gpu_set_texture(pipes_tex0, i1);
+	gpu_set_texture(pipes_tex1, i1pack);
+	gpu_set_texture(pipes_texmask, i1texmask);
+	gpu_set_texture(pipes_texa, layers_temp_image);
+	gpu_set_float(pipes_opac, i1mask_opacity);
+	gpu_set_int(pipes_blending, i1blending);
 	gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 	gpu_set_index_buffer(const_data_screen_aligned_ib);
 	gpu_draw_indexed_vertices();
@@ -731,10 +731,10 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 	if (slot_layer_is_mask(l1)) {
 		_gpu_begin(l0.texpaint);
 		iron_gpu_set_pipeline(pipes_merge_mask);
-		_gpu_set_texture(pipes_tex0_merge_mask, l1.texpaint);
-		_gpu_set_texture(pipes_texa_merge_mask, layers_temp_image);
-		_gpu_set_float(pipes_opac_merge_mask, slot_layer_get_opacity(l1));
-		_gpu_set_int(pipes_blending_merge_mask, l1.blending);
+		gpu_set_texture(pipes_tex0_merge_mask, l1.texpaint);
+		gpu_set_texture(pipes_texa_merge_mask, layers_temp_image);
+		gpu_set_float(pipes_opac_merge_mask, slot_layer_get_opacity(l1));
+		gpu_set_int(pipes_blending_merge_mask, l1.blending);
 		gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 		gpu_set_index_buffer(const_data_screen_aligned_ib);
 		gpu_draw_indexed_vertices();
@@ -745,12 +745,12 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 		if (l1.paint_base) {
 			_gpu_begin(l0.texpaint);
 			iron_gpu_set_pipeline(pipes_merge);
-			_gpu_set_texture(pipes_tex0, l1.texpaint);
-			_gpu_set_texture(pipes_tex1, empty);
-			_gpu_set_texture(pipes_texmask, mask);
-			_gpu_set_texture(pipes_texa, layers_temp_image);
-			_gpu_set_float(pipes_opac, slot_layer_get_opacity(l1));
-			_gpu_set_int(pipes_blending, l1.blending);
+			gpu_set_texture(pipes_tex0, l1.texpaint);
+			gpu_set_texture(pipes_tex1, empty);
+			gpu_set_texture(pipes_texmask, mask);
+			gpu_set_texture(pipes_texa, layers_temp_image);
+			gpu_set_float(pipes_opac, slot_layer_get_opacity(l1));
+			gpu_set_int(pipes_blending, l1.blending);
 			gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 			gpu_set_index_buffer(const_data_screen_aligned_ib);
 			gpu_draw_indexed_vertices();
@@ -767,12 +767,12 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 			if (l1.paint_nor) {
 				_gpu_begin(l0.texpaint_nor);
 				iron_gpu_set_pipeline(pipes_merge);
-				_gpu_set_texture(pipes_tex0, l1.texpaint);
-				_gpu_set_texture(pipes_tex1, l1.texpaint_nor);
-				_gpu_set_texture(pipes_texmask, mask);
-				_gpu_set_texture(pipes_texa, layers_temp_image);
-				_gpu_set_float(pipes_opac, slot_layer_get_opacity(l1));
-				_gpu_set_int(pipes_blending, l1.paint_nor_blend ? -2 : -1);
+				gpu_set_texture(pipes_tex0, l1.texpaint);
+				gpu_set_texture(pipes_tex1, l1.texpaint_nor);
+				gpu_set_texture(pipes_texmask, mask);
+				gpu_set_texture(pipes_texa, layers_temp_image);
+				gpu_set_float(pipes_opac, slot_layer_get_opacity(l1));
+				gpu_set_int(pipes_blending, l1.paint_nor_blend ? -2 : -1);
 				gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 				gpu_set_index_buffer(const_data_screen_aligned_ib);
 				gpu_draw_indexed_vertices();

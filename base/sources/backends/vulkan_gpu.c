@@ -1840,10 +1840,6 @@ void iron_gpu_command_list_render_target_to_texture_barrier(iron_gpu_command_lis
 	// render-passes are used to transition render-targets
 }
 
-void iron_gpu_command_list_set_vertex_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer, int offset, size_t size) {
-	last_vertex_constant_buffer_offset = offset;
-}
-
 int calc_descriptor_id(void) {
 	int texture_count = 0;
 	for (int i = 0; i < 16; ++i) {
@@ -1934,7 +1930,6 @@ VkDescriptorSet get_descriptor_set() {
 	vkAllocateDescriptorSets(vk_ctx.device, &alloc_info, &descriptor_set);
 
 	VkDescriptorBufferInfo buffer_descs[2];
-
 	memset(&buffer_descs, 0, sizeof(buffer_descs));
 
 	if (vk_ctx.vertex_uniform_buffer != NULL) {
@@ -2015,6 +2010,10 @@ VkDescriptorSet get_descriptor_set() {
 	descriptor_sets_count += 1;
 
 	return descriptor_set;
+}
+
+void iron_gpu_command_list_set_vertex_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer, int offset, size_t size) {
+	last_vertex_constant_buffer_offset = offset;
 }
 
 void iron_gpu_command_list_set_fragment_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer, int offset, size_t size) {

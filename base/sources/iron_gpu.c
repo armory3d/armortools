@@ -309,95 +309,95 @@ void gpu_end() {
 	iron_gpu_command_list_begin(&commandList);
 }
 
-void gpu_set_int(iron_gpu_constant_location_t location, int value) {
-	if (location.impl.vertexOffset >= 0)
-		iron_gpu_constant_buffer_set_int(&vertexConstantBuffer, location.impl.vertexOffset, value);
-	if (location.impl.fragmentOffset >= 0)
-		iron_gpu_constant_buffer_set_int(&fragmentConstantBuffer, location.impl.fragmentOffset, value);
+void gpu_set_int(iron_gpu_constant_location_t *location, int value) {
+	if (location->impl.vertexOffset >= 0)
+		iron_gpu_constant_buffer_set_int(&vertexConstantBuffer, location->impl.vertexOffset, value);
+	if (location->impl.fragmentOffset >= 0)
+		iron_gpu_constant_buffer_set_int(&fragmentConstantBuffer, location->impl.fragmentOffset, value);
 }
 
-void gpu_set_int2(iron_gpu_constant_location_t location, int value1, int value2) {
-	if (location.impl.vertexOffset >= 0)
-		iron_gpu_constant_buffer_set_int2(&vertexConstantBuffer, location.impl.vertexOffset, value1, value2);
-	if (location.impl.fragmentOffset >= 0)
-		iron_gpu_constant_buffer_set_int2(&fragmentConstantBuffer, location.impl.fragmentOffset, value1, value2);
+void gpu_set_int2(iron_gpu_constant_location_t *location, int value1, int value2) {
+	if (location->impl.vertexOffset >= 0)
+		iron_gpu_constant_buffer_set_int2(&vertexConstantBuffer, location->impl.vertexOffset, value1, value2);
+	if (location->impl.fragmentOffset >= 0)
+		iron_gpu_constant_buffer_set_int2(&fragmentConstantBuffer, location->impl.fragmentOffset, value1, value2);
 }
 
-void gpu_set_int3(iron_gpu_constant_location_t location, int value1, int value2, int value3) {
-	if (location.impl.vertexOffset >= 0)
-		iron_gpu_constant_buffer_set_int3(&vertexConstantBuffer, location.impl.vertexOffset, value1, value2, value3);
-	if (location.impl.fragmentOffset >= 0)
-		iron_gpu_constant_buffer_set_int3(&fragmentConstantBuffer, location.impl.fragmentOffset, value1, value2, value3);
+void gpu_set_int3(iron_gpu_constant_location_t *location, int value1, int value2, int value3) {
+	if (location->impl.vertexOffset >= 0)
+		iron_gpu_constant_buffer_set_int3(&vertexConstantBuffer, location->impl.vertexOffset, value1, value2, value3);
+	if (location->impl.fragmentOffset >= 0)
+		iron_gpu_constant_buffer_set_int3(&fragmentConstantBuffer, location->impl.fragmentOffset, value1, value2, value3);
 }
 
-void gpu_set_int4(iron_gpu_constant_location_t location, int value1, int value2, int value3, int value4) {
-	if (location.impl.vertexOffset >= 0)
-		iron_gpu_constant_buffer_set_int4(&vertexConstantBuffer, location.impl.vertexOffset, value1, value2, value3, value4);
-	if (location.impl.fragmentOffset >= 0)
-		iron_gpu_constant_buffer_set_int4(&fragmentConstantBuffer, location.impl.fragmentOffset, value1, value2, value3, value4);
+void gpu_set_int4(iron_gpu_constant_location_t *location, int value1, int value2, int value3, int value4) {
+	if (location->impl.vertexOffset >= 0)
+		iron_gpu_constant_buffer_set_int4(&vertexConstantBuffer, location->impl.vertexOffset, value1, value2, value3, value4);
+	if (location->impl.fragmentOffset >= 0)
+		iron_gpu_constant_buffer_set_int4(&fragmentConstantBuffer, location->impl.fragmentOffset, value1, value2, value3, value4);
 }
 
-void gpu_set_ints(iron_gpu_constant_location_t location, int *values, int count) {
-	if (location.impl.vertexOffset >= 0)
-		iron_gpu_constant_buffer_set_ints(&vertexConstantBuffer, location.impl.vertexOffset, values, count);
-	if (location.impl.fragmentOffset >= 0)
-		iron_gpu_constant_buffer_set_ints(&fragmentConstantBuffer, location.impl.fragmentOffset, values, count);
+void gpu_set_ints(iron_gpu_constant_location_t *location, int *values, int count) {
+	if (location->impl.vertexOffset >= 0)
+		iron_gpu_constant_buffer_set_ints(&vertexConstantBuffer, location->impl.vertexOffset, values, count);
+	if (location->impl.fragmentOffset >= 0)
+		iron_gpu_constant_buffer_set_ints(&fragmentConstantBuffer, location->impl.fragmentOffset, values, count);
 }
 
-void gpu_set_float(iron_gpu_constant_location_t location, float value) {
-	if (location.impl.vertexOffset >= 0)
-		iron_gpu_constant_buffer_set_float(&vertexConstantBuffer, location.impl.vertexOffset, value);
-	if (location.impl.fragmentOffset >= 0)
-		iron_gpu_constant_buffer_set_float(&fragmentConstantBuffer, location.impl.fragmentOffset, value);
+void gpu_set_float(iron_gpu_constant_location_t *location, float value) {
+	if (location->impl.vertexOffset >= 0)
+		iron_gpu_constant_buffer_set_float(&vertexConstantBuffer, location->impl.vertexOffset, value);
+	if (location->impl.fragmentOffset >= 0)
+		iron_gpu_constant_buffer_set_float(&fragmentConstantBuffer, location->impl.fragmentOffset, value);
 }
 
-void gpu_set_float2(iron_gpu_constant_location_t location, float value1, float value2) {
-	if (location.impl.vertexOffset >= 0)
-		iron_gpu_constant_buffer_set_float2(&vertexConstantBuffer, location.impl.vertexOffset, value1, value2);
-	if (location.impl.fragmentOffset >= 0)
-		iron_gpu_constant_buffer_set_float2(&fragmentConstantBuffer, location.impl.fragmentOffset, value1, value2);
+void gpu_set_float2(iron_gpu_constant_location_t *location, float value1, float value2) {
+	if (location->impl.vertexOffset >= 0)
+		iron_gpu_constant_buffer_set_float2(&vertexConstantBuffer, location->impl.vertexOffset, value1, value2);
+	if (location->impl.fragmentOffset >= 0)
+		iron_gpu_constant_buffer_set_float2(&fragmentConstantBuffer, location->impl.fragmentOffset, value1, value2);
 }
 
-void gpu_set_float3(iron_gpu_constant_location_t location, float value1, float value2, float value3) {
-	if (location.impl.vertexOffset >= 0)
-		iron_gpu_constant_buffer_set_float3(&vertexConstantBuffer, location.impl.vertexOffset, value1, value2, value3);
-	if (location.impl.fragmentOffset >= 0)
-		iron_gpu_constant_buffer_set_float3(&fragmentConstantBuffer, location.impl.fragmentOffset, value1, value2, value3);
+void gpu_set_float3(iron_gpu_constant_location_t *location, float value1, float value2, float value3) {
+	if (location->impl.vertexOffset >= 0)
+		iron_gpu_constant_buffer_set_float3(&vertexConstantBuffer, location->impl.vertexOffset, value1, value2, value3);
+	if (location->impl.fragmentOffset >= 0)
+		iron_gpu_constant_buffer_set_float3(&fragmentConstantBuffer, location->impl.fragmentOffset, value1, value2, value3);
 }
 
-void gpu_set_float4(iron_gpu_constant_location_t location, float value1, float value2, float value3, float value4) {
-	if (location.impl.vertexOffset >= 0)
-		iron_gpu_constant_buffer_set_float4(&vertexConstantBuffer, location.impl.vertexOffset, value1, value2, value3, value4);
-	if (location.impl.fragmentOffset >= 0)
-		iron_gpu_constant_buffer_set_float4(&fragmentConstantBuffer, location.impl.fragmentOffset, value1, value2, value3, value4);
+void gpu_set_float4(iron_gpu_constant_location_t *location, float value1, float value2, float value3, float value4) {
+	if (location->impl.vertexOffset >= 0)
+		iron_gpu_constant_buffer_set_float4(&vertexConstantBuffer, location->impl.vertexOffset, value1, value2, value3, value4);
+	if (location->impl.fragmentOffset >= 0)
+		iron_gpu_constant_buffer_set_float4(&fragmentConstantBuffer, location->impl.fragmentOffset, value1, value2, value3, value4);
 }
 
-void gpu_set_floats(iron_gpu_constant_location_t location, float *values, int count) {
-	if (location.impl.vertexOffset >= 0)
-		iron_gpu_constant_buffer_set_floats(&vertexConstantBuffer, location.impl.vertexOffset, values, count);
-	if (location.impl.fragmentOffset >= 0)
-		iron_gpu_constant_buffer_set_floats(&fragmentConstantBuffer, location.impl.fragmentOffset, values, count);
+void gpu_set_floats(iron_gpu_constant_location_t *location, f32_array_t *values) {
+	if (location->impl.vertexOffset >= 0)
+		iron_gpu_constant_buffer_set_floats(&vertexConstantBuffer, location->impl.vertexOffset, values->buffer, values->length);
+	if (location->impl.fragmentOffset >= 0)
+		iron_gpu_constant_buffer_set_floats(&fragmentConstantBuffer, location->impl.fragmentOffset, values->buffer, values->length);
 }
 
-void gpu_set_bool(iron_gpu_constant_location_t location, bool value) {
-	if (location.impl.vertexOffset >= 0)
-		iron_gpu_constant_buffer_set_bool(&vertexConstantBuffer, location.impl.vertexOffset, value);
-	if (location.impl.fragmentOffset >= 0)
-		iron_gpu_constant_buffer_set_bool(&fragmentConstantBuffer, location.impl.fragmentOffset, value);
+void gpu_set_bool(iron_gpu_constant_location_t *location, bool value) {
+	if (location->impl.vertexOffset >= 0)
+		iron_gpu_constant_buffer_set_bool(&vertexConstantBuffer, location->impl.vertexOffset, value);
+	if (location->impl.fragmentOffset >= 0)
+		iron_gpu_constant_buffer_set_bool(&fragmentConstantBuffer, location->impl.fragmentOffset, value);
 }
 
-void gpu_set_matrix4(iron_gpu_constant_location_t location, iron_matrix4x4_t *value) {
-	if (location.impl.vertexOffset >= 0)
-		iron_gpu_constant_buffer_set_matrix4(&vertexConstantBuffer, location.impl.vertexOffset, value);
-	if (location.impl.fragmentOffset >= 0)
-		iron_gpu_constant_buffer_set_matrix4(&fragmentConstantBuffer, location.impl.fragmentOffset, value);
+void gpu_set_matrix4(iron_gpu_constant_location_t *location, iron_matrix4x4_t value) {
+	if (location->impl.vertexOffset >= 0)
+		iron_gpu_constant_buffer_set_matrix4(&vertexConstantBuffer, location->impl.vertexOffset, &value);
+	if (location->impl.fragmentOffset >= 0)
+		iron_gpu_constant_buffer_set_matrix4(&fragmentConstantBuffer, location->impl.fragmentOffset, &value);
 }
 
-void gpu_set_matrix3(iron_gpu_constant_location_t location, iron_matrix3x3_t *value) {
-	if (location.impl.vertexOffset >= 0)
-		iron_gpu_constant_buffer_set_matrix3(&vertexConstantBuffer, location.impl.vertexOffset, value);
-	if (location.impl.fragmentOffset >= 0)
-		iron_gpu_constant_buffer_set_matrix3(&fragmentConstantBuffer, location.impl.fragmentOffset, value);
+void gpu_set_matrix3(iron_gpu_constant_location_t *location, iron_matrix3x3_t value) {
+	if (location->impl.vertexOffset >= 0)
+		iron_gpu_constant_buffer_set_matrix3(&vertexConstantBuffer, location->impl.vertexOffset, &value);
+	if (location->impl.fragmentOffset >= 0)
+		iron_gpu_constant_buffer_set_matrix3(&fragmentConstantBuffer, location->impl.fragmentOffset, &value);
 }
 
 void gpu_set_texture_addressing(iron_gpu_texture_unit_t unit, gpu_texture_direction_t dir, gpu_texture_addressing_t addressing) {

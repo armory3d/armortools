@@ -55,8 +55,8 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 				_gpu_begin(m.texpaint);
 				iron_gpu_set_pipeline(pipes_colorid_to_mask);
 				let rt: render_target_t = map_get(render_path_render_targets, "texpaint_colorid");
-				_gpu_set_texture(pipes_texpaint_colorid, rt._image);
-				_gpu_set_texture(pipes_tex_colorid, project_get_image(project_assets[context_raw.colorid_handle.position]));
+				gpu_set_texture(pipes_texpaint_colorid, rt._image);
+				gpu_set_texture(pipes_tex_colorid, project_get_image(project_assets[context_raw.colorid_handle.position]));
 				gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 				gpu_set_index_buffer(const_data_screen_aligned_ib);
 				gpu_draw_indexed_vertices();

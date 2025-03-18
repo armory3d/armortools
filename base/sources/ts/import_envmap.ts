@@ -92,8 +92,8 @@ function import_envmap_get_radiance_mip(mip: iron_gpu_texture_t, level: i32, rad
 	gpu_set_index_buffer(const_data_screen_aligned_ib);
 	iron_gpu_set_pipeline(import_envmap_pipeline);
 	import_envmap_params.x = 0.1 + level / 8;
-	_gpu_set_float4(import_envmap_params_loc, import_envmap_params.x, import_envmap_params.y, import_envmap_params.z, import_envmap_params.w);
-	_gpu_set_texture(import_envmap_radiance_loc, radiance);
+	gpu_set_float4(import_envmap_params_loc, import_envmap_params.x, import_envmap_params.y, import_envmap_params.z, import_envmap_params.w);
+	gpu_set_texture(import_envmap_radiance_loc, radiance);
 	gpu_draw_indexed_vertices();
 	_gpu_end();
 }

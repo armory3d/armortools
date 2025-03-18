@@ -80,7 +80,7 @@ function tab_fonts_draw(htab: ui_handle_t) {
 				let state: ui_state_t = ui_state_t.IDLE;
 				if (project_fonts[i].preview_ready) {
 					// draw_set_pipeline(pipe); // L8
-					// _gpu_set_int(channel_location, 1);
+					// gpu_set_int(channel_location, 1);
 					state = _ui_image(img);
 					// draw_set_pipeline(null);
 				}

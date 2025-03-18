@@ -1110,7 +1110,7 @@ function ui_nodes_render() {
 				///if (is_paint || is_sculpt)
 				if (single_channel) {
 					draw_set_pipeline(ui_view2d_pipe);
-					_gpu_set_int(ui_view2d_channel_loc, 1);
+					gpu_set_int(ui_view2d_channel_loc, 1);
 				}
 				///end
 

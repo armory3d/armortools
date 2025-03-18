@@ -223,7 +223,7 @@ function ui_view2d_render() {
 				if (!context_raw.texture_filter) {
 					draw_set_bilinear_filter(false);
 				}
-				_gpu_set_int(ui_view2d_channel_loc, channel);
+				gpu_set_int(ui_view2d_channel_loc, channel);
 			}
 			///end
 

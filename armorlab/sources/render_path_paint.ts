@@ -190,17 +190,17 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	render_path_set_target("");
 	iron_gpu_set_pipeline(pipes_cursor);
 	let gbuffer0: render_target_t = map_get(render_path_render_targets, "gbuffer0");
-	_gpu_set_texture_depth(pipes_cursor_gbufferd, gbuffer0._image);
-	_gpu_set_float2(pipes_cursor_mouse, mx, my);
-	_gpu_set_float2(pipes_cursor_tex_step, 1 / gbuffer0._image.width, 1 / gbuffer0._image.height);
-	_gpu_set_float(pipes_cursor_radius, radius);
+	gpu_set_texture_depth(pipes_cursor_gbufferd, gbuffer0._image);
+	gpu_set_float2(pipes_cursor_mouse, mx, my);
+	gpu_set_float2(pipes_cursor_tex_step, 1 / gbuffer0._image.width, 1 / gbuffer0._image.height);
+	gpu_set_float(pipes_cursor_radius, radius);
 	let right: vec4_t = vec4_norm(camera_object_right_world(scene_camera));
-	_gpu_set_float3(pipes_cursor_camera_right, right.x, right.y, right.z);
-	_gpu_set_float3(pipes_cursor_tint, tint_r, tint_g, tint_b);
-	_gpu_set_matrix4(pipes_cursor_vp, scene_camera.vp);
+	gpu_set_float3(pipes_cursor_camera_right, right.x, right.y, right.z);
+	gpu_set_float3(pipes_cursor_tint, tint_r, tint_g, tint_b);
+	gpu_set_matrix4(pipes_cursor_vp, scene_camera.vp);
 	let help_mat: mat4_t = mat4_identity();
 	help_mat = mat4_inv(scene_camera.vp);
-	_gpu_set_matrix4(pipes_cursor_inv_vp, help_mat);
+	gpu_set_matrix4(pipes_cursor_inv_vp, help_mat);
 	///if (arm_metal || arm_vulkan)
 	let vs: vertex_element_t[] = [
 		{

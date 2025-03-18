@@ -1294,56 +1294,12 @@ iron_gpu_texture_unit_t *gpu_get_texture_unit(iron_gpu_pipeline_t *pipeline, str
 	return unit_copy;
 }
 
-void _gpu_set_texture(iron_gpu_texture_unit_t *unit, iron_gpu_texture_t *texture) {
-	gpu_set_texture(unit, texture);
-}
-
-void _gpu_set_texture_depth(iron_gpu_texture_unit_t *unit, iron_gpu_texture_t *render_target) {
-	gpu_set_texture_depth(unit, render_target);
-}
-
 void gpu_set_texture_parameters(iron_gpu_texture_unit_t *unit, i32 u_addr, i32 v_addr, i32 min_filter, i32 mag_filter, i32 mip_filter) {
 	gpu_set_texture_addressing(*unit, GPU_TEXTURE_DIRECTION_U, (gpu_texture_addressing_t)u_addr);
 	gpu_set_texture_addressing(*unit, GPU_TEXTURE_DIRECTION_V, (gpu_texture_addressing_t)v_addr);
 	gpu_set_texture_minification_filter(*unit, (gpu_texture_filter_t)min_filter);
 	gpu_set_texture_magnification_filter(*unit, (gpu_texture_filter_t)mag_filter);
 	gpu_set_texture_mipmap_filter(*unit, (gpu_mipmap_filter_t)mip_filter);
-}
-
-void _gpu_set_bool(iron_gpu_constant_location_t *location, bool value) {
-	gpu_set_bool(*location, value != 0);
-}
-
-void _gpu_set_int(iron_gpu_constant_location_t *location, i32 value) {
-	gpu_set_int(*location, value);
-}
-
-void _gpu_set_float(iron_gpu_constant_location_t *location, f32 value) {
-	gpu_set_float(*location, value);
-}
-
-void _gpu_set_float2(iron_gpu_constant_location_t *location, f32 value1, f32 value2) {
-	gpu_set_float2(*location, value1, value2);
-}
-
-void _gpu_set_float3(iron_gpu_constant_location_t *location, f32 value1, f32 value2, f32 value3) {
-	gpu_set_float3(*location, value1, value2, value3);
-}
-
-void _gpu_set_float4(iron_gpu_constant_location_t *location, f32 value1, f32 value2, f32 value3, f32 value4) {
-	gpu_set_float4(*location, value1, value2, value3, value4);
-}
-
-void _gpu_set_floats(iron_gpu_constant_location_t *location, f32_array_t *values) {
-	gpu_set_floats(*location, (float *)values->buffer, values->length);
-}
-
-void _gpu_set_matrix4(iron_gpu_constant_location_t *location, mat4_t m) {
-	gpu_set_matrix4(*location, &m);
-}
-
-void _gpu_set_matrix3(iron_gpu_constant_location_t *location, mat3_t m) {
-	gpu_set_matrix3(*location, &m);
 }
 
 void iron_set_window_title(string_t *title) {

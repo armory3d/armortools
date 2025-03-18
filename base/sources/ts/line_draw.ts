@@ -236,8 +236,8 @@ function line_draw_end(overlay: bool = false) {
 	let camera: camera_object_t = scene_camera;
 	line_draw_vp = mat4_clone(camera.v);
 	line_draw_vp = mat4_mult_mat(line_draw_vp, camera.p);
-	_gpu_set_matrix4(line_draw_vp_loc, line_draw_vp);
-	_gpu_set_float3(line_draw_color_loc,
+	gpu_set_matrix4(line_draw_vp_loc, line_draw_vp);
+	gpu_set_float3(line_draw_color_loc,
 		color_get_rb(line_draw_color) / 255,
 		color_get_gb(line_draw_color) / 255,
 		color_get_bb(line_draw_color) / 255
@@ -278,8 +278,8 @@ function shape_draw_sphere(mat: mat4_t) {
 	line_draw_vp = mat4_scale(line_draw_vp, vec4_create(f, f, f));
 	line_draw_vp = mat4_mult_mat(line_draw_vp, camera.v);
 	line_draw_vp = mat4_mult_mat(line_draw_vp, camera.p);
-	_gpu_set_matrix4(line_draw_vp_loc, line_draw_vp);
-	_gpu_set_float3(line_draw_color_loc,
+	gpu_set_matrix4(line_draw_vp_loc, line_draw_vp);
+	gpu_set_float3(line_draw_color_loc,
 		color_get_rb(line_draw_color) / 255,
 		color_get_gb(line_draw_color) / 255,
 		color_get_bb(line_draw_color) / 255

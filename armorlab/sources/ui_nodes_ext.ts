@@ -80,7 +80,7 @@ function ui_nodes_ext_run() {
 	if (texheight != null) {
 		_gpu_begin(texpaint_pack._image);
 		iron_gpu_set_pipeline(pipes_copy_a);
-		_gpu_set_texture(pipes_copy_a_tex, texheight);
+		gpu_set_texture(pipes_copy_a_tex, texheight);
 		gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 		gpu_set_index_buffer(const_data_screen_aligned_ib);
 		gpu_draw_indexed_vertices();

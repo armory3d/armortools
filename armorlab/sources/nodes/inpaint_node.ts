@@ -89,8 +89,8 @@ function inpaint_node_get_cached_image(self: inpaint_node_t): iron_gpu_texture_t
 		let source: iron_gpu_texture_t = logic_node_input_get_as_image(self.base.inputs[0]);
 		_gpu_begin(inpaint_node_image);
 		iron_gpu_set_pipeline(pipes_inpaint_preview);
-		_gpu_set_texture(pipes_tex0_inpaint_preview, source);
-		_gpu_set_texture(pipes_texa_inpaint_preview, inpaint_node_mask);
+		gpu_set_texture(pipes_tex0_inpaint_preview, source);
+		gpu_set_texture(pipes_texa_inpaint_preview, inpaint_node_mask);
 		gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 		gpu_set_index_buffer(const_data_screen_aligned_ib);
 		gpu_draw_indexed_vertices();
