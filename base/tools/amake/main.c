@@ -121,6 +121,7 @@ int main(int argc, char **argv) {
     JSRuntime *runtime = JS_NewRuntime();
     JSContext *ctx = JS_NewContext(runtime);
 
+    js_std_init_handlers(runtime);
     js_std_add_helpers(ctx, argc, argv);
     js_init_module_std(ctx, "std");
     js_init_module_os(ctx, "os");
