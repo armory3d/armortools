@@ -1,0 +1,31 @@
+
+const constants: {
+	P: float4x4;
+};
+
+struct vert_in {
+	pos: float3;
+	col: float4;
+}
+
+struct vert_out {
+	pos: float4;
+	col: float4;
+}
+
+fun draw_colored_vert(input: vert_in): vert_out {
+	var output: vert_out;
+	output.pos = constants.P * float4(input.pos, 1.0);
+	output.col = input.col;
+	return output;
+}
+
+fun draw_colored_frag(input: vert_out): float4 {
+	return input.col;
+}
+
+#[pipe]
+struct pipe {
+	vertex = draw_colored_vert;
+	fragment = draw_colored_frag;
+}

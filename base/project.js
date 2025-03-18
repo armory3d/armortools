@@ -51,6 +51,7 @@ if (!flags.lite) {
 	project.add_tsfiles("sources/ts/nodes");
 	project.add_shaders("shaders/*.glsl");
 	project.add_shaders("shaders/draw/*.glsl");
+	project.add_shaders("shaders/draw/*.kong");
 	project.add_assets("assets/*", { destination: "data/{name}" });
 	project.add_assets("assets/locale/*", { destination: "data/locale/{name}" });
 	project.add_assets("assets/licenses/**", { destination: "data/licenses/{name}" });

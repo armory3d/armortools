@@ -30,6 +30,7 @@ project.add_cfiles("aimage.c");
 	if (platform === "linux") {
 		project.add_project("../../sources/libs/to_spirv");
 	}
+	project.add_project("../../sources/libs/kong");
 	project.flatten();
 }
 

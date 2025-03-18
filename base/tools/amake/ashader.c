@@ -10,6 +10,58 @@
 int krafix_compile(const char *source, char *output, int *length, const char *targetlang, const char *system, const char *shadertype, int version);
 #endif
 
+#include "../../sources/libs/kong/sources/analyzer.h"
+#include "../../sources/libs/kong/sources/compiler.h"
+#include "../../sources/libs/kong/sources/disasm.h"
+#include "../../sources/libs/kong/sources/errors.h"
+#include "../../sources/libs/kong/sources/functions.h"
+#include "../../sources/libs/kong/sources/globals.h"
+#include "../../sources/libs/kong/sources/log.h"
+#include "../../sources/libs/kong/sources/names.h"
+#include "../../sources/libs/kong/sources/parser.h"
+#include "../../sources/libs/kong/sources/tokenizer.h"
+#include "../../sources/libs/kong/sources/typer.h"
+#include "../../sources/libs/kong/sources/types.h"
+#include "../../sources/libs/kong/sources/backends/hlsl.h"
+#include "../../sources/libs/kong/sources/backends/metal.h"
+#include "../../sources/libs/kong/sources/backends/spirv.h"
+#include "../../sources/libs/kong/sources/backends/wgsl.h"
+
+void kong_compile(const char *from, const char *to) {
+	FILE *fp = fopen(from, "rb");
+	fseek(fp , 0, SEEK_END);
+	int size = ftell(fp);
+	rewind(fp);
+	char *data = malloc(size + 1);
+	data[size] = 0;
+	fread(data, size, 1, fp);
+	fclose(fp);
+
+	names_init();
+	types_init();
+	functions_init();
+	globals_init();
+
+	tokens tokens = tokenize(from, data);
+	kong_parse(from, &tokens);
+
+	resolve_types();
+	allocate_globals();
+	for (function_id i = 0; get_function(i) != NULL; ++i) {
+		compile_function_block(&get_function(i)->code, get_function(i)->block);
+	}
+	// analyze();
+
+	char output[512];
+	strcpy(output, to);
+	int i = string_last_index_of(to, "/");
+	output[i] = '\0';
+
+	// hlsl_export(output, api);
+	// metal_export(output);
+	spirv_export(output);
+}
+
 #ifdef _WIN32
 #include <d3d11.h>
 #include <D3Dcompiler.h>
@@ -1006,6 +1058,11 @@ static void to_msl() {
 int ashader(char *shader_lang, char *from, char *to) {
 	// shader_lang == glsl || essl || hlsl || msl || spirv
 	shader_type = string_index_of(from, ".vert") != -1 ? "vert" : "frag";
+
+	if (ends_with(from, ".kong")) {
+		kong_compile(from, to);
+		return 0;
+	}
 
 	#ifdef _WIN32
 	char from_[512];
