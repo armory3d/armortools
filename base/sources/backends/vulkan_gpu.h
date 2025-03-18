@@ -179,32 +179,20 @@ typedef struct {
 } gpu_texture_impl_t;
 
 typedef struct {
+	int myCount;
+
 	VkBuffer buf;
-	VkDescriptorBufferInfo buffer_info;
-	VkMemoryAllocateInfo mem_alloc;
 	VkDeviceMemory mem;
+	VkMemoryAllocateInfo mem_alloc;
+
+	float *data;
+	int myStride;
+	unsigned bufferId;
+
 	int lastStart;
 	int lastCount;
 	int mySize;
-} gpu_constant_buffer_impl_t;
-
-typedef struct {
-	float *data;
-	int myCount;
-	int myStride;
-	unsigned bufferId;
-	VkMemoryAllocateInfo mem_alloc;
-
-	VkBuffer buf;
-	VkDeviceMemory mem;
-} gpu_vertex_buffer_impl_t;
-
-typedef struct {
-	int count;
-	VkBuffer buf;
-	VkDeviceMemory mem;
-	VkMemoryAllocateInfo mem_alloc;
-} gpu_index_buffer_impl_t;
+} gpu_buffer_impl_t;
 
 typedef struct {
 	VkPipeline pipeline;

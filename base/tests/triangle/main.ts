@@ -76,7 +76,7 @@ function main() {
 	for (let i: i32 = 0; i < vertices.length; i++) {
 		buffer_set_f32(vb_data, i * 4, vertices[i]);
 	}
-	gpu_vertex_buffer_unlock_all(vb);
+	iron_gpu_vertex_buffer_unlock_all(vb);
 
 	ib = gpu_create_index_buffer(indices.length);
 	let ib_data: u32_array_t = gpu_lock_index_buffer(ib);

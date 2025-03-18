@@ -182,23 +182,6 @@ struct D3D12VertexBufferView {
 	unsigned int StrideInBytes;
 };
 
-typedef struct {
-	struct ID3D12Resource *uploadBuffer;
-	struct D3D12VertexBufferView view;
-
-	int myCount;
-	int myStride;
-	int lastStart;
-	int lastCount;
-} gpu_vertex_buffer_impl_t;
-
-typedef struct {
-	struct ID3D12Resource *constant_buffer;
-	int lastStart;
-	int lastCount;
-	int mySize;
-} gpu_constant_buffer_impl_t;
-
 struct D3D12IindexBufferView {
 	__int64 BufferLocation;
 	unsigned int SizeInBytes;
@@ -206,6 +189,13 @@ struct D3D12IindexBufferView {
 };
 
 typedef struct {
+	struct ID3D12Resource *uploadBuffer;
+	struct D3D12VertexBufferView view;
+	int myCount;
+	int myStride;
+	int lastStart;
+	int lastCount;
+
 	struct ID3D12Resource *index_buffer;
 	struct D3D12IindexBufferView index_buffer_view;
 	struct ID3D12Resource *upload_buffer;
@@ -213,11 +203,15 @@ typedef struct {
 	bool gpu_memory;
 	int last_start;
 	int last_count;
-} gpu_index_buffer_impl_t;
 
-struct iron_gpu_index_buffer;
+	struct ID3D12Resource *constant_buffer;
+	int mySize;
 
-void iron_gpu_internal_index_buffer_upload(struct iron_gpu_index_buffer *buffer, struct ID3D12GraphicsCommandList *commandList);
+} gpu_buffer_impl_t;
+
+struct iron_gpu_buffer;
+
+void iron_gpu_internal_index_buffer_upload(struct iron_gpu_buffer *buffer, struct ID3D12GraphicsCommandList *commandList);
 
 struct ID3D12StateObject;
 struct ID3D12Resource;

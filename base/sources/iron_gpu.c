@@ -29,8 +29,8 @@ iron_gpu_sampler_t *iron_internal_get_current_sampler(int stage, int unit);
 iron_gpu_command_list_t commandList;
 bool waitAfterNextDraw = false;
 
-static iron_gpu_constant_buffer_t vertexConstantBuffer;
-static iron_gpu_constant_buffer_t fragmentConstantBuffer;
+static iron_gpu_buffer_t vertexConstantBuffer;
+static iron_gpu_buffer_t fragmentConstantBuffer;
 static int constantBufferIndex = 0;
 
 static struct {
@@ -44,8 +44,8 @@ static struct {
 typedef struct render_state {
 	iron_gpu_pipeline_t *pipeline;
 
-	iron_gpu_index_buffer_t *index_buffer;
-	gpu_vertex_buffer_impl_t *vertex_buffer;
+	iron_gpu_buffer_t *index_buffer;
+	iron_gpu_buffer_t *vertex_buffer;
 
 	bool viewport_set;
 	int viewport_x;
@@ -461,13 +461,12 @@ void gpu_set_render_targets(iron_gpu_texture_t **targets, int count) {
 	current_state.scissor_set = false;
 }
 
-void gpu_set_vertex_buffer(iron_gpu_vertex_buffer_t *buffer) {
-	gpu_vertex_buffer_impl_t *vb = &buffer->_buffer[buffer->_currentIndex];
-	current_state.vertex_buffer = vb;
-	iron_gpu_command_list_set_vertex_buffer(&commandList, vb);
+void gpu_set_vertex_buffer(iron_gpu_buffer_t *buffer) {
+	current_state.vertex_buffer = buffer;
+	iron_gpu_command_list_set_vertex_buffer(&commandList, buffer);
 }
 
-void gpu_set_index_buffer(iron_gpu_index_buffer_t *buffer) {
+void gpu_set_index_buffer(iron_gpu_buffer_t *buffer) {
 	current_state.index_buffer = buffer;
 	iron_gpu_command_list_set_index_buffer(&commandList, buffer);
 }
@@ -477,54 +476,46 @@ void iron_gpu_set_pipeline(iron_gpu_pipeline_t *pipeline) {
 	iron_gpu_command_list_set_pipeline(&commandList, pipeline);
 }
 
-void gpu_set_texture(iron_gpu_texture_unit_t unit, iron_gpu_texture_t *render_target) {
-
+void gpu_set_texture(iron_gpu_texture_unit_t *unit, iron_gpu_texture_t *render_target) {
 	if (!render_target->_uploaded) {
 		iron_gpu_command_list_upload_texture(&commandList, render_target);
 		render_target->_uploaded = true;
 	}
-
 
 	if (render_target->state != IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE) {
 		iron_gpu_command_list_render_target_to_texture_barrier(&commandList, render_target);
 		render_target->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
 	}
 
-	iron_gpu_texture_unit_t g5_unit;
-	memcpy(&g5_unit.stages[0], &unit.stages[0], IRON_GPU_SHADER_TYPE_COUNT * sizeof(int));
-
 	bool found = false;
 	for (int i = 0; i < current_state.texture_count; ++i) {
-		if (iron_gpu_texture_unit_equals(&current_state.texture_units[i], &g5_unit)) {
+		if (iron_gpu_texture_unit_equals(&current_state.texture_units[i], unit)) {
 			current_state.textures[i] = render_target;
-			current_state.texture_units[i] = g5_unit;
+			current_state.texture_units[i] = *unit;
 			found = true;
 			break;
 		}
 	}
 	if (!found) {
 		current_state.textures[current_state.texture_count] = render_target;
-		current_state.texture_units[current_state.texture_count] = g5_unit;
+		current_state.texture_units[current_state.texture_count] = *unit;
 		current_state.texture_count += 1;
 	}
 
-	iron_gpu_command_list_set_texture(&commandList, g5_unit, render_target);
+	iron_gpu_command_list_set_texture(&commandList, *unit, render_target);
 }
 
-void gpu_render_target_use_depth_as_texture(iron_gpu_texture_t *render_target, iron_gpu_texture_unit_t unit) {
+void gpu_set_texture_depth(iron_gpu_texture_unit_t *unit, iron_gpu_texture_t *render_target) {
 	if (render_target->state != IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE) {
 		iron_gpu_command_list_render_target_to_texture_barrier(&commandList, render_target);
 		render_target->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
 	}
 
-	iron_gpu_texture_unit_t g5_unit;
-	memcpy(&g5_unit.stages[0], &unit.stages[0], IRON_GPU_SHADER_TYPE_COUNT * sizeof(int));
-
 	bool found = false;
 	for (int i = 0; i < current_state.depth_render_target_count; ++i) {
-		if (iron_gpu_texture_unit_equals(&current_state.depth_render_target_units[i], &g5_unit)) {
+		if (iron_gpu_texture_unit_equals(&current_state.depth_render_target_units[i], unit)) {
 			current_state.depth_render_targets[i] = render_target;
-			current_state.depth_render_target_units[i] = g5_unit;
+			current_state.depth_render_target_units[i] = *unit;
 			found = true;
 			break;
 		}
@@ -532,23 +523,23 @@ void gpu_render_target_use_depth_as_texture(iron_gpu_texture_t *render_target, i
 	if (!found) {
 		assert(current_state.depth_render_target_count < MAX_TEXTURES);
 		current_state.depth_render_targets[current_state.depth_render_target_count] = render_target;
-		current_state.depth_render_target_units[current_state.depth_render_target_count] = g5_unit;
+		current_state.depth_render_target_units[current_state.depth_render_target_count] = *unit;
 		current_state.depth_render_target_count += 1;
 	}
 
-	iron_gpu_command_list_set_texture_from_render_target_depth(&commandList, g5_unit, render_target);
+	iron_gpu_command_list_set_texture_from_render_target_depth(&commandList, *unit, render_target);
 }
 
 void iron_gpu_render_target_get_pixels(iron_gpu_texture_t *render_target, uint8_t *data) {
 	iron_gpu_command_list_get_render_target_pixels(&commandList, render_target, data);
 }
 
-void gpu_index_buffer_unlock_all(iron_gpu_index_buffer_t *buffer) {
+void gpu_index_buffer_unlock_all(iron_gpu_buffer_t *buffer) {
 	iron_gpu_index_buffer_unlock_all(buffer);
 	iron_gpu_command_list_upload_index_buffer(&commandList, buffer);
 }
 
-void gpu_index_buffer_unlock(iron_gpu_index_buffer_t *buffer, int count) {
+void gpu_index_buffer_unlock(iron_gpu_buffer_t *buffer, int count) {
 	iron_gpu_index_buffer_unlock(buffer, count);
 	iron_gpu_command_list_upload_index_buffer(&commandList, buffer);
 }
@@ -563,76 +554,40 @@ void iron_gpu_vertex_structure_add(iron_gpu_vertex_structure_t *structure, const
 	structure->size++;
 }
 
-void gpu_vertex_buffer_init(iron_gpu_vertex_buffer_t *buffer, int count, iron_gpu_vertex_structure_t *structure, gpu_usage_t usage) {
-	buffer->_multiple = usage == GPU_USAGE_STATIC ? 1 : 2;
-	buffer->_currentIndex = 0;
+void gpu_vertex_buffer_init(iron_gpu_buffer_t *buffer, int count, iron_gpu_vertex_structure_t *structure, gpu_usage_t usage) {
 	buffer->myCount = count;
-	for (int i = 0; i < buffer->_multiple; ++i) {
-		iron_gpu_vertex_buffer_init(&buffer->_buffer[i], count, structure, usage == GPU_USAGE_STATIC);
-	}
+	iron_gpu_vertex_buffer_init(buffer, count, structure, usage == GPU_USAGE_STATIC);
 }
 
-void gpu_vertex_buffer_destroy(iron_gpu_vertex_buffer_t *buffer) {
-	for (int i = 0; i < buffer->_multiple; ++i) {
-		iron_gpu_vertex_buffer_destroy(&buffer->_buffer[i]);
-	}
+float *gpu_vertex_buffer_lock_all(iron_gpu_buffer_t *buffer) {
+	waitAfterNextDraw = true;
+	return iron_gpu_vertex_buffer_lock_all(buffer);
 }
 
-static void iron_internal_prepare_lock(iron_gpu_vertex_buffer_t *buffer) {
-	++buffer->_currentIndex;
-	if (buffer->_currentIndex >= buffer->_multiple - 1) {
-		waitAfterNextDraw = true;
-	}
-	if (buffer->_currentIndex >= buffer->_multiple) {
-		buffer->_currentIndex = 0;
-	}
+float *gpu_vertex_buffer_lock(iron_gpu_buffer_t *buffer, int start, int count) {
+	waitAfterNextDraw = true;
+	return iron_gpu_vertex_buffer_lock(buffer, start, count);
 }
 
-float *gpu_vertex_buffer_lock_all(iron_gpu_vertex_buffer_t *buffer) {
-	iron_internal_prepare_lock(buffer);
-	return iron_gpu_vertex_buffer_lock_all(&buffer->_buffer[buffer->_currentIndex]);
-}
-
-float *gpu_vertex_buffer_lock(iron_gpu_vertex_buffer_t *buffer, int start, int count) {
-	iron_internal_prepare_lock(buffer);
-	return iron_gpu_vertex_buffer_lock(&buffer->_buffer[buffer->_currentIndex], start, count);
-}
-
-void gpu_vertex_buffer_unlock_all(iron_gpu_vertex_buffer_t *buffer) {
-	iron_gpu_vertex_buffer_unlock_all(&buffer->_buffer[buffer->_currentIndex]);
-}
-
-void gpu_vertex_buffer_unlock(iron_gpu_vertex_buffer_t *buffer, int count) {
-	iron_gpu_vertex_buffer_unlock(&buffer->_buffer[buffer->_currentIndex], count);
-}
-
-int gpu_vertex_buffer_count(iron_gpu_vertex_buffer_t *buffer) {
-	return buffer->myCount;
-}
-
-int gpu_vertex_buffer_stride(iron_gpu_vertex_buffer_t *buffer) {
-	return iron_gpu_vertex_buffer_stride(&buffer->_buffer[buffer->_currentIndex]);
-}
-
-void iron_gpu_constant_buffer_set_int(iron_gpu_constant_buffer_t *buffer, int offset, int value) {
+void iron_gpu_constant_buffer_set_int(iron_gpu_buffer_t *buffer, int offset, int value) {
 	int *ints = (int *)(&buffer->data[offset]);
 	ints[0] = value;
 }
 
-void iron_gpu_constant_buffer_set_int2(iron_gpu_constant_buffer_t *buffer, int offset, int value1, int value2) {
+void iron_gpu_constant_buffer_set_int2(iron_gpu_buffer_t *buffer, int offset, int value1, int value2) {
 	int *ints = (int *)(&buffer->data[offset]);
 	ints[0] = value1;
 	ints[1] = value2;
 }
 
-void iron_gpu_constant_buffer_set_int3(iron_gpu_constant_buffer_t *buffer, int offset, int value1, int value2, int value3) {
+void iron_gpu_constant_buffer_set_int3(iron_gpu_buffer_t *buffer, int offset, int value1, int value2, int value3) {
 	int *ints = (int *)(&buffer->data[offset]);
 	ints[0] = value1;
 	ints[1] = value2;
 	ints[2] = value3;
 }
 
-void iron_gpu_constant_buffer_set_int4(iron_gpu_constant_buffer_t *buffer, int offset, int value1, int value2, int value3, int value4) {
+void iron_gpu_constant_buffer_set_int4(iron_gpu_buffer_t *buffer, int offset, int value1, int value2, int value3, int value4) {
 	int *ints = (int *)(&buffer->data[offset]);
 	ints[0] = value1;
 	ints[1] = value2;
@@ -640,32 +595,32 @@ void iron_gpu_constant_buffer_set_int4(iron_gpu_constant_buffer_t *buffer, int o
 	ints[3] = value4;
 }
 
-void iron_gpu_constant_buffer_set_ints(iron_gpu_constant_buffer_t *buffer, int offset, int *values, int count) {
+void iron_gpu_constant_buffer_set_ints(iron_gpu_buffer_t *buffer, int offset, int *values, int count) {
 	int *ints = (int *)(&buffer->data[offset]);
 	for (int i = 0; i < count; ++i) {
 		ints[i] = values[i];
 	}
 }
 
-void iron_gpu_constant_buffer_set_float(iron_gpu_constant_buffer_t *buffer, int offset, float value) {
+void iron_gpu_constant_buffer_set_float(iron_gpu_buffer_t *buffer, int offset, float value) {
 	float *floats = (float *)(&buffer->data[offset]);
 	floats[0] = value;
 }
 
-void iron_gpu_constant_buffer_set_float2(iron_gpu_constant_buffer_t *buffer, int offset, float value1, float value2) {
+void iron_gpu_constant_buffer_set_float2(iron_gpu_buffer_t *buffer, int offset, float value1, float value2) {
 	float *floats = (float *)(&buffer->data[offset]);
 	floats[0] = value1;
 	floats[1] = value2;
 }
 
-void iron_gpu_constant_buffer_set_float3(iron_gpu_constant_buffer_t *buffer, int offset, float value1, float value2, float value3) {
+void iron_gpu_constant_buffer_set_float3(iron_gpu_buffer_t *buffer, int offset, float value1, float value2, float value3) {
 	float *floats = (float *)(&buffer->data[offset]);
 	floats[0] = value1;
 	floats[1] = value2;
 	floats[2] = value3;
 }
 
-void iron_gpu_constant_buffer_set_float4(iron_gpu_constant_buffer_t *buffer, int offset, float value1, float value2, float value3, float value4) {
+void iron_gpu_constant_buffer_set_float4(iron_gpu_buffer_t *buffer, int offset, float value1, float value2, float value3, float value4) {
 	float *floats = (float *)(&buffer->data[offset]);
 	floats[0] = value1;
 	floats[1] = value2;
@@ -673,14 +628,14 @@ void iron_gpu_constant_buffer_set_float4(iron_gpu_constant_buffer_t *buffer, int
 	floats[3] = value4;
 }
 
-void iron_gpu_constant_buffer_set_floats(iron_gpu_constant_buffer_t *buffer, int offset, float *values, int count) {
+void iron_gpu_constant_buffer_set_floats(iron_gpu_buffer_t *buffer, int offset, float *values, int count) {
 	float *floats = (float *)(&buffer->data[offset]);
 	for (int i = 0; i < count; ++i) {
 		floats[i] = values[i];
 	}
 }
 
-void iron_gpu_constant_buffer_set_bool(iron_gpu_constant_buffer_t *buffer, int offset, bool value) {
+void iron_gpu_constant_buffer_set_bool(iron_gpu_buffer_t *buffer, int offset, bool value) {
 	int *ints = (int *)(&buffer->data[offset]);
 	ints[0] = value ? 1 : 0;
 }
@@ -694,7 +649,7 @@ static void iron_internal_set_matrix3(uint8_t *constants, int offset, iron_matri
 	}
 }
 
-void iron_gpu_constant_buffer_set_matrix3(iron_gpu_constant_buffer_t *buffer, int offset, iron_matrix3x3_t *value) {
+void iron_gpu_constant_buffer_set_matrix3(iron_gpu_buffer_t *buffer, int offset, iron_matrix3x3_t *value) {
 	if (iron_gpu_transpose_mat) {
 		iron_matrix3x3_t m = *value;
 		iron_matrix3x3_transpose(&m);
@@ -714,7 +669,7 @@ static void iron_internal_set_matrix4(uint8_t *constants, int offset, iron_matri
 	}
 }
 
-void iron_gpu_constant_buffer_set_matrix4(iron_gpu_constant_buffer_t *buffer, int offset, iron_matrix4x4_t *value) {
+void iron_gpu_constant_buffer_set_matrix4(iron_gpu_buffer_t *buffer, int offset, iron_matrix4x4_t *value) {
 	if (iron_gpu_transpose_mat) {
 		iron_matrix4x4_t m = *value;
 		iron_matrix4x4_transpose(&m);

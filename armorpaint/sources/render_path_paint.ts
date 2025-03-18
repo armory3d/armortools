@@ -442,7 +442,7 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	iron_gpu_set_pipeline(pipes_cursor);
 	let rt: render_target_t = map_get(render_path_render_targets, "gbuffer0");
 	let gbuffer0: iron_gpu_texture_t = rt._image;
-	gpu_set_texture_depth(pipes_cursor_gbufferd, gbuffer0);
+	_gpu_set_texture_depth(pipes_cursor_gbufferd, gbuffer0);
 	_gpu_set_float2(pipes_cursor_mouse, mx, my);
 	_gpu_set_float2(pipes_cursor_tex_step, 1 / gbuffer0.width, 1 / gbuffer0.height);
 	_gpu_set_float(pipes_cursor_radius, radius);

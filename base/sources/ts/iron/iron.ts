@@ -219,7 +219,7 @@ declare function gpu_set_index_buffer(buffer: any): void;
 declare function gpu_create_vertex_buffer(count: i32, structure: iron_gpu_vertex_structure_t, usage: i32): any;
 declare function gpu_delete_vertex_buffer(buffer: any): void;
 declare function gpu_lock_vertex_buffer(buffer: any): buffer_t;
-declare function gpu_vertex_buffer_unlock_all(buffer: any): void;
+declare function iron_gpu_vertex_buffer_unlock_all(buffer: any): void;
 declare function gpu_set_vertex_buffer(buffer: any): void;
 declare function gpu_draw_indexed_vertices(start: i32 = 0, count: i32 = -1): void;
 declare function gpu_create_shader(data: buffer_t, type: i32): iron_gpu_shader_t;
@@ -243,7 +243,7 @@ declare function iron_copy_to_clipboard(text: string): void;
 declare function gpu_get_constant_location(pipeline: any, name: string): any;
 declare function gpu_get_texture_unit(pipeline: any, name: string): any;
 declare function _gpu_set_texture(stage: any, texture: any): void;
-declare function gpu_set_texture_depth(unit: any, texture: any): void;
+declare function _gpu_set_texture_depth(unit: any, texture: any): void;
 declare function gpu_set_texture_parameters(tex_unit: any, u_addr: i32, v_addr: i32, min_filter: i32, mag_filter: i32, mip_filter: i32): void;
 declare function _gpu_set_bool(location: any, value: bool): void;
 declare function _gpu_set_int(location: any, value: i32): void;
@@ -634,11 +634,7 @@ declare type iron_gpu_vertex_structure_t = {
 	size?: i32;
 };
 
-declare type iron_gpu_index_buffer_t = {
-	impl?: any;
-};
-
-declare type iron_gpu_vertex_buffer_t = {
+declare type iron_gpu_buffer_t = {
 	impl?: any;
 };
 

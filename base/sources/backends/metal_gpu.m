@@ -41,7 +41,7 @@ bool iron_internal_current_render_target_has_depth(void);
 static iron_gpu_raytrace_acceleration_structure_t *accel;
 static iron_gpu_raytrace_pipeline_t *pipeline;
 static iron_gpu_texture_t *output = NULL;
-static iron_gpu_constant_buffer_t *constant_buf;
+static iron_gpu_buffer_t *constant_buf;
 
 typedef struct inst {
 	iron_matrix4x4_t m;
@@ -61,15 +61,15 @@ static iron_gpu_texture_t *_texsobol;
 static iron_gpu_texture_t *_texscramble;
 static iron_gpu_texture_t *_texrank;
 
-static iron_gpu_vertex_buffer_t *vb[16];
-static iron_gpu_vertex_buffer_t *vb_last[16];
-static iron_gpu_index_buffer_t *ib[16];
+static iron_gpu_buffer_t *vb[16];
+static iron_gpu_buffer_t *vb_last[16];
+static iron_gpu_buffer_t *ib[16];
 static int vb_count = 0;
 static int vb_count_last = 0;
 static inst_t instances[1024];
 static int instances_count = 0;
 
-iron_gpu_vertex_buffer_t *currentVertexBuffer = NULL;
+iron_gpu_buffer_t *currentVertexBuffer = NULL;
 bool iron_gpu_transpose_mat = true;
 
 id getMetalEncoder(void) {
@@ -94,9 +94,6 @@ void iron_gpu_internal_init(void) {
 void iron_gpu_internal_init_window(int depthBufferBits, bool vsync) {
 	depthBits = depthBufferBits;
 	iron_gpu_render_target_init(&fallback_render_target, 32, 32, IRON_IMAGE_FORMAT_RGBA32, 0);
-}
-
-void iron_gpu_flush(void) {
 }
 
 bool iron_internal_current_render_target_has_depth(void) {
@@ -368,11 +365,11 @@ void iron_gpu_command_list_set_pipeline(iron_gpu_command_list_t *list, struct ir
 	lastPipeline = pipeline;
 }
 
-void iron_gpu_command_list_set_vertex_buffer(iron_gpu_command_list_t *list, struct iron_gpu_vertex_buffer *buffer) {
+void iron_gpu_command_list_set_vertex_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer) {
 	iron_gpu_internal_vertex_buffer_set(buffer);
 }
 
-void iron_gpu_command_list_set_index_buffer(iron_gpu_command_list_t *list, struct iron_gpu_index_buffer *buffer) {
+void iron_gpu_command_list_set_index_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer) {
 	list->impl.current_index_buffer = buffer;
 }
 
@@ -391,9 +388,9 @@ void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, str
 	}
 }
 
-void iron_gpu_command_list_upload_index_buffer(iron_gpu_command_list_t *list, struct iron_gpu_index_buffer *buffer) {}
+void iron_gpu_command_list_upload_index_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer) {}
 
-void iron_gpu_command_list_upload_vertex_buffer(iron_gpu_command_list_t *list, struct iron_gpu_vertex_buffer *buffer) {}
+void iron_gpu_command_list_upload_vertex_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer) {}
 
 void iron_gpu_command_list_upload_texture(iron_gpu_command_list_t *list, struct iron_gpu_texture *texture) {}
 
@@ -459,13 +456,13 @@ void iron_gpu_command_list_wait_for_execution_to_finish(iron_gpu_command_list_t 
 	[commandBuffer waitUntilCompleted];
 }
 
-void iron_gpu_command_list_set_vertex_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_constant_buffer *buffer, int offset, size_t size) {
+void iron_gpu_command_list_set_vertex_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer, int offset, size_t size) {
 	id<MTLBuffer> buf = (__bridge id<MTLBuffer>)buffer->impl._buffer;
 	id<MTLRenderCommandEncoder> encoder = getMetalEncoder();
 	[encoder setVertexBuffer:buf offset:offset atIndex:1];
 }
 
-void iron_gpu_command_list_set_fragment_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_constant_buffer *buffer, int offset, size_t size) {
+void iron_gpu_command_list_set_fragment_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer, int offset, size_t size) {
 	id<MTLBuffer> buf = (__bridge id<MTLBuffer>)buffer->impl._buffer;
 	id<MTLRenderCommandEncoder> encoder = getMetalEncoder();
 	[encoder setFragmentBuffer:buf offset:offset atIndex:0];
@@ -953,7 +950,7 @@ bool iron_gpu_raytrace_supported() {
 }
 
 void iron_gpu_raytrace_pipeline_init(iron_gpu_raytrace_pipeline_t *pipeline, iron_gpu_command_list_t *command_list, void *ray_shader, int ray_shader_size,
-                                 iron_gpu_constant_buffer_t *constant_buffer) {
+                                 iron_gpu_buffer_t *constant_buffer) {
 	id<MTLDevice> device = getMetalDevice();
 	if (!device.supportsRaytracing) return;
 	constant_buf = constant_buffer;
@@ -1012,7 +1009,7 @@ void iron_gpu_raytrace_acceleration_structure_init(iron_gpu_raytrace_acceleratio
 	instances_count = 0;
 }
 
-void iron_gpu_raytrace_acceleration_structure_add(iron_gpu_raytrace_acceleration_structure_t *accel, iron_gpu_vertex_buffer_t *_vb, iron_gpu_index_buffer_t *_ib,
+void iron_gpu_raytrace_acceleration_structure_add(iron_gpu_raytrace_acceleration_structure_t *accel, iron_gpu_buffer_t *_vb, iron_gpu_buffer_t *_ib,
 	iron_matrix4x4_t _transform) {
 
 	int vb_i = -1;
@@ -1045,7 +1042,7 @@ void _iron_gpu_raytrace_acceleration_structure_destroy_top(iron_gpu_raytrace_acc
 }
 
 void iron_gpu_raytrace_acceleration_structure_build(iron_gpu_raytrace_acceleration_structure_t *accel, iron_gpu_command_list_t *command_list,
-	iron_gpu_vertex_buffer_t *_vb_full, iron_gpu_index_buffer_t *_ib_full) {
+	iron_gpu_buffer_t *_vb_full, iron_gpu_buffer_t *_ib_full) {
 
 	bool build_bottom = false;
 	for (int i = 0; i < 16; ++i) {
@@ -1432,12 +1429,12 @@ void iron_gpu_render_target_set_depth_from(iron_gpu_texture_t *target, iron_gpu_
 	target->impl._depthTex = source->impl._depthTex;
 }
 
-static void vertex_buffer_unset(iron_gpu_vertex_buffer_t *buffer) {
+static void vertex_buffer_unset(iron_gpu_buffer_t *buffer) {
 	if (currentVertexBuffer == buffer)
 		currentVertexBuffer = NULL;
 }
 
-void iron_gpu_vertex_buffer_init(iron_gpu_vertex_buffer_t *buffer, int count, iron_gpu_vertex_structure_t *structure, bool gpuMemory) {
+void iron_gpu_vertex_buffer_init(iron_gpu_buffer_t *buffer, int count, iron_gpu_vertex_structure_t *structure, bool gpuMemory) {
 	memset(&buffer->impl, 0, sizeof(buffer->impl));
 	buffer->impl.myCount = count;
 	buffer->impl.gpuMemory = gpuMemory;
@@ -1457,14 +1454,14 @@ void iron_gpu_vertex_buffer_init(iron_gpu_vertex_buffer_t *buffer, int count, ir
 	buffer->impl.lastCount = 0;
 }
 
-void iron_gpu_vertex_buffer_destroy(iron_gpu_vertex_buffer_t *buf) {
+void iron_gpu_vertex_buffer_destroy(iron_gpu_buffer_t *buf) {
 	id<MTLBuffer> buffer = (__bridge_transfer id<MTLBuffer>)buf->impl.mtlBuffer;
 	buffer = nil;
 	buf->impl.mtlBuffer = NULL;
 	vertex_buffer_unset(buf);
 }
 
-float *iron_gpu_vertex_buffer_lock_all(iron_gpu_vertex_buffer_t *buf) {
+float *iron_gpu_vertex_buffer_lock_all(iron_gpu_buffer_t *buf) {
 	buf->impl.lastStart = 0;
 	buf->impl.lastCount = iron_gpu_vertex_buffer_count(buf);
 	id<MTLBuffer> buffer = (__bridge id<MTLBuffer>)buf->impl.mtlBuffer;
@@ -1472,7 +1469,7 @@ float *iron_gpu_vertex_buffer_lock_all(iron_gpu_vertex_buffer_t *buf) {
 	return floats;
 }
 
-float *iron_gpu_vertex_buffer_lock(iron_gpu_vertex_buffer_t *buf, int start, int count) {
+float *iron_gpu_vertex_buffer_lock(iron_gpu_buffer_t *buf, int start, int count) {
 	buf->impl.lastStart = start;
 	buf->impl.lastCount = count;
 	id<MTLBuffer> buffer = (__bridge id<MTLBuffer>)buf->impl.mtlBuffer;
@@ -1480,13 +1477,13 @@ float *iron_gpu_vertex_buffer_lock(iron_gpu_vertex_buffer_t *buf, int start, int
 	return &floats[start * buf->impl.myStride / sizeof(float)];
 }
 
-void iron_gpu_vertex_buffer_unlock_all(iron_gpu_vertex_buffer_t *buf) {
+void iron_gpu_vertex_buffer_unlock_all(iron_gpu_buffer_t *buf) {
 }
 
-void iron_gpu_vertex_buffer_unlock(iron_gpu_vertex_buffer_t *buf, int count) {
+void iron_gpu_vertex_buffer_unlock(iron_gpu_buffer_t *buf, int count) {
 }
 
-int iron_gpu_internal_vertex_buffer_set(iron_gpu_vertex_buffer_t *buf) {
+int iron_gpu_internal_vertex_buffer_set(iron_gpu_buffer_t *buf) {
 	currentVertexBuffer = buf;
 
 	id<MTLRenderCommandEncoder> encoder = getMetalEncoder();
@@ -1496,31 +1493,31 @@ int iron_gpu_internal_vertex_buffer_set(iron_gpu_vertex_buffer_t *buf) {
 	return 0;
 }
 
-int iron_gpu_vertex_buffer_count(iron_gpu_vertex_buffer_t *buffer) {
+int iron_gpu_vertex_buffer_count(iron_gpu_buffer_t *buffer) {
 	return buffer->impl.myCount;
 }
 
-int iron_gpu_vertex_buffer_stride(iron_gpu_vertex_buffer_t *buffer) {
+int iron_gpu_vertex_buffer_stride(iron_gpu_buffer_t *buffer) {
 	return buffer->impl.myStride;
 }
 
-void iron_gpu_constant_buffer_init(iron_gpu_constant_buffer_t *buffer, int size) {
+void iron_gpu_constant_buffer_init(iron_gpu_buffer_t *buffer, int size) {
 	buffer->impl.mySize = size;
 	buffer->data = NULL;
 	buffer->impl._buffer = (__bridge_retained void *)[getMetalDevice() newBufferWithLength:size options:MTLResourceOptionCPUCacheModeDefault];
 }
 
-void iron_gpu_constant_buffer_destroy(iron_gpu_constant_buffer_t *buffer) {
+void iron_gpu_constant_buffer_destroy(iron_gpu_buffer_t *buffer) {
 	id<MTLBuffer> buf = (__bridge_transfer id<MTLBuffer>)buffer->impl._buffer;
 	buf = nil;
 	buffer->impl._buffer = NULL;
 }
 
-void iron_gpu_constant_buffer_lock_all(iron_gpu_constant_buffer_t *buffer) {
+void iron_gpu_constant_buffer_lock_all(iron_gpu_buffer_t *buffer) {
 	iron_gpu_constant_buffer_lock(buffer, 0, iron_gpu_constant_buffer_size(buffer));
 }
 
-void iron_gpu_constant_buffer_lock(iron_gpu_constant_buffer_t *buffer, int start, int count) {
+void iron_gpu_constant_buffer_lock(iron_gpu_buffer_t *buffer, int start, int count) {
 	buffer->impl.lastStart = start;
 	buffer->impl.lastCount = count;
 	id<MTLBuffer> buf = (__bridge id<MTLBuffer>)buffer->impl._buffer;
@@ -1528,15 +1525,15 @@ void iron_gpu_constant_buffer_lock(iron_gpu_constant_buffer_t *buffer, int start
 	buffer->data = &data[start];
 }
 
-void iron_gpu_constant_buffer_unlock(iron_gpu_constant_buffer_t *buffer) {
+void iron_gpu_constant_buffer_unlock(iron_gpu_buffer_t *buffer) {
 	buffer->data = NULL;
 }
 
-int iron_gpu_constant_buffer_size(iron_gpu_constant_buffer_t *buffer) {
+int iron_gpu_constant_buffer_size(iron_gpu_buffer_t *buffer) {
 	return buffer->impl.mySize;
 }
 
-void iron_gpu_index_buffer_init(iron_gpu_index_buffer_t *buffer, int indexCount, bool gpuMemory) {
+void iron_gpu_index_buffer_init(iron_gpu_buffer_t *buffer, int indexCount, bool gpuMemory) {
 	buffer->impl.count = indexCount;
 	buffer->impl.gpu_memory = gpuMemory;
 	buffer->impl.last_start = 0;
@@ -1551,21 +1548,21 @@ void iron_gpu_index_buffer_init(iron_gpu_index_buffer_t *buffer, int indexCount,
 	                options:options];
 }
 
-void iron_gpu_index_buffer_destroy(iron_gpu_index_buffer_t *buffer) {
+void iron_gpu_index_buffer_destroy(iron_gpu_buffer_t *buffer) {
 	id<MTLBuffer> buf = (__bridge_transfer id<MTLBuffer>)buffer->impl.metal_buffer;
 	buf = nil;
 	buffer->impl.metal_buffer = NULL;
 }
 
-static int iron_gpu_internal_index_buffer_stride(iron_gpu_index_buffer_t *buffer) {
+static int iron_gpu_internal_index_buffer_stride(iron_gpu_buffer_t *buffer) {
 	return 4;
 }
 
-void *iron_gpu_index_buffer_lock_all(iron_gpu_index_buffer_t *buffer) {
+void *iron_gpu_index_buffer_lock_all(iron_gpu_buffer_t *buffer) {
 	return iron_gpu_index_buffer_lock(buffer, 0, iron_gpu_index_buffer_count(buffer));
 }
 
-void *iron_gpu_index_buffer_lock(iron_gpu_index_buffer_t *buffer, int start, int count) {
+void *iron_gpu_index_buffer_lock(iron_gpu_buffer_t *buffer, int start, int count) {
 	buffer->impl.last_start = start;
 	buffer->impl.last_count = count;
 
@@ -1574,13 +1571,13 @@ void *iron_gpu_index_buffer_lock(iron_gpu_index_buffer_t *buffer, int start, int
 	return &data[start * iron_gpu_internal_index_buffer_stride(buffer)];
 }
 
-void iron_gpu_index_buffer_unlock_all(iron_gpu_index_buffer_t *buffer) {
+void iron_gpu_index_buffer_unlock_all(iron_gpu_buffer_t *buffer) {
 	iron_gpu_index_buffer_unlock(buffer, buffer->impl.last_count);
 }
 
-void iron_gpu_index_buffer_unlock(iron_gpu_index_buffer_t *buffer, int count) {
+void iron_gpu_index_buffer_unlock(iron_gpu_buffer_t *buffer, int count) {
 }
 
-int iron_gpu_index_buffer_count(iron_gpu_index_buffer_t *buffer) {
+int iron_gpu_index_buffer_count(iron_gpu_buffer_t *buffer) {
 	return buffer->impl.count;
 }

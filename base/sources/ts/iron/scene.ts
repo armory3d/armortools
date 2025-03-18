@@ -475,9 +475,9 @@ type mesh_data_t = {
 type mesh_data_runtime_t = {
 	refcount?: i32; // Number of users
 	handle?: string; // Handle used to retrieve this object in Data
-	vertex_buffer?: iron_gpu_vertex_buffer_t;
-	vertex_buffer_map?: map_t<string, iron_gpu_vertex_buffer_t>;
-	index_buffers?: iron_gpu_index_buffer_t[];
+	vertex_buffer?: iron_gpu_buffer_t;
+	vertex_buffer_map?: map_t<string, iron_gpu_buffer_t>;
+	index_buffers?: iron_gpu_buffer_t[];
 	ready?: bool;
 	vertices?: buffer_t;
 	indices?: u32_array_t[];

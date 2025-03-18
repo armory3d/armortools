@@ -1187,10 +1187,6 @@ void iron_gpu_end() {
 	began = false;
 }
 
-void iron_gpu_flush() {
-	vkDeviceWaitIdle(vk_ctx.device);
-}
-
 bool iron_vulkan_internal_get_size(int *width, int *height) {
 	// this is exclusively used by the Android backend at the moment
 	if (vk_ctx.windows[0].surface) {
@@ -1308,7 +1304,7 @@ void iron_gpu_command_list_destroy(iron_gpu_command_list_t *list) {
 }
 
 void iron_gpu_command_list_begin(iron_gpu_command_list_t *list) {
-	vkWaitForFences(vk_ctx.device, 1, &list->impl.fence, VK_TRUE, UINT64_MAX);
+	iron_gpu_command_list_wait_for_execution_to_finish(list);
 
 	vkResetCommandBuffer(list->impl._buffer, 0);
 	VkCommandBufferBeginInfo cmd_buf_info = {
@@ -1501,15 +1497,15 @@ void iron_gpu_command_list_set_pipeline(iron_gpu_command_list_t *list, struct ir
 	}
 }
 
-void iron_gpu_command_list_set_vertex_buffer(iron_gpu_command_list_t *list, gpu_vertex_buffer_impl_t *vertexBuffer) {
+void iron_gpu_command_list_set_vertex_buffer(iron_gpu_command_list_t *list, iron_gpu_buffer_t *vertexBuffer) {
 	VkBuffer buffers[1];
 	VkDeviceSize offsets[1];
-	buffers[0] = vertexBuffer->buf;
+	buffers[0] = vertexBuffer->impl.buf;
 	offsets[0] = (VkDeviceSize)(0);
 	vkCmdBindVertexBuffers(list->impl._buffer, 0, 1, buffers, offsets);
 }
 
-void iron_gpu_command_list_set_index_buffer(iron_gpu_command_list_t *list, struct iron_gpu_index_buffer *indexBuffer) {
+void iron_gpu_command_list_set_index_buffer(iron_gpu_command_list_t *list, iron_gpu_buffer_t *indexBuffer) {
 	list->impl._indexCount = iron_gpu_index_buffer_count(indexBuffer);
 	vkCmdBindIndexBuffer(list->impl._buffer, indexBuffer->impl.buf, 0, VK_INDEX_TYPE_UINT32);
 }
@@ -1758,9 +1754,9 @@ void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, str
 	}
 }
 
-void iron_gpu_command_list_upload_index_buffer(iron_gpu_command_list_t *list, struct iron_gpu_index_buffer *buffer) {}
+void iron_gpu_command_list_upload_index_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer) {}
 
-void iron_gpu_command_list_upload_vertex_buffer(iron_gpu_command_list_t *list, struct iron_gpu_vertex_buffer *buffer) {}
+void iron_gpu_command_list_upload_vertex_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer) {}
 
 void iron_gpu_command_list_upload_texture(iron_gpu_command_list_t *list, struct iron_gpu_texture *texture) {}
 
@@ -1844,7 +1840,7 @@ void iron_gpu_command_list_render_target_to_texture_barrier(iron_gpu_command_lis
 	// render-passes are used to transition render-targets
 }
 
-void iron_gpu_command_list_set_vertex_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_constant_buffer *buffer, int offset, size_t size) {
+void iron_gpu_command_list_set_vertex_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer, int offset, size_t size) {
 	last_vertex_constant_buffer_offset = offset;
 }
 
@@ -2021,7 +2017,7 @@ VkDescriptorSet get_descriptor_set() {
 	return descriptor_set;
 }
 
-void iron_gpu_command_list_set_fragment_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_constant_buffer *buffer, int offset, size_t size) {
+void iron_gpu_command_list_set_fragment_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer, int offset, size_t size) {
 	last_fragment_constant_buffer_offset = offset;
 
 	VkDescriptorSet descriptor_set = get_descriptor_set();
@@ -2032,7 +2028,7 @@ void iron_gpu_command_list_set_fragment_constant_buffer(iron_gpu_command_list_t 
 void iron_gpu_command_list_execute(iron_gpu_command_list_t *list) {
 	// Make sure the previous execution is done, so we can reuse the fence
 	// Not optimal of course
-	vkWaitForFences(vk_ctx.device, 1, &list->impl.fence, VK_TRUE, UINT64_MAX);
+	iron_gpu_command_list_wait_for_execution_to_finish(list);
 	vkResetFences(vk_ctx.device, 1, &list->impl.fence);
 
 	VkPipelineStageFlags pipe_stage_flags = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
@@ -2600,15 +2596,18 @@ void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipeline) {
 	VkPipelineShaderStageCreateInfo shaderStages[2];
 	memset(&shaderStages, 0, 2 * sizeof(VkPipelineShaderStageCreateInfo));
 
+	char *vs_main = "main";
+	char *fs_main = "main";
+
 	shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
 	shaderStages[0].module = prepare_vs(&pipeline->impl.vert_shader_module, pipeline->vertex_shader);
-	shaderStages[0].pName = "main";
+	shaderStages[0].pName = vs_main;
 
 	shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
 	shaderStages[1].module = prepare_fs(&pipeline->impl.frag_shader_module, pipeline->fragment_shader);
-	shaderStages[1].pName = "main";
+	shaderStages[1].pName = fs_main;
 
 	pipeline_info.pVertexInputState = &vi;
 	pipeline_info.pInputAssemblyState = &ia;
@@ -3390,18 +3389,18 @@ void iron_gpu_render_target_set_depth_from(iron_gpu_texture_t *target, iron_gpu_
 	}
 }
 
-void iron_gpu_vertex_buffer_init(gpu_vertex_buffer_impl_t *buffer, int vertexCount, iron_gpu_vertex_structure_t *structure, bool gpuMemory) {
-	buffer->myCount = vertexCount;
-	buffer->myStride = 0;
+void iron_gpu_vertex_buffer_init(iron_gpu_buffer_t *buffer, int vertexCount, iron_gpu_vertex_structure_t *structure, bool gpuMemory) {
+	buffer->impl.myCount = vertexCount;
+	buffer->impl.myStride = 0;
 	for (int i = 0; i < structure->size; ++i) {
 		iron_gpu_vertex_element_t element = structure->elements[i];
-		buffer->myStride += iron_gpu_vertex_data_size(element.data);
+		buffer->impl.myStride += iron_gpu_vertex_data_size(element.data);
 	}
 
 	VkBufferCreateInfo buf_info = {
 		.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
 		.pNext = NULL,
-		.size = vertexCount * buffer->myStride,
+		.size = vertexCount * buffer->impl.myStride,
 		.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
 		.flags = 0,
 	};
@@ -3412,75 +3411,78 @@ void iron_gpu_vertex_buffer_init(gpu_vertex_buffer_impl_t *buffer, int vertexCou
 		buf_info.usage |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
 	}
 
-	memset(&buffer->mem_alloc, 0, sizeof(VkMemoryAllocateInfo));
-	buffer->mem_alloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	buffer->mem_alloc.pNext = NULL;
-	buffer->mem_alloc.allocationSize = 0;
-	buffer->mem_alloc.memoryTypeIndex = 0;
+	memset(&buffer->impl.mem_alloc, 0, sizeof(VkMemoryAllocateInfo));
+	buffer->impl.mem_alloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	buffer->impl.mem_alloc.pNext = NULL;
+	buffer->impl.mem_alloc.allocationSize = 0;
+	buffer->impl.mem_alloc.memoryTypeIndex = 0;
 
 	VkMemoryRequirements mem_reqs = {0};
 
-	buffer->buf = NULL;
-	buffer->mem = NULL;
+	buffer->impl.buf = NULL;
+	buffer->impl.mem = NULL;
 
-	vkCreateBuffer(vk_ctx.device, &buf_info, NULL, &buffer->buf);
+	vkCreateBuffer(vk_ctx.device, &buf_info, NULL, &buffer->impl.buf);
 
-	vkGetBufferMemoryRequirements(vk_ctx.device, buffer->buf, &mem_reqs);
+	vkGetBufferMemoryRequirements(vk_ctx.device, buffer->impl.buf, &mem_reqs);
 
-	buffer->mem_alloc.allocationSize = mem_reqs.size;
-	memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &buffer->mem_alloc.memoryTypeIndex);
+	buffer->impl.mem_alloc.allocationSize = mem_reqs.size;
+	memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &buffer->impl.mem_alloc.memoryTypeIndex);
 
 	VkMemoryAllocateFlagsInfo memory_allocate_flags_info = {0};
 	if (iron_gpu_raytrace_supported()) {
 		memory_allocate_flags_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO;
 		memory_allocate_flags_info.flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR;
-		buffer->mem_alloc.pNext = &memory_allocate_flags_info;
+		buffer->impl.mem_alloc.pNext = &memory_allocate_flags_info;
 	}
 
-	vkAllocateMemory(vk_ctx.device, &buffer->mem_alloc, NULL, &buffer->mem);
-	vkBindBufferMemory(vk_ctx.device, buffer->buf, buffer->mem, 0);
+	vkAllocateMemory(vk_ctx.device, &buffer->impl.mem_alloc, NULL, &buffer->impl.mem);
+	vkBindBufferMemory(vk_ctx.device, buffer->impl.buf, buffer->impl.mem, 0);
 }
 
-static void unset_vertex_buffer(gpu_vertex_buffer_impl_t *buffer) {
+static void unset_vertex_buffer(iron_gpu_buffer_t *buffer) {
 
 }
 
-void iron_gpu_vertex_buffer_destroy(gpu_vertex_buffer_impl_t *buffer) {
+void iron_gpu_vertex_buffer_destroy(iron_gpu_buffer_t *buffer) {
 	unset_vertex_buffer(buffer);
-	vkFreeMemory(vk_ctx.device, buffer->mem, NULL);
-	vkDestroyBuffer(vk_ctx.device, buffer->buf, NULL);
+	vkFreeMemory(vk_ctx.device, buffer->impl.mem, NULL);
+	vkDestroyBuffer(vk_ctx.device, buffer->impl.buf, NULL);
 }
 
-float *iron_gpu_vertex_buffer_lock_all(gpu_vertex_buffer_impl_t *buffer) {
-	return iron_gpu_vertex_buffer_lock(buffer, 0, buffer->myCount);
+float *iron_gpu_vertex_buffer_lock_all(iron_gpu_buffer_t *buffer) {
+	return iron_gpu_vertex_buffer_lock(buffer, 0, buffer->impl.myCount);
 }
 
-float *iron_gpu_vertex_buffer_lock(gpu_vertex_buffer_impl_t *buffer, int start, int count) {
-	vkMapMemory(vk_ctx.device, buffer->mem, start * buffer->myStride, count * buffer->myStride, 0, (void **)&buffer->data);
-	return buffer->data;
+float *iron_gpu_vertex_buffer_lock(iron_gpu_buffer_t *buffer, int start, int count) {
+	vkMapMemory(vk_ctx.device, buffer->impl.mem, start * buffer->impl.myStride, count * buffer->impl.myStride, 0, (void **)&buffer->impl.data);
+	return buffer->impl.data;
 }
 
-void iron_gpu_vertex_buffer_unlock_all(gpu_vertex_buffer_impl_t *buffer) {
-	vkUnmapMemory(vk_ctx.device, buffer->mem);
+void iron_gpu_vertex_buffer_unlock_all(iron_gpu_buffer_t *buffer) {
+	vkUnmapMemory(vk_ctx.device, buffer->impl.mem);
 }
 
-void iron_gpu_vertex_buffer_unlock(gpu_vertex_buffer_impl_t *buffer, int count) {
-	vkUnmapMemory(vk_ctx.device, buffer->mem);
+void iron_gpu_vertex_buffer_unlock(iron_gpu_buffer_t *buffer, int count) {
+	vkUnmapMemory(vk_ctx.device, buffer->impl.mem);
 }
 
-int iron_gpu_internal_vertex_buffer_set(gpu_vertex_buffer_impl_t *buffer) {
+int iron_gpu_internal_vertex_buffer_set(iron_gpu_buffer_t *buffer) {
 	return 0;
 }
 
-int iron_gpu_vertex_buffer_count(gpu_vertex_buffer_impl_t *buffer) {
-	return buffer->myCount;
+int iron_gpu_vertex_buffer_count(iron_gpu_buffer_t *buffer) {
+	return buffer->impl.myCount;
 }
 
-int iron_gpu_vertex_buffer_stride(gpu_vertex_buffer_impl_t *buffer) {
-	return buffer->myStride;
+int iron_gpu_vertex_buffer_stride(iron_gpu_buffer_t *buffer) {
+	return buffer->impl.myStride;
 }
 
-static void create_uniform_buffer(VkBuffer *buf, VkMemoryAllocateInfo *mem_alloc, VkDeviceMemory *mem, VkDescriptorBufferInfo *buffer_info, int size) {
+void iron_gpu_constant_buffer_init(iron_gpu_buffer_t *buffer, int size) {
+	buffer->impl.mySize = size;
+	buffer->data = NULL;
+
 	VkBufferCreateInfo buf_info;
 	memset(&buf_info, 0, sizeof(buf_info));
 	buf_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -3491,30 +3493,19 @@ static void create_uniform_buffer(VkBuffer *buf, VkMemoryAllocateInfo *mem_alloc
 	}
 
 	buf_info.size = size;
-	vkCreateBuffer(vk_ctx.device, &buf_info, NULL, buf);
+	vkCreateBuffer(vk_ctx.device, &buf_info, NULL, &buffer->impl.buf);
 
 	VkMemoryRequirements mem_reqs;
-	vkGetBufferMemoryRequirements(vk_ctx.device, *buf, &mem_reqs);
+	vkGetBufferMemoryRequirements(vk_ctx.device, buffer->impl.buf, &mem_reqs);
 
-	mem_alloc->sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	mem_alloc->pNext = NULL;
-	mem_alloc->allocationSize = mem_reqs.size;
-	mem_alloc->memoryTypeIndex = 0;
+	buffer->impl.mem_alloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	buffer->impl.mem_alloc.pNext = NULL;
+	buffer->impl.mem_alloc.allocationSize = mem_reqs.size;
+	buffer->impl.mem_alloc.memoryTypeIndex = 0;
 
-	memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &mem_alloc->memoryTypeIndex);
-	vkAllocateMemory(vk_ctx.device, mem_alloc, NULL, mem);
-	vkBindBufferMemory(vk_ctx.device, *buf, *mem, 0);
-
-	buffer_info->buffer = *buf;
-	buffer_info->offset = 0;
-	buffer_info->range = size;
-}
-
-void iron_gpu_constant_buffer_init(iron_gpu_constant_buffer_t *buffer, int size) {
-	buffer->impl.mySize = size;
-	buffer->data = NULL;
-
-	create_uniform_buffer(&buffer->impl.buf, &buffer->impl.mem_alloc, &buffer->impl.mem, &buffer->impl.buffer_info, size);
+	memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &buffer->impl.mem_alloc.memoryTypeIndex);
+	vkAllocateMemory(vk_ctx.device, &buffer->impl.mem_alloc, NULL, &buffer->impl.mem);
+	vkBindBufferMemory(vk_ctx.device, buffer->impl.buf, buffer->impl.mem, 0);
 
 	// buffer hack
 	if (vk_ctx.vertex_uniform_buffer == NULL) {
@@ -3530,30 +3521,30 @@ void iron_gpu_constant_buffer_init(iron_gpu_constant_buffer_t *buffer, int size)
 	vkUnmapMemory(vk_ctx.device, buffer->impl.mem);
 }
 
-void iron_gpu_constant_buffer_destroy(iron_gpu_constant_buffer_t *buffer) {
+void iron_gpu_constant_buffer_destroy(iron_gpu_buffer_t *buffer) {
 	vkFreeMemory(vk_ctx.device, buffer->impl.mem, NULL);
 	vkDestroyBuffer(vk_ctx.device, buffer->impl.buf, NULL);
 }
 
-void iron_gpu_constant_buffer_lock_all(iron_gpu_constant_buffer_t *buffer) {
+void iron_gpu_constant_buffer_lock_all(iron_gpu_buffer_t *buffer) {
 	iron_gpu_constant_buffer_lock(buffer, 0, iron_gpu_constant_buffer_size(buffer));
 }
 
-void iron_gpu_constant_buffer_lock(iron_gpu_constant_buffer_t *buffer, int start, int count) {
+void iron_gpu_constant_buffer_lock(iron_gpu_buffer_t *buffer, int start, int count) {
 	vkMapMemory(vk_ctx.device, buffer->impl.mem, start, count, 0, (void **)&buffer->data);
 }
 
-void iron_gpu_constant_buffer_unlock(iron_gpu_constant_buffer_t *buffer) {
+void iron_gpu_constant_buffer_unlock(iron_gpu_buffer_t *buffer) {
 	vkUnmapMemory(vk_ctx.device, buffer->impl.mem);
 	buffer->data = NULL;
 }
 
-int iron_gpu_constant_buffer_size(iron_gpu_constant_buffer_t *buffer) {
+int iron_gpu_constant_buffer_size(iron_gpu_buffer_t *buffer) {
 	return buffer->impl.mySize;
 }
 
-void iron_gpu_index_buffer_init(iron_gpu_index_buffer_t *buffer, int indexCount, bool gpuMemory) {
-	buffer->impl.count = indexCount;
+void iron_gpu_index_buffer_init(iron_gpu_buffer_t *buffer, int indexCount, bool gpuMemory) {
+	buffer->impl.myCount = indexCount;
 
 	VkBufferCreateInfo buf_info = {
 		.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
@@ -3597,36 +3588,36 @@ void iron_gpu_index_buffer_init(iron_gpu_index_buffer_t *buffer, int indexCount,
 	vkBindBufferMemory(vk_ctx.device, buffer->impl.buf, buffer->impl.mem, 0);
 }
 
-void iron_gpu_index_buffer_destroy(iron_gpu_index_buffer_t *buffer) {
+void iron_gpu_index_buffer_destroy(iron_gpu_buffer_t *buffer) {
 	// unset(buffer);
 	vkFreeMemory(vk_ctx.device, buffer->impl.mem, NULL);
 	vkDestroyBuffer(vk_ctx.device, buffer->impl.buf, NULL);
 }
 
-static int iron_gpu_internal_index_buffer_stride(iron_gpu_index_buffer_t *buffer) {
+static int iron_gpu_internal_index_buffer_stride(iron_gpu_buffer_t *buffer) {
 	return 4;
 }
 
-void *iron_gpu_index_buffer_lock_all(iron_gpu_index_buffer_t *buffer) {
+void *iron_gpu_index_buffer_lock_all(iron_gpu_buffer_t *buffer) {
 	return iron_gpu_index_buffer_lock(buffer, 0, iron_gpu_index_buffer_count(buffer));
 }
 
-void *iron_gpu_index_buffer_lock(iron_gpu_index_buffer_t *buffer, int start, int count) {
+void *iron_gpu_index_buffer_lock(iron_gpu_buffer_t *buffer, int start, int count) {
 	uint8_t *data;
 	vkMapMemory(vk_ctx.device, buffer->impl.mem, 0, buffer->impl.mem_alloc.allocationSize, 0, (void **)&data);
 	return &data[start * iron_gpu_internal_index_buffer_stride(buffer)];
 }
 
-void iron_gpu_index_buffer_unlock_all(iron_gpu_index_buffer_t *buffer) {
+void iron_gpu_index_buffer_unlock_all(iron_gpu_buffer_t *buffer) {
 	vkUnmapMemory(vk_ctx.device, buffer->impl.mem);
 }
 
-void iron_gpu_index_buffer_unlock(iron_gpu_index_buffer_t *buffer, int count) {
+void iron_gpu_index_buffer_unlock(iron_gpu_buffer_t *buffer, int count) {
 	iron_gpu_index_buffer_unlock_all(buffer);
 }
 
-int iron_gpu_index_buffer_count(iron_gpu_index_buffer_t *buffer) {
-	return buffer->impl.count;
+int iron_gpu_index_buffer_count(iron_gpu_buffer_t *buffer) {
+	return buffer->impl.myCount;
 }
 
 static const int INDEX_RAYGEN = 0;
@@ -3647,9 +3638,9 @@ static iron_gpu_texture_t *texenv;
 static iron_gpu_texture_t *texsobol;
 static iron_gpu_texture_t *texscramble;
 static iron_gpu_texture_t *texrank;
-static gpu_vertex_buffer_impl_t *vb[16];
-static gpu_vertex_buffer_impl_t *vb_last[16];
-static iron_gpu_index_buffer_t *ib[16];
+static iron_gpu_buffer_t *vb[16];
+static iron_gpu_buffer_t *vb_last[16];
+static iron_gpu_buffer_t *ib[16];
 static int vb_count = 0;
 static int vb_count_last = 0;
 static inst_t instances[1024];
@@ -3670,7 +3661,7 @@ static PFN_vkDestroyAccelerationStructureKHR _vkDestroyAccelerationStructureKHR 
 static PFN_vkCmdTraceRaysKHR _vkCmdTraceRaysKHR = NULL;
 
 void iron_gpu_raytrace_pipeline_init(iron_gpu_raytrace_pipeline_t *pipeline, iron_gpu_command_list_t *command_list, void *ray_shader, int ray_shader_size,
-                                 iron_gpu_constant_buffer_t *constant_buffer) {
+                                 struct iron_gpu_buffer *constant_buffer) {
 	output = NULL;
 	pipeline->_constant_buffer = constant_buffer;
 
@@ -4031,7 +4022,7 @@ void iron_gpu_raytrace_acceleration_structure_init(iron_gpu_raytrace_acceleratio
 	instances_count = 0;
 }
 
-void iron_gpu_raytrace_acceleration_structure_add(iron_gpu_raytrace_acceleration_structure_t *accel, struct iron_gpu_vertex_buffer *_vb, iron_gpu_index_buffer_t *_ib,
+void iron_gpu_raytrace_acceleration_structure_add(iron_gpu_raytrace_acceleration_structure_t *accel, struct iron_gpu_buffer *_vb, struct iron_gpu_buffer *_ib,
 	iron_matrix4x4_t _transform) {
 
 	int vb_i = -1;
@@ -4072,7 +4063,7 @@ void _iron_gpu_raytrace_acceleration_structure_destroy_top(iron_gpu_raytrace_acc
 }
 
 void iron_gpu_raytrace_acceleration_structure_build(iron_gpu_raytrace_acceleration_structure_t *accel, iron_gpu_command_list_t *command_list,
-	struct iron_gpu_vertex_buffer *_vb_full, iron_gpu_index_buffer_t *_ib_full) {
+	struct iron_gpu_buffer *_vb_full, struct iron_gpu_buffer *_ib_full) {
 
 	bool build_bottom = false;
 	for (int i = 0; i < 16; ++i) {
@@ -4099,13 +4090,13 @@ void iron_gpu_raytrace_acceleration_structure_build(iron_gpu_raytrace_accelerati
 	if (build_bottom) {
 		for (int i = 0; i < vb_count; ++i) {
 
-			uint32_t prim_count = ib[i]->impl.count / 3;
-			uint32_t vert_count = vb[i]->myCount;
+			uint32_t prim_count = ib[i]->impl.myCount / 3;
+			uint32_t vert_count = vb[i]->impl.myCount;
 
 			VkDeviceOrHostAddressConstKHR vertex_data_device_address = {0};
 			VkDeviceOrHostAddressConstKHR index_data_device_address = {0};
 
-			vertex_data_device_address.deviceAddress = get_buffer_device_address(vb[i]->buf);
+			vertex_data_device_address.deviceAddress = get_buffer_device_address(vb[i]->impl.buf);
 			index_data_device_address.deviceAddress = get_buffer_device_address(ib[i]->impl.buf);
 
 			VkAccelerationStructureGeometryKHR acceleration_geometry = {
@@ -4115,8 +4106,8 @@ void iron_gpu_raytrace_acceleration_structure_build(iron_gpu_raytrace_accelerati
 				.geometry.triangles.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR,
 				.geometry.triangles.vertexFormat = VK_FORMAT_R16G16B16A16_SNORM,
 				.geometry.triangles.vertexData.deviceAddress = vertex_data_device_address.deviceAddress,
-				.geometry.triangles.vertexStride = vb[i]->myStride,
-				.geometry.triangles.maxVertex = vb[i]->myCount,
+				.geometry.triangles.vertexStride = vb[i]->impl.myStride,
+				.geometry.triangles.maxVertex = vb[i]->impl.myCount,
 				.geometry.triangles.indexType = VK_INDEX_TYPE_UINT32,
 				.geometry.triangles.indexData.deviceAddress = index_data_device_address.deviceAddress,
 			};
@@ -4337,7 +4328,7 @@ void iron_gpu_raytrace_acceleration_structure_build(iron_gpu_raytrace_accelerati
 
 			int ib_off = 0;
 			for (int j = 0; j < instances[i].i; ++j) {
-				ib_off += ib[j]->impl.count * 4;
+				ib_off += ib[j]->impl.myCount * 4;
 			}
 			instance.instanceCustomIndex = ib_off;
 
@@ -4569,13 +4560,13 @@ void iron_gpu_raytrace_acceleration_structure_build(iron_gpu_raytrace_accelerati
 
 		#ifdef is_forge
 
-		vb_full = _vb_full->buf;
-		vb_full_mem = _vb_full->mem;
+		vb_full = _vb_full->impl.buf;
+		vb_full_mem = _vb_full->impl.mem;
 
 		#else
 
-		vb_full = vb[0]->buf;
-		vb_full_mem = vb[0]->mem;
+		vb_full = vb[0]->impl.buf;
+		vb_full_mem = vb[0]->impl.mem;
 
 		#endif
 	}

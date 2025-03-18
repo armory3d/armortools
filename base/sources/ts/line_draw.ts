@@ -4,8 +4,8 @@ let line_draw_strength: f32 = 0.005;
 let line_draw_mat: mat4_t = mat4_nan();
 let line_draw_dim: vec4_t = vec4_nan();
 
-let line_draw_vertex_buffer: iron_gpu_vertex_buffer_t;
-let line_draw_index_buffer: iron_gpu_index_buffer_t;
+let line_draw_vertex_buffer: iron_gpu_buffer_t;
+let line_draw_index_buffer: iron_gpu_buffer_t;
 let line_draw_pipeline: iron_gpu_pipeline_t = null;
 let line_draw_overlay_pipeline: iron_gpu_pipeline_t = null;
 
@@ -227,7 +227,7 @@ function line_draw_begin() {
 }
 
 function line_draw_end(overlay: bool = false) {
-	gpu_vertex_buffer_unlock_all(line_draw_vertex_buffer);
+	iron_gpu_vertex_buffer_unlock_all(line_draw_vertex_buffer);
 	gpu_index_buffer_unlock_all(line_draw_index_buffer);
 
 	gpu_set_vertex_buffer(line_draw_vertex_buffer);
@@ -245,8 +245,8 @@ function line_draw_end(overlay: bool = false) {
 	gpu_draw_indexed_vertices(0, line_draw_lines * 6);
 }
 
-let _shape_draw_sphere_vb: iron_gpu_vertex_buffer_t = null;
-let _shape_draw_sphere_ib: iron_gpu_index_buffer_t = null;
+let _shape_draw_sphere_vb: iron_gpu_buffer_t = null;
+let _shape_draw_sphere_ib: iron_gpu_buffer_t = null;
 
 function shape_draw_sphere(mat: mat4_t) {
 	line_draw_init();
@@ -265,7 +265,7 @@ function shape_draw_sphere(mat: mat4_t) {
 			buffer_set_f32(data, (i * 3 + 1) * 4, posa[i * 4 + 1] / 32767);
 			buffer_set_f32(data, (i * 3 + 2) * 4, posa[i * 4 + 2] / 32767);
 		}
-		gpu_vertex_buffer_unlock_all(_shape_draw_sphere_vb);
+		iron_gpu_vertex_buffer_unlock_all(_shape_draw_sphere_vb);
 		_shape_draw_sphere_ib = md._.index_buffers[0];
 	}
 

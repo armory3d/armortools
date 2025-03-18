@@ -3,10 +3,10 @@
 #include <iron_gpu.h>
 #include <iron_math.h>
 
-struct iron_gpu_index_buffer;
+struct iron_gpu_buffer;
 
 typedef struct {
-	struct iron_gpu_index_buffer *current_index_buffer;
+	struct iron_gpu_buffer *current_index_buffer;
 } gpu_command_list_impl_t;
 
 struct iron_gpu_shader;
@@ -64,19 +64,13 @@ typedef struct {
 	bool gpuMemory;
 	int lastStart;
 	int lastCount;
-} gpu_vertex_buffer_impl_t;
 
-typedef struct {
-	void *_buffer;
-	int lastStart;
-	int lastCount;
-	int mySize;
-} gpu_constant_buffer_impl_t;
-
-typedef struct {
 	void *metal_buffer;
 	int count;
 	bool gpu_memory;
 	int last_start;
 	int last_count;
-} gpu_index_buffer_impl_t;
+
+	void *_buffer;
+	int mySize;
+} gpu_buffer_impl_t;

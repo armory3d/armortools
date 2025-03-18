@@ -3,8 +3,8 @@ let util_render_material_preview_size: i32 = 256;
 let util_render_decal_preview_size: i32 = 512;
 let util_render_layer_preview_size: i32 = 200;
 let util_render_font_preview_size: i32 = 200;
-let util_render_screen_aligned_full_vb: iron_gpu_vertex_buffer_t = null;
-let util_render_screen_aligned_full_ib: iron_gpu_index_buffer_t = null;
+let util_render_screen_aligned_full_vb: iron_gpu_buffer_t = null;
+let util_render_screen_aligned_full_ib: iron_gpu_buffer_t = null;
 
 function util_render_make_material_preview() {
 	context_raw.material_preview = true;
@@ -468,7 +468,7 @@ function util_render_create_screen_aligned_full_data() {
 	for (let i: i32 = 0; i < math_floor((vertices.length) / 2); ++i) {
 		buffer_set_i16(vertices, i * 2, data[i]);
 	}
-	gpu_vertex_buffer_unlock_all(util_render_screen_aligned_full_vb);
+	iron_gpu_vertex_buffer_unlock_all(util_render_screen_aligned_full_vb);
 
 	util_render_screen_aligned_full_ib = gpu_create_index_buffer(indices.length);
 	let id: u32_array_t = gpu_lock_index_buffer(util_render_screen_aligned_full_ib);

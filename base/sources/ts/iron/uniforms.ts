@@ -99,7 +99,7 @@ function uniforms_set_obj_consts(context: shader_context_t, object: object_t) {
 				let image: iron_gpu_texture_t = uniforms_tex_links(object, current_material(object), tu.link);
 				if (image != null) {
 					ends_with(tu.link, "_depth") ?
-						gpu_set_texture_depth(context._.tex_units[j], image) :
+						_gpu_set_texture_depth(context._.tex_units[j], image) :
 						_gpu_set_texture(context._.tex_units[j], image);
 					gpu_set_texture_parameters(context._.tex_units[j], tex_addressing_t.REPEAT, tex_addressing_t.REPEAT, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.NONE);
 				}
@@ -119,7 +119,7 @@ function uniforms_bind_render_target(rt: render_target_t, context: shader_contex
 		if (sampler_id == tus[j].name) {
 
 			if (attach_depth) {
-				gpu_set_texture_depth(context._.tex_units[j], rt._image); // sampler2D
+				_gpu_set_texture_depth(context._.tex_units[j], rt._image); // sampler2D
 			}
 			else {
 				_gpu_set_texture(context._.tex_units[j], rt._image); // sampler2D

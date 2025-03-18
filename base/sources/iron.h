@@ -379,7 +379,7 @@ int krafix_compile(const char *source, char *output, int *length, const char *ta
 #endif
 
 extern iron_gpu_command_list_t commandList;
-static iron_gpu_constant_buffer_t constant_buffer;
+static iron_gpu_buffer_t constant_buffer;
 static iron_gpu_texture_t *render_target;
 static iron_gpu_raytrace_pipeline_t rt_pipeline;
 static iron_gpu_raytrace_acceleration_structure_t accel;
@@ -924,17 +924,17 @@ void iron_show_keyboard(bool show) {
 }
 
 any gpu_create_index_buffer(i32 count) {
-	iron_gpu_index_buffer_t *buffer = (iron_gpu_index_buffer_t *)malloc(sizeof(iron_gpu_index_buffer_t));
+	iron_gpu_buffer_t *buffer = (iron_gpu_buffer_t *)malloc(sizeof(iron_gpu_buffer_t));
 	iron_gpu_index_buffer_init(buffer, count, GPU_USAGE_STATIC);
 	return buffer;
 }
 
-void gpu_delete_index_buffer(iron_gpu_index_buffer_t *buffer) {
+void gpu_delete_index_buffer(iron_gpu_buffer_t *buffer) {
 	iron_gpu_index_buffer_destroy(buffer);
 	free(buffer);
 }
 
-u32_array_t *gpu_lock_index_buffer(iron_gpu_index_buffer_t *buffer) {
+u32_array_t *gpu_lock_index_buffer(iron_gpu_buffer_t *buffer) {
 	void *vertices = iron_gpu_index_buffer_lock_all(buffer);
 	u32_array_t *ar = (u32_array_t *)malloc(sizeof(u32_array_t));
 	ar->buffer = vertices;
@@ -943,21 +943,21 @@ u32_array_t *gpu_lock_index_buffer(iron_gpu_index_buffer_t *buffer) {
 }
 
 any gpu_create_vertex_buffer(i32 count, iron_gpu_vertex_structure_t *structure, i32 usage) {
-	iron_gpu_vertex_buffer_t *buffer = (iron_gpu_vertex_buffer_t *)malloc(sizeof(iron_gpu_vertex_buffer_t));
+	iron_gpu_buffer_t *buffer = (iron_gpu_buffer_t *)malloc(sizeof(iron_gpu_buffer_t));
 	gpu_vertex_buffer_init(buffer, count, structure, (gpu_usage_t)usage);
 	return buffer;
 }
 
-void gpu_delete_vertex_buffer(iron_gpu_vertex_buffer_t *buffer) {
-	gpu_vertex_buffer_destroy(buffer);
+void gpu_delete_vertex_buffer(iron_gpu_buffer_t *buffer) {
+	iron_gpu_vertex_buffer_destroy(buffer);
 	free(buffer);
 }
 
-buffer_t *gpu_lock_vertex_buffer(iron_gpu_vertex_buffer_t *buffer) {
+buffer_t *gpu_lock_vertex_buffer(iron_gpu_buffer_t *buffer) {
 	float *vertices = gpu_vertex_buffer_lock_all(buffer);
 	buffer_t *b = (buffer_t *)malloc(sizeof(buffer_t));
 	b->buffer = vertices;
-	b->length = gpu_vertex_buffer_count(buffer) * gpu_vertex_buffer_stride(buffer);
+	b->length = buffer->myCount * iron_gpu_vertex_buffer_stride(buffer);
 	return b;
 }
 
@@ -1295,11 +1295,11 @@ iron_gpu_texture_unit_t *gpu_get_texture_unit(iron_gpu_pipeline_t *pipeline, str
 }
 
 void _gpu_set_texture(iron_gpu_texture_unit_t *unit, iron_gpu_texture_t *texture) {
-	gpu_set_texture(*unit, texture);
+	gpu_set_texture(unit, texture);
 }
 
-void gpu_set_texture_depth(iron_gpu_texture_unit_t *unit, iron_gpu_texture_t *render_target) {
-	gpu_render_target_use_depth_as_texture(render_target, *unit);
+void _gpu_set_texture_depth(iron_gpu_texture_unit_t *unit, iron_gpu_texture_t *render_target) {
+	gpu_set_texture_depth(unit, render_target);
 }
 
 void gpu_set_texture_parameters(iron_gpu_texture_unit_t *unit, i32 u_addr, i32 v_addr, i32 min_filter, i32 mag_filter, i32 mip_filter) {
@@ -2252,11 +2252,11 @@ void iron_raytrace_as_init() {
 	iron_gpu_raytrace_acceleration_structure_init(&accel);
 }
 
-void iron_raytrace_as_add(struct iron_gpu_vertex_buffer *vb, iron_gpu_index_buffer_t *ib, iron_matrix4x4_t transform) {
+void iron_raytrace_as_add(struct iron_gpu_buffer *vb, iron_gpu_buffer_t *ib, iron_matrix4x4_t transform) {
 	iron_gpu_raytrace_acceleration_structure_add(&accel, vb, ib, transform);
 }
 
-void iron_raytrace_as_build(struct iron_gpu_vertex_buffer *vb_full, iron_gpu_index_buffer_t *ib_full) {
+void iron_raytrace_as_build(struct iron_gpu_buffer *vb_full, iron_gpu_buffer_t *ib_full) {
 	iron_gpu_raytrace_acceleration_structure_build(&accel, &commandList, vb_full, ib_full);
 }
 

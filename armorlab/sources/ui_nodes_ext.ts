@@ -105,7 +105,7 @@ function ui_nodes_ext_run() {
 					buffer_set_i16(vertices, i * 2, buffer_get_i16(ui_nodes_ext_last_vertices, i * 2));
 				}
 			}
-			gpu_vertex_buffer_unlock_all(g._.vertex_buffer);
+			iron_gpu_vertex_buffer_unlock_all(g._.vertex_buffer);
 
 			// Apply displacement
 			if (config_raw.displace_strength > 0) {

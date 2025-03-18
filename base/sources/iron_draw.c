@@ -29,8 +29,8 @@ static iron_gpu_pipeline_t *draw_custom_pipeline = NULL;
 static iron_matrix3x3_t draw_transform;
 static bool _draw_thrown = false;
 
-static iron_gpu_vertex_buffer_t image_vertex_buffer;
-static iron_gpu_index_buffer_t image_index_buffer;
+static iron_gpu_buffer_t image_vertex_buffer;
+static iron_gpu_buffer_t image_index_buffer;
 static iron_gpu_shader_t image_vert_shader;
 static iron_gpu_shader_t image_frag_shader;
 static iron_gpu_pipeline_t image_pipeline;
@@ -41,10 +41,10 @@ static int image_buffer_index = 0;
 static int image_buffer_start = 0;
 static iron_gpu_texture_t *image_last_texture = NULL;
 
-static iron_gpu_vertex_buffer_t colored_rect_vertex_buffer;
-static iron_gpu_index_buffer_t colored_rect_index_buffer;
-static iron_gpu_vertex_buffer_t colored_tris_vertex_buffer;
-static iron_gpu_index_buffer_t colored_tris_index_buffer;
+static iron_gpu_buffer_t colored_rect_vertex_buffer;
+static iron_gpu_buffer_t colored_rect_index_buffer;
+static iron_gpu_buffer_t colored_tris_vertex_buffer;
+static iron_gpu_buffer_t colored_tris_index_buffer;
 static iron_gpu_shader_t colored_vert_shader;
 static iron_gpu_shader_t colored_frag_shader;
 static iron_gpu_pipeline_t colored_pipeline;
@@ -56,8 +56,8 @@ static int colored_rect_buffer_start = 0;
 static int colored_tris_buffer_index = 0;
 static int colored_tris_buffer_start = 0;
 
-static iron_gpu_vertex_buffer_t text_vertex_buffer;
-static iron_gpu_index_buffer_t text_index_buffer;
+static iron_gpu_buffer_t text_vertex_buffer;
+static iron_gpu_buffer_t text_index_buffer;
 static iron_gpu_shader_t text_vert_shader;
 static iron_gpu_shader_t text_frag_shader;
 static iron_gpu_pipeline_t text_pipeline;
@@ -340,12 +340,12 @@ void draw_set_image_rect_colors(uint32_t color) {
 
 void draw_image_buffer(bool end) {
 	if (image_buffer_index - image_buffer_start == 0) return;
-	gpu_vertex_buffer_unlock(&image_vertex_buffer, (image_buffer_index - image_buffer_start) * 4);
+	iron_gpu_vertex_buffer_unlock(&image_vertex_buffer, (image_buffer_index - image_buffer_start) * 4);
 	iron_gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : &image_pipeline);
 	gpu_set_matrix4(image_proj_loc, &draw_projection_matrix);
 	gpu_set_vertex_buffer(&image_vertex_buffer);
 	gpu_set_index_buffer(&image_index_buffer);
-	gpu_set_texture(image_tex_unit, image_last_texture);
+	gpu_set_texture(&image_tex_unit, image_last_texture);
 	gpu_set_texture_addressing(image_tex_unit, GPU_TEXTURE_DIRECTION_U, GPU_TEXTURE_ADDRESSING_CLAMP);
 	gpu_set_texture_addressing(image_tex_unit, GPU_TEXTURE_DIRECTION_V, GPU_TEXTURE_ADDRESSING_CLAMP);
 	// gpu_set_texture_mipmap_filter(image_tex_unit, draw_bilinear_filter ? GPU_MIPMAP_FILTER_LINEAR : GPU_MIPMAP_FILTER_NONE);
@@ -449,7 +449,7 @@ void draw_colored_rect_draw_buffer(bool tris_done) {
 
 	if (!tris_done) draw_colored_tris_end(true);
 
-	gpu_vertex_buffer_unlock(&colored_rect_vertex_buffer, (colored_rect_buffer_index - colored_rect_buffer_start) * 4);
+	iron_gpu_vertex_buffer_unlock(&colored_rect_vertex_buffer, (colored_rect_buffer_index - colored_rect_buffer_start) * 4);
 	iron_gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : &colored_pipeline);
 	gpu_set_matrix4(colored_proj_loc, &draw_projection_matrix);
 	gpu_set_vertex_buffer(&colored_rect_vertex_buffer);
@@ -497,7 +497,7 @@ void draw_colored_tris_draw_buffer(bool rect_done) {
 
 	if (!rect_done) draw_colored_rect_end(true);
 
-	gpu_vertex_buffer_unlock(&colored_tris_vertex_buffer, (colored_tris_buffer_index - colored_tris_buffer_start) * 3);
+	iron_gpu_vertex_buffer_unlock(&colored_tris_vertex_buffer, (colored_tris_buffer_index - colored_tris_buffer_start) * 3);
 	iron_gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : &colored_pipeline);
 	gpu_set_matrix4(colored_proj_loc, &draw_projection_matrix);
 	gpu_set_vertex_buffer(&colored_tris_vertex_buffer);
@@ -662,12 +662,12 @@ void draw_text_set_rect_colors(uint32_t color) {
 
 void draw_text_draw_buffer(bool end) {
 	if (text_buffer_index - text_buffer_start == 0) return;
-	gpu_vertex_buffer_unlock(&text_vertex_buffer, text_buffer_index * 4);
+	iron_gpu_vertex_buffer_unlock(&text_vertex_buffer, text_buffer_index * 4);
 	iron_gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : _draw_current != NULL ? &text_pipeline_rt : &text_pipeline);
 	gpu_set_matrix4(text_proj_loc, &draw_projection_matrix);
 	gpu_set_vertex_buffer(&text_vertex_buffer);
 	gpu_set_index_buffer(&text_index_buffer);
-	gpu_set_texture(text_tex_unit, text_last_texture);
+	gpu_set_texture(&text_tex_unit, text_last_texture);
 	gpu_set_texture_addressing(text_tex_unit, GPU_TEXTURE_DIRECTION_U, GPU_TEXTURE_ADDRESSING_CLAMP);
 	gpu_set_texture_addressing(text_tex_unit, GPU_TEXTURE_DIRECTION_V, GPU_TEXTURE_ADDRESSING_CLAMP);
 	gpu_set_texture_mipmap_filter(text_tex_unit, GPU_MIPMAP_FILTER_NONE);

@@ -8,16 +8,7 @@ typedef struct {
 	WGPUBuffer buffer;
 	int count;
 	int stride;
-} gpu_vertex_buffer_impl_t;
-
-typedef struct {
-	WGPUBuffer buffer;
-} gpu_constant_buffer_impl_t;
-
-typedef struct {
-	WGPUBuffer buffer;
-	int count;
-} gpu_index_buffer_impl_t;
+} gpu_buffer_impl_t;
 
 typedef struct {
 	WGPUTexture texture;

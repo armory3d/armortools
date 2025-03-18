@@ -7,8 +7,8 @@ let render_path_raytrace_first: bool = true;
 let render_path_raytrace_f32a: f32_array_t = f32_array_create(24);
 let render_path_raytrace_help_mat: mat4_t = mat4_identity();
 let render_path_raytrace_transform: mat4_t;
-let render_path_raytrace_vb: iron_gpu_vertex_buffer_t;
-let render_path_raytrace_ib: iron_gpu_index_buffer_t;
+let render_path_raytrace_vb: iron_gpu_buffer_t;
+let render_path_raytrace_ib: iron_gpu_buffer_t;
 
 let render_path_raytrace_last_envmap: iron_gpu_texture_t = null;
 let render_path_raytrace_is_bake: bool = false;
@@ -168,8 +168,8 @@ function render_path_raytrace_raytrace_init(shader_name: string, build: bool = t
 		iron_raytrace_as_add(render_path_raytrace_vb, render_path_raytrace_ib, render_path_raytrace_transform);
 		///end
 
-		let vb_full: iron_gpu_vertex_buffer_t = context_raw.merged_object.data._.vertex_buffer;
-		let ib_full: iron_gpu_index_buffer_t = context_raw.merged_object.data._.index_buffers[0];
+		let vb_full: iron_gpu_buffer_t = context_raw.merged_object.data._.vertex_buffer;
+		let ib_full: iron_gpu_buffer_t = context_raw.merged_object.data._.index_buffers[0];
 
 		iron_raytrace_as_build(vb_full, ib_full);
 	}
