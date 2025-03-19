@@ -10,8 +10,8 @@
 #include "../shader_stage.h"
 #include "../types.h"
 #include "cstyle.h"
-// #include "d3d11.h"
-#include "d3d12.h"
+#include "d3d11.h"
+// #include "d3d12.h"
 // #include "d3d9.h"
 #include "util.h"
 
@@ -94,38 +94,39 @@ static void write_bytecode(char *hlsl, char *directory, const char *filename, co
 	char full_filename[512];
 
 	{
-		sprintf(full_filename, "%s/%s.h", directory, filename);
-		FILE *file = fopen(full_filename, "wb");
+		// sprintf(full_filename, "%s/%s.h", directory, filename);
+		// FILE *file = fopen(full_filename, "wb");
 
-		if (file == NULL) {
-			debug_context context = {0};
-			error(context, "Could not open file %s.", full_filename);
-		}
+		// if (file == NULL) {
+		// 	debug_context context = {0};
+		// 	error(context, "Could not open file %s.", full_filename);
+		// }
 
-		fprintf(file, "#ifndef KONG_%s_HEADER\n", name);
-		fprintf(file, "#define KONG_%s_HEADER\n\n", name);
+		// fprintf(file, "#ifndef KONG_%s_HEADER\n", name);
+		// fprintf(file, "#define KONG_%s_HEADER\n\n", name);
 
-		fprintf(file, "#include <stddef.h>\n");
-		fprintf(file, "#include <stdint.h>\n\n");
+		// fprintf(file, "#include <stddef.h>\n");
+		// fprintf(file, "#include <stdint.h>\n\n");
 
-		fprintf(file, "#ifdef __cplusplus\n");
-		fprintf(file, "extern \"C\" {\n");
-		fprintf(file, "#endif\n\n");
+		// fprintf(file, "#ifdef __cplusplus\n");
+		// fprintf(file, "extern \"C\" {\n");
+		// fprintf(file, "#endif\n\n");
 
-		fprintf(file, "extern uint8_t *%s;\n", name);
-		fprintf(file, "extern size_t %s_size;\n", name);
+		// fprintf(file, "extern uint8_t *%s;\n", name);
+		// fprintf(file, "extern size_t %s_size;\n", name);
 
-		fprintf(file, "\n#ifdef __cplusplus\n");
-		fprintf(file, "}\n");
-		fprintf(file, "#endif\n\n");
+		// fprintf(file, "\n#ifdef __cplusplus\n");
+		// fprintf(file, "}\n");
+		// fprintf(file, "#endif\n\n");
 
-		fprintf(file, "#endif\n");
+		// fprintf(file, "#endif\n");
 
-		fclose(file);
+		// fclose(file);
 	}
 
 	{
-		sprintf(full_filename, "%s/%s.c", directory, filename);
+		// sprintf(full_filename, "%s/%s.c", directory, filename);
+		sprintf(full_filename, "%s/%s.hlsl", directory, filename);
 
 		FILE *file = fopen(full_filename, "wb");
 
@@ -134,48 +135,49 @@ static void write_bytecode(char *hlsl, char *directory, const char *filename, co
 			error(context, "Could not open file %s.", full_filename);
 		}
 
-		fprintf(file, "#include \"%s.h\"\n\n", filename);
+		// fprintf(file, "#include \"%s.h\"\n\n", filename);
 
-		fprintf(file, "uint8_t *%s = \"", name);
-		for (size_t i = 0; i < output_size; ++i) {
-			// based on the encoding described in https://github.com/adobe/bin2c
-			if (output[i] == '!' || output[i] == '#' || (output[i] >= '%' && output[i] <= '>') || (output[i] >= 'A' && output[i] <= '[') ||
-			    (output[i] >= ']' && output[i] <= '~')) {
-				fprintf(file, "%c", output[i]);
-			}
-			else if (output[i] == '\a') {
-				fprintf(file, "\\a");
-			}
-			else if (output[i] == '\b') {
-				fprintf(file, "\\b");
-			}
-			else if (output[i] == '\t') {
-				fprintf(file, "\\t");
-			}
-			else if (output[i] == '\v') {
-				fprintf(file, "\\v");
-			}
-			else if (output[i] == '\f') {
-				fprintf(file, "\\f");
-			}
-			else if (output[i] == '\r') {
-				fprintf(file, "\\r");
-			}
-			else if (output[i] == '\"') {
-				fprintf(file, "\\\"");
-			}
-			else if (output[i] == '\\') {
-				fprintf(file, "\\\\");
-			}
-			else {
-				fprintf(file, "\\%03o", output[i]);
-			}
-		}
-		fprintf(file, "\";\n");
+		// fprintf(file, "uint8_t *%s = \"", name);
+		// for (size_t i = 0; i < output_size; ++i) {
+		// 	// based on the encoding described in https://github.com/adobe/bin2c
+		// 	if (output[i] == '!' || output[i] == '#' || (output[i] >= '%' && output[i] <= '>') || (output[i] >= 'A' && output[i] <= '[') ||
+		// 	    (output[i] >= ']' && output[i] <= '~')) {
+		// 		fprintf(file, "%c", output[i]);
+		// 	}
+		// 	else if (output[i] == '\a') {
+		// 		fprintf(file, "\\a");
+		// 	}
+		// 	else if (output[i] == '\b') {
+		// 		fprintf(file, "\\b");
+		// 	}
+		// 	else if (output[i] == '\t') {
+		// 		fprintf(file, "\\t");
+		// 	}
+		// 	else if (output[i] == '\v') {
+		// 		fprintf(file, "\\v");
+		// 	}
+		// 	else if (output[i] == '\f') {
+		// 		fprintf(file, "\\f");
+		// 	}
+		// 	else if (output[i] == '\r') {
+		// 		fprintf(file, "\\r");
+		// 	}
+		// 	else if (output[i] == '\"') {
+		// 		fprintf(file, "\\\"");
+		// 	}
+		// 	else if (output[i] == '\\') {
+		// 		fprintf(file, "\\\\");
+		// 	}
+		// 	else {
+		// 		fprintf(file, "\\%03o", output[i]);
+		// 	}
+		// }
+		// fprintf(file, "\";\n");
 
-		fprintf(file, "size_t %s_size = %zu;\n\n", name, output_size);
+		// fprintf(file, "size_t %s_size = %zu;\n\n", name, output_size);
 
-		fprintf(file, "/*\n%s*/\n", hlsl);
+		// fprintf(file, "/*\n%s*/\n", hlsl);
+		fprintf(file, "%s\n", hlsl);
 
 		fclose(file);
 	}
@@ -1462,10 +1464,10 @@ static void hlsl_export_vertex(char *directory, api_kind d3d, function *main) {
 		// result = compile_hlsl_to_d3d9(hlsl, &output, &output_size, SHADER_STAGE_VERTEX, false);
 		break;
 	case API_DIRECT3D11:
-		// result = compile_hlsl_to_d3d11(hlsl, &output, &output_size, SHADER_STAGE_VERTEX, false);
+		result = compile_hlsl_to_d3d11(hlsl, &output, &output_size, SHADER_STAGE_VERTEX, false);
 		break;
 	case API_DIRECT3D12:
-		result = compile_hlsl_to_d3d12(hlsl, &output, &output_size, SHADER_STAGE_VERTEX, false);
+		// result = compile_hlsl_to_d3d12(hlsl, &output, &output_size, SHADER_STAGE_VERTEX, false);
 		break;
 	default:
 		error(context, "Unsupported API for HLSL");
@@ -1475,7 +1477,8 @@ static void hlsl_export_vertex(char *directory, api_kind d3d, function *main) {
 	char *name = get_name(main->name);
 
 	char filename[512];
-	sprintf(filename, "kong_%s", name);
+	// sprintf(filename, "kong_%s", name);
+	sprintf(filename, "%s", name);
 
 	char var_name[256];
 	sprintf(var_name, "%s_code", name);
@@ -1484,67 +1487,67 @@ static void hlsl_export_vertex(char *directory, api_kind d3d, function *main) {
 }
 
 static void hlsl_export_amplification(char *directory, function *main) {
-	char  *hlsl   = (char *)calloc(1024 * 1024, 1);
-	size_t offset = 0;
+	// char  *hlsl   = (char *)calloc(1024 * 1024, 1);
+	// size_t offset = 0;
 
-	write_types(hlsl, &offset, SHADER_STAGE_AMPLIFICATION, NULL, 0, NO_TYPE, main, NULL, 0);
+	// write_types(hlsl, &offset, SHADER_STAGE_AMPLIFICATION, NULL, 0, NO_TYPE, main, NULL, 0);
 
-	write_globals(hlsl, &offset, main, NULL, 0);
+	// write_globals(hlsl, &offset, main, NULL, 0);
 
-	write_functions(hlsl, &offset, SHADER_STAGE_AMPLIFICATION, main, NULL, 0);
+	// write_functions(hlsl, &offset, SHADER_STAGE_AMPLIFICATION, main, NULL, 0);
 
-	uint8_t *output      = NULL;
-	size_t   output_size = 0;
-	int      result      = compile_hlsl_to_d3d12(hlsl, &output, &output_size, SHADER_STAGE_AMPLIFICATION, false);
+	// uint8_t *output      = NULL;
+	// size_t   output_size = 0;
+	// int      result      = compile_hlsl_to_d3d12(hlsl, &output, &output_size, SHADER_STAGE_AMPLIFICATION, false);
 
-	debug_context context = {0};
-	check(result == 0, context, "HLSL compilation failed");
+	// debug_context context = {0};
+	// check(result == 0, context, "HLSL compilation failed");
 
-	char *name = get_name(main->name);
+	// char *name = get_name(main->name);
 
-	char filename[512];
-	sprintf(filename, "kong_%s", name);
+	// char filename[512];
+	// sprintf(filename, "kong_%s", name);
 
-	char var_name[256];
-	sprintf(var_name, "%s_code", name);
+	// char var_name[256];
+	// sprintf(var_name, "%s_code", name);
 
-	write_bytecode(hlsl, directory, filename, var_name, output, output_size);
+	// write_bytecode(hlsl, directory, filename, var_name, output, output_size);
 }
 
 static void hlsl_export_mesh(char *directory, function *main) {
-	char  *hlsl   = (char *)calloc(1024 * 1024, 1);
-	size_t offset = 0;
+	// char  *hlsl   = (char *)calloc(1024 * 1024, 1);
+	// size_t offset = 0;
 
-	attribute *vertices_attribute = find_attribute(&main->attributes, add_name("vertices"));
-	if (vertices_attribute == NULL || vertices_attribute->paramters_count != 2) {
-		debug_context context = {0};
-		error(context, "Mesh function requires a vertices attribute with two parameters");
-	}
-	assert(vertices_attribute != NULL);
-	type_id vertex_output = (type_id)vertices_attribute->parameters[1];
+	// attribute *vertices_attribute = find_attribute(&main->attributes, add_name("vertices"));
+	// if (vertices_attribute == NULL || vertices_attribute->paramters_count != 2) {
+	// 	debug_context context = {0};
+	// 	error(context, "Mesh function requires a vertices attribute with two parameters");
+	// }
+	// assert(vertices_attribute != NULL);
+	// type_id vertex_output = (type_id)vertices_attribute->parameters[1];
 
-	write_types(hlsl, &offset, SHADER_STAGE_MESH, NULL, 0, vertex_output, main, NULL, 0);
+	// write_types(hlsl, &offset, SHADER_STAGE_MESH, NULL, 0, vertex_output, main, NULL, 0);
 
-	write_globals(hlsl, &offset, main, NULL, 0);
+	// write_globals(hlsl, &offset, main, NULL, 0);
 
-	write_functions(hlsl, &offset, SHADER_STAGE_MESH, main, NULL, 0);
+	// write_functions(hlsl, &offset, SHADER_STAGE_MESH, main, NULL, 0);
 
-	uint8_t *output      = NULL;
-	size_t   output_size = 0;
-	int      result      = compile_hlsl_to_d3d12(hlsl, &output, &output_size, SHADER_STAGE_MESH, false);
+	// uint8_t *output      = NULL;
+	// size_t   output_size = 0;
+	// int      result      = compile_hlsl_to_d3d12(hlsl, &output, &output_size, SHADER_STAGE_MESH, false);
 
-	debug_context context = {0};
-	check(result == 0, context, "HLSL compilation failed");
+	// debug_context context = {0};
+	// check(result == 0, context, "HLSL compilation failed");
 
-	char *name = get_name(main->name);
+	// char *name = get_name(main->name);
 
-	char filename[512];
-	sprintf(filename, "kong_%s", name);
+	// char filename[512];
+	// sprintf(filename, "kong_%s", name);
 
-	char var_name[256];
-	sprintf(var_name, "%s_code", name);
+	// char var_name[256];
+	// sprintf(var_name, "%s_code", name);
 
-	write_bytecode(hlsl, directory, filename, var_name, output, output_size);
+	// write_bytecode(hlsl, directory, filename, var_name, output, output_size);
 }
 
 static void hlsl_export_fragment(char *directory, api_kind d3d, function *main) {
@@ -1571,10 +1574,10 @@ static void hlsl_export_fragment(char *directory, api_kind d3d, function *main) 
 		// result = compile_hlsl_to_d3d9(hlsl, &output, &output_size, SHADER_STAGE_FRAGMENT, false);
 		break;
 	case API_DIRECT3D11:
-		// result = compile_hlsl_to_d3d11(hlsl, &output, &output_size, SHADER_STAGE_FRAGMENT, false);
+		result = compile_hlsl_to_d3d11(hlsl, &output, &output_size, SHADER_STAGE_FRAGMENT, false);
 		break;
 	case API_DIRECT3D12:
-		result = compile_hlsl_to_d3d12(hlsl, &output, &output_size, SHADER_STAGE_FRAGMENT, false);
+		// result = compile_hlsl_to_d3d12(hlsl, &output, &output_size, SHADER_STAGE_FRAGMENT, false);
 		break;
 	default:
 		error(context, "Unsupported API for HLSL");
@@ -1584,7 +1587,8 @@ static void hlsl_export_fragment(char *directory, api_kind d3d, function *main) 
 	char *name = get_name(main->name);
 
 	char filename[512];
-	sprintf(filename, "kong_%s", name);
+	// sprintf(filename, "kong_%s", name);
+	sprintf(filename, "%s", name);
 
 	char var_name[256];
 	sprintf(var_name, "%s_code", name);
@@ -1612,10 +1616,10 @@ static void hlsl_export_compute(char *directory, api_kind d3d, function *main) {
 		error(context, "Compute shaders are not supported in Direct3D 9");
 		break;
 	case API_DIRECT3D11:
-		// result = compile_hlsl_to_d3d11(hlsl, &output, &output_size, SHADER_STAGE_COMPUTE, false);
+		result = compile_hlsl_to_d3d11(hlsl, &output, &output_size, SHADER_STAGE_COMPUTE, false);
 		break;
 	case API_DIRECT3D12:
-		result = compile_hlsl_to_d3d12(hlsl, &output, &output_size, SHADER_STAGE_COMPUTE, false);
+		// result = compile_hlsl_to_d3d12(hlsl, &output, &output_size, SHADER_STAGE_COMPUTE, false);
 		break;
 	default:
 		error(context, "Unsupported API for HLSL");
@@ -1634,77 +1638,77 @@ static void hlsl_export_compute(char *directory, api_kind d3d, function *main) {
 }
 
 static void hlsl_export_all_ray_shaders(char *directory) {
-	char         *hlsl    = (char *)calloc(1024 * 1024, 1);
-	debug_context context = {0};
-	check(hlsl != NULL, context, "Could not allocate the hlsl string");
-	size_t offset = 0;
+	// char         *hlsl    = (char *)calloc(1024 * 1024, 1);
+	// debug_context context = {0};
+	// check(hlsl != NULL, context, "Could not allocate the hlsl string");
+	// size_t offset = 0;
 
-	function *all_rayshaders[256 * 3];
-	size_t    all_rayshaders_size = 0;
-	for (size_t rayshader_index = 0; rayshader_index < raygen_shaders_size; ++rayshader_index) {
-		all_rayshaders[all_rayshaders_size] = raygen_shaders[rayshader_index];
-		all_rayshaders_size += 1;
-	}
-	for (size_t rayshader_index = 0; rayshader_index < raymiss_shaders_size; ++rayshader_index) {
-		all_rayshaders[all_rayshaders_size] = raymiss_shaders[rayshader_index];
-		all_rayshaders_size += 1;
-	}
-	for (size_t rayshader_index = 0; rayshader_index < rayclosesthit_shaders_size; ++rayshader_index) {
-		all_rayshaders[all_rayshaders_size] = rayclosesthit_shaders[rayshader_index];
-		all_rayshaders_size += 1;
-	}
-	for (size_t rayshader_index = 0; rayshader_index < rayintersection_shaders_size; ++rayshader_index) {
-		all_rayshaders[all_rayshaders_size] = rayintersection_shaders[rayshader_index];
-		all_rayshaders_size += 1;
-	}
-	for (size_t rayshader_index = 0; rayshader_index < rayanyhit_shaders_size; ++rayshader_index) {
-		all_rayshaders[all_rayshaders_size] = rayanyhit_shaders[rayshader_index];
-		all_rayshaders_size += 1;
-	}
+	// function *all_rayshaders[256 * 3];
+	// size_t    all_rayshaders_size = 0;
+	// for (size_t rayshader_index = 0; rayshader_index < raygen_shaders_size; ++rayshader_index) {
+	// 	all_rayshaders[all_rayshaders_size] = raygen_shaders[rayshader_index];
+	// 	all_rayshaders_size += 1;
+	// }
+	// for (size_t rayshader_index = 0; rayshader_index < raymiss_shaders_size; ++rayshader_index) {
+	// 	all_rayshaders[all_rayshaders_size] = raymiss_shaders[rayshader_index];
+	// 	all_rayshaders_size += 1;
+	// }
+	// for (size_t rayshader_index = 0; rayshader_index < rayclosesthit_shaders_size; ++rayshader_index) {
+	// 	all_rayshaders[all_rayshaders_size] = rayclosesthit_shaders[rayshader_index];
+	// 	all_rayshaders_size += 1;
+	// }
+	// for (size_t rayshader_index = 0; rayshader_index < rayintersection_shaders_size; ++rayshader_index) {
+	// 	all_rayshaders[all_rayshaders_size] = rayintersection_shaders[rayshader_index];
+	// 	all_rayshaders_size += 1;
+	// }
+	// for (size_t rayshader_index = 0; rayshader_index < rayanyhit_shaders_size; ++rayshader_index) {
+	// 	all_rayshaders[all_rayshaders_size] = rayanyhit_shaders[rayshader_index];
+	// 	all_rayshaders_size += 1;
+	// }
 
-	if (all_rayshaders_size == 0) {
-		char *name = "ray";
+	// if (all_rayshaders_size == 0) {
+	// 	// char *name = "ray";
 
-		char filename[512];
-		sprintf(filename, "kong_%s", name);
+	// 	// char filename[512];
+	// 	// sprintf(filename, "kong_%s", name);
 
-		char full_filename[512];
+	// 	// char full_filename[512];
 
-		sprintf(full_filename, "%s/%s.h", directory, filename);
-		FILE *file = fopen(full_filename, "wb");
+	// 	// sprintf(full_filename, "%s/%s.h", directory, filename);
+	// 	// FILE *file = fopen(full_filename, "wb");
 
-		fprintf(file, "#ifndef KONG_%s_HEADER\n", name);
-		fprintf(file, "#define KONG_%s_HEADER\n\n", name);
+	// 	// fprintf(file, "#ifndef KONG_%s_HEADER\n", name);
+	// 	// fprintf(file, "#define KONG_%s_HEADER\n\n", name);
 
-		fprintf(file, "#define KONG_HAS_NO_RAY_SHADERS\n\n");
+	// 	// fprintf(file, "#define KONG_HAS_NO_RAY_SHADERS\n\n");
 
-		fprintf(file, "#endif\n");
+	// 	// fprintf(file, "#endif\n");
 
-		fclose(file);
+	// 	// fclose(file);
 
-		return;
-	}
+	// 	return;
+	// }
 
-	write_types(hlsl, &offset, SHADER_STAGE_RAY_GENERATION, NULL, 0, NO_TYPE, NULL, all_rayshaders, all_rayshaders_size);
+	// write_types(hlsl, &offset, SHADER_STAGE_RAY_GENERATION, NULL, 0, NO_TYPE, NULL, all_rayshaders, all_rayshaders_size);
 
-	write_globals(hlsl, &offset, NULL, all_rayshaders, all_rayshaders_size);
+	// write_globals(hlsl, &offset, NULL, all_rayshaders, all_rayshaders_size);
 
-	write_functions(hlsl, &offset, SHADER_STAGE_RAY_GENERATION, NULL, all_rayshaders, all_rayshaders_size);
+	// write_functions(hlsl, &offset, SHADER_STAGE_RAY_GENERATION, NULL, all_rayshaders, all_rayshaders_size);
 
-	uint8_t *output      = NULL;
-	size_t   output_size = 0;
-	int      result      = compile_hlsl_to_d3d12(hlsl, &output, &output_size, SHADER_STAGE_RAY_GENERATION, false);
-	check(result == 0, context, "HLSL compilation failed");
+	// uint8_t *output      = NULL;
+	// size_t   output_size = 0;
+	// int      result      = compile_hlsl_to_d3d12(hlsl, &output, &output_size, SHADER_STAGE_RAY_GENERATION, false);
+	// check(result == 0, context, "HLSL compilation failed");
 
-	char *name = "ray";
+	// char *name = "ray";
 
-	char filename[512];
-	sprintf(filename, "kong_%s", name);
+	// char filename[512];
+	// sprintf(filename, "kong_%s", name);
 
-	char var_name[256];
-	sprintf(var_name, "%s_code", name);
+	// char var_name[256];
+	// sprintf(var_name, "%s_code", name);
 
-	write_bytecode(hlsl, directory, filename, var_name, output, output_size);
+	// write_bytecode(hlsl, directory, filename, var_name, output, output_size);
 }
 
 void hlsl_export(char *directory, api_kind d3d) {

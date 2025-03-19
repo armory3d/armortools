@@ -30,13 +30,25 @@ project.add_cfiles("aimage.c");
 	if (platform === "linux") {
 		project.add_project("../../sources/libs/to_spirv");
 	}
-	project.add_project("../../sources/libs/kong");
-	project.flatten();
+
+	//project.add_project("../../sources/libs/kong");
+	//project.flatten();
+
+	project.add_cfiles('../../sources/libs/kong/sources/libs/*.c');
+	project.add_cfiles('../../sources/libs/kong/sources/*.c');
+	project.add_cfiles('../../sources/libs/kong/sources/backends/*.c');
+	project.add_cfiles('../../sources/libs/kong/sources/backends/*.cpp');
+
+	if (platform === "windows") {
+		project.add_define('_CRT_SECURE_NO_WARNINGS');
+		project.add_lib('d3dcompiler');
+		project.add_include_dir('../../sources/libs/kong/sources/libs/dxc/inc');
+		project.add_lib('../../sources/libs/kong/sources/libs/dxc/lib/x64/dxcompiler');
+	}
 }
 
 if (platform === "windows") {
 	// hlslbin
-	project.add_lib("d3dcompiler");
 	project.add_lib("dxguid");
 }
 else if (platform === "macos") {

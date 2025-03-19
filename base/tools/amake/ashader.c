@@ -27,41 +27,6 @@ int krafix_compile(const char *source, char *output, int *length, const char *ta
 #include "../../sources/libs/kong/sources/backends/spirv.h"
 #include "../../sources/libs/kong/sources/backends/wgsl.h"
 
-void kong_compile(const char *from, const char *to) {
-	FILE *fp = fopen(from, "rb");
-	fseek(fp , 0, SEEK_END);
-	int size = ftell(fp);
-	rewind(fp);
-	char *data = malloc(size + 1);
-	data[size] = 0;
-	fread(data, size, 1, fp);
-	fclose(fp);
-
-	names_init();
-	types_init();
-	functions_init();
-	globals_init();
-
-	tokens tokens = tokenize(from, data);
-	kong_parse(from, &tokens);
-
-	resolve_types();
-	allocate_globals();
-	for (function_id i = 0; get_function(i) != NULL; ++i) {
-		compile_function_block(&get_function(i)->code, get_function(i)->block);
-	}
-	// analyze();
-
-	char output[512];
-	strcpy(output, to);
-	int i = string_last_index_of(to, "/");
-	output[i] = '\0';
-
-	// hlsl_export(output, api);
-	// metal_export(output);
-	spirv_export(output);
-}
-
 #ifdef _WIN32
 #include <d3d11.h>
 #include <D3Dcompiler.h>
@@ -82,11 +47,8 @@ char *hlsl_to_bin(char *source, char *shader_type, char *to) {
 	if (string_equals(shader_type, "vert")) {
 		type = "vs_5_0";
 	}
-	else if (string_equals(shader_type, "frag")) {
-		type = "ps_5_0";
-	}
 	else {
-		type = "gs_5_0";
+		type = "ps_5_0";
 	}
 
 	ID3DBlob *error_message;
@@ -106,36 +68,29 @@ char *hlsl_to_bin(char *source, char *shader_type, char *to) {
 	char *file = malloc(len * 2);
 	int output_len = 0;
 
-	bool has_bone = strstr(source, " bone:") != NULL;
-	bool has_col = strstr(source, " col:") != NULL;
-	bool has_nor = strstr(source, " nor:") != NULL;
-	bool has_pos = strstr(source, " pos:") != NULL;
-	bool has_tex = strstr(source, " tex:") != NULL;
+	bool has_col = strstr(source, " col:") != NULL || strstr(source, " col :") != NULL;
+	bool has_nor = strstr(source, " nor:") != NULL || strstr(source, " nor :") != NULL;
+	bool has_pos = strstr(source, " pos:") != NULL || strstr(source, " pos :") != NULL;
+	bool has_tex = strstr(source, " tex:") != NULL || strstr(source, " tex :") != NULL;
 
-	int ibone = -1;
 	int icol = -1;
 	int inor = -1;
 	int ipos = -1;
 	int itex = -1;
-	int iweight = -1;
 
 	int index = 0;
-	if (has_bone) ibone = index++;
 	if (has_col) icol = index++;
 	if (has_nor) inor = index++;
 	if (has_pos) ipos = index++;
 	if (has_tex) itex = index++;
-	if (has_bone) iweight = index++;
 
 	file[output_len] = (char)index;
 	output_len += 1;
 
-	write_attrib(file, &output_len, "bone", ibone);
 	write_attrib(file, &output_len, "col", icol);
 	write_attrib(file, &output_len, "nor", inor);
 	write_attrib(file, &output_len, "pos", ipos);
 	write_attrib(file, &output_len, "tex", itex);
-	write_attrib(file, &output_len, "weight", iweight);
 
 	D3D11_SHADER_DESC desc;
 	reflector->lpVtbl->GetDesc(reflector, &desc);
@@ -221,19 +176,90 @@ void hlslbin(const char *from, const char *to) {
 	fclose(fp);
 
 	char *type;
-	if (strstr(from, ".vert.")) {
+	if (strstr(from, "vert.")) {
 		type = "vert";
 	}
-	else if (strstr(from, ".frag.")) {
+	else  {
 		type = "frag";
-	}
-	else {
-		type = "geom";
 	}
 
 	hlsl_to_bin(source, type, to);
 }
 #endif
+
+void kong_compile(const char *from, const char *to) {
+	FILE *fp = fopen(from, "rb");
+	fseek(fp , 0, SEEK_END);
+	int size = ftell(fp);
+	rewind(fp);
+	char *data = malloc(size + 1);
+	data[size] = 0;
+	fread(data, size, 1, fp);
+	fclose(fp);
+
+	names_init();
+	types_init();
+	functions_init();
+	globals_init();
+	tokens tokens = tokenize(from, data);
+	kong_parse(from, &tokens);
+	resolve_types();
+	allocate_globals();
+	for (function_id i = 0; get_function(i) != NULL; ++i) {
+		compile_function_block(&get_function(i)->code, get_function(i)->block);
+	}
+	analyze();
+
+	char output[512];
+	strcpy(output, to);
+
+	#ifdef _WIN32
+
+	int i = string_last_index_of(to, "\\");
+	output[i] = '\0';
+
+	strcat(output, "\\..\\..\\temp");
+	hlsl_export(output, API_DIRECT3D11);
+
+	char filename[512];
+	strcpy(filename, to);
+	char *file = &filename[i + 1];
+	i = string_index_of(file, ".");
+	file[i] = '\0';
+
+	strcat(output, "\\");
+	strcat(output, file);
+
+	char from_[512];
+	strcpy(from_, output);
+	strcat(from_, "_frag.hlsl");
+
+	char to_[512];
+	strcpy(to_, to);
+	to_[strlen(to_) - 4] = '\0';
+	strcat(to_, "frag.d3d11");
+
+	hlslbin(from_, to_);
+
+	strcpy(from_, output);
+	strcat(from_, "_vert.hlsl");
+
+	strcpy(to_, to);
+	to_[strlen(to_) - 4] = '\0';
+	strcat(to_, "vert.d3d11");
+
+	hlslbin(from_, to_);
+
+	#else
+
+	int i = string_last_index_of(to, "/");
+	output[i] = '\0';
+
+	// metal_export(output);
+	spirv_export(output);
+
+	#endif
+}
 
 static char out[128 * 1024];
 static int out_pos = 0;

@@ -10,11 +10,11 @@
 extern "C" {
 #endif
 
-#if (__STDC_VERSION__ >= 201112L)
-#define noreturn _Noreturn
-#else
+// #if (__STDC_VERSION__ >= 201112L)
+// #define noreturn _Noreturn
+// #else
 #define noreturn
-#endif
+// #endif
 
 typedef struct debug_context {
 	const char *filename;
