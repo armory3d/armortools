@@ -99,8 +99,7 @@ iron_ticks_t iron_timestamp(void);
 int iron_cpu_cores(void);
 int iron_hardware_threads(void);
 double iron_time(void);
-// void iron_start(void);
-void kinc_start(void);
+void iron_start(void);
 void iron_stop(void);
 void iron_set_keep_screen_on(bool on);
 

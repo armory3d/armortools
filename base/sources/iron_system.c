@@ -259,8 +259,7 @@ bool iron_internal_frame(void) {
 	return running;
 }
 
-// void iron_start(void) {
-void kinc_start(void) {
+void iron_start(void) {
 	running = true;
 
 #if !defined(IRON_WASM)

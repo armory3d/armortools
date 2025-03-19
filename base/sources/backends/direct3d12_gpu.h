@@ -82,9 +82,7 @@ typedef struct {
 
 typedef struct {
 	int vertexOffset;
-	uint32_t vertexSize;
 	int fragmentOffset;
-	uint32_t fragmentSize;
 } gpu_constant_location_impl_t;
 
 typedef struct iron_gpu_sampler_impl {
@@ -94,7 +92,6 @@ typedef struct iron_gpu_sampler_impl {
 typedef struct {
 	char name[64];
 	uint32_t offset;
-	uint32_t size;
 } ShaderConstant;
 
 typedef struct {
@@ -109,7 +106,6 @@ typedef struct {
 
 typedef struct {
 	ShaderConstant constants[32];
-	int constantsSize;
 	ShaderAttribute attributes[32];
 	ShaderTexture textures[32];
 	int texturesCount;

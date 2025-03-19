@@ -1007,7 +1007,6 @@ static ShaderConstant findConstant(iron_gpu_shader_t *shader, const char *name) 
 	ShaderConstant constant;
 	constant.name[0] = 0;
 	constant.offset = -1;
-	constant.size = 0;
 	return constant;
 }
 
@@ -1043,12 +1042,10 @@ iron_gpu_constant_location_t iron_gpu_pipeline_get_constant_location(struct iron
 	{
 		ShaderConstant constant = findConstant(pipe->vertex_shader, name);
 		location.impl.vertexOffset = constant.offset;
-		location.impl.vertexSize = constant.size;
 	}
 	{
 		ShaderConstant constant = findConstant(pipe->fragment_shader, name);
 		location.impl.fragmentOffset = constant.offset;
-		location.impl.fragmentSize = constant.size;
 	}
 
 	return location;
@@ -1096,6 +1093,11 @@ void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipe) {
 	for (int i = 0; i < pipe->input_layout->size; ++i) {
 		vertexDesc[i].SemanticName = "TEXCOORD";
 		vertexDesc[i].SemanticIndex = findAttribute(pipe->vertex_shader, pipe->input_layout->elements[i].name).attribute;
+
+		if (pipe->kong) {
+			vertexDesc[i].SemanticIndex = i;
+		}
+
 		vertexDesc[i].InputSlot = 0;
 		vertexDesc[i].AlignedByteOffset = (i == 0) ? 0 : D3D12_APPEND_ALIGNED_ELEMENT;
 		vertexDesc[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
@@ -1277,7 +1279,6 @@ void iron_gpu_shader_init(iron_gpu_shader_t *shader, const void *_data, size_t l
 	shader->impl.texturesCount = texCount;
 
 	uint8_t constantCount = data[index++];
-	shader->impl.constantsSize = 0;
 	for (unsigned i = 0; i < constantCount; ++i) {
 		char name[64];
 		for (unsigned i2 = 0; i2 < 63; ++i2) {
@@ -1288,12 +1289,11 @@ void iron_gpu_shader_init(iron_gpu_shader_t *shader, const void *_data, size_t l
 		ShaderConstant constant;
 		memcpy(&constant.offset, &data[index], sizeof(constant.offset));
 		index += 4;
-		memcpy(&constant.size, &data[index], sizeof(constant.size));
+		// memcpy(&constant.size, &data[index], sizeof(constant.size));
 		index += 4;
 		index += 2; // columns and rows
 		strcpy(constant.name, name);
 		shader->impl.constants[i] = constant;
-		shader->impl.constantsSize = constant.offset + constant.size;
 	}
 
 	shader->impl.length = (int)length - index;
