@@ -82,13 +82,13 @@ void draw_text_end(void);
 iron_matrix4x4_t draw_matrix4x4_orthogonal_projection(float left, float right, float bottom, float top, float zn, float zf) {
 	float tx = -(right + left) / (right - left);
 	float ty = -(top + bottom) / (top - bottom);
-	float tz = -(zf + zn) / (zf - zn);
+	float tz = -zn / (zf - zn);
 	return (iron_matrix4x4_t) {
 		2.0f / (right - left), 0.0f, 0.0f, 0.0f,
 		0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
-		0.0f, 0.0f, -2.0f / (zf - zn), 0.0f,
+		0.0f, 0.0f, -1.0f / (zf - zn), 0.0f,
 		tx, ty, tz, 1.0f
-	};
+    };
 }
 
 void draw_matrix3x3_multquad(iron_matrix3x3_t *m, float qx, float qy, float qw, float qh, iron_vector2_t *out) {
@@ -192,9 +192,14 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_ver
 		colored_pipeline.blend_destination = IRON_GPU_BLEND_INV_SOURCE_ALPHA;
 		colored_pipeline.alpha_blend_source = IRON_GPU_BLEND_ONE;
 		colored_pipeline.alpha_blend_destination = IRON_GPU_BLEND_INV_SOURCE_ALPHA;
+
+		colored_pipeline.kong = true;
+
 		iron_gpu_pipeline_compile(&colored_pipeline);
 
 		colored_proj_loc = iron_gpu_pipeline_get_constant_location(&colored_pipeline, "P");
+		colored_proj_loc.impl.vertexOffset = 0;
+		colored_proj_loc.impl.fragmentOffset = -1;
 
 		gpu_vertex_buffer_init(&colored_rect_vertex_buffer, DRAW_BUFFER_SIZE * 4, &structure, GPU_USAGE_DYNAMIC);
 		colored_rect_verts = gpu_vertex_buffer_lock_all(&colored_rect_vertex_buffer);

@@ -734,6 +734,8 @@ void iron_gpu_internal_pipeline_set_defaults(iron_gpu_pipeline_t *state) {
 
 	state->color_attachment_count = 1;
 	state->depth_attachment_bits = 0;
+
+	state->kong = false;
 }
 
 void iron_gpu_sampler_options_set_defaults(iron_gpu_sampler_options_t *options) {

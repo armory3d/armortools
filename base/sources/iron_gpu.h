@@ -355,6 +355,8 @@ typedef struct iron_gpu_pipeline {
 	int depth_attachment_bits;
 
 	gpu_pipeline_impl_t impl;
+
+	bool kong;
 } iron_gpu_pipeline_t;
 
 typedef struct iron_gpu_sampler_options {
