@@ -92,6 +92,24 @@ static void add_func_float_float(char *name) {
 	f->block                   = NULL;
 }
 
+static void add_func_float_float_float(char *name) {
+	function_id func = add_function(add_name(name));
+	function   *f    = get_function(func);
+	init_type_ref(&f->return_type, add_name("float"));
+	f->return_type.type = find_type_by_ref(&f->return_type);
+
+	f->parameter_names[0] = add_name("a");
+	init_type_ref(&f->parameter_types[0], add_name("float"));
+	f->parameter_types[0].type = find_type_by_ref(&f->parameter_types[0]);
+
+	f->parameter_names[1] = add_name("b");
+	init_type_ref(&f->parameter_types[1], add_name("float"));
+	f->parameter_types[1].type = find_type_by_ref(&f->parameter_types[1]);
+
+	f->parameters_size = 2;
+	f->block           = NULL;
+}
+
 static void add_func_float_float2(char *name) {
 	function_id func = add_function(add_name(name));
 	function   *f    = get_function(func);
@@ -585,6 +603,10 @@ void functions_init(void) {
 	add_func_float3_float3("normalize");
 	add_func_float_float("sin");
 	add_func_float_float("cos");
+	add_func_float_float("asin");
+	add_func_float_float("acos");
+	add_func_float_float("atan");
+	add_func_float_float_float("atan2");
 	add_func_float_float2("length");
 	add_func_uint3("ray_index");
 	add_func_float3("ray_dimensions");

@@ -1,0 +1,52 @@
+
+#[set(everything)]
+const constants: {
+	SMVP: float4x4;
+	envmap_data_world: float4; // angle, sin(angle), cos(angle), strength
+};
+
+#[set(everything)]
+const envmap: tex2d;
+
+#[set(everything)]
+const envmap_sampler: sampler;
+
+const PI: float = 3.1415926535;
+const PI2: float = 6.283185307;
+
+struct vert_in {
+	pos: float3;
+	nor: float3;
+}
+
+struct vert_out {
+	pos: float4;
+	nor: float3;
+}
+
+fun world_pass_vert(input: vert_in): vert_out {
+	var output: vert_out;
+	output.pos = constants.SMVP * float4(input.pos, 1.0);
+	output.nor = input.nor;
+	return output;
+}
+
+fun envmap_equirect(normal: float3, angle: float): float2 {
+	var phi: float = acos(normal.z);
+	var theta: float = atan2(normal.x, -normal.y) + PI + angle;
+	return float2(theta / PI2, phi / PI);
+}
+
+fun world_pass_frag(input: vert_out): float4 {
+	var n: float3 = normalize(input.nor);
+	var color: float4;
+	color.rgb = sample(envmap, envmap_sampler, envmap_equirect(-n, constants.envmap_data_world.x)).rgb * constants.envmap_data_world.w;
+	color.a = 0.0; // Mark as non-opaque
+	return color;
+}
+
+#[pipe]
+struct pipe {
+	vertex = world_pass_vert;
+	fragment = world_pass_frag;
+}

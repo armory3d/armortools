@@ -18,6 +18,7 @@ typedef struct opcode {
 	enum {
 		OPCODE_VAR,
 		OPCODE_NOT,
+		OPCODE_NEGATE,
 		OPCODE_STORE_VARIABLE,
 		OPCODE_SUB_AND_STORE_VARIABLE,
 		OPCODE_ADD_AND_STORE_VARIABLE,
@@ -62,6 +63,10 @@ typedef struct opcode {
 		struct {
 			variable var;
 		} op_var;
+		struct {
+			variable from;
+			variable to;
+		} op_negate;
 		struct {
 			variable from;
 			variable to;

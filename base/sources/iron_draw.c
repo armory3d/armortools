@@ -153,10 +153,17 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_ver
 		image_pipeline.blend_destination = IRON_GPU_BLEND_INV_SOURCE_ALPHA;
 		image_pipeline.alpha_blend_source = IRON_GPU_BLEND_ONE;
 		image_pipeline.alpha_blend_destination = IRON_GPU_BLEND_INV_SOURCE_ALPHA;
+
+		image_pipeline.kong = true;
+
 		iron_gpu_pipeline_compile(&image_pipeline);
 
 		image_tex_unit = iron_gpu_pipeline_get_texture_unit(&image_pipeline, "tex");
+		image_tex_unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT] = 0;
+
 		image_proj_loc = iron_gpu_pipeline_get_constant_location(&image_pipeline, "P");
+		image_proj_loc.impl.vertexOffset = 0;
+		image_proj_loc.impl.fragmentOffset = -1;
 
 		gpu_vertex_buffer_init(&image_vertex_buffer, DRAW_BUFFER_SIZE * 4, &structure, GPU_USAGE_DYNAMIC);
 		image_rect_verts = gpu_vertex_buffer_lock_all(&image_vertex_buffer);
@@ -248,9 +255,17 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_ver
 		text_pipeline.blend_destination = IRON_GPU_BLEND_INV_SOURCE_ALPHA;
 		text_pipeline.alpha_blend_source = IRON_GPU_BLEND_SOURCE_ALPHA;
 		text_pipeline.alpha_blend_destination = IRON_GPU_BLEND_INV_SOURCE_ALPHA;
+
+		text_pipeline.kong = true;
+
 		iron_gpu_pipeline_compile(&text_pipeline);
+
 		text_tex_unit = iron_gpu_pipeline_get_texture_unit(&text_pipeline, "tex");
+		text_tex_unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT] = 0;
+
 		text_proj_loc = iron_gpu_pipeline_get_constant_location(&text_pipeline, "P");
+		text_proj_loc.impl.vertexOffset = 0;
+		text_proj_loc.impl.fragmentOffset = -1;
 
 		iron_gpu_pipeline_init(&text_pipeline_rt);
 		text_pipeline_rt.input_layout = &structure;
@@ -260,6 +275,9 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_ver
 		text_pipeline_rt.blend_destination = IRON_GPU_BLEND_INV_SOURCE_ALPHA;
 		text_pipeline_rt.alpha_blend_source = IRON_GPU_BLEND_ONE;
 		text_pipeline_rt.alpha_blend_destination = IRON_GPU_BLEND_INV_SOURCE_ALPHA;
+
+		text_pipeline_rt.kong = true;
+
 		iron_gpu_pipeline_compile(&text_pipeline_rt);
 
 		gpu_vertex_buffer_init(&text_vertex_buffer, DRAW_BUFFER_SIZE * 4, &structure, GPU_USAGE_DYNAMIC);

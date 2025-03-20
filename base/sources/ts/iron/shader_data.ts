@@ -142,6 +142,13 @@ function shader_context_compile(raw: shader_context_t): shader_context_t {
 		}
 	}
 	else {
+
+		if (starts_with(raw.fragment_shader, "_")) {
+			raw.fragment_shader = substring(raw.fragment_shader, 1, raw.fragment_shader.length);
+			raw.vertex_shader = substring(raw.vertex_shader, 1, raw.vertex_shader.length);
+			raw._.pipe_state.kong = true;
+		}
+
 		///if arm_embed
 		raw._.pipe_state.fragment_shader = sys_get_shader(raw.fragment_shader);
 		raw._.pipe_state.vertex_shader = sys_get_shader(raw.vertex_shader);
@@ -158,20 +165,46 @@ function shader_context_compile(raw: shader_context_t): shader_context_t {
 	return shader_context_finish_compile(raw);
 }
 
+function shader_context_type_offset(t: string): i32 {
+	if (t == "int") {
+		return 4;
+	}
+	if (t == "float") {
+		return 4;
+	}
+	if (t == "vec2") {
+		return 8;
+	}
+	if (t == "vec3") {
+		return 12;
+	}
+	if (t == "vec4") {
+		return 16;
+	}
+	if (t == "mat4") {
+		return 64;
+	}
+	if (t == "mat3") {
+		return 36;
+	}
+}
+
 function shader_context_finish_compile(raw: shader_context_t): shader_context_t {
 	gpu_compile_pipeline(raw._.pipe_state);
 
 	if (raw.constants != null) {
+		let offset: i32 = 0;
 		for (let i: i32 = 0; i < raw.constants.length; ++i) {
 			let c: shader_const_t = raw.constants[i];
-			shader_context_add_const(raw, c);
+			shader_context_add_const(raw, c, offset);
+			offset += shader_context_type_offset(c.type);
 		}
 	}
 
 	if (raw.texture_units != null) {
 		for (let i: i32 = 0; i < raw.texture_units.length; ++i) {
 			let tu: tex_unit_t = raw.texture_units[i];
-			shader_context_add_tex(raw, tu);
+			shader_context_add_tex(raw, tu, i);
 		}
 	}
 
@@ -343,12 +376,21 @@ function shader_context_get_tex_format(s: string): tex_format_t {
 	return tex_format_t.RGBA32;
 }
 
-function shader_context_add_const(raw: shader_context_t, c: shader_const_t) {
-	array_push(raw._.constants, gpu_get_constant_location(raw._.pipe_state, c.name));
+function shader_context_add_const(raw: shader_context_t, c: shader_const_t, offset: i32) {
+	let cl: iron_gpu_constant_location_t = gpu_get_constant_location(raw._.pipe_state, c.name);
+	if (raw._.pipe_state.kong) {
+		let ptr: gpu_constant_location_impl_t = ADDRESS(cl.impl);
+		ptr.vertexOffset = offset;
+		ptr.fragmentOffset = offset;
+	}
+	array_push(raw._.constants, cl);
 }
 
-function shader_context_add_tex(raw: shader_context_t, tu: tex_unit_t) {
-	let unit: any = gpu_get_texture_unit(raw._.pipe_state, tu.name);
+function shader_context_add_tex(raw: shader_context_t, tu: tex_unit_t, i: i32) {
+	let unit: iron_gpu_texture_unit_t = gpu_get_texture_unit(raw._.pipe_state, tu.name);
+	if (raw._.pipe_state.kong) {
+		ARRAY_ACCESS(unit.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = i;
+	}
 	array_push(raw._.tex_units, unit);
 }
 

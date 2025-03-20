@@ -380,8 +380,16 @@ variable emit_expression(opcodes *code, block *parent, expression *e) {
 			error(context, "not implemented");
 		case OPERATOR_LESS_EQUAL:
 			error(context, "not implemented");
-		case OPERATOR_MINUS:
-			error(context, "not implemented");
+		case OPERATOR_MINUS: {
+			variable v = emit_expression(code, parent, e->unary.right);
+			opcode   o;
+			o.type          = OPCODE_NEGATE;
+			o.size          = OP_SIZE(o, op_negate);
+			o.op_negate.from = v;
+			o.op_negate.to   = allocate_variable(v.type, VARIABLE_LOCAL);
+			emit_op(code, &o);
+			return o.op_negate.to;
+		}
 		case OPERATOR_PLUS:
 			error(context, "not implemented");
 		case OPERATOR_DIVIDE:

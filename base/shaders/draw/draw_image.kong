@@ -1,0 +1,43 @@
+
+#[set(everything)]
+const constants: {
+	P: float4x4;
+};
+
+#[set(everything)]
+const tex: tex2d;
+
+#[set(everything)]
+const tex_sampler: sampler;
+
+struct vert_in {
+	pos: float3;
+	tex: float2;
+	col: float4;
+}
+
+struct vert_out {
+	pos: float4;
+	tex: float2;
+	col: float4;
+}
+
+fun draw_image_vert(input: vert_in): vert_out {
+	var output: vert_out;
+	output.pos = constants.P * float4(input.pos, 1.0);
+	output.tex = input.tex;
+	output.col = input.col;
+	return output;
+}
+
+fun draw_image_frag(input: vert_out): float4 {
+	var texcolor: float4 = sample(tex, tex_sampler, input.tex) * input.col;
+	texcolor.rgb = texcolor.rgb * texcolor.a * input.col.a;
+	return texcolor;
+}
+
+#[pipe]
+struct pipe {
+	vertex = draw_image_vert;
+	fragment = draw_image_frag;
+}
