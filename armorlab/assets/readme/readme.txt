@@ -1,7 +1,7 @@
 Thank you for supporting ArmorLab!
 
 Quick start:
-https://armorlab.org/manual
+https://armory3d.org/lab/manual
 
                                 (
    (                            )\ )           )

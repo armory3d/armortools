@@ -7,7 +7,7 @@ function export_obj_write_string(out: u8[], str: string) {
 
 function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp: bool = false) {
 	let o: u8[] = [];
-	export_obj_write_string(o, "# armorsculpt.org\n");
+	export_obj_write_string(o, "# armorsculpt\n");
 
 	let texpaint: iron_gpu_texture_t = project_layers[0].texpaint;
 	let pixels: buffer_t = gpu_get_texture_pixels(texpaint);

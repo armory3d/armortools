@@ -1,4 +1,4 @@
-![](https://armorsculpt.org/img/git.jpg)
+![](https://armory3d.org/sculpt/img/git.jpg)
 
 armorsculpt
 ==============

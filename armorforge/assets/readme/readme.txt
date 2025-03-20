@@ -1,7 +1,7 @@
 Thank you for supporting ArmorForge!
 
 Quick start:
-https://armorforge.org/manual
+https://armory3d.org/forge/manual
 
                                 (
    (                            )\ )

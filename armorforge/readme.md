@@ -1,4 +1,4 @@
-![](https://armorforge.org/img/git.jpg)
+![](https://armory3d.org/forge/img/git.jpg)
 
 armorforge
 ==============

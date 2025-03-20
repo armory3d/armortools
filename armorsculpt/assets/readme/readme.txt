@@ -1,7 +1,7 @@
 Thank you for supporting ArmorSculpt!
 
 Quick start:
-https://armorsculpt.org/manual
+https://armory3d.org/sculpt/manual
 
                                 (
    (                            )\ )            (            )
