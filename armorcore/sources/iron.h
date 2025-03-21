@@ -713,7 +713,7 @@ void _drop_files(wchar_t *file_path, void *data) {
 	char buffer[1024];
 
 #ifdef KINC_WINDOWS
-	WideCharToMultiByte(CP_UTF8, 0, file_path, wcslen(file_path), buffer, sizeof(buffer), NULL, NULL);
+	WideCharToMultiByte(CP_UTF8, 0, file_path, wcslen(file_path) + 1, buffer, sizeof(buffer), NULL, NULL);
 #else
 	wcstombs(buffer, file_path, sizeof(buffer));
 #endif
