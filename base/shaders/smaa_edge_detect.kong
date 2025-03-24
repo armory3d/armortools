@@ -1,0 +1,119 @@
+// Copyright (C) 2013 Jorge Jimenez (jorge@iryoku.com)
+// Copyright (C) 2013 Jose I. Echevarria (joseignacioechevarria@gmail.com)
+// Copyright (C) 2013 Belen Masia (bmasia@unizar.es)
+// Copyright (C) 2013 Fernando Navarro (fernandn@microsoft.com)
+// Copyright (C) 2013 Diego Gutierrez (diegog@unizar.es)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+// of the Software, and to permit persons to whom the Software is furnished to
+// do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software. As clarification, there
+// is no requirement that the copyright notice and permission be included in
+// binary distributions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+// http://www.iryoku.com/smaa/
+
+#[set(everything)]
+const color_tex: tex2d;
+
+#[set(everything)]
+const color_tex_sampler: sampler;
+
+#[set(everything)]
+const constants: {
+	screen_size_inv: float2;
+};
+
+struct vert_in {
+	pos: float2;
+}
+
+struct vert_out {
+	pos: float4;
+	tex: float2;
+	offset0: float4;
+	offset1: float4;
+	offset2: float4;
+}
+
+fun smaa_edge_detect_vert(input: vert_in): vert_out {
+	var output: vert_out;
+	output.tex = input.pos.xy * 0.5 + 0.5;
+	output.tex.y = 1.0 - output.tex.y;
+	output.pos = float4(input.pos.xy, 0.0, 1.0);
+	var xyxy: float4 = float4(constants.screen_size_inv.xy, constants.screen_size_inv.xy);
+	output.offset0 = xyxy * float4(-1.0, 0.0, 0.0,  1.0) + float4(output.tex.xy, output.tex.xy);
+	output.offset1 = xyxy * float4( 1.0, 0.0, 0.0, -1.0) + float4(output.tex.xy, output.tex.xy);
+	output.offset2 = xyxy * float4(-2.0, 0.0, 0.0,  2.0) + float4(output.tex.xy, output.tex.xy);
+	return output;
+}
+
+fun smaa_edge_detect_frag(input: vert_out): float4 {
+	var delta: float4;
+	var C: float3 = sample_lod(color_tex, color_tex_sampler, input.tex, 0.0).rgb;
+
+	var Cleft: float3 = sample_lod(color_tex, color_tex_sampler, input.offset0.xy, 0.0).rgb;
+	var t: float3 = abs(C - Cleft);
+	delta.x = max(max(t.r, t.g), t.b);
+
+	var Ctop: float3  = sample_lod(color_tex, color_tex_sampler, input.offset0.zw, 0.0).rgb;
+	t = abs(C - Ctop);
+	delta.y = max(max(t.r, t.g), t.b);
+
+	// var edges: float2 = step(float2(0.1, 0.1), delta.xy);
+	// if (dot(edges, float2(1.0, 1.0)) == 0.0) {
+	// 	discard;
+	// }
+
+	var edges: float2;
+	edges.x = step(0.1, delta.x);
+	edges.y = step(0.1, delta.y);
+	if (dot(edges, float2(1.0, 1.0)) == 0.0) {
+		discard;
+	}
+
+	var Cright: float3 = sample_lod(color_tex, color_tex_sampler, input.offset1.xy, 0.0).rgb;
+	t = abs(C - Cright);
+	delta.z = max(max(t.r, t.g), t.b);
+
+	var Cbottom: float3  = sample_lod(color_tex, color_tex_sampler, input.offset1.zw, 0.0).rgb;
+	t = abs(C - Cbottom);
+	delta.w = max(max(t.r, t.g), t.b);
+
+	var max_delta: float2 = max(delta.xy, delta.zw);
+
+	var Cleftleft: float3 = sample_lod(color_tex, color_tex_sampler, input.offset2.xy, 0.0).rgb;
+	t = abs(C - Cleftleft);
+	delta.z = max(max(t.r, t.g), t.b);
+
+	var Ctoptop: float3 = sample_lod(color_tex, color_tex_sampler, input.offset2.zw, 0.0).rgb;
+	t = abs(C - Ctoptop);
+	delta.w = max(max(t.r, t.g), t.b);
+
+	max_delta = max(max_delta.xy, delta.zw);
+	var final_delta: float = max(max_delta.x, max_delta.y);
+
+	// edges.xy *= step(final_delta, 2.0 * delta.xy);
+	edges.x *= step(final_delta, 2.0 * delta.x);
+	edges.y *= step(final_delta, 2.0 * delta.y);
+
+	return float4(edges.xy, 0, 0);
+}
+
+#[pipe]
+struct pipe {
+	vertex = smaa_edge_detect_vert;
+	fragment = smaa_edge_detect_frag;
+}

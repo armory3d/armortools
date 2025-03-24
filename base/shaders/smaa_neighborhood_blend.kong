@@ -1,0 +1,80 @@
+
+#[set(everything)]
+const color_tex: tex2d;
+
+#[set(everything)]
+const color_tex_sampler: sampler;
+
+#[set(everything)]
+const blend_tex: tex2d;
+
+#[set(everything)]
+const blend_tex_sampler: sampler;
+
+#[set(everything)]
+const constants: {
+	screen_size_inv: float2;
+};
+
+struct vert_in {
+	pos: float2;
+}
+
+struct vert_out {
+	pos: float4;
+	tex: float2;
+	offset: float4;
+}
+
+fun smaa_neighborhood_blend_vert(input: vert_in): vert_out {
+	var output: vert_out;
+	output.tex = input.pos.xy * 0.5 + 0.5;
+	output.tex.y = 1.0 - output.tex.y;
+	output.pos = float4(input.pos.xy, 0.0, 1.0);
+	var xyxy: float4 = float4(constants.screen_size_inv.xy, constants.screen_size_inv.xy);
+	output.offset = xyxy * float4(1.0, 0.0, 0.0, -1.0) + float4(output.tex.xy, output.tex.xy);
+	return output;
+}
+
+fun sample_color_tex(coords: float2): float4 {
+	coords.y = 1.0 - coords.y;
+	return sample_lod(color_tex, color_tex_sampler, coords, 0.0);
+}
+
+fun smaa_neighborhood_blend_frag(input: vert_out): float4 {
+	var a: float4;
+	a.x = sample_lod(blend_tex, blend_tex_sampler, input.offset.xy, 0.0).a; // Right
+	a.y = sample_lod(blend_tex, blend_tex_sampler, input.offset.zw, 0.0).g; // Top
+	a.wz = sample_lod(blend_tex, blend_tex_sampler, input.tex, 0.0).xz; // Bottom / Left
+
+	if (dot(a, float4(1.0, 1.0, 1.0, 1.0)) < 0.00001) { // 1e-5
+		return sample_lod(color_tex, color_tex_sampler, input.tex, 0.0);
+	}
+	else {
+		var h: bool = max(a.x, a.z) > max(a.y, a.w);
+		var blending_offset: float4 = float4(0.0, a.y, 0.0, a.w);
+		var blending_weight: float2 = a.yw;
+		if (h) {
+			blending_offset.x = a.x;
+			blending_offset.y = 0.0;
+			blending_offset.z = a.z;
+			blending_offset.w = 0.0;
+			blending_weight.x = a.x;
+			blending_weight.y = a.z;
+		}
+		blending_weight /= dot(blending_weight, float2(1.0, 1.0));
+		var tc: float2 = float2(input.tex.x, 1.0 - input.tex.y);
+		var xyxy: float4 = float4(tc.xy, tc.xy);
+		var blending_coord: float4 = blending_offset * float4(constants.screen_size_inv.xy, -constants.screen_size_inv.xy) + xyxy;
+		var color: float4 = blending_weight.x * sample_color_tex(blending_coord.xy);
+		color += blending_weight.y * sample_color_tex(blending_coord.zw);
+		return color;
+	}
+	return float4(0.0, 0.0, 0.0, 0.0);
+}
+
+#[pipe]
+struct pipe {
+	vertex = smaa_neighborhood_blend_vert;
+	fragment = smaa_neighborhood_blend_frag;
+}

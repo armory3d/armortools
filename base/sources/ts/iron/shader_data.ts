@@ -166,27 +166,33 @@ function shader_context_compile(raw: shader_context_t): shader_context_t {
 }
 
 function shader_context_type_offset(t: string): i32 {
-	if (t == "int") {
-		return 4;
-	}
-	if (t == "float") {
-		return 4;
-	}
-	if (t == "vec2") {
-		return 8;
-	}
-	if (t == "vec3") {
-		return 12;
-	}
-	if (t == "vec4") {
-		return 16;
-	}
-	if (t == "mat4") {
-		return 64;
-	}
-	if (t == "mat3") {
-		return 36;
-	}
+	///if IRON_DIRECT3D12
+	if (t == "int") return 16;
+	if (t == "float") return 16;
+	if (t == "vec2") return 16;
+	if (t == "vec3") return 16;
+	if (t == "vec4") return 16;
+	if (t == "mat3") return 48;
+	if (t == "mat4") return 64;
+	///end
+	///if IRON_VULKAN
+	if (t == "int") return 4;
+	if (t == "float") return 4;
+	if (t == "vec2") return 8;
+	if (t == "vec3") return 16;
+	if (t == "vec4") return 16;
+	if (t == "mat3") return 48;
+	if (t == "mat4") return 64;
+	///end
+	///if IRON_METAL
+	if (t == "int") return 4;
+	if (t == "float") return 4;
+	if (t == "vec2") return 8;
+	if (t == "vec3") return 12;
+	if (t == "vec4") return 16;
+	if (t == "mat3") return 36;
+	if (t == "mat4") return 64;
+	///end
 }
 
 function shader_context_finish_compile(raw: shader_context_t): shader_context_t {

@@ -31,10 +31,7 @@ out vec4 frag_color;
 vec2 cdw_end;
 
 vec4 textureLod_a(sampler2D edges_tex, vec2 coord, float lod) {
-#ifdef GLSL
-#else
 	coord.y = 1.0 - coord.y;
-#endif
 	return textureLod(edges_tex, coord, lod);
 }
 

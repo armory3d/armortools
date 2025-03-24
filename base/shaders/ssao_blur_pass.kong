@@ -1,0 +1,139 @@
+
+#[set(everything)]
+const tex: tex2d;
+
+#[set(everything)]
+const tex_sampler: sampler;
+
+#[set(everything)]
+const gbuffer0: tex2d;
+
+#[set(everything)]
+const gbuffer0_sampler: sampler;
+
+#[set(everything)]
+const constants: {
+	dir_inv: float2;
+};
+
+// const blur_weights: float[] = {
+// 	0.132572, 0.125472, 0.106373, 0.08078, 0.05495, 0.033482, 0.018275, 0.008934, 0.003912, 0.001535
+// };
+
+const discard_threshold: float = 0.95;
+
+struct vert_in {
+	pos: float2;
+}
+
+struct vert_out {
+	pos: float4;
+	tex: float2;
+}
+
+fun ssao_blur_pass_vert(input: vert_in): vert_out {
+	var output: vert_out;
+	output.tex = input.pos.xy * 0.5 + 0.5;
+	output.tex.y = 1.0 - output.tex.y;
+	output.pos = float4(input.pos.xy, 0.0, 1.0);
+	return output;
+}
+
+fun octahedron_wrap(v: float2): float2 {
+	var a: float2;
+	if (v.x >= 0.0) {
+		a.x = 1.0;
+	}
+	else {
+		a.x = -1.0;
+	}
+
+	if (v.y >= 0.0) {
+		a.y = 1.0;
+	}
+	else {
+		a.y = -1.0;
+	}
+
+	var r: float2;
+	r.x = abs(v.y);
+	r.y = abs(v.x);
+	r.x = 1.0 - r.x;
+	r.y = 1.0 - r.y;
+	return r * a;
+
+	// return (1.0 - abs(v.yx)) * (float2(v.x >= 0.0 ? 1.0 : -1.0, v.y >= 0.0 ? 1.0 : -1.0));
+}
+
+fun get_nor(enc: float2): float3 {
+	var n: float3;
+	n.z = 1.0 - abs(enc.x) - abs(enc.y);
+	if (n.z >= 0.0) {
+		n.xy = enc.xy;
+	}
+	else {
+		n.xy = octahedron_wrap(enc.xy);
+	}
+	n = normalize(n);
+	return n;
+}
+
+fun ssao_blur_pass_frag(input: vert_out): float {
+
+	var nor: float3 = get_nor(sample_lod(gbuffer0, gbuffer0_sampler, input.tex, 0.0).rg);
+	// var weight: float = blur_weights[0];
+	var weight: float = 0.132572;
+	var color: float = sample_lod(tex, tex_sampler, input.tex, 0.0).r * weight;
+
+	for (var i: int = 1; i < 8; i += 1) {
+
+		var blur_weight_i: float; // = blur_weights[i];
+		if (i == 1) {
+			blur_weight_i = 0.125472;
+		}
+		if (i == 2) {
+			blur_weight_i = 0.106373;
+		}
+		if (i == 3) {
+			blur_weight_i = 0.08078;
+		}
+		if (i == 4) {
+			blur_weight_i = 0.05495;
+		}
+		if (i == 5) {
+			blur_weight_i = 0.033482;
+		}
+		if (i == 6) {
+			blur_weight_i = 0.018275;
+		}
+		if (i == 7) {
+			blur_weight_i = 0.008934;
+		}
+
+		var posadd: float = i;
+
+		var nor2: float3 = get_nor(sample_lod(gbuffer0, gbuffer0_sampler, input.tex + posadd * constants.dir_inv, 0.0).rg);
+		var influence_factor: float = step(discard_threshold, dot(nor2, nor));
+		var col: float = sample_lod(tex, tex_sampler, input.tex + posadd * constants.dir_inv, 0.0).r;
+
+		var w: float = blur_weight_i * influence_factor;
+		color += col * w;
+		weight += w;
+
+		nor2 = get_nor(sample_lod(gbuffer0, gbuffer0_sampler, input.tex - posadd * constants.dir_inv, 0.0).rg);
+		influence_factor = step(discard_threshold, dot(nor2, nor));
+		col = sample_lod(tex, tex_sampler, input.tex - posadd * constants.dir_inv, 0.0).r;
+		w = blur_weight_i * influence_factor;
+		color += col * w;
+		weight += w;
+	}
+
+	color = color / weight;
+	return color;
+}
+
+#[pipe]
+struct pipe {
+	vertex = ssao_blur_pass_vert;
+	fragment = ssao_blur_pass_frag;
+}
