@@ -144,7 +144,7 @@ function read_token(): string {
 	return token;
 }
 
-function parse() {
+function alang_parse() {
 	pos = 0;
 
 	while (true) {
@@ -1734,7 +1734,7 @@ function alang(_alang_source: string, _alang_output: string) {
 	any_array_resize(struct_types.values, 512 * 2);
 	//
 
-	parse();
+	alang_parse();
 	fhandle = fopen(alang_output, "wb");
 	write_iron_c();
 	fclose(fhandle);

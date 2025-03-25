@@ -145,7 +145,7 @@ function read_token() {
 	return token;
 }
 
-function parse() {
+function alang_parse() {
 	tokens = [];
 	pos = 0;
 
@@ -1670,7 +1670,7 @@ function write_iron_c() {
 // ╚═╝  ╚═╝    ╚═╝     ╚═════╝    ╚═╝  ╚═╝    ╚══════╝       ╚═╝       ╚═╝  ╚═╝    ╚═╝  ╚═╝       ╚═╝
 
 function alang() {
-	parse();
+	alang_parse();
 	fhandle = std.open(flags.alang_output, "w");
 	write_iron_c();
 	fhandle.close();
