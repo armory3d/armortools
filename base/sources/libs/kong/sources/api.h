@@ -1,3 +1,0 @@
-#pragma once
-
-typedef enum api_kind { API_DEFAULT, API_DIRECT3D9, API_DIRECT3D11, API_DIRECT3D12, API_OPENGL, API_METAL, API_WEBGPU, API_VULKAN } api_kind;
