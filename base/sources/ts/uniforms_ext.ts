@@ -127,6 +127,15 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 	else if (link == "_picker_height") {
 		return context_raw.picked_color.height;
 	}
+	else if (link == "_taa_blend") {
+		if (render_path_base_taa_frame == 0) {
+			return 0.0;
+		}
+		if (context_raw.ddirty > 1 || context_raw.pdirty > 0) {
+			return 0.5;
+		}
+		return 0.833;
+	}
 
 	if (parser_material_script_links != null) {
 		let keys: string[] = map_keys(parser_material_script_links);

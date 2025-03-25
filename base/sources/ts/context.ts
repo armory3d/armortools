@@ -143,7 +143,7 @@ type context_t = {
 	decal_x?: f32;
 	decal_y?: f32;
 
-	cache_draws?: bool;
+	// cache_draws?: bool;
 	write_icon_on_export?: bool;
 
 	text_tool_image?: iron_gpu_texture_t;
@@ -369,7 +369,7 @@ function context_create(): context_t {
 	c.decal_preview = false;
 	c.decal_x = 0.0;
 	c.decal_y = 0.0;
-	c.cache_draws = false;
+	// c.cache_draws = false;
 	c.write_icon_on_export = false;
 	///if arm_physics
 	c.particle_hit_x = 0.0;

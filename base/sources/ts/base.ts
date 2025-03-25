@@ -450,7 +450,7 @@ function base_update() {
 	///if arm_windows
 	let is_picker: bool = context_is_picker();
 	let decal: bool = context_is_decal();
-	ui_always_redraw_window = !context_raw.cache_draws ||
+	ui_always_redraw_window = //!context_raw.cache_draws ||
 							  ui_menu_show ||
 							  ui_box_show ||
 							  base_is_dragging ||

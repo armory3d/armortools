@@ -72,6 +72,11 @@ function camera_object_proj_jitter(raw: camera_object_t) {
 	raw.p = mat4_clone(raw.no_jitter_p);
 
 	let i: i32 = raw.frame % 6;
+
+	if (context_raw.ddirty > 1 || context_raw.pdirty > 0) {
+		i = raw.frame % 2;
+	}
+
 	let x: f32 = 0.0;
 	let y: f32 = 0.0;
 

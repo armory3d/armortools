@@ -108,11 +108,14 @@ function render_path_base_is_cached(): bool {
 		if (mx != render_path_base_last_x || my != render_path_base_last_y || mouse_locked) {
 			context_raw.ddirty = 0;
 		}
-		///if (arm_metal || arm_android)
+
 		if (context_raw.ddirty > -6) {
-		///else
-		if (context_raw.ddirty > -2) {
-		///end
+			// Accumulate taa frames
+			context_raw.ddirty--;
+			return false;
+		}
+
+		if (context_raw.ddirty > -12) {
 			render_path_set_target("");
 			render_path_bind_target("last", "tex");
 			if (render_path_base_ssaa4()) {
@@ -122,11 +125,11 @@ function render_path_base_is_cached(): bool {
 				render_path_draw_shader("shader_datas/copy_pass/copy_pass");
 			}
 			render_path_paint_commands_cursor();
-			if (context_raw.ddirty <= 0) {
-				context_raw.ddirty--;
-			}
+			context_raw.ddirty--;
 		}
+
 		render_path_base_end();
+
 		return true;
 	}
 	return false;
@@ -252,7 +255,8 @@ function render_path_base_init_ssao() {
 
 function render_path_base_draw_ssao() {
 	let ssao: bool = config_raw.rp_ssao != false && context_raw.camera_type == camera_type_t.PERSPECTIVE;
-	if (ssao && context_raw.ddirty > 0 && render_path_base_taa_frame > 0) {
+	// if (ssao && context_raw.ddirty > 0 && render_path_base_taa_frame > 0) {
+	if (ssao && render_path_base_taa_frame > 0) {
 		if (map_get(render_path_render_targets, "singlea") == null) {
 			render_path_base_init_ssao();
 		}
