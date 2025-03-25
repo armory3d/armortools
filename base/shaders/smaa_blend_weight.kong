@@ -1,0 +1,375 @@
+
+#[set(everything)]
+const edges_tex: tex2d;
+
+#[set(everything)]
+const edges_tex_sampler: sampler;
+
+#[set(everything)]
+const area_tex: tex2d;
+
+#[set(everything)]
+const area_tex_sampler: sampler;
+
+#[set(everything)]
+const search_tex: tex2d;
+
+#[set(everything)]
+const search_tex_sampler: sampler;
+
+#[set(everything)]
+const constants: {
+	screen_size: float2;
+	screen_size_inv: float2;
+};
+
+struct vert_in {
+	pos: float2;
+}
+
+struct vert_out {
+	pos: float4;
+	tex: float2;
+	pixcoord: float2;
+	offset0: float4;
+	offset1: float4;
+	offset2: float4;
+}
+
+fun smaa_blend_weight_vert(input: vert_in): vert_out {
+	var output: vert_out;
+	output.tex = input.pos.xy * 0.5 + 0.5;
+	output.pixcoord = output.tex * constants.screen_size;
+	output.pos = float4(input.pos.xy, 0.0, 1.0);
+
+	var xyxy: float4 = float4(constants.screen_size_inv.xy, constants.screen_size_inv.xy);
+	output.offset0 = xyxy * float4(-0.25, -0.125, 1.25, -0.125) + float4(output.tex.xy, output.tex.xy);
+	output.offset1 = xyxy * float4(-0.125, -0.25, -0.125, 1.25) + float4(output.tex.xy, output.tex.xy);
+	var xxyy: float4 = float4(constants.screen_size_inv.xx, constants.screen_size_inv.yy);
+	output.offset2 = xxyy * float4(-32.0, 32.0, -32.0, 32.0) + float4(output.offset0.xz, output.offset1.yw);
+	return output;
+}
+
+fun abs1(a: float): float {
+	if (a < 0) {
+		return -a;
+	}
+	return a;
+}
+
+fun sample_edges_tex(coord: float2): float4 {
+	coord.y = 1.0 - coord.y;
+	return sample_lod(edges_tex, edges_tex_sampler, coord, 0.0);
+}
+
+fun smaa_sample_level_zero_offset(coord: float2, offset: float2): float4 {
+	return sample_edges_tex(coord + offset * constants.screen_size_inv.xy);
+}
+
+fun smaa_decode_diag_bilinear_access2(e: float2): float2 {
+	e.r = e.r * abs1(5.0 * e.r - 5.0 * 0.75);
+	// return floor(e + 0.5);
+	e.x = floor(e.x + 0.5);
+	e.y = floor(e.y + 0.5);
+	return e;
+}
+
+fun smaa_decode_diag_bilinear_access4(e: float4): float4 {
+	// e.rb = e.rb * abs(5.0 * e.rb - 5.0 * 0.75);
+	e.r = e.r * abs1(5.0 * e.r - 5.0 * 0.75);
+	e.b = e.b * abs1(5.0 * e.b - 5.0 * 0.75);
+	// return floor(e + 0.5);
+	e.x = floor(e.x + 0.5);
+	e.y = floor(e.y + 0.5);
+	e.z = floor(e.z + 0.5);
+	e.w = floor(e.w + 0.5);
+	return e;
+}
+
+fun smaa_search_diag1(texcoord: float2, dir: float2): float3 {
+	var coord: float4 = float4(texcoord, -1.0, 1.0);
+	var t: float3 = float3(constants.screen_size_inv.xy, 1.0);
+	var cdw_end: float2;
+	while (coord.z < 7.0 && coord.w > 0.9) {
+		coord.xyz = t * float3(dir, 1.0) + coord.xyz;
+		cdw_end = sample_edges_tex(coord.xy).rg;
+		coord.w = dot(cdw_end /*e*/, float2(0.5, 0.5));
+	}
+	return float3(coord.zw, cdw_end.y);
+}
+
+fun smaa_search_diag2(texcoord: float2, dir: float2): float3 {
+	var coord: float4 = float4(texcoord, -1.0, 1.0);
+	coord.x += 0.25 * constants.screen_size_inv.x;
+	var t: float3 = float3(constants.screen_size_inv.xy, 1.0);
+	var cw: float = coord.w;
+	var cdw_end: float2;
+	while (coord.z < 7.0 && cw > 0.9) {
+		coord.xyz = t * float3(dir, 1.0) + coord.xyz;
+		cdw_end = sample_edges_tex(coord.xy).rg;
+		cdw_end = smaa_decode_diag_bilinear_access2(cdw_end);
+		cw = dot(cdw_end, float2(0.5, 0.5));
+	}
+	coord.w = cw;
+	return float3(coord.zw, cdw_end.y);
+}
+
+fun smaa_area_diag(dist: float2, e: float2, offset: float): float2 {
+	var texcoord: float2 = float2(20, 20) * e + dist;
+	texcoord = float2(1.0 / 160.0, 1.0 / 560.0) * texcoord + 0.5 * float2(1.0 / 160.0, 1.0 / 560.0);
+	texcoord.x += 0.5;
+	texcoord.y += (1.0 / 7.0) * offset;
+	return sample_lod(area_tex, area_tex_sampler, texcoord, 0.0).rg;
+}
+
+fun smaa_calculate_diag_weights(texcoord: float2, e: float2): float2 {
+	var weights: float2 = float2(0.0, 0.0);
+	var d: float4;
+	if (e.r > 0.0) {
+		var r: float3 = smaa_search_diag1(texcoord, float2(-1.0, 1.0));
+		d.xz = r.xy;
+		var dadd: float;
+		if (r.z > 0.9) {
+			dadd = 1.0;
+		}
+		else {
+			dadd = 0.0;
+		}
+		d.x += dadd;
+	}
+	else {
+		d.xz = float2(0.0, 0.0);
+	}
+	d.yw = smaa_search_diag1(texcoord, float2(1.0, -1.0)).xy;
+
+	if (d.x + d.y > 2.0) {
+		var xyxy: float4 = float4(constants.screen_size_inv.xy, constants.screen_size_inv.xy);
+		var coords: float4 = float4(-d.x + 0.25, d.x, d.y, -d.y - 0.25) * xyxy + float4(texcoord.xy, texcoord.xy);
+		var c: float4;
+
+		c.xy = smaa_sample_level_zero_offset(coords.xy, float2(-1,  0)).rg;
+		c.zw = smaa_sample_level_zero_offset(coords.zw, float2( 1,  0)).rg;
+		c.yxwz = smaa_decode_diag_bilinear_access4(c.xyzw);
+
+		var cc: float2 = float2(2.0, 2.0) * c.xz + c.yw;
+		var a1condx: float = step(0.9, d.z);
+		var a1condy: float = step(0.9, d.w);
+		if (a1condx == 1.0) {
+			cc.x = 0.0;
+		}
+		if (a1condy == 1.0) {
+			cc.y = 0.0;
+		}
+		weights += smaa_area_diag(d.xy, cc, 0.0);
+	}
+
+	d.xz = smaa_search_diag2(texcoord, float2(-1.0, -1.0)).xy;
+	if (smaa_sample_level_zero_offset(texcoord, float2(1, 0)).r > 0.0) {
+		var r: float3 = smaa_search_diag2(texcoord, float2(1.0, 1.0));
+		d.yw = r.xy;
+		var dadd: float;
+		if (r.z > 0.9) {
+			dadd = 1.0;
+		}
+		else {
+			dadd = 0.0;
+		}
+		d.y += dadd;
+	}
+	else {
+		d.yw = float2(0.0, 0.0);
+	}
+
+	if (d.x + d.y > 2.0) {
+		var xyxy: float4 = float4(constants.screen_size_inv.xy, constants.screen_size_inv.xy);
+		var coords: float4 = float4(-d.x, -d.x, d.y, d.y) * xyxy + float4(texcoord.xy, texcoord.xy);
+		var c: float4;
+		c.x  = smaa_sample_level_zero_offset(coords.xy, float2(-1,  0)).g;
+		c.y  = smaa_sample_level_zero_offset(coords.xy, float2( 0, -1)).r;
+		c.zw = smaa_sample_level_zero_offset(coords.zw, float2( 1,  0)).gr;
+		var cc: float2 = float2(2.0, 2.0) * c.xz + c.yw;
+
+		var a1condx: float = step(0.9, d.z);
+		var a1condy: float = step(0.9, d.w);
+		if (a1condx == 1.0) {
+			cc.x = 0.0;
+		}
+		if (a1condy == 1.0) {
+			cc.y = 0.0;
+		}
+		weights += smaa_area_diag(d.xy, cc, 0.0).gr;
+	}
+	return weights;
+}
+
+fun smaa_search_length(e: float2, offset: float): float {
+	var scale: float2 = float2(66.0, 33.0) * float2(0.5, -1.0);
+	var bias: float2 = float2(66.0, 33.0) * float2(offset, 1.0);
+	scale += float2(-1.0, 1.0);
+	bias += float2( 0.5, -0.5);
+	scale *= 1.0 / float2(64.0, 16.0);
+	bias *= 1.0 / float2(64.0, 16.0);
+	var coord: float2 = scale * e + bias;
+	return sample_lod(search_tex, search_tex_sampler, coord, 0.0).r;
+}
+
+fun smaa_search_x_left(texcoord: float2, end: float): float {
+	var e: float2 = float2(0.0, 1.0);
+	while (texcoord.x > end && e.g > 0.8281 && e.r == 0.0) {
+		e = sample_edges_tex(texcoord).rg;
+		texcoord = -float2(2.0, 0.0) * constants.screen_size_inv.xy + texcoord;
+	}
+	var offset: float = -(255.0 / 127.0) * smaa_search_length(e, 0.0) + 3.25;
+	return constants.screen_size_inv.x * offset + texcoord.x;
+}
+
+fun smaa_search_x_right(texcoord: float2, end: float): float {
+	var e: float2 = float2(0.0, 1.0);
+	while (texcoord.x < end && e.g > 0.8281 && e.r == 0.0) {
+		e = sample_edges_tex(texcoord).rg;
+		texcoord = float2(2.0, 0.0) * constants.screen_size_inv.xy + texcoord;
+	}
+	var offset: float = -(255.0 / 127.0) * smaa_search_length(e, 0.5) + 3.25;
+	return -constants.screen_size_inv.x * offset + texcoord.x;
+}
+
+fun smaa_search_y_up(texcoord: float2, end: float): float {
+	var e: float2 = float2(1.0, 0.0);
+	while (texcoord.y > end && e.r > 0.8281 && e.g == 0.0) {
+		e = sample_edges_tex(texcoord).rg;
+		texcoord = -float2(0.0, 2.0) * constants.screen_size_inv.xy + texcoord;
+	}
+	var offset: float = -(255.0 / 127.0) * smaa_search_length(e.gr, 0.0) + 3.25;
+	return constants.screen_size_inv.y * offset + texcoord.y;
+}
+
+fun smaa_search_y_down(texcoord: float2, end: float): float {
+	var e: float2 = float2(1.0, 0.0);
+	while (texcoord.y < end && e.r > 0.8281 && e.g == 0.0) {
+		e = sample_edges_tex(texcoord).rg;
+		texcoord = float2(0.0, 2.0) * constants.screen_size_inv.xy + texcoord;
+	}
+	var offset: float = -(255.0 / 127.0) * smaa_search_length(e.gr, 0.5) + 3.25;
+	return -constants.screen_size_inv.y * offset + texcoord.y;
+}
+
+fun smaa_area(dist: float2, e1: float, e2: float): float2 {
+	// var f2: float2 = floor(4.0 * float2(e1, e2));
+	var f2: float2 = float2(floor(4.0 * e1), floor(4.0 * e2));
+	var texcoord: float2 = float2(16, 16) * (f2 + 0.5) + dist;
+	texcoord = float2(1.0 / 160.0, 1.0 / 560.0) * texcoord + 0.5 * float2(1.0 / 160.0, 1.0 / 560.0);
+	texcoord.y = (1.0 / 7.0) + texcoord.y;
+	return sample_lod(area_tex, area_tex_sampler, texcoord, 0.0).rg;
+}
+
+fun smaa_detect_horizontal_corner_pattern(weights: float2, texcoord: float4, d: float2): float2 {
+	// var left_right: float2 = step(d.xy, d.yx);
+	var left_right: float2 = float2(step(d.x, d.y), step(d.y, d.x));
+
+	var rounding: float2 = (1.0 - 0.25) * left_right;
+	rounding /= left_right.x + left_right.y;
+	var factor: float2 = float2(1.0, 1.0);
+	factor.x -= rounding.x * smaa_sample_level_zero_offset(texcoord.xy, float2(0,  1)).r;
+	factor.x -= rounding.y * smaa_sample_level_zero_offset(texcoord.zw, float2(1,  1)).r;
+	factor.y -= rounding.x * smaa_sample_level_zero_offset(texcoord.xy, float2(0, -2)).r;
+	factor.y -= rounding.y * smaa_sample_level_zero_offset(texcoord.zw, float2(1, -2)).r;
+	// weights *= saturate(factor);
+	weights.x *= saturate(factor.x);
+	weights.y *= saturate(factor.y);
+	return weights;
+}
+
+fun smaa_detect_vertical_corner_pattern(weights: float2, texcoord: float4, d: float2): float2 {
+	// var left_right: float2 = step(d.xy, d.yx);
+	var left_right: float2 = float2(step(d.x, d.y), step(d.y, d.x));
+
+	var rounding: float2 = (1.0 - 0.25) * left_right;
+	rounding /= left_right.x + left_right.y;
+	var factor: float2 = float2(1.0, 1.0);
+	factor.x -= rounding.x * smaa_sample_level_zero_offset(texcoord.xy, float2( 1, 0)).g;
+	factor.x -= rounding.y * smaa_sample_level_zero_offset(texcoord.zw, float2( 1, 1)).g;
+	factor.y -= rounding.x * smaa_sample_level_zero_offset(texcoord.xy, float2(-2, 0)).g;
+	factor.y -= rounding.y * smaa_sample_level_zero_offset(texcoord.zw, float2(-2, 1)).g;
+	weights.x *= saturate(factor.x);
+	weights.y *= saturate(factor.y);
+	return weights;
+}
+
+fun smaa_blend_weight_frag(input: vert_out): float4 {
+	var weights: float4 = float4(0.0, 0.0, 0.0, 0.0);
+	var e: float2 = sample_edges_tex(input.tex).rg;
+
+	if (e.g > 0.0) {
+		weights.rg = smaa_calculate_diag_weights(input.tex, e);
+		if (weights.r == -weights.g) {
+			var d: float2;
+
+			var coords: float3;
+			coords.x = smaa_search_x_left(input.offset0.xy, input.offset2.x);
+			coords.y = input.offset1.y;
+			d.x = coords.x;
+
+			var e1: float = sample_edges_tex(coords.xy).r;
+
+			coords.z = smaa_search_x_right(input.offset0.zw, input.offset2.y);
+			d.y = coords.z;
+
+			var f2: float2 = constants.screen_size.xx * d - input.pixcoord.xx;
+			// d = abs(floor(f2) + 0.5);
+			d.x = abs1(floor(f2.x) + 0.5);
+			d.y = abs1(floor(f2.y) + 0.5);
+
+			// var sqrt_d: float2 = sqrt(d);
+			var sqrt_d: float2 = float2(sqrt(d.x), sqrt(d.y));
+
+			var e2: float = smaa_sample_level_zero_offset(coords.zy, float2(1, 0)).r;
+			weights.rg = smaa_area(sqrt_d, e1, e2);
+			coords.y = input.tex.y;
+
+			var xyzy: float4 = float4(coords.xy, coords.zy);
+			weights.rg = smaa_detect_horizontal_corner_pattern(weights.rg, xyzy, d);
+		}
+		else {
+			e.r = 0.0;
+		}
+	}
+
+	if (e.r > 0.0) {
+		var d: float2;
+
+		var coords: float3;
+		coords.y = smaa_search_y_up(input.offset1.xy, input.offset2.z);
+		coords.x = input.offset0.x;
+		d.x = coords.y;
+
+		var e1: float = sample_edges_tex(coords.xy).g;
+
+		coords.z = smaa_search_y_down(input.offset1.zw, input.offset2.w);
+		d.y = coords.z;
+
+		var f2: float2 = constants.screen_size.yy * d - input.pixcoord.yy;
+		// d = abs(floor(f2) + 0.5);
+		d.x = abs1(floor(f2.x) + 0.5);
+		d.y = abs1(floor(f2.y) + 0.5);
+
+		// var sqrt_d: float2 = sqrt(d);
+		var sqrt_d: float2 = float2(sqrt(d.x), sqrt(d.y));
+
+		var e2: float = smaa_sample_level_zero_offset(coords.xz, float2(0, 1)).g;
+		// weights.ba = smaa_area(sqrt_d, e1, e2);
+		weights.ba = smaa_area(float2(0,0), 0, 0);
+		coords.x = input.tex.x;
+
+		var xyxz: float4 = float4(coords.xy, coords.xz);
+		// weights.ba = smaa_detect_vertical_corner_pattern(weights.ba, xyxz, d);
+		weights.ba = smaa_detect_vertical_corner_pattern(float2(1,1), float4(1,1,1,1), float2(1,1));
+	}
+
+	return weights;
+}
+
+#[pipe]
+struct pipe {
+	vertex = smaa_blend_weight_vert;
+	fragment = smaa_blend_weight_frag;
+}
