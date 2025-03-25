@@ -29,21 +29,18 @@ project.add_cfiles("aimage.c");
 	project.add_cfiles("ashader.c");
 	if (platform === "linux") {
 		project.add_project("../../sources/libs/to_spirv");
+		//project.flatten();
 	}
 
-	//project.add_project("../../sources/libs/kong");
-	//project.flatten();
-
-	project.add_cfiles('../../sources/libs/kong/sources/libs/*.c');
-	project.add_cfiles('../../sources/libs/kong/sources/*.c');
-	project.add_cfiles('../../sources/libs/kong/sources/backends/*.c');
-	project.add_cfiles('../../sources/libs/kong/sources/backends/*.cpp');
-
+	project.add_cfiles('../../sources/libs/kong/libs/*.c');
+	project.add_cfiles('../../sources/libs/kong/*.c');
+	project.add_cfiles('../../sources/libs/kong/backends/*.c');
+	// project.add_cfiles('../../sources/libs/kong/backends/*.cpp'); // d3d12.cpp
 	if (platform === "windows") {
 		project.add_define('_CRT_SECURE_NO_WARNINGS');
 		project.add_lib('d3dcompiler');
-		project.add_include_dir('../../sources/libs/kong/sources/libs/dxc/inc');
-		project.add_lib('../../sources/libs/kong/sources/libs/dxc/lib/x64/dxcompiler');
+		// project.add_include_dir('../../sources/libs/kong/libs/dxc/inc');
+		// project.add_lib('../../sources/libs/kong/libs/dxc/lib/x64/dxcompiler');
 	}
 }
 

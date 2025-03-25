@@ -10,22 +10,22 @@
 int krafix_compile(const char *source, char *output, int *length, const char *targetlang, const char *system, const char *shadertype, int version);
 #endif
 
-#include "../../sources/libs/kong/sources/analyzer.h"
-#include "../../sources/libs/kong/sources/compiler.h"
-#include "../../sources/libs/kong/sources/disasm.h"
-#include "../../sources/libs/kong/sources/errors.h"
-#include "../../sources/libs/kong/sources/functions.h"
-#include "../../sources/libs/kong/sources/globals.h"
-#include "../../sources/libs/kong/sources/log.h"
-#include "../../sources/libs/kong/sources/names.h"
-#include "../../sources/libs/kong/sources/parser.h"
-#include "../../sources/libs/kong/sources/tokenizer.h"
-#include "../../sources/libs/kong/sources/typer.h"
-#include "../../sources/libs/kong/sources/types.h"
-#include "../../sources/libs/kong/sources/backends/hlsl.h"
-#include "../../sources/libs/kong/sources/backends/metal.h"
-#include "../../sources/libs/kong/sources/backends/spirv.h"
-#include "../../sources/libs/kong/sources/backends/wgsl.h"
+#include "../../sources/libs/kong/analyzer.h"
+#include "../../sources/libs/kong/compiler.h"
+#include "../../sources/libs/kong/disasm.h"
+#include "../../sources/libs/kong/errors.h"
+#include "../../sources/libs/kong/functions.h"
+#include "../../sources/libs/kong/globals.h"
+#include "../../sources/libs/kong/log.h"
+#include "../../sources/libs/kong/names.h"
+#include "../../sources/libs/kong/parser.h"
+#include "../../sources/libs/kong/tokenizer.h"
+#include "../../sources/libs/kong/typer.h"
+#include "../../sources/libs/kong/types.h"
+#include "../../sources/libs/kong/backends/hlsl.h"
+#include "../../sources/libs/kong/backends/metal.h"
+#include "../../sources/libs/kong/backends/spirv.h"
+#include "../../sources/libs/kong/backends/wgsl.h"
 
 #ifdef _WIN32
 #include <d3d11.h>
@@ -187,6 +187,14 @@ void hlslbin(const char *from, const char *to) {
 }
 #endif
 
+extern uint64_t next_variable_id;
+extern size_t allocated_globals_size;
+extern function_id next_function_index;
+extern global_id globals_size;
+extern name_id names_index;
+extern size_t sets_count;
+extern type_id next_type_index;
+
 void kong_compile(const char *from, const char *to) {
 	FILE *fp = fopen(from, "rb");
 	fseek(fp , 0, SEEK_END);
@@ -197,12 +205,19 @@ void kong_compile(const char *from, const char *to) {
 	fread(data, size, 1, fp);
 	fclose(fp);
 
+	next_variable_id = 1;
+	allocated_globals_size = 0;
+	next_function_index = 0;
+	globals_size = 0;
+	names_index = 1;
+	sets_count = 0;
+	next_type_index = 0;
 	names_init();
 	types_init();
 	functions_init();
 	globals_init();
 	tokens tokens = tokenize(from, data);
-	kong_parse(from, &tokens);
+	parse(from, &tokens);
 	resolve_types();
 	allocate_globals();
 	for (function_id i = 0; get_function(i) != NULL; ++i) {
@@ -219,7 +234,7 @@ void kong_compile(const char *from, const char *to) {
 	output[i] = '\0';
 
 	strcat(output, "\\..\\..\\temp");
-	hlsl_export(output, API_DIRECT3D11);
+	hlsl_export(output, API_DIRECT3D11, false);
 
 	char filename[512];
 	strcpy(filename, to);
