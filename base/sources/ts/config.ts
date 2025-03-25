@@ -55,7 +55,6 @@ function config_save() {
 	json_encode_f32("rp_supersample", config_raw.rp_supersample);
 	json_encode_bool("rp_ssao", config_raw.rp_ssao);
 	json_encode_bool("rp_bloom", config_raw.rp_bloom);
-	json_encode_bool("rp_motionblur", config_raw.rp_motionblur);
 	json_encode_bool("rp_gi", config_raw.rp_gi);
 	json_encode_f32("rp_vignette", config_raw.rp_vignette);
 	json_encode_f32("rp_grain", config_raw.rp_grain);
@@ -142,7 +141,6 @@ function config_init() {
 		config_raw.rp_gi = false;
 		config_raw.rp_vignette = 0.2;
 		config_raw.rp_grain = 0.09;
-		config_raw.rp_motionblur = false;
 		///if (arm_android || arm_ios || is_forge)
 		config_raw.rp_ssao = false;
 		///else
@@ -395,7 +393,6 @@ type config_t = {
 	rp_supersample?: f32;
 	rp_ssao?: bool;
 	rp_bloom?: bool;
-	rp_motionblur?: bool;
 	rp_gi?: bool;
 	rp_vignette?: f32;
 	rp_grain?: f32;

@@ -32,52 +32,19 @@ function render_path_deferred_init() {
 	}
 	{
 		let t: render_target_t = render_target_create();
-		t.name = "tex";
-		t.width = 0;
-		t.height = 0;
-		t.format = "RGBA64";
-		t.scale = render_path_base_get_super_sampling();
-		render_path_create_render_target(t);
-	}
-	{
-		let t: render_target_t = render_target_create();
 		t.name = "buf";
 		t.width = 0;
 		t.height = 0;
-		///if (arm_direct3d12 || arm_vulkan)
-		// Match raytrace_target format
-		// Will cause "The render target format in slot 0 does not match that specified by the current pipeline state"
 		t.format = "RGBA64";
-		///else
-		t.format = "RGBA32";
-		///end
 		t.scale = render_path_base_get_super_sampling();
 		render_path_create_render_target(t);
 	}
 	{
 		let t: render_target_t = render_target_create();
-		t.name = "buf2";
+		t.name = "last";
 		t.width = 0;
 		t.height = 0;
-		t.format = "RGBA32";
-		t.scale = render_path_base_get_super_sampling();
-		render_path_create_render_target(t);
-	}
-	{
-		let t: render_target_t = render_target_create();
-		t.name = "taa";
-		t.width = 0;
-		t.height = 0;
-		t.format = "RGBA32";
-		t.scale = render_path_base_get_super_sampling();
-		render_path_create_render_target(t);
-	}
-	{
-		let t: render_target_t = render_target_create();
-		t.name = "taa2";
-		t.width = 0;
-		t.height = 0;
-		t.format = "RGBA32";
+		t.format = "RGBA64";
 		t.scale = render_path_base_get_super_sampling();
 		render_path_create_render_target(t);
 	}
@@ -137,13 +104,8 @@ function render_path_deferred_init() {
 	render_path_load_shader("shader_datas/compositor_pass/compositor_pass");
 	render_path_load_shader("shader_datas/copy_pass/copy_pass");
 	render_path_load_shader("shader_datas/copy_pass/copyR8_pass");
-	render_path_load_shader("shader_datas/smaa_edge_detect/smaa_edge_detect");
-	render_path_load_shader("shader_datas/smaa_blend_weight/smaa_blend_weight");
-	render_path_load_shader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
 	render_path_load_shader("shader_datas/taa_pass/taa_pass");
 	render_path_load_shader("shader_datas/supersample_resolve/supersample_resolve");
-	// render_path_load_shader("shader_datas/motion_blur_pass/motion_blur_pass");
-	// render_path_load_shader("shader_datas/motion_blur_veloc_pass/motion_blur_veloc_pass");
 
 	render_path_paint_init();
 
@@ -164,18 +126,17 @@ function render_path_deferred_commands() {
 function render_path_deferred_draw_deferred() {
 	render_path_base_draw_ssao();
 	render_path_base_draw_deferred_light();
-	render_path_base_draw_bloom("tex");
-	// draw_motion_blur();
+	render_path_base_draw_bloom();
 	// draw_histogram();
 
-	render_path_set_target("buf");
-	render_path_bind_target("tex", "tex");
+	render_path_set_target("gbuffer1");
+	render_path_bind_target("buf", "tex");
 	// render_path_bind_target("histogram", "histogram");
 	render_path_draw_shader("shader_datas/compositor_pass/compositor_pass");
 
-	render_path_set_target("buf");
+	render_path_set_target("gbuffer1");
 	render_path_base_draw_compass();
 	render_path_draw_meshes("overlay");
 
-	render_path_base_draw_taa();
+	render_path_base_draw_taa("gbuffer1", "buf");
 }

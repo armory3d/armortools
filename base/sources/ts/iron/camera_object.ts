@@ -70,16 +70,20 @@ function camera_object_proj_jitter(raw: camera_object_t) {
 	let w: i32 = render_path_current_w;
 	let h: i32 = render_path_current_h;
 	raw.p = mat4_clone(raw.no_jitter_p);
+
+	let i: i32 = raw.frame % 6;
 	let x: f32 = 0.0;
 	let y: f32 = 0.0;
-	if (raw.frame % 2 == 0) {
-		x = 0.25;
-		y = 0.25;
-	}
-	else {
-		x = -0.25;
-		y = -0.25;
-	}
+
+	if (i == 0) { x = 0.5; y = 0.333; }
+	else if (i == 1) { x = -0.5; y = -0.333; }
+	else if (i == 2) { x = 0.25; y = 0.111; }
+	else if (i == 3) { x = -0.25; y = -0.111; }
+	else if (i == 4) { x = 0.375; y = 0.444; }
+	else { x = -0.375; y = -0.444; }
+	x *= 2;
+	y *= 2;
+
 	raw.p.m20 += x / w;
 	raw.p.m21 += y / h;
 	raw.frame++;

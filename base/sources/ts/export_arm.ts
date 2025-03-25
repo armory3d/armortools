@@ -173,7 +173,7 @@ function export_arm_run_project() {
 	///end
 
 	///if (arm_android || arm_ios)
-	let rt: render_target_t = map_get(render_path_render_targets, context_raw.render_mode == render_mode_t.FORWARD ? "buf" : "tex");
+	let rt: render_target_t = map_get(render_path_render_targets, "buf");
 	let tex: iron_gpu_texture_t = rt._image;
 	let mesh_icon: iron_gpu_texture_t = gpu_create_render_target(256, 256);
 	let r: f32 = sys_w() / sys_h();

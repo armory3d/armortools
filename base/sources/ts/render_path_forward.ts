@@ -23,5 +23,5 @@ function render_path_forward_draw_forward() {
 	render_path_base_draw_compass();
 	render_path_draw_meshes("overlay");
 
-	render_path_base_draw_taa();
+	render_path_base_draw_taa("buf", "gbuffer1");
 }

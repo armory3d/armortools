@@ -114,10 +114,13 @@ function render_path_base_is_cached(): bool {
 		if (context_raw.ddirty > -2) {
 		///end
 			render_path_set_target("");
-			render_path_bind_target("taa", "tex");
-			render_path_base_ssaa4() ?
-				render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolve") :
+			render_path_bind_target("last", "tex");
+			if (render_path_base_ssaa4()) {
+				render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolve");
+			}
+			else {
 				render_path_draw_shader("shader_datas/copy_pass/copy_pass");
+			}
 			render_path_paint_commands_cursor();
 			if (context_raw.ddirty <= 0) {
 				context_raw.ddirty--;
@@ -153,7 +156,7 @@ function render_path_base_commands(draw_commands: ()=>void) {
 	render_path_base_end();
 }
 
-function render_path_base_draw_bloom(tex: string) {
+function render_path_base_draw_bloom() {
 	if (config_raw.rp_bloom == false) {
 		return;
 	}
@@ -187,13 +190,13 @@ function render_path_base_draw_bloom(tex: string) {
 		render_path_base_bloom_current_mip = i;
 		render_path_set_target(render_path_base_bloom_mipmaps[i].name);
 		render_path_clear_target(0x00000000);
-		render_path_bind_target(i == 0 ? tex : render_path_base_bloom_mipmaps[i - 1].name, "tex");
+		render_path_bind_target(i == 0 ? "buf" : render_path_base_bloom_mipmaps[i - 1].name, "tex");
 		render_path_draw_shader("shader_datas/bloom_pass/bloom_downsample_pass");
 	}
 	for (let i: i32 = 0; i < num_mips; ++i) {
 		let mip_level: i32 = num_mips - 1 - i;
 		render_path_base_bloom_current_mip = mip_level;
-		render_path_set_target(mip_level == 0 ? tex : render_path_base_bloom_mipmaps[mip_level - 1].name);
+		render_path_set_target(mip_level == 0 ? "buf" : render_path_base_bloom_mipmaps[mip_level - 1].name);
 		render_path_bind_target(render_path_base_bloom_mipmaps[mip_level].name, "tex");
 		render_path_draw_shader("shader_datas/bloom_pass/bloom_upsample_pass");
 	}
@@ -272,7 +275,7 @@ function render_path_base_draw_ssao() {
 }
 
 function render_path_base_draw_deferred_light() {
-	render_path_set_target("tex");
+	render_path_set_target("buf");
 	render_path_bind_target("_main", "gbufferD");
 	render_path_bind_target("gbuffer0", "gbuffer0");
 	render_path_bind_target("gbuffer1", "gbuffer1");
@@ -287,26 +290,13 @@ function render_path_base_draw_deferred_light() {
 
 	render_path_draw_shader("shader_datas/deferred_light/deferred_light");
 
-	render_path_set_depth_from("tex", "gbuffer0"); // Bind depth for world pass
+	render_path_set_depth_from("buf", "gbuffer0"); // Bind depth for world pass
 
-	render_path_set_target("tex");
+	render_path_set_target("buf");
 	render_path_draw_skydome("shader_datas/world_pass/world_pass");
 
-	render_path_set_depth_from("tex", "gbuffer1"); // Unbind depth
+	render_path_set_depth_from("buf", "gbuffer1"); // Unbind depth
 }
-
-// function render_path_base_draw_motion_blur() {
-// 	if (config_raw.rp_motionblur != false) {
-// 		render_path_set_target("buf");
-// 		render_path_bind_target("tex", "tex");
-// 		render_path_bind_target("gbuffer0", "gbuffer0");
-// 		render_path_bind_target("_main", "gbufferD");
-// 		render_path_draw_shader("shader_datas/motion_blur_pass/motion_blur_pass");
-// 		render_path_set_target("tex");
-// 		render_path_bind_target("buf", "tex");
-// 		render_path_draw_shader("shader_datas/copy_pass/copy_pass");
-// 	}
-// }
 
 // function render_path_base_draw_histogram() {
 // 	{
@@ -316,57 +306,43 @@ function render_path_base_draw_deferred_light() {
 // 		t.height = 1;
 // 		t.format = "RGBA64";
 // 		render_path_create_render_target(t);
-
 // 		render_path_load_shader("shader_datas/histogram_pass/histogram_pass");
 // 	}
-
 // 	render_path_set_target("histogram");
-// 	render_path_bind_target("taa", "tex");
+// 	render_path_bind_target("last", "tex");
 // 	render_path_draw_shader("shader_datas/histogram_pass/histogram_pass");
 // }
 
-function render_path_base_draw_taa() {
-	let current: string = render_path_base_taa_frame % 2 == 0 ? "buf2" : "taa2";
-	let last: string = render_path_base_taa_frame % 2 == 0 ? "taa2" : "buf2";
-
-	render_path_set_target(current);
-	render_path_clear_target(0x00000000);
-	render_path_bind_target("buf", "color_tex");
-	render_path_draw_shader("shader_datas/smaa_edge_detect/smaa_edge_detect");
-
-	render_path_set_target("taa");
-	render_path_clear_target(0x00000000);
-	render_path_bind_target(current, "edges_tex");
-	render_path_draw_shader("shader_datas/smaa_blend_weight/smaa_blend_weight");
-
-	render_path_set_target(current);
-	render_path_bind_target("buf", "color_tex");
-	render_path_bind_target("taa", "blend_tex");
-	render_path_draw_shader("shader_datas/smaa_neighborhood_blend/smaa_neighborhood_blend");
+function render_path_base_draw_taa(bufa: string, bufb: string) {
+	render_path_set_target(bufb);
+	render_path_bind_target(bufa, "tex");
 
 	let skip_taa: bool = context_raw.split_view;
 	if (skip_taa) {
-		render_path_set_target("taa");
-		render_path_bind_target(current, "tex");
 		render_path_draw_shader("shader_datas/copy_pass/copy_pass");
 	}
 	else {
-		render_path_set_target("taa");
-		render_path_bind_target(current, "tex");
-		render_path_bind_target(last, "tex2");
+		render_path_bind_target("last", "tex2");
 		render_path_draw_shader("shader_datas/taa_pass/taa_pass");
 	}
 
+	render_path_set_target("");
+	render_path_bind_target(bufb, "tex");
+
 	if (render_path_base_ssaa4()) {
-		render_path_set_target("");
-		render_path_bind_target(render_path_base_taa_frame % 2 == 0 ? "taa2" : "taa", "tex");
 		render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolve");
 	}
 	else {
-		render_path_set_target("");
-		render_path_bind_target(render_path_base_taa_frame == 0 ? current : "taa", "tex");
 		render_path_draw_shader("shader_datas/copy_pass/copy_pass");
 	}
+
+	// Swap buf and last targets
+	let last_target: render_target_t = map_get(render_path_render_targets, "last");
+	last_target.name = bufb;
+	let buf_target: render_target_t = map_get(render_path_render_targets, bufb);
+	buf_target.name = "last";
+	map_set(render_path_render_targets, bufb, last_target);
+	map_set(render_path_render_targets, "last", buf_target);
 }
 
 function render_path_base_draw_gbuffer() {

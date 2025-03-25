@@ -32,7 +32,7 @@ function sim_update() {
         iron_delay_idle_sleep();
 
         if (sim_record) {
-            let rt: render_target_t = map_get(render_path_render_targets, "taa");
+            let rt: render_target_t = map_get(render_path_render_targets, "last");
             let pixels: buffer_t = gpu_get_texture_pixels(rt._image);
             ///if (arm_metal || arm_vulkan)
             export_arm_bgra_swap(pixels);
@@ -52,7 +52,7 @@ function sim_play() {
             return;
         }
         let path: string = path_base_dir(project_filepath) + "/output.mp4";
-        let rt: render_target_t = map_get(render_path_render_targets, "taa");
+        let rt: render_target_t = map_get(render_path_render_targets, "last");
         iron_mp4_begin(path, rt._image.width, rt._image.height);
     }
 
