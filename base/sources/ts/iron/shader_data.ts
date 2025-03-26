@@ -165,34 +165,25 @@ function shader_context_compile(raw: shader_context_t): shader_context_t {
 	return shader_context_finish_compile(raw);
 }
 
-function shader_context_type_offset(t: string): i32 {
-	///if IRON_DIRECT3D12
-	if (t == "int") return 16;
-	if (t == "float") return 16;
-	if (t == "vec2") return 16;
-	if (t == "vec3") return 16;
-	if (t == "vec4") return 16;
-	if (t == "mat3") return 48;
-	if (t == "mat4") return 64;
-	///end
-	///if IRON_VULKAN
-	if (t == "int") return 4;
-	if (t == "float") return 4;
-	if (t == "vec2") return 8;
-	if (t == "vec3") return 16;
-	if (t == "vec4") return 16;
-	if (t == "mat3") return 48;
-	if (t == "mat4") return 64;
-	///end
-	///if IRON_METAL
+function shader_context_type_size(t: string): i32 {
 	if (t == "int") return 4;
 	if (t == "float") return 4;
 	if (t == "vec2") return 8;
 	if (t == "vec3") return 12;
 	if (t == "vec4") return 16;
-	if (t == "mat3") return 36;
+	if (t == "mat3") return 48;
 	if (t == "mat4") return 64;
-	///end
+}
+
+function shader_context_type_pad(offset: i32, size: i32): i32 {
+	let r: i32 = offset % 16;
+	if (r == 0) {
+		return 0;
+	}
+	if (size >= 16 || r + size > 16) {
+		return 16 - r;
+	}
+	return 0;
 }
 
 function shader_context_finish_compile(raw: shader_context_t): shader_context_t {
@@ -202,8 +193,10 @@ function shader_context_finish_compile(raw: shader_context_t): shader_context_t 
 		let offset: i32 = 0;
 		for (let i: i32 = 0; i < raw.constants.length; ++i) {
 			let c: shader_const_t = raw.constants[i];
+			let size: i32 = shader_context_type_size(c.type);
+			offset += shader_context_type_pad(offset, size);
 			shader_context_add_const(raw, c, offset);
-			offset += shader_context_type_offset(c.type);
+			offset += size;
 		}
 	}
 

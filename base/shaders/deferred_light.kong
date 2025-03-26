@@ -1,0 +1,257 @@
+
+#[set(everything)]
+const gbufferD: tex2d;
+
+#[set(everything)]
+const gbufferD_sampler: sampler;
+
+#[set(everything)]
+const gbuffer0: tex2d;
+
+#[set(everything)]
+const gbuffer0_sampler: sampler;
+
+#[set(everything)]
+const gbuffer1: tex2d;
+
+#[set(everything)]
+const gbuffer1_sampler: sampler;
+
+#[set(everything)]
+const senvmap_brdf: tex2d;
+
+#[set(everything)]
+const senvmap_brdf_sampler: sampler;
+
+#[set(everything)]
+const senvmap_radiance: tex2d;
+
+#[set(everything)]
+const senvmap_radiance_sampler: sampler;
+
+#[set(everything)]
+const ssaotex: tex2d;
+
+#[set(everything)]
+const ssaotex_sampler: sampler;
+
+#[set(everything)]
+const constants: {
+	invVP: float4x4;
+	eye: float3;
+	envmap_data: float4; // angle, sin(angle), cos(angle), strength
+	envmap_num_mipmaps: int;
+	camera_proj: float2;
+	eye_look: float3;
+	shirr0: float4;
+	shirr1: float4;
+	shirr2: float4;
+	shirr3: float4;
+	shirr4: float4;
+	shirr5: float4;
+	shirr6: float4;
+};
+
+const PI: float = 3.14159265358979;
+const PI2: float = 6.28318530718;
+
+struct vert_in {
+	pos: float2;
+}
+
+struct vert_out {
+	pos: float4;
+	tex: float2;
+	view_ray: float3;
+}
+
+fun deferred_light_vert(input: vert_in): vert_out {
+	var output: vert_out;
+	output.tex = input.pos.xy * 0.5 + 0.5;
+	output.tex.y = 1.0 - output.tex.y;
+	output.pos = float4(input.pos.xy, 0.0, 1.0);
+
+	// NDC (at the back of cube)
+	var v: float4 = float4(input.pos.xy, 1.0, 1.0);
+	v = constants.invVP * v;
+	v.xyz /= v.w;
+	output.view_ray = float3(v.xyz - constants.eye);
+
+	return output;
+}
+
+fun octahedron_wrap(v: float2): float2 {
+	var a: float2;
+	if (v.x >= 0.0) {
+		a.x = 1.0;
+	}
+	else {
+		a.x = -1.0;
+	}
+
+	if (v.y >= 0.0) {
+		a.y = 1.0;
+	}
+	else {
+		a.y = -1.0;
+	}
+
+	var r: float2;
+	r.x = abs(v.y);
+	r.y = abs(v.x);
+	r.x = 1.0 - r.x;
+	r.y = 1.0 - r.y;
+	return r * a;
+
+	// return (1.0 - abs(v.yx)) * (float2(v.x >= 0.0 ? 1.0 : -1.0, v.y >= 0.0 ? 1.0 : -1.0));
+}
+
+// fun unpack_f32_i16(val: float, out f: float, out i: uint) {
+// 	// Constant optimize by compiler
+// 	const num_bit_target: int = 16;
+// 	const num_bit_i: int = 4;
+// 	const prec: float = float(1 << num_bit_target);
+// 	const maxi: float = float(1 << num_bit_i);
+// 	const prec_minus_one: float = prec - 1.0;
+// 	const t1: float = ((prec / maxi) - 1.0) / prec_minus_one;
+// 	const t2: float = (prec / maxi) / prec_minus_one;
+// 	// Code
+// 	// extract integer part
+// 	// + rcp(prec_minus_one) to deal with precision issue
+// 	i = uint((val / t2) + (1.0 / prec_minus_one));
+// 	// Now that we have i, solve formula in pack_f32_i16 for f
+// 	//f = (val - t2 * float(i)) / t1 => convert in mads form
+// 	f = clamp((-t2 * float(i) + val) / t1, 0.0, 1.0); // Saturate in case of precision issue
+// }
+
+fun surface_albedo(base_color: float3, metalness: float): float3 {
+	return lerp(base_color, float3(0.0, 0.0, 0.0), metalness);
+}
+
+fun surface_f0(base_color: float3, metalness: float): float3 {
+	return lerp(float3(0.04, 0.04, 0.04), base_color, metalness);
+}
+
+fun get_pos(eye: float3, eye_look: float3, view_ray: float3, depth: float, camera_proj: float2): float3 {
+	// eye_look, view_ray should be normalized
+	var linear_depth: float = camera_proj.y / ((depth * 0.5 + 0.5) - camera_proj.x);
+	var view_z_dist: float = dot(eye_look, view_ray);
+	var wposition: float3 = eye + view_ray * (linear_depth / view_z_dist);
+	return wposition;
+}
+
+const c1: float = 0.429043;
+const c2: float = 0.511664;
+const c3: float = 0.743125;
+const c4: float = 0.886227;
+const c5: float = 0.247708;
+
+fun sh_irradiance(nor: float3): float3 {
+	// TODO: Use padding for 4th component and pass shirr[].xyz directly
+	var cl00: float3 = float3(constants.shirr0.x, constants.shirr0.y, constants.shirr0.z);
+	var cl1m1: float3 = float3(constants.shirr0.w, constants.shirr1.x, constants.shirr1.y);
+	var cl10: float3 = float3(constants.shirr1.z, constants.shirr1.w, constants.shirr2.x);
+	var cl11: float3 = float3(constants.shirr2.y, constants.shirr2.z, constants.shirr2.w);
+	var cl2m2: float3 = float3(constants.shirr3.x, constants.shirr3.y, constants.shirr3.z);
+	var cl2m1: float3 = float3(constants.shirr3.w, constants.shirr4.x, constants.shirr4.y);
+	var cl20: float3 = float3(constants.shirr4.z, constants.shirr4.w, constants.shirr5.x);
+	var cl21: float3 = float3(constants.shirr5.y, constants.shirr5.z, constants.shirr5.w);
+	var cl22: float3 = float3(constants.shirr6.x, constants.shirr6.y, constants.shirr6.z);
+	return (
+		c1 * cl22 * (nor.y * nor.y - (-nor.z) * (-nor.z)) +
+		c3 * cl20 * nor.x * nor.x +
+		c4 * cl00 -
+		c5 * cl20 +
+		2.0 * c1 * cl2m2 * nor.y * (-nor.z) +
+		2.0 * c1 * cl21  * nor.y * nor.x +
+		2.0 * c1 * cl2m1 * (-nor.z) * nor.x +
+		2.0 * c2 * cl11  * nor.y +
+		2.0 * c2 * cl1m1 * (-nor.z) +
+		2.0 * c2 * cl10  * nor.x
+	);
+}
+
+fun mip_from_roughness(roughness: float, num_mipmaps: float): float {
+	// First mipmap level = roughness 0, last = roughness = 1
+	return roughness * num_mipmaps;
+}
+
+fun envmap_equirect(normal: float3, angle: float): float2 {
+	var phi: float = acos(normal.z);
+	var theta: float = atan2(normal.x, -normal.y) + PI + angle;
+	return float2(theta / PI2, phi / PI);
+}
+
+fun deferred_light_frag(input: vert_out): float4 {
+	// normal.xy, roughness, metallic/matid
+	var g0: float4 = sample_lod(gbuffer0, gbuffer0_sampler, input.tex, 0.0);
+
+	var n: float3;
+	n.z = 1.0 - abs(g0.x) - abs(g0.y);
+	if (n.z >= 0.0) {
+		n.xy = g0.xy;
+	}
+	else {
+		n.xy = octahedron_wrap(g0.xy);
+	}
+	n = normalize(n);
+
+	var roughness: float = g0.b;
+	var metallic: float;
+	var matid: uint;
+	// unpack_f32_i16(g0.a, metallic, matid);
+	matid = uint((g0.a / 0.06250047610269868710814625956118106842041015625) + (1.0 / 65535.0));
+	metallic = clamp((-0.06250047610269868710814625956118106842041015625 * float(matid) + g0.a) / 0.062485207147583624058737396240234375, 0.0, 1.0);
+
+	var g1: float4 = sample_lod(gbuffer1, gbuffer1_sampler, input.tex, 0.0); // basecolor.rgb, occ
+	var occ: float = g1.a;
+	var albedo: float3 = surface_albedo(g1.rgb, metallic);
+	var f0: float3 = surface_f0(g1.rgb, metallic);
+
+	var depth: float = sample_lod(gbufferD, gbufferD_sampler, input.tex, 0.0).r * 2.0 - 1.0;
+	var p: float3 = get_pos(constants.eye, constants.eye_look, normalize(input.view_ray), depth, constants.camera_proj);
+	var v: float3 = normalize(constants.eye - p);
+	var dotnv: float = max(0.0, dot(n, v));
+
+	occ = lerp(1.0, occ, dotnv); // ao fresnel
+
+	// Envmap
+	var envl: float3 = sh_irradiance(
+		float3(
+			n.x * constants.envmap_data.z - n.y * constants.envmap_data.y,
+			n.x * constants.envmap_data.y + n.y * constants.envmap_data.z,
+			n.z
+		)
+	);
+	envl /= PI;
+
+	var reflection_world: float3 = reflect(-v, n);
+	var lod: float = mip_from_roughness(roughness, float(constants.envmap_num_mipmaps));
+	var prefiltered_color: float3 = sample_lod(senvmap_radiance, senvmap_radiance_sampler, envmap_equirect(reflection_world, constants.envmap_data.x), lod).rgb;
+
+	envl.rgb = envl.rgb * albedo;
+	// Indirect specular
+	// var env_brdf: float2 = senvmap_brdf[uint2(roughness * 256.0, (1.0 - dotnv) * 256.0)].xy;
+	var env_brdf: float4 = senvmap_brdf[uint2(roughness * 256.0, (1.0 - dotnv) * 256.0)];
+	envl.rgb += prefiltered_color * (f0 * env_brdf.x + env_brdf.y) * 1.5;
+	envl.rgb *= constants.envmap_data.w * occ;
+
+	var color: float4;
+	color.rgb = envl;
+	color.rgb = color.rgb * sample_lod(ssaotex, ssaotex_sampler, input.tex, 0.0).r;
+
+	if (matid == uint(1)) { // Emission
+		color.rgb += g1.rgb; // materialid
+		albedo = float3(0.0, 0.0, 0.0);
+	}
+
+	color.a = 1.0; // Mark as opaque
+
+	return color;
+}
+
+#[pipe]
+struct pipe {
+	vertex = deferred_light_vert;
+	fragment = deferred_light_frag;
+}

@@ -1,0 +1,87 @@
+
+#[set(everything)]
+const radiance: tex2d;
+
+#[set(everything)]
+const radiance_sampler: sampler;
+
+#[set(everything)]
+const constants: {
+	params: float4;
+};
+
+const PI: float = 3.14159265358979;
+const PI2: float = 6.28318530718;
+// #ifdef METAL
+// const samples = 1024 * 2; // Prevent gpu hang
+// #else
+// const samples: float = 1024 * 16;
+const samples: float = 16384;
+// #endif
+
+struct vert_in {
+	pos: float2;
+}
+
+struct vert_out {
+	pos: float4;
+	tex: float2;
+}
+
+fun prefilter_envmap_vert(input: vert_in): vert_out {
+	var output: vert_out;
+	output.tex = input.pos.xy * 0.5 + 0.5;
+	output.tex.y = 1.0 - output.tex.y;
+	output.pos = float4(input.pos.xy, 0.0, 1.0);
+	return output;
+}
+
+fun rand(co: float2): float {
+	return frac(sin(dot(co.xy, float2(12.9898, 78.233)) % 3.14) * 43758.5453);
+}
+
+fun equirect(normal: float3): float2 {
+	var phi: float = acos(normal.z);
+	var theta: float = atan2(normal.x, -normal.y) + PI;
+	return float2(theta / PI2, phi / PI);
+}
+
+fun reverse_equirect(co: float2): float3 {
+	var theta: float = co.x * PI2 - PI;
+	var phi: float = co.y * PI;
+	return float3(sin(phi) * cos(theta), -(sin(phi) * sin(theta)), cos(phi));
+}
+
+// fun cos_weighted_hemisphere_direction(n: float3, co: float2, seed: uint): float3 {
+fun cos_weighted_hemisphere_direction(n: float3, co: float2, seed: float): float3 {
+	var r: float2 = float2(rand(co * seed), rand(co * seed * 2.0));
+	var uu: float3 = normalize(cross(n, float3(0.0, 1.0, 1.0)));
+	var vv: float3 = cross(uu, n);
+	var ra: float = sqrt(r.y);
+	var rx: float = ra * cos(PI2 * r.x);
+	var ry: float = ra * sin(PI2 * r.x);
+	var rz: float = sqrt(1.0 - r.y);
+	var rr: float3 = float3(rx * uu + ry * vv + rz * n);
+	return normalize(rr);
+}
+
+fun prefilter_envmap_frag(input: vert_out): float4 {
+	var color: float4 = float4(0.0, 0.0, 0.0, 1.0);
+	var n: float3 = reverse_equirect(input.tex);
+	for (var i: uint = 0; i < samples; i += 1) {
+		var dir: float3 = normalize(lerp(n, cos_weighted_hemisphere_direction(n, input.tex, i), constants.params.x));
+		color.rgb += sample(radiance, radiance_sampler, equirect(dir)).rgb;
+	}
+	color.rgb /= float(samples);
+	// color.rgb = pow(color.rgb, float3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));
+	color.r = pow(color.r, 1.0 / 2.2);
+	color.g = pow(color.g, 1.0 / 2.2);
+	color.b = pow(color.b, 1.0 / 2.2);
+	return color;
+}
+
+#[pipe]
+struct pipe {
+	vertex = prefilter_envmap_vert;
+	fragment = prefilter_envmap_frag;
+}

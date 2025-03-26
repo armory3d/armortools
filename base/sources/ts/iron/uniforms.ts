@@ -196,10 +196,58 @@ function uniforms_set_context_const(location: iron_gpu_constant_location_t, c: s
 	}
 	else if (c.type == "vec4") {
 		let v: vec4_t = vec4_nan();
-		// if (c.link == "") {}
-		// else {
+		if (c.link == "_envmap_irradiance0") {
+			let fa: f32_array_t = scene_world == null ? world_data_get_empty_irradiance() : scene_world._.irradiance;
+			v.x = fa[0];
+			v.y = fa[1];
+			v.z = fa[2];
+			v.w = fa[3];
+		}
+		else if (c.link == "_envmap_irradiance1") {
+			let fa: f32_array_t = scene_world == null ? world_data_get_empty_irradiance() : scene_world._.irradiance;
+			v.x = fa[4];
+			v.y = fa[5];
+			v.z = fa[6];
+			v.w = fa[7];
+		}
+		else if (c.link == "_envmap_irradiance2") {
+			let fa: f32_array_t = scene_world == null ? world_data_get_empty_irradiance() : scene_world._.irradiance;
+			v.x = fa[8];
+			v.y = fa[9];
+			v.z = fa[10];
+			v.w = fa[11];
+		}
+		else if (c.link == "_envmap_irradiance3") {
+			let fa: f32_array_t = scene_world == null ? world_data_get_empty_irradiance() : scene_world._.irradiance;
+			v.x = fa[12];
+			v.y = fa[13];
+			v.z = fa[14];
+			v.w = fa[15];
+		}
+		else if (c.link == "_envmap_irradiance4") {
+			let fa: f32_array_t = scene_world == null ? world_data_get_empty_irradiance() : scene_world._.irradiance;
+			v.x = fa[16];
+			v.y = fa[17];
+			v.z = fa[18];
+			v.w = fa[19];
+		}
+		else if (c.link == "_envmap_irradiance5") {
+			let fa: f32_array_t = scene_world == null ? world_data_get_empty_irradiance() : scene_world._.irradiance;
+			v.x = fa[20];
+			v.y = fa[21];
+			v.z = fa[22];
+			v.w = fa[23];
+		}
+		else if (c.link == "_envmap_irradiance6") {
+			let fa: f32_array_t = scene_world == null ? world_data_get_empty_irradiance() : scene_world._.irradiance;
+			v.x = fa[24];
+			v.y = fa[25];
+			v.z = fa[26];
+			v.w = fa[27];
+		}
+		else {
 			return false;
-		// }
+		}
 
 		if (!vec4_isnan(v)) {
 			gpu_set_float4(location, v.x, v.y, v.z, v.w);

@@ -13,16 +13,24 @@ function import_envmap_run(path: string, image: iron_gpu_texture_t) {
 	// Init
 	if (import_envmap_pipeline == null) {
 		import_envmap_pipeline = gpu_create_pipeline();
-		import_envmap_pipeline.vertex_shader = sys_get_shader("pass.vert");
+		import_envmap_pipeline.vertex_shader = sys_get_shader("prefilter_envmap.vert");
 		import_envmap_pipeline.fragment_shader = sys_get_shader("prefilter_envmap.frag");
 		let vs: iron_gpu_vertex_structure_t = gpu_vertex_struct_create();
 		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
 		import_envmap_pipeline.input_layout = vs;
 		import_envmap_pipeline.color_attachment_count = 1;
 		ARRAY_ACCESS(import_envmap_pipeline.color_attachment, 0) = tex_format_t.RGBA128;
+
+		import_envmap_pipeline.kong = true;
 		gpu_compile_pipeline(import_envmap_pipeline);
+
 		import_envmap_params_loc = gpu_get_constant_location(import_envmap_pipeline, "params");
+		let ptr: gpu_constant_location_impl_t = ADDRESS(import_envmap_params_loc.impl);
+		ptr.vertexOffset = -1;
+		ptr.fragmentOffset = 0;
+
 		import_envmap_radiance_loc = gpu_get_texture_unit(import_envmap_pipeline, "radiance");
+		ARRAY_ACCESS(import_envmap_radiance_loc.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = 0;
 
 		import_envmap_radiance = gpu_create_render_target(1024, 512, tex_format_t.RGBA128);
 
