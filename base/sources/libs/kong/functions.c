@@ -110,6 +110,28 @@ static void add_func_float_float_float(char *name) {
 	f->block           = NULL;
 }
 
+static void add_func_float_float_float_float(char *name) {
+	function_id func = add_function(add_name(name));
+	function   *f    = get_function(func);
+	init_type_ref(&f->return_type, add_name("float"));
+	f->return_type.type = find_type_by_ref(&f->return_type);
+
+	f->parameter_names[0] = add_name("a");
+	init_type_ref(&f->parameter_types[0], add_name("float"));
+	f->parameter_types[0].type = find_type_by_ref(&f->parameter_types[0]);
+
+	f->parameter_names[1] = add_name("b");
+	init_type_ref(&f->parameter_types[1], add_name("float"));
+	f->parameter_types[1].type = find_type_by_ref(&f->parameter_types[1]);
+
+	f->parameter_names[2] = add_name("c");
+	init_type_ref(&f->parameter_types[2], add_name("float"));
+	f->parameter_types[2].type = find_type_by_ref(&f->parameter_types[2]);
+
+	f->parameters_size = 3;
+	f->block           = NULL;
+}
+
 static void add_func_float_float2(char *name) {
 	function_id func = add_function(add_name(name));
 	function   *f    = get_function(func);
@@ -641,8 +663,10 @@ void functions_init(void) {
 	add_func_float_float_float("rsqrt");
 	add_func_float_float_float("min");
 	add_func_float_float_float("max");
+	add_func_float_float_float_float("clamp");
 	add_func_float_float_float("step");
 	add_func_float_float_float("smoothstep");
+	add_func_float_float_float("pow");
 	add_func_float_float3_float3("dot");
 	add_func_float3_float3_float3("cross");
 	add_func_float3_float3("saturate3");
