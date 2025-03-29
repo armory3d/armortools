@@ -335,6 +335,19 @@ function uniforms_set_context_const(location: iron_gpu_constant_location_t, c: s
 			v.x = zfar / (zfar - znear);
 			v.y = (-zfar * znear) / (zfar - znear);
 		}
+		else if (starts_with(c.link, "_size(")) {
+			let tex: string = substring(c.link, 6, c.link.length - 1);
+			for (let i: i32 = 0; i < math_floor(_render_path_bind_params.length / 2); ++i) {
+				let pos: i32 = i * 2; // bind params = [texture, sampler_id]
+				let sampler_id: string = _render_path_bind_params[pos + 1];
+				if (sampler_id == tex) {
+					let rt_id: string = _render_path_bind_params[pos];
+					let rt: render_target_t = map_get(render_path_render_targets, rt_id);
+					v.x = rt.width;
+					v.y = rt.height;
+				}
+			}
+		}
 		else {
 			return false;
 		}

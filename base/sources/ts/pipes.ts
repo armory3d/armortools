@@ -260,26 +260,78 @@ function pipes_init() {
 		pipes_cursor.vertex_shader = sys_get_shader("cursor.vert");
 		pipes_cursor.fragment_shader = sys_get_shader("cursor.frag");
 		let vs: iron_gpu_vertex_structure_t = gpu_vertex_struct_create();
-		///if (arm_metal || arm_vulkan)
-		gpu_vertex_struct_add(vs, "tex", vertex_data_t.I16_2X_NORM);
-		///else
 		gpu_vertex_struct_add(vs, "pos", vertex_data_t.I16_4X_NORM);
 		gpu_vertex_struct_add(vs, "nor", vertex_data_t.I16_2X_NORM);
 		gpu_vertex_struct_add(vs, "tex", vertex_data_t.I16_2X_NORM);
-		///end
 		pipes_cursor.input_layout = vs;
 		pipes_cursor.blend_source = blend_factor_t.SOURCE_ALPHA;
 		pipes_cursor.blend_destination = blend_factor_t.INV_SOURCE_ALPHA;
 		pipes_cursor.depth_write = false;
 		pipes_cursor.depth_mode = compare_mode_t.ALWAYS;
+
+		pipes_cursor.kong = true;
+
 		gpu_compile_pipeline(pipes_cursor);
+
 		pipes_cursor_vp = gpu_get_constant_location(pipes_cursor, "VP");
+		let ptr: gpu_constant_location_impl_t = ADDRESS(pipes_cursor_vp.impl);
+		let size: i32 = 0;
+		let offset: i32 = 0;
+		size = shader_context_type_size("mat4");
+		offset += shader_context_type_pad(offset, size);
+		ptr.vertexOffset = offset;
+		ptr.fragmentOffset = offset;
+		offset += size;
+
 		pipes_cursor_inv_vp = gpu_get_constant_location(pipes_cursor, "invVP");
+		ptr = ADDRESS(pipes_cursor_inv_vp.impl);
+		size = shader_context_type_size("mat4");
+		offset += shader_context_type_pad(offset, size);
+		ptr.vertexOffset = offset;
+		ptr.fragmentOffset = offset;
+		offset += size;
+
 		pipes_cursor_mouse = gpu_get_constant_location(pipes_cursor, "mouse");
+		ptr = ADDRESS(pipes_cursor_mouse.impl);
+		size = shader_context_type_size("vec2");
+		offset += shader_context_type_pad(offset, size);
+		ptr.vertexOffset = offset;
+		ptr.fragmentOffset = offset;
+		offset += size;
+
 		pipes_cursor_tex_step = gpu_get_constant_location(pipes_cursor, "tex_step");
+		ptr = ADDRESS(pipes_cursor_tex_step.impl);
+		size = shader_context_type_size("vec2");
+		offset += shader_context_type_pad(offset, size);
+		ptr.vertexOffset = offset;
+		ptr.fragmentOffset = offset;
+		offset += size;
+
 		pipes_cursor_radius = gpu_get_constant_location(pipes_cursor, "radius");
+		ptr = ADDRESS(pipes_cursor_radius.impl);
+		size = shader_context_type_size("float");
+		offset += shader_context_type_pad(offset, size);
+		ptr.vertexOffset = offset;
+		ptr.fragmentOffset = offset;
+		offset += size;
+
 		pipes_cursor_camera_right = gpu_get_constant_location(pipes_cursor, "camera_right");
+		ptr = ADDRESS(pipes_cursor_camera_right.impl);
+		size = shader_context_type_size("vec3");
+		offset += shader_context_type_pad(offset, size);
+		ptr.vertexOffset = offset;
+		ptr.fragmentOffset = offset;
+		offset += size;
+
 		pipes_cursor_tint = gpu_get_constant_location(pipes_cursor, "tint");
+		ptr = ADDRESS(pipes_cursor_tint.impl);
+		size = shader_context_type_size("vec3");
+		offset += shader_context_type_pad(offset, size);
+		ptr.vertexOffset = offset;
+		ptr.fragmentOffset = offset;
+		offset += size;
+
 		pipes_cursor_gbufferd = gpu_get_texture_unit(pipes_cursor, "gbufferD");
+		ARRAY_ACCESS(pipes_cursor_gbufferd.stages, IRON_GPU_SHADER_TYPE_VERTEX) = 0;
 	}
 }

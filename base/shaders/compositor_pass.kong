@@ -1,0 +1,70 @@
+
+#[set(everything)]
+const tex: tex2d;
+
+#[set(everything)]
+const tex_sampler: sampler;
+
+// #[set(everything)]
+// const histogram: tex2d;
+
+// #[set(everything)]
+// const histogram_sampler: sampler;
+
+#[set(everything)]
+const constants: {
+	vignette_strength: float;
+	grain_strength: float;
+};
+
+struct vert_in {
+	pos: float2;
+}
+
+struct vert_out {
+	pos: float4;
+	tex: float2;
+}
+
+fun compositor_pass_vert(input: vert_in): vert_out {
+	var output: vert_out;
+	output.tex = input.pos.xy * 0.5 + 0.5;
+	output.tex.y = 1.0 - output.tex.y;
+	output.pos = float4(input.pos.xy, 0.0, 1.0);
+	return output;
+}
+
+fun tonemap_filmic(color: float3): float3 {
+	// Based on Filmic Tonemapping Operators http://filmicgames.com/archives/75
+	// var x: float3 = max(float3(0.0, 0.0, 0.0), color - 0.004);
+	var x: float3;
+	x.x = max(float3(0.0, 0.0, 0.0), color.x - 0.004);
+	x.y = max(float3(0.0, 0.0, 0.0), color.y - 0.004);
+	x.z = max(float3(0.0, 0.0, 0.0), color.z - 0.004);
+	return (x * (6.2 * x + 0.5)) / (x * (6.2 * x + 1.7) + 0.06);
+}
+
+fun compositor_pass_frag(input: vert_out): float4 {
+	var color: float4 = sample_lod(tex, tex_sampler, input.tex, 0.0);
+
+	// Static grain
+	var x: float = (input.tex.x + 4.0) * (input.tex.y + 4.0) * 10.0;
+	var g: float = (((x % 13.0) + 1.0) * ((x % 123.0) + 1.0) % 0.01) - 0.005;
+	color.rgb += float3(g, g, g) * constants.grain_strength;
+
+	color.rgb *= (1.0 - constants.vignette_strength) + constants.vignette_strength * pow(16.0 * input.tex.x * input.tex.y * (1.0 - input.tex.x) * (1.0 - input.tex.y), 0.2);
+
+	// Auto exposure
+	// const float auto_exposure_strength = 1.0;
+	// float expo = 2.0 - clamp(length(sample_lod(histogram, histogram_sampler, float2(0.5, 0.5), 0.0).rgb), 0.0, 1.0);
+	// color.rgb *= pow(expo, auto_exposure_strength * 2.0);
+
+	color.rgb = tonemap_filmic(color.rgb); // With gamma
+	return color;
+}
+
+#[pipe]
+struct pipe {
+	vertex = compositor_pass_vert;
+	fragment = compositor_pass_frag;
+}

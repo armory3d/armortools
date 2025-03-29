@@ -1,0 +1,66 @@
+
+#[set(everything)]
+const tex: tex2d;
+
+#[set(everything)]
+const tex_sampler: sampler;
+
+#[set(everything)]
+const constants: {
+	screen_size_inv: float2;
+	current_mip_level: int;
+	sample_scale: float;
+};
+
+struct vert_in {
+	pos: float2;
+}
+
+struct vert_out {
+	pos: float4;
+	tex: float2;
+}
+
+const bloom_strength: float = 0.02;
+
+fun bloom_upsample_pass_vert(input: vert_in): vert_out {
+	var output: vert_out;
+	output.tex = input.pos.xy * 0.5 + 0.5;
+	output.tex.y = 1.0 - output.tex.y;
+	output.pos = float4(input.pos.xy, 0.0, 1.0);
+	return output;
+}
+
+fun upsample_dual_filter(tex: tex2d, tex_coord: float2, texel_size: float2): float3 {
+	var delta: float2 = texel_size * constants.sample_scale;
+
+	var result: float3;
+	result  = sample_lod(tex, tex_sampler, tex_coord + float2(-delta.x * 2.0, 0.0), 0.0).rgb;
+	result += sample_lod(tex, tex_sampler, tex_coord + float2(-delta.x, delta.y),   0.0).rgb * 2.0;
+	result += sample_lod(tex, tex_sampler, tex_coord + float2(0.0, delta.y * 2.0),  0.0).rgb;
+	result += sample_lod(tex, tex_sampler, tex_coord + delta,                     0.0).rgb * 2.0;
+	result += sample_lod(tex, tex_sampler, tex_coord + float2(delta.x * 2.0, 0.0),  0.0).rgb;
+	result += sample_lod(tex, tex_sampler, tex_coord + float2(delta.x, -delta.y),   0.0).rgb * 2.0;
+	result += sample_lod(tex, tex_sampler, tex_coord + float2(0.0, -delta.y * 2.0), 0.0).rgb;
+	result += sample_lod(tex, tex_sampler, tex_coord - delta,                     0.0).rgb * 2.0;
+
+	return result * (1.0 / 12.0);
+}
+
+fun bloom_upsample_pass_frag(input: vert_out): float4 {
+	var color: float4;
+	color.rgb = upsample_dual_filter(tex, input.tex, constants.screen_size_inv);
+
+	if (constants.current_mip_level == 0) {
+		color.rgb = color.rgb * bloom_strength;
+	}
+
+	color.a = 1.0;
+	return color;
+}
+
+#[pipe]
+struct pipe {
+	vertex = bloom_upsample_pass_vert;
+	fragment = bloom_upsample_pass_frag;
+}
