@@ -27,10 +27,6 @@ project.add_cfiles("aimage.c");
 
 {
 	project.add_cfiles("ashader.c");
-	if (platform === "linux") {
-		project.add_project("../../sources/libs/to_spirv");
-		//project.flatten();
-	}
 
 	project.add_cfiles('../../sources/libs/kong/libs/*.c');
 	project.add_cfiles('../../sources/libs/kong/*.c');
