@@ -1,0 +1,41 @@
+
+#[set(everything)]
+const tex0: tex2d;
+
+#[set(everything)]
+const tex0_sampler: sampler;
+
+#[set(everything)]
+const texa: tex2d;
+
+#[set(everything)]
+const texa_sampler: sampler;
+
+struct vert_in {
+	pos: float2;
+}
+
+struct vert_out {
+	pos: float4;
+	tex: float2;
+}
+
+fun inpaint_preview_vert(input: vert_in): vert_out {
+	var output: vert_out;
+	output.tex = input.pos.xy * 0.5 + 0.5;
+	output.tex.y = 1.0 - output.tex.y;
+	output.pos = float4(input.pos.xy, 0.0, 1.0);
+	return output;
+}
+
+fun inpaint_preview_frag(input: vert_out): float4 {
+	var col: float4 = sample_lod(tex0, tex0_sampler, input.tex, 0.0);
+	var mask: float = clamp(sample_lod(texa, texa_sampler, input.tex, 0.0).r + 0.5, 0.0, 1.0);
+	return col * mask;
+}
+
+#[pipe]
+struct pipe {
+	vertex = inpaint_preview_vert;
+	fragment = inpaint_preview_frag;
+}

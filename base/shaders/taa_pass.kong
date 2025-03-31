@@ -36,7 +36,7 @@ fun taa_pass_vert(input: vert_in): vert_out {
 fun taa_pass_frag(input: vert_out): float4 {
 	var current: float4 = sample_lod(tex, tex_sampler, input.tex, 0.0);
 	var previous: float4 = sample_lod(tex2, tex2_sampler, input.tex, 0.0);
-	return float4(lerp(current.rgb, previous.rgb, constants.taa_blend), 1.0);
+	return float4(lerp3(current.rgb, previous.rgb, constants.taa_blend), 1.0);
 }
 
 #[pipe]

@@ -54,9 +54,11 @@ function line_draw_init() {
 		ARRAY_ACCESS(line_draw_pipeline.color_attachment, 1) = tex_format_t.RGBA64;
 		ARRAY_ACCESS(line_draw_pipeline.color_attachment, 2) = tex_format_t.RGBA64;
 		line_draw_pipeline.depth_attachment_bits = 24;
+		line_draw_pipeline.kong = true;
 		gpu_compile_pipeline(line_draw_pipeline);
-		line_draw_color_loc = gpu_get_constant_location(line_draw_pipeline, "color");
-		line_draw_vp_loc = gpu_get_constant_location(line_draw_pipeline, "VP");
+		pipes_offset = 0;
+		line_draw_color_loc = pipes_get_constant_location(line_draw_pipeline, "color", "vec3");
+		line_draw_vp_loc = pipes_get_constant_location(line_draw_pipeline, "VP", "mat4");
 		line_draw_vp = mat4_identity();
 		line_draw_vertex_buffer = gpu_create_vertex_buffer(line_draw_max_vertices, structure, usage_t.DYNAMIC);
 		line_draw_index_buffer = gpu_create_index_buffer(line_draw_max_indices);
@@ -67,12 +69,13 @@ function line_draw_init() {
 		line_draw_overlay_pipeline = gpu_create_pipeline();
 		line_draw_overlay_pipeline.input_layout = structure;
 		line_draw_overlay_pipeline.fragment_shader = sys_get_shader("line_overlay.frag");
-		line_draw_overlay_pipeline.vertex_shader = sys_get_shader("line.vert");
+		line_draw_overlay_pipeline.vertex_shader = sys_get_shader("line_overlay.vert");
 		line_draw_overlay_pipeline.depth_write = true;
 		line_draw_overlay_pipeline.depth_mode = compare_mode_t.LESS;
 		line_draw_overlay_pipeline.cull_mode = cull_mode_t.NONE;
 		line_draw_overlay_pipeline.color_attachment_count = 1;
 		ARRAY_ACCESS(line_draw_overlay_pipeline.color_attachment, 0) = tex_format_t.RGBA64;
+		line_draw_overlay_pipeline.kong = true;
 		gpu_compile_pipeline(line_draw_overlay_pipeline);
 	}
 }

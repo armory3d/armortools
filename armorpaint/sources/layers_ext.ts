@@ -71,6 +71,7 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 			gpu_set_texture(pipes_texmask, mask);
 			gpu_set_texture(pipes_texa, layers_temp_image);
 			gpu_set_float(pipes_opac, slot_layer_get_opacity(l1));
+			gpu_set_float(pipes_tex1w, empty.width);
 			gpu_set_int(pipes_blending, layers.length > 1 ? l1.blending : 0);
 			gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 			gpu_set_index_buffer(const_data_screen_aligned_ib);
@@ -93,6 +94,7 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 			gpu_set_texture(pipes_texmask, mask);
 			gpu_set_texture(pipes_texa, layers_temp_image);
 			gpu_set_float(pipes_opac, slot_layer_get_opacity(l1));
+			gpu_set_float(pipes_tex1w, l1.texpaint_nor.width);
 			gpu_set_int(pipes_blending, l1.paint_nor_blend ? -2 : -1);
 			gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 			gpu_set_index_buffer(const_data_screen_aligned_ib);
@@ -156,6 +158,7 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 		gpu_set_texture(pipes_texmask, empty);
 		gpu_set_texture(pipes_texa, empty);
 		gpu_set_float(pipes_opac, 1.0);
+		gpu_set_float(pipes_tex1w, l0.texpaint_pack.width);
 		gpu_set_int(pipes_blending, -4);
 		gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 		gpu_set_index_buffer(const_data_screen_aligned_ib);

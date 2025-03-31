@@ -273,6 +273,7 @@ function layers_commands_merge_pack(pipe: iron_gpu_pipeline_t, i0: iron_gpu_text
 	gpu_set_texture(pipes_texmask, i1texmask);
 	gpu_set_texture(pipes_texa, layers_temp_image);
 	gpu_set_float(pipes_opac, i1mask_opacity);
+	gpu_set_float(pipes_tex1w, i1pack.width);
 	gpu_set_int(pipes_blending, i1blending);
 	gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 	gpu_set_index_buffer(const_data_screen_aligned_ib);
@@ -750,6 +751,7 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 			gpu_set_texture(pipes_texmask, mask);
 			gpu_set_texture(pipes_texa, layers_temp_image);
 			gpu_set_float(pipes_opac, slot_layer_get_opacity(l1));
+			gpu_set_float(pipes_tex1w, empty.width);
 			gpu_set_int(pipes_blending, l1.blending);
 			gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 			gpu_set_index_buffer(const_data_screen_aligned_ib);
@@ -772,6 +774,7 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 				gpu_set_texture(pipes_texmask, mask);
 				gpu_set_texture(pipes_texa, layers_temp_image);
 				gpu_set_float(pipes_opac, slot_layer_get_opacity(l1));
+				gpu_set_float(pipes_tex1w, l1.texpaint_nor.width);
 				gpu_set_int(pipes_blending, l1.paint_nor_blend ? -2 : -1);
 				gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 				gpu_set_index_buffer(const_data_screen_aligned_ib);

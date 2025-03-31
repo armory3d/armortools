@@ -65,33 +65,16 @@ fun cursor_vert(input: vert_in): vert_out {
 	n_tan = normalize(constants.camera_right - n * dot(constants.camera_right, n));
 	n_bin = cross(n_tan, n);
 
-	var x_bit: float = (input.pos.x + 16383.0) / (2.0 * 16383.0);
-    var z_bit: float = (input.pos.z + 16383.0) / (2.0 * 16383.0);
-    var vertex_id: int = int(2.0 * x_bit + z_bit);
-
-	if (input.pos.x < 0 && input.pos.z < 0) {
-		vertex_id = 0;
-	}
-	if (input.pos.x > 0 && input.pos.z < 0) {
-		vertex_id = 1;
-	}
-	if (input.pos.x > 0 && input.pos.z > 0) {
-		vertex_id = 2;
-	}
-	if (input.pos.x < 0 && input.pos.z > 0) {
-		vertex_id = 3;
-	}
-
-	if (vertex_id == 0) {
+	if (input.pos.x < 0 && input.pos.z < 0) { // vertex_id == 0
 		wpos += normalize(-n_tan - n_bin) * 0.7 * constants.radius;
 	}
-	/*else */if (vertex_id == 1) {
+	/*else */if (input.pos.x > 0 && input.pos.z < 0) { // vertex_id == 1
 		wpos += normalize( n_tan - n_bin) * 0.7 * constants.radius;
 	}
-	/*else */if (vertex_id == 2) {
+	/*else */if (input.pos.x > 0 && input.pos.z > 0) { // vertex_id == 2
 		wpos += normalize( n_tan + n_bin) * 0.7 * constants.radius;
 	}
-	/*else */if (vertex_id == 3) {
+	/*else */if (input.pos.x < 0 && input.pos.z > 0) { // vertex_id == 3
 		wpos += normalize(-n_tan + n_bin) * 0.7 * constants.radius;
 	}
 

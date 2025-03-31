@@ -125,11 +125,11 @@ fun octahedron_wrap(v: float2): float2 {
 // }
 
 fun surface_albedo(base_color: float3, metalness: float): float3 {
-	return lerp(base_color, float3(0.0, 0.0, 0.0), metalness);
+	return lerp3(base_color, float3(0.0, 0.0, 0.0), metalness);
 }
 
 fun surface_f0(base_color: float3, metalness: float): float3 {
-	return lerp(float3(0.04, 0.04, 0.04), base_color, metalness);
+	return lerp3(float3(0.04, 0.04, 0.04), base_color, metalness);
 }
 
 fun get_pos(eye: float3, eye_look: float3, view_ray: float3, depth: float, camera_proj: float2): float3 {

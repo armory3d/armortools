@@ -1,0 +1,33 @@
+
+#[set(everything)]
+const tex: tex2d;
+
+#[set(everything)]
+const tex_sampler: sampler;
+
+struct vert_in {
+	pos: float2;
+}
+
+struct vert_out {
+	pos: float4;
+	tex: float2;
+}
+
+fun layer_copy_rrrr_vert(input: vert_in): vert_out {
+	var output: vert_out;
+	output.tex = input.pos.xy * 0.5 + 0.5;
+	output.tex.y = 1.0 - output.tex.y;
+	output.pos = float4(input.pos.xy, 0.0, 1.0);
+	return output;
+}
+
+fun layer_copy_rrrr_frag(input: vert_out): float4 {
+	return sample_lod(tex, tex_sampler, input.tex, 0.0).rrrr;
+}
+
+#[pipe]
+struct pipe {
+	vertex = layer_copy_rrrr_vert;
+	fragment = layer_copy_rrrr_frag;
+}

@@ -139,10 +139,10 @@ fun ssao_pass_frag(input: vert_out): float {
 	var o2: float3 = cross(o1, n);
 	var c1: float3 = 0.5 * (o1 + o2);
 	var c2: float3 = 0.5 * (o1 - o2);
-	col += ray_cast(input.view_ray, lerp(n, o1, 0.5), vpos);
-	col += ray_cast(input.view_ray, lerp(n, o2, 0.5), vpos);
-	col += ray_cast(input.view_ray, lerp(n, -c1, 0.5), vpos);
-	col += ray_cast(input.view_ray, lerp(n, -c2, 0.5), vpos);
+	col += ray_cast(input.view_ray, lerp3(n, o1, 0.5), vpos);
+	col += ray_cast(input.view_ray, lerp3(n, o2, 0.5), vpos);
+	col += ray_cast(input.view_ray, lerp3(n, -c1, 0.5), vpos);
+	col += ray_cast(input.view_ray, lerp3(n, -c2, 0.5), vpos);
 	return col;
 }
 
