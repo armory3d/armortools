@@ -1359,6 +1359,34 @@ static void write_functions(char *hlsl, size_t *offset, shader_stage stage, func
 					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = saturate(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
 					                   o->op_call.var.index, o->op_call.parameters[0].index);
 				}
+				else if (o->op_call.func == add_name("lerp3")) { ////
+					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = lerp(_%" PRIu64 ", _%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index);
+				}
+				else if (o->op_call.func == add_name("lerp4")) { ////
+					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = lerp(_%" PRIu64 ", _%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index);
+				}
+				else if (o->op_call.func == add_name("frac3")) { ////
+					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = frac(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index);
+				}
+				else if (o->op_call.func == add_name("abs3")) { ////
+					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = abs(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index);
+				}
+				else if (o->op_call.func == add_name("clamp3")) { ////
+					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = clamp(_%" PRIu64 ", _%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index);
+				}
+				else if (o->op_call.func == add_name("min3")) { ////
+					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = min(_%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index);
+				}
+				else if (o->op_call.func == add_name("max3")) { ////
+					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = max(_%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index);
+				}
 				else if (o->op_call.func == add_name("trace_ray")) {
 					check(o->op_call.parameters_size == 3, context, "trace_ray requires three parameters");
 					*offset += sprintf(&hlsl[*offset], "TraceRay(_%" PRIu64 ", RAY_FLAG_NONE, 0xFF, 0, 0, 0, _%" PRIu64 ", _%" PRIu64 ");\n",
