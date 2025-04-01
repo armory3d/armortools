@@ -7,5 +7,5 @@ let project = new Project("test");
 project.add_project("../../");
 project.add_tsfiles("./");
 project.add_tsfiles("../../sources/ts/iron");
-project.add_shaders("./*.glsl");
+project.add_shaders("./*.kong");
 return project;

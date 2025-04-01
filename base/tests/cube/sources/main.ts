@@ -1,4 +1,4 @@
-// ../../../make --graphics vulkan --run
+// ../../make --run
 
 function main() {
 	let ops: iron_window_options_t = {
@@ -10,7 +10,8 @@ function main() {
 		features: window_features_t.RESIZABLE | window_features_t.MINIMIZABLE | window_features_t.MAXIMIZABLE,
 		mode: window_mode_t.WINDOWED,
 		frequency: 60,
-		vsync: true
+		vsync: true,
+		use_depth: false
 	};
 	sys_start(ops);
 	sys_init();
@@ -77,8 +78,8 @@ function ready() {
 				contexts: [
 					{
 						name: "mesh",
-						vertex_shader: "mesh.vert",
-						fragment_shader: "mesh.frag",
+						vertex_shader: "_mesh.vert",
+						fragment_shader: "_mesh.frag",
 						compare_mode: "less",
 						cull_mode: "clockwise",
 						depth_write: true,

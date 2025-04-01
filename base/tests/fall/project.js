@@ -8,8 +8,8 @@ project.add_project("../../");
 project.add_tsfiles("sources");
 project.add_cfiles("../../sources/libs/asim.c");
 project.add_tsfiles("../../sources/ts/iron");
-project.add_shaders("../../shaders/draw/*.glsl");
-project.add_shaders("shaders/*.glsl");
+project.add_shaders("../../shaders/draw/*.kong");
+project.add_shaders("shaders/*.kong");
 project.add_assets("assets/*", { destination: "data/{name}" });
 
 return project;

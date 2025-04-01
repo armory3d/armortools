@@ -1,6 +1,8 @@
-// ../../../make --graphics vulkan --run
+// ../../make --run
 
 ///include "../../sources/libs/asim.h"
+
+let body: any;
 
 function main() {
 	let ops: iron_window_options_t = {
@@ -88,8 +90,8 @@ function ready() {
 				contexts: [
 					{
 						name: "mesh",
-						vertex_shader: "mesh.vert",
-						fragment_shader: "mesh.frag",
+						vertex_shader: "_mesh.vert",
+						fragment_shader: "_mesh.frag",
 						compare_mode: "less",
 						cull_mode: "clockwise",
 						depth_write: true,
@@ -143,21 +145,21 @@ function scene_ready() {
 	let cube: object_t = scene_get_child("Cube");
 	let mesh: mesh_object_t = cube.ext;
 
-	asim_init(mesh.data.vertex_arrays[0].values, mesh.data.index_arrays[0].values, mesh.data.scale_pos);
+	asim_world_create();
+	body = asim_body_create(1, 1, 1, 1, 1, 0, 0, 5, null, null, 1);
+	asim_body_create(0, 1, 1, 1, 1, 0, 0, 0, mesh.data.vertex_arrays[0].values, mesh.data.index_arrays[0].values, mesh.data.scale_pos);
 }
 
 function scene_update() {
-	asim_update();
+	asim_world_update();
 	camera_update();
 
 	if (keyboard_started("space")) {
-		asim_set_sphere(0, 0, 5);
+		asim_body_sync_transform(body, vec4_create(0, 0, 5), quat_create(0, 0, 0, 1));
 	}
 
 	let sphere: object_t = scene_get_child("Sphere");
 	let t: transform_t = sphere.transform;
-	t.loc.x = asim_get_sphere_x();
-	t.loc.y = asim_get_sphere_y();
-	t.loc.z = asim_get_sphere_z();
+	asim_body_get_pos(body, ADDRESS(t.loc));
 	transform_build_matrix(t);
 }
