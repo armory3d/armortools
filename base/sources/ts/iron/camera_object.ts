@@ -13,6 +13,7 @@ type camera_object_t = {
 
 let _camera_object_v: vec4_t = vec4_create();
 let _camera_object_sphere_center: vec4_t = vec4_create();
+let camera_object_taa_frames: i32 = 1;
 
 function camera_object_create(data: camera_data_t): camera_object_t {
 	let raw: camera_object_t = {};
@@ -71,12 +72,7 @@ function camera_object_proj_jitter(raw: camera_object_t) {
 	let h: i32 = render_path_current_h;
 	raw.p = mat4_clone(raw.no_jitter_p);
 
-	let i: i32 = raw.frame % 6;
-
-	if (context_raw.ddirty > 1 || context_raw.pdirty > 0) {
-		i = raw.frame % 2;
-	}
-
+	let i: i32 = raw.frame % camera_object_taa_frames;
 	let x: f32 = 0.0;
 	let y: f32 = 0.0;
 

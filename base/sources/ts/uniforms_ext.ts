@@ -132,8 +132,10 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 			return 0.0;
 		}
 		if (context_raw.ddirty > 1 || context_raw.pdirty > 0) {
+			camera_object_taa_frames = 2;
 			return 0.5;
 		}
+		camera_object_taa_frames = 6;
 		return 0.833;
 	}
 
