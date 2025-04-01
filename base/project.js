@@ -15,8 +15,12 @@ let dir = flags.name.toLowerCase();
 if (!flags.lite) {
 	project.add_define("IDLE_SLEEP");
 
-	if (graphics === "vulkan") {
-		project.add_project("./sources/libs/to_spirv");
+	project.add_cfiles('sources/libs/kong/libs/*.c');
+	project.add_cfiles('sources/libs/kong/*.c');
+	project.add_cfiles('sources/libs/kong/backends/*.c');
+	if (platform === "windows") {
+		project.add_define('_CRT_SECURE_NO_WARNINGS');
+		project.add_lib('d3dcompiler');
 	}
 
 	if (flags.with_onnx) {
@@ -260,7 +264,7 @@ if (fs_exists(os_cwd() + "/icon.png")) {
 
 project.add_include_dir("sources/libs");
 project.add_cfiles("sources/libs/gc.c");
-project.add_cfiles("sources/libs/dir.c");
+project.add_cfiles("sources/libs/kong/dir.c");
 project.add_include_dir("sources");
 project.add_cfiles("sources/iron.c");
 project.add_define("IRON_C_PATH=\"" + os_cwd() + "/build/iron.c" + "\"");

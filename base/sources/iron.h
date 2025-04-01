@@ -317,7 +317,7 @@ string_t *iron_get_arg(i32 index) {
 #include "iron_math.h"
 #include "iron_net.h"
 #include <lz4x.h>
-#include "dir.h"
+#include "kong/dir.h"
 #ifdef WITH_AUDIO
 #include "iron_audio.h"
 #endif
@@ -372,10 +372,6 @@ const char *iphonegetresourcepath();
 
 #if defined(IRON_IOS) || defined(IRON_ANDROID)
 char mobile_title[1024];
-#endif
-
-#if defined(IRON_VULKAN) && defined(KRAFIX_LIBRARY)
-int krafix_compile(const char *source, char *output, int *length, const char *targetlang, const char *system, const char *shadertype, int version);
 #endif
 
 extern iron_gpu_command_list_t commandList;

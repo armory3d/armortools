@@ -1,7 +1,4 @@
 #include "dir.h"
-
-#include "log.h"
-
 #include <stddef.h>
 #include <stdio.h>
 
@@ -18,8 +15,7 @@ directory open_dir(const char *dirname) {
 	directory        dir;
 	dir.handle = FindFirstFileA(pattern, &data);
 	if (dir.handle == INVALID_HANDLE_VALUE) {
-		kong_log(LOG_LEVEL_ERROR, "FindFirstFile failed (%d)\n", GetLastError());
-		exit(1);
+		return dir;
 	}
 	FindNextFileA(dir.handle, &data);
 	return dir;
