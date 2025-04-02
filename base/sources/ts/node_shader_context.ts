@@ -1,7 +1,11 @@
 
+type material_t = {
+	name?: string;
+	canvas?: ui_node_canvas_t;
+};
+
 type node_shader_context_t = {
-	vert?: node_shader_t;
-	frag?: node_shader_t;
+	kong?: node_shader_t;
 	data?: shader_context_t;
 	allow_vcols?: bool;
 	material?: material_t;
@@ -121,19 +125,9 @@ function node_shader_context_add_texture_unit(raw: node_shader_context_t, ctype:
 	array_push(raw.tunits, c);
 }
 
-function node_shader_context_make_vert(raw: node_shader_context_t): node_shader_t {
+function node_shader_context_make_kong(raw: node_shader_context_t): node_shader_t {
 	raw.data.vertex_shader = raw.material.name + "_" + raw.data.name + ".vert";
-	raw.vert = node_shader_create(raw, "vert");
-	return raw.vert;
-}
-
-function node_shader_context_make_frag(raw: node_shader_context_t): node_shader_t {
 	raw.data.fragment_shader = raw.material.name + "_" + raw.data.name + ".frag";
-	raw.frag = node_shader_create(raw, "frag");
-	return raw.frag;
+	raw.kong = node_shader_create(raw);
+	return raw.kong;
 }
-
-type material_t = {
-	name?: string;
-	canvas?: ui_node_canvas_t;
-};

@@ -63,11 +63,11 @@ nodes_material_category_add(category_name, armpack_encode(node_list));
 
 // Node shader
 parser_material_custom_nodes_set(node_type, function(node, socket_name) {
-	let frag = parser_material_frag_get();
+	let kong = parser_material_kong_get();
 	let scale = parser_material_parse_value_input(node, 0);
 	let my_out = "my_out";
 
-	node_shader_write(frag,
+	node_shader_write_frag(kong,
 		"float " + my_out + " = cos(sin(tex_coord.x * 200.0 * " + scale + ") + cos(tex_coord.y * 200.0 * " + scale + "));"
 	);
 

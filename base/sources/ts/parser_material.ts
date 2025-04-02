@@ -16,9 +16,8 @@
 //
 
 let parser_material_con: node_shader_context_t;
-let parser_material_vert: node_shader_t;
-let parser_material_frag: node_shader_t;
-let parser_material_curshader: node_shader_t;
+let parser_material_kong: node_shader_t;
+let parser_material_kong: node_shader_t;
 let parser_material_matcon: material_context_t;
 let parser_material_parsed: string[];
 let parser_material_parents: ui_node_t[];
@@ -127,15 +126,13 @@ function parser_material_init() {
 	parser_material_parsing_basecolor = false;
 }
 
-function parser_material_parse(canvas: ui_node_canvas_t, _con: node_shader_context_t, _vert: node_shader_t, _frag: node_shader_t, _matcon: material_context_t): shader_out_t {
+function parser_material_parse(canvas: ui_node_canvas_t, _con: node_shader_context_t, _kong: node_shader_t, _matcon: material_context_t): shader_out_t {
 	parser_material_init();
 	parser_material_canvases = [canvas];
 	parser_material_nodes = canvas.nodes;
 	parser_material_links = canvas.links;
 	parser_material_con = _con;
-	parser_material_vert = _vert;
-	parser_material_frag = _frag;
-	parser_material_curshader = parser_material_frag;
+	parser_material_kong = _kong;
 	parser_material_matcon = _matcon;
 
 	if (parser_material_start_group != null) {
@@ -177,101 +174,97 @@ function parser_material_parse(canvas: ui_node_canvas_t, _con: node_shader_conte
 }
 
 function parser_material_finalize(con: node_shader_context_t) {
-	let vert: node_shader_t = con.vert;
-	let frag: node_shader_t = con.frag;
+	let kong: node_shader_t = con.kong;
 
-	if (frag.dotnv) {
-		frag.vvec = true;
-		frag.n = true;
+	if (kong.frag_dotnv) {
+		kong.frag_vvec = true;
+		kong.frag_n = true;
 	}
-	if (frag.vvec) {
-		vert.wposition = true;
+	if (kong.frag_vvec) {
+		kong.vert_wposition = true;
 	}
 
-	if (frag.bposition) {
+	if (kong.frag_bposition) {
 		if (parser_material_triplanar) {
-			node_shader_write_attrib(frag, "vec3 bposition = vec3(\
+			node_shader_write_attrib_frag(kong, "vec3 bposition = vec3(\
 				tex_coord1.x * tex_coord_blend.y + tex_coord2.x * tex_coord_blend.z,\
 				tex_coord.x * tex_coord_blend.x + tex_coord2.y * tex_coord_blend.z,\
 				tex_coord.y * tex_coord_blend.x + tex_coord1.y * tex_coord_blend.y);");
 		}
-		else if (frag.ndcpos) {
-			node_shader_add_out(vert, "vec3 bposition");
-			node_shader_write(vert, "bposition = (ndc.xyz / ndc.w);");
+		else if (kong.frag_ndcpos) {
+			node_shader_add_out(kong, "vec3 bposition");
+			node_shader_write_vert(kong, "bposition = (ndc.xyz / ndc.w);");
 		}
 		else {
-			node_shader_add_out(vert, "vec3 bposition");
-			node_shader_add_uniform(vert, "vec3 dim", "_dim");
-			node_shader_add_uniform(vert, "vec3 hdim", "_half_dim");
-			node_shader_write_attrib(vert, "bposition = (pos.xyz + hdim) / dim;");
+			node_shader_add_out(kong, "vec3 bposition");
+			node_shader_add_uniform(kong, "vec3 dim", "_dim");
+			node_shader_add_uniform(kong, "vec3 hdim", "_half_dim");
+			node_shader_write_attrib_vert(kong, "bposition = (pos.xyz + hdim) / dim;");
 		}
 	}
-	if (frag.wposition) {
-		node_shader_add_uniform(vert, "mat4 W", "_world_matrix");
-		node_shader_add_out(vert, "vec3 wposition");
-		node_shader_write_attrib(vert, "wposition = vec4(mul(vec4(pos.xyz, 1.0), W)).xyz;");
+	if (kong.frag_wposition) {
+		node_shader_add_uniform(kong, "mat4 W", "_world_matrix");
+		node_shader_add_out(kong, "vec3 wposition");
+		node_shader_write_attrib_vert(kong, "wposition = vec4(mul(vec4(pos.xyz, 1.0), W)).xyz;");
 	}
-	else if (vert.wposition) {
-		node_shader_add_uniform(vert, "mat4 W", "_world_matrix");
-		node_shader_write_attrib(vert, "vec3 wposition = vec4(mul(vec4(pos.xyz, 1.0), W)).xyz;");
+	else if (kong.vert_wposition) {
+		node_shader_add_uniform(kong, "mat4 W", "_world_matrix");
+		node_shader_write_attrib_vert(kong, "vec3 wposition = vec4(mul(vec4(pos.xyz, 1.0), W)).xyz;");
 	}
-	if (frag.vposition) {
-		node_shader_add_uniform(vert, "mat4 WV", "_world_view_matrix");
-		node_shader_add_out(vert, "vec3 vposition");
-		node_shader_write_attrib(vert, "vposition = vec4(mul(vec4(pos.xyz, 1.0), WV)).xyz;");
+	if (kong.frag_vposition) {
+		node_shader_add_uniform(kong, "mat4 WV", "_world_view_matrix");
+		node_shader_add_out(kong, "vec3 vposition");
+		node_shader_write_attrib_vert(kong, "vposition = vec4(mul(vec4(pos.xyz, 1.0), WV)).xyz;");
 	}
-	if (frag.mposition) {
-		node_shader_add_out(vert, "vec3 mposition");
-		if (frag.ndcpos) {
-			node_shader_write(vert, "mposition = (ndc.xyz / ndc.w);");
+	if (kong.frag_mposition) {
+		node_shader_add_out(kong, "vec3 mposition");
+		if (kong.frag_ndcpos) {
+			node_shader_write_vert(kong, "mposition = (ndc.xyz / ndc.w);");
 		}
 		else {
-			node_shader_write_attrib(vert, "mposition = pos.xyz;");
+			node_shader_write_attrib_vert(kong, "mposition = pos.xyz;");
 		}
 	}
-	if (frag.wtangent) {
-		// NodeShaderadd_elem(con, "tang", "short4norm");
-		// add_uniform(vert, "mat3 N", "_normal_matrix");
-		node_shader_add_out(vert, "vec3 wtangent");
-		// write_attrib(vert, "wtangent = normalize(mul(tang.xyz, N));");
-		node_shader_write_attrib(vert, "wtangent = vec3(0.0, 0.0, 0.0);");
+	if (kong.frag_wtangent) {
+		node_shader_add_out(kong, "vec3 wtangent");
+		node_shader_write_attrib_vert(kong, "wtangent = vec3(0.0, 0.0, 0.0);");
 	}
-	if (frag.vvec_cam) {
-		node_shader_add_uniform(vert, "mat4 WV", "_world_view_matrix");
-		node_shader_add_out(vert, "vec3 eye_dir_cam");
-		node_shader_write_attrib(vert, "eye_dir_cam = vec4(mul(vec4(pos.xyz, 1.0), WV)).xyz; eye_dir_cam.z *= -1.0;");
-		node_shader_write_attrib(frag, "vec3 vvec_cam = normalize(eye_dir_cam);");
+	if (kong.frag_vvec_cam) {
+		node_shader_add_uniform(kong, "mat4 WV", "_world_view_matrix");
+		node_shader_add_out(kong, "vec3 eye_dir_cam");
+		node_shader_write_attrib_vert(kong, "eye_dir_cam = vec4(mul(vec4(pos.xyz, 1.0), WV)).xyz; eye_dir_cam.z *= -1.0;");
+		node_shader_write_attrib_frag(kong, "vec3 vvec_cam = normalize(eye_dir_cam);");
 	}
-	if (frag.vvec) {
-		node_shader_add_uniform(vert, "vec3 eye", "_camera_pos");
-		node_shader_add_out(vert, "vec3 eye_dir");
-		node_shader_write_attrib(vert, "eye_dir = eye - wposition;");
-		node_shader_write_attrib(frag, "vec3 vvec = normalize(eye_dir);");
+	if (kong.frag_vvec) {
+		node_shader_add_uniform(kong, "vec3 eye", "_camera_pos");
+		node_shader_add_out(kong, "vec3 eye_dir");
+		node_shader_write_attrib_vert(kong, "eye_dir = eye - wposition;");
+		node_shader_write_attrib_frag(kong, "vec3 vvec = normalize(eye_dir);");
 	}
-	if (frag.n) {
-		node_shader_add_uniform(vert, "mat3 N", "_normal_matrix");
-		node_shader_add_out(vert, "vec3 wnormal");
-		node_shader_write_attrib(vert, "wnormal = mul(vec3(nor.xy, pos.w), N);");
-		node_shader_write_attrib(frag, "vec3 n = normalize(wnormal);");
+	if (kong.frag_n) {
+		node_shader_add_uniform(kong, "mat3 N", "_normal_matrix");
+		node_shader_add_out(kong, "vec3 wnormal");
+		node_shader_write_attrib_vert(kong, "wnormal = mul(vec3(nor.xy, pos.w), N);");
+		node_shader_write_attrib_frag(kong, "vec3 n = normalize(wnormal);");
 	}
-	else if (vert.n) {
-		node_shader_add_uniform(vert, "mat3 N", "_normal_matrix");
-		node_shader_write_attrib(vert, "vec3 wnormal = normalize(mul(vec3(nor.xy, pos.w), N));");
+	else if (kong.vert_n) {
+		node_shader_add_uniform(kong, "mat3 N", "_normal_matrix");
+		node_shader_write_attrib_vert(kong, "vec3 wnormal = normalize(mul(vec3(nor.xy, pos.w), N));");
 	}
-	if (frag.nattr) {
-		node_shader_add_out(vert, "vec3 nattr");
-		node_shader_write_attrib(vert, "nattr = vec3(nor.xy, pos.w);");
+	if (kong.frag_nattr) {
+		node_shader_add_out(kong, "vec3 nattr");
+		node_shader_write_attrib_vert(kong, "nattr = vec3(nor.xy, pos.w);");
 	}
-	if (frag.dotnv) {
-		node_shader_write_attrib(frag, "float dotnv = max(dot(n, vvec), 0.0);");
+	if (kong.frag_dotnv) {
+		node_shader_write_attrib_frag(kong, "float dotnv = max(dot(n, vvec), 0.0);");
 	}
-	if (frag.wvpposition) {
-		node_shader_add_out(vert, "vec4 wvpposition");
-		node_shader_write_end(vert, "wvpposition = gl_Position;");
+	if (kong.frag_wvpposition) {
+		node_shader_add_out(kong, "vec4 wvpposition");
+		node_shader_write_end_vert(kong, "wvpposition = gl_Position;");
 	}
 	if (node_shader_context_is_elem(con, "col")) {
-		node_shader_add_out(vert, "vec3 vcolor");
-		node_shader_write_attrib(vert, "vcolor = col.rgb;");
+		node_shader_add_out(kong, "vec3 vcolor");
+		node_shader_write_attrib_vert(kong, "vcolor = col.rgb;");
 	}
 }
 
@@ -423,16 +416,27 @@ function parser_material_parse_shader(node: ui_node_t, socket: ui_node_socket_t)
 		// Displacement / Height
 		if (node.inputs.length > 7 && parser_material_parse_height) {
 			if (!parser_material_parse_height_as_channel) {
-				parser_material_curshader = parser_material_vert;
+				parser_material_is_frag = false;
 			}
 			sout.out_height = parser_material_parse_value_input(node.inputs[7]);
 			if (!parser_material_parse_height_as_channel) {
-				parser_material_curshader = parser_material_frag;
+				parser_material_is_frag = true;
 			}
 		}
 	}
 
 	return sout;
+}
+
+let parser_material_is_frag: bool = true;
+
+function parser_material_write(raw: node_shader_t, s: string) {
+	if (parser_material_is_frag) {
+		node_shader_write_frag(raw, s);
+	}
+	else {
+		node_shader_write_vert(raw, s);
+	}
 }
 
 function parser_material_parse_vector_input(inp: ui_node_socket_t): string {
@@ -491,8 +495,8 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 	}
 	else if (node.type == "ATTRIBUTE") {
 		if (socket == node.outputs[0]) { // Color
-			if (parser_material_curshader.context.allow_vcols) {
-				node_shader_context_add_elem(parser_material_curshader.context, "col", "short4norm"); // Vcols only for now
+			if (parser_material_kong.context.allow_vcols) {
+				node_shader_context_add_elem(parser_material_kong.context, "col", "short4norm"); // Vcols only for now
 				return "vcolor";
 			}
 			else {
@@ -500,13 +504,13 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 			}
 		}
 		else { // Vector
-			node_shader_context_add_elem(parser_material_curshader.context, "tex", "short2norm"); // UVMaps only for now
+			node_shader_context_add_elem(parser_material_kong.context, "tex", "short2norm"); // UVMaps only for now
 			return "vec3(tex_coord.x, tex_coord.y, 0.0)";
 		}
 	}
 	else if (node.type == "VERTEX_COLOR") {
-		if (parser_material_curshader.context.allow_vcols) {
-			node_shader_context_add_elem(parser_material_curshader.context, "col", "short4norm");
+		if (parser_material_kong.context.allow_vcols) {
+			node_shader_context_add_elem(parser_material_kong.context, "col", "short4norm");
 			return "vcolor";
 		}
 		else {
@@ -518,7 +522,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		return parser_material_vec3(socket.default_value);
 	}
 	else if (node.type == "TEX_BRICK") {
-		node_shader_add_function(parser_material_curshader, str_tex_brick);
+		node_shader_add_function(parser_material_kong, str_tex_brick);
 		let co: string = parser_material_get_coord(node);
 		let col1: string = parser_material_parse_vector_input(node.inputs[1]);
 		let col2: string = parser_material_parse_vector_input(node.inputs[2]);
@@ -528,7 +532,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		return res;
 	}
 	else if (node.type == "TEX_CHECKER") {
-		node_shader_add_function(parser_material_curshader, str_tex_checker);
+		node_shader_add_function(parser_material_kong, str_tex_checker);
 		let co: string = parser_material_get_coord(node);
 		let col1: string = parser_material_parse_vector_input(node.inputs[1]);
 		let col2: string = parser_material_parse_vector_input(node.inputs[2]);
@@ -560,7 +564,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		}
 		else {
 			let tex_store: string = parser_material_store_var_name(node); // Pink color for missing texture
-			node_shader_write(parser_material_curshader, "vec4 " + tex_store + " = vec4(1.0, 0.0, 1.0, 1.0);");
+			parser_material_write(parser_material_kong, "vec4 " + tex_store + " = vec4(1.0, 0.0, 1.0, 1.0);");
 			return tex_store + ".rgb";
 		}
 	}
@@ -575,22 +579,22 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		return texstore + ".rrr";
 	}
 	else if (node.type == "TEX_MAGIC") {
-		node_shader_add_function(parser_material_curshader, str_tex_magic);
+		node_shader_add_function(parser_material_kong, str_tex_magic);
 		let co: string = parser_material_get_coord(node);
 		let scale: string = parser_material_parse_value_input(node.inputs[1]);
 		let res: string = "tex_magic(" + co + " * " + scale + " * 4.0)";
 		return res;
 	}
 	else if (node.type == "TEX_NOISE") {
-		node_shader_add_function(parser_material_curshader, str_tex_noise);
+		node_shader_add_function(parser_material_kong, str_tex_noise);
 		let co: string = parser_material_get_coord(node);
 		let scale: string = parser_material_parse_value_input(node.inputs[1]);
 		let res: string = "vec3(tex_noise(" + co + " * " + scale + "), tex_noise(" + co + " * " + scale + " + 0.33), tex_noise(" + co + " * " + scale + " + 0.66))";
 		return res;
 	}
 	else if (node.type == "TEX_VORONOI") {
-		node_shader_add_function(parser_material_curshader, str_tex_voronoi);
-		node_shader_add_uniform(parser_material_curshader, "sampler2D snoise256", "$noise256.k");
+		node_shader_add_function(parser_material_kong, str_tex_voronoi);
+		node_shader_add_uniform(parser_material_kong, "sampler2D snoise256", "$noise256.k");
 		let co: string = parser_material_get_coord(node);
 		let scale: string = parser_material_parse_value_input(node.inputs[1]);
 		let but: ui_node_button_t = node.buttons[0]; //coloring;
@@ -607,7 +611,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		return res;
 	}
 	else if (node.type == "TEX_WAVE") {
-		node_shader_add_function(parser_material_curshader, str_tex_wave);
+		node_shader_add_function(parser_material_kong, str_tex_wave);
 		let co: string = parser_material_get_coord(node);
 		let scale: string = parser_material_parse_value_input(node.inputs[1]);
 		let res: string = parser_material_to_vec3("tex_wave_f(" + co + " * " + scale + ")");
@@ -617,7 +621,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		let out_col: string = parser_material_parse_vector_input(node.inputs[0]);
 		let bright: string = parser_material_parse_value_input(node.inputs[1]);
 		let contr: string = parser_material_parse_value_input(node.inputs[2]);
-		node_shader_add_function(parser_material_curshader, str_brightcontrast);
+		node_shader_add_function(parser_material_kong, str_brightcontrast);
 		return "brightcontrast(" + out_col + ", " + bright + ", " + contr + ")";
 	}
 	else if (node.type == "GAMMA") {
@@ -632,12 +636,12 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		let angle: string = parser_material_parse_value_input(node.inputs[1], true);
 		let mask: string = parser_material_parse_value_input(node.inputs[2], true);
 		let tex_name: string = "texwarp_" + parser_material_node_name(node);
-		node_shader_add_uniform(parser_material_curshader, "sampler2D " + tex_name, "_" + tex_name);
+		node_shader_add_uniform(parser_material_kong, "sampler2D " + tex_name, "_" + tex_name);
 		let store: string = parser_material_store_var_name(node);
 		let pi: f32 = math_pi();
-		node_shader_write(parser_material_curshader, "float " + store + "_rad = " + angle + " * (" + pi + " / 180);");
-		node_shader_write(parser_material_curshader, "float " + store + "_x = cos(" + store + "_rad);");
-		node_shader_write(parser_material_curshader, "float " + store + "_y = sin(" + store + "_rad);");
+		parser_material_write(parser_material_kong, "float " + store + "_rad = " + angle + " * (" + pi + " / 180);");
+		parser_material_write(parser_material_kong, "float " + store + "_x = cos(" + store + "_rad);");
+		parser_material_write(parser_material_kong, "float " + store + "_y = sin(" + store + "_rad);");
 		return "texture(" + tex_name + ", tex_coord + vec2(" + store + "_x, " + store + "_y) * " + mask + ").rgb;";
 	}
 	else if (node.type == "BLUR") {
@@ -650,19 +654,19 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		}
 		let steps: string = "int(" + strength + " * 10 + 1)";
 		let tex_name: string = "texblur_" + parser_material_node_name(node);
-		node_shader_add_uniform(parser_material_curshader, "sampler2D " + tex_name, "_" + tex_name);
+		node_shader_add_uniform(parser_material_kong, "sampler2D " + tex_name, "_" + tex_name);
 		let store: string = parser_material_store_var_name(node);
-		node_shader_write(parser_material_curshader, "vec3 " + store + "_res = vec3(0.0, 0.0, 0.0);");
-		node_shader_write(parser_material_curshader, "for (int i = -" + steps + "; i <= " + steps + "; ++i) {");
-		node_shader_write(parser_material_curshader, "for (int j = -" + steps + "; j <= " + steps + "; ++j) {");
-		node_shader_write(parser_material_curshader, store + "_res += texture(" + tex_name + ", tex_coord + vec2(i, j) / vec2(textureSize(" + tex_name + ", 0))).rgb;");
-		node_shader_write(parser_material_curshader, "}");
-		node_shader_write(parser_material_curshader, "}");
-		node_shader_write(parser_material_curshader, store + "_res /= (" + steps + " * 2 + 1) * (" + steps + " * 2 + 1);");
+		parser_material_write(parser_material_kong, "vec3 " + store + "_res = vec3(0.0, 0.0, 0.0);");
+		parser_material_write(parser_material_kong, "for (int i = -" + steps + "; i <= " + steps + "; ++i) {");
+		parser_material_write(parser_material_kong, "for (int j = -" + steps + "; j <= " + steps + "; ++j) {");
+		parser_material_write(parser_material_kong, store + "_res += texture(" + tex_name + ", tex_coord + vec2(i, j) / vec2(textureSize(" + tex_name + ", 0))).rgb;");
+		parser_material_write(parser_material_kong, "}");
+		parser_material_write(parser_material_kong, "}");
+		parser_material_write(parser_material_kong, store + "_res /= (" + steps + " * 2 + 1) * (" + steps + " * 2 + 1);");
 		return store + "_res";
 	}
 	else if (node.type == "HUE_SAT") {
-		node_shader_add_function(parser_material_curshader, str_hue_sat);
+		node_shader_add_function(parser_material_kong, str_hue_sat);
 		let hue: string = parser_material_parse_value_input(node.inputs[0]);
 		let sat: string = parser_material_parse_value_input(node.inputs[1]);
 		let val: string = parser_material_parse_value_input(node.inputs[2]);
@@ -678,7 +682,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 	else if (node.type == "MIX_RGB") {
 		let fac: string = parser_material_parse_value_input(node.inputs[0]);
 		let fac_var: string = parser_material_node_name(node) + "_fac";
-		node_shader_write(parser_material_curshader, "float " + fac_var + " = " + fac + ";");
+		parser_material_write(parser_material_kong, "float " + fac_var + " = " + fac + ";");
 		let col1: string = parser_material_parse_vector_input(node.inputs[1]);
 		let col2: string = parser_material_parse_vector_input(node.inputs[2]);
 		let but: ui_node_button_t = node.buttons[0]; // blend_type
@@ -737,19 +741,19 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 			out_col = "(" + v3 + ")";
 		}
 		else if (blend == "HUE") {
-			node_shader_add_function(parser_material_curshader, str_hue_sat);
+			node_shader_add_function(parser_material_kong, str_hue_sat);
 			out_col = "mix(" + col1 + ", hsv_to_rgb(vec3(rgb_to_hsv(" + col2 + ").r, rgb_to_hsv(" + col1 + ").g, rgb_to_hsv(" + col1 + ").b)), " + fac_var + ")";
 		}
 		else if (blend == "SATURATION") {
-			node_shader_add_function(parser_material_curshader, str_hue_sat);
+			node_shader_add_function(parser_material_kong, str_hue_sat);
 			out_col = "mix(" + col1 + ", hsv_to_rgb(vec3(rgb_to_hsv(" + col1 + ").r, rgb_to_hsv(" + col2 + ").g, rgb_to_hsv(" + col1 + ").b)), " + fac_var + ")";
 		}
 		else if (blend == "COLOR") {
-			node_shader_add_function(parser_material_curshader, str_hue_sat);
+			node_shader_add_function(parser_material_kong, str_hue_sat);
 			out_col = "mix(" + col1 + ", hsv_to_rgb(vec3(rgb_to_hsv(" + col2 + ").r, rgb_to_hsv(" + col2 + ").g, rgb_to_hsv(" + col1 + ").b)), " + fac_var + ")";
 		}
 		else if (blend == "VALUE") {
-			node_shader_add_function(parser_material_curshader, str_hue_sat);
+			node_shader_add_function(parser_material_kong, str_hue_sat);
 			out_col = "mix(" + col1 + ", hsv_to_rgb(vec3(rgb_to_hsv(" + col1 + ").r, rgb_to_hsv(" + col1 + ").g, rgb_to_hsv(" + col2 + ").b)), " + fac_var + ")";
 		}
 		if (use_clamp) {
@@ -783,17 +787,17 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		}
 		// Write cols array
 		let cols_var: string = parser_material_node_name(node) + "_cols";
-		node_shader_write(parser_material_curshader, "vec3 " + cols_var + "[" + len + "];"); // TODO: Make const
+		parser_material_write(parser_material_kong, "vec3 " + cols_var + "[" + len + "];"); // TODO: Make const
 		for (let i: i32 = 0; i < len; ++i) {
 			let tmp: f32[] = [];
 			array_push(tmp, elems[i * 5]);
 			array_push(tmp, elems[i * 5 + 1]);
 			array_push(tmp, elems[i * 5 + 2]);
-			node_shader_write(parser_material_curshader, cols_var + "[" + i + "] = " + parser_material_vec3(tmp) + ";");
+			parser_material_write(parser_material_kong, cols_var + "[" + i + "] = " + parser_material_vec3(tmp) + ";");
 		}
 		// Get index
 		let fac_var: string = parser_material_node_name(node) + "_fac";
-		node_shader_write(parser_material_curshader, "float " + fac_var + " = " + fac + ";");
+		parser_material_write(parser_material_kong, "float " + fac_var + " = " + fac + ";");
 		let index: string = "0";
 		for (let i: i32 = 1; i < len; ++i) {
 			let e: f32 = elems[i * 5 + 4];
@@ -801,17 +805,17 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		}
 		// Write index
 		let index_var: string = parser_material_node_name(node) + "_i";
-		node_shader_write(parser_material_curshader, "int " + index_var + " = " + index + ";");
+		parser_material_write(parser_material_kong, "int " + index_var + " = " + index + ";");
 		if (interp == "CONSTANT") {
 			return cols_var + "[" + index_var + "]";
 		}
 		else { // Linear
 			// Write facs array
 			let facs_var: string = parser_material_node_name(node) + "_facs";
-			node_shader_write(parser_material_curshader, "float " + facs_var + "[" + len + "];"); // TODO: Make const
+			parser_material_write(parser_material_kong, "float " + facs_var + "[" + len + "];"); // TODO: Make const
 			for (let i: i32 = 0; i < len; ++i) {
 				let e: f32 = elems[i * 5 + 4];
-				node_shader_write(parser_material_curshader, facs_var + "[" + i + "] = " + e + ";");
+				parser_material_write(parser_material_kong, facs_var + "[" + i + "] = " + e + ";");
 			}
 			// Mix color
 			// float f = (pos - start) * (1.0 / (finish - start))
@@ -847,7 +851,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 	// 	return "(sqrt(vec3(" + vc0 + ", " + vc1 + ", " + vc2 + ") * vec3(" + vc3a + ", " + vc3b + ", " + vc3c + ")) * " + fac + ")";
 	// }
 	else if (node.type == "COMBHSV") {
-		node_shader_add_function(parser_material_curshader, str_hue_sat);
+		node_shader_add_function(parser_material_kong, str_hue_sat);
 		let h: string = parser_material_parse_value_input(node.inputs[0]);
 		let s: string = parser_material_parse_value_input(node.inputs[1]);
 		let v: string = parser_material_parse_value_input(node.inputs[2]);
@@ -860,23 +864,23 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		return "vec3(" + r + ", " + g + ", " + b + ")";
 	}
 	else if (node.type == "WAVELENGTH") {
-		node_shader_add_function(parser_material_curshader, str_wavelength_to_rgb);
+		node_shader_add_function(parser_material_kong, str_wavelength_to_rgb);
 		let wl: string = parser_material_parse_value_input(node.inputs[0]);
-		node_shader_add_function(parser_material_curshader, str_wavelength_to_rgb);
+		node_shader_add_function(parser_material_kong, str_wavelength_to_rgb);
 		return "wavelength_to_rgb((" + wl + " - 450.0) / 150.0)";
 	}
 	else if (node.type == "CAMERA") {
-		parser_material_curshader.vvec_cam = true;
+		parser_material_kong.frag_vvec_cam = true;
 		return "vvec_cam";
 	}
 	else if (node.type == "LAYER") {
 		let l: any = node.buttons[0].default_value;
 		if (socket == node.outputs[0]) { // Base
-			node_shader_add_uniform(parser_material_curshader, "sampler2D texpaint" + l, "_texpaint" + l);
+			node_shader_add_uniform(parser_material_kong, "sampler2D texpaint" + l, "_texpaint" + l);
 			return "texture(texpaint" + l + ", tex_coord).rgb";
 		}
 		else if (socket == node.outputs[5]) { // Normal
-			node_shader_add_uniform(parser_material_curshader, "sampler2D texpaint_nor" + l, "_texpaint_nor" + l);
+			node_shader_add_uniform(parser_material_kong, "sampler2D texpaint_nor" + l, "_texpaint_nor" + l);
 			return "texture(texpaint_nor" + l + ", tex_coord).rgb";
 		}
 	}
@@ -906,43 +910,43 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 	}
 	else if (node.type == "PICKER") {
 		if (socket == node.outputs[0]) { // Base
-			node_shader_add_uniform(parser_material_curshader, "vec3 picker_base", "_picker_base");
+			node_shader_add_uniform(parser_material_kong, "vec3 picker_base", "_picker_base");
 			return "picker_base";
 		}
 		else if (socket == node.outputs[5]) { // Normal
-			node_shader_add_uniform(parser_material_curshader, "vec3 picker_normal", "_picker_normal");
+			node_shader_add_uniform(parser_material_kong, "vec3 picker_normal", "_picker_normal");
 			return "picker_normal";
 		}
 	}
 	else if (node.type == "NEW_GEOMETRY") {
 		if (socket == node.outputs[0]) { // Position
-			parser_material_curshader.wposition = true;
+			parser_material_kong.frag_wposition = true;
 			return "wposition";
 		}
 		else if (socket == node.outputs[1]) { // Normal
-			parser_material_curshader.n = true;
+			parser_material_kong.frag_n = true;
 			return "n";
 		}
 		else if (socket == node.outputs[2]) { // Tangent
-			parser_material_curshader.wtangent = true;
+			parser_material_kong.frag_wtangent = true;
 			return "wtangent";
 		}
 		else if (socket == node.outputs[3]) { // True Normal
-			parser_material_curshader.n = true;
+			parser_material_kong.frag_n = true;
 			return "n";
 		}
 		else if (socket == node.outputs[4]) { // Incoming
-			parser_material_curshader.vvec = true;
+			parser_material_kong.frag_vvec = true;
 			return "vvec";
 		}
 		else if (socket == node.outputs[5]) { // Parametric
-			parser_material_curshader.mposition = true;
+			parser_material_kong.frag_mposition = true;
 			return "mposition";
 		}
 	}
 	else if (node.type == "OBJECT_INFO") {
 		if (socket == node.outputs[0]) { // Location
-			parser_material_curshader.wposition = true;
+			parser_material_kong.frag_wposition = true;
 			return "wposition";
 		}
 		else if (socket == node.outputs[1]) { // Color
@@ -961,32 +965,32 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 	// 	}
 	// }
 	else if (node.type == "TANGENT") {
-		parser_material_curshader.wtangent = true;
+		parser_material_kong.frag_wtangent = true;
 		return "wtangent";
 	}
 	else if (node.type == "TEX_COORD") {
 		if (socket == node.outputs[0]) { // Generated - bounds
-			parser_material_curshader.bposition = true;
+			parser_material_kong.frag_bposition = true;
 			return "bposition";
 		}
 		else if (socket == node.outputs[1]) { // Normal
-			parser_material_curshader.n = true;
+			parser_material_kong.frag_n = true;
 			return "n";
 		}
 		else if (socket == node.outputs[2]) {// UV
-			node_shader_context_add_elem(parser_material_curshader.context, "tex", "short2norm");
+			node_shader_context_add_elem(parser_material_kong.context, "tex", "short2norm");
 			return "vec3(tex_coord.x, tex_coord.y, 0.0)";
 		}
 		else if (socket == node.outputs[3]) { // Object
-			parser_material_curshader.mposition = true;
+			parser_material_kong.frag_mposition = true;
 			return "mposition";
 		}
 		else if (socket == node.outputs[4]) { // Camera
-			parser_material_curshader.vposition = true;
+			parser_material_kong.frag_vposition = true;
 			return "vposition";
 		}
 		else if (socket == node.outputs[5]) { // Window
-			parser_material_curshader.wvpposition = true;
+			parser_material_kong.frag_wvpposition = true;
 			return "wvpposition.xyz";
 		}
 		else if (socket == node.outputs[6]) { // Reflection
@@ -994,7 +998,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		}
 	}
 	else if (node.type == "UVMAP") {
-		node_shader_context_add_elem(parser_material_curshader.context, "tex", "short2norm");
+		node_shader_context_add_elem(parser_material_kong.context, "tex", "short2norm");
 		return "vec3(tex_coord.x, tex_coord.y, 0.0)";
 	}
 	else if (node.type == "BUMP") {
@@ -1003,8 +1007,8 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		let height: string = parser_material_parse_value_input(node.inputs[2]);
 		let nor: string = parser_material_parse_vector_input(node.inputs[3]);
 		let sample_bump_res: string = parser_material_store_var_name(node) + "_bump";
-		node_shader_write(parser_material_curshader, "float " + sample_bump_res + "_x = dFdx(float(" + height + ")) * (" + strength + ") * 16.0;");
-		node_shader_write(parser_material_curshader, "float " + sample_bump_res + "_y = dFdy(float(" + height + ")) * (" + strength + ") * 16.0;");
+		parser_material_write(parser_material_kong, "float " + sample_bump_res + "_x = dFdx(float(" + height + ")) * (" + strength + ") * 16.0;");
+		parser_material_write(parser_material_kong, "float " + sample_bump_res + "_y = dFdy(float(" + height + ")) * (" + strength + ") * 16.0;");
 		return "(normalize(vec3(" + sample_bump_res + "_x, " + sample_bump_res + "_y, 1.0) + " + nor + ") * vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5))";
 	}
 	else if (node.type == "MAPPING") {
@@ -1052,9 +1056,9 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		let norm: string = parser_material_parse_vector_input(node.inputs[1]);
 
 		let store: string = parser_material_store_var_name(node);
-		node_shader_write(parser_material_curshader, "vec3 " + store + "_texn = " + norm + " * 2.0 - 1.0;");
-		node_shader_write(parser_material_curshader, "" + store + "_texn.xy = " + strength + " * " + store + "_texn.xy;");
-		node_shader_write(parser_material_curshader, "" + store + "_texn = normalize(" + store + "_texn);");
+		parser_material_write(parser_material_kong, "vec3 " + store + "_texn = " + norm + " * 2.0 - 1.0;");
+		parser_material_write(parser_material_kong, "" + store + "_texn.xy = " + strength + " * " + store + "_texn.xy;");
+		parser_material_write(parser_material_kong, "" + store + "_texn = normalize(" + store + "_texn);");
 
 		return "(0.5 * " + store + "_texn + 0.5)";
 	}
@@ -1069,18 +1073,18 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		// The blending algorithms are based on the paper "Blending in Detail" by Colin Barré-Brisebois and Stephen Hill 2012
 		// https://blog.selfshadow.com/publications/blending-in-detail/
 		if (blend == "PARTIAL_DERIVATIVE") { //partial derivate blending
-			node_shader_write(parser_material_curshader, "vec3 " + store + "_n1 = " + nm1 + " * 2.0 - 1.0;");
-			node_shader_write(parser_material_curshader, "vec3 " + store + "_n2 = " + nm2 + " * 2.0 - 1.0;");
+			parser_material_write(parser_material_kong, "vec3 " + store + "_n1 = " + nm1 + " * 2.0 - 1.0;");
+			parser_material_write(parser_material_kong, "vec3 " + store + "_n2 = " + nm2 + " * 2.0 - 1.0;");
 			return "0.5 * normalize(vec3(" + store + "_n1.xy * " + store + "_n2.z + " + store + "_n2.xy * " + store + "_n1.z, " + store + "_n1.z * " + store + "_n2.z)) + 0.5;";
 		}
 		else if (blend == "WHITEOUT") { //whiteout blending
-			node_shader_write(parser_material_curshader, "vec3 " + store + "_n1 = " + nm1 + " * 2.0 - 1.0;");
-			node_shader_write(parser_material_curshader, "vec3 " + store + "_n2 = " + nm2 + " * 2.0 - 1.0;");
+			parser_material_write(parser_material_kong, "vec3 " + store + "_n1 = " + nm1 + " * 2.0 - 1.0;");
+			parser_material_write(parser_material_kong, "vec3 " + store + "_n2 = " + nm2 + " * 2.0 - 1.0;");
 			return "0.5 * normalize(vec3(" + store + "_n1.xy + " + store + "_n2.xy, " + store + "_n1.z * " + store + "_n2.z)) + 0.5;";
 		}
 		else if (blend == "REORIENTED") { //reoriented normal mapping
-			node_shader_write(parser_material_curshader, "vec3 " + store + "_n1 = " + nm1 + " * 2.0 - vec3(1.0, 1.0, 0.0);");
-			node_shader_write(parser_material_curshader, "vec3 " + store + "_n2 = " + nm2 + " * vec3(-2.0, -2.0, 2.0) - vec3(-1.0, -1.0, 1.0);");
+			parser_material_write(parser_material_kong, "vec3 " + store + "_n1 = " + nm1 + " * 2.0 - vec3(1.0, 1.0, 0.0);");
+			parser_material_write(parser_material_kong, "vec3 " + store + "_n2 = " + nm2 + " * vec3(-2.0, -2.0, 2.0) - vec3(-1.0, -1.0, 1.0);");
 			return "0.5 * normalize(" + store + "_n1 * dot(" + store + "_n1, " + store + "_n2) - " + store + "_n2 * " + store + "_n1.z) + 0.5";
 		}
 	}
@@ -1188,21 +1192,24 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 }
 
 function parse_normal_map_color_input(inp: ui_node_socket_t) {
-	parser_material_frag.write_normal++;
+	parser_material_kong.frag_write_normal++;
 	parser_material_out_normaltan = parser_material_parse_vector_input(inp);
+	let _parser_material_is_frag: bool = parser_material_is_frag;
+	parser_material_is_frag = true;
 	if (!parser_material_arm_export_tangents) {
-		node_shader_write(parser_material_frag, "vec3 texn = (" + parser_material_out_normaltan + ") * 2.0 - 1.0;");
-		node_shader_write(parser_material_frag, "texn.y = -texn.y;");
+		parser_material_write(parser_material_kong, "vec3 texn = (" + parser_material_out_normaltan + ") * 2.0 - 1.0;");
+		parser_material_write(parser_material_kong, "texn.y = -texn.y;");
 		if (!parser_material_cotangent_frame_written) {
 			parser_material_cotangent_frame_written = true;
-			node_shader_add_function(parser_material_frag, str_cotangent_frame);
+			node_shader_add_function(parser_material_kong, str_cotangent_frame);
 		}
-		parser_material_frag.n = true;
-		node_shader_write(parser_material_frag, "mat3 TBN = cotangent_frame(n, vvec, tex_coord);");
+		parser_material_kong.frag_n = true;
+		parser_material_write(parser_material_kong, "mat3 TBN = cotangent_frame(n, vvec, tex_coord);");
 
-		node_shader_write(parser_material_frag, "n = mul(normalize(texn), TBN);");
+		parser_material_write(parser_material_kong, "n = mul(normalize(texn), TBN);");
 	}
-	parser_material_frag.write_normal--;
+	parser_material_is_frag = _parser_material_is_frag;
+	parser_material_kong.frag_write_normal--;
 }
 
 function parser_material_parse_value_input(inp: ui_node_socket_t, vector_as_grayscale: bool = false): string {
@@ -1240,57 +1247,57 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 		return parser_material_parse_group_input(node, socket);
 	}
 	else if (node.type == "ATTRIBUTE") {
-		node_shader_add_uniform(parser_material_curshader, "float time", "_time");
+		node_shader_add_uniform(parser_material_kong, "float time", "_time");
 		return "time";
 	}
 	else if (node.type == "VERTEX_COLOR") {
 		return "1.0";
 	}
 	else if (node.type == "WIREFRAME") {
-		node_shader_add_uniform(parser_material_curshader, "sampler2D texuvmap", "_texuvmap");
+		node_shader_add_uniform(parser_material_kong, "sampler2D texuvmap", "_texuvmap");
 		// let use_pixel_size: bool = node.buttons[0].default_value == "true";
 		// let pixel_size: f32 = parse_value_input(node.inputs[0]);
 		return "textureLod(texuvmap, tex_coord, 0.0).r";
 	}
 	else if (node.type == "CAMERA") {
 		if (socket == node.outputs[1]) { // View Z Depth
-			node_shader_add_uniform(parser_material_curshader, "vec2 camera_proj", "_camera_plane_proj");
-			parser_material_curshader.wvpposition = true;
+			node_shader_add_uniform(parser_material_kong, "vec2 camera_proj", "_camera_plane_proj");
+			parser_material_kong.frag_wvpposition = true;
 			return "(camera_proj.y / ((wvpposition.z / wvpposition.w) - camera_proj.x))";
 		}
 		else { // View Distance
-			node_shader_add_uniform(parser_material_curshader, "vec3 eye", "_camera_pos");
-			parser_material_curshader.wposition = true;
+			node_shader_add_uniform(parser_material_kong, "vec3 eye", "_camera_pos");
+			parser_material_kong.frag_wposition = true;
 			return "distance(eye, wposition)";
 		}
 	}
 	else if (node.type == "LAYER") {
 		let l: any = node.buttons[0].default_value;
 		if (socket == node.outputs[1]) { // Opac
-			node_shader_add_uniform(parser_material_curshader, "sampler2D texpaint" + l, "_texpaint" + l);
+			node_shader_add_uniform(parser_material_kong, "sampler2D texpaint" + l, "_texpaint" + l);
 			return "texture(texpaint" + l + ", tex_coord).a";
 		}
 		else if (socket == node.outputs[2]) { // Occ
-			node_shader_add_uniform(parser_material_curshader, "sampler2D texpaint_pack" + l, "_texpaint_pack" + l);
+			node_shader_add_uniform(parser_material_kong, "sampler2D texpaint_pack" + l, "_texpaint_pack" + l);
 			return "texture(texpaint_pack" + l + ", tex_coord).r";
 		}
 		else if (socket == node.outputs[3]) { // Rough
-			node_shader_add_uniform(parser_material_curshader, "sampler2D texpaint_pack" + l, "_texpaint_pack" + l);
+			node_shader_add_uniform(parser_material_kong, "sampler2D texpaint_pack" + l, "_texpaint_pack" + l);
 			return "texture(texpaint_pack" + l + ", tex_coord).g";
 		}
 		else if (socket == node.outputs[4]) { // Metal
-			node_shader_add_uniform(parser_material_curshader, "sampler2D texpaint_pack" + l, "_texpaint_pack" + l);
+			node_shader_add_uniform(parser_material_kong, "sampler2D texpaint_pack" + l, "_texpaint_pack" + l);
 			return "texture(texpaint_pack" + l + ", tex_coord).b";
 		}
 		else if (socket == node.outputs[7]) { // Height
-			node_shader_add_uniform(parser_material_curshader, "sampler2D texpaint_pack" + l, "_texpaint_pack" + l);
+			node_shader_add_uniform(parser_material_kong, "sampler2D texpaint_pack" + l, "_texpaint_pack" + l);
 			return "texture(texpaint_pack" + l + ", tex_coord).a";
 		}
 	}
 	else if (node.type == "LAYER_MASK") {
 		if (socket == node.outputs[0]) {
 			let l: any = node.buttons[0].default_value;
-			node_shader_add_uniform(parser_material_curshader, "sampler2D texpaint" + l, "_texpaint" + l);
+			node_shader_add_uniform(parser_material_kong, "sampler2D texpaint" + l, "_texpaint" + l);
 			return "texture(texpaint" + l + ", tex_coord).r";
 		}
 	}
@@ -1327,29 +1334,29 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 	}
 	else if (node.type == "PICKER") {
 		if (socket == node.outputs[1]) {
-			node_shader_add_uniform(parser_material_curshader, "float picker_opacity", "_picker_opacity");
+			node_shader_add_uniform(parser_material_kong, "float picker_opacity", "_picker_opacity");
 			return "picker_opacity";
 		}
 		else if (socket == node.outputs[2]) {
-			node_shader_add_uniform(parser_material_curshader, "float picker_occlusion", "_picker_occlusion");
+			node_shader_add_uniform(parser_material_kong, "float picker_occlusion", "_picker_occlusion");
 			return "picker_occlusion";
 		}
 		else if (socket == node.outputs[3]) {
-			node_shader_add_uniform(parser_material_curshader, "float picker_roughness", "_picker_roughness");
+			node_shader_add_uniform(parser_material_kong, "float picker_roughness", "_picker_roughness");
 			return "picker_roughness";
 		}
 		else if (socket == node.outputs[4]) {
-			node_shader_add_uniform(parser_material_curshader, "float picker_metallic", "_picker_metallic");
+			node_shader_add_uniform(parser_material_kong, "float picker_metallic", "_picker_metallic");
 			return "picker_metallic";
 		}
 		else if (socket == node.outputs[7]) {
-			node_shader_add_uniform(parser_material_curshader, "float picker_height", "_picker_height");
+			node_shader_add_uniform(parser_material_kong, "float picker_height", "_picker_height");
 			return "picker_height";
 		}
 	}
 	else if (node.type == "FRESNEL") {
 		let ior: string = parser_material_parse_value_input(node.inputs[0]);
-		parser_material_curshader.dotnv = true;
+		parser_material_kong.frag_dotnv = true;
 		return "pow(1.0 - dotnv, 7.25 / " + ior + ")";
 	}
 	else if (node.type == "NEW_GEOMETRY") {
@@ -1362,11 +1369,11 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 			let radius: f32 = 1.0;
 			let offset: f32 = 0.0;
 			let store: string = parser_material_store_var_name(node);
-			parser_material_curshader.n = true;
-			node_shader_write(parser_material_curshader, "vec3 " + store + "_dx = dFdx(n);");
-			node_shader_write(parser_material_curshader, "vec3 " + store + "_dy = dFdy(n);");
-			node_shader_write(parser_material_curshader, "float " + store + "_curvature = max(dot(" + store + "_dx, " + store + "_dx), dot(" + store + "_dy, " + store + "_dy));");
-			node_shader_write(parser_material_curshader, store + "_curvature = clamp(pow(" + store + "_curvature, (1.0 / " + radius + ") * 0.25) * " + strength + " * 2.0 + " + offset + " / 10.0, 0.0, 1.0);");
+			parser_material_kong.frag_n = true;
+			parser_material_write(parser_material_kong, "vec3 " + store + "_dx = dFdx(n);");
+			parser_material_write(parser_material_kong, "vec3 " + store + "_dy = dFdy(n);");
+			parser_material_write(parser_material_kong, "float " + store + "_curvature = max(dot(" + store + "_dx, " + store + "_dx), dot(" + store + "_dy, " + store + "_dy));");
+			parser_material_write(parser_material_kong, store + "_curvature = clamp(pow(" + store + "_curvature, (1.0 / " + radius + ") * 0.25) * " + strength + " * 2.0 + " + offset + " / 10.0, 0.0, 1.0);");
 			return store + "_curvature";
 		}
 		else if (socket == node.outputs[8]) { // Random Per Island
@@ -1379,25 +1386,25 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 	else if (node.type == "LAYER_WEIGHT") {
 		let blend: string = parser_material_parse_value_input(node.inputs[0]);
 		if (socket == node.outputs[0]) { // Fresnel
-			parser_material_curshader.dotnv = true;
+			parser_material_kong.frag_dotnv = true;
 			return "clamp(pow(1.0 - dotnv, (1.0 - " + blend + ") * 10.0), 0.0, 1.0)";
 		}
 		else if (socket == node.outputs[1]) { // Facing
-			parser_material_curshader.dotnv = true;
+			parser_material_kong.frag_dotnv = true;
 			return "((1.0 - dotnv) * " + blend + ")";
 		}
 	}
 	else if (node.type == "OBJECT_INFO") {
 		if (socket == node.outputs[1]) { // Object Index
-			node_shader_add_uniform(parser_material_curshader, "float object_info_index", "_object_info_index");
+			node_shader_add_uniform(parser_material_kong, "float object_info_index", "_object_info_index");
 			return "object_info_index";
 		}
 		else if (socket == node.outputs[2]) { // Material Index
-			node_shader_add_uniform(parser_material_curshader, "float object_info_material_index", "_object_info_material_index");
+			node_shader_add_uniform(parser_material_kong, "float object_info_material_index", "_object_info_material_index");
 			return "object_info_material_index";
 		}
 		else if (socket == node.outputs[3]) { // Random
-			node_shader_add_uniform(parser_material_curshader, "float object_info_random", "_object_info_random");
+			node_shader_add_uniform(parser_material_kong, "float object_info_random", "_object_info_random");
 			return "object_info_random";
 		}
 	}
@@ -1405,14 +1412,14 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 		return parser_material_vec1(node.outputs[0].default_value[0]);
 	}
 	else if (node.type == "TEX_BRICK") {
-		node_shader_add_function(parser_material_curshader, str_tex_brick);
+		node_shader_add_function(parser_material_kong, str_tex_brick);
 		let co: string = parser_material_get_coord(node);
 		let scale: string = parser_material_parse_value_input(node.inputs[4]);
 		let res: string = "tex_brick_f(" + co + " * " + scale + ")";
 		return res;
 	}
 	else if (node.type == "TEX_CHECKER") {
-		node_shader_add_function(parser_material_curshader, str_tex_checker);
+		node_shader_add_function(parser_material_kong, str_tex_checker);
 		let co: string = parser_material_get_coord(node);
 		let scale: string = parser_material_parse_value_input(node.inputs[3]);
 		let res: string = "tex_checker_f(" + co + ", " + scale + ")";
@@ -1452,29 +1459,29 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 		return texstore + ".r";
 	}
 	else if (node.type == "TEX_MAGIC") {
-		node_shader_add_function(parser_material_curshader, str_tex_magic);
+		node_shader_add_function(parser_material_kong, str_tex_magic);
 		let co: string = parser_material_get_coord(node);
 		let scale: string = parser_material_parse_value_input(node.inputs[1]);
 		let res: string = "tex_magic_f(" + co + " * " + scale + " * 4.0)";
 		return res;
 	}
 	else if (node.type == "TEX_MUSGRAVE") {
-		node_shader_add_function(parser_material_curshader, str_tex_musgrave);
+		node_shader_add_function(parser_material_kong, str_tex_musgrave);
 		let co: string = parser_material_get_coord(node);
 		let scale: string = parser_material_parse_value_input(node.inputs[1]);
 		let res: string = "tex_musgrave_f(" + co + " * " + scale + " * 0.5)";
 		return res;
 	}
 	else if (node.type == "TEX_NOISE") {
-		node_shader_add_function(parser_material_curshader, str_tex_noise);
+		node_shader_add_function(parser_material_kong, str_tex_noise);
 		let co: string = parser_material_get_coord(node);
 		let scale: string = parser_material_parse_value_input(node.inputs[1]);
 		let res: string = "tex_noise(" + co + " * " + scale + ")";
 		return res;
 	}
 	else if (node.type == "TEX_VORONOI") {
-		node_shader_add_function(parser_material_curshader, str_tex_voronoi);
-		node_shader_add_uniform(parser_material_curshader, "sampler2D snoise256", "$noise256.k");
+		node_shader_add_function(parser_material_kong, str_tex_voronoi);
+		node_shader_add_uniform(parser_material_kong, "sampler2D snoise256", "$noise256.k");
 		let co: string = parser_material_get_coord(node);
 		let scale: string = parser_material_parse_value_input(node.inputs[1]);
 		let but: ui_node_button_t = node.buttons[0]; // coloring
@@ -1490,7 +1497,7 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 		return res;
 	}
 	else if (node.type == "TEX_WAVE") {
-		node_shader_add_function(parser_material_curshader, str_tex_wave);
+		node_shader_add_function(parser_material_kong, str_tex_wave);
 		let co: string = parser_material_get_coord(node);
 		let scale: string = parser_material_parse_value_input(node.inputs[1]);
 		let res: string = "tex_wave_f(" + co + " * " + scale + ")";
@@ -1504,9 +1511,9 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 			return "0.0";
 		}
 		let tex_name: string = "texbake_" + parser_material_node_name(node);
-		node_shader_add_uniform(parser_material_curshader, "sampler2D " + tex_name, "_" + tex_name);
+		node_shader_add_uniform(parser_material_kong, "sampler2D " + tex_name, "_" + tex_name);
 		let store: string = parser_material_store_var_name(node);
-		node_shader_write(parser_material_curshader, "float " + store + "_res = texture(" + tex_name + ", tex_coord).r;");
+		parser_material_write(parser_material_kong, "float " + store + "_res = texture(" + tex_name + ", tex_coord).r;");
 		return store + "_res";
 	}
 	else if (node.type == "NORMAL") {
@@ -1650,7 +1657,7 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 		let str: string = sys_buffer_to_string(script);
 		let link: string = parser_material_node_name(node);
 		map_set(parser_material_script_links, link, str);
-		node_shader_add_uniform(parser_material_curshader, "float " + link, "_" + link);
+		node_shader_add_uniform(parser_material_kong, "float " + link, "_" + link);
 		return link;
 	}
 	else if (node.type == "SHADER_GPU") {
@@ -1663,7 +1670,7 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 		return "(((" + col + ".r * 0.3 + " + col + ".g * 0.59 + " + col + ".b * 0.11) / 3.0) * 2.5)";
 	}
 	else if (node.type == "SEPHSV") {
-		node_shader_add_function(parser_material_curshader, str_hue_sat);
+		node_shader_add_function(parser_material_kong, str_hue_sat);
 		let col: string = parser_material_parse_vector_input(node.inputs[0]);
 		if (socket == node.outputs[0]) {
 			return "rgb_to_hsv(" + col + ").r";
@@ -1763,7 +1770,7 @@ function parser_material_get_coord(node: ui_node_t): string {
 		return parser_material_parse_vector_input(node.inputs[0]);
 	}
 	else {
-		parser_material_curshader.bposition = true;
+		parser_material_kong.frag_bposition = true;
 		return "bposition";
 	}
 }
@@ -1795,14 +1802,14 @@ function parser_material_get_gradient(grad: string, co: string): string {
 function parser_material_vector_curve(name: string, fac: string, points: f32_ptr, num: i32): string {
 	// Write Ys array
 	let ys_var: string = name + "_ys";
-	node_shader_write(parser_material_curshader, "float " + ys_var + "[" + num + "];"); // TODO: Make const
+	parser_material_write(parser_material_kong, "float " + ys_var + "[" + num + "];"); // TODO: Make const
 	for (let i: i32 = 0; i < num; ++i) {
 		let p: f32 = ARRAY_ACCESS(points, i * 2 + 1);
-		node_shader_write(parser_material_curshader, ys_var + "[" + i + "] = " + p + ";");
+		parser_material_write(parser_material_kong, ys_var + "[" + i + "] = " + p + ";");
 	}
 	// Get index
 	let fac_var: string = name + "_fac";
-	node_shader_write(parser_material_curshader, "float " + fac_var + " = " + fac + ";");
+	parser_material_write(parser_material_kong, "float " + fac_var + " = " + fac + ";");
 	let index: string = "0";
 	for (let i: i32 = 1; i < num; ++i) {
 		let p: f32 = ARRAY_ACCESS(points, i * 2 + 0);
@@ -1810,14 +1817,14 @@ function parser_material_vector_curve(name: string, fac: string, points: f32_ptr
 	}
 	// Write index
 	let index_var: string = name + "_i";
-	node_shader_write(parser_material_curshader, "int " + index_var + " = " + index + ";");
+	parser_material_write(parser_material_kong, "int " + index_var + " = " + index + ";");
 	// Linear
 	// Write Xs array
 	let facs_var: string = name + "_xs";
-	node_shader_write(parser_material_curshader, "float " + facs_var + "[" + num + "];"); // TODO: Make const
+	parser_material_write(parser_material_kong, "float " + facs_var + "[" + num + "];"); // TODO: Make const
 	for (let i: i32 = 0; i < num; ++i) {
 		let p: f32 = ARRAY_ACCESS(points, i * 2 + 0);
-		node_shader_write(parser_material_curshader, "" + facs_var + "[" + i + "] = " + p + ";");
+		parser_material_write(parser_material_kong, "" + facs_var + "[" + i + "] = " + p + ";");
 	}
 	// Map vector
 	return "mix(" +
@@ -1842,7 +1849,7 @@ function parser_material_write_result(l: ui_node_link_t): string {
 				return null;
 			}
 			map_set(parser_material_parsed_map, res_var, res);
-			node_shader_write(parser_material_curshader, "vec3 " + res_var + " = " + res + ";");
+			parser_material_write(parser_material_kong, "vec3 " + res_var + " = " + res + ";");
 		}
 		else if (st == "VALUE") {
 			let res: string = parser_material_parse_value(from_node, from_socket);
@@ -1850,7 +1857,7 @@ function parser_material_write_result(l: ui_node_link_t): string {
 				return null;
 			}
 			map_set(parser_material_parsed_map, res_var, res);
-			node_shader_write(parser_material_curshader, "float " + res_var + " = " + res + ";");
+			parser_material_write(parser_material_kong, "float " + res_var + " = " + res + ";");
 		}
 	}
 	return res_var;
@@ -1862,8 +1869,8 @@ function parser_material_store_var_name(node: ui_node_t): string {
 
 function parser_material_texture_store(node: ui_node_t, tex: bind_tex_t, tex_name: string, color_space: i32): string {
 	array_push(parser_material_matcon.bind_textures, tex);
-	node_shader_context_add_elem(parser_material_curshader.context, "tex", "short2norm");
-	node_shader_add_uniform(parser_material_curshader, "sampler2D " + tex_name);
+	node_shader_context_add_elem(parser_material_kong.context, "tex", "short2norm");
+	node_shader_add_uniform(parser_material_kong, "sampler2D " + tex_name);
 	let uv_name: string = "";
 	if (parser_material_get_input_link(node.inputs[0]) != null) {
 		uv_name = parser_material_parse_vector_input(node.inputs[0]);
@@ -1874,45 +1881,45 @@ function parser_material_texture_store(node: ui_node_t, tex: bind_tex_t, tex_nam
 	let tex_store: string = parser_material_store_var_name(node);
 
 	if (parser_material_sample_keep_aspect) {
-		node_shader_write(parser_material_curshader, "vec2 " + tex_store + "_size = vec2(textureSize(" + tex_name + ", 0));");
-		node_shader_write(parser_material_curshader, "float " + tex_store + "_ax = " + tex_store + "_size.x / " + tex_store + "_size.y;");
-		node_shader_write(parser_material_curshader, "float " + tex_store + "_ay = " + tex_store + "_size.y / " + tex_store + "_size.x;");
-		node_shader_write(parser_material_curshader, "vec2 " + tex_store + "_uv = ((" + uv_name + ".xy / " + parser_material_sample_uv_scale + " - vec2(0.5, 0.5)) * vec2(max(" + tex_store + "_ay, 1.0), max(" + tex_store + "_ax, 1.0))) + vec2(0.5, 0.5);");
-		node_shader_write(parser_material_curshader, "if (" + tex_store + "_uv.x < 0.0 || " + tex_store + "_uv.y < 0.0 || " + tex_store + "_uv.x > 1.0 || " + tex_store + "_uv.y > 1.0) discard;");
-		node_shader_write(parser_material_curshader, "" + tex_store + "_uv *= " + parser_material_sample_uv_scale + ";");
+		parser_material_write(parser_material_kong, "vec2 " + tex_store + "_size = vec2(textureSize(" + tex_name + ", 0));");
+		parser_material_write(parser_material_kong, "float " + tex_store + "_ax = " + tex_store + "_size.x / " + tex_store + "_size.y;");
+		parser_material_write(parser_material_kong, "float " + tex_store + "_ay = " + tex_store + "_size.y / " + tex_store + "_size.x;");
+		parser_material_write(parser_material_kong, "vec2 " + tex_store + "_uv = ((" + uv_name + ".xy / " + parser_material_sample_uv_scale + " - vec2(0.5, 0.5)) * vec2(max(" + tex_store + "_ay, 1.0), max(" + tex_store + "_ax, 1.0))) + vec2(0.5, 0.5);");
+		parser_material_write(parser_material_kong, "if (" + tex_store + "_uv.x < 0.0 || " + tex_store + "_uv.y < 0.0 || " + tex_store + "_uv.x > 1.0 || " + tex_store + "_uv.y > 1.0) discard;");
+		parser_material_write(parser_material_kong, "" + tex_store + "_uv *= " + parser_material_sample_uv_scale + ";");
 		uv_name = tex_store + "_uv";
 	}
 
 	if (parser_material_triplanar) {
-		node_shader_write(parser_material_curshader, "vec4 " + tex_store + " = vec4(0.0, 0.0, 0.0, 0.0);");
-		node_shader_write(parser_material_curshader, "if (tex_coord_blend.x > 0) " + tex_store + " += texture(" + tex_name + ", " + uv_name + ".xy) * tex_coord_blend.x;");
-		node_shader_write(parser_material_curshader, "if (tex_coord_blend.y > 0) " + tex_store + " += texture(" + tex_name + ", " + uv_name + "1.xy) * tex_coord_blend.y;");
-		node_shader_write(parser_material_curshader, "if (tex_coord_blend.z > 0) " + tex_store + " += texture(" + tex_name + ", " + uv_name + "2.xy) * tex_coord_blend.z;");
+		parser_material_write(parser_material_kong, "vec4 " + tex_store + " = vec4(0.0, 0.0, 0.0, 0.0);");
+		parser_material_write(parser_material_kong, "if (tex_coord_blend.x > 0) " + tex_store + " += texture(" + tex_name + ", " + uv_name + ".xy) * tex_coord_blend.x;");
+		parser_material_write(parser_material_kong, "if (tex_coord_blend.y > 0) " + tex_store + " += texture(" + tex_name + ", " + uv_name + "1.xy) * tex_coord_blend.y;");
+		parser_material_write(parser_material_kong, "if (tex_coord_blend.z > 0) " + tex_store + " += texture(" + tex_name + ", " + uv_name + "2.xy) * tex_coord_blend.z;");
 	}
 	else {
-		if (parser_material_curshader == parser_material_frag) {
+		if (parser_material_is_frag) {
 			map_set(parser_material_texture_map, tex_store, "texture(" + tex_name + ", " + uv_name + ".xy)");
-			node_shader_write(parser_material_curshader, "vec4 " + tex_store + " = texture(" + tex_name + ", " + uv_name + ".xy);");
+			parser_material_write(parser_material_kong, "vec4 " + tex_store + " = texture(" + tex_name + ", " + uv_name + ".xy);");
 		}
 		else {
 			map_set(parser_material_texture_map, tex_store, "textureLod(" + tex_name + ", " + uv_name + ".xy, 0.0)");
-			node_shader_write(parser_material_curshader, "vec4 " + tex_store + " = textureLod(" + tex_name + ", " + uv_name + ".xy, 0.0);");
+			parser_material_write(parser_material_kong, "vec4 " + tex_store + " = textureLod(" + tex_name + ", " + uv_name + ".xy, 0.0);");
 		}
 		if (!ends_with(tex.file, ".jpg")) { // Pre-mult alpha
-			node_shader_write(parser_material_curshader, tex_store + ".rgb *= " + tex_store + ".a;");
+			parser_material_write(parser_material_kong, tex_store + ".rgb *= " + tex_store + ".a;");
 		}
 	}
 
 	if (parser_material_transform_color_space) {
 		// Base color socket auto-converts from sRGB to linear
 		if (color_space == color_space_t.LINEAR && parser_material_parsing_basecolor) { // Linear to sRGB
-			node_shader_write(parser_material_curshader, tex_store + ".rgb = pow(" + tex_store + ".rgb, vec3(2.2, 2.2, 2.2));");
+			parser_material_write(parser_material_kong, tex_store + ".rgb = pow(" + tex_store + ".rgb, vec3(2.2, 2.2, 2.2));");
 		}
 		else if (color_space == color_space_t.SRGB && !parser_material_parsing_basecolor) { // sRGB to linear
-			node_shader_write(parser_material_curshader, tex_store + ".rgb = pow(" + tex_store + ".rgb, vec3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));");
+			parser_material_write(parser_material_kong, tex_store + ".rgb = pow(" + tex_store + ".rgb, vec3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));");
 		}
 		else if (color_space == color_space_t.DIRECTX_NORMAL_MAP) { // DirectX normal map to OpenGL normal map
-			node_shader_write(parser_material_curshader, tex_store + ".y = 1.0 - " + tex_store + ".y;");
+			parser_material_write(parser_material_kong, tex_store + ".y = 1.0 - " + tex_store + ".y;");
 		}
 	}
 	return tex_store;

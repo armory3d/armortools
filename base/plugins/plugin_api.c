@@ -447,7 +447,7 @@ FN(node_shader_add_uniform) {
 	return JS_UNDEFINED;
 }
 
-VOID_FN_PTR_STR(node_shader_write)
+VOID_FN_PTR_STR(node_shader_write_frag)
 
 void *gpu_create_texture_from_bytes(void *p, int w, int h, int format);
 FN(gpu_create_texture_from_bytes) {
@@ -637,9 +637,9 @@ FN(parser_material_custom_nodes_delete) {
 	return JS_UNDEFINED;
 }
 
-extern void *parser_material_frag;
-FN(parser_material_frag_get) {
-	return JS_NewInt64(ctx, (int64_t)parser_material_frag);
+extern void *parser_material_kong;
+FN(parser_material_kong_get) {
+	return JS_NewInt64(ctx, (int64_t)parser_material_kong);
 }
 
 char *parser_material_parse_value_input(void *inp, bool vector_as_grayscale);
@@ -809,7 +809,7 @@ void plugin_api_init() {
 	BIND(iron_file_save_bytes, 3);
 	BIND(context_set_viewport_shader, 1);
 	BIND(node_shader_add_uniform, 3);
-	BIND(node_shader_write, 2);
+	BIND(node_shader_write_frag, 2);
 	BIND(gpu_create_texture_from_bytes, 3);
 	BIND(project_filepath_get, 0);
 	BIND(project_save, 0);
@@ -831,7 +831,7 @@ void plugin_api_init() {
 	BIND(nodes_material_category_remove, 1);
 	BIND(parser_material_custom_nodes_set, 2);
 	BIND(parser_material_custom_nodes_delete, 1);
-	BIND(parser_material_frag_get, 0);
+	BIND(parser_material_kong_get, 0);
 	BIND(parser_material_parse_value_input, 2);
 
 	BIND(nodes_brush_category_add, 2);

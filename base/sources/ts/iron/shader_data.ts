@@ -133,6 +133,7 @@ function shader_context_compile(raw: shader_context_t): shader_context_t {
 
 	// Shaders
 	if (raw.shader_from_source) {
+		raw._.pipe_state.kong = true;
 		raw._.pipe_state.vertex_shader = gpu_create_shader_from_source(raw.vertex_shader, shader_type_t.VERTEX);
 		raw._.pipe_state.fragment_shader = gpu_create_shader_from_source(raw.fragment_shader, shader_type_t.FRAGMENT);
 

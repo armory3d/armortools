@@ -976,6 +976,70 @@ iron_gpu_shader_t *gpu_create_shader(buffer_t *data, i32 shader_type) {
 	return shader;
 }
 
+static void write_attrib(char *file, int *output_len, const char *attrib, int index) {
+	if (index > -1) {
+		strcpy(file + (*output_len), attrib);
+		(*output_len) += strlen(attrib);
+		file[(*output_len)] = 0;
+		(*output_len) += 1;
+		file[(*output_len)] = index;
+		(*output_len) += 1;
+	}
+}
+
+#include "../../sources/libs/kong/analyzer.h"
+#include "../../sources/libs/kong/compiler.h"
+#include "../../sources/libs/kong/disasm.h"
+#include "../../sources/libs/kong/errors.h"
+#include "../../sources/libs/kong/functions.h"
+#include "../../sources/libs/kong/globals.h"
+#include "../../sources/libs/kong/log.h"
+#include "../../sources/libs/kong/names.h"
+#include "../../sources/libs/kong/parser.h"
+#include "../../sources/libs/kong/tokenizer.h"
+#include "../../sources/libs/kong/typer.h"
+#include "../../sources/libs/kong/types.h"
+#include "../../sources/libs/kong/backends/hlsl.h"
+#include "../../sources/libs/kong/backends/metal.h"
+#include "../../sources/libs/kong/backends/spirv.h"
+#include "../../sources/libs/kong/backends/wgsl.h"
+
+extern uint64_t next_variable_id;
+extern size_t allocated_globals_size;
+extern function_id next_function_index;
+extern global_id globals_size;
+extern name_id names_index;
+extern size_t sets_count;
+extern type_id next_type_index;
+void hlsl_export2(char **vs, char **fs, api_kind d3d, bool debug);
+
+void gpu_create_shaders_from_kong(char *kong, char **vs, char **fs) {
+	next_variable_id = 1;
+	allocated_globals_size = 0;
+	next_function_index = 0;
+	globals_size = 0;
+	names_index = 1;
+	sets_count = 0;
+	next_type_index = 0;
+	names_init();
+	types_init();
+	functions_init();
+	globals_init();
+	char *from = "";
+	tokens tokens = tokenize(from, kong);
+	parse(from, &tokens);
+	resolve_types();
+	allocate_globals();
+	for (function_id i = 0; get_function(i) != NULL; ++i) {
+		compile_function_block(&get_function(i)->code, get_function(i)->block);
+	}
+	analyze();
+
+	hlsl_export2(vs, fs, API_DIRECT3D11, false);
+	// metal_export(output);
+	// spirv_export(output);
+}
+
 iron_gpu_shader_t *gpu_create_shader_from_source(string_t *source, iron_gpu_shader_type_t shader_type) {
 	iron_gpu_shader_t *shader = NULL;
 	char *temp_string_s = shader_type == IRON_GPU_SHADER_TYPE_VERTEX ? temp_string_vs : temp_string_fs;
@@ -1002,33 +1066,30 @@ iron_gpu_shader_t *gpu_create_shader_from_source(string_t *source, iron_gpu_shad
 	int output_len = 0;
 
 	if (shader_type == IRON_GPU_SHADER_TYPE_VERTEX) {
-		bool has_bone = strstr(temp_string_s, " bone :") != NULL;
-		bool has_col = strstr(temp_string_s, " col :") != NULL;
-		bool has_nor = strstr(temp_string_s, " nor :") != NULL;
-		bool has_pos = strstr(temp_string_s, " pos :") != NULL;
-		bool has_tex = strstr(temp_string_s, " tex :") != NULL;
 
-		i32_map_t *attributes = i32_map_create();
+		bool has_col = strstr(temp_string_s, " col:") != NULL || strstr(temp_string_s, " col :") != NULL;
+		bool has_nor = strstr(temp_string_s, " nor:") != NULL || strstr(temp_string_s, " nor :") != NULL;
+		bool has_pos = strstr(temp_string_s, " pos:") != NULL || strstr(temp_string_s, " pos :") != NULL;
+		bool has_tex = strstr(temp_string_s, " tex:") != NULL || strstr(temp_string_s, " tex :") != NULL;
+
+		int icol = -1;
+		int inor = -1;
+		int ipos = -1;
+		int itex = -1;
+
 		int index = 0;
-		if (has_bone) i32_map_set(attributes, "bone", index++);
-		if (has_col) i32_map_set(attributes, "col", index++);
-		if (has_nor) i32_map_set(attributes, "nor", index++);
-		if (has_pos) i32_map_set(attributes, "pos", index++);
-		if (has_tex) i32_map_set(attributes, "tex", index++);
-		if (has_bone) i32_map_set(attributes, "weight", index++);
+		if (has_col) icol = index++;
+		if (has_nor) inor = index++;
+		if (has_pos) ipos = index++;
+		if (has_tex) itex = index++;
 
 		file[output_len] = (char)index;
 		output_len += 1;
 
-		any_array_t *keys = map_keys(attributes);
-		for (int i = 0; i < keys->length; ++i) {
-			strcpy(file + output_len, keys->buffer[i]);
-			output_len += strlen(keys->buffer[i]);
-			file[output_len] = 0;
-			output_len += 1;
-			file[output_len] = i32_map_get(attributes, keys->buffer[i]);
-			output_len += 1;
-		}
+		write_attrib(file, &output_len, "col", icol);
+		write_attrib(file, &output_len, "nor", inor);
+		write_attrib(file, &output_len, "pos", ipos);
+		write_attrib(file, &output_len, "tex", itex);
 	}
 	else {
 		file[output_len] = 0;
@@ -1113,11 +1174,8 @@ iron_gpu_shader_t *gpu_create_shader_from_source(string_t *source, iron_gpu_shad
 	shader = (iron_gpu_shader_t *)malloc(sizeof(iron_gpu_shader_t));
 	iron_gpu_shader_init(shader, temp_string_s, strlen(temp_string_s), shader_type);
 
-	#elif defined(IRON_VULKAN) && defined(KRAFIX_LIBRARY)
+	#elif defined(IRON_VULKAN)
 
-	char *output = malloc(1024 * 1024);
-	int length;
-	krafix_compile(source, output, &length, "spirv", "windows", shader_type == IRON_GPU_SHADER_TYPE_VERTEX ? "vert" : "frag", -1);
 	shader = (iron_gpu_shader_t *)malloc(sizeof(iron_gpu_shader_t));
 	iron_gpu_shader_init(shader, output, length, shader_type);
 

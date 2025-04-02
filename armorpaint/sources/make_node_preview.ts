@@ -29,15 +29,14 @@ function make_node_preview_run(data: material_t, matcon: material_context_t, nod
 	let con_mesh: node_shader_context_t = node_shader_context_create(data, props);
 
 	con_mesh.allow_vcols = true;
-	let vert: node_shader_t = node_shader_context_make_vert(con_mesh);
-	let frag: node_shader_t = node_shader_context_make_frag(con_mesh);
-	frag.ins = vert.outs;
 
-	node_shader_write_attrib(vert, "gl_Position = vec4(pos.xy * 3.0, 0.0, 1.0);"); // Pos unpack
-	node_shader_write_attrib(vert, "const vec2 madd = vec2(0.5, 0.5);");
-	node_shader_add_out(vert, "vec2 tex_coord");
-	node_shader_write_attrib(vert, "tex_coord = gl_Position.xy * madd + madd;");
-	node_shader_write_attrib(vert, "tex_coord.y = 1.0 - tex_coord.y;");
+	let kong: node_shader_t = node_shader_context_make_kong(con_mesh);
+
+	node_shader_write_attrib_vert(kong, "output.pos = float4(pos.xy * 3.0, 0.0, 1.0);"); // Pos unpack
+	node_shader_write_attrib_vert(kong, "const madd: float2 = float2(0.5, 0.5);");
+	node_shader_add_out(kong, "tex_coord: float2");
+	node_shader_write_attrib_vert(kong, "tex_coord = output.pos.xy * madd + madd;");
+	node_shader_write_attrib_vert(kong, "tex_coord.y = 1.0 - tex_coord.y;");
 
 	parser_material_init();
 	parser_material_canvases = [context_raw.material.canvas];
@@ -58,9 +57,7 @@ function make_node_preview_run(data: material_t, matcon: material_context_t, nod
 	array_push(links, link);
 
 	parser_material_con = con_mesh;
-	parser_material_vert = vert;
-	parser_material_frag = frag;
-	parser_material_curshader = frag;
+	parser_material_kong = kong;
 	parser_material_matcon = matcon;
 
 	parser_material_transform_color_space = false;
@@ -72,19 +69,14 @@ function make_node_preview_run(data: material_t, matcon: material_context_t, nod
 	}
 	array_remove(links, link);
 
-	node_shader_add_out(frag, "vec4 frag_color");
-	node_shader_write(frag, "vec3 basecol = " + res + ";");
-	node_shader_write(frag, "frag_color = vec4(basecol.rgb, 1.0);");
-
-	// frag.ndcpos = true;
-	// add_out(vert, "vec4 ndc");
-	// write_attrib(vert, "ndc = vec4(gl_Position.xyz * vec3(0.5, 0.5, 0.0) + vec3(0.5, 0.5, 0.0), 1.0);");
+	kong.frag_out = "float4";
+	node_shader_write_frag(kong, "var basecol: float3 = " + res + ";");
+	node_shader_write_frag(kong, "output = float4(basecol.rgb, 1.0);");
 
 	parser_material_finalize(con_mesh);
 
 	con_mesh.data.shader_from_source = true;
-	con_mesh.data.vertex_shader = node_shader_get(vert);
-	con_mesh.data.fragment_shader = node_shader_get(frag);
+	gpu_create_shaders_from_kong(node_shader_get(kong), ADDRESS(con_mesh.data.vertex_shader), ADDRESS(con_mesh.data.fragment_shader));
 
 	return con_mesh;
 }
