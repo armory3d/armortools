@@ -72,7 +72,7 @@ parser_material_custom_nodes_set(node_type, function(node, socket_name) {
 	);
 
 	if (socket_name == "Color") {
-		return "vec3(" + my_out + ", " + my_out + ", " + my_out + ")";
+		return "float3(" + my_out + ", " + my_out + ", " + my_out + ")";
 	}
 	else if (socket_name == "Fac") {
 		return my_out;

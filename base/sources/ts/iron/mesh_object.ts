@@ -9,7 +9,6 @@ type mesh_object_t = {
 	frustum_culling?: bool;
 	skip_context?: string; // Do not draw this context
 	force_context?: string; // Draw only this context
-	prev_matrix?: mat4_t;
 };
 
 let _mesh_object_last_pipeline: iron_gpu_pipeline_t = null;
@@ -21,7 +20,6 @@ function mesh_object_create(data: mesh_data_t, materials: material_data_t[]): me
 	raw.material_index = 0;
 	raw.screen_size = 0.0;
 	raw.frustum_culling = true;
-	raw.prev_matrix = mat4_identity();
 	raw.base = object_create(false);
 	raw.base.ext = raw;
 	raw.base.ext_type = "mesh_object_t";
@@ -185,8 +183,6 @@ function mesh_object_render(raw: mesh_object_t, context: string, bind_params: st
 		gpu_set_index_buffer(raw.data._.index_buffers[i]);
 		gpu_draw_indexed_vertices();
 	}
-
-	raw.prev_matrix = mat4_clone(raw.base.transform.world_unpack);
 }
 
 function mesh_object_valid_context(raw: mesh_object_t, mats: material_data_t[], context: string): bool {

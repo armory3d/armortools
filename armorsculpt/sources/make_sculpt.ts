@@ -32,21 +32,21 @@ function make_sculpt_run(data: material_t, matcon: material_context_t): node_sha
 
 	let decal: bool = context_is_decal();
 
-	node_shader_add_out(kong, "vec2 tex_coord");
-	node_shader_write_vert(kong, "const vec2 madd = vec2(0.5, 0.5);");
+	node_shader_add_out(kong, "tex_coord: float2");
+	node_shader_write_vert(kong, "const madd: float2 = float2(0.5, 0.5);");
 	node_shader_write_vert(kong, "tex_coord = pos.xy * madd + madd;");
 	node_shader_write_vert(kong, "tex_coord.y = 1.0 - tex_coord.y;");
-	node_shader_write_vert(kong, "gl_Position = vec4(pos.xy, 0.0, 1.0);");
+	node_shader_write_vert(kong, "output.pos = float4(pos.xy, 0.0, 1.0);");
 
-	node_shader_add_uniform(kong, "vec4 inp", "_input_brush");
-	node_shader_add_uniform(kong, "vec4 inplast", "_input_brush_last");
-	node_shader_add_uniform(kong, "sampler2D gbufferD");
+	node_shader_add_uniform(kong, "inp: float4", "_input_brush");
+	node_shader_add_uniform(kong, "inplast: float4", "_input_brush_last");
+	node_shader_add_uniform(kong, "gbufferD: tex2d");
 
-	kong.frag_out = "vec4 frag_color[2]";
+	kong.frag_out = "float4[2]";
 
-	node_shader_add_uniform(kong, "float brush_radius", "_brush_radius");
-	node_shader_add_uniform(kong, "float brush_opacity", "_brush_opacity");
-	node_shader_add_uniform(kong, "float brush_hardness", "_brush_hardness");
+	node_shader_add_uniform(kong, "brush_radius: float", "_brush_radius");
+	node_shader_add_uniform(kong, "brush_opacity: float", "_brush_opacity");
+	node_shader_add_uniform(kong, "brush_hardness: float", "_brush_hardness");
 
 	if (context_raw.tool == workspace_tool_t.BRUSH  ||
 		context_raw.tool == workspace_tool_t.ERASER ||
@@ -61,28 +61,29 @@ function make_sculpt_run(data: material_t, matcon: material_context_t): node_sha
 		make_brush_run(kong);
 	}
 
-	node_shader_write_frag(kong, "vec3 basecol = vec3(1.0, 1.0, 1.0);");
-	node_shader_write_frag(kong, "float opacity = 1.0;");
-	node_shader_write_frag(kong, "if (opacity == 0.0) discard;");
+	node_shader_write_frag(kong, "var basecol: float3 = float3(1.0, 1.0, 1.0);");
+	node_shader_write_frag(kong, "var opacity: float = 1.0;");
+	node_shader_write_frag(kong, "if (opacity == 0.0) { discard; }");
 
-	node_shader_write_frag(kong, "float str = clamp((brush_radius - dist) * brush_hardness * 400.0, 0.0, 1.0) * opacity;");
+	node_shader_write_frag(kong, "var str: float = clamp((brush_radius - dist) * brush_hardness * 400.0, 0.0, 1.0) * opacity;");
 
-	node_shader_add_uniform(kong, "sampler2D texpaint_undo", "_texpaint_undo");
-	node_shader_write_frag(kong, "vec4 sample_undo = textureLod(texpaint_undo, tex_coord, 0.0);");
+	node_shader_add_uniform(kong, "texpaint_undo: tex2d", "_texpaint_undo");
+	node_shader_write_frag(kong, "var sample_undo: float4 = sample_lod(texpaint_undo, tex_coord, 0.0);");
 
-	node_shader_write_frag(kong, "if (sample_undo.r == 0 && sample_undo.g == 0 && sample_undo.b == 0) discard;");
+	node_shader_write_frag(kong, "if (sample_undo.r == 0 && sample_undo.g == 0 && sample_undo.b == 0) { discard; }");
 
 	node_shader_add_function(kong, str_octahedron_wrap);
-	node_shader_add_uniform(kong, "sampler2D gbuffer0_undo");
-	node_shader_write_frag(kong, "vec2 g0_undo = textureLod(gbuffer0_undo, inp.xy, 0.0).rg;");
-	node_shader_write_frag(kong, "vec3 wn;");
+	node_shader_add_uniform(kong, "gbuffer0_undo: tex2d");
+	node_shader_write_frag(kong, "var g0_undo: float2 = sample_lod(gbuffer0_undo, inp.xy, 0.0).rg;");
+	node_shader_write_frag(kong, "var wn: float3;");
 	node_shader_write_frag(kong, "wn.z = 1.0 - abs(g0_undo.x) - abs(g0_undo.y);");
-	node_shader_write_frag(kong, "wn.xy = wn.z >= 0.0 ? g0_undo.xy : octahedron_wrap(g0_undo.xy);");
-	node_shader_write_frag(kong, "vec3 n = normalize(wn);");
+	// node_shader_write_frag(kong, "wn.xy = wn.z >= 0.0 ? g0_undo.xy : octahedron_wrap(g0_undo.xy);");
+	node_shader_write_frag(kong, "if (wn.z >= 0.0) { wn.xy = g0_undo.xy; } else { wn.xy = octahedron_wrap(g0_undo.xy); }");
+	node_shader_write_frag(kong, "var n: float3 = normalize(wn);");
 
-	node_shader_write_frag(kong, "frag_color[0] = vec4(sample_undo.rgb + n * 0.1 * str, 1.0);");
+	node_shader_write_frag(kong, "output[0].rgba = float4(sample_undo.rgb + n * 0.1 * str, 1.0);");
 
-	node_shader_write_frag(kong, "frag_color[1] = vec4(str, 0.0, 0.0, 1.0);");
+	node_shader_write_frag(kong, "output[1].rgba = float4(str, 0.0, 0.0, 1.0);");
 
 	parser_material_finalize(con_paint);
 	con_paint.data.shader_from_source = true;

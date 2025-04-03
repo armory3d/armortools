@@ -6,7 +6,6 @@ type camera_object_t = {
 	no_jitter_p?: mat4_t;
 	frame?: i32;
 	v?: mat4_t;
-	prev_v?: mat4_t;
 	vp?: mat4_t;
 	frustum_planes?: frustum_plane_t[];
 };
@@ -23,7 +22,6 @@ function camera_object_create(data: camera_data_t): camera_object_t {
 	raw.base.ext = raw;
 	raw.base.ext_type = "camera_object_t";
 	raw.data = data;
-	raw.prev_v = mat4_nan();
 
 	camera_object_build_proj(raw);
 
@@ -64,7 +62,6 @@ function camera_object_render_frame(raw: camera_object_t) {
 	camera_object_proj_jitter(raw);
 	camera_object_build_mat(raw);
 	render_path_render_frame();
-	raw.prev_v = mat4_clone(raw.v);
 }
 
 function camera_object_proj_jitter(raw: camera_object_t) {
@@ -106,11 +103,6 @@ function camera_object_build_mat(raw: camera_object_t) {
 
 	if (raw.data.frustum_culling) {
 		camera_object_build_view_frustum(raw.vp, raw.frustum_planes);
-	}
-
-	// First time setting up previous V, prevents first frame flicker
-	if (mat4_isnan(raw.prev_v)) {
-		raw.prev_v = mat4_clone(raw.v);
 	}
 }
 

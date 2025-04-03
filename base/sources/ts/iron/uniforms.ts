@@ -427,12 +427,6 @@ function uniforms_set_obj_const(obj: object_t, loc: iron_gpu_constant_location_t
 		else if (c.link == "_world_wiew_matrix") {
 			m = mat4_mult_mat(obj.transform.world_unpack, camera.v);
 		}
-		else if (c.link == "_prev_world_view_proj_matrix") {
-			let mo: mesh_object_t = obj.ext;
-			m = mat4_mult_mat(mo.prev_matrix, camera.prev_v);
-			// m = mat4_mult_mat(m, camera.prev_p);
-			m = mat4_mult_mat(m, camera.p);
-		}
 		else if (uniforms_mat4_links != null) {
 			m = uniforms_mat4_links(obj, current_material(obj), c.link);
 		}

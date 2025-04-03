@@ -33,68 +33,68 @@ function strings_graphics_api(): string {
 	///end
 }
 
-let str_tex_checker: string = " \
-vec3 tex_checker(const vec3 co, const vec3 col1, const vec3 col2, const float scale) { \
+let str_tex_checker: string = "\
+fun tex_checker(co: float3, col1: float3, col2: float3, scale: float): float3 { \
 	/* Prevent precision issues on unit coordinates */ \
-	vec3 p = (co + 0.000001 * 0.999999) * scale; \
-	float xi = abs(floor(p.x)); \
-	float yi = abs(floor(p.y)); \
-	float zi = abs(floor(p.z)); \
-	bool check = ((mod(xi, 2.0) == mod(yi, 2.0)) == bool(mod(zi, 2.0))); \
-	return check ? col1 : col2; \
+	var p: float3 = (co + 0.000001 * 0.999999) * scale; \
+	var xi: float = abs(floor(p.x)); \
+	var yi: float = abs(floor(p.y)); \
+	var zi: float = abs(floor(p.z)); \
+	var check: bool = (((xi % 2.0) == (yi % 2.0)) == bool((zi % 2.0))); \
+	if (check) { return col1; } else { return col2; } \
 } \
-float tex_checker_f(const vec3 co, const float scale) { \
-	vec3 p = (co + 0.000001 * 0.999999) * scale; \
-	float xi = abs(floor(p.x)); \
-	float yi = abs(floor(p.y)); \
-	float zi = abs(floor(p.z)); \
-	return float((mod(xi, 2.0) == mod(yi, 2.0)) == bool(mod(zi, 2.0))); \
+fun tex_checker_f(co: float3, scale: float): float { \
+	var p: float3 = (co + 0.000001 * 0.999999) * scale; \
+	var xi: float = abs(floor(p.x)); \
+	var yi: float = abs(floor(p.y)); \
+	var zi: float = abs(floor(p.z)); \
+	return float(((xi % 2.0) == (yi % 2.0)) == bool((zi % 2.0))); \
 } \
 ";
 
 	// Created by inigo quilez - iq/2013
 	// License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License
-let str_tex_voronoi: string = " \
-vec4 tex_voronoi(const vec3 x, textureArg(snoise256)) { \
-	vec3 p = floor(x); \
-	vec3 f = fract(x); \
-	float id = 0.0; \
-	float res = 100.0; \
-	for (int k = -1; k <= 1; k++) \
-	for (int j = -1; j <= 1; j++) \
-	for (int i = -1; i <= 1; i++) { \
-		vec3 b = vec3(float(i), float(j), float(k)); \
-		vec3 pb = p + b; \
-		vec3 r = vec3(b) - f + texture(snoise256, (pb.xy + vec2(3.0, 1.0) * pb.z + 0.5) / 256.0).xyz; \
-		float d = dot(r, r); \
+let str_tex_voronoi: string = "\
+fun tex_voronoi(x: float3, textureArg(snoise256)): float4 { \
+	var p: float3 = floor(x); \
+	var f: float3 = frac(x); \
+	var id: float = 0.0; \
+	var res: float = 100.0; \
+	for (var k: int = -1; k <= 1; k += 1) \
+	for (var j: int = -1; j <= 1; j += 1) \
+	for (var i: int = -1; i <= 1; i += 1) { \
+		var b: float3 = float3(float(i), float(j), float(k)); \
+		var pb: float3 = p + b; \
+		var r: float3 = float3(b) - f + sample(snoise256, (pb.xy + float2(3.0, 1.0) * pb.z + 0.5) / 256.0).xyz; \
+		var d: float = dot(r, r); \
 		if (d < res) { \
-			id = dot(p + b, vec3(1.0, 57.0, 113.0)); \
+			id = dot(p + b, float3(1.0, 57.0, 113.0)); \
 			res = d; \
 		} \
 	} \
-	vec3 col = 0.5 + 0.5 * cos(id * 0.35 + vec3(0.0, 1.0, 2.0)); \
-	return vec4(col, sqrt(res)); \
+	var col: float3 = 0.5 + 0.5 * cos(id * 0.35 + float3(0.0, 1.0, 2.0)); \
+	return float4(col, sqrt(res)); \
 } \
 ";
 
 	// By Morgan McGuire @morgan3d, http://graphicscodex.com Reuse permitted under the BSD license.
 	// https://www.shadertoy.com/view/4dS3Wd
-let str_tex_noise: string = " \
-float hash(float n) { return fract(sin(n) * 1e4); } \
-float tex_noise_f(vec3 x) { \
-    const vec3 step = vec3(110, 241, 171); \
-    vec3 i = floor(x); \
-    vec3 f = fract(x); \
-    float n = dot(i, step); \
-    vec3 u = f * f * (3.0 - 2.0 * f); \
-    return mix(mix(mix(hash(n + dot(step, vec3(0, 0, 0))), hash(n + dot(step, vec3(1, 0, 0))), u.x), \
-                   mix(hash(n + dot(step, vec3(0, 1, 0))), hash(n + dot(step, vec3(1, 1, 0))), u.x), u.y), \
-               mix(mix(hash(n + dot(step, vec3(0, 0, 1))), hash(n + dot(step, vec3(1, 0, 1))), u.x), \
-                   mix(hash(n + dot(step, vec3(0, 1, 1))), hash(n + dot(step, vec3(1, 1, 1))), u.x), u.y), u.z); \
+let str_tex_noise: string = "\
+fun hash(n: float): float { return frac(sin(n) * 10000); } \
+fun tex_noise_f(float3 x): float { \
+    var step: float3 = float3(110, 241, 171); \
+    var i: float3 = floor(x); \
+    var f: float3 = frac(x); \
+    var n: float = dot(i, step); \
+    var u: float3 = f * f * (3.0 - 2.0 * f); \
+    return lerp(lerp(lerp(hash(n + dot(step, float3(0, 0, 0))), hash(n + dot(step, float3(1, 0, 0))), u.x), \
+                     lerp(hash(n + dot(step, float3(0, 1, 0))), hash(n + dot(step, float3(1, 1, 0))), u.x), u.y), \
+                lerp(lerp(hash(n + dot(step, float3(0, 0, 1))), hash(n + dot(step, float3(1, 0, 1))), u.x), \
+                     lerp(hash(n + dot(step, float3(0, 1, 1))), hash(n + dot(step, float3(1, 1, 1))), u.x), u.y), u.z); \
 } \
-float tex_noise(vec3 p) { \
+fun tex_noise(p: float3): float { \
 	p *= 1.25; \
-	float f = 0.5 * tex_noise_f(p); p *= 2.01; \
+	var f: float = 0.5 * tex_noise_f(p); p *= 2.01; \
 	f += 0.25 * tex_noise_f(p); p *= 2.02; \
 	f += 0.125 * tex_noise_f(p); p *= 2.03; \
 	f += 0.0625 * tex_noise_f(p); \
@@ -104,29 +104,30 @@ float tex_noise(vec3 p) { \
 
 	// Based on noise created by Nikita Miropolskiy, nikat/2013
 	// Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License
-let str_tex_musgrave: string = " \
-vec3 random3(const vec3 c) { \
-	float j = 4096.0 * sin(dot(c, vec3(17.0, 59.4, 15.0))); \
-	vec3 r; \
-	r.z = fract(512.0 * j); \
+let str_tex_musgrave: string = "\
+fun random3(c: float3): float3 { \
+	var j: float = 4096.0 * sin(dot(c, float3(17.0, 59.4, 15.0))); \
+	var r: float3; \
+	r.z = frac(512.0 * j); \
 	j *= 0.125; \
-	r.x = fract(512.0 * j); \
+	r.x = frac(512.0 * j); \
 	j *= 0.125; \
-	r.y = fract(512.0 * j); \
+	r.y = frac(512.0 * j); \
 	return r - 0.5; \
 } \
-float tex_musgrave_f(const vec3 p) { \
-	const float F3 = 0.3333333; \
-	const float G3 = 0.1666667; \
-	vec3 s = floor(p + dot(p, vec3(F3, F3, F3))); \
-	vec3 x = p - s + dot(s, vec3(G3, G3, G3)); \
-	vec3 e = step(vec3(0.0, 0.0, 0.0), x - x.yzx); \
-	vec3 i1 = e * (1.0 - e.zxy); \
-	vec3 i2 = 1.0 - e.zxy * (1.0 - e); \
-	vec3 x1 = x - i1 + G3; \
-	vec3 x2 = x - i2 + 2.0 * G3; \
-	vec3 x3 = x - 1.0 + 3.0 * G3; \
-	vec4 w, d; \
+fun tex_musgrave_f(p: float3): float { \
+	var F3: float = 0.3333333; \
+	var G3: float = 0.1666667; \
+	var s: float3 = floor(p + dot(p, float3(F3, F3, F3))); \
+	var x: float3 = p - s + dot(s, float3(G3, G3, G3)); \
+	var e: float3 = step(float3(0.0, 0.0, 0.0), x - x.yzx); \
+	var i1: float3 = e * (1.0 - e.zxy); \
+	var i2: float3 = 1.0 - e.zxy * (1.0 - e); \
+	var x1: float3 = x - i1 + G3; \
+	var x2: float3 = x - i2 + 2.0 * G3; \
+	var x3: float3 = x - 1.0 + 3.0 * G3; \
+	var w: float4; \
+	var d: float4; \
 	w.x = dot(x, x); \
 	w.y = dot(x1, x1); \
 	w.z = dot(x2, x2); \
@@ -139,177 +140,196 @@ float tex_musgrave_f(const vec3 p) { \
 	w *= w; \
 	w *= w; \
 	d *= w; \
-	return clamp(dot(d, vec4(52.0, 52.0, 52.0, 52.0)), 0.0, 1.0); \
+	return clamp(dot(d, float4(52.0, 52.0, 52.0, 52.0)), 0.0, 1.0); \
 } \
 ";
 
-let str_hue_sat: string = " \
-vec3 hsv_to_rgb(const vec3 c) { \
-	const vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0); \
-	vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www); \
-	return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y); \
+let str_hue_sat: string = "\
+fun hsv_to_rgb(c: float3): float3 { \
+	var K: float4 = float4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0); \
+	var p: float3 = abs(frac(c.xxx + K.xyz) * 6.0 - K.www); \
+	return c.z * lerp(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y); \
 } \
-vec3 rgb_to_hsv(const vec3 c) { \
-	const vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0); \
-	vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g)); \
-	vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r)); \
-	float d = q.x - min(q.w, q.y); \
-	float e = 1.0e-10; \
-	return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x); \
+fun rgb_to_hsv(c: float3): float3 { \
+	var K: float4 = float4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0); \
+	var p: float4 = lerp(float4(c.bg, K.wz), float4(c.gb, K.xy), step(c.b, c.g)); \
+	var q: float4 = lerp(float4(p.xyw, c.r), float4(c.r, p.yzx), step(p.x, c.r)); \
+	var d: float = q.x - min(q.w, q.y); \
+	var e: float = 0.0000000001; \
+	return float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x); \
 } \
-vec3 hue_sat(const vec3 col, const vec4 shift) { \
-	vec3 hsv = rgb_to_hsv(col); \
+fun hue_sat(col: float3, shift: float4): float3 { \
+	var hsv: float3 = rgb_to_hsv(col); \
 	hsv.x += shift.x; \
 	hsv.y *= shift.y; \
 	hsv.z *= shift.z; \
-	return mix(hsv_to_rgb(hsv), col, shift.w); \
+	return lerp(hsv_to_rgb(hsv), col, shift.w); \
 } \
 ";
 
-// https://twitter.com/Donzanoid/status/903424376707657730
-let str_wavelength_to_rgb: string = " \
-vec3 wavelength_to_rgb(const float t) { \
-	vec3 r = t * 2.1 - vec3(1.8, 1.14, 0.3); \
+// https://x.com/Donzanoid/status/903424376707657730
+let str_wavelength_to_rgb: string = "\
+fun wavelength_to_rgb(t: float): float3 { \
+	var r: float3 = t * 2.1 - float3(1.8, 1.14, 0.3); \
 	return 1.0 - r * r; \
 } \
 ";
 
-let str_tex_magic: string = " \
-vec3 tex_magic(const vec3 p) { \
-	float a = 1.0 - (sin(p.x) + sin(p.y)); \
-	float b = 1.0 - sin(p.x - p.y); \
-	float c = 1.0 - sin(p.x + p.y); \
-	return vec3(a, b, c); \
+let str_tex_magic: string = "\
+fun tex_magic(p: float3): float3 { \
+	var a: float = 1.0 - (sin(p.x) + sin(p.y)); \
+	var b: float = 1.0 - sin(p.x - p.y); \
+	var c: float = 1.0 - sin(p.x + p.y); \
+	return float3(a, b, c); \
 } \
-float tex_magic_f(const vec3 p) { \
-	vec3 c = tex_magic(p); \
+fun tex_magic_f(p: float3): float { \
+	var c: float3 = tex_magic(p); \
 	return (c.x + c.y + c.z) / 3.0; \
 } \
 ";
 
-let str_tex_brick: string = " \
-float tex_brick_noise(int n) { \
-	int nn; \
+let str_tex_brick: string = "\
+fun tex_brick_noise(n: int): float { \
+	var nn: int; \
 	n = (n >> 13) ^ n; \
 	nn = (n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff; \
 	return 0.5f * float(nn) / 1073741824.0; \
 } \
-vec3 tex_brick(vec3 p, const vec3 c1, const vec3 c2, const vec3 c3) { \
-	vec3 brick_size = vec3(0.9, 0.49, 0.49); \
-	vec3 mortar_size = vec3(0.05, 0.1, 0.1); \
+fun tex_brick(p: float3, c1: float3, c2: float3, c3: float3): float3 { \
+	var brick_size: float3 = float3(0.9, 0.49, 0.49); \
+	var mortar_size: float3 = float3(0.05, 0.1, 0.1); \
 	p /= brick_size / 2; \
-	if (fract(p.y * 0.5) > 0.5) p.x += 0.5; \
-	float col = floor(p.x / (brick_size.x + (mortar_size.x * 2.0))); \
-	float row = p.y; \
-	p = fract(p); \
-	vec3 b = step(p, 1.0 - mortar_size); \
-	float tint = min(max(tex_brick_noise((int(col) << 16) + (int(row) & 0xFFFF)), 0.0), 1.0); \
-	return mix(c3, mix(c1, c2, tint), b.x * b.y * b.z); \
+	if (frac(p.y * 0.5) > 0.5) { p.x += 0.5; } \
+	var col: float = floor(p.x / (brick_size.x + (mortar_size.x * 2.0))); \
+	var row: float = p.y; \
+	p = frac(p); \
+	var b: float3 = step(p, 1.0 - mortar_size); \
+	var tint: float = min(max(tex_brick_noise((int(col) << 16) + (int(row) & 0xFFFF)), 0.0), 1.0); \
+	return lerp(c3, lerp(c1, c2, tint), b.x * b.y * b.z); \
 } \
-float tex_brick_f(vec3 p) { \
-	p /= vec3(0.9, 0.49, 0.49) / 2; \
-	if (fract(p.y * 0.5) > 0.5) p.x += 0.5; \
-	p = fract(p); \
-	vec3 b = step(p, vec3(0.95, 0.9, 0.9)); \
-	return mix(1.0, 0.0, b.x * b.y * b.z); \
+fun tex_brick_f(p: float3): float { \
+	p /= float3(0.9, 0.49, 0.49) / 2; \
+	if (frac(p.y * 0.5) > 0.5) { p.x += 0.5; } \
+	p = frac(p); \
+	var b: float3 = step(p, float3(0.95, 0.9, 0.9)); \
+	return lerp(1.0, 0.0, b.x * b.y * b.z); \
 } \
 ";
 
-let str_tex_wave: string = " \
-float tex_wave_f(const vec3 p) { \
+let str_tex_wave: string = "\
+fun tex_wave_f(p: float3): float { \
 	return 1.0 - sin((p.x + p.y) * 10.0); \
 } \
 ";
 
-let str_brightcontrast: string = " \
-vec3 brightcontrast(const vec3 col, const float bright, const float contr) { \
-	float a = 1.0 + contr; \
-	float b = bright - contr * 0.5; \
+let str_brightcontrast: string = "\
+fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
+	var a: float = 1.0 + contr; \
+	var b: float = bright - contr * 0.5; \
 	return max(a * col + b, 0.0); \
 } \
 ";
 
-let str_cotangent_frame: string = " \
-mat3 cotangent_frame(const vec3 n, const vec3 p, const vec2 duv1, const vec2 duv2) { \
-	vec3 dp1 = dFdx(p); \
-	vec3 dp2 = dFdy(p); \
-	vec3 dp2perp = cross(dp2, n); \
-	vec3 dp1perp = cross(n, dp1); \
-	vec3 t = dp2perp * duv1.x + dp1perp * duv2.x; \
-	vec3 b = dp2perp * duv1.y + dp1perp * duv2.y; \
-	float invmax = inversesqrt(max(dot(t, t), dot(b, b))); \
-	return mat3(t * invmax, b * invmax, n); \
+let str_cotangent_frame: string = "\
+fun cotangent_frame(n: float3, p: float3, duv1: float2, duv2: float2): float3x3 { \
+	var dp1: float3 = ddx3(p); \
+	var dp2: float3 = ddy3(p); \
+	var dp2perp: float3 = cross(dp2, n); \
+	var dp1perp: float3 = cross(n, dp1); \
+	var t: float3 = dp2perp * duv1.x + dp1perp * duv2.x; \
+	var b: float3 = dp2perp * duv1.y + dp1perp * duv2.y; \
+var invmax: float = rsqrt(max(dot(t, t), dot(b, b))); \
+	return float3x3(t * invmax, b * invmax, n); \
 } \
-mat3 cotangent_frame(const vec3 n, const vec3 p, const vec2 tex_coord) { \
-	return cotangent_frame(n, p, dFdx(tex_coord), dFdy(tex_coord)); \
-} \
-";
-
-let str_octahedron_wrap: string = " \
-vec2 octahedron_wrap(const vec2 v) { \
-	return (1.0 - abs(v.yx)) * (vec2(v.x >= 0.0 ? 1.0 : -1.0, v.y >= 0.0 ? 1.0 : -1.0)); \
+fun cotangent_frame(n: float3, p: float3, tex_coord: float2): float3x3 { \
+	return cotangent_frame(n, p, ddx2(tex_coord), ddy2(tex_coord)); \
 } \
 ";
 
-let str_pack_float_int16: string = " \
-float pack_f32_i16(const float f, const uint i) { \
-	const float prec = float(1 << 16); \
-	const float maxi = float(1 << 4); \
-	const float prec_minus_one = prec - 1.0; \
-	const float t1 = ((prec / maxi) - 1.0) / prec_minus_one; \
-	const float t2 = (prec / maxi) / prec_minus_one; \
-	return t1 * f + t2 * float(i); \
+let str_octahedron_wrap: string = "\
+fun octahedron_wrap(v: float2): float2 { \
+	var a: float2; \
+	if (v.x >= 0.0) { a.x = 1.0; } else { a.x = -1.0; } \
+	if (v.y >= 0.0) { a.y = 1.0; } else { a.y = -1.0; } \
+	var r: float2; \
+	r.x = abs(v.y); \
+	r.y = abs(v.x); \
+	r.x = 1.0 - r.x; \
+	r.y = 1.0 - r.y; \
+	return r * a; \
 } \
 ";
+
+// let str_octahedron_wrap: string = "\
+// fun octahedron_wrap(v: float2): float2 { \
+// 	return (1.0 - abs(v.yx)) * (float2(v.x >= 0.0 ? 1.0 : -1.0, v.y >= 0.0 ? 1.0 : -1.0)); \
+// } \
+// ";
+
+let str_pack_float_int16: string = "\
+fun pack_f32_i16(f: float, i: uint): float { \
+	return 0.062504762 * f + 0.062519999 * float(i); \
+} \
+";
+
+// let str_pack_float_int16: string = "\
+// fun pack_f32_i16(f: float, i: uint): float { \
+// 	var prec: float = float(1 << 16); \
+// 	var maxi: float = float(1 << 4); \
+// 	var prec_minus_one: float = prec - 1.0; \
+// 	var t1: float = ((prec / maxi) - 1.0) / prec_minus_one; \
+// 	var t2: float = (prec / maxi) / prec_minus_one; \
+// 	return t1 * f + t2 * float(i); \
+// } \
+// ";
 
 ///if arm_skin
-let str_get_skinning_dual_quat: string = " \
-void get_skinning_dual_quat(const ivec4 bone, vec4 weight, out vec4 A, inout vec4 B) { \
-	ivec4 bonei = bone * 2; \
-	mat4 mat_a = mat4( \
+let str_get_skinning_dual_quat: string = "\
+fun get_skinning_dual_quat(bone: int4, weight: float4, out A: float4, inout B: float4) { \
+	var bonei: int4 = bone * 2; \
+	var mat_a: float4x4 = float4x4( \
 		skin_bones[bonei.x], \
 		skin_bones[bonei.y], \
 		skin_bones[bonei.z], \
 		skin_bones[bonei.w]); \
-	mat4 mat_b = mat4( \
+	var mat_b: float4x4 = float4x4( \
 		skin_bones[bonei.x + 1], \
 		skin_bones[bonei.y + 1], \
 		skin_bones[bonei.z + 1], \
 		skin_bones[bonei.w + 1]); \
-	weight.xyz *= sign(mul(mat_a, mat_a[3])).xyz; \
-	A = mul(weight, mat_a); \
-	B = mul(weight, mat_b); \
-	float inv_norm_a = 1.0 / length(A); \
+	weight.xyz *= sign(mat_a[3] * mat_a).xyz; \
+	A = mat_a * weight; \
+	B = mat_b * weight; \
+	var inv_norm_a: float = 1.0 / length(A); \
 	A *= inv_norm_a; \
 	B *= inv_norm_a; \
 } \
 ";
 ///end
 
-let str_create_basis: string = " \
-void create_basis(vec3 normal, out vec3 tangent, out vec3 binormal) { \
+let str_create_basis: string = "\
+fun create_basis(normal: float3, out tangent: float3, out binormal: float3) { \
 	tangent = normalize(camera_right - normal * dot(camera_right, normal)); \
 	binormal = cross(tangent, normal); \
 } \
 ";
 
-function str_sh_irradiance(): string {
-///if arm_metal
-	return "vec3 sh_irradiance(const vec3 nor, constant vec4 shirr[7]) { \
-	const float c1 = 0.429043; \
-	const float c2 = 0.511664; \
-	const float c3 = 0.743125; \
-	const float c4 = 0.886227; \
-	const float c5 = 0.247708; \
-	vec3 cl00 = vec3(shirr[0].x, shirr[0].y, shirr[0].z); \
-	vec3 cl1m1 = vec3(shirr[0].w, shirr[1].x, shirr[1].y); \
-	vec3 cl10 = vec3(shirr[1].z, shirr[1].w, shirr[2].x); \
-	vec3 cl11 = vec3(shirr[2].y, shirr[2].z, shirr[2].w); \
-	vec3 cl2m2 = vec3(shirr[3].x, shirr[3].y, shirr[3].z); \
-	vec3 cl2m1 = vec3(shirr[3].w, shirr[4].x, shirr[4].y); \
-	vec3 cl20 = vec3(shirr[4].z, shirr[4].w, shirr[5].x); \
-	vec3 cl21 = vec3(shirr[5].y, shirr[5].z, shirr[5].w); \
-	vec3 cl22 = vec3(shirr[6].x, shirr[6].y, shirr[6].z); \
+let str_sh_irradiance: string = "\
+fun sh_irradiance(float3 nor, shirr: float4[7]): float3 { \
+	var c1: float = 0.429043; \
+	var c2: float = 0.511664; \
+	var c3: float = 0.743125; \
+	var c4: float = 0.886227; \
+	var c5: float = 0.247708; \
+	var cl00: float3 = float3(shirr[0].x, shirr[0].y, shirr[0].z); \
+	var cl1m1: float3 = float3(shirr[0].w, shirr[1].x, shirr[1].y); \
+	var cl10: float3 = float3(shirr[1].z, shirr[1].w, shirr[2].x); \
+	var cl11: float3 = float3(shirr[2].y, shirr[2].z, shirr[2].w); \
+	var cl2m2: float3 = float3(shirr[3].x, shirr[3].y, shirr[3].z); \
+	var cl2m1: float3 = float3(shirr[3].w, shirr[4].x, shirr[4].y); \
+	var cl20: float3 = float3(shirr[4].z, shirr[4].w, shirr[5].x); \
+	var cl21: float3 = float3(shirr[5].y, shirr[5].z, shirr[5].w); \
+	var cl22: float3 = float3(shirr[6].x, shirr[6].y, shirr[6].z); \
 	return ( \
 		c1 * cl22 * (nor.y * nor.y - (-nor.z) * (-nor.z)) + \
 		c3 * cl20 * nor.x * nor.x + \
@@ -324,63 +344,27 @@ function str_sh_irradiance(): string {
 	); \
 } \
 ";
-///else
-	return "vec3 sh_irradiance(const vec3 nor, const vec4 shirr[7]) { \
-	const float c1 = 0.429043; \
-	const float c2 = 0.511664; \
-	const float c3 = 0.743125; \
-	const float c4 = 0.886227; \
-	const float c5 = 0.247708; \
-	vec3 cl00 = vec3(shirr[0].x, shirr[0].y, shirr[0].z); \
-	vec3 cl1m1 = vec3(shirr[0].w, shirr[1].x, shirr[1].y); \
-	vec3 cl10 = vec3(shirr[1].z, shirr[1].w, shirr[2].x); \
-	vec3 cl11 = vec3(shirr[2].y, shirr[2].z, shirr[2].w); \
-	vec3 cl2m2 = vec3(shirr[3].x, shirr[3].y, shirr[3].z); \
-	vec3 cl2m1 = vec3(shirr[3].w, shirr[4].x, shirr[4].y); \
-	vec3 cl20 = vec3(shirr[4].z, shirr[4].w, shirr[5].x); \
-	vec3 cl21 = vec3(shirr[5].y, shirr[5].z, shirr[5].w); \
-	vec3 cl22 = vec3(shirr[6].x, shirr[6].y, shirr[6].z); \
-	return ( \
-		c1 * cl22 * (nor.y * nor.y - (-nor.z) * (-nor.z)) + \
-		c3 * cl20 * nor.x * nor.x + \
-		c4 * cl00 - \
-		c5 * cl20 + \
-		2.0 * c1 * cl2m2 * nor.y * (-nor.z) + \
-		2.0 * c1 * cl21  * nor.y * nor.x + \
-		2.0 * c1 * cl2m1 * (-nor.z) * nor.x + \
-		2.0 * c2 * cl11  * nor.y + \
-		2.0 * c2 * cl1m1 * (-nor.z) + \
-		2.0 * c2 * cl10  * nor.x \
-	); \
-} \
-";
-///end
-}
 
-let str_envmap_equirect: string = " \
-vec2 envmap_equirect(const vec3 normal, const float angle) { \
-	const float PI = 3.1415926535; \
-	const float PI2 = PI * 2.0; \
-	float phi = acos(normal.z); \
-	float theta = atan2(-normal.y, normal.x) + PI + angle; \
-	return vec2(theta / PI2, phi / PI); \
+let str_envmap_equirect: string = "\
+fun envmap_equirect(normal: float3, angle: float): float2 { \
+	var PI: float = 3.1415926535; \
+	var PI2: float = PI * 2.0; \
+	var phi: float = acos(normal.z); \
+	var theta: float = atan2(-normal.y, normal.x) + PI + angle; \
+	return float2(theta / PI2, phi / PI); \
 } \
 ";
 
-let str_get_pos_nor_from_depth: string = " \
-vec3 get_pos_from_depth(vec2 uv, mat4 invVP, textureArg(gbufferD)) { \n\
-#ifdef GLSL \n\
-	float depth = textureLod(gbufferD, uv, 0.0).r; \n\
-#else \n\
-	float depth = textureLod(gbufferD, vec2(uv.x, 1.0 - uv.y), 0.0).r; \n\
-#endif \n\
-	vec4 wpos = vec4(uv * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0); \
-	wpos = mul(wpos, invVP); \
+let str_get_pos_nor_from_depth: string = "\
+fun get_pos_from_depth(uv: float2, invVP: flaot4x4, textureArg(gbufferD)): float3 { \
+	var depth: float = sample_lod(gbufferD, float2(uv.x, 1.0 - uv.y), 0.0).r; \
+	var wpos: float4 = float4(uv * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0); \
+	wpos = invVP * wpos; \
 	return wpos.xyz / wpos.w; \
 } \
-vec3 get_nor_from_depth(vec3 p0, vec2 uv, mat4 invVP, vec2 tex_step, textureArg(gbufferD)) { \
-	vec3 p1 = get_pos_from_depth(uv + vec2(tex_step.x * 4.0, 0.0), invVP, texturePass(gbufferD)); \
-	vec3 p2 = get_pos_from_depth(uv + vec2(0.0, tex_step.y * 4.0), invVP, texturePass(gbufferD)); \
+fun get_nor_from_depth(p0: float3, uv: float2, invVP: flaot4x4, tex_step: float2, textureArg(gbufferD)): float3 { \
+	var p1: float3 = get_pos_from_depth(uv + float2(tex_step.x * 4.0, 0.0), invVP, texturePass(gbufferD)); \
+	var p2: float3 = get_pos_from_depth(uv + float2(0.0, tex_step.y * 4.0), invVP, texturePass(gbufferD)); \
 	return normalize(cross(p2 - p0, p1 - p0)); \
 } \
 ";

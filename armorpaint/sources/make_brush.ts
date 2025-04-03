@@ -28,7 +28,8 @@ function make_brush_run(kong: node_shader_t) {
 			node_shader_write_frag(kong, "var g0: float2 = sample_lod(gbuffer0, inp.xy, 0.0).rg;");
 			node_shader_write_frag(kong, "var wn: float3;");
 			node_shader_write_frag(kong, "wn.z = 1.0 - abs(g0.x) - abs(g0.y);");
-			node_shader_write_frag(kong, "wn.xy = wn.z >= 0.0 ? g0.xy : octahedron_wrap(g0.xy);");
+			// node_shader_write_frag(kong, "wn.xy = wn.z >= 0.0 ? g0.xy : octahedron_wrap(g0.xy);");
+			node_shader_write_frag(kong, "if (wn.z >= 0.0) { wn.xy = g0.xy; } else { wn.xy = octahedron_wrap(g0.xy); }");
 			node_shader_write_frag(kong, "wn = normalize(wn);");
 			node_shader_write_frag(kong, "var plane_dist: float = dot(wn, winp.xyz - wposition);");
 
