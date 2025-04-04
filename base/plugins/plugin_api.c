@@ -437,13 +437,13 @@ FN(iron_file_save_bytes) {
 
 VOID_FN_CB(context_set_viewport_shader)
 
-void node_shader_add_uniform(void *p, char *s0, char *s1, bool b);
-FN(node_shader_add_uniform) {
+void node_shader_add_constant(void *p, char *s0, char *s1, bool b);
+FN(node_shader_add_constant) {
 	int64_t p;
 	JS_ToInt64(ctx, &p, argv[0]);
 	char *s0 = (char *)JS_ToCString(ctx, argv[1]);
 	char *s1 = (char *)JS_ToCString(ctx, argv[2]);
-	node_shader_add_uniform((void *)p, s0, s1, false);
+	node_shader_add_constant((void *)p, s0, s1, false);
 	return JS_UNDEFINED;
 }
 
@@ -808,7 +808,7 @@ void plugin_api_init() {
 	BIND(data_delete_blob, 1);
 	BIND(iron_file_save_bytes, 3);
 	BIND(context_set_viewport_shader, 1);
-	BIND(node_shader_add_uniform, 3);
+	BIND(node_shader_add_constant, 3);
 	BIND(node_shader_write_frag, 2);
 	BIND(gpu_create_texture_from_bytes, 3);
 	BIND(project_filepath_get, 0);

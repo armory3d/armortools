@@ -193,78 +193,78 @@ function parser_material_finalize(con: node_shader_context_t) {
 		}
 		else if (kong.frag_ndcpos) {
 			node_shader_add_out(kong, "bposition: float3");
-			node_shader_write_vert(kong, "bposition = (ndc.xyz / ndc.w);");
+			node_shader_write_vert(kong, "output.bposition = (ndc.xyz / ndc.w);");
 		}
 		else {
 			node_shader_add_out(kong, "bposition: float3");
-			node_shader_add_uniform(kong, "dim: float3", "_dim");
-			node_shader_add_uniform(kong, "hdim: float3", "_half_dim");
-			node_shader_write_attrib_vert(kong, "bposition = (pos.xyz + hdim) / dim;");
+			node_shader_add_constant(kong, "dim: float3", "_dim");
+			node_shader_add_constant(kong, "hdim: float3", "_half_dim");
+			node_shader_write_attrib_vert(kong, "output.bposition = (input.pos.xyz + constants.hdim) / constants.dim;");
 		}
 	}
 	if (kong.frag_wposition) {
-		node_shader_add_uniform(kong, "W: float4x4", "_world_matrix");
+		node_shader_add_constant(kong, "W: float4x4", "_world_matrix");
 		node_shader_add_out(kong, "wposition: float3");
-		node_shader_write_attrib_vert(kong, "wposition = float4(W * float4(pos.xyz, 1.0)).xyz;");
+		node_shader_write_attrib_vert(kong, "output.wposition = float4(constants.W * float4(input.pos.xyz, 1.0)).xyz;");
 	}
 	else if (kong.vert_wposition) {
-		node_shader_add_uniform(kong, "W: float4x4", "_world_matrix");
-		node_shader_write_attrib_vert(kong, "var wposition: float3 = float4(W * float4(pos.xyz, 1.0)).xyz;");
+		node_shader_add_constant(kong, "W: float4x4", "_world_matrix");
+		node_shader_write_attrib_vert(kong, "var wposition: float3 = float4(constants.W * float4(input.pos.xyz, 1.0)).xyz;");
 	}
 	if (kong.frag_vposition) {
-		node_shader_add_uniform(kong, "WV: float4x4", "_world_view_matrix");
+		node_shader_add_constant(kong, "WV: float4x4", "_world_view_matrix");
 		node_shader_add_out(kong, "vposition: float3");
-		node_shader_write_attrib_vert(kong, "vposition = float4(WV * float4(pos.xyz, 1.0)).xyz;");
+		node_shader_write_attrib_vert(kong, "output.vposition = float4(constants.WV * float4(input.pos.xyz, 1.0)).xyz;");
 	}
 	if (kong.frag_mposition) {
 		node_shader_add_out(kong, "mposition: float3");
 		if (kong.frag_ndcpos) {
-			node_shader_write_vert(kong, "mposition = (ndc.xyz / ndc.w);");
+			node_shader_write_vert(kong, "output.mposition = (ndc.xyz / ndc.w);");
 		}
 		else {
-			node_shader_write_attrib_vert(kong, "mposition = pos.xyz;");
+			node_shader_write_attrib_vert(kong, "output.mposition = input.pos.xyz;");
 		}
 	}
 	if (kong.frag_wtangent) {
 		node_shader_add_out(kong, "wtangent: float3");
-		node_shader_write_attrib_vert(kong, "wtangent = float3(0.0, 0.0, 0.0);");
+		node_shader_write_attrib_vert(kong, "output.wtangent = float3(0.0, 0.0, 0.0);");
 	}
 	if (kong.frag_vvec_cam) {
-		node_shader_add_uniform(kong, "WV: float4x4", "_world_view_matrix");
+		node_shader_add_constant(kong, "WV: float4x4", "_world_view_matrix");
 		node_shader_add_out(kong, "eye_dir_cam: float3");
-		node_shader_write_attrib_vert(kong, "eye_dir_cam = float4(WV * float4(pos.xyz, 1.0)).xyz; eye_dir_cam.z *= -1.0;");
-		node_shader_write_attrib_frag(kong, "var vvec_cam: float3 = normalize(eye_dir_cam);");
+		node_shader_write_attrib_vert(kong, "output.eye_dir_cam = float4(constants.WV * float4(input.pos.xyz, 1.0)).xyz; eye_dir_cam.z *= -1.0;");
+		node_shader_write_attrib_frag(kong, "var vvec_cam: float3 = normalize(input.eye_dir_cam);");
 	}
 	if (kong.frag_vvec) {
-		node_shader_add_uniform(kong, "eye: float3", "_camera_pos");
+		node_shader_add_constant(kong, "eye: float3", "_camera_pos");
 		node_shader_add_out(kong, "eye_dir: float3");
-		node_shader_write_attrib_vert(kong, "eye_dir = eye - wposition;");
-		node_shader_write_attrib_frag(kong, "var vvec: float3 = normalize(eye_dir);");
+		node_shader_write_attrib_vert(kong, "output.eye_dir = constants.eye - wposition;");
+		node_shader_write_attrib_frag(kong, "var vvec: float3 = normalize(input.eye_dir);");
 	}
 	if (kong.frag_n) {
-		node_shader_add_uniform(kong, "N: float3x3", "_normal_matrix");
+		node_shader_add_constant(kong, "N: float3x3", "_normal_matrix");
 		node_shader_add_out(kong, "wnormal: float3");
-		node_shader_write_attrib_vert(kong, "wnormal = N * float3(nor.xy, pos.w);");
-		node_shader_write_attrib_frag(kong, "var n: float3 = normalize(wnormal);");
+		node_shader_write_attrib_vert(kong, "output.wnormal = constants.N * float3(input.nor.xy, input.pos.w);");
+		node_shader_write_attrib_frag(kong, "var n: float3 = normalize(input.wnormal);");
 	}
 	else if (kong.vert_n) {
-		node_shader_add_uniform(kong, "N: float3x3", "_normal_matrix");
-		node_shader_write_attrib_vert(kong, "var wnormal: float3 = normalize(N * float3(nor.xy, pos.w));");
+		node_shader_add_constant(kong, "N: float3x3", "_normal_matrix");
+		node_shader_write_attrib_vert(kong, "var wnormal: float3 = normalize(constants.N * float3(input.nor.xy, input.pos.w));");
 	}
 	if (kong.frag_nattr) {
 		node_shader_add_out(kong, "var nattr: float3");
-		node_shader_write_attrib_vert(kong, "nattr = float3(nor.xy, pos.w);");
+		node_shader_write_attrib_vert(kong, "output.nattr = float3(input.nor.xy, input.pos.w);");
 	}
 	if (kong.frag_dotnv) {
 		node_shader_write_attrib_frag(kong, "var dotnv: float = max(dot(n, vvec), 0.0);");
 	}
 	if (kong.frag_wvpposition) {
 		node_shader_add_out(kong, "wvpposition: float4");
-		node_shader_write_end_vert(kong, "wvpposition = output.pos;");
+		node_shader_write_end_vert(kong, "output.wvpposition = input.pos;");
 	}
 	if (node_shader_context_is_elem(con, "col")) {
 		node_shader_add_out(kong, "vcolor: float3");
-		node_shader_write_attrib_vert(kong, "vcolor = col.rgb;");
+		node_shader_write_attrib_vert(kong, "output.vcolor = col.rgb;");
 	}
 }
 
@@ -594,7 +594,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 	}
 	else if (node.type == "TEX_VORONOI") {
 		node_shader_add_function(parser_material_kong, str_tex_voronoi);
-		node_shader_add_uniform(parser_material_kong, "snoise256: tex2d", "$noise256.k");
+		node_shader_add_texture(parser_material_kong, "snoise256", "$noise256.k");
 		let co: string = parser_material_get_coord(node);
 		let scale: string = parser_material_parse_value_input(node.inputs[1]);
 		let but: ui_node_button_t = node.buttons[0]; //coloring;
@@ -636,7 +636,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		let angle: string = parser_material_parse_value_input(node.inputs[1], true);
 		let mask: string = parser_material_parse_value_input(node.inputs[2], true);
 		let tex_name: string = "texwarp_" + parser_material_node_name(node);
-		node_shader_add_uniform(parser_material_kong, "" + tex_name + ": tex2d", "_" + tex_name);
+		node_shader_add_texture(parser_material_kong, "" + tex_name, "_" + tex_name);
 		let store: string = parser_material_store_var_name(node);
 		let pi: f32 = math_pi();
 		parser_material_write(parser_material_kong, "var " + store + "_rad: float = " + angle + " * (" + pi + " / 180);");
@@ -654,7 +654,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		}
 		let steps: string = "int(" + strength + " * 10 + 1)";
 		let tex_name: string = "texblur_" + parser_material_node_name(node);
-		node_shader_add_uniform(parser_material_kong, "" + tex_name + ": tex2d", "_" + tex_name);
+		node_shader_add_texture(parser_material_kong, "" + tex_name, "_" + tex_name);
 		let store: string = parser_material_store_var_name(node);
 		parser_material_write(parser_material_kong, "var " + store + "_res: float3 = float3(0.0, 0.0, 0.0);");
 		parser_material_write(parser_material_kong, "for (var i: int = -" + steps + "; i <= " + steps + "; i += 1) {");
@@ -706,7 +706,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 			out_col = "max(" + col1 + ", " + col2 + " * " + fac_var + ")";
 		}
 		else if (blend == "SCREEN") {
-			let v3: string = parser_material_to_vec3("1.0 - " + fac_var + "");
+			let v3: string = parser_material_to_vec3("1.0 - " + fac_var);
 			out_col = "(float3(1.0, 1.0, 1.0) - (" + v3 + " + " + fac_var + " * (float3(1.0, 1.0, 1.0) - " + col2 + ")) * (float3(1.0, 1.0, 1.0) - " + col1 + "))";
 		}
 		else if (blend == "DODGE") {
@@ -876,11 +876,11 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 	else if (node.type == "LAYER") {
 		let l: any = node.buttons[0].default_value;
 		if (socket == node.outputs[0]) { // Base
-			node_shader_add_uniform(parser_material_kong, "texpaint" + l + ": tex2d", "_texpaint" + l);
+			node_shader_add_texture(parser_material_kong, "texpaint" + l, "_texpaint" + l);
 			return "sample(texpaint" + l + ", tex_coord).rgb";
 		}
 		else if (socket == node.outputs[5]) { // Normal
-			node_shader_add_uniform(parser_material_kong, "texpaint_nor" + l + ": tex2d", "_texpaint_nor" + l);
+			node_shader_add_texture(parser_material_kong, "texpaint_nor" + l, "_texpaint_nor" + l);
 			return "sample(texpaint_nor" + l + ", tex_coord).rgb";
 		}
 	}
@@ -910,12 +910,12 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 	}
 	else if (node.type == "PICKER") {
 		if (socket == node.outputs[0]) { // Base
-			node_shader_add_uniform(parser_material_kong, "picker_base: float3", "_picker_base");
-			return "picker_base";
+			node_shader_add_constant(parser_material_kong, "picker_base: float3", "_picker_base");
+			return "constants.picker_base";
 		}
 		else if (socket == node.outputs[5]) { // Normal
-			node_shader_add_uniform(parser_material_kong, "picker_normal: float3", "_picker_normal");
-			return "picker_normal";
+			node_shader_add_constant(parser_material_kong, "picker_normal: float3", "_picker_normal");
+			return "constants.picker_normal";
 		}
 	}
 	else if (node.type == "NEW_GEOMETRY") {
@@ -1247,57 +1247,57 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 		return parser_material_parse_group_input(node, socket);
 	}
 	else if (node.type == "ATTRIBUTE") {
-		node_shader_add_uniform(parser_material_kong, "time: float", "_time");
-		return "time";
+		node_shader_add_constant(parser_material_kong, "time: float", "_time");
+		return "constants.time";
 	}
 	else if (node.type == "VERTEX_COLOR") {
 		return "1.0";
 	}
 	else if (node.type == "WIREFRAME") {
-		node_shader_add_uniform(parser_material_kong, "texuvmap: tex2d", "_texuvmap");
+		node_shader_add_texture(parser_material_kong, "texuvmap", "_texuvmap");
 		// let use_pixel_size: bool = node.buttons[0].default_value == "true";
 		// let pixel_size: f32 = parse_value_input(node.inputs[0]);
 		return "sample_lod(texuvmap, tex_coord, 0.0).r";
 	}
 	else if (node.type == "CAMERA") {
 		if (socket == node.outputs[1]) { // View Z Depth
-			node_shader_add_uniform(parser_material_kong, "camera_proj: float2", "_camera_plane_proj");
+			node_shader_add_constant(parser_material_kong, "camera_proj: float2", "_camera_plane_proj");
 			parser_material_kong.frag_wvpposition = true;
-			return "(camera_proj.y / ((wvpposition.z / wvpposition.w) - camera_proj.x))";
+			return "(constants.camera_proj.y / ((wvpposition.z / wvpposition.w) - constants.camera_proj.x))";
 		}
 		else { // View Distance
-			node_shader_add_uniform(parser_material_kong, "eye: float3", "_camera_pos");
+			node_shader_add_constant(parser_material_kong, "eye: float3", "_camera_pos");
 			parser_material_kong.frag_wposition = true;
-			return "distance(eye, wposition)";
+			return "distance(constants.eye, wposition)";
 		}
 	}
 	else if (node.type == "LAYER") {
 		let l: any = node.buttons[0].default_value;
 		if (socket == node.outputs[1]) { // Opac
-			node_shader_add_uniform(parser_material_kong, "texpaint" + l + ": tex2d", "_texpaint" + l);
+			node_shader_add_texture(parser_material_kong, "texpaint" + l, "_texpaint" + l);
 			return "sample(texpaint" + l + ", tex_coord).a";
 		}
 		else if (socket == node.outputs[2]) { // Occ
-			node_shader_add_uniform(parser_material_kong, "texpaint_pack" + l + ": tex2d", "_texpaint_pack" + l);
+			node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
 			return "sample(texpaint_pack" + l + ", tex_coord).r";
 		}
 		else if (socket == node.outputs[3]) { // Rough
-			node_shader_add_uniform(parser_material_kong, "texpaint_pack" + l + ": tex2d", "_texpaint_pack" + l);
+			node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
 			return "sample(texpaint_pack" + l + ", tex_coord).g";
 		}
 		else if (socket == node.outputs[4]) { // Metal
-			node_shader_add_uniform(parser_material_kong, "texpaint_pack" + l + ": tex2d", "_texpaint_pack" + l);
+			node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
 			return "sample(texpaint_pack" + l + ", tex_coord).b";
 		}
 		else if (socket == node.outputs[7]) { // Height
-			node_shader_add_uniform(parser_material_kong, "texpaint_pack" + l + ": tex2d", "_texpaint_pack" + l);
+			node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
 			return "sample(texpaint_pack" + l + ", tex_coord).a";
 		}
 	}
 	else if (node.type == "LAYER_MASK") {
 		if (socket == node.outputs[0]) {
 			let l: any = node.buttons[0].default_value;
-			node_shader_add_uniform(parser_material_kong, "texpaint" + l + ": tex2d", "_texpaint" + l);
+			node_shader_add_texture(parser_material_kong, "texpaint" + l, "_texpaint" + l);
 			return "sample(texpaint" + l + ", tex_coord).r";
 		}
 	}
@@ -1334,24 +1334,24 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 	}
 	else if (node.type == "PICKER") {
 		if (socket == node.outputs[1]) {
-			node_shader_add_uniform(parser_material_kong, "picker_opacity: float", "_picker_opacity");
-			return "picker_opacity";
+			node_shader_add_constant(parser_material_kong, "picker_opacity: float", "_picker_opacity");
+			return "constants.picker_opacity";
 		}
 		else if (socket == node.outputs[2]) {
-			node_shader_add_uniform(parser_material_kong, "picker_occlusion: float", "_picker_occlusion");
-			return "picker_occlusion";
+			node_shader_add_constant(parser_material_kong, "picker_occlusion: float", "_picker_occlusion");
+			return "constants.picker_occlusion";
 		}
 		else if (socket == node.outputs[3]) {
-			node_shader_add_uniform(parser_material_kong, "picker_roughness: float", "_picker_roughness");
-			return "picker_roughness";
+			node_shader_add_constant(parser_material_kong, "picker_roughness: float", "_picker_roughness");
+			return "constants.picker_roughness";
 		}
 		else if (socket == node.outputs[4]) {
-			node_shader_add_uniform(parser_material_kong, "picker_metallic: float", "_picker_metallic");
-			return "picker_metallic";
+			node_shader_add_constant(parser_material_kong, "picker_metallic: float", "_picker_metallic");
+			return "constants.picker_metallic";
 		}
 		else if (socket == node.outputs[7]) {
-			node_shader_add_uniform(parser_material_kong, "picker_height: float", "_picker_height");
-			return "picker_height";
+			node_shader_add_constant(parser_material_kong, "picker_height: float", "_picker_height");
+			return "constants.picker_height";
 		}
 	}
 	else if (node.type == "FRESNEL") {
@@ -1396,16 +1396,16 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 	}
 	else if (node.type == "OBJECT_INFO") {
 		if (socket == node.outputs[1]) { // Object Index
-			node_shader_add_uniform(parser_material_kong, "object_info_index: float", "_object_info_index");
-			return "object_info_index";
+			node_shader_add_constant(parser_material_kong, "object_info_index: float", "_object_info_index");
+			return "constants.object_info_index";
 		}
 		else if (socket == node.outputs[2]) { // Material Index
-			node_shader_add_uniform(parser_material_kong, "object_info_material_index: float", "_object_info_material_index");
-			return "object_info_material_index";
+			node_shader_add_constant(parser_material_kong, "object_info_material_index: float", "_object_info_material_index");
+			return "constants.object_info_material_index";
 		}
 		else if (socket == node.outputs[3]) { // Random
-			node_shader_add_uniform(parser_material_kong, "object_info_random: float", "_object_info_random");
-			return "object_info_random";
+			node_shader_add_constant(parser_material_kong, "object_info_random: float", "_object_info_random");
+			return "constants.object_info_random";
 		}
 	}
 	else if (node.type == "VALUE") {
@@ -1481,7 +1481,7 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 	}
 	else if (node.type == "TEX_VORONOI") {
 		node_shader_add_function(parser_material_kong, str_tex_voronoi);
-		node_shader_add_uniform(parser_material_kong, "sampler2D snoise256", "$noise256.k");
+		node_shader_add_texture(parser_material_kong, "snoise256", "$noise256.k");
 		let co: string = parser_material_get_coord(node);
 		let scale: string = parser_material_parse_value_input(node.inputs[1]);
 		let but: ui_node_button_t = node.buttons[0]; // coloring
@@ -1511,7 +1511,7 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 			return "0.0";
 		}
 		let tex_name: string = "texbake_" + parser_material_node_name(node);
-		node_shader_add_uniform(parser_material_kong, "" + tex_name + ": tex2d", "_" + tex_name);
+		node_shader_add_texture(parser_material_kong, "" + tex_name, "_" + tex_name);
 		let store: string = parser_material_store_var_name(node);
 		parser_material_write(parser_material_kong, "var " + store + "_res: float = sample(" + tex_name + ", tex_coord).r;");
 		return store + "_res";
@@ -1657,7 +1657,7 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 		let str: string = sys_buffer_to_string(script);
 		let link: string = parser_material_node_name(node);
 		map_set(parser_material_script_links, link, str);
-		node_shader_add_uniform(parser_material_kong, "float " + link, "_" + link);
+		node_shader_add_constant(parser_material_kong, "float " + link, "_" + link);
 		return link;
 	}
 	else if (node.type == "SHADER_GPU") {
@@ -1870,7 +1870,7 @@ function parser_material_store_var_name(node: ui_node_t): string {
 function parser_material_texture_store(node: ui_node_t, tex: bind_tex_t, tex_name: string, color_space: i32): string {
 	array_push(parser_material_matcon.bind_textures, tex);
 	node_shader_context_add_elem(parser_material_kong.context, "tex", "short2norm");
-	node_shader_add_uniform(parser_material_kong, "" + tex_name + ": tex2d");
+	node_shader_add_texture(parser_material_kong, "" + tex_name);
 	let uv_name: string = "";
 	if (parser_material_get_input_link(node.inputs[0]) != null) {
 		uv_name = parser_material_parse_vector_input(node.inputs[0]);

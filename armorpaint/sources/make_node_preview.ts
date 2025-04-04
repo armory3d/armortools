@@ -32,11 +32,11 @@ function make_node_preview_run(data: material_t, matcon: material_context_t, nod
 
 	let kong: node_shader_t = node_shader_context_make_kong(con_mesh);
 
-	node_shader_write_attrib_vert(kong, "output.pos = float4(pos.xy * 3.0, 0.0, 1.0);"); // Pos unpack
+	node_shader_write_attrib_vert(kong, "output.pos = float4(input.pos.xy * 3.0, 0.0, 1.0);"); // Pos unpack
 	node_shader_write_attrib_vert(kong, "const madd: float2 = float2(0.5, 0.5);");
 	node_shader_add_out(kong, "tex_coord: float2");
-	node_shader_write_attrib_vert(kong, "tex_coord = output.pos.xy * madd + madd;");
-	node_shader_write_attrib_vert(kong, "tex_coord.y = 1.0 - tex_coord.y;");
+	node_shader_write_attrib_vert(kong, "output.tex_coord = output.pos.xy * madd + madd;");
+	node_shader_write_attrib_vert(kong, "output.tex_coord.y = 1.0 - output.tex_coord.y;");
 
 	parser_material_init();
 	parser_material_canvases = [context_raw.material.canvas];

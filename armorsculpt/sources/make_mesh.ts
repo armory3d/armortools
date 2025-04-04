@@ -32,23 +32,23 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 
 	node_shader_add_out(kong, "tex_coord: float2");
 	kong.frag_wvpposition = true;
-	node_shader_add_uniform(kong, "VP: float4x4", "_view_proj_matrix");
+	node_shader_add_constant(kong, "VP: float4x4", "_view_proj_matrix");
 	kong.vert_wposition = true;
 
 	let texture_count: i32 = 0;
 
-	node_shader_add_uniform(kong, "WVP: float4x4", "_world_view_proj_matrix");
+	node_shader_add_constant(kong, "WVP: float4x4", "_world_view_proj_matrix");
 	let lid: i32 = project_layers[0].id;
-	node_shader_add_uniform(kong, "texpaint_vert: tex2d", "_texpaint_vert" + lid);
+	node_shader_add_texture(kong, "texpaint_vert", "_texpaint_vert" + lid);
 	node_shader_write_vert(kong, "var meshpos: float3 = sample_lod(texpaint_vert, int2(gl_VertexID % textureSize(texpaint_vert, 0).x, gl_VertexID / textureSize(texpaint_vert, 0).y), 0).xyz;");
-	// + pos.xyz * 0.000001
-	node_shader_write_vert(kong, "output.pos = WVP * float4(meshpos.xyz, 1.0);");
+	// + input.pos.xyz * 0.000001
+	node_shader_write_vert(kong, "output.pos = constants.WVP * float4(meshpos.xyz, 1.0);");
 
-	node_shader_write_vert(kong, "tex_coord = float2(0.0, 0.0);");
+	node_shader_write_vert(kong, "output.tex_coord = float2(0.0, 0.0);");
 
 	kong.frag_out = "float4[3]";
 
-	node_shader_add_uniform(kong, "N: float3x3", "_normal_matrix");
+	node_shader_add_constant(kong, "N: float3x3", "_normal_matrix");
 	node_shader_add_out(kong, "wnormal: float3");
 
 	node_shader_write_attrib_vert(kong, "var base_vertex0: int = gl_VertexID - (gl_VertexID % 3);");
@@ -58,16 +58,16 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	node_shader_write_attrib_vert(kong, "var meshpos1: float3 = sample_lod(texpaint_vert, int2(base_vertex1 % textureSize(texpaint_vert, 0).x, base_vertex1 / textureSize(texpaint_vert, 0).y), 0).xyz;");
 	node_shader_write_attrib_vert(kong, "var meshpos2: float3 = sample_lod(texpaint_vert, int2(base_vertex2 % textureSize(texpaint_vert, 0).x, base_vertex2 / textureSize(texpaint_vert, 0).y), 0).xyz;");
 	node_shader_write_attrib_vert(kong, "var meshnor: float3 = normalize(cross(meshpos2 - meshpos1, meshpos0 - meshpos1));");
-	node_shader_write_attrib_vert(kong, "wnormal = mul(meshnor, N);");
-	node_shader_write_attrib_frag(kong, "var n: float3 = normalize(wnormal);");
+	node_shader_write_attrib_vert(kong, "output.wnormal = mul(meshnor, constants.N);");
+	node_shader_write_attrib_frag(kong, "var n: float3 = normalize(input.wnormal);");
 
 	node_shader_add_function(kong, str_pack_float_int16);
 	node_shader_add_function(kong, str_octahedron_wrap);
 	node_shader_add_function(kong, str_cotangent_frame);
 	if (layer_pass > 0) {
-		node_shader_add_uniform(kong, "gbuffer0: tex2d");
-		node_shader_add_uniform(kong, "gbuffer1: tex2d");
-		node_shader_add_uniform(kong, "gbuffer2: tex2d");
+		node_shader_add_texture(kong, "gbuffer0");
+		node_shader_add_texture(kong, "gbuffer1");
+		node_shader_add_texture(kong, "gbuffer2");
 		node_shader_write_frag(kong, "var fragcoord: float2 = (wvpposition.xy / wvpposition.w) * 0.5 + 0.5;");
 		node_shader_write_frag(kong, "fragcoord.y = 1.0 - fragcoord.y;");
 		node_shader_write_frag(kong, "var gbuffer0_sample: float4 = sample_lod(gbuffer0, fragcoord, 0.0);");
@@ -106,13 +106,13 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 
 	if (context_raw.draw_wireframe) {
 		texture_count++;
-		node_shader_add_uniform(kong, "texuvmap: tex2d", "_texuvmap");
+		node_shader_add_texture(kong, "texuvmap", "_texuvmap");
 	}
 
 	if (context_raw.viewport_mode == viewport_mode_t.LIT && context_raw.render_mode == render_mode_t.FORWARD) {
 		texture_count += 4;
-		node_shader_add_uniform(kong, "senvmap_brdf: tex2d", "$brdf.k");
-		node_shader_add_uniform(kong, "senvmap_radiance: tex2d", "_envmap_radiance");
+		node_shader_add_texture(kong, "senvmap_brdf", "$brdf.k");
+		node_shader_add_texture(kong, "senvmap_radiance", "_envmap_radiance");
 	}
 
 	// Get layers for this pass
@@ -145,7 +145,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	for (let i: i32 = 0; i < layers.length; ++i) {
 		let l: slot_layer_t = layers[i];
 		if (slot_layer_get_object_mask(l) > 0) {
-			node_shader_add_uniform(kong, "uid: int", "_uid");
+			node_shader_add_constant(kong, "uid: int", "_uid");
 			if (slot_layer_get_object_mask(l) > project_paint_objects.length) { // Atlas
 				let visibles: mesh_object_t[] = project_get_atlas_objects(slot_layer_get_object_mask(l));
 				node_shader_write_frag(kong, "if (");
@@ -154,17 +154,17 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 						node_shader_write_frag(kong, " || ");
 					}
 					let uid: i32 = visibles[i].base.uid;
-					node_shader_write_frag(kong, uid + " == uid");
+					node_shader_write_frag(kong, uid + " == constants.uid");
 				}
 				node_shader_write_frag(kong, ") {");
 			}
 			else { // Object mask
 				let uid: i32 = project_paint_objects[slot_layer_get_object_mask(l) - 1].base.uid;
-				node_shader_write_frag(kong, "if (" + uid + " == uid) {");
+				node_shader_write_frag(kong, "if (" + uid + " == constants.uid) {");
 			}
 		}
 
-		node_shader_add_shared_sampler(kong, "texpaint" + l.id + ": tex2d");
+		node_shader_add_shared_sampler(kong, "texpaint" + l.id);
 		node_shader_write_frag(kong, "texpaint_sample = float4(0.8, 0.8, 0.8, 1.0);");
 		node_shader_write_frag(kong, "texpaint_opac = texpaint_sample.a;");
 
@@ -184,9 +184,9 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 				for (let i: i32 = 0; i < masks.length; ++i) {
 					let m: slot_layer_t = masks[i];
 					if (!slot_layer_is_visible(m)) continue;
-					node_shader_add_shared_sampler(kong, "texpaint" + m.id + ": tex2d");
+					node_shader_add_shared_sampler(kong, "texpaint" + m.id);
 					node_shader_write_frag(kong, "{"); // Group mask is sampled across multiple layers
-					node_shader_write_frag(kong, "var texpaint_mask_sample" + m.id + ": float = sample_lod_shared(texpaint" + m.id + ", tex_coord, 0.0).r;");
+					node_shader_write_frag(kong, "var texpaint_mask_sample" + m.id + ": float = sample_lod_shared(texpaint" + m.id + ", input.tex_coord, 0.0).r;");
 					node_shader_write_frag(kong, "}");
 				}
 				node_shader_write_frag(kong, "texpaint_opac *= clamp(" + texpaint_mask + ", 0.0, 1.0);");
@@ -207,17 +207,17 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		}
 
 		if (last_pass && context_raw.draw_texels) {
-			node_shader_add_uniform(kong, "texpaint_size: float2", "_texpaint_size");
-			node_shader_write_frag(kong, "var texel0: float2 = tex_coord * texpaint_size * 0.01;");
-			node_shader_write_frag(kong, "var texel1: float2 = tex_coord * texpaint_size * 0.1;");
-			node_shader_write_frag(kong, "var texel2: float2 = tex_coord * texpaint_size;");
+			node_shader_add_constant(kong, "texpaint_size: float2", "_texpaint_size");
+			node_shader_write_frag(kong, "var texel0: float2 = input.tex_coord * constants.texpaint_size * 0.01;");
+			node_shader_write_frag(kong, "var texel1: float2 = input.tex_coord * constants.texpaint_size * 0.1;");
+			node_shader_write_frag(kong, "var texel2: float2 = input.tex_coord * constants.texpaint_size;");
 			node_shader_write_frag(kong, "basecol *= max(float((int(texel0.x) % 2.0) == (int(texel0.y) % 2.0)), 0.9);");
 			node_shader_write_frag(kong, "basecol *= max(float((int(texel1.x) % 2.0) == (int(texel1.y) % 2.0)), 0.9);");
 			node_shader_write_frag(kong, "basecol *= max(float((int(texel2.x) % 2.0) == (int(texel2.y) % 2.0)), 0.9);");
 		}
 
 		if (last_pass && context_raw.draw_wireframe) {
-			node_shader_write_frag(kong, "basecol *= 1.0 - sample_lod(texuvmap, tex_coord, 0.0).r;");
+			node_shader_write_frag(kong, "basecol *= 1.0 - sample_lod(texuvmap, input.tex_coord, 0.0).r;");
 		}
 
 		if (make_material_height_used) {
@@ -242,7 +242,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		}
 
 		kong.frag_vvec = true;
-		node_shader_write_frag(kong, "var TBN: float3x3 = cotangent_frame(n, vvec, tex_coord);");
+		node_shader_write_frag(kong, "var TBN: float3x3 = cotangent_frame(n, vvec, input.tex_coord);");
 		node_shader_write_frag(kong, "n = ntex * 2.0 - 1.0;");
 		node_shader_write_frag(kong, "n.y = -n.y;");
 		node_shader_write_frag(kong, "n = normalize(TBN * n);");
@@ -263,17 +263,24 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 				kong.frag_vvec = true;
 				node_shader_write_frag(kong, "var dotnv: float = max(0.0, dot(n, vvec));");
 				node_shader_write_frag(kong, "var env_brdf: float2 = senvmap_brdf[int2(float2(roughness, 1.0 - dotnv) * 256.0)].xy;");
-				node_shader_add_uniform(kong, "envmap_num_mipmaps: int", "_envmap_num_mipmaps");
-				node_shader_add_uniform(kong, "envmap_data: float4", "_envmap_data"); // angle, sin(angle), cos(angle), strength
+				node_shader_add_constant(kong, "envmap_num_mipmaps: int", "_envmap_num_mipmaps");
+				node_shader_add_constant(kong, "envmap_data: float4", "_envmap_data"); // angle, sin(angle), cos(angle), strength
 				node_shader_write_frag(kong, "var wreflect: float3 = reflect(-vvec, n);");
-				node_shader_write_frag(kong, "var envlod: float = roughness * float(envmap_num_mipmaps);");
+				node_shader_write_frag(kong, "var envlod: float = roughness * float(constants.envmap_num_mipmaps);");
 				node_shader_add_function(kong, str_envmap_equirect);
-				node_shader_write_frag(kong, "var prefiltered_color: float3 = sample_lod(senvmap_radiance, envmap_equirect(wreflect, envmap_data.x), envlod).rgb;");
-				node_shader_add_uniform(kong, "shirr: float4[7]", "_envmap_irradiance");
+				node_shader_write_frag(kong, "var prefiltered_color: float3 = sample_lod(senvmap_radiance, envmap_equirect(wreflect, constants.envmap_data.x), envlod).rgb;");
+				// node_shader_add_constant(kong, "shirr: float4[7]", "_envmap_irradiance");
+				node_shader_add_constant(kong, "shirr0: float4", "_envmap_irradiance0");
+				node_shader_add_constant(kong, "shirr1: float4", "_envmap_irradiance1");
+				node_shader_add_constant(kong, "shirr2: float4", "_envmap_irradiance2");
+				node_shader_add_constant(kong, "shirr3: float4", "_envmap_irradiance3");
+				node_shader_add_constant(kong, "shirr4: float4", "_envmap_irradiance4");
+				node_shader_add_constant(kong, "shirr5: float4", "_envmap_irradiance5");
+				node_shader_add_constant(kong, "shirr6: float4", "_envmap_irradiance6");
 				node_shader_add_function(kong, str_sh_irradiance);
-				node_shader_write_frag(kong, "var indirect: float3 = albedo * (sh_irradiance(float3(n.x * envmap_data.z - n.y * envmap_data.y, n.x * envmap_data.y + n.y * envmap_data.z, n.z), shirr) / 3.14159265);");
+				node_shader_write_frag(kong, "var indirect: float3 = albedo * (sh_irradiance(float3(n.x * constants.envmap_data.z - n.y * constants.envmap_data.y, n.x * constants.envmap_data.y + n.y * constants.envmap_data.z, n.z)) / 3.14159265);");
 				node_shader_write_frag(kong, "indirect += prefiltered_color * (f0 * env_brdf.x + env_brdf.y) * 1.5;");
-				node_shader_write_frag(kong, "indirect *= envmap_data.w * occlusion;");
+				node_shader_write_frag(kong, "indirect *= constants.envmap_data.w * occlusion;");
 				node_shader_write_frag(kong, "output[1].rgba = float4(indirect, 1.0);");
 			}
 			else { // Deferred, Pathtraced
@@ -288,8 +295,8 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			node_shader_write_frag(kong, "output[1].rgba = float4(nAttr, 1.0);");
 		}
 		else if (context_raw.viewport_mode == viewport_mode_t.OBJECT_ID) {
-			node_shader_add_uniform(kong, "object_id: float", "_object_id");
-			node_shader_write_frag(kong, "var obid: float = object_id + 1.0 / 255.0;");
+			node_shader_add_constant(kong, "object_id: float", "_object_id");
+			node_shader_write_frag(kong, "var obid: float = constants.object_id + 1.0 / 255.0;");
 			node_shader_write_frag(kong, "var id_r: float = frac(sin(dot(float2(obid, obid * 20.0), float2(12.9898, 78.233))) * 43758.5453);");
 			node_shader_write_frag(kong, "var id_g: float = frac(sin(dot(float2(obid * 20.0, obid), float2(12.9898, 78.233))) * 43758.5453);");
 			node_shader_write_frag(kong, "var id_b: float = frac(sin(dot(float2(obid, obid * 40.0), float2(12.9898, 78.233))) * 43758.5453);");
@@ -309,7 +316,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		node_shader_write_frag(kong, "output[0].rgba = float4(n.xy, roughness, pack_f32_i16(metallic, uint(int(matid * 255.0) % 3)));");
 	}
 
-	node_shader_write_frag(kong, "output[2].rgba = float4(0.0, 0.0, tex_coord.xy);");
+	node_shader_write_frag(kong, "output[2].rgba = float4(0.0, 0.0, input.tex_coord.xy);");
 
 	parser_material_finalize(con_mesh);
 	con_mesh.data.shader_from_source = true;

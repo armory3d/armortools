@@ -5,7 +5,8 @@ type node_shader_t = {
 	outs?: string[];
 	frag_out?: string;
 	shared_samplers?: string[];
-	uniforms?: string[];
+	constants?: string[];
+	textures?: string[];
 	functions?: map_t<string, string>;
 
 	vert?: string;
@@ -44,7 +45,8 @@ function node_shader_create(context: node_shader_context_t): node_shader_t {
 	raw.outs = [];
 	raw.frag_out = "float4";
 	raw.shared_samplers = [];
-	raw.uniforms = [];
+	raw.constants = [];
+	raw.textures = [];
 	raw.functions = map_create();
 
 	raw.vert = "";
@@ -70,27 +72,36 @@ function node_shader_add_out(raw: node_shader_t, s: string) {
 	array_push(raw.outs, s);
 }
 
-function node_shader_add_uniform(raw: node_shader_t, s: string, link: string = null) {
+function node_shader_add_constant(raw: node_shader_t, s: string, link: string = null) {
+	let ar: string[] = string_split(s, " ");
+	let utype: string = ar[ar.length - 2];
+	let uname: string = ar[ar.length - 1];
+
+	if (ar[0] == "float" && string_index_of(ar[1], "[") >= 0) {
+		ar[0] = "floats";
+		ar[1] = string_split(ar[1], "[")[0];
+	}
+	else if (ar[0] == "vec4" && string_index_of(ar[1], "[") >= 0) {
+		ar[0] = "floats";
+		ar[1] = string_split(ar[1], "[")[0];
+	}
+	node_shader_context_add_constant(raw.context, ar[0], ar[1], link);
+
+	if (array_index_of(raw.constants, s) == -1) {
+		array_push(raw.constants, s);
+	}
+}
+
+function node_shader_add_texture(raw: node_shader_t, s: string, link: string = null) {
 	let ar: string[] = string_split(s, " ");
 	// layout(RGBA8) sampler2D tex
 	let utype: string = ar[ar.length - 2];
 	let uname: string = ar[ar.length - 1];
-	if (starts_with(utype, "sampler")) {
-		node_shader_context_add_texture_unit(raw.context, utype, uname, link);
-	}
-	else {
-		if (ar[0] == "float" && string_index_of(ar[1], "[") >= 0) {
-			ar[0] = "floats";
-			ar[1] = string_split(ar[1], "[")[0];
-		}
-		else if (ar[0] == "vec4" && string_index_of(ar[1], "[") >= 0) {
-			ar[0] = "floats";
-			ar[1] = string_split(ar[1], "[")[0];
-		}
-		node_shader_context_add_constant(raw.context, ar[0], ar[1], link);
-	}
-	if (array_index_of(raw.uniforms, s) == -1) {
-		array_push(raw.uniforms, s);
+
+	node_shader_context_add_texture_unit(raw.context, utype, uname, link);
+
+	if (array_index_of(raw.textures, s) == -1) {
+		array_push(raw.textures, s);
 	}
 }
 
@@ -170,11 +181,6 @@ function node_shader_get(raw: node_shader_t): string {
 
 	node_shader_vstruct_to_vsin(raw);
 
-	let shared_sampler: string = "shared_sampler";
-	// if (raw.shared_samplers.length > 0) {
-	// 	shared_sampler = string_split(raw.shared_samplers[0], " ")[1] + "_sampler";
-	// }
-
 	let s: string = "";
 
 	s += "struct vert_in {\n";
@@ -192,13 +198,26 @@ function node_shader_get(raw: node_shader_t): string {
 	}
 	s += "}\n\n";
 
-	s += "#[set(everything)] \n";
-	s += "const constants: { \n";
-	for (let i: i32 = 0; i < raw.uniforms.length; ++i) {
-		let a: string = raw.uniforms[i];
+	for (let i: i32 = 0; i < raw.textures.length; ++i) {
+		s += "#[set(everything)]\n";
+		let a: string = raw.textures[i];
+		s += "const " + a + ": tex2d;\n";
+		s += "#[set(everything)]\n";
+		s += "const " + a + "_sampler: sampler;\n";
+	}
+
+	s += "#[set(everything)]\n";
+	s += "const constants: {\n";
+	for (let i: i32 = 0; i < raw.constants.length; ++i) {
+		let a: string = raw.constants[i];
 		s += "\t" + a + ";\n";
 	}
 	s += "};\n\n";
+
+	let shared_sampler: string = "shared_sampler";
+	// if (raw.shared_samplers.length > 0) {
+	// 	shared_sampler = string_split(raw.shared_samplers[0], " ")[1] + "_sampler";
+	// }
 
 	// for (let i: i32 = 0; i < raw.shared_samplers.length; ++i) {
 	// 	let a: string = raw.shared_samplers[i];
@@ -235,8 +254,6 @@ function node_shader_get(raw: node_shader_t): string {
 	s += "\tvertex = kong_vert;\n";
 	s += "\tfragment = kong_frag;\n";
 	s += "}\n";
-
-	iron_file_save_bytes("C:/users/lubos/desktop/test.txt", sys_string_to_buffer(s), 0);
 
 	return s;
 }

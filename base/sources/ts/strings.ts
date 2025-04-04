@@ -246,6 +246,10 @@ fun cotangent_frame(n: float3, p: float3, tex_coord: float2): float3x3 { \
 } \
 ";
 
+let str_transpose: string = "\
+fun _transpose(m: float3x3): float3x3 { return float3x3(m[0][0], m[1][0], m[2][0], m[0][1], m[1][1], m[2][1], m[0][2], m[1][2], m[2][2]); }\
+";
+
 let str_octahedron_wrap: string = "\
 fun octahedron_wrap(v: float2): float2 { \
 	var a: float2; \
@@ -315,21 +319,21 @@ fun create_basis(normal: float3, out tangent: float3, out binormal: float3) { \
 ";
 
 let str_sh_irradiance: string = "\
-fun sh_irradiance(float3 nor, shirr: float4[7]): float3 { \
+fun sh_irradiance(float3 nor): float3 { \
 	var c1: float = 0.429043; \
 	var c2: float = 0.511664; \
 	var c3: float = 0.743125; \
 	var c4: float = 0.886227; \
 	var c5: float = 0.247708; \
-	var cl00: float3 = float3(shirr[0].x, shirr[0].y, shirr[0].z); \
-	var cl1m1: float3 = float3(shirr[0].w, shirr[1].x, shirr[1].y); \
-	var cl10: float3 = float3(shirr[1].z, shirr[1].w, shirr[2].x); \
-	var cl11: float3 = float3(shirr[2].y, shirr[2].z, shirr[2].w); \
-	var cl2m2: float3 = float3(shirr[3].x, shirr[3].y, shirr[3].z); \
-	var cl2m1: float3 = float3(shirr[3].w, shirr[4].x, shirr[4].y); \
-	var cl20: float3 = float3(shirr[4].z, shirr[4].w, shirr[5].x); \
-	var cl21: float3 = float3(shirr[5].y, shirr[5].z, shirr[5].w); \
-	var cl22: float3 = float3(shirr[6].x, shirr[6].y, shirr[6].z); \
+	var cl00: float3 = float3(constants.shirr0.x, constants.shirr0.y, constants.shirr0.z); \
+	var cl1m1: float3 = float3(constants.shirr0.w, constants.shirr1.x, constants.shirr1.y); \
+	var cl10: float3 = float3(constants.shirr1.z, constants.shirr1.w, constants.shirr2.x); \
+	var cl11: float3 = float3(constants.shirr2.y, constants.shirr2.z, constants.shirr2.w); \
+	var cl2m2: float3 = float3(constants.shirr3.x, constants.shirr3.y, constants.shirr3.z); \
+	var cl2m1: float3 = float3(constants.shirr3.w, constants.shirr4.x, constants.shirr4.y); \
+	var cl20: float3 = float3(constants.shirr4.z, constants.shirr4.w, constants.shirr5.x); \
+	var cl21: float3 = float3(constants.shirr5.y, constants.shirr5.z, constants.shirr5.w); \
+	var cl22: float3 = float3(constants.shirr6.x, constants.shirr6.y, constants.shirr6.z); \
 	return ( \
 		c1 * cl22 * (nor.y * nor.y - (-nor.z) * (-nor.z)) + \
 		c3 * cl20 * nor.x * nor.x + \

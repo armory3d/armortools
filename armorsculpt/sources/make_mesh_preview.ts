@@ -35,7 +35,7 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 
 	let kong: node_shader_t = node_shader_context_make_kong(con_mesh);
 
-	let pos: string = "pos";
+	let pos: string = "input.pos";
 
 	///if arm_skin
 	let skin: bool = mesh_data_get_vertex_array(context_raw.paint_object.data, "bone") != null;
@@ -44,26 +44,26 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 		node_shader_context_add_elem(con_mesh, "bone", "short4norm");
 		node_shader_context_add_elem(con_mesh, "weight", "short4norm");
 		node_shader_add_function(kong, str_get_skinning_dual_quat);
-		node_shader_add_uniform(kong, "skin_bones: float4[128 * 2]", "_skin_bones");
-		node_shader_add_uniform(kong, "pos_unpack: float", "_pos_unpack");
+		node_shader_add_constant(kong, "skin_bones: float4[128 * 2]", "_skin_bones");
+		node_shader_add_constant(kong, "pos_unpack: float", "_pos_unpack");
 		node_shader_write_attrib_vert(kong, "var skin_a: float4;");
 		node_shader_write_attrib_vert(kong, "var skin_b: float4;");
 		node_shader_write_attrib_vert(kong, "get_skinning_dual_quat(int4(bone * 32767), weight, skin_a, skin_b);");
-		node_shader_write_attrib_vert(kong, "var spos: float3 = pos.xyz;");
-		node_shader_write_attrib_vert(kong, "spos.xyz *= pos_unpack;");
+		node_shader_write_attrib_vert(kong, "var spos: float3 = input.pos.xyz;");
+		node_shader_write_attrib_vert(kong, "spos.xyz *= constants.pos_unpack;");
 		node_shader_write_attrib_vert(kong, "spos.xyz += 2.0 * cross(skin_a.xyz, cross(skin_a.xyz, spos.xyz) + skin_a.w * spos.xyz);");
 		node_shader_write_attrib_vert(kong, "spos.xyz += 2.0 * (skin_a.w * skin_b.xyz - skin_b.w * skin_a.xyz + cross(skin_a.xyz, skin_b.xyz));");
-		node_shader_write_attrib_vert(kong, "spos.xyz /= pos_unpack;");
+		node_shader_write_attrib_vert(kong, "spos.xyz /= constants.pos_unpack;");
 	}
 	///end
 
-	node_shader_add_uniform(kong, "WVP: float4x4", "_world_view_proj_matrix");
-	node_shader_write_attrib_vert(kong, "output.pos = WVP * float4(" + pos + ".xyz, 1.0);");
+	node_shader_add_constant(kong, "WVP: float4x4", "_world_view_proj_matrix");
+	node_shader_write_attrib_vert(kong, "output.pos = constants.WVP * float4(" + pos + ".xyz, 1.0);");
 
 	let sc: f32 = context_raw.brush_scale * context_raw.brush_nodes_scale;
 	let brush_scale: string = sc + "";
 	node_shader_add_out(kong, "tex_coord: float2");
-	node_shader_write_attrib_vert(kong, "tex_coord = tex * float(" + brush_scale + ");");
+	node_shader_write_attrib_vert(kong, "output.tex_coord = input.tex * float(" + brush_scale + ");");
 
 	let decal: bool = context_raw.decal_preview;
 	parser_material_sample_keep_aspect = decal;
@@ -90,8 +90,8 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 
 	if (decal) {
 		if (context_raw.tool == workspace_tool_t.TEXT) {
-			node_shader_add_uniform(kong, "textexttool: tex2d", "_textexttool");
-			node_shader_write_frag(kong, "opacity *= sample_lod(textexttool, tex_coord / float(" + brush_scale + "), 0.0).r;");
+			node_shader_add_texture(kong, "textexttool", "_textexttool");
+			node_shader_write_frag(kong, "opacity *= sample_lod(textexttool, input.tex_coord / float(" + brush_scale + "), 0.0).r;");
 		}
 	}
 	if (decal) {
@@ -123,7 +123,7 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	}
 	else {
 		kong.frag_vvec = true;
-		node_shader_write_frag(kong, "var TBN: float3x3 = cotangent_frame(n, vvec, tex_coord);");
+		node_shader_write_frag(kong, "var TBN: float3x3 = cotangent_frame(n, vvec, input.tex_coord);");
 		node_shader_write_frag(kong, "n = nortan * 2.0 - 1.0;");
 		node_shader_write_frag(kong, "n.y = -n.y;");
 		node_shader_write_frag(kong, "n = normalize(mul(n, TBN));");
@@ -148,7 +148,7 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 
 	///if arm_skin
 	if (skin) {
-		node_shader_write_vert(kong, "wnormal = normalize(N * float3(nor.xy, pos.w) + 2.0 * cross(skin_a.xyz, cross(skin_a.xyz, float3(nor.xy, pos.w)) + skin_a.w * float3(nor.xy, pos.w)));");
+		node_shader_write_vert(kong, "wnormal = normalize(N * float3(input.nor.xy, input.pos.w) + 2.0 * cross(skin_a.xyz, cross(skin_a.xyz, float3(input.nor.xy, input.pos.w)) + skin_a.w * float3(input.nor.xy, input.pos.w)));");
 	}
 	///end
 
