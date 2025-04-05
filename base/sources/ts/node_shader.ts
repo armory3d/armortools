@@ -73,45 +73,52 @@ function node_shader_add_out(raw: node_shader_t, s: string) {
 }
 
 function node_shader_add_constant(raw: node_shader_t, s: string, link: string = null) {
-	let ar: string[] = string_split(s, " ");
-	let utype: string = ar[ar.length - 2];
-	let uname: string = ar[ar.length - 1];
-
-	if (ar[0] == "float" && string_index_of(ar[1], "[") >= 0) {
-		ar[0] = "floats";
-		ar[1] = string_split(ar[1], "[")[0];
-	}
-	else if (ar[0] == "vec4" && string_index_of(ar[1], "[") >= 0) {
-		ar[0] = "floats";
-		ar[1] = string_split(ar[1], "[")[0];
-	}
-	node_shader_context_add_constant(raw.context, ar[0], ar[1], link);
-
+	// inp: float4
 	if (array_index_of(raw.constants, s) == -1) {
+		let ar: string[] = string_split(s, ": ");
+		let uname: string = ar[0];
+		let utype: string = ar[1];
+
+		////
+		if (utype == "float2") utype = "vec2";
+		if (utype == "float3") utype = "vec3";
+		if (utype == "float4") utype = "vec4";
+		if (utype == "float3x3") utype = "mat3";
+		if (utype == "float4x4") utype = "mat4";
+		////
+
+		// if (ar[0] == "float" && string_index_of(ar[1], "[") >= 0) {
+		// 	ar[0] = "floats";
+		// 	ar[1] = string_split(ar[1], "[")[0];
+		// }
+		// else if (ar[0] == "vec4" && string_index_of(ar[1], "[") >= 0) {
+		// 	ar[0] = "floats";
+		// 	ar[1] = string_split(ar[1], "[")[0];
+		// }
+
 		array_push(raw.constants, s);
+		node_shader_context_add_constant(raw.context, utype, uname, link);
 	}
 }
 
 function node_shader_add_texture(raw: node_shader_t, s: string, link: string = null) {
-	let ar: string[] = string_split(s, " ");
-	// layout(RGBA8) sampler2D tex
-	let utype: string = ar[ar.length - 2];
-	let uname: string = ar[ar.length - 1];
-
-	node_shader_context_add_texture_unit(raw.context, utype, uname, link);
-
+	// mytex: tex2d
 	if (array_index_of(raw.textures, s) == -1) {
+		let ar: string[] = string_split(s, ": ");
+		let uname: string = ar[0];
+		let utype: string = ar[1];
 		array_push(raw.textures, s);
+		node_shader_context_add_texture_unit(raw.context, utype, uname, link);
 	}
 }
 
 function node_shader_add_shared_sampler(raw: node_shader_t, s: string) {
+	// mytex: tex2d
 	if (array_index_of(raw.shared_samplers, s) == -1) {
 		array_push(raw.shared_samplers, s);
-		let ar: string[] = string_split(s, " ");
-		// layout(RGBA8) sampler2D tex
-		let utype: string = ar[ar.length - 2];
-		let uname: string = ar[ar.length - 1];
+		let ar: string[] = string_split(s, ": ");
+		let uname: string = ar[0];
+		let utype: string = ar[1];
 		node_shader_context_add_texture_unit(raw.context, utype, uname, null);
 	}
 }
