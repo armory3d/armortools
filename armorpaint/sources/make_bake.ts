@@ -22,7 +22,7 @@ function make_bake_run(con: node_shader_context_t, kong: node_shader_t) {
 	else if (context_raw.bake_type == bake_type_t.NORMAL) { // Tangent
 		kong.frag_n = true;
 		node_shader_add_texture(kong, "texpaint_undo", "_texpaint_undo"); // Baked high-poly normals
-		node_shader_write_frag(kong, "var n0: float3 = sample_lod(texpaint_undo, input.tex_coord, 0.0).rgb * float3(2.0, 2.0, 2.0) - float3(1.0, 1.0, 1.0);");
+		node_shader_write_frag(kong, "var n0: float3 = sample_lod(texpaint_undo, texpaint_undo_sampler, input.tex_coord, 0.0).rgb * float3(2.0, 2.0, 2.0) - float3(1.0, 1.0, 1.0);");
 		node_shader_add_function(kong, str_cotangent_frame);
 		node_shader_add_function(kong, str_transpose);
 		node_shader_write_frag(kong, "var invTBN: float3x3 = _transpose(cotangent_frame(n, n, input.tex_coord));");
@@ -39,22 +39,22 @@ function make_bake_run(con: node_shader_context_t, kong: node_shader_t) {
 	else if (context_raw.bake_type == bake_type_t.HEIGHT) {
 		kong.frag_wposition = true;
 		node_shader_add_texture(kong, "texpaint_undo", "_texpaint_undo"); // Baked high-poly positions
-		node_shader_write_frag(kong, "var wpos0: float3 = sample_lod(texpaint_undo, input.tex_coord, 0.0).rgb * float3(2.0, 2.0, 2.0) - float3(1.0, 1.0, 1.0);");
-		node_shader_write_frag(kong, "var res: float = distance(wpos0, wposition) * 10.0;");
+		node_shader_write_frag(kong, "var wpos0: float3 = sample_lod(texpaint_undo, texpaint_undo_sampler, input.tex_coord, 0.0).rgb * float3(2.0, 2.0, 2.0) - float3(1.0, 1.0, 1.0);");
+		node_shader_write_frag(kong, "var res: float = distance(wpos0, input.wposition) * 10.0;");
 		node_shader_write_frag(kong, "output[0].rgba = float4(res, res, res, 1.0);");
 	}
 	else if (context_raw.bake_type == bake_type_t.DERIVATIVE) {
 		node_shader_add_texture(kong, "texpaint_undo", "_texpaint_undo"); // Baked height
 		node_shader_write_frag(kong, "var tex_dx: float2 = ddx2(input.tex_coord);");
 		node_shader_write_frag(kong, "var tex_dy: float2 = ddy2(input.tex_coord);");
-		node_shader_write_frag(kong, "var h0: float = sample_lod(texpaint_undo, input.tex_coord, 0.0).r * 100;");
-		node_shader_write_frag(kong, "var h1: float = sample_lod(texpaint_undo, input.tex_coord + tex_dx, 0.0).r * 100;");
-		node_shader_write_frag(kong, "var h2: float = sample_lod(texpaint_undo, input.tex_coord + tex_dy, 0.0).r * 100;");
+		node_shader_write_frag(kong, "var h0: float = sample_lod(texpaint_undo, texpaint_undo_sampler, input.tex_coord, 0.0).r * 100;");
+		node_shader_write_frag(kong, "var h1: float = sample_lod(texpaint_undo, texpaint_undo_sampler, input.tex_coord + tex_dx, 0.0).r * 100;");
+		node_shader_write_frag(kong, "var h2: float = sample_lod(texpaint_undo, texpaint_undo_sampler, input.tex_coord + tex_dy, 0.0).r * 100;");
 		node_shader_write_frag(kong, "output[0].rgba = float4((h1 - h0) * 0.5 + 0.5, (h2 - h0) * 0.5 + 0.5, 0.0, 1.0);");
 	}
 	else if (context_raw.bake_type == bake_type_t.POSITION) {
 		kong.frag_wposition = true;
-		node_shader_write_frag(kong, "output[0].rgba = float4(wposition * float3(0.5, 0.5, 0.5) + float3(0.5, 0.5, 0.5), 1.0);");
+		node_shader_write_frag(kong, "output[0].rgba = float4(input.wposition * float3(0.5, 0.5, 0.5) + float3(0.5, 0.5, 0.5), 1.0);");
 		if (context_raw.bake_up_axis == bake_up_axis_t.Y) {
 			node_shader_write_frag(kong, "output[0].rgb = float3(output[0].r, output[0].b, 1.0 - output[0].g);");
 		}
@@ -64,7 +64,7 @@ function make_bake_run(con: node_shader_context_t, kong: node_shader_t) {
 	}
 	else if (context_raw.bake_type == bake_type_t.MATERIALID) {
 		node_shader_add_texture(kong, "texpaint_nor_undo", "_texpaint_nor_undo");
-		node_shader_write_frag(kong, "var sample_matid: float = sample_lod(texpaint_nor_undo, input.tex_coord, 0.0).a + 1.0 / 255.0;");
+		node_shader_write_frag(kong, "var sample_matid: float = sample_lod(texpaint_nor_undo, texpaint_nor_undo_sampler, input.tex_coord, 0.0).a + 1.0 / 255.0;");
 		node_shader_write_frag(kong, "var matid_r: float = frac(sin(dot(float2(sample_matid, sample_matid * 20.0), float2(12.9898, 78.233))) * 43758.5453);");
 		node_shader_write_frag(kong, "var matid_g: float = frac(sin(dot(float2(sample_matid * 20.0, sample_matid), float2(12.9898, 78.233))) * 43758.5453);");
 		node_shader_write_frag(kong, "var matid_b: float = frac(sin(dot(float2(sample_matid, sample_matid * 40.0), float2(12.9898, 78.233))) * 43758.5453);");

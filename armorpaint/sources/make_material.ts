@@ -415,31 +415,31 @@ function make_material_parse_brush() {
 
 function make_material_blend_mode(kong: node_shader_t, blending: i32, cola: string, colb: string, opac: string): string {
 	if (blending == blend_type_t.MIX) {
-		return "lerp(" + cola + ", " + colb + ", " + opac + ")";
+		return "lerp3(" + cola + ", " + colb + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.DARKEN) {
-		return "lerp(" + cola + ", min(" + cola + ", " + colb + "), " + opac + ")";
+		return "lerp3(" + cola + ", min3(" + cola + ", " + colb + "), " + opac + ")";
 	}
 	else if (blending == blend_type_t.MULTIPLY) {
-		return "lerp(" + cola + ", " + cola + " * " + colb + ", " + opac + ")";
+		return "lerp3(" + cola + ", " + cola + " * " + colb + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.BURN) {
-		return "lerp(" + cola + ", float3(1.0, 1.0, 1.0) - (float3(1.0, 1.0, 1.0) - " + cola + ") / " + colb + ", " + opac + ")";
+		return "lerp3(" + cola + ", float3(1.0, 1.0, 1.0) - (float3(1.0, 1.0, 1.0) - " + cola + ") / " + colb + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.LIGHTEN) {
-		return "max(" + cola + ", " + colb + " * " + opac + ")";
+		return "max3(" + cola + ", " + colb + " * " + opac + ")";
 	}
 	else if (blending == blend_type_t.SCREEN) {
 		return "(float3(1.0, 1.0, 1.0) - (float3(1.0 - " + opac + ", 1.0 - " + opac + ", 1.0 - " + opac + ") + " + opac + " * (float3(1.0, 1.0, 1.0) - " + colb + ")) * (float3(1.0, 1.0, 1.0) - " + cola + "))";
 	}
 	else if (blending == blend_type_t.DODGE) {
-		return "lerp(" + cola + ", " + cola + " / (float3(1.0, 1.0, 1.0) - " + colb + "), " + opac + ")";
+		return "lerp3(" + cola + ", " + cola + " / (float3(1.0, 1.0, 1.0) - " + colb + "), " + opac + ")";
 	}
 	else if (blending == blend_type_t.ADD) {
-		return "lerp(" + cola + ", " + cola + " + " + colb + ", " + opac + ")";
+		return "lerp3(" + cola + ", " + cola + " + " + colb + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.OVERLAY) {
-		return "lerp(" + cola + ", float3( \
+		return "lerp3(" + cola + ", float3( \
 			" + cola + ".r < 0.5 ? 2.0 * " + cola + ".r * " + colb + ".r : 1.0 - 2.0 * (1.0 - " + cola + ".r) * (1.0 - " + colb + ".r), \
 			" + cola + ".g < 0.5 ? 2.0 * " + cola + ".g * " + colb + ".g : 1.0 - 2.0 * (1.0 - " + cola + ".g) * (1.0 - " + colb + ".g), \
 			" + cola + ".b < 0.5 ? 2.0 * " + cola + ".b * " + colb + ".b : 1.0 - 2.0 * (1.0 - " + cola + ".b) * (1.0 - " + colb + ".b) \
@@ -452,59 +452,59 @@ function make_material_blend_mode(kong: node_shader_t, blending: i32, cola: stri
 		return "(" + cola + " + " + opac + " * (float3(2.0, 2.0, 2.0) * (" + colb + " - float3(0.5, 0.5, 0.5))))";
 	}
 	else if (blending == blend_type_t.DIFFERENCE) {
-		return "lerp(" + cola + ", abs(" + cola + " - " + colb + "), " + opac + ")";
+		return "lerp3(" + cola + ", abs3(" + cola + " - " + colb + "), " + opac + ")";
 	}
 	else if (blending == blend_type_t.SUBTRACT) {
-		return "lerp(" + cola + ", " + cola + " - " + colb + ", " + opac + ")";
+		return "lerp3(" + cola + ", " + cola + " - " + colb + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.DIVIDE) {
 		return "float3(1.0 - " + opac + ", 1.0 - " + opac + ", 1.0 - " + opac + ") * " + cola + " + float3(" + opac + ", " + opac + ", " + opac + ") * " + cola + " / " + colb + "";
 	}
 	else if (blending == blend_type_t.HUE) {
 		node_shader_add_function(kong, str_hue_sat);
-		return "lerp(" + cola + ", hsv_to_rgb(float3(rgb_to_hsv(" + colb + ").r, rgb_to_hsv(" + cola + ").g, rgb_to_hsv(" + cola + ").b)), " + opac + ")";
+		return "lerp3(" + cola + ", hsv_to_rgb(float3(rgb_to_hsv(" + colb + ").r, rgb_to_hsv(" + cola + ").g, rgb_to_hsv(" + cola + ").b)), " + opac + ")";
 	}
 	else if (blending == blend_type_t.SATURATION) {
 		node_shader_add_function(kong, str_hue_sat);
-		return "lerp(" + cola + ", hsv_to_rgb(float3(rgb_to_hsv(" + cola + ").r, rgb_to_hsv(" + colb + ").g, rgb_to_hsv(" + cola + ").b)), " + opac + ")";
+		return "lerp3(" + cola + ", hsv_to_rgb(float3(rgb_to_hsv(" + cola + ").r, rgb_to_hsv(" + colb + ").g, rgb_to_hsv(" + cola + ").b)), " + opac + ")";
 	}
 	else if (blending == blend_type_t.COLOR) {
 		node_shader_add_function(kong, str_hue_sat);
-		return "lerp(" + cola + ", hsv_to_rgb(float3(rgb_to_hsv(" + colb + ").r, rgb_to_hsv(" + colb + ").g, rgb_to_hsv(" + cola + ").b)), " + opac + ")";
+		return "lerp3(" + cola + ", hsv_to_rgb(float3(rgb_to_hsv(" + colb + ").r, rgb_to_hsv(" + colb + ").g, rgb_to_hsv(" + cola + ").b)), " + opac + ")";
 	}
 	else { // BlendValue
 		node_shader_add_function(kong, str_hue_sat);
-		return "lerp(" + cola + ", hsv_to_rgb(float3(rgb_to_hsv(" + cola + ").r, rgb_to_hsv(" + cola + ").g, rgb_to_hsv(" + colb + ").b)), " + opac + ")";
+		return "lerp3(" + cola + ", hsv_to_rgb(float3(rgb_to_hsv(" + cola + ").r, rgb_to_hsv(" + cola + ").g, rgb_to_hsv(" + colb + ").b)), " + opac + ")";
 	}
 }
 
 function make_material_blend_mode_mask(blending: i32, cola: string, colb: string, opac: string): string {
 	if (blending == blend_type_t.MIX) {
-		return "lerp(" + cola + ", " + colb + ", " + opac + ")";
+		return "lerp3(" + cola + ", " + colb + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.DARKEN) {
-		return "lerp(" + cola + ", min(" + cola + ", " + colb + "), " + opac + ")";
+		return "lerp3(" + cola + ", min3(" + cola + ", " + colb + "), " + opac + ")";
 	}
 	else if (blending == blend_type_t.MULTIPLY) {
-		return "lerp(" + cola + ", " + cola + " * " + colb + ", " + opac + ")";
+		return "lerp3(" + cola + ", " + cola + " * " + colb + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.BURN) {
-		return "lerp(" + cola + ", 1.0 - (1.0 - " + cola + ") / " + colb + ", " + opac + ")";
+		return "lerp3(" + cola + ", 1.0 - (1.0 - " + cola + ") / " + colb + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.LIGHTEN) {
-		return "max(" + cola + ", " + colb + " * " + opac + ")";
+		return "max3(" + cola + ", " + colb + " * " + opac + ")";
 	}
 	else if (blending == blend_type_t.SCREEN) {
 		return "(1.0 - ((1.0 - " + opac + ") + " + opac + " * (1.0 - " + colb + ")) * (1.0 - " + cola + "))";
 	}
 	else if (blending == blend_type_t.DODGE) {
-		return "lerp(" + cola + ", " + cola + " / (1.0 - " + colb + "), " + opac + ")";
+		return "lerp3(" + cola + ", " + cola + " / (1.0 - " + colb + "), " + opac + ")";
 	}
 	else if (blending == blend_type_t.ADD) {
-		return "lerp(" + cola + ", " + cola + " + " + colb + ", " + opac + ")";
+		return "lerp3(" + cola + ", " + cola + " + " + colb + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.OVERLAY) {
-		return "lerp(" + cola + ", " + cola + " < 0.5 ? 2.0 * " + cola + " * " + colb + " : 1.0 - 2.0 * (1.0 - " + cola + ") * (1.0 - " + colb + "), " + opac + ")";
+		return "lerp3(" + cola + ", " + cola + " < 0.5 ? 2.0 * " + cola + " * " + colb + " : 1.0 - 2.0 * (1.0 - " + cola + ") * (1.0 - " + colb + "), " + opac + ")";
 	}
 	else if (blending == blend_type_t.SOFT_LIGHT) {
 		return "((1.0 - " + opac + ") * " + cola + " + " + opac + " * ((1.0 - " + cola + ") * " + colb + " * " + cola + " + " + cola + " * (1.0 - (1.0 - " + colb + ") * (1.0 - " + cola + "))))";
@@ -513,16 +513,16 @@ function make_material_blend_mode_mask(blending: i32, cola: string, colb: string
 		return "(" + cola + " + " + opac + " * (2.0 * (" + colb + " - 0.5)))";
 	}
 	else if (blending == blend_type_t.DIFFERENCE) {
-		return "lerp(" + cola + ", abs(" + cola + " - " + colb + "), " + opac + ")";
+		return "lerp3(" + cola + ", abs3(" + cola + " - " + colb + "), " + opac + ")";
 	}
 	else if (blending == blend_type_t.SUBTRACT) {
-		return "lerp(" + cola + ", " + cola + " - " + colb + ", " + opac + ")";
+		return "lerp3(" + cola + ", " + cola + " - " + colb + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.DIVIDE) {
 		return "(1.0 - " + opac + ") * " + cola + " + " + opac + " * " + cola + " / " + colb + "";
 	}
 	else { // BlendHue, BlendSaturation, BlendColor, BlendValue
-		return "lerp(" + cola + ", " + colb + ", " + opac + ")";
+		return "lerp3(" + cola + ", " + colb + ", " + opac + ")";
 	}
 }
 

@@ -40,7 +40,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	node_shader_add_constant(kong, "WVP: float4x4", "_world_view_proj_matrix");
 	let lid: i32 = project_layers[0].id;
 	node_shader_add_texture(kong, "texpaint_vert", "_texpaint_vert" + lid);
-	node_shader_write_vert(kong, "var meshpos: float3 = sample_lod(texpaint_vert, int2(gl_VertexID % textureSize(texpaint_vert, 0).x, gl_VertexID / textureSize(texpaint_vert, 0).y), 0).xyz;");
+	node_shader_write_vert(kong, "var meshpos: float3 = sample_lod(texpaint_vert, texpaint_vert_sampler, int2(gl_VertexID % textureSize(texpaint_vert, 0).x, gl_VertexID / textureSize(texpaint_vert, 0).y), 0).xyz;");
 	// + input.pos.xyz * 0.000001
 	node_shader_write_vert(kong, "output.pos = constants.WVP * float4(meshpos.xyz, 1.0);");
 
@@ -54,11 +54,11 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	node_shader_write_attrib_vert(kong, "var base_vertex0: int = gl_VertexID - (gl_VertexID % 3);");
 	node_shader_write_attrib_vert(kong, "var base_vertex1: int = base_vertex0 + 1;");
 	node_shader_write_attrib_vert(kong, "var base_vertex2: int = base_vertex0 + 2;");
-	node_shader_write_attrib_vert(kong, "var meshpos0: float3 = sample_lod(texpaint_vert, int2(base_vertex0 % textureSize(texpaint_vert, 0).x, base_vertex0 / textureSize(texpaint_vert, 0).y), 0).xyz;");
-	node_shader_write_attrib_vert(kong, "var meshpos1: float3 = sample_lod(texpaint_vert, int2(base_vertex1 % textureSize(texpaint_vert, 0).x, base_vertex1 / textureSize(texpaint_vert, 0).y), 0).xyz;");
-	node_shader_write_attrib_vert(kong, "var meshpos2: float3 = sample_lod(texpaint_vert, int2(base_vertex2 % textureSize(texpaint_vert, 0).x, base_vertex2 / textureSize(texpaint_vert, 0).y), 0).xyz;");
+	node_shader_write_attrib_vert(kong, "var meshpos0: float3 = sample_lod(texpaint_vert, texpaint_vert_sampler, int2(base_vertex0 % textureSize(texpaint_vert, 0).x, base_vertex0 / textureSize(texpaint_vert, 0).y), 0).xyz;");
+	node_shader_write_attrib_vert(kong, "var meshpos1: float3 = sample_lod(texpaint_vert, texpaint_vert_sampler, int2(base_vertex1 % textureSize(texpaint_vert, 0).x, base_vertex1 / textureSize(texpaint_vert, 0).y), 0).xyz;");
+	node_shader_write_attrib_vert(kong, "var meshpos2: float3 = sample_lod(texpaint_vert, texpaint_vert_sampler, int2(base_vertex2 % textureSize(texpaint_vert, 0).x, base_vertex2 / textureSize(texpaint_vert, 0).y), 0).xyz;");
 	node_shader_write_attrib_vert(kong, "var meshnor: float3 = normalize(cross(meshpos2 - meshpos1, meshpos0 - meshpos1));");
-	node_shader_write_attrib_vert(kong, "output.wnormal = mul(meshnor, constants.N);");
+	node_shader_write_attrib_vert(kong, "output.wnormal = constants.N * meshnor;");
 	node_shader_write_attrib_frag(kong, "var n: float3 = normalize(input.wnormal);");
 
 	node_shader_add_function(kong, str_pack_float_int16);
@@ -68,11 +68,11 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		node_shader_add_texture(kong, "gbuffer0");
 		node_shader_add_texture(kong, "gbuffer1");
 		node_shader_add_texture(kong, "gbuffer2");
-		node_shader_write_frag(kong, "var fragcoord: float2 = (wvpposition.xy / wvpposition.w) * 0.5 + 0.5;");
+		node_shader_write_frag(kong, "var fragcoord: float2 = (input.wvpposition.xy / input.wvpposition.w) * 0.5 + 0.5;");
 		node_shader_write_frag(kong, "fragcoord.y = 1.0 - fragcoord.y;");
-		node_shader_write_frag(kong, "var gbuffer0_sample: float4 = sample_lod(gbuffer0, fragcoord, 0.0);");
-		node_shader_write_frag(kong, "var gbuffer1_sample: float4 = sample_lod(gbuffer1, fragcoord, 0.0);");
-		node_shader_write_frag(kong, "var gbuffer2_sample: float4 = sample_lod(gbuffer2, fragcoord, 0.0);");
+		node_shader_write_frag(kong, "var gbuffer0_sample: float4 = sample_lod(gbuffer0, gbuffer0_sampler, fragcoord, 0.0);");
+		node_shader_write_frag(kong, "var gbuffer1_sample: float4 = sample_lod(gbuffer1, gbuffer1_sampler, fragcoord, 0.0);");
+		node_shader_write_frag(kong, "var gbuffer2_sample: float4 = sample_lod(gbuffer2, gbuffer2_sampler, fragcoord, 0.0);");
 		node_shader_write_frag(kong, "var basecol: float3 = gbuffer0_sample.rgb;");
 		node_shader_write_frag(kong, "var roughness: float = gbuffer2_sample.g;");
 		node_shader_write_frag(kong, "var metallic: float = gbuffer2_sample.b;");
@@ -186,7 +186,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 					if (!slot_layer_is_visible(m)) continue;
 					node_shader_add_shared_sampler(kong, "texpaint" + m.id);
 					node_shader_write_frag(kong, "{"); // Group mask is sampled across multiple layers
-					node_shader_write_frag(kong, "var texpaint_mask_sample" + m.id + ": float = sample_lod_shared(texpaint" + m.id + ", input.tex_coord, 0.0).r;");
+					node_shader_write_frag(kong, "var texpaint_mask_sample" + m.id + ": float = sample_lod(texpaint" + m.id + ", shared_sampler, input.tex_coord, 0.0).r;");
 					node_shader_write_frag(kong, "}");
 				}
 				node_shader_write_frag(kong, "texpaint_opac *= clamp(" + texpaint_mask + ", 0.0, 1.0);");
@@ -217,7 +217,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		}
 
 		if (last_pass && context_raw.draw_wireframe) {
-			node_shader_write_frag(kong, "basecol *= 1.0 - sample_lod(texuvmap, input.tex_coord, 0.0).r;");
+			node_shader_write_frag(kong, "basecol *= 1.0 - sample_lod(texuvmap, texuvmap_sampler, input.tex_coord, 0.0).r;");
 		}
 
 		if (make_material_height_used) {
@@ -249,7 +249,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 
 		if (context_raw.viewport_mode == viewport_mode_t.LIT) {
 
-			node_shader_write_frag(kong, "basecol = pow(basecol, float3(2.2, 2.2, 2.2));");
+			node_shader_write_frag(kong, "basecol = pow3(basecol, float3(2.2, 2.2, 2.2));");
 
 			if (context_raw.viewport_shader != null) {
 				node_shader_write_frag(kong, "var output_color: float3;");
@@ -258,8 +258,8 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			}
 			else if (context_raw.render_mode == render_mode_t.FORWARD) {
 				kong.frag_wposition = true;
-				node_shader_write_frag(kong, "var albedo: float3 = lerp(basecol, float3(0.0, 0.0, 0.0), metallic);");
-				node_shader_write_frag(kong, "var f0: float3 = lerp(float3(0.04, 0.04, 0.04), basecol, metallic);");
+				node_shader_write_frag(kong, "var albedo: float3 = lerp3(basecol, float3(0.0, 0.0, 0.0), metallic);");
+				node_shader_write_frag(kong, "var f0: float3 = lerp3(float3(0.04, 0.04, 0.04), basecol, metallic);");
 				kong.frag_vvec = true;
 				node_shader_write_frag(kong, "var dotnv: float = max(0.0, dot(n, vvec));");
 				node_shader_write_frag(kong, "var env_brdf: float2 = senvmap_brdf[int2(float2(roughness, 1.0 - dotnv) * 256.0)].xy;");
@@ -268,7 +268,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 				node_shader_write_frag(kong, "var wreflect: float3 = reflect(-vvec, n);");
 				node_shader_write_frag(kong, "var envlod: float = roughness * float(constants.envmap_num_mipmaps);");
 				node_shader_add_function(kong, str_envmap_equirect);
-				node_shader_write_frag(kong, "var prefiltered_color: float3 = sample_lod(senvmap_radiance, envmap_equirect(wreflect, constants.envmap_data.x), envlod).rgb;");
+				node_shader_write_frag(kong, "var prefiltered_color: float3 = sample_lod(senvmap_radiance, senvmap_radiance_sampler, envmap_equirect(wreflect, constants.envmap_data.x), envlod).rgb;");
 				// node_shader_add_constant(kong, "shirr: float4[7]", "_envmap_irradiance");
 				node_shader_add_constant(kong, "shirr0: float4", "_envmap_irradiance0");
 				node_shader_add_constant(kong, "shirr1: float4", "_envmap_irradiance1");
@@ -307,7 +307,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		}
 
 		if (context_raw.viewport_mode != viewport_mode_t.LIT && context_raw.viewport_mode != viewport_mode_t.PATH_TRACE) {
-			node_shader_write_frag(kong, "output[1].rgb = pow(output[1].rgb, float3(2.2, 2.2, 2.2));");
+			node_shader_write_frag(kong, "output[1].rgb = pow3(output[1].rgb, float3(2.2, 2.2, 2.2));");
 		}
 
 		node_shader_write_frag(kong, "n /= (abs(n.x) + abs(n.y) + abs(n.z));");

@@ -80,7 +80,7 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	let opac: string = "0.0";
 	let height: string = "0.0";
 	let nortan: string = "float3(1.0, 1.0, 1.0)";
-	node_shader_write_frag(kong, "var basecol: float3 = pow(" + base + ", float3(2.2, 2.2, 2.2));");
+	node_shader_write_frag(kong, "var basecol: float3 = pow3(" + base + ", float3(2.2, 2.2, 2.2));");
 	node_shader_write_frag(kong, "var roughness: float = " + rough + ";");
 	node_shader_write_frag(kong, "var metallic: float = " + met + ";");
 	node_shader_write_frag(kong, "var occlusion: float = " + occ + ";");
@@ -91,7 +91,7 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	if (decal) {
 		if (context_raw.tool == workspace_tool_t.TEXT) {
 			node_shader_add_texture(kong, "textexttool", "_textexttool");
-			node_shader_write_frag(kong, "opacity *= sample_lod(textexttool, input.tex_coord / float(" + brush_scale + "), 0.0).r;");
+			node_shader_write_frag(kong, "opacity *= sample_lod(textexttool, textexttool_sampler, input.tex_coord / float(" + brush_scale + "), 0.0).r;");
 		}
 	}
 	if (decal) {
@@ -126,7 +126,7 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 		node_shader_write_frag(kong, "var TBN: float3x3 = cotangent_frame(n, vvec, input.tex_coord);");
 		node_shader_write_frag(kong, "n = nortan * 2.0 - 1.0;");
 		node_shader_write_frag(kong, "n.y = -n.y;");
-		node_shader_write_frag(kong, "n = normalize(mul(n, TBN));");
+		node_shader_write_frag(kong, "n = normalize(TBN * n);");
 	}
 
 	node_shader_write_frag(kong, "n /= (abs(n.x) + abs(n.y) + abs(n.z));");
@@ -140,7 +140,7 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	}
 	else {
 		node_shader_write_frag(kong, "output[0].rgba = float4(n.x, n.y, lerp(1.0, roughness, opacity), pack_f32_i16(lerp(1.0, metallic, opacity), uint(0)));"); // metallic/matid
-		node_shader_write_frag(kong, "output[1].rgba = float4(lerp(float3(0.0, 0.0, 0.0), basecol, opacity), occlusion);");
+		node_shader_write_frag(kong, "output[1].rgba = float4(lerp3(float3(0.0, 0.0, 0.0), basecol, opacity), occlusion);");
 	}
 	node_shader_write_frag(kong, "output[2].rgba = float4(0.0, 0.0, 0.0, 0.0);"); // veloc
 

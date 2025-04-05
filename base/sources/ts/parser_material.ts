@@ -602,11 +602,11 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		coloring = string_replace_all(coloring, " ", "_");
 		let res: string = "";
 		if (coloring == "INTENSITY") {
-			let voronoi: string = "tex_voronoi(" + co + " * " + scale + ", texturePass(snoise256)).a";
+			let voronoi: string = "tex_voronoi(" + co + " * " + scale + ").a";
 			res = parser_material_to_vec3(voronoi);
 		}
 		else { // Cells
-			res = "tex_voronoi(" + co + " * " + scale + ", texturePass(snoise256)).rgb";
+			res = "tex_voronoi(" + co + " * " + scale + ").rgb";
 		}
 		return res;
 	}
@@ -627,7 +627,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 	else if (node.type == "GAMMA") {
 		let out_col: string = parser_material_parse_vector_input(node.inputs[0]);
 		let gamma: string = parser_material_parse_value_input(node.inputs[1]);
-		return "pow(" + out_col + ", " + parser_material_to_vec3(gamma) + ")";
+		return "pow3(" + out_col + ", " + parser_material_to_vec3(gamma) + ")";
 	}
 	else if (node.type == "DIRECT_WARP") {
 		if (parser_material_warp_passthrough) {
@@ -642,7 +642,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		parser_material_write(parser_material_kong, "var " + store + "_rad: float = " + angle + " * (" + pi + " / 180);");
 		parser_material_write(parser_material_kong, "var " + store + "_x: float = cos(" + store + "_rad);");
 		parser_material_write(parser_material_kong, "var " + store + "_y: float = sin(" + store + "_rad);");
-		return "sample(" + tex_name + ", tex_coord + float2(" + store + "_x, " + store + "_y) * " + mask + ").rgb;";
+		return "sample(" + tex_name + ", " + tex_name + "_sampler, + tex_coord + float2(" + store + "_x, " + store + "_y) * " + mask + ").rgb;";
 	}
 	else if (node.type == "BLUR") {
 		if (parser_material_blur_passthrough) {
@@ -659,7 +659,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		parser_material_write(parser_material_kong, "var " + store + "_res: float3 = float3(0.0, 0.0, 0.0);");
 		parser_material_write(parser_material_kong, "for (var i: int = -" + steps + "; i <= " + steps + "; i += 1) {");
 		parser_material_write(parser_material_kong, "for (var j: int = -" + steps + "; j <= " + steps + "; j += 1) {");
-		parser_material_write(parser_material_kong, store + "_res += sample(" + tex_name + ", tex_coord + float2(i, j) / float2(textureSize(" + tex_name + ", 0))).rgb;");
+		parser_material_write(parser_material_kong, store + "_res += sample(" + tex_name + ", " + tex_name + "_sampler, tex_coord + float2(i, j) / float2(textureSize(" + tex_name + ", 0))).rgb;");
 		parser_material_write(parser_material_kong, "}");
 		parser_material_write(parser_material_kong, "}");
 		parser_material_write(parser_material_kong, store + "_res /= (" + steps + " * 2 + 1) * (" + steps + " * 2 + 1);");
@@ -677,7 +677,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 	else if (node.type == "INVERT") {
 		let fac: string = parser_material_parse_value_input(node.inputs[0]);
 		let out_col: string = parser_material_parse_vector_input(node.inputs[1]);
-		return "lerp(" + out_col + ", float3(1.0, 1.0, 1.0) - (" + out_col + "), " + fac + ")";
+		return "lerp3(" + out_col + ", float3(1.0, 1.0, 1.0) - (" + out_col + "), " + fac + ")";
 	}
 	else if (node.type == "MIX_RGB") {
 		let fac: string = parser_material_parse_value_input(node.inputs[0]);
@@ -691,32 +691,32 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		let use_clamp: bool = node.buttons[1].default_value[0] > 0;
 		let out_col: string = "";
 		if (blend == "MIX") {
-			out_col = "lerp(" + col1 + ", " + col2 + ", " + fac_var + ")";
+			out_col = "lerp3(" + col1 + ", " + col2 + ", " + fac_var + ")";
 		}
 		else if (blend == "DARKEN") {
-			out_col = "min(" + col1 + ", " + col2 + " * " + fac_var + ")";
+			out_col = "min3(" + col1 + ", " + col2 + " * " + fac_var + ")";
 		}
 		else if (blend == "MULTIPLY") {
-			out_col = "lerp(" + col1 + ", " + col1 + " * " + col2 + ", " + fac_var + ")";
+			out_col = "lerp3(" + col1 + ", " + col1 + " * " + col2 + ", " + fac_var + ")";
 		}
 		else if (blend == "BURN") {
-			out_col = "lerp(" + col1 + ", float3(1.0, 1.0, 1.0) - (float3(1.0, 1.0, 1.0) - " + col1 + ") / " + col2 + ", " + fac_var + ")";
+			out_col = "lerp3(" + col1 + ", float3(1.0, 1.0, 1.0) - (float3(1.0, 1.0, 1.0) - " + col1 + ") / " + col2 + ", " + fac_var + ")";
 		}
 		else if (blend == "LIGHTEN") {
-			out_col = "max(" + col1 + ", " + col2 + " * " + fac_var + ")";
+			out_col = "max3(" + col1 + ", " + col2 + " * " + fac_var + ")";
 		}
 		else if (blend == "SCREEN") {
 			let v3: string = parser_material_to_vec3("1.0 - " + fac_var);
 			out_col = "(float3(1.0, 1.0, 1.0) - (" + v3 + " + " + fac_var + " * (float3(1.0, 1.0, 1.0) - " + col2 + ")) * (float3(1.0, 1.0, 1.0) - " + col1 + "))";
 		}
 		else if (blend == "DODGE") {
-			out_col = "lerp(" + col1 + ", " + col1 + " / (float3(1.0, 1.0, 1.0) - " + col2 + "), " + fac_var + ")";
+			out_col = "lerp3(" + col1 + ", " + col1 + " / (float3(1.0, 1.0, 1.0) - " + col2 + "), " + fac_var + ")";
 		}
 		else if (blend == "ADD") {
-			out_col = "lerp(" + col1 + ", " + col1 + " + " + col2 + ", " + fac_var + ")";
+			out_col = "lerp3(" + col1 + ", " + col1 + " + " + col2 + ", " + fac_var + ")";
 		}
 		else if (blend == "OVERLAY") {
-			out_col = "lerp(" + col1 + ", float3( \
+			out_col = "lerp3(" + col1 + ", float3( \
 				" + col1 + ".r < 0.5 ? 2.0 * " + col1 + ".r * " + col2 + ".r : 1.0 - 2.0 * (1.0 - " + col1 + ".r) * (1.0 - " + col2 + ".r), \
 				" + col1 + ".g < 0.5 ? 2.0 * " + col1 + ".g * " + col2 + ".g : 1.0 - 2.0 * (1.0 - " + col1 + ".g) * (1.0 - " + col2 + ".g), \
 				" + col1 + ".b < 0.5 ? 2.0 * " + col1 + ".b * " + col2 + ".b : 1.0 - 2.0 * (1.0 - " + col1 + ".b) * (1.0 - " + col2 + ".b) \
@@ -729,35 +729,35 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 			out_col = "(" + col1 + " + " + fac_var + " * (float3(2.0, 2.0, 2.0) * (" + col2 + " - float3(0.5, 0.5, 0.5))))";
 		}
 		else if (blend == "DIFFERENCE") {
-			out_col = "lerp(" + col1 + ", abs(" + col1 + " - " + col2 + "), " + fac_var + ")";
+			out_col = "lerp3(" + col1 + ", abs3(" + col1 + " - " + col2 + "), " + fac_var + ")";
 		}
 		else if (blend == "SUBTRACT") {
-			out_col = "lerp(" + col1 + ", " + col1 + " - " + col2 + ", " + fac_var + ")";
+			out_col = "lerp3(" + col1 + ", " + col1 + " - " + col2 + ", " + fac_var + ")";
 		}
 		else if (blend == "DIVIDE") {
 			let eps: f32 = 0.000001;
-			col2 = "max(" + col2 + ", float3(" + eps + ", " + eps + ", " + eps + "))";
+			col2 = "max3(" + col2 + ", float3(" + eps + ", " + eps + ", " + eps + "))";
 			let v3: string = parser_material_to_vec3("(1.0 - " + fac_var + ") * " + col1 + " + " + fac_var + " * " + col1 + " / " + col2);
 			out_col = "(" + v3 + ")";
 		}
 		else if (blend == "HUE") {
 			node_shader_add_function(parser_material_kong, str_hue_sat);
-			out_col = "lerp(" + col1 + ", hsv_to_rgb(float3(rgb_to_hsv(" + col2 + ").r, rgb_to_hsv(" + col1 + ").g, rgb_to_hsv(" + col1 + ").b)), " + fac_var + ")";
+			out_col = "lerp3(" + col1 + ", hsv_to_rgb(float3(rgb_to_hsv(" + col2 + ").r, rgb_to_hsv(" + col1 + ").g, rgb_to_hsv(" + col1 + ").b)), " + fac_var + ")";
 		}
 		else if (blend == "SATURATION") {
 			node_shader_add_function(parser_material_kong, str_hue_sat);
-			out_col = "lerp(" + col1 + ", hsv_to_rgb(float3(rgb_to_hsv(" + col1 + ").r, rgb_to_hsv(" + col2 + ").g, rgb_to_hsv(" + col1 + ").b)), " + fac_var + ")";
+			out_col = "lerp3(" + col1 + ", hsv_to_rgb(float3(rgb_to_hsv(" + col1 + ").r, rgb_to_hsv(" + col2 + ").g, rgb_to_hsv(" + col1 + ").b)), " + fac_var + ")";
 		}
 		else if (blend == "COLOR") {
 			node_shader_add_function(parser_material_kong, str_hue_sat);
-			out_col = "lerp(" + col1 + ", hsv_to_rgb(float3(rgb_to_hsv(" + col2 + ").r, rgb_to_hsv(" + col2 + ").g, rgb_to_hsv(" + col1 + ").b)), " + fac_var + ")";
+			out_col = "lerp3(" + col1 + ", hsv_to_rgb(float3(rgb_to_hsv(" + col2 + ").r, rgb_to_hsv(" + col2 + ").g, rgb_to_hsv(" + col1 + ").b)), " + fac_var + ")";
 		}
 		else if (blend == "VALUE") {
 			node_shader_add_function(parser_material_kong, str_hue_sat);
-			out_col = "lerp(" + col1 + ", hsv_to_rgb(float3(rgb_to_hsv(" + col1 + ").r, rgb_to_hsv(" + col1 + ").g, rgb_to_hsv(" + col2 + ").b)), " + fac_var + ")";
+			out_col = "lerp3(" + col1 + ", hsv_to_rgb(float3(rgb_to_hsv(" + col1 + ").r, rgb_to_hsv(" + col1 + ").g, rgb_to_hsv(" + col2 + ").b)), " + fac_var + ")";
 		}
 		if (use_clamp) {
-			return "clamp(" + out_col + ", float3(0.0, 0.0, 0.0), float3(1.0, 1.0, 1.0))";
+			return "clamp3(" + out_col + ", float3(0.0, 0.0, 0.0), float3(1.0, 1.0, 1.0))";
 		}
 		else {
 			return out_col;
@@ -766,7 +766,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 	else if (node.type == "QUANTIZE") {
 		let strength: string = parser_material_parse_value_input(node.inputs[0]);
 		let col: string = parser_material_parse_vector_input(node.inputs[1]);
-		return "(floor(100.0 * " + strength + " * " + col + ") / (100.0 * " + strength + "))";
+		return "(floor3(100.0 * " + strength + " * " + col + ") / (100.0 * " + strength + "))";
 	}
 	else if (node.type == "REPLACECOL") {
 		let input_color: string = parser_material_parse_vector_input(node.inputs[0]);
@@ -774,7 +774,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		let new_color: string = parser_material_parse_vector_input(node.inputs[2]);
 		let radius: string = parser_material_parse_value_input(node.inputs[3]);
 		let fuzziness: string = parser_material_parse_value_input(node.inputs[4]);
-		return "lerp(" + new_color + ", " + input_color + ", clamp((distance(" + old_color + ", " + input_color + ") - " + radius + ") / max(" + fuzziness + ", " + parser_material_eps + "), 0.0, 1.0))";
+		return "lerp3(" + new_color + ", " + input_color + ", clamp((distance(" + old_color + ", " + input_color + ") - " + radius + ") / max(" + fuzziness + ", " + parser_material_eps + "), 0.0, 1.0))";
 	}
 	else if (node.type == "VALTORGB") { // ColorRamp
 		let fac: string = parser_material_parse_value_input(node.inputs[0]);
@@ -820,7 +820,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 			// Mix color
 			// float f = (pos - start) * (1.0 / (finish - start))
 			// TODO: index_var + 1 out of bounds
-			return "lerp(" + cols_var + "[" + index_var + "], " + cols_var + "[" + index_var + " + 1], (" +
+			return "lerp3(" + cols_var + "[" + index_var + "], " + cols_var + "[" + index_var + " + 1], (" +
 				fac_var + " - " + facs_var + "[" + index_var + "]) * (1.0 / (" + facs_var + "[" + index_var + " + 1] - " +
 				facs_var + "[" + index_var + "]) ))";
 		}
@@ -877,11 +877,11 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		let l: any = node.buttons[0].default_value;
 		if (socket == node.outputs[0]) { // Base
 			node_shader_add_texture(parser_material_kong, "texpaint" + l, "_texpaint" + l);
-			return "sample(texpaint" + l + ", tex_coord).rgb";
+			return "sample(texpaint" + l + ", texpaint" + l + "_sampler, tex_coord).rgb";
 		}
 		else if (socket == node.outputs[5]) { // Normal
 			node_shader_add_texture(parser_material_kong, "texpaint_nor" + l, "_texpaint_nor" + l);
-			return "sample(texpaint_nor" + l + ", tex_coord).rgb";
+			return "sample(texpaint_nor" + l + ", texpaint_nor" + l + "_sampler, tex_coord).rgb";
 		}
 	}
 	else if (node.type == "MATERIAL") {
@@ -921,7 +921,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 	else if (node.type == "NEW_GEOMETRY") {
 		if (socket == node.outputs[0]) { // Position
 			parser_material_kong.frag_wposition = true;
-			return "wposition";
+			return "input.wposition";
 		}
 		else if (socket == node.outputs[1]) { // Normal
 			parser_material_kong.frag_n = true;
@@ -966,12 +966,12 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 	// }
 	else if (node.type == "TANGENT") {
 		parser_material_kong.frag_wtangent = true;
-		return "wtangent";
+		return "input.wtangent";
 	}
 	else if (node.type == "TEX_COORD") {
 		if (socket == node.outputs[0]) { // Generated - bounds
 			parser_material_kong.frag_bposition = true;
-			return "bposition";
+			return "input.bposition";
 		}
 		else if (socket == node.outputs[1]) { // Normal
 			parser_material_kong.frag_n = true;
@@ -983,15 +983,15 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		}
 		else if (socket == node.outputs[3]) { // Object
 			parser_material_kong.frag_mposition = true;
-			return "mposition";
+			return "input.mposition";
 		}
 		else if (socket == node.outputs[4]) { // Camera
 			parser_material_kong.frag_vposition = true;
-			return "vposition";
+			return "input.vposition";
 		}
 		else if (socket == node.outputs[5]) { // Window
 			parser_material_kong.frag_wvpposition = true;
-			return "wvpposition.xyz";
+			return "input.wvpposition.xyz";
 		}
 		else if (socket == node.outputs[6]) { // Reflection
 			return "float3(0.0, 0.0, 0.0)";
@@ -1147,28 +1147,28 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 			return "(" + vec2 + ".x * " + vec1 + ")";
 		}
 		else if (op == "ABSOLUTE") {
-			return "abs(" + vec1 + ")";
+			return "abs3(" + vec1 + ")";
 		}
 		else if (op == "MINIMUM") {
-			return "min(" + vec1 + ", " + vec2 + ")";
+			return "min3(" + vec1 + ", " + vec2 + ")";
 		}
 		else if (op == "MAXIMUM") {
-			return "max(" + vec1 + ", " + vec2 + ")";
+			return "max3(" + vec1 + ", " + vec2 + ")";
 		}
 		else if (op == "FLOOR") {
-			return "floor(" + vec1 + ")";
+			return "floor3(" + vec1 + ")";
 		}
 		else if (op == "CEIL") {
-			return "ceil(" + vec1 + ")";
+			return "ceil3(" + vec1 + ")";
 		}
 		else if (op == "FRACTION") {
-			return "frac(" + vec1 + ")";
+			return "frac3(" + vec1 + ")";
 		}
 		else if (op == "MODULO") {
-			return "mod(" + vec1 + ", " + vec2 + ")";
+			return "(" + vec1 + " % " + vec2 + ")";
 		}
 		else if(op == "SNAP") {
-			return "(floor(" + vec1 + " / " + vec2 + ") * " + vec2 + ")";
+			return "(floor3(" + vec1 + " / " + vec2 + ") * " + vec2 + ")";
 		}
 		else if (op == "SINE") {
 			return "sin(" + vec1 + ")";
@@ -1257,7 +1257,7 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 		node_shader_add_texture(parser_material_kong, "texuvmap", "_texuvmap");
 		// let use_pixel_size: bool = node.buttons[0].default_value == "true";
 		// let pixel_size: f32 = parse_value_input(node.inputs[0]);
-		return "sample_lod(texuvmap, tex_coord, 0.0).r";
+		return "sample_lod(texuvmap, texuvmap_sampler, tex_coord, 0.0).r";
 	}
 	else if (node.type == "CAMERA") {
 		if (socket == node.outputs[1]) { // View Z Depth
@@ -1275,30 +1275,30 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 		let l: any = node.buttons[0].default_value;
 		if (socket == node.outputs[1]) { // Opac
 			node_shader_add_texture(parser_material_kong, "texpaint" + l, "_texpaint" + l);
-			return "sample(texpaint" + l + ", tex_coord).a";
+			return "sample(texpaint" + l + ", texpaint" + l + "_sampler, tex_coord).a";
 		}
 		else if (socket == node.outputs[2]) { // Occ
 			node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
-			return "sample(texpaint_pack" + l + ", tex_coord).r";
+			return "sample(texpaint_pack" + l + ", texpaint_pack" + l + "_sampler, tex_coord).r";
 		}
 		else if (socket == node.outputs[3]) { // Rough
 			node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
-			return "sample(texpaint_pack" + l + ", tex_coord).g";
+			return "sample(texpaint_pack" + l + ", texpaint_pack" + l + "_sampler, tex_coord).g";
 		}
 		else if (socket == node.outputs[4]) { // Metal
 			node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
-			return "sample(texpaint_pack" + l + ", tex_coord).b";
+			return "sample(texpaint_pack" + l + ", texpaint_pack" + l + "_sampler, tex_coord).b";
 		}
 		else if (socket == node.outputs[7]) { // Height
 			node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
-			return "sample(texpaint_pack" + l + ", tex_coord).a";
+			return "sample(texpaint_pack" + l + ", texpaint_pack" + l + "_sampler, tex_coord).a";
 		}
 	}
 	else if (node.type == "LAYER_MASK") {
 		if (socket == node.outputs[0]) {
 			let l: any = node.buttons[0].default_value;
 			node_shader_add_texture(parser_material_kong, "texpaint" + l, "_texpaint" + l);
-			return "sample(texpaint" + l + ", tex_coord).r";
+			return "sample(texpaint" + l + ", texpaint" + l + "_sampler, tex_coord).r";
 		}
 	}
 	else if (node.type == "MATERIAL") {
@@ -1489,10 +1489,10 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 		coloring = string_replace_all(coloring, " ", "_");
 		let res: string = "";
 		if (coloring == "INTENSITY") {
-			res = "tex_voronoi(" + co + " * " + scale + ", texturePass(snoise256)).a";
+			res = "tex_voronoi(" + co + " * " + scale + ").a";
 		}
 		else { // Cells
-			res = "tex_voronoi(" + co + " * " + scale + ", texturePass(snoise256)).r";
+			res = "tex_voronoi(" + co + " * " + scale + ").r";
 		}
 		return res;
 	}
@@ -1513,7 +1513,7 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 		let tex_name: string = "texbake_" + parser_material_node_name(node);
 		node_shader_add_texture(parser_material_kong, "" + tex_name, "_" + tex_name);
 		let store: string = parser_material_store_var_name(node);
-		parser_material_write(parser_material_kong, "var " + store + "_res: float = sample(" + tex_name + ", tex_coord).r;");
+		parser_material_write(parser_material_kong, "var " + store + "_res: float = sample(" + tex_name + ", " + tex_name + "_sampler, tex_coord).r;");
 		return store + "_res";
 	}
 	else if (node.type == "NORMAL") {
@@ -1892,18 +1892,18 @@ function parser_material_texture_store(node: ui_node_t, tex: bind_tex_t, tex_nam
 
 	if (parser_material_triplanar) {
 		parser_material_write(parser_material_kong, "var " + tex_store + ": float4 = float4(0.0, 0.0, 0.0, 0.0);");
-		parser_material_write(parser_material_kong, "if (tex_coord_blend.x > 0) {" + tex_store + " += sample(" + tex_name + ", " + uv_name + ".xy) * tex_coord_blend.x; }");
-		parser_material_write(parser_material_kong, "if (tex_coord_blend.y > 0) {" + tex_store + " += sample(" + tex_name + ", " + uv_name + "1.xy) * tex_coord_blend.y; }");
-		parser_material_write(parser_material_kong, "if (tex_coord_blend.z > 0) {" + tex_store + " += sample(" + tex_name + ", " + uv_name + "2.xy) * tex_coord_blend.z; }");
+		parser_material_write(parser_material_kong, "if (tex_coord_blend.x > 0) {" + tex_store + " += sample(" + tex_name + ", " + tex_name + "_sampler, " + uv_name + ".xy) * tex_coord_blend.x; }");
+		parser_material_write(parser_material_kong, "if (tex_coord_blend.y > 0) {" + tex_store + " += sample(" + tex_name + ", " + tex_name + "_sampler, " + uv_name + "1.xy) * tex_coord_blend.y; }");
+		parser_material_write(parser_material_kong, "if (tex_coord_blend.z > 0) {" + tex_store + " += sample(" + tex_name + ", " + tex_name + "_sampler, " + uv_name + "2.xy) * tex_coord_blend.z; }");
 	}
 	else {
 		if (parser_material_is_frag) {
-			map_set(parser_material_texture_map, tex_store, "sample(" + tex_name + ", " + uv_name + ".xy)");
-			parser_material_write(parser_material_kong, "var " + tex_store + ": float4 = sample(" + tex_name + ", " + uv_name + ".xy);");
+			map_set(parser_material_texture_map, tex_store, "sample(" + tex_name + ", " + tex_name + "_sampler, " + uv_name + ".xy)");
+			parser_material_write(parser_material_kong, "var " + tex_store + ": float4 = sample(" + tex_name + ", " + tex_name + "_sampler, " + uv_name + ".xy);");
 		}
 		else {
-			map_set(parser_material_texture_map, tex_store, "sample_lod(" + tex_name + ", " + uv_name + ".xy, 0.0)");
-			parser_material_write(parser_material_kong, "var " + tex_store + ": float4 = sample_lod(" + tex_name + ", " + uv_name + ".xy, 0.0);");
+			map_set(parser_material_texture_map, tex_store, "sample_lod(" + tex_name + ", " + tex_name + "_sampler, " + uv_name + ".xy, 0.0)");
+			parser_material_write(parser_material_kong, "var " + tex_store + ": float4 = sample_lod(" + tex_name + ", " + tex_name + "_sampler, " + uv_name + ".xy, 0.0);");
 		}
 		if (!ends_with(tex.file, ".jpg")) { // Pre-mult alpha
 			parser_material_write(parser_material_kong, tex_store + ".rgb *= " + tex_store + ".a;");
@@ -1913,10 +1913,10 @@ function parser_material_texture_store(node: ui_node_t, tex: bind_tex_t, tex_nam
 	if (parser_material_transform_color_space) {
 		// Base color socket auto-converts from sRGB to linear
 		if (color_space == color_space_t.LINEAR && parser_material_parsing_basecolor) { // Linear to sRGB
-			parser_material_write(parser_material_kong, tex_store + ".rgb = pow(" + tex_store + ".rgb, float3(2.2, 2.2, 2.2));");
+			parser_material_write(parser_material_kong, tex_store + ".rgb = pow3(" + tex_store + ".rgb, float3(2.2, 2.2, 2.2));");
 		}
 		else if (color_space == color_space_t.SRGB && !parser_material_parsing_basecolor) { // sRGB to linear
-			parser_material_write(parser_material_kong, tex_store + ".rgb = pow(" + tex_store + ".rgb, float3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));");
+			parser_material_write(parser_material_kong, tex_store + ".rgb = pow3(" + tex_store + ".rgb, float3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));");
 		}
 		else if (color_space == color_space_t.DIRECTX_NORMAL_MAP) { // DirectX normal map to OpenGL normal map
 			parser_material_write(parser_material_kong, tex_store + ".y = 1.0 - " + tex_store + ".y;");
