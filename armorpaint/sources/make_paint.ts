@@ -283,9 +283,10 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		context_raw.tool == workspace_tool_t.PARTICLE ||
 		decal)) {
 		node_shader_add_texture(kong, "texbrushstencil", "_texbrushstencil");
+		node_shader_add_constant(kong, "texbrushstencil_size: float2", "_size(texbrushstencil)");
 		node_shader_add_constant(kong, "stencil_transform: float4", "_stencil_transform");
 		node_shader_write_frag(kong, "var stencil_uv: float2 = float2((sp.xy - constants.stencil_transform.xy) / constants.stencil_transform.z * float2(constants.aspect_ratio, 1.0));");
-		node_shader_write_frag(kong, "var stencil_size: float2 = float2(textureSize(texbrushstencil, 0));");
+		node_shader_write_frag(kong, "var stencil_size: float2 = constants.texbrushstencil_size;");
 		node_shader_write_frag(kong, "var stencil_ratio: float = stencil_size.y / stencil_size.x;");
 		node_shader_write_frag(kong, "stencil_uv -= float2(0.5 / stencil_ratio, 0.5);");
 		node_shader_write_frag(kong, "stencil_uv = float2(stencil_uv.x * cos(constants.stencil_transform.w) - stencil_uv.y * sin(constants.stencil_transform.w),\

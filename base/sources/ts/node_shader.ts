@@ -87,15 +87,6 @@ function node_shader_add_constant(raw: node_shader_t, s: string, link: string = 
 		if (utype == "float4x4") utype = "mat4";
 		////
 
-		// if (ar[0] == "float" && string_index_of(ar[1], "[") >= 0) {
-		// 	ar[0] = "floats";
-		// 	ar[1] = string_split(ar[1], "[")[0];
-		// }
-		// else if (ar[0] == "vec4" && string_index_of(ar[1], "[") >= 0) {
-		// 	ar[0] = "floats";
-		// 	ar[1] = string_split(ar[1], "[")[0];
-		// }
-
 		array_push(raw.constants, s);
 		node_shader_context_add_constant(raw.context, utype, uname, link);
 	}

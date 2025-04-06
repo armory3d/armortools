@@ -655,11 +655,12 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		let steps: string = "int(" + strength + " * 10 + 1)";
 		let tex_name: string = "texblur_" + parser_material_node_name(node);
 		node_shader_add_texture(parser_material_kong, "" + tex_name, "_" + tex_name);
+		node_shader_add_constant(parser_material_kong, "" + tex_name + "_size: float2", "_size(" + tex_name + ")");
 		let store: string = parser_material_store_var_name(node);
 		parser_material_write(parser_material_kong, "var " + store + "_res: float3 = float3(0.0, 0.0, 0.0);");
 		parser_material_write(parser_material_kong, "for (var i: int = -" + steps + "; i <= " + steps + "; i += 1) {");
 		parser_material_write(parser_material_kong, "for (var j: int = -" + steps + "; j <= " + steps + "; j += 1) {");
-		parser_material_write(parser_material_kong, store + "_res += sample(" + tex_name + ", " + tex_name + "_sampler, tex_coord + float2(i, j) / float2(textureSize(" + tex_name + ", 0))).rgb;");
+		parser_material_write(parser_material_kong, store + "_res += sample(" + tex_name + ", " + tex_name + "_sampler, tex_coord + float2(i, j) / constants." + tex_name + "_size).rgb;");
 		parser_material_write(parser_material_kong, "}");
 		parser_material_write(parser_material_kong, "}");
 		parser_material_write(parser_material_kong, store + "_res /= (" + steps + " * 2 + 1) * (" + steps + " * 2 + 1);");
@@ -1881,7 +1882,8 @@ function parser_material_texture_store(node: ui_node_t, tex: bind_tex_t, tex_nam
 	let tex_store: string = parser_material_store_var_name(node);
 
 	if (parser_material_sample_keep_aspect) {
-		parser_material_write(parser_material_kong, "var " + tex_store + "_size: float2 = float2(textureSize(" + tex_name + ", 0));");
+		node_shader_add_constant(parser_material_kong, tex_name + "_size: float2", "_size(" + tex_name + ")");
+		parser_material_write(parser_material_kong, "var " + tex_store + "_size: float2 = constants." + tex_name + "_size;");
 		parser_material_write(parser_material_kong, "var " + tex_store + "_ax: float = " + tex_store + "_size.x / " + tex_store + "_size.y;");
 		parser_material_write(parser_material_kong, "var " + tex_store + "_ay: float = " + tex_store + "_size.y / " + tex_store + "_size.x;");
 		parser_material_write(parser_material_kong, "var " + tex_store + "_uv: float2 = ((" + uv_name + ".xy / " + parser_material_sample_uv_scale + " - float2(0.5, 0.5)) * float2(max(" + tex_store + "_ay, 1.0), max(" + tex_store + "_ax, 1.0))) + float2(0.5, 0.5);");

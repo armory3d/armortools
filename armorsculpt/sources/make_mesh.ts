@@ -40,7 +40,8 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	node_shader_add_constant(kong, "WVP: float4x4", "_world_view_proj_matrix");
 	let lid: i32 = project_layers[0].id;
 	node_shader_add_texture(kong, "texpaint_vert", "_texpaint_vert" + lid);
-	node_shader_write_vert(kong, "var meshpos: float3 = sample_lod(texpaint_vert, texpaint_vert_sampler, int2(gl_VertexID % textureSize(texpaint_vert, 0).x, gl_VertexID / textureSize(texpaint_vert, 0).y), 0).xyz;");
+	node_shader_add_constant(kong, "texpaint_vert_size: float2", "_size(texpaint_vert" + lid + ")");
+	node_shader_write_vert(kong, "var meshpos: float3 = sample_lod(texpaint_vert, texpaint_vert_sampler, int2(gl_VertexID % constants.texpaint_vert_size.x, gl_VertexID / constants.texpaint_vert_size.y), 0).xyz;");
 	// + input.pos.xyz * 0.000001
 	node_shader_write_vert(kong, "output.pos = constants.WVP * float4(meshpos.xyz, 1.0);");
 
@@ -54,9 +55,9 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	node_shader_write_attrib_vert(kong, "var base_vertex0: int = gl_VertexID - (gl_VertexID % 3);");
 	node_shader_write_attrib_vert(kong, "var base_vertex1: int = base_vertex0 + 1;");
 	node_shader_write_attrib_vert(kong, "var base_vertex2: int = base_vertex0 + 2;");
-	node_shader_write_attrib_vert(kong, "var meshpos0: float3 = sample_lod(texpaint_vert, texpaint_vert_sampler, int2(base_vertex0 % textureSize(texpaint_vert, 0).x, base_vertex0 / textureSize(texpaint_vert, 0).y), 0).xyz;");
-	node_shader_write_attrib_vert(kong, "var meshpos1: float3 = sample_lod(texpaint_vert, texpaint_vert_sampler, int2(base_vertex1 % textureSize(texpaint_vert, 0).x, base_vertex1 / textureSize(texpaint_vert, 0).y), 0).xyz;");
-	node_shader_write_attrib_vert(kong, "var meshpos2: float3 = sample_lod(texpaint_vert, texpaint_vert_sampler, int2(base_vertex2 % textureSize(texpaint_vert, 0).x, base_vertex2 / textureSize(texpaint_vert, 0).y), 0).xyz;");
+	node_shader_write_attrib_vert(kong, "var meshpos0: float3 = sample_lod(texpaint_vert, texpaint_vert_sampler, int2(base_vertex0 % constants.texpaint_vert_size.x, base_vertex0 / constants.texpaint_vert_size.y), 0).xyz;");
+	node_shader_write_attrib_vert(kong, "var meshpos1: float3 = sample_lod(texpaint_vert, texpaint_vert_sampler, int2(base_vertex1 % constants.texpaint_vert_size.x, base_vertex1 / constants.texpaint_vert_size.y), 0).xyz;");
+	node_shader_write_attrib_vert(kong, "var meshpos2: float3 = sample_lod(texpaint_vert, texpaint_vert_sampler, int2(base_vertex2 % constants.texpaint_vert_size.x, base_vertex2 / constants.texpaint_vert_size.y), 0).xyz;");
 	node_shader_write_attrib_vert(kong, "var meshnor: float3 = normalize(cross(meshpos2 - meshpos1, meshpos0 - meshpos1));");
 	node_shader_write_attrib_vert(kong, "output.wnormal = constants.N * meshnor;");
 	node_shader_write_attrib_frag(kong, "var n: float3 = normalize(input.wnormal);");

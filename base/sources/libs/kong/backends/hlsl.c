@@ -90,6 +90,7 @@ static char *function_string(name_id func) {
 }
 
 static void write_bytecode(char *hlsl, char *directory, const char *filename, const char *name, uint8_t *output, size_t output_size) {
+
 	char full_filename[512];
 
 	{
@@ -1387,6 +1388,38 @@ static void write_functions(char *hlsl, size_t *offset, shader_stage stage, func
 					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = max(_%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
 					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index);
 				}
+				else if (o->op_call.func == add_name("step3")) { ////
+					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = step(_%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index);
+				}
+				else if (o->op_call.func == add_name("pow3")) { ////
+					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = pow(_%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index);
+				}
+				else if (o->op_call.func == add_name("floor3")) { ////
+					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = floor(_%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index);
+				}
+				else if (o->op_call.func == add_name("ceil3")) { ////
+					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = ceil(_%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index);
+				}
+				else if (o->op_call.func == add_name("ddx2")) { ////
+					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = ddx(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index);
+				}
+				else if (o->op_call.func == add_name("ddy2")) { ////
+					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = ddx(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index);
+				}
+				else if (o->op_call.func == add_name("ddx3")) { ////
+					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = ddx(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index);
+				}
+				else if (o->op_call.func == add_name("ddy3")) { ////
+					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = ddx(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index);
+				}
 				else if (o->op_call.func == add_name("trace_ray")) {
 					check(o->op_call.parameters_size == 3, context, "trace_ray requires three parameters");
 					*offset += sprintf(&hlsl[*offset], "TraceRay(_%" PRIu64 ", RAY_FLAG_NONE, 0xFF, 0, 0, 0, _%" PRIu64 ", _%" PRIu64 ");\n",
@@ -1929,4 +1962,116 @@ void hlsl_export(char *directory, api_kind d3d, bool debug) {
 	if (d3d == API_DIRECT3D12) {
 		hlsl_export_all_ray_shaders(directory, debug);
 	}
+}
+
+static char *hlsl_export_vertex2(api_kind d3d, function *main, bool debug) {
+	char  *hlsl   = (char *)calloc(1024 * 1024, 1);
+	size_t offset = 0;
+
+	assert(main->parameters_size > 0);
+	type_id vertex_inputs[64];
+	for (size_t input_index = 0; input_index < main->parameters_size; ++input_index) {
+		vertex_inputs[input_index] = main->parameter_types[input_index].type;
+	}
+	type_id vertex_output = main->return_type.type;
+
+	debug_context context = {0};
+	check(main->parameters_size > 0, context, "vertex input missing");
+	check(vertex_output != NO_TYPE, context, "vertex output missing");
+
+	write_types(hlsl, &offset, SHADER_STAGE_VERTEX, vertex_inputs, main->parameters_size, vertex_output, main, NULL, 0);
+	write_globals(hlsl, &offset, main, NULL, 0);
+	write_functions(hlsl, &offset, SHADER_STAGE_VERTEX, main, NULL, 0);
+	return hlsl;
+}
+
+static char *hlsl_export_fragment2(api_kind d3d, function *main, bool debug) {
+	char  *hlsl   = (char *)calloc(1024 * 1024, 1);
+	size_t offset = 0;
+
+	assert(main->parameters_size > 0);
+	type_id pixel_input = main->parameter_types[0].type;
+
+	debug_context context = {0};
+	check(pixel_input != NO_TYPE, context, "fragment input missing");
+
+	write_types(hlsl, &offset, SHADER_STAGE_FRAGMENT, &pixel_input, 1, NO_TYPE, main, NULL, 0);
+	write_globals(hlsl, &offset, main, NULL, 0);
+	write_functions(hlsl, &offset, SHADER_STAGE_FRAGMENT, main, NULL, 0);
+	return hlsl;
+}
+
+void hlsl_export2(char **vs, char **fs, api_kind d3d, bool debug) {
+	static_array(function *, shaders, 256);
+
+	shaders vertex_shaders;
+	shaders fragment_shaders;
+
+	static_array_init(vertex_shaders);
+	static_array_init(fragment_shaders);
+
+	for (type_id i = 0; get_type(i) != NULL; ++i) {
+		type *t = get_type(i);
+		if (!t->built_in && has_attribute(&t->attributes, add_name("pipe"))) {
+			name_id vertex_shader_name        = NO_NAME;
+			name_id fragment_shader_name      = NO_NAME;
+
+			for (size_t j = 0; j < t->members.size; ++j) {
+				if (t->members.m[j].name == add_name("vertex")) {
+					vertex_shader_name = t->members.m[j].value.identifier;
+				}
+				else if (t->members.m[j].name == add_name("fragment")) {
+					fragment_shader_name = t->members.m[j].value.identifier;
+				}
+			}
+
+			debug_context context = {0};
+
+			function *vertex_shader        = NULL;
+			function *fragment_shader      = NULL;
+
+			for (function_id i = 0; get_function(i) != NULL; ++i) {
+				function *f = get_function(i);
+				if (vertex_shader_name != NO_NAME && f->name == vertex_shader_name) {
+					vertex_shader = f;
+					static_array_push(vertex_shaders, f);
+				}
+				if (f->name == fragment_shader_name) {
+					fragment_shader = f;
+					static_array_push(fragment_shaders, f);
+				}
+			}
+
+			global_array all_globals = {0};
+
+			if (vertex_shader != NULL) {
+				find_referenced_globals(vertex_shader, &all_globals);
+			}
+			if (fragment_shader != NULL) {
+				find_referenced_globals(fragment_shader, &all_globals);
+			}
+
+			for (size_t global_index = 0; global_index < all_globals.size; ++global_index) {
+				global *g = get_global(all_globals.globals[global_index]);
+				for (size_t set_index = 0; set_index < g->sets_count; ++set_index) {
+					bool found = false;
+
+					for (size_t all_sets_index = 0; all_sets_index < all_descriptor_sets_count; ++all_sets_index) {
+						if (all_descriptor_sets[all_sets_index] == g->sets[set_index]) {
+							found = true;
+							break;
+						}
+					}
+
+					if (!found) {
+						all_descriptor_sets[all_descriptor_sets_count] = g->sets[set_index];
+						all_descriptor_sets_count += 1;
+					}
+				}
+			}
+		}
+	}
+
+	*vs = hlsl_export_vertex2(d3d, vertex_shaders.values[0], debug);
+	*fs = hlsl_export_fragment2(d3d, fragment_shaders.values[0], debug);
 }

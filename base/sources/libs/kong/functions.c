@@ -390,6 +390,74 @@ void functions_init(void) {
 	}
 
 	{
+		function_id func = add_function(add_name("float2x2"));
+		function   *f    = get_function(func);
+		init_type_ref(&f->return_type, add_name("float2x2"));
+		f->return_type.type   = find_type_by_ref(&f->return_type);
+		f->parameter_names[0] = add_name("x");
+		init_type_ref(&f->parameter_types[0], add_name("float2"));
+		f->parameter_types[0].type = find_type_by_ref(&f->parameter_types[0]);
+
+		f->parameter_names[1] = add_name("y");
+		init_type_ref(&f->parameter_types[1], add_name("float2"));
+		f->parameter_types[1].type = find_type_by_ref(&f->parameter_types[1]);
+
+		f->parameters_size = 2;
+
+		f->block = NULL;
+	}
+
+	{
+		function_id func = add_function(add_name("float3x3"));
+		function   *f    = get_function(func);
+		init_type_ref(&f->return_type, add_name("float3x3"));
+		f->return_type.type = find_type_by_ref(&f->return_type);
+
+		f->parameter_names[0] = add_name("x");
+		init_type_ref(&f->parameter_types[0], add_name("float3"));
+		f->parameter_types[0].type = find_type_by_ref(&f->parameter_types[0]);
+
+		f->parameter_names[1] = add_name("y");
+		init_type_ref(&f->parameter_types[1], add_name("float3"));
+		f->parameter_types[1].type = find_type_by_ref(&f->parameter_types[1]);
+
+		f->parameter_names[2] = add_name("z");
+		init_type_ref(&f->parameter_types[2], add_name("float3"));
+		f->parameter_types[2].type = find_type_by_ref(&f->parameter_types[2]);
+
+		f->parameters_size = 3;
+
+		f->block = NULL;
+	}
+
+	{
+		function_id func = add_function(add_name("float4x4"));
+		function   *f    = get_function(func);
+		init_type_ref(&f->return_type, add_name("float4x4"));
+		f->return_type.type = find_type_by_ref(&f->return_type);
+
+		f->parameter_names[0] = add_name("x");
+		init_type_ref(&f->parameter_types[0], add_name("float4"));
+		f->parameter_types[0].type = find_type_by_ref(&f->parameter_types[0]);
+
+		f->parameter_names[1] = add_name("y");
+		init_type_ref(&f->parameter_types[1], add_name("float4"));
+		f->parameter_types[1].type = find_type_by_ref(&f->parameter_types[1]);
+
+		f->parameter_names[2] = add_name("z");
+		init_type_ref(&f->parameter_types[2], add_name("float4"));
+		f->parameter_types[2].type = find_type_by_ref(&f->parameter_types[2]);
+
+		f->parameter_names[3] = add_name("w");
+		init_type_ref(&f->parameter_types[3], add_name("float4"));
+		f->parameter_types[3].type = find_type_by_ref(&f->parameter_types[3]);
+
+		f->parameters_size = 4;
+
+		f->block = NULL;
+	}
+
+	{
 		function_id func = add_function(add_name("int"));
 		function   *f    = get_function(func);
 		init_type_ref(&f->return_type, add_name("int"));
@@ -703,8 +771,6 @@ void functions_init(void) {
 	add_func_int("instance_id");
 
 	add_func_float_float_float_float("lerp");
-	add_func_float3_float3_float3_float("lerp3"); ////
-	add_func_float4_float4_float4_float("lerp4"); ////
 	add_func_float3("world_ray_origin");
 	add_func_float3("world_ray_direction");
 	add_func_float("ray_length");
@@ -720,23 +786,18 @@ void functions_init(void) {
 	add_func_uint3("ray_index");
 	add_func_float3("ray_dimensions");
 	add_func_float_float("frac");
-	add_func_float3_float3("frac3"); ////
 	add_func_float3x3("object_to_world3x3");
 	add_func_float3_float3_float3("reflect");
 	add_func_uint("primitive_index");
 	add_func_float_float("abs");
-	add_func_float3_float3("abs3"); ////
 	add_func_float_float_float("floor");
 	add_func_float_float_float("ceil");
 	add_func_float_float_float("round");
 	add_func_float_float_float("sqrt");
 	add_func_float_float_float("rsqrt");
 	add_func_float_float_float("min");
-	add_func_float3_float3_float3("min3"); ////
 	add_func_float_float_float("max");
-	add_func_float3_float3_float3("max3"); ////
 	add_func_float_float_float_float("clamp");
-	add_func_float3_float3_float_float("clamp3"); ////
 	add_func_float_float_float("step");
 	add_func_float_float_float("smoothstep");
 	add_func_float_float_float("pow");
@@ -744,6 +805,23 @@ void functions_init(void) {
 	add_func_float3_float3_float3("cross");
 	add_func_float3_float3("saturate3");
 	add_func_float_float("saturate");
+	add_func_float_float("ddx");
+	add_func_float_float("ddy");
+	add_func_float_float("ddx2"); ////
+	add_func_float_float("ddy2"); ////
+	add_func_float_float("ddx3"); ////
+	add_func_float_float("ddy3"); ////
+	add_func_float3_float3_float_float("clamp3"); ////
+	add_func_float3_float3_float3("min3"); ////
+	add_func_float3_float3_float3("max3"); ////
+	add_func_float3_float3_float3("step3"); ////
+	add_func_float3_float3_float3("pow3"); ////
+	add_func_float3_float3_float3("floor3"); ////
+	add_func_float3_float3_float3("ceil3"); ////
+	add_func_float3_float3("abs3"); ////
+	add_func_float3_float3("frac3"); ////
+	add_func_float3_float3_float3_float("lerp3"); ////
+	add_func_float4_float4_float4_float("lerp4"); ////
 
 	add_func_void_uint_uint("set_mesh_output_counts");
 
