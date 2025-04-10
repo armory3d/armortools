@@ -9,7 +9,6 @@ project.add_project("../base");
 
 project.add_tsfiles("sources");
 project.add_tsfiles("sources/nodes");
-project.add_shaders("shaders/*.glsl");
 project.add_shaders("shaders/*.kong");
 project.add_assets("assets/*", { destination: "data/{name}" });
 project.add_assets("assets/export_presets/*", { destination: "data/export_presets/{name}" });

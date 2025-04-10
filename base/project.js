@@ -53,7 +53,6 @@ if (!flags.lite) {
 	project.add_tsfiles("sources/ts");
 	project.add_tsfiles("sources/ts/iron");
 	project.add_tsfiles("sources/ts/nodes");
-	project.add_shaders("shaders/*.glsl");
 	project.add_shaders("shaders/*.kong");
 	project.add_shaders("shaders/draw/*.kong");
 	project.add_assets("assets/*", { destination: "data/{name}" });

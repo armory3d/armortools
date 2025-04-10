@@ -133,7 +133,6 @@ function shader_context_compile(raw: shader_context_t): shader_context_t {
 
 	// Shaders
 	if (raw.shader_from_source) {
-		raw._.pipe_state.kong = true;
 		raw._.pipe_state.vertex_shader = gpu_create_shader_from_source(raw.vertex_shader, shader_type_t.VERTEX);
 		raw._.pipe_state.fragment_shader = gpu_create_shader_from_source(raw.fragment_shader, shader_type_t.FRAGMENT);
 
@@ -143,13 +142,6 @@ function shader_context_compile(raw: shader_context_t): shader_context_t {
 		}
 	}
 	else {
-
-		if (starts_with(raw.fragment_shader, "_")) {
-			raw.fragment_shader = substring(raw.fragment_shader, 1, raw.fragment_shader.length);
-			raw.vertex_shader = substring(raw.vertex_shader, 1, raw.vertex_shader.length);
-			raw._.pipe_state.kong = true;
-		}
-
 		///if arm_embed
 		raw._.pipe_state.fragment_shader = sys_get_shader(raw.fragment_shader);
 		raw._.pipe_state.vertex_shader = sys_get_shader(raw.vertex_shader);
@@ -378,19 +370,19 @@ function shader_context_get_tex_format(s: string): tex_format_t {
 
 function shader_context_add_const(raw: shader_context_t, c: shader_const_t, offset: i32) {
 	let cl: iron_gpu_constant_location_t = gpu_get_constant_location(raw._.pipe_state, c.name);
-	if (raw._.pipe_state.kong) {
-		let ptr: gpu_constant_location_impl_t = ADDRESS(cl.impl);
-		ptr.vertexOffset = offset;
-		ptr.fragmentOffset = offset;
-	}
+
+	let ptr: gpu_constant_location_impl_t = ADDRESS(cl.impl);
+	ptr.vertexOffset = offset;
+	ptr.fragmentOffset = offset;
+
 	array_push(raw._.constants, cl);
 }
 
 function shader_context_add_tex(raw: shader_context_t, tu: tex_unit_t, i: i32) {
 	let unit: iron_gpu_texture_unit_t = gpu_get_texture_unit(raw._.pipe_state, tu.name);
-	if (raw._.pipe_state.kong) {
-		ARRAY_ACCESS(unit.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = i;
-	}
+
+	ARRAY_ACCESS(unit.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = i;
+
 	array_push(raw._.tex_units, unit);
 }
 

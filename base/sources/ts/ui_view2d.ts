@@ -43,7 +43,6 @@ function ui_view2d_init() {
 	ui_view2d_pipe.blend_source = blend_factor_t.BLEND_ONE;
 	ui_view2d_pipe.blend_destination = blend_factor_t.BLEND_ZERO;
 	ARRAY_ACCESS(ui_view2d_pipe.color_write_mask_alpha, 0) = false;
-	ui_view2d_pipe.kong = true;
 	gpu_compile_pipeline(ui_view2d_pipe);
 	pipes_offset = 0;
 	ui_view2d_channel_loc = pipes_get_constant_location(ui_view2d_pipe, "channel", "int");

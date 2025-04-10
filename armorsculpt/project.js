@@ -9,10 +9,10 @@ project.add_project("../base");
 
 project.add_tsfiles("../armorpaint/sources");
 project.add_tsfiles("../armorpaint/sources/nodes");
-project.add_shaders("../armorpaint/shaders/*.glsl");
+project.add_shaders("../armorpaint/shaders/*.kong");
 project.add_tsfiles("sources");
 project.add_tsfiles("sources/nodes");
-project.add_shaders("shaders/*.glsl");
+project.add_shaders("shaders/*.kong");
 project.add_assets("assets/*", { destination: "data/{name}" });
 project.add_assets("assets/keymap_presets/*", { destination: "data/keymap_presets/{name}" });
 project.add_assets("assets/licenses/**", { destination: "data/licenses/{name}" });

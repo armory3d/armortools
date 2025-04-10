@@ -121,7 +121,6 @@ function util_uv_cache_dilate_map() {
 		util_uv_pipe_dilate.depth_write = false;
 		util_uv_pipe_dilate.depth_mode = compare_mode_t.ALWAYS;
 		ARRAY_ACCESS(util_uv_pipe_dilate.color_attachment, 0) = tex_format_t.R8;
-		util_uv_pipe_dilate.kong = true;
 		gpu_compile_pipeline(util_uv_pipe_dilate);
 		// dilate_tex_unpack = getConstantLocation(pipeDilate, "tex_unpack");
 	}

@@ -154,8 +154,6 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_ver
 		image_pipeline.alpha_blend_source = IRON_GPU_BLEND_ONE;
 		image_pipeline.alpha_blend_destination = IRON_GPU_BLEND_INV_SOURCE_ALPHA;
 
-		image_pipeline.kong = true;
-
 		iron_gpu_pipeline_compile(&image_pipeline);
 
 		image_tex_unit = iron_gpu_pipeline_get_texture_unit(&image_pipeline, "tex");
@@ -199,8 +197,6 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_ver
 		colored_pipeline.blend_destination = IRON_GPU_BLEND_INV_SOURCE_ALPHA;
 		colored_pipeline.alpha_blend_source = IRON_GPU_BLEND_ONE;
 		colored_pipeline.alpha_blend_destination = IRON_GPU_BLEND_INV_SOURCE_ALPHA;
-
-		colored_pipeline.kong = true;
 
 		iron_gpu_pipeline_compile(&colored_pipeline);
 
@@ -256,8 +252,6 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_ver
 		text_pipeline.alpha_blend_source = IRON_GPU_BLEND_SOURCE_ALPHA;
 		text_pipeline.alpha_blend_destination = IRON_GPU_BLEND_INV_SOURCE_ALPHA;
 
-		text_pipeline.kong = true;
-
 		iron_gpu_pipeline_compile(&text_pipeline);
 
 		text_tex_unit = iron_gpu_pipeline_get_texture_unit(&text_pipeline, "tex");
@@ -275,8 +269,6 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_ver
 		text_pipeline_rt.blend_destination = IRON_GPU_BLEND_INV_SOURCE_ALPHA;
 		text_pipeline_rt.alpha_blend_source = IRON_GPU_BLEND_ONE;
 		text_pipeline_rt.alpha_blend_destination = IRON_GPU_BLEND_INV_SOURCE_ALPHA;
-
-		text_pipeline_rt.kong = true;
 
 		iron_gpu_pipeline_compile(&text_pipeline_rt);
 

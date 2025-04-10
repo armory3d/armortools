@@ -21,7 +21,6 @@ function import_envmap_run(path: string, image: iron_gpu_texture_t) {
 		import_envmap_pipeline.color_attachment_count = 1;
 		ARRAY_ACCESS(import_envmap_pipeline.color_attachment, 0) = tex_format_t.RGBA128;
 
-		import_envmap_pipeline.kong = true;
 		gpu_compile_pipeline(import_envmap_pipeline);
 
 		import_envmap_params_loc = gpu_get_constant_location(import_envmap_pipeline, "params");

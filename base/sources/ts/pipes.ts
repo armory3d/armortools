@@ -63,7 +63,6 @@ function _pipes_make_merge(red: bool, green: bool, blue: bool, alpha: bool): iro
 	ARRAY_ACCESS(pipe.color_write_mask_green, 0) = green;
 	ARRAY_ACCESS(pipe.color_write_mask_blue, 0) = blue;
 	ARRAY_ACCESS(pipe.color_write_mask_alpha, 0) = alpha;
-	pipe.kong = true;
 	gpu_compile_pipeline(pipe);
 	return pipe;
 }
@@ -97,7 +96,6 @@ function pipes_init() {
 		gpu_vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
 		gpu_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
 		pipes_copy.input_layout = vs;
-		pipes_copy.kong = true;
 		gpu_compile_pipeline(pipes_copy);
 	}
 
@@ -110,7 +108,6 @@ function pipes_init() {
 		gpu_vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
 		gpu_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
 		pipes_copy_bgra.input_layout = vs;
-		pipes_copy_bgra.kong = true;
 		gpu_compile_pipeline(pipes_copy_bgra);
 	}
 
@@ -125,7 +122,6 @@ function pipes_init() {
 		pipes_copy8.input_layout = vs;
 		pipes_copy8.color_attachment_count = 1;
 		ARRAY_ACCESS(pipes_copy8.color_attachment, 0) = tex_format_t.R8;
-		pipes_copy8.kong = true;
 		gpu_compile_pipeline(pipes_copy8);
 	}
 
@@ -140,7 +136,6 @@ function pipes_init() {
 		pipes_copy128.input_layout = vs;
 		pipes_copy128.color_attachment_count = 1;
 		ARRAY_ACCESS(pipes_copy128.color_attachment, 0) = tex_format_t.RGBA128;
-		pipes_copy128.kong = true;
 		gpu_compile_pipeline(pipes_copy128);
 	}
 
@@ -156,7 +151,6 @@ function pipes_init() {
 		pipes_invert8.input_layout = vs;
 		pipes_invert8.color_attachment_count = 1;
 		ARRAY_ACCESS(pipes_invert8.color_attachment, 0) = tex_format_t.R8;
-		pipes_invert8.kong = true;
 		gpu_compile_pipeline(pipes_invert8);
 	}
 
@@ -167,7 +161,6 @@ function pipes_init() {
 		let vs: iron_gpu_vertex_structure_t = gpu_vertex_struct_create();
 		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
 		pipes_apply_mask.input_layout = vs;
-		pipes_apply_mask.kong = true;
 		gpu_compile_pipeline(pipes_apply_mask);
 		pipes_tex0_mask = gpu_get_texture_unit(pipes_apply_mask, "tex0");
 		ARRAY_ACCESS(pipes_tex0_mask.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = 0;
@@ -182,7 +175,6 @@ function pipes_init() {
 		let vs: iron_gpu_vertex_structure_t = gpu_vertex_struct_create();
 		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
 		pipes_merge_mask.input_layout = vs;
-		pipes_merge_mask.kong = true;
 		gpu_compile_pipeline(pipes_merge_mask);
 		pipes_tex0_merge_mask = gpu_get_texture_unit(pipes_merge_mask, "tex0");
 		ARRAY_ACCESS(pipes_tex0_merge_mask.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = 0;
@@ -200,7 +192,6 @@ function pipes_init() {
 		let vs: iron_gpu_vertex_structure_t = gpu_vertex_struct_create();
 		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
 		pipes_colorid_to_mask.input_layout = vs;
-		pipes_colorid_to_mask.kong = true;
 		gpu_compile_pipeline(pipes_colorid_to_mask);
 		pipes_texpaint_colorid = gpu_get_texture_unit(pipes_colorid_to_mask, "texpaint_colorid");
 		ARRAY_ACCESS(pipes_texpaint_colorid.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = 0;
@@ -222,7 +213,6 @@ function pipes_init() {
 		ARRAY_ACCESS(pipes_copy_r.color_write_mask_green, 0) = false;
 		ARRAY_ACCESS(pipes_copy_r.color_write_mask_blue, 0) = false;
 		ARRAY_ACCESS(pipes_copy_r.color_write_mask_alpha, 0) = false;
-		pipes_copy_r.kong = true;
 		gpu_compile_pipeline(pipes_copy_r);
 	}
 
@@ -238,7 +228,6 @@ function pipes_init() {
 		ARRAY_ACCESS(pipes_copy_g.color_write_mask_red, 0) = false;
 		ARRAY_ACCESS(pipes_copy_g.color_write_mask_blue, 0) = false;
 		ARRAY_ACCESS(pipes_copy_g.color_write_mask_alpha, 0) = false;
-		pipes_copy_g.kong = true;
 		gpu_compile_pipeline(pipes_copy_g);
 	}
 
@@ -249,7 +238,6 @@ function pipes_init() {
 		let vs: iron_gpu_vertex_structure_t = gpu_vertex_struct_create();
 		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
 		pipes_inpaint_preview.input_layout = vs;
-		pipes_inpaint_preview.kong = true;
 		gpu_compile_pipeline(pipes_inpaint_preview);
 		pipes_tex0_inpaint_preview = gpu_get_texture_unit(pipes_inpaint_preview, "tex0");
 		ARRAY_ACCESS(pipes_tex0_inpaint_preview.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = 0;
@@ -267,7 +255,6 @@ function pipes_init() {
 		ARRAY_ACCESS(pipes_copy_a.color_write_mask_red, 0) = false;
 		ARRAY_ACCESS(pipes_copy_a.color_write_mask_green, 0) = false;
 		ARRAY_ACCESS(pipes_copy_a.color_write_mask_blue, 0) = false;
-		pipes_copy_a.kong = true;
 		gpu_compile_pipeline(pipes_copy_a);
 		pipes_copy_a_tex = gpu_get_texture_unit(pipes_copy_a, "tex");
 		ARRAY_ACCESS(pipes_copy_a_tex.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = 0;
@@ -284,7 +271,6 @@ function pipes_init() {
 		gpu_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
 		pipes_copy_rgb.input_layout = vs;
 		ARRAY_ACCESS(pipes_copy_rgb.color_write_mask_alpha, 0) = false;
-		pipes_copy_rgb.kong = true;
 		gpu_compile_pipeline(pipes_copy_rgb);
 	}
 
@@ -301,7 +287,6 @@ function pipes_init() {
 		pipes_cursor.blend_destination = blend_factor_t.INV_SOURCE_ALPHA;
 		pipes_cursor.depth_write = false;
 		pipes_cursor.depth_mode = compare_mode_t.ALWAYS;
-		pipes_cursor.kong = true;
 		gpu_compile_pipeline(pipes_cursor);
 		pipes_offset = 0;
 		pipes_cursor_vp = pipes_get_constant_location(pipes_cursor, "VP", "mat4");
