@@ -995,59 +995,8 @@ void iron_gpu_pipeline_destroy(iron_gpu_pipeline_t *pipe) {
 	}
 }
 
-static ShaderConstant findConstant(iron_gpu_shader_t *shader, const char *name) {
-	if (shader != NULL) {
-		for (int i = 0; i < MAX_SHADER_THING; ++i) {
-			if (strcmp(shader->impl.constants[i].name, name) == 0) {
-				return shader->impl.constants[i];
-			}
-		}
-	}
-
-	ShaderConstant constant;
-	constant.name[0] = 0;
-	constant.offset = -1;
-	return constant;
-}
-
-static ShaderTexture findTexture(iron_gpu_shader_t *shader, const char *name) {
-	for (int i = 0; i < MAX_SHADER_THING; ++i) {
-		if (strcmp(shader->impl.textures[i].name, name) == 0) {
-			return shader->impl.textures[i];
-		}
-	}
-
-	ShaderTexture texture;
-	texture.name[0] = 0;
-	texture.texture = -1;
-	return texture;
-}
-
-static ShaderAttribute findAttribute(iron_gpu_shader_t *shader, const char *name) {
-	for (int i = 0; i < MAX_SHADER_THING; ++i) {
-		if (strcmp(shader->impl.attributes[i].name, name) == 0) {
-			return shader->impl.attributes[i];
-		}
-	}
-
-	ShaderAttribute attribute;
-	attribute.name[0] = 0;
-	attribute.attribute = -1;
-	return attribute;
-}
-
 iron_gpu_constant_location_t iron_gpu_pipeline_get_constant_location(struct iron_gpu_pipeline *pipe, const char *name) {
 	iron_gpu_constant_location_t location;
-
-	{
-		ShaderConstant constant = findConstant(pipe->vertex_shader, name);
-		location.impl.vertexOffset = constant.offset;
-	}
-	{
-		ShaderConstant constant = findConstant(pipe->fragment_shader, name);
-		location.impl.fragmentOffset = constant.offset;
-	}
-
 	return location;
 }
 
@@ -1055,15 +1004,6 @@ iron_gpu_texture_unit_t iron_gpu_pipeline_get_texture_unit(iron_gpu_pipeline_t *
 	iron_gpu_texture_unit_t unit;
 	for (int i = 0; i < IRON_GPU_SHADER_TYPE_COUNT; ++i) {
 		unit.stages[i] = -1;
-	}
-
-	ShaderTexture vertexTexture = findTexture(pipe->vertex_shader, name);
-	if (vertexTexture.texture != -1) {
-		unit.stages[IRON_GPU_SHADER_TYPE_VERTEX] = vertexTexture.texture;
-	}
-	else {
-		ShaderTexture fragmentTexture = findTexture(pipe->fragment_shader, name);
-		unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT] = fragmentTexture.texture;
 	}
 	return unit;
 }
@@ -1092,12 +1032,7 @@ void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipe) {
 
 	for (int i = 0; i < pipe->input_layout->size; ++i) {
 		vertexDesc[i].SemanticName = "TEXCOORD";
-		vertexDesc[i].SemanticIndex = findAttribute(pipe->vertex_shader, pipe->input_layout->elements[i].name).attribute;
-
-		if (pipe->kong) {
-			vertexDesc[i].SemanticIndex = i;
-		}
-
+		vertexDesc[i].SemanticIndex = i;
 		vertexDesc[i].InputSlot = 0;
 		vertexDesc[i].AlignedByteOffset = (i == 0) ? 0 : D3D12_APPEND_ALIGNED_ELEMENT;
 		vertexDesc[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
@@ -1250,55 +1185,10 @@ void iron_gpu_shader_init(iron_gpu_shader_t *shader, const void *_data, size_t l
 	memset(shader->impl.attributes, 0, sizeof(shader->impl.attributes));
 	memset(shader->impl.textures, 0, sizeof(shader->impl.textures));
 
-	unsigned index = 0;
 	uint8_t *data = (uint8_t *)_data;
-
-	int attributesCount = data[index++];
-	for (int i = 0; i < attributesCount; ++i) {
-		char name[64];
-		for (unsigned i2 = 0; i2 < 63; ++i2) {
-			name[i2] = data[index++];
-			if (name[i2] == 0)
-				break;
-		}
-		strcpy(shader->impl.attributes[i].name, name);
-		shader->impl.attributes[i].attribute = data[index++];
-	}
-
-	uint8_t texCount = data[index++];
-	for (unsigned i = 0; i < texCount; ++i) {
-		char name[64];
-		for (unsigned i2 = 0; i2 < 63; ++i2) {
-			name[i2] = data[index++];
-			if (name[i2] == 0)
-				break;
-		}
-		strcpy(shader->impl.textures[i].name, name);
-		shader->impl.textures[i].texture = data[index++];
-	}
-	shader->impl.texturesCount = texCount;
-
-	uint8_t constantCount = data[index++];
-	for (unsigned i = 0; i < constantCount; ++i) {
-		char name[64];
-		for (unsigned i2 = 0; i2 < 63; ++i2) {
-			name[i2] = data[index++];
-			if (name[i2] == 0)
-				break;
-		}
-		ShaderConstant constant;
-		memcpy(&constant.offset, &data[index], sizeof(constant.offset));
-		index += 4;
-		// memcpy(&constant.size, &data[index], sizeof(constant.size));
-		index += 4;
-		index += 2; // columns and rows
-		strcpy(constant.name, name);
-		shader->impl.constants[i] = constant;
-	}
-
-	shader->impl.length = (int)length - index;
+	shader->impl.length = (int)length;
 	shader->impl.data = (uint8_t *)malloc(shader->impl.length);
-	memcpy(shader->impl.data, &data[index], shader->impl.length);
+	memcpy(shader->impl.data, data, shader->impl.length);
 }
 
 void iron_gpu_shader_destroy(iron_gpu_shader_t *shader) {
@@ -2033,13 +1923,13 @@ void iron_gpu_index_buffer_init(iron_gpu_buffer_t *buffer, int count, bool gpuMe
 }
 
 void iron_gpu_index_buffer_destroy(iron_gpu_buffer_t *buffer) {
-	if (buffer->impl.index_buffer != NULL) {
-		buffer->impl.index_buffer->lpVtbl->Release(buffer->impl.index_buffer);
-		buffer->impl.index_buffer = NULL;
-	}
+	// if (buffer->impl.index_buffer != NULL) {
+	// 	buffer->impl.index_buffer->lpVtbl->Release(buffer->impl.index_buffer);
+	// 	buffer->impl.index_buffer = NULL;
+	// }
 
-	buffer->impl.upload_buffer->lpVtbl->Release(buffer->impl.upload_buffer);
-	buffer->impl.upload_buffer = NULL;
+	// buffer->impl.upload_buffer->lpVtbl->Release(buffer->impl.upload_buffer);
+	// buffer->impl.upload_buffer = NULL;
 }
 
 static int iron_gpu_internal_index_buffer_stride(iron_gpu_buffer_t *buffer) {

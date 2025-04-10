@@ -976,17 +976,6 @@ iron_gpu_shader_t *gpu_create_shader(buffer_t *data, i32 shader_type) {
 	return shader;
 }
 
-static void write_attrib(char *file, int *output_len, const char *attrib, int index) {
-	if (index > -1) {
-		strcpy(file + (*output_len), attrib);
-		(*output_len) += strlen(attrib);
-		file[(*output_len)] = 0;
-		(*output_len) += 1;
-		file[(*output_len)] = index;
-		(*output_len) += 1;
-	}
-}
-
 #include "../../sources/libs/kong/analyzer.h"
 #include "../../sources/libs/kong/compiler.h"
 #include "../../sources/libs/kong/disasm.h"
@@ -1058,114 +1047,10 @@ iron_gpu_shader_t *gpu_create_shader_from_source(string_t *source, iron_gpu_shad
 		return NULL;
 	}
 
-	ID3D11ShaderReflection *reflector = NULL;
-	D3DReflect(shader_buffer->lpVtbl->GetBufferPointer(shader_buffer), shader_buffer->lpVtbl->GetBufferSize(shader_buffer), &IID_ID3D11ShaderReflection, (void **)&reflector);
-
 	int size = shader_buffer->lpVtbl->GetBufferSize(shader_buffer);
-	char *file = malloc(size * 2);
-	int output_len = 0;
-
-	if (shader_type == IRON_GPU_SHADER_TYPE_VERTEX) {
-
-		bool has_col = strstr(temp_string_s, " col:") != NULL || strstr(temp_string_s, " col :") != NULL;
-		bool has_nor = strstr(temp_string_s, " nor:") != NULL || strstr(temp_string_s, " nor :") != NULL;
-		bool has_pos = strstr(temp_string_s, " pos:") != NULL || strstr(temp_string_s, " pos :") != NULL;
-		bool has_tex = strstr(temp_string_s, " tex:") != NULL || strstr(temp_string_s, " tex :") != NULL;
-
-		int icol = -1;
-		int inor = -1;
-		int ipos = -1;
-		int itex = -1;
-
-		int index = 0;
-		if (has_col) icol = index++;
-		if (has_nor) inor = index++;
-		if (has_pos) ipos = index++;
-		if (has_tex) itex = index++;
-
-		file[output_len] = (char)index;
-		output_len += 1;
-
-		write_attrib(file, &output_len, "col", icol);
-		write_attrib(file, &output_len, "nor", inor);
-		write_attrib(file, &output_len, "pos", ipos);
-		write_attrib(file, &output_len, "tex", itex);
-	}
-	else {
-		file[output_len] = 0;
-		output_len += 1;
-	}
-
-	D3D11_SHADER_DESC desc;
-	reflector->lpVtbl->GetDesc(reflector, &desc);
-
-	file[output_len] = desc.BoundResources;
-	output_len += 1;
-	for (int i = 0; i < desc.BoundResources; ++i) {
-		D3D11_SHADER_INPUT_BIND_DESC bindDesc;
-		reflector->lpVtbl->GetResourceBindingDesc(reflector, i, &bindDesc);
-		strcpy(file + output_len, bindDesc.Name);
-		output_len += strlen(bindDesc.Name);
-		file[output_len] = 0;
-		output_len += 1;
-		file[output_len] = bindDesc.BindPoint;
-		output_len += 1;
-	}
-
-	ID3D11ShaderReflectionConstantBuffer *constants = reflector->lpVtbl->GetConstantBufferByName(reflector, "$Globals");
-	D3D11_SHADER_BUFFER_DESC buffer_desc;
-	hr = constants->lpVtbl->GetDesc(constants, &buffer_desc);
-	if (hr == S_OK) {
-		file[output_len] = buffer_desc.Variables;
-		output_len += 1;
-		for (int i = 0; i < buffer_desc.Variables; ++i) {
-			ID3D11ShaderReflectionVariable *variable = constants->lpVtbl->GetVariableByIndex(constants, i);
-			D3D11_SHADER_VARIABLE_DESC variable_desc;
-			hr = variable->lpVtbl->GetDesc(variable, &variable_desc);
-			if (hr == S_OK) {
-				strcpy(file + output_len, variable_desc.Name);
-				output_len += strlen(variable_desc.Name);
-				file[output_len] = 0;
-				output_len += 1;
-
-				*(uint32_t *)(file + output_len) = variable_desc.StartOffset;
-				output_len += 4;
-
-				*(uint32_t *)(file + output_len) = variable_desc.Size;
-				output_len += 4;
-
-				D3D11_SHADER_TYPE_DESC type_desc;
-				ID3D11ShaderReflectionType *type = variable->lpVtbl->GetType(variable);
-				hr = type->lpVtbl->GetDesc(type, &type_desc);
-				if (hr == S_OK) {
-					file[output_len] = type_desc.Columns;
-					output_len += 1;
-					file[output_len] = type_desc.Rows;
-					output_len += 1;
-				}
-				else {
-					file[output_len] = 0;
-					output_len += 1;
-					file[output_len] = 0;
-					output_len += 1;
-				}
-			}
-		}
-	}
-	else {
-		file[output_len] = 0;
-		output_len += 1;
-	}
-
-	memcpy(file + output_len, (char *)shader_buffer->lpVtbl->GetBufferPointer(shader_buffer), shader_buffer->lpVtbl->GetBufferSize(shader_buffer));
-	output_len += shader_buffer->lpVtbl->GetBufferSize(shader_buffer);
-
-	shader_buffer->lpVtbl->Release(shader_buffer);
-	reflector->lpVtbl->Release(reflector);
-
 	shader = (iron_gpu_shader_t *)malloc(sizeof(iron_gpu_shader_t));
-	iron_gpu_shader_init(shader, file, (int)output_len, shader_type);
-	free(file);
+	iron_gpu_shader_init(shader, (char *)shader_buffer->lpVtbl->GetBufferPointer(shader_buffer), size, shader_type);
+	shader_buffer->lpVtbl->Release(shader_buffer);
 
 	#elif defined(IRON_METAL)
 
