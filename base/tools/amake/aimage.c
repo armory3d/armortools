@@ -112,6 +112,17 @@ void export_ico(const char *from, const char *to) {
     fwrite(png48, 1, png48_len, file);
     fwrite(png256, 1, png256_len, file);
 	fclose(file);
+
+    free(data256);
+    free(data48);
+    free(data32);
+    free(data24);
+    free(data16);
+    free(png256);
+    free(png48);
+    free(png32);
+    free(png24);
+    free(png16);
 }
 
 void export_png(const char *from, const char *to, int width, int height) {

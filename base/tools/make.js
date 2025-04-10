@@ -2225,23 +2225,23 @@ class CompilerCommandsExporter extends Exporter {
 // ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝
 
 function export_ico(icon, to, from) {
+	if (!fs_exists(path_join(from, icon))) {
+		from = irondir;
+		icon = "icon.png";
+	}
 	if (fs_exists(to) && fs_mtime(to) > fs_mtime(from)) {
 		return;
-	}
-	if (!fs_exists(path_join(from, icon))) {
-		from = makedir;
-		icon = "icon.png";
 	}
 	amake.export_ico(path_join(from, icon), to);
 }
 
 function export_png_icon(icon, to, width, height, from) {
+	if (!fs_exists(path_join(from, icon))) {
+		from = irondir;
+		icon = "icon.png";
+	}
 	if (fs_exists(to) && fs_mtime(to) > fs_mtime(from)) {
 		return;
-	}
-	if (!fs_exists(path_join(from, icon))) {
-		from = makedir;
-		icon = "icon.png";
 	}
 	amake.export_png(path_join(from, icon), to, width, height);
 }
