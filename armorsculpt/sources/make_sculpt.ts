@@ -33,7 +33,7 @@ function make_sculpt_run(data: material_t, matcon: material_context_t): node_sha
 	let decal: bool = context_is_decal();
 
 	node_shader_add_out(kong, "tex_coord: float2");
-	node_shader_write_vert(kong, "const madd: float2 = float2(0.5, 0.5);");
+	node_shader_write_vert(kong, "var madd: float2 = float2(0.5, 0.5);");
 	node_shader_write_vert(kong, "output.tex_coord = input.pos.xy * madd + madd;");
 	node_shader_write_vert(kong, "output.tex_coord.y = 1.0 - output.tex_coord.y;");
 	node_shader_write_vert(kong, "output.pos = float4(input.pos.xy, 0.0, 1.0);");

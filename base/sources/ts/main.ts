@@ -22,14 +22,13 @@ function main() {
 	scene_set_active("Scene");
 	uniforms_ext_init();
 	render_path_base_init();
+	render_path_deferred_init(); // Allocate gbuffer
 
 	if (context_raw.render_mode == render_mode_t.FORWARD) {
-		render_path_deferred_init(); // Allocate gbuffer
 		render_path_forward_init();
 		render_path_commands = render_path_forward_commands;
 	}
 	else {
-		render_path_deferred_init();
 		render_path_commands = render_path_deferred_commands;
 	}
 

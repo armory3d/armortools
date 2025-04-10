@@ -22,7 +22,6 @@ type node_shader_t = {
 	frag_write_normal?: i32;
 
 	// References
-	vert_wposition?: bool;
 	vert_n?: bool;
 	frag_bposition?: bool;
 	frag_wposition?: bool;
@@ -204,13 +203,15 @@ function node_shader_get(raw: node_shader_t): string {
 		s += "const " + a + "_sampler: sampler;\n\n";
 	}
 
-	s += "#[set(everything)]\n";
-	s += "const constants: {\n";
-	for (let i: i32 = 0; i < raw.constants.length; ++i) {
-		let a: string = raw.constants[i];
-		s += "\t" + a + ";\n";
+	if (raw.constants.length > 0) {
+		s += "#[set(everything)]\n";
+		s += "const constants: {\n";
+		for (let i: i32 = 0; i < raw.constants.length; ++i) {
+			let a: string = raw.constants[i];
+			s += "\t" + a + ";\n";
+		}
+		s += "};\n\n";
 	}
-	s += "};\n\n";
 
 	for (let i: i32 = 0; i < raw.shared_samplers.length; ++i) {
 		let a: string = raw.shared_samplers[i];
@@ -235,6 +236,7 @@ function node_shader_get(raw: node_shader_t): string {
 	s += raw.vert_normal;
 	s += raw.vert;
 	s += raw.vert_end;
+	s += "output.pos.z = (output.pos.z + output.pos.w) * 0.5;\n";
 	s += "\n\treturn output;\n";
 	s += "}\n\n";
 

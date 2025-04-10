@@ -36,7 +36,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	node_shader_add_out(kong, "tex_coord: float2");
 	kong.frag_wvpposition = true;
 	node_shader_add_constant(kong, "VP: float4x4", "_view_proj_matrix");
-	kong.vert_wposition = true;
+	kong.frag_wposition = true;
 
 	let texture_count: i32 = 0;
 	let displace_strength: f32 = make_material_get_displace_strength();
@@ -69,10 +69,10 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 				}
 			}
 		}
-		node_shader_write_vert(kong, "wposition += wnormal * float3(height, height, height) * float3(" + displace_strength + ", " + displace_strength + ", " + displace_strength + ");");
+		node_shader_write_vert(kong, "output.wposition += wnormal * float3(height, height, height) * float3(" + displace_strength + ", " + displace_strength + ", " + displace_strength + ");");
 	}
 
-	node_shader_write_vert(kong, "output.pos = constants.VP * float4(wposition.xyz, 1.0);");
+	node_shader_write_vert(kong, "output.pos = constants.VP * float4(output.wposition.xyz, 1.0);");
 	node_shader_write_vert(kong, "output.tex_coord = input.tex;");
 
 	kong.frag_out = "float4[3]";
@@ -147,7 +147,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		}
 
 		if (context_raw.viewport_mode == viewport_mode_t.LIT && context_raw.render_mode == render_mode_t.FORWARD) {
-			texture_count += 4;
+			texture_count += 2;
 			node_shader_add_texture(kong, "senvmap_brdf", "$brdf.k");
 			node_shader_add_texture(kong, "senvmap_radiance", "_envmap_radiance");
 		}
@@ -271,12 +271,12 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 						// Whiteout blend
 						node_shader_write_frag(kong, "{");
 						node_shader_write_frag(kong, "var n1: float3 = ntex * float3(2.0, 2.0, 2.0) - float3(1.0, 1.0, 1.0);");
-						node_shader_write_frag(kong, "var n2: float3 = clamp3(float3(0.5, 0.5, 1.0), texpaint_nor_sample.rgb, texpaint_opac) * float3(2.0, 2.0, 2.0) - float3(1.0, 1.0, 1.0);");
+						node_shader_write_frag(kong, "var n2: float3 = lerp3(float3(0.5, 0.5, 1.0), texpaint_nor_sample.rgb, texpaint_opac) * float3(2.0, 2.0, 2.0) - float3(1.0, 1.0, 1.0);");
 						node_shader_write_frag(kong, "ntex = normalize(float3(n1.xy + n2.xy, n1.z * n2.z)) * float3(0.5, 0.5, 0.5) + float3(0.5, 0.5, 0.5);");
 						node_shader_write_frag(kong, "}");
 					}
 					else {
-						node_shader_write_frag(kong, "ntex = clamp3(ntex, texpaint_nor_sample.rgb, texpaint_opac);");
+						node_shader_write_frag(kong, "ntex = lerp3(ntex, texpaint_nor_sample.rgb, texpaint_opac);");
 					}
 				}
 			}
@@ -286,13 +286,13 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 				node_shader_write_frag(kong, "texpaint_pack_sample = sample_lod(texpaint_pack" + l.id + ", shared_sampler, input.tex_coord, 0.0);");
 
 				if (l.paint_occ) {
-					node_shader_write_frag(kong, "occlusion = clamp(occlusion, texpaint_pack_sample.r, texpaint_opac);");
+					node_shader_write_frag(kong, "occlusion = lerp(occlusion, texpaint_pack_sample.r, texpaint_opac);");
 				}
 				if (l.paint_rough) {
-					node_shader_write_frag(kong, "roughness = clamp(roughness, texpaint_pack_sample.g, texpaint_opac);");
+					node_shader_write_frag(kong, "roughness = lerp(roughness, texpaint_pack_sample.g, texpaint_opac);");
 				}
 				if (l.paint_met) {
-					node_shader_write_frag(kong, "metallic = clamp(metallic, texpaint_pack_sample.b, texpaint_opac);");
+					node_shader_write_frag(kong, "metallic = lerp(metallic, texpaint_pack_sample.b, texpaint_opac);");
 				}
 				if (l.paint_height && make_material_height_used) {
 					let assign: string = l.paint_height_blend ? "+=" : "=";
@@ -366,11 +366,12 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			}
 			else if (context_raw.render_mode == render_mode_t.FORWARD && context_raw.viewport_mode != viewport_mode_t.PATH_TRACE) {
 				kong.frag_wposition = true;
-				node_shader_write_frag(kong, "var albedo: float3 = clamp3(basecol, float3(0.0, 0.0, 0.0), metallic);");
-				node_shader_write_frag(kong, "var f0: float3 = clamp3(float3(0.04, 0.04, 0.04), basecol, metallic);");
+				node_shader_write_frag(kong, "var albedo: float3 = lerp3(basecol, float3(0.0, 0.0, 0.0), metallic);");
+				node_shader_write_frag(kong, "var f0: float3 = lerp3(float3(0.04, 0.04, 0.04), basecol, metallic);");
 				kong.frag_vvec = true;
 				node_shader_write_frag(kong, "var dotnv: float = max(0.0, dot(n, vvec));");
-				node_shader_write_frag(kong, "var env_brdf: float2 = senvmap_brdf[int2(float2(roughness, 1.0 - dotnv) * 256.0)].xy;");
+				// node_shader_write_frag(kong, "var env_brdf: float2 = senvmap_brdf[int2(float2(roughness, 1.0 - dotnv) * 256.0)].xy;");
+				node_shader_write_frag(kong, "var env_brdf: float4 = senvmap_brdf[int2(float2(roughness, 1.0 - dotnv) * 256.0)];");
 				node_shader_add_constant(kong, "envmap_num_mipmaps: int", "_envmap_num_mipmaps");
 				node_shader_add_constant(kong, "envmap_data: float4", "_envmap_data"); // angle, sin(angle), cos(angle), strength
 				node_shader_write_frag(kong, "var wreflect: float3 = reflect(-vvec, n);");
@@ -393,7 +394,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			}
 			else { // Deferred, Pathtraced
 				if (make_material_emis_used) {
-					node_shader_write_frag(kong, "if (int(matid * 255.0) % 3 == 1) { basecol *= 10.0 };"); // Boost for bloom
+					node_shader_write_frag(kong, "if (int(matid * 255.0) % 3 == 1) { basecol *= 10.0; }"); // Boost for bloom
 				}
 				node_shader_write_frag(kong, "output[1].rgba = float4(basecol, occlusion);");
 			}
@@ -477,7 +478,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		}
 
 		if (context_raw.viewport_mode != viewport_mode_t.LIT && context_raw.viewport_mode != viewport_mode_t.PATH_TRACE) {
-			node_shader_write_frag(kong, "output[1].rgb = pow3(output[1].rgb, float3(2.2, 2.2, 2.2));");
+			node_shader_write_frag(kong, "output[1].rgb = pow3(output[1].rgb, float3(2.2, 2.2, 2.2));"); ////
 		}
 
 		node_shader_write_frag(kong, "n /= (abs(n.x) + abs(n.y) + abs(n.z));");
@@ -490,7 +491,13 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 
 	parser_material_finalize(con_mesh);
 	con_mesh.data.shader_from_source = true;
-	gpu_create_shaders_from_kong(node_shader_get(kong), ADDRESS(con_mesh.data.vertex_shader), ADDRESS(con_mesh.data.fragment_shader));
+
+	let test: string = node_shader_get(kong);
+
+	// iron_file_save_bytes("c:/users/lubos/desktop/test.kong", sys_string_to_buffer(test), 0);
+
+	gpu_create_shaders_from_kong(test, ADDRESS(con_mesh.data.vertex_shader), ADDRESS(con_mesh.data.fragment_shader));
+
 	return con_mesh;
 }
 

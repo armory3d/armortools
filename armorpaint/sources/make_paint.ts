@@ -494,7 +494,12 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	parser_material_triplanar = false;
 	parser_material_sample_keep_aspect = false;
 	con_paint.data.shader_from_source = true;
-	gpu_create_shaders_from_kong(node_shader_get(kong), ADDRESS(con_paint.data.vertex_shader), ADDRESS(con_paint.data.fragment_shader));
+
+	let test: string = node_shader_get(kong);
+
+	// iron_file_save_bytes("c:/users/lubos/desktop/test.kong", sys_string_to_buffer(test), 0);
+
+	gpu_create_shaders_from_kong(test, ADDRESS(con_paint.data.vertex_shader), ADDRESS(con_paint.data.fragment_shader));
 
 	return con_paint;
 }

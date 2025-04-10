@@ -33,7 +33,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	node_shader_add_out(kong, "tex_coord: float2");
 	kong.frag_wvpposition = true;
 	node_shader_add_constant(kong, "VP: float4x4", "_view_proj_matrix");
-	kong.vert_wposition = true;
+	kong.frag_wposition = true;
 
 	let texture_count: i32 = 0;
 
@@ -111,7 +111,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	}
 
 	if (context_raw.viewport_mode == viewport_mode_t.LIT && context_raw.render_mode == render_mode_t.FORWARD) {
-		texture_count += 4;
+		texture_count += 2;
 		node_shader_add_texture(kong, "senvmap_brdf", "$brdf.k");
 		node_shader_add_texture(kong, "senvmap_radiance", "_envmap_radiance");
 	}
@@ -263,7 +263,8 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 				node_shader_write_frag(kong, "var f0: float3 = lerp3(float3(0.04, 0.04, 0.04), basecol, metallic);");
 				kong.frag_vvec = true;
 				node_shader_write_frag(kong, "var dotnv: float = max(0.0, dot(n, vvec));");
-				node_shader_write_frag(kong, "var env_brdf: float2 = senvmap_brdf[int2(float2(roughness, 1.0 - dotnv) * 256.0)].xy;");
+				// node_shader_write_frag(kong, "var env_brdf: float2 = senvmap_brdf[int2(float2(roughness, 1.0 - dotnv) * 256.0)].xy;");
+				node_shader_write_frag(kong, "var env_brdf: float4 = senvmap_brdf[int2(float2(roughness, 1.0 - dotnv) * 256.0)];");
 				node_shader_add_constant(kong, "envmap_num_mipmaps: int", "_envmap_num_mipmaps");
 				node_shader_add_constant(kong, "envmap_data: float4", "_envmap_data"); // angle, sin(angle), cos(angle), strength
 				node_shader_write_frag(kong, "var wreflect: float3 = reflect(-vvec, n);");

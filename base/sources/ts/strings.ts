@@ -192,23 +192,25 @@ let str_tex_brick: string = "\
 fun tex_brick_noise(n: int): float { \
 	var nn: int; \
 	n = (n >> 13) ^ n; \
-	nn = (n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff; \
-	return 0.5f * float(nn) / 1073741824.0; \
+	/*nn = (n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff;*/ \
+	nn = (n * (n * n * 60493 + 19990303) + 1376312589) & 2147483647; \
+	return 0.5 * float(nn) / 1073741824.0; \
 } \
 fun tex_brick(p: float3, c1: float3, c2: float3, c3: float3): float3 { \
 	var brick_size: float3 = float3(0.9, 0.49, 0.49); \
 	var mortar_size: float3 = float3(0.05, 0.1, 0.1); \
-	p /= brick_size / 2; \
+	p /= brick_size / 2.0; \
 	if (frac(p.y * 0.5) > 0.5) { p.x += 0.5; } \
 	var col: float = floor(p.x / (brick_size.x + (mortar_size.x * 2.0))); \
 	var row: float = p.y; \
 	p = frac3(p); \
 	var b: float3 = step3(p, 1.0 - mortar_size); \
-	var tint: float = min(max(tex_brick_noise((int(col) << 16) + (int(row) & 0xFFFF)), 0.0), 1.0); \
+	/*var tint: float = min(max(tex_brick_noise((int(col) << 16) + (int(row) & 0xffff)), 0.0), 1.0);*/ \
+	var tint: float = min(max(tex_brick_noise((int(col) << 16) + (int(row) & 65535)), 0.0), 1.0); \
 	return lerp3(c3, lerp3(c1, c2, tint), b.x * b.y * b.z); \
 } \
 fun tex_brick_f(p: float3): float { \
-	p /= float3(0.9, 0.49, 0.49) / 2; \
+	p /= float3(0.9, 0.49, 0.49) / 2.0; \
 	if (frac(p.y * 0.5) > 0.5) { p.x += 0.5; } \
 	p = frac3(p); \
 	var b: float3 = step3(p, float3(0.95, 0.9, 0.9)); \
@@ -318,7 +320,7 @@ fun create_basis(normal: float3, out tangent: float3, out binormal: float3) { \
 ";
 
 let str_sh_irradiance: string = "\
-fun sh_irradiance(float3 nor): float3 { \
+fun sh_irradiance(nor: float3): float3 { \
 	var c1: float = 0.429043; \
 	var c2: float = 0.511664; \
 	var c3: float = 0.743125; \

@@ -467,7 +467,9 @@ function context_init() {
 }
 
 function context_use_deferred(): bool {
-	return context_raw.render_mode != render_mode_t.FORWARD && (context_raw.viewport_mode == viewport_mode_t.LIT || context_raw.viewport_mode == viewport_mode_t.PATH_TRACE) && context_raw.tool != workspace_tool_t.COLORID;
+	return context_raw.render_mode != render_mode_t.FORWARD &&
+		(context_raw.viewport_mode == viewport_mode_t.LIT || context_raw.viewport_mode == viewport_mode_t.PATH_TRACE) &&
+		context_raw.tool != workspace_tool_t.COLORID;
 }
 
 function context_select_material(i: i32) {

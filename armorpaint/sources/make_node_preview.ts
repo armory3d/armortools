@@ -33,7 +33,7 @@ function make_node_preview_run(data: material_t, matcon: material_context_t, nod
 	let kong: node_shader_t = node_shader_context_make_kong(con_mesh);
 
 	node_shader_write_attrib_vert(kong, "output.pos = float4(input.pos.xy * 3.0, 0.0, 1.0);"); // Pos unpack
-	node_shader_write_attrib_vert(kong, "const madd: float2 = float2(0.5, 0.5);");
+	node_shader_write_attrib_vert(kong, "var madd: float2 = float2(0.5, 0.5);");
 	node_shader_add_out(kong, "tex_coord: float2");
 	node_shader_write_attrib_vert(kong, "output.tex_coord = output.pos.xy * madd + madd;");
 	node_shader_write_attrib_vert(kong, "output.tex_coord.y = 1.0 - output.tex_coord.y;");
@@ -76,7 +76,12 @@ function make_node_preview_run(data: material_t, matcon: material_context_t, nod
 	parser_material_finalize(con_mesh);
 
 	con_mesh.data.shader_from_source = true;
-	gpu_create_shaders_from_kong(node_shader_get(kong), ADDRESS(con_mesh.data.vertex_shader), ADDRESS(con_mesh.data.fragment_shader));
+
+	let test: string = node_shader_get(kong);
+
+	// iron_file_save_bytes("c:/users/lubos/desktop/test.kong", sys_string_to_buffer(test), 0);
+
+	gpu_create_shaders_from_kong(test, ADDRESS(con_mesh.data.vertex_shader), ADDRESS(con_mesh.data.fragment_shader));
 
 	return con_mesh;
 }
