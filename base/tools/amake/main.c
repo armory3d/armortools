@@ -53,14 +53,6 @@ static JSValue js_os_exec_win(JSContext *ctx, JSValue this_val, int argc, JSValu
     return JS_UNDEFINED;
 }
 
-void hlslbin(const char *from, const char *to);
-JSValue js_hlslbin(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-    const char *from = JS_ToCString(ctx, argv[0]);
-    const char *to = JS_ToCString(ctx, argv[1]);
-    hlslbin(from , to);
-    return JS_UNDEFINED;
-}
-
 #endif
 
 void alang(char *source, char *output);
@@ -133,7 +125,6 @@ int main(int argc, char **argv) {
     JS_SetPropertyStr(ctx, amake, "export_png", JS_NewCFunction(ctx, js_export_png, "export_png", 4));
     #ifdef _WIN32
     JS_SetPropertyStr(ctx, amake, "os_exec_win", JS_NewCFunction(ctx, js_os_exec_win, "os_exec_win", 1));
-    JS_SetPropertyStr(ctx, amake, "hlslbin", JS_NewCFunction(ctx, js_hlslbin, "hlslbin", 1));
     #endif
     JS_SetPropertyStr(ctx, amake, "alang", JS_NewCFunction(ctx, js_alang, "alang", 2));
     JS_SetPropertyStr(ctx, amake, "ashader", JS_NewCFunction(ctx, js_ashader, "ashader", 3));

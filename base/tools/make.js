@@ -3275,7 +3275,6 @@ let goptions = {
 	alangjs: false,
 	js: false,
 	ashader: false,
-	hlslbin: false,
 };
 
 let args = scriptArgs;
@@ -3307,13 +3306,6 @@ if (goptions.ashader) {
 	let from = args[4];
 	let to = args[5];
 	amake.ashader(type, from, to);
-	std.exit();
-}
-
-if (goptions.hlslbin) {
-	let from = args[3];
-	let to = args[4];
-	amake.hlslbin(from, to);
 	std.exit();
 }
 
