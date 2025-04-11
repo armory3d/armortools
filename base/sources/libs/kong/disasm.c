@@ -64,24 +64,35 @@ static void write_functions(void) {
 			case OPCODE_RETURN:
 				kong_log(LOG_LEVEL_INFO, "RETURN $%zu", o->op_return.var.index);
 				break;
-			case OPCODE_LOAD_MEMBER: {
-				char indices[256];
+			case OPCODE_LOAD_ACCESS_LIST: {
+				char accesses[1024];
 				int  offset = 0;
 
-				for (int i = 0; i < o->op_load_member.member_indices_size; ++i) {
-					if (o->op_load_member.dynamic_member[i]) {
-						offset += sprintf(&indices[offset], "$%" PRIu64, o->op_load_member.dynamic_member_indices[i].index);
+				for (int i = 0; i < o->op_load_access_list.access_list_size; ++i) {
+					switch (o->op_load_access_list.access_list[i].kind) {
+					case ACCESS_ELEMENT:
+						offset += sprintf(&accesses[offset], "$%" PRIu64, o->op_load_access_list.access_list[i].access_element.index.index);
+						break;
+					case ACCESS_MEMBER:
+						offset += sprintf(&accesses[offset], "%s", get_name(o->op_load_access_list.access_list[i].access_member.name));
+						break;
+					case ACCESS_SWIZZLE: {
+						swizzle swizzle          = o->op_load_access_list.access_list[i].access_swizzle.swizzle;
+						char    swizzle_chars[4] = "xyzw";
+
+						for (uint32_t swizzle_index = 0; swizzle_index < swizzle.size; ++swizzle_index) {
+							offset += sprintf(&accesses[offset], "%c", swizzle_chars[swizzle.indices[swizzle_index]]);
+						}
+						break;
 					}
-					else {
-						offset += sprintf(&indices[offset], "%i", o->op_load_member.static_member_indices[i]);
 					}
 
-					if (i < o->op_load_member.member_indices_size - 1) {
-						offset += sprintf(&indices[offset], ", ");
+					if (i < o->op_load_access_list.access_list_size - 1) {
+						offset += sprintf(&accesses[offset], ", ");
 					}
 				}
 
-				kong_log(LOG_LEVEL_INFO, "$%zu = LOAD_MEMBER $%zu[%s]", o->op_load_member.to.index, o->op_load_member.from.index, indices);
+				kong_log(LOG_LEVEL_INFO, "$%zu = LOAD_ACCESS_LIST $%zu[%s]", o->op_load_access_list.to.index, o->op_load_access_list.from.index, accesses);
 				break;
 			}
 			case OPCODE_CALL: {
@@ -114,33 +125,44 @@ static void write_functions(void) {
 				break;
 			case OPCODE_MULTIPLY_AND_STORE_VARIABLE:
 				break;
-			case OPCODE_STORE_MEMBER: {
-				char indices[256];
+			case OPCODE_STORE_ACCESS_LIST: {
+				char accesses[1024];
 				int  offset = 0;
 
-				for (int i = 0; i < o->op_store_member.member_indices_size; ++i) {
-					if (o->op_store_member.dynamic_member[i]) {
-						offset += sprintf(&indices[offset], "$%" PRIu64, o->op_store_member.dynamic_member_indices[i].index);
+				for (int i = 0; i < o->op_store_access_list.access_list_size; ++i) {
+					switch (o->op_store_access_list.access_list[i].kind) {
+					case ACCESS_ELEMENT:
+						offset += sprintf(&accesses[offset], "$%" PRIu64, o->op_store_access_list.access_list[i].access_element.index.index);
+						break;
+					case ACCESS_MEMBER:
+						offset += sprintf(&accesses[offset], "%s", get_name(o->op_store_access_list.access_list[i].access_member.name));
+						break;
+					case ACCESS_SWIZZLE: {
+						swizzle swizzle          = o->op_store_access_list.access_list[i].access_swizzle.swizzle;
+						char    swizzle_chars[4] = "xyzw";
+
+						for (uint32_t swizzle_index = 0; swizzle_index < swizzle.size; ++swizzle_index) {
+							offset += sprintf(&accesses[offset], "%c", swizzle_chars[swizzle.indices[swizzle_index]]);
+						}
+						break;
 					}
-					else {
-						offset += sprintf(&indices[offset], "%i", o->op_store_member.static_member_indices[i]);
 					}
 
-					if (i < o->op_store_member.member_indices_size - 1) {
-						offset += sprintf(&indices[offset], ", ");
+					if (i < o->op_store_access_list.access_list_size - 1) {
+						offset += sprintf(&accesses[offset], ", ");
 					}
 				}
 
-				kong_log(LOG_LEVEL_INFO, "$%zu[%s] = STORE_MEMBER $%zu", o->op_store_member.to.index, indices, o->op_store_member.from.index);
+				kong_log(LOG_LEVEL_INFO, "$%zu[%s] = STORE_ACCESS_LIST $%zu", o->op_store_access_list.to.index, accesses, o->op_store_access_list.from.index);
 				break;
 			}
-			case OPCODE_SUB_AND_STORE_MEMBER:
+			case OPCODE_SUB_AND_STORE_ACCESS_LIST:
 				break;
-			case OPCODE_ADD_AND_STORE_MEMBER:
+			case OPCODE_ADD_AND_STORE_ACCESS_LIST:
 				break;
-			case OPCODE_DIVIDE_AND_STORE_MEMBER:
+			case OPCODE_DIVIDE_AND_STORE_ACCESS_LIST:
 				break;
-			case OPCODE_MULTIPLY_AND_STORE_MEMBER:
+			case OPCODE_MULTIPLY_AND_STORE_ACCESS_LIST:
 				break;
 			case OPCODE_LOAD_FLOAT_CONSTANT:
 				kong_log(LOG_LEVEL_INFO, "$%zu = LOAD_FLOAT_CONSTANT %f", o->op_load_float_constant.to.index, o->op_load_float_constant.number);
@@ -176,7 +198,15 @@ static void write_functions(void) {
 				break;
 			case OPCODE_OR:
 				break;
-			case OPCODE_XOR:
+			case OPCODE_BITWISE_XOR:
+				break;
+			case OPCODE_BITWISE_AND:
+				break;
+			case OPCODE_BITWISE_OR:
+				break;
+			case OPCODE_LEFT_SHIFT:
+				break;
+			case OPCODE_RIGHT_SHIFT:
 				break;
 			case OPCODE_IF:
 				break;

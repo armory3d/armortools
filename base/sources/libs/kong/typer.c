@@ -35,81 +35,185 @@ type_ref find_local_var_type(block *b, name_id name) {
 
 void resolve_types_in_expression(statement *parent, expression *e);
 
-type_ref resolve_member_var_type(statement *parent_block, type_ref parent_type, expression *left) {
-	if (left->kind == EXPRESSION_VARIABLE) {
-		if (parent_type.type != NO_TYPE) {
-			name_id name = left->variable;
+static void resolve_types_in_element(statement *parent_block, expression *element) {
+	resolve_types_in_expression(parent_block, element->element.of);
+	resolve_types_in_expression(parent_block, element->element.element_index);
 
-			type *parent_struct = get_type(parent_type.type);
-			for (size_t i = 0; i < parent_struct->members.size; ++i) {
-				if (parent_struct->members.m[i].name == name) {
-					left->type = parent_struct->members.m[i].type;
-					return left->type;
-				}
-			}
+	type_id     of_type       = element->element.of->type.type;
+	expression *element_index = element->element.element_index;
 
+	assert(of_type != NO_TYPE);
+	////
+	// assert(element_index->type.type == NO_TYPE);
+	////
+
+	if (of_type == tex2d_type_id) {
+		element->type.type = float4_id;
+	}
+	else if (of_type == tex2darray_type_id) {
+		element->type.type = tex2d_type_id;
+	}
+	else {
+		type *of = get_type(of_type);
+		if (of->array_size > 0) {
+			element->type.type = of->base;
+		}
+		else {
 			debug_context context = {0};
-			error(context, "Member %s not found", get_name(name));
-			type_ref t;
-			init_type_ref(&t, NO_NAME);
-			return t;
+			error(context, "Indexed non-array %s", get_name(of->name));
 		}
-
-		if (parent_block != NULL) {
-			resolve_types_in_expression(parent_block, left);
-			return left->type;
-		}
-	}
-	else if (left->kind == EXPRESSION_CALL) {
-		if (parent_block != NULL) {
-			resolve_types_in_expression(parent_block, left);
-			return left->type;
-		}
-	}
-	else if (left->kind == EXPRESSION_INDEX) {
-		if (parent_type.type != NO_TYPE) {
-			init_type_ref(&left->type, NO_NAME);
-			left->type.type = get_type(parent_type.type)->base;
-			return left->type;
-		}
-	}
-
-	{
-		debug_context context = {0};
-		error(context, "Member not found");
-		type_ref t;
-		init_type_ref(&t, NO_NAME);
-		return t;
 	}
 }
 
-void resolve_member_type(statement *parent_block, type_ref parent_type, expression *e) {
-	debug_context context = {0};
-	check(e->kind == EXPRESSION_STATIC_MEMBER || e->kind == EXPRESSION_DYNAMIC_MEMBER, context, "Malformed member");
+static void resolve_types_in_member(statement *parent_block, expression *member) {
+	resolve_types_in_expression(parent_block, member->member.of);
 
-	type_ref t = resolve_member_var_type(parent_block, parent_type, e->member.left);
+	type_id of_type     = member->member.of->type.type;
+	name_id member_name = member->member.member_name;
 
-	if (e->kind == EXPRESSION_STATIC_MEMBER && e->member.right->kind == EXPRESSION_VARIABLE) {
-		resolve_member_var_type(parent_block, t, e->member.right);
-		e->type = e->member.right->type;
-	}
-	else if (e->kind == EXPRESSION_DYNAMIC_MEMBER) {
-		resolve_types_in_expression(parent_block, e->member.right);
-		if (e->member.left->type.type == tex2d_type_id) {
-			init_type_ref(&e->type, NO_NAME);
-			e->type.type = float4_id;
+	assert(of_type != NO_TYPE);
+
+	if (is_vector_or_scalar(of_type)) {
+		expression *of = member->member.of;
+
+		member->kind       = EXPRESSION_SWIZZLE;
+		member->swizzle.of = of;
+
+		char    *name         = get_name(member_name);
+		uint32_t swizzle_size = (uint32_t)strlen(name);
+
+		if (swizzle_size > 4) {
+			debug_context context = {0};
+			error(context, "Swizzle size can not be more than four", get_name(member_name));
 		}
-		else if (get_type(e->member.left->type.type)->array_size > 0) {
-			init_type_ref(&e->type, NO_NAME);
-			e->type.type = get_type(e->member.left->type.type)->base;
+
+		member->swizzle.swizz.size = swizzle_size;
+
+		for (uint32_t swizzle_index = 0; swizzle_index < swizzle_size; ++swizzle_index) {
+			switch (name[swizzle_index]) {
+			case 'r':
+			case 'x':
+				member->swizzle.swizz.indices[swizzle_index] = 0;
+				break;
+			case 'g':
+			case 'y':
+				if (1 >= vector_size(of_type)) {
+					debug_context context = {0};
+					error(context, "Swizzle out of bounds", get_name(member_name));
+				}
+				member->swizzle.swizz.indices[swizzle_index] = 1;
+				break;
+			case 'b':
+			case 'z':
+				if (2 >= vector_size(of_type)) {
+					debug_context context = {0};
+					error(context, "Swizzle out of bounds", get_name(member_name));
+				}
+				member->swizzle.swizz.indices[swizzle_index] = 2;
+				break;
+			case 'a':
+			case 'w':
+				if (3 >= vector_size(of_type)) {
+					debug_context context = {0};
+					error(context, "Swizzle out of bounds", get_name(member_name));
+				}
+				member->swizzle.swizz.indices[swizzle_index] = 3;
+				break;
+			}
+		}
+
+		if (of_type == float_id || of_type == float2_id || of_type == float3_id || of_type == float4_id) {
+			switch (swizzle_size) {
+			case 1:
+				member->type.type = float_id;
+				break;
+			case 2:
+				member->type.type = float2_id;
+				break;
+			case 3:
+				member->type.type = float3_id;
+				break;
+			case 4:
+				member->type.type = float4_id;
+				break;
+			default:
+				assert(false);
+				break;
+			}
+		}
+		else if (of_type == int_id || of_type == int2_id || of_type == int3_id || of_type == int4_id) {
+			switch (swizzle_size) {
+			case 1:
+				member->type.type = int_id;
+				break;
+			case 2:
+				member->type.type = int2_id;
+				break;
+			case 3:
+				member->type.type = int3_id;
+				break;
+			case 4:
+				member->type.type = int4_id;
+				break;
+			default:
+				assert(false);
+				break;
+			}
+		}
+		else if (of_type == uint_id || of_type == uint2_id || of_type == uint3_id || of_type == uint4_id) {
+			switch (swizzle_size) {
+			case 1:
+				member->type.type = uint_id;
+				break;
+			case 2:
+				member->type.type = uint2_id;
+				break;
+			case 3:
+				member->type.type = uint3_id;
+				break;
+			case 4:
+				member->type.type = uint4_id;
+				break;
+			default:
+				assert(false);
+				break;
+			}
+		}
+		else if (of_type == bool_id || of_type == bool2_id || of_type == bool3_id || of_type == bool4_id) {
+			switch (swizzle_size) {
+			case 1:
+				member->type.type = bool_id;
+				break;
+			case 2:
+				member->type.type = bool2_id;
+				break;
+			case 3:
+				member->type.type = bool3_id;
+				break;
+			case 4:
+				member->type.type = bool4_id;
+				break;
+			default:
+				assert(false);
+				break;
+			}
 		}
 		else {
-			e->type = e->member.left->type;
+			assert(false);
 		}
 	}
 	else {
-		resolve_member_type(parent_block, t, e->member.right);
-		e->type = e->member.right->type;
+		type *of_struct = get_type(of_type);
+
+		for (size_t i = 0; i < of_struct->members.size; ++i) {
+			if (of_struct->members.m[i].name == member_name) {
+				member->type = of_struct->members.m[i].type;
+				return;
+			}
+		}
+
+		debug_context context = {0};
+		error(context, "Member %s not found", get_name(member_name));
 	}
 }
 
@@ -325,9 +429,16 @@ void resolve_types_in_expression(statement *parent, expression *e) {
 		case OPERATOR_LESS:
 		case OPERATOR_LESS_EQUAL:
 		case OPERATOR_OR:
-		case OPERATOR_AND:
-		case OPERATOR_XOR: {
+		case OPERATOR_AND: {
 			e->type.type = bool_id;
+			break;
+		}
+		case OPERATOR_BITWISE_XOR:
+		case OPERATOR_BITWISE_AND:
+		case OPERATOR_BITWISE_OR:
+		case OPERATOR_LEFT_SHIFT:
+		case OPERATOR_RIGHT_SHIFT: {
+			e->type = e->binary.left->type;
 			break;
 		}
 		case OPERATOR_MULTIPLY:
@@ -404,7 +515,11 @@ void resolve_types_in_expression(statement *parent, expression *e) {
 		case OPERATOR_DIVIDE:
 		case OPERATOR_MULTIPLY:
 		case OPERATOR_OR:
-		case OPERATOR_XOR:
+		case OPERATOR_BITWISE_XOR:
+		case OPERATOR_BITWISE_AND:
+		case OPERATOR_BITWISE_OR:
+		case OPERATOR_LEFT_SHIFT:
+		case OPERATOR_RIGHT_SHIFT:
 		case OPERATOR_AND:
 		case OPERATOR_MOD:
 		case OPERATOR_ASSIGN:
@@ -462,17 +577,12 @@ void resolve_types_in_expression(statement *parent, expression *e) {
 		}
 		break;
 	}
-	case EXPRESSION_STATIC_MEMBER:
-	case EXPRESSION_DYNAMIC_MEMBER: {
-		type_ref t;
-		init_type_ref(&t, NO_NAME);
-		resolve_member_type(parent, t, e);
+	case EXPRESSION_MEMBER: {
+		resolve_types_in_member(parent, e);
 		break;
 	}
-	case EXPRESSION_INDEX:
-	case EXPRESSION_CONSTRUCTOR: {
-		debug_context context = {0};
-		error(context, "not implemented");
+	case EXPRESSION_ELEMENT: {
+		resolve_types_in_element(parent, e);
 		break;
 	}
 	}

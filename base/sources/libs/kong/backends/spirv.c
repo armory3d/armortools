@@ -4,6 +4,7 @@
 #include "../compiler.h"
 #include "../errors.h"
 #include "../functions.h"
+#include "../hashmap.h"
 #include "../log.h"
 #include "../parser.h"
 #include "../shader_stage.h"
@@ -163,7 +164,11 @@ typedef enum spirv_opcode {
 	SPIRV_OPCODE_DECORATE            = 71,
 	SPIRV_OPCODE_MEMBER_DECORATE     = 72,
 	SPIRV_OPCODE_COMPOSITE_CONSTRUCT = 80,
+	SPIRV_OPCODE_COMPOSITE_EXTRACT   = 81,
 	SPIRV_OPCODE_F_MUL               = 133,
+	SPIRV_OPCODE_VECTOR_TIMES_MATRIX = 144,
+	SPIRV_OPCODE_MATRIX_TIMES_VECTOR = 145,
+	SPIRV_OPCODE_MATRIX_TIMES_MATRIX = 146,
 	SPIRV_OPCODE_F_ORD_LESS_THAN     = 184,
 	SPIRV_OPCODE_LOOP_MERGE          = 246,
 	SPIRV_OPCODE_SELECTION_MERGE     = 247,
@@ -175,8 +180,8 @@ typedef enum spirv_opcode {
 
 static type_id find_access_type(int *indices, int indices_size, type_id base_type) {
 	if (indices_size == 1) {
-		if (base_type == float2_id || base_type == float3_id || base_type == float4_id) {
-			return float_id;
+		if (is_vector(base_type)) {
+			return vector_base_type(base_type);
 		}
 		else {
 			type *t = get_type(base_type);
@@ -191,38 +196,6 @@ static type_id find_access_type(int *indices, int indices_size, type_id base_typ
 	}
 }
 
-static void vector_member_indices(int *input_indices, int *output_indices, int indices_size, type_id base_type) {
-	if (base_type == float2_id || base_type == float3_id || base_type == float4_id) {
-		type *t = get_type(base_type);
-
-		if (strcmp(get_name(t->members.m[input_indices[0]].name), "x") == 0 || strcmp(get_name(t->members.m[input_indices[0]].name), "r") == 0) {
-			output_indices[0] = 0;
-		}
-		else if (strcmp(get_name(t->members.m[input_indices[0]].name), "y") == 0 || strcmp(get_name(t->members.m[input_indices[0]].name), "g") == 0) {
-			output_indices[0] = 1;
-		}
-		else if (strcmp(get_name(t->members.m[input_indices[0]].name), "z") == 0 || strcmp(get_name(t->members.m[input_indices[0]].name), "b") == 0) {
-			output_indices[0] = 2;
-		}
-		else if (strcmp(get_name(t->members.m[input_indices[0]].name), "w") == 0 || strcmp(get_name(t->members.m[input_indices[0]].name), "a") == 0) {
-			output_indices[0] = 3;
-		}
-		else {
-			// assert(false);
-			output_indices[0] = 0; // TODO
-		}
-	}
-	else {
-		output_indices[0] = input_indices[0];
-	}
-
-	if (indices_size > 1) {
-		type *t = get_type(base_type);
-		assert(input_indices[0] < t->members.size);
-		vector_member_indices(&input_indices[1], &output_indices[1], indices_size - 1, t->members.m[input_indices[0]].type.type);
-	}
-}
-
 typedef enum addressing_model { ADDRESSING_MODEL_LOGICAL = 0 } addressing_model;
 
 typedef enum memory_model { MEMORY_MODEL_SIMPLE = 0, MEMORY_MODEL_GLSL450 = 1 } memory_model;
@@ -231,7 +204,16 @@ typedef enum capability { CAPABILITY_SHADER = 1 } capability;
 
 typedef enum execution_model { EXECUTION_MODEL_VERTEX = 0, EXECUTION_MODEL_FRAGMENT = 4 } execution_model;
 
-typedef enum decoration { DECORATION_BLOCK = 2, DECORATION_BUILTIN = 11, DECORATION_LOCATION = 30 } decoration;
+typedef enum decoration {
+	DECORATION_BLOCK          = 2,
+	DECORATION_COL_MAJOR      = 5,
+	DECORATION_MATRIX_STRIDE  = 7,
+	DECORATION_BUILTIN        = 11,
+	DECORATION_LOCATION       = 30,
+	DECORATION_BINDING        = 33,
+	DECORATION_DESCRIPTOR_SET = 34,
+	DECORATION_OFFSET         = 35
+} decoration;
 
 typedef enum builtin { BUILTIN_POSITION = 0 } builtin;
 
@@ -463,7 +445,7 @@ static struct {
 static spirv_id convert_type_to_spirv_id(type_id type) {
 	complex_type ct;
 	ct.type    = type;
-	ct.pointer = (uint16_t) false;
+	ct.pointer = false;
 	ct.storage = (uint16_t)STORAGE_CLASS_NONE;
 
 	spirv_id spirv_index = hmget(type_map, ct);
@@ -477,7 +459,7 @@ static spirv_id convert_type_to_spirv_id(type_id type) {
 static spirv_id convert_pointer_type_to_spirv_id(type_id type, storage_class storage) {
 	complex_type ct;
 	ct.type    = type;
-	ct.pointer = (uint16_t) true;
+	ct.pointer = true;
 	ct.storage = (uint16_t)storage;
 
 	spirv_id spirv_index = hmget(type_map, ct);
@@ -492,7 +474,7 @@ static spirv_id output_struct_pointer_type = {0};
 
 static void write_base_type(instructions_buffer *constants_block, type_id type, spirv_id spirv_type) {
 	complex_type ct;
-	ct.pointer = (uint16_t) false;
+	ct.pointer = false;
 	ct.storage = (uint16_t)STORAGE_CLASS_NONE;
 	ct.type    = type;
 
@@ -505,7 +487,7 @@ static void write_base_types(instructions_buffer *constants_block) {
 	void_function_type = write_type_function(constants_block, void_type, NULL, 0);
 
 	complex_type ct;
-	ct.pointer = (uint16_t) false;
+	ct.pointer = false;
 	ct.storage = (uint16_t)STORAGE_CLASS_NONE;
 
 	spirv_float_type = write_type_float(constants_block, 32);
@@ -556,7 +538,7 @@ static void write_types(instructions_buffer *constants, function *main) {
 
 			complex_type ct;
 			ct.type    = types[i];
-			ct.pointer = (uint16_t) false;
+			ct.pointer = false;
 			ct.storage = (uint16_t)STORAGE_CLASS_NONE;
 			hmput(type_map, ct, struct_type);
 		}
@@ -616,6 +598,26 @@ static void write_fragment_output_decorations(instructions_buffer *instructions,
 	write_instruction(instructions, WORD_COUNT(operands), SPIRV_OPCODE_DECORATE, operands);
 }
 
+static void write_op_decorate(instructions_buffer *instructions, spirv_id target, decoration decor) {
+	uint32_t operands[] = {target.id, (uint32_t)decor};
+	write_instruction(instructions, WORD_COUNT(operands), SPIRV_OPCODE_DECORATE, operands);
+}
+
+static void write_op_decorate_value(instructions_buffer *instructions, spirv_id target, decoration decor, uint32_t value) {
+	uint32_t operands[] = {target.id, (uint32_t)decor, value};
+	write_instruction(instructions, WORD_COUNT(operands), SPIRV_OPCODE_DECORATE, operands);
+}
+
+static void write_op_member_decorate(instructions_buffer *instructions, spirv_id structure_type, uint32_t member, decoration decor) {
+	uint32_t operands[] = {structure_type.id, member, (uint32_t)decor};
+	write_instruction(instructions, WORD_COUNT(operands), SPIRV_OPCODE_MEMBER_DECORATE, operands);
+}
+
+static void write_op_member_decorate_value(instructions_buffer *instructions, spirv_id structure_type, uint32_t member, decoration decor, uint32_t value) {
+	uint32_t operands[] = {structure_type.id, member, (uint32_t)decor, value};
+	write_instruction(instructions, WORD_COUNT(operands), SPIRV_OPCODE_MEMBER_DECORATE, operands);
+}
+
 static spirv_id write_op_function_preallocated(instructions_buffer *instructions, spirv_id result_type, function_control control, spirv_id function_type,
                                                spirv_id result) {
 	uint32_t operands[] = {result_type.id, result.id, (uint32_t)control, function_type.id};
@@ -660,18 +662,25 @@ static void write_op_function_end(instructions_buffer *instructions) {
 	write_simple_instruction(instructions, SPIRV_OPCODE_FUNCTION_END);
 }
 
-static struct {
-	int      key;
-	spirv_id value;
-} *int_constants = NULL;
+typedef struct int_constant_container {
+	struct container container;
+	spirv_id         value;
+} int_constant_container;
+
+static struct hash_map *int_constants = NULL;
 
 static spirv_id get_int_constant(int value) {
-	spirv_id index = hmget(int_constants, value);
-	if (index.id == 0) {
-		index = allocate_index();
-		hmput(int_constants, value, index);
+	int_constant_container *container = (int_constant_container *)hash_map_get(int_constants, value);
+
+	if (container == NULL) {
+		container = (int_constant_container *)malloc(sizeof(int_constant_container));
+		assert(container != NULL);
+		container->container.key = value;
+		container->value         = allocate_index();
+		hash_map_add(int_constants, (struct container *)container);
 	}
-	return index;
+
+	return container->value;
 }
 
 static struct {
@@ -741,6 +750,19 @@ static spirv_id write_op_composite_construct(instructions_buffer *instructions, 
 	return result;
 }
 
+static spirv_id write_op_composite_extract(instructions_buffer *instructions, spirv_id type, spirv_id composite, uint32_t *indices, uint16_t indices_size) {
+	spirv_id result = allocate_index();
+
+	operands_buffer[0] = type.id;
+	operands_buffer[1] = result.id;
+	operands_buffer[2] = composite.id;
+	for (uint16_t i = 0; i < indices_size; ++i) {
+		operands_buffer[i + 3] = indices[i];
+	}
+	write_instruction(instructions, 4 + indices_size, SPIRV_OPCODE_COMPOSITE_EXTRACT, operands_buffer);
+	return result;
+}
+
 static spirv_id write_op_f_ord_less_than(instructions_buffer *instructions, spirv_id type, spirv_id operand1, spirv_id operand2) {
 	spirv_id result = allocate_index();
 
@@ -757,6 +779,36 @@ static spirv_id write_op_f_mul(instructions_buffer *instructions, spirv_id type,
 	uint32_t operands[] = {type.id, result.id, operand1.id, operand2.id};
 
 	write_instruction(instructions, WORD_COUNT(operands), SPIRV_OPCODE_F_MUL, operands);
+
+	return result;
+}
+
+static spirv_id write_op_matrix_times_vector(instructions_buffer *instructions, spirv_id type, spirv_id operand1, spirv_id operand2) {
+	spirv_id result = allocate_index();
+
+	uint32_t operands[] = {type.id, result.id, operand1.id, operand2.id};
+
+	write_instruction(instructions, WORD_COUNT(operands), SPIRV_OPCODE_MATRIX_TIMES_VECTOR, operands);
+
+	return result;
+}
+
+static spirv_id write_op_vector_times_matrix(instructions_buffer *instructions, spirv_id type, spirv_id operand1, spirv_id operand2) {
+	spirv_id result = allocate_index();
+
+	uint32_t operands[] = {type.id, result.id, operand1.id, operand2.id};
+
+	write_instruction(instructions, WORD_COUNT(operands), SPIRV_OPCODE_VECTOR_TIMES_MATRIX, operands);
+
+	return result;
+}
+
+static spirv_id write_op_matrix_times_matrix(instructions_buffer *instructions, spirv_id type, spirv_id operand1, spirv_id operand2) {
+	spirv_id result = allocate_index();
+
+	uint32_t operands[] = {type.id, result.id, operand1.id, operand2.id};
+
+	write_instruction(instructions, WORD_COUNT(operands), SPIRV_OPCODE_MATRIX_TIMES_MATRIX, operands);
 
 	return result;
 }
@@ -880,31 +932,111 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 		case OPCODE_VAR: {
 			break;
 		}
-		case OPCODE_LOAD_MEMBER: {
-			int      indices[256];
-			uint16_t indices_size = o->op_load_member.member_indices_size;
-			for (size_t i = 0; i < indices_size; ++i) {
-				indices[i] = (int)o->op_load_member.static_member_indices[i];
-			}
+		case OPCODE_LOAD_ACCESS_LIST: {
+			uint16_t indices_size = o->op_load_access_list.access_list_size;
 
-			storage_class storage;
-			if (o->op_load_member.from.index == parameter_ids[0]) {
-				storage = STORAGE_CLASS_FUNCTION;
+			if (o->op_load_access_list.from.kind == VARIABLE_INTERNAL) {
+				uint32_t indices[256];
+
+				type *s = get_type(o->op_load_access_list.from.type.type);
+
+				for (uint16_t i = 0; i < indices_size; ++i) {
+					switch (o->op_load_access_list.access_list[i].kind) {
+					case ACCESS_ELEMENT:
+						assert(false);
+						break;
+					case ACCESS_MEMBER: {
+						uint32_t member_index = 0;
+						bool     found        = false;
+
+						for (; member_index < s->members.size; ++member_index) {
+							if (s->members.m[member_index].name == o->op_load_access_list.access_list[i].access_member.name) {
+								found = true;
+								break;
+							}
+						}
+
+						assert(found);
+
+						indices[i] = member_index;
+
+						break;
+					}
+					case ACCESS_SWIZZLE: {
+						assert(o->op_load_access_list.access_list[i].access_swizzle.swizzle.size == 1);
+
+						indices[i] = o->op_load_access_list.access_list[i].access_swizzle.swizzle.indices[0];
+
+						break;
+					}
+					}
+
+					s = get_type(o->op_load_access_list.access_list[i].type);
+				}
+
+				spirv_id value = write_op_composite_extract(instructions, convert_type_to_spirv_id(o->op_load_access_list.to.type.type),
+				                                            convert_kong_index_to_spirv_id(o->op_load_access_list.from.index), indices, indices_size);
+
+				hmput(index_map, o->op_load_access_list.to.index, value);
 			}
 			else {
-				if (o->op_load_member.from.kind == VARIABLE_GLOBAL) {
-					storage = STORAGE_CLASS_UNIFORM;
+				int indices[256];
+
+				type *s = get_type(o->op_load_access_list.from.type.type);
+
+				for (uint16_t i = 0; i < indices_size; ++i) {
+					switch (o->op_load_access_list.access_list[i].kind) {
+					case ACCESS_ELEMENT:
+						assert(false);
+						break;
+					case ACCESS_MEMBER: {
+						int  member_index = 0;
+						bool found        = false;
+
+						for (; member_index < s->members.size; ++member_index) {
+							if (s->members.m[member_index].name == o->op_load_access_list.access_list[i].access_member.name) {
+								found = true;
+								break;
+							}
+						}
+
+						assert(found);
+
+						indices[i] = member_index;
+
+						break;
+					}
+					case ACCESS_SWIZZLE: {
+						assert(o->op_load_access_list.access_list[i].access_swizzle.swizzle.size == 1);
+
+						indices[i] = o->op_load_access_list.access_list[i].access_swizzle.swizzle.indices[0];
+
+						break;
+					}
+					}
+
+					s = get_type(o->op_load_access_list.access_list[i].type);
+				}
+
+				storage_class storage;
+				if (o->op_load_access_list.from.index == parameter_ids[0]) {
+					storage = STORAGE_CLASS_FUNCTION;
 				}
 				else {
-					storage = STORAGE_CLASS_INPUT;
+					if (o->op_load_access_list.from.kind == VARIABLE_GLOBAL) {
+						storage = STORAGE_CLASS_UNIFORM;
+					}
+					else {
+						storage = STORAGE_CLASS_INPUT;
+					}
 				}
+
+				spirv_id pointer = write_op_access_chain(instructions, convert_pointer_type_to_spirv_id(o->op_load_access_list.to.type.type, storage),
+				                                         convert_kong_index_to_spirv_id(o->op_load_access_list.from.index), indices, indices_size);
+
+				spirv_id value = write_op_load(instructions, convert_type_to_spirv_id(o->op_load_access_list.to.type.type), pointer);
+				hmput(index_map, o->op_load_access_list.to.index, value);
 			}
-			spirv_id pointer = write_op_access_chain(instructions, convert_pointer_type_to_spirv_id(o->op_load_member.to.type.type, storage),
-			                                         convert_kong_index_to_spirv_id(o->op_load_member.from.index), indices, indices_size);
-
-			spirv_id value = write_op_load(instructions, convert_type_to_spirv_id(o->op_load_member.to.type.type), pointer);
-			hmput(index_map, o->op_load_member.to.index, value);
-
 			break;
 		}
 		case OPCODE_LOAD_FLOAT_CONSTANT: {
@@ -961,33 +1093,67 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 			}
 			break;
 		}
-		case OPCODE_STORE_MEMBER: {
-			int      indices[256];
-			uint16_t indices_size = o->op_store_member.member_indices_size;
-			for (size_t i = 0; i < indices_size; ++i) {
-				check(!o->op_store_member.dynamic_member[i], context, "TODO");
-				indices[i] = (int)o->op_store_member.static_member_indices[i];
+		case OPCODE_STORE_ACCESS_LIST: {
+			int indices[256];
+
+			uint16_t indices_size = o->op_store_access_list.access_list_size;
+
+			type *s = get_type(o->op_store_access_list.to.type.type);
+
+			for (uint16_t i = 0; i < indices_size; ++i) {
+				switch (o->op_store_access_list.access_list[i].kind) {
+				case ACCESS_ELEMENT:
+					assert(false);
+					break;
+				case ACCESS_MEMBER: {
+					int  member_index = 0;
+					bool found        = false;
+
+					for (; member_index < s->members.size; ++member_index) {
+						if (s->members.m[member_index].name == o->op_store_access_list.access_list[i].access_member.name) {
+							found = true;
+							break;
+						}
+					}
+
+					assert(found);
+
+					indices[i] = member_index;
+
+					break;
+				}
+				case ACCESS_SWIZZLE: {
+					assert(o->op_store_access_list.access_list[i].access_swizzle.swizzle.size == 1);
+
+					indices[i] = o->op_store_access_list.access_list[i].access_swizzle.swizzle.indices[0];
+
+					break;
+				}
+				}
+
+				s = get_type(o->op_store_access_list.access_list[i].type);
 			}
 
-			type_id access_kong_type = find_access_type(indices, indices_size, o->op_store_member.to.type.type);
+			type_id access_kong_type = find_access_type(indices, indices_size, o->op_store_access_list.to.type.type);
 
 			spirv_id access_type = {0};
 
-			switch (o->op_store_member.to.kind) {
+			switch (o->op_store_access_list.to.kind) {
 			case VARIABLE_LOCAL:
 				access_type = convert_pointer_type_to_spirv_id(access_kong_type, STORAGE_CLASS_FUNCTION);
 				break;
 			case VARIABLE_GLOBAL:
 				access_type = convert_pointer_type_to_spirv_id(access_kong_type, STORAGE_CLASS_OUTPUT);
 				break;
+			case VARIABLE_INTERNAL:
+				assert(false);
+				break;
 			}
 
-			int spirv_indices[256];
-			vector_member_indices(indices, spirv_indices, indices_size, o->op_store_member.to.type.type);
-
 			spirv_id pointer =
-			    write_op_access_chain(instructions, access_type, convert_kong_index_to_spirv_id(o->op_store_member.to.index), spirv_indices, indices_size);
-			write_op_store(instructions, pointer, convert_kong_index_to_spirv_id(o->op_store_member.from.index));
+			    write_op_access_chain(instructions, access_type, convert_kong_index_to_spirv_id(o->op_store_access_list.to.index), indices, indices_size);
+			write_op_store(instructions, pointer, convert_kong_index_to_spirv_id(o->op_store_access_list.from.index));
+
 			break;
 		}
 		case OPCODE_STORE_VARIABLE: {
@@ -1046,7 +1212,14 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 					// convert_kong_index_to_spirv_id(o->op_return.var.index)); write_op_store(instructions, output_var, object);
 				}
 				else {
-					write_op_store(instructions, output_var, convert_kong_index_to_spirv_id(o->op_return.var.index));
+					spirv_id loaded;
+					if (o->op_return.var.kind == VARIABLE_INTERNAL) {
+						loaded = convert_kong_index_to_spirv_id(o->op_return.var.index);
+					}
+					else {
+						loaded = write_op_load(instructions, convert_type_to_spirv_id(float4_id), convert_kong_index_to_spirv_id(o->op_return.var.index));
+					}
+					write_op_store(instructions, output_var, loaded);
 				}
 				write_op_return(instructions);
 			}
@@ -1060,9 +1233,44 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 			break;
 		}
 		case OPCODE_MULTIPLY: {
-			spirv_id result = write_op_f_mul(instructions, convert_type_to_spirv_id(o->op_binary.result.type.type),
-			                                 convert_kong_index_to_spirv_id(o->op_binary.left.index), convert_kong_index_to_spirv_id(o->op_binary.right.index));
+			spirv_id left;
+			if (o->op_binary.left.kind != VARIABLE_INTERNAL) {
+				left =
+				    write_op_load(instructions, convert_type_to_spirv_id(o->op_binary.left.type.type), convert_kong_index_to_spirv_id(o->op_binary.left.index));
+			}
+			else {
+				left = convert_kong_index_to_spirv_id(o->op_binary.left.index);
+			}
+
+			spirv_id right;
+			if (o->op_binary.right.kind != VARIABLE_INTERNAL) {
+				right = write_op_load(instructions, convert_type_to_spirv_id(o->op_binary.right.type.type),
+				                      convert_kong_index_to_spirv_id(o->op_binary.right.index));
+			}
+			else {
+				right = convert_kong_index_to_spirv_id(o->op_binary.right.index);
+			}
+
+			bool left_is_matrix  = o->op_binary.left.type.type == float3x3_id || o->op_binary.left.type.type == float4x4_id;
+			bool right_is_matrix = o->op_binary.right.type.type == float3x3_id || o->op_binary.right.type.type == float4x4_id;
+
+			spirv_id result;
+
+			if (left_is_matrix && right_is_matrix) {
+				result = write_op_matrix_times_matrix(instructions, convert_type_to_spirv_id(o->op_binary.result.type.type), left, right);
+			}
+			else if (left_is_matrix) {
+				result = write_op_matrix_times_vector(instructions, convert_type_to_spirv_id(o->op_binary.result.type.type), left, right);
+			}
+			else if (right_is_matrix) {
+				result = write_op_vector_times_matrix(instructions, convert_type_to_spirv_id(o->op_binary.result.type.type), left, right);
+			}
+			else {
+				result = write_op_f_mul(instructions, convert_type_to_spirv_id(o->op_binary.result.type.type), left, right);
+			}
+
 			hmput(index_map, o->op_binary.result.index, result);
+
 			break;
 		}
 		case OPCODE_IF: {
@@ -1140,13 +1348,17 @@ static void write_functions(instructions_buffer *instructions, function *main, s
 	write_function(instructions, main, entry_point, stage, true, input, output);
 }
 
-static void write_constants(instructions_buffer *instructions) {
-	size_t size = hmlenu(int_constants);
-	for (size_t i = 0; i < size; ++i) {
-		write_constant_int(instructions, int_constants[i].value, int_constants[i].key);
-	}
+static void write_int_constant(struct container *container, void *data) {
+	int_constant_container *int_constant = (int_constant_container *)container;
+	instructions_buffer    *instructions = (instructions_buffer *)data;
 
-	size = hmlenu(float_constants);
+	write_constant_int(instructions, int_constant->value, int_constant->container.key);
+}
+
+static void write_constants(instructions_buffer *instructions) {
+	hash_map_iterate(int_constants, write_int_constant, instructions);
+
+	size_t size = hmlenu(float_constants);
 	for (size_t i = 0; i < size; ++i) {
 		write_constant_float(instructions, float_constants[i].value, float_constants[i].key);
 	}
@@ -1159,7 +1371,7 @@ static void write_constants(instructions_buffer *instructions) {
 
 static int global_register_indices[512];
 
-static void write_globals(instructions_buffer *instructions_block, function *main) {
+static void write_globals(instructions_buffer *decorations, instructions_buffer *instructions_block, function *main) {
 	global_array globals = {0};
 
 	if (main != NULL) {
@@ -1218,7 +1430,8 @@ static void write_globals(instructions_buffer *instructions_block, function *mai
 			type *t = get_type(g->type);
 			for (size_t i = 0; i < t->members.size; ++i) {
 			    *offset +=
-			        sprintf(&hlsl[*offset], "\t%s _%" PRIu64 "_%s;\n", type_string(t->members.m[i].type.type), g->var_index, get_name(t->members.m[i].name));
+			        sprintf(&hlsl[*offset], "\t%s _%" PRIu64 "_%s;\n", type_string(t->members.m[i].type.type), g->var_index,
+			get_name(t->members.m[i].name));
 			}
 			*offset += sprintf(&hlsl[*offset], "}\n\n");*/
 
@@ -1227,27 +1440,61 @@ static void write_globals(instructions_buffer *instructions_block, function *mai
 			spirv_id member_types[256];
 			uint16_t member_types_size = 0;
 			for (size_t j = 0; j < t->members.size; ++j) {
-				member_types[member_types_size] = convert_type_to_spirv_id(t->members.m[j].type.type);
+				type_id member_type = t->members.m[j].type.type;
+
+				member_types[member_types_size] = convert_type_to_spirv_id(member_type);
+
+				spirv_id member_pointer_type = write_type_pointer(instructions_block, STORAGE_CLASS_UNIFORM, member_types[member_types_size]);
+
+				complex_type ct;
+				ct.type    = member_type;
+				ct.pointer = true;
+				ct.storage = (uint16_t)STORAGE_CLASS_UNIFORM;
+				hmput(type_map, ct, member_pointer_type);
+
 				member_types_size += 1;
 				assert(member_types_size < 256);
 			}
+
 			spirv_id struct_type = write_type_struct(instructions_block, member_types, member_types_size);
+
+			uint32_t offset = 0;
+			for (uint32_t j = 0; j < (uint32_t)t->members.size; ++j) {
+				type_id member_type = t->members.m[j].type.type;
+
+				if (member_type == float3x3_id || member_type == float4x4_id) {
+					write_op_member_decorate(decorations, struct_type, j, DECORATION_COL_MAJOR);
+				}
+				write_op_member_decorate_value(decorations, struct_type, j, DECORATION_OFFSET, offset);
+				if (member_type == float3x3_id) {
+					write_op_member_decorate_value(decorations, struct_type, j, DECORATION_MATRIX_STRIDE, 12);
+					offset += 12;
+				}
+				if (member_type == float4x4_id) {
+					write_op_member_decorate_value(decorations, struct_type, j, DECORATION_MATRIX_STRIDE, 16);
+					offset += 16;
+				}
+			}
 
 			complex_type ct;
 			ct.type    = g->type;
-			ct.pointer = (uint16_t) false;
+			ct.pointer = false;
 			ct.storage = (uint16_t)STORAGE_CLASS_NONE;
 			hmput(type_map, ct, struct_type);
 
 			spirv_id struct_pointer_type = write_type_pointer(instructions_block, STORAGE_CLASS_UNIFORM, struct_type);
 
 			ct.type    = g->type;
-			ct.pointer = (uint16_t) true;
+			ct.pointer = true;
 			ct.storage = (uint16_t)STORAGE_CLASS_UNIFORM;
 			hmput(type_map, ct, struct_pointer_type);
 
 			spirv_id spirv_var_id = convert_kong_index_to_spirv_id(g->var_index);
 			write_op_variable_preallocated(instructions_block, struct_pointer_type, spirv_var_id, STORAGE_CLASS_UNIFORM);
+
+			write_op_decorate(decorations, struct_type, DECORATION_BLOCK);
+			write_op_decorate_value(decorations, spirv_var_id, DECORATION_DESCRIPTOR_SET, 0);
+			write_op_decorate_value(decorations, spirv_var_id, DECORATION_BINDING, 0);
 		}
 	}
 }
@@ -1271,12 +1518,8 @@ static void init_type_map(void) {
 }
 
 static void init_int_constants(void) {
-	spirv_id default_id = {0};
-	hmdefault(int_constants, default_id);
-	size_t size = hmlenu(int_constants);
-	for (size_t i = 0; i < size; ++i) {
-		hmdel(int_constants, int_constants[i].key);
-	}
+	hash_map_destroy(int_constants);
+	int_constants = hash_map_create();
 }
 
 static void init_float_constants(void) {
@@ -1342,7 +1585,7 @@ static void spirv_export_vertex(char *directory, function *main, bool debug) {
 
 	write_base_types(&constants);
 
-	write_globals(&constants, main);
+	write_globals(&decorations, &constants, main);
 
 	spirv_id types[]       = {spirv_float4_type};
 	spirv_id output_struct = write_type_struct(&constants, types, 1);

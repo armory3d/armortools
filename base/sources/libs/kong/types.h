@@ -1,4 +1,5 @@
-#pragma once
+#ifndef KONG_TYPES_HEADER
+#define KONG_TYPES_HEADER
 
 #include "names.h"
 #include "tokenizer.h"
@@ -87,6 +88,9 @@ extern type_id uint2_id;
 extern type_id uint3_id;
 extern type_id uint4_id;
 extern type_id bool_id;
+extern type_id bool2_id;
+extern type_id bool3_id;
+extern type_id bool4_id;
 extern type_id tex2d_type_id;
 extern type_id tex2darray_type_id;
 extern type_id texcube_type_id;
@@ -111,3 +115,18 @@ static inline bool is_cbv_srv_uav(type_id t) {
 static inline bool is_sampler(type_id t) {
 	return t == sampler_type_id;
 }
+
+typedef struct swizzle {
+	uint32_t indices[4];
+	uint32_t size;
+} swizzle;
+
+bool is_vector_or_scalar(type_id t);
+
+bool is_vector(type_id t);
+
+uint32_t vector_size(type_id t);
+
+type_id vector_base_type(type_id vector_type);
+
+#endif

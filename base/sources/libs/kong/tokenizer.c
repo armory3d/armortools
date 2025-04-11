@@ -373,7 +373,8 @@ tokens tokenize(const char *filename, const char *source) {
 
 				if (strcmp(long_op, "==") == 0 || strcmp(long_op, "!=") == 0 || strcmp(long_op, "<=") == 0 || strcmp(long_op, ">=") == 0 ||
 				    strcmp(long_op, "||") == 0 || strcmp(long_op, "&&") == 0 || strcmp(long_op, "->") == 0 || strcmp(long_op, "-=") == 0 ||
-				    strcmp(long_op, "+=") == 0 || strcmp(long_op, "/=") == 0 || strcmp(long_op, "*=") == 0) {
+				    strcmp(long_op, "+=") == 0 || strcmp(long_op, "/=") == 0 || strcmp(long_op, "*=") == 0 || strcmp(long_op, "<<") == 0 ||
+				    strcmp(long_op, ">>") == 0) {
 					tokenizer_buffer_add(&buffer, ch);
 					tokenizer_state_advance(&context, &state);
 				}
@@ -460,7 +461,27 @@ tokens tokenize(const char *filename, const char *source) {
 				}
 				else if (tokenizer_buffer_equals(&buffer, "^")) {
 					token token = token_create(TOKEN_OPERATOR, &state);
-					token.op    = OPERATOR_XOR;
+					token.op    = OPERATOR_BITWISE_XOR;
+					tokens_add(&tokens, token);
+				}
+				else if (tokenizer_buffer_equals(&buffer, "&")) {
+					token token = token_create(TOKEN_OPERATOR, &state);
+					token.op    = OPERATOR_BITWISE_AND;
+					tokens_add(&tokens, token);
+				}
+				else if (tokenizer_buffer_equals(&buffer, "|")) {
+					token token = token_create(TOKEN_OPERATOR, &state);
+					token.op    = OPERATOR_BITWISE_OR;
+					tokens_add(&tokens, token);
+				}
+				else if (tokenizer_buffer_equals(&buffer, "<<")) {
+					token token = token_create(TOKEN_OPERATOR, &state);
+					token.op    = OPERATOR_LEFT_SHIFT;
+					tokens_add(&tokens, token);
+				}
+				else if (tokenizer_buffer_equals(&buffer, ">>")) {
+					token token = token_create(TOKEN_OPERATOR, &state);
+					token.op    = OPERATOR_RIGHT_SHIFT;
 					tokens_add(&tokens, token);
 				}
 				else if (tokenizer_buffer_equals(&buffer, "&&")) {

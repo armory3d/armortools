@@ -8,17 +8,18 @@
 #include "names.h"
 #include "parser.h"
 #include "tokenizer.h"
+#include "transformer.h"
 #include "typer.h"
 #include "types.h"
 
-// #include "backends/cpu.h"
-// #include "backends/glsl.h"
+#include "backends/cpu.h"
+#include "backends/glsl.h"
 #include "backends/hlsl.h"
 #include "backends/metal.h"
 #include "backends/spirv.h"
 #include "backends/wgsl.h"
 
-// #include "integrations/kore3.h"
+#include "integrations/kore3.h"
 
 #include "dir.h"
 
@@ -66,7 +67,10 @@ static void read_file(char *filename) {
 
 typedef enum integration_kind { INTEGRATION_KORE3 } integration_kind;
 
-/*int main(int argc, char **argv) {
+////
+
+/*
+int main(int argc, char **argv) {
 	arg_mode mode = MODE_MODECHECK;
 
 	char            *inputs[256] = {0};
@@ -292,6 +296,12 @@ typedef enum integration_kind { INTEGRATION_KORE3 } integration_kind;
 
 	analyze();
 
+	switch (api) {
+	case API_VULKAN:
+		transform(TRANSFORM_FLAG_ONE_COMPONENT_SWIZZLE);
+		break;
+	}
+
 #ifndef NDEBUG
 	disassemble();
 #endif
@@ -329,4 +339,7 @@ typedef enum integration_kind { INTEGRATION_KORE3 } integration_kind;
 	}
 
 	return 0;
-}*/
+}
+*/
+
+////

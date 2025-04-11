@@ -6,13 +6,34 @@
 #include <stddef.h>
 #include <stdint.h>
 
-typedef enum variable_kind { VARIABLE_GLOBAL, VARIABLE_LOCAL } variable_kind;
+typedef enum variable_kind { VARIABLE_GLOBAL, VARIABLE_LOCAL, VARIABLE_INTERNAL } variable_kind;
 
 typedef struct variable {
 	variable_kind kind;
 	uint64_t      index;
 	type_ref      type;
 } variable;
+
+typedef enum access_kind { ACCESS_MEMBER, ACCESS_ELEMENT, ACCESS_SWIZZLE } access_kind;
+
+typedef struct access {
+	access_kind kind;
+	type_id     type;
+
+	union {
+		struct {
+			name_id name;
+		} access_member;
+
+		struct {
+			variable index;
+		} access_element;
+
+		struct {
+			swizzle swizzle;
+		} access_swizzle;
+	};
+} access;
 
 typedef struct opcode {
 	enum {
@@ -24,15 +45,15 @@ typedef struct opcode {
 		OPCODE_ADD_AND_STORE_VARIABLE,
 		OPCODE_DIVIDE_AND_STORE_VARIABLE,
 		OPCODE_MULTIPLY_AND_STORE_VARIABLE,
-		OPCODE_STORE_MEMBER,
-		OPCODE_SUB_AND_STORE_MEMBER,
-		OPCODE_ADD_AND_STORE_MEMBER,
-		OPCODE_DIVIDE_AND_STORE_MEMBER,
-		OPCODE_MULTIPLY_AND_STORE_MEMBER,
+		OPCODE_STORE_ACCESS_LIST,
+		OPCODE_SUB_AND_STORE_ACCESS_LIST,
+		OPCODE_ADD_AND_STORE_ACCESS_LIST,
+		OPCODE_DIVIDE_AND_STORE_ACCESS_LIST,
+		OPCODE_MULTIPLY_AND_STORE_ACCESS_LIST,
 		OPCODE_LOAD_FLOAT_CONSTANT,
 		OPCODE_LOAD_INT_CONSTANT,
 		OPCODE_LOAD_BOOL_CONSTANT,
-		OPCODE_LOAD_MEMBER,
+		OPCODE_LOAD_ACCESS_LIST,
 		OPCODE_RETURN,
 		OPCODE_DISCARD,
 		OPCODE_CALL,
@@ -49,7 +70,11 @@ typedef struct opcode {
 		OPCODE_LESS_EQUAL,
 		OPCODE_AND,
 		OPCODE_OR,
-		OPCODE_XOR,
+		OPCODE_BITWISE_XOR,
+		OPCODE_BITWISE_AND,
+		OPCODE_BITWISE_OR,
+		OPCODE_LEFT_SHIFT,
+		OPCODE_RIGHT_SHIFT,
 		OPCODE_IF,
 		OPCODE_WHILE_START,
 		OPCODE_WHILE_CONDITION,
@@ -80,13 +105,9 @@ typedef struct opcode {
 			variable from;
 			variable to;
 
-			bool     dynamic_member[64];
-			variable dynamic_member_indices[64];
-
-			uint32_t static_member_indices[64];
-
-			uint8_t member_indices_size;
-		} op_store_member;
+			access  access_list[64];
+			uint8_t access_list_size;
+		} op_store_access_list;
 		struct {
 			float    number;
 			variable to;
@@ -103,15 +124,9 @@ typedef struct opcode {
 			variable from;
 			variable to;
 
-			bool     dynamic_member[64];
-			variable dynamic_member_indices[64];
-
-			uint32_t static_member_indices[64];
-			type_id  member_parent_type;
-			bool     member_parent_array;
-
-			uint8_t member_indices_size;
-		} op_load_member;
+			access  access_list[64];
+			uint8_t access_list_size;
+		} op_load_access_list;
 		struct {
 			variable var;
 		} op_return;
@@ -166,3 +181,7 @@ void allocate_globals(void);
 struct statement;
 
 void compile_function_block(opcodes *code, struct statement *block);
+
+variable allocate_variable(type_ref type, variable_kind kind);
+
+#define OP_SIZE(op, opmember) offsetof(opcode, opmember) + sizeof(op.opmember)

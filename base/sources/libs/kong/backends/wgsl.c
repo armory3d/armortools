@@ -331,147 +331,96 @@ static void write_functions(char *code, size_t *offset) {
 					*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s;\n", o->op_var.var.index, type_string(o->op_var.var.type.type));
 				}
 				break;
-			case OPCODE_LOAD_MEMBER: {
-				uint64_t global_var_index = 0;
-				for (global_id j = 0; get_global(j) != NULL && get_global(j)->type != NO_TYPE; ++j) {
-					global *g = get_global(j);
-					if (o->op_load_member.from.index == g->var_index) {
-						global_var_index = g->var_index;
+			case OPCODE_LOAD_ACCESS_LIST: {
+				indent(code, offset, indentation);
+				*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = _%" PRIu64, o->op_load_access_list.to.index,
+				                   type_string(o->op_load_access_list.to.type.type), o->op_load_access_list.from.index);
+
+				type *s = get_type(o->op_load_access_list.from.type.type);
+
+				for (size_t i = 0; i < o->op_load_access_list.access_list_size; ++i) {
+					switch (o->op_load_access_list.access_list[i].kind) {
+					case ACCESS_ELEMENT:
+						*offset += sprintf(&code[*offset], "[_%" PRIu64 "]", o->op_load_access_list.access_list[i].access_element.index.index);
+						break;
+					case ACCESS_MEMBER:
+						*offset += sprintf(&code[*offset], ".%s", get_name(o->op_load_access_list.access_list[i].access_member.name));
+						break;
+					case ACCESS_SWIZZLE: {
+						char swizzle[4];
+
+						for (uint32_t swizzle_index = 0; swizzle_index < o->op_load_access_list.access_list[i].access_swizzle.swizzle.size; ++swizzle_index) {
+							swizzle[swizzle_index] = "xyzw"[o->op_load_access_list.access_list[i].access_swizzle.swizzle.indices[swizzle_index]];
+						}
+						swizzle[o->op_load_access_list.access_list[i].access_swizzle.swizzle.size] = 0;
+
+						*offset += sprintf(&code[*offset], ".%s", swizzle);
 						break;
 					}
+					}
+
+					s = get_type(o->op_load_access_list.access_list[i].type);
 				}
 
-				indent(code, offset, indentation);
-				*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = _%" PRIu64, o->op_load_member.to.index, type_string(o->op_load_member.to.type.type),
-				                   o->op_load_member.from.index);
-				type *s = get_type(o->op_load_member.member_parent_type);
-				for (size_t i = 0; i < o->op_load_member.member_indices_size; ++i) {
-					*offset += sprintf(&code[*offset], ".%s", get_name(s->members.m[o->op_load_member.static_member_indices[i]].name));
-					s = get_type(s->members.m[o->op_load_member.static_member_indices[i]].type.type);
-				}
 				*offset += sprintf(&code[*offset], ";\n");
+
 				break;
 			}
-			case OPCODE_STORE_MEMBER: {
-				type *s = get_type(o->op_store_member.to.type.type);
+			case OPCODE_STORE_ACCESS_LIST:
+			case OPCODE_SUB_AND_STORE_ACCESS_LIST:
+			case OPCODE_ADD_AND_STORE_ACCESS_LIST:
+			case OPCODE_DIVIDE_AND_STORE_ACCESS_LIST:
+			case OPCODE_MULTIPLY_AND_STORE_ACCESS_LIST: {
+				indent(code, offset, indentation);
+				*offset += sprintf(&code[*offset], "_%" PRIu64, o->op_store_access_list.to.index);
 
-				if (o->op_store_member.member_indices_size > 1) {
-					type_id last_type        = NO_TYPE;
-					type_id last_last_type   = NO_TYPE;
-					char   *last_member_name = NULL;
-					for (size_t i = 0; i < o->op_store_member.member_indices_size; ++i) {
-						if (i == o->op_store_member.member_indices_size - 1) {
-							if (!o->op_store_member.dynamic_member[i]) {
-								last_member_name = get_name(s->members.m[o->op_store_member.static_member_indices[i]].name);
-							}
+				type *s = get_type(o->op_store_access_list.to.type.type);
+
+				for (size_t i = 0; i < o->op_store_access_list.access_list_size; ++i) {
+					switch (o->op_store_access_list.access_list[i].kind) {
+					case ACCESS_ELEMENT:
+						*offset += sprintf(&code[*offset], "[_%" PRIu64 "]", o->op_store_access_list.access_list[i].access_element.index.index);
+						break;
+					case ACCESS_MEMBER:
+						*offset += sprintf(&code[*offset], ".%s", get_name(o->op_store_access_list.access_list[i].access_member.name));
+						break;
+					case ACCESS_SWIZZLE: {
+						char swizzle[4];
+
+						for (uint32_t swizzle_index = 0; swizzle_index < o->op_store_access_list.access_list[i].access_swizzle.swizzle.size; ++swizzle_index) {
+							swizzle[swizzle_index] = "xyzw"[o->op_store_access_list.access_list[i].access_swizzle.swizzle.indices[swizzle_index]];
 						}
+						swizzle[o->op_store_access_list.access_list[i].access_swizzle.swizzle.size] = 0;
 
-						if (!o->op_store_member.dynamic_member[i]) {
-							type_id t = s->members.m[o->op_store_member.static_member_indices[i]].type.type;
-							s         = get_type(t);
-
-							if (i == o->op_store_member.member_indices_size - 2) {
-								last_last_type = t;
-							}
-							else if (i == o->op_store_member.member_indices_size - 1) {
-								last_type = t;
-							}
-						}
-					}
-
-					debug_context context = {0};
-					check(last_last_type != NO_TYPE, context, "last_last_type not found");
-					check(last_type != NO_TYPE, context, "last_type not found");
-					check(last_member_name != NULL, context, "last_member_name not found");
-
-					if ((last_last_type == float2_id || last_last_type == float3_id || last_last_type == float4_id) &&
-					    (last_type == float2_id || last_type == float3_id || last_type == float4_id)) {
-						{
-							int count = 1;
-							if (last_type == float2_id) {
-								count = 2;
-							}
-							else if (last_type == float3_id) {
-								count = 3;
-							}
-							else if (last_type == float4_id) {
-								count = 4;
-							}
-
-							for (int element = 0; element < count; ++element) {
-								*offset += sprintf(&code[*offset], "\t_%" PRIu64, o->op_store_member.to.index);
-
-								s = get_type(o->op_store_member.to.type.type);
-
-								for (size_t i = 0; i < o->op_store_member.member_indices_size; ++i) {
-									bool is_array = s->array_size > 0 || o->op_store_member.to.type.type == tex2d_type_id;
-
-									if (is_array) {
-										if (o->op_store_member.dynamic_member[i]) {
-											*offset += sprintf(&code[*offset], "[_%" PRIu64 "]", o->op_store_member.dynamic_member_indices[i].index);
-										}
-										else {
-											*offset += sprintf(&code[*offset], "[%i]", o->op_store_member.static_member_indices[i]);
-										}
-										is_array = false;
-
-										s = get_type(s->base);
-									}
-									else {
-										debug_context context = {0};
-										check(!o->op_store_member.dynamic_member[i], context, "Unexpected dynamic member");
-										check(o->op_store_member.static_member_indices[i] < s->members.size, context, "Member index out of bounds");
-
-										if (i == o->op_store_member.member_indices_size - 1) {
-											*offset += sprintf(&code[*offset], ".%c", last_member_name[element]);
-										}
-										else {
-											*offset += sprintf(&code[*offset], ".%s", get_name(s->members.m[o->op_store_member.static_member_indices[i]].name));
-										}
-
-										s = get_type(s->members.m[o->op_store_member.static_member_indices[i]].type.type);
-									}
-								}
-								*offset += sprintf(&code[*offset], " = _%" PRIu64 ".%c;\n", o->op_store_member.from.index, last_member_name[element]);
-							}
-						}
+						*offset += sprintf(&code[*offset], ".%s", swizzle);
 
 						break;
 					}
+					}
+
+					s = get_type(o->op_store_access_list.access_list[i].type);
 				}
 
-				indent(code, offset, indentation);
-				*offset += sprintf(&code[*offset], "_%" PRIu64, o->op_store_member.to.index);
-
-				s = get_type(o->op_store_member.to.type.type);
-
-				for (size_t i = 0; i < o->op_store_member.member_indices_size; ++i) {
-					bool is_array = s->array_size > 0 || o->op_store_member.to.type.type == tex2d_type_id;
-
-					if (is_array) {
-						if (o->op_store_member.dynamic_member[i]) {
-							*offset += sprintf(&code[*offset], "[_%" PRIu64 "]", o->op_store_member.dynamic_member_indices[i].index);
-						}
-						else {
-							*offset += sprintf(&code[*offset], "[%i]", o->op_store_member.static_member_indices[i]);
-						}
-						is_array = false;
-
-						s = get_type(s->base);
-					}
-					else {
-						debug_context context = {0};
-						check(!o->op_store_member.dynamic_member[i], context, "Unexpected dynamic member");
-						check(o->op_store_member.static_member_indices[i] < s->members.size, context, "Member index out of bounds");
-
-						*offset += sprintf(&code[*offset], ".%s", get_name(s->members.m[o->op_store_member.static_member_indices[i]].name));
-
-						s = get_type(s->members.m[o->op_store_member.static_member_indices[i]].type.type);
-					}
+				switch (o->type) {
+				case OPCODE_STORE_ACCESS_LIST:
+					*offset += sprintf(&code[*offset], " = _%" PRIu64 ";\n", o->op_store_access_list.from.index);
+					break;
+				case OPCODE_SUB_AND_STORE_ACCESS_LIST:
+					*offset += sprintf(&code[*offset], " -= _%" PRIu64 ";\n", o->op_store_access_list.from.index);
+					break;
+				case OPCODE_ADD_AND_STORE_ACCESS_LIST:
+					*offset += sprintf(&code[*offset], " += _%" PRIu64 ";\n", o->op_store_access_list.from.index);
+					break;
+				case OPCODE_DIVIDE_AND_STORE_ACCESS_LIST:
+					*offset += sprintf(&code[*offset], " /= _%" PRIu64 ";\n", o->op_store_access_list.from.index);
+					break;
+				case OPCODE_MULTIPLY_AND_STORE_ACCESS_LIST:
+					*offset += sprintf(&code[*offset], " *= _%" PRIu64 ";\n", o->op_store_access_list.from.index);
+					break;
+				default:
+					assert(false);
+					break;
 				}
-
-				*offset += sprintf(&code[*offset], " = _%" PRIu64 ";\n", o->op_store_member.from.index);
-
 				break;
 			}
 			case OPCODE_RETURN: {

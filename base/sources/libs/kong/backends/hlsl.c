@@ -90,43 +90,41 @@ static char *function_string(name_id func) {
 }
 
 static void write_bytecode(char *hlsl, char *directory, const char *filename, const char *name, uint8_t *output, size_t output_size) {
-
 	char full_filename[512];
 
 	{
-		// sprintf(full_filename, "%s/%s.h", directory, filename);
-		// FILE *file = fopen(full_filename, "wb");
+		sprintf(full_filename, "%s/%s.h", directory, filename);
+		FILE *file = fopen(full_filename, "wb");
 
-		// if (file == NULL) {
-		// 	debug_context context = {0};
-		// 	error(context, "Could not open file %s.", full_filename);
-		// }
+		if (file == NULL) {
+			debug_context context = {0};
+			error(context, "Could not open file %s.", full_filename);
+		}
 
-		// fprintf(file, "#ifndef KONG_%s_HEADER\n", name);
-		// fprintf(file, "#define KONG_%s_HEADER\n\n", name);
+		fprintf(file, "#ifndef KONG_%s_HEADER\n", name);
+		fprintf(file, "#define KONG_%s_HEADER\n\n", name);
 
-		// fprintf(file, "#include <stddef.h>\n");
-		// fprintf(file, "#include <stdint.h>\n\n");
+		fprintf(file, "#include <stddef.h>\n");
+		fprintf(file, "#include <stdint.h>\n\n");
 
-		// fprintf(file, "#ifdef __cplusplus\n");
-		// fprintf(file, "extern \"C\" {\n");
-		// fprintf(file, "#endif\n\n");
+		fprintf(file, "#ifdef __cplusplus\n");
+		fprintf(file, "extern \"C\" {\n");
+		fprintf(file, "#endif\n\n");
 
-		// fprintf(file, "extern uint8_t *%s;\n", name);
-		// fprintf(file, "extern size_t %s_size;\n", name);
+		fprintf(file, "extern uint8_t *%s;\n", name);
+		fprintf(file, "extern size_t %s_size;\n", name);
 
-		// fprintf(file, "\n#ifdef __cplusplus\n");
-		// fprintf(file, "}\n");
-		// fprintf(file, "#endif\n\n");
+		fprintf(file, "\n#ifdef __cplusplus\n");
+		fprintf(file, "}\n");
+		fprintf(file, "#endif\n\n");
 
-		// fprintf(file, "#endif\n");
+		fprintf(file, "#endif\n");
 
-		// fclose(file);
+		fclose(file);
 	}
 
 	{
-		// sprintf(full_filename, "%s/%s.c", directory, filename);
-		sprintf(full_filename, "%s/%s.hlsl", directory, filename);
+		sprintf(full_filename, "%s/%s.c", directory, filename);
 
 		FILE *file = fopen(full_filename, "wb");
 
@@ -135,49 +133,48 @@ static void write_bytecode(char *hlsl, char *directory, const char *filename, co
 			error(context, "Could not open file %s.", full_filename);
 		}
 
-		// fprintf(file, "#include \"%s.h\"\n\n", filename);
+		fprintf(file, "#include \"%s.h\"\n\n", filename);
 
-		// fprintf(file, "uint8_t *%s = \"", name);
-		// for (size_t i = 0; i < output_size; ++i) {
-		// 	// based on the encoding described in https://github.com/adobe/bin2c
-		// 	if (output[i] == '!' || output[i] == '#' || (output[i] >= '%' && output[i] <= '>') || (output[i] >= 'A' && output[i] <= '[') ||
-		// 	    (output[i] >= ']' && output[i] <= '~')) {
-		// 		fprintf(file, "%c", output[i]);
-		// 	}
-		// 	else if (output[i] == '\a') {
-		// 		fprintf(file, "\\a");
-		// 	}
-		// 	else if (output[i] == '\b') {
-		// 		fprintf(file, "\\b");
-		// 	}
-		// 	else if (output[i] == '\t') {
-		// 		fprintf(file, "\\t");
-		// 	}
-		// 	else if (output[i] == '\v') {
-		// 		fprintf(file, "\\v");
-		// 	}
-		// 	else if (output[i] == '\f') {
-		// 		fprintf(file, "\\f");
-		// 	}
-		// 	else if (output[i] == '\r') {
-		// 		fprintf(file, "\\r");
-		// 	}
-		// 	else if (output[i] == '\"') {
-		// 		fprintf(file, "\\\"");
-		// 	}
-		// 	else if (output[i] == '\\') {
-		// 		fprintf(file, "\\\\");
-		// 	}
-		// 	else {
-		// 		fprintf(file, "\\%03o", output[i]);
-		// 	}
-		// }
-		// fprintf(file, "\";\n");
+		fprintf(file, "uint8_t *%s = \"", name);
+		for (size_t i = 0; i < output_size; ++i) {
+			// based on the encoding described in https://github.com/adobe/bin2c
+			if (output[i] == '!' || output[i] == '#' || (output[i] >= '%' && output[i] <= '>') || (output[i] >= 'A' && output[i] <= '[') ||
+			    (output[i] >= ']' && output[i] <= '~')) {
+				fprintf(file, "%c", output[i]);
+			}
+			else if (output[i] == '\a') {
+				fprintf(file, "\\a");
+			}
+			else if (output[i] == '\b') {
+				fprintf(file, "\\b");
+			}
+			else if (output[i] == '\t') {
+				fprintf(file, "\\t");
+			}
+			else if (output[i] == '\v') {
+				fprintf(file, "\\v");
+			}
+			else if (output[i] == '\f') {
+				fprintf(file, "\\f");
+			}
+			else if (output[i] == '\r') {
+				fprintf(file, "\\r");
+			}
+			else if (output[i] == '\"') {
+				fprintf(file, "\\\"");
+			}
+			else if (output[i] == '\\') {
+				fprintf(file, "\\\\");
+			}
+			else {
+				fprintf(file, "\\%03o", output[i]);
+			}
+		}
+		fprintf(file, "\";\n");
 
-		// fprintf(file, "size_t %s_size = %zu;\n\n", name, output_size);
+		fprintf(file, "size_t %s_size = %zu;\n\n", name, output_size);
 
-		// fprintf(file, "/*\n%s*/\n", hlsl);
-		fprintf(file, "%s\n", hlsl);
+		fprintf(file, "/*\n%s*/\n", hlsl);
 
 		fclose(file);
 	}
@@ -1117,12 +1114,12 @@ static void write_functions(char *hlsl, size_t *offset, shader_stage stage, func
 		while (index < size) {
 			opcode *o = (opcode *)&data[index];
 			switch (o->type) {
-			case OPCODE_LOAD_MEMBER: {
+			case OPCODE_LOAD_ACCESS_LIST: {
 				uint64_t global_var_index = 0;
 				global  *g                = NULL;
 				for (global_id j = 0; get_global(j) != NULL && get_global(j)->type != NO_TYPE; ++j) {
 					g = get_global(j);
-					if (o->op_load_member.from.index == g->var_index) {
+					if (o->op_load_access_list.from.index == g->var_index) {
 						global_var_index = g->var_index;
 						if (get_type(g->type)->built_in) {
 							global_var_index = 0;
@@ -1132,49 +1129,66 @@ static void write_functions(char *hlsl, size_t *offset, shader_stage stage, func
 				}
 
 				indent(hlsl, offset, indentation);
-				*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = _%" PRIu64, type_string(o->op_load_member.to.type.type), o->op_load_member.to.index,
-				                   o->op_load_member.from.index);
-				type *s = get_type(o->op_load_member.member_parent_type);
-				for (size_t i = 0; i < o->op_load_member.member_indices_size; ++i) {
-					if (o->op_load_member.dynamic_member[i]) {
-						type *from_type = get_type(o->op_load_member.from.type.type);
+				*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = _%" PRIu64, type_string(o->op_load_access_list.to.type.type),
+				                   o->op_load_access_list.to.index, o->op_load_access_list.from.index);
+
+				type *s = get_type(o->op_load_access_list.from.type.type);
+
+				for (size_t i = 0; i < o->op_load_access_list.access_list_size; ++i) {
+					switch (o->op_load_access_list.access_list[i].kind) {
+					case ACCESS_ELEMENT: {
+						type *from_type = get_type(o->op_load_access_list.from.type.type);
 
 						if (from_type->array_size == UINT32_MAX && from_type->base == tex2d_type_id) {
-							*offset += sprintf(&hlsl[*offset], "[NonUniformResourceIndex(_%" PRIu64 ")]", o->op_load_member.dynamic_member_indices[i].index);
+							*offset += sprintf(&hlsl[*offset], "[NonUniformResourceIndex(_%" PRIu64 ")]",
+							                   o->op_load_access_list.access_list[i].access_element.index.index);
 						}
 						else if (global_var_index != 0 && i == 0 && get_type(from_type->base)->built_in) {
-							*offset += sprintf(&hlsl[*offset], "[_%" PRIu64 "].data", o->op_load_member.dynamic_member_indices[i].index);
+							*offset += sprintf(&hlsl[*offset], "[_%" PRIu64 "].data", o->op_load_access_list.access_list[i].access_element.index.index);
 						}
 						else {
-							*offset += sprintf(&hlsl[*offset], "[_%" PRIu64 "]", o->op_load_member.dynamic_member_indices[i].index);
+							*offset += sprintf(&hlsl[*offset], "[_%" PRIu64 "]", o->op_load_access_list.access_list[i].access_element.index.index);
 						}
-
-						s = get_type(o->op_load_member.dynamic_member_indices[i].type.type);
+						break;
 					}
-					else {
+					case ACCESS_MEMBER:
 						if (global_var_index != 0 && i == 0) {
-							*offset += sprintf(&hlsl[*offset], "_%s", get_name(s->members.m[o->op_load_member.static_member_indices[i]].name));
+							*offset += sprintf(&hlsl[*offset], "_%s", member_string(s, o->op_load_access_list.access_list[i].access_member.name));
 						}
 						else {
-							*offset += sprintf(&hlsl[*offset], ".%s", get_name(s->members.m[o->op_load_member.static_member_indices[i]].name));
+							*offset += sprintf(&hlsl[*offset], ".%s", member_string(s, o->op_load_access_list.access_list[i].access_member.name));
 						}
+						break;
+					case ACCESS_SWIZZLE: {
+						char swizzle[4];
 
-						s = get_type(s->members.m[o->op_load_member.static_member_indices[i]].type.type);
+						for (uint32_t swizzle_index = 0; swizzle_index < o->op_load_access_list.access_list[i].access_swizzle.swizzle.size; ++swizzle_index) {
+							swizzle[swizzle_index] = "xyzw"[o->op_load_access_list.access_list[i].access_swizzle.swizzle.indices[swizzle_index]];
+						}
+						swizzle[o->op_load_access_list.access_list[i].access_swizzle.swizzle.size] = 0;
+
+						*offset += sprintf(&hlsl[*offset], ".%s", swizzle);
+						break;
 					}
+					}
+
+					s = get_type(o->op_load_access_list.access_list[i].type);
 				}
+
 				*offset += sprintf(&hlsl[*offset], ";\n");
+
 				break;
 			}
-			case OPCODE_STORE_MEMBER:
-			case OPCODE_SUB_AND_STORE_MEMBER:
-			case OPCODE_ADD_AND_STORE_MEMBER:
-			case OPCODE_DIVIDE_AND_STORE_MEMBER:
-			case OPCODE_MULTIPLY_AND_STORE_MEMBER: {
+			case OPCODE_STORE_ACCESS_LIST:
+			case OPCODE_SUB_AND_STORE_ACCESS_LIST:
+			case OPCODE_ADD_AND_STORE_ACCESS_LIST:
+			case OPCODE_DIVIDE_AND_STORE_ACCESS_LIST:
+			case OPCODE_MULTIPLY_AND_STORE_ACCESS_LIST: {
 				uint64_t global_var_index = 0;
 				global  *g                = NULL;
 				for (global_id j = 0; get_global(j) != NULL && get_global(j)->type != NO_TYPE; ++j) {
 					g = get_global(j);
-					if (o->op_store_member.to.index == g->var_index) {
+					if (o->op_store_access_list.to.index == g->var_index) {
 						global_var_index = g->var_index;
 						if (get_type(g->type)->built_in) {
 							global_var_index = 0;
@@ -1184,59 +1198,58 @@ static void write_functions(char *hlsl, size_t *offset, shader_stage stage, func
 				}
 
 				indent(hlsl, offset, indentation);
-				*offset += sprintf(&hlsl[*offset], "_%" PRIu64, o->op_store_member.to.index);
+				*offset += sprintf(&hlsl[*offset], "_%" PRIu64, o->op_store_access_list.to.index);
 
-				type *s = get_type(o->op_store_member.to.type.type);
+				type *s = get_type(o->op_store_access_list.to.type.type);
 
-				for (size_t i = 0; i < o->op_store_member.member_indices_size; ++i) {
-					bool is_array = s->array_size > 0 || o->op_store_member.to.type.type == tex2d_type_id;
-
-					if (is_array) {
+				for (size_t i = 0; i < o->op_store_access_list.access_list_size; ++i) {
+					switch (o->op_store_access_list.access_list[i].kind) {
+					case ACCESS_ELEMENT: {
 						type *from_type = get_type(s->base);
 
 						if (global_var_index != 0 && i == 0 && from_type->built_in) {
-							if (o->op_store_member.dynamic_member[i]) {
-								*offset += sprintf(&hlsl[*offset], "[_%" PRIu64 "].data", o->op_store_member.dynamic_member_indices[i].index);
-							}
-							else {
-								*offset += sprintf(&hlsl[*offset], "[%i].data", o->op_store_member.static_member_indices[i]);
-							}
-						}
-						else if (o->op_store_member.dynamic_member[i]) {
-							*offset += sprintf(&hlsl[*offset], "[_%" PRIu64 "]", o->op_store_member.dynamic_member_indices[i].index);
+							*offset += sprintf(&hlsl[*offset], "[_%" PRIu64 "].data", o->op_store_access_list.access_list[i].access_element.index.index);
 						}
 						else {
-							*offset += sprintf(&hlsl[*offset], "[%i]", o->op_store_member.static_member_indices[i]);
+							*offset += sprintf(&hlsl[*offset], "[_%" PRIu64 "]", o->op_store_access_list.access_list[i].access_element.index.index);
 						}
-
-						s = from_type;
+						break;
 					}
-					else {
-						debug_context context = {0};
-						check(!o->op_store_member.dynamic_member[i], context, "Unexpected dynamic member");
-						check(o->op_store_member.static_member_indices[i] < s->members.size, context, "Member index out of bounds");
+					case ACCESS_MEMBER:
+						*offset += sprintf(&hlsl[*offset], ".%s", member_string(s, o->op_store_access_list.access_list[i].access_member.name));
+						break;
+					case ACCESS_SWIZZLE: {
+						char swizzle[4];
 
-						*offset += sprintf(&hlsl[*offset], ".%s", member_string(s, s->members.m[o->op_store_member.static_member_indices[i]].name));
+						for (uint32_t swizzle_index = 0; swizzle_index < o->op_store_access_list.access_list[i].access_swizzle.swizzle.size; ++swizzle_index) {
+							swizzle[swizzle_index] = "xyzw"[o->op_store_access_list.access_list[i].access_swizzle.swizzle.indices[swizzle_index]];
+						}
+						swizzle[o->op_store_access_list.access_list[i].access_swizzle.swizzle.size] = 0;
 
-						s = get_type(s->members.m[o->op_store_member.static_member_indices[i]].type.type);
+						*offset += sprintf(&hlsl[*offset], ".%s", swizzle);
+
+						break;
 					}
+					}
+
+					s = get_type(o->op_store_access_list.access_list[i].type);
 				}
 
 				switch (o->type) {
-				case OPCODE_STORE_MEMBER:
-					*offset += sprintf(&hlsl[*offset], " = _%" PRIu64 ";\n", o->op_store_member.from.index);
+				case OPCODE_STORE_ACCESS_LIST:
+					*offset += sprintf(&hlsl[*offset], " = _%" PRIu64 ";\n", o->op_store_access_list.from.index);
 					break;
-				case OPCODE_SUB_AND_STORE_MEMBER:
-					*offset += sprintf(&hlsl[*offset], " -= _%" PRIu64 ";\n", o->op_store_member.from.index);
+				case OPCODE_SUB_AND_STORE_ACCESS_LIST:
+					*offset += sprintf(&hlsl[*offset], " -= _%" PRIu64 ";\n", o->op_store_access_list.from.index);
 					break;
-				case OPCODE_ADD_AND_STORE_MEMBER:
-					*offset += sprintf(&hlsl[*offset], " += _%" PRIu64 ";\n", o->op_store_member.from.index);
+				case OPCODE_ADD_AND_STORE_ACCESS_LIST:
+					*offset += sprintf(&hlsl[*offset], " += _%" PRIu64 ";\n", o->op_store_access_list.from.index);
 					break;
-				case OPCODE_DIVIDE_AND_STORE_MEMBER:
-					*offset += sprintf(&hlsl[*offset], " /= _%" PRIu64 ";\n", o->op_store_member.from.index);
+				case OPCODE_DIVIDE_AND_STORE_ACCESS_LIST:
+					*offset += sprintf(&hlsl[*offset], " /= _%" PRIu64 ";\n", o->op_store_access_list.from.index);
 					break;
-				case OPCODE_MULTIPLY_AND_STORE_MEMBER:
-					*offset += sprintf(&hlsl[*offset], " *= _%" PRIu64 ";\n", o->op_store_member.from.index);
+				case OPCODE_MULTIPLY_AND_STORE_ACCESS_LIST:
+					*offset += sprintf(&hlsl[*offset], " *= _%" PRIu64 ";\n", o->op_store_access_list.from.index);
 					break;
 				default:
 					assert(false);
@@ -1360,66 +1373,72 @@ static void write_functions(char *hlsl, size_t *offset, shader_stage stage, func
 					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = saturate(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
 					                   o->op_call.var.index, o->op_call.parameters[0].index);
 				}
-				else if (o->op_call.func == add_name("lerp3")) { ////
+
+				////
+
+				else if (o->op_call.func == add_name("lerp3")) {
 					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = lerp(_%" PRIu64 ", _%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
 					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index);
 				}
-				else if (o->op_call.func == add_name("lerp4")) { ////
+				else if (o->op_call.func == add_name("lerp4")) {
 					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = lerp(_%" PRIu64 ", _%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
 					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index);
 				}
-				else if (o->op_call.func == add_name("frac3")) { ////
+				else if (o->op_call.func == add_name("frac3")) {
 					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = frac(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
 					                   o->op_call.var.index, o->op_call.parameters[0].index);
 				}
-				else if (o->op_call.func == add_name("abs3")) { ////
+				else if (o->op_call.func == add_name("abs3")) {
 					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = abs(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
 					                   o->op_call.var.index, o->op_call.parameters[0].index);
 				}
-				else if (o->op_call.func == add_name("clamp3")) { ////
+				else if (o->op_call.func == add_name("clamp3")) {
 					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = clamp(_%" PRIu64 ", _%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
 					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index);
 				}
-				else if (o->op_call.func == add_name("min3")) { ////
+				else if (o->op_call.func == add_name("min3")) {
 					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = min(_%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
 					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index);
 				}
-				else if (o->op_call.func == add_name("max3")) { ////
+				else if (o->op_call.func == add_name("max3")) {
 					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = max(_%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
 					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index);
 				}
-				else if (o->op_call.func == add_name("step3")) { ////
+				else if (o->op_call.func == add_name("step3")) {
 					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = step(_%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
 					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index);
 				}
-				else if (o->op_call.func == add_name("pow3")) { ////
+				else if (o->op_call.func == add_name("pow3")) {
 					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = pow(_%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
 					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index);
 				}
-				else if (o->op_call.func == add_name("floor3")) { ////
+				else if (o->op_call.func == add_name("floor3")) {
 					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = floor(_%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
 					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index);
 				}
-				else if (o->op_call.func == add_name("ceil3")) { ////
+				else if (o->op_call.func == add_name("ceil3")) {
 					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = ceil(_%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
 					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index);
 				}
-				else if (o->op_call.func == add_name("ddx2")) { ////
+				else if (o->op_call.func == add_name("ddx2")) {
 					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = ddx(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
 					                   o->op_call.var.index, o->op_call.parameters[0].index);
 				}
-				else if (o->op_call.func == add_name("ddy2")) { ////
+				else if (o->op_call.func == add_name("ddy2")) {
 					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = ddx(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
 					                   o->op_call.var.index, o->op_call.parameters[0].index);
 				}
-				else if (o->op_call.func == add_name("ddx3")) { ////
+				else if (o->op_call.func == add_name("ddx3")) {
 					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = ddx(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
 					                   o->op_call.var.index, o->op_call.parameters[0].index);
 				}
-				else if (o->op_call.func == add_name("ddy3")) { ////
+				else if (o->op_call.func == add_name("ddy3")) {
 					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = ddx(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
 					                   o->op_call.var.index, o->op_call.parameters[0].index);
 				}
+
+				////
+
 				else if (o->op_call.func == add_name("trace_ray")) {
 					check(o->op_call.parameters_size == 3, context, "trace_ray requires three parameters");
 					*offset += sprintf(&hlsl[*offset], "TraceRay(_%" PRIu64 ", RAY_FLAG_NONE, 0xFF, 0, 0, 0, _%" PRIu64 ", _%" PRIu64 ");\n",
@@ -1499,24 +1518,23 @@ static void hlsl_export_vertex(char *directory, api_kind d3d, function *main, bo
 
 	uint8_t *output      = NULL;
 	size_t   output_size = 0;
-	// int      result      = 1;
-	// switch (d3d) {
-	// case API_DIRECT3D11:
-	// 	result = compile_hlsl_to_d3d11(hlsl, &output, &output_size, SHADER_STAGE_VERTEX, debug);
-	// 	break;
-	// case API_DIRECT3D12:
-	// 	result = compile_hlsl_to_d3d12(hlsl, &output, &output_size, SHADER_STAGE_VERTEX, debug);
-	// 	break;
-	// default:
-	// 	error(context, "Unsupported API for HLSL");
-	// }
-	// check(result == 0, context, "HLSL compilation failed");
+	int      result      = 1;
+	switch (d3d) {
+	case API_DIRECT3D11:
+		result = compile_hlsl_to_d3d11(hlsl, &output, &output_size, SHADER_STAGE_VERTEX, debug);
+		break;
+	case API_DIRECT3D12:
+		result = compile_hlsl_to_d3d12(hlsl, &output, &output_size, SHADER_STAGE_VERTEX, debug);
+		break;
+	default:
+		error(context, "Unsupported API for HLSL");
+	}
+	check(result == 0, context, "HLSL compilation failed");
 
 	char *name = get_name(main->name);
 
 	char filename[512];
-	// sprintf(filename, "kong_%s", name);
-	sprintf(filename, "%s", name);
+	sprintf(filename, "kong_%s", name);
 
 	char var_name[256];
 	sprintf(var_name, "%s_code", name);
@@ -1525,67 +1543,67 @@ static void hlsl_export_vertex(char *directory, api_kind d3d, function *main, bo
 }
 
 static void hlsl_export_amplification(char *directory, function *main, bool debug) {
-	// char  *hlsl   = (char *)calloc(1024 * 1024, 1);
-	// size_t offset = 0;
+	char  *hlsl   = (char *)calloc(1024 * 1024, 1);
+	size_t offset = 0;
 
-	// write_types(hlsl, &offset, SHADER_STAGE_AMPLIFICATION, NULL, 0, NO_TYPE, main, NULL, 0);
+	write_types(hlsl, &offset, SHADER_STAGE_AMPLIFICATION, NULL, 0, NO_TYPE, main, NULL, 0);
 
-	// write_globals(hlsl, &offset, main, NULL, 0);
+	write_globals(hlsl, &offset, main, NULL, 0);
 
-	// write_functions(hlsl, &offset, SHADER_STAGE_AMPLIFICATION, main, NULL, 0);
+	write_functions(hlsl, &offset, SHADER_STAGE_AMPLIFICATION, main, NULL, 0);
 
-	// uint8_t *output      = NULL;
-	// size_t   output_size = 0;
-	// int      result      = compile_hlsl_to_d3d12(hlsl, &output, &output_size, SHADER_STAGE_AMPLIFICATION, debug);
+	uint8_t *output      = NULL;
+	size_t   output_size = 0;
+	int      result      = compile_hlsl_to_d3d12(hlsl, &output, &output_size, SHADER_STAGE_AMPLIFICATION, debug);
 
-	// debug_context context = {0};
-	// check(result == 0, context, "HLSL compilation failed");
+	debug_context context = {0};
+	check(result == 0, context, "HLSL compilation failed");
 
-	// char *name = get_name(main->name);
+	char *name = get_name(main->name);
 
-	// char filename[512];
-	// sprintf(filename, "kong_%s", name);
+	char filename[512];
+	sprintf(filename, "kong_%s", name);
 
-	// char var_name[256];
-	// sprintf(var_name, "%s_code", name);
+	char var_name[256];
+	sprintf(var_name, "%s_code", name);
 
-	// write_bytecode(hlsl, directory, filename, var_name, output, output_size);
+	write_bytecode(hlsl, directory, filename, var_name, output, output_size);
 }
 
 static void hlsl_export_mesh(char *directory, function *main, bool debug) {
-	// char  *hlsl   = (char *)calloc(1024 * 1024, 1);
-	// size_t offset = 0;
+	char  *hlsl   = (char *)calloc(1024 * 1024, 1);
+	size_t offset = 0;
 
-	// attribute *vertices_attribute = find_attribute(&main->attributes, add_name("vertices"));
-	// if (vertices_attribute == NULL || vertices_attribute->paramters_count != 2) {
-	// 	debug_context context = {0};
-	// 	error(context, "Mesh function requires a vertices attribute with two parameters");
-	// }
-	// assert(vertices_attribute != NULL);
-	// type_id vertex_output = (type_id)vertices_attribute->parameters[1];
+	attribute *vertices_attribute = find_attribute(&main->attributes, add_name("vertices"));
+	if (vertices_attribute == NULL || vertices_attribute->paramters_count != 2) {
+		debug_context context = {0};
+		error(context, "Mesh function requires a vertices attribute with two parameters");
+	}
+	assert(vertices_attribute != NULL);
+	type_id vertex_output = (type_id)vertices_attribute->parameters[1];
 
-	// write_types(hlsl, &offset, SHADER_STAGE_MESH, NULL, 0, vertex_output, main, NULL, 0);
+	write_types(hlsl, &offset, SHADER_STAGE_MESH, NULL, 0, vertex_output, main, NULL, 0);
 
-	// write_globals(hlsl, &offset, main, NULL, 0);
+	write_globals(hlsl, &offset, main, NULL, 0);
 
-	// write_functions(hlsl, &offset, SHADER_STAGE_MESH, main, NULL, 0);
+	write_functions(hlsl, &offset, SHADER_STAGE_MESH, main, NULL, 0);
 
-	// uint8_t *output      = NULL;
-	// size_t   output_size = 0;
-	// int      result      = compile_hlsl_to_d3d12(hlsl, &output, &output_size, SHADER_STAGE_MESH, debug);
+	uint8_t *output      = NULL;
+	size_t   output_size = 0;
+	int      result      = compile_hlsl_to_d3d12(hlsl, &output, &output_size, SHADER_STAGE_MESH, debug);
 
-	// debug_context context = {0};
-	// check(result == 0, context, "HLSL compilation failed");
+	debug_context context = {0};
+	check(result == 0, context, "HLSL compilation failed");
 
-	// char *name = get_name(main->name);
+	char *name = get_name(main->name);
 
-	// char filename[512];
-	// sprintf(filename, "kong_%s", name);
+	char filename[512];
+	sprintf(filename, "kong_%s", name);
 
-	// char var_name[256];
-	// sprintf(var_name, "%s_code", name);
+	char var_name[256];
+	sprintf(var_name, "%s_code", name);
 
-	// write_bytecode(hlsl, directory, filename, var_name, output, output_size);
+	write_bytecode(hlsl, directory, filename, var_name, output, output_size);
 }
 
 static void hlsl_export_fragment(char *directory, api_kind d3d, function *main, bool debug) {
@@ -1606,24 +1624,23 @@ static void hlsl_export_fragment(char *directory, api_kind d3d, function *main, 
 
 	uint8_t *output      = NULL;
 	size_t   output_size = 0;
-	// int      result      = 1;
-	// switch (d3d) {
-	// case API_DIRECT3D11:
-	// 	result = compile_hlsl_to_d3d11(hlsl, &output, &output_size, SHADER_STAGE_FRAGMENT, debug);
-	// 	break;
-	// case API_DIRECT3D12:
-	// 	result = compile_hlsl_to_d3d12(hlsl, &output, &output_size, SHADER_STAGE_FRAGMENT, debug);
-	// 	break;
-	// default:
-	// 	error(context, "Unsupported API for HLSL");
-	// }
-	// check(result == 0, context, "HLSL compilation failed");
+	int      result      = 1;
+	switch (d3d) {
+	case API_DIRECT3D11:
+		result = compile_hlsl_to_d3d11(hlsl, &output, &output_size, SHADER_STAGE_FRAGMENT, debug);
+		break;
+	case API_DIRECT3D12:
+		result = compile_hlsl_to_d3d12(hlsl, &output, &output_size, SHADER_STAGE_FRAGMENT, debug);
+		break;
+	default:
+		error(context, "Unsupported API for HLSL");
+	}
+	check(result == 0, context, "HLSL compilation failed");
 
 	char *name = get_name(main->name);
 
 	char filename[512];
-	// sprintf(filename, "kong_%s", name);
-	sprintf(filename, "%s", name);
+	sprintf(filename, "kong_%s", name);
 
 	char var_name[256];
 	sprintf(var_name, "%s_code", name);
@@ -1632,116 +1649,116 @@ static void hlsl_export_fragment(char *directory, api_kind d3d, function *main, 
 }
 
 static void hlsl_export_compute(char *directory, api_kind d3d, function *main, bool debug) {
-	// char  *hlsl   = (char *)calloc(1024 * 1024, 1);
-	// size_t offset = 0;
+	char  *hlsl   = (char *)calloc(1024 * 1024, 1);
+	size_t offset = 0;
 
-	// write_types(hlsl, &offset, SHADER_STAGE_COMPUTE, NULL, 0, NO_TYPE, main, NULL, 0);
+	write_types(hlsl, &offset, SHADER_STAGE_COMPUTE, NULL, 0, NO_TYPE, main, NULL, 0);
 
-	// write_globals(hlsl, &offset, main, NULL, 0);
+	write_globals(hlsl, &offset, main, NULL, 0);
 
-	// write_functions(hlsl, &offset, SHADER_STAGE_COMPUTE, main, NULL, 0);
+	write_functions(hlsl, &offset, SHADER_STAGE_COMPUTE, main, NULL, 0);
 
-	// debug_context context = {0};
+	debug_context context = {0};
 
-	// uint8_t *output      = NULL;
-	// size_t   output_size = 0;
-	// int      result      = 1;
-	// switch (d3d) {
-	// case API_DIRECT3D11:
-	// 	result = compile_hlsl_to_d3d11(hlsl, &output, &output_size, SHADER_STAGE_COMPUTE, debug);
-	// 	break;
-	// case API_DIRECT3D12:
-	// 	result = compile_hlsl_to_d3d12(hlsl, &output, &output_size, SHADER_STAGE_COMPUTE, debug);
-	// 	break;
-	// default:
-	// 	error(context, "Unsupported API for HLSL");
-	// }
-	// check(result == 0, context, "HLSL compilation failed");
+	uint8_t *output      = NULL;
+	size_t   output_size = 0;
+	int      result      = 1;
+	switch (d3d) {
+	case API_DIRECT3D11:
+		result = compile_hlsl_to_d3d11(hlsl, &output, &output_size, SHADER_STAGE_COMPUTE, debug);
+		break;
+	case API_DIRECT3D12:
+		result = compile_hlsl_to_d3d12(hlsl, &output, &output_size, SHADER_STAGE_COMPUTE, debug);
+		break;
+	default:
+		error(context, "Unsupported API for HLSL");
+	}
+	check(result == 0, context, "HLSL compilation failed");
 
-	// char *name = get_name(main->name);
+	char *name = get_name(main->name);
 
-	// char filename[512];
-	// sprintf(filename, "kong_%s", name);
+	char filename[512];
+	sprintf(filename, "kong_%s", name);
 
-	// char var_name[256];
-	// sprintf(var_name, "%s_code", name);
+	char var_name[256];
+	sprintf(var_name, "%s_code", name);
 
-	// write_bytecode(hlsl, directory, filename, var_name, output, output_size);
+	write_bytecode(hlsl, directory, filename, var_name, output, output_size);
 }
 
 static void hlsl_export_all_ray_shaders(char *directory, bool debug) {
-	// char         *hlsl    = (char *)calloc(1024 * 1024, 1);
-	// debug_context context = {0};
-	// check(hlsl != NULL, context, "Could not allocate the hlsl string");
-	// size_t offset = 0;
+	char         *hlsl    = (char *)calloc(1024 * 1024, 1);
+	debug_context context = {0};
+	check(hlsl != NULL, context, "Could not allocate the hlsl string");
+	size_t offset = 0;
 
-	// function *all_rayshaders[256 * 3];
-	// size_t    all_rayshaders_size = 0;
+	function *all_rayshaders[256 * 3];
+	size_t    all_rayshaders_size = 0;
 
-	// for (size_t rayshader_index = 0; rayshader_index < raygen_shaders_size; ++rayshader_index) {
-	// 	all_rayshaders[all_rayshaders_size] = raygen_shaders[rayshader_index];
-	// 	all_rayshaders_size += 1;
-	// }
-	// for (size_t rayshader_index = 0; rayshader_index < raymiss_shaders_size; ++rayshader_index) {
-	// 	all_rayshaders[all_rayshaders_size] = raymiss_shaders[rayshader_index];
-	// 	all_rayshaders_size += 1;
-	// }
-	// for (size_t rayshader_index = 0; rayshader_index < rayclosesthit_shaders_size; ++rayshader_index) {
-	// 	all_rayshaders[all_rayshaders_size] = rayclosesthit_shaders[rayshader_index];
-	// 	all_rayshaders_size += 1;
-	// }
-	// for (size_t rayshader_index = 0; rayshader_index < rayintersection_shaders_size; ++rayshader_index) {
-	// 	all_rayshaders[all_rayshaders_size] = rayintersection_shaders[rayshader_index];
-	// 	all_rayshaders_size += 1;
-	// }
-	// for (size_t rayshader_index = 0; rayshader_index < rayanyhit_shaders_size; ++rayshader_index) {
-	// 	all_rayshaders[all_rayshaders_size] = rayanyhit_shaders[rayshader_index];
-	// 	all_rayshaders_size += 1;
-	// }
+	for (size_t rayshader_index = 0; rayshader_index < raygen_shaders_size; ++rayshader_index) {
+		all_rayshaders[all_rayshaders_size] = raygen_shaders[rayshader_index];
+		all_rayshaders_size += 1;
+	}
+	for (size_t rayshader_index = 0; rayshader_index < raymiss_shaders_size; ++rayshader_index) {
+		all_rayshaders[all_rayshaders_size] = raymiss_shaders[rayshader_index];
+		all_rayshaders_size += 1;
+	}
+	for (size_t rayshader_index = 0; rayshader_index < rayclosesthit_shaders_size; ++rayshader_index) {
+		all_rayshaders[all_rayshaders_size] = rayclosesthit_shaders[rayshader_index];
+		all_rayshaders_size += 1;
+	}
+	for (size_t rayshader_index = 0; rayshader_index < rayintersection_shaders_size; ++rayshader_index) {
+		all_rayshaders[all_rayshaders_size] = rayintersection_shaders[rayshader_index];
+		all_rayshaders_size += 1;
+	}
+	for (size_t rayshader_index = 0; rayshader_index < rayanyhit_shaders_size; ++rayshader_index) {
+		all_rayshaders[all_rayshaders_size] = rayanyhit_shaders[rayshader_index];
+		all_rayshaders_size += 1;
+	}
 
-	// if (all_rayshaders_size == 0) {
-	// 	char *name = "ray";
+	if (all_rayshaders_size == 0) {
+		char *name = "ray";
 
-	// 	char filename[512];
-	// 	sprintf(filename, "kong_%s", name);
+		char filename[512];
+		sprintf(filename, "kong_%s", name);
 
-	// 	char full_filename[512];
+		char full_filename[512];
 
-	// 	sprintf(full_filename, "%s/%s.h", directory, filename);
-	// 	FILE *file = fopen(full_filename, "wb");
+		sprintf(full_filename, "%s/%s.h", directory, filename);
+		FILE *file = fopen(full_filename, "wb");
 
-	// 	fprintf(file, "#ifndef KONG_%s_HEADER\n", name);
-	// 	fprintf(file, "#define KONG_%s_HEADER\n\n", name);
+		fprintf(file, "#ifndef KONG_%s_HEADER\n", name);
+		fprintf(file, "#define KONG_%s_HEADER\n\n", name);
 
-	// 	fprintf(file, "#define KONG_HAS_NO_RAY_SHADERS\n\n");
+		fprintf(file, "#define KONG_HAS_NO_RAY_SHADERS\n\n");
 
-	// 	fprintf(file, "#endif\n");
+		fprintf(file, "#endif\n");
 
-	// 	fclose(file);
+		fclose(file);
 
-	// 	return;
-	// }
+		return;
+	}
 
-	// write_types(hlsl, &offset, SHADER_STAGE_RAY_GENERATION, NULL, 0, NO_TYPE, NULL, all_rayshaders, all_rayshaders_size);
+	write_types(hlsl, &offset, SHADER_STAGE_RAY_GENERATION, NULL, 0, NO_TYPE, NULL, all_rayshaders, all_rayshaders_size);
 
-	// write_globals(hlsl, &offset, NULL, all_rayshaders, all_rayshaders_size);
+	write_globals(hlsl, &offset, NULL, all_rayshaders, all_rayshaders_size);
 
-	// write_functions(hlsl, &offset, SHADER_STAGE_RAY_GENERATION, NULL, all_rayshaders, all_rayshaders_size);
+	write_functions(hlsl, &offset, SHADER_STAGE_RAY_GENERATION, NULL, all_rayshaders, all_rayshaders_size);
 
-	// uint8_t *output      = NULL;
-	// size_t   output_size = 0;
-	// int      result      = compile_hlsl_to_d3d12(hlsl, &output, &output_size, SHADER_STAGE_RAY_GENERATION, debug);
-	// check(result == 0, context, "HLSL compilation failed");
+	uint8_t *output      = NULL;
+	size_t   output_size = 0;
+	int      result      = compile_hlsl_to_d3d12(hlsl, &output, &output_size, SHADER_STAGE_RAY_GENERATION, debug);
+	check(result == 0, context, "HLSL compilation failed");
 
-	// char *name = "ray";
+	char *name = "ray";
 
-	// char filename[512];
-	// sprintf(filename, "kong_%s", name);
+	char filename[512];
+	sprintf(filename, "kong_%s", name);
 
-	// char var_name[256];
-	// sprintf(var_name, "%s_code", name);
+	char var_name[256];
+	sprintf(var_name, "%s_code", name);
 
-	// write_bytecode(hlsl, directory, filename, var_name, output, output_size);
+	write_bytecode(hlsl, directory, filename, var_name, output, output_size);
 }
 
 void hlsl_export(char *directory, api_kind d3d, bool debug) {
@@ -1964,6 +1981,10 @@ void hlsl_export(char *directory, api_kind d3d, bool debug) {
 	}
 }
 
+////
+
+int compile_hlsl_to_d3d12(const char *source, uint8_t **output, size_t *outputlength, shader_stage stage, bool debug) {}
+
 static char *hlsl_export_vertex2(api_kind d3d, function *main, bool debug) {
 	char  *hlsl   = (char *)calloc(1024 * 1024, 1);
 	size_t offset = 0;
@@ -2075,3 +2096,5 @@ void hlsl_export2(char **vs, char **fs, api_kind d3d, bool debug) {
 	*vs = hlsl_export_vertex2(d3d, vertex_shaders.values[0], debug);
 	*fs = hlsl_export_fragment2(d3d, fragment_shaders.values[0], debug);
 }
+
+////
