@@ -325,18 +325,18 @@ void *_gc_cut(void *ptr, size_t pos, size_t size) {
 		start = start->cut;
 	}
 	size_t start_size = start->size;
-	pos -= start->ptr - ptr;
+	pos -= (char *)start->ptr - (char *)ptr;
 	start->size = pos;
 
 	// Middle
-	gc_allocation_t *middle = gc_allocation_new(start->ptr + pos, size);
+	gc_allocation_t *middle = gc_allocation_new((char *)start->ptr + pos, size);
 	middle->tag |= GC_TAG_CUT;
 	middle->tag |= GC_TAG_LEAF;
 	start->cut = middle;
 	gc_allocation_map_put(gc->allocs, middle);
 
 	// End
-	gc_allocation_t *end = gc_allocation_new(start->ptr + pos + size, start_size - size - pos);
+	gc_allocation_t *end = gc_allocation_new((char *)start->ptr + pos + size, start_size - size - pos);
 	end->tag |= GC_TAG_CUT;
 	middle->cut = end;
 	gc_allocation_map_put(gc->allocs, end);
