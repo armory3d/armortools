@@ -1,7 +1,7 @@
 
 function make_colorid_picker_run(kong: node_shader_t) {
 	// Mangle vertices to form full screen triangle
-	node_shader_write_vert(kong, "output.pos = float4(-1.0 + float((gl_VertexID & 1) << 2), -1.0 + float((gl_VertexID & 2) << 1), 0.0, 1.0);");
+	node_shader_write_vert(kong, "output.pos = float4(-1.0 + float((vertex_id() & 1) << 2), -1.0 + float((vertex_id() & 2) << 1), 0.0, 1.0);");
 
 	node_shader_add_texture(kong, "gbuffer2");
 	node_shader_add_constant(kong, "gbuffer_size: float2", "_gbuffer_size");

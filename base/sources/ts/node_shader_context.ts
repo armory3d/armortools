@@ -9,8 +9,6 @@ type node_shader_context_t = {
 	data?: shader_context_t;
 	allow_vcols?: bool;
 	material?: material_t;
-	constants?: shader_const_t[];
-	tunits?: tex_unit_t[];
 };
 
 function node_shader_context_create(material: material_t, props: shader_context_t): node_shader_context_t {
@@ -59,8 +57,8 @@ function node_shader_context_create(material: material_t, props: shader_context_
 		raw.data.color_writes_alpha = props.color_writes_alpha;
 	}
 
-	raw.tunits = raw.data.texture_units = [];
-	raw.constants = raw.data.constants = [];
+	raw.data.texture_units = [];
+	raw.data.constants = [];
 	return raw;
 }
 
@@ -96,8 +94,8 @@ function node_shader_context_get_elem(raw: node_shader_context_t, name: string):
 }
 
 function node_shader_context_add_constant(raw: node_shader_context_t, ctype: string, name: string, link: string = null) {
-	for (let i: i32 = 0; i < raw.constants.length; ++i) {
-		let c: shader_const_t = raw.constants[i];
+	for (let i: i32 = 0; i < raw.data.constants.length; ++i) {
+		let c: shader_const_t = raw.data.constants[i];
 		if (c.name == name) {
 			return;
 		}
@@ -107,22 +105,19 @@ function node_shader_context_add_constant(raw: node_shader_context_t, ctype: str
 	if (link != null) {
 		c.link = link;
 	}
-	array_push(raw.constants, c);
+	array_push(raw.data.constants, c);
 }
 
-function node_shader_context_add_texture_unit(raw: node_shader_context_t, ctype: string, name: string, link: string = null) {
-	for (let i: i32 = 0; i < raw.tunits.length; ++i) {
-		let c: tex_unit_t = raw.tunits[i];
+function node_shader_context_add_texture_unit(raw: node_shader_context_t, ctype: string, name: string, link: string = null, vert: bool = false) {
+	for (let i: i32 = 0; i < raw.data.texture_units.length; ++i) {
+		let c: tex_unit_t = raw.data.texture_units[i];
 		if (c.name == name) {
 			return;
 		}
 	}
 
-	let c: tex_unit_t = { name: name };
-	if (link != null) {
-		c.link = link;
-	}
-	array_push(raw.tunits, c);
+	let c: tex_unit_t = { name: name, link: link, vert: vert };
+	array_push(raw.data.texture_units, c);
 }
 
 function node_shader_context_make_kong(raw: node_shader_context_t): node_shader_t {

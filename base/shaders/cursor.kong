@@ -28,7 +28,6 @@ struct vert_out {
 }
 
 fun get_pos(uv: float2): float3 {
-	// var depth: float = sample_lod(gbufferD, gbufferD_sampler, uv, 0.0).r;
 	var depth: float = sample_lod(gbufferD, gbufferD_sampler, float2(uv.x, 1.0 - uv.y), 0.0).r;
 	var wpos: float4 = float4(uv * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
 	wpos = constants.invVP * wpos;
@@ -65,16 +64,16 @@ fun cursor_vert(input: vert_in): vert_out {
 	n_tan = normalize(constants.camera_right - n * dot(constants.camera_right, n));
 	n_bin = cross(n_tan, n);
 
-	if (input.pos.x < 0 && input.pos.z < 0) { // vertex_id == 0
+	if (vertex_id() == 0) {
 		wpos += normalize(-n_tan - n_bin) * 0.7 * constants.radius;
 	}
-	/*else */if (input.pos.x > 0 && input.pos.z < 0) { // vertex_id == 1
+	/*else */if (vertex_id() == 1) {
 		wpos += normalize( n_tan - n_bin) * 0.7 * constants.radius;
 	}
-	/*else */if (input.pos.x > 0 && input.pos.z > 0) { // vertex_id == 2
+	/*else */if (vertex_id() == 2) {
 		wpos += normalize( n_tan + n_bin) * 0.7 * constants.radius;
 	}
-	/*else */if (input.pos.x < 0 && input.pos.z > 0) { // vertex_id == 3
+	/*else */if (vertex_id() == 3) {
 		wpos += normalize(-n_tan + n_bin) * 0.7 * constants.radius;
 	}
 

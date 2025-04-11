@@ -626,6 +626,7 @@ type shader_const_t = {
 type tex_unit_t = {
 	name?: string;
 	link?: string;
+	vert?: bool;
 };
 
 type speaker_data_t = {

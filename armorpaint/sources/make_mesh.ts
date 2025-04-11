@@ -54,7 +54,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			}
 			num_layers++;
 			texture_count++;
-			node_shader_add_texture(kong, "texpaint_pack_vert" + l.id, "_texpaint_pack_vert" + l.id);
+			node_shader_add_texture(kong, "texpaint_pack_vert" + l.id, "_texpaint_pack_vert" + l.id, true);
 			node_shader_write_vert(kong, "height += sample_lod(texpaint_pack_vert" + l.id + ", texpaint_pack_vert" + l.id + "_sampler, input.tex, 0.0).a;");
 			let masks: slot_layer_t[] = slot_layer_get_masks(l);
 			if (masks != null) {

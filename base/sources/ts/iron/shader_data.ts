@@ -381,7 +381,12 @@ function shader_context_add_const(raw: shader_context_t, c: shader_const_t, offs
 function shader_context_add_tex(raw: shader_context_t, tu: tex_unit_t, i: i32) {
 	let unit: iron_gpu_texture_unit_t = gpu_get_texture_unit(raw._.pipe_state, tu.name);
 
-	ARRAY_ACCESS(unit.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = i;
+	if (tu.vert) {
+		ARRAY_ACCESS(unit.stages, IRON_GPU_SHADER_TYPE_VERTEX) = i;
+	}
+	else {
+		ARRAY_ACCESS(unit.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = i;
+	}
 
 	array_push(raw._.tex_units, unit);
 }
