@@ -35,9 +35,9 @@ fun copy_mrt3_pass_vert(input: vert_in): vert_out {
 
 fun copy_mrt3_pass_frag(input: vert_out): float4[3] {
 	var color: float4[3];
-	color[0].rgba = sample_lod(tex0, tex0_sampler, input.tex, 0.0);
-	color[1].rgba = sample_lod(tex1, tex1_sampler, input.tex, 0.0);
-	color[2].rgba = sample_lod(tex2, tex2_sampler, input.tex, 0.0);
+	color[0] = sample_lod(tex0, tex0_sampler, input.tex, 0.0);
+	color[1] = sample_lod(tex1, tex1_sampler, input.tex, 0.0);
+	color[2] = sample_lod(tex2, tex2_sampler, input.tex, 0.0);
 	return color;
 }
 

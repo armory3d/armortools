@@ -382,7 +382,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	let layered: bool = context_raw.layer != project_layers[0];
 	if (layered && !is_mask) {
 		if (context_raw.tool == workspace_tool_t.ERASER) {
-			node_shader_write_frag(kong, "output[0].rgba = float4(lerp3(sample_undo.rgb, float3(0.0, 0.0, 0.0), str), sample_undo.a - str);");
+			node_shader_write_frag(kong, "output[0] = float4(lerp3(sample_undo.rgb, float3(0.0, 0.0, 0.0), str), sample_undo.a - str);");
 			node_shader_write_frag(kong, "nortan = float3(0.5, 0.5, 1.0);");
 			node_shader_write_frag(kong, "occlusion = 1.0;");
 			node_shader_write_frag(kong, "roughness = 0.0;");
@@ -390,17 +390,17 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 			node_shader_write_frag(kong, "matid = 0.0;");
 		}
 		else if (context_raw.tool == workspace_tool_t.PARTICLE || decal || context_raw.brush_mask_image != null) {
-			node_shader_write_frag(kong, "output[0].rgba = float4(" + make_material_blend_mode(kong, context_raw.brush_blending, "sample_undo.rgb", "basecol", "str") + ", max(str, sample_undo.a));");
+			node_shader_write_frag(kong, "output[0] = float4(" + make_material_blend_mode(kong, context_raw.brush_blending, "sample_undo.rgb", "basecol", "str") + ", max(str, sample_undo.a));");
 		}
 		else {
 			if (context_raw.layer.fill_layer != null) {
-				node_shader_write_frag(kong, "output[0].rgba = float4(" + make_material_blend_mode(kong, context_raw.brush_blending, "sample_undo.rgb", "basecol", "opacity") + ", mat_opacity);");
+				node_shader_write_frag(kong, "output[0] = float4(" + make_material_blend_mode(kong, context_raw.brush_blending, "sample_undo.rgb", "basecol", "opacity") + ", mat_opacity);");
 			}
 			else {
-				node_shader_write_frag(kong, "output[0].rgba = float4(" + make_material_blend_mode(kong, context_raw.brush_blending, "sample_undo.rgb", "basecol", "opacity") + ", max(str, sample_undo.a));");
+				node_shader_write_frag(kong, "output[0] = float4(" + make_material_blend_mode(kong, context_raw.brush_blending, "sample_undo.rgb", "basecol", "opacity") + ", max(str, sample_undo.a));");
 			}
 		}
-		node_shader_write_frag(kong, "output[1].rgba = float4(nortan, matid);");
+		node_shader_write_frag(kong, "output[1] = float4(nortan, matid);");
 
 		let height: string = "0.0";
 		if (context_raw.material.paint_height && make_material_height_used) {
@@ -410,17 +410,17 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		if (decal) {
 			node_shader_add_texture(kong, "texpaint_pack_undo", "_texpaint_pack_undo");
 			node_shader_write_frag(kong, "var sample_pack_undo: float4 = sample_lod(texpaint_pack_undo, texpaint_pack_undo_sampler, sample_tc, 0.0);");
-			node_shader_write_frag(kong, "output[2].rgba = lerp4(sample_pack_undo, float4(occlusion, roughness, metallic, " + height + "), str);");
+			node_shader_write_frag(kong, "output[2] = lerp4(sample_pack_undo, float4(occlusion, roughness, metallic, " + height + "), str);");
 		}
 		else {
-			node_shader_write_frag(kong, "output[2].rgba = float4(occlusion, roughness, metallic, " + height + ");");
+			node_shader_write_frag(kong, "output[2] = float4(occlusion, roughness, metallic, " + height + ");");
 		}
 	}
 	else {
 		if (context_raw.tool == workspace_tool_t.ERASER) {
-			node_shader_write_frag(kong, "output[0].rgba = float4(lerp3(sample_undo.rgb, float3(0.0, 0.0, 0.0), str), sample_undo.a - str);");
-			node_shader_write_frag(kong, "output[1].rgba = float4(0.5, 0.5, 1.0, 0.0);");
-			node_shader_write_frag(kong, "output[2].rgba = float4(1.0, 0.0, 0.0, 0.0);");
+			node_shader_write_frag(kong, "output[0] = float4(lerp3(sample_undo.rgb, float3(0.0, 0.0, 0.0), str), sample_undo.a - str);");
+			node_shader_write_frag(kong, "output[1] = float4(0.5, 0.5, 1.0, 0.0);");
+			node_shader_write_frag(kong, "output[2] = float4(1.0, 0.0, 0.0, 0.0);");
 		}
 		else {
 			node_shader_add_texture(kong, "texpaint_nor_undo", "_texpaint_nor_undo");
@@ -428,20 +428,20 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 			node_shader_write_frag(kong, "var sample_nor_undo: float4 = sample_lod(texpaint_nor_undo, texpaint_nor_undo_sampler, sample_tc, 0.0);");
 			node_shader_write_frag(kong, "var sample_pack_undo: float4 = sample_lod(texpaint_pack_undo, texpaint_pack_undo_sampler, sample_tc, 0.0);");
 			///if is_forge
-			node_shader_write_frag(kong, "output[0].rgba = float4(" + make_material_blend_mode(kong, context_raw.brush_blending, "sample_undo.rgb", "basecol", "str") + ", mat_opacity);");
+			node_shader_write_frag(kong, "output[0] = float4(" + make_material_blend_mode(kong, context_raw.brush_blending, "sample_undo.rgb", "basecol", "str") + ", mat_opacity);");
 			///else
-			node_shader_write_frag(kong, "output[0].rgba = float4(" + make_material_blend_mode(kong, context_raw.brush_blending, "sample_undo.rgb", "basecol", "str") + ", max(str, sample_undo.a));");
+			node_shader_write_frag(kong, "output[0] = float4(" + make_material_blend_mode(kong, context_raw.brush_blending, "sample_undo.rgb", "basecol", "str") + ", max(str, sample_undo.a));");
 			///end
-			node_shader_write_frag(kong, "output[1].rgba = float4(lerp3(sample_nor_undo.rgb, nortan, str), matid);");
+			node_shader_write_frag(kong, "output[1] = float4(lerp3(sample_nor_undo.rgb, nortan, str), matid);");
 			if (context_raw.material.paint_height && make_material_height_used) {
-				node_shader_write_frag(kong, "output[2].rgba = lerp4(sample_pack_undo, float4(occlusion, roughness, metallic, height), str);");
+				node_shader_write_frag(kong, "output[2] = lerp4(sample_pack_undo, float4(occlusion, roughness, metallic, height), str);");
 			}
 			else {
-				node_shader_write_frag(kong, "output[2].rgba = float4(lerp3(sample_pack_undo.rgb, float3(occlusion, roughness, metallic), str), 0.0);");
+				node_shader_write_frag(kong, "output[2] = float4(lerp3(sample_pack_undo.rgb, float3(occlusion, roughness, metallic), str), 0.0);");
 			}
 		}
 	}
-	node_shader_write_frag(kong, "output[3].rgba = float4(str, 0.0, 0.0, 1.0);");
+	node_shader_write_frag(kong, "output[3] = float4(str, 0.0, 0.0, 1.0);");
 
 	if (!context_raw.material.paint_base) {
 		con_paint.data.color_writes_red[0] = false;

@@ -1024,6 +1024,9 @@ void gpu_create_shaders_from_kong(char *kong, char **vs, char **fs) {
 	}
 	analyze();
 
+	// vulkan
+	// transform(TRANSFORM_FLAG_ONE_COMPONENT_SWIZZLE);
+
 	hlsl_export2(vs, fs, API_DIRECT3D11, false);
 	// metal_export(output);
 	// spirv_export(output);

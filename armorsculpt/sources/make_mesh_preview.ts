@@ -135,14 +135,14 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	// var matid: uint = uint(0);
 
 	if (decal) {
-		node_shader_write_frag(kong, "output[0].rgba = float4(n.x, n.y, roughness, pack_f32_i16(metallic, uint(0)));"); // metallic/matid
-		node_shader_write_frag(kong, "output[1].rgba = float4(basecol, occlusion);");
+		node_shader_write_frag(kong, "output[0] = float4(n.x, n.y, roughness, pack_f32_i16(metallic, uint(0)));"); // metallic/matid
+		node_shader_write_frag(kong, "output[1] = float4(basecol, occlusion);");
 	}
 	else {
-		node_shader_write_frag(kong, "output[0].rgba = float4(n.x, n.y, lerp(1.0, roughness, opacity), pack_f32_i16(lerp(1.0, metallic, opacity), uint(0)));"); // metallic/matid
-		node_shader_write_frag(kong, "output[1].rgba = float4(lerp3(float3(0.0, 0.0, 0.0), basecol, opacity), occlusion);");
+		node_shader_write_frag(kong, "output[0] = float4(n.x, n.y, lerp(1.0, roughness, opacity), pack_f32_i16(lerp(1.0, metallic, opacity), uint(0)));"); // metallic/matid
+		node_shader_write_frag(kong, "output[1] = float4(lerp3(float3(0.0, 0.0, 0.0), basecol, opacity), occlusion);");
 	}
-	node_shader_write_frag(kong, "output[2].rgba = float4(0.0, 0.0, 0.0, 0.0);"); // veloc
+	node_shader_write_frag(kong, "output[2] = float4(0.0, 0.0, 0.0, 0.0);"); // veloc
 
 	parser_material_finalize(con_mesh);
 

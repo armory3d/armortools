@@ -31,7 +31,7 @@ fun layer_copy_vert(input: vert_in): vert_out {
 }
 
 fun layer_copy_frag(input: vert_out): float4 {
-	return sample_lod(tex, tex_sampler, input.tex, 0.0).rgba * input.col;
+	return sample_lod(tex, tex_sampler, input.tex, 0.0) * input.col;
 }
 
 #[pipe]

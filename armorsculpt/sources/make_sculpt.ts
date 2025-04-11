@@ -81,9 +81,9 @@ function make_sculpt_run(data: material_t, matcon: material_context_t): node_sha
 	node_shader_write_frag(kong, "if (wn.z >= 0.0) { wn.xy = g0_undo.xy; } else { wn.xy = octahedron_wrap(g0_undo.xy); }");
 	node_shader_write_frag(kong, "var n: float3 = normalize(wn);");
 
-	node_shader_write_frag(kong, "output[0].rgba = float4(sample_undo.rgb + n * 0.1 * str, 1.0);");
+	node_shader_write_frag(kong, "output[0] = float4(sample_undo.rgb + n * 0.1 * str, 1.0);");
 
-	node_shader_write_frag(kong, "output[1].rgba = float4(str, 0.0, 0.0, 1.0);");
+	node_shader_write_frag(kong, "output[1] = float4(str, 0.0, 0.0, 1.0);");
 
 	parser_material_finalize(con_paint);
 	con_paint.data.shader_from_source = true;

@@ -68,9 +68,6 @@ fun layer_merge_frag(input: vert_out): float4 {
 	var str: float = col0.a * constants.opac;
 	str *= sample_lod(texmask, texmask_sampler, input.tex, 0.0).r;
 
-
-	return float4(1,1,1,1);
-
 	if (constants.blending == -1) { // Merging _nor and _pack
 		var col1: float4 = sample_lod(tex1, tex1_sampler, input.tex, 0.0);
 		return float4(lerp4(cola, col1, str));
@@ -241,6 +238,8 @@ fun layer_merge_frag(input: vert_out): float4 {
 				str),
 			max(col0.a, cola.a));
 	}
+
+	return float4(1, 1, 1, 1);
 }
 
 #[pipe]

@@ -53,27 +53,6 @@ char *hlsl_to_bin(char *source, char *shader_type, char *to) {
 	fclose(fp);
 	shader_buffer->lpVtbl->Release(shader_buffer);
 }
-
-void hlslbin(const char *from, const char *to) {
-	FILE *fp = fopen(from, "rb");
-	fseek(fp , 0, SEEK_END);
-	int size = ftell(fp);
-	rewind(fp);
-	char *source = malloc(size + 1);
-	source[size] = 0;
-	fread(source, size, 1, fp);
-	fclose(fp);
-
-	char *type;
-	if (strstr(from, "vert.")) {
-		type = "vert";
-	}
-	else  {
-		type = "frag";
-	}
-
-	hlsl_to_bin(source, type, to);
-}
 #endif
 
 extern uint64_t next_variable_id;
@@ -83,6 +62,7 @@ extern global_id globals_size;
 extern name_id names_index;
 extern size_t sets_count;
 extern type_id next_type_index;
+void hlsl_export2(char **vs, char **fs, api_kind d3d, bool debug);
 
 void kong_compile(const char *from, const char *to) {
 	FILE *fp = fopen(from, "rb");
@@ -117,45 +97,48 @@ void kong_compile(const char *from, const char *to) {
 	// vulkan
 	// transform(TRANSFORM_FLAG_ONE_COMPONENT_SWIZZLE);
 
-	char output[512];
-	strcpy(output, to);
-
 	#ifdef _WIN32
 
+	char *vs;
+	char *fs;
+	hlsl_export2(&vs, &fs, API_DIRECT3D11, false);
+
 	int i = string_last_index_of(to, "\\");
-	output[i] = '\0';
-
-	strcat(output, "\\..\\..\\temp");
-	hlsl_export(output, API_DIRECT3D11, false);
-
 	char filename[512];
 	strcpy(filename, to);
 	char *file = &filename[i + 1];
-	i = string_index_of(file, ".");
-	file[i] = '\0';
+	int j = string_index_of(file, ".");
+	file[j] = '\0';
 
-	strcat(output, "\\");
-	strcat(output, file);
-
-	char from_[512];
-	strcpy(from_, output);
-	strcat(from_, "_frag.hlsl");
+	////
+	// char tmp[512];
+	// strcpy(tmp, to);
+	// tmp[i] = '\0';
+	// strcat(tmp, "\\..\\..\\temp\\");
+	// strcat(tmp, file);
+	// strcat(tmp, ".vert.hlsl");
+	// fp = fopen(tmp, "wb");
+	// fwrite(vs, 1, strlen(vs), fp);
+	// fclose(fp);
+	// tmp[i] = '\0';
+	// strcat(tmp, "\\..\\..\\temp\\");
+	// strcat(tmp, file);
+	// strcat(tmp, ".frag.hlsl");
+	// fp = fopen(tmp, "wb");
+	// fwrite(fs, 1, strlen(fs), fp);
+	// fclose(fp);
+	////
 
 	char to_[512];
 	strcpy(to_, to);
 	to_[strlen(to_) - 4] = '\0';
-	strcat(to_, "frag.d3d11");
-
-	hlslbin(from_, to_);
-
-	strcpy(from_, output);
-	strcat(from_, "_vert.hlsl");
+	strcat(to_, "vert.d3d11");
+	hlsl_to_bin(vs, "vert", to_);
 
 	strcpy(to_, to);
 	to_[strlen(to_) - 4] = '\0';
-	strcat(to_, "vert.d3d11");
-
-	hlslbin(from_, to_);
+	strcat(to_, "frag.d3d11");
+	hlsl_to_bin(fs, "frag", to_);
 
 	#else
 

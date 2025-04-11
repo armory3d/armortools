@@ -83,8 +83,8 @@ fun mesh_posnortex_frag(input: vert_out): float4[2] {
 
 	var matid: uint = 0;
 	var color: float4[2];
-	color[0].rgba = float4(n.xy, roughness, pack_f32_i16(metallic, matid));
-	color[1].rgba = float4(basecol, occlusion);
+	color[0] = float4(n.xy, roughness, pack_f32_i16(metallic, matid));
+	color[1] = float4(basecol, occlusion);
 	return color;
 }
 

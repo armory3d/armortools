@@ -21,17 +21,17 @@ function make_colorid_picker_run(kong: node_shader_t) {
 			node_shader_add_texture(kong, "gbufferD");
 			node_shader_add_constant(kong, "invVP: float4x4", "_inv_view_proj_matrix");
 			node_shader_add_function(kong, str_get_pos_nor_from_depth);
-			node_shader_write_frag(kong, "output[0].rgba = float4(get_pos_from_depth(float2(constants.inp.x, 1.0 - constants.inp.y), constants.invVP), tex_coord_inp.x);");
-			node_shader_write_frag(kong, "output[1].rgba = float4(get_nor_from_depth(output[0].rgb, float2(constants.inp.x, 1.0 - constants.inp.y), constants.invVP, float2(1.0, 1.0) / constants.gbuffer_size), tex_coord_inp.y);");
+			node_shader_write_frag(kong, "output[0] = float4(get_pos_from_depth(float2(constants.inp.x, 1.0 - constants.inp.y), constants.invVP), tex_coord_inp.x);");
+			node_shader_write_frag(kong, "output[1] = float4(get_nor_from_depth(output[0].rgb, float2(constants.inp.x, 1.0 - constants.inp.y), constants.invVP, float2(1.0, 1.0) / constants.gbuffer_size), tex_coord_inp.y);");
 		}
 		else {
 			kong.frag_out = "float4[4]";
 			node_shader_add_texture(kong, "texpaint");
 			node_shader_add_texture(kong, "texpaint_nor");
 			node_shader_add_texture(kong, "texpaint_pack");
-			node_shader_write_frag(kong, "output[0].rgba = sample_lod(texpaint, texpaint_sampler, tex_coord_inp, 0.0);");
-			node_shader_write_frag(kong, "output[1].rgba = sample_lod(texpaint_nor, texpaint_nor_sampler, tex_coord_inp, 0.0);");
-			node_shader_write_frag(kong, "output[2].rgba = sample_lod(texpaint_pack, texpaint_pack_sampler, tex_coord_inp, 0.0);");
+			node_shader_write_frag(kong, "output[0] = sample_lod(texpaint, texpaint_sampler, tex_coord_inp, 0.0);");
+			node_shader_write_frag(kong, "output[1] = sample_lod(texpaint_nor, texpaint_nor_sampler, tex_coord_inp, 0.0);");
+			node_shader_write_frag(kong, "output[2] = sample_lod(texpaint_pack, texpaint_pack_sampler, tex_coord_inp, 0.0);");
 			node_shader_write_frag(kong, "output[3].rg = tex_coord_inp.xy;");
 		}
 	}

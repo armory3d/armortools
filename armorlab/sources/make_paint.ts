@@ -54,9 +54,9 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		node_shader_add_texture(kong, "texpaint");
 		node_shader_add_texture(kong, "texpaint_nor");
 		node_shader_add_texture(kong, "texpaint_pack");
-		node_shader_write_frag(kong, "output[0].rgba = sample_lod(texpaint, texpaint_sampler, tex_coord_inp, 0.0);");
-		node_shader_write_frag(kong, "output[1].rgba = sample_lod(texpaint_nor, texpaint_nor_sampler, tex_coord_inp, 0.0);");
-		node_shader_write_frag(kong, "output[2].rgba = sample_lod(texpaint_pack, texpaint_pack_sampler, tex_coord_inp, 0.0);");
+		node_shader_write_frag(kong, "output[0] = sample_lod(texpaint, texpaint_sampler, tex_coord_inp, 0.0);");
+		node_shader_write_frag(kong, "output[1] = sample_lod(texpaint_nor, texpaint_nor_sampler, tex_coord_inp, 0.0);");
+		node_shader_write_frag(kong, "output[2] = sample_lod(texpaint_pack, texpaint_pack_sampler, tex_coord_inp, 0.0);");
 		node_shader_write_frag(kong, "output[3].rg = tex_coord_inp.xy;");
 		con_paint.data.shader_from_source = true;
 		gpu_create_shaders_from_kong(node_shader_get(kong), ADDRESS(con_paint.data.vertex_shader), ADDRESS(con_paint.data.fragment_shader));
@@ -152,12 +152,12 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	node_shader_write_frag(kong, "var sample_undo: float4 = sample_lod(texpaint_undo, texpaint_undo_sampler, sample_tc, 0.0);");
 
 	if (context_raw.tool == workspace_tool_t.ERASER) {
-		node_shader_write_frag(kong, "output[0].rgba = float4(0.0, 0.0, 0.0, 0.0);");
-		node_shader_write_frag(kong, "output[1].rgba = float4(0.5, 0.5, 1.0, 0.0);");
-		node_shader_write_frag(kong, "output[2].rgba = float4(1.0, 0.0, 0.0, 0.0);");
+		node_shader_write_frag(kong, "output[0] = float4(0.0, 0.0, 0.0, 0.0);");
+		node_shader_write_frag(kong, "output[1] = float4(0.5, 0.5, 1.0, 0.0);");
+		node_shader_write_frag(kong, "output[2] = float4(1.0, 0.0, 0.0, 0.0);");
 	}
 
-	node_shader_write_frag(kong, "output[3].rgba = float4(str, 0.0, 0.0, 1.0);");
+	node_shader_write_frag(kong, "output[3] = float4(str, 0.0, 0.0, 1.0);");
 
 	parser_material_finalize(con_paint);
 	parser_material_sample_keep_aspect = false;

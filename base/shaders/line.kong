@@ -22,8 +22,8 @@ fun line_vert(input: vert_in): vert_out {
 
 fun line_frag(input: vert_out): float4[2] {
 	var color: float4[2];
-	color[0].rgba = float4(1.0, 1.0, 0.0, 1.0);
-	color[1].rgba = float4(constants.color, 1.0);
+	color[0] = float4(1.0, 1.0, 0.0, 1.0);
+	color[1] = float4(constants.color, 1.0);
 	return color;
 }
 
