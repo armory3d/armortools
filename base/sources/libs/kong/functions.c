@@ -785,6 +785,7 @@ void functions_init(void) {
 	add_func_uint3("dispatch_thread_id");
 	add_func_int("group_index");
 	add_func_int("instance_id");
+	add_func_int("vertex_id");
 
 	////
 	// add_func_float3_float_float_float("lerp");

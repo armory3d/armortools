@@ -856,7 +856,7 @@ static void write_functions(char *hlsl, size_t *offset, shader_stage stage, func
 						    sprintf(&hlsl[*offset], ", %s _%" PRIu64, type_string(f->parameter_types[parameter_index].type), parameter_ids[parameter_index]);
 					}
 				}
-				*offset += sprintf(&hlsl[*offset], ") {\n");
+				*offset += sprintf(&hlsl[*offset], ", in uint _kong_vertex_id : SV_VertexID) {\n");
 			}
 			else if (stage == SHADER_STAGE_FRAGMENT) {
 				if (get_type(f->return_type.type)->array_size > 0) {
@@ -1337,6 +1337,10 @@ static void write_functions(char *hlsl, size_t *offset, shader_stage stage, func
 				else if (o->op_call.func == add_name("instance_id")) {
 					check(o->op_call.parameters_size == 0, context, "instance_id can not have a parameter");
 					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = InstanceID();\n", type_string(o->op_call.var.type.type), o->op_call.var.index);
+				}
+				else if (o->op_call.func == add_name("vertex_id")) {
+					check(o->op_call.parameters_size == 0, context, "vertex_id can not have a parameter");
+					*offset += sprintf(&hlsl[*offset], "%s _%" PRIu64 " = _kong_vertex_id;\n", type_string(o->op_call.var.type.type), o->op_call.var.index);
 				}
 				else if (o->op_call.func == add_name("world_ray_direction")) {
 					check(o->op_call.parameters_size == 0, context, "world_ray_direction can not have a parameter");
