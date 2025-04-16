@@ -41,7 +41,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	let lid: i32 = project_layers[0].id;
 	node_shader_add_texture(kong, "texpaint_vert", "_texpaint_vert" + lid, true);
 	node_shader_add_constant(kong, "texpaint_vert_size: float2", "_size(texpaint_vert" + lid + ")");
-	node_shader_write_vert(kong, "var meshpos: float3 = sample_lod(texpaint_vert, texpaint_vert_sampler, int2(vertex_id() % constants.texpaint_vert_size.x, vertex_id() / constants.texpaint_vert_size.y), 0).xyz;");
+	node_shader_write_vert(kong, "var meshpos: float3 = sample_lod(texpaint_vert, texpaint_vert_sampler, uint2(vertex_id() % constants.texpaint_vert_size.x, vertex_id() / constants.texpaint_vert_size.y), 0).xyz;");
 	// + input.pos.xyz * 0.000001
 	node_shader_write_vert(kong, "output.pos = constants.WVP * float4(meshpos.xyz, 1.0);");
 
@@ -55,9 +55,9 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	node_shader_write_attrib_vert(kong, "var base_vertex0: int = vertex_id() - (vertex_id() % 3);");
 	node_shader_write_attrib_vert(kong, "var base_vertex1: int = base_vertex0 + 1;");
 	node_shader_write_attrib_vert(kong, "var base_vertex2: int = base_vertex0 + 2;");
-	node_shader_write_attrib_vert(kong, "var meshpos0: float3 = sample_lod(texpaint_vert, texpaint_vert_sampler, int2(base_vertex0 % constants.texpaint_vert_size.x, base_vertex0 / constants.texpaint_vert_size.y), 0).xyz;");
-	node_shader_write_attrib_vert(kong, "var meshpos1: float3 = sample_lod(texpaint_vert, texpaint_vert_sampler, int2(base_vertex1 % constants.texpaint_vert_size.x, base_vertex1 / constants.texpaint_vert_size.y), 0).xyz;");
-	node_shader_write_attrib_vert(kong, "var meshpos2: float3 = sample_lod(texpaint_vert, texpaint_vert_sampler, int2(base_vertex2 % constants.texpaint_vert_size.x, base_vertex2 / constants.texpaint_vert_size.y), 0).xyz;");
+	node_shader_write_attrib_vert(kong, "var meshpos0: float3 = sample_lod(texpaint_vert, texpaint_vert_sampler, uint2(base_vertex0 % constants.texpaint_vert_size.x, base_vertex0 / constants.texpaint_vert_size.y), 0).xyz;");
+	node_shader_write_attrib_vert(kong, "var meshpos1: float3 = sample_lod(texpaint_vert, texpaint_vert_sampler, uint2(base_vertex1 % constants.texpaint_vert_size.x, base_vertex1 / constants.texpaint_vert_size.y), 0).xyz;");
+	node_shader_write_attrib_vert(kong, "var meshpos2: float3 = sample_lod(texpaint_vert, texpaint_vert_sampler, uint2(base_vertex2 % constants.texpaint_vert_size.x, base_vertex2 / constants.texpaint_vert_size.y), 0).xyz;");
 	node_shader_write_attrib_vert(kong, "var meshnor: float3 = normalize(cross(meshpos2 - meshpos1, meshpos0 - meshpos1));");
 	node_shader_write_attrib_vert(kong, "output.wnormal = constants.N * meshnor;");
 	node_shader_write_attrib_frag(kong, "var n: float3 = normalize(input.wnormal);");
@@ -263,8 +263,8 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 				node_shader_write_frag(kong, "var f0: float3 = lerp3(float3(0.04, 0.04, 0.04), basecol, metallic);");
 				kong.frag_vvec = true;
 				node_shader_write_frag(kong, "var dotnv: float = max(0.0, dot(n, vvec));");
-				// node_shader_write_frag(kong, "var env_brdf: float2 = senvmap_brdf[int2(float2(roughness, 1.0 - dotnv) * 256.0)].xy;");
-				node_shader_write_frag(kong, "var env_brdf: float4 = senvmap_brdf[int2(float2(roughness, 1.0 - dotnv) * 256.0)];");
+				// node_shader_write_frag(kong, "var env_brdf: float2 = senvmap_brdf[uint2(float2(roughness, 1.0 - dotnv) * 256.0)].xy;");
+				node_shader_write_frag(kong, "var env_brdf: float4 = senvmap_brdf[uint2(float2(roughness, 1.0 - dotnv) * 256.0)];");
 				node_shader_add_constant(kong, "envmap_num_mipmaps: int", "_envmap_num_mipmaps");
 				node_shader_add_constant(kong, "envmap_data: float4", "_envmap_data"); // angle, sin(angle), cos(angle), strength
 				node_shader_write_frag(kong, "var wreflect: float3 = reflect(-vvec, n);");

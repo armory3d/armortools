@@ -38,9 +38,9 @@ fun tonemap_filmic(color: float3): float3 {
 	// Based on Filmic Tonemapping Operators http://filmicgames.com/archives/75
 	// var x: float3 = max(float3(0.0, 0.0, 0.0), color - 0.004);
 	var x: float3;
-	x.x = max(float3(0.0, 0.0, 0.0), color.x - 0.004);
-	x.y = max(float3(0.0, 0.0, 0.0), color.y - 0.004);
-	x.z = max(float3(0.0, 0.0, 0.0), color.z - 0.004);
+	x.x = max(0.0, color.x - 0.004);
+	x.y = max(0.0, color.y - 0.004);
+	x.z = max(0.0, color.z - 0.004);
 	return (x * (6.2 * x + 0.5)) / (x * (6.2 * x + 1.7) + 0.06);
 }
 

@@ -135,8 +135,8 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			node_shader_write_frag(kong, "var f0: float3 = lerp3(float3(0.04, 0.04, 0.04), basecol, metallic);");
 			kong.frag_vvec = true;
 			node_shader_write_frag(kong, "var dotnv: float = max(0.0, dot(n, vvec));");
-			// node_shader_write_frag(kong, "var env_brdf: float2 = senvmap_brdf[int2(float2(roughness, 1.0 - dotnv) * 256.0)].xy;");
-			node_shader_write_frag(kong, "var env_brdf: float4 = senvmap_brdf[int2(float2(roughness, 1.0 - dotnv) * 256.0)];");
+			// node_shader_write_frag(kong, "var env_brdf: float2 = senvmap_brdf[uint2(float2(roughness, 1.0 - dotnv) * 256.0)].xy;");
+			node_shader_write_frag(kong, "var env_brdf: float4 = senvmap_brdf[uint2(float2(roughness, 1.0 - dotnv) * 256.0)];");
 			node_shader_add_constant(kong, "envmap_num_mipmaps: int", "_envmap_num_mipmaps");
 			node_shader_add_constant(kong, "envmap_data: float4", "_envmap_data"); // angle, sin(angle), cos(angle), strength
 			node_shader_write_frag(kong, "var wreflect: float3 = reflect(-vvec, n);");

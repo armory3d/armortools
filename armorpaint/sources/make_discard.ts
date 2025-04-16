@@ -2,7 +2,7 @@
 function make_discard_color_id(kong: node_shader_t) {
 	node_shader_add_texture(kong, "texpaint_colorid"); // 1x1 picker
 	node_shader_add_texture(kong, "texcolorid", "_texcolorid"); // color map
-	node_shader_write_frag(kong, "var colorid_c1: float3 = texpaint_colorid[int2(0, 0)].rgb;");
+	node_shader_write_frag(kong, "var colorid_c1: float3 = texpaint_colorid[uint2(0, 0)].rgb;");
 	node_shader_write_frag(kong, "var colorid_c2: float3 = sample_lod(texcolorid, texcolorid_sampler, tex_coord_pick, 0).rgb;");
 	// node_shader_write_frag(kong, "if (any(colorid_c1 != colorid_c2)) { discard };");
 	node_shader_write_frag(kong, "if (colorid_c1 != colorid_c2) { discard; }");
@@ -13,8 +13,8 @@ function make_discard_face(kong: node_shader_t) {
 	node_shader_add_texture(kong, "textrianglemap", "_textrianglemap");
 	node_shader_add_constant(kong, "textrianglemap_size: float2", "_texpaint_size");
 	node_shader_add_constant(kong, "gbuffer_size: float2", "_gbuffer_size");
-	node_shader_write_frag(kong, "var tex_coord_inp: float2 = gbuffer2[int2(inp.x * constants.gbuffer_size.x, inp.y * constants.gbuffer_size.y)].ba;");
-	node_shader_write_frag(kong, "var face_c1: float4 = textrianglemap[int2(tex_coord_inp * constants.textrianglemap_size)];");
+	node_shader_write_frag(kong, "var tex_coord_inp: float2 = gbuffer2[uint2(inp.x * constants.gbuffer_size.x, inp.y * constants.gbuffer_size.y)].ba;");
+	node_shader_write_frag(kong, "var face_c1: float4 = textrianglemap[uint2(tex_coord_inp * constants.textrianglemap_size)];");
 	node_shader_write_frag(kong, "var face_c2: float4 = sample_lod(textrianglemap, textrianglemap_sampler, tex_coord_pick, 0.0);");
 	// node_shader_write_frag(kong, "if (any(face_c1 != face_c2)) { discard; }");
 	node_shader_write_frag(kong, "if (face_c1 != face_c2) { discard; }");

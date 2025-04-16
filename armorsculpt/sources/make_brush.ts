@@ -15,7 +15,7 @@ function make_brush_run(kong: node_shader_t) {
 
 		node_shader_add_constant(kong, "texpaint_undo_size: float2", "_size(texpaint_undo)");
 
-		node_shader_write_attrib_frag(kong, "var wposition: float3 = (constants.W * texpaint_undo[int2(tex_coord.x * constants.texpaint_undo_size.x, tex_coord.y * constants.texpaint_undo_size.y)]).xyz;");
+		node_shader_write_attrib_frag(kong, "var wposition: float3 = (constants.W * texpaint_undo[uint2(tex_coord.x * constants.texpaint_undo_size.x, tex_coord.y * constants.texpaint_undo_size.y)]).xyz;");
 
 		node_shader_write_frag(kong, "var depthlast: float = sample_lod(gbufferD, gbufferD_sampler, constants.inplast.xy, 0.0).r;");
 

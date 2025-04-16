@@ -48,7 +48,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		node_shader_add_constant(kong, "gbuffer_size: float2", "_gbuffer_size");
 		node_shader_add_constant(kong, "inp: float4", "_input_brush");
 
-		node_shader_write_frag(kong, "var tex_coord_inp: float2 = gbuffer2[int2(constants.inp.x * constants.gbuffer_size.x, constants.inp.y * constants.gbuffer_size.y)].ba;");
+		node_shader_write_frag(kong, "var tex_coord_inp: float2 = gbuffer2[uint2(constants.inp.x * constants.gbuffer_size.x, constants.inp.y * constants.gbuffer_size.y)].ba;");
 
 		kong.frag_out = "float4[4]";
 		node_shader_add_texture(kong, "texpaint");

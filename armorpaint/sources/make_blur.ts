@@ -1,6 +1,6 @@
 
 function make_blur_run(kong: node_shader_t) {
-	node_shader_write_frag(kong, "var tex_coord_inp: float2 = gbuffer2[int2(sp.x * constants.gbuffer_size.x, sp.y * constants.gbuffer_size.y)].ba;");
+	node_shader_write_frag(kong, "var tex_coord_inp: float2 = gbuffer2[uint2(sp.x * constants.gbuffer_size.x, sp.y * constants.gbuffer_size.y)].ba;");
 
 	node_shader_write_frag(kong, "var basecol: float3 = float3(0.0, 0.0, 0.0);");
 	node_shader_write_frag(kong, "var roughness: float = 0.0;");
@@ -30,7 +30,7 @@ function make_blur_run(kong: node_shader_t) {
 		node_shader_add_constant(kong, "brush_direction: float3", "_brush_direction");
 		node_shader_write_frag(kong, "var blur_direction: float2 = constants.brush_direction.yx;");
 		node_shader_write_frag(kong, "for (var i: int = 0; i < 7; i += 1) {");
-		node_shader_write_frag(kong, "var tex_coord_inp2: float2 = gbuffer2[int2((sp.x + blur_direction.x * blur_step * float(i)) * constants.gbuffer_size.x, (sp.y + blur_direction.y * blur_step * float(i)) * constants.gbuffer_size.y)].ba;");
+		node_shader_write_frag(kong, "var tex_coord_inp2: float2 = gbuffer2[uint2((sp.x + blur_direction.x * blur_step * float(i)) * constants.gbuffer_size.x, (sp.y + blur_direction.y * blur_step * float(i)) * constants.gbuffer_size.y)].ba;");
 		node_shader_write_frag(kong, "var texpaint_sample: float4 = sample(texpaint_undo, texpaint_undo_sampler, tex_coord_inp2);");
 		node_shader_write_frag(kong, "opacity += texpaint_sample.a * blur_weight[i];");
 		node_shader_write_frag(kong, "basecol += texpaint_sample.rgb * blur_weight[i];");

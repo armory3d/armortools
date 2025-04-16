@@ -370,8 +370,8 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 				node_shader_write_frag(kong, "var f0: float3 = lerp3(float3(0.04, 0.04, 0.04), basecol, metallic);");
 				kong.frag_vvec = true;
 				node_shader_write_frag(kong, "var dotnv: float = max(0.0, dot(n, vvec));");
-				// node_shader_write_frag(kong, "var env_brdf: float2 = senvmap_brdf[int2(float2(roughness, 1.0 - dotnv) * 256.0)].xy;");
-				node_shader_write_frag(kong, "var env_brdf: float4 = senvmap_brdf[int2(float2(roughness, 1.0 - dotnv) * 256.0)];");
+				// node_shader_write_frag(kong, "var env_brdf: float2 = senvmap_brdf[uint2(float2(roughness, 1.0 - dotnv) * 256.0)].xy;");
+				node_shader_write_frag(kong, "var env_brdf: float4 = senvmap_brdf[uint2(float2(roughness, 1.0 - dotnv) * 256.0)];");
 				node_shader_add_constant(kong, "envmap_num_mipmaps: int", "_envmap_num_mipmaps");
 				node_shader_add_constant(kong, "envmap_data: float4", "_envmap_data"); // angle, sin(angle), cos(angle), strength
 				node_shader_write_frag(kong, "var wreflect: float3 = reflect(-vvec, n);");
@@ -439,7 +439,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			let id: i32 = context_raw.layer.id;
 			node_shader_add_shared_sampler(kong, "texpaint_nor" + id);
 			node_shader_add_constant(kong, "texpaint_size: float2", "_texpaint_size");
-			node_shader_write_frag(kong, "var sample_matid: float = texpaint_nor" + id + "[int2(input.tex_coord * constants.texpaint_size)].a + 1.0 / 255.0;");
+			node_shader_write_frag(kong, "var sample_matid: float = texpaint_nor" + id + "[uint2(input.tex_coord * constants.texpaint_size)].a + 1.0 / 255.0;");
 			node_shader_write_frag(kong, "var matid_r: float = frac(sin(dot(float2(sample_matid, sample_matid * 20.0), float2(12.9898, 78.233))) * 43758.5453);");
 			node_shader_write_frag(kong, "var matid_g: float = frac(sin(dot(float2(sample_matid * 20.0, sample_matid), float2(12.9898, 78.233))) * 43758.5453);");
 			node_shader_write_frag(kong, "var matid_b: float = frac(sin(dot(float2(sample_matid, sample_matid * 40.0), float2(12.9898, 78.233))) * 43758.5453);");

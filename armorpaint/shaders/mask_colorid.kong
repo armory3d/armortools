@@ -31,7 +31,7 @@ fun mask_colorid_vert(input: vert_in): vert_out {
 }
 
 fun mask_colorid_frag(input: vert_out): float4 {
-	var coord: int2 = int2(0, 0);
+	var coord: uint2 = uint2(0, 0);
 	var colorid_c1: float4 = texpaint_colorid[coord];
 	var colorid_c2: float4 = sample_lod(texcolorid, texcolorid_sampler, input.tex, 0.0);
 	if (colorid_c1.x != colorid_c2.x || colorid_c1.y != colorid_c2.y || colorid_c1.z != colorid_c2.z) {

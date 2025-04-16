@@ -7,7 +7,7 @@ function make_colorid_picker_run(kong: node_shader_t) {
 	node_shader_add_constant(kong, "gbuffer_size: float2", "_gbuffer_size");
 	node_shader_add_constant(kong, "inp: float4", "_input_brush");
 
-	node_shader_write_frag(kong, "var tex_coord_inp: float2 = gbuffer2[int2(constants.inp.x * constants.gbuffer_size.x, constants.inp.y * constants.gbuffer_size.y)].ba;");
+	node_shader_write_frag(kong, "var tex_coord_inp: float2 = gbuffer2[uint2(constants.inp.x * constants.gbuffer_size.x, constants.inp.y * constants.gbuffer_size.y)].ba;");
 
 	if (context_raw.tool == workspace_tool_t.COLORID) {
 		kong.frag_out = "float4";
