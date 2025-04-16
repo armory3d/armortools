@@ -19,7 +19,6 @@ struct iron_gpu_texture;
 
 - (CAMetalLayer *)metalLayer;
 - (id<MTLDevice>)metalDevice;
-- (id<MTLLibrary>)metalLibrary;
 - (id<MTLCommandQueue>)metalQueue;
 
 - (void)keyDown:(NSEvent *)theEvent;

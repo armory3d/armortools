@@ -36,7 +36,6 @@ extern bool iron_internal_metal_has_depth;
 id getMetalDevice(void);
 id getMetalQueue(void);
 id getMetalEncoder(void);
-id getMetalLibrary(void);
 bool iron_internal_current_render_target_has_depth(void);
 static iron_gpu_raytrace_acceleration_structure_t *accel;
 static iron_gpu_raytrace_pipeline_t *pipeline;
@@ -640,6 +639,20 @@ static int findAttributeIndex(NSArray<MTLVertexAttribute *> *attributes, const c
 }
 
 void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipeline) {
+
+	id<MTLDevice> device = getMetalDevice();
+	NSError *error = nil;
+	id<MTLLibrary> library = [device newLibraryWithSource:[[NSString alloc] initWithBytes:pipeline->vertex_shader->impl.source length:pipeline->vertex_shader->impl.length encoding:NSUTF8StringEncoding] options:nil error:&error];
+	if (library == nil) {
+		iron_error("%s", error.localizedDescription.UTF8String);
+	}
+
+	pipeline->vertex_shader->impl.mtlFunction = (__bridge_retained void *)[library newFunctionWithName:[NSString stringWithCString:pipeline->vertex_shader->impl.name encoding:NSUTF8StringEncoding]];
+	assert(pipeline->vertex_shader->impl.mtlFunction);
+
+	pipeline->fragment_shader->impl.mtlFunction = (__bridge_retained void *)[library newFunctionWithName:[NSString stringWithCString:pipeline->fragment_shader->impl.name encoding:NSUTF8StringEncoding]];
+	assert(pipeline->fragment_shader->impl.mtlFunction);
+
 	MTLRenderPipelineDescriptor *renderPipelineDesc = [[MTLRenderPipelineDescriptor alloc] init];
 	renderPipelineDesc.vertexFunction = (__bridge id<MTLFunction>)pipeline->vertex_shader->impl.mtlFunction;
 	renderPipelineDesc.fragmentFunction = (__bridge id<MTLFunction>)pipeline->fragment_shader->impl.mtlFunction;
@@ -713,7 +726,6 @@ void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipeline) {
 
 	NSError *errors = nil;
 	MTLRenderPipelineReflection *reflection = nil;
-	id<MTLDevice> device = getMetalDevice();
 
 	pipeline->impl._pipeline = (__bridge_retained void *)[device newRenderPipelineStateWithDescriptor:renderPipelineDesc
 	                                                                                          options:MTLPipelineOptionBufferTypeInfo
@@ -903,45 +915,20 @@ void iron_gpu_shader_destroy(iron_gpu_shader_t *shader) {
 	shader->impl.mtlFunction = NULL;
 }
 
-void iron_gpu_shader_init(iron_gpu_shader_t *shader, const void *source, size_t length, iron_gpu_shader_type_t type) {
+void iron_gpu_shader_init(iron_gpu_shader_t *shader, const void *data, size_t length, iron_gpu_shader_type_t type) {
 	shader->impl.name[0] = 0;
+	const char *source = data;
 
-	{
-		uint8_t *data = (uint8_t *)source;
-		if (length > 1 && data[0] == '>') {
-			memcpy(shader->impl.name, data + 1, length - 1);
-			shader->impl.name[length - 1] = 0;
+	for (int i = 3; i < length; ++i) { // //>
+		if (source[i] == '\n') {
+			shader->impl.name[i - 3] = 0;
+			break;
 		}
-		else {
-			for (int i = 3; i < length; ++i) {
-				if (data[i] == '\n') {
-					shader->impl.name[i - 3] = 0;
-					break;
-				}
-				else {
-					shader->impl.name[i - 3] = data[i];
-				}
-			}
-		}
+		shader->impl.name[i - 3] = source[i];
 	}
 
-	char *data = (char *)source;
-	id<MTLLibrary> library = nil;
-	if (length > 1 && data[0] == '>') {
-		library = getMetalLibrary();
-	}
-	else {
-		id<MTLDevice> device = getMetalDevice();
-		NSError *error = nil;
-		library = [device newLibraryWithSource:[[NSString alloc] initWithBytes:data length:length encoding:NSUTF8StringEncoding] options:nil error:&error];
-		if (library == nil) {
-			iron_error("%s", error.localizedDescription.UTF8String);
-		}
-	}
-	shader->impl.mtlFunction = (__bridge_retained void *)[library newFunctionWithName:[NSString stringWithCString:shader->impl.name
-	                                                                                                     encoding:NSUTF8StringEncoding]];
-
-	assert(shader->impl.mtlFunction);
+	shader->impl.source = data;
+	shader->impl.length = length;
 }
 
 bool iron_gpu_raytrace_supported() {

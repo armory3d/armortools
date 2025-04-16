@@ -45,7 +45,7 @@ if (platform === "windows") {
 	project.add_lib("dxguid");
 }
 else if (platform === "macos") {
-	project.add_cfiles("../../sources/backends/mac.plist");
+	project.add_cfiles("../../sources/backends/data/mac.plist");
 }
 
 return project;

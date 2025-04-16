@@ -28,7 +28,6 @@ struct iron_gpu_texture;
 - (void)hideKeyboard;
 - (CAMetalLayer *)metalLayer;
 - (id<MTLDevice>)metalDevice;
-- (id<MTLLibrary>)metalLibrary;
 - (id<MTLCommandQueue>)metalQueue;
 
 @end

@@ -412,10 +412,6 @@ static bool controlKeyMouseButton = false;
 	return device;
 }
 
-- (id<MTLLibrary>)metalLibrary {
-	return library;
-}
-
 - (id<MTLCommandQueue>)metalQueue {
 	return commandQueue;
 }
@@ -1105,10 +1101,6 @@ CAMetalLayer *getMetalLayer(void) {
 
 id getMetalDevice(void) {
 	return [view metalDevice];
-}
-
-id getMetalLibrary(void) {
-	return [view metalLibrary];
 }
 
 id getMetalQueue(void) {

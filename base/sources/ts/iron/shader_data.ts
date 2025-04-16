@@ -166,6 +166,7 @@ function shader_context_type_size(t: string): i32 {
 	if (t == "vec4") return 16;
 	if (t == "mat3") return 48;
 	if (t == "mat4") return 64;
+	return 0;
 }
 
 function shader_context_type_pad(offset: i32, size: i32): i32 {

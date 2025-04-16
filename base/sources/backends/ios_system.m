@@ -299,10 +299,6 @@ static bool shiftDown = false;
 	return device;
 }
 
-- (id<MTLLibrary>)metalLibrary {
-	return library;
-}
-
 - (id<MTLCommandQueue>)metalQueue {
 	return commandQueue;
 }
@@ -340,10 +336,6 @@ CAMetalLayer *getMetalLayer(void) {
 
 id getMetalDevice(void) {
 	return [glView metalDevice];
-}
-
-id getMetalLibrary(void) {
-	return [glView metalLibrary];
 }
 
 id getMetalQueue(void) {

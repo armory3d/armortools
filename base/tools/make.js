@@ -560,7 +560,7 @@ class VisualStudioExporter extends Exporter {
 			return file.file.endsWith(".cpp") || file.file.endsWith(".c") || file.file.endsWith(".cc");
 		});
 		this.item_group(from, to, project, 'CustomBuild', (file) => {
-			return file.file.endsWith(".hlsl") || file.file.endsWith(".glsl");
+			return file.file.endsWith(".hlsl");
 		});
 		if (platform === "windows") {
 			this.item_group(from, to, project, "ResourceCompile", (file) => {
@@ -2433,7 +2433,7 @@ function shader_find_type(options) {
 		return 'spirv';
 	}
 	else if (options.graphics === 'metal') {
-		return 'msl';
+		return 'metal';
 	}
 	else if (options.graphics === 'direct3d12') {
 		return 'hlsl';

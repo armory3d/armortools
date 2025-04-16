@@ -63,6 +63,10 @@ extern name_id names_index;
 extern size_t sets_count;
 extern type_id next_type_index;
 void hlsl_export2(char **vs, char **fs, api_kind d3d, bool debug);
+extern size_t vertex_inputs_size;
+extern size_t fragment_inputs_size;
+extern size_t vertex_functions_size;
+extern size_t fragment_functions_size;
 
 void kong_compile(const char *from, const char *to) {
 	FILE *fp = fopen(from, "rb");
@@ -81,6 +85,10 @@ void kong_compile(const char *from, const char *to) {
 	names_index = 1;
 	sets_count = 0;
 	next_type_index = 0;
+	vertex_inputs_size = 0;
+	fragment_inputs_size = 0;
+	vertex_functions_size = 0;
+	fragment_functions_size = 0;
 	names_init();
 	types_init();
 	functions_init();
@@ -94,35 +102,32 @@ void kong_compile(const char *from, const char *to) {
 	}
 	analyze();
 
-	// vulkan
-	// transform(TRANSFORM_FLAG_ONE_COMPONENT_SWIZZLE);
-
 	#ifdef _WIN32
 
 	char *vs;
 	char *fs;
 	hlsl_export2(&vs, &fs, API_DIRECT3D11, false);
 
-	int i = string_last_index_of(to, "\\");
-	char filename[512];
-	strcpy(filename, to);
-	char *file = &filename[i + 1];
-	int j = string_index_of(file, ".");
-	file[j] = '\0';
-
 	////
+	// int i = string_last_index_of(to, "\\");
+	// char filename[512];
+	// strcpy(filename, to);
+	// char *filebase = &filename[i + 1];
+	// int j = string_index_of(filebase, ".");
+	// filebase[j] = '\0';
+
 	// char tmp[512];
 	// strcpy(tmp, to);
 	// tmp[i] = '\0';
 	// strcat(tmp, "\\..\\..\\temp\\");
-	// strcat(tmp, file);
+	// strcat(tmp, filebase);
 	// strcat(tmp, ".vert.hlsl");
 	// fp = fopen(tmp, "wb");
 	// fwrite(vs, 1, strlen(vs), fp);
 	// fclose(fp);
 	// tmp[i] = '\0';
 	// strcat(tmp, "\\..\\..\\temp\\");
-	// strcat(tmp, file);
+	// strcat(tmp, filebase);
 	// strcat(tmp, ".frag.hlsl");
 	// fp = fopen(tmp, "wb");
 	// fwrite(fs, 1, strlen(fs), fp);
@@ -140,19 +145,52 @@ void kong_compile(const char *from, const char *to) {
 	strcat(to_, "frag.d3d11");
 	hlsl_to_bin(fs, "frag", to_);
 
-	#else
+	#elif defined(__APPLE__)
+
+	char *metal = metal_export("");
 
 	int i = string_last_index_of(to, "/");
-	output[i] = '\0';
+	char filename[512];
+	strcpy(filename, to);
+	char *filebase = &filename[i + 1];
+	int j = string_index_of(filebase, ".");
+	filebase[j] = '\0';
 
-	// metal_export(output);
-	spirv_export(output);
+	char to_[512];
+	strcpy(to_, to);
+	to_[strlen(to_) - 5] = '\0';
+	strcat(to_, "vert.metal");
+
+	fp = fopen(to_, "wb");
+	fwrite("//>", 1, 3, fp);
+	fwrite(filebase, 1, strlen(filebase), fp);
+	fwrite("_vert\n", 1, 6, fp);
+	fwrite(metal, 1, strlen(metal), fp);
+	fclose(fp);
+
+	strcpy(to_, to);
+	to_[strlen(to_) - 5] = '\0';
+	strcat(to_, "frag.metal");
+
+	fp = fopen(to_, "wb");
+	fwrite("//>", 1, 3, fp);
+	fwrite(filebase, 1, strlen(filebase), fp);
+	fwrite("_frag\n", 1, 6, fp);
+	fclose(fp);
+
+	#else
+
+	// transform(TRANSFORM_FLAG_ONE_COMPONENT_SWIZZLE);
+
+	// int i = string_last_index_of(to, "/");
+	// output[i] = '\0';
+	// spirv_export2(output);
 
 	#endif
 }
 
 int ashader(char *shader_lang, char *from, char *to) {
-	// shader_lang == hlsl || msl || spirv
+	// shader_lang == hlsl || metal || spirv
 	kong_compile(from, to);
 	return 0;
 }

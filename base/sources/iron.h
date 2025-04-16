@@ -360,7 +360,8 @@ unsigned char *iron_deflate_raw(unsigned char *data, int data_len, int *out_len,
 #include "sinfl.h"
 #endif
 #if defined(IDLE_SLEEP) && !defined(IRON_WINDOWS)
-#include <unistd.h>
+// #include <unistd.h>
+int usleep(unsigned int usec);
 #endif
 
 #ifdef IRON_MACOS
@@ -1001,6 +1002,10 @@ extern name_id names_index;
 extern size_t sets_count;
 extern type_id next_type_index;
 void hlsl_export2(char **vs, char **fs, api_kind d3d, bool debug);
+extern size_t vertex_inputs_size;
+extern size_t fragment_inputs_size;
+extern size_t vertex_functions_size;
+extern size_t fragment_functions_size;
 
 void gpu_create_shaders_from_kong(char *kong, char **vs, char **fs) {
 	next_variable_id = 1;
@@ -1010,6 +1015,10 @@ void gpu_create_shaders_from_kong(char *kong, char **vs, char **fs) {
 	names_index = 1;
 	sets_count = 0;
 	next_type_index = 0;
+	vertex_inputs_size = 0;
+	fragment_inputs_size = 0;
+	vertex_functions_size = 0;
+	fragment_functions_size = 0;
 	names_init();
 	types_init();
 	functions_init();
@@ -1024,12 +1033,25 @@ void gpu_create_shaders_from_kong(char *kong, char **vs, char **fs) {
 	}
 	analyze();
 
-	// vulkan
-	// transform(TRANSFORM_FLAG_ONE_COMPONENT_SWIZZLE);
+	#ifdef _WIN32
 
 	hlsl_export2(vs, fs, API_DIRECT3D11, false);
-	// metal_export(output);
+
+	#elif defined(__APPLE__)
+
+	static char vs_temp[1024 * 128];
+	strcpy(vs_temp, "//>kong_vert\n");
+	char *metal = metal_export("");
+	strcat(vs_temp, metal);
+	*vs = &vs_temp[0];
+	*fs = "//>kong_frag\n";
+
+	#else
+
+	// transform(TRANSFORM_FLAG_ONE_COMPONENT_SWIZZLE);
 	// spirv_export(output);
+
+	#endif
 }
 
 iron_gpu_shader_t *gpu_create_shader_from_source(string_t *source, iron_gpu_shader_type_t shader_type) {
@@ -1057,8 +1079,7 @@ iron_gpu_shader_t *gpu_create_shader_from_source(string_t *source, iron_gpu_shad
 
 	#elif defined(IRON_METAL)
 
-	strcpy(temp_string_s, "// my_main\n");
-	strcat(temp_string_s, source);
+	strcpy(temp_string_s, source);
 	shader = (iron_gpu_shader_t *)malloc(sizeof(iron_gpu_shader_t));
 	iron_gpu_shader_init(shader, temp_string_s, strlen(temp_string_s), shader_type);
 

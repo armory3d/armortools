@@ -33,6 +33,8 @@ typedef struct iron_gpu_sampler_impl {
 typedef struct {
 	char name[1024];
 	void *mtlFunction;
+	char *source;
+	int length;
 } gpu_shader_impl_t;
 
 typedef struct {
