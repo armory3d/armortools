@@ -50,9 +50,9 @@ static void write_code(char *metal, char *directory, const char *filename) {
 }
 
 static type_id vertex_inputs[256];
-static size_t  vertex_inputs_size = 0;
+/*static*/ size_t  vertex_inputs_size = 0;
 static type_id fragment_inputs[256];
-static size_t  fragment_inputs_size = 0;
+/*static*/ size_t  fragment_inputs_size = 0;
 
 static bool is_vertex_input(type_id t) {
 	for (size_t i = 0; i < vertex_inputs_size; ++i) {
@@ -134,9 +134,9 @@ static void write_types(char *metal, size_t *offset) {
 static int global_register_indices[512];
 
 static function_id vertex_functions[256];
-static size_t      vertex_functions_size = 0;
+/*static*/ size_t      vertex_functions_size = 0;
 static function_id fragment_functions[256];
-static size_t      fragment_functions_size = 0;
+/*static*/ size_t      fragment_functions_size = 0;
 static function_id compute_functions[256];
 static size_t      compute_functions_size = 0;
 
@@ -224,6 +224,36 @@ static void write_argument_buffers(char *code, size_t *offset) {
 		}
 
 		*offset += sprintf(&code[*offset], "};\n\n");
+	}
+}
+
+static void write_globals(char *code, size_t *offset) {
+	global_array globals = {0};
+    for (function_id i = 0; get_function(i) != NULL; ++i) {
+        function *f = get_function(i);
+		find_referenced_globals(f, &globals);
+    }
+
+	for (size_t i = 0; i < globals.size; ++i) {
+		global *g         = get_global(globals.globals[i]);
+		type   *t         = get_type(g->type);
+		type_id base_type = t->array_size > 0 ? t->base : g->type;
+
+		if (base_type == float_id) {
+			*offset += sprintf(&code[*offset], "constant float _%" PRIu64 " = %f;\n\n", g->var_index, g->value.value.floats[0]);
+		}
+		else if (base_type == float2_id) {
+			*offset += sprintf(&code[*offset], "constant float2 _%" PRIu64 " = float2(%f, %f);\n\n", g->var_index, g->value.value.floats[0],
+			                   g->value.value.floats[1]);
+		}
+		else if (base_type == float3_id) {
+			*offset += sprintf(&code[*offset], "constant float3 _%" PRIu64 " = float3(%f, %f, %f);\n\n", g->var_index, g->value.value.floats[0],
+			                   g->value.value.floats[1], g->value.value.floats[2]);
+		}
+		else if (base_type == float4_id) {
+			*offset += sprintf(&code[*offset], "constant float4 _%" PRIu64 " = float4(%f, %f, %f, %f);\n\n", g->var_index, g->value.value.floats[0],
+				                g->value.value.floats[1], g->value.value.floats[2], g->value.value.floats[3]);
+		}
 	}
 }
 
@@ -334,7 +364,7 @@ static void write_functions(char *code, size_t *offset) {
 			for (uint8_t parameter_index = 1; parameter_index < f->parameters_size; ++parameter_index) {
 				*offset += sprintf(&code[*offset], ", %s _%" PRIu64, type_string(f->parameter_types[0].type), parameter_ids[0]);
 			}
-			*offset += sprintf(&code[*offset], "%s) {\n", buffers);
+			*offset += sprintf(&code[*offset], "%s, uint _kong_vertex_id [[vertex_id]]) {\n", buffers);
 		}
 		else if (is_fragment_function(i)) {
 			if (get_type(f->return_type.type)->array_size > 0) {
@@ -372,15 +402,15 @@ static void write_functions(char *code, size_t *offset) {
 			*offset += sprintf(&code[*offset], "%s) {\n", buffers);
 		}
 		else {
-			*offset += sprintf(&code[*offset], "%s %s(", type_string(f->return_type.type), get_name(f->name));
+			descriptor_set_group *set_group = get_descriptor_set_group(0);
+			descriptor_set *set = set_group->values[0];
+
+			*offset += sprintf(&code[*offset], "%s %s(constant %s& argument_buffer0", type_string(f->return_type.type), get_name(f->name), get_name(set->name));
+
 			for (uint8_t parameter_index = 0; parameter_index < f->parameters_size; ++parameter_index) {
-				if (parameter_index == 0) {
-					*offset += sprintf(&code[*offset], "%s _%" PRIu64, type_string(f->parameter_types[parameter_index].type), parameter_ids[parameter_index]);
-				}
-				else {
-					*offset += sprintf(&code[*offset], ", %s _%" PRIu64, type_string(f->parameter_types[parameter_index].type), parameter_ids[parameter_index]);
-				}
+				*offset += sprintf(&code[*offset], ", %s _%" PRIu64, type_string(f->parameter_types[parameter_index].type), parameter_ids[parameter_index]);
 			}
+
 			*offset += sprintf(&code[*offset], ") {\n");
 		}
 
@@ -556,6 +586,11 @@ static void write_functions(char *code, size_t *offset) {
 				}
 				break;
 			}
+			case OPCODE_DISCARD: {
+				indent(code, offset, indentation);
+				*offset += sprintf(&code[*offset], "discard_fragment();\n");
+				break;
+			}
 			case OPCODE_CALL: {
 				debug_context context = {0};
 
@@ -605,9 +640,113 @@ static void write_functions(char *code, size_t *offset) {
 					check(o->op_call.parameters_size == 0, context, "group_index can not have a parameter");
 					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = _kong_group_index;\n", type_string(o->op_call.var.type.type), o->op_call.var.index);
 				}
+				else if (o->op_call.func == add_name("vertex_id")) {
+					check(o->op_call.parameters_size == 0, context, "vertex_id can not have a parameter");
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = _kong_vertex_id;\n", type_string(o->op_call.var.type.type), o->op_call.var.index);
+				}
+				else if (o->op_call.func == add_name("lerp")) {
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = mix(_%" PRIu64 ", _%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index);
+				}
+				else if (o->op_call.func == add_name("frac")) {
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = fract(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index);
+				}
+				else if (o->op_call.func == add_name("ddx")) {
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = dfdx(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index);
+				}
+				else if (o->op_call.func == add_name("ddy")) {
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = dfdx(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index);
+				}
+
+				////
+
+				else if (o->op_call.func == add_name("lerp3")) {
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = mix(_%" PRIu64 ", _%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index);
+				}
+				else if (o->op_call.func == add_name("lerp4")) {
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = mix(_%" PRIu64 ", _%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index);
+				}
+				else if (o->op_call.func == add_name("frac3")) {
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = fract(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index);
+				}
+				else if (o->op_call.func == add_name("abs3")) {
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = abs(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index);
+				}
+				else if (o->op_call.func == add_name("clamp3")) {
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = clamp(_%" PRIu64 ", _%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index);
+				}
+				else if (o->op_call.func == add_name("min3")) {
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = min(_%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index);
+				}
+				else if (o->op_call.func == add_name("max3")) {
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = max(_%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index);
+				}
+				else if (o->op_call.func == add_name("step3")) {
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = step(_%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index);
+				}
+				else if (o->op_call.func == add_name("pow3")) {
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = pow(_%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index);
+				}
+				else if (o->op_call.func == add_name("floor3")) {
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = floor(_%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index);
+				}
+				else if (o->op_call.func == add_name("ceil3")) {
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = ceil(_%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index);
+				}
+				else if (o->op_call.func == add_name("ddx2")) {
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = dfdx(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index);
+				}
+				else if (o->op_call.func == add_name("ddy2")) {
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = dfdx(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index);
+				}
+				else if (o->op_call.func == add_name("ddx3")) {
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = dfdx(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index);
+				}
+				else if (o->op_call.func == add_name("ddy3")) {
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = dfdx(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index);
+				}
+
+				////
+
 				else {
+
 					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = %s(", type_string(o->op_call.var.type.type), o->op_call.var.index,
 					                   function_string(o->op_call.func));
+
+					bool is_built_in = true;
+					for (function_id i = 0; get_function(i) != NULL; ++i) {
+						function *f = get_function(i);
+						if (o->op_call.func == f->name && f->block != NULL) {
+							is_built_in = false;
+							break;
+						}
+					}
+
+					if (!is_built_in) {
+						*offset += sprintf(&code[*offset], "argument_buffer0");
+						if (o->op_call.parameters_size > 0) {
+							*offset += sprintf(&code[*offset], ", ");
+						}
+					}
+
 					if (o->op_call.parameters_size > 0) {
 						*offset += sprintf(&code[*offset], "_%" PRIu64, o->op_call.parameters[0].index);
 						for (uint8_t i = 1; i < o->op_call.parameters_size; ++i) {
@@ -616,6 +755,12 @@ static void write_functions(char *code, size_t *offset) {
 					}
 					*offset += sprintf(&code[*offset], ");\n");
 				}
+				break;
+			}
+			case OPCODE_MOD: {
+				indent(code, offset, indentation);
+				*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = fmod(_%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_binary.result.type.type),
+				                   o->op_binary.result.index, o->op_binary.left.index, o->op_binary.right.index);
 				break;
 			}
 			default:
@@ -630,7 +775,10 @@ static void write_functions(char *code, size_t *offset) {
 	}
 }
 
-static void metal_export_everything(char *directory) {
+////
+// static void metal_export_everything(char *directory) {
+static char *metal_export_everything(char *directory) {
+////
 	char         *metal   = (char *)calloc(1024 * 1024, 1);
 	debug_context context = {0};
 	check(metal != NULL, context, "Could not allocate Metal string");
@@ -648,12 +796,20 @@ static void metal_export_everything(char *directory) {
 
 	write_argument_buffers(metal, &offset);
 
+	write_globals(metal, &offset);
+
 	write_functions(metal, &offset);
 
-	write_code(metal, directory, "kong");
+	////
+	// write_code(metal, directory, "kong");
+	return metal;
+	////
 }
 
-void metal_export(char *directory) {
+////
+// void metal_export(char *directory) {
+char *metal_export(char *directory) {
+////
 	int cbuffer_index = 0;
 	int texture_index = 0;
 	int sampler_index = 0;
@@ -727,5 +883,8 @@ void metal_export(char *directory) {
 		}
 	}
 
-	metal_export_everything(directory);
+	////
+	// metal_export_everything(directory);
+	return metal_export_everything(directory);
+	////
 }
