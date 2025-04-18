@@ -1,5 +1,12 @@
 
 #[set(everything)]
+const constants: {
+	opac: float;
+	blending: int;
+	tex1w: float;
+};
+
+#[set(everything)]
 const tex0: tex2d;
 
 #[set(everything)]
@@ -22,13 +29,6 @@ const texa: tex2d;
 
 #[set(everything)]
 const texa_sampler: sampler;
-
-#[set(everything)]
-const constants: {
-	opac: float;
-	blending: int;
-	tex1w: float;
-};
 
 struct vert_in {
 	pos: float2;

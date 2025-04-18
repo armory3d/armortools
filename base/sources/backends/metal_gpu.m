@@ -464,7 +464,7 @@ void iron_gpu_command_list_set_vertex_constant_buffer(iron_gpu_command_list_t *l
 void iron_gpu_command_list_set_fragment_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer, int offset, size_t size) {
 	id<MTLBuffer> buf = (__bridge id<MTLBuffer>)buffer->impl._buffer;
 	id<MTLRenderCommandEncoder> encoder = getMetalEncoder();
-	[encoder setFragmentBuffer:buf offset:offset atIndex:0];
+	[encoder setFragmentBuffer:buf offset:offset atIndex:1];
 }
 
 void iron_gpu_command_list_render_target_to_texture_barrier(iron_gpu_command_list_t *list, struct iron_gpu_texture *renderTarget) {

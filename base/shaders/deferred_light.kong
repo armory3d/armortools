@@ -1,5 +1,22 @@
 
 #[set(everything)]
+const constants: {
+	invVP: float4x4;
+	eye: float3;
+	envmap_data: float4; // angle, sin(angle), cos(angle), strength
+	envmap_num_mipmaps: int;
+	camera_proj: float2;
+	eye_look: float3;
+	shirr0: float4;
+	shirr1: float4;
+	shirr2: float4;
+	shirr3: float4;
+	shirr4: float4;
+	shirr5: float4;
+	shirr6: float4;
+};
+
+#[set(everything)]
 const gbufferD: tex2d;
 
 #[set(everything)]
@@ -34,23 +51,6 @@ const ssaotex: tex2d;
 
 #[set(everything)]
 const ssaotex_sampler: sampler;
-
-#[set(everything)]
-const constants: {
-	invVP: float4x4;
-	eye: float3;
-	envmap_data: float4; // angle, sin(angle), cos(angle), strength
-	envmap_num_mipmaps: int;
-	camera_proj: float2;
-	eye_look: float3;
-	shirr0: float4;
-	shirr1: float4;
-	shirr2: float4;
-	shirr3: float4;
-	shirr4: float4;
-	shirr5: float4;
-	shirr6: float4;
-};
 
 const PI: float = 3.14159265358979;
 const PI2: float = 6.28318530718;

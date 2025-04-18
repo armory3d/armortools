@@ -1,14 +1,14 @@
 
 #[set(everything)]
+const constants: {
+	params: float4;
+};
+
+#[set(everything)]
 const radiance: tex2d;
 
 #[set(everything)]
 const radiance_sampler: sampler;
-
-#[set(everything)]
-const constants: {
-	params: float4;
-};
 
 const PI: float = 3.14159265358979;
 const PI2: float = 6.28318530718;

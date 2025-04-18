@@ -1,16 +1,16 @@
 
 #[set(everything)]
-const tex: tex2d;
-
-#[set(everything)]
-const tex_sampler: sampler;
-
-#[set(everything)]
 const constants: {
 	screen_size_inv: float2;
 	current_mip_level: int;
 	sample_scale: float;
 };
+
+#[set(everything)]
+const tex: tex2d;
+
+#[set(everything)]
+const tex_sampler: sampler;
 
 struct vert_in {
 	pos: float2;

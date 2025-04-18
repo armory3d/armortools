@@ -195,14 +195,6 @@ function node_shader_get(raw: node_shader_t): string {
 	}
 	s += "}\n\n";
 
-	for (let i: i32 = 0; i < raw.textures.length; ++i) {
-		let a: string = raw.textures[i];
-		s += "#[set(everything)]\n";
-		s += "const " + a + ": tex2d;\n";
-		s += "#[set(everything)]\n";
-		s += "const " + a + "_sampler: sampler;\n\n";
-	}
-
 	if (raw.constants.length > 0) {
 		s += "#[set(everything)]\n";
 		s += "const constants: {\n";
@@ -211,6 +203,14 @@ function node_shader_get(raw: node_shader_t): string {
 			s += "\t" + a + ";\n";
 		}
 		s += "};\n\n";
+	}
+
+	for (let i: i32 = 0; i < raw.textures.length; ++i) {
+		let a: string = raw.textures[i];
+		s += "#[set(everything)]\n";
+		s += "const " + a + ": tex2d;\n";
+		s += "#[set(everything)]\n";
+		s += "const " + a + "_sampler: sampler;\n\n";
 	}
 
 	for (let i: i32 = 0; i < raw.shared_samplers.length; ++i) {

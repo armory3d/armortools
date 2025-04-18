@@ -1,5 +1,11 @@
 
 #[set(everything)]
+const constants: {
+	dilate_radius: float;
+	tex_size: float2;
+};
+
+#[set(everything)]
 const tex: tex2d;
 
 #[set(everything)]
@@ -10,12 +16,6 @@ const texdilate: tex2d;
 
 #[set(everything)]
 const texdilate_sampler: sampler;
-
-#[set(everything)]
-const constants: {
-	dilate_radius: float;
-	tex_size: float2;
-};
 
 // const offsets: float2[8] = {
 // 	float2(-1.0,  0.0), float2( 1.0,  0.0), float2( 0.0,  1.0), float2( 0.0, -1.0),

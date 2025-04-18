@@ -1,5 +1,13 @@
 
 #[set(everything)]
+const constants: {
+	invP: float4x4;
+	P: float4x4;
+	V3: float3x3;
+	camera_proj: float2;
+};
+
+#[set(everything)]
 const gbufferD: tex2d;
 
 #[set(everything)]
@@ -10,14 +18,6 @@ const gbuffer0: tex2d;
 
 #[set(everything)]
 const gbuffer0_sampler: sampler;
-
-#[set(everything)]
-const constants: {
-	invP: float4x4;
-	P: float4x4;
-	V3: float3x3;
-	camera_proj: float2;
-};
 
 const max_steps: float = 32;
 const ray_step: float = 0.001;
