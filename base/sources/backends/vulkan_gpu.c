@@ -2014,9 +2014,6 @@ VkDescriptorSet get_descriptor_set() {
 
 void iron_gpu_command_list_set_vertex_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer, int offset, size_t size) {
 	last_vertex_constant_buffer_offset = offset;
-}
-
-void iron_gpu_command_list_set_fragment_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer, int offset, size_t size) {
 	last_fragment_constant_buffer_offset = offset;
 
 	VkDescriptorSet descriptor_set = get_descriptor_set();
@@ -2316,7 +2313,6 @@ static VkFormat convert_image_format(iron_image_format_t format) {
 
 void iron_gpu_pipeline_init(iron_gpu_pipeline_t *pipeline) {
 	iron_gpu_internal_pipeline_init(pipeline);
-	iron_gpu_internal_pipeline_set_defaults(pipeline);
 }
 
 void iron_gpu_pipeline_destroy(iron_gpu_pipeline_t *pipeline) {
@@ -2328,12 +2324,8 @@ void iron_gpu_pipeline_destroy(iron_gpu_pipeline_t *pipeline) {
 iron_gpu_constant_location_t iron_gpu_pipeline_get_constant_location(iron_gpu_pipeline_t *pipeline, const char *name) {
 	iron_gpu_constant_location_t location;
 	location.impl.vertexOffset = -1;
-	location.impl.fragmentOffset = -1;
 	if (has_number(pipeline->impl.vertexOffsets, name)) {
 		location.impl.vertexOffset = find_number(pipeline->impl.vertexOffsets, name);
-	}
-	if (has_number(pipeline->impl.fragmentOffsets, name)) {
-		location.impl.fragmentOffset = find_number(pipeline->impl.fragmentOffsets, name);
 	}
 	return location;
 }
@@ -2439,14 +2431,10 @@ static VkBlendOp convert_blend_operation(iron_gpu_blending_operation_t op) {
 void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipeline) {
 	memset(pipeline->impl.vertexLocations, 0, sizeof(iron_internal_named_number) * IRON_INTERNAL_NAMED_NUMBER_COUNT);
 	memset(pipeline->impl.vertexOffsets, 0, sizeof(iron_internal_named_number) * IRON_INTERNAL_NAMED_NUMBER_COUNT);
-	memset(pipeline->impl.fragmentLocations, 0, sizeof(iron_internal_named_number) * IRON_INTERNAL_NAMED_NUMBER_COUNT);
-	memset(pipeline->impl.fragmentOffsets, 0, sizeof(iron_internal_named_number) * IRON_INTERNAL_NAMED_NUMBER_COUNT);
 	memset(pipeline->impl.vertexTextureBindings, 0, sizeof(iron_internal_named_number) * IRON_INTERNAL_NAMED_NUMBER_COUNT);
 	memset(pipeline->impl.fragmentTextureBindings, 0, sizeof(iron_internal_named_number) * IRON_INTERNAL_NAMED_NUMBER_COUNT);
 	parse_shader((uint32_t *)pipeline->vertex_shader->impl.source, pipeline->vertex_shader->impl.length, pipeline->impl.vertexLocations,
 	             pipeline->impl.vertexTextureBindings, pipeline->impl.vertexOffsets);
-	parse_shader((uint32_t *)pipeline->fragment_shader->impl.source, pipeline->fragment_shader->impl.length, pipeline->impl.fragmentLocations,
-	             pipeline->impl.fragmentTextureBindings, pipeline->impl.fragmentOffsets);
 
 	VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo = {
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,

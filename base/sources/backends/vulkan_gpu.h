@@ -123,18 +123,15 @@ typedef struct gpu_pipeline_impl {
 	VkShaderModule frag_shader_module;
 
 	iron_internal_named_number vertexLocations[IRON_INTERNAL_NAMED_NUMBER_COUNT];
-	iron_internal_named_number fragmentLocations[IRON_INTERNAL_NAMED_NUMBER_COUNT];
 	iron_internal_named_number vertexTextureBindings[IRON_INTERNAL_NAMED_NUMBER_COUNT];
 	iron_internal_named_number fragmentTextureBindings[IRON_INTERNAL_NAMED_NUMBER_COUNT];
 	iron_internal_named_number vertexOffsets[IRON_INTERNAL_NAMED_NUMBER_COUNT];
-	iron_internal_named_number fragmentOffsets[IRON_INTERNAL_NAMED_NUMBER_COUNT];
 
 	VkPipelineLayout pipeline_layout;
 } gpu_pipeline_impl_t;
 
 typedef struct {
 	int vertexOffset;
-	int fragmentOffset;
 } gpu_constant_location_impl_t;
 
 typedef struct {

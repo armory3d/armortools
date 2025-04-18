@@ -232,7 +232,6 @@ extern WGPUDevice device;
 
 void iron_gpu_pipeline_init(iron_gpu_pipeline_t *pipe) {
 	iron_gpu_internal_pipeline_init(pipe);
-	iron_gpu_internal_pipeline_set_defaults(pipe);
 }
 
 iron_gpu_constant_location_t iron_gpu_pipeline_get_constant_location(iron_gpu_pipeline_t *pipe, const char* name) {
@@ -470,10 +469,6 @@ void iron_gpu_command_list_wait_for_execution_to_finish(iron_gpu_command_list_t 
 }
 
 void iron_gpu_command_list_set_vertex_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer, int offset, size_t size) {
-
-}
-
-void iron_gpu_command_list_set_fragment_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer, int offset, size_t size) {
 
 }
 

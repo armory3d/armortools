@@ -2288,7 +2288,8 @@ void iron_raytrace_dispatch_rays(iron_gpu_texture_t *render_target, buffer_t *bu
 	float *cb = (float *)buffer->buffer;
 	iron_gpu_constant_buffer_lock_all(&constant_buffer);
 	for (int i = 0; i < constant_buffer_size; ++i) {
-		iron_gpu_constant_buffer_set_float(&constant_buffer, i * 4, cb[i]);
+		float *floats = (float *)(&constant_buffer.data[i * 4]);
+		floats[0] = cb[i];
 	}
 	iron_gpu_constant_buffer_unlock(&constant_buffer);
 

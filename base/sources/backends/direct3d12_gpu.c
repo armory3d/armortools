@@ -272,7 +272,7 @@ static void create_root_signature() {
 	ID3DBlob *rootBlob;
 	ID3DBlob *errorBlob;
 
-	D3D12_ROOT_PARAMETER parameters[4] = {};
+	D3D12_ROOT_PARAMETER parameters[3] = {};
 
 	D3D12_DESCRIPTOR_RANGE range = {
 		.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV,
@@ -299,49 +299,12 @@ static void create_root_signature() {
 	parameters[1].DescriptorTable.pDescriptorRanges = &range2;
 
 	parameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	parameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	parameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	parameters[2].Descriptor.ShaderRegister = 0;
 	parameters[2].Descriptor.RegisterSpace = 0;
 
-	parameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	parameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	parameters[3].Descriptor.ShaderRegister = 0;
-	parameters[3].Descriptor.RegisterSpace = 0;
-
-	D3D12_STATIC_SAMPLER_DESC samplers[IRON_INTERNAL_G5_TEXTURE_COUNT * 2];
-	for (int i = 0; i < IRON_INTERNAL_G5_TEXTURE_COUNT; ++i) {
-		samplers[i].ShaderRegister = i;
-		samplers[i].Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
-		samplers[i].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		samplers[i].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		samplers[i].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		samplers[i].MipLODBias = 0;
-		samplers[i].MaxAnisotropy = 16;
-		samplers[i].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
-		samplers[i].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
-		samplers[i].MinLOD = 0.0f;
-		samplers[i].MaxLOD = D3D12_FLOAT32_MAX;
-		samplers[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-		samplers[i].RegisterSpace = 0;
-	}
-	for (int i = IRON_INTERNAL_G5_TEXTURE_COUNT; i < IRON_INTERNAL_G5_TEXTURE_COUNT * 2; ++i) {
-		samplers[i].ShaderRegister = i;
-		samplers[i].Filter = D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT;
-		samplers[i].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		samplers[i].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		samplers[i].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		samplers[i].MipLODBias = 0;
-		samplers[i].MaxAnisotropy = 16;
-		samplers[i].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
-		samplers[i].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
-		samplers[i].MinLOD = 0.0f;
-		samplers[i].MaxLOD = D3D12_FLOAT32_MAX;
-		samplers[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-		samplers[i].RegisterSpace = 0;
-	}
-
 	D3D12_ROOT_SIGNATURE_DESC descRootSignature = {
-		.NumParameters = 4,
+		.NumParameters = 3,
 		.pParameters = parameters,
 		.NumStaticSamplers = 0,
 		.pStaticSamplers = NULL,
@@ -612,10 +575,6 @@ void iron_gpu_command_list_render_target_to_texture_barrier(struct iron_gpu_comm
 
 void iron_gpu_command_list_set_vertex_constant_buffer(struct iron_gpu_command_list *list, iron_gpu_buffer_t *buffer, int offset, size_t size) {
 	list->impl._commandList->lpVtbl->SetGraphicsRootConstantBufferView(list->impl._commandList, 2, buffer->impl.constant_buffer->lpVtbl->GetGPUVirtualAddress(buffer->impl.constant_buffer) + offset);
-}
-
-void iron_gpu_command_list_set_fragment_constant_buffer(struct iron_gpu_command_list *list, iron_gpu_buffer_t *buffer, int offset, size_t size) {
-	list->impl._commandList->lpVtbl->SetGraphicsRootConstantBufferView(list->impl._commandList, 3, buffer->impl.constant_buffer->lpVtbl->GetGPUVirtualAddress(buffer->impl.constant_buffer) + offset);
 }
 
 void iron_gpu_command_list_draw_indexed_vertices(struct iron_gpu_command_list *list) {
@@ -984,7 +943,6 @@ void iron_gpu_command_list_set_texture_from_render_target_depth(iron_gpu_command
 }
 
 void iron_gpu_pipeline_init(iron_gpu_pipeline_t *pipe) {
-	iron_gpu_internal_pipeline_set_defaults(pipe);
 	iron_gpu_internal_pipeline_init(pipe);
 }
 

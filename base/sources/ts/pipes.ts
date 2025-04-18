@@ -307,7 +307,6 @@ function pipes_get_constant_location(pipe: iron_gpu_pipeline_t, name: string, ty
 	let size: i32 = shader_context_type_size(type);
 	pipes_offset += shader_context_type_pad(pipes_offset, size);
 	ptr.vertexOffset = pipes_offset;
-	ptr.fragmentOffset = pipes_offset;
 	pipes_offset += size;
 	return loc;
 }

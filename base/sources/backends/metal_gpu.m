@@ -459,9 +459,7 @@ void iron_gpu_command_list_set_vertex_constant_buffer(iron_gpu_command_list_t *l
 	id<MTLBuffer> buf = (__bridge id<MTLBuffer>)buffer->impl._buffer;
 	id<MTLRenderCommandEncoder> encoder = getMetalEncoder();
 	[encoder setVertexBuffer:buf offset:offset atIndex:1];
-}
 
-void iron_gpu_command_list_set_fragment_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer, int offset, size_t size) {
 	id<MTLBuffer> buf = (__bridge id<MTLBuffer>)buffer->impl._buffer;
 	id<MTLRenderCommandEncoder> encoder = getMetalEncoder();
 	[encoder setFragmentBuffer:buf offset:offset atIndex:1];
@@ -601,7 +599,7 @@ static MTLPixelFormat convert_render_target_format(iron_image_format_t format) {
 
 void iron_gpu_pipeline_init(iron_gpu_pipeline_t *pipeline) {
 	memset(&pipeline->impl, 0, sizeof(pipeline->impl));
-	iron_gpu_internal_pipeline_set_defaults(pipeline);
+	iron_gpu_internal_pipeline_init(pipeline);
 }
 
 void iron_gpu_pipeline_destroy(iron_gpu_pipeline_t *pipeline) {
@@ -776,13 +774,8 @@ void iron_gpu_internal_pipeline_set(iron_gpu_pipeline_t *pipeline) {
 }
 
 iron_gpu_constant_location_t iron_gpu_pipeline_get_constant_location(iron_gpu_pipeline_t *pipeline, const char *name) {
-	if (strcmp(name, "bias") == 0) {
-		name = "bias0";
-	}
-
 	iron_gpu_constant_location_t location;
 	location.impl.vertexOffset = -1;
-	location.impl.fragmentOffset = -1;
 
 	MTLRenderPipelineReflection *reflection = (__bridge MTLRenderPipelineReflection *)pipeline->impl._reflection;
 
@@ -807,7 +800,7 @@ iron_gpu_constant_location_t iron_gpu_pipeline_get_constant_location(iron_gpu_pi
 				MTLStructType *structObj = [arg bufferStructType];
 				for (MTLStructMember *member in structObj.members) {
 					if (strcmp([[member name] UTF8String], name) == 0) {
-						location.impl.fragmentOffset = (int)[member offset];
+						location.impl.vertexOffset = (int)[member offset];
 						break;
 					}
 				}

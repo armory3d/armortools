@@ -25,8 +25,7 @@ function import_envmap_run(path: string, image: iron_gpu_texture_t) {
 
 		import_envmap_params_loc = gpu_get_constant_location(import_envmap_pipeline, "params");
 		let ptr: gpu_constant_location_impl_t = ADDRESS(import_envmap_params_loc.impl);
-		ptr.vertexOffset = -1;
-		ptr.fragmentOffset = 0;
+		ptr.vertexOffset = 0;
 
 		import_envmap_radiance_loc = gpu_get_texture_unit(import_envmap_pipeline, "radiance");
 		ARRAY_ACCESS(import_envmap_radiance_loc.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = 0;

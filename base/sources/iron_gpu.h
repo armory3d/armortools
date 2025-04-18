@@ -355,8 +355,6 @@ typedef struct iron_gpu_pipeline {
 	int depth_attachment_bits;
 
 	gpu_pipeline_impl_t impl;
-
-	bool kong;
 } iron_gpu_pipeline_t;
 
 typedef struct iron_gpu_sampler_options {
@@ -386,8 +384,6 @@ void iron_gpu_shader_destroy(iron_gpu_shader_t *shader);
 void iron_gpu_sampler_options_set_defaults(iron_gpu_sampler_options_t *options);
 void iron_gpu_sampler_init(iron_gpu_sampler_t *sampler, const iron_gpu_sampler_options_t *options);
 void iron_gpu_sampler_destroy(iron_gpu_sampler_t *sampler);
-
-void iron_gpu_internal_pipeline_set_defaults(iron_gpu_pipeline_t *pipeline);
 
 struct iron_gpu_pipeline;
 struct iron_gpu_texture;
@@ -420,7 +416,6 @@ void iron_gpu_command_list_upload_index_buffer(iron_gpu_command_list_t *list, ir
 void iron_gpu_command_list_upload_vertex_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer);
 void iron_gpu_command_list_upload_texture(iron_gpu_command_list_t *list, struct iron_gpu_texture *texture);
 void iron_gpu_command_list_set_vertex_constant_buffer(iron_gpu_command_list_t *list, iron_gpu_buffer_t *buffer, int offset, size_t size);
-void iron_gpu_command_list_set_fragment_constant_buffer(iron_gpu_command_list_t *list, iron_gpu_buffer_t *buffer, int offset, size_t size);
 void iron_gpu_command_list_execute(iron_gpu_command_list_t *list);
 void iron_gpu_command_list_wait_for_execution_to_finish(iron_gpu_command_list_t *list);
 void iron_gpu_command_list_get_render_target_pixels(iron_gpu_command_list_t *list, struct iron_gpu_texture *render_target, uint8_t *data);

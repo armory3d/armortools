@@ -161,7 +161,6 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_ver
 
 		image_proj_loc = iron_gpu_pipeline_get_constant_location(&image_pipeline, "P");
 		image_proj_loc.impl.vertexOffset = 0;
-		image_proj_loc.impl.fragmentOffset = -1;
 
 		gpu_vertex_buffer_init(&image_vertex_buffer, DRAW_BUFFER_SIZE * 4, &structure, GPU_USAGE_DYNAMIC);
 		image_rect_verts = gpu_vertex_buffer_lock_all(&image_vertex_buffer);
@@ -202,7 +201,6 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_ver
 
 		colored_proj_loc = iron_gpu_pipeline_get_constant_location(&colored_pipeline, "P");
 		colored_proj_loc.impl.vertexOffset = 0;
-		colored_proj_loc.impl.fragmentOffset = -1;
 
 		gpu_vertex_buffer_init(&colored_rect_vertex_buffer, DRAW_BUFFER_SIZE * 4, &structure, GPU_USAGE_DYNAMIC);
 		colored_rect_verts = gpu_vertex_buffer_lock_all(&colored_rect_vertex_buffer);
@@ -259,7 +257,6 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_ver
 
 		text_proj_loc = iron_gpu_pipeline_get_constant_location(&text_pipeline, "P");
 		text_proj_loc.impl.vertexOffset = 0;
-		text_proj_loc.impl.fragmentOffset = -1;
 
 		iron_gpu_pipeline_init(&text_pipeline_rt);
 		text_pipeline_rt.input_layout = &structure;

@@ -20,7 +20,6 @@ typedef struct {
 
 typedef struct {
 	int vertexOffset;
-	int fragmentOffset;
 } gpu_constant_location_impl_t;
 
 typedef struct iron_gpu_sampler_impl {
