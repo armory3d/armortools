@@ -325,7 +325,6 @@ string_t *iron_get_arg(i32 index) {
 #include <stb_image.h>
 #ifdef IRON_DIRECT3D12
 #include <d3d12.h>
-extern bool waitAfterNextDraw;
 #endif
 #ifdef WITH_D3DCOMPILER
 #include <d3d11.h>
@@ -959,10 +958,6 @@ buffer_t *gpu_lock_vertex_buffer(iron_gpu_buffer_t *buffer) {
 }
 
 void gpu_draw_indexed_vertices(i32 start, i32 count) {
-	#ifdef IRON_DIRECT3D12
-	// TODO: Prevent heapIndex overflow in iron_gpu_internal_set_textures
-	waitAfterNextDraw = true;
-	#endif
 	if (count < 0) {
 		iron_gpu_draw_indexed_vertices();
 	}

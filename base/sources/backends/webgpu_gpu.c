@@ -452,7 +452,7 @@ void iron_gpu_command_list_wait_for_execution_to_finish(iron_gpu_command_list_t 
 
 }
 
-void iron_gpu_command_list_set_vertex_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer, int offset, size_t size) {
+void iron_gpu_command_list_set_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer, int offset, size_t size) {
 
 }
 

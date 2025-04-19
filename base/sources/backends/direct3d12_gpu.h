@@ -40,34 +40,16 @@ struct D3D12Rect {
 	long bottom;
 };
 
-struct dx_window {
-	struct IDXGISwapChain *swapChain;
-	UINT64 current_fence_value;
-	UINT64 fence_values[QUEUE_SLOT_COUNT];
-	HANDLE frame_fence_events[QUEUE_SLOT_COUNT];
-	struct ID3D12Fence *frame_fences[QUEUE_SLOT_COUNT];
-	int width;
-	int height;
-	int new_width;
-	int new_height;
-	int current_backbuffer;
-	bool vsync;
-};
-
 typedef struct {
 	struct ID3D12CommandAllocator *_commandAllocator;
 	struct ID3D12GraphicsCommandList *_commandList;
 	struct iron_gpu_pipeline *_currentPipeline;
 	int _indexCount;
-
 	struct D3D12Rect current_full_scissor;
-
 	uint64_t fence_value;
 	struct ID3D12Fence *fence;
 	HANDLE fence_event;
-
 	struct iron_gpu_texture *currentTextures[IRON_INTERNAL_G5_TEXTURE_COUNT];
-
 	int heapIndex;
 	struct ID3D12DescriptorHeap *srvHeap;
 } gpu_command_list_impl_t;
@@ -97,9 +79,6 @@ typedef struct {
 } ShaderTexture;
 
 typedef struct {
-	ShaderConstant constants[32];
-	ShaderAttribute attributes[32];
-	ShaderTexture textures[32];
 	int texturesCount;
 	void *shader;
 	uint8_t *data;
@@ -113,7 +92,6 @@ typedef struct {
 	struct ID3D12Resource *image;
 	struct ID3D12Resource *uploadImage;
 	struct ID3D12DescriptorHeap *srvDescriptorHeap;
-
 	struct ID3D12Resource *renderTarget;
 	struct ID3D12Resource *renderTargetReadback;
 	struct ID3D12DescriptorHeap *renderTargetDescriptorHeap;
@@ -122,7 +100,6 @@ typedef struct {
 	struct ID3D12Resource *depthStencilTexture;
 	struct D3D12Viewport viewport;
 	struct D3D12Rect scissor;
-
 	int stage_depth;
 	int framebuffer_index;
 } gpu_texture_impl_t;
@@ -146,7 +123,6 @@ typedef struct {
 	int myStride;
 	int lastStart;
 	int lastCount;
-
 	struct ID3D12Resource *index_buffer;
 	struct D3D12IindexBufferView index_buffer_view;
 	struct ID3D12Resource *upload_buffer;
@@ -154,7 +130,6 @@ typedef struct {
 	bool gpu_memory;
 	int last_start;
 	int last_count;
-
 	struct ID3D12Resource *constant_buffer;
 	int mySize;
 } gpu_buffer_impl_t;

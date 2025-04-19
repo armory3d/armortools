@@ -252,24 +252,6 @@ function shader_context_get_compare_mode(s: string): compare_mode_t {
 	if (s == "never") {
 		return compare_mode_t.NEVER;
 	}
-	if (s == "less") {
-		return compare_mode_t.LESS;
-	}
-	if (s == "less_equal") {
-		return compare_mode_t.LESS_EQUAL;
-	}
-	if (s == "greater") {
-		return compare_mode_t.GREATER;
-	}
-	if (s == "greater_equal") {
-		return compare_mode_t.GREATER_EQUAL;
-	}
-	if (s == "equal") {
-		return compare_mode_t.EQUAL;
-	}
-	if (s == "not_equal") {
-		return compare_mode_t.NOT_EQUAL;
-	}
 	return compare_mode_t.LESS;
 }
 
@@ -301,18 +283,6 @@ function shader_context_get_blend_fac(s: string): blend_factor_t {
 	}
 	if (s == "inverse_destination_alpha") {
 		return blend_factor_t.INV_DEST_ALPHA;
-	}
-	if (s == "source_color") {
-		return blend_factor_t.SOURCE_COLOR;
-	}
-	if (s == "destination_color") {
-		return blend_factor_t.DEST_COLOR;
-	}
-	if (s == "inverse_source_color") {
-		return blend_factor_t.INV_SOURCE_COLOR;
-	}
-	if (s == "inverse_destination_color") {
-		return blend_factor_t.INV_DEST_COLOR;
 	}
 	return blend_factor_t.BLEND_ONE;
 }
@@ -348,13 +318,6 @@ function shader_context_add_const(raw: shader_context_t, c: shader_const_t, offs
 
 function shader_context_add_tex(raw: shader_context_t, tu: tex_unit_t, i: i32) {
 	let unit: iron_gpu_texture_unit_t = gpu_get_texture_unit(raw._.pipe_state, tu.name);
-
-	if (tu.vert) {
-		ARRAY_ACCESS(unit.stages, IRON_GPU_SHADER_TYPE_VERTEX) = i;
-	}
-	else {
-		ARRAY_ACCESS(unit.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = i;
-	}
-
+	unit.offset = i;
 	array_push(raw._.tex_units, unit);
 }

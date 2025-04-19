@@ -31,8 +31,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	let props: shader_context_t = {
 		name: context_id,
 		depth_write: false,
-		compare_mode: "always", // TODO: align texcoords winding order
-		// cull_mode: "counter_clockwise",
+		compare_mode: "always",
 		cull_mode: "none",
 		vertex_elements: [
 			{

@@ -9,9 +9,6 @@
 #include "iron_string.h"
 #include "iron_vec2.h"
 #include "iron_gc.h"
-#ifdef IRON_DIRECT3D12
-extern bool waitAfterNextDraw;
-#endif
 
 #define MATH_PI 3.14159265358979323846
 #define DRAW_BUFFER_SIZE 1000
@@ -157,7 +154,7 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_ver
 		iron_gpu_pipeline_compile(&image_pipeline);
 
 		image_tex_unit = iron_gpu_pipeline_get_texture_unit(&image_pipeline, "tex");
-		image_tex_unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT] = 0;
+		image_tex_unit.offset = 0;
 
 		image_proj_loc = iron_gpu_pipeline_get_constant_location(&image_pipeline, "P");
 		image_proj_loc.impl.vertexOffset = 0;
@@ -253,7 +250,7 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *colored_ver
 		iron_gpu_pipeline_compile(&text_pipeline);
 
 		text_tex_unit = iron_gpu_pipeline_get_texture_unit(&text_pipeline, "tex");
-		text_tex_unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT] = 0;
+		text_tex_unit.offset = 0;
 
 		text_proj_loc = iron_gpu_pipeline_get_constant_location(&text_pipeline, "P");
 		text_proj_loc.impl.vertexOffset = 0;
@@ -402,9 +399,6 @@ void draw_texture(iron_gpu_texture_t *tex, float x, float y) {
 }
 
 void draw_scaled_sub_image(iron_gpu_texture_t *image, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
-	#ifdef IRON_DIRECT3D12
-	waitAfterNextDraw = true;
-	#endif
 	draw_scaled_sub_texture(image, sx, sy, sw, sh, dx, dy, dw, dh);
 }
 

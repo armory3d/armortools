@@ -2005,7 +2005,7 @@ VkDescriptorSet get_descriptor_set() {
 	return descriptor_set;
 }
 
-void iron_gpu_command_list_set_vertex_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer, int offset, size_t size) {
+void iron_gpu_command_list_set_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer, int offset, size_t size) {
 	last_vertex_constant_buffer_offset = offset;
 	last_fragment_constant_buffer_offset = offset;
 
@@ -2054,25 +2054,13 @@ void iron_gpu_command_list_wait_for_execution_to_finish(iron_gpu_command_list_t 
 }
 
 void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *texture) {
-	if (unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT] >= 0) {
-		texture->impl.stage = unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT];
-		vulkan_textures[unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT]] = texture;
-	}
-	else if (unit.stages[IRON_GPU_SHADER_TYPE_VERTEX] >= 0) {
-		texture->impl.stage = unit.stages[IRON_GPU_SHADER_TYPE_VERTEX];
-		vulkan_textures[unit.stages[IRON_GPU_SHADER_TYPE_VERTEX]] = texture;
-	}
+	texture->impl.stage = unit.offset;
+	vulkan_textures[unit.offset] = texture;
 }
 
 void iron_gpu_command_list_set_texture_from_render_target_depth(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *target) {
-	if (unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT] >= 0) {
-		target->impl.stage_depth = unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT];
-		vulkan_textures[unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT]] = target;
-	}
-	else if (unit.stages[IRON_GPU_SHADER_TYPE_VERTEX] >= 0) {
-		target->impl.stage_depth = unit.stages[IRON_GPU_SHADER_TYPE_VERTEX];
-		vulkan_textures[unit.stages[IRON_GPU_SHADER_TYPE_VERTEX]] = target;
-	}
+	target->impl.stage_depth = unit.offset;
+	vulkan_textures[unit.offset] = target;
 }
 
 static bool has_number(iron_internal_named_number *named_numbers, const char *name) {
@@ -2319,21 +2307,7 @@ iron_gpu_constant_location_t iron_gpu_pipeline_get_constant_location(iron_gpu_pi
 
 iron_gpu_texture_unit_t iron_gpu_pipeline_get_texture_unit(iron_gpu_pipeline_t *pipeline, const char *name) {
 	iron_gpu_texture_unit_t unit;
-	for (int i = 0; i < IRON_GPU_SHADER_TYPE_COUNT; ++i) {
-		unit.stages[i] = -1;
-	}
-
-	int number = find_number(pipeline->impl.vertexTextureBindings, name);
-	if (number >= 0) {
-		unit.stages[IRON_GPU_SHADER_TYPE_VERTEX] = number - 2;
-	}
-	else {
-		number = find_number(pipeline->impl.fragmentTextureBindings, name);
-		if (number >= 0) {
-			unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT] = number - 2;
-		}
-	}
-
+	unit.offset = -1;
 	return unit;
 }
 

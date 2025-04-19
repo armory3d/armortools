@@ -677,21 +677,12 @@ enum blend_factor_t {
 	DEST_ALPHA,
 	INV_SOURCE_ALPHA,
 	INV_DEST_ALPHA,
-	SOURCE_COLOR,
-	DEST_COLOR,
-	INV_SOURCE_COLOR,
-	INV_DEST_COLOR,
 }
 
 enum compare_mode_t {
 	ALWAYS,
 	NEVER,
-	EQUAL,
-	NOT_EQUAL,
 	LESS,
-	LESS_EQUAL,
-	GREATER,
-	GREATER_EQUAL,
 }
 
 enum cull_mode_t {
@@ -701,8 +692,8 @@ enum cull_mode_t {
 }
 
 enum shader_type_t {
-	FRAGMENT,
 	VERTEX,
+	FRAGMENT,
 }
 
 declare let ui_nodes_enum_texts: (s: string)=>string[];

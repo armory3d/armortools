@@ -28,7 +28,7 @@ function import_envmap_run(path: string, image: iron_gpu_texture_t) {
 		ptr.vertexOffset = 0;
 
 		import_envmap_radiance_loc = gpu_get_texture_unit(import_envmap_pipeline, "radiance");
-		ARRAY_ACCESS(import_envmap_radiance_loc.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = 0;
+		import_envmap_radiance_loc.offset = 0;
 
 		import_envmap_radiance = gpu_create_render_target(1024, 512, tex_format_t.RGBA128);
 

@@ -455,7 +455,7 @@ void iron_gpu_command_list_wait_for_execution_to_finish(iron_gpu_command_list_t 
 	[commandBuffer waitUntilCompleted];
 }
 
-void iron_gpu_command_list_set_vertex_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer, int offset, size_t size) {
+void iron_gpu_command_list_set_constant_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer, int offset, size_t size) {
 	id<MTLBuffer> buf = (__bridge id<MTLBuffer>)buffer->impl._buffer;
 	id<MTLRenderCommandEncoder> encoder = getMetalEncoder();
 	[encoder setVertexBuffer:buf offset:offset atIndex:1];
@@ -472,23 +472,15 @@ void iron_gpu_command_list_texture_to_render_target_barrier(iron_gpu_command_lis
 
 void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *texture) {
 	id<MTLTexture> tex = (__bridge id<MTLTexture>)texture->impl._tex;
-	if (unit.stages[IRON_GPU_SHADER_TYPE_VERTEX] >= 0) {
-		[render_command_encoder setVertexTexture:tex atIndex:unit.stages[IRON_GPU_SHADER_TYPE_VERTEX]];
-	}
-	if (unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT] >= 0) {
-		[render_command_encoder setFragmentTexture:tex atIndex:unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT]];
-	}
+	[render_command_encoder setVertexTexture:tex atIndex:unit.offset];
+	[render_command_encoder setFragmentTexture:tex atIndex:unit.offset];
 }
 
 void iron_gpu_command_list_set_texture_from_render_target_depth(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *target) {
 	id<MTLRenderCommandEncoder> encoder = getMetalEncoder();
 	id<MTLTexture> depth_tex = (__bridge id<MTLTexture>)target->impl._depthTex;
-	if (unit.stages[IRON_GPU_SHADER_TYPE_VERTEX] >= 0) {
-		[encoder setVertexTexture:depth_tex atIndex:unit.stages[IRON_GPU_SHADER_TYPE_VERTEX]];
-	}
-	if (unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT] >= 0) {
-		[encoder setFragmentTexture:depth_tex atIndex:unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT]];
-	}
+	[encoder setVertexTexture:depth_tex atIndex:unit.offset];
+	[encoder setFragmentTexture:depth_tex atIndex:unit.offset];
 }
 
 static MTLBlendFactor convert_blending_factor(iron_gpu_blending_factor_t factor) {
@@ -802,25 +794,7 @@ iron_gpu_constant_location_t iron_gpu_pipeline_get_constant_location(iron_gpu_pi
 
 iron_gpu_texture_unit_t iron_gpu_pipeline_get_texture_unit(iron_gpu_pipeline_t *pipeline, const char *name) {
 	iron_gpu_texture_unit_t unit = {0};
-	for (int i = 0; i < IRON_GPU_SHADER_TYPE_COUNT; ++i) {
-		unit.stages[i] = -1;
-	}
-
-	MTLRenderPipelineReflection *reflection = (__bridge MTLRenderPipelineReflection *)pipeline->impl._reflection;
-	for (MTLArgument *arg in reflection.fragmentArguments) {
-		if ([arg type] == MTLArgumentTypeTexture && strcmp([[arg name] UTF8String], name) == 0) {
-			unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT] = (int)[arg index];
-			break;
-		}
-	}
-
-	for (MTLArgument *arg in reflection.vertexArguments) {
-		if ([arg type] == MTLArgumentTypeTexture && strcmp([[arg name] UTF8String], name) == 0) {
-			unit.stages[IRON_GPU_SHADER_TYPE_VERTEX] = (int)[arg index];
-			break;
-		}
-	}
-
+	unit.offset = -1;
 	return unit;
 }
 

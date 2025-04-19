@@ -74,13 +74,13 @@ function pipes_init() {
 	pipes_merge_g = _pipes_make_merge(false, true, false, false);
 	pipes_merge_b = _pipes_make_merge(false, false, true, false);
 	pipes_tex0 = gpu_get_texture_unit(pipes_merge, "tex0"); // Always binding texpaint.a for blending
-	ARRAY_ACCESS(pipes_tex0.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = 0;
+	pipes_tex0.offset = 0;
 	pipes_tex1 = gpu_get_texture_unit(pipes_merge, "tex1");
-	ARRAY_ACCESS(pipes_tex1.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = 1;
+	pipes_tex1.offset = 1;
 	pipes_texmask = gpu_get_texture_unit(pipes_merge, "texmask");
-	ARRAY_ACCESS(pipes_texmask.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = 2;
+	pipes_texmask.offset = 2;
 	pipes_texa = gpu_get_texture_unit(pipes_merge, "texa");
-	ARRAY_ACCESS(pipes_texa.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = 3;
+	pipes_texa.offset = 3;
 	pipes_offset = 0;
 	pipes_opac = pipes_get_constant_location(pipes_merge, "opac", "float");
 	pipes_blending = pipes_get_constant_location(pipes_merge, "blending", "int");
@@ -163,9 +163,9 @@ function pipes_init() {
 		pipes_apply_mask.input_layout = vs;
 		gpu_compile_pipeline(pipes_apply_mask);
 		pipes_tex0_mask = gpu_get_texture_unit(pipes_apply_mask, "tex0");
-		ARRAY_ACCESS(pipes_tex0_mask.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = 0;
+		pipes_tex0_mask.offset = 0;
 		pipes_texa_mask = gpu_get_texture_unit(pipes_apply_mask, "texa");
-		ARRAY_ACCESS(pipes_texa_mask.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = 1;
+		pipes_texa_mask.offset = 1;
 	}
 
 	{
@@ -177,9 +177,9 @@ function pipes_init() {
 		pipes_merge_mask.input_layout = vs;
 		gpu_compile_pipeline(pipes_merge_mask);
 		pipes_tex0_merge_mask = gpu_get_texture_unit(pipes_merge_mask, "tex0");
-		ARRAY_ACCESS(pipes_tex0_merge_mask.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = 0;
+		pipes_tex0_merge_mask.offset = 0;
 		pipes_texa_merge_mask = gpu_get_texture_unit(pipes_merge_mask, "texa");
-		ARRAY_ACCESS(pipes_texa_merge_mask.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = 1;
+		pipes_texa_merge_mask.offset = 1;
 		pipes_offset = 0;
 		pipes_opac_merge_mask = pipes_get_constant_location(pipes_merge_mask, "opac", "float");
 		pipes_blending_merge_mask = pipes_get_constant_location(pipes_merge_mask, "blending", "int");
@@ -194,9 +194,9 @@ function pipes_init() {
 		pipes_colorid_to_mask.input_layout = vs;
 		gpu_compile_pipeline(pipes_colorid_to_mask);
 		pipes_texpaint_colorid = gpu_get_texture_unit(pipes_colorid_to_mask, "texpaint_colorid");
-		ARRAY_ACCESS(pipes_texpaint_colorid.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = 0;
+		pipes_texpaint_colorid.offset = 0;
 		pipes_tex_colorid = gpu_get_texture_unit(pipes_colorid_to_mask, "texcolorid");
-		ARRAY_ACCESS(pipes_tex_colorid.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = 1;
+		pipes_tex_colorid.offset = 1;
 	}
 	///end
 
@@ -240,9 +240,9 @@ function pipes_init() {
 		pipes_inpaint_preview.input_layout = vs;
 		gpu_compile_pipeline(pipes_inpaint_preview);
 		pipes_tex0_inpaint_preview = gpu_get_texture_unit(pipes_inpaint_preview, "tex0");
-		ARRAY_ACCESS(pipes_tex0_inpaint_preview.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = 0;
+		pipes_tex0_inpaint_preview.offset = 0;
 		pipes_texa_inpaint_preview = gpu_get_texture_unit(pipes_inpaint_preview, "texa");
-		ARRAY_ACCESS(pipes_texa_inpaint_preview.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = 1;
+		pipes_texa_inpaint_preview.offset = 1;
 	}
 
 	{
@@ -257,7 +257,7 @@ function pipes_init() {
 		ARRAY_ACCESS(pipes_copy_a.color_write_mask_blue, 0) = false;
 		gpu_compile_pipeline(pipes_copy_a);
 		pipes_copy_a_tex = gpu_get_texture_unit(pipes_copy_a, "tex");
-		ARRAY_ACCESS(pipes_copy_a_tex.stages, IRON_GPU_SHADER_TYPE_FRAGMENT) = 0;
+		pipes_copy_a_tex.offset = 0;
 	}
 	///end
 
@@ -297,7 +297,7 @@ function pipes_init() {
 		pipes_cursor_camera_right = pipes_get_constant_location(pipes_cursor, "camera_right", "vec3");
 		pipes_cursor_tint = pipes_get_constant_location(pipes_cursor, "tint", "vec3");
 		pipes_cursor_gbufferd = gpu_get_texture_unit(pipes_cursor, "gbufferD");
-		ARRAY_ACCESS(pipes_cursor_gbufferd.stages, IRON_GPU_SHADER_TYPE_VERTEX) = 0;
+		pipes_cursor_gbufferd.offset = 0;
 	}
 }
 
