@@ -3,7 +3,7 @@
 const my_texture: tex2d;
 
 #[set(everything)]
-const my_texture_sampler: sampler;
+const sampler_linear: sampler;
 
 #[set(everything)]
 const constants: {
@@ -33,7 +33,7 @@ fun mesh_vert(input: vert_in): vert_out {
 
 fun mesh_frag(input: vert_out): float4 {
     var l: float3 = float3(0.5, 0.0, 0.5);
-    var base_color: float3 = float3(1.0, 1.0, 1.0); // sample(my_texture, my_texture_sampler, input.tex).rgb;
+    var base_color: float3 = float3(1.0, 1.0, 1.0); // sample(my_texture, sampler_linear, input.tex).rgb;
     var ambient: float3 = base_color * 0.5;
     var n: float3 = normalize(input.nor);
     var dotnl: float = max(dot(n, l), 0.0);

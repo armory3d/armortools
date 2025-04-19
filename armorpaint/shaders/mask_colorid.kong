@@ -5,13 +5,10 @@
 const texpaint_colorid: tex2d; // 1x1 picked color
 
 #[set(everything)]
-const texpaint_colorid_sampler: sampler;
-
-#[set(everything)]
 const texcolorid: tex2d;
 
 #[set(everything)]
-const texcolorid_sampler: sampler;
+const sampler_linear: sampler;
 
 struct vert_in {
 	pos: float2;
@@ -33,7 +30,7 @@ fun mask_colorid_vert(input: vert_in): vert_out {
 fun mask_colorid_frag(input: vert_out): float4 {
 	var coord: uint2 = uint2(0, 0);
 	var colorid_c1: float4 = texpaint_colorid[coord];
-	var colorid_c2: float4 = sample_lod(texcolorid, texcolorid_sampler, input.tex, 0.0);
+	var colorid_c2: float4 = sample_lod(texcolorid, sampler_linear, input.tex, 0.0);
 	if (colorid_c1.x != colorid_c2.x || colorid_c1.y != colorid_c2.y || colorid_c1.z != colorid_c2.z) {
 		discard;
 	}

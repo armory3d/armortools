@@ -14,7 +14,7 @@ const constants: {
 const gbufferD: tex2d;
 
 #[set(everything)]
-const gbufferD_sampler: sampler;
+const sampler_linear: sampler;
 
 struct vert_in {
 	pos: float4; // hlsl
@@ -28,7 +28,7 @@ struct vert_out {
 }
 
 fun get_pos(uv: float2): float3 {
-	var depth: float = sample_lod(gbufferD, gbufferD_sampler, float2(uv.x, 1.0 - uv.y), 0.0).r;
+	var depth: float = sample_lod(gbufferD, sampler_linear, float2(uv.x, 1.0 - uv.y), 0.0).r;
 	var wpos: float4 = float4(uv * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
 	wpos = constants.invVP * wpos;
 	return wpos.xyz / wpos.w;

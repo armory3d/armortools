@@ -3,13 +3,10 @@
 const tex0: tex2d;
 
 #[set(everything)]
-const tex0_sampler: sampler;
-
-#[set(everything)]
 const texa: tex2d;
 
 #[set(everything)]
-const texa_sampler: sampler;
+const sampler_linear: sampler;
 
 struct vert_in {
 	pos: float2;
@@ -29,8 +26,8 @@ fun mask_apply_vert(input: vert_in): vert_out {
 }
 
 fun mask_apply_frag(input: vert_out): float4 {
-	var col0: float4 = sample_lod(tex0, tex0_sampler, input.tex, 0.0);
-	var mask: float = sample_lod(texa, texa_sampler, input.tex, 0.0).r;
+	var col0: float4 = sample_lod(tex0, sampler_linear, input.tex, 0.0);
+	var mask: float = sample_lod(texa, sampler_linear, input.tex, 0.0).r;
 	return float4(col0.rgb, col0.a * mask);
 }
 

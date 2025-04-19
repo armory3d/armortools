@@ -10,25 +10,16 @@ const constants: {
 const tex0: tex2d;
 
 #[set(everything)]
-const tex0_sampler: sampler;
-
-#[set(everything)]
 const tex1: tex2d;
-
-#[set(everything)]
-const tex1_sampler: sampler;
 
 #[set(everything)]
 const texmask: tex2d;
 
 #[set(everything)]
-const texmask_sampler: sampler;
-
-#[set(everything)]
 const texa: tex2d;
 
 #[set(everything)]
-const texa_sampler: sampler;
+const sampler_linear: sampler;
 
 struct vert_in {
 	pos: float2;
@@ -63,17 +54,17 @@ fun rgb_to_hsv(c: float3): float3 {
 }
 
 fun layer_merge_frag(input: vert_out): float4 {
-	var col0: float4 = sample_lod(tex0, tex0_sampler, input.tex, 0.0);
-	var cola: float4 = sample_lod(texa, texa_sampler, input.tex, 0.0);
+	var col0: float4 = sample_lod(tex0, sampler_linear, input.tex, 0.0);
+	var cola: float4 = sample_lod(texa, sampler_linear, input.tex, 0.0);
 	var str: float = col0.a * constants.opac;
-	str *= sample_lod(texmask, texmask_sampler, input.tex, 0.0).r;
+	str *= sample_lod(texmask, sampler_linear, input.tex, 0.0).r;
 
 	if (constants.blending == -1) { // Merging _nor and _pack
-		var col1: float4 = sample_lod(tex1, tex1_sampler, input.tex, 0.0);
+		var col1: float4 = sample_lod(tex1, sampler_linear, input.tex, 0.0);
 		return float4(lerp4(cola, col1, str));
 	}
 	if (constants.blending == -2) { // Merging _nor with normal blending
-		var col1: float4 = sample_lod(tex1, tex1_sampler, input.tex, 0.0);
+		var col1: float4 = sample_lod(tex1, sampler_linear, input.tex, 0.0);
 		// Whiteout blend
 		var n1: float3 = cola.rgb * float3(2.0, 2.0, 2.0) - float3(1.0, 1.0, 1.0);
 		var n2: float3 = lerp3(float3(0.5, 0.5, 1.0), col1.rgb, str) * float3(2.0, 2.0, 2.0) - float3(1.0, 1.0, 1.0);
@@ -82,15 +73,15 @@ fun layer_merge_frag(input: vert_out): float4 {
 			max(col1.a, cola.a));
 	}
 	if (constants.blending == -3) { // Merging _pack with height blending
-		var col1: float4 = sample_lod(tex1, tex1_sampler, input.tex, 0.0);
+		var col1: float4 = sample_lod(tex1, sampler_linear, input.tex, 0.0);
 		return float4(lerp3(cola.rgb, col1.rgb, str), cola.a + col1.a);
 	}
 	if (constants.blending == -4) { // Merge _pack.height into _nor
 		var tex_step: float = 1.0 / constants.tex1w;
-		var height0: float = sample_lod(tex1, tex1_sampler, float2(input.tex.x - tex_step, input.tex.y), 0.0).a;
-		var height1: float = sample_lod(tex1, tex1_sampler, float2(input.tex.x + tex_step, input.tex.y), 0.0).a;
-		var height2: float = sample_lod(tex1, tex1_sampler, float2(input.tex.x, input.tex.y - tex_step), 0.0).a;
-		var height3: float = sample_lod(tex1, tex1_sampler, float2(input.tex.x, input.tex.y + tex_step), 0.0).a;
+		var height0: float = sample_lod(tex1, sampler_linear, float2(input.tex.x - tex_step, input.tex.y), 0.0).a;
+		var height1: float = sample_lod(tex1, sampler_linear, float2(input.tex.x + tex_step, input.tex.y), 0.0).a;
+		var height2: float = sample_lod(tex1, sampler_linear, float2(input.tex.x, input.tex.y - tex_step), 0.0).a;
+		var height3: float = sample_lod(tex1, sampler_linear, float2(input.tex.x, input.tex.y + tex_step), 0.0).a;
 		var height_dx: float = height0 - height1;
 		var height_dy: float = height2 - height3;
 		// Whiteout blend

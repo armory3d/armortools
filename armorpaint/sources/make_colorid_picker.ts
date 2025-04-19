@@ -12,7 +12,7 @@ function make_colorid_picker_run(kong: node_shader_t) {
 	if (context_raw.tool == workspace_tool_t.COLORID) {
 		kong.frag_out = "float4";
 		node_shader_add_texture(kong, "texcolorid", "_texcolorid");
-		node_shader_write_frag(kong, "var idcol: float3 = sample_lod(texcolorid, texcolorid_sampler, tex_coord_inp, 0.0).rgb;");
+		node_shader_write_frag(kong, "var idcol: float3 = sample_lod(texcolorid, sampler_linear, tex_coord_inp, 0.0).rgb;");
 		node_shader_write_frag(kong, "output = float4(idcol, 1.0);");
 	}
 	else if (context_raw.tool == workspace_tool_t.PICKER || context_raw.tool == workspace_tool_t.MATERIAL) {
@@ -29,9 +29,9 @@ function make_colorid_picker_run(kong: node_shader_t) {
 			node_shader_add_texture(kong, "texpaint");
 			node_shader_add_texture(kong, "texpaint_nor");
 			node_shader_add_texture(kong, "texpaint_pack");
-			node_shader_write_frag(kong, "output[0] = sample_lod(texpaint, texpaint_sampler, tex_coord_inp, 0.0);");
-			node_shader_write_frag(kong, "output[1] = sample_lod(texpaint_nor, texpaint_nor_sampler, tex_coord_inp, 0.0);");
-			node_shader_write_frag(kong, "output[2] = sample_lod(texpaint_pack, texpaint_pack_sampler, tex_coord_inp, 0.0);");
+			node_shader_write_frag(kong, "output[0] = sample_lod(texpaint, sampler_linear, tex_coord_inp, 0.0);");
+			node_shader_write_frag(kong, "output[1] = sample_lod(texpaint_nor, sampler_linear, tex_coord_inp, 0.0);");
+			node_shader_write_frag(kong, "output[2] = sample_lod(texpaint_pack, sampler_linear, tex_coord_inp, 0.0);");
 			node_shader_write_frag(kong, "output[3].rg = tex_coord_inp.xy;");
 		}
 	}

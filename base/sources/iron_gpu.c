@@ -10,21 +10,6 @@
 #define CONSTANT_BUFFER_MULTIPLY 100
 #define FRAMEBUFFER_COUNT 2
 #define MAX_TEXTURES 16
-#define MAX_SAMPLERS_PER_STAGE 16
-#define MAX_SAMPLER_CACHE_SIZE 256
-
-static iron_gpu_sampler_options_t sampler_options[IRON_GPU_SHADER_TYPE_COUNT][MAX_SAMPLERS_PER_STAGE];
-
-struct sampler_cache_entry {
-	iron_gpu_sampler_options_t options;
-	iron_gpu_sampler_t sampler;
-};
-
-static struct sampler_cache_entry sampler_cache[MAX_SAMPLER_CACHE_SIZE];
-static int sampler_cache_size = 0;
-
-void iron_internal_samplers_reset(void);
-iron_gpu_sampler_t *iron_internal_get_current_sampler(int stage, int unit);
 
 iron_gpu_command_list_t commandList;
 bool waitAfterNextDraw = false;
@@ -67,7 +52,6 @@ typedef struct render_state {
 	int depth_render_target_count;
 
 	uint8_t vertex_constant_data[CONSTANT_BUFFER_SIZE];
-	uint8_t fragment_constant_data[CONSTANT_BUFFER_SIZE];
 } render_state;
 
 static render_state current_state;
@@ -107,31 +91,11 @@ void gpu_internal_init_window(int depthBufferBits, bool vsync) {
 	iron_gpu_command_list_begin(&commandList);
 }
 
-void iron_gpu_internal_set_samplers(int count, iron_gpu_texture_unit_t *texture_units) {
-	for (int i = 0; i < count; ++i) {
-		for (int j = 0; j < IRON_GPU_SHADER_TYPE_COUNT; ++j) {
-			if (texture_units[i].stages[j] >= 0) {
-				iron_gpu_sampler_t *sampler = iron_internal_get_current_sampler(j, texture_units[i].stages[j]);
-				iron_gpu_texture_unit_t unit;
-				for (int k = 0; k < IRON_GPU_SHADER_TYPE_COUNT; ++k) {
-					unit.stages[k] = -1;
-				}
-				unit.stages[j] = texture_units[i].stages[j];
-				iron_gpu_command_list_set_sampler(&commandList, unit, sampler);
-			}
-		}
-	}
-}
-
 static void iron_internal_start_draw(bool compute) {
 	if ((constantBufferIndex + 1) >= CONSTANT_BUFFER_MULTIPLY || waitAfterNextDraw) {
 		memcpy(current_state.vertex_constant_data, vertexConstantBuffer.data, CONSTANT_BUFFER_SIZE);
 	}
 	iron_gpu_constant_buffer_unlock(&vertexConstantBuffer);
-
-	iron_gpu_internal_set_samplers(current_state.texture_count, current_state.texture_units);
-	iron_gpu_internal_set_samplers(current_state.depth_render_target_count, current_state.depth_render_target_units);
-
 	iron_gpu_command_list_set_vertex_constant_buffer(&commandList, &vertexConstantBuffer, constantBufferIndex * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
 }
 
@@ -252,8 +216,6 @@ void gpu_begin() {
 	current_state.scissor_set = false;
 	current_state.texture_count = 0;
 	current_state.depth_render_target_count = 0;
-
-	iron_internal_samplers_reset();
 
 	iron_gpu_command_list_begin(&commandList);
 
@@ -408,43 +370,6 @@ void gpu_set_matrix3(iron_gpu_constant_location_t *location, iron_matrix3x3_t va
 	}
 	else {
 		iron_internal_set_matrix3(vertexConstantBuffer.data, location->impl.vertexOffset, &value);
-	}
-}
-
-void gpu_set_texture_addressing(iron_gpu_texture_unit_t unit, gpu_texture_direction_t dir, gpu_texture_addressing_t addressing) {
-	for (int i = 0; i < IRON_GPU_SHADER_TYPE_COUNT; ++i) {
-		if (unit.stages[i] >= 0) {
-			if (dir == GPU_TEXTURE_DIRECTION_U) {
-				sampler_options[i][unit.stages[i]].u_addressing = (iron_gpu_texture_addressing_t)addressing;
-			}
-			if (dir == GPU_TEXTURE_DIRECTION_V) {
-				sampler_options[i][unit.stages[i]].v_addressing = (iron_gpu_texture_addressing_t)addressing;
-			}
-		}
-	}
-}
-
-void gpu_set_texture_magnification_filter(iron_gpu_texture_unit_t texunit, gpu_texture_filter_t filter) {
-	for (int i = 0; i < IRON_GPU_SHADER_TYPE_COUNT; ++i) {
-		if (texunit.stages[i] >= 0) {
-			sampler_options[i][texunit.stages[i]].magnification_filter = (iron_gpu_texture_filter_t)filter;
-		}
-	}
-}
-
-void gpu_set_texture_minification_filter(iron_gpu_texture_unit_t texunit, gpu_texture_filter_t filter) {
-	for (int i = 0; i < IRON_GPU_SHADER_TYPE_COUNT; ++i) {
-		if (texunit.stages[i] >= 0) {
-			sampler_options[i][texunit.stages[i]].minification_filter = (iron_gpu_texture_filter_t)filter;
-		}
-	}
-}
-
-void gpu_set_texture_mipmap_filter(iron_gpu_texture_unit_t texunit, gpu_mipmap_filter_t filter) {
-	for (int i = 0; i < IRON_GPU_SHADER_TYPE_COUNT; ++i) {
-		if (texunit.stages[i] >= 0) {
-			sampler_options[i][texunit.stages[i]].mipmap_filter = (iron_gpu_mipmap_filter_t)filter;
-		}
 	}
 }
 
@@ -606,46 +531,4 @@ void iron_gpu_internal_pipeline_init(iron_gpu_pipeline_t *pipe) {
 
 	pipe->color_attachment_count = 1;
 	pipe->depth_attachment_bits = 0;
-}
-
-void iron_gpu_sampler_options_set_defaults(iron_gpu_sampler_options_t *options) {
-	options->u_addressing = IRON_GPU_TEXTURE_ADDRESSING_CLAMP;
-	options->v_addressing = IRON_GPU_TEXTURE_ADDRESSING_CLAMP;
-
-	options->magnification_filter = IRON_GPU_TEXTURE_FILTER_POINT;
-	options->minification_filter = IRON_GPU_TEXTURE_FILTER_POINT;
-	options->mipmap_filter = IRON_GPU_MIPMAP_FILTER_POINT;
-}
-
-void iron_internal_samplers_reset(void) {
-	for (int i = 0; i < IRON_GPU_SHADER_TYPE_COUNT; ++i) {
-		for (int j = 0; j < MAX_SAMPLERS_PER_STAGE; ++j) {
-			iron_gpu_sampler_options_set_defaults(&sampler_options[i][j]);
-		}
-	}
-}
-
-bool sampler_options_equals(iron_gpu_sampler_options_t *options1, iron_gpu_sampler_options_t *options2) {
-	return options1->u_addressing == options2->u_addressing &&
-		   options1->v_addressing == options2->v_addressing &&
-	       options1->minification_filter == options2->minification_filter &&
-	       options1->magnification_filter == options2->magnification_filter &&
-		   options1->mipmap_filter == options2->mipmap_filter;
-}
-
-iron_gpu_sampler_t *iron_internal_get_current_sampler(int stage, int unit) {
-	// TODO: Please make this much faster
-	for (int i = 0; i < sampler_cache_size; ++i) {
-		if (sampler_options_equals(&sampler_cache[i].options, &sampler_options[stage][unit])) {
-			return &sampler_cache[i].sampler;
-		}
-	}
-
-	assert(sampler_cache_size < MAX_SAMPLER_CACHE_SIZE);
-	iron_gpu_sampler_t *sampler = &sampler_cache[sampler_cache_size].sampler;
-	iron_gpu_sampler_init(sampler, &sampler_options[stage][unit]);
-	sampler_cache[sampler_cache_size].options = sampler_options[stage][unit];
-	sampler_cache_size += 1;
-
-	return sampler;
 }

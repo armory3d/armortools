@@ -127,68 +127,6 @@ static DXGI_FORMAT convert_format(iron_image_format_t format) {
 	}
 }
 
-static D3D12_TEXTURE_ADDRESS_MODE convert_texture_addressing(iron_gpu_texture_addressing_t addressing) {
-	switch (addressing) {
-	case IRON_GPU_TEXTURE_ADDRESSING_REPEAT:
-		return D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	case IRON_GPU_TEXTURE_ADDRESSING_MIRROR:
-		return D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
-	case IRON_GPU_TEXTURE_ADDRESSING_CLAMP:
-		return D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
-	case IRON_GPU_TEXTURE_ADDRESSING_BORDER:
-		return D3D12_TEXTURE_ADDRESS_MODE_BORDER;
-	}
-}
-
-static D3D12_FILTER convert_filter(iron_gpu_texture_filter_t minification, iron_gpu_texture_filter_t magnification, iron_gpu_mipmap_filter_t mipmap) {
-	switch (minification) {
-	case IRON_GPU_TEXTURE_FILTER_POINT:
-		switch (magnification) {
-		case IRON_GPU_TEXTURE_FILTER_POINT:
-			switch (mipmap) {
-			case IRON_GPU_MIPMAP_FILTER_NONE:
-			case IRON_GPU_MIPMAP_FILTER_POINT:
-				return D3D12_FILTER_MIN_MAG_MIP_POINT;
-			case IRON_GPU_MIPMAP_FILTER_LINEAR:
-				return D3D12_FILTER_MIN_MAG_POINT_MIP_LINEAR;
-			}
-		case IRON_GPU_TEXTURE_FILTER_LINEAR:
-			switch (mipmap) {
-			case IRON_GPU_MIPMAP_FILTER_NONE:
-			case IRON_GPU_MIPMAP_FILTER_POINT:
-				return D3D12_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT;
-			case IRON_GPU_MIPMAP_FILTER_LINEAR:
-				return D3D12_FILTER_MIN_POINT_MAG_MIP_LINEAR;
-			}
-		case IRON_GPU_TEXTURE_FILTER_ANISOTROPIC:
-			return D3D12_FILTER_ANISOTROPIC;
-		}
-	case IRON_GPU_TEXTURE_FILTER_LINEAR:
-		switch (magnification) {
-		case IRON_GPU_TEXTURE_FILTER_POINT:
-			switch (mipmap) {
-			case IRON_GPU_MIPMAP_FILTER_NONE:
-			case IRON_GPU_MIPMAP_FILTER_POINT:
-				return D3D12_FILTER_MIN_LINEAR_MAG_MIP_POINT;
-			case IRON_GPU_MIPMAP_FILTER_LINEAR:
-				return D3D12_FILTER_MIN_MAG_MIP_LINEAR;
-			}
-		case IRON_GPU_TEXTURE_FILTER_LINEAR:
-			switch (mipmap) {
-			case IRON_GPU_MIPMAP_FILTER_NONE:
-			case IRON_GPU_MIPMAP_FILTER_POINT:
-				return D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT;
-			case IRON_GPU_MIPMAP_FILTER_LINEAR:
-				return D3D12_FILTER_MIN_MAG_MIP_LINEAR;
-			}
-		case IRON_GPU_TEXTURE_FILTER_ANISOTROPIC:
-			return D3D12_FILTER_ANISOTROPIC;
-		}
-	case IRON_GPU_TEXTURE_FILTER_ANISOTROPIC:
-		return D3D12_FILTER_ANISOTROPIC;
-	}
-}
-
 static int formatSize(DXGI_FORMAT format) {
 	switch (format) {
 	case DXGI_FORMAT_R32G32B32A32_FLOAT:
@@ -272,7 +210,7 @@ static void create_root_signature() {
 	ID3DBlob *rootBlob;
 	ID3DBlob *errorBlob;
 
-	D3D12_ROOT_PARAMETER parameters[3] = {};
+	D3D12_ROOT_PARAMETER parameters[2] = {};
 
 	D3D12_DESCRIPTOR_RANGE range = {
 		.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV,
@@ -286,28 +224,33 @@ static void create_root_signature() {
 	parameters[0].DescriptorTable.NumDescriptorRanges = 1;
 	parameters[0].DescriptorTable.pDescriptorRanges = &range;
 
-	D3D12_DESCRIPTOR_RANGE range2 = {
-		.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER,
-		.NumDescriptors = (UINT)IRON_INTERNAL_G5_TEXTURE_COUNT,
-		.BaseShaderRegister = 0,
-		.RegisterSpace = 0,
-		.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND,
-	};
-	parameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	parameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	parameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-	parameters[1].DescriptorTable.NumDescriptorRanges = 1;
-	parameters[1].DescriptorTable.pDescriptorRanges = &range2;
+	parameters[1].Descriptor.ShaderRegister = 0;
+	parameters[1].Descriptor.RegisterSpace = 0;
 
-	parameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	parameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-	parameters[2].Descriptor.ShaderRegister = 0;
-	parameters[2].Descriptor.RegisterSpace = 0;
+	D3D12_STATIC_SAMPLER_DESC samplers[IRON_INTERNAL_G5_TEXTURE_COUNT];
+ 	for (int i = 0; i < IRON_INTERNAL_G5_TEXTURE_COUNT; ++i) {
+ 		samplers[i].ShaderRegister = i;
+ 		samplers[i].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+ 		samplers[i].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+ 		samplers[i].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+ 		samplers[i].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+ 		samplers[i].MipLODBias = 0;
+ 		samplers[i].MaxAnisotropy = 16;
+ 		samplers[i].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+ 		samplers[i].BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+ 		samplers[i].MinLOD = 0.0f;
+ 		samplers[i].MaxLOD = D3D12_FLOAT32_MAX;
+ 		samplers[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+ 		samplers[i].RegisterSpace = 0;
+ 	}
 
 	D3D12_ROOT_SIGNATURE_DESC descRootSignature = {
-		.NumParameters = 3,
+		.NumParameters = 2,
 		.pParameters = parameters,
-		.NumStaticSamplers = 0,
-		.pStaticSamplers = NULL,
+		.NumStaticSamplers = IRON_INTERNAL_G5_TEXTURE_COUNT,
+		.pStaticSamplers = samplers,
 		.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT,
 	};
 
@@ -461,7 +404,6 @@ void iron_gpu_command_list_init(struct iron_gpu_command_list *list) {
 
 	for (int i = 0; i < IRON_INTERNAL_G5_TEXTURE_COUNT; ++i) {
 		list->impl.currentTextures[i] = NULL;
-		list->impl.current_samplers[i] = NULL;
 	}
 	list->impl.heapIndex = 0;
 
@@ -472,13 +414,6 @@ void iron_gpu_command_list_init(struct iron_gpu_command_list *list) {
 		.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
 	};
 	device->lpVtbl->CreateDescriptorHeap(device, &heapDesc, &IID_ID3D12DescriptorHeap, &list->impl.srvHeap);
-
-	D3D12_DESCRIPTOR_HEAP_DESC samplerHeapDesc = {
-		.NumDescriptors = HEAP_SIZE,
-		.Type = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
-		.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
-	};
-	device->lpVtbl->CreateDescriptorHeap(device, &samplerHeapDesc, &IID_ID3D12DescriptorHeap, &list->impl.samplerHeap);
 }
 
 void iron_gpu_command_list_destroy(struct iron_gpu_command_list *list) {}
@@ -486,7 +421,6 @@ void iron_gpu_command_list_destroy(struct iron_gpu_command_list *list) {}
 void iron_gpu_internal_reset_textures(struct iron_gpu_command_list *list) {
 	for (int i = 0; i < IRON_INTERNAL_G5_TEXTURE_COUNT; ++i) {
 		list->impl.currentTextures[i] = NULL;
-		list->impl.current_samplers[i] = NULL;
 	}
 }
 
@@ -574,7 +508,7 @@ void iron_gpu_command_list_render_target_to_texture_barrier(struct iron_gpu_comm
 }
 
 void iron_gpu_command_list_set_vertex_constant_buffer(struct iron_gpu_command_list *list, iron_gpu_buffer_t *buffer, int offset, size_t size) {
-	list->impl._commandList->lpVtbl->SetGraphicsRootConstantBufferView(list->impl._commandList, 2, buffer->impl.constant_buffer->lpVtbl->GetGPUVirtualAddress(buffer->impl.constant_buffer) + offset);
+	list->impl._commandList->lpVtbl->SetGraphicsRootConstantBufferView(list->impl._commandList, 1, buffer->impl.constant_buffer->lpVtbl->GetGPUVirtualAddress(buffer->impl.constant_buffer) + offset);
 }
 
 void iron_gpu_command_list_draw_indexed_vertices(struct iron_gpu_command_list *list) {
@@ -636,7 +570,6 @@ void iron_gpu_command_list_disable_scissor(struct iron_gpu_command_list *list) {
 void iron_gpu_internal_set_textures(iron_gpu_command_list_t *list) {
 	if (list->impl.currentTextures[0] != NULL) {
 		int srvStep = device->lpVtbl->GetDescriptorHandleIncrementSize(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		int samplerStep = device->lpVtbl->GetDescriptorHandleIncrementSize(device, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 
 		if (list->impl.heapIndex + IRON_INTERNAL_G5_TEXTURE_COUNT >= HEAP_SIZE) {
 			list->impl.heapIndex = 0;
@@ -644,26 +577,17 @@ void iron_gpu_internal_set_textures(iron_gpu_command_list_t *list) {
 
 		D3D12_GPU_DESCRIPTOR_HANDLE srvGpu;
 		list->impl.srvHeap->lpVtbl->GetGPUDescriptorHandleForHeapStart(list->impl.srvHeap, &srvGpu);
-		D3D12_GPU_DESCRIPTOR_HANDLE samplerGpu;
-		list->impl.samplerHeap->lpVtbl->GetGPUDescriptorHandleForHeapStart(list->impl.samplerHeap, &samplerGpu);
 		srvGpu.ptr += list->impl.heapIndex * srvStep;
-		samplerGpu.ptr += list->impl.heapIndex * samplerStep;
 
 		for (int i = 0; i < IRON_INTERNAL_G5_TEXTURE_COUNT; ++i) {
-			if (list->impl.currentTextures[i] != NULL && list->impl.current_samplers[i] != NULL) {
-				ID3D12DescriptorHeap *samplerDescriptorHeap = list->impl.current_samplers[i]->impl.sampler_heap;
-
+			if (list->impl.currentTextures[i] != NULL) {
 				D3D12_CPU_DESCRIPTOR_HANDLE srvCpu;
 				list->impl.srvHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(list->impl.srvHeap, &srvCpu);
-				D3D12_CPU_DESCRIPTOR_HANDLE samplerCpu;
-				list->impl.samplerHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(list->impl.samplerHeap, &samplerCpu);
 				srvCpu.ptr += list->impl.heapIndex * srvStep;
-				samplerCpu.ptr += list->impl.heapIndex * samplerStep;
 				++list->impl.heapIndex;
 
 				bool is_depth = list->impl.currentTextures[i]->impl.stage_depth == i;
 				D3D12_CPU_DESCRIPTOR_HANDLE sourceCpu;
-
 				if (is_depth) {
 					list->impl.currentTextures[i]->impl.srvDepthDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(
 						list->impl.currentTextures[i]->impl.srvDepthDescriptorHeap, &sourceCpu);
@@ -672,19 +596,13 @@ void iron_gpu_internal_set_textures(iron_gpu_command_list_t *list) {
 					list->impl.currentTextures[i]->impl.srvDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(
 						list->impl.currentTextures[i]->impl.srvDescriptorHeap, &sourceCpu);
 				}
-
-				D3D12_CPU_DESCRIPTOR_HANDLE handle;
-				samplerDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(samplerDescriptorHeap, &handle);
-
 				device->lpVtbl->CopyDescriptorsSimple(device, 1, srvCpu, sourceCpu, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-				device->lpVtbl->CopyDescriptorsSimple(device, 1, samplerCpu, handle, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 			}
 		}
 
-		ID3D12DescriptorHeap *heaps[2] = {list->impl.srvHeap, list->impl.samplerHeap};
-		list->impl._commandList->lpVtbl->SetDescriptorHeaps(list->impl._commandList, 2, heaps);
+		ID3D12DescriptorHeap *heaps[1] = {list->impl.srvHeap};
+		list->impl._commandList->lpVtbl->SetDescriptorHeaps(list->impl._commandList, 1, heaps);
 		list->impl._commandList->lpVtbl->SetGraphicsRootDescriptorTable(list->impl._commandList, 0, srvGpu);
-		list->impl._commandList->lpVtbl->SetGraphicsRootDescriptorTable(list->impl._commandList, 1, samplerGpu);
 	}
 }
 
@@ -904,23 +822,6 @@ void iron_gpu_command_list_get_render_target_pixels(iron_gpu_command_list_t *lis
 	render_target->impl.renderTargetReadback->lpVtbl->Unmap(render_target->impl.renderTargetReadback, 0, NULL);
 }
 
-void iron_gpu_internal_sampler_set(iron_gpu_command_list_t *list, iron_gpu_sampler_t *sampler, int unit) {
-	if (unit < 0) {
-		return;
-	}
-	list->impl.current_samplers[unit] = sampler;
-}
-
-void iron_gpu_command_list_set_sampler(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_sampler_t *sampler) {
-	if (unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT] >= 0) {
-		iron_gpu_internal_sampler_set(list, sampler, unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT]);
-	}
-	else if (unit.stages[IRON_GPU_SHADER_TYPE_VERTEX] >= 0) {
-		iron_gpu_internal_sampler_set(list, sampler, unit.stages[IRON_GPU_SHADER_TYPE_VERTEX]);
-	}
-	iron_gpu_internal_set_textures(list);
-}
-
 void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *texture) {
 	if (unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT] >= 0) {
 		texture->impl.stage = unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT];
@@ -1111,32 +1012,6 @@ void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipe) {
 
 	device->lpVtbl->CreateGraphicsPipelineState(device, &psoDesc, &IID_ID3D12PipelineState, &pipe->impl.pso);
 }
-
-void iron_gpu_sampler_init(iron_gpu_sampler_t *sampler, const iron_gpu_sampler_options_t *options) {
-	D3D12_DESCRIPTOR_HEAP_DESC descHeapSampler = {
-		.NumDescriptors = 2,
-		.Type = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
-		.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
-	};
-	device->lpVtbl->CreateDescriptorHeap(device, &descHeapSampler, &IID_ID3D12DescriptorHeap, &sampler->impl.sampler_heap);
-
-	D3D12_SAMPLER_DESC samplerDesc = {
-		.Filter = convert_filter(options->minification_filter, options->magnification_filter, options->mipmap_filter),
-		.AddressU = convert_texture_addressing(options->u_addressing),
-		.AddressV = convert_texture_addressing(options->v_addressing),
-		.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
-		.MinLOD = 0,
-		.MaxLOD = 32,
-		.MipLODBias = 0.0f,
-		.MaxAnisotropy = 1,
-		.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER,
-	};
-	D3D12_CPU_DESCRIPTOR_HANDLE handle;
-	sampler->impl.sampler_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(sampler->impl.sampler_heap, &handle);
-	device->lpVtbl->CreateSampler(device, &samplerDesc, handle);
-}
-
-void iron_gpu_sampler_destroy(iron_gpu_sampler_t *sampler) {}
 
 void iron_gpu_shader_init(iron_gpu_shader_t *shader, const void *_data, size_t length, iron_gpu_shader_type_t type) {
 	memset(shader->impl.constants, 0, sizeof(shader->impl.constants));

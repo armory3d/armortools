@@ -144,7 +144,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		}
 
 		if (depth_reject) {
-			node_shader_write_frag(kong, "if (sp.z > sample_lod(gbufferD, gbufferD_sampler, sp.xy, 0.0).r + 0.0005) { discard; }");
+			node_shader_write_frag(kong, "if (sp.z > sample_lod(gbufferD, sampler_linear, sp.xy, 0.0).r + 0.0005) { discard; }");
 		}
 
 		make_brush_run(kong);
@@ -155,7 +155,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		if (angle_fill) {
 			node_shader_add_function(kong, str_octahedron_wrap);
 			node_shader_add_texture(kong, "gbuffer0");
-			node_shader_write_frag(kong, "var g0: float2 = sample_lod(gbuffer0, gbuffer0_sampler, constants.inp.xy, 0.0).rg;");
+			node_shader_write_frag(kong, "var g0: float2 = sample_lod(gbuffer0, sampler_linear, constants.inp.xy, 0.0).rg;");
 			node_shader_write_frag(kong, "var wn: float3;");
 			node_shader_write_frag(kong, "wn.z = 1.0 - abs(g0.x) - abs(g0.y);");
 			// node_shader_write_frag(kong, "wn.xy = wn.z >= 0.0 ? g0.xy : octahedron_wrap(g0.xy);");
@@ -167,7 +167,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		}
 		let stencil_fill: bool = context_raw.tool == workspace_tool_t.FILL && context_raw.brush_stencil_image != null;
 		if (stencil_fill) {
-			node_shader_write_frag(kong, "if (sp.z > sample_lod(gbufferD, gbufferD_sampler, sp.xy, 0.0).r + 0.0005) { discard; }");
+			node_shader_write_frag(kong, "if (sp.z > sample_lod(gbufferD, sampler_linear, sp.xy, 0.0).r + 0.0005) { discard; }");
 		}
 	}
 
@@ -260,7 +260,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 
 	if (context_raw.brush_mask_image != null && context_raw.tool == workspace_tool_t.DECAL) {
 		node_shader_add_texture(kong, "texbrushmask", "_texbrushmask");
-		node_shader_write_frag(kong, "var mask_sample: float4 = sample_lod(texbrushmask, texbrushmask_sampler, uvsp, 0.0);");
+		node_shader_write_frag(kong, "var mask_sample: float4 = sample_lod(texbrushmask, sampler_linear, uvsp, 0.0);");
 		if (context_raw.brush_mask_image_is_alpha) {
 			node_shader_write_frag(kong, "opacity *= mask_sample.a;");
 		}
@@ -270,7 +270,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	}
 	else if (context_raw.tool == workspace_tool_t.TEXT) {
 		node_shader_add_texture(kong, "textexttool", "_textexttool");
-		node_shader_write_frag(kong, "opacity *= sample_lod(textexttool, textexttool_sampler, uvsp, 0.0).r;");
+		node_shader_write_frag(kong, "opacity *= sample_lod(textexttool, sampler_linear, uvsp, 0.0).r;");
 	}
 
 	if (context_raw.brush_stencil_image != null && (
@@ -294,7 +294,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		node_shader_write_frag(kong, "stencil_uv += float2(0.5 / stencil_ratio, 0.5);");
 		node_shader_write_frag(kong, "stencil_uv.x *= stencil_ratio;");
 		node_shader_write_frag(kong, "if (stencil_uv.x < 0 || stencil_uv.x > 1 || stencil_uv.y < 0 || stencil_uv.y > 1) { discard; }");
-		node_shader_write_frag(kong, "var texbrushstencil_sample: float4 = sample_lod(texbrushstencil, texbrushstencil_sampler, stencil_uv, 0.0);");
+		node_shader_write_frag(kong, "var texbrushstencil_sample: float4 = sample_lod(texbrushstencil, sampler_linear, stencil_uv, 0.0);");
 		if (context_raw.brush_stencil_image_is_alpha) {
 			node_shader_write_frag(kong, "opacity *= texbrushstencil_sample.a;");
 		}
@@ -325,7 +325,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 			node_shader_write_frag(kong, "pa_mask *= distance(constants.eye, winp.xyz) / 1.5;");
 		}
 		node_shader_write_frag(kong, "pa_mask = pa_mask.xy * 0.5 + 0.5;");
-		node_shader_write_frag(kong, "var mask_sample: float4 = sample_lod(texbrushmask, texbrushmask_sampler, pa_mask, 0.0);");
+		node_shader_write_frag(kong, "var mask_sample: float4 = sample_lod(texbrushmask, sampler_linear, pa_mask, 0.0);");
 		if (context_raw.brush_mask_image_is_alpha) {
 			node_shader_write_frag(kong, "opacity *= mask_sample.a;");
 		}
@@ -350,12 +350,12 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	node_shader_write_frag(kong, "var sample_tc: float2 = float2(input.wvpposition.xy / input.wvpposition.w) * 0.5 + 0.5;");
 	node_shader_write_frag(kong, "sample_tc.y = 1.0 - sample_tc.y;");
 	node_shader_add_texture(kong, "paintmask");
-	node_shader_write_frag(kong, "var sample_mask: float = sample_lod(paintmask, paintmask_sampler, sample_tc, 0.0).r;");
+	node_shader_write_frag(kong, "var sample_mask: float = sample_lod(paintmask, sampler_linear, sample_tc, 0.0).r;");
 	node_shader_write_frag(kong, "str = max(str, sample_mask);");
 	// write(frag, "str = clamp(str + sample_mask, 0.0, 1.0);");
 
 	node_shader_add_texture(kong, "texpaint_undo", "_texpaint_undo");
-	node_shader_write_frag(kong, "var sample_undo: float4 = sample_lod(texpaint_undo, texpaint_undo_sampler, sample_tc, 0.0);");
+	node_shader_write_frag(kong, "var sample_undo: float4 = sample_lod(texpaint_undo, sampler_linear, sample_tc, 0.0);");
 
 	let matid: f32 = context_raw.material.id / 255;
 	if (context_raw.picker_mask_handle.position == picker_mask_t.MATERIAL) {
@@ -409,7 +409,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 
 		if (decal) {
 			node_shader_add_texture(kong, "texpaint_pack_undo", "_texpaint_pack_undo");
-			node_shader_write_frag(kong, "var sample_pack_undo: float4 = sample_lod(texpaint_pack_undo, texpaint_pack_undo_sampler, sample_tc, 0.0);");
+			node_shader_write_frag(kong, "var sample_pack_undo: float4 = sample_lod(texpaint_pack_undo, sampler_linear, sample_tc, 0.0);");
 			node_shader_write_frag(kong, "output[2] = lerp4(sample_pack_undo, float4(occlusion, roughness, metallic, " + height + "), str);");
 		}
 		else {
@@ -425,8 +425,8 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		else {
 			node_shader_add_texture(kong, "texpaint_nor_undo", "_texpaint_nor_undo");
 			node_shader_add_texture(kong, "texpaint_pack_undo", "_texpaint_pack_undo");
-			node_shader_write_frag(kong, "var sample_nor_undo: float4 = sample_lod(texpaint_nor_undo, texpaint_nor_undo_sampler, sample_tc, 0.0);");
-			node_shader_write_frag(kong, "var sample_pack_undo: float4 = sample_lod(texpaint_pack_undo, texpaint_pack_undo_sampler, sample_tc, 0.0);");
+			node_shader_write_frag(kong, "var sample_nor_undo: float4 = sample_lod(texpaint_nor_undo, sampler_linear, sample_tc, 0.0);");
+			node_shader_write_frag(kong, "var sample_pack_undo: float4 = sample_lod(texpaint_pack_undo, sampler_linear, sample_tc, 0.0);");
 			///if is_forge
 			node_shader_write_frag(kong, "output[0] = float4(" + make_material_blend_mode(kong, context_raw.brush_blending, "sample_undo.rgb", "basecol", "str") + ", mat_opacity);");
 			///else

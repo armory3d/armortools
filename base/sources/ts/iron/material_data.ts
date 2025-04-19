@@ -109,8 +109,3 @@ function material_context_create(raw: material_context_t): material_context_t {
 
 	return raw;
 }
-
-function material_context_set_tex_params(raw: material_context_t, texture_index: i32, context: shader_context_t, unit_index: i32) {
-	// This function is called by mesh_object_t for samplers set using material context
-	shader_context_set_tex_params(context, unit_index, raw.bind_textures[texture_index]);
-}

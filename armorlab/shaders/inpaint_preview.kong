@@ -3,13 +3,10 @@
 const tex0: tex2d;
 
 #[set(everything)]
-const tex0_sampler: sampler;
-
-#[set(everything)]
 const texa: tex2d;
 
 #[set(everything)]
-const texa_sampler: sampler;
+const sampler_linear: sampler;
 
 struct vert_in {
 	pos: float2;
@@ -29,8 +26,8 @@ fun inpaint_preview_vert(input: vert_in): vert_out {
 }
 
 fun inpaint_preview_frag(input: vert_out): float4 {
-	var col: float4 = sample_lod(tex0, tex0_sampler, input.tex, 0.0);
-	var mask: float = clamp(sample_lod(texa, texa_sampler, input.tex, 0.0).r + 0.5, 0.0, 1.0);
+	var col: float4 = sample_lod(tex0, sampler_linear, input.tex, 0.0);
+	var mask: float = clamp(sample_lod(texa, sampler_linear, input.tex, 0.0).r + 0.5, 0.0, 1.0);
 	return col * mask;
 }
 

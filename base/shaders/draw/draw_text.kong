@@ -8,7 +8,7 @@ const constants: {
 const tex: tex2d;
 
 #[set(everything)]
-const tex_sampler: sampler;
+const sampler_linear: sampler;
 
 struct vert_in {
 	pos: float3;
@@ -31,7 +31,7 @@ fun draw_text_vert(input: vert_in): vert_out {
 }
 
 fun draw_text_frag(input: vert_out): float4 {
-	return float4(input.col.rgb, sample(tex, tex_sampler, input.tex).r * input.col.a);
+	return float4(input.col.rgb, sample(tex, sampler_linear, input.tex).r * input.col.a);
 }
 
 #[pipe]

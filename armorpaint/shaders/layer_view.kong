@@ -9,7 +9,7 @@ const constants: {
 const tex: tex2d;
 
 #[set(everything)]
-const tex_sampler: sampler;
+const sampler_linear: sampler;
 
 struct vert_in {
 	pos: float3;
@@ -33,22 +33,22 @@ fun layer_view_vert(input: vert_in): vert_out {
 
 fun layer_view_frag(input: vert_out): float4 {
 	if (constants.channel == 1) {
-		return sample_lod(tex, tex_sampler, input.tex, 0.0).rrra * input.col;
+		return sample_lod(tex, sampler_linear, input.tex, 0.0).rrra * input.col;
 	}
 	if (constants.channel == 2) {
-		return sample_lod(tex, tex_sampler, input.tex, 0.0).ggga * input.col;
+		return sample_lod(tex, sampler_linear, input.tex, 0.0).ggga * input.col;
 	}
 	if (constants.channel == 3) {
-		return sample_lod(tex, tex_sampler, input.tex, 0.0).bbba * input.col;
+		return sample_lod(tex, sampler_linear, input.tex, 0.0).bbba * input.col;
 	}
 	if (constants.channel == 4) {
-		return sample_lod(tex, tex_sampler, input.tex, 0.0).aaaa * input.col;
+		return sample_lod(tex, sampler_linear, input.tex, 0.0).aaaa * input.col;
 	}
 	if (constants.channel == 5) {
-		return sample_lod(tex, tex_sampler, input.tex, 0.0).rgba * input.col;
+		return sample_lod(tex, sampler_linear, input.tex, 0.0).rgba * input.col;
 	}
 	// else {
-		var tex_sample: float4 = sample_lod(tex, tex_sampler, input.tex, 0.0);
+		var tex_sample: float4 = sample_lod(tex, sampler_linear, input.tex, 0.0);
 		tex_sample.rgb *= tex_sample.a;
 		return tex_sample * input.col;
 	// }

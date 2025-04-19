@@ -17,7 +17,6 @@ struct ID3D12RootSignature;
 struct ID3D12StateObject;
 struct iron_gpu_pipeline;
 struct iron_gpu_texture;
-struct iron_gpu_sampler;
 struct iron_gpu_shader;
 struct iron_gpu_command_list;
 struct iron_gpu_buffer;
@@ -68,11 +67,9 @@ typedef struct {
 	HANDLE fence_event;
 
 	struct iron_gpu_texture *currentTextures[IRON_INTERNAL_G5_TEXTURE_COUNT];
-	struct iron_gpu_sampler *current_samplers[IRON_INTERNAL_G5_TEXTURE_COUNT];
 
 	int heapIndex;
 	struct ID3D12DescriptorHeap *srvHeap;
-	struct ID3D12DescriptorHeap *samplerHeap;
 } gpu_command_list_impl_t;
 
 typedef struct {
@@ -83,10 +80,6 @@ typedef struct {
 typedef struct {
 	int vertexOffset;
 } gpu_constant_location_impl_t;
-
-typedef struct iron_gpu_sampler_impl {
-	struct ID3D12DescriptorHeap *sampler_heap;
-} gpu_sampler_impl_t;
 
 typedef struct {
 	char name[64];

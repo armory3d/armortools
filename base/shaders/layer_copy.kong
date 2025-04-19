@@ -8,7 +8,7 @@ const constants: {
 const tex: tex2d;
 
 #[set(everything)]
-const tex_sampler: sampler;
+const sampler_linear: sampler;
 
 struct vert_in {
 	pos: float3;
@@ -31,7 +31,7 @@ fun layer_copy_vert(input: vert_in): vert_out {
 }
 
 fun layer_copy_frag(input: vert_out): float4 {
-	return sample_lod(tex, tex_sampler, input.tex, 0.0) * input.col;
+	return sample_lod(tex, sampler_linear, input.tex, 0.0) * input.col;
 }
 
 #[pipe]

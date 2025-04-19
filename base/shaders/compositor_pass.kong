@@ -8,14 +8,11 @@ const constants: {
 #[set(everything)]
 const tex: tex2d;
 
-#[set(everything)]
-const tex_sampler: sampler;
-
 // #[set(everything)]
 // const histogram: tex2d;
 
-// #[set(everything)]
-// const histogram_sampler: sampler;
+#[set(everything)]
+const sampler_linear: sampler;
 
 struct vert_in {
 	pos: float2;
@@ -45,7 +42,7 @@ fun tonemap_filmic(color: float3): float3 {
 }
 
 fun compositor_pass_frag(input: vert_out): float4 {
-	var color: float4 = sample_lod(tex, tex_sampler, input.tex, 0.0);
+	var color: float4 = sample_lod(tex, sampler_linear, input.tex, 0.0);
 
 	// Static grain
 	var x: float = (input.tex.x + 4.0) * (input.tex.y + 4.0) * 10.0;
@@ -56,7 +53,7 @@ fun compositor_pass_frag(input: vert_out): float4 {
 
 	// Auto exposure
 	// const float auto_exposure_strength = 1.0;
-	// float expo = 2.0 - clamp(length(sample_lod(histogram, histogram_sampler, float2(0.5, 0.5), 0.0).rgb), 0.0, 1.0);
+	// float expo = 2.0 - clamp(length(sample_lod(histogram, sampler_linear, float2(0.5, 0.5), 0.0).rgb), 0.0, 1.0);
 	// color.rgb *= pow(expo, auto_exposure_strength * 2.0);
 
 	color.rgb = tonemap_filmic(color.rgb); // With gamma

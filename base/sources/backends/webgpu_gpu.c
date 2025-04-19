@@ -343,10 +343,6 @@ void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipe) {
 	pipe->impl.pipeline = wgpuDeviceCreateRenderPipeline(device, &rpDesc);
 }
 
-void iron_gpu_sampler_init(iron_gpu_sampler_t *sampler, const iron_gpu_sampler_options_t *options) {}
-
-void iron_gpu_sampler_destroy(iron_gpu_sampler_t *sampler) {}
-
 void iron_gpu_shader_init(iron_gpu_shader_t *shader, const void *source, size_t length, iron_gpu_shader_type_t type) {
 	WGPUShaderModuleSPIRVDescriptor smSpirvDesc;
 	memset(&smSpirvDesc, 0, sizeof(smSpirvDesc));
@@ -360,18 +356,6 @@ void iron_gpu_shader_init(iron_gpu_shader_t *shader, const void *source, size_t 
 }
 
 void iron_gpu_shader_destroy(iron_gpu_shader_t *shader) {}
-
-
-
-
-
-#include <string.h>
-#include <iron_gpu.h>
-#include <iron_system.h>
-
-extern WGPUDevice device;
-extern WGPUQueue queue;
-extern WGPUSwapChain swapChain;
 
 void iron_gpu_command_list_init(iron_gpu_command_list_t *list) {}
 
@@ -475,7 +459,5 @@ void iron_gpu_command_list_set_vertex_constant_buffer(iron_gpu_command_list_t *l
 void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *texture) {
 
 }
-
-void iron_gpu_command_list_set_sampler(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_sampler_t *sampler) {}
 
 void iron_gpu_command_list_set_texture_from_render_target_depth(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *renderTarget) {}

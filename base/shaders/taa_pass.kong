@@ -8,13 +8,10 @@ const constants: {
 const tex: tex2d;
 
 #[set(everything)]
-const tex_sampler: sampler;
-
-#[set(everything)]
 const tex2: tex2d;
 
 #[set(everything)]
-const tex2_sampler: sampler;
+const sampler_linear: sampler;
 
 struct vert_in {
 	pos: float2;
@@ -34,8 +31,8 @@ fun taa_pass_vert(input: vert_in): vert_out {
 }
 
 fun taa_pass_frag(input: vert_out): float4 {
-	var current: float4 = sample_lod(tex, tex_sampler, input.tex, 0.0);
-	var previous: float4 = sample_lod(tex2, tex2_sampler, input.tex, 0.0);
+	var current: float4 = sample_lod(tex, sampler_linear, input.tex, 0.0);
+	var previous: float4 = sample_lod(tex2, sampler_linear, input.tex, 0.0);
 	return float4(lerp3(current.rgb, previous.rgb, constants.taa_blend), 1.0);
 }
 

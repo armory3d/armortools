@@ -22,10 +22,6 @@ typedef struct {
 	int vertexOffset;
 } gpu_constant_location_impl_t;
 
-typedef struct iron_gpu_sampler_impl {
-	int a;
-} gpu_sampler_impl_t;
-
 struct WGPUShaderModuleImpl;
 
 typedef struct {

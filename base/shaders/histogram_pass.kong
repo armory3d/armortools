@@ -1,8 +1,9 @@
+
 #[set(everything)]
 const tex: tex2d;
 
 #[set(everything)]
-const tex_sampler: sampler;
+const sampler_linear: sampler;
 
 struct vert_in {
 	pos: float2;
@@ -26,11 +27,11 @@ fun histogram_pass_vert(input: vert_in): vert_out {
 fun histogram_pass_frag(input: vert_out): float4 {
 	var color: float4;
 	color.a = 0.01 * auto_exposure_speed;
-	color.rgb = sample_lod(tex, tex_sampler, float2(0.5, 0.5), 0.0).rgb +
-				sample_lod(tex, tex_sampler, float2(0.2, 0.2), 0.0).rgb +
-				sample_lod(tex, tex_sampler, float2(0.8, 0.2), 0.0).rgb +
-				sample_lod(tex, tex_sampler, float2(0.2, 0.8), 0.0).rgb +
-				sample_lod(tex, tex_sampler, float2(0.8, 0.8), 0.0).rgb;
+	color.rgb = sample_lod(tex, sampler_linear, float2(0.5, 0.5), 0.0).rgb +
+				sample_lod(tex, sampler_linear, float2(0.2, 0.2), 0.0).rgb +
+				sample_lod(tex, sampler_linear, float2(0.8, 0.2), 0.0).rgb +
+				sample_lod(tex, sampler_linear, float2(0.2, 0.8), 0.0).rgb +
+				sample_lod(tex, sampler_linear, float2(0.8, 0.8), 0.0).rgb;
 	color.rgb /= 5.0;
 	return color;
 }

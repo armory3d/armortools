@@ -9,13 +9,10 @@ const constants: {
 const tex: tex2d;
 
 #[set(everything)]
-const tex_sampler: sampler;
-
-#[set(everything)]
 const texdilate: tex2d;
 
 #[set(everything)]
-const texdilate_sampler: sampler;
+const sampler_linear: sampler;
 
 // const offsets: float2[8] = {
 // 	float2(-1.0,  0.0), float2( 1.0,  0.0), float2( 0.0,  1.0), float2( 0.0, -1.0),
@@ -89,7 +86,7 @@ fun dilate_pass_frag(input: vert_out): float4 {
 				var cur_dist: float = length(input.tex - cur_uv);
 				if (cur_dist < min_dist) {
 					var project_uv: float2 = cur_uv + get_offset(j) * texel_size * float2(i, i) * float2(0.25, 0.25);
-					var direction: float4 = sample_lod(tex, tex_sampler, project_uv, 0.0);
+					var direction: float4 = sample_lod(tex, sampler_linear, project_uv, 0.0);
 					min_dist = cur_dist;
 					if (direction.x != 0.0 || direction.y != 0.0 || direction.z != 0.0) {
 						var delta: float4 = offset_col - direction;

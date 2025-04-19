@@ -244,7 +244,6 @@ declare function gpu_get_constant_location(pipeline: any, name: string): any;
 declare function gpu_get_texture_unit(pipeline: any, name: string): any;
 declare function gpu_set_texture(stage: any, texture: any): void;
 declare function gpu_set_texture_depth(unit: any, texture: any): void;
-declare function gpu_set_texture_parameters(tex_unit: any, u_addr: i32, v_addr: i32, min_filter: i32, mag_filter: i32, mip_filter: i32): void;
 declare function gpu_set_bool(location: any, value: bool): void;
 declare function gpu_set_int(location: any, value: i32): void;
 declare function gpu_set_float(location: any, value: f32): void;
@@ -644,24 +643,6 @@ declare type iron_gpu_texture_unit_t = any;
 enum clear_flag_t {
 	COLOR = 1,
 	DEPTH = 2,
-}
-
-enum tex_filter_t {
-	POINT,
-	LINEAR,
-	ANISOTROPIC,
-}
-
-enum mip_map_filter_t {
-	NONE,
-	POINT,
-	LINEAR,
-}
-
-enum tex_addressing_t {
-	REPEAT,
-	MIRROR,
-	CLAMP,
 }
 
 enum usage_t {

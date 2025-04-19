@@ -91,7 +91,7 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	if (decal) {
 		if (context_raw.tool == workspace_tool_t.TEXT) {
 			node_shader_add_texture(kong, "textexttool", "_textexttool");
-			node_shader_write_frag(kong, "opacity *= sample_lod(textexttool, textexttool_sampler, input.tex_coord / float(" + brush_scale + "), 0.0).r;");
+			node_shader_write_frag(kong, "opacity *= sample_lod(textexttool, sampler_linear, input.tex_coord / float(" + brush_scale + "), 0.0).r;");
 		}
 	}
 	if (decal) {

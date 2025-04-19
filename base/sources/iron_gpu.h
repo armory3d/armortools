@@ -74,30 +74,6 @@ struct iron_gpu_constant_location;
 struct iron_gpu_buffer;
 
 typedef enum {
-	GPU_TEXTURE_ADDRESSING_REPEAT,
-	GPU_TEXTURE_ADDRESSING_MIRROR,
-	GPU_TEXTURE_ADDRESSING_CLAMP,
-	GPU_TEXTURE_ADDRESSING_BORDER
-} gpu_texture_addressing_t;
-
-typedef enum {
-	GPU_TEXTURE_DIRECTION_U,
-	GPU_TEXTURE_DIRECTION_V
-} gpu_texture_direction_t;
-
-typedef enum {
-	GPU_TEXTURE_FILTER_POINT,
-	GPU_TEXTURE_FILTER_LINEAR,
-	GPU_TEXTURE_FILTER_ANISOTROPIC
-} gpu_texture_filter_t;
-
-typedef enum {
-	GPU_MIPMAP_FILTER_NONE,
-	GPU_MIPMAP_FILTER_POINT,
-	GPU_MIPMAP_FILTER_LINEAR // linear texture filter + linear mip filter -> trilinear filter
-} gpu_mipmap_filter_t;
-
-typedef enum {
     GPU_USAGE_STATIC,
     GPU_USAGE_DYNAMIC,
     GPU_USAGE_READABLE
@@ -111,7 +87,6 @@ void gpu_scissor(int x, int y, int width, int height);
 void gpu_disable_scissor(void);
 void iron_gpu_draw_indexed_vertices(void);
 void iron_gpu_draw_indexed_vertices_from_to(int start, int count);
-void gpu_set_texture_addressing(struct iron_gpu_texture_unit unit, gpu_texture_direction_t dir, gpu_texture_addressing_t addressing);
 void iron_gpu_set_pipeline(struct iron_gpu_pipeline *pipeline);
 void gpu_set_int(struct iron_gpu_constant_location *location, int value);
 void gpu_set_int2(struct iron_gpu_constant_location *location, int value1, int value2);
@@ -126,9 +101,6 @@ void gpu_set_floats(struct iron_gpu_constant_location *location, f32_array_t *va
 void gpu_set_bool(struct iron_gpu_constant_location *location, bool value);
 void gpu_set_matrix3(struct iron_gpu_constant_location *location, iron_matrix3x3_t value);
 void gpu_set_matrix4(struct iron_gpu_constant_location *location, iron_matrix4x4_t value);
-void gpu_set_texture_magnification_filter(struct iron_gpu_texture_unit unit, gpu_texture_filter_t filter);
-void gpu_set_texture_minification_filter(struct iron_gpu_texture_unit unit, gpu_texture_filter_t filter);
-void gpu_set_texture_mipmap_filter(struct iron_gpu_texture_unit unit, gpu_mipmap_filter_t filter);
 void gpu_restore_render_target(void);
 void gpu_set_render_targets(struct iron_gpu_texture **targets, int count);
 void gpu_set_texture(struct iron_gpu_texture_unit *unit, struct iron_gpu_texture *texture);
@@ -297,25 +269,6 @@ typedef enum iron_gpu_compare_mode {
 	IRON_GPU_COMPARE_MODE_GREATER_EQUAL
 } iron_gpu_compare_mode_t;
 
-typedef enum iron_gpu_texture_addressing {
-	IRON_GPU_TEXTURE_ADDRESSING_REPEAT,
-	IRON_GPU_TEXTURE_ADDRESSING_MIRROR,
-	IRON_GPU_TEXTURE_ADDRESSING_CLAMP,
-	IRON_GPU_TEXTURE_ADDRESSING_BORDER
-} iron_gpu_texture_addressing_t;
-
-typedef enum iron_gpu_texture_filter {
-	IRON_GPU_TEXTURE_FILTER_POINT,
-	IRON_GPU_TEXTURE_FILTER_LINEAR,
-	IRON_GPU_TEXTURE_FILTER_ANISOTROPIC
-} iron_gpu_texture_filter_t;
-
-typedef enum iron_gpu_mipmap_filter {
-	IRON_GPU_MIPMAP_FILTER_NONE,
-	IRON_GPU_MIPMAP_FILTER_POINT,
-	IRON_GPU_MIPMAP_FILTER_LINEAR // linear texture filter + linear mip filter -> trilinear filter
-} iron_gpu_mipmap_filter_t;
-
 typedef struct iron_gpu_constant_location {
 	gpu_constant_location_impl_t impl;
 } iron_gpu_constant_location_t;
@@ -357,20 +310,6 @@ typedef struct iron_gpu_pipeline {
 	gpu_pipeline_impl_t impl;
 } iron_gpu_pipeline_t;
 
-typedef struct iron_gpu_sampler_options {
-	iron_gpu_texture_addressing_t u_addressing;
-	iron_gpu_texture_addressing_t v_addressing;
-
-	iron_gpu_texture_filter_t minification_filter;
-	iron_gpu_texture_filter_t magnification_filter;
-	iron_gpu_mipmap_filter_t mipmap_filter;
-
-} iron_gpu_sampler_options_t;
-
-typedef struct iron_gpu_sampler {
-	gpu_sampler_impl_t impl;
-} iron_gpu_sampler_t;
-
 void iron_gpu_pipeline_init(iron_gpu_pipeline_t *pipeline);
 void iron_gpu_internal_pipeline_init(iron_gpu_pipeline_t *pipeline);
 void iron_gpu_pipeline_destroy(iron_gpu_pipeline_t *pipeline);
@@ -380,10 +319,6 @@ iron_gpu_texture_unit_t iron_gpu_pipeline_get_texture_unit(iron_gpu_pipeline_t *
 
 void iron_gpu_shader_init(iron_gpu_shader_t *shader, const void *source, size_t length, iron_gpu_shader_type_t type);
 void iron_gpu_shader_destroy(iron_gpu_shader_t *shader);
-
-void iron_gpu_sampler_options_set_defaults(iron_gpu_sampler_options_t *options);
-void iron_gpu_sampler_init(iron_gpu_sampler_t *sampler, const iron_gpu_sampler_options_t *options);
-void iron_gpu_sampler_destroy(iron_gpu_sampler_t *sampler);
 
 struct iron_gpu_pipeline;
 struct iron_gpu_texture;
@@ -421,7 +356,6 @@ void iron_gpu_command_list_wait_for_execution_to_finish(iron_gpu_command_list_t 
 void iron_gpu_command_list_get_render_target_pixels(iron_gpu_command_list_t *list, struct iron_gpu_texture *render_target, uint8_t *data);
 void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *texture);
 void iron_gpu_command_list_set_texture_from_render_target_depth(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *target);
-void iron_gpu_command_list_set_sampler(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_sampler_t *sampler);
 
 void iron_gpu_render_target_get_pixels(iron_gpu_texture_t *render_target, uint8_t *data);
 

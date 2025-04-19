@@ -88,16 +88,16 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		node_shader_add_texture(kong, "senvmap_radiance", "_envmap_radiance");
 	}
 
-	node_shader_add_shared_sampler(kong, "texpaint");
-	node_shader_write_frag(kong, "texpaint_sample = sample_lod(texpaint, shared_sampler, input.tex_coord, 0.0);");
+	node_shader_add_texture(kong, "texpaint");
+	node_shader_write_frag(kong, "texpaint_sample = sample_lod(texpaint, sampler_linear, input.tex_coord, 0.0);");
 	node_shader_write_frag(kong, "texpaint_opac = texpaint_sample.a;");
 
 	node_shader_write_frag(kong, "basecol = texpaint_sample.rgb * texpaint_opac;");
-	node_shader_add_shared_sampler(kong, "texpaint_nor");
-	node_shader_write_frag(kong, "texpaint_nor_sample = sample_lod(texpaint_nor, shared_sampler, input.tex_coord, 0.0);");
+	node_shader_add_texture(kong, "texpaint_nor");
+	node_shader_write_frag(kong, "texpaint_nor_sample = sample_lod(texpaint_nor, sampler_linear, input.tex_coord, 0.0);");
 	node_shader_write_frag(kong, "ntex = lerp3(ntex, texpaint_nor_sample.rgb, texpaint_opac);");
-	node_shader_add_shared_sampler(kong, "texpaint_pack");
-	node_shader_write_frag(kong, "texpaint_pack_sample = sample_lod(texpaint_pack, shared_sampler, input.tex_coord, 0.0);");
+	node_shader_add_texture(kong, "texpaint_pack");
+	node_shader_write_frag(kong, "texpaint_pack_sample = sample_lod(texpaint_pack, sampler_linear, input.tex_coord, 0.0);");
 	node_shader_write_frag(kong, "occlusion = lerp(occlusion, texpaint_pack_sample.r, texpaint_opac);");
 	node_shader_write_frag(kong, "roughness = lerp(roughness, texpaint_pack_sample.g, texpaint_opac);");
 	node_shader_write_frag(kong, "metallic = lerp(metallic, texpaint_pack_sample.b, texpaint_opac);");
@@ -142,7 +142,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			node_shader_write_frag(kong, "var wreflect: float3 = reflect(-vvec, n);");
 			node_shader_write_frag(kong, "var envlod: float = roughness * float(constants.envmap_num_mipmaps);");
 			node_shader_add_function(frag, str_envmap_equirect);
-			node_shader_write_frag(kong, "var prefiltered_color: float3 = sample_lod(senvmap_radiance, senvmap_radiance_sampler, envmap_equirect(wreflect, constants.envmap_data.x), envlod).rgb;");
+			node_shader_write_frag(kong, "var prefiltered_color: float3 = sample_lod(senvmap_radiance, sampler_linear, envmap_equirect(wreflect, constants.envmap_data.x), envlod).rgb;");
 			// node_shader_add_constant(kong, "shirr: float4[7]", "_envmap_irradiance");
 			node_shader_add_constant(kong, "shirr0: float4", "_envmap_irradiance0");
 			node_shader_add_constant(kong, "shirr1: float4", "_envmap_irradiance1");

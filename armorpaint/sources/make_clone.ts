@@ -3,12 +3,12 @@ function make_clone_run(kong: node_shader_t) {
 	node_shader_add_constant(kong, "clone_delta: float2", "_clone_delta");
 	node_shader_write_frag(kong, "var tex_coord_inp: float2 = gbuffer2[uint2((sp.xy + constants.clone_delta) * gbuffer_size)].ba;");
 
-	node_shader_write_frag(kong, "var texpaint_pack_sample: float3 = sample_lod(texpaint_pack_undo, texpaint_pack_undo_sampler, tex_coord_inp, 0.0).rgb;");
-	let base: string = "sample_lod(texpaint_undo, texpaint_undo_sampler, tex_coord_inp, 0.0).rgb";
+	node_shader_write_frag(kong, "var texpaint_pack_sample: float3 = sample_lod(texpaint_pack_undo, sampler_linear, tex_coord_inp, 0.0).rgb;");
+	let base: string = "sample_lod(texpaint_undo, sampler_linear, tex_coord_inp, 0.0).rgb";
 	let rough: string = "texpaint_pack_sample.g";
 	let met: string = "texpaint_pack_sample.b";
 	let occ: string = "texpaint_pack_sample.r";
-	let nortan: string = "sample_lod(texpaint_nor_undo, texpaint_nor_undo_sampler, tex_coord_inp, 0.0).rgb";
+	let nortan: string = "sample_lod(texpaint_nor_undo, sampler_linear, tex_coord_inp, 0.0).rgb";
 	let height: string = "0.0";
 	let opac: string = "1.0";
 	node_shader_write_frag(kong, "var basecol: float3 = " + base + ";");

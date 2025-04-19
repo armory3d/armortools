@@ -8,13 +8,10 @@ const constants: {
 const tex: tex2d;
 
 #[set(everything)]
-const tex_sampler: sampler;
-
-#[set(everything)]
 const gbuffer0: tex2d;
 
 #[set(everything)]
-const gbuffer0_sampler: sampler;
+const sampler_linear: sampler;
 
 // const blur_weights: float[] = {
 // 	0.132572, 0.125472, 0.106373, 0.08078, 0.05495, 0.033482, 0.018275, 0.008934, 0.003912, 0.001535
@@ -80,10 +77,10 @@ fun get_nor(enc: float2): float3 {
 
 fun ssao_blur_pass_frag(input: vert_out): float {
 
-	var nor: float3 = get_nor(sample_lod(gbuffer0, gbuffer0_sampler, input.tex, 0.0).rg);
+	var nor: float3 = get_nor(sample_lod(gbuffer0, sampler_linear, input.tex, 0.0).rg);
 	// var weight: float = blur_weights[0];
 	var weight: float = 0.132572;
-	var color: float = sample_lod(tex, tex_sampler, input.tex, 0.0).r * weight;
+	var color: float = sample_lod(tex, sampler_linear, input.tex, 0.0).r * weight;
 
 	for (var i: int = 1; i < 8; i += 1) {
 
@@ -112,17 +109,17 @@ fun ssao_blur_pass_frag(input: vert_out): float {
 
 		var posadd: float = i;
 
-		var nor2: float3 = get_nor(sample_lod(gbuffer0, gbuffer0_sampler, input.tex + posadd * constants.dir_inv, 0.0).rg);
+		var nor2: float3 = get_nor(sample_lod(gbuffer0, sampler_linear, input.tex + posadd * constants.dir_inv, 0.0).rg);
 		var influence_factor: float = step(discard_threshold, dot(nor2, nor));
-		var col: float = sample_lod(tex, tex_sampler, input.tex + posadd * constants.dir_inv, 0.0).r;
+		var col: float = sample_lod(tex, sampler_linear, input.tex + posadd * constants.dir_inv, 0.0).r;
 
 		var w: float = blur_weight_i * influence_factor;
 		color += col * w;
 		weight += w;
 
-		nor2 = get_nor(sample_lod(gbuffer0, gbuffer0_sampler, input.tex - posadd * constants.dir_inv, 0.0).rg);
+		nor2 = get_nor(sample_lod(gbuffer0, sampler_linear, input.tex - posadd * constants.dir_inv, 0.0).rg);
 		influence_factor = step(discard_threshold, dot(nor2, nor));
-		col = sample_lod(tex, tex_sampler, input.tex - posadd * constants.dir_inv, 0.0).r;
+		col = sample_lod(tex, sampler_linear, input.tex - posadd * constants.dir_inv, 0.0).r;
 		w = blur_weight_i * influence_factor;
 		color += col * w;
 		weight += w;

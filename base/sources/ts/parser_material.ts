@@ -641,7 +641,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		parser_material_write(parser_material_kong, "var " + store + "_rad: float = " + angle + " * (" + pi + " / 180);");
 		parser_material_write(parser_material_kong, "var " + store + "_x: float = cos(" + store + "_rad);");
 		parser_material_write(parser_material_kong, "var " + store + "_y: float = sin(" + store + "_rad);");
-		return "sample(" + tex_name + ", " + tex_name + "_sampler, + tex_coord + float2(" + store + "_x, " + store + "_y) * " + mask + ").rgb;";
+		return "sample(" + tex_name + ", sampler_linear, + tex_coord + float2(" + store + "_x, " + store + "_y) * " + mask + ").rgb;";
 	}
 	else if (node.type == "BLUR") {
 		if (parser_material_blur_passthrough) {
@@ -659,7 +659,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		parser_material_write(parser_material_kong, "var " + store + "_res: float3 = float3(0.0, 0.0, 0.0);");
 		parser_material_write(parser_material_kong, "for (var i: int = -" + steps + "; i <= " + steps + "; i += 1) {");
 		parser_material_write(parser_material_kong, "for (var j: int = -" + steps + "; j <= " + steps + "; j += 1) {");
-		parser_material_write(parser_material_kong, store + "_res += sample(" + tex_name + ", " + tex_name + "_sampler, tex_coord + float2(i, j) / constants." + tex_name + "_size).rgb;");
+		parser_material_write(parser_material_kong, store + "_res += sample(" + tex_name + ", sampler_linear, tex_coord + float2(i, j) / constants." + tex_name + "_size).rgb;");
 		parser_material_write(parser_material_kong, "}");
 		parser_material_write(parser_material_kong, "}");
 		parser_material_write(parser_material_kong, store + "_res /= (" + steps + " * 2 + 1) * (" + steps + " * 2 + 1);");
@@ -877,11 +877,11 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		let l: any = node.buttons[0].default_value;
 		if (socket == node.outputs[0]) { // Base
 			node_shader_add_texture(parser_material_kong, "texpaint" + l, "_texpaint" + l);
-			return "sample(texpaint" + l + ", texpaint" + l + "_sampler, tex_coord).rgb";
+			return "sample(texpaint" + l + ", sampler_linear, tex_coord).rgb";
 		}
 		else if (socket == node.outputs[5]) { // Normal
 			node_shader_add_texture(parser_material_kong, "texpaint_nor" + l, "_texpaint_nor" + l);
-			return "sample(texpaint_nor" + l + ", texpaint_nor" + l + "_sampler, tex_coord).rgb";
+			return "sample(texpaint_nor" + l + ", sampler_linear, tex_coord).rgb";
 		}
 	}
 	else if (node.type == "MATERIAL") {
@@ -1257,7 +1257,7 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 		node_shader_add_texture(parser_material_kong, "texuvmap", "_texuvmap");
 		// let use_pixel_size: bool = node.buttons[0].default_value == "true";
 		// let pixel_size: f32 = parse_value_input(node.inputs[0]);
-		return "sample_lod(texuvmap, texuvmap_sampler, input.tex_coord, 0.0).r";
+		return "sample_lod(texuvmap, sampler_linear, input.tex_coord, 0.0).r";
 	}
 	else if (node.type == "CAMERA") {
 		if (socket == node.outputs[1]) { // View Z Depth
@@ -1275,30 +1275,30 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 		let l: any = node.buttons[0].default_value;
 		if (socket == node.outputs[1]) { // Opac
 			node_shader_add_texture(parser_material_kong, "texpaint" + l, "_texpaint" + l);
-			return "sample(texpaint" + l + ", texpaint" + l + "_sampler, tex_coord).a";
+			return "sample(texpaint" + l + ", sampler_linear, tex_coord).a";
 		}
 		else if (socket == node.outputs[2]) { // Occ
 			node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
-			return "sample(texpaint_pack" + l + ", texpaint_pack" + l + "_sampler, tex_coord).r";
+			return "sample(texpaint_pack" + l + ", sampler_linear, tex_coord).r";
 		}
 		else if (socket == node.outputs[3]) { // Rough
 			node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
-			return "sample(texpaint_pack" + l + ", texpaint_pack" + l + "_sampler, tex_coord).g";
+			return "sample(texpaint_pack" + l + ", sampler_linear, tex_coord).g";
 		}
 		else if (socket == node.outputs[4]) { // Metal
 			node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
-			return "sample(texpaint_pack" + l + ", texpaint_pack" + l + "_sampler, tex_coord).b";
+			return "sample(texpaint_pack" + l + ", sampler_linear, tex_coord).b";
 		}
 		else if (socket == node.outputs[7]) { // Height
 			node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
-			return "sample(texpaint_pack" + l + ", texpaint_pack" + l + "_sampler, tex_coord).a";
+			return "sample(texpaint_pack" + l + ", sampler_linear, tex_coord).a";
 		}
 	}
 	else if (node.type == "LAYER_MASK") {
 		if (socket == node.outputs[0]) {
 			let l: any = node.buttons[0].default_value;
 			node_shader_add_texture(parser_material_kong, "texpaint" + l, "_texpaint" + l);
-			return "sample(texpaint" + l + ", texpaint" + l + "_sampler, tex_coord).r";
+			return "sample(texpaint" + l + ", sampler_linear, tex_coord).r";
 		}
 	}
 	else if (node.type == "MATERIAL") {
@@ -1513,7 +1513,7 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 		let tex_name: string = "texbake_" + parser_material_node_name(node);
 		node_shader_add_texture(parser_material_kong, "" + tex_name, "_" + tex_name);
 		let store: string = parser_material_store_var_name(node);
-		parser_material_write(parser_material_kong, "var " + store + "_res: float = sample(" + tex_name + ", " + tex_name + "_sampler, tex_coord).r;");
+		parser_material_write(parser_material_kong, "var " + store + "_res: float = sample(" + tex_name + ", sampler_linear, tex_coord).r;");
 		return store + "_res";
 	}
 	else if (node.type == "NORMAL") {
@@ -1893,18 +1893,18 @@ function parser_material_texture_store(node: ui_node_t, tex: bind_tex_t, tex_nam
 
 	if (parser_material_triplanar) {
 		parser_material_write(parser_material_kong, "var " + tex_store + ": float4 = float4(0.0, 0.0, 0.0, 0.0);");
-		parser_material_write(parser_material_kong, "if (tex_coord_blend.x > 0) {" + tex_store + " += sample(" + tex_name + ", " + tex_name + "_sampler, " + uv_name + ".xy) * tex_coord_blend.x; }");
-		parser_material_write(parser_material_kong, "if (tex_coord_blend.y > 0) {" + tex_store + " += sample(" + tex_name + ", " + tex_name + "_sampler, " + uv_name + "1.xy) * tex_coord_blend.y; }");
-		parser_material_write(parser_material_kong, "if (tex_coord_blend.z > 0) {" + tex_store + " += sample(" + tex_name + ", " + tex_name + "_sampler, " + uv_name + "2.xy) * tex_coord_blend.z; }");
+		parser_material_write(parser_material_kong, "if (tex_coord_blend.x > 0) {" + tex_store + " += sample(" + tex_name + ", sampler_linear, " + uv_name + ".xy) * tex_coord_blend.x; }");
+		parser_material_write(parser_material_kong, "if (tex_coord_blend.y > 0) {" + tex_store + " += sample(" + tex_name + ", sampler_linear, " + uv_name + "1.xy) * tex_coord_blend.y; }");
+		parser_material_write(parser_material_kong, "if (tex_coord_blend.z > 0) {" + tex_store + " += sample(" + tex_name + ", sampler_linear, " + uv_name + "2.xy) * tex_coord_blend.z; }");
 	}
 	else {
 		if (parser_material_is_frag) {
-			map_set(parser_material_texture_map, tex_store, "sample(" + tex_name + ", " + tex_name + "_sampler, " + uv_name + ".xy)");
-			parser_material_write(parser_material_kong, "var " + tex_store + ": float4 = sample(" + tex_name + ", " + tex_name + "_sampler, " + uv_name + ".xy);");
+			map_set(parser_material_texture_map, tex_store, "sample(" + tex_name + ", sampler_linear, " + uv_name + ".xy)");
+			parser_material_write(parser_material_kong, "var " + tex_store + ": float4 = sample(" + tex_name + ", sampler_linear, " + uv_name + ".xy);");
 		}
 		else {
-			map_set(parser_material_texture_map, tex_store, "sample_lod(" + tex_name + ", " + tex_name + "_sampler, " + uv_name + ".xy, 0.0)");
-			parser_material_write(parser_material_kong, "var " + tex_store + ": float4 = sample_lod(" + tex_name + ", " + tex_name + "_sampler, " + uv_name + ".xy, 0.0);");
+			map_set(parser_material_texture_map, tex_store, "sample_lod(" + tex_name + ", sampler_linear, " + uv_name + ".xy, 0.0)");
+			parser_material_write(parser_material_kong, "var " + tex_store + ": float4 = sample_lod(" + tex_name + ", sampler_linear, " + uv_name + ".xy, 0.0);");
 		}
 		if (!ends_with(tex.file, ".jpg")) { // Pre-mult alpha
 			parser_material_write(parser_material_kong, tex_store + ".rgb *= " + tex_store + ".a;");
@@ -2006,21 +2006,9 @@ function parser_material_make_bind_tex(tex_name: string, file: string): bind_tex
 		name: tex_name,
 		file: file
 	};
-
 	if (context_raw.texture_filter) {
-		tex.min_filter = "anisotropic";
-		tex.mag_filter = "linear";
-		tex.mipmap_filter = "linear";
 		tex.generate_mipmaps = true;
 	}
-	else {
-		tex.min_filter = "point";
-		tex.mag_filter = "point";
-		tex.mipmap_filter = "no";
-	}
-
-	tex.u_addressing = "repeat";
-	tex.v_addressing = "repeat";
 	return tex;
 }
 

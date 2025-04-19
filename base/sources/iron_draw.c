@@ -358,12 +358,6 @@ void draw_image_buffer(bool end) {
 	gpu_set_vertex_buffer(&image_vertex_buffer);
 	gpu_set_index_buffer(&image_index_buffer);
 	gpu_set_texture(&image_tex_unit, image_last_texture);
-	gpu_set_texture_addressing(image_tex_unit, GPU_TEXTURE_DIRECTION_U, GPU_TEXTURE_ADDRESSING_CLAMP);
-	gpu_set_texture_addressing(image_tex_unit, GPU_TEXTURE_DIRECTION_V, GPU_TEXTURE_ADDRESSING_CLAMP);
-	// gpu_set_texture_mipmap_filter(image_tex_unit, draw_bilinear_filter ? GPU_MIPMAP_FILTER_LINEAR : GPU_MIPMAP_FILTER_NONE);
-	gpu_set_texture_mipmap_filter(image_tex_unit, GPU_MIPMAP_FILTER_NONE);
-	gpu_set_texture_minification_filter(image_tex_unit, draw_bilinear_filter ? GPU_TEXTURE_FILTER_LINEAR : GPU_TEXTURE_FILTER_POINT);
-	gpu_set_texture_magnification_filter(image_tex_unit, draw_bilinear_filter ? GPU_TEXTURE_FILTER_LINEAR : GPU_TEXTURE_FILTER_POINT);
 	iron_gpu_draw_indexed_vertices_from_to(image_buffer_start * 2 * 3, (image_buffer_index - image_buffer_start) * 2 * 3);
 
 	if (end || image_buffer_index + 1 >= DRAW_BUFFER_SIZE) {
@@ -680,11 +674,6 @@ void draw_text_draw_buffer(bool end) {
 	gpu_set_vertex_buffer(&text_vertex_buffer);
 	gpu_set_index_buffer(&text_index_buffer);
 	gpu_set_texture(&text_tex_unit, text_last_texture);
-	gpu_set_texture_addressing(text_tex_unit, GPU_TEXTURE_DIRECTION_U, GPU_TEXTURE_ADDRESSING_CLAMP);
-	gpu_set_texture_addressing(text_tex_unit, GPU_TEXTURE_DIRECTION_V, GPU_TEXTURE_ADDRESSING_CLAMP);
-	gpu_set_texture_mipmap_filter(text_tex_unit, GPU_MIPMAP_FILTER_NONE);
-	gpu_set_texture_minification_filter(text_tex_unit, draw_bilinear_filter ? GPU_TEXTURE_FILTER_LINEAR : GPU_TEXTURE_FILTER_POINT);
-	gpu_set_texture_magnification_filter(text_tex_unit, draw_bilinear_filter ? GPU_TEXTURE_FILTER_LINEAR : GPU_TEXTURE_FILTER_POINT);
 	iron_gpu_draw_indexed_vertices_from_to(text_buffer_start * 2 * 3, (text_buffer_index - text_buffer_start) * 2 * 3);
 
 	if (end || text_buffer_index + 1 >= DRAW_BUFFER_SIZE) {

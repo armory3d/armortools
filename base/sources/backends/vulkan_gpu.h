@@ -140,10 +140,6 @@ typedef struct {
 	int length;
 } gpu_shader_impl_t;
 
-typedef struct iron_gpu_sampler_impl {
-	VkSampler sampler;
-} gpu_sampler_impl_t;
-
 typedef struct {
 	VkImageLayout imageLayout;
 	VkDeviceSize deviceSize;

@@ -58,20 +58,17 @@ function uniforms_set_context_consts(context: shader_context_t, bind_params: str
 
 			if (char_at(tulink, 0) == "$") { // Link to embedded data
 				gpu_set_texture(context._.tex_units[j], map_get(scene_embedded, substring(tulink, 1, tulink.length)));
-				gpu_set_texture_parameters(context._.tex_units[j], tex_addressing_t.REPEAT, tex_addressing_t.REPEAT, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.NONE);
 			}
 			else if (tulink == "_envmap_radiance") {
 				let w: world_data_t = scene_world;
 				if (w != null) {
 					gpu_set_texture(context._.tex_units[j], w._.radiance);
-					gpu_set_texture_parameters(context._.tex_units[j], tex_addressing_t.REPEAT, tex_addressing_t.REPEAT, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.LINEAR);
 				}
 			}
 			else if (tulink == "_envmap") {
 				let w: world_data_t = scene_world;
 				if (w != null) {
 					gpu_set_texture(context._.tex_units[j], w._.envmap);
-					gpu_set_texture_parameters(context._.tex_units[j], tex_addressing_t.REPEAT, tex_addressing_t.REPEAT, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.NONE);
 				}
 			}
 		}
@@ -101,7 +98,6 @@ function uniforms_set_obj_consts(context: shader_context_t, object: object_t) {
 					ends_with(tu.link, "_depth") ?
 						gpu_set_texture_depth(context._.tex_units[j], image) :
 						gpu_set_texture(context._.tex_units[j], image);
-					gpu_set_texture_parameters(context._.tex_units[j], tex_addressing_t.REPEAT, tex_addressing_t.REPEAT, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.NONE);
 				}
 			}
 		}
@@ -114,40 +110,13 @@ function uniforms_bind_render_target(rt: render_target_t, context: shader_contex
 	}
 
 	let tus: tex_unit_t[] = context.texture_units;
-
 	for (let j: i32 = 0; j < tus.length; ++j) { // Set texture
 		if (sampler_id == tus[j].name) {
-
 			if (attach_depth) {
 				gpu_set_texture_depth(context._.tex_units[j], rt._image); // sampler2D
 			}
 			else {
 				gpu_set_texture(context._.tex_units[j], rt._image); // sampler2D
-			}
-
-			if (rt.mipmaps) {
-				gpu_set_texture_parameters(context._.tex_units[j], tex_addressing_t.CLAMP, tex_addressing_t.CLAMP, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.LINEAR);
-				continue;
-			}
-
-			if (starts_with(rt.name, "bloom")) {
-				// Use bilinear filter for bloom mips to get correct blur
-				gpu_set_texture_parameters(context._.tex_units[j], tex_addressing_t.CLAMP, tex_addressing_t.CLAMP, tex_filter_t.LINEAR, tex_filter_t.LINEAR, mip_map_filter_t.NONE);
-				continue;
-			}
-
-			if (attach_depth) {
-				gpu_set_texture_parameters(context._.tex_units[j], tex_addressing_t.CLAMP, tex_addressing_t.CLAMP, tex_filter_t.POINT, tex_filter_t.POINT, mip_map_filter_t.NONE);
-				continue;
-			}
-
-			// No filtering when sampling render targets
-			let oc: _shader_override_t = context._.override_context;
-			let allow_params: bool = oc == null || oc.shared_sampler == null || oc.shared_sampler == sampler_id;
-			if (allow_params) {
-				let addressing: tex_addressing_t = (oc != null && oc.addressing == "repeat") ? tex_addressing_t.REPEAT : tex_addressing_t.CLAMP;
-				let filter: tex_filter_t = (oc != null && oc.filter == "point") ? tex_filter_t.POINT : tex_filter_t.LINEAR;
-				gpu_set_texture_parameters(context._.tex_units[j], addressing, addressing, filter, filter, mip_map_filter_t.NONE);
 			}
 		}
 	}
@@ -592,8 +561,6 @@ function uniforms_set_material_consts(context: shader_context_t, material_contex
 				let sname: string = context.texture_units[j].name;
 				if (mname == sname) {
 					gpu_set_texture(context._.tex_units[j], material_context._.textures[i]);
-					// After texture sampler have been assigned, set texture parameters
-					material_context_set_tex_params(material_context, i, context, j);
 					break;
 				}
 			}

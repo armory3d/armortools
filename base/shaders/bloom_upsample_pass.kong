@@ -10,7 +10,7 @@ const constants: {
 const tex: tex2d;
 
 #[set(everything)]
-const tex_sampler: sampler;
+const sampler_linear: sampler;
 
 struct vert_in {
 	pos: float2;
@@ -35,14 +35,14 @@ fun upsample_dual_filter(tex: tex2d, tex_coord: float2, texel_size: float2): flo
 	var delta: float2 = texel_size * constants.sample_scale;
 
 	var result: float3;
-	result  = sample_lod(tex, tex_sampler, tex_coord + float2(-delta.x * 2.0, 0.0), 0.0).rgb;
-	result += sample_lod(tex, tex_sampler, tex_coord + float2(-delta.x, delta.y),   0.0).rgb * 2.0;
-	result += sample_lod(tex, tex_sampler, tex_coord + float2(0.0, delta.y * 2.0),  0.0).rgb;
-	result += sample_lod(tex, tex_sampler, tex_coord + delta,                     0.0).rgb * 2.0;
-	result += sample_lod(tex, tex_sampler, tex_coord + float2(delta.x * 2.0, 0.0),  0.0).rgb;
-	result += sample_lod(tex, tex_sampler, tex_coord + float2(delta.x, -delta.y),   0.0).rgb * 2.0;
-	result += sample_lod(tex, tex_sampler, tex_coord + float2(0.0, -delta.y * 2.0), 0.0).rgb;
-	result += sample_lod(tex, tex_sampler, tex_coord - delta,                     0.0).rgb * 2.0;
+	result  = sample_lod(tex, sampler_linear, tex_coord + float2(-delta.x * 2.0, 0.0), 0.0).rgb;
+	result += sample_lod(tex, sampler_linear, tex_coord + float2(-delta.x, delta.y),   0.0).rgb * 2.0;
+	result += sample_lod(tex, sampler_linear, tex_coord + float2(0.0, delta.y * 2.0),  0.0).rgb;
+	result += sample_lod(tex, sampler_linear, tex_coord + delta,                     0.0).rgb * 2.0;
+	result += sample_lod(tex, sampler_linear, tex_coord + float2(delta.x * 2.0, 0.0),  0.0).rgb;
+	result += sample_lod(tex, sampler_linear, tex_coord + float2(delta.x, -delta.y),   0.0).rgb * 2.0;
+	result += sample_lod(tex, sampler_linear, tex_coord + float2(0.0, -delta.y * 2.0), 0.0).rgb;
+	result += sample_lod(tex, sampler_linear, tex_coord - delta,                     0.0).rgb * 2.0;
 
 	return result * (1.0 / 12.0);
 }

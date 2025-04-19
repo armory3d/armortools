@@ -4,7 +4,6 @@ type node_shader_t = {
 	ins?: string[];
 	outs?: string[];
 	frag_out?: string;
-	shared_samplers?: string[];
 	constants?: string[];
 	textures?: string[];
 	functions?: map_t<string, string>;
@@ -43,7 +42,6 @@ function node_shader_create(context: node_shader_context_t): node_shader_t {
 	raw.ins = [];
 	raw.outs = [];
 	raw.frag_out = "float4";
-	raw.shared_samplers = [];
 	raw.constants = [];
 	raw.textures = [];
 	raw.functions = map_create();
@@ -99,17 +97,6 @@ function node_shader_add_texture(raw: node_shader_t, s: string, link: string = n
 		let utype: string = ar[1];
 		array_push(raw.textures, s);
 		node_shader_context_add_texture_unit(raw.context, utype, uname, link, vert);
-	}
-}
-
-function node_shader_add_shared_sampler(raw: node_shader_t, s: string) {
-	// mytex: tex2d
-	if (array_index_of(raw.shared_samplers, s) == -1) {
-		array_push(raw.shared_samplers, s);
-		let ar: string[] = string_split(s, ": ");
-		let uname: string = ar[0];
-		let utype: string = ar[1];
-		node_shader_context_add_texture_unit(raw.context, utype, uname, null, false);
 	}
 }
 
@@ -209,18 +196,11 @@ function node_shader_get(raw: node_shader_t): string {
 		let a: string = raw.textures[i];
 		s += "#[set(everything)]\n";
 		s += "const " + a + ": tex2d;\n";
-		s += "#[set(everything)]\n";
-		s += "const " + a + "_sampler: sampler;\n\n";
 	}
 
-	for (let i: i32 = 0; i < raw.shared_samplers.length; ++i) {
-		let a: string = raw.shared_samplers[i];
+	if (raw.textures.length > 0) {
 		s += "#[set(everything)]\n";
-		s += "const " + a + ": tex2d;\n";
-	}
-	if (raw.shared_samplers.length > 0) {
-		s += "#[set(everything)]\n";
-		s += "const shared_sampler: sampler;\n\n";
+		s += "const sampler_linear: sampler;\n\n";
 	}
 
 	let keys: string[] = map_keys(raw.functions);

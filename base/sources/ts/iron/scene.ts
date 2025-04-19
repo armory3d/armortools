@@ -553,11 +553,6 @@ type bind_const_t = {
 type bind_tex_t = {
 	name?: string;
 	file?: string;
-	u_addressing?: string;
-	v_addressing?: string;
-	min_filter?: string;
-	mag_filter?: string;
-	mipmap_filter?: string;
 	generate_mipmaps?: bool;
 	mipmaps?: string[]; // Reference image names
 };
@@ -602,14 +597,7 @@ type shader_context_runtime_t = {
 	pipe_state?: iron_gpu_pipeline_t;
 	constants?: iron_gpu_constant_location_t[];
 	tex_units?: iron_gpu_texture_unit_t[];
-	override_context?: _shader_override_t;
 	structure?: iron_gpu_vertex_structure_t;
-};
-
-type _shader_override_t = {
-	addressing?: string;
-	filter?: string;
-	shared_sampler?: string;
 };
 
 type vertex_element_t = {

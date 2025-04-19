@@ -25,10 +25,6 @@ typedef struct {
 	int vertexOffset;
 } gpu_constant_location_impl_t;
 
-typedef struct iron_gpu_sampler_impl {
-	void *sampler;
-} gpu_sampler_impl_t;
-
 typedef struct {
 	char name[1024];
 	void *mtlFunction;

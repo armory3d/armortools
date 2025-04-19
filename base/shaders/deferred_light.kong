@@ -20,37 +20,22 @@ const constants: {
 const gbufferD: tex2d;
 
 #[set(everything)]
-const gbufferD_sampler: sampler;
-
-#[set(everything)]
 const gbuffer0: tex2d;
-
-#[set(everything)]
-const gbuffer0_sampler: sampler;
 
 #[set(everything)]
 const gbuffer1: tex2d;
 
 #[set(everything)]
-const gbuffer1_sampler: sampler;
-
-#[set(everything)]
 const senvmap_brdf: tex2d;
-
-#[set(everything)]
-const senvmap_brdf_sampler: sampler;
 
 #[set(everything)]
 const senvmap_radiance: tex2d;
 
 #[set(everything)]
-const senvmap_radiance_sampler: sampler;
-
-#[set(everything)]
 const ssaotex: tex2d;
 
 #[set(everything)]
-const ssaotex_sampler: sampler;
+const sampler_linear: sampler;
 
 const PI: float = 3.14159265358979;
 const PI2: float = 6.28318530718;
@@ -184,7 +169,7 @@ fun envmap_equirect(normal: float3, angle: float): float2 {
 
 fun deferred_light_frag(input: vert_out): float4 {
 	// normal.xy, roughness, metallic/matid
-	var g0: float4 = sample_lod(gbuffer0, gbuffer0_sampler, input.tex, 0.0);
+	var g0: float4 = sample_lod(gbuffer0, sampler_linear, input.tex, 0.0);
 
 	var n: float3;
 	n.z = 1.0 - abs(g0.x) - abs(g0.y);
@@ -203,12 +188,12 @@ fun deferred_light_frag(input: vert_out): float4 {
 	matid = uint((g0.a / 0.06250047610269868710814625956118106842041015625) + (1.0 / 65535.0));
 	metallic = clamp((-0.06250047610269868710814625956118106842041015625 * float(matid) + g0.a) / 0.062485207147583624058737396240234375, 0.0, 1.0);
 
-	var g1: float4 = sample_lod(gbuffer1, gbuffer1_sampler, input.tex, 0.0); // basecolor.rgb, occ
+	var g1: float4 = sample_lod(gbuffer1, sampler_linear, input.tex, 0.0); // basecolor.rgb, occ
 	var occ: float = g1.a;
 	var albedo: float3 = surface_albedo(g1.rgb, metallic);
 	var f0: float3 = surface_f0(g1.rgb, metallic);
 
-	var depth: float = sample_lod(gbufferD, gbufferD_sampler, input.tex, 0.0).r * 2.0 - 1.0;
+	var depth: float = sample_lod(gbufferD, sampler_linear, input.tex, 0.0).r * 2.0 - 1.0;
 	var p: float3 = get_pos(constants.eye, constants.eye_look, normalize(input.view_ray), depth, constants.camera_proj);
 	var v: float3 = normalize(constants.eye - p);
 	var dotnv: float = max(0.0, dot(n, v));
@@ -227,7 +212,7 @@ fun deferred_light_frag(input: vert_out): float4 {
 
 	var reflection_world: float3 = reflect(-v, n);
 	var lod: float = mip_from_roughness(roughness, float(constants.envmap_num_mipmaps));
-	var prefiltered_color: float3 = sample_lod(senvmap_radiance, senvmap_radiance_sampler, envmap_equirect(reflection_world, constants.envmap_data.x), lod).rgb;
+	var prefiltered_color: float3 = sample_lod(senvmap_radiance, sampler_linear, envmap_equirect(reflection_world, constants.envmap_data.x), lod).rgb;
 
 	envl.rgb = envl.rgb * albedo;
 	// Indirect specular
@@ -238,7 +223,7 @@ fun deferred_light_frag(input: vert_out): float4 {
 
 	var color: float4;
 	color.rgb = envl;
-	color.rgb = color.rgb * sample_lod(ssaotex, ssaotex_sampler, input.tex, 0.0).r;
+	color.rgb = color.rgb * sample_lod(ssaotex, sampler_linear, input.tex, 0.0).r;
 
 	if (matid == uint(1)) { // Emission
 		color.rgb += g1.rgb; // materialid

@@ -8,7 +8,7 @@ const constants: {
 const radiance: tex2d;
 
 #[set(everything)]
-const radiance_sampler: sampler;
+const sampler_linear: sampler;
 
 const PI: float = 3.14159265358979;
 const PI2: float = 6.28318530718;
@@ -70,7 +70,7 @@ fun prefilter_envmap_frag(input: vert_out): float4 {
 	var n: float3 = reverse_equirect(input.tex);
 	for (var i: uint = 0; i < samples; i += 1) {
 		var dir: float3 = normalize(lerp3(n, cos_weighted_hemisphere_direction(n, input.tex, i), constants.params.x));
-		color.rgb += sample(radiance, radiance_sampler, equirect(dir)).rgb;
+		color.rgb += sample(radiance, sampler_linear, equirect(dir)).rgb;
 	}
 	color.rgb /= float(samples);
 	// color.rgb = pow(color.rgb, float3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));

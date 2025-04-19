@@ -1,8 +1,9 @@
+
 #[set(everything)]
 const tex: tex2d;
 
 #[set(everything)]
-const tex_sampler: sampler;
+const sampler_linear: sampler;
 
 struct vert_in {
 	pos: float2;
@@ -22,7 +23,7 @@ fun copy_pass_vert(input: vert_in): vert_out {
 }
 
 fun copy_pass_frag(input: vert_out): float4 {
-	var color: float4 = sample_lod(tex, tex_sampler, input.tex, 0.0);
+	var color: float4 = sample_lod(tex, sampler_linear, input.tex, 0.0);
 	return color;
 }
 

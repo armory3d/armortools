@@ -9,7 +9,7 @@ const constants: {
 const tex: tex2d;
 
 #[set(everything)]
-const tex_sampler: sampler;
+const sampler_linear: sampler;
 
 struct vert_in {
 	pos: float2;
@@ -36,11 +36,11 @@ fun downsample_dual_filter(tex: tex2d, tex_coord: float2, texel_size: float2): f
 	var delta: float3 = float3(texel_size.xy, texel_size.x) * float3(0.5, 0.5, -0.5);
 
 	var result: float3;
-	result  = sample_lod(tex, tex_sampler, tex_coord,            0.0).rgb * 4.0;
-	result += sample_lod(tex, tex_sampler, tex_coord - delta.xy, 0.0).rgb;
-	result += sample_lod(tex, tex_sampler, tex_coord - delta.zy, 0.0).rgb;
-	result += sample_lod(tex, tex_sampler, tex_coord + delta.zy, 0.0).rgb;
-	result += sample_lod(tex, tex_sampler, tex_coord + delta.xy, 0.0).rgb;
+	result  = sample_lod(tex, sampler_linear, tex_coord,            0.0).rgb * 4.0;
+	result += sample_lod(tex, sampler_linear, tex_coord - delta.xy, 0.0).rgb;
+	result += sample_lod(tex, sampler_linear, tex_coord - delta.zy, 0.0).rgb;
+	result += sample_lod(tex, sampler_linear, tex_coord + delta.zy, 0.0).rgb;
+	result += sample_lod(tex, sampler_linear, tex_coord + delta.xy, 0.0).rgb;
 
 	return result * (1.0 / 8.0);
 }

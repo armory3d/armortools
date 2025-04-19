@@ -68,13 +68,13 @@ function make_sculpt_run(data: material_t, matcon: material_context_t): node_sha
 	node_shader_write_frag(kong, "var str: float = clamp((constants.brush_radius - dist) * constants.brush_hardness * 400.0, 0.0, 1.0) * opacity;");
 
 	node_shader_add_texture(kong, "texpaint_undo", "_texpaint_undo");
-	node_shader_write_frag(kong, "var sample_undo: float4 = sample_lod(texpaint_undo, texpaint_undo_sampler, input.tex_coord, 0.0);");
+	node_shader_write_frag(kong, "var sample_undo: float4 = sample_lod(texpaint_undo, sampler_linear, input.tex_coord, 0.0);");
 
 	node_shader_write_frag(kong, "if (sample_undo.r == 0 && sample_undo.g == 0 && sample_undo.b == 0) { discard; }");
 
 	node_shader_add_function(kong, str_octahedron_wrap);
 	node_shader_add_texture(kong, "gbuffer0_undo");
-	node_shader_write_frag(kong, "var g0_undo: float2 = sample_lod(gbuffer0_undo, gbuffer0_undo_sampler, constants.inp.xy, 0.0).rg;");
+	node_shader_write_frag(kong, "var g0_undo: float2 = sample_lod(gbuffer0_undo, sampler_linear, constants.inp.xy, 0.0).rg;");
 	node_shader_write_frag(kong, "var wn: float3;");
 	node_shader_write_frag(kong, "wn.z = 1.0 - abs(g0_undo.x) - abs(g0_undo.y);");
 	// node_shader_write_frag(kong, "wn.xy = wn.z >= 0.0 ? g0_undo.xy : octahedron_wrap(g0_undo.xy);");

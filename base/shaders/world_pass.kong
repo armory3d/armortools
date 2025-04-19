@@ -9,7 +9,7 @@ const constants: {
 const envmap: tex2d;
 
 #[set(everything)]
-const envmap_sampler: sampler;
+const sampler_linear: sampler;
 
 const PI: float = 3.1415926535;
 const PI2: float = 6.283185307;
@@ -40,7 +40,7 @@ fun envmap_equirect(normal: float3, angle: float): float2 {
 fun world_pass_frag(input: vert_out): float4 {
 	var n: float3 = normalize(input.nor);
 	var color: float4;
-	color.rgb = sample(envmap, envmap_sampler, envmap_equirect(-n, constants.envmap_data_world.x)).rgb * constants.envmap_data_world.w;
+	color.rgb = sample(envmap, sampler_linear, envmap_equirect(-n, constants.envmap_data_world.x)).rgb * constants.envmap_data_world.w;
 	color.a = 0.0; // Mark as non-opaque
 	return color;
 }

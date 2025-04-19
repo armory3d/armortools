@@ -1257,14 +1257,6 @@ iron_gpu_texture_unit_t *gpu_get_texture_unit(iron_gpu_pipeline_t *pipeline, str
 	return unit_copy;
 }
 
-void gpu_set_texture_parameters(iron_gpu_texture_unit_t *unit, i32 u_addr, i32 v_addr, i32 min_filter, i32 mag_filter, i32 mip_filter) {
-	gpu_set_texture_addressing(*unit, GPU_TEXTURE_DIRECTION_U, (gpu_texture_addressing_t)u_addr);
-	gpu_set_texture_addressing(*unit, GPU_TEXTURE_DIRECTION_V, (gpu_texture_addressing_t)v_addr);
-	gpu_set_texture_minification_filter(*unit, (gpu_texture_filter_t)min_filter);
-	gpu_set_texture_magnification_filter(*unit, (gpu_texture_filter_t)mag_filter);
-	gpu_set_texture_mipmap_filter(*unit, (gpu_mipmap_filter_t)mip_filter);
-}
-
 void iron_set_window_title(string_t *title) {
 	iron_window_set_title(title);
 	#if defined(IRON_IOS) || defined(IRON_ANDROID)

@@ -8,7 +8,7 @@ const constants: {
 const tex: tex2d;
 
 #[set(everything)]
-const tex_sampler: sampler;
+const sampler_linear: sampler;
 
 struct vert_in {
 	pos: float3;
@@ -31,7 +31,7 @@ fun draw_image_vert(input: vert_in): vert_out {
 }
 
 fun draw_image_frag(input: vert_out): float4 {
-	var texcolor: float4 = sample(tex, tex_sampler, input.tex) * input.col;
+	var texcolor: float4 = sample(tex, sampler_linear, input.tex) * input.col;
 	texcolor.rgb = texcolor.rgb * texcolor.a * input.col.a;
 	return texcolor;
 }

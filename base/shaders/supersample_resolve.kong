@@ -8,7 +8,7 @@ const constants: {
 const tex: tex2d;
 
 #[set(everything)]
-const tex_sampler: sampler;
+const sampler_linear: sampler;
 
 struct vert_in {
 	pos: float2;
@@ -30,15 +30,15 @@ fun supersample_resolve_vert(input: vert_in): vert_out {
 fun supersample_resolve_frag(input: vert_out): float4 {
 	// 4X resolve
 	var tex_step: float2 = constants.screen_size_inv / 4.0;
-	var col: float4 = sample(tex, tex_sampler, input.tex);
-	col += sample(tex, tex_sampler, input.tex + float2(1.5, 0.0) * tex_step);
-	col += sample(tex, tex_sampler, input.tex + float2(-1.5, 0.0) * tex_step);
-	col += sample(tex, tex_sampler, input.tex + float2(0.0, 1.5) * tex_step);
-	col += sample(tex, tex_sampler, input.tex + float2(0.0, -1.5) * tex_step);
-	col += sample(tex, tex_sampler, input.tex + float2(1.5, 1.5) * tex_step);
-	col += sample(tex, tex_sampler, input.tex + float2(-1.5, -1.5) * tex_step);
-	col += sample(tex, tex_sampler, input.tex + float2(1.5, -1.5) * tex_step);
-	col += sample(tex, tex_sampler, input.tex + float2(-1.5, 1.5) * tex_step);
+	var col: float4 = sample(tex, sampler_linear, input.tex);
+	col += sample(tex, sampler_linear, input.tex + float2(1.5, 0.0) * tex_step);
+	col += sample(tex, sampler_linear, input.tex + float2(-1.5, 0.0) * tex_step);
+	col += sample(tex, sampler_linear, input.tex + float2(0.0, 1.5) * tex_step);
+	col += sample(tex, sampler_linear, input.tex + float2(0.0, -1.5) * tex_step);
+	col += sample(tex, sampler_linear, input.tex + float2(1.5, 1.5) * tex_step);
+	col += sample(tex, sampler_linear, input.tex + float2(-1.5, -1.5) * tex_step);
+	col += sample(tex, sampler_linear, input.tex + float2(1.5, -1.5) * tex_step);
+	col += sample(tex, sampler_linear, input.tex + float2(-1.5, 1.5) * tex_step);
 	return col / 9.0;
 }
 

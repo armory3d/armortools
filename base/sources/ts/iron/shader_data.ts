@@ -317,36 +317,6 @@ function shader_context_get_blend_fac(s: string): blend_factor_t {
 	return blend_factor_t.BLEND_ONE;
 }
 
-function shader_context_get_tex_addresing(s: string): tex_addressing_t {
-	if (s == "repeat") {
-		return tex_addressing_t.REPEAT;
-	}
-	if (s == "mirror") {
-		return tex_addressing_t.MIRROR;
-	}
-	return tex_addressing_t.CLAMP;
-}
-
-function shader_context_get_tex_filter(s: string): tex_filter_t {
-	if (s == "point") {
-		return tex_filter_t.POINT;
-	}
-	if (s == "linear") {
-		return tex_filter_t.LINEAR;
-	}
-	return tex_filter_t.ANISOTROPIC;
-}
-
-function shader_context_get_mipmap_filter(s: string): mip_map_filter_t {
-	if (s == "no") {
-		return mip_map_filter_t.NONE;
-	}
-	if (s == "point") {
-		return mip_map_filter_t.POINT;
-	}
-	return mip_map_filter_t.LINEAR;
-}
-
 function shader_context_get_tex_format(s: string): tex_format_t {
 	if (s == "RGBA32") {
 		return tex_format_t.RGBA32;
@@ -387,15 +357,4 @@ function shader_context_add_tex(raw: shader_context_t, tu: tex_unit_t, i: i32) {
 	}
 
 	array_push(raw._.tex_units, unit);
-}
-
-function shader_context_set_tex_params(raw: shader_context_t, unit_index: i32, tex: bind_tex_t) {
-	// This function is called for samplers set using material context
-	let unit: any = raw._.tex_units[unit_index];
-	gpu_set_texture_parameters(unit,
-		tex.u_addressing == null ? tex_addressing_t.REPEAT : shader_context_get_tex_addresing(tex.u_addressing),
-		tex.v_addressing == null ? tex_addressing_t.REPEAT : shader_context_get_tex_addresing(tex.v_addressing),
-		tex.min_filter == null ? tex_filter_t.LINEAR : shader_context_get_tex_filter(tex.min_filter),
-		tex.mag_filter == null ? tex_filter_t.LINEAR : shader_context_get_tex_filter(tex.mag_filter),
-		tex.mipmap_filter == null ? mip_map_filter_t.NONE : shader_context_get_mipmap_filter(tex.mipmap_filter));
 }

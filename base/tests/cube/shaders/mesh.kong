@@ -3,7 +3,7 @@
 const my_texture: tex2d;
 
 #[set(everything)]
-const my_texture_sampler: sampler;
+const sampler_linear: sampler;
 
 #[set(everything)]
 const constants: {
@@ -28,7 +28,7 @@ fun mesh_vert(input: vert_in): vert_out {
 }
 
 fun mesh_frag(input: vert_out): float4 {
-	return sample(my_texture, my_texture_sampler, input.tex);
+	return sample(my_texture, sampler_linear, input.tex);
 }
 
 #[pipe]

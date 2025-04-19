@@ -65,7 +65,7 @@ fun tex_voronoi(x: float3): float4 { \
 	for (var i: int = -1; i <= 1; i += 1) { \
 		var b: float3 = float3(float(i), float(j), float(k)); \
 		var pb: float3 = p + b; \
-		var r: float3 = float3(b) - f + sample(snoise256, snoise256_sampler, (pb.xy + float2(3.0, 1.0) * pb.z + 0.5) / 256.0).xyz; \
+		var r: float3 = float3(b) - f + sample(snoise256, sampler_linear, (pb.xy + float2(3.0, 1.0) * pb.z + 0.5) / 256.0).xyz; \
 		var d: float = dot(r, r); \
 		if (d < res) { \
 			id = dot(p + b, float3(1.0, 57.0, 113.0)); \
@@ -362,7 +362,7 @@ fun envmap_equirect(normal: float3, angle: float): float2 { \
 
 let str_get_pos_nor_from_depth: string = "\
 fun get_pos_from_depth(uv: float2, invVP: flaot4x4): float3 { \
-	var depth: float = sample_lod(gbufferD, gbufferD_sampler, float2(uv.x, 1.0 - uv.y), 0.0).r; \
+	var depth: float = sample_lod(gbufferD, sampler_linear, float2(uv.x, 1.0 - uv.y), 0.0).r; \
 	var wpos: float4 = float4(uv * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0); \
 	wpos = invVP * wpos; \
 	return wpos.xyz / wpos.w; \

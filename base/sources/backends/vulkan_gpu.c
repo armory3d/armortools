@@ -33,13 +33,6 @@ static iron_gpu_texture_t *vulkan_textures[16] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
 
-static VkSampler vulkan_samplers[16] = {
-	VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE,
-	VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE,
-    VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE,
-	VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_NULL_HANDLE
-};
-
 static iron_gpu_texture_t *current_render_targets[8] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
@@ -2060,12 +2053,6 @@ void iron_gpu_command_list_wait_for_execution_to_finish(iron_gpu_command_list_t 
 	vkWaitForFences(vk_ctx.device, 1, &list->impl.fence, VK_TRUE, UINT64_MAX);
 }
 
-void iron_gpu_command_list_set_sampler(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_sampler_t *sampler) {
-	if (unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT] >= 0) {
-		vulkan_samplers[unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT]] = sampler->impl.sampler;
-	}
-}
-
 void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *texture) {
 	if (unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT] >= 0) {
 		texture->impl.stage = unit.stages[IRON_GPU_SHADER_TYPE_FRAGMENT];
@@ -2713,70 +2700,6 @@ void iron_gpu_shader_init(iron_gpu_shader_t *shader, const void *source, size_t 
 void iron_gpu_shader_destroy(iron_gpu_shader_t *shader) {
 	free(shader->impl.source);
 	shader->impl.source = NULL;
-}
-
-static VkSamplerAddressMode convert_addressing(iron_gpu_texture_addressing_t mode) {
-	switch (mode) {
-	case IRON_GPU_TEXTURE_ADDRESSING_REPEAT:
-		return VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	case IRON_GPU_TEXTURE_ADDRESSING_BORDER:
-		return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-	case IRON_GPU_TEXTURE_ADDRESSING_CLAMP:
-		return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-	case IRON_GPU_TEXTURE_ADDRESSING_MIRROR:
-		return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
-	default:
-		return VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	}
-}
-
-static VkSamplerMipmapMode convert_mipmap_mode(iron_gpu_mipmap_filter_t filter) {
-	switch (filter) {
-	case IRON_GPU_MIPMAP_FILTER_NONE:
-	case IRON_GPU_MIPMAP_FILTER_POINT:
-		return VK_SAMPLER_MIPMAP_MODE_NEAREST;
-	case IRON_GPU_MIPMAP_FILTER_LINEAR:
-		return VK_SAMPLER_MIPMAP_MODE_LINEAR;
-	default:
-		return VK_SAMPLER_MIPMAP_MODE_NEAREST;
-	}
-}
-
-static VkFilter convert_texture_filter(iron_gpu_texture_filter_t filter) {
-	switch (filter) {
-	case IRON_GPU_TEXTURE_FILTER_POINT:
-		return VK_FILTER_NEAREST;
-	case IRON_GPU_TEXTURE_FILTER_LINEAR:
-		return VK_FILTER_LINEAR;
-	case IRON_GPU_TEXTURE_FILTER_ANISOTROPIC:
-		return VK_FILTER_LINEAR; // ?
-	default:
-		return VK_FILTER_NEAREST;
-	}
-}
-
-void iron_gpu_sampler_init(iron_gpu_sampler_t *sampler, const iron_gpu_sampler_options_t *options) {
-	VkSamplerCreateInfo info = {
-		.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
-		.pNext = NULL,
-		.flags = 0,
-		.addressModeU = convert_addressing(options->u_addressing),
-		.addressModeV = convert_addressing(options->v_addressing),
-		.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-		.mipmapMode = convert_mipmap_mode(options->mipmap_filter),
-		.magFilter = convert_texture_filter(options->magnification_filter),
-		.minFilter = convert_texture_filter(options->minification_filter),
-		.anisotropyEnable = (options->magnification_filter == IRON_GPU_TEXTURE_FILTER_ANISOTROPIC || options->minification_filter == IRON_GPU_TEXTURE_FILTER_ANISOTROPIC),
-		.maxAnisotropy = 1,
-		.maxLod = 32,
-		.minLod = 0,
-	};
-
-	vkCreateSampler(vk_ctx.device, &info, NULL, &sampler->impl.sampler);
-}
-
-void iron_gpu_sampler_destroy(iron_gpu_sampler_t *sampler) {
-	vkDestroySampler(vk_ctx.device, sampler->impl.sampler, NULL);
 }
 
 static void prepare_texture_image(uint8_t *tex_colors, uint32_t width, uint32_t height, gpu_texture_impl_t *tex_obj, VkImageTiling tiling,
