@@ -9,6 +9,7 @@ mat3_t mat3_create(float _00, float _10, float _20,
 mat3_t mat3_identity();
 mat3_t mat3_translation(float x, float y);
 mat3_t mat3_rotation(float alpha);
+mat3_t mat3_scale(mat3_t m, vec4_t v);
 mat3_t mat3_set_from4(mat4_t m4);
 mat3_t mat3_multmat(mat3_t a, mat3_t b);
 mat3_t mat3_nan();

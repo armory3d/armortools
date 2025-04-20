@@ -68,6 +68,7 @@ extern WGPUDevice device;
 iron_gpu_buffer_t *iron_gpu_internal_current_vertex_buffer = NULL;
 
 void iron_gpu_vertex_buffer_init(iron_gpu_buffer_t *buffer, int count, iron_gpu_vertex_structure_t *structure, bool gpuMemory) {
+	buffer->myCount = count;
 	buffer->impl.count = count;
 	buffer->impl.stride = 0;
 	for (int i = 0; i < structure->size; ++i) {

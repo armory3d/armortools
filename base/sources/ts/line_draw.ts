@@ -243,7 +243,9 @@ function line_draw_end(overlay: bool = false) {
 		color_get_gb(line_draw_color) / 255,
 		color_get_bb(line_draw_color) / 255
 	);
-	gpu_draw_indexed_vertices(0, line_draw_lines * 6);
+	////
+	// gpu_draw_indexed_vertices(0, line_draw_lines * 6);
+	////
 }
 
 let _shape_draw_sphere_vb: iron_gpu_buffer_t = null;

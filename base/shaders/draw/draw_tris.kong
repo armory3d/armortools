@@ -1,0 +1,45 @@
+
+#[set(everything)]
+const constants: {
+	P: float4x4;
+	pos0: float2;
+	pos1: float2;
+	pos2: float2;
+	col: float4;
+};
+
+struct vert_in {
+	pos: float2;
+}
+
+struct vert_out {
+	pos: float4;
+	col: float4;
+}
+
+fun draw_tris_vert(input: vert_in): vert_out {
+	var output: vert_out;
+	if (vertex_id() == 0) {
+		output.pos = float4(constants.pos0, 0.0, 1.0);
+	}
+	else if (vertex_id() == 1) {
+		output.pos = float4(constants.pos1, 0.0, 1.0);
+	}
+	else if (vertex_id() == 2) {
+		output.pos = float4(constants.pos2, 0.0, 1.0);
+	}
+	output.pos.xy = output.pos.xy * 2.0 - 1.0;
+	output.pos.y = -output.pos.y;
+	output.col = constants.col;
+	return output;
+}
+
+fun draw_tris_frag(input: vert_out): float4 {
+	return input.col;
+}
+
+#[pipe]
+struct pipe {
+	vertex = draw_tris_vert;
+	fragment = draw_tris_frag;
+}

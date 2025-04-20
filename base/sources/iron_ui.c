@@ -203,10 +203,10 @@ void ui_draw_rect(bool fill, float x, float y, float w, float h) {
 		if (theme->ROUND_CORNERS && current->enabled && r > 0 && w >= r * 2.0) {
 			y -= 1; // Make it pixel perfect with non-round draw
 			h += 1;
-			draw_scaled_texture(&current->filled_round_corner_image, x, y, r, r);
-			draw_scaled_texture(&current->filled_round_corner_image, x, y + h, r, -r);
-			draw_scaled_texture(&current->filled_round_corner_image, x + w, y, -r, r);
-			draw_scaled_texture(&current->filled_round_corner_image, x + w, y + h, -r, -r);
+			draw_scaled_image(&current->filled_round_corner_image, x, y, r, r);
+			draw_scaled_image(&current->filled_round_corner_image, x, y + h, r, -r);
+			draw_scaled_image(&current->filled_round_corner_image, x + w, y, -r, r);
+			draw_scaled_image(&current->filled_round_corner_image, x + w, y + h, -r, -r);
 			draw_filled_rect(x + r, y, w - r * 2.0, h);
 			draw_filled_rect(x, y + r, w, h - r * 2.0);
 		}
@@ -221,10 +221,10 @@ void ui_draw_rect(bool fill, float x, float y, float w, float h) {
 			w += 1;
 			y -= 1;
 			h += 1;
-			draw_scaled_texture(&current->round_corner_image, x, y, r, r);
-			draw_scaled_texture(&current->round_corner_image, x, y + h, r, -r);
-			draw_scaled_texture(&current->round_corner_image, x + w, y, -r, r);
-			draw_scaled_texture(&current->round_corner_image, x + w, y + h, -r, -r);
+			draw_scaled_image(&current->round_corner_image, x, y, r, r);
+			draw_scaled_image(&current->round_corner_image, x, y + h, r, -r);
+			draw_scaled_image(&current->round_corner_image, x + w, y, -r, r);
+			draw_scaled_image(&current->round_corner_image, x + w, y + h, -r, -r);
 			draw_filled_rect(x + r, y, w - r * 2.0, strength);
 			draw_filled_rect(x + r, y + h - 1, w - r * 2.0, strength);
 			draw_filled_rect(x, y + r, strength, h - r * 2.0);
@@ -243,8 +243,8 @@ void ui_draw_round_bottom(float x, float y, float w) {
 		y -= 1; // Make it pixel perfect with non-round draw
 		h += 1;
 		draw_set_color(theme->SEPARATOR_COL);
-		draw_scaled_texture(&current->filled_round_corner_image, x, y + h, r, -r);
-		draw_scaled_texture(&current->filled_round_corner_image, x + w, y + h, -r, -r);
+		draw_scaled_image(&current->filled_round_corner_image, x, y + h, r, -r);
+		draw_scaled_image(&current->filled_round_corner_image, x + w, y + h, -r, -r);
 		draw_filled_rect(x + r, y, w - r * 2.0, h);
 	}
 }
@@ -654,8 +654,8 @@ void ui_draw_tooltip_image(bool bind_global_g) {
 	draw_filled_rect(current->tooltip_x, current->tooltip_y, w, h);
 	draw_set_color(0xffffffff);
 	current->tooltip_invert_y ?
-		draw_scaled_texture(current->tooltip_img, current->tooltip_x, current->tooltip_y + h, w, -h) :
-		draw_scaled_texture(current->tooltip_img, current->tooltip_x, current->tooltip_y, w, h);
+		draw_scaled_image(current->tooltip_img, current->tooltip_x, current->tooltip_y + h, w, -h) :
+		draw_scaled_image(current->tooltip_img, current->tooltip_x, current->tooltip_y, w, h);
 }
 
 void ui_draw_tooltip(bool bind_global_g) {
@@ -1423,7 +1423,7 @@ void ui_draw_check(bool selected, bool hover) {
 			ui_fade_color(0.25);
 		}
 		int size = UI_CHECK_SELECT_SIZE();
-		draw_scaled_texture(&current->check_select_image, x + current->check_select_offset_x, y + current->check_select_offset_y, size, size);
+		draw_scaled_image(&current->check_select_image, x + current->check_select_offset_x, y + current->check_select_offset_y, size, size);
 	}
 }
 
@@ -1431,14 +1431,14 @@ void ui_draw_radio(bool selected, bool hover) {
 	float x = current->_x + current->radio_offset_x;
 	float y = current->_y + current->radio_offset_y;
 	draw_set_color(selected ? theme->HIGHLIGHT_COL : hover ? theme->HOVER_COL : theme->BUTTON_COL);
-	draw_texture(&current->radio_image, x, y); // Circle bg
+	draw_image(&current->radio_image, x, y); // Circle bg
 
 	if (selected) { // Check
 		draw_set_color(theme->LABEL_COL);
 		if (!current->enabled) {
 			ui_fade_color(0.25);
 		}
-		draw_texture(&current->radio_select_image, x + current->radio_select_offset_x, y + current->radio_select_offset_y); // Circle
+		draw_image(&current->radio_select_image, x + current->radio_select_offset_x, y + current->radio_select_offset_y); // Circle
 	}
 }
 
@@ -1654,7 +1654,7 @@ void ui_end_window(bool bind_global_g) {
 			draw_restore_render_target();
 		}
 		draw_set_color(0xffffffff);
-		draw_texture(&handle->texture, current->_window_x, current->_window_y);
+		draw_image(&handle->texture, current->_window_x, current->_window_y);
 		if (handle->redraws <= 0) {
 			handle->redraws--;
 		}
@@ -1787,10 +1787,10 @@ bool ui_button(char *text, int align, char *label/*, iron_gpu_texture_t *icon, i
 	if (icon != NULL) {
 		draw_set_color(0xffffffff);
 		if (current->image_invert_y) {
-			draw_scaled_sub_texture(icon, sx, sy, sw, sh, _x + current->button_offset_y, _y - 1 + sh, sw, -sh);
+			draw_scaled_sub_image(icon, sx, sy, sw, sh, _x + current->button_offset_y, _y - 1 + sh, sw, -sh);
 		}
 		else {
-			draw_scaled_sub_texture(icon, sx, sy, sw, sh, _x + current->button_offset_y, _y - 1, sw, sh);
+			draw_scaled_sub_image(icon, sx, sy, sw, sh, _x + current->button_offset_y, _y - 1, sw, sh);
 		}
 	}
 	*/
@@ -1896,11 +1896,11 @@ static int image_height(void *image) {
 }
 
 static void _draw_scaled_image(void *image, float dx, float dy, float dw, float dh) {
-	draw_scaled_texture((iron_gpu_texture_t *)image, dx, dy, dw, dh);
+	draw_scaled_image((iron_gpu_texture_t *)image, dx, dy, dw, dh);
 }
 
 static void _draw_scaled_sub_image(void *image, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
-	draw_scaled_sub_texture((iron_gpu_texture_t *)image, sx, sy, sw, sh, dx, dy, dw, dh);
+	draw_scaled_sub_image((iron_gpu_texture_t *)image, sx, sy, sw, sh, dx, dy, dw, dh);
 }
 
 int ui_sub_image(iron_gpu_texture_t *image, uint32_t tint, int h, int sx, int sy, int sw, int sh) {

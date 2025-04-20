@@ -12,7 +12,7 @@ function render() {
 	iron_gpu_set_pipeline(pipeline);
 	gpu_set_vertex_buffer(vb);
 	gpu_set_index_buffer(ib);
-	gpu_draw_indexed_vertices(0, -1);
+	gpu_draw_indexed_vertices();
 	_gpu_end();
 }
 

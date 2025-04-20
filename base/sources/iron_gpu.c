@@ -7,7 +7,7 @@
 #include "iron_file.h"
 
 #define CONSTANT_BUFFER_SIZE 256
-#define CONSTANT_BUFFER_MULTIPLE 1024
+#define CONSTANT_BUFFER_MULTIPLE 10240
 #define FRAMEBUFFER_COUNT 2
 #define MAX_TEXTURES 16
 
@@ -17,7 +17,6 @@ static int constantBufferIndex = 0;
 static int window_currentBuffer;
 static iron_gpu_texture_t window_framebuffers[FRAMEBUFFER_COUNT];
 static iron_gpu_texture_t *window_current_render_targets[8];
-static int window_current_render_target_count;
 static bool window_resized = false;
 
 void iron_gpu_internal_resize(int width, int height) {
@@ -34,46 +33,30 @@ void gpu_internal_init_window(int depthBufferBits, bool vsync) {
 	iron_gpu_constant_buffer_init(&vertexConstantBuffer, CONSTANT_BUFFER_SIZE * CONSTANT_BUFFER_MULTIPLE);
 }
 
-static void iron_internal_start_draw() {
+void iron_gpu_draw_indexed_vertices(void) {
 	iron_gpu_constant_buffer_unlock(&vertexConstantBuffer);
-	iron_gpu_command_list_set_constant_buffer(&commandList, &vertexConstantBuffer, constantBufferIndex * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
-}
-
-static void iron_internal_end_draw() {
+	iron_gpu_command_list_set_constant_buffer(&commandList, &vertexConstantBuffer, constantBufferIndex * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);\
+	iron_gpu_command_list_draw_indexed_vertices(&commandList);
 	++constantBufferIndex;
 	iron_gpu_constant_buffer_lock(&vertexConstantBuffer, constantBufferIndex * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
 }
 
-void iron_gpu_draw_indexed_vertices(void) {
-	iron_internal_start_draw();
-	iron_gpu_command_list_draw_indexed_vertices(&commandList);
-	iron_internal_end_draw();
-}
-
-void iron_gpu_draw_indexed_vertices_from_to(int start, int count) {
-	iron_internal_start_draw();
-	iron_gpu_command_list_draw_indexed_vertices_from_to(&commandList, start, count);
-	iron_internal_end_draw();
-}
-
 void iron_gpu_clear(unsigned color, float depth, unsigned flags) {
-	if (window_current_render_target_count > 0) {
-		if (window_current_render_targets[0] == NULL) {
-			iron_gpu_command_list_clear(&commandList, &window_framebuffers[window_currentBuffer], flags, color, depth);
+	if (window_current_render_targets[0] == NULL) {
+		iron_gpu_command_list_clear(&commandList, &window_framebuffers[window_currentBuffer], flags, color, depth);
+	}
+	else {
+		if (window_current_render_targets[0]->state != IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET) {
+			iron_gpu_command_list_texture_to_render_target_barrier(&commandList, window_current_render_targets[0]);
+			window_current_render_targets[0]->state = IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
 		}
-		else {
-			if (window_current_render_targets[0]->state != IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET) {
-				iron_gpu_command_list_texture_to_render_target_barrier(&commandList, window_current_render_targets[0]);
-				window_current_render_targets[0]->state = IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
-			}
-			iron_gpu_command_list_clear(&commandList, window_current_render_targets[0], flags, color, depth);
-		}
+		iron_gpu_command_list_clear(&commandList, window_current_render_targets[0], flags, color, depth);
 	}
 }
 
 void gpu_begin() {
 	constantBufferIndex = 0;
-	iron_gpu_constant_buffer_lock(&vertexConstantBuffer, 0, CONSTANT_BUFFER_SIZE);
+	iron_gpu_constant_buffer_lock(&vertexConstantBuffer, constantBufferIndex, CONSTANT_BUFFER_SIZE);
 
 	window_currentBuffer = (window_currentBuffer + 1) % FRAMEBUFFER_COUNT;
 
@@ -94,7 +77,6 @@ void gpu_begin() {
 	// }
 
 	window_current_render_targets[0] = NULL;
-	window_current_render_target_count = 1;
 	iron_gpu_command_list_begin(&commandList);
 	iron_gpu_command_list_framebuffer_to_render_target_barrier(&commandList, &window_framebuffers[window_currentBuffer]);
 	gpu_restore_render_target();
@@ -236,7 +218,6 @@ void gpu_restore_render_target(void) {
 	window_current_render_targets[0] = NULL;
 	iron_gpu_texture_t *render_target = &window_framebuffers[window_currentBuffer];
 	iron_gpu_command_list_set_render_targets(&commandList, &render_target, 1);
-	window_current_render_target_count = 1;
 }
 
 void gpu_set_render_targets(iron_gpu_texture_t **targets, int count) {
@@ -247,12 +228,7 @@ void gpu_set_render_targets(iron_gpu_texture_t **targets, int count) {
 			window_current_render_targets[i]->state = IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
 		}
 	}
-	window_current_render_target_count = count;
-	iron_gpu_texture_t *render_targets[16];
-	for (int i = 0; i < count; ++i) {
-		render_targets[i] = targets[i];
-	}
-	iron_gpu_command_list_set_render_targets(&commandList, render_targets, count);
+	iron_gpu_command_list_set_render_targets(&commandList, window_current_render_targets, count);
 }
 
 void gpu_set_vertex_buffer(iron_gpu_buffer_t *buffer) {
@@ -296,11 +272,6 @@ void gpu_index_buffer_unlock_all(iron_gpu_buffer_t *buffer) {
 	iron_gpu_command_list_upload_index_buffer(&commandList, buffer);
 }
 
-void gpu_index_buffer_unlock(iron_gpu_buffer_t *buffer, int count) {
-	iron_gpu_index_buffer_unlock(buffer, count);
-	iron_gpu_command_list_upload_index_buffer(&commandList, buffer);
-}
-
 void iron_gpu_vertex_structure_init(iron_gpu_vertex_structure_t *structure) {
 	structure->size = 0;
 }
@@ -312,16 +283,11 @@ void iron_gpu_vertex_structure_add(iron_gpu_vertex_structure_t *structure, const
 }
 
 void gpu_vertex_buffer_init(iron_gpu_buffer_t *buffer, int count, iron_gpu_vertex_structure_t *structure, gpu_usage_t usage) {
-	buffer->myCount = count;
 	iron_gpu_vertex_buffer_init(buffer, count, structure, usage == GPU_USAGE_STATIC);
 }
 
 float *gpu_vertex_buffer_lock_all(iron_gpu_buffer_t *buffer) {
 	return iron_gpu_vertex_buffer_lock_all(buffer);
-}
-
-float *gpu_vertex_buffer_lock(iron_gpu_buffer_t *buffer, int start, int count) {
-	return iron_gpu_vertex_buffer_lock(buffer, start, count);
 }
 
 void iron_gpu_internal_pipeline_init(iron_gpu_pipeline_t *pipe) {

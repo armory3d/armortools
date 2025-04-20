@@ -957,13 +957,8 @@ buffer_t *gpu_lock_vertex_buffer(iron_gpu_buffer_t *buffer) {
 	return b;
 }
 
-void gpu_draw_indexed_vertices(i32 start, i32 count) {
-	if (count < 0) {
-		iron_gpu_draw_indexed_vertices();
-	}
-	else {
-		iron_gpu_draw_indexed_vertices_from_to(start, count);
-	}
+void gpu_draw_indexed_vertices() {
+	iron_gpu_draw_indexed_vertices();
 }
 
 iron_gpu_shader_t *gpu_create_shader(buffer_t *data, i32 shader_type) {

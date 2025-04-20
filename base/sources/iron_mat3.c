@@ -43,6 +43,19 @@ mat3_t mat3_rotation(float alpha) {
 	);
 }
 
+mat3_t mat3_scale(mat3_t m, vec4_t v) {
+	m.m[0] *= v.x;
+	m.m[1] *= v.x;
+	m.m[2] *= v.x;
+	m.m[3] *= v.y;
+	m.m[4] *= v.y;
+	m.m[5] *= v.y;
+	m.m[6] *= v.z;
+	m.m[7] *= v.z;
+	m.m[8] *= v.z;
+	return m;
+}
+
 mat3_t mat3_set_from4(mat4_t m4) {
 	mat3_t m;
     m.m[0] = m4.m[0];

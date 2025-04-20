@@ -221,7 +221,7 @@ declare function gpu_delete_vertex_buffer(buffer: any): void;
 declare function gpu_lock_vertex_buffer(buffer: any): buffer_t;
 declare function iron_gpu_vertex_buffer_unlock_all(buffer: any): void;
 declare function gpu_set_vertex_buffer(buffer: any): void;
-declare function gpu_draw_indexed_vertices(start: i32 = 0, count: i32 = -1): void;
+declare function gpu_draw_indexed_vertices(): void;
 declare function gpu_create_shader(data: buffer_t, type: i32): iron_gpu_shader_t;
 declare function gpu_create_shader_from_source(source: string, shader_type: shader_type_t): iron_gpu_shader_t;
 declare function iron_gpu_shader_destroy(shader: iron_gpu_shader_t): void;
@@ -294,7 +294,7 @@ declare function iron_get_arg(index: i32): string;
 declare function iron_get_files_location(): string;
 declare function _iron_http_request(url: string, size: i32, callback: (url: string, _: buffer_t)=>void): void;
 
-declare function draw_init(image_vert: buffer_t, image_frag: buffer_t, colored_vert: buffer_t, colored_frag: buffer_t, text_vert: buffer_t, text_frag: buffer_t): void;
+declare function draw_init(image_vert: buffer_t, image_frag: buffer_t, rect_vert: buffer_t, rect_frag: buffer_t, tris_vert: buffer_t, tris_frag: buffer_t, text_vert: buffer_t, text_frag: buffer_t): void;
 declare function draw_begin(render_target: iron_gpu_texture_t = null): void;
 declare function draw_end(): void;
 declare function draw_scaled_sub_image(image: iron_gpu_texture_t, sx: f32, sy: f32, sw: f32, sh: f32, dx: f32, dy: f32, dw: f32, dh: f32): void;

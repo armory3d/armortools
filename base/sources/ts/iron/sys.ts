@@ -50,8 +50,10 @@ function sys_start(ops: iron_window_options_t) {
 	draw_init(
 		iron_load_blob(data_path() + "draw_image.vert" + sys_shader_ext()),
 		iron_load_blob(data_path() + "draw_image.frag" + sys_shader_ext()),
-		iron_load_blob(data_path() + "draw_colored.vert" + sys_shader_ext()),
-		iron_load_blob(data_path() + "draw_colored.frag" + sys_shader_ext()),
+		iron_load_blob(data_path() + "draw_rect.vert" + sys_shader_ext()),
+		iron_load_blob(data_path() + "draw_rect.frag" + sys_shader_ext()),
+		iron_load_blob(data_path() + "draw_tris.vert" + sys_shader_ext()),
+		iron_load_blob(data_path() + "draw_tris.frag" + sys_shader_ext()),
 		iron_load_blob(data_path() + "draw_text.vert" + sys_shader_ext()),
 		iron_load_blob(data_path() + "draw_text.frag" + sys_shader_ext())
 	);

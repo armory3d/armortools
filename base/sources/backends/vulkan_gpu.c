@@ -3272,6 +3272,7 @@ void iron_gpu_render_target_set_depth_from(iron_gpu_texture_t *target, iron_gpu_
 }
 
 void iron_gpu_vertex_buffer_init(iron_gpu_buffer_t *buffer, int vertexCount, iron_gpu_vertex_structure_t *structure, bool gpuMemory) {
+	buffer->myCount = count;
 	buffer->impl.myCount = vertexCount;
 	buffer->impl.myStride = 0;
 	for (int i = 0; i < structure->size; ++i) {
