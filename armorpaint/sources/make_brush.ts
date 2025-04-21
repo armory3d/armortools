@@ -10,7 +10,7 @@ function make_brush_run(kong: node_shader_t) {
 	let fill_layer: bool = context_raw.layer.fill_layer != null;
 	let decal: bool = context_is_decal();
 	if (decal && !fill_layer) {
-		node_shader_write_frag(kong, "if (decal_mask.z > 0.0) {");
+		node_shader_write_frag(kong, "if (constants.decal_mask.z > 0.0) {");
 	}
 
 	if (config_raw.brush_3d) {

@@ -32,7 +32,7 @@ function make_texcoord_run(kong: node_shader_t) {
 		else if (decal) {
 			node_shader_add_constant(kong, "decal_mask: float4", "_decal_mask");
 			node_shader_write_attrib_frag(kong, "uvsp -= constants.decal_mask.xy;");
-			node_shader_write_attrib_frag(kong, "uvsp.x *= aspect_ratio;");
+			node_shader_write_attrib_frag(kong, "uvsp.x *= constants.aspect_ratio;");
 			node_shader_write_attrib_frag(kong, "uvsp *= 0.21 / (constants.decal_mask.w * 0.9);"); // Decal radius
 
 			if (context_raw.brush_directional) {
@@ -54,7 +54,7 @@ function make_texcoord_run(kong: node_shader_t) {
 			node_shader_write_attrib_frag(kong, "if (uvsp.x < 0.0 || uvsp.y < 0.0 || uvsp.x > 1.0 || uvsp.y > 1.0) { discard; }");
 		}
 		else {
-			node_shader_write_attrib_frag(kong, "uvsp.x *= aspect_ratio;");
+			node_shader_write_attrib_frag(kong, "uvsp.x *= constants.aspect_ratio;");
 
 			if (uv_angle != 0.0) {
 				node_shader_add_constant(kong, "brush_angle: float2", "_brush_angle");
