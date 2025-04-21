@@ -1018,13 +1018,11 @@ function _ui_image(image: iron_gpu_texture_t, tint: i32 = 0xffffffff, h: f32 = -
 }
 
 function ui_window(handle: ui_handle_t, x: i32, y: i32, w: i32, h: i32, drag: bool = false): bool {
-	_draw_current = ADDRESS(handle.texture);
 	_draw_in_use = true;
 	return _ui_window(handle, x, y, w, h, drag);
 }
 
 function ui_end(last: bool = true) {
-	_draw_current = null;
 	_draw_in_use = false;
 	_ui_end(last);
 }

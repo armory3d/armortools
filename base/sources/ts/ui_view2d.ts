@@ -36,15 +36,17 @@ function ui_view2d_init() {
 	ui_view2d_pipe.vertex_shader = sys_get_shader("layer_view.vert");
 	ui_view2d_pipe.fragment_shader = sys_get_shader("layer_view.frag");
 	let vs: iron_gpu_vertex_structure_t = gpu_vertex_struct_create();
-	gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
-	gpu_vertex_struct_add(vs, "tex", vertex_data_t.F32_2X);
-	gpu_vertex_struct_add(vs, "col", vertex_data_t.U8_4X_NORM);
+	gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
 	ui_view2d_pipe.input_layout = vs;
 	ui_view2d_pipe.blend_source = blend_factor_t.BLEND_ONE;
 	ui_view2d_pipe.blend_destination = blend_factor_t.BLEND_ZERO;
 	ARRAY_ACCESS(ui_view2d_pipe.color_write_mask_alpha, 0) = false;
 	gpu_compile_pipeline(ui_view2d_pipe);
 	pipes_offset = 0;
+	pipes_get_constant_location(ui_view2d_pipe, "P", "mat4");
+	pipes_get_constant_location(ui_view2d_pipe, "pos", "float4");
+	pipes_get_constant_location(ui_view2d_pipe, "tex", "float4");
+	pipes_get_constant_location(ui_view2d_pipe, "col", "float4");
 	ui_view2d_channel_loc = pipes_get_constant_location(ui_view2d_pipe, "channel", "int");
 	///end
 
@@ -193,14 +195,14 @@ function ui_view2d_render() {
 			}
 
 			tex =
-				slot_layer_is_mask(context_raw.layer) ? layer.texpaint :
-				ui_view2d_tex_type == paint_tex_t.BASE     ? layer.texpaint :
-				ui_view2d_tex_type == paint_tex_t.OPACITY  ? layer.texpaint :
-				ui_view2d_tex_type == paint_tex_t.NORMAL   ? layer.texpaint_nor :
-														layer.texpaint_pack;
+				slot_layer_is_mask(context_raw.layer) 	  ? layer.texpaint :
+				ui_view2d_tex_type == paint_tex_t.BASE    ? layer.texpaint :
+				ui_view2d_tex_type == paint_tex_t.OPACITY ? layer.texpaint :
+				ui_view2d_tex_type == paint_tex_t.NORMAL  ? layer.texpaint_nor :
+															layer.texpaint_pack;
 
 			channel =
-				slot_layer_is_mask(context_raw.layer)  ? 1 :
+				slot_layer_is_mask(context_raw.layer)  		? 1 :
 				ui_view2d_tex_type == paint_tex_t.OCCLUSION ? 1 :
 				ui_view2d_tex_type == paint_tex_t.ROUGHNESS ? 2 :
 				ui_view2d_tex_type == paint_tex_t.METALLIC  ? 3 :

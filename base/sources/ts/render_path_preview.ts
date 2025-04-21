@@ -116,7 +116,7 @@ function render_path_preview_commands_decal() {
 	render_path_draw_meshes("mesh");
 
 	// Deferred light
-	render_path_set_target("tex");
+	render_path_set_target("buf");
 	render_path_bind_target("_main", "gbufferD");
 	render_path_bind_target("gbuffer0", "gbuffer0");
 	render_path_bind_target("gbuffer1", "gbuffer1");
@@ -125,12 +125,12 @@ function render_path_preview_commands_decal() {
 	}
 	render_path_draw_shader("shader_datas/deferred_light/deferred_light");
 
-	render_path_set_depth_from("tex", "gbuffer0"); // Bind depth for world pass
+	render_path_set_depth_from("buf", "gbuffer0"); // Bind depth for world pass
 
-	render_path_set_target("tex");
+	render_path_set_target("buf");
 	render_path_draw_skydome("shader_datas/world_pass/world_pass");
 
-	render_path_set_depth_from("tex", "gbuffer1"); // Unbind depth
+	render_path_set_depth_from("buf", "gbuffer1"); // Unbind depth
 
 	let framebuffer: string = "texpreview";
 	let texpreview: render_target_t = map_get(render_path_render_targets, "texpreview");
@@ -138,6 +138,6 @@ function render_path_preview_commands_decal() {
 
 	render_path_set_target(framebuffer);
 
-	render_path_bind_target("tex", "tex");
+	render_path_bind_target("buf", "tex");
 	render_path_draw_shader("shader_datas/compositor_pass/compositor_pass");
 }

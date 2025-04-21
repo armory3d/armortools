@@ -2,6 +2,9 @@
 #[set(everything)]
 const constants: {
 	P: float4x4;
+	pos: float4; // xywh
+	tex: float4; // xywh
+	col: float4;
 };
 
 #[set(everything)]
@@ -11,9 +14,7 @@ const tex: tex2d;
 const sampler_linear: sampler;
 
 struct vert_in {
-	pos: float3;
-	tex: float2;
-	col: float4;
+	pos: float2;
 }
 
 struct vert_out {
@@ -24,9 +25,12 @@ struct vert_out {
 
 fun layer_invert_vert(input: vert_in): vert_out {
 	var output: vert_out;
-	output.pos = constants.P * float4(input.pos, 1.0);
-	output.tex = input.tex;
-	output.col = input.col;
+	output.pos = float4(input.pos, 0.0, 1.0);
+	output.pos.xy = output.pos.xy * constants.pos.zw + constants.pos.xy;
+	output.pos.xy = output.pos.xy * 2.0 - 1.0;
+	output.pos.y = -output.pos.y;
+	output.tex = input.pos * constants.tex.zw + constants.tex.xy;
+	output.col = constants.col;
 	return output;
 }
 

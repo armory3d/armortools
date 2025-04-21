@@ -7,9 +7,9 @@
 #include "iron_file.h"
 
 #define CONSTANT_BUFFER_SIZE 256
+// #define CONSTANT_BUFFER_MULTIPLE 1024
 #define CONSTANT_BUFFER_MULTIPLE 10240
 #define FRAMEBUFFER_COUNT 2
-#define MAX_TEXTURES 16
 
 iron_gpu_command_list_t commandList;
 static iron_gpu_buffer_t vertexConstantBuffer;
@@ -35,9 +35,19 @@ void gpu_internal_init_window(int depthBufferBits, bool vsync) {
 
 void iron_gpu_draw_indexed_vertices(void) {
 	iron_gpu_constant_buffer_unlock(&vertexConstantBuffer);
-	iron_gpu_command_list_set_constant_buffer(&commandList, &vertexConstantBuffer, constantBufferIndex * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);\
+	iron_gpu_command_list_set_constant_buffer(&commandList, &vertexConstantBuffer, constantBufferIndex * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
 	iron_gpu_command_list_draw_indexed_vertices(&commandList);
 	++constantBufferIndex;
+
+	// Flush
+	if (constantBufferIndex == CONSTANT_BUFFER_MULTIPLE) {
+		iron_gpu_command_list_end(&commandList);
+		iron_gpu_command_list_execute(&commandList);
+		iron_gpu_command_list_wait_for_execution_to_finish(&commandList);
+		iron_gpu_command_list_begin(&commandList);
+		constantBufferIndex = 0;
+	}
+
 	iron_gpu_constant_buffer_lock(&vertexConstantBuffer, constantBufferIndex * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
 }
 
@@ -57,7 +67,6 @@ void iron_gpu_clear(unsigned color, float depth, unsigned flags) {
 void gpu_begin() {
 	constantBufferIndex = 0;
 	iron_gpu_constant_buffer_lock(&vertexConstantBuffer, constantBufferIndex, CONSTANT_BUFFER_SIZE);
-
 	window_currentBuffer = (window_currentBuffer + 1) % FRAMEBUFFER_COUNT;
 
 	// if (window_resized) {
