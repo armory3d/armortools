@@ -18,8 +18,6 @@ WGPUDevice device;
 WGPUQueue queue;
 WGPUSwapChain swapChain;
 
-void iron_gpu_internal_destroy_window() {}
-
 void iron_gpu_internal_destroy() {}
 
 void iron_gpu_internal_init() {}
@@ -55,10 +53,6 @@ void iron_gpu_begin(iron_gpu_texture_t *renderTarget) {}
 
 void iron_gpu_end() {}
 
-bool iron_gpu_swap_buffers() {
-	return true;
-}
-
 bool iron_gpu_raytrace_supported() {
 	return false;
 }
@@ -80,7 +74,7 @@ void iron_gpu_vertex_buffer_destroy(iron_gpu_buffer_t *buffer) {
 
 }
 
-float *iron_gpu_vertex_buffer_lock_all(iron_gpu_buffer_t *buffer) {
+float *iron_gpu_vertex_buffer_lock(iron_gpu_buffer_t *buffer) {
 	WGPUBufferDescriptor bDesc;
 	memset(&bDesc, 0, sizeof(bDesc));
 	bDesc.size = buffer->impl.count * buffer->impl.stride * sizeof(float);
@@ -90,16 +84,8 @@ float *iron_gpu_vertex_buffer_lock_all(iron_gpu_buffer_t *buffer) {
 	return wgpuBufferGetMappedRange(buffer->impl.buffer, 0, bDesc.size);
 }
 
-float *iron_gpu_vertex_buffer_lock(iron_gpu_buffer_t *buffer, int start, int count) {
-	return NULL;
-}
-
-void iron_gpu_vertex_buffer_unlock_all(iron_gpu_buffer_t *buffer) {
+void iron_gpu_vertex_buffer_unlock(iron_gpu_buffer_t *buffer) {
 	wgpuBufferUnmap(buffer->impl.buffer);
-}
-
-void iron_gpu_vertex_buffer_unlock(iron_gpu_buffer_t* buffer, int count) {
-
 }
 
 int iron_gpu_vertex_buffer_count(iron_gpu_buffer_t *buffer) {
@@ -117,10 +103,6 @@ void iron_gpu_constant_buffer_init(iron_gpu_buffer_t *buffer, int size) {
 }
 
 void iron_gpu_constant_buffer_destroy(iron_gpu_buffer_t *buffer) {}
-
-void iron_gpu_constant_buffer_lock_all(iron_gpu_buffer_t *buffer) {
-	iron_gpu_constant_buffer_lock(buffer, 0, iron_gpu_constant_buffer_size(buffer));
-}
 
 void iron_gpu_constant_buffer_lock(iron_gpu_buffer_t *buffer, int start, int count) {}
 
@@ -146,11 +128,9 @@ static int iron_gpu_internal_index_buffer_stride(iron_gpu_buffer_t *buffer) {
 	return 4;
 }
 
-void *iron_gpu_index_buffer_lock_all(iron_gpu_buffer_t *buffer) {
-	iron_gpu_index_buffer_lock(buffer, 0, iron_gpu_index_buffer_count(buffer));
-}
-
-void *iron_gpu_index_buffer_lock(iron_gpu_buffer_t *buffer, int start, int count) {
+void *iron_gpu_index_buffer_lock(iron_gpu_buffer_t *buffer) {
+	int start = 0;
+	int count = iron_gpu_index_buffer_count(buffer);
 	WGPUBufferDescriptor bDesc;
 	memset(&bDesc, 0, sizeof(bDesc));
 	bDesc.size = count * iron_gpu_internal_index_buffer_stride(buffer);
@@ -160,12 +140,8 @@ void *iron_gpu_index_buffer_lock(iron_gpu_buffer_t *buffer, int start, int count
 	return wgpuBufferGetMappedRange(buffer->impl.buffer, start * iron_gpu_internal_index_buffer_stride(buffer), bDesc.size);
 }
 
-void iron_gpu_index_buffer_unlock_all(iron_gpu_buffer_t *buffer) {
+void iron_gpu_index_buffer_unlock(iron_gpu_buffer_t *buffer) {
 	wgpuBufferUnmap(buffer->impl.buffer);
-}
-
-void iron_gpu_index_buffer_unlock(iron_gpu_buffer_t *buffer, int count) {
-	iron_gpu_index_buffer_unlock_all(buffer);
 }
 
 void iron_gpu_internal_index_buffer_set(iron_gpu_buffer_t *buffer) {
@@ -227,12 +203,10 @@ void iron_gpu_render_target_init_framebuffer(iron_gpu_texture_t *target, int wid
 
 void iron_gpu_render_target_set_depth_from(iron_gpu_texture_t *renderTarget, iron_gpu_texture_t *source) {}
 
-void iron_gpu_render_target_get_pixels(iron_gpu_texture_t *renderTarget, uint8_t *data) {}
-
 extern WGPUDevice device;
 
 void iron_gpu_pipeline_init(iron_gpu_pipeline_t *pipe) {
-	iron_gpu_internal_pipeline_init(pipe);
+	gpu_internal_pipeline_init(pipe);
 }
 
 iron_gpu_constant_location_t iron_gpu_pipeline_get_constant_location(iron_gpu_pipeline_t *pipe, const char* name) {
@@ -392,21 +366,13 @@ void iron_gpu_command_list_end(iron_gpu_command_list_t *list) {
 	wgpuQueueSubmit(queue, 1, &commands);
 }
 
-void iron_gpu_command_list_clear(iron_gpu_command_list_t *list, struct iron_gpu_texture *renderTarget, unsigned flags, unsigned color, float depth) {
-
-}
-
 void iron_gpu_command_list_render_target_to_framebuffer_barrier(iron_gpu_command_list_t *list, struct iron_gpu_texture *renderTarget) {}
 void iron_gpu_command_list_framebuffer_to_render_target_barrier(iron_gpu_command_list_t *list, struct iron_gpu_texture *renderTarget) {}
 void iron_gpu_command_list_texture_to_render_target_barrier(iron_gpu_command_list_t *list, struct iron_gpu_texture *renderTarget) {}
 void iron_gpu_command_list_render_target_to_texture_barrier(iron_gpu_command_list_t *list, struct iron_gpu_texture *renderTarget) {}
 
-void iron_gpu_command_list_draw_indexed_vertices(iron_gpu_command_list_t *list) {
+void iron_gpu_command_list_draw(iron_gpu_command_list_t *list) {
 	wgpuRenderPassEncoderDrawIndexed(list->impl.pass, list->impl.indexCount, 1, 0, 0, 0);
-}
-
-void iron_gpu_command_list_draw_indexed_vertices_from_to(iron_gpu_command_list_t *list, int start, int count) {
-
 }
 
 void iron_gpu_command_list_viewport(iron_gpu_command_list_t *list, int x, int y, int width, int height) {
@@ -436,7 +402,7 @@ void iron_gpu_command_list_set_index_buffer(iron_gpu_command_list_t *list, struc
 	wgpuRenderPassEncoderSetIndexBuffer(list->impl.pass, buffer->impl.buffer, WGPUIndexFormat_Uint32, 0, size);
 }
 
-void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, struct iron_gpu_texture **targets, int count) {
+void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, struct iron_gpu_texture **targets, int count, unsigned flags, unsigned color, float depth) {
 
 }
 
@@ -445,11 +411,7 @@ void iron_gpu_command_list_upload_vertex_buffer(iron_gpu_command_list_t *list, s
 void iron_gpu_command_list_upload_texture(iron_gpu_command_list_t *list, struct iron_gpu_texture *texture) {}
 void iron_gpu_command_list_get_render_target_pixels(iron_gpu_command_list_t *list, iron_gpu_texture_t *render_target, uint8_t *data) {}
 
-void iron_gpu_command_list_execute(iron_gpu_command_list_t *list) {
-
-}
-
-void iron_gpu_command_list_wait_for_execution_to_finish(iron_gpu_command_list_t *list) {
+void iron_gpu_command_list_wait(iron_gpu_command_list_t *list) {
 
 }
 

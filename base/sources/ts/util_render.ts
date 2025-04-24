@@ -167,8 +167,7 @@ function util_render_make_text_preview() {
 		context_raw.text_tool_image = gpu_create_render_target(tex_w, tex_w, tex_format_t.R8);
 		///end
 	}
-	draw_begin(context_raw.text_tool_image);
-	iron_gpu_clear(0xff000000);
+	draw_begin(context_raw.text_tool_image, true, 0xff000000);
 	draw_set_font(font, font_size);
 	draw_set_color(0xffffffff);
 	draw_string(text, tex_w / 2 - text_w / 2, tex_w / 2 - text_h / 2);
@@ -191,8 +190,7 @@ function util_render_make_font_preview() {
 	if (context_raw.font.image == null) {
 		context_raw.font.image = gpu_create_render_target(tex_w, tex_w, tex_format_t.RGBA32);
 	}
-	draw_begin(context_raw.font.image);
-	iron_gpu_clear(0x00000000);
+	draw_begin(context_raw.font.image, true, 0x00000000);
 	draw_set_font(font, font_size);
 	draw_set_color(0xffffffff);
 	draw_string(text, tex_w / 2 - text_w / 2, tex_w / 2 - text_h / 2);
@@ -366,8 +364,7 @@ function util_render_make_brush_preview() {
 	// Scale layer down to to image preview
 	l = render_path_paint_live_layer;
 	let target: iron_gpu_texture_t = context_raw.brush.image;
-	draw_begin(target);
-	iron_gpu_clear(0x00000000);
+	draw_begin(target, true, 0x00000000);
 	draw_set_pipeline(pipes_copy);
 	draw_scaled_image(l.texpaint, 0, 0, target.width, target.height);
 	draw_set_pipeline(null);
@@ -403,14 +400,14 @@ function util_render_make_node_preview(canvas: ui_node_canvas_t, node: ui_node_t
 	transform_build_matrix(context_raw.paint_object.base.transform);
 
 	_gpu_begin(image);
-	iron_gpu_set_pipeline(res.scon._.pipe_state);
+	gpu_set_pipeline(res.scon._.pipe_state);
 	let empty: string[] = [""];
 	uniforms_set_context_consts(res.scon, empty);
 	uniforms_set_obj_consts(res.scon, context_raw.paint_object.base);
 	uniforms_set_material_consts(res.scon, res.mcon);
 	gpu_set_vertex_buffer(util_render_screen_aligned_full_vb);
 	gpu_set_index_buffer(util_render_screen_aligned_full_ib);
-	gpu_draw_indexed_vertices();
+	gpu_draw();
 	_gpu_end();
 
 	context_raw.paint_object.base.transform.scale_world = _scale_world;
@@ -468,12 +465,12 @@ function util_render_create_screen_aligned_full_data() {
 	for (let i: i32 = 0; i < math_floor((vertices.length) / 2); ++i) {
 		buffer_set_i16(vertices, i * 2, data[i]);
 	}
-	iron_gpu_vertex_buffer_unlock_all(util_render_screen_aligned_full_vb);
+	iron_gpu_vertex_buffer_unlock(util_render_screen_aligned_full_vb);
 
 	util_render_screen_aligned_full_ib = gpu_create_index_buffer(indices.length);
 	let id: u32_array_t = gpu_lock_index_buffer(util_render_screen_aligned_full_ib);
 	for (let i: i32 = 0; i < id.length; ++i) {
 		id[i] = indices[i];
 	}
-	gpu_index_buffer_unlock_all(util_render_screen_aligned_full_ib);
+	gpu_index_buffer_unlock(util_render_screen_aligned_full_ib);
 }

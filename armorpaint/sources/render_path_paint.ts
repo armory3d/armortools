@@ -120,8 +120,7 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 		///end
 
 		if (context_raw.tool == workspace_tool_t.COLORID) {
-			render_path_set_target("texpaint_colorid");
-			render_path_clear_target(0xff000000);
+			render_path_set_target("texpaint_colorid", null, clear_flag_t.COLOR, 0xff000000);
 			render_path_bind_target("gbuffer2", "gbuffer2");
 			render_path_paint_draw_fullscreen_triangle("paint");
 			ui_header_handle.redraws = 2;
@@ -231,8 +230,7 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 			let texpaint: string = "texpaint" + tid;
 			if (context_raw.tool == workspace_tool_t.BAKE && context_raw.brush_time == sys_delta()) {
 				// Clear to black on bake start
-				render_path_set_target(texpaint);
-				render_path_clear_target(0xff000000);
+				render_path_set_target(texpaint, null, clear_flag_t.COLOR, 0xff000000);
 			}
 
 			render_path_set_target("texpaint_blend1");
@@ -439,7 +437,7 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	let geom: mesh_data_t = plane.data;
 
 	render_path_set_target("");
-	iron_gpu_set_pipeline(pipes_cursor);
+	gpu_set_pipeline(pipes_cursor);
 	let rt: render_target_t = map_get(render_path_render_targets, "gbuffer0");
 	let gbuffer0: iron_gpu_texture_t = rt._image;
 	gpu_set_texture_depth(pipes_cursor_gbufferd, gbuffer0);
@@ -452,19 +450,9 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	gpu_set_matrix4(pipes_cursor_vp, scene_camera.vp);
 	let inv_vp: mat4_t = mat4_inv(scene_camera.vp);
 	gpu_set_matrix4(pipes_cursor_inv_vp, inv_vp);
-	////if (arm_metal || arm_vulkan)
-	// let vs: vertex_element_t[] = [
-	// 	{
-	// 		name: "tex",
-	// 		data: "short2norm"
-	// 	}
-	// ];
-	// gpu_set_vertex_buffer(mesh_data_get(geom, vs));
-	////else
 	gpu_set_vertex_buffer(geom._.vertex_buffer);
-	////end
 	gpu_set_index_buffer(geom._.index_buffers[0]);
-	gpu_draw_indexed_vertices();
+	gpu_draw();
 
 	gpu_disable_scissor();
 	render_path_end();
@@ -717,14 +705,11 @@ function render_path_paint_draw() {
 	if (context_raw.brush_blend_dirty) {
 		context_raw.brush_blend_dirty = false;
 		///if arm_metal
-		render_path_set_target("texpaint_blend0");
-		render_path_clear_target(0x00000000);
-		render_path_set_target("texpaint_blend1");
-		render_path_clear_target(0x00000000);
+		render_path_set_target("texpaint_blend0", null, clear_flag_t.COLOR, 0x00000000);
+		render_path_set_target("texpaint_blend1", null, clear_flag_t.COLOR, 0x00000000);
 		///else
 		let additional: string[] = ["texpaint_blend1"];
-		render_path_set_target("texpaint_blend0", additional);
-		render_path_clear_target(0x00000000);
+		render_path_set_target("texpaint_blend0", additional, clear_flag_t.COLOR, 0x00000000);
 		///end
 	}
 

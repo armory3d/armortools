@@ -6,10 +6,10 @@ const constants: {
 };
 
 #[set(everything)]
-const envmap: tex2d;
+const sampler_linear: sampler;
 
 #[set(everything)]
-const sampler_linear: sampler;
+const envmap: tex2d;
 
 const PI: float = 3.1415926535;
 const PI2: float = 6.283185307;

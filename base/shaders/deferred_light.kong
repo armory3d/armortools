@@ -17,6 +17,9 @@ const constants: {
 };
 
 #[set(everything)]
+const sampler_linear: sampler;
+
+#[set(everything)]
 const gbufferD: tex2d;
 
 #[set(everything)]
@@ -33,9 +36,6 @@ const senvmap_radiance: tex2d;
 
 #[set(everything)]
 const ssaotex: tex2d;
-
-#[set(everything)]
-const sampler_linear: sampler;
 
 const PI: float = 3.14159265358979;
 const PI2: float = 6.28318530718;

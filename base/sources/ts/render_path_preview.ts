@@ -6,7 +6,7 @@ function render_path_preview_init() {
 		t.name = "texpreview";
 		t.width = 1;
 		t.height = 1;
-		t.format = "RGBA32";
+		t.format = "RGBA64";
 		render_path_create_render_target(t);
 	}
 	{
@@ -14,7 +14,7 @@ function render_path_preview_init() {
 		t.name = "texpreview_icon";
 		t.width = 1;
 		t.height = 1;
-		t.format = "RGBA32";
+		t.format = "RGBA64";
 		render_path_create_render_target(t);
 	}
 
@@ -63,11 +63,8 @@ function render_path_preview_init() {
 }
 
 function render_path_preview_commands_preview() {
-	render_path_set_target("mgbuffer2");
-	render_path_clear_target(0xff000000);
-
-	render_path_set_target("mgbuffer0");
-	render_path_clear_target(0xffffffff, 1.0, clear_flag_t.COLOR | clear_flag_t.DEPTH);
+	render_path_set_target("mgbuffer2", null, clear_flag_t.COLOR, 0xff000000);
+	render_path_set_target("mgbuffer0", null, clear_flag_t.COLOR | clear_flag_t.DEPTH, 0xffffffff, 1.0);
 	let additional: string[] = ["mgbuffer1", "mgbuffer2"];
 	render_path_set_target("mgbuffer0", additional);
 	render_path_draw_meshes("mesh");
@@ -106,11 +103,8 @@ function render_path_preview_commands_preview() {
 }
 
 function render_path_preview_commands_decal() {
-	render_path_set_target("gbuffer2");
-	render_path_clear_target(0xff000000);
-
-	render_path_set_target("gbuffer0");
-	render_path_clear_target(0xffffffff, 1.0, clear_flag_t.COLOR | clear_flag_t.DEPTH);
+	render_path_set_target("gbuffer2", null, clear_flag_t.COLOR, 0xff000000);
+	render_path_set_target("gbuffer0", null, clear_flag_t.COLOR | clear_flag_t.DEPTH, 0xffffffff, 1.0);
 	let additional: string[] = ["gbuffer1", "gbuffer2"];
 	render_path_set_target("gbuffer0", additional);
 	render_path_draw_meshes("mesh");

@@ -32,19 +32,19 @@ function layers_init() {
 	draw_begin(texpaint._image);
 	draw_scaled_image(resource_get("placeholder.k"), 0, 0, config_get_texture_res_x(), config_get_texture_res_y()); // Base
 	draw_end();
-	_gpu_begin(texpaint_nor._image);
-	iron_gpu_clear(color_from_floats(0.5, 0.5, 1.0, 0.0)); // Nor
+	// Nor
+	_gpu_begin(texpaint_nor._image, null, clear_flag_t.COLOR, color_from_floats(0.5, 0.5, 1.0, 0.0));
 	_gpu_end();
-	_gpu_begin(texpaint_pack._image);
-	iron_gpu_clear(color_from_floats(1.0, 0.4, 0.0, 0.0)); // Occ, rough, met
+	// Occ, rough, met
+	_gpu_begin(texpaint_pack._image, null, clear_flag_t.COLOR, color_from_floats(1.0, 0.4, 0.0, 0.0));
 	_gpu_end();
 	let texpaint_nor_empty: render_target_t = map_get(render_path_render_targets, "texpaint_nor_empty");
 	let texpaint_pack_empty: render_target_t = map_get(render_path_render_targets, "texpaint_pack_empty");
-	_gpu_begin(texpaint_nor_empty._image);
-	iron_gpu_clear(color_from_floats(0.5, 0.5, 1.0, 0.0)); // Nor
+	// Nor
+	_gpu_begin(texpaint_nor_empty._image, null, clear_flag_t.COLOR, color_from_floats(0.5, 0.5, 1.0, 0.0));
 	_gpu_end();
-	_gpu_begin(texpaint_pack_empty._image);
-	iron_gpu_clear(color_from_floats(1.0, 0.4, 0.0, 0.0)); // Occ, rough, met
+	// Occ, rough, met
+	_gpu_begin(texpaint_pack_empty._image, null, clear_flag_t.COLOR, color_from_floats(1.0, 0.4, 0.0, 0.0));
 	_gpu_end();
 	///end
 }
@@ -256,18 +256,18 @@ function layers_apply_mask(l: slot_layer_t, m: slot_layer_t) {
 
 	// Apply mask
 	_gpu_begin(l.texpaint);
-	iron_gpu_set_pipeline(pipes_apply_mask);
+	gpu_set_pipeline(pipes_apply_mask);
 	gpu_set_texture(pipes_tex0_mask, layers_temp_image);
 	gpu_set_texture(pipes_texa_mask, m.texpaint);
 	gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 	gpu_set_index_buffer(const_data_screen_aligned_ib);
-	gpu_draw_indexed_vertices();
+	gpu_draw();
 	_gpu_end();
 }
 
 function layers_commands_merge_pack(pipe: iron_gpu_pipeline_t, i0: iron_gpu_texture_t, i1: iron_gpu_texture_t, i1pack: iron_gpu_texture_t, i1mask_opacity: f32, i1texmask: iron_gpu_texture_t, i1blending: i32 = -1) {
 	_gpu_begin(i0);
-	iron_gpu_set_pipeline(pipe);
+	gpu_set_pipeline(pipe);
 	gpu_set_texture(pipes_tex0, i1);
 	gpu_set_texture(pipes_tex1, i1pack);
 	gpu_set_texture(pipes_texmask, i1texmask);
@@ -277,7 +277,7 @@ function layers_commands_merge_pack(pipe: iron_gpu_pipeline_t, i0: iron_gpu_text
 	gpu_set_int(pipes_blending, i1blending);
 	gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 	gpu_set_index_buffer(const_data_screen_aligned_ib);
-	gpu_draw_indexed_vertices();
+	gpu_draw();
 	_gpu_end();
 }
 
@@ -731,21 +731,21 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 
 	if (slot_layer_is_mask(l1)) {
 		_gpu_begin(l0.texpaint);
-		iron_gpu_set_pipeline(pipes_merge_mask);
+		gpu_set_pipeline(pipes_merge_mask);
 		gpu_set_texture(pipes_tex0_merge_mask, l1.texpaint);
 		gpu_set_texture(pipes_texa_merge_mask, layers_temp_image);
 		gpu_set_float(pipes_opac_merge_mask, slot_layer_get_opacity(l1));
 		gpu_set_int(pipes_blending_merge_mask, l1.blending);
 		gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 		gpu_set_index_buffer(const_data_screen_aligned_ib);
-		gpu_draw_indexed_vertices();
+		gpu_draw();
 		_gpu_end();
 	}
 
 	if (slot_layer_is_layer(l1)) {
 		if (l1.paint_base) {
 			_gpu_begin(l0.texpaint);
-			iron_gpu_set_pipeline(pipes_merge);
+			gpu_set_pipeline(pipes_merge);
 			gpu_set_texture(pipes_tex0, l1.texpaint);
 			gpu_set_texture(pipes_tex1, empty);
 			gpu_set_texture(pipes_texmask, mask);
@@ -755,7 +755,7 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 			gpu_set_int(pipes_blending, l1.blending);
 			gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 			gpu_set_index_buffer(const_data_screen_aligned_ib);
-			gpu_draw_indexed_vertices();
+			gpu_draw();
 			_gpu_end();
 		}
 
@@ -768,7 +768,7 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 
 			if (l1.paint_nor) {
 				_gpu_begin(l0.texpaint_nor);
-				iron_gpu_set_pipeline(pipes_merge);
+				gpu_set_pipeline(pipes_merge);
 				gpu_set_texture(pipes_tex0, l1.texpaint);
 				gpu_set_texture(pipes_tex1, l1.texpaint_nor);
 				gpu_set_texture(pipes_texmask, mask);
@@ -778,7 +778,7 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 				gpu_set_int(pipes_blending, l1.paint_nor_blend ? -2 : -1);
 				gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 				gpu_set_index_buffer(const_data_screen_aligned_ib);
-				gpu_draw_indexed_vertices();
+				gpu_draw();
 				_gpu_end();
 			}
 		}

@@ -15,12 +15,14 @@ let dir = flags.name.toLowerCase();
 if (!flags.lite) {
 	project.add_define("IDLE_SLEEP");
 
-	project.add_cfiles('sources/libs/kong/libs/*.c');
-	project.add_cfiles('sources/libs/kong/*.c');
-	project.add_cfiles('sources/libs/kong/backends/*.c');
+	project.add_cfiles("sources/libs/kong/libs/*.c");
+	project.add_cfiles("sources/libs/kong/*.c");
+	project.add_cfiles("sources/libs/kong/backends/*.c");
+	project.add_define("WITH_KONG");
+
 	if (platform === "windows") {
-		project.add_define('_CRT_SECURE_NO_WARNINGS');
-		project.add_lib('d3dcompiler');
+		project.add_define("_CRT_SECURE_NO_WARNINGS");
+		project.add_lib("d3dcompiler");
 	}
 
 	if (flags.with_onnx) {

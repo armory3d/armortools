@@ -2,13 +2,13 @@
 // Turn picked color id into mask
 
 #[set(everything)]
+const sampler_linear: sampler;
+
+#[set(everything)]
 const texpaint_colorid: tex2d; // 1x1 picked color
 
 #[set(everything)]
 const texcolorid: tex2d;
-
-#[set(everything)]
-const sampler_linear: sampler;
 
 struct vert_in {
 	pos: float2;

@@ -183,7 +183,6 @@ declare function color_set_ab(c: i32, i: u8): i32;
 declare function _iron_init(ops: iron_window_options_t): void;
 declare function iron_set_app_name(name: string): void;
 declare function iron_log(v: any): void;
-declare function iron_gpu_clear(color: i32, depth: f32 = 0.0, flags: i32 = clear_flag_t.COLOR): void;
 declare function _iron_set_update_callback(callback: ()=>void): void;
 declare function _iron_set_drop_files_callback(callback: (file: string)=>void): void;
 declare function iron_set_cut_copy_paste_callback(on_cut: ()=>string, on_copy: ()=>string, on_paste: (text: string)=>void): void;
@@ -214,21 +213,21 @@ declare function iron_show_keyboard(show: bool): void;
 declare function gpu_create_index_buffer(count: i32): any;
 declare function gpu_delete_index_buffer(buffer: any): void;
 declare function gpu_lock_index_buffer(buffer: any): u32_array_t;
-declare function gpu_index_buffer_unlock_all(buffer: any): void;
+declare function gpu_index_buffer_unlock(buffer: any): void;
 declare function gpu_set_index_buffer(buffer: any): void;
 declare function gpu_create_vertex_buffer(count: i32, structure: iron_gpu_vertex_structure_t, usage: i32): any;
 declare function gpu_delete_vertex_buffer(buffer: any): void;
 declare function gpu_lock_vertex_buffer(buffer: any): buffer_t;
-declare function iron_gpu_vertex_buffer_unlock_all(buffer: any): void;
+declare function iron_gpu_vertex_buffer_unlock(buffer: any): void;
 declare function gpu_set_vertex_buffer(buffer: any): void;
-declare function gpu_draw_indexed_vertices(): void;
+declare function gpu_draw(): void;
 declare function gpu_create_shader(data: buffer_t, type: i32): iron_gpu_shader_t;
 declare function gpu_create_shader_from_source(source: string, shader_type: shader_type_t): iron_gpu_shader_t;
 declare function iron_gpu_shader_destroy(shader: iron_gpu_shader_t): void;
 declare function gpu_create_pipeline(): any;
 declare function gpu_delete_pipeline(pipeline: any): void;
 declare function gpu_compile_pipeline(pipeline: any): void;
-declare function iron_gpu_set_pipeline(pipeline: any): void;
+declare function gpu_set_pipeline(pipeline: any): void;
 declare function iron_load_image(file: string, readable: bool): any;
 declare function iron_unload_image(image: iron_gpu_texture_t): void;
 declare function iron_load_sound(file: string): any;
@@ -283,7 +282,7 @@ declare function iron_gpu_render_target_set_depth_from(target: any, source: any)
 declare function gpu_viewport(x: i32, y: i32, width: i32, height: i32): void;
 declare function gpu_scissor(x: i32, y: i32, width: i32, height: i32): void;
 declare function gpu_disable_scissor(): void;
-declare function _gpu_begin(render_target: iron_gpu_texture_t, additional: iron_gpu_texture_t[] = null): void;
+declare function _gpu_begin(render_target: iron_gpu_texture_t, additional: iron_gpu_texture_t[] = null, flags: i32 = clear_flag_t.NONE, color: i32 = 0, depth: f32 = 0.0): void;
 declare function _gpu_end(): void;
 declare function gpu_swap_buffers(): void;
 declare function iron_file_save_bytes(path: string, bytes: buffer_t, length?: i32): void;
@@ -295,7 +294,7 @@ declare function iron_get_files_location(): string;
 declare function _iron_http_request(url: string, size: i32, callback: (url: string, _: buffer_t)=>void): void;
 
 declare function draw_init(image_vert: buffer_t, image_frag: buffer_t, rect_vert: buffer_t, rect_frag: buffer_t, tris_vert: buffer_t, tris_frag: buffer_t, text_vert: buffer_t, text_frag: buffer_t): void;
-declare function draw_begin(render_target: iron_gpu_texture_t = null): void;
+declare function draw_begin(render_target: iron_gpu_texture_t = null, clear: bool = false, color: u32 = 0): void;
 declare function draw_end(): void;
 declare function draw_scaled_sub_image(image: iron_gpu_texture_t, sx: f32, sy: f32, sw: f32, sh: f32, dx: f32, dy: f32, dw: f32, dh: f32): void;
 declare function draw_sub_image(image: iron_gpu_texture_t, x: f32, y: f32, sx: f32, sy: f32, sw: f32, sh: f32): void;
@@ -641,6 +640,7 @@ declare type iron_gpu_constant_location_t = any;
 declare type iron_gpu_texture_unit_t = any;
 
 enum clear_flag_t {
+	NONE = 0,
 	COLOR = 1,
 	DEPTH = 2,
 }

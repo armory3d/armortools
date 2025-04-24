@@ -1,14 +1,14 @@
 
 #[set(everything)]
-const my_texture: tex2d;
+const constants: {
+	WVP: float4x4;
+};
 
 #[set(everything)]
 const sampler_linear: sampler;
 
 #[set(everything)]
-const constants: {
-	WVP: float4x4;
-};
+const my_texture: tex2d;
 
 struct vert_in {
 	pos: float4;

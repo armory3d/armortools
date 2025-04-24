@@ -82,7 +82,7 @@ struct vk_context vk_ctx = {0};
 void iron_vulkan_get_instance_extensions(const char **extensions, int *index);
 VkBool32 iron_vulkan_get_physical_device_presentation_support(VkPhysicalDevice physical_device, uint32_t queue_family_index);
 VkResult iron_vulkan_create_surface(VkInstance instance, VkSurfaceKHR *surface);
-void iron_gpu_internal_resize(int, int);
+void gpu_internal_resize(int, int);
 
 VkBool32 vkDebugUtilsMessengerCallbackEXT(
 	VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
@@ -248,14 +248,14 @@ void create_descriptor_layout(void) {
 	vkCreateDescriptorPool(vk_ctx.device, &pool_info, NULL, &descriptor_pool);
 }
 
-void iron_internal_resize(int width, int height) {
+void iron_gpu_internal_resize(int width, int height) {
 	struct vk_window *window = &vk_ctx.windows[0];
 	if (window->width != width || window->height != height) {
 		window->resized = true;
 		window->width = width;
 		window->height = height;
 	}
-	iron_gpu_internal_resize(width, height);
+	gpu_internal_resize(width, height);
 }
 
 VkSwapchainKHR cleanup_swapchain() {
@@ -1044,7 +1044,13 @@ void iron_gpu_internal_init() {
 	vkCreateSemaphore(vk_ctx.device, &sem_info, NULL, &relay_semaphore);
 }
 
-void iron_gpu_internal_destroy() {}
+void iron_gpu_internal_destroy() {
+	struct vk_window *window = &vk_ctx.windows[0];
+	VkSwapchainKHR swapchain = cleanup_swapchain();
+	vkDestroyRenderPass(vk_ctx.device, window->rendertarget_render_pass, NULL);
+	vk.fpDestroySwapchainKHR(vk_ctx.device, swapchain, NULL);
+	vk.fpDestroySurfaceKHR(vk_ctx.instance, window->surface, NULL);
+}
 
 void iron_vulkan_init_window() {
 	// this function is used in the android backend
@@ -1101,18 +1107,6 @@ void iron_gpu_internal_init_window(int depthBufferBits, bool vsync) {
 
 	began = false;
 	iron_gpu_begin(NULL);
-}
-
-void iron_gpu_internal_destroy_window() {
-	struct vk_window *window = &vk_ctx.windows[0];
-	VkSwapchainKHR swapchain = cleanup_swapchain();
-	vkDestroyRenderPass(vk_ctx.device, window->rendertarget_render_pass, NULL);
-	vk.fpDestroySwapchainKHR(vk_ctx.device, swapchain, NULL);
-	vk.fpDestroySurfaceKHR(vk_ctx.instance, window->surface, NULL);
-}
-
-bool iron_gpu_swap_buffers() {
-	return true;
 }
 
 void iron_gpu_begin(iron_gpu_texture_t *renderTarget) {
@@ -1297,7 +1291,7 @@ void iron_gpu_command_list_destroy(iron_gpu_command_list_t *list) {
 }
 
 void iron_gpu_command_list_begin(iron_gpu_command_list_t *list) {
-	iron_gpu_command_list_wait_for_execution_to_finish(list);
+	iron_gpu_command_list_wait(list);
 
 	vkResetCommandBuffer(list->impl._buffer, 0);
 	VkCommandBufferBeginInfo cmd_buf_info = {
@@ -1393,49 +1387,48 @@ void iron_gpu_command_list_end(iron_gpu_command_list_t *list) {
 	vkCmdPipelineBarrier(list->impl._buffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, NULL, 0, NULL, 1, pmemory_barrier);
 
 	vkEndCommandBuffer(list->impl._buffer);
-}
 
-void iron_gpu_command_list_clear(iron_gpu_command_list_t *list, struct iron_gpu_texture *renderTarget, unsigned flags, unsigned color, float depth) {
-	VkClearRect clearRect = {
-		.rect.offset.x = 0,
-		.rect.offset.y = 0,
-		.rect.extent.width = renderTarget->width,
-		.rect.extent.height = renderTarget->height,
-		.baseArrayLayer = 0,
-		.layerCount = 1,
+	// Make sure the previous execution is done, so we can reuse the fence
+	// Not optimal of course
+	iron_gpu_command_list_wait(list);
+	vkResetFences(vk_ctx.device, 1, &list->impl.fence);
+
+	VkPipelineStageFlags pipe_stage_flags = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+	VkSubmitInfo submit_info = {
+		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+		.pNext = NULL,
 	};
 
-	int count = 0;
-	VkClearAttachment attachments[2];
-	if (flags & IRON_GPU_CLEAR_COLOR) {
-		VkClearColorValue clearColor = {0};
-		clearColor.float32[0] = ((color & 0x00ff0000) >> 16) / 255.0f;
-		clearColor.float32[1] = ((color & 0x0000ff00) >> 8) / 255.0f;
-		clearColor.float32[2] = (color & 0x000000ff) / 255.0f;
-		clearColor.float32[3] = ((color & 0xff000000) >> 24) / 255.0f;
-		attachments[count].aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		attachments[count].colorAttachment = 0;
-		attachments[count].clearValue.color = clearColor;
-		count++;
+	VkSemaphore semaphores[2] = { framebuffer_available, relay_semaphore };
+	VkPipelineStageFlags dst_stage_flags[2] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT};
+	if (wait_for_framebuffer) {
+		submit_info.pWaitSemaphores = semaphores;
+		submit_info.pWaitDstStageMask = dst_stage_flags;
+		submit_info.waitSemaphoreCount = wait_for_relay ? 2 : 1;
+		wait_for_framebuffer = false;
 	}
-	if ((flags & IRON_GPU_CLEAR_DEPTH) && renderTarget->impl.depthBufferBits > 0) {
-		attachments[count].aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-		attachments[count].clearValue.depthStencil.depth = depth;
-		attachments[count].clearValue.depthStencil.stencil = 0;
-		count++;
+	else if (wait_for_relay) {
+		submit_info.waitSemaphoreCount = 1;
+		submit_info.pWaitSemaphores = &semaphores[1];
+		submit_info.pWaitDstStageMask = &dst_stage_flags[1];
 	}
-	vkCmdClearAttachments(list->impl._buffer, count, attachments, 1, &clearRect);
+
+	submit_info.commandBufferCount = 1;
+	submit_info.pCommandBuffers = &list->impl._buffer;
+	submit_info.signalSemaphoreCount = 1;
+	submit_info.pSignalSemaphores = &relay_semaphore;
+	wait_for_relay = true;
+
+	vkQueueSubmit(vk_ctx.queue, 1, &submit_info, list->impl.fence);
 }
 
 void iron_gpu_command_list_render_target_to_framebuffer_barrier(iron_gpu_command_list_t *list, struct iron_gpu_texture *renderTarget) {}
 
 void iron_gpu_command_list_framebuffer_to_render_target_barrier(iron_gpu_command_list_t *list, struct iron_gpu_texture *renderTarget) {}
 
-void iron_gpu_command_list_draw_indexed_vertices(iron_gpu_command_list_t *list) {
-	iron_gpu_command_list_draw_indexed_vertices_from_to(list, 0, list->impl._indexCount);
-}
-
-void iron_gpu_command_list_draw_indexed_vertices_from_to(iron_gpu_command_list_t *list, int start, int count) {
+void iron_gpu_command_list_draw(iron_gpu_command_list_t *list) {
+	int start = 0;
+	int count = list->impl._indexCount;
 	vkCmdDrawIndexed(list->impl._buffer, count, 1, start, 0, 0);
 }
 
@@ -1562,7 +1555,7 @@ void iron_internal_restore_render_target(iron_gpu_command_list_t *list, struct i
 	}
 }
 
-void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, struct iron_gpu_texture **targets, int count) {
+void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, struct iron_gpu_texture **targets, int count, unsigned flags, unsigned color, float depth) {
 	for (int i = 0; i < count; ++i) {
 		current_render_targets[i] = targets[i];
 	}
@@ -1745,6 +1738,36 @@ void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, str
 		current_vulkan_pipeline = current_pipeline->impl.rendertarget_pipeline;
 		vkCmdBindPipeline(list->impl._buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, current_pipeline->impl.rendertarget_pipeline);
 	}
+
+	VkClearRect clearRect = {
+		.rect.offset.x = 0,
+		.rect.offset.y = 0,
+		.rect.extent.width = renderTarget->width,
+		.rect.extent.height = renderTarget->height,
+		.baseArrayLayer = 0,
+		.layerCount = 1,
+	};
+
+	int count = 0;
+	VkClearAttachment attachments[2];
+	if (flags & IRON_GPU_CLEAR_COLOR) {
+		VkClearColorValue clearColor = {0};
+		clearColor.float32[0] = ((color & 0x00ff0000) >> 16) / 255.0f;
+		clearColor.float32[1] = ((color & 0x0000ff00) >> 8) / 255.0f;
+		clearColor.float32[2] = (color & 0x000000ff) / 255.0f;
+		clearColor.float32[3] = ((color & 0xff000000) >> 24) / 255.0f;
+		attachments[count].aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		attachments[count].colorAttachment = 0;
+		attachments[count].clearValue.color = clearColor;
+		count++;
+	}
+	if ((flags & IRON_GPU_CLEAR_DEPTH) && renderTarget->impl.depthBufferBits > 0) {
+		attachments[count].aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+		attachments[count].clearValue.depthStencil.depth = depth;
+		attachments[count].clearValue.depthStencil.stencil = 0;
+		count++;
+	}
+	vkCmdClearAttachments(list->impl._buffer, count, attachments, 1, &clearRect);
 }
 
 void iron_gpu_command_list_upload_index_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer) {}
@@ -1814,8 +1837,7 @@ void iron_gpu_command_list_get_render_target_pixels(iron_gpu_command_list_t *lis
 	in_render_pass = true;
 
 	iron_gpu_command_list_end(list);
-	iron_gpu_command_list_execute(list);
-	iron_gpu_command_list_wait_for_execution_to_finish(list);
+	iron_gpu_command_list_wait(list);
 	iron_gpu_command_list_begin(list);
 
 	// Read buffer
@@ -2014,42 +2036,7 @@ void iron_gpu_command_list_set_constant_buffer(iron_gpu_command_list_t *list, st
 	vkCmdBindDescriptorSets(list->impl._buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, current_pipeline->impl.pipeline_layout, 0, 1, &descriptor_set, 2, offsets);
 }
 
-void iron_gpu_command_list_execute(iron_gpu_command_list_t *list) {
-	// Make sure the previous execution is done, so we can reuse the fence
-	// Not optimal of course
-	iron_gpu_command_list_wait_for_execution_to_finish(list);
-	vkResetFences(vk_ctx.device, 1, &list->impl.fence);
-
-	VkPipelineStageFlags pipe_stage_flags = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-	VkSubmitInfo submit_info = {
-		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-		.pNext = NULL,
-	};
-
-	VkSemaphore semaphores[2] = { framebuffer_available, relay_semaphore };
-	VkPipelineStageFlags dst_stage_flags[2] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT};
-	if (wait_for_framebuffer) {
-		submit_info.pWaitSemaphores = semaphores;
-		submit_info.pWaitDstStageMask = dst_stage_flags;
-		submit_info.waitSemaphoreCount = wait_for_relay ? 2 : 1;
-		wait_for_framebuffer = false;
-	}
-	else if (wait_for_relay) {
-		submit_info.waitSemaphoreCount = 1;
-		submit_info.pWaitSemaphores = &semaphores[1];
-		submit_info.pWaitDstStageMask = &dst_stage_flags[1];
-	}
-
-	submit_info.commandBufferCount = 1;
-	submit_info.pCommandBuffers = &list->impl._buffer;
-	submit_info.signalSemaphoreCount = 1;
-	submit_info.pSignalSemaphores = &relay_semaphore;
-	wait_for_relay = true;
-
-	vkQueueSubmit(vk_ctx.queue, 1, &submit_info, list->impl.fence);
-}
-
-void iron_gpu_command_list_wait_for_execution_to_finish(iron_gpu_command_list_t *list) {
+void iron_gpu_command_list_wait(iron_gpu_command_list_t *list) {
 	vkWaitForFences(vk_ctx.device, 1, &list->impl.fence, VK_TRUE, UINT64_MAX);
 }
 
@@ -2277,8 +2264,6 @@ static VkFormat convert_image_format(iron_image_format_t format) {
 		return VK_FORMAT_R16_SFLOAT;
 	case IRON_IMAGE_FORMAT_R32:
 		return VK_FORMAT_R32_SFLOAT;
-	case IRON_IMAGE_FORMAT_BGRA32:
-		return VK_FORMAT_B8G8R8A8_UNORM;
 	case IRON_IMAGE_FORMAT_RGBA32:
 		return VK_FORMAT_R8G8B8A8_UNORM;
 	default:
@@ -2287,7 +2272,7 @@ static VkFormat convert_image_format(iron_image_format_t format) {
 }
 
 void iron_gpu_pipeline_init(iron_gpu_pipeline_t *pipeline) {
-	iron_gpu_internal_pipeline_init(pipeline);
+	gpu_internal_pipeline_init(pipeline);
 }
 
 void iron_gpu_pipeline_destroy(iron_gpu_pipeline_t *pipeline) {
@@ -3333,20 +3318,14 @@ void iron_gpu_vertex_buffer_destroy(iron_gpu_buffer_t *buffer) {
 	vkDestroyBuffer(vk_ctx.device, buffer->impl.buf, NULL);
 }
 
-float *iron_gpu_vertex_buffer_lock_all(iron_gpu_buffer_t *buffer) {
-	return iron_gpu_vertex_buffer_lock(buffer, 0, buffer->impl.myCount);
-}
-
-float *iron_gpu_vertex_buffer_lock(iron_gpu_buffer_t *buffer, int start, int count) {
+float *iron_gpu_vertex_buffer_lock(iron_gpu_buffer_t *buffer) {
+	int start = 0;
+	int count = buffer->impl.myCount;
 	vkMapMemory(vk_ctx.device, buffer->impl.mem, start * buffer->impl.myStride, count * buffer->impl.myStride, 0, (void **)&buffer->impl.data);
 	return buffer->impl.data;
 }
 
-void iron_gpu_vertex_buffer_unlock_all(iron_gpu_buffer_t *buffer) {
-	vkUnmapMemory(vk_ctx.device, buffer->impl.mem);
-}
-
-void iron_gpu_vertex_buffer_unlock(iron_gpu_buffer_t *buffer, int count) {
+void iron_gpu_vertex_buffer_unlock(iron_gpu_buffer_t *buffer) {
 	vkUnmapMemory(vk_ctx.device, buffer->impl.mem);
 }
 
@@ -3407,10 +3386,6 @@ void iron_gpu_constant_buffer_init(iron_gpu_buffer_t *buffer, int size) {
 void iron_gpu_constant_buffer_destroy(iron_gpu_buffer_t *buffer) {
 	vkFreeMemory(vk_ctx.device, buffer->impl.mem, NULL);
 	vkDestroyBuffer(vk_ctx.device, buffer->impl.buf, NULL);
-}
-
-void iron_gpu_constant_buffer_lock_all(iron_gpu_buffer_t *buffer) {
-	iron_gpu_constant_buffer_lock(buffer, 0, iron_gpu_constant_buffer_size(buffer));
 }
 
 void iron_gpu_constant_buffer_lock(iron_gpu_buffer_t *buffer, int start, int count) {
@@ -3481,22 +3456,16 @@ static int iron_gpu_internal_index_buffer_stride(iron_gpu_buffer_t *buffer) {
 	return 4;
 }
 
-void *iron_gpu_index_buffer_lock_all(iron_gpu_buffer_t *buffer) {
-	return iron_gpu_index_buffer_lock(buffer, 0, iron_gpu_index_buffer_count(buffer));
-}
-
-void *iron_gpu_index_buffer_lock(iron_gpu_buffer_t *buffer, int start, int count) {
+void *iron_gpu_index_buffer_lock(iron_gpu_buffer_t *buffer) {
+	int start = 0;
+	int count = iron_gpu_index_buffer_count(buffer);
 	uint8_t *data;
 	vkMapMemory(vk_ctx.device, buffer->impl.mem, 0, buffer->impl.mem_alloc.allocationSize, 0, (void **)&data);
 	return &data[start * iron_gpu_internal_index_buffer_stride(buffer)];
 }
 
-void iron_gpu_index_buffer_unlock_all(iron_gpu_buffer_t *buffer) {
+void iron_gpu_index_buffer_unlock(iron_gpu_buffer_t *buffer) {
 	vkUnmapMemory(vk_ctx.device, buffer->impl.mem);
-}
-
-void iron_gpu_index_buffer_unlock(iron_gpu_buffer_t *buffer, int count) {
-	iron_gpu_index_buffer_unlock_all(buffer);
 }
 
 int iron_gpu_index_buffer_count(iron_gpu_buffer_t *buffer) {

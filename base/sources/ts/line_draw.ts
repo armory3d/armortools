@@ -228,12 +228,12 @@ function line_draw_begin() {
 }
 
 function line_draw_end(overlay: bool = false) {
-	iron_gpu_vertex_buffer_unlock_all(line_draw_vertex_buffer);
-	gpu_index_buffer_unlock_all(line_draw_index_buffer);
+	iron_gpu_vertex_buffer_unlock(line_draw_vertex_buffer);
+	gpu_index_buffer_unlock(line_draw_index_buffer);
 
 	gpu_set_vertex_buffer(line_draw_vertex_buffer);
 	gpu_set_index_buffer(line_draw_index_buffer);
-	iron_gpu_set_pipeline(overlay ? line_draw_overlay_pipeline : line_draw_pipeline);
+	gpu_set_pipeline(overlay ? line_draw_overlay_pipeline : line_draw_pipeline);
 	let camera: camera_object_t = scene_camera;
 	line_draw_vp = mat4_clone(camera.v);
 	line_draw_vp = mat4_mult_mat(line_draw_vp, camera.p);
@@ -244,7 +244,7 @@ function line_draw_end(overlay: bool = false) {
 		color_get_bb(line_draw_color) / 255
 	);
 	////
-	// gpu_draw_indexed_vertices(0, line_draw_lines * 6);
+	// gpu_draw(0, line_draw_lines * 6);
 	////
 }
 
@@ -268,13 +268,13 @@ function shape_draw_sphere(mat: mat4_t) {
 			buffer_set_f32(data, (i * 3 + 1) * 4, posa[i * 4 + 1] / 32767);
 			buffer_set_f32(data, (i * 3 + 2) * 4, posa[i * 4 + 2] / 32767);
 		}
-		iron_gpu_vertex_buffer_unlock_all(_shape_draw_sphere_vb);
+		iron_gpu_vertex_buffer_unlock(_shape_draw_sphere_vb);
 		_shape_draw_sphere_ib = md._.index_buffers[0];
 	}
 
 	gpu_set_vertex_buffer(_shape_draw_sphere_vb);
 	gpu_set_index_buffer(_shape_draw_sphere_ib);
-	iron_gpu_set_pipeline(line_draw_overlay_pipeline);
+	gpu_set_pipeline(line_draw_overlay_pipeline);
 	let camera: camera_object_t = scene_camera;
 	line_draw_vp = mat4_clone(mat);
 	let f: f32 = line_draw_strength * 50;
@@ -287,5 +287,5 @@ function shape_draw_sphere(mat: mat4_t) {
 		color_get_gb(line_draw_color) / 255,
 		color_get_bb(line_draw_color) / 255
 	);
-	gpu_draw_indexed_vertices();
+	gpu_draw();
 }

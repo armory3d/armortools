@@ -63,20 +63,8 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 	if (context_raw.pdirty > 0) {
 
 		if (context_raw.tool == workspace_tool_t.PICKER) {
-
 				let additional: string[] = ["texpaint_nor_picker", "texpaint_pack_picker", "texpaint_uv_picker"];
-				///if arm_metal
-				// render_path_set_target("texpaint_picker");
-				// render_path_clear_target(0xff000000);
-				// render_path_set_target("texpaint_nor_picker");
-				// render_path_clear_target(0xff000000);
-				// render_path_set_target("texpaint_pack_picker");
-				// render_path_clear_target(0xff000000);
 				render_path_set_target("texpaint_picker", additional);
-				///else
-				render_path_set_target("texpaint_picker", additional);
-				// render_path_clear_target(0xff000000);
-				///end
 				render_path_bind_target("gbuffer2", "gbuffer2");
 				// tid = context_raw.layer.id;
 				render_path_bind_target("texpaint" + tid, "texpaint");
@@ -188,7 +176,7 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	let geom: mesh_data_t = plane.data;
 
 	render_path_set_target("");
-	iron_gpu_set_pipeline(pipes_cursor);
+	gpu_set_pipeline(pipes_cursor);
 	let gbuffer0: render_target_t = map_get(render_path_render_targets, "gbuffer0");
 	gpu_set_texture_depth(pipes_cursor_gbufferd, gbuffer0._image);
 	gpu_set_float2(pipes_cursor_mouse, mx, my);
@@ -200,19 +188,9 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	gpu_set_matrix4(pipes_cursor_vp, scene_camera.vp);
 	let inv_vp: mat4_t = mat4_inv(scene_camera.vp);
 	gpu_set_matrix4(pipes_cursor_inv_vp, inv_vp);
-	////if (arm_metal || arm_vulkan)
-	// let vs: vertex_element_t[] = [
-	// 	{
-	// 		name: "tex",
-	// 		data: "short2norm"
-	// 	}
-	// ];
-	// gpu_set_vertex_buffer(mesh_data_get(geom, vs));
-	////else
 	gpu_set_vertex_buffer(geom._.vertex_buffer);
-	////end
 	gpu_set_index_buffer(geom._.index_buffers[0]);
-	gpu_draw_indexed_vertices();
+	gpu_draw();
 
 	gpu_disable_scissor();
 	render_path_end();
@@ -249,14 +227,11 @@ function render_path_paint_draw() {
 	if (context_raw.brush_blend_dirty) {
 		context_raw.brush_blend_dirty = false;
 		///if arm_metal
-		render_path_set_target("texpaint_blend0");
-		render_path_clear_target(0x00000000);
-		render_path_set_target("texpaint_blend1");
-		render_path_clear_target(0x00000000);
+		render_path_set_target("texpaint_blend0", null, clear_flag_t.COLOR, 0x00000000);
+		render_path_set_target("texpaint_blend1", null, clear_flag_t.COLOR, 0x00000000);
 		///else
 		let additional: string[] = ["texpaint_blend1"];
-		render_path_set_target("texpaint_blend0", additional);
-		render_path_clear_target(0x00000000);
+		render_path_set_target("texpaint_blend0", additional, clear_flag_t.COLOR, 0x00000000);
 		///end
 	}
 }

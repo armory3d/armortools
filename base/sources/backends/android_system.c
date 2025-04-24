@@ -847,7 +847,6 @@ static void cmd(struct android_app *app, int32_t cmd) {
 			}
 			else {
 				initDisplay();
-				iron_gpu_swap_buffers();
 			}
 
 			updateAppForegroundStatus(true, appIsForeground);
@@ -1070,7 +1069,7 @@ double iron_time() {
 	return (double)(now.tv_sec - start_sec) + (now.tv_usec / 1000000.0);
 }
 
-void iron_internal_resize(int width, int height);
+void iron_gpu_internal_resize(int width, int height);
 
 bool iron_internal_handle_messages(void) {
 	iron_mutex_lock(&unicode_mutex);
@@ -1115,7 +1114,7 @@ bool iron_internal_handle_messages(void) {
 		int32_t width = iron_android_width();
 		int32_t height = iron_android_height();
 #ifdef IRON_VULKAN
-		iron_internal_resize(width, height);
+		iron_gpu_internal_resize(width, height);
 #endif
 		iron_internal_call_resize_callback(width, height);
 	}

@@ -9,10 +9,10 @@ const constants: {
 };
 
 #[set(everything)]
-const tex: tex2d;
+const sampler_linear: sampler;
 
 #[set(everything)]
-const sampler_linear: sampler;
+const tex: tex2d;
 
 struct vert_in {
 	pos: float2;

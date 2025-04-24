@@ -52,17 +52,9 @@ typedef struct {
 typedef struct {
 	int myCount;
 	int myStride;
-	void *mtlBuffer;
-	bool gpuMemory;
-	int lastStart;
-	int lastCount;
-
 	void *metal_buffer;
 	int count;
 	bool gpu_memory;
-	int last_start;
-	int last_count;
-
 	void *_buffer;
 	int mySize;
 } gpu_buffer_impl_t;

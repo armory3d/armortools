@@ -741,8 +741,7 @@ function ui_nodes_draw_grid(zoom: f32): iron_gpu_texture_t {
 	}
 
 	let grid: iron_gpu_texture_t = gpu_create_render_target(w, h);
-	draw_begin(grid);
-	iron_gpu_clear(ui_nodes_ui.ops.theme.SEPARATOR_COL);
+	draw_begin(grid, true, ui_nodes_ui.ops.theme.SEPARATOR_COL);
 
 	let sep_col: i32 = ui_nodes_ui.ops.theme.SEPARATOR_COL;
 	let line_primary: i32 = sep_col - 0x00050505;

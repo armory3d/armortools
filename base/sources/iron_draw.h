@@ -27,7 +27,7 @@ typedef struct draw_font {
 } draw_font_t;
 
 void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *rect_vert, buffer_t *rect_frag, buffer_t *tris_vert, buffer_t *tris_frag, buffer_t *text_vert, buffer_t *text_frag);
-void draw_begin(iron_gpu_texture_t *target);
+void draw_begin(iron_gpu_texture_t *target, bool clear, unsigned color);
 void draw_scaled_sub_image(iron_gpu_texture_t *img, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh);
 void draw_scaled_image(iron_gpu_texture_t *tex, float dx, float dy, float dw, float dh);
 void draw_sub_image(iron_gpu_texture_t *tex, float sx, float sy, float sw, float sh, float x, float y);
@@ -55,8 +55,7 @@ int draw_font_height(draw_font_t *font, int font_size);
 float draw_sub_string_width(draw_font_t *font, int font_size, const char *text, int start, int end);
 int draw_string_width(draw_font_t *font, int font_size, const char *text);
 void draw_set_bilinear_filter(bool bilinear);
-void draw_restore_render_target(void);
-void draw_set_render_target(iron_gpu_texture_t *target);
+void draw_set_render_target(iron_gpu_texture_t *target, bool clear, unsigned color);
 
 void draw_filled_circle(float cx, float cy, float radius, int segments);
 void draw_circle(float cx, float cy, float radius, int segments, float strength);

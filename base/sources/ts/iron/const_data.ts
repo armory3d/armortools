@@ -17,14 +17,14 @@ function const_data_create_screen_aligned_data() {
 	for (let i: i32 = 0; i < math_floor((vertices.length) / 4); ++i) {
 		buffer_set_f32(vertices, i * 4, data[i]);
 	}
-	iron_gpu_vertex_buffer_unlock_all(const_data_screen_aligned_vb);
+	iron_gpu_vertex_buffer_unlock(const_data_screen_aligned_vb);
 
 	const_data_screen_aligned_ib = gpu_create_index_buffer(indices.length);
 	let id: u32_array_t = gpu_lock_index_buffer(const_data_screen_aligned_ib);
 	for (let i: i32 = 0; i < id.length; ++i) {
 		id[i] = indices[i];
 	}
-	gpu_index_buffer_unlock_all(const_data_screen_aligned_ib);
+	gpu_index_buffer_unlock(const_data_screen_aligned_ib);
 }
 
 ///include "const_data.h"
@@ -50,12 +50,12 @@ function const_data_create_skydome_data() {
 		buffer_set_f32(vertices, (i * struct_length + 4) * 4, ARRAY_ACCESS(_const_data_skydome_nor, i * 3 + 1));
 		buffer_set_f32(vertices, (i * struct_length + 5) * 4, ARRAY_ACCESS(_const_data_skydome_nor, i * 3 + 2));
 	}
-	iron_gpu_vertex_buffer_unlock_all(const_data_skydome_vb);
+	iron_gpu_vertex_buffer_unlock(const_data_skydome_vb);
 
 	const_data_skydome_ib = gpu_create_index_buffer(_const_data_skydome_indices_count);
 	let id: u32_array_t = gpu_lock_index_buffer(const_data_skydome_ib);
 	for (let i: i32 = 0; i < id.length; ++i) {
 		id[i] = ARRAY_ACCESS(_const_data_skydome_indices, i);
 	}
-	gpu_index_buffer_unlock_all(const_data_skydome_ib);
+	gpu_index_buffer_unlock(const_data_skydome_ib);
 }

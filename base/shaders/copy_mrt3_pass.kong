@@ -1,5 +1,8 @@
 
 #[set(everything)]
+const sampler_linear: sampler;
+
+#[set(everything)]
 const tex0: tex2d;
 
 #[set(everything)]
@@ -7,9 +10,6 @@ const tex1: tex2d;
 
 #[set(everything)]
 const tex2: tex2d;
-
-#[set(everything)]
-const sampler_linear: sampler;
 
 struct vert_in {
 	pos: float2;

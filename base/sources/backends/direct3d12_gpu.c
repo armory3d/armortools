@@ -13,7 +13,7 @@
 #include <iron_math.h>
 #include <backends/windows_system.h>
 
-void iron_gpu_internal_resize(int, int);
+void gpu_internal_resize(int, int);
 void iron_memory_emergency();
 
 static ID3D12RootSignature *globalRootSignature = NULL;
@@ -131,7 +131,6 @@ static int formatByteSize(iron_image_format_t format) {
 		return 1;
 	case IRON_IMAGE_FORMAT_R16:
 		return 2;
-	case IRON_IMAGE_FORMAT_BGRA32:
 	case IRON_IMAGE_FORMAT_RGBA32:
 	case IRON_IMAGE_FORMAT_R32:
 		return 4;
@@ -238,8 +237,6 @@ static void create_root_signature() {
 										&globalRootSignature);
 }
 
-void iron_gpu_internal_destroy_window() {}
-
 void iron_gpu_internal_destroy() {
 	if (device) {
 		device->lpVtbl->Release(device);
@@ -341,22 +338,18 @@ void iron_gpu_begin(iron_gpu_texture_t *renderTarget) {
 
 void iron_gpu_end() {
 	began = false;
+	if (window_swapChain) {
+		window_swapChain->lpVtbl->Present(window_swapChain, window_vsync, 0);
+	}
 }
 
-void iron_internal_resize(int width, int height) {
+void iron_gpu_internal_resize(int width, int height) {
 	if (width == 0 || height == 0) {
 		return;
 	}
 	window_new_width = width;
 	window_new_height = height;
-	iron_gpu_internal_resize(width, height);
-}
-
-bool iron_gpu_swap_buffers() {
-	if (window_swapChain) {
-		window_swapChain->lpVtbl->Present(window_swapChain, window_vsync, 0);
-	}
-	return true;
+	gpu_internal_resize(width, height);
 }
 
 bool iron_gpu_raytrace_supported() {
@@ -411,27 +404,10 @@ void iron_gpu_command_list_begin(struct iron_gpu_command_list *list) {
 
 void iron_gpu_command_list_end(struct iron_gpu_command_list *list) {
 	list->impl._commandList->lpVtbl->Close(list->impl._commandList);
-}
 
-void iron_gpu_command_list_clear(struct iron_gpu_command_list *list, iron_gpu_texture_t *renderTarget, unsigned flags, unsigned color, float depth) {
-	if (flags & IRON_GPU_CLEAR_COLOR) {
-		float clearColor[] = {((color & 0x00ff0000) >> 16) / 255.0f,
-							  ((color & 0x0000ff00) >> 8) / 255.0f,
-							  (color & 0x000000ff) / 255.0f,
-							  ((color & 0xff000000) >> 24) / 255.0f};
-
-		D3D12_CPU_DESCRIPTOR_HANDLE handle;
-		renderTarget->impl.renderTargetDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(renderTarget->impl.renderTargetDescriptorHeap, &handle);
-		list->impl._commandList->lpVtbl->ClearRenderTargetView(list->impl._commandList, handle, clearColor, 0, NULL);
-	}
-	if (flags & IRON_GPU_CLEAR_DEPTH) {
-		D3D12_CLEAR_FLAGS d3dflags = D3D12_CLEAR_FLAG_DEPTH;
-		if (renderTarget->impl.depthStencilDescriptorHeap != NULL) {
-			D3D12_CPU_DESCRIPTOR_HANDLE handle;
-			renderTarget->impl.depthStencilDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(renderTarget->impl.depthStencilDescriptorHeap, &handle);
-			list->impl._commandList->lpVtbl->ClearDepthStencilView(list->impl._commandList, handle, d3dflags, depth, 0, 0, NULL);
-		}
-	}
+	ID3D12CommandList *commandLists[] = {(ID3D12CommandList *)list->impl._commandList};
+	queue->lpVtbl->ExecuteCommandLists(queue, 1, commandLists);
+	queue->lpVtbl->Signal(queue, list->impl.fence, ++list->impl.fence_value);
 }
 
 void iron_gpu_command_list_render_target_to_framebuffer_barrier(struct iron_gpu_command_list *list, iron_gpu_texture_t *renderTarget) {
@@ -486,22 +462,14 @@ void iron_gpu_command_list_set_constant_buffer(struct iron_gpu_command_list *lis
 	list->impl._commandList->lpVtbl->SetGraphicsRootConstantBufferView(list->impl._commandList, 1, buffer->impl.constant_buffer->lpVtbl->GetGPUVirtualAddress(buffer->impl.constant_buffer) + offset);
 }
 
-void iron_gpu_command_list_draw_indexed_vertices(struct iron_gpu_command_list *list) {
-	iron_gpu_command_list_draw_indexed_vertices_from_to(list, 0, list->impl._indexCount);
-}
-
-void iron_gpu_command_list_draw_indexed_vertices_from_to(struct iron_gpu_command_list *list, int start, int count) {
+void iron_gpu_command_list_draw(struct iron_gpu_command_list *list) {
+	int start = 0;
+	int count = list->impl._indexCount;
 	list->impl._commandList->lpVtbl->IASetPrimitiveTopology(list->impl._commandList, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	list->impl._commandList->lpVtbl->DrawIndexedInstanced(list->impl._commandList, count, 1, start, 0, 0);
 }
 
-void iron_gpu_command_list_execute(iron_gpu_command_list_t *list) {
-	ID3D12CommandList *commandLists[] = {(ID3D12CommandList *)list->impl._commandList};
-	queue->lpVtbl->ExecuteCommandLists(queue, 1, commandLists);
-	queue->lpVtbl->Signal(queue, list->impl.fence, ++list->impl.fence_value);
-}
-
-void iron_gpu_command_list_wait_for_execution_to_finish(iron_gpu_command_list_t *list) {
+void iron_gpu_command_list_wait(iron_gpu_command_list_t *list) {
 	wait_for_fence(list->impl.fence, list->impl.fence_value, list->impl.fence_event);
 }
 
@@ -610,7 +578,7 @@ void iron_gpu_command_list_set_index_buffer(struct iron_gpu_command_list *list, 
 	list->impl._commandList->lpVtbl->IASetIndexBuffer(list->impl._commandList, (D3D12_INDEX_BUFFER_VIEW *) & buffer->impl.index_buffer_view);
 }
 
-void iron_gpu_command_list_set_render_targets(struct iron_gpu_command_list *list, iron_gpu_texture_t **targets, int count) {
+void iron_gpu_command_list_set_render_targets(struct iron_gpu_command_list *list, iron_gpu_texture_t **targets, int count, unsigned flags, unsigned color, float depth) {
 	iron_gpu_texture_t *render_target = targets[0];
 
 	D3D12_CPU_DESCRIPTOR_HANDLE target_descriptors[16];
@@ -630,6 +598,25 @@ void iron_gpu_command_list_set_render_targets(struct iron_gpu_command_list *list
 	list->impl._commandList->lpVtbl->RSSetViewports(list->impl._commandList, 1, (D3D12_VIEWPORT *)&render_target->impl.viewport);
 	list->impl._commandList->lpVtbl->RSSetScissorRects(list->impl._commandList, 1, (D3D12_RECT *)&render_target->impl.scissor);
 	list->impl.current_full_scissor = render_target->impl.scissor;
+
+	if (flags & IRON_GPU_CLEAR_COLOR) {
+		float clearColor[] = {((color & 0x00ff0000) >> 16) / 255.0f,
+							  ((color & 0x0000ff00) >> 8) / 255.0f,
+							  (color & 0x000000ff) / 255.0f,
+							  ((color & 0xff000000) >> 24) / 255.0f};
+
+		D3D12_CPU_DESCRIPTOR_HANDLE handle;
+		renderTarget->impl.renderTargetDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(renderTarget->impl.renderTargetDescriptorHeap, &handle);
+		list->impl._commandList->lpVtbl->ClearRenderTargetView(list->impl._commandList, handle, clearColor, 0, NULL);
+	}
+	if (flags & IRON_GPU_CLEAR_DEPTH) {
+		D3D12_CLEAR_FLAGS d3dflags = D3D12_CLEAR_FLAG_DEPTH;
+		if (renderTarget->impl.depthStencilDescriptorHeap != NULL) {
+			D3D12_CPU_DESCRIPTOR_HANDLE handle;
+			renderTarget->impl.depthStencilDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(renderTarget->impl.depthStencilDescriptorHeap, &handle);
+			list->impl._commandList->lpVtbl->ClearDepthStencilView(list->impl._commandList, handle, d3dflags, depth, 0, 0, NULL);
+		}
+	}
 }
 
 void iron_gpu_command_list_upload_vertex_buffer(iron_gpu_command_list_t *list, struct iron_gpu_buffer *buffer) {}
@@ -786,8 +773,7 @@ void iron_gpu_command_list_get_render_target_pixels(iron_gpu_command_list_t *lis
 	}
 
 	iron_gpu_command_list_end(list);
-	iron_gpu_command_list_execute(list);
-	iron_gpu_command_list_wait_for_execution_to_finish(list);
+	iron_gpu_command_list_wait(list);
 	iron_gpu_command_list_begin(list);
 
 	// Read buffer
@@ -809,7 +795,7 @@ void iron_gpu_command_list_set_texture_from_render_target_depth(iron_gpu_command
 }
 
 void iron_gpu_pipeline_init(iron_gpu_pipeline_t *pipe) {
-	iron_gpu_internal_pipeline_init(pipe);
+	gpu_internal_pipeline_init(pipe);
 }
 
 void iron_gpu_pipeline_destroy(iron_gpu_pipeline_t *pipe) {
@@ -1545,11 +1531,9 @@ void iron_gpu_vertex_buffer_destroy(iron_gpu_buffer_t *buffer) {
 	buffer->impl.uploadBuffer->lpVtbl->Release(buffer->impl.uploadBuffer);
 }
 
-float *iron_gpu_vertex_buffer_lock_all(iron_gpu_buffer_t *buffer) {
-	return iron_gpu_vertex_buffer_lock(buffer, 0, iron_gpu_vertex_buffer_count(buffer));
-}
-
-float *iron_gpu_vertex_buffer_lock(iron_gpu_buffer_t *buffer, int start, int count) {
+float *iron_gpu_vertex_buffer_lock(iron_gpu_buffer_t *buffer) {
+	int start = 0l
+	int count = iron_gpu_vertex_buffer_count(buffer);
 	buffer->impl.lastStart = start;
 	buffer->impl.lastCount = count;
 
@@ -1565,18 +1549,10 @@ float *iron_gpu_vertex_buffer_lock(iron_gpu_buffer_t *buffer, int start, int cou
 	return (float *)bytes;
 }
 
-void iron_gpu_vertex_buffer_unlock_all(iron_gpu_buffer_t *buffer) {
+void iron_gpu_vertex_buffer_unlock(iron_gpu_buffer_t *buffer) {
 	D3D12_RANGE range = {
 		.Begin = buffer->impl.lastStart * buffer->impl.myStride,
 		.End = (buffer->impl.lastStart + buffer->impl.lastCount) * buffer->impl.myStride,
-	};
-	buffer->impl.uploadBuffer->lpVtbl->Unmap(buffer->impl.uploadBuffer, 0, &range);
-}
-
-void iron_gpu_vertex_buffer_unlock(iron_gpu_buffer_t *buffer, int count) {
-	D3D12_RANGE range = {
-		.Begin = buffer->impl.lastStart * buffer->impl.myStride,
-		.End = (buffer->impl.lastStart + count) * buffer->impl.myStride,
 	};
 	buffer->impl.uploadBuffer->lpVtbl->Unmap(buffer->impl.uploadBuffer, 0, &range);
 }
@@ -1629,10 +1605,6 @@ void iron_gpu_constant_buffer_init(iron_gpu_buffer_t *buffer, int size) {
 
 void iron_gpu_constant_buffer_destroy(iron_gpu_buffer_t *buffer) {
 	buffer->impl.constant_buffer->lpVtbl->Release(buffer->impl.constant_buffer);
-}
-
-void iron_gpu_constant_buffer_lock_all(iron_gpu_buffer_t *buffer) {
-	iron_gpu_constant_buffer_lock(buffer, 0, iron_gpu_constant_buffer_size(buffer));
 }
 
 void iron_gpu_constant_buffer_lock(iron_gpu_buffer_t *buffer, int start, int count) {
@@ -1729,11 +1701,9 @@ static int iron_gpu_internal_index_buffer_stride(iron_gpu_buffer_t *buffer) {
 	return 4;
 }
 
-void *iron_gpu_index_buffer_lock_all(iron_gpu_buffer_t *buffer) {
-	return iron_gpu_index_buffer_lock(buffer, 0, iron_gpu_index_buffer_count(buffer));
-}
-
-void *iron_gpu_index_buffer_lock(iron_gpu_buffer_t *buffer, int start, int count) {
+void *iron_gpu_index_buffer_lock(iron_gpu_buffer_t *buffer) {
+	int start = 0;
+	int count = iron_gpu_index_buffer_count(buffer);
 	buffer->impl.last_start = start;
 	buffer->impl.last_count = count;
 
@@ -1749,18 +1719,10 @@ void *iron_gpu_index_buffer_lock(iron_gpu_buffer_t *buffer, int start, int count
 	return bytes;
 }
 
-void iron_gpu_index_buffer_unlock_all(iron_gpu_buffer_t *buffer) {
+void iron_gpu_index_buffer_unlock(iron_gpu_buffer_t *buffer) {
 	D3D12_RANGE range = {
 		.Begin = buffer->impl.last_start * iron_gpu_internal_index_buffer_stride(buffer),
 		.End = (buffer->impl.last_start + buffer->impl.last_count) * iron_gpu_internal_index_buffer_stride(buffer),
-	};
-	buffer->impl.upload_buffer->lpVtbl->Unmap(buffer->impl.upload_buffer, 0, &range);
-}
-
-void iron_gpu_index_buffer_unlock(iron_gpu_buffer_t *buffer, int count) {
-	D3D12_RANGE range = {
-		.Begin = buffer->impl.last_start * iron_gpu_internal_index_buffer_stride(buffer),
-		.End = (buffer->impl.last_start + count) * iron_gpu_internal_index_buffer_stride(buffer),
 	};
 	buffer->impl.upload_buffer->lpVtbl->Unmap(buffer->impl.upload_buffer, 0, &range);
 }
@@ -2513,8 +2475,7 @@ void iron_gpu_raytrace_acceleration_structure_build(iron_gpu_raytrace_accelerati
 	dxrCommandList->lpVtbl->BuildRaytracingAccelerationStructure(dxrCommandList, &topLevelBuildDesc, 0, NULL);
 
 	iron_gpu_command_list_end(command_list);
-	iron_gpu_command_list_execute(command_list);
-	iron_gpu_command_list_wait_for_execution_to_finish(command_list);
+	iron_gpu_command_list_wait(command_list);
 	iron_gpu_command_list_begin(command_list);
 
 	scratchResource->lpVtbl->Release(scratchResource);

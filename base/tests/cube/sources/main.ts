@@ -19,8 +19,7 @@ function main() {
 }
 
 function render_commands() {
-	render_path_set_target("");
-	render_path_clear_target(0xff6495ed, 1.0, clear_flag_t.COLOR | clear_flag_t.DEPTH);
+	render_path_set_target("", null, clear_flag_t.COLOR | clear_flag_t.DEPTH, 0xff6495ed, 1.0);
 	render_path_draw_meshes("mesh");
 }
 

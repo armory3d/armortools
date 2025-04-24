@@ -239,15 +239,14 @@ void ui_nodes_bake_elements() {
 		iron_gpu_texture_destroy(&ui_socket_image);
 	}
 	iron_gpu_render_target_init(&ui_socket_image, 24, 24, IRON_IMAGE_FORMAT_RGBA32, 0);
-	draw_set_render_target(&ui_socket_image);
-	iron_gpu_clear(0x00000000, 0, IRON_GPU_CLEAR_COLOR);
+	draw_set_render_target(&ui_socket_image, true, 0x00000000);
 
 	draw_set_color(0xff111111);
 	draw_filled_circle(12, 12, 11, 0);
 	draw_set_color(0xffffffff);
 	draw_filled_circle(12, 12, 9, 0);
 
-	draw_restore_render_target();
+	draw_set_render_target(NULL, false, 0);
 	ui_nodes_elements_baked = true;
 }
 

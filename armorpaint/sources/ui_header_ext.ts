@@ -53,13 +53,13 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			let m: slot_layer_t = layers_new_mask(false, context_raw.layer);
 			sys_notify_on_next_frame(function (m: slot_layer_t) {
 				_gpu_begin(m.texpaint);
-				iron_gpu_set_pipeline(pipes_colorid_to_mask);
+				gpu_set_pipeline(pipes_colorid_to_mask);
 				let rt: render_target_t = map_get(render_path_render_targets, "texpaint_colorid");
 				gpu_set_texture(pipes_texpaint_colorid, rt._image);
 				gpu_set_texture(pipes_tex_colorid, project_get_image(project_assets[context_raw.colorid_handle.position]));
 				gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 				gpu_set_index_buffer(const_data_screen_aligned_ib);
-				gpu_draw_indexed_vertices();
+				gpu_draw();
 				_gpu_end();
 				context_raw.colorid_picked = false;
 				ui_toolbar_handle.redraws = 1;

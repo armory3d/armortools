@@ -1088,8 +1088,7 @@ function ui_base_update_ui() {
 			}
 
 			let source: iron_gpu_texture_t = l.texpaint;
-			draw_begin(target);
-			iron_gpu_clear(0x00000000);
+			draw_begin(target, true, 0x00000000);
 			// draw_set_pipeline(l.is_mask() ? pipes_copy8 : pipes_copy);
 			draw_set_pipeline(pipes_copy); // texpaint_preview is always RGBA32 for now
 			draw_scaled_image(source, 0, 0, target.width, target.height);
@@ -1108,8 +1107,7 @@ function ui_base_update_ui() {
 		if (target != null) {
 
 			let source: iron_gpu_texture_t = l.texpaint;
-			draw_begin(target);
-			iron_gpu_clear(0x00000000);
+			draw_begin(target, true, 0x00000000);
 			// draw_set_pipeline(raw.layer.is_mask() ? pipes_copy8 : pipes_copy);
 			draw_set_pipeline(pipes_copy); // texpaint_preview is always RGBA32 for now
 			draw_scaled_image(source, 0, 0, target.width, target.height);

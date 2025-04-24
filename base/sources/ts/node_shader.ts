@@ -192,15 +192,15 @@ function node_shader_get(raw: node_shader_t): string {
 		s += "};\n\n";
 	}
 
+	if (raw.textures.length > 0) {
+		s += "#[set(everything)]\n";
+		s += "const sampler_linear: sampler;\n\n";
+	}
+
 	for (let i: i32 = 0; i < raw.textures.length; ++i) {
 		let a: string = raw.textures[i];
 		s += "#[set(everything)]\n";
 		s += "const " + a + ": tex2d;\n";
-	}
-
-	if (raw.textures.length > 0) {
-		s += "#[set(everything)]\n";
-		s += "const sampler_linear: sampler;\n\n";
 	}
 
 	let keys: string[] = map_keys(raw.functions);

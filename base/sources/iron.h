@@ -374,7 +374,7 @@ const char *iphonegetresourcepath();
 char mobile_title[1024];
 #endif
 
-extern iron_gpu_command_list_t commandList;
+extern iron_gpu_command_list_t gpu_command_list;
 static iron_gpu_buffer_t constant_buffer;
 static iron_gpu_texture_t *render_target;
 static iron_gpu_raytrace_pipeline_t rt_pipeline;
@@ -422,7 +422,6 @@ void _update(void *data) {
 	gpu_begin();
 	iron_update();
 	gpu_end();
-	iron_gpu_swap_buffers();
 }
 
 char *_copy(void *data) {
@@ -931,7 +930,7 @@ void gpu_delete_index_buffer(iron_gpu_buffer_t *buffer) {
 }
 
 u32_array_t *gpu_lock_index_buffer(iron_gpu_buffer_t *buffer) {
-	void *vertices = iron_gpu_index_buffer_lock_all(buffer);
+	void *vertices = iron_gpu_index_buffer_lock(buffer);
 	u32_array_t *ar = (u32_array_t *)malloc(sizeof(u32_array_t));
 	ar->buffer = vertices;
 	ar->length = iron_gpu_index_buffer_count(buffer);
@@ -940,7 +939,7 @@ u32_array_t *gpu_lock_index_buffer(iron_gpu_buffer_t *buffer) {
 
 any gpu_create_vertex_buffer(i32 count, iron_gpu_vertex_structure_t *structure, i32 usage) {
 	iron_gpu_buffer_t *buffer = (iron_gpu_buffer_t *)malloc(sizeof(iron_gpu_buffer_t));
-	gpu_vertex_buffer_init(buffer, count, structure, (gpu_usage_t)usage);
+	iron_gpu_vertex_buffer_init(buffer, count, structure, (gpu_usage_t)usage == GPU_USAGE_STATIC);
 	return buffer;
 }
 
@@ -950,15 +949,11 @@ void gpu_delete_vertex_buffer(iron_gpu_buffer_t *buffer) {
 }
 
 buffer_t *gpu_lock_vertex_buffer(iron_gpu_buffer_t *buffer) {
-	float *vertices = gpu_vertex_buffer_lock_all(buffer);
+	float *vertices = iron_gpu_vertex_buffer_lock(buffer);
 	buffer_t *b = (buffer_t *)malloc(sizeof(buffer_t));
 	b->buffer = vertices;
 	b->length = buffer->myCount * iron_gpu_vertex_buffer_stride(buffer);
 	return b;
-}
-
-void gpu_draw_indexed_vertices() {
-	iron_gpu_draw_indexed_vertices();
 }
 
 iron_gpu_shader_t *gpu_create_shader(buffer_t *data, i32 shader_type) {
@@ -966,6 +961,8 @@ iron_gpu_shader_t *gpu_create_shader(buffer_t *data, i32 shader_type) {
 	iron_gpu_shader_init(shader, data->buffer, data->length, (iron_gpu_shader_type_t)shader_type);
 	return shader;
 }
+
+#ifdef WITH_KONG
 
 #include "../../sources/libs/kong/analyzer.h"
 #include "../../sources/libs/kong/compiler.h"
@@ -1043,6 +1040,8 @@ void gpu_create_shaders_from_kong(char *kong, char **vs, char **fs) {
 
 	#endif
 }
+
+#endif
 
 iron_gpu_shader_t *gpu_create_shader_from_source(string_t *source, iron_gpu_shader_type_t shader_type) {
 	iron_gpu_shader_t *shader = NULL;
@@ -1371,7 +1370,6 @@ int _format_byte_size(iron_image_format_t format) {
 		return 1;
 	case IRON_IMAGE_FORMAT_R16:
 		return 2;
-	case IRON_IMAGE_FORMAT_BGRA32:
 	case IRON_IMAGE_FORMAT_RGBA32:
 	case IRON_IMAGE_FORMAT_R32:
 	default:
@@ -1392,7 +1390,7 @@ buffer_t *gpu_get_texture_pixels(iron_gpu_texture_t *image) {
 		}
 
 		uint8_t *b = (uint8_t *)image->buffer->buffer;
-		iron_gpu_render_target_get_pixels(image, b);
+		gpu_render_target_get_pixels(image, b);
 
 		// Release staging texture immediately to save memory
 		#ifdef IRON_DIRECT3D12
@@ -1418,26 +1416,20 @@ void gpu_set_mipmaps(iron_gpu_texture_t *texture, any_array_t *mipmaps) {
 	}
 }
 
-void _gpu_begin(iron_gpu_texture_t *render_target, any_array_t *additional) {
+void _gpu_begin(iron_gpu_texture_t *render_target, any_array_t *additional, unsigned flags, unsigned color, float depth) {
 	if (render_target == NULL) {
-		gpu_restore_render_target();
+		gpu_set_render_targets(NULL, 0, flags, color, depth);
 	}
 	else {
-		iron_gpu_texture_t *rt = (iron_gpu_texture_t *)render_target;
 		int32_t length = 1;
-		iron_gpu_texture_t *render_targets[8] = { rt, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+		iron_gpu_texture_t *render_targets[8] = { render_target, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 		if (additional != NULL) {
 			length = additional->length + 1;
-			if (length > 8) {
-				length = 8;
-			}
 			for (int32_t i = 1; i < length; ++i) {
-				iron_gpu_texture_t *img = additional->buffer[i - 1];
-				iron_gpu_texture_t *art = (iron_gpu_texture_t *)img;
-				render_targets[i] = art;
+				render_targets[i] = additional->buffer[i - 1];
 			}
 		}
-		gpu_set_render_targets(render_targets, length);
+		gpu_set_render_targets(render_targets, length, flags, color, depth);
 	}
 }
 
@@ -1446,7 +1438,6 @@ void _gpu_end() {
 
 void gpu_swap_buffers() {
 	gpu_end();
-	iron_gpu_swap_buffers();
 	gpu_begin();
 }
 
@@ -2142,7 +2133,7 @@ void iron_raytrace_init(buffer_t *shader) {
 	}
 	raytrace_created = true;
 	iron_gpu_constant_buffer_init(&constant_buffer, constant_buffer_size * 4);
-	iron_gpu_raytrace_pipeline_init(&rt_pipeline, &commandList, shader->buffer, (int)shader->length, &constant_buffer);
+	iron_gpu_raytrace_pipeline_init(&rt_pipeline, &gpu_command_list, shader->buffer, (int)shader->length, &constant_buffer);
 }
 
 void iron_raytrace_as_init() {
@@ -2158,7 +2149,7 @@ void iron_raytrace_as_add(struct iron_gpu_buffer *vb, iron_gpu_buffer_t *ib, iro
 }
 
 void iron_raytrace_as_build(struct iron_gpu_buffer *vb_full, iron_gpu_buffer_t *ib_full) {
-	iron_gpu_raytrace_acceleration_structure_build(&accel, &commandList, vb_full, ib_full);
+	iron_gpu_raytrace_acceleration_structure_build(&accel, &gpu_command_list, vb_full, ib_full);
 }
 
 void iron_raytrace_set_textures(iron_gpu_texture_t *tex0, iron_gpu_texture_t *tex1, iron_gpu_texture_t *tex2, iron_gpu_texture_t *texenv, iron_gpu_texture_t *texsobol, iron_gpu_texture_t *texscramble, iron_gpu_texture_t *texrank) {
@@ -2173,7 +2164,7 @@ void iron_raytrace_set_textures(iron_gpu_texture_t *tex0, iron_gpu_texture_t *te
 	// if (texpaint0_tex != NULL) {
 	// 	iron_gpu_texture_t *texture = texpaint0_tex;
 	// 	if (!texture->_uploaded) {
-	// 		iron_gpu_command_list_upload_texture(&commandList, texture);
+	// 		iron_gpu_command_list_upload_texture(&gpu_command_list, texture);
 	// 		texture->_uploaded = true;
 	// 	}
 	// 	texpaint0 = (iron_gpu_texture_t *)malloc(sizeof(iron_gpu_texture_t));
@@ -2195,7 +2186,7 @@ void iron_raytrace_set_textures(iron_gpu_texture_t *tex0, iron_gpu_texture_t *te
 	// if (texpaint1_tex != NULL) {
 	// 	iron_gpu_texture_t *texture = texpaint1_tex;
 	// 	if (!texture->_uploaded) {
-	// 		iron_gpu_command_list_upload_texture(&commandList, texture);
+	// 		iron_gpu_command_list_upload_texture(&gpu_command_list, texture);
 	// 		texture->_uploaded = true;
 	// 	}
 	// 	texpaint1 = (iron_gpu_texture_t *)malloc(sizeof(iron_gpu_texture_t));
@@ -2217,7 +2208,7 @@ void iron_raytrace_set_textures(iron_gpu_texture_t *tex0, iron_gpu_texture_t *te
 	// if (texpaint2_tex != NULL) {
 	// 	iron_gpu_texture_t *texture = (iron_gpu_texture_t *)texpaint2_tex;
 	// 	if (!texture->_uploaded) {
-	// 		iron_gpu_command_list_upload_texture(&commandList, texture);
+	// 		iron_gpu_command_list_upload_texture(&gpu_command_list, texture);
 	// 		texture->_uploaded = true;
 	// 	}
 	// 	texpaint2 = (iron_gpu_texture_t *)malloc(sizeof(iron_gpu_texture_t));
@@ -2237,19 +2228,19 @@ void iron_raytrace_set_textures(iron_gpu_texture_t *tex0, iron_gpu_texture_t *te
 	texpaint2 = tex2;
 
 	if (!texenv->_uploaded) {
-		iron_gpu_command_list_upload_texture(&commandList, texenv);
+		iron_gpu_command_list_upload_texture(&gpu_command_list, texenv);
 		texenv->_uploaded = true;
 	}
 	if (!texsobol->_uploaded) {
-		iron_gpu_command_list_upload_texture(&commandList, texsobol);
+		iron_gpu_command_list_upload_texture(&gpu_command_list, texsobol);
 		texsobol->_uploaded = true;
 	}
 	if (!texscramble->_uploaded) {
-		iron_gpu_command_list_upload_texture(&commandList, texscramble);
+		iron_gpu_command_list_upload_texture(&gpu_command_list, texscramble);
 		texscramble->_uploaded = true;
 	}
 	if (!texrank->_uploaded) {
-		iron_gpu_command_list_upload_texture(&commandList, texrank);
+		iron_gpu_command_list_upload_texture(&gpu_command_list, texrank);
 		texrank->_uploaded = true;
 	}
 
@@ -2268,7 +2259,7 @@ void iron_raytrace_set_textures(iron_gpu_texture_t *tex0, iron_gpu_texture_t *te
 
 void iron_raytrace_dispatch_rays(iron_gpu_texture_t *render_target, buffer_t *buffer) {
 	float *cb = (float *)buffer->buffer;
-	iron_gpu_constant_buffer_lock_all(&constant_buffer);
+	iron_gpu_constant_buffer_lock(&constant_buffer, 0, iron_gpu_constant_buffer_size(&constant_buffer));
 	for (int i = 0; i < constant_buffer_size; ++i) {
 		float *floats = (float *)(&constant_buffer.data[i * 4]);
 		floats[0] = cb[i];
@@ -2278,7 +2269,7 @@ void iron_raytrace_dispatch_rays(iron_gpu_texture_t *render_target, buffer_t *bu
 	iron_gpu_raytrace_set_acceleration_structure(&accel);
 	iron_gpu_raytrace_set_pipeline(&rt_pipeline);
 	iron_gpu_raytrace_set_target(render_target);
-	iron_gpu_raytrace_dispatch_rays(&commandList);
+	iron_gpu_raytrace_dispatch_rays(&gpu_command_list);
 }
 
 #endif

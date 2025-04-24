@@ -5,13 +5,13 @@ const constants: {
 };
 
 #[set(everything)]
+const sampler_linear: sampler;
+
+#[set(everything)]
 const tex: tex2d;
 
 #[set(everything)]
 const gbuffer0: tex2d;
-
-#[set(everything)]
-const sampler_linear: sampler;
 
 // const blur_weights: float[] = {
 // 	0.132572, 0.125472, 0.106373, 0.08078, 0.05495, 0.033482, 0.018275, 0.008934, 0.003912, 0.001535

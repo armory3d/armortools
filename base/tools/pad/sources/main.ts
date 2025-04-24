@@ -320,8 +320,7 @@ function draw_minimap() {
 		minimap = gpu_create_render_target(minimap_w, minimap_h);
 	}
 
-	draw_begin(minimap);
-	iron_gpu_clear(theme.SEPARATOR_COL);
+	draw_begin(minimap, true, theme.SEPARATOR_COL);
 	draw_set_color(0xff333333);
 	let lines: string[] = string_split(storage.text, "\n");
 	let minimap_full_h: i32 = lines.length * 2;

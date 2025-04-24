@@ -170,7 +170,7 @@ function mesh_object_render(raw: mesh_object_t, context: string, bind_params: st
 
 		// Uniforms
 		if (scontext._.pipe_state != _mesh_object_last_pipeline) {
-			iron_gpu_set_pipeline(scontext._.pipe_state);
+			gpu_set_pipeline(scontext._.pipe_state);
 			_mesh_object_last_pipeline = scontext._.pipe_state;
 		}
 		uniforms_set_context_consts(scontext, bind_params);
@@ -181,7 +181,7 @@ function mesh_object_render(raw: mesh_object_t, context: string, bind_params: st
 
 		gpu_set_vertex_buffer(mesh_data_get(raw.data, elems));
 		gpu_set_index_buffer(raw.data._.index_buffers[i]);
-		gpu_draw_indexed_vertices();
+		gpu_draw();
 	}
 }
 

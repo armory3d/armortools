@@ -214,8 +214,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 											///end
 										}
 										else {
-											draw_begin(icon);
-											iron_gpu_clear(0xffffffff);
+											draw_begin(icon, true, 0xffffffff);
 										}
 										draw_set_pipeline(pipes_copy_rgb);
 										draw_image(data.image, 0, 0);
@@ -432,8 +431,7 @@ function ui_files_make_icon (args: ui_files_make_icon_t) {
 	let sw: i32 = image.width > image.height ? w : math_floor(1.0 * image.width / image.height * w);
 	let sh: i32 = image.width > image.height ? math_floor(1.0 * image.height / image.width * w) : w;
 	let icon: iron_gpu_texture_t = gpu_create_render_target(sw, sh);
-	draw_begin(icon);
-	iron_gpu_clear(0xffffffff);
+	draw_begin(icon, true, 0xffffffff);
 	draw_set_pipeline(pipes_copy_rgb);
 	draw_scaled_image(image, 0, 0, sw, sh);
 	draw_set_pipeline(null);

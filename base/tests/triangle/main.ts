@@ -7,12 +7,11 @@ let vb: any;
 let ib: any;
 
 function render() {
-	_gpu_begin(null, null);
-	iron_gpu_clear(0xff000000, 1.0, clear_flag_t.COLOR | clear_flag_t.DEPTH);
-	iron_gpu_set_pipeline(pipeline);
+	_gpu_begin(null, null, clear_flag_t.COLOR | clear_flag_t.DEPTH, 0xff000000, 1.0);
+	gpu_set_pipeline(pipeline);
 	gpu_set_vertex_buffer(vb);
 	gpu_set_index_buffer(ib);
-	gpu_draw_indexed_vertices();
+	gpu_draw();
 	_gpu_end();
 }
 
@@ -55,14 +54,14 @@ function main() {
 	for (let i: i32 = 0; i < vertices.length; i++) {
 		buffer_set_f32(vb_data, i * 4, vertices[i]);
 	}
-	iron_gpu_vertex_buffer_unlock_all(vb);
+	iron_gpu_vertex_buffer_unlock(vb);
 
 	ib = gpu_create_index_buffer(indices.length);
 	let ib_data: u32_array_t = gpu_lock_index_buffer(ib);
 	for (let i: i32 = 0; i < indices.length; i++) {
 		ib_data[i] = indices[i];
 	}
-	gpu_index_buffer_unlock_all(ib);
+	gpu_index_buffer_unlock(ib);
 
 	_iron_set_update_callback(render);
 }

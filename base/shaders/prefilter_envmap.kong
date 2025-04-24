@@ -5,10 +5,10 @@ const constants: {
 };
 
 #[set(everything)]
-const radiance: tex2d;
+const sampler_linear: sampler;
 
 #[set(everything)]
-const sampler_linear: sampler;
+const radiance: tex2d;
 
 const PI: float = 3.14159265358979;
 const PI2: float = 6.28318530718;

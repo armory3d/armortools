@@ -190,14 +190,11 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 	}
 
 	// Clear export layer
-	_gpu_begin(layers_expa);
-	iron_gpu_clear(color_from_floats(0.0, 0.0, 0.0, 0.0));
+	_gpu_begin(layers_expa, null, clear_flag_t.COLOR, color_from_floats(0.0, 0.0, 0.0, 0.0));
 	_gpu_end();
-	_gpu_begin(layers_expb);
-	iron_gpu_clear(color_from_floats(0.5, 0.5, 1.0, 0.0));
+	_gpu_begin(layers_expb, null, clear_flag_t.COLOR, color_from_floats(0.5, 0.5, 1.0, 0.0));
 	_gpu_end();
-	_gpu_begin(layers_expc);
-	iron_gpu_clear(color_from_floats(1.0, 0.0, 0.0, 0.0));
+	_gpu_begin(layers_expc, null, clear_flag_t.COLOR, color_from_floats(1.0, 0.0, 0.0, 0.0));
 	_gpu_end();
 
 	// Flatten layers
@@ -225,8 +222,7 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 		if (l1masks != null && !bake_material) {
 			if (l1masks.length > 1) {
 				layers_make_temp_mask_img();
-				draw_begin(pipes_temp_mask_image);
-				iron_gpu_clear(0x00000000);
+				draw_begin(pipes_temp_mask_image, true, 0x00000000);
 				draw_end();
 				let l1: slot_layer_t = {
 					texpaint: pipes_temp_mask_image
@@ -249,7 +245,7 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 			draw_end();
 
 			_gpu_begin(layers_expa);
-			iron_gpu_set_pipeline(pipes_merge);
+			gpu_set_pipeline(pipes_merge);
 			gpu_set_texture(pipes_tex0, l1.texpaint);
 			gpu_set_texture(pipes_tex1, empty);
 			gpu_set_texture(pipes_texmask, mask);
@@ -259,7 +255,7 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 			gpu_set_int(pipes_blending, layers.length > 1 ? l1.blending : 0);
 			gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 			gpu_set_index_buffer(const_data_screen_aligned_ib);
-			gpu_draw_indexed_vertices();
+			gpu_draw();
 			_gpu_end();
 		}
 
@@ -271,7 +267,7 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 			draw_end();
 
 			_gpu_begin(layers_expb);
-			iron_gpu_set_pipeline(pipes_merge);
+			gpu_set_pipeline(pipes_merge);
 			gpu_set_texture(pipes_tex0, l1.texpaint);
 			gpu_set_texture(pipes_tex1, l1.texpaint_nor);
 			gpu_set_texture(pipes_texmask, mask);
@@ -281,7 +277,7 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 			gpu_set_int(pipes_blending, l1.paint_nor_blend ? -2 : -1);
 			gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 			gpu_set_index_buffer(const_data_screen_aligned_ib);
-			gpu_draw_indexed_vertices();
+			gpu_draw();
 			_gpu_end();
 		}
 

@@ -169,7 +169,7 @@ function util_mesh_swap_axis(a: i32, b: i32) {
 			buffer_set_i16(vertices, (i * l + 4) * 2, vas[1].values[i * 2    ]);
 			buffer_set_i16(vertices, (i * l + 5) * 2, vas[1].values[i * 2 + 1]);
 		}
-		iron_gpu_vertex_buffer_unlock_all(g._.vertex_buffer);
+		iron_gpu_vertex_buffer_unlock(g._.vertex_buffer);
 	}
 
 	util_mesh_remove_merged();
@@ -194,7 +194,7 @@ function util_mesh_flip_normals() {
 			buffer_set_i16(vertices, (i * l + 4) * 2, -buffer_get_i16(vertices, (i * l + 4) * 2));
 			buffer_set_i16(vertices, (i * l + 5) * 2, -buffer_get_i16(vertices, (i * l + 5) * 2));
 		}
-		iron_gpu_vertex_buffer_unlock_all(g._.vertex_buffer);
+		iron_gpu_vertex_buffer_unlock(g._.vertex_buffer);
 	}
 
 	render_path_raytrace_ready = false;
@@ -286,7 +286,7 @@ function util_mesh_calc_normals(smooth: bool = false) {
 				}
 			}
 		}
-		iron_gpu_vertex_buffer_unlock_all(g._.vertex_buffer);
+		iron_gpu_vertex_buffer_unlock(g._.vertex_buffer);
 
 		let va0: i16_array_t = o.data.vertex_arrays[0].values;
 		let va1: i16_array_t = o.data.vertex_arrays[1].values;
@@ -377,7 +377,7 @@ function util_mesh_to_origin() {
 			buffer_set_i16(vertices, (i * l + 1) * 2, va[i * 4 + 1]);
 			buffer_set_i16(vertices, (i * l + 2) * 2, va[i * 4 + 2]);
 		}
-		iron_gpu_vertex_buffer_unlock_all(g._.vertex_buffer);
+		iron_gpu_vertex_buffer_unlock(g._.vertex_buffer);
 	}
 
 	util_mesh_merge();
@@ -402,7 +402,7 @@ function util_mesh_apply_displacement(texpaint_pack: iron_gpu_texture_t, strengt
 		buffer_set_i16(vertices, (i * l + 1) * 2, buffer_get_i16(vertices, (i * l + 1) * 2) - math_floor(buffer_get_i16(vertices, (i * l + 5) * 2) * h));
 		buffer_set_i16(vertices, (i * l + 2) * 2, buffer_get_i16(vertices, (i * l + 2) * 2) - math_floor(buffer_get_i16(vertices, (i * l + 3) * 2) * h));
 	}
-	iron_gpu_vertex_buffer_unlock_all(g._.vertex_buffer);
+	iron_gpu_vertex_buffer_unlock(g._.vertex_buffer);
 
 	let va0: i16_array_t = o.data.vertex_arrays[0].values;
 	for (let i: i32 = 0; i < math_floor((vertices.length) / 4 / l); ++i) {

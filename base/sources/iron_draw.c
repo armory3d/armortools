@@ -110,12 +110,12 @@ static void draw_pipeline_init(iron_gpu_pipeline_t *pipe, iron_gpu_shader_t *ver
 
 void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *rect_vert, buffer_t *rect_frag, buffer_t *tris_vert, buffer_t *tris_frag, buffer_t *text_vert, buffer_t *text_frag) {
 	draw_transform = iron_matrix3x3_identity();
-	iron_gpu_vertex_structure_init(&draw_structure);
-	iron_gpu_vertex_structure_add(&draw_structure, "pos", IRON_GPU_VERTEX_DATA_F32_2X);
+	draw_structure.size = 0;
+	gpu_vertex_structure_add(&draw_structure, "pos", IRON_GPU_VERTEX_DATA_F32_2X);
 
 	{
-		gpu_vertex_buffer_init(&rect_vertex_buffer, 4, &draw_structure, GPU_USAGE_STATIC);
-		float *verts = gpu_vertex_buffer_lock_all(&rect_vertex_buffer);
+		iron_gpu_vertex_buffer_init(&rect_vertex_buffer, 4, &draw_structure, true);
+		float *verts = iron_gpu_vertex_buffer_lock(&rect_vertex_buffer);
 		verts[0] = 0.0; // Bottom-left
 		verts[1] = 1.0;
 		verts[2] = 0.0; // Top-left
@@ -124,36 +124,36 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *rect_vert, 
 		verts[5] = 0.0;
 		verts[6] = 1.0; // Bottom-right
 		verts[7] = 1.0;
-		iron_gpu_vertex_buffer_unlock_all(&rect_vertex_buffer);
+		iron_gpu_vertex_buffer_unlock(&rect_vertex_buffer);
 
 		iron_gpu_index_buffer_init(&rect_index_buffer, 3 * 2, true);
-		int *indices = iron_gpu_index_buffer_lock_all(&rect_index_buffer);
+		int *indices = iron_gpu_index_buffer_lock(&rect_index_buffer);
 		indices[0] = 0;
 		indices[1] = 1;
 		indices[2] = 2;
 		indices[3] = 0;
 		indices[4] = 2;
 		indices[5] = 3;
-		gpu_index_buffer_unlock_all(&rect_index_buffer);
+		gpu_index_buffer_unlock(&rect_index_buffer);
 	}
 
 	{
-		gpu_vertex_buffer_init(&tris_vertex_buffer, 3, &draw_structure, GPU_USAGE_STATIC);
-		float *verts = gpu_vertex_buffer_lock_all(&tris_vertex_buffer);
+		iron_gpu_vertex_buffer_init(&tris_vertex_buffer, 3, &draw_structure, true);
+		float *verts = iron_gpu_vertex_buffer_lock(&tris_vertex_buffer);
 		verts[0] = 0.0; // Bottom-left
 		verts[1] = 1.0;
 		verts[2] = 0.0; // Top-left
 		verts[3] = 0.0;
 		verts[4] = 1.0; // Top-right
 		verts[5] = 0.0;
-		iron_gpu_vertex_buffer_unlock_all(&tris_vertex_buffer);
+		iron_gpu_vertex_buffer_unlock(&tris_vertex_buffer);
 
 		iron_gpu_index_buffer_init(&tris_index_buffer, 3, true);
-		int *indices = iron_gpu_index_buffer_lock_all(&tris_index_buffer);
+		int *indices = iron_gpu_index_buffer_lock(&tris_index_buffer);
 		indices[0] = 0;
 		indices[1] = 1;
 		indices[2] = 2;
-		gpu_index_buffer_unlock_all(&tris_index_buffer);
+		gpu_index_buffer_unlock(&tris_index_buffer);
 	}
 
 	// Image painter
@@ -236,7 +236,7 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *rect_vert, 
 	}
 }
 
-void draw_begin(iron_gpu_texture_t *render_target) {
+void draw_begin(iron_gpu_texture_t *render_target, bool clear, unsigned color) {
 	if (_draw_in_use && !_draw_thrown) {
 		_draw_thrown = true;
 		iron_log("End before you begin");
@@ -244,17 +244,11 @@ void draw_begin(iron_gpu_texture_t *render_target) {
 	_draw_in_use = true;
 
 	draw_set_color(0xffffffff);
-
-	if (render_target != NULL) {
-		draw_set_render_target(render_target);
-	}
-	else {
-		draw_restore_render_target();
-	}
+	draw_set_render_target(render_target, clear, color);
 }
 
 void draw_scaled_sub_image(iron_gpu_texture_t *tex, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
-	iron_gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : &image_pipeline);
+	gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : &image_pipeline);
 	gpu_set_vertex_buffer(&rect_vertex_buffer);
 	gpu_set_index_buffer(&rect_index_buffer);
 	gpu_set_matrix4(&image_p_loc, draw_projection_matrix);
@@ -262,7 +256,7 @@ void draw_scaled_sub_image(iron_gpu_texture_t *tex, float sx, float sy, float sw
 	gpu_set_float4(&image_tex_loc, sx / tex->width, sy / tex->height, sw / tex->width, sh / tex->height);
 	gpu_set_float4(&image_col_loc, _draw_color_r(draw_color) / 255.0, _draw_color_g(draw_color) / 255.0, _draw_color_b(draw_color) / 255.0,  _draw_color_a(draw_color) / 255.0);
 	gpu_set_texture(&image_tex_unit, tex);
-	iron_gpu_draw_indexed_vertices();
+	gpu_draw();
 }
 
 void draw_scaled_image(iron_gpu_texture_t *tex, float dx, float dy, float dw, float dh) {
@@ -278,7 +272,7 @@ void draw_image(iron_gpu_texture_t *tex, float x, float y) {
 }
 
 void draw_filled_triangle(float x0, float y0, float x1, float y1, float x2, float y2) {
-	iron_gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : &tris_pipeline);
+	gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : &tris_pipeline);
 	gpu_set_vertex_buffer(&tris_vertex_buffer);
 	gpu_set_index_buffer(&tris_index_buffer);
 	gpu_set_matrix4(&tris_p_loc, draw_projection_matrix);
@@ -286,17 +280,17 @@ void draw_filled_triangle(float x0, float y0, float x1, float y1, float x2, floa
 	gpu_set_float2(&tris_pos1_loc, x1 / vw(), y1 / vh());
 	gpu_set_float2(&tris_pos2_loc, x2 / vw(), y2 / vh());
 	gpu_set_float4(&tris_col_loc, _draw_color_r(draw_color) / 255.0, _draw_color_g(draw_color) / 255.0, _draw_color_b(draw_color) / 255.0,  _draw_color_a(draw_color) / 255.0);
-	iron_gpu_draw_indexed_vertices();
+	gpu_draw();
 }
 
 void draw_filled_rect(float x, float y, float width, float height) {
-	iron_gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : &rect_pipeline);
+	gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : &rect_pipeline);
 	gpu_set_vertex_buffer(&rect_vertex_buffer);
 	gpu_set_index_buffer(&rect_index_buffer);
 	gpu_set_matrix4(&rect_p_loc, draw_projection_matrix);
 	gpu_set_float4(&rect_pos_loc, x / vw(), y / vh(), width / vw(), height / vh());
 	gpu_set_float4(&rect_col_loc, _draw_color_r(draw_color) / 255.0, _draw_color_g(draw_color) / 255.0, _draw_color_b(draw_color) / 255.0,  _draw_color_a(draw_color) / 255.0);
-	iron_gpu_draw_indexed_vertices();
+	gpu_draw();
 }
 
 void draw_rect(float x, float y, float width, float height, float strength) {
@@ -543,10 +537,10 @@ void draw_string(const char *text, float x, float y) {
 	float ypos = y + img->baseline;
 	draw_font_aligned_quad_t q;
 
-	iron_gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : _draw_current != NULL ? &text_pipeline_rt : &text_pipeline);
-	gpu_set_vertex_buffer(&rect_vertex_buffer);
-	gpu_set_index_buffer(&rect_index_buffer);
-	gpu_set_texture(&text_tex_unit, tex);
+	// gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : _draw_current != NULL ? &text_pipeline_rt : &text_pipeline);
+	// gpu_set_vertex_buffer(&rect_vertex_buffer);
+	// gpu_set_index_buffer(&rect_index_buffer);
+	// gpu_set_texture(&text_tex_unit, tex);
 
 	for (int i = 0; text[i] != 0; ) {
 		int l = 0;
@@ -555,12 +549,18 @@ void draw_string(const char *text, float x, float y) {
 
 		if (draw_font_get_baked_quad(draw_font, draw_font_size, &q, codepoint, xpos, ypos)) {
 			xpos += q.xadvance;
+
+			gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : _draw_current != NULL ? &text_pipeline_rt : &text_pipeline);
+			gpu_set_vertex_buffer(&rect_vertex_buffer);
+			gpu_set_index_buffer(&rect_index_buffer);
+			gpu_set_texture(&text_tex_unit, tex);
+
 			gpu_set_float4(&text_pos_loc, q.x0 / vw(), q.y0 / vh(), (q.x1 - q.x0) / vw(), (q.y1 - q.y0) / vh());
 			gpu_set_float4(&text_tex_loc, q.s0, q.t0, q.s1 - q.s0, q.t1 - q.t0);
 
 			gpu_set_matrix4(&text_p_loc, draw_projection_matrix);
 			gpu_set_float4(&text_col_loc, _draw_color_r(draw_color) / 255.0, _draw_color_g(draw_color) / 255.0, _draw_color_b(draw_color) / 255.0,  _draw_color_a(draw_color) / 255.0);
-			iron_gpu_draw_indexed_vertices();
+			gpu_draw();
 		}
 	}
 }
@@ -757,15 +757,15 @@ void draw_set_bilinear_filter(bool bilinear) {
 	draw_bilinear_filter = bilinear;
 }
 
-void draw_restore_render_target(void) {
-	_draw_current = NULL;
-	gpu_restore_render_target();
-}
-
-void draw_set_render_target(iron_gpu_texture_t *target) {
+void draw_set_render_target(iron_gpu_texture_t *target, bool clear, unsigned color) {
 	_draw_current = target;
-	iron_gpu_texture_t *render_targets[1] = { target };
-	gpu_set_render_targets(render_targets, 1);
+	if (target == NULL) {
+		gpu_set_render_targets(NULL, 0, clear ? IRON_GPU_CLEAR_COLOR : IRON_GPU_CLEAR_NONE, color, 0.0);
+	}
+	else {
+		iron_gpu_texture_t *render_targets[1] = { target };
+		gpu_set_render_targets(render_targets, 1, clear ? IRON_GPU_CLEAR_COLOR : IRON_GPU_CLEAR_NONE, color, 0.0);
+	}
 }
 
 void draw_filled_circle(float cx, float cy, float radius, int segments) {

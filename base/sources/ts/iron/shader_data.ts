@@ -163,6 +163,7 @@ function shader_context_type_size(t: string): i32 {
 	if (t == "float") return 4;
 	if (t == "vec2") return 8;
 	if (t == "vec3") return 12;
+	// if (t == "vec3") return 16;
 	if (t == "vec4") return 16;
 	if (t == "mat3") return 48;
 	if (t == "mat4") return 64;
@@ -170,6 +171,9 @@ function shader_context_type_size(t: string): i32 {
 }
 
 function shader_context_type_pad(offset: i32, size: i32): i32 {
+	///if arm_metal
+	// return 0;
+	///end
 	let r: i32 = offset % 16;
 	if (r == 0) {
 		return 0;

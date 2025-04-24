@@ -404,7 +404,6 @@ static void write_functions(char *code, size_t *offset) {
 		else {
 			descriptor_set_group *set_group = get_descriptor_set_group(0);
 			descriptor_set *set = set_group->values[0];
-
 			*offset += sprintf(&code[*offset], "%s %s(constant %s& argument_buffer0", type_string(f->return_type.type), get_name(f->name), get_name(set->name));
 
 			for (uint8_t parameter_index = 0; parameter_index < f->parameters_size; ++parameter_index) {

@@ -45,8 +45,8 @@ function slot_material_create(m: material_data_t = null, c: ui_node_canvas_t = n
 
 	let w: i32 = util_render_material_preview_size;
 	let w_icon: i32 = 50;
-	raw.image = gpu_create_render_target(w, w);
-	raw.image_icon = gpu_create_render_target(w_icon, w_icon);
+	raw.image = gpu_create_render_target(w, w, tex_format_t.RGBA64);
+	raw.image_icon = gpu_create_render_target(w_icon, w_icon, tex_format_t.RGBA64);
 
 	if (c == null) {
 		if (slot_material_default_canvas == null) { // Synchronous

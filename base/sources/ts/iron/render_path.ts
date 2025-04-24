@@ -77,12 +77,12 @@ function render_path_render_frame() {
 	_render_path_frame++;
 }
 
-function render_path_set_target(target: string, additional: string[] = null) {
+function render_path_set_target(target: string, additional: string[] = null, flags: i32 = clear_flag_t.NONE, color: i32 = 0, depth: f32 = 0.0) {
 	if (target == "") { // Framebuffer
 		_render_path_current_target = null;
 		render_path_current_w = sys_w();
 		render_path_current_h = sys_h();
-		render_path_begin();
+		render_path_begin(null, null, flags, color, depth);
 		render_path_set_current_viewport(sys_w(), sys_h());
 		render_path_set_current_scissor(sys_w(), sys_h());
 	}
@@ -100,7 +100,7 @@ function render_path_set_target(target: string, additional: string[] = null) {
 		}
 		render_path_current_w = rt._image.width;
 		render_path_current_h = rt._image.height;
-		render_path_begin(rt._image, additional_images);
+		render_path_begin(rt._image, additional_images, flags, color, depth);
 	}
 	_render_path_bind_params = null;
 }
@@ -111,12 +111,12 @@ function render_path_set_depth_from(target: string, from: string) {
 	iron_gpu_render_target_set_depth_from(rt._image, rt_from._image);
 }
 
-function render_path_begin(render_target: iron_gpu_texture_t = null, additional_targets: iron_gpu_texture_t[] = null) {
+function render_path_begin(render_target: iron_gpu_texture_t, additional_targets: iron_gpu_texture_t[], flags: i32, color: i32, depth: f32) {
 	if (_render_path_current_image != null) {
 		render_path_end();
 	}
 	_render_path_current_image = render_target;
-	_gpu_begin(render_target, additional_targets);
+	_gpu_begin(render_target, additional_targets, flags, color, depth);
 }
 
 function render_path_end() {
@@ -141,10 +141,6 @@ function render_path_set_current_scissor(view_w: i32, view_h: i32) {
 function render_path_set_viewport(view_w: i32, view_h: i32) {
 	render_path_set_current_viewport(view_w, view_h);
 	render_path_set_current_scissor(view_w, view_h);
-}
-
-function render_path_clear_target(color: color_t = 0x00000000, depth: f32 = 0.0, flags: i32 = clear_flag_t.COLOR) {
-	iron_gpu_clear(color, depth, flags);
 }
 
 function render_path_gen_mipmaps(target: string) {
@@ -213,12 +209,12 @@ function render_path_draw_skydome(handle: string) {
 	if (cc.context == null) {
 		return; // World data not specified
 	}
-	iron_gpu_set_pipeline(cc.context._.pipe_state);
+	gpu_set_pipeline(cc.context._.pipe_state);
 	uniforms_set_context_consts(cc.context, _render_path_bind_params);
 	uniforms_set_obj_consts(cc.context, null); // External hosek
 	gpu_set_vertex_buffer(const_data_skydome_vb);
 	gpu_set_index_buffer(const_data_skydome_ib);
-	gpu_draw_indexed_vertices();
+	gpu_draw();
 	render_path_end();
 }
 
@@ -239,12 +235,12 @@ function render_path_draw_shader(handle: string) {
 	if (const_data_screen_aligned_vb == null) {
 		const_data_create_screen_aligned_data();
 	}
-	iron_gpu_set_pipeline(cc.context._.pipe_state);
+	gpu_set_pipeline(cc.context._.pipe_state);
 	uniforms_set_context_consts(cc.context, _render_path_bind_params);
 	uniforms_set_obj_consts(cc.context, null);
 	gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 	gpu_set_index_buffer(const_data_screen_aligned_ib);
-	gpu_draw_indexed_vertices();
+	gpu_draw();
 
 	render_path_end();
 }

@@ -394,7 +394,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			}
 			else { // Deferred, Pathtraced
 				if (make_material_emis_used) {
-					node_shader_write_frag(kong, "if (int(matid * 255.0) % 3 == 1) { basecol *= 10.0; }"); // Boost for bloom
+					node_shader_write_frag(kong, "if (int(matid * 255.0) % float(3) == 1) { basecol *= 10.0; }"); // Boost for bloom
 				}
 				node_shader_write_frag(kong, "output[1] = float4(basecol, occlusion);");
 			}
@@ -421,11 +421,11 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			node_shader_write_frag(kong, "output[1] = float4(float3(height, height, height), 1.0);");
 		}
 		else if (context_raw.viewport_mode == viewport_mode_t.EMISSION) {
-			node_shader_write_frag(kong, "float emis = int(matid * 255.0) % 3 == 1 ? 1.0 : 0.0;");
+			node_shader_write_frag(kong, "float emis = int(matid * 255.0) % float(3) == 1 ? 1.0 : 0.0;");
 			node_shader_write_frag(kong, "output[1] = float4(float3(emis, emis, emis), 1.0);");
 		}
 		else if (context_raw.viewport_mode == viewport_mode_t.SUBSURFACE) {
-			node_shader_write_frag(kong, "float subs = int(matid * 255.0) % 3 == 2 ? 1.0 : 0.0;");
+			node_shader_write_frag(kong, "float subs = int(matid * 255.0) % float(3) == 2 ? 1.0 : 0.0;");
 			node_shader_write_frag(kong, "output[1] = float4(float3(subs, subs, subs), 1.0);");
 		}
 		else if (context_raw.viewport_mode == viewport_mode_t.TEXCOORD) {
@@ -484,7 +484,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		node_shader_write_frag(kong, "n /= (abs(n.x) + abs(n.y) + abs(n.z));");
 		// node_shader_write_frag(kong, "n.xy = n.z >= 0.0 ? n.xy : octahedron_wrap(n.xy);");
 		node_shader_write_frag(kong, "if (n.z < 0.0) { n.xy = octahedron_wrap(n.xy); }");
-		node_shader_write_frag(kong, "output[0] = float4(n.xy, roughness, pack_f32_i16(metallic, uint(int(matid * 255.0) % 3)));");
+		node_shader_write_frag(kong, "output[0] = float4(n.xy, roughness, pack_f32_i16(metallic, uint(int(matid * 255.0) % float(3))));");
 	}
 
 	node_shader_write_frag(kong, "output[2] = float4(0.0, 0.0, input.tex_coord.xy);");

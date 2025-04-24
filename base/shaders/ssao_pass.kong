@@ -8,13 +8,13 @@ const constants: {
 };
 
 #[set(everything)]
+const sampler_linear: sampler;
+
+#[set(everything)]
 const gbufferD: tex2d;
 
 #[set(everything)]
 const gbuffer0: tex2d;
-
-#[set(everything)]
-const sampler_linear: sampler;
 
 const max_steps: float = 32;
 const ray_step: float = 0.001;
