@@ -9,7 +9,6 @@ function const_data_create_screen_aligned_data() {
 	let data: f32[] = [-1.0, -1.0, 3.0, -1.0, -1.0, 3.0];
 	let indices: i32[] = [0, 1, 2];
 
-	// Mandatory vertex data names and sizes
 	let structure: iron_gpu_vertex_structure_t = gpu_vertex_struct_create();
 	gpu_vertex_struct_add(structure, "pos", vertex_data_t.F32_2X);
 	const_data_screen_aligned_vb = gpu_create_vertex_buffer(math_floor(data.length / math_floor(iron_gpu_vertex_struct_size(structure) / 4)), structure, usage_t.STATIC);

@@ -45,7 +45,6 @@ typedef enum iron_gpu_vertex_data {
 	IRON_GPU_VERTEX_DATA_F32_2X,
 	IRON_GPU_VERTEX_DATA_F32_3X,
 	IRON_GPU_VERTEX_DATA_F32_4X,
-	IRON_GPU_VERTEX_DATA_U8_4X_NORM,
 	IRON_GPU_VERTEX_DATA_I16_2X_NORM,
 	IRON_GPU_VERTEX_DATA_I16_4X_NORM,
 } iron_gpu_vertex_data_t;
@@ -292,8 +291,6 @@ static inline int iron_gpu_vertex_data_size(iron_gpu_vertex_data_t data) {
 		return 3 * 4;
 	case IRON_GPU_VERTEX_DATA_F32_4X:
 		return 4 * 4;
-	case IRON_GPU_VERTEX_DATA_U8_4X_NORM:
-		return 4 * 1;
 	case IRON_GPU_VERTEX_DATA_I16_2X_NORM:
 		return 2 * 2;
 	case IRON_GPU_VERTEX_DATA_I16_4X_NORM:

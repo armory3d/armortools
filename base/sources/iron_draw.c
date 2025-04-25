@@ -550,10 +550,12 @@ void draw_string(const char *text, float x, float y) {
 		if (draw_font_get_baked_quad(draw_font, draw_font_size, &q, codepoint, xpos, ypos)) {
 			xpos += q.xadvance;
 
+			//
 			gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : _draw_current != NULL ? &text_pipeline_rt : &text_pipeline);
 			gpu_set_vertex_buffer(&rect_vertex_buffer);
 			gpu_set_index_buffer(&rect_index_buffer);
 			gpu_set_texture(&text_tex_unit, tex);
+			//
 
 			gpu_set_float4(&text_pos_loc, q.x0 / vw(), q.y0 / vh(), (q.x1 - q.x0) / vw(), (q.y1 - q.y0) / vh());
 			gpu_set_float4(&text_tex_loc, q.s0, q.t0, q.s1 - q.s0, q.t1 - q.t0);

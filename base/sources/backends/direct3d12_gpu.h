@@ -119,7 +119,6 @@ struct D3D12IindexBufferView {
 typedef struct {
 	struct ID3D12Resource *uploadBuffer;
 	struct D3D12VertexBufferView view;
-	int myCount;
 	int myStride;
 	int lastStart;
 	int lastCount;

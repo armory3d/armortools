@@ -859,9 +859,6 @@ void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipe) {
 		case IRON_GPU_VERTEX_DATA_F32_4X:
 			vertexDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 			break;
-		case IRON_GPU_VERTEX_DATA_U8_4X_NORM:
-			vertexDesc[i].Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-			break;
 		case IRON_GPU_VERTEX_DATA_I16_2X_NORM:
 			vertexDesc[i].Format = DXGI_FORMAT_R16G16_SNORM;
 			break;
@@ -1485,14 +1482,13 @@ void iron_gpu_render_target_set_depth_from(iron_gpu_texture_t *render_target, ir
 
 void iron_gpu_vertex_buffer_init(iron_gpu_buffer_t *buffer, int count, iron_gpu_vertex_structure_t *structure, bool gpuMemory) {
 	buffer->myCount = count;
-	buffer->impl.myCount = count;
 
 	buffer->impl.myStride = 0;
 	for (int i = 0; i < structure->size; ++i) {
 		buffer->impl.myStride += iron_gpu_vertex_data_size(structure->elements[i].data);
 	}
 
-	int uploadBufferSize = buffer->impl.myStride * buffer->impl.myCount;
+	int uploadBufferSize = buffer->impl.myStride * buffer-.myCount;
 
 	D3D12_HEAP_PROPERTIES heapProperties = {
 		.Type = D3D12_HEAP_TYPE_UPLOAD,
@@ -1562,7 +1558,7 @@ int iron_gpu_internal_vertex_buffer_set(iron_gpu_buffer_t *buffer) {
 }
 
 int iron_gpu_vertex_buffer_count(iron_gpu_buffer_t *buffer) {
-	return buffer->impl.myCount;
+	return buffer->myCount;
 }
 
 int iron_gpu_vertex_buffer_stride(iron_gpu_buffer_t *buffer) {
@@ -2254,10 +2250,10 @@ void iron_gpu_raytrace_acceleration_structure_build(iron_gpu_raytrace_accelerati
 
 	#ifdef is_forge
 	create_srv_ib(_ib_full, _ib_full->impl.count, 0);
-	create_srv_vb(_vb_full, _vb_full->impl.myCount, vb[0]->impl.myStride);
+	create_srv_vb(_vb_full, _vb_full->myCount, vb[0]->impl.myStride);
 	#else
 	create_srv_ib(ib[0], ib[0]->impl.count, 0);
-	create_srv_vb(vb[0], vb[0]->impl.myCount, vb[0]->impl.myStride);
+	create_srv_vb(vb[0], vb[0]->myCount, vb[0]->impl.myStride);
 	#endif
 
 	// Reset the command list for the acceleration structure construction
@@ -2288,14 +2284,14 @@ void iron_gpu_raytrace_acceleration_structure_build(iron_gpu_raytrace_accelerati
 				.Triangles.IndexFormat = DXGI_FORMAT_R32_UINT,
 				.Triangles.Transform3x4 = 0,
 				.Triangles.VertexFormat = DXGI_FORMAT_R16G16B16A16_SNORM,
-				.Triangles.VertexCount = vb[i]->impl.myCount,
+				.Triangles.VertexCount = vb[i]->myCount,
 			};
 
 			D3D12_RESOURCE_DESC desc;
 			vb[i]->impl.uploadBuffer->lpVtbl->GetDesc(vb[i]->impl.uploadBuffer, &desc);
 
 			geometryDesc.Triangles.VertexBuffer.StartAddress = vb[i]->impl.uploadBuffer->lpVtbl->GetGPUVirtualAddress(vb[i]->impl.uploadBuffer);
-			geometryDesc.Triangles.VertexBuffer.StrideInBytes = desc.Width / vb[i]->impl.myCount;
+			geometryDesc.Triangles.VertexBuffer.StrideInBytes = desc.Width / vb[i]->myCount;
 			geometryDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
 			geometryDescs[i] = geometryDesc;
 

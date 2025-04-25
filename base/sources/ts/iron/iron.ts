@@ -665,7 +665,6 @@ enum vertex_data_t {
 	F32_2X,
 	F32_3X,
 	F32_4X,
-	U8_4X_NORM,
 	I16_2X_NORM,
 	I16_4X_NORM,
 }

@@ -44,13 +44,11 @@ typedef struct {
 	void *_tex;
 	void *data;
 	bool has_mipmaps;
-
 	void *_texReadback;
 	void *_depthTex;
 } gpu_texture_impl_t;
 
 typedef struct {
-	int myCount;
 	int myStride;
 	void *metal_buffer;
 	int count;

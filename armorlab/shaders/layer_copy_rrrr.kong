@@ -1,5 +1,10 @@
 
 #[set(everything)]
+const constants: {
+	empty: float4;
+};
+
+#[set(everything)]
 const sampler_linear: sampler;
 
 #[set(everything)]

@@ -350,9 +350,6 @@ function render_path_base_draw_taa(bufa: string, bufb: string) {
 
 function render_path_base_draw_gbuffer() {
 	render_path_set_target("gbuffer0", null, clear_flag_t.DEPTH, 0, 1.0); // Only clear gbuffer0
-	if (make_mesh_layer_pass_count == 1) {
-		render_path_set_target("gbuffer2", null, clear_flag_t.COLOR, 0xff000000);
-	}
 	let additional: string[] = ["gbuffer1", "gbuffer2"];
 	render_path_set_target("gbuffer0", additional);
 	render_path_paint_bind_layers();

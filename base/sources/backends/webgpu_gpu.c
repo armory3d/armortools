@@ -259,9 +259,6 @@ void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipe) {
 		case IRON_GPU_VERTEX_DATA_F32_4X:
 			vaDesc[i].format = WGPUVertexFormat_Float32x4;
 			break;
-		case IRON_GPU_VERTEX_DATA_U8_4X_NORM:
-			vaDesc[i].format = WGPUVertexFormat_Unorm8x4;
-			break;
 		case IRON_GPU_VERTEX_DATA_I16_2X_NORM:
 			vaDesc[i].format = WGPUVertexFormat_Snorm16x2;
 			break;

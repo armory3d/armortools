@@ -10,6 +10,11 @@ struct vert_out {
 	dummy: float;
 }
 
+#[set(everything)]
+const constants: {
+	empty: float;
+};
+
 fun dilate_map_vert(input: vert_in): vert_out {
 	var output: vert_out;
 	var tex_coord: float2 = float2(input.tex.x * 2.0 - 1.0, (1.0 - input.tex.y) * 2.0 - 1.0);

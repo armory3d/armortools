@@ -20,7 +20,7 @@ static id<MTLArgumentEncoder> argument_encoder = nil;
 static id<MTLBuffer> argument_buffer = nil;
 static int argument_buffer_step;
 static id<CAMetalDrawable> drawable;
-static id<MTLTexture> depth_texture;
+static id<MTLTexture> framebuffer_depth;
 static int depth_bits;
 static bool has_depth = false;
 static int framebuffer_count = 0;
@@ -266,7 +266,10 @@ void iron_gpu_begin(iron_gpu_texture_t *target) {
 	CAMetalLayer *layer = getMetalLayer();
 	drawable = [layer nextDrawable];
 
-	if (depth_bits > 0 && (depth_texture == nil || depth_texture.width != drawable.texture.width || depth_texture.height != drawable.texture.height)) {
+	if (depth_bits > 0 && (framebuffer_depth == nil || framebuffer_depth.width != drawable.texture.width || framebuffer_depth.height != drawable.texture.height)) {
+		if (framebuffer_depth != nil) {
+			framebuffer_depth = nil;
+		}
 		MTLTextureDescriptor *desc = [MTLTextureDescriptor new];
 		desc.textureType = MTLTextureType2D;
 		desc.width = drawable.texture.width;
@@ -278,12 +281,9 @@ void iron_gpu_begin(iron_gpu_texture_t *target) {
 		desc.resourceOptions = MTLResourceStorageModePrivate;
 		desc.usage = MTLTextureUsageRenderTarget;
 		id<MTLDevice> device = getMetalDevice();
-		depth_texture = [device newTextureWithDescriptor:desc];
-		has_depth = true;
+		framebuffer_depth = [device newTextureWithDescriptor:desc];
 	}
-	else {
-		has_depth = false;
-	}
+	has_depth = (depth_bits > 0 && framebuffer_depth != nil);
 }
 
 void iron_gpu_end() {
@@ -401,6 +401,12 @@ void iron_gpu_command_list_set_index_buffer(iron_gpu_command_list_t *list, iron_
 }
 
 void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, iron_gpu_texture_t **targets, int count, unsigned flags, unsigned color, float depth) {
+	if (command_buffer != nil && command_encoder != nil) {
+		[command_encoder endEncoding];
+		[command_buffer commit];
+		[command_buffer waitUntilCompleted];
+	}
+
 	if (targets[0]->framebuffer_index >= 0) {
 		for (int i = 0; i < 8; ++i) {
 			render_targets[i] = NULL;
@@ -412,23 +418,14 @@ void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, iro
 		for (int i = 0; i < count; ++i) {
 			render_targets[i] = targets[i];
 		}
-		for (int i = count; i < 8; ++i) {
-			render_targets[i] = NULL;
-		}
-	}
-
-	if (command_buffer != nil && command_encoder != nil) {
-		[command_encoder endEncoding];
-		[command_buffer commit];
-		[command_buffer waitUntilCompleted];
 	}
 
 	MTLRenderPassDescriptor *desc = [MTLRenderPassDescriptor renderPassDescriptor];
 	for (int i = 0; i < count; ++i) {
 		if (targets == NULL) {
 			desc.colorAttachments[i].texture = drawable.texture;
-			desc.depthAttachment.texture = depth_texture;
-			has_depth = depth_texture != nil;
+			desc.depthAttachment.texture = framebuffer_depth;
+			has_depth = framebuffer_depth != nil;
 		}
 		else {
 			desc.colorAttachments[i].texture = (__bridge id<MTLTexture>)targets[i]->impl._tex;
@@ -559,8 +556,6 @@ void iron_gpu_pipeline_init(iron_gpu_pipeline_t *pipeline) {
 }
 
 void iron_gpu_pipeline_destroy(iron_gpu_pipeline_t *pipeline) {
-	pipeline->impl._depthStencil = NULL;
-
 	id<MTLRenderPipelineState> pipe = (__bridge_transfer id<MTLRenderPipelineState>)pipeline->impl._pipeline;
 	pipe = nil;
 	pipeline->impl._pipeline = NULL;
@@ -579,7 +574,6 @@ void iron_gpu_pipeline_destroy(iron_gpu_pipeline_t *pipeline) {
 }
 
 void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipeline) {
-
 	id<MTLDevice> device = getMetalDevice();
 	NSError *error = nil;
 	id<MTLLibrary> library = [device newLibraryWithSource:[[NSString alloc] initWithBytes:pipeline->vertex_shader->impl.source length:pipeline->vertex_shader->impl.length encoding:NSUTF8StringEncoding] options:nil error:&error];
@@ -620,35 +614,29 @@ void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipeline) {
 	MTLVertexDescriptor *vertexDescriptor = [[MTLVertexDescriptor alloc] init];
 
 	for (int i = 0; i < pipeline->input_layout->size; ++i) {
-		int index = i;
-		vertexDescriptor.attributes[index].bufferIndex = 0;
-		vertexDescriptor.attributes[index].offset = offset;
-
+		vertexDescriptor.attributes[i].bufferIndex = 0;
+		vertexDescriptor.attributes[i].offset = offset;
 		offset += iron_gpu_vertex_data_size(pipeline->input_layout->elements[i].data);
-		if (index >= 0) {
-			switch (pipeline->input_layout->elements[i].data) {
-			case IRON_GPU_VERTEX_DATA_F32_1X:
-				vertexDescriptor.attributes[index].format = MTLVertexFormatFloat;
-				break;
-			case IRON_GPU_VERTEX_DATA_F32_2X:
-				vertexDescriptor.attributes[index].format = MTLVertexFormatFloat2;
-				break;
-			case IRON_GPU_VERTEX_DATA_F32_3X:
-				vertexDescriptor.attributes[index].format = MTLVertexFormatFloat3;
-				break;
-			case IRON_GPU_VERTEX_DATA_F32_4X:
-				vertexDescriptor.attributes[index].format = MTLVertexFormatFloat4;
-				break;
-			case IRON_GPU_VERTEX_DATA_U8_4X_NORM:
-				vertexDescriptor.attributes[index].format = MTLVertexFormatUChar4Normalized;
-				break;
-			case IRON_GPU_VERTEX_DATA_I16_2X_NORM:
-				vertexDescriptor.attributes[index].format = MTLVertexFormatShort2Normalized;
-				break;
-			case IRON_GPU_VERTEX_DATA_I16_4X_NORM:
-				vertexDescriptor.attributes[index].format = MTLVertexFormatShort4Normalized;
-				break;
-			}
+
+		switch (pipeline->input_layout->elements[i].data) {
+		case IRON_GPU_VERTEX_DATA_F32_1X:
+			vertexDescriptor.attributes[i].format = MTLVertexFormatFloat;
+			break;
+		case IRON_GPU_VERTEX_DATA_F32_2X:
+			vertexDescriptor.attributes[i].format = MTLVertexFormatFloat2;
+			break;
+		case IRON_GPU_VERTEX_DATA_F32_3X:
+			vertexDescriptor.attributes[i].format = MTLVertexFormatFloat3;
+			break;
+		case IRON_GPU_VERTEX_DATA_F32_4X:
+			vertexDescriptor.attributes[i].format = MTLVertexFormatFloat4;
+			break;
+		case IRON_GPU_VERTEX_DATA_I16_2X_NORM:
+			vertexDescriptor.attributes[i].format = MTLVertexFormatShort2Normalized;
+			break;
+		case IRON_GPU_VERTEX_DATA_I16_4X_NORM:
+			vertexDescriptor.attributes[i].format = MTLVertexFormatShort4Normalized;
+			break;
 		}
 	}
 
@@ -940,7 +928,7 @@ void iron_gpu_render_target_set_depth_from(iron_gpu_texture_t *target, iron_gpu_
 
 void iron_gpu_vertex_buffer_init(iron_gpu_buffer_t *buffer, int count, iron_gpu_vertex_structure_t *structure, bool gpu_memory) {
 	memset(&buffer->impl, 0, sizeof(buffer->impl));
-	buffer->impl.myCount = count;
+	buffer->myCount = count;
 	buffer->impl.gpu_memory = gpu_memory;
 	for (int i = 0; i < structure->size; ++i) {
 		iron_gpu_vertex_element_t element = structure->elements[i];
@@ -971,7 +959,7 @@ void iron_gpu_vertex_buffer_unlock(iron_gpu_buffer_t *buf) {
 }
 
 int iron_gpu_vertex_buffer_count(iron_gpu_buffer_t *buffer) {
-	return buffer->impl.myCount;
+	return buffer->myCount;
 }
 
 int iron_gpu_vertex_buffer_stride(iron_gpu_buffer_t *buffer) {

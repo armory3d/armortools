@@ -182,15 +182,18 @@ function node_shader_get(raw: node_shader_t): string {
 	}
 	s += "}\n\n";
 
+	s += "#[set(everything)]\n";
+	s += "const constants: {\n";
 	if (raw.constants.length > 0) {
-		s += "#[set(everything)]\n";
-		s += "const constants: {\n";
 		for (let i: i32 = 0; i < raw.constants.length; ++i) {
 			let a: string = raw.constants[i];
 			s += "\t" + a + ";\n";
 		}
-		s += "};\n\n";
 	}
+	else {
+		s += "\tempty: float4;\n";
+	}
+	s += "};\n\n";
 
 	if (raw.textures.length > 0) {
 		s += "#[set(everything)]\n";

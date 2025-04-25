@@ -2447,9 +2447,6 @@ void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipeline) {
 		case IRON_GPU_VERTEX_DATA_F32_4X:
 			vi_attrs[attr].format = VK_FORMAT_R32G32B32A32_SFLOAT;
 			break;
-		case IRON_GPU_VERTEX_DATA_U8_4X_NORM:
-			vi_attrs[attr].format = VK_FORMAT_R8G8B8A8_UNORM;
-			break;
 		case IRON_GPU_VERTEX_DATA_I16_2X_NORM:
 			vi_attrs[attr].format = VK_FORMAT_R16G16_SNORM;
 			break;
@@ -3257,8 +3254,7 @@ void iron_gpu_render_target_set_depth_from(iron_gpu_texture_t *target, iron_gpu_
 }
 
 void iron_gpu_vertex_buffer_init(iron_gpu_buffer_t *buffer, int vertexCount, iron_gpu_vertex_structure_t *structure, bool gpuMemory) {
-	buffer->myCount = count;
-	buffer->impl.myCount = vertexCount;
+	buffer->myCount = vertexCount;
 	buffer->impl.myStride = 0;
 	for (int i = 0; i < structure->size; ++i) {
 		iron_gpu_vertex_element_t element = structure->elements[i];
@@ -3320,7 +3316,7 @@ void iron_gpu_vertex_buffer_destroy(iron_gpu_buffer_t *buffer) {
 
 float *iron_gpu_vertex_buffer_lock(iron_gpu_buffer_t *buffer) {
 	int start = 0;
-	int count = buffer->impl.myCount;
+	int count = buffer->myCount;
 	vkMapMemory(vk_ctx.device, buffer->impl.mem, start * buffer->impl.myStride, count * buffer->impl.myStride, 0, (void **)&buffer->impl.data);
 	return buffer->impl.data;
 }
@@ -3334,7 +3330,7 @@ int iron_gpu_internal_vertex_buffer_set(iron_gpu_buffer_t *buffer) {
 }
 
 int iron_gpu_vertex_buffer_count(iron_gpu_buffer_t *buffer) {
-	return buffer->impl.myCount;
+	return buffer->myCount;
 }
 
 int iron_gpu_vertex_buffer_stride(iron_gpu_buffer_t *buffer) {
@@ -3402,7 +3398,7 @@ int iron_gpu_constant_buffer_size(iron_gpu_buffer_t *buffer) {
 }
 
 void iron_gpu_index_buffer_init(iron_gpu_buffer_t *buffer, int indexCount, bool gpuMemory) {
-	buffer->impl.myCount = indexCount;
+	buffer->myCount = indexCount;
 
 	VkBufferCreateInfo buf_info = {
 		.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
@@ -3469,7 +3465,7 @@ void iron_gpu_index_buffer_unlock(iron_gpu_buffer_t *buffer) {
 }
 
 int iron_gpu_index_buffer_count(iron_gpu_buffer_t *buffer) {
-	return buffer->impl.myCount;
+	return buffer->myCount;
 }
 
 static const int INDEX_RAYGEN = 0;
@@ -3942,8 +3938,8 @@ void iron_gpu_raytrace_acceleration_structure_build(iron_gpu_raytrace_accelerati
 	if (build_bottom) {
 		for (int i = 0; i < vb_count; ++i) {
 
-			uint32_t prim_count = ib[i]->impl.myCount / 3;
-			uint32_t vert_count = vb[i]->impl.myCount;
+			uint32_t prim_count = ib[i]->myCount / 3;
+			uint32_t vert_count = vb[i]->myCount;
 
 			VkDeviceOrHostAddressConstKHR vertex_data_device_address = {0};
 			VkDeviceOrHostAddressConstKHR index_data_device_address = {0};
@@ -3959,7 +3955,7 @@ void iron_gpu_raytrace_acceleration_structure_build(iron_gpu_raytrace_accelerati
 				.geometry.triangles.vertexFormat = VK_FORMAT_R16G16B16A16_SNORM,
 				.geometry.triangles.vertexData.deviceAddress = vertex_data_device_address.deviceAddress,
 				.geometry.triangles.vertexStride = vb[i]->impl.myStride,
-				.geometry.triangles.maxVertex = vb[i]->impl.myCount,
+				.geometry.triangles.maxVertex = vb[i]->myCount,
 				.geometry.triangles.indexType = VK_INDEX_TYPE_UINT32,
 				.geometry.triangles.indexData.deviceAddress = index_data_device_address.deviceAddress,
 			};
@@ -4180,7 +4176,7 @@ void iron_gpu_raytrace_acceleration_structure_build(iron_gpu_raytrace_accelerati
 
 			int ib_off = 0;
 			for (int j = 0; j < instances[i].i; ++j) {
-				ib_off += ib[j]->impl.myCount * 4;
+				ib_off += ib[j]->myCount * 4;
 			}
 			instance.instanceCustomIndex = ib_off;
 
