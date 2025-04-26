@@ -606,14 +606,14 @@ void iron_gpu_command_list_set_render_targets(struct iron_gpu_command_list *list
 							  ((color & 0xff000000) >> 24) / 255.0f};
 
 		D3D12_CPU_DESCRIPTOR_HANDLE handle;
-		renderTarget->impl.renderTargetDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(renderTarget->impl.renderTargetDescriptorHeap, &handle);
+		render_target->impl.renderTargetDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(render_target->impl.renderTargetDescriptorHeap, &handle);
 		list->impl._commandList->lpVtbl->ClearRenderTargetView(list->impl._commandList, handle, clearColor, 0, NULL);
 	}
 	if (flags & IRON_GPU_CLEAR_DEPTH) {
 		D3D12_CLEAR_FLAGS d3dflags = D3D12_CLEAR_FLAG_DEPTH;
-		if (renderTarget->impl.depthStencilDescriptorHeap != NULL) {
+		if (render_target->impl.depthStencilDescriptorHeap != NULL) {
 			D3D12_CPU_DESCRIPTOR_HANDLE handle;
-			renderTarget->impl.depthStencilDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(renderTarget->impl.depthStencilDescriptorHeap, &handle);
+			render_target->impl.depthStencilDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(render_target->impl.depthStencilDescriptorHeap, &handle);
 			list->impl._commandList->lpVtbl->ClearDepthStencilView(list->impl._commandList, handle, d3dflags, depth, 0, 0, NULL);
 		}
 	}
@@ -1488,7 +1488,7 @@ void iron_gpu_vertex_buffer_init(iron_gpu_buffer_t *buffer, int count, iron_gpu_
 		buffer->impl.myStride += iron_gpu_vertex_data_size(structure->elements[i].data);
 	}
 
-	int uploadBufferSize = buffer->impl.myStride * buffer-.myCount;
+	int uploadBufferSize = buffer->impl.myStride * buffer->myCount;
 
 	D3D12_HEAP_PROPERTIES heapProperties = {
 		.Type = D3D12_HEAP_TYPE_UPLOAD,
@@ -1528,7 +1528,7 @@ void iron_gpu_vertex_buffer_destroy(iron_gpu_buffer_t *buffer) {
 }
 
 float *iron_gpu_vertex_buffer_lock(iron_gpu_buffer_t *buffer) {
-	int start = 0l
+	int start = 0l;
 	int count = iron_gpu_vertex_buffer_count(buffer);
 	buffer->impl.lastStart = start;
 	buffer->impl.lastCount = count;
