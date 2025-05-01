@@ -1528,7 +1528,7 @@ void iron_gpu_vertex_buffer_destroy(iron_gpu_buffer_t *buffer) {
 }
 
 float *iron_gpu_vertex_buffer_lock(iron_gpu_buffer_t *buffer) {
-	int start = 0l;
+	int start = 0;
 	int count = iron_gpu_vertex_buffer_count(buffer);
 	buffer->impl.lastStart = start;
 	buffer->impl.lastCount = count;
