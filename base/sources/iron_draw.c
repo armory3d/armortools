@@ -208,7 +208,7 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *rect_vert, 
 		tris_pos2_loc = iron_gpu_pipeline_get_constant_location(&tris_pipeline, "pos2");
 		tris_pos2_loc.impl.vertexOffset = 80;
 		tris_col_loc = iron_gpu_pipeline_get_constant_location(&tris_pipeline, "col");
-		tris_col_loc.impl.vertexOffset = 96;
+		tris_col_loc.impl.vertexOffset = 96; // 88 with 16 align
 	}
 
 	// Text painter

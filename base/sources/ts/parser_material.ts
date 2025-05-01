@@ -251,7 +251,7 @@ function parser_material_finalize(con: node_shader_context_t) {
 		node_shader_write_attrib_vert(kong, "var wnormal: float3 = normalize(constants.N * float3(input.nor.xy, input.pos.w));");
 	}
 	if (kong.frag_nattr) {
-		node_shader_add_out(kong, "var nattr: float3");
+		node_shader_add_out(kong, "nattr: float3");
 		node_shader_write_attrib_vert(kong, "output.nattr = float3(input.nor.xy, input.pos.w);");
 	}
 	if (kong.frag_dotnv) {

@@ -266,6 +266,7 @@ function pipes_init() {
 		gpu_vertex_struct_add(vs, "pos", vertex_data_t.I16_4X_NORM);
 		gpu_vertex_struct_add(vs, "nor", vertex_data_t.I16_2X_NORM);
 		gpu_vertex_struct_add(vs, "tex", vertex_data_t.I16_2X_NORM);
+		gpu_vertex_struct_add(vs, "col", vertex_data_t.I16_4X_NORM);
 		pipes_cursor.input_layout = vs;
 		pipes_cursor.blend_source = blend_factor_t.SOURCE_ALPHA;
 		pipes_cursor.blend_destination = blend_factor_t.INV_SOURCE_ALPHA;

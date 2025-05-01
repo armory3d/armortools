@@ -252,6 +252,8 @@ void iron_gpu_internal_init_window(int depth_buffer_bits, bool vsync) {
 	// device.makeArgumentEncoder(bufferIndex:)
 
 	argument_buffer_step = [argument_encoder encodedLength];
+	// int align = [argument_encoder alignment];
+	// argument_buffer_step += (align - (argument_buffer_step % align)) % align;
 	argument_buffer = [device newBufferWithLength:(argument_buffer_step * 2048) options:MTLResourceStorageModeShared];
 	for (int i = 0; i < 2048; ++i) {
 		[argument_encoder setArgumentBuffer:argument_buffer offset:argument_buffer_step * i];
@@ -520,7 +522,7 @@ void iron_gpu_command_list_set_constant_buffer(iron_gpu_command_list_t *list, ir
 	id<MTLBuffer> buf = (__bridge id<MTLBuffer>)buffer->impl._buffer;
 	int i = constant_buffer_index;
 	[argument_encoder setArgumentBuffer:argument_buffer offset:argument_buffer_step * i];
-	[argument_encoder setBuffer:buf offset:offset atIndex:0 ];
+	[argument_encoder setBuffer:buf offset:offset atIndex:0];
 	[command_encoder setVertexBuffer:argument_buffer offset:argument_buffer_step * i atIndex:1];
     [command_encoder setFragmentBuffer:argument_buffer offset:argument_buffer_step * i atIndex:1];
 	[command_encoder useResource:buf usage:MTLResourceUsageRead];

@@ -294,7 +294,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		}
 		else if (context_raw.viewport_mode == viewport_mode_t.OBJECT_NORMAL) {
 			kong.frag_nattr = true;
-			node_shader_write_frag(kong, "output[1] = float4(nAttr, 1.0);");
+			node_shader_write_frag(kong, "output[1] = float4(input.nattr, 1.0);");
 		}
 		else if (context_raw.viewport_mode == viewport_mode_t.OBJECT_ID) {
 			node_shader_add_constant(kong, "object_id: float", "_object_id");

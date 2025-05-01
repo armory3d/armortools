@@ -433,7 +433,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		}
 		else if (context_raw.viewport_mode == viewport_mode_t.OBJECT_NORMAL) {
 			kong.frag_nattr = true;
-			node_shader_write_frag(kong, "output[1] = float4(nattr, 1.0);");
+			node_shader_write_frag(kong, "output[1] = float4(input.nattr, 1.0);");
 		}
 		else if (context_raw.viewport_mode == viewport_mode_t.MATERIAL_ID) {
 			let id: i32 = context_raw.layer.id;
@@ -446,11 +446,11 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			node_shader_write_frag(kong, "output[1] = float4(matid_r, matid_g, matid_b, 1.0);");
 		}
 		else if (context_raw.viewport_mode == viewport_mode_t.OBJECT_ID) {
-			node_shader_add_constant(kong, "float object_id", "_object_id");
-			node_shader_write_frag(kong, "float obid = constants.object_id + 1.0 / 255.0;");
-			node_shader_write_frag(kong, "float id_r = frac(sin(dot(float2(obid, obid * 20.0), float2(12.9898, 78.233))) * 43758.5453);");
-			node_shader_write_frag(kong, "float id_g = frac(sin(dot(float2(obid * 20.0, obid), float2(12.9898, 78.233))) * 43758.5453);");
-			node_shader_write_frag(kong, "float id_b = frac(sin(dot(float2(obid, obid * 40.0), float2(12.9898, 78.233))) * 43758.5453);");
+			node_shader_add_constant(kong, "object_id: float", "_object_id");
+			node_shader_write_frag(kong, "var obid: float = constants.object_id + 1.0 / 255.0;");
+			node_shader_write_frag(kong, "var id_r: float = frac(sin(dot(float2(obid, obid * 20.0), float2(12.9898, 78.233))) * 43758.5453);");
+			node_shader_write_frag(kong, "var id_g: float = frac(sin(dot(float2(obid * 20.0, obid), float2(12.9898, 78.233))) * 43758.5453);");
+			node_shader_write_frag(kong, "var id_b: float = frac(sin(dot(float2(obid, obid * 40.0), float2(12.9898, 78.233))) * 43758.5453);");
 			node_shader_write_frag(kong, "output[1] = float4(id_r, id_g, id_b, 1.0);");
 		}
 		else if (context_raw.viewport_mode == viewport_mode_t.MASK && (slot_layer_get_masks(context_raw.layer) != null || slot_layer_is_mask(context_raw.layer))) {

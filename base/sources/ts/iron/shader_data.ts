@@ -158,12 +158,13 @@ function shader_context_compile(raw: shader_context_t): shader_context_t {
 	return shader_context_finish_compile(raw);
 }
 
+///if arm_metal
+
 function shader_context_type_size(t: string): i32 {
 	if (t == "int") return 4;
 	if (t == "float") return 4;
 	if (t == "vec2") return 8;
-	if (t == "vec3") return 12;
-	// if (t == "vec3") return 16;
+	if (t == "vec3") return 16;
 	if (t == "vec4") return 16;
 	if (t == "mat3") return 48;
 	if (t == "mat4") return 64;
@@ -171,9 +172,26 @@ function shader_context_type_size(t: string): i32 {
 }
 
 function shader_context_type_pad(offset: i32, size: i32): i32 {
-	///if arm_metal
-	// return 0;
-	///end
+	if (size > 16) {
+		size = 16;
+	}
+	return (size - (offset % size)) % size;
+}
+
+///else
+
+function shader_context_type_size(t: string): i32 {
+	if (t == "int") return 4;
+	if (t == "float") return 4;
+	if (t == "vec2") return 8;
+	if (t == "vec3") return 12;
+	if (t == "vec4") return 16;
+	if (t == "mat3") return 48;
+	if (t == "mat4") return 64;
+	return 0;
+}
+
+function shader_context_type_pad(offset: i32, size: i32): i32 {
 	let r: i32 = offset % 16;
 	if (r == 0) {
 		return 0;
@@ -183,6 +201,8 @@ function shader_context_type_pad(offset: i32, size: i32): i32 {
 	}
 	return 0;
 }
+
+///end
 
 function shader_context_finish_compile(raw: shader_context_t): shader_context_t {
 	gpu_compile_pipeline(raw._.pipe_state);

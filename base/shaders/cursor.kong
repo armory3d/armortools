@@ -17,9 +17,10 @@ const sampler_linear: sampler;
 const gbufferD: tex2d;
 
 struct vert_in {
-	pos: float4; // hlsl
-	nor: float2; // hlsl
+	pos: float4;
+	nor: float2;
 	tex: float2;
+	col: float4;
 }
 
 struct vert_out {
@@ -46,8 +47,7 @@ fun get_normal(p0: float3, uv: float2): float3 {
 // }
 
 fun cursor_vert(input: vert_in): vert_out {
-
-	var keep: float = input.pos.x + input.nor.x; // hlsl
+	var keep: float = input.pos.x + input.nor.x + input.col.x; // hlsl
 
 	var output: vert_out;
 	output.tex = input.tex;

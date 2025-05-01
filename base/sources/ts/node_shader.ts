@@ -219,7 +219,7 @@ function node_shader_get(raw: node_shader_t): string {
 	s += raw.vert_normal;
 	s += raw.vert;
 	s += raw.vert_end;
-	s += "output.pos.z = (output.pos.z + output.pos.w) * 0.5;\n";
+	s += "output.pos.z = (output.pos.z + output.pos.w) * 0.5;\n"; ////
 	s += "\n\treturn output;\n";
 	s += "}\n\n";
 

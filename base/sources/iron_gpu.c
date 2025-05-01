@@ -50,7 +50,7 @@ void gpu_draw(void) {
 
 void gpu_begin() {
 	constant_buffer_index = 0;
-	iron_gpu_constant_buffer_lock(&constant_buffer, constant_buffer_index, CONSTANT_BUFFER_SIZE);
+	iron_gpu_constant_buffer_lock(&constant_buffer, constant_buffer_index * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
 	framebuffer_index = (framebuffer_index + 1) % FRAMEBUFFER_COUNT;
 
 	// if (window_resized) {
