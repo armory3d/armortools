@@ -177,7 +177,7 @@ void iron_gpu_internal_resize(int width, int height) {
 void iron_gpu_internal_init(void) {
 }
 
-id<MTLTexture> dummy_tex;
+id<MTLSamplerState> linear_sampler;
 
 void iron_gpu_internal_init_window(int depth_buffer_bits, bool vsync) {
 	depth_bits = depth_buffer_bits;
@@ -190,13 +190,7 @@ void iron_gpu_internal_init_window(int depth_buffer_bits, bool vsync) {
     linear_desc.sAddressMode = MTLSamplerAddressModeRepeat;
     linear_desc.tAddressMode = MTLSamplerAddressModeRepeat;
 	linear_desc.supportArgumentBuffers = true;
-	id<MTLSamplerState> linear_sampler = [device newSamplerStateWithDescriptor:linear_desc];
-
-	MTLTextureDescriptor *dummy_desc = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA8Unorm width:1 height:1 mipmapped:NO];
-	dummy_desc.usage = MTLTextureUsageShaderRead;
-	dummy_tex = [device newTextureWithDescriptor:dummy_desc];
-	uint8_t dummy_data[4] = {0, 0, 0, 255};
-	[dummy_tex replaceRegion:MTLRegionMake2D(0, 0, 1, 1) mipmapLevel:0 withBytes:dummy_data bytesPerRow:4];
+	linear_sampler = [device newSamplerStateWithDescriptor:linear_desc];
 
 	MTLArgumentDescriptor *constantsDesc = [MTLArgumentDescriptor argumentDescriptor];
     constantsDesc.dataType = MTLDataTypePointer;
@@ -255,13 +249,6 @@ void iron_gpu_internal_init_window(int depth_buffer_bits, bool vsync) {
 	// int align = [argument_encoder alignment];
 	// argument_buffer_step += (align - (argument_buffer_step % align)) % align;
 	argument_buffer = [device newBufferWithLength:(argument_buffer_step * 2048) options:MTLResourceStorageModeShared];
-	for (int i = 0; i < 2048; ++i) {
-		[argument_encoder setArgumentBuffer:argument_buffer offset:argument_buffer_step * i];
-		[argument_encoder setSamplerState:linear_sampler atIndex:1];
-		for (int j = 2; j < 10; ++j) {
-			[argument_encoder setTexture:dummy_tex atIndex:j];
-		}
-	}
 }
 
 void iron_gpu_begin(iron_gpu_texture_t *target) {
@@ -523,11 +510,10 @@ void iron_gpu_command_list_set_constant_buffer(iron_gpu_command_list_t *list, ir
 	int i = constant_buffer_index;
 	[argument_encoder setArgumentBuffer:argument_buffer offset:argument_buffer_step * i];
 	[argument_encoder setBuffer:buf offset:offset atIndex:0];
+	[argument_encoder setSamplerState:linear_sampler atIndex:1];
 	[command_encoder setVertexBuffer:argument_buffer offset:argument_buffer_step * i atIndex:1];
     [command_encoder setFragmentBuffer:argument_buffer offset:argument_buffer_step * i atIndex:1];
-	[command_encoder useResource:buf usage:MTLResourceUsageRead];
-	[command_encoder useResource:argument_buffer usage:MTLResourceUsageRead];
-	[command_encoder useResource:dummy_tex usage:MTLResourceUsageRead];
+	[command_encoder useResource:buf usage:MTLResourceUsageRead  stages:MTLRenderStageVertex|MTLRenderStageFragment];
 }
 
 void iron_gpu_command_list_render_target_to_texture_barrier(iron_gpu_command_list_t *list, iron_gpu_texture_t *renderTarget) {
@@ -541,7 +527,7 @@ void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, iron_gpu_t
 	int i = constant_buffer_index;
 	[argument_encoder setArgumentBuffer:argument_buffer offset:argument_buffer_step * i];
 	[argument_encoder setTexture:tex atIndex:unit.offset + 2];
-	[command_encoder useResource:tex usage:MTLResourceUsageRead];
+	[command_encoder useResource:tex usage:MTLResourceUsageRead stages:MTLRenderStageVertex|MTLRenderStageFragment];
 }
 
 void iron_gpu_command_list_set_texture_from_render_target_depth(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *target) {
@@ -549,7 +535,7 @@ void iron_gpu_command_list_set_texture_from_render_target_depth(iron_gpu_command
 	int i = constant_buffer_index;
 	[argument_encoder setArgumentBuffer:argument_buffer offset:argument_buffer_step * i];
 	[argument_encoder setTexture:depth_tex atIndex:unit.offset + 2];
-	[command_encoder useResource:depth_tex usage:MTLResourceUsageRead];
+	[command_encoder useResource:depth_tex usage:MTLResourceUsageRead stages:MTLRenderStageVertex|MTLRenderStageFragment];
 }
 
 void iron_gpu_pipeline_init(iron_gpu_pipeline_t *pipeline) {
