@@ -278,7 +278,7 @@ function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: st
 		return vec4_create(context_raw.envmap_angle, math_sin(-context_raw.envmap_angle), math_cos(-context_raw.envmap_angle), scene_world.strength * 1.5);
 	}
 	else if (link == "_envmap_data_world") {
-		return vec4_create(context_raw.envmap_angle, math_sin(-context_raw.envmap_angle), math_cos(-context_raw.envmap_angle), context_raw.show_envmap ? scene_world.strength : 1.0);
+		return vec4_create(context_raw.envmap_angle, 0.0, 0.0, context_raw.show_envmap ? scene_world.strength : 1.0);
 	}
 	else if (link == "_stencil_transform") {
 		let v: vec4_t = vec4_create(context_raw.brush_stencil_x, context_raw.brush_stencil_y, context_raw.brush_stencil_scale, context_raw.brush_stencil_angle);

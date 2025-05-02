@@ -352,7 +352,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 
 		kong.frag_vvec = true;
 		node_shader_write_frag(kong, "var TBN: float3x3 = cotangent_frame(n, vvec, input.tex_coord);");
-		node_shader_write_frag(kong, "n = ntex * 2.0 - 1.0;");
+		node_shader_write_frag(kong, "n = ntex * float3(2.0, 2.0, 2.0) - float3(1.0, 1.0, 1.0);");
 		node_shader_write_frag(kong, "n.y = -n.y;");
 		node_shader_write_frag(kong, "n = normalize(TBN * n);");
 
@@ -490,13 +490,9 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	node_shader_write_frag(kong, "output[2] = float4(0.0, 0.0, input.tex_coord.xy);");
 
 	parser_material_finalize(con_mesh);
+
 	con_mesh.data.shader_from_source = true;
-
-	let test: string = node_shader_get(kong);
-
-	// iron_file_save_bytes("c:/users/lubos/desktop/test.kong", sys_string_to_buffer(test), 0);
-
-	gpu_create_shaders_from_kong(test, ADDRESS(con_mesh.data.vertex_shader), ADDRESS(con_mesh.data.fragment_shader));
+	gpu_create_shaders_from_kong(node_shader_get(kong), ADDRESS(con_mesh.data.vertex_shader), ADDRESS(con_mesh.data.fragment_shader));
 
 	return con_mesh;
 }

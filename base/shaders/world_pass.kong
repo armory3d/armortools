@@ -2,7 +2,7 @@
 #[set(everything)]
 const constants: {
 	SMVP: float4x4;
-	envmap_data_world: float4; // angle, sin(angle), cos(angle), strength
+	envmap_data_world: float4; // angle, empty, empty, strength
 };
 
 #[set(everything)]

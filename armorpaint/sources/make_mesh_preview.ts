@@ -147,12 +147,8 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	}
 	///end
 
-	let test: string = node_shader_get(kong);
-
-	// iron_file_save_bytes("c:/users/lubos/desktop/test.kong", sys_string_to_buffer(test), 0);
-
 	con_mesh.data.shader_from_source = true;
-	gpu_create_shaders_from_kong(test, ADDRESS(con_mesh.data.vertex_shader), ADDRESS(con_mesh.data.fragment_shader));
+	gpu_create_shaders_from_kong(node_shader_get(kong), ADDRESS(con_mesh.data.vertex_shader), ADDRESS(con_mesh.data.fragment_shader));
 
 	return con_mesh;
 }
