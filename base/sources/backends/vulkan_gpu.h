@@ -13,28 +13,6 @@ typedef struct {
 	uint32_t number;
 } iron_internal_named_number;
 
-struct indexed_name {
-	uint32_t id;
-	char *name;
-};
-
-struct indexed_index {
-	uint32_t id;
-	uint32_t value;
-};
-
-struct descriptor_set {
-	int id;
-	bool in_use;
-	VkDescriptorImageInfo tex_desc[16];
-	VkDescriptorSet set;
-};
-
-typedef struct inst {
-	iron_matrix4x4_t m;
-	int i;
-} inst_t;
-
 struct vk_funs {
 	PFN_vkGetPhysicalDeviceSurfaceSupportKHR fpGetPhysicalDeviceSurfaceSupportKHR;
 	PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR fpGetPhysicalDeviceSurfaceCapabilitiesKHR;

@@ -26,6 +26,28 @@
 		}                                                                                                                                                      \
 	}
 
+struct indexed_name {
+	uint32_t id;
+	char *name;
+};
+
+struct indexed_index {
+	uint32_t id;
+	uint32_t value;
+};
+
+struct descriptor_set {
+	int id;
+	bool in_use;
+	VkDescriptorImageInfo tex_desc[16];
+	VkDescriptorSet set;
+};
+
+typedef struct inst {
+	iron_matrix4x4_t m;
+	int i;
+} inst_t;
+
 bool iron_gpu_transpose_mat = true;
 
 static iron_gpu_texture_t *vulkan_textures[16] = {
@@ -1742,13 +1764,13 @@ void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, str
 	VkClearRect clearRect = {
 		.rect.offset.x = 0,
 		.rect.offset.y = 0,
-		.rect.extent.width = renderTarget->width,
-		.rect.extent.height = renderTarget->height,
+		.rect.extent.width = targets[0]->width,
+		.rect.extent.height = targets[0]->height,
 		.baseArrayLayer = 0,
 		.layerCount = 1,
 	};
 
-	int count = 0;
+	count = 0;
 	VkClearAttachment attachments[2];
 	if (flags & IRON_GPU_CLEAR_COLOR) {
 		VkClearColorValue clearColor = {0};
@@ -1761,7 +1783,7 @@ void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, str
 		attachments[count].clearValue.color = clearColor;
 		count++;
 	}
-	if ((flags & IRON_GPU_CLEAR_DEPTH) && renderTarget->impl.depthBufferBits > 0) {
+	if ((flags & IRON_GPU_CLEAR_DEPTH) && targets[0]->impl.depthBufferBits > 0) {
 		attachments[count].aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 		attachments[count].clearValue.depthStencil.depth = depth;
 		attachments[count].clearValue.depthStencil.stencil = 0;
@@ -1874,7 +1896,7 @@ static int write_tex_descs(VkDescriptorImageInfo *tex_descs) {
 	int texture_count = 0;
 	for (int i = 0; i < 16; ++i) {
 		if (vulkan_textures[i] != NULL) {
-			tex_descs[i].sampler = vulkan_samplers[i];
+			// tex_descs[i].sampler = vulkan_samplers[i];
 			if (vulkan_textures[i]->impl.stage_depth == i) {
 				tex_descs[i].imageView = vulkan_textures[i]->impl.depthView;
 				vulkan_textures[i]->impl.stage_depth = -1;
@@ -1965,7 +1987,7 @@ VkDescriptorSet get_descriptor_set() {
 	int texture_count = 0;
 	for (int i = 0; i < 16; ++i) {
 		if (vulkan_textures[i] != NULL) {
-			tex_desc[i].sampler = vulkan_samplers[i];
+			// tex_desc[i].sampler = vulkan_samplers[i];
 			if (vulkan_textures[i]->impl.stage_depth == i) {
 				tex_desc[i].imageView = vulkan_textures[i]->impl.depthView;
 				vulkan_textures[i]->impl.stage_depth = -1;
@@ -2315,18 +2337,8 @@ static VkCompareOp convert_compare_mode(iron_gpu_compare_mode_t compare) {
 		return VK_COMPARE_OP_ALWAYS;
 	case IRON_GPU_COMPARE_MODE_NEVER:
 		return VK_COMPARE_OP_NEVER;
-	case IRON_GPU_COMPARE_MODE_EQUAL:
-		return VK_COMPARE_OP_EQUAL;
-	case IRON_GPU_COMPARE_MODE_NOT_EQUAL:
-		return VK_COMPARE_OP_NOT_EQUAL;
 	case IRON_GPU_COMPARE_MODE_LESS:
 		return VK_COMPARE_OP_LESS;
-	case IRON_GPU_COMPARE_MODE_LESS_EQUAL:
-		return VK_COMPARE_OP_LESS_OR_EQUAL;
-	case IRON_GPU_COMPARE_MODE_GREATER:
-		return VK_COMPARE_OP_GREATER;
-	case IRON_GPU_COMPARE_MODE_GREATER_EQUAL:
-		return VK_COMPARE_OP_GREATER_OR_EQUAL;
 	}
 }
 
@@ -2344,18 +2356,6 @@ static VkBlendFactor convert_blend_factor(iron_gpu_blending_factor_t factor) {
 		return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
 	case IRON_GPU_BLEND_INV_DEST_ALPHA:
 		return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
-	case IRON_GPU_BLEND_SOURCE_COLOR:
-		return VK_BLEND_FACTOR_SRC_COLOR;
-	case IRON_GPU_BLEND_DEST_COLOR:
-		return VK_BLEND_FACTOR_DST_COLOR;
-	case IRON_GPU_BLEND_INV_SOURCE_COLOR:
-		return VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
-	case IRON_GPU_BLEND_INV_DEST_COLOR:
-		return VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
-	case IRON_GPU_BLEND_CONSTANT:
-		return VK_BLEND_FACTOR_CONSTANT_COLOR;
-	case IRON_GPU_BLEND_INV_CONSTANT:
-		return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
 	}
 }
 
@@ -2363,14 +2363,6 @@ static VkBlendOp convert_blend_operation(iron_gpu_blending_operation_t op) {
 	switch (op) {
 	case IRON_GPU_BLENDOP_ADD:
 		return VK_BLEND_OP_ADD;
-	case IRON_GPU_BLENDOP_SUBTRACT:
-		return VK_BLEND_OP_SUBTRACT;
-	case IRON_GPU_BLENDOP_REVERSE_SUBTRACT:
-		return VK_BLEND_OP_REVERSE_SUBTRACT;
-	case IRON_GPU_BLENDOP_MIN:
-		return VK_BLEND_OP_MIN;
-	case IRON_GPU_BLENDOP_MAX:
-		return VK_BLEND_OP_MAX;
 	}
 }
 

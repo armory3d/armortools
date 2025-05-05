@@ -976,6 +976,7 @@ iron_gpu_shader_t *gpu_create_shader(buffer_t *data, i32 shader_type) {
 #include "../../sources/libs/kong/tokenizer.h"
 #include "../../sources/libs/kong/typer.h"
 #include "../../sources/libs/kong/types.h"
+#include "../../sources/libs/kong/transformer.h"
 #include "../../sources/libs/kong/backends/hlsl.h"
 #include "../../sources/libs/kong/backends/metal.h"
 #include "../../sources/libs/kong/backends/spirv.h"
@@ -1035,8 +1036,8 @@ void gpu_create_shaders_from_kong(char *kong, char **vs, char **fs) {
 
 	#else
 
-	// transform(TRANSFORM_FLAG_ONE_COMPONENT_SWIZZLE);
-	// spirv_export(output);
+	transform(TRANSFORM_FLAG_ONE_COMPONENT_SWIZZLE | TRANSFORM_FLAG_BINARY_UNIFY_LENGTH);
+	spirv_export2(vs, fs);
 
 	#endif
 }

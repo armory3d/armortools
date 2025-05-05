@@ -19,6 +19,7 @@
 #include "../../sources/libs/kong/tokenizer.h"
 #include "../../sources/libs/kong/typer.h"
 #include "../../sources/libs/kong/types.h"
+#include "../../sources/libs/kong/transformer.h"
 #include "../../sources/libs/kong/backends/hlsl.h"
 #include "../../sources/libs/kong/backends/metal.h"
 #include "../../sources/libs/kong/backends/spirv.h"
@@ -180,11 +181,10 @@ void kong_compile(const char *from, const char *to) {
 
 	#else
 
-	// transform(TRANSFORM_FLAG_ONE_COMPONENT_SWIZZLE);
-
-	// int i = string_last_index_of(to, "/");
-	// output[i] = '\0';
-	// spirv_export2(output);
+	transform(TRANSFORM_FLAG_ONE_COMPONENT_SWIZZLE | TRANSFORM_FLAG_BINARY_UNIFY_LENGTH);
+	char *vs;
+	char *fs;
+	spirv_export2(&vs, &fs);
 
 	#endif
 }
