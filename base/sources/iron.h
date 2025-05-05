@@ -990,6 +990,7 @@ extern name_id names_index;
 extern size_t sets_count;
 extern type_id next_type_index;
 void hlsl_export2(char **vs, char **fs, api_kind d3d, bool debug);
+void spirv_export2(char **vs, char **fs, bool debug);
 extern size_t vertex_inputs_size;
 extern size_t fragment_inputs_size;
 extern size_t vertex_functions_size;
@@ -1037,7 +1038,7 @@ void gpu_create_shaders_from_kong(char *kong, char **vs, char **fs) {
 	#else
 
 	transform(TRANSFORM_FLAG_ONE_COMPONENT_SWIZZLE | TRANSFORM_FLAG_BINARY_UNIFY_LENGTH);
-	spirv_export2(vs, fs);
+	spirv_export2(vs, fs, false);
 
 	#endif
 }
@@ -1048,7 +1049,7 @@ iron_gpu_shader_t *gpu_create_shader_from_source(string_t *source, iron_gpu_shad
 	iron_gpu_shader_t *shader = NULL;
 	char *temp_string_s = shader_type == IRON_GPU_SHADER_TYPE_VERTEX ? temp_string_vs : temp_string_fs;
 
-#ifdef WITH_D3DCOMPILER
+	#ifdef WITH_D3DCOMPILER
 
 	strcpy(temp_string_s, source);
 
@@ -1076,7 +1077,7 @@ iron_gpu_shader_t *gpu_create_shader_from_source(string_t *source, iron_gpu_shad
 	#elif defined(IRON_VULKAN)
 
 	shader = (iron_gpu_shader_t *)malloc(sizeof(iron_gpu_shader_t));
-	iron_gpu_shader_init(shader, output, length, shader_type);
+	// iron_gpu_shader_init(shader, source, length, shader_type);
 
 	#endif
 
