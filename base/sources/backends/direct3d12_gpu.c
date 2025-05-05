@@ -1,6 +1,7 @@
 
 #define WIN32_LEAN_AND_MEAN
 #define HEAP_SIZE 1024
+#define QUEUE_SLOT_COUNT 2
 #include <iron_global.h>
 #include <stdbool.h>
 #include <malloc.h>
@@ -184,59 +185,6 @@ void setup_swapchain() {
 	}
 }
 
-static void create_root_signature() {
-	ID3DBlob *rootBlob;
-	ID3DBlob *errorBlob;
-
-	D3D12_ROOT_PARAMETER parameters[2] = {};
-
-	D3D12_DESCRIPTOR_RANGE range = {
-		.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV,
-		.NumDescriptors = (UINT)IRON_INTERNAL_G5_TEXTURE_COUNT,
-		.BaseShaderRegister = 0,
-		.RegisterSpace = 0,
-		.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND,
-	};
-	parameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	parameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-	parameters[0].DescriptorTable.NumDescriptorRanges = 1;
-	parameters[0].DescriptorTable.pDescriptorRanges = &range;
-
-	parameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	parameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-	parameters[1].Descriptor.ShaderRegister = 0;
-	parameters[1].Descriptor.RegisterSpace = 0;
-
-	D3D12_STATIC_SAMPLER_DESC samplers[IRON_INTERNAL_G5_TEXTURE_COUNT];
- 	for (int i = 0; i < IRON_INTERNAL_G5_TEXTURE_COUNT; ++i) {
- 		samplers[i].ShaderRegister = i;
- 		samplers[i].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
- 		samplers[i].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
- 		samplers[i].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
- 		samplers[i].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
- 		samplers[i].MipLODBias = 0;
- 		samplers[i].MaxAnisotropy = 16;
- 		samplers[i].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
- 		samplers[i].BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
- 		samplers[i].MinLOD = 0.0f;
- 		samplers[i].MaxLOD = D3D12_FLOAT32_MAX;
- 		samplers[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
- 		samplers[i].RegisterSpace = 0;
- 	}
-
-	D3D12_ROOT_SIGNATURE_DESC descRootSignature = {
-		.NumParameters = 2,
-		.pParameters = parameters,
-		.NumStaticSamplers = IRON_INTERNAL_G5_TEXTURE_COUNT,
-		.pStaticSamplers = samplers,
-		.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT,
-	};
-
-	D3D12SerializeRootSignature(&descRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &rootBlob, &errorBlob);
-	device->lpVtbl->CreateRootSignature(device, 0, rootBlob->lpVtbl->GetBufferPointer(rootBlob), rootBlob->lpVtbl->GetBufferSize(rootBlob), &IID_ID3D12RootSignature,
-										&globalRootSignature);
-}
-
 void iron_gpu_internal_destroy() {
 	if (device) {
 		device->lpVtbl->Release(device);
@@ -254,7 +202,50 @@ void iron_gpu_internal_init() {
 
 	D3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, &IID_ID3D12Device, &device);
 
-	create_root_signature();
+	// Root signature
+	ID3DBlob *rootBlob;
+	ID3DBlob *errorBlob;
+	D3D12_ROOT_PARAMETER parameters[2] = {};
+	D3D12_DESCRIPTOR_RANGE range = {
+		.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV,
+		.NumDescriptors = (UINT)IRON_INTERNAL_G5_TEXTURE_COUNT,
+		.BaseShaderRegister = 0,
+		.RegisterSpace = 0,
+		.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND,
+	};
+	parameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	parameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	parameters[0].DescriptorTable.NumDescriptorRanges = 1;
+	parameters[0].DescriptorTable.pDescriptorRanges = &range;
+	parameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	parameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	parameters[1].Descriptor.ShaderRegister = 0;
+	parameters[1].Descriptor.RegisterSpace = 0;
+	D3D12_STATIC_SAMPLER_DESC samplers[IRON_INTERNAL_G5_TEXTURE_COUNT];
+ 	for (int i = 0; i < IRON_INTERNAL_G5_TEXTURE_COUNT; ++i) {
+ 		samplers[i].ShaderRegister = i;
+ 		samplers[i].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+ 		samplers[i].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+ 		samplers[i].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+ 		samplers[i].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+ 		samplers[i].MipLODBias = 0;
+ 		samplers[i].MaxAnisotropy = 16;
+ 		samplers[i].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+ 		samplers[i].BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+ 		samplers[i].MinLOD = 0.0f;
+ 		samplers[i].MaxLOD = D3D12_FLOAT32_MAX;
+ 		samplers[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+ 		samplers[i].RegisterSpace = 0;
+ 	}
+	D3D12_ROOT_SIGNATURE_DESC descRootSignature = {
+		.NumParameters = 2,
+		.pParameters = parameters,
+		.NumStaticSamplers = IRON_INTERNAL_G5_TEXTURE_COUNT,
+		.pStaticSamplers = samplers,
+		.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT,
+	};
+	D3D12SerializeRootSignature(&descRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &rootBlob, &errorBlob);
+	device->lpVtbl->CreateRootSignature(device, 0, rootBlob->lpVtbl->GetBufferPointer(rootBlob), rootBlob->lpVtbl->GetBufferSize(rootBlob), &IID_ID3D12RootSignature, &globalRootSignature);
 
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {
 		.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE,
@@ -333,7 +324,7 @@ void iron_gpu_begin(iron_gpu_texture_t *renderTarget) {
 	++window_current_fence_value;
 
 	wait_for_fence(window_frame_fences[window_current_backbuffer], window_fence_values[window_current_backbuffer],
-				 window_frame_fence_events[window_current_backbuffer]);
+				   window_frame_fence_events[window_current_backbuffer]);
 }
 
 void iron_gpu_end() {
@@ -386,20 +377,12 @@ void iron_gpu_command_list_init(struct iron_gpu_command_list *list) {
 
 void iron_gpu_command_list_destroy(struct iron_gpu_command_list *list) {}
 
-void iron_gpu_internal_reset_textures(struct iron_gpu_command_list *list) {
-	for (int i = 0; i < IRON_INTERNAL_G5_TEXTURE_COUNT; ++i) {
-		list->impl.currentTextures[i] = NULL;
-	}
-}
-
 void iron_gpu_command_list_begin(struct iron_gpu_command_list *list) {
 	if (list->impl.fence_value > 0) {
 		wait_for_fence(list->impl.fence, list->impl.fence_value, list->impl.fence_event);
 		list->impl._commandAllocator->lpVtbl->Reset(list->impl._commandAllocator);
 		list->impl._commandList->lpVtbl->Reset(list->impl._commandList, list->impl._commandAllocator, NULL);
 	}
-
-	iron_gpu_internal_reset_textures(list);
 }
 
 void iron_gpu_command_list_end(struct iron_gpu_command_list *list) {
@@ -462,7 +445,47 @@ void iron_gpu_command_list_set_constant_buffer(struct iron_gpu_command_list *lis
 	list->impl._commandList->lpVtbl->SetGraphicsRootConstantBufferView(list->impl._commandList, 1, buffer->impl.constant_buffer->lpVtbl->GetGPUVirtualAddress(buffer->impl.constant_buffer) + offset);
 }
 
+void iron_gpu_internal_set_textures(iron_gpu_command_list_t *list) {
+	UINT srv_step = device->lpVtbl->GetDescriptorHandleIncrementSize(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    if (list->impl.heapIndex + IRON_INTERNAL_G5_TEXTURE_COUNT > HEAP_SIZE) {
+        list->impl.heapIndex = 0;
+    }
+
+    D3D12_CPU_DESCRIPTOR_HANDLE cpu_base;
+    D3D12_GPU_DESCRIPTOR_HANDLE gpu_base;
+    list->impl.srvHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(list->impl.srvHeap, &cpu_base);
+    list->impl.srvHeap->lpVtbl->GetGPUDescriptorHandleForHeapStart(list->impl.srvHeap, &gpu_base);
+    cpu_base.ptr += list->impl.heapIndex * srv_step;
+    gpu_base.ptr += list->impl.heapIndex * srv_step;
+
+    for (int i = 0; i < IRON_INTERNAL_G5_TEXTURE_COUNT; ++i) {
+        iron_gpu_texture_t *texture = list->impl.currentTextures[i];
+        if (!texture) continue;
+
+        D3D12_CPU_DESCRIPTOR_HANDLE source_cpu;
+        ID3D12DescriptorHeap *source_heap = (texture->impl.stage_depth == i) ?
+            texture->impl.srvDepthDescriptorHeap : texture->impl.srvDescriptorHeap;
+        source_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(source_heap, &source_cpu);
+
+        device->lpVtbl->CopyDescriptorsSimple(device, 1, cpu_base, source_cpu, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        cpu_base.ptr += srv_step;
+        list->impl.heapIndex++;
+    }
+
+	for (int i = 0; i < IRON_INTERNAL_G5_TEXTURE_COUNT; ++i) {
+        if (!list->impl.currentTextures[i]) continue;
+		list->impl.currentTextures[i]->impl.stage = 0;
+		list->impl.currentTextures[i]->impl.stage_depth = -1;
+		list->impl.currentTextures[i] = NULL;
+	}
+
+    ID3D12DescriptorHeap *heaps[] = {list->impl.srvHeap};
+    list->impl._commandList->lpVtbl->SetDescriptorHeaps(list->impl._commandList, 1, heaps);
+    list->impl._commandList->lpVtbl->SetGraphicsRootDescriptorTable(list->impl._commandList, 0, gpu_base);
+}
+
 void iron_gpu_command_list_draw(struct iron_gpu_command_list *list) {
+	iron_gpu_internal_set_textures(list);
 	int start = 0;
 	int count = list->impl._indexCount;
 	list->impl._commandList->lpVtbl->IASetPrimitiveTopology(list->impl._commandList, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -510,45 +533,6 @@ void iron_gpu_command_list_disable_scissor(struct iron_gpu_command_list *list) {
 	}
 }
 
-void iron_gpu_internal_set_textures(iron_gpu_command_list_t *list) {
-	if (list->impl.currentTextures[0] != NULL) {
-		int srvStep = device->lpVtbl->GetDescriptorHandleIncrementSize(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-		if (list->impl.heapIndex + IRON_INTERNAL_G5_TEXTURE_COUNT >= HEAP_SIZE) {
-			list->impl.heapIndex = 0;
-		}
-
-		D3D12_GPU_DESCRIPTOR_HANDLE srvGpu;
-		list->impl.srvHeap->lpVtbl->GetGPUDescriptorHandleForHeapStart(list->impl.srvHeap, &srvGpu);
-		srvGpu.ptr += list->impl.heapIndex * srvStep;
-
-		for (int i = 0; i < IRON_INTERNAL_G5_TEXTURE_COUNT; ++i) {
-			if (list->impl.currentTextures[i] != NULL) {
-				D3D12_CPU_DESCRIPTOR_HANDLE srvCpu;
-				list->impl.srvHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(list->impl.srvHeap, &srvCpu);
-				srvCpu.ptr += list->impl.heapIndex * srvStep;
-				++list->impl.heapIndex;
-
-				bool is_depth = list->impl.currentTextures[i]->impl.stage_depth == i;
-				D3D12_CPU_DESCRIPTOR_HANDLE sourceCpu;
-				if (is_depth) {
-					list->impl.currentTextures[i]->impl.srvDepthDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(
-						list->impl.currentTextures[i]->impl.srvDepthDescriptorHeap, &sourceCpu);
-				}
-				else {
-					list->impl.currentTextures[i]->impl.srvDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(
-						list->impl.currentTextures[i]->impl.srvDescriptorHeap, &sourceCpu);
-				}
-				device->lpVtbl->CopyDescriptorsSimple(device, 1, srvCpu, sourceCpu, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-			}
-		}
-
-		ID3D12DescriptorHeap *heaps[1] = {list->impl.srvHeap};
-		list->impl._commandList->lpVtbl->SetDescriptorHeaps(list->impl._commandList, 1, heaps);
-		list->impl._commandList->lpVtbl->SetGraphicsRootDescriptorTable(list->impl._commandList, 0, srvGpu);
-	}
-}
-
 void iron_gpu_command_list_set_pipeline(struct iron_gpu_command_list *list, iron_gpu_pipeline_t *pipeline) {
 	list->impl._currentPipeline = pipeline;
 	list->impl._commandList->lpVtbl->SetPipelineState(list->impl._commandList, pipeline->impl.pso);
@@ -558,10 +542,6 @@ void iron_gpu_command_list_set_pipeline(struct iron_gpu_command_list *list, iron
 	}
 
 	list->impl._commandList->lpVtbl->SetGraphicsRootSignature(list->impl._commandList, globalRootSignature);
-
-	if (pipeline->impl.textures > 0) {
-		iron_gpu_internal_set_textures(list);
-	}
 }
 
 void iron_gpu_command_list_set_vertex_buffer(struct iron_gpu_command_list *list, iron_gpu_buffer_t *buffer) {
@@ -579,6 +559,12 @@ void iron_gpu_command_list_set_index_buffer(struct iron_gpu_command_list *list, 
 }
 
 void iron_gpu_command_list_set_render_targets(struct iron_gpu_command_list *list, iron_gpu_texture_t **targets, int count, unsigned flags, unsigned color, float depth) {
+	////
+	iron_gpu_command_list_end(list);
+	iron_gpu_command_list_wait(list);
+	iron_gpu_command_list_begin(list);
+	////
+
 	iron_gpu_texture_t *render_target = targets[0];
 
 	D3D12_CPU_DESCRIPTOR_HANDLE target_descriptors[16];
@@ -586,9 +572,9 @@ void iron_gpu_command_list_set_render_targets(struct iron_gpu_command_list *list
 		targets[i]->impl.renderTargetDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(targets[i]->impl.renderTargetDescriptorHeap, &target_descriptors[i]);
 	}
 
-	if (render_target->impl.depthStencilDescriptorHeap != NULL) {
+	if (render_target->impl.depthDescriptorHeap != NULL) {
 		D3D12_CPU_DESCRIPTOR_HANDLE heapStart;
-		render_target->impl.depthStencilDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(render_target->impl.depthStencilDescriptorHeap, &heapStart);
+		render_target->impl.depthDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(render_target->impl.depthDescriptorHeap, &heapStart);
 		list->impl._commandList->lpVtbl->OMSetRenderTargets(list->impl._commandList, count, &target_descriptors[0], false, &heapStart);
 	}
 	else {
@@ -611,9 +597,9 @@ void iron_gpu_command_list_set_render_targets(struct iron_gpu_command_list *list
 	}
 	if (flags & IRON_GPU_CLEAR_DEPTH) {
 		D3D12_CLEAR_FLAGS d3dflags = D3D12_CLEAR_FLAG_DEPTH;
-		if (render_target->impl.depthStencilDescriptorHeap != NULL) {
+		if (render_target->impl.depthDescriptorHeap != NULL) {
 			D3D12_CPU_DESCRIPTOR_HANDLE handle;
-			render_target->impl.depthStencilDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(render_target->impl.depthStencilDescriptorHeap, &handle);
+			render_target->impl.depthDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(render_target->impl.depthDescriptorHeap, &handle);
 			list->impl._commandList->lpVtbl->ClearDepthStencilView(list->impl._commandList, handle, d3dflags, depth, 0, 0, NULL);
 		}
 	}
@@ -786,7 +772,6 @@ void iron_gpu_command_list_get_render_target_pixels(iron_gpu_command_list_t *lis
 void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *texture) {
 	texture->impl.stage = unit.offset;
 	list->impl.currentTextures[texture->impl.stage] = texture;
-	iron_gpu_internal_set_textures(list);
 }
 
 void iron_gpu_command_list_set_texture_from_render_target_depth(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *texture) {
@@ -869,8 +854,6 @@ void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipe) {
 			break;
 		}
 	}
-
-	pipe->impl.textures = pipe->fragment_shader->impl.texturesCount;
 
 	const D3D12_DEPTH_STENCILOP_DESC defaultStencilOp = {
 		D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_COMPARISON_FUNC_NEVER
@@ -1227,9 +1210,9 @@ void iron_gpu_texture_destroy(iron_gpu_texture_t *render_target) {
 		render_target->impl.renderTarget->lpVtbl->Release(render_target->impl.renderTarget);
 		render_target->impl.renderTargetDescriptorHeap->lpVtbl->Release(render_target->impl.renderTargetDescriptorHeap);
 		render_target->impl.srvDescriptorHeap->lpVtbl->Release(render_target->impl.srvDescriptorHeap);
-		if (render_target->impl.depthStencilTexture != NULL) {
-			render_target->impl.depthStencilTexture->lpVtbl->Release(render_target->impl.depthStencilTexture);
-			render_target->impl.depthStencilDescriptorHeap->lpVtbl->Release(render_target->impl.depthStencilDescriptorHeap);
+		if (render_target->impl.depthTexture != NULL) {
+			render_target->impl.depthTexture->lpVtbl->Release(render_target->impl.depthTexture);
+			render_target->impl.depthDescriptorHeap->lpVtbl->Release(render_target->impl.depthDescriptorHeap);
 			render_target->impl.srvDepthDescriptorHeap->lpVtbl->Release(render_target->impl.srvDepthDescriptorHeap);
 		}
 		if (render_target->impl.renderTargetReadback != NULL) {
@@ -1374,7 +1357,7 @@ static void render_target_init(iron_gpu_texture_t *render_target, int width, int
 			.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV,
 			.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
 		};
-		device->lpVtbl->CreateDescriptorHeap(device, &dsvHeapDesc, &IID_ID3D12DescriptorHeap, &render_target->impl.depthStencilDescriptorHeap);
+		device->lpVtbl->CreateDescriptorHeap(device, &dsvHeapDesc, &IID_ID3D12DescriptorHeap, &render_target->impl.depthDescriptorHeap);
 
 		D3D12_RESOURCE_DESC depthTexture = {
 			.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D,
@@ -1405,12 +1388,12 @@ static void render_target_init(iron_gpu_texture_t *render_target, int width, int
 		};
 
 		HRESULT result = device->lpVtbl->CreateCommittedResource(device, &heapProperties, D3D12_HEAP_FLAG_NONE, &depthTexture, D3D12_RESOURCE_STATE_DEPTH_WRITE,
-																 &clearValue, &IID_ID3D12Resource, &render_target->impl.depthStencilTexture);
+																 &clearValue, &IID_ID3D12Resource, &render_target->impl.depthTexture);
 		if (result != S_OK) {
 			for (int i = 0; i < 10; ++i) {
 				iron_memory_emergency();
 				result = device->lpVtbl->CreateCommittedResource(device, &heapProperties, D3D12_HEAP_FLAG_NONE, &depthTexture, D3D12_RESOURCE_STATE_DEPTH_WRITE,
-																 &clearValue, &IID_ID3D12Resource, &render_target->impl.depthStencilTexture);
+																 &clearValue, &IID_ID3D12Resource, &render_target->impl.depthTexture);
 				if (result == S_OK) {
 					break;
 				}
@@ -1418,8 +1401,8 @@ static void render_target_init(iron_gpu_texture_t *render_target, int width, int
 		}
 
 		D3D12_CPU_DESCRIPTOR_HANDLE handle;
-		render_target->impl.depthStencilDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(render_target->impl.depthStencilDescriptorHeap, &handle);
-		device->lpVtbl->CreateDepthStencilView(device, render_target->impl.depthStencilTexture, NULL, handle);
+		render_target->impl.depthDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(render_target->impl.depthDescriptorHeap, &handle);
+		device->lpVtbl->CreateDepthStencilView(device, render_target->impl.depthTexture, NULL, handle);
 
 		// Reading depth texture as a shader resource
 		D3D12_DESCRIPTOR_HEAP_DESC srvDepthHeapDesc = {
@@ -1440,11 +1423,11 @@ static void render_target_init(iron_gpu_texture_t *render_target, int width, int
 		};
 
 		render_target->impl.srvDepthDescriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(render_target->impl.srvDepthDescriptorHeap, &handle);
-		device->lpVtbl->CreateShaderResourceView(device, render_target->impl.depthStencilTexture, &srvDepthViewDesc, handle);
+		device->lpVtbl->CreateShaderResourceView(device, render_target->impl.depthTexture, &srvDepthViewDesc, handle);
 	}
 	else {
-		render_target->impl.depthStencilDescriptorHeap = NULL;
-		render_target->impl.depthStencilTexture = NULL;
+		render_target->impl.depthDescriptorHeap = NULL;
+		render_target->impl.depthTexture = NULL;
 		render_target->impl.srvDepthDescriptorHeap = NULL;
 	}
 
@@ -1475,9 +1458,9 @@ void iron_gpu_render_target_init_framebuffer(iron_gpu_texture_t *target, int wid
 }
 
 void iron_gpu_render_target_set_depth_from(iron_gpu_texture_t *render_target, iron_gpu_texture_t *source) {
-	render_target->impl.depthStencilDescriptorHeap = source->impl.depthStencilDescriptorHeap;
+	render_target->impl.depthDescriptorHeap = source->impl.depthDescriptorHeap;
 	render_target->impl.srvDepthDescriptorHeap = source->impl.srvDepthDescriptorHeap;
-	render_target->impl.depthStencilTexture = source->impl.depthStencilTexture;
+	render_target->impl.depthTexture = source->impl.depthTexture;
 }
 
 void iron_gpu_vertex_buffer_init(iron_gpu_buffer_t *buffer, int count, iron_gpu_vertex_structure_t *structure, bool gpuMemory) {

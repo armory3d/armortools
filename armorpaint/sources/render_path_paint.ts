@@ -403,7 +403,9 @@ function render_path_paint_commands_live_brush() {
 }
 
 function render_path_paint_commands_cursor() {
-	if (!config_raw.brush_3d) return;
+	if (!config_raw.brush_3d) {
+		return;
+	}
 	let decal_mask: bool = context_is_decal_mask();
 	let tool: workspace_tool_t = context_raw.tool;
 	if (tool != workspace_tool_t.BRUSH &&
@@ -562,7 +564,6 @@ function render_path_paint_begin() {
 }
 
 function render_path_paint_end() {
-	render_path_paint_commands_cursor();
 	context_raw.ddirty--;
 	context_raw.rdirty--;
 

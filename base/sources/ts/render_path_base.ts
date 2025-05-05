@@ -149,12 +149,13 @@ function render_path_base_commands(draw_commands: ()=>void) {
 	if (context_raw.viewport_mode == viewport_mode_t.PATH_TRACE) {
 		let use_live_layer: bool = context_raw.tool == workspace_tool_t.MATERIAL;
 		render_path_raytrace_draw(use_live_layer);
-		context_raw.foreground_event = false; // render_path_paint_end();
+		context_raw.foreground_event = false;
 		render_path_base_end();
 		return;
 	}
 
 	draw_commands();
+	render_path_paint_commands_cursor();
 	render_path_paint_end();
 	render_path_base_end();
 }

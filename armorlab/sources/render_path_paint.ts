@@ -207,7 +207,6 @@ function render_path_paint_begin() {
 }
 
 function render_path_paint_end() {
-	render_path_paint_commands_cursor();
 	context_raw.ddirty--;
 	context_raw.rdirty--;
 

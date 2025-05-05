@@ -168,6 +168,11 @@ function shader_context_type_size(t: string): i32 {
 	if (t == "vec4") return 16;
 	if (t == "mat3") return 48;
 	if (t == "mat4") return 64;
+	if (t == "float2") return 8;
+	if (t == "float3") return 16;
+	if (t == "float4") return 16;
+	if (t == "float3x3") return 48;
+	if (t == "float4x4") return 64;
 	return 0;
 }
 
@@ -188,6 +193,11 @@ function shader_context_type_size(t: string): i32 {
 	if (t == "vec4") return 16;
 	if (t == "mat3") return 48;
 	if (t == "mat4") return 64;
+	if (t == "float2") return 8;
+	if (t == "float3") return 12;
+	if (t == "float4") return 16;
+	if (t == "float3x3") return 48;
+	if (t == "float4x4") return 64;
 	return 0;
 }
 

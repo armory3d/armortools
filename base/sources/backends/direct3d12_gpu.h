@@ -3,7 +3,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define QUEUE_SLOT_COUNT 2
 #define IRON_INTERNAL_G5_TEXTURE_COUNT 16
 
 struct ID3D12CommandAllocator;
@@ -56,7 +55,6 @@ typedef struct {
 
 typedef struct {
 	struct ID3D12PipelineState *pso;
-	int textures;
 } gpu_pipeline_impl_t;
 
 typedef struct {
@@ -79,7 +77,6 @@ typedef struct {
 } ShaderTexture;
 
 typedef struct {
-	int texturesCount;
 	void *shader;
 	uint8_t *data;
 	int length;
@@ -88,6 +85,7 @@ typedef struct {
 typedef struct {
 	bool mipmap;
 	int stage;
+	int stage_depth;
 	int stride;
 	struct ID3D12Resource *image;
 	struct ID3D12Resource *uploadImage;
@@ -95,12 +93,11 @@ typedef struct {
 	struct ID3D12Resource *renderTarget;
 	struct ID3D12Resource *renderTargetReadback;
 	struct ID3D12DescriptorHeap *renderTargetDescriptorHeap;
-	struct ID3D12DescriptorHeap *depthStencilDescriptorHeap;
+	struct ID3D12DescriptorHeap *depthDescriptorHeap;
 	struct ID3D12DescriptorHeap *srvDepthDescriptorHeap;
-	struct ID3D12Resource *depthStencilTexture;
+	struct ID3D12Resource *depthTexture;
 	struct D3D12Viewport viewport;
 	struct D3D12Rect scissor;
-	int stage_depth;
 	int framebuffer_index;
 } gpu_texture_impl_t;
 
