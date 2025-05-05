@@ -8,7 +8,10 @@
 
 static type   *types           = NULL;
 static type_id types_size      = 1024;
-/*static*/ type_id next_type_index = 0;
+////
+// static type_id next_type_index = 0;
+type_id next_type_index = 0;
+////
 
 type_id void_id;
 type_id float_id;
@@ -287,6 +290,11 @@ bool is_vector(type_id t) {
 	       t == uint4_id || t == bool2_id || t == bool3_id || t == bool4_id;
 }
 
+bool is_matrix(type_id t) {
+	return t == float2x2_id || t == float2x3_id || t == float3x2_id || t == float3x3_id || t == float2x4_id || t == float4x2_id || t == float3x4_id ||
+	       t == float4x3_id || t == float4x4_id;
+}
+
 uint32_t vector_size(type_id t) {
 	if (t == float_id || t == int_id || t == uint_id || t == bool_id) {
 		return 1u;
@@ -309,19 +317,87 @@ uint32_t vector_size(type_id t) {
 }
 
 type_id vector_base_type(type_id vector_type) {
-	if (vector_type == float2_id || vector_type == float3_id || vector_type == float4_id) {
+	if (vector_type == float_id || vector_type == float2_id || vector_type == float3_id || vector_type == float4_id) {
 		return float_id;
 	}
-	if (vector_type == int2_id || vector_type == int3_id || vector_type == int4_id) {
+	if (vector_type == int_id || vector_type == int2_id || vector_type == int3_id || vector_type == int4_id) {
 		return int_id;
 	}
-	if (vector_type == uint2_id || vector_type == uint3_id || vector_type == uint4_id) {
+	if (vector_type == uint_id || vector_type == uint2_id || vector_type == uint3_id || vector_type == uint4_id) {
 		return uint_id;
 	}
-	if (vector_type == bool2_id || vector_type == bool3_id || vector_type == bool4_id) {
+	if (vector_type == bool_id || vector_type == bool2_id || vector_type == bool3_id || vector_type == bool4_id) {
 		return bool_id;
 	}
 
 	assert(false);
 	return float_id;
+}
+
+type_id vector_to_size(type_id vector_type, uint32_t size) {
+	type_id base_type = vector_base_type(vector_type);
+	if (base_type == float_id) {
+		switch (size) {
+		case 1u:
+			return float_id;
+		case 2u:
+			return float2_id;
+		case 3u:
+			return float3_id;
+		case 4u:
+			return float4_id;
+		default:
+			assert(false);
+			return float_id;
+		}
+	}
+	else if (base_type == int_id) {
+		switch (size) {
+		case 1u:
+			return int_id;
+		case 2u:
+			return int2_id;
+		case 3u:
+			return int3_id;
+		case 4u:
+			return int4_id;
+		default:
+			assert(false);
+			return int_id;
+		}
+	}
+	else if (base_type == uint_id) {
+		switch (size) {
+		case 1u:
+			return uint_id;
+		case 2u:
+			return uint2_id;
+		case 3u:
+			return uint3_id;
+		case 4u:
+			return uint4_id;
+		default:
+			assert(false);
+			return uint_id;
+		}
+	}
+	else if (base_type == bool_id) {
+		switch (size) {
+		case 1u:
+			return bool_id;
+		case 2u:
+			return bool2_id;
+		case 3u:
+			return bool3_id;
+		case 4u:
+			return bool4_id;
+		default:
+			assert(false);
+			return bool_id;
+		}
+	}
+	else {
+		assert(false);
+		return float_id;
+	}
 }

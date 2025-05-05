@@ -17,7 +17,7 @@ void cstyle_write_opcode(char *code, size_t *offset, opcode *o, type_string_func
 	case OPCODE_VAR:
 		indent(code, offset, *indentation);
 		if (get_type(o->op_var.var.type.type)->array_size > 0) {
-			*offset += sprintf(&code[*offset], "%s _%" PRIu64 "[%i];\n", type_string(o->op_var.var.type.type), o->op_var.var.index,
+			*offset += sprintf(&code[*offset], "%s _%" PRIu64 "[%i];\n", type_string(get_type(o->op_var.var.type.type)->base), o->op_var.var.index,
 			                   get_type(o->op_var.var.type.type)->array_size);
 		}
 		else {

@@ -52,6 +52,8 @@ static_array(descriptor_set_group, descriptor_set_groups, 256);
 void find_referenced_functions(function *f, function **functions, size_t *functions_size);
 void find_referenced_types(function *f, type_id *types, size_t *types_size);
 void find_referenced_globals(function *f, global_array *globals);
+void find_used_builtins(function *f);
+void find_used_capabilities(function *f);
 
 descriptor_set_group *get_descriptor_set_group(uint32_t descriptor_set_group_index);
 

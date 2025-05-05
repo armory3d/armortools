@@ -13,7 +13,10 @@ typedef struct allocated_global {
 } allocated_global;
 
 static allocated_global allocated_globals[1024];
-/*static*/ size_t           allocated_globals_size = 0;
+////
+// static size_t           allocated_globals_size = 0;
+size_t           allocated_globals_size = 0;
+////
 
 allocated_global find_allocated_global(name_id name) {
 	for (size_t i = 0; i < allocated_globals_size; ++i) {
@@ -79,7 +82,10 @@ variable find_variable(block *parent, name_id name) {
 
 const char all_names[1024 * 1024];
 
-/*static*/ uint64_t next_variable_id = 1;
+////
+// static uint64_t next_variable_id = 1;
+uint64_t next_variable_id = 1;
+////
 
 variable all_variables[1024 * 1024];
 

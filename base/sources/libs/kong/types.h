@@ -77,7 +77,14 @@ extern type_id float_id;
 extern type_id float2_id;
 extern type_id float3_id;
 extern type_id float4_id;
+extern type_id float2x2_id;
+extern type_id float3x2_id;
+extern type_id float2x3_id;
+extern type_id float4x2_id;
+extern type_id float2x4_id;
 extern type_id float3x3_id;
+extern type_id float4x3_id;
+extern type_id float3x4_id;
 extern type_id float4x4_id;
 extern type_id int_id;
 extern type_id int2_id;
@@ -125,8 +132,12 @@ bool is_vector_or_scalar(type_id t);
 
 bool is_vector(type_id t);
 
+bool is_matrix(type_id t);
+
 uint32_t vector_size(type_id t);
 
 type_id vector_base_type(type_id vector_type);
+
+type_id vector_to_size(type_id vector_type, uint32_t size);
 
 #endif

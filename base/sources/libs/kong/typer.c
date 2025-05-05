@@ -39,13 +39,9 @@ static void resolve_types_in_element(statement *parent_block, expression *elemen
 	resolve_types_in_expression(parent_block, element->element.of);
 	resolve_types_in_expression(parent_block, element->element.element_index);
 
-	type_id     of_type       = element->element.of->type.type;
-	expression *element_index = element->element.element_index;
+	type_id of_type = element->element.of->type.type;
 
 	assert(of_type != NO_TYPE);
-	////
-	// assert(element_index->type.type == NO_TYPE);
-	////
 
 	if (of_type == tex2d_type_id) {
 		element->type.type = float4_id;
@@ -585,6 +581,9 @@ void resolve_types_in_expression(statement *parent, expression *e) {
 		resolve_types_in_element(parent, e);
 		break;
 	}
+	case EXPRESSION_SWIZZLE:
+		assert(false); // swizzle is created in the typer
+		break;
 	}
 
 	if (e->type.type == NO_TYPE) {
@@ -601,6 +600,8 @@ void resolve_types_in_block(statement *parent, statement *block) {
 	for (size_t i = 0; i < block->block.statements.size; ++i) {
 		statement *s = block->block.statements.s[i];
 		switch (s->kind) {
+		case STATEMENT_DISCARD:
+			break;
 		case STATEMENT_EXPRESSION: {
 			resolve_types_in_expression(block, s->expression);
 			break;

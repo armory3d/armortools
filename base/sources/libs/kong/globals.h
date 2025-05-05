@@ -32,6 +32,13 @@ typedef struct global_value {
 
 struct descriptor_set;
 
+typedef enum global_usage {
+	GLOBAL_USAGE_TEXTURE_SAMPLE = 0x00000001,
+	GLOBAL_USAGE_TEXTURE_READ   = 0x00000002,
+	GLOBAL_USAGE_TEXTURE_WRITE  = 0x00000004,
+	GLOBAL_USAGE_BUFFER_WRITE   = 0x00000008,
+} global_usage;
+
 typedef struct global {
 	name_id                name;
 	type_id                type;
@@ -40,6 +47,7 @@ typedef struct global {
 	attribute_list         attributes;
 	struct descriptor_set *sets[64];
 	size_t                 sets_count;
+	uint32_t               usage;
 } global;
 
 typedef struct global_array {
@@ -52,6 +60,7 @@ void globals_init(void);
 
 global_id add_global(type_id type, attribute_list attributes, name_id name);
 global_id add_global_with_value(type_id type, attribute_list attributes, name_id name, global_value value);
+bool      global_has_usage(global_id g, global_usage usage);
 
 global *find_global(name_id name);
 

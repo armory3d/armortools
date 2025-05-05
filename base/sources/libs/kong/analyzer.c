@@ -152,6 +152,170 @@ void find_referenced_functions(function *f, function **functions, size_t *functi
 	}
 }
 
+void find_used_builtins(function *f) {
+	if (f->block == NULL) {
+		// built-in
+		return;
+	}
+
+	if (f->used_builtins.builtins_analyzed) {
+		return;
+	}
+
+	f->used_builtins.builtins_analyzed = true;
+
+	uint8_t *data = f->code.o;
+	size_t   size = f->code.size;
+
+	size_t index = 0;
+	while (index < size) {
+		opcode *o = (opcode *)&data[index];
+		switch (o->type) {
+		case OPCODE_CALL: {
+			char *func_name = get_name(o->op_call.func);
+
+			name_id func = o->op_call.func;
+
+			if (func == add_name("dispatch_thread_id")) {
+				f->used_builtins.dispatch_thread_id = true;
+			}
+
+			if (func == add_name("group_thread_id")) {
+				f->used_builtins.group_thread_id = true;
+			}
+
+			if (func == add_name("group_id")) {
+				f->used_builtins.group_id = true;
+			}
+
+			for (function_id i = 0; get_function(i) != NULL; ++i) {
+				function *called = get_function(i);
+				if (called->name == o->op_call.func) {
+					find_used_builtins(f);
+
+					f->used_builtins.dispatch_thread_id |= called->used_builtins.dispatch_thread_id;
+					f->used_builtins.group_thread_id |= called->used_builtins.group_thread_id;
+					f->used_builtins.group_id |= called->used_builtins.group_id;
+
+					break;
+				}
+			}
+			break;
+		}
+		default:
+			break;
+		}
+
+		index += o->size;
+	}
+}
+
+static global *find_global_by_var(variable var) {
+	for (global_id global_index = 0; get_global(global_index) != NULL && get_global(global_index)->type != NO_TYPE; ++global_index) {
+		if (var.index == get_global(global_index)->var_index) {
+			return get_global(global_index);
+		}
+	}
+
+	return NULL;
+}
+
+void find_used_capabilities(function *f) {
+	if (f->block == NULL) {
+		// built-in
+		return;
+	}
+
+	if (f->used_capabilities.capabilities_analyzed) {
+		return;
+	}
+
+	f->used_capabilities.capabilities_analyzed = true;
+
+	uint8_t *data = f->code.o;
+	size_t   size = f->code.size;
+
+	size_t   index                  = 0;
+	variable last_base_texture_from = {0};
+	variable last_base_texture_to   = {0};
+
+	while (index < size) {
+		opcode *o = (opcode *)&data[index];
+		switch (o->type) {
+		case OPCODE_STORE_ACCESS_LIST: {
+			variable to      = o->op_store_access_list.to;
+			type_id  to_type = to.type.type;
+
+			if (is_texture(to_type)) {
+				assert(get_type(to_type)->array_size == 0);
+
+				f->used_capabilities.image_write = true;
+
+				global *g = find_global_by_var(to);
+				assert(g != NULL);
+				g->usage |= GLOBAL_USAGE_TEXTURE_WRITE;
+			}
+			break;
+		}
+		case OPCODE_LOAD_ACCESS_LIST: {
+			variable from      = o->op_load_access_list.from;
+			type_id  from_type = from.type.type;
+
+			if (is_texture(from_type)) {
+				if (get_type(from_type)->array_size > 0) {
+					last_base_texture_from = from;
+					last_base_texture_to   = o->op_load_access_list.to;
+				}
+				else {
+					global *g = find_global_by_var(from);
+					assert(g != NULL);
+					g->usage |= GLOBAL_USAGE_TEXTURE_READ;
+				}
+			}
+
+			break;
+		}
+		case OPCODE_CALL: {
+			name_id func_name = o->op_call.func;
+
+			if (func_name == add_name("sample") || func_name == add_name("sample_lod")) {
+				variable tex_parameter = o->op_call.parameters[0];
+
+				global *g = NULL;
+
+				if (tex_parameter.kind == VARIABLE_INTERNAL) {
+					assert(last_base_texture_to.index == tex_parameter.index);
+					g = find_global_by_var(last_base_texture_from);
+				}
+				else {
+					g = find_global_by_var(tex_parameter);
+				}
+
+				assert(g != NULL);
+
+				g->usage |= GLOBAL_USAGE_TEXTURE_SAMPLE;
+			}
+
+			for (function_id i = 0; get_function(i) != NULL; ++i) {
+				function *called = get_function(i);
+				if (called->name == func_name) {
+					find_used_capabilities(f);
+
+					f->used_capabilities.image_write |= called->used_capabilities.image_write;
+
+					break;
+				}
+			}
+			break;
+		}
+		default:
+			break;
+		}
+
+		index += o->size;
+	}
+}
+
 static void add_found_type(type_id t, type_id *types, size_t *types_size) {
 	for (size_t i = 0; i < *types_size; ++i) {
 		if (types[i] == t) {

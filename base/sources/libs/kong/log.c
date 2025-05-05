@@ -34,18 +34,4 @@ void kong_log_args(log_level_t level, const char *format, va_list args) {
 		strcat(buffer, "\n");
 		fprintf(level == LOG_LEVEL_INFO ? stdout : stderr, "%s", buffer);
 	}
-
-#ifdef __android__
-	switch (level) {
-	case KINC_LOG_LEVEL_INFO:
-		__android_log_vprint(ANDROID_LOG_INFO, "krom", format, args);
-		break;
-	case KINC_LOG_LEVEL_WARNING:
-		__android_log_vprint(ANDROID_LOG_WARN, "krom", format, args);
-		break;
-	case KINC_LOG_LEVEL_ERROR:
-		__android_log_vprint(ANDROID_LOG_ERROR, "krom", format, args);
-		break;
-	}
-#endif
 }

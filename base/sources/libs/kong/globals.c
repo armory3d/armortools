@@ -5,7 +5,10 @@
 #include <assert.h>
 
 static global    globals[1024];
-/*static*/ global_id globals_size = 0;
+////
+// static global_id globals_size = 0;
+global_id globals_size = 0;
+////
 
 void globals_init(void) {
 	global_value int_value;
@@ -31,40 +34,42 @@ void globals_init(void) {
 	add_global_with_value(float_id, attributes, add_name("COMPARE_GREATER_EQUAL"), int_value);
 
 	int_value.value.ints[0] = 0;
-	add_global_with_value(float_id, attributes, add_name("BLEND_ONE"), int_value);
+	add_global_with_value(float_id, attributes, add_name("BLEND_FACTOR_ZERO"), int_value);
 	int_value.value.ints[0] = 1;
-	add_global_with_value(float_id, attributes, add_name("BLEND_ZERO"), int_value);
+	add_global_with_value(float_id, attributes, add_name("BLEND_FACTOR_ONE"), int_value);
 	int_value.value.ints[0] = 2;
-	add_global_with_value(float_id, attributes, add_name("BLEND_SOURCE_ALPHA"), int_value);
+	add_global_with_value(float_id, attributes, add_name("BLEND_FACTOR_SRC"), int_value);
 	int_value.value.ints[0] = 3;
-	add_global_with_value(float_id, attributes, add_name("BLEND_DEST_ALPHA"), int_value);
+	add_global_with_value(float_id, attributes, add_name("BLEND_FACTOR_ONE_MINUS_SRC"), int_value);
 	int_value.value.ints[0] = 4;
-	add_global_with_value(float_id, attributes, add_name("BLEND_INV_SOURCE_ALPHA"), int_value);
+	add_global_with_value(float_id, attributes, add_name("BLEND_FACTOR_SRC_ALPHA"), int_value);
 	int_value.value.ints[0] = 5;
-	add_global_with_value(float_id, attributes, add_name("BLEND_INV_DEST_ALPHA"), int_value);
+	add_global_with_value(float_id, attributes, add_name("BLEND_FACTOR_ONE_MINUS_SRC_ALPHA"), int_value);
 	int_value.value.ints[0] = 6;
-	add_global_with_value(float_id, attributes, add_name("BLEND_SOURCE_COLOR"), int_value);
+	add_global_with_value(float_id, attributes, add_name("BLEND_FACTOR_DST"), int_value);
 	int_value.value.ints[0] = 7;
-	add_global_with_value(float_id, attributes, add_name("BLEND_DEST_COLOR"), int_value);
+	add_global_with_value(float_id, attributes, add_name("BLEND_FACTOR_ONE_MINUS_DST"), int_value);
 	int_value.value.ints[0] = 8;
-	add_global_with_value(float_id, attributes, add_name("BLEND_INV_SOURCE_COLOR"), int_value);
+	add_global_with_value(float_id, attributes, add_name("BLEND_FACTOR_DST_ALPHA"), int_value);
 	int_value.value.ints[0] = 9;
-	add_global_with_value(float_id, attributes, add_name("BLEND_INV_DEST_COLOR"), int_value);
+	add_global_with_value(float_id, attributes, add_name("BLEND_FACTOR_ONE_MINUS_DST_ALPHA"), int_value);
 	int_value.value.ints[0] = 10;
-	add_global_with_value(float_id, attributes, add_name("BLEND_CONSTANT"), int_value);
+	add_global_with_value(float_id, attributes, add_name("BLEND_FACTOR_SRC_ALPHA_SATURATED"), int_value);
 	int_value.value.ints[0] = 11;
-	add_global_with_value(float_id, attributes, add_name("BLEND_INV_CONSTANT"), int_value);
+	add_global_with_value(float_id, attributes, add_name("BLEND_FACTOR_CONSTANT"), int_value);
+	int_value.value.ints[0] = 12;
+	add_global_with_value(float_id, attributes, add_name("BLEND_FACTOR_ONE_MINUS_CONSTANT"), int_value);
 
 	int_value.value.ints[0] = 0;
-	add_global_with_value(float_id, attributes, add_name("BLENDOP_ADD"), int_value);
+	add_global_with_value(float_id, attributes, add_name("BLEND_OPERATION_ADD"), int_value);
 	int_value.value.ints[0] = 1;
-	add_global_with_value(float_id, attributes, add_name("BLENDOP_SUBTRACT"), int_value);
+	add_global_with_value(float_id, attributes, add_name("BLEND_OPERATION_SUBTRACT"), int_value);
 	int_value.value.ints[0] = 2;
-	add_global_with_value(float_id, attributes, add_name("BLENDOP_REVERSE_SUBTRACT"), int_value);
+	add_global_with_value(float_id, attributes, add_name("BLEND_OPERATION_REVERSE_SUBTRACT"), int_value);
 	int_value.value.ints[0] = 3;
-	add_global_with_value(float_id, attributes, add_name("BLENDOP_MIN"), int_value);
+	add_global_with_value(float_id, attributes, add_name("BLEND_OPERATION_MIN"), int_value);
 	int_value.value.ints[0] = 4;
-	add_global_with_value(float_id, attributes, add_name("BLENDOP_MAX"), int_value);
+	add_global_with_value(float_id, attributes, add_name("BLEND_OPERATION_MAX"), int_value);
 
 	global_value uint_value;
 	uint_value.kind = GLOBAL_VALUE_UINT;
@@ -163,6 +168,7 @@ global_id add_global(type_id type, attribute_list attributes, name_id name) {
 	globals[index].value.kind = GLOBAL_VALUE_NONE;
 	globals[index].attributes = attributes;
 	globals[index].sets_count = 0;
+	globals[index].usage      = 0;
 	globals_size += 1;
 	return index;
 }
@@ -175,8 +181,13 @@ global_id add_global_with_value(type_id type, attribute_list attributes, name_id
 	globals[index].value      = value;
 	globals[index].attributes = attributes;
 	globals[index].sets_count = 0;
+	globals[index].usage      = 0;
 	globals_size += 1;
 	return index;
+}
+
+bool global_has_usage(global_id g, global_usage usage) {
+	return (get_global(g)->usage & usage) == usage;
 }
 
 global *find_global(name_id name) {

@@ -50,9 +50,15 @@ static void write_code(char *metal, char *directory, const char *filename) {
 }
 
 static type_id vertex_inputs[256];
-/*static*/ size_t  vertex_inputs_size = 0;
+////
+// static size_t  vertex_inputs_size = 0;
+size_t  vertex_inputs_size = 0;
+///
 static type_id fragment_inputs[256];
-/*static*/ size_t  fragment_inputs_size = 0;
+////
+// static size_t  fragment_inputs_size = 0;
+size_t  fragment_inputs_size = 0;
+////
 
 static bool is_vertex_input(type_id t) {
 	for (size_t i = 0; i < vertex_inputs_size; ++i) {
@@ -134,9 +140,15 @@ static void write_types(char *metal, size_t *offset) {
 static int global_register_indices[512];
 
 static function_id vertex_functions[256];
-/*static*/ size_t      vertex_functions_size = 0;
+////
+// static size_t      vertex_functions_size = 0;
+size_t      vertex_functions_size = 0;
+////
 static function_id fragment_functions[256];
-/*static*/ size_t      fragment_functions_size = 0;
+////
+// static size_t      fragment_functions_size = 0;
+size_t      fragment_functions_size = 0;
+////
 static function_id compute_functions[256];
 static size_t      compute_functions_size = 0;
 
@@ -229,10 +241,10 @@ static void write_argument_buffers(char *code, size_t *offset) {
 
 static void write_globals(char *code, size_t *offset) {
 	global_array globals = {0};
-    for (function_id i = 0; get_function(i) != NULL; ++i) {
-        function *f = get_function(i);
+	for (function_id i = 0; get_function(i) != NULL; ++i) {
+		function *f = get_function(i);
 		find_referenced_globals(f, &globals);
-    }
+	}
 
 	for (size_t i = 0; i < globals.size; ++i) {
 		global *g         = get_global(globals.globals[i]);
@@ -243,8 +255,8 @@ static void write_globals(char *code, size_t *offset) {
 			*offset += sprintf(&code[*offset], "constant float _%" PRIu64 " = %f;\n\n", g->var_index, g->value.value.floats[0]);
 		}
 		else if (base_type == float2_id) {
-			*offset += sprintf(&code[*offset], "constant float2 _%" PRIu64 " = float2(%f, %f);\n\n", g->var_index, g->value.value.floats[0],
-			                   g->value.value.floats[1]);
+			*offset +=
+			    sprintf(&code[*offset], "constant float2 _%" PRIu64 " = float2(%f, %f);\n\n", g->var_index, g->value.value.floats[0], g->value.value.floats[1]);
 		}
 		else if (base_type == float3_id) {
 			*offset += sprintf(&code[*offset], "constant float3 _%" PRIu64 " = float3(%f, %f, %f);\n\n", g->var_index, g->value.value.floats[0],
@@ -252,7 +264,7 @@ static void write_globals(char *code, size_t *offset) {
 		}
 		else if (base_type == float4_id) {
 			*offset += sprintf(&code[*offset], "constant float4 _%" PRIu64 " = float4(%f, %f, %f, %f);\n\n", g->var_index, g->value.value.floats[0],
-				                g->value.value.floats[1], g->value.value.floats[2], g->value.value.floats[3]);
+			                   g->value.value.floats[1], g->value.value.floats[2], g->value.value.floats[3]);
 		}
 	}
 }
@@ -403,13 +415,13 @@ static void write_functions(char *code, size_t *offset) {
 		}
 		else {
 			descriptor_set_group *set_group = get_descriptor_set_group(0);
-			descriptor_set *set = set_group->values[0];
+			descriptor_set       *set       = set_group->values[0];
+
 			*offset += sprintf(&code[*offset], "%s %s(constant %s& argument_buffer0", type_string(f->return_type.type), get_name(f->name), get_name(set->name));
 
 			for (uint8_t parameter_index = 0; parameter_index < f->parameters_size; ++parameter_index) {
 				*offset += sprintf(&code[*offset], ", %s _%" PRIu64, type_string(f->parameter_types[parameter_index].type), parameter_ids[parameter_index]);
 			}
-
 			*offset += sprintf(&code[*offset], ") {\n");
 		}
 
@@ -644,20 +656,21 @@ static void write_functions(char *code, size_t *offset) {
 					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = _kong_vertex_id;\n", type_string(o->op_call.var.type.type), o->op_call.var.index);
 				}
 				else if (o->op_call.func == add_name("lerp")) {
-					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = mix(_%" PRIu64 ", _%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
-					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index);
+					*offset +=
+					    sprintf(&code[*offset], "%s _%" PRIu64 " = mix(_%" PRIu64 ", _%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					            o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index);
 				}
 				else if (o->op_call.func == add_name("frac")) {
-					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = fract(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
-					                   o->op_call.var.index, o->op_call.parameters[0].index);
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = fract(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type), o->op_call.var.index,
+					                   o->op_call.parameters[0].index);
 				}
 				else if (o->op_call.func == add_name("ddx")) {
-					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = dfdx(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
-					                   o->op_call.var.index, o->op_call.parameters[0].index);
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = dfdx(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type), o->op_call.var.index,
+					                   o->op_call.parameters[0].index);
 				}
 				else if (o->op_call.func == add_name("ddy")) {
-					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = dfdy(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
-					                   o->op_call.var.index, o->op_call.parameters[0].index);
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = dfdy(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type), o->op_call.var.index,
+					                   o->op_call.parameters[0].index);
 				}
 
 				////
@@ -726,7 +739,6 @@ static void write_functions(char *code, size_t *offset) {
 				////
 
 				else {
-
 					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = %s(", type_string(o->op_call.var.type.type), o->op_call.var.index,
 					                   function_string(o->op_call.func));
 

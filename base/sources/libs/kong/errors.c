@@ -5,6 +5,24 @@
 #include <stdlib.h>
 #include <string.h>
 
+static void debug_break(void) {
+#ifndef NDEBUG
+#if defined(_MSC_VER)
+	__debugbreak();
+#elif defined(__clang__)
+	__builtin_debugtrap();
+#else
+#if defined(__aarch64__)
+	__asm__ volatile(".inst 0xd4200000");
+#elif defined(__x86_64__)
+	__asm__ volatile("int $0x03");
+#else
+	kong_log(LOG_LEVEL_WARNING, "Oh no, debug_break is not implemented for the current compiler and CPU.");
+#endif
+#endif
+#endif
+}
+
 void error_args(debug_context context, const char *message, va_list args) {
 	char buffer[4096];
 
@@ -18,6 +36,8 @@ void error_args(debug_context context, const char *message, va_list args) {
 	strcat(buffer, message);
 
 	kong_log_args(LOG_LEVEL_ERROR, buffer, args);
+
+	debug_break();
 
 	exit(1);
 }

@@ -68,7 +68,6 @@ static void read_file(char *filename) {
 typedef enum integration_kind { INTEGRATION_KORE3 } integration_kind;
 
 ////
-
 /*
 int main(int argc, char **argv) {
 	arg_mode mode = MODE_MODECHECK;
@@ -298,7 +297,12 @@ int main(int argc, char **argv) {
 
 	switch (api) {
 	case API_VULKAN:
+		transform(TRANSFORM_FLAG_ONE_COMPONENT_SWIZZLE | TRANSFORM_FLAG_BINARY_UNIFY_LENGTH);
+		break;
+	case API_WEBGPU:
 		transform(TRANSFORM_FLAG_ONE_COMPONENT_SWIZZLE);
+		break;
+	default:
 		break;
 	}
 
@@ -341,5 +345,4 @@ int main(int argc, char **argv) {
 	return 0;
 }
 */
-
 ////
