@@ -2852,3 +2852,8 @@ void spirv_export(char *directory, bool debug) {
 		spirv_export_compute(directory, compute_shaders[i], debug);
 	}
 }
+
+////
+void spirv_export2(char **vs, char **fs, bool debug) {
+}
+////
