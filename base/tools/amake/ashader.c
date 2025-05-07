@@ -64,7 +64,7 @@ extern name_id names_index;
 extern size_t sets_count;
 extern type_id next_type_index;
 void hlsl_export2(char **vs, char **fs, api_kind d3d, bool debug);
-void spirv_export2(char **vs, char **fs, bool debug);
+void spirv_export2(char **vs, char **fs, int *vs_size, int *fs_size, bool debug);
 extern size_t vertex_inputs_size;
 extern size_t fragment_inputs_size;
 extern size_t vertex_functions_size;
@@ -185,7 +185,26 @@ void kong_compile(const char *from, const char *to) {
 	transform(TRANSFORM_FLAG_ONE_COMPONENT_SWIZZLE | TRANSFORM_FLAG_BINARY_UNIFY_LENGTH);
 	char *vs;
 	char *fs;
-	spirv_export2(&vs, &fs, false);
+	int vs_size;
+	int fs_size;
+	spirv_export2(&vs, &fs, &vs_size, &fs_size, false);
+
+	char to_[512];
+	strcpy(to_, to);
+	to_[strlen(to_) - 5] = '\0';
+	strcat(to_, "vert.spirv");
+
+	fp = fopen(to_, "wb");
+	fwrite(vs, 1, vs_size, fp);
+	fclose(fp);
+
+	strcpy(to_, to);
+	to_[strlen(to_) - 5] = '\0';
+	strcat(to_, "frag.spirv");
+
+	fp = fopen(to_, "wb");
+	fwrite(fs, 1, fs_size, fp);
+	fclose(fp);
 
 	#endif
 }

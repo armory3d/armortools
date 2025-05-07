@@ -7,7 +7,6 @@ struct vert_in {
 
 struct vert_out {
 	pos: float4;
-	dummy: float;
 }
 
 #[set(everything)]

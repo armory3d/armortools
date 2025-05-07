@@ -990,7 +990,7 @@ extern name_id names_index;
 extern size_t sets_count;
 extern type_id next_type_index;
 void hlsl_export2(char **vs, char **fs, api_kind d3d, bool debug);
-void spirv_export2(char **vs, char **fs, bool debug);
+void spirv_export2(char **vs, char **fs, int *vs_size, int *fs_size, bool debug);
 extern size_t vertex_inputs_size;
 extern size_t fragment_inputs_size;
 extern size_t vertex_functions_size;
@@ -1038,7 +1038,9 @@ void gpu_create_shaders_from_kong(char *kong, char **vs, char **fs) {
 	#else
 
 	transform(TRANSFORM_FLAG_ONE_COMPONENT_SWIZZLE | TRANSFORM_FLAG_BINARY_UNIFY_LENGTH);
-	spirv_export2(vs, fs, false);
+	int vs_size;
+	int fs_size;
+	spirv_export2(vs, fs, &vs_size, &fs_size, false);
 
 	#endif
 }
