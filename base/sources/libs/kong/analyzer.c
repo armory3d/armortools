@@ -188,6 +188,10 @@ void find_used_builtins(function *f) {
 				f->used_builtins.group_id = true;
 			}
 
+			if (func == add_name("vertex_id")) {
+				f->used_builtins.vertex_id = true;
+			}
+
 			for (function_id i = 0; get_function(i) != NULL; ++i) {
 				function *called = get_function(i);
 				if (called->name == o->op_call.func) {
@@ -196,6 +200,7 @@ void find_used_builtins(function *f) {
 					f->used_builtins.dispatch_thread_id |= called->used_builtins.dispatch_thread_id;
 					f->used_builtins.group_thread_id |= called->used_builtins.group_thread_id;
 					f->used_builtins.group_id |= called->used_builtins.group_id;
+					f->used_builtins.vertex_id |= called->used_builtins.vertex_id;
 
 					break;
 				}

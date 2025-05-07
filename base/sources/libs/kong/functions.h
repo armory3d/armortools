@@ -15,6 +15,7 @@ typedef struct builtins {
 	bool dispatch_thread_id;
 	bool group_thread_id;
 	bool group_id;
+	bool vertex_id;
 } builtins;
 
 typedef struct capabilities {
