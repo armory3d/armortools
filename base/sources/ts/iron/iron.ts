@@ -222,7 +222,7 @@ declare function iron_gpu_vertex_buffer_unlock(buffer: any): void;
 declare function gpu_set_vertex_buffer(buffer: any): void;
 declare function gpu_draw(): void;
 declare function gpu_create_shader(data: buffer_t, type: i32): iron_gpu_shader_t;
-declare function gpu_create_shader_from_source(source: string, shader_type: shader_type_t): iron_gpu_shader_t;
+declare function gpu_create_shader_from_source(source: string, source_size: i32, shader_type: shader_type_t): iron_gpu_shader_t;
 declare function iron_gpu_shader_destroy(shader: iron_gpu_shader_t): void;
 declare function gpu_create_pipeline(): any;
 declare function gpu_delete_pipeline(pipeline: any): void;

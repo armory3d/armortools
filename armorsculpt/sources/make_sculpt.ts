@@ -87,7 +87,7 @@ function make_sculpt_run(data: material_t, matcon: material_context_t): node_sha
 
 	parser_material_finalize(con_paint);
 	con_paint.data.shader_from_source = true;
-	gpu_create_shaders_from_kong(node_shader_get(kong), ADDRESS(con_paint.data.vertex_shader), ADDRESS(con_paint.data.fragment_shader));
+	gpu_create_shaders_from_kong(node_shader_get(kong), ADDRESS(con_paint.data.vertex_shader), ADDRESS(con_paint.data.fragment_shader), ADDRESS(con_paint.data._.vertex_shader_size), ADDRESS(con_paint.data._.fragment_shader_size));
 
 	return con_paint;
 }

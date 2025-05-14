@@ -133,8 +133,8 @@ function shader_context_compile(raw: shader_context_t): shader_context_t {
 
 	// Shaders
 	if (raw.shader_from_source) {
-		raw._.pipe_state.vertex_shader = gpu_create_shader_from_source(raw.vertex_shader, shader_type_t.VERTEX);
-		raw._.pipe_state.fragment_shader = gpu_create_shader_from_source(raw.fragment_shader, shader_type_t.FRAGMENT);
+		raw._.pipe_state.vertex_shader = gpu_create_shader_from_source(raw.vertex_shader, raw._.vertex_shader_size, shader_type_t.VERTEX);
+		raw._.pipe_state.fragment_shader = gpu_create_shader_from_source(raw.fragment_shader, raw._.fragment_shader_size, shader_type_t.FRAGMENT);
 
 		// Shader compile error
 		if (raw._.pipe_state.vertex_shader == null || raw._.pipe_state.fragment_shader == null) {
@@ -143,6 +143,7 @@ function shader_context_compile(raw: shader_context_t): shader_context_t {
 	}
 	else {
 		///if arm_embed
+
 		raw._.pipe_state.fragment_shader = sys_get_shader(raw.fragment_shader);
 		raw._.pipe_state.vertex_shader = sys_get_shader(raw.vertex_shader);
 
@@ -158,32 +159,7 @@ function shader_context_compile(raw: shader_context_t): shader_context_t {
 	return shader_context_finish_compile(raw);
 }
 
-///if arm_metal
-
-function shader_context_type_size(t: string): i32 {
-	if (t == "int") return 4;
-	if (t == "float") return 4;
-	if (t == "vec2") return 8;
-	if (t == "vec3") return 16;
-	if (t == "vec4") return 16;
-	if (t == "mat3") return 48;
-	if (t == "mat4") return 64;
-	if (t == "float2") return 8;
-	if (t == "float3") return 16;
-	if (t == "float4") return 16;
-	if (t == "float3x3") return 48;
-	if (t == "float4x4") return 64;
-	return 0;
-}
-
-function shader_context_type_pad(offset: i32, size: i32): i32 {
-	if (size > 16) {
-		size = 16;
-	}
-	return (size - (offset % size)) % size;
-}
-
-///else
+///if arm_direct3d12
 
 function shader_context_type_size(t: string): i32 {
 	if (t == "int") return 4;
@@ -210,6 +186,31 @@ function shader_context_type_pad(offset: i32, size: i32): i32 {
 		return 16 - r;
 	}
 	return 0;
+}
+
+///else
+
+function shader_context_type_size(t: string): i32 {
+	if (t == "int") return 4;
+	if (t == "float") return 4;
+	if (t == "vec2") return 8;
+	if (t == "vec3") return 16;
+	if (t == "vec4") return 16;
+	if (t == "mat3") return 48;
+	if (t == "mat4") return 64;
+	if (t == "float2") return 8;
+	if (t == "float3") return 16;
+	if (t == "float4") return 16;
+	if (t == "float3x3") return 48;
+	if (t == "float4x4") return 64;
+	return 0;
+}
+
+function shader_context_type_pad(offset: i32, size: i32): i32 {
+	if (size > 16) {
+		size = 16;
+	}
+	return (size - (offset % size)) % size;
 }
 
 ///end

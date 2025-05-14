@@ -598,6 +598,8 @@ type shader_context_runtime_t = {
 	constants?: iron_gpu_constant_location_t[];
 	tex_units?: iron_gpu_texture_unit_t[];
 	structure?: iron_gpu_vertex_structure_t;
+	vertex_shader_size?: i32;
+	fragment_shader_size?: i32;
 };
 
 type vertex_element_t = {

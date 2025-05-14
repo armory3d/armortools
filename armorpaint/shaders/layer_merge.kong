@@ -234,6 +234,7 @@ fun layer_merge_frag(input: vert_out): float4 {
 				str),
 			max(col0.a, cola.a));
 	}
+
 	*/
 
 	return float4(1, 1, 1, 1);

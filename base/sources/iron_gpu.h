@@ -219,7 +219,6 @@ float *iron_gpu_vertex_buffer_lock(iron_gpu_buffer_t *buffer);
 void iron_gpu_vertex_buffer_unlock(iron_gpu_buffer_t *buffer);
 int iron_gpu_vertex_buffer_count(iron_gpu_buffer_t *buffer);
 int iron_gpu_vertex_buffer_stride(iron_gpu_buffer_t *buffer);
-int iron_gpu_internal_vertex_buffer_set(iron_gpu_buffer_t *buffer);
 void gpu_set_vertex_buffer(iron_gpu_buffer_t *buffer);
 void iron_gpu_constant_buffer_init(iron_gpu_buffer_t *buffer, int size);
 void iron_gpu_constant_buffer_destroy(iron_gpu_buffer_t *buffer);

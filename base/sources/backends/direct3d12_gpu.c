@@ -1536,10 +1536,6 @@ void iron_gpu_vertex_buffer_unlock(iron_gpu_buffer_t *buffer) {
 	buffer->impl.uploadBuffer->lpVtbl->Unmap(buffer->impl.uploadBuffer, 0, &range);
 }
 
-int iron_gpu_internal_vertex_buffer_set(iron_gpu_buffer_t *buffer) {
-	return 0;
-}
-
 int iron_gpu_vertex_buffer_count(iron_gpu_buffer_t *buffer) {
 	return buffer->myCount;
 }

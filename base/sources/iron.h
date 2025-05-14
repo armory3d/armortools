@@ -996,7 +996,7 @@ extern size_t fragment_inputs_size;
 extern size_t vertex_functions_size;
 extern size_t fragment_functions_size;
 
-void gpu_create_shaders_from_kong(char *kong, char **vs, char **fs) {
+void gpu_create_shaders_from_kong(char *kong, char **vs, char **fs, int *vs_size, int *fs_size) {
 	next_variable_id = 1;
 	allocated_globals_size = 0;
 	next_function_index = 0;
@@ -1038,17 +1038,15 @@ void gpu_create_shaders_from_kong(char *kong, char **vs, char **fs) {
 	#else
 
 	transform(TRANSFORM_FLAG_ONE_COMPONENT_SWIZZLE | TRANSFORM_FLAG_BINARY_UNIFY_LENGTH);
-	int vs_size;
-	int fs_size;
-	spirv_export2(vs, fs, &vs_size, &fs_size, false);
+	spirv_export2(vs, fs, vs_size, fs_size, false);
 
 	#endif
 }
 
 #endif
 
-iron_gpu_shader_t *gpu_create_shader_from_source(string_t *source, iron_gpu_shader_type_t shader_type) {
-	iron_gpu_shader_t *shader = NULL;
+iron_gpu_shader_t *gpu_create_shader_from_source(string_t *source, int source_size, iron_gpu_shader_type_t shader_type) {
+	iron_gpu_shader_t *shader = (iron_gpu_shader_t *)malloc(sizeof(iron_gpu_shader_t));
 	char *temp_string_s = shader_type == IRON_GPU_SHADER_TYPE_VERTEX ? temp_string_vs : temp_string_fs;
 
 	#ifdef WITH_D3DCOMPILER
@@ -1066,20 +1064,17 @@ iron_gpu_shader_t *gpu_create_shader_from_source(string_t *source, iron_gpu_shad
 	}
 
 	int size = shader_buffer->lpVtbl->GetBufferSize(shader_buffer);
-	shader = (iron_gpu_shader_t *)malloc(sizeof(iron_gpu_shader_t));
 	iron_gpu_shader_init(shader, (char *)shader_buffer->lpVtbl->GetBufferPointer(shader_buffer), size, shader_type);
 	shader_buffer->lpVtbl->Release(shader_buffer);
 
 	#elif defined(IRON_METAL)
 
 	strcpy(temp_string_s, source);
-	shader = (iron_gpu_shader_t *)malloc(sizeof(iron_gpu_shader_t));
 	iron_gpu_shader_init(shader, temp_string_s, strlen(temp_string_s), shader_type);
 
 	#elif defined(IRON_VULKAN)
 
-	shader = (iron_gpu_shader_t *)malloc(sizeof(iron_gpu_shader_t));
-	// iron_gpu_shader_init(shader, source, length, shader_type);
+	iron_gpu_shader_init(shader, source, source_size, shader_type);
 
 	#endif
 
