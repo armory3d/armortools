@@ -60,7 +60,7 @@ fun deferred_light_vert(input: vert_in): vert_out {
 	var v: float4 = float4(input.pos.xy, 1.0, 1.0);
 	v = constants.invVP * v;
 	v.xyz /= v.w;
-	output.view_ray = float3(v.xyz - constants.eye);
+	output.view_ray = v.xyz - constants.eye;
 
 	return output;
 }

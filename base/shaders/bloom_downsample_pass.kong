@@ -32,7 +32,7 @@ fun bloom_downsample_pass_vert(input: vert_in): vert_out {
 	return output;
 }
 
-fun downsample_dual_filter(tex: tex2d, tex_coord: float2, texel_size: float2): float3 {
+fun downsample_dual_filter(tex_coord: float2, texel_size: float2): float3 {
 	var delta: float3 = float3(texel_size.xy, texel_size.x) * float3(0.5, 0.5, -0.5);
 
 	var result: float3;
@@ -47,14 +47,14 @@ fun downsample_dual_filter(tex: tex2d, tex_coord: float2, texel_size: float2): f
 
 fun bloom_downsample_pass_frag(input: vert_out): float4 {
 	var color: float4;
-	color.rgb = downsample_dual_filter(tex, input.tex, constants.screen_size_inv);
+	color.rgb = downsample_dual_filter(input.tex, constants.screen_size_inv);
 
 	if (constants.current_mip_level == 0) {
 		var brightness: float = max(color.r, max(color.g, color.b));
 
 		var softening_curve: float = brightness - bloom_threshold + bloom_knee;
 		softening_curve = clamp(softening_curve, 0.0, 2.0 * bloom_knee);
-		softening_curve = softening_curve * softening_curve / (4 * bloom_knee + epsilon);
+		softening_curve = softening_curve * softening_curve / (4.0 * bloom_knee + epsilon);
 
 		var contribution_factor: float = max(softening_curve, brightness - bloom_threshold);
 

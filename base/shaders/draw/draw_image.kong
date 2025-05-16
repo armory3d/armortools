@@ -25,11 +25,15 @@ struct vert_out {
 
 fun draw_image_vert(input: vert_in): vert_out {
 	var output: vert_out;
+
+	var cpos: float4 = constants.pos;
+	var ctex: float4 = constants.tex;
+
 	output.pos = float4(input.pos, 0.0, 1.0);
-	output.pos.xy = output.pos.xy * constants.pos.zw + constants.pos.xy;
+	output.pos.xy = output.pos.xy * cpos.zw + cpos.xy;
 	output.pos.xy = output.pos.xy * 2.0 - 1.0;
 	output.pos.y = -output.pos.y;
-	output.tex = input.pos * constants.tex.zw + constants.tex.xy;
+	output.tex = input.pos * ctex.zw + ctex.xy;
 	output.col = constants.col;
 	return output;
 }

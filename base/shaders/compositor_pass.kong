@@ -38,7 +38,7 @@ fun tonemap_filmic(color: float3): float3 {
 	x.x = max(0.0, color.x - 0.004);
 	x.y = max(0.0, color.y - 0.004);
 	x.z = max(0.0, color.z - 0.004);
-	return (x * (6.2 * x + 0.5)) / (x * (6.2 * x + 1.7) + 0.06);
+	return (x * (x * 6.2 + 0.5)) / (x * (x * 6.2 + 1.7) + 0.06);
 }
 
 fun compositor_pass_frag(input: vert_out): float4 {
@@ -47,13 +47,13 @@ fun compositor_pass_frag(input: vert_out): float4 {
 	// Static grain
 	var x: float = (input.tex.x + 4.0) * (input.tex.y + 4.0) * 10.0;
 	var g: float = (((x % 13.0) + 1.0) * ((x % 123.0) + 1.0) % 0.01) - 0.005;
-	color.rgb += float3(g, g, g) * constants.grain_strength;
+	color.rgb = color.rgb + (float3(g, g, g) * constants.grain_strength);
 
-	color.rgb *= (1.0 - constants.vignette_strength) + constants.vignette_strength * pow(16.0 * input.tex.x * input.tex.y * (1.0 - input.tex.x) * (1.0 - input.tex.y), 0.2);
+	color.rgb = color.rgb * ((1.0 - constants.vignette_strength) + constants.vignette_strength * pow(16.0 * input.tex.x * input.tex.y * (1.0 - input.tex.x) * (1.0 - input.tex.y), 0.2));
 
 	// Auto exposure
-	// const float auto_exposure_strength = 1.0;
-	// float expo = 2.0 - clamp(length(sample_lod(histogram, sampler_linear, float2(0.5, 0.5), 0.0).rgb), 0.0, 1.0);
+	// const auto_exposure_strength: float = 1.0;
+	// var expo: float = 2.0 - clamp(length(sample_lod(histogram, sampler_linear, float2(0.5, 0.5), 0.0).rgb), 0.0, 1.0);
 	// color.rgb *= pow(expo, auto_exposure_strength * 2.0);
 
 	color.rgb = tonemap_filmic(color.rgb); // With gamma
