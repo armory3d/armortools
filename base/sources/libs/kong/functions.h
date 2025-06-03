@@ -20,6 +20,7 @@ typedef struct builtins {
 
 typedef struct capabilities {
 	bool capabilities_analyzed;
+	bool image_read;
 	bool image_write;
 } capabilities;
 

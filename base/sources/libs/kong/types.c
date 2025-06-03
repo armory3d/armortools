@@ -10,7 +10,7 @@ static type   *types           = NULL;
 static type_id types_size      = 1024;
 ////
 // static type_id next_type_index = 0;
-type_id next_type_index = 0;
+type_id        next_type_index = 0;
 ////
 
 type_id void_id;

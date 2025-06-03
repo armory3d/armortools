@@ -53,7 +53,7 @@ static type_id vertex_inputs[256];
 ////
 // static size_t  vertex_inputs_size = 0;
 size_t  vertex_inputs_size = 0;
-///
+////
 static type_id fragment_inputs[256];
 ////
 // static size_t  fragment_inputs_size = 0;
@@ -104,19 +104,62 @@ static void type_name(type_id id, char *output_name) {
 static void write_types(char *metal, size_t *offset) {
 	for (type_id i = 0; get_type(i) != NULL; ++i) {
 		type *t = get_type(i);
+		if (!t->built_in && has_attribute(&t->attributes, add_name("pipe"))) {
+			name_id vertex_shader_name = NO_NAME;
+
+			for (size_t j = 0; j < t->members.size; ++j) {
+				if (t->members.m[j].name == add_name("vertex")) {
+					vertex_shader_name = t->members.m[j].value.identifier;
+				}
+			}
+
+			for (function_id i = 0; get_function(i) != NULL; ++i) {
+				function *f = get_function(i);
+				if (f->name == vertex_shader_name) {
+					uint64_t parameter_ids[256] = {0};
+					for (uint8_t parameter_index = 0; parameter_index < f->parameters_size; ++parameter_index) {
+						for (size_t i = 0; i < f->block->block.vars.size; ++i) {
+							if (f->parameter_names[parameter_index] == f->block->block.vars.v[i].name) {
+								parameter_ids[parameter_index] = f->block->block.vars.v[i].variable_id;
+								break;
+							}
+						}
+					}
+
+					*offset += sprintf(&metal[*offset], "struct _kong_%s_attributes {\n", get_name(f->name));
+
+					uint32_t a = 0;
+
+					for (uint8_t parameter_index = 0; parameter_index < f->parameters_size; ++parameter_index) {
+						type *t = get_type(f->parameter_types[parameter_index].type);
+
+						for (size_t j = 0; j < t->members.size; ++j) {
+							*offset += sprintf(&metal[*offset], "\t%s _%" PRIu64 "_%s [[attribute(%u)]];\n", type_string(t->members.m[j].type.type),
+							                   parameter_ids[parameter_index], get_name(t->members.m[j].name), a);
+
+							a += 1;
+						}
+					}
+
+					*offset += sprintf(&metal[*offset], "};\n\n");
+				}
+			}
+		}
+	}
+
+	for (type_id i = 0; get_type(i) != NULL; ++i) {
+		if (is_vertex_input(i)) {
+			continue;
+		}
+
+		type *t = get_type(i);
 
 		if (!t->built_in && !has_attribute(&t->attributes, add_name("pipe"))) {
 			char name[256];
 			type_name(i, name);
 			*offset += sprintf(&metal[*offset], "struct %s {\n", name);
 
-			if (is_vertex_input(i)) {
-				for (size_t j = 0; j < t->members.size; ++j) {
-					*offset +=
-					    sprintf(&metal[*offset], "\t%s %s [[attribute(%zu)]];\n", type_string(t->members.m[j].type.type), get_name(t->members.m[j].name), j);
-				}
-			}
-			else if (is_fragment_input(i)) {
+			if (is_fragment_input(i)) {
 				for (size_t j = 0; j < t->members.size; ++j) {
 					if (j == 0) {
 						*offset += sprintf(&metal[*offset], "\t%s %s [[position]];\n", type_string(t->members.m[j].type.type), get_name(t->members.m[j].name));
@@ -142,12 +185,12 @@ static int global_register_indices[512];
 static function_id vertex_functions[256];
 ////
 // static size_t      vertex_functions_size = 0;
-size_t      vertex_functions_size = 0;
+size_t              vertex_functions_size = 0;
 ////
 static function_id fragment_functions[256];
 ////
 // static size_t      fragment_functions_size = 0;
-size_t      fragment_functions_size = 0;
+size_t             fragment_functions_size = 0;
 ////
 static function_id compute_functions[256];
 static size_t      compute_functions_size = 0;
@@ -322,15 +365,13 @@ static void write_functions(char *code, size_t *offset) {
 		char buffers[1024];
 		memset(buffers, 0, sizeof(buffers));
 
-		if (is_vertex_function(i) || is_fragment_function(i) || is_compute_function(i)) {
-			global_array globals = {0};
-			find_referenced_globals(f, &globals);
+		size_t buffer_index = f->parameters_size;
 
+		if (is_vertex_function(i) || is_fragment_function(i) || is_compute_function(i)) {
 			size_t buffers_offset = 0;
 
 			descriptor_set_group *set_group = get_descriptor_set_group(f->descriptor_set_group_index);
 
-			size_t buffer_index          = 1;
 			size_t argument_buffer_index = 0;
 
 			for (size_t set_index = 0; set_index < set_group->size; ++set_index) {
@@ -371,12 +412,10 @@ static void write_functions(char *code, size_t *offset) {
 		}
 
 		if (is_vertex_function(i)) {
-			*offset += sprintf(&code[*offset], "vertex %s %s(%s _%" PRIu64 " [[stage_in]]", type_string(f->return_type.type), get_name(f->name),
-			                   type_string(f->parameter_types[0].type), parameter_ids[0]);
-			for (uint8_t parameter_index = 1; parameter_index < f->parameters_size; ++parameter_index) {
-				*offset += sprintf(&code[*offset], ", %s _%" PRIu64, type_string(f->parameter_types[0].type), parameter_ids[0]);
-			}
-			*offset += sprintf(&code[*offset], "%s, uint _kong_vertex_id [[vertex_id]]) {\n", buffers);
+			*offset += sprintf(&code[*offset], "vertex %s %s(_kong_%s_attributes _kong_stage_in [[stage_in]]", type_string(f->return_type.type),
+			                   get_name(f->name), get_name(f->name));
+
+			*offset += sprintf(&code[*offset], "%s, uint _kong_vertex_id [[vertex_id]], uint _kong_instance_id [[instance_id]]) {\n", buffers);
 		}
 		else if (is_fragment_function(i)) {
 			if (get_type(f->return_type.type)->array_size > 0) {
@@ -445,14 +484,17 @@ static void write_functions(char *code, size_t *offset) {
 				bool root_constant = var_name(o->op_load_access_list.from, from_name);
 
 				indent(code, offset, indentation);
-				*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = %s", type_string(o->op_load_access_list.to.type.type), o->op_load_access_list.to.index,
-				                   from_name);
+				*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = ", type_string(o->op_load_access_list.to.type.type), o->op_load_access_list.to.index);
 
-				type *s = get_type(o->op_load_access_list.from.type.type);
+				type_id s = o->op_load_access_list.from.type.type;
 
 				for (size_t i = 0; i < o->op_load_access_list.access_list_size; ++i) {
 					switch (o->op_load_access_list.access_list[i].kind) {
 					case ACCESS_ELEMENT:
+						if (i == 0) {
+							*offset += sprintf(&code[*offset], "%s", from_name);
+						}
+
 						if (is_texture(o->op_load_access_list.from.type.type) && i == 0) {
 							*offset += sprintf(&code[*offset], ".read(_%" PRIu64 ")", o->op_load_access_list.access_list[i].access_element.index.index);
 						}
@@ -461,14 +503,28 @@ static void write_functions(char *code, size_t *offset) {
 						}
 						break;
 					case ACCESS_MEMBER:
-						if (i == 0 && g != NULL) {
+						if (i == 0 && g != NULL && !root_constant) {
+							*offset += sprintf(&code[*offset], "%s", from_name);
+
 							*offset += sprintf(&code[*offset], "->%s", get_name(o->op_load_access_list.access_list[i].access_member.name));
 						}
+						else if (i == 0 && is_vertex_input(s)) {
+							*offset +=
+							    sprintf(&code[*offset], "_kong_stage_in.%s_%s", from_name, get_name(o->op_load_access_list.access_list[i].access_member.name));
+						}
 						else {
+							if (i == 0) {
+								*offset += sprintf(&code[*offset], "%s", from_name);
+							}
+
 							*offset += sprintf(&code[*offset], ".%s", get_name(o->op_load_access_list.access_list[i].access_member.name));
 						}
 						break;
 					case ACCESS_SWIZZLE: {
+						if (i == 0) {
+							*offset += sprintf(&code[*offset], "%s", from_name);
+						}
+
 						char swizzle[4];
 
 						for (uint32_t swizzle_index = 0; swizzle_index < o->op_load_access_list.access_list[i].access_swizzle.swizzle.size; ++swizzle_index) {
@@ -481,7 +537,7 @@ static void write_functions(char *code, size_t *offset) {
 					}
 					}
 
-					s = get_type(o->op_load_access_list.access_list[i].type);
+					s = o->op_load_access_list.access_list[i].type;
 				}
 
 				*offset += sprintf(&code[*offset], ";\n");
@@ -870,9 +926,10 @@ char *metal_export(char *directory) {
 					vertex_functions[vertex_functions_size] = i;
 					vertex_functions_size += 1;
 
-					assert(f->parameters_size > 0);
-					vertex_inputs[vertex_inputs_size] = f->parameter_types[0].type;
-					vertex_inputs_size += 1;
+					for (uint8_t parameter_index = 0; parameter_index < f->parameters_size; ++parameter_index) {
+						vertex_inputs[vertex_inputs_size] = f->parameter_types[parameter_index].type;
+						vertex_inputs_size += 1;
+					}
 				}
 				else if (f->name == fragment_shader_name) {
 					fragment_functions[fragment_functions_size] = i;

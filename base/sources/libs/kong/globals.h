@@ -52,6 +52,7 @@ typedef struct global {
 
 typedef struct global_array {
 	global_id globals[256];
+	bool      readable[256];
 	bool      writable[256];
 	size_t    size;
 } global_array;

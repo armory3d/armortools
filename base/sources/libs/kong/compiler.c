@@ -15,7 +15,7 @@ typedef struct allocated_global {
 static allocated_global allocated_globals[1024];
 ////
 // static size_t           allocated_globals_size = 0;
-size_t           allocated_globals_size = 0;
+size_t                  allocated_globals_size = 0;
 ////
 
 allocated_global find_allocated_global(name_id name) {

@@ -10,7 +10,7 @@ static char   *names       = NULL;
 static size_t  names_size  = 1024 * 1024;
 ////
 // static name_id names_index = 1;
-name_id names_index = 1;
+name_id        names_index = 1;
 ////
 
 static struct {

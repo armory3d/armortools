@@ -5,7 +5,7 @@
 static descriptor_set sets[MAX_SETS];
 ////
 // static size_t         sets_count = 0;
-size_t         sets_count = 0;
+size_t                sets_count = 0;
 ////
 
 descriptor_set *create_set(name_id name) {

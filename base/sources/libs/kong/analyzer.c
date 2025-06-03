@@ -15,7 +15,7 @@ static raytracing_pipelines all_raytracing_pipelines;
 // a pipeline group is a collection of pipelines that share shaders
 static raytracing_pipeline_groups all_raytracing_pipeline_groups;
 
-static void find_referenced_global_for_var(variable v, global_array *globals, bool write) {
+static void find_referenced_global_for_var(variable v, global_array *globals, bool read, bool write) {
 	for (global_id j = 0; get_global(j) != NULL && get_global(j)->type != NO_TYPE; ++j) {
 		global *g = get_global(j);
 
@@ -24,6 +24,10 @@ static void find_referenced_global_for_var(variable v, global_array *globals, bo
 			for (size_t k = 0; k < globals->size; ++k) {
 				if (globals->globals[k] == j) {
 					found = true;
+
+					if (read) {
+						globals->readable[k] = true;
+					}
 
 					if (write) {
 						globals->writable[k] = true;
@@ -34,6 +38,7 @@ static void find_referenced_global_for_var(variable v, global_array *globals, bo
 			}
 			if (!found) {
 				globals->globals[globals->size]  = j;
+				globals->readable[globals->size] = read;
 				globals->writable[globals->size] = write;
 				globals->size += 1;
 			}
@@ -74,12 +79,12 @@ void find_referenced_globals(function *f, global_array *globals) {
 			case OPCODE_GREATER_EQUAL:
 			case OPCODE_LESS:
 			case OPCODE_LESS_EQUAL: {
-				find_referenced_global_for_var(o->op_binary.left, globals, false);
-				find_referenced_global_for_var(o->op_binary.right, globals, false);
+				find_referenced_global_for_var(o->op_binary.left, globals, false, false);
+				find_referenced_global_for_var(o->op_binary.right, globals, false, false);
 				break;
 			}
 			case OPCODE_LOAD_ACCESS_LIST: {
-				find_referenced_global_for_var(o->op_load_access_list.from, globals, false);
+				find_referenced_global_for_var(o->op_load_access_list.from, globals, true, false);
 				break;
 			}
 			case OPCODE_STORE_ACCESS_LIST:
@@ -87,12 +92,12 @@ void find_referenced_globals(function *f, global_array *globals) {
 			case OPCODE_ADD_AND_STORE_ACCESS_LIST:
 			case OPCODE_DIVIDE_AND_STORE_ACCESS_LIST:
 			case OPCODE_MULTIPLY_AND_STORE_ACCESS_LIST: {
-				find_referenced_global_for_var(o->op_store_access_list.to, globals, true);
+				find_referenced_global_for_var(o->op_store_access_list.to, globals, false, true);
 				break;
 			}
 			case OPCODE_CALL: {
 				for (uint8_t i = 0; i < o->op_call.parameters_size; ++i) {
-					find_referenced_global_for_var(o->op_call.parameters[i], globals, false);
+					find_referenced_global_for_var(o->op_call.parameters[i], globals, false, false);
 				}
 				break;
 			}
@@ -172,8 +177,6 @@ void find_used_builtins(function *f) {
 		opcode *o = (opcode *)&data[index];
 		switch (o->type) {
 		case OPCODE_CALL: {
-			char *func_name = get_name(o->op_call.func);
-
 			name_id func = o->op_call.func;
 
 			if (func == add_name("dispatch_thread_id")) {
@@ -267,6 +270,8 @@ void find_used_capabilities(function *f) {
 			type_id  from_type = from.type.type;
 
 			if (is_texture(from_type)) {
+				f->used_capabilities.image_read = true;
+
 				if (get_type(from_type)->array_size > 0) {
 					last_base_texture_from = from;
 					last_base_texture_to   = o->op_load_access_list.to;
@@ -306,6 +311,7 @@ void find_used_capabilities(function *f) {
 				if (called->name == func_name) {
 					find_used_capabilities(f);
 
+					f->used_capabilities.image_read |= called->used_capabilities.image_read;
 					f->used_capabilities.image_write |= called->used_capabilities.image_write;
 
 					break;
@@ -489,6 +495,14 @@ static void find_all_render_pipelines(void) {
 	}
 }
 
+static bool same_shader(function *a, function *b) {
+	if (a == NULL && b == NULL) {
+		return false;
+	}
+
+	return a == b;
+}
+
 static void find_render_pipeline_groups(void) {
 	static_array_init(all_render_pipeline_groups);
 
@@ -516,8 +530,10 @@ static void find_render_pipeline_groups(void) {
 
 			for (size_t index_in_bucket = 0; index_in_bucket < group.size; ++index_in_bucket) {
 				render_pipeline *pipeline_in_group = &all_render_pipelines.values[group.values[index_in_bucket]];
-				if (pipeline->vertex_shader == pipeline_in_group->vertex_shader || pipeline->amplification_shader == pipeline_in_group->amplification_shader ||
-				    pipeline->mesh_shader == pipeline_in_group->mesh_shader || pipeline->fragment_shader == pipeline_in_group->fragment_shader) {
+				if (same_shader(pipeline->vertex_shader, pipeline_in_group->vertex_shader) ||
+				    same_shader(pipeline->amplification_shader, pipeline_in_group->amplification_shader) ||
+				    same_shader(pipeline->mesh_shader, pipeline_in_group->mesh_shader) ||
+				    same_shader(pipeline->fragment_shader, pipeline_in_group->fragment_shader)) {
 					found = true;
 					break;
 				}
@@ -688,6 +704,9 @@ static void update_globals_in_descriptor_set_group(descriptor_set_group *group, 
 
 			for (size_t global_index2 = 0; global_index2 < globals->size; ++global_index2) {
 				if (globals->globals[global_index2] == g) {
+					if (globals->readable[global_index2]) {
+						set->globals.readable[global_index] = true;
+					}
 					if (globals->writable[global_index2]) {
 						set->globals.writable[global_index] = true;
 					}

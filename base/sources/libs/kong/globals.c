@@ -7,7 +7,7 @@
 static global    globals[1024];
 ////
 // static global_id globals_size = 0;
-global_id globals_size = 0;
+global_id        globals_size = 0;
 ////
 
 void globals_init(void) {
