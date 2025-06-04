@@ -2012,11 +2012,11 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 			}
 			else if (func == add_name("float")) {
 				if (o->op_call.parameters[0].type.type == int_id) {
-					spirv_id id = write_op_convert_s_to_f(instructions, spirv_float_type, convert_kong_index_to_spirv_id(o->op_call.parameters[0].index));
+					spirv_id id = write_op_convert_s_to_f(instructions, spirv_float_type, get_var(instructions, o->op_call.parameters[0]));
 					hmput(index_map, o->op_call.var.index, id);
 				}
 				else if (o->op_call.parameters[0].type.type == uint_id) {
-					spirv_id id = write_op_convert_u_to_f(instructions, spirv_float_type, convert_kong_index_to_spirv_id(o->op_call.parameters[0].index));
+					spirv_id id = write_op_convert_u_to_f(instructions, spirv_float_type, get_var(instructions, o->op_call.parameters[0]));
 					hmput(index_map, o->op_call.var.index, id);
 				}
 				else {
@@ -2066,6 +2066,15 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 				spirv_id id = write_op_composite_construct(instructions, spirv_float4_type, constituents, o->op_call.parameters_size);
 				hmput(index_map, o->op_call.var.index, id);
 			}
+			else if (func == add_name("int")) {
+				if (o->op_call.parameters[0].type.type == float_id) {
+					spirv_id id = write_op_convert_f_to_s(instructions, spirv_int_type, get_var(instructions, o->op_call.parameters[0]));
+					hmput(index_map, o->op_call.var.index, id);
+				}
+				else {
+					assert(false);
+				}
+			}
 			else if (func == add_name("int2")) {
 				if (o->op_call.parameters_size == 1) {
 					spirv_id constituent = convert_kong_index_to_spirv_id(o->op_call.parameters[0].index);
@@ -2106,6 +2115,15 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 				}
 				spirv_id id = write_op_composite_construct(instructions, spirv_int4_type, constituents, o->op_call.parameters_size);
 				hmput(index_map, o->op_call.var.index, id);
+			}
+			else if (func == add_name("uint")) {
+				if (o->op_call.parameters[0].type.type == float_id) {
+					spirv_id id = write_op_convert_f_to_u(instructions, spirv_uint_type, get_var(instructions, o->op_call.parameters[0]));
+					hmput(index_map, o->op_call.var.index, id);
+				}
+				else {
+					assert(false);
+				}
 			}
 			else if (func == add_name("uint2")) {
 				spirv_id constituents[2];
@@ -2381,6 +2399,12 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 				spirv_id operand1 = get_var(instructions, o->op_call.parameters[0]);
 				spirv_id operand2 = get_var(instructions, o->op_call.parameters[1]);
 				spirv_id operand3 = get_var(instructions, o->op_call.parameters[2]);
+
+				if (o->op_call.parameters[2].type.type == float_id) {
+					spirv_id operands[3] = {operand3, operand3, operand3};
+					operand3 = write_op_composite_construct(instructions, spirv_float3_type, operands, 3);
+				}
+
 				spirv_id id = write_op_ext_inst3(instructions, spirv_float3_type, glsl_import, SPIRV_GLSL_STD_FMIX, operand1, operand2, operand3);
 				hmput(index_map, o->op_call.var.index, id);
 			}
@@ -2388,6 +2412,12 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 				spirv_id operand1 = get_var(instructions, o->op_call.parameters[0]);
 				spirv_id operand2 = get_var(instructions, o->op_call.parameters[1]);
 				spirv_id operand3 = get_var(instructions, o->op_call.parameters[2]);
+
+				if (o->op_call.parameters[2].type.type == float_id) {
+					spirv_id operands[4] = {operand3, operand3, operand3, operand3};
+					operand3 = write_op_composite_construct(instructions, spirv_float4_type, operands, 4);
+				}
+
 				spirv_id id = write_op_ext_inst3(instructions, spirv_float4_type, glsl_import, SPIRV_GLSL_STD_FMIX, operand1, operand2, operand3);
 				hmput(index_map, o->op_call.var.index, id);
 			}
@@ -2880,7 +2910,7 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 				spirv_id result = write_op_f_ord_equal(instructions, spirv_bool_type, left, right);
 				hmput(index_map, o->op_binary.result.index, result);
 			}
-			else if (vector_base_type(o->op_binary.left.type.type) == int_id) {
+			else if (vector_base_type(o->op_binary.left.type.type) == int_id || vector_base_type(o->op_binary.left.type.type) == uint_id) {
 				spirv_id result = write_op_i_equal(instructions, spirv_bool_type, left, right);
 				hmput(index_map, o->op_binary.result.index, result);
 			}
@@ -2895,7 +2925,7 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 				spirv_id result = write_op_f_ord_not_equal(instructions, spirv_bool_type, left, right);
 				hmput(index_map, o->op_binary.result.index, result);
 			}
-			else if (vector_base_type(o->op_binary.left.type.type) == int_id) {
+			else if (vector_base_type(o->op_binary.left.type.type) == int_id || vector_base_type(o->op_binary.left.type.type) == uint_id) {
 				spirv_id result = write_op_i_not_equal(instructions, spirv_bool_type, left, right);
 				hmput(index_map, o->op_binary.result.index, result);
 			}
@@ -3013,7 +3043,31 @@ static void write_functions(instructions_buffer *instructions, function *main, s
 				parameter_types_size++;
 			}
 
-			function_types[i] = write_type_function(instructions, return_type, parameter_types, parameter_types_size);
+			int function_type_index = -1;
+			for (size_t j = 0; j < i; ++j) {
+				function *f2 = functions[j];
+				if (return_type.id != convert_type_to_spirv_id(f2->return_type.type).id || f->parameters_size != f2->parameters_size) {
+					continue;
+				}
+				bool parameters_match = true;
+				for (uint8_t parameter_index = 0; parameter_index < f2->parameters_size; ++parameter_index) {
+					if (parameter_types[parameter_index].id != convert_type_to_spirv_id(f2->parameter_types[parameter_index].type).id) {
+						parameters_match = false;
+						break;
+					}
+				}
+				if (parameters_match) {
+					function_type_index = j;
+					break;
+				}
+			}
+
+			if (function_type_index == -1) {
+				function_types[i] = write_type_function(instructions, return_type, parameter_types, parameter_types_size);
+			}
+			else {
+				function_types[i] = function_types[function_type_index];
+			}
 		}
 	}
 

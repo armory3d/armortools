@@ -205,13 +205,13 @@ void transform(uint32_t flags) {
 							init_type_ref(&t, NO_NAME);
 							t.type = vector_to_size(left_type, right_size);
 
-							vec = allocate_variable(t, o->op_binary.left.kind);
+							vec = allocate_variable(t, VARIABLE_INTERNAL);
 
 							opcode constructor_call = {
 							    .type = OPCODE_CALL,
 							    .op_call =
 							        {
-							            .func            = get_type(o->op_load_access_list.to.type.type)->name,
+							            .func            = get_type(right_type)->name,
 							            .parameters_size = right_size,
 							            .var             = vec,
 							        },
@@ -282,13 +282,13 @@ void transform(uint32_t flags) {
 							init_type_ref(&t, NO_NAME);
 							t.type = vector_to_size(left_type, left_size);
 
-							vec = allocate_variable(t, o->op_binary.right.kind);
+							vec = allocate_variable(t, VARIABLE_INTERNAL);
 
 							opcode constructor_call = {
 							    .type = OPCODE_CALL,
 							    .op_call =
 							        {
-							            .func            = get_type(o->op_load_access_list.to.type.type)->name,
+							            .func            = get_type(left_type)->name,
 							            .parameters_size = left_size,
 							            .var             = vec,
 							        },
