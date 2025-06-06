@@ -61,7 +61,7 @@ fun layer_merge_frag(input: vert_out): float4 {
 
 	if (constants.blending == 101) { // Merging _nor and _pack
 		var col1: float4 = sample_lod(tex1, sampler_linear, input.tex, 0.0);
-		return float4(lerp4(cola, col1, str));
+		return lerp4(cola, col1, str);
 	}
 	if (constants.blending == 102) { // Merging _nor with normal blending
 		var col1: float4 = sample_lod(tex1, sampler_linear, input.tex, 0.0);
@@ -237,7 +237,7 @@ fun layer_merge_frag(input: vert_out): float4 {
 
 	*/
 
-	return float4(1, 1, 1, 1);
+	return float4(1.0, 1.0, 1.0, 1.0);
 }
 
 #[pipe]

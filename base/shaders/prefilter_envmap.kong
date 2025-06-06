@@ -13,7 +13,7 @@ const radiance: tex2d;
 const PI: float = 3.14159265358979;
 const PI2: float = 6.28318530718;
 // #ifdef METAL
-// const samples = 1024 * 2; // Prevent gpu hang
+// const samples: float = 1024 * 2; // Prevent gpu hang
 // #else
 // const samples: float = 1024 * 16;
 const samples: float = 16384;
@@ -61,18 +61,25 @@ fun cos_weighted_hemisphere_direction(n: float3, co: float2, seed: float): float
 	var rx: float = ra * cos(PI2 * r.x);
 	var ry: float = ra * sin(PI2 * r.x);
 	var rz: float = sqrt(1.0 - r.y);
-	var rr: float3 = float3(rx * uu + ry * vv + rz * n);
+	var rr: float3 = rx * uu + ry * vv + rz * n;
 	return normalize(rr);
 }
 
 fun prefilter_envmap_frag(input: vert_out): float4 {
 	var color: float4 = float4(0.0, 0.0, 0.0, 1.0);
 	var n: float3 = reverse_equirect(input.tex);
-	for (var i: uint = 0; i < samples; i += 1) {
-		var dir: float3 = normalize(lerp3(n, cos_weighted_hemisphere_direction(n, input.tex, i), constants.params.x));
-		color.rgb += sample(radiance, sampler_linear, equirect(dir)).rgb;
+
+	//for (var i: int = 0; i < int(samples); i += 1) {
+	var i: int = 0;
+	while (i < int(samples)) {
+		var dir: float3 = normalize(lerp3(n, cos_weighted_hemisphere_direction(n, input.tex, float(i)), constants.params.x));
+		color.rgb = color.rgb + sample(radiance, sampler_linear, equirect(dir)).rgb;
+
+		//
+		i += 1;
+		//
 	}
-	color.rgb /= float(samples);
+	color.rgb = color.rgb / samples;
 	// color.rgb = pow(color.rgb, float3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));
 	color.r = pow(color.r, 1.0 / 2.2);
 	color.g = pow(color.g, 1.0 / 2.2);

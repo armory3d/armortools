@@ -68,14 +68,16 @@ fun mesh_posnor_frag(input: vert_out): float4[2] {
 	var metallic: float = 0.0;
 	var occlusion: float = 1.0;
 	var n: float3 = normalize(input.wnormal);
-	n /= abs(n.x) + abs(n.y) + abs(n.z);
+	// n /= abs(n.x) + abs(n.y) + abs(n.z);
+	n = n / (abs(n.x) + abs(n.y) + abs(n.z));
 	if (n.z >= 0.0) {
 		n.xy = n.xy;
 	}
 	else {
 		n.xy = octahedron_wrap(n.xy);
 	}
-	var matid: uint = 0;
+	// var matid: uint = 0;
+	var matid: uint = uint(0.0);
 	var color: float4[2];
 	color[0] = float4(n.xy, roughness, pack_f32_i16(metallic, matid));
 	color[1] = float4(basecol, occlusion);

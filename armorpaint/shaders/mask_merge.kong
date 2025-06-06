@@ -63,12 +63,15 @@ fun mask_merge_frag(input: vert_out): float4 {
 	}
 	/*else*/ if (constants.blending == 8) { // Overlay
 		// out_color = lerp(cola, cola < 0.5 ? 2.0 * cola * col0 : 1.0 - 2.0 * (1.0 - cola) * (1.0 - col0), str);
-		if (cola < 0.5) {
+
+		////
+		//if (cola < 0.5) {
 			out_color = lerp(cola, 2.0 * cola * col0, str);
-		}
-		else {
-			out_color = lerp(cola, 1.0 - 2.0 * (1.0 - cola) * (1.0 - col0), str);
-		}
+		//}
+		//else {
+		//	out_color = lerp(cola, 1.0 - 2.0 * (1.0 - cola) * (1.0 - col0), str);
+		//}
+		////
 	}
 	/*else*/ if (constants.blending == 9) { // Soft Light
 		out_color = ((1.0 - str) * cola + str * ((1.0 - cola) * col0 * cola + cola * (1.0 - (1.0 - col0) * (1.0 - cola))));

@@ -68,7 +68,10 @@ fun ray_cast(view_ray: float3, dir: float3, vpos: float3): float {
 	dir = dir * ray_step;
 	var hit_coord: float3 = vpos;
 	var dist: float = 0.15;
-	for (var i: int = 0; i < max_steps; i = i + 1) {
+
+	// for (var i: int = 0; i < max_steps; i = i + 1) {
+	var i: int = 0;
+	while (i < max_steps) {
 		hit_coord += dir;
 		var delta: float = get_delta_depth(view_ray, hit_coord);
 		if (delta > 0.0 && delta < 0.2) {
@@ -76,6 +79,10 @@ fun ray_cast(view_ray: float3, dir: float3, vpos: float3): float {
 			// break;
 			return dist;
 		}
+
+		//
+		i += 1;
+		//
 	}
 	return dist;
 }
