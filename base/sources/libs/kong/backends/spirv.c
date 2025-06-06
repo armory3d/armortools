@@ -1667,8 +1667,6 @@ static size_t   input_vars_count = 0;
 static uint32_t vertex_parameter_indices[256];
 static uint32_t vertex_parameter_member_indices[256];
 
-static uint64_t if_end_id = 0;
-
 static void write_function(instructions_buffer *instructions, function *f, spirv_id result_type, spirv_id fun_type, spirv_id fun_id, shader_stage stage,
                            bool main, type_id output) {
 	write_op_function_preallocated(instructions, result_type, FUNCTION_CONTROL_NONE, fun_type, fun_id);
@@ -1766,7 +1764,10 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 		}
 		else if (stage == SHADER_STAGE_VERTEX) {
 			for (size_t i = 0; i < input_vars_count; ++i) {
-				spirv_id index   = get_int_constant((int)vertex_parameter_member_indices[i]);
+				////
+				// spirv_id index   = get_int_constant((int)vertex_parameter_member_indices[i]);
+				spirv_id index   = get_int_constant((int)i);
+				////
 				spirv_id loaded  = write_op_load(instructions, convert_type_to_spirv_id(input_types[i]), input_vars[i]);
 				spirv_id pointer = write_op_access_chain(instructions, convert_pointer_type_to_spirv_id(input_types[i], STORAGE_CLASS_FUNCTION),
 				                                         spirv_parameter_ids[vertex_parameter_indices[i]], &index, 1);
@@ -1781,6 +1782,8 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 	}
 
 	bool ends_with_return = false;
+	uint64_t next_block_branch_id = 0;
+	uint64_t next_block_label_id = 0;
 
 	index = 0;
 	while (index < size) {
@@ -2692,6 +2695,7 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 						write_op_store(instructions, output_vars[i], value);
 					}
 				}
+
 				write_op_return(instructions);
 			}
 			else if (stage == SHADER_STAGE_FRAGMENT && main) {
@@ -2712,6 +2716,7 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 					spirv_id loaded = get_var(instructions, o->op_return.var);
 					write_op_store(instructions, output_vars[0], loaded);
 				}
+
 				write_op_return(instructions);
 			}
 			else {
@@ -2719,10 +2724,13 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 				write_op_return_value(instructions, return_value);
 			}
 			ends_with_return = true;
+			next_block_branch_id = 0;
 			break;
 		}
 		case OPCODE_DISCARD: {
 			write_op_discard(instructions);
+			ends_with_return = true;
+			next_block_branch_id = 0;
 			break;
 		}
 		case OPCODE_LESS: {
@@ -2933,11 +2941,14 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 			break;
 		}
 		case OPCODE_IF: {
-			if_end_id = o->op_if.end_id;
+			next_block_branch_id = o->op_if.end_id;
+			next_block_label_id = o->op_if.end_id;
 			write_op_selection_merge(instructions, convert_kong_index_to_spirv_id(o->op_if.end_id), SELECTION_CONTROL_NONE);
 
 			write_op_branch_conditional(instructions, convert_kong_index_to_spirv_id(o->op_if.condition.index),
 			                            convert_kong_index_to_spirv_id(o->op_if.start_id), convert_kong_index_to_spirv_id(o->op_if.end_id));
+
+			write_op_label_preallocated(instructions, convert_kong_index_to_spirv_id(o->op_if.start_id));
 
 			break;
 		}
@@ -2979,14 +2990,16 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 			break;
 		}
 		case OPCODE_BLOCK_START: {
-			write_op_label_preallocated(instructions, convert_kong_index_to_spirv_id(o->op_block.id));
 			break;
 		}
 		case OPCODE_BLOCK_END: {
-			if (o->op_block.id == if_end_id) {
-				write_op_branch(instructions, convert_kong_index_to_spirv_id(if_end_id));
+			if (o->op_block.id == next_block_branch_id) {
+				write_op_branch(instructions, convert_kong_index_to_spirv_id(o->op_block.id));
 			}
-			write_op_label_preallocated(instructions, convert_kong_index_to_spirv_id(o->op_block.id));
+			if (o->op_block.id == next_block_label_id) {
+				write_op_label_preallocated(instructions, convert_kong_index_to_spirv_id(o->op_block.id));
+			}
+
 			break;
 		}
 		default: {
