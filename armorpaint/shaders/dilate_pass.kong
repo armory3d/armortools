@@ -65,13 +65,23 @@ fun dilate_pass_frag(input: vert_out): float4 {
 	// Based on https://shaderbits.com/blog/uv-dilation by Ryan Brucks
 	var texel_size: float2 = float2(1.0, 1.0) / constants.tex_size;
 	var min_dist: float = 10000000.0;
-	var coord: uint2 = uint2(input.tex * constants.tex_size);
-	var mask: float = texdilate[coord].r;
+	//var coord: uint2 = uint2(input.tex * constants.tex_size);
+	var coordf: float2 = float2(input.tex.x * constants.tex_size.x, input.tex.y * constants.tex_size.y);
+	var coord: uint2 = uint2(uint(coordf.x), uint(coordf.y));
+	//var mask: float = texdilate[coord].r;
+	var mask4: float4 = texdilate[coord];
+	var mask: float = mask4.r;
 	if (mask > 0.0) {
 		discard;
 	}
 
 	var color: float4 = tex[coord];
+
+
+
+
+	////
+	/*
 	var i: int = 0;
 	while (i < int(constants.dilate_radius)) {
 		i += 1;
@@ -100,6 +110,12 @@ fun dilate_pass_frag(input: vert_out): float4 {
 			j += 1;
 		}
 	}
+	*/
+	////
+
+
+
+
 
 	return color;
 }

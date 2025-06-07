@@ -1,4 +1,9 @@
 
+#[set(everything)]
+const constants: {
+	empty: float;
+};
+
 struct vert_in {
 	pos: float4;
 	nor: float2;
@@ -8,11 +13,6 @@ struct vert_in {
 struct vert_out {
 	pos: float4;
 }
-
-#[set(everything)]
-const constants: {
-	empty: float;
-};
 
 fun dilate_map_vert(input: vert_in): vert_out {
 	var output: vert_out;

@@ -71,7 +71,7 @@ fun ray_cast(view_ray: float3, dir: float3, vpos: float3): float {
 
 	// for (var i: int = 0; i < max_steps; i = i + 1) {
 	var i: int = 0;
-	while (i < max_steps) {
+	while (i < int(max_steps)) {
 		hit_coord += dir;
 		var delta: float = get_delta_depth(view_ray, hit_coord);
 		if (delta > 0.0 && delta < 0.2) {
@@ -88,8 +88,8 @@ fun ray_cast(view_ray: float3, dir: float3, vpos: float3): float {
 }
 
 fun tangent(n: float3): float3 {
-	var t1: float3 = cross(n, float3(0, 0, 1));
-	var t2: float3 = cross(n, float3(0, 1, 0));
+	var t1: float3 = cross(n, float3(0.0, 0.0, 1.0));
+	var t2: float3 = cross(n, float3(0.0, 1.0, 0.0));
 	if (length(t1) > length(t2)) {
 		return normalize(t1);
 	}

@@ -109,7 +109,7 @@ fun ssao_blur_pass_frag(input: vert_out): float {
 			blur_weight_i = 0.008934;
 		}
 
-		var posadd: float = i;
+		var posadd: float = float(i);
 
 		var nor2: float3 = get_nor(sample_lod(gbuffer0, sampler_linear, input.tex + posadd * constants.dir_inv, 0.0).rg);
 		var influence_factor: float = step(discard_threshold, dot(nor2, nor));

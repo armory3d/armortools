@@ -132,6 +132,11 @@ fun layer_merge_frag(input: vert_out): float4 {
 			lerp3(cola.rgb, cola.rgb + col0.rgb, str),
 			max(col0.a, cola.a));
 	}
+
+	////
+
+	/* TODO: SPIRV
+
 	if (constants.blending == 8) { // Overlay
 		var rr: float;
 		if (cola.r < 0.5) {
@@ -170,11 +175,6 @@ fun layer_merge_frag(input: vert_out): float4 {
 			(cola.rgb + str * (float3(2.0, 2.0, 2.0) * (col0.rgb - float3(0.5, 0.5, 0.5)))),
 			max(col0.a, cola.a));
 	}
-
-
-
-	/* TODO: SPIRV
-
 	if (constants.blending == 11) {
 		return float4(
 			lerp3(cola.rgb, abs3(cola.rgb - col0.rgb), str),
@@ -236,6 +236,8 @@ fun layer_merge_frag(input: vert_out): float4 {
 	}
 
 	*/
+
+	////
 
 	return float4(1.0, 1.0, 1.0, 1.0);
 }
