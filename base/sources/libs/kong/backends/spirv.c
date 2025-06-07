@@ -194,6 +194,9 @@ typedef enum spirv_opcode {
 	SPIRV_OPCODE_SAMPLED_IMAGE             = 86,
 	SPIRV_OPCODE_IMAGE_SAMPLE_IMPLICIT_LOD = 87,
 	SPIRV_OPCODE_IMAGE_SAMPLE_EXPLICIT_LOD = 88,
+	////
+	SPIRV_OPCODE_IMAGE_FETCH               = 95,
+	////
 	SPIRV_OPCODE_IMAGE_READ                = 98,
 	SPIRV_OPCODE_IMAGE_WRITE               = 99,
 	SPIRV_OPCODE_CONVERT_F_TO_U            = 109,
@@ -343,11 +346,11 @@ typedef enum decoration {
 
 typedef enum builtin {
 	BUILTIN_POSITION             = 0,
-	BUILTIN_VERTEX_ID            = 5,
 	BUILTIN_WORKGROUP_SIZE       = 25,
 	BUILTIN_WORKGROUP_ID         = 26,
 	BUILTIN_LOCAL_INVOCATION_ID  = 27,
 	BUILTIN_GLOBAL_INVOCATION_ID = 28,
+	BUILTIN_VERTEX_INDEX         = 42,
 } builtin;
 
 typedef enum storage_class {
@@ -496,12 +499,14 @@ static void write_op_execution_mode3(instructions_buffer *instructions, spirv_id
 
 static void write_capabilities(instructions_buffer *instructions, const capabilities *caps) {
 	write_capability(instructions, CAPABILITY_SHADER);
-	if (caps->image_read) {
-		write_capability(instructions, CAPABILITY_STORAGE_IMAGE_READ_WITHOUT_FORMAT);
-	}
-	if (caps->image_write) {
-		write_capability(instructions, CAPABILITY_STORAGE_IMAGE_WRITE_WITHOUT_FORMAT);
-	}
+	////
+	// if (caps->image_read) {
+		// write_capability(instructions, CAPABILITY_STORAGE_IMAGE_READ_WITHOUT_FORMAT);
+	// }
+	// if (caps->image_write) {
+		// write_capability(instructions, CAPABILITY_STORAGE_IMAGE_WRITE_WITHOUT_FORMAT);
+	// }
+	////
 }
 
 static spirv_id write_type_void(instructions_buffer *instructions) {
@@ -1441,6 +1446,20 @@ static spirv_id write_op_image_sample_explicit_lod(instructions_buffer *instruct
 	return result;
 }
 
+////
+
+static spirv_id write_op_image_fetch(instructions_buffer *instructions, spirv_id result_type, spirv_id sampled_image, spirv_id coordinate) {
+	spirv_id result = allocate_index();
+
+	uint32_t operands[] = {result_type.id, result.id, sampled_image.id, coordinate.id};
+
+	write_instruction(instructions, WORD_COUNT(operands), SPIRV_OPCODE_IMAGE_FETCH, operands);
+
+	return result;
+}
+
+////
+
 static spirv_id write_op_ext_inst(instructions_buffer *instructions, spirv_id result_type, spirv_id set, uint32_t instruction, spirv_id operand) {
 	spirv_id result = allocate_index();
 
@@ -1800,12 +1819,18 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 				assert(indices_size == 1);
 				assert(o->op_load_access_list.access_list[0].kind == ACCESS_ELEMENT);
 
-				spirv_id image = write_op_load(instructions, spirv_readwrite_image_type, convert_kong_index_to_spirv_id(o->op_load_access_list.from.index));
+				////
+				// spirv_id image = write_op_load(instructions, spirv_readwrite_image_type, convert_kong_index_to_spirv_id(o->op_load_access_list.from.index));
+				spirv_id image = write_op_load(instructions, spirv_image_type, convert_kong_index_to_spirv_id(o->op_load_access_list.from.index));
+				////
 
 				variable coordinate_var = o->op_load_access_list.access_list[0].access_element.index;
 				spirv_id coordinate     = get_var(instructions, coordinate_var);
 
-				spirv_id value = write_op_image_read(instructions, spirv_float4_type, image, coordinate);
+				////
+				// spirv_id value = write_op_image_read(instructions, spirv_float4_type, image, coordinate);
+				spirv_id value = write_op_image_fetch(instructions, spirv_float4_type, image, coordinate);
+				////
 
 				hmput(index_map, o->op_load_access_list.to.index, value);
 			}
@@ -3257,6 +3282,11 @@ static void write_globals(instructions_buffer *decorations, instructions_buffer 
 		bool    readable  = globals.readable[i];
 		bool    writable  = globals.writable[i];
 
+		////
+		readable = false;
+		writable = false;
+		////
+
 		if (base_type == sampler_type_id) {
 			add_to_type_map(g->type, spirv_sampler_type, false, STORAGE_CLASS_NONE);
 			add_to_type_map(g->type, spirv_sampler_pointer_type, false, STORAGE_CLASS_UNIFORM_CONSTANT);
@@ -3436,7 +3466,7 @@ static void write_globals(instructions_buffer *decorations, instructions_buffer 
 	if (main->used_builtins.vertex_id) {
 		write_op_variable_preallocated(global_vars_block, convert_pointer_type_to_spirv_id(uint_id, STORAGE_CLASS_INPUT), vertex_id_variable,
 		                               STORAGE_CLASS_INPUT);
-		write_op_decorate_value(decorations, vertex_id_variable, DECORATION_BUILTIN, BUILTIN_VERTEX_ID);
+		write_op_decorate_value(decorations, vertex_id_variable, DECORATION_BUILTIN, BUILTIN_VERTEX_INDEX);
 	}
 
 	if (stage == SHADER_STAGE_COMPUTE) {
@@ -3780,8 +3810,10 @@ static void spirv_export_fragment(char *directory, function *main, bool debug) {
 
 	write_fragment_output_decorations(&decorations, output_vars, (uint32_t)output_vars_count);
 
+	type_id output_type = output->array_size > 0 ? output->base : pixel_output;
+
 	for (size_t i = 0; i < output_vars_count; ++i) {
-		write_op_variable_preallocated(&instructions, convert_pointer_type_to_spirv_id(float4_id, STORAGE_CLASS_OUTPUT), output_vars[i], STORAGE_CLASS_OUTPUT);
+		write_op_variable_preallocated(&instructions, convert_pointer_type_to_spirv_id(output_type, STORAGE_CLASS_OUTPUT), output_vars[i], STORAGE_CLASS_OUTPUT);
 	}
 
 	write_functions(&instructions, main, entry_point, SHADER_STAGE_FRAGMENT, NO_TYPE);
@@ -4315,8 +4347,10 @@ static char *spirv_export_fragment2(function *main, bool debug, int *size_out) {
 
 	write_fragment_output_decorations(&decorations, output_vars, (uint32_t)output_vars_count);
 
+	type_id output_type = output->array_size > 0 ? output->base : pixel_output;
+
 	for (size_t i = 0; i < output_vars_count; ++i) {
-		write_op_variable_preallocated(&instructions, convert_pointer_type_to_spirv_id(float4_id, STORAGE_CLASS_OUTPUT), output_vars[i], STORAGE_CLASS_OUTPUT);
+		write_op_variable_preallocated(&instructions, convert_pointer_type_to_spirv_id(output_type, STORAGE_CLASS_OUTPUT), output_vars[i], STORAGE_CLASS_OUTPUT);
 	}
 
 	write_functions(&instructions, main, entry_point, SHADER_STAGE_FRAGMENT, NO_TYPE);
