@@ -256,22 +256,22 @@ void create_descriptor_layout(void) {
 	memset(bindings, 0, sizeof(bindings));
 
 	bindings[0].binding = 0;
-	bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+	bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	bindings[0].descriptorCount = 1;
-	bindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	bindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 	bindings[0].pImmutableSamplers = NULL;
 
 	bindings[1].binding = 1;
-	bindings[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+	bindings[1].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
 	bindings[1].descriptorCount = 1;
-	bindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	bindings[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 	bindings[1].pImmutableSamplers = NULL;
 
 	for (int i = 2; i < 18; ++i) {
 		bindings[i].binding = i;
 		bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		bindings[i].descriptorCount = 1;
-		bindings[i].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT;
+		bindings[i].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 		bindings[i].pImmutableSamplers = NULL;
 	}
 
@@ -287,7 +287,7 @@ void create_descriptor_layout(void) {
 	VkDescriptorPoolSize type_counts[2];
 	memset(type_counts, 0, sizeof(type_counts));
 
-	type_counts[0].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+	type_counts[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	type_counts[0].descriptorCount = 2 * 1024;
 
 	type_counts[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -806,9 +806,9 @@ void iron_gpu_internal_init() {
 	};
 
 #ifdef IRON_ANDROID
-	app.apiVersion = VK_API_VERSION_1_0; // VK_API_VERSION_1_1
+	app.apiVersion = VK_API_VERSION_1_1;
 #else
-	app.apiVersion = VK_API_VERSION_1_2; // VKRT
+	app.apiVersion = VK_API_VERSION_1_3;
 #endif
 
 	VkInstanceCreateInfo info = {0};
@@ -2011,14 +2011,14 @@ VkDescriptorSet get_descriptor_set() {
 	writes[0].dstSet = descriptor_set;
 	writes[0].dstBinding = 0;
 	writes[0].descriptorCount = 1;
-	writes[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+	writes[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	writes[0].pBufferInfo = &buffer_descs[0];
 
 	writes[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 	writes[1].dstSet = descriptor_set;
 	writes[1].dstBinding = 1;
 	writes[1].descriptorCount = 1;
-	writes[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+	writes[1].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
 	writes[1].pBufferInfo = &buffer_descs[1];
 
 	for (int i = 2; i < 18; ++i) {
@@ -2874,8 +2874,7 @@ static void render_target_init(iron_gpu_texture_t *target, int width, int height
 		}
 
 		if (depth_bits > 0) {
-			// const VkFormat depth_format = VK_FORMAT_D16_UNORM;
-			const VkFormat depth_format = VK_FORMAT_D24_UNORM_S8_UINT;
+			const VkFormat depth_format = VK_FORMAT_D32_SFLOAT;
 			VkImageCreateInfo image = {
 				.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
 				.pNext = NULL,
