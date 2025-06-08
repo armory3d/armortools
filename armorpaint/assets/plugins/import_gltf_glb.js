@@ -2,7 +2,7 @@
 function import_gltf_glb(path) {
 	let b = data_get_blob(path);
 	data_delete_blob(path);
-	return io_gltf_parse(b);
+	return io_gltf_parse(b, path);
 }
 
 let plugin = plugin_create();

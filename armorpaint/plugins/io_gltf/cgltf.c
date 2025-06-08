@@ -11,8 +11,8 @@ static float scale_pos = 1.0;
 
 uint32_t *io_gltf_read_u8_array(cgltf_accessor *a) {
 	cgltf_buffer_view *v = a->buffer_view;
-	unsigned char *ar = (unsigned char *)v->buffer->data + v->offset;
-	uint32_t *res = malloc(sizeof(unsigned int) * v->size);
+	uint8_t *ar = (uint8_t *) (v->buffer->data + v->offset);
+	uint32_t *res = malloc(sizeof(uint32_t) * v->size);
 	for (int i = 0; i < v->size; ++i) {
 		res[i] = ar[i];
 	}
@@ -21,9 +21,9 @@ uint32_t *io_gltf_read_u8_array(cgltf_accessor *a) {
 
 uint32_t *io_gltf_read_u16_array(cgltf_accessor *a) {
 	cgltf_buffer_view *v = a->buffer_view;
-	unsigned short *ar = (unsigned short *)v->buffer->data + v->offset / 2;
+	uint16_t *ar = (uint16_t *) (v->buffer->data + v->offset);
 	uint32_t *res = malloc(sizeof(unsigned int) * v->size);
-	for (int i = 0; i < v->size / 2; ++i) {
+	for (int i = 0; i < a->count; ++i) {
 		res[i] = ar[i];
 	}
 	return res;
@@ -31,32 +31,53 @@ uint32_t *io_gltf_read_u16_array(cgltf_accessor *a) {
 
 uint32_t *io_gltf_read_u32_array(cgltf_accessor *a) {
 	cgltf_buffer_view *v = a->buffer_view;
-	unsigned int *ar = (unsigned int *)v->buffer->data + v->offset / 4;
+	uint32_t *ar = (uint32_t *) (v->buffer->data + v->offset);
 	return ar;
 }
 
 float *io_gltf_read_f32_array(cgltf_accessor *a) {
 	cgltf_buffer_view *v = a->buffer_view;
-	float *ar = (float *)v->buffer->data + v->offset / 4;
+	float *ar = (float *) (v->buffer->data + v->offset);
 	return ar;
 }
 
 void io_gltf_parse_mesh(raw_mesh_t *raw, cgltf_mesh *mesh, float *to_world, float *scale) {
-	cgltf_primitive *prim = &mesh->primitives[0];
 
-	cgltf_accessor *a = prim->indices;
-	int elem_size = a->buffer_view->size / a->count;
-	int index_count = a->count;
-	uint32_t *inda = elem_size == 1 ? io_gltf_read_u8_array(a)  :
-		      		 elem_size == 2 ? io_gltf_read_u16_array(a) :
-									  io_gltf_read_u32_array(a);
+	cgltf_primitive *prim = NULL;
+	uint32_t *inda = NULL;
 
+	for (int i = 0; i < mesh->primitives_count; ++i) {
+		prim = &mesh->primitives[0];
+
+		cgltf_accessor *a = prim->indices;
+		int elem_size = a->buffer_view->size / a->count;
+
+		inda = elem_size == 1 ? io_gltf_read_u8_array(a)
+			 : elem_size == 2 ? io_gltf_read_u16_array(a)
+			 : elem_size == 4 ? io_gltf_read_u32_array(a) : NULL;
+		
+		if (inda) {
+			break;
+		}
+	}
+
+	if (!inda) {
+		// All of the primitives in the mesh don't have data
+		return;
+	}
+
+	int index_count = prim->indices->count;
+	
+	int vertex_count = -1;
 	float *posa32 = NULL;
 	float *nora32 = NULL;
 	float *texa32 = NULL;
+
 	for (int i = 0; i < prim->attributes_count; ++i) {
 		cgltf_attribute* attrib = &prim->attributes[i];
+
 		if (attrib->type == cgltf_attribute_type_position) {
+			vertex_count = attrib->data->count;
 			posa32 = io_gltf_read_f32_array(attrib->data);
 		}
 		else if (attrib->type == cgltf_attribute_type_normal) {
@@ -67,7 +88,10 @@ void io_gltf_parse_mesh(raw_mesh_t *raw, cgltf_mesh *mesh, float *to_world, floa
 		}
 	}
 
-	int vertex_count = prim->attributes[0].data->count; // Assume VEC3 position
+	if (vertex_count == -1) {
+		// No vertex data position attributes found in primitive
+		return;
+	}
 
 	float *m = to_world;
 	for (int i = 0; i < vertex_count; ++i) {
@@ -186,14 +210,14 @@ void io_gltf_parse_mesh(raw_mesh_t *raw, cgltf_mesh *mesh, float *to_world, floa
 	raw->scale_tex = 1.0;
 }
 
-void *io_gltf_parse(char *buf, size_t size) {
+void *io_gltf_parse(char *buf, size_t size, const char *path) {
 	cgltf_options options = {0};
 	cgltf_data *data = NULL;
 	cgltf_result result = cgltf_parse(&options, buf, size, &data);
 	if (result != cgltf_result_success) {
 		return NULL;
 	}
-	cgltf_load_buffers(&options, data, NULL);
+	cgltf_load_buffers(&options, data, path);
 
 	raw_mesh_t *raw = (raw_mesh_t *)calloc(sizeof(raw_mesh_t), 1);
 
