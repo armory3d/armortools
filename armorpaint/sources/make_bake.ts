@@ -93,7 +93,7 @@ function make_bake_position_normal(kong: node_shader_t) {
 	node_shader_add_out(kong, "position: float3");
 	node_shader_add_out(kong, "normal: float3");
 	node_shader_add_constant(kong, "W: float4x4", "_world_matrix");
-	node_shader_write_vert(kong, "output.position = float4(constants.W * float4(input.pos.xyz, 1.0)).xyz;");
+	node_shader_write_vert(kong, "output.position = (constants.W * float4(input.pos.xyz, 1.0)).xyz;");
 	node_shader_write_vert(kong, "output.normal = float3(input.nor.xy, input.pos.w);");
 	node_shader_write_vert(kong, "var tpos: float2 = float2(input.tex.x * 2.0 - 1.0, (1.0 - input.tex.y) * 2.0 - 1.0);");
 	node_shader_write_vert(kong, "output.pos = float4(tpos, 0.0, 1.0);");

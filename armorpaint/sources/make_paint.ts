@@ -158,7 +158,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 			node_shader_write_frag(kong, "var wn: float3;");
 			node_shader_write_frag(kong, "wn.z = 1.0 - abs(g0.x) - abs(g0.y);");
 			// node_shader_write_frag(kong, "wn.xy = wn.z >= 0.0 ? g0.xy : octahedron_wrap(g0.xy);");
-			node_shader_write_frag(kong, "if (wn.z >= 0.0) { wn.xy = g0.xy; } else { wn.xy = octahedron_wrap(g0.xy); }");
+			node_shader_write_frag(kong, "if (wn.z >= 0.0) { wn.x = g0.x; wn.y = g0.y; } else { var f2: float2 = octahedron_wrap(g0.xy); wn.x = f2.x; wn.y = f2.y; }");
 			node_shader_write_frag(kong, "wn = normalize(wn);");
 			kong.frag_n = true;
 			let angle: f32 = context_raw.brush_angle_reject_dot;
@@ -346,7 +346,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 
 	// Manual blending to preserve memory
 	kong.frag_wvpposition = true;
-	node_shader_write_frag(kong, "var sample_tc: float2 = float2(input.wvpposition.xy / input.wvpposition.w) * 0.5 + 0.5;");
+	node_shader_write_frag(kong, "var sample_tc: float2 = float2(input.wvpposition.x / input.wvpposition.w, input.wvpposition.y / input.wvpposition.w) * 0.5 + 0.5;");
 	node_shader_write_frag(kong, "sample_tc.y = 1.0 - sample_tc.y;");
 	node_shader_add_texture(kong, "paintmask");
 	node_shader_write_frag(kong, "var sample_mask: float = sample_lod(paintmask, sampler_linear, sample_tc, 0.0).r;");

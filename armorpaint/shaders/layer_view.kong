@@ -57,7 +57,7 @@ fun layer_view_frag(input: vert_out): float4 {
 	}
 	// else {
 		var tex_sample: float4 = sample_lod(tex, sampler_linear, input.tex, 0.0);
-		tex_sample.rgb *= tex_sample.a;
+		tex_sample.rgb = tex_sample.rgb * tex_sample.a;
 		return tex_sample * input.col;
 	// }
 }

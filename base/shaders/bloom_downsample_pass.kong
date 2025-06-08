@@ -60,7 +60,7 @@ fun bloom_downsample_pass_frag(input: vert_out): float4 {
 
 		contribution_factor /= max(epsilon, brightness);
 
-		color.rgb *= contribution_factor;
+		color.rgb = color.rgb * contribution_factor;
 	}
 
 	color.a = 1.0;

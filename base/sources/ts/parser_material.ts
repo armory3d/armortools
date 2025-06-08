@@ -207,12 +207,12 @@ function parser_material_finalize(con: node_shader_context_t) {
 	if (kong.frag_wposition) {
 		node_shader_add_constant(kong, "W: float4x4", "_world_matrix");
 		node_shader_add_out(kong, "wposition: float3");
-		node_shader_write_attrib_vert(kong, "output.wposition = float4(constants.W * float4(input.pos.xyz, 1.0)).xyz;");
+		node_shader_write_attrib_vert(kong, "output.wposition = (constants.W * float4(input.pos.xyz, 1.0)).xyz;");
 	}
 	if (kong.frag_vposition) {
 		node_shader_add_constant(kong, "WV: float4x4", "_world_view_matrix");
 		node_shader_add_out(kong, "vposition: float3");
-		node_shader_write_attrib_vert(kong, "output.vposition = float4(constants.WV * float4(input.pos.xyz, 1.0)).xyz;");
+		node_shader_write_attrib_vert(kong, "output.vposition = (constants.WV * float4(input.pos.xyz, 1.0)).xyz;");
 	}
 	if (kong.frag_mposition) {
 		node_shader_add_out(kong, "mposition: float3");
@@ -230,7 +230,7 @@ function parser_material_finalize(con: node_shader_context_t) {
 	if (kong.frag_vvec_cam) {
 		node_shader_add_constant(kong, "WV: float4x4", "_world_view_matrix");
 		node_shader_add_out(kong, "eye_dir_cam: float3");
-		node_shader_write_attrib_vert(kong, "output.eye_dir_cam = float4(constants.WV * float4(input.pos.xyz, 1.0)).xyz;");
+		node_shader_write_attrib_vert(kong, "output.eye_dir_cam = (constants.WV * float4(input.pos.xyz, 1.0)).xyz;");
 		node_shader_write_attrib_vert(kong, "output.eye_dir_cam.z *= -1.0;");
 		node_shader_write_attrib_frag(kong, "var vvec_cam: float3 = normalize(input.eye_dir_cam);");
 	}
@@ -1927,19 +1927,24 @@ function parser_material_texture_store(node: ui_node_t, tex: bind_tex_t, tex_nam
 }
 
 function parser_material_vec1(v: f32): string {
-	return "float(" + v + ")";
+	return f32_to_string_with_zeros(v);
+	// return "float(" + v + ")";
 	// return v + "";
 }
 
 function parser_material_vec3(v: f32_array_t): string {
-	let v0: f32 = v[0];
-	let v1: f32 = v[1];
-	let v2: f32 = v[2];
+	// let v0: f32 = v[0];
+	// let v1: f32 = v[1];
+	// let v2: f32 = v[2];
+	let v0: string = f32_to_string_with_zeros(v[0]);
+	let v1: string = f32_to_string_with_zeros(v[1]);
+	let v2: string = f32_to_string_with_zeros(v[2]);
 	return "float3(" + v0 + ", " + v1 + ", " + v2 + ")";
 }
 
 function parser_material_to_vec3(s: string): string {
-	return "float3(" + s + ")";
+	// return "float3(" + s + ")";
+	return "float3(" + s + ", " + s + ", " + s + ")";
 }
 
 function parser_material_node_by_type(nodes: ui_node_t[], ntype: string): ui_node_t {

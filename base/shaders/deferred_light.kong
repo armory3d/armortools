@@ -59,7 +59,7 @@ fun deferred_light_vert(input: vert_in): vert_out {
 	// NDC (at the back of cube)
 	var v: float4 = float4(input.pos.xy, 1.0, 1.0);
 	v = constants.invVP * v;
-	v.xyz /= v.w;
+	v.xyz = v.xyz / v.w;
 	output.view_ray = v.xyz - constants.eye;
 
 	return output;
@@ -174,10 +174,15 @@ fun deferred_light_frag(input: vert_out): float4 {
 	var n: float3;
 	n.z = 1.0 - abs(g0.x) - abs(g0.y);
 	if (n.z >= 0.0) {
-		n.xy = g0.xy;
+		//n.xy = g0.xy;
+		n.x = g0.x;
+		n.y = g0.y;
 	}
 	else {
-		n.xy = octahedron_wrap(g0.xy);
+		//n.xy = octahedron_wrap(g0.xy);
+		var f2: float2 = octahedron_wrap(g0.xy);
+		n.x = f2.x;
+		n.y = f2.y;
 	}
 	n = normalize(n);
 
@@ -222,7 +227,7 @@ fun deferred_light_frag(input: vert_out): float4 {
 
 	//envl.rgb += prefiltered_color * (f0 * env_brdf.x + env_brdf.y) * 1.5;
 	envl.rgb = envl.rgb + (prefiltered_color * (f0 * env_brdf.x + env_brdf.y) * 1.5);
-	envl.rgb *= constants.envmap_data.w * occ;
+	envl.rgb = envl.rgb * constants.envmap_data.w * occ;
 
 	var color: float4;
 	color.rgb = envl.rgb;

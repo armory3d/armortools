@@ -238,5 +238,9 @@ function node_shader_get(raw: node_shader_t): string {
 	s += "\tfragment = kong_frag;\n";
 	s += "}\n";
 
+	////
+	iron_log(s);
+	////
+
 	return s;
 }

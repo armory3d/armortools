@@ -46,7 +46,7 @@ fun ssao_pass_vert(input: vert_in): vert_out {
 
 fun get_projected_coord(hit_coord: float3): float2 {
 	var projected_coord: float4 = constants.P * float4(hit_coord, 1.0);
-	projected_coord.xy /= projected_coord.w;
+	projected_coord.xy = projected_coord.xy / projected_coord.w;
 	projected_coord.xy = projected_coord.xy * 0.5 + 0.5;
 	projected_coord.y = 1.0 - projected_coord.y;
 	return projected_coord.xy;
@@ -130,10 +130,15 @@ fun ssao_pass_frag(input: vert_out): float {
 	var n: float3;
 	n.z = 1.0 - abs(enc.x) - abs(enc.y);
 	if (n.z >= 0.0) {
-		n.xy = enc.xy;
+		//n.xy = enc.xy;
+		n.x = enc.x;
+		n.y = enc.y;
 	}
 	else {
-		n.xy = octahedron_wrap(enc.xy);
+		//n.xy = octahedron_wrap(enc.xy);
+		var f2: float2 = octahedron_wrap(enc.xy);
+		n.x = f2.x;
+		n.y = f2.y;
 	}
 	n = normalize(constants.V3 * n);
 

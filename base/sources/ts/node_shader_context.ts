@@ -44,6 +44,9 @@ function node_shader_context_create(material: material_t, props: shader_context_
 		depth_attachment: props.depth_attachment
 	};
 
+	let rw: shader_context_t = raw.data;
+	rw._ = {};
+
 	if (props.color_writes_red != null) {
 		raw.data.color_writes_red = props.color_writes_red;
 	}

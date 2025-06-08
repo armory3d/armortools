@@ -124,7 +124,7 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 		node_shader_write_frag(kong, "n = normalize(TBN * n);");
 	}
 
-	node_shader_write_frag(kong, "n /= (abs(n.x) + abs(n.y) + abs(n.z));");
+	node_shader_write_frag(kong, "n = n / (abs(n.x) + abs(n.y) + abs(n.z));");
 	// node_shader_write_frag(kong, "n.xy = n.z >= 0.0 ? n.xy : octahedron_wrap(n.xy);");
 	node_shader_write_frag(kong, "if (n.z < 0.0) { n.xy = octahedron_wrap(n.xy); }");
 	// uint matid = uint(0);

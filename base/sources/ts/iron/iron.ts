@@ -135,6 +135,7 @@ declare function i32_to_string_hex(i: i32): string;
 declare function i64_to_string(i: i64): string;
 declare function u64_to_string(i: u64): string;
 declare function f32_to_string(f: f32): string;
+declare function f32_to_string_with_zeros(f: f32): string;
 declare function json_parse(s: string): any;
 
 declare function json_parse_to_map(s: string): map_t<string, string>;

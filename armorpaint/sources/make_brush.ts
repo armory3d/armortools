@@ -19,7 +19,7 @@ function make_brush_run(kong: node_shader_t) {
 		node_shader_add_constant(kong, "invVP: float4x4", "_inv_view_proj_matrix");
 		node_shader_write_frag(kong, "var winp: float4 = float4(float2(constants.inp.x, 1.0 - constants.inp.y) * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);");
 		node_shader_write_frag(kong, "winp = constants.invVP * winp;");
-		node_shader_write_frag(kong, "winp.xyz /= winp.w;");
+		node_shader_write_frag(kong, "winp.xyz = winp.xyz / winp.w;");
 		kong.frag_wposition = true;
 
 		if (config_raw.brush_angle_reject || context_raw.xray) {
@@ -29,7 +29,7 @@ function make_brush_run(kong: node_shader_t) {
 			node_shader_write_frag(kong, "var wn: float3;");
 			node_shader_write_frag(kong, "wn.z = 1.0 - abs(g0.x) - abs(g0.y);");
 			// node_shader_write_frag(kong, "wn.xy = wn.z >= 0.0 ? g0.xy : octahedron_wrap(g0.xy);");
-			node_shader_write_frag(kong, "if (wn.z >= 0.0) { wn.xy = g0.xy; } else { wn.xy = octahedron_wrap(g0.xy); }");
+			node_shader_write_frag(kong, "if (wn.z >= 0.0) { wn.x = g0.x; wn.y = g0.y; } else { var f2: float2 = octahedron_wrap(g0.xy); wn.x = f2.x; wn.y = f2.y; }");
 			node_shader_write_frag(kong, "wn = normalize(wn);");
 			node_shader_write_frag(kong, "var plane_dist: float = dot(wn, winp.xyz - input.wposition);");
 
@@ -45,7 +45,7 @@ function make_brush_run(kong: node_shader_t) {
 
 		node_shader_write_frag(kong, "var winplast: float4 = float4(float2(constants.inplast.x, 1.0 - constants.inplast.y) * 2.0 - 1.0, depthlast * 2.0 - 1.0, 1.0);");
 		node_shader_write_frag(kong, "winplast = constants.invVP * winplast;");
-		node_shader_write_frag(kong, "winplast.xyz /= winplast.w;");
+		node_shader_write_frag(kong, "winplast.xyz = winplast.xyz / winplast.w;");
 
 		node_shader_write_frag(kong, "var pa: float3 = input.wposition - winp.xyz;");
 		if (context_raw.xray) {

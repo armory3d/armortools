@@ -37,7 +37,7 @@ fun histogram_pass_frag(input: vert_out): float4 {
 				sample_lod(tex, sampler_linear, float2(0.8, 0.2), 0.0).rgb +
 				sample_lod(tex, sampler_linear, float2(0.2, 0.8), 0.0).rgb +
 				sample_lod(tex, sampler_linear, float2(0.8, 0.8), 0.0).rgb;
-	color.rgb /= 5.0;
+	color.rgb = color.rgb / 5.0;
 	return color;
 }
 
