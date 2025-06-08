@@ -2047,6 +2047,12 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 					spirv_id id = write_op_convert_u_to_f(instructions, spirv_float_type, get_var(instructions, o->op_call.parameters[0]));
 					hmput(index_map, o->op_call.var.index, id);
 				}
+				////
+				else if (o->op_call.parameters[0].type.type == float_id) {
+					spirv_id id = get_var(instructions, o->op_call.parameters[0]);
+					hmput(index_map, o->op_call.var.index, id);
+				}
+				////
 				else {
 					assert(false);
 				}
@@ -2149,6 +2155,13 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 					spirv_id id = write_op_convert_f_to_u(instructions, spirv_uint_type, get_var(instructions, o->op_call.parameters[0]));
 					hmput(index_map, o->op_call.var.index, id);
 				}
+				////
+				else if (o->op_call.parameters[0].type.type == int_id) {
+					spirv_id id = get_var(instructions, o->op_call.parameters[0]);
+					// write_op_bitcast
+					hmput(index_map, o->op_call.var.index, id);
+				}
+				////
 				else {
 					assert(false);
 				}
