@@ -71,7 +71,6 @@ struct vk_context {
 
 	// buffer hack
 	VkBuffer *vertex_uniform_buffer;
-	VkBuffer *fragment_uniform_buffer;
 
 #ifdef VALIDATE
 	bool validation_found;
