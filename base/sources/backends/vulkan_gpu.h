@@ -6,12 +6,7 @@
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
 
-#define IRON_INTERNAL_NAMED_NUMBER_COUNT 32
-
-typedef struct {
-	char name[256];
-	uint32_t number;
-} iron_internal_named_number;
+#define MAXIMUM_WINDOWS 1
 
 struct vk_funs {
 	PFN_vkGetPhysicalDeviceSurfaceSupportKHR fpGetPhysicalDeviceSurfaceSupportKHR;
@@ -48,40 +43,24 @@ struct vk_window {
 	uint32_t image_count;
 	VkImage *images;
 	VkImageView *views;
-	VkFramebuffer *framebuffers;
-	VkRenderPass framebuffer_render_pass;
-	VkRenderPass rendertarget_render_pass;
-	VkRenderPass rendertarget_render_pass_with_depth;
 	struct vk_depth depth;
 };
-
-#define MAXIMUM_WINDOWS 1
 
 struct vk_context {
 	VkInstance instance;
 	VkPhysicalDevice gpu;
 	VkDevice device;
 	VkPhysicalDeviceMemoryProperties memory_properties;
-
 	VkCommandBuffer setup_cmd;
 	VkCommandPool cmd_pool;
 	VkQueue queue;
-
 	struct vk_window windows[MAXIMUM_WINDOWS];
-
-	// buffer hack
-	VkBuffer *vertex_uniform_buffer;
-
+	VkBuffer *uniform_buffer;
 #ifdef VALIDATE
 	bool validation_found;
 	VkDebugUtilsMessengerEXT debug_messenger;
 #endif
 };
-
-extern struct vk_funs vk;
-extern struct vk_context vk_ctx;
-extern void flush_init_cmd(void);
-extern void reuse_descriptor_sets(void);
 
 typedef struct {
 	int _indexCount;
@@ -93,17 +72,9 @@ typedef struct gpu_pipeline_impl {
 	const char **textures;
 	int *textureValues;
 	int textureCount;
-
-	VkPipeline framebuffer_pipeline;
-	VkPipeline rendertarget_pipeline;
+	VkPipeline pipeline;
 	VkShaderModule vert_shader_module;
 	VkShaderModule frag_shader_module;
-
-	iron_internal_named_number vertexLocations[IRON_INTERNAL_NAMED_NUMBER_COUNT];
-	iron_internal_named_number vertexTextureBindings[IRON_INTERNAL_NAMED_NUMBER_COUNT];
-	iron_internal_named_number fragmentTextureBindings[IRON_INTERNAL_NAMED_NUMBER_COUNT];
-	iron_internal_named_number vertexOffsets[IRON_INTERNAL_NAMED_NUMBER_COUNT];
-
 	VkPipelineLayout pipeline_layout;
 } gpu_pipeline_impl_t;
 
@@ -131,7 +102,6 @@ typedef struct {
 	VkImageView depthView;
 	int depthBufferBits;
 
-	VkFramebuffer framebuffer;
 	VkFormat format;
 
 	VkBuffer readback_buffer;
@@ -140,7 +110,6 @@ typedef struct {
 
 	int stage;
 	int stage_depth;
-
 } gpu_texture_impl_t;
 
 typedef struct {
