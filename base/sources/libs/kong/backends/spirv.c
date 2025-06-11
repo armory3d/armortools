@@ -659,6 +659,8 @@ static spirv_id spirv_readwrite_image_pointer_type;
 static spirv_id spirv_sampled_image_type;
 static spirv_id spirv_sampled_image2darray_type;
 static spirv_id spirv_sampled_imagecube_type;
+static spirv_id spirv_float3x3_type;
+static spirv_id spirv_float4x4_type;
 
 static spirv_id glsl_import;
 
@@ -811,12 +813,14 @@ static void write_base_types(instructions_buffer *buffer) {
 	add_to_type_map(float2x2_id, write_type_matrix(buffer, spirv_float2_type, 2), false, STORAGE_CLASS_NONE);
 	add_to_type_map(float2x3_id, write_type_matrix(buffer, spirv_float3_type, 2), false, STORAGE_CLASS_NONE);
 	add_to_type_map(float3x2_id, write_type_matrix(buffer, spirv_float2_type, 3), false, STORAGE_CLASS_NONE);
-	add_to_type_map(float3x3_id, write_type_matrix(buffer, spirv_float3_type, 3), false, STORAGE_CLASS_NONE);
+	spirv_float3x3_type = write_type_matrix(buffer, spirv_float3_type, 3);
+	add_to_type_map(float3x3_id, spirv_float3x3_type, false, STORAGE_CLASS_NONE);
 	add_to_type_map(float2x4_id, write_type_matrix(buffer, spirv_float4_type, 2), false, STORAGE_CLASS_NONE);
 	add_to_type_map(float4x2_id, write_type_matrix(buffer, spirv_float2_type, 4), false, STORAGE_CLASS_NONE);
 	add_to_type_map(float3x4_id, write_type_matrix(buffer, spirv_float4_type, 3), false, STORAGE_CLASS_NONE);
 	add_to_type_map(float4x3_id, write_type_matrix(buffer, spirv_float3_type, 4), false, STORAGE_CLASS_NONE);
-	add_to_type_map(float4x4_id, write_type_matrix(buffer, spirv_float4_type, 4), false, STORAGE_CLASS_NONE);
+	spirv_float4x4_type = write_type_matrix(buffer, spirv_float4_type, 4);
+	add_to_type_map(float4x4_id, spirv_float4x4_type, false, STORAGE_CLASS_NONE);
 }
 
 static spirv_id get_int_constant(int value);
@@ -2092,12 +2096,28 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 				spirv_id id = write_op_composite_construct(instructions, spirv_float3_type, constituents, o->op_call.parameters_size);
 				hmput(index_map, o->op_call.var.index, id);
 			}
+			else if (func == add_name("float3x3")) {
+				spirv_id constituents[3];
+				for (int i = 0; i < o->op_call.parameters_size; ++i) {
+					constituents[i] = get_var(instructions, o->op_call.parameters[i]);
+				}
+				spirv_id id = write_op_composite_construct(instructions, spirv_float3x3_type, constituents, o->op_call.parameters_size);
+				hmput(index_map, o->op_call.var.index, id);
+			}
 			else if (func == add_name("float4")) {
 				spirv_id constituents[4];
 				for (int i = 0; i < o->op_call.parameters_size; ++i) {
 					constituents[i] = get_var(instructions, o->op_call.parameters[i]);
 				}
 				spirv_id id = write_op_composite_construct(instructions, spirv_float4_type, constituents, o->op_call.parameters_size);
+				hmput(index_map, o->op_call.var.index, id);
+			}
+			else if (func == add_name("float4x4")) {
+				spirv_id constituents[4];
+				for (int i = 0; i < o->op_call.parameters_size; ++i) {
+					constituents[i] = get_var(instructions, o->op_call.parameters[i]);
+				}
+				spirv_id id = write_op_composite_construct(instructions, spirv_float4x4_type, constituents, o->op_call.parameters_size);
 				hmput(index_map, o->op_call.var.index, id);
 			}
 			else if (func == add_name("int")) {
@@ -2155,13 +2175,10 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 					spirv_id id = write_op_convert_f_to_u(instructions, spirv_uint_type, get_var(instructions, o->op_call.parameters[0]));
 					hmput(index_map, o->op_call.var.index, id);
 				}
-				////
 				else if (o->op_call.parameters[0].type.type == int_id) {
-					spirv_id id = get_var(instructions, o->op_call.parameters[0]);
-					// write_op_bitcast
+					spirv_id id = write_op_bitcast(instructions, spirv_uint_type, get_var(instructions, o->op_call.parameters[0]));
 					hmput(index_map, o->op_call.var.index, id);
 				}
-				////
 				else {
 					assert(false);
 				}
