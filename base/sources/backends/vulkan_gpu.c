@@ -56,6 +56,8 @@ static VkDescriptorSetLayout desc_layout;
 static VkDescriptorPool descriptor_pool;
 static struct descriptor_set descriptor_sets[MAX_DESCRIPTOR_SETS] = {0};
 static int descriptor_sets_count = 0;
+iron_gpu_texture_t *window_render_target;
+int current_render_targets_count = 0;
 
 static bool began = false;
 static VkPhysicalDeviceProperties gpu_props;
@@ -260,9 +262,7 @@ void set_image_layout(VkImage image, VkImageAspectFlags aspect_mask, VkImageLayo
 		barrier.dstAccessMask = barrier.dstAccessMask | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 	}
 
-	VkPipelineStageFlags src_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-	VkPipelineStageFlags dst_stage_mask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-	vkCmdPipelineBarrier(vk_ctx.setup_cmd, src_stage_mask, dst_stage_mask, 0, 0, NULL, 0, NULL, 1, &barrier);
+	vkCmdPipelineBarrier(vk_ctx.setup_cmd, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
 	flush_init_cmd();
 }
 
@@ -1000,15 +1000,17 @@ void iron_gpu_internal_init_window(int depthBufferBits, bool vsync) {
 	create_swapchain();
 
 	began = false;
-	iron_gpu_begin(NULL);
+	// iron_gpu_begin(NULL);
 }
 
-void iron_gpu_begin(iron_gpu_texture_t *renderTarget) {
+void iron_gpu_begin(iron_gpu_texture_t *render_target) {
 	struct vk_window *window = &vk_ctx.windows[0];
 
 	if (began) {
 		return;
 	}
+
+	window_render_target = render_target;
 
 	if (window->resized) {
 		vkDeviceWaitIdle(vk_ctx.device);
@@ -1086,7 +1088,7 @@ void set_viewport_and_scissor(iron_gpu_command_list_t *list) {
 	VkRect2D scissor;
 	memset(&scissor, 0, sizeof(scissor));
 
-	if (current_render_targets[0] == NULL || current_render_targets[0]->framebuffer_index >= 0) {
+	if (current_render_targets_count == 0 || current_render_targets[0] == NULL || current_render_targets[0]->framebuffer_index >= 0) {
 		viewport.x = 0;
 		viewport.y = (float)iron_window_height();
 		viewport.width = (float)iron_window_width();
@@ -1158,46 +1160,46 @@ static void begin_pass(iron_gpu_command_list_t *list) {
 	VkRenderingAttachmentInfo color_attachment_infos[8];
 	for (size_t attachment_index = 0; attachment_index < 1; ++attachment_index) {
 		color_attachment_infos[attachment_index] = (VkRenderingAttachmentInfo){
-		    .sType              = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
-		    .pNext              = NULL,
-		    .imageView          = vk_ctx.windows[0].views[vk_ctx.windows[0].current_image],
-		    .imageLayout        = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-		    .resolveMode        = VK_RESOLVE_MODE_NONE,
-		    .resolveImageView   = VK_NULL_HANDLE,
-		    .resolveImageLayout = VK_IMAGE_LAYOUT_GENERAL,
-		    .loadOp             = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-		    .storeOp            = VK_ATTACHMENT_STORE_OP_STORE,
-		    .clearValue = clear_value,
+			.sType              = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
+			.pNext              = NULL,
+			.imageView          = vk_ctx.windows[0].views[vk_ctx.windows[0].current_image],
+			.imageLayout        = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			.resolveMode        = VK_RESOLVE_MODE_NONE,
+			.resolveImageView   = VK_NULL_HANDLE,
+			.resolveImageLayout = VK_IMAGE_LAYOUT_GENERAL,
+			.loadOp             = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+			.storeOp            = VK_ATTACHMENT_STORE_OP_STORE,
+			.clearValue = clear_value,
 		};
 	}
 
 	VkRenderingAttachmentInfo depth_attachment_info;
 	if (vk_ctx.windows[0].depth_bits > 0) {
 		depth_attachment_info = (VkRenderingAttachmentInfo) {
-		    .sType              = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
-		    .pNext              = NULL,
-		    .imageView          = vk_ctx.windows[0].depth.view,
-		    .imageLayout        = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
-		    .resolveMode        = VK_RESOLVE_MODE_NONE,
-		    .resolveImageView   = VK_NULL_HANDLE,
-		    .resolveImageLayout = VK_IMAGE_LAYOUT_GENERAL,
-		    .loadOp             = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-		    .storeOp            = VK_ATTACHMENT_STORE_OP_STORE,
-		    .clearValue         = 1.0,
+			.sType              = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
+			.pNext              = NULL,
+			.imageView          = vk_ctx.windows[0].depth.view,
+			.imageLayout        = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+			.resolveMode        = VK_RESOLVE_MODE_NONE,
+			.resolveImageView   = VK_NULL_HANDLE,
+			.resolveImageLayout = VK_IMAGE_LAYOUT_GENERAL,
+			.loadOp             = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+			.storeOp            = VK_ATTACHMENT_STORE_OP_STORE,
+			.clearValue         = 1.0,
 		};
 	}
 
 	VkRenderingInfo rendering_info = {
-	    .sType                = VK_STRUCTURE_TYPE_RENDERING_INFO,
-	    .pNext                = NULL,
-	    .flags                = 0,
-	    .renderArea           = render_area,
-	    .layerCount           = 1,
-	    .viewMask             = 0,
-	    .colorAttachmentCount = (uint32_t)1,
-	    .pColorAttachments    = color_attachment_infos,
-	    .pDepthAttachment     = vk_ctx.windows[0].depth_bits == 0 ? VK_NULL_HANDLE : &depth_attachment_info,
-	    .pStencilAttachment   = VK_NULL_HANDLE,
+		.sType                = VK_STRUCTURE_TYPE_RENDERING_INFO,
+		.pNext                = NULL,
+		.flags                = 0,
+		.renderArea           = render_area,
+		.layerCount           = 1,
+		.viewMask             = 0,
+		.colorAttachmentCount = (uint32_t)1,
+		.pColorAttachments    = color_attachment_infos,
+		.pDepthAttachment     = vk_ctx.windows[0].depth_bits == 0 ? VK_NULL_HANDLE : &depth_attachment_info,
+		.pStencilAttachment   = VK_NULL_HANDLE,
 	};
 	vkCmdBeginRendering(list->impl._buffer, &rendering_info);
 	in_render_pass = true;
@@ -1236,10 +1238,11 @@ void iron_gpu_command_list_begin(iron_gpu_command_list_t *list) {
 		.subresourceRange.layerCount = 1,
 		.image = vk_ctx.windows[0].images[vk_ctx.windows[0].current_image],
 	};
-
 	VkImageMemoryBarrier *pmemory_barrier = &prePresentBarrier;
 	vkCmdPipelineBarrier(list->impl._buffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0, NULL, 0, NULL, 1,
 						 pmemory_barrier);
+
+	// iron_gpu_command_list_framebuffer_to_render_target_barrier(list, window_render_target);
 
 	begin_pass(list);
 	set_viewport_and_scissor(list);
@@ -1249,6 +1252,13 @@ void iron_gpu_command_list_begin(iron_gpu_command_list_t *list) {
 
 void iron_gpu_command_list_end(iron_gpu_command_list_t *list) {
 	end_pass(list);
+
+	if (current_render_targets_count > 0 && current_render_targets[0] != window_render_target) {
+		for (int i = 0; i < current_render_targets_count; ++i) {
+			iron_gpu_command_list_render_target_to_texture_barrier(list, current_render_targets[i]);
+		}
+		current_render_targets_count = 0;
+	}
 
 	VkImageMemoryBarrier prePresentBarrier = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
@@ -1265,10 +1275,11 @@ void iron_gpu_command_list_end(iron_gpu_command_list_t *list) {
 		.subresourceRange.baseArrayLayer = 0,
 		.subresourceRange.layerCount = 1,
 	};
-
 	prePresentBarrier.image = vk_ctx.windows[0].images[vk_ctx.windows[0].current_image];
 	VkImageMemoryBarrier *pmemory_barrier = &prePresentBarrier;
 	vkCmdPipelineBarrier(list->impl._buffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, NULL, 0, NULL, 1, pmemory_barrier);
+
+	// iron_gpu_command_list_render_target_to_framebuffer_barrier(list, window_render_target);
 
 	vkEndCommandBuffer(list->impl._buffer);
 
@@ -1307,95 +1318,145 @@ void iron_gpu_command_list_end(iron_gpu_command_list_t *list) {
 }
 
 void iron_gpu_command_list_render_target_to_framebuffer_barrier(iron_gpu_command_list_t *list, struct iron_gpu_texture *renderTarget) {
-    // VkImage image = renderTarget->impl.image;
-    // VkImageMemoryBarrier barrier = {
-    //     .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-    //     .pNext = NULL,
-    //     .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-    //     .dstAccessMask = VK_ACCESS_MEMORY_READ_BIT,
-    //     .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-    //     .newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-    //     .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-    //     .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-    //     .image = image,
-    //     .subresourceRange = {
-    //         .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-    //         .baseMipLevel = 0,
-    //         .levelCount = 1,
-    //         .baseArrayLayer = 0,
-    //         .layerCount = 1,
-    //     },
-    // };
-    // vkCmdPipelineBarrier(list->impl._buffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
+	VkImage image = renderTarget->impl.image;
+	VkImageMemoryBarrier barrier = {
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+		.pNext = NULL,
+		.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+		.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT,
+		.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+		.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.image = image,
+		.subresourceRange = {
+			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+			.baseMipLevel = 0,
+			.levelCount = 1,
+			.baseArrayLayer = 0,
+			.layerCount = 1,
+		},
+	};
+	vkCmdPipelineBarrier(list->impl._buffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
 }
 
 void iron_gpu_command_list_framebuffer_to_render_target_barrier(iron_gpu_command_list_t *list, struct iron_gpu_texture *render_target) {
-	// VkImage image = render_target->impl.image;
-    // VkImageMemoryBarrier barrier = {
-    //     .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-    //     .pNext = NULL,
-    //     .srcAccessMask = VK_ACCESS_MEMORY_READ_BIT,
-    //     .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-    //     .oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-    //     .newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-    //     .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-    //     .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-    //     .image = image,
-    //     .subresourceRange = {
-    //         .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-    //         .baseMipLevel = 0,
-    //         .levelCount = 1,
-    //         .baseArrayLayer = 0,
-    //         .layerCount = 1,
-    //     },
-    // };
-    // vkCmdPipelineBarrier(list->impl._buffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
+	VkImage image = render_target->impl.image;
+	VkImageMemoryBarrier barrier = {
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+		.pNext = NULL,
+		.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT,
+		.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+		.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+		.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.image = image,
+		.subresourceRange = {
+			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+			.baseMipLevel = 0,
+			.levelCount = 1,
+			.baseArrayLayer = 0,
+			.layerCount = 1,
+		},
+	};
+	vkCmdPipelineBarrier(list->impl._buffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
 }
 
 void iron_gpu_command_list_texture_to_render_target_barrier(iron_gpu_command_list_t *list, struct iron_gpu_texture *render_target) {
-	// VkImageMemoryBarrier barrier = {
-    //     .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-    //     .pNext = NULL,
-    //     .srcAccessMask = VK_ACCESS_SHADER_READ_BIT,
-    //     .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-    //     .oldLayout = VK_IMAGE_LAYOUT_GENERAL,
-    //     .newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-    //     .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-    //     .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-    //     .image = render_target->impl.image,
-    //     .subresourceRange = {
-    //         .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-    //         .baseMipLevel = 0,
-    //         .levelCount = 1,
-    //         .baseArrayLayer = 0,
-    //         .layerCount = 1,
-    //     },
-    // };
-    // vkCmdPipelineBarrier(list->impl._buffer, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
-    // render_target->state = IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
+	if (render_target->state != IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET) {
+		VkImageMemoryBarrier barrier = {
+			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+			.pNext = NULL,
+			.srcAccessMask = VK_ACCESS_SHADER_READ_BIT,
+			.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+			.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
+			.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.image = render_target->impl.image,
+			.subresourceRange = {
+				.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+				.baseMipLevel = 0,
+				.levelCount = 1,
+				.baseArrayLayer = 0,
+				.layerCount = 1,
+			},
+		};
+		vkCmdPipelineBarrier(list->impl._buffer, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
+		render_target->state = IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
+	}
+
+	if (render_target->impl.depthBufferBits > 0 && render_target->depth_state != IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET) {
+		VkImageMemoryBarrier barrier = {
+			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+			.pNext = NULL,
+			.srcAccessMask = VK_ACCESS_SHADER_READ_BIT,
+			.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+			.oldLayout = VK_IMAGE_LAYOUT_GENERAL,
+			.newLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.image = render_target->impl.depthImage,
+			.subresourceRange = {
+				.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
+				.baseMipLevel = 0,
+				.levelCount = 1,
+				.baseArrayLayer = 0,
+				.layerCount = 1,
+			},
+		};
+		vkCmdPipelineBarrier(list->impl._buffer, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
+		render_target->depth_state = IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
+	}
 }
 
 void iron_gpu_command_list_render_target_to_texture_barrier(iron_gpu_command_list_t *list, struct iron_gpu_texture *render_target) {
-	// VkImageMemoryBarrier barrier = {
-    //     .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-    //     .pNext = NULL,
-    //     .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-    //     .dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
-    //     .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-    //     .newLayout = VK_IMAGE_LAYOUT_GENERAL,
-    //     .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-    //     .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-    //     .image = render_target->impl.image,
-    //     .subresourceRange = {
-    //         .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-    //         .baseMipLevel = 0,
-    //         .levelCount = 1,
-    //         .baseArrayLayer = 0,
-    //         .layerCount = 1,
-    //     },
-    // };
-    // vkCmdPipelineBarrier(list->impl._buffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
-    // render_target->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
+	if (render_target->state != IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE) {
+		VkImageMemoryBarrier barrier = {
+			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+			.pNext = NULL,
+			.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+			.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+			.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.image = render_target->impl.image,
+			.subresourceRange = {
+				.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+				.baseMipLevel = 0,
+				.levelCount = 1,
+				.baseArrayLayer = 0,
+				.layerCount = 1,
+			},
+		};
+		vkCmdPipelineBarrier(list->impl._buffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
+		render_target->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
+	}
+
+	if (render_target->impl.depthBufferBits > 0 && render_target->depth_state != IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE) {
+		VkImageMemoryBarrier barrier = {
+			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+			.pNext = NULL,
+			.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+			.dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+			.oldLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+			.newLayout = VK_IMAGE_LAYOUT_GENERAL,
+			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.image = render_target->impl.depthImage,
+			.subresourceRange = {
+				.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
+				.baseMipLevel = 0,
+				.levelCount = 1,
+				.baseArrayLayer = 0,
+				.layerCount = 1,
+			},
+		};
+		vkCmdPipelineBarrier(list->impl._buffer, VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
+		render_target->depth_state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
+	}
 }
 
 void iron_gpu_command_list_draw(iron_gpu_command_list_t *list) {
@@ -1466,9 +1527,23 @@ void iron_internal_restore_render_target(iron_gpu_command_list_t *list, struct i
 	}
 
 	end_pass(list);
-	current_render_targets[0] = NULL;
+
+
+	////
+	if (current_render_targets_count > 0 && current_render_targets[0] != window_render_target) {
+		for (int i = 0; i < current_render_targets_count; ++i) {
+			iron_gpu_command_list_render_target_to_texture_barrier(list, current_render_targets[i]);
+		}
+	}
+
+	current_render_targets_count = 0;
+	////
+
+
 	on_back_buffer = true;
 	begin_pass(list);
+
+	set_viewport_and_scissor(list);
 
 	if (current_pipeline != NULL) {
 		vkCmdBindPipeline(list->impl._buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, current_pipeline->impl.pipeline);
@@ -1476,20 +1551,45 @@ void iron_internal_restore_render_target(iron_gpu_command_list_t *list, struct i
 }
 
 void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, struct iron_gpu_texture **targets, int count, unsigned flags, unsigned color, float depth) {
-	for (int i = 0; i < count; ++i) {
-		current_render_targets[i] = targets[i];
-	}
-	for (int i = count; i < 8; ++i) {
-		current_render_targets[i] = NULL;
-	}
 
 	if (targets[0]->framebuffer_index >= 0) {
+		////
 		iron_internal_restore_render_target(list, targets[0]);
+		////
 		return;
 	}
 
 	end_pass(list);
 	on_back_buffer = false;
+
+
+
+
+
+	////
+	if (current_render_targets_count > 0 && current_render_targets[0] != window_render_target) {
+		for (int i = 0; i < current_render_targets_count; ++i) {
+			iron_gpu_command_list_render_target_to_texture_barrier(list, current_render_targets[i]);
+		}
+	}
+
+	for (int i = 0; i < count; ++i) {
+		current_render_targets[i] = targets[i];
+	}
+	current_render_targets_count = count;
+	////
+
+
+	if (targets[0] != window_render_target) {
+		for (int i = 0; i < count; ++i) {
+			iron_gpu_command_list_texture_to_render_target_barrier(list, targets[i]);
+		}
+	}
+
+
+
+
+
 
 	// begin_pass(list);
 	VkRect2D render_area = {
@@ -1508,46 +1608,46 @@ void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, str
 	VkRenderingAttachmentInfo color_attachment_infos[8];
 	for (size_t i = 0; i < count; ++i) {
 		color_attachment_infos[i] = (VkRenderingAttachmentInfo){
-		    .sType              = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
-		    .pNext              = NULL,
-		    .imageView          = targets[i]->impl.view,
-		    .imageLayout        = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-		    .resolveMode        = VK_RESOLVE_MODE_NONE,
-		    .resolveImageView   = VK_NULL_HANDLE,
-		    .resolveImageLayout = VK_IMAGE_LAYOUT_GENERAL,
-		    .loadOp             = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-		    .storeOp            = VK_ATTACHMENT_STORE_OP_STORE,
-		    .clearValue = clear_value,
+			.sType              = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
+			.pNext              = NULL,
+			.imageView          = targets[i]->impl.view,
+			.imageLayout        = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			.resolveMode        = VK_RESOLVE_MODE_NONE,
+			.resolveImageView   = VK_NULL_HANDLE,
+			.resolveImageLayout = VK_IMAGE_LAYOUT_GENERAL,
+			.loadOp             = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+			.storeOp            = VK_ATTACHMENT_STORE_OP_STORE,
+			.clearValue = clear_value,
 		};
 	}
 
 	VkRenderingAttachmentInfo depth_attachment_info;
 	if (targets[0]->impl.depthBufferBits > 0) {
 		depth_attachment_info = (VkRenderingAttachmentInfo) {
-		    .sType              = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
-		    .pNext              = NULL,
-		    .imageView          = targets[0]->impl.depthView,
-		    .imageLayout        = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
-		    .resolveMode        = VK_RESOLVE_MODE_NONE,
-		    .resolveImageView   = VK_NULL_HANDLE,
-		    .resolveImageLayout = VK_IMAGE_LAYOUT_GENERAL,
-		    .loadOp             = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-		    .storeOp            = VK_ATTACHMENT_STORE_OP_STORE,
-		    .clearValue         = 1.0,
+			.sType              = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
+			.pNext              = NULL,
+			.imageView          = targets[0]->impl.depthView,
+			.imageLayout        = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+			.resolveMode        = VK_RESOLVE_MODE_NONE,
+			.resolveImageView   = VK_NULL_HANDLE,
+			.resolveImageLayout = VK_IMAGE_LAYOUT_GENERAL,
+			.loadOp             = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+			.storeOp            = VK_ATTACHMENT_STORE_OP_STORE,
+			.clearValue         = 1.0,
 		};
 	}
 
 	VkRenderingInfo rendering_info = {
-	    .sType                = VK_STRUCTURE_TYPE_RENDERING_INFO,
-	    .pNext                = NULL,
-	    .flags                = 0,
-	    .renderArea           = render_area,
-	    .layerCount           = 1,
-	    .viewMask             = 0,
-	    .colorAttachmentCount = (uint32_t)count,
-	    .pColorAttachments    = color_attachment_infos,
-	    .pDepthAttachment     = targets[0]->impl.depthBufferBits == 0 ? VK_NULL_HANDLE : &depth_attachment_info,
-	    .pStencilAttachment   = VK_NULL_HANDLE,
+		.sType                = VK_STRUCTURE_TYPE_RENDERING_INFO,
+		.pNext                = NULL,
+		.flags                = 0,
+		.renderArea           = render_area,
+		.layerCount           = 1,
+		.viewMask             = 0,
+		.colorAttachmentCount = (uint32_t)count,
+		.pColorAttachments    = color_attachment_infos,
+		.pDepthAttachment     = targets[0]->impl.depthBufferBits == 0 ? VK_NULL_HANDLE : &depth_attachment_info,
+		.pStencilAttachment   = VK_NULL_HANDLE,
 	};
 	vkCmdBeginRendering(list->impl._buffer, &rendering_info);
 	in_render_pass = true;
@@ -2037,13 +2137,13 @@ void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipeline) {
 		color_attachment_formats[i] = convert_image_format(pipeline->color_attachment[i]);
 	}
 
-    VkPipelineRenderingCreateInfo rendering_info = {
-        .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO,
-        .colorAttachmentCount = pipeline->color_attachment_count,
-        .pColorAttachmentFormats = color_attachment_formats,
-        .depthAttachmentFormat = pipeline->depth_attachment_bits > 0 ? VK_FORMAT_D32_SFLOAT : VK_FORMAT_UNDEFINED,
-        .stencilAttachmentFormat = VK_FORMAT_UNDEFINED,
-    };
+	VkPipelineRenderingCreateInfo rendering_info = {
+		.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO,
+		.colorAttachmentCount = pipeline->color_attachment_count,
+		.pColorAttachmentFormats = color_attachment_formats,
+		.depthAttachmentFormat = pipeline->depth_attachment_bits > 0 ? VK_FORMAT_D32_SFLOAT : VK_FORMAT_UNDEFINED,
+		.stencilAttachmentFormat = VK_FORMAT_UNDEFINED,
+	};
 	pipeline_info.pNext = &rendering_info;
 
 	vkCreateGraphicsPipelines(vk_ctx.device, VK_NULL_HANDLE, 1, &pipeline_info, NULL, &pipeline->impl.pipeline);
@@ -2232,6 +2332,7 @@ void iron_gpu_texture_init_from_bytes(iron_gpu_texture_t *texture, void *data, i
 	texture->impl.stage = 0;
 	texture->impl.stage_depth = -1;
 	texture->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
+	texture->depth_state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
 	texture->framebuffer_index = -1;
 
 	const VkFormat tex_format = convert_image_format(format);
@@ -2325,6 +2426,7 @@ void iron_gpu_texture_init(iron_gpu_texture_t *texture, int width, int height, i
 	texture->impl.stage = 0;
 	texture->impl.stage_depth = -1;
 	texture->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
+	texture->depth_state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
 	texture->framebuffer_index = -1;
 
 	const VkFormat tex_format = convert_image_format(format);
@@ -2514,7 +2616,7 @@ static void render_target_init(iron_gpu_texture_t *target, int width, int height
 			vkBindImageMemory(vk_ctx.device, target->impl.image, target->impl.mem, 0);
 
 			set_image_layout(target->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED,
-						   VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+							 VK_IMAGE_LAYOUT_GENERAL);
 
 			colorImageView.image = target->impl.image;
 			vkCreateImageView(vk_ctx.device, &colorImageView, NULL, &target->impl.view);
@@ -2584,7 +2686,8 @@ void iron_gpu_render_target_init(iron_gpu_texture_t *target, int width, int heig
 	render_target_init(target, width, height, format, depth_bits, -1);
 	target->width = width;
 	target->height = height;
-	target->state = IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
+	target->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
+	target->depth_state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
 	target->_uploaded = true;
 }
 
@@ -2598,6 +2701,7 @@ void iron_gpu_render_target_set_depth_from(iron_gpu_texture_t *target, iron_gpu_
 	target->impl.depthMemory = source->impl.depthMemory;
 	target->impl.depthView = source->impl.depthView;
 	target->impl.depthBufferBits = source->impl.depthBufferBits;
+	target->depth_state = source->depth_state;
 }
 
 void iron_gpu_vertex_buffer_init(iron_gpu_buffer_t *buffer, int vertexCount, iron_gpu_vertex_structure_t *structure, bool gpuMemory) {

@@ -90,6 +90,7 @@ typedef struct iron_gpu_texture {
 	int framebuffer_index;
 	bool isDepthAttachment;
 	iron_internal_render_target_state_t state;
+	iron_internal_render_target_state_t depth_state;
 	buffer_t *buffer;
 	gpu_texture_impl_t impl;
 } iron_gpu_texture_t;
