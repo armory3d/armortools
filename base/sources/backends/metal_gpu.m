@@ -303,12 +303,6 @@ void iron_gpu_command_list_begin(iron_gpu_command_list_t *list) {
 void iron_gpu_command_list_end(iron_gpu_command_list_t *list) {
 }
 
-void iron_gpu_command_list_render_target_to_framebuffer_barrier(iron_gpu_command_list_t *list, iron_gpu_texture_t *renderTarget) {
-}
-
-void iron_gpu_command_list_framebuffer_to_render_target_barrier(iron_gpu_command_list_t *list, iron_gpu_texture_t *renderTarget) {
-}
-
 void iron_gpu_command_list_draw(iron_gpu_command_list_t *list) {
 	id<MTLBuffer> indexBuffer = (__bridge id<MTLBuffer>)list->impl.current_index_buffer->impl.metal_buffer;
 	[command_encoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
@@ -514,12 +508,6 @@ void iron_gpu_command_list_set_constant_buffer(iron_gpu_command_list_t *list, ir
 	[command_encoder setVertexBuffer:argument_buffer offset:argument_buffer_step * i atIndex:1];
     [command_encoder setFragmentBuffer:argument_buffer offset:argument_buffer_step * i atIndex:1];
 	[command_encoder useResource:buf usage:MTLResourceUsageRead  stages:MTLRenderStageVertex|MTLRenderStageFragment];
-}
-
-void iron_gpu_command_list_render_target_to_texture_barrier(iron_gpu_command_list_t *list, iron_gpu_texture_t *renderTarget) {
-}
-
-void iron_gpu_command_list_texture_to_render_target_barrier(iron_gpu_command_list_t *list, iron_gpu_texture_t *renderTarget) {
 }
 
 void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *texture) {

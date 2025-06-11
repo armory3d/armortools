@@ -71,13 +71,11 @@ void gpu_begin() {
 
 	render_targets[0] = NULL;
 	iron_gpu_command_list_begin(&gpu_command_list);
-	iron_gpu_command_list_framebuffer_to_render_target_barrier(&gpu_command_list, &framebuffers[framebuffer_index]);
 	gpu_set_render_targets(NULL, 0, IRON_GPU_CLEAR_NONE, 0, 0);
 }
 
 void gpu_end() {
 	iron_gpu_constant_buffer_unlock(&constant_buffer);
-	iron_gpu_command_list_render_target_to_framebuffer_barrier(&gpu_command_list, &framebuffers[framebuffer_index]);
 	iron_gpu_command_list_end(&gpu_command_list);
 	iron_gpu_command_list_wait(&gpu_command_list);
 	iron_gpu_end();
@@ -92,10 +90,6 @@ void gpu_set_render_targets(iron_gpu_texture_t **targets, int count, unsigned fl
 	}
 	for (int i = 0; i < count; ++i) {
 		render_targets[i] = targets[i];
-		if (render_targets[i]->state != IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET) {
-			iron_gpu_command_list_texture_to_render_target_barrier(&gpu_command_list, render_targets[i]);
-			render_targets[i]->state = IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
-		}
 	}
 	iron_gpu_command_list_set_render_targets(&gpu_command_list, render_targets, count, flags, color, depth);
 }
@@ -240,18 +234,10 @@ void gpu_set_texture(iron_gpu_texture_unit_t *unit, iron_gpu_texture_t *render_t
 		iron_gpu_command_list_upload_texture(&gpu_command_list, render_target);
 		render_target->_uploaded = true;
 	}
-	if (render_target->state != IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE) {
-		iron_gpu_command_list_render_target_to_texture_barrier(&gpu_command_list, render_target);
-		render_target->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
-	}
 	iron_gpu_command_list_set_texture(&gpu_command_list, *unit, render_target);
 }
 
 void gpu_set_texture_depth(iron_gpu_texture_unit_t *unit, iron_gpu_texture_t *render_target) {
-	if (render_target->state != IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE) {
-		iron_gpu_command_list_render_target_to_texture_barrier(&gpu_command_list, render_target);
-		render_target->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
-	}
 	iron_gpu_command_list_set_texture_from_render_target_depth(&gpu_command_list, *unit, render_target);
 }
 
