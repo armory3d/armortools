@@ -32,6 +32,9 @@ int window_height;
 int window_new_width;
 int window_new_height;
 int window_current_backbuffer;
+iron_gpu_texture_t *window_render_target;
+iron_gpu_texture_t *current_render_targets[8];
+int current_render_targets_count = 0;
 bool window_vsync;
 
 ID3D12Device *device = NULL;
@@ -303,13 +306,15 @@ int iron_gpu_max_bound_textures(void) {
 	return IRON_INTERNAL_G5_TEXTURE_COUNT;
 }
 
-void iron_gpu_begin(iron_gpu_texture_t *renderTarget) {
+void iron_gpu_begin(iron_gpu_texture_t *render_target) {
 	if (began) {
 		return;
 	}
 	began = true;
 
+	window_render_target = render_target;
 	window_current_backbuffer = (window_current_backbuffer + 1) % QUEUE_SLOT_COUNT;
+
 	if (window_new_width != window_width || window_new_height != window_height) {
 		window_swapChain->lpVtbl->ResizeBuffers(window_swapChain, QUEUE_SLOT_COUNT, window_new_width, window_new_height, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
 		setup_swapchain();
@@ -383,9 +388,19 @@ void iron_gpu_command_list_begin(struct iron_gpu_command_list *list) {
 		list->impl._commandAllocator->lpVtbl->Reset(list->impl._commandAllocator);
 		list->impl._commandList->lpVtbl->Reset(list->impl._commandList, list->impl._commandAllocator, NULL);
 	}
+	iron_gpu_command_list_framebuffer_to_render_target_barrier(list, window_render_target);
 }
 
 void iron_gpu_command_list_end(struct iron_gpu_command_list *list) {
+	iron_gpu_command_list_render_target_to_framebuffer_barrier(list, window_render_target);
+
+	if (current_render_targets_count > 0 && current_render_targets[0] != window_render_target) {
+		for (int i = 0; i < current_render_targets_count; ++i) {
+			iron_gpu_command_list_render_target_to_texture_barrier(list, current_render_targets[i]);
+		}
+		current_render_targets_count = 0;
+	}
+
 	list->impl._commandList->lpVtbl->Close(list->impl._commandList);
 
 	ID3D12CommandList *commandLists[] = {(ID3D12CommandList *)list->impl._commandList};
@@ -418,27 +433,33 @@ void iron_gpu_command_list_framebuffer_to_render_target_barrier(struct iron_gpu_
 }
 
 void iron_gpu_command_list_texture_to_render_target_barrier(struct iron_gpu_command_list *list, iron_gpu_texture_t *renderTarget) {
-	D3D12_RESOURCE_BARRIER barrier = {
-		.Transition.pResource = renderTarget->impl.renderTarget,
-		.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
-		.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE,
-		.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-		.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET,
-		.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
-	};
-	list->impl._commandList->lpVtbl->ResourceBarrier(list->impl._commandList, 1, &barrier);
+	if (renderTarget->state != IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET) {
+		D3D12_RESOURCE_BARRIER barrier = {
+			.Transition.pResource = renderTarget->impl.renderTarget,
+			.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
+			.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE,
+			.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+			.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET,
+			.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
+		};
+		list->impl._commandList->lpVtbl->ResourceBarrier(list->impl._commandList, 1, &barrier);
+		renderTarget->state = IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
+	}
 }
 
 void iron_gpu_command_list_render_target_to_texture_barrier(struct iron_gpu_command_list *list, iron_gpu_texture_t *renderTarget) {
-	D3D12_RESOURCE_BARRIER barrier = {
-		.Transition.pResource = renderTarget->impl.renderTarget,
-		.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
-		.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE,
-		.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET,
-		.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-		.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
-	};
-	list->impl._commandList->lpVtbl->ResourceBarrier(list->impl._commandList, 1, &barrier);
+	if (renderTarget->state != IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE) {
+		D3D12_RESOURCE_BARRIER barrier = {
+			.Transition.pResource = renderTarget->impl.renderTarget,
+			.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
+			.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE,
+			.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET,
+			.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+			.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
+		};
+		list->impl._commandList->lpVtbl->ResourceBarrier(list->impl._commandList, 1, &barrier);
+		renderTarget->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
+	}
 }
 
 void iron_gpu_command_list_set_constant_buffer(struct iron_gpu_command_list *list, iron_gpu_buffer_t *buffer, int offset, size_t size) {
@@ -566,6 +587,23 @@ void iron_gpu_command_list_set_render_targets(struct iron_gpu_command_list *list
 	////
 
 	iron_gpu_texture_t *render_target = targets[0];
+
+	if (current_render_targets_count > 0 && current_render_targets[0] != window_render_target) {
+		for (int i = 0; i < current_render_targets_count; ++i) {
+			iron_gpu_command_list_render_target_to_texture_barrier(list, current_render_targets[i]);
+		}
+	}
+
+	if (render_target != window_render_target) {
+		for (int i = 0; i < count; ++i) {
+			iron_gpu_command_list_texture_to_render_target_barrier(list, targets[i]);
+		}
+	}
+
+	for (int i = 0; i < count; ++i) {
+		current_render_targets[i] = targets[i];
+	}
+	current_render_targets_count = count;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE target_descriptors[16];
 	for (int i = 0; i < count; ++i) {
@@ -713,14 +751,13 @@ void iron_gpu_command_list_get_render_target_pixels(iron_gpu_command_list_t *lis
 	}
 
 	// Copy render target to readback buffer
-	D3D12_RESOURCE_STATES sourceState = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
 	{
 		D3D12_RESOURCE_BARRIER barrier = {
 			.Transition.pResource = render_target->impl.renderTarget,
 			.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
 			.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE,
-			.Transition.StateBefore = sourceState,
+			.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 			.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_SOURCE,
 			.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
 		};
@@ -752,7 +789,7 @@ void iron_gpu_command_list_get_render_target_pixels(iron_gpu_command_list_t *lis
 			.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
 			.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE,
 			.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_SOURCE,
-			.Transition.StateAfter = sourceState,
+			.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 			.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
 		};
 		list->impl._commandList->lpVtbl->ResourceBarrier(list->impl._commandList, 1, &barrier);
@@ -1302,12 +1339,12 @@ static void render_target_init(iron_gpu_texture_t *render_target, int width, int
 		device->lpVtbl->CreateRenderTargetView(device, render_target->impl.renderTarget, &viewDesc, handle);
 	}
 	else {
-		HRESULT result = device->lpVtbl->CreateCommittedResource(device, &heapProperties, D3D12_HEAP_FLAG_NONE, &texResourceDesc, D3D12_RESOURCE_STATE_RENDER_TARGET,
+		HRESULT result = device->lpVtbl->CreateCommittedResource(device, &heapProperties, D3D12_HEAP_FLAG_NONE, &texResourceDesc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 														 &clearValue, &IID_ID3D12Resource, &render_target->impl.renderTarget);
 		if (result != S_OK) {
 			for (int i = 0; i < 10; ++i) {
 				iron_memory_emergency();
-				result = device->lpVtbl->CreateCommittedResource(device, &heapProperties, D3D12_HEAP_FLAG_NONE, &texResourceDesc, D3D12_RESOURCE_STATE_RENDER_TARGET,
+				result = device->lpVtbl->CreateCommittedResource(device, &heapProperties, D3D12_HEAP_FLAG_NONE, &texResourceDesc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 														 &clearValue, &IID_ID3D12Resource, &render_target->impl.renderTarget);
 				if (result == S_OK) {
 					break;
@@ -1447,14 +1484,14 @@ static void render_target_init(iron_gpu_texture_t *render_target, int width, int
 void iron_gpu_render_target_init(iron_gpu_texture_t *target, int width, int height, iron_image_format_t format, int depthBufferBits) {
 	render_target_init(target, width, height, format, depthBufferBits, -1);
 	target->_uploaded = true;
-	target->state = IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
+	target->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
 }
 
 void iron_gpu_render_target_init_framebuffer(iron_gpu_texture_t *target, int width, int height, iron_image_format_t format, int depthBufferBits) {
 	render_target_init(target, width, height, format, depthBufferBits, framebuffer_count);
 	framebuffer_count += 1;
 	target->_uploaded = true;
-	target->state = IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
+	target->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
 }
 
 void iron_gpu_render_target_set_depth_from(iron_gpu_texture_t *render_target, iron_gpu_texture_t *source) {
