@@ -351,8 +351,7 @@ function render_path_base_draw_taa(bufa: string, bufb: string) {
 
 function render_path_base_draw_gbuffer() {
 	render_path_set_target("gbuffer0", null, clear_flag_t.DEPTH, 0, 1.0); // Only clear gbuffer0
-	// let additional: string[] = ["gbuffer1", "gbuffer2"];
-	let additional: string[] = ["gbuffer1"];
+	let additional: string[] = ["gbuffer1", "gbuffer2"];
 	render_path_set_target("gbuffer0", additional);
 	render_path_paint_bind_layers();
 	render_path_draw_meshes("mesh");
@@ -363,7 +362,7 @@ function render_path_base_draw_gbuffer() {
 			let ping: string = i % 2 == 1 ? "_copy" : "";
 			let pong: string = i % 2 == 1 ? "" : "_copy";
 			if (i == make_mesh_layer_pass_count - 1) {
-				// render_path_set_target("gbuffer2" + ping, null, clear_flag_t.COLOR, 0xff000000);
+				render_path_set_target("gbuffer2" + ping, null, clear_flag_t.COLOR, 0xff000000);
 			}
 			let g1ping: string = "gbuffer1" + ping;
 			let g2ping: string = "gbuffer2" + ping;
@@ -371,7 +370,7 @@ function render_path_base_draw_gbuffer() {
 			render_path_set_target("gbuffer0" + ping, additional);
 			render_path_bind_target("gbuffer0" + pong, "gbuffer0");
 			render_path_bind_target("gbuffer1" + pong, "gbuffer1");
-			// render_path_bind_target("gbuffer2" + pong, "gbuffer2");
+			render_path_bind_target("gbuffer2" + pong, "gbuffer2");
 			render_path_paint_bind_layers();
 			render_path_draw_meshes("mesh" + i);
 			render_path_paint_unbind_layers();

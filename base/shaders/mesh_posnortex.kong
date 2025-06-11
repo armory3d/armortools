@@ -66,7 +66,7 @@ fun pack_f32_i16(f: float, i: uint): float {
 	return 0.062504762 * f + 0.062519999 * float(i);
 }
 
-fun mesh_posnortex_frag(input: vert_out): float4[2] {
+fun mesh_posnortex_frag(input: vert_out): float4[3] {
 	var n: float3 = normalize(input.wnormal);
 	var basecol: float3 = float3(0.2, 0.2, 0.2) + input.tex.x * 0.0000001; // keep tex_coord
 	var roughness: float = 0.4;
@@ -84,9 +84,10 @@ fun mesh_posnortex_frag(input: vert_out): float4[2] {
 
 	// var matid: uint = 0;
 	var matid: uint = uint(0.0);
-	var color: float4[2];
+	var color: float4[3];
 	color[0] = float4(n.xy, roughness, pack_f32_i16(metallic, matid));
 	color[1] = float4(basecol, occlusion);
+	color[2] = float4(0.0, 0.0, 0.0, 0.0);
 	return color;
 }
 
