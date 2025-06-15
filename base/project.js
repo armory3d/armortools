@@ -223,7 +223,6 @@ if (!flags.lite) {
 		project.add_cfiles("sources/backends/android_native_app_glue.c");
 		project.add_define("IRON_ANDROID");
 		project.add_define("IRON_VULKAN");
-		project.add_define("IRON_ANDROID_API=24");
 		project.add_define("VK_USE_PLATFORM_ANDROID_KHR");
 		project.add_lib("vulkan");
 		project.add_lib("log");
@@ -304,9 +303,9 @@ else if (platform === "android") {
 	project.target_options.android.package = flags.package;
 	project.target_options.android.permissions = ["android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.READ_EXTERNAL_STORAGE", "android.permission.INTERNET"];
 	project.target_options.android.screenOrientation = ["sensorLandscape"];
-	project.target_options.android.minSdkVersion = 30;
-	project.target_options.android.targetSdkVersion = 33;
-	project.target_options.android.versionCode = 240000;
+	project.target_options.android.minSdkVersion = 33;
+	project.target_options.android.targetSdkVersion = 36;
+	project.target_options.android.versionCode = 250601;
 	project.target_options.android.versionName = "1.0 alpha";
 }
 else if (platform === "ios") {

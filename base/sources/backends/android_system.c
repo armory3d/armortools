@@ -11,6 +11,7 @@
 #include <iron_video.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 #include <vulkan/vulkan_android.h>
 #include <vulkan/vulkan_core.h>
@@ -1083,7 +1084,7 @@ bool iron_internal_handle_messages(void) {
 	int events;
 	struct android_poll_source *source;
 
-	while ((ident = ALooper_pollAll(paused ? -1 : 0, NULL, &events, (void **)&source)) >= 0) {
+	while ((ident = ALooper_pollOnce(paused ? -1 : 0, NULL, &events, (void **)&source)) >= 0) {
 		if (source != NULL) {
 			source->process(app, source);
 		}
@@ -1113,9 +1114,7 @@ bool iron_internal_handle_messages(void) {
 		activityJustResized = false;
 		int32_t width = iron_android_width();
 		int32_t height = iron_android_height();
-#ifdef IRON_VULKAN
 		iron_gpu_internal_resize(width, height);
-#endif
 		iron_internal_call_resize_callback(width, height);
 	}
 
