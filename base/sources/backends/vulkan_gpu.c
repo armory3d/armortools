@@ -899,18 +899,18 @@ void iron_gpu_internal_init() {
 			.ppEnabledExtensionNames = (const char *const *)wanted_device_extensions,
 		};
 
+		VkPhysicalDeviceRayTracingPipelineFeaturesKHR raytracing_pipeline_ext = {0};
+		VkPhysicalDeviceAccelerationStructureFeaturesKHR raytracing_acceleration_structure_ext = {0};
+		VkPhysicalDeviceBufferDeviceAddressFeatures buffer_device_address_ext = {0};
 		if (iron_gpu_raytrace_supported()) {
-			VkPhysicalDeviceRayTracingPipelineFeaturesKHR raytracing_pipeline_ext = {0};
 			raytracing_pipeline_ext.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
 			raytracing_pipeline_ext.pNext = deviceinfo.pNext;
 			raytracing_pipeline_ext.rayTracingPipeline = VK_TRUE;
 
-			VkPhysicalDeviceAccelerationStructureFeaturesKHR raytracing_acceleration_structure_ext = {0};
 			raytracing_acceleration_structure_ext.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
 			raytracing_acceleration_structure_ext.pNext = &raytracing_pipeline_ext;
 			raytracing_acceleration_structure_ext.accelerationStructure = VK_TRUE;
 
-			VkPhysicalDeviceBufferDeviceAddressFeatures buffer_device_address_ext = {0};
 			buffer_device_address_ext.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
 			buffer_device_address_ext.pNext = &raytracing_acceleration_structure_ext;
 			buffer_device_address_ext.bufferDeviceAddress = VK_TRUE;
@@ -1947,7 +1947,6 @@ void iron_gpu_pipeline_init(iron_gpu_pipeline_t *pipeline) {
 }
 
 void iron_gpu_pipeline_destroy(iron_gpu_pipeline_t *pipeline) {
-	vkDestroyPipeline(vk_ctx.device, pipeline->impl.pipeline, NULL);
 	vkDestroyPipeline(vk_ctx.device, pipeline->impl.pipeline, NULL);
 	vkDestroyPipelineLayout(vk_ctx.device, pipeline->impl.pipeline_layout, NULL);
 }
