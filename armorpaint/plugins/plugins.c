@@ -23,11 +23,12 @@ FN(io_usd_parse) {
 	return JS_NewInt64(ctx, (int64_t)io_usd_parse(ab, len));
 }
 
-void *io_gltf_parse(char *buf, size_t size);
+void *io_gltf_parse(char *buf, size_t size, const char *path);
 FN(io_gltf_parse) {
 	size_t len;
 	void *ab = JS_GetArrayBuffer(ctx, &len, argv[0]);
-	return JS_NewInt64(ctx, (int64_t)io_gltf_parse(ab, len));
+	const char *path = JS_ToCString(ctx, argv[1]);
+	return JS_NewInt64(ctx, (int64_t)io_gltf_parse(ab, len, path));
 }
 
 void *io_fbx_parse(char *buf, size_t size);
@@ -43,7 +44,7 @@ void plugin_embed() {
 	BIND(proc_xatlas_unwrap, 1);
 	BIND(io_svg_parse, 1);
 	BIND(io_usd_parse, 1);
-	BIND(io_gltf_parse, 1);
+	BIND(io_gltf_parse, 2);
 	BIND(io_fbx_parse, 1);
 
 	JS_FreeValue(js_ctx, global_obj);
