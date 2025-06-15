@@ -2152,80 +2152,6 @@ void iron_raytrace_as_build(struct iron_gpu_buffer *vb_full, iron_gpu_buffer_t *
 }
 
 void iron_raytrace_set_textures(iron_gpu_texture_t *tex0, iron_gpu_texture_t *tex1, iron_gpu_texture_t *tex2, iron_gpu_texture_t *texenv, iron_gpu_texture_t *texsobol, iron_gpu_texture_t *texscramble, iron_gpu_texture_t *texrank) {
-	iron_gpu_texture_t *texpaint0;
-	iron_gpu_texture_t *texpaint1;
-	iron_gpu_texture_t *texpaint2;
-
-	// iron_gpu_texture_t *texpaint0_image = tex0;
-	// iron_gpu_texture_t *texpaint0_tex = texpaint0_image;
-	// iron_gpu_texture_t *texpaint0_rt = texpaint0_image->render_target_;
-
-	// if (texpaint0_tex != NULL) {
-	// 	iron_gpu_texture_t *texture = texpaint0_tex;
-	// 	if (!texture->_uploaded) {
-	// 		iron_gpu_command_list_upload_texture(&gpu_command_list, texture);
-	// 		texture->_uploaded = true;
-	// 	}
-	// 	texpaint0 = (iron_gpu_texture_t *)malloc(sizeof(iron_gpu_texture_t));
-	// 	#ifdef IRON_DIRECT3D12
-	// 	texpaint0->impl.srvDescriptorHeap = texture->impl.srvDescriptorHeap;
-	// 	#endif
-	// 	#ifdef IRON_VULKAN
-	// 	texpaint0->impl.view = texture->impl.view;
-	// 	#endif
-	// }
-	// else {
-	// 	texpaint0 = texpaint0_rt;
-	// }
-
-	// iron_gpu_texture_t *texpaint1_image = tex1;
-	// iron_gpu_texture_t *texpaint1_tex = texpaint1_image;
-	// iron_gpu_texture_t *texpaint1_rt = texpaint1_image->render_target_;
-
-	// if (texpaint1_tex != NULL) {
-	// 	iron_gpu_texture_t *texture = texpaint1_tex;
-	// 	if (!texture->_uploaded) {
-	// 		iron_gpu_command_list_upload_texture(&gpu_command_list, texture);
-	// 		texture->_uploaded = true;
-	// 	}
-	// 	texpaint1 = (iron_gpu_texture_t *)malloc(sizeof(iron_gpu_texture_t));
-	// 	#ifdef IRON_DIRECT3D12
-	// 	texpaint1->impl.srvDescriptorHeap = texture->impl.srvDescriptorHeap;
-	// 	#endif
-	// 	#ifdef IRON_VULKAN
-	// 	texpaint1->impl.view = texture->impl.view;
-	// 	#endif
-	// }
-	// else {
-	// 	texpaint1 = texpaint1_rt;
-	// }
-
-	// iron_gpu_texture_t *texpaint2_image = tex2;
-	// iron_gpu_texture_t *texpaint2_tex = texpaint2_image;
-	// iron_gpu_texture_t *texpaint2_rt = texpaint2_image->render_target_;
-
-	// if (texpaint2_tex != NULL) {
-	// 	iron_gpu_texture_t *texture = (iron_gpu_texture_t *)texpaint2_tex;
-	// 	if (!texture->_uploaded) {
-	// 		iron_gpu_command_list_upload_texture(&gpu_command_list, texture);
-	// 		texture->_uploaded = true;
-	// 	}
-	// 	texpaint2 = (iron_gpu_texture_t *)malloc(sizeof(iron_gpu_texture_t));
-	// 	#ifdef IRON_DIRECT3D12
-	// 	texpaint2->impl.srvDescriptorHeap = texture->impl.srvDescriptorHeap;
-	// 	#endif
-	// 	#ifdef IRON_VULKAN
-	// 	texpaint2->impl.view = texture->impl.view;
-	// 	#endif
-	// }
-	// else {
-	// 	texpaint2 = texpaint2_rt;
-	// }
-
-	texpaint0 = tex0;
-	texpaint1 = tex1;
-	texpaint2 = tex2;
-
 	if (!texenv->_uploaded) {
 		iron_gpu_command_list_upload_texture(&gpu_command_list, texenv);
 		texenv->_uploaded = true;
@@ -2243,17 +2169,7 @@ void iron_raytrace_set_textures(iron_gpu_texture_t *tex0, iron_gpu_texture_t *te
 		texrank->_uploaded = true;
 	}
 
-	iron_gpu_raytrace_set_textures(texpaint0, texpaint1, texpaint2, texenv, texsobol, texscramble, texrank);
-
-	// if (texpaint0_tex != NULL) {
-	// 	free(texpaint0);
-	// }
-	// if (texpaint1_tex != NULL) {
-	// 	free(texpaint1);
-	// }
-	// if (texpaint2_tex != NULL) {
-	// 	free(texpaint2);
-	// }
+	iron_gpu_raytrace_set_textures(tex0, tex1, tex2, texenv, texsobol, texscramble, texrank);
 }
 
 void iron_raytrace_dispatch_rays(iron_gpu_texture_t *render_target, buffer_t *buffer) {
