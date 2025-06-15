@@ -56,8 +56,11 @@ static VkDescriptorSetLayout desc_layout;
 static VkDescriptorPool descriptor_pool;
 static struct descriptor_set descriptor_sets[MAX_DESCRIPTOR_SETS] = {0};
 static int descriptor_sets_count = 0;
-iron_gpu_texture_t *window_render_target;
-int current_render_targets_count = 0;
+static iron_gpu_texture_t *window_render_target;
+static int current_render_targets_count = 0;
+static VkRenderingInfo current_rendering_info;
+static VkRenderingAttachmentInfo current_color_attachment_infos[8];
+static VkRenderingAttachmentInfo current_depth_attachment_info;
 
 static bool began = false;
 static VkPhysicalDeviceProperties gpu_props;
@@ -968,11 +971,9 @@ void iron_gpu_internal_init_window(int depthBufferBits, bool vsync) {
 	VkBool32 surface_supported;
 	vkGetPhysicalDeviceSurfaceSupportKHR(vk_ctx.gpu, graphics_queue_node_index, window->surface, &surface_supported);
 
-	uint32_t formatCount;
-	vk.fpGetPhysicalDeviceSurfaceFormatsKHR(vk_ctx.gpu, window->surface, &formatCount, NULL);
-
-	VkSurfaceFormatKHR *surfFormats = (VkSurfaceFormatKHR *)malloc(formatCount * sizeof(VkSurfaceFormatKHR));
-	vk.fpGetPhysicalDeviceSurfaceFormatsKHR(vk_ctx.gpu, window->surface, &formatCount, surfFormats);
+	VkSurfaceFormatKHR surfFormats[256];
+	uint32_t formatCount = sizeof(surfFormats) / sizeof(surfFormats[0]);
+	VkResult result = vkGetPhysicalDeviceSurfaceFormatsKHR(vk_ctx.gpu, window->surface, &formatCount, surfFormats);
 
 	// If the format list includes just one entry of VK_FORMAT_UNDEFINED,
 	// the surface has no preferred format.  Otherwise, at least one
@@ -994,7 +995,6 @@ void iron_gpu_internal_init_window(int depthBufferBits, bool vsync) {
 			window->format = surfFormats[0];
 		}
 	}
-	free(surfFormats);
 	window->width = iron_window_width();
 	window->height = iron_window_height();
 	create_swapchain();
@@ -1157,9 +1157,8 @@ static void begin_pass(iron_gpu_command_list_t *list) {
 	clear_value.color.float32[2] = 0.0f;
 	clear_value.color.float32[3] = 1.0f;
 
-	VkRenderingAttachmentInfo color_attachment_infos[8];
 	for (size_t attachment_index = 0; attachment_index < 1; ++attachment_index) {
-		color_attachment_infos[attachment_index] = (VkRenderingAttachmentInfo){
+		current_color_attachment_infos[attachment_index] = (VkRenderingAttachmentInfo){
 			.sType              = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
 			.pNext              = NULL,
 			.imageView          = vk_ctx.windows[0].views[vk_ctx.windows[0].current_image],
@@ -1173,9 +1172,9 @@ static void begin_pass(iron_gpu_command_list_t *list) {
 		};
 	}
 
-	VkRenderingAttachmentInfo depth_attachment_info;
+
 	if (vk_ctx.windows[0].depth_bits > 0) {
-		depth_attachment_info = (VkRenderingAttachmentInfo) {
+		current_depth_attachment_info = (VkRenderingAttachmentInfo) {
 			.sType              = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
 			.pNext              = NULL,
 			.imageView          = vk_ctx.windows[0].depth.view,
@@ -1189,7 +1188,7 @@ static void begin_pass(iron_gpu_command_list_t *list) {
 		};
 	}
 
-	VkRenderingInfo rendering_info = {
+	current_rendering_info = (VkRenderingInfo) {
 		.sType                = VK_STRUCTURE_TYPE_RENDERING_INFO,
 		.pNext                = NULL,
 		.flags                = 0,
@@ -1197,11 +1196,11 @@ static void begin_pass(iron_gpu_command_list_t *list) {
 		.layerCount           = 1,
 		.viewMask             = 0,
 		.colorAttachmentCount = (uint32_t)1,
-		.pColorAttachments    = color_attachment_infos,
-		.pDepthAttachment     = vk_ctx.windows[0].depth_bits == 0 ? VK_NULL_HANDLE : &depth_attachment_info,
+		.pColorAttachments    = current_color_attachment_infos,
+		.pDepthAttachment     = vk_ctx.windows[0].depth_bits == 0 ? VK_NULL_HANDLE : &current_depth_attachment_info,
 		.pStencilAttachment   = VK_NULL_HANDLE,
 	};
-	vkCmdBeginRendering(list->impl._buffer, &rendering_info);
+	vkCmdBeginRendering(list->impl._buffer, &current_rendering_info);
 	in_render_pass = true;
 }
 
@@ -1605,9 +1604,8 @@ void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, str
 	clear_value.color.float32[2] = 0.0f;
 	clear_value.color.float32[3] = 1.0f;
 
-	VkRenderingAttachmentInfo color_attachment_infos[8];
 	for (size_t i = 0; i < count; ++i) {
-		color_attachment_infos[i] = (VkRenderingAttachmentInfo){
+		current_color_attachment_infos[i] = (VkRenderingAttachmentInfo){
 			.sType              = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
 			.pNext              = NULL,
 			.imageView          = targets[i]->impl.view,
@@ -1621,9 +1619,8 @@ void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, str
 		};
 	}
 
-	VkRenderingAttachmentInfo depth_attachment_info;
 	if (targets[0]->impl.depthBufferBits > 0) {
-		depth_attachment_info = (VkRenderingAttachmentInfo) {
+		current_depth_attachment_info = (VkRenderingAttachmentInfo) {
 			.sType              = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
 			.pNext              = NULL,
 			.imageView          = targets[0]->impl.depthView,
@@ -1637,7 +1634,7 @@ void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, str
 		};
 	}
 
-	VkRenderingInfo rendering_info = {
+	current_rendering_info = (VkRenderingInfo) {
 		.sType                = VK_STRUCTURE_TYPE_RENDERING_INFO,
 		.pNext                = NULL,
 		.flags                = 0,
@@ -1645,11 +1642,11 @@ void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, str
 		.layerCount           = 1,
 		.viewMask             = 0,
 		.colorAttachmentCount = (uint32_t)count,
-		.pColorAttachments    = color_attachment_infos,
-		.pDepthAttachment     = targets[0]->impl.depthBufferBits == 0 ? VK_NULL_HANDLE : &depth_attachment_info,
+		.pColorAttachments    = current_color_attachment_infos,
+		.pDepthAttachment     = targets[0]->impl.depthBufferBits == 0 ? VK_NULL_HANDLE : &current_depth_attachment_info,
 		.pStencilAttachment   = VK_NULL_HANDLE,
 	};
-	vkCmdBeginRendering(list->impl._buffer, &rendering_info);
+	vkCmdBeginRendering(list->impl._buffer, &current_rendering_info);
 	in_render_pass = true;
 
 	if (current_pipeline != NULL) {
@@ -1758,7 +1755,7 @@ void iron_gpu_command_list_get_render_target_pixels(iron_gpu_command_list_t *lis
 				   VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
 	////
-	// begin_pass(list, &current_render_pass_begin_info);
+	// begin_pass(list, &current_rendering_info);
 	////
 
 	iron_gpu_command_list_end(list);
@@ -1985,7 +1982,6 @@ void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipeline) {
 	VkPipelineDynamicStateCreateInfo dynamicState = {0};
 
 	memset(dynamicStateEnables, 0, sizeof(dynamicStateEnables));
-	memset(&dynamicState, 0, sizeof(dynamicState));
 	dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 	dynamicState.pDynamicStates = dynamicStateEnables;
 
@@ -2142,11 +2138,10 @@ void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipeline) {
 		.colorAttachmentCount = pipeline->color_attachment_count,
 		.pColorAttachmentFormats = color_attachment_formats,
 		.depthAttachmentFormat = pipeline->depth_attachment_bits > 0 ? VK_FORMAT_D32_SFLOAT : VK_FORMAT_UNDEFINED,
-		.stencilAttachmentFormat = VK_FORMAT_UNDEFINED,
 	};
 	pipeline_info.pNext = &rendering_info;
 
-	vkCreateGraphicsPipelines(vk_ctx.device, VK_NULL_HANDLE, 1, &pipeline_info, NULL, &pipeline->impl.pipeline);
+	VkResult result = vkCreateGraphicsPipelines(vk_ctx.device, VK_NULL_HANDLE, 1, &pipeline_info, NULL, &pipeline->impl.pipeline);
 
 	vkDestroyShaderModule(vk_ctx.device, pipeline->impl.frag_shader_module, NULL);
 	vkDestroyShaderModule(vk_ctx.device, pipeline->impl.vert_shader_module, NULL);
@@ -2304,7 +2299,7 @@ static void prepare_texture_image(uint8_t *tex_colors, uint32_t width, uint32_t 
 		tex_obj->imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 	}
 	else {
-		tex_obj->imageLayout = VK_IMAGE_LAYOUT_GENERAL; // VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		tex_obj->imageLayout = VK_IMAGE_LAYOUT_GENERAL; // VK_IMAGE_LAYOUT_GENERAL;
 	}
 
 	set_image_layout(tex_obj->image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, tex_obj->imageLayout);
@@ -2518,7 +2513,7 @@ void iron_gpu_texture_set_mipmap(iron_gpu_texture_t *texture, iron_gpu_texture_t
 	// memcpy(mapped_data, mipmap->data, (size_t)buffer_info.size);
 	// vkUnmapMemory(vk_ctx.device, staging_buffer_mem);
 
-	// set_image_layout(texture->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+	// set_image_layout(texture->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_GENERAL,
 	//                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
 	// VkBufferImageCopy region = {
@@ -2545,7 +2540,7 @@ void iron_gpu_texture_set_mipmap(iron_gpu_texture_t *texture, iron_gpu_texture_t
 	// flush_init_cmd();
 
 	// set_image_layout(texture->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-	//                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	//                VK_IMAGE_LAYOUT_GENERAL);
 
 	// vkFreeMemory(vk_ctx.device, staging_buffer_mem, NULL);
 	// vkDestroyBuffer(vk_ctx.device, staging_buffer, NULL);
@@ -2953,7 +2948,11 @@ static PFN_vkDestroyAccelerationStructureKHR _vkDestroyAccelerationStructureKHR 
 static PFN_vkCmdTraceRaysKHR _vkCmdTraceRaysKHR = NULL;
 
 bool iron_gpu_raytrace_supported() {
+	#ifdef IRON_ANDROID
+	return false; // Use VK_KHR_ray_query
+	#else
 	return true;
+	#endif
 }
 
 void iron_gpu_raytrace_pipeline_init(iron_gpu_raytrace_pipeline_t *pipeline, iron_gpu_command_list_t *command_list, void *ray_shader, int ray_shader_size,
@@ -3425,7 +3424,7 @@ void iron_gpu_raytrace_acceleration_structure_build(iron_gpu_raytrace_accelerati
 			VkBufferCreateInfo buffer_create_info = {
 				.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
 				.size = acceleration_build_sizes_info.accelerationStructureSize,
-				.usage = VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR,
+				.usage = VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
 				.sharingMode = VK_SHARING_MODE_EXCLUSIVE,
 			};
 			VkBuffer bottom_level_buffer = VK_NULL_HANDLE;
@@ -3670,7 +3669,7 @@ void iron_gpu_raytrace_acceleration_structure_build(iron_gpu_raytrace_accelerati
 		VkBufferCreateInfo buffer_create_info = {
 			.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
 			.size = acceleration_build_sizes_info.accelerationStructureSize,
-			.usage = VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR,
+			.usage = VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
 			.sharingMode = VK_SHARING_MODE_EXCLUSIVE,
 		};
 		VkBuffer top_level_buffer = VK_NULL_HANDLE;
@@ -4086,7 +4085,7 @@ void iron_gpu_raytrace_dispatch_rays(iron_gpu_command_list_t *command_list) {
 
 	VkDescriptorImageInfo tex0image_descriptor = {
 		.imageView = texpaint0->impl.view,
-		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+		.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
 	};
 
 	VkWriteDescriptorSet tex0_image_write = {
@@ -4101,7 +4100,7 @@ void iron_gpu_raytrace_dispatch_rays(iron_gpu_command_list_t *command_list) {
 
 	VkDescriptorImageInfo tex1image_descriptor = {
 		.imageView = texpaint1->impl.view,
-		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+		.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
 	};
 
 	VkWriteDescriptorSet tex1_image_write = {
@@ -4116,7 +4115,7 @@ void iron_gpu_raytrace_dispatch_rays(iron_gpu_command_list_t *command_list) {
 
 	VkDescriptorImageInfo tex2image_descriptor = {
 		.imageView = texpaint2->impl.view,
-		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+		.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
 	};
 
 	VkWriteDescriptorSet tex2_image_write = {
@@ -4131,7 +4130,7 @@ void iron_gpu_raytrace_dispatch_rays(iron_gpu_command_list_t *command_list) {
 
 	VkDescriptorImageInfo texenvimage_descriptor = {
 		.imageView = texenv->impl.view,
-		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+		.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
 	};
 
 	VkWriteDescriptorSet texenv_image_write = {
@@ -4146,7 +4145,7 @@ void iron_gpu_raytrace_dispatch_rays(iron_gpu_command_list_t *command_list) {
 
 	VkDescriptorImageInfo texsobolimage_descriptor = {
 		.imageView = texsobol->impl.view,
-		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+		.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
 	};
 
 	VkWriteDescriptorSet texsobol_image_write = {
@@ -4161,7 +4160,7 @@ void iron_gpu_raytrace_dispatch_rays(iron_gpu_command_list_t *command_list) {
 
 	VkDescriptorImageInfo texscrambleimage_descriptor = {
 		.imageView = texscramble->impl.view,
-		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+		.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
 	};
 
 	VkWriteDescriptorSet texscramble_image_write = {
@@ -4176,7 +4175,7 @@ void iron_gpu_raytrace_dispatch_rays(iron_gpu_command_list_t *command_list) {
 
 	VkDescriptorImageInfo texrankimage_descriptor = {
 		.imageView = texrank->impl.view,
-		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+		.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
 	};
 
 	VkWriteDescriptorSet texrank_image_write = {
@@ -4250,5 +4249,5 @@ void iron_gpu_raytrace_dispatch_rays(iron_gpu_command_list_t *command_list) {
 	_vkCmdTraceRaysKHR(command_list->impl._buffer, &raygen_shader_sbt_entry, &miss_shader_sbt_entry, &hit_shader_sbt_entry, &callable_shader_sbt_entry,
 					   output->width, output->height, 1);
 
-	// vkCmdBeginRenderPass(command_list->impl._buffer, &current_render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBeginRendering(command_list->impl._buffer, &current_rendering_info);
 }
