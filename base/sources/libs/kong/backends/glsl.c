@@ -89,19 +89,30 @@ static void write_code(char *glsl, char *directory, const char *filename, const 
 	}
 }
 
-static void write_types(char *glsl, size_t *offset, shader_stage stage, type_id input, type_id output, function *main) {
+static void write_types(char *glsl, size_t *offset, shader_stage stage, type_id inputs[64], size_t inputs_count, type_id output, function *main) {
 	type_id types[256];
 	size_t  types_size = 0;
 	find_referenced_types(main, types, &types_size);
+
+	size_t input_location = 0;
 
 	for (size_t i = 0; i < types_size; ++i) {
 		type *t = get_type(types[i]);
 
 		if (!t->built_in && !has_attribute(&t->attributes, add_name("pipe"))) {
-			if (stage == SHADER_STAGE_VERTEX && types[i] == input) {
+			bool type_is_input = false;
+			for (size_t input_index = 0; input_index < inputs_count; ++input_index) {
+				if (types[i] == inputs[input_index]) {
+					type_is_input = true;
+					break;
+				}
+			}
+
+			if (stage == SHADER_STAGE_VERTEX && type_is_input) {
 				for (size_t j = 0; j < t->members.size; ++j) {
-					*offset += sprintf(&glsl[*offset], "layout(location = %zu) in %s %s_%s;\n", j, type_string(t->members.m[j].type.type), get_name(t->name),
-					                   get_name(t->members.m[j].name));
+					*offset += sprintf(&glsl[*offset], "layout(location = %zu) in %s %s_%s;\n", input_location, type_string(t->members.m[j].type.type),
+					                   get_name(t->name), get_name(t->members.m[j].name));
+					++input_location;
 				}
 			}
 			else if (stage == SHADER_STAGE_VERTEX && types[i] == output) {
@@ -112,7 +123,7 @@ static void write_types(char *glsl, size_t *offset, shader_stage stage, type_id 
 					}
 				}
 			}
-			else if (stage == SHADER_STAGE_FRAGMENT && types[i] == input) {
+			else if (stage == SHADER_STAGE_FRAGMENT && type_is_input) {
 				for (size_t j = 0; j < t->members.size; ++j) {
 					if (j != 0) {
 						*offset += sprintf(&glsl[*offset], "in %s %s_%s;\n", type_string(t->members.m[j].type.type), get_name(t->name),
@@ -150,14 +161,20 @@ static void write_globals(char *glsl, size_t *offset, function *main) {
 
 		if (g->type == sampler_type_id) {
 		}
-		else if (g->type == tex2d_type_id) {
-			*offset += sprintf(&glsl[*offset], "uniform sampler2D _%" PRIu64 ";\n\n", g->var_index);
-		}
-		else if (g->type == tex2darray_type_id) {
-			*offset += sprintf(&glsl[*offset], "uniform sampler2DArray _%" PRIu64 ";\n\n", g->var_index);
-		}
-		else if (g->type == texcube_type_id) {
-			*offset += sprintf(&glsl[*offset], "uniform samplerCube _%" PRIu64 ";\n\n", g->var_index);
+		else if (get_type(g->type)->tex_kind != TEXTURE_KIND_NONE) {
+			if (get_type(g->type)->tex_kind == TEXTURE_KIND_2D) {
+				*offset += sprintf(&glsl[*offset], "uniform sampler2D _%" PRIu64 ";\n\n", g->var_index);
+			}
+			else if (get_type(g->type)->tex_kind == TEXTURE_KIND_2D_ARRAY) {
+				*offset += sprintf(&glsl[*offset], "uniform sampler2DArray _%" PRIu64 ";\n\n", g->var_index);
+			}
+			else if (get_type(g->type)->tex_kind == TEXTURE_KIND_CUBE) {
+				*offset += sprintf(&glsl[*offset], "uniform samplerCube _%" PRIu64 ";\n\n", g->var_index);
+			}
+			else {
+				// TODO
+				assert(false);
+			}
 		}
 		else if (g->type == float_id) {
 		}
@@ -173,7 +190,8 @@ static void write_globals(char *glsl, size_t *offset, function *main) {
 	}
 }
 
-static void write_functions(char *code, size_t *offset, shader_stage stage, type_id input, type_id output, function *main, bool flip) {
+static void write_functions(char *code, size_t *offset, shader_stage stage, type_id inputs[64], size_t inputs_count, type_id output, function *main,
+                            bool flip) {
 	function *functions[256];
 	size_t    functions_size = 0;
 
@@ -325,7 +343,17 @@ static void write_functions(char *code, size_t *offset, shader_stage stage, type
 
 				indent(code, offset, indentation);
 
-				if (f == main && o->op_load_access_list.from.type.type == input) {
+				bool from_is_input = false;
+				if (f == main) {
+					for (size_t input_index = 0; input_index < inputs_count; ++input_index) {
+						if (o->op_load_access_list.from.type.type == inputs[input_index]) {
+							from_is_input = true;
+							break;
+						}
+					}
+				}
+
+				if (from_is_input) {
 					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = %s", type_string(o->op_load_access_list.to.type.type),
 					                   o->op_load_access_list.to.index, type_string(o->op_load_access_list.from.type.type));
 				}
@@ -342,7 +370,7 @@ static void write_functions(char *code, size_t *offset, shader_stage stage, type
 						*offset += sprintf(&code[*offset], "[_%" PRIu64 "]", o->op_load_access_list.access_list[i].access_element.index.index);
 						break;
 					case ACCESS_MEMBER:
-						if (global_var_index != 0 || (f == main && o->op_load_access_list.from.type.type == input && i == 0)) {
+						if (global_var_index != 0 || (from_is_input && i == 0)) {
 							*offset += sprintf(&code[*offset], "_%s", get_name(o->op_load_access_list.access_list[i].access_member.name));
 						}
 						else {
@@ -457,20 +485,21 @@ static void glsl_export_vertex(char *directory, function *main, bool flip) {
 
 	size_t offset = 0;
 
-	assert(main->parameters_size > 0);
-	type_id vertex_input  = main->parameter_types[0].type;
+	type_id vertex_inputs[64];
+	for (size_t input_index = 0; input_index < main->parameters_size; ++input_index) {
+		vertex_inputs[input_index] = main->parameter_types[input_index].type;
+	}
 	type_id vertex_output = main->return_type.type;
 
-	check(vertex_input != NO_TYPE, context, "vertex input missing");
 	check(vertex_output != NO_TYPE, context, "vertex output missing");
 
 	offset += sprintf(&glsl[offset], "#version 330\n\n");
 
-	write_types(glsl, &offset, SHADER_STAGE_VERTEX, vertex_input, vertex_output, main);
+	write_types(glsl, &offset, SHADER_STAGE_VERTEX, vertex_inputs, main->parameters_size, vertex_output, main);
 
 	write_globals(glsl, &offset, main);
 
-	write_functions(glsl, &offset, SHADER_STAGE_VERTEX, vertex_input, vertex_output, main, flip);
+	write_functions(glsl, &offset, SHADER_STAGE_VERTEX, vertex_inputs, main->parameters_size, vertex_output, main, flip);
 
 	char *name = get_name(main->name);
 
@@ -507,11 +536,11 @@ static void glsl_export_fragment(char *directory, function *main) {
 
 	offset += sprintf(&glsl[offset], "#version 330\n\n");
 
-	write_types(glsl, &offset, SHADER_STAGE_FRAGMENT, pixel_input, NO_TYPE, main);
+	write_types(glsl, &offset, SHADER_STAGE_FRAGMENT, &pixel_input, 1, NO_TYPE, main);
 
 	write_globals(glsl, &offset, main);
 
-	write_functions(glsl, &offset, SHADER_STAGE_FRAGMENT, pixel_input, NO_TYPE, main, false);
+	write_functions(glsl, &offset, SHADER_STAGE_FRAGMENT, &pixel_input, 1, NO_TYPE, main, false);
 
 	char *name = get_name(main->name);
 
@@ -535,11 +564,11 @@ static void glsl_export_compute(char *directory, function *main) {
 
 	offset += sprintf(&glsl[offset], "#version 330\n\n");
 
-	write_types(glsl, &offset, SHADER_STAGE_COMPUTE, NO_TYPE, NO_TYPE, main);
+	write_types(glsl, &offset, SHADER_STAGE_COMPUTE, NULL, 0, NO_TYPE, main);
 
 	write_globals(glsl, &offset, main);
 
-	write_functions(glsl, &offset, SHADER_STAGE_COMPUTE, NO_TYPE, NO_TYPE, main, false);
+	write_functions(glsl, &offset, SHADER_STAGE_COMPUTE, NULL, 0, NO_TYPE, main, false);
 
 	char *name = get_name(main->name);
 

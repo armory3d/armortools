@@ -66,8 +66,14 @@ static char *type_string(type_id type) {
 	if (type == bvh_type_id) {
 		return "RaytracingAccelerationStructure";
 	}
-	if (type == tex2d_type_id) {
-		return "Texture2D<float4>";
+	if (get_type(type)->tex_kind != TEXTURE_KIND_NONE) {
+		if (get_type(type)->tex_kind == TEXTURE_KIND_2D) {
+			return "Texture2D<float4>";
+		}
+		else {
+			// TODO
+			assert(false);
+		}
 	}
 	return get_name(get_type(type)->name);
 }
@@ -319,7 +325,7 @@ static void assign_register_indices(uint32_t *register_indices, function *shader
 				register_indices[global_index] = sampler_index;
 				sampler_index += 1;
 			}
-			else if (base_type == tex2d_type_id) {
+			else if (get_type(base_type)->tex_kind != TEXTURE_KIND_NONE) {
 				if (t->array_size == UINT32_MAX) {
 					register_indices[global_index] = 0;
 				}
@@ -332,7 +338,7 @@ static void assign_register_indices(uint32_t *register_indices, function *shader
 					srv_index += 1;
 				}
 			}
-			else if (base_type == texcube_type_id || base_type == tex2darray_type_id || base_type == bvh_type_id) {
+			else if (base_type == bvh_type_id) {
 				register_indices[global_index] = srv_index;
 				srv_index += 1;
 			}
@@ -402,24 +408,30 @@ static void write_globals(char *hlsl, size_t *offset, function *main, function *
 		if (base_type == sampler_type_id) {
 			*offset += sprintf(&hlsl[*offset], "SamplerState _%" PRIu64 " : register(s%i);\n\n", g->var_index, register_index);
 		}
-		else if (base_type == tex2d_type_id) {
-			if (writable) {
-				*offset += sprintf(&hlsl[*offset], "RWTexture2D<float4> _%" PRIu64 " : register(u%i);\n\n", g->var_index, register_index);
-			}
-			else {
-				if (t->array_size > 0 && t->array_size == UINT32_MAX) {
-					*offset += sprintf(&hlsl[*offset], "Texture2D<float4> _%" PRIu64 "[] : register(t%i, space1);\n\n", g->var_index, register_index);
+		else if (get_type(base_type)->tex_kind != TEXTURE_KIND_NONE) {
+			if (get_type(base_type)->tex_kind == TEXTURE_KIND_2D) {
+				if (writable) {
+					*offset += sprintf(&hlsl[*offset], "RWTexture2D<float4> _%" PRIu64 " : register(u%i);\n\n", g->var_index, register_index);
 				}
 				else {
-					*offset += sprintf(&hlsl[*offset], "Texture2D<float4> _%" PRIu64 " : register(t%i);\n\n", g->var_index, register_index);
+					if (t->array_size > 0 && t->array_size == UINT32_MAX) {
+						*offset += sprintf(&hlsl[*offset], "Texture2D<float4> _%" PRIu64 "[] : register(t%i, space1);\n\n", g->var_index, register_index);
+					}
+					else {
+						*offset += sprintf(&hlsl[*offset], "Texture2D<float4> _%" PRIu64 " : register(t%i);\n\n", g->var_index, register_index);
+					}
 				}
 			}
-		}
-		else if (base_type == tex2darray_type_id) {
-			*offset += sprintf(&hlsl[*offset], "Texture2DArray<float4> _%" PRIu64 " : register(t%i);\n\n", g->var_index, register_index);
-		}
-		else if (base_type == texcube_type_id) {
-			*offset += sprintf(&hlsl[*offset], "TextureCube<float4> _%" PRIu64 " : register(t%i);\n\n", g->var_index, register_index);
+			else if (get_type(base_type)->tex_kind == TEXTURE_KIND_2D_ARRAY) {
+				*offset += sprintf(&hlsl[*offset], "Texture2DArray<float4> _%" PRIu64 " : register(t%i);\n\n", g->var_index, register_index);
+			}
+			else if (get_type(base_type)->tex_kind == TEXTURE_KIND_CUBE) {
+				*offset += sprintf(&hlsl[*offset], "TextureCube<float4> _%" PRIu64 " : register(t%i);\n\n", g->var_index, register_index);
+			}
+			else {
+				// TODO
+				assert(false);
+			}
 		}
 		else if (base_type == bvh_type_id) {
 			*offset += sprintf(&hlsl[*offset], "RaytracingAccelerationStructure  _%" PRIu64 " : register(t%i);\n\n", g->var_index, register_index);
@@ -1139,7 +1151,7 @@ static void write_functions(char *hlsl, size_t *offset, shader_stage stage, func
 					case ACCESS_ELEMENT: {
 						type *from_type = get_type(o->op_load_access_list.from.type.type);
 
-						if (from_type->array_size == UINT32_MAX && from_type->base == tex2d_type_id) {
+						if (from_type->array_size == UINT32_MAX && get_type(from_type->base)->tex_kind != TEXTURE_KIND_NONE) {
 							*offset += sprintf(&hlsl[*offset], "[NonUniformResourceIndex(_%" PRIu64 ")]",
 							                   o->op_load_access_list.access_list[i].access_element.index.index);
 						}

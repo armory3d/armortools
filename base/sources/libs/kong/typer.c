@@ -43,14 +43,30 @@ static void resolve_types_in_element(statement *parent_block, expression *elemen
 
 	assert(of_type != NO_TYPE);
 
-	if (of_type == tex2d_type_id) {
-		element->type.type = float4_id;
-	}
-	else if (of_type == tex2darray_type_id) {
-		element->type.type = tex2d_type_id;
+	type *of = get_type(of_type);
+
+	if (of->tex_kind != TEXTURE_KIND_NONE) {
+		if (of->tex_format == TEXTURE_FORMAT_UNDEFINED) {
+			element->type.type = float4_id;
+		}
+		else if (of->tex_format == TEXTURE_FORMAT_FRAMEBUFFER) {
+			element->type.type = float4_id;
+		}
+		else if (of->tex_format == TEXTURE_FORMAT_RGBA32_FLOAT) {
+			element->type.type = float4_id;
+		}
+		else if (of->tex_format == TEXTURE_FORMAT_RGBA8_UNORM) {
+			element->type.type = float4_id;
+		}
+		else if (of->tex_format == TEXTURE_FORMAT_DEPTH) {
+			element->type.type = float_id;
+		}
+		else {
+			// TODO
+			assert(false);
+		}
 	}
 	else {
-		type *of = get_type(of_type);
 		if (of->array_size > 0) {
 			element->type.type = of->base;
 		}
@@ -561,13 +577,31 @@ void resolve_types_in_expression(statement *parent, expression *e) {
 		break;
 	}
 	case EXPRESSION_CALL: {
-		for (function_id i = 0; get_function(i) != NULL; ++i) {
-			function *f = get_function(i);
-			if (f->name == e->call.func_name) {
-				e->type = f->return_type;
-				break;
+		if (e->call.func_name == add_name("sample") || e->call.func_name == add_name("sample_lod")) {
+			if (e->call.parameters.e[0]->kind == EXPRESSION_VARIABLE) {
+				global *g = find_global(e->call.parameters.e[0]->variable);
+				assert(g != NULL);
+				if (is_depth(get_type(g->type)->tex_format)) {
+					e->type.type = float_id;
+				}
+				else {
+					e->type.type = float4_id;
+				}
+			}
+			else {
+				e->type.type = float4_id;
 			}
 		}
+		else {
+			for (function_id i = 0; get_function(i) != NULL; ++i) {
+				function *f = get_function(i);
+				if (f->name == e->call.func_name) {
+					e->type = f->return_type;
+					break;
+				}
+			}
+		}
+
 		for (size_t i = 0; i < e->call.parameters.size; ++i) {
 			resolve_types_in_expression(parent, e->call.parameters.e[i]);
 		}

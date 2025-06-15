@@ -70,6 +70,7 @@ typedef enum integration_kind { INTEGRATION_KORE3 } integration_kind;
 ////
 /*
 ////
+
 int main(int argc, char **argv) {
 	arg_mode mode = MODE_MODECHECK;
 

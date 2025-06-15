@@ -923,6 +923,43 @@ descriptor_set_group *find_descriptor_set_group_for_function(function *f) {
 	}
 }
 
+void find_sampler_use() {
+	for (function_id i = 0; get_function(i) != NULL; ++i) {
+		function *f = get_function(i);
+
+		if (f->block == NULL) {
+			continue;
+		}
+
+		uint8_t *data = f->code.o;
+		size_t   size = f->code.size;
+
+		size_t index = 0;
+		while (index < size) {
+			opcode *o = (opcode *)&data[index];
+
+			switch (o->type) {
+			case OPCODE_CALL:
+				if (o->op_call.func == add_name("sample") || o->op_call.func == add_name("sample_lod")) {
+					if (is_depth(get_type(o->op_call.parameters[0].type.type)->tex_format)) {
+
+						type *sampler_type = get_type(o->op_call.parameters[1].type.type);
+
+						global *g = find_global_by_var(o->op_call.parameters[1]);
+						assert(g != NULL);
+						g->usage |= GLOBAL_USAGE_SAMPLE_DEPTH;
+					}
+				}
+				break;
+			default:
+				break;
+			}
+
+			index += o->size;
+		}
+	}
+}
+
 void analyze(void) {
 	find_all_render_pipelines();
 	find_render_pipeline_groups();
@@ -933,4 +970,6 @@ void analyze(void) {
 	find_raytracing_pipeline_groups();
 
 	find_descriptor_set_groups();
+
+	find_sampler_use();
 }

@@ -180,24 +180,30 @@ static void write_globals(char *code, size_t *offset, char *header_code, size_t 
 		if (base_type == sampler_type_id) {
 			*offset += sprintf(&code[*offset], "SamplerState _%" PRIu64 ";\n\n", g->var_index);
 		}
-		else if (base_type == tex2d_type_id) {
-			if (has_attribute(&g->attributes, add_name("write"))) {
-				*offset += sprintf(&code[*offset], "RWTexture2D<float4> _%" PRIu64 ";\n\n", g->var_index);
-			}
-			else {
-				if (t->array_size > 0 && t->array_size == UINT32_MAX) {
-					*offset += sprintf(&code[*offset], "Texture2D<float4> _%" PRIu64 "[];\n\n", g->var_index);
+		else if (get_type(base_type)->tex_kind != TEXTURE_KIND_NONE) {
+			if (get_type(base_type)->tex_kind == TEXTURE_KIND_2D) {
+				if (has_attribute(&g->attributes, add_name("write"))) {
+					*offset += sprintf(&code[*offset], "RWTexture2D<float4> _%" PRIu64 ";\n\n", g->var_index);
 				}
 				else {
-					*offset += sprintf(&code[*offset], "Texture2D<float4> _%" PRIu64 ";\n\n", g->var_index);
+					if (t->array_size > 0 && t->array_size == UINT32_MAX) {
+						*offset += sprintf(&code[*offset], "Texture2D<float4> _%" PRIu64 "[];\n\n", g->var_index);
+					}
+					else {
+						*offset += sprintf(&code[*offset], "Texture2D<float4> _%" PRIu64 ";\n\n", g->var_index);
+					}
 				}
 			}
-		}
-		else if (base_type == tex2darray_type_id) {
-			*offset += sprintf(&code[*offset], "Texture2DArray<float4> _%" PRIu64 ";\n\n", g->var_index);
-		}
-		else if (base_type == texcube_type_id) {
-			*offset += sprintf(&code[*offset], "TextureCube<float4> _%" PRIu64 ";\n\n", g->var_index);
+			else if (get_type(base_type)->tex_kind == TEXTURE_KIND_2D_ARRAY) {
+				*offset += sprintf(&code[*offset], "Texture2DArray<float4> _%" PRIu64 ";\n\n", g->var_index);
+			}
+			else if (get_type(base_type)->tex_kind == TEXTURE_KIND_CUBE) {
+				*offset += sprintf(&code[*offset], "TextureCube<float4> _%" PRIu64 ";\n\n", g->var_index);
+			}
+			else {
+				// TODO
+				assert(false);
+			}
 		}
 		else if (base_type == bvh_type_id) {
 			*offset += sprintf(&code[*offset], "RaytracingAccelerationStructure  _%" PRIu64 ";\n\n", g->var_index);

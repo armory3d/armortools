@@ -40,9 +40,6 @@ type_id bool2_id;
 type_id bool3_id;
 type_id bool4_id;
 type_id function_type_id;
-type_id tex2d_type_id;
-type_id tex2darray_type_id;
-type_id texcube_type_id;
 type_id sampler_type_id;
 type_id ray_type_id;
 type_id bvh_type_id;
@@ -68,14 +65,8 @@ void types_init(void) {
 	void_id                     = add_type(add_name("void"));
 	get_type(void_id)->built_in = true;
 
-	sampler_type_id                        = add_type(add_name("sampler"));
-	get_type(sampler_type_id)->built_in    = true;
-	tex2d_type_id                          = add_type(add_name("tex2d"));
-	get_type(tex2d_type_id)->built_in      = true;
-	tex2darray_type_id                     = add_type(add_name("tex2darray"));
-	get_type(tex2darray_type_id)->built_in = true;
-	texcube_type_id                        = add_type(add_name("texcube"));
-	get_type(texcube_type_id)->built_in    = true;
+	sampler_type_id                     = add_type(add_name("sampler"));
+	get_type(sampler_type_id)->built_in = true;
 
 	bool_id                      = add_type(add_name("bool"));
 	get_type(bool_id)->built_in  = true;
@@ -193,6 +184,11 @@ static void grow_if_needed(uint64_t size) {
 	}
 }
 
+static bool types_equal(type *a, type *b) {
+	return a->name == b->name && a->attributes.attributes_count == 0 && b->attributes.attributes_count == 0 && a->members.size == 0 && b->members.size == 0 &&
+	       a->built_in == b->built_in && a->array_size == b->array_size && a->base == b->base && a->tex_kind == b->tex_kind && a->tex_format == b->tex_format;
+}
+
 type_id add_type(name_id name) {
 	grow_if_needed(next_type_index + 1);
 
@@ -205,6 +201,25 @@ type_id add_type(name_id name) {
 	types[s].built_in                    = false;
 	types[s].array_size                  = 0;
 	types[s].base                        = NO_TYPE;
+	types[s].tex_kind                    = TEXTURE_KIND_NONE;
+	types[s].tex_format                  = TEXTURE_FORMAT_UNDEFINED;
+
+	return s;
+}
+
+type_id add_full_type(type *t) {
+	for (type_id type_index = 0; type_index < next_type_index; ++type_index) {
+		if (types_equal(&types[type_index], t)) {
+			return type_index;
+		}
+	}
+
+	grow_if_needed(next_type_index + 1);
+
+	type_id s = next_type_index;
+	++next_type_index;
+
+	types[s] = *t;
 
 	return s;
 }
@@ -399,5 +414,19 @@ type_id vector_to_size(type_id vector_type, uint32_t size) {
 	else {
 		assert(false);
 		return float_id;
+	}
+}
+
+bool is_depth(texture_format format) {
+	switch (format) {
+	case TEXTURE_FORMAT_DEPTH16_UNORM:
+	case TEXTURE_FORMAT_DEPTH24_NOTHING8:
+	case TEXTURE_FORMAT_DEPTH24_STENCIL8:
+	case TEXTURE_FORMAT_DEPTH32_FLOAT:
+	case TEXTURE_FORMAT_DEPTH32_FLOAT_STENCIL8_NOTHING24:
+	case TEXTURE_FORMAT_DEPTH:
+		return true;
+	default:
+		return false;
 	}
 }

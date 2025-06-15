@@ -151,13 +151,13 @@ void globals_init(void) {
 	uint_value.value.uints[0] = 37;
 	add_global_with_value(uint_id, attributes, add_name("TEXTURE_FORMAT_DEPTH16_UNORM"), uint_value);
 	uint_value.value.uints[0] = 38;
-	add_global_with_value(uint_id, attributes, add_name("TEXTURE_FORMAT_DEPTH24PLUS_NOTHING8"), uint_value);
+	add_global_with_value(uint_id, attributes, add_name("TEXTURE_FORMAT_DEPTH24_NOTHING8"), uint_value);
 	uint_value.value.uints[0] = 39;
-	add_global_with_value(uint_id, attributes, add_name("TEXTURE_FORMAT_DEPTH24PLUS_STENCIL8"), uint_value);
+	add_global_with_value(uint_id, attributes, add_name("TEXTURE_FORMAT_DEPTH24_STENCIL8"), uint_value);
 	uint_value.value.uints[0] = 40;
-	add_global_with_value(uint_id, attributes, add_name("TEXTURE_FORMAT_DEPTH32FLOAT"), uint_value);
+	add_global_with_value(uint_id, attributes, add_name("TEXTURE_FORMAT_DEPTH32_FLOAT"), uint_value);
 	uint_value.value.uints[0] = 41;
-	add_global_with_value(uint_id, attributes, add_name("TEXTURE_FORMAT_DEPTH32FLOAT_STENCIL8_NOTHING24"), uint_value);
+	add_global_with_value(uint_id, attributes, add_name("TEXTURE_FORMAT_DEPTH32_FLOAT_STENCIL8_NOTHING24"), uint_value);
 }
 
 global_id add_global(type_id type, attribute_list attributes, name_id name) {

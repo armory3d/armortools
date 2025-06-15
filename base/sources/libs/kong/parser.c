@@ -1114,6 +1114,148 @@ static definition parse_function(state_t *state) {
 	return d;
 }
 
+static texture_format convert_texture_format(state_t *state, name_id format_name) {
+	if (format_name == NO_NAME) {
+		return TEXTURE_FORMAT_UNDEFINED;
+	}
+	else if (format_name == add_name("framebuffer_format")) {
+		return TEXTURE_FORMAT_FRAMEBUFFER;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_DEPTH")) {
+		return TEXTURE_FORMAT_DEPTH;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_R8_UNORM")) {
+		return TEXTURE_FORMAT_R8_UNORM;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_R8_SNORM")) {
+		return TEXTURE_FORMAT_R8_SNORM;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_R8_UINT")) {
+		return TEXTURE_FORMAT_R8_UINT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_R8_SINT")) {
+		return TEXTURE_FORMAT_R8_SINT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_R16_UINT")) {
+		return TEXTURE_FORMAT_R16_UINT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_R16_SINT")) {
+		return TEXTURE_FORMAT_R16_SINT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_R16_FLOAT")) {
+		return TEXTURE_FORMAT_R16_FLOAT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RG8_UNORM")) {
+		return TEXTURE_FORMAT_RG8_UNORM;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RG8_SNORM")) {
+		return TEXTURE_FORMAT_RG8_SNORM;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RG8_UINT")) {
+		return TEXTURE_FORMAT_RG8_UINT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RG8_SINT")) {
+		return TEXTURE_FORMAT_RG8_SINT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_R32_UINT")) {
+		return TEXTURE_FORMAT_R32_UINT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_R32_SINT")) {
+		return TEXTURE_FORMAT_R32_SINT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_R32_FLOAT")) {
+		return TEXTURE_FORMAT_R32_FLOAT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RG16_UINT")) {
+		return TEXTURE_FORMAT_RG16_UINT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RG16_SINT")) {
+		return TEXTURE_FORMAT_RG16_SINT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RG16_FLOAT")) {
+		return TEXTURE_FORMAT_RG16_FLOAT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RGBA8_UNORM")) {
+		return TEXTURE_FORMAT_RGBA8_UNORM;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RGBA8_UNORM_SRGB")) {
+		return TEXTURE_FORMAT_RGBA8_UNORM_SRGB;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RGBA8_SNORM")) {
+		return TEXTURE_FORMAT_RGBA8_SNORM;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RGBA8_UINT")) {
+		return TEXTURE_FORMAT_RGBA8_UINT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RGBA8_SINT")) {
+		return TEXTURE_FORMAT_RGBA8_SINT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_BGRA8_UNORM")) {
+		return TEXTURE_FORMAT_BGRA8_UNORM;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_BGRA8_UNORM_SRGB")) {
+		return TEXTURE_FORMAT_BGRA8_UNORM_SRGB;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RGB9E5U_FLOAT")) {
+		return TEXTURE_FORMAT_RGB9E5U_FLOAT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RGB10A2_UINT")) {
+		return TEXTURE_FORMAT_RGB10A2_UINT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RGB10A2_UNORM")) {
+		return TEXTURE_FORMAT_RGB10A2_UNORM;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RG11B10U_FLOAT")) {
+		return TEXTURE_FORMAT_RG11B10U_FLOAT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RG32_UINT")) {
+		return TEXTURE_FORMAT_RG32_UINT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RG32_SINT")) {
+		return TEXTURE_FORMAT_RG32_SINT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RG32_FLOAT")) {
+		return TEXTURE_FORMAT_RG32_FLOAT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RGBA16_UINT")) {
+		return TEXTURE_FORMAT_RGBA16_UINT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RGBA16_SINT")) {
+		return TEXTURE_FORMAT_RGBA16_SINT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RGBA16_FLOAT")) {
+		return TEXTURE_FORMAT_RGBA16_FLOAT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RGBA32_UINT")) {
+		return TEXTURE_FORMAT_RGBA32_UINT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RGBA32_SINT")) {
+		return TEXTURE_FORMAT_RGBA32_SINT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_RGBA32_FLOAT")) {
+		return TEXTURE_FORMAT_RGBA32_FLOAT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_DEPTH16_UNORM")) {
+		return TEXTURE_FORMAT_DEPTH16_UNORM;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_DEPTH24_NOTHING8")) {
+		return TEXTURE_FORMAT_DEPTH24_NOTHING8;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_DEPTH24_STENCIL8")) {
+		return TEXTURE_FORMAT_DEPTH24_STENCIL8;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_DEPTH32_FLOAT")) {
+		return TEXTURE_FORMAT_DEPTH32_FLOAT;
+	}
+	else if (format_name == add_name("TEXTURE_FORMAT_DEPTH32_FLOAT_STENCIL8_NOTHING24")) {
+		return TEXTURE_FORMAT_DEPTH32_FLOAT_STENCIL8_NOTHING24;
+	}
+	else {
+		error(state->context, "Unknown texture format %s", format_name);
+		return TEXTURE_FORMAT_UNDEFINED;
+	}
+}
+
 static definition parse_const(state_t *state, attribute_list attributes) {
 	advance_state(state);
 	match_token(state, TOKEN_IDENTIFIER, "Expected an identifier");
@@ -1123,8 +1265,9 @@ static definition parse_const(state_t *state, attribute_list attributes) {
 	match_token(state, TOKEN_COLON, "Expected a colon");
 	advance_state(state);
 
-	name_id type_name = NO_NAME;
-	type_id type      = NO_TYPE;
+	name_id type_name   = NO_NAME;
+	type_id type        = NO_TYPE;
+	name_id format_name = NO_NAME;
 
 	if (current(state).kind == TOKEN_LEFT_CURLY) {
 		type = parse_struct_inner(state, NO_NAME).type;
@@ -1157,10 +1300,36 @@ static definition parse_const(state_t *state, attribute_list attributes) {
 		value = parse_expression(state);
 	}
 
+	if (current(state).kind == TOKEN_OPERATOR && current(state).op == OPERATOR_LESS) {
+		advance_state(state);
+		match_token(state, TOKEN_IDENTIFIER, "Expected an identifier");
+		format_name = current(state).identifier;
+		advance_state(state);
+
+		if (current(state).kind == TOKEN_LEFT_PAREN) {
+			advance_state(state);
+			match_token(state, TOKEN_RIGHT_PAREN, "Expected a right paren");
+			advance_state(state);
+		}
+
+		if (current(state).kind != TOKEN_OPERATOR || current(state).op != OPERATOR_GREATER) {
+			error(state->context, "Expected a greater than");
+		}
+		advance_state(state);
+	}
+
 	match_token(state, TOKEN_SEMICOLON, "Expected a semicolon");
 	advance_state(state);
 
 	definition d = {0};
+
+	name_id tex1d_name        = add_name("tex1d");
+	name_id tex2d_name        = add_name("tex2d");
+	name_id tex3d_name        = add_name("tex3d");
+	name_id texcube_name      = add_name("texcube");
+	name_id tex1darray_name   = add_name("tex1darray");
+	name_id tex2darray_name   = add_name("tex2darray");
+	name_id texcubearray_name = add_name("texcubearray");
 
 	if (type_name == NO_NAME) {
 		debug_context context = {0};
@@ -1168,27 +1337,61 @@ static definition parse_const(state_t *state, attribute_list attributes) {
 		d.kind   = DEFINITION_CONST_CUSTOM;
 		d.global = add_global(type, attributes, name.identifier);
 	}
-	else if (type_name == add_name("tex2d")) {
-		d.kind = DEFINITION_TEX2D;
+	else if (type_name == tex1d_name || type_name == tex2d_name || type_name == tex3d_name || type_name == texcube_name || type_name == tex1darray_name ||
+	         type_name == tex2darray_name || type_name == texcubearray_name) {
+		struct type tex_type;
+		tex_type.name                        = type_name;
+		tex_type.attributes.attributes_count = 0;
+		tex_type.members.size                = 0;
+		tex_type.built_in                    = true;
+		tex_type.array_size                  = 0;
+		tex_type.base                        = NO_TYPE;
 
-		type_id t_id = tex2d_type_id;
+		if (type_name == tex1d_name) {
+			d.kind            = DEFINITION_TEX1D;
+			tex_type.tex_kind = TEXTURE_KIND_1D;
+		}
+		else if (type_name == tex2d_name) {
+			d.kind            = DEFINITION_TEX2D;
+			tex_type.tex_kind = TEXTURE_KIND_2D;
+		}
+		else if (type_name == tex3d_name) {
+			d.kind            = DEFINITION_TEX3D;
+			tex_type.tex_kind = TEXTURE_KIND_3D;
+		}
+		else if (type_name == texcube_name) {
+			d.kind            = DEFINITION_TEXCUBE;
+			tex_type.tex_kind = TEXTURE_KIND_CUBE;
+		}
+		else if (type_name == tex1darray_name) {
+			d.kind            = DEFINITION_TEX1DARRAY;
+			tex_type.tex_kind = TEXTURE_KIND_1D_ARRAY;
+		}
+		else if (type_name == tex2darray_name) {
+			d.kind            = DEFINITION_TEX2DARRAY;
+			tex_type.tex_kind = TEXTURE_KIND_2D_ARRAY;
+		}
+		else if (type_name == texcubearray_name) {
+			d.kind            = DEFINITION_TEXCUBEARRAY;
+			tex_type.tex_kind = TEXTURE_KIND_CUBE_ARRAY;
+		}
+		else {
+			assert(false);
+		}
+
+		tex_type.tex_format = convert_texture_format(state, format_name);
+
+		type_id t_id = add_full_type(&tex_type);
+
 		if (array) {
-			type_id array_type_id               = add_type(get_type(t_id)->name);
+			type_id array_type_id               = add_type(type_name);
 			get_type(array_type_id)->base       = t_id;
-			get_type(array_type_id)->built_in   = get_type(t_id)->built_in;
+			get_type(array_type_id)->built_in   = true;
 			get_type(array_type_id)->array_size = array_size;
 			t_id                                = array_type_id;
 		}
 
 		d.global = add_global(t_id, attributes, name.identifier);
-	}
-	else if (type_name == add_name("tex2darray")) {
-		d.kind   = DEFINITION_TEX2DARRAY;
-		d.global = add_global(tex2darray_type_id, attributes, name.identifier);
-	}
-	else if (type_name == add_name("texcube")) {
-		d.kind   = DEFINITION_TEXCUBE;
-		d.global = add_global(texcube_type_id, attributes, name.identifier);
 	}
 	else if (type_name == add_name("sampler")) {
 		d.kind   = DEFINITION_SAMPLER;

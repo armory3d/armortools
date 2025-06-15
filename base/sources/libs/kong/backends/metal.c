@@ -251,19 +251,23 @@ static void write_argument_buffers(char *code, size_t *offset) {
 				}
 			}
 			else if (is_texture(g->type)) {
-				if (g->type == tex2darray_type_id) {
-					*offset += sprintf(&code[*offset], "\ttexture2d_array<float> _%" PRIu64 " [[id(%zu)]];\n", g->var_index, global_index);
-				}
-				else if (g->type == texcube_type_id) {
-					*offset += sprintf(&code[*offset], "\ttexturecube<float> _%" PRIu64 " [[id(%zu)]];\n", g->var_index, global_index);
-				}
-				else {
+				if (get_type(g->type)->tex_kind == TEXTURE_KIND_2D) {
 					if (writable) {
 						*offset += sprintf(&code[*offset], "\ttexture2d<float, access::write> _%" PRIu64 " [[id(%zu)]];\n", g->var_index, global_index);
 					}
 					else {
 						*offset += sprintf(&code[*offset], "\ttexture2d<float> _%" PRIu64 " [[id(%zu)]];\n", g->var_index, global_index);
 					}
+				}
+				else if (get_type(g->type)->tex_kind == TEXTURE_KIND_2D_ARRAY) {
+					*offset += sprintf(&code[*offset], "\ttexture2d_array<float> _%" PRIu64 " [[id(%zu)]];\n", g->var_index, global_index);
+				}
+				else if (get_type(g->type)->tex_kind == TEXTURE_KIND_CUBE) {
+					*offset += sprintf(&code[*offset], "\ttexturecube<float> _%" PRIu64 " [[id(%zu)]];\n", g->var_index, global_index);
+				}
+				else {
+					// TODO
+					assert(false);
 				}
 			}
 			else if (is_sampler(g->type)) {
@@ -666,18 +670,28 @@ static void write_functions(char *code, size_t *offset) {
 				if (o->op_call.func == add_name("sample")) {
 					check(o->op_call.parameters_size == 3, context, "sample requires three parameters");
 
-					if (o->op_call.parameters[0].type.type == tex2darray_type_id) {
+					variable image_var = o->op_call.parameters[0];
+
+					if (get_type(o->op_call.parameters[0].type.type)->tex_kind == TEXTURE_KIND_2D_ARRAY) {
 						*offset +=
 						    sprintf(&code[*offset],
 						            "%s _%" PRIu64 " = argument_buffer0._%" PRIu64 ".sample(argument_buffer0._%" PRIu64 ", _%" PRIu64 ".xy, _%" PRIu64 ".z);\n",
-						            type_string(o->op_call.var.type.type), o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index,
+						            type_string(o->op_call.var.type.type), o->op_call.var.index, image_var.index, o->op_call.parameters[1].index,
 						            o->op_call.parameters[2].index, o->op_call.parameters[2].index);
 					}
 					else {
-						*offset +=
-						    sprintf(&code[*offset], "%s _%" PRIu64 " = argument_buffer0._%" PRIu64 ".sample(argument_buffer0._%" PRIu64 ", _%" PRIu64 ");\n",
-						            type_string(o->op_call.var.type.type), o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index,
-						            o->op_call.parameters[2].index);
+						if (is_depth(get_type(image_var.type.type)->tex_format)) {
+							*offset += sprintf(&code[*offset],
+							                   "%s _%" PRIu64 " = argument_buffer0._%" PRIu64 ".sample(argument_buffer0._%" PRIu64 ", _%" PRIu64 ").r;\n",
+							                   type_string(o->op_call.var.type.type), o->op_call.var.index, image_var.index, o->op_call.parameters[1].index,
+							                   o->op_call.parameters[2].index);
+						}
+						else {
+							*offset += sprintf(&code[*offset],
+							                   "%s _%" PRIu64 " = argument_buffer0._%" PRIu64 ".sample(argument_buffer0._%" PRIu64 ", _%" PRIu64 ");\n",
+							                   type_string(o->op_call.var.type.type), o->op_call.var.index, image_var.index, o->op_call.parameters[1].index,
+							                   o->op_call.parameters[2].index);
+						}
 					}
 				}
 				else if (o->op_call.func == add_name("sample_lod")) {
@@ -889,7 +903,7 @@ char *metal_export(char *directory) {
 			global_register_indices[i] = sampler_index;
 			sampler_index += 1;
 		}
-		else if (g->type == tex2d_type_id || g->type == texcube_type_id) {
+		else if (is_texture(g->type)) {
 			global_register_indices[i] = texture_index;
 			texture_index += 1;
 		}

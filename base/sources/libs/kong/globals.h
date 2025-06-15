@@ -37,6 +37,7 @@ typedef enum global_usage {
 	GLOBAL_USAGE_TEXTURE_READ   = 0x00000002,
 	GLOBAL_USAGE_TEXTURE_WRITE  = 0x00000004,
 	GLOBAL_USAGE_BUFFER_WRITE   = 0x00000008,
+	GLOBAL_USAGE_SAMPLE_DEPTH   = 0x00000010,
 } global_usage;
 
 typedef struct global {
