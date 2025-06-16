@@ -35,13 +35,13 @@
 #endif
 
 // NEON Capability check
-#if defined(IRON_IOS) || defined(__aarch64__) || defined(IRON_NEON)
+#if (defined(IRON_IOS) || defined(__aarch64__)) && !defined(IRON_NOSIMD)
 #define IRON_NEON
 #endif
 
 // No SIMD Capabilities
 #if !defined(IRON_SSE4_2) && !defined(IRON_SSE4_1) && !defined(IRON_SSSE3) && !defined(IRON_SSE3) && !defined(IRON_SSE2) && !defined(IRON_SSE) &&              \
-    !defined(IRON_NEON)
+    !defined(IRON_NEON) && !defined(IRON_NOSIMD)
 
 #define IRON_NOSIMD
 #endif

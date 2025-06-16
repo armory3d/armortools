@@ -1760,10 +1760,20 @@ class XCodeExporter extends Exporter {
 }
 
 class MakeExporter extends Exporter {
-	constructor(cCompiler, cppCompiler, cFlags, cppFlags, linkerFlags, outputExtension, libsLine = null) {
+	constructor(ccompiler, cppcompiler, cFlags, cppFlags, linkerFlags, outputExtension, libsLine = null) {
 		super();
-		this.cCompiler = cCompiler;
-		this.cppCompiler = cppCompiler;
+
+		if (ccompiler == "tcc") {
+			let tccdir = makedir + "/tcc"
+			linkerFlags = "-lc -lm -pthread";
+			ccompiler = tccdir + "/bin/" + sys_dir() + "/tcc";
+			ccompiler += " -DSTBI_NO_SIMD -DSINFL_NO_SIMD -DIRON_NOSIMD -w";
+			ccompiler += " -I" + tccdir + "/include -B" + tccdir + "/bin/" + sys_dir();
+			cppcompiler = ccompiler;
+		}
+
+		this.ccompiler = ccompiler;
+		this.cppcompiler = cppcompiler;
 		this.cFlags = cFlags;
 		this.cppFlags = cppFlags;
 		this.linkerFlags = linkerFlags;
@@ -1854,7 +1864,7 @@ class MakeExporter extends Exporter {
 		}
 		this.p(executable_name + this.outputExtension + ": " + ofilelist);
 		let output = '-o "' + executable_name + this.outputExtension + '"';
-		this.p('\t' + this.cppCompiler + ' ' + output + ' ' + optimization + ' ' + ofilelist + ' $(LIB)');
+		this.p('\t' + this.cppcompiler + ' ' + output + ' ' + optimization + ' ' + ofilelist + ' $(LIB)');
 		for (let fileobject of project.getFiles()) {
 			let file = fileobject.file;
 			if (file.endsWith(".c") || file.endsWith(".cpp") || file.endsWith(".cc")) {
@@ -1863,10 +1873,10 @@ class MakeExporter extends Exporter {
 				let realfile = path_relative(output_path, path_resolve(from, file));
 				this.p("-include " + name + ".d");
 				this.p(name + ".o: " + realfile);
-				let compiler = this.cppCompiler;
+				let compiler = this.cppcompiler;
 				let flags = '$(CPPFLAGS)';
 				if (file.endsWith(".c")) {
-					compiler = this.cCompiler;
+					compiler = this.ccompiler;
 					flags = '$(CFLAGS)';
 				}
 				this.p('\t' + compiler + ' ' + optimization + ' $(INC) $(DEF) -MD ' + flags + ' -c ' + realfile + ' -o ' + name + '.o');
@@ -1881,33 +1891,17 @@ class LinuxExporter extends Exporter {
 		super();
 		let compilerFlags = "";
 		let linkerFlags = "-static-libgcc -static-libstdc++ -pthread";
-		if (this.getCCompiler() == "gcc") {
+		if (goptions.ccompiler == "gcc") {
 			compilerFlags += "-flto";
 			linkerFlags += " -flto";
 		}
-		else if (this.getCCompiler() == "tcc") {
-			let tccdir = makedir + "/tcc"
-			linkerFlags = "-lc -lm -pthread";
-			goptions.ccompiler = tccdir + "/tcc";
-			goptions.ccompiler += " -DSTBI_NO_SIMD -DSINFL_NO_SIMD -w";
-			goptions.ccompiler += " -I" + tccdir + " -I" + tccdir + "/include -B" + tccdir;
-			goptions.cppcompiler = goptions.ccompiler;
-		}
-		this.make = new MakeExporter(this.getCCompiler(), this.getCPPCompiler(), compilerFlags, compilerFlags, linkerFlags, '');
+		this.make = new MakeExporter(goptions.ccompiler, goptions.cppcompiler, compilerFlags, compilerFlags, linkerFlags, '');
 		this.compile_commands = new CompilerCommandsExporter();
 	}
 
 	export_solution(project) {
 		this.make.export_solution(project);
 		this.compile_commands.export_solution(project);
-	}
-
-	getCCompiler() {
-		return goptions.ccompiler;
-	}
-
-	getCPPCompiler() {
-		return goptions.cppcompiler;
 	}
 }
 
@@ -3172,7 +3166,10 @@ function export_amake_project() {
 	fs_ensuredir("build");
 
 	let exporter = null;
-	if (goptions.target === 'ios' || goptions.target === 'macos') {
+	if (goptions.ccompiler === "tcc") {
+		exporter = new MakeExporter(goptions.ccompiler, goptions.cppcompiler, "", "", "", "");
+	}
+	else if (goptions.target === 'ios' || goptions.target === 'macos') {
 		exporter = new XCodeExporter();
 	}
 	else if (goptions.target === 'android') {
@@ -3233,7 +3230,7 @@ function main() {
 	if (goptions.compile && project_name !== '') {
 		console.log('Compiling...');
 		let make = null;
-		if (goptions.target == 'linux' || goptions.target == 'wasm') {
+		if (goptions.target == 'linux' || goptions.target == 'wasm' || goptions.ccompiler == "tcc") {
 			let cores = os_cpus_length();
 			make = os_exec('make', ['-j', cores.toString()], { cwd: path_join("build", goptions.build_path) });
 		}
