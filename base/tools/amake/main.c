@@ -41,16 +41,42 @@ static JSValue js_os_exec_win(JSContext *ctx, JSValue this_val, int argc, JSValu
         strcat(cmd, " ");
     }
 
+    HANDLE hReadPipe, hWritePipe;
+    SECURITY_ATTRIBUTES saAttr;
+    saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+    saAttr.bInheritHandle = TRUE;
+    saAttr.lpSecurityDescriptor = NULL;
+    CreatePipe(&hReadPipe, &hWritePipe, &saAttr, 0);
+    SetHandleInformation(hReadPipe, HANDLE_FLAG_INHERIT, 0);
+
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
     ZeroMemory(&si, sizeof(si));
     si.cb = sizeof(si);
+    si.dwFlags = STARTF_USESTDHANDLES;
+    si.hStdOutput = hWritePipe;
+    si.hStdError = hWritePipe;
     ZeroMemory(&pi, sizeof(pi));
-    CreateProcessA(NULL, cmd, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
+    CreateProcessA(NULL, cmd, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
+    CloseHandle(hWritePipe);
+
+    char buf[4096];
+    int buf_len = 0;
+    int bytes_read;
+    while (ReadFile(hReadPipe, buf + buf_len, 4096 - buf_len - 1, &bytes_read, NULL) && bytes_read > 0) {
+        buf_len += bytes_read;
+        if (buf_len >= 4096 - 1) {
+            break;
+        }
+    }
+    buf[buf_len] = '\0';
+
+    CloseHandle(hReadPipe);
     WaitForSingleObject(pi.hProcess, INFINITE);
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
-    return JS_UNDEFINED;
+
+    return JS_NewString(ctx, buf);
 }
 
 #endif
