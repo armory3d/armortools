@@ -135,7 +135,7 @@ function os_exec(exe, params = [], ops = {}) {
 	let res = { status: 0 };
 
 	if (os_platform() === "win32") {
-		res.status = amake.os_exec_win(params, ops);
+		res.stdout = amake.os_exec_win(params, ops);
 		res.status = 0;
 	}
 	else {
@@ -3240,9 +3240,8 @@ function main() {
 			make = os_exec('xcodebuild', xcode_options, { cwd: "build" });
 		}
 		else if (goptions.target == 'windows') {
-			// let vswhere = path_join(os_env('ProgramFiles(x86)'), 'Microsoft Visual Studio', 'Installer', 'vswhere.exe');
-			// let vsvars = os_exec(vswhere, ['-products', '*', '-latest', '-find', 'VC\\Auxiliary\\Build\\vcvars64.bat']).trim();
-			let vsvars = "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat";
+			let vswhere = path_join(os_env('ProgramFiles(x86)'), 'Microsoft Visual Studio', 'Installer', 'vswhere.exe');
+			let vsvars = os_exec(vswhere, ['-products', '*', '-latest', '-find', 'VC\\Auxiliary\\Build\\vcvars64.bat']).stdout.trim();
 			fs_writefile(path_join("build", 'build.bat'), '@call "' + vsvars + '"\n' + '@MSBuild.exe "' + path_resolve("build", project_name + '.vcxproj') + '" /m /clp:ErrorsOnly /p:Configuration=' + (goptions.debug ? 'Debug' : 'Release') + ',Platform=x64');
 			make = os_exec('build.bat', [], { cwd: "build" });
 		}
