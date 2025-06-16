@@ -1889,7 +1889,7 @@ class LinuxExporter extends Exporter {
 			let tccdir = makedir + "/tcc"
 			linkerFlags = "-lc -lm -pthread";
 			goptions.ccompiler = tccdir + "/tcc";
-			goptions.ccompiler += " -DSTBI_NO_SIMD -DSINFL_NO_SIMD";
+			goptions.ccompiler += " -DSTBI_NO_SIMD -DSINFL_NO_SIMD -w";
 			goptions.ccompiler += " -I" + tccdir + " -I" + tccdir + "/include -B" + tccdir;
 			goptions.cppcompiler = goptions.ccompiler;
 		}
