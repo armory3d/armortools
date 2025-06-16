@@ -1518,11 +1518,11 @@ void iron_gpu_command_list_set_index_buffer(iron_gpu_command_list_t *list, iron_
 	vkCmdBindIndexBuffer(list->impl._buffer, indexBuffer->impl.buf, 0, VK_INDEX_TYPE_UINT32);
 }
 
-void iron_internal_restore_render_target(iron_gpu_command_list_t *list, struct iron_gpu_texture *target) {
+void iron_internal_restore_render_target(iron_gpu_command_list_t *list, struct iron_gpu_texture *target, unsigned flags, unsigned color, float depth) {
 	set_viewport_and_scissor(list);
 
 	if (on_back_buffer && in_render_pass) {
-		return;
+		// return;
 	}
 
 	end_pass(list);
@@ -1542,10 +1542,42 @@ void iron_internal_restore_render_target(iron_gpu_command_list_t *list, struct i
 	on_back_buffer = true;
 	begin_pass(list);
 
-	set_viewport_and_scissor(list);
-
 	if (current_pipeline != NULL) {
 		vkCmdBindPipeline(list->impl._buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, current_pipeline->impl.pipeline);
+	}
+
+	set_viewport_and_scissor(list);
+
+	if (flags != IRON_GPU_CLEAR_NONE) {
+		int count = 0;
+		VkClearAttachment attachments[2];
+		if (flags & IRON_GPU_CLEAR_COLOR) {
+			VkClearColorValue clearColor = {0};
+			clearColor.float32[0] = ((color & 0x00ff0000) >> 16) / 255.0f;
+			clearColor.float32[1] = ((color & 0x0000ff00) >> 8) / 255.0f;
+			clearColor.float32[2] = (color & 0x000000ff) / 255.0f;
+			clearColor.float32[3] = ((color & 0xff000000) >> 24) / 255.0f;
+			attachments[count].aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			attachments[count].colorAttachment = 0;
+			attachments[count].clearValue.color = clearColor;
+			count++;
+		}
+		if (flags & IRON_GPU_CLEAR_DEPTH) {
+			attachments[count].aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+			attachments[count].clearValue.depthStencil.depth = depth;
+			attachments[count].clearValue.depthStencil.stencil = 0;
+			count++;
+		}
+		VkClearRect clearRect = {
+			.rect.offset.x = 0,
+			.rect.offset.y = 0,
+			.rect.extent.width = iron_window_width(),
+			.rect.extent.height = iron_window_height(),
+			.baseArrayLayer = 0,
+			.layerCount = 1,
+		};
+		vkCmdClearAttachments(list->impl._buffer, count, attachments, 1, &clearRect);
+
 	}
 }
 
@@ -1553,7 +1585,7 @@ void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, str
 
 	if (targets[0]->framebuffer_index >= 0) {
 		////
-		iron_internal_restore_render_target(list, targets[0]);
+		iron_internal_restore_render_target(list, targets[0], flags, color, depth);
 		////
 		return;
 	}
@@ -1655,17 +1687,8 @@ void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, str
 
 	set_viewport_and_scissor(list);
 
-	VkClearRect clearRect = {
-		.rect.offset.x = 0,
-		.rect.offset.y = 0,
-		.rect.extent.width = targets[0]->width,
-		.rect.extent.height = targets[0]->height,
-		.baseArrayLayer = 0,
-		.layerCount = 1,
-	};
-
 	if (flags != IRON_GPU_CLEAR_NONE) {
-		count = 0;
+		int count = 0;
 		VkClearAttachment attachments[2];
 		if (flags & IRON_GPU_CLEAR_COLOR) {
 			VkClearColorValue clearColor = {0};
@@ -1684,6 +1707,14 @@ void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, str
 			attachments[count].clearValue.depthStencil.stencil = 0;
 			count++;
 		}
+		VkClearRect clearRect = {
+			.rect.offset.x = 0,
+			.rect.offset.y = 0,
+			.rect.extent.width = targets[0]->width,
+			.rect.extent.height = targets[0]->height,
+			.baseArrayLayer = 0,
+			.layerCount = 1,
+		};
 		vkCmdClearAttachments(list->impl._buffer, count, attachments, 1, &clearRect);
 	}
 }
