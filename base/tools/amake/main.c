@@ -76,6 +76,7 @@ static JSValue js_os_exec_win(JSContext *ctx, JSValue this_val, int argc, JSValu
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
 
+    printf("%s", buf);
     return JS_NewString(ctx, buf);
 }
 
