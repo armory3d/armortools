@@ -1885,6 +1885,14 @@ class LinuxExporter extends Exporter {
 			compilerFlags += "-flto";
 			linkerFlags += " -flto";
 		}
+		else if (this.getCCompiler() == "tcc") {
+			let tccdir = makedir + "/tcc"
+			linkerFlags = "-lc -lm -pthread";
+			goptions.ccompiler = tccdir + "/tcc";
+			goptions.ccompiler += " -DSTBI_NO_SIMD -DSINFL_NO_SIMD";
+			goptions.ccompiler += " -I" + tccdir + " -I" + tccdir + "/include -B" + tccdir;
+			goptions.cppcompiler = goptions.ccompiler;
+		}
 		this.make = new MakeExporter(this.getCCompiler(), this.getCPPCompiler(), compilerFlags, compilerFlags, linkerFlags, '');
 		this.compile_commands = new CompilerCommandsExporter();
 	}
