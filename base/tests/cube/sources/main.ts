@@ -11,7 +11,7 @@ function main() {
 		mode: window_mode_t.WINDOWED,
 		frequency: 60,
 		vsync: true,
-		use_depth: false
+		use_depth: true
 	};
 	sys_start(ops);
 	sys_init();
@@ -77,8 +77,8 @@ function ready() {
 				contexts: [
 					{
 						name: "mesh",
-						vertex_shader: "_mesh.vert",
-						fragment_shader: "_mesh.frag",
+						vertex_shader: "mesh.vert",
+						fragment_shader: "mesh.frag",
 						compare_mode: "less",
 						cull_mode: "clockwise",
 						depth_write: true,
