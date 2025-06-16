@@ -2489,7 +2489,8 @@ class ShaderCompiler {
 			if (type == "hlsl") {
 				type = "d3d11";
 			}
-			compiled_shader.files = [path_resolve('build', 'temp', path_basename_noext(shader) + '.' + type)];
+			let base = path_resolve('build', 'temp', path_basename_noext(shader));
+			compiled_shader.files = [base + '.vert.' + type, base + '.frag.' + type];
 
 			compiled_shader.name = AssetConverter.create_export_info(shader, false, options, ".").name;
 			compiled_shaders.push(compiled_shader);
@@ -2782,6 +2783,7 @@ function export_iron_project(project, options) {
 		}
 		for (let shader of exported_shaders) {
 			embed_files.push(shader.files[0]);
+			embed_files.push(shader.files[1]);
 		}
 
 		if (embed_files.length > 0) {
