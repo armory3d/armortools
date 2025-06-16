@@ -669,66 +669,6 @@ class VisualStudioExporter extends Exporter {
 		this.p('</ItemDefinitionGroup>', indent);
 	}
 
-	windowsSDKs() {
-		// Environment* env = Environment::GetCurrent(args);
-		// Isolate* isolate = env->isolate();
-		// std::vector<Local<Value>> result;
-		// HKEY key;
-		// LSTATUS status = RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots", 0, KEY_READ | KEY_QUERY_VALUE, &key);
-		// char name[256];
-		// DWORD nameLength;
-		// for (DWORD i = 0;; ++i) {
-		// 	nameLength = sizeof(name);
-		// 	status = RegEnumKeyExA(key, i, &name[0], &nameLength, NULL, NULL, NULL, NULL);
-		// 	if (status != ERROR_SUCCESS) {
-		// 	break;
-		// 	}
-		// 	result.emplace_back(String::NewFromUtf8(isolate, name).ToLocalChecked());
-		// }
-		// RegCloseKey(key);
-		// args.GetReturnValue().Set(Array::New(isolate, result.data(), result.size()));
-	}
-
-	findWindowsSdk() {
-		let sdks = windowsSDKs();
-		let best = [0, 0, 0, 0];
-		for (let key of sdks) {
-			let elements = key.split('\\');
-			let last = elements[elements.length - 1];
-			if (last.indexOf('.') >= 0) {
-				let numstrings = last.split('.');
-				let nums = [];
-				for (let str of numstrings) {
-					nums.push(parseInt(str));
-				}
-				if (nums[0] > best[0]) {
-					best = nums;
-				}
-				else if (nums[0] === best[0]) {
-					if (nums[1] > best[1]) {
-						best = nums;
-					}
-					else if (nums[1] === best[1]) {
-						if (nums[2] > best[2]) {
-							best = nums;
-						}
-						else if (nums[2] === best[2]) {
-							if (nums[3] > best[3]) {
-								best = nums;
-							}
-						}
-					}
-				}
-			}
-		}
-		if (best[0] > 0) {
-			return best[0] + '.' + best[1] + '.' + best[2] + '.' + best[3];
-		}
-		else {
-			return null;
-		}
-	}
-
 	globals(indent) {
 		if (goptions.visualstudio === 'vs2022') {
 			this.p('<VCProjectVersion>16.0</VCProjectVersion>', indent);
@@ -2672,8 +2612,8 @@ function write_ts_project(projectdir, options) {
 		let files = fs_readdir(src);
 		if (src.endsWith(".ts")) {
 			// Add file instead of dir
-			files = [src.substring(src.lastIndexOf("/") + 1, src.length)];
-			src = src.substring(0, src.lastIndexOf("/"));
+			files = [src.substring(src.lastIndexOf(path_sep) + 1, src.length)];
+			src = src.substring(0, src.lastIndexOf(path_sep));
 		}
 		for (let file of files) {
 			if (file.endsWith(".ts")) {

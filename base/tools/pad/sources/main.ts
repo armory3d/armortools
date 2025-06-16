@@ -48,7 +48,7 @@ function encode_storage(): string {
 	return config_json;
 }
 
-function shutdown() {
+function on_shutdown() {
 	let storage_string: string = sys_string_to_buffer(encode_storage());
 	iron_file_save_bytes(iron_internal_save_path() + "/config.json", storage_string, 0);
 }
@@ -118,7 +118,7 @@ function main() {
 
 	sys_notify_on_frames(render);
 	_iron_set_drop_files_callback(drop_files);
-	iron_set_application_state_callback(null, null, null, null, shutdown);
+	iron_set_application_state_callback(null, null, null, null, on_shutdown);
 }
 
 function armpack_to_string(bytes: buffer_t): string {

@@ -18,7 +18,10 @@ directory open_dir(const char *dirname) {
 	directory        dir;
 	dir.handle = FindFirstFileA(pattern, &data);
 	if (dir.handle == INVALID_HANDLE_VALUE) {
-		kong_log(LOG_LEVEL_ERROR, "FindFirstFile failed (%d)\n", GetLastError());
+		////
+		// kong_log(LOG_LEVEL_ERROR, "FindFirstFile failed (%d)\n", GetLastError());
+		printf("FindFirstFile failed (%d)\n", GetLastError());
+		////
 		exit(1);
 	}
 	FindNextFileA(dir.handle, &data);
