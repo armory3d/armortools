@@ -5,20 +5,10 @@
 
 #define IRON_INTERNAL_G5_TEXTURE_COUNT 16
 
-struct ID3D12CommandAllocator;
-struct ID3D12GraphicsCommandList;
-struct ID3D12Fence;
 struct ID3D12Resource;
 struct ID3D12DescriptorHeap;
-struct IDXGISwapChain;
 struct ID3D12PipelineState;
-struct ID3D12RootSignature;
 struct ID3D12StateObject;
-struct iron_gpu_pipeline;
-struct iron_gpu_texture;
-struct iron_gpu_shader;
-struct iron_gpu_command_list;
-struct iron_gpu_buffer;
 
 typedef void *HANDLE;
 typedef unsigned __int64 UINT64;
@@ -40,26 +30,8 @@ struct D3D12Rect {
 };
 
 typedef struct {
-	struct ID3D12CommandAllocator *_commandAllocator;
-	struct ID3D12GraphicsCommandList *_commandList;
-	struct iron_gpu_pipeline *_currentPipeline;
-	int _indexCount;
-	struct D3D12Rect current_full_scissor;
-	uint64_t fence_value;
-	struct ID3D12Fence *fence;
-	HANDLE fence_event;
-	struct iron_gpu_texture *currentTextures[IRON_INTERNAL_G5_TEXTURE_COUNT];
-	int heapIndex;
-	struct ID3D12DescriptorHeap *srvHeap;
-} gpu_command_list_impl_t;
-
-typedef struct {
 	struct ID3D12PipelineState *pso;
 } gpu_pipeline_impl_t;
-
-typedef struct {
-	int vertexOffset;
-} gpu_constant_location_impl_t;
 
 typedef struct {
 	char name[64];

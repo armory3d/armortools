@@ -121,20 +121,20 @@ function render_path_begin(render_target: iron_gpu_texture_t, additional_targets
 
 function render_path_end() {
 	if (_render_path_scissor_set) {
-		gpu_disable_scissor();
+		iron_gpu_disable_scissor();
 		_render_path_scissor_set = false;
 	}
-	_gpu_end();
+	iron_gpu_end();
 	_render_path_current_image = null;
 	_render_path_bind_params = null;
 }
 
 function render_path_set_current_viewport(view_w: i32, view_h: i32) {
-	gpu_viewport(sys_x(),render_path_current_h - (view_h - sys_y()), view_w, view_h);
+	iron_gpu_viewport(sys_x(),render_path_current_h - (view_h - sys_y()), view_w, view_h);
 }
 
 function render_path_set_current_scissor(view_w: i32, view_h: i32) {
-	gpu_scissor(sys_x(),render_path_current_h - (view_h - sys_y()), view_w, view_h);
+	iron_gpu_scissor(sys_x(),render_path_current_h - (view_h - sys_y()), view_w, view_h);
 	_render_path_scissor_set = true;
 }
 
@@ -209,11 +209,11 @@ function render_path_draw_skydome(handle: string) {
 	if (cc.context == null) {
 		return; // World data not specified
 	}
-	gpu_set_pipeline(cc.context._.pipe_state);
+	iron_gpu_set_pipeline(cc.context._.pipe_state);
 	uniforms_set_context_consts(cc.context, _render_path_bind_params);
 	uniforms_set_obj_consts(cc.context, null); // External hosek
-	gpu_set_vertex_buffer(const_data_skydome_vb);
-	gpu_set_index_buffer(const_data_skydome_ib);
+	iron_gpu_set_vertex_buffer(const_data_skydome_vb);
+	iron_gpu_set_index_buffer(const_data_skydome_ib);
 	gpu_draw();
 	render_path_end();
 }
@@ -235,11 +235,11 @@ function render_path_draw_shader(handle: string) {
 	if (const_data_screen_aligned_vb == null) {
 		const_data_create_screen_aligned_data();
 	}
-	gpu_set_pipeline(cc.context._.pipe_state);
+	iron_gpu_set_pipeline(cc.context._.pipe_state);
 	uniforms_set_context_consts(cc.context, _render_path_bind_params);
 	uniforms_set_obj_consts(cc.context, null);
-	gpu_set_vertex_buffer(const_data_screen_aligned_vb);
-	gpu_set_index_buffer(const_data_screen_aligned_ib);
+	iron_gpu_set_vertex_buffer(const_data_screen_aligned_vb);
+	iron_gpu_set_index_buffer(const_data_screen_aligned_ib);
 	gpu_draw();
 
 	render_path_end();

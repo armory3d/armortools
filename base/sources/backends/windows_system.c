@@ -1682,8 +1682,6 @@ void iron_init(const char *name, int width, int height, iron_window_options_t *w
 		win->title = name;
 	}
 
-	iron_gpu_internal_init();
-
 	iron_window_create(win);
 	loadXInput();
 	initializeDirectInput();
@@ -1693,7 +1691,7 @@ void iron_internal_shutdown() {
 	iron_windows_hide_windows();
 	iron_internal_shutdown_callback();
 	iron_windows_destroy_windows();
-	iron_gpu_internal_destroy();
+	iron_gpu_destroy();
 	iron_windows_restore_displays();
 }
 
@@ -2072,7 +2070,7 @@ void iron_window_create(iron_window_options_t *win) {
 
 	bool vsync = win->vsync;
 
-	gpu_internal_init_window(win->depth_bits, vsync);
+	gpu_init(win->depth_bits, vsync);
 
 	if (win->visible) {
 		iron_window_show();

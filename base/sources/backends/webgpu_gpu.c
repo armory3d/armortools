@@ -18,11 +18,9 @@ WGPUDevice device;
 WGPUQueue queue;
 WGPUSwapChain swapChain;
 
-void iron_gpu_internal_destroy() {}
+void iron_gpu_destroy() {}
 
-void iron_gpu_internal_init() {}
-
-void iron_gpu_internal_init_window(int depthBufferBits, bool vsync) {
+void iron_gpu_init(int depthBufferBits, bool vsync) {
 	newRenderTargetWidth = renderTargetWidth = iron_width();
 	newRenderTargetHeight = renderTargetHeight = iron_height();
 
@@ -62,7 +60,7 @@ extern WGPUDevice device;
 iron_gpu_buffer_t *iron_gpu_internal_current_vertex_buffer = NULL;
 
 void iron_gpu_vertex_buffer_init(iron_gpu_buffer_t *buffer, int count, iron_gpu_vertex_structure_t *structure, bool gpuMemory) {
-	buffer->myCount = count;
+	buffer->count = count;
 	buffer->impl.count = count;
 	buffer->impl.stride = 0;
 	for (int i = 0; i < structure->size; ++i) {
@@ -173,7 +171,7 @@ void iron_gpu_texture_init(iron_gpu_texture_t *texture, int width, int height, i
 	// tvDesc.dimension = WGPUTextureViewDimension_2D;
  	// WGPUTextureView textureView = wgpuTextureCreateView(texture, &tvDesc);
 
-	texture->_uploaded = true;
+	texture->uploaded = true;
 	texture->format = format;
 	texture->data = NULL;
 }
@@ -196,7 +194,7 @@ void iron_gpu_render_target_init(iron_gpu_texture_t *target, int width, int heig
 	target->height = target->height = height;
 	target->state = IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
 	target->data = NULL;
-	target->_uploaded = true;
+	target->uploaded = true;
 }
 
 void iron_gpu_render_target_init_framebuffer(iron_gpu_texture_t *target, int width, int height, iron_image_format_t format, int depthBufferBits) {}
@@ -416,8 +414,8 @@ void iron_gpu_command_list_set_constant_buffer(iron_gpu_command_list_t *list, st
 
 }
 
-void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *texture) {
+void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t *unit, iron_gpu_texture_t *texture) {
 
 }
 
-void iron_gpu_command_list_set_texture_from_render_target_depth(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *renderTarget) {}
+void iron_gpu_set_texture_depth(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t *unit, iron_gpu_texture_t *renderTarget) {}

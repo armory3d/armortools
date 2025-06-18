@@ -55,7 +55,6 @@ int draw_font_height(draw_font_t *font, int font_size);
 float draw_sub_string_width(draw_font_t *font, int font_size, const char *text, int start, int end);
 int draw_string_width(draw_font_t *font, int font_size, const char *text);
 void draw_set_bilinear_filter(bool bilinear);
-void draw_set_render_target(iron_gpu_texture_t *target, bool clear, unsigned color);
 
 void draw_filled_circle(float cx, float cy, float radius, int segments);
 void draw_circle(float cx, float cy, float radius, int segments, float strength);

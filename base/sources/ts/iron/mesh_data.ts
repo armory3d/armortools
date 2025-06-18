@@ -246,7 +246,7 @@ function mesh_data_build(raw: mesh_data_t) {
 			indices_array[i] = id[i];
 		}
 
-		gpu_index_buffer_unlock(index_buffer);
+		iron_gpu_index_buffer_unlock(index_buffer);
 		array_push(raw._.index_buffers, index_buffer);
 	}
 

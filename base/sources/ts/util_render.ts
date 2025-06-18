@@ -400,15 +400,15 @@ function util_render_make_node_preview(canvas: ui_node_canvas_t, node: ui_node_t
 	transform_build_matrix(context_raw.paint_object.base.transform);
 
 	_gpu_begin(image);
-	gpu_set_pipeline(res.scon._.pipe_state);
+	iron_gpu_set_pipeline(res.scon._.pipe_state);
 	let empty: string[] = [""];
 	uniforms_set_context_consts(res.scon, empty);
 	uniforms_set_obj_consts(res.scon, context_raw.paint_object.base);
 	uniforms_set_material_consts(res.scon, res.mcon);
-	gpu_set_vertex_buffer(util_render_screen_aligned_full_vb);
-	gpu_set_index_buffer(util_render_screen_aligned_full_ib);
+	iron_gpu_set_vertex_buffer(util_render_screen_aligned_full_vb);
+	iron_gpu_set_index_buffer(util_render_screen_aligned_full_ib);
 	gpu_draw();
-	_gpu_end();
+	iron_gpu_end();
 
 	context_raw.paint_object.base.transform.scale_world = _scale_world;
 	transform_build_matrix(context_raw.paint_object.base.transform);
@@ -472,5 +472,5 @@ function util_render_create_screen_aligned_full_data() {
 	for (let i: i32 = 0; i < id.length; ++i) {
 		id[i] = indices[i];
 	}
-	gpu_index_buffer_unlock(util_render_screen_aligned_full_ib);
+	iron_gpu_index_buffer_unlock(util_render_screen_aligned_full_ib);
 }

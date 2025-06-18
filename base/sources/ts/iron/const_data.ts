@@ -23,7 +23,7 @@ function const_data_create_screen_aligned_data() {
 	for (let i: i32 = 0; i < id.length; ++i) {
 		id[i] = indices[i];
 	}
-	gpu_index_buffer_unlock(const_data_screen_aligned_ib);
+	iron_gpu_index_buffer_unlock(const_data_screen_aligned_ib);
 }
 
 ///include "const_data.h"
@@ -56,5 +56,5 @@ function const_data_create_skydome_data() {
 	for (let i: i32 = 0; i < id.length; ++i) {
 		id[i] = ARRAY_ACCESS(_const_data_skydome_indices, i);
 	}
-	gpu_index_buffer_unlock(const_data_skydome_ib);
+	iron_gpu_index_buffer_unlock(const_data_skydome_ib);
 }

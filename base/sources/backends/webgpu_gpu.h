@@ -18,10 +18,6 @@ typedef struct {
 	WGPURenderPipeline pipeline;
 } gpu_pipeline_impl_t;
 
-typedef struct {
-	int vertexOffset;
-} gpu_constant_location_impl_t;
-
 struct WGPUShaderModuleImpl;
 
 typedef struct {

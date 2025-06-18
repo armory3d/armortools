@@ -57,18 +57,18 @@ function uniforms_set_context_consts(context: shader_context_t, bind_params: str
 			}
 
 			if (char_at(tulink, 0) == "$") { // Link to embedded data
-				gpu_set_texture(context._.tex_units[j], map_get(scene_embedded, substring(tulink, 1, tulink.length)));
+				iron_gpu_set_texture(context._.tex_units[j], map_get(scene_embedded, substring(tulink, 1, tulink.length)));
 			}
 			else if (tulink == "_envmap_radiance") {
 				let w: world_data_t = scene_world;
 				if (w != null) {
-					gpu_set_texture(context._.tex_units[j], w._.radiance);
+					iron_gpu_set_texture(context._.tex_units[j], w._.radiance);
 				}
 			}
 			else if (tulink == "_envmap") {
 				let w: world_data_t = scene_world;
 				if (w != null) {
-					gpu_set_texture(context._.tex_units[j], w._.envmap);
+					iron_gpu_set_texture(context._.tex_units[j], w._.envmap);
 				}
 			}
 		}
@@ -96,8 +96,8 @@ function uniforms_set_obj_consts(context: shader_context_t, object: object_t) {
 				let image: iron_gpu_texture_t = uniforms_tex_links(object, current_material(object), tu.link);
 				if (image != null) {
 					ends_with(tu.link, "_depth") ?
-						gpu_set_texture_depth(context._.tex_units[j], image) :
-						gpu_set_texture(context._.tex_units[j], image);
+						iron_gpu_set_texture_depth(context._.tex_units[j], image) :
+						iron_gpu_set_texture(context._.tex_units[j], image);
 				}
 			}
 		}
@@ -113,10 +113,10 @@ function uniforms_bind_render_target(rt: render_target_t, context: shader_contex
 	for (let j: i32 = 0; j < tus.length; ++j) { // Set texture
 		if (sampler_id == tus[j].name) {
 			if (attach_depth) {
-				gpu_set_texture_depth(context._.tex_units[j], rt._image); // sampler2D
+				iron_gpu_set_texture_depth(context._.tex_units[j], rt._image); // sampler2D
 			}
 			else {
-				gpu_set_texture(context._.tex_units[j], rt._image); // sampler2D
+				iron_gpu_set_texture(context._.tex_units[j], rt._image); // sampler2D
 			}
 		}
 	}
@@ -560,7 +560,7 @@ function uniforms_set_material_consts(context: shader_context_t, material_contex
 			for (let j: i32 = 0; j < context._.tex_units.length; ++j) {
 				let sname: string = context.texture_units[j].name;
 				if (mname == sname) {
-					gpu_set_texture(context._.tex_units[j], material_context._.textures[i]);
+					iron_gpu_set_texture(context._.tex_units[j], material_context._.textures[i]);
 					break;
 				}
 			}

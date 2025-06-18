@@ -348,8 +348,7 @@ function shader_context_get_tex_format(s: string): tex_format_t {
 
 function shader_context_add_const(raw: shader_context_t, c: shader_const_t, offset: i32) {
 	let cl: iron_gpu_constant_location_t = gpu_get_constant_location(raw._.pipe_state, c.name);
-	let ptr: gpu_constant_location_impl_t = ADDRESS(cl.impl);
-	ptr.vertexOffset = offset;
+	cl.offset = offset;
 	array_push(raw._.constants, cl);
 }
 

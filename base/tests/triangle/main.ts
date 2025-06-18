@@ -8,11 +8,11 @@ let ib: any;
 
 function render() {
 	_gpu_begin(null, null, clear_flag_t.COLOR | clear_flag_t.DEPTH, 0xff000000, 1.0);
-	gpu_set_pipeline(pipeline);
-	gpu_set_vertex_buffer(vb);
-	gpu_set_index_buffer(ib);
+	iron_gpu_set_pipeline(pipeline);
+	iron_gpu_set_vertex_buffer(vb);
+	iron_gpu_set_index_buffer(ib);
 	gpu_draw();
-	_gpu_end();
+	iron_gpu_end();
 }
 
 function main() {
@@ -61,7 +61,7 @@ function main() {
 	for (let i: i32 = 0; i < indices.length; i++) {
 		ib_data[i] = indices[i];
 	}
-	gpu_index_buffer_unlock(ib);
+	iron_gpu_index_buffer_unlock(ib);
 
 	_iron_set_update_callback(render);
 }

@@ -374,7 +374,6 @@ const char *iphonegetresourcepath();
 char mobile_title[1024];
 #endif
 
-extern iron_gpu_command_list_t gpu_command_list;
 static iron_gpu_buffer_t constant_buffer;
 static iron_gpu_texture_t *render_target;
 static iron_gpu_raytrace_pipeline_t rt_pipeline;
@@ -419,9 +418,8 @@ void _update(void *data) {
 	iron_a2_update();
 	#endif
 
-	gpu_begin();
 	iron_update();
-	gpu_end();
+	iron_gpu_present();
 }
 
 char *_copy(void *data) {
@@ -952,7 +950,7 @@ buffer_t *gpu_lock_vertex_buffer(iron_gpu_buffer_t *buffer) {
 	float *vertices = iron_gpu_vertex_buffer_lock(buffer);
 	buffer_t *b = (buffer_t *)malloc(sizeof(buffer_t));
 	b->buffer = vertices;
-	b->length = buffer->myCount * iron_gpu_vertex_buffer_stride(buffer);
+	b->length = buffer->count * iron_gpu_vertex_buffer_stride(buffer);
 	return b;
 }
 
@@ -1389,7 +1387,7 @@ buffer_t *gpu_get_texture_pixels(iron_gpu_texture_t *image) {
 		}
 
 		uint8_t *b = (uint8_t *)image->buffer->buffer;
-		gpu_render_target_get_pixels(image, b);
+		iron_gpu_get_render_target_pixels(image, b);
 
 		// Release staging texture immediately to save memory
 		#ifdef IRON_DIRECT3D12
@@ -1417,7 +1415,7 @@ void gpu_set_mipmaps(iron_gpu_texture_t *texture, any_array_t *mipmaps) {
 
 void _gpu_begin(iron_gpu_texture_t *render_target, any_array_t *additional, unsigned flags, unsigned color, float depth) {
 	if (render_target == NULL) {
-		gpu_set_render_targets(NULL, 0, flags, color, depth);
+		iron_gpu_begin(NULL, 0, flags, color, depth);
 	}
 	else {
 		int32_t length = 1;
@@ -1428,16 +1426,8 @@ void _gpu_begin(iron_gpu_texture_t *render_target, any_array_t *additional, unsi
 				render_targets[i] = additional->buffer[i - 1];
 			}
 		}
-		gpu_set_render_targets(render_targets, length, flags, color, depth);
+		iron_gpu_begin(render_targets, length, flags, color, depth);
 	}
-}
-
-void _gpu_end() {
-}
-
-void gpu_swap_buffers() {
-	gpu_end();
-	gpu_begin();
 }
 
 void iron_file_save_bytes(string_t *path, buffer_t *bytes, u64 length) {
@@ -2132,7 +2122,7 @@ void iron_raytrace_init(buffer_t *shader) {
 	}
 	raytrace_created = true;
 	iron_gpu_constant_buffer_init(&constant_buffer, constant_buffer_size * 4);
-	iron_gpu_raytrace_pipeline_init(&rt_pipeline, &gpu_command_list, shader->buffer, (int)shader->length, &constant_buffer);
+	iron_gpu_raytrace_pipeline_init(&rt_pipeline, shader->buffer, (int)shader->length, &constant_buffer);
 }
 
 void iron_raytrace_as_init() {
@@ -2148,25 +2138,25 @@ void iron_raytrace_as_add(struct iron_gpu_buffer *vb, iron_gpu_buffer_t *ib, iro
 }
 
 void iron_raytrace_as_build(struct iron_gpu_buffer *vb_full, iron_gpu_buffer_t *ib_full) {
-	iron_gpu_raytrace_acceleration_structure_build(&accel, &gpu_command_list, vb_full, ib_full);
+	iron_gpu_raytrace_acceleration_structure_build(&accel, vb_full, ib_full);
 }
 
 void iron_raytrace_set_textures(iron_gpu_texture_t *tex0, iron_gpu_texture_t *tex1, iron_gpu_texture_t *tex2, iron_gpu_texture_t *texenv, iron_gpu_texture_t *texsobol, iron_gpu_texture_t *texscramble, iron_gpu_texture_t *texrank) {
-	if (!texenv->_uploaded) {
-		iron_gpu_command_list_upload_texture(&gpu_command_list, texenv);
-		texenv->_uploaded = true;
+	if (!texenv->uploaded) {
+		iron_gpu_upload_texture(texenv);
+		texenv->uploaded = true;
 	}
-	if (!texsobol->_uploaded) {
-		iron_gpu_command_list_upload_texture(&gpu_command_list, texsobol);
-		texsobol->_uploaded = true;
+	if (!texsobol->uploaded) {
+		iron_gpu_upload_texture(texsobol);
+		texsobol->uploaded = true;
 	}
-	if (!texscramble->_uploaded) {
-		iron_gpu_command_list_upload_texture(&gpu_command_list, texscramble);
-		texscramble->_uploaded = true;
+	if (!texscramble->uploaded) {
+		iron_gpu_upload_texture(texscramble);
+		texscramble->uploaded = true;
 	}
-	if (!texrank->_uploaded) {
-		iron_gpu_command_list_upload_texture(&gpu_command_list, texrank);
-		texrank->_uploaded = true;
+	if (!texrank->uploaded) {
+		iron_gpu_upload_texture(texrank);
+		texrank->uploaded = true;
 	}
 
 	iron_gpu_raytrace_set_textures(tex0, tex1, tex2, texenv, texsobol, texscramble, texrank);
@@ -2184,7 +2174,7 @@ void iron_raytrace_dispatch_rays(iron_gpu_texture_t *render_target, buffer_t *bu
 	iron_gpu_raytrace_set_acceleration_structure(&accel);
 	iron_gpu_raytrace_set_pipeline(&rt_pipeline);
 	iron_gpu_raytrace_set_target(render_target);
-	iron_gpu_raytrace_dispatch_rays(&gpu_command_list);
+	iron_gpu_raytrace_dispatch_rays();
 }
 
 #endif

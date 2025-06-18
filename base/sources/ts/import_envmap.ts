@@ -24,8 +24,7 @@ function import_envmap_run(path: string, image: iron_gpu_texture_t) {
 		gpu_compile_pipeline(import_envmap_pipeline);
 
 		import_envmap_params_loc = gpu_get_constant_location(import_envmap_pipeline, "params");
-		let ptr: gpu_constant_location_impl_t = ADDRESS(import_envmap_params_loc.impl);
-		ptr.vertexOffset = 0;
+		import_envmap_params_loc.offset = 0;
 
 		import_envmap_radiance_loc = gpu_get_texture_unit(import_envmap_pipeline, "radiance");
 		import_envmap_radiance_loc.offset = 0;
@@ -94,14 +93,14 @@ function import_envmap_run(path: string, image: iron_gpu_texture_t) {
 
 function import_envmap_get_radiance_mip(mip: iron_gpu_texture_t, level: i32, radiance: iron_gpu_texture_t) {
 	_gpu_begin(mip);
-	gpu_set_vertex_buffer(const_data_screen_aligned_vb);
-	gpu_set_index_buffer(const_data_screen_aligned_ib);
-	gpu_set_pipeline(import_envmap_pipeline);
+	iron_gpu_set_vertex_buffer(const_data_screen_aligned_vb);
+	iron_gpu_set_index_buffer(const_data_screen_aligned_ib);
+	iron_gpu_set_pipeline(import_envmap_pipeline);
 	import_envmap_params.x = 0.1 + level / 8;
 	gpu_set_float4(import_envmap_params_loc, import_envmap_params.x, import_envmap_params.y, import_envmap_params.z, import_envmap_params.w);
-	gpu_set_texture(import_envmap_radiance_loc, radiance);
+	iron_gpu_set_texture(import_envmap_radiance_loc, radiance);
 	gpu_draw();
-	_gpu_end();
+	iron_gpu_end();
 }
 
 function import_envmap_reverse_equirect(x: f32, y: f32): vec4_t {

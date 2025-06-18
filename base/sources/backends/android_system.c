@@ -1212,8 +1212,7 @@ void iron_init(const char *name, int width, int height, struct iron_window_optio
 	win->width = width;
 	win->height = height;
 
-	iron_gpu_internal_init();
-	gpu_internal_init_window(win->depth_bits, true);
+	gpu_init(win->depth_bits, true);
 
 	iron_internal_gamepad_trigger_connect(0);
 }

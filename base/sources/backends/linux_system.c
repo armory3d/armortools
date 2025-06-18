@@ -422,7 +422,7 @@ void iron_window_create(iron_window_options_t *win) {
 		xlib.XSelectExtensionEvent(x11_ctx.display, window->window, &x11_ctx.eraser.motionClass, 1);
 	}
 
-	gpu_internal_init_window(win->depth_bits, win->vsync);
+	gpu_init(win->depth_bits, win->vsync);
 }
 
 static struct {
@@ -1437,10 +1437,7 @@ void iron_init(const char *name, int width, int height, iron_window_options_t *w
 	gettimeofday(&start, NULL);
 	iron_x11_init();
 	iron_display_init();
-
 	iron_set_app_name(name);
-
-	iron_gpu_internal_init();
 
 	iron_window_options_t defaultWin;
 	if (win == NULL) {
@@ -1457,7 +1454,7 @@ void iron_init(const char *name, int width, int height, iron_window_options_t *w
 }
 
 void iron_internal_shutdown() {
-	iron_gpu_internal_destroy();
+	iron_gpu_destroy();
 	iron_linux_closeHIDGamepads();
 	free(clipboardString);
 	xlib.XCloseDisplay(x11_ctx.display);

@@ -22,10 +22,6 @@ typedef struct {
 } gpu_pipeline_impl_t;
 
 typedef struct {
-	int vertexOffset;
-} gpu_constant_location_impl_t;
-
-typedef struct {
 	char name[1024];
 	void *mtlFunction;
 	char *source;

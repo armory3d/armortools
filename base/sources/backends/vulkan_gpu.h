@@ -79,10 +79,6 @@ typedef struct gpu_pipeline_impl {
 } gpu_pipeline_impl_t;
 
 typedef struct {
-	int vertexOffset;
-} gpu_constant_location_impl_t;
-
-typedef struct {
 	unsigned id;
 	char *source;
 	int length;
@@ -113,7 +109,7 @@ typedef struct {
 } gpu_texture_impl_t;
 
 typedef struct {
-	int myCount;
+	int count;
 
 	VkBuffer buf;
 	VkDeviceMemory mem;

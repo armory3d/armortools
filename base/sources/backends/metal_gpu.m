@@ -10,7 +10,6 @@
 id getMetalLayer(void);
 id getMetalDevice(void);
 id getMetalQueue(void);
-void gpu_internal_resize(int, int);
 
 extern int constant_buffer_index;
 bool iron_gpu_transpose_mat = true;
@@ -167,19 +166,16 @@ static int formatByteSize(iron_image_format_t format) {
 	}
 }
 
-void iron_gpu_internal_destroy(void) {
+void iron_gpu_destroy(void) {
 }
 
 void iron_gpu_internal_resize(int width, int height) {
-	gpu_internal_resize(width, height);
-}
 
-void iron_gpu_internal_init(void) {
 }
 
 id<MTLSamplerState> linear_sampler;
 
-void iron_gpu_internal_init_window(int depth_buffer_bits, bool vsync) {
+void iron_gpu_init(int depth_buffer_bits, bool vsync) {
 	depth_bits = depth_buffer_bits;
 	id<MTLDevice> device = getMetalDevice();
 
@@ -510,19 +506,19 @@ void iron_gpu_command_list_set_constant_buffer(iron_gpu_command_list_t *list, ir
 	[command_encoder useResource:buf usage:MTLResourceUsageRead  stages:MTLRenderStageVertex|MTLRenderStageFragment];
 }
 
-void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *texture) {
+void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t *unit, iron_gpu_texture_t *texture) {
 	id<MTLTexture> tex = (__bridge id<MTLTexture>)texture->impl._tex;
 	int i = constant_buffer_index;
 	[argument_encoder setArgumentBuffer:argument_buffer offset:argument_buffer_step * i];
-	[argument_encoder setTexture:tex atIndex:unit.offset + 2];
+	[argument_encoder setTexture:tex atIndex:unit->offset + 2];
 	[command_encoder useResource:tex usage:MTLResourceUsageRead stages:MTLRenderStageVertex|MTLRenderStageFragment];
 }
 
-void iron_gpu_command_list_set_texture_from_render_target_depth(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *target) {
+void iron_gpu_set_texture_depth(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t *unit, iron_gpu_texture_t *target) {
 	id<MTLTexture> depth_tex = (__bridge id<MTLTexture>)target->impl._depthTex;
 	int i = constant_buffer_index;
 	[argument_encoder setArgumentBuffer:argument_buffer offset:argument_buffer_step * i];
-	[argument_encoder setTexture:depth_tex atIndex:unit.offset + 2];
+	[argument_encoder setTexture:depth_tex atIndex:unit->offset + 2];
 	[command_encoder useResource:depth_tex usage:MTLResourceUsageRead stages:MTLRenderStageVertex|MTLRenderStageFragment];
 }
 
@@ -732,7 +728,7 @@ void iron_gpu_texture_init(iron_gpu_texture_t *texture, int width, int height, i
 	texture->format = format;
 	texture->impl.data = malloc(width * height * (format == IRON_IMAGE_FORMAT_R8 ? 1 : 4));
 	create(texture, width, height, format, true);
-	texture->_uploaded = true;
+	texture->uploaded = true;
 	texture->data = NULL;
 	texture->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
 	texture->framebuffer_index = -1;
@@ -743,7 +739,7 @@ void iron_gpu_texture_init_from_bytes(iron_gpu_texture_t *texture, void *data, i
 	texture->height = height;
 	texture->format = format;
 	texture->data = data;
-	texture->_uploaded = false;
+	texture->uploaded = false;
 	texture->impl.data = NULL;
 	texture->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
 	texture->framebuffer_index = -1;
@@ -851,7 +847,7 @@ static void render_target_init(iron_gpu_texture_t *target, int width, int height
 	target->width = width;
 	target->height = height;
 	target->data = NULL;
-	target->_uploaded = true;
+	target->uploaded = true;
 	target->state = IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
 	target->framebuffer_index = framebuffer_index;
 
@@ -890,7 +886,7 @@ void iron_gpu_render_target_init(iron_gpu_texture_t *target, int width, int heig
 	target->width = target->width = width;
 	target->height = target->height = height;
 	target->state = IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
-	target->_uploaded = true;
+	target->uploaded = true;
 }
 
 void iron_gpu_render_target_init_framebuffer(iron_gpu_texture_t *target, int width, int height, iron_image_format_t format, int depth_buffer_bits) {
@@ -904,7 +900,7 @@ void iron_gpu_render_target_set_depth_from(iron_gpu_texture_t *target, iron_gpu_
 
 void iron_gpu_vertex_buffer_init(iron_gpu_buffer_t *buffer, int count, iron_gpu_vertex_structure_t *structure, bool gpu_memory) {
 	memset(&buffer->impl, 0, sizeof(buffer->impl));
-	buffer->myCount = count;
+	buffer->count = count;
 	buffer->impl.gpu_memory = gpu_memory;
 	for (int i = 0; i < structure->size; ++i) {
 		iron_gpu_vertex_element_t element = structure->elements[i];
@@ -935,7 +931,7 @@ void iron_gpu_vertex_buffer_unlock(iron_gpu_buffer_t *buf) {
 }
 
 int iron_gpu_vertex_buffer_count(iron_gpu_buffer_t *buffer) {
-	return buffer->myCount;
+	return buffer->count;
 }
 
 int iron_gpu_vertex_buffer_stride(iron_gpu_buffer_t *buffer) {

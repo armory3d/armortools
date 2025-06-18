@@ -77,7 +77,6 @@ struct vk_context vk_ctx = {0};
 void iron_vulkan_get_instance_extensions(const char **extensions, int *index);
 VkBool32 iron_vulkan_get_physical_device_presentation_support(VkPhysicalDevice physical_device, uint32_t queue_family_index);
 VkResult iron_vulkan_create_surface(VkInstance instance, VkSurfaceKHR *surface);
-void gpu_internal_resize(int, int);
 
 static VkFormat convert_image_format(iron_image_format_t format) {
 	switch (format) {
@@ -352,7 +351,6 @@ void iron_gpu_internal_resize(int width, int height) {
 		window->width = width;
 		window->height = height;
 	}
-	gpu_internal_resize(width, height);
 }
 
 VkSwapchainKHR cleanup_swapchain() {
@@ -592,7 +590,7 @@ static bool find_layer(VkLayerProperties *layers, int layer_count, const char *w
 	return false;
 }
 
-void iron_gpu_internal_init() {
+void iron_gpu_init(int depthBufferBits, bool vsync) {
 	uint32_t instance_layer_count = 0;
 
 	static const char *wanted_instance_layers[64];
@@ -941,26 +939,11 @@ void iron_gpu_internal_init() {
 
 	vkCreateSemaphore(vk_ctx.device, &sem_info, NULL, &framebuffer_available);
 	vkCreateSemaphore(vk_ctx.device, &sem_info, NULL, &relay_semaphore);
-}
 
-void iron_gpu_internal_destroy() {
-	struct vk_window *window = &vk_ctx.windows[0];
-	VkSwapchainKHR swapchain = cleanup_swapchain();
-	vk.fpDestroySwapchainKHR(vk_ctx.device, swapchain, NULL);
-	vk.fpDestroySurfaceKHR(vk_ctx.instance, window->surface, NULL);
-}
 
-void iron_vulkan_init_window() {
-	// this function is used in the android backend
-	struct vk_window *window = &vk_ctx.windows[0];
 
-	// delay swapchain/surface recreation
-	// otherwise trouble ensues due to G4onG5 backend ending the command list in gpu_begin
-	window->resized = true;
-	window->surface_destroyed = true;
-}
 
-void iron_gpu_internal_init_window(int depthBufferBits, bool vsync) {
+
 	struct vk_window *window = &vk_ctx.windows[0];
 
 	window->depth_bits = depthBufferBits;
@@ -1001,6 +984,23 @@ void iron_gpu_internal_init_window(int depthBufferBits, bool vsync) {
 
 	began = false;
 	// iron_gpu_begin(NULL);
+}
+
+void iron_gpu_destroy() {
+	struct vk_window *window = &vk_ctx.windows[0];
+	VkSwapchainKHR swapchain = cleanup_swapchain();
+	vk.fpDestroySwapchainKHR(vk_ctx.device, swapchain, NULL);
+	vk.fpDestroySurfaceKHR(vk_ctx.instance, window->surface, NULL);
+}
+
+void iron_vulkan_init_window() {
+	// this function is used in the android backend
+	struct vk_window *window = &vk_ctx.windows[0];
+
+	// delay swapchain/surface recreation
+	// otherwise trouble ensues due to G4onG5 backend ending the command list in iron_gpu_begin
+	window->resized = true;
+	window->surface_destroyed = true;
 }
 
 void iron_gpu_begin(iron_gpu_texture_t *render_target) {
@@ -1951,13 +1951,13 @@ void iron_gpu_command_list_wait(iron_gpu_command_list_t *list) {
 	vkWaitForFences(vk_ctx.device, 1, &list->impl.fence, VK_TRUE, UINT64_MAX);
 }
 
-void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *texture) {
-	texture->impl.stage = unit.offset;
+void iron_gpu_set_texture(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t *unit, iron_gpu_texture_t *texture) {
+	texture->impl.stage = unit->offset;
 	current_textures[unit.offset] = texture;
 }
 
-void iron_gpu_command_list_set_texture_from_render_target_depth(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t unit, iron_gpu_texture_t *target) {
-	target->impl.stage_depth = unit.offset;
+void iron_gpu_set_texture_depth(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t *unit, iron_gpu_texture_t *target) {
+	target->impl.stage_depth = unit->offset;
 	current_textures[unit.offset] = target;
 }
 
@@ -2351,7 +2351,7 @@ static void update_stride(iron_gpu_texture_t *texture) {
 void iron_gpu_texture_init_from_bytes(iron_gpu_texture_t *texture, void *data, int width, int height, iron_image_format_t format) {
 	texture->width = width;
 	texture->height = height;
-	texture->_uploaded = false;
+	texture->uploaded = false;
 	texture->format = format;
 	texture->data = data;
 	texture->impl.stage = 0;
@@ -2445,7 +2445,7 @@ void iron_gpu_texture_init_from_bytes(iron_gpu_texture_t *texture, void *data, i
 void iron_gpu_texture_init(iron_gpu_texture_t *texture, int width, int height, iron_image_format_t format) {
 	texture->width = width;
 	texture->height = height;
-	texture->_uploaded = true;
+	texture->uploaded = true;
 	texture->format = format;
 	texture->data = NULL;
 	texture->impl.stage = 0;
@@ -2575,7 +2575,7 @@ void iron_gpu_texture_set_mipmap(iron_gpu_texture_t *texture, iron_gpu_texture_t
 	// vkFreeMemory(vk_ctx.device, staging_buffer_mem, NULL);
 	// vkDestroyBuffer(vk_ctx.device, staging_buffer, NULL);
 
-	// texture->_uploaded = true;
+	// texture->uploaded = true;
 }
 
 static void render_target_init(iron_gpu_texture_t *target, int width, int height, iron_image_format_t format, int depth_bits, int framebuffer_index) {
@@ -2713,7 +2713,7 @@ void iron_gpu_render_target_init(iron_gpu_texture_t *target, int width, int heig
 	target->height = height;
 	target->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
 	target->depth_state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
-	target->_uploaded = true;
+	target->uploaded = true;
 }
 
 void iron_gpu_render_target_init_framebuffer(iron_gpu_texture_t *target, int width, int height, iron_image_format_t format, int depth_bits) {
@@ -2730,7 +2730,7 @@ void iron_gpu_render_target_set_depth_from(iron_gpu_texture_t *target, iron_gpu_
 }
 
 void iron_gpu_vertex_buffer_init(iron_gpu_buffer_t *buffer, int vertexCount, iron_gpu_vertex_structure_t *structure, bool gpuMemory) {
-	buffer->myCount = vertexCount;
+	buffer->count = vertexCount;
 	buffer->impl.myStride = 0;
 	for (int i = 0; i < structure->size; ++i) {
 		iron_gpu_vertex_element_t element = structure->elements[i];
@@ -2787,7 +2787,7 @@ void iron_gpu_vertex_buffer_destroy(iron_gpu_buffer_t *buffer) {
 
 float *iron_gpu_vertex_buffer_lock(iron_gpu_buffer_t *buffer) {
 	int start = 0;
-	int count = buffer->myCount;
+	int count = buffer->count;
 	vkMapMemory(vk_ctx.device, buffer->impl.mem, start * buffer->impl.myStride, count * buffer->impl.myStride, 0, (void **)&buffer->impl.data);
 	return buffer->impl.data;
 }
@@ -2797,7 +2797,7 @@ void iron_gpu_vertex_buffer_unlock(iron_gpu_buffer_t *buffer) {
 }
 
 int iron_gpu_vertex_buffer_count(iron_gpu_buffer_t *buffer) {
-	return buffer->myCount;
+	return buffer->count;
 }
 
 int iron_gpu_vertex_buffer_stride(iron_gpu_buffer_t *buffer) {
@@ -2862,7 +2862,7 @@ int iron_gpu_constant_buffer_size(iron_gpu_buffer_t *buffer) {
 }
 
 void iron_gpu_index_buffer_init(iron_gpu_buffer_t *buffer, int indexCount, bool gpuMemory) {
-	buffer->myCount = indexCount;
+	buffer->count = indexCount;
 
 	VkBufferCreateInfo buf_info = {
 		.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
@@ -2929,7 +2929,7 @@ void iron_gpu_index_buffer_unlock(iron_gpu_buffer_t *buffer) {
 }
 
 int iron_gpu_index_buffer_count(iron_gpu_buffer_t *buffer) {
-	return buffer->myCount;
+	return buffer->count;
 }
 
 static const int INDEX_RAYGEN = 0;
@@ -3415,8 +3415,8 @@ void iron_gpu_raytrace_acceleration_structure_build(iron_gpu_raytrace_accelerati
 	if (build_bottom) {
 		for (int i = 0; i < vb_count; ++i) {
 
-			uint32_t prim_count = ib[i]->myCount / 3;
-			uint32_t vert_count = vb[i]->myCount;
+			uint32_t prim_count = ib[i]->count / 3;
+			uint32_t vert_count = vb[i]->count;
 
 			VkDeviceOrHostAddressConstKHR vertex_data_device_address = {0};
 			VkDeviceOrHostAddressConstKHR index_data_device_address = {0};
@@ -3432,7 +3432,7 @@ void iron_gpu_raytrace_acceleration_structure_build(iron_gpu_raytrace_accelerati
 				.geometry.triangles.vertexFormat = VK_FORMAT_R16G16B16A16_SNORM,
 				.geometry.triangles.vertexData.deviceAddress = vertex_data_device_address.deviceAddress,
 				.geometry.triangles.vertexStride = vb[i]->impl.myStride,
-				.geometry.triangles.maxVertex = vb[i]->myCount,
+				.geometry.triangles.maxVertex = vb[i]->count,
 				.geometry.triangles.indexType = VK_INDEX_TYPE_UINT32,
 				.geometry.triangles.indexData.deviceAddress = index_data_device_address.deviceAddress,
 			};
@@ -3653,7 +3653,7 @@ void iron_gpu_raytrace_acceleration_structure_build(iron_gpu_raytrace_accelerati
 
 			int ib_off = 0;
 			for (int j = 0; j < instances[i].i; ++j) {
-				ib_off += ib[j]->myCount * 4;
+				ib_off += ib[j]->count * 4;
 			}
 			instance.instanceCustomIndex = ib_off;
 

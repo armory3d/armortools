@@ -125,11 +125,11 @@ function util_uv_cache_dilate_map() {
 	}
 	let geom: mesh_data_t = mask == 0 && context_raw.merged_object != null ? context_raw.merged_object.data : context_raw.paint_object.data;
 	_gpu_begin(util_uv_dilatemap, null, clear_flag_t.COLOR, 0x00000000);
-	gpu_set_pipeline(util_uv_pipe_dilate);
-	gpu_set_vertex_buffer(geom._.vertex_buffer);
-	gpu_set_index_buffer(geom._.index_buffers[0]);
+	iron_gpu_set_pipeline(util_uv_pipe_dilate);
+	iron_gpu_set_vertex_buffer(geom._.vertex_buffer);
+	iron_gpu_set_index_buffer(geom._.index_buffers[0]);
 	gpu_draw();
-	_gpu_end();
+	iron_gpu_end();
 	util_uv_dilatemap_cached = true;
 	util_uv_dilate_bytes = null;
 }

@@ -79,12 +79,12 @@ function ui_nodes_ext_run() {
 
 	if (texheight != null) {
 		_gpu_begin(texpaint_pack._image);
-		gpu_set_pipeline(pipes_copy_a);
-		gpu_set_texture(pipes_copy_a_tex, texheight);
-		gpu_set_vertex_buffer(const_data_screen_aligned_vb);
-		gpu_set_index_buffer(const_data_screen_aligned_ib);
+		iron_gpu_set_pipeline(pipes_copy_a);
+		iron_gpu_set_texture(pipes_copy_a_tex, texheight);
+		iron_gpu_set_vertex_buffer(const_data_screen_aligned_vb);
+		iron_gpu_set_index_buffer(const_data_screen_aligned_ib);
 		gpu_draw();
-		_gpu_end();
+		iron_gpu_end();
 
 		let is_float_node: bool = context_raw.brush_output_node_inst.base.inputs[channel_type_t.HEIGHT].node.base.get == float_node_get;
 

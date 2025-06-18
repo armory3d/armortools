@@ -613,7 +613,7 @@ void ui_draw_tooltip_text(bool bind_global_g) {
 		}
 	}
 	current->tooltip_x = fmin(current->tooltip_x, iron_window_width() - tooltip_w - 20);
-	if (bind_global_g) draw_set_render_target(NULL, false, 0);
+	if (bind_global_g) draw_begin(NULL, false, 0);
 	float font_height = draw_font_height(current->ops->font, current->font_size);
 	float off = 0;
 	if (current->tooltip_img != NULL) {
@@ -648,7 +648,7 @@ void ui_draw_tooltip_image(bool bind_global_g) {
 	current->tooltip_x = fmin(current->tooltip_x, iron_window_width() - w - 20);
 	current->tooltip_y = fmin(current->tooltip_y, iron_window_height() - h - 20);
 	if (bind_global_g) {
-		draw_set_render_target(NULL, false, 0);
+		draw_begin(NULL, false, 0);
 	}
 	draw_set_color(0xff000000);
 	draw_filled_rect(current->tooltip_x, current->tooltip_y, w, h);
@@ -662,7 +662,7 @@ void ui_draw_tooltip(bool bind_global_g) {
 	static char temp[1024];
 	if (current->slider_tooltip) {
 		if (bind_global_g) {
-			draw_set_render_target(NULL, false, 0);
+			draw_begin(NULL, false, 0);
 		}
 		draw_set_font(current->ops->font, current->font_size * 2);
 		sprintf(temp, "%f", round(current->scroll_handle->value * 100.0) / 100.0);
@@ -678,7 +678,7 @@ void ui_draw_tooltip(bool bind_global_g) {
 	}
 	if (ui_touch_tooltip && current->text_selected_handle != NULL) {
 		if (bind_global_g) {
-			draw_set_render_target(NULL, false, 0);
+			draw_begin(NULL, false, 0);
 		}
 		draw_set_font(current->ops->font, current->font_size * 2.0);
 		float x_off = draw_string_width(current->ops->font, current->font_size * 2.0, current->text_selected) / 2.0;
@@ -719,7 +719,7 @@ void ui_draw_combo(bool begin /*= true*/) {
 	}
 	draw_set_color(theme->SEPARATOR_COL);
 	if (begin) {
-		draw_set_render_target(NULL, false, 0);
+		draw_begin(NULL, false, 0);
 	}
 
 	float combo_h = (current->combo_selected_texts->length + (current->combo_selected_label != NULL ? 1 : 0) + (current->combo_search_bar ? 1 : 0)) * UI_ELEMENT_H();
@@ -898,35 +898,35 @@ void ui_bake_elements() {
 	}
 	float r = UI_CHECK_SELECT_SIZE();
 	iron_gpu_render_target_init(&current->check_select_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
-	draw_set_render_target(&current->check_select_image, true, 0x00000000);
+	draw_begin(&current->check_select_image, true, 0x00000000);
 	draw_set_color(0xffffffff);
 	draw_line(0, r / 2.0, r / 2.0 - 2.0 * UI_SCALE(), r - 2.0 * UI_SCALE(), 2.0 * UI_SCALE());
 	draw_line(r / 2.0 - 3.0 * UI_SCALE(), r - 3.0 * UI_SCALE(), r / 2.0 + 5.0 * UI_SCALE(), r - 11.0 * UI_SCALE(), 2.0 * UI_SCALE());
-	// draw_end();
+	draw_end();
 
 	if (current->radio_image.width != 0) {
 		iron_gpu_texture_destroy(&current->radio_image);
 	}
 	r = UI_CHECK_SIZE();
 	iron_gpu_render_target_init(&current->radio_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
-	draw_set_render_target(&current->radio_image, true, 0x00000000);
+	draw_begin(&current->radio_image, true, 0x00000000);
 	draw_set_color(0xffaaaaaa);
 	draw_filled_circle(r / 2.0, r / 2.0, r / 2.0, 0);
 	draw_set_color(0xffffffff);
 	draw_circle(r / 2.0, r / 2.0, r / 2.0, 0, 1.0 * UI_SCALE());
-	// draw_end();
+	draw_end();
 
 	if (current->radio_select_image.width != 0) {
 		iron_gpu_texture_destroy(&current->radio_select_image);
 	}
 	r = UI_CHECK_SELECT_SIZE();
 	iron_gpu_render_target_init(&current->radio_select_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
-	draw_set_render_target(&current->radio_select_image, true, 0x00000000);
+	draw_begin(&current->radio_select_image, true, 0x00000000);
 	draw_set_color(0xffaaaaaa);
 	draw_filled_circle(r / 2.0, r / 2.0, 4.5 * UI_SCALE(), 0);
 	draw_set_color(0xffffffff);
 	draw_filled_circle(r / 2.0, r / 2.0, 4.0 * UI_SCALE(), 0);
-	// draw_end();
+	draw_end();
 
 	if (theme->ROUND_CORNERS) {
 		if (current->filled_round_corner_image.width != 0) {
@@ -934,22 +934,21 @@ void ui_bake_elements() {
 		}
 		r = 4.0 * UI_SCALE();
 		iron_gpu_render_target_init(&current->filled_round_corner_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
-		draw_set_render_target(&current->filled_round_corner_image, true, 0x00000000);
+		draw_begin(&current->filled_round_corner_image, true, 0x00000000);
 		draw_set_color(0xffffffff);
 		draw_filled_circle(r, r, r, 0);
-		// draw_end();
+		draw_end();
 
 		if (current->round_corner_image.width != 0) {
 			iron_gpu_texture_destroy(&current->round_corner_image);
 		}
 		iron_gpu_render_target_init(&current->round_corner_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
-		draw_set_render_target(&current->round_corner_image, true, 0x00000000);
+		draw_begin(&current->round_corner_image, true, 0x00000000);
 		draw_set_color(0xffffffff);
 		draw_circle(r, r, r, 0, 1);
-		// draw_end();
+		draw_end();
 	}
 
-	draw_set_render_target(NULL, false, 0);
 	current->elements_baked = true;
 }
 
@@ -1542,7 +1541,7 @@ void ui_end_sticky() {
 	// draw_end();
 	current->sticky = false;
 	current->scissor = true;
-	gpu_scissor(0, current->_y, current->_window_w, current->_window_h - current->_y);
+	iron_gpu_scissor(0, current->_y, current->_window_w, current->_window_h - current->_y);
 	current->window_header_h += current->_y - current->window_header_h;
 	current->_y += current->current_window->scroll_offset;
 	current->is_hovered = false;
@@ -1557,7 +1556,7 @@ void ui_end_window(bool bind_global_g) {
 	if (handle->redraws > 0 || current->is_scrolling) {
 		if (current->scissor) {
 			current->scissor = false;
-			gpu_disable_scissor();
+			iron_gpu_disable_scissor();
 		}
 
 		if (current->tab_count > 0) {
@@ -1646,7 +1645,7 @@ void ui_end_window(bool bind_global_g) {
 	// Draw window texture
 	if (ui_always_redraw_window || handle->redraws > -4) {
 		if (bind_global_g) {
-			draw_set_render_target(NULL, false, 0);
+			draw_begin(NULL, false, 0);
 		}
 		draw_set_color(0xffffffff);
 		draw_image(&handle->texture, current->_window_x, current->_window_y);
@@ -1719,10 +1718,10 @@ bool _ui_window(ui_handle_t *handle, int x, int y, int w, int h, bool drag) {
 	current->tab_count = 0;
 
 	if (theme->FILL_WINDOW_BG) {
-		draw_set_render_target(&handle->texture, true, theme->WINDOW_BG_COL);
+		draw_begin(&handle->texture, true, theme->WINDOW_BG_COL);
 	}
 	else {
-		draw_set_render_target(&handle->texture, true, 0x00000000);
+		draw_begin(&handle->texture, true, 0x00000000);
 		draw_set_color(theme->WINDOW_BG_COL);
 		draw_filled_rect(current->_x, current->_y - handle->scroll_offset, handle->last_max_x, handle->last_max_y);
 	}

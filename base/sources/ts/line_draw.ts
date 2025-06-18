@@ -229,11 +229,11 @@ function line_draw_begin() {
 
 function line_draw_end(overlay: bool = false) {
 	iron_gpu_vertex_buffer_unlock(line_draw_vertex_buffer);
-	gpu_index_buffer_unlock(line_draw_index_buffer);
+	iron_gpu_index_buffer_unlock(line_draw_index_buffer);
 
-	gpu_set_vertex_buffer(line_draw_vertex_buffer);
-	gpu_set_index_buffer(line_draw_index_buffer);
-	gpu_set_pipeline(overlay ? line_draw_overlay_pipeline : line_draw_pipeline);
+	iron_gpu_set_vertex_buffer(line_draw_vertex_buffer);
+	iron_gpu_set_index_buffer(line_draw_index_buffer);
+	iron_gpu_set_pipeline(overlay ? line_draw_overlay_pipeline : line_draw_pipeline);
 	let camera: camera_object_t = scene_camera;
 	line_draw_vp = mat4_clone(camera.v);
 	line_draw_vp = mat4_mult_mat(line_draw_vp, camera.p);
@@ -272,9 +272,9 @@ function shape_draw_sphere(mat: mat4_t) {
 		_shape_draw_sphere_ib = md._.index_buffers[0];
 	}
 
-	gpu_set_vertex_buffer(_shape_draw_sphere_vb);
-	gpu_set_index_buffer(_shape_draw_sphere_ib);
-	gpu_set_pipeline(line_draw_overlay_pipeline);
+	iron_gpu_set_vertex_buffer(_shape_draw_sphere_vb);
+	iron_gpu_set_index_buffer(_shape_draw_sphere_ib);
+	iron_gpu_set_pipeline(line_draw_overlay_pipeline);
 	let camera: camera_object_t = scene_camera;
 	line_draw_vp = mat4_clone(mat);
 	let f: f32 = line_draw_strength * 50;
