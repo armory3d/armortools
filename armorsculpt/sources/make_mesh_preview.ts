@@ -153,7 +153,7 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	///end
 
 	con_mesh.data.shader_from_source = true;
-	gpu_create_shaders_from_kong(node_shader_get(kong), ADDRESS(con_paint.data.vertex_shader), ADDRESS(con_paint.data.fragment_shader), ADDRESS(con_paint.data._.vertex_shader_size), ADDRESS(con_paint.data._.fragment_shader_size));
+	gpu_create_shaders_from_kong(node_shader_get(kong), ADDRESS(con_mesh.data.vertex_shader), ADDRESS(con_mesh.data.fragment_shader), ADDRESS(con_mesh.data._.vertex_shader_size), ADDRESS(con_mesh.data._.fragment_shader_size));
 
 	return con_mesh;
 }
