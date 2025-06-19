@@ -160,7 +160,7 @@ function make_material_parse_paint_material(bake_previews: bool = true) {
 	if (bake_previews) {
 		let current: gpu_texture_t = _draw_current;
 		let g2_in_use: bool = _draw_in_use;
-		if (g2_in_use) draw_end();
+		if (g2_in_use) draw_end(); ////
 		make_material_bake_node_previews();
 		if (g2_in_use) draw_begin(current);
 	}

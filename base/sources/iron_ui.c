@@ -1891,14 +1891,6 @@ static int image_height(void *image) {
 	return ((gpu_texture_t *)image)->height;
 }
 
-static void _draw_scaled_image(void *image, float dx, float dy, float dw, float dh) {
-	draw_scaled_image((gpu_texture_t *)image, dx, dy, dw, dh);
-}
-
-static void _draw_scaled_sub_image(void *image, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
-	draw_scaled_sub_image((gpu_texture_t *)image, sx, sy, sw, sh, dx, dy, dw, dh);
-}
-
 int ui_sub_image(gpu_texture_t *image, uint32_t tint, int h, int sx, int sy, int sw, int sh) {
 	float iw = (sw > 0 ? sw : image_width(image)) * UI_SCALE();
 	float ih = (sh > 0 ? sh : image_height(image)) * UI_SCALE();
@@ -1951,18 +1943,18 @@ int ui_sub_image(gpu_texture_t *image, uint32_t tint, int h, int sx, int sy, int
 	}
 	if (sw > 0) { // Source rect specified
 		if (current->image_invert_y) {
-			_draw_scaled_sub_image(image, sx, sy, sw, sh, x, current->_y + h, w, -h);
+			draw_scaled_sub_image(image, sx, sy, sw, sh, x, current->_y + h, w, -h);
 		}
 		else {
-			_draw_scaled_sub_image(image, sx, sy, sw, sh, x, current->_y, w, h);
+			draw_scaled_sub_image(image, sx, sy, sw, sh, x, current->_y, w, h);
 		}
 	}
 	else {
 		if (current->image_invert_y) {
-			_draw_scaled_image(image, x, current->_y + h, w, -h);
+			draw_scaled_image(image, x, current->_y + h, w, -h);
 		}
 		else {
-			_draw_scaled_image(image, x, current->_y, w, h);
+			draw_scaled_image(image, x, current->_y, w, h);
 		}
 	}
 
