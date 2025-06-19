@@ -595,11 +595,12 @@ type shader_context_t = {
 
 type shader_context_runtime_t = {
 	pipe_state?: iron_gpu_pipeline_t;
-	constants?: iron_gpu_constant_location_t[];
-	tex_units?: iron_gpu_texture_unit_t[];
+	constants?: i32[];
+	tex_units?: i32[];
 	structure?: iron_gpu_vertex_structure_t;
 	vertex_shader_size?: i32;
 	fragment_shader_size?: i32;
+	constant_buffer?: iron_gpu_buffer_t;
 };
 
 type vertex_element_t = {

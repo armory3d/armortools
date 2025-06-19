@@ -108,7 +108,8 @@ function node_shader_context_add_constant(raw: node_shader_context_t, ctype: str
 	if (link != null) {
 		c.link = link;
 	}
-	array_push(raw.data.constants, c);
+	let consts: shader_const_t[] = raw.data.constants;
+	array_push(consts, c);
 }
 
 function node_shader_context_add_texture_unit(raw: node_shader_context_t, ctype: string, name: string, link: string = null) {

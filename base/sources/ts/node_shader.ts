@@ -4,7 +4,7 @@ type node_shader_t = {
 	ins?: string[];
 	outs?: string[];
 	frag_out?: string;
-	constants?: string[];
+	consts?: string[];
 	textures?: string[];
 	functions?: map_t<string, string>;
 
@@ -42,7 +42,7 @@ function node_shader_create(context: node_shader_context_t): node_shader_t {
 	raw.ins = [];
 	raw.outs = [];
 	raw.frag_out = "float4";
-	raw.constants = [];
+	raw.consts = [];
 	raw.textures = [];
 	raw.functions = map_create();
 
@@ -71,7 +71,7 @@ function node_shader_add_out(raw: node_shader_t, s: string) {
 
 function node_shader_add_constant(raw: node_shader_t, s: string, link: string = null) {
 	// inp: float4
-	if (array_index_of(raw.constants, s) == -1) {
+	if (array_index_of(raw.consts, s) == -1) {
 		let ar: string[] = string_split(s, ": ");
 		let uname: string = ar[0];
 		let utype: string = ar[1];
@@ -84,7 +84,7 @@ function node_shader_add_constant(raw: node_shader_t, s: string, link: string = 
 		if (utype == "float4x4") utype = "mat4";
 		////
 
-		array_push(raw.constants, s);
+		array_push(raw.consts, s);
 		node_shader_context_add_constant(raw.context, utype, uname, link);
 	}
 }
@@ -184,9 +184,9 @@ function node_shader_get(raw: node_shader_t): string {
 
 	s += "#[set(everything)]\n";
 	s += "const constants: {\n";
-	if (raw.constants.length > 0) {
-		for (let i: i32 = 0; i < raw.constants.length; ++i) {
-			let a: string = raw.constants[i];
+	if (raw.consts.length > 0) {
+		for (let i: i32 = 0; i < raw.consts.length; ++i) {
+			let a: string = raw.consts[i];
 			s += "\t" + a + ";\n";
 		}
 	}

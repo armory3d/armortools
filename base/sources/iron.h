@@ -1229,20 +1229,6 @@ buffer_t *iron_load_blob(string_t *file) {
 	return buffer;
 }
 
-iron_gpu_constant_location_t *gpu_get_constant_location(iron_gpu_pipeline_t *pipeline, string_t *name) {
-	iron_gpu_constant_location_t location = iron_gpu_pipeline_get_constant_location(pipeline, name);
-	iron_gpu_constant_location_t *location_copy = (iron_gpu_constant_location_t *)malloc(sizeof(iron_gpu_constant_location_t));
-	memcpy(location_copy, &location, sizeof(iron_gpu_constant_location_t)); // TODO
-	return location_copy;
-}
-
-iron_gpu_texture_unit_t *gpu_get_texture_unit(iron_gpu_pipeline_t *pipeline, string_t *name) {
-	iron_gpu_texture_unit_t unit = iron_gpu_pipeline_get_texture_unit(pipeline, name);
-	iron_gpu_texture_unit_t *unit_copy = (iron_gpu_texture_unit_t *)malloc(sizeof(iron_gpu_texture_unit_t));
-	memcpy(unit_copy, &unit, sizeof(iron_gpu_texture_unit_t)); // TODO
-	return unit_copy;
-}
-
 void iron_set_window_title(string_t *title) {
 	iron_window_set_title(title);
 	#if defined(IRON_IOS) || defined(IRON_ANDROID)

@@ -10,8 +10,8 @@ let line_draw_pipeline: iron_gpu_pipeline_t = null;
 let line_draw_overlay_pipeline: iron_gpu_pipeline_t = null;
 
 let line_draw_vp: mat4_t;
-let line_draw_vp_loc: iron_gpu_constant_location_t;
-let line_draw_color_loc: iron_gpu_constant_location_t;
+let line_draw_vp_loc: i32;
+let line_draw_color_loc: i32;
 
 let line_draw_vb_data: buffer_t;
 let line_draw_ib_data: u32_array_t;
@@ -56,8 +56,8 @@ function line_draw_init() {
 		line_draw_pipeline.depth_attachment_bits = 24;
 		gpu_compile_pipeline(line_draw_pipeline);
 		pipes_offset = 0;
-		line_draw_color_loc = pipes_get_constant_location(line_draw_pipeline, "color", "vec3");
-		line_draw_vp_loc = pipes_get_constant_location(line_draw_pipeline, "VP", "mat4");
+		line_draw_color_loc = pipes_get_constant_location("vec3");
+		line_draw_vp_loc = pipes_get_constant_location("mat4");
 		line_draw_vp = mat4_identity();
 		line_draw_vertex_buffer = gpu_create_vertex_buffer(line_draw_max_vertices, structure, usage_t.DYNAMIC);
 		line_draw_index_buffer = gpu_create_index_buffer(line_draw_max_indices);

@@ -506,19 +506,19 @@ void iron_gpu_command_list_set_constant_buffer(iron_gpu_command_list_t *list, ir
 	[command_encoder useResource:buf usage:MTLResourceUsageRead  stages:MTLRenderStageVertex|MTLRenderStageFragment];
 }
 
-void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t *unit, iron_gpu_texture_t *texture) {
+void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, int unit, iron_gpu_texture_t *texture) {
 	id<MTLTexture> tex = (__bridge id<MTLTexture>)texture->impl._tex;
 	int i = constant_buffer_index;
 	[argument_encoder setArgumentBuffer:argument_buffer offset:argument_buffer_step * i];
-	[argument_encoder setTexture:tex atIndex:unit->offset + 2];
+	[argument_encoder setTexture:tex atIndex:unit + 2];
 	[command_encoder useResource:tex usage:MTLResourceUsageRead stages:MTLRenderStageVertex|MTLRenderStageFragment];
 }
 
-void iron_gpu_set_texture_depth(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t *unit, iron_gpu_texture_t *target) {
+void iron_gpu_set_texture_depth(iron_gpu_command_list_t *list, int unit, iron_gpu_texture_t *target) {
 	id<MTLTexture> depth_tex = (__bridge id<MTLTexture>)target->impl._depthTex;
 	int i = constant_buffer_index;
 	[argument_encoder setArgumentBuffer:argument_buffer offset:argument_buffer_step * i];
-	[argument_encoder setTexture:depth_tex atIndex:unit->offset + 2];
+	[argument_encoder setTexture:depth_tex atIndex:unit + 2];
 	[command_encoder useResource:depth_tex usage:MTLResourceUsageRead stages:MTLRenderStageVertex|MTLRenderStageFragment];
 }
 
@@ -641,17 +641,6 @@ void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipeline) {
 	depthStencilDescriptor.depthCompareFunction = MTLCompareFunctionAlways;
 	depthStencilDescriptor.depthWriteEnabled = false;
 	pipeline->impl._depthStencilNone = (__bridge_retained void *)[device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
-}
-
-iron_gpu_constant_location_t iron_gpu_pipeline_get_constant_location(iron_gpu_pipeline_t *pipeline, const char *name) {
-	iron_gpu_constant_location_t location;
-	return location;
-}
-
-iron_gpu_texture_unit_t iron_gpu_pipeline_get_texture_unit(iron_gpu_pipeline_t *pipeline, const char *name) {
-	iron_gpu_texture_unit_t unit;
-	unit.offset = -1;
-	return unit;
 }
 
 void iron_gpu_shader_destroy(iron_gpu_shader_t *shader) {

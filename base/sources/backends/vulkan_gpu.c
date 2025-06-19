@@ -1951,13 +1951,13 @@ void iron_gpu_command_list_wait(iron_gpu_command_list_t *list) {
 	vkWaitForFences(vk_ctx.device, 1, &list->impl.fence, VK_TRUE, UINT64_MAX);
 }
 
-void iron_gpu_set_texture(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t *unit, iron_gpu_texture_t *texture) {
-	texture->impl.stage = unit->offset;
+void iron_gpu_set_texture(iron_gpu_command_list_t *list, int unit, iron_gpu_texture_t *texture) {
+	texture->impl.stage = unit;
 	current_textures[unit.offset] = texture;
 }
 
-void iron_gpu_set_texture_depth(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t *unit, iron_gpu_texture_t *target) {
-	target->impl.stage_depth = unit->offset;
+void iron_gpu_set_texture_depth(iron_gpu_command_list_t *list, int unit, iron_gpu_texture_t *target) {
+	target->impl.stage_depth = unit;
 	current_textures[unit.offset] = target;
 }
 
@@ -1980,16 +1980,6 @@ void iron_gpu_pipeline_init(iron_gpu_pipeline_t *pipeline) {
 void iron_gpu_pipeline_destroy(iron_gpu_pipeline_t *pipeline) {
 	vkDestroyPipeline(vk_ctx.device, pipeline->impl.pipeline, NULL);
 	vkDestroyPipelineLayout(vk_ctx.device, pipeline->impl.pipeline_layout, NULL);
-}
-
-iron_gpu_constant_location_t iron_gpu_pipeline_get_constant_location(iron_gpu_pipeline_t *pipeline, const char *name) {
-	iron_gpu_constant_location_t location;
-	return location;
-}
-
-iron_gpu_texture_unit_t iron_gpu_pipeline_get_texture_unit(iron_gpu_pipeline_t *pipeline, const char *name) {
-	iron_gpu_texture_unit_t unit;
-	return unit;
 }
 
 void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipeline) {

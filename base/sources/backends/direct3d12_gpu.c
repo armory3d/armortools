@@ -972,14 +972,14 @@ void iron_gpu_get_render_target_pixels(iron_gpu_texture_t *render_target, uint8_
 	render_target->impl.renderTargetReadback->lpVtbl->Unmap(render_target->impl.renderTargetReadback, 0, NULL);
 }
 
-void iron_gpu_set_texture(iron_gpu_texture_unit_t *unit, iron_gpu_texture_t *texture) {
+void iron_gpu_set_texture(int unit, iron_gpu_texture_t *texture) {
 	iron_gpu_upload_texture(texture);
-	texture->impl.stage = unit->offset;
+	texture->impl.stage = unit;
 	current_textures[texture->impl.stage] = texture;
 }
 
-void iron_gpu_set_texture_depth(iron_gpu_texture_unit_t *unit, iron_gpu_texture_t *texture) {
-	texture->impl.stage_depth = unit->offset;
+void iron_gpu_set_texture_depth(int unit, iron_gpu_texture_t *texture) {
+	texture->impl.stage_depth = unit;
 	current_textures[texture->impl.stage_depth] = texture;
 }
 
@@ -992,18 +992,6 @@ void iron_gpu_pipeline_destroy(iron_gpu_pipeline_t *pipe) {
 		pipe->impl.pso->lpVtbl->Release(pipe->impl.pso);
 		pipe->impl.pso = NULL;
 	}
-}
-
-iron_gpu_constant_location_t iron_gpu_pipeline_get_constant_location(iron_gpu_pipeline_t *pipe, const char *name) {
-	iron_gpu_constant_location_t location;
-	location.offset = -1;
-	return location;
-}
-
-iron_gpu_texture_unit_t iron_gpu_pipeline_get_texture_unit(iron_gpu_pipeline_t *pipe, const char *name) {
-	iron_gpu_texture_unit_t unit;
-	unit.offset = -1;
-	return unit;
 }
 
 void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipe) {

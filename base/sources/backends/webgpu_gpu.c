@@ -207,16 +207,6 @@ void iron_gpu_pipeline_init(iron_gpu_pipeline_t *pipe) {
 	gpu_internal_pipeline_init(pipe);
 }
 
-iron_gpu_constant_location_t iron_gpu_pipeline_get_constant_location(iron_gpu_pipeline_t *pipe, const char* name) {
-	iron_gpu_constant_location_t location;
-	return location;
-}
-
-iron_gpu_texture_unit_t iron_gpu_pipeline_get_texture_unit(iron_gpu_pipeline_t *pipe, const char *name) {
-	iron_gpu_texture_unit_t unit;
-	return unit;
-}
-
 void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipe) {
 	WGPUColorTargetState csDesc;
 	memset(&csDesc, 0, sizeof(csDesc));
@@ -414,8 +404,8 @@ void iron_gpu_command_list_set_constant_buffer(iron_gpu_command_list_t *list, st
 
 }
 
-void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t *unit, iron_gpu_texture_t *texture) {
+void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, int unit, iron_gpu_texture_t *texture) {
 
 }
 
-void iron_gpu_set_texture_depth(iron_gpu_command_list_t *list, iron_gpu_texture_unit_t *unit, iron_gpu_texture_t *renderTarget) {}
+void iron_gpu_set_texture_depth(iron_gpu_command_list_t *list, int unit, iron_gpu_texture_t *renderTarget) {}

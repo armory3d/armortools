@@ -122,7 +122,7 @@ function uniforms_bind_render_target(rt: render_target_t, context: shader_contex
 	}
 }
 
-function uniforms_set_context_const(location: iron_gpu_constant_location_t, c: shader_const_t): bool {
+function uniforms_set_context_const(location: i32, c: shader_const_t): bool {
 	if (c.link == null) {
 		return true;
 	}
@@ -374,7 +374,7 @@ function uniforms_set_context_const(location: iron_gpu_constant_location_t, c: s
 	return false;
 }
 
-function uniforms_set_obj_const(obj: object_t, loc: iron_gpu_constant_location_t, c: shader_const_t) {
+function uniforms_set_obj_const(obj: object_t, loc: i32, c: shader_const_t) {
 	if (c.link == null) {
 		return;
 	}
@@ -578,7 +578,7 @@ function current_material(object: object_t): material_data_t {
 	return null;
 }
 
-function uniforms_set_material_const(location: iron_gpu_constant_location_t, shader_const: shader_const_t, material_const: bind_const_t) {
+function uniforms_set_material_const(location: i32, shader_const: shader_const_t, material_const: bind_const_t) {
 	if (shader_const.type == "vec4") {
 		gpu_set_float4(location, material_const.vec[0], material_const.vec[1], material_const.vec[2], material_const.vec[3]);
 	}

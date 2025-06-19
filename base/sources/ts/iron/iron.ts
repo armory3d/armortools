@@ -240,19 +240,17 @@ declare function iron_load_blob(file: string): buffer_t;
 declare function iron_load_url(url: string): void;
 declare function iron_copy_to_clipboard(text: string): void;
 
-declare function gpu_get_constant_location(pipeline: any, name: string): any;
-declare function gpu_get_texture_unit(pipeline: any, name: string): any;
-declare function iron_gpu_set_texture(stage: any, texture: any): void;
-declare function iron_gpu_set_texture_depth(unit: any, texture: any): void;
-declare function gpu_set_bool(location: any, value: bool): void;
-declare function gpu_set_int(location: any, value: i32): void;
-declare function gpu_set_float(location: any, value: f32): void;
-declare function gpu_set_float2(location: any, value1: f32, value2: f32): void;
-declare function gpu_set_float3(location: any, value1: f32, value2: f32, value3: f32): void;
-declare function gpu_set_float4(location: any, value1: f32, value2: f32, value3: f32, value4: f32): void;
-declare function gpu_set_floats(location: any, values: f32_array_t): void;
-declare function gpu_set_matrix4(location: any, matrix: mat4_t): void;
-declare function gpu_set_matrix3(location: any, matrix: mat3_t): void;
+declare function iron_gpu_set_texture(stage: i32, texture: iron_gpu_texture_t): void;
+declare function iron_gpu_set_texture_depth(unit: i32, texture: iron_gpu_texture_t): void;
+declare function gpu_set_bool(location: i32, value: bool): void;
+declare function gpu_set_int(location: i32, value: i32): void;
+declare function gpu_set_float(location: i32, value: f32): void;
+declare function gpu_set_float2(location: i32, value1: f32, value2: f32): void;
+declare function gpu_set_float3(location: i32, value1: f32, value2: f32, value3: f32): void;
+declare function gpu_set_float4(location: i32, value1: f32, value2: f32, value3: f32, value4: f32): void;
+declare function gpu_set_floats(location: i32, values: f32_array_t): void;
+declare function gpu_set_matrix4(location: i32, matrix: mat4_t): void;
+declare function gpu_set_matrix3(location: i32, matrix: mat3_t): void;
 
 declare function iron_time(): f32;
 declare function iron_window_width(): i32;
@@ -637,9 +635,6 @@ declare type iron_gpu_buffer_t = {
 	impl?: any;
 };
 
-declare type iron_gpu_constant_location_t = any;
-declare type iron_gpu_texture_unit_t = any;
-
 enum clear_flag_t {
 	NONE = 0,
 	COLOR = 1,
@@ -767,7 +762,7 @@ declare function ui_end_menu(): void;
 declare function _ui_menu_button(s: string): bool;
 declare function ui_begin_region(ui: ui_t, x: i32, y: i32, w: i32): void;
 declare function ui_end_region(last: bool): void;
-declare function ui_inline_radio(handle: ui_handle_t, texts: string[], align: i32): int;
+declare function ui_inline_radio(handle: ui_handle_t, texts: string[], align: i32): i32;
 declare function ui_end_input(): void;
 declare function ui_panel(handle: ui_handle_t, text: string, is_tree: bool, filled: bool): bool;
 declare function ui_nodes_rgba_popup(nhandle: ui_handle_t, val: f32_ptr, x: i32, y: i32): void;

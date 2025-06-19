@@ -1,6 +1,6 @@
 
 let ui_view2d_pipe: iron_gpu_pipeline_t;
-let ui_view2d_channel_loc: iron_gpu_constant_location_t;
+let ui_view2d_channel_loc: i32;
 let ui_view2d_text_input_hover: bool = false;
 let ui_view2d_uvmap_show: bool = false;
 let ui_view2d_tex_type: paint_tex_t = paint_tex_t.BASE;
@@ -43,11 +43,11 @@ function ui_view2d_init() {
 	ARRAY_ACCESS(ui_view2d_pipe.color_write_mask_alpha, 0) = false;
 	gpu_compile_pipeline(ui_view2d_pipe);
 	pipes_offset = 0;
-	pipes_get_constant_location(ui_view2d_pipe, "P", "mat4");
-	pipes_get_constant_location(ui_view2d_pipe, "pos", "float4");
-	pipes_get_constant_location(ui_view2d_pipe, "tex", "float4");
-	pipes_get_constant_location(ui_view2d_pipe, "col", "float4");
-	ui_view2d_channel_loc = pipes_get_constant_location(ui_view2d_pipe, "channel", "int");
+	pipes_get_constant_location("mat4");
+	pipes_get_constant_location("float4");
+	pipes_get_constant_location("float4");
+	pipes_get_constant_location("float4");
+	ui_view2d_channel_loc = pipes_get_constant_location("int");
 	///end
 
 	let scale: f32 = config_raw.window_scale;

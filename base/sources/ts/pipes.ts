@@ -7,7 +7,7 @@ let pipes_copy_rgb: iron_gpu_pipeline_t = null;
 let pipes_copy_r: iron_gpu_pipeline_t;
 let pipes_copy_g: iron_gpu_pipeline_t;
 let pipes_copy_a: iron_gpu_pipeline_t;
-let pipes_copy_a_tex: iron_gpu_texture_unit_t;
+let pipes_copy_a_tex: i32;
 
 let pipes_merge: iron_gpu_pipeline_t = null;
 let pipes_merge_r: iron_gpu_pipeline_t = null;
@@ -19,36 +19,36 @@ let pipes_invert8: iron_gpu_pipeline_t;
 let pipes_apply_mask: iron_gpu_pipeline_t;
 let pipes_colorid_to_mask: iron_gpu_pipeline_t;
 
-let pipes_tex0: iron_gpu_texture_unit_t;
-let pipes_tex1: iron_gpu_texture_unit_t;
-let pipes_texmask: iron_gpu_texture_unit_t;
-let pipes_texa: iron_gpu_texture_unit_t;
-let pipes_opac: iron_gpu_constant_location_t;
-let pipes_blending: iron_gpu_constant_location_t;
-let pipes_tex1w: iron_gpu_constant_location_t;
-let pipes_tex0_mask: iron_gpu_texture_unit_t;
-let pipes_texa_mask: iron_gpu_texture_unit_t;
-let pipes_tex0_merge_mask: iron_gpu_texture_unit_t;
-let pipes_texa_merge_mask: iron_gpu_texture_unit_t;
-let pipes_tex_colorid: iron_gpu_texture_unit_t;
-let pipes_texpaint_colorid: iron_gpu_texture_unit_t;
-let pipes_opac_merge_mask: iron_gpu_constant_location_t;
-let pipes_blending_merge_mask: iron_gpu_constant_location_t;
+let pipes_tex0: i32;
+let pipes_tex1: i32;
+let pipes_texmask: i32;
+let pipes_texa: i32;
+let pipes_opac: i32;
+let pipes_blending: i32;
+let pipes_tex1w: i32;
+let pipes_tex0_mask: i32;
+let pipes_texa_mask: i32;
+let pipes_tex0_merge_mask: i32;
+let pipes_texa_merge_mask: i32;
+let pipes_tex_colorid: i32;
+let pipes_texpaint_colorid: i32;
+let pipes_opac_merge_mask: i32;
+let pipes_blending_merge_mask: i32;
 let pipes_temp_mask_image: iron_gpu_texture_t = null;
 
 let pipes_inpaint_preview: iron_gpu_pipeline_t;
-let pipes_tex0_inpaint_preview: iron_gpu_texture_unit_t;
-let pipes_texa_inpaint_preview: iron_gpu_texture_unit_t;
+let pipes_tex0_inpaint_preview: i32;
+let pipes_texa_inpaint_preview: i32;
 
 let pipes_cursor: iron_gpu_pipeline_t;
-let pipes_cursor_vp: iron_gpu_constant_location_t;
-let pipes_cursor_inv_vp: iron_gpu_constant_location_t;
-let pipes_cursor_mouse: iron_gpu_constant_location_t;
-let pipes_cursor_tex_step: iron_gpu_constant_location_t;
-let pipes_cursor_radius: iron_gpu_constant_location_t;
-let pipes_cursor_camera_right: iron_gpu_constant_location_t;
-let pipes_cursor_tint: iron_gpu_constant_location_t;
-let pipes_cursor_gbufferd: iron_gpu_texture_unit_t;
+let pipes_cursor_vp: i32;
+let pipes_cursor_inv_vp: i32;
+let pipes_cursor_mouse: i32;
+let pipes_cursor_tex_step: i32;
+let pipes_cursor_radius: i32;
+let pipes_cursor_camera_right: i32;
+let pipes_cursor_tint: i32;
+let pipes_cursor_gbufferd: i32;
 
 let pipes_offset: i32;
 
@@ -73,18 +73,14 @@ function pipes_init() {
 	pipes_merge_r = _pipes_make_merge(true, false, false, false);
 	pipes_merge_g = _pipes_make_merge(false, true, false, false);
 	pipes_merge_b = _pipes_make_merge(false, false, true, false);
-	pipes_tex0 = gpu_get_texture_unit(pipes_merge, "tex0"); // Always binding texpaint.a for blending
-	pipes_tex0.offset = 0;
-	pipes_tex1 = gpu_get_texture_unit(pipes_merge, "tex1");
-	pipes_tex1.offset = 1;
-	pipes_texmask = gpu_get_texture_unit(pipes_merge, "texmask");
-	pipes_texmask.offset = 2;
-	pipes_texa = gpu_get_texture_unit(pipes_merge, "texa");
-	pipes_texa.offset = 3;
+	pipes_tex0 = 0; // Always binding texpaint.a for blending
+	pipes_tex1 = 1;
+	pipes_texmask = 2;
+	pipes_texa = 3;
 	pipes_offset = 0;
-	pipes_opac = pipes_get_constant_location(pipes_merge, "opac", "float");
-	pipes_blending = pipes_get_constant_location(pipes_merge, "blending", "int");
-	pipes_tex1w = pipes_get_constant_location(pipes_merge, "tex1w", "float");
+	pipes_opac = pipes_get_constant_location("float");
+	pipes_blending = pipes_get_constant_location("int");
+	pipes_tex1w = pipes_get_constant_location("float");
 	///end
 
 	{
@@ -152,10 +148,8 @@ function pipes_init() {
 		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
 		pipes_apply_mask.input_layout = vs;
 		gpu_compile_pipeline(pipes_apply_mask);
-		pipes_tex0_mask = gpu_get_texture_unit(pipes_apply_mask, "tex0");
-		pipes_tex0_mask.offset = 0;
-		pipes_texa_mask = gpu_get_texture_unit(pipes_apply_mask, "texa");
-		pipes_texa_mask.offset = 1;
+		pipes_tex0_mask = 0;
+		pipes_texa_mask = 1;
 	}
 
 	{
@@ -166,13 +160,11 @@ function pipes_init() {
 		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
 		pipes_merge_mask.input_layout = vs;
 		gpu_compile_pipeline(pipes_merge_mask);
-		pipes_tex0_merge_mask = gpu_get_texture_unit(pipes_merge_mask, "tex0");
-		pipes_tex0_merge_mask.offset = 0;
-		pipes_texa_merge_mask = gpu_get_texture_unit(pipes_merge_mask, "texa");
-		pipes_texa_merge_mask.offset = 1;
+		pipes_tex0_merge_mask = 0;
+		pipes_texa_merge_mask = 1;
 		pipes_offset = 0;
-		pipes_opac_merge_mask = pipes_get_constant_location(pipes_merge_mask, "opac", "float");
-		pipes_blending_merge_mask = pipes_get_constant_location(pipes_merge_mask, "blending", "int");
+		pipes_opac_merge_mask = pipes_get_constant_location("float");
+		pipes_blending_merge_mask = pipes_get_constant_location("int");
 	}
 
 	{
@@ -183,10 +175,8 @@ function pipes_init() {
 		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
 		pipes_colorid_to_mask.input_layout = vs;
 		gpu_compile_pipeline(pipes_colorid_to_mask);
-		pipes_texpaint_colorid = gpu_get_texture_unit(pipes_colorid_to_mask, "texpaint_colorid");
-		pipes_texpaint_colorid.offset = 0;
-		pipes_tex_colorid = gpu_get_texture_unit(pipes_colorid_to_mask, "texcolorid");
-		pipes_tex_colorid.offset = 1;
+		pipes_texpaint_colorid = 0;
+		pipes_tex_colorid = 1;
 	}
 	///end
 
@@ -225,10 +215,8 @@ function pipes_init() {
 		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
 		pipes_inpaint_preview.input_layout = vs;
 		gpu_compile_pipeline(pipes_inpaint_preview);
-		pipes_tex0_inpaint_preview = gpu_get_texture_unit(pipes_inpaint_preview, "tex0");
-		pipes_tex0_inpaint_preview.offset = 0;
-		pipes_texa_inpaint_preview = gpu_get_texture_unit(pipes_inpaint_preview, "texa");
-		pipes_texa_inpaint_preview.offset = 1;
+		pipes_tex0_inpaint_preview = 0;
+		pipes_texa_inpaint_preview = 1;
 	}
 
 	{
@@ -242,8 +230,7 @@ function pipes_init() {
 		ARRAY_ACCESS(pipes_copy_a.color_write_mask_green, 0) = false;
 		ARRAY_ACCESS(pipes_copy_a.color_write_mask_blue, 0) = false;
 		gpu_compile_pipeline(pipes_copy_a);
-		pipes_copy_a_tex = gpu_get_texture_unit(pipes_copy_a, "tex");
-		pipes_copy_a_tex.offset = 0;
+		pipes_copy_a_tex = 0;
 	}
 	///end
 
@@ -274,23 +261,21 @@ function pipes_init() {
 		pipes_cursor.depth_mode = compare_mode_t.ALWAYS;
 		gpu_compile_pipeline(pipes_cursor);
 		pipes_offset = 0;
-		pipes_cursor_vp = pipes_get_constant_location(pipes_cursor, "VP", "mat4");
-		pipes_cursor_inv_vp = pipes_get_constant_location(pipes_cursor, "invVP", "mat4");
-		pipes_cursor_mouse = pipes_get_constant_location(pipes_cursor, "mouse", "vec2");
-		pipes_cursor_tex_step = pipes_get_constant_location(pipes_cursor, "tex_step", "vec2");
-		pipes_cursor_radius = pipes_get_constant_location(pipes_cursor, "radius", "float");
-		pipes_cursor_camera_right = pipes_get_constant_location(pipes_cursor, "camera_right", "vec3");
-		pipes_cursor_tint = pipes_get_constant_location(pipes_cursor, "tint", "vec3");
-		pipes_cursor_gbufferd = gpu_get_texture_unit(pipes_cursor, "gbufferD");
-		pipes_cursor_gbufferd.offset = 0;
+		pipes_cursor_vp = pipes_get_constant_location("mat4");
+		pipes_cursor_inv_vp = pipes_get_constant_location("mat4");
+		pipes_cursor_mouse = pipes_get_constant_location("vec2");
+		pipes_cursor_tex_step = pipes_get_constant_location("vec2");
+		pipes_cursor_radius = pipes_get_constant_location("float");
+		pipes_cursor_camera_right = pipes_get_constant_location("vec3");
+		pipes_cursor_tint = pipes_get_constant_location("vec3");
+		pipes_cursor_gbufferd = 0;
 	}
 }
 
-function pipes_get_constant_location(pipe: iron_gpu_pipeline_t, name: string, type: string): iron_gpu_constant_location_t {
-	let loc: iron_gpu_constant_location_t = gpu_get_constant_location(pipe, name);
+function pipes_get_constant_location(type: string): i32 {
 	let size: i32 = shader_context_type_size(type);
 	pipes_offset += shader_context_type_pad(pipes_offset, size);
-	loc.offset = pipes_offset;
+	let loc: i32 = pipes_offset;
 	pipes_offset += size;
 	return loc;
 }

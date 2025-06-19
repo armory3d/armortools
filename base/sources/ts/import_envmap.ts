@@ -1,9 +1,9 @@
 
 let import_envmap_pipeline: iron_gpu_pipeline_t = null;
-let import_envmap_params_loc: iron_gpu_constant_location_t;
+let import_envmap_params_loc: i32;
 let import_envmap_params: vec4_t = vec4_create();
 let import_envmap_n: vec4_t = vec4_create();
-let import_envmap_radiance_loc: iron_gpu_texture_unit_t;
+let import_envmap_radiance_loc: i32;
 let import_envmap_radiance: iron_gpu_texture_t = null;
 let import_envmap_radiance_cpu: iron_gpu_texture_t = null;
 let import_envmap_mips: iron_gpu_texture_t[] = null;
@@ -22,12 +22,8 @@ function import_envmap_run(path: string, image: iron_gpu_texture_t) {
 		ARRAY_ACCESS(import_envmap_pipeline.color_attachment, 0) = tex_format_t.RGBA128;
 
 		gpu_compile_pipeline(import_envmap_pipeline);
-
-		import_envmap_params_loc = gpu_get_constant_location(import_envmap_pipeline, "params");
-		import_envmap_params_loc.offset = 0;
-
-		import_envmap_radiance_loc = gpu_get_texture_unit(import_envmap_pipeline, "radiance");
-		import_envmap_radiance_loc.offset = 0;
+		import_envmap_params_loc = 0;
+		import_envmap_radiance_loc = 0;
 
 		import_envmap_radiance = gpu_create_render_target(1024, 512, tex_format_t.RGBA128);
 

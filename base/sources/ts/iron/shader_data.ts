@@ -347,13 +347,9 @@ function shader_context_get_tex_format(s: string): tex_format_t {
 }
 
 function shader_context_add_const(raw: shader_context_t, c: shader_const_t, offset: i32) {
-	let cl: iron_gpu_constant_location_t = gpu_get_constant_location(raw._.pipe_state, c.name);
-	cl.offset = offset;
-	array_push(raw._.constants, cl);
+	array_push(raw._.constants, offset);
 }
 
 function shader_context_add_tex(raw: shader_context_t, tu: tex_unit_t, i: i32) {
-	let unit: iron_gpu_texture_unit_t = gpu_get_texture_unit(raw._.pipe_state, tu.name);
-	unit.offset = i;
-	array_push(raw._.tex_units, unit);
+	array_push(raw._.tex_units, i);
 }
