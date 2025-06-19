@@ -923,7 +923,7 @@ any gpu_create_index_buffer(i32 count) {
 }
 
 void gpu_delete_index_buffer(gpu_buffer_t *buffer) {
-	gpu_index_buffer_destroy(buffer);
+	gpu_buffer_destroy(buffer);
 	free(buffer);
 }
 
@@ -942,7 +942,7 @@ any gpu_create_vertex_buffer(i32 count, gpu_vertex_structure_t *structure, i32 u
 }
 
 void gpu_delete_vertex_buffer(gpu_buffer_t *buffer) {
-	gpu_vertex_buffer_destroy(buffer);
+	gpu_buffer_destroy(buffer);
 	free(buffer);
 }
 
@@ -1088,10 +1088,6 @@ gpu_pipeline_t *gpu_create_pipeline() {
 void gpu_delete_pipeline(gpu_pipeline_t *pipeline) {
 	gpu_pipeline_destroy(pipeline);
 	free(pipeline);
-}
-
-void gpu_compile_pipeline(gpu_pipeline_t *pipeline) {
-	gpu_pipeline_compile(pipeline);
 }
 
 bool _load_image(iron_file_reader_t *reader, const char *filename, unsigned char **output, int *width, int *height, iron_image_format_t *format) {

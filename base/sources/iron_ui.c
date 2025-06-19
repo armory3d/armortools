@@ -637,6 +637,7 @@ void ui_draw_tooltip_text(bool bind_global_g) {
 	for (int i = 0; i < line_count; ++i) {
 		draw_string(ui_extract_line(current->tooltip_text, i), current->tooltip_x + 5, current->tooltip_y + off + i * current->font_size);
 	}
+	if (bind_global_g) draw_end();
 }
 
 void ui_draw_tooltip_image(bool bind_global_g) {
@@ -656,6 +657,7 @@ void ui_draw_tooltip_image(bool bind_global_g) {
 	current->tooltip_invert_y ?
 		draw_scaled_image(current->tooltip_img, current->tooltip_x, current->tooltip_y + h, w, -h) :
 		draw_scaled_image(current->tooltip_img, current->tooltip_x, current->tooltip_y, w, h);
+	if (bind_global_g) draw_end();
 }
 
 void ui_draw_tooltip(bool bind_global_g) {
@@ -675,6 +677,7 @@ void ui_draw_tooltip(bool bind_global_g) {
 		draw_filled_rect(x - x_off, current->slider_tooltip_y - y_off, x_off * 2.0, y_off);
 		draw_set_color(theme->TEXT_COL);
 		draw_string(text, x - x_off, current->slider_tooltip_y - y_off);
+		if (bind_global_g) draw_end();
 	}
 	if (ui_touch_tooltip && current->text_selected_handle != NULL) {
 		if (bind_global_g) {
@@ -689,6 +692,7 @@ void ui_draw_tooltip(bool bind_global_g) {
 		draw_filled_rect(x - x_off, y - y_off, x_off * 2.0, y_off * 2.0);
 		draw_set_color(theme->TEXT_COL);
 		draw_string(current->text_selected, x - x_off, y - y_off);
+		if (bind_global_g) draw_end();
 	}
 
 	if (current->tooltip_text[0] != '\0' || current->tooltip_img != NULL) {
@@ -1538,7 +1542,6 @@ void ui_begin_sticky() {
 }
 
 void ui_end_sticky() {
-	// draw_end();
 	current->sticky = false;
 	current->scissor = true;
 	gpu_scissor(0, current->_y, current->_window_w, current->_window_h - current->_y);
@@ -1550,7 +1553,7 @@ void ui_end_sticky() {
 	}
 }
 
-void ui_end_window(bool bind_global_g) {
+void ui_end_window() {
 	ui_handle_t *handle = current->current_window;
 	if (handle == NULL) return;
 	if (handle->redraws > 0 || current->is_scrolling) {
@@ -1638,20 +1641,21 @@ void ui_end_window(bool bind_global_g) {
 			handle->last_max_y += current->_window_h;
 		}
 		handle->redraws--;
+		draw_end();
 	}
 
 	current->window_ended = true;
 
 	// Draw window texture
 	if (ui_always_redraw_window || handle->redraws > -4) {
-		if (bind_global_g) {
-			draw_begin(NULL, false, 0);
-		}
+
+		draw_begin(NULL, false, 0);
 		draw_set_color(0xffffffff);
 		draw_image(&handle->texture, current->_window_x, current->_window_y);
 		if (handle->redraws <= 0) {
 			handle->redraws--;
 		}
+		draw_end();
 	}
 }
 
@@ -1668,7 +1672,7 @@ bool _ui_window(ui_handle_t *handle, int x, int y, int w, int h, bool drag) {
 	}
 
 	if (!current->window_ended) {
-		ui_end_window(true); // End previous window if necessary
+		ui_end_window(); // End previous window if necessary
 	}
 	current->window_ended = false;
 	current->current_window = handle;
@@ -2286,7 +2290,7 @@ void ui_tooltip_image(gpu_texture_t *image, int max_width) {
 
 void _ui_end(bool last) {
 	if (!current->window_ended) {
-		ui_end_window(true);
+		ui_end_window();
 	}
 	ui_draw_combo(true); // Handle active combo
 	ui_draw_tooltip(true);

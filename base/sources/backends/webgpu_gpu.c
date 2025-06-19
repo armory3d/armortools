@@ -21,8 +21,8 @@ WGPUSwapChain swapChain;
 void gpu_destroy() {}
 
 void gpu_init_internal(int depthBufferBits, bool vsync) {
-	newRenderTargetWidth = renderTargetWidth = iron_width();
-	newRenderTargetHeight = renderTargetHeight = iron_height();
+	newRenderTargetWidth = renderTargetWidth = iron_window_width();
+	newRenderTargetHeight = renderTargetHeight = iron_window_height();
 
 	device = emscripten_webgpu_get_device();
 	queue = wgpuDeviceGetQueue(device);
@@ -41,8 +41,8 @@ void gpu_init_internal(int depthBufferBits, bool vsync) {
 	memset(&scDesc, 0, sizeof(scDesc));
 	scDesc.usage = WGPUTextureUsage_RenderAttachment;
 	scDesc.format = WGPUTextureFormat_BGRA8Unorm;
-	scDesc.width = iron_width();
-	scDesc.height = iron_height();
+	scDesc.width = iron_window_width();
+	scDesc.height = iron_window_height();
 	scDesc.presentMode = WGPUPresentMode_Fifo;
 	swapChain = wgpuDeviceCreateSwapChain(device, surface, &scDesc);
 }
@@ -66,10 +66,6 @@ void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structur
 	for (int i = 0; i < structure->size; ++i) {
 		buffer->impl.stride += gpu_vertex_data_size(structure->elements[i].data);
 	}
-}
-
-void gpu_vertex_buffer_destroy(gpu_buffer_t *buffer) {
-
 }
 
 float *gpu_vertex_buffer_lock(gpu_buffer_t *buffer) {
@@ -118,7 +114,7 @@ void gpu_index_buffer_init(gpu_buffer_t *buffer, int count) {
 	buffer->impl.count = count;
 }
 
-void gpu_index_buffer_destroy(gpu_buffer_t *buffer) {
+void gpu_buffer_destroy(gpu_buffer_t *buffer) {
 }
 
 static int gpu_internal_index_buffer_stride(gpu_buffer_t *buffer) {
@@ -151,8 +147,8 @@ int gpu_index_buffer_count(gpu_buffer_t *buffer) {
 
 void gpu_texture_init(gpu_texture_t *texture, int width, int height, iron_image_format_t format) {
 	// WGPUExtent3D size = {};
-	// size.width = iron_width();
-	// size.height = iron_height();
+	// size.width = iron_window_width();
+	// size.height = iron_window_height();
 	// size.depth = 1;
 
 	// WGPUTextureDescriptor tDesc = {};

@@ -298,7 +298,7 @@ void ui_separator(int h, bool fill);
 void ui_tooltip(char *text);
 void ui_tooltip_image(gpu_texture_t *image, int max_width);
 void _ui_end(bool last);
-void ui_end_window(bool bind_global_g);
+void ui_end_window();
 char *ui_hovered_tab_name();
 void ui_set_hovered_tab_name(char *name);
 void ui_mouse_down(ui_t *ui, int button, int x, int y); // Input events

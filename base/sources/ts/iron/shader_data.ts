@@ -218,7 +218,7 @@ function shader_context_type_pad(offset: i32, size: i32): i32 {
 ///end
 
 function shader_context_finish_compile(raw: shader_context_t): shader_context_t {
-	gpu_compile_pipeline(raw._.pipe_state);
+	gpu_pipeline_compile(raw._.pipe_state);
 
 	if (raw.constants != null) {
 		let offset: i32 = 0;

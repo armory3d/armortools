@@ -40,7 +40,7 @@ function main() {
 	pipeline.vertex_shader = vert;
 	pipeline.fragment_shader = frag;
 	pipeline.input_layout = vs;
-	gpu_compile_pipeline(pipeline);
+	gpu_pipeline_compile(pipeline);
 
 	let vertices: f32[] = [
 		-1.0, -1.0, 0.0,

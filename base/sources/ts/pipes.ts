@@ -63,7 +63,7 @@ function _pipes_make_merge(red: bool, green: bool, blue: bool, alpha: bool): gpu
 	ARRAY_ACCESS(pipe.color_write_mask_green, 0) = green;
 	ARRAY_ACCESS(pipe.color_write_mask_blue, 0) = blue;
 	ARRAY_ACCESS(pipe.color_write_mask_alpha, 0) = alpha;
-	gpu_compile_pipeline(pipe);
+	gpu_pipeline_compile(pipe);
 	return pipe;
 }
 
@@ -90,7 +90,7 @@ function pipes_init() {
 		let vs: gpu_vertex_structure_t = gpu_vertex_struct_create();
 		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
 		pipes_copy.input_layout = vs;
-		gpu_compile_pipeline(pipes_copy);
+		gpu_pipeline_compile(pipes_copy);
 	}
 
 	{
@@ -100,7 +100,7 @@ function pipes_init() {
 		let vs: gpu_vertex_structure_t = gpu_vertex_struct_create();
 		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
 		pipes_copy_bgra.input_layout = vs;
-		gpu_compile_pipeline(pipes_copy_bgra);
+		gpu_pipeline_compile(pipes_copy_bgra);
 	}
 
 	{
@@ -112,7 +112,7 @@ function pipes_init() {
 		pipes_copy8.input_layout = vs;
 		pipes_copy8.color_attachment_count = 1;
 		ARRAY_ACCESS(pipes_copy8.color_attachment, 0) = tex_format_t.R8;
-		gpu_compile_pipeline(pipes_copy8);
+		gpu_pipeline_compile(pipes_copy8);
 	}
 
 	{
@@ -124,7 +124,7 @@ function pipes_init() {
 		pipes_copy128.input_layout = vs;
 		pipes_copy128.color_attachment_count = 1;
 		ARRAY_ACCESS(pipes_copy128.color_attachment, 0) = tex_format_t.RGBA128;
-		gpu_compile_pipeline(pipes_copy128);
+		gpu_pipeline_compile(pipes_copy128);
 	}
 
 	///if (is_paint || is_sculpt)
@@ -137,7 +137,7 @@ function pipes_init() {
 		pipes_invert8.input_layout = vs;
 		pipes_invert8.color_attachment_count = 1;
 		ARRAY_ACCESS(pipes_invert8.color_attachment, 0) = tex_format_t.R8;
-		gpu_compile_pipeline(pipes_invert8);
+		gpu_pipeline_compile(pipes_invert8);
 	}
 
 	{
@@ -147,7 +147,7 @@ function pipes_init() {
 		let vs: gpu_vertex_structure_t = gpu_vertex_struct_create();
 		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
 		pipes_apply_mask.input_layout = vs;
-		gpu_compile_pipeline(pipes_apply_mask);
+		gpu_pipeline_compile(pipes_apply_mask);
 		pipes_tex0_mask = 0;
 		pipes_texa_mask = 1;
 	}
@@ -159,7 +159,7 @@ function pipes_init() {
 		let vs: gpu_vertex_structure_t = gpu_vertex_struct_create();
 		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
 		pipes_merge_mask.input_layout = vs;
-		gpu_compile_pipeline(pipes_merge_mask);
+		gpu_pipeline_compile(pipes_merge_mask);
 		pipes_tex0_merge_mask = 0;
 		pipes_texa_merge_mask = 1;
 		pipes_offset = 0;
@@ -174,7 +174,7 @@ function pipes_init() {
 		let vs: gpu_vertex_structure_t = gpu_vertex_struct_create();
 		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
 		pipes_colorid_to_mask.input_layout = vs;
-		gpu_compile_pipeline(pipes_colorid_to_mask);
+		gpu_pipeline_compile(pipes_colorid_to_mask);
 		pipes_texpaint_colorid = 0;
 		pipes_tex_colorid = 1;
 	}
@@ -191,7 +191,7 @@ function pipes_init() {
 		ARRAY_ACCESS(pipes_copy_r.color_write_mask_green, 0) = false;
 		ARRAY_ACCESS(pipes_copy_r.color_write_mask_blue, 0) = false;
 		ARRAY_ACCESS(pipes_copy_r.color_write_mask_alpha, 0) = false;
-		gpu_compile_pipeline(pipes_copy_r);
+		gpu_pipeline_compile(pipes_copy_r);
 	}
 
 	{
@@ -204,7 +204,7 @@ function pipes_init() {
 		ARRAY_ACCESS(pipes_copy_g.color_write_mask_red, 0) = false;
 		ARRAY_ACCESS(pipes_copy_g.color_write_mask_blue, 0) = false;
 		ARRAY_ACCESS(pipes_copy_g.color_write_mask_alpha, 0) = false;
-		gpu_compile_pipeline(pipes_copy_g);
+		gpu_pipeline_compile(pipes_copy_g);
 	}
 
 	{
@@ -214,7 +214,7 @@ function pipes_init() {
 		let vs: gpu_vertex_structure_t = gpu_vertex_struct_create();
 		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
 		pipes_inpaint_preview.input_layout = vs;
-		gpu_compile_pipeline(pipes_inpaint_preview);
+		gpu_pipeline_compile(pipes_inpaint_preview);
 		pipes_tex0_inpaint_preview = 0;
 		pipes_texa_inpaint_preview = 1;
 	}
@@ -229,7 +229,7 @@ function pipes_init() {
 		ARRAY_ACCESS(pipes_copy_a.color_write_mask_red, 0) = false;
 		ARRAY_ACCESS(pipes_copy_a.color_write_mask_green, 0) = false;
 		ARRAY_ACCESS(pipes_copy_a.color_write_mask_blue, 0) = false;
-		gpu_compile_pipeline(pipes_copy_a);
+		gpu_pipeline_compile(pipes_copy_a);
 		pipes_copy_a_tex = 0;
 	}
 	///end
@@ -242,7 +242,7 @@ function pipes_init() {
 		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
 		pipes_copy_rgb.input_layout = vs;
 		ARRAY_ACCESS(pipes_copy_rgb.color_write_mask_alpha, 0) = false;
-		gpu_compile_pipeline(pipes_copy_rgb);
+		gpu_pipeline_compile(pipes_copy_rgb);
 	}
 
 	{
@@ -259,7 +259,7 @@ function pipes_init() {
 		pipes_cursor.blend_destination = blend_factor_t.INV_SOURCE_ALPHA;
 		pipes_cursor.depth_write = false;
 		pipes_cursor.depth_mode = compare_mode_t.ALWAYS;
-		gpu_compile_pipeline(pipes_cursor);
+		gpu_pipeline_compile(pipes_cursor);
 		pipes_offset = 0;
 		pipes_cursor_vp = pipes_get_constant_location("mat4");
 		pipes_cursor_inv_vp = pipes_get_constant_location("mat4");

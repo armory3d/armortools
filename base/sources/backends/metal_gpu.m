@@ -903,12 +903,6 @@ void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structur
 	buffer->impl.metal_buffer = (__bridge_retained void *)buf;
 }
 
-void gpu_vertex_buffer_destroy(gpu_buffer_t *buf) {
-	id<MTLBuffer> buffer = (__bridge_transfer id<MTLBuffer>)buf->impl.metal_buffer;
-	buffer = nil;
-	buf->impl.metal_buffer = NULL;
-}
-
 float *gpu_vertex_buffer_lock(gpu_buffer_t *buf) {
 	id<MTLBuffer> buffer = (__bridge id<MTLBuffer>)buf->impl.metal_buffer;
 	float *floats = (float *)[buffer contents];
@@ -964,7 +958,7 @@ void gpu_index_buffer_init(gpu_buffer_t *buffer, int indexCount) {
 	                options:options];
 }
 
-void gpu_index_buffer_destroy(gpu_buffer_t *buffer) {
+void gpu_buffer_destroy(gpu_buffer_t *buffer) {
 	id<MTLBuffer> buf = (__bridge_transfer id<MTLBuffer>)buffer->impl.metal_buffer;
 	buf = nil;
 	buffer->impl.metal_buffer = NULL;

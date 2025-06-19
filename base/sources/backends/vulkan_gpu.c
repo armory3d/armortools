@@ -2770,11 +2770,6 @@ void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int vertexCount, gpu_vertex_st
 	vkBindBufferMemory(vk_ctx.device, buffer->impl.buf, buffer->impl.mem, 0);
 }
 
-void gpu_vertex_buffer_destroy(gpu_buffer_t *buffer) {
-	vkFreeMemory(vk_ctx.device, buffer->impl.mem, NULL);
-	vkDestroyBuffer(vk_ctx.device, buffer->impl.buf, NULL);
-}
-
 float *gpu_vertex_buffer_lock(gpu_buffer_t *buffer) {
 	int start = 0;
 	int count = buffer->count;
@@ -2896,7 +2891,7 @@ void gpu_index_buffer_init(gpu_buffer_t *buffer, int indexCount) {
 	vkBindBufferMemory(vk_ctx.device, buffer->impl.buf, buffer->impl.mem, 0);
 }
 
-void gpu_index_buffer_destroy(gpu_buffer_t *buffer) {
+void gpu_buffer_destroy(gpu_buffer_t *buffer) {
 	// unset(buffer);
 	vkFreeMemory(vk_ctx.device, buffer->impl.mem, NULL);
 	vkDestroyBuffer(vk_ctx.device, buffer->impl.buf, NULL);

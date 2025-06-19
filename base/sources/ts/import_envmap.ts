@@ -21,7 +21,7 @@ function import_envmap_run(path: string, image: gpu_texture_t) {
 		import_envmap_pipeline.color_attachment_count = 1;
 		ARRAY_ACCESS(import_envmap_pipeline.color_attachment, 0) = tex_format_t.RGBA128;
 
-		gpu_compile_pipeline(import_envmap_pipeline);
+		gpu_pipeline_compile(import_envmap_pipeline);
 		import_envmap_params_loc = 0;
 		import_envmap_radiance_loc = 0;
 

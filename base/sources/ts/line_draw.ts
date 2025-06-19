@@ -54,7 +54,7 @@ function line_draw_init() {
 		ARRAY_ACCESS(line_draw_pipeline.color_attachment, 1) = tex_format_t.RGBA64;
 		ARRAY_ACCESS(line_draw_pipeline.color_attachment, 2) = tex_format_t.RGBA64;
 		line_draw_pipeline.depth_attachment_bits = 24;
-		gpu_compile_pipeline(line_draw_pipeline);
+		gpu_pipeline_compile(line_draw_pipeline);
 		pipes_offset = 0;
 		line_draw_color_loc = pipes_get_constant_location("vec3");
 		line_draw_vp_loc = pipes_get_constant_location("mat4");
@@ -74,7 +74,7 @@ function line_draw_init() {
 		line_draw_overlay_pipeline.cull_mode = cull_mode_t.NONE;
 		line_draw_overlay_pipeline.color_attachment_count = 1;
 		ARRAY_ACCESS(line_draw_overlay_pipeline.color_attachment, 0) = tex_format_t.RGBA64;
-		gpu_compile_pipeline(line_draw_overlay_pipeline);
+		gpu_pipeline_compile(line_draw_overlay_pipeline);
 	}
 }
 

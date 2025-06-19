@@ -86,8 +86,6 @@ struct iron_window_options;
 void iron_init(const char *name, int width, int height, struct iron_window_options *win);
 const char *iron_application_name(void);
 void iron_set_app_name(const char *name);
-int iron_width(void);
-int iron_height(void);
 void iron_load_url(const char *url);
 const char *iron_system_id(void);
 const char *iron_language(void);

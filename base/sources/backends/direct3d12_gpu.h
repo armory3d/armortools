@@ -71,11 +71,9 @@ typedef struct {
 
 typedef struct {
 	struct ID3D12Resource *buffer;
-	struct ID3D12Resource *upload_buffer;
 	struct D3D12VertexBufferView vertex_buffer_view;
 	struct D3D12IndexBufferView index_buffer_view;
 	int stride;
-	int count;
 	int last_start;
 	int last_count;
 } gpu_buffer_impl_t;

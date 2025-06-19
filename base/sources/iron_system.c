@@ -275,14 +275,6 @@ void iron_start(void) {
 #endif
 }
 
-int iron_width(void) {
-	return iron_window_width();
-}
-
-int iron_height(void) {
-	return iron_window_height();
-}
-
 void iron_memory_emergency(void) {}
 
 static uint8_t *current_file = NULL;

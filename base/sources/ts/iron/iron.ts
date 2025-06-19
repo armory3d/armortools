@@ -227,7 +227,7 @@ declare function gpu_create_shader_from_source(source: string, source_size: i32,
 declare function gpu_shader_destroy(shader: gpu_shader_t): void;
 declare function gpu_create_pipeline(): any;
 declare function gpu_delete_pipeline(pipeline: any): void;
-declare function gpu_compile_pipeline(pipeline: any): void;
+declare function gpu_pipeline_compile(pipeline: any): void;
 declare function gpu_set_pipeline(pipeline: any): void;
 declare function iron_load_image(file: string, readable: bool): any;
 declare function iron_unload_image(image: gpu_texture_t): void;
@@ -735,7 +735,7 @@ declare function ui_text_area(handle: ui_handle_t, align: ui_align_t = ui_align_
 declare function _ui_window(handle: ui_handle_t, x: i32, y: i32, w: i32, h: i32, drag: bool = false): bool;
 declare function ui_begin(ui: ui_t): void;
 declare function _ui_end(last: bool = true): void;
-declare function ui_end_window(bind_global_g: bool = true): void;
+declare function ui_end_window(): void;
 declare function ui_end_region(last: bool = true): void;
 declare function ui_float_input(handle: ui_handle_t, label: string = "", align: ui_align_t = ui_align_t.LEFT, precision: f32 = 1000.0): f32;
 declare function ui_get_current(): ui_t;
@@ -1013,12 +1013,10 @@ function _ui_image(image: gpu_texture_t, tint: i32 = 0xffffffff, h: f32 = -1.0, 
 }
 
 function ui_window(handle: ui_handle_t, x: i32, y: i32, w: i32, h: i32, drag: bool = false): bool {
-	_draw_in_use = true;
 	return _ui_window(handle, x, y, w, h, drag);
 }
 
 function ui_end(last: bool = true) {
-	_draw_in_use = false;
 	_ui_end(last);
 }
 
