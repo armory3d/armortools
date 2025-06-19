@@ -16,6 +16,9 @@ void gpu_draw() {
 	iron_gpu_set_constant_buffer(&constant_buffer, constant_buffer_index * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
 	iron_gpu_draw();
 	++constant_buffer_index;
+	if (constant_buffer_index >= CONSTANT_BUFFER_MULTIPLE) {
+		constant_buffer_index = 0;
+	}
 	iron_gpu_constant_buffer_lock(&constant_buffer, constant_buffer_index * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
 }
 

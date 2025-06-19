@@ -632,7 +632,7 @@ void iron_gpu_present() {
 	wait_for_fence(window_frame_fences[framebuffer_index], window_fence_values[framebuffer_index], window_frame_fence_events[framebuffer_index]);
 
 	if (fence_value > 0) {
-		wait_for_fence(fence, fence_value, fence_event);
+		iron_gpu_wait();
 		_commandAllocator->lpVtbl->Reset(_commandAllocator);
 		_commandList->lpVtbl->Reset(_commandList, _commandAllocator, NULL);
 	}
@@ -961,9 +961,7 @@ void iron_gpu_get_render_target_pixels(iron_gpu_texture_t *render_target, uint8_
 	};
 	_commandList->lpVtbl->ResourceBarrier(_commandList, 1, &barrier);
 
-	// iron_gpu_end();
 	// iron_gpu_wait();
-	// iron_gpu_begin();
 
 	// Read buffer
 	void *p;
@@ -2401,9 +2399,7 @@ void iron_gpu_raytrace_acceleration_structure_build(iron_gpu_raytrace_accelerati
 	_commandList->lpVtbl->ResourceBarrier(_commandList, 1, &barrier);
 	dxrCommandList->lpVtbl->BuildRaytracingAccelerationStructure(dxrCommandList, &topLevelBuildDesc, 0, NULL);
 
-	// iron_gpu_end();
 	// iron_gpu_wait();
-	// iron_gpu_begin();
 
 	scratchResource->lpVtbl->Release(scratchResource);
 	instanceDescs->lpVtbl->Release(instanceDescs);

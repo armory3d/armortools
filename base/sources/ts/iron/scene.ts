@@ -600,7 +600,6 @@ type shader_context_runtime_t = {
 	structure?: iron_gpu_vertex_structure_t;
 	vertex_shader_size?: i32;
 	fragment_shader_size?: i32;
-	constant_buffer?: iron_gpu_buffer_t;
 };
 
 type vertex_element_t = {
