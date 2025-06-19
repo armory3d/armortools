@@ -23,7 +23,7 @@ let minimap_w: i32 = 150;
 let minimap_h: i32 = 0;
 let minimap_box_h: i32 = 0;
 let minimap_scrolling: bool = false;
-let minimap: iron_gpu_texture_t = null;
+let minimap: gpu_texture_t = null;
 let window_header_h: i32 = 0;
 
 function drop_files(path: string) {

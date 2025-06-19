@@ -2,17 +2,17 @@
 // Red triangle test
 // ../../make --run
 
-let pipeline: iron_gpu_pipeline_t;
+let pipeline: gpu_pipeline_t;
 let vb: any;
 let ib: any;
 
 function render() {
 	_gpu_begin(null, null, clear_flag_t.COLOR | clear_flag_t.DEPTH, 0xff000000, 1.0);
-	iron_gpu_set_pipeline(pipeline);
-	iron_gpu_set_vertex_buffer(vb);
-	iron_gpu_set_index_buffer(ib);
+	gpu_set_pipeline(pipeline);
+	gpu_set_vertex_buffer(vb);
+	gpu_set_index_buffer(ib);
 	gpu_draw();
-	iron_gpu_end();
+	gpu_end();
 }
 
 function main() {
@@ -31,7 +31,7 @@ function main() {
 	_iron_init(ops);
 
 	pipeline = gpu_create_pipeline();
-	let vs: iron_gpu_vertex_structure_t = gpu_vertex_struct_create();
+	let vs: gpu_vertex_structure_t = gpu_vertex_struct_create();
 	gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
 	let vs_buffer: buffer_t = iron_load_blob("./data/test.vert" + sys_shader_ext());
 	let fs_buffer: buffer_t = iron_load_blob("./data/test.frag" + sys_shader_ext());
@@ -54,14 +54,14 @@ function main() {
 	for (let i: i32 = 0; i < vertices.length; i++) {
 		buffer_set_f32(vb_data, i * 4, vertices[i]);
 	}
-	iron_gpu_vertex_buffer_unlock(vb);
+	gpu_vertex_buffer_unlock(vb);
 
 	ib = gpu_create_index_buffer(indices.length);
 	let ib_data: u32_array_t = gpu_lock_index_buffer(ib);
 	for (let i: i32 = 0; i < indices.length; i++) {
 		ib_data[i] = indices[i];
 	}
-	iron_gpu_index_buffer_unlock(ib);
+	gpu_index_buffer_unlock(ib);
 
 	_iron_set_update_callback(render);
 }

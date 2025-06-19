@@ -60,7 +60,7 @@ function tab_fonts_draw(htab: ui_handle_t) {
 					}
 					continue;
 				}
-				let img: iron_gpu_texture_t = project_fonts[i].image;
+				let img: gpu_texture_t = project_fonts[i].image;
 
 				if (context_raw.font == project_fonts[i]) {
 					// ui_fill(1, -2, img.width + 3, img.height + 3, ui.ops.theme.HIGHLIGHT_COL); // TODO

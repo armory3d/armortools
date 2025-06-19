@@ -19,7 +19,7 @@ function console_draw_toast(s: string) {
 
 function _console_toast_render(s: string) {
 	console_draw_toast(s);
-	iron_gpu_present();
+	gpu_present();
 	sys_remove_render_2d(_console_toast_render);
 }
 
@@ -27,7 +27,7 @@ function console_toast(s: string) {
 	// Show a popup message
 	sys_notify_on_render_2d(_console_toast_render, s);
 	console_trace(s);
-	iron_gpu_present();
+	gpu_present();
 }
 
 function console_draw_progress() {
@@ -53,7 +53,7 @@ function console_progress(s: string) {
 	draw_end();
 	sys_render();
 	draw_begin();
-	iron_gpu_present();
+	gpu_present();
 	///end
 }
 

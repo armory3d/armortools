@@ -139,8 +139,8 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 				render_path_draw_meshes("paint");
 				let picker0: render_target_t = map_get(render_path_render_targets, "texpaint_posnortex_picker0");
 				let picker1: render_target_t = map_get(render_path_render_targets, "texpaint_posnortex_picker1");
-				let texpaint_posnortex_picker0: iron_gpu_texture_t = picker0._image;
-				let texpaint_posnortex_picker1: iron_gpu_texture_t = picker1._image;
+				let texpaint_posnortex_picker0: gpu_texture_t = picker0._image;
+				let texpaint_posnortex_picker1: gpu_texture_t = picker1._image;
 				let a: buffer_t = gpu_get_texture_pixels(texpaint_posnortex_picker0);
 				let b: buffer_t = gpu_get_texture_pixels(texpaint_posnortex_picker1);
 				context_raw.posx_picked = buffer_get_f32(a, 0);
@@ -439,10 +439,10 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	let geom: mesh_data_t = plane.data;
 
 	render_path_set_target("");
-	iron_gpu_set_pipeline(pipes_cursor);
+	gpu_set_pipeline(pipes_cursor);
 	let rt: render_target_t = map_get(render_path_render_targets, "gbuffer0");
-	let gbuffer0: iron_gpu_texture_t = rt._image;
-	iron_gpu_set_texture_depth(pipes_cursor_gbufferd, gbuffer0);
+	let gbuffer0: gpu_texture_t = rt._image;
+	gpu_set_texture_depth(pipes_cursor_gbufferd, gbuffer0);
 	gpu_set_float2(pipes_cursor_mouse, mx, my);
 	gpu_set_float2(pipes_cursor_tex_step, 1 / gbuffer0.width, 1 / gbuffer0.height);
 	gpu_set_float(pipes_cursor_radius, radius);
@@ -452,11 +452,11 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	gpu_set_matrix4(pipes_cursor_vp, scene_camera.vp);
 	let inv_vp: mat4_t = mat4_inv(scene_camera.vp);
 	gpu_set_matrix4(pipes_cursor_inv_vp, inv_vp);
-	iron_gpu_set_vertex_buffer(geom._.vertex_buffer);
-	iron_gpu_set_index_buffer(geom._.index_buffers[0]);
+	gpu_set_vertex_buffer(geom._.vertex_buffer);
+	gpu_set_index_buffer(geom._.index_buffers[0]);
 	gpu_draw();
 
-	iron_gpu_disable_scissor();
+	gpu_disable_scissor();
 	render_path_end();
 }
 

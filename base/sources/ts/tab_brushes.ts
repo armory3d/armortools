@@ -52,8 +52,8 @@ function tab_brushes_draw(htab: ui_handle_t) {
 					}
 					continue;
 				}
-				let img: iron_gpu_texture_t = ui_SCALE(ui) > 1 ? project_brushes[i].image : project_brushes[i].image_icon;
-				let img_full: iron_gpu_texture_t = project_brushes[i].image;
+				let img: gpu_texture_t = ui_SCALE(ui) > 1 ? project_brushes[i].image : project_brushes[i].image_icon;
+				let img_full: gpu_texture_t = project_brushes[i].image;
 
 				if (context_raw.brush == project_brushes[i]) {
 					// ui_fill(1, -2, img.width + 3, img.height + 3, ui.ops.theme.HIGHLIGHT_COL); // TODO

@@ -1,21 +1,21 @@
 
-let import_envmap_pipeline: iron_gpu_pipeline_t = null;
+let import_envmap_pipeline: gpu_pipeline_t = null;
 let import_envmap_params_loc: i32;
 let import_envmap_params: vec4_t = vec4_create();
 let import_envmap_n: vec4_t = vec4_create();
 let import_envmap_radiance_loc: i32;
-let import_envmap_radiance: iron_gpu_texture_t = null;
-let import_envmap_radiance_cpu: iron_gpu_texture_t = null;
-let import_envmap_mips: iron_gpu_texture_t[] = null;
-let import_envmap_mips_cpu: iron_gpu_texture_t[] = null;
+let import_envmap_radiance: gpu_texture_t = null;
+let import_envmap_radiance_cpu: gpu_texture_t = null;
+let import_envmap_mips: gpu_texture_t[] = null;
+let import_envmap_mips_cpu: gpu_texture_t[] = null;
 
-function import_envmap_run(path: string, image: iron_gpu_texture_t) {
+function import_envmap_run(path: string, image: gpu_texture_t) {
 	// Init
 	if (import_envmap_pipeline == null) {
 		import_envmap_pipeline = gpu_create_pipeline();
 		import_envmap_pipeline.vertex_shader = sys_get_shader("prefilter_envmap.vert");
 		import_envmap_pipeline.fragment_shader = sys_get_shader("prefilter_envmap.frag");
-		let vs: iron_gpu_vertex_structure_t = gpu_vertex_struct_create();
+		let vs: gpu_vertex_structure_t = gpu_vertex_struct_create();
 		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
 		import_envmap_pipeline.input_layout = vs;
 		import_envmap_pipeline.color_attachment_count = 1;
@@ -44,8 +44,8 @@ function import_envmap_run(path: string, image: iron_gpu_texture_t) {
 
 	let radiance_pixels: buffer_t = gpu_get_texture_pixels(import_envmap_radiance);
 	if (import_envmap_radiance_cpu != null) {
-		let _radiance_cpu: iron_gpu_texture_t = import_envmap_radiance_cpu;
-		sys_notify_on_next_frame(function (_radiance_cpu: iron_gpu_texture_t) {
+		let _radiance_cpu: gpu_texture_t = import_envmap_radiance_cpu;
+		sys_notify_on_next_frame(function (_radiance_cpu: gpu_texture_t) {
 			iron_unload_image(_radiance_cpu);
 		}, _radiance_cpu);
 	}
@@ -54,8 +54,8 @@ function import_envmap_run(path: string, image: iron_gpu_texture_t) {
 	// Radiance
 	if (import_envmap_mips_cpu != null) {
 		for (let i: i32 = 0; i < import_envmap_mips_cpu.length; ++i) {
-			let mip: iron_gpu_texture_t = import_envmap_mips_cpu[i];
-			sys_notify_on_next_frame(function (mip: iron_gpu_texture_t) {
+			let mip: gpu_texture_t = import_envmap_mips_cpu[i];
+			sys_notify_on_next_frame(function (mip: gpu_texture_t) {
 				///if (!arm_direct3d12) // TODO: crashes after 50+ imports
 				iron_unload_image(mip);
 				///end
@@ -87,16 +87,16 @@ function import_envmap_run(path: string, image: iron_gpu_texture_t) {
 	project_raw.envmap = path;
 }
 
-function import_envmap_get_radiance_mip(mip: iron_gpu_texture_t, level: i32, radiance: iron_gpu_texture_t) {
+function import_envmap_get_radiance_mip(mip: gpu_texture_t, level: i32, radiance: gpu_texture_t) {
 	_gpu_begin(mip);
-	iron_gpu_set_vertex_buffer(const_data_screen_aligned_vb);
-	iron_gpu_set_index_buffer(const_data_screen_aligned_ib);
-	iron_gpu_set_pipeline(import_envmap_pipeline);
+	gpu_set_vertex_buffer(const_data_screen_aligned_vb);
+	gpu_set_index_buffer(const_data_screen_aligned_ib);
+	gpu_set_pipeline(import_envmap_pipeline);
 	import_envmap_params.x = 0.1 + level / 8;
 	gpu_set_float4(import_envmap_params_loc, import_envmap_params.x, import_envmap_params.y, import_envmap_params.z, import_envmap_params.w);
-	iron_gpu_set_texture(import_envmap_radiance_loc, radiance);
+	gpu_set_texture(import_envmap_radiance_loc, radiance);
 	gpu_draw();
-	iron_gpu_end();
+	gpu_end();
 }
 
 function import_envmap_reverse_equirect(x: f32, y: f32): vec4_t {

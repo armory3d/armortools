@@ -3,23 +3,23 @@
 #define CONSTANT_BUFFER_SIZE 256
 #define CONSTANT_BUFFER_MULTIPLE 2048
 int constant_buffer_index = 0;
-static iron_gpu_buffer_t constant_buffer;
+static gpu_buffer_t constant_buffer;
 
 void gpu_init(int depth_buffer_bits, bool vsync) {
-	iron_gpu_init(depth_buffer_bits, vsync);
-	iron_gpu_constant_buffer_init(&constant_buffer, CONSTANT_BUFFER_SIZE * CONSTANT_BUFFER_MULTIPLE);
-	iron_gpu_constant_buffer_lock(&constant_buffer, 0, CONSTANT_BUFFER_SIZE);
+	gpu_init_internal(depth_buffer_bits, vsync);
+	gpu_constant_buffer_init(&constant_buffer, CONSTANT_BUFFER_SIZE * CONSTANT_BUFFER_MULTIPLE);
+	gpu_constant_buffer_lock(&constant_buffer, 0, CONSTANT_BUFFER_SIZE);
 }
 
 void gpu_draw() {
-	iron_gpu_constant_buffer_unlock(&constant_buffer);
-	iron_gpu_set_constant_buffer(&constant_buffer, constant_buffer_index * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
-	iron_gpu_draw();
+	gpu_constant_buffer_unlock(&constant_buffer);
+	gpu_set_constant_buffer(&constant_buffer, constant_buffer_index * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
+	gpu_draw_internal();
 	++constant_buffer_index;
 	if (constant_buffer_index >= CONSTANT_BUFFER_MULTIPLE) {
 		constant_buffer_index = 0;
 	}
-	iron_gpu_constant_buffer_lock(&constant_buffer, constant_buffer_index * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
+	gpu_constant_buffer_lock(&constant_buffer, constant_buffer_index * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
 }
 
 void gpu_set_int(int location, int value) {
@@ -93,7 +93,7 @@ void gpu_set_bool(int location, bool value) {
 	ints[0] = value ? 1 : 0;
 }
 
-static void iron_internal_set_matrix3(uint8_t *constants, int offset, iron_matrix3x3_t *value) {
+static void gpu_internal_set_matrix3(uint8_t *constants, int offset, iron_matrix3x3_t *value) {
 	float *floats = (float *)(&constants[offset]);
 	for (int y = 0; y < 3; ++y) {
 		for (int x = 0; x < 3; ++x) {
@@ -102,7 +102,7 @@ static void iron_internal_set_matrix3(uint8_t *constants, int offset, iron_matri
 	}
 }
 
-static void iron_internal_set_matrix4(uint8_t *constants, int offset, iron_matrix4x4_t *value) {
+static void gpu_internal_set_matrix4(uint8_t *constants, int offset, iron_matrix4x4_t *value) {
 	float *floats = (float *)(&constants[offset]);
 	for (int y = 0; y < 4; ++y) {
 		for (int x = 0; x < 4; ++x) {
@@ -112,46 +112,46 @@ static void iron_internal_set_matrix4(uint8_t *constants, int offset, iron_matri
 }
 
 void gpu_set_matrix3(int location, iron_matrix3x3_t value) {
-	if (iron_gpu_transpose_mat) {
+	if (gpu_transpose_mat) {
 		iron_matrix3x3_t m = value;
 		iron_matrix3x3_transpose(&m);
-		iron_internal_set_matrix3(constant_buffer.data, location, &m);
+		gpu_internal_set_matrix3(constant_buffer.data, location, &m);
 	}
 	else {
-		iron_internal_set_matrix3(constant_buffer.data, location, &value);
+		gpu_internal_set_matrix3(constant_buffer.data, location, &value);
 	}
 }
 
 void gpu_set_matrix4(int location, iron_matrix4x4_t value) {
-	if (iron_gpu_transpose_mat) {
+	if (gpu_transpose_mat) {
 		iron_matrix4x4_t m = value;
 		iron_matrix4x4_transpose(&m);
-		iron_internal_set_matrix4(constant_buffer.data, location, &m);
+		gpu_internal_set_matrix4(constant_buffer.data, location, &m);
 	}
 	else {
-		iron_internal_set_matrix4(constant_buffer.data, location, &value);
+		gpu_internal_set_matrix4(constant_buffer.data, location, &value);
 	}
 }
 
-void gpu_vertex_structure_add(iron_gpu_vertex_structure_t *structure, const char *name, iron_gpu_vertex_data_t data) {
+void gpu_vertex_structure_add(gpu_vertex_structure_t *structure, const char *name, gpu_vertex_data_t data) {
 	structure->elements[structure->size].name = name;
 	structure->elements[structure->size].data = data;
 	structure->size++;
 }
 
-void gpu_internal_pipeline_init(iron_gpu_pipeline_t *pipe) {
+void gpu_internal_pipeline_init(gpu_pipeline_t *pipe) {
 	pipe->input_layout = NULL;
 	pipe->vertex_shader = NULL;
 	pipe->fragment_shader = NULL;
-	pipe->cull_mode = IRON_GPU_CULL_MODE_NEVER;
+	pipe->cull_mode = GPU_CULL_MODE_NEVER;
 	pipe->depth_write = false;
-	pipe->depth_mode = IRON_GPU_COMPARE_MODE_ALWAYS;
-	pipe->blend_source = IRON_GPU_BLEND_ONE;
-	pipe->blend_destination = IRON_GPU_BLEND_ZERO;
-	pipe->blend_operation = IRON_GPU_BLENDOP_ADD;
-	pipe->alpha_blend_source = IRON_GPU_BLEND_ONE;
-	pipe->alpha_blend_destination = IRON_GPU_BLEND_ZERO;
-	pipe->alpha_blend_operation = IRON_GPU_BLENDOP_ADD;
+	pipe->depth_mode = GPU_COMPARE_MODE_ALWAYS;
+	pipe->blend_source = GPU_BLEND_ONE;
+	pipe->blend_destination = GPU_BLEND_ZERO;
+	pipe->blend_operation = GPU_BLENDOP_ADD;
+	pipe->alpha_blend_source = GPU_BLEND_ONE;
+	pipe->alpha_blend_destination = GPU_BLEND_ZERO;
+	pipe->alpha_blend_operation = GPU_BLENDOP_ADD;
 	for (int i = 0; i < 8; ++i) {
 		pipe->color_write_mask_red[i] = true;
 		pipe->color_write_mask_green[i] = true;

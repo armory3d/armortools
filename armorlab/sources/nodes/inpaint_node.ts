@@ -5,11 +5,11 @@ type inpaint_node_t = {
 	base?: logic_node_t;
 };
 
-let inpaint_node_image: iron_gpu_texture_t = null;
-let inpaint_node_mask: iron_gpu_texture_t = null;
-let inpaint_node_result: iron_gpu_texture_t = null;
+let inpaint_node_image: gpu_texture_t = null;
+let inpaint_node_mask: gpu_texture_t = null;
+let inpaint_node_result: gpu_texture_t = null;
 
-let inpaint_node_temp: iron_gpu_texture_t = null;
+let inpaint_node_temp: gpu_texture_t = null;
 let inpaint_node_prompt: string = "";
 let inpaint_node_strength: f32 = 0.5;
 let inpaint_node_auto: bool = true;
@@ -34,7 +34,7 @@ function inpaint_node_init() {
 		inpaint_node_mask = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 		sys_notify_on_next_frame(function () {
 			_gpu_begin(inpaint_node_mask, null, clear_flag_t.COLOR, color_from_floats(1.0, 1.0, 1.0, 1.0));
-			iron_gpu_end();
+			gpu_end();
 		});
 	}
 
@@ -67,8 +67,8 @@ function inpaint_node_button(node_id: i32) {
 	}
 }
 
-function inpaint_node_get_as_image(self: inpaint_node_t, from: i32): iron_gpu_texture_t {
-	let source: iron_gpu_texture_t = logic_node_input_get_as_image(self.base.inputs[0]);
+function inpaint_node_get_as_image(self: inpaint_node_t, from: i32): gpu_texture_t {
+	let source: gpu_texture_t = logic_node_input_get_as_image(self.base.inputs[0]);
 	console_progress(tr("Processing") + " - " + tr("Inpaint"));
 
 	draw_begin(inpaint_node_image);
@@ -83,26 +83,26 @@ function inpaint_node_get_as_image(self: inpaint_node_t, from: i32): iron_gpu_te
 	}
 }
 
-function inpaint_node_get_cached_image(self: inpaint_node_t): iron_gpu_texture_t {
+function inpaint_node_get_cached_image(self: inpaint_node_t): gpu_texture_t {
 	sys_notify_on_next_frame(function (self: inpaint_node_t) {
-		let source: iron_gpu_texture_t = logic_node_input_get_as_image(self.base.inputs[0]);
+		let source: gpu_texture_t = logic_node_input_get_as_image(self.base.inputs[0]);
 		_gpu_begin(inpaint_node_image);
-		iron_gpu_set_pipeline(pipes_inpaint_preview);
-		iron_gpu_set_texture(pipes_tex0_inpaint_preview, source);
-		iron_gpu_set_texture(pipes_texa_inpaint_preview, inpaint_node_mask);
-		iron_gpu_set_vertex_buffer(const_data_screen_aligned_vb);
-		iron_gpu_set_index_buffer(const_data_screen_aligned_ib);
+		gpu_set_pipeline(pipes_inpaint_preview);
+		gpu_set_texture(pipes_tex0_inpaint_preview, source);
+		gpu_set_texture(pipes_texa_inpaint_preview, inpaint_node_mask);
+		gpu_set_vertex_buffer(const_data_screen_aligned_vb);
+		gpu_set_index_buffer(const_data_screen_aligned_ib);
 		gpu_draw();
-		iron_gpu_end();
+		gpu_end();
 	}, self);
 	return inpaint_node_image;
 }
 
-function inpaint_node_get_target(): iron_gpu_texture_t {
+function inpaint_node_get_target(): gpu_texture_t {
 	return inpaint_node_mask;
 }
 
-function inpaint_node_texsynth_inpaint(image: iron_gpu_texture_t, tiling: bool, mask: iron_gpu_texture_t): iron_gpu_texture_t {
+function inpaint_node_texsynth_inpaint(image: gpu_texture_t, tiling: bool, mask: gpu_texture_t): gpu_texture_t {
 	let w: i32 = config_get_texture_res_x();
 	let h: i32 = config_get_texture_res_y();
 
@@ -115,7 +115,7 @@ function inpaint_node_texsynth_inpaint(image: iron_gpu_texture_t, tiling: bool, 
 	return inpaint_node_result;
 }
 
-function inpaint_node_sd_inpaint(image: iron_gpu_texture_t, mask: iron_gpu_texture_t): iron_gpu_texture_t {
+function inpaint_node_sd_inpaint(image: gpu_texture_t, mask: gpu_texture_t): gpu_texture_t {
 	inpaint_node_init();
 
 	let bytes_img: buffer_t = gpu_get_texture_pixels(mask);

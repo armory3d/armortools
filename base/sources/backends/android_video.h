@@ -13,7 +13,7 @@
 // 	void *sound;
 // 	void *androidVideo;
 // 	int id;
-// 	iron_gpu_texture_t image;
+// 	gpu_texture_t image;
 // 	double lastTime;
 // 	int myWidth;
 // 	int myHeight;

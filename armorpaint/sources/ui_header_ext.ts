@@ -53,14 +53,14 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			let m: slot_layer_t = layers_new_mask(false, context_raw.layer);
 			sys_notify_on_next_frame(function (m: slot_layer_t) {
 				_gpu_begin(m.texpaint);
-				iron_gpu_set_pipeline(pipes_colorid_to_mask);
+				gpu_set_pipeline(pipes_colorid_to_mask);
 				let rt: render_target_t = map_get(render_path_render_targets, "texpaint_colorid");
-				iron_gpu_set_texture(pipes_texpaint_colorid, rt._image);
-				iron_gpu_set_texture(pipes_tex_colorid, project_get_image(project_assets[context_raw.colorid_handle.position]));
-				iron_gpu_set_vertex_buffer(const_data_screen_aligned_vb);
-				iron_gpu_set_index_buffer(const_data_screen_aligned_ib);
+				gpu_set_texture(pipes_texpaint_colorid, rt._image);
+				gpu_set_texture(pipes_tex_colorid, project_get_image(project_assets[context_raw.colorid_handle.position]));
+				gpu_set_vertex_buffer(const_data_screen_aligned_vb);
+				gpu_set_index_buffer(const_data_screen_aligned_ib);
 				gpu_draw();
-				iron_gpu_end();
+				gpu_end();
 				context_raw.colorid_picked = false;
 				ui_toolbar_handle.redraws = 1;
 				ui_header_handle.redraws = 1;
@@ -178,7 +178,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			tr("Object ID"),
 			tr("Vertex Color"),
 		];
-		if (iron_gpu_raytrace_supported()) {
+		if (gpu_raytrace_supported()) {
 			array_push(bakes, tr("Lightmap"));
 			array_push(bakes, tr("Bent Normal"));
 			array_push(bakes, tr("Thickness"));
@@ -189,7 +189,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 
 		context_raw.bake_type = ui_combo(bake_handle, bakes, tr("Bake"));
 
-		if (!iron_gpu_raytrace_supported()) {
+		if (!gpu_raytrace_supported()) {
 			context_raw.bake_type += 1; // Offset for removed AO
 		}
 
@@ -338,7 +338,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			context_raw.brush_scale = ui_slider(brush_scale_handle, tr("UV Scale"), 0.01, 5.0, true);
 			if (brush_scale_handle.changed) {
 				if (context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT) {
-					let current: iron_gpu_texture_t = _draw_current;
+					let current: gpu_texture_t = _draw_current;
 					draw_end();
 					util_render_make_decal_preview();
 					draw_begin(current);
@@ -423,7 +423,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			ui._w = w;
 
 			if (h.changed) {
-				let current: iron_gpu_texture_t = _draw_current;
+				let current: gpu_texture_t = _draw_current;
 				draw_end();
 				util_render_make_text_preview();
 				util_render_make_decal_preview();
@@ -436,7 +436,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			ui_combo(context_raw.fill_type_handle, fill_mode_combo, tr("Fill Mode"));
 			if (context_raw.fill_type_handle.changed) {
 				if (context_raw.fill_type_handle.position == fill_type_t.FACE) {
-					let current: iron_gpu_texture_t = _draw_current;
+					let current: gpu_texture_t = _draw_current;
 					draw_end();
 					// cache_uv_map();
 					util_uv_cache_triangle_map();

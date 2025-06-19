@@ -4,7 +4,7 @@
 #import <QuartzCore/CAMetalLayer.h>
 #import <CoreMotion/CMMotionManager.h>
 
-struct iron_gpu_texture;
+struct gpu_texture;
 
 @interface GLView : UIView <UIKeyInput> {
 @private

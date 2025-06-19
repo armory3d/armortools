@@ -9,7 +9,7 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 	let o: u8[] = [];
 	export_obj_write_string(o, "# armorsculpt\n");
 
-	let texpaint: iron_gpu_texture_t = project_layers[0].texpaint;
+	let texpaint: gpu_texture_t = project_layers[0].texpaint;
 	let pixels: buffer_t = gpu_get_texture_pixels(texpaint);
 	let mesh: mesh_data_t = paint_objects[0].data;
 	let inda: u32_array_t = mesh.index_arrays[0].values;

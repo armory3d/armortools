@@ -12,7 +12,7 @@
 // 	bool loop;
 // 	void *sound;
 // 	bool image_initialized;
-// 	iron_gpu_texture_t image;
+// 	gpu_texture_t image;
 // 	double lastTime;
 // 	float duration;
 // 	bool finished;

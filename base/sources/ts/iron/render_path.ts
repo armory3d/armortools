@@ -11,7 +11,7 @@ type render_target_t = {
 	// Runtime
 	_depth_buffer_bits?: i32;
 	_depth_from?: string;
-	_image?: iron_gpu_texture_t; // RT or image
+	_image?: gpu_texture_t; // RT or image
 	_has_depth?: bool;
 };
 
@@ -36,7 +36,7 @@ let render_path_current_h: i32;
 let _render_path_frame_time: f32 = 0.0;
 let _render_path_frame: i32 = 0;
 let _render_path_current_target: render_target_t = null;
-let _render_path_current_image: iron_gpu_texture_t = null;
+let _render_path_current_image: gpu_texture_t = null;
 let _render_path_draw_order: draw_order_t = draw_order_t.DIST;
 let _render_path_paused: bool = false;
 let _render_path_depth_to_render_target: map_t<string, render_target_t> = map_create();
@@ -89,7 +89,7 @@ function render_path_set_target(target: string, additional: string[] = null, fla
 	else { // Render target
 		let rt: render_target_t = map_get(render_path_render_targets, target);
 		_render_path_current_target = rt;
-		let additional_images: iron_gpu_texture_t[] = null;
+		let additional_images: gpu_texture_t[] = null;
 		if (additional != null) {
 			additional_images = [];
 			for (let i: i32 = 0; i < additional.length; ++i) {
@@ -108,10 +108,10 @@ function render_path_set_target(target: string, additional: string[] = null, fla
 function render_path_set_depth_from(target: string, from: string) {
 	let rt: render_target_t = map_get(render_path_render_targets, target);
 	let rt_from: render_target_t = map_get(render_path_render_targets, from);
-	iron_gpu_render_target_set_depth_from(rt._image, rt_from._image);
+	gpu_render_target_set_depth_from(rt._image, rt_from._image);
 }
 
-function render_path_begin(render_target: iron_gpu_texture_t, additional_targets: iron_gpu_texture_t[], flags: i32, color: i32, depth: f32) {
+function render_path_begin(render_target: gpu_texture_t, additional_targets: gpu_texture_t[], flags: i32, color: i32, depth: f32) {
 	if (_render_path_current_image != null) {
 		render_path_end();
 	}
@@ -121,20 +121,20 @@ function render_path_begin(render_target: iron_gpu_texture_t, additional_targets
 
 function render_path_end() {
 	if (_render_path_scissor_set) {
-		iron_gpu_disable_scissor();
+		gpu_disable_scissor();
 		_render_path_scissor_set = false;
 	}
-	iron_gpu_end();
+	gpu_end();
 	_render_path_current_image = null;
 	_render_path_bind_params = null;
 }
 
 function render_path_set_current_viewport(view_w: i32, view_h: i32) {
-	iron_gpu_viewport(sys_x(),render_path_current_h - (view_h - sys_y()), view_w, view_h);
+	gpu_viewport(sys_x(),render_path_current_h - (view_h - sys_y()), view_w, view_h);
 }
 
 function render_path_set_current_scissor(view_w: i32, view_h: i32) {
-	iron_gpu_scissor(sys_x(),render_path_current_h - (view_h - sys_y()), view_w, view_h);
+	gpu_scissor(sys_x(),render_path_current_h - (view_h - sys_y()), view_w, view_h);
 	_render_path_scissor_set = true;
 }
 
@@ -145,7 +145,7 @@ function render_path_set_viewport(view_w: i32, view_h: i32) {
 
 function render_path_gen_mipmaps(target: string) {
 	let rt: render_target_t = map_get(render_path_render_targets, target);
-	iron_gpu_texture_generate_mipmaps(rt._image, 1000);
+	gpu_texture_generate_mipmaps(rt._image, 1000);
 }
 
 function _render_path_sort_dist(a: any_ptr, b: any_ptr): i32 {
@@ -209,11 +209,11 @@ function render_path_draw_skydome(handle: string) {
 	if (cc.context == null) {
 		return; // World data not specified
 	}
-	iron_gpu_set_pipeline(cc.context._.pipe_state);
+	gpu_set_pipeline(cc.context._.pipe_state);
 	uniforms_set_context_consts(cc.context, _render_path_bind_params);
 	uniforms_set_obj_consts(cc.context, null); // External hosek
-	iron_gpu_set_vertex_buffer(const_data_skydome_vb);
-	iron_gpu_set_index_buffer(const_data_skydome_ib);
+	gpu_set_vertex_buffer(const_data_skydome_vb);
+	gpu_set_index_buffer(const_data_skydome_ib);
 	gpu_draw();
 	render_path_end();
 }
@@ -235,11 +235,11 @@ function render_path_draw_shader(handle: string) {
 	if (const_data_screen_aligned_vb == null) {
 		const_data_create_screen_aligned_data();
 	}
-	iron_gpu_set_pipeline(cc.context._.pipe_state);
+	gpu_set_pipeline(cc.context._.pipe_state);
 	uniforms_set_context_consts(cc.context, _render_path_bind_params);
 	uniforms_set_obj_consts(cc.context, null);
-	iron_gpu_set_vertex_buffer(const_data_screen_aligned_vb);
-	iron_gpu_set_index_buffer(const_data_screen_aligned_ib);
+	gpu_set_vertex_buffer(const_data_screen_aligned_vb);
+	gpu_set_index_buffer(const_data_screen_aligned_ib);
 	gpu_draw();
 
 	render_path_end();
@@ -281,7 +281,7 @@ function render_path_unload() {
 	}
 }
 
-function _render_path_resize_on_init(_image: iron_gpu_texture_t) {
+function _render_path_resize_on_init(_image: gpu_texture_t) {
 	iron_unload_image(_image);
 }
 
@@ -310,7 +310,7 @@ function render_path_resize() {
 		}
 
 		if (nodepth != null) {
-			iron_gpu_render_target_set_depth_from(rt._image, nodepth._image);
+			gpu_render_target_set_depth_from(rt._image, nodepth._image);
 		}
 	}
 
@@ -318,7 +318,7 @@ function render_path_resize() {
 	for (let i: i32 = 0; i < render_targets_keys.length; ++i) {
 		let rt: render_target_t = map_get(render_path_render_targets, render_targets_keys[i]);
 		if (rt != null && rt.width == 0) {
-			let _image: iron_gpu_texture_t = rt._image;
+			let _image: gpu_texture_t = rt._image;
 			sys_notify_on_init(_render_path_resize_on_init, _image);
 			rt._image = render_path_create_image(rt, rt._depth_buffer_bits);
 		}
@@ -329,7 +329,7 @@ function render_path_resize() {
 		let rt: render_target_t = map_get(render_path_render_targets, render_targets_keys[i]);
 		if (rt != null && rt._depth_from != "") {
 			let depth_from: render_target_t = map_get(_render_path_depth_to_render_target, rt._depth_from);
-			iron_gpu_render_target_set_depth_from(rt._image, depth_from._image);
+			gpu_render_target_set_depth_from(rt._image, depth_from._image);
 		}
 	}
 }
@@ -368,7 +368,7 @@ function render_path_create_target(t: render_target_t): render_target_t {
 			t._depth_buffer_bits = 0;
 			t._depth_from = t.depth_buffer;
 			t._image = render_path_create_image(t, t._depth_buffer_bits);
-			iron_gpu_render_target_set_depth_from(t._image, depth_target._image);
+			gpu_render_target_set_depth_from(t._image, depth_target._image);
 		}
 	}
 	else { // No depth buffer
@@ -379,7 +379,7 @@ function render_path_create_target(t: render_target_t): render_target_t {
 	return t;
 }
 
-function render_path_create_image(t: render_target_t, depth_buffer_bits: i32): iron_gpu_texture_t {
+function render_path_create_image(t: render_target_t, depth_buffer_bits: i32): gpu_texture_t {
 	let width: i32 = t.width == 0 ? sys_w() : t.width;
 	let height: i32 = t.height == 0 ? sys_h() : t.height;
 	width = math_floor(width * t.scale);

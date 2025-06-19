@@ -223,7 +223,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	}
 
 	// Draw eye icon
-	let icons: iron_gpu_texture_t = resource_get("icons.k");
+	let icons: gpu_texture_t = resource_get("icons.k");
 	let r: rect_t = resource_tile18(icons, l.visible ? 0 : 1, 0);
 	let center: i32 = (step / 2) * ui_SCALE(ui);
 	ui._x += 2;

@@ -4,7 +4,7 @@
 
 // void iron_video_destroy(iron_video_t *video) {}
 
-// iron_gpu_texture_t *iron_video_current_image(iron_video_t *video) {
+// gpu_texture_t *iron_video_current_image(iron_video_t *video) {
 // 	return NULL;
 // }
 

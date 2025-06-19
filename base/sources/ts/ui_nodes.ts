@@ -32,7 +32,7 @@ let ui_nodes_last_node_selected_id: i32 = -1;
 let ui_nodes_release_link: bool = false;
 let ui_nodes_is_node_menu_op: bool = false;
 
-let ui_nodes_grid: iron_gpu_texture_t = null;
+let ui_nodes_grid: gpu_texture_t = null;
 let ui_nodes_grid_redraw: bool = true;
 let ui_nodes_grid_cell_w: i32 = 200;
 let ui_nodes_grid_small_cell_w: i32 = 40;
@@ -719,7 +719,7 @@ function ui_nodes_get_node_y(): i32 {
 	return math_floor((mouse_y - ui_nodes_wy - UI_NODES_PAN_Y()) / UI_NODES_SCALE());
 }
 
-function ui_nodes_draw_grid(zoom: f32): iron_gpu_texture_t {
+function ui_nodes_draw_grid(zoom: f32): gpu_texture_t {
 	let ww: i32 = config_raw.layout[layout_size_t.NODES_W];
 
 	///if (is_paint || is_sculpt)
@@ -740,7 +740,7 @@ function ui_nodes_draw_grid(zoom: f32): iron_gpu_texture_t {
 		h = 1;
 	}
 
-	let grid: iron_gpu_texture_t = gpu_create_render_target(w, h);
+	let grid: gpu_texture_t = gpu_create_render_target(w, h);
 	draw_begin(grid, true, ui_nodes_ui.ops.theme.SEPARATOR_COL);
 
 	let sep_col: i32 = ui_nodes_ui.ops.theme.SEPARATOR_COL;
@@ -1059,7 +1059,7 @@ function ui_nodes_render() {
 
 		// Node previews
 		if (config_raw.node_preview && nodes.nodes_selected_id.length > 0) {
-			let img: iron_gpu_texture_t = null;
+			let img: gpu_texture_t = null;
 			let sel: ui_node_t = ui_get_node(c.nodes, nodes.nodes_selected_id[0]);
 
 			///if (is_paint || is_sculpt)

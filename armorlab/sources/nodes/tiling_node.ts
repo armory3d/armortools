@@ -1,10 +1,10 @@
 
 type tiling_node_t = {
 	base?: logic_node_t;
-	result?: iron_gpu_texture_t;
+	result?: gpu_texture_t;
 };
 
-let tiling_node_image: iron_gpu_texture_t = null;
+let tiling_node_image: gpu_texture_t = null;
 let tiling_node_prompt: string = "";
 let tiling_node_strength: f32 = 0.5;
 let tiling_node_auto: bool = true;
@@ -43,8 +43,8 @@ function tiling_node_button(node_id: i32) {
 	}
 }
 
-function tiling_node_get_as_image(self: tiling_node_t, from: i32): iron_gpu_texture_t {
-	let source: iron_gpu_texture_t = logic_node_input_get_as_image(self.base.inputs[0]);
+function tiling_node_get_as_image(self: tiling_node_t, from: i32): gpu_texture_t {
+	let source: gpu_texture_t = logic_node_input_get_as_image(self.base.inputs[0]);
 	draw_begin(tiling_node_image);
 	draw_scaled_image(source, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
 	draw_end();
@@ -60,13 +60,13 @@ function tiling_node_get_as_image(self: tiling_node_t, from: i32): iron_gpu_text
 	return self.result;
 }
 
-function tiling_node_get_cached_image(self: tiling_node_t): iron_gpu_texture_t {
+function tiling_node_get_cached_image(self: tiling_node_t): gpu_texture_t {
 	return self.result;
 }
 
-function tiling_node_sd_tiling(image: iron_gpu_texture_t, seed: i32): iron_gpu_texture_t {
+function tiling_node_sd_tiling(image: gpu_texture_t, seed: i32): gpu_texture_t {
 	text_to_photo_node_tiling = false;
-	let tile: iron_gpu_texture_t = gpu_create_render_target(512, 512);
+	let tile: gpu_texture_t = gpu_create_render_target(512, 512);
 	draw_begin(tile);
 	draw_scaled_image(image, -256, -256, 512, 512);
 	draw_scaled_image(image, 256, -256, 512, 512);
@@ -92,7 +92,7 @@ function tiling_node_sd_tiling(image: iron_gpu_texture_t, seed: i32): iron_gpu_t
 	// 		u8a[y * 512 + x] = 0;
 	// 	}
 	// }
-	let mask: iron_gpu_texture_t = gpu_create_texture_from_bytes(u8a, 512, 512, tex_format_t.R8);
+	let mask: gpu_texture_t = gpu_create_texture_from_bytes(u8a, 512, 512, tex_format_t.R8);
 
 	inpaint_node_prompt = tiling_node_prompt;
 	inpaint_node_strength = tiling_node_strength;

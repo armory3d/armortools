@@ -214,23 +214,23 @@ declare function iron_show_keyboard(show: bool): void;
 declare function gpu_create_index_buffer(count: i32): any;
 declare function gpu_delete_index_buffer(buffer: any): void;
 declare function gpu_lock_index_buffer(buffer: any): u32_array_t;
-declare function iron_gpu_index_buffer_unlock(buffer: any): void;
-declare function iron_gpu_set_index_buffer(buffer: any): void;
-declare function gpu_create_vertex_buffer(count: i32, structure: iron_gpu_vertex_structure_t, usage: i32): any;
+declare function gpu_index_buffer_unlock(buffer: any): void;
+declare function gpu_set_index_buffer(buffer: any): void;
+declare function gpu_create_vertex_buffer(count: i32, structure: gpu_vertex_structure_t, usage: i32): any;
 declare function gpu_delete_vertex_buffer(buffer: any): void;
 declare function gpu_lock_vertex_buffer(buffer: any): buffer_t;
-declare function iron_gpu_vertex_buffer_unlock(buffer: any): void;
-declare function iron_gpu_set_vertex_buffer(buffer: any): void;
+declare function gpu_vertex_buffer_unlock(buffer: any): void;
+declare function gpu_set_vertex_buffer(buffer: any): void;
 declare function gpu_draw(): void;
-declare function gpu_create_shader(data: buffer_t, type: i32): iron_gpu_shader_t;
-declare function gpu_create_shader_from_source(source: string, source_size: i32, shader_type: shader_type_t): iron_gpu_shader_t;
-declare function iron_gpu_shader_destroy(shader: iron_gpu_shader_t): void;
+declare function gpu_create_shader(data: buffer_t, type: i32): gpu_shader_t;
+declare function gpu_create_shader_from_source(source: string, source_size: i32, shader_type: shader_type_t): gpu_shader_t;
+declare function gpu_shader_destroy(shader: gpu_shader_t): void;
 declare function gpu_create_pipeline(): any;
 declare function gpu_delete_pipeline(pipeline: any): void;
 declare function gpu_compile_pipeline(pipeline: any): void;
-declare function iron_gpu_set_pipeline(pipeline: any): void;
+declare function gpu_set_pipeline(pipeline: any): void;
 declare function iron_load_image(file: string, readable: bool): any;
-declare function iron_unload_image(image: iron_gpu_texture_t): void;
+declare function iron_unload_image(image: gpu_texture_t): void;
 declare function iron_load_sound(file: string): any;
 declare function iron_a1_sound_destroy(sound: any): void;
 declare function iron_a1_play_sound(sound: any, loop: bool, pitch: f32, unique: bool): audio_channel_t;
@@ -240,8 +240,8 @@ declare function iron_load_blob(file: string): buffer_t;
 declare function iron_load_url(url: string): void;
 declare function iron_copy_to_clipboard(text: string): void;
 
-declare function iron_gpu_set_texture(stage: i32, texture: iron_gpu_texture_t): void;
-declare function iron_gpu_set_texture_depth(unit: i32, texture: iron_gpu_texture_t): void;
+declare function gpu_set_texture(stage: i32, texture: gpu_texture_t): void;
+declare function gpu_set_texture_depth(unit: i32, texture: gpu_texture_t): void;
 declare function gpu_set_bool(location: i32, value: bool): void;
 declare function gpu_set_int(location: i32, value: i32): void;
 declare function gpu_set_float(location: i32, value: f32): void;
@@ -275,15 +275,15 @@ declare function gpu_create_render_target(width: i32, height: i32, format: i32 =
 declare function gpu_create_texture_from_bytes(data: buffer_t, width: i32, height: i32, format: i32 = tex_format_t.RGBA32, readable: bool = true): any;
 declare function gpu_create_texture_from_encoded_bytes(data: buffer_t, format: string, readable: bool = false): any;
 declare function gpu_get_texture_pixels(texture: any): buffer_t;
-declare function iron_gpu_texture_generate_mipmaps(texture: any, levels: i32): void;
-declare function gpu_set_mipmaps(texture: any, mipmaps: iron_gpu_texture_t[]): void;
-declare function iron_gpu_render_target_set_depth_from(target: any, source: any): void;
-declare function iron_gpu_viewport(x: i32, y: i32, width: i32, height: i32): void;
-declare function iron_gpu_scissor(x: i32, y: i32, width: i32, height: i32): void;
-declare function iron_gpu_disable_scissor(): void;
-declare function _gpu_begin(render_target: iron_gpu_texture_t, additional: iron_gpu_texture_t[] = null, flags: i32 = clear_flag_t.NONE, color: i32 = 0, depth: f32 = 0.0): void;
-declare function iron_gpu_end(): void;
-declare function iron_gpu_present(): void;
+declare function gpu_texture_generate_mipmaps(texture: any, levels: i32): void;
+declare function gpu_set_mipmaps(texture: any, mipmaps: gpu_texture_t[]): void;
+declare function gpu_render_target_set_depth_from(target: any, source: any): void;
+declare function gpu_viewport(x: i32, y: i32, width: i32, height: i32): void;
+declare function gpu_scissor(x: i32, y: i32, width: i32, height: i32): void;
+declare function gpu_disable_scissor(): void;
+declare function _gpu_begin(render_target: gpu_texture_t, additional: gpu_texture_t[] = null, flags: i32 = clear_flag_t.NONE, color: i32 = 0, depth: f32 = 0.0): void;
+declare function gpu_end(): void;
+declare function gpu_present(): void;
 declare function iron_file_save_bytes(path: string, bytes: buffer_t, length?: i32): void;
 declare function iron_sys_command(cmd: string): i32;
 declare function iron_internal_save_path(): string;
@@ -293,12 +293,12 @@ declare function iron_get_files_location(): string;
 declare function _iron_http_request(url: string, size: i32, callback: (url: string, _: buffer_t)=>void): void;
 
 declare function draw_init(image_vert: buffer_t, image_frag: buffer_t, rect_vert: buffer_t, rect_frag: buffer_t, tris_vert: buffer_t, tris_frag: buffer_t, text_vert: buffer_t, text_frag: buffer_t): void;
-declare function draw_begin(render_target: iron_gpu_texture_t = null, clear: bool = false, color: u32 = 0): void;
+declare function draw_begin(render_target: gpu_texture_t = null, clear: bool = false, color: u32 = 0): void;
 declare function draw_end(): void;
-declare function draw_scaled_sub_image(image: iron_gpu_texture_t, sx: f32, sy: f32, sw: f32, sh: f32, dx: f32, dy: f32, dw: f32, dh: f32): void;
-declare function draw_sub_image(image: iron_gpu_texture_t, x: f32, y: f32, sx: f32, sy: f32, sw: f32, sh: f32): void;
-declare function draw_scaled_image(image: iron_gpu_texture_t, dx: f32, dy: f32, dw: f32, dh: f32): void;
-declare function draw_image(image: iron_gpu_texture_t, x: f32, y: f32): void;
+declare function draw_scaled_sub_image(image: gpu_texture_t, sx: f32, sy: f32, sw: f32, sh: f32, dx: f32, dy: f32, dw: f32, dh: f32): void;
+declare function draw_sub_image(image: gpu_texture_t, x: f32, y: f32, sx: f32, sy: f32, sw: f32, sh: f32): void;
+declare function draw_scaled_image(image: gpu_texture_t, dx: f32, dy: f32, dw: f32, dh: f32): void;
+declare function draw_image(image: gpu_texture_t, x: f32, y: f32): void;
 declare function draw_filled_triangle(x0: f32, y0: f32, x1: f32, y1: f32, x2: f32, y2: f32): void;
 declare function draw_filled_rect(x: f32, y: f32, width: f32, height: f32): void;
 declare function draw_rect(x: f32, y: f32, width: f32, height: f32, strength: f32 = 1.0): void;
@@ -355,13 +355,13 @@ declare function iron_mp4_encode(pixels: buffer_t): void;
 declare function iron_ml_inference(model: buffer_t, tensors: buffer_t[], input_shape?: i32[][], output_shape?: i32[], use_gpu?: bool): buffer_t;
 declare function iron_ml_unload(): void;
 
-declare function iron_gpu_raytrace_supported(): bool;
+declare function gpu_raytrace_supported(): bool;
 declare function iron_raytrace_init(shader: buffer_t): void;
 declare function iron_raytrace_as_init(): void;
 declare function iron_raytrace_as_add(vb: any, ib: any, transform: mat4_t): void;
 declare function iron_raytrace_as_build(vb_full: any, ib_full: any): void;
 
-declare function iron_raytrace_set_textures(tex0: iron_gpu_texture_t, tex1: iron_gpu_texture_t, tex2: iron_gpu_texture_t, texenv: any, tex_sobol: any, tex_scramble: any, tex_rank: any): void;
+declare function iron_raytrace_set_textures(tex0: gpu_texture_t, tex1: gpu_texture_t, tex2: gpu_texture_t, texenv: any, tex_sobol: any, tex_scramble: any, tex_rank: any): void;
 declare function iron_raytrace_dispatch_rays(target: any, cb: buffer_t): void;
 
 declare function iron_window_x(): i32;
@@ -576,22 +576,22 @@ declare function f32_nan(): f32;
 declare function f32_isnan(f: f32): bool;
 
 
-function gpu_vertex_struct_create(): iron_gpu_vertex_structure_t {
-	let raw: iron_gpu_vertex_structure_t = {};
+function gpu_vertex_struct_create(): gpu_vertex_structure_t {
+	let raw: gpu_vertex_structure_t = {};
 	return raw;
 }
 
-function gpu_vertex_struct_add(raw: iron_gpu_vertex_structure_t, name: string, data: vertex_data_t) {
-	let e: iron_gpu_vertex_element_t = ADDRESS(ARRAY_ACCESS(raw.elements, raw.size));
+function gpu_vertex_struct_add(raw: gpu_vertex_structure_t, name: string, data: vertex_data_t) {
+	let e: gpu_vertex_element_t = ADDRESS(ARRAY_ACCESS(raw.elements, raw.size));
 	e.name = name;
 	e.data = data;
 	raw.size++;
 }
 
-declare function iron_gpu_vertex_struct_size(s: iron_gpu_vertex_structure_t): i32;
-declare function iron_gpu_vertex_data_size(data: vertex_data_t);
+declare function gpu_vertex_struct_size(s: gpu_vertex_structure_t): i32;
+declare function gpu_vertex_data_size(data: vertex_data_t);
 
-declare type iron_gpu_pipeline_t = {
+declare type gpu_pipeline_t = {
 	input_layout?: any;
 	vertex_shader?: any;
 	fragment_shader?: any;
@@ -617,21 +617,21 @@ declare type iron_gpu_pipeline_t = {
 	impl?: any;
 };
 
-declare type iron_gpu_shader_t = {
+declare type gpu_shader_t = {
 	impl?: any;
 };
 
-declare type iron_gpu_vertex_element_t = {
+declare type gpu_vertex_element_t = {
 	name?: string;
 	data?: vertex_data_t;
 };
 
-declare type iron_gpu_vertex_structure_t = {
-	elements?: any; // iron_gpu_vertex_element_t[IRON_GPU_MAX_VERTEX_ELEMENTS];
+declare type gpu_vertex_structure_t = {
+	elements?: any; // gpu_vertex_element_t[GPU_MAX_VERTEX_ELEMENTS];
 	size?: i32;
 };
 
-declare type iron_gpu_buffer_t = {
+declare type gpu_buffer_t = {
 	impl?: any;
 };
 
@@ -774,7 +774,7 @@ declare function ui_draw_string(text: string, x_offset: f32, y_offset: f32, alig
 declare function ui_next_node_id(nodes: ui_node_t[]): i32;
 declare function ui_node_canvas(nodes: ui_nodes_t, canvas: ui_node_canvas_t): void;
 
-declare type iron_gpu_texture_t = {
+declare type gpu_texture_t = {
 	width: i32;
 	height: i32;
 };
@@ -837,7 +837,7 @@ declare type ui_handle_t = {
 	color: u32;
 	value: f32;
 	text: string;
-	// iron_gpu_texture_t texture;
+	// gpu_texture_t texture;
 	redraws: i32;
 	scroll_offset: f32;
 	scroll_enabled: bool;
@@ -856,8 +856,8 @@ declare type ui_options_t = {
 	font?: draw_font_t;
 	theme?: ui_theme_t;
 	scale_factor?: f32;
-	color_wheel?: iron_gpu_texture_t;
-	black_white_gradient?: iron_gpu_texture_t;
+	color_wheel?: gpu_texture_t;
+	black_white_gradient?: gpu_texture_t;
 };
 
 declare type ui_coloring_t = {
@@ -965,7 +965,7 @@ let ui_children: map_t<string, ui_handle_t> = map_create();
 let ui_nodes_custom_buttons: map_t<string, (i: i32)=>void> = map_create();
 
 declare function UI_OUTPUTS_H(sockets_count: i32, length: i32 = -1): f32;
-declare function ui_tooltip_image(image: iron_gpu_texture_t, max_width: i32 = 0);
+declare function ui_tooltip_image(image: gpu_texture_t, max_width: i32 = 0);
 
 function ui_SCALE(ui: ui_t): f32 {
 	let current: ui_t = ui_get_current();
@@ -1008,7 +1008,7 @@ function ui_nodes_INPUT_Y(canvas: ui_node_canvas_t, sockets: ui_node_socket_t[],
 	return UI_INPUT_Y(canvas, sockets.buffer, sockets.length, pos);
 }
 
-function _ui_image(image: iron_gpu_texture_t, tint: i32 = 0xffffffff, h: f32 = -1.0, sx: i32 = 0, sy: i32 = 0, sw: i32 = 0, sh: i32 = 0): ui_state_t {
+function _ui_image(image: gpu_texture_t, tint: i32 = 0xffffffff, h: f32 = -1.0, sx: i32 = 0, sy: i32 = 0, sw: i32 = 0, sh: i32 = 0): ui_state_t {
 	return ui_sub_image(image, tint, h, sx, sy, sw, sh);
 }
 

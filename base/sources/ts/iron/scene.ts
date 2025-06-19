@@ -13,7 +13,7 @@ let scene_animations: anim_raw_t[];
 ///if arm_skin
 let scene_armatures: armature_t[];
 ///end
-let scene_embedded: map_t<string, iron_gpu_texture_t>;
+let scene_embedded: map_t<string, gpu_texture_t>;
 
 let _scene_ready: bool;
 let _scene_uid_counter: i32 = 0;
@@ -444,7 +444,7 @@ function scene_load_embedded_data(datas: string[]) {
 }
 
 function scene_embed_data(file: string) {
-	let image: iron_gpu_texture_t = data_get_image(file);
+	let image: gpu_texture_t = data_get_image(file);
 	map_set(scene_embedded, file, image);
 }
 
@@ -475,14 +475,14 @@ type mesh_data_t = {
 type mesh_data_runtime_t = {
 	refcount?: i32; // Number of users
 	handle?: string; // Handle used to retrieve this object in Data
-	vertex_buffer?: iron_gpu_buffer_t;
-	vertex_buffer_map?: map_t<string, iron_gpu_buffer_t>;
-	index_buffers?: iron_gpu_buffer_t[];
+	vertex_buffer?: gpu_buffer_t;
+	vertex_buffer_map?: map_t<string, gpu_buffer_t>;
+	index_buffers?: gpu_buffer_t[];
 	ready?: bool;
 	vertices?: buffer_t;
 	indices?: u32_array_t[];
 	material_indices?: i32[];
-	structure?: iron_gpu_vertex_structure_t;
+	structure?: gpu_vertex_structure_t;
 	///if arm_skin
 	skeleton_transforms_inv?: mat4_t[];
 	actions?: map_t<string, obj_t[]>;
@@ -542,7 +542,7 @@ type material_context_t = {
 };
 
 type material_context_runtime_t = {
-	textures?: iron_gpu_texture_t[];
+	textures?: gpu_texture_t[];
 };
 
 type bind_const_t = {
@@ -594,10 +594,10 @@ type shader_context_t = {
 };
 
 type shader_context_runtime_t = {
-	pipe_state?: iron_gpu_pipeline_t;
+	pipe_state?: gpu_pipeline_t;
 	constants?: i32[];
 	tex_units?: i32[];
-	structure?: iron_gpu_vertex_structure_t;
+	structure?: gpu_vertex_structure_t;
 	vertex_shader_size?: i32;
 	fragment_shader_size?: i32;
 };
@@ -641,9 +641,9 @@ type world_data_t = {
 };
 
 type world_data_runtime_t = {
-	envmap?: iron_gpu_texture_t;
-	radiance?: iron_gpu_texture_t;
-	radiance_mipmaps?: iron_gpu_texture_t[];
+	envmap?: gpu_texture_t;
+	radiance?: gpu_texture_t;
+	radiance_mipmaps?: gpu_texture_t[];
 	irradiance?: f32_array_t;
 };
 

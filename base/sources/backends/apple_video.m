@@ -228,7 +228,7 @@
 // 			CGSize size = CVImageBufferGetDisplaySize(pixelBuffer);
 // 			video->impl.myWidth = size.width;
 // 			video->impl.myHeight = size.height;
-// 			iron_gpu_texture_init(&video->impl.image, iron_video_width(video), iron_video_height(video), IRON_IMAGE_FORMAT_BGRA32);
+// 			gpu_texture_init(&video->impl.image, iron_video_width(video), iron_video_height(video), IRON_IMAGE_FORMAT_BGRA32);
 // 			video->impl.image_initialized = true;
 // 		}
 
@@ -283,7 +283,7 @@
 // 	return video->impl.myHeight;
 // }
 
-// iron_gpu_texture_t *iron_video_current_image(iron_video_t *video) {
+// gpu_texture_t *iron_video_current_image(iron_video_t *video) {
 // 	iron_video_update(video, iron_time());
 // 	return &video->impl.image;
 // }

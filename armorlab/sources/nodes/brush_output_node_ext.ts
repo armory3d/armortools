@@ -4,11 +4,11 @@ type brush_output_node_t = {
 	raw?: ui_node_t;
 
 	id?: i32;
-	texpaint?: iron_gpu_texture_t;
-	texpaint_nor?: iron_gpu_texture_t;
-	texpaint_pack?: iron_gpu_texture_t;
-	texpaint_nor_empty?: iron_gpu_texture_t;
-	texpaint_pack_empty?: iron_gpu_texture_t;
+	texpaint?: gpu_texture_t;
+	texpaint_nor?: gpu_texture_t;
+	texpaint_pack?: gpu_texture_t;
+	texpaint_nor_empty?: gpu_texture_t;
+	texpaint_pack_empty?: gpu_texture_t;
 };
 
 function brush_output_node_create_ext(n: brush_output_node_t) {
@@ -66,7 +66,7 @@ function brush_output_node_create_ext(n: brush_output_node_t) {
 	context_raw.brush_output_node_inst = n;
 }
 
-function brush_output_node_get_as_image(self: brush_output_node_t, from: i32): iron_gpu_texture_t {
+function brush_output_node_get_as_image(self: brush_output_node_t, from: i32): gpu_texture_t {
 	return logic_node_input_get_as_image(self.base.inputs[from]);
 }
 

@@ -39,11 +39,11 @@ function ui_nodes_ext_run() {
 	parser_logic_parse(project_canvas);
 
 	photo_to_pbr_node_cached_source = null;
-	let texbase: iron_gpu_texture_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.BASE_COLOR);
-	let texocc: iron_gpu_texture_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.OCCLUSION);
-	let texrough: iron_gpu_texture_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.ROUGHNESS);
-	let texnor: iron_gpu_texture_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.NORMAL_MAP);
-	let texheight: iron_gpu_texture_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.HEIGHT);
+	let texbase: gpu_texture_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.BASE_COLOR);
+	let texocc: gpu_texture_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.OCCLUSION);
+	let texrough: gpu_texture_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.ROUGHNESS);
+	let texnor: gpu_texture_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.NORMAL_MAP);
+	let texheight: gpu_texture_t = logic_node_get_as_image(context_raw.brush_output_node_inst.base, channel_type_t.HEIGHT);
 
 	if (texbase != null) {
 		let texpaint: render_target_t = map_get(render_path_render_targets, "texpaint");
@@ -79,12 +79,12 @@ function ui_nodes_ext_run() {
 
 	if (texheight != null) {
 		_gpu_begin(texpaint_pack._image);
-		iron_gpu_set_pipeline(pipes_copy_a);
-		iron_gpu_set_texture(pipes_copy_a_tex, texheight);
-		iron_gpu_set_vertex_buffer(const_data_screen_aligned_vb);
-		iron_gpu_set_index_buffer(const_data_screen_aligned_ib);
+		gpu_set_pipeline(pipes_copy_a);
+		gpu_set_texture(pipes_copy_a_tex, texheight);
+		gpu_set_vertex_buffer(const_data_screen_aligned_vb);
+		gpu_set_index_buffer(const_data_screen_aligned_ib);
 		gpu_draw();
-		iron_gpu_end();
+		gpu_end();
 
 		let is_float_node: bool = context_raw.brush_output_node_inst.base.inputs[channel_type_t.HEIGHT].node.base.get == float_node_get;
 
@@ -105,7 +105,7 @@ function ui_nodes_ext_run() {
 					buffer_set_i16(vertices, i * 2, buffer_get_i16(ui_nodes_ext_last_vertices, i * 2));
 				}
 			}
-			iron_gpu_vertex_buffer_unlock(g._.vertex_buffer);
+			gpu_vertex_buffer_unlock(g._.vertex_buffer);
 
 			// Apply displacement
 			if (config_raw.displace_strength > 0) {

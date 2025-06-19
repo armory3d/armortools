@@ -374,10 +374,10 @@ const char *iphonegetresourcepath();
 char mobile_title[1024];
 #endif
 
-static iron_gpu_buffer_t constant_buffer;
-static iron_gpu_texture_t *render_target;
-static iron_gpu_raytrace_pipeline_t rt_pipeline;
-static iron_gpu_raytrace_acceleration_structure_t accel;
+static gpu_buffer_t constant_buffer;
+static gpu_texture_t *render_target;
+static gpu_raytrace_pipeline_t rt_pipeline;
+static gpu_raytrace_acceleration_structure_t accel;
 static bool raytrace_created = false;
 static bool raytrace_accel_created = false;
 const int constant_buffer_size = 24;
@@ -419,7 +419,7 @@ void _update(void *data) {
 	#endif
 
 	iron_update();
-	iron_gpu_present();
+	gpu_present();
 }
 
 char *_copy(void *data) {
@@ -917,46 +917,46 @@ void iron_show_keyboard(bool show) {
 }
 
 any gpu_create_index_buffer(i32 count) {
-	iron_gpu_buffer_t *buffer = (iron_gpu_buffer_t *)malloc(sizeof(iron_gpu_buffer_t));
-	iron_gpu_index_buffer_init(buffer, count, GPU_USAGE_STATIC);
+	gpu_buffer_t *buffer = (gpu_buffer_t *)malloc(sizeof(gpu_buffer_t));
+	gpu_index_buffer_init(buffer, count);
 	return buffer;
 }
 
-void gpu_delete_index_buffer(iron_gpu_buffer_t *buffer) {
-	iron_gpu_index_buffer_destroy(buffer);
+void gpu_delete_index_buffer(gpu_buffer_t *buffer) {
+	gpu_index_buffer_destroy(buffer);
 	free(buffer);
 }
 
-u32_array_t *gpu_lock_index_buffer(iron_gpu_buffer_t *buffer) {
-	void *vertices = iron_gpu_index_buffer_lock(buffer);
+u32_array_t *gpu_lock_index_buffer(gpu_buffer_t *buffer) {
+	void *vertices = gpu_index_buffer_lock(buffer);
 	u32_array_t *ar = (u32_array_t *)malloc(sizeof(u32_array_t));
 	ar->buffer = vertices;
-	ar->length = iron_gpu_index_buffer_count(buffer);
+	ar->length = gpu_index_buffer_count(buffer);
 	return ar;
 }
 
-any gpu_create_vertex_buffer(i32 count, iron_gpu_vertex_structure_t *structure, i32 usage) {
-	iron_gpu_buffer_t *buffer = (iron_gpu_buffer_t *)malloc(sizeof(iron_gpu_buffer_t));
-	iron_gpu_vertex_buffer_init(buffer, count, structure, (gpu_usage_t)usage == GPU_USAGE_STATIC);
+any gpu_create_vertex_buffer(i32 count, gpu_vertex_structure_t *structure, i32 usage) {
+	gpu_buffer_t *buffer = (gpu_buffer_t *)malloc(sizeof(gpu_buffer_t));
+	gpu_vertex_buffer_init(buffer, count, structure);
 	return buffer;
 }
 
-void gpu_delete_vertex_buffer(iron_gpu_buffer_t *buffer) {
-	iron_gpu_vertex_buffer_destroy(buffer);
+void gpu_delete_vertex_buffer(gpu_buffer_t *buffer) {
+	gpu_vertex_buffer_destroy(buffer);
 	free(buffer);
 }
 
-buffer_t *gpu_lock_vertex_buffer(iron_gpu_buffer_t *buffer) {
-	float *vertices = iron_gpu_vertex_buffer_lock(buffer);
+buffer_t *gpu_lock_vertex_buffer(gpu_buffer_t *buffer) {
+	float *vertices = gpu_vertex_buffer_lock(buffer);
 	buffer_t *b = (buffer_t *)malloc(sizeof(buffer_t));
 	b->buffer = vertices;
-	b->length = buffer->count * iron_gpu_vertex_buffer_stride(buffer);
+	b->length = buffer->count * gpu_vertex_buffer_stride(buffer);
 	return b;
 }
 
-iron_gpu_shader_t *gpu_create_shader(buffer_t *data, i32 shader_type) {
-	iron_gpu_shader_t *shader = (iron_gpu_shader_t *)malloc(sizeof(iron_gpu_shader_t));
-	iron_gpu_shader_init(shader, data->buffer, data->length, (iron_gpu_shader_type_t)shader_type);
+gpu_shader_t *gpu_create_shader(buffer_t *data, i32 shader_type) {
+	gpu_shader_t *shader = (gpu_shader_t *)malloc(sizeof(gpu_shader_t));
+	gpu_shader_init(shader, data->buffer, data->length, (gpu_shader_type_t)shader_type);
 	return shader;
 }
 
@@ -1043,9 +1043,9 @@ void gpu_create_shaders_from_kong(char *kong, char **vs, char **fs, int *vs_size
 
 #endif
 
-iron_gpu_shader_t *gpu_create_shader_from_source(string_t *source, int source_size, iron_gpu_shader_type_t shader_type) {
-	iron_gpu_shader_t *shader = (iron_gpu_shader_t *)malloc(sizeof(iron_gpu_shader_t));
-	char *temp_string_s = shader_type == IRON_GPU_SHADER_TYPE_VERTEX ? temp_string_vs : temp_string_fs;
+gpu_shader_t *gpu_create_shader_from_source(string_t *source, int source_size, gpu_shader_type_t shader_type) {
+	gpu_shader_t *shader = (gpu_shader_t *)malloc(sizeof(gpu_shader_t));
+	char *temp_string_s = shader_type == GPU_SHADER_TYPE_VERTEX ? temp_string_vs : temp_string_fs;
 
 	#ifdef WITH_D3DCOMPILER
 
@@ -1055,43 +1055,43 @@ iron_gpu_shader_t *gpu_create_shader_from_source(string_t *source, int source_si
 	ID3DBlob *shader_buffer;
 	UINT flags = D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_SKIP_VALIDATION;
 	HRESULT hr = D3DCompile(temp_string_s, strlen(source) + 1, NULL, NULL, NULL, "main",
-		shader_type == IRON_GPU_SHADER_TYPE_VERTEX ? "vs_5_0" : "ps_5_0", flags, 0, &shader_buffer, &error_message);
+		shader_type == GPU_SHADER_TYPE_VERTEX ? "vs_5_0" : "ps_5_0", flags, 0, &shader_buffer, &error_message);
 	if (hr != S_OK) {
 		iron_log("%s", (char *)error_message->lpVtbl->GetBufferPointer(error_message));
 		return NULL;
 	}
 
 	int size = shader_buffer->lpVtbl->GetBufferSize(shader_buffer);
-	iron_gpu_shader_init(shader, (char *)shader_buffer->lpVtbl->GetBufferPointer(shader_buffer), size, shader_type);
+	gpu_shader_init(shader, (char *)shader_buffer->lpVtbl->GetBufferPointer(shader_buffer), size, shader_type);
 	shader_buffer->lpVtbl->Release(shader_buffer);
 
 	#elif defined(IRON_METAL)
 
 	strcpy(temp_string_s, source);
-	iron_gpu_shader_init(shader, temp_string_s, strlen(temp_string_s), shader_type);
+	gpu_shader_init(shader, temp_string_s, strlen(temp_string_s), shader_type);
 
 	#elif defined(IRON_VULKAN)
 
-	iron_gpu_shader_init(shader, source, source_size, shader_type);
+	gpu_shader_init(shader, source, source_size, shader_type);
 
 	#endif
 
 	return shader;
 }
 
-iron_gpu_pipeline_t *gpu_create_pipeline() {
-	iron_gpu_pipeline_t *pipeline = (iron_gpu_pipeline_t *)malloc(sizeof(iron_gpu_pipeline_t));
-	iron_gpu_pipeline_init(pipeline);
+gpu_pipeline_t *gpu_create_pipeline() {
+	gpu_pipeline_t *pipeline = (gpu_pipeline_t *)malloc(sizeof(gpu_pipeline_t));
+	gpu_pipeline_init(pipeline);
 	return pipeline;
 }
 
-void gpu_delete_pipeline(iron_gpu_pipeline_t *pipeline) {
-	iron_gpu_pipeline_destroy(pipeline);
+void gpu_delete_pipeline(gpu_pipeline_t *pipeline) {
+	gpu_pipeline_destroy(pipeline);
 	free(pipeline);
 }
 
-void gpu_compile_pipeline(iron_gpu_pipeline_t *pipeline) {
-	iron_gpu_pipeline_compile(pipeline);
+void gpu_compile_pipeline(gpu_pipeline_t *pipeline) {
+	gpu_pipeline_compile(pipeline);
 }
 
 bool _load_image(iron_file_reader_t *reader, const char *filename, unsigned char **output, int *width, int *height, iron_image_format_t *format) {
@@ -1161,13 +1161,13 @@ bool _load_image(iron_file_reader_t *reader, const char *filename, unsigned char
 	return success;
 }
 
-iron_gpu_texture_t *gpu_create_texture_from_encoded_bytes(buffer_t *data, string_t *format, bool readable);
+gpu_texture_t *gpu_create_texture_from_encoded_bytes(buffer_t *data, string_t *format, bool readable);
 
-iron_gpu_texture_t *iron_load_image(string_t *file, bool readable) {
+gpu_texture_t *iron_load_image(string_t *file, bool readable) {
 	#ifdef WITH_EMBED
 	buffer_t *b = embed_get(file);
 	if (b != NULL) {
-		iron_gpu_texture_t *texture = gpu_create_texture_from_encoded_bytes(b, ".k", readable);
+		gpu_texture_t *texture = gpu_create_texture_from_encoded_bytes(b, ".k", readable);
 		return texture;
 	}
 	#endif
@@ -1185,8 +1185,8 @@ iron_gpu_texture_t *iron_load_image(string_t *file, bool readable) {
 		return NULL;
 	}
 
-	iron_gpu_texture_t *texture = (iron_gpu_texture_t *)malloc(sizeof(iron_gpu_texture_t));
-	iron_gpu_texture_init_from_bytes(texture, image_data, image_width, image_height, image_format);
+	gpu_texture_t *texture = (gpu_texture_t *)malloc(sizeof(gpu_texture_t));
+	gpu_texture_init_from_bytes(texture, image_data, image_width, image_height, image_format);
 	if (!readable) {
 		free(image_data);
 	}
@@ -1194,9 +1194,9 @@ iron_gpu_texture_t *iron_load_image(string_t *file, bool readable) {
 	return texture;
 }
 
-void iron_unload_image(iron_gpu_texture_t *image) {
+void iron_unload_image(gpu_texture_t *image) {
 	if (image != NULL) {
-		iron_gpu_texture_destroy(image);
+		gpu_texture_destroy(image);
 		// free(image);
 	}
 }
@@ -1268,15 +1268,15 @@ bool iron_display_is_primary(i32 index) {
 	return index == iron_primary_display();
 }
 
-iron_gpu_texture_t *gpu_create_render_target(i32 width, i32 height, i32 format, i32 depth_buffer_bits) {
-	iron_gpu_texture_t *render_target = (iron_gpu_texture_t *)malloc(sizeof(iron_gpu_texture_t));
-	iron_gpu_render_target_init(render_target, width, height, (iron_image_format_t)format, depth_buffer_bits);
+gpu_texture_t *gpu_create_render_target(i32 width, i32 height, i32 format, i32 depth_buffer_bits) {
+	gpu_texture_t *render_target = (gpu_texture_t *)malloc(sizeof(gpu_texture_t));
+	gpu_render_target_init(render_target, width, height, (iron_image_format_t)format, depth_buffer_bits);
 	render_target->buffer = NULL;
 	return render_target;
 }
 
-iron_gpu_texture_t *gpu_create_texture_from_bytes(buffer_t *data, i32 width, i32 height, i32 format, bool readable) {
-	iron_gpu_texture_t *texture = (iron_gpu_texture_t *)malloc(sizeof(iron_gpu_texture_t));
+gpu_texture_t *gpu_create_texture_from_bytes(buffer_t *data, i32 width, i32 height, i32 format, bool readable) {
+	gpu_texture_t *texture = (gpu_texture_t *)malloc(sizeof(gpu_texture_t));
 	texture->buffer = NULL;
 	void *image_data;
 	if (readable) {
@@ -1286,12 +1286,12 @@ iron_gpu_texture_t *gpu_create_texture_from_bytes(buffer_t *data, i32 width, i32
 	else {
 		image_data = data->buffer;
 	}
-	iron_gpu_texture_init_from_bytes(texture, image_data, width, height, (iron_image_format_t)format);
+	gpu_texture_init_from_bytes(texture, image_data, width, height, (iron_image_format_t)format);
 	return texture;
 }
 
-iron_gpu_texture_t *gpu_create_texture_from_encoded_bytes(buffer_t *data, string_t *format, bool readable) {
-	iron_gpu_texture_t *texture = (iron_gpu_texture_t *)malloc(sizeof(iron_gpu_texture_t));
+gpu_texture_t *gpu_create_texture_from_encoded_bytes(buffer_t *data, string_t *format, bool readable) {
+	gpu_texture_t *texture = (gpu_texture_t *)malloc(sizeof(gpu_texture_t));
 	texture->buffer = NULL;
 
 	unsigned char *content_data = (unsigned char *)data->buffer;
@@ -1335,7 +1335,7 @@ iron_gpu_texture_t *gpu_create_texture_from_encoded_bytes(buffer_t *data, string
 		image_format = IRON_IMAGE_FORMAT_RGBA32;
 	}
 
-	iron_gpu_texture_init_from_bytes(texture, image_data, image_width, image_height, image_format);
+	gpu_texture_init_from_bytes(texture, image_data, image_width, image_height, image_format);
 	if (!readable) {
 		free(image_data);;
 	}
@@ -1360,7 +1360,7 @@ int _format_byte_size(iron_image_format_t format) {
 	}
 }
 
-buffer_t *gpu_get_texture_pixels(iron_gpu_texture_t *image) {
+buffer_t *gpu_get_texture_pixels(gpu_texture_t *image) {
 	if (image->buffer == NULL) {
 		image->buffer = malloc(sizeof(buffer_t));
 		image->buffer->buffer = NULL;
@@ -1373,12 +1373,12 @@ buffer_t *gpu_get_texture_pixels(iron_gpu_texture_t *image) {
 		}
 
 		uint8_t *b = (uint8_t *)image->buffer->buffer;
-		iron_gpu_get_render_target_pixels(image, b);
+		gpu_get_render_target_pixels(image, b);
 
 		// Release staging texture immediately to save memory
 		#ifdef IRON_DIRECT3D12
-		image->impl.renderTargetReadback->lpVtbl->Release(image->impl.renderTargetReadback);
-		image->impl.renderTargetReadback = NULL;
+		image->impl.readback->lpVtbl->Release(image->impl.readback);
+		image->impl.readback = NULL;
 		#elif defined(IRON_METAL)
 		// id<MTLTexture> texReadback = (__bridge_transfer id<MTLTexture>)image->impl._texReadback;
 		// texReadback = nil;
@@ -1391,28 +1391,28 @@ buffer_t *gpu_get_texture_pixels(iron_gpu_texture_t *image) {
 	return image->buffer;
 }
 
-void gpu_set_mipmaps(iron_gpu_texture_t *texture, any_array_t *mipmaps) {
+void gpu_set_mipmaps(gpu_texture_t *texture, any_array_t *mipmaps) {
 	for (int32_t i = 0; i < mipmaps->length; ++i) {
-		iron_gpu_texture_t *img = mipmaps->buffer[i];
-		iron_gpu_texture_t *img_tex = img;
-		iron_gpu_texture_set_mipmap(texture, img_tex, i + 1);
+		gpu_texture_t *img = mipmaps->buffer[i];
+		gpu_texture_t *img_tex = img;
+		gpu_texture_set_mipmap(texture, img_tex, i + 1);
 	}
 }
 
-void _gpu_begin(iron_gpu_texture_t *render_target, any_array_t *additional, unsigned flags, unsigned color, float depth) {
+void _gpu_begin(gpu_texture_t *render_target, any_array_t *additional, unsigned flags, unsigned color, float depth) {
 	if (render_target == NULL) {
-		iron_gpu_begin(NULL, 0, flags, color, depth);
+		gpu_begin(NULL, 0, flags, color, depth);
 	}
 	else {
 		int32_t length = 1;
-		iron_gpu_texture_t *render_targets[8] = { render_target, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+		gpu_texture_t *render_targets[8] = { render_target, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 		if (additional != NULL) {
 			length = additional->length + 1;
 			for (int32_t i = 1; i < length; ++i) {
 				render_targets[i] = additional->buffer[i - 1];
 			}
 		}
-		iron_gpu_begin(render_targets, length, flags, color, depth);
+		gpu_begin(render_targets, length, flags, color, depth);
 	}
 }
 
@@ -2103,64 +2103,64 @@ void iron_ml_unload() {
 
 void iron_raytrace_init(buffer_t *shader) {
 	if (raytrace_created) {
-		iron_gpu_constant_buffer_destroy(&constant_buffer);
-		iron_gpu_raytrace_pipeline_destroy(&rt_pipeline);
+		gpu_constant_buffer_destroy(&constant_buffer);
+		gpu_raytrace_pipeline_destroy(&rt_pipeline);
 	}
 	raytrace_created = true;
-	iron_gpu_constant_buffer_init(&constant_buffer, constant_buffer_size * 4);
-	iron_gpu_raytrace_pipeline_init(&rt_pipeline, shader->buffer, (int)shader->length, &constant_buffer);
+	gpu_constant_buffer_init(&constant_buffer, constant_buffer_size * 4);
+	gpu_raytrace_pipeline_init(&rt_pipeline, shader->buffer, (int)shader->length, &constant_buffer);
 }
 
 void iron_raytrace_as_init() {
 	if (raytrace_accel_created) {
-		iron_gpu_raytrace_acceleration_structure_destroy(&accel);
+		gpu_raytrace_acceleration_structure_destroy(&accel);
 	}
 	raytrace_accel_created = true;
-	iron_gpu_raytrace_acceleration_structure_init(&accel);
+	gpu_raytrace_acceleration_structure_init(&accel);
 }
 
-void iron_raytrace_as_add(struct iron_gpu_buffer *vb, iron_gpu_buffer_t *ib, iron_matrix4x4_t transform) {
-	iron_gpu_raytrace_acceleration_structure_add(&accel, vb, ib, transform);
+void iron_raytrace_as_add(struct gpu_buffer *vb, gpu_buffer_t *ib, iron_matrix4x4_t transform) {
+	gpu_raytrace_acceleration_structure_add(&accel, vb, ib, transform);
 }
 
-void iron_raytrace_as_build(struct iron_gpu_buffer *vb_full, iron_gpu_buffer_t *ib_full) {
-	iron_gpu_raytrace_acceleration_structure_build(&accel, vb_full, ib_full);
+void iron_raytrace_as_build(struct gpu_buffer *vb_full, gpu_buffer_t *ib_full) {
+	gpu_raytrace_acceleration_structure_build(&accel, vb_full, ib_full);
 }
 
-void iron_raytrace_set_textures(iron_gpu_texture_t *tex0, iron_gpu_texture_t *tex1, iron_gpu_texture_t *tex2, iron_gpu_texture_t *texenv, iron_gpu_texture_t *texsobol, iron_gpu_texture_t *texscramble, iron_gpu_texture_t *texrank) {
+void iron_raytrace_set_textures(gpu_texture_t *tex0, gpu_texture_t *tex1, gpu_texture_t *tex2, gpu_texture_t *texenv, gpu_texture_t *texsobol, gpu_texture_t *texscramble, gpu_texture_t *texrank) {
 	if (!texenv->uploaded) {
-		iron_gpu_upload_texture(texenv);
+		gpu_upload_texture(texenv);
 		texenv->uploaded = true;
 	}
 	if (!texsobol->uploaded) {
-		iron_gpu_upload_texture(texsobol);
+		gpu_upload_texture(texsobol);
 		texsobol->uploaded = true;
 	}
 	if (!texscramble->uploaded) {
-		iron_gpu_upload_texture(texscramble);
+		gpu_upload_texture(texscramble);
 		texscramble->uploaded = true;
 	}
 	if (!texrank->uploaded) {
-		iron_gpu_upload_texture(texrank);
+		gpu_upload_texture(texrank);
 		texrank->uploaded = true;
 	}
 
-	iron_gpu_raytrace_set_textures(tex0, tex1, tex2, texenv, texsobol, texscramble, texrank);
+	gpu_raytrace_set_textures(tex0, tex1, tex2, texenv, texsobol, texscramble, texrank);
 }
 
-void iron_raytrace_dispatch_rays(iron_gpu_texture_t *render_target, buffer_t *buffer) {
+void iron_raytrace_dispatch_rays(gpu_texture_t *render_target, buffer_t *buffer) {
 	float *cb = (float *)buffer->buffer;
-	iron_gpu_constant_buffer_lock(&constant_buffer, 0, iron_gpu_constant_buffer_size(&constant_buffer));
+	gpu_constant_buffer_lock(&constant_buffer, 0, gpu_constant_buffer_size(&constant_buffer));
 	for (int i = 0; i < constant_buffer_size; ++i) {
 		float *floats = (float *)(&constant_buffer.data[i * 4]);
 		floats[0] = cb[i];
 	}
-	iron_gpu_constant_buffer_unlock(&constant_buffer);
+	gpu_constant_buffer_unlock(&constant_buffer);
 
-	iron_gpu_raytrace_set_acceleration_structure(&accel);
-	iron_gpu_raytrace_set_pipeline(&rt_pipeline);
-	iron_gpu_raytrace_set_target(render_target);
-	iron_gpu_raytrace_dispatch_rays();
+	gpu_raytrace_set_acceleration_structure(&accel);
+	gpu_raytrace_set_pipeline(&rt_pipeline);
+	gpu_raytrace_set_target(render_target);
+	gpu_raytrace_dispatch_rays();
 }
 
 #endif

@@ -5,10 +5,10 @@ type slot_layer_t = {
 	ext?: string;
 	visible?: bool;
 	parent?: slot_layer_t; // Group (for layers) or layer (for masks)
-	texpaint?: iron_gpu_texture_t; // Base or mask
-	texpaint_nor?: iron_gpu_texture_t;
-	texpaint_pack?: iron_gpu_texture_t;
-	texpaint_preview?: iron_gpu_texture_t; // Layer preview
+	texpaint?: gpu_texture_t; // Base or mask
+	texpaint_nor?: gpu_texture_t;
+	texpaint_pack?: gpu_texture_t;
+	texpaint_preview?: gpu_texture_t; // Layer preview
 	mask_opacity?: f32; // Opacity mask
 	fill_layer?: slot_material_t;
 	show_panel?: bool;
@@ -179,22 +179,22 @@ function slot_layer_unload(raw: slot_layer_t) {
 		return;
 	}
 
-	let _texpaint: iron_gpu_texture_t = raw.texpaint;
-	let _texpaint_nor: iron_gpu_texture_t = raw.texpaint_nor;
-	let _texpaint_pack: iron_gpu_texture_t = raw.texpaint_pack;
-	let _texpaint_preview: iron_gpu_texture_t = raw.texpaint_preview;
+	let _texpaint: gpu_texture_t = raw.texpaint;
+	let _texpaint_nor: gpu_texture_t = raw.texpaint_nor;
+	let _texpaint_pack: gpu_texture_t = raw.texpaint_pack;
+	let _texpaint_preview: gpu_texture_t = raw.texpaint_preview;
 
-	sys_notify_on_next_frame(function (_texpaint: iron_gpu_texture_t) {
+	sys_notify_on_next_frame(function (_texpaint: gpu_texture_t) {
 		iron_unload_image(_texpaint);
 	}, _texpaint);
 
 	if (_texpaint_nor != null) {
-		sys_notify_on_next_frame(function (_texpaint_nor: iron_gpu_texture_t) {
+		sys_notify_on_next_frame(function (_texpaint_nor: gpu_texture_t) {
 			iron_unload_image(_texpaint_nor);
 		}, _texpaint_nor);
 	}
 	if (_texpaint_pack != null) {
-		sys_notify_on_next_frame(function (_texpaint_pack: iron_gpu_texture_t) {
+		sys_notify_on_next_frame(function (_texpaint_pack: gpu_texture_t) {
 			iron_unload_image(_texpaint_pack);
 		}, _texpaint_pack);
 	}
@@ -216,11 +216,11 @@ function slot_layer_swap(raw: slot_layer_t, other: slot_layer_t) {
 		let rt1: render_target_t = map_get(render_path_render_targets, "texpaint" + other.ext);
 		rt0._image = other.texpaint;
 		rt1._image = raw.texpaint;
-		let _texpaint: iron_gpu_texture_t = raw.texpaint;
+		let _texpaint: gpu_texture_t = raw.texpaint;
 		raw.texpaint = other.texpaint;
 		other.texpaint = _texpaint;
 
-		let _texpaint_preview: iron_gpu_texture_t = raw.texpaint_preview;
+		let _texpaint_preview: gpu_texture_t = raw.texpaint_preview;
 		raw.texpaint_preview = other.texpaint_preview;
 		other.texpaint_preview = _texpaint_preview;
 	}
@@ -234,8 +234,8 @@ function slot_layer_swap(raw: slot_layer_t, other: slot_layer_t) {
 		nor1._image = raw.texpaint_nor;
 		let pack1: render_target_t = map_get(render_path_render_targets, "texpaint_pack" + other.ext);
 		pack1._image = raw.texpaint_pack;
-		let _texpaint_nor: iron_gpu_texture_t = raw.texpaint_nor;
-		let _texpaint_pack: iron_gpu_texture_t = raw.texpaint_pack;
+		let _texpaint_nor: gpu_texture_t = raw.texpaint_nor;
+		let _texpaint_pack: gpu_texture_t = raw.texpaint_pack;
 		raw.texpaint_nor = other.texpaint_nor;
 		raw.texpaint_pack = other.texpaint_pack;
 		other.texpaint_nor = _texpaint_nor;
@@ -243,10 +243,10 @@ function slot_layer_swap(raw: slot_layer_t, other: slot_layer_t) {
 	}
 }
 
-function slot_layer_clear(raw: slot_layer_t, base_color: i32 = 0x00000000, base_image: iron_gpu_texture_t = null, occlusion: f32 = 1.0, roughness: f32 = layers_default_rough, metallic: f32 = 0.0) {
+function slot_layer_clear(raw: slot_layer_t, base_color: i32 = 0x00000000, base_image: gpu_texture_t = null, occlusion: f32 = 1.0, roughness: f32 = layers_default_rough, metallic: f32 = 0.0) {
 	// Base
 	_gpu_begin(raw.texpaint, null, clear_flag_t.COLOR, base_color);
-	iron_gpu_end();
+	gpu_end();
 	if (base_image != null) {
 		draw_begin(raw.texpaint);
 		draw_scaled_image(base_image, 0, 0, raw.texpaint.width, raw.texpaint.height);
@@ -256,10 +256,10 @@ function slot_layer_clear(raw: slot_layer_t, base_color: i32 = 0x00000000, base_
 	if (slot_layer_is_layer(raw)) {
 		// Nor
 		_gpu_begin(raw.texpaint_nor, null, clear_flag_t.COLOR, color_from_floats(0.5, 0.5, 1.0, 0.0));
-		iron_gpu_end();
+		gpu_end();
 		// Occ, rough, met
 		_gpu_begin(raw.texpaint_pack, null, clear_flag_t.COLOR, color_from_floats(occlusion, roughness, metallic, 0.0));
-		iron_gpu_end();
+		gpu_end();
 	}
 
 	context_raw.layer_preview_dirty = true;
@@ -267,14 +267,14 @@ function slot_layer_clear(raw: slot_layer_t, base_color: i32 = 0x00000000, base_
 }
 
 function slot_layer_invert_mask(raw: slot_layer_t) {
-	let inverted: iron_gpu_texture_t = gpu_create_render_target(raw.texpaint.width, raw.texpaint.height, tex_format_t.RGBA32);
+	let inverted: gpu_texture_t = gpu_create_render_target(raw.texpaint.width, raw.texpaint.height, tex_format_t.RGBA32);
 	draw_begin(inverted);
 	draw_set_pipeline(pipes_invert8);
 	draw_image(raw.texpaint, 0, 0);
 	draw_set_pipeline(null);
 	draw_end();
-	let _texpaint: iron_gpu_texture_t = raw.texpaint;
-	sys_notify_on_next_frame(function (_texpaint: iron_gpu_texture_t) {
+	let _texpaint: gpu_texture_t = raw.texpaint;
+	sys_notify_on_next_frame(function (_texpaint: gpu_texture_t) {
 		iron_unload_image(_texpaint);
 	}, _texpaint);
 	let rt: render_target_t = map_get(render_path_render_targets, "texpaint" + raw.id);
@@ -382,7 +382,7 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 		format = tex_format_t.RGBA128;
 		///end
 
-		let _texpaint: iron_gpu_texture_t = raw.texpaint;
+		let _texpaint: gpu_texture_t = raw.texpaint;
 		raw.texpaint = gpu_create_render_target(res_x, res_y, format);
 		draw_begin(raw.texpaint);
 		draw_set_pipeline(pipes_copy);
@@ -390,7 +390,7 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 		draw_set_pipeline(null);
 		draw_end();
 
-		let _texpaint_nor: iron_gpu_texture_t = raw.texpaint_nor;
+		let _texpaint_nor: gpu_texture_t = raw.texpaint_nor;
 		if (raw.texpaint_nor != null) {
 			raw.texpaint_nor = gpu_create_render_target(res_x, res_y, format);
 
@@ -401,7 +401,7 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 			draw_end();
 		}
 
-		let _texpaint_pack: iron_gpu_texture_t = raw.texpaint_pack;
+		let _texpaint_pack: gpu_texture_t = raw.texpaint_pack;
 		if (raw.texpaint_pack != null) {
 			raw.texpaint_pack = gpu_create_render_target(res_x, res_y, format);
 
@@ -412,18 +412,18 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 			draw_end();
 		}
 
-		sys_notify_on_next_frame(function (_texpaint: iron_gpu_texture_t) {
+		sys_notify_on_next_frame(function (_texpaint: gpu_texture_t) {
 			iron_unload_image(_texpaint);
 		}, _texpaint);
 
 		if (_texpaint_nor != null) {
-			sys_notify_on_next_frame(function (_texpaint_nor: iron_gpu_texture_t) {
+			sys_notify_on_next_frame(function (_texpaint_nor: gpu_texture_t) {
 				iron_unload_image(_texpaint_nor);
 			}, _texpaint_nor);
 		}
 
 		if (_texpaint_pack != null) {
-			sys_notify_on_next_frame(function (_texpaint_pack: iron_gpu_texture_t) {
+			sys_notify_on_next_frame(function (_texpaint_pack: gpu_texture_t) {
 				iron_unload_image(_texpaint_pack);
 			}, _texpaint_pack);
 		}
@@ -442,7 +442,7 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 		}
 	}
 	else if (slot_layer_is_mask(raw)) {
-		let _texpaint: iron_gpu_texture_t = raw.texpaint;
+		let _texpaint: gpu_texture_t = raw.texpaint;
 		raw.texpaint = gpu_create_render_target(res_x, res_y, tex_format_t.RGBA32);
 
 		draw_begin(raw.texpaint);
@@ -451,7 +451,7 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 		draw_set_pipeline(null);
 		draw_end();
 
-		sys_notify_on_next_frame(function (_texpaint: iron_gpu_texture_t) {
+		sys_notify_on_next_frame(function (_texpaint: gpu_texture_t) {
 			iron_unload_image(_texpaint);
 		}, _texpaint);
 

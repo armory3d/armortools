@@ -274,10 +274,10 @@ function shader_context_parse_vertex_struct(raw: shader_context_t) {
 
 function shader_context_delete(raw: shader_context_t) {
 	if (raw._.pipe_state.fragment_shader != null) {
-		iron_gpu_shader_destroy(raw._.pipe_state.fragment_shader);
+		gpu_shader_destroy(raw._.pipe_state.fragment_shader);
 	}
 	if (raw._.pipe_state.vertex_shader != null) {
-		iron_gpu_shader_destroy(raw._.pipe_state.vertex_shader);
+		gpu_shader_destroy(raw._.pipe_state.vertex_shader);
 	}
 	gpu_delete_pipeline(raw._.pipe_state);
 }

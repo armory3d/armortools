@@ -345,7 +345,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	}
 
 	// Draw eye icon
-	let icons: iron_gpu_texture_t = resource_get("icons.k");
+	let icons: gpu_texture_t = resource_get("icons.k");
 	let r: rect_t = resource_tile18(icons, l.visible ? 0 : 1, 0);
 	let center: f32 = (step / 2) * ui_SCALE(ui);
 	ui._x += 2;
@@ -573,7 +573,7 @@ function tab_layers_draw_layer_highlight(l: slot_layer_t, mini: bool) {
 function tab_layers_handle_layer_icon_state(l: slot_layer_t, i: i32, state: ui_state_t, uix: f32, uiy: f32) {
 	let ui: ui_t = ui_base_ui;
 
-	let texpaint_preview: iron_gpu_texture_t = l.texpaint_preview;
+	let texpaint_preview: gpu_texture_t = l.texpaint_preview;
 
 	tab_layers_show_context_menu = false;
 
@@ -620,7 +620,7 @@ function tab_layers_handle_layer_icon_state(l: slot_layer_t, i: i32, state: ui_s
 
 function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32, mini: bool): ui_state_t {
 	let ui: ui_t = ui_base_ui;
-	let icons: iron_gpu_texture_t = resource_get("icons.k");
+	let icons: gpu_texture_t = resource_get("icons.k");
 	let icon_h: i32 = (ui_ELEMENT_H(ui) - (mini ? 2 : 3)) * 2;
 
 	if (mini && ui_SCALE(ui) > 1) {
@@ -637,9 +637,9 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 	}
 
 	if (!slot_layer_is_group(l)) {
-		let texpaint_preview: iron_gpu_texture_t = l.texpaint_preview;
+		let texpaint_preview: gpu_texture_t = l.texpaint_preview;
 
-		let icon: iron_gpu_texture_t = l.fill_layer == null ? texpaint_preview : l.fill_layer.image_icon;
+		let icon: gpu_texture_t = l.fill_layer == null ? texpaint_preview : l.fill_layer.image_icon;
 		if (l.fill_layer == null) {
 			// Checker
 			let r: rect_t = resource_tile50(icons, 4, 1);

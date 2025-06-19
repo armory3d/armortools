@@ -10,8 +10,8 @@ function brush_output_node_create_ext(n: brush_output_node_t) {
 
 function brush_output_node_parse_inputs(self: brush_output_node_t) {
 
-	let last_mask: iron_gpu_texture_t = context_raw.brush_mask_image;
-	let last_stencil: iron_gpu_texture_t = context_raw.brush_stencil_image;
+	let last_mask: gpu_texture_t = context_raw.brush_mask_image;
+	let last_stencil: gpu_texture_t = context_raw.brush_stencil_image;
 
 	let input0: logic_node_value_t = logic_node_input_get(self.base.inputs[0]);
 	let input1: logic_node_value_t = logic_node_input_get(self.base.inputs[1]);

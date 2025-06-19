@@ -3,8 +3,8 @@ let util_render_material_preview_size: i32 = 256;
 let util_render_decal_preview_size: i32 = 512;
 let util_render_layer_preview_size: i32 = 200;
 let util_render_font_preview_size: i32 = 200;
-let util_render_screen_aligned_full_vb: iron_gpu_buffer_t = null;
-let util_render_screen_aligned_full_ib: iron_gpu_buffer_t = null;
+let util_render_screen_aligned_full_vb: gpu_buffer_t = null;
+let util_render_screen_aligned_full_ib: gpu_buffer_t = null;
 
 function util_render_make_material_preview() {
 	context_raw.material_preview = true;
@@ -79,7 +79,7 @@ function util_render_make_material_preview() {
 }
 
 function util_render_make_decal_preview() {
-	let current: iron_gpu_texture_t = _draw_current;
+	let current: gpu_texture_t = _draw_current;
 	let g2_in_use: bool = _draw_in_use;
 	if (g2_in_use) draw_end();
 
@@ -143,7 +143,7 @@ function util_render_make_decal_preview() {
 }
 
 function util_render_make_text_preview() {
-	let current: iron_gpu_texture_t = _draw_current;
+	let current: gpu_texture_t = _draw_current;
 	let g2_in_use: bool = _draw_in_use;
 	if (g2_in_use) draw_end();
 
@@ -177,7 +177,7 @@ function util_render_make_text_preview() {
 }
 
 function util_render_make_font_preview() {
-	let current: iron_gpu_texture_t = _draw_current;
+	let current: gpu_texture_t = _draw_current;
 	let g2_in_use: bool = _draw_in_use;
 	if (g2_in_use) draw_end();
 
@@ -205,7 +205,7 @@ function util_render_make_brush_preview() {
 		return;
 	}
 
-	let current: iron_gpu_texture_t = _draw_current;
+	let current: gpu_texture_t = _draw_current;
 	let g2_in_use: bool = _draw_in_use;
 	if (g2_in_use) draw_end();
 
@@ -363,7 +363,7 @@ function util_render_make_brush_preview() {
 
 	// Scale layer down to to image preview
 	l = render_path_paint_live_layer;
-	let target: iron_gpu_texture_t = context_raw.brush.image;
+	let target: gpu_texture_t = context_raw.brush.image;
 	draw_begin(target, true, 0x00000000);
 	draw_set_pipeline(pipes_copy);
 	draw_scaled_image(l.texpaint, 0, 0, target.width, target.height);
@@ -385,7 +385,7 @@ function util_render_make_brush_preview() {
 	if (g2_in_use) draw_begin(current);
 }
 
-function util_render_make_node_preview(canvas: ui_node_canvas_t, node: ui_node_t, image: iron_gpu_texture_t, group: ui_node_canvas_t = null, parents: ui_node_t[] = null) {
+function util_render_make_node_preview(canvas: ui_node_canvas_t, node: ui_node_t, image: gpu_texture_t, group: ui_node_canvas_t = null, parents: ui_node_t[] = null) {
 	let res: parse_node_preview_result_t = make_material_parse_node_preview_material(node, group, parents);
 	if (res == null || res.scon == null) {
 		return;
@@ -400,15 +400,15 @@ function util_render_make_node_preview(canvas: ui_node_canvas_t, node: ui_node_t
 	transform_build_matrix(context_raw.paint_object.base.transform);
 
 	_gpu_begin(image);
-	iron_gpu_set_pipeline(res.scon._.pipe_state);
+	gpu_set_pipeline(res.scon._.pipe_state);
 	let empty: string[] = [""];
 	uniforms_set_context_consts(res.scon, empty);
 	uniforms_set_obj_consts(res.scon, context_raw.paint_object.base);
 	uniforms_set_material_consts(res.scon, res.mcon);
-	iron_gpu_set_vertex_buffer(util_render_screen_aligned_full_vb);
-	iron_gpu_set_index_buffer(util_render_screen_aligned_full_ib);
+	gpu_set_vertex_buffer(util_render_screen_aligned_full_vb);
+	gpu_set_index_buffer(util_render_screen_aligned_full_ib);
 	gpu_draw();
-	iron_gpu_end();
+	gpu_end();
 
 	context_raw.paint_object.base.transform.scale_world = _scale_world;
 	transform_build_matrix(context_raw.paint_object.base.transform);
@@ -455,22 +455,22 @@ function util_render_create_screen_aligned_full_data() {
 	let indices: u32[] = [0, 1, 2];
 
 	// Mandatory vertex data names and sizes
-	let structure: iron_gpu_vertex_structure_t = gpu_vertex_struct_create();
+	let structure: gpu_vertex_structure_t = gpu_vertex_struct_create();
 	gpu_vertex_struct_add(structure, "pos", vertex_data_t.I16_4X_NORM);
 	gpu_vertex_struct_add(structure, "nor", vertex_data_t.I16_2X_NORM);
 	gpu_vertex_struct_add(structure, "tex", vertex_data_t.I16_2X_NORM);
 	gpu_vertex_struct_add(structure, "col", vertex_data_t.I16_4X_NORM);
-	util_render_screen_aligned_full_vb = gpu_create_vertex_buffer(math_floor(data.length / math_floor(iron_gpu_vertex_struct_size(structure) / 2)), structure, usage_t.STATIC);
+	util_render_screen_aligned_full_vb = gpu_create_vertex_buffer(math_floor(data.length / math_floor(gpu_vertex_struct_size(structure) / 2)), structure, usage_t.STATIC);
 	let vertices: buffer_t = gpu_lock_vertex_buffer(util_render_screen_aligned_full_vb);
 	for (let i: i32 = 0; i < math_floor((vertices.length) / 2); ++i) {
 		buffer_set_i16(vertices, i * 2, data[i]);
 	}
-	iron_gpu_vertex_buffer_unlock(util_render_screen_aligned_full_vb);
+	gpu_vertex_buffer_unlock(util_render_screen_aligned_full_vb);
 
 	util_render_screen_aligned_full_ib = gpu_create_index_buffer(indices.length);
 	let id: u32_array_t = gpu_lock_index_buffer(util_render_screen_aligned_full_ib);
 	for (let i: i32 = 0; i < id.length; ++i) {
 		id[i] = indices[i];
 	}
-	iron_gpu_index_buffer_unlock(util_render_screen_aligned_full_ib);
+	gpu_index_buffer_unlock(util_render_screen_aligned_full_ib);
 }

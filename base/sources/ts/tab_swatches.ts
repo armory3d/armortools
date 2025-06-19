@@ -1,13 +1,13 @@
 
-let _tab_swatches_empty: iron_gpu_texture_t;
+let _tab_swatches_empty: gpu_texture_t;
 let tab_swatches_drag_pos: i32 = -1;
 let _tab_swatches_draw_i: i32;
 
-function tab_swatches_empty_set(image: iron_gpu_texture_t) {
+function tab_swatches_empty_set(image: gpu_texture_t) {
 	_tab_swatches_empty = image;
 }
 
-function tab_swatches_empty_get(): iron_gpu_texture_t {
+function tab_swatches_empty_get(): gpu_texture_t {
 	if (_tab_swatches_empty == null) {
 		let b: u8_array_t = u8_array_create(4);
 		b[0] = 255;

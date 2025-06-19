@@ -14,7 +14,7 @@
 
 static ui_nodes_t *current_nodes = NULL;
 static bool ui_nodes_elements_baked = false;
-static iron_gpu_texture_t ui_socket_image;
+static gpu_texture_t ui_socket_image;
 static bool ui_box_select = false;
 static int ui_box_select_x = 0;
 static int ui_box_select_y = 0;
@@ -236,16 +236,14 @@ int ui_get_socket_id(ui_node_array_t *nodes) {
 
 void ui_nodes_bake_elements() {
 	if (ui_socket_image.width != 0) {
-		iron_gpu_texture_destroy(&ui_socket_image);
+		gpu_texture_destroy(&ui_socket_image);
 	}
-	iron_gpu_render_target_init(&ui_socket_image, 24, 24, IRON_IMAGE_FORMAT_RGBA32, 0);
+	gpu_render_target_init(&ui_socket_image, 24, 24, IRON_IMAGE_FORMAT_RGBA32, 0);
 	draw_begin(&ui_socket_image, true, 0x00000000);
-
 	draw_set_color(0xff111111);
 	draw_filled_circle(12, 12, 11, 0);
 	draw_set_color(0xffffffff);
 	draw_filled_circle(12, 12, 9, 0);
-
 	draw_end();
 	ui_nodes_elements_baked = true;
 }

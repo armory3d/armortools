@@ -1,14 +1,14 @@
 
-let util_uv_uvmap: iron_gpu_texture_t = null;
+let util_uv_uvmap: gpu_texture_t = null;
 let util_uv_uvmap_cached: bool = false;
-let util_uv_trianglemap: iron_gpu_texture_t = null;
+let util_uv_trianglemap: gpu_texture_t = null;
 let util_uv_trianglemap_cached: bool = false;
-let util_uv_dilatemap: iron_gpu_texture_t = null;
+let util_uv_dilatemap: gpu_texture_t = null;
 let util_uv_dilatemap_cached: bool = false;
-let util_uv_uvislandmap: iron_gpu_texture_t = null;
+let util_uv_uvislandmap: gpu_texture_t = null;
 let util_uv_uvislandmap_cached: bool = false;
 let util_uv_dilate_bytes: buffer_t = null;
-let util_uv_pipe_dilate: iron_gpu_pipeline_t = null;
+let util_uv_pipe_dilate: gpu_pipeline_t = null;
 
 function util_uv_cache_uv_map() {
 	if (util_uv_uvmap != null && (util_uv_uvmap.width != config_get_texture_res_x() || util_uv_uvmap.height != config_get_texture_res_y())) {
@@ -107,7 +107,7 @@ function util_uv_cache_dilate_map() {
 		util_uv_pipe_dilate = gpu_create_pipeline();
 		util_uv_pipe_dilate.vertex_shader = sys_get_shader("dilate_map.vert");
 		util_uv_pipe_dilate.fragment_shader = sys_get_shader("dilate_map.frag");
-		let vs: iron_gpu_vertex_structure_t = gpu_vertex_struct_create();
+		let vs: gpu_vertex_structure_t = gpu_vertex_struct_create();
 		gpu_vertex_struct_add(vs, "pos", vertex_data_t.I16_4X_NORM);
 		gpu_vertex_struct_add(vs, "nor", vertex_data_t.I16_2X_NORM);
 		gpu_vertex_struct_add(vs, "tex", vertex_data_t.I16_2X_NORM);
@@ -125,11 +125,11 @@ function util_uv_cache_dilate_map() {
 	}
 	let geom: mesh_data_t = mask == 0 && context_raw.merged_object != null ? context_raw.merged_object.data : context_raw.paint_object.data;
 	_gpu_begin(util_uv_dilatemap, null, clear_flag_t.COLOR, 0x00000000);
-	iron_gpu_set_pipeline(util_uv_pipe_dilate);
-	iron_gpu_set_vertex_buffer(geom._.vertex_buffer);
-	iron_gpu_set_index_buffer(geom._.index_buffers[0]);
+	gpu_set_pipeline(util_uv_pipe_dilate);
+	gpu_set_vertex_buffer(geom._.vertex_buffer);
+	gpu_set_index_buffer(geom._.index_buffers[0]);
 	gpu_draw();
-	iron_gpu_end();
+	gpu_end();
 	util_uv_dilatemap_cached = true;
 	util_uv_dilate_bytes = null;
 }

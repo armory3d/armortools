@@ -2,8 +2,8 @@
 type slot_brush_t = {
 	nodes?: ui_nodes_t;
 	canvas?: ui_node_canvas_t;
-	image?: iron_gpu_texture_t; // 200px
-	image_icon?: iron_gpu_texture_t; // 50px
+	image?: gpu_texture_t; // 200px
+	image_icon?: gpu_texture_t; // 50px
 	preview_ready?: bool;
 	id?: i32;
 };

@@ -251,7 +251,7 @@ function config_apply() {
 	config_save();
 	context_raw.ddirty = 2;
 
-	let current: iron_gpu_texture_t = _draw_current;
+	let current: gpu_texture_t = _draw_current;
 	let g2_in_use: bool = _draw_in_use;
 	if (g2_in_use) draw_end();
 	render_path_base_apply_config();

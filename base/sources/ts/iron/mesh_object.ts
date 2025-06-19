@@ -11,7 +11,7 @@ type mesh_object_t = {
 	force_context?: string; // Draw only this context
 };
 
-let _mesh_object_last_pipeline: iron_gpu_pipeline_t = null;
+let _mesh_object_last_pipeline: gpu_pipeline_t = null;
 let _mesh_object_material_contexts: material_context_t[] = [];
 let _mesh_object_shader_contexts: shader_context_t[] = [];
 
@@ -170,7 +170,7 @@ function mesh_object_render(raw: mesh_object_t, context: string, bind_params: st
 
 		// Uniforms
 		if (scontext._.pipe_state != _mesh_object_last_pipeline) {
-			iron_gpu_set_pipeline(scontext._.pipe_state);
+			gpu_set_pipeline(scontext._.pipe_state);
 			_mesh_object_last_pipeline = scontext._.pipe_state;
 		}
 		uniforms_set_context_consts(scontext, bind_params);
@@ -179,8 +179,8 @@ function mesh_object_render(raw: mesh_object_t, context: string, bind_params: st
 			uniforms_set_material_consts(scontext, material_contexts[mi]);
 		}
 
-		iron_gpu_set_vertex_buffer(mesh_data_get(raw.data, elems));
-		iron_gpu_set_index_buffer(raw.data._.index_buffers[i]);
+		gpu_set_vertex_buffer(mesh_data_get(raw.data, elems));
+		gpu_set_index_buffer(raw.data._.index_buffers[i]);
 		gpu_draw();
 	}
 }

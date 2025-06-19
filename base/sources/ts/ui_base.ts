@@ -591,7 +591,7 @@ function ui_base_update() {
 
 					let shortcuts: string[] = ["l", "b", "n", "o", "r", "m", "a", "h", "e", "s", "t", "1", "2", "3", "4"];
 
-					if (iron_gpu_raytrace_supported()) {
+					if (gpu_raytrace_supported()) {
 						array_push(modes, tr("Path Traced"));
 						array_push(shortcuts, "p");
 					}
@@ -1082,12 +1082,12 @@ function ui_base_update_ui() {
 				continue;
 			}
 
-			let target: iron_gpu_texture_t = l.texpaint_preview;
+			let target: gpu_texture_t = l.texpaint_preview;
 			if (target == null) {
 				continue;
 			}
 
-			let source: iron_gpu_texture_t = l.texpaint;
+			let source: gpu_texture_t = l.texpaint;
 			draw_begin(target, true, 0x00000000);
 			// draw_set_pipeline(l.is_mask() ? pipes_copy8 : pipes_copy);
 			draw_set_pipeline(pipes_copy); // texpaint_preview is always RGBA32 for now
@@ -1103,10 +1103,10 @@ function ui_base_update_ui() {
 		// Update layer preview
 		let l: slot_layer_t = context_raw.layer;
 
-		let target: iron_gpu_texture_t = l.texpaint_preview;
+		let target: gpu_texture_t = l.texpaint_preview;
 		if (target != null) {
 
-			let source: iron_gpu_texture_t = l.texpaint;
+			let source: gpu_texture_t = l.texpaint;
 			draw_begin(target, true, 0x00000000);
 			// draw_set_pipeline(raw.layer.is_mask() ? pipes_copy8 : pipes_copy);
 			draw_set_pipeline(pipes_copy); // texpaint_preview is always RGBA32 for now
@@ -1336,16 +1336,16 @@ function ui_base_render_cursor() {
 
 	// Show picked material next to cursor
 	if (context_raw.tool == workspace_tool_t.PICKER && context_raw.picker_select_material && context_raw.color_picker_callback == null) {
-		let img: iron_gpu_texture_t = context_raw.material.image_icon;
+		let img: gpu_texture_t = context_raw.material.image_icon;
 		draw_image(img, mx + 10, my + 10);
 	}
 	if (context_raw.tool == workspace_tool_t.PICKER && context_raw.color_picker_callback != null) {
-		let img: iron_gpu_texture_t = resource_get("icons.k");
+		let img: gpu_texture_t = resource_get("icons.k");
 		let rect: rect_t = resource_tile50(img, workspace_tool_t.PICKER, 0);
 		draw_sub_image(img, mx + 10, my + 10, rect.x, rect.y, rect.w, rect.h);
 	}
 
-	let cursor_img: iron_gpu_texture_t = resource_get("cursor.k");
+	let cursor_img: gpu_texture_t = resource_get("cursor.k");
 	let psize: i32 = math_floor(182 * (context_raw.brush_radius * context_raw.brush_nodes_radius) * ui_SCALE(ui_base_ui));
 
 	// Clone source cursor

@@ -6,7 +6,7 @@ let _uniforms_vec: vec4_t = vec4_create();
 let _uniforms_vec2: vec4_t = vec4_create();
 let _uniforms_quat: quat_t = quat_create();
 
-let uniforms_tex_links: (o: object_t, md: material_data_t, s: string)=>iron_gpu_texture_t = null;
+let uniforms_tex_links: (o: object_t, md: material_data_t, s: string)=>gpu_texture_t = null;
 let uniforms_mat4_links: (o: object_t, md: material_data_t, s: string)=>mat4_t = null;
 let uniforms_vec4_links: (o: object_t, md: material_data_t, s: string)=>vec4_t = null;
 let uniforms_vec3_links: (o: object_t, md: material_data_t, s: string)=>vec4_t = null;
@@ -57,18 +57,18 @@ function uniforms_set_context_consts(context: shader_context_t, bind_params: str
 			}
 
 			if (char_at(tulink, 0) == "$") { // Link to embedded data
-				iron_gpu_set_texture(context._.tex_units[j], map_get(scene_embedded, substring(tulink, 1, tulink.length)));
+				gpu_set_texture(context._.tex_units[j], map_get(scene_embedded, substring(tulink, 1, tulink.length)));
 			}
 			else if (tulink == "_envmap_radiance") {
 				let w: world_data_t = scene_world;
 				if (w != null) {
-					iron_gpu_set_texture(context._.tex_units[j], w._.radiance);
+					gpu_set_texture(context._.tex_units[j], w._.radiance);
 				}
 			}
 			else if (tulink == "_envmap") {
 				let w: world_data_t = scene_world;
 				if (w != null) {
-					iron_gpu_set_texture(context._.tex_units[j], w._.envmap);
+					gpu_set_texture(context._.tex_units[j], w._.envmap);
 				}
 			}
 		}
@@ -93,11 +93,11 @@ function uniforms_set_obj_consts(context: shader_context_t, object: object_t) {
 					continue;
 				}
 
-				let image: iron_gpu_texture_t = uniforms_tex_links(object, current_material(object), tu.link);
+				let image: gpu_texture_t = uniforms_tex_links(object, current_material(object), tu.link);
 				if (image != null) {
 					ends_with(tu.link, "_depth") ?
-						iron_gpu_set_texture_depth(context._.tex_units[j], image) :
-						iron_gpu_set_texture(context._.tex_units[j], image);
+						gpu_set_texture_depth(context._.tex_units[j], image) :
+						gpu_set_texture(context._.tex_units[j], image);
 				}
 			}
 		}
@@ -113,10 +113,10 @@ function uniforms_bind_render_target(rt: render_target_t, context: shader_contex
 	for (let j: i32 = 0; j < tus.length; ++j) { // Set texture
 		if (sampler_id == tus[j].name) {
 			if (attach_depth) {
-				iron_gpu_set_texture_depth(context._.tex_units[j], rt._image); // sampler2D
+				gpu_set_texture_depth(context._.tex_units[j], rt._image); // sampler2D
 			}
 			else {
-				iron_gpu_set_texture(context._.tex_units[j], rt._image); // sampler2D
+				gpu_set_texture(context._.tex_units[j], rt._image); // sampler2D
 			}
 		}
 	}
@@ -560,7 +560,7 @@ function uniforms_set_material_consts(context: shader_context_t, material_contex
 			for (let j: i32 = 0; j < context._.tex_units.length; ++j) {
 				let sname: string = context.texture_units[j].name;
 				if (mname == sname) {
-					iron_gpu_set_texture(context._.tex_units[j], material_context._.textures[i]);
+					gpu_set_texture(context._.tex_units[j], material_context._.textures[i]);
 					break;
 				}
 			}

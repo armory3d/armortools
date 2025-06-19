@@ -1,7 +1,7 @@
 
 let box_projects_htab: ui_handle_t = ui_handle_create();
 let box_projects_hsearch: ui_handle_t = ui_handle_create();
-let box_projects_icon_map: map_t<string, iron_gpu_texture_t> = null;
+let box_projects_icon_map: map_t<string, gpu_texture_t> = null;
 
 let _box_projects_path: string;
 let _box_projects_icon_path: string;
@@ -113,9 +113,9 @@ function box_projects_tab(ui: ui_t) {
 				if (box_projects_icon_map == null) {
 					box_projects_icon_map = map_create();
 				}
-				let icon: iron_gpu_texture_t = map_get(box_projects_icon_map, icon_path);
+				let icon: gpu_texture_t = map_get(box_projects_icon_map, icon_path);
 				if (icon == null) {
-					let image: iron_gpu_texture_t = data_get_image(icon_path);
+					let image: gpu_texture_t = data_get_image(icon_path);
 					icon = image;
 					map_set(box_projects_icon_map, icon_path, icon);
 				}
@@ -209,7 +209,7 @@ function box_projects_recent_tab(ui: ui_t) {
 			}
 
 			if (ui_button(file, ui_align_t.LEFT) && file_exists(path)) {
-				let current: iron_gpu_texture_t = _draw_current;
+				let current: gpu_texture_t = _draw_current;
 				let g2_in_use: bool = _draw_in_use;
 				if (g2_in_use) draw_end();
 
@@ -241,7 +241,7 @@ function box_projects_recent_tab(ui: ui_t) {
 }
 
 function box_projects_draw_badge(ui: ui_t) {
-	let img: iron_gpu_texture_t = data_get_image("badge.k");
+	let img: gpu_texture_t = data_get_image("badge.k");
 	_ui_image(img);
 	_ui_end_element();
 }

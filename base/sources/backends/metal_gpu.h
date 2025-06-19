@@ -3,17 +3,17 @@
 #include <iron_gpu.h>
 #include <iron_math.h>
 
-struct iron_gpu_buffer;
+struct gpu_buffer;
 
 typedef struct {
-	struct iron_gpu_buffer *current_index_buffer;
+	struct gpu_buffer *current_index_buffer;
 } gpu_command_list_impl_t;
 
-struct iron_gpu_shader;
+struct gpu_shader;
 
 typedef struct {
-	struct iron_gpu_shader *vertex_shader;
-	struct iron_gpu_shader *fragment_shader;
+	struct gpu_shader *vertex_shader;
+	struct gpu_shader *fragment_shader;
 	void *_pipeline;
 	void *_pipelineDepth;
 	void *_reflection;

@@ -176,9 +176,9 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	let geom: mesh_data_t = plane.data;
 
 	render_path_set_target("");
-	iron_gpu_set_pipeline(pipes_cursor);
+	gpu_set_pipeline(pipes_cursor);
 	let gbuffer0: render_target_t = map_get(render_path_render_targets, "gbuffer0");
-	iron_gpu_set_texture_depth(pipes_cursor_gbufferd, gbuffer0._image);
+	gpu_set_texture_depth(pipes_cursor_gbufferd, gbuffer0._image);
 	gpu_set_float2(pipes_cursor_mouse, mx, my);
 	gpu_set_float2(pipes_cursor_tex_step, 1 / gbuffer0._image.width, 1 / gbuffer0._image.height);
 	gpu_set_float(pipes_cursor_radius, radius);
@@ -188,11 +188,11 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	gpu_set_matrix4(pipes_cursor_vp, scene_camera.vp);
 	let inv_vp: mat4_t = mat4_inv(scene_camera.vp);
 	gpu_set_matrix4(pipes_cursor_inv_vp, inv_vp);
-	iron_gpu_set_vertex_buffer(geom._.vertex_buffer);
-	iron_gpu_set_index_buffer(geom._.index_buffers[0]);
+	gpu_set_vertex_buffer(geom._.vertex_buffer);
+	gpu_set_index_buffer(geom._.index_buffers[0]);
 	gpu_draw();
 
-	iron_gpu_disable_scissor();
+	gpu_disable_scissor();
 	render_path_end();
 }
 
@@ -236,7 +236,7 @@ function render_path_paint_draw() {
 }
 
 function render_path_paint_bind_layers() {
-	let image: iron_gpu_texture_t = null;
+	let image: gpu_texture_t = null;
 	let nodes: ui_nodes_t = ui_nodes_get_nodes();
 	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
 	if (nodes.nodes_selected_id.length > 0) {

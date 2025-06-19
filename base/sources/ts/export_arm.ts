@@ -174,8 +174,8 @@ function export_arm_run_project() {
 
 	///if (arm_android || arm_ios)
 	let rt: render_target_t = map_get(render_path_render_targets, "buf");
-	let tex: iron_gpu_texture_t = rt._image;
-	let mesh_icon: iron_gpu_texture_t = gpu_create_render_target(256, 256);
+	let tex: gpu_texture_t = rt._image;
+	let mesh_icon: gpu_texture_t = gpu_create_render_target(256, 256);
 	let r: f32 = sys_w() / sys_h();
 	draw_begin(mesh_icon);
 	draw_scaled_image(tex, -(256 * r - 256) / 2, 0, 256 * r, 256);
@@ -196,7 +196,7 @@ function export_arm_run_project() {
 	export_arm_bgra_swap(mesh_icon_pixels);
 	///end
 
-	sys_notify_on_next_frame(function (mesh_icon: iron_gpu_texture_t) {
+	sys_notify_on_next_frame(function (mesh_icon: gpu_texture_t) {
 		iron_unload_image(mesh_icon);
 	});
 
@@ -483,11 +483,11 @@ function export_arm_pack_assets(raw: project_format_t, assets: asset_t[]) {
 	if (raw.packed_assets == null) {
 		raw.packed_assets = [];
 	}
-	let temp_images: iron_gpu_texture_t[] = [];
+	let temp_images: gpu_texture_t[] = [];
 	for (let i: i32 = 0; i < assets.length; ++i) {
 		if (!project_packed_asset_exists(raw.packed_assets, assets[i].file)) {
-			let image: iron_gpu_texture_t = project_get_image(assets[i]);
-			let temp: iron_gpu_texture_t = gpu_create_render_target(image.width, image.height);
+			let image: gpu_texture_t = project_get_image(assets[i]);
+			let temp: gpu_texture_t = gpu_create_render_target(image.width, image.height);
 			draw_begin(temp);
 			draw_image(image, 0, 0);
 			draw_end();
@@ -501,9 +501,9 @@ function export_arm_pack_assets(raw: project_format_t, assets: asset_t[]) {
 			array_push(raw.packed_assets, pa);
 		}
 	}
-	sys_notify_on_next_frame(function (temp_images: iron_gpu_texture_t[]) {
+	sys_notify_on_next_frame(function (temp_images: gpu_texture_t[]) {
 		for (let i: i32 = 0; i < temp_images.length; ++i) {
-			let image: iron_gpu_texture_t = temp_images[i];
+			let image: gpu_texture_t = temp_images[i];
 			iron_unload_image(image);
 		}
 	}, temp_images);

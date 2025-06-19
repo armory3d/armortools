@@ -22,7 +22,7 @@ let _sys_drop_files_listeners: sys_string_callback_t[] = [];
 
 let _sys_start_time: f32;
 let _sys_window_title: string;
-let _sys_shaders: map_t<string, iron_gpu_shader_t> = map_create();
+let _sys_shaders: map_t<string, gpu_shader_t> = map_create();
 
 declare type iron_window_options_t = {
 	title?: string;
@@ -300,8 +300,8 @@ function sys_shader_ext(): string {
 	///end
 }
 
-function sys_get_shader(name: string): iron_gpu_shader_t {
-	let shader: iron_gpu_shader_t = map_get(_sys_shaders, name);
+function sys_get_shader(name: string): gpu_shader_t {
+	let shader: gpu_shader_t = map_get(_sys_shaders, name);
 	if (shader == null) {
 		shader = gpu_create_shader(
 			iron_load_blob(data_path() + name + sys_shader_ext()),

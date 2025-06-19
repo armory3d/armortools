@@ -469,7 +469,7 @@ function _parser_material_cache_tex_text_node(file: string, text: string) {
 	if (map_get(data_cached_images, file) == null) {
 		sys_notify_on_init(function(text: string) {
 			let _text_tool_text: string = context_raw.text_tool_text;
-			let _text_tool_image: iron_gpu_texture_t = context_raw.text_tool_image;
+			let _text_tool_image: gpu_texture_t = context_raw.text_tool_image;
 			context_raw.text_tool_text = text;
 			context_raw.text_tool_image = null;
 

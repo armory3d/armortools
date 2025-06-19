@@ -12,7 +12,7 @@ id getMetalDevice(void);
 id getMetalQueue(void);
 
 extern int constant_buffer_index;
-bool iron_gpu_transpose_mat = true;
+bool gpu_transpose_mat = true;
 static id<MTLCommandBuffer> command_buffer = nil;
 static id<MTLRenderCommandEncoder> command_encoder = nil;
 static id<MTLArgumentEncoder> argument_encoder = nil;
@@ -23,78 +23,78 @@ static id<MTLTexture> framebuffer_depth;
 static int depth_bits;
 static bool has_depth = false;
 static int framebuffer_count = 0;
-static iron_gpu_texture_t *render_targets[8] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+static gpu_texture_t *render_targets[8] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 
 typedef struct inst {
 	iron_matrix4x4_t m;
 	int i;
 } inst_t;
 
-static iron_gpu_raytrace_acceleration_structure_t *accel;
-static iron_gpu_raytrace_pipeline_t *pipeline;
-static iron_gpu_texture_t *output = NULL;
-static iron_gpu_buffer_t *constant_buf;
+static gpu_raytrace_acceleration_structure_t *accel;
+static gpu_raytrace_pipeline_t *pipeline;
+static gpu_texture_t *output = NULL;
+static gpu_buffer_t *constant_buf;
 static id<MTLComputePipelineState> _raytracing_pipeline;
 static NSMutableArray *_primitive_accels;
 static id<MTLAccelerationStructure> _instance_accel;
 static dispatch_semaphore_t _semaphore;
-static iron_gpu_texture_t *_texpaint0;
-static iron_gpu_texture_t *_texpaint1;
-static iron_gpu_texture_t *_texpaint2;
-static iron_gpu_texture_t *_texenv;
-static iron_gpu_texture_t *_texsobol;
-static iron_gpu_texture_t *_texscramble;
-static iron_gpu_texture_t *_texrank;
-static iron_gpu_buffer_t *vb[16];
-static iron_gpu_buffer_t *vb_last[16];
-static iron_gpu_buffer_t *ib[16];
+static gpu_texture_t *_texpaint0;
+static gpu_texture_t *_texpaint1;
+static gpu_texture_t *_texpaint2;
+static gpu_texture_t *_texenv;
+static gpu_texture_t *_texsobol;
+static gpu_texture_t *_texscramble;
+static gpu_texture_t *_texrank;
+static gpu_buffer_t *vb[16];
+static gpu_buffer_t *vb_last[16];
+static gpu_buffer_t *ib[16];
 static int vb_count = 0;
 static int vb_count_last = 0;
 static inst_t instances[1024];
 static int instances_count = 0;
 
-static MTLBlendFactor convert_blending_factor(iron_gpu_blending_factor_t factor) {
+static MTLBlendFactor convert_blending_factor(gpu_blending_factor_t factor) {
 	switch (factor) {
-	case IRON_GPU_BLEND_ONE:
+	case GPU_BLEND_ONE:
 		return MTLBlendFactorOne;
-	case IRON_GPU_BLEND_ZERO:
+	case GPU_BLEND_ZERO:
 		return MTLBlendFactorZero;
-	case IRON_GPU_BLEND_SOURCE_ALPHA:
+	case GPU_BLEND_SOURCE_ALPHA:
 		return MTLBlendFactorSourceAlpha;
-	case IRON_GPU_BLEND_DEST_ALPHA:
+	case GPU_BLEND_DEST_ALPHA:
 		return MTLBlendFactorDestinationAlpha;
-	case IRON_GPU_BLEND_INV_SOURCE_ALPHA:
+	case GPU_BLEND_INV_SOURCE_ALPHA:
 		return MTLBlendFactorOneMinusSourceAlpha;
-	case IRON_GPU_BLEND_INV_DEST_ALPHA:
+	case GPU_BLEND_INV_DEST_ALPHA:
 		return MTLBlendFactorOneMinusDestinationAlpha;
 	}
 }
 
-static MTLBlendOperation convert_blending_operation(iron_gpu_blending_operation_t op) {
+static MTLBlendOperation convert_blending_operation(gpu_blending_operation_t op) {
 	switch (op) {
-	case IRON_GPU_BLENDOP_ADD:
+	case GPU_BLENDOP_ADD:
 		return MTLBlendOperationAdd;
 	}
 }
 
-static MTLCompareFunction convert_compare_mode(iron_gpu_compare_mode_t compare) {
+static MTLCompareFunction convert_compare_mode(gpu_compare_mode_t compare) {
 	switch (compare) {
-	case IRON_GPU_COMPARE_MODE_ALWAYS:
+	case GPU_COMPARE_MODE_ALWAYS:
 		return MTLCompareFunctionAlways;
-	case IRON_GPU_COMPARE_MODE_NEVER:
+	case GPU_COMPARE_MODE_NEVER:
 		return MTLCompareFunctionNever;
-	case IRON_GPU_COMPARE_MODE_LESS:
+	case GPU_COMPARE_MODE_LESS:
 		return MTLCompareFunctionLess;
 	}
 }
 
-static MTLCullMode convert_cull_mode(iron_gpu_cull_mode_t cull) {
+static MTLCullMode convert_cull_mode(gpu_cull_mode_t cull) {
 	switch (cull) {
-	case IRON_GPU_CULL_MODE_CLOCKWISE:
+	case GPU_CULL_MODE_CLOCKWISE:
 		return MTLCullModeFront;
-	case IRON_GPU_CULL_MODE_COUNTERCLOCKWISE:
+	case GPU_CULL_MODE_COUNTERCLOCKWISE:
 		return MTLCullModeBack;
-	case IRON_GPU_CULL_MODE_NEVER:
+	case GPU_CULL_MODE_NEVER:
 		return MTLCullModeNone;
 	}
 }
@@ -166,16 +166,16 @@ static int formatByteSize(iron_image_format_t format) {
 	}
 }
 
-void iron_gpu_destroy(void) {
+void gpu_destroy(void) {
 }
 
-void iron_gpu_internal_resize(int width, int height) {
+void gpu_internal_resize(int width, int height) {
 
 }
 
 id<MTLSamplerState> linear_sampler;
 
-void iron_gpu_init(int depth_buffer_bits, bool vsync) {
+void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	depth_bits = depth_buffer_bits;
 	id<MTLDevice> device = getMetalDevice();
 
@@ -247,7 +247,7 @@ void iron_gpu_init(int depth_buffer_bits, bool vsync) {
 	argument_buffer = [device newBufferWithLength:(argument_buffer_step * 2048) options:MTLResourceStorageModeShared];
 }
 
-void iron_gpu_begin(iron_gpu_texture_t *target) {
+void gpu_begin(gpu_texture_t *target) {
 	CAMetalLayer *layer = getMetalLayer();
 	drawable = [layer nextDrawable];
 
@@ -271,7 +271,7 @@ void iron_gpu_begin(iron_gpu_texture_t *target) {
 	has_depth = (depth_bits > 0 && framebuffer_depth != nil);
 }
 
-void iron_gpu_end() {
+void gpu_end() {
 	[command_encoder endEncoding];
 	[command_buffer presentDrawable:drawable];
 	[command_buffer commit];
@@ -282,33 +282,33 @@ void iron_gpu_end() {
 	command_encoder = nil;
 }
 
-int iron_gpu_max_bound_textures(void) {
+int gpu_max_bound_textures(void) {
 	return 16;
 }
 
-void iron_gpu_command_list_init(iron_gpu_command_list_t *list) {
+void gpu_command_list_init(gpu_command_list_t *list) {
 }
 
-void iron_gpu_command_list_destroy(iron_gpu_command_list_t *list) {
+void gpu_command_list_destroy(gpu_command_list_t *list) {
 }
 
-void iron_gpu_command_list_begin(iron_gpu_command_list_t *list) {
+void gpu_command_list_begin(gpu_command_list_t *list) {
 	render_targets[0] = NULL;
 }
 
-void iron_gpu_command_list_end(iron_gpu_command_list_t *list) {
+void gpu_command_list_end(gpu_command_list_t *list) {
 }
 
-void iron_gpu_command_list_draw(iron_gpu_command_list_t *list) {
+void gpu_command_list_draw(gpu_command_list_t *list) {
 	id<MTLBuffer> indexBuffer = (__bridge id<MTLBuffer>)list->impl.current_index_buffer->impl.metal_buffer;
 	[command_encoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
-	                    		indexCount:iron_gpu_index_buffer_count(list->impl.current_index_buffer)
+	                    		indexCount:gpu_index_buffer_count(list->impl.current_index_buffer)
 	                     		 indexType:MTLIndexTypeUInt32
 	                   		   indexBuffer:indexBuffer
 	             		 indexBufferOffset:0];
 }
 
-void iron_gpu_command_list_viewport(iron_gpu_command_list_t *list, int x, int y, int width, int height) {
+void gpu_command_list_viewport(gpu_command_list_t *list, int x, int y, int width, int height) {
 	MTLViewport viewport;
 	viewport.originX = x;
 	viewport.originY = y;
@@ -319,7 +319,7 @@ void iron_gpu_command_list_viewport(iron_gpu_command_list_t *list, int x, int y,
 	[command_encoder setViewport:viewport];
 }
 
-void iron_gpu_command_list_scissor(iron_gpu_command_list_t *list, int x, int y, int width, int height) {
+void gpu_command_list_scissor(gpu_command_list_t *list, int x, int y, int width, int height) {
 	MTLScissorRect scissor;
 	scissor.x = x;
 	scissor.y = y;
@@ -338,7 +338,7 @@ void iron_gpu_command_list_scissor(iron_gpu_command_list_t *list, int x, int y, 
 	[command_encoder setScissorRect:scissor];
 }
 
-void iron_gpu_command_list_disable_scissor(iron_gpu_command_list_t *list) {
+void gpu_command_list_disable_scissor(gpu_command_list_t *list) {
 	MTLScissorRect scissor;
 	scissor.x = 0;
 	scissor.y = 0;
@@ -353,7 +353,7 @@ void iron_gpu_command_list_disable_scissor(iron_gpu_command_list_t *list) {
 	[command_encoder setScissorRect:scissor];
 }
 
-void iron_gpu_command_list_set_pipeline(iron_gpu_command_list_t *list, iron_gpu_pipeline_t *pipeline) {
+void gpu_command_list_set_pipeline(gpu_command_list_t *list, gpu_pipeline_t *pipeline) {
 	if (has_depth) {
 		id<MTLRenderPipelineState> pipe = (__bridge id<MTLRenderPipelineState>)pipeline->impl._pipelineDepth;
 		[command_encoder setRenderPipelineState:pipe];
@@ -370,16 +370,16 @@ void iron_gpu_command_list_set_pipeline(iron_gpu_command_list_t *list, iron_gpu_
 	[command_encoder setCullMode:convert_cull_mode(pipeline->cull_mode)];
 }
 
-void iron_gpu_command_list_set_vertex_buffer(iron_gpu_command_list_t *list, iron_gpu_buffer_t *buf) {
+void gpu_command_list_set_vertex_buffer(gpu_command_list_t *list, gpu_buffer_t *buf) {
 	id<MTLBuffer> buffer = (__bridge id<MTLBuffer>)buf->impl.metal_buffer;
 	[command_encoder setVertexBuffer:buffer offset:0 atIndex:0];
 }
 
-void iron_gpu_command_list_set_index_buffer(iron_gpu_command_list_t *list, iron_gpu_buffer_t *buffer) {
+void gpu_command_list_set_index_buffer(gpu_command_list_t *list, gpu_buffer_t *buffer) {
 	list->impl.current_index_buffer = buffer;
 }
 
-void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, iron_gpu_texture_t **targets, int count, unsigned flags, unsigned color, float depth) {
+void gpu_command_list_set_render_targets(gpu_command_list_t *list, gpu_texture_t **targets, int count, unsigned flags, unsigned color, float depth) {
 	if (command_buffer != nil && command_encoder != nil) {
 		[command_encoder endEncoding];
 		[command_buffer commit];
@@ -411,7 +411,7 @@ void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, iro
 			desc.depthAttachment.texture = (__bridge id<MTLTexture>)targets[0]->impl._depthTex;
 			has_depth = targets[0]->impl._depthTex != nil;
 		}
-		if (flags & IRON_GPU_CLEAR_COLOR) {
+		if (flags & GPU_CLEAR_COLOR) {
 			float red, green, blue, alpha;
 			iron_color_components(color, &red, &green, &blue, &alpha);
 			desc.colorAttachments[i].loadAction = MTLLoadActionClear;
@@ -425,7 +425,7 @@ void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, iro
 		}
 	}
 
-	if (flags & IRON_GPU_CLEAR_DEPTH) {
+	if (flags & GPU_CLEAR_DEPTH) {
 		desc.depthAttachment.clearDepth = depth;
 		desc.depthAttachment.loadAction = MTLLoadActionClear;
 		desc.depthAttachment.storeAction = MTLStoreActionStore;
@@ -441,16 +441,16 @@ void iron_gpu_command_list_set_render_targets(iron_gpu_command_list_t *list, iro
 	command_encoder = [command_buffer renderCommandEncoderWithDescriptor:desc];
 }
 
-void iron_gpu_command_list_upload_index_buffer(iron_gpu_command_list_t *list, iron_gpu_buffer_t *buffer) {
+void gpu_command_list_upload_index_buffer(gpu_command_list_t *list, gpu_buffer_t *buffer) {
 }
 
-void iron_gpu_command_list_upload_vertex_buffer(iron_gpu_command_list_t *list, iron_gpu_buffer_t *buffer) {
+void gpu_command_list_upload_vertex_buffer(gpu_command_list_t *list, gpu_buffer_t *buffer) {
 }
 
-void iron_gpu_command_list_upload_texture(iron_gpu_command_list_t *list, iron_gpu_texture_t *texture) {
+void gpu_command_list_upload_texture(gpu_command_list_t *list, gpu_texture_t *texture) {
 }
 
-void iron_gpu_command_list_get_render_target_pixels(iron_gpu_command_list_t *list, iron_gpu_texture_t *render_target, uint8_t *data) {
+void gpu_command_list_get_render_target_pixels(gpu_command_list_t *list, gpu_texture_t *render_target, uint8_t *data) {
 	// Create readback buffer
 	if (render_target->impl._texReadback == NULL) {
 		id<MTLDevice> device = getMetalDevice();
@@ -491,11 +491,11 @@ void iron_gpu_command_list_get_render_target_pixels(iron_gpu_command_list_t *lis
 	[tex getBytes:data bytesPerRow:formatByteSize * render_target->width fromRegion:region mipmapLevel:0];
 }
 
-void iron_gpu_command_list_wait(iron_gpu_command_list_t *list) {
+void gpu_command_list_wait(gpu_command_list_t *list) {
 
 }
 
-void iron_gpu_command_list_set_constant_buffer(iron_gpu_command_list_t *list, iron_gpu_buffer_t *buffer, int offset, size_t size) {
+void gpu_command_list_set_constant_buffer(gpu_command_list_t *list, gpu_buffer_t *buffer, int offset, size_t size) {
 	id<MTLBuffer> buf = (__bridge id<MTLBuffer>)buffer->impl._buffer;
 	int i = constant_buffer_index;
 	[argument_encoder setArgumentBuffer:argument_buffer offset:argument_buffer_step * i];
@@ -506,7 +506,7 @@ void iron_gpu_command_list_set_constant_buffer(iron_gpu_command_list_t *list, ir
 	[command_encoder useResource:buf usage:MTLResourceUsageRead  stages:MTLRenderStageVertex|MTLRenderStageFragment];
 }
 
-void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, int unit, iron_gpu_texture_t *texture) {
+void gpu_command_list_set_texture(gpu_command_list_t *list, int unit, gpu_texture_t *texture) {
 	id<MTLTexture> tex = (__bridge id<MTLTexture>)texture->impl._tex;
 	int i = constant_buffer_index;
 	[argument_encoder setArgumentBuffer:argument_buffer offset:argument_buffer_step * i];
@@ -514,7 +514,7 @@ void iron_gpu_command_list_set_texture(iron_gpu_command_list_t *list, int unit, 
 	[command_encoder useResource:tex usage:MTLResourceUsageRead stages:MTLRenderStageVertex|MTLRenderStageFragment];
 }
 
-void iron_gpu_set_texture_depth(iron_gpu_command_list_t *list, int unit, iron_gpu_texture_t *target) {
+void gpu_set_texture_depth(gpu_command_list_t *list, int unit, gpu_texture_t *target) {
 	id<MTLTexture> depth_tex = (__bridge id<MTLTexture>)target->impl._depthTex;
 	int i = constant_buffer_index;
 	[argument_encoder setArgumentBuffer:argument_buffer offset:argument_buffer_step * i];
@@ -522,12 +522,12 @@ void iron_gpu_set_texture_depth(iron_gpu_command_list_t *list, int unit, iron_gp
 	[command_encoder useResource:depth_tex usage:MTLResourceUsageRead stages:MTLRenderStageVertex|MTLRenderStageFragment];
 }
 
-void iron_gpu_pipeline_init(iron_gpu_pipeline_t *pipeline) {
+void gpu_pipeline_init(gpu_pipeline_t *pipeline) {
 	memset(&pipeline->impl, 0, sizeof(pipeline->impl));
 	gpu_internal_pipeline_init(pipeline);
 }
 
-void iron_gpu_pipeline_destroy(iron_gpu_pipeline_t *pipeline) {
+void gpu_pipeline_destroy(gpu_pipeline_t *pipeline) {
 	id<MTLRenderPipelineState> pipe = (__bridge_transfer id<MTLRenderPipelineState>)pipeline->impl._pipeline;
 	pipe = nil;
 	pipeline->impl._pipeline = NULL;
@@ -545,7 +545,7 @@ void iron_gpu_pipeline_destroy(iron_gpu_pipeline_t *pipeline) {
 	pipeline->impl._depthStencilNone = NULL;
 }
 
-void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipeline) {
+void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
 	id<MTLDevice> device = getMetalDevice();
 	NSError *error = nil;
 	id<MTLLibrary> library = [device newLibraryWithSource:[[NSString alloc] initWithBytes:pipeline->vertex_shader->impl.source length:pipeline->vertex_shader->impl.length encoding:NSUTF8StringEncoding] options:nil error:&error];
@@ -566,8 +566,8 @@ void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipeline) {
 	for (int i = 0; i < pipeline->color_attachment_count; ++i) {
 		renderPipelineDesc.colorAttachments[i].pixelFormat = convert_render_target_format(pipeline->color_attachment[i]);
 		renderPipelineDesc.colorAttachments[i].blendingEnabled =
-		    pipeline->blend_source != IRON_GPU_BLEND_ONE || pipeline->blend_destination != IRON_GPU_BLEND_ZERO ||
-		    pipeline->alpha_blend_source != IRON_GPU_BLEND_ONE || pipeline->alpha_blend_destination != IRON_GPU_BLEND_ZERO;
+		    pipeline->blend_source != GPU_BLEND_ONE || pipeline->blend_destination != GPU_BLEND_ZERO ||
+		    pipeline->alpha_blend_source != GPU_BLEND_ONE || pipeline->alpha_blend_destination != GPU_BLEND_ZERO;
 		renderPipelineDesc.colorAttachments[i].sourceRGBBlendFactor = convert_blending_factor(pipeline->blend_source);
 		renderPipelineDesc.colorAttachments[i].destinationRGBBlendFactor = convert_blending_factor(pipeline->blend_destination);
 		renderPipelineDesc.colorAttachments[i].rgbBlendOperation = convert_blending_operation(pipeline->blend_operation);
@@ -588,25 +588,25 @@ void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipeline) {
 	for (int i = 0; i < pipeline->input_layout->size; ++i) {
 		vertexDescriptor.attributes[i].bufferIndex = 0;
 		vertexDescriptor.attributes[i].offset = offset;
-		offset += iron_gpu_vertex_data_size(pipeline->input_layout->elements[i].data);
+		offset += gpu_vertex_data_size(pipeline->input_layout->elements[i].data);
 
 		switch (pipeline->input_layout->elements[i].data) {
-		case IRON_GPU_VERTEX_DATA_F32_1X:
+		case GPU_VERTEX_DATA_F32_1X:
 			vertexDescriptor.attributes[i].format = MTLVertexFormatFloat;
 			break;
-		case IRON_GPU_VERTEX_DATA_F32_2X:
+		case GPU_VERTEX_DATA_F32_2X:
 			vertexDescriptor.attributes[i].format = MTLVertexFormatFloat2;
 			break;
-		case IRON_GPU_VERTEX_DATA_F32_3X:
+		case GPU_VERTEX_DATA_F32_3X:
 			vertexDescriptor.attributes[i].format = MTLVertexFormatFloat3;
 			break;
-		case IRON_GPU_VERTEX_DATA_F32_4X:
+		case GPU_VERTEX_DATA_F32_4X:
 			vertexDescriptor.attributes[i].format = MTLVertexFormatFloat4;
 			break;
-		case IRON_GPU_VERTEX_DATA_I16_2X_NORM:
+		case GPU_VERTEX_DATA_I16_2X_NORM:
 			vertexDescriptor.attributes[i].format = MTLVertexFormatShort2Normalized;
 			break;
-		case IRON_GPU_VERTEX_DATA_I16_4X_NORM:
+		case GPU_VERTEX_DATA_I16_4X_NORM:
 			vertexDescriptor.attributes[i].format = MTLVertexFormatShort4Normalized;
 			break;
 		}
@@ -643,13 +643,13 @@ void iron_gpu_pipeline_compile(iron_gpu_pipeline_t *pipeline) {
 	pipeline->impl._depthStencilNone = (__bridge_retained void *)[device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
 }
 
-void iron_gpu_shader_destroy(iron_gpu_shader_t *shader) {
+void gpu_shader_destroy(gpu_shader_t *shader) {
 	id<MTLFunction> function = (__bridge_transfer id<MTLFunction>)shader->impl.mtlFunction;
 	function = nil;
 	shader->impl.mtlFunction = NULL;
 }
 
-void iron_gpu_shader_init(iron_gpu_shader_t *shader, const void *data, size_t length, iron_gpu_shader_type_t type) {
+void gpu_shader_init(gpu_shader_t *shader, const void *data, size_t length, gpu_shader_type_t type) {
 	shader->impl.name[0] = 0;
 	const char *source = data;
 
@@ -665,7 +665,7 @@ void iron_gpu_shader_init(iron_gpu_shader_t *shader, const void *data, size_t le
 	shader->impl.length = length;
 }
 
-void iron_gpu_raytrace_pipeline_init(iron_gpu_raytrace_pipeline_t *pipeline, iron_gpu_command_list_t *command_list, void *ray_shader, int ray_shader_size, iron_gpu_buffer_t *constant_buffer) {
+void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, gpu_command_list_t *command_list, void *ray_shader, int ray_shader_size, gpu_buffer_t *constant_buffer) {
 	id<MTLDevice> device = getMetalDevice();
 	if (!device.supportsRaytracing) return;
 	constant_buf = constant_buffer;
@@ -685,10 +685,10 @@ void iron_gpu_raytrace_pipeline_init(iron_gpu_raytrace_pipeline_t *pipeline, iro
 	_semaphore = dispatch_semaphore_create(2);
 }
 
-void iron_gpu_raytrace_pipeline_destroy(iron_gpu_raytrace_pipeline_t *pipeline) {
+void gpu_raytrace_pipeline_destroy(gpu_raytrace_pipeline_t *pipeline) {
 }
 
-static void create(iron_gpu_texture_t *texture, int width, int height, int format, bool writable) {
+static void create(gpu_texture_t *texture, int width, int height, int format, bool writable) {
 	texture->impl.has_mipmaps = false;
 	id<MTLDevice> device = getMetalDevice();
 
@@ -711,7 +711,7 @@ static void create(iron_gpu_texture_t *texture, int width, int height, int forma
 	texture->impl._tex = (__bridge_retained void *)[device newTextureWithDescriptor:descriptor];
 }
 
-void iron_gpu_texture_init(iron_gpu_texture_t *texture, int width, int height, iron_image_format_t format) {
+void gpu_texture_init(gpu_texture_t *texture, int width, int height, iron_image_format_t format) {
 	texture->width = width;
 	texture->height = height;
 	texture->format = format;
@@ -723,7 +723,7 @@ void iron_gpu_texture_init(iron_gpu_texture_t *texture, int width, int height, i
 	texture->framebuffer_index = -1;
 }
 
-void iron_gpu_texture_init_from_bytes(iron_gpu_texture_t *texture, void *data, int width, int height, iron_image_format_t format) {
+void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, iron_image_format_t format) {
 	texture->width = width;
 	texture->height = height;
 	texture->format = format;
@@ -738,11 +738,11 @@ void iron_gpu_texture_init_from_bytes(iron_gpu_texture_t *texture, void *data, i
 	       mipmapLevel:0
 	             slice:0
 	         withBytes:data
-	       bytesPerRow:iron_gpu_texture_stride(texture)
-	     bytesPerImage:iron_gpu_texture_stride(texture) * texture->height];
+	       bytesPerRow:gpu_texture_stride(texture)
+	     bytesPerImage:gpu_texture_stride(texture) * texture->height];
 }
 
-void iron_gpu_texture_destroy(iron_gpu_texture_t *target) {
+void gpu_texture_destroy(gpu_texture_t *target) {
 	id<MTLTexture> tex = (__bridge_transfer id<MTLTexture>)target->impl._tex;
 	tex = nil;
 	target->impl._tex = NULL;
@@ -765,7 +765,7 @@ void iron_gpu_texture_destroy(iron_gpu_texture_t *target) {
 	}
 }
 
-int iron_gpu_texture_stride(iron_gpu_texture_t *texture) {
+int gpu_texture_stride(gpu_texture_t *texture) {
 	switch (texture->format) {
 	case IRON_IMAGE_FORMAT_R8:
 		return texture->width;
@@ -779,9 +779,9 @@ int iron_gpu_texture_stride(iron_gpu_texture_t *texture) {
 	}
 }
 
-void iron_gpu_texture_generate_mipmaps(iron_gpu_texture_t *texture, int levels) {}
+void gpu_texture_generate_mipmaps(gpu_texture_t *texture, int levels) {}
 
-void iron_gpu_texture_set_mipmap(iron_gpu_texture_t *texture, iron_gpu_texture_t *mipmap, int level) {
+void gpu_texture_set_mipmap(gpu_texture_t *texture, gpu_texture_t *mipmap, int level) {
 	if (!texture->impl.has_mipmaps) {
 		id<MTLDevice> device = getMetalDevice();
 		MTLTextureDescriptor *descriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:convert_image_format((iron_image_format_t)texture->format)
@@ -831,8 +831,8 @@ void iron_gpu_texture_set_mipmap(iron_gpu_texture_t *texture, iron_gpu_texture_t
 	       bytesPerRow:mipmap->width * formatByteSize(mipmap->format)];
 }
 
-static void render_target_init(iron_gpu_texture_t *target, int width, int height, iron_image_format_t format, int depth_buffer_bits, int framebuffer_index) {
-	memset(target, 0, sizeof(iron_gpu_texture_t));
+static void render_target_init(gpu_texture_t *target, int width, int height, iron_image_format_t format, int depth_buffer_bits, int framebuffer_index) {
+	memset(target, 0, sizeof(gpu_texture_t));
 	target->width = width;
 	target->height = height;
 	target->data = NULL;
@@ -870,7 +870,7 @@ static void render_target_init(iron_gpu_texture_t *target, int width, int height
 	target->impl._texReadback = NULL;
 }
 
-void iron_gpu_render_target_init(iron_gpu_texture_t *target, int width, int height, iron_image_format_t format, int depth_buffer_bits) {
+void gpu_render_target_init(gpu_texture_t *target, int width, int height, iron_image_format_t format, int depth_buffer_bits) {
 	render_target_init(target, width, height, format, depth_buffer_bits, -1);
 	target->width = target->width = width;
 	target->height = target->height = height;
@@ -878,22 +878,21 @@ void iron_gpu_render_target_init(iron_gpu_texture_t *target, int width, int heig
 	target->uploaded = true;
 }
 
-void iron_gpu_render_target_init_framebuffer(iron_gpu_texture_t *target, int width, int height, iron_image_format_t format, int depth_buffer_bits) {
+void gpu_render_target_init_framebuffer(gpu_texture_t *target, int width, int height, iron_image_format_t format, int depth_buffer_bits) {
 	render_target_init(target, width, height, format, depth_buffer_bits, framebuffer_count);
 	framebuffer_count += 1;
 }
 
-void iron_gpu_render_target_set_depth_from(iron_gpu_texture_t *target, iron_gpu_texture_t *source) {
+void gpu_render_target_set_depth_from(gpu_texture_t *target, gpu_texture_t *source) {
 	target->impl._depthTex = source->impl._depthTex;
 }
 
-void iron_gpu_vertex_buffer_init(iron_gpu_buffer_t *buffer, int count, iron_gpu_vertex_structure_t *structure, bool gpu_memory) {
+void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structure_t *structure) {
 	memset(&buffer->impl, 0, sizeof(buffer->impl));
 	buffer->count = count;
-	buffer->impl.gpu_memory = gpu_memory;
 	for (int i = 0; i < structure->size; ++i) {
-		iron_gpu_vertex_element_t element = structure->elements[i];
-		buffer->impl.myStride += iron_gpu_vertex_data_size(element.data);
+		gpu_vertex_element_t element = structure->elements[i];
+		buffer->impl.myStride += gpu_vertex_data_size(element.data);
 	}
 
 	id<MTLDevice> device = getMetalDevice();
@@ -904,58 +903,57 @@ void iron_gpu_vertex_buffer_init(iron_gpu_buffer_t *buffer, int count, iron_gpu_
 	buffer->impl.metal_buffer = (__bridge_retained void *)buf;
 }
 
-void iron_gpu_vertex_buffer_destroy(iron_gpu_buffer_t *buf) {
+void gpu_vertex_buffer_destroy(gpu_buffer_t *buf) {
 	id<MTLBuffer> buffer = (__bridge_transfer id<MTLBuffer>)buf->impl.metal_buffer;
 	buffer = nil;
 	buf->impl.metal_buffer = NULL;
 }
 
-float *iron_gpu_vertex_buffer_lock(iron_gpu_buffer_t *buf) {
+float *gpu_vertex_buffer_lock(gpu_buffer_t *buf) {
 	id<MTLBuffer> buffer = (__bridge id<MTLBuffer>)buf->impl.metal_buffer;
 	float *floats = (float *)[buffer contents];
 	return floats;
 }
 
-void iron_gpu_vertex_buffer_unlock(iron_gpu_buffer_t *buf) {
+void gpu_vertex_buffer_unlock(gpu_buffer_t *buf) {
 }
 
-int iron_gpu_vertex_buffer_count(iron_gpu_buffer_t *buffer) {
+int gpu_vertex_buffer_count(gpu_buffer_t *buffer) {
 	return buffer->count;
 }
 
-int iron_gpu_vertex_buffer_stride(iron_gpu_buffer_t *buffer) {
+int gpu_vertex_buffer_stride(gpu_buffer_t *buffer) {
 	return buffer->impl.myStride;
 }
 
-void iron_gpu_constant_buffer_init(iron_gpu_buffer_t *buffer, int size) {
+void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size) {
 	buffer->impl.mySize = size;
 	buffer->data = NULL;
 	buffer->impl._buffer = (__bridge_retained void *)[getMetalDevice() newBufferWithLength:size options:MTLResourceOptionCPUCacheModeDefault];
 }
 
-void iron_gpu_constant_buffer_destroy(iron_gpu_buffer_t *buffer) {
+void gpu_constant_buffer_destroy(gpu_buffer_t *buffer) {
 	id<MTLBuffer> buf = (__bridge_transfer id<MTLBuffer>)buffer->impl._buffer;
 	buf = nil;
 	buffer->impl._buffer = NULL;
 }
 
-void iron_gpu_constant_buffer_lock(iron_gpu_buffer_t *buffer, int start, int count) {
+void gpu_constant_buffer_lock(gpu_buffer_t *buffer, int start, int count) {
 	id<MTLBuffer> buf = (__bridge id<MTLBuffer>)buffer->impl._buffer;
 	uint8_t *data = (uint8_t *)[buf contents];
 	buffer->data = &data[start];
 }
 
-void iron_gpu_constant_buffer_unlock(iron_gpu_buffer_t *buffer) {
+void gpu_constant_buffer_unlock(gpu_buffer_t *buffer) {
 	// buffer->data = NULL;
 }
 
-int iron_gpu_constant_buffer_size(iron_gpu_buffer_t *buffer) {
+int gpu_constant_buffer_size(gpu_buffer_t *buffer) {
 	return buffer->impl.mySize;
 }
 
-void iron_gpu_index_buffer_init(iron_gpu_buffer_t *buffer, int indexCount, bool gpu_memory) {
+void gpu_index_buffer_init(gpu_buffer_t *buffer, int indexCount) {
 	buffer->impl.count = indexCount;
-	buffer->impl.gpu_memory = gpu_memory;
 
 	id<MTLDevice> device = getMetalDevice();
 	MTLResourceOptions options = MTLResourceCPUCacheModeWriteCombined;
@@ -966,32 +964,32 @@ void iron_gpu_index_buffer_init(iron_gpu_buffer_t *buffer, int indexCount, bool 
 	                options:options];
 }
 
-void iron_gpu_index_buffer_destroy(iron_gpu_buffer_t *buffer) {
+void gpu_index_buffer_destroy(gpu_buffer_t *buffer) {
 	id<MTLBuffer> buf = (__bridge_transfer id<MTLBuffer>)buffer->impl.metal_buffer;
 	buf = nil;
 	buffer->impl.metal_buffer = NULL;
 }
 
-static int iron_gpu_internal_index_buffer_stride(iron_gpu_buffer_t *buffer) {
+static int gpu_internal_index_buffer_stride(gpu_buffer_t *buffer) {
 	return 4;
 }
 
-void *iron_gpu_index_buffer_lock(iron_gpu_buffer_t *buffer) {
+void *gpu_index_buffer_lock(gpu_buffer_t *buffer) {
 	int start = 0;
-	int count = iron_gpu_index_buffer_count(buffer);
+	int count = gpu_index_buffer_count(buffer);
 	id<MTLBuffer> metal_buffer = (__bridge id<MTLBuffer>)buffer->impl.metal_buffer;
 	uint8_t *data = (uint8_t *)[metal_buffer contents];
-	return &data[start * iron_gpu_internal_index_buffer_stride(buffer)];
+	return &data[start * gpu_internal_index_buffer_stride(buffer)];
 }
 
-void iron_gpu_index_buffer_unlock(iron_gpu_buffer_t *buffer) {
+void gpu_index_buffer_unlock(gpu_buffer_t *buffer) {
 }
 
-int iron_gpu_index_buffer_count(iron_gpu_buffer_t *buffer) {
+int gpu_index_buffer_count(gpu_buffer_t *buffer) {
 	return buffer->impl.count;
 }
 
-bool iron_gpu_raytrace_supported() {
+bool gpu_raytrace_supported() {
 	id<MTLDevice> device = getMetalDevice();
 	return device.supportsRaytracing;
 }
@@ -1027,12 +1025,12 @@ id<MTLAccelerationStructure> create_acceleration_sctructure(MTLAccelerationStruc
 	return compacted_acceleration_structure;
 }
 
-void iron_gpu_raytrace_acceleration_structure_init(iron_gpu_raytrace_acceleration_structure_t *accel) {
+void gpu_raytrace_acceleration_structure_init(gpu_raytrace_acceleration_structure_t *accel) {
 	vb_count = 0;
 	instances_count = 0;
 }
 
-void iron_gpu_raytrace_acceleration_structure_add(iron_gpu_raytrace_acceleration_structure_t *accel, iron_gpu_buffer_t *_vb, iron_gpu_buffer_t *_ib,
+void gpu_raytrace_acceleration_structure_add(gpu_raytrace_acceleration_structure_t *accel, gpu_buffer_t *_vb, gpu_buffer_t *_ib,
 	iron_matrix4x4_t _transform) {
 
 	int vb_i = -1;
@@ -1054,18 +1052,18 @@ void iron_gpu_raytrace_acceleration_structure_add(iron_gpu_raytrace_acceleration
 	instances_count++;
 }
 
-void _iron_gpu_raytrace_acceleration_structure_destroy_bottom(iron_gpu_raytrace_acceleration_structure_t *accel) {
+void _gpu_raytrace_acceleration_structure_destroy_bottom(gpu_raytrace_acceleration_structure_t *accel) {
 //	for (int i = 0; i < vb_count_last; ++i) {
 //	}
 	_primitive_accels = nil;
 }
 
-void _iron_gpu_raytrace_acceleration_structure_destroy_top(iron_gpu_raytrace_acceleration_structure_t *accel) {
+void _gpu_raytrace_acceleration_structure_destroy_top(gpu_raytrace_acceleration_structure_t *accel) {
 	_instance_accel = nil;
 }
 
-void iron_gpu_raytrace_acceleration_structure_build(iron_gpu_raytrace_acceleration_structure_t *accel, iron_gpu_command_list_t *command_list,
-	iron_gpu_buffer_t *_vb_full, iron_gpu_buffer_t *_ib_full) {
+void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structure_t *accel, gpu_command_list_t *command_list,
+	gpu_buffer_t *_vb_full, gpu_buffer_t *_ib_full) {
 
 	bool build_bottom = false;
 	for (int i = 0; i < 16; ++i) {
@@ -1077,9 +1075,9 @@ void iron_gpu_raytrace_acceleration_structure_build(iron_gpu_raytrace_accelerati
 
 	if (vb_count_last > 0) {
 		if (build_bottom) {
-			_iron_gpu_raytrace_acceleration_structure_destroy_bottom(accel);
+			_gpu_raytrace_acceleration_structure_destroy_bottom(accel);
 		}
-		_iron_gpu_raytrace_acceleration_structure_destroy_top(accel);
+		_gpu_raytrace_acceleration_structure_destroy_top(accel);
 	}
 
 	vb_count_last = vb_count;
@@ -1127,9 +1125,9 @@ void iron_gpu_raytrace_acceleration_structure_build(iron_gpu_raytrace_accelerati
 	_instance_accel = create_acceleration_sctructure(inst_accel_descriptor);
 }
 
-void iron_gpu_raytrace_acceleration_structure_destroy(iron_gpu_raytrace_acceleration_structure_t *accel) {}
+void gpu_raytrace_acceleration_structure_destroy(gpu_raytrace_acceleration_structure_t *accel) {}
 
-void iron_gpu_raytrace_set_textures(iron_gpu_texture_t *texpaint0, iron_gpu_texture_t *texpaint1, iron_gpu_texture_t *texpaint2, iron_gpu_texture_t *texenv, iron_gpu_texture_t *texsobol, iron_gpu_texture_t *texscramble, iron_gpu_texture_t *texrank) {
+void gpu_raytrace_set_textures(gpu_texture_t *texpaint0, gpu_texture_t *texpaint1, gpu_texture_t *texpaint2, gpu_texture_t *texenv, gpu_texture_t *texsobol, gpu_texture_t *texscramble, gpu_texture_t *texrank) {
 	_texpaint0 = texpaint0;
 	_texpaint1 = texpaint1;
 	_texpaint2 = texpaint2;
@@ -1139,19 +1137,19 @@ void iron_gpu_raytrace_set_textures(iron_gpu_texture_t *texpaint0, iron_gpu_text
 	_texrank = texrank;
 }
 
-void iron_gpu_raytrace_set_acceleration_structure(iron_gpu_raytrace_acceleration_structure_t *_accel) {
+void gpu_raytrace_set_acceleration_structure(gpu_raytrace_acceleration_structure_t *_accel) {
 	accel = _accel;
 }
 
-void iron_gpu_raytrace_set_pipeline(iron_gpu_raytrace_pipeline_t *_pipeline) {
+void gpu_raytrace_set_pipeline(gpu_raytrace_pipeline_t *_pipeline) {
 	pipeline = _pipeline;
 }
 
-void iron_gpu_raytrace_set_target(iron_gpu_texture_t *_output) {
+void gpu_raytrace_set_target(gpu_texture_t *_output) {
 	output = _output;
 }
 
-void iron_gpu_raytrace_dispatch_rays(iron_gpu_command_list_t *command_list) {
+void gpu_raytrace_dispatch_rays(gpu_command_list_t *command_list) {
 	id<MTLDevice> device = getMetalDevice();
 	if (!device.supportsRaytracing) return;
 	dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);

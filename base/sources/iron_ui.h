@@ -67,8 +67,8 @@ typedef struct ui_options {
 	draw_font_t *font;
 	ui_theme_t *theme;
 	float scale_factor;
-	iron_gpu_texture_t *color_wheel;
-	iron_gpu_texture_t *black_white_gradient;
+	gpu_texture_t *color_wheel;
+	gpu_texture_t *black_white_gradient;
 } ui_options_t;
 
 typedef struct ui_handle_array {
@@ -83,7 +83,7 @@ typedef struct ui_handle {
 	uint32_t color;
 	float value;
 	char *text;
-	iron_gpu_texture_t texture;
+	gpu_texture_t texture;
 	int redraws;
 	float scroll_offset;
 	bool scroll_enabled;
@@ -243,7 +243,7 @@ typedef struct ui {
 	int combo_to_submit;
 	int combo_initial_value;
 	char tooltip_text[512];
-	iron_gpu_texture_t *tooltip_img;
+	gpu_texture_t *tooltip_img;
 	int tooltip_img_max_width;
 	bool tooltip_invert_y;
 	float tooltip_x;
@@ -262,11 +262,11 @@ typedef struct ui {
 	bool scissor;
 
 	bool elements_baked;
-	iron_gpu_texture_t check_select_image;
-	iron_gpu_texture_t radio_image;
-	iron_gpu_texture_t radio_select_image;
-	iron_gpu_texture_t round_corner_image;
-	iron_gpu_texture_t filled_round_corner_image;
+	gpu_texture_t check_select_image;
+	gpu_texture_t radio_image;
+	gpu_texture_t radio_select_image;
+	gpu_texture_t round_corner_image;
+	gpu_texture_t filled_round_corner_image;
 } ui_t;
 
 void ui_init(ui_t *ui, ui_options_t *ops);
@@ -280,8 +280,8 @@ bool ui_button(char *text, int align, char *label);
 int ui_text(char *text, int align, int bg);
 bool ui_tab(ui_handle_t *handle, char *text, bool vertical, uint32_t color);
 bool ui_panel(ui_handle_t *handle, char *text, bool is_tree, bool filled);
-int ui_sub_image(iron_gpu_texture_t *image, uint32_t tint, int h, int sx, int sy, int sw, int sh);
-int ui_image(iron_gpu_texture_t *image, uint32_t tint, int h);
+int ui_sub_image(gpu_texture_t *image, uint32_t tint, int h, int sx, int sy, int sw, int sh);
+int ui_image(gpu_texture_t *image, uint32_t tint, int h);
 char *ui_text_input(ui_handle_t *handle, char *label, int align, bool editable, bool live_update);
 bool ui_check(ui_handle_t *handle, char *text, char *label);
 bool ui_radio(ui_handle_t *handle, int position, char *text, char *label);
@@ -296,7 +296,7 @@ void ui_row6();
 void ui_row7();
 void ui_separator(int h, bool fill);
 void ui_tooltip(char *text);
-void ui_tooltip_image(iron_gpu_texture_t *image, int max_width);
+void ui_tooltip_image(gpu_texture_t *image, int max_width);
 void _ui_end(bool last);
 void ui_end_window(bool bind_global_g);
 char *ui_hovered_tab_name();

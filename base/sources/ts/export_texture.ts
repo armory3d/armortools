@@ -178,7 +178,7 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 	layers_make_temp_img();
 	layers_make_export_img();
 	let rt: render_target_t = map_get(render_path_render_targets, "empty_white");
-	let empty: iron_gpu_texture_t = rt._image;
+	let empty: gpu_texture_t = rt._image;
 
 	// Append object mask name
 	let export_selected: bool = context_raw.layers_export == export_mode_t.SELECTED;
@@ -191,11 +191,11 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 
 	// Clear export layer
 	_gpu_begin(layers_expa, null, clear_flag_t.COLOR, color_from_floats(0.0, 0.0, 0.0, 0.0));
-	iron_gpu_end();
+	gpu_end();
 	_gpu_begin(layers_expb, null, clear_flag_t.COLOR, color_from_floats(0.5, 0.5, 1.0, 0.0));
-	iron_gpu_end();
+	gpu_end();
 	_gpu_begin(layers_expc, null, clear_flag_t.COLOR, color_from_floats(1.0, 0.0, 0.0, 0.0));
-	iron_gpu_end();
+	gpu_end();
 
 	// Flatten layers
 	for (let i: i32 = 0; i < layers.length; ++i) {
@@ -217,7 +217,7 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 			}
 		}
 
-		let mask: iron_gpu_texture_t = empty;
+		let mask: gpu_texture_t = empty;
 		let l1masks: slot_layer_t[] = slot_layer_get_masks(l1);
 		if (l1masks != null && !bake_material) {
 			if (l1masks.length > 1) {
@@ -245,18 +245,18 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 			draw_end();
 
 			_gpu_begin(layers_expa);
-			iron_gpu_set_pipeline(pipes_merge);
-			iron_gpu_set_texture(pipes_tex0, l1.texpaint);
-			iron_gpu_set_texture(pipes_tex1, empty);
-			iron_gpu_set_texture(pipes_texmask, mask);
-			iron_gpu_set_texture(pipes_texa, layers_temp_image);
+			gpu_set_pipeline(pipes_merge);
+			gpu_set_texture(pipes_tex0, l1.texpaint);
+			gpu_set_texture(pipes_tex1, empty);
+			gpu_set_texture(pipes_texmask, mask);
+			gpu_set_texture(pipes_texa, layers_temp_image);
 			gpu_set_float(pipes_opac, slot_layer_get_opacity(l1));
 			gpu_set_float(pipes_tex1w, empty.width);
 			gpu_set_int(pipes_blending, layers.length > 1 ? l1.blending : 0);
-			iron_gpu_set_vertex_buffer(const_data_screen_aligned_vb);
-			iron_gpu_set_index_buffer(const_data_screen_aligned_ib);
+			gpu_set_vertex_buffer(const_data_screen_aligned_vb);
+			gpu_set_index_buffer(const_data_screen_aligned_ib);
 			gpu_draw();
-			iron_gpu_end();
+			gpu_end();
 		}
 
 		if (l1.paint_nor) {
@@ -267,18 +267,18 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 			draw_end();
 
 			_gpu_begin(layers_expb);
-			iron_gpu_set_pipeline(pipes_merge);
-			iron_gpu_set_texture(pipes_tex0, l1.texpaint);
-			iron_gpu_set_texture(pipes_tex1, l1.texpaint_nor);
-			iron_gpu_set_texture(pipes_texmask, mask);
-			iron_gpu_set_texture(pipes_texa, layers_temp_image);
+			gpu_set_pipeline(pipes_merge);
+			gpu_set_texture(pipes_tex0, l1.texpaint);
+			gpu_set_texture(pipes_tex1, l1.texpaint_nor);
+			gpu_set_texture(pipes_texmask, mask);
+			gpu_set_texture(pipes_texa, layers_temp_image);
 			gpu_set_float(pipes_opac, slot_layer_get_opacity(l1));
 			gpu_set_float(pipes_tex1w, l1.texpaint_nor.width);
 			gpu_set_int(pipes_blending, l1.paint_nor_blend ? 102 : 101);
-			iron_gpu_set_vertex_buffer(const_data_screen_aligned_vb);
-			iron_gpu_set_index_buffer(const_data_screen_aligned_ib);
+			gpu_set_vertex_buffer(const_data_screen_aligned_vb);
+			gpu_set_index_buffer(const_data_screen_aligned_ib);
 			gpu_draw();
-			iron_gpu_end();
+			gpu_end();
 		}
 
 		if (l1.paint_occ || l1.paint_rough || l1.paint_met || l1.paint_height) {
@@ -310,9 +310,9 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 	///end
 	///end
 
-	let texpaint: iron_gpu_texture_t = layers_expa;
-	let texpaint_nor: iron_gpu_texture_t = layers_expb;
-	let texpaint_pack: iron_gpu_texture_t = layers_expc;
+	let texpaint: gpu_texture_t = layers_expa;
+	let texpaint_nor: gpu_texture_t = layers_expb;
+	let texpaint_pack: gpu_texture_t = layers_expc;
 
 	///if is_lab
 	texpaint = context_raw.brush_output_node_inst.texpaint;
@@ -462,7 +462,7 @@ function export_texture_write_texture(file: string, pixels: buffer_t, type: i32 
 	}
 
 	if (context_raw.layers_destination == export_destination_t.PACKED) {
-		let image: iron_gpu_texture_t = gpu_create_texture_from_bytes(pixels, res_x, res_y);
+		let image: gpu_texture_t = gpu_create_texture_from_bytes(pixels, res_x, res_y);
 		map_set(data_cached_images, file, image);
 		let ar: string[] = string_split(file, path_sep);
 		let name: string = ar[ar.length - 1];

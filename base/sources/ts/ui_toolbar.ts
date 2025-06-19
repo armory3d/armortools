@@ -30,7 +30,7 @@ let _ui_toolbar_i: i32;
 function ui_toolbar_init() {
 }
 
-function ui_toolbar_draw_tool(i: i32, ui: ui_t, img: iron_gpu_texture_t, icon_accent: i32, keys: string[]) {
+function ui_toolbar_draw_tool(i: i32, ui: ui_t, img: gpu_texture_t, icon_accent: i32, keys: string[]) {
 	ui._x += 2;
 	if (context_raw.tool == i) {
 		ui_toolbar_draw_highlight();
@@ -108,7 +108,7 @@ function ui_toolbar_render_ui() {
 		ui._y -= 4 * ui_SCALE(ui);
 
 		ui.image_scroll_align = false;
-		let img: iron_gpu_texture_t = resource_get("icons.k");
+		let img: gpu_texture_t = resource_get("icons.k");
 
 		let col: u32 = ui.ops.theme.WINDOW_BG_COL;
 		let light: bool = col > 0xff666666;

@@ -473,7 +473,7 @@ static char *clipboardString = NULL;
 
 char buffer[1024];
 
-void iron_gpu_internal_resize(int width, int height);
+void gpu_internal_resize(int width, int height);
 static void init_pen_device(XDeviceInfo *info, struct x11_pen_device *pen, bool eraser);
 
 static void load_lib(void **lib, const char *name) {
@@ -1198,7 +1198,7 @@ static bool _handle_messages() {
 			if (event.xconfigure.width != k_window->width || event.xconfigure.height != k_window->height) {
 				k_window->width = event.xconfigure.width;
 				k_window->height = event.xconfigure.height;
-				iron_gpu_internal_resize(event.xconfigure.width, event.xconfigure.height);
+				gpu_internal_resize(event.xconfigure.width, event.xconfigure.height);
 				iron_internal_call_resize_callback(event.xconfigure.width, event.xconfigure.height);
 			}
 			break;
@@ -1454,7 +1454,7 @@ void iron_init(const char *name, int width, int height, iron_window_options_t *w
 }
 
 void iron_internal_shutdown() {
-	iron_gpu_destroy();
+	gpu_destroy();
 	iron_linux_closeHIDGamepads();
 	free(clipboardString);
 	xlib.XCloseDisplay(x11_ctx.display);
