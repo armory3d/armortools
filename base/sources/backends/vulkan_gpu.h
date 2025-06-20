@@ -6,23 +6,6 @@
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
 
-#define MAXIMUM_WINDOWS 1
-
-struct vk_funs {
-	PFN_vkGetPhysicalDeviceSurfaceSupportKHR fpGetPhysicalDeviceSurfaceSupportKHR;
-	PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR fpGetPhysicalDeviceSurfaceCapabilitiesKHR;
-	PFN_vkGetPhysicalDeviceSurfaceFormatsKHR fpGetPhysicalDeviceSurfaceFormatsKHR;
-	PFN_vkGetPhysicalDeviceSurfacePresentModesKHR fpGetPhysicalDeviceSurfacePresentModesKHR;
-	PFN_vkCreateSwapchainKHR fpCreateSwapchainKHR;
-	PFN_vkDestroySwapchainKHR fpDestroySwapchainKHR;
-	PFN_vkGetSwapchainImagesKHR fpGetSwapchainImagesKHR;
-	PFN_vkDestroySurfaceKHR fpDestroySurfaceKHR;
-	PFN_vkCreateDebugUtilsMessengerEXT fpCreateDebugUtilsMessengerEXT;
-	PFN_vkDestroyDebugUtilsMessengerEXT fpDestroyDebugUtilsMessengerEXT;
-	PFN_vkQueuePresentKHR fpQueuePresentKHR;
-	PFN_vkAcquireNextImageKHR fpAcquireNextImageKHR;
-};
-
 struct vk_depth {
 	VkImage image;
 	VkImageView view;
@@ -54,19 +37,13 @@ struct vk_context {
 	VkCommandBuffer setup_cmd;
 	VkCommandPool cmd_pool;
 	VkQueue queue;
-	struct vk_window windows[MAXIMUM_WINDOWS];
+	struct vk_window windows[1];
 	VkBuffer *uniform_buffer;
 #ifdef VALIDATE
 	bool validation_found;
 	VkDebugUtilsMessengerEXT debug_messenger;
 #endif
 };
-
-typedef struct {
-	int _indexCount;
-	VkCommandBuffer _buffer;
-	VkFence fence;
-} gpu_command_list_impl_t;
 
 typedef struct gpu_pipeline_impl {
 	const char **textures;
@@ -88,37 +65,30 @@ typedef struct {
 	VkImageLayout imageLayout;
 	VkDeviceSize deviceSize;
 	int stride;
-
 	VkImage image;
 	VkDeviceMemory mem;
 	VkImageView view;
-
 	VkImage depthImage;
 	VkDeviceMemory depthMemory;
 	VkImageView depthView;
-	int depthBufferBits;
-
+	int depth_buffer_bits;
 	VkFormat format;
-
 	VkBuffer readback_buffer;
 	VkDeviceMemory readback_memory;
 	bool readback_buffer_created;
-
 	int stage;
 	int stage_depth;
+	VkImageLayout state;
 } gpu_texture_impl_t;
 
 typedef struct {
 	int count;
-
 	VkBuffer buf;
 	VkDeviceMemory mem;
 	VkMemoryAllocateInfo mem_alloc;
-
 	float *data;
-	int myStride;
+	int stride;
 	unsigned bufferId;
-
 	int lastStart;
 	int lastCount;
 	int mySize;

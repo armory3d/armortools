@@ -8,7 +8,6 @@
 #include <X11/extensions/Xinerama.h>
 #include <X11/extensions/Xrandr.h>
 
-#define MAXIMUM_WINDOWS 1
 #define MAXIMUM_DISPLAYS 16
 
 struct iron_x11_window {
@@ -177,7 +176,7 @@ struct x11_context {
 	struct x11_pen_device pen;
 	struct x11_pen_device eraser;
 
-	struct iron_x11_window windows[MAXIMUM_WINDOWS];
+	struct iron_x11_window windows[1];
 	int num_displays;
 	struct iron_x11_display displays[MAXIMUM_DISPLAYS];
 };

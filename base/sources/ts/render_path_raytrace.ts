@@ -47,6 +47,7 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	let probe: world_data_t = scene_world;
 	let saved_envmap: gpu_texture_t = context_raw.show_envmap_blur ? probe._.radiance_mipmaps[0] : context_raw.saved_envmap;
 
+	////
 	if (render_path_raytrace_last_envmap != saved_envmap) {
 		render_path_raytrace_last_envmap = saved_envmap;
 
@@ -57,6 +58,7 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 		let l: slot_layer_t = layers_flatten(true);
 		iron_raytrace_set_textures(l.texpaint, l.texpaint_nor, l.texpaint_pack, saved_envmap, bnoise_sobol, bnoise_scramble, bnoise_rank);
 	}
+	////
 
 	///if is_lab
 	let l: slot_layer_t = layers_flatten(true);

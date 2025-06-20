@@ -1,14 +1,12 @@
+#include <stdlib.h>
+#include <assert.h>
 #include <string.h>
-#include <emscripten.h>
-#include <emscripten/html5.h>
-#include <emscripten/html5_webgpu.h>
 #include <webgpu/webgpu.h>
 #include <iron_gpu.h>
 #include <iron_math.h>
 #include <iron_system.h>
-#include <stdlib.h>
-#include <assert.h>
 
+bool gpu_transpose_mat = false;
 int renderTargetWidth;
 int renderTargetHeight;
 int newRenderTargetWidth;
@@ -17,6 +15,11 @@ int newRenderTargetHeight;
 WGPUDevice device;
 WGPUQueue queue;
 WGPUSwapChain swapChain;
+WGPUCommandEncoder encoder;
+WGPURenderPassEncoder pass;
+int indexCount;
+gpu_buffer_t *gpu_internal_current_vertex_buffer = NULL;
+gpu_buffer_t *gpu_internal_current_index_buffer = NULL;
 
 void gpu_destroy() {}
 
@@ -47,17 +50,12 @@ void gpu_init_internal(int depthBufferBits, bool vsync) {
 	swapChain = wgpuDeviceCreateSwapChain(device, surface, &scDesc);
 }
 
-void gpu_begin(gpu_texture_t *renderTarget) {}
-
+void gpu_begin(struct gpu_texture **targets, int count, unsigned flags, unsigned color, float depth) {}
 void gpu_end() {}
 
 bool gpu_raytrace_supported() {
 	return false;
 }
-
-extern WGPUDevice device;
-
-gpu_buffer_t *gpu_internal_current_vertex_buffer = NULL;
 
 void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structure_t *structure) {
 	buffer->count = count;
@@ -90,32 +88,20 @@ int gpu_vertex_buffer_stride(gpu_buffer_t *buffer) {
 	return buffer->impl.stride;
 }
 
-bool gpu_transpose_mat = false;
-
-void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size) {
-}
-
-void gpu_constant_buffer_destroy(gpu_buffer_t *buffer) {
-}
-
-void gpu_constant_buffer_lock(gpu_buffer_t *buffer, int start, int count) {
-}
-
-void gpu_constant_buffer_unlock(gpu_buffer_t *buffer) {
-}
+void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size) {}
+void gpu_constant_buffer_destroy(gpu_buffer_t *buffer) {}
+void gpu_constant_buffer_lock(gpu_buffer_t *buffer, int start, int count) {}
+void gpu_constant_buffer_unlock(gpu_buffer_t *buffer) {}
 
 int gpu_constant_buffer_size(gpu_buffer_t *buffer) {
 	return 0;
 }
 
-gpu_buffer_t *gpu_internal_current_index_buffer = NULL;
-
 void gpu_index_buffer_init(gpu_buffer_t *buffer, int count) {
 	buffer->impl.count = count;
 }
 
-void gpu_buffer_destroy(gpu_buffer_t *buffer) {
-}
+void gpu_buffer_destroy(gpu_buffer_t *buffer) {}
 
 static int gpu_internal_index_buffer_stride(gpu_buffer_t *buffer) {
 	return 4;
@@ -137,9 +123,7 @@ void gpu_index_buffer_unlock(gpu_buffer_t *buffer) {
 	wgpuBufferUnmap(buffer->impl.buffer);
 }
 
-void gpu_internal_index_buffer_set(gpu_buffer_t *buffer) {
-
-}
+void gpu_internal_index_buffer_set(gpu_buffer_t *buffer) {}
 
 int gpu_index_buffer_count(gpu_buffer_t *buffer) {
 	return buffer->impl.count;
@@ -181,7 +165,6 @@ int gpu_texture_stride(gpu_texture_t *texture) {
 }
 
 void gpu_texture_generate_mipmaps(gpu_texture_t *texture, int levels) {}
-
 void gpu_texture_set_mipmap(gpu_texture_t *texture, gpu_texture_t *mipmap, int level) {}
 
 void gpu_render_target_init(gpu_texture_t *target, int width, int height, iron_image_format_t format, int depthBufferBits) {
@@ -193,10 +176,7 @@ void gpu_render_target_init(gpu_texture_t *target, int width, int height, iron_i
 }
 
 void gpu_render_target_init_framebuffer(gpu_texture_t *target, int width, int height, iron_image_format_t format, int depthBufferBits) {}
-
 void gpu_render_target_set_depth_from(gpu_texture_t *renderTarget, gpu_texture_t *source) {}
-
-extern WGPUDevice device;
 
 void gpu_pipeline_init(gpu_pipeline_t *pipe) {
 	gpu_internal_pipeline_init(pipe);
@@ -311,15 +291,13 @@ void gpu_shader_init(gpu_shader_t *shader, const void *source, size_t length, gp
 }
 
 void gpu_shader_destroy(gpu_shader_t *shader) {}
+void gpu_init() {}
+void gpu_destroy() {}
 
-void gpu_command_list_init(gpu_command_list_t *list) {}
-
-void gpu_command_list_destroy(gpu_command_list_t *list) {}
-
-void gpu_command_list_begin(gpu_command_list_t *list) {
+void gpu_begin() {
 	WGPUCommandEncoderDescriptor ceDesc;
 	memset(&ceDesc, 0, sizeof(ceDesc));
-	list->impl.encoder = wgpuDeviceCreateCommandEncoder(device, &ceDesc);
+	encoder = wgpuDeviceCreateCommandEncoder(device, &ceDesc);
 
 	WGPURenderPassColorAttachment attachment;
 	memset(&attachment, 0, sizeof(attachment));
@@ -334,73 +312,47 @@ void gpu_command_list_begin(gpu_command_list_t *list) {
 	passDesc.colorAttachmentCount = 1;
 	passDesc.colorAttachments = &attachment;
 
-	list->impl.pass = wgpuCommandEncoderBeginRenderPass(list->impl.encoder, &passDesc);
+	pass = wgpuCommandEncoderBeginRenderPass(encoder, &passDesc);
 }
 
-void gpu_command_list_end(gpu_command_list_t *list) {
-	wgpuRenderPassEncoderEnd(list->impl.pass);
+void gpu_end() {
+	wgpuRenderPassEncoderEnd(pass);
 
 	WGPUCommandBufferDescriptor cbDesc;
 	memset(&cbDesc, 0, sizeof(cbDesc));
-	WGPUCommandBuffer commands = wgpuCommandEncoderFinish(list->impl.encoder, &cbDesc);
+	WGPUCommandBuffer commands = wgpuCommandEncoderFinish(encoder, &cbDesc);
 	wgpuQueueSubmit(queue, 1, &commands);
 }
 
-void gpu_command_list_render_target_to_framebuffer_barrier(gpu_command_list_t *list, struct gpu_texture *renderTarget) {}
-void gpu_command_list_framebuffer_to_render_target_barrier(gpu_command_list_t *list, struct gpu_texture *renderTarget) {}
-void gpu_command_list_texture_to_render_target_barrier(gpu_command_list_t *list, struct gpu_texture *renderTarget) {}
-void gpu_command_list_render_target_to_texture_barrier(gpu_command_list_t *list, struct gpu_texture *renderTarget) {}
+void gpu_barrier(gpu_texture_t *renderTarget, int state_after) {}
 
-void gpu_command_list_draw(gpu_command_list_t *list) {
-	wgpuRenderPassEncoderDrawIndexed(list->impl.pass, list->impl.indexCount, 1, 0, 0, 0);
+void gpu_draw() {
+	wgpuRenderPassEncoderDrawIndexed(pass, indexCount, 1, 0, 0, 0);
 }
 
-void gpu_command_list_viewport(gpu_command_list_t *list, int x, int y, int width, int height) {
+void gpu_viewport(int x, int y, int width, int height) {}
+void gpu_scissor(int x, int y, int width, int height) {}
+void gpu_disable_scissor() {}
 
+void gpu_set_pipeline(struct gpu_pipeline *pipeline) {
+	wgpuRenderPassEncoderSetPipeline(pass, pipeline->impl.pipeline);
 }
 
-void gpu_command_list_scissor(gpu_command_list_t *list, int x, int y, int width, int height) {
+void gpu_set_pipeline_layout() {}
 
-}
-
-void gpu_command_list_disable_scissor(gpu_command_list_t *list) {}
-
-void gpu_command_list_set_pipeline(gpu_command_list_t *list, struct gpu_pipeline *pipeline) {
-	wgpuRenderPassEncoderSetPipeline(list->impl.pass, pipeline->impl.pipeline);
-}
-
-void gpu_command_list_set_pipeline_layout(gpu_command_list_t *list) {}
-
-void gpu_command_list_set_vertex_buffer(gpu_command_list_t *list, struct gpu_buffer *buffer) {
+void gpu_set_vertex_buffer(struct gpu_buffer *buffer) {
 	uint64_t size = (gpu_vertex_buffer_count(buffer)) * gpu_vertex_buffer_stride(buffer);
-	wgpuRenderPassEncoderSetVertexBuffer(list->impl.pass, 0, buffer->impl.buffer, 0, size);
+	wgpuRenderPassEncoderSetVertexBuffer(pass, 0, buffer->impl.buffer, 0, size);
 }
 
-void gpu_command_list_set_index_buffer(gpu_command_list_t *list, struct gpu_buffer *buffer) {
-	list->impl.indexCount = gpu_index_buffer_count(buffer);
+void gpu_set_index_buffer(struct gpu_buffer *buffer) {
+	indexCount = gpu_index_buffer_count(buffer);
 	uint64_t size = gpu_index_buffer_count(buffer) * sizeof(int);
-	wgpuRenderPassEncoderSetIndexBuffer(list->impl.pass, buffer->impl.buffer, WGPUIndexFormat_Uint32, 0, size);
+	wgpuRenderPassEncoderSetIndexBuffer(pass, buffer->impl.buffer, WGPUIndexFormat_Uint32, 0, size);
 }
 
-void gpu_command_list_set_render_targets(gpu_command_list_t *list, struct gpu_texture **targets, int count, unsigned flags, unsigned color, float depth) {
-
-}
-
-void gpu_command_list_upload_index_buffer(gpu_command_list_t *list, struct gpu_buffer *buffer) {}
-void gpu_command_list_upload_vertex_buffer(gpu_command_list_t *list, struct gpu_buffer *buffer) {}
-void gpu_command_list_upload_texture(gpu_command_list_t *list, struct gpu_texture *texture) {}
-void gpu_command_list_get_render_target_pixels(gpu_command_list_t *list, gpu_texture_t *render_target, uint8_t *data) {}
-
-void gpu_command_list_wait(gpu_command_list_t *list) {
-
-}
-
-void gpu_command_list_set_constant_buffer(gpu_command_list_t *list, struct gpu_buffer *buffer, int offset, size_t size) {
-
-}
-
-void gpu_command_list_set_texture(gpu_command_list_t *list, int unit, gpu_texture_t *texture) {
-
-}
-
-void gpu_set_texture_depth(gpu_command_list_t *list, int unit, gpu_texture_t *renderTarget) {}
+void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {}
+void gpu_wait() {}
+void gpu_set_constant_buffer(struct gpu_buffer *buffer, int offset, size_t size) {}
+void gpu_set_texture(int unit, gpu_texture_t *texture) {}
+void gpu_set_texture_depth(int unit, gpu_texture_t *renderTarget) {}

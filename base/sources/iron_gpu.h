@@ -87,7 +87,6 @@ typedef struct gpu_texture {
 	iron_image_compression_t compression;
 	void *data;
 	bool uploaded;
-	int framebuffer_index;
 	iron_internal_render_target_state_t state;
 	iron_internal_render_target_state_t depth_state;
 	buffer_t *buffer;

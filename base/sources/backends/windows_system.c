@@ -1769,8 +1769,7 @@ typedef struct {
 
 LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-#define MAXIMUM_WINDOWS 1
-static WindowData windows[MAXIMUM_WINDOWS] = {0};
+static WindowData windows[1] = {0};
 
 const wchar_t *windowClassName = L"IronWindow";
 
@@ -2019,7 +2018,7 @@ void iron_window_destroy() {
 }
 
 void iron_windows_hide_windows(void) {
-	for (int i = 0; i < MAXIMUM_WINDOWS; ++i) {
+	for (int i = 0; i < 1; ++i) {
 		if (windows[i].handle != NULL) {
 			ShowWindow(windows[i].handle, SW_HIDE);
 			UpdateWindow(windows[i].handle);
@@ -2028,7 +2027,7 @@ void iron_windows_hide_windows(void) {
 }
 
 void iron_windows_destroy_windows(void) {
-	for (int i = 0; i < MAXIMUM_WINDOWS; ++i) {
+	for (int i = 0; i < 1; ++i) {
 		iron_window_destroy(i);
 	}
 	UnregisterClassW(windowClassName, GetModuleHandleW(NULL));

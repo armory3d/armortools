@@ -23,9 +23,3 @@ struct WGPUShaderModuleImpl;
 typedef struct {
 	WGPUShaderModule module;
 } gpu_shader_impl_t;
-
-typedef struct {
-	WGPUCommandEncoder encoder;
-	WGPURenderPassEncoder pass;
-	int indexCount;
-} gpu_command_list_impl_t;

@@ -720,7 +720,7 @@ static void check_pen_device(struct iron_x11_window *window, XEvent *event, stru
 }
 
 struct iron_x11_window *window_from_window(Window window) {
-	for (int i = 0; i < MAXIMUM_WINDOWS; i++) {
+	for (int i = 0; i < 1; i++) {
 		if (x11_ctx.windows[i].window == window) {
 			return &x11_ctx.windows[i];
 		}

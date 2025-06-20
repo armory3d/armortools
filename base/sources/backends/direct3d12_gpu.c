@@ -1419,27 +1419,19 @@ static int gpu_internal_index_buffer_stride(gpu_buffer_t *buffer) {
 }
 
 void *gpu_index_buffer_lock(gpu_buffer_t *buffer) {
-	int start = 0;
-	int count = gpu_index_buffer_count(buffer);
-	buffer->impl.last_start = start;
-	buffer->impl.last_count = count;
-
 	D3D12_RANGE range = {
-		.Begin = start * gpu_internal_index_buffer_stride(buffer),
-		.End = (start + count) * gpu_internal_index_buffer_stride(buffer),
+		.Begin = 0,
+		.End = gpu_index_buffer_count(buffer) * gpu_internal_index_buffer_stride(buffer),
 	};
-
 	void *p;
 	buffer->impl.buffer->lpVtbl->Map(buffer->impl.buffer, 0, &range, &p);
-	byte *bytes = (byte *)p;
-	bytes += start * gpu_internal_index_buffer_stride(buffer);
-	return bytes;
+	return p;
 }
 
 void gpu_index_buffer_unlock(gpu_buffer_t *buffer) {
 	D3D12_RANGE range = {
-		.Begin = buffer->impl.last_start * gpu_internal_index_buffer_stride(buffer),
-		.End = (buffer->impl.last_start + buffer->impl.last_count) * gpu_internal_index_buffer_stride(buffer),
+		.Begin = 0,
+		.End = gpu_index_buffer_count(buffer) * gpu_internal_index_buffer_stride(buffer),
 	};
 	buffer->impl.buffer->lpVtbl->Unmap(buffer->impl.buffer, 0, &range);
 }
