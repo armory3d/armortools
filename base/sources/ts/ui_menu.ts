@@ -36,6 +36,7 @@ function ui_menu_render() {
 		ui_menu_y -= iron_window_height() * 2;
 	}
 
+	draw_begin();
 	ui_begin_region(ui, ui_menu_x, ui_menu_y, menu_w);
 	ui_menu_start(ui);
 
@@ -568,6 +569,7 @@ function ui_menu_render() {
 	ui.ops.theme.ELEMENT_H = _ELEMENT_H;
 	ui_menu_end(ui);
 	ui_end_region();
+	draw_end();
 
 	if (ui_menu_show_first) {
 		ui_menu_show_first = false;

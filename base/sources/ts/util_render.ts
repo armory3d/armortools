@@ -80,8 +80,8 @@ function util_render_make_material_preview() {
 
 function util_render_make_decal_preview() {
 	let current: gpu_texture_t = _draw_current;
-	let g2_in_use: bool = _draw_in_use;
-	if (g2_in_use) draw_end();
+	let in_use: bool = gpu_in_use;
+	if (in_use) draw_end();
 
 	if (context_raw.decal_image == null) {
 		context_raw.decal_image = gpu_create_render_target(util_render_decal_preview_size, util_render_decal_preview_size);
@@ -139,13 +139,13 @@ function util_render_make_decal_preview() {
 	make_material_parse_mesh_material();
 	context_raw.ddirty = 1; // Refresh depth for decal paint
 
-	if (g2_in_use) draw_begin(current);
+	if (in_use) draw_begin(current);
 }
 
 function util_render_make_text_preview() {
 	let current: gpu_texture_t = _draw_current;
-	let g2_in_use: bool = _draw_in_use;
-	if (g2_in_use) draw_end();
+	let in_use: bool = gpu_in_use;
+	if (in_use) draw_end();
 
 	let text: string = context_raw.text_tool_text;
 	let font: draw_font_t = context_raw.font.font;
@@ -173,13 +173,13 @@ function util_render_make_text_preview() {
 	draw_string(text, tex_w / 2 - text_w / 2, tex_w / 2 - text_h / 2);
 	draw_end();
 
-	if (g2_in_use) draw_begin(current);
+	if (in_use) draw_begin(current);
 }
 
 function util_render_make_font_preview() {
 	let current: gpu_texture_t = _draw_current;
-	let g2_in_use: bool = _draw_in_use;
-	if (g2_in_use) draw_end();
+	let in_use: bool = gpu_in_use;
+	if (in_use) draw_end();
 
 	let text: string = "Abg";
 	let font: draw_font_t = context_raw.font.font;
@@ -197,7 +197,7 @@ function util_render_make_font_preview() {
 	draw_end();
 	context_raw.font.preview_ready = true;
 
-	if (g2_in_use) draw_begin(current);
+	if (in_use) draw_begin(current);
 }
 
 function util_render_make_brush_preview() {
@@ -206,8 +206,8 @@ function util_render_make_brush_preview() {
 	}
 
 	let current: gpu_texture_t = _draw_current;
-	let g2_in_use: bool = _draw_in_use;
-	if (g2_in_use) draw_end();
+	let in_use: bool = gpu_in_use;
+	if (in_use) draw_end();
 
 	context_raw.material_preview = true;
 
@@ -382,7 +382,7 @@ function util_render_make_brush_preview() {
 	context_raw.brush.preview_ready = true;
 	context_raw.brush_blend_dirty = true;
 
-	if (g2_in_use) draw_begin(current);
+	if (in_use) draw_begin(current);
 }
 
 function util_render_make_node_preview(canvas: ui_node_canvas_t, node: ui_node_t, image: gpu_texture_t, group: ui_node_canvas_t = null, parents: ui_node_t[] = null) {

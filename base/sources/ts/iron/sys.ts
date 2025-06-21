@@ -508,9 +508,7 @@ function sys_render() {
 
 function sys_render_2d() {
 	if (_sys_on_renders_2d.length > 0) {
-		draw_begin();
 		_sys_run_callbacks(_sys_on_renders_2d);
-		draw_end();
 	}
 }
 

@@ -867,8 +867,6 @@ function ui_nodes_render() {
 
 	ui_nodes_ui.input_enabled = base_ui_enabled;
 
-	draw_end();
-
 	if (ui_nodes_grid_redraw) {
 		if (ui_nodes_grid != null) {
 			iron_unload_image(ui_nodes_grid);
@@ -1252,8 +1250,6 @@ function ui_nodes_render() {
 
 	ui_end(!ui_nodes_show_menu);
 
-	draw_begin(null);
-
 	if (ui_nodes_show_menu) {
 		///if (is_paint || is_sculpt)
 		let list: node_list_t[] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_list : nodes_brush_list;
@@ -1278,6 +1274,7 @@ function ui_nodes_render() {
 
 		let py: i32 = ui_nodes_popup_y;
 		let menuw: i32 = math_floor(ew * 2.3);
+		draw_begin(null);
 		ui_begin_region(ui_nodes_ui, math_floor(ui_nodes_popup_x), math_floor(py), menuw);
 		let _FILL_BUTTON_BG: i32 = ui_nodes_ui.ops.theme.FILL_BUTTON_BG;
 		ui_nodes_ui.ops.theme.FILL_BUTTON_BG = false;
@@ -1349,6 +1346,7 @@ function ui_nodes_render() {
 		ui_nodes_ui.ops.theme.ELEMENT_H = _ELEMENT_H;
 		ui_menu_end(ui_nodes_ui);
 		ui_end_region();
+		draw_end();
 	}
 
 	if (ui_nodes_hide_menu) {

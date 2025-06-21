@@ -591,6 +591,7 @@ function base_render() {
 		let h: f32 = img.height * ratio;
 		let inv: i32 = 0;
 
+		draw_begin();
 		draw_set_color(base_drag_tint);
 
 		let bg_rect: rect_t = base_get_drag_background();
@@ -602,6 +603,7 @@ function base_render() {
 			draw_scaled_image(img, mouse_x + base_drag_off_x, mouse_y + base_drag_off_y + inv, size, h - inv * 2) :
 			draw_scaled_sub_image(img, base_drag_rect.x, base_drag_rect.y, base_drag_rect.w, base_drag_rect.h, mouse_x + base_drag_off_x, mouse_y + base_drag_off_y + inv, size, h - inv * 2);
 		draw_set_color(0xffffffff);
+		draw_end();
 	}
 
 	let using_menu: bool = ui_menu_show && mouse_y > ui_header_h;

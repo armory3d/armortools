@@ -210,12 +210,12 @@ function box_projects_recent_tab(ui: ui_t) {
 
 			if (ui_button(file, ui_align_t.LEFT) && file_exists(path)) {
 				let current: gpu_texture_t = _draw_current;
-				let g2_in_use: bool = _draw_in_use;
-				if (g2_in_use) draw_end();
+				let in_use: bool = gpu_in_use;
+				if (in_use) draw_end();
 
 				import_arm_run_project(path);
 
-				if (g2_in_use) draw_begin(current);
+				if (in_use) draw_begin(current);
 				ui_box_hide();
 			}
 			if (ui.is_hovered) {

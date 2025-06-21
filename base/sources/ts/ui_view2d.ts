@@ -92,8 +92,6 @@ function ui_view2d_render() {
 		ui_view2d_hwnd.redraws = 2; // Paint was active
 	}
 
-	draw_end();
-
 	// Cache grid
 	if (ui_view2d_grid_redraw) {
 		if (ui_view2d_grid != null) {
@@ -181,17 +179,17 @@ function ui_view2d_render() {
 
 			if (ui_view2d_layer_mode == view_2d_layer_mode_t.VISIBLE) {
 				let current: gpu_texture_t = _draw_current;
-				let g2_in_use: bool = _draw_in_use;
-				if (g2_in_use) draw_end();
+				let in_use: bool = gpu_in_use;
+				if (in_use) draw_end();
 				layer = layers_flatten();
-				if (g2_in_use) draw_begin(current);
+				if (in_use) draw_begin(current);
 			}
 			else if (slot_layer_is_group(layer)) {
 				let current: gpu_texture_t = _draw_current;
-				let g2_in_use: bool = _draw_in_use;
-				if (g2_in_use) draw_end();
+				let in_use: bool = gpu_in_use;
+				if (in_use) draw_end();
 				layer = layers_flatten(false, slot_layer_get_children(layer));
-				if (g2_in_use) draw_begin(current);
+				if (in_use) draw_begin(current);
 			}
 
 			tex =
@@ -421,7 +419,6 @@ function ui_view2d_render() {
 		///end
 	}
 	ui_end();
-	draw_begin(null);
 }
 
 function ui_view2d_update() {

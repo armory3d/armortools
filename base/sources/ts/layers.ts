@@ -401,8 +401,8 @@ function layers_update_fill_layers() {
 
 function layers_update_fill_layer(parse_paint: bool = true) {
 	let current: gpu_texture_t = _draw_current;
-	let g2_in_use: bool = _draw_in_use;
-	if (g2_in_use) draw_end();
+	let in_use: bool = gpu_in_use;
+	if (in_use) draw_end();
 
 	let _tool: workspace_tool_t = context_raw.tool;
 	let _fill_type: i32 = context_raw.fill_type_handle.position;
@@ -421,7 +421,7 @@ function layers_update_fill_layer(parse_paint: bool = true) {
 	context_raw.rdirty = 2;
 	context_raw.tool = _tool;
 	context_raw.fill_type_handle.position = _fill_type;
-	if (g2_in_use) draw_begin(current);
+	if (in_use) draw_begin(current);
 }
 
 function layers_set_object_mask() {

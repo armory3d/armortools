@@ -46,12 +46,12 @@ function project_open() {
 		}
 
 		let current: gpu_texture_t = _draw_current;
-		let g2_in_use: bool = _draw_in_use;
-		if (g2_in_use) draw_end();
+		let in_use: bool = gpu_in_use;
+		if (in_use) draw_end();
 
 		import_arm_run_project(path);
 
-		if (g2_in_use) draw_begin(current);
+		if (in_use) draw_begin(current);
 	});
 }
 
@@ -227,8 +227,8 @@ function project_new(reset_layers: bool = true) {
 	let md: mesh_data_t = data_get_mesh("Scene", n);
 
 	let current: gpu_texture_t = _draw_current;
-	let g2_in_use: bool = _draw_in_use;
-	if (g2_in_use) draw_end();
+	let in_use: bool = gpu_in_use;
+	if (in_use) draw_end();
 
 	///if is_paint
 	context_raw.picker_mask_handle.position = picker_mask_t.NONE;
@@ -316,7 +316,7 @@ function project_new(reset_layers: bool = true) {
 		sys_notify_on_init(layers_init);
 	}
 
-	if (g2_in_use) draw_begin(current);
+	if (in_use) draw_begin(current);
 
 	context_raw.saved_envmap = null;
 	context_raw.envmap_loaded = false;

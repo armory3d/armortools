@@ -546,14 +546,14 @@ function context_set_layer(l: slot_layer_t) {
 	ui_header_handle.redraws = 2;
 
 	let current: gpu_texture_t = _draw_current;
-	let g2_in_use: bool = _draw_in_use;
-	if (g2_in_use) draw_end();
+	let in_use: bool = gpu_in_use;
+	if (in_use) draw_end();
 
 	layers_set_object_mask();
 	make_material_parse_mesh_material();
 	make_material_parse_paint_material();
 
-	if (g2_in_use) draw_begin(current);
+	if (in_use) draw_begin(current);
 
 	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 	ui_view2d_hwnd.redraws = 2;

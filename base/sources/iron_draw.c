@@ -15,14 +15,12 @@
 draw_font_t *draw_font = NULL;
 int draw_font_size;
 gpu_texture_t *_draw_current = NULL;
-bool _draw_in_use = false;
 
 static iron_matrix4x4_t draw_projection_matrix;
 static iron_matrix3x3_t draw_transform;
 static bool draw_bilinear_filter = true;
 static uint32_t draw_color = 0;
 static gpu_pipeline_t *draw_custom_pipeline = NULL;
-static bool _draw_thrown = false;
 
 static gpu_buffer_t rect_vertex_buffer;
 static gpu_buffer_t rect_index_buffer;
@@ -215,14 +213,7 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *rect_vert, 
 }
 
 void draw_begin(gpu_texture_t *target, bool clear, unsigned color) {
-	if (_draw_in_use && !_draw_thrown) {
-		_draw_thrown = true;
-		iron_log("End before you begin");
-	}
-	_draw_in_use = true;
-
 	draw_set_color(0xffffffff);
-
 	_draw_current = target;
 	if (target == NULL) {
 		gpu_begin(NULL, 0, clear ? GPU_CLEAR_COLOR : GPU_CLEAR_NONE, color, 0.0);
@@ -234,11 +225,6 @@ void draw_begin(gpu_texture_t *target, bool clear, unsigned color) {
 }
 
 void draw_end(void) {
-	if (!_draw_in_use && !_draw_thrown) {
-		_draw_thrown = true;
-		iron_log("Begin before you end");
-	}
-	_draw_in_use = false;
 	gpu_end();
 }
 

@@ -6,45 +6,6 @@
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
 
-struct vk_depth {
-	VkImage image;
-	VkImageView view;
-	VkDeviceMemory memory;
-};
-
-struct vk_window {
-	int width;
-	int height;
-	bool resized;
-	bool surface_destroyed;
-	int depth_bits;
-	bool vsynced;
-	uint32_t current_image;
-	VkSurfaceKHR surface;
-	VkSurfaceFormatKHR format;
-	VkSwapchainKHR swapchain;
-	uint32_t image_count;
-	VkImage *images;
-	VkImageView *views;
-	struct vk_depth depth;
-};
-
-struct vk_context {
-	VkInstance instance;
-	VkPhysicalDevice gpu;
-	VkDevice device;
-	VkPhysicalDeviceMemoryProperties memory_properties;
-	VkCommandBuffer setup_cmd;
-	VkCommandPool cmd_pool;
-	VkQueue queue;
-	struct vk_window windows[1];
-	VkBuffer *uniform_buffer;
-#ifdef VALIDATE
-	bool validation_found;
-	VkDebugUtilsMessengerEXT debug_messenger;
-#endif
-};
-
 typedef struct gpu_pipeline_impl {
 	const char **textures;
 	int *textureValues;

@@ -1154,7 +1154,6 @@ function ui_base_update_ui() {
 function ui_base_render() {
 	if (!ui_base_show && config_raw.touch_ui) {
 		ui_base_ui.input_enabled = true;
-		draw_end();
 		ui_begin(ui_base_ui);
 		if (ui_window(ui_handle(__ID__), 0, 0, 150, math_floor(ui_ELEMENT_H(ui_base_ui) + ui_ELEMENT_OFFSET(ui_base_ui) + 1))) {
 			if (ui_button(tr("Close"))) {
@@ -1162,7 +1161,6 @@ function ui_base_render() {
 			}
 		}
 		ui_end();
-		draw_begin(null);
 	}
 
 	if (!ui_base_show || iron_window_width() == 0 || iron_window_height() == 0) {
@@ -1184,7 +1182,6 @@ function ui_base_render() {
 		ui_base_htabs[i].position = config_raw.layout_tabs[i];
 	}
 
-	draw_end();
 	ui_begin(ui_base_ui);
 
 	///if (is_paint || is_sculpt)
@@ -1199,7 +1196,6 @@ function ui_base_render() {
 	///end
 
 	ui_end();
-	draw_begin(null);
 }
 
 function ui_base_draw_sidebar() {
@@ -1284,6 +1280,7 @@ function ui_base_render_cursor() {
 		return;
 	}
 
+	draw_begin();
 	draw_set_color(0xffffffff);
 
 	context_raw.view_index = context_raw.view_index_last;
@@ -1427,6 +1424,7 @@ function ui_base_render_cursor() {
 		draw_scaled_image(cursor_img, mx - radius / 2, my - radius / 2, radius, radius);
 		draw_set_color(0xffffffff);
 	}
+	draw_end();
 }
 
 function ui_base_show_material_nodes() {

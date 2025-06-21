@@ -252,10 +252,10 @@ function config_apply() {
 	context_raw.ddirty = 2;
 
 	let current: gpu_texture_t = _draw_current;
-	let g2_in_use: bool = _draw_in_use;
-	if (g2_in_use) draw_end();
+	let in_use: bool = gpu_in_use;
+	if (in_use) draw_end();
 	render_path_base_apply_config();
-	if (g2_in_use) draw_begin(current);
+	if (in_use) draw_begin(current);
 }
 
 function config_get_super_sample_quality(f: f32): i32 {

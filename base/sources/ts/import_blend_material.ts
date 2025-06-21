@@ -31,12 +31,12 @@ function import_blend_material_run(path: string) {
 function _import_blend_material() {
 
 	let current: gpu_texture_t = _draw_current;
-	let g2_in_use: bool = _draw_in_use;
-	if (g2_in_use) draw_end();
+	let in_use: bool = gpu_in_use;
+	if (in_use) draw_end();
 
 	console_toast(tr("Baking material"));
 
-	if (g2_in_use) draw_begin(current);
+	if (in_use) draw_begin(current);
 
 	sys_notify_on_init(function () {
 

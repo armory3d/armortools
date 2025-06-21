@@ -45,15 +45,15 @@ function ui_box_render() {
 	}
 
 	if (config_raw.touch_ui) { // Darken bg
+		draw_begin();
 		///if (arm_android || arm_ios)
 		draw_set_color(color_from_floats(0, 0, 0, ui_box_tween_alpha));
 		///else
 		draw_set_color(color_from_floats(0, 0, 0, 0.5));
 		///end
 		draw_filled_rect(0, 0, iron_window_width(), iron_window_height());
+		draw_end();
 	}
-
-	draw_end();
 
 	let ui: ui_t = base_ui_box;
 	let appw: i32 = iron_window_width();
@@ -122,8 +122,6 @@ function ui_box_render() {
 		}
 		ui_end();
 	}
-
-	draw_begin(null);
 
 	ui_box_draws++;
 }
