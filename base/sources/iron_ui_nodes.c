@@ -759,7 +759,10 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 	current_nodes = nodes;
 	ui_t *current = ui_get_current();
 	if (!ui_nodes_elements_baked) {
+		gpu_texture_t *current = _draw_current;
+		draw_end();
 		ui_nodes_bake_elements();
+		draw_begin(current, false, 0);
 	}
 	if (ui_nodes_exclude_remove == NULL) {
 		ui_nodes_exclude_remove = gc_alloc(sizeof(char_ptr_array_t));
