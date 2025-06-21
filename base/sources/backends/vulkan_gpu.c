@@ -1295,20 +1295,20 @@ void gpu_present() {
 	vkResetFences(device, 1, &fence);
 
 	VkSubmitInfo submit_info = {
-        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-        .pNext = NULL,
-        .commandBufferCount = 1,
-        .pCommandBuffers = &command_buffer,
-        .signalSemaphoreCount = 1,
-        .pSignalSemaphores = &rendering_finished_semaphore,
-    };
+		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+		.pNext = NULL,
+		.commandBufferCount = 1,
+		.pCommandBuffers = &command_buffer,
+		.signalSemaphoreCount = 1,
+		.pSignalSemaphores = &rendering_finished_semaphore,
+	};
 
 	VkSemaphore wait_semaphores[1] = {framebuffer_available_semaphore};
-    VkPipelineStageFlags wait_stages[1] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-    submit_info.waitSemaphoreCount = 1;
-    submit_info.pWaitSemaphores = wait_semaphores;
-    submit_info.pWaitDstStageMask = wait_stages;
-    vkQueueSubmit(queue, 1, &submit_info, fence);
+	VkPipelineStageFlags wait_stages[1] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+	submit_info.waitSemaphoreCount = 1;
+	submit_info.pWaitSemaphores = wait_semaphores;
+	submit_info.pWaitDstStageMask = wait_stages;
+	vkQueueSubmit(queue, 1, &submit_info, fence);
 
 	VkPresentInfoKHR present = {
 		.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
@@ -1336,7 +1336,7 @@ void gpu_present() {
 	}
 
 	gpu_wait();
-    acquire_next_image();
+	acquire_next_image();
 
 	if (!command_buffer_open) {
 		vkResetCommandBuffer(command_buffer, 0);
