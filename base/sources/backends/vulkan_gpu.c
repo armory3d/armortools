@@ -37,11 +37,11 @@ static gpu_texture_t *current_render_targets[8] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
 static int current_render_targets_count = 0;
-static VkSemaphore framebuffer_available;
-static VkSemaphore relay_semaphore;
-static bool wait_for_relay = false;
+
+static VkSemaphore framebuffer_available_semaphore;
+static VkSemaphore rendering_finished_semaphore;
+static VkFence fence;
 static gpu_pipeline_t *current_pipeline = NULL;
-static bool wait_for_framebuffer = false;
 static VkDescriptorSetLayout descriptor_layout;
 static VkDescriptorPool descriptor_pool;
 static descriptor_set_t descriptor_sets[MAX_DESCRIPTOR_SETS] = {0};
@@ -53,7 +53,6 @@ static VkPhysicalDeviceMemoryProperties memory_properties;
 static VkSampler immutable_sampler;
 static int index_count;
 static VkCommandBuffer command_buffer;
-static VkFence fence;
 static gpu_texture_t framebuffers[FRAMEBUFFER_COUNT];
 static int framebuffer_index = 0;
 static bool command_buffer_open = true;
@@ -61,7 +60,6 @@ static bool command_buffer_open = true;
 static VkInstance instance;
 static VkPhysicalDevice gpu;
 static VkDevice device;
-static VkCommandBuffer setup_cmd;
 static VkCommandPool cmd_pool;
 static VkQueue queue;
 static VkBuffer *uniform_buffer;
@@ -73,11 +71,10 @@ static VkDebugUtilsMessengerEXT debug_messenger;
 static bool window_surface_destroyed;
 static int window_depth_bits;
 static bool window_vsynced;
-static uint32_t window_current_image;
 static VkSurfaceKHR window_surface;
 static VkSurfaceFormatKHR window_format;
 static VkSwapchainKHR window_swapchain;
-static uint32_t window_image_count;
+static uint32_t framebuffer_count;
 
 void iron_vulkan_get_instance_extensions(const char **extensions, int *index);
 VkBool32 iron_vulkan_get_physical_device_presentation_support(VkPhysicalDevice physical_device, uint32_t queue_family_index);
@@ -221,55 +218,6 @@ static void memory_type_from_properties(uint32_t type_bits, VkFlags requirements
 	}
 }
 
-static void setup_init_cmd() {
-	if (setup_cmd == VK_NULL_HANDLE) {
-		VkCommandBufferAllocateInfo cmd = {
-			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-			.pNext = NULL,
-			.commandPool = cmd_pool,
-			.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-			.commandBufferCount = 1,
-		};
-		vkAllocateCommandBuffers(device, &cmd, &setup_cmd);
-
-		VkCommandBufferBeginInfo begin_info = {
-			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-			.pNext = NULL,
-			.flags = 0,
-			.pInheritanceInfo = NULL,
-		};
-		vkBeginCommandBuffer(setup_cmd, &begin_info);
-	}
-}
-
-static void flush_init_cmd() {
-	if (setup_cmd == VK_NULL_HANDLE) {
-		return;
-	}
-
-	vkEndCommandBuffer(setup_cmd);
-
-	const VkCommandBuffer cmd_bufs[] = { setup_cmd };
-	VkFence null_fence = { VK_NULL_HANDLE };
-	VkSubmitInfo submit_info = {
-		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-		.pNext = NULL,
-		.waitSemaphoreCount = 0,
-		.pWaitSemaphores = NULL,
-		.pWaitDstStageMask = NULL,
-		.commandBufferCount = 1,
-		.pCommandBuffers = cmd_bufs,
-		.signalSemaphoreCount = 0,
-		.pSignalSemaphores = NULL,
-	};
-
-	vkQueueSubmit(queue, 1, &submit_info, null_fence);
-	vkQueueWaitIdle(queue);
-
-	vkFreeCommandBuffers(device, cmd_pool, 1, cmd_bufs);
-	setup_cmd = VK_NULL_HANDLE;
-}
-
 static VkAccessFlags access_mask(VkImageLayout layout) {
 	// .srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
 	// .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
@@ -281,7 +229,7 @@ static VkAccessFlags access_mask(VkImageLayout layout) {
 	if (layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
 		return VK_ACCESS_TRANSFER_WRITE_BIT;
 	}
-	if (layout == VK_IMAGE_LAYOUT_GENERAL) {
+	if (layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
 		return VK_ACCESS_MEMORY_READ_BIT;
 	}
 	return 0;
@@ -316,8 +264,8 @@ static void gpu_barrier(gpu_texture_t *render_target, VkImageLayout state_after)
 			.pNext = NULL,
 			.srcAccessMask = access_mask(render_target->impl.state),
 			.dstAccessMask = access_mask(state_after),
-			.oldLayout = render_target->impl.state,
-			.newLayout = state_after,
+			.oldLayout = render_target->impl.state == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL ? VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL : render_target->impl.state,
+			.newLayout = state_after == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL ? VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL : state_after,
 			.image = render_target->impl.depthImage,
 			.subresourceRange = {
 				.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
@@ -334,7 +282,9 @@ static void gpu_barrier(gpu_texture_t *render_target, VkImageLayout state_after)
 }
 
 static void set_image_layout(VkImage image, VkImageAspectFlags aspect_mask, VkImageLayout old_layout, VkImageLayout new_layout) {
-	setup_init_cmd();
+	if (gpu_in_use) {
+		vkCmdEndRendering(command_buffer);
+	}
 
 	VkImageMemoryBarrier barrier = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
@@ -357,12 +307,15 @@ static void set_image_layout(VkImage image, VkImageAspectFlags aspect_mask, VkIm
 	if (new_layout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
 		barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 	}
-	if (new_layout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+	if (new_layout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL) {
 		barrier.dstAccessMask = barrier.dstAccessMask | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 	}
 
-	vkCmdPipelineBarrier(setup_cmd, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
-	flush_init_cmd();
+	vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
+
+	if (gpu_in_use) {
+		vkCmdBeginRendering(command_buffer, &current_rendering_info);
+	}
 }
 
 void create_descriptor_layout(void) {
@@ -447,9 +400,9 @@ void gpu_internal_resize(int width, int height) {
 }
 
 VkSwapchainKHR cleanup_swapchain() {
-	for (int i = 0; i < FRAMEBUFFER_COUNT; ++i) {
-		gpu_texture_destroy(&framebuffers[i]);
-	}
+	// for (int i = 0; i < FRAMEBUFFER_COUNT; ++i) {
+	// 	gpu_texture_destroy(&framebuffers[i]);
+	// }
 	VkSwapchainKHR chain = window_swapchain;
 	window_swapchain = VK_NULL_HANDLE;
 	return chain;
@@ -518,7 +471,7 @@ static void render_target_init(gpu_texture_t *target, int width, int height, iro
 	memory_type_from_properties(memory_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &allocation_nfo.memoryTypeIndex);
 	vkAllocateMemory(device, &allocation_nfo, NULL, &target->impl.mem);
 	vkBindImageMemory(device, target->impl.image, target->impl.mem, 0);
-	set_image_layout(target->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+	set_image_layout(target->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	color_image_view.image = target->impl.image;
 	vkCreateImageView(device, &color_image_view, NULL, &target->impl.view);
 
@@ -569,7 +522,7 @@ static void render_target_init(gpu_texture_t *target, int width, int height, iro
 		memory_type_from_properties(mem_reqs.memoryTypeBits, 0, /* No requirements */ &mem_alloc.memoryTypeIndex);
 		vkAllocateMemory(device, &mem_alloc, NULL, &target->impl.depthMemory);
 		vkBindImageMemory(device, target->impl.depthImage, target->impl.depthMemory, 0);
-		set_image_layout(target->impl.depthImage, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+		set_image_layout(target->impl.depthImage, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 		vkCreateImageView(device, &view, NULL, &target->impl.depthView);
 	}
 }
@@ -659,11 +612,11 @@ static void create_swapchain() {
 		vkDestroySwapchainKHR(device, old_swapchain, NULL);
 	}
 
-	vkGetSwapchainImagesKHR(device, window_swapchain, &window_image_count, NULL);
-	VkImage *window_images = (VkImage *)malloc(window_image_count * sizeof(VkImage));
-	vkGetSwapchainImagesKHR(device, window_swapchain, &window_image_count, window_images);
+	vkGetSwapchainImagesKHR(device, window_swapchain, &framebuffer_count, NULL);
+	VkImage *window_images = (VkImage *)malloc(framebuffer_count * sizeof(VkImage));
+	vkGetSwapchainImagesKHR(device, window_swapchain, &framebuffer_count, window_images);
 
-	for (uint32_t i = 0; i < window_image_count; i++) {
+	for (uint32_t i = 0; i < framebuffer_count; i++) {
 		framebuffers[i].impl.image = window_images[i];
 		VkImageViewCreateInfo color_attachment_view = {
 			.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
@@ -686,15 +639,14 @@ static void create_swapchain() {
 		vkCreateImageView(device, &color_attachment_view, NULL, &framebuffers[i].impl.view);
 	}
 
-	window_current_image = 0;
+	framebuffer_index = 0;
 
-	const VkFormat depth_format = VK_FORMAT_D16_UNORM;
 	if (window_depth_bits > 0) {
 		VkImageCreateInfo image = {
 			.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
 			.pNext = NULL,
 			.imageType = VK_IMAGE_TYPE_2D,
-			.format = depth_format,
+			.format = VK_FORMAT_D16_UNORM,
 			.extent.width = iron_window_width(),
 			.extent.height = iron_window_height(),
 			.extent.depth = 1,
@@ -717,7 +669,7 @@ static void create_swapchain() {
 			.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
 			.pNext = NULL,
 			.image = VK_NULL_HANDLE,
-			.format = depth_format,
+			.format = VK_FORMAT_D16_UNORM,
 			.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
 			.subresourceRange.baseMipLevel = 0,
 			.subresourceRange.levelCount = 1,
@@ -734,13 +686,23 @@ static void create_swapchain() {
 		memory_type_from_properties(mem_reqs.memoryTypeBits, 0, &mem_alloc.memoryTypeIndex);
 		vkAllocateMemory(device, &mem_alloc, NULL, &framebuffers[0].impl.depthMemory);
 		vkBindImageMemory(device, framebuffers[0].impl.depthImage, framebuffers[0].impl.depthMemory, 0);
-		set_image_layout(framebuffers[0].impl.depthImage, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+		set_image_layout(framebuffers[0].impl.depthImage, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 		view.image = framebuffers[0].impl.depthImage;
 		vkCreateImageView(device, &view, NULL, &framebuffers[0].impl.depthView);
 	}
+}
 
-	flush_init_cmd();
+static void acquire_next_image() {
+	while (true) {
+		VkResult err = vkAcquireNextImageKHR(device, window_swapchain, UINT64_MAX, framebuffer_available_semaphore, VK_NULL_HANDLE, &framebuffer_index);
+		if (err == VK_ERROR_SURFACE_LOST_KHR || err == VK_ERROR_OUT_OF_DATE_KHR) {
+			window_surface_destroyed = (err == VK_ERROR_SURFACE_LOST_KHR);
+			create_swapchain();
+			continue;
+		}
+		break;
+	}
 }
 
 void gpu_init_internal(int depth_buffer_bits, bool vsync) {
@@ -1064,8 +1026,8 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 		.flags = 0,
 	};
 
-	vkCreateSemaphore(device, &sem_info, NULL, &framebuffer_available);
-	vkCreateSemaphore(device, &sem_info, NULL, &relay_semaphore);
+	vkCreateSemaphore(device, &sem_info, NULL, &framebuffer_available_semaphore);
+	vkCreateSemaphore(device, &sem_info, NULL, &rendering_finished_semaphore);
 
 	window_depth_bits = depth_buffer_bits;
 	window_vsynced = vsync;
@@ -1096,12 +1058,6 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 		}
 	}
 
-	for (int i = 0; i < FRAMEBUFFER_COUNT; ++i) {
-		render_target_init(&framebuffers[i], iron_window_width(), iron_window_height(), IRON_IMAGE_FORMAT_RGBA32, depth_buffer_bits, i);
-	}
-
-	create_swapchain();
-
 	VkCommandBufferAllocateInfo cmd = {
 		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
 		.pNext = NULL,
@@ -1109,6 +1065,21 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 		.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
 		.commandBufferCount = 1,
 	};
+	vkAllocateCommandBuffers(device, &cmd, &command_buffer);
+
+	VkCommandBufferBeginInfo begin_info = {
+		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+		.pNext = NULL,
+		.flags = 0,
+		.pInheritanceInfo = NULL,
+	};
+	vkBeginCommandBuffer(command_buffer, &begin_info);
+
+	for (int i = 0; i < FRAMEBUFFER_COUNT; ++i) {
+		render_target_init(&framebuffers[i], iron_window_width(), iron_window_height(), IRON_IMAGE_FORMAT_RGBA32, depth_buffer_bits, i);
+	}
+
+	create_swapchain();
 
 	VkFenceCreateInfo fence_info = {
 		.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
@@ -1119,14 +1090,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 
 	index_count = 0;
 
-	vkAllocateCommandBuffers(device, &cmd, &command_buffer);
-	VkCommandBufferBeginInfo begin_info = {
-		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-		.pNext = NULL,
-		.flags = 0,
-		.pInheritanceInfo = NULL,
-	};
-	vkBeginCommandBuffer(command_buffer, &begin_info);
+	acquire_next_image();
 }
 
 void gpu_destroy() {
@@ -1186,19 +1150,6 @@ void gpu_begin(gpu_texture_t **targets, int count, unsigned flags, unsigned colo
 	}
 	gpu_in_use = true;
 
-	gpu_wait();
-	if (!command_buffer_open) {
-		vkResetCommandBuffer(command_buffer, 0);
-		VkCommandBufferBeginInfo begin_info = {
-			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-			.pNext = NULL,
-			.flags = 0,
-			.pInheritanceInfo = NULL,
-		};
-		vkBeginCommandBuffer(command_buffer, &begin_info);
-		command_buffer_open = true;
-	}
-
 	if (current_render_targets_count > 0 && current_render_targets[0] != &framebuffers[framebuffer_index]) {
 		for (int i = 0; i < current_render_targets_count; ++i) {
 			gpu_barrier(current_render_targets[i], VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
@@ -1239,11 +1190,11 @@ void gpu_begin(gpu_texture_t **targets, int count, unsigned flags, unsigned colo
 		current_color_attachment_infos[i] = (VkRenderingAttachmentInfo){
 			.sType              = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
 			.pNext              = NULL,
-			.imageView          = current_render_targets[i]->impl.view, // window_views[window_current_image],
+			.imageView          = current_render_targets[i]->impl.view,
 			.imageLayout        = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 			.resolveMode        = VK_RESOLVE_MODE_NONE,
 			.resolveImageView   = VK_NULL_HANDLE,
-			.resolveImageLayout = VK_IMAGE_LAYOUT_GENERAL,
+			.resolveImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 			.loadOp             = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
 			.storeOp            = VK_ATTACHMENT_STORE_OP_STORE,
 			.clearValue = clear_value,
@@ -1254,11 +1205,11 @@ void gpu_begin(gpu_texture_t **targets, int count, unsigned flags, unsigned colo
 		current_depth_attachment_info = (VkRenderingAttachmentInfo) {
 			.sType              = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
 			.pNext              = NULL,
-			.imageView          = target->impl.depthView, //  window_depth_view,
+			.imageView          = target->impl.depthView,
 			.imageLayout        = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
 			.resolveMode        = VK_RESOLVE_MODE_NONE,
 			.resolveImageView   = VK_NULL_HANDLE,
-			.resolveImageLayout = VK_IMAGE_LAYOUT_GENERAL,
+			.resolveImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 			.loadOp             = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
 			.storeOp            = VK_ATTACHMENT_STORE_OP_STORE,
 			.clearValue         = 1.0,
@@ -1272,7 +1223,7 @@ void gpu_begin(gpu_texture_t **targets, int count, unsigned flags, unsigned colo
 		.renderArea           = render_area,
 		.layerCount           = 1,
 		.viewMask             = 0,
-		.colorAttachmentCount = (uint32_t)1,
+		.colorAttachmentCount = (uint32_t)current_render_targets_count,
 		.pColorAttachments    = current_color_attachment_infos,
 		.pDepthAttachment     = target->impl.depth_buffer_bits == 0 ? VK_NULL_HANDLE : &current_depth_attachment_info,
 		.pStencilAttachment   = VK_NULL_HANDLE,
@@ -1331,39 +1282,6 @@ void gpu_end() {
 			current_render_targets[i] == &framebuffers[framebuffer_index] ? VK_IMAGE_LAYOUT_PRESENT_SRC_KHR : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
 	current_render_targets_count = 0;
-
-	vkEndCommandBuffer(command_buffer);
-	command_buffer_open = false;
-
-	// gpu_wait();
-	vkResetFences(device, 1, &fence);
-
-	VkSubmitInfo submit_info = {
-		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-		.pNext = NULL,
-	};
-
-	VkSemaphore semaphores[2] = { framebuffer_available, relay_semaphore };
-	VkPipelineStageFlags dst_stage_flags[2] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT};
-	if (wait_for_framebuffer) {
-		submit_info.pWaitSemaphores = semaphores;
-		submit_info.pWaitDstStageMask = dst_stage_flags;
-		submit_info.waitSemaphoreCount = wait_for_relay ? 2 : 1;
-		wait_for_framebuffer = false;
-	}
-	else if (wait_for_relay) {
-		submit_info.waitSemaphoreCount = 1;
-		submit_info.pWaitSemaphores = &semaphores[1];
-		submit_info.pWaitDstStageMask = &dst_stage_flags[1];
-	}
-
-	submit_info.commandBufferCount = 1;
-	submit_info.pCommandBuffers = &command_buffer;
-	submit_info.signalSemaphoreCount = 1;
-	submit_info.pSignalSemaphores = &relay_semaphore;
-	wait_for_relay = true;
-
-	vkQueueSubmit(queue, 1, &submit_info, fence);
 }
 
 void gpu_wait() {
@@ -1371,16 +1289,36 @@ void gpu_wait() {
 }
 
 void gpu_present() {
+	vkEndCommandBuffer(command_buffer);
+	command_buffer_open = false;
+
+	vkResetFences(device, 1, &fence);
+
+	VkSubmitInfo submit_info = {
+        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+        .pNext = NULL,
+        .commandBufferCount = 1,
+        .pCommandBuffers = &command_buffer,
+        .signalSemaphoreCount = 1,
+        .pSignalSemaphores = &rendering_finished_semaphore,
+    };
+
+	VkSemaphore wait_semaphores[1] = {framebuffer_available_semaphore};
+    VkPipelineStageFlags wait_stages[1] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+    submit_info.waitSemaphoreCount = 1;
+    submit_info.pWaitSemaphores = wait_semaphores;
+    submit_info.pWaitDstStageMask = wait_stages;
+    vkQueueSubmit(queue, 1, &submit_info, fence);
+
 	VkPresentInfoKHR present = {
 		.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
 		.pNext = NULL,
 		.swapchainCount = 1,
 		.pSwapchains = &window_swapchain,
-		.pImageIndices = &window_current_image,
-		.pWaitSemaphores = &relay_semaphore,
+		.pImageIndices = &framebuffer_index,
+		.pWaitSemaphores = &rendering_finished_semaphore,
 		.waitSemaphoreCount = 1,
 	};
-	wait_for_relay = false;
 
 	VkResult err = vkQueuePresentKHR(queue, &present);
 	if (err == VK_ERROR_SURFACE_LOST_KHR) {
@@ -1397,16 +1335,19 @@ void gpu_present() {
 		descriptor_sets[i].in_use = false;
 	}
 
-	framebuffer_index = (framebuffer_index + 1) % FRAMEBUFFER_COUNT;
+	gpu_wait();
+    acquire_next_image();
 
-	while (true) {
-		VkResult err = vkAcquireNextImageKHR(device, window_swapchain, UINT64_MAX, framebuffer_available, VK_NULL_HANDLE, &window_current_image);
-		if (err == VK_ERROR_SURFACE_LOST_KHR || err == VK_ERROR_OUT_OF_DATE_KHR) {
-			window_surface_destroyed = (err == VK_ERROR_SURFACE_LOST_KHR);
-			create_swapchain();
-			continue;
-		}
-		break;
+	if (!command_buffer_open) {
+		vkResetCommandBuffer(command_buffer, 0);
+		VkCommandBufferBeginInfo begin_info = {
+			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+			.pNext = NULL,
+			.flags = 0,
+			.pInheritanceInfo = NULL,
+		};
+		vkBeginCommandBuffer(command_buffer, &begin_info);
+		command_buffer_open = true;
 	}
 }
 
@@ -1551,7 +1492,7 @@ static int write_tex_descs(VkDescriptorImageInfo *tex_descs) {
 			else {
 				tex_descs[i].imageView = current_textures[i]->impl.view;
 			}
-			tex_descs[i].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+			tex_descs[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			texture_count++;
 		}
 	}
@@ -1621,7 +1562,7 @@ static VkDescriptorSet get_descriptor_set() {
 			}
 			texture_count++;
 		}
-		tex_desc[i].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+		tex_desc[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 	}
 
 	VkWriteDescriptorSet writes[17];
@@ -2015,10 +1956,10 @@ static void prepare_texture_image(uint8_t *tex_colors, uint32_t width, uint32_t 
 	}
 
 	if (usage & VK_IMAGE_USAGE_STORAGE_BIT) {
-		tex_obj->imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+		tex_obj->imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 	}
 	else {
-		tex_obj->imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+		tex_obj->imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 	}
 
 	set_image_layout(tex_obj->image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, tex_obj->imageLayout);
@@ -2053,7 +1994,6 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	if (props.linearTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT) {
 		prepare_texture_image((uint8_t *)data, (uint32_t)width, (uint32_t)height, &texture->impl, VK_IMAGE_TILING_LINEAR,
 							  VK_IMAGE_USAGE_SAMPLED_BIT /*| VK_IMAGE_USAGE_STORAGE_BIT*/, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &texture->impl.deviceSize, tex_format);
-		flush_init_cmd();
 	}
 	else if (props.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT) {
 		gpu_texture_impl_t staging_texture;
@@ -2088,7 +2028,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 			.extent.depth = 1,
 		};
 
-		vkCmdCopyImage(setup_cmd, staging_texture.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, texture->impl.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copy_region);
+		vkCmdCopyImage(command_buffer, staging_texture.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, texture->impl.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copy_region);
 		set_image_layout(texture->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture->impl.imageLayout);
 		vkDestroyImage(device, staging_texture.image, NULL);
 		vkFreeMemory(device, staging_texture.mem, NULL);
@@ -2136,7 +2076,6 @@ void gpu_texture_init(gpu_texture_t *texture, int width, int height, iron_image_
 	prepare_texture_image(NULL, (uint32_t)width, (uint32_t)height, &texture->impl, VK_IMAGE_TILING_LINEAR,
 						  VK_IMAGE_USAGE_SAMPLED_BIT /*| VK_IMAGE_USAGE_STORAGE_BIT*/, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &texture->impl.deviceSize, tex_format);
 
-	flush_init_cmd();
 	update_stride(texture);
 
 	VkImageViewCreateInfo view = {
@@ -2213,7 +2152,7 @@ void gpu_texture_set_mipmap(gpu_texture_t *texture, gpu_texture_t *mipmap, int l
 	// memcpy(mapped_data, mipmap->data, (size_t)buffer_info.size);
 	// vkUnmapMemory(device, staging_buffer_mem);
 
-	// set_image_layout(texture->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_GENERAL,
+	// set_image_layout(texture->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 	//                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
 	// VkBufferImageCopy region = {
@@ -2228,19 +2167,17 @@ void gpu_texture_set_mipmap(gpu_texture_t *texture, gpu_texture_t *mipmap, int l
 		// .imageExtent = (VkExtent3D){(uint32_t)mipmap->width, (uint32_t)mipmap->height, 1},
 	// };
 
-	// setup_init_cmd();
 	// vkCmdCopyBufferToImage(
-	//     setup_cmd,
+	//     command_buffer,
 	//     staging_buffer,
 	//     texture->impl.image,
 	//     VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 	//     1,
 	//     &region
 	// );
-	// flush_init_cmd();
 
 	// set_image_layout(texture->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-	//                VK_IMAGE_LAYOUT_GENERAL);
+	//                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 	// vkFreeMemory(device, staging_buffer_mem, NULL);
 	// vkDestroyBuffer(device, staging_buffer, NULL);
@@ -3558,7 +3495,7 @@ void gpu_raytrace_dispatch_rays() {
 
 	VkDescriptorImageInfo image_descriptor = {
 		.imageView = output->impl.view,
-		.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 	};
 
 	VkDescriptorBufferInfo buffer_descriptor = {
@@ -3621,7 +3558,7 @@ void gpu_raytrace_dispatch_rays() {
 
 	VkDescriptorImageInfo tex0image_descriptor = {
 		.imageView = texpaint0->impl.view,
-		.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 	};
 
 	VkWriteDescriptorSet tex0_image_write = {
@@ -3636,7 +3573,7 @@ void gpu_raytrace_dispatch_rays() {
 
 	VkDescriptorImageInfo tex1image_descriptor = {
 		.imageView = texpaint1->impl.view,
-		.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 	};
 
 	VkWriteDescriptorSet tex1_image_write = {
@@ -3651,7 +3588,7 @@ void gpu_raytrace_dispatch_rays() {
 
 	VkDescriptorImageInfo tex2image_descriptor = {
 		.imageView = texpaint2->impl.view,
-		.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 	};
 
 	VkWriteDescriptorSet tex2_image_write = {
@@ -3666,7 +3603,7 @@ void gpu_raytrace_dispatch_rays() {
 
 	VkDescriptorImageInfo texenvimage_descriptor = {
 		.imageView = texenv->impl.view,
-		.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 	};
 
 	VkWriteDescriptorSet texenv_image_write = {
@@ -3681,7 +3618,7 @@ void gpu_raytrace_dispatch_rays() {
 
 	VkDescriptorImageInfo texsobolimage_descriptor = {
 		.imageView = texsobol->impl.view,
-		.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 	};
 
 	VkWriteDescriptorSet texsobol_image_write = {
@@ -3696,7 +3633,7 @@ void gpu_raytrace_dispatch_rays() {
 
 	VkDescriptorImageInfo texscrambleimage_descriptor = {
 		.imageView = texscramble->impl.view,
-		.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 	};
 
 	VkWriteDescriptorSet texscramble_image_write = {
@@ -3711,7 +3648,7 @@ void gpu_raytrace_dispatch_rays() {
 
 	VkDescriptorImageInfo texrankimage_descriptor = {
 		.imageView = texrank->impl.view,
-		.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 	};
 
 	VkWriteDescriptorSet texrank_image_write = {
