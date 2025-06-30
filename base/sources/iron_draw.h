@@ -63,4 +63,3 @@ void draw_cubic_bezier(f32_array_t *x, f32_array_t *y, int segments, float stren
 extern int draw_font_size;
 extern draw_font_t *draw_font;
 extern gpu_texture_t *_draw_current;
-extern bool gpu_in_use;
