@@ -228,7 +228,7 @@
 // 			CGSize size = CVImageBufferGetDisplaySize(pixelBuffer);
 // 			video->impl.myWidth = size.width;
 // 			video->impl.myHeight = size.height;
-// 			gpu_texture_init(&video->impl.image, iron_video_width(video), iron_video_height(video), IRON_IMAGE_FORMAT_BGRA32);
+// 			gpu_texture_init(&video->impl.image, iron_video_width(video), iron_video_height(video), GPU_TEXTURE_FORMAT_BGRA32);
 // 			video->impl.image_initialized = true;
 // 		}
 

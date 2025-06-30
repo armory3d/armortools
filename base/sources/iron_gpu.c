@@ -1,14 +1,54 @@
 #include "iron_gpu.h"
+#include <iron_system.h>
 
 #define CONSTANT_BUFFER_SIZE 256
 #define CONSTANT_BUFFER_MULTIPLE 2048
-int constant_buffer_index = 0;
+
 static gpu_buffer_t constant_buffer;
+static bool gpu_thrown = false;
+
+int constant_buffer_index = 0;
+bool gpu_in_use = false;
+gpu_texture_t *current_render_targets[8] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+int current_render_targets_count = 0;
+gpu_texture_t framebuffers[GPU_FRAMEBUFFER_COUNT];
+int framebuffer_index = 0;
 
 void gpu_init(int depth_buffer_bits, bool vsync) {
 	gpu_init_internal(depth_buffer_bits, vsync);
 	gpu_constant_buffer_init(&constant_buffer, CONSTANT_BUFFER_SIZE * CONSTANT_BUFFER_MULTIPLE);
 	gpu_constant_buffer_lock(&constant_buffer, 0, CONSTANT_BUFFER_SIZE);
+}
+
+void gpu_begin(gpu_texture_t **targets, int count, unsigned flags, unsigned color, float depth) {
+	if (gpu_in_use && !gpu_thrown) {
+		gpu_thrown = true;
+		iron_log("End before you begin");
+	}
+	gpu_in_use = true;
+
+	if (current_render_targets_count > 0 && current_render_targets[0] != &framebuffers[framebuffer_index]) {
+		for (int i = 0; i < current_render_targets_count; ++i) {
+			gpu_barrier(current_render_targets[i], GPU_TEXTURE_STATE_SHADER_RESOURCE);
+		}
+	}
+
+	if (targets == NULL) {
+		current_render_targets[0] = &framebuffers[framebuffer_index];
+		current_render_targets_count = 1;
+	}
+	else {
+		for (int i = 0; i < count; ++i) {
+			current_render_targets[i] = targets[i];
+		}
+		current_render_targets_count = count;
+	}
+
+	for (int i = 0; i < current_render_targets_count; ++i) {
+		gpu_barrier(current_render_targets[i], GPU_TEXTURE_STATE_RENDER_TARGET);
+	}
+
+	gpu_begin_internal(targets, count, flags, color, depth);
 }
 
 void gpu_draw() {
@@ -21,6 +61,16 @@ void gpu_draw() {
 		// gpu_wait();
 	}
 	gpu_constant_buffer_lock(&constant_buffer, constant_buffer_index * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
+}
+
+void gpu_end() {
+	if (!gpu_in_use && !gpu_thrown) {
+		gpu_thrown = true;
+		iron_log("Begin before you end");
+	}
+	gpu_in_use = false;
+
+	gpu_end_internal();
 }
 
 void gpu_set_int(int location, int value) {
@@ -158,7 +208,7 @@ void gpu_internal_pipeline_init(gpu_pipeline_t *pipe) {
 		pipe->color_write_mask_green[i] = true;
 		pipe->color_write_mask_blue[i] = true;
 		pipe->color_write_mask_alpha[i] = true;
-		pipe->color_attachment[i] = IRON_IMAGE_FORMAT_RGBA32;
+		pipe->color_attachment[i] = GPU_TEXTURE_FORMAT_RGBA32;
 	}
 	pipe->color_attachment_count = 1;
 	pipe->depth_attachment_bits = 0;

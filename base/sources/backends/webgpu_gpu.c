@@ -50,8 +50,38 @@ void gpu_init_internal(int depthBufferBits, bool vsync) {
 	swapChain = wgpuDeviceCreateSwapChain(device, surface, &scDesc);
 }
 
-void gpu_begin(struct gpu_texture **targets, int count, unsigned flags, unsigned color, float depth) {}
-void gpu_end() {}
+void gpu_begin_internal(struct gpu_texture **targets, int count, unsigned flags, unsigned color, float depth) {
+	WGPUCommandEncoderDescriptor ceDesc;
+	memset(&ceDesc, 0, sizeof(ceDesc));
+	encoder = wgpuDeviceCreateCommandEncoder(device, &ceDesc);
+
+	WGPURenderPassColorAttachment attachment;
+	memset(&attachment, 0, sizeof(attachment));
+	attachment.view = wgpuSwapChainGetCurrentTextureView(swapChain);;
+	attachment.loadOp = WGPULoadOp_Clear;
+	attachment.storeOp = WGPUStoreOp_Store;
+	WGPUColor color = {0, 0, 0, 1};
+	attachment.clearValue = color;
+
+	WGPURenderPassDescriptor passDesc;
+	memset(&passDesc, 0, sizeof(passDesc));
+	passDesc.colorAttachmentCount = 1;
+	passDesc.colorAttachments = &attachment;
+
+	pass = wgpuCommandEncoderBeginRenderPass(encoder, &passDesc);
+}
+void gpu_end_internal() {
+	wgpuRenderPassEncoderEnd(pass);
+
+	WGPUCommandBufferDescriptor cbDesc;
+	memset(&cbDesc, 0, sizeof(cbDesc));
+	WGPUCommandBuffer commands = wgpuCommandEncoderFinish(encoder, &cbDesc);
+	wgpuQueueSubmit(queue, 1, &commands);
+}
+
+void gpu_present() {
+
+}
 
 bool gpu_raytrace_supported() {
 	return false;
@@ -129,7 +159,7 @@ int gpu_index_buffer_count(gpu_buffer_t *buffer) {
 	return buffer->impl.count;
 }
 
-void gpu_texture_init(gpu_texture_t *texture, int width, int height, iron_image_format_t format) {
+void gpu_texture_init(gpu_texture_t *texture, int width, int height, gpu_texture_format_t format) {
 	// WGPUExtent3D size = {};
 	// size.width = iron_window_width();
 	// size.height = iron_window_height();
@@ -155,7 +185,7 @@ void gpu_texture_init(gpu_texture_t *texture, int width, int height, iron_image_
 	texture->data = NULL;
 }
 
-void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, iron_image_format_t format) {}
+void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, gpu_texture_format_t format) {}
 void gpu_texture_init_from_encoded_data(gpu_texture_t *texture, void *data, int size, const char *format, bool readable) {}
 void gpu_texture_init_from_data(gpu_texture_t *texture, void *data, int width, int height, int format, bool readable) {}
 void gpu_texture_destroy(gpu_texture_t *texture) {}
@@ -167,15 +197,15 @@ int gpu_texture_stride(gpu_texture_t *texture) {
 void gpu_texture_generate_mipmaps(gpu_texture_t *texture, int levels) {}
 void gpu_texture_set_mipmap(gpu_texture_t *texture, gpu_texture_t *mipmap, int level) {}
 
-void gpu_render_target_init(gpu_texture_t *target, int width, int height, iron_image_format_t format, int depthBufferBits) {
+void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format, int depthBufferBits) {
     target->width = target->width = width;
 	target->height = target->height = height;
-	target->state = IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
+	target->state = GPU_TEXTURE_STATE_RENDER_TARGET;
 	target->data = NULL;
 	target->uploaded = true;
 }
 
-void gpu_render_target_init_framebuffer(gpu_texture_t *target, int width, int height, iron_image_format_t format, int depthBufferBits) {}
+void gpu_render_target_init_framebuffer(gpu_texture_t *target, int width, int height, gpu_texture_format_t format, int depthBufferBits) {}
 void gpu_render_target_set_depth_from(gpu_texture_t *renderTarget, gpu_texture_t *source) {}
 
 void gpu_pipeline_init(gpu_pipeline_t *pipe) {
@@ -291,42 +321,11 @@ void gpu_shader_init(gpu_shader_t *shader, const void *source, size_t length, gp
 }
 
 void gpu_shader_destroy(gpu_shader_t *shader) {}
-void gpu_init() {}
 void gpu_destroy() {}
-
-void gpu_begin() {
-	WGPUCommandEncoderDescriptor ceDesc;
-	memset(&ceDesc, 0, sizeof(ceDesc));
-	encoder = wgpuDeviceCreateCommandEncoder(device, &ceDesc);
-
-	WGPURenderPassColorAttachment attachment;
-	memset(&attachment, 0, sizeof(attachment));
-	attachment.view = wgpuSwapChainGetCurrentTextureView(swapChain);;
-	attachment.loadOp = WGPULoadOp_Clear;
-	attachment.storeOp = WGPUStoreOp_Store;
-	WGPUColor color = {0, 0, 0, 1};
-	attachment.clearValue = color;
-
-	WGPURenderPassDescriptor passDesc;
-	memset(&passDesc, 0, sizeof(passDesc));
-	passDesc.colorAttachmentCount = 1;
-	passDesc.colorAttachments = &attachment;
-
-	pass = wgpuCommandEncoderBeginRenderPass(encoder, &passDesc);
-}
-
-void gpu_end() {
-	wgpuRenderPassEncoderEnd(pass);
-
-	WGPUCommandBufferDescriptor cbDesc;
-	memset(&cbDesc, 0, sizeof(cbDesc));
-	WGPUCommandBuffer commands = wgpuCommandEncoderFinish(encoder, &cbDesc);
-	wgpuQueueSubmit(queue, 1, &commands);
-}
 
 void gpu_barrier(gpu_texture_t *renderTarget, int state_after) {}
 
-void gpu_draw() {
+void gpu_draw_internal() {
 	wgpuRenderPassEncoderDrawIndexed(pass, indexCount, 1, 0, 0, 0);
 }
 

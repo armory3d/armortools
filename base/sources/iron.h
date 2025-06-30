@@ -1090,8 +1090,8 @@ void gpu_delete_pipeline(gpu_pipeline_t *pipeline) {
 	free(pipeline);
 }
 
-bool _load_image(iron_file_reader_t *reader, const char *filename, unsigned char **output, int *width, int *height, iron_image_format_t *format) {
-	*format = IRON_IMAGE_FORMAT_RGBA32;
+bool _load_image(iron_file_reader_t *reader, const char *filename, unsigned char **output, int *width, int *height, gpu_texture_format_t *format) {
+	*format = GPU_TEXTURE_FORMAT_RGBA32;
 	int size = (int)iron_file_reader_size(reader);
 	bool success = true;
 	unsigned char *data = (unsigned char *)malloc(size);
@@ -1117,7 +1117,7 @@ bool _load_image(iron_file_reader_t *reader, const char *filename, unsigned char
 			int output_size = *width * *height * 16;
 			*output = (unsigned char *)malloc(output_size);
 			LZ4_decompress_safe((char *)(data + 12), (char *)*output, compressed_size, output_size);
-			*format = IRON_IMAGE_FORMAT_RGBA128;
+			*format = GPU_TEXTURE_FORMAT_RGBA128;
 
 			#ifdef IRON_IOS // No RGBA128 filtering, convert to RGBA64
 			uint32_t *_output32 = (uint32_t *)*output;
@@ -1127,7 +1127,7 @@ bool _load_image(iron_file_reader_t *reader, const char *filename, unsigned char
 				uint32_t x = *((uint32_t *)&_output32[i]);
 				_output16[i] = ((x >> 16) & 0x8000) | ((((x & 0x7f800000) - 0x38000000) >> 13) & 0x7c00) | ((x >> 13) & 0x03ff);
 			}
-			*format = IRON_IMAGE_FORMAT_RGBA64;
+			*format = GPU_TEXTURE_FORMAT_RGBA64;
 			free(*output);
 			*output = _output;
 			#endif
@@ -1143,7 +1143,7 @@ bool _load_image(iron_file_reader_t *reader, const char *filename, unsigned char
 			iron_error(stbi_failure_reason());
 			success = false;
 		}
-		*format = IRON_IMAGE_FORMAT_RGBA128;
+		*format = GPU_TEXTURE_FORMAT_RGBA128;
 	}
 	else { // jpg, png, ..
 		int comp;
@@ -1176,7 +1176,7 @@ gpu_texture_t *iron_load_image(string_t *file, bool readable) {
 	unsigned char *image_data;
 	int image_width;
 	int image_height;
-	iron_image_format_t image_format;
+	gpu_texture_format_t image_format;
 	if (!_load_image(&reader, file, &image_data, &image_width, &image_height, &image_format)) {
 		return NULL;
 	}
@@ -1266,7 +1266,7 @@ bool iron_display_is_primary(i32 index) {
 
 gpu_texture_t *gpu_create_render_target(i32 width, i32 height, i32 format, i32 depth_buffer_bits) {
 	gpu_texture_t *render_target = (gpu_texture_t *)malloc(sizeof(gpu_texture_t));
-	gpu_render_target_init(render_target, width, height, (iron_image_format_t)format, depth_buffer_bits);
+	gpu_render_target_init(render_target, width, height, (gpu_texture_format_t)format, depth_buffer_bits);
 	render_target->buffer = NULL;
 	return render_target;
 }
@@ -1282,7 +1282,7 @@ gpu_texture_t *gpu_create_texture_from_bytes(buffer_t *data, i32 width, i32 heig
 	else {
 		image_data = data->buffer;
 	}
-	gpu_texture_init_from_bytes(texture, image_data, width, height, (iron_image_format_t)format);
+	gpu_texture_init_from_bytes(texture, image_data, width, height, (gpu_texture_format_t)format);
 	return texture;
 }
 
@@ -1293,7 +1293,7 @@ gpu_texture_t *gpu_create_texture_from_encoded_bytes(buffer_t *data, string_t *f
 	unsigned char *content_data = (unsigned char *)data->buffer;
 	int content_length = (int)data->length;
 	unsigned char *image_data;
-	iron_image_format_t image_format;
+	gpu_texture_format_t image_format;
 	int image_width;
 	int image_height;
 
@@ -1311,24 +1311,24 @@ gpu_texture_t *gpu_create_texture_from_encoded_bytes(buffer_t *data, string_t *f
 			int output_size = image_width * image_height * 4;
 			image_data = (unsigned char *)malloc(output_size);
 			LZ4_decompress_safe((char *)content_data + 12, (char *)image_data, compressed_size, output_size);
-			image_format = IRON_IMAGE_FORMAT_RGBA32;
+			image_format = GPU_TEXTURE_FORMAT_RGBA32;
 		}
 		else if (strcmp(fourcc, "LZ4F") == 0) {
 			int output_size = image_width * image_height * 16;
 			image_data = (unsigned char *)malloc(output_size);
 			LZ4_decompress_safe((char *)content_data + 12, (char *)image_data, compressed_size, output_size);
-			image_format = IRON_IMAGE_FORMAT_RGBA128;
+			image_format = GPU_TEXTURE_FORMAT_RGBA128;
 		}
 	}
 	else if (ends_with(format, "hdr")) {
 		int comp;
 		image_data = (unsigned char *)stbi_loadf_from_memory(content_data, content_length, &image_width, &image_height, &comp, 4);
-		image_format = IRON_IMAGE_FORMAT_RGBA128;
+		image_format = GPU_TEXTURE_FORMAT_RGBA128;
 	}
 	else { // jpg, png, ..
 		int comp;
 		image_data = stbi_load_from_memory(content_data, content_length, &image_width, &image_height, &comp, 4);
-		image_format = IRON_IMAGE_FORMAT_RGBA32;
+		image_format = GPU_TEXTURE_FORMAT_RGBA32;
 	}
 
 	gpu_texture_init_from_bytes(texture, image_data, image_width, image_height, image_format);
@@ -1339,18 +1339,18 @@ gpu_texture_t *gpu_create_texture_from_encoded_bytes(buffer_t *data, string_t *f
 	return texture;
 }
 
-int _format_byte_size(iron_image_format_t format) {
+int _format_byte_size(gpu_texture_format_t format) {
 	switch (format) {
-	case IRON_IMAGE_FORMAT_RGBA128:
+	case GPU_TEXTURE_FORMAT_RGBA128:
 		return 16;
-	case IRON_IMAGE_FORMAT_RGBA64:
+	case GPU_TEXTURE_FORMAT_RGBA64:
 		return 8;
-	case IRON_IMAGE_FORMAT_R8:
+	case GPU_TEXTURE_FORMAT_R8:
 		return 1;
-	case IRON_IMAGE_FORMAT_R16:
+	case GPU_TEXTURE_FORMAT_R16:
 		return 2;
-	case IRON_IMAGE_FORMAT_RGBA32:
-	case IRON_IMAGE_FORMAT_R32:
+	case GPU_TEXTURE_FORMAT_RGBA32:
+	case GPU_TEXTURE_FORMAT_R32:
 	default:
 		return 4;
 	}

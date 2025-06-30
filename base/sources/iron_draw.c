@@ -450,7 +450,7 @@ bool draw_font_load(draw_font_t *font, int size) {
 	img->chars = baked;
 	img->first_unused_y = status;
 	img->tex = (gpu_texture_t *)malloc(sizeof(gpu_texture_t));
-	gpu_texture_init_from_bytes(img->tex, pixels, width, height, IRON_IMAGE_FORMAT_R8);
+	gpu_texture_init_from_bytes(img->tex, pixels, width, height, GPU_TEXTURE_FORMAT_R8);
 	free(pixels);
 	return true;
 }
@@ -592,7 +592,7 @@ void draw_font_13(draw_font_t *font) {
 	img->height = 128;
 	img->first_unused_y = 0;
 	img->tex = (gpu_texture_t *)malloc(sizeof(gpu_texture_t));
-	gpu_texture_init_from_bytes(img->tex, (void *)iron_font_13_pixels, 128, 128, IRON_IMAGE_FORMAT_R8);
+	gpu_texture_init_from_bytes(img->tex, (void *)iron_font_13_pixels, 128, 128, GPU_TEXTURE_FORMAT_R8);
 
 	stbtt_bakedchar *baked = (stbtt_bakedchar *)malloc(95 * sizeof(stbtt_bakedchar));
 	for (int i = 0; i < 95; ++i) {

@@ -2,7 +2,6 @@
 #define WIN32_LEAN_AND_MEAN
 #define HEAP_SIZE 1024
 #define TEXTURE_COUNT 16
-#define FRAMEBUFFER_COUNT 2
 #include <iron_global.h>
 #include <stdbool.h>
 #include <malloc.h>
@@ -18,21 +17,14 @@
 void iron_memory_emergency();
 
 bool gpu_transpose_mat = false;
-bool gpu_in_use = false;
-static bool gpu_thrown = false;
 static ID3D12Device *device = NULL;
 static ID3D12CommandQueue *queue;
 static struct IDXGISwapChain *window_swapchain;
 static ID3D12RootSignature *root_signature = NULL;
 static struct ID3D12CommandAllocator *command_allocator;
 static struct ID3D12GraphicsCommandList *command_list;
-static bool command_list_open = true;
-static gpu_texture_t framebuffers[FRAMEBUFFER_COUNT];
-static int framebuffer_index = 0;
 static gpu_pipeline_t *current_pipeline;
 static gpu_texture_t *current_textures[TEXTURE_COUNT];
-static gpu_texture_t *current_render_targets[8];
-static int current_render_targets_count = 0;
 static bool window_vsync;
 static int index_count;
 static struct ID3D12DescriptorHeap *srv_heap;
@@ -40,7 +32,7 @@ static int srv_heap_index;
 static UINT64 fence_value;
 static ID3D12Fence *fence;
 static HANDLE fence_event;
-static UINT64 frame_fence_values[FRAMEBUFFER_COUNT];
+static UINT64 frame_fence_values[GPU_FRAMEBUFFER_COUNT];
 
 static D3D12_BLEND convert_blend_factor(gpu_blending_factor_t factor) {
 	switch (factor) {
@@ -90,19 +82,19 @@ static D3D12_COMPARISON_FUNC convert_compare_mode(gpu_compare_mode_t compare) {
 	}
 }
 
-static DXGI_FORMAT convert_format(iron_image_format_t format) {
+static DXGI_FORMAT convert_format(gpu_texture_format_t format) {
 	switch (format) {
-	case IRON_IMAGE_FORMAT_RGBA128:
+	case GPU_TEXTURE_FORMAT_RGBA128:
 		return DXGI_FORMAT_R32G32B32A32_FLOAT;
-	case IRON_IMAGE_FORMAT_RGBA64:
+	case GPU_TEXTURE_FORMAT_RGBA64:
 		return DXGI_FORMAT_R16G16B16A16_FLOAT;
-	case IRON_IMAGE_FORMAT_R32:
+	case GPU_TEXTURE_FORMAT_R32:
 		return DXGI_FORMAT_R32_FLOAT;
-	case IRON_IMAGE_FORMAT_R16:
+	case GPU_TEXTURE_FORMAT_R16:
 		return DXGI_FORMAT_R16_FLOAT;
-	case IRON_IMAGE_FORMAT_R8:
+	case GPU_TEXTURE_FORMAT_R8:
 		return DXGI_FORMAT_R8_UNORM;
-	case IRON_IMAGE_FORMAT_RGBA32:
+	case GPU_TEXTURE_FORMAT_RGBA32:
 	default:
 		return DXGI_FORMAT_R8G8B8A8_UNORM;
 	}
@@ -123,6 +115,17 @@ static int format_size(DXGI_FORMAT format) {
 	}
 }
 
+static D3D12_RESOURCE_STATES convert_texture_state(gpu_texture_state_t state) {
+	switch (state) {
+	case GPU_TEXTURE_STATE_SHADER_RESOURCE:
+		return D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+	case GPU_TEXTURE_STATE_RENDER_TARGET:
+		return D3D12_RESOURCE_STATE_RENDER_TARGET;
+	case GPU_TEXTURE_STATE_PRESENT:
+		return D3D12_RESOURCE_STATE_PRESENT;
+	}
+}
+
 static void wait_for_fence(ID3D12Fence *fence, UINT64 completion_value, HANDLE wait_event) {
 	if (fence->lpVtbl->GetCompletedValue(fence) < completion_value) {
 		fence->lpVtbl->SetEventOnCompletion(fence, completion_value, wait_event);
@@ -139,25 +142,25 @@ static UINT64 get_footprint(ID3D12Resource *destinationResource, UINT FirstSubre
 	return requiredSize;
 }
 
-static void gpu_barrier(gpu_texture_t *render_target, D3D12_RESOURCE_STATES state_after) {
-	if (render_target->impl.state == state_after) {
+void gpu_barrier(gpu_texture_t *render_target, gpu_texture_state_t state_after) {
+	if (render_target->state == state_after) {
 		return;
 	}
 	D3D12_RESOURCE_BARRIER barrier = {
 		.Transition.pResource = render_target->impl.render_target,
 		.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
 		.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE,
-		.Transition.StateBefore = render_target->impl.state,
-		.Transition.StateAfter = state_after,
+		.Transition.StateBefore = convert_texture_state(render_target->state),
+		.Transition.StateAfter = convert_texture_state(state_after),
 		.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
 	};
 	command_list->lpVtbl->ResourceBarrier(command_list, 1, &barrier);
-	render_target->impl.state = state_after;
+	render_target->state = state_after;
 }
 
 void gpu_destroy() {
 	gpu_wait();
-	for (int i = 0; i < FRAMEBUFFER_COUNT; ++i) {
+	for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
 		gpu_texture_destroy(&framebuffers[i]);
 	}
 	command_list->lpVtbl->Release(command_list);
@@ -171,7 +174,7 @@ void gpu_destroy() {
 	device->lpVtbl->Release(device);
 }
 
-static void render_target_init(gpu_texture_t *render_target, int width, int height, iron_image_format_t format, int depth_buffer_bits, int framebuffer_index) {
+static void render_target_init(gpu_texture_t *render_target, int width, int height, gpu_texture_format_t format, int depth_buffer_bits, int framebuffer_index) {
 	render_target->width = render_target->width = width;
 	render_target->height = render_target->height = height;
 	render_target->impl.stage = 0;
@@ -181,7 +184,7 @@ static void render_target_init(gpu_texture_t *render_target, int width, int heig
 	render_target->impl.upload_image = NULL;
 	render_target->data = NULL;
 	render_target->uploaded = true;
-	render_target->impl.state = (framebuffer_index >= 0) ? D3D12_RESOURCE_STATE_PRESENT : D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+	render_target->state = (framebuffer_index >= 0) ? GPU_TEXTURE_STATE_PRESENT : GPU_TEXTURE_STATE_SHADER_RESOURCE;
 
 	DXGI_FORMAT dxgi_format = convert_format(format);
 
@@ -429,7 +432,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 
 	HWND hwnd = iron_windows_window_handle();
 	DXGI_SWAP_CHAIN_DESC swapchain_desc = {
-		.BufferCount = FRAMEBUFFER_COUNT,
+		.BufferCount = GPU_FRAMEBUFFER_COUNT,
 		.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM,
 		.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT,
 		.BufferDesc.Width = iron_window_width(),
@@ -448,9 +451,9 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	fence_event = CreateEvent(NULL, FALSE, FALSE, NULL);
 	device->lpVtbl->CreateFence(device, 0, D3D12_FENCE_FLAG_NONE, &IID_ID3D12Fence, &fence);
 
-	for (int i = 0; i < FRAMEBUFFER_COUNT; ++i) {
+	for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
 		frame_fence_values[i] = 0;
-		render_target_init(&framebuffers[i], iron_window_width(), iron_window_height(), IRON_IMAGE_FORMAT_RGBA32, depth_buffer_bits, i);
+		render_target_init(&framebuffers[i], iron_window_width(), iron_window_height(), GPU_TEXTURE_FORMAT_RGBA32, depth_buffer_bits, i);
 	}
 
 	for (int i = 0; i < TEXTURE_COUNT; ++i) {
@@ -474,47 +477,14 @@ int gpu_max_bound_textures(void) {
 	return TEXTURE_COUNT;
 }
 
-void gpu_begin(gpu_texture_t **targets, int count, unsigned flags, unsigned color, float depth) {
-	if (gpu_in_use && !gpu_thrown) {
-		gpu_thrown = true;
-		iron_log("End before you begin");
-	}
-	gpu_in_use = true;
-
-	if (!command_list_open) {
-		gpu_wait();
-		command_allocator->lpVtbl->Reset(command_allocator);
-		command_list->lpVtbl->Reset(command_list, command_allocator, NULL);
-		command_list_open = true;
-	}
-
-	if (current_render_targets_count > 0 && current_render_targets[0] != &framebuffers[framebuffer_index]) {
-		for (int i = 0; i < current_render_targets_count; ++i) {
-			gpu_barrier(current_render_targets[i], D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-		}
-	}
-
-	if (targets == NULL) {
-		current_render_targets[0] = &framebuffers[framebuffer_index];
-		current_render_targets_count = 1;
-	}
-	else {
-		for (int i = 0; i < count; ++i) {
-			current_render_targets[i] = targets[i];
-		}
-		current_render_targets_count = count;
-	}
-
-	gpu_texture_t *target = current_render_targets[0];
-
-	for (int i = 0; i < current_render_targets_count; ++i) {
-		gpu_barrier(current_render_targets[i], D3D12_RESOURCE_STATE_RENDER_TARGET);
-	}
+void gpu_begin_internal(gpu_texture_t **targets, int count, unsigned flags, unsigned color, float depth) {
 
 	D3D12_CPU_DESCRIPTOR_HANDLE target_descriptors[16];
 	for (int i = 0; i < current_render_targets_count; ++i) {
 		current_render_targets[i]->impl.descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(current_render_targets[i]->impl.descriptor_heap, &target_descriptors[i]);
 	}
+
+	gpu_texture_t *target = current_render_targets[0];
 
 	if (target->impl.depth_descriptor_heap != NULL) {
 		D3D12_CPU_DESCRIPTOR_HANDLE heapStart;
@@ -548,16 +518,10 @@ void gpu_begin(gpu_texture_t **targets, int count, unsigned flags, unsigned colo
 	}
 }
 
-void gpu_end() {
-	if (!gpu_in_use && !gpu_thrown) {
-		gpu_thrown = true;
-		iron_log("Begin before you end");
-	}
-	gpu_in_use = false;
-
+void gpu_end_internal() {
 	for (int i = 0; i < current_render_targets_count; ++i) {
 		gpu_barrier(current_render_targets[i],
-			current_render_targets[i] == &framebuffers[framebuffer_index] ? D3D12_RESOURCE_STATE_PRESENT : D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			current_render_targets[i] == &framebuffers[framebuffer_index] ? GPU_TEXTURE_STATE_PRESENT : GPU_TEXTURE_STATE_SHADER_RESOURCE);
 	}
 	current_render_targets_count = 0;
 }
@@ -568,7 +532,6 @@ void gpu_wait() {
 
 void gpu_present() {
 	command_list->lpVtbl->Close(command_list);
-	command_list_open = false;
 
 	ID3D12CommandList *command_lists[] = {(ID3D12CommandList *)command_list};
 	queue->lpVtbl->ExecuteCommandLists(queue, 1, command_lists);
@@ -579,8 +542,12 @@ void gpu_present() {
 	queue->lpVtbl->Signal(queue, fence, ++fence_value);
 	frame_fence_values[framebuffer_index] = fence_value;
 
-	framebuffer_index = (framebuffer_index + 1) % FRAMEBUFFER_COUNT;
+	framebuffer_index = (framebuffer_index + 1) % GPU_FRAMEBUFFER_COUNT;
 	wait_for_fence(fence, frame_fence_values[framebuffer_index], fence_event);
+
+	gpu_wait();
+	command_allocator->lpVtbl->Reset(command_allocator);
+	command_list->lpVtbl->Reset(command_list, command_allocator, NULL);
 }
 
 void gpu_internal_resize(int width, int height) {
@@ -591,11 +558,11 @@ void gpu_internal_resize(int width, int height) {
 		return;
 	}
 
-	for (int i = 0; i < FRAMEBUFFER_COUNT; ++i) {
+	for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
 		gpu_texture_destroy(&framebuffers[i]);
-		render_target_init(&framebuffers[i], width, height, IRON_IMAGE_FORMAT_RGBA32, 0, i);
+		render_target_init(&framebuffers[i], width, height, GPU_TEXTURE_FORMAT_RGBA32, 0, i);
 	}
-	window_swapchain->lpVtbl->ResizeBuffers(window_swapchain, FRAMEBUFFER_COUNT, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+	window_swapchain->lpVtbl->ResizeBuffers(window_swapchain, GPU_FRAMEBUFFER_COUNT, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
 }
 
 bool gpu_raytrace_supported() {
@@ -989,7 +956,7 @@ void gpu_shader_destroy(gpu_shader_t *shader) {
 	free(shader->impl.data);
 }
 
-void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, iron_image_format_t format) {
+void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, gpu_texture_format_t format) {
 	memset(&texture->impl, 0, sizeof(texture->impl));
 	texture->impl.stage = 0;
 	texture->impl.stage_depth = -1;
@@ -999,7 +966,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	texture->uploaded = false;
 	texture->format = format;
 	texture->data = data;
-	texture->impl.state = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
 	texture->impl.render_target = NULL;
 
 	DXGI_FORMAT d3d_format = convert_format(format);
@@ -1110,7 +1077,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	device->lpVtbl->CreateShaderResourceView(device, texture->impl.image, &srv_desc, handle);
 }
 
-void gpu_texture_init(gpu_texture_t *texture, int width, int height, iron_image_format_t format) {
+void gpu_texture_init(gpu_texture_t *texture, int width, int height, gpu_texture_format_t format) {
 	memset(&texture->impl, 0, sizeof(texture->impl));
 	texture->impl.stage = 0;
 	texture->impl.stage_depth = -1;
@@ -1220,7 +1187,7 @@ void gpu_texture_init(gpu_texture_t *texture, int width, int height, iron_image_
 
 
 	texture->uploaded = true;
-	texture->impl.state = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
 	texture->format = format;
 }
 
@@ -1253,7 +1220,7 @@ void gpu_texture_generate_mipmaps(gpu_texture_t *texture, int levels) {}
 
 void gpu_texture_set_mipmap(gpu_texture_t *texture, gpu_texture_t *mipmap, int level) {}
 
-void gpu_render_target_init(gpu_texture_t *target, int width, int height, iron_image_format_t format, int depth_buffer_bits) {
+void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format, int depth_buffer_bits) {
 	render_target_init(target, width, height, format, depth_buffer_bits, -1);
 }
 

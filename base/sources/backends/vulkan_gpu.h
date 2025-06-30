@@ -39,7 +39,6 @@ typedef struct {
 	bool readback_buffer_created;
 	int stage;
 	int stage_depth;
-	VkImageLayout state;
 } gpu_texture_impl_t;
 
 typedef struct {

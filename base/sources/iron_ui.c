@@ -512,7 +512,7 @@ void ui_resize(ui_handle_t *handle, int w, int h) {
 	if (h < 1) {
 		h = 1;
 	}
-	gpu_render_target_init(&handle->texture, w, h, IRON_IMAGE_FORMAT_RGBA32, 0);
+	gpu_render_target_init(&handle->texture, w, h, GPU_TEXTURE_FORMAT_RGBA32, 0);
 }
 
 bool ui_input_in_rect(float x, float y, float w, float h) {
@@ -901,7 +901,7 @@ void ui_bake_elements() {
 		gpu_texture_destroy(&current->check_select_image);
 	}
 	float r = UI_CHECK_SELECT_SIZE();
-	gpu_render_target_init(&current->check_select_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
+	gpu_render_target_init(&current->check_select_image, r, r, GPU_TEXTURE_FORMAT_RGBA32, 0);
 	draw_begin(&current->check_select_image, true, 0x00000000);
 	draw_set_color(0xffffffff);
 	draw_line(0, r / 2.0, r / 2.0 - 2.0 * UI_SCALE(), r - 2.0 * UI_SCALE(), 2.0 * UI_SCALE());
@@ -912,7 +912,7 @@ void ui_bake_elements() {
 		gpu_texture_destroy(&current->radio_image);
 	}
 	r = UI_CHECK_SIZE();
-	gpu_render_target_init(&current->radio_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
+	gpu_render_target_init(&current->radio_image, r, r, GPU_TEXTURE_FORMAT_RGBA32, 0);
 	draw_begin(&current->radio_image, true, 0x00000000);
 	draw_set_color(0xffaaaaaa);
 	draw_filled_circle(r / 2.0, r / 2.0, r / 2.0, 0);
@@ -924,7 +924,7 @@ void ui_bake_elements() {
 		gpu_texture_destroy(&current->radio_select_image);
 	}
 	r = UI_CHECK_SELECT_SIZE();
-	gpu_render_target_init(&current->radio_select_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
+	gpu_render_target_init(&current->radio_select_image, r, r, GPU_TEXTURE_FORMAT_RGBA32, 0);
 	draw_begin(&current->radio_select_image, true, 0x00000000);
 	draw_set_color(0xffaaaaaa);
 	draw_filled_circle(r / 2.0, r / 2.0, 4.5 * UI_SCALE(), 0);
@@ -937,7 +937,7 @@ void ui_bake_elements() {
 			gpu_texture_destroy(&current->filled_round_corner_image);
 		}
 		r = 4.0 * UI_SCALE();
-		gpu_render_target_init(&current->filled_round_corner_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
+		gpu_render_target_init(&current->filled_round_corner_image, r, r, GPU_TEXTURE_FORMAT_RGBA32, 0);
 		draw_begin(&current->filled_round_corner_image, true, 0x00000000);
 		draw_set_color(0xffffffff);
 		draw_filled_circle(r, r, r, 0);
@@ -946,7 +946,7 @@ void ui_bake_elements() {
 		if (current->round_corner_image.width != 0) {
 			gpu_texture_destroy(&current->round_corner_image);
 		}
-		gpu_render_target_init(&current->round_corner_image, r, r, IRON_IMAGE_FORMAT_RGBA32, 0);
+		gpu_render_target_init(&current->round_corner_image, r, r, GPU_TEXTURE_FORMAT_RGBA32, 0);
 		draw_begin(&current->round_corner_image, true, 0x00000000);
 		draw_set_color(0xffffffff);
 		draw_circle(r, r, r, 0, 1);

@@ -15,7 +15,6 @@
 #include <iron_system.h>
 #include "vulkan_gpu.h"
 
-#define FRAMEBUFFER_COUNT 2
 #define MAX_DESCRIPTOR_SETS 1024
 
 typedef struct descriptor_set {
@@ -26,18 +25,11 @@ typedef struct descriptor_set {
 } descriptor_set_t;
 
 bool gpu_transpose_mat = true;
-bool gpu_in_use = false;
-static bool gpu_thrown = false;
 
 static gpu_texture_t *current_textures[16] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
-static gpu_texture_t *current_render_targets[8] = {
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
-};
-static int current_render_targets_count = 0;
-
 static VkSemaphore framebuffer_available_semaphore;
 static VkSemaphore rendering_finished_semaphore;
 static VkFence fence;
@@ -53,8 +45,6 @@ static VkPhysicalDeviceMemoryProperties memory_properties;
 static VkSampler immutable_sampler;
 static int index_count;
 static VkCommandBuffer command_buffer;
-static gpu_texture_t framebuffers[FRAMEBUFFER_COUNT];
-static int framebuffer_index = 0;
 static bool command_buffer_open = true;
 
 static VkInstance instance;
@@ -80,19 +70,19 @@ void iron_vulkan_get_instance_extensions(const char **extensions, int *index);
 VkBool32 iron_vulkan_get_physical_device_presentation_support(VkPhysicalDevice physical_device, uint32_t queue_family_index);
 VkResult iron_vulkan_create_surface(VkInstance instance, VkSurfaceKHR *surface);
 
-static VkFormat convert_image_format(iron_image_format_t format) {
+static VkFormat convert_image_format(gpu_texture_format_t format) {
 	switch (format) {
-	case IRON_IMAGE_FORMAT_RGBA128:
+	case GPU_TEXTURE_FORMAT_RGBA128:
 		return VK_FORMAT_R32G32B32A32_SFLOAT;
-	case IRON_IMAGE_FORMAT_RGBA64:
+	case GPU_TEXTURE_FORMAT_RGBA64:
 		return VK_FORMAT_R16G16B16A16_SFLOAT;
-	case IRON_IMAGE_FORMAT_R8:
+	case GPU_TEXTURE_FORMAT_R8:
 		return VK_FORMAT_R8_UNORM;
-	case IRON_IMAGE_FORMAT_R16:
+	case GPU_TEXTURE_FORMAT_R16:
 		return VK_FORMAT_R16_SFLOAT;
-	case IRON_IMAGE_FORMAT_R32:
+	case GPU_TEXTURE_FORMAT_R32:
 		return VK_FORMAT_R32_SFLOAT;
-	case IRON_IMAGE_FORMAT_RGBA32:
+	case GPU_TEXTURE_FORMAT_RGBA32:
 		// return VK_FORMAT_R8G8B8A8_UNORM;
 		return VK_FORMAT_B8G8R8A8_UNORM;
 	default:
@@ -160,6 +150,17 @@ static VkBlendOp convert_blend_operation(gpu_blending_operation_t op) {
 	switch (op) {
 	case GPU_BLENDOP_ADD:
 		return VK_BLEND_OP_ADD;
+	}
+}
+
+static VkImageLayout convert_texture_state(gpu_texture_state_t state) {
+	switch (state) {
+	case GPU_TEXTURE_STATE_SHADER_RESOURCE:
+		return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	case GPU_TEXTURE_STATE_RENDER_TARGET:
+		return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	case GPU_TEXTURE_STATE_PRESENT:
+		return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 	}
 }
 
@@ -235,18 +236,18 @@ static VkAccessFlags access_mask(VkImageLayout layout) {
 	return 0;
 }
 
-static void gpu_barrier(gpu_texture_t *render_target, VkImageLayout state_after) {
-	if (render_target->impl.state == state_after) {
+void gpu_barrier(gpu_texture_t *render_target, gpu_texture_state_t state_after) {
+	if (render_target->state == state_after) {
 		return;
 	}
 
 	VkImageMemoryBarrier barrier = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
 		.pNext = NULL,
-		.srcAccessMask = access_mask(render_target->impl.state),
-		.dstAccessMask = access_mask(state_after),
-		.oldLayout = render_target->impl.state,
-		.newLayout = state_after,
+		.srcAccessMask = access_mask(convert_texture_state(render_target->state)),
+		.dstAccessMask = access_mask(convert_texture_state(state_after)),
+		.oldLayout = convert_texture_state(render_target->state),
+		.newLayout = convert_texture_state(state_after),
 		.image = render_target->impl.image,
 		.subresourceRange = {
 			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
@@ -262,10 +263,10 @@ static void gpu_barrier(gpu_texture_t *render_target, VkImageLayout state_after)
 		VkImageMemoryBarrier barrier = {
 			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
 			.pNext = NULL,
-			.srcAccessMask = access_mask(render_target->impl.state),
-			.dstAccessMask = access_mask(state_after),
-			.oldLayout = render_target->impl.state == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL ? VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL : render_target->impl.state,
-			.newLayout = state_after == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL ? VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL : state_after,
+			.srcAccessMask = access_mask(convert_texture_state(render_target->state)),
+			.dstAccessMask = access_mask(convert_texture_state(state_after)),
+			.oldLayout = convert_texture_state(render_target->state) == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL ? VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL : convert_texture_state(render_target->state),
+			.newLayout = convert_texture_state(state_after) == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL ? VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL : convert_texture_state(state_after),
 			.image = render_target->impl.depthImage,
 			.subresourceRange = {
 				.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
@@ -278,7 +279,7 @@ static void gpu_barrier(gpu_texture_t *render_target, VkImageLayout state_after)
 		vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
 	}
 
-	render_target->impl.state = state_after;
+	render_target->state = state_after;
 }
 
 static void set_image_layout(VkImage image, VkImageAspectFlags aspect_mask, VkImageLayout old_layout, VkImageLayout new_layout) {
@@ -400,7 +401,7 @@ void gpu_internal_resize(int width, int height) {
 }
 
 VkSwapchainKHR cleanup_swapchain() {
-	// for (int i = 0; i < FRAMEBUFFER_COUNT; ++i) {
+	// for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
 	// 	gpu_texture_destroy(&framebuffers[i]);
 	// }
 	VkSwapchainKHR chain = window_swapchain;
@@ -408,7 +409,7 @@ VkSwapchainKHR cleanup_swapchain() {
 	return chain;
 }
 
-static void render_target_init(gpu_texture_t *target, int width, int height, iron_image_format_t format, int depth_bits, int framebuffer_index) {
+static void render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format, int depth_bits, int framebuffer_index) {
 	target->width = width;
 	target->height = height;
 	target->data = NULL;
@@ -417,10 +418,9 @@ static void render_target_init(gpu_texture_t *target, int width, int height, iro
 	target->impl.stage = 0;
 	target->impl.stage_depth = -1;
 	target->impl.readback_buffer_created = false;
-	target->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
-	target->depth_state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
+	target->depth_state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
 	target->uploaded = true;
-	target->impl.state = (framebuffer_index >= 0) ? VK_IMAGE_LAYOUT_PRESENT_SRC_KHR : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	target->state = (framebuffer_index >= 0) ? GPU_TEXTURE_STATE_PRESENT : GPU_TEXTURE_STATE_SHADER_RESOURCE;
 
 	if (framebuffer_index >= 0) {
 		return;
@@ -1075,8 +1075,8 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	};
 	vkBeginCommandBuffer(command_buffer, &begin_info);
 
-	for (int i = 0; i < FRAMEBUFFER_COUNT; ++i) {
-		render_target_init(&framebuffers[i], iron_window_width(), iron_window_height(), IRON_IMAGE_FORMAT_RGBA32, depth_buffer_bits, i);
+	for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
+		render_target_init(&framebuffers[i], iron_window_width(), iron_window_height(), GPU_TEXTURE_FORMAT_RGBA32, depth_buffer_bits, i);
 	}
 
 	create_swapchain();
@@ -1143,35 +1143,9 @@ static void set_viewport_and_scissor() {
 	vkCmdSetScissor(command_buffer, 0, 1, &scissor);
 }
 
-void gpu_begin(gpu_texture_t **targets, int count, unsigned flags, unsigned color, float depth) {
-	if (gpu_in_use && !gpu_thrown) {
-		gpu_thrown = true;
-		iron_log("End before you begin");
-	}
-	gpu_in_use = true;
-
-	if (current_render_targets_count > 0 && current_render_targets[0] != &framebuffers[framebuffer_index]) {
-		for (int i = 0; i < current_render_targets_count; ++i) {
-			gpu_barrier(current_render_targets[i], VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-		}
-	}
-
-	if (targets == NULL) {
-		current_render_targets[0] = &framebuffers[framebuffer_index];
-		current_render_targets_count = 1;
-	}
-	else {
-		for (int i = 0; i < count; ++i) {
-			current_render_targets[i] = targets[i];
-		}
-		current_render_targets_count = count;
-	}
+void gpu_begin_internal(gpu_texture_t **targets, int count, unsigned flags, unsigned color, float depth) {
 
 	gpu_texture_t *target = current_render_targets[0];
-
-	for (int i = 0; i < current_render_targets_count; ++i) {
-		gpu_barrier(current_render_targets[i], VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-	}
 
 	VkRect2D render_area = {
 		.offset = {0, 0}
@@ -1268,18 +1242,12 @@ void gpu_begin(gpu_texture_t **targets, int count, unsigned flags, unsigned colo
 	}
 }
 
-void gpu_end() {
-	if (!gpu_in_use && !gpu_thrown) {
-		gpu_thrown = true;
-		iron_log("Begin before you end");
-	}
-	gpu_in_use = false;
-
+void gpu_end_internal() {
 	vkCmdEndRendering(command_buffer);
 
 	for (int i = 0; i < current_render_targets_count; ++i) {
 		gpu_barrier(current_render_targets[i],
-			current_render_targets[i] == &framebuffers[framebuffer_index] ? VK_IMAGE_LAYOUT_PRESENT_SRC_KHR : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			current_render_targets[i] == &framebuffers[framebuffer_index] ? GPU_TEXTURE_STATE_PRESENT : GPU_TEXTURE_STATE_SHADER_RESOURCE);
 	}
 	current_render_targets_count = 0;
 }
@@ -1976,7 +1944,7 @@ static void update_stride(gpu_texture_t *texture) {
 	texture->impl.stride = (int)layout.rowPitch;
 }
 
-void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, iron_image_format_t format) {
+void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, gpu_texture_format_t format) {
 	texture->width = width;
 	texture->height = height;
 	texture->uploaded = false;
@@ -1984,8 +1952,8 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	texture->data = data;
 	texture->impl.stage = 0;
 	texture->impl.stage_depth = -1;
-	texture->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
-	texture->depth_state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
+	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
+	texture->depth_state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
 
 	const VkFormat tex_format = convert_image_format(format);
 	VkFormatProperties props;
@@ -2058,7 +2026,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	vkCreateImageView(device, &view, NULL, &texture->impl.view);
 }
 
-void gpu_texture_init(gpu_texture_t *texture, int width, int height, iron_image_format_t format) {
+void gpu_texture_init(gpu_texture_t *texture, int width, int height, gpu_texture_format_t format) {
 	texture->width = width;
 	texture->height = height;
 	texture->uploaded = true;
@@ -2066,8 +2034,8 @@ void gpu_texture_init(gpu_texture_t *texture, int width, int height, iron_image_
 	texture->data = NULL;
 	texture->impl.stage = 0;
 	texture->impl.stage_depth = -1;
-	texture->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
-	texture->depth_state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
+	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
+	texture->depth_state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
 
 	VkFormat tex_format = convert_image_format(format);
 	VkFormatProperties props;
@@ -2185,7 +2153,7 @@ void gpu_texture_set_mipmap(gpu_texture_t *texture, gpu_texture_t *mipmap, int l
 	// texture->uploaded = true;
 }
 
-void gpu_render_target_init(gpu_texture_t *target, int width, int height, iron_image_format_t format, int depth_bits) {
+void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format, int depth_bits) {
 	render_target_init(target, width, height, format, depth_bits, -1);
 }
 

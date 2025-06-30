@@ -7,29 +7,23 @@
 #import <Metal/Metal.h>
 #import <MetalKit/MTKView.h>
 
-#define FRAMEBUFFER_COUNT 1
+#define GPU_FRAMEBUFFER_COUNT 1
 
 id getMetalLayer(void);
 id getMetalDevice(void);
 id getMetalQueue(void);
 
-extern int constant_buffer_index;
+
 bool gpu_transpose_mat = true;
-bool gpu_in_use = false;
-static bool gpu_thrown = false;
 static id<MTLCommandBuffer> command_buffer = nil;
 static id<MTLRenderCommandEncoder> command_encoder = nil;
 static id<MTLArgumentEncoder> argument_encoder = nil;
 static id<MTLBuffer> argument_buffer = nil;
-static int argument_buffer_step;
 static id<CAMetalDrawable> drawable;
-static bool has_depth = false;
-static gpu_texture_t *current_render_targets[8] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
-static int current_render_targets_count = 0;
-static gpu_buffer_t *current_index_buffer;
 static id<MTLSamplerState> linear_sampler;
-static gpu_texture_t framebuffers[FRAMEBUFFER_COUNT];
-static int framebuffer_index = 0;
+static bool has_depth = false;
+static int argument_buffer_step;
+static gpu_buffer_t *current_index_buffer;
 
 static MTLBlendFactor convert_blending_factor(gpu_blending_factor_t factor) {
 	switch (factor) {
@@ -77,37 +71,37 @@ static MTLCullMode convert_cull_mode(gpu_cull_mode_t cull) {
 	}
 }
 
-static MTLPixelFormat convert_render_target_format(iron_image_format_t format) {
+static MTLPixelFormat convert_render_target_format(gpu_texture_format_t format) {
 	switch (format) {
-	case IRON_IMAGE_FORMAT_RGBA128:
+	case GPU_TEXTURE_FORMAT_RGBA128:
 		return MTLPixelFormatRGBA32Float;
-	case IRON_IMAGE_FORMAT_RGBA64:
+	case GPU_TEXTURE_FORMAT_RGBA64:
 		return MTLPixelFormatRGBA16Float;
-	case IRON_IMAGE_FORMAT_R32:
+	case GPU_TEXTURE_FORMAT_R32:
 		return MTLPixelFormatR32Float;
-	case IRON_IMAGE_FORMAT_R16:
+	case GPU_TEXTURE_FORMAT_R16:
 		return MTLPixelFormatR16Float;
-	case IRON_IMAGE_FORMAT_R8:
+	case GPU_TEXTURE_FORMAT_R8:
 		return MTLPixelFormatR8Unorm;
-	case IRON_IMAGE_FORMAT_RGBA32:
+	case GPU_TEXTURE_FORMAT_RGBA32:
 	default:
 		return MTLPixelFormatBGRA8Unorm;
 	}
 }
 
-static MTLPixelFormat convert_image_format(iron_image_format_t format) {
+static MTLPixelFormat convert_image_format(gpu_texture_format_t format) {
 	switch (format) {
-	case IRON_IMAGE_FORMAT_RGBA32:
+	case GPU_TEXTURE_FORMAT_RGBA32:
 		return MTLPixelFormatRGBA8Unorm;
-	case IRON_IMAGE_FORMAT_R8:
+	case GPU_TEXTURE_FORMAT_R8:
 		return MTLPixelFormatR8Unorm;
-	case IRON_IMAGE_FORMAT_R16:
+	case GPU_TEXTURE_FORMAT_R16:
 		return MTLPixelFormatR16Float;
-	case IRON_IMAGE_FORMAT_R32:
+	case GPU_TEXTURE_FORMAT_R32:
 		return MTLPixelFormatR32Float;
-	case IRON_IMAGE_FORMAT_RGBA128:
+	case GPU_TEXTURE_FORMAT_RGBA128:
 		return MTLPixelFormatRGBA32Float;
-	case IRON_IMAGE_FORMAT_RGBA64:
+	case GPU_TEXTURE_FORMAT_RGBA64:
 		return MTLPixelFormatRGBA16Float;
 	}
 }
@@ -127,31 +121,31 @@ static int format_size(MTLPixelFormat format) {
 	}
 }
 
-static int format_byte_size(iron_image_format_t format) {
+static int format_byte_size(gpu_texture_format_t format) {
 	switch (format) {
-	case IRON_IMAGE_FORMAT_RGBA128:
+	case GPU_TEXTURE_FORMAT_RGBA128:
 		return 16;
-	case IRON_IMAGE_FORMAT_RGBA64:
+	case GPU_TEXTURE_FORMAT_RGBA64:
 		return 8;
-	case IRON_IMAGE_FORMAT_R16:
+	case GPU_TEXTURE_FORMAT_R16:
 		return 2;
-	case IRON_IMAGE_FORMAT_R8:
+	case GPU_TEXTURE_FORMAT_R8:
 		return 1;
-	case IRON_IMAGE_FORMAT_RGBA32:
-	case IRON_IMAGE_FORMAT_R32:
+	case GPU_TEXTURE_FORMAT_RGBA32:
+	case GPU_TEXTURE_FORMAT_R32:
 	default:
 		return 4;
 	}
 }
 
-static void render_target_init(gpu_texture_t *target, int width, int height, iron_image_format_t format, int depth_buffer_bits, int framebuffer_index) {
+static void render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format, int depth_buffer_bits, int framebuffer_index) {
 	id<MTLDevice> device = getMetalDevice();
 	memset(target, 0, sizeof(gpu_texture_t));
 	target->width = width;
 	target->height = height;
 	target->data = NULL;
 	target->uploaded = true;
-	target->state = IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
+	target->state = GPU_TEXTURE_STATE_RENDER_TARGET;
 	target->impl._texReadback = NULL;
 	target->impl._depthTex = NULL;
 
@@ -267,30 +261,14 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	// argument_buffer_step += (align - (argument_buffer_step % align)) % align;
 	argument_buffer = [device newBufferWithLength:(argument_buffer_step * 2048) options:MTLResourceStorageModeShared];
 
-	for (int i = 0; i < FRAMEBUFFER_COUNT; ++i) {
-		render_target_init(&framebuffers[i], iron_window_width(), iron_window_height(), IRON_IMAGE_FORMAT_RGBA32, depth_buffer_bits, i);
+	for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
+		render_target_init(&framebuffers[i], iron_window_width(), iron_window_height(), GPU_TEXTURE_FORMAT_RGBA32, depth_buffer_bits, i);
 	}
 
 	next_drawable();
 }
 
-void gpu_begin(gpu_texture_t **targets, int count, unsigned flags, unsigned color, float depth) {
-	if (gpu_in_use && !gpu_thrown) {
-		gpu_thrown = true;
-		iron_log("End before you begin");
-	}
-	gpu_in_use = true;
-
-	if (targets == NULL) {
-		current_render_targets[0] = &framebuffers[framebuffer_index];
-		current_render_targets_count = 1;
-	}
-	else {
-		for (int i = 0; i < count; ++i) {
-			current_render_targets[i] = targets[i];
-		}
-		current_render_targets_count = count;
-	}
+void gpu_begin_internal(gpu_texture_t **targets, int count, unsigned flags, unsigned color, float depth) {
 
 	has_depth = current_render_targets[0]->impl._depthTex != nil;
 
@@ -332,13 +310,7 @@ void gpu_begin(gpu_texture_t **targets, int count, unsigned flags, unsigned colo
 	command_encoder = [command_buffer renderCommandEncoderWithDescriptor:desc];
 }
 
-void gpu_end() {
-	if (!gpu_in_use && !gpu_thrown) {
-		gpu_thrown = true;
-		iron_log("Begin before you end");
-	}
-	gpu_in_use = false;
-
+void gpu_end_internal() {
 	[command_encoder endEncoding];
 	current_render_targets_count = 0;
 }
@@ -356,6 +328,9 @@ void gpu_present() {
 	command_encoder = nil;
 
 	next_drawable();
+}
+
+void gpu_barrier(gpu_texture_t *render_target, gpu_texture_state_t state_after) {
 }
 
 int gpu_max_bound_textures(void) {
@@ -646,7 +621,7 @@ static void create_texture(gpu_texture_t *texture, int width, int height, int fo
 	texture->impl.has_mipmaps = false;
 	id<MTLDevice> device = getMetalDevice();
 
-	MTLTextureDescriptor *descriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:convert_image_format((iron_image_format_t)format)
+	MTLTextureDescriptor *descriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:convert_image_format((gpu_texture_format_t)format)
 	                                                                                      width:width
 	                                                                                     height:height
 	                                                                                  mipmapped:NO];
@@ -654,7 +629,7 @@ static void create_texture(gpu_texture_t *texture, int width, int height, int fo
 	descriptor.width = width;
 	descriptor.height = height;
 	descriptor.depth = 1;
-	descriptor.pixelFormat = convert_image_format((iron_image_format_t)format);
+	descriptor.pixelFormat = convert_image_format((gpu_texture_format_t)format);
 	descriptor.arrayLength = 1;
 	descriptor.mipmapLevelCount = 1;
 	// TODO: Make less textures writable
@@ -665,25 +640,25 @@ static void create_texture(gpu_texture_t *texture, int width, int height, int fo
 	texture->impl._tex = (__bridge_retained void *)[device newTextureWithDescriptor:descriptor];
 }
 
-void gpu_texture_init(gpu_texture_t *texture, int width, int height, iron_image_format_t format) {
+void gpu_texture_init(gpu_texture_t *texture, int width, int height, gpu_texture_format_t format) {
 	texture->width = width;
 	texture->height = height;
 	texture->format = format;
-	texture->impl.data = malloc(width * height * (format == IRON_IMAGE_FORMAT_R8 ? 1 : 4));
+	texture->impl.data = malloc(width * height * (format == GPU_TEXTURE_FORMAT_R8 ? 1 : 4));
 	create_texture(texture, width, height, format, true);
 	texture->uploaded = true;
 	texture->data = NULL;
-	texture->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
+	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
 }
 
-void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, iron_image_format_t format) {
+void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, gpu_texture_format_t format) {
 	texture->width = width;
 	texture->height = height;
 	texture->format = format;
 	texture->data = data;
 	texture->uploaded = false;
 	texture->impl.data = NULL;
-	texture->state = IRON_INTERNAL_RENDER_TARGET_STATE_TEXTURE;
+	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
 	create_texture(texture, width, height, format, true);
 	id<MTLTexture> tex = (__bridge id<MTLTexture>)texture->impl._tex;
 	[tex replaceRegion:MTLRegionMake2D(0, 0, texture->width, texture->height)
@@ -715,14 +690,14 @@ void gpu_texture_destroy(gpu_texture_t *target) {
 
 int gpu_texture_stride(gpu_texture_t *texture) {
 	switch (texture->format) {
-	case IRON_IMAGE_FORMAT_R8:
+	case GPU_TEXTURE_FORMAT_R8:
 		return texture->width;
-	case IRON_IMAGE_FORMAT_RGBA32:
+	case GPU_TEXTURE_FORMAT_RGBA32:
 	default:
 		return texture->width * 4;
-	case IRON_IMAGE_FORMAT_RGBA64:
+	case GPU_TEXTURE_FORMAT_RGBA64:
 		return texture->width * 8;
-	case IRON_IMAGE_FORMAT_RGBA128:
+	case GPU_TEXTURE_FORMAT_RGBA128:
 		return texture->width * 16;
 	}
 }
@@ -733,7 +708,7 @@ void gpu_texture_generate_mipmaps(gpu_texture_t *texture, int levels) {
 void gpu_texture_set_mipmap(gpu_texture_t *texture, gpu_texture_t *mipmap, int level) {
 	if (!texture->impl.has_mipmaps) {
 		id<MTLDevice> device = getMetalDevice();
-		MTLTextureDescriptor *descriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:convert_image_format((iron_image_format_t)texture->format)
+		MTLTextureDescriptor *descriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:convert_image_format((gpu_texture_format_t)texture->format)
 		                                                                                      width:texture->width
 		                                                                                     height:texture->height
 		                                                                                  mipmapped:YES];
@@ -741,7 +716,7 @@ void gpu_texture_set_mipmap(gpu_texture_t *texture, gpu_texture_t *mipmap, int l
 		descriptor.width = texture->width;
 		descriptor.height = texture->height;
 		descriptor.depth = 1;
-		descriptor.pixelFormat = convert_image_format((iron_image_format_t)texture->format);
+		descriptor.pixelFormat = convert_image_format((gpu_texture_format_t)texture->format);
 		descriptor.arrayLength = 1;
 		bool writable = true;
 		if (writable) {
@@ -780,11 +755,11 @@ void gpu_texture_set_mipmap(gpu_texture_t *texture, gpu_texture_t *mipmap, int l
 	       bytesPerRow:mipmap->width * format_byte_size(mipmap->format)];
 }
 
-void gpu_render_target_init(gpu_texture_t *target, int width, int height, iron_image_format_t format, int depth_buffer_bits) {
+void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format, int depth_buffer_bits) {
 	render_target_init(target, width, height, format, depth_buffer_bits, -1);
 	target->width = width;
 	target->height = height;
-	target->state = IRON_INTERNAL_RENDER_TARGET_STATE_RENDER_TARGET;
+	target->state = GPU_TEXTURE_STATE_RENDER_TARGET;
 	target->uploaded = true;
 }
 

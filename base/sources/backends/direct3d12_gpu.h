@@ -66,7 +66,6 @@ typedef struct {
 	struct ID3D12Resource *depth_texture;
 	struct D3D12Viewport viewport;
 	struct D3D12Rect scissor;
-	enum D3D12_RESOURCE_STATES state;
 } gpu_texture_impl_t;
 
 typedef struct {
