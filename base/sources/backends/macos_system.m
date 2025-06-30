@@ -268,7 +268,7 @@ static int getMouseX(NSEvent *event) {
 static int getMouseY(NSEvent *event) {
 	NSWindow *window = [[NSApplication sharedApplication] mainWindow];
 	float scale = [window backingScaleFactor];
-	return (int)(iron_height() - [event locationInWindow].y * scale);
+	return (int)(iron_window_height() - [event locationInWindow].y * scale);
 }
 
 static bool controlKeyMouseButton = false;
