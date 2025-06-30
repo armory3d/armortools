@@ -18,6 +18,8 @@
 void iron_memory_emergency();
 
 bool gpu_transpose_mat = false;
+bool gpu_in_use = false;
+static bool gpu_thrown = false;
 static ID3D12Device *device = NULL;
 static ID3D12CommandQueue *queue;
 static struct IDXGISwapChain *window_swapchain;
@@ -473,9 +475,14 @@ int gpu_max_bound_textures(void) {
 }
 
 void gpu_begin(gpu_texture_t **targets, int count, unsigned flags, unsigned color, float depth) {
+	if (gpu_in_use && !gpu_thrown) {
+		gpu_thrown = true;
+		iron_log("End before you begin");
+	}
+	gpu_in_use = true;
 
-	gpu_wait();
 	if (!command_list_open) {
+		gpu_wait();
 		command_allocator->lpVtbl->Reset(command_allocator);
 		command_list->lpVtbl->Reset(command_list, command_allocator, NULL);
 		command_list_open = true;
@@ -542,18 +549,17 @@ void gpu_begin(gpu_texture_t **targets, int count, unsigned flags, unsigned colo
 }
 
 void gpu_end() {
+	if (!gpu_in_use && !gpu_thrown) {
+		gpu_thrown = true;
+		iron_log("Begin before you end");
+	}
+	gpu_in_use = false;
+
 	for (int i = 0; i < current_render_targets_count; ++i) {
 		gpu_barrier(current_render_targets[i],
 			current_render_targets[i] == &framebuffers[framebuffer_index] ? D3D12_RESOURCE_STATE_PRESENT : D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	}
 	current_render_targets_count = 0;
-
-	command_list->lpVtbl->Close(command_list);
-	command_list_open = false;
-
-	ID3D12CommandList *command_lists[] = {(ID3D12CommandList *)command_list};
-	queue->lpVtbl->ExecuteCommandLists(queue, 1, command_lists);
-	queue->lpVtbl->Signal(queue, fence, ++fence_value);
 }
 
 void gpu_wait() {
@@ -561,6 +567,13 @@ void gpu_wait() {
 }
 
 void gpu_present() {
+	command_list->lpVtbl->Close(command_list);
+	command_list_open = false;
+
+	ID3D12CommandList *command_lists[] = {(ID3D12CommandList *)command_list};
+	queue->lpVtbl->ExecuteCommandLists(queue, 1, command_lists);
+	queue->lpVtbl->Signal(queue, fence, ++fence_value);
+
 	window_swapchain->lpVtbl->Present(window_swapchain, window_vsync, 0);
 
 	queue->lpVtbl->Signal(queue, fence, ++fence_value);
@@ -1354,7 +1367,7 @@ void gpu_constant_buffer_lock(gpu_buffer_t *buffer, int start, int count) {
 	buffer->impl.last_count = count;
 	D3D12_RANGE range = {
 		.Begin = start,
-		.End = range.Begin + count,
+		.End = start + count,
 	};
 	uint8_t *p;
 	buffer->impl.buffer->lpVtbl->Map(buffer->impl.buffer, 0, &range, (void **)&p);
@@ -1364,7 +1377,7 @@ void gpu_constant_buffer_lock(gpu_buffer_t *buffer, int start, int count) {
 void gpu_constant_buffer_unlock(gpu_buffer_t *buffer) {
 	D3D12_RANGE range = {
 		.Begin = buffer->impl.last_start,
-		.End = range.Begin + buffer->impl.last_count,
+		.End = buffer->impl.last_start + buffer->impl.last_count,
 	};
 	buffer->impl.buffer->lpVtbl->Unmap(buffer->impl.buffer, 0, &range);
 	buffer->data = NULL;

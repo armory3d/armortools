@@ -18,6 +18,7 @@ void gpu_draw() {
 	++constant_buffer_index;
 	if (constant_buffer_index >= CONSTANT_BUFFER_MULTIPLE) {
 		constant_buffer_index = 0;
+		// gpu_wait();
 	}
 	gpu_constant_buffer_lock(&constant_buffer, constant_buffer_index * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
 }
@@ -93,8 +94,8 @@ void gpu_set_bool(int location, bool value) {
 	ints[0] = value ? 1 : 0;
 }
 
-static void gpu_internal_set_matrix3(uint8_t *constants, int offset, iron_matrix3x3_t *value) {
-	float *floats = (float *)(&constants[offset]);
+static void gpu_internal_set_matrix3(int offset, iron_matrix3x3_t *value) {
+	float *floats = (float *)(&constant_buffer.data[offset]);
 	for (int y = 0; y < 3; ++y) {
 		for (int x = 0; x < 3; ++x) {
 			floats[x + y * 4] = iron_matrix3x3_get(value, x, y);
@@ -102,8 +103,8 @@ static void gpu_internal_set_matrix3(uint8_t *constants, int offset, iron_matrix
 	}
 }
 
-static void gpu_internal_set_matrix4(uint8_t *constants, int offset, iron_matrix4x4_t *value) {
-	float *floats = (float *)(&constants[offset]);
+static void gpu_internal_set_matrix4(int offset, iron_matrix4x4_t *value) {
+	float *floats = (float *)(&constant_buffer.data[offset]);
 	for (int y = 0; y < 4; ++y) {
 		for (int x = 0; x < 4; ++x) {
 			floats[x + y * 4] = iron_matrix4x4_get(value, x, y);
@@ -115,10 +116,10 @@ void gpu_set_matrix3(int location, iron_matrix3x3_t value) {
 	if (gpu_transpose_mat) {
 		iron_matrix3x3_t m = value;
 		iron_matrix3x3_transpose(&m);
-		gpu_internal_set_matrix3(constant_buffer.data, location, &m);
+		gpu_internal_set_matrix3(location, &m);
 	}
 	else {
-		gpu_internal_set_matrix3(constant_buffer.data, location, &value);
+		gpu_internal_set_matrix3(location, &value);
 	}
 }
 
@@ -126,10 +127,10 @@ void gpu_set_matrix4(int location, iron_matrix4x4_t value) {
 	if (gpu_transpose_mat) {
 		iron_matrix4x4_t m = value;
 		iron_matrix4x4_transpose(&m);
-		gpu_internal_set_matrix4(constant_buffer.data, location, &m);
+		gpu_internal_set_matrix4(location, &m);
 	}
 	else {
-		gpu_internal_set_matrix4(constant_buffer.data, location, &value);
+		gpu_internal_set_matrix4(location, &value);
 	}
 }
 
