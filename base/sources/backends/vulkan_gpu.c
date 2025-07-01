@@ -449,7 +449,6 @@ void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_t
 		image.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
 	}
 	else {
-		.usage = ,
 		image.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 	}
 
@@ -642,7 +641,7 @@ static void create_swapchain() {
 		mem_alloc.allocationSize = mem_reqs.size;
 		memory_type_from_properties(mem_reqs.memoryTypeBits, 0, &mem_alloc.memoryTypeIndex);
 		vkAllocateMemory(device, &mem_alloc, NULL, &framebuffer_depth.impl.mem);
-		vkBindImageMemory(device, framebuffer_depth.impl.image, framebuffer_depth.impl.memory, 0);
+		vkBindImageMemory(device, framebuffer_depth.impl.image, framebuffer_depth.impl.mem, 0);
 		set_image_layout(framebuffer_depth.impl.image, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 		view.image = framebuffer_depth.impl.image;
