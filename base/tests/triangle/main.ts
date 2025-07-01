@@ -7,7 +7,7 @@ let vb: any;
 let ib: any;
 
 function render() {
-	_gpu_begin(null, null, clear_flag_t.COLOR | clear_flag_t.DEPTH, 0xff000000, 1.0);
+	_gpu_begin(null, null, null, clear_flag_t.COLOR | clear_flag_t.DEPTH, 0xff000000, 1.0);
 	gpu_set_pipeline(pipeline);
 	gpu_set_vertex_buffer(vb);
 	gpu_set_index_buffer(ib);
@@ -26,7 +26,7 @@ function main() {
 		features: window_features_t.RESIZABLE | window_features_t.MINIMIZABLE | window_features_t.MAXIMIZABLE,
 		vsync: true,
 		frequency: 60,
-		use_depth: true
+		depth_bits: 32
 	};
 	_iron_init(ops);
 

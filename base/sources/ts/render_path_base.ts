@@ -192,7 +192,7 @@ function render_path_base_draw_bloom() {
 
 	for (let i: i32 = 0; i < num_mips; ++i) {
 		render_path_base_bloom_current_mip = i;
-		render_path_set_target(render_path_base_bloom_mipmaps[i].name, null, clear_flag_t.COLOR, 0x00000000);
+		render_path_set_target(render_path_base_bloom_mipmaps[i].name, null, null, clear_flag_t.COLOR, 0x00000000);
 		render_path_bind_target(i == 0 ? "buf" : render_path_base_bloom_mipmaps[i - 1].name, "tex");
 		render_path_draw_shader("shader_datas/bloom_pass/bloom_downsample_pass");
 	}
@@ -262,7 +262,7 @@ function render_path_base_draw_ssao() {
 		}
 
 		render_path_set_target("singlea");
-		render_path_bind_target("_main", "gbufferD");
+		render_path_bind_target("main", "gbufferD");
 		render_path_bind_target("gbuffer0", "gbuffer0");
 		render_path_draw_shader("shader_datas/ssao_pass/ssao_pass");
 
@@ -280,7 +280,7 @@ function render_path_base_draw_ssao() {
 
 function render_path_base_draw_deferred_light() {
 	render_path_set_target("buf");
-	render_path_bind_target("_main", "gbufferD");
+	render_path_bind_target("main", "gbufferD");
 	render_path_bind_target("gbuffer0", "gbuffer0");
 	render_path_bind_target("gbuffer1", "gbuffer1");
 	let ssao: bool = config_raw.rp_ssao != false && context_raw.camera_type == camera_type_t.PERSPECTIVE;
@@ -291,15 +291,10 @@ function render_path_base_draw_deferred_light() {
 		render_path_bind_target("empty_white", "ssaotex");
 	}
 
-
 	render_path_draw_shader("shader_datas/deferred_light/deferred_light");
 
-	render_path_set_depth_from("buf", "gbuffer0"); // Bind depth for world pass
-
-	render_path_set_target("buf");
+	render_path_set_target("buf", null, "main");
 	render_path_draw_skydome("shader_datas/world_pass/world_pass");
-
-	render_path_set_depth_from("buf", "gbuffer1"); // Unbind depth
 }
 
 // function render_path_base_draw_histogram() {
@@ -350,9 +345,9 @@ function render_path_base_draw_taa(bufa: string, bufb: string) {
 }
 
 function render_path_base_draw_gbuffer() {
-	render_path_set_target("gbuffer0", null, clear_flag_t.DEPTH, 0, 1.0); // Only clear gbuffer0
+	render_path_set_target("gbuffer0", null, "main", clear_flag_t.DEPTH, 0, 1.0); // Only clear gbuffer0
 	let additional: string[] = ["gbuffer1", "gbuffer2"];
-	render_path_set_target("gbuffer0", additional);
+	render_path_set_target("gbuffer0", additional, "main");
 	render_path_paint_bind_layers();
 	render_path_draw_meshes("mesh");
 	render_path_paint_unbind_layers();
@@ -362,12 +357,12 @@ function render_path_base_draw_gbuffer() {
 			let ping: string = i % 2 == 1 ? "_copy" : "";
 			let pong: string = i % 2 == 1 ? "" : "_copy";
 			if (i == make_mesh_layer_pass_count - 1) {
-				render_path_set_target("gbuffer2" + ping, null, clear_flag_t.COLOR, 0xff000000);
+				render_path_set_target("gbuffer2" + ping, null, null, clear_flag_t.COLOR, 0xff000000);
 			}
 			let g1ping: string = "gbuffer1" + ping;
 			let g2ping: string = "gbuffer2" + ping;
 			let additional: string[] = [g1ping, g2ping];
-			render_path_set_target("gbuffer0" + ping, additional);
+			render_path_set_target("gbuffer0" + ping, additional, "main");
 			render_path_bind_target("gbuffer0" + pong, "gbuffer0");
 			render_path_bind_target("gbuffer1" + pong, "gbuffer1");
 			render_path_bind_target("gbuffer2" + pong, "gbuffer2");
@@ -400,7 +395,6 @@ function render_path_base_make_gbuffer_copy_textures() {
 			t.height = 0;
 			t.format = "RGBA64";
 			t.scale = render_path_base_get_super_sampling();
-			t.depth_buffer = "main";
 			render_path_create_render_target(t);
 		}
 		{
@@ -421,12 +415,6 @@ function render_path_base_make_gbuffer_copy_textures() {
 			t.scale = render_path_base_get_super_sampling();
 			render_path_create_render_target(t);
 		}
-
-		///if arm_metal
-		// TODO: Fix depth attach for gbuffer0_copy on metal
-		// Use resize to re-create buffers from scratch for now
-		render_path_resize();
-		///end
 	}
 }
 

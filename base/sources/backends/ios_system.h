@@ -15,7 +15,6 @@ struct gpu_texture;
 	id<CAMetalDrawable> drawable;
 	id<MTLLibrary> library;
 	MTLRenderPassDescriptor *renderPassDescriptor;
-	id<MTLTexture> depthTexture;
 
 	CMMotionManager *motionManager;
 	bool hasAccelerometer;

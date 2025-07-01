@@ -130,7 +130,7 @@ function shader_context_compile(raw: shader_context_t): shader_context_t {
 
 	// Depth attachment format
 	if (raw.depth_attachment != null) {
-		raw._.pipe_state.depth_attachment_bits = raw.depth_attachment == "NONE" ? 0 : 24;
+		raw._.pipe_state.depth_attachment_bits = raw.depth_attachment == "NONE" ? 0 : 32;
 	}
 
 	// Shaders

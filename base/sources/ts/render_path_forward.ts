@@ -10,10 +10,8 @@ function render_path_forward_commands() {
 }
 
 function render_path_forward_draw_forward() {
-	render_path_set_depth_from("gbuffer1", "gbuffer0");
-	render_path_set_target("gbuffer1");
+	render_path_set_target("gbuffer1", null, "main");
 	render_path_draw_skydome("shader_datas/world_pass/world_pass");
-	render_path_set_depth_from("gbuffer1", "gbuffer2");
 
 	render_path_set_target("buf");
 	render_path_bind_target("gbuffer1", "tex");

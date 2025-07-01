@@ -216,11 +216,11 @@ void draw_begin(gpu_texture_t *target, bool clear, unsigned color) {
 	draw_set_color(0xffffffff);
 	_draw_current = target;
 	if (target == NULL) {
-		gpu_begin(NULL, 0, clear ? GPU_CLEAR_COLOR : GPU_CLEAR_NONE, color, 0.0);
+		gpu_begin(NULL, 0, NULL, clear ? GPU_CLEAR_COLOR : GPU_CLEAR_NONE, color, 0.0);
 	}
 	else {
 		gpu_texture_t *targets[1] = { target };
-		gpu_begin(targets, 1, clear ? GPU_CLEAR_COLOR : GPU_CLEAR_NONE, color, 0.0);
+		gpu_begin(targets, 1, NULL, clear ? GPU_CLEAR_COLOR : GPU_CLEAR_NONE, color, 0.0);
 	}
 }
 

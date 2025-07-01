@@ -49,14 +49,10 @@ typedef struct iron_window_options {
 	iron_window_mode_t mode;
 	int frequency;
 	bool vsync;
-
-	bool use_depth;
-
 	int display_index;
 	bool visible;
 	int color_bits;
 	int depth_bits;
-
 } iron_window_options_t;
 
 void iron_window_create(iron_window_options_t *win);

@@ -24,15 +24,18 @@ static ID3D12RootSignature *root_signature = NULL;
 static struct ID3D12CommandAllocator *command_allocator;
 static struct ID3D12GraphicsCommandList *command_list;
 static gpu_pipeline_t *current_pipeline;
-static gpu_texture_t *current_textures[TEXTURE_COUNT];
+static gpu_texture_t *current_textures[TEXTURE_COUNT] = {
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+};
 static bool window_vsync;
-static int index_count;
+static int index_count = 0;
 static struct ID3D12DescriptorHeap *srv_heap;
-static int srv_heap_index;
+static int srv_heap_index = 0;
 static UINT64 fence_value;
 static ID3D12Fence *fence;
 static HANDLE fence_event;
-static UINT64 frame_fence_values[GPU_FRAMEBUFFER_COUNT];
+static UINT64 frame_fence_values[GPU_FRAMEBUFFER_COUNT] = {0, 0};
 
 static D3D12_BLEND convert_blend_factor(gpu_blending_factor_t factor) {
 	switch (factor) {
@@ -94,6 +97,8 @@ static DXGI_FORMAT convert_format(gpu_texture_format_t format) {
 		return DXGI_FORMAT_R16_FLOAT;
 	case GPU_TEXTURE_FORMAT_R8:
 		return DXGI_FORMAT_R8_UNORM;
+	case GPU_TEXTURE_FORMAT_D32:
+		return DXGI_FORMAT_D32_FLOAT;
 	case GPU_TEXTURE_FORMAT_RGBA32:
 	default:
 		return DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -174,11 +179,10 @@ void gpu_destroy() {
 	device->lpVtbl->Release(device);
 }
 
-static void render_target_init(gpu_texture_t *render_target, int width, int height, gpu_texture_format_t format, int depth_buffer_bits, int framebuffer_index) {
-	render_target->width = render_target->width = width;
-	render_target->height = render_target->height = height;
+void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height, gpu_texture_format_t format, int framebuffer_index) {
+	render_target->width = width;
+	render_target->height = height;
 	render_target->impl.stage = 0;
-	render_target->impl.stage_depth = -1;
 	render_target->impl.readback = NULL;
 	render_target->impl.image = NULL;
 	render_target->impl.upload_image = NULL;
@@ -194,6 +198,7 @@ static void render_target_init(gpu_texture_t *render_target, int width, int heig
 	clear_value.Color[1] = 0.0f;
 	clear_value.Color[2] = 0.0f;
 	clear_value.Color[3] = 0.0f;
+	clear_value.DepthStencil.Depth = 1.0f;
 
 	D3D12_HEAP_PROPERTIES heap_properties = {
 		.Type = D3D12_HEAP_TYPE_DEFAULT,
@@ -214,12 +219,12 @@ static void render_target_init(gpu_texture_t *render_target, int width, int heig
 		.SampleDesc.Count = 1,
 		.SampleDesc.Quality = 0,
 		.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN,
-		.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET,
+		.Flags = format == GPU_TEXTURE_FORMAT_D32 ? D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL : D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET,
 	};
 
 	D3D12_DESCRIPTOR_HEAP_DESC heap_desc = {
 		.NumDescriptors = 1,
-		.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
+		.Type = format == GPU_TEXTURE_FORMAT_D32 ? D3D12_DESCRIPTOR_HEAP_TYPE_DSV : D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
 		.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
 	};
 	device->lpVtbl->CreateDescriptorHeap(device, &heap_desc, &IID_ID3D12DescriptorHeap, &render_target->impl.descriptor_heap);
@@ -252,7 +257,12 @@ static void render_target_init(gpu_texture_t *render_target, int width, int heig
 	D3D12_CPU_DESCRIPTOR_HANDLE handle;
 	render_target->impl.descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(render_target->impl.descriptor_heap, &handle);
 
-	device->lpVtbl->CreateRenderTargetView(device, render_target->impl.render_target, &view_desc, handle);
+	if (format == GPU_TEXTURE_FORMAT_D32) {
+		device->lpVtbl->CreateDepthStencilView(device, render_target->impl.render_target, NULL, handle);
+	}
+	else {
+		device->lpVtbl->CreateRenderTargetView(device, render_target->impl.render_target, &view_desc, handle);
+	}
 
 	D3D12_DESCRIPTOR_HEAP_DESC descriptor_heap_desc = {
 		.NumDescriptors = 1,
@@ -266,7 +276,7 @@ static void render_target_init(gpu_texture_t *render_target, int width, int heig
 	D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {
 		.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D,
 		.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
-		.Format = dxgi_format,
+		.Format = format == GPU_TEXTURE_FORMAT_D32 ? DXGI_FORMAT_R32_FLOAT : dxgi_format,
 		.Texture2D.MipLevels = 1,
 		.Texture2D.MostDetailedMip = 0,
 		.Texture2D.ResourceMinLODClamp = 0.0f,
@@ -274,85 +284,6 @@ static void render_target_init(gpu_texture_t *render_target, int width, int heig
 
 	render_target->impl.srv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(render_target->impl.srv_descriptor_heap, &handle);
 	device->lpVtbl->CreateShaderResourceView(device, render_target->impl.render_target, &srv_desc, handle);
-
-	if (depth_buffer_bits > 0) {
-		D3D12_DESCRIPTOR_HEAP_DESC dsv_heap_desc = {
-			.NumDescriptors = 1,
-			.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV,
-			.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
-		};
-		device->lpVtbl->CreateDescriptorHeap(device, &dsv_heap_desc, &IID_ID3D12DescriptorHeap, &render_target->impl.depth_descriptor_heap);
-
-		D3D12_RESOURCE_DESC depth_resource_desc = {
-			.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D,
-			.Alignment = 0,
-			.Width = width,
-			.Height = height,
-			.DepthOrArraySize = 1,
-			.MipLevels = 1,
-			.Format = DXGI_FORMAT_D32_FLOAT,
-			.SampleDesc.Count = 1,
-			.SampleDesc.Quality = 0,
-			.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN,
-			.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL,
-		};
-
-		D3D12_CLEAR_VALUE clear_value = {
-			.Format = DXGI_FORMAT_D32_FLOAT,
-			.DepthStencil.Depth = 1.0f,
-			.DepthStencil.Stencil = 0,
-		};
-
-		D3D12_HEAP_PROPERTIES heap_properties = {
-			.Type = D3D12_HEAP_TYPE_DEFAULT,
-			.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
-			.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN,
-			.CreationNodeMask = 1,
-			.VisibleNodeMask = 1,
-		};
-
-		HRESULT result = device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &depth_resource_desc, D3D12_RESOURCE_STATE_DEPTH_WRITE,
-																 &clear_value, &IID_ID3D12Resource, &render_target->impl.depth_texture);
-		if (result != S_OK) {
-			for (int i = 0; i < 10; ++i) {
-				iron_memory_emergency();
-				result = device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &depth_resource_desc, D3D12_RESOURCE_STATE_DEPTH_WRITE,
-																 &clear_value, &IID_ID3D12Resource, &render_target->impl.depth_texture);
-				if (result == S_OK) {
-					break;
-				}
-			}
-		}
-
-		D3D12_CPU_DESCRIPTOR_HANDLE handle;
-		render_target->impl.depth_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(render_target->impl.depth_descriptor_heap, &handle);
-		device->lpVtbl->CreateDepthStencilView(device, render_target->impl.depth_texture, NULL, handle);
-
-		D3D12_DESCRIPTOR_HEAP_DESC srv_depth_heap_desc = {
-			.NumDescriptors = 1,
-			.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-			.NodeMask = 0,
-			.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
-		};
-		device->lpVtbl->CreateDescriptorHeap(device, &srv_depth_heap_desc, &IID_ID3D12DescriptorHeap, &render_target->impl.srv_depth_descriptor_heap);
-
-		D3D12_SHADER_RESOURCE_VIEW_DESC srv_depth_view_desc = {
-			.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D,
-			.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
-			.Format = DXGI_FORMAT_R32_FLOAT,
-			.Texture2D.MipLevels = 1,
-			.Texture2D.MostDetailedMip = 0,
-			.Texture2D.ResourceMinLODClamp = 0.0f,
-		};
-
-		render_target->impl.srv_depth_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(render_target->impl.srv_depth_descriptor_heap, &handle);
-		device->lpVtbl->CreateShaderResourceView(device, render_target->impl.depth_texture, &srv_depth_view_desc, handle);
-	}
-	else {
-		render_target->impl.depth_descriptor_heap = NULL;
-		render_target->impl.depth_texture = NULL;
-		render_target->impl.srv_depth_descriptor_heap = NULL;
-	}
 
 	render_target->impl.scissor.top = 0;
 	render_target->impl.scissor.left = 0;
@@ -451,16 +382,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	fence_event = CreateEvent(NULL, FALSE, FALSE, NULL);
 	device->lpVtbl->CreateFence(device, 0, D3D12_FENCE_FLAG_NONE, &IID_ID3D12Fence, &fence);
 
-	for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
-		frame_fence_values[i] = 0;
-		render_target_init(&framebuffers[i], iron_window_width(), iron_window_height(), GPU_TEXTURE_FORMAT_RGBA32, depth_buffer_bits, i);
-	}
-
-	for (int i = 0; i < TEXTURE_COUNT; ++i) {
-		current_textures[i] = NULL;
-	}
-	srv_heap_index = 0;
-	index_count = 0;
+	gpu_create_framebuffers(depth_buffer_bits);
 
 	D3D12_DESCRIPTOR_HEAP_DESC heap_desc = {
 		.NumDescriptors = HEAP_SIZE,
@@ -477,7 +399,7 @@ int gpu_max_bound_textures(void) {
 	return TEXTURE_COUNT;
 }
 
-void gpu_begin_internal(gpu_texture_t **targets, int count, unsigned flags, unsigned color, float depth) {
+void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, unsigned flags, unsigned color, float depth) {
 
 	D3D12_CPU_DESCRIPTOR_HANDLE target_descriptors[16];
 	for (int i = 0; i < current_render_targets_count; ++i) {
@@ -486,10 +408,10 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, unsigned flags, unsi
 
 	gpu_texture_t *target = current_render_targets[0];
 
-	if (target->impl.depth_descriptor_heap != NULL) {
-		D3D12_CPU_DESCRIPTOR_HANDLE heapStart;
-		target->impl.depth_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(target->impl.depth_descriptor_heap, &heapStart);
-		command_list->lpVtbl->OMSetRenderTargets(command_list, current_render_targets_count, &target_descriptors[0], false, &heapStart);
+	if (depth_buffer != NULL) {
+		D3D12_CPU_DESCRIPTOR_HANDLE depth_handle;
+		depth_buffer->impl.descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(depth_buffer->impl.descriptor_heap, &depth_handle);
+		command_list->lpVtbl->OMSetRenderTargets(command_list, current_render_targets_count, &target_descriptors[0], false, &depth_handle);
 	}
 	else {
 		command_list->lpVtbl->OMSetRenderTargets(command_list, current_render_targets_count, &target_descriptors[0], false, NULL);
@@ -508,13 +430,10 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, unsigned flags, unsi
 		target->impl.descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(target->impl.descriptor_heap, &handle);
 		command_list->lpVtbl->ClearRenderTargetView(command_list, handle, clearColor, 0, NULL);
 	}
-	if (flags & GPU_CLEAR_DEPTH) {
-		D3D12_CLEAR_FLAGS d3dflags = D3D12_CLEAR_FLAG_DEPTH;
-		if (target->impl.depth_descriptor_heap != NULL) {
-			D3D12_CPU_DESCRIPTOR_HANDLE handle;
-			target->impl.depth_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(target->impl.depth_descriptor_heap, &handle);
-			command_list->lpVtbl->ClearDepthStencilView(command_list, handle, d3dflags, depth, 0, 0, NULL);
-		}
+	if (flags & GPU_CLEAR_DEPTH && depth_buffer != NULL) {
+		D3D12_CPU_DESCRIPTOR_HANDLE handle;
+		depth_buffer->impl.descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(depth_buffer->impl.descriptor_heap, &handle);
+		command_list->lpVtbl->ClearDepthStencilView(command_list, handle, D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0, NULL);
 	}
 }
 
@@ -560,7 +479,7 @@ void gpu_internal_resize(int width, int height) {
 
 	for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
 		gpu_texture_destroy(&framebuffers[i]);
-		render_target_init(&framebuffers[i], width, height, GPU_TEXTURE_FORMAT_RGBA32, 0, i);
+		gpu_render_target_init2(&framebuffers[i], width, height, GPU_TEXTURE_FORMAT_RGBA32, i);
 	}
 	window_swapchain->lpVtbl->ResizeBuffers(window_swapchain, GPU_FRAMEBUFFER_COUNT, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
 }
@@ -597,9 +516,7 @@ void gpu_internal_set_textures() {
 		}
 
 		D3D12_CPU_DESCRIPTOR_HANDLE source_cpu;
-		ID3D12DescriptorHeap *source_heap = (texture->impl.stage_depth == i) ?
-			texture->impl.srv_depth_descriptor_heap :
-			texture->impl.srv_descriptor_heap;
+		ID3D12DescriptorHeap *source_heap = texture->impl.srv_descriptor_heap;
 		source_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(source_heap, &source_cpu);
 
 		device->lpVtbl->CopyDescriptorsSimple(device, 1, cpu_base, source_cpu, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -612,7 +529,6 @@ void gpu_internal_set_textures() {
 			continue;
 		}
 		current_textures[i]->impl.stage = 0;
-		current_textures[i]->impl.stage_depth = -1;
 		current_textures[i] = NULL;
 	}
 
@@ -824,11 +740,6 @@ void gpu_set_texture(int unit, gpu_texture_t *texture) {
 	current_textures[texture->impl.stage] = texture;
 }
 
-void gpu_set_texture_depth(int unit, gpu_texture_t *texture) {
-	texture->impl.stage_depth = unit;
-	current_textures[texture->impl.stage_depth] = texture;
-}
-
 void gpu_pipeline_init(gpu_pipeline_t *pipe) {
 	gpu_internal_pipeline_init(pipe);
 }
@@ -959,7 +870,6 @@ void gpu_shader_destroy(gpu_shader_t *shader) {
 void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, gpu_texture_format_t format) {
 	memset(&texture->impl, 0, sizeof(texture->impl));
 	texture->impl.stage = 0;
-	texture->impl.stage_depth = -1;
 	texture->impl.mipmap = true;
 	texture->width = width;
 	texture->height = height;
@@ -1080,7 +990,6 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 void gpu_texture_init(gpu_texture_t *texture, int width, int height, gpu_texture_format_t format) {
 	memset(&texture->impl, 0, sizeof(texture->impl));
 	texture->impl.stage = 0;
-	texture->impl.stage_depth = -1;
 	texture->impl.mipmap = true;
 	texture->width = width;
 	texture->height = height;
@@ -1196,11 +1105,6 @@ void gpu_texture_destroy(gpu_texture_t *render_target) {
 		render_target->impl.render_target->lpVtbl->Release(render_target->impl.render_target);
 		render_target->impl.descriptor_heap->lpVtbl->Release(render_target->impl.descriptor_heap);
 		render_target->impl.srv_descriptor_heap->lpVtbl->Release(render_target->impl.srv_descriptor_heap);
-		if (render_target->impl.depth_texture != NULL) {
-			render_target->impl.depth_texture->lpVtbl->Release(render_target->impl.depth_texture);
-			render_target->impl.depth_descriptor_heap->lpVtbl->Release(render_target->impl.depth_descriptor_heap);
-			render_target->impl.srv_depth_descriptor_heap->lpVtbl->Release(render_target->impl.srv_depth_descriptor_heap);
-		}
 		if (render_target->impl.readback != NULL) {
 			render_target->impl.readback->lpVtbl->Release(render_target->impl.readback);
 		}
@@ -1220,14 +1124,8 @@ void gpu_texture_generate_mipmaps(gpu_texture_t *texture, int levels) {}
 
 void gpu_texture_set_mipmap(gpu_texture_t *texture, gpu_texture_t *mipmap, int level) {}
 
-void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format, int depth_buffer_bits) {
-	render_target_init(target, width, height, format, depth_buffer_bits, -1);
-}
-
-void gpu_render_target_set_depth_from(gpu_texture_t *render_target, gpu_texture_t *source) {
-	render_target->impl.depth_descriptor_heap = source->impl.depth_descriptor_heap;
-	render_target->impl.srv_depth_descriptor_heap = source->impl.srv_depth_descriptor_heap;
-	render_target->impl.depth_texture = source->impl.depth_texture;
+void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format) {
+	gpu_render_target_init2(target, width, height, format, -1);
 }
 
 void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structure_t *structure) {

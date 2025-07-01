@@ -55,7 +55,7 @@ function render_path_sculpt_begin() {
         render_path_draw_shader("shader_datas/copy_pass/copy_pass");
 
         render_path_set_target("gbufferD_undo");
-        render_path_bind_target("_main", "tex");
+        render_path_bind_target("main", "tex");
         render_path_draw_shader("shader_datas/copy_pass/copy_pass");
     }
 

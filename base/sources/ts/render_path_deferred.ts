@@ -1,7 +1,15 @@
 
 function render_path_deferred_init() {
-	render_path_create_depth_buffer("main", "DEPTH24");
 
+	{
+		let t: render_target_t = render_target_create();
+		t.name = "main";
+		t.width = 0;
+		t.height = 0;
+		t.format = "D32";
+		t.scale = render_path_base_get_super_sampling();
+		render_path_create_render_target(t);
+	}
 	{
 		let t: render_target_t = render_target_create();
 		t.name = "gbuffer0";
@@ -9,7 +17,6 @@ function render_path_deferred_init() {
 		t.height = 0;
 		t.format = "RGBA64";
 		t.scale = render_path_base_get_super_sampling();
-		t.depth_buffer = "main";
 		render_path_create_render_target(t);
 	}
 	{

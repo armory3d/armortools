@@ -53,7 +53,6 @@ typedef struct {
 typedef struct {
 	bool mipmap;
 	int stage;
-	int stage_depth;
 	int stride;
 	struct ID3D12Resource *image;
 	struct ID3D12Resource *upload_image;
@@ -61,9 +60,6 @@ typedef struct {
 	struct ID3D12Resource *render_target;
 	struct ID3D12Resource *readback;
 	struct ID3D12DescriptorHeap *descriptor_heap;
-	struct ID3D12DescriptorHeap *depth_descriptor_heap;
-	struct ID3D12DescriptorHeap *srv_depth_descriptor_heap;
-	struct ID3D12Resource *depth_texture;
 	struct D3D12Viewport viewport;
 	struct D3D12Rect scissor;
 } gpu_texture_impl_t;

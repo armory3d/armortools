@@ -202,7 +202,7 @@ function import_arm_run_project(path: string) {
 		}, _texpaint_blend0);
 		blend0.width = config_get_texture_res_x();
 		blend0.height = config_get_texture_res_y();
-		blend0._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8, 0);
+		blend0._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 		let blend1: render_target_t = map_get(rts, "texpaint_blend1");
 		let _texpaint_blend1: gpu_texture_t = blend1._image;
 		sys_notify_on_next_frame(function (_texpaint_blend1: gpu_texture_t) {
@@ -210,7 +210,7 @@ function import_arm_run_project(path: string) {
 		}, _texpaint_blend1);
 		blend1.width = config_get_texture_res_x();
 		blend1.height = config_get_texture_res_y();
-		blend1._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8, 0);
+		blend1._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 		context_raw.brush_blend_dirty = true;
 	}
 

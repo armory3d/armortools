@@ -241,7 +241,6 @@ declare function iron_load_url(url: string): void;
 declare function iron_copy_to_clipboard(text: string): void;
 
 declare function gpu_set_texture(stage: i32, texture: gpu_texture_t): void;
-declare function gpu_set_texture_depth(unit: i32, texture: gpu_texture_t): void;
 declare function gpu_set_bool(location: i32, value: bool): void;
 declare function gpu_set_int(location: i32, value: i32): void;
 declare function gpu_set_float(location: i32, value: f32): void;
@@ -271,17 +270,16 @@ declare function iron_display_y(index: i32): i32;
 declare function iron_display_frequency(index: i32): i32;
 declare function iron_display_is_primary(index: i32): bool;
 
-declare function gpu_create_render_target(width: i32, height: i32, format: i32 = tex_format_t.RGBA32, depth_buffer_bits: i32 = 0): any;
+declare function gpu_create_render_target(width: i32, height: i32, format: i32 = tex_format_t.RGBA32): any;
 declare function gpu_create_texture_from_bytes(data: buffer_t, width: i32, height: i32, format: i32 = tex_format_t.RGBA32, readable: bool = true): any;
 declare function gpu_create_texture_from_encoded_bytes(data: buffer_t, format: string, readable: bool = false): any;
 declare function gpu_get_texture_pixels(texture: any): buffer_t;
 declare function gpu_texture_generate_mipmaps(texture: any, levels: i32): void;
 declare function gpu_set_mipmaps(texture: any, mipmaps: gpu_texture_t[]): void;
-declare function gpu_render_target_set_depth_from(target: any, source: any): void;
 declare function gpu_viewport(x: i32, y: i32, width: i32, height: i32): void;
 declare function gpu_scissor(x: i32, y: i32, width: i32, height: i32): void;
 declare function gpu_disable_scissor(): void;
-declare function _gpu_begin(render_target: gpu_texture_t, additional: gpu_texture_t[] = null, flags: i32 = clear_flag_t.NONE, color: i32 = 0, depth: f32 = 0.0): void;
+declare function _gpu_begin(render_target: gpu_texture_t, additional: gpu_texture_t[] = null, depth_buffer: gpu_texture_t = null, flags: i32 = clear_flag_t.NONE, color: i32 = 0, depth: f32 = 0.0): void;
 declare function gpu_end(): void;
 declare function gpu_present(): void;
 declare function iron_file_save_bytes(path: string, bytes: buffer_t, length?: i32): void;
@@ -654,6 +652,7 @@ enum tex_format_t {
 	R8,
 	R16,
 	R32,
+	D32,
 }
 
 enum vertex_data_t {

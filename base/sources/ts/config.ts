@@ -211,8 +211,7 @@ function config_get_options(): iron_window_options_t {
 		mode: window_mode,
 		features: features,
 		vsync: config_raw.window_vsync,
-		frequency: config_raw.window_frequency,
-		use_depth: false
+		frequency: config_raw.window_frequency
 	};
 	return ops;
 }

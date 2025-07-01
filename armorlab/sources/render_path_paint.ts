@@ -127,7 +127,7 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 			let additional: string[] = ["texpaint_nor" + tid, "texpaint_pack" + tid, "texpaint_blend0"];
 			render_path_set_target(texpaint, additional);
 
-			render_path_bind_target("_main", "gbufferD");
+			render_path_bind_target("main", "gbufferD");
 
 			render_path_bind_target("texpaint_blend1", "paintmask");
 
@@ -177,10 +177,11 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 
 	render_path_set_target("");
 	gpu_set_pipeline(pipes_cursor);
-	let gbuffer0: render_target_t = map_get(render_path_render_targets, "gbuffer0");
-	gpu_set_texture_depth(pipes_cursor_gbufferd, gbuffer0._image);
+	let rt: render_target_t = map_get(render_path_render_targets, "main");
+	let main: gpu_texture_t = rt._image;
+	gpu_set_texture(pipes_cursor_gbufferd, main);
 	gpu_set_float2(pipes_cursor_mouse, mx, my);
-	gpu_set_float2(pipes_cursor_tex_step, 1 / gbuffer0._image.width, 1 / gbuffer0._image.height);
+	gpu_set_float2(pipes_cursor_tex_step, 1 / main.width, 1 / main.height);
 	gpu_set_float(pipes_cursor_radius, radius);
 	let right: vec4_t = vec4_norm(camera_object_right_world(scene_camera));
 	gpu_set_float3(pipes_cursor_camera_right, right.x, right.y, right.z);
@@ -226,11 +227,11 @@ function render_path_paint_draw() {
 	if (context_raw.brush_blend_dirty) {
 		context_raw.brush_blend_dirty = false;
 		///if arm_metal
-		render_path_set_target("texpaint_blend0", null, clear_flag_t.COLOR, 0x00000000);
-		render_path_set_target("texpaint_blend1", null, clear_flag_t.COLOR, 0x00000000);
+		render_path_set_target("texpaint_blend0", null, null, clear_flag_t.COLOR, 0x00000000);
+		render_path_set_target("texpaint_blend1", null, null, clear_flag_t.COLOR, 0x00000000);
 		///else
 		let additional: string[] = ["texpaint_blend1"];
-		render_path_set_target("texpaint_blend0", additional, clear_flag_t.COLOR, 0x00000000);
+		render_path_set_target("texpaint_blend0", additional, null, clear_flag_t.COLOR, 0x00000000);
 		///end
 	}
 }

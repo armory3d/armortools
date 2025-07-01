@@ -88,11 +88,10 @@ void iron_window_options_set_defaults(iron_window_options_t *win) {
 	win->height = 600;
 	win->visible = true;
 	win->features = IRON_WINDOW_FEATURE_RESIZEABLE | IRON_WINDOW_FEATURE_MINIMIZABLE | IRON_WINDOW_FEATURE_MAXIMIZABLE;
-
 	win->frequency = 60;
 	win->vsync = true;
 	win->color_bits = 32;
-	win->depth_bits = 16;
+	win->depth_bits = 32;
 }
 
 #if !defined(IRON_WASM) && !defined(IRON_ANDROID) && !defined(IRON_WINDOWS)

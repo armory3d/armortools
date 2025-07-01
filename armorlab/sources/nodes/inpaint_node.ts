@@ -33,7 +33,7 @@ function inpaint_node_init() {
 	if (inpaint_node_mask == null) {
 		inpaint_node_mask = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 		sys_notify_on_next_frame(function () {
-			_gpu_begin(inpaint_node_mask, null, clear_flag_t.COLOR, color_from_floats(1.0, 1.0, 1.0, 1.0));
+			_gpu_begin(inpaint_node_mask, null, null, clear_flag_t.COLOR, color_from_floats(1.0, 1.0, 1.0, 1.0));
 			gpu_end();
 		});
 	}

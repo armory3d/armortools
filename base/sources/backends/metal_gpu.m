@@ -83,6 +83,8 @@ static MTLPixelFormat convert_render_target_format(gpu_texture_format_t format) 
 		return MTLPixelFormatR16Float;
 	case GPU_TEXTURE_FORMAT_R8:
 		return MTLPixelFormatR8Unorm;
+	case GPU_TEXTURE_FORMAT_D32:
+		return MTLPixelFormatDepth32Float;
 	case GPU_TEXTURE_FORMAT_RGBA32:
 	default:
 		return MTLPixelFormatBGRA8Unorm;
@@ -138,7 +140,7 @@ static int format_byte_size(gpu_texture_format_t format) {
 	}
 }
 
-static void render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format, int depth_buffer_bits, int framebuffer_index) {
+void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_texture_format_t format, int framebuffer_index) {
 	id<MTLDevice> device = getMetalDevice();
 	memset(target, 0, sizeof(gpu_texture_t));
 	target->width = width;
@@ -147,7 +149,6 @@ static void render_target_init(gpu_texture_t *target, int width, int height, gpu
 	target->uploaded = true;
 	target->state = GPU_TEXTURE_STATE_RENDER_TARGET;
 	target->impl._texReadback = NULL;
-	target->impl._depthTex = NULL;
 
 	if (framebuffer_index < 0) {
 		id<MTLDevice> device = getMetalDevice();
@@ -162,20 +163,6 @@ static void render_target_init(gpu_texture_t *target, int width, int height, gpu
 		descriptor.usage = MTLTextureUsageRenderTarget | MTLTextureUsageShaderRead | MTLTextureUsageShaderWrite;
 		descriptor.resourceOptions = MTLResourceStorageModePrivate;
 		target->impl._tex = (__bridge_retained void *)[device newTextureWithDescriptor:descriptor];
-	}
-
-	if (depth_buffer_bits > 0) {
-		MTLTextureDescriptor *depthDescriptor = [MTLTextureDescriptor new];
-		depthDescriptor.textureType = MTLTextureType2D;
-		depthDescriptor.width = width;
-		depthDescriptor.height = height;
-		depthDescriptor.depth = 1;
-		depthDescriptor.pixelFormat = MTLPixelFormatDepth32Float;
-		depthDescriptor.arrayLength = 1;
-		depthDescriptor.mipmapLevelCount = 1;
-		depthDescriptor.usage = MTLTextureUsageRenderTarget | MTLTextureUsageShaderRead;
-		depthDescriptor.resourceOptions = MTLResourceStorageModePrivate;
-		target->impl._depthTex = (__bridge_retained void *)[device newTextureWithDescriptor:depthDescriptor];
 	}
 }
 
@@ -261,16 +248,14 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	// argument_buffer_step += (align - (argument_buffer_step % align)) % align;
 	argument_buffer = [device newBufferWithLength:(argument_buffer_step * 2048) options:MTLResourceStorageModeShared];
 
-	for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
-		render_target_init(&framebuffers[i], iron_window_width(), iron_window_height(), GPU_TEXTURE_FORMAT_RGBA32, depth_buffer_bits, i);
-	}
+	gpu_create_framebuffers(depth_buffer_bits);
 
 	next_drawable();
 }
 
-void gpu_begin_internal(gpu_texture_t **targets, int count, unsigned flags, unsigned color, float depth) {
+void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, unsigned flags, unsigned color, float depth) {
 
-	has_depth = current_render_targets[0]->impl._depthTex != nil;
+	has_depth = depth_buffer != NULL;
 
 	MTLRenderPassDescriptor *desc = [MTLRenderPassDescriptor renderPassDescriptor];
 	for (int i = 0; i < current_render_targets_count; ++i) {
@@ -289,7 +274,10 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, unsigned flags, unsi
 		}
 	}
 
-	desc.depthAttachment.texture = (__bridge id<MTLTexture>)current_render_targets[0]->impl._depthTex;
+	if (depth_buffer != NULL) {
+		desc.depthAttachment.texture = (__bridge id<MTLTexture>)depth_buffer->impl._tex;
+	}
+
 	if (flags & GPU_CLEAR_DEPTH) {
 		desc.depthAttachment.clearDepth = depth;
 		desc.depthAttachment.loadAction = MTLLoadActionClear;
@@ -464,14 +452,6 @@ void gpu_set_texture(int unit, gpu_texture_t *texture) {
 	[argument_encoder setArgumentBuffer:argument_buffer offset:argument_buffer_step * i];
 	[argument_encoder setTexture:tex atIndex:unit + 2];
 	[command_encoder useResource:tex usage:MTLResourceUsageRead stages:MTLRenderStageVertex|MTLRenderStageFragment];
-}
-
-void gpu_set_texture_depth(int unit, gpu_texture_t *target) {
-	id<MTLTexture> depth_tex = (__bridge id<MTLTexture>)target->impl._depthTex;
-	int i = constant_buffer_index;
-	[argument_encoder setArgumentBuffer:argument_buffer offset:argument_buffer_step * i];
-	[argument_encoder setTexture:depth_tex atIndex:unit + 2];
-	[command_encoder useResource:depth_tex usage:MTLResourceUsageRead stages:MTLRenderStageVertex|MTLRenderStageFragment];
 }
 
 void gpu_pipeline_init(gpu_pipeline_t *pipeline) {
@@ -674,10 +654,6 @@ void gpu_texture_destroy(gpu_texture_t *target) {
 	tex = nil;
 	target->impl._tex = NULL;
 
-	id<MTLTexture> depthTex = (__bridge_transfer id<MTLTexture>)target->impl._depthTex;
-	depthTex = nil;
-	target->impl._depthTex = NULL;
-
 	id<MTLTexture> texReadback = (__bridge_transfer id<MTLTexture>)target->impl._texReadback;
 	texReadback = nil;
 	target->impl._texReadback = NULL;
@@ -755,16 +731,12 @@ void gpu_texture_set_mipmap(gpu_texture_t *texture, gpu_texture_t *mipmap, int l
 	       bytesPerRow:mipmap->width * format_byte_size(mipmap->format)];
 }
 
-void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format, int depth_buffer_bits) {
-	render_target_init(target, width, height, format, depth_buffer_bits, -1);
+void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format) {
+	gpu_render_target_init2(target, width, height, format, -1);
 	target->width = width;
 	target->height = height;
 	target->state = GPU_TEXTURE_STATE_RENDER_TARGET;
 	target->uploaded = true;
-}
-
-void gpu_render_target_set_depth_from(gpu_texture_t *target, gpu_texture_t *source) {
-	target->impl._depthTex = source->impl._depthTex;
 }
 
 void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structure_t *structure) {

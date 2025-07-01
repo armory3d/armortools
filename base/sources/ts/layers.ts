@@ -33,18 +33,18 @@ function layers_init() {
 	draw_scaled_image(resource_get("placeholder.k"), 0, 0, config_get_texture_res_x(), config_get_texture_res_y()); // Base
 	draw_end();
 	// Nor
-	_gpu_begin(texpaint_nor._image, null, clear_flag_t.COLOR, color_from_floats(0.5, 0.5, 1.0, 0.0));
+	_gpu_begin(texpaint_nor._image, null, null, clear_flag_t.COLOR, color_from_floats(0.5, 0.5, 1.0, 0.0));
 	gpu_end();
 	// Occ, rough, met
-	_gpu_begin(texpaint_pack._image, null, clear_flag_t.COLOR, color_from_floats(1.0, 0.4, 0.0, 0.0));
+	_gpu_begin(texpaint_pack._image, null, null, clear_flag_t.COLOR, color_from_floats(1.0, 0.4, 0.0, 0.0));
 	gpu_end();
 	let texpaint_nor_empty: render_target_t = map_get(render_path_render_targets, "texpaint_nor_empty");
 	let texpaint_pack_empty: render_target_t = map_get(render_path_render_targets, "texpaint_pack_empty");
 	// Nor
-	_gpu_begin(texpaint_nor_empty._image, null, clear_flag_t.COLOR, color_from_floats(0.5, 0.5, 1.0, 0.0));
+	_gpu_begin(texpaint_nor_empty._image, null, null, clear_flag_t.COLOR, color_from_floats(0.5, 0.5, 1.0, 0.0));
 	gpu_end();
 	// Occ, rough, met
-	_gpu_begin(texpaint_pack_empty._image, null, clear_flag_t.COLOR, color_from_floats(1.0, 0.4, 0.0, 0.0));
+	_gpu_begin(texpaint_pack_empty._image, null, null, clear_flag_t.COLOR, color_from_floats(1.0, 0.4, 0.0, 0.0));
 	gpu_end();
 	///end
 }

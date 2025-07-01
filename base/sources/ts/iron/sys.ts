@@ -34,9 +34,6 @@ declare type iron_window_options_t = {
 	mode?: window_mode_t;
 	frequency?: i32;
 	vsync?: bool;
-
-	use_depth?: bool;
-
 	display_index?: i32;
 	visible?: bool;
 	color_bits?: i32;

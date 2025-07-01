@@ -12,6 +12,7 @@ bool gpu_in_use = false;
 gpu_texture_t *current_render_targets[8] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 int current_render_targets_count = 0;
 gpu_texture_t framebuffers[GPU_FRAMEBUFFER_COUNT];
+gpu_texture_t framebuffer_depth;
 int framebuffer_index = 0;
 
 void gpu_init(int depth_buffer_bits, bool vsync) {
@@ -20,7 +21,7 @@ void gpu_init(int depth_buffer_bits, bool vsync) {
 	gpu_constant_buffer_lock(&constant_buffer, 0, CONSTANT_BUFFER_SIZE);
 }
 
-void gpu_begin(gpu_texture_t **targets, int count, unsigned flags, unsigned color, float depth) {
+void gpu_begin(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, unsigned flags, unsigned color, float depth) {
 	if (gpu_in_use && !gpu_thrown) {
 		gpu_thrown = true;
 		iron_log("End before you begin");
@@ -48,7 +49,7 @@ void gpu_begin(gpu_texture_t **targets, int count, unsigned flags, unsigned colo
 		gpu_barrier(current_render_targets[i], GPU_TEXTURE_STATE_RENDER_TARGET);
 	}
 
-	gpu_begin_internal(targets, count, flags, color, depth);
+	gpu_begin_internal(targets, count, depth_buffer, flags, color, depth);
 }
 
 void gpu_draw() {
@@ -212,4 +213,13 @@ void gpu_internal_pipeline_init(gpu_pipeline_t *pipe) {
 	}
 	pipe->color_attachment_count = 1;
 	pipe->depth_attachment_bits = 0;
+}
+
+void gpu_create_framebuffers(int depth_buffer_bits) {
+	for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
+		gpu_render_target_init2(&framebuffers[i], iron_window_width(), iron_window_height(), GPU_TEXTURE_FORMAT_RGBA32, i);
+	}
+	if (depth_buffer_bits > 0) {
+		gpu_render_target_init(&framebuffer_depth, iron_window_width(), iron_window_height(), GPU_TEXTURE_FORMAT_D32);
+	}
 }

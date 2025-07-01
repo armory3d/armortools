@@ -11,7 +11,7 @@ function main() {
 		mode: window_mode_t.WINDOWED,
 		frequency: 60,
 		vsync: true,
-		use_depth: true
+		depth_bits: 32
 	};
 	sys_start(ops);
 	sys_init();
@@ -19,7 +19,7 @@ function main() {
 }
 
 function render_commands() {
-	render_path_set_target("", null, clear_flag_t.COLOR | clear_flag_t.DEPTH, 0xff6495ed, 1.0);
+	render_path_set_target("", null, null, clear_flag_t.COLOR | clear_flag_t.DEPTH, 0xff6495ed, 1.0);
 	render_path_draw_meshes("mesh");
 }
 

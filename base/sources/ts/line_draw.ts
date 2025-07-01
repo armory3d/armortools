@@ -53,7 +53,7 @@ function line_draw_init() {
 		ARRAY_ACCESS(line_draw_pipeline.color_attachment, 0) = tex_format_t.RGBA64;
 		ARRAY_ACCESS(line_draw_pipeline.color_attachment, 1) = tex_format_t.RGBA64;
 		ARRAY_ACCESS(line_draw_pipeline.color_attachment, 2) = tex_format_t.RGBA64;
-		line_draw_pipeline.depth_attachment_bits = 24;
+		line_draw_pipeline.depth_attachment_bits = 32;
 		gpu_pipeline_compile(line_draw_pipeline);
 		pipes_offset = 0;
 		line_draw_color_loc = pipes_get_constant_location("vec3");

@@ -29,16 +29,11 @@ typedef struct {
 	VkImage image;
 	VkDeviceMemory mem;
 	VkImageView view;
-	VkImage depthImage;
-	VkDeviceMemory depthMemory;
-	VkImageView depthView;
-	int depth_buffer_bits;
 	VkFormat format;
 	VkBuffer readback_buffer;
 	VkDeviceMemory readback_memory;
 	bool readback_buffer_created;
 	int stage;
-	int stage_depth;
 } gpu_texture_impl_t;
 
 typedef struct {

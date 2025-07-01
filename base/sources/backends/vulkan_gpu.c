@@ -85,6 +85,8 @@ static VkFormat convert_image_format(gpu_texture_format_t format) {
 	case GPU_TEXTURE_FORMAT_RGBA32:
 		// return VK_FORMAT_R8G8B8A8_UNORM;
 		return VK_FORMAT_B8G8R8A8_UNORM;
+	case GPU_TEXTURE_FORMAT_D32:
+		return VK_FORMAT_D32_SFLOAT;
 	default:
 		return VK_FORMAT_B8G8R8A8_UNORM;
 	}
@@ -259,25 +261,27 @@ void gpu_barrier(gpu_texture_t *render_target, gpu_texture_state_t state_after) 
 	};
 	vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
 
-	if (render_target->impl.depth_buffer_bits > 0) {
-		VkImageMemoryBarrier barrier = {
-			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-			.pNext = NULL,
-			.srcAccessMask = access_mask(convert_texture_state(render_target->state)),
-			.dstAccessMask = access_mask(convert_texture_state(state_after)),
-			.oldLayout = convert_texture_state(render_target->state) == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL ? VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL : convert_texture_state(render_target->state),
-			.newLayout = convert_texture_state(state_after) == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL ? VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL : convert_texture_state(state_after),
-			.image = render_target->impl.depthImage,
-			.subresourceRange = {
-				.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
-				.baseMipLevel = 0,
-				.levelCount = 1,
-				.baseArrayLayer = 0,
-				.layerCount = 1,
-			},
-		};
-		vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
-	}
+	// if (render_target->format == GPU_TEXTURE_FORMAT_D32) {
+	// 	VkImageMemoryBarrier barrier = {
+	// 		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+	// 		.pNext = NULL,
+	// 		.srcAccessMask = access_mask(convert_texture_state(render_target->state)),
+	// 		.dstAccessMask = access_mask(convert_texture_state(state_after)),
+	// 		.oldLayout = convert_texture_state(render_target->state) == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL ? VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL : convert_texture_state(render_target->state),
+	// 		.newLayout = convert_texture_state(state_after) == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL ? VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL : convert_texture_state(state_after),
+	// 		.image = render_target->impl.image,
+	// 		.subresourceRange = {
+	// 			.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
+	// 			.baseMipLevel = 0,
+	// 			.levelCount = 1,
+	// 			.baseArrayLayer = 0,
+	// 			.layerCount = 1,
+	// 		},
+	// 	};
+	// 	vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
+	// }
+	// else {
+	// }
 
 	render_target->state = state_after;
 }
@@ -409,16 +413,13 @@ VkSwapchainKHR cleanup_swapchain() {
 	return chain;
 }
 
-static void render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format, int depth_bits, int framebuffer_index) {
+void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_texture_format_t format, int framebuffer_index) {
 	target->width = width;
 	target->height = height;
 	target->data = NULL;
 	target->impl.format = convert_image_format(format);
-	target->impl.depth_buffer_bits = depth_bits;
 	target->impl.stage = 0;
-	target->impl.stage_depth = -1;
 	target->impl.readback_buffer_created = false;
-	target->depth_state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
 	target->uploaded = true;
 	target->state = (framebuffer_index >= 0) ? GPU_TEXTURE_STATE_PRESENT : GPU_TEXTURE_STATE_SHADER_RESOURCE;
 
@@ -441,9 +442,16 @@ static void render_target_init(gpu_texture_t *target, int width, int height, gpu
 		.arrayLayers = 1,
 		.samples = VK_SAMPLE_COUNT_1_BIT,
 		.tiling = VK_IMAGE_TILING_OPTIMAL,
-		.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
 		.flags = 0,
 	};
+
+	if (format == GPU_TEXTURE_FORMAT_D32) {
+		image.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+	}
+	else {
+		.usage = ,
+		image.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+	}
 
 	VkImageViewCreateInfo color_image_view = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
@@ -451,7 +459,7 @@ static void render_target_init(gpu_texture_t *target, int width, int height, gpu
 		.viewType = VK_IMAGE_VIEW_TYPE_2D,
 		.format = target->impl.format,
 		.flags = 0,
-		.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+		.subresourceRange.aspectMask = format == GPU_TEXTURE_FORMAT_D32 ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT,
 		.subresourceRange.baseMipLevel = 0,
 		.subresourceRange.levelCount = 1,
 		.subresourceRange.baseArrayLayer = 0,
@@ -471,60 +479,9 @@ static void render_target_init(gpu_texture_t *target, int width, int height, gpu
 	memory_type_from_properties(memory_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &allocation_nfo.memoryTypeIndex);
 	vkAllocateMemory(device, &allocation_nfo, NULL, &target->impl.mem);
 	vkBindImageMemory(device, target->impl.image, target->impl.mem, 0);
-	set_image_layout(target->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	set_image_layout(target->impl.image, format == GPU_TEXTURE_FORMAT_D32 ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	color_image_view.image = target->impl.image;
 	vkCreateImageView(device, &color_image_view, NULL, &target->impl.view);
-
-	if (depth_bits > 0) {
-		const VkFormat depth_format = VK_FORMAT_D32_SFLOAT;
-		VkImageCreateInfo image = {
-			.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-			.pNext = NULL,
-			.imageType = VK_IMAGE_TYPE_2D,
-			.format = depth_format,
-			.extent.width = width,
-			.extent.height = height,
-			.extent.depth = 1,
-			.mipLevels = 1,
-			.arrayLayers = 1,
-			.samples = VK_SAMPLE_COUNT_1_BIT,
-			.tiling = VK_IMAGE_TILING_OPTIMAL,
-			.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-			.flags = 0,
-		};
-
-		vkCreateImage(device, &image, NULL, &target->impl.depthImage);
-
-		VkMemoryAllocateInfo mem_alloc = {
-			.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-			.pNext = NULL,
-			.allocationSize = 0,
-			.memoryTypeIndex = 0,
-		};
-
-		VkImageViewCreateInfo view = {
-			.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-			.pNext = NULL,
-			.image = target->impl.depthImage,
-			.format = depth_format,
-			.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
-			.subresourceRange.baseMipLevel = 0,
-			.subresourceRange.levelCount = 1,
-			.subresourceRange.baseArrayLayer = 0,
-			.subresourceRange.layerCount = 1,
-			.flags = 0,
-			.viewType = VK_IMAGE_VIEW_TYPE_2D,
-		};
-
-		VkMemoryRequirements mem_reqs = {0};
-		vkGetImageMemoryRequirements(device, target->impl.depthImage, &mem_reqs);
-		mem_alloc.allocationSize = mem_reqs.size;
-		memory_type_from_properties(mem_reqs.memoryTypeBits, 0, /* No requirements */ &mem_alloc.memoryTypeIndex);
-		vkAllocateMemory(device, &mem_alloc, NULL, &target->impl.depthMemory);
-		vkBindImageMemory(device, target->impl.depthImage, target->impl.depthMemory, 0);
-		set_image_layout(target->impl.depthImage, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-		vkCreateImageView(device, &view, NULL, &target->impl.depthView);
-	}
 }
 
 static void create_swapchain() {
@@ -680,16 +637,16 @@ static void create_swapchain() {
 		};
 
 		VkMemoryRequirements mem_reqs = {0};
-		vkCreateImage(device, &image, NULL, &framebuffers[0].impl.depthImage);
-		vkGetImageMemoryRequirements(device, framebuffers[0].impl.depthImage, &mem_reqs);
+		vkCreateImage(device, &image, NULL, &framebuffer_depth.impl.image);
+		vkGetImageMemoryRequirements(device, framebuffer_depth.impl.image, &mem_reqs);
 		mem_alloc.allocationSize = mem_reqs.size;
 		memory_type_from_properties(mem_reqs.memoryTypeBits, 0, &mem_alloc.memoryTypeIndex);
-		vkAllocateMemory(device, &mem_alloc, NULL, &framebuffers[0].impl.depthMemory);
-		vkBindImageMemory(device, framebuffers[0].impl.depthImage, framebuffers[0].impl.depthMemory, 0);
-		set_image_layout(framebuffers[0].impl.depthImage, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		vkAllocateMemory(device, &mem_alloc, NULL, &framebuffer_depth.impl.mem);
+		vkBindImageMemory(device, framebuffer_depth.impl.image, framebuffer_depth.impl.memory, 0);
+		set_image_layout(framebuffer_depth.impl.image, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-		view.image = framebuffers[0].impl.depthImage;
-		vkCreateImageView(device, &view, NULL, &framebuffers[0].impl.depthView);
+		view.image = framebuffer_depth.impl.image;
+		vkCreateImageView(device, &view, NULL, &framebuffer_depth.impl.view);
 	}
 }
 
@@ -1075,9 +1032,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	};
 	vkBeginCommandBuffer(command_buffer, &begin_info);
 
-	for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
-		render_target_init(&framebuffers[i], iron_window_width(), iron_window_height(), GPU_TEXTURE_FORMAT_RGBA32, depth_buffer_bits, i);
-	}
+	gpu_create_framebuffers(depth_buffer_bits);
 
 	create_swapchain();
 
@@ -1143,7 +1098,7 @@ static void set_viewport_and_scissor() {
 	vkCmdSetScissor(command_buffer, 0, 1, &scissor);
 }
 
-void gpu_begin_internal(gpu_texture_t **targets, int count, unsigned flags, unsigned color, float depth) {
+void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t * depth_buffer, unsigned flags, unsigned color, float depth) {
 
 	gpu_texture_t *target = current_render_targets[0];
 
@@ -1175,11 +1130,11 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, unsigned flags, unsi
 		};
 	}
 
-	if (target->impl.depth_buffer_bits > 0) {
+	if (depth_buffer != NULL) {
 		current_depth_attachment_info = (VkRenderingAttachmentInfo) {
 			.sType              = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
 			.pNext              = NULL,
-			.imageView          = target->impl.depthView,
+			.imageView          = depth_buffer->impl.view,
 			.imageLayout        = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
 			.resolveMode        = VK_RESOLVE_MODE_NONE,
 			.resolveImageView   = VK_NULL_HANDLE,
@@ -1199,7 +1154,7 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, unsigned flags, unsi
 		.viewMask             = 0,
 		.colorAttachmentCount = (uint32_t)current_render_targets_count,
 		.pColorAttachments    = current_color_attachment_infos,
-		.pDepthAttachment     = target->impl.depth_buffer_bits == 0 ? VK_NULL_HANDLE : &current_depth_attachment_info,
+		.pDepthAttachment     = depth_buffer == NULL ? VK_NULL_HANDLE : &current_depth_attachment_info,
 		.pStencilAttachment   = VK_NULL_HANDLE,
 	};
 	vkCmdBeginRendering(command_buffer, &current_rendering_info);
@@ -1453,13 +1408,7 @@ static int write_tex_descs(VkDescriptorImageInfo *tex_descs) {
 	int texture_count = 0;
 	for (int i = 0; i < 16; ++i) {
 		if (current_textures[i] != NULL) {
-			if (current_textures[i]->impl.stage_depth == i) {
-				tex_descs[i].imageView = current_textures[i]->impl.depthView;
-				current_textures[i]->impl.stage_depth = -1;
-			}
-			else {
-				tex_descs[i].imageView = current_textures[i]->impl.view;
-			}
+			tex_descs[i].imageView = current_textures[i]->impl.view;
 			tex_descs[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			texture_count++;
 		}
@@ -1521,13 +1470,7 @@ static VkDescriptorSet get_descriptor_set() {
 	int texture_count = 0;
 	for (int i = 0; i < 16; ++i) {
 		if (current_textures[i] != NULL) {
-			if (current_textures[i]->impl.stage_depth == i) {
-				tex_desc[i].imageView = current_textures[i]->impl.depthView;
-				current_textures[i]->impl.stage_depth = -1;
-			}
-			else {
-				tex_desc[i].imageView = current_textures[i]->impl.view;
-			}
+			tex_desc[i].imageView = current_textures[i]->impl.view;
 			texture_count++;
 		}
 		tex_desc[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -1575,11 +1518,6 @@ void gpu_set_constant_buffer(gpu_buffer_t *buffer, int offset, size_t size) {
 void gpu_set_texture(int unit, gpu_texture_t *texture) {
 	texture->impl.stage = unit;
 	current_textures[unit] = texture;
-}
-
-void gpu_set_texture_depth(int unit, gpu_texture_t *target) {
-	target->impl.stage_depth = unit;
-	current_textures[unit] = target;
 }
 
 void gpu_pipeline_init(gpu_pipeline_t *pipeline) {
@@ -1951,9 +1889,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	texture->format = format;
 	texture->data = data;
 	texture->impl.stage = 0;
-	texture->impl.stage_depth = -1;
 	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
-	texture->depth_state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
 
 	const VkFormat tex_format = convert_image_format(format);
 	VkFormatProperties props;
@@ -2033,9 +1969,7 @@ void gpu_texture_init(gpu_texture_t *texture, int width, int height, gpu_texture
 	texture->format = format;
 	texture->data = NULL;
 	texture->impl.stage = 0;
-	texture->impl.stage_depth = -1;
 	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
-	texture->depth_state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
 
 	VkFormat tex_format = convert_image_format(format);
 	VkFormatProperties props;
@@ -2074,11 +2008,6 @@ void gpu_texture_destroy(gpu_texture_t *target) {
 	}
 	if (target->impl.view != NULL) {
 		vkDestroyImageView(device, target->impl.view, NULL);
-	}
-	if (target->impl.depth_buffer_bits > 0) {
-		vkDestroyImageView(device, target->impl.depthView, NULL);
-		vkDestroyImage(device, target->impl.depthImage, NULL);
-		vkFreeMemory(device, target->impl.depthMemory, NULL);
 	}
 }
 
@@ -2153,16 +2082,8 @@ void gpu_texture_set_mipmap(gpu_texture_t *texture, gpu_texture_t *mipmap, int l
 	// texture->uploaded = true;
 }
 
-void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format, int depth_bits) {
-	render_target_init(target, width, height, format, depth_bits, -1);
-}
-
-void gpu_render_target_set_depth_from(gpu_texture_t *target, gpu_texture_t *source) {
-	target->impl.depthImage = source->impl.depthImage;
-	target->impl.depthMemory = source->impl.depthMemory;
-	target->impl.depthView = source->impl.depthView;
-	target->impl.depth_buffer_bits = source->impl.depth_buffer_bits;
-	target->depth_state = source->depth_state;
+void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format) {
+	gpu_render_target_init2(target, width, height, format, -1);
 }
 
 void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structure_t *structure) {

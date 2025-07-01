@@ -780,7 +780,6 @@ void _iron_init(iron_window_options_t *ops) {
 	ops->display_index = -1;
 	ops->visible = enable_window;
 	ops->color_bits = 32;
-	ops->depth_bits = ops->use_depth ? 24 : 0;
 	iron_init(ops->title, ops->width, ops->height, ops);
 	iron_random_init((int)(iron_time() * 1000));
 
@@ -1264,9 +1263,9 @@ bool iron_display_is_primary(i32 index) {
 	return index == iron_primary_display();
 }
 
-gpu_texture_t *gpu_create_render_target(i32 width, i32 height, i32 format, i32 depth_buffer_bits) {
+gpu_texture_t *gpu_create_render_target(i32 width, i32 height, i32 format) {
 	gpu_texture_t *render_target = (gpu_texture_t *)malloc(sizeof(gpu_texture_t));
-	gpu_render_target_init(render_target, width, height, (gpu_texture_format_t)format, depth_buffer_bits);
+	gpu_render_target_init(render_target, width, height, (gpu_texture_format_t)format);
 	render_target->buffer = NULL;
 	return render_target;
 }
@@ -1395,9 +1394,9 @@ void gpu_set_mipmaps(gpu_texture_t *texture, any_array_t *mipmaps) {
 	}
 }
 
-void _gpu_begin(gpu_texture_t *render_target, any_array_t *additional, unsigned flags, unsigned color, float depth) {
+void _gpu_begin(gpu_texture_t *render_target, any_array_t *additional, gpu_texture_t *depth_buffer, unsigned flags, unsigned color, float depth) {
 	if (render_target == NULL) {
-		gpu_begin(NULL, 0, flags, color, depth);
+		gpu_begin(NULL, 0, NULL, flags, color, depth);
 	}
 	else {
 		int32_t length = 1;
@@ -1408,7 +1407,7 @@ void _gpu_begin(gpu_texture_t *render_target, any_array_t *additional, unsigned 
 				render_targets[i] = additional->buffer[i - 1];
 			}
 		}
-		gpu_begin(render_targets, length, flags, color, depth);
+		gpu_begin(render_targets, length, depth_buffer, flags, color, depth);
 	}
 }
 

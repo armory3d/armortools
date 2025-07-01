@@ -2064,12 +2064,9 @@ void iron_window_create(iron_window_options_t *win) {
 	wchar_t wbuffer[1024];
 	MultiByteToWideChar(CP_UTF8, 0, win->title, -1, wbuffer, 1024);
 
-	createWindow(wbuffer, win->x, win->y, win->width, win->height, win->color_bits, win->frequency, win->features, win->mode,
-	                            win->display_index);
+	createWindow(wbuffer, win->x, win->y, win->width, win->height, win->color_bits, win->frequency, win->features, win->mode, win->display_index);
 
-	bool vsync = win->vsync;
-
-	gpu_init(win->depth_bits, vsync);
+	gpu_init(win->depth_bits, win->vsync);
 
 	if (win->visible) {
 		iron_window_show();

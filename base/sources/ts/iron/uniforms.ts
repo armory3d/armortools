@@ -31,20 +31,8 @@ function uniforms_set_context_consts(context: shader_context_t, bind_params: str
 			let pos: i32 = i * 2; // bind params = [texture, sampler_id]
 			let rt_id: string = bind_params[pos];
 			let sampler_id: string = bind_params[pos + 1];
-			let attach_depth: bool = false; // Attach texture depth if "_" is prepended
-			let c: string = char_at(rt_id, 0);
-			if (c == "_") {
-				attach_depth = true;
-				rt_id = substring(rt_id, 1, rt_id.length);
-			}
-			let rt: render_target_t;
-			if (attach_depth) {
-				rt = map_get(_render_path_depth_to_render_target, rt_id);
-			}
-			else {
-				rt = map_get(render_path_render_targets, rt_id);
-			}
-			uniforms_bind_render_target(rt, context, sampler_id, attach_depth);
+			let rt: render_target_t = map_get(render_path_render_targets, rt_id);
+			uniforms_bind_render_target(rt, context, sampler_id);
 		}
 	}
 
@@ -95,16 +83,14 @@ function uniforms_set_obj_consts(context: shader_context_t, object: object_t) {
 
 				let image: gpu_texture_t = uniforms_tex_links(object, current_material(object), tu.link);
 				if (image != null) {
-					ends_with(tu.link, "_depth") ?
-						gpu_set_texture_depth(context._.tex_units[j], image) :
-						gpu_set_texture(context._.tex_units[j], image);
+					gpu_set_texture(context._.tex_units[j], image);
 				}
 			}
 		}
 	}
 }
 
-function uniforms_bind_render_target(rt: render_target_t, context: shader_context_t, sampler_id: string, attach_depth: bool) {
+function uniforms_bind_render_target(rt: render_target_t, context: shader_context_t, sampler_id: string) {
 	if (rt == null) {
 		return;
 	}
@@ -112,12 +98,7 @@ function uniforms_bind_render_target(rt: render_target_t, context: shader_contex
 	let tus: tex_unit_t[] = context.texture_units;
 	for (let j: i32 = 0; j < tus.length; ++j) { // Set texture
 		if (sampler_id == tus[j].name) {
-			if (attach_depth) {
-				gpu_set_texture_depth(context._.tex_units[j], rt._image); // sampler2D
-			}
-			else {
-				gpu_set_texture(context._.tex_units[j], rt._image); // sampler2D
-			}
+			gpu_set_texture(context._.tex_units[j], rt._image);
 		}
 	}
 }

@@ -10,11 +10,11 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 	let empty: gpu_texture_t = empty_rt._image;
 
 	// Clear export layer
-	_gpu_begin(layers_expa, null, clear_flag_t.COLOR, color_from_floats(0.0, 0.0, 0.0, 0.0));
+	_gpu_begin(layers_expa, null, null, clear_flag_t.COLOR, color_from_floats(0.0, 0.0, 0.0, 0.0));
 	gpu_end();
-	_gpu_begin(layers_expb, null, clear_flag_t.COLOR, color_from_floats(0.5, 0.5, 1.0, 0.0));
+	_gpu_begin(layers_expb, null, null, clear_flag_t.COLOR, color_from_floats(0.5, 0.5, 1.0, 0.0));
 	gpu_end();
-	_gpu_begin(layers_expc, null, clear_flag_t.COLOR, color_from_floats(1.0, 0.0, 0.0, 0.0));
+	_gpu_begin(layers_expc, null, null, clear_flag_t.COLOR, color_from_floats(1.0, 0.0, 0.0, 0.0));
 	gpu_end();
 
 	// Flatten layers

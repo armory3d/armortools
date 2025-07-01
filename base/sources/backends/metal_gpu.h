@@ -24,7 +24,6 @@ typedef struct {
 	void *data;
 	bool has_mipmaps;
 	void *_texReadback;
-	void *_depthTex;
 } gpu_texture_impl_t;
 
 typedef struct {

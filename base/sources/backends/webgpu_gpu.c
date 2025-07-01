@@ -23,7 +23,7 @@ gpu_buffer_t *gpu_internal_current_index_buffer = NULL;
 
 void gpu_destroy() {}
 
-void gpu_init_internal(int depthBufferBits, bool vsync) {
+void gpu_init_internal(int depth_bits, bool vsync) {
 	newRenderTargetWidth = renderTargetWidth = iron_window_width();
 	newRenderTargetHeight = renderTargetHeight = iron_window_height();
 
@@ -50,7 +50,7 @@ void gpu_init_internal(int depthBufferBits, bool vsync) {
 	swapChain = wgpuDeviceCreateSwapChain(device, surface, &scDesc);
 }
 
-void gpu_begin_internal(struct gpu_texture **targets, int count, unsigned flags, unsigned color, float depth) {
+void gpu_begin_internal(struct gpu_texture **targets, int count, gpu_texture_t *depth_buffer, unsigned flags, unsigned color, float depth) {
 	WGPUCommandEncoderDescriptor ceDesc;
 	memset(&ceDesc, 0, sizeof(ceDesc));
 	encoder = wgpuDeviceCreateCommandEncoder(device, &ceDesc);
@@ -197,7 +197,7 @@ int gpu_texture_stride(gpu_texture_t *texture) {
 void gpu_texture_generate_mipmaps(gpu_texture_t *texture, int levels) {}
 void gpu_texture_set_mipmap(gpu_texture_t *texture, gpu_texture_t *mipmap, int level) {}
 
-void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format, int depthBufferBits) {
+void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format) {
     target->width = target->width = width;
 	target->height = target->height = height;
 	target->state = GPU_TEXTURE_STATE_RENDER_TARGET;
@@ -205,8 +205,7 @@ void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_te
 	target->uploaded = true;
 }
 
-void gpu_render_target_init_framebuffer(gpu_texture_t *target, int width, int height, gpu_texture_format_t format, int depthBufferBits) {}
-void gpu_render_target_set_depth_from(gpu_texture_t *renderTarget, gpu_texture_t *source) {}
+void gpu_render_target_init_framebuffer(gpu_texture_t *target, int width, int height, gpu_texture_format_t format) {}
 
 void gpu_pipeline_init(gpu_pipeline_t *pipe) {
 	gpu_internal_pipeline_init(pipe);
@@ -354,4 +353,3 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 void gpu_wait() {}
 void gpu_set_constant_buffer(struct gpu_buffer *buffer, int offset, size_t size) {}
 void gpu_set_texture(int unit, gpu_texture_t *texture) {}
-void gpu_set_texture_depth(int unit, gpu_texture_t *renderTarget) {}

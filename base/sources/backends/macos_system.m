@@ -365,7 +365,7 @@ static bool controlKeyMouseButton = false;
 	return YES;
 }
 
-- (void)update { // window resizes, moves and display changes (resize, depth and display config change)
+- (void)update {
 }
 
 - (id)initWithFrame:(NSRect)frameRect {

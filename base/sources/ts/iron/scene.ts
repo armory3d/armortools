@@ -586,7 +586,7 @@ type shader_context_t = {
 	color_writes_blue?: bool[];
 	color_writes_alpha?: bool[];
 	color_attachments?: string[]; // RGBA32, RGBA64, R8
-	depth_attachment?: string; // DEPTH32
+	depth_attachment?: string; // D32
 	vertex_elements?: vertex_element_t[];
 	constants?: shader_const_t[];
 	texture_units?: tex_unit_t[];

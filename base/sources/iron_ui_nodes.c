@@ -238,7 +238,7 @@ void ui_nodes_bake_elements() {
 	if (ui_socket_image.width != 0) {
 		gpu_texture_destroy(&ui_socket_image);
 	}
-	gpu_render_target_init(&ui_socket_image, 24, 24, GPU_TEXTURE_FORMAT_RGBA32, 0);
+	gpu_render_target_init(&ui_socket_image, 24, 24, GPU_TEXTURE_FORMAT_RGBA32);
 	draw_begin(&ui_socket_image, true, 0x00000000);
 	draw_set_color(0xff111111);
 	draw_filled_circle(12, 12, 11, 0);

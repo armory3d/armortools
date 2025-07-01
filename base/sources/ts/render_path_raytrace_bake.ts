@@ -54,7 +54,7 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 		let _bake_type: bake_type_t = context_raw.bake_type;
 		context_raw.bake_type = bake_type_t.INIT;
 		parse_paint_material(true);
-		render_path_set_target("baketex0", null, clear_flag_t.COLOR, 0x00000000);
+		render_path_set_target("baketex0", null, null, clear_flag_t.COLOR, 0x00000000);
 		// Pixels with alpha of 0.0 are skipped during raytracing
 		let additional: string[] = ["baketex1"];
 		render_path_set_target("baketex0", additional);
