@@ -70,7 +70,6 @@ function render_path_set_target(target: string, additional: string[] = null, dep
 	if (_render_path_current_image != null) {
 		render_path_end();
 	}
-	_render_path_current_image = render_target;
 
 	if (target == "") { // Framebuffer
 		_render_path_current_target = null;
@@ -95,6 +94,7 @@ function render_path_set_target(target: string, additional: string[] = null, dep
 		render_path_current_w = rt._image.width;
 		render_path_current_h = rt._image.height;
 		let db: render_target_t = map_get(render_path_render_targets, depth_buffer);
+		_render_path_current_image = rt._image;
 		_gpu_begin(rt._image, additional_images, db != null ? db._image : null, flags, color, depth);
 	}
 	_render_path_bind_params = null;
