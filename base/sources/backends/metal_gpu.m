@@ -105,6 +105,8 @@ static MTLPixelFormat convert_image_format(gpu_texture_format_t format) {
 		return MTLPixelFormatRGBA32Float;
 	case GPU_TEXTURE_FORMAT_RGBA64:
 		return MTLPixelFormatRGBA16Float;
+	case GPU_TEXTURE_FORMAT_D32:
+		return MTLPixelFormatDepth32Float;
 	}
 }
 
