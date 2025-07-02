@@ -154,6 +154,8 @@ void gpu_init(int depth_buffer_bits, bool vsync);
 void gpu_init_internal(int depth_buffer_bits, bool vsync);
 void gpu_destroy(void);
 void gpu_draw(void);
+void gpu_resize(int width, int height);
+void gpu_resize_internal(int width, int height);
 void gpu_set_int(int location, int value);
 void gpu_set_int2(int location, int value1, int value2);
 void gpu_set_int3(int location, int value1, int value2, int value3);

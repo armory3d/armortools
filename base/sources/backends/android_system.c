@@ -1070,8 +1070,6 @@ double iron_time() {
 	return (double)(now.tv_sec - start_sec) + (now.tv_usec / 1000000.0);
 }
 
-void gpu_internal_resize(int width, int height);
-
 bool iron_internal_handle_messages(void) {
 	iron_mutex_lock(&unicode_mutex);
 	for (int i = 0; i < unicode_stack_index; ++i) {
@@ -1114,7 +1112,7 @@ bool iron_internal_handle_messages(void) {
 		activityJustResized = false;
 		int32_t width = iron_android_width();
 		int32_t height = iron_android_height();
-		gpu_internal_resize(width, height);
+		gpu_resize(width, height);
 		iron_internal_call_resize_callback(width, height);
 	}
 

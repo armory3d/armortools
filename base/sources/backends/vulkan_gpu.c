@@ -399,7 +399,7 @@ void create_descriptor_layout(void) {
 	vkCreateDescriptorPool(device, &pool_info, NULL, &descriptor_pool);
 }
 
-void gpu_internal_resize(int width, int height) {
+void gpu_resize_internal(int width, int height) {
 	// vkDeviceWaitIdle(device);
 	// create_swapchain();
 }

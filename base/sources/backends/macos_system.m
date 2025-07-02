@@ -1308,13 +1308,23 @@ int main(int argc, char **argv) {
 	iron_stop();
 }
 
+void iron_internal_call_resize_callback(int width, int height) {
+	if (windows[0].resizeCallback != NULL) {
+		windows[0].resizeCallback(width, height, windows[0].resizeCallbackData);
+	}
+}
+
 - (void)windowDidResize:(NSNotification *)notification {
 	NSWindow *window = [notification object];
 	NSSize size = [[window contentView] frame].size;
 	[view resize:size];
-	if (windows[0].resizeCallback != NULL) {
-		windows[0].resizeCallback(size.width, size.height, windows[0].resizeCallbackData);
-	}
+
+	float scale = [window backingScaleFactor];
+	int w = size.width * scale;
+	int h = size.height * scale;
+
+	gpu_resize(w, h);
+	iron_internal_call_resize_callback(w, h);
 }
 
 - (void)windowWillMiniaturize:(NSNotification *)notification {

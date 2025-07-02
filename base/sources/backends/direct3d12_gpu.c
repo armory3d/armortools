@@ -469,7 +469,7 @@ void gpu_present() {
 	command_list->lpVtbl->Reset(command_list, command_allocator, NULL);
 }
 
-void gpu_internal_resize(int width, int height) {
+void gpu_resize_internal(int width, int height) {
 	if (fence_value == 0 || width == 0 || height == 0) {
 		return;
 	}

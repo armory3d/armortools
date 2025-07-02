@@ -112,9 +112,7 @@ void iron_internal_call_resize_callback(int width, int height);
 	backingWidth = self.frame.size.width * self.contentScaleFactor;
 	backingHeight = self.frame.size.height * self.contentScaleFactor;
 
-	CAMetalLayer *metalLayer = (CAMetalLayer *)self.layer;
-	metalLayer.drawableSize = CGSizeMake(backingWidth, backingHeight);
-
+	gpu_resize();
 	iron_internal_call_resize_callback(backingWidth, backingHeight);
 }
 

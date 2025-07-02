@@ -408,7 +408,6 @@ void iron_mouse_get_position(int *x, int *y) {
 
 __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
 __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
-void gpu_internal_resize(int width, int height);
 
 typedef BOOL(WINAPI *GetPointerInfoType)(UINT32 pointerId, POINTER_INFO *pointerInfo);
 static GetPointerInfoType MyGetPointerInfo = NULL;
@@ -653,7 +652,7 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 	case WM_SIZE: {
 		int width = LOWORD(lParam);
 		int height = HIWORD(lParam);
-		gpu_internal_resize(width, height);
+		gpu_resize(width, height);
 		iron_internal_call_resize_callback(width, height);
 		break;
 	}

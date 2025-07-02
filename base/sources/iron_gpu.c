@@ -74,6 +74,10 @@ void gpu_end() {
 	gpu_end_internal();
 }
 
+void gpu_resize(int width, int height) {
+	gpu_resize_internal(width, height);
+}
+
 void gpu_set_int(int location, int value) {
 	int *ints = (int *)(&constant_buffer.data[location]);
 	ints[0] = value;
