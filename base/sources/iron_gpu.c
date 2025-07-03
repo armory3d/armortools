@@ -75,6 +75,12 @@ void gpu_end() {
 }
 
 void gpu_resize(int width, int height) {
+	if (width == 0 || height == 0) {
+		return;
+	}
+	if (width == framebuffers[0].width && height == framebuffers[0].height) {
+		return;
+	}
 	gpu_resize_internal(width, height);
 }
 

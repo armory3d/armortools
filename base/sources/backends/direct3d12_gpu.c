@@ -470,10 +470,7 @@ void gpu_present() {
 }
 
 void gpu_resize_internal(int width, int height) {
-	if (fence_value == 0 || width == 0 || height == 0) {
-		return;
-	}
-	if (width == framebuffers[0].width && height == framebuffers[0].height) {
+	if (fence_value == 0) {
 		return;
 	}
 

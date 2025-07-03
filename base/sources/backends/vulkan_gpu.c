@@ -43,9 +43,8 @@ static VkRenderingAttachmentInfo current_color_attachment_infos[8];
 static VkRenderingAttachmentInfo current_depth_attachment_info;
 static VkPhysicalDeviceMemoryProperties memory_properties;
 static VkSampler immutable_sampler;
-static int index_count;
+static int index_count = 0;
 static VkCommandBuffer command_buffer;
-static bool command_buffer_open = true;
 
 static VkInstance instance;
 static VkPhysicalDevice gpu;
@@ -65,6 +64,7 @@ static VkSurfaceKHR window_surface;
 static VkSurfaceFormatKHR window_format;
 static VkSwapchainKHR window_swapchain;
 static uint32_t framebuffer_count;
+static bool framebuffer_acquired = false;
 
 void iron_vulkan_get_instance_extensions(const char **extensions, int *index);
 VkBool32 iron_vulkan_get_physical_device_presentation_support(VkPhysicalDevice physical_device, uint32_t queue_family_index);
@@ -399,11 +399,6 @@ void create_descriptor_layout(void) {
 	vkCreateDescriptorPool(device, &pool_info, NULL, &descriptor_pool);
 }
 
-void gpu_resize_internal(int width, int height) {
-	// vkDeviceWaitIdle(device);
-	// create_swapchain();
-}
-
 VkSwapchainKHR cleanup_swapchain() {
 	// for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
 	// 	gpu_texture_destroy(&framebuffers[i]);
@@ -502,19 +497,6 @@ static void create_swapchain() {
 	present_mode_count = present_mode_count > 256 ? 256 : present_mode_count;
 	vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, window_surface, &present_mode_count, present_modes);
 
-	VkExtent2D swapchain_extent;
-	// if (caps.currentExtent.width == (uint32_t)-1) {
-		swapchain_extent.width = iron_window_width();
-		swapchain_extent.height = iron_window_height();
-	// }
-	// else {
-	// 	swapchain_extent = caps.currentExtent;
-	// 	window_width = caps.currentExtent.width;
-	// 	window_height = caps.currentExtent.height;
-	// }
-
-	VkPresentModeKHR swapchain_present_mode = window_vsynced ? VK_PRESENT_MODE_FIFO_KHR : VK_PRESENT_MODE_MAILBOX_KHR;
-
 	uint32_t image_count = caps.minImageCount;// + 1;
 	if ((caps.maxImageCount > 0) && (image_count > caps.maxImageCount)) {
 		image_count = caps.maxImageCount;
@@ -528,6 +510,9 @@ static void create_swapchain() {
 		pre_transform = caps.currentTransform;
 	}
 
+	// Fetch newest window size
+	iron_internal_handle_messages();
+
 	VkSwapchainCreateInfoKHR swapchain_info = {
 		.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
 		.pNext = NULL,
@@ -535,8 +520,8 @@ static void create_swapchain() {
 		.minImageCount = image_count,
 		.imageFormat = window_format.format,
 		.imageColorSpace = window_format.colorSpace,
-		.imageExtent.width = swapchain_extent.width,
-		.imageExtent.height = swapchain_extent.height,
+		.imageExtent.width = iron_window_width(),
+		.imageExtent.height = iron_window_height(),
 		.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
 		.preTransform = pre_transform,
 	};
@@ -558,7 +543,7 @@ static void create_swapchain() {
 	swapchain_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	swapchain_info.queueFamilyIndexCount = 0;
 	swapchain_info.pQueueFamilyIndices = NULL;
-	swapchain_info.presentMode = swapchain_present_mode;
+	swapchain_info.presentMode = window_vsynced ? VK_PRESENT_MODE_FIFO_KHR : VK_PRESENT_MODE_MAILBOX_KHR;
 	swapchain_info.oldSwapchain = old_swapchain;
 	swapchain_info.clipped = true;
 
@@ -650,15 +635,26 @@ static void create_swapchain() {
 }
 
 static void acquire_next_image() {
-	while (true) {
-		VkResult err = vkAcquireNextImageKHR(device, window_swapchain, UINT64_MAX, framebuffer_available_semaphore, VK_NULL_HANDLE, &framebuffer_index);
-		if (err == VK_ERROR_SURFACE_LOST_KHR || err == VK_ERROR_OUT_OF_DATE_KHR) {
-			window_surface_destroyed = (err == VK_ERROR_SURFACE_LOST_KHR);
-			create_swapchain();
-			continue;
+	VkResult err = vkAcquireNextImageKHR(device, window_swapchain, UINT64_MAX, framebuffer_available_semaphore, VK_NULL_HANDLE, &framebuffer_index);
+	if (err == VK_ERROR_SURFACE_LOST_KHR || err == VK_ERROR_OUT_OF_DATE_KHR) {
+		window_surface_destroyed = (err == VK_ERROR_SURFACE_LOST_KHR);
+
+		gpu_in_use = false;
+		create_swapchain();
+		gpu_in_use = true;
+		acquire_next_image();
+
+		for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
+			// gpu_texture_destroy(&framebuffers[i]);
+			// gpu_render_target_init2(&framebuffers[i], iron_window_width(), iron_window_height(), GPU_TEXTURE_FORMAT_RGBA32, i);
+			framebuffers[i].width = iron_window_width();
+			framebuffers[i].height = iron_window_height();
 		}
-		break;
 	}
+}
+
+void gpu_resize_internal(int width, int height) {
+	// Newest window size is fetched in create_swapchain
 }
 
 void gpu_init_internal(int depth_buffer_bits, bool vsync) {
@@ -1041,10 +1037,6 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 		.flags = VK_FENCE_CREATE_SIGNALED_BIT,
 	};
 	vkCreateFence(device, &fence_info, NULL, &fence);
-
-	index_count = 0;
-
-	acquire_next_image();
 }
 
 void gpu_destroy() {
@@ -1098,6 +1090,10 @@ static void set_viewport_and_scissor() {
 }
 
 void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t * depth_buffer, unsigned flags, unsigned color, float depth) {
+	if (!framebuffer_acquired) {
+		acquire_next_image();
+		framebuffer_acquired = true;
+	}
 
 	gpu_texture_t *target = current_render_targets[0];
 
@@ -1212,8 +1208,6 @@ void gpu_wait() {
 
 void gpu_present() {
 	vkEndCommandBuffer(command_buffer);
-	command_buffer_open = false;
-
 	vkResetFences(device, 1, &fence);
 
 	VkSubmitInfo submit_info = {
@@ -1241,36 +1235,23 @@ void gpu_present() {
 		.pWaitSemaphores = &rendering_finished_semaphore,
 		.waitSemaphoreCount = 1,
 	};
-
-	VkResult err = vkQueuePresentKHR(queue, &present);
-	if (err == VK_ERROR_SURFACE_LOST_KHR) {
-		vkDeviceWaitIdle(device);
-		window_surface_destroyed = true;
-		create_swapchain();
-	}
-	else if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR) {
-		vkDeviceWaitIdle(device);
-		create_swapchain();
-	}
+	vkQueuePresentKHR(queue, &present);
 
 	for (int i = 0; i < descriptor_sets_count; ++i) {
 		descriptor_sets[i].in_use = false;
 	}
 
 	gpu_wait();
-	acquire_next_image();
+	framebuffer_acquired = false;
 
-	if (!command_buffer_open) {
-		vkResetCommandBuffer(command_buffer, 0);
-		VkCommandBufferBeginInfo begin_info = {
-			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-			.pNext = NULL,
-			.flags = 0,
-			.pInheritanceInfo = NULL,
-		};
-		vkBeginCommandBuffer(command_buffer, &begin_info);
-		command_buffer_open = true;
-	}
+	vkResetCommandBuffer(command_buffer, 0);
+	VkCommandBufferBeginInfo begin_info = {
+		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+		.pNext = NULL,
+		.flags = 0,
+		.pInheritanceInfo = NULL,
+	};
+	vkBeginCommandBuffer(command_buffer, &begin_info);
 }
 
 void gpu_draw_internal() {

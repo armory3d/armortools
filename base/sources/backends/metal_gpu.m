@@ -173,12 +173,6 @@ void gpu_destroy(void) {
 }
 
 void gpu_resize_internal(int width, int height) {
-	if (width == 0 || height == 0) {
-		return;
-	}
-	if (width == framebuffers[0].width && height == framebuffers[0].height) {
-		return;
-	}
 	resize_w = width;
 	resize_h = height;
 }
