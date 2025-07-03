@@ -232,4 +232,7 @@ void gpu_create_framebuffers(int depth_buffer_bits) {
 	if (depth_buffer_bits > 0) {
 		gpu_render_target_init(&framebuffer_depth, iron_window_width(), iron_window_height(), GPU_TEXTURE_FORMAT_D32);
 	}
+	else {
+		framebuffer_depth.width = framebuffer_depth.height = 0;
+	}
 }

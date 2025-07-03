@@ -60,8 +60,6 @@ typedef struct {
 	struct ID3D12Resource *render_target;
 	struct ID3D12Resource *readback;
 	struct ID3D12DescriptorHeap *descriptor_heap;
-	struct D3D12Viewport viewport;
-	struct D3D12Rect scissor;
 } gpu_texture_impl_t;
 
 typedef struct {

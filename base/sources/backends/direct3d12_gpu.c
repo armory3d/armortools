@@ -1,4 +1,3 @@
-
 #define WIN32_LEAN_AND_MEAN
 #define HEAP_SIZE 1024
 #define TEXTURE_COUNT 16
@@ -36,6 +35,7 @@ static UINT64 fence_value;
 static ID3D12Fence *fence;
 static HANDLE fence_event;
 static UINT64 frame_fence_values[GPU_FRAMEBUFFER_COUNT] = {0, 0};
+static bool resized = false;
 
 static D3D12_BLEND convert_blend_factor(gpu_blending_factor_t factor) {
 	switch (factor) {
@@ -168,6 +168,9 @@ void gpu_destroy() {
 	for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
 		gpu_texture_destroy(&framebuffers[i]);
 	}
+	if (framebuffer_depth.width > 0) {
+		gpu_texture_destroy(&framebuffer_depth);
+	}
 	command_list->lpVtbl->Release(command_list);
 	command_allocator->lpVtbl->Release(command_allocator);
 	window_swapchain->lpVtbl->Release(window_swapchain);
@@ -211,8 +214,8 @@ void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height
 	D3D12_RESOURCE_DESC resource_desc = {
 		.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D,
 		.Alignment = 0,
-		.Width = render_target->width,
-		.Height = render_target->height,
+		.Width = width,
+		.Height = height,
 		.DepthOrArraySize = 1,
 		.MipLevels = 1,
 		.Format = dxgi_format,
@@ -284,18 +287,6 @@ void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height
 
 	render_target->impl.srv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(render_target->impl.srv_descriptor_heap, &handle);
 	device->lpVtbl->CreateShaderResourceView(device, render_target->impl.render_target, &srv_desc, handle);
-
-	render_target->impl.scissor.top = 0;
-	render_target->impl.scissor.left = 0;
-	render_target->impl.scissor.right = width;
-	render_target->impl.scissor.bottom = height;
-
-	render_target->impl.viewport.TopLeftX = 0.0f;
-	render_target->impl.viewport.TopLeftY = 0.0f;
-	render_target->impl.viewport.Width = (float)width;
-	render_target->impl.viewport.Height = (float)height;
-	render_target->impl.viewport.MinDepth = 0.0f;
-	render_target->impl.viewport.MaxDepth = 1.0f;
 }
 
 void gpu_init_internal(int depth_buffer_bits, bool vsync) {
@@ -417,8 +408,8 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t *depth
 		command_list->lpVtbl->OMSetRenderTargets(command_list, current_render_targets_count, &target_descriptors[0], false, NULL);
 	}
 
-	command_list->lpVtbl->RSSetViewports(command_list, 1, (D3D12_VIEWPORT *)&target->impl.viewport);
-	command_list->lpVtbl->RSSetScissorRects(command_list, 1, (D3D12_RECT *)&target->impl.scissor);
+	gpu_viewport(0, 0, target->width, target->height);
+	gpu_scissor(0, 0, target->width, target->height);
 
 	if (flags & GPU_CLEAR_COLOR) {
 		float clearColor[] = {((color & 0x00ff0000) >> 16) / 255.0f,
@@ -463,8 +454,30 @@ void gpu_present() {
 
 	framebuffer_index = (framebuffer_index + 1) % GPU_FRAMEBUFFER_COUNT;
 	wait_for_fence(fence, frame_fence_values[framebuffer_index], fence_event);
-
 	gpu_wait();
+
+	if (resized) {
+		framebuffer_index = 0;
+
+		for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
+			gpu_texture_destroy(&framebuffers[i]);
+		}
+		if (framebuffer_depth.width > 0) {
+			gpu_texture_destroy(&framebuffer_depth);
+		}
+
+		window_swapchain->lpVtbl->ResizeBuffers(window_swapchain, GPU_FRAMEBUFFER_COUNT, iron_window_width(), iron_window_height(), DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+
+		for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
+			gpu_render_target_init2(&framebuffers[i], iron_window_width(), iron_window_height(), GPU_TEXTURE_FORMAT_RGBA32, i);
+		}
+		if (framebuffer_depth.width > 0) {
+			gpu_render_target_init2(&framebuffer_depth, iron_window_width(), iron_window_height(), GPU_TEXTURE_FORMAT_D32, -1);
+		}
+
+		resized = false;
+	}
+
 	command_allocator->lpVtbl->Reset(command_allocator);
 	command_list->lpVtbl->Reset(command_list, command_allocator, NULL);
 }
@@ -473,12 +486,7 @@ void gpu_resize_internal(int width, int height) {
 	if (fence_value == 0) {
 		return;
 	}
-
-	for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
-		gpu_texture_destroy(&framebuffers[i]);
-		gpu_render_target_init2(&framebuffers[i], width, height, GPU_TEXTURE_FORMAT_RGBA32, i);
-	}
-	window_swapchain->lpVtbl->ResizeBuffers(window_swapchain, GPU_FRAMEBUFFER_COUNT, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+	resized = true;
 }
 
 bool gpu_raytrace_supported() {

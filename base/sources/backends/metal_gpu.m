@@ -24,8 +24,7 @@ static id<MTLSamplerState> linear_sampler;
 static bool has_depth = false;
 static int argument_buffer_step;
 static gpu_buffer_t *current_index_buffer;
-static int resize_w = 0;
-static int resize_h = 0;
+static bool resized = false;
 
 static MTLBlendFactor convert_blending_factor(gpu_blending_factor_t factor) {
 	switch (factor) {
@@ -173,8 +172,7 @@ void gpu_destroy(void) {
 }
 
 void gpu_resize_internal(int width, int height) {
-	resize_w = width;
-	resize_h = height;
+	resized = true;
 }
 
 static void next_drawable() {
@@ -320,14 +318,14 @@ void gpu_present() {
 	command_buffer = nil;
 	command_encoder = nil;
 
-	if (resize_w > 0) {
+	if (resized) {
 		CAMetalLayer *layer = getMetalLayer();
-		layer.drawableSize = CGSizeMake(resize_w, resize_h);
+		layer.drawableSize = CGSizeMake(iron_window_width(), iron_window_height());
 		for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
 			// gpu_texture_destroy(&framebuffers[i]);
-			gpu_render_target_init2(&framebuffers[i], resize_w, resize_h, GPU_TEXTURE_FORMAT_RGBA32, i);
+			gpu_render_target_init2(&framebuffers[i], iron_window_width(), iron_window_height(), GPU_TEXTURE_FORMAT_RGBA32, i);
 		}
-		resize_w = 0;
+		resized = false;
 	}
 
 	next_drawable();
