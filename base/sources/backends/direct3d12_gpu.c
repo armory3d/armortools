@@ -141,10 +141,9 @@ static void wait_for_fence(ID3D12Fence *fence, UINT64 completion_value, HANDLE w
 static UINT64 get_footprint(ID3D12Resource *destinationResource, UINT FirstSubresource, UINT NumSubresources) {
 	D3D12_RESOURCE_DESC desc;
 	destinationResource->lpVtbl->GetDesc(destinationResource, &desc);
-	UINT64 requiredSize = 0;
-	device->lpVtbl->GetCopyableFootprints(device, &desc, FirstSubresource, NumSubresources, 0, NULL, NULL, NULL, &requiredSize);
-	device->lpVtbl->Release(device);
-	return requiredSize;
+	UINT64 required_size = 0;
+	device->lpVtbl->GetCopyableFootprints(device, &desc, FirstSubresource, NumSubresources, 0, NULL, NULL, NULL, &required_size);
+	return required_size;
 }
 
 void gpu_barrier(gpu_texture_t *render_target, gpu_texture_state_t state_after) {
@@ -440,6 +439,19 @@ void gpu_wait() {
 	wait_for_fence(fence, fence_value, fence_event);
 }
 
+void gpu_flush() {
+	command_list->lpVtbl->Close(command_list);
+
+	ID3D12CommandList *command_lists[] = {(ID3D12CommandList *)command_list};
+	queue->lpVtbl->ExecuteCommandLists(queue, 1, command_lists);
+	queue->lpVtbl->Signal(queue, fence, ++fence_value);
+
+	gpu_wait();
+
+	command_allocator->lpVtbl->Reset(command_allocator);
+	command_list->lpVtbl->Reset(command_list, command_allocator, NULL);
+}
+
 void gpu_present() {
 	command_list->lpVtbl->Close(command_list);
 
@@ -623,7 +635,6 @@ void gpu_upload_texture(gpu_texture_t *texture) {
 	texture->impl.image->lpVtbl->GetDevice(texture->impl.image, &IID_ID3D12Device, &device);
 	D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint;
 	device->lpVtbl->GetCopyableFootprints(device, &Desc, 0, 1, 0, &footprint, NULL, NULL, NULL);
-	device->lpVtbl->Release(device);
 
 	D3D12_TEXTURE_COPY_LOCATION source = {
 		.pResource = texture->impl.upload_image,
@@ -655,11 +666,11 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	D3D12_RESOURCE_DESC desc;
 	render_target->impl.render_target->lpVtbl->GetDesc(render_target->impl.render_target, &desc);
 	DXGI_FORMAT dxgi_format = desc.Format;
-	int _formatSize = format_size(dxgi_format);
-	int rowPitch = render_target->width * _formatSize;
-	int align = rowPitch % D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
+	int _format_size = format_size(dxgi_format);
+	int row_pitch = render_target->width * _format_size;
+	int align = row_pitch % D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
 	if (align != 0) {
-		rowPitch = rowPitch + (D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - align);
+		row_pitch = row_pitch + (D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - align);
 	}
 
 	// Create readback buffer
@@ -675,7 +686,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 		D3D12_RESOURCE_DESC resource_desc = {
 			.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER,
 			.Alignment = 0,
-			.Width = rowPitch * render_target->height,
+			.Width = row_pitch * render_target->height,
 			.Height = 1,
 			.DepthOrArraySize = 1,
 			.MipLevels = 1,
@@ -687,7 +698,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 		};
 
 		device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc, D3D12_RESOURCE_STATE_COMMON, NULL,
-										&IID_ID3D12Resource, &render_target->impl.readback);
+												&IID_ID3D12Resource, &render_target->impl.readback);
 	}
 
 	// Copy render target to readback buffer
@@ -715,7 +726,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 		.PlacedFootprint.Footprint.Width = render_target->width,
 		.PlacedFootprint.Footprint.Height = render_target->height,
 		.PlacedFootprint.Footprint.Depth = 1,
-		.PlacedFootprint.Footprint.RowPitch = rowPitch,
+		.PlacedFootprint.Footprint.RowPitch = row_pitch,
 	};
 
 	command_list->lpVtbl->CopyTextureRegion(command_list , &dest, 0, 0, 0, &source, NULL);
@@ -730,12 +741,12 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	};
 	command_list->lpVtbl->ResourceBarrier(command_list, 1, &barrier);
 
-	// gpu_wait();
+	gpu_flush();
 
 	// Read buffer
 	void *p;
 	render_target->impl.readback->lpVtbl->Map(render_target->impl.readback, 0, NULL, &p);
-	memcpy(data, p, render_target->width * render_target->height * _formatSize);
+	memcpy(data, p, render_target->width * render_target->height * _format_size);
 	render_target->impl.readback->lpVtbl->Unmap(render_target->impl.readback, 0, NULL);
 }
 
@@ -885,7 +896,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	texture->impl.render_target = NULL;
 
 	DXGI_FORMAT d3d_format = convert_format(format);
-	int _formatSize = format_size(d3d_format);
+	int _format_size = format_size(d3d_format);
 
 	D3D12_HEAP_PROPERTIES heapPropertiesDefault = {
 		.Type = D3D12_HEAP_TYPE_DEFAULT,
@@ -966,7 +977,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	texture->impl.upload_image->lpVtbl->Map(texture->impl.upload_image, 0, NULL, (void **)&pixel);
 	int pitch = gpu_texture_stride(texture);
 	for (int y = 0; y < texture->height; ++y) {
-		memcpy(&pixel[y * pitch], &((uint8_t *)data)[y * texture->width * _formatSize], texture->width * _formatSize);
+		memcpy(&pixel[y * pitch], &((uint8_t *)data)[y * texture->width * _format_size], texture->width * _format_size);
 	}
 	texture->impl.upload_image->lpVtbl->Unmap(texture->impl.upload_image, 0, NULL);
 
@@ -2064,7 +2075,7 @@ void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structu
 	command_list->lpVtbl->ResourceBarrier(command_list, 1, &barrier);
 	dxrCommandList->lpVtbl->BuildRaytracingAccelerationStructure(dxrCommandList, &topLevelBuildDesc, 0, NULL);
 
-	// gpu_wait();
+	gpu_flush();
 
 	scratchResource->lpVtbl->Release(scratchResource);
 	instanceDescs->lpVtbl->Release(instanceDescs);

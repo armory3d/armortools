@@ -77,11 +77,8 @@ fun dilate_pass_frag(input: vert_out): float4 {
 
 	var color: float4 = tex[coord];
 
-
-
-
 	////
-	/*
+
 	var i: int = 0;
 	while (i < int(constants.dilate_radius)) {
 		i += 1;
@@ -110,12 +107,8 @@ fun dilate_pass_frag(input: vert_out): float4 {
 			j += 1;
 		}
 	}
-	*/
+
 	////
-
-
-
-
 
 	return color;
 }
