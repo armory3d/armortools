@@ -894,6 +894,9 @@ void ui_draw_combo(bool begin /*= true*/) {
 	}
 	current->input_enabled = current->combo_selected_handle == NULL;
 	ui_end_region(false);
+	if (begin) {
+		draw_end();
+	}
 }
 
 void ui_bake_elements() {
@@ -959,7 +962,9 @@ void ui_bake_elements() {
 void ui_begin_region(ui_t *ui, int x, int y, int w) {
 	ui_set_current(ui);
 	if (!current->elements_baked) {
+		draw_end();
 		ui_bake_elements();
+		draw_begin(NULL, false, 0);
 	}
 	current->changed = false;
 	current->current_window = NULL;
