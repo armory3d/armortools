@@ -15,16 +15,10 @@
 #include <iron_system.h>
 #include "vulkan_gpu.h"
 
-#define MAX_DESCRIPTOR_SETS 1024
-
-typedef struct descriptor_set {
-	int id;
-	bool in_use;
-	VkDescriptorImageInfo tex_desc[16];
-	VkDescriptorSet set;
-} descriptor_set_t;
+#define MAX_DESCRIPTOR_SETS 2048
 
 bool gpu_transpose_mat = true;
+extern int constant_buffer_index;
 
 static gpu_texture_t *current_textures[16] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
@@ -35,9 +29,7 @@ static VkSemaphore rendering_finished_semaphore;
 static VkFence fence;
 static gpu_pipeline_t *current_pipeline = NULL;
 static VkDescriptorSetLayout descriptor_layout;
-static VkDescriptorPool descriptor_pool;
-static descriptor_set_t descriptor_sets[MAX_DESCRIPTOR_SETS] = {0};
-static int descriptor_sets_count = 0;
+static VkDescriptorSet descriptor_sets[MAX_DESCRIPTOR_SETS];
 static VkRenderingInfo current_rendering_info;
 static VkRenderingAttachmentInfo current_color_attachment_infos[8];
 static VkRenderingAttachmentInfo current_depth_attachment_info;
@@ -51,7 +43,6 @@ static VkPhysicalDevice gpu;
 static VkDevice device;
 static VkCommandPool cmd_pool;
 static VkQueue queue;
-static VkBuffer *uniform_buffer;
 #ifdef VALIDATE
 static bool validation_found;
 static VkDebugUtilsMessengerEXT debug_messenger;
@@ -323,7 +314,7 @@ static void set_image_layout(VkImage image, VkImageAspectFlags aspect_mask, VkIm
 	}
 }
 
-void create_descriptor_layout(void) {
+static void create_descriptors(void) {
 	VkDescriptorSetLayoutBinding bindings[18];
 	memset(bindings, 0, sizeof(bindings));
 
@@ -380,23 +371,38 @@ void create_descriptor_layout(void) {
 	memset(type_counts, 0, sizeof(type_counts));
 
 	type_counts[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-	type_counts[0].descriptorCount = 1 * 1024;
+	type_counts[0].descriptorCount = 1;
 
 	type_counts[1].type = VK_DESCRIPTOR_TYPE_SAMPLER;
-	type_counts[1].descriptorCount = 1 * 1024;
+	type_counts[1].descriptorCount = 1;
 
 	type_counts[2].type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-	type_counts[2].descriptorCount = 16 * 1024;
+	type_counts[2].descriptorCount = 16;
 
 	VkDescriptorPoolCreateInfo pool_info = {
 		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
 		.pNext = NULL,
-		.maxSets = 1024,
+		.maxSets = MAX_DESCRIPTOR_SETS,
 		.poolSizeCount = 3,
 		.pPoolSizes = type_counts,
 	};
 
+	VkDescriptorPool descriptor_pool;
 	vkCreateDescriptorPool(device, &pool_info, NULL, &descriptor_pool);
+
+	VkDescriptorSetLayout layouts[MAX_DESCRIPTOR_SETS];
+	for (int i = 0; i < MAX_DESCRIPTOR_SETS; ++i) {
+		layouts[i] = descriptor_layout;
+	}
+
+	VkDescriptorSetAllocateInfo alloc_info = {
+		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+		.pNext = NULL,
+		.descriptorPool = descriptor_pool,
+		.descriptorSetCount = MAX_DESCRIPTOR_SETS,
+		.pSetLayouts = layouts,
+	};
+	vkAllocateDescriptorSets(device, &alloc_info, descriptor_sets);
 }
 
 VkSwapchainKHR cleanup_swapchain() {
@@ -970,7 +976,8 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	};
 
 	vkCreateCommandPool(device, &cmd_pool_info, NULL, &cmd_pool);
-	create_descriptor_layout();
+
+	create_descriptors();
 
 	VkSemaphoreCreateInfo sem_info = {
 		.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
@@ -1263,10 +1270,6 @@ void gpu_present() {
 	};
 	vkQueuePresentKHR(queue, &present);
 
-	for (int i = 0; i < descriptor_sets_count; ++i) {
-		descriptor_sets[i].in_use = false;
-	}
-
 	gpu_wait();
 	framebuffer_acquired = false;
 
@@ -1403,89 +1406,22 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	}
 }
 
-static int calc_descriptor_id(void) {
-	int texture_count = 0;
-	for (int i = 0; i < 16; ++i) {
-		if (current_textures[i] != NULL) {
-			texture_count++;
-		}
-	}
-	bool uniform_buffer = true;
-	return 1 | (texture_count << 1) | ((uniform_buffer ? 1 : 0) << 8);
-}
-
-static int write_tex_descs(VkDescriptorImageInfo *tex_descs) {
-	memset(tex_descs, 0, sizeof(VkDescriptorImageInfo) * 16);
-
-	int texture_count = 0;
-	for (int i = 0; i < 16; ++i) {
-		if (current_textures[i] != NULL) {
-			tex_descs[i].imageView = current_textures[i]->impl.view;
-			tex_descs[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			texture_count++;
-		}
-	}
-	return texture_count;
-}
-
-static void update_textures(descriptor_set_t *set) {
-	memset(&set->tex_desc, 0, sizeof(set->tex_desc));
-	int texture_count = write_tex_descs(set->tex_desc);
-	VkWriteDescriptorSet writes[16];
-	memset(&writes, 0, sizeof(writes));
-
-	for (int i = 0; i < 16; ++i) {
-		writes[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		writes[i].dstSet = set->set;
-		writes[i].dstBinding = i + 2;
-		writes[i].descriptorCount = 1;
-		writes[i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-		writes[i].pImageInfo = &set->tex_desc[i];
-	}
-
-	if (current_textures[0] != NULL) {
-		vkUpdateDescriptorSets(device, texture_count, writes, 0, NULL);
-	}
-}
-
-static VkDescriptorSet get_descriptor_set() {
-	int id = calc_descriptor_id();
-	for (int i = 0; i < descriptor_sets_count; ++i) {
-		if (descriptor_sets[i].id == id) {
-			if (!descriptor_sets[i].in_use) {
-				descriptor_sets[i].in_use = true;
-				update_textures(&descriptor_sets[i]);
-				return descriptor_sets[i].set;
-			}
-		}
-	}
-
-	VkDescriptorSetAllocateInfo alloc_info = {
-		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-		.pNext = NULL,
-		.descriptorPool = descriptor_pool,
-		.descriptorSetCount = 1,
-		.pSetLayouts = &descriptor_layout,
-	};
-	VkDescriptorSet descriptor_set;
-	vkAllocateDescriptorSets(device, &alloc_info, &descriptor_set);
+static VkDescriptorSet get_descriptor_set(VkBuffer buffer) {
+	VkDescriptorSet descriptor_set = descriptor_sets[constant_buffer_index];
 
 	VkDescriptorBufferInfo buffer_descs[1];
 	memset(&buffer_descs, 0, sizeof(buffer_descs));
-	buffer_descs[0].buffer = *uniform_buffer;
+	buffer_descs[0].buffer = buffer;
 	buffer_descs[0].offset = 0;
-	buffer_descs[0].range = 256 * sizeof(float);
+	buffer_descs[0].range = 256 ;
 
 	VkDescriptorImageInfo tex_desc[16];
 	memset(&tex_desc, 0, sizeof(tex_desc));
-
-	int texture_count = 0;
 	for (int i = 0; i < 16; ++i) {
 		if (current_textures[i] != NULL) {
 			tex_desc[i].imageView = current_textures[i]->impl.view;
-			texture_count++;
+			tex_desc[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		}
-		tex_desc[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 	}
 
 	VkWriteDescriptorSet writes[17];
@@ -1513,16 +1449,11 @@ static VkDescriptorSet get_descriptor_set() {
 	}
 
 	vkUpdateDescriptorSets(device, write_count, writes, 0, NULL);
-	descriptor_sets[descriptor_sets_count].id = id;
-	descriptor_sets[descriptor_sets_count].in_use = true;
-	descriptor_sets[descriptor_sets_count].set = descriptor_set;
-	write_tex_descs(descriptor_sets[descriptor_sets_count].tex_desc);
-	descriptor_sets_count += 1;
 	return descriptor_set;
 }
 
 void gpu_set_constant_buffer(gpu_buffer_t *buffer, int offset, size_t size) {
-	VkDescriptorSet descriptor_set = get_descriptor_set();
+	VkDescriptorSet descriptor_set = get_descriptor_set(buffer->impl.buf);
 	uint32_t offsets[1] = {offset};
 	vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, current_pipeline->impl.pipeline_layout, 0, 1, &descriptor_set, 1, offsets);
 }
@@ -2188,10 +2119,6 @@ void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size) {
 	memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &buffer->impl.mem_alloc.memoryTypeIndex);
 	vkAllocateMemory(device, &buffer->impl.mem_alloc, NULL, &buffer->impl.mem);
 	vkBindBufferMemory(device, buffer->impl.buf, buffer->impl.mem, 0);
-
-	if (uniform_buffer == NULL) {
-		uniform_buffer = &buffer->impl.buf;
-	}
 
 	void *p;
 	vkMapMemory(device, buffer->impl.mem, 0, buffer->impl.mem_alloc.allocationSize, 0, (void **)&p);

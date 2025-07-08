@@ -823,7 +823,7 @@ function base_init_config() {
 	raw.pressure_hardness = true;
 	raw.pressure_angle = false;
 	raw.pressure_opacity = false;
-	///if (arm_vulkan || arm_ios)
+	///if (arm_android || arm_ios)
 	raw.material_live = false;
 	///else
 	raw.material_live = true;

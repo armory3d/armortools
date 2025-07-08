@@ -147,6 +147,7 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t *depth
 void gpu_end(void);
 void gpu_end_internal(void);
 void gpu_wait(void);
+void gpu_flush(void);
 void gpu_present(void);
 void gpu_barrier(gpu_texture_t *render_target, gpu_texture_state_t state_after);
 void gpu_create_framebuffers(int depth_buffer_bits);
