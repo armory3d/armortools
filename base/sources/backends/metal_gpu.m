@@ -307,6 +307,14 @@ void gpu_end_internal() {
 }
 
 void gpu_wait() {
+	[command_buffer waitUntilCompleted];
+}
+
+void gpu_flush() {
+	[command_buffer commit];
+	gpu_wait();
+	id<MTLCommandQueue> commandQueue = getMetalQueue();
+	command_buffer = [commandQueue commandBuffer];
 }
 
 void gpu_present() {
@@ -408,6 +416,8 @@ void gpu_upload_texture(gpu_texture_t *texture) {
 }
 
 void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
+	gpu_flush();
+
 	// Create readback buffer
 	if (render_target->impl._texReadback == NULL) {
 		id<MTLDevice> device = getMetalDevice();
