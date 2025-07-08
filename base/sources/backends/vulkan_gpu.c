@@ -1206,6 +1206,32 @@ void gpu_wait() {
 	vkWaitForFences(device, 1, &fence, VK_TRUE, UINT64_MAX);
 }
 
+void gpu_flush() {
+	vkEndCommandBuffer(command_buffer);
+	vkResetFences(device, 1, &fence);
+
+	VkSubmitInfo submit_info = {
+		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+		.pNext = NULL,
+		.commandBufferCount = 1,
+		.pCommandBuffers = &command_buffer,
+		.signalSemaphoreCount = 1,
+		.pSignalSemaphores = &rendering_finished_semaphore,
+	};
+
+	vkQueueSubmit(queue, 1, &submit_info, fence);
+	gpu_wait();
+
+	vkResetCommandBuffer(command_buffer, 0);
+	VkCommandBufferBeginInfo begin_info = {
+		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+		.pNext = NULL,
+		.flags = 0,
+		.pInheritanceInfo = NULL,
+	};
+	vkBeginCommandBuffer(command_buffer, &begin_info);
+}
+
 void gpu_present() {
 	vkEndCommandBuffer(command_buffer);
 	vkResetFences(device, 1, &fence);
@@ -1310,6 +1336,10 @@ void gpu_upload_texture(gpu_texture_t *texture) {
 }
 
 void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
+	if (gpu_in_use) {
+		vkCmdEndRendering(command_buffer);
+	}
+
 	VkFormat format = render_target->impl.format;
 	int format_bytes_size = format_size(format);
 
@@ -1340,8 +1370,6 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 		render_target->impl.readback_buffer_created = true;
 	}
 
-	vkCmdEndRendering(command_buffer);
-
 	set_image_layout(render_target->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 
 	VkBufferImageCopy region;
@@ -1362,13 +1390,17 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 
 	set_image_layout(render_target->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
-	gpu_wait();
+	gpu_flush();
 
 	// Read buffer
 	void *p;
 	vkMapMemory(device, render_target->impl.readback_memory, 0, VK_WHOLE_SIZE, 0, (void **)&p);
 	memcpy(data, p, render_target->width * render_target->height * format_bytes_size);
 	vkUnmapMemory(device, render_target->impl.readback_memory);
+
+	if (gpu_in_use) {
+		vkCmdBeginRendering(command_buffer, &current_rendering_info);
+	}
 }
 
 static int calc_descriptor_id(void) {
@@ -3580,8 +3612,6 @@ void gpu_raytrace_dispatch_rays() {
 
 	VkStridedDeviceAddressRegionKHR callable_shader_sbt_entry = {0};
 
-	vkCmdEndRendering(command_buffer);
-
 	// Dispatch the ray tracing commands
 	vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, pipeline->impl.pipeline);
 	vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, pipeline->impl.pipeline_layout, 0, 1,
@@ -3590,6 +3620,4 @@ void gpu_raytrace_dispatch_rays() {
 	_vkCmdTraceRaysKHR = (void *)vkGetDeviceProcAddr(device, "vkCmdTraceRaysKHR");
 	_vkCmdTraceRaysKHR(command_buffer, &raygen_shader_sbt_entry, &miss_shader_sbt_entry, &hit_shader_sbt_entry, &callable_shader_sbt_entry,
 					   output->width, output->height, 1);
-
-	vkCmdBeginRendering(command_buffer, &current_rendering_info);
 }
