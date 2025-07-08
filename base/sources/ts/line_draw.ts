@@ -56,8 +56,8 @@ function line_draw_init() {
 		line_draw_pipeline.depth_attachment_bits = 32;
 		gpu_pipeline_compile(line_draw_pipeline);
 		pipes_offset = 0;
-		line_draw_color_loc = pipes_get_constant_location("vec3");
 		line_draw_vp_loc = pipes_get_constant_location("mat4");
+		line_draw_color_loc = pipes_get_constant_location("vec3");
 		line_draw_vp = mat4_identity();
 		line_draw_vertex_buffer = gpu_create_vertex_buffer(line_draw_max_vertices, structure, usage_t.DYNAMIC);
 		line_draw_index_buffer = gpu_create_index_buffer(line_draw_max_indices);
@@ -225,6 +225,9 @@ function line_draw_begin() {
 	line_draw_lines = 0;
 	line_draw_vb_data = gpu_lock_vertex_buffer(line_draw_vertex_buffer);
 	line_draw_ib_data = gpu_lock_index_buffer(line_draw_index_buffer);
+	for (let i: i32 = 0; i < line_draw_max_indices; ++i) {
+		line_draw_ib_data[i] = 0;
+	}
 }
 
 function line_draw_end(overlay: bool = false) {
@@ -243,9 +246,7 @@ function line_draw_end(overlay: bool = false) {
 		color_get_gb(line_draw_color) / 255,
 		color_get_bb(line_draw_color) / 255
 	);
-	////
-	// gpu_draw(0, line_draw_lines * 6);
-	////
+	gpu_draw();
 }
 
 let _shape_draw_sphere_vb: gpu_buffer_t = null;
