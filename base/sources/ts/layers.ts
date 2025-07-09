@@ -265,7 +265,7 @@ function layers_apply_mask(l: slot_layer_t, m: slot_layer_t) {
 	gpu_end();
 }
 
-function layers_commands_merge_pack(pipe: gpu_pipeline_t, i0: gpu_texture_t, i1: gpu_texture_t, i1pack: gpu_texture_t, i1mask_opacity: f32, i1texmask: gpu_texture_t, i1blending: i32 = -1) {
+function layers_commands_merge_pack(pipe: gpu_pipeline_t, i0: gpu_texture_t, i1: gpu_texture_t, i1pack: gpu_texture_t, i1mask_opacity: f32, i1texmask: gpu_texture_t, i1blending: i32 = 101) {
 	_gpu_begin(i0);
 	gpu_set_pipeline(pipe);
 	gpu_set_texture(pipes_tex0, i1);
@@ -792,7 +792,7 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 
 			if (l1.paint_occ || l1.paint_rough || l1.paint_met || l1.paint_height) {
 				if (l1.paint_occ && l1.paint_rough && l1.paint_met && l1.paint_height) {
-					layers_commands_merge_pack(pipes_merge, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask, l1.paint_height_blend ? -3 : -1);
+					layers_commands_merge_pack(pipes_merge, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask, l1.paint_height_blend ? 103 : 101);
 				}
 				else {
 					if (l1.paint_occ) {

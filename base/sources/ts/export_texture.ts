@@ -289,7 +289,7 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 			draw_end();
 
 			if (l1.paint_occ && l1.paint_rough && l1.paint_met && l1.paint_height) {
-				layers_commands_merge_pack(pipes_merge, layers_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask, l1.paint_height_blend ? -3 : -1);
+				layers_commands_merge_pack(pipes_merge, layers_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask, l1.paint_height_blend ? 103 : 101);
 			}
 			else {
 				if (l1.paint_occ) layers_commands_merge_pack(pipes_merge_r, layers_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
@@ -299,15 +299,6 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 		}
 	}
 
-	///if arm_metal
-	// Flush command list
-	draw_begin(layers_expa);
-	draw_end();
-	draw_begin(layers_expb);
-	draw_end();
-	draw_begin(layers_expc);
-	draw_end();
-	///end
 	///end
 
 	let texpaint: gpu_texture_t = layers_expa;
