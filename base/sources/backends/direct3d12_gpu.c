@@ -983,8 +983,6 @@ void gpu_texture_destroy(gpu_texture_t *render_target) {
 	}
 }
 
-void gpu_texture_generate_mipmaps(gpu_texture_t *texture, int levels) {}
-
 void gpu_texture_set_mipmap(gpu_texture_t *texture, gpu_texture_t *mipmap, int level) {}
 
 void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format) {

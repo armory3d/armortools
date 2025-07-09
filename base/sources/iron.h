@@ -934,7 +934,7 @@ u32_array_t *gpu_lock_index_buffer(gpu_buffer_t *buffer) {
 	return ar;
 }
 
-any gpu_create_vertex_buffer(i32 count, gpu_vertex_structure_t *structure, i32 usage) {
+any gpu_create_vertex_buffer(i32 count, gpu_vertex_structure_t *structure) {
 	gpu_buffer_t *buffer = (gpu_buffer_t *)malloc(sizeof(gpu_buffer_t));
 	gpu_vertex_buffer_init(buffer, count, structure);
 	return buffer;
@@ -1156,13 +1156,13 @@ bool _load_image(iron_file_reader_t *reader, const char *filename, unsigned char
 	return success;
 }
 
-gpu_texture_t *gpu_create_texture_from_encoded_bytes(buffer_t *data, string_t *format, bool readable);
+gpu_texture_t *gpu_create_texture_from_encoded_bytes(buffer_t *data, string_t *format);
 
-gpu_texture_t *iron_load_image(string_t *file, bool readable) {
+gpu_texture_t *iron_load_image(string_t *file) {
 	#ifdef WITH_EMBED
 	buffer_t *b = embed_get(file);
 	if (b != NULL) {
-		gpu_texture_t *texture = gpu_create_texture_from_encoded_bytes(b, ".k", readable);
+		gpu_texture_t *texture = gpu_create_texture_from_encoded_bytes(b, ".k");
 		return texture;
 	}
 	#endif
@@ -1182,9 +1182,7 @@ gpu_texture_t *iron_load_image(string_t *file, bool readable) {
 
 	gpu_texture_t *texture = (gpu_texture_t *)malloc(sizeof(gpu_texture_t));
 	gpu_texture_init_from_bytes(texture, image_data, image_width, image_height, image_format);
-	if (!readable) {
-		free(image_data);
-	}
+	free(image_data);
 
 	return texture;
 }
@@ -1270,22 +1268,14 @@ gpu_texture_t *gpu_create_render_target(i32 width, i32 height, i32 format) {
 	return render_target;
 }
 
-gpu_texture_t *gpu_create_texture_from_bytes(buffer_t *data, i32 width, i32 height, i32 format, bool readable) {
+gpu_texture_t *gpu_create_texture_from_bytes(buffer_t *data, i32 width, i32 height, i32 format) {
 	gpu_texture_t *texture = (gpu_texture_t *)malloc(sizeof(gpu_texture_t));
 	texture->buffer = NULL;
-	void *image_data;
-	if (readable) {
-		image_data = malloc(data->length);
-		memcpy(image_data, data->buffer, data->length);
-	}
-	else {
-		image_data = data->buffer;
-	}
-	gpu_texture_init_from_bytes(texture, image_data, width, height, (gpu_texture_format_t)format);
+	gpu_texture_init_from_bytes(texture, data->buffer, width, height, (gpu_texture_format_t)format);
 	return texture;
 }
 
-gpu_texture_t *gpu_create_texture_from_encoded_bytes(buffer_t *data, string_t *format, bool readable) {
+gpu_texture_t *gpu_create_texture_from_encoded_bytes(buffer_t *data, string_t *format) {
 	gpu_texture_t *texture = (gpu_texture_t *)malloc(sizeof(gpu_texture_t));
 	texture->buffer = NULL;
 
@@ -1331,9 +1321,7 @@ gpu_texture_t *gpu_create_texture_from_encoded_bytes(buffer_t *data, string_t *f
 	}
 
 	gpu_texture_init_from_bytes(texture, image_data, image_width, image_height, image_format);
-	if (!readable) {
-		free(image_data);;
-	}
+	free(image_data);;
 
 	return texture;
 }

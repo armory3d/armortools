@@ -1908,8 +1908,6 @@ void gpu_texture_destroy(gpu_texture_t *target) {
 	}
 }
 
-void gpu_texture_generate_mipmaps(gpu_texture_t *texture, int levels) {}
-
 void gpu_texture_set_mipmap(gpu_texture_t *texture, gpu_texture_t *mipmap, int level) {
 	// VkBuffer staging_buffer;
 	// VkDeviceMemory staging_buffer_mem;

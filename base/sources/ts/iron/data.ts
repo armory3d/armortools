@@ -109,13 +109,13 @@ function data_get_blob(file: string): buffer_t {
 	return b;
 }
 
-function data_get_image(file: string, readable: bool = false): gpu_texture_t {
+function data_get_image(file: string): gpu_texture_t {
 	let cached: gpu_texture_t = map_get(data_cached_images, file);
 	if (cached != null) {
 		return cached;
 	}
 
-	let image_: any = iron_load_image(data_resolve_path(file), readable);
+	let image_: any = iron_load_image(data_resolve_path(file));
 	if (image_ == null) {
 		return null;
 	}

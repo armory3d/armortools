@@ -59,7 +59,7 @@ function line_draw_init() {
 		line_draw_vp_loc = pipes_get_constant_location("mat4");
 		line_draw_color_loc = pipes_get_constant_location("vec3");
 		line_draw_vp = mat4_identity();
-		line_draw_vertex_buffer = gpu_create_vertex_buffer(line_draw_max_vertices, structure, usage_t.DYNAMIC);
+		line_draw_vertex_buffer = gpu_create_vertex_buffer(line_draw_max_vertices, structure);
 		line_draw_index_buffer = gpu_create_index_buffer(line_draw_max_indices);
 	}
 	if (line_draw_overlay_pipeline == null) {
@@ -262,7 +262,7 @@ function shape_draw_sphere(mat: mat4_t) {
 		let posa: i16_array_t = md.vertex_arrays[0].values;
 		let structure: gpu_vertex_structure_t = gpu_vertex_struct_create();
 		gpu_vertex_struct_add(structure, "pos", vertex_data_t.F32_3X);
-		_shape_draw_sphere_vb = gpu_create_vertex_buffer(posa.length, structure, usage_t.STATIC);
+		_shape_draw_sphere_vb = gpu_create_vertex_buffer(posa.length, structure);
 		let data: buffer_t = gpu_lock_vertex_buffer(_shape_draw_sphere_vb);
 		for (let i: i32 = 0; i < posa.length / 4; ++i) {
 			buffer_set_f32(data, (i * 3 + 0) * 4, posa[i * 4 + 0] / 32767);

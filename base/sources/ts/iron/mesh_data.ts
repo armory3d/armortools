@@ -198,7 +198,7 @@ function mesh_data_get(raw: mesh_data_t, vs: vertex_element_t[]): gpu_buffer_t {
 		let cols: vertex_array_t = mesh_data_get_vertex_array(raw, "col");
 		let vstruct: gpu_vertex_structure_t = mesh_data_get_vertex_struct(vertex_arrays);
 		let size: i32 = mesh_data_get_vertex_size(positions.data);
-		vb = gpu_create_vertex_buffer(math_floor(positions.values.length / size), vstruct, usage_t.STATIC);
+		vb = gpu_create_vertex_buffer(math_floor(positions.values.length / size), vstruct);
 		raw._.vertices = gpu_lock_vertex_buffer(vb);
 		mesh_data_build_vertices(raw._.vertices, vertex_arrays, 0, has_tex && uvs == null, tex_offset);
 		gpu_vertex_buffer_unlock(vb);
@@ -220,7 +220,7 @@ function mesh_data_build(raw: mesh_data_t) {
 
 	let positions: vertex_array_t = mesh_data_get_vertex_array(raw, "pos");
 	let size: i32 = mesh_data_get_vertex_size(positions.data);
-	raw._.vertex_buffer = gpu_create_vertex_buffer(math_floor(positions.values.length / size), raw._.structure, usage_t.STATIC);
+	raw._.vertex_buffer = gpu_create_vertex_buffer(math_floor(positions.values.length / size), raw._.structure);
 	raw._.vertices = gpu_lock_vertex_buffer(raw._.vertex_buffer);
 	mesh_data_build_vertices(raw._.vertices, raw.vertex_arrays);
 	gpu_vertex_buffer_unlock(raw._.vertex_buffer);

@@ -2339,13 +2339,13 @@ class AssetConverter {
 					else {
 						images = self.exporter.copy_image(file, export_info.destination, globalThis.flags.embed && !options.noembed);
 					}
-					parsed_files.push({ name: export_info.name, from: file, type: 'image', files: images, original_width: options.original_width, original_height: options.original_height, readable: options.readable, noembed: options.noembed });
+					parsed_files.push({ name: export_info.name, from: file, type: 'image', files: images, original_width: options.original_width, original_height: options.original_height, noembed: options.noembed });
 					break;
 				}
 				default: {
 					let export_info = AssetConverter.create_export_info(file, true, options, ".");
 					let blobs = self.exporter.copy_blob(file, export_info.destination, globalThis.flags.embed && !options.noembed);
-					parsed_files.push({ name: export_info.name, from: file, type: 'blob', files: blobs, original_width: undefined, original_height: undefined, readable: undefined, noembed: options.noembed });
+					parsed_files.push({ name: export_info.name, from: file, type: 'blob', files: blobs, original_width: undefined, original_height: undefined, noembed: options.noembed });
 					break;
 				}
 			}

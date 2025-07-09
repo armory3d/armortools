@@ -216,7 +216,7 @@ declare function gpu_delete_index_buffer(buffer: any): void;
 declare function gpu_lock_index_buffer(buffer: any): u32_array_t;
 declare function gpu_index_buffer_unlock(buffer: any): void;
 declare function gpu_set_index_buffer(buffer: any): void;
-declare function gpu_create_vertex_buffer(count: i32, structure: gpu_vertex_structure_t, usage: i32): any;
+declare function gpu_create_vertex_buffer(count: i32, structure: gpu_vertex_structure_t): any;
 declare function gpu_delete_vertex_buffer(buffer: any): void;
 declare function gpu_lock_vertex_buffer(buffer: any): buffer_t;
 declare function gpu_vertex_buffer_unlock(buffer: any): void;
@@ -229,7 +229,7 @@ declare function gpu_create_pipeline(): any;
 declare function gpu_delete_pipeline(pipeline: any): void;
 declare function gpu_pipeline_compile(pipeline: any): void;
 declare function gpu_set_pipeline(pipeline: any): void;
-declare function iron_load_image(file: string, readable: bool): any;
+declare function iron_load_image(file: string): any;
 declare function iron_unload_image(image: gpu_texture_t): void;
 declare function iron_load_sound(file: string): any;
 declare function iron_a1_sound_destroy(sound: any): void;
@@ -271,10 +271,9 @@ declare function iron_display_frequency(index: i32): i32;
 declare function iron_display_is_primary(index: i32): bool;
 
 declare function gpu_create_render_target(width: i32, height: i32, format: i32 = tex_format_t.RGBA32): any;
-declare function gpu_create_texture_from_bytes(data: buffer_t, width: i32, height: i32, format: i32 = tex_format_t.RGBA32, readable: bool = true): any;
-declare function gpu_create_texture_from_encoded_bytes(data: buffer_t, format: string, readable: bool = false): any;
+declare function gpu_create_texture_from_bytes(data: buffer_t, width: i32, height: i32, format: i32 = tex_format_t.RGBA32): any;
+declare function gpu_create_texture_from_encoded_bytes(data: buffer_t, format: string): any;
 declare function gpu_get_texture_pixels(texture: any): buffer_t;
-declare function gpu_texture_generate_mipmaps(texture: any, levels: i32): void;
 declare function gpu_set_mipmaps(texture: any, mipmaps: gpu_texture_t[]): void;
 declare function gpu_viewport(x: i32, y: i32, width: i32, height: i32): void;
 declare function gpu_scissor(x: i32, y: i32, width: i32, height: i32): void;
@@ -637,12 +636,6 @@ enum clear_flag_t {
 	NONE = 0,
 	COLOR = 1,
 	DEPTH = 2,
-}
-
-enum usage_t {
-	STATIC,
-	DYNAMIC,
-	READABLE,
 }
 
 enum tex_format_t {

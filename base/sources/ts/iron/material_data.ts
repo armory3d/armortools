@@ -79,7 +79,7 @@ function material_context_create(raw: material_context_t): material_context_t {
 				continue;
 			}
 
-			let image: gpu_texture_t = data_get_image(tex.file, false);
+			let image: gpu_texture_t = data_get_image(tex.file);
 			array_push(raw._.textures, image);
 
 			// Set mipmaps
@@ -100,7 +100,7 @@ function material_context_create(raw: material_context_t): material_context_t {
 				tex.generate_mipmaps = false;
 			}
 			else if (tex.generate_mipmaps == true && image != null) {
-				gpu_texture_generate_mipmaps(image, 1000);
+				// gpu_texture_generate_mipmaps(image, 1000);
 				tex.mipmaps = null;
 				tex.generate_mipmaps = false;
 			}

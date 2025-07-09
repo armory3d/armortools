@@ -160,11 +160,7 @@ int gpu_index_buffer_count(gpu_buffer_t *buffer) {
 }
 
 void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, gpu_texture_format_t format) {}
-void gpu_texture_init_from_encoded_data(gpu_texture_t *texture, void *data, int size, const char *format, bool readable) {}
-void gpu_texture_init_from_data(gpu_texture_t *texture, void *data, int width, int height, int format, bool readable) {}
 void gpu_texture_destroy(gpu_texture_t *texture) {}
-
-void gpu_texture_generate_mipmaps(gpu_texture_t *texture, int levels) {}
 void gpu_texture_set_mipmap(gpu_texture_t *texture, gpu_texture_t *mipmap, int level) {}
 
 void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format) {

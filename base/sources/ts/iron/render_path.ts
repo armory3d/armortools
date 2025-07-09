@@ -124,11 +124,6 @@ function render_path_set_viewport(view_w: i32, view_h: i32) {
 	render_path_set_current_scissor(view_w, view_h);
 }
 
-function render_path_gen_mipmaps(target: string) {
-	let rt: render_target_t = map_get(render_path_render_targets, target);
-	gpu_texture_generate_mipmaps(rt._image, 1000);
-}
-
 function _render_path_sort_dist(a: any_ptr, b: any_ptr): i32 {
 	let ma: mesh_object_t = DEREFERENCE(a);
 	let mb: mesh_object_t = DEREFERENCE(b);
