@@ -181,12 +181,6 @@ function export_arm_run_project() {
 	draw_scaled_image(tex, -(256 * r - 256) / 2, 0, 256 * r, 256);
 	draw_end();
 
-	///if arm_metal
-	// Flush command list
-	draw_begin(mesh_icon);
-	draw_end();
-	///end
-
 	let mesh_icon_pixels: buffer_t = gpu_get_texture_pixels(mesh_icon);
 	let u8a: u8_array_t = mesh_icon_pixels;
 	for (let i: i32 = 0; i < 256 * 256 * 4; ++i) {

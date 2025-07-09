@@ -370,7 +370,7 @@ function util_render_make_brush_preview() {
 	draw_set_pipeline(null);
 	draw_end();
 
-	// Scale image preview down to to icon
+	// Scale image preview down to icon
 	let texpreview: render_target_t = map_get(render_path_render_targets, "texpreview");
 	texpreview._image = context_raw.brush.image;
 	let texpreview_icon: render_target_t = map_get(render_path_render_targets, "texpreview_icon");
@@ -424,10 +424,7 @@ function util_render_pick_pos_nor_tex() {
 		render_path_paint_set_plane_mesh();
 	}
 	render_path_paint_commands_paint(false);
-	///if arm_metal
-	// Flush command list
-	render_path_paint_commands_paint(false);
-	///end
+
 	if (context_raw.paint2d) {
 		render_path_paint_restore_plane_mesh();
 	}

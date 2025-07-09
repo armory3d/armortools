@@ -104,7 +104,7 @@ function render_path_preview_commands_preview() {
 
 	render_path_set_target("texpreview_icon");
 	render_path_bind_target("texpreview", "tex");
-	render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolve");
+	render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolveRGBA64");
 }
 
 function render_path_preview_commands_decal() {

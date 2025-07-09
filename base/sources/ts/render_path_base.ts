@@ -119,7 +119,7 @@ function render_path_base_is_cached(): bool {
 			render_path_set_target("");
 			render_path_bind_target("last", "tex");
 			if (render_path_base_ssaa4()) {
-				render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolve");
+				render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolveRGBA64");
 			}
 			else {
 				render_path_draw_shader("shader_datas/copy_pass/copy_pass");
@@ -329,7 +329,7 @@ function render_path_base_draw_taa(bufa: string, bufb: string) {
 	render_path_bind_target(bufb, "tex");
 
 	if (render_path_base_ssaa4()) {
-		render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolve");
+		render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolveRGBA64");
 	}
 	else {
 		render_path_draw_shader("shader_datas/copy_pass/copy_pass");

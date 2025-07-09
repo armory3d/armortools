@@ -113,6 +113,7 @@ function render_path_deferred_init() {
 	render_path_load_shader("shader_datas/copy_pass/copyR8_pass");
 	render_path_load_shader("shader_datas/taa_pass/taa_pass");
 	render_path_load_shader("shader_datas/supersample_resolve/supersample_resolve");
+	render_path_load_shader("shader_datas/supersample_resolve/supersample_resolveRGBA64");
 
 	render_path_paint_init();
 
