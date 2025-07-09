@@ -421,7 +421,6 @@ void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_t
 	target->impl.format = convert_image_format(format);
 	target->impl.stage = 0;
 	target->impl.readback_buffer_created = false;
-	target->uploaded = true;
 	target->state = (framebuffer_index >= 0) ? GPU_TEXTURE_STATE_PRESENT : GPU_TEXTURE_STATE_SHADER_RESOURCE;
 
 	if (framebuffer_index >= 0) {
@@ -1333,9 +1332,6 @@ void gpu_set_index_buffer(gpu_buffer_t *buffer) {
 	vkCmdBindIndexBuffer(command_buffer, buffer->impl.buf, 0, VK_INDEX_TYPE_UINT32);
 }
 
-void gpu_upload_texture(gpu_texture_t *texture) {
-}
-
 void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	if (gpu_in_use) {
 		vkCmdEndRendering(command_buffer);
@@ -1826,7 +1822,6 @@ static void update_stride(gpu_texture_t *texture) {
 void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, gpu_texture_format_t format) {
 	texture->width = width;
 	texture->height = height;
-	texture->uploaded = false;
 	texture->format = format;
 	texture->data = data;
 	texture->impl.stage = 0;
@@ -1903,45 +1898,6 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	vkCreateImageView(device, &view, NULL, &texture->impl.view);
 }
 
-void gpu_texture_init(gpu_texture_t *texture, int width, int height, gpu_texture_format_t format) {
-	texture->width = width;
-	texture->height = height;
-	texture->uploaded = true;
-	texture->format = format;
-	texture->data = NULL;
-	texture->impl.stage = 0;
-	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
-
-	VkFormat tex_format = convert_image_format(format);
-	VkFormatProperties props;
-	vkGetPhysicalDeviceFormatProperties(gpu, tex_format, &props);
-
-	prepare_texture_image(NULL, (uint32_t)width, (uint32_t)height, &texture->impl, VK_IMAGE_TILING_LINEAR,
-						  VK_IMAGE_USAGE_SAMPLED_BIT /*| VK_IMAGE_USAGE_STORAGE_BIT*/, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &texture->impl.deviceSize, tex_format);
-
-	update_stride(texture);
-
-	VkImageViewCreateInfo view = {
-		.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-		.pNext = NULL,
-		.viewType = VK_IMAGE_VIEW_TYPE_2D,
-		.format = tex_format,
-		.components.r = VK_COMPONENT_SWIZZLE_R,
-		.components.g = VK_COMPONENT_SWIZZLE_G,
-		.components.b = VK_COMPONENT_SWIZZLE_B,
-		.components.a = VK_COMPONENT_SWIZZLE_A,
-		.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-		.subresourceRange.baseMipLevel = 0,
-		.subresourceRange.levelCount = 1,
-		.subresourceRange.baseArrayLayer = 0,
-		.subresourceRange.layerCount = 1,
-		.flags = 0,
-		.image = texture->impl.image,
-	};
-
-	vkCreateImageView(device, &view, NULL, &texture->impl.view);
-}
-
 void gpu_texture_destroy(gpu_texture_t *target) {
 	if (target->impl.image != NULL) {
 		vkDestroyImage(device, target->impl.image, NULL);
@@ -1950,10 +1906,6 @@ void gpu_texture_destroy(gpu_texture_t *target) {
 	if (target->impl.view != NULL) {
 		vkDestroyImageView(device, target->impl.view, NULL);
 	}
-}
-
-int gpu_texture_stride(gpu_texture_t *texture) {
-	return texture->impl.stride;
 }
 
 void gpu_texture_generate_mipmaps(gpu_texture_t *texture, int levels) {}
@@ -2019,8 +1971,6 @@ void gpu_texture_set_mipmap(gpu_texture_t *texture, gpu_texture_t *mipmap, int l
 
 	// vkFreeMemory(device, staging_buffer_mem, NULL);
 	// vkDestroyBuffer(device, staging_buffer, NULL);
-
-	// texture->uploaded = true;
 }
 
 void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format) {

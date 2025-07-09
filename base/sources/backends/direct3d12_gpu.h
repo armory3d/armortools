@@ -51,15 +51,11 @@ typedef struct {
 } gpu_shader_impl_t;
 
 typedef struct {
-	bool mipmap;
-	int stage;
-	int stride;
 	struct ID3D12Resource *image;
-	struct ID3D12Resource *upload_image;
-	struct ID3D12DescriptorHeap *srv_descriptor_heap;
-	struct ID3D12Resource *render_target;
 	struct ID3D12Resource *readback;
-	struct ID3D12DescriptorHeap *descriptor_heap;
+	struct ID3D12DescriptorHeap *srv_descriptor_heap;
+	struct ID3D12DescriptorHeap *rtv_descriptor_heap;
+	int stride;
 } gpu_texture_impl_t;
 
 typedef struct {

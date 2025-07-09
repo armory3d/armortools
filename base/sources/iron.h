@@ -2123,23 +2123,6 @@ void iron_raytrace_as_build(struct gpu_buffer *vb_full, gpu_buffer_t *ib_full) {
 }
 
 void iron_raytrace_set_textures(gpu_texture_t *tex0, gpu_texture_t *tex1, gpu_texture_t *tex2, gpu_texture_t *texenv, gpu_texture_t *texsobol, gpu_texture_t *texscramble, gpu_texture_t *texrank) {
-	if (!texenv->uploaded) {
-		gpu_upload_texture(texenv);
-		texenv->uploaded = true;
-	}
-	if (!texsobol->uploaded) {
-		gpu_upload_texture(texsobol);
-		texsobol->uploaded = true;
-	}
-	if (!texscramble->uploaded) {
-		gpu_upload_texture(texscramble);
-		texscramble->uploaded = true;
-	}
-	if (!texrank->uploaded) {
-		gpu_upload_texture(texrank);
-		texrank->uploaded = true;
-	}
-
 	gpu_raytrace_set_textures(tex0, tex1, tex2, texenv, texsobol, texscramble, texrank);
 }
 

@@ -148,7 +148,6 @@ void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_t
 	target->width = width;
 	target->height = height;
 	target->data = NULL;
-	target->uploaded = true;
 	target->state = GPU_TEXTURE_STATE_RENDER_TARGET;
 	target->impl._texReadback = NULL;
 
@@ -412,9 +411,6 @@ void gpu_set_index_buffer(gpu_buffer_t *buffer) {
 	current_index_buffer = buffer;
 }
 
-void gpu_upload_texture(gpu_texture_t *texture) {
-}
-
 void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	gpu_flush();
 
@@ -643,15 +639,18 @@ static void create_texture(gpu_texture_t *texture, int width, int height, int fo
 	texture->impl._tex = (__bridge_retained void *)[device newTextureWithDescriptor:descriptor];
 }
 
-void gpu_texture_init(gpu_texture_t *texture, int width, int height, gpu_texture_format_t format) {
-	texture->width = width;
-	texture->height = height;
-	texture->format = format;
-	texture->impl.data = malloc(width * height * (format == GPU_TEXTURE_FORMAT_R8 ? 1 : 4));
-	create_texture(texture, width, height, format, true);
-	texture->uploaded = true;
-	texture->data = NULL;
-	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
+int gpu_texture_stride(gpu_texture_t *texture) {
+	switch (texture->format) {
+	case GPU_TEXTURE_FORMAT_R8:
+		return texture->width;
+	case GPU_TEXTURE_FORMAT_RGBA32:
+	default:
+		return texture->width * 4;
+	case GPU_TEXTURE_FORMAT_RGBA64:
+		return texture->width * 8;
+	case GPU_TEXTURE_FORMAT_RGBA128:
+		return texture->width * 16;
+	}
 }
 
 void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, gpu_texture_format_t format) {
@@ -659,7 +658,6 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	texture->height = height;
 	texture->format = format;
 	texture->data = data;
-	texture->uploaded = false;
 	texture->impl.data = NULL;
 	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
 	create_texture(texture, width, height, format, true);
@@ -684,20 +682,6 @@ void gpu_texture_destroy(gpu_texture_t *target) {
 	if (target->impl.data != NULL) {
 		free(target->impl.data);
 		target->impl.data = NULL;
-	}
-}
-
-int gpu_texture_stride(gpu_texture_t *texture) {
-	switch (texture->format) {
-	case GPU_TEXTURE_FORMAT_R8:
-		return texture->width;
-	case GPU_TEXTURE_FORMAT_RGBA32:
-	default:
-		return texture->width * 4;
-	case GPU_TEXTURE_FORMAT_RGBA64:
-		return texture->width * 8;
-	case GPU_TEXTURE_FORMAT_RGBA128:
-		return texture->width * 16;
 	}
 }
 
@@ -759,7 +743,6 @@ void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_te
 	target->width = width;
 	target->height = height;
 	target->state = GPU_TEXTURE_STATE_RENDER_TARGET;
-	target->uploaded = true;
 }
 
 void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structure_t *structure) {

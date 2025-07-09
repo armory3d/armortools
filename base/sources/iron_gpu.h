@@ -83,7 +83,6 @@ typedef struct gpu_texture {
 	gpu_texture_format_t format;
 	gpu_texture_compression_t compression;
 	void *data;
-	bool uploaded;
 	gpu_texture_state_t state;
 	buffer_t *buffer;
 	gpu_texture_impl_t impl;
@@ -172,12 +171,10 @@ void gpu_set_matrix3(int location, iron_matrix3x3_t value);
 void gpu_set_matrix4(int location, iron_matrix4x4_t value);
 
 void gpu_vertex_structure_add(gpu_vertex_structure_t *structure, const char *name, gpu_vertex_data_t data);
-void gpu_texture_init(gpu_texture_t *texture, int width, int height, gpu_texture_format_t format);
 void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, gpu_texture_format_t format);
 void gpu_texture_destroy(gpu_texture_t *texture);
 void gpu_texture_generate_mipmaps(gpu_texture_t *texture, int levels);
 void gpu_texture_set_mipmap(gpu_texture_t *texture, gpu_texture_t *mipmap, int level);
-int gpu_texture_stride(gpu_texture_t *texture);
 void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format);
 void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height, gpu_texture_format_t format, int framebuffer_index);
 void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structure_t *structure);
@@ -210,7 +207,6 @@ void gpu_disable_scissor();
 void gpu_set_pipeline(gpu_pipeline_t *pipeline);
 void gpu_set_vertex_buffer(gpu_buffer_t *buffer);
 void gpu_set_index_buffer(gpu_buffer_t *buffer);
-void gpu_upload_texture(gpu_texture_t *texture);
 void gpu_set_constant_buffer(gpu_buffer_t *buffer, int offset, size_t size);
 void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data);
 void gpu_set_texture(int unit, gpu_texture_t *texture);

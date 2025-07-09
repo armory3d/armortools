@@ -1,5 +1,5 @@
 #define WIN32_LEAN_AND_MEAN
-#define HEAP_SIZE 1024
+#define HEAP_SIZE 2048
 #define TEXTURE_COUNT 16
 #include <iron_global.h>
 #include <stdbool.h>
@@ -138,20 +138,12 @@ static void wait_for_fence(ID3D12Fence *fence, UINT64 completion_value, HANDLE w
 	}
 }
 
-static UINT64 get_footprint(ID3D12Resource *destinationResource, UINT FirstSubresource, UINT NumSubresources) {
-	D3D12_RESOURCE_DESC desc;
-	destinationResource->lpVtbl->GetDesc(destinationResource, &desc);
-	UINT64 required_size = 0;
-	device->lpVtbl->GetCopyableFootprints(device, &desc, FirstSubresource, NumSubresources, 0, NULL, NULL, NULL, &required_size);
-	return required_size;
-}
-
 void gpu_barrier(gpu_texture_t *render_target, gpu_texture_state_t state_after) {
 	if (render_target->state == state_after) {
 		return;
 	}
 	D3D12_RESOURCE_BARRIER barrier = {
-		.Transition.pResource = render_target->impl.render_target,
+		.Transition.pResource = render_target->impl.image,
 		.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
 		.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE,
 		.Transition.StateBefore = convert_texture_state(render_target->state),
@@ -184,12 +176,8 @@ void gpu_destroy() {
 void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height, gpu_texture_format_t format, int framebuffer_index) {
 	render_target->width = width;
 	render_target->height = height;
-	render_target->impl.stage = 0;
 	render_target->impl.readback = NULL;
-	render_target->impl.image = NULL;
-	render_target->impl.upload_image = NULL;
 	render_target->data = NULL;
-	render_target->uploaded = true;
 	render_target->state = (framebuffer_index >= 0) ? GPU_TEXTURE_STATE_PRESENT : GPU_TEXTURE_STATE_SHADER_RESOURCE;
 
 	DXGI_FORMAT dxgi_format = convert_format(format);
@@ -229,19 +217,19 @@ void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height
 		.Type = format == GPU_TEXTURE_FORMAT_D32 ? D3D12_DESCRIPTOR_HEAP_TYPE_DSV : D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
 		.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
 	};
-	device->lpVtbl->CreateDescriptorHeap(device, &heap_desc, &IID_ID3D12DescriptorHeap, &render_target->impl.descriptor_heap);
+	device->lpVtbl->CreateDescriptorHeap(device, &heap_desc, &IID_ID3D12DescriptorHeap, &render_target->impl.rtv_descriptor_heap);
 
 	if (framebuffer_index >= 0) {
-		window_swapchain->lpVtbl->GetBuffer(window_swapchain, framebuffer_index, &IID_ID3D12Resource, &render_target->impl.render_target);
+		window_swapchain->lpVtbl->GetBuffer(window_swapchain, framebuffer_index, &IID_ID3D12Resource, &render_target->impl.image);
 	}
 	else {
 		HRESULT result = device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-														 		 &clear_value, &IID_ID3D12Resource, &render_target->impl.render_target);
+														 		 &clear_value, &IID_ID3D12Resource, &render_target->impl.image);
 		if (result != S_OK) {
 			for (int i = 0; i < 10; ++i) {
 				iron_memory_emergency();
 				result = device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-														 		 &clear_value, &IID_ID3D12Resource, &render_target->impl.render_target);
+														 		 &clear_value, &IID_ID3D12Resource, &render_target->impl.image);
 				if (result == S_OK) {
 					break;
 				}
@@ -257,13 +245,13 @@ void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height
 	};
 
 	D3D12_CPU_DESCRIPTOR_HANDLE handle;
-	render_target->impl.descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(render_target->impl.descriptor_heap, &handle);
+	render_target->impl.rtv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(render_target->impl.rtv_descriptor_heap, &handle);
 
 	if (format == GPU_TEXTURE_FORMAT_D32) {
-		device->lpVtbl->CreateDepthStencilView(device, render_target->impl.render_target, NULL, handle);
+		device->lpVtbl->CreateDepthStencilView(device, render_target->impl.image, NULL, handle);
 	}
 	else {
-		device->lpVtbl->CreateRenderTargetView(device, render_target->impl.render_target, &view_desc, handle);
+		device->lpVtbl->CreateRenderTargetView(device, render_target->impl.image, &view_desc, handle);
 	}
 
 	D3D12_DESCRIPTOR_HEAP_DESC descriptor_heap_desc = {
@@ -285,7 +273,7 @@ void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height
 	};
 
 	render_target->impl.srv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(render_target->impl.srv_descriptor_heap, &handle);
-	device->lpVtbl->CreateShaderResourceView(device, render_target->impl.render_target, &srv_desc, handle);
+	device->lpVtbl->CreateShaderResourceView(device, render_target->impl.image, &srv_desc, handle);
 }
 
 void gpu_init_internal(int depth_buffer_bits, bool vsync) {
@@ -393,14 +381,14 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t *depth
 
 	D3D12_CPU_DESCRIPTOR_HANDLE target_descriptors[16];
 	for (int i = 0; i < current_render_targets_count; ++i) {
-		current_render_targets[i]->impl.descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(current_render_targets[i]->impl.descriptor_heap, &target_descriptors[i]);
+		current_render_targets[i]->impl.rtv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(current_render_targets[i]->impl.rtv_descriptor_heap, &target_descriptors[i]);
 	}
 
 	gpu_texture_t *target = current_render_targets[0];
 
 	if (depth_buffer != NULL) {
 		D3D12_CPU_DESCRIPTOR_HANDLE depth_handle;
-		depth_buffer->impl.descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(depth_buffer->impl.descriptor_heap, &depth_handle);
+		depth_buffer->impl.rtv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(depth_buffer->impl.rtv_descriptor_heap, &depth_handle);
 		command_list->lpVtbl->OMSetRenderTargets(command_list, current_render_targets_count, &target_descriptors[0], false, &depth_handle);
 	}
 	else {
@@ -417,12 +405,12 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t *depth
 							  ((color & 0xff000000) >> 24) / 255.0f};
 
 		D3D12_CPU_DESCRIPTOR_HANDLE handle;
-		target->impl.descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(target->impl.descriptor_heap, &handle);
+		target->impl.rtv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(target->impl.rtv_descriptor_heap, &handle);
 		command_list->lpVtbl->ClearRenderTargetView(command_list, handle, clearColor, 0, NULL);
 	}
 	if (flags & GPU_CLEAR_DEPTH && depth_buffer != NULL) {
 		D3D12_CPU_DESCRIPTOR_HANDLE handle;
-		depth_buffer->impl.descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(depth_buffer->impl.descriptor_heap, &handle);
+		depth_buffer->impl.rtv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(depth_buffer->impl.rtv_descriptor_heap, &handle);
 		command_list->lpVtbl->ClearDepthStencilView(command_list, handle, D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0, NULL);
 	}
 }
@@ -527,26 +515,15 @@ void gpu_internal_set_textures() {
 	gpu_base.ptr += srv_heap_index * srv_step;
 
 	for (int i = 0; i < TEXTURE_COUNT; ++i) {
-		gpu_texture_t *texture = current_textures[i];
-		if (!texture) {
-			continue;
+		if (current_textures[i] != NULL) {
+			D3D12_CPU_DESCRIPTOR_HANDLE source_cpu;
+			ID3D12DescriptorHeap *source_heap =  current_textures[i]->impl.srv_descriptor_heap;
+			source_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(source_heap, &source_cpu);
+
+			device->lpVtbl->CopyDescriptorsSimple(device, 1, cpu_base, source_cpu, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			cpu_base.ptr += srv_step;
+			srv_heap_index++;
 		}
-
-		D3D12_CPU_DESCRIPTOR_HANDLE source_cpu;
-		ID3D12DescriptorHeap *source_heap = texture->impl.srv_descriptor_heap;
-		source_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(source_heap, &source_cpu);
-
-		device->lpVtbl->CopyDescriptorsSimple(device, 1, cpu_base, source_cpu, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		cpu_base.ptr += srv_step;
-		srv_heap_index++;
-	}
-
-	for (int i = 0; i < TEXTURE_COUNT; ++i) {
-		if (!current_textures[i]) {
-			continue;
-		}
-		current_textures[i]->impl.stage = 0;
-		current_textures[i] = NULL;
 	}
 
 	ID3D12DescriptorHeap *heaps[] = {srv_heap};
@@ -615,56 +592,9 @@ void gpu_set_index_buffer(gpu_buffer_t *buffer) {
 	command_list->lpVtbl->IASetIndexBuffer(command_list, (D3D12_INDEX_BUFFER_VIEW *)&buffer->impl.index_buffer_view);
 }
 
-void gpu_upload_texture(gpu_texture_t *texture) {
-	if (texture->uploaded) {
-		return;
-	}
-	D3D12_RESOURCE_BARRIER barrier = {
-		.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
-		.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE,
-		.Transition.pResource = texture->impl.image,
-		.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-		.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST,
-		.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
-	};
-	command_list->lpVtbl->ResourceBarrier(command_list, 1, &barrier);
-
-	D3D12_RESOURCE_DESC Desc;
-	texture->impl.image->lpVtbl->GetDesc(texture->impl.image, &Desc);
-	ID3D12Device *device = NULL;
-	texture->impl.image->lpVtbl->GetDevice(texture->impl.image, &IID_ID3D12Device, &device);
-	D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint;
-	device->lpVtbl->GetCopyableFootprints(device, &Desc, 0, 1, 0, &footprint, NULL, NULL, NULL);
-
-	D3D12_TEXTURE_COPY_LOCATION source = {
-		.pResource = texture->impl.upload_image,
-		.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT,
-		.PlacedFootprint = footprint,
-	};
-
-	D3D12_TEXTURE_COPY_LOCATION destination = {
-		.pResource = texture->impl.image,
-		.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX,
-		.SubresourceIndex = 0,
-	};
-
-	command_list->lpVtbl->CopyTextureRegion(command_list, &destination, 0, 0, 0, &source, NULL);
-
-	barrier = (D3D12_RESOURCE_BARRIER){
-		.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
-		.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE,
-		.Transition.pResource = texture->impl.image,
-		.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST,
-		.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-		.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
-	};
-	command_list->lpVtbl->ResourceBarrier(command_list, 1, &barrier);
-	texture->uploaded = true;
-}
-
 void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	D3D12_RESOURCE_DESC desc;
-	render_target->impl.render_target->lpVtbl->GetDesc(render_target->impl.render_target, &desc);
+	render_target->impl.image->lpVtbl->GetDesc(render_target->impl.image, &desc);
 	DXGI_FORMAT dxgi_format = desc.Format;
 	int _format_size = format_size(dxgi_format);
 	int row_pitch = render_target->width * _format_size;
@@ -703,7 +633,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 
 	// Copy render target to readback buffer
 	D3D12_RESOURCE_BARRIER barrier = {
-		.Transition.pResource = render_target->impl.render_target,
+		.Transition.pResource = render_target->impl.image,
 		.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
 		.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE,
 		.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
@@ -713,7 +643,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	command_list->lpVtbl->ResourceBarrier(command_list, 1, &barrier);
 
 	D3D12_TEXTURE_COPY_LOCATION source = {
-		.pResource = render_target->impl.render_target,
+		.pResource = render_target->impl.image,
 		.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX,
 		.SubresourceIndex = 0,
 	};
@@ -732,7 +662,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	command_list->lpVtbl->CopyTextureRegion(command_list , &dest, 0, 0, 0, &source, NULL);
 
 	barrier = (D3D12_RESOURCE_BARRIER){
-		.Transition.pResource = render_target->impl.render_target,
+		.Transition.pResource = render_target->impl.image,
 		.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
 		.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE,
 		.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_SOURCE,
@@ -751,9 +681,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 }
 
 void gpu_set_texture(int unit, gpu_texture_t *texture) {
-	gpu_upload_texture(texture);
-	texture->impl.stage = unit;
-	current_textures[texture->impl.stage] = texture;
+	current_textures[unit] = texture;
 }
 
 void gpu_pipeline_init(gpu_pipeline_t *pipe) {
@@ -885,20 +813,15 @@ void gpu_shader_destroy(gpu_shader_t *shader) {
 
 void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, gpu_texture_format_t format) {
 	memset(&texture->impl, 0, sizeof(texture->impl));
-	texture->impl.stage = 0;
-	texture->impl.mipmap = true;
 	texture->width = width;
 	texture->height = height;
-	texture->uploaded = false;
 	texture->format = format;
 	texture->data = data;
 	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
-	texture->impl.render_target = NULL;
-
 	DXGI_FORMAT d3d_format = convert_format(format);
 	int _format_size = format_size(d3d_format);
 
-	D3D12_HEAP_PROPERTIES heapPropertiesDefault = {
+	D3D12_HEAP_PROPERTIES heap_properties = {
 		.Type = D3D12_HEAP_TYPE_DEFAULT,
 		.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
 		.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN,
@@ -906,7 +829,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 		.VisibleNodeMask = 1,
 	};
 
-	D3D12_RESOURCE_DESC resourceDescTex = {
+	D3D12_RESOURCE_DESC resource_desc = {
 		.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D,
 		.Alignment = 0,
 		.Width = texture->width,
@@ -920,13 +843,13 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 		.Flags = D3D12_RESOURCE_FLAG_NONE,
 	};
 
-	HRESULT result = device->lpVtbl->CreateCommittedResource(device, &heapPropertiesDefault, D3D12_HEAP_FLAG_NONE, &resourceDescTex,
+	HRESULT result = device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc,
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, NULL, &IID_ID3D12Resource, &texture->impl.image);
 
-		if (result != S_OK) {
+	if (result != S_OK) {
 		for (int i = 0; i < 10; ++i) {
 			iron_memory_emergency();
-			result = device->lpVtbl->CreateCommittedResource(device, &heapPropertiesDefault, D3D12_HEAP_FLAG_NONE, &resourceDescTex,
+			result = device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc,
 				D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, NULL, &IID_ID3D12Resource, &texture->impl.image);
 			if (result == S_OK) {
 				break;
@@ -934,7 +857,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 		}
 	}
 
-	D3D12_HEAP_PROPERTIES heapPropertiesUpload = {
+	D3D12_HEAP_PROPERTIES heap_properties_upload = {
 		.Type = D3D12_HEAP_TYPE_UPLOAD,
 		.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
 		.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN,
@@ -942,11 +865,14 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 		.VisibleNodeMask = 1,
 	};
 
-	const UINT64 uploadBufferSize = get_footprint(texture->impl.image, 0, 1);
-	D3D12_RESOURCE_DESC resourceDescBuffer = {
+	D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint;
+	UINT64 upload_buffer_size = 0;
+	device->lpVtbl->GetCopyableFootprints(device, &resource_desc, 0, 1, 0, &footprint, NULL, NULL, &upload_buffer_size);
+
+	D3D12_RESOURCE_DESC resource_desc_upload = {
 		.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER,
 		.Alignment = 0,
-		.Width = uploadBufferSize,
+		.Width = upload_buffer_size,
 		.Height = 1,
 		.DepthOrArraySize = 1,
 		.MipLevels = 1,
@@ -957,29 +883,30 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 		.Flags = D3D12_RESOURCE_FLAG_NONE,
 	};
 
-	result = device->lpVtbl->CreateCommittedResource(device, &heapPropertiesUpload, D3D12_HEAP_FLAG_NONE, &resourceDescBuffer,
-		D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &IID_ID3D12Resource, &texture->impl.upload_image);
+	struct ID3D12Resource *upload_image;
+
+	result = device->lpVtbl->CreateCommittedResource(device, &heap_properties_upload, D3D12_HEAP_FLAG_NONE, &resource_desc_upload,
+		D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &IID_ID3D12Resource, &upload_image);
 
 	if (result != S_OK) {
 		for (int i = 0; i < 10; ++i) {
 			iron_memory_emergency();
-			result = device->lpVtbl->CreateCommittedResource(device, &heapPropertiesUpload, D3D12_HEAP_FLAG_NONE, &resourceDescBuffer,
-				D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &IID_ID3D12Resource, &texture->impl.upload_image);
+			result = device->lpVtbl->CreateCommittedResource(device, &heap_properties_upload, D3D12_HEAP_FLAG_NONE, &resource_desc_upload,
+				D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &IID_ID3D12Resource, &upload_image);
 			if (result == S_OK) {
 				break;
 			}
 		}
 	}
 
-	texture->impl.stride = (int)ceilf(uploadBufferSize / (float)(height * D3D12_TEXTURE_DATA_PITCH_ALIGNMENT)) * D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
+	texture->impl.stride = (int)ceilf(upload_buffer_size / (float)(height * D3D12_TEXTURE_DATA_PITCH_ALIGNMENT)) * D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
 
 	BYTE *pixel;
-	texture->impl.upload_image->lpVtbl->Map(texture->impl.upload_image, 0, NULL, (void **)&pixel);
-	int pitch = gpu_texture_stride(texture);
+	upload_image->lpVtbl->Map(upload_image, 0, NULL, (void **)&pixel);
 	for (int y = 0; y < texture->height; ++y) {
-		memcpy(&pixel[y * pitch], &((uint8_t *)data)[y * texture->width * _format_size], texture->width * _format_size);
+		memcpy(&pixel[y * texture->impl.stride], &((uint8_t *)data)[y * texture->width * _format_size], texture->width * _format_size);
 	}
-	texture->impl.upload_image->lpVtbl->Unmap(texture->impl.upload_image, 0, NULL);
+	upload_image->lpVtbl->Unmap(upload_image, 0, NULL);
 
 	D3D12_DESCRIPTOR_HEAP_DESC descriptor_heap_desc = {
 		.NumDescriptors = 1,
@@ -1001,139 +928,59 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	D3D12_CPU_DESCRIPTOR_HANDLE handle;
 	texture->impl.srv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(texture->impl.srv_descriptor_heap, &handle);
 	device->lpVtbl->CreateShaderResourceView(device, texture->impl.image, &srv_desc, handle);
-}
 
-void gpu_texture_init(gpu_texture_t *texture, int width, int height, gpu_texture_format_t format) {
-	memset(&texture->impl, 0, sizeof(texture->impl));
-	texture->impl.stage = 0;
-	texture->impl.mipmap = true;
-	texture->width = width;
-	texture->height = height;
-	texture->data = NULL;
-	texture->impl.render_target = NULL;
+	D3D12_RESOURCE_BARRIER barrier = {
+		.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
+		.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE,
+		.Transition.pResource = texture->impl.image,
+		.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST,
+		.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
+	};
+	command_list->lpVtbl->ResourceBarrier(command_list, 1, &barrier);
 
-	DXGI_FORMAT d3d_format = convert_format(format);
-
-	D3D12_HEAP_PROPERTIES heapPropertiesDefault = {
-		.Type = D3D12_HEAP_TYPE_DEFAULT,
-		.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
-		.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN,
-		.CreationNodeMask = 1,
-		.VisibleNodeMask = 1,
+	D3D12_TEXTURE_COPY_LOCATION source = {
+		.pResource = upload_image,
+		.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT,
+		.PlacedFootprint = footprint,
 	};
 
-	D3D12_RESOURCE_DESC resourceDescTex = {
-		.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D,
-		.Alignment = 0,
-		.Width = texture->width,
-		.Height = texture->height,
-		.DepthOrArraySize = 1,
-		.MipLevels = 1,
-		.Format = d3d_format,
-		.SampleDesc.Count = 1,
-		.SampleDesc.Quality = 0,
-		.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN,
-		.Flags = D3D12_RESOURCE_FLAG_NONE,
+	D3D12_TEXTURE_COPY_LOCATION destination = {
+		.pResource = texture->impl.image,
+		.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX,
+		.SubresourceIndex = 0,
 	};
 
-	HRESULT result = device->lpVtbl->CreateCommittedResource(device, &heapPropertiesDefault, D3D12_HEAP_FLAG_NONE, &resourceDescTex,
-															 D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, NULL, &IID_ID3D12Resource, &texture->impl.image);
-	if (result != S_OK) {
-		for (int i = 0; i < 10; ++i) {
-			iron_memory_emergency();
-			result = device->lpVtbl->CreateCommittedResource(device, &heapPropertiesDefault, D3D12_HEAP_FLAG_NONE, &resourceDescTex,
-															 D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, NULL, &IID_ID3D12Resource, &texture->impl.image);
-			if (result == S_OK) {
-				break;
-			}
-		}
-	}
+	command_list->lpVtbl->CopyTextureRegion(command_list, &destination, 0, 0, 0, &source, NULL);
 
-	D3D12_HEAP_PROPERTIES heapPropertiesUpload = {
-		.Type = D3D12_HEAP_TYPE_UPLOAD,
-		.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
-		.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN,
-		.CreationNodeMask = 1,
-		.VisibleNodeMask = 1,
+	barrier = (D3D12_RESOURCE_BARRIER){
+		.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
+		.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE,
+		.Transition.pResource = texture->impl.image,
+		.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST,
+		.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
 	};
+	command_list->lpVtbl->ResourceBarrier(command_list, 1, &barrier);
 
-	const UINT64 uploadBufferSize = get_footprint(texture->impl.image, 0, 1);
-	D3D12_RESOURCE_DESC resourceDescBuffer = {
-		.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER,
-		.Alignment = 0,
-		.Width = uploadBufferSize,
-		.Height = 1,
-		.DepthOrArraySize = 1,
-		.MipLevels = 1,
-		.Format = DXGI_FORMAT_UNKNOWN,
-		.SampleDesc.Count = 1,
-		.SampleDesc.Quality = 0,
-		.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR,
-		.Flags = D3D12_RESOURCE_FLAG_NONE,
-	};
-
-	result = device->lpVtbl->CreateCommittedResource(device, &heapPropertiesUpload, D3D12_HEAP_FLAG_NONE, &resourceDescBuffer,
-													 D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &IID_ID3D12Resource, &texture->impl.upload_image);
-	if (result != S_OK) {
-		for (int i = 0; i < 10; ++i) {
-			iron_memory_emergency();
-			result = device->lpVtbl->CreateCommittedResource(device, &heapPropertiesUpload, D3D12_HEAP_FLAG_NONE, &resourceDescBuffer,
-															 D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &IID_ID3D12Resource, &texture->impl.upload_image);
-			if (result == S_OK) {
-				break;
-			}
-		}
-	}
-
-	texture->impl.stride = (int)ceilf(uploadBufferSize / (float)(height * D3D12_TEXTURE_DATA_PITCH_ALIGNMENT)) * D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
-
-	D3D12_DESCRIPTOR_HEAP_DESC descriptor_heap_desc = {
-		.NumDescriptors = 1,
-		.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-		.NodeMask = 0,
-		.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
-	};
-
-	device->lpVtbl->CreateDescriptorHeap(device, &descriptor_heap_desc, &IID_ID3D12DescriptorHeap, &texture->impl.srv_descriptor_heap);
-
-	D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {
-		.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D,
-		.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
-		.Format = d3d_format,
-		.Texture2D.MipLevels = 1,
-		.Texture2D.MostDetailedMip = 0,
-		.Texture2D.ResourceMinLODClamp = 0.0f,
-	};
-
-	D3D12_CPU_DESCRIPTOR_HANDLE handle;
-	texture->impl.srv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(texture->impl.srv_descriptor_heap, &handle);
-
-	device->lpVtbl->CreateShaderResourceView(device, texture->impl.image, &srv_desc, handle);
-
-
-	texture->uploaded = true;
-	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
-	texture->format = format;
+	// TODO:
+	gpu_flush();
+	upload_image->lpVtbl->Release(upload_image);
 }
 
 void gpu_texture_destroy(gpu_texture_t *render_target) {
-	if (render_target->impl.render_target != NULL) {
-		render_target->impl.render_target->lpVtbl->Release(render_target->impl.render_target);
-		render_target->impl.descriptor_heap->lpVtbl->Release(render_target->impl.descriptor_heap);
-		render_target->impl.srv_descriptor_heap->lpVtbl->Release(render_target->impl.srv_descriptor_heap);
-		if (render_target->impl.readback != NULL) {
-			render_target->impl.readback->lpVtbl->Release(render_target->impl.readback);
-		}
-	}
-
 	if (render_target->impl.image != NULL) {
 		render_target->impl.image->lpVtbl->Release(render_target->impl.image);
-		render_target->impl.upload_image->lpVtbl->Release(render_target->impl.upload_image);
 	}
-}
-
-int gpu_texture_stride(gpu_texture_t *texture) {
-	return texture->impl.stride;
+	if (render_target->impl.rtv_descriptor_heap != NULL) {
+		render_target->impl.rtv_descriptor_heap->lpVtbl->Release(render_target->impl.rtv_descriptor_heap);
+	}
+	if (render_target->impl.srv_descriptor_heap != NULL) {
+		render_target->impl.srv_descriptor_heap->lpVtbl->Release(render_target->impl.srv_descriptor_heap);
+	}
+	if (render_target->impl.readback != NULL) {
+		render_target->impl.readback->lpVtbl->Release(render_target->impl.readback);
+	}
 }
 
 void gpu_texture_generate_mipmaps(gpu_texture_t *texture, int levels) {}
@@ -1152,7 +999,7 @@ void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structur
 		buffer->impl.stride += gpu_vertex_data_size(structure->elements[i].data);
 	}
 
-	int uploadBufferSize = buffer->impl.stride * buffer->count;
+	int upload_buffer_size = buffer->impl.stride * buffer->count;
 
 	D3D12_HEAP_PROPERTIES heap_properties = {
 		.Type = D3D12_HEAP_TYPE_UPLOAD,
@@ -1165,7 +1012,7 @@ void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structur
 	D3D12_RESOURCE_DESC resource_desc = {
 		.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER,
 		.Alignment = 0,
-		.Width = uploadBufferSize,
+		.Width = upload_buffer_size,
 		.Height = 1,
 		.DepthOrArraySize = 1,
 		.MipLevels = 1,
@@ -1180,7 +1027,7 @@ void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structur
 											&IID_ID3D12Resource, &buffer->impl.buffer);
 
 	buffer->impl.vertex_buffer_view.BufferLocation = buffer->impl.buffer->lpVtbl->GetGPUVirtualAddress(buffer->impl.buffer);
-	buffer->impl.vertex_buffer_view.SizeInBytes = uploadBufferSize;
+	buffer->impl.vertex_buffer_view.SizeInBytes = upload_buffer_size;
 	buffer->impl.vertex_buffer_view.StrideInBytes = buffer->impl.stride;
 }
 
@@ -1271,7 +1118,7 @@ int gpu_constant_buffer_size(gpu_buffer_t *buffer) {
 void gpu_index_buffer_init(gpu_buffer_t *buffer, int count) {
 	buffer->count = count;
 
-	int uploadBufferSize = sizeof(uint32_t) * count;
+	int upload_buffer_size = sizeof(uint32_t) * count;
 
 	D3D12_HEAP_PROPERTIES heap_properties = {
 		.Type = D3D12_HEAP_TYPE_UPLOAD,
@@ -1284,7 +1131,7 @@ void gpu_index_buffer_init(gpu_buffer_t *buffer, int count) {
 	D3D12_RESOURCE_DESC resource_desc = {
 		.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER,
 		.Alignment = 0,
-		.Width = uploadBufferSize,
+		.Width = upload_buffer_size,
 		.Height = 1,
 		.DepthOrArraySize = 1,
 		.MipLevels = 1,
@@ -1299,7 +1146,7 @@ void gpu_index_buffer_init(gpu_buffer_t *buffer, int count) {
 		D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &IID_ID3D12Resource, &buffer->impl.buffer);
 
 	buffer->impl.index_buffer_view.BufferLocation = buffer->impl.buffer->lpVtbl->GetGPUVirtualAddress(buffer->impl.buffer);
-	buffer->impl.index_buffer_view.SizeInBytes = uploadBufferSize;
+	buffer->impl.index_buffer_view.SizeInBytes = upload_buffer_size;
 	buffer->impl.index_buffer_view.Format = DXGI_FORMAT_R32_UINT;
 }
 
@@ -2154,8 +2001,8 @@ void gpu_raytrace_set_pipeline(gpu_raytrace_pipeline_t *_pipeline) {
 
 void gpu_raytrace_set_target(gpu_texture_t *_output) {
 	if (_output != output) {
-		_output->impl.render_target->lpVtbl->Release(_output->impl.render_target);
-		_output->impl.descriptor_heap->lpVtbl->Release(_output->impl.descriptor_heap);
+		_output->impl.image->lpVtbl->Release(_output->impl.image);
+		_output->impl.rtv_descriptor_heap->lpVtbl->Release(_output->impl.rtv_descriptor_heap);
 		_output->impl.srv_descriptor_heap->lpVtbl->Release(_output->impl.srv_descriptor_heap);
 
 		D3D12_HEAP_PROPERTIES heap_properties = {
@@ -2183,7 +2030,7 @@ void gpu_raytrace_set_target(gpu_texture_t *_output) {
 		clear_value.Color[3] = 0.0f;
 
 		device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &desc,
-										D3D12_RESOURCE_STATE_COMMON, &clear_value, &IID_ID3D12Resource, &_output->impl.render_target);
+										D3D12_RESOURCE_STATE_COMMON, &clear_value, &IID_ID3D12Resource, &_output->impl.image);
 
 		D3D12_RENDER_TARGET_VIEW_DESC view = {
 			.Format = DXGI_FORMAT_R16G16B16A16_FLOAT,
@@ -2196,10 +2043,10 @@ void gpu_raytrace_set_target(gpu_texture_t *_output) {
 			.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
 			.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
 		};
-		device->lpVtbl->CreateDescriptorHeap(device, &heap_desc, &IID_ID3D12DescriptorHeap, &_output->impl.descriptor_heap);
+		device->lpVtbl->CreateDescriptorHeap(device, &heap_desc, &IID_ID3D12DescriptorHeap, &_output->impl.rtv_descriptor_heap);
 		D3D12_CPU_DESCRIPTOR_HANDLE handle;
-		_output->impl.descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(_output->impl.descriptor_heap, &handle);
-		device->lpVtbl->CreateRenderTargetView(device, _output->impl.render_target, &view, handle);
+		_output->impl.rtv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(_output->impl.rtv_descriptor_heap, &handle);
+		device->lpVtbl->CreateRenderTargetView(device, _output->impl.image, &view, handle);
 
 		D3D12_DESCRIPTOR_HEAP_DESC descriptor_heap_desc = {
 			.NumDescriptors = 1,
@@ -2218,13 +2065,13 @@ void gpu_raytrace_set_target(gpu_texture_t *_output) {
 			.Texture2D.ResourceMinLODClamp = 0.0f,
 		};
 		_output->impl.srv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(_output->impl.srv_descriptor_heap, &handle);
-		device->lpVtbl->CreateShaderResourceView(device, _output->impl.render_target, &srv_desc,
+		device->lpVtbl->CreateShaderResourceView(device, _output->impl.image, &srv_desc,
 												 handle);
 
 		D3D12_UNORDERED_ACCESS_VIEW_DESC UAVDesc = {
 			.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D,
 		};
-		device->lpVtbl->CreateUnorderedAccessView(device, _output->impl.render_target, NULL, &UAVDesc, outputCpuDescriptor);
+		device->lpVtbl->CreateUnorderedAccessView(device, _output->impl.image, NULL, &UAVDesc, outputCpuDescriptor);
 	}
 	output = _output;
 }
