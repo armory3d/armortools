@@ -2011,9 +2011,6 @@ function parser_material_make_bind_tex(tex_name: string, file: string): bind_tex
 		name: tex_name,
 		file: file
 	};
-	if (context_raw.texture_filter) {
-		tex.generate_mipmaps = true;
-	}
 	return tex;
 }
 

@@ -22,7 +22,6 @@ typedef struct {
 typedef struct {
 	void *_tex;
 	void *data;
-	bool has_mipmaps;
 	void *_texReadback;
 } gpu_texture_impl_t;
 

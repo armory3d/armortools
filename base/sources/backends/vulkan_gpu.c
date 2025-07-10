@@ -417,9 +417,7 @@ VkSwapchainKHR cleanup_swapchain() {
 void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_texture_format_t format, int framebuffer_index) {
 	target->width = width;
 	target->height = height;
-	target->data = NULL;
 	target->impl.format = convert_image_format(format);
-	target->impl.stage = 0;
 	target->impl.readback_buffer_created = false;
 	target->state = (framebuffer_index >= 0) ? GPU_TEXTURE_STATE_PRESENT : GPU_TEXTURE_STATE_SHADER_RESOURCE;
 
@@ -1453,7 +1451,6 @@ void gpu_set_constant_buffer(gpu_buffer_t *buffer, int offset, size_t size) {
 }
 
 void gpu_set_texture(int unit, gpu_texture_t *texture) {
-	texture->impl.stage = unit;
 	current_textures[unit] = texture;
 }
 
@@ -1674,8 +1671,8 @@ void gpu_shader_destroy(gpu_shader_t *shader) {
 	shader->impl.source = NULL;
 }
 
-static void prepare_texture_image(uint8_t *tex_colors, uint32_t width, uint32_t height, gpu_texture_impl_t *tex_obj, VkImageTiling tiling,
-								  VkImageUsageFlags usage, VkFlags required_props, VkDeviceSize *deviceSize, VkFormat tex_format) {
+static void prepare_texture_image(uint8_t *pixels, uint32_t width, uint32_t height, gpu_texture_impl_t *impl, VkImageTiling tiling,
+								  VkImageUsageFlags usage, VkFlags required_props, VkFormat tex_format) {
 
 	VkImageCreateInfo image_create_info = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
@@ -1701,15 +1698,15 @@ static void prepare_texture_image(uint8_t *tex_colors, uint32_t width, uint32_t 
 		.memoryTypeIndex = 0,
 	};
 
-	vkCreateImage(device, &image_create_info, NULL, &tex_obj->image);
+	vkCreateImage(device, &image_create_info, NULL, &impl->image);
 	VkMemoryRequirements mem_reqs;
-	vkGetImageMemoryRequirements(device, tex_obj->image, &mem_reqs);
-	*deviceSize = mem_alloc.allocationSize = mem_reqs.size;
+	vkGetImageMemoryRequirements(device, impl->image, &mem_reqs);
+	mem_alloc.allocationSize = mem_reqs.size;
 	memory_type_from_properties(mem_reqs.memoryTypeBits, required_props, &mem_alloc.memoryTypeIndex);
-	vkAllocateMemory(device, &mem_alloc, NULL, &tex_obj->mem);
-	vkBindImageMemory(device, tex_obj->image, tex_obj->mem, 0);
+	vkAllocateMemory(device, &mem_alloc, NULL, &impl->mem);
+	vkBindImageMemory(device, impl->image, impl->mem, 0);
 
-	if (required_props & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT && tex_colors != NULL) {
+	if (required_props & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
 		VkImageSubresource subres = {
 			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
 			.mipLevel = 0,
@@ -1718,49 +1715,37 @@ static void prepare_texture_image(uint8_t *tex_colors, uint32_t width, uint32_t 
 
 		VkSubresourceLayout layout;
 		uint8_t *data;
-		vkGetImageSubresourceLayout(device, tex_obj->image, &subres, &layout);
-		vkMapMemory(device, tex_obj->mem, 0, mem_alloc.allocationSize, 0, (void **)&data);
+		vkGetImageSubresourceLayout(device, impl->image, &subres, &layout);
+		vkMapMemory(device, impl->mem, 0, mem_alloc.allocationSize, 0, (void **)&data);
 
 		if (tex_format == VK_FORMAT_R8_UNORM) {
 			for (uint32_t y = 0; y < height; y++) {
 				for (uint32_t x = 0; x < width; x++) {
-					data[y * layout.rowPitch + x] = tex_colors[y * width + x];
-				}
-			}
-		}
-		else if (tex_format == VK_FORMAT_R32_SFLOAT) {
-			uint32_t *data32 = (uint32_t *)data;
-			uint32_t *tex_colors32 = (uint32_t *)tex_colors;
-			for (uint32_t y = 0; y < height; y++) {
-				for (uint32_t x = 0; x < width; x++) {
-					data32[y * (layout.rowPitch / 4) + x] = tex_colors32[y * width + x];
+					data[y * layout.rowPitch + x] = pixels[y * width + x];
 				}
 			}
 		}
 		else if (tex_format == VK_FORMAT_R16_SFLOAT) {
 			uint16_t *data16 = (uint16_t *)data;
-			uint16_t *tex_colors16 = (uint16_t *)tex_colors;
+			uint16_t *tex_colors16 = (uint16_t *)pixels;
 			for (uint32_t y = 0; y < height; y++) {
 				for (uint32_t x = 0; x < width; x++) {
 					data16[y * (layout.rowPitch / 4) + x] = tex_colors16[y * width + x];
 				}
 			}
 		}
-		else if (tex_format == VK_FORMAT_R32G32B32A32_SFLOAT) {
+		else if (tex_format == VK_FORMAT_R32_SFLOAT) {
 			uint32_t *data32 = (uint32_t *)data;
-			uint32_t *tex_colors32 = (uint32_t *)tex_colors;
+			uint32_t *tex_colors32 = (uint32_t *)pixels;
 			for (uint32_t y = 0; y < height; y++) {
 				for (uint32_t x = 0; x < width; x++) {
-					data32[y * (layout.rowPitch / 4) + x * 4 + 0] = tex_colors32[y * width * 4 + x * 4 + 0];
-					data32[y * (layout.rowPitch / 4) + x * 4 + 1] = tex_colors32[y * width * 4 + x * 4 + 1];
-					data32[y * (layout.rowPitch / 4) + x * 4 + 2] = tex_colors32[y * width * 4 + x * 4 + 2];
-					data32[y * (layout.rowPitch / 4) + x * 4 + 3] = tex_colors32[y * width * 4 + x * 4 + 3];
+					data32[y * (layout.rowPitch / 4) + x] = tex_colors32[y * width + x];
 				}
 			}
 		}
 		else if (tex_format == VK_FORMAT_R16G16B16A16_SFLOAT) {
 			uint16_t *data16 = (uint16_t *)data;
-			uint16_t *tex_colors16 = (uint16_t *)tex_colors;
+			uint16_t *tex_colors16 = (uint16_t *)pixels;
 			for (uint32_t y = 0; y < height; y++) {
 				for (uint32_t x = 0; x < width; x++) {
 					data16[y * (layout.rowPitch / 4) + x * 4 + 0] = tex_colors16[y * width * 4 + x * 4 + 0];
@@ -1770,80 +1755,69 @@ static void prepare_texture_image(uint8_t *tex_colors, uint32_t width, uint32_t 
 				}
 			}
 		}
+		else if (tex_format == VK_FORMAT_R32G32B32A32_SFLOAT) {
+			uint32_t *data32 = (uint32_t *)data;
+			uint32_t *tex_colors32 = (uint32_t *)pixels;
+			for (uint32_t y = 0; y < height; y++) {
+				for (uint32_t x = 0; x < width; x++) {
+					data32[y * (layout.rowPitch / 4) + x * 4 + 0] = tex_colors32[y * width * 4 + x * 4 + 0];
+					data32[y * (layout.rowPitch / 4) + x * 4 + 1] = tex_colors32[y * width * 4 + x * 4 + 1];
+					data32[y * (layout.rowPitch / 4) + x * 4 + 2] = tex_colors32[y * width * 4 + x * 4 + 2];
+					data32[y * (layout.rowPitch / 4) + x * 4 + 3] = tex_colors32[y * width * 4 + x * 4 + 3];
+				}
+			}
+		}
 		else if (tex_format == VK_FORMAT_B8G8R8A8_UNORM) {
 			for (uint32_t y = 0; y < height; y++) {
-				// uint32_t *row = (uint32_t *)((char *)data + layout.rowPitch * y);
 				for (uint32_t x = 0; x < width; x++) {
-					data[y * layout.rowPitch + x * 4 + 0] = tex_colors[y * width * 4 + x * 4 + 2];
-					data[y * layout.rowPitch + x * 4 + 1] = tex_colors[y * width * 4 + x * 4 + 1];
-					data[y * layout.rowPitch + x * 4 + 2] = tex_colors[y * width * 4 + x * 4 + 0];
-					data[y * layout.rowPitch + x * 4 + 3] = tex_colors[y * width * 4 + x * 4 + 3];
-					// row[x] = tex_colors[(x & 1) ^ (y & 1)];
+					data[y * layout.rowPitch + x * 4 + 0] = pixels[y * width * 4 + x * 4 + 2];
+					data[y * layout.rowPitch + x * 4 + 1] = pixels[y * width * 4 + x * 4 + 1];
+					data[y * layout.rowPitch + x * 4 + 2] = pixels[y * width * 4 + x * 4 + 0];
+					data[y * layout.rowPitch + x * 4 + 3] = pixels[y * width * 4 + x * 4 + 3];
 				}
 			}
 		}
 		else {
 			for (uint32_t y = 0; y < height; y++) {
-				// uint32_t *row = (uint32_t *)((char *)data + layout.rowPitch * y);
 				for (uint32_t x = 0; x < width; x++) {
-					data[y * layout.rowPitch + x * 4 + 0] = tex_colors[y * width * 4 + x * 4 + 0];
-					data[y * layout.rowPitch + x * 4 + 1] = tex_colors[y * width * 4 + x * 4 + 1];
-					data[y * layout.rowPitch + x * 4 + 2] = tex_colors[y * width * 4 + x * 4 + 2];
-					data[y * layout.rowPitch + x * 4 + 3] = tex_colors[y * width * 4 + x * 4 + 3];
-					// row[x] = tex_colors[(x & 1) ^ (y & 1)];
+					data[y * layout.rowPitch + x * 4 + 0] = pixels[y * width * 4 + x * 4 + 0];
+					data[y * layout.rowPitch + x * 4 + 1] = pixels[y * width * 4 + x * 4 + 1];
+					data[y * layout.rowPitch + x * 4 + 2] = pixels[y * width * 4 + x * 4 + 2];
+					data[y * layout.rowPitch + x * 4 + 3] = pixels[y * width * 4 + x * 4 + 3];
 				}
 			}
 		}
 
-		vkUnmapMemory(device, tex_obj->mem);
+		vkUnmapMemory(device, impl->mem);
 	}
 
-	if (usage & VK_IMAGE_USAGE_STORAGE_BIT) {
-		tex_obj->imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	}
-	else {
-		tex_obj->imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	}
-
-	set_image_layout(tex_obj->image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, tex_obj->imageLayout);
-}
-
-static void update_stride(gpu_texture_t *texture) {
-	VkImageSubresource subres = {
-		.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-		.mipLevel = 0,
-		.arrayLayer = 0,
-	};
-	VkSubresourceLayout layout;
-	vkGetImageSubresourceLayout(device, texture->impl.image, &subres, &layout);
-	texture->impl.stride = (int)layout.rowPitch;
+	impl->imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	set_image_layout(impl->image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, impl->imageLayout);
 }
 
 void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, gpu_texture_format_t format) {
 	texture->width = width;
 	texture->height = height;
 	texture->format = format;
-	texture->data = data;
-	texture->impl.stage = 0;
 	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
 
-	const VkFormat tex_format = convert_image_format(format);
+	VkFormat tex_format = convert_image_format(format);
 	VkFormatProperties props;
 	vkGetPhysicalDeviceFormatProperties(gpu, tex_format, &props);
 
 	if (props.linearTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT) {
 		prepare_texture_image((uint8_t *)data, (uint32_t)width, (uint32_t)height, &texture->impl, VK_IMAGE_TILING_LINEAR,
-							  VK_IMAGE_USAGE_SAMPLED_BIT /*| VK_IMAGE_USAGE_STORAGE_BIT*/, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &texture->impl.deviceSize, tex_format);
+							  VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, tex_format);
 	}
 	else if (props.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT) {
 		gpu_texture_impl_t staging_texture;
 
 		memset(&staging_texture, 0, sizeof(staging_texture));
 		prepare_texture_image((uint8_t *)data, (uint32_t)width, (uint32_t)height, &staging_texture, VK_IMAGE_TILING_LINEAR,
-							  VK_IMAGE_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &texture->impl.deviceSize, tex_format);
+							  VK_IMAGE_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, tex_format);
 		prepare_texture_image((uint8_t *)data, (uint32_t)width, (uint32_t)height, &texture->impl, VK_IMAGE_TILING_OPTIMAL,
-							  (VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT /*| VK_IMAGE_USAGE_STORAGE_BIT*/),
-							  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &texture->impl.deviceSize, tex_format);
+							  (VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT),
+							  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, tex_format);
 
 		set_image_layout(staging_texture.image, VK_IMAGE_ASPECT_COLOR_BIT, staging_texture.imageLayout, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 		set_image_layout(texture->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, texture->impl.imageLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
@@ -1874,7 +1848,13 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 		vkFreeMemory(device, staging_texture.mem, NULL);
 	}
 
-	update_stride(texture);
+	VkImageSubresource subres = {
+		.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+		.mipLevel = 0,
+		.arrayLayer = 0,
+	};
+	VkSubresourceLayout layout;
+	vkGetImageSubresourceLayout(device, texture->impl.image, &subres, &layout);
 
 	VkImageViewCreateInfo view = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
@@ -1906,69 +1886,6 @@ void gpu_texture_destroy(gpu_texture_t *target) {
 	if (target->impl.view != NULL) {
 		vkDestroyImageView(device, target->impl.view, NULL);
 	}
-}
-
-void gpu_texture_set_mipmap(gpu_texture_t *texture, gpu_texture_t *mipmap, int level) {
-	// VkBuffer staging_buffer;
-	// VkDeviceMemory staging_buffer_mem;
-
-	// VkBufferCreateInfo buffer_info = {
-		// .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-		// .size = mipmap->width * mipmap->height * format_size(mipmap->format),
-		// .usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-		// .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-	// };
-
-	// vkCreateBuffer(device, &buffer_info, NULL, &staging_buffer);
-
-	// VkMemoryRequirements mem_req;
-	// vkGetBufferMemoryRequirements(device, staging_buffer, &mem_req);
-
-	// VkMemoryAllocateInfo alloc_info = {
-		// .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-		// .allocationSize = mem_req.size,
-	// };
-
-	// memory_type_from_properties(mem_req.memoryTypeBits,
-	// 	VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &alloc_info.memoryTypeIndex);
-
-	// vkAllocateMemory(device, &alloc_info, NULL, &staging_buffer_mem);
-	// vkBindBufferMemory(device, staging_buffer, staging_buffer_mem, 0);
-
-	// void *mapped_data;
-	// vkMapMemory(device, staging_buffer_mem, 0, buffer_info.size, 0, &mapped_data);
-	// memcpy(mapped_data, mipmap->data, (size_t)buffer_info.size);
-	// vkUnmapMemory(device, staging_buffer_mem);
-
-	// set_image_layout(texture->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-	//                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-
-	// VkBufferImageCopy region = {
-		// .bufferOffset = 0,
-		// .bufferRowLength = 0,
-		// .bufferImageHeight = 0,
-		// .imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-		// .imageSubresource.mipLevel = level,
-		// .imageSubresource.baseArrayLayer = 0,
-		// .imageSubresource.layerCount = 1,
-		// .imageOffset = (VkOffset3D){0, 0, 0},
-		// .imageExtent = (VkExtent3D){(uint32_t)mipmap->width, (uint32_t)mipmap->height, 1},
-	// };
-
-	// vkCmdCopyBufferToImage(
-	//     command_buffer,
-	//     staging_buffer,
-	//     texture->impl.image,
-	//     VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-	//     1,
-	//     &region
-	// );
-
-	// set_image_layout(texture->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-	//                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-	// vkFreeMemory(device, staging_buffer_mem, NULL);
-	// vkDestroyBuffer(device, staging_buffer, NULL);
 }
 
 void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format) {

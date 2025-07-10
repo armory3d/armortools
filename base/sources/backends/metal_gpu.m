@@ -147,7 +147,6 @@ void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_t
 	memset(target, 0, sizeof(gpu_texture_t));
 	target->width = width;
 	target->height = height;
-	target->data = NULL;
 	target->state = GPU_TEXTURE_STATE_RENDER_TARGET;
 	target->impl._texReadback = NULL;
 
@@ -616,9 +615,11 @@ void gpu_shader_init(gpu_shader_t *shader, const void *data, size_t length, gpu_
 	shader->impl.length = length;
 }
 
-static void create_texture(gpu_texture_t *texture, int width, int height, int format, bool writable) {
-	texture->impl.has_mipmaps = false;
-	id<MTLDevice> device = getMetalDevice();
+void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, gpu_texture_format_t format) {
+	texture->width = width;
+	texture->height = height;
+	texture->format = format;
+	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
 
 	MTLTextureDescriptor *descriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:convert_image_format((gpu_texture_format_t)format)
 	                                                                                      width:width
@@ -631,43 +632,17 @@ static void create_texture(gpu_texture_t *texture, int width, int height, int fo
 	descriptor.pixelFormat = convert_image_format((gpu_texture_format_t)format);
 	descriptor.arrayLength = 1;
 	descriptor.mipmapLevelCount = 1;
-	// TODO: Make less textures writable
-	if (writable) {
-		descriptor.usage = MTLTextureUsageShaderWrite | MTLTextureUsageShaderRead;
-	}
+	descriptor.usage = MTLTextureUsageShaderRead; // MTLTextureUsageShaderWrite
 
+	id<MTLDevice> device = getMetalDevice();
 	texture->impl._tex = (__bridge_retained void *)[device newTextureWithDescriptor:descriptor];
-}
 
-int gpu_texture_stride(gpu_texture_t *texture) {
-	switch (texture->format) {
-	case GPU_TEXTURE_FORMAT_R8:
-		return texture->width;
-	case GPU_TEXTURE_FORMAT_RGBA32:
-	default:
-		return texture->width * 4;
-	case GPU_TEXTURE_FORMAT_RGBA64:
-		return texture->width * 8;
-	case GPU_TEXTURE_FORMAT_RGBA128:
-		return texture->width * 16;
-	}
-}
-
-void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, gpu_texture_format_t format) {
-	texture->width = width;
-	texture->height = height;
-	texture->format = format;
-	texture->data = data;
-	texture->impl.data = NULL;
-	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
-	create_texture(texture, width, height, format, true);
-	id<MTLTexture> tex = (__bridge id<MTLTexture>)texture->impl._tex;
-	[tex replaceRegion:MTLRegionMake2D(0, 0, texture->width, texture->height)
-	       mipmapLevel:0
-	             slice:0
-	         withBytes:data
-	       bytesPerRow:gpu_texture_stride(texture)
-	     bytesPerImage:gpu_texture_stride(texture) * texture->height];
+	[texture->impl._tex replaceRegion:MTLRegionMake2D(0, 0, width, height)
+	       				  mipmapLevel:0
+	             				slice:0
+	         				withBytes:data
+	       				  bytesPerRow:width * format_byte_size(texture)
+				    	bytesPerImage:width * format_byte_size(texture) * height];
 }
 
 void gpu_texture_destroy(gpu_texture_t *target) {
@@ -678,61 +653,6 @@ void gpu_texture_destroy(gpu_texture_t *target) {
 	id<MTLTexture> texReadback = (__bridge_transfer id<MTLTexture>)target->impl._texReadback;
 	texReadback = nil;
 	target->impl._texReadback = NULL;
-
-	if (target->impl.data != NULL) {
-		free(target->impl.data);
-		target->impl.data = NULL;
-	}
-}
-
-void gpu_texture_set_mipmap(gpu_texture_t *texture, gpu_texture_t *mipmap, int level) {
-	if (!texture->impl.has_mipmaps) {
-		id<MTLDevice> device = getMetalDevice();
-		MTLTextureDescriptor *descriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:convert_image_format((gpu_texture_format_t)texture->format)
-		                                                                                      width:texture->width
-		                                                                                     height:texture->height
-		                                                                                  mipmapped:YES];
-		descriptor.textureType = MTLTextureType2D;
-		descriptor.width = texture->width;
-		descriptor.height = texture->height;
-		descriptor.depth = 1;
-		descriptor.pixelFormat = convert_image_format((gpu_texture_format_t)texture->format);
-		descriptor.arrayLength = 1;
-		bool writable = true;
-		if (writable) {
-			descriptor.usage = MTLTextureUsageShaderWrite | MTLTextureUsageShaderRead;
-		}
-		void *mipmaptex = (__bridge_retained void *)[device newTextureWithDescriptor:descriptor];
-
-		id<MTLCommandQueue> commandQueue = getMetalQueue();
-		id<MTLCommandBuffer> commandBuffer = [commandQueue commandBuffer];
-		id<MTLBlitCommandEncoder> commandEncoder = [commandBuffer blitCommandEncoder];
-		[commandEncoder copyFromTexture:(__bridge id<MTLTexture>)texture->impl._tex
-		                    sourceSlice:0
-		                    sourceLevel:0
-		                   sourceOrigin:MTLOriginMake(0, 0, 0)
-		                     sourceSize:MTLSizeMake(texture->width, texture->height, 1)
-		                      toTexture:(__bridge id<MTLTexture>)mipmaptex
-		               destinationSlice:0
-		               destinationLevel:0
-		              destinationOrigin:MTLOriginMake(0, 0, 0)];
-
-		[commandEncoder endEncoding];
-		[commandBuffer commit];
-		[commandBuffer waitUntilCompleted];
-
-		id<MTLTexture> tex = (__bridge_transfer id<MTLTexture>)texture->impl._tex;
-		tex = nil;
-		texture->impl._tex = mipmaptex;
-
-		texture->impl.has_mipmaps = true;
-	}
-
-	id<MTLTexture> tex = (__bridge id<MTLTexture>)texture->impl._tex;
-	[tex replaceRegion:MTLRegionMake2D(0, 0, mipmap->width, mipmap->height)
-	       mipmapLevel:level
-	         withBytes:mipmap->data
-	       bytesPerRow:mipmap->width * format_byte_size(mipmap->format)];
 }
 
 void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format) {

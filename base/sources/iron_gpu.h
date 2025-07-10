@@ -82,7 +82,6 @@ typedef struct gpu_texture {
 	int height;
 	gpu_texture_format_t format;
 	gpu_texture_compression_t compression;
-	void *data;
 	gpu_texture_state_t state;
 	buffer_t *buffer;
 	gpu_texture_impl_t impl;
@@ -173,7 +172,6 @@ void gpu_set_matrix4(int location, iron_matrix4x4_t value);
 void gpu_vertex_structure_add(gpu_vertex_structure_t *structure, const char *name, gpu_vertex_data_t data);
 void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, gpu_texture_format_t format);
 void gpu_texture_destroy(gpu_texture_t *texture);
-void gpu_texture_set_mipmap(gpu_texture_t *texture, gpu_texture_t *mipmap, int level);
 void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format);
 void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height, gpu_texture_format_t format, int framebuffer_index);
 void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structure_t *structure);

@@ -274,7 +274,6 @@ declare function gpu_create_render_target(width: i32, height: i32, format: i32 =
 declare function gpu_create_texture_from_bytes(data: buffer_t, width: i32, height: i32, format: i32 = tex_format_t.RGBA32): any;
 declare function gpu_create_texture_from_encoded_bytes(data: buffer_t, format: string): any;
 declare function gpu_get_texture_pixels(texture: any): buffer_t;
-declare function gpu_set_mipmaps(texture: any, mipmaps: gpu_texture_t[]): void;
 declare function gpu_viewport(x: i32, y: i32, width: i32, height: i32): void;
 declare function gpu_scissor(x: i32, y: i32, width: i32, height: i32): void;
 declare function gpu_disable_scissor(): void;
@@ -770,6 +769,7 @@ declare type gpu_texture_t = {
 	width: i32;
 	height: i32;
 };
+
 declare type ui_theme_t = any;
 
 declare type ui_t = {

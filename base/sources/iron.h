@@ -1350,36 +1350,24 @@ buffer_t *gpu_get_texture_pixels(gpu_texture_t *image) {
 	}
 	image->buffer->length = _format_byte_size(image->format) * image->width * image->height;
 
-	if (image->data == NULL) {
-		if (image->buffer->buffer == NULL) {
-			image->buffer->buffer = malloc(image->buffer->length);
-		}
-
-		uint8_t *b = (uint8_t *)image->buffer->buffer;
-		gpu_get_render_target_pixels(image, b);
-
-		// Release staging texture immediately to save memory
-		#ifdef IRON_DIRECT3D12
-		image->impl.readback->lpVtbl->Release(image->impl.readback);
-		image->impl.readback = NULL;
-		#elif defined(IRON_METAL)
-		// id<MTLTexture> texReadback = (__bridge_transfer id<MTLTexture>)image->impl._texReadback;
-		// texReadback = nil;
-		// image->impl._texReadback = NULL;
-		#endif
+	if (image->buffer->buffer == NULL) {
+		image->buffer->buffer = malloc(image->buffer->length);
 	}
-	else {
-		image->buffer->buffer = image->data;
-	}
+
+	uint8_t *b = (uint8_t *)image->buffer->buffer;
+	gpu_get_render_target_pixels(image, b);
+
+	// Release staging texture immediately to save memory
+	#ifdef IRON_DIRECT3D12
+	image->impl.readback->lpVtbl->Release(image->impl.readback);
+	image->impl.readback = NULL;
+	#elif defined(IRON_METAL)
+	// id<MTLTexture> texReadback = (__bridge_transfer id<MTLTexture>)image->impl._texReadback;
+	// texReadback = nil;
+	// image->impl._texReadback = NULL;
+	#endif
+
 	return image->buffer;
-}
-
-void gpu_set_mipmaps(gpu_texture_t *texture, any_array_t *mipmaps) {
-	for (int32_t i = 0; i < mipmaps->length; ++i) {
-		gpu_texture_t *img = mipmaps->buffer[i];
-		gpu_texture_t *img_tex = img;
-		gpu_texture_set_mipmap(texture, img_tex, i + 1);
-	}
 }
 
 void _gpu_begin(gpu_texture_t *render_target, any_array_t *additional, gpu_texture_t *depth_buffer, unsigned flags, unsigned color, float depth) {

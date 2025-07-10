@@ -67,7 +67,6 @@ function import_envmap_run(path: string, image: gpu_texture_t) {
 		import_envmap_get_radiance_mip(import_envmap_mips[i], i, import_envmap_radiance);
 		array_push(import_envmap_mips_cpu, gpu_create_texture_from_bytes(gpu_get_texture_pixels(import_envmap_mips[i]), import_envmap_mips[i].width, import_envmap_mips[i].height, tex_format_t.RGBA128));
 	}
-	gpu_set_mipmaps(import_envmap_radiance_cpu, import_envmap_mips_cpu);
 
 	// Irradiance
 	scene_world._.irradiance = import_envmap_get_spherical_harmonics(radiance_pixels, import_envmap_radiance.width, import_envmap_radiance.height);

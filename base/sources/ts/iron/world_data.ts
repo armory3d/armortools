@@ -28,7 +28,6 @@ function world_data_parse(name: string, id: string): world_data_t {
 			let mipimg: gpu_texture_t = data_get_image(base + "_" + i + ext);
 			raw._.radiance_mipmaps[i] = mipimg;
 		}
-		gpu_set_mipmaps(raw._.radiance, raw._.radiance_mipmaps);
 	}
 
 	return raw;

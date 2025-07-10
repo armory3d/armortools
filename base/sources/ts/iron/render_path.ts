@@ -6,7 +6,6 @@ type render_target_t = {
 	// Opt
 	format?: string;
 	scale?: f32;
-	mipmaps?: bool;
 	// Runtime
 	_image?: gpu_texture_t;
 };
@@ -322,7 +321,6 @@ function render_path_get_tex_format(s: string): tex_format_t {
 function render_target_create(): render_target_t {
 	let raw: render_target_t = {};
 	raw.scale = 1.0;
-	raw.mipmaps = false;
 	return raw;
 }
 

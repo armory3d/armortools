@@ -55,7 +55,6 @@ typedef struct {
 	struct ID3D12Resource *readback;
 	struct ID3D12DescriptorHeap *srv_descriptor_heap;
 	struct ID3D12DescriptorHeap *rtv_descriptor_heap;
-	int stride;
 } gpu_texture_impl_t;
 
 typedef struct {

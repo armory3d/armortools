@@ -274,8 +274,6 @@ void iron_start(void) {
 #endif
 }
 
-void iron_memory_emergency(void) {}
-
 static uint8_t *current_file = NULL;
 static size_t current_file_size = 0;
 

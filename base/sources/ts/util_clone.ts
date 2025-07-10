@@ -255,8 +255,6 @@ function util_clone_bind_textures(texs: bind_tex_t[]): bind_tex_t[] {
 		let t: bind_tex_t = {};
 		t.name = texs[i].name;
 		t.file = texs[i].file;
-		t.generate_mipmaps = texs[i].generate_mipmaps;
-		t.mipmaps = util_clone_string_array(texs[i].mipmaps);
 		array_push(r, t);
 	}
 	return r;

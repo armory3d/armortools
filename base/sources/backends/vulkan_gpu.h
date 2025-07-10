@@ -24,8 +24,6 @@ typedef struct {
 
 typedef struct {
 	VkImageLayout imageLayout;
-	VkDeviceSize deviceSize;
-	int stride;
 	VkImage image;
 	VkDeviceMemory mem;
 	VkImageView view;
@@ -33,7 +31,6 @@ typedef struct {
 	VkBuffer readback_buffer;
 	VkDeviceMemory readback_memory;
 	bool readback_buffer_created;
-	int stage;
 } gpu_texture_impl_t;
 
 typedef struct {

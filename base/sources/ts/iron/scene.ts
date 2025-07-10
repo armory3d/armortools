@@ -553,8 +553,6 @@ type bind_const_t = {
 type bind_tex_t = {
 	name?: string;
 	file?: string;
-	generate_mipmaps?: bool;
-	mipmaps?: string[]; // Reference image names
 };
 
 type shader_data_t = {

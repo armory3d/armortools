@@ -13,8 +13,6 @@
 #include <iron_math.h>
 #include <backends/windows_system.h>
 
-void iron_memory_emergency();
-
 bool gpu_transpose_mat = false;
 static ID3D12Device *device = NULL;
 static ID3D12CommandQueue *queue;
@@ -177,7 +175,6 @@ void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height
 	render_target->width = width;
 	render_target->height = height;
 	render_target->impl.readback = NULL;
-	render_target->data = NULL;
 	render_target->state = (framebuffer_index >= 0) ? GPU_TEXTURE_STATE_PRESENT : GPU_TEXTURE_STATE_SHADER_RESOURCE;
 
 	DXGI_FORMAT dxgi_format = convert_format(format);
@@ -223,18 +220,8 @@ void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height
 		window_swapchain->lpVtbl->GetBuffer(window_swapchain, framebuffer_index, &IID_ID3D12Resource, &render_target->impl.image);
 	}
 	else {
-		HRESULT result = device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-														 		 &clear_value, &IID_ID3D12Resource, &render_target->impl.image);
-		if (result != S_OK) {
-			for (int i = 0; i < 10; ++i) {
-				iron_memory_emergency();
-				result = device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-														 		 &clear_value, &IID_ID3D12Resource, &render_target->impl.image);
-				if (result == S_OK) {
-					break;
-				}
-			}
-		}
+		device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+												&clear_value, &IID_ID3D12Resource, &render_target->impl.image);
 	}
 
 	D3D12_RENDER_TARGET_VIEW_DESC view_desc = {
@@ -816,7 +803,6 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	texture->width = width;
 	texture->height = height;
 	texture->format = format;
-	texture->data = data;
 	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
 	DXGI_FORMAT d3d_format = convert_format(format);
 	int _format_size = format_size(d3d_format);
@@ -843,19 +829,8 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 		.Flags = D3D12_RESOURCE_FLAG_NONE,
 	};
 
-	HRESULT result = device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc,
+	device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc,
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, NULL, &IID_ID3D12Resource, &texture->impl.image);
-
-	if (result != S_OK) {
-		for (int i = 0; i < 10; ++i) {
-			iron_memory_emergency();
-			result = device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc,
-				D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, NULL, &IID_ID3D12Resource, &texture->impl.image);
-			if (result == S_OK) {
-				break;
-			}
-		}
-	}
 
 	D3D12_HEAP_PROPERTIES heap_properties_upload = {
 		.Type = D3D12_HEAP_TYPE_UPLOAD,
@@ -866,7 +841,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	};
 
 	D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint;
-	UINT64 upload_buffer_size = 0;
+	UINT64 upload_buffer_size;
 	device->lpVtbl->GetCopyableFootprints(device, &resource_desc, 0, 1, 0, &footprint, NULL, NULL, &upload_buffer_size);
 
 	D3D12_RESOURCE_DESC resource_desc_upload = {
@@ -884,27 +859,15 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	};
 
 	struct ID3D12Resource *upload_image;
-
-	result = device->lpVtbl->CreateCommittedResource(device, &heap_properties_upload, D3D12_HEAP_FLAG_NONE, &resource_desc_upload,
+	device->lpVtbl->CreateCommittedResource(device, &heap_properties_upload, D3D12_HEAP_FLAG_NONE, &resource_desc_upload,
 		D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &IID_ID3D12Resource, &upload_image);
 
-	if (result != S_OK) {
-		for (int i = 0; i < 10; ++i) {
-			iron_memory_emergency();
-			result = device->lpVtbl->CreateCommittedResource(device, &heap_properties_upload, D3D12_HEAP_FLAG_NONE, &resource_desc_upload,
-				D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &IID_ID3D12Resource, &upload_image);
-			if (result == S_OK) {
-				break;
-			}
-		}
-	}
-
-	texture->impl.stride = (int)ceilf(upload_buffer_size / (float)(height * D3D12_TEXTURE_DATA_PITCH_ALIGNMENT)) * D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
+	int stride = (int)ceilf(upload_buffer_size / (float)(height * D3D12_TEXTURE_DATA_PITCH_ALIGNMENT)) * D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
 
 	BYTE *pixel;
 	upload_image->lpVtbl->Map(upload_image, 0, NULL, (void **)&pixel);
 	for (int y = 0; y < texture->height; ++y) {
-		memcpy(&pixel[y * texture->impl.stride], &((uint8_t *)data)[y * texture->width * _format_size], texture->width * _format_size);
+		memcpy(&pixel[y * stride], &((uint8_t *)data)[y * texture->width * _format_size], texture->width * _format_size);
 	}
 	upload_image->lpVtbl->Unmap(upload_image, 0, NULL);
 
@@ -953,14 +916,8 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 
 	command_list->lpVtbl->CopyTextureRegion(command_list, &destination, 0, 0, 0, &source, NULL);
 
-	barrier = (D3D12_RESOURCE_BARRIER){
-		.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
-		.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE,
-		.Transition.pResource = texture->impl.image,
-		.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST,
-		.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-		.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
-	};
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST,
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 	command_list->lpVtbl->ResourceBarrier(command_list, 1, &barrier);
 
 	// TODO:
@@ -982,8 +939,6 @@ void gpu_texture_destroy(gpu_texture_t *render_target) {
 		render_target->impl.readback->lpVtbl->Release(render_target->impl.readback);
 	}
 }
-
-void gpu_texture_set_mipmap(gpu_texture_t *texture, gpu_texture_t *mipmap, int level) {}
 
 void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format) {
 	gpu_render_target_init2(target, width, height, format, -1);
