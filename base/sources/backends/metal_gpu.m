@@ -635,9 +635,9 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	descriptor.usage = MTLTextureUsageShaderRead; // MTLTextureUsageShaderWrite
 
 	id<MTLDevice> device = getMetalDevice();
-	texture->impl._tex = (__bridge_retained void *)[device newTextureWithDescriptor:descriptor];
-
-	[texture->impl._tex replaceRegion:MTLRegionMake2D(0, 0, width, height)
+	id<MTLTexture> tex = [device newTextureWithDescriptor:descriptor];
+	texture->impl._tex = (__bridge_retained void *)tex;
+	[tex replaceRegion:MTLRegionMake2D(0, 0, width, height)
 	       				  mipmapLevel:0
 	             				slice:0
 	         				withBytes:data
