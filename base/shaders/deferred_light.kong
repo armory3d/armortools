@@ -35,6 +35,21 @@ const senvmap_brdf: tex2d;
 const senvmap_radiance: tex2d;
 
 #[set(everything)]
+const senvmap_radiance0: tex2d;
+
+#[set(everything)]
+const senvmap_radiance1: tex2d;
+
+#[set(everything)]
+const senvmap_radiance2: tex2d;
+
+#[set(everything)]
+const senvmap_radiance3: tex2d;
+
+#[set(everything)]
+const senvmap_radiance4: tex2d;
+
+#[set(everything)]
 const ssaotex: tex2d;
 
 const PI: float = 3.14159265358979;
@@ -167,6 +182,25 @@ fun envmap_equirect(normal: float3, angle: float): float2 {
 	return float2(theta / PI2, phi / PI);
 }
 
+fun envmap_sample(lod: float, coord: float2): float3 {
+	if (lod == 0.0) {
+		return sample_lod(senvmap_radiance, sampler_linear, coord, 0.0).rgb;
+	}
+	if (lod == 1.0) {
+		return sample_lod(senvmap_radiance0, sampler_linear, coord, 0.0).rgb;
+	}
+	if (lod == 2.0) {
+		return sample_lod(senvmap_radiance1, sampler_linear, coord, 0.0).rgb;
+	}
+	if (lod == 3.0) {
+		return sample_lod(senvmap_radiance2, sampler_linear, coord, 0.0).rgb;
+	}
+	if (lod == 4.0) {
+		return sample_lod(senvmap_radiance3, sampler_linear, coord, 0.0).rgb;
+	}
+	return sample_lod(senvmap_radiance4, sampler_linear, coord, 0.0).rgb;
+}
+
 fun deferred_light_frag(input: vert_out): float4 {
 	// normal.xy, roughness, metallic/matid
 	var g0: float4 = sample_lod(gbuffer0, sampler_linear, input.tex, 0.0);
@@ -217,8 +251,18 @@ fun deferred_light_frag(input: vert_out): float4 {
 	envl = envl / PI;
 
 	var reflection_world: float3 = reflect(-v, n);
-	var lod: float = mip_from_roughness(roughness, float(constants.envmap_num_mipmaps));
-	var prefiltered_color: float3 = sample_lod(senvmap_radiance, sampler_linear, envmap_equirect(reflection_world, constants.envmap_data.x), lod).rgb;
+
+	// var lod: float = mip_from_roughness(roughness, float(constants.envmap_num_mipmaps));
+	// var prefiltered_color: float3 = sample_lod(senvmap_radiance, sampler_linear, envmap_equirect(reflection_world, constants.envmap_data.x), lod).rgb;
+
+	var lod: float = mip_from_roughness(roughness, 5.0);
+	var lod0: float = floor(lod);
+	var lod1: float = ceil(lod);
+	var lodf: float = lod - lod0;
+	var envmap_coord: float2 = envmap_equirect(reflection_world, constants.envmap_data.x);
+	var lodc0: float3 = envmap_sample(lod0, envmap_coord);
+	var lodc1: float3 = envmap_sample(lod1, envmap_coord);
+	var prefiltered_color: float3 = lerp3(lodc0, lodc1, lodf);
 
 	envl.rgb = envl.rgb * albedo;
 	// Indirect specular

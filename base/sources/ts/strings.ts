@@ -360,6 +360,27 @@ fun envmap_equirect(normal: float3, angle: float): float2 { \
 } \
 ";
 
+let str_envmap_sample: string = "\
+fun envmap_sample(lod: float, coord: float2): float3 { \
+	if (lod == 0.0) { \
+		return sample_lod(senvmap_radiance, sampler_linear, coord, 0.0).rgb; \
+	} \
+	if (lod == 1.0) { \
+		return sample_lod(senvmap_radiance0, sampler_linear, coord, 0.0).rgb; \
+	} \
+	if (lod == 2.0) { \
+		return sample_lod(senvmap_radiance1, sampler_linear, coord, 0.0).rgb; \
+	} \
+	if (lod == 3.0) { \
+		return sample_lod(senvmap_radiance2, sampler_linear, coord, 0.0).rgb; \
+	} \
+	if (lod == 4.0) { \
+		return sample_lod(senvmap_radiance3, sampler_linear, coord, 0.0).rgb; \
+	} \
+	return sample_lod(senvmap_radiance4, sampler_linear, coord, 0.0).rgb; \
+} \
+";
+
 let str_get_pos_nor_from_depth: string = "\
 fun get_pos_from_depth(uv: float2, invVP: flaot4x4): float3 { \
 	var depth: float = sample_lod(gbufferD, sampler_linear, float2(uv.x, 1.0 - uv.y), 0.0).r; \

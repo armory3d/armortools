@@ -53,6 +53,36 @@ function uniforms_set_context_consts(context: shader_context_t, bind_params: str
 					gpu_set_texture(context._.tex_units[j], w._.radiance);
 				}
 			}
+			else if (tulink == "_envmap_radiance0") {
+				let w: world_data_t = scene_world;
+				if (w != null) {
+					gpu_set_texture(context._.tex_units[j], w._.radiance_mipmaps[0]);
+				}
+			}
+			else if (tulink == "_envmap_radiance1") {
+				let w: world_data_t = scene_world;
+				if (w != null) {
+					gpu_set_texture(context._.tex_units[j], w._.radiance_mipmaps[1]);
+				}
+			}
+			else if (tulink == "_envmap_radiance2") {
+				let w: world_data_t = scene_world;
+				if (w != null) {
+					gpu_set_texture(context._.tex_units[j], w._.radiance_mipmaps[2]);
+				}
+			}
+			else if (tulink == "_envmap_radiance3") {
+				let w: world_data_t = scene_world;
+				if (w != null) {
+					gpu_set_texture(context._.tex_units[j], w._.radiance_mipmaps[3]);
+				}
+			}
+			else if (tulink == "_envmap_radiance4") {
+				let w: world_data_t = scene_world;
+				if (w != null) {
+					gpu_set_texture(context._.tex_units[j], w._.radiance_mipmaps[4]);
+				}
+			}
 			else if (tulink == "_envmap") {
 				let w: world_data_t = scene_world;
 				if (w != null) {
