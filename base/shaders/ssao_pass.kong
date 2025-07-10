@@ -59,6 +59,9 @@ fun get_pos_view(view_ray: float3, depth: float): float3 {
 
 fun get_delta_depth(view_ray: float3, hit_coord: float3): float {
 	var coord: float2 = get_projected_coord(hit_coord);
+	if (coord.x < 0.0 || coord.x > 1.0 || coord.y < 0.0 || coord.y > 1.0) {
+		return 1000.0;
+	}
 	var depth: float = sample_lod(gbufferD, sampler_linear, coord, 0.0).r * 2.0 - 1.0;
 	var p: float3 = get_pos_view(view_ray, depth);
 	return p.z - hit_coord.z;

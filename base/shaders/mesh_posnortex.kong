@@ -1,8 +1,8 @@
 
 #[set(everything)]
 const constants: {
-	N: float3x3;
 	WVP: float4x4;
+	N: float3x3;
 	tex_unpack: float;
 };
 
@@ -74,7 +74,7 @@ fun mesh_posnortex_frag(input: vert_out): float4[3] {
 	var occlusion: float = 1.0;
 
 	// n /= abs(n.x) + abs(n.y) + abs(n.z);
-	n = (n / abs(n.x) + abs(n.y) + abs(n.z));
+	n = n / (abs(n.x) + abs(n.y) + abs(n.z));
 	if (n.z >= 0.0) {
 		n.xy = n.xy;
 	}

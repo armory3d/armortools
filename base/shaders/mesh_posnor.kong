@@ -1,8 +1,8 @@
 
 #[set(everything)]
 const constants: {
-	N: float3x3;
 	WVP: float4x4;
+	N: float3x3;
 };
 
 struct vert_in {
