@@ -682,7 +682,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 	else if (node.type == "MIX_RGB") {
 		let fac: string = parser_material_parse_value_input(node.inputs[0]);
 		let fac_var: string = parser_material_node_name(node) + "_fac";
-		parser_material_write(parser_material_kong, "float " + fac_var + " = " + fac + ";");
+		parser_material_write(parser_material_kong, "var " + fac_var + ": float = " + fac + ";");
 		let col1: string = parser_material_parse_vector_input(node.inputs[1]);
 		let col2: string = parser_material_parse_vector_input(node.inputs[2]);
 		let but: ui_node_button_t = node.buttons[0]; // blend_type
@@ -1007,8 +1007,8 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		let height: string = parser_material_parse_value_input(node.inputs[2]);
 		let nor: string = parser_material_parse_vector_input(node.inputs[3]);
 		let sample_bump_res: string = parser_material_store_var_name(node) + "_bump";
-		parser_material_write(parser_material_kong, "float " + sample_bump_res + "_x = ddx(float(" + height + ")) * (" + strength + ") * 16.0;");
-		parser_material_write(parser_material_kong, "float " + sample_bump_res + "_y = ddy(float(" + height + ")) * (" + strength + ") * 16.0;");
+		parser_material_write(parser_material_kong, "var " + sample_bump_res + "_x: float = ddx(float(" + height + ")) * (" + strength + ") * 16.0;");
+		parser_material_write(parser_material_kong, "var " + sample_bump_res + "_y: float = ddy(float(" + height + ")) * (" + strength + ") * 16.0;");
 		return "(normalize(float3(" + sample_bump_res + "_x, " + sample_bump_res + "_y, 1.0) + " + nor + ") * float3(0.5, 0.5, 0.5) + float3(0.5, 0.5, 0.5))";
 	}
 	else if (node.type == "MAPPING") {

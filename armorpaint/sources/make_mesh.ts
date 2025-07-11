@@ -438,11 +438,13 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			node_shader_write_frag(kong, "output[1] = float4(float3(height, height, height), 1.0);");
 		}
 		else if (context_raw.viewport_mode == viewport_mode_t.EMISSION) {
-			node_shader_write_frag(kong, "float emis = float(int(matid * 255.0)) % float(3) == 1 ? 1.0 : 0.0;");
+			node_shader_write_frag(kong, "var matid_mod: float = float(int(matid * 255.0)) % float(3);");
+			node_shader_write_frag(kong, "var emis: float = 0.0; if (matid_mod == 1.0) { emis = 1.0; }");
 			node_shader_write_frag(kong, "output[1] = float4(float3(emis, emis, emis), 1.0);");
 		}
 		else if (context_raw.viewport_mode == viewport_mode_t.SUBSURFACE) {
-			node_shader_write_frag(kong, "float subs = float(int(matid * 255.0)) % float(3) == 2 ? 1.0 : 0.0;");
+			node_shader_write_frag(kong, "var matid_mod: float = float(int(matid * 255.0)) % float(3);");
+			node_shader_write_frag(kong, "var subs: float = 0.0; if (matid_mod == 2.0) { subs = 1.0; }");
 			node_shader_write_frag(kong, "output[1] = float4(float3(subs, subs, subs), 1.0);");
 		}
 		else if (context_raw.viewport_mode == viewport_mode_t.TEXCOORD) {

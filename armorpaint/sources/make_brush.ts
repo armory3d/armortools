@@ -74,7 +74,7 @@ function make_brush_run(kong: node_shader_t) {
 
 		node_shader_write_frag(kong, "var pa: float2 = bsp.xy - binp.xy;");
 		node_shader_write_frag(kong, "var ba: float2 = binplast.xy - binp.xy;");
-		node_shader_write_frag(kong, "float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);");
+		node_shader_write_frag(kong, "var h: float = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);");
 		node_shader_write_frag(kong, "dist = length(pa - ba * h);");
 	}
 
