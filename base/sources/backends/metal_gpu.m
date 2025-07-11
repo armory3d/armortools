@@ -75,7 +75,7 @@ static MTLCullMode convert_cull_mode(gpu_cull_mode_t cull) {
 	}
 }
 
-static MTLPixelFormat convert_render_target_format(gpu_texture_format_t format) {
+static MTLPixelFormat convert_texture_format(gpu_texture_format_t format) {
 	switch (format) {
 	case GPU_TEXTURE_FORMAT_RGBA128:
 		return MTLPixelFormatRGBA32Float;
@@ -92,40 +92,6 @@ static MTLPixelFormat convert_render_target_format(gpu_texture_format_t format) 
 	case GPU_TEXTURE_FORMAT_RGBA32:
 	default:
 		return MTLPixelFormatBGRA8Unorm;
-	}
-}
-
-static MTLPixelFormat convert_image_format(gpu_texture_format_t format) {
-	switch (format) {
-	case GPU_TEXTURE_FORMAT_RGBA32:
-		return MTLPixelFormatRGBA8Unorm;
-	case GPU_TEXTURE_FORMAT_R8:
-		return MTLPixelFormatR8Unorm;
-	case GPU_TEXTURE_FORMAT_R16:
-		return MTLPixelFormatR16Float;
-	case GPU_TEXTURE_FORMAT_R32:
-		return MTLPixelFormatR32Float;
-	case GPU_TEXTURE_FORMAT_RGBA128:
-		return MTLPixelFormatRGBA32Float;
-	case GPU_TEXTURE_FORMAT_RGBA64:
-		return MTLPixelFormatRGBA16Float;
-	case GPU_TEXTURE_FORMAT_D32:
-		return MTLPixelFormatDepth32Float;
-	}
-}
-
-static int format_size(MTLPixelFormat format) {
-	switch (format) {
-	case MTLPixelFormatRGBA32Float:
-		return 16;
-	case MTLPixelFormatRGBA16Float:
-		return 8;
-	case MTLPixelFormatR16Float:
-		return 2;
-	case MTLPixelFormatR8Unorm:
-		return 1;
-	default:
-		return 4;
 	}
 }
 
@@ -160,7 +126,7 @@ void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_t
 		descriptor.width = width;
 		descriptor.height = height;
 		descriptor.depth = 1;
-		descriptor.pixelFormat = convert_render_target_format(format);
+		descriptor.pixelFormat = convert_texture_format(format);
 		descriptor.arrayLength = 1;
 		descriptor.mipmapLevelCount = 1;
 		descriptor.usage = MTLTextureUsageRenderTarget | MTLTextureUsageShaderRead | MTLTextureUsageShaderWrite;
@@ -202,58 +168,20 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
     samplerDesc.dataType = MTLDataTypeSampler;
     samplerDesc.index = 1;
 
-    MTLArgumentDescriptor *textureDesc0 = [MTLArgumentDescriptor argumentDescriptor];
-    textureDesc0.dataType = MTLDataTypeTexture;
-    textureDesc0.index = 2;
-    textureDesc0.textureType = MTLTextureType2D;
+	MTLArgumentDescriptor *textureDesc[16];
+	for (int i = 0; i < 16; ++i) {
+		textureDesc[i] = [MTLArgumentDescriptor argumentDescriptor];
+		textureDesc[i].dataType = MTLDataTypeTexture;
+		textureDesc[i].index = i + 2;
+		textureDesc[i].textureType = MTLTextureType2D;
+	}
 
-	MTLArgumentDescriptor *textureDesc1 = [MTLArgumentDescriptor argumentDescriptor];
-    textureDesc1.dataType = MTLDataTypeTexture;
-    textureDesc1.index = 3;
-    textureDesc1.textureType = MTLTextureType2D;
-
-	MTLArgumentDescriptor *textureDesc2 = [MTLArgumentDescriptor argumentDescriptor];
-    textureDesc2.dataType = MTLDataTypeTexture;
-    textureDesc2.index = 4;
-    textureDesc2.textureType = MTLTextureType2D;
-
-	MTLArgumentDescriptor *textureDesc3 = [MTLArgumentDescriptor argumentDescriptor];
-    textureDesc3.dataType = MTLDataTypeTexture;
-    textureDesc3.index = 5;
-    textureDesc3.textureType = MTLTextureType2D;
-
-	MTLArgumentDescriptor *textureDesc4 = [MTLArgumentDescriptor argumentDescriptor];
-    textureDesc4.dataType = MTLDataTypeTexture;
-    textureDesc4.index = 6;
-    textureDesc4.textureType = MTLTextureType2D;
-
-	MTLArgumentDescriptor *textureDesc5 = [MTLArgumentDescriptor argumentDescriptor];
-    textureDesc5.dataType = MTLDataTypeTexture;
-    textureDesc5.index = 7;
-    textureDesc5.textureType = MTLTextureType2D;
-
-	MTLArgumentDescriptor *textureDesc6 = [MTLArgumentDescriptor argumentDescriptor];
-    textureDesc6.dataType = MTLDataTypeTexture;
-    textureDesc6.index = 8;
-    textureDesc6.textureType = MTLTextureType2D;
-
-	MTLArgumentDescriptor *textureDesc7 = [MTLArgumentDescriptor argumentDescriptor];
-    textureDesc7.dataType = MTLDataTypeTexture;
-    textureDesc7.index = 9;
-    textureDesc7.textureType = MTLTextureType2D;
-
-    NSArray *arguments = [NSArray arrayWithObjects:constantsDesc, samplerDesc, textureDesc0, textureDesc1, textureDesc2, textureDesc3, textureDesc4, textureDesc5, textureDesc6, textureDesc7, nil];
+    NSArray *arguments = [NSArray arrayWithObjects:constantsDesc, samplerDesc, textureDesc[0], textureDesc[1], textureDesc[2], textureDesc[3], textureDesc[4], textureDesc[5], textureDesc[6], textureDesc[7], textureDesc[8], textureDesc[9], textureDesc[10], textureDesc[11], textureDesc[12], textureDesc[13], textureDesc[14], textureDesc[15], nil];
     argument_encoder = [device newArgumentEncoderWithArguments:arguments];
-
-	// device.makeArgumentEncoder(bufferIndex:)
-
 	argument_buffer_step = [argument_encoder encodedLength];
-	// int align = [argument_encoder alignment];
-	// argument_buffer_step += (align - (argument_buffer_step % align)) % align;
 	argument_buffer = [device newBufferWithLength:(argument_buffer_step * 2048) options:MTLResourceStorageModeShared];
 
 	gpu_create_framebuffers(depth_buffer_bits);
-
 	next_drawable();
 }
 
@@ -316,13 +244,14 @@ void gpu_flush() {
 
 	if (gpu_in_use) {
 		command_encoder = [command_buffer renderCommandEncoderWithDescriptor:render_pass_desc];
-		id<MTLRenderPipelineState> pipe = (__bridge id<MTLRenderPipelineState>)pipeline->impl._pipeline;
+		id<MTLRenderPipelineState> pipe = (__bridge id<MTLRenderPipelineState>)current_pipeline->impl._pipeline;
 		[command_encoder setRenderPipelineState:pipe];
-		id<MTLDepthStencilState> depthStencil = (__bridge id<MTLDepthStencilState>)pipeline->impl._depth;
-		[command_encoder setDepthStencilState:depthStencil];
+		id<MTLDepthStencilState> depth_state = (__bridge id<MTLDepthStencilState>)current_pipeline->impl._depth;
+		[command_encoder setDepthStencilState:depth_state];
 		[command_encoder setFrontFacingWinding:MTLWindingClockwise];
-		[command_encoder setCullMode:convert_cull_mode(pipeline->cull_mode)];
-		[command_encoder setVertexBuffer:current_vb offset:0 atIndex:0];
+		[command_encoder setCullMode:convert_cull_mode(current_pipeline->cull_mode)];
+		id<MTLBuffer> vb = (__bridge id<MTLBuffer>)current_vb->impl.metal_buffer;
+		[command_encoder setVertexBuffer:vb offset:0 atIndex:0];
 		[command_encoder setViewport:current_viewport];
 		[command_encoder setScissorRect:current_scissor];
 	}
@@ -398,8 +327,8 @@ void gpu_set_pipeline(gpu_pipeline_t *pipeline) {
 	current_pipeline = pipeline;
 	id<MTLRenderPipelineState> pipe = (__bridge id<MTLRenderPipelineState>)pipeline->impl._pipeline;
 	[command_encoder setRenderPipelineState:pipe];
-	id<MTLDepthStencilState> depthStencil = (__bridge id<MTLDepthStencilState>)pipeline->impl._depth;
-	[command_encoder setDepthStencilState:depthStencil];
+	id<MTLDepthStencilState> depth_state = (__bridge id<MTLDepthStencilState>)pipeline->impl._depth;
+	[command_encoder setDepthStencilState:depth_state];
 	[command_encoder setFrontFacingWinding:MTLWindingClockwise];
 	[command_encoder setCullMode:convert_cull_mode(pipeline->cull_mode)];
 }
@@ -452,9 +381,9 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 
 	// Read buffer
 	id<MTLTexture> tex = (__bridge id<MTLTexture>)render_target->impl._readback;
-	int format_byte_size = format_size([(__bridge id<MTLTexture>)render_target->impl._tex pixelFormat]);
+	int byte_size = format_byte_size(render_target->format);
 	MTLRegion region = MTLRegionMake2D(0, 0, render_target->width, render_target->height);
-	[tex getBytes:data bytesPerRow:format_byte_size * render_target->width fromRegion:region mipmapLevel:0];
+	[tex getBytes:data bytesPerRow:byte_size * render_target->width fromRegion:region mipmapLevel:0];
 }
 
 void gpu_set_constant_buffer(gpu_buffer_t *buffer, int offset, size_t size) {
@@ -486,8 +415,8 @@ void gpu_pipeline_destroy(gpu_pipeline_t *pipeline) {
 	pipe = nil;
 	pipeline->impl._pipeline = NULL;
 
-	id<MTLDepthStencilState> depthStencil = (__bridge_transfer id<MTLDepthStencilState>)pipeline->impl._depth;
-	depthStencil = nil;
+	id<MTLDepthStencilState> depth_state = (__bridge_transfer id<MTLDepthStencilState>)pipeline->impl._depth;
+	depth_state = nil;
 	pipeline->impl._depth = NULL;
 }
 
@@ -510,7 +439,7 @@ void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
 	renderPipelineDesc.fragmentFunction = (__bridge id<MTLFunction>)pipeline->fragment_shader->impl.mtl_function;
 
 	for (int i = 0; i < pipeline->color_attachment_count; ++i) {
-		renderPipelineDesc.colorAttachments[i].pixelFormat = convert_render_target_format(pipeline->color_attachment[i]);
+		renderPipelineDesc.colorAttachments[i].pixelFormat = convert_texture_format(pipeline->color_attachment[i]);
 		renderPipelineDesc.colorAttachments[i].blendingEnabled =
 		    pipeline->blend_source != GPU_BLEND_ONE || pipeline->blend_destination != GPU_BLEND_ZERO ||
 		    pipeline->alpha_blend_source != GPU_BLEND_ONE || pipeline->alpha_blend_destination != GPU_BLEND_ZERO;
@@ -526,7 +455,7 @@ void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
 		    (pipeline->color_write_mask_blue[i] ? MTLColorWriteMaskBlue : 0) |
 			(pipeline->color_write_mask_alpha[i] ? MTLColorWriteMaskAlpha : 0);
 	}
-	renderPipelineDesc.depthAttachmentPixelFormat = depth_attachment_bits > 0 ? MTLPixelFormatDepth32Float : MTLPixelFormatInvalid;
+	renderPipelineDesc.depthAttachmentPixelFormat = pipeline->depth_attachment_bits > 0 ? MTLPixelFormatDepth32Float : MTLPixelFormatInvalid;
 
 	float offset = 0;
 	MTLVertexDescriptor *vertexDescriptor = [[MTLVertexDescriptor alloc] init];
@@ -606,7 +535,11 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	texture->format = format;
 	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
 
-	MTLTextureDescriptor *descriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:convert_image_format((gpu_texture_format_t)format)
+	MTLPixelFormat mtlformat = convert_texture_format(format);
+	if (mtlformat == MTLPixelFormatBGRA8Unorm) {
+		mtlformat = MTLPixelFormatRGBA8Unorm;
+	}
+	MTLTextureDescriptor *descriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:mtlformat
 	                                                                                      width:width
 	                                                                                     height:height
 	                                                                                  mipmapped:NO];
@@ -614,7 +547,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	descriptor.width = width;
 	descriptor.height = height;
 	descriptor.depth = 1;
-	descriptor.pixelFormat = convert_image_format((gpu_texture_format_t)format);
+	descriptor.pixelFormat = mtlformat;
 	descriptor.arrayLength = 1;
 	descriptor.mipmapLevelCount = 1;
 	descriptor.usage = MTLTextureUsageShaderRead; // MTLTextureUsageShaderWrite
@@ -626,8 +559,8 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	       				  mipmapLevel:0
 	             				slice:0
 	         				withBytes:data
-	       				  bytesPerRow:width * format_byte_size(texture)
-				    	bytesPerImage:width * format_byte_size(texture) * height];
+	       				  bytesPerRow:width * format_byte_size(format)
+				    	bytesPerImage:width * format_byte_size(format) * height];
 }
 
 void gpu_texture_destroy(gpu_texture_t *target) {
