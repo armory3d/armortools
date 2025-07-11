@@ -152,6 +152,8 @@ static VkImageLayout convert_texture_state(gpu_texture_state_t state) {
 		return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 	case GPU_TEXTURE_STATE_RENDER_TARGET:
 		return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	case GPU_TEXTURE_STATE_RENDER_TARGET_DEPTH:
+		return VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
 	case GPU_TEXTURE_STATE_PRESENT:
 		return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 	}
@@ -213,10 +215,6 @@ static void memory_type_from_properties(uint32_t type_bits, VkFlags requirements
 }
 
 static VkAccessFlags access_mask(VkImageLayout layout) {
-	// .srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-	// .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-	// .dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
-	// .dstAccessMask = VK_ACCESS_MEMORY_READ_BIT,
 	if (layout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL) {
 		return VK_ACCESS_TRANSFER_READ_BIT;
 	}
@@ -243,7 +241,7 @@ void gpu_barrier(gpu_texture_t *render_target, gpu_texture_state_t state_after) 
 		.newLayout = convert_texture_state(state_after),
 		.image = render_target->impl.image,
 		.subresourceRange = {
-			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+			.aspectMask = render_target->format == GPU_TEXTURE_FORMAT_D32 ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT,
 			.baseMipLevel = 0,
 			.levelCount = 1,
 			.baseArrayLayer = 0,
@@ -251,28 +249,6 @@ void gpu_barrier(gpu_texture_t *render_target, gpu_texture_state_t state_after) 
 		},
 	};
 	vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
-
-	// if (render_target->format == GPU_TEXTURE_FORMAT_D32) {
-	// 	VkImageMemoryBarrier barrier = {
-	// 		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-	// 		.pNext = NULL,
-	// 		.srcAccessMask = access_mask(convert_texture_state(render_target->state)),
-	// 		.dstAccessMask = access_mask(convert_texture_state(state_after)),
-	// 		.oldLayout = convert_texture_state(render_target->state) == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL ? VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL : convert_texture_state(render_target->state),
-	// 		.newLayout = convert_texture_state(state_after) == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL ? VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL : convert_texture_state(state_after),
-	// 		.image = render_target->impl.image,
-	// 		.subresourceRange = {
-	// 			.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
-	// 			.baseMipLevel = 0,
-	// 			.levelCount = 1,
-	// 			.baseArrayLayer = 0,
-	// 			.layerCount = 1,
-	// 		},
-	// 	};
-	// 	vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
-	// }
-	// else {
-	// }
 
 	render_target->state = state_after;
 }

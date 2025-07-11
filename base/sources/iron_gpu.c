@@ -11,6 +11,7 @@ int constant_buffer_index = 0;
 bool gpu_in_use = false;
 gpu_texture_t *current_render_targets[8] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 int current_render_targets_count = 0;
+gpu_texture_t *current_depth_buffer = NULL;
 gpu_texture_t framebuffers[GPU_FRAMEBUFFER_COUNT];
 gpu_texture_t framebuffer_depth;
 int framebuffer_index = 0;
@@ -33,6 +34,9 @@ void gpu_begin(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, 
 			gpu_barrier(current_render_targets[i], GPU_TEXTURE_STATE_SHADER_RESOURCE);
 		}
 	}
+	if (current_depth_buffer != NULL) {
+		gpu_barrier(current_depth_buffer, GPU_TEXTURE_STATE_SHADER_RESOURCE);
+	}
 
 	if (targets == NULL) {
 		current_render_targets[0] = &framebuffers[framebuffer_index];
@@ -44,9 +48,13 @@ void gpu_begin(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, 
 		}
 		current_render_targets_count = count;
 	}
+	current_depth_buffer = depth_buffer;
 
 	for (int i = 0; i < current_render_targets_count; ++i) {
 		gpu_barrier(current_render_targets[i], GPU_TEXTURE_STATE_RENDER_TARGET);
+	}
+	if (current_depth_buffer != NULL) {
+		gpu_barrier(current_depth_buffer, GPU_TEXTURE_STATE_RENDER_TARGET_DEPTH);
 	}
 
 	gpu_begin_internal(targets, count, depth_buffer, flags, color, depth);
