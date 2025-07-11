@@ -173,7 +173,7 @@ static uint32_t traverse(int di, bool count_arrays) {
 			ei += count;
 			len += count;
 			break;
-		default: // Dynamic (type - value)
+		default: // Dynamic (type (array / map / string) - value)
 			ei -= 1; // Undo flag2 read
 			for (uint32_t j = 0; j < count; ++j) {
 				len += traverse(0, count_arrays);
@@ -286,7 +286,7 @@ static void read_store_array(uint32_t count) { // Store in any/i32/../_array_t f
 		store_typed_array(flag, count);
 		bottom = pad(di, PTR_SIZE) + di;
 	}
-	// Dynamic (type - value)
+	// Dynamic (type (array / map / string) - value)
 	else {
 		ei -= 1; // Undo flag read
 
@@ -455,7 +455,7 @@ void armpack_encode_map(uint32_t count) {
 	armpack_write_i32(count);
 }
 
-void armpack_encode_array(uint32_t count) { // any
+void armpack_encode_array(uint32_t count) { // array of arrays / array of maps / array of strings
 	armpack_write_u8(0xdd);
 	armpack_write_u32(count);
 }
