@@ -1121,9 +1121,6 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t * dept
 	gpu_viewport(0, 0, current_render_targets[0]->width, current_render_targets[0]->height);
 	gpu_scissor(0, 0, current_render_targets[0]->width, current_render_targets[0]->height);
 
-	vkCmdSetViewport(command_buffer, 0, 1, &viewport);
-	vkCmdSetScissor(command_buffer, 0, 1, &scissor);
-
 	if (flags != GPU_CLEAR_NONE) {
 		int count = 0;
 		VkClearAttachment attachments[2];
@@ -1867,16 +1864,16 @@ void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_te
 
 void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structure_t *structure) {
 	buffer->count = count;
-	buffer->impl.stride = 0;
+	buffer->stride = 0;
 	for (int i = 0; i < structure->size; ++i) {
 		gpu_vertex_element_t element = structure->elements[i];
-		buffer->impl.stride += gpu_vertex_data_size(element.data);
+		buffer->stride += gpu_vertex_data_size(element.data);
 	}
 
 	VkBufferCreateInfo buf_info = {
 		.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
 		.pNext = NULL,
-		.size = count * buffer->impl.stride,
+		.size = count * buffer->stride,
 		.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
 		.flags = 0,
 	};
@@ -1912,7 +1909,7 @@ void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structur
 }
 
 float *gpu_vertex_buffer_lock(gpu_buffer_t *buffer) {
-	vkMapMemory(device, buffer->impl.mem, 0, buffer->count * buffer->impl.stride, 0, (void **)&buffer->impl.data);
+	vkMapMemory(device, buffer->impl.mem, 0, buffer->count * buffer->stride, 0, (void **)&buffer->impl.data);
 	return buffer->impl.data;
 }
 
@@ -2522,7 +2519,7 @@ void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structu
 				.geometry.triangles.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR,
 				.geometry.triangles.vertexFormat = VK_FORMAT_R16G16B16A16_SNORM,
 				.geometry.triangles.vertexData.deviceAddress = vertex_data_device_address.deviceAddress,
-				.geometry.triangles.vertexStride = vb[i]->impl.stride,
+				.geometry.triangles.vertexStride = vb[i]->stride,
 				.geometry.triangles.maxVertex = vb[i]->count,
 				.geometry.triangles.indexType = VK_INDEX_TYPE_UINT32,
 				.geometry.triangles.indexData.deviceAddress = index_data_device_address.deviceAddress,
