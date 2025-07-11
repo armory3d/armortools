@@ -34,16 +34,10 @@ typedef struct {
 } gpu_texture_impl_t;
 
 typedef struct {
-	int count;
 	VkBuffer buf;
 	VkDeviceMemory mem;
 	VkMemoryAllocateInfo mem_alloc;
 	float *data;
-	int stride;
-	unsigned bufferId;
-	int lastStart;
-	int lastCount;
-	int mySize;
 } gpu_buffer_impl_t;
 
 typedef struct {

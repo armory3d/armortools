@@ -21,12 +21,18 @@ static ID3D12RootSignature *root_signature = NULL;
 static struct ID3D12CommandAllocator *command_allocator;
 static struct ID3D12GraphicsCommandList *command_list;
 static gpu_pipeline_t *current_pipeline;
+static D3D12_VIEWPORT current_viewport;
+static D3D12_RECT current_scissor;
+static gpu_buffer_t *current_vb;
+static gpu_buffer_t *current_ib;
+static D3D12_CPU_DESCRIPTOR_HANDLE target_descriptors[16];
+static D3D12_CPU_DESCRIPTOR_HANDLE depth_handle;
+static D3D12_CPU_DESCRIPTOR_HANDLE *current_depth_handle;
 static gpu_texture_t *current_textures[TEXTURE_COUNT] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
 static bool window_vsync;
-static int index_count = 0;
 static struct ID3D12DescriptorHeap *srv_heap;
 static int srv_heap_index = 0;
 static UINT64 fence_value;
@@ -367,23 +373,21 @@ int gpu_max_bound_textures(void) {
 }
 
 void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, unsigned flags, unsigned color, float depth) {
-
-	D3D12_CPU_DESCRIPTOR_HANDLE target_descriptors[16];
 	for (int i = 0; i < current_render_targets_count; ++i) {
 		current_render_targets[i]->impl.rtv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(current_render_targets[i]->impl.rtv_descriptor_heap, &target_descriptors[i]);
 	}
 
-	gpu_texture_t *target = current_render_targets[0];
-
 	if (depth_buffer != NULL) {
-		D3D12_CPU_DESCRIPTOR_HANDLE depth_handle;
 		depth_buffer->impl.rtv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(depth_buffer->impl.rtv_descriptor_heap, &depth_handle);
-		command_list->lpVtbl->OMSetRenderTargets(command_list, current_render_targets_count, &target_descriptors[0], false, &depth_handle);
+		current_depth_handle = &depth_handle;
 	}
 	else {
-		command_list->lpVtbl->OMSetRenderTargets(command_list, current_render_targets_count, &target_descriptors[0], false, NULL);
+		current_depth_handle = NULL;
 	}
 
+	command_list->lpVtbl->OMSetRenderTargets(command_list, current_render_targets_count, &target_descriptors[0], false, current_depth_handle);
+
+	gpu_texture_t *target = current_render_targets[0];
 	gpu_viewport(0, 0, target->width, target->height);
 	gpu_scissor(0, 0, target->width, target->height);
 
@@ -418,18 +422,25 @@ void gpu_wait() {
 
 void gpu_flush() {
 	command_list->lpVtbl->Close(command_list);
-
 	ID3D12CommandList *command_lists[] = {(ID3D12CommandList *)command_list};
 	queue->lpVtbl->ExecuteCommandLists(queue, 1, command_lists);
 	queue->lpVtbl->Signal(queue, fence, ++fence_value);
-
 	gpu_wait();
-
 	command_allocator->lpVtbl->Reset(command_allocator);
 	command_list->lpVtbl->Reset(command_list, command_allocator, NULL);
+
+	if (gpu_in_use) {
+		command_list->lpVtbl->OMSetRenderTargets(command_list, current_render_targets_count, &target_descriptors[0], false, current_depth_handle);
+		command_list->lpVtbl->SetPipelineState(command_list, current_pipeline->impl.pso);
+		command_list->lpVtbl->SetGraphicsRootSignature(command_list, root_signature);
+		command_list->lpVtbl->IASetVertexBuffers(command_list, 0, 1, (D3D12_VERTEX_BUFFER_VIEW *)&current_vb->impl.vertex_buffer_view);
+		command_list->lpVtbl->IASetIndexBuffer(command_list, (D3D12_INDEX_BUFFER_VIEW *)&current_ib->impl.index_buffer_view);
+		command_list->lpVtbl->RSSetViewports(command_list, 1, &current_viewport);
+		command_list->lpVtbl->RSSetScissorRects(command_list, 1, &current_scissor);
+	}
 }
 
-void gpu_present() {
+void gpu_present_internal() {
 	command_list->lpVtbl->Close(command_list);
 
 	ID3D12CommandList *command_lists[] = {(ID3D12CommandList *)command_list};
@@ -523,11 +534,11 @@ void gpu_internal_set_textures() {
 void gpu_draw_internal() {
 	gpu_internal_set_textures();
 	command_list->lpVtbl->IASetPrimitiveTopology(command_list, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	command_list->lpVtbl->DrawIndexedInstanced(command_list, index_count, 1, 0, 0, 0);
+	command_list->lpVtbl->DrawIndexedInstanced(command_list, current_ib->count, 1, 0, 0, 0);
 }
 
 void gpu_viewport(int x, int y, int width, int height) {
-	D3D12_VIEWPORT viewport = {
+	current_viewport = (D3D12_VIEWPORT){
 		.TopLeftX = (float)x,
 		.TopLeftY = (float)y,
 		.Width = (float)width,
@@ -535,49 +546,45 @@ void gpu_viewport(int x, int y, int width, int height) {
 		.MinDepth = 0.0f,
 		.MaxDepth = 1.0f,
 	};
-	command_list->lpVtbl->RSSetViewports(command_list, 1, &viewport);
+	command_list->lpVtbl->RSSetViewports(command_list, 1, &current_viewport);
 }
 
 void gpu_scissor(int x, int y, int width, int height) {
-	D3D12_RECT scissor = {
+	current_scissor = (D3D12_RECT){
 		.left = x,
 		.top = y,
 		.right = x + width,
 		.bottom = y + height,
 	};
-	command_list->lpVtbl->RSSetScissorRects(command_list, 1, &scissor);
+	command_list->lpVtbl->RSSetScissorRects(command_list, 1, &current_scissor);
 }
 
 void gpu_disable_scissor() {
-	D3D12_RECT scissor = {
+	current_scissor = (D3D12_RECT){
 		.left = 0,
 		.top = 0,
 		.right = current_render_targets[0]->width,
 		.bottom = current_render_targets[0]->height,
 	};
-	command_list->lpVtbl->RSSetScissorRects(command_list, 1, &scissor);
+	command_list->lpVtbl->RSSetScissorRects(command_list, 1, &current_scissor);
 }
 
 void gpu_set_pipeline(gpu_pipeline_t *pipeline) {
 	current_pipeline = pipeline;
 	command_list->lpVtbl->SetPipelineState(command_list, pipeline->impl.pso);
+	command_list->lpVtbl->SetGraphicsRootSignature(command_list, root_signature);
 	for (int i = 0; i < TEXTURE_COUNT; ++i) {
 		current_textures[i] = NULL;
 	}
-	command_list->lpVtbl->SetGraphicsRootSignature(command_list, root_signature);
 }
 
 void gpu_set_vertex_buffer(gpu_buffer_t *buffer) {
-	D3D12_VERTEX_BUFFER_VIEW view = {
-		.BufferLocation = buffer->impl.buffer->lpVtbl->GetGPUVirtualAddress(buffer->impl.buffer),
-		.SizeInBytes = (gpu_vertex_buffer_count(buffer)) * gpu_vertex_buffer_stride(buffer),
-		.StrideInBytes = gpu_vertex_buffer_stride(buffer),
-	};
-	command_list->lpVtbl->IASetVertexBuffers(command_list, 0, 1, &view);
+	current_vb = buffer;
+	command_list->lpVtbl->IASetVertexBuffers(command_list, 0, 1, (D3D12_VERTEX_BUFFER_VIEW *)&buffer->impl.vertex_buffer_view);
 }
 
 void gpu_set_index_buffer(gpu_buffer_t *buffer) {
-	index_count = gpu_index_buffer_count(buffer);
+	current_ib = buffer;
 	command_list->lpVtbl->IASetIndexBuffer(command_list, (D3D12_INDEX_BUFFER_VIEW *)&buffer->impl.index_buffer_view);
 }
 
@@ -949,12 +956,12 @@ void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_te
 void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structure_t *structure) {
 	buffer->count = count;
 
-	buffer->impl.stride = 0;
+	buffer->stride = 0;
 	for (int i = 0; i < structure->size; ++i) {
-		buffer->impl.stride += gpu_vertex_data_size(structure->elements[i].data);
+		buffer->stride += gpu_vertex_data_size(structure->elements[i].data);
 	}
 
-	int upload_buffer_size = buffer->impl.stride * buffer->count;
+	int upload_buffer_size = buffer->stride * buffer->count;
 
 	D3D12_HEAP_PROPERTIES heap_properties = {
 		.Type = D3D12_HEAP_TYPE_UPLOAD,
@@ -983,13 +990,13 @@ void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structur
 
 	buffer->impl.vertex_buffer_view.BufferLocation = buffer->impl.buffer->lpVtbl->GetGPUVirtualAddress(buffer->impl.buffer);
 	buffer->impl.vertex_buffer_view.SizeInBytes = upload_buffer_size;
-	buffer->impl.vertex_buffer_view.StrideInBytes = buffer->impl.stride;
+	buffer->impl.vertex_buffer_view.StrideInBytes = buffer->stride;
 }
 
 float *gpu_vertex_buffer_lock(gpu_buffer_t *buffer) {
 	D3D12_RANGE range = {
 		.Begin = 0,
-		.End = gpu_vertex_buffer_count(buffer) * buffer->impl.stride,
+		.End = buffer->count * buffer->stride,
 	};
 	void *p;
 	buffer->impl.buffer->lpVtbl->Map(buffer->impl.buffer, 0, &range, &p);
@@ -999,17 +1006,9 @@ float *gpu_vertex_buffer_lock(gpu_buffer_t *buffer) {
 void gpu_vertex_buffer_unlock(gpu_buffer_t *buffer) {
 	D3D12_RANGE range = {
 		.Begin = 0,
-		.End = gpu_vertex_buffer_count(buffer) * buffer->impl.stride,
+		.End = buffer->count * buffer->stride,
 	};
 	buffer->impl.buffer->lpVtbl->Unmap(buffer->impl.buffer, 0, &range);
-}
-
-int gpu_vertex_buffer_count(gpu_buffer_t *buffer) {
-	return buffer->count;
-}
-
-int gpu_vertex_buffer_stride(gpu_buffer_t *buffer) {
-	return buffer->impl.stride;
 }
 
 void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size) {
@@ -1066,10 +1065,6 @@ void gpu_constant_buffer_unlock(gpu_buffer_t *buffer) {
 	buffer->data = NULL;
 }
 
-int gpu_constant_buffer_size(gpu_buffer_t *buffer) {
-	return buffer->count;
-}
-
 void gpu_index_buffer_init(gpu_buffer_t *buffer, int count) {
 	buffer->count = count;
 
@@ -1110,14 +1105,10 @@ void gpu_buffer_destroy(gpu_buffer_t *buffer) {
 	buffer->impl.buffer = NULL;
 }
 
-static int gpu_internal_index_buffer_stride(gpu_buffer_t *buffer) {
-	return 4;
-}
-
 void *gpu_index_buffer_lock(gpu_buffer_t *buffer) {
 	D3D12_RANGE range = {
 		.Begin = 0,
-		.End = gpu_index_buffer_count(buffer) * gpu_internal_index_buffer_stride(buffer),
+		.End = buffer->count * 4,
 	};
 	void *p;
 	buffer->impl.buffer->lpVtbl->Map(buffer->impl.buffer, 0, &range, &p);
@@ -1127,13 +1118,9 @@ void *gpu_index_buffer_lock(gpu_buffer_t *buffer) {
 void gpu_index_buffer_unlock(gpu_buffer_t *buffer) {
 	D3D12_RANGE range = {
 		.Begin = 0,
-		.End = gpu_index_buffer_count(buffer) * gpu_internal_index_buffer_stride(buffer),
+		.End = buffer->count * 4,
 	};
 	buffer->impl.buffer->lpVtbl->Unmap(buffer->impl.buffer, 0, &range);
-}
-
-int gpu_index_buffer_count(gpu_buffer_t *buffer) {
-	return buffer->count;
 }
 
 static const wchar_t *hit_group_name = L"hitgroup";
@@ -1657,10 +1644,10 @@ void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structu
 
 	#ifdef is_forge
 	create_srv_ib(_ib_full, _ib_full->count, 0);
-	create_srv_vb(_vb_full, _vb_full->count, vb[0]->impl.stride);
+	create_srv_vb(_vb_full, _vb_full->count, vb[0]->stride);
 	#else
 	create_srv_ib(ib[0], ib[0]->count, 0);
-	create_srv_vb(vb[0], vb[0]->count, vb[0]->impl.stride);
+	create_srv_vb(vb[0], vb[0]->count, vb[0]->stride);
 	#endif
 
 	// Reset the command list for the acceleration structure construction

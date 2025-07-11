@@ -13,7 +13,6 @@ id getMetalLayer(void);
 id getMetalDevice(void);
 id getMetalQueue(void);
 
-
 bool gpu_transpose_mat = true;
 static id<MTLCommandBuffer> command_buffer = nil;
 static id<MTLRenderCommandEncoder> command_encoder = nil;
@@ -21,9 +20,13 @@ static id<MTLArgumentEncoder> argument_encoder = nil;
 static id<MTLBuffer> argument_buffer = nil;
 static id<CAMetalDrawable> drawable;
 static id<MTLSamplerState> linear_sampler;
-static bool has_depth = false;
 static int argument_buffer_step;
-static gpu_buffer_t *current_index_buffer;
+static gpu_buffer_t *current_vb;
+static gpu_buffer_t *current_ib;
+static gpu_pipeline_t *current_pipeline;
+static MTLViewport current_viewport;
+static MTLScissorRect current_scissor;
+static MTLRenderPassDescriptor *render_pass_desc;
 static bool resized = false;
 
 static MTLBlendFactor convert_blending_factor(gpu_blending_factor_t factor) {
@@ -148,7 +151,7 @@ void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_t
 	target->width = width;
 	target->height = height;
 	target->state = GPU_TEXTURE_STATE_RENDER_TARGET;
-	target->impl._texReadback = NULL;
+	target->impl._readback = NULL;
 
 	if (framebuffer_index < 0) {
 		id<MTLDevice> device = getMetalDevice();
@@ -255,48 +258,45 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 }
 
 void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, unsigned flags, unsigned color, float depth) {
-
-	has_depth = depth_buffer != NULL;
-
-	MTLRenderPassDescriptor *desc = [MTLRenderPassDescriptor renderPassDescriptor];
+	render_pass_desc = [MTLRenderPassDescriptor renderPassDescriptor];
 	for (int i = 0; i < current_render_targets_count; ++i) {
-		desc.colorAttachments[i].texture = (__bridge id<MTLTexture>)current_render_targets[i]->impl._tex;
+		render_pass_desc.colorAttachments[i].texture = (__bridge id<MTLTexture>)current_render_targets[i]->impl._tex;
 		if (flags & GPU_CLEAR_COLOR) {
 			float red, green, blue, alpha;
 			iron_color_components(color, &red, &green, &blue, &alpha);
-			desc.colorAttachments[i].loadAction = MTLLoadActionClear;
-			desc.colorAttachments[i].storeAction = MTLStoreActionStore;
-			desc.colorAttachments[i].clearColor = MTLClearColorMake(red, green, blue, alpha);
+			render_pass_desc.colorAttachments[i].loadAction = MTLLoadActionClear;
+			render_pass_desc.colorAttachments[i].storeAction = MTLStoreActionStore;
+			render_pass_desc.colorAttachments[i].clearColor = MTLClearColorMake(red, green, blue, alpha);
 		}
 		else {
-			desc.colorAttachments[i].loadAction = MTLLoadActionLoad;
-			desc.colorAttachments[i].storeAction = MTLStoreActionStore;
-			desc.colorAttachments[i].clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
+			render_pass_desc.colorAttachments[i].loadAction = MTLLoadActionLoad;
+			render_pass_desc.colorAttachments[i].storeAction = MTLStoreActionStore;
+			render_pass_desc.colorAttachments[i].clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
 		}
 	}
 
 	if (depth_buffer != NULL) {
-		desc.depthAttachment.texture = (__bridge id<MTLTexture>)depth_buffer->impl._tex;
+		render_pass_desc.depthAttachment.texture = (__bridge id<MTLTexture>)depth_buffer->impl._tex;
 	}
 
 	if (flags & GPU_CLEAR_DEPTH) {
-		desc.depthAttachment.clearDepth = depth;
-		desc.depthAttachment.loadAction = MTLLoadActionClear;
-		desc.depthAttachment.storeAction = MTLStoreActionStore;
+		render_pass_desc.depthAttachment.clearDepth = depth;
+		render_pass_desc.depthAttachment.loadAction = MTLLoadActionClear;
+		render_pass_desc.depthAttachment.storeAction = MTLStoreActionStore;
 	}
 	else {
-		desc.depthAttachment.clearDepth = 1;
-		desc.depthAttachment.loadAction = MTLLoadActionLoad;
-		desc.depthAttachment.storeAction = MTLStoreActionStore;
+		render_pass_desc.depthAttachment.clearDepth = 1;
+		render_pass_desc.depthAttachment.loadAction = MTLLoadActionLoad;
+		render_pass_desc.depthAttachment.storeAction = MTLStoreActionStore;
 	}
 
-	id<MTLCommandQueue> commandQueue = getMetalQueue();
+	id<MTLCommandQueue> queue = getMetalQueue();
 
 	if (command_buffer == nil) {
-		command_buffer = [commandQueue commandBuffer];
+		command_buffer = [queue commandBuffer];
 	}
 
-	command_encoder = [command_buffer renderCommandEncoderWithDescriptor:desc];
+	command_encoder = [command_buffer renderCommandEncoderWithDescriptor:render_pass_desc];
 }
 
 void gpu_end_internal() {
@@ -311,11 +311,24 @@ void gpu_wait() {
 void gpu_flush() {
 	[command_buffer commit];
 	gpu_wait();
-	id<MTLCommandQueue> commandQueue = getMetalQueue();
-	command_buffer = [commandQueue commandBuffer];
+	id<MTLCommandQueue> queue = getMetalQueue();
+	command_buffer = [queue commandBuffer];
+
+	if (gpu_in_use) {
+		command_encoder = [command_buffer renderCommandEncoderWithDescriptor:render_pass_desc];
+		id<MTLRenderPipelineState> pipe = (__bridge id<MTLRenderPipelineState>)pipeline->impl._pipeline;
+		[command_encoder setRenderPipelineState:pipe];
+		id<MTLDepthStencilState> depthStencil = (__bridge id<MTLDepthStencilState>)pipeline->impl._depth;
+		[command_encoder setDepthStencilState:depthStencil];
+		[command_encoder setFrontFacingWinding:MTLWindingClockwise];
+		[command_encoder setCullMode:convert_cull_mode(pipeline->cull_mode)];
+		[command_encoder setVertexBuffer:current_vb offset:0 atIndex:0];
+		[command_encoder setViewport:current_viewport];
+		[command_encoder setScissorRect:current_scissor];
+	}
 }
 
-void gpu_present() {
+void gpu_present_internal() {
 	[command_buffer presentDrawable:drawable];
 	[command_buffer commit];
 	[command_buffer waitUntilCompleted];
@@ -345,76 +358,67 @@ int gpu_max_bound_textures(void) {
 }
 
 void gpu_draw_internal() {
-	id<MTLBuffer> indexBuffer = (__bridge id<MTLBuffer>)current_index_buffer->impl.metal_buffer;
+	id<MTLBuffer> index_buffer = (__bridge id<MTLBuffer>)current_ib->impl.metal_buffer;
 	[command_encoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
-	                    		indexCount:gpu_index_buffer_count(current_index_buffer)
+	                    		indexCount:current_ib->count
 	                     		 indexType:MTLIndexTypeUInt32
-	                   		   indexBuffer:indexBuffer
+	                   		   indexBuffer:index_buffer
 	             		 indexBufferOffset:0];
 }
 
 void gpu_viewport(int x, int y, int width, int height) {
-	MTLViewport viewport;
-	viewport.originX = x;
-	viewport.originY = y;
-	viewport.width = width;
-	viewport.height = height;
-	viewport.znear = 0.1;
-	viewport.zfar = 100.0;
-	[command_encoder setViewport:viewport];
+	current_viewport.originX = x;
+	current_viewport.originY = y;
+	current_viewport.width = width;
+	current_viewport.height = height;
+	current_viewport.znear = 0.1;
+	current_viewport.zfar = 100.0;
+	[command_encoder setViewport:current_viewport];
 }
 
 void gpu_scissor(int x, int y, int width, int height) {
-	MTLScissorRect scissor;
-	scissor.x = x;
-	scissor.y = y;
+	current_scissor.x = x;
+	current_scissor.y = y;
 	int target_w = current_render_targets[0]->width;
 	int target_h = current_render_targets[0]->height;
-	scissor.width = (x + width <= target_w) ? width : target_w - x;
-	scissor.height = (y + height <= target_h) ? height : target_h - y;
-	[command_encoder setScissorRect:scissor];
+	current_scissor.width = (x + width <= target_w) ? width : target_w - x;
+	current_scissor.height = (y + height <= target_h) ? height : target_h - y;
+	[command_encoder setScissorRect:current_scissor];
 }
 
 void gpu_disable_scissor() {
-	MTLScissorRect scissor;
-	scissor.x = 0;
-	scissor.y = 0;
-	scissor.width = current_render_targets[0]->width;
-	scissor.height = current_render_targets[0]->height;
-	[command_encoder setScissorRect:scissor];
+	current_scissor.x = 0;
+	current_scissor.y = 0;
+	current_scissor.width = current_render_targets[0]->width;
+	current_scissor.height = current_render_targets[0]->height;
+	[command_encoder setScissorRect:current_scissor];
 }
 
 void gpu_set_pipeline(gpu_pipeline_t *pipeline) {
-	if (has_depth) {
-		id<MTLRenderPipelineState> pipe = (__bridge id<MTLRenderPipelineState>)pipeline->impl._pipelineDepth;
-		[command_encoder setRenderPipelineState:pipe];
-		id<MTLDepthStencilState> depthStencil = (__bridge id<MTLDepthStencilState>)pipeline->impl._depthStencil;
-		[command_encoder setDepthStencilState:depthStencil];
-	}
-	else {
-		id<MTLRenderPipelineState> pipe = (__bridge id<MTLRenderPipelineState>)pipeline->impl._pipeline;
-		[command_encoder setRenderPipelineState:pipe];
-		id<MTLDepthStencilState> depthStencil = (__bridge id<MTLDepthStencilState>)pipeline->impl._depthStencilNone;
-		[command_encoder setDepthStencilState:depthStencil];
-	}
+	current_pipeline = pipeline;
+	id<MTLRenderPipelineState> pipe = (__bridge id<MTLRenderPipelineState>)pipeline->impl._pipeline;
+	[command_encoder setRenderPipelineState:pipe];
+	id<MTLDepthStencilState> depthStencil = (__bridge id<MTLDepthStencilState>)pipeline->impl._depth;
+	[command_encoder setDepthStencilState:depthStencil];
 	[command_encoder setFrontFacingWinding:MTLWindingClockwise];
 	[command_encoder setCullMode:convert_cull_mode(pipeline->cull_mode)];
 }
 
-void gpu_set_vertex_buffer(gpu_buffer_t *buf) {
-	id<MTLBuffer> buffer = (__bridge id<MTLBuffer>)buf->impl.metal_buffer;
-	[command_encoder setVertexBuffer:buffer offset:0 atIndex:0];
+void gpu_set_vertex_buffer(gpu_buffer_t *buffer) {
+	current_vb = buffer;
+	id<MTLBuffer> buf = (__bridge id<MTLBuffer>)buffer->impl.metal_buffer;
+	[command_encoder setVertexBuffer:buf offset:0 atIndex:0];
 }
 
 void gpu_set_index_buffer(gpu_buffer_t *buffer) {
-	current_index_buffer = buffer;
+	current_ib = buffer;
 }
 
 void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	gpu_flush();
 
 	// Create readback buffer
-	if (render_target->impl._texReadback == NULL) {
+	if (render_target->impl._readback == NULL) {
 		id<MTLDevice> device = getMetalDevice();
 		MTLTextureDescriptor *descriptor = [MTLTextureDescriptor new];
 		descriptor.textureType = MTLTextureType2D;
@@ -426,19 +430,19 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 		descriptor.mipmapLevelCount = 1;
 		descriptor.usage = MTLTextureUsageUnknown;
 		descriptor.resourceOptions = MTLResourceStorageModeShared;
-		render_target->impl._texReadback = (__bridge_retained void *)[device newTextureWithDescriptor:descriptor];
+		render_target->impl._readback = (__bridge_retained void *)[device newTextureWithDescriptor:descriptor];
 	}
 
 	// Copy render target to readback buffer
-	id<MTLCommandQueue> commandQueue = getMetalQueue();
-	id<MTLCommandBuffer> commandBuffer = [commandQueue commandBuffer];
+	id<MTLCommandQueue> queue = getMetalQueue();
+	id<MTLCommandBuffer> commandBuffer = [queue commandBuffer];
 	id<MTLBlitCommandEncoder> commandEncoder = [commandBuffer blitCommandEncoder];
 	[commandEncoder copyFromTexture:(__bridge id<MTLTexture>)render_target->impl._tex
 	                    sourceSlice:0
 	                    sourceLevel:0
 	                   sourceOrigin:MTLOriginMake(0, 0, 0)
 	                     sourceSize:MTLSizeMake(render_target->width, render_target->height, 1)
-	                      toTexture:(__bridge id<MTLTexture>)render_target->impl._texReadback
+	                      toTexture:(__bridge id<MTLTexture>)render_target->impl._readback
 	               destinationSlice:0
 	               destinationLevel:0
 	              destinationOrigin:MTLOriginMake(0, 0, 0)];
@@ -447,7 +451,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	[commandBuffer waitUntilCompleted];
 
 	// Read buffer
-	id<MTLTexture> tex = (__bridge id<MTLTexture>)render_target->impl._texReadback;
+	id<MTLTexture> tex = (__bridge id<MTLTexture>)render_target->impl._readback;
 	int format_byte_size = format_size([(__bridge id<MTLTexture>)render_target->impl._tex pixelFormat]);
 	MTLRegion region = MTLRegionMake2D(0, 0, render_target->width, render_target->height);
 	[tex getBytes:data bytesPerRow:format_byte_size * render_target->width fromRegion:region mipmapLevel:0];
@@ -482,17 +486,9 @@ void gpu_pipeline_destroy(gpu_pipeline_t *pipeline) {
 	pipe = nil;
 	pipeline->impl._pipeline = NULL;
 
-	id<MTLRenderPipelineState> pipeDepth = (__bridge_transfer id<MTLRenderPipelineState>)pipeline->impl._pipelineDepth;
-	pipeDepth = nil;
-	pipeline->impl._pipelineDepth = NULL;
-
-	id<MTLDepthStencilState> depthStencil = (__bridge_transfer id<MTLDepthStencilState>)pipeline->impl._depthStencil;
+	id<MTLDepthStencilState> depthStencil = (__bridge_transfer id<MTLDepthStencilState>)pipeline->impl._depth;
 	depthStencil = nil;
-	pipeline->impl._depthStencil = NULL;
-
-	id<MTLDepthStencilState> depthStencilNone = (__bridge_transfer id<MTLDepthStencilState>)pipeline->impl._depthStencilNone;
-	depthStencilNone = nil;
-	pipeline->impl._depthStencilNone = NULL;
+	pipeline->impl._depth = NULL;
 }
 
 void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
@@ -503,15 +499,15 @@ void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
 		iron_error("%s", error.localizedDescription.UTF8String);
 	}
 
-	pipeline->vertex_shader->impl.mtlFunction = (__bridge_retained void *)[library newFunctionWithName:[NSString stringWithCString:pipeline->vertex_shader->impl.name encoding:NSUTF8StringEncoding]];
-	assert(pipeline->vertex_shader->impl.mtlFunction);
+	pipeline->vertex_shader->impl.mtl_function = (__bridge_retained void *)[library newFunctionWithName:[NSString stringWithCString:pipeline->vertex_shader->impl.name encoding:NSUTF8StringEncoding]];
+	assert(pipeline->vertex_shader->impl.mtl_function);
 
-	pipeline->fragment_shader->impl.mtlFunction = (__bridge_retained void *)[library newFunctionWithName:[NSString stringWithCString:pipeline->fragment_shader->impl.name encoding:NSUTF8StringEncoding]];
-	assert(pipeline->fragment_shader->impl.mtlFunction);
+	pipeline->fragment_shader->impl.mtl_function = (__bridge_retained void *)[library newFunctionWithName:[NSString stringWithCString:pipeline->fragment_shader->impl.name encoding:NSUTF8StringEncoding]];
+	assert(pipeline->fragment_shader->impl.mtl_function);
 
 	MTLRenderPipelineDescriptor *renderPipelineDesc = [[MTLRenderPipelineDescriptor alloc] init];
-	renderPipelineDesc.vertexFunction = (__bridge id<MTLFunction>)pipeline->vertex_shader->impl.mtlFunction;
-	renderPipelineDesc.fragmentFunction = (__bridge id<MTLFunction>)pipeline->fragment_shader->impl.mtlFunction;
+	renderPipelineDesc.vertexFunction = (__bridge id<MTLFunction>)pipeline->vertex_shader->impl.mtl_function;
+	renderPipelineDesc.fragmentFunction = (__bridge id<MTLFunction>)pipeline->fragment_shader->impl.mtl_function;
 
 	for (int i = 0; i < pipeline->color_attachment_count; ++i) {
 		renderPipelineDesc.colorAttachments[i].pixelFormat = convert_render_target_format(pipeline->color_attachment[i]);
@@ -530,7 +526,7 @@ void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
 		    (pipeline->color_write_mask_blue[i] ? MTLColorWriteMaskBlue : 0) |
 			(pipeline->color_write_mask_alpha[i] ? MTLColorWriteMaskAlpha : 0);
 	}
-	renderPipelineDesc.depthAttachmentPixelFormat = MTLPixelFormatInvalid;
+	renderPipelineDesc.depthAttachmentPixelFormat = depth_attachment_bits > 0 ? MTLPixelFormatDepth32Float : MTLPixelFormatInvalid;
 
 	float offset = 0;
 	MTLVertexDescriptor *vertexDescriptor = [[MTLVertexDescriptor alloc] init];
@@ -576,27 +572,16 @@ void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
 	                                     reflection:&reflection
 	                                          error:&errors];
 
-	renderPipelineDesc.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
-	pipeline->impl._pipelineDepth = (__bridge_retained void *)[
-		device newRenderPipelineStateWithDescriptor:renderPipelineDesc
-	                                        options:MTLPipelineOptionBufferTypeInfo
-	                                     reflection:&reflection
-	                                          error:&errors];
-
 	MTLDepthStencilDescriptor *depthStencilDescriptor = [MTLDepthStencilDescriptor new];
 	depthStencilDescriptor.depthCompareFunction = convert_compare_mode(pipeline->depth_mode);
 	depthStencilDescriptor.depthWriteEnabled = pipeline->depth_write;
-	pipeline->impl._depthStencil = (__bridge_retained void *)[device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
-
-	depthStencilDescriptor.depthCompareFunction = MTLCompareFunctionAlways;
-	depthStencilDescriptor.depthWriteEnabled = false;
-	pipeline->impl._depthStencilNone = (__bridge_retained void *)[device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
+	pipeline->impl._depth = (__bridge_retained void *)[device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
 }
 
 void gpu_shader_destroy(gpu_shader_t *shader) {
-	id<MTLFunction> function = (__bridge_transfer id<MTLFunction>)shader->impl.mtlFunction;
+	id<MTLFunction> function = (__bridge_transfer id<MTLFunction>)shader->impl.mtl_function;
 	function = nil;
-	shader->impl.mtlFunction = NULL;
+	shader->impl.mtl_function = NULL;
 }
 
 void gpu_shader_init(gpu_shader_t *shader, const void *data, size_t length, gpu_shader_type_t type) {
@@ -650,9 +635,9 @@ void gpu_texture_destroy(gpu_texture_t *target) {
 	tex = nil;
 	target->impl._tex = NULL;
 
-	id<MTLTexture> texReadback = (__bridge_transfer id<MTLTexture>)target->impl._texReadback;
-	texReadback = nil;
-	target->impl._texReadback = NULL;
+	id<MTLTexture> readback = (__bridge_transfer id<MTLTexture>)target->impl._readback;
+	readback = nil;
+	target->impl._readback = NULL;
 }
 
 void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format) {
@@ -667,14 +652,14 @@ void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structur
 	buffer->count = count;
 	for (int i = 0; i < structure->size; ++i) {
 		gpu_vertex_element_t element = structure->elements[i];
-		buffer->impl.myStride += gpu_vertex_data_size(element.data);
+		buffer->stride += gpu_vertex_data_size(element.data);
 	}
 
 	id<MTLDevice> device = getMetalDevice();
 	MTLResourceOptions options = MTLResourceCPUCacheModeWriteCombined;
 	options |= MTLResourceStorageModeShared;
 
-	id<MTLBuffer> buf = [device newBufferWithLength:count * buffer->impl.myStride options:options];
+	id<MTLBuffer> buf = [device newBufferWithLength:count * buffer->stride options:options];
 	buffer->impl.metal_buffer = (__bridge_retained void *)buf;
 }
 
@@ -687,16 +672,8 @@ float *gpu_vertex_buffer_lock(gpu_buffer_t *buf) {
 void gpu_vertex_buffer_unlock(gpu_buffer_t *buf) {
 }
 
-int gpu_vertex_buffer_count(gpu_buffer_t *buffer) {
-	return buffer->count;
-}
-
-int gpu_vertex_buffer_stride(gpu_buffer_t *buffer) {
-	return buffer->impl.myStride;
-}
-
 void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size) {
-	buffer->impl.count = size;
+	buffer->count = size;
 	buffer->data = NULL;
 	buffer->impl.metal_buffer = (__bridge_retained void *)[getMetalDevice() newBufferWithLength:size options:MTLResourceOptionCPUCacheModeDefault];
 }
@@ -716,12 +693,8 @@ void gpu_constant_buffer_lock(gpu_buffer_t *buffer, int start, int count) {
 void gpu_constant_buffer_unlock(gpu_buffer_t *buffer) {
 }
 
-int gpu_constant_buffer_size(gpu_buffer_t *buffer) {
-	return buffer->impl.count;
-}
-
 void gpu_index_buffer_init(gpu_buffer_t *buffer, int indexCount) {
-	buffer->impl.count = indexCount;
+	buffer->count = indexCount;
 
 	id<MTLDevice> device = getMetalDevice();
 	MTLResourceOptions options = MTLResourceCPUCacheModeWriteCombined;
@@ -745,10 +718,6 @@ void *gpu_index_buffer_lock(gpu_buffer_t *buffer) {
 }
 
 void gpu_index_buffer_unlock(gpu_buffer_t *buffer) {
-}
-
-int gpu_index_buffer_count(gpu_buffer_t *buffer) {
-	return buffer->impl.count;
 }
 
 typedef struct inst {
@@ -910,8 +879,8 @@ void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structu
 	descriptor.indexType = MTLIndexTypeUInt32;
 	descriptor.indexBuffer = (__bridge id<MTLBuffer>)ib[0]->impl.metal_buffer;
 	descriptor.vertexBuffer = (__bridge id<MTLBuffer>)vb[0]->impl.metal_buffer;
-	descriptor.vertexStride = vb[0]->impl.myStride;
-	descriptor.triangleCount = ib[0]->impl.count / 3;
+	descriptor.vertexStride = vb[0]->stride;
+	descriptor.triangleCount = ib[0]->count / 3;
 	descriptor.vertexFormat = MTLAttributeFormatShort4Normalized;
 
 	MTLPrimitiveAccelerationStructureDescriptor *accel_descriptor = [MTLPrimitiveAccelerationStructureDescriptor descriptor];

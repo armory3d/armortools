@@ -8,6 +8,8 @@ static gpu_buffer_t constant_buffer;
 static bool gpu_thrown = false;
 
 int constant_buffer_index = 0;
+int draw_calls = 0;
+int draw_calls_last = 0;
 bool gpu_in_use = false;
 gpu_texture_t *current_render_targets[8] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 int current_render_targets_count = 0;
@@ -64,11 +66,18 @@ void gpu_draw() {
 	gpu_constant_buffer_unlock(&constant_buffer);
 	gpu_set_constant_buffer(&constant_buffer, constant_buffer_index * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
 	gpu_draw_internal();
-	++constant_buffer_index;
+
+	constant_buffer_index++;
 	if (constant_buffer_index >= CONSTANT_BUFFER_MULTIPLE) {
 		constant_buffer_index = 0;
-		// gpu_wait();
 	}
+
+	draw_calls++;
+	if (draw_calls + draw_calls_last >= CONSTANT_BUFFER_MULTIPLE) {
+		draw_calls = draw_calls_last = constant_buffer_index = 0;
+		gpu_flush();
+	}
+
 	gpu_constant_buffer_lock(&constant_buffer, constant_buffer_index * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
 }
 
@@ -78,8 +87,13 @@ void gpu_end() {
 		iron_log("Begin before you end");
 	}
 	gpu_in_use = false;
-
 	gpu_end_internal();
+}
+
+void gpu_present() {
+	gpu_present_internal();
+	draw_calls_last = draw_calls;
+	draw_calls = 0;
 }
 
 void gpu_resize(int width, int height) {

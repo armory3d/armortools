@@ -930,7 +930,7 @@ u32_array_t *gpu_lock_index_buffer(gpu_buffer_t *buffer) {
 	void *vertices = gpu_index_buffer_lock(buffer);
 	u32_array_t *ar = (u32_array_t *)malloc(sizeof(u32_array_t));
 	ar->buffer = vertices;
-	ar->length = gpu_index_buffer_count(buffer);
+	ar->length = buffer->count;
 	return ar;
 }
 
@@ -949,7 +949,7 @@ buffer_t *gpu_lock_vertex_buffer(gpu_buffer_t *buffer) {
 	float *vertices = gpu_vertex_buffer_lock(buffer);
 	buffer_t *b = (buffer_t *)malloc(sizeof(buffer_t));
 	b->buffer = vertices;
-	b->length = buffer->count * gpu_vertex_buffer_stride(buffer);
+	b->length = buffer->count * buffer->stride;
 	return b;
 }
 
@@ -1362,9 +1362,9 @@ buffer_t *gpu_get_texture_pixels(gpu_texture_t *image) {
 	image->impl.readback->lpVtbl->Release(image->impl.readback);
 	image->impl.readback = NULL;
 	#elif defined(IRON_METAL)
-	// id<MTLTexture> texReadback = (__bridge_transfer id<MTLTexture>)image->impl._texReadback;
-	// texReadback = nil;
-	// image->impl._texReadback = NULL;
+	// id<MTLTexture> readback = (__bridge_transfer id<MTLTexture>)image->impl._readback;
+	// readback = nil;
+	// image->impl._readback = NULL;
 	#endif
 
 	return image->buffer;
@@ -2104,7 +2104,7 @@ void iron_raytrace_set_textures(gpu_texture_t *tex0, gpu_texture_t *tex1, gpu_te
 
 void iron_raytrace_dispatch_rays(gpu_texture_t *render_target, buffer_t *buffer) {
 	float *cb = (float *)buffer->buffer;
-	gpu_constant_buffer_lock(&constant_buffer, 0, gpu_constant_buffer_size(&constant_buffer));
+	gpu_constant_buffer_lock(&constant_buffer, 0, constant_buffer.count);
 	for (int i = 0; i < constant_buffer_size; ++i) {
 		float *floats = (float *)(&constant_buffer.data[i * 4]);
 		floats[0] = cb[i];

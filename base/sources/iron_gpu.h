@@ -90,6 +90,7 @@ typedef struct gpu_texture {
 
 typedef struct gpu_buffer {
 	int count;
+	int stride;
 	uint8_t *data;
 	gpu_buffer_impl_t impl;
 } gpu_buffer_t;
@@ -148,6 +149,7 @@ void gpu_end_internal(void);
 void gpu_wait(void);
 void gpu_flush(void);
 void gpu_present(void);
+void gpu_present_internal(void);
 void gpu_barrier(gpu_texture_t *render_target, gpu_texture_state_t state_after);
 void gpu_create_framebuffers(int depth_buffer_bits);
 void gpu_init(int depth_buffer_bits, bool vsync);
@@ -178,18 +180,14 @@ void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height
 void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structure_t *structure);
 float *gpu_vertex_buffer_lock(gpu_buffer_t *buffer);
 void gpu_vertex_buffer_unlock(gpu_buffer_t *buffer);
-int gpu_vertex_buffer_count(gpu_buffer_t *buffer);
-int gpu_vertex_buffer_stride(gpu_buffer_t *buffer);
 void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size);
 void gpu_constant_buffer_destroy(gpu_buffer_t *buffer);
 void gpu_constant_buffer_lock(gpu_buffer_t *buffer, int start, int count);
 void gpu_constant_buffer_unlock(gpu_buffer_t *buffer);
-int gpu_constant_buffer_size(gpu_buffer_t *buffer);
 void gpu_index_buffer_init(gpu_buffer_t *buffer, int count);
 void gpu_buffer_destroy(gpu_buffer_t *buffer);
 void *gpu_index_buffer_lock(gpu_buffer_t *buffer);
 void gpu_index_buffer_unlock(gpu_buffer_t *buffer);
-int gpu_index_buffer_count(gpu_buffer_t *buffer);
 
 void gpu_pipeline_init(gpu_pipeline_t *pipeline);
 void gpu_internal_pipeline_init(gpu_pipeline_t *pipeline);

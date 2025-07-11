@@ -6,7 +6,6 @@
 
 typedef struct {
 	WGPUBuffer buffer;
-	int count;
 	int stride;
 } gpu_buffer_impl_t;
 

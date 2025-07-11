@@ -28,6 +28,10 @@ static VkSemaphore framebuffer_available_semaphore;
 static VkSemaphore rendering_finished_semaphore;
 static VkFence fence;
 static gpu_pipeline_t *current_pipeline = NULL;
+static VkViewport current_viewport;
+static VkRect2D current_scissor;
+static gpu_buffer_t *current_vb;
+static gpu_buffer_t *current_ib;
 static VkDescriptorSetLayout descriptor_layout;
 static VkDescriptorSet descriptor_sets[MAX_DESCRIPTOR_SETS];
 static VkRenderingInfo current_rendering_info;
@@ -35,7 +39,6 @@ static VkRenderingAttachmentInfo current_color_attachment_infos[8];
 static VkRenderingAttachmentInfo current_depth_attachment_info;
 static VkPhysicalDeviceMemoryProperties memory_properties;
 static VkSampler immutable_sampler;
-static int index_count = 0;
 static VkCommandBuffer command_buffer;
 
 static VkInstance instance;
@@ -1050,25 +1053,6 @@ int gpu_max_bound_textures(void) {
 	return props.limits.maxPerStageDescriptorSamplers;
 }
 
-static void set_viewport_and_scissor() {
-	VkViewport viewport = {
-		.x = 0,
-		.y = (float)current_render_targets[0]->height,
-		.width = (float)current_render_targets[0]->width,
-		.height = -(float)current_render_targets[0]->height,
-		.minDepth = (float)0.0f,
-		.maxDepth = (float)1.0f,
-	};
-	VkRect2D scissor = {
-		.extent.width = current_render_targets[0]->width,
-		.extent.height = current_render_targets[0]->height,
-		.offset.x = 0,
-		.offset.y = 0,
-	};
-	vkCmdSetViewport(command_buffer, 0, 1, &viewport);
-	vkCmdSetScissor(command_buffer, 0, 1, &scissor);
-}
-
 void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t * depth_buffer, unsigned flags, unsigned color, float depth) {
 	if (!framebuffer_acquired) {
 		acquire_next_image();
@@ -1134,11 +1118,11 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t * dept
 	};
 	vkCmdBeginRendering(command_buffer, &current_rendering_info);
 
-	set_viewport_and_scissor();
+	gpu_viewport(0, 0, current_render_targets[0]->width, current_render_targets[0]->height);
+	gpu_scissor(0, 0, current_render_targets[0]->width, current_render_targets[0]->height);
 
-	if (current_pipeline != NULL) {
-		vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, current_pipeline->impl.pipeline);
-	}
+	vkCmdSetViewport(command_buffer, 0, 1, &viewport);
+	vkCmdSetScissor(command_buffer, 0, 1, &scissor);
 
 	if (flags != GPU_CLEAR_NONE) {
 		int count = 0;
@@ -1196,7 +1180,6 @@ void gpu_flush() {
 		.commandBufferCount = 1,
 		.pCommandBuffers = &command_buffer,
 	};
-
 	vkQueueSubmit(queue, 1, &submit_info, fence);
 	gpu_wait();
 
@@ -1208,9 +1191,22 @@ void gpu_flush() {
 		.pInheritanceInfo = NULL,
 	};
 	vkBeginCommandBuffer(command_buffer, &begin_info);
+
+	if (gpu_in_use) {
+		vkCmdBeginRendering(command_buffer, &current_rendering_info);
+		vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, current_pipeline->impl.pipeline);
+		VkBuffer buffers[1];
+		VkDeviceSize offsets[1];
+		buffers[0] = current_vb->impl.buf;
+		offsets[0] = (VkDeviceSize)(0);
+		vkCmdBindVertexBuffers(command_buffer, 0, 1, buffers, offsets);
+		vkCmdBindIndexBuffer(command_buffer, current_ib->impl.buf, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdSetViewport(command_buffer, 0, 1, &current_viewport);
+		vkCmdSetScissor(command_buffer, 0, 1, &current_scissor);
+	}
 }
 
-void gpu_present() {
+void gpu_present_internal() {
 	vkEndCommandBuffer(command_buffer);
 	vkResetFences(device, 1, &fence);
 
@@ -1255,37 +1251,37 @@ void gpu_present() {
 }
 
 void gpu_draw_internal() {
-	vkCmdDrawIndexed(command_buffer, index_count, 1, 0, 0, 0);
+	vkCmdDrawIndexed(command_buffer, current_ib->count, 1, 0, 0, 0);
 }
 
 void gpu_viewport(int x, int y, int width, int height) {
-	VkViewport viewport;
-	memset(&viewport, 0, sizeof(viewport));
-	viewport.x = (float)x;
-	viewport.y = y + (float)height;
-	viewport.width = (float)width;
-	viewport.height = (float)-height;
-	viewport.minDepth = (float)0.0f;
-	viewport.maxDepth = (float)1.0f;
-	vkCmdSetViewport(command_buffer, 0, 1, &viewport);
+	current_viewport = (VkViewport){
+		.x = (float)x,
+		.y = y + (float)height,
+		.width = (float)width,
+		.height = (float)-height,
+		.minDepth = (float)0.0f,
+		.maxDepth = (float)1.0f,
+	};
+	vkCmdSetViewport(command_buffer, 0, 1, &current_viewport);
 }
 
 void gpu_scissor(int x, int y, int width, int height) {
-	VkRect2D scissor;
-	memset(&scissor, 0, sizeof(scissor));
-	scissor.extent.width = width;
-	scissor.extent.height = height;
-	scissor.offset.x = x;
-	scissor.offset.y = y;
-	vkCmdSetScissor(command_buffer, 0, 1, &scissor);
+	current_scissor = (VkRect2D){
+		.offset.x = x,
+		.offset.y = y,
+		.extent.width = width,
+		.extent.height = height,
+	};
+	vkCmdSetScissor(command_buffer, 0, 1, &current_scissor);
 }
 
 void gpu_disable_scissor() {
-	VkRect2D scissor;
-	memset(&scissor, 0, sizeof(scissor));
-	scissor.extent.width = current_render_targets[0]->width;
-	scissor.extent.height = current_render_targets[0]->height;
-	vkCmdSetScissor(command_buffer, 0, 1, &scissor);
+	current_scissor = (VkRect2D){
+		.extent.width = current_render_targets[0]->width,
+		.extent.height = current_render_targets[0]->height,
+	};
+	vkCmdSetScissor(command_buffer, 0, 1, &current_scissor);
 }
 
 void gpu_set_pipeline(gpu_pipeline_t *pipeline) {
@@ -1294,6 +1290,7 @@ void gpu_set_pipeline(gpu_pipeline_t *pipeline) {
 }
 
 void gpu_set_vertex_buffer(gpu_buffer_t *buffer) {
+	current_vb = buffer;
 	VkBuffer buffers[1];
 	VkDeviceSize offsets[1];
 	buffers[0] = buffer->impl.buf;
@@ -1302,7 +1299,7 @@ void gpu_set_vertex_buffer(gpu_buffer_t *buffer) {
 }
 
 void gpu_set_index_buffer(gpu_buffer_t *buffer) {
-	index_count = gpu_index_buffer_count(buffer);
+	current_ib = buffer;
 	vkCmdBindIndexBuffer(command_buffer, buffer->impl.buf, 0, VK_INDEX_TYPE_UINT32);
 }
 
@@ -1923,16 +1920,8 @@ void gpu_vertex_buffer_unlock(gpu_buffer_t *buffer) {
 	vkUnmapMemory(device, buffer->impl.mem);
 }
 
-int gpu_vertex_buffer_count(gpu_buffer_t *buffer) {
-	return buffer->count;
-}
-
-int gpu_vertex_buffer_stride(gpu_buffer_t *buffer) {
-	return buffer->impl.stride;
-}
-
 void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size) {
-	buffer->impl.count = size;
+	buffer->count = size;
 	buffer->data = NULL;
 
 	VkBufferCreateInfo buf_info;
@@ -1977,10 +1966,6 @@ void gpu_constant_buffer_lock(gpu_buffer_t *buffer, int start, int count) {
 void gpu_constant_buffer_unlock(gpu_buffer_t *buffer) {
 	vkUnmapMemory(device, buffer->impl.mem);
 	buffer->data = NULL;
-}
-
-int gpu_constant_buffer_size(gpu_buffer_t *buffer) {
-	return buffer->impl.count;
 }
 
 void gpu_index_buffer_init(gpu_buffer_t *buffer, int count) {
@@ -2038,10 +2023,6 @@ void *gpu_index_buffer_lock(gpu_buffer_t *buffer) {
 
 void gpu_index_buffer_unlock(gpu_buffer_t *buffer) {
 	vkUnmapMemory(device, buffer->impl.mem);
-}
-
-int gpu_index_buffer_count(gpu_buffer_t *buffer) {
-	return buffer->count;
 }
 
 static const int INDEX_RAYGEN = 0;
