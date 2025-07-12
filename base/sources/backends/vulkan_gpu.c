@@ -3074,7 +3074,7 @@ void gpu_raytrace_set_target(gpu_texture_t *_output) {
 	if (_output != output) {
 		vkDestroyImage(device, _output->impl.image, NULL);
 
-		VkImageCreateInfo image = {
+		VkImageCreateInfo image_info = {
 			.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
 			.pNext = NULL,
 			.imageType = VK_IMAGE_TYPE_2D,
@@ -3089,12 +3089,10 @@ void gpu_raytrace_set_target(gpu_texture_t *_output) {
 			.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT,
 			.flags = 0,
 		};
-
-		vkCreateImage(device, &image, NULL, &_output->impl.image);
-
+		vkCreateImage(device, &image_info, NULL, &_output->impl.image);
 		vkBindImageMemory(device, _output->impl.image, _output->impl.mem, 0);
 
-		VkImageViewCreateInfo color_image_view = {
+		VkImageViewCreateInfo image_view_info = {
 			.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
 			.pNext = NULL,
 			.viewType = VK_IMAGE_VIEW_TYPE_2D,
@@ -3107,7 +3105,9 @@ void gpu_raytrace_set_target(gpu_texture_t *_output) {
 			.subresourceRange.layerCount = 1,
 			.image = _output->impl.image,
 		};
-		vkCreateImageView(device, &color_image_view, NULL, &_output->impl.view);
+		vkCreateImageView(device, &image_view_info, NULL, &_output->impl.view);
+
+		set_image_layout(_output->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
 	output = _output;
 }
@@ -3130,7 +3130,7 @@ void gpu_raytrace_dispatch_rays() {
 
 	VkDescriptorImageInfo image_descriptor = {
 		.imageView = output->impl.view,
-		.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+		.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
 	};
 
 	VkDescriptorBufferInfo buffer_descriptor = {
@@ -3312,6 +3312,8 @@ void gpu_raytrace_dispatch_rays() {
 	};
 	vkUpdateDescriptorSets(device, 12, write_descriptor_sets, 0, VK_NULL_HANDLE);
 
+	set_image_layout(output->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+
 	VkPhysicalDeviceRayTracingPipelinePropertiesKHR ray_tracing_pipeline_properties;
 	ray_tracing_pipeline_properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
 	ray_tracing_pipeline_properties.pNext = NULL;
@@ -3354,4 +3356,6 @@ void gpu_raytrace_dispatch_rays() {
 	_vkCmdTraceRaysKHR = (void *)vkGetDeviceProcAddr(device, "vkCmdTraceRaysKHR");
 	_vkCmdTraceRaysKHR(command_buffer, &raygen_shader_sbt_entry, &miss_shader_sbt_entry, &hit_shader_sbt_entry, &callable_shader_sbt_entry,
 					   output->width, output->height, 1);
+
+	set_image_layout(output->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }

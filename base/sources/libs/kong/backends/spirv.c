@@ -307,7 +307,9 @@ static type_id find_access_type(int *indices, access_kind *access_kinds, int ind
 			return find_access_type(&indices[1], &access_kinds[1], indices_size - 1, t->base);
 		}
 		case ACCESS_SWIZZLE:
-			assert(false);
+			////
+			// assert(false);
+			////
 			return base_type;
 		case ACCESS_MEMBER: {
 			type *t = get_type(base_type);

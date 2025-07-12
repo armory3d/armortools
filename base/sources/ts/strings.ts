@@ -336,16 +336,16 @@ fun sh_irradiance(nor: float3): float3 { \
 	var cl21: float3 = float3(constants.shirr5.y, constants.shirr5.z, constants.shirr5.w); \
 	var cl22: float3 = float3(constants.shirr6.x, constants.shirr6.y, constants.shirr6.z); \
 	return ( \
-		c1 * cl22 * (nor.y * nor.y - (-nor.z) * (-nor.z)) + \
-		c3 * cl20 * nor.x * nor.x + \
-		c4 * cl00 - \
-		c5 * cl20 + \
-		2.0 * c1 * cl2m2 * nor.y * (-nor.z) + \
-		2.0 * c1 * cl21  * nor.y * nor.x + \
-		2.0 * c1 * cl2m1 * (-nor.z) * nor.x + \
-		2.0 * c2 * cl11  * nor.y + \
-		2.0 * c2 * cl1m1 * (-nor.z) + \
-		2.0 * c2 * cl10  * nor.x \
+		cl22 * c1 * (nor.y * nor.y - (-nor.z) * (-nor.z)) + \
+		cl20 * c3 * nor.x * nor.x + \
+		cl00 * c4 - \
+		cl20 * c5 + \
+		cl2m2 * 2.0 * c1 * nor.y * (-nor.z) + \
+		cl21  * 2.0 * c1 * nor.y * nor.x + \
+		cl2m1 * 2.0 * c1 * (-nor.z) * nor.x + \
+		cl11  * 2.0 * c2 * nor.y + \
+		cl1m1 * 2.0 * c2 * (-nor.z) + \
+		cl10  * 2.0 * c2 * nor.x \
 	); \
 } \
 ";
