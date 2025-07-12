@@ -1,7 +1,6 @@
 
 #[set(everything)]
 const constants: {
-	W: float3x3;
 	pos0: float2;
 	pos1: float2;
 	pos2: float2;
@@ -28,7 +27,6 @@ fun draw_tris_vert(input: vert_in): vert_out {
 	else if (vertex_id() == 2) {
 		output.pos = float4(constants.pos2, 0.0, 1.0);
 	}
-	// output.pos.xyz = constants.W * output.pos.xyz;
 	output.pos.xy = output.pos.xy * 2.0 - 1.0;
 	output.pos.y = -output.pos.y;
 	output.col = constants.col;

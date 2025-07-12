@@ -1305,9 +1305,7 @@ function ui_base_render_cursor() {
 		if (!operator_shortcut(map_get(config_keymap, "stencil_hide"), shortcut_type_t.DOWN)) {
 			draw_set_color(0x88ffffff);
 			let angle: f32 = context_raw.brush_stencil_angle;
-			let cx: f32 = r.x + r.w / 2;
-			let cy: f32 = r.y + r.h / 2;
-			draw_set_transform(mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(-angle)), mat3_translation(-cx, -cy)));
+			draw_set_transform(mat3_multmat(mat3_multmat(mat3_translation(0.5, 0.5), mat3_rotation(-angle)), mat3_translation(-0.5, -0.5)));
 			draw_scaled_image(context_raw.brush_stencil_image, r.x, r.y, r.w, r.h);
 			draw_set_transform(mat3_nan());
 			draw_set_color(0xffffffff);
@@ -1323,9 +1321,7 @@ function ui_base_render_cursor() {
 			draw_rect(r.x - 8 + r.w, r.y - 8 + r.h, 16, 16);
 			// Rotate
 			let angle: f32 = context_raw.brush_stencil_angle;
-			let cx: f32 = r.x + r.w / 2;
-			let cy: f32 = r.y + r.h / 2;
-			draw_set_transform(mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(-angle)), mat3_translation(-cx, -cy)));
+			draw_set_transform(mat3_multmat(mat3_multmat(mat3_translation(0.5, 0.5), mat3_rotation(-angle)), mat3_translation(-0.5, -0.5)));
 			draw_filled_circle(r.x + r.w / 2, r.y - 4, 8);
 			draw_set_transform(mat3_nan());
 		}
@@ -1381,9 +1377,7 @@ function ui_base_render_cursor() {
 
 				draw_set_color(color_from_floats(1, 1, 1, decal_alpha));
 				let angle: f32 = (context_raw.brush_angle + context_raw.brush_nodes_angle) * (math_pi() / 180);
-				let cx: f32 = decalx + psizex / 2;
-				let cy: f32 = decaly + psizey / 2;
-				draw_set_transform(mat3_multmat(mat3_multmat(mat3_translation(cx, cy), mat3_rotation(angle)), mat3_translation(-cx, -cy)));
+				draw_set_transform(mat3_multmat(mat3_multmat(mat3_translation(0.5, 0.5), mat3_rotation(angle)), mat3_translation(-0.5, -0.5)));
 				draw_scaled_image(context_raw.decal_image, decalx, decaly, psizex, psizey);
 				draw_set_transform(mat3_nan());
 				draw_set_color(0xffffffff);

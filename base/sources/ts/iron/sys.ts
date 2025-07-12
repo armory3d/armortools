@@ -47,6 +47,8 @@ function sys_start(ops: iron_window_options_t) {
 	draw_init(
 		iron_load_blob(data_path() + "draw_image.vert" + sys_shader_ext()),
 		iron_load_blob(data_path() + "draw_image.frag" + sys_shader_ext()),
+		iron_load_blob(data_path() + "draw_image_transform.vert" + sys_shader_ext()),
+		iron_load_blob(data_path() + "draw_image_transform.frag" + sys_shader_ext()),
 		iron_load_blob(data_path() + "draw_rect.vert" + sys_shader_ext()),
 		iron_load_blob(data_path() + "draw_rect.frag" + sys_shader_ext()),
 		iron_load_blob(data_path() + "draw_tris.vert" + sys_shader_ext()),

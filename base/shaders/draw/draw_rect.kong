@@ -1,7 +1,6 @@
 
 #[set(everything)]
 const constants: {
-	W: float3x3;
 	pos: float4; // xywh
 	col: float4;
 };
@@ -21,7 +20,6 @@ fun draw_rect_vert(input: vert_in): vert_out {
 	var cpos: float4 = constants.pos;
 
 	output.pos = float4(input.pos, 0.0, 1.0);
-	// output.pos.xyz = constants.W * output.pos.xyz;
 	output.pos.xy = output.pos.xy * cpos.zw + cpos.xy;
 	output.pos.xy = output.pos.xy * 2.0 - 1.0;
 	output.pos.y = -output.pos.y;

@@ -288,7 +288,7 @@ declare function iron_get_arg(index: i32): string;
 declare function iron_get_files_location(): string;
 declare function _iron_http_request(url: string, size: i32, callback: (url: string, _: buffer_t)=>void): void;
 
-declare function draw_init(image_vert: buffer_t, image_frag: buffer_t, rect_vert: buffer_t, rect_frag: buffer_t, tris_vert: buffer_t, tris_frag: buffer_t, text_vert: buffer_t, text_frag: buffer_t): void;
+declare function draw_init(image_vert: buffer_t, image_frag: buffer_t, image_transform_vert: buffer_t, image_transform_frag: buffer_t, rect_vert: buffer_t, rect_frag: buffer_t, tris_vert: buffer_t, tris_frag: buffer_t, text_vert: buffer_t, text_frag: buffer_t): void;
 declare function draw_begin(render_target: gpu_texture_t = null, clear: bool = false, color: u32 = 0): void;
 declare function draw_end(): void;
 declare function draw_scaled_sub_image(image: gpu_texture_t, sx: f32, sy: f32, sw: f32, sh: f32, dx: f32, dy: f32, dw: f32, dh: f32): void;

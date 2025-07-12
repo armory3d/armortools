@@ -4,6 +4,7 @@ const constants: {
 	pos: float4; // xywh
 	tex: float4; // xywh
 	col: float4;
+	W: float3x3;
 };
 
 #[set(everything)]
@@ -22,13 +23,15 @@ struct vert_out {
 	col: float4;
 }
 
-fun layer_copy_vert(input: vert_in): vert_out {
+fun draw_image_vert(input: vert_in): vert_out {
 	var output: vert_out;
 
 	var cpos: float4 = constants.pos;
 	var ctex: float4 = constants.tex;
 
-	output.pos = float4(input.pos, 0.0, 1.0);
+	output.pos = float4(input.pos, 1.0, 1.0);
+	output.pos.xyz = constants.W * output.pos.xyz;
+	output.pos.z = 0.0;
 	output.pos.xy = output.pos.xy * cpos.zw + cpos.xy;
 	output.pos.xy = output.pos.xy * 2.0 - 1.0;
 	output.pos.y = -output.pos.y;
@@ -37,12 +40,14 @@ fun layer_copy_vert(input: vert_in): vert_out {
 	return output;
 }
 
-fun layer_copy_frag(input: vert_out): float4 {
-	return sample_lod(tex, sampler_linear, input.tex, 0.0) * input.col;
+fun draw_image_frag(input: vert_out): float4 {
+	var texcolor: float4 = sample(tex, sampler_linear, input.tex) * input.col;
+	texcolor.rgb = texcolor.rgb * texcolor.a * input.col.a;
+	return texcolor;
 }
 
 #[pipe]
 struct pipe {
-	vertex = layer_copy_vert;
-	fragment = layer_copy_frag;
+	vertex = draw_image_vert;
+	fragment = draw_image_frag;
 }

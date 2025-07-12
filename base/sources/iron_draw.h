@@ -26,7 +26,7 @@ typedef struct draw_font {
 	int index;
 } draw_font_t;
 
-void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *rect_vert, buffer_t *rect_frag, buffer_t *tris_vert, buffer_t *tris_frag, buffer_t *text_vert, buffer_t *text_frag);
+void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *image_transform_vert, buffer_t *image_transform_frag, buffer_t *rect_vert, buffer_t *rect_frag, buffer_t *tris_vert, buffer_t *tris_frag, buffer_t *text_vert, buffer_t *text_frag);
 void draw_begin(gpu_texture_t *target, bool clear, unsigned color);
 void draw_scaled_sub_image(gpu_texture_t *img, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh);
 void draw_scaled_image(gpu_texture_t *tex, float dx, float dy, float dw, float dh);

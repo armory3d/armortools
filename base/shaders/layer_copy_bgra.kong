@@ -1,7 +1,6 @@
 
 #[set(everything)]
 const constants: {
-	W: float3x3;
 	pos: float4; // xywh
 	tex: float4; // xywh
 	col: float4;
