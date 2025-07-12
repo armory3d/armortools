@@ -147,10 +147,6 @@ void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_te
 
 void gpu_render_target_init_framebuffer(gpu_texture_t *target, int width, int height, gpu_texture_format_t format) {}
 
-void gpu_pipeline_init(gpu_pipeline_t *pipe) {
-	gpu_internal_pipeline_init(pipe);
-}
-
 void gpu_pipeline_compile(gpu_pipeline_t *pipe) {
 	WGPUColorTargetState csDesc;
 	memset(&csDesc, 0, sizeof(csDesc));

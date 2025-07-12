@@ -1,10 +1,6 @@
 #pragma once
 
-struct gpu_shader;
-
 typedef struct {
-	struct gpu_shader *vertex_shader;
-	struct gpu_shader *fragment_shader;
 	void *_pipeline;
 	void *_depth;
 } gpu_pipeline_impl_t;

@@ -512,16 +512,14 @@ bool draw_font_get_baked_quad(draw_font_t *font, int size, draw_font_aligned_qua
 
 void draw_string(const char *text, float x, float y) {
 	draw_font_image_t *img = draw_font_get_image_internal(draw_font, draw_font_size);
-	gpu_texture_t *tex = img->tex;
-
 	float xpos = x;
 	float ypos = y + img->baseline;
 	draw_font_aligned_quad_t q;
 
-	// gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : _draw_current != NULL ? &text_pipeline_rt : &text_pipeline);
-	// gpu_set_vertex_buffer(&rect_vertex_buffer);
-	// gpu_set_index_buffer(&rect_index_buffer);
-	// gpu_set_texture(text_tex_unit, tex);
+	gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : _draw_current != NULL ? &text_pipeline_rt : &text_pipeline);
+	gpu_set_vertex_buffer(&rect_vertex_buffer);
+	gpu_set_index_buffer(&rect_index_buffer);
+	gpu_set_texture(text_tex_unit, img->tex);
 
 	for (int i = 0; text[i] != 0; ) {
 		int l = 0;
@@ -530,17 +528,8 @@ void draw_string(const char *text, float x, float y) {
 
 		if (draw_font_get_baked_quad(draw_font, draw_font_size, &q, codepoint, xpos, ypos)) {
 			xpos += q.xadvance;
-
-			//
-			gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : _draw_current != NULL ? &text_pipeline_rt : &text_pipeline);
-			gpu_set_vertex_buffer(&rect_vertex_buffer);
-			gpu_set_index_buffer(&rect_index_buffer);
-			gpu_set_texture(text_tex_unit, tex);
-			//
-
 			gpu_set_float4(text_pos_loc, q.x0 / vw(), q.y0 / vh(), (q.x1 - q.x0) / vw(), (q.y1 - q.y0) / vh());
 			gpu_set_float4(text_tex_loc, q.s0, q.t0, q.s1 - q.s0, q.t1 - q.t0);
-
 			gpu_set_matrix4(text_p_loc, draw_projection_matrix);
 			gpu_set_float4(text_col_loc, _draw_color_r(draw_color) / 255.0, _draw_color_g(draw_color) / 255.0, _draw_color_b(draw_color) / 255.0,  _draw_color_a(draw_color) / 255.0);
 			gpu_draw();

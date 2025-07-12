@@ -184,7 +184,6 @@ void *gpu_index_buffer_lock(gpu_buffer_t *buffer);
 void gpu_index_buffer_unlock(gpu_buffer_t *buffer);
 
 void gpu_pipeline_init(gpu_pipeline_t *pipeline);
-void gpu_internal_pipeline_init(gpu_pipeline_t *pipeline);
 void gpu_pipeline_destroy(gpu_pipeline_t *pipeline);
 void gpu_pipeline_compile(gpu_pipeline_t *pipeline);
 void gpu_shader_init(gpu_shader_t *shader, const void *source, size_t length, gpu_shader_type_t type);

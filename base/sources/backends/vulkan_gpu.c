@@ -1120,14 +1120,14 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t * dept
 		int count = 0;
 		VkClearAttachment attachments[2];
 		if (flags & GPU_CLEAR_COLOR) {
-			VkClearColorValue clearColor = {0};
-			clearColor.float32[0] = ((color & 0x00ff0000) >> 16) / 255.0f;
-			clearColor.float32[1] = ((color & 0x0000ff00) >> 8) / 255.0f;
-			clearColor.float32[2] = (color & 0x000000ff) / 255.0f;
-			clearColor.float32[3] = ((color & 0xff000000) >> 24) / 255.0f;
+			VkClearColorValue clear_color = {0};
+			clear_color.float32[0] = ((color & 0x00ff0000) >> 16) / 255.0f;
+			clear_color.float32[1] = ((color & 0x0000ff00) >> 8) / 255.0f;
+			clear_color.float32[2] = (color & 0x000000ff) / 255.0f;
+			clear_color.float32[3] = ((color & 0xff000000) >> 24) / 255.0f;
 			attachments[count].aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 			attachments[count].colorAttachment = 0;
-			attachments[count].clearValue.color = clearColor;
+			attachments[count].clearValue.color = clear_color;
 			count++;
 		}
 		if (flags & GPU_CLEAR_DEPTH) {
@@ -1136,7 +1136,7 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t * dept
 			attachments[count].clearValue.depthStencil.stencil = 0;
 			count++;
 		}
-		VkClearRect clearRect = {
+		VkClearRect clear_rect = {
 			.rect.offset.x = 0,
 			.rect.offset.y = 0,
 			.rect.extent.width = targets[0]->width,
@@ -1144,7 +1144,7 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t * dept
 			.baseArrayLayer = 0,
 			.layerCount = 1,
 		};
-		vkCmdClearAttachments(command_buffer, count, attachments, 1, &clearRect);
+		vkCmdClearAttachments(command_buffer, count, attachments, 1, &clear_rect);
 	}
 }
 
@@ -1419,10 +1419,6 @@ void gpu_set_constant_buffer(gpu_buffer_t *buffer, int offset, size_t size) {
 
 void gpu_set_texture(int unit, gpu_texture_t *texture) {
 	current_textures[unit] = texture;
-}
-
-void gpu_pipeline_init(gpu_pipeline_t *pipeline) {
-	gpu_internal_pipeline_init(pipeline);
 }
 
 void gpu_pipeline_destroy(gpu_pipeline_t *pipeline) {

@@ -384,14 +384,14 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t *depth
 	gpu_scissor(0, 0, target->width, target->height);
 
 	if (flags & GPU_CLEAR_COLOR) {
-		float clearColor[] = {((color & 0x00ff0000) >> 16) / 255.0f,
-							  ((color & 0x0000ff00) >> 8) / 255.0f,
-							  (color & 0x000000ff) / 255.0f,
-							  ((color & 0xff000000) >> 24) / 255.0f};
+		float clear_color[] = {((color & 0x00ff0000) >> 16) / 255.0f,
+							   ((color & 0x0000ff00) >> 8) / 255.0f,
+							   (color & 0x000000ff) / 255.0f,
+							   ((color & 0xff000000) >> 24) / 255.0f};
 
 		D3D12_CPU_DESCRIPTOR_HANDLE handle;
 		target->impl.rtv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(target->impl.rtv_descriptor_heap, &handle);
-		command_list->lpVtbl->ClearRenderTargetView(command_list, handle, clearColor, 0, NULL);
+		command_list->lpVtbl->ClearRenderTargetView(command_list, handle, clear_color, 0, NULL);
 	}
 	if (flags & GPU_CLEAR_DEPTH && depth_buffer != NULL) {
 		D3D12_CPU_DESCRIPTOR_HANDLE handle;
@@ -670,10 +670,6 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 
 void gpu_set_texture(int unit, gpu_texture_t *texture) {
 	current_textures[unit] = texture;
-}
-
-void gpu_pipeline_init(gpu_pipeline_t *pipe) {
-	gpu_internal_pipeline_init(pipe);
 }
 
 void gpu_pipeline_destroy(gpu_pipeline_t *pipe) {

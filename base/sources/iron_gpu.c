@@ -223,7 +223,7 @@ void gpu_vertex_structure_add(gpu_vertex_structure_t *structure, const char *nam
 	structure->size++;
 }
 
-void gpu_internal_pipeline_init(gpu_pipeline_t *pipe) {
+void gpu_pipeline_init(gpu_pipeline_t *pipe) {
 	pipe->input_layout = NULL;
 	pipe->vertex_shader = NULL;
 	pipe->fragment_shader = NULL;

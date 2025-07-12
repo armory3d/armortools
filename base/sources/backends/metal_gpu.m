@@ -395,11 +395,6 @@ void gpu_set_texture(int unit, gpu_texture_t *texture) {
 	[command_encoder useResource:tex usage:MTLResourceUsageRead stages:MTLRenderStageVertex|MTLRenderStageFragment];
 }
 
-void gpu_pipeline_init(gpu_pipeline_t *pipeline) {
-	memset(&pipeline->impl, 0, sizeof(pipeline->impl));
-	gpu_internal_pipeline_init(pipeline);
-}
-
 void gpu_pipeline_destroy(gpu_pipeline_t *pipeline) {
 	id<MTLRenderPipelineState> pipe = (__bridge_transfer id<MTLRenderPipelineState>)pipeline->impl._pipeline;
 	pipe = nil;
@@ -424,77 +419,77 @@ void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
 	pipeline->fragment_shader->impl.mtl_function = (__bridge_retained void *)[library newFunctionWithName:[NSString stringWithCString:pipeline->fragment_shader->impl.name encoding:NSUTF8StringEncoding]];
 	assert(pipeline->fragment_shader->impl.mtl_function);
 
-	MTLRenderPipelineDescriptor *renderPipelineDesc = [[MTLRenderPipelineDescriptor alloc] init];
-	renderPipelineDesc.vertexFunction = (__bridge id<MTLFunction>)pipeline->vertex_shader->impl.mtl_function;
-	renderPipelineDesc.fragmentFunction = (__bridge id<MTLFunction>)pipeline->fragment_shader->impl.mtl_function;
+	MTLRenderPipelineDescriptor *render_pipeline_desc = [[MTLRenderPipelineDescriptor alloc] init];
+	render_pipeline_desc.vertexFunction = (__bridge id<MTLFunction>)pipeline->vertex_shader->impl.mtl_function;
+	render_pipeline_desc.fragmentFunction = (__bridge id<MTLFunction>)pipeline->fragment_shader->impl.mtl_function;
 
 	for (int i = 0; i < pipeline->color_attachment_count; ++i) {
-		renderPipelineDesc.colorAttachments[i].pixelFormat = convert_texture_format(pipeline->color_attachment[i]);
-		renderPipelineDesc.colorAttachments[i].blendingEnabled =
+		render_pipeline_desc.colorAttachments[i].pixelFormat = convert_texture_format(pipeline->color_attachment[i]);
+		render_pipeline_desc.colorAttachments[i].blendingEnabled =
 		    pipeline->blend_source != GPU_BLEND_ONE || pipeline->blend_destination != GPU_BLEND_ZERO ||
 		    pipeline->alpha_blend_source != GPU_BLEND_ONE || pipeline->alpha_blend_destination != GPU_BLEND_ZERO;
-		renderPipelineDesc.colorAttachments[i].sourceRGBBlendFactor = convert_blending_factor(pipeline->blend_source);
-		renderPipelineDesc.colorAttachments[i].destinationRGBBlendFactor = convert_blending_factor(pipeline->blend_destination);
-		renderPipelineDesc.colorAttachments[i].rgbBlendOperation = MTLBlendOperationAdd;
-		renderPipelineDesc.colorAttachments[i].sourceAlphaBlendFactor = convert_blending_factor(pipeline->alpha_blend_source);
-		renderPipelineDesc.colorAttachments[i].destinationAlphaBlendFactor = convert_blending_factor(pipeline->alpha_blend_destination);
-		renderPipelineDesc.colorAttachments[i].alphaBlendOperation = MTLBlendOperationAdd;
-		renderPipelineDesc.colorAttachments[i].writeMask =
+		render_pipeline_desc.colorAttachments[i].sourceRGBBlendFactor = convert_blending_factor(pipeline->blend_source);
+		render_pipeline_desc.colorAttachments[i].destinationRGBBlendFactor = convert_blending_factor(pipeline->blend_destination);
+		render_pipeline_desc.colorAttachments[i].rgbBlendOperation = MTLBlendOperationAdd;
+		render_pipeline_desc.colorAttachments[i].sourceAlphaBlendFactor = convert_blending_factor(pipeline->alpha_blend_source);
+		render_pipeline_desc.colorAttachments[i].destinationAlphaBlendFactor = convert_blending_factor(pipeline->alpha_blend_destination);
+		render_pipeline_desc.colorAttachments[i].alphaBlendOperation = MTLBlendOperationAdd;
+		render_pipeline_desc.colorAttachments[i].writeMask =
 		    (pipeline->color_write_mask_red[i] ? MTLColorWriteMaskRed : 0) |
 			(pipeline->color_write_mask_green[i] ? MTLColorWriteMaskGreen : 0) |
 		    (pipeline->color_write_mask_blue[i] ? MTLColorWriteMaskBlue : 0) |
 			(pipeline->color_write_mask_alpha[i] ? MTLColorWriteMaskAlpha : 0);
 	}
-	renderPipelineDesc.depthAttachmentPixelFormat = pipeline->depth_attachment_bits > 0 ? MTLPixelFormatDepth32Float : MTLPixelFormatInvalid;
+	render_pipeline_desc.depthAttachmentPixelFormat = pipeline->depth_attachment_bits > 0 ? MTLPixelFormatDepth32Float : MTLPixelFormatInvalid;
 
 	float offset = 0;
-	MTLVertexDescriptor *vertexDescriptor = [[MTLVertexDescriptor alloc] init];
+	MTLVertexDescriptor *vertex_descriptor = [[MTLVertexDescriptor alloc] init];
 
 	for (int i = 0; i < pipeline->input_layout->size; ++i) {
-		vertexDescriptor.attributes[i].bufferIndex = 0;
-		vertexDescriptor.attributes[i].offset = offset;
+		vertex_descriptor.attributes[i].bufferIndex = 0;
+		vertex_descriptor.attributes[i].offset = offset;
 		offset += gpu_vertex_data_size(pipeline->input_layout->elements[i].data);
 
 		switch (pipeline->input_layout->elements[i].data) {
 		case GPU_VERTEX_DATA_F32_1X:
-			vertexDescriptor.attributes[i].format = MTLVertexFormatFloat;
+			vertex_descriptor.attributes[i].format = MTLVertexFormatFloat;
 			break;
 		case GPU_VERTEX_DATA_F32_2X:
-			vertexDescriptor.attributes[i].format = MTLVertexFormatFloat2;
+			vertex_descriptor.attributes[i].format = MTLVertexFormatFloat2;
 			break;
 		case GPU_VERTEX_DATA_F32_3X:
-			vertexDescriptor.attributes[i].format = MTLVertexFormatFloat3;
+			vertex_descriptor.attributes[i].format = MTLVertexFormatFloat3;
 			break;
 		case GPU_VERTEX_DATA_F32_4X:
-			vertexDescriptor.attributes[i].format = MTLVertexFormatFloat4;
+			vertex_descriptor.attributes[i].format = MTLVertexFormatFloat4;
 			break;
 		case GPU_VERTEX_DATA_I16_2X_NORM:
-			vertexDescriptor.attributes[i].format = MTLVertexFormatShort2Normalized;
+			vertex_descriptor.attributes[i].format = MTLVertexFormatShort2Normalized;
 			break;
 		case GPU_VERTEX_DATA_I16_4X_NORM:
-			vertexDescriptor.attributes[i].format = MTLVertexFormatShort4Normalized;
+			vertex_descriptor.attributes[i].format = MTLVertexFormatShort4Normalized;
 			break;
 		}
 	}
 
-	vertexDescriptor.layouts[0].stride = offset;
-	vertexDescriptor.layouts[0].stepFunction = MTLVertexStepFunctionPerVertex;
+	vertex_descriptor.layouts[0].stride = offset;
+	vertex_descriptor.layouts[0].stepFunction = MTLVertexStepFunctionPerVertex;
 
-	renderPipelineDesc.vertexDescriptor = vertexDescriptor;
+	render_pipeline_desc.vertexDescriptor = vertex_descriptor;
 
 	NSError *errors = nil;
 	MTLRenderPipelineReflection *reflection = nil;
 
 	pipeline->impl._pipeline = (__bridge_retained void *)[
-		device newRenderPipelineStateWithDescriptor:renderPipelineDesc
+		device newRenderPipelineStateWithDescriptor:render_pipeline_desc
 	                                        options:MTLPipelineOptionBufferTypeInfo
 	                                     reflection:&reflection
 	                                          error:&errors];
 
-	MTLDepthStencilDescriptor *depthStencilDescriptor = [MTLDepthStencilDescriptor new];
-	depthStencilDescriptor.depthCompareFunction = convert_compare_mode(pipeline->depth_mode);
-	depthStencilDescriptor.depthWriteEnabled = pipeline->depth_write;
-	pipeline->impl._depth = (__bridge_retained void *)[device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
+	MTLDepthStencilDescriptor *depth_descriptor = [MTLDepthStencilDescriptor new];
+	depth_descriptor.depthCompareFunction = convert_compare_mode(pipeline->depth_mode);
+	depth_descriptor.depthWriteEnabled = pipeline->depth_write;
+	pipeline->impl._depth = (__bridge_retained void *)[device newDepthStencilStateWithDescriptor:depth_descriptor];
 }
 
 void gpu_shader_destroy(gpu_shader_t *shader) {
