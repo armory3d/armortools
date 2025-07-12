@@ -75,7 +75,7 @@ void gpu_draw() {
 	draw_calls++;
 	if (draw_calls + draw_calls_last >= CONSTANT_BUFFER_MULTIPLE) {
 		draw_calls = draw_calls_last = constant_buffer_index = 0;
-		gpu_flush();
+		gpu_execute_and_wait();
 	}
 
 	gpu_constant_buffer_lock(&constant_buffer, constant_buffer_index * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);

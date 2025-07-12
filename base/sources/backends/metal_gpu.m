@@ -226,7 +226,7 @@ void gpu_wait() {
 	[command_buffer waitUntilCompleted];
 }
 
-void gpu_flush() {
+void gpu_execute_and_wait() {
 	[command_buffer commit];
 	gpu_wait();
 	id<MTLCommandQueue> queue = getMetalQueue();
@@ -334,7 +334,7 @@ void gpu_set_index_buffer(gpu_buffer_t *buffer) {
 }
 
 void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
-	gpu_flush();
+	gpu_execute_and_wait();
 
 	// Create readback buffer
 	if (render_target->impl._readback == NULL) {

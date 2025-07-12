@@ -1156,7 +1156,7 @@ void gpu_wait() {
 	vkWaitForFences(device, 1, &fence, VK_TRUE, UINT64_MAX);
 }
 
-void gpu_flush() {
+void gpu_execute_and_wait() {
 	if (gpu_in_use) {
 		vkCmdEndRendering(command_buffer);
 	}
@@ -1346,7 +1346,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 
 	set_image_layout(render_target->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-	gpu_flush();
+	gpu_execute_and_wait();
 
 	// Read buffer
 	void *p;

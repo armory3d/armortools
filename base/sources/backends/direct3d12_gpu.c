@@ -412,7 +412,7 @@ void gpu_wait() {
 	wait_for_fence(fence, fence_value, fence_event);
 }
 
-void gpu_flush() {
+void gpu_execute_and_wait() {
 	command_list->lpVtbl->Close(command_list);
 	ID3D12CommandList *command_lists[] = {(ID3D12CommandList *)command_list};
 	queue->lpVtbl->ExecuteCommandLists(queue, 1, command_lists);
@@ -659,7 +659,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	};
 	command_list->lpVtbl->ResourceBarrier(command_list, 1, &barrier);
 
-	gpu_flush();
+	gpu_execute_and_wait();
 
 	// Read buffer
 	void *p;
@@ -922,7 +922,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	command_list->lpVtbl->ResourceBarrier(command_list, 1, &barrier);
 
 	// TODO:
-	gpu_flush();
+	gpu_execute_and_wait();
 	upload_image->lpVtbl->Release(upload_image);
 }
 
@@ -1856,7 +1856,7 @@ void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structu
 	command_list->lpVtbl->ResourceBarrier(command_list, 1, &barrier);
 	dxrCommandList->lpVtbl->BuildRaytracingAccelerationStructure(dxrCommandList, &topLevelBuildDesc, 0, NULL);
 
-	gpu_flush();
+	gpu_execute_and_wait();
 
 	scratchResource->lpVtbl->Release(scratchResource);
 	instanceDescs->lpVtbl->Release(instanceDescs);
