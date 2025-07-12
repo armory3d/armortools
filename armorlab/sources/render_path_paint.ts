@@ -192,8 +192,6 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	gpu_set_vertex_buffer(geom._.vertex_buffer);
 	gpu_set_index_buffer(geom._.index_buffers[0]);
 	gpu_draw();
-
-	gpu_disable_scissor();
 	render_path_end();
 }
 

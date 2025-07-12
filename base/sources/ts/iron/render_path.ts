@@ -33,7 +33,6 @@ let _render_path_last_w: i32 = 0;
 let _render_path_last_h: i32 = 0;
 let _render_path_bind_params: string[];
 let _render_path_meshes_sorted: bool;
-let _render_path_scissor_set: bool = false;
 let _render_path_last_frame_time: f32 = 0.0;
 let _render_path_loading: i32 = 0;
 let _render_path_cached_shader_contexts: map_t<string, cached_shader_context_t> = map_create();
@@ -75,8 +74,7 @@ function render_path_set_target(target: string, additional: string[] = null, dep
 		render_path_current_w = sys_w();
 		render_path_current_h = sys_h();
 		_gpu_begin(null, null, null, flags, color, depth);
-		render_path_set_current_viewport(sys_w(), sys_h());
-		render_path_set_current_scissor(sys_w(), sys_h());
+		gpu_viewport(sys_x(), render_path_current_h - (sys_h() - sys_y()), sys_w(), sys_h());
 	}
 	else { // Render target
 		let rt: render_target_t = map_get(render_path_render_targets, target);
@@ -100,27 +98,9 @@ function render_path_set_target(target: string, additional: string[] = null, dep
 }
 
 function render_path_end() {
-	if (_render_path_scissor_set) {
-		gpu_disable_scissor();
-		_render_path_scissor_set = false;
-	}
 	gpu_end();
 	_render_path_current_image = null;
 	_render_path_bind_params = null;
-}
-
-function render_path_set_current_viewport(view_w: i32, view_h: i32) {
-	gpu_viewport(sys_x(),render_path_current_h - (view_h - sys_y()), view_w, view_h);
-}
-
-function render_path_set_current_scissor(view_w: i32, view_h: i32) {
-	gpu_scissor(sys_x(),render_path_current_h - (view_h - sys_y()), view_w, view_h);
-	_render_path_scissor_set = true;
-}
-
-function render_path_set_viewport(view_w: i32, view_h: i32) {
-	render_path_set_current_viewport(view_w, view_h);
-	render_path_set_current_scissor(view_w, view_h);
 }
 
 function _render_path_sort_dist(a: any_ptr, b: any_ptr): i32 {
