@@ -197,10 +197,10 @@ function render() {
 		else {
 			ui_button("Drop folder here", UI_ALIGN_LEFT, "");
 		}
-	}
 
-	ui_fill(iron_window_width() - minimap_w, 0, minimap_w, UI_ELEMENT_H() + UI_ELEMENT_OFFSET() + 1, theme.SEPARATOR_COL);
-	ui_fill(storage.sidebar_w, 0, 1, iron_window_height(), theme.SEPARATOR_COL);
+		ui_fill(iron_window_width() - minimap_w, 0, minimap_w, UI_ELEMENT_H() + UI_ELEMENT_OFFSET() + 1, theme.SEPARATOR_COL);
+		ui_fill(storage.sidebar_w, 0, 1, iron_window_height(), theme.SEPARATOR_COL);
+	}
 
 	let editor_updated: bool = false;
 
