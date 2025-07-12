@@ -71,7 +71,7 @@ static uint8_t _draw_color_r(uint32_t color) {
 }
 
 static uint8_t _draw_color_g(uint32_t color) {
-	return (color & 0x0000ff00) >>  8;
+	return (color & 0x0000ff00) >> 8;
 }
 
 static uint8_t _draw_color_b(uint32_t color) {
