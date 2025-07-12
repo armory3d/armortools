@@ -224,13 +224,9 @@ function render_path_paint_draw() {
 
 	if (context_raw.brush_blend_dirty) {
 		context_raw.brush_blend_dirty = false;
-		///if arm_metal
 		render_path_set_target("texpaint_blend0", null, null, clear_flag_t.COLOR, 0x00000000);
 		render_path_set_target("texpaint_blend1", null, null, clear_flag_t.COLOR, 0x00000000);
-		///else
-		let additional: string[] = ["texpaint_blend1"];
-		render_path_set_target("texpaint_blend0", additional, null, clear_flag_t.COLOR, 0x00000000);
-		///end
+		render_path_end();
 	}
 }
 
