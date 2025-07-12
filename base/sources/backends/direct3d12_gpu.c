@@ -58,20 +58,12 @@ static D3D12_BLEND convert_blend_factor(gpu_blending_factor_t factor) {
 	}
 }
 
-static D3D12_BLEND_OP convert_blend_operation(gpu_blending_operation_t op) {
-	switch (op) {
-	case GPU_BLENDOP_ADD:
-		return D3D12_BLEND_OP_ADD;
-	}
-}
-
 static D3D12_CULL_MODE convert_cull_mode(gpu_cull_mode_t cull_mode) {
 	switch (cull_mode) {
 	case GPU_CULL_MODE_CLOCKWISE:
 		return D3D12_CULL_MODE_FRONT;
 	case GPU_CULL_MODE_COUNTERCLOCKWISE:
 		return D3D12_CULL_MODE_BACK;
-	case GPU_CULL_MODE_NEVER:
 	default:
 		return D3D12_CULL_MODE_NONE;
 	}
@@ -782,10 +774,10 @@ void gpu_pipeline_compile(gpu_pipeline_t *pipe) {
 												   		 pipe->alpha_blend_source != GPU_BLEND_ONE || pipe->alpha_blend_destination != GPU_BLEND_ZERO;
 		psoDesc.BlendState.RenderTarget[i].SrcBlend = convert_blend_factor(pipe->blend_source);
 		psoDesc.BlendState.RenderTarget[i].DestBlend = convert_blend_factor(pipe->blend_destination);
-		psoDesc.BlendState.RenderTarget[i].BlendOp = convert_blend_operation(pipe->blend_operation);
+		psoDesc.BlendState.RenderTarget[i].BlendOp = D3D12_BLEND_OP_ADD;
 		psoDesc.BlendState.RenderTarget[i].SrcBlendAlpha = convert_blend_factor(pipe->alpha_blend_source);
 		psoDesc.BlendState.RenderTarget[i].DestBlendAlpha = convert_blend_factor(pipe->alpha_blend_destination);
-		psoDesc.BlendState.RenderTarget[i].BlendOpAlpha = convert_blend_operation(pipe->alpha_blend_operation);
+		psoDesc.BlendState.RenderTarget[i].BlendOpAlpha = D3D12_BLEND_OP_ADD;
 		psoDesc.BlendState.RenderTarget[i].RenderTargetWriteMask =
 			(((pipe->color_write_mask_red[i] ? D3D12_COLOR_WRITE_ENABLE_RED : 0) |
 			(pipe->color_write_mask_green[i] ? D3D12_COLOR_WRITE_ENABLE_GREEN : 0)) |

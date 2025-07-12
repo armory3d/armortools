@@ -76,9 +76,6 @@ static VkFormat convert_image_format(gpu_texture_format_t format) {
 		return VK_FORMAT_R16_SFLOAT;
 	case GPU_TEXTURE_FORMAT_R32:
 		return VK_FORMAT_R32_SFLOAT;
-	case GPU_TEXTURE_FORMAT_RGBA32:
-		// return VK_FORMAT_R8G8B8A8_UNORM;
-		return VK_FORMAT_B8G8R8A8_UNORM;
 	case GPU_TEXTURE_FORMAT_D32:
 		return VK_FORMAT_D32_SFLOAT;
 	default:
@@ -107,7 +104,6 @@ static VkCullModeFlagBits convert_cull_mode(gpu_cull_mode_t cull_mode) {
 		return VK_CULL_MODE_BACK_BIT;
 	case GPU_CULL_MODE_COUNTERCLOCKWISE:
 		return VK_CULL_MODE_FRONT_BIT;
-	case GPU_CULL_MODE_NEVER:
 	default:
 		return VK_CULL_MODE_NONE;
 	}
@@ -139,13 +135,6 @@ static VkBlendFactor convert_blend_factor(gpu_blending_factor_t factor) {
 		return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
 	case GPU_BLEND_INV_DEST_ALPHA:
 		return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
-	}
-}
-
-static VkBlendOp convert_blend_operation(gpu_blending_operation_t op) {
-	switch (op) {
-	case GPU_BLENDOP_ADD:
-		return VK_BLEND_OP_ADD;
 	}
 }
 
@@ -1549,10 +1538,10 @@ void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
 								   pipeline->alpha_blend_destination != GPU_BLEND_ZERO;
 		att_state[i].srcColorBlendFactor = convert_blend_factor(pipeline->blend_source);
 		att_state[i].dstColorBlendFactor = convert_blend_factor(pipeline->blend_destination);
-		att_state[i].colorBlendOp = convert_blend_operation(pipeline->blend_operation);
+		att_state[i].colorBlendOp = VK_BLEND_OP_ADD;
 		att_state[i].srcAlphaBlendFactor = convert_blend_factor(pipeline->alpha_blend_source);
 		att_state[i].dstAlphaBlendFactor = convert_blend_factor(pipeline->alpha_blend_destination);
-		att_state[i].alphaBlendOp = convert_blend_operation(pipeline->alpha_blend_operation);
+		att_state[i].alphaBlendOp = VK_BLEND_OP_ADD;
 	}
 	cb.attachmentCount = pipeline->color_attachment_count;
 	cb.pAttachments = att_state;

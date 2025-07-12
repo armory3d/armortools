@@ -62,10 +62,6 @@ typedef enum {
 	GPU_BLEND_INV_DEST_ALPHA
 } gpu_blending_factor_t;
 
-typedef enum {
-	GPU_BLENDOP_ADD
-} gpu_blending_operation_t;
-
 typedef enum gpu_cull_mode {
 	GPU_CULL_MODE_CLOCKWISE,
 	GPU_CULL_MODE_COUNTERCLOCKWISE,
@@ -118,10 +114,8 @@ typedef struct gpu_pipeline {
 	gpu_compare_mode_t depth_mode;
 	gpu_blending_factor_t blend_source;
 	gpu_blending_factor_t blend_destination;
-	gpu_blending_operation_t blend_operation;
 	gpu_blending_factor_t alpha_blend_source;
 	gpu_blending_factor_t alpha_blend_destination;
-	gpu_blending_operation_t alpha_blend_operation;
 	bool color_write_mask_red[8];
 	bool color_write_mask_green[8];
 	bool color_write_mask_blue[8];

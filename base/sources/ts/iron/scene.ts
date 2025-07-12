@@ -575,10 +575,8 @@ type shader_context_t = {
 	shader_from_source?: bool; // Build shader at runtime using from_source()
 	blend_source?: string;
 	blend_destination?: string;
-	blend_operation?: string;
 	alpha_blend_source?: string;
 	alpha_blend_destination?: string;
-	alpha_blend_operation?: string;
 	color_writes_red?: bool[]; // Per target masks
 	color_writes_green?: bool[];
 	color_writes_blue?: bool[];

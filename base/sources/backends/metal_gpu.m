@@ -46,13 +46,6 @@ static MTLBlendFactor convert_blending_factor(gpu_blending_factor_t factor) {
 	}
 }
 
-static MTLBlendOperation convert_blending_operation(gpu_blending_operation_t op) {
-	switch (op) {
-	case GPU_BLENDOP_ADD:
-		return MTLBlendOperationAdd;
-	}
-}
-
 static MTLCompareFunction convert_compare_mode(gpu_compare_mode_t compare) {
 	switch (compare) {
 	case GPU_COMPARE_MODE_ALWAYS:
@@ -89,7 +82,6 @@ static MTLPixelFormat convert_texture_format(gpu_texture_format_t format) {
 		return MTLPixelFormatR8Unorm;
 	case GPU_TEXTURE_FORMAT_D32:
 		return MTLPixelFormatDepth32Float;
-	case GPU_TEXTURE_FORMAT_RGBA32:
 	default:
 		return MTLPixelFormatBGRA8Unorm;
 	}
@@ -105,8 +97,6 @@ static int format_byte_size(gpu_texture_format_t format) {
 		return 2;
 	case GPU_TEXTURE_FORMAT_R8:
 		return 1;
-	case GPU_TEXTURE_FORMAT_RGBA32:
-	case GPU_TEXTURE_FORMAT_R32:
 	default:
 		return 4;
 	}
@@ -445,10 +435,10 @@ void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
 		    pipeline->alpha_blend_source != GPU_BLEND_ONE || pipeline->alpha_blend_destination != GPU_BLEND_ZERO;
 		renderPipelineDesc.colorAttachments[i].sourceRGBBlendFactor = convert_blending_factor(pipeline->blend_source);
 		renderPipelineDesc.colorAttachments[i].destinationRGBBlendFactor = convert_blending_factor(pipeline->blend_destination);
-		renderPipelineDesc.colorAttachments[i].rgbBlendOperation = convert_blending_operation(pipeline->blend_operation);
+		renderPipelineDesc.colorAttachments[i].rgbBlendOperation = MTLBlendOperationAdd;
 		renderPipelineDesc.colorAttachments[i].sourceAlphaBlendFactor = convert_blending_factor(pipeline->alpha_blend_source);
 		renderPipelineDesc.colorAttachments[i].destinationAlphaBlendFactor = convert_blending_factor(pipeline->alpha_blend_destination);
-		renderPipelineDesc.colorAttachments[i].alphaBlendOperation = convert_blending_operation(pipeline->alpha_blend_operation);
+		renderPipelineDesc.colorAttachments[i].alphaBlendOperation = MTLBlendOperationAdd;
 		renderPipelineDesc.colorAttachments[i].writeMask =
 		    (pipeline->color_write_mask_red[i] ? MTLColorWriteMaskRed : 0) |
 			(pipeline->color_write_mask_green[i] ? MTLColorWriteMaskGreen : 0) |

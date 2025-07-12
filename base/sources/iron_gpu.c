@@ -232,10 +232,8 @@ void gpu_internal_pipeline_init(gpu_pipeline_t *pipe) {
 	pipe->depth_mode = GPU_COMPARE_MODE_ALWAYS;
 	pipe->blend_source = GPU_BLEND_ONE;
 	pipe->blend_destination = GPU_BLEND_ZERO;
-	pipe->blend_operation = GPU_BLENDOP_ADD;
 	pipe->alpha_blend_source = GPU_BLEND_ONE;
 	pipe->alpha_blend_destination = GPU_BLEND_ZERO;
-	pipe->alpha_blend_operation = GPU_BLENDOP_ADD;
 	for (int i = 0; i < 8; ++i) {
 		pipe->color_write_mask_red[i] = true;
 		pipe->color_write_mask_green[i] = true;

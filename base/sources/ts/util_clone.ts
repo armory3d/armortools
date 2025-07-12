@@ -204,10 +204,8 @@ function util_clone_shader_contexts(contexts: shader_context_t[]): shader_contex
 		c.shader_from_source = contexts[i].shader_from_source;
 		c.blend_source = contexts[i].blend_source;
 		c.blend_destination = contexts[i].blend_destination;
-		c.blend_operation = contexts[i].blend_operation;
 		c.alpha_blend_source = contexts[i].alpha_blend_source;
 		c.alpha_blend_destination = contexts[i].alpha_blend_destination;
-		c.alpha_blend_operation = contexts[i].alpha_blend_operation;
 		c.color_writes_red = util_clone_bool_array(contexts[i].color_writes_red);
 		c.color_writes_green = util_clone_bool_array(contexts[i].color_writes_green);
 		c.color_writes_blue = util_clone_bool_array(contexts[i].color_writes_blue);
