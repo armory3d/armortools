@@ -323,14 +323,23 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			node_shader_write_frag(kong, "var texel0: float2 = input.tex_coord * constants.texpaint_size * 0.01;");
 			node_shader_write_frag(kong, "var texel1: float2 = input.tex_coord * constants.texpaint_size * 0.1;");
 			node_shader_write_frag(kong, "var texel2: float2 = input.tex_coord * constants.texpaint_size;");
-			node_shader_write_frag(kong, "basecol *= max(float((int(texel0.x) % 2.0) == (int(texel0.y) % 2.0)), 0.9);");
-			node_shader_write_frag(kong, "basecol *= max(float((int(texel1.x) % 2.0) == (int(texel1.y) % 2.0)), 0.9);");
-			node_shader_write_frag(kong, "basecol *= max(float((int(texel2.x) % 2.0) == (int(texel2.y) % 2.0)), 0.9);");
+			// node_shader_write_frag(kong, "basecol = basecol * max(float((int(texel0.x) % 2.0) == (int(texel0.y) % 2.0)), 0.9);");
+			// node_shader_write_frag(kong, "basecol = basecol * max(float((int(texel1.x) % 2.0) == (int(texel1.y) % 2.0)), 0.9);");
+			// node_shader_write_frag(kong, "basecol = basecol * max(float((int(texel2.x) % 2.0) == (int(texel2.y) % 2.0)), 0.9);");
+			node_shader_write_frag(kong, "var texel0xmod: float = float(int(texel0.x)) % 2.0;");
+			node_shader_write_frag(kong, "var texel0ymod: float = float(int(texel0.y)) % 2.0;");
+			node_shader_write_frag(kong, "var texel1xmod: float = float(int(texel1.x)) % 2.0;");
+			node_shader_write_frag(kong, "var texel1ymod: float = float(int(texel1.y)) % 2.0;");
+			node_shader_write_frag(kong, "var texel2xmod: float = float(int(texel2.x)) % 2.0;");
+			node_shader_write_frag(kong, "var texel2ymod: float = float(int(texel2.y)) % 2.0;");
+			node_shader_write_frag(kong, "if (texel0xmod == texel0ymod) { basecol = basecol * 0.9; }");
+			node_shader_write_frag(kong, "if (texel1xmod == texel1ymod) { basecol = basecol * 0.9; }");
+			node_shader_write_frag(kong, "if (texel2xmod == texel2ymod) { basecol = basecol * 0.9; }");
 		}
 
 		if (last_pass && context_raw.draw_wireframe) {
 			node_shader_write_frag(kong, "var wireframe: float = sample_lod(texuvmap, sampler_linear, input.tex_coord, 0.0).a;");
-			node_shader_write_frag(kong, "basecol *= 1.0 - wireframe * 0.25;");
+			node_shader_write_frag(kong, "basecol = basecol * (1.0 - wireframe * 0.25);");
 			node_shader_write_frag(kong, "roughness = max(roughness, wireframe);");
 		}
 
