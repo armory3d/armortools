@@ -31,9 +31,9 @@ function make_texcoord_run(kong: node_shader_t) {
 		}
 		else if (decal) {
 			node_shader_add_constant(kong, "decal_mask: float4", "_decal_mask");
-			node_shader_write_attrib_frag(kong, "uvsp -= constants.decal_mask.xy;");
+			node_shader_write_attrib_frag(kong, "uvsp = uvsp - constants.decal_mask.xy;");
 			node_shader_write_attrib_frag(kong, "uvsp.x *= constants.aspect_ratio;");
-			node_shader_write_attrib_frag(kong, "uvsp *= 0.21 / (constants.decal_mask.w * 0.9);"); // Decal radius
+			node_shader_write_attrib_frag(kong, "uvsp = uvsp * (0.21 / (constants.decal_mask.w * 0.9));"); // Decal radius
 
 			if (context_raw.brush_directional) {
 				node_shader_add_constant(kong, "brush_direction: float3", "_brush_direction");
@@ -78,7 +78,7 @@ function make_texcoord_run(kong: node_shader_t) {
 		kong.frag_wposition = true;
 		kong.frag_n = true;
 		node_shader_add_constant(kong, "brush_scale: float", "_brush_scale");
-		node_shader_write_attrib_frag(kong, "var tri_weight: float3 = wnormal * wnormal;"); // n * n
+		node_shader_write_attrib_frag(kong, "var tri_weight: float3 = input.wnormal * input.wnormal;"); // n * n
 		node_shader_write_attrib_frag(kong, "var tri_max: float = max(tri_weight.x, max(tri_weight.y, tri_weight.z));");
 		node_shader_write_attrib_frag(kong, "tri_weight = max(tri_weight - tri_max * 0.75, 0.0);");
 		node_shader_write_attrib_frag(kong, "var tex_coord_blend: float3 = tri_weight * (1.0 / (tri_weight.x + tri_weight.y + tri_weight.z));");
