@@ -84,7 +84,7 @@ function util_render_make_decal_preview() {
 	if (in_use) draw_end();
 
 	if (context_raw.decal_image == null) {
-		context_raw.decal_image = gpu_create_render_target(util_render_decal_preview_size, util_render_decal_preview_size);
+		context_raw.decal_image = gpu_create_render_target(util_render_decal_preview_size, util_render_decal_preview_size, tex_format_t.RGBA64);
 	}
 	context_raw.decal_preview = true;
 
@@ -161,11 +161,7 @@ function util_render_make_text_preview() {
 		context_raw.text_tool_image = null;
 	}
 	if (context_raw.text_tool_image == null) {
-		///if arm_metal
 		context_raw.text_tool_image = gpu_create_render_target(tex_w, tex_w, tex_format_t.RGBA32);
-		///else
-		context_raw.text_tool_image = gpu_create_render_target(tex_w, tex_w, tex_format_t.R8);
-		///end
 	}
 	draw_begin(context_raw.text_tool_image, true, 0xff000000);
 	draw_set_font(font, font_size);

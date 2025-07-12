@@ -1,7 +1,7 @@
 
 function make_clone_run(kong: node_shader_t) {
 	node_shader_add_constant(kong, "clone_delta: float2", "_clone_delta");
-	node_shader_write_frag(kong, "var tex_coord_inp: float2 = gbuffer2[uint2((sp.xy + constants.clone_delta) * gbuffer_size)].ba;");
+	node_shader_write_frag(kong, "var tex_coord_inp: float2 = gbuffer2[uint2((sp.xy + constants.clone_delta) * constants.gbuffer_size)].ba;");
 
 	node_shader_write_frag(kong, "var texpaint_pack_sample: float3 = sample_lod(texpaint_pack_undo, sampler_linear, tex_coord_inp, 0.0).rgb;");
 	let base: string = "sample_lod(texpaint_undo, sampler_linear, tex_coord_inp, 0.0).rgb";
@@ -18,7 +18,7 @@ function make_clone_run(kong: node_shader_t) {
 	node_shader_write_frag(kong, "var nortan: float3 = " + nortan + ";");
 	node_shader_write_frag(kong, "var height: float = " + height + ";");
 	node_shader_write_frag(kong, "var mat_opacity: float = " + opac + ";");
-	node_shader_write_frag(kong, "var opacity: float = mat_opacity * brush_opacity;");
+	node_shader_write_frag(kong, "var opacity: float = mat_opacity * constants.brush_opacity;");
 	if (context_raw.material.paint_emis) {
 		node_shader_write_frag(kong, "var emis: float = 0.0;");
 	}

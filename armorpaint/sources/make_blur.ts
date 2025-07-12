@@ -69,5 +69,5 @@ function make_blur_run(kong: node_shader_t) {
 		node_shader_write_frag(kong, "nortan += texture(texpaint_nor_undo, tex_coord_inp + float2(0.0, blur_step * float(j))).rgb * blur_weight[j + 7];");
 		node_shader_write_frag(kong, "}");
 	}
-	node_shader_write_frag(kong, "opacity *= brush_opacity;");
+	node_shader_write_frag(kong, "opacity *= constants.brush_opacity;");
 }
