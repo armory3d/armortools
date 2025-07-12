@@ -88,13 +88,13 @@ static VkFormat convert_image_format(gpu_texture_format_t format) {
 
 static int format_size(VkFormat format) {
 	switch (format) {
-	case VK_FORMAT_R32G32B32A32_SFLOAT:
+	case GPU_TEXTURE_FORMAT_RGBA128:
 		return 16;
-	case VK_FORMAT_R16G16B16A16_SFLOAT:
+	case GPU_TEXTURE_FORMAT_RGBA64:
 		return 8;
-	case VK_FORMAT_R16_SFLOAT:
+	case GPU_TEXTURE_FORMAT_R16:
 		return 2;
-	case VK_FORMAT_R8_UNORM:
+	case GPU_TEXTURE_FORMAT_R8:
 		return 1;
 	default:
 		return 4;
@@ -396,22 +396,22 @@ VkSwapchainKHR cleanup_swapchain() {
 void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_texture_format_t format, int framebuffer_index) {
 	target->width = width;
 	target->height = height;
-	target->impl.format = convert_image_format(format);
-	target->impl.readback_buffer_created = false;
+	target->format = format;
 	target->state = (framebuffer_index >= 0) ? GPU_TEXTURE_STATE_PRESENT : GPU_TEXTURE_STATE_SHADER_RESOURCE;
+	target->impl.readback_created = false;
 
 	if (framebuffer_index >= 0) {
 		return;
 	}
 
 	VkFormatProperties format_properties;
-	vkGetPhysicalDeviceFormatProperties(gpu, target->impl.format, &format_properties);
+	vkGetPhysicalDeviceFormatProperties(gpu, convert_image_format(target->format), &format_properties);
 
 	VkImageCreateInfo image = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
 		.pNext = NULL,
 		.imageType = VK_IMAGE_TYPE_2D,
-		.format = target->impl.format,
+		.format = convert_image_format(target->format),
 		.extent.width = width,
 		.extent.height = height,
 		.extent.depth = 1,
@@ -433,7 +433,7 @@ void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_t
 		.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
 		.pNext = NULL,
 		.viewType = VK_IMAGE_VIEW_TYPE_2D,
-		.format = target->impl.format,
+		.format = convert_image_format(target->format),
 		.flags = 0,
 		.subresourceRange.aspectMask = format == GPU_TEXTURE_FORMAT_D32 ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT,
 		.subresourceRange.baseMipLevel = 0,
@@ -1305,10 +1305,9 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 		vkCmdEndRendering(command_buffer);
 	}
 
-	VkFormat format = render_target->impl.format;
-	int format_bytes_size = format_size(format);
+	int format_bytes_size = format_size(render_target->format);
 
-	if (!render_target->impl.readback_buffer_created) {
+	if (!render_target->impl.readback_created) {
 		VkBufferCreateInfo buf_info = {
 			.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
 			.pNext = NULL,
@@ -1316,10 +1315,10 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 			.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT,
 			.flags = 0,
 		};
-		vkCreateBuffer(device, &buf_info, NULL, &render_target->impl.readback_buffer);
+		vkCreateBuffer(device, &buf_info, NULL, &render_target->impl.readback);
 
 		VkMemoryRequirements mem_reqs = {0};
-		vkGetBufferMemoryRequirements(device, render_target->impl.readback_buffer, &mem_reqs);
+		vkGetBufferMemoryRequirements(device, render_target->impl.readback, &mem_reqs);
 
 		VkMemoryAllocateInfo mem_alloc;
 		memset(&mem_alloc, 0, sizeof(VkMemoryAllocateInfo));
@@ -1329,10 +1328,10 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 		mem_alloc.memoryTypeIndex = 0;
 		mem_alloc.allocationSize = mem_reqs.size;
 		memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &mem_alloc.memoryTypeIndex);
-		vkAllocateMemory(device, &mem_alloc, NULL, &render_target->impl.readback_memory);
-		vkBindBufferMemory(device, render_target->impl.readback_buffer, render_target->impl.readback_memory, 0);
+		vkAllocateMemory(device, &mem_alloc, NULL, &render_target->impl.readback_mem);
+		vkBindBufferMemory(device, render_target->impl.readback, render_target->impl.readback_mem, 0);
 
-		render_target->impl.readback_buffer_created = true;
+		render_target->impl.readback_created = true;
 	}
 
 	set_image_layout(render_target->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
@@ -1351,7 +1350,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	region.imageExtent.width = (uint32_t)render_target->width;
 	region.imageExtent.height = (uint32_t)render_target->height;
 	region.imageExtent.depth = 1;
-	vkCmdCopyImageToBuffer(command_buffer, render_target->impl.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, render_target->impl.readback_buffer, 1, &region);
+	vkCmdCopyImageToBuffer(command_buffer, render_target->impl.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, render_target->impl.readback, 1, &region);
 
 	set_image_layout(render_target->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
@@ -1359,9 +1358,9 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 
 	// Read buffer
 	void *p;
-	vkMapMemory(device, render_target->impl.readback_memory, 0, VK_WHOLE_SIZE, 0, (void **)&p);
+	vkMapMemory(device, render_target->impl.readback_mem, 0, VK_WHOLE_SIZE, 0, (void **)&p);
 	memcpy(data, p, render_target->width * render_target->height * format_bytes_size);
-	vkUnmapMemory(device, render_target->impl.readback_memory);
+	vkUnmapMemory(device, render_target->impl.readback_mem);
 
 	if (gpu_in_use) {
 		vkCmdBeginRendering(command_buffer, &current_rendering_info);
@@ -1588,14 +1587,14 @@ void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
 
 	shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-	pipeline->impl.vert_shader_module = create_shader_module(pipeline->vertex_shader->impl.source, pipeline->vertex_shader->impl.length);
-	shaderStages[0].module = pipeline->impl.vert_shader_module;
+	VkShaderModule vert_shader_module = create_shader_module(pipeline->vertex_shader->impl.source, pipeline->vertex_shader->impl.length);
+	shaderStages[0].module = vert_shader_module;
 	shaderStages[0].pName = "main";
 
 	shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-	pipeline->impl.frag_shader_module = create_shader_module(pipeline->fragment_shader->impl.source, pipeline->fragment_shader->impl.length);
-	shaderStages[1].module = pipeline->impl.frag_shader_module;
+	VkShaderModule frag_shader_module = create_shader_module(pipeline->fragment_shader->impl.source, pipeline->fragment_shader->impl.length);
+	shaderStages[1].module = frag_shader_module;
 	shaderStages[1].pName = "main";
 
 	pipeline_info.pVertexInputState = &vi;
@@ -1622,8 +1621,8 @@ void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
 	pipeline_info.pNext = &rendering_info;
 
 	VkResult result = vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipeline_info, NULL, &pipeline->impl.pipeline);
-	vkDestroyShaderModule(device, pipeline->impl.frag_shader_module, NULL);
-	vkDestroyShaderModule(device, pipeline->impl.vert_shader_module, NULL);
+	vkDestroyShaderModule(device, frag_shader_module, NULL);
+	vkDestroyShaderModule(device, vert_shader_module, NULL);
 }
 
 void gpu_shader_init(gpu_shader_t *shader, const void *source, size_t length, gpu_shader_type_t type) {
@@ -1761,8 +1760,7 @@ static void prepare_texture_image(uint8_t *pixels, uint32_t width, uint32_t heig
 		vkUnmapMemory(device, impl->mem);
 	}
 
-	impl->imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	set_image_layout(impl->image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, impl->imageLayout);
+	set_image_layout(impl->image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
 void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, gpu_texture_format_t format) {
@@ -1789,8 +1787,8 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 							  (VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT),
 							  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, tex_format);
 
-		set_image_layout(staging_texture.image, VK_IMAGE_ASPECT_COLOR_BIT, staging_texture.imageLayout, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-		set_image_layout(texture->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, texture->impl.imageLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+		set_image_layout(staging_texture.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+		set_image_layout(texture->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
 		VkImageCopy copy_region = {
 			.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
@@ -1813,7 +1811,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 		};
 
 		vkCmdCopyImage(command_buffer, staging_texture.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, texture->impl.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copy_region);
-		set_image_layout(texture->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture->impl.imageLayout);
+		set_image_layout(texture->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 		vkDestroyImage(device, staging_texture.image, NULL);
 		vkFreeMemory(device, staging_texture.mem, NULL);
 	}
@@ -3088,7 +3086,7 @@ void gpu_raytrace_set_target(gpu_texture_t *_output) {
 			.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
 			.pNext = NULL,
 			.imageType = VK_IMAGE_TYPE_2D,
-			.format = _output->impl.format,
+			.format = convert_image_format(_output->format),
 			.extent.width = _output->width,
 			.extent.height = _output->height,
 			.extent.depth = 1,
@@ -3108,7 +3106,7 @@ void gpu_raytrace_set_target(gpu_texture_t *_output) {
 			.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
 			.pNext = NULL,
 			.viewType = VK_IMAGE_VIEW_TYPE_2D,
-			.format = _output->impl.format,
+			.format = convert_image_format(_output->format),
 			.flags = 0,
 			.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
 			.subresourceRange.baseMipLevel = 0,

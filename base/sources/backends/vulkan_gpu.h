@@ -7,12 +7,7 @@
 #include <vulkan/vulkan_core.h>
 
 typedef struct gpu_pipeline_impl {
-	const char **textures;
-	int *textureValues;
-	int textureCount;
 	VkPipeline pipeline;
-	VkShaderModule vert_shader_module;
-	VkShaderModule frag_shader_module;
 	VkPipelineLayout pipeline_layout;
 } gpu_pipeline_impl_t;
 
@@ -23,14 +18,12 @@ typedef struct {
 } gpu_shader_impl_t;
 
 typedef struct {
-	VkImageLayout imageLayout;
 	VkImage image;
 	VkDeviceMemory mem;
 	VkImageView view;
-	VkFormat format;
-	VkBuffer readback_buffer;
-	VkDeviceMemory readback_memory;
-	bool readback_buffer_created;
+	VkBuffer readback;
+	VkDeviceMemory readback_mem;
+	bool readback_created;
 } gpu_texture_impl_t;
 
 typedef struct {
