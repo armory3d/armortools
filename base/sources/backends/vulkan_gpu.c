@@ -808,6 +808,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 		wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME;
 		wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_SPIRV_1_4_EXTENSION_NAME;
 		wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME;
+		wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_RAY_QUERY_EXTENSION_NAME;
 	}
 
 	uint32_t device_extension_count = 0;
@@ -912,6 +913,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 		VkPhysicalDeviceRayTracingPipelineFeaturesKHR raytracing_pipeline_ext = {0};
 		VkPhysicalDeviceAccelerationStructureFeaturesKHR raytracing_acceleration_structure_ext = {0};
 		VkPhysicalDeviceBufferDeviceAddressFeatures buffer_device_address_ext = {0};
+		VkPhysicalDeviceRayQueryFeaturesKHR ray_query_ext = {0};
 		if (gpu_raytrace_supported()) {
 			raytracing_pipeline_ext.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
 			raytracing_pipeline_ext.pNext = deviceinfo.pNext;
@@ -925,7 +927,11 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 			buffer_device_address_ext.pNext = &raytracing_acceleration_structure_ext;
 			buffer_device_address_ext.bufferDeviceAddress = VK_TRUE;
 
-			deviceinfo.pNext = &buffer_device_address_ext;
+			ray_query_ext.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR;
+			ray_query_ext.pNext = &buffer_device_address_ext;
+			ray_query_ext.rayQuery = VK_TRUE;
+
+			deviceinfo.pNext = &ray_query_ext;
 		}
 
 		vkCreateDevice(gpu, &deviceinfo, NULL, &device);
