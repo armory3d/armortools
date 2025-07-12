@@ -1422,6 +1422,7 @@ void gpu_set_texture(int unit, gpu_texture_t *texture) {
 }
 
 void gpu_pipeline_destroy(gpu_pipeline_t *pipeline) {
+	gpu_execute_and_wait(); ////
 	vkDestroyPipeline(device, pipeline->impl.pipeline, NULL);
 	vkDestroyPipelineLayout(device, pipeline->impl.pipeline_layout, NULL);
 }
