@@ -1157,6 +1157,9 @@ void gpu_wait() {
 }
 
 void gpu_flush() {
+	if (gpu_in_use) {
+		vkCmdEndRendering(command_buffer);
+	}
 	vkEndCommandBuffer(command_buffer);
 	vkResetFences(device, 1, &fence);
 
