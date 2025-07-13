@@ -236,6 +236,11 @@ typedef enum spirv_opcode {
 	SPIRV_OPCODE_F_ORD_GREATER_THAN        = 186,
 	SPIRV_OPCODE_F_ORD_LESS_THAN_EQUAL     = 188,
 	SPIRV_OPCODE_F_ORD_GREATER_THAN_EQUAL  = 190,
+	SPIRV_OPCODE_SHIFT_RIGHT_LOGICAL       = 194,
+	SPIRV_OPCODE_SHIFT_LEFT_LOGICAL        = 196,
+	SPIRV_OPCODE_BITWISE_OR                = 197,
+	SPIRV_OPCODE_BITWISE_XOR               = 198,
+	SPIRV_OPCODE_BITWISE_AND               = 199,
 	SPIRV_OPCODE_DPDX                      = 207,
 	SPIRV_OPCODE_DPDY                      = 208,
 	SPIRV_OPCODE_LOOP_MERGE                = 246,
@@ -1637,9 +1642,47 @@ static spirv_id write_op_logical_or(instructions_buffer *instructions, spirv_id 
 	spirv_id result = allocate_index();
 
 	uint32_t operands[] = {type.id, result.id, operand1.id, operand2.id};
-
 	write_instruction(instructions, WORD_COUNT(operands), SPIRV_OPCODE_LOGICAL_OR, operands);
+	return result;
+}
 
+static spirv_id write_op_bitwise_xor(instructions_buffer *instructions, spirv_id type, spirv_id operand1, spirv_id operand2) {
+	spirv_id result = allocate_index();
+
+	uint32_t operands[] = {type.id, result.id, operand1.id, operand2.id};
+	write_instruction(instructions, WORD_COUNT(operands), SPIRV_OPCODE_BITWISE_XOR, operands);
+	return result;
+}
+
+static spirv_id write_op_bitwise_and(instructions_buffer *instructions, spirv_id type, spirv_id operand1, spirv_id operand2) {
+	spirv_id result = allocate_index();
+
+	uint32_t operands[] = {type.id, result.id, operand1.id, operand2.id};
+	write_instruction(instructions, WORD_COUNT(operands), SPIRV_OPCODE_BITWISE_AND, operands);
+	return result;
+}
+
+static spirv_id write_op_bitwise_or(instructions_buffer *instructions, spirv_id type, spirv_id operand1, spirv_id operand2) {
+	spirv_id result = allocate_index();
+
+	uint32_t operands[] = {type.id, result.id, operand1.id, operand2.id};
+	write_instruction(instructions, WORD_COUNT(operands), SPIRV_OPCODE_BITWISE_OR, operands);
+	return result;
+}
+
+static spirv_id write_op_left_shift(instructions_buffer *instructions, spirv_id type, spirv_id operand1, spirv_id operand2) {
+	spirv_id result = allocate_index();
+
+	uint32_t operands[] = {type.id, result.id, operand1.id, operand2.id};
+	write_instruction(instructions, WORD_COUNT(operands), SPIRV_OPCODE_SHIFT_LEFT_LOGICAL, operands);
+	return result;
+}
+
+static spirv_id write_op_right_shift(instructions_buffer *instructions, spirv_id type, spirv_id operand1, spirv_id operand2) {
+	spirv_id result = allocate_index();
+
+	uint32_t operands[] = {type.id, result.id, operand1.id, operand2.id};
+	write_instruction(instructions, WORD_COUNT(operands), SPIRV_OPCODE_SHIFT_RIGHT_LOGICAL, operands);
 	return result;
 }
 
@@ -1838,9 +1881,10 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 		}
 	}
 
-	bool     ends_with_return     = false;
-	uint64_t next_block_branch_id = 0;
-	uint64_t next_block_label_id  = 0;
+	bool     ends_with_return         = false;
+	uint64_t next_block_branch_id[16] = {0};
+	uint64_t next_block_label_id[16]  = {0};
+	uint8_t  nested_if_count          = 0;
 
 	index = 0;
 	while (index < size) {
@@ -2697,6 +2741,41 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 			hmput(index_map, o->op_binary.result.index, result);
 			break;
 		}
+		case OPCODE_BITWISE_XOR: {
+			spirv_id left  = get_var(instructions, o->op_binary.left);
+			spirv_id right = get_var(instructions, o->op_binary.right);
+			spirv_id result = write_op_bitwise_xor(instructions, convert_type_to_spirv_id(o->op_binary.result.type.type), left, right);
+			hmput(index_map, o->op_binary.result.index, result);
+			break;
+		}
+		case OPCODE_BITWISE_AND: {
+			spirv_id left  = get_var(instructions, o->op_binary.left);
+			spirv_id right = get_var(instructions, o->op_binary.right);
+			spirv_id result = write_op_bitwise_and(instructions, convert_type_to_spirv_id(o->op_binary.result.type.type), left, right);
+			hmput(index_map, o->op_binary.result.index, result);
+			break;
+		}
+		case OPCODE_BITWISE_OR: {
+			spirv_id left  = get_var(instructions, o->op_binary.left);
+			spirv_id right = get_var(instructions, o->op_binary.right);
+			spirv_id result = write_op_bitwise_or(instructions, convert_type_to_spirv_id(o->op_binary.result.type.type), left, right);
+			hmput(index_map, o->op_binary.result.index, result);
+			break;
+		}
+		case OPCODE_LEFT_SHIFT: {
+			spirv_id left  = get_var(instructions, o->op_binary.left);
+			spirv_id right = get_var(instructions, o->op_binary.right);
+			spirv_id result = write_op_left_shift(instructions, convert_type_to_spirv_id(o->op_binary.result.type.type), left, right);
+			hmput(index_map, o->op_binary.result.index, result);
+			break;
+		}
+		case OPCODE_RIGHT_SHIFT: {
+			spirv_id left  = get_var(instructions, o->op_binary.left);
+			spirv_id right = get_var(instructions, o->op_binary.right);
+			spirv_id result = write_op_right_shift(instructions, convert_type_to_spirv_id(o->op_binary.result.type.type), left, right);
+			hmput(index_map, o->op_binary.result.index, result);
+			break;
+		}
 		case OPCODE_NOT: {
 			spirv_id operand = get_var(instructions, o->op_not.from);
 			spirv_id result  = write_op_not(instructions, spirv_bool_type, operand);
@@ -2829,14 +2908,14 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 				spirv_id return_value = get_var(instructions, o->op_return.var);
 				write_op_return_value(instructions, return_value);
 			}
-			ends_with_return     = true;
-			next_block_branch_id = 0;
+			ends_with_return                      = true;
+			next_block_branch_id[nested_if_count] = 0;
 			break;
 		}
 		case OPCODE_DISCARD: {
 			write_op_discard(instructions);
-			ends_with_return     = true;
-			next_block_branch_id = 0;
+			ends_with_return                      = true;
+			next_block_branch_id[nested_if_count] = 0;
 			break;
 		}
 		case OPCODE_LESS: {
@@ -3047,8 +3126,9 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 			break;
 		}
 		case OPCODE_IF: {
-			next_block_branch_id = o->op_if.end_id;
-			next_block_label_id  = o->op_if.end_id;
+			nested_if_count++;
+			next_block_branch_id[nested_if_count] = o->op_if.end_id;
+			next_block_label_id[nested_if_count]  = o->op_if.end_id;
 			write_op_selection_merge(instructions, convert_kong_index_to_spirv_id(o->op_if.end_id), SELECTION_CONTROL_NONE);
 
 			write_op_branch_conditional(instructions, convert_kong_index_to_spirv_id(o->op_if.condition.index),
@@ -3099,11 +3179,12 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 			break;
 		}
 		case OPCODE_BLOCK_END: {
-			if (o->op_block.id == next_block_branch_id) {
+			if (o->op_block.id == next_block_branch_id[nested_if_count]) {
 				write_op_branch(instructions, convert_kong_index_to_spirv_id(o->op_block.id));
 			}
-			if (o->op_block.id == next_block_label_id) {
+			if (o->op_block.id == next_block_label_id[nested_if_count]) {
 				write_op_label_preallocated(instructions, convert_kong_index_to_spirv_id(o->op_block.id));
+				nested_if_count--;
 			}
 			break;
 		}
