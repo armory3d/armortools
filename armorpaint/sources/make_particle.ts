@@ -13,7 +13,7 @@ function make_particle_mask(kong: node_shader_t) {
 	node_shader_write_frag(kong, "dist = length(pa - ba * h) * 10.0;");
 
 	node_shader_write_frag(kong, "if (dist > 1.0) { discard; }");
-	node_shader_write_frag(kong, "var str: float = clamp(pow(1.0 / dist * brush_hardness * 0.2, 4.0), 0.0, 1.0) * opacity;");
+	node_shader_write_frag(kong, "var str: float = clamp(pow(1.0 / dist * constants.brush_hardness * 0.2, 4.0), 0.0, 1.0) * opacity;");
 	node_shader_write_frag(kong, "if (constants.particle_hit.x == 0.0 && constants.particle_hit.y == 0.0 && constants.particle_hit.z == 0.0) { str = 0.0; }");
 	node_shader_write_frag(kong, "if (str == 0.0) { discard; }");
 	///else

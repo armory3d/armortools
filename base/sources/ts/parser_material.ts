@@ -27,7 +27,7 @@ let parser_material_nodes: ui_node_t[];
 let parser_material_links: ui_node_link_t[];
 
 let parser_material_cotangent_frame_written: bool;
-let parser_material_tex_coord: string = "tex_coord";
+let parser_material_tex_coord: string = "input.tex_coord";
 let parser_material_eps: f32 = 0.000001;
 
 let parser_material_custom_nodes: map_t<string, any> = map_create(); // JSValue -> (n: ui_node_t, s: string)=>string
@@ -641,7 +641,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		parser_material_write(parser_material_kong, "var " + store + "_rad: float = " + angle + " * (" + pi + " / 180);");
 		parser_material_write(parser_material_kong, "var " + store + "_x: float = cos(" + store + "_rad);");
 		parser_material_write(parser_material_kong, "var " + store + "_y: float = sin(" + store + "_rad);");
-		return "sample(" + tex_name + ", sampler_linear, + tex_coord + float2(" + store + "_x, " + store + "_y) * " + mask + ").rgb;";
+		return "sample(" + tex_name + ", sampler_linear, + input.tex_coord + float2(" + store + "_x, " + store + "_y) * " + mask + ").rgb;";
 	}
 	else if (node.type == "BLUR") {
 		if (parser_material_blur_passthrough) {
@@ -659,7 +659,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		parser_material_write(parser_material_kong, "var " + store + "_res: float3 = float3(0.0, 0.0, 0.0);");
 		parser_material_write(parser_material_kong, "for (var i: int = -" + steps + "; i <= " + steps + "; i += 1) {");
 		parser_material_write(parser_material_kong, "for (var j: int = -" + steps + "; j <= " + steps + "; j += 1) {");
-		parser_material_write(parser_material_kong, store + "_res += sample(" + tex_name + ", sampler_linear, tex_coord + float2(i, j) / constants." + tex_name + "_size).rgb;");
+		parser_material_write(parser_material_kong, store + "_res += sample(" + tex_name + ", sampler_linear, input.tex_coord + float2(i, j) / constants." + tex_name + "_size).rgb;");
 		parser_material_write(parser_material_kong, "}");
 		parser_material_write(parser_material_kong, "}");
 		parser_material_write(parser_material_kong, store + "_res /= (" + steps + " * 2 + 1) * (" + steps + " * 2 + 1);");
@@ -877,11 +877,11 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		let l: any = node.buttons[0].default_value;
 		if (socket == node.outputs[0]) { // Base
 			node_shader_add_texture(parser_material_kong, "texpaint" + l, "_texpaint" + l);
-			return "sample(texpaint" + l + ", sampler_linear, tex_coord).rgb";
+			return "sample(texpaint" + l + ", sampler_linear, input.tex_coord).rgb";
 		}
 		else if (socket == node.outputs[5]) { // Normal
 			node_shader_add_texture(parser_material_kong, "texpaint_nor" + l, "_texpaint_nor" + l);
-			return "sample(texpaint_nor" + l + ", sampler_linear, tex_coord).rgb";
+			return "sample(texpaint_nor" + l + ", sampler_linear, input.tex_coord).rgb";
 		}
 	}
 	else if (node.type == "MATERIAL") {
@@ -1204,7 +1204,7 @@ function parse_normal_map_color_input(inp: ui_node_socket_t) {
 			node_shader_add_function(parser_material_kong, str_cotangent_frame);
 		}
 		parser_material_kong.frag_n = true;
-		parser_material_write(parser_material_kong, "var TBN: float3x3 = cotangent_frame(n, vvec, tex_coord);");
+		parser_material_write(parser_material_kong, "var TBN: float3x3 = cotangent_frame(n, vvec, input.tex_coord);");
 
 		parser_material_write(parser_material_kong, "n = TBN * normalize(texn);");
 	}
@@ -1275,30 +1275,30 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 		let l: any = node.buttons[0].default_value;
 		if (socket == node.outputs[1]) { // Opac
 			node_shader_add_texture(parser_material_kong, "texpaint" + l, "_texpaint" + l);
-			return "sample(texpaint" + l + ", sampler_linear, tex_coord).a";
+			return "sample(texpaint" + l + ", sampler_linear, input.tex_coord).a";
 		}
 		else if (socket == node.outputs[2]) { // Occ
 			node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
-			return "sample(texpaint_pack" + l + ", sampler_linear, tex_coord).r";
+			return "sample(texpaint_pack" + l + ", sampler_linear, input.tex_coord).r";
 		}
 		else if (socket == node.outputs[3]) { // Rough
 			node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
-			return "sample(texpaint_pack" + l + ", sampler_linear, tex_coord).g";
+			return "sample(texpaint_pack" + l + ", sampler_linear, input.tex_coord).g";
 		}
 		else if (socket == node.outputs[4]) { // Metal
 			node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
-			return "sample(texpaint_pack" + l + ", sampler_linear, tex_coord).b";
+			return "sample(texpaint_pack" + l + ", sampler_linear, input.tex_coord).b";
 		}
 		else if (socket == node.outputs[7]) { // Height
 			node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
-			return "sample(texpaint_pack" + l + ", sampler_linear, tex_coord).a";
+			return "sample(texpaint_pack" + l + ", sampler_linear, input.tex_coord).a";
 		}
 	}
 	else if (node.type == "LAYER_MASK") {
 		if (socket == node.outputs[0]) {
 			let l: any = node.buttons[0].default_value;
 			node_shader_add_texture(parser_material_kong, "texpaint" + l, "_texpaint" + l);
-			return "sample(texpaint" + l + ", sampler_linear, tex_coord).r";
+			return "sample(texpaint" + l + ", sampler_linear, input.tex_coord).r";
 		}
 	}
 	else if (node.type == "MATERIAL") {
@@ -1513,7 +1513,7 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 		let tex_name: string = "texbake_" + parser_material_node_name(node);
 		node_shader_add_texture(parser_material_kong, "" + tex_name, "_" + tex_name);
 		let store: string = parser_material_store_var_name(node);
-		parser_material_write(parser_material_kong, "var " + store + "_res: float = sample(" + tex_name + ", sampler_linear, tex_coord).r;");
+		parser_material_write(parser_material_kong, "var " + store + "_res: float = sample(" + tex_name + ", sampler_linear, input.tex_coord).r;");
 		return store + "_res";
 	}
 	else if (node.type == "NORMAL") {
