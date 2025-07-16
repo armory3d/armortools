@@ -2518,6 +2518,12 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 				spirv_id id = write_op_ext_inst2(instructions, spirv_float3_type, glsl_import, SPIRV_GLSL_STD_FMAX, operand1, operand2);
 				hmput(index_map, o->op_call.var.index, id);
 			}
+			else if (func == add_name("max4")) {
+				spirv_id operand1 = get_var(instructions, o->op_call.parameters[0]);
+				spirv_id operand2 = get_var(instructions, o->op_call.parameters[1]);
+				spirv_id id = write_op_ext_inst2(instructions, spirv_float4_type, glsl_import, SPIRV_GLSL_STD_FMAX, operand1, operand2);
+				hmput(index_map, o->op_call.var.index, id);
+			}
 			else if (func == add_name("step3")) {
 				spirv_id operand1 = get_var(instructions, o->op_call.parameters[0]);
 				spirv_id operand2 = get_var(instructions, o->op_call.parameters[1]);

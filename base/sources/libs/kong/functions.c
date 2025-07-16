@@ -277,6 +277,24 @@ static void add_func_float3_float3_float3(char *name) {
 	f->block           = NULL;
 }
 
+static void add_func_float4_float4_float4(char *name) {
+	function_id func = add_function(add_name(name));
+	function   *f    = get_function(func);
+	init_type_ref(&f->return_type, add_name("float4"));
+	f->return_type.type = find_type_by_ref(&f->return_type);
+
+	f->parameter_names[0] = add_name("a");
+	init_type_ref(&f->parameter_types[0], add_name("float4"));
+	f->parameter_types[0].type = find_type_by_ref(&f->parameter_types[0]);
+
+	f->parameter_names[1] = add_name("b");
+	init_type_ref(&f->parameter_types[1], add_name("float4"));
+	f->parameter_types[1].type = find_type_by_ref(&f->parameter_types[1]);
+
+	f->parameters_size = 2;
+	f->block           = NULL;
+}
+
 static void add_func_void_uint_uint(char *name) {
 	function_id func = add_function(add_name(name));
 	function   *f    = get_function(func);
@@ -843,6 +861,7 @@ void functions_init(void) {
 	add_func_float3_float3_float_float("clamp3");
 	add_func_float3_float3_float3("min3");
 	add_func_float3_float3_float3("max3");
+	add_func_float4_float4_float4("max4");
 	add_func_float3_float3_float3("step3");
 	add_func_float3_float3_float3("pow3");
 	add_func_float3_float3_float3("floor3");
