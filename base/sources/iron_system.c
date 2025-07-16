@@ -1,4 +1,3 @@
-#pragma once
 
 #include "iron_system.h"
 #include <stdio.h>
