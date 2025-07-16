@@ -23,7 +23,7 @@ struct vert_out {
 	col: float4;
 }
 
-fun draw_image_vert(input: vert_in): vert_out {
+fun draw_image_transform_vert(input: vert_in): vert_out {
 	var output: vert_out;
 
 	var cpos: float4 = constants.pos;
@@ -40,7 +40,7 @@ fun draw_image_vert(input: vert_in): vert_out {
 	return output;
 }
 
-fun draw_image_frag(input: vert_out): float4 {
+fun draw_image_transform_frag(input: vert_out): float4 {
 	var texcolor: float4 = sample(tex, sampler_linear, input.tex) * input.col;
 	texcolor.rgb = texcolor.rgb * texcolor.a * input.col.a;
 	return texcolor;
@@ -48,6 +48,6 @@ fun draw_image_frag(input: vert_out): float4 {
 
 #[pipe]
 struct pipe {
-	vertex = draw_image_vert;
-	fragment = draw_image_frag;
+	vertex = draw_image_transform_vert;
+	fragment = draw_image_transform_frag;
 }
