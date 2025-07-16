@@ -49,10 +49,9 @@ function line_draw_init() {
 		line_draw_pipeline.depth_write = true;
 		line_draw_pipeline.depth_mode = compare_mode_t.LESS;
 		line_draw_pipeline.cull_mode = cull_mode_t.NONE;
-		line_draw_pipeline.color_attachment_count = 3;
+		line_draw_pipeline.color_attachment_count = 2;
 		ARRAY_ACCESS(line_draw_pipeline.color_attachment, 0) = tex_format_t.RGBA64;
 		ARRAY_ACCESS(line_draw_pipeline.color_attachment, 1) = tex_format_t.RGBA64;
-		ARRAY_ACCESS(line_draw_pipeline.color_attachment, 2) = tex_format_t.RGBA64;
 		line_draw_pipeline.depth_attachment_bits = 32;
 		gpu_pipeline_compile(line_draw_pipeline);
 		pipes_offset = 0;
@@ -69,8 +68,8 @@ function line_draw_init() {
 		line_draw_overlay_pipeline.input_layout = structure;
 		line_draw_overlay_pipeline.fragment_shader = sys_get_shader("line_overlay.frag");
 		line_draw_overlay_pipeline.vertex_shader = sys_get_shader("line_overlay.vert");
-		line_draw_overlay_pipeline.depth_write = true;
-		line_draw_overlay_pipeline.depth_mode = compare_mode_t.LESS;
+		line_draw_overlay_pipeline.depth_write = false;
+		line_draw_overlay_pipeline.depth_mode = compare_mode_t.ALWAYS;
 		line_draw_overlay_pipeline.cull_mode = cull_mode_t.NONE;
 		line_draw_overlay_pipeline.color_attachment_count = 1;
 		ARRAY_ACCESS(line_draw_overlay_pipeline.color_attachment, 0) = tex_format_t.RGBA64;
@@ -230,13 +229,13 @@ function line_draw_begin() {
 	}
 }
 
-function line_draw_end(overlay: bool = false) {
+function line_draw_end() {
 	gpu_vertex_buffer_unlock(line_draw_vertex_buffer);
 	gpu_index_buffer_unlock(line_draw_index_buffer);
 
 	gpu_set_vertex_buffer(line_draw_vertex_buffer);
 	gpu_set_index_buffer(line_draw_index_buffer);
-	gpu_set_pipeline(overlay ? line_draw_overlay_pipeline : line_draw_pipeline);
+	gpu_set_pipeline(line_draw_pipeline);
 	let camera: camera_object_t = scene_camera;
 	line_draw_vp = mat4_clone(camera.v);
 	line_draw_vp = mat4_mult_mat(line_draw_vp, camera.p);
