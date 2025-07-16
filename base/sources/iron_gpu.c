@@ -1,9 +1,6 @@
 #include "iron_gpu.h"
 #include <iron_system.h>
 
-#define CONSTANT_BUFFER_SIZE 256
-#define CONSTANT_BUFFER_MULTIPLE 2048
-
 static gpu_buffer_t constant_buffer;
 static bool gpu_thrown = false;
 
@@ -20,8 +17,8 @@ int framebuffer_index = 0;
 
 void gpu_init(int depth_buffer_bits, bool vsync) {
 	gpu_init_internal(depth_buffer_bits, vsync);
-	gpu_constant_buffer_init(&constant_buffer, CONSTANT_BUFFER_SIZE * CONSTANT_BUFFER_MULTIPLE);
-	gpu_constant_buffer_lock(&constant_buffer, 0, CONSTANT_BUFFER_SIZE);
+	gpu_constant_buffer_init(&constant_buffer, GPU_CONSTANT_BUFFER_SIZE * GPU_CONSTANT_BUFFER_MULTIPLE);
+	gpu_constant_buffer_lock(&constant_buffer, 0, GPU_CONSTANT_BUFFER_SIZE);
 }
 
 void gpu_begin(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, unsigned flags, unsigned color, float depth) {
@@ -64,21 +61,21 @@ void gpu_begin(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, 
 
 void gpu_draw() {
 	gpu_constant_buffer_unlock(&constant_buffer);
-	gpu_set_constant_buffer(&constant_buffer, constant_buffer_index * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
+	gpu_set_constant_buffer(&constant_buffer, constant_buffer_index * GPU_CONSTANT_BUFFER_SIZE, GPU_CONSTANT_BUFFER_SIZE);
 	gpu_draw_internal();
 
 	constant_buffer_index++;
-	if (constant_buffer_index >= CONSTANT_BUFFER_MULTIPLE) {
+	if (constant_buffer_index >= GPU_CONSTANT_BUFFER_MULTIPLE) {
 		constant_buffer_index = 0;
 	}
 
 	draw_calls++;
-	if (draw_calls + draw_calls_last >= CONSTANT_BUFFER_MULTIPLE) {
+	if (draw_calls + draw_calls_last >= GPU_CONSTANT_BUFFER_MULTIPLE) {
 		draw_calls = draw_calls_last = constant_buffer_index = 0;
 		gpu_execute_and_wait();
 	}
 
-	gpu_constant_buffer_lock(&constant_buffer, constant_buffer_index * CONSTANT_BUFFER_SIZE, CONSTANT_BUFFER_SIZE);
+	gpu_constant_buffer_lock(&constant_buffer, constant_buffer_index * GPU_CONSTANT_BUFFER_SIZE, GPU_CONSTANT_BUFFER_SIZE);
 }
 
 void gpu_end() {

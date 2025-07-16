@@ -7,8 +7,6 @@
 #import <Metal/Metal.h>
 #import <MetalKit/MTKView.h>
 
-#define GPU_FRAMEBUFFER_COUNT 1
-
 id getMetalLayer(void);
 id getMetalDevice(void);
 id getMetalQueue(void);
@@ -28,6 +26,10 @@ static MTLViewport current_viewport;
 static MTLScissorRect current_scissor;
 static MTLRenderPassDescriptor *render_pass_desc;
 static bool resized = false;
+static gpu_texture_t *current_textures[16] = {
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+};
 
 static MTLBlendFactor convert_blending_factor(gpu_blending_factor_t factor) {
 	switch (factor) {
@@ -169,7 +171,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
     NSArray *arguments = [NSArray arrayWithObjects:constantsDesc, samplerDesc, textureDesc[0], textureDesc[1], textureDesc[2], textureDesc[3], textureDesc[4], textureDesc[5], textureDesc[6], textureDesc[7], textureDesc[8], textureDesc[9], textureDesc[10], textureDesc[11], textureDesc[12], textureDesc[13], textureDesc[14], textureDesc[15], nil];
     argument_encoder = [device newArgumentEncoderWithArguments:arguments];
 	argument_buffer_step = [argument_encoder encodedLength];
-	argument_buffer = [device newBufferWithLength:(argument_buffer_step * 2048) options:MTLResourceStorageModeShared];
+	argument_buffer = [device newBufferWithLength:(argument_buffer_step * GPU_CONSTANT_BUFFER_MULTIPLE) options:MTLResourceStorageModeShared];
 
 	gpu_create_framebuffers(depth_buffer_bits);
 	next_drawable();
@@ -227,6 +229,10 @@ void gpu_wait() {
 }
 
 void gpu_execute_and_wait() {
+	if (gpu_in_use) {
+		[command_encoder endEncoding];
+	}
+
 	[command_buffer commit];
 	gpu_wait();
 	id<MTLCommandQueue> queue = getMetalQueue();
@@ -321,6 +327,9 @@ void gpu_set_pipeline(gpu_pipeline_t *pipeline) {
 	[command_encoder setDepthStencilState:depth_state];
 	[command_encoder setFrontFacingWinding:MTLWindingClockwise];
 	[command_encoder setCullMode:convert_cull_mode(pipeline->cull_mode)];
+	for (int i = 0; i < 16; ++i) {
+		current_textures[i] = NULL;
+	}
 }
 
 void gpu_set_vertex_buffer(gpu_buffer_t *buffer) {
@@ -378,21 +387,24 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 
 void gpu_set_constant_buffer(gpu_buffer_t *buffer, int offset, size_t size) {
 	id<MTLBuffer> buf = (__bridge id<MTLBuffer>)buffer->impl.metal_buffer;
-	int i = constant_buffer_index;
-	[argument_encoder setArgumentBuffer:argument_buffer offset:argument_buffer_step * i];
+	[argument_encoder setArgumentBuffer:argument_buffer offset:argument_buffer_step * constant_buffer_index];
 	[argument_encoder setBuffer:buf offset:offset atIndex:0];
 	[argument_encoder setSamplerState:linear_sampler atIndex:1];
-	[command_encoder setVertexBuffer:argument_buffer offset:argument_buffer_step * i atIndex:1];
-    [command_encoder setFragmentBuffer:argument_buffer offset:argument_buffer_step * i atIndex:1];
-	[command_encoder useResource:buf usage:MTLResourceUsageRead  stages:MTLRenderStageVertex|MTLRenderStageFragment];
+	[command_encoder setVertexBuffer:argument_buffer offset:argument_buffer_step * constant_buffer_index atIndex:1];
+    [command_encoder setFragmentBuffer:argument_buffer offset:argument_buffer_step * constant_buffer_index atIndex:1];
+	[command_encoder useResource:buf usage:MTLResourceUsageRead stages:MTLRenderStageVertex|MTLRenderStageFragment];
+	for (int i = 0; i < 16; ++i) {
+		if (current_textures[i] == NULL) {
+			break;
+		}
+		id<MTLTexture> tex = (__bridge id<MTLTexture>)current_textures[i]->impl._tex;
+		[argument_encoder setTexture:tex atIndex:i + 2];
+		[command_encoder useResource:tex usage:MTLResourceUsageRead stages:MTLRenderStageVertex|MTLRenderStageFragment];
+	}
 }
 
 void gpu_set_texture(int unit, gpu_texture_t *texture) {
-	id<MTLTexture> tex = (__bridge id<MTLTexture>)texture->impl._tex;
-	int i = constant_buffer_index;
-	[argument_encoder setArgumentBuffer:argument_buffer offset:argument_buffer_step * i];
-	[argument_encoder setTexture:tex atIndex:unit + 2];
-	[command_encoder useResource:tex usage:MTLResourceUsageRead stages:MTLRenderStageVertex|MTLRenderStageFragment];
+	current_textures[unit] = texture;
 }
 
 void gpu_pipeline_destroy(gpu_pipeline_t *pipeline) {
