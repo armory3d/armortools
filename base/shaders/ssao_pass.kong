@@ -16,8 +16,8 @@ const gbufferD: tex2d;
 #[set(everything)]
 const gbuffer0: tex2d;
 
-const max_steps: float = 32;
-const ray_step: float = 0.001;
+const max_steps: float = 24;
+const ray_step: float = 0.0015;
 
 struct vert_in {
 	pos: float2;
@@ -79,7 +79,9 @@ fun ray_cast(view_ray: float3, dir: float3, vpos: float3): float {
 		var delta: float = get_delta_depth(view_ray, hit_coord);
 		if (delta > 0.0 && delta < 0.2) {
 			dist = distance(vpos, hit_coord);
-			// break;
+			return dist;
+		}
+		if (distance(vpos, hit_coord) > 2.0) {
 			return dist;
 		}
 
@@ -146,11 +148,12 @@ fun ssao_pass_frag(input: vert_out): float {
 	n = normalize(constants.V3 * n);
 
 	var vpos: float3 = get_pos_view(input.view_ray, d);
-	var col: float = ray_cast(input.view_ray, n, vpos);
-	var o1: float3 = normalize(tangent(n));
+	var o1: float3 = tangent(n);
 	var o2: float3 = cross(o1, n);
 	var c1: float3 = 0.5 * (o1 + o2);
 	var c2: float3 = 0.5 * (o1 - o2);
+
+	var col: float = ray_cast(input.view_ray, n, vpos);
 	col += ray_cast(input.view_ray, lerp3(n, o1, 0.5), vpos);
 	col += ray_cast(input.view_ray, lerp3(n, o2, 0.5), vpos);
 	col += ray_cast(input.view_ray, lerp3(n, -c1, 0.5), vpos);
