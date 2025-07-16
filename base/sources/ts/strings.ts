@@ -40,15 +40,25 @@ fun tex_checker(co: float3, col1: float3, col2: float3, scale: float): float3 { 
 	var xi: float = abs(floor(p.x)); \
 	var yi: float = abs(floor(p.y)); \
 	var zi: float = abs(floor(p.z)); \
-	var check: bool = (((xi % 2.0) == (yi % 2.0)) == bool((zi % 2.0))); \
-	if (check) { return col1; } else { return col2; } \
+	/* var check: bool = (xi % 2.0 == yi % 2.0) == zi % 2.0;*/ \
+	var checka: int = 0; \
+	var checkb: int = 0; \
+	if (xi % 2.0 == yi % 2.0) { checka = 1; } \
+	if (zi % 2.0 != 0.0) { checkb = 1; } \
+	if (checka == checkb) { return col1; } return col2; \
 } \
 fun tex_checker_f(co: float3, scale: float): float { \
 	var p: float3 = (co + 0.000001 * 0.999999) * scale; \
 	var xi: float = abs(floor(p.x)); \
 	var yi: float = abs(floor(p.y)); \
 	var zi: float = abs(floor(p.z)); \
-	return float(((xi % 2.0) == (yi % 2.0)) == bool((zi % 2.0))); \
+	/*return float((xi % 2.0 == yi % 2.0) == zi % 2.0);*/ \
+	var checka: int = 0; \
+	var checkb: int = 0; \
+	if (xi % 2.0 == yi % 2.0) { checka = 1; } \
+	if (zi % 2.0 != 0.0) { checkb = 1; } \
+	if (checka == checkb) { return 1.0; } return 0.0; \
+	\
 } \
 ";
 
@@ -60,19 +70,24 @@ fun tex_voronoi(x: float3): float4 { \
 	var f: float3 = frac3(x); \
 	var id: float = 0.0; \
 	var res: float = 100.0; \
-	for (var k: int = -1; k <= 1; k += 1) \
-	for (var j: int = -1; j <= 1; j += 1) \
-	for (var i: int = -1; i <= 1; i += 1) { \
-		var b: float3 = float3(float(i), float(j), float(k)); \
+	for (var k: int = 0; k <= 2; k += 1) \
+	for (var j: int = 0; j <= 2; j += 1) \
+	for (var i: int = 0; i <= 2; i += 1) { \
+		var b: float3 = float3(float(i - 1), float(j - 1), float(k - 1)); \
 		var pb: float3 = p + b; \
-		var r: float3 = float3(b) - f + sample(snoise256, sampler_linear, (pb.xy + float2(3.0, 1.0) * pb.z + 0.5) / 256.0).xyz; \
+		var snoise_sample: float3 = sample(snoise256, sampler_linear, (pb.xy + float2(3.0, 1.0) * pb.z + 0.5) / 256.0).xyz; \
+		var r: float3 = b - f + snoise_sample; \
 		var d: float = dot(r, r); \
 		if (d < res) { \
 			id = dot(p + b, float3(1.0, 57.0, 113.0)); \
 			res = d; \
 		} \
 	} \
-	var col: float3 = 0.5 + 0.5 * cos(id * 0.35 + float3(0.0, 1.0, 2.0)); \
+	/*var col: float3 = 0.5 + 0.5 * cos(id * 0.35 + float3(0.0, 1.0, 2.0));*/ \
+	var col: float3; \
+	col.x = 0.5 + 0.5 * cos(id * 0.35 + 0.0); \
+	col.y = 0.5 + 0.5 * cos(id * 0.35 + 1.0); \
+	col.z = 0.5 + 0.5 * cos(id * 0.35 + 2.0); \
 	return float4(col, sqrt(res)); \
 } \
 ";
@@ -80,23 +95,23 @@ fun tex_voronoi(x: float3): float4 { \
 	// By Morgan McGuire @morgan3d, http://graphicscodex.com Reuse permitted under the BSD license.
 	// https://www.shadertoy.com/view/4dS3Wd
 let str_tex_noise: string = "\
-fun hash(n: float): float { return frac(sin(n) * 10000); } \
-fun tex_noise_f(float3 x): float { \
-    var step: float3 = float3(110, 241, 171); \
+fun hash(n: float): float { return frac(sin(n) * 10000.0); } \
+fun tex_noise_f(x: float3): float { \
+    var step: float3 = float3(110.0, 241.0, 171.0); \
     var i: float3 = floor3(x); \
     var f: float3 = frac3(x); \
     var n: float = dot(i, step); \
     var u: float3 = f * f * (3.0 - 2.0 * f); \
-    return lerp(lerp(lerp(hash(n + dot(step, float3(0, 0, 0))), hash(n + dot(step, float3(1, 0, 0))), u.x), \
-                     lerp(hash(n + dot(step, float3(0, 1, 0))), hash(n + dot(step, float3(1, 1, 0))), u.x), u.y), \
-                lerp(lerp(hash(n + dot(step, float3(0, 0, 1))), hash(n + dot(step, float3(1, 0, 1))), u.x), \
-                     lerp(hash(n + dot(step, float3(0, 1, 1))), hash(n + dot(step, float3(1, 1, 1))), u.x), u.y), u.z); \
+    return lerp(lerp(lerp(hash(n + dot(step, float3(0.0, 0.0, 0.0))), hash(n + dot(step, float3(1.0, 0.0, 0.0))), u.x), \
+                     lerp(hash(n + dot(step, float3(0.0, 1.0, 0.0))), hash(n + dot(step, float3(1.0, 1.0, 0.0))), u.x), u.y), \
+                lerp(lerp(hash(n + dot(step, float3(0.0, 0.0, 1.0))), hash(n + dot(step, float3(1.0, 0.0, 1.0))), u.x), \
+                     lerp(hash(n + dot(step, float3(0.0, 1.0, 1.0))), hash(n + dot(step, float3(1.0, 1.0, 1.0))), u.x), u.y), u.z); \
 } \
 fun tex_noise(p: float3): float { \
-	p *= 1.25; \
-	var f: float = 0.5 * tex_noise_f(p); p *= 2.01; \
-	f += 0.25 * tex_noise_f(p); p *= 2.02; \
-	f += 0.125 * tex_noise_f(p); p *= 2.03; \
+	p = p * 1.25; \
+	var f: float = 0.5 * tex_noise_f(p); p = p * 2.01; \
+	f += 0.25 * tex_noise_f(p); p = p * 2.02; \
+	f += 0.125 * tex_noise_f(p); p = p * 2.03; \
 	f += 0.0625 * tex_noise_f(p); \
 	return 1.0 - f; \
 } \
@@ -132,7 +147,7 @@ fun tex_musgrave_f(p: float3): float { \
 	w.y = dot(x1, x1); \
 	w.z = dot(x2, x2); \
 	w.w = dot(x3, x3); \
-	w = max4(0.6 - w, 0.0); \
+	w = max4(float4(0.6, 0.6, 0.6, 0.6) - w, float4(0.0, 0.0, 0.0, 0.0)); \
 	d.x = dot(random3(s), x); \
 	d.y = dot(random3(s + i1), x1); \
 	d.z = dot(random3(s + i2), x2); \
@@ -148,7 +163,7 @@ let str_hue_sat: string = "\
 fun hsv_to_rgb(c: float3): float3 { \
 	var K: float4 = float4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0); \
 	var p: float3 = abs3(frac3(c.xxx + K.xyz) * 6.0 - K.www); \
-	return c.z * lerp3(K.xxx, clamp3(p - K.xxx, 0.0, 1.0), c.y); \
+	return lerp3(K.xxx, clamp3(p - K.xxx, float3(0.0, 0.0, 0.0), float3(1.0, 1.0, 1.0)), c.y) * c.z; \
 } \
 fun rgb_to_hsv(c: float3): float3 { \
 	var K: float4 = float4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0); \
@@ -228,7 +243,7 @@ let str_brightcontrast: string = "\
 fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
 	var a: float = 1.0 + contr; \
 	var b: float = bright - contr * 0.5; \
-	return max3(a * col + b, 0.0); \
+	return max3(a * col + b, float3(0.0, 0.0, 0.0)); \
 } \
 ";
 

@@ -638,10 +638,10 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		node_shader_add_texture(parser_material_kong, "" + tex_name, "_" + tex_name);
 		let store: string = parser_material_store_var_name(node);
 		let pi: f32 = math_pi();
-		parser_material_write(parser_material_kong, "var " + store + "_rad: float = " + angle + " * (" + pi + " / 180);");
+		parser_material_write(parser_material_kong, "var " + store + "_rad: float = " + angle + " * (" + pi + " / 180.0);");
 		parser_material_write(parser_material_kong, "var " + store + "_x: float = cos(" + store + "_rad);");
 		parser_material_write(parser_material_kong, "var " + store + "_y: float = sin(" + store + "_rad);");
-		return "sample(" + tex_name + ", sampler_linear, + input.tex_coord + float2(" + store + "_x, " + store + "_y) * " + mask + ").rgb;";
+		return "sample(" + tex_name + ", sampler_linear, input.tex_coord + float2(" + store + "_x, " + store + "_y) * " + mask + ").rgb";
 	}
 	else if (node.type == "BLUR") {
 		if (parser_material_blur_passthrough) {
@@ -651,18 +651,18 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		if (strength == "0.0") {
 			return "float3(0.0, 0.0, 0.0)";
 		}
-		let steps: string = "int(" + strength + " * 10 + 1)";
+		let steps: string = "(" + strength + " * 10.0 + 1.0)";
 		let tex_name: string = "texblur_" + parser_material_node_name(node);
 		node_shader_add_texture(parser_material_kong, "" + tex_name, "_" + tex_name);
 		node_shader_add_constant(parser_material_kong, "" + tex_name + "_size: float2", "_size(" + tex_name + ")");
 		let store: string = parser_material_store_var_name(node);
 		parser_material_write(parser_material_kong, "var " + store + "_res: float3 = float3(0.0, 0.0, 0.0);");
-		parser_material_write(parser_material_kong, "for (var i: int = -" + steps + "; i <= " + steps + "; i += 1) {");
-		parser_material_write(parser_material_kong, "for (var j: int = -" + steps + "; j <= " + steps + "; j += 1) {");
-		parser_material_write(parser_material_kong, store + "_res += sample(" + tex_name + ", sampler_linear, input.tex_coord + float2(i, j) / constants." + tex_name + "_size).rgb;");
+		parser_material_write(parser_material_kong, "for (var i: int = 0; i <= int(" + steps + " * 2.0); i += 1) {");
+		parser_material_write(parser_material_kong, "for (var j: int = 0; j <= int(" + steps + " * 2.0); j += 1) {");
+		parser_material_write(parser_material_kong, store + "_res += sample(" + tex_name + ", sampler_linear, input.tex_coord + float2(float(i) - " + steps + ", float(j) - " + steps + ") / constants." + tex_name + "_size).rgb;");
 		parser_material_write(parser_material_kong, "}");
 		parser_material_write(parser_material_kong, "}");
-		parser_material_write(parser_material_kong, store + "_res /= (" + steps + " * 2 + 1) * (" + steps + " * 2 + 1);");
+		parser_material_write(parser_material_kong, store + "_res = " + store + "_res / (" + steps + " * 2.0 + 1.0) * (" + steps + " * 2.0 + 1.0);");
 		return store + "_res";
 	}
 	else if (node.type == "HUE_SAT") {
@@ -672,7 +672,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		let val: string = parser_material_parse_value_input(node.inputs[2]);
 		let fac: string = parser_material_parse_value_input(node.inputs[3]);
 		let col: string = parser_material_parse_vector_input(node.inputs[4]);
-		return "hue_sat(" + col + ", float4(" + hue + "-0.5, " + sat + ", " + val + ", 1.0-" + fac + "))";
+		return "hue_sat(" + col + ", float4(" + hue + " - 0.5, " + sat + ", " + val + ", 1.0 - " + fac + "))";
 	}
 	else if (node.type == "INVERT") {
 		let fac: string = parser_material_parse_value_input(node.inputs[0]);
@@ -829,6 +829,11 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		let fac: string = parser_material_parse_value_input(node.inputs[0]);
 		let vec: string = parser_material_parse_vector_input(node.inputs[1]);
 		let curves: f32_array_t = node.buttons[0].default_value;
+		if (curves[96] == 0.0) {
+			curves[96] = 1.0;
+			curves[97] = 1.0;
+			curves[98] = 1.0;
+		}
 		let name: string = parser_material_node_name(node);
 		let vc0: string = parser_material_vector_curve(name + "0", vec + ".x", curves.buffer + 32 * 0, curves[96]);
 		let vc1: string = parser_material_vector_curve(name + "1", vec + ".y", curves.buffer + 32 * 1, curves[97]);
@@ -1075,12 +1080,12 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		if (blend == "PARTIAL_DERIVATIVE") { //partial derivate blending
 			parser_material_write(parser_material_kong, "var " + store + "_n1: float3 = " + nm1 + " * 2.0 - 1.0;");
 			parser_material_write(parser_material_kong, "var " + store + "_n2: float3 = " + nm2 + " * 2.0 - 1.0;");
-			return "0.5 * normalize(float3(" + store + "_n1.xy * " + store + "_n2.z + " + store + "_n2.xy * " + store + "_n1.z, " + store + "_n1.z * " + store + "_n2.z)) + 0.5;";
+			return "0.5 * normalize(float3(" + store + "_n1.xy * " + store + "_n2.z + " + store + "_n2.xy * " + store + "_n1.z, " + store + "_n1.z * " + store + "_n2.z)) + 0.5";
 		}
 		else if (blend == "WHITEOUT") { //whiteout blending
 			parser_material_write(parser_material_kong, "var " + store + "_n1: float3 = " + nm1 + " * 2.0 - 1.0;");
 			parser_material_write(parser_material_kong, "var " + store + "_n2: float3 = " + nm2 + " * 2.0 - 1.0;");
-			return "0.5 * normalize(float3(" + store + "_n1.xy + " + store + "_n2.xy, " + store + "_n1.z * " + store + "_n2.z)) + 0.5;";
+			return "0.5 * normalize(float3(" + store + "_n1.xy + " + store + "_n2.xy, " + store + "_n1.z * " + store + "_n2.z)) + 0.5";
 		}
 		else if (blend == "REORIENTED") { //reoriented normal mapping
 			parser_material_write(parser_material_kong, "var " + store + "_n1: float3 = " + nm1 + " * 2.0 - float3(1.0, 1.0, 0.0);");
@@ -1827,9 +1832,10 @@ function parser_material_vector_curve(name: string, fac: string, points: f32_ptr
 		parser_material_write(parser_material_kong, "" + facs_var + "[" + i + "] = " + p + ";");
 	}
 	// Map vector
-	return "lerp(" +
-		ys_var + "[" + index_var + "], " + ys_var + "[" + index_var + " + 1], (" + fac_var + " - " +
-		facs_var + "[" + index_var + "]) * (1.0 / (" + facs_var + "[" + index_var + " + 1] - " + facs_var + "[" + index_var + "])))";
+	return "0.0"; ////
+	// return "lerp(" +
+	// 	ys_var + "[" + index_var + "], " + ys_var + "[" + index_var + " + 1], (" + fac_var + " - " +
+	// 	facs_var + "[" + index_var + "]) * (1.0 / (" + facs_var + "[" + index_var + " + 1] - " + facs_var + "[" + index_var + "])))";
 }
 
 function parser_material_res_var_name(node: ui_node_t, socket: ui_node_socket_t): string {
@@ -1907,7 +1913,7 @@ function parser_material_texture_store(node: ui_node_t, tex: bind_tex_t, tex_nam
 			parser_material_write(parser_material_kong, "var " + tex_store + ": float4 = sample_lod(" + tex_name + ", sampler_linear, " + uv_name + ".xy, 0.0);");
 		}
 		if (!ends_with(tex.file, ".jpg")) { // Pre-mult alpha
-			parser_material_write(parser_material_kong, tex_store + ".rgb *= " + tex_store + ".a;");
+			parser_material_write(parser_material_kong, tex_store + ".rgb = " + tex_store + ".rgb * " + tex_store + ".a;");
 		}
 	}
 
