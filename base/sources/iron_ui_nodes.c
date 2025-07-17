@@ -45,8 +45,10 @@ void *ui_popup_data2;
 int ui_popup_handle_node_id = -1;
 int ui_popup_handle_node_socket_id = -1;
 
-char *ui_tr(char *id/*, map<char *, char *> vars*/) {
-	return id;
+char *tr(char *id, void *map); // translator.ts
+
+char *ui_tr(char *id) {
+	return tr(id, NULL);
 }
 
 void ui_nodes_init(ui_nodes_t *nodes) {
