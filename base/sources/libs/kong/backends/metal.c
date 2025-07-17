@@ -786,12 +786,12 @@ static void write_functions(char *code, size_t *offset) {
 					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index);
 				}
 				else if (o->op_call.func == add_name("floor3")) {
-					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = floor(_%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
-					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index);
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = floor(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index);
 				}
 				else if (o->op_call.func == add_name("ceil3")) {
-					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = ceil(_%" PRIu64 ", _%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
-					                   o->op_call.var.index, o->op_call.parameters[0].index, o->op_call.parameters[1].index);
+					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = ceil(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
+					                   o->op_call.var.index, o->op_call.parameters[0].index);
 				}
 				else if (o->op_call.func == add_name("ddx2")) {
 					*offset += sprintf(&code[*offset], "%s _%" PRIu64 " = dfdx(_%" PRIu64 ");\n", type_string(o->op_call.var.type.type),
