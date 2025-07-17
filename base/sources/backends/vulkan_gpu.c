@@ -20,7 +20,7 @@
 bool gpu_transpose_mat = true;
 extern int constant_buffer_index;
 
-static gpu_texture_t *current_textures[16] = {
+static gpu_texture_t *current_textures[GPU_MAX_TEXTURES] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
@@ -116,6 +116,8 @@ static VkCompareOp convert_compare_mode(gpu_compare_mode_t compare) {
 		return VK_COMPARE_OP_ALWAYS;
 	case GPU_COMPARE_MODE_NEVER:
 		return VK_COMPARE_OP_NEVER;
+	case GPU_COMPARE_MODE_EQUAL:
+		return VK_COMPARE_OP_EQUAL;
 	case GPU_COMPARE_MODE_LESS:
 		return VK_COMPARE_OP_LESS;
 	}
@@ -318,7 +320,7 @@ static void create_descriptors(void) {
 	bindings[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 	bindings[1].pImmutableSamplers = &immutable_sampler;
 
-	for (int i = 2; i < 18; ++i) {
+	for (int i = 2; i < 2 + GPU_MAX_TEXTURES; ++i) {
 		bindings[i].binding = i;
 		bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
 		bindings[i].descriptorCount = 1;
@@ -329,7 +331,7 @@ static void create_descriptors(void) {
 	VkDescriptorSetLayoutCreateInfo layout_create_info = {
 		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
 		.pNext = NULL,
-		.bindingCount = 18,
+		.bindingCount = 2 + GPU_MAX_TEXTURES,
 		.pBindings = bindings,
 	};
 
@@ -345,7 +347,7 @@ static void create_descriptors(void) {
 	type_counts[1].descriptorCount = 1;
 
 	type_counts[2].type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-	type_counts[2].descriptorCount = 16;
+	type_counts[2].descriptorCount = GPU_MAX_TEXTURES;
 
 	VkDescriptorPoolCreateInfo pool_info = {
 		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
@@ -1042,12 +1044,6 @@ bool iron_vulkan_internal_get_size(int *width, int *height) {
 	return false;
 }
 
-int gpu_max_bound_textures(void) {
-	VkPhysicalDeviceProperties props;
-	vkGetPhysicalDeviceProperties(gpu, &props);
-	return props.limits.maxPerStageDescriptorSamplers;
-}
-
 void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t * depth_buffer, unsigned flags, unsigned color, float depth) {
 	if (!framebuffer_acquired) {
 		acquire_next_image();
@@ -1374,9 +1370,9 @@ static VkDescriptorSet get_descriptor_set(VkBuffer buffer) {
 	buffer_descs[0].offset = 0;
 	buffer_descs[0].range = 256 ;
 
-	VkDescriptorImageInfo tex_desc[16];
+	VkDescriptorImageInfo tex_desc[GPU_MAX_TEXTURES];
 	memset(&tex_desc, 0, sizeof(tex_desc));
-	for (int i = 0; i < 16; ++i) {
+	for (int i = 0; i < GPU_MAX_TEXTURES; ++i) {
 		if (current_textures[i] != NULL) {
 			tex_desc[i].imageView = current_textures[i]->impl.view;
 			tex_desc[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -1395,7 +1391,7 @@ static VkDescriptorSet get_descriptor_set(VkBuffer buffer) {
 	writes[0].pBufferInfo = &buffer_descs[0];
 	write_count++;
 
-	for (int i = 0; i < 16; ++i) {
+	for (int i = 0; i < GPU_MAX_TEXTURES; ++i) {
 		if (current_textures[i] != NULL) {
 			writes[write_count].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			writes[write_count].dstSet = descriptor_set;

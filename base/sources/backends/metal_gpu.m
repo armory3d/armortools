@@ -26,7 +26,7 @@ static MTLViewport current_viewport;
 static MTLScissorRect current_scissor;
 static MTLRenderPassDescriptor *render_pass_desc;
 static bool resized = false;
-static gpu_texture_t *current_textures[16] = {
+static gpu_texture_t *current_textures[GPU_MAX_TEXTURES] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
@@ -54,6 +54,8 @@ static MTLCompareFunction convert_compare_mode(gpu_compare_mode_t compare) {
 		return MTLCompareFunctionAlways;
 	case GPU_COMPARE_MODE_NEVER:
 		return MTLCompareFunctionNever;
+	case GPU_COMPARE_MODE_EQUAL:
+		return MTLCompareFunctionEqual;
 	case GPU_COMPARE_MODE_LESS:
 		return MTLCompareFunctionLess;
 	}
@@ -152,23 +154,23 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	linear_desc.supportArgumentBuffers = true;
 	linear_sampler = [device newSamplerStateWithDescriptor:linear_desc];
 
-	MTLArgumentDescriptor *constantsDesc = [MTLArgumentDescriptor argumentDescriptor];
-    constantsDesc.dataType = MTLDataTypePointer;
-    constantsDesc.index = 0;
+	MTLArgumentDescriptor *constants_desc = [MTLArgumentDescriptor argumentDescriptor];
+    constants_desc.dataType = MTLDataTypePointer;
+    constants_desc.index = 0;
 
-	MTLArgumentDescriptor *samplerDesc = [MTLArgumentDescriptor argumentDescriptor];
-    samplerDesc.dataType = MTLDataTypeSampler;
-    samplerDesc.index = 1;
+	MTLArgumentDescriptor *sampler_desc = [MTLArgumentDescriptor argumentDescriptor];
+    sampler_desc.dataType = MTLDataTypeSampler;
+    sampler_desc.index = 1;
 
-	MTLArgumentDescriptor *textureDesc[16];
-	for (int i = 0; i < 16; ++i) {
-		textureDesc[i] = [MTLArgumentDescriptor argumentDescriptor];
-		textureDesc[i].dataType = MTLDataTypeTexture;
-		textureDesc[i].index = i + 2;
-		textureDesc[i].textureType = MTLTextureType2D;
+	MTLArgumentDescriptor *texture_desc[GPU_MAX_TEXTURES];
+	for (int i = 0; i < GPU_MAX_TEXTURES; ++i) {
+		texture_desc[i] = [MTLArgumentDescriptor argumentDescriptor];
+		texture_desc[i].dataType = MTLDataTypeTexture;
+		texture_desc[i].index = i + 2;
+		texture_desc[i].textureType = MTLTextureType2D;
 	}
 
-    NSArray *arguments = [NSArray arrayWithObjects:constantsDesc, samplerDesc, textureDesc[0], textureDesc[1], textureDesc[2], textureDesc[3], textureDesc[4], textureDesc[5], textureDesc[6], textureDesc[7], textureDesc[8], textureDesc[9], textureDesc[10], textureDesc[11], textureDesc[12], textureDesc[13], textureDesc[14], textureDesc[15], nil];
+    NSArray *arguments = [NSArray arrayWithObjects:constants_desc, sampler_desc, texture_desc[0], texture_desc[1], texture_desc[2], texture_desc[3], texture_desc[4], texture_desc[5], texture_desc[6], texture_desc[7], texture_desc[8], texture_desc[9], texture_desc[10], texture_desc[11], texture_desc[12], texture_desc[13], texture_desc[14], texture_desc[15], nil];
     argument_encoder = [device newArgumentEncoderWithArguments:arguments];
 	argument_buffer_step = [argument_encoder encodedLength];
 	argument_buffer = [device newBufferWithLength:(argument_buffer_step * GPU_CONSTANT_BUFFER_MULTIPLE) options:MTLResourceStorageModeShared];
@@ -290,10 +292,6 @@ void gpu_present_internal() {
 void gpu_barrier(gpu_texture_t *render_target, gpu_texture_state_t state_after) {
 }
 
-int gpu_max_bound_textures(void) {
-	return 16;
-}
-
 void gpu_draw_internal() {
 	id<MTLBuffer> index_buffer = (__bridge id<MTLBuffer>)current_ib->impl.metal_buffer;
 	[command_encoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
@@ -339,7 +337,7 @@ void gpu_set_pipeline(gpu_pipeline_t *pipeline) {
 	[command_encoder setDepthStencilState:depth_state];
 	[command_encoder setFrontFacingWinding:MTLWindingClockwise];
 	[command_encoder setCullMode:convert_cull_mode(pipeline->cull_mode)];
-	for (int i = 0; i < 16; ++i) {
+	for (int i = 0; i < GPU_MAX_TEXTURES; ++i) {
 		current_textures[i] = NULL;
 	}
 }
@@ -405,7 +403,7 @@ void gpu_set_constant_buffer(gpu_buffer_t *buffer, int offset, size_t size) {
 	[command_encoder setVertexBuffer:argument_buffer offset:argument_buffer_step * constant_buffer_index atIndex:1];
     [command_encoder setFragmentBuffer:argument_buffer offset:argument_buffer_step * constant_buffer_index atIndex:1];
 	[command_encoder useResource:buf usage:MTLResourceUsageRead stages:MTLRenderStageVertex|MTLRenderStageFragment];
-	for (int i = 0; i < 16; ++i) {
+	for (int i = 0; i < GPU_MAX_TEXTURES; ++i) {
 		if (current_textures[i] == NULL) {
 			break;
 		}

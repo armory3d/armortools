@@ -1,6 +1,4 @@
 #define WIN32_LEAN_AND_MEAN
-#define HEAP_SIZE 2048
-#define TEXTURE_COUNT 16
 #include <iron_global.h>
 #include <stdbool.h>
 #include <malloc.h>
@@ -25,10 +23,10 @@ static D3D12_VIEWPORT current_viewport;
 static D3D12_RECT current_scissor;
 static gpu_buffer_t *current_vb;
 static gpu_buffer_t *current_ib;
-static D3D12_CPU_DESCRIPTOR_HANDLE target_descriptors[16];
+static D3D12_CPU_DESCRIPTOR_HANDLE target_descriptors[GPU_MAX_TEXTURES];
 static D3D12_CPU_DESCRIPTOR_HANDLE depth_handle;
 static D3D12_CPU_DESCRIPTOR_HANDLE *current_depth_handle;
-static gpu_texture_t *current_textures[TEXTURE_COUNT] = {
+static gpu_texture_t *current_textures[GPU_MAX_TEXTURES] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
@@ -76,6 +74,8 @@ static D3D12_COMPARISON_FUNC convert_compare_mode(gpu_compare_mode_t compare) {
 		return D3D12_COMPARISON_FUNC_ALWAYS;
 	case GPU_COMPARE_MODE_NEVER:
 		return D3D12_COMPARISON_FUNC_NEVER;
+	case GPU_COMPARE_MODE_EQUAL:
+		return D3D12_COMPARISON_FUNC_EQUAL;
 	case GPU_COMPARE_MODE_LESS:
 		return D3D12_COMPARISON_FUNC_LESS;
 	}
@@ -280,7 +280,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	D3D12_ROOT_PARAMETER parameters[2] = {};
 	D3D12_DESCRIPTOR_RANGE range = {
 		.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV,
-		.NumDescriptors = (UINT)TEXTURE_COUNT,
+		.NumDescriptors = (UINT)GPU_MAX_TEXTURES,
 		.BaseShaderRegister = 0,
 		.RegisterSpace = 0,
 		.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND,
@@ -293,8 +293,8 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	parameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	parameters[1].Descriptor.ShaderRegister = 0;
 	parameters[1].Descriptor.RegisterSpace = 0;
-	D3D12_STATIC_SAMPLER_DESC samplers[TEXTURE_COUNT];
- 	for (int i = 0; i < TEXTURE_COUNT; ++i) {
+	D3D12_STATIC_SAMPLER_DESC samplers[GPU_MAX_TEXTURES];
+	for (int i = 0; i < GPU_MAX_TEXTURES; ++i) {
  		samplers[i].ShaderRegister = i;
  		samplers[i].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
  		samplers[i].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -312,7 +312,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	D3D12_ROOT_SIGNATURE_DESC root_signature_desc = {
 		.NumParameters = 2,
 		.pParameters = parameters,
-		.NumStaticSamplers = TEXTURE_COUNT,
+		.NumStaticSamplers = GPU_MAX_TEXTURES,
 		.pStaticSamplers = samplers,
 		.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT,
 	};
@@ -350,7 +350,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	gpu_create_framebuffers(depth_buffer_bits);
 
 	D3D12_DESCRIPTOR_HEAP_DESC heap_desc = {
-		.NumDescriptors = HEAP_SIZE,
+		.NumDescriptors = GPU_CONSTANT_BUFFER_MULTIPLE,
 		.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
 		.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
 	};
@@ -358,10 +358,6 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 
 	device->lpVtbl->CreateCommandAllocator(device, D3D12_COMMAND_LIST_TYPE_DIRECT, &IID_ID3D12CommandAllocator, &command_allocator);
 	device->lpVtbl->CreateCommandList(device, 0, D3D12_COMMAND_LIST_TYPE_DIRECT, command_allocator, NULL, &IID_ID3D12CommandList, &command_list);
-}
-
-int gpu_max_bound_textures(void) {
-	return TEXTURE_COUNT;
 }
 
 void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, unsigned flags, unsigned color, float depth) {
@@ -495,7 +491,7 @@ void gpu_set_constant_buffer(gpu_buffer_t *buffer, int offset, size_t size) {
 
 void gpu_internal_set_textures() {
 	UINT srv_step = device->lpVtbl->GetDescriptorHandleIncrementSize(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	if (srv_heap_index + TEXTURE_COUNT > HEAP_SIZE) {
+	if (srv_heap_index + GPU_MAX_TEXTURES > GPU_CONSTANT_BUFFER_MULTIPLE) {
 		srv_heap_index = 0;
 	}
 
@@ -506,7 +502,7 @@ void gpu_internal_set_textures() {
 	cpu_base.ptr += srv_heap_index * srv_step;
 	gpu_base.ptr += srv_heap_index * srv_step;
 
-	for (int i = 0; i < TEXTURE_COUNT; ++i) {
+	for (int i = 0; i < GPU_MAX_TEXTURES; ++i) {
 		if (current_textures[i] != NULL) {
 			D3D12_CPU_DESCRIPTOR_HANDLE source_cpu;
 			ID3D12DescriptorHeap *source_heap =  current_textures[i]->impl.srv_descriptor_heap;
@@ -565,7 +561,7 @@ void gpu_set_pipeline(gpu_pipeline_t *pipeline) {
 	current_pipeline = pipeline;
 	command_list->lpVtbl->SetPipelineState(command_list, pipeline->impl.pso);
 	command_list->lpVtbl->SetGraphicsRootSignature(command_list, root_signature);
-	for (int i = 0; i < TEXTURE_COUNT; ++i) {
+	for (int i = 0; i < GPU_MAX_TEXTURES; ++i) {
 		current_textures[i] = NULL;
 	}
 }

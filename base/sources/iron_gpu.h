@@ -13,6 +13,7 @@
 #define GPU_CLEAR_COLOR 1
 #define GPU_CLEAR_DEPTH 2
 #define GPU_MAX_VERTEX_ELEMENTS 16
+#define GPU_MAX_TEXTURES 16
 #define GPU_FRAMEBUFFER_COUNT 2
 #define GPU_CONSTANT_BUFFER_SIZE 256
 #define GPU_CONSTANT_BUFFER_MULTIPLE 2048
@@ -73,7 +74,8 @@ typedef enum gpu_cull_mode {
 typedef enum gpu_compare_mode {
 	GPU_COMPARE_MODE_ALWAYS,
 	GPU_COMPARE_MODE_NEVER,
-	GPU_COMPARE_MODE_LESS
+	GPU_COMPARE_MODE_LESS,
+	GPU_COMPARE_MODE_EQUAL
 } gpu_compare_mode_t;
 
 typedef struct gpu_texture {
