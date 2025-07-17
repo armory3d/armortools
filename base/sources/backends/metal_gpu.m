@@ -217,6 +217,14 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t *depth
 	}
 
 	command_encoder = [command_buffer renderCommandEncoderWithDescriptor:render_pass_desc];
+	current_viewport.originX = 0;
+	current_viewport.originY = 0;
+	current_viewport.width = current_render_targets[0]->width;
+	current_viewport.height = current_render_targets[0]->height;
+	current_scissor.x = 0;
+	current_scissor.y = 0;
+	current_scissor.width = current_render_targets[0]->width;
+	current_scissor.height = current_render_targets[0]->height;
 }
 
 void gpu_end_internal() {
@@ -239,6 +247,10 @@ void gpu_execute_and_wait() {
 	command_buffer = [queue commandBuffer];
 
 	if (gpu_in_use) {
+		for (int i = 0; i < current_render_targets_count; ++i) {
+			render_pass_desc.colorAttachments[i].loadAction = MTLLoadActionLoad;
+		}
+		render_pass_desc.depthAttachment.loadAction = MTLLoadActionLoad;
 		command_encoder = [command_buffer renderCommandEncoderWithDescriptor:render_pass_desc];
 		id<MTLRenderPipelineState> pipe = (__bridge id<MTLRenderPipelineState>)current_pipeline->impl._pipeline;
 		[command_encoder setRenderPipelineState:pipe];
