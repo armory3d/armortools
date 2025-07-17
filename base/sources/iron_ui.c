@@ -1653,7 +1653,6 @@ void ui_end_window() {
 
 	// Draw window texture
 	if (ui_always_redraw_window || handle->redraws > -4) {
-
 		draw_begin(NULL, false, 0);
 		draw_set_color(0xffffffff);
 		draw_image(&handle->texture, current->_window_x, current->_window_y);
