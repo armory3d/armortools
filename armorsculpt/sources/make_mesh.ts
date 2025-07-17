@@ -137,7 +137,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			count += masks.length;
 		}
 		texture_count += count;
-		if (texture_count >= make_mesh_get_max_textures()) {
+		if (texture_count >= GPU_MAX_TEXTURES - 3) {
 			texture_count = start_count + count + 3; // gbuffer0_copy, gbuffer1_copy, gbuffer2_copy
 			make_mesh_layer_pass_count++;
 		}
@@ -341,8 +341,4 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	con_mesh.data.shader_from_source = true;
 	gpu_create_shaders_from_kong(node_shader_get(kong), ADDRESS(con_mesh.data.vertex_shader), ADDRESS(con_mesh.data.fragment_shader), ADDRESS(con_mesh.data._.vertex_shader_size), ADDRESS(con_mesh.data._.fragment_shader_size));
 	return con_mesh;
-}
-
-function make_mesh_get_max_textures(): i32 {
-	return 16 - 3; // G4onG5/G4.c.h MAX_TEXTURES
 }

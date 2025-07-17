@@ -289,6 +289,9 @@ function shader_context_get_compare_mode(s: string): compare_mode_t {
 	if (s == "never") {
 		return compare_mode_t.NEVER;
 	}
+	if (s == "equal") {
+		return compare_mode_t.EQUAL;
+	}
 	return compare_mode_t.LESS;
 }
 
