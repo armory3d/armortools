@@ -180,18 +180,19 @@ function node_shader_get(raw: node_shader_t): string {
 		let a: string = raw.outs[i];
 		s += "\t" + a + ";\n";
 	}
+	if (raw.consts.length == 0) {
+		s += "\tempty: float;\n";
+	}
 	s += "}\n\n";
 
 	s += "#[set(everything)]\n";
 	s += "const constants: {\n";
-	if (raw.consts.length > 0) {
-		for (let i: i32 = 0; i < raw.consts.length; ++i) {
-			let a: string = raw.consts[i];
-			s += "\t" + a + ";\n";
-		}
+	for (let i: i32 = 0; i < raw.consts.length; ++i) {
+		let a: string = raw.consts[i];
+		s += "\t" + a + ";\n";
 	}
-	else {
-		s += "\tempty: float4;\n";
+	if (raw.consts.length == 0) {
+		s += "\tempty: float;\n";
 	}
 	s += "};\n\n";
 
@@ -219,7 +220,10 @@ function node_shader_get(raw: node_shader_t): string {
 	s += raw.vert_normal;
 	s += raw.vert;
 	s += raw.vert_end;
-	s += "output.pos.z = (output.pos.z + output.pos.w) * 0.5;\n"; ////
+	s += "\toutput.pos.z = (output.pos.z + output.pos.w) * 0.5;\n"; ////
+	if (raw.consts.length == 0) {
+		s += "\toutput.empty = constants.empty;\n";
+	}
 	s += "\n\treturn output;\n";
 	s += "}\n\n";
 
