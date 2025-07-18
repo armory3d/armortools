@@ -103,18 +103,16 @@ function uniforms_set_obj_consts(context: shader_context_t, object: object_t) {
 
 	// Texture object constants
 	// External
-	if (uniforms_tex_links != null) {
-		if (context.texture_units != null) {
-			for (let j: i32 = 0; j < context.texture_units.length; ++j) {
-				let tu: tex_unit_t = context.texture_units[j];
-				if (tu.link == null) {
-					continue;
-				}
+	if (uniforms_tex_links != null && context.texture_units != null) {
+		for (let j: i32 = 0; j < context.texture_units.length; ++j) {
+			let tu: tex_unit_t = context.texture_units[j];
+			if (tu.link == null) {
+				continue;
+			}
 
-				let image: gpu_texture_t = uniforms_tex_links(object, current_material(object), tu.link);
-				if (image != null) {
-					gpu_set_texture(context._.tex_units[j], image);
-				}
+			let image: gpu_texture_t = uniforms_tex_links(object, current_material(object), tu.link);
+			if (image != null) {
+				gpu_set_texture(context._.tex_units[j], image);
 			}
 		}
 	}
@@ -316,8 +314,13 @@ function uniforms_set_context_const(location: i32, c: shader_const_t): bool {
 			v.y = (-zfar * znear) / (zfar - znear);
 		}
 		else if (starts_with(c.link, "_size(")) {
-			if (_render_path_bind_params != null) {
-				let tex: string = substring(c.link, 6, c.link.length - 1);
+			let tex: string = substring(c.link, 6, c.link.length - 1);
+			let image: gpu_texture_t = uniforms_tex_links(null, null, tex);
+			if (image != null) {
+				v.x = image.width;
+				v.y = image.height;
+			}
+			else if (_render_path_bind_params != null) {
 				for (let i: i32 = 0; i < math_floor(_render_path_bind_params.length / 2); ++i) {
 					let pos: i32 = i * 2; // bind params = [texture, sampler_id]
 					let sampler_id: string = _render_path_bind_params[pos + 1];

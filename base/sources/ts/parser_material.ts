@@ -654,7 +654,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		let steps: string = "(" + strength + " * 10.0 + 1.0)";
 		let tex_name: string = "texblur_" + parser_material_node_name(node);
 		node_shader_add_texture(parser_material_kong, "" + tex_name, "_" + tex_name);
-		node_shader_add_constant(parser_material_kong, "" + tex_name + "_size: float2", "_size(" + tex_name + ")");
+		node_shader_add_constant(parser_material_kong, "" + tex_name + "_size: float2", "_size(_" + tex_name + ")");
 		let store: string = parser_material_store_var_name(node);
 		parser_material_write(parser_material_kong, "var " + store + "_res: float3 = float3(0.0, 0.0, 0.0);");
 		parser_material_write(parser_material_kong, "for (var i: int = 0; i <= int(" + steps + " * 2.0); i += 1) {");

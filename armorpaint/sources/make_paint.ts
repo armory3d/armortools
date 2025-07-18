@@ -282,7 +282,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		context_raw.tool == workspace_tool_t.PARTICLE ||
 		decal)) {
 		node_shader_add_texture(kong, "texbrushstencil", "_texbrushstencil");
-		node_shader_add_constant(kong, "texbrushstencil_size: float2", "_size(texbrushstencil)");
+		node_shader_add_constant(kong, "texbrushstencil_size: float2", "_size(_texbrushstencil)");
 		node_shader_add_constant(kong, "stencil_transform: float4", "_stencil_transform");
 		node_shader_write_frag(kong, "var stencil_uv: float2 = (sp.xy - constants.stencil_transform.xy) / constants.stencil_transform.z * float2(constants.aspect_ratio, 1.0);");
 		node_shader_write_frag(kong, "var stencil_size: float2 = constants.texbrushstencil_size;");
@@ -318,10 +318,10 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 			node_shader_add_constant(kong, "brush_angle: float2", "_brush_angle");
 			node_shader_write_frag(kong, "pa_mask.xy = float2(pa_mask.x * constants.brush_angle.x - pa_mask.y * constants.brush_angle.y, pa_mask.x * constants.brush_angle.y + pa_mask.y * constants.brush_angle.x);");
 		}
-		node_shader_write_frag(kong, "pa_mask /= constants.brush_radius;");
+		node_shader_write_frag(kong, "pa_mask = pa_mask / constants.brush_radius;");
 		if (config_raw.brush_3d) {
 			node_shader_add_constant(kong, "eye: float3", "_camera_pos");
-			node_shader_write_frag(kong, "pa_mask *= distance(constants.eye, winp.xyz) / 1.5;");
+			node_shader_write_frag(kong, "pa_mask = pa_mask * (distance(constants.eye, winp.xyz) / 1.5);");
 		}
 		node_shader_write_frag(kong, "pa_mask = pa_mask.xy * 0.5 + 0.5;");
 		node_shader_write_frag(kong, "var mask_sample: float4 = sample_lod(texbrushmask, sampler_linear, pa_mask, 0.0);");

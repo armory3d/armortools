@@ -40,7 +40,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	node_shader_add_constant(kong, "WVP: float4x4", "_world_view_proj_matrix");
 	let lid: i32 = project_layers[0].id;
 	node_shader_add_texture(kong, "texpaint_vert", "_texpaint_vert" + lid);
-	node_shader_add_constant(kong, "texpaint_vert_size: float2", "_size(texpaint_vert" + lid + ")");
+	node_shader_add_constant(kong, "texpaint_vert_size: float2", "_size(_texpaint_vert" + lid + ")");
 	node_shader_write_vert(kong, "var meshpos: float3 = sample_lod(texpaint_vert, sampler_linear, uint2(vertex_id() % constants.texpaint_vert_size.x, vertex_id() / constants.texpaint_vert_size.y), 0).xyz;");
 	// + input.pos.xyz * 0.000001
 	node_shader_write_vert(kong, "output.pos = constants.WVP * float4(meshpos.xyz, 1.0);");
