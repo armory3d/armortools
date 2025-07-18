@@ -15,8 +15,6 @@
 #include <iron_system.h>
 #include "vulkan_gpu.h"
 
-#define MAX_DESCRIPTOR_SETS 2048
-
 bool gpu_transpose_mat = true;
 extern int constant_buffer_index;
 
@@ -33,7 +31,7 @@ static VkRect2D current_scissor;
 static gpu_buffer_t *current_vb;
 static gpu_buffer_t *current_ib;
 static VkDescriptorSetLayout descriptor_layout;
-static VkDescriptorSet descriptor_sets[MAX_DESCRIPTOR_SETS];
+static VkDescriptorSet descriptor_sets[GPU_CONSTANT_BUFFER_MULTIPLE];
 static VkRenderingInfo current_rendering_info;
 static VkRenderingAttachmentInfo current_color_attachment_infos[8];
 static VkRenderingAttachmentInfo current_depth_attachment_info;
@@ -83,7 +81,7 @@ static VkFormat convert_image_format(gpu_texture_format_t format) {
 	}
 }
 
-static int format_size(VkFormat format) {
+static int format_size(gpu_texture_format_t format) {
 	switch (format) {
 	case GPU_TEXTURE_FORMAT_RGBA128:
 		return 16;
@@ -352,7 +350,7 @@ static void create_descriptors(void) {
 	VkDescriptorPoolCreateInfo pool_info = {
 		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
 		.pNext = NULL,
-		.maxSets = MAX_DESCRIPTOR_SETS,
+		.maxSets = GPU_CONSTANT_BUFFER_MULTIPLE,
 		.poolSizeCount = 3,
 		.pPoolSizes = type_counts,
 	};
@@ -360,8 +358,8 @@ static void create_descriptors(void) {
 	VkDescriptorPool descriptor_pool;
 	vkCreateDescriptorPool(device, &pool_info, NULL, &descriptor_pool);
 
-	VkDescriptorSetLayout layouts[MAX_DESCRIPTOR_SETS];
-	for (int i = 0; i < MAX_DESCRIPTOR_SETS; ++i) {
+	VkDescriptorSetLayout layouts[GPU_CONSTANT_BUFFER_MULTIPLE];
+	for (int i = 0; i < GPU_CONSTANT_BUFFER_MULTIPLE; ++i) {
 		layouts[i] = descriptor_layout;
 	}
 
@@ -369,7 +367,7 @@ static void create_descriptors(void) {
 		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
 		.pNext = NULL,
 		.descriptorPool = descriptor_pool,
-		.descriptorSetCount = MAX_DESCRIPTOR_SETS,
+		.descriptorSetCount = GPU_CONSTANT_BUFFER_MULTIPLE,
 		.pSetLayouts = layouts,
 	};
 	vkAllocateDescriptorSets(device, &alloc_info, descriptor_sets);
@@ -1631,210 +1629,131 @@ void gpu_shader_destroy(gpu_shader_t *shader) {
 	shader->impl.source = NULL;
 }
 
-static void prepare_texture_image(uint8_t *pixels, uint32_t width, uint32_t height, gpu_texture_impl_t *impl, VkImageTiling tiling,
-								  VkImageUsageFlags usage, VkFlags required_props, VkFormat tex_format) {
-
-	VkImageCreateInfo image_create_info = {
-		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-		.pNext = NULL,
-		.imageType = VK_IMAGE_TYPE_2D,
-		.format = tex_format,
-		.extent.width = width,
-		.extent.height = height,
-		.extent.depth = 1,
-		.mipLevels = 1,
-		.arrayLayers = 1,
-		.samples = VK_SAMPLE_COUNT_1_BIT,
-		.tiling = tiling,
-		.usage = usage,
-		.flags = 0,
-		.initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED,
-	};
-
-	VkMemoryAllocateInfo mem_alloc = {
-		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-		.pNext = NULL,
-		.allocationSize = 0,
-		.memoryTypeIndex = 0,
-	};
-
-	vkCreateImage(device, &image_create_info, NULL, &impl->image);
-	VkMemoryRequirements mem_reqs;
-	vkGetImageMemoryRequirements(device, impl->image, &mem_reqs);
-	mem_alloc.allocationSize = mem_reqs.size;
-	memory_type_from_properties(mem_reqs.memoryTypeBits, required_props, &mem_alloc.memoryTypeIndex);
-	vkAllocateMemory(device, &mem_alloc, NULL, &impl->mem);
-	vkBindImageMemory(device, impl->image, impl->mem, 0);
-
-	if (required_props & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
-		VkImageSubresource subres = {
-			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-			.mipLevel = 0,
-			.arrayLayer = 0,
-		};
-
-		VkSubresourceLayout layout;
-		uint8_t *data;
-		vkGetImageSubresourceLayout(device, impl->image, &subres, &layout);
-		vkMapMemory(device, impl->mem, 0, mem_alloc.allocationSize, 0, (void **)&data);
-
-		if (tex_format == VK_FORMAT_R8_UNORM) {
-			for (uint32_t y = 0; y < height; y++) {
-				for (uint32_t x = 0; x < width; x++) {
-					data[y * layout.rowPitch + x] = pixels[y * width + x];
-				}
-			}
-		}
-		else if (tex_format == VK_FORMAT_R16_SFLOAT) {
-			uint16_t *data16 = (uint16_t *)data;
-			uint16_t *tex_colors16 = (uint16_t *)pixels;
-			for (uint32_t y = 0; y < height; y++) {
-				for (uint32_t x = 0; x < width; x++) {
-					data16[y * (layout.rowPitch / 4) + x] = tex_colors16[y * width + x];
-				}
-			}
-		}
-		else if (tex_format == VK_FORMAT_R32_SFLOAT) {
-			uint32_t *data32 = (uint32_t *)data;
-			uint32_t *tex_colors32 = (uint32_t *)pixels;
-			for (uint32_t y = 0; y < height; y++) {
-				for (uint32_t x = 0; x < width; x++) {
-					data32[y * (layout.rowPitch / 4) + x] = tex_colors32[y * width + x];
-				}
-			}
-		}
-		else if (tex_format == VK_FORMAT_R16G16B16A16_SFLOAT) {
-			uint16_t *data16 = (uint16_t *)data;
-			uint16_t *tex_colors16 = (uint16_t *)pixels;
-			for (uint32_t y = 0; y < height; y++) {
-				for (uint32_t x = 0; x < width; x++) {
-					data16[y * (layout.rowPitch / 4) + x * 4 + 0] = tex_colors16[y * width * 4 + x * 4 + 0];
-					data16[y * (layout.rowPitch / 4) + x * 4 + 1] = tex_colors16[y * width * 4 + x * 4 + 1];
-					data16[y * (layout.rowPitch / 4) + x * 4 + 2] = tex_colors16[y * width * 4 + x * 4 + 2];
-					data16[y * (layout.rowPitch / 4) + x * 4 + 3] = tex_colors16[y * width * 4 + x * 4 + 3];
-				}
-			}
-		}
-		else if (tex_format == VK_FORMAT_R32G32B32A32_SFLOAT) {
-			uint32_t *data32 = (uint32_t *)data;
-			uint32_t *tex_colors32 = (uint32_t *)pixels;
-			for (uint32_t y = 0; y < height; y++) {
-				for (uint32_t x = 0; x < width; x++) {
-					data32[y * (layout.rowPitch / 4) + x * 4 + 0] = tex_colors32[y * width * 4 + x * 4 + 0];
-					data32[y * (layout.rowPitch / 4) + x * 4 + 1] = tex_colors32[y * width * 4 + x * 4 + 1];
-					data32[y * (layout.rowPitch / 4) + x * 4 + 2] = tex_colors32[y * width * 4 + x * 4 + 2];
-					data32[y * (layout.rowPitch / 4) + x * 4 + 3] = tex_colors32[y * width * 4 + x * 4 + 3];
-				}
-			}
-		}
-		else if (tex_format == VK_FORMAT_B8G8R8A8_UNORM) {
-			for (uint32_t y = 0; y < height; y++) {
-				for (uint32_t x = 0; x < width; x++) {
-					data[y * layout.rowPitch + x * 4 + 0] = pixels[y * width * 4 + x * 4 + 2];
-					data[y * layout.rowPitch + x * 4 + 1] = pixels[y * width * 4 + x * 4 + 1];
-					data[y * layout.rowPitch + x * 4 + 2] = pixels[y * width * 4 + x * 4 + 0];
-					data[y * layout.rowPitch + x * 4 + 3] = pixels[y * width * 4 + x * 4 + 3];
-				}
-			}
-		}
-		else {
-			for (uint32_t y = 0; y < height; y++) {
-				for (uint32_t x = 0; x < width; x++) {
-					data[y * layout.rowPitch + x * 4 + 0] = pixels[y * width * 4 + x * 4 + 0];
-					data[y * layout.rowPitch + x * 4 + 1] = pixels[y * width * 4 + x * 4 + 1];
-					data[y * layout.rowPitch + x * 4 + 2] = pixels[y * width * 4 + x * 4 + 2];
-					data[y * layout.rowPitch + x * 4 + 3] = pixels[y * width * 4 + x * 4 + 3];
-				}
-			}
-		}
-
-		vkUnmapMemory(device, impl->mem);
-	}
-
-	set_image_layout(impl->image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-}
-
 void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, gpu_texture_format_t format) {
 	texture->width = width;
 	texture->height = height;
 	texture->format = format;
 	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
 
-	VkFormat tex_format = convert_image_format(format);
-	VkFormatProperties props;
-	vkGetPhysicalDeviceFormatProperties(gpu, tex_format, &props);
-
-	if (props.linearTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT) {
-		prepare_texture_image((uint8_t *)data, (uint32_t)width, (uint32_t)height, &texture->impl, VK_IMAGE_TILING_LINEAR,
-							  VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, tex_format);
-	}
-	else if (props.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT) {
-		gpu_texture_impl_t staging_texture;
-
-		memset(&staging_texture, 0, sizeof(staging_texture));
-		prepare_texture_image((uint8_t *)data, (uint32_t)width, (uint32_t)height, &staging_texture, VK_IMAGE_TILING_LINEAR,
-							  VK_IMAGE_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, tex_format);
-		prepare_texture_image((uint8_t *)data, (uint32_t)width, (uint32_t)height, &texture->impl, VK_IMAGE_TILING_OPTIMAL,
-							  (VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT),
-							  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, tex_format);
-
-		set_image_layout(staging_texture.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-		set_image_layout(texture->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-
-		VkImageCopy copy_region = {
-			.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-			.srcSubresource.mipLevel = 0,
-			.srcSubresource.baseArrayLayer = 0,
-			.srcSubresource.layerCount = 1,
-			.srcOffset.x = 0,
-			.srcOffset.y = 0,
-			.srcOffset.z = 0,
-			.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-			.dstSubresource.mipLevel = 0,
-			.dstSubresource.baseArrayLayer = 0,
-			.dstSubresource.layerCount = 1,
-			.dstOffset.x = 0,
-			.dstOffset.y = 0,
-			.dstOffset.z = 0,
-			.extent.width = (uint32_t)width,
-			.extent.height = (uint32_t)height,
-			.extent.depth = 1,
-		};
-
-		vkCmdCopyImage(command_buffer, staging_texture.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, texture->impl.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copy_region);
-		set_image_layout(texture->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-		vkDestroyImage(device, staging_texture.image, NULL);
-		vkFreeMemory(device, staging_texture.mem, NULL);
+	VkFormat vk_format = convert_image_format(format);
+	if (vk_format == VK_FORMAT_B8G8R8A8_UNORM) {
+		vk_format = VK_FORMAT_R8G8B8A8_UNORM;
 	}
 
-	VkImageSubresource subres = {
-		.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-		.mipLevel = 0,
-		.arrayLayer = 0,
+	VkDeviceSize buffer_size = width * height * format_size(format);
+	VkBufferCreateInfo buffer_info = {
+		.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+		.size = buffer_size,
+		.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+		.sharingMode = VK_SHARING_MODE_EXCLUSIVE,
 	};
-	VkSubresourceLayout layout;
-	vkGetImageSubresourceLayout(device, texture->impl.image, &subres, &layout);
+	VkBuffer staging_buffer;
+	vkCreateBuffer(device, &buffer_info, NULL, &staging_buffer);
 
-	VkImageViewCreateInfo view = {
-		.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-		.pNext = NULL,
-		.image = VK_NULL_HANDLE,
-		.viewType = VK_IMAGE_VIEW_TYPE_2D,
-		.format = tex_format,
-		.components.r = VK_COMPONENT_SWIZZLE_R,
-		.components.g = VK_COMPONENT_SWIZZLE_G,
-		.components.b = VK_COMPONENT_SWIZZLE_B,
-		.components.a = VK_COMPONENT_SWIZZLE_A,
+	VkMemoryRequirements mem_reqs;
+	vkGetBufferMemoryRequirements(device, staging_buffer, &mem_reqs);
+	VkMemoryAllocateInfo mem_alloc = {
+		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+		.allocationSize = mem_reqs.size,
+		.memoryTypeIndex = 0,
+	};
+	memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &mem_alloc.memoryTypeIndex);
+	VkDeviceMemory staging_memory;
+	vkAllocateMemory(device, &mem_alloc, NULL, &staging_memory);
+	vkBindBufferMemory(device, staging_buffer, staging_memory, 0);
+
+	void *mapped_data;
+	vkMapMemory(device, staging_memory, 0, buffer_size, 0, &mapped_data);
+	memcpy(mapped_data, data, buffer_size);
+	vkUnmapMemory(device, staging_memory);
+
+	VkImageCreateInfo image_info = {
+		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+		.imageType = VK_IMAGE_TYPE_2D,
+		.format = vk_format,
+		.extent.width = (uint32_t)width,
+		.extent.height = (uint32_t)height,
+		.extent.depth = 1,
+		.mipLevels = 1,
+		.arrayLayers = 1,
+		.samples = VK_SAMPLE_COUNT_1_BIT,
+		.tiling = VK_IMAGE_TILING_OPTIMAL,
+		.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+		.sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+		.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+	};
+	vkCreateImage(device, &image_info, NULL, &texture->impl.image);
+	vkGetImageMemoryRequirements(device, texture->impl.image, &mem_reqs);
+	mem_alloc.allocationSize = mem_reqs.size;
+	memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &mem_alloc.memoryTypeIndex);
+	vkAllocateMemory(device, &mem_alloc, NULL, &texture->impl.mem);
+	vkBindImageMemory(device, texture->impl.image, texture->impl.mem, 0);
+
+	if (gpu_in_use) {
+		vkCmdEndRendering(command_buffer);
+	}
+
+	VkImageMemoryBarrier barrier = {
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+		.srcAccessMask = 0,
+		.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+		.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+		.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		.image = texture->impl.image,
 		.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
 		.subresourceRange.baseMipLevel = 0,
 		.subresourceRange.levelCount = 1,
 		.subresourceRange.baseArrayLayer = 0,
 		.subresourceRange.layerCount = 1,
-		.flags = 0,
 	};
+	vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
 
-	view.image = texture->impl.image;
-	vkCreateImageView(device, &view, NULL, &texture->impl.view);
+	VkBufferImageCopy copy_region = {
+		.bufferOffset = 0,
+		.bufferRowLength = 0,
+		.bufferImageHeight = 0,
+		.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+		.imageSubresource.mipLevel = 0,
+		.imageSubresource.baseArrayLayer = 0,
+		.imageSubresource.layerCount = 1,
+		.imageOffset = {0, 0, 0},
+		.imageExtent = {(uint32_t)width, (uint32_t)height, 1},
+	};
+	vkCmdCopyBufferToImage(command_buffer, staging_buffer, texture->impl.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copy_region);
+
+	barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+	barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
+
+	VkImageViewCreateInfo view_info = {
+		.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+		.image = texture->impl.image,
+		.viewType = VK_IMAGE_VIEW_TYPE_2D,
+		.format = vk_format,
+		.components = {
+			.r = VK_COMPONENT_SWIZZLE_R,
+			.g = VK_COMPONENT_SWIZZLE_G,
+			.b = VK_COMPONENT_SWIZZLE_B,
+			.a = VK_COMPONENT_SWIZZLE_A,
+		},
+		.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+		.subresourceRange.baseMipLevel = 0,
+		.subresourceRange.levelCount = 1,
+		.subresourceRange.baseArrayLayer = 0,
+		.subresourceRange.layerCount = 1,
+	};
+	vkCreateImageView(device, &view_info, NULL, &texture->impl.view);
+
+	if (gpu_in_use) {
+		vkCmdBeginRendering(command_buffer, &current_rendering_info);
+	}
+
+	//// TODO
+	gpu_execute_and_wait();
+	vkDestroyBuffer(device, staging_buffer, NULL);
+	vkFreeMemory(device, staging_memory, NULL);
 }
 
 void gpu_texture_destroy(gpu_texture_t *target) {
