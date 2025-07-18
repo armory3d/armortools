@@ -58,6 +58,7 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	let brush_scale: string = sc + "";
 	node_shader_add_out(kong, "tex_coord: float2");
 	node_shader_write_attrib_vert(kong, "output.tex_coord = input.tex * float(" + brush_scale + ");");
+	node_shader_write_attrib_frag(kong, "var tex_coord: float2 = input.tex_coord;");
 
 	let decal: bool = context_raw.decal_preview;
 	parser_material_sample_keep_aspect = decal;
@@ -86,7 +87,7 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	if (decal) {
 		if (context_raw.tool == workspace_tool_t.TEXT) {
 			node_shader_add_texture(kong, "textexttool", "_textexttool");
-			node_shader_write_frag(kong, "opacity *= sample_lod(textexttool, sampler_linear, input.tex_coord / float(" + brush_scale + "), 0.0).r;");
+			node_shader_write_frag(kong, "opacity *= sample_lod(textexttool, sampler_linear, tex_coord / float(" + brush_scale + "), 0.0).r;");
 		}
 	}
 	if (decal) {
@@ -118,7 +119,7 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	}
 	else {
 		kong.frag_vvec = true;
-		node_shader_write_frag(kong, "var TBN: float3x3 = cotangent_frame(n, vvec, input.tex_coord);");
+		node_shader_write_frag(kong, "var TBN: float3x3 = cotangent_frame(n, vvec, tex_coord);");
 		node_shader_write_frag(kong, "n = nortan * 2.0 - 1.0;");
 		node_shader_write_frag(kong, "n.y = -n.y;");
 		node_shader_write_frag(kong, "n = normalize(TBN * n);");

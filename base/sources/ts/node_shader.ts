@@ -181,7 +181,7 @@ function node_shader_get(raw: node_shader_t): string {
 		s += "\t" + a + ";\n";
 	}
 	if (raw.consts.length == 0) {
-		s += "\tempty: float;\n";
+		s += "\tempty: float4;\n";
 	}
 	s += "}\n\n";
 
@@ -192,7 +192,7 @@ function node_shader_get(raw: node_shader_t): string {
 		s += "\t" + a + ";\n";
 	}
 	if (raw.consts.length == 0) {
-		s += "\tempty: float;\n";
+		s += "\tempty: float4;\n";
 	}
 	s += "};\n\n";
 

@@ -37,6 +37,7 @@ function make_node_preview_run(data: material_t, matcon: material_context_t, nod
 	node_shader_add_out(kong, "tex_coord: float2");
 	node_shader_write_attrib_vert(kong, "output.tex_coord = output.pos.xy * madd + madd;");
 	node_shader_write_attrib_vert(kong, "output.tex_coord.y = 1.0 - output.tex_coord.y;");
+	node_shader_write_attrib_frag(kong, "var tex_coord: float2 = input.tex_coord;");
 
 	parser_material_init();
 	parser_material_canvases = [context_raw.material.canvas];

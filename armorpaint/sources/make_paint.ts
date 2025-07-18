@@ -143,7 +143,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		}
 
 		if (depth_reject) {
-			node_shader_write_frag(kong, "if (sp.z > sample_lod(gbufferD, sampler_linear, sp.xy, 0.0).r + 0.0005) { discard; }");
+			node_shader_write_frag(kong, "if (sp.z > sample_lod(gbufferD, sampler_linear, sp.xy, 0.0).r - 0.00005) { discard; }");
 		}
 
 		make_brush_run(kong);
@@ -166,7 +166,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		}
 		let stencil_fill: bool = context_raw.tool == workspace_tool_t.FILL && context_raw.brush_stencil_image != null;
 		if (stencil_fill) {
-			node_shader_write_frag(kong, "if (sp.z > sample_lod(gbufferD, sampler_linear, sp.xy, 0.0).r + 0.0005) { discard; }");
+			node_shader_write_frag(kong, "if (sp.z > sample_lod(gbufferD, sampler_linear, sp.xy, 0.0).r - 0.00005) { discard; }");
 		}
 	}
 
@@ -212,7 +212,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		let uv_type: uv_type_t = context_raw.layer.fill_layer != null ? context_raw.layer.uv_type : context_raw.brush_paint;
 		parser_material_triplanar = uv_type == uv_type_t.TRIPLANAR && !decal;
 		parser_material_sample_keep_aspect = decal;
-		parser_material_sample_uv_scale = "brush_scale";
+		parser_material_sample_uv_scale = "constants.brush_scale";
 		let sout: shader_out_t = parser_material_parse(ui_nodes_get_canvas_material(), con_paint, kong, matcon);
 		parser_material_parse_emission = false;
 		parser_material_parse_subsurface = false;
@@ -248,13 +248,13 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		if (context_raw.material.paint_subs) {
 			node_shader_write_frag(kong, "var subs: float = " + subs + ";");
 		}
-		if (height != "0.0" && height != "0" && !make_material_height_used) {
+		if (!make_material_height_used && parse_float(height) != 0.0) {
 			make_material_height_used = true;
 			// Height used for the first time, also rebuild vertex shader
 			return make_paint_run(data, matcon);
 		}
-		make_material_emis_used = emis != "0.0" && emis != "0";
-		make_material_subs_used = subs != "0.0" && subs != "0";
+		make_material_emis_used = parse_float(emis) != 0.0;
+		make_material_subs_used = parse_float(subs) != 0.0;
 	}
 
 	if (context_raw.brush_mask_image != null && context_raw.tool == workspace_tool_t.DECAL) {
@@ -273,18 +273,18 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	}
 
 	if (context_raw.brush_stencil_image != null && (
-		context_raw.tool == workspace_tool_t.BRUSH  ||
+		context_raw.tool == workspace_tool_t.BRUSH ||
 		context_raw.tool == workspace_tool_t.ERASER ||
 		context_raw.tool == workspace_tool_t.FILL ||
-		context_raw.tool == workspace_tool_t.CLONE  ||
-		context_raw.tool == workspace_tool_t.BLUR   ||
-		context_raw.tool == workspace_tool_t.SMUDGE   ||
+		context_raw.tool == workspace_tool_t.CLONE ||
+		context_raw.tool == workspace_tool_t.BLUR ||
+		context_raw.tool == workspace_tool_t.SMUDGE ||
 		context_raw.tool == workspace_tool_t.PARTICLE ||
 		decal)) {
 		node_shader_add_texture(kong, "texbrushstencil", "_texbrushstencil");
 		node_shader_add_constant(kong, "texbrushstencil_size: float2", "_size(texbrushstencil)");
 		node_shader_add_constant(kong, "stencil_transform: float4", "_stencil_transform");
-		node_shader_write_frag(kong, "var stencil_uv: float2 = float2((sp.xy - constants.stencil_transform.xy) / constants.stencil_transform.z * float2(constants.aspect_ratio, 1.0));");
+		node_shader_write_frag(kong, "var stencil_uv: float2 = (sp.xy - constants.stencil_transform.xy) / constants.stencil_transform.z * float2(constants.aspect_ratio, 1.0);");
 		node_shader_write_frag(kong, "var stencil_size: float2 = constants.texbrushstencil_size;");
 		node_shader_write_frag(kong, "var stencil_ratio: float = stencil_size.y / stencil_size.x;");
 		node_shader_write_frag(kong, "stencil_uv -= float2(0.5 / stencil_ratio, 0.5);");
@@ -292,7 +292,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 												   stencil_uv.x * sin(constants.stencil_transform.w) + stencil_uv.y * cos(constants.stencil_transform.w));");
 		node_shader_write_frag(kong, "stencil_uv += float2(0.5 / stencil_ratio, 0.5);");
 		node_shader_write_frag(kong, "stencil_uv.x *= stencil_ratio;");
-		node_shader_write_frag(kong, "if (stencil_uv.x < 0 || stencil_uv.x > 1 || stencil_uv.y < 0 || stencil_uv.y > 1) { discard; }");
+		node_shader_write_frag(kong, "if (stencil_uv.x < 0.0 || stencil_uv.x > 1.0 || stencil_uv.y < 0.0 || stencil_uv.y > 1.0) { discard; }");
 		node_shader_write_frag(kong, "var texbrushstencil_sample: float4 = sample_lod(texbrushstencil, sampler_linear, stencil_uv, 0.0);");
 		if (context_raw.brush_stencil_image_is_alpha) {
 			node_shader_write_frag(kong, "opacity *= texbrushstencil_sample.a;");
@@ -367,16 +367,14 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	if (context_raw.material.paint_emis && make_material_emis_used) {
 		node_shader_write_frag(kong, "if (emis > 0.0) {");
 		node_shader_write_frag(kong, "	matid += 1.0 / 255.0;");
-		// node_shader_write_frag(kong, "	if (str == 0.0) { discard; }");
+		node_shader_write_frag(kong, "	if (str == 0.0) { discard; }");
 		node_shader_write_frag(kong, "}");
-		node_shader_write_frag(kong, "	if (emis > 0.0 && str == 0.0) { discard; }");
 	}
 	else if (context_raw.material.paint_subs && make_material_subs_used) {
 		node_shader_write_frag(kong, "if (subs > 0.0) {");
-		node_shader_write_frag(kong, "    matid += 2.0 / 255.0;");
-		// node_shader_write_frag(kong, "	if (str == 0.0) { discard; }");
+		node_shader_write_frag(kong, "	matid += 2.0 / 255.0;");
+		node_shader_write_frag(kong, "	if (str == 0.0) { discard; }");
 		node_shader_write_frag(kong, "}");
-		node_shader_write_frag(kong, "	if (subs > 0.0 && str == 0.0) { discard; }");
 	}
 
 	let is_mask: bool = slot_layer_is_mask(context_raw.layer);

@@ -46,6 +46,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	node_shader_write_vert(kong, "output.pos = constants.WVP * float4(meshpos.xyz, 1.0);");
 
 	node_shader_write_vert(kong, "output.tex_coord = float2(0.0, 0.0);");
+	node_shader_write_attrib_frag(kong, "var tex_coord: float2 = input.tex_coord;");
 
 	kong.frag_out = "float4[3]";
 
@@ -192,7 +193,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 					if (!slot_layer_is_visible(m)) continue;
 					node_shader_add_texture(kong, "texpaint" + m.id);
 					node_shader_write_frag(kong, "{"); // Group mask is sampled across multiple layers
-					node_shader_write_frag(kong, "var texpaint_mask_sample" + m.id + ": float = sample_lod(texpaint" + m.id + ", sampler_liniear, input.tex_coord, 0.0).r;");
+					node_shader_write_frag(kong, "var texpaint_mask_sample" + m.id + ": float = sample_lod(texpaint" + m.id + ", sampler_liniear, tex_coord, 0.0).r;");
 					node_shader_write_frag(kong, "}");
 				}
 				node_shader_write_frag(kong, "texpaint_opac *= clamp(" + texpaint_mask + ", 0.0, 1.0);");
@@ -214,16 +215,16 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 
 		if (last_pass && context_raw.draw_texels) {
 			node_shader_add_constant(kong, "texpaint_size: float2", "_texpaint_size");
-			node_shader_write_frag(kong, "var texel0: float2 = input.tex_coord * constants.texpaint_size * 0.01;");
-			node_shader_write_frag(kong, "var texel1: float2 = input.tex_coord * constants.texpaint_size * 0.1;");
-			node_shader_write_frag(kong, "var texel2: float2 = input.tex_coord * constants.texpaint_size;");
+			node_shader_write_frag(kong, "var texel0: float2 = tex_coord * constants.texpaint_size * 0.01;");
+			node_shader_write_frag(kong, "var texel1: float2 = tex_coord * constants.texpaint_size * 0.1;");
+			node_shader_write_frag(kong, "var texel2: float2 = tex_coord * constants.texpaint_size;");
 			node_shader_write_frag(kong, "basecol *= max(float((int(texel0.x) % 2.0) == (int(texel0.y) % 2.0)), 0.9);");
 			node_shader_write_frag(kong, "basecol *= max(float((int(texel1.x) % 2.0) == (int(texel1.y) % 2.0)), 0.9);");
 			node_shader_write_frag(kong, "basecol *= max(float((int(texel2.x) % 2.0) == (int(texel2.y) % 2.0)), 0.9);");
 		}
 
 		if (last_pass && context_raw.draw_wireframe) {
-			node_shader_write_frag(kong, "basecol *= 1.0 - sample_lod(texuvmap, sampler_linear, input.tex_coord, 0.0).r;");
+			node_shader_write_frag(kong, "basecol *= 1.0 - sample_lod(texuvmap, sampler_linear, tex_coord, 0.0).r;");
 		}
 
 		if (make_material_height_used) {
@@ -248,7 +249,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		}
 
 		kong.frag_vvec = true;
-		node_shader_write_frag(kong, "var TBN: float3x3 = cotangent_frame(n, vvec, input.tex_coord);");
+		node_shader_write_frag(kong, "var TBN: float3x3 = cotangent_frame(n, vvec, tex_coord);");
 		node_shader_write_frag(kong, "n = ntex * 2.0 - 1.0;");
 		node_shader_write_frag(kong, "n.y = -n.y;");
 		node_shader_write_frag(kong, "n = normalize(TBN * n);");
@@ -335,7 +336,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		node_shader_write_frag(kong, "output[0] = float4(n.xy, roughness, pack_f32_i16(metallic, uint(float(int(matid * 255.0)) % float(3))));");
 	}
 
-	node_shader_write_frag(kong, "output[2] = float4(0.0, 0.0, input.tex_coord.xy);");
+	node_shader_write_frag(kong, "output[2] = float4(0.0, 0.0, tex_coord.xy);");
 
 	parser_material_finalize(con_mesh);
 	con_mesh.data.shader_from_source = true;

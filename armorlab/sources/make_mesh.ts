@@ -94,15 +94,15 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	}
 
 	node_shader_add_texture(kong, "texpaint");
-	node_shader_write_frag(kong, "texpaint_sample = sample_lod(texpaint, sampler_linear, input.tex_coord, 0.0);");
+	node_shader_write_frag(kong, "texpaint_sample = sample_lod(texpaint, sampler_linear, tex_coord, 0.0);");
 	node_shader_write_frag(kong, "texpaint_opac = texpaint_sample.a;");
 
 	node_shader_write_frag(kong, "basecol = texpaint_sample.rgb * texpaint_opac;");
 	node_shader_add_texture(kong, "texpaint_nor");
-	node_shader_write_frag(kong, "texpaint_nor_sample = sample_lod(texpaint_nor, sampler_linear, input.tex_coord, 0.0);");
+	node_shader_write_frag(kong, "texpaint_nor_sample = sample_lod(texpaint_nor, sampler_linear, tex_coord, 0.0);");
 	node_shader_write_frag(kong, "ntex = lerp3(ntex, texpaint_nor_sample.rgb, texpaint_opac);");
 	node_shader_add_texture(kong, "texpaint_pack");
-	node_shader_write_frag(kong, "texpaint_pack_sample = sample_lod(texpaint_pack, sampler_linear, input.tex_coord, 0.0);");
+	node_shader_write_frag(kong, "texpaint_pack_sample = sample_lod(texpaint_pack, sampler_linear, tex_coord, 0.0);");
 	node_shader_write_frag(kong, "occlusion = lerp(occlusion, texpaint_pack_sample.r, texpaint_opac);");
 	node_shader_write_frag(kong, "roughness = lerp(roughness, texpaint_pack_sample.g, texpaint_opac);");
 	node_shader_write_frag(kong, "metallic = lerp(metallic, texpaint_pack_sample.b, texpaint_opac);");
@@ -120,7 +120,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	}
 
 	kong.frag_vvec = true;
-	node_shader_write_frag(kong, "var TBN: float3x3 = cotangent_frame(n, vvec, input.tex_coord);");
+	node_shader_write_frag(kong, "var TBN: float3x3 = cotangent_frame(n, vvec, tex_coord);");
 	node_shader_write_frag(kong, "n = ntex * 2.0 - 1.0;");
 	node_shader_write_frag(kong, "n.y = -n.y;");
 	node_shader_write_frag(kong, "n = normalize(TBN * n);");
@@ -211,7 +211,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	// node_shader_write_frag(kong, "n.xy = n.z >= 0.0 ? n.xy : octahedron_wrap(n.xy);");
 	node_shader_write_frag(kong, "if (n.z < 0.0) { n.xy = octahedron_wrap(n.xy); }");
 	node_shader_write_frag(kong, "output[0] = float4(n.xy, roughness, pack_f32_i16(metallic, uint(float(int(matid * 255.0)) % float(3))));");
-	node_shader_write_frag(kong, "output[2] = float4(0.0, 0.0, input.tex_coord.xy);");
+	node_shader_write_frag(kong, "output[2] = float4(0.0, 0.0, tex_coord.xy);");
 
 	parser_material_finalize(con_mesh);
 	con_mesh.data.shader_from_source = true;

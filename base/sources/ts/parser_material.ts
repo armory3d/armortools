@@ -27,7 +27,7 @@ let parser_material_nodes: ui_node_t[];
 let parser_material_links: ui_node_link_t[];
 
 let parser_material_cotangent_frame_written: bool;
-let parser_material_tex_coord: string = "input.tex_coord";
+let parser_material_tex_coord: string = "tex_coord";
 let parser_material_eps: f32 = 0.000001;
 
 let parser_material_custom_nodes: map_t<string, any> = map_create(); // JSValue -> (n: ui_node_t, s: string)=>string
@@ -504,7 +504,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		}
 		else { // Vector
 			node_shader_context_add_elem(parser_material_kong.context, "tex", "short2norm"); // UVMaps only for now
-			return "float3(input.tex_coord.x, input.tex_coord.y, 0.0)";
+			return "float3(tex_coord.x, tex_coord.y, 0.0)";
 		}
 	}
 	else if (node.type == "VERTEX_COLOR") {
@@ -641,7 +641,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		parser_material_write(parser_material_kong, "var " + store + "_rad: float = " + angle + " * (" + pi + " / 180.0);");
 		parser_material_write(parser_material_kong, "var " + store + "_x: float = cos(" + store + "_rad);");
 		parser_material_write(parser_material_kong, "var " + store + "_y: float = sin(" + store + "_rad);");
-		return "sample(" + tex_name + ", sampler_linear, input.tex_coord + float2(" + store + "_x, " + store + "_y) * " + mask + ").rgb";
+		return "sample(" + tex_name + ", sampler_linear, tex_coord + float2(" + store + "_x, " + store + "_y) * " + mask + ").rgb";
 	}
 	else if (node.type == "BLUR") {
 		if (parser_material_blur_passthrough) {
@@ -659,7 +659,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		parser_material_write(parser_material_kong, "var " + store + "_res: float3 = float3(0.0, 0.0, 0.0);");
 		parser_material_write(parser_material_kong, "for (var i: int = 0; i <= int(" + steps + " * 2.0); i += 1) {");
 		parser_material_write(parser_material_kong, "for (var j: int = 0; j <= int(" + steps + " * 2.0); j += 1) {");
-		parser_material_write(parser_material_kong, store + "_res += sample(" + tex_name + ", sampler_linear, input.tex_coord + float2(float(i) - " + steps + ", float(j) - " + steps + ") / constants." + tex_name + "_size).rgb;");
+		parser_material_write(parser_material_kong, store + "_res += sample(" + tex_name + ", sampler_linear, tex_coord + float2(float(i) - " + steps + ", float(j) - " + steps + ") / constants." + tex_name + "_size).rgb;");
 		parser_material_write(parser_material_kong, "}");
 		parser_material_write(parser_material_kong, "}");
 		parser_material_write(parser_material_kong, store + "_res = " + store + "_res / (" + steps + " * 2.0 + 1.0) * (" + steps + " * 2.0 + 1.0);");
@@ -882,11 +882,11 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		let l: any = node.buttons[0].default_value;
 		if (socket == node.outputs[0]) { // Base
 			node_shader_add_texture(parser_material_kong, "texpaint" + l, "_texpaint" + l);
-			return "sample(texpaint" + l + ", sampler_linear, input.tex_coord).rgb";
+			return "sample(texpaint" + l + ", sampler_linear, tex_coord).rgb";
 		}
 		else if (socket == node.outputs[5]) { // Normal
 			node_shader_add_texture(parser_material_kong, "texpaint_nor" + l, "_texpaint_nor" + l);
-			return "sample(texpaint_nor" + l + ", sampler_linear, input.tex_coord).rgb";
+			return "sample(texpaint_nor" + l + ", sampler_linear, tex_coord).rgb";
 		}
 	}
 	else if (node.type == "MATERIAL") {
@@ -984,7 +984,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		}
 		else if (socket == node.outputs[2]) {// UV
 			node_shader_context_add_elem(parser_material_kong.context, "tex", "short2norm");
-			return "float3(input.tex_coord.x, input.tex_coord.y, 0.0)";
+			return "float3(tex_coord.x, tex_coord.y, 0.0)";
 		}
 		else if (socket == node.outputs[3]) { // Object
 			parser_material_kong.frag_mposition = true;
@@ -1004,7 +1004,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 	}
 	else if (node.type == "UVMAP") {
 		node_shader_context_add_elem(parser_material_kong.context, "tex", "short2norm");
-		return "float3(input.tex_coord.x, input.tex_coord.y, 0.0)";
+		return "float3(tex_coord.x, tex_coord.y, 0.0)";
 	}
 	else if (node.type == "BUMP") {
 		let strength: string = parser_material_parse_value_input(node.inputs[0]);
@@ -1209,7 +1209,7 @@ function parse_normal_map_color_input(inp: ui_node_socket_t) {
 			node_shader_add_function(parser_material_kong, str_cotangent_frame);
 		}
 		parser_material_kong.frag_n = true;
-		parser_material_write(parser_material_kong, "var TBN: float3x3 = cotangent_frame(n, vvec, input.tex_coord);");
+		parser_material_write(parser_material_kong, "var TBN: float3x3 = cotangent_frame(n, vvec, tex_coord);");
 
 		parser_material_write(parser_material_kong, "n = TBN * normalize(texn);");
 	}
@@ -1262,7 +1262,7 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 		node_shader_add_texture(parser_material_kong, "texuvmap", "_texuvmap");
 		// let use_pixel_size: bool = node.buttons[0].default_value == "true";
 		// let pixel_size: f32 = parse_value_input(node.inputs[0]);
-		return "sample_lod(texuvmap, sampler_linear, input.tex_coord, 0.0).r";
+		return "sample_lod(texuvmap, sampler_linear, tex_coord, 0.0).r";
 	}
 	else if (node.type == "CAMERA") {
 		if (socket == node.outputs[1]) { // View Z Depth
@@ -1280,30 +1280,30 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 		let l: any = node.buttons[0].default_value;
 		if (socket == node.outputs[1]) { // Opac
 			node_shader_add_texture(parser_material_kong, "texpaint" + l, "_texpaint" + l);
-			return "sample(texpaint" + l + ", sampler_linear, input.tex_coord).a";
+			return "sample(texpaint" + l + ", sampler_linear, tex_coord).a";
 		}
 		else if (socket == node.outputs[2]) { // Occ
 			node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
-			return "sample(texpaint_pack" + l + ", sampler_linear, input.tex_coord).r";
+			return "sample(texpaint_pack" + l + ", sampler_linear, tex_coord).r";
 		}
 		else if (socket == node.outputs[3]) { // Rough
 			node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
-			return "sample(texpaint_pack" + l + ", sampler_linear, input.tex_coord).g";
+			return "sample(texpaint_pack" + l + ", sampler_linear, tex_coord).g";
 		}
 		else if (socket == node.outputs[4]) { // Metal
 			node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
-			return "sample(texpaint_pack" + l + ", sampler_linear, input.tex_coord).b";
+			return "sample(texpaint_pack" + l + ", sampler_linear, tex_coord).b";
 		}
 		else if (socket == node.outputs[7]) { // Height
 			node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
-			return "sample(texpaint_pack" + l + ", sampler_linear, input.tex_coord).a";
+			return "sample(texpaint_pack" + l + ", sampler_linear, tex_coord).a";
 		}
 	}
 	else if (node.type == "LAYER_MASK") {
 		if (socket == node.outputs[0]) {
 			let l: any = node.buttons[0].default_value;
 			node_shader_add_texture(parser_material_kong, "texpaint" + l, "_texpaint" + l);
-			return "sample(texpaint" + l + ", sampler_linear, input.tex_coord).r";
+			return "sample(texpaint" + l + ", sampler_linear, tex_coord).r";
 		}
 	}
 	else if (node.type == "MATERIAL") {
@@ -1518,7 +1518,7 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 		let tex_name: string = "texbake_" + parser_material_node_name(node);
 		node_shader_add_texture(parser_material_kong, "" + tex_name, "_" + tex_name);
 		let store: string = parser_material_store_var_name(node);
-		parser_material_write(parser_material_kong, "var " + store + "_res: float = sample(" + tex_name + ", sampler_linear, input.tex_coord).r;");
+		parser_material_write(parser_material_kong, "var " + store + "_res: float = sample(" + tex_name + ", sampler_linear, tex_coord).r;");
 		return store + "_res";
 	}
 	else if (node.type == "NORMAL") {
@@ -1891,9 +1891,9 @@ function parser_material_texture_store(node: ui_node_t, tex: bind_tex_t, tex_nam
 		parser_material_write(parser_material_kong, "var " + tex_store + "_size: float2 = constants." + tex_name + "_size;");
 		parser_material_write(parser_material_kong, "var " + tex_store + "_ax: float = " + tex_store + "_size.x / " + tex_store + "_size.y;");
 		parser_material_write(parser_material_kong, "var " + tex_store + "_ay: float = " + tex_store + "_size.y / " + tex_store + "_size.x;");
-		parser_material_write(parser_material_kong, "var " + tex_store + "_uv: float2 = ((" + uv_name + ".xy / " + parser_material_sample_uv_scale + " - float2(0.5, 0.5)) * float2(max(" + tex_store + "_ay, 1.0), max(" + tex_store + "_ax, 1.0))) + float2(0.5, 0.5);");
+		parser_material_write(parser_material_kong, "var " + tex_store + "_uv: float2 = ((" + uv_name + ".xy / float(" + parser_material_sample_uv_scale + ") - float2(0.5, 0.5)) * float2(max(" + tex_store + "_ay, 1.0), max(" + tex_store + "_ax, 1.0))) + float2(0.5, 0.5);");
 		parser_material_write(parser_material_kong, "if (" + tex_store + "_uv.x < 0.0 || " + tex_store + "_uv.y < 0.0 || " + tex_store + "_uv.x > 1.0 || " + tex_store + "_uv.y > 1.0) { discard; }");
-		parser_material_write(parser_material_kong, "" + tex_store + "_uv *= " + parser_material_sample_uv_scale + ";");
+		parser_material_write(parser_material_kong, tex_store + "_uv = " + tex_store + "_uv * float(" + parser_material_sample_uv_scale + ");");
 		uv_name = tex_store + "_uv";
 	}
 

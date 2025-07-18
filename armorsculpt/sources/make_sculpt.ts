@@ -37,6 +37,7 @@ function make_sculpt_run(data: material_t, matcon: material_context_t): node_sha
 	node_shader_write_vert(kong, "output.tex_coord = input.pos.xy * madd + madd;");
 	node_shader_write_vert(kong, "output.tex_coord.y = 1.0 - output.tex_coord.y;");
 	node_shader_write_vert(kong, "output.pos = float4(input.pos.xy, 0.0, 1.0);");
+	node_shader_write_attrib_frag(kong, "var tex_coord: float2 = input.tex_coord;");
 
 	node_shader_add_constant(kong, "inp: float4", "_input_brush");
 	node_shader_add_constant(kong, "inplast: float4", "_input_brush_last");
@@ -68,7 +69,7 @@ function make_sculpt_run(data: material_t, matcon: material_context_t): node_sha
 	node_shader_write_frag(kong, "var str: float = clamp((constants.brush_radius - dist) * constants.brush_hardness * 400.0, 0.0, 1.0) * opacity;");
 
 	node_shader_add_texture(kong, "texpaint_undo", "_texpaint_undo");
-	node_shader_write_frag(kong, "var sample_undo: float4 = sample_lod(texpaint_undo, sampler_linear, input.tex_coord, 0.0);");
+	node_shader_write_frag(kong, "var sample_undo: float4 = sample_lod(texpaint_undo, sampler_linear, tex_coord, 0.0);");
 
 	node_shader_write_frag(kong, "if (sample_undo.r == 0 && sample_undo.g == 0 && sample_undo.b == 0) { discard; }");
 

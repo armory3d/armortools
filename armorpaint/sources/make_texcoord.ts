@@ -48,14 +48,11 @@ function make_texcoord_run(kong: node_shader_t) {
 
 			node_shader_add_constant(kong, "brush_scale_x: float", "_brush_scale_x");
 			node_shader_write_attrib_frag(kong, "uvsp.x *= constants.brush_scale_x;");
-
 			node_shader_write_attrib_frag(kong, "uvsp += float2(0.5, 0.5);");
-
 			node_shader_write_attrib_frag(kong, "if (uvsp.x < 0.0 || uvsp.y < 0.0 || uvsp.x > 1.0 || uvsp.y > 1.0) { discard; }");
 		}
 		else {
 			node_shader_write_attrib_frag(kong, "uvsp.x *= constants.aspect_ratio;");
-
 			if (uv_angle != 0.0) {
 				node_shader_add_constant(kong, "brush_angle: float2", "_brush_angle");
 				node_shader_write_attrib_frag(kong, "uvsp = float2(uvsp.x * constants.brush_angle.x - uvsp.y * constants.brush_angle.y, uvsp.x * constants.brush_angle.y + uvsp.y * constants.brush_angle.x);");
@@ -68,11 +65,11 @@ function make_texcoord_run(kong: node_shader_t) {
 		node_shader_add_constant(kong, "brush_scale: float", "_brush_scale");
 		node_shader_add_out(kong, "tex_coord: float2");
 		node_shader_write_vert(kong, "output.tex_coord = input.tex * constants.brush_scale;");
-
 		if (uv_angle > 0.0) {
 			node_shader_add_constant(kong, "brush_angle: float2", "_brush_angle");
 			node_shader_write_vert(kong, "output.tex_coord = float2(output.tex_coord.x * constants.brush_angle.x - output.tex_coord.y * constants.brush_angle.y, output.tex_coord.x * constants.brush_angle.y + output.tex_coord.y * constants.brush_angle.x);");
 		}
+		node_shader_write_attrib_frag(kong, "var tex_coord: float2 = input.tex_coord;");
 	}
 	else { // TexCoords - triplanar
 		kong.frag_wposition = true;
@@ -85,7 +82,6 @@ function make_texcoord_run(kong: node_shader_t) {
 		node_shader_write_attrib_frag(kong, "var tex_coord: float2 = input.wposition.yz * constants.brush_scale * 0.5;");
 		node_shader_write_attrib_frag(kong, "var tex_coord1: float2 = input.wposition.xz * constants.brush_scale * 0.5;");
 		node_shader_write_attrib_frag(kong, "var tex_coord2: float2 = input.wposition.xy * constants.brush_scale * 0.5;");
-
 		if (uv_angle != 0.0) {
 			node_shader_add_constant(kong, "brush_angle: float2", "_brush_angle");
 			node_shader_write_attrib_frag(kong, "tex_coord = float2(tex_coord.x * constants.brush_angle.x - tex_coord.y * constants.brush_angle.y, tex_coord.x * constants.brush_angle.y + tex_coord.y * constants.brush_angle.x);");
