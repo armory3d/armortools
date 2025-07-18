@@ -1321,7 +1321,7 @@ gpu_texture_t *gpu_create_texture_from_encoded_bytes(buffer_t *data, string_t *f
 	}
 
 	gpu_texture_init_from_bytes(texture, image_data, image_width, image_height, image_format);
-	free(image_data);;
+	free(image_data);
 
 	return texture;
 }
