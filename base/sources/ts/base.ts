@@ -132,10 +132,10 @@ function base_init() {
 	sys_notify_on_update(camera_update);
 	sys_notify_on_render_2d(base_render);
 
-	base_appx = ui_toolbar_w;
-	base_appy = ui_header_h;
+	base_appx = ui_toolbar_w(true);
+	base_appy = 0;
 	if (config_raw.layout[layout_size_t.HEADER] == 1) {
-		base_appy += ui_header_h;
+		base_appy = ui_header_h * 2;
 	}
 	let cam: camera_object_t = scene_camera;
 	cam.data.fov = math_floor(cam.data.fov * 100) / 100;
@@ -176,10 +176,10 @@ function base_w(): i32 {
 		res = iron_window_width() - sidebarw - ui_toolbar_default_w;
 	}
 	else if (ui_nodes_show || ui_view2d_show) {
-		res = iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - config_raw.layout[layout_size_t.NODES_W] - ui_toolbar_w;
+		res = iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - config_raw.layout[layout_size_t.NODES_W] - ui_toolbar_w(true);
 	}
 	else if (ui_base_show) {
-		res = iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - ui_toolbar_w;
+		res = iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - ui_toolbar_w(true);
 	}
 	else { // Distract free
 		res = iron_window_width();
@@ -278,7 +278,7 @@ function base_resize() {
 	context_raw.ddirty = 2;
 
 	if (ui_base_show) {
-		base_appx = ui_toolbar_w;
+		base_appx = ui_toolbar_w(true);
 		base_appy = 0;
 		if (config_raw.layout[layout_size_t.HEADER] == 1) {
 			base_appy = ui_header_h * 2;

@@ -67,7 +67,7 @@ function ui_view2d_render() {
 	ui_view2d_ww = config_raw.layout[layout_size_t.NODES_W];
 
 	///if (is_paint || is_sculpt)
-	ui_view2d_wx = math_floor(sys_w()) + ui_toolbar_w;
+	ui_view2d_wx = math_floor(sys_w()) + ui_toolbar_w(true);
 	///else
 	ui_view2d_wx = math_floor(sys_w());
 	///end
@@ -76,8 +76,8 @@ function ui_view2d_render() {
 
 	///if (is_paint || is_sculpt)
 	if (!ui_base_show) {
-		ui_view2d_ww += config_raw.layout[layout_size_t.SIDEBAR_W] + ui_toolbar_w;
-		ui_view2d_wx -= ui_toolbar_w;
+		ui_view2d_ww += config_raw.layout[layout_size_t.SIDEBAR_W] + ui_toolbar_w(true);
+		ui_view2d_wx -= ui_toolbar_w(true);
 	}
 	///end
 

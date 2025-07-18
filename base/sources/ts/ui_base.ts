@@ -58,7 +58,6 @@ function ui_base_init_hwnd_tabs(): tab_draw_array_t[] {
 function ui_base_init() {
 	///if (is_paint || is_sculpt)
 	ui_toolbar_init();
-	ui_toolbar_w = math_floor(ui_toolbar_default_w * config_raw.window_scale);
 	context_raw.text_tool_text = tr("Text");
 	///end
 

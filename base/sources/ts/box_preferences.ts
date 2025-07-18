@@ -902,7 +902,6 @@ function box_preferences_set_scale() {
 	_ui_set_scale(base_ui_menu, scale);
 	base_resize();
 	config_raw.layout[layout_size_t.SIDEBAR_W] = math_floor(ui_base_default_sidebar_w * scale);
-	ui_toolbar_w = math_floor(ui_toolbar_default_w * scale);
 }
 
 function box_preferences_theme_to_json(theme: ui_theme_t): string {

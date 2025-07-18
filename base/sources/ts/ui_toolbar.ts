@@ -6,7 +6,6 @@ let ui_toolbar_default_w: i32 = 36;
 ///end
 
 let ui_toolbar_handle: ui_handle_t = ui_handle_create();
-let ui_toolbar_w: i32 = ui_toolbar_default_w;
 let ui_toolbar_last_tool: i32 = 0;
 let ui_toolbar_tool_names: string[] = [
 	_tr("Brush"),
@@ -68,8 +67,10 @@ function ui_toolbar_draw_tool(i: i32, ui: ui_t, img: gpu_texture_t, icon_accent:
 	ui._y += 2;
 }
 
-function ui_toolbar_get_w(): i32 {
-	let ui: ui_t = ui_base_ui;
+function ui_toolbar_w(screen_size_request: bool = false): i32 {
+	if (screen_size_request && context_is_floating_toolbar()) {
+		return 0;
+	}
 
 	let w: i32 = 0;
 	if (config_raw.touch_ui) {
@@ -78,33 +79,30 @@ function ui_toolbar_get_w(): i32 {
 	else {
 		w = ui_toolbar_default_w;
 	}
-	w = math_floor(w * ui_SCALE(ui));
+	w = math_floor(w * config_raw.window_scale);
 	return w;
 }
 
-function ui_toolbar_get_x(): i32 {
+function ui_toolbar_x(): i32 {
 	let ui: ui_t = ui_base_ui;
 	return 5 * ui_SCALE(ui);
 }
 
 function ui_toolbar_render_ui() {
 	let ui: ui_t = ui_base_ui;
-
-	ui_toolbar_w = ui_toolbar_get_w();
-
 	let x: i32 = 0;
 	let y: i32 = ui_header_h;
 	let h: i32 = iron_window_height() - ui_header_h;
 	let _WINDOW_BG_COL: i32 = ui.ops.theme.WINDOW_BG_COL;
 
 	if (context_is_floating_toolbar()) {
-		x += ui_toolbar_get_x();
-		y += ui_toolbar_get_x();
-		h = ui_toolbar_tool_names.length * (ui_toolbar_w + 2);
+		x += ui_toolbar_x();
+		y += ui_toolbar_x();
+		h = ui_toolbar_tool_names.length * (ui_toolbar_w() + 2);
 		ui.ops.theme.WINDOW_BG_COL = ui.ops.theme.SEPARATOR_COL;
 	}
 
-	if (ui_window(ui_toolbar_handle, x, y, ui_toolbar_w, h)) {
+	if (ui_window(ui_toolbar_handle, x, y, ui_toolbar_w(), h)) {
 		ui._y -= 4 * ui_SCALE(ui);
 
 		ui.image_scroll_align = false;
@@ -133,7 +131,7 @@ function ui_toolbar_render_ui() {
 			let font_height: i32 = draw_font_height(ui.ops.font, ui.font_size);
 			ui.font_offset_y = (ui_ELEMENT_H(ui) - font_height) / 2;
 			let _w: i32 = ui._w;
-			ui._w = ui_toolbar_w;
+			ui._w = ui_toolbar_w();
 
 			if (ui_button(">>")) {
 				ui_toolbar_tool_properties_menu();
@@ -213,7 +211,6 @@ function ui_toolbar_render_ui() {
 	}
 
 	if (context_is_floating_toolbar()) {
-		ui_toolbar_w = 0;
 		ui.ops.theme.WINDOW_BG_COL = _WINDOW_BG_COL;
 	}
 
@@ -245,7 +242,7 @@ function ui_toolbar_tool_properties_menu() {
 
 function ui_toolbar_draw_highlight() {
 	let ui: ui_t = ui_base_ui;
-	let size: i32 = ui_toolbar_w - 4;
+	let size: i32 = ui_toolbar_w() - 4;
 	draw_set_color(ui.ops.theme.HIGHLIGHT_COL);
 	ui_draw_rect(true, ui._x + -1,  ui._y + 2, size + 2, size + 2);
 }

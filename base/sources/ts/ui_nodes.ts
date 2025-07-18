@@ -542,7 +542,7 @@ function ui_nodes_update() {
 	}
 
 	///if (is_paint || is_sculpt)
-	ui_nodes_wx = math_floor(sys_w()) + ui_toolbar_w;
+	ui_nodes_wx = math_floor(sys_w()) + ui_toolbar_w(true);
 	///end
 	///if is_lab
 	ui_nodes_wx = math_floor(sys_w());
@@ -556,8 +556,8 @@ function ui_nodes_update() {
 	let ww: i32 = config_raw.layout[layout_size_t.NODES_W];
 	if (!ui_base_show) {
 		///if (is_paint || is_sculpt)
-		ww += config_raw.layout[layout_size_t.SIDEBAR_W] + ui_toolbar_w;
-		ui_nodes_wx -= ui_toolbar_w;
+		ww += config_raw.layout[layout_size_t.SIDEBAR_W] + ui_toolbar_w(true);
+		ui_nodes_wx -= ui_toolbar_w(true);
 		///end
 		ui_nodes_wy = 0;
 	}
@@ -724,7 +724,7 @@ function ui_nodes_draw_grid(zoom: f32): gpu_texture_t {
 
 	///if (is_paint || is_sculpt)
 	if (!ui_base_show) {
-		ww += config_raw.layout[layout_size_t.SIDEBAR_W] + ui_toolbar_w;
+		ww += config_raw.layout[layout_size_t.SIDEBAR_W] + ui_toolbar_w(true);
 	}
 	///end
 
@@ -889,7 +889,7 @@ function ui_nodes_render() {
 	ui_nodes_ww = config_raw.layout[layout_size_t.NODES_W];
 
 	///if (is_paint || is_sculpt)
-	ui_nodes_wx = math_floor(sys_w()) + ui_toolbar_w;
+	ui_nodes_wx = math_floor(sys_w()) + ui_toolbar_w(true);
 	///end
 	///if is_lab
 	ui_nodes_wx = math_floor(sys_w());
@@ -899,8 +899,8 @@ function ui_nodes_render() {
 
 	///if (is_paint || is_sculpt)
 	if (!ui_base_show) {
-		ui_nodes_ww += config_raw.layout[layout_size_t.SIDEBAR_W] + ui_toolbar_w;
-		ui_nodes_wx -= ui_toolbar_w;
+		ui_nodes_ww += config_raw.layout[layout_size_t.SIDEBAR_W] + ui_toolbar_w(true);
+		ui_nodes_wx -= ui_toolbar_w(true);
 	}
 	///end
 

@@ -15,7 +15,7 @@ function ui_menubar_init() {
 function ui_menubar_render_ui() {
 	let ui: ui_t = ui_base_ui;
 
-	let item_w: i32 = ui_toolbar_get_w();
+	let item_w: i32 = ui_toolbar_w();
 	let panel_x: i32 = sys_x();
 
 	///if (is_paint || is_sculpt)
@@ -120,7 +120,7 @@ function ui_menubar_render_ui() {
 function ui_menubar_draw_tab_header() {
 	let ui: ui_t = ui_base_ui;
 
-	let item_w: i32 = ui_toolbar_get_w();
+	let item_w: i32 = ui_toolbar_w();
 	let panel_x: i32 = sys_x();
 
 	let nodesw: i32 = (ui_nodes_show || ui_view2d_show) ? config_raw.layout[layout_size_t.NODES_W] : 0;

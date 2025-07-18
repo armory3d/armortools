@@ -40,7 +40,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 		if (project_assets.length > 0) {
 
 			///if (is_paint || is_sculpt)
-			let statusw: i32 = iron_window_width() - ui_toolbar_w - config_raw.layout[layout_size_t.SIDEBAR_W];
+			let statusw: i32 = iron_window_width() - ui_toolbar_w(true) - config_raw.layout[layout_size_t.SIDEBAR_W];
 			///end
 			///if is_lab
 			let statusw: i32 = iron_window_width();
