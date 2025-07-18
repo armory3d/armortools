@@ -1295,10 +1295,8 @@ function ui_base_render_cursor() {
 	}
 
 	if (context_raw.brush_stencil_image != null &&
-		// @ts-ignore
 		context_raw.tool != workspace_tool_t.BAKE &&
 		context_raw.tool != workspace_tool_t.PICKER &&
-		// @ts-ignore
 		context_raw.tool != workspace_tool_t.MATERIAL &&
 		context_raw.tool != workspace_tool_t.COLORID) {
 		let r: rect_t = ui_base_get_brush_stencil_rect();
@@ -1320,10 +1318,15 @@ function ui_base_render_cursor() {
 			draw_rect(r.x - 8,       r.y - 8 + r.h, 16, 16);
 			draw_rect(r.x - 8 + r.w, r.y - 8 + r.h, 16, 16);
 			// Rotate
-			let angle: f32 = context_raw.brush_stencil_angle;
-			draw_set_transform(mat3_multmat(mat3_multmat(mat3_translation(0.5, 0.5), mat3_rotation(-angle)), mat3_translation(-0.5, -0.5)));
-			draw_filled_circle(r.x + r.w / 2, r.y - 4, 8);
-			draw_set_transform(mat3_nan());
+			let cosa: f32 = math_cos(-context_raw.brush_stencil_angle);
+			let sina: f32 = math_sin(-context_raw.brush_stencil_angle);
+			let ox: f32 = 0;
+			let oy: f32 = -r.h / 2;
+			let x: f32 = ox * cosa - oy * sina;
+			let y: f32 = ox * sina + oy * cosa;
+			x += r.x + r.w / 2;
+			y += r.y + r.h / 2;
+			draw_filled_circle(x, y, 8);
 		}
 	}
 
