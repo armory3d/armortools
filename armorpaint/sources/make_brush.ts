@@ -34,10 +34,11 @@ function make_brush_run(kong: node_shader_t) {
 			node_shader_write_frag(kong, "var plane_dist: float = dot(wn, winp.xyz - input.wposition);");
 
 			if (config_raw.brush_angle_reject && !context_raw.xray) {
-				node_shader_write_frag(kong, "if (plane_dist < -0.01) { discard; }");
+				// constants.inp.w = paint2d ? 0.0 : 1.0
+				node_shader_write_frag(kong, "if (plane_dist < -0.01 && constants.inp.w == 0.0) { discard; }");
 				kong.frag_n = true;
 				let angle: f32 = context_raw.brush_angle_reject_dot;
-				node_shader_write_frag(kong, "if (dot(wn, n) < " + angle + ") { discard; }");
+				node_shader_write_frag(kong, "if (dot(wn, n) < " + angle + " && constants.inp.w == 0.0) { discard; }");
 			}
 		}
 

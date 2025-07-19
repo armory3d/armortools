@@ -258,7 +258,7 @@ function vec2d(x: f32): f32 {
 function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: string): vec4_t {
 	if (link == "_input_brush") {
 		let down: bool = mouse_down() || pen_down();
-		let v: vec4_t = vec4_create(context_raw.paint_vec.x, context_raw.paint_vec.y, down ? 1.0 : 0.0, 0.0);
+		let v: vec4_t = vec4_create(context_raw.paint_vec.x, context_raw.paint_vec.y, down ? 1.0 : 0.0, context_raw.paint2d ? 1.0 : 0.0);
 		if (context_raw.paint2d) {
 			v.x = vec2d(v.x);
 		}
@@ -267,7 +267,7 @@ function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: st
 	}
 	else if (link == "_input_brush_last") {
 		let down: bool = mouse_down() || pen_down();
-		let v: vec4_t = vec4_create(context_raw.last_paint_vec_x, context_raw.last_paint_vec_y, down ? 1.0 : 0.0, 0.0);
+		let v: vec4_t = vec4_create(context_raw.last_paint_vec_x, context_raw.last_paint_vec_y, down ? 1.0 : 0.0, context_raw.paint2d ? 1.0 : 0.0);
 		if (context_raw.paint2d) {
 			v.x = vec2d(v.x);
 		}
