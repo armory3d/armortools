@@ -47,7 +47,9 @@ void iron_http_request(const char *url, const char *path, const char *data, int 
 		                                            [responseData appendData:data];
 		                                            [responseData appendBytes:"\0" length:1];
 
-		                                            callback(error == nil ? 0 : 1, statusCode, (const char *)[responseData bytes], callbackdata);
+													dispatch_async(dispatch_get_main_queue(), ^{
+														callback(error ? 1 : 0, statusCode, (const char *)[responseData bytes], callbackdata);
+													});
 	                                            }];
 	[dataTask resume];
 }
