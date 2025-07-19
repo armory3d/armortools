@@ -2383,9 +2383,8 @@ function shader_find_type(options) {
 }
 
 class ShaderCompiler {
-	constructor(exporter, compiler, to, temp, options, shader_matchers) {
+	constructor(exporter, to, temp, options, shader_matchers) {
 		this.exporter = exporter;
-		this.compiler = compiler;
 		this.type = shader_find_type(options);
 		this.options = options;
 		this.to = to;
@@ -2698,8 +2697,7 @@ function export_iron_project(project, options) {
 	fs_ensuredir(shaderdir);
 
 	let exported_shaders = [];
-	let krafix = path_join(irondir, "tools", "bin", sys_dir(), "krafix" + exe_ext());
-	let shader_compiler = new ShaderCompiler(exporter, krafix, shaderdir, temp, options, project.shader_matchers);
+	let shader_compiler = new ShaderCompiler(exporter, shaderdir, temp, options, project.shader_matchers);
 	exported_shaders = shader_compiler.run();
 
 	// Write embed.h
