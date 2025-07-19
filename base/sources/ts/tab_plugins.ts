@@ -40,3 +40,25 @@ function tab_plugins_draw(htab: ui_handle_t) {
 		///end
 	}
 }
+
+function plugin_uv_unwrap_button() {
+	let cb: any = map_get(util_mesh_unwrappers, "uv_unwrap.js"); // JSValue * -> (a: raw_mesh_t)=>void
+	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+		let md: mesh_data_t = project_paint_objects[i].data;
+		let mesh: raw_mesh_t = {
+			posa: md.vertex_arrays[0].values,
+			nora: md.vertex_arrays[1].values,
+			texa: null,
+			inda: md.index_arrays[0].values
+		};
+		js_call_ptr(cb, mesh);
+		md.vertex_arrays[0].values = mesh.posa;
+		md.vertex_arrays[1].values = mesh.nora;
+		md.vertex_arrays[2].values = mesh.texa;
+		md.index_arrays[0].values = mesh.inda;
+		md._.indices[0] = mesh.inda;
+		md._.ready = false;
+		mesh_data_build(md);
+	}
+	util_mesh_merge();
+}

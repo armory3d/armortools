@@ -9,6 +9,12 @@ FN(proc_xatlas_unwrap) {
 	return JS_UNDEFINED;
 }
 
+void plugin_uv_unwrap_button();
+FN(plugin_uv_unwrap_button) {
+	plugin_uv_unwrap_button();
+	return JS_UNDEFINED;
+}
+
 void *io_svg_parse(char *buf);
 FN(io_svg_parse) {
 	size_t len;
@@ -42,6 +48,7 @@ void plugin_embed() {
 	JSValue global_obj = JS_GetGlobalObject(js_ctx);
 
 	BIND(proc_xatlas_unwrap, 1);
+	BIND(plugin_uv_unwrap_button, 0);
 	BIND(io_svg_parse, 1);
 	BIND(io_usd_parse, 1);
 	BIND(io_gltf_parse, 2);
