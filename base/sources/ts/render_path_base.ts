@@ -230,13 +230,19 @@ function render_path_base_draw_split(draw_commands: ()=>void) {
 }
 
 function render_path_base_init_ssao() {
+	///if (arm_macos || arm_ios || arm_android)
+	let scale: f32 = 0.5;
+	///else
+	let scale: f32 = 1.0;
+	///end
+
 	{
 		let t: render_target_t = render_target_create();
 		t.name = "singlea";
 		t.width = 0;
 		t.height = 0;
 		t.format = "R8";
-		t.scale = render_path_base_get_super_sampling();
+		t.scale = scale * render_path_base_get_super_sampling();
 		render_path_create_render_target(t);
 	}
 	{
@@ -245,7 +251,7 @@ function render_path_base_init_ssao() {
 		t.width = 0;
 		t.height = 0;
 		t.format = "R8";
-		t.scale = render_path_base_get_super_sampling();
+		t.scale = scale * render_path_base_get_super_sampling();
 		render_path_create_render_target(t);
 	}
 	render_path_load_shader("shader_datas/ssao_pass/ssao_pass");
