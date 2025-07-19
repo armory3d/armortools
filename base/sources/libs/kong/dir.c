@@ -20,9 +20,9 @@ directory open_dir(const char *dirname) {
 	if (dir.handle == INVALID_HANDLE_VALUE) {
 		////
 		// kong_log(LOG_LEVEL_ERROR, "FindFirstFile failed (%d)\n", GetLastError());
-		printf("FindFirstFile failed (%d)\n", GetLastError());
+		// exit(1);
+		return dir;
 		////
-		exit(1);
 	}
 	FindNextFileA(dir.handle, &data);
 	return dir;
