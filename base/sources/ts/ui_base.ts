@@ -722,10 +722,8 @@ function ui_base_update() {
 			history_push_undo = true;
 			context_raw.particle_hit_x = context_raw.particle_hit_y = context_raw.particle_hit_z = 0;
 			let o: object_t = scene_spawn_object(".Sphere");
-			let md: material_data_t = data_get_material("Scene", ".Gizmo");
 			let mo: mesh_object_t = o.ext;
 			mo.base.name = ".Bullet";
-			mo.materials[0] = md;
 			mo.base.visible = true;
 
 			let camera: camera_object_t = scene_camera;
