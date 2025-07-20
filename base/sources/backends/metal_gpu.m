@@ -110,6 +110,7 @@ void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_t
 	memset(target, 0, sizeof(gpu_texture_t));
 	target->width = width;
 	target->height = height;
+	target->format = format;
 	target->state = GPU_TEXTURE_STATE_RENDER_TARGET;
 	target->impl._readback = NULL;
 
@@ -582,9 +583,6 @@ void gpu_texture_destroy(gpu_texture_t *target) {
 
 void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format) {
 	gpu_render_target_init2(target, width, height, format, -1);
-	target->width = width;
-	target->height = height;
-	target->state = GPU_TEXTURE_STATE_RENDER_TARGET;
 }
 
 void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structure_t *structure) {
