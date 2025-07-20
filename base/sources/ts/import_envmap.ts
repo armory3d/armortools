@@ -5,9 +5,7 @@ let import_envmap_params: vec4_t = vec4_create();
 let import_envmap_n: vec4_t = vec4_create();
 let import_envmap_radiance_loc: i32;
 let import_envmap_radiance: gpu_texture_t = null;
-let import_envmap_radiance_cpu: gpu_texture_t = null;
 let import_envmap_mips: gpu_texture_t[] = null;
-let import_envmap_mips_cpu: gpu_texture_t[] = null;
 
 function import_envmap_run(path: string, image: gpu_texture_t) {
 	// Init
@@ -29,7 +27,7 @@ function import_envmap_run(path: string, image: gpu_texture_t) {
 
 		import_envmap_mips = [];
 		let w: i32 = 512;
-		for (let i: i32 = 0; i < 10; ++i) {
+		for (let i: i32 = 0; i < 5; ++i) {
 			array_push(import_envmap_mips, gpu_create_render_target(w, w > 1 ? math_floor(w / 2) : 1, tex_format_t.RGBA128));
 			w = math_floor(w / 2);
 		}
@@ -42,42 +40,22 @@ function import_envmap_run(path: string, image: gpu_texture_t) {
 	draw_set_pipeline(null);
 	draw_end();
 
-	let radiance_pixels: buffer_t = gpu_get_texture_pixels(import_envmap_radiance);
-	if (import_envmap_radiance_cpu != null) {
-		let _radiance_cpu: gpu_texture_t = import_envmap_radiance_cpu;
-		sys_notify_on_next_frame(function (_radiance_cpu: gpu_texture_t) {
-			iron_unload_image(_radiance_cpu);
-		}, _radiance_cpu);
-	}
-	import_envmap_radiance_cpu = gpu_create_texture_from_bytes(radiance_pixels, import_envmap_radiance.width, import_envmap_radiance.height, tex_format_t.RGBA128);
-
 	// Radiance
-	if (import_envmap_mips_cpu != null) {
-		for (let i: i32 = 0; i < import_envmap_mips_cpu.length; ++i) {
-			let mip: gpu_texture_t = import_envmap_mips_cpu[i];
-			sys_notify_on_next_frame(function (mip: gpu_texture_t) {
-				///if (!arm_direct3d12) // TODO: crashes after 50+ imports
-				iron_unload_image(mip);
-				///end
-			}, mip);
-		}
-	}
-	import_envmap_mips_cpu = [];
 	for (let i: i32 = 0; i < import_envmap_mips.length; ++i) {
 		import_envmap_get_radiance_mip(import_envmap_mips[i], i, import_envmap_radiance);
-		array_push(import_envmap_mips_cpu, gpu_create_texture_from_bytes(gpu_get_texture_pixels(import_envmap_mips[i]), import_envmap_mips[i].width, import_envmap_mips[i].height, tex_format_t.RGBA128));
 	}
 
 	// Irradiance
+	let radiance_pixels: buffer_t = gpu_get_texture_pixels(import_envmap_radiance);
 	scene_world._.irradiance = import_envmap_get_spherical_harmonics(radiance_pixels, import_envmap_radiance.width, import_envmap_radiance.height);
 
 	// World
 	scene_world.strength = 1.0;
-	scene_world.radiance_mipmaps = import_envmap_mips_cpu.length - 2;
+	scene_world.radiance_mipmaps = import_envmap_mips.length - 2;
 	scene_world._.envmap = image;
 	scene_world.envmap = path;
-	scene_world._.radiance = import_envmap_radiance_cpu;
-	scene_world._.radiance_mipmaps = import_envmap_mips_cpu;
+	scene_world._.radiance = import_envmap_radiance;
+	scene_world._.radiance_mipmaps = import_envmap_mips;
 	context_raw.saved_envmap = image;
 	if (context_raw.show_envmap_blur) {
 		scene_world._.envmap = scene_world._.radiance_mipmaps[0];
@@ -92,6 +70,11 @@ function import_envmap_get_radiance_mip(mip: gpu_texture_t, level: i32, radiance
 	gpu_set_index_buffer(const_data_screen_aligned_ib);
 	gpu_set_pipeline(import_envmap_pipeline);
 	import_envmap_params.x = 0.1 + level / 8;
+	///if (arm_macos || arm_ios)
+	import_envmap_params.y = 1024 * 2; // Prevent gpu hang
+	///else
+	import_envmap_params.y = 1024 * 16;
+	///end
 	gpu_set_float4(import_envmap_params_loc, import_envmap_params.x, import_envmap_params.y, import_envmap_params.z, import_envmap_params.w);
 	gpu_set_texture(import_envmap_radiance_loc, radiance);
 	gpu_draw();

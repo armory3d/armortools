@@ -1,7 +1,7 @@
 
 #[set(everything)]
 const constants: {
-	params: float4;
+	params: float4; // level, constants.params.y
 };
 
 #[set(everything)]
@@ -12,12 +12,6 @@ const radiance: tex2d;
 
 const PI: float = 3.14159265358979;
 const PI2: float = 6.28318530718;
-// #ifdef METAL
-// const samples: float = 1024 * 2; // Prevent gpu hang
-// #else
-// const samples: float = 1024 * 16;
-const samples: float = 16384;
-// #endif
 
 struct vert_in {
 	pos: float2;
@@ -69,9 +63,9 @@ fun prefilter_envmap_frag(input: vert_out): float4 {
 	var color: float4 = float4(0.0, 0.0, 0.0, 1.0);
 	var n: float3 = reverse_equirect(input.tex);
 
-	//for (var i: int = 0; i < int(samples); i += 1) {
+	//for (var i: int = 0; i < int(constants.params.y); i += 1) {
 	var i: int = 0;
-	while (i < int(samples)) {
+	while (i < int(constants.params.y)) {
 		var dir: float3 = normalize(lerp3(n, cos_weighted_hemisphere_direction(n, input.tex, float(i)), constants.params.x));
 		color.rgb = color.rgb + sample(radiance, sampler_linear, equirect(dir)).rgb;
 
@@ -79,7 +73,7 @@ fun prefilter_envmap_frag(input: vert_out): float4 {
 		i += 1;
 		//
 	}
-	color.rgb = color.rgb / samples;
+	color.rgb = color.rgb / constants.params.y;
 	// color.rgb = pow(color.rgb, float3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));
 	color.r = pow(color.r, 1.0 / 2.2);
 	color.g = pow(color.g, 1.0 / 2.2);

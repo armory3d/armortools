@@ -1356,17 +1356,6 @@ buffer_t *gpu_get_texture_pixels(gpu_texture_t *image) {
 
 	uint8_t *b = (uint8_t *)image->buffer->buffer;
 	gpu_get_render_target_pixels(image, b);
-
-	// Release staging texture immediately to save memory
-	#ifdef IRON_DIRECT3D12
-	image->impl.readback->lpVtbl->Release(image->impl.readback);
-	image->impl.readback = NULL;
-	#elif defined(IRON_METAL)
-	// id<MTLTexture> readback = (__bridge_transfer id<MTLTexture>)image->impl._readback;
-	// readback = nil;
-	// image->impl._readback = NULL;
-	#endif
-
 	return image->buffer;
 }
 
