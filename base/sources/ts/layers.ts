@@ -128,9 +128,7 @@ function layers_make_temp_img() {
 
 	if (layers_temp_image != null && (layers_temp_image.width != l.texpaint.width || layers_temp_image.height != l.texpaint.height || layers_temp_image.format != l.texpaint.format)) {
 		let _temptex0: render_target_t = map_get(render_path_render_targets, "temptex0");
-		sys_notify_on_next_frame(function (_temptex0: render_target_t) {
-			render_target_unload(_temptex0);
-		}, _temptex0);
+		render_target_unload(_temptex0);
 		map_delete(render_path_render_targets, "temptex0");
 		layers_temp_image = null;
 	}
