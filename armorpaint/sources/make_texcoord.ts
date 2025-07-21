@@ -77,7 +77,7 @@ function make_texcoord_run(kong: node_shader_t) {
 		node_shader_add_constant(kong, "brush_scale: float", "_brush_scale");
 		node_shader_write_attrib_frag(kong, "var tri_weight: float3 = input.wnormal * input.wnormal;"); // n * n
 		node_shader_write_attrib_frag(kong, "var tri_max: float = max(tri_weight.x, max(tri_weight.y, tri_weight.z));");
-		node_shader_write_attrib_frag(kong, "tri_weight = max(tri_weight - tri_max * 0.75, 0.0);");
+		node_shader_write_attrib_frag(kong, "tri_weight = max3(tri_weight - tri_max * 0.75, 0.0);");
 		node_shader_write_attrib_frag(kong, "var tex_coord_blend: float3 = tri_weight * (1.0 / (tri_weight.x + tri_weight.y + tri_weight.z));");
 		node_shader_write_attrib_frag(kong, "var tex_coord: float2 = input.wposition.yz * constants.brush_scale * 0.5;");
 		node_shader_write_attrib_frag(kong, "var tex_coord1: float2 = input.wposition.xz * constants.brush_scale * 0.5;");
