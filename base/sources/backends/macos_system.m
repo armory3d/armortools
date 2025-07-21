@@ -1052,7 +1052,7 @@ double iron_frequency(void) {
 	return (double)info.denom / (double)info.numer / 1e-9;
 }
 
-iron_ticks_t iron_timestamp(void) {
+uint64_t iron_timestamp(void) {
 	return mach_absolute_time();
 }
 

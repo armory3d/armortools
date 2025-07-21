@@ -1422,18 +1422,17 @@ double iron_frequency(void) {
 
 static struct timeval start;
 
-iron_ticks_t iron_timestamp(void) {
+uint64_t iron_timestamp(void) {
 	struct timeval now;
 	gettimeofday(&now, NULL);
 	now.tv_sec -= start.tv_sec;
 	now.tv_usec -= start.tv_usec;
-	return (iron_ticks_t)now.tv_sec * 1000000 + (iron_ticks_t)now.tv_usec;
+	return (uint64_t)now.tv_sec * 1000000 + (uint64_t)now.tv_usec;
 }
 
 void iron_init(const char *name, int width, int height, iron_window_options_t *win) {
-	iron_linux_initHIDGamepads();
-
 	gettimeofday(&start, NULL);
+	iron_linux_initHIDGamepads();
 	iron_x11_init();
 	iron_display_init();
 	iron_set_app_name(name);

@@ -1058,10 +1058,10 @@ double iron_frequency() {
 	return 1000000.0;
 }
 
-iron_ticks_t iron_timestamp() {
+uint64_t iron_timestamp() {
 	struct timeval now;
 	gettimeofday(&now, NULL);
-	return (iron_ticks_t)(now.tv_sec - start_sec) * 1000000 + (iron_ticks_t)(now.tv_usec);
+	return (uint64_t)(now.tv_sec - start_sec) * 1000000 + (uint64_t)(now.tv_usec);
 }
 
 double iron_time() {

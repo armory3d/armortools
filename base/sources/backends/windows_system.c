@@ -1587,7 +1587,7 @@ double iron_frequency() {
 	return (double)frequency.QuadPart;
 }
 
-iron_ticks_t iron_timestamp(void) {
+uint64_t iron_timestamp(void) {
 	LARGE_INTEGER stamp;
 	QueryPerformanceCounter(&stamp);
 	return stamp.QuadPart - startCount.QuadPart;

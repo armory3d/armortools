@@ -86,10 +86,8 @@ void iron_load_url(const char *url);
 const char *iron_system_id(void);
 const char *iron_language(void);
 
-typedef uint64_t iron_ticks_t;
-
 double iron_frequency(void);
-iron_ticks_t iron_timestamp(void);
+uint64_t iron_timestamp(void);
 int iron_cpu_cores(void);
 int iron_hardware_threads(void);
 double iron_time(void);

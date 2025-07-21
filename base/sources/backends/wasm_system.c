@@ -98,8 +98,8 @@ double iron_frequency(void) {
 	return 1000.0;
 }
 
-iron_ticks_t iron_timestamp(void) {
-	return (iron_ticks_t)(js_time());
+uint64_t iron_timestamp(void) {
+	return (uint64_t)(js_time());
 }
 
 double iron_time(void) {
