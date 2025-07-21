@@ -121,7 +121,7 @@ struct iron_x11_procs {
 	int (*XQueryPointer)(Display *, Window, Window *, Window *, int *, int *, int *, int *, unsigned int *);
 	Colormap (*XCreateColormap)(Display *, Window, Visual *, int);
 	Window (*XCreateWindow)(Display *display, Window parent, int x, int y, unsigned int width, unsigned int height, unsigned int border_width, int depth,
-	                        unsigned int class, Visual *visual, unsigned long valuemask, XSetWindowAttributes *attributes);
+							unsigned int class, Visual *visual, unsigned long valuemask, XSetWindowAttributes *attributes);
 	int (*XMoveWindow)(Display *, Window, int, int);
 	int (*XResizeWindow)(Display *, Window, unsigned int, unsigned int);
 	int (*XDestroyWindow)(Display *, Window);
@@ -135,6 +135,7 @@ struct iron_x11_procs {
 	int (*XMapWindow)(Display *, Window);
 	int (*XUnmapWindow)(Display *, Window);
 	int (*XSetWMProtocols)(Display *, Window, Atom *, int);
+	int (*XAllocColor)(Display *, Colormap, XColor *);
 
 	XDeviceInfo *(*XListInputDevices)(Display *, int *);
 	void (*XFreeDeviceList)(XDeviceInfo *);

@@ -363,10 +363,10 @@ void iron_window_set_title(const char *_title) {
 	const char *title = _title == NULL ? "" : _title;
 	struct iron_x11_window *window = &x11_ctx.windows[0];
 	xlib.XChangeProperty(x11_ctx.display, window->window, x11_ctx.atoms.NET_WM_NAME, x11_ctx.atoms.UTF8_STRING, 8, PropModeReplace, (unsigned char *)title,
-	                     strlen(title));
+						 strlen(title));
 
 	xlib.XChangeProperty(x11_ctx.display, window->window, x11_ctx.atoms.NET_WM_ICON_NAME, x11_ctx.atoms.UTF8_STRING, 8, PropModeReplace, (unsigned char *)title,
-	                     strlen(title));
+						 strlen(title));
 
 	xlib.XFlush(x11_ctx.display);
 }
@@ -379,15 +379,23 @@ void iron_window_create(iron_window_options_t *win) {
 	Visual *visual = NULL;
 	XSetWindowAttributes set_window_attribs = {0};
 
+	XColor color;
+	Colormap colormap = DefaultColormap(x11_ctx.display, DefaultScreen(x11_ctx.display));
+	color.red = (32 * 65535) / 255;
+	color.green = (32 * 65535) / 255;
+	color.blue = (32 * 65535) / 255;
+	xlib.XAllocColor(x11_ctx.display, colormap, &color);
+	set_window_attribs.background_pixel = color.pixel;
+
 	set_window_attribs.border_pixel = 0;
 	set_window_attribs.event_mask =
-	    KeyPressMask | KeyReleaseMask | ExposureMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask | StructureNotifyMask | FocusChangeMask;
+		KeyPressMask | KeyReleaseMask | ExposureMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask | StructureNotifyMask | FocusChangeMask;
 	int screen = DefaultScreen(x11_ctx.display);
 	visual = DefaultVisual(x11_ctx.display, screen);
 	int depth = DefaultDepth(x11_ctx.display, screen);
 	set_window_attribs.colormap = xlib.XCreateColormap(x11_ctx.display, RootWindow(x11_ctx.display, screen), visual, AllocNone);
 	window->window = xlib.XCreateWindow(x11_ctx.display, RootWindow(x11_ctx.display, DefaultScreen(x11_ctx.display)), 0, 0, win->width, win->height, 0, depth,
-	                                    InputOutput, visual, CWBorderPixel | CWColormap | CWEventMask, &set_window_attribs);
+										InputOutput, visual, CWBackPixel | CWBorderPixel | CWColormap | CWEventMask, &set_window_attribs);
 
 	static char nameClass[256];
 	static const char *nameClassAddendum = "_IronApplication";
@@ -504,7 +512,7 @@ bool iron_x11_init() {
 #define LOAD_LIB(name)                                                                                                                                         \
 	{                                                                                                                                                          \
 		load_lib(&x11_ctx.libs.name, #name);                                                                                                                   \
-                                                                                                                                                               \
+																																							   \
 		if (x11_ctx.libs.name == NULL) {                                                                                                                       \
 			iron_error("Failed to load lib%s.so", #name);                                                                                  \
 			return false;                                                                                                                                      \
@@ -570,6 +578,7 @@ bool iron_x11_init() {
 	LOAD_FUN(X11, XUnmapWindow)
 	LOAD_FUN(X11, XSetWMProtocols)
 	LOAD_FUN(X11, XPeekEvent)
+	LOAD_FUN(X11, XAllocColor)
 
 	LOAD_FUN(Xi, XListInputDevices)
 	LOAD_FUN(Xi, XFreeDeviceList)
@@ -600,44 +609,44 @@ bool iron_x11_init() {
 
 	// this should be kept in sync with the x11_atoms struct
 	static char *atom_names[] = {
-	    "XdndAware",
-	    "XdndDrop",
-	    "XdndEnter",
-	    "text/uri-list",
-	    "XdndStatus",
-	    "XdndActionCopy",
-	    "XdndSelection",
-	    "CLIPBOARD",
-	    "UTF8_STRING",
-	    "XSEL_DATA",
-	    "TARGETS",
-	    "MULTIPLE",
-	    "text/plain;charset=utf-8",
-	    "WM_DELETE_WINDOW",
-	    "_MOTIF_WM_HINTS",
-	    "_NET_WM_NAME",
-	    "_NET_WM_ICON_NAME",
-	    "_NET_WM_STATE",
-	    "_NET_WM_STATE_FULLSCREEN",
-	    XI_MOUSE,
-	    XI_TABLET,
-	    XI_KEYBOARD,
-	    XI_TOUCHSCREEN,
-	    XI_TOUCHPAD,
-	    XI_BUTTONBOX,
-	    XI_BARCODE,
-	    XI_TRACKBALL,
-	    XI_QUADRATURE,
-	    XI_ID_MODULE,
-	    XI_ONE_KNOB,
-	    XI_NINE_KNOB,
-	    XI_KNOB_BOX,
-	    XI_SPACEBALL,
-	    XI_DATAGLOVE,
-	    XI_EYETRACKER,
-	    XI_CURSORKEYS,
-	    XI_FOOTMOUSE,
-	    XI_JOYSTICK,
+		"XdndAware",
+		"XdndDrop",
+		"XdndEnter",
+		"text/uri-list",
+		"XdndStatus",
+		"XdndActionCopy",
+		"XdndSelection",
+		"CLIPBOARD",
+		"UTF8_STRING",
+		"XSEL_DATA",
+		"TARGETS",
+		"MULTIPLE",
+		"text/plain;charset=utf-8",
+		"WM_DELETE_WINDOW",
+		"_MOTIF_WM_HINTS",
+		"_NET_WM_NAME",
+		"_NET_WM_ICON_NAME",
+		"_NET_WM_STATE",
+		"_NET_WM_STATE_FULLSCREEN",
+		XI_MOUSE,
+		XI_TABLET,
+		XI_KEYBOARD,
+		XI_TOUCHSCREEN,
+		XI_TOUCHPAD,
+		XI_BUTTONBOX,
+		XI_BARCODE,
+		XI_TRACKBALL,
+		XI_QUADRATURE,
+		XI_ID_MODULE,
+		XI_ONE_KNOB,
+		XI_NINE_KNOB,
+		XI_KNOB_BOX,
+		XI_SPACEBALL,
+		XI_DATAGLOVE,
+		XI_EYETRACKER,
+		XI_CURSORKEYS,
+		XI_FOOTMOUSE,
+		XI_JOYSTICK,
 	};
 
 	assert((sizeof atom_names / sizeof atom_names[0]) == (sizeof(struct iron_x11_atoms) / sizeof(Atom)));
@@ -733,7 +742,7 @@ void iron_vulkan_get_instance_extensions(const char **names, int *index) {
 
 VkBool32 iron_vulkan_get_physical_device_presentation_support(VkPhysicalDevice physicalDevice, uint32_t queueFamilyIndex) {
 	return vkGetPhysicalDeviceXlibPresentationSupportKHR(physicalDevice, queueFamilyIndex, x11_ctx.display,
-	                                                     DefaultVisual(x11_ctx.display, DefaultScreen(x11_ctx.display))->visualid);
+														 DefaultVisual(x11_ctx.display, DefaultScreen(x11_ctx.display))->visualid);
 }
 VkResult iron_vulkan_create_surface(VkInstance instance, VkSurfaceKHR *surface) {
 	VkXlibSurfaceCreateInfoKHR info = {0};
@@ -1221,7 +1230,7 @@ static bool _handle_messages() {
 			}
 			else if (event.xclient.message_type == x11_ctx.atoms.XdndDrop) {
 				xlib.XConvertSelection(x11_ctx.display, x11_ctx.atoms.XdndSelection, x11_ctx.atoms.XdndTextUriList, x11_ctx.atoms.XdndSelection, window,
-				                       event.xclient.data.l[2]);
+									   event.xclient.data.l[2]);
 			}
 			else if (event.xclient.data.l[0] == x11_ctx.atoms.WM_DELETE_WINDOW) {
 				if (iron_internal_call_close_callback()) {
@@ -1236,7 +1245,7 @@ static bool _handle_messages() {
 				unsigned long ressize, restail;
 				int resbits;
 				xlib.XGetWindowProperty(x11_ctx.display, window, x11_ctx.atoms.XSEL_DATA, 0, LONG_MAX / 4, False, AnyPropertyType, &x11_ctx.atoms.UTF8_STRING,
-				                        &resbits, &ressize, &restail, (unsigned char **)&result);
+										&resbits, &ressize, &restail, (unsigned char **)&result);
 				iron_internal_paste_callback(result);
 				xlib.XFree(result);
 			}
@@ -1247,7 +1256,7 @@ static bool _handle_messages() {
 				unsigned long bytesAfter = 1;
 				unsigned char *data = 0;
 				xlib.XGetWindowProperty(x11_ctx.display, event.xselection.requestor, event.xselection.property, 0, LONG_MAX, False, event.xselection.target,
-				                        &type, &format, &numItems, &bytesAfter, &data);
+										&type, &format, &numItems, &bytesAfter, &data);
 				size_t pos = 0;
 				size_t len = 0;
 				while (pos < numItems) {
@@ -1276,7 +1285,7 @@ static bool _handle_messages() {
 				send.xselection.time = event.xselectionrequest.time;
 				Atom available[] = {x11_ctx.atoms.TARGETS, x11_ctx.atoms.MULTIPLE, x11_ctx.atoms.TEXT_PLAIN, x11_ctx.atoms.UTF8_STRING};
 				xlib.XChangeProperty(x11_ctx.display, send.xselection.requestor, send.xselection.property, XA_ATOM, 32, PropModeReplace,
-				                     (unsigned char *)&available[0], 4);
+									 (unsigned char *)&available[0], 4);
 				xlib.XSendEvent(x11_ctx.display, send.xselection.requestor, True, 0, &send);
 			}
 			if (event.xselectionrequest.target == x11_ctx.atoms.TEXT_PLAIN || event.xselectionrequest.target == x11_ctx.atoms.UTF8_STRING) {
@@ -1288,7 +1297,7 @@ static bool _handle_messages() {
 				send.xselection.property = event.xselectionrequest.property;
 				send.xselection.time = event.xselectionrequest.time;
 				xlib.XChangeProperty(x11_ctx.display, send.xselection.requestor, send.xselection.property, send.xselection.target, 8, PropModeReplace,
-				                     (const unsigned char *)clipboardString, strlen(clipboardString));
+									 (const unsigned char *)clipboardString, strlen(clipboardString));
 				xlib.XSendEvent(x11_ctx.display, send.xselection.requestor, True, 0, &send);
 			}
 			break;
