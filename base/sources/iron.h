@@ -1112,50 +1112,47 @@ gpu_texture_t *gpu_create_texture_from_bytes(buffer_t *data, i32 width, i32 heig
 gpu_texture_t *gpu_create_texture_from_encoded_bytes(buffer_t *data, string_t *format) {
 	gpu_texture_t *texture = (gpu_texture_t *)malloc(sizeof(gpu_texture_t));
 	texture->buffer = NULL;
-
-	unsigned char *content_data = (unsigned char *)data->buffer;
-	int content_length = (int)data->length;
-	unsigned char *image_data;
-	gpu_texture_format_t image_format;
-	int image_width;
-	int image_height;
+	unsigned char *texture_data;
+	gpu_texture_format_t texture_format;
+	int width;
+	int height;
 
 	if (ends_with(format, "k")) {
-		image_width = iron_read_s32le(content_data);
-		image_height = iron_read_s32le(content_data + 4);
+		width = iron_read_s32le(data->buffer);
+		height = iron_read_s32le(data->buffer + 4);
 		char fourcc[5];
-		fourcc[0] = content_data[8];
-		fourcc[1] = content_data[9];
-		fourcc[2] = content_data[10];
-		fourcc[3] = content_data[11];
+		fourcc[0] = data->buffer[8];
+		fourcc[1] = data->buffer[9];
+		fourcc[2] = data->buffer[10];
+		fourcc[3] = data->buffer[11];
 		fourcc[4] = 0;
-		int compressed_size = content_length - 12;
+		int compressed_size = data->length - 12;
 		if (strcmp(fourcc, "LZ4 ") == 0) {
-			int output_size = image_width * image_height * 4;
-			image_data = (unsigned char *)malloc(output_size);
-			LZ4_decompress_safe((char *)content_data + 12, (char *)image_data, compressed_size, output_size);
-			image_format = GPU_TEXTURE_FORMAT_RGBA32;
+			int output_size = width * height * 4;
+			texture_data = (unsigned char *)malloc(output_size);
+			LZ4_decompress_safe((char *)data->buffer + 12, (char *)texture_data, compressed_size, output_size);
+			texture_format = GPU_TEXTURE_FORMAT_RGBA32;
 		}
 		else if (strcmp(fourcc, "LZ4F") == 0) {
-			int output_size = image_width * image_height * 16;
-			image_data = (unsigned char *)malloc(output_size);
-			LZ4_decompress_safe((char *)content_data + 12, (char *)image_data, compressed_size, output_size);
-			image_format = GPU_TEXTURE_FORMAT_RGBA128;
+			int output_size = width * height * 16;
+			texture_data = (unsigned char *)malloc(output_size);
+			LZ4_decompress_safe((char *)data->buffer + 12, (char *)texture_data, compressed_size, output_size);
+			texture_format = GPU_TEXTURE_FORMAT_RGBA128;
 		}
 	}
 	else if (ends_with(format, "hdr")) {
 		int comp;
-		image_data = (unsigned char *)stbi_loadf_from_memory(content_data, content_length, &image_width, &image_height, &comp, 4);
-		image_format = GPU_TEXTURE_FORMAT_RGBA128;
+		texture_data = (unsigned char *)stbi_loadf_from_memory(data->buffer, data->length, &width, &height, &comp, 4);
+		texture_format = GPU_TEXTURE_FORMAT_RGBA128;
 	}
 	else { // jpg, png, ..
 		int comp;
-		image_data = stbi_load_from_memory(content_data, content_length, &image_width, &image_height, &comp, 4);
-		image_format = GPU_TEXTURE_FORMAT_RGBA32;
+		texture_data = stbi_load_from_memory(data->buffer, data->length, &width, &height, &comp, 4);
+		texture_format = GPU_TEXTURE_FORMAT_RGBA32;
 	}
 
-	gpu_texture_init_from_bytes(texture, image_data, image_width, image_height, image_format);
-	free(image_data);
+	gpu_texture_init_from_bytes(texture, texture_data, width, height, texture_format);
+	free(texture_data);
 
 	return texture;
 }
