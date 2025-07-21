@@ -60,6 +60,9 @@ static bool framebuffer_acquired = false;
 static VkBuffer readback_buffer;
 static int readback_buffer_size = 0;
 static VkDeviceMemory readback_mem;
+static VkBuffer upload_buffer;
+static int upload_buffer_size = 0;
+static VkDeviceMemory upload_mem;
 
 void iron_vulkan_get_instance_extensions(const char **extensions, int *index);
 VkBool32 iron_vulkan_get_physical_device_presentation_support(VkPhysicalDevice physical_device, uint32_t queue_family_index);
@@ -1636,32 +1639,42 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 		vk_format = VK_FORMAT_R8G8B8A8_UNORM;
 	}
 
-	VkDeviceSize buffer_size = width * height * gpu_texture_format_size(format);
-	VkBufferCreateInfo buffer_info = {
-		.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-		.size = buffer_size,
-		.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-		.sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-	};
-	VkBuffer staging_buffer;
-	vkCreateBuffer(device, &buffer_info, NULL, &staging_buffer);
+	VkDeviceSize _upload_size = width * height * gpu_texture_format_size(format);
 
-	VkMemoryRequirements mem_reqs;
-	vkGetBufferMemoryRequirements(device, staging_buffer, &mem_reqs);
-	VkMemoryAllocateInfo mem_alloc = {
-		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-		.allocationSize = mem_reqs.size,
-		.memoryTypeIndex = 0,
-	};
-	memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &mem_alloc.memoryTypeIndex);
-	VkDeviceMemory staging_memory;
-	vkAllocateMemory(device, &mem_alloc, NULL, &staging_memory);
-	vkBindBufferMemory(device, staging_buffer, staging_memory, 0);
+	int new_upload_buffer_size = _upload_size;
+	if (new_upload_buffer_size < (1024 * 1024 * 4)) {
+		new_upload_buffer_size = (1024 * 1024 * 4);
+	}
+	if (upload_buffer_size < new_upload_buffer_size) {
+		if (upload_buffer_size > 0) {
+			vkFreeMemory(device, upload_mem, NULL);
+			vkDestroyBuffer(device, upload_buffer, NULL);
+		}
+		upload_buffer_size = new_upload_buffer_size;
+		VkBufferCreateInfo buffer_info = {
+			.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+			.size = upload_buffer_size,
+			.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			.sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+		};
+		vkCreateBuffer(device, &buffer_info, NULL, &upload_buffer);
+
+		VkMemoryRequirements mem_reqs;
+		vkGetBufferMemoryRequirements(device, upload_buffer, &mem_reqs);
+		VkMemoryAllocateInfo mem_alloc = {
+			.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+			.allocationSize = mem_reqs.size,
+			.memoryTypeIndex = 0,
+		};
+		memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &mem_alloc.memoryTypeIndex);
+		vkAllocateMemory(device, &mem_alloc, NULL, &upload_mem);
+		vkBindBufferMemory(device, upload_buffer, upload_mem, 0);
+	}
 
 	void *mapped_data;
-	vkMapMemory(device, staging_memory, 0, buffer_size, 0, &mapped_data);
-	memcpy(mapped_data, data, buffer_size);
-	vkUnmapMemory(device, staging_memory);
+	vkMapMemory(device, upload_mem, 0, _upload_size, 0, &mapped_data);
+	memcpy(mapped_data, data, _upload_size);
+	vkUnmapMemory(device, upload_mem);
 
 	VkImageCreateInfo image_info = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
@@ -1679,8 +1692,13 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 		.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
 	};
 	vkCreateImage(device, &image_info, NULL, &texture->impl.image);
+	VkMemoryRequirements mem_reqs;
 	vkGetImageMemoryRequirements(device, texture->impl.image, &mem_reqs);
-	mem_alloc.allocationSize = mem_reqs.size;
+	VkMemoryAllocateInfo mem_alloc = {
+		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+		.allocationSize = mem_reqs.size,
+		.memoryTypeIndex = 0,
+	};
 	memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &mem_alloc.memoryTypeIndex);
 	vkAllocateMemory(device, &mem_alloc, NULL, &texture->impl.mem);
 	vkBindImageMemory(device, texture->impl.image, texture->impl.mem, 0);
@@ -1715,7 +1733,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 		.imageOffset = {0, 0, 0},
 		.imageExtent = {(uint32_t)width, (uint32_t)height, 1},
 	};
-	vkCmdCopyBufferToImage(command_buffer, staging_buffer, texture->impl.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copy_region);
+	vkCmdCopyBufferToImage(command_buffer, upload_buffer, texture->impl.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copy_region);
 
 	barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 	barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
@@ -1746,10 +1764,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 		vkCmdBeginRendering(command_buffer, &current_rendering_info);
 	}
 
-	//// TODO
-	gpu_execute_and_wait();
-	vkDestroyBuffer(device, staging_buffer, NULL);
-	vkFreeMemory(device, staging_memory, NULL);
+	gpu_execute_and_wait(); ////
 }
 
 void gpu_texture_destroy(gpu_texture_t *target) {
