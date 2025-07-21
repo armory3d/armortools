@@ -84,21 +84,6 @@ static VkFormat convert_image_format(gpu_texture_format_t format) {
 	}
 }
 
-static int format_size(gpu_texture_format_t format) {
-	switch (format) {
-	case GPU_TEXTURE_FORMAT_RGBA128:
-		return 16;
-	case GPU_TEXTURE_FORMAT_RGBA64:
-		return 8;
-	case GPU_TEXTURE_FORMAT_R16:
-		return 2;
-	case GPU_TEXTURE_FORMAT_R8:
-		return 1;
-	default:
-		return 4;
-	}
-}
-
 static VkCullModeFlagBits convert_cull_mode(gpu_cull_mode_t cull_mode) {
 	switch (cull_mode) {
 	case GPU_CULL_MODE_CLOCKWISE:
@@ -1304,7 +1289,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 		vkCmdEndRendering(command_buffer);
 	}
 
-	int buffer_size = render_target->width * render_target->height * format_size(render_target->format);
+	int buffer_size = render_target->width * render_target->height * gpu_texture_format_size(render_target->format);
 	int new_readback_buffer_size = buffer_size;
 	if (new_readback_buffer_size < (2048 * 2048 * 4)) {
 		new_readback_buffer_size = (2048 * 2048 * 4);
@@ -1651,7 +1636,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 		vk_format = VK_FORMAT_R8G8B8A8_UNORM;
 	}
 
-	VkDeviceSize buffer_size = width * height * format_size(format);
+	VkDeviceSize buffer_size = width * height * gpu_texture_format_size(format);
 	VkBufferCreateInfo buffer_info = {
 		.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
 		.size = buffer_size,

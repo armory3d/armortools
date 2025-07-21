@@ -105,21 +105,6 @@ static DXGI_FORMAT convert_format(gpu_texture_format_t format) {
 	}
 }
 
-static int format_size(DXGI_FORMAT format) {
-	switch (format) {
-	case DXGI_FORMAT_R32G32B32A32_FLOAT:
-		return 16;
-	case DXGI_FORMAT_R16G16B16A16_FLOAT:
-		return 8;
-	case DXGI_FORMAT_R16_FLOAT:
-		return 2;
-	case DXGI_FORMAT_R8_UNORM:
-		return 1;
-	default:
-		return 4;
-	}
-}
-
 static D3D12_RESOURCE_STATES convert_texture_state(gpu_texture_state_t state) {
 	switch (state) {
 	case GPU_TEXTURE_STATE_SHADER_RESOURCE:
@@ -591,8 +576,8 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	D3D12_RESOURCE_DESC desc;
 	render_target->impl.image->lpVtbl->GetDesc(render_target->impl.image, &desc);
 	DXGI_FORMAT dxgi_format = desc.Format;
-	int _format_size = format_size(dxgi_format);
-	int row_pitch = render_target->width * _format_size;
+	int format_size = gpu_texture_format_size(render_target->format);
+	int row_pitch = render_target->width * format_size;
 	int align = row_pitch % D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
 	if (align != 0) {
 		row_pitch = row_pitch + (D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - align);
@@ -678,7 +663,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	// Read buffer
 	void *p;
 	readback_buffer->lpVtbl->Map(readback_buffer, 0, NULL, &p);
-	memcpy(data, p, render_target->width * render_target->height * _format_size);
+	memcpy(data, p, render_target->width * render_target->height * format_size);
 	readback_buffer->lpVtbl->Unmap(readback_buffer, 0, NULL);
 }
 
@@ -815,8 +800,8 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	texture->format = format;
 	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
 	texture->buffer = NULL;
-	DXGI_FORMAT d3d_format = convert_format(format);
-	int _format_size = format_size(d3d_format);
+	DXGI_FORMAT dxgi_format = convert_format(format);
+	int format_size = gpu_texture_format_size(format);
 
 	D3D12_HEAP_PROPERTIES heap_properties = {
 		.Type = D3D12_HEAP_TYPE_DEFAULT,
@@ -833,7 +818,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 		.Height = texture->height,
 		.DepthOrArraySize = 1,
 		.MipLevels = 1,
-		.Format = d3d_format,
+		.Format = dxgi_format,
 		.SampleDesc.Count = 1,
 		.SampleDesc.Quality = 0,
 		.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN,
@@ -887,7 +872,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	BYTE *pixel;
 	upload_buffer->lpVtbl->Map(upload_buffer, 0, NULL, (void **)&pixel);
 	for (int y = 0; y < texture->height; ++y) {
-		memcpy(&pixel[y * stride], &((uint8_t *)data)[y * texture->width * _format_size], texture->width * _format_size);
+		memcpy(&pixel[y * stride], &((uint8_t *)data)[y * texture->width * format_size], texture->width * format_size);
 	}
 	upload_buffer->lpVtbl->Unmap(upload_buffer, 0, NULL);
 
@@ -902,7 +887,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {
 		.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D,
 		.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
-		.Format = d3d_format,
+		.Format = dxgi_format,
 		.Texture2D.MipLevels = 1,
 		.Texture2D.MostDetailedMip = 0,
 		.Texture2D.ResourceMinLODClamp = 0.0f,

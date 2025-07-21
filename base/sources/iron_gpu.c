@@ -253,3 +253,43 @@ void gpu_create_framebuffers(int depth_buffer_bits) {
 		framebuffer_depth.width = framebuffer_depth.height = 0;
 	}
 }
+
+int gpu_vertex_data_size(gpu_vertex_data_t data) {
+	switch (data) {
+	case GPU_VERTEX_DATA_F32_1X:
+		return 1 * 4;
+	case GPU_VERTEX_DATA_F32_2X:
+		return 2 * 4;
+	case GPU_VERTEX_DATA_F32_3X:
+		return 3 * 4;
+	case GPU_VERTEX_DATA_F32_4X:
+		return 4 * 4;
+	case GPU_VERTEX_DATA_I16_2X_NORM:
+		return 2 * 2;
+	case GPU_VERTEX_DATA_I16_4X_NORM:
+		return 4 * 2;
+	}
+}
+
+int gpu_vertex_struct_size(gpu_vertex_structure_t *s) {
+	int size = 0;
+	for (int i = 0; i < s->size; ++i) {
+		size += gpu_vertex_data_size(s->elements[i].data);
+	}
+	return size;
+}
+
+int gpu_texture_format_size(gpu_texture_format_t format) {
+	switch (format) {
+	case GPU_TEXTURE_FORMAT_RGBA128:
+		return 16;
+	case GPU_TEXTURE_FORMAT_RGBA64:
+		return 8;
+	case GPU_TEXTURE_FORMAT_R16:
+		return 2;
+	case GPU_TEXTURE_FORMAT_R8:
+		return 1;
+	default:
+		return 4;
+	}
+}

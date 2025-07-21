@@ -217,30 +217,9 @@ void gpu_raytrace_set_pipeline(gpu_raytrace_pipeline_t *pipeline);
 void gpu_raytrace_set_target(gpu_texture_t *output);
 void gpu_raytrace_dispatch_rays();
 
-static inline int gpu_vertex_data_size(gpu_vertex_data_t data) {
-	switch (data) {
-	case GPU_VERTEX_DATA_F32_1X:
-		return 1 * 4;
-	case GPU_VERTEX_DATA_F32_2X:
-		return 2 * 4;
-	case GPU_VERTEX_DATA_F32_3X:
-		return 3 * 4;
-	case GPU_VERTEX_DATA_F32_4X:
-		return 4 * 4;
-	case GPU_VERTEX_DATA_I16_2X_NORM:
-		return 2 * 2;
-	case GPU_VERTEX_DATA_I16_4X_NORM:
-		return 4 * 2;
-	}
-}
-
-static inline int gpu_vertex_struct_size(gpu_vertex_structure_t *s) {
-	int size = 0;
-	for (int i = 0; i < s->size; ++i) {
-		size += gpu_vertex_data_size(s->elements[i].data);
-	}
-	return size;
-}
+int gpu_vertex_data_size(gpu_vertex_data_t data);
+int gpu_vertex_struct_size(gpu_vertex_structure_t *s);
+int gpu_texture_format_size(gpu_texture_format_t format);
 
 extern bool gpu_transpose_mat;
 extern bool gpu_in_use;

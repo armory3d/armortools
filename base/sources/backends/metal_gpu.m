@@ -93,21 +93,6 @@ static MTLPixelFormat convert_texture_format(gpu_texture_format_t format) {
 	}
 }
 
-static int format_byte_size(gpu_texture_format_t format) {
-	switch (format) {
-	case GPU_TEXTURE_FORMAT_RGBA128:
-		return 16;
-	case GPU_TEXTURE_FORMAT_RGBA64:
-		return 8;
-	case GPU_TEXTURE_FORMAT_R16:
-		return 2;
-	case GPU_TEXTURE_FORMAT_R8:
-		return 1;
-	default:
-		return 4;
-	}
-}
-
 void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_texture_format_t format, int framebuffer_index) {
 	target->width = width;
 	target->height = height;
@@ -359,7 +344,7 @@ void gpu_set_index_buffer(gpu_buffer_t *buffer) {
 void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	gpu_execute_and_wait();
 
-	int buffer_size = render_target->width * render_target->height * format_byte_size(render_target->format);
+	int buffer_size = render_target->width * render_target->height * gpu_texture_format_size(render_target->format);
 	int new_readback_buffer_size = buffer_size;
 	if (new_readback_buffer_size < (2048 * 2048 * 4)) {
 		new_readback_buffer_size = (2048 * 2048 * 4);
@@ -385,7 +370,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	                      sourceSize:MTLSizeMake(render_target->width, render_target->height, 1)
 	                        toBuffer:(__bridge id<MTLBuffer>)readback_buffer
 	               destinationOffset:0
-              destinationBytesPerRow:render_target->width * format_byte_size(render_target->format)
+              destinationBytesPerRow:render_target->width * gpu_texture_format_size(render_target->format)
             destinationBytesPerImage:0];
 	[command_encoder endEncoding];
 	[command_buffer commit];
@@ -393,7 +378,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 
 	// Read buffer
 	id<MTLBuffer> buffer = (__bridge id<MTLBuffer>)readback_buffer;
-    memcpy(data, [buffer contents], render_target->width * render_target->height * format_byte_size(render_target->format));
+    memcpy(data, [buffer contents], render_target->width * render_target->height * gpu_texture_format_size(render_target->format));
 }
 
 void gpu_set_constant_buffer(gpu_buffer_t *buffer, int offset, size_t size) {
@@ -568,8 +553,8 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	       				  mipmapLevel:0
 	             				slice:0
 	         				withBytes:data
-	       				  bytesPerRow:width * format_byte_size(format)
-				    	bytesPerImage:width * format_byte_size(format) * height];
+	       				  bytesPerRow:width * gpu_texture_format_size(format)
+				    	bytesPerImage:width * gpu_texture_format_size(format) * height];
 }
 
 void gpu_texture_destroy(gpu_texture_t *target) {
