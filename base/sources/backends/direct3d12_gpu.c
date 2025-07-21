@@ -174,8 +174,9 @@ void gpu_destroy() {
 void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height, gpu_texture_format_t format, int framebuffer_index) {
 	render_target->width = width;
 	render_target->height = height;
-	render_target->impl.readback = NULL;
+	render_target->format = format;
 	render_target->state = (framebuffer_index >= 0) ? GPU_TEXTURE_STATE_PRESENT : GPU_TEXTURE_STATE_SHADER_RESOURCE;
+	render_target->impl.readback = NULL;
 
 	DXGI_FORMAT dxgi_format = convert_format(format);
 
