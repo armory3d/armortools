@@ -38,6 +38,10 @@ static ID3D12Fence *fence;
 static HANDLE fence_event;
 static UINT64 frame_fence_values[GPU_FRAMEBUFFER_COUNT] = {0, 0};
 static bool resized = false;
+static struct ID3D12Resource *readback_buffer = NULL;
+static int readback_buffer_size = 0;
+static struct ID3D12Resource *upload_buffer = NULL;
+static int upload_buffer_size = 0;
 
 static D3D12_BLEND convert_blend_factor(gpu_blending_factor_t factor) {
 	switch (factor) {
@@ -160,6 +164,12 @@ void gpu_destroy() {
 	if (framebuffer_depth.width > 0) {
 		gpu_texture_destroy(&framebuffer_depth);
 	}
+	if (readback_buffer != NULL) {
+		readback_buffer->lpVtbl->Release(readback_buffer);
+	}
+	if (upload_buffer != NULL) {
+		upload_buffer->lpVtbl->Release(upload_buffer);
+	}
 	command_list->lpVtbl->Release(command_list);
 	command_allocator->lpVtbl->Release(command_allocator);
 	window_swapchain->lpVtbl->Release(window_swapchain);
@@ -176,7 +186,7 @@ void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height
 	render_target->height = height;
 	render_target->format = format;
 	render_target->state = (framebuffer_index >= 0) ? GPU_TEXTURE_STATE_PRESENT : GPU_TEXTURE_STATE_SHADER_RESOURCE;
-	render_target->impl.readback = NULL;
+	render_target->buffer = NULL;
 
 	DXGI_FORMAT dxgi_format = convert_format(format);
 
@@ -588,8 +598,15 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 		row_pitch = row_pitch + (D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - align);
 	}
 
-	// Create readback buffer
-	if (render_target->impl.readback == NULL) {
+	int new_readback_buffer_size = row_pitch * render_target->height;
+	if (new_readback_buffer_size < (2048 * 2048 * 4)) {
+		new_readback_buffer_size = (2048 * 2048 * 4);
+	}
+	if (readback_buffer_size < new_readback_buffer_size) {
+		readback_buffer_size = new_readback_buffer_size;
+		if (readback_buffer != NULL) {
+			readback_buffer->lpVtbl->Release(readback_buffer);
+		}
 		D3D12_HEAP_PROPERTIES heap_properties = {
 			.Type = D3D12_HEAP_TYPE_READBACK,
 			.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
@@ -601,7 +618,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 		D3D12_RESOURCE_DESC resource_desc = {
 			.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER,
 			.Alignment = 0,
-			.Width = row_pitch * render_target->height,
+			.Width = readback_buffer_size,
 			.Height = 1,
 			.DepthOrArraySize = 1,
 			.MipLevels = 1,
@@ -613,7 +630,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 		};
 
 		device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc, D3D12_RESOURCE_STATE_COMMON, NULL,
-												&IID_ID3D12Resource, &render_target->impl.readback);
+												&IID_ID3D12Resource, &readback_buffer);
 	}
 
 	// Copy render target to readback buffer
@@ -634,7 +651,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	};
 
 	D3D12_TEXTURE_COPY_LOCATION dest = {
-		.pResource = render_target->impl.readback,
+		.pResource = readback_buffer,
 		.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT,
 		.PlacedFootprint.Offset = 0,
 		.PlacedFootprint.Footprint.Format = dxgi_format,
@@ -656,13 +673,13 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	};
 	command_list->lpVtbl->ResourceBarrier(command_list, 1, &barrier);
 
-	gpu_execute_and_wait();
+	gpu_execute_and_wait(); ////
 
 	// Read buffer
 	void *p;
-	render_target->impl.readback->lpVtbl->Map(render_target->impl.readback, 0, NULL, &p);
+	readback_buffer->lpVtbl->Map(readback_buffer, 0, NULL, &p);
 	memcpy(data, p, render_target->width * render_target->height * _format_size);
-	render_target->impl.readback->lpVtbl->Unmap(render_target->impl.readback, 0, NULL);
+	readback_buffer->lpVtbl->Unmap(readback_buffer, 0, NULL);
 }
 
 void gpu_set_texture(int unit, gpu_texture_t *texture) {
@@ -793,11 +810,11 @@ void gpu_shader_destroy(gpu_shader_t *shader) {
 }
 
 void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, gpu_texture_format_t format) {
-	memset(&texture->impl, 0, sizeof(texture->impl));
 	texture->width = width;
 	texture->height = height;
 	texture->format = format;
 	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
+	texture->buffer = NULL;
 	DXGI_FORMAT d3d_format = convert_format(format);
 	int _format_size = format_size(d3d_format);
 
@@ -826,44 +843,53 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc,
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, NULL, &IID_ID3D12Resource, &texture->impl.image);
 
-	D3D12_HEAP_PROPERTIES heap_properties_upload = {
-		.Type = D3D12_HEAP_TYPE_UPLOAD,
-		.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
-		.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN,
-		.CreationNodeMask = 1,
-		.VisibleNodeMask = 1,
-	};
-
 	D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint;
-	UINT64 upload_buffer_size;
-	device->lpVtbl->GetCopyableFootprints(device, &resource_desc, 0, 1, 0, &footprint, NULL, NULL, &upload_buffer_size);
+	UINT64 _upload_size;
+	device->lpVtbl->GetCopyableFootprints(device, &resource_desc, 0, 1, 0, &footprint, NULL, NULL, &_upload_size);
 
-	D3D12_RESOURCE_DESC resource_desc_upload = {
-		.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER,
-		.Alignment = 0,
-		.Width = upload_buffer_size,
-		.Height = 1,
-		.DepthOrArraySize = 1,
-		.MipLevels = 1,
-		.Format = DXGI_FORMAT_UNKNOWN,
-		.SampleDesc.Count = 1,
-		.SampleDesc.Quality = 0,
-		.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR,
-		.Flags = D3D12_RESOURCE_FLAG_NONE,
-	};
+	int new_upload_buffer_size = _upload_size;
+	if (new_upload_buffer_size < (1024 * 1024 * 4)) {
+		new_upload_buffer_size = (1024 * 1024 * 4);
+	}
+	if (upload_buffer_size < new_upload_buffer_size) {
+		upload_buffer_size = new_upload_buffer_size;
+		if (upload_buffer != NULL) {
+			upload_buffer->lpVtbl->Release(upload_buffer);
+		}
 
-	struct ID3D12Resource *upload_image;
-	device->lpVtbl->CreateCommittedResource(device, &heap_properties_upload, D3D12_HEAP_FLAG_NONE, &resource_desc_upload,
-		D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &IID_ID3D12Resource, &upload_image);
+		D3D12_HEAP_PROPERTIES heap_properties_upload = {
+			.Type = D3D12_HEAP_TYPE_UPLOAD,
+			.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
+			.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN,
+			.CreationNodeMask = 1,
+			.VisibleNodeMask = 1,
+		};
 
-	int stride = (int)ceilf(upload_buffer_size / (float)(height * D3D12_TEXTURE_DATA_PITCH_ALIGNMENT)) * D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
+		D3D12_RESOURCE_DESC resource_desc_upload = {
+			.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER,
+			.Alignment = 0,
+			.Width = _upload_size,
+			.Height = 1,
+			.DepthOrArraySize = 1,
+			.MipLevels = 1,
+			.Format = DXGI_FORMAT_UNKNOWN,
+			.SampleDesc.Count = 1,
+			.SampleDesc.Quality = 0,
+			.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR,
+			.Flags = D3D12_RESOURCE_FLAG_NONE,
+		};
 
+		device->lpVtbl->CreateCommittedResource(device, &heap_properties_upload, D3D12_HEAP_FLAG_NONE, &resource_desc_upload,
+			D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &IID_ID3D12Resource, &upload_buffer);
+	}
+
+	int stride = (int)ceilf(_upload_size / (float)(height * D3D12_TEXTURE_DATA_PITCH_ALIGNMENT)) * D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
 	BYTE *pixel;
-	upload_image->lpVtbl->Map(upload_image, 0, NULL, (void **)&pixel);
+	upload_buffer->lpVtbl->Map(upload_buffer, 0, NULL, (void **)&pixel);
 	for (int y = 0; y < texture->height; ++y) {
 		memcpy(&pixel[y * stride], &((uint8_t *)data)[y * texture->width * _format_size], texture->width * _format_size);
 	}
-	upload_image->lpVtbl->Unmap(upload_image, 0, NULL);
+	upload_buffer->lpVtbl->Unmap(upload_buffer, 0, NULL);
 
 	D3D12_DESCRIPTOR_HEAP_DESC descriptor_heap_desc = {
 		.NumDescriptors = 1,
@@ -897,7 +923,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	command_list->lpVtbl->ResourceBarrier(command_list, 1, &barrier);
 
 	D3D12_TEXTURE_COPY_LOCATION source = {
-		.pResource = upload_image,
+		.pResource = upload_buffer,
 		.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT,
 		.PlacedFootprint = footprint,
 	};
@@ -914,9 +940,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 	command_list->lpVtbl->ResourceBarrier(command_list, 1, &barrier);
 
-	// TODO:
-	gpu_execute_and_wait();
-	upload_image->lpVtbl->Release(upload_image);
+	gpu_execute_and_wait(); ////
 }
 
 void gpu_texture_destroy(gpu_texture_t *render_target) {
@@ -928,9 +952,6 @@ void gpu_texture_destroy(gpu_texture_t *render_target) {
 	}
 	if (render_target->impl.srv_descriptor_heap != NULL) {
 		render_target->impl.srv_descriptor_heap->lpVtbl->Release(render_target->impl.srv_descriptor_heap);
-	}
-	if (render_target->impl.readback != NULL) {
-		render_target->impl.readback->lpVtbl->Release(render_target->impl.readback);
 	}
 }
 

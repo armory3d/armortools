@@ -45,14 +45,12 @@ typedef struct {
 } gpu_pipeline_impl_t;
 
 typedef struct {
-	void *shader;
 	uint8_t *data;
 	int length;
 } gpu_shader_impl_t;
 
 typedef struct {
 	struct ID3D12Resource *image;
-	struct ID3D12Resource *readback;
 	struct ID3D12DescriptorHeap *srv_descriptor_heap;
 	struct ID3D12DescriptorHeap *rtv_descriptor_heap;
 } gpu_texture_impl_t;
