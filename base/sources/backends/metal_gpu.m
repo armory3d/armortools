@@ -532,7 +532,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	texture->height = height;
 	texture->format = format;
 	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
-	target->buffer = NULL;
+	texture->buffer = NULL;
 
 	MTLPixelFormat mtlformat = convert_texture_format(format);
 	if (mtlformat == MTLPixelFormatBGRA8Unorm) {
