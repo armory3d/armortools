@@ -57,6 +57,9 @@ static VkSurfaceFormatKHR window_format;
 static VkSwapchainKHR window_swapchain;
 static uint32_t framebuffer_count;
 static bool framebuffer_acquired = false;
+static VkBuffer readback_buffer;
+static int readback_buffer_size = 0;
+static VkDeviceMemory readback_mem;
 
 void iron_vulkan_get_instance_extensions(const char **extensions, int *index);
 VkBool32 iron_vulkan_get_physical_device_presentation_support(VkPhysicalDevice physical_device, uint32_t queue_family_index);
@@ -388,7 +391,6 @@ void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_t
 	target->format = format;
 	target->state = (framebuffer_index >= 0) ? GPU_TEXTURE_STATE_PRESENT : GPU_TEXTURE_STATE_SHADER_RESOURCE;
 	target->buffer = NULL;
-	target->impl.readback_created = false;
 
 	if (framebuffer_index >= 0) {
 		return;
@@ -1019,6 +1021,10 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 }
 
 void gpu_destroy() {
+	if (readback_buffer_size > 0) {
+		vkFreeMemory(device, readback_mem, NULL);
+		vkDestroyBuffer(device, readback_buffer, NULL);
+	}
 	vkFreeCommandBuffers(device, cmd_pool, 1, &command_buffer);
 	vkDestroyFence(device, fence, NULL);
 	VkSwapchainKHR swapchain = cleanup_swapchain();
@@ -1298,20 +1304,29 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 		vkCmdEndRendering(command_buffer);
 	}
 
-	int format_bytes_size = format_size(render_target->format);
+	int buffer_size = render_target->width * render_target->height * format_size(render_target->format);
+	int new_readback_buffer_size = buffer_size;
+	if (new_readback_buffer_size < (2048 * 2048 * 4)) {
+		new_readback_buffer_size = (2048 * 2048 * 4);
+	}
+	if (readback_buffer_size < new_readback_buffer_size) {
+		if (readback_buffer_size > 0 ) {
+			vkFreeMemory(device, readback_mem, NULL);
+			vkDestroyBuffer(device, readback_buffer, NULL);
+		}
+		readback_buffer_size = new_readback_buffer_size;
 
-	if (!render_target->impl.readback_created) {
 		VkBufferCreateInfo buf_info = {
 			.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
 			.pNext = NULL,
-			.size = render_target->width * render_target->height * format_bytes_size,
+			.size = readback_buffer_size,
 			.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT,
 			.flags = 0,
 		};
-		vkCreateBuffer(device, &buf_info, NULL, &render_target->impl.readback);
+		vkCreateBuffer(device, &buf_info, NULL, &readback_buffer);
 
 		VkMemoryRequirements mem_reqs = {0};
-		vkGetBufferMemoryRequirements(device, render_target->impl.readback, &mem_reqs);
+		vkGetBufferMemoryRequirements(device, readback_buffer, &mem_reqs);
 
 		VkMemoryAllocateInfo mem_alloc;
 		memset(&mem_alloc, 0, sizeof(VkMemoryAllocateInfo));
@@ -1321,10 +1336,8 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 		mem_alloc.memoryTypeIndex = 0;
 		mem_alloc.allocationSize = mem_reqs.size;
 		memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &mem_alloc.memoryTypeIndex);
-		vkAllocateMemory(device, &mem_alloc, NULL, &render_target->impl.readback_mem);
-		vkBindBufferMemory(device, render_target->impl.readback, render_target->impl.readback_mem, 0);
-
-		render_target->impl.readback_created = true;
+		vkAllocateMemory(device, &mem_alloc, NULL, &readback_mem);
+		vkBindBufferMemory(device, readback_buffer, readback_mem, 0);
 	}
 
 	set_image_layout(render_target->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
@@ -1343,7 +1356,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	region.imageExtent.width = (uint32_t)render_target->width;
 	region.imageExtent.height = (uint32_t)render_target->height;
 	region.imageExtent.depth = 1;
-	vkCmdCopyImageToBuffer(command_buffer, render_target->impl.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, render_target->impl.readback, 1, &region);
+	vkCmdCopyImageToBuffer(command_buffer, render_target->impl.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, readback_buffer, 1, &region);
 
 	set_image_layout(render_target->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
@@ -1351,9 +1364,9 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 
 	// Read buffer
 	void *p;
-	vkMapMemory(device, render_target->impl.readback_mem, 0, VK_WHOLE_SIZE, 0, (void **)&p);
-	memcpy(data, p, render_target->width * render_target->height * format_bytes_size);
-	vkUnmapMemory(device, render_target->impl.readback_mem);
+	vkMapMemory(device, readback_mem, 0, VK_WHOLE_SIZE, 0, (void **)&p);
+	memcpy(data, p, buffer_size);
+	vkUnmapMemory(device, readback_mem);
 
 	if (gpu_in_use) {
 		vkCmdBeginRendering(command_buffer, &current_rendering_info);
@@ -1617,12 +1630,8 @@ void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
 
 void gpu_shader_init(gpu_shader_t *shader, const void *source, size_t length, gpu_shader_type_t type) {
 	shader->impl.length = (int)length;
-	shader->impl.id = 0;
-	shader->impl.source = (char *)malloc(length + 1);
-	for (int i = 0; i < length; ++i) {
-		shader->impl.source[i] = ((char *)source)[i];
-	}
-	shader->impl.source[length] = 0;
+	shader->impl.source = (char *)malloc(length);
+	memcpy(shader->impl.source, source, length);
 }
 
 void gpu_shader_destroy(gpu_shader_t *shader) {

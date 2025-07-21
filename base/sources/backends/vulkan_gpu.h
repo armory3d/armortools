@@ -12,7 +12,6 @@ typedef struct gpu_pipeline_impl {
 } gpu_pipeline_impl_t;
 
 typedef struct {
-	unsigned id;
 	char *source;
 	int length;
 } gpu_shader_impl_t;
@@ -21,9 +20,6 @@ typedef struct {
 	VkImage image;
 	VkDeviceMemory mem;
 	VkImageView view;
-	VkBuffer readback;
-	VkDeviceMemory readback_mem;
-	bool readback_created;
 } gpu_texture_impl_t;
 
 typedef struct {
