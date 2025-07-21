@@ -359,7 +359,7 @@ void gpu_set_index_buffer(gpu_buffer_t *buffer) {
 void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	gpu_execute_and_wait();
 
-	NSUInteger buffer_size = render_target->width * render_target->height * format_byte_size(render_target->format);
+	int buffer_size = render_target->width * render_target->height * format_byte_size(render_target->format);
 	int new_readback_buffer_size = buffer_size;
 	if (new_readback_buffer_size < (2048 * 2048 * 4)) {
 		new_readback_buffer_size = (2048 * 2048 * 4);
