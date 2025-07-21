@@ -228,7 +228,7 @@ declare function gpu_create_pipeline(): any;
 declare function gpu_delete_pipeline(pipeline: any): void;
 declare function gpu_pipeline_compile(pipeline: any): void;
 declare function gpu_set_pipeline(pipeline: any): void;
-declare function iron_load_image(file: string): any;
+declare function iron_load_texture(file: string): any;
 declare function iron_delete_texture(image: gpu_texture_t): void;
 declare function iron_load_sound(file: string): any;
 declare function iron_a1_sound_destroy(sound: any): void;

@@ -115,7 +115,7 @@ function data_get_image(file: string): gpu_texture_t {
 		return cached;
 	}
 
-	let image_: any = iron_load_image(data_resolve_path(file));
+	let image_: any = iron_load_texture(data_resolve_path(file));
 	if (image_ == null) {
 		return null;
 	}
