@@ -587,10 +587,9 @@ void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structur
 	buffer->impl.metal_buffer = (__bridge_retained void *)buf;
 }
 
-float *gpu_vertex_buffer_lock(gpu_buffer_t *buf) {
+void *gpu_vertex_buffer_lock(gpu_buffer_t *buf) {
 	id<MTLBuffer> buffer = (__bridge id<MTLBuffer>)buf->impl.metal_buffer;
-	float *floats = (float *)[buffer contents];
-	return floats;
+	return [buffer contents];
 }
 
 void gpu_vertex_buffer_unlock(gpu_buffer_t *buf) {

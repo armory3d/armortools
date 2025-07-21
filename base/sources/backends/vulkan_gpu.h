@@ -30,7 +30,6 @@ typedef struct {
 	VkBuffer buf;
 	VkDeviceMemory mem;
 	VkMemoryAllocateInfo mem_alloc;
-	float *data;
 } gpu_buffer_impl_t;
 
 typedef struct {

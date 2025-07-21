@@ -927,9 +927,8 @@ void gpu_delete_index_buffer(gpu_buffer_t *buffer) {
 }
 
 u32_array_t *gpu_lock_index_buffer(gpu_buffer_t *buffer) {
-	void *vertices = gpu_index_buffer_lock(buffer);
 	u32_array_t *ar = (u32_array_t *)malloc(sizeof(u32_array_t));
-	ar->buffer = vertices;
+	ar->buffer = gpu_index_buffer_lock(buffer);
 	ar->length = buffer->count;
 	return ar;
 }
@@ -946,9 +945,8 @@ void gpu_delete_vertex_buffer(gpu_buffer_t *buffer) {
 }
 
 buffer_t *gpu_lock_vertex_buffer(gpu_buffer_t *buffer) {
-	float *vertices = gpu_vertex_buffer_lock(buffer);
 	buffer_t *b = (buffer_t *)malloc(sizeof(buffer_t));
-	b->buffer = vertices;
+	b->buffer = gpu_vertex_buffer_lock(buffer);
 	b->length = buffer->count * buffer->stride;
 	return b;
 }

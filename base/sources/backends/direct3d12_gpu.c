@@ -999,14 +999,14 @@ void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structur
 	buffer->impl.vertex_buffer_view.StrideInBytes = buffer->stride;
 }
 
-float *gpu_vertex_buffer_lock(gpu_buffer_t *buffer) {
+void *gpu_vertex_buffer_lock(gpu_buffer_t *buffer) {
 	D3D12_RANGE range = {
 		.Begin = 0,
 		.End = buffer->count * buffer->stride,
 	};
 	void *p;
 	buffer->impl.buffer->lpVtbl->Map(buffer->impl.buffer, 0, &range, &p);
-	return (float *)p;
+	return p;
 }
 
 void gpu_vertex_buffer_unlock(gpu_buffer_t *buffer) {

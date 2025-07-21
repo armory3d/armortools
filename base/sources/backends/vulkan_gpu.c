@@ -1818,9 +1818,10 @@ void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structur
 	vkBindBufferMemory(device, buffer->impl.buf, buffer->impl.mem, 0);
 }
 
-float *gpu_vertex_buffer_lock(gpu_buffer_t *buffer) {
-	vkMapMemory(device, buffer->impl.mem, 0, buffer->count * buffer->stride, 0, (void **)&buffer->impl.data);
-	return buffer->impl.data;
+void *gpu_vertex_buffer_lock(gpu_buffer_t *buffer) {
+	void *p;
+	vkMapMemory(device, buffer->impl.mem, 0, buffer->count * buffer->stride, 0, (void **)&p);
+	return p;
 }
 
 void gpu_vertex_buffer_unlock(gpu_buffer_t *buffer) {

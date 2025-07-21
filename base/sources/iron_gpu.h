@@ -176,7 +176,7 @@ void gpu_texture_destroy(gpu_texture_t *texture);
 void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format);
 void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height, gpu_texture_format_t format, int framebuffer_index);
 void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structure_t *structure);
-float *gpu_vertex_buffer_lock(gpu_buffer_t *buffer);
+void *gpu_vertex_buffer_lock(gpu_buffer_t *buffer);
 void gpu_vertex_buffer_unlock(gpu_buffer_t *buffer);
 void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size);
 void gpu_constant_buffer_destroy(gpu_buffer_t *buffer);
