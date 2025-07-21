@@ -15,7 +15,6 @@ typedef struct {
 typedef struct {
 	void *_tex;
 	void *data;
-	void *_readback;
 } gpu_texture_impl_t;
 
 typedef struct {

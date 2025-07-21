@@ -30,6 +30,7 @@ static gpu_texture_t *current_textures[GPU_MAX_TEXTURES] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
+static void *readback_buffer;
 
 static MTLBlendFactor convert_blending_factor(gpu_blending_factor_t factor) {
 	switch (factor) {
@@ -107,12 +108,11 @@ static int format_byte_size(gpu_texture_format_t format) {
 }
 
 void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_texture_format_t format, int framebuffer_index) {
-	memset(target, 0, sizeof(gpu_texture_t));
 	target->width = width;
 	target->height = height;
 	target->format = format;
 	target->state = GPU_TEXTURE_STATE_RENDER_TARGET;
-	target->impl._readback = NULL;
+	target->buffer = NULL;
 
 	if (framebuffer_index < 0) {
 		id<MTLDevice> device = getMetalDevice();
@@ -131,6 +131,8 @@ void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_t
 }
 
 void gpu_destroy(void) {
+	id<MTLTexture> readback = (__bridge_transfer id<MTLTexture>)readback_buffer;
+	readback = nil;
 }
 
 void gpu_resize_internal(int width, int height) {
@@ -356,44 +358,32 @@ void gpu_set_index_buffer(gpu_buffer_t *buffer) {
 void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	gpu_execute_and_wait();
 
-	// Create readback buffer
-	if (render_target->impl._readback == NULL) {
+	if (readback_buffer == NULL) {
 		id<MTLDevice> device = getMetalDevice();
-		MTLTextureDescriptor *descriptor = [MTLTextureDescriptor new];
-		descriptor.textureType = MTLTextureType2D;
-		descriptor.width = render_target->width;
-		descriptor.height = render_target->height;
-		descriptor.depth = 1;
-		descriptor.pixelFormat = [(__bridge id<MTLTexture>)render_target->impl._tex pixelFormat];
-		descriptor.arrayLength = 1;
-		descriptor.mipmapLevelCount = 1;
-		descriptor.usage = MTLTextureUsageUnknown;
-		descriptor.resourceOptions = MTLResourceStorageModeShared;
-		render_target->impl._readback = (__bridge_retained void *)[device newTextureWithDescriptor:descriptor];
+		NSUInteger buffer_size = render_target->width * render_target->height * format_byte_size(render_target->format);
+		readback_buffer = (__bridge_retained void *)[device newBufferWithLength:buffer_size options:MTLResourceStorageModeShared];
 	}
 
 	// Copy render target to readback buffer
 	id<MTLCommandQueue> queue = getMetalQueue();
-	id<MTLCommandBuffer> commandBuffer = [queue commandBuffer];
-	id<MTLBlitCommandEncoder> commandEncoder = [commandBuffer blitCommandEncoder];
-	[commandEncoder copyFromTexture:(__bridge id<MTLTexture>)render_target->impl._tex
-	                    sourceSlice:0
-	                    sourceLevel:0
-	                   sourceOrigin:MTLOriginMake(0, 0, 0)
-	                     sourceSize:MTLSizeMake(render_target->width, render_target->height, 1)
-	                      toTexture:(__bridge id<MTLTexture>)render_target->impl._readback
-	               destinationSlice:0
-	               destinationLevel:0
-	              destinationOrigin:MTLOriginMake(0, 0, 0)];
-	[commandEncoder endEncoding];
-	[commandBuffer commit];
-	[commandBuffer waitUntilCompleted];
+	id<MTLCommandBuffer> command_buffer = [queue commandBuffer];
+	id<MTLBlitCommandEncoder> command_encoder = [command_buffer blitCommandEncoder];
+	[command_encoder copyFromTexture:(__bridge id<MTLTexture>)render_target->impl._tex
+	                     sourceSlice:0
+	                     sourceLevel:0
+	                    sourceOrigin:MTLOriginMake(0, 0, 0)
+	                      sourceSize:MTLSizeMake(render_target->width, render_target->height, 1)
+	                        toBuffer:(__bridge id<MTLBuffer>)readback_buffer
+	               destinationOffset:0
+              destinationBytesPerRow:render_target->width * format_byte_size(render_target->format)
+            destinationBytesPerImage:0];
+	[command_encoder endEncoding];
+	[command_buffer commit];
+	[command_buffer waitUntilCompleted];
 
 	// Read buffer
-	id<MTLTexture> tex = (__bridge id<MTLTexture>)render_target->impl._readback;
-	int byte_size = format_byte_size(render_target->format);
-	MTLRegion region = MTLRegionMake2D(0, 0, render_target->width, render_target->height);
-	[tex getBytes:data bytesPerRow:byte_size * render_target->width fromRegion:region mipmapLevel:0];
+	id<MTLBuffer> buffer = (__bridge id<MTLBuffer>)readback_buffer;
+    memcpy(data, [buffer contents], render_target->width * render_target->height * format_byte_size(render_target->format));
 }
 
 void gpu_set_constant_buffer(gpu_buffer_t *buffer, int offset, size_t size) {
@@ -542,6 +532,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	texture->height = height;
 	texture->format = format;
 	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
+	target->buffer = NULL;
 
 	MTLPixelFormat mtlformat = convert_texture_format(format);
 	if (mtlformat == MTLPixelFormatBGRA8Unorm) {
@@ -575,10 +566,6 @@ void gpu_texture_destroy(gpu_texture_t *target) {
 	id<MTLTexture> tex = (__bridge_transfer id<MTLTexture>)target->impl._tex;
 	tex = nil;
 	target->impl._tex = NULL;
-
-	id<MTLTexture> readback = (__bridge_transfer id<MTLTexture>)target->impl._readback;
-	readback = nil;
-	target->impl._readback = NULL;
 }
 
 void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format) {
@@ -586,7 +573,6 @@ void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_te
 }
 
 void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structure_t *structure) {
-	memset(&buffer->impl, 0, sizeof(buffer->impl));
 	buffer->count = count;
 	for (int i = 0; i < structure->size; ++i) {
 		gpu_vertex_element_t element = structure->elements[i];
