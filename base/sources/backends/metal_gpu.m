@@ -31,6 +31,7 @@ static gpu_texture_t *current_textures[GPU_MAX_TEXTURES] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
 static void *readback_buffer;
+static int readback_buffer_size = 0;
 
 static MTLBlendFactor convert_blending_factor(gpu_blending_factor_t factor) {
 	switch (factor) {
@@ -358,9 +359,18 @@ void gpu_set_index_buffer(gpu_buffer_t *buffer) {
 void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	gpu_execute_and_wait();
 
-	if (readback_buffer == NULL) {
+	NSUInteger buffer_size = render_target->width * render_target->height * format_byte_size(render_target->format);
+	int new_readback_buffer_size = buffer_size;
+	if (new_readback_buffer_size < (2048 * 2048 * 4)) {
+		new_readback_buffer_size = (2048 * 2048 * 4);
+	}
+	if (readback_buffer_size < new_readback_buffer_size) {
+		readback_buffer_size = new_readback_buffer_size;
+		if (readback_buffer != NULL) {
+			id<MTLTexture> readback = (__bridge_transfer id<MTLTexture>)readback_buffer;
+			readback = nil;
+		}
 		id<MTLDevice> device = getMetalDevice();
-		NSUInteger buffer_size = render_target->width * render_target->height * format_byte_size(render_target->format);
 		readback_buffer = (__bridge_retained void *)[device newBufferWithLength:buffer_size options:MTLResourceStorageModeShared];
 	}
 
@@ -532,7 +542,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	texture->height = height;
 	texture->format = format;
 	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
-	target->buffer = NULL;
+	texture->buffer = NULL;
 
 	MTLPixelFormat mtlformat = convert_texture_format(format);
 	if (mtlformat == MTLPixelFormatBGRA8Unorm) {
