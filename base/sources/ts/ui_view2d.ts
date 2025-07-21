@@ -95,7 +95,7 @@ function ui_view2d_render() {
 	// Cache grid
 	if (ui_view2d_grid_redraw) {
 		if (ui_view2d_grid != null) {
-			iron_unload_image(ui_view2d_grid);
+			iron_delete_texture(ui_view2d_grid);
 		}
 		ui_view2d_grid = ui_nodes_draw_grid(ui_view2d_pan_scale);
 		ui_view2d_grid_redraw = false;

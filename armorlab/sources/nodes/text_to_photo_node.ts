@@ -280,7 +280,7 @@ function text_to_photo_node_vae_decoder(latents: f32_array_t, upscale: bool): gp
 			while (image.width < config_get_texture_res_x()) {
 				let last_image: gpu_texture_t = image;
 				image = upscale_node_esrgan(image);
-				iron_unload_image(last_image);
+				iron_delete_texture(last_image);
 			}
 			return image;
 		}

@@ -928,23 +928,15 @@ void iron_set_gamepad_button_callback(void (*callback)(int, int, float)) {
 	iron_gamepad_set_button_callback(_gamepad_button, NULL);
 }
 
-void iron_show_mouse(bool show) {
-	show ? iron_mouse_show() : iron_mouse_hide();
-}
-
-void iron_show_keyboard(bool show) {
-	show ? iron_keyboard_show() : iron_keyboard_hide();
+void gpu_delete_buffer(gpu_buffer_t *buffer) {
+	buffers_to_destroy[buffers_to_destroy_count] = buffer;
+	buffers_to_destroy_count++;
 }
 
 any gpu_create_index_buffer(i32 count) {
 	gpu_buffer_t *buffer = (gpu_buffer_t *)malloc(sizeof(gpu_buffer_t));
 	gpu_index_buffer_init(buffer, count);
 	return buffer;
-}
-
-void gpu_delete_index_buffer(gpu_buffer_t *buffer) {
-	buffers_to_destroy[buffers_to_destroy_count] = buffer;
-	buffers_to_destroy_count++;
 }
 
 u32_array_t *gpu_lock_index_buffer(gpu_buffer_t *buffer) {
@@ -958,11 +950,6 @@ any gpu_create_vertex_buffer(i32 count, gpu_vertex_structure_t *structure) {
 	gpu_buffer_t *buffer = (gpu_buffer_t *)malloc(sizeof(gpu_buffer_t));
 	gpu_vertex_buffer_init(buffer, count, structure);
 	return buffer;
-}
-
-void gpu_delete_vertex_buffer(gpu_buffer_t *buffer) {
-	buffers_to_destroy[buffers_to_destroy_count] = buffer;
-	buffers_to_destroy_count++;
 }
 
 buffer_t *gpu_lock_vertex_buffer(gpu_buffer_t *buffer) {
@@ -1206,7 +1193,7 @@ gpu_texture_t *iron_load_image(string_t *file) {
 	return texture;
 }
 
-void iron_unload_image(gpu_texture_t *texture) {
+void iron_delete_texture(gpu_texture_t *texture) {
 	textures_to_destroy[textures_to_destroy_count] = texture;
 	textures_to_destroy_count++;
 }

@@ -189,7 +189,7 @@ function data_delete_image(handle: string) {
 	if (image == null) {
 		return;
 	}
-	iron_unload_image(image);
+	iron_delete_texture(image);
 	map_delete(data_cached_images, handle);
 }
 
@@ -247,7 +247,7 @@ function data_delete_all() {
 	let cached_images_keys: string[] = map_keys(data_cached_images);
 	for (let i: i32 = 0; i < cached_images_keys.length; ++i) {
 		let c: gpu_texture_t = map_get(data_cached_images, cached_images_keys[i]);
-		iron_unload_image(c);
+		iron_delete_texture(c);
 	}
 	data_cached_images = map_create();
 

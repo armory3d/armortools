@@ -21,9 +21,9 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 			let baketex0: render_target_t = map_get(render_path_render_targets, "baketex0");
 			let baketex1: render_target_t = map_get(render_path_render_targets, "baketex1");
 			let baketex2: render_target_t = map_get(render_path_render_targets, "baketex2");
-			iron_unload_image(baketex0._image);
-			iron_unload_image(baketex1._image);
-			iron_unload_image(baketex2._image);
+			iron_delete_texture(baketex0._image);
+			iron_delete_texture(baketex1._image);
+			iron_delete_texture(baketex2._image);
 		}
 
 		{

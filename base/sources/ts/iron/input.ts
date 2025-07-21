@@ -110,12 +110,12 @@ function mouse_unlock() {
 }
 
 function mouse_hide() {
-	iron_show_mouse(false);
+	iron_mouse_hide();
 	mouse_hidden = true;
 }
 
 function mouse_show() {
-	iron_show_mouse(true);
+	iron_mouse_show();
 	mouse_hidden = false;
 }
 

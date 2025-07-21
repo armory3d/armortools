@@ -12,7 +12,7 @@ let util_uv_pipe_dilate: gpu_pipeline_t = null;
 
 function util_uv_cache_uv_map() {
 	if (util_uv_uvmap != null && (util_uv_uvmap.width != config_get_texture_res_x() || util_uv_uvmap.height != config_get_texture_res_y())) {
-		iron_unload_image(util_uv_uvmap);
+		iron_delete_texture(util_uv_uvmap);
 		util_uv_uvmap = null;
 		util_uv_uvmap_cached = false;
 	}
@@ -54,7 +54,7 @@ function util_uv_cache_uv_map() {
 
 function util_uv_cache_triangle_map() {
 	if (util_uv_trianglemap != null && (util_uv_trianglemap.width != config_get_texture_res_x() || util_uv_trianglemap.height != config_get_texture_res_y())) {
-		iron_unload_image(util_uv_trianglemap);
+		iron_delete_texture(util_uv_trianglemap);
 		util_uv_trianglemap = null;
 		util_uv_trianglemap_cached = false;
 	}
@@ -92,7 +92,7 @@ function util_uv_cache_triangle_map() {
 
 function util_uv_cache_dilate_map() {
 	if (util_uv_dilatemap != null && (util_uv_dilatemap.width != config_get_texture_res_x() || util_uv_dilatemap.height != config_get_texture_res_y())) {
-		iron_unload_image(util_uv_dilatemap);
+		iron_delete_texture(util_uv_dilatemap);
 		util_uv_dilatemap = null;
 		util_uv_dilatemap_cached = false;
 	}
@@ -181,7 +181,7 @@ function util_uv_cache_uv_island_map() {
 	}
 
 	if (util_uv_uvislandmap != null) {
-		iron_unload_image(util_uv_uvislandmap);
+		iron_delete_texture(util_uv_uvislandmap);
 	}
 	util_uv_uvislandmap = gpu_create_texture_from_bytes(bytes, w, h, tex_format_t.R8);
 	util_uv_uvislandmap_cached = true;

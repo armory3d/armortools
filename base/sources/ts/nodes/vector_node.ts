@@ -38,7 +38,7 @@ function vector_node_get_as_image(self: vector_node_t, from: i32): gpu_texture_t
 	// let y: f32 = logic_node_input_get(self.base.inputs[1]);
 	// let z: f32 = logic_node_input_get(self.base.inputs[2]);
 	if (self.image != null) {
-		iron_unload_image(self.image);
+		iron_delete_texture(self.image);
 	}
 	let b: buffer_t = buffer_create(16);
 	let n0: float_node_t = self.base.inputs[0].node;

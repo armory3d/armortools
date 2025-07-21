@@ -34,7 +34,7 @@ function color_node_get_as_image(self: color_node_t, from: i32): gpu_texture_t {
 		return logic_node_input_get_as_image(self.base.inputs[0]);
 	}
 	if (self.image != null) {
-		iron_unload_image(self.image);
+		iron_delete_texture(self.image);
 	}
 	let b: buffer_t = buffer_create(16);
 	buffer_set_f32(b, 0, self.value.x);

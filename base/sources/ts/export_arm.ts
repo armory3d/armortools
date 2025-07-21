@@ -190,9 +190,7 @@ function export_arm_run_project() {
 	export_arm_bgra_swap(mesh_icon_pixels);
 	///end
 
-	sys_notify_on_next_frame(function (mesh_icon: gpu_texture_t) {
-		iron_unload_image(mesh_icon);
-	});
+	iron_delete_texture(mesh_icon);
 
 	// raw.mesh_icons =
 	// 	///if (arm_metal || arm_vulkan)
@@ -495,12 +493,11 @@ function export_arm_pack_assets(raw: project_format_t, assets: asset_t[]) {
 			array_push(raw.packed_assets, pa);
 		}
 	}
-	sys_notify_on_next_frame(function (temp_images: gpu_texture_t[]) {
-		for (let i: i32 = 0; i < temp_images.length; ++i) {
-			let image: gpu_texture_t = temp_images[i];
-			iron_unload_image(image);
-		}
-	}, temp_images);
+
+	for (let i: i32 = 0; i < temp_images.length; ++i) {
+		let image: gpu_texture_t = temp_images[i];
+		iron_delete_texture(image);
+	}
 }
 
 function export_arm_run_swatches(path: string) {

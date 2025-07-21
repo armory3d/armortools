@@ -23,22 +23,22 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 }
 
 function layers_ext_on_resized() {
-	iron_unload_image(context_raw.brush_output_node_inst.texpaint);
+	iron_delete_texture(context_raw.brush_output_node_inst.texpaint);
 	let texpaint_rt: render_target_t = map_get(render_path_render_targets, "texpaint");
 	context_raw.brush_output_node_inst.texpaint = texpaint_rt._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
 
-	iron_unload_image(context_raw.brush_output_node_inst.texpaint_nor);
+	iron_delete_texture(context_raw.brush_output_node_inst.texpaint_nor);
 	let texpaint_nor_rt: render_target_t = map_get(render_path_render_targets, "texpaint_nor");
 	context_raw.brush_output_node_inst.texpaint_nor = texpaint_nor_rt._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
 
-	iron_unload_image(context_raw.brush_output_node_inst.texpaint_pack);
+	iron_delete_texture(context_raw.brush_output_node_inst.texpaint_pack);
 	let texpaint_pack_rt: render_target_t = map_get(render_path_render_targets, "texpaint_pack");
 	context_raw.brush_output_node_inst.texpaint_pack = texpaint_pack_rt._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y());
 
 	if (inpaint_node_image != null) {
-		iron_unload_image(inpaint_node_image);
+		iron_delete_texture(inpaint_node_image);
 		inpaint_node_image = null;
-		iron_unload_image(inpaint_node_mask);
+		iron_delete_texture(inpaint_node_mask);
 		inpaint_node_mask = null;
 		inpaint_node_init();
 	}
@@ -46,24 +46,24 @@ function layers_ext_on_resized() {
 	if (photo_to_pbr_node_images != null) {
 		for (let i: i32 = 0; i < photo_to_pbr_node_images.length; ++i) {
 			let image: gpu_texture_t = photo_to_pbr_node_images[i];
-			iron_unload_image(image);
+			iron_delete_texture(image);
 		}
 		photo_to_pbr_node_images = null;
 		photo_to_pbr_node_init();
 	}
 
 	if (tiling_node_image != null) {
-		iron_unload_image(tiling_node_image);
+		iron_delete_texture(tiling_node_image);
 		tiling_node_image = null;
 		tiling_node_init();
 	}
 
 	let texpaint_blend0_rt: render_target_t = map_get(render_path_render_targets, "texpaint_blend0");
-	iron_unload_image(texpaint_blend0_rt._image);
+	iron_delete_texture(texpaint_blend0_rt._image);
 	texpaint_blend0_rt._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 
 	let texpaint_blend1_rt: render_target_t = map_get(render_path_render_targets, "texpaint_blend1");
-	iron_unload_image(texpaint_blend1_rt._image);
+	iron_delete_texture(texpaint_blend1_rt._image);
 	texpaint_blend1_rt._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 
 	if (map_get(render_path_render_targets, "texpaint_node") != null) {

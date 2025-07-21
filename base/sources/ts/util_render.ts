@@ -157,7 +157,7 @@ function util_render_make_text_preview() {
 		tex_w = 512;
 	}
 	if (context_raw.text_tool_image != null && context_raw.text_tool_image.width < tex_w) {
-		iron_unload_image(context_raw.text_tool_image);
+		iron_delete_texture(context_raw.text_tool_image);
 		context_raw.text_tool_image = null;
 	}
 	if (context_raw.text_tool_image == null) {

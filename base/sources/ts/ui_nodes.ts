@@ -869,7 +869,7 @@ function ui_nodes_render() {
 
 	if (ui_nodes_grid_redraw) {
 		if (ui_nodes_grid != null) {
-			iron_unload_image(ui_nodes_grid);
+			iron_delete_texture(ui_nodes_grid);
 		}
 		let ui_nodes: ui_nodes_t = ui_nodes_get_nodes();
 		ui_nodes_grid = ui_nodes_draw_grid(ui_nodes.zoom);

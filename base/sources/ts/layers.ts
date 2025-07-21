@@ -76,18 +76,14 @@ function layers_resize() {
 
 	let blend0: render_target_t = map_get(rts, "texpaint_blend0");
 	let _texpaint_blend0: gpu_texture_t = blend0._image;
-	sys_notify_on_next_frame(function (_texpaint_blend0: gpu_texture_t) {
-		iron_unload_image(_texpaint_blend0);
-	}, _texpaint_blend0);
+	iron_delete_texture(_texpaint_blend0);
 	blend0.width = config_get_texture_res_x();
 	blend0.height = config_get_texture_res_y();
 	blend0._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 
 	let blend1: render_target_t = map_get(rts, "texpaint_blend1");
 	let _texpaint_blend1: gpu_texture_t = blend1._image;
-	sys_notify_on_next_frame(function (_texpaint_blend1: gpu_texture_t) {
-		iron_unload_image(_texpaint_blend1);
-	}, _texpaint_blend1);
+	iron_delete_texture(_texpaint_blend1);
 	blend1.width = config_get_texture_res_x();
 	blend1.height = config_get_texture_res_y();
 	blend1._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
@@ -97,9 +93,7 @@ function layers_resize() {
 	let blur: render_target_t = map_get(rts, "texpaint_blur");
 	if (blur != null) {
 		let _texpaint_blur: gpu_texture_t = blur._image;
-		sys_notify_on_next_frame(function (_texpaint_blur: gpu_texture_t) {
-			iron_unload_image(_texpaint_blur);
-		}, _texpaint_blur);
+		iron_delete_texture(_texpaint_blur);
 		let size_x: f32 = math_floor(config_get_texture_res_x() * 0.95);
 		let size_y: f32 = math_floor(config_get_texture_res_y() * 0.95);
 		blur.width = size_x;
@@ -161,9 +155,7 @@ function layers_make_temp_img() {
 function layers_make_temp_mask_img() {
 	if (pipes_temp_mask_image != null && (pipes_temp_mask_image.width != config_get_texture_res_x() || pipes_temp_mask_image.height != config_get_texture_res_y())) {
 		let _temp_mask_image: gpu_texture_t = pipes_temp_mask_image;
-		sys_notify_on_next_frame(function (_temp_mask_image: gpu_texture_t) {
-			iron_unload_image(_temp_mask_image);
-		}, _temp_mask_image);
+		iron_delete_texture(_temp_mask_image);
 		pipes_temp_mask_image = null;
 	}
 	if (pipes_temp_mask_image == null) {
@@ -183,15 +175,9 @@ function layers_make_export_img() {
 		let _expa: gpu_texture_t = layers_expa;
 		let _expb: gpu_texture_t = layers_expb;
 		let _expc: gpu_texture_t = layers_expc;
-		sys_notify_on_next_frame(function (_expa: gpu_texture_t) {
-			iron_unload_image(_expa);
-		}, _expa);
-		sys_notify_on_next_frame(function (_expb: gpu_texture_t) {
-			iron_unload_image(_expb);
-		}, _expb);
-		sys_notify_on_next_frame(function (_expc: gpu_texture_t) {
-			iron_unload_image(_expc);
-		}, _expc);
+		iron_delete_texture(_expa);
+		iron_delete_texture(_expb);
+		iron_delete_texture(_expc);
 		layers_expa = null;
 		layers_expb = null;
 		layers_expc = null;

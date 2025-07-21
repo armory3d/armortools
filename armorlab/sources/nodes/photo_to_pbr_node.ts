@@ -157,9 +157,7 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): g
 		draw_begin(photo_to_pbr_node_images[from]);
 		draw_image(temp2, x * photo_to_pbr_node_tile_w, y * photo_to_pbr_node_tile_w);
 		draw_end();
-		sys_notify_on_next_frame(function(temp2: gpu_texture_t) {
-			iron_unload_image(temp2);
-		}, temp2);
+		iron_delete_texture(temp2);
 	}
 
 	return photo_to_pbr_node_images[from];

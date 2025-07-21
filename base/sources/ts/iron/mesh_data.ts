@@ -342,11 +342,11 @@ function mesh_data_delete(raw: mesh_data_t) {
 	for (let i: i32 = 0; i < vertex_buffer_keys.length; ++i) {
 		let buf: gpu_buffer_t = map_get(raw._.vertex_buffer_map, vertex_buffer_keys[i]);
 		if (buf != null) {
-			gpu_delete_vertex_buffer(buf);
+			gpu_delete_buffer(buf);
 		}
 	}
 	for (let i: i32 = 0; i < raw._.index_buffers.length; ++i) {
 		let buf: gpu_buffer_t = raw._.index_buffers[i];
-		gpu_delete_index_buffer(buf);
+		gpu_delete_buffer(buf);
 	}
 }

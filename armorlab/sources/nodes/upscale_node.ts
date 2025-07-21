@@ -26,7 +26,7 @@ function upscale_node_get_as_image(self: upscale_node_t, from: i32): gpu_texture
 		while (upscale_node_image.width < config_get_texture_res_x()) {
 			let last_image: gpu_texture_t = upscale_node_image;
 			upscale_node_image = upscale_node_esrgan(upscale_node_image);
-			iron_unload_image(last_image);
+			iron_delete_texture(last_image);
 		}
 	}
 	return upscale_node_image;
@@ -47,7 +47,7 @@ function upscale_node_do_tile(source: gpu_texture_t): gpu_texture_t {
 	let size2w: i32 = math_floor(size1w * 2);
 	let size2h: i32 = math_floor(size1h * 2);
 	if (upscale_node_temp != null) {
-		iron_unload_image(upscale_node_temp);
+		iron_delete_texture(upscale_node_temp);
 	}
 	upscale_node_temp = gpu_create_render_target(size1w, size1h);
 	draw_begin(upscale_node_temp);
@@ -118,10 +118,10 @@ function upscale_node_esrgan(source: gpu_texture_t): gpu_texture_t {
 				draw_begin(result);
 				draw_sub_image(tile_result, x * tile_size2x, y * tile_size2x, 64, 64, tile_size2x, tile_size2x);
 				draw_end();
-				iron_unload_image(tile_result);
+				iron_delete_texture(tile_result);
 			}
 		}
-		iron_unload_image(tile_source);
+		iron_delete_texture(tile_source);
 	}
 	else {
 		result = upscale_node_do_tile(source); // Single tile

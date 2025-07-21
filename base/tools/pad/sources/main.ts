@@ -315,7 +315,7 @@ function draw_minimap() {
 	if (minimap_h != iron_window_height()) {
 		minimap_h = iron_window_height();
 		if (minimap != null) {
-			iron_unload_image(minimap);
+			iron_delete_texture(minimap);
 		}
 		minimap = gpu_create_render_target(minimap_w, minimap_h);
 	}
