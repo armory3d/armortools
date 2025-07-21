@@ -374,13 +374,18 @@ const char *iphonegetresourcepath();
 char mobile_title[1024];
 #endif
 
-static gpu_buffer_t constant_buffer;
-static gpu_texture_t *render_target;
+static gpu_buffer_t rt_constant_buffer;
 static gpu_raytrace_pipeline_t rt_pipeline;
-static gpu_raytrace_acceleration_structure_t accel;
-static bool raytrace_created = false;
-static bool raytrace_accel_created = false;
-const int constant_buffer_size = 24;
+static gpu_raytrace_acceleration_structure_t rt_accel;
+static bool rt_created = false;
+static bool rt_accel_created = false;
+const int rt_constant_buffer_size = 24;
+static gpu_texture_t *textures_to_destroy[128];
+static gpu_buffer_t *buffers_to_destroy[128];
+static gpu_pipeline_t *pipelines_to_destroy[32];
+static int textures_to_destroy_count = 0;
+static int buffers_to_destroy_count = 0;
+static int pipelines_to_destroy_count = 0;
 
 void _update(void *data) {
 	#ifdef IRON_WINDOWS
@@ -417,6 +422,22 @@ void _update(void *data) {
 	#ifdef WITH_AUDIO
 	iron_a2_update();
 	#endif
+
+	while (textures_to_destroy_count > 0) {
+		textures_to_destroy_count--;
+		gpu_texture_destroy(textures_to_destroy[textures_to_destroy_count]);
+		free(textures_to_destroy[textures_to_destroy_count]);
+	}
+	while (buffers_to_destroy_count > 0) {
+		buffers_to_destroy_count--;
+		gpu_buffer_destroy(buffers_to_destroy[buffers_to_destroy_count]);
+		free(buffers_to_destroy[buffers_to_destroy_count]);
+	}
+	while (pipelines_to_destroy_count > 0) {
+		pipelines_to_destroy_count--;
+		gpu_pipeline_destroy(pipelines_to_destroy[pipelines_to_destroy_count]);
+		free(pipelines_to_destroy[pipelines_to_destroy_count]);
+	}
 
 	iron_update();
 	gpu_present();
@@ -922,8 +943,8 @@ any gpu_create_index_buffer(i32 count) {
 }
 
 void gpu_delete_index_buffer(gpu_buffer_t *buffer) {
-	gpu_buffer_destroy(buffer);
-	free(buffer);
+	buffers_to_destroy[buffers_to_destroy_count] = buffer;
+	buffers_to_destroy_count++;
 }
 
 u32_array_t *gpu_lock_index_buffer(gpu_buffer_t *buffer) {
@@ -940,8 +961,8 @@ any gpu_create_vertex_buffer(i32 count, gpu_vertex_structure_t *structure) {
 }
 
 void gpu_delete_vertex_buffer(gpu_buffer_t *buffer) {
-	gpu_buffer_destroy(buffer);
-	free(buffer);
+	buffers_to_destroy[buffers_to_destroy_count] = buffer;
+	buffers_to_destroy_count++;
 }
 
 buffer_t *gpu_lock_vertex_buffer(gpu_buffer_t *buffer) {
@@ -1083,8 +1104,8 @@ gpu_pipeline_t *gpu_create_pipeline() {
 }
 
 void gpu_delete_pipeline(gpu_pipeline_t *pipeline) {
-	gpu_pipeline_destroy(pipeline);
-	free(pipeline);
+	pipelines_to_destroy[pipelines_to_destroy_count] = pipeline;
+	pipelines_to_destroy_count++;
 }
 
 bool _load_image(iron_file_reader_t *reader, const char *filename, unsigned char **output, int *width, int *height, gpu_texture_format_t *format) {
@@ -1185,11 +1206,9 @@ gpu_texture_t *iron_load_image(string_t *file) {
 	return texture;
 }
 
-void iron_unload_image(gpu_texture_t *image) {
-	if (image != NULL) {
-		gpu_texture_destroy(image);
-		// free(image);
-	}
+void iron_unload_image(gpu_texture_t *texture) {
+	textures_to_destroy[textures_to_destroy_count] = texture;
+	textures_to_destroy_count++;
 }
 
 #ifdef WITH_AUDIO
@@ -2060,29 +2079,29 @@ void iron_ml_unload() {
 #endif
 
 void iron_raytrace_init(buffer_t *shader) {
-	if (raytrace_created) {
-		gpu_constant_buffer_destroy(&constant_buffer);
+	if (rt_created) {
+		gpu_constant_buffer_destroy(&rt_constant_buffer);
 		gpu_raytrace_pipeline_destroy(&rt_pipeline);
 	}
-	raytrace_created = true;
-	gpu_constant_buffer_init(&constant_buffer, constant_buffer_size * 4);
-	gpu_raytrace_pipeline_init(&rt_pipeline, shader->buffer, (int)shader->length, &constant_buffer);
+	rt_created = true;
+	gpu_constant_buffer_init(&rt_constant_buffer, rt_constant_buffer_size * 4);
+	gpu_raytrace_pipeline_init(&rt_pipeline, shader->buffer, (int)shader->length, &rt_constant_buffer);
 }
 
 void iron_raytrace_as_init() {
-	if (raytrace_accel_created) {
-		gpu_raytrace_acceleration_structure_destroy(&accel);
+	if (rt_accel_created) {
+		gpu_raytrace_acceleration_structure_destroy(&rt_accel);
 	}
-	raytrace_accel_created = true;
-	gpu_raytrace_acceleration_structure_init(&accel);
+	rt_accel_created = true;
+	gpu_raytrace_acceleration_structure_init(&rt_accel);
 }
 
 void iron_raytrace_as_add(struct gpu_buffer *vb, gpu_buffer_t *ib, iron_matrix4x4_t transform) {
-	gpu_raytrace_acceleration_structure_add(&accel, vb, ib, transform);
+	gpu_raytrace_acceleration_structure_add(&rt_accel, vb, ib, transform);
 }
 
 void iron_raytrace_as_build(struct gpu_buffer *vb_full, gpu_buffer_t *ib_full) {
-	gpu_raytrace_acceleration_structure_build(&accel, vb_full, ib_full);
+	gpu_raytrace_acceleration_structure_build(&rt_accel, vb_full, ib_full);
 }
 
 void iron_raytrace_set_textures(gpu_texture_t *tex0, gpu_texture_t *tex1, gpu_texture_t *tex2, gpu_texture_t *texenv, gpu_texture_t *texsobol, gpu_texture_t *texscramble, gpu_texture_t *texrank) {
@@ -2091,14 +2110,14 @@ void iron_raytrace_set_textures(gpu_texture_t *tex0, gpu_texture_t *tex1, gpu_te
 
 void iron_raytrace_dispatch_rays(gpu_texture_t *render_target, buffer_t *buffer) {
 	float *cb = (float *)buffer->buffer;
-	gpu_constant_buffer_lock(&constant_buffer, 0, constant_buffer.count);
-	for (int i = 0; i < constant_buffer_size; ++i) {
-		float *floats = (float *)(&constant_buffer.data[i * 4]);
+	gpu_constant_buffer_lock(&rt_constant_buffer, 0, rt_constant_buffer.count);
+	for (int i = 0; i < rt_constant_buffer_size; ++i) {
+		float *floats = (float *)(&rt_constant_buffer.data[i * 4]);
 		floats[0] = cb[i];
 	}
-	gpu_constant_buffer_unlock(&constant_buffer);
+	gpu_constant_buffer_unlock(&rt_constant_buffer);
 
-	gpu_raytrace_set_acceleration_structure(&accel);
+	gpu_raytrace_set_acceleration_structure(&rt_accel);
 	gpu_raytrace_set_pipeline(&rt_pipeline);
 	gpu_raytrace_set_target(render_target);
 	gpu_raytrace_dispatch_rays();
