@@ -387,6 +387,7 @@ void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_t
 	target->height = height;
 	target->format = format;
 	target->state = (framebuffer_index >= 0) ? GPU_TEXTURE_STATE_PRESENT : GPU_TEXTURE_STATE_SHADER_RESOURCE;
+	target->buffer = NULL;
 	target->impl.readback_created = false;
 
 	if (framebuffer_index >= 0) {
@@ -1634,6 +1635,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	texture->height = height;
 	texture->format = format;
 	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
+	target->buffer = NULL;
 
 	VkFormat vk_format = convert_image_format(format);
 	if (vk_format == VK_FORMAT_B8G8R8A8_UNORM) {
