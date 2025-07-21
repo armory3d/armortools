@@ -1635,7 +1635,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	texture->height = height;
 	texture->format = format;
 	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
-	target->buffer = NULL;
+	texture->buffer = NULL;
 
 	VkFormat vk_format = convert_image_format(format);
 	if (vk_format == VK_FORMAT_B8G8R8A8_UNORM) {
