@@ -1,6 +1,7 @@
 
 let pipes_copy: gpu_pipeline_t;
 let pipes_copy8: gpu_pipeline_t;
+let pipes_copy64: gpu_pipeline_t;
 let pipes_copy128: gpu_pipeline_t;
 let pipes_copy_bgra: gpu_pipeline_t;
 let pipes_copy_rgb: gpu_pipeline_t = null;
@@ -113,6 +114,18 @@ function pipes_init() {
 		pipes_copy8.color_attachment_count = 1;
 		ARRAY_ACCESS(pipes_copy8.color_attachment, 0) = tex_format_t.R8;
 		gpu_pipeline_compile(pipes_copy8);
+	}
+
+	{
+		pipes_copy64 = gpu_create_pipeline();
+		pipes_copy64.vertex_shader = sys_get_shader("layer_copy.vert");
+		pipes_copy64.fragment_shader = sys_get_shader("layer_copy.frag");
+		let vs: gpu_vertex_structure_t = gpu_vertex_struct_create();
+		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
+		pipes_copy64.input_layout = vs;
+		pipes_copy64.color_attachment_count = 1;
+		ARRAY_ACCESS(pipes_copy64.color_attachment, 0) = tex_format_t.RGBA64;
+		gpu_pipeline_compile(pipes_copy64);
 	}
 
 	{

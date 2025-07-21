@@ -686,7 +686,17 @@ function history_copy_to_undo(from_id: i32, to_id: i32, is_mask: bool) {
 		render_path_bind_target("texpaint" + from_id, "tex0");
 		render_path_bind_target("texpaint_nor" + from_id, "tex1");
 		render_path_bind_target("texpaint_pack" + from_id, "tex2");
-		render_path_draw_shader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
+
+		let format: tex_format_t =
+			base_bits_handle.position == texture_bits_t.BITS8  ? tex_format_t.RGBA32 :
+			base_bits_handle.position == texture_bits_t.BITS16 ? tex_format_t.RGBA64 :
+																 tex_format_t.RGBA128;
+
+		let pipe: string = format == tex_format_t.RGBA32 ? "copy_mrt3_pass" :
+						   format == tex_format_t.RGBA64 ? "copy_mrt3RGBA64_pass" :
+								   						   "copy_mrt3RGBA128_pass";
+
+		render_path_draw_shader("shader_datas/copy_mrt3_pass/" + pipe);
 	}
 	history_undo_i = (history_undo_i + 1) % config_raw.undo_steps;
 }

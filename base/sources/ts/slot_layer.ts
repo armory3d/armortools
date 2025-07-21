@@ -372,10 +372,14 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 		format = tex_format_t.RGBA128;
 		///end
 
+		let pipe: gpu_pipeline_t = format == tex_format_t.RGBA32 ? pipes_copy :
+								   format == tex_format_t.RGBA64 ? pipes_copy64 :
+								   								   pipes_copy128;
+
 		let _texpaint: gpu_texture_t = raw.texpaint;
 		raw.texpaint = gpu_create_render_target(res_x, res_y, format);
 		draw_begin(raw.texpaint);
-		draw_set_pipeline(pipes_copy);
+		draw_set_pipeline(pipe);
 		draw_scaled_image(_texpaint, 0, 0, res_x, res_y);
 		draw_set_pipeline(null);
 		draw_end();
@@ -385,7 +389,7 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 			raw.texpaint_nor = gpu_create_render_target(res_x, res_y, format);
 
 			draw_begin(raw.texpaint_nor);
-			draw_set_pipeline(pipes_copy);
+			draw_set_pipeline(pipe);
 			draw_scaled_image(_texpaint_nor, 0, 0, res_x, res_y);
 			draw_set_pipeline(null);
 			draw_end();
@@ -396,7 +400,7 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 			raw.texpaint_pack = gpu_create_render_target(res_x, res_y, format);
 
 			draw_begin(raw.texpaint_pack);
-			draw_set_pipeline(pipes_copy);
+			draw_set_pipeline(pipe);
 			draw_scaled_image(_texpaint_pack, 0, 0, res_x, res_y);
 			draw_set_pipeline(null);
 			draw_end();

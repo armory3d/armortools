@@ -22,6 +22,21 @@ function make_paint_color_attachments(): string[] {
 		let res: string[] = ["RGBA64", "RGBA64"];
 		return res;
 	}
+
+	let format: tex_format_t =
+		base_bits_handle.position == texture_bits_t.BITS8  ? tex_format_t.RGBA32 :
+		base_bits_handle.position == texture_bits_t.BITS16 ? tex_format_t.RGBA64 :
+															 tex_format_t.RGBA128;
+
+	if (format == tex_format_t.RGBA64) {
+		let res: string[] = ["RGBA64", "RGBA64", "RGBA64", "R8"];
+		return res;
+	}
+	if (format == tex_format_t.RGBA128) {
+		let res: string[] = ["RGBA128", "RGBA128", "RGBA128", "R8"];
+		return res;
+	}
+
 	let res: string[] = ["RGBA32", "RGBA32", "RGBA32", "R8"];
 	return res;
 }

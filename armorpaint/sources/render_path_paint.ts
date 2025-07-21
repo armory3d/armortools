@@ -96,6 +96,7 @@ function render_path_paint_init() {
 
 	render_path_load_shader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
 	render_path_load_shader("shader_datas/copy_mrt3_pass/copy_mrt3RGBA64_pass");
+	render_path_load_shader("shader_datas/copy_mrt3_pass/copy_mrt3RGBA128_pass");
 	render_path_load_shader("shader_datas/dilate_pass/dilate_pass");
 }
 

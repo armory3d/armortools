@@ -896,6 +896,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			///end
 			if (base_bits_handle.changed) {
 				sys_notify_on_init(layers_set_bits);
+				make_material_parse_paint_material();
 				ui_menu_keep_open = true;
 			}
 		}
