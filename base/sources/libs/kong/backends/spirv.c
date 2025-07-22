@@ -4201,7 +4201,7 @@ void spirv_export(char *directory, bool debug) {
 
 ////
 
-static char *write_bytecode2(int *size_out, instructions_buffer *header, instructions_buffer *decorations,
+static char *write_bytecode2(char *buffer, int *size_out, instructions_buffer *header, instructions_buffer *decorations,
 	instructions_buffer *base_types, instructions_buffer *constants, instructions_buffer *aggregate_types,
 	instructions_buffer *global_vars, instructions_buffer *instructions, bool debug) {
 	uint8_t *output_header      = (uint8_t *)header->instructions;
@@ -4227,7 +4227,6 @@ static char *write_bytecode2(int *size_out, instructions_buffer *header, instruc
 
 
 	{
-		char *buffer = malloc(1024 * 128);
 		int pos = 0;
 		memcpy(buffer + pos, output_header, output_header_size);
 		pos += output_header_size;
@@ -4404,7 +4403,16 @@ static char *spirv_export_vertex2(function *main, bool debug, int *size_out) {
 
 	write_constants(&constants);
 
-	return write_bytecode2(size_out, &header, &decorations, &base_types, &constants, &aggregate_types, &global_vars, &instructions, debug);
+	static char _buffer[1024 * 1024];
+	char *result = write_bytecode2(&_buffer[0], size_out, &header, &decorations, &base_types, &constants, &aggregate_types, &global_vars, &instructions, debug);
+	free(header.instructions);
+	free(decorations.instructions);
+	free(base_types.instructions);
+	free(constants.instructions);
+	free(aggregate_types.instructions);
+	free(global_vars.instructions);
+	free(instructions.instructions);
+	return result;
 }
 
 static char *spirv_export_fragment2(function *main, bool debug, int *size_out) {
@@ -4540,7 +4548,16 @@ static char *spirv_export_fragment2(function *main, bool debug, int *size_out) {
 
 	write_constants(&constants);
 
-	return write_bytecode2(size_out, &header, &decorations, &base_types, &constants, &aggregate_types, &global_vars, &instructions, debug);
+	static char _buffer[1024 * 1024];
+	char *result = write_bytecode2(&_buffer[0], size_out, &header, &decorations, &base_types, &constants, &aggregate_types, &global_vars, &instructions, debug);
+	free(header.instructions);
+	free(decorations.instructions);
+	free(base_types.instructions);
+	free(constants.instructions);
+	free(aggregate_types.instructions);
+	free(global_vars.instructions);
+	free(instructions.instructions);
+	return result;
 }
 
 void spirv_export2(char **vs, char **fs, int *vs_size, int *fs_size, bool debug) {
