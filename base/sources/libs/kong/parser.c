@@ -9,8 +9,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+////
+static statement statements_buffer[2048];
+int statement_index = 0;
+////
+
 static statement *statement_allocate(void) {
-	statement    *s       = (statement *)malloc(sizeof(statement));
+	////
+	// statement    *s       = (statement *)malloc(sizeof(statement));
+	statement   *s = &statements_buffer[statement_index];
+	statement_index++;
+	////
 	debug_context context = {0};
 	check(s != NULL, context, "Could not allocate statement");
 	return s;
@@ -29,8 +38,17 @@ static void statements_add(statements *statements, statement *statement) {
 	statements->size += 1;
 }
 
+////
+static expression experessions_buffer[2048];
+int expression_index = 0;
+////
+
 static expression *expression_allocate(void) {
-	expression   *e       = (expression *)malloc(sizeof(expression));
+	////
+	//expression   *e       = (expression *)malloc(sizeof(expression));
+	expression   *e = &experessions_buffer[expression_index];
+	expression_index++;
+	////
 	debug_context context = {0};
 	check(e != NULL, context, "Could not allocate expression");
 	init_type_ref(&e->type, NO_NAME);

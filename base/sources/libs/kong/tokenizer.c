@@ -244,6 +244,9 @@ tokens tokenize(const char *filename, const char *source) {
 			}
 
 			tokens_add(&tokens, token_create(TOKEN_NONE, &state));
+			////
+			free(buffer.buf);
+			////
 			return tokens;
 		}
 		else {

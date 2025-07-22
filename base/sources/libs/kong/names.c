@@ -13,7 +13,10 @@ static size_t  names_size  = 1024 * 1024;
 name_id        names_index = 1;
 ////
 
-static struct {
+////
+// static struct {
+struct {
+////
 	char   *key;
 	name_id value;
 } *hash = NULL;

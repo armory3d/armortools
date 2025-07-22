@@ -7,7 +7,11 @@
 #include <string.h>
 
 static function   *functions           = NULL;
-static function_id functions_size      = 1024;
+////
+// static function_id functions_size      = 1024;
+static function_id functions_size      = 128;
+////
+
 ////
 // static function_id next_function_index = 0;
 function_id next_function_index = 0;
