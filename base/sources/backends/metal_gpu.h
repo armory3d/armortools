@@ -6,7 +6,7 @@ typedef struct {
 } gpu_pipeline_impl_t;
 
 typedef struct {
-	char name[1024];
+	char name[256];
 	void *mtl_function;
 	char *source;
 	int length;
