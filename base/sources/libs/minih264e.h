@@ -4221,9 +4221,9 @@ static void h264e_denoise_run_neon(unsigned char *frm, unsigned char *frmprev, i
 
             vgd = vsubq_s16(vdupq_n_s16(127), vcls);
 
-            // same as above 
+            // same as above
             vt = vaddq_s16(vreinterpretq_s16_u16(vneighbourhood), vdupq_n_s16(1));
-            
+
             vt = vqshlq_n_s16(vt, 7);
             vcls = vclsq_s16(vt);
             vt = vshlq_s16(vt, vcls);
@@ -4267,7 +4267,7 @@ static void h264e_denoise_run_neon(unsigned char *frm, unsigned char *frmprev, i
             vpr1 = vmlal_u16(vpr1, vget_high_u16(vf0w), vget_high_u16(vg));
 
             vst1_u8(pp - stride_frmprev, vmovn_u16(vcombine_u16(vrshrn_n_u32(vpr0, 16), vrshrn_n_u32(vpr1, 16))));
-        }                    
+        }
 
         while (cloop--)
         {
@@ -4279,11 +4279,11 @@ static void h264e_denoise_run_neon(unsigned char *frm, unsigned char *frmprev, i
             neighbourhood += pf[-stride_frm] - pp[-stride_frmprev];
             neighbourhood += pf[+stride_frm] - pp[+stride_frmprev];
 
-            if (d < 0) 
+            if (d < 0)
             {
                 d = -d;
             }
-            if (neighbourhood < 0) 
+            if (neighbourhood < 0)
             {
                 neighbourhood = -neighbourhood;
             }
@@ -4293,7 +4293,7 @@ static void h264e_denoise_run_neon(unsigned char *frm, unsigned char *frmprev, i
             gn = g_diff_to_gainQ8[neighbourhood];
 
             gn <<= 2;
-            if (gn > 255) 
+            if (gn > 255)
             {
                 gn = 255;
             }
@@ -4305,16 +4305,16 @@ static void h264e_denoise_run_neon(unsigned char *frm, unsigned char *frmprev, i
             //out_val = ((pp[0]*g ) >> 16) + (((0xffff-g)*pf[0] ) >> 16);
             //out_val = ((pp[0]*g + (1<<15)) >> 16) + (((0xffff-g)*pf[0]  + (1<<15)) >> 16);
             out_val = (pp[0]*g + (0xffff - g)*pf[0]  + (1 << 15)) >> 16;
-            
+
             assert(out_val <= 255);
-            
+
             pp[-stride_frmprev] = (unsigned char)out_val;
             //pp[-stride_frmprev] = gn;
             //pp[-stride_frmprev] = neighbourhood;
             //pp[-stride_frmprev] = pp[0];
 
             pf++, pp++;
-        } 
+        }
 
         pp[-stride_frmprev] = *pf++;
     } while(--h);
@@ -4393,15 +4393,15 @@ static uint8x16_t intra_predict_dc16_neon(const pix_t *left, const pix_t *top)
  *    L2 xx xx xx xx
  *    L3 xx xx xx xx
  */
-#define UL edge[-1] 
-#define U0 edge[0] 
-#define T1 edge[1] 
-#define U2 edge[2] 
-#define U3 edge[3] 
-#define U4 edge[4] 
-#define U5 edge[5] 
-#define U6 edge[6] 
-#define U7 edge[7] 
+#define UL edge[-1]
+#define U0 edge[0]
+#define T1 edge[1]
+#define U2 edge[2]
+#define U3 edge[3]
+#define U4 edge[4]
+#define U5 edge[5]
+#define U6 edge[6]
+#define U7 edge[7]
 #define L0 edge[-2]
 #define L1 edge[-3]
 #define L2 edge[-4]
@@ -4462,7 +4462,7 @@ static void h264e_intra_predict_chroma_neon(pix_t *predict, const pix_t *left, c
         vst1q_u32(d, v); d += 4;
     } else if (mode == 1)
     {
-        do 
+        do
         {
             v = vreinterpretq_u32_u8(vcombine_u8(vdup_n_u8(left[0]), vdup_n_u8(left[8])));
             vst1q_u32(d, v); d += 4;
@@ -4534,8 +4534,8 @@ static int h264e_intra_choose_4x4_neon(const pix_t *blockin, pix_t *blockpred, i
     vx = vdupq_n_u8(intra_predict_dc4_neon((avail & AVAIL_L) ? &L3 : 0, (avail & AVAIL_T) ? &U0 : 0));
 
     best_sad = vsad_neon(vx, vr);
-    if (2 != mpred) 
-    {   
+    if (2 != mpred)
+    {
         best_sad += penalty;
     }
     vpred = vx;
@@ -4560,14 +4560,14 @@ static int h264e_intra_choose_4x4_neon(const pix_t *blockin, pix_t *blockpred, i
         d2 = vext_u8(vget_low_u8(vx), vget_low_u8(vx), 2);
         d3 = vext_u8(vget_low_u8(vx), vget_low_u8(vx), 3);
         vx = vreinterpretq_u8_u32(vcombine_u32(
-            t2 = vzip_u32(vreinterpret_u32_u8(vget_low_u8(vx)), vreinterpret_u32_u8(vget_low_u8(v1))).val[0], 
+            t2 = vzip_u32(vreinterpret_u32_u8(vget_low_u8(vx)), vreinterpret_u32_u8(vget_low_u8(v1))).val[0],
             vzip_u32(vreinterpret_u32_u8(d2), vreinterpret_u32_u8(d3)).val[0]));
         VTEST(3);
 
         vx = vt;
         vx = vrhaddq_u8(vextq_u8(vt, vt, 5), vextq_u8(vt, vt, 6));
         vx = vreinterpretq_u8_u32(vzipq_u32(vreinterpretq_u32_u8(vx), vreinterpretq_u32_u8(vextq_u8(vx, vx, 1))).val[0]);
-        vx = vreinterpretq_u8_u32(vzipq_u32(vreinterpretq_u32_u8(vx), 
+        vx = vreinterpretq_u8_u32(vzipq_u32(vreinterpretq_u32_u8(vx),
         vreinterpretq_u32_u8(vcombine_u8(vreinterpret_u8_u32(t2), vget_high_u8(vextq_u8(vt, vt, 7))))).val[0]);
 
         VTEST(7);
@@ -4589,7 +4589,7 @@ static int h264e_intra_choose_4x4_neon(const pix_t *blockin, pix_t *blockpred, i
             v2 = vreinterpretq_u8_u16(vsetq_lane_u16(tmp, vreinterpretq_u16_u8(v2), 2));
             v8 = vreinterpretq_u8_u16(vsetq_lane_u16(tmp, vreinterpretq_u16_u8(v8), 4));
             v9 = vextq_u8(v2, v2, 14);
-            v9 = vzipq_u8(v9, vhaddq_u8(v9, v2)).val[0]; 
+            v9 = vzipq_u8(v9, vhaddq_u8(v9, v2)).val[0];
             v9 = vrhaddq_u8(v9, vextq_u8(v8, v8, 14));
             tmp |= tmp << 16;
             vx = vreinterpretq_u8_u32(vzipq_u32(vreinterpretq_u32_u8(vextq_u8(v9, v9, 4)),
@@ -4671,10 +4671,10 @@ static void copy_wh_neon(const uint8_t *src, int src_stride, uint8_t *h264e_rest
             v2 = vld1q_u8(src); src += src_stride;
             v3 = vld1q_u8(src); src += src_stride;
 
-            vst1q_u8(dst, v0); dst += 16; 
-            vst1q_u8(dst, v1); dst += 16; 
-            vst1q_u8(dst, v2); dst += 16; 
-            vst1q_u8(dst, v3); dst += 16; 
+            vst1q_u8(dst, v0); dst += 16;
+            vst1q_u8(dst, v1); dst += 16;
+            vst1q_u8(dst, v2); dst += 16;
+            vst1q_u8(dst, v3); dst += 16;
         } while (h -= 4);
     }
 }
@@ -5092,21 +5092,21 @@ static int h264e_sad_mb_unlaign_8x8_neon(const pix_t *a, int a_stride, const pix
     do
     {
         va = vld1q_u8(a), vb = vld1q_u8(b);  a += a_stride, b += 16;
-        s0 = vabdl_u8(    vget_low_u8(va), vget_low_u8(vb));   s1 = vabdl_u8(    vget_high_u8(va), vget_high_u8(vb)); 
+        s0 = vabdl_u8(    vget_low_u8(va), vget_low_u8(vb));   s1 = vabdl_u8(    vget_high_u8(va), vget_high_u8(vb));
         va = vld1q_u8(a), vb = vld1q_u8(b);  a += a_stride, b += 16;
-        s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb)); 
+        s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb));
         va = vld1q_u8(a), vb = vld1q_u8(b);  a += a_stride, b += 16;
-        s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb)); 
+        s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb));
         va = vld1q_u8(a), vb = vld1q_u8(b);  a += a_stride, b += 16;
-        s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb)); 
+        s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb));
         va = vld1q_u8(a), vb = vld1q_u8(b);  a += a_stride, b += 16;
-        s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb)); 
+        s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb));
         va = vld1q_u8(a), vb = vld1q_u8(b);  a += a_stride, b += 16;
-        s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb)); 
+        s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb));
         va = vld1q_u8(a), vb = vld1q_u8(b);  a += a_stride, b += 16;
-        s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb)); 
+        s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb));
         va = vld1q_u8(a), vb = vld1q_u8(b);  a += a_stride, b += 16;
-        s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb)); 
+        s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb));
         {
         uint32x4_t v0 = vpaddlq_u16(s0);
         uint64x2_t v1 = vpaddlq_u32(v0);
@@ -5130,21 +5130,21 @@ static int h264e_sad_mb_unlaign_wh_neon(const pix_t *a, int a_stride, const pix_
         do
         {
             va = vld1q_u8(a), vb = vld1q_u8(b);  a += a_stride, b += 16;
-            s0 = vabdl_u8(    vget_low_u8(va), vget_low_u8(vb));   s1 = vabdl_u8(    vget_high_u8(va), vget_high_u8(vb)); 
+            s0 = vabdl_u8(    vget_low_u8(va), vget_low_u8(vb));   s1 = vabdl_u8(    vget_high_u8(va), vget_high_u8(vb));
             va = vld1q_u8(a), vb = vld1q_u8(b);  a += a_stride, b += 16;
-            s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb)); 
+            s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb));
             va = vld1q_u8(a), vb = vld1q_u8(b);  a += a_stride, b += 16;
-            s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb)); 
+            s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb));
             va = vld1q_u8(a), vb = vld1q_u8(b);  a += a_stride, b += 16;
-            s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb)); 
+            s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb));
             va = vld1q_u8(a), vb = vld1q_u8(b);  a += a_stride, b += 16;
-            s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb)); 
+            s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb));
             va = vld1q_u8(a), vb = vld1q_u8(b);  a += a_stride, b += 16;
-            s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb)); 
+            s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb));
             va = vld1q_u8(a), vb = vld1q_u8(b);  a += a_stride, b += 16;
-            s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb)); 
+            s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb));
             va = vld1q_u8(a), vb = vld1q_u8(b);  a += a_stride, b += 16;
-            s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb)); 
+            s0 = vabal_u8(s0, vget_low_u8(va), vget_low_u8(vb));   s1 = vabal_u8(s1, vget_high_u8(va), vget_high_u8(vb));
 
             uint32x4_t v0 = vpaddlq_u16(s0);
             uint64x2_t v1 = vpaddlq_u32(v0);
@@ -5596,16 +5596,18 @@ static int quantize_neon(quant_t *q, int mode, const uint16_t *qdat, int zmask)
                 q9 = vld1q_u8(iscan16_neon + 16);
 
                 {
+////
 // vtbl4_u8 is marked unavailable for iOS arm64, use wider versions there.
-#if defined(__APPLE__) && defined(__aarch64__) &&  defined(__apple_build_version__)
-                uint8x16x2_t vlut;
-                vlut.val[0] = vreinterpretq_u8_s16(vcombine_s16(d22, d23));
-                vlut.val[1] = vreinterpretq_u8_s16(vcombine_s16(d24, d25));
-                vst1_s16(q->qv + 0, d4 = vreinterpret_s16_u8(vtbl2q_u8(vlut, vget_low_u8(q8))));
-                vst1_s16(q->qv + 4, d5 = vreinterpret_s16_u8(vtbl2q_u8(vlut, vget_high_u8(q8))));
-                vst1_s16(q->qv + 8, d6 = vreinterpret_s16_u8(vtbl2q_u8(vlut, vget_low_u8(q9))));
-                vst1_s16(q->qv +12, d7 = vreinterpret_s16_u8(vtbl2q_u8(vlut, vget_high_u8(q9))));
-#else
+// #if defined(__APPLE__) && defined(__aarch64__) &&  defined(__apple_build_version__)
+//                 uint8x16x2_t vlut;
+//                 vlut.val[0] = vreinterpretq_u8_s16(vcombine_s16(d22, d23));
+//                 vlut.val[1] = vreinterpretq_u8_s16(vcombine_s16(d24, d25));
+//                 vst1_s16(q->qv + 0, d4 = vreinterpret_s16_u8(vtbl2q_u8(vlut, vget_low_u8(q8))));
+//                 vst1_s16(q->qv + 4, d5 = vreinterpret_s16_u8(vtbl2q_u8(vlut, vget_high_u8(q8))));
+//                 vst1_s16(q->qv + 8, d6 = vreinterpret_s16_u8(vtbl2q_u8(vlut, vget_low_u8(q9))));
+//                 vst1_s16(q->qv +12, d7 = vreinterpret_s16_u8(vtbl2q_u8(vlut, vget_high_u8(q9))));
+// #else
+////
                 uint8x8x4_t vlut;
                 vlut.val[0] = vreinterpret_u8_s16(d22);
                 vlut.val[1] = vreinterpret_u8_s16(d23);
@@ -5615,7 +5617,9 @@ static int quantize_neon(quant_t *q, int mode, const uint16_t *qdat, int zmask)
                 vst1_s16(q->qv + 4, d5 = vreinterpret_s16_u8(vtbl4_u8(vlut, vget_high_u8(q8))));
                 vst1_s16(q->qv + 8, d6 = vreinterpret_s16_u8(vtbl4_u8(vlut, vget_low_u8(q9))));
                 vst1_s16(q->qv +12, d7 = vreinterpret_s16_u8(vtbl4_u8(vlut, vget_high_u8(q9))));
-#endif
+////
+// #endif
+////
                 }
                 {
                     uint16x8_t bm0 = vld1q_u16(imask16_neon);
