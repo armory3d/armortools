@@ -10,7 +10,7 @@
 #include <string.h>
 
 ////
-static statement statements_buffer[2048];
+static statement statements_buffer[8192];
 int statement_index = 0;
 ////
 
@@ -39,7 +39,7 @@ static void statements_add(statements *statements, statement *statement) {
 }
 
 ////
-static expression experessions_buffer[2048];
+static expression experessions_buffer[8192];
 int expression_index = 0;
 ////
 
