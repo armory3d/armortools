@@ -330,13 +330,13 @@ static void create_descriptors(void) {
 	memset(type_counts, 0, sizeof(type_counts));
 
 	type_counts[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-	type_counts[0].descriptorCount = 1;
+	type_counts[0].descriptorCount = GPU_CONSTANT_BUFFER_MULTIPLE;
 
 	type_counts[1].type = VK_DESCRIPTOR_TYPE_SAMPLER;
-	type_counts[1].descriptorCount = 1;
+	type_counts[1].descriptorCount = GPU_CONSTANT_BUFFER_MULTIPLE;
 
 	type_counts[2].type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-	type_counts[2].descriptorCount = GPU_MAX_TEXTURES;
+	type_counts[2].descriptorCount = GPU_CONSTANT_BUFFER_MULTIPLE * GPU_MAX_TEXTURES;
 
 	VkDescriptorPoolCreateInfo pool_info = {
 		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
