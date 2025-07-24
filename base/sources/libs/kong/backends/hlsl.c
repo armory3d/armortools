@@ -2006,7 +2006,8 @@ void hlsl_export(char *directory, api_kind d3d, bool debug) {
 int compile_hlsl_to_d3d12(const char *source, uint8_t **output, size_t *outputlength, shader_stage stage, bool debug) { return 0; }
 
 static char *hlsl_export_vertex2(api_kind d3d, function *main, bool debug) {
-	char  *hlsl   = (char *)calloc(1024 * 1024, 1);
+	static char _buffer[1024 * 1024];
+	char  *hlsl   = &_buffer[0];
 	size_t offset = 0;
 
 	assert(main->parameters_size > 0);
@@ -2027,7 +2028,8 @@ static char *hlsl_export_vertex2(api_kind d3d, function *main, bool debug) {
 }
 
 static char *hlsl_export_fragment2(api_kind d3d, function *main, bool debug) {
-	char  *hlsl   = (char *)calloc(1024 * 1024, 1);
+	static char _buffer[1024 * 1024];
+	char  *hlsl   = &_buffer[0];
 	size_t offset = 0;
 
 	assert(main->parameters_size > 0);
