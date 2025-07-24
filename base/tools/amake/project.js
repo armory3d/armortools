@@ -47,5 +47,8 @@ if (platform === "windows") {
 else if (platform === "macos") {
 	project.add_cfiles("../../sources/backends/data/mac.plist");
 }
+else if (platform === "linux") {
+	project.add_lib('dl');
+}
 
 return project;
