@@ -795,10 +795,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 		wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME;
 		wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME;
 		wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME;
-		wanted_device_extensions[wanted_device_extension_count++] = VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME;
 		wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME;
-		wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_SPIRV_1_4_EXTENSION_NAME;
-		wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME;
 		wanted_device_extensions[wanted_device_extension_count++] = VK_KHR_RAY_QUERY_EXTENSION_NAME;
 	}
 
@@ -1845,10 +1842,7 @@ void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size) {
 	memset(&buf_info, 0, sizeof(buf_info));
 	buf_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 	buf_info.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-
-	if (gpu_raytrace_supported()) {
-		buf_info.usage |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-	}
+	buf_info.usage |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 
 	buf_info.size = size;
 	vkCreateBuffer(device, &buf_info, NULL, &buffer->impl.buf);
@@ -1991,7 +1985,42 @@ bool gpu_raytrace_supported() {
 	#ifdef IRON_ANDROID
 	return false; // Use VK_KHR_ray_query
 	#else
-	return true;
+
+	static bool extensions_checked = false;
+	static bool raytrace_supported = true;
+	if (extensions_checked) {
+		return raytrace_supported;
+	}
+
+	const char *required_extensions[] = {
+		VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
+		VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,
+		VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
+		VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
+		VK_KHR_RAY_QUERY_EXTENSION_NAME
+	};
+	uint32_t required_extensions_count = sizeof(required_extensions) / sizeof(required_extensions[0]);
+	uint32_t extensions_count = 0;
+	vkEnumerateDeviceExtensionProperties(gpu, NULL, &extensions_count, NULL);
+	VkExtensionProperties *extensions = (VkExtensionProperties *)malloc(sizeof(VkExtensionProperties) * extensions_count);
+	vkEnumerateDeviceExtensionProperties(gpu, NULL, &extensions_count, extensions);
+	for (uint32_t i = 0; i < required_extensions_count; i++) {
+		bool found = false;
+		for (uint32_t j = 0; j < extensions_count; j++) {
+			if (strcmp(required_extensions[i], extensions[j].extensionName) == 0) {
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			raytrace_supported = false;
+			break;
+		}
+	}
+	free(extensions);
+	extensions_checked = true;
+	return raytrace_supported;
+
 	#endif
 }
 
