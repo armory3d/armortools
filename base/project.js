@@ -8,6 +8,7 @@ flags.with_compress = true;
 flags.with_image_write = true;
 flags.with_iron = true;
 flags.with_eval = true;
+flags.with_plugins = true;
 
 let project = new Project("Base");
 let dir = flags.name.toLowerCase();
@@ -48,9 +49,11 @@ if (!flags.lite) {
 		}
 	}
 
-	project.add_define("WITH_PLUGINS");
-	project.add_project("../" + dir + "/plugins");
-	project.add_project("plugins");
+	if (flags.with_plugins) {
+		project.add_define("WITH_PLUGINS");
+		project.add_project("../" + dir + "/plugins");
+		project.add_project("plugins");
+	}
 
 	project.add_tsfiles("sources/ts");
 	project.add_tsfiles("sources/ts/iron");

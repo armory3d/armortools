@@ -126,6 +126,16 @@ void *js_pcall_str(void *p, char *arg0) {
 char *js_call(void *p) {
 	return (char *)JS_ToCString(js_ctx, *js_call_arg(p, 0, NULL));
 }
+
+#else
+
+void js_init() {}
+float js_eval(const char *js) { return 0.0; }
+void *js_call_arg(void *p, int argc, void *argv) { return NULL; }
+char *js_call_ptr(void *p, void *arg) { return NULL; }
+char *js_call_ptr_str(void *p, void *arg0, char *arg1) { return NULL; }
+void *js_pcall_str(void *p, char *arg0) { return NULL; }
+char *js_call(void *p) { return NULL; }
 #endif
 
 #ifdef WITH_EMBED
