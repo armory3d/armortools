@@ -23,7 +23,7 @@ static gpu_texture_t *current_textures[GPU_MAX_TEXTURES] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
 static VkSemaphore framebuffer_available_semaphore;
-static VkSemaphore rendering_finished_semaphore;
+static VkSemaphore rendering_finished_semaphores[GPU_FRAMEBUFFER_COUNT];
 static VkFence fence;
 static gpu_pipeline_t *current_pipeline = NULL;
 static VkViewport current_viewport;
@@ -63,6 +63,7 @@ static VkDeviceMemory readback_mem;
 static VkBuffer upload_buffer;
 static int upload_buffer_size = 0;
 static VkDeviceMemory upload_mem;
+static bool is_amd = false;
 
 void iron_vulkan_get_instance_extensions(const char **extensions, int *index);
 VkBool32 iron_vulkan_get_physical_device_presentation_support(VkPhysicalDevice physical_device, uint32_t queue_family_index);
@@ -189,6 +190,9 @@ static bool find_layer(VkLayerProperties *layers, int layer_count, const char *w
 static void memory_type_from_properties(uint32_t type_bits, VkFlags requirements_mask, uint32_t *type_index) {
 	for (uint32_t i = 0; i < 32; i++) {
 		if ((type_bits & 1) == 1) {
+			if (is_amd && memory_properties.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_DEVICE_COHERENT_BIT_AMD) {
+				continue;
+			}
 			if ((memory_properties.memoryTypes[i].propertyFlags & requirements_mask) == requirements_mask) {
 				*type_index = i;
 			}
@@ -760,6 +764,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 		VkPhysicalDeviceProperties properties;
 		vkGetPhysicalDeviceProperties(gpu, &properties);
 		iron_log("Chosen Vulkan device: %s", properties.deviceName);
+		is_amd = properties.vendorID == 0x1002;
 		free(physical_devices);
 	}
 	else {
@@ -945,7 +950,9 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	};
 
 	vkCreateSemaphore(device, &sem_info, NULL, &framebuffer_available_semaphore);
-	vkCreateSemaphore(device, &sem_info, NULL, &rendering_finished_semaphore);
+	for (uint32_t i = 0; i < GPU_FRAMEBUFFER_COUNT; i++) {
+		vkCreateSemaphore(device, &sem_info, NULL, &rendering_finished_semaphores[i]);
+	}
 
 	window_depth_bits = depth_buffer_bits;
 	window_vsynced = vsync;
@@ -1142,6 +1149,10 @@ void gpu_end_internal() {
 			current_render_targets[i] == &framebuffers[framebuffer_index] ? GPU_TEXTURE_STATE_PRESENT : GPU_TEXTURE_STATE_SHADER_RESOURCE);
 	}
 	current_render_targets_count = 0;
+
+	if (is_amd) {
+		gpu_execute_and_wait(); ////
+	}
 }
 
 void gpu_wait() {
@@ -1197,7 +1208,7 @@ void gpu_present_internal() {
 		.commandBufferCount = 1,
 		.pCommandBuffers = &command_buffer,
 		.signalSemaphoreCount = 1,
-		.pSignalSemaphores = &rendering_finished_semaphore,
+		.pSignalSemaphores = &rendering_finished_semaphores[framebuffer_index],
 	};
 
 	VkSemaphore wait_semaphores[1] = {framebuffer_available_semaphore};
@@ -1213,7 +1224,7 @@ void gpu_present_internal() {
 		.swapchainCount = 1,
 		.pSwapchains = &window_swapchain,
 		.pImageIndices = &framebuffer_index,
-		.pWaitSemaphores = &rendering_finished_semaphore,
+		.pWaitSemaphores = &rendering_finished_semaphores[framebuffer_index],
 		.waitSemaphoreCount = 1,
 	};
 	vkQueuePresentKHR(queue, &present);
@@ -1415,7 +1426,6 @@ void gpu_set_texture(int unit, gpu_texture_t *texture) {
 }
 
 void gpu_pipeline_destroy(gpu_pipeline_t *pipeline) {
-	gpu_execute_and_wait(); ////
 	vkDestroyPipeline(device, pipeline->impl.pipeline, NULL);
 	vkDestroyPipelineLayout(device, pipeline->impl.pipeline_layout, NULL);
 }
