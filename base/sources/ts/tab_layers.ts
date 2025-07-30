@@ -333,6 +333,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	let ui: ui_t = ui_base_ui;
 
 	let step: i32 = ui.ops.theme.ELEMENT_H;
+	let uiw: f32 = ui._w;
 
 	let has_panel: bool = slot_layer_is_group(l) || (slot_layer_is_layer(l) && slot_layer_get_masks(l, false) != null);
 	if (has_panel) {
@@ -395,7 +396,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	}
 	else {
 		if (ui.enabled && ui.input_enabled && ui.combo_selected_handle == null &&
-			ui.input_x > ui._window_x + ui._x && ui.input_x < ui._window_x + ui._window_w &&
+			ui.input_x > ui._window_x + ui._x && ui.input_x < ui._window_x + uiw &&
 			ui.input_y > ui._window_y + ui._y - center && ui.input_y < ui._window_y + ui._y - center + (step * ui_SCALE(ui)) * 2) {
 			if (ui.input_started) {
 				context_set_layer(l);
