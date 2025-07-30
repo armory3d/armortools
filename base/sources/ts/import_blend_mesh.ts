@@ -31,14 +31,10 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 		return;
 	}
 
-	let save: string;
+	let save: string = "tmp.obj";
 	if (path_is_protected()) {
-		save = iron_internal_save_path();
+		save = iron_internal_save_path() + save;
 	}
-	else {
-		save = path_data();
-	}
-	save += "tmp.obj";
 
 	///if arm_windows
 	path = string_replace_all(path, "\\", "\\\\");
