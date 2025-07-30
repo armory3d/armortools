@@ -131,9 +131,11 @@ void io_fbx_parse_mesh(raw_mesh_t *raw, ufbx_mesh *mesh, ufbx_matrix *to_world, 
 	raw->nora->buffer = nora;
 	raw->nora->length = raw->nora->capacity = vertex_count * 2;
 
-	raw->texa = (i16_array_t *)malloc(sizeof(i16_array_t));
-	raw->texa->buffer = texa;
-	raw->texa->length = raw->texa->capacity = vertex_count * 2;
+	if (texa != NULL) {
+		raw->texa = (i16_array_t *)malloc(sizeof(i16_array_t));
+		raw->texa->buffer = texa;
+		raw->texa->length = raw->texa->capacity = vertex_count * 2;
+	}
 
 	if (cola != NULL) {
 		raw->cola = (i16_array_t *)malloc(sizeof(i16_array_t));
