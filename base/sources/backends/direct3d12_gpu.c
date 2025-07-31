@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <malloc.h>
 #include <math.h>
+#include <assert.h>
 #include <d3d12.h>
 #include <dxgi.h>
 #include <dxgi1_4.h>
@@ -14,10 +15,10 @@
 bool gpu_transpose_mat = false;
 static ID3D12Device *device = NULL;
 static ID3D12CommandQueue *queue;
-static struct IDXGISwapChain *window_swapchain;
+static IDXGISwapChain *window_swapchain;
 static ID3D12RootSignature *root_signature = NULL;
-static struct ID3D12CommandAllocator *command_allocator;
-static struct ID3D12GraphicsCommandList *command_list;
+static ID3D12CommandAllocator *command_allocator;
+static ID3D12GraphicsCommandList *command_list;
 static gpu_pipeline_t *current_pipeline;
 static D3D12_VIEWPORT current_viewport;
 static D3D12_RECT current_scissor;
@@ -31,17 +32,19 @@ static gpu_texture_t *current_textures[GPU_MAX_TEXTURES] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
 static bool window_vsync;
-static struct ID3D12DescriptorHeap *srv_heap;
+static ID3D12DescriptorHeap *srv_heap;
 static int srv_heap_index = 0;
 static UINT64 fence_value;
 static ID3D12Fence *fence;
 static HANDLE fence_event;
 static UINT64 frame_fence_values[GPU_FRAMEBUFFER_COUNT] = {0, 0};
 static bool resized = false;
-static struct ID3D12Resource *readback_buffer = NULL;
+static ID3D12Resource *readback_buffer = NULL;
 static int readback_buffer_size = 0;
-static struct ID3D12Resource *upload_buffer = NULL;
+static ID3D12Resource *upload_buffer = NULL;
 static int upload_buffer_size = 0;
+static ID3D12Resource *resources_to_destroy[256];
+static int resources_to_destroy_count = 0;
 
 static D3D12_BLEND convert_blend_factor(gpu_blending_factor_t factor) {
 	switch (factor) {
@@ -125,19 +128,23 @@ static void wait_for_fence(ID3D12Fence *fence, UINT64 completion_value, HANDLE w
 	}
 }
 
+static void _gpu_barrier(ID3D12Resource *r, D3D12_RESOURCE_STATES state_before, D3D12_RESOURCE_STATES state_after) {
+	D3D12_RESOURCE_BARRIER barrier = {
+		.Transition.pResource = r,
+		.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
+		.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE,
+		.Transition.StateBefore = state_before,
+		.Transition.StateAfter = state_after,
+		.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
+	};
+	command_list->lpVtbl->ResourceBarrier(command_list, 1, &barrier);
+}
+
 void gpu_barrier(gpu_texture_t *render_target, gpu_texture_state_t state_after) {
 	if (render_target->state == state_after) {
 		return;
 	}
-	D3D12_RESOURCE_BARRIER barrier = {
-		.Transition.pResource = render_target->impl.image,
-		.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
-		.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE,
-		.Transition.StateBefore = convert_texture_state(render_target->state),
-		.Transition.StateAfter = convert_texture_state(state_after),
-		.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
-	};
-	command_list->lpVtbl->ResourceBarrier(command_list, 1, &barrier);
+	_gpu_barrier(render_target->impl.image, convert_texture_state(render_target->state), convert_texture_state(state_after));
 	render_target->state = state_after;
 }
 
@@ -425,20 +432,13 @@ void gpu_execute_and_wait() {
 }
 
 void gpu_present_internal() {
-	command_list->lpVtbl->Close(command_list);
-
-	ID3D12CommandList *command_lists[] = {(ID3D12CommandList *)command_list};
-	queue->lpVtbl->ExecuteCommandLists(queue, 1, command_lists);
-	queue->lpVtbl->Signal(queue, fence, ++fence_value);
+	gpu_execute_and_wait();
 
 	window_swapchain->lpVtbl->Present(window_swapchain, window_vsync, 0);
-
 	queue->lpVtbl->Signal(queue, fence, ++fence_value);
 	frame_fence_values[framebuffer_index] = fence_value;
-
 	framebuffer_index = (framebuffer_index + 1) % GPU_FRAMEBUFFER_COUNT;
 	wait_for_fence(fence, frame_fence_values[framebuffer_index], fence_event);
-	gpu_wait();
 
 	if (resized) {
 		framebuffer_index = 0;
@@ -462,8 +462,11 @@ void gpu_present_internal() {
 		resized = false;
 	}
 
-	command_allocator->lpVtbl->Reset(command_allocator);
-	command_list->lpVtbl->Reset(command_list, command_allocator, NULL);
+	while (resources_to_destroy_count > 0) {
+		resources_to_destroy_count--;
+		ID3D12Resource *r = resources_to_destroy[resources_to_destroy_count];
+		r->lpVtbl->Release(r);
+	}
 }
 
 void gpu_resize_internal(int width, int height) {
@@ -658,7 +661,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	};
 	command_list->lpVtbl->ResourceBarrier(command_list, 1, &barrier);
 
-	gpu_execute_and_wait(); ////
+	gpu_execute_and_wait();
 
 	// Read buffer
 	void *p;
@@ -944,70 +947,14 @@ void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_te
 	gpu_render_target_init2(target, width, height, format, -1);
 }
 
-void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structure_t *structure) {
-	buffer->count = count;
-
-	buffer->stride = 0;
-	for (int i = 0; i < structure->size; ++i) {
-		buffer->stride += gpu_vertex_data_size(structure->elements[i].data);
+void _gpu_buffer_init(ID3D12Resource **buffer, int size, D3D12_HEAP_TYPE heap_type) {
+	if (*buffer != NULL) {
+		assert(resources_to_destroy_count < 256);
+		resources_to_destroy[resources_to_destroy_count] = *buffer;
+		resources_to_destroy_count++;
 	}
-
-	int upload_buffer_size = buffer->stride * buffer->count;
-
 	D3D12_HEAP_PROPERTIES heap_properties = {
-		.Type = D3D12_HEAP_TYPE_UPLOAD,
-		.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
-		.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN,
-		.CreationNodeMask = 1,
-		.VisibleNodeMask = 1,
-	};
-
-	D3D12_RESOURCE_DESC resource_desc = {
-		.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER,
-		.Alignment = 0,
-		.Width = upload_buffer_size,
-		.Height = 1,
-		.DepthOrArraySize = 1,
-		.MipLevels = 1,
-		.Format = DXGI_FORMAT_UNKNOWN,
-		.SampleDesc.Count = 1,
-		.SampleDesc.Quality = 0,
-		.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR,
-		.Flags = D3D12_RESOURCE_FLAG_NONE,
-	};
-
-	device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL,
-											&IID_ID3D12Resource, &buffer->impl.buffer);
-
-	buffer->impl.vertex_buffer_view.BufferLocation = buffer->impl.buffer->lpVtbl->GetGPUVirtualAddress(buffer->impl.buffer);
-	buffer->impl.vertex_buffer_view.SizeInBytes = upload_buffer_size;
-	buffer->impl.vertex_buffer_view.StrideInBytes = buffer->stride;
-}
-
-void *gpu_vertex_buffer_lock(gpu_buffer_t *buffer) {
-	D3D12_RANGE range = {
-		.Begin = 0,
-		.End = buffer->count * buffer->stride,
-	};
-	void *p;
-	buffer->impl.buffer->lpVtbl->Map(buffer->impl.buffer, 0, &range, &p);
-	return p;
-}
-
-void gpu_vertex_buffer_unlock(gpu_buffer_t *buffer) {
-	D3D12_RANGE range = {
-		.Begin = 0,
-		.End = buffer->count * buffer->stride,
-	};
-	buffer->impl.buffer->lpVtbl->Unmap(buffer->impl.buffer, 0, &range);
-}
-
-void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size) {
-	buffer->count = size;
-	buffer->data = NULL;
-
-	D3D12_HEAP_PROPERTIES heap_properties = {
-		.Type = D3D12_HEAP_TYPE_UPLOAD,
+		.Type = heap_type,
 		.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
 		.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN,
 		.CreationNodeMask = 1,
@@ -1028,7 +975,88 @@ void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size) {
 		.Flags = D3D12_RESOURCE_FLAG_NONE,
 	};
 
-	device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &IID_ID3D12Resource, &buffer->impl.buffer);
+	device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc,
+		D3D12_RESOURCE_STATE_COMMON, NULL, &IID_ID3D12Resource, buffer);
+}
+
+void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structure_t *structure) {
+	buffer->count = count;
+	buffer->stride = 0;
+	for (int i = 0; i < structure->size; ++i) {
+		buffer->stride += gpu_vertex_data_size(structure->elements[i].data);
+	}
+	buffer->impl.vertex_buffer_view.SizeInBytes = buffer->stride * buffer->count;
+	buffer->impl.vertex_buffer_view.StrideInBytes = buffer->stride;
+	buffer->impl.buffer = NULL;
+}
+
+void *gpu_vertex_buffer_lock(gpu_buffer_t *buffer) {
+	_gpu_buffer_init(&buffer->impl.buffer, buffer->stride * buffer->count, D3D12_HEAP_TYPE_UPLOAD);
+
+	D3D12_RANGE range = {
+		.Begin = 0,
+		.End = buffer->count * buffer->stride,
+	};
+	void *p;
+	buffer->impl.buffer->lpVtbl->Map(buffer->impl.buffer, 0, &range, &p);
+	return p;
+}
+
+void gpu_vertex_buffer_unlock(gpu_buffer_t *buffer) {
+	D3D12_RANGE range = {
+		.Begin = 0,
+		.End = buffer->count * buffer->stride,
+	};
+	buffer->impl.buffer->lpVtbl->Unmap(buffer->impl.buffer, 0, &range);
+
+	ID3D12Resource *upload_buffer = buffer->impl.buffer;
+	_gpu_buffer_init(&buffer->impl.buffer, buffer->stride * buffer->count, D3D12_HEAP_TYPE_DEFAULT);
+	_gpu_barrier(buffer->impl.buffer, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
+	command_list->lpVtbl->CopyBufferRegion(command_list, buffer->impl.buffer, 0, upload_buffer, 0, buffer->stride * buffer->count);
+	_gpu_barrier(buffer->impl.buffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+	buffer->impl.vertex_buffer_view.BufferLocation = buffer->impl.buffer->lpVtbl->GetGPUVirtualAddress(buffer->impl.buffer);
+}
+
+void gpu_index_buffer_init(gpu_buffer_t *buffer, int count) {
+	buffer->count = count;
+	buffer->impl.index_buffer_view.SizeInBytes = count * 4;
+	buffer->impl.index_buffer_view.Format = DXGI_FORMAT_R32_UINT;
+	buffer->impl.buffer = NULL;
+}
+
+void *gpu_index_buffer_lock(gpu_buffer_t *buffer) {
+	_gpu_buffer_init(&buffer->impl.buffer, buffer->count * 4, D3D12_HEAP_TYPE_UPLOAD);
+
+	D3D12_RANGE range = {
+		.Begin = 0,
+		.End = buffer->count * 4,
+	};
+	void *p;
+	buffer->impl.buffer->lpVtbl->Map(buffer->impl.buffer, 0, &range, &p);
+	return p;
+}
+
+void gpu_index_buffer_unlock(gpu_buffer_t *buffer) {
+	D3D12_RANGE range = {
+		.Begin = 0,
+		.End = buffer->count * 4,
+	};
+	buffer->impl.buffer->lpVtbl->Unmap(buffer->impl.buffer, 0, &range);
+
+	ID3D12Resource *upload_buffer = buffer->impl.buffer;
+	_gpu_buffer_init(&buffer->impl.buffer, buffer->count * 4, D3D12_HEAP_TYPE_DEFAULT);
+	_gpu_barrier(buffer->impl.buffer, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
+	command_list->lpVtbl->CopyBufferRegion(command_list, buffer->impl.buffer, 0, upload_buffer, 0, buffer->count * 4);
+	_gpu_barrier(buffer->impl.buffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_INDEX_BUFFER);
+	buffer->impl.index_buffer_view.BufferLocation = buffer->impl.buffer->lpVtbl->GetGPUVirtualAddress(buffer->impl.buffer);
+}
+
+void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size) {
+	buffer->count = size;
+	buffer->data = NULL;
+	buffer->impl.buffer = NULL;
+	_gpu_buffer_init(&buffer->impl.buffer, size, D3D12_HEAP_TYPE_UPLOAD);
+	_gpu_barrier(buffer->impl.buffer, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 }
 
 void gpu_constant_buffer_destroy(gpu_buffer_t *buffer) {
@@ -1036,6 +1064,8 @@ void gpu_constant_buffer_destroy(gpu_buffer_t *buffer) {
 }
 
 void gpu_constant_buffer_lock(gpu_buffer_t *buffer, int start, int count) {
+	_gpu_barrier(buffer->impl.buffer, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_GENERIC_READ);
+
 	buffer->impl.last_start = start;
 	buffer->impl.last_count = count;
 	D3D12_RANGE range = {
@@ -1054,64 +1084,13 @@ void gpu_constant_buffer_unlock(gpu_buffer_t *buffer) {
 	};
 	buffer->impl.buffer->lpVtbl->Unmap(buffer->impl.buffer, 0, &range);
 	buffer->data = NULL;
-}
 
-void gpu_index_buffer_init(gpu_buffer_t *buffer, int count) {
-	buffer->count = count;
-
-	int upload_buffer_size = sizeof(uint32_t) * count;
-
-	D3D12_HEAP_PROPERTIES heap_properties = {
-		.Type = D3D12_HEAP_TYPE_UPLOAD,
-		.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
-		.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN,
-		.CreationNodeMask = 1,
-		.VisibleNodeMask = 1,
-	};
-
-	D3D12_RESOURCE_DESC resource_desc = {
-		.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER,
-		.Alignment = 0,
-		.Width = upload_buffer_size,
-		.Height = 1,
-		.DepthOrArraySize = 1,
-		.MipLevels = 1,
-		.Format = DXGI_FORMAT_UNKNOWN,
-		.SampleDesc.Count = 1,
-		.SampleDesc.Quality = 0,
-		.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR,
-		.Flags = D3D12_RESOURCE_FLAG_NONE,
-	};
-
-	device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc,
-		D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &IID_ID3D12Resource, &buffer->impl.buffer);
-
-	buffer->impl.index_buffer_view.BufferLocation = buffer->impl.buffer->lpVtbl->GetGPUVirtualAddress(buffer->impl.buffer);
-	buffer->impl.index_buffer_view.SizeInBytes = upload_buffer_size;
-	buffer->impl.index_buffer_view.Format = DXGI_FORMAT_R32_UINT;
+	_gpu_barrier(buffer->impl.buffer, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 }
 
 void gpu_buffer_destroy(gpu_buffer_t *buffer) {
 	buffer->impl.buffer->lpVtbl->Release(buffer->impl.buffer);
 	buffer->impl.buffer = NULL;
-}
-
-void *gpu_index_buffer_lock(gpu_buffer_t *buffer) {
-	D3D12_RANGE range = {
-		.Begin = 0,
-		.End = buffer->count * 4,
-	};
-	void *p;
-	buffer->impl.buffer->lpVtbl->Map(buffer->impl.buffer, 0, &range, &p);
-	return p;
-}
-
-void gpu_index_buffer_unlock(gpu_buffer_t *buffer) {
-	D3D12_RANGE range = {
-		.Begin = 0,
-		.End = buffer->count * 4,
-	};
-	buffer->impl.buffer->lpVtbl->Unmap(buffer->impl.buffer, 0, &range);
 }
 
 static const wchar_t *hit_group_name = L"hitgroup";
