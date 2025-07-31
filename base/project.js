@@ -285,6 +285,8 @@ if (flags.with_eval) {
 	project.add_define("WITH_EVAL");
 	project.add_cfiles("sources/libs/quickjs-amalgam.c");
 	project.add_define("QJS_BUILD_LIBC");
+	// project.add_cfiles("tools/amake/alang.c");
+	// project.add_cfiles("tools/amake/alang_eval.c");
 }
 
 if (flags.with_iron) {
