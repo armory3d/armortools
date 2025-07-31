@@ -976,7 +976,7 @@ void _gpu_buffer_init(ID3D12Resource **buffer, int size, D3D12_HEAP_TYPE heap_ty
 	};
 
 	device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc,
-		D3D12_RESOURCE_STATE_COMMON, NULL, &IID_ID3D12Resource, buffer);
+		heap_type == D3D12_HEAP_TYPE_UPLOAD ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COMMON, NULL, &IID_ID3D12Resource, buffer);
 }
 
 void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structure_t *structure) {
@@ -1056,7 +1056,6 @@ void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size) {
 	buffer->data = NULL;
 	buffer->impl.buffer = NULL;
 	_gpu_buffer_init(&buffer->impl.buffer, size, D3D12_HEAP_TYPE_UPLOAD);
-	_gpu_barrier(buffer->impl.buffer, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 }
 
 void gpu_constant_buffer_destroy(gpu_buffer_t *buffer) {
@@ -1064,8 +1063,6 @@ void gpu_constant_buffer_destroy(gpu_buffer_t *buffer) {
 }
 
 void gpu_constant_buffer_lock(gpu_buffer_t *buffer, int start, int count) {
-	_gpu_barrier(buffer->impl.buffer, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_GENERIC_READ);
-
 	buffer->impl.last_start = start;
 	buffer->impl.last_count = count;
 	D3D12_RANGE range = {
@@ -1084,8 +1081,6 @@ void gpu_constant_buffer_unlock(gpu_buffer_t *buffer) {
 	};
 	buffer->impl.buffer->lpVtbl->Unmap(buffer->impl.buffer, 0, &range);
 	buffer->data = NULL;
-
-	_gpu_barrier(buffer->impl.buffer, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 }
 
 void gpu_buffer_destroy(gpu_buffer_t *buffer) {
