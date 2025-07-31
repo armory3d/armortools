@@ -8,9 +8,7 @@
 #include <IOKit/hid/IOHIDKeys.h>
 #include <IOKit/hid/IOHIDManager.h>
 
-struct gpu_texture;
-
-@interface BasicOpenGLView : MTKView {
+@interface BasicMTKView : MTKView {
 @private
 	id<MTLDevice> device;
 	id<MTLCommandQueue> commandQueue;
@@ -20,10 +18,8 @@ struct gpu_texture;
 - (CAMetalLayer *)metalLayer;
 - (id<MTLDevice>)metalDevice;
 - (id<MTLCommandQueue>)metalQueue;
-
 - (void)keyDown:(NSEvent *)theEvent;
 - (void)keyUp:(NSEvent *)theEvent;
-
 - (void)mouseDown:(NSEvent *)theEvent;
 - (void)mouseUp:(NSEvent *)theEvent;
 - (void)mouseMoved:(NSEvent *)theEvent;
@@ -34,13 +30,10 @@ struct gpu_texture;
 - (void)scrollWheel:(NSEvent *)theEvent;
 - (NSDragOperation)draggingEntered:(id<NSDraggingInfo>)sender;
 - (BOOL)performDragOperation:(id<NSDraggingInfo>)sender;
-
-- (void)update; // moved or resized
-
+- (void)update;
 - (BOOL)acceptsFirstResponder;
 - (BOOL)becomeFirstResponder;
 - (BOOL)resignFirstResponder;
-
 - (id)initWithFrame:(NSRect)frameRect;
 - (void)resize:(NSSize)size;
 
