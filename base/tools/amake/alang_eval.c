@@ -2,6 +2,8 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
+#include <string.h>
 
 typedef union value {
 	float f;
@@ -28,21 +30,21 @@ static void set_variable_value(interpreter_state *state, variable var, value v) 
 	state->vars[var.index].type = var.type.type;
 }
 
-static void eval() {
+static float eval() {
 	interpreter_state state = {0};
 	function *main_func = NULL;
 
-	for (function_id i = 0; get_function(i) != NULL; ++i) {
-		function *f = get_function(i);
-		if (strcmp(get_name(f->name), "main") == 0) {
+	for (function_id i = 0; _get_function(i) != NULL; ++i) {
+		function *f = _get_function(i);
+		if (strcmp(_get_name(f->name), "main") == 0) {
 			main_func = f;
 			break;
 		}
 	}
 
-	for (size_t i = 0; i < allocated_globals_size; ++i) {
-		global *g = allocated_globals[i].g;
-		uint64_t var_index = allocated_globals[i].variable_id;
+	for (size_t i = 0; i < __allocated_globals_size; ++i) {
+		global *g = __allocated_globals[i].g;
+		uint64_t var_index = __allocated_globals[i].variable_id;
 		if (g->value.kind == GLOBAL_VALUE_FLOAT) {
 			state.vars[var_index].val.f = g->value.value.floats[0];
 			state.vars[var_index].type = g->type;
@@ -96,9 +98,9 @@ static void eval() {
 			value right = get_variable_value(&state, op->op_binary.right);
 			value result;
 			type_id result_type = op->op_binary.result.type.type;
-			if (result_type == float_id) {
-				float l = (op->op_binary.left.type.type == float_id) ? left.f : (float)left.i;
-				float r = (op->op_binary.right.type.type == float_id) ? right.f : (float)right.i;
+			if (result_type == _float_id) {
+				float l = (op->op_binary.left.type.type == _float_id) ? left.f : (float)left.i;
+				float r = (op->op_binary.right.type.type == _float_id) ? right.f : (float)right.i;
 				result.f = l + r;
 			}
 			else {
@@ -112,9 +114,9 @@ static void eval() {
 			value right = get_variable_value(&state, op->op_binary.right);
 			value result;
 			type_id result_type = op->op_binary.result.type.type;
-			if (result_type == float_id) {
-				float l = (op->op_binary.left.type.type == float_id) ? left.f : (float)left.i;
-				float r = (op->op_binary.right.type.type == float_id) ? right.f : (float)right.i;
+			if (result_type == _float_id) {
+				float l = (op->op_binary.left.type.type == _float_id) ? left.f : (float)left.i;
+				float r = (op->op_binary.right.type.type == _float_id) ? right.f : (float)right.i;
 				result.f = l - r;
 			}
 			else {
@@ -128,9 +130,9 @@ static void eval() {
 			value right = get_variable_value(&state, op->op_binary.right);
 			value result;
 			type_id result_type = op->op_binary.result.type.type;
-			if (result_type == float_id) {
-				float l = (op->op_binary.left.type.type == float_id) ? left.f : (float)left.i;
-				float r = (op->op_binary.right.type.type == float_id) ? right.f : (float)right.i;
+			if (result_type == _float_id) {
+				float l = (op->op_binary.left.type.type == _float_id) ? left.f : (float)left.i;
+				float r = (op->op_binary.right.type.type == _float_id) ? right.f : (float)right.i;
 				result.f = l * r;
 			}
 			else {
@@ -144,9 +146,9 @@ static void eval() {
 			value right = get_variable_value(&state, op->op_binary.right);
 			value result;
 			type_id result_type = op->op_binary.result.type.type;
-			if (result_type == float_id) {
-				float l = (op->op_binary.left.type.type == float_id) ? left.f : (float)left.i;
-				float r = (op->op_binary.right.type.type == float_id) ? right.f : (float)right.i;
+			if (result_type == _float_id) {
+				float l = (op->op_binary.left.type.type == _float_id) ? left.f : (float)left.i;
+				float r = (op->op_binary.right.type.type == _float_id) ? right.f : (float)right.i;
 				result.f = l / r;
 			}
 			else {
@@ -169,12 +171,12 @@ static void eval() {
 			value result;
 			type_id left_type = op->op_binary.left.type.type;
 			type_id right_type = op->op_binary.right.type.type;
-			if (left_type == float_id || right_type == float_id) {
-				float l = (left_type == float_id) ? left.f : (float)left.i;
-				float r = (right_type == float_id) ? right.f : (float)right.i;
+			if (left_type == _float_id || right_type == _float_id) {
+				float l = (left_type == _float_id) ? left.f : (float)left.i;
+				float r = (right_type == _float_id) ? right.f : (float)right.i;
 				result.b = l == r;
 			}
-			else if (left_type == bool_id && right_type == bool_id) {
+			else if (left_type == _bool_id && right_type == _bool_id) {
 				result.b = left.b == right.b;
 			}
 			else {
@@ -189,12 +191,12 @@ static void eval() {
 			value result;
 			type_id left_type = op->op_binary.left.type.type;
 			type_id right_type = op->op_binary.right.type.type;
-			if (left_type == float_id || right_type == float_id) {
-				float l = (left_type == float_id) ? left.f : (float)left.i;
-				float r = (right_type == float_id) ? right.f : (float)right.i;
+			if (left_type == _float_id || right_type == _float_id) {
+				float l = (left_type == _float_id) ? left.f : (float)left.i;
+				float r = (right_type == _float_id) ? right.f : (float)right.i;
 				result.b = l != r;
 			}
-			else if (left_type == bool_id && right_type == bool_id) {
+			else if (left_type == _bool_id && right_type == _bool_id) {
 				result.b = left.b != right.b;
 			}
 			else {
@@ -209,9 +211,9 @@ static void eval() {
 			value result;
 			type_id left_type = op->op_binary.left.type.type;
 			type_id right_type = op->op_binary.right.type.type;
-			if (left_type == float_id || right_type == float_id) {
-				float l = (left_type == float_id) ? left.f : (float)left.i;
-				float r = (right_type == float_id) ? right.f : (float)right.i;
+			if (left_type == _float_id || right_type == _float_id) {
+				float l = (left_type == _float_id) ? left.f : (float)left.i;
+				float r = (right_type == _float_id) ? right.f : (float)right.i;
 				result.b = l > r;
 			}
 			else {
@@ -226,9 +228,9 @@ static void eval() {
 			value result;
 			type_id left_type = op->op_binary.left.type.type;
 			type_id right_type = op->op_binary.right.type.type;
-			if (left_type == float_id || right_type == float_id) {
-				float l = (left_type == float_id) ? left.f : (float)left.i;
-				float r = (right_type == float_id) ? right.f : (float)right.i;
+			if (left_type == _float_id || right_type == _float_id) {
+				float l = (left_type == _float_id) ? left.f : (float)left.i;
+				float r = (right_type == _float_id) ? right.f : (float)right.i;
 				result.b = l >= r;
 			}
 			else {
@@ -243,9 +245,9 @@ static void eval() {
 			value result;
 			type_id left_type = op->op_binary.left.type.type;
 			type_id right_type = op->op_binary.right.type.type;
-			if (left_type == float_id || right_type == float_id) {
-				float l = (left_type == float_id) ? left.f : (float)left.i;
-				float r = (right_type == float_id) ? right.f : (float)right.i;
+			if (left_type == _float_id || right_type == _float_id) {
+				float l = (left_type == _float_id) ? left.f : (float)left.i;
+				float r = (right_type == _float_id) ? right.f : (float)right.i;
 				result.b = l < r;
 			}
 			else {
@@ -260,9 +262,9 @@ static void eval() {
 			value result;
 			type_id left_type = op->op_binary.left.type.type;
 			type_id right_type = op->op_binary.right.type.type;
-			if (left_type == float_id || right_type == float_id) {
-				float l = (left_type == float_id) ? left.f : (float)left.i;
-				float r = (right_type == float_id) ? right.f : (float)right.i;
+			if (left_type == _float_id || right_type == _float_id) {
+				float l = (left_type == _float_id) ? left.f : (float)left.i;
+				float r = (right_type == _float_id) ? right.f : (float)right.i;
 				result.b = l <= r;
 			}
 			else {
@@ -337,7 +339,7 @@ static void eval() {
 		case OPCODE_NEGATE: {
 			value from = get_variable_value(&state, op->op_negate.from);
 			value result;
-			if (op->op_negate.from.type.type == float_id) {
+			if (op->op_negate.from.type.type == _float_id) {
 				result.f = -from.f;
 			}
 			else {
@@ -374,11 +376,12 @@ static void eval() {
 		case OPCODE_RETURN: {
 			if (op->op_return.var.index != 0) {
 				value return_val = get_variable_value(&state, op->op_return.var);
+				return return_val.f;
 			}
-			return;
+			return 0.0;
 		}
 		case OPCODE_CALL: {
-			if (strcmp(get_name(op->op_call.func), "print") == 0) {
+			if (strcmp(_get_name(op->op_call.func), "print") == 0) {
 				value param = get_variable_value(&state, op->op_call.parameters[0]);
 				value result;
 				printf("%f\n", param.f);
@@ -391,21 +394,29 @@ static void eval() {
 		}
 		}
 	}
+
+	return 0.0;
 }
 
-void alang_eval(char *data) {
-	names_init();
-	types_init();
-	functions_init();
-	globals_init();
+float alang_eval(char *data) {
+	_names_init();
+	_types_init();
+	_functions_init();
+	_globals_init();
+
+	char buffer[2048];
+	strcpy(buffer, "fun main(): float { return ");
+	strcat(buffer, data);
+	strcat(buffer, "; }");
 
 	char *filename = "main.kong";
-	tokens tokens = tokenize(filename, data);
-	parse(filename, &tokens);
-	resolve_types();
+	tokens tokens = _tokenize(filename, buffer);
+	_parse(filename, &tokens);
+	_resolve_types();
 	// allocate_globals();
-	for (function_id i = 0; get_function(i) != NULL; ++i) {
-		compile_function_block(&get_function(i)->code, get_function(i)->block);
+	for (function_id i = 0; _get_function(i) != NULL; ++i) {
+		_compile_function_block(&_get_function(i)->code, _get_function(i)->block);
 	}
-	eval();
+
+	return eval(buffer);
 }

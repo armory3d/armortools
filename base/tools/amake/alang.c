@@ -233,218 +233,9 @@ static void kong_log_args(log_level_t log_level, const char *format, va_list arg
 #define NO_TYPE 0xFFFFFFFF
 #define MAX_MEMBERS 1024
 
-typedef enum variable_kind { VARIABLE_GLOBAL, VARIABLE_LOCAL, VARIABLE_INTERNAL } variable_kind;
-typedef enum access_kind { ACCESS_MEMBER, ACCESS_ELEMENT } access_kind;
-
-typedef enum operatorr {
-	OPERATOR_EQUALS,
-	OPERATOR_NOT_EQUALS,
-	OPERATOR_GREATER,
-	OPERATOR_GREATER_EQUAL,
-	OPERATOR_LESS,
-	OPERATOR_LESS_EQUAL,
-	OPERATOR_MINUS,
-	OPERATOR_PLUS,
-	OPERATOR_DIVIDE,
-	OPERATOR_MULTIPLY,
-	OPERATOR_NOT,
-	OPERATOR_OR,
-	OPERATOR_BITWISE_XOR,
-	OPERATOR_BITWISE_AND,
-	OPERATOR_BITWISE_OR,
-	OPERATOR_LEFT_SHIFT,
-	OPERATOR_RIGHT_SHIFT,
-	OPERATOR_AND,
-	OPERATOR_MOD,
-	OPERATOR_ASSIGN,
-	OPERATOR_MINUS_ASSIGN,
-	OPERATOR_PLUS_ASSIGN,
-	OPERATOR_DIVIDE_ASSIGN,
-	OPERATOR_MULTIPLY_ASSIGN
-} operatorr;
-
-typedef struct variable {
-	variable_kind kind;
-	uint64_t      index;
-	type_ref      type;
-} variable;
-
-typedef struct access {
-	access_kind kind;
-	type_id     type;
-
-	union {
-		struct {
-			name_id name;
-		} access_member;
-
-		struct {
-			variable index;
-		} access_element;
-	};
-} access;
-
-typedef struct opcode {
-	enum {
-		OPCODE_VAR,
-		OPCODE_NOT,
-		OPCODE_NEGATE,
-		OPCODE_STORE_VARIABLE,
-		OPCODE_SUB_AND_STORE_VARIABLE,
-		OPCODE_ADD_AND_STORE_VARIABLE,
-		OPCODE_DIVIDE_AND_STORE_VARIABLE,
-		OPCODE_MULTIPLY_AND_STORE_VARIABLE,
-		OPCODE_STORE_ACCESS_LIST,
-		OPCODE_SUB_AND_STORE_ACCESS_LIST,
-		OPCODE_ADD_AND_STORE_ACCESS_LIST,
-		OPCODE_DIVIDE_AND_STORE_ACCESS_LIST,
-		OPCODE_MULTIPLY_AND_STORE_ACCESS_LIST,
-		OPCODE_LOAD_FLOAT_CONSTANT,
-		OPCODE_LOAD_INT_CONSTANT,
-		OPCODE_LOAD_BOOL_CONSTANT,
-		OPCODE_LOAD_ACCESS_LIST,
-		OPCODE_RETURN,
-		OPCODE_CALL,
-		OPCODE_MULTIPLY,
-		OPCODE_DIVIDE,
-		OPCODE_MOD,
-		OPCODE_ADD,
-		OPCODE_SUB,
-		OPCODE_EQUALS,
-		OPCODE_NOT_EQUALS,
-		OPCODE_GREATER,
-		OPCODE_GREATER_EQUAL,
-		OPCODE_LESS,
-		OPCODE_LESS_EQUAL,
-		OPCODE_AND,
-		OPCODE_OR,
-		OPCODE_BITWISE_XOR,
-		OPCODE_BITWISE_AND,
-		OPCODE_BITWISE_OR,
-		OPCODE_LEFT_SHIFT,
-		OPCODE_RIGHT_SHIFT,
-		OPCODE_IF,
-		OPCODE_WHILE_START,
-		OPCODE_WHILE_CONDITION,
-		OPCODE_WHILE_END,
-		OPCODE_WHILE_BODY,
-		OPCODE_BLOCK_START,
-		OPCODE_BLOCK_END
-	} type;
-	uint32_t size;
-
-	union {
-		struct {
-			variable var;
-		} op_var;
-		struct {
-			variable from;
-			variable to;
-		} op_negate;
-		struct {
-			variable from;
-			variable to;
-		} op_not;
-		struct {
-			variable from;
-			variable to;
-		} op_store_var;
-		struct {
-			variable from;
-			variable to;
-
-			access  access_list[64];
-			uint8_t access_list_size;
-		} op_store_access_list;
-		struct {
-			float    number;
-			variable to;
-		} op_load_float_constant;
-		struct {
-			int      number;
-			variable to;
-		} op_load_int_constant;
-		struct {
-			bool     boolean;
-			variable to;
-		} op_load_bool_constant;
-		struct {
-			variable from;
-			variable to;
-
-			access  access_list[64];
-			uint8_t access_list_size;
-		} op_load_access_list;
-		struct {
-			variable var;
-		} op_return;
-		struct {
-			variable var;
-			name_id  func;
-			variable parameters[64];
-			uint8_t  parameters_size;
-		} op_call;
-		struct {
-			variable right;
-			variable left;
-			variable result;
-		} op_binary;
-		struct {
-			variable condition;
-			uint64_t start_id;
-			uint64_t end_id;
-		} op_if;
-		struct {
-			uint64_t start_id;
-			uint64_t continue_id;
-			uint64_t end_id;
-		} op_while_start;
-		struct {
-			uint64_t start_id;
-			uint64_t continue_id;
-			uint64_t end_id;
-		} op_while_end;
-		struct {
-			variable condition;
-			uint64_t end_id;
-		} op_while;
-		struct {
-			uint64_t id;
-		} op_block;
-		struct {
-			uint8_t nothing;
-		} op_nothing;
-	};
-} opcode;
-
 struct statement;
 
 typedef uint32_t global_id;
-
-typedef struct global_value {
-	enum {
-		GLOBAL_VALUE_FLOAT,
-		GLOBAL_VALUE_INT,
-		GLOBAL_VALUE_UINT,
-		GLOBAL_VALUE_BOOL,
-		GLOBAL_VALUE_NONE
-	} kind;
-	union {
-		float    floats[1];
-		int      ints[1];
-		unsigned uints[1];
-		bool     b;
-	} value;
-} global_value;
-
-typedef struct global {
-	name_id                name;
-	type_id                type;
-	uint64_t               var_index;
-	global_value           value;
-	attribute_list         attributes;
-	uint32_t               usage;
-} global;
 
 typedef struct global_array {
 	global_id globals[256];
@@ -579,56 +370,6 @@ typedef struct definition {
 	};
 } definition;
 
-typedef struct token {
-	int line, column;
-
-	enum {
-		TOKEN_NONE,
-		TOKEN_BOOLEAN,
-		TOKEN_FLOAT,
-		TOKEN_INT,
-		// TOKEN_STRING,
-		TOKEN_IDENTIFIER,
-		TOKEN_LEFT_PAREN,
-		TOKEN_RIGHT_PAREN,
-		TOKEN_LEFT_CURLY,
-		TOKEN_RIGHT_CURLY,
-		TOKEN_LEFT_SQUARE,
-		TOKEN_RIGHT_SQUARE,
-		TOKEN_HASH,
-		TOKEN_IF,
-		TOKEN_ELSE,
-		TOKEN_WHILE,
-		TOKEN_DO,
-		TOKEN_FOR,
-		TOKEN_SEMICOLON,
-		TOKEN_COLON,
-		TOKEN_DOT,
-		TOKEN_COMMA,
-		TOKEN_OPERATOR,
-		TOKEN_IN,
-		TOKEN_STRUCT,
-		TOKEN_FUNCTION,
-		TOKEN_VAR,
-		TOKEN_CONST,
-		TOKEN_RETURN
-	} kind;
-
-	union {
-		bool   boolean;
-		double number;
-		// char string[MAX_IDENTIFIER_SIZE];
-		name_id   identifier;
-		operatorr op;
-	};
-} token;
-
-typedef struct tokens {
-	token *t;
-	size_t current_size;
-	size_t max_size;
-} tokens;
-
 typedef struct member {
 	name_id  name;
 	type_ref type;
@@ -650,33 +391,32 @@ typedef struct type {
 } type;
 
 static void allocate_globals(void);
-static void compile_function_block(opcodes *code, struct statement *block);
+void _compile_function_block(opcodes *code, struct statement *block);
 static variable allocate_variable(type_ref type, variable_kind kind);
 
-static void functions_init(void);
+void _functions_init(void);
 static function_id add_function(name_id name);
 static function_id find_function(name_id name);
-static function *get_function(function_id function);
+function *_get_function(function_id function);
 
-static void globals_init(void);
+void _globals_init(void);
 static global_id add_global(type_id type, attribute_list attributes, name_id name);
 static global_id add_global_with_value(type_id type, attribute_list attributes, name_id name, global_value value);
 static global *find_global(name_id name);
 static global *get_global(global_id id);
 static void assign_global_var(global_id id, uint64_t var_index);
 
-static void names_init(void);
+void _names_init(void);
 static name_id add_name(char *name);
-static char *get_name(name_id index);
+char *_get_name(name_id index);
 
-static void parse(const char *filename, tokens *tokens);
-static void alang_eval(char *data);
+void _parse(const char *filename, tokens *tokens);
 static token tokens_get(tokens *arr, size_t index);
-static tokens tokenize(const char *filename, const char *source);
+tokens _tokenize(const char *filename, const char *source);
 
-static void resolve_types(void);
+void _resolve_types(void);
 static void init_type_ref(type_ref *t, name_id name);
-static void types_init(void);
+void _types_init(void);
 static type_id add_type(name_id name);
 static type_id add_full_type(type *t);
 static type_id find_type_by_name(name_id name);
@@ -790,11 +530,6 @@ typedef struct modifiers {
 	size_t     size;
 } modifiers_t;
 
-typedef struct allocated_global {
-	global  *g;
-	uint64_t variable_id;
-} allocated_global;
-
 typedef struct tokenizer_state {
 	const char *iterator;
 	char        next;
@@ -831,8 +566,8 @@ struct {
 	name_id value;
 } *names_hash = NULL;
 
-static allocated_global allocated_globals[1024];
-static size_t                  allocated_globals_size = 0;
+allocated_global __allocated_globals[1024];
+size_t           __allocated_globals_size = 0;
 static const char all_names[1024 * 1024];
 static uint64_t next_variable_id = 1;
 static variable all_variables[1024 * 1024];
@@ -851,11 +586,11 @@ static int expression_index = 0;
 static type   *types           = NULL;
 static type_id types_size      = 1024;
 static type_id        next_type_index = 0;
-static type_id void_id;
-static type_id float_id;
-static type_id int_id;
-static type_id uint_id;
-static type_id bool_id;
+type_id _void_id;
+type_id _float_id;
+type_id _int_id;
+type_id _uint_id;
+type_id _bool_id;
 static type_id function_type_id;
 
 static definition  parse_definition(state_t *state);
@@ -867,9 +602,9 @@ static definition parse_const(state_t *state, attribute_list attributes);
 static void resolve_types_in_expression(statement *parent, expression *e);
 
 static allocated_global find_allocated_global(name_id name) {
-	for (size_t i = 0; i < allocated_globals_size; ++i) {
-		if (name == allocated_globals[i].g->name) {
-			return allocated_globals[i];
+	for (size_t i = 0; i < __allocated_globals_size; ++i) {
+		if (name == __allocated_globals[i].g->name) {
+			return __allocated_globals[i];
 		}
 	}
 
@@ -916,7 +651,7 @@ static variable find_variable(block *parent, name_id name) {
 		}
 		else {
 			debug_context context = {0};
-			error(context, "Variable %s not found", get_name(name));
+			error(context, "Variable %s not found", _get_name(name));
 
 			variable v;
 			v.index = 0;
@@ -971,7 +706,7 @@ static variable emit_expression(opcodes *code, block *parent, expression *e) {
 			variable left_var  = emit_expression(code, parent, left);
 			type_ref t;
 			init_type_ref(&t, NO_NAME);
-			t.type              = bool_id;
+			t.type              = _bool_id;
 			variable result_var = allocate_variable(t, VARIABLE_INTERNAL);
 
 			opcode o;
@@ -1258,7 +993,7 @@ static variable emit_expression(opcodes *code, block *parent, expression *e) {
 	case EXPRESSION_BOOLEAN: {
 		type_ref t;
 		init_type_ref(&t, NO_NAME);
-		t.type     = float_id;
+		t.type     = _float_id;
 		variable v = allocate_variable(t, VARIABLE_INTERNAL);
 
 		opcode o;
@@ -1273,7 +1008,7 @@ static variable emit_expression(opcodes *code, block *parent, expression *e) {
 	case EXPRESSION_FLOAT: {
 		type_ref t;
 		init_type_ref(&t, NO_NAME);
-		t.type     = float_id;
+		t.type     = _float_id;
 		variable v = allocate_variable(t, VARIABLE_INTERNAL);
 
 		opcode o;
@@ -1288,7 +1023,7 @@ static variable emit_expression(opcodes *code, block *parent, expression *e) {
 	case EXPRESSION_INT: {
 		type_ref t;
 		init_type_ref(&t, NO_NAME);
-		t.type     = int_id;
+		t.type     = _int_id;
 		variable v = allocate_variable(t, VARIABLE_INTERNAL);
 
 		opcode o;
@@ -1455,7 +1190,7 @@ static block_ids emit_statement(opcodes *code, block *parent, statement *stateme
 				o.op_not.from = previous_conditions[previous_conditions_size - 1].condition;
 				type_ref t;
 				init_type_ref(&t, NO_NAME);
-				t.type            = bool_id;
+				t.type            = _bool_id;
 				current_condition = allocate_variable(t, VARIABLE_INTERNAL);
 				o.op_not.to       = current_condition;
 				emit_op(code, &o);
@@ -1473,7 +1208,7 @@ static block_ids emit_statement(opcodes *code, block *parent, statement *stateme
 				o.op_binary.right = current_condition;
 				type_ref t;
 				init_type_ref(&t, NO_NAME);
-				t.type             = bool_id;
+				t.type             = _bool_id;
 				summed_condition   = allocate_variable(t, VARIABLE_INTERNAL);
 				o.op_binary.result = summed_condition;
 				emit_op(code, &o);
@@ -1495,7 +1230,7 @@ static block_ids emit_statement(opcodes *code, block *parent, statement *stateme
 					o.op_binary.right = v;
 					type_ref t;
 					init_type_ref(&t, NO_NAME);
-					t.type             = bool_id;
+					t.type             = _bool_id;
 					else_test          = allocate_variable(t, VARIABLE_INTERNAL);
 					o.op_binary.result = else_test;
 					emit_op(code, &o);
@@ -1696,15 +1431,15 @@ static void allocate_globals(void) {
 		init_type_ref(&t, NO_NAME);
 		t.type                                                = g->type;
 		variable v                                            = allocate_variable(t, VARIABLE_GLOBAL);
-		allocated_globals[allocated_globals_size].g           = g;
-		allocated_globals[allocated_globals_size].variable_id = v.index;
-		allocated_globals_size += 1;
+		__allocated_globals[__allocated_globals_size].g           = g;
+		__allocated_globals[__allocated_globals_size].variable_id = v.index;
+		__allocated_globals_size += 1;
 
 		assign_global_var(i, v.index);
 	}
 }
 
-static void compile_function_block(opcodes *code, struct statement *block) {
+void _compile_function_block(opcodes *code, struct statement *block) {
 	if (block == NULL) {
 		// built-in
 		return;
@@ -1725,7 +1460,7 @@ static void compile_function_block(opcodes *code, struct statement *block) {
 
 static void add_func_int(char *name) {
 	function_id func = add_function(add_name(name));
-	function   *f    = get_function(func);
+	function   *f    = _get_function(func);
 	init_type_ref(&f->return_type, add_name("int"));
 	f->return_type.type = find_type_by_ref(&f->return_type);
 	f->parameters_size  = 0;
@@ -1734,7 +1469,7 @@ static void add_func_int(char *name) {
 
 static void add_func_float(char *name) {
 	function_id func = add_function(add_name(name));
-	function   *f    = get_function(func);
+	function   *f    = _get_function(func);
 	init_type_ref(&f->return_type, add_name("float"));
 	f->return_type.type = find_type_by_ref(&f->return_type);
 	f->parameters_size  = 0;
@@ -1743,7 +1478,7 @@ static void add_func_float(char *name) {
 
 static void add_func_uint(char *name) {
 	function_id func = add_function(add_name(name));
-	function   *f    = get_function(func);
+	function   *f    = _get_function(func);
 	init_type_ref(&f->return_type, add_name("uint"));
 	f->return_type.type = find_type_by_ref(&f->return_type);
 	f->parameters_size  = 0;
@@ -1752,7 +1487,7 @@ static void add_func_uint(char *name) {
 
 static void add_func_float_float(char *name) {
 	function_id func = add_function(add_name(name));
-	function   *f    = get_function(func);
+	function   *f    = _get_function(func);
 	init_type_ref(&f->return_type, add_name("float"));
 	f->return_type.type   = find_type_by_ref(&f->return_type);
 	f->parameter_names[0] = add_name("a");
@@ -1762,7 +1497,7 @@ static void add_func_float_float(char *name) {
 	f->block                   = NULL;
 }
 
-static void functions_init(void) {
+void _functions_init(void) {
 	function     *new_functions = realloc(functions, functions_size * sizeof(function));
 	debug_context context       = {0};
 	check(new_functions != NULL, context, "Could not allocate functions");
@@ -1771,7 +1506,7 @@ static void functions_init(void) {
 
 	{
 		function_id func = add_function(add_name("float"));
-		function   *f    = get_function(func);
+		function   *f    = _get_function(func);
 		init_type_ref(&f->return_type, add_name("float"));
 		f->return_type.type   = find_type_by_ref(&f->return_type);
 		f->parameter_names[0] = add_name("x");
@@ -1785,7 +1520,7 @@ static void functions_init(void) {
 
 	{
 		function_id func = add_function(add_name("int"));
-		function   *f    = get_function(func);
+		function   *f    = _get_function(func);
 		init_type_ref(&f->return_type, add_name("int"));
 		f->return_type.type = find_type_by_ref(&f->return_type);
 
@@ -1800,7 +1535,7 @@ static void functions_init(void) {
 
 	{
 		function_id func = add_function(add_name("uint"));
-		function   *f    = get_function(func);
+		function   *f    = _get_function(func);
 		init_type_ref(&f->return_type, add_name("uint"));
 		f->return_type.type = find_type_by_ref(&f->return_type);
 
@@ -1815,7 +1550,7 @@ static void functions_init(void) {
 
 	{
 		function_id func = add_function(add_name("bool"));
-		function   *f    = get_function(func);
+		function   *f    = _get_function(func);
 		init_type_ref(&f->return_type, add_name("bool"));
 		f->return_type.type = find_type_by_ref(&f->return_type);
 
@@ -1861,27 +1596,27 @@ static function_id add_function(name_id name) {
 	return f;
 }
 
-static function *get_function(function_id function) {
+function *_get_function(function_id function) {
 	if (function >= next_function_index) {
 		return NULL;
 	}
 	return &functions[function];
 }
 
-static void globals_init(void) {
+void _globals_init(void) {
 	global_value int_value;
 	int_value.kind = GLOBAL_VALUE_INT;
 
 	attribute_list attributes = {0};
 
 	// int_value.value.ints[0] = 0;
-	// add_global_with_value(float_id, attributes, add_name("COMPARE_ALWAYS"), int_value);
+	// add_global_with_value(_float_id, attributes, add_name("COMPARE_ALWAYS"), int_value);
 
 	// global_value uint_value;
 	// uint_value.kind = GLOBAL_VALUE_UINT;
 
 	// uint_value.value.uints[0] = 0;
-	// add_global_with_value(uint_id, attributes, add_name("TEXTURE_FORMAT_R8_UNORM"), uint_value);
+	// add_global_with_value(_uint_id, attributes, add_name("TEXTURE_FORMAT_R8_UNORM"), uint_value);
 }
 
 static global_id add_global(type_id type, attribute_list attributes, name_id name) {
@@ -1932,7 +1667,7 @@ static void assign_global_var(global_id id, uint64_t var_index) {
 	globals[id].var_index = var_index;
 }
 
-static void names_init(void) {
+void _names_init(void) {
 	char         *new_names = realloc(names, names_size);
 	debug_context context   = {0};
 	check(new_names != NULL, context, "Could not allocate names");
@@ -1975,7 +1710,7 @@ static name_id add_name(char *name) {
 	return id;
 }
 
-static char *get_name(name_id id) {
+char *_get_name(name_id id) {
 	debug_context context = {0};
 	check(id < names_index, context, "Encountered a weird name id");
 	return &names[id];
@@ -2049,7 +1784,7 @@ static void match_token_identifier(state_t *state) {
 	}
 }
 
-static void parse(const char *filename, tokens *tokens) {
+void _parse(const char *filename, tokens *tokens) {
 	state_t state          = {0};
 	state.context.filename = filename;
 	state.tokens           = tokens;
@@ -2117,7 +1852,7 @@ static definition parse_definition(state_t *state) {
 	}
 	case TOKEN_FUNCTION: {
 		definition d  = parse_function(state);
-		function  *f  = get_function(d.function);
+		function  *f  = _get_function(d.function);
 		f->attributes = attributes;
 		return d;
 	}
@@ -2944,7 +2679,7 @@ static definition parse_function(state_t *state) {
 	definition d;
 	d.kind             = DEFINITION_FUNCTION;
 	d.function         = add_function(name.identifier);
-	function *f        = get_function(d.function);
+	function *f        = _get_function(d.function);
 	f->return_type     = return_type;
 	f->parameters_size = parameters_size;
 	for (uint8_t parameter_index = 0; parameter_index < parameters_size; ++parameter_index) {
@@ -3041,7 +2776,7 @@ static definition parse_const(state_t *state, attribute_list attributes) {
 		float_value.value.floats[0] = (float)value->number;
 
 		d.kind   = DEFINITION_CONST_BASIC;
-		d.global = add_global_with_value(float_id, attributes, name.identifier, float_value);
+		d.global = add_global_with_value(_float_id, attributes, name.identifier, float_value);
 	}
 	else {
 		debug_context context = {0};
@@ -3221,7 +2956,7 @@ static void tokens_add_identifier(tokenizer_state *state, tokens *tokens, tokeni
 	tokens_add(tokens, token);
 }
 
-static tokens tokenize(const char *filename, const char *source) {
+tokens _tokenize(const char *filename, const char *source) {
 	mode mode           = MODE_SELECT;
 	bool number_has_dot = false;
 
@@ -3593,7 +3328,7 @@ static void resolve_types_in_element(statement *parent_block, expression *elemen
 	}
 	else {
 		debug_context context = {0};
-		error(context, "Indexed non-array %s", get_name(of->name));
+		error(context, "Indexed non-array %s", _get_name(of->name));
 	}
 }
 
@@ -3615,20 +3350,20 @@ static void resolve_types_in_member(statement *parent_block, expression *member)
 	}
 
 	debug_context context = {0};
-	error(context, "Member %s not found", get_name(member_name));
+	error(context, "Member %s not found", _get_name(member_name));
 }
 
 static bool types_compatible(type_id left, type_id right) {
 	if (left == right) {
 		return true;
 	}
-	if ((left == int_id && right == float_id) || (left == float_id && right == int_id)) {
+	if ((left == _int_id && right == _float_id) || (left == _float_id && right == _int_id)) {
 		return true;
 	}
-	if ((left == uint_id && right == float_id) || (left == float_id && right == uint_id)) {
+	if ((left == _uint_id && right == _float_id) || (left == _float_id && right == _uint_id)) {
 		return true;
 	}
-	if ((left == uint_id && right == int_id) || (left == int_id && right == uint_id)) {
+	if ((left == _uint_id && right == _int_id) || (left == _int_id && right == _uint_id)) {
 		return true;
 	}
 	return false;
@@ -3642,24 +3377,24 @@ static type_ref upgrade_type(type_ref left_type, type_ref right_type) {
 		return left_type;
 	}
 
-	if (left == int_id && right == float_id) {
+	if (left == _int_id && right == _float_id) {
 		return right_type;
 	}
-	if (left == float_id && right == int_id) {
+	if (left == _float_id && right == _int_id) {
 		return left_type;
 	}
 
-	if (left == uint_id && right == float_id) {
+	if (left == _uint_id && right == _float_id) {
 		return right_type;
 	}
-	if (left == float_id && right == uint_id) {
+	if (left == _float_id && right == _uint_id) {
 		return left_type;
 	}
 
-	if (left == uint_id && right == int_id) {
+	if (left == _uint_id && right == _int_id) {
 		return right_type;
 	}
-	if (left == int_id && right == uint_id) {
+	if (left == _int_id && right == _uint_id) {
 		return left_type;
 	}
 
@@ -3681,7 +3416,7 @@ static void resolve_types_in_expression(statement *parent, expression *e) {
 		case OPERATOR_LESS_EQUAL:
 		case OPERATOR_OR:
 		case OPERATOR_AND: {
-			e->type.type = bool_id;
+			e->type.type = _bool_id;
 			break;
 		}
 		case OPERATOR_BITWISE_XOR:
@@ -3701,7 +3436,7 @@ static void resolve_types_in_expression(statement *parent, expression *e) {
 			}
 			else {
 				debug_context context = {0};
-				error(context, "Type mismatch %s vs %s", get_name(get_type(left_type)->name), get_name(get_type(right_type)->name));
+				error(context, "Type mismatch %s vs %s", _get_name(get_type(left_type)->name), _get_name(get_type(right_type)->name));
 			}
 			break;
 		}
@@ -3713,7 +3448,7 @@ static void resolve_types_in_expression(statement *parent, expression *e) {
 			type_id right_type = e->binary.right->type.type;
 			if (!types_compatible(left_type, right_type)) {
 				debug_context context = {0};
-				error(context, "Type mismatch %s vs %s", get_name(get_type(left_type)->name), get_name(get_type(right_type)->name));
+				error(context, "Type mismatch %s vs %s", _get_name(get_type(left_type)->name), _get_name(get_type(right_type)->name));
 			}
 			e->type = upgrade_type(e->binary.left->type, e->binary.right->type);
 			break;
@@ -3726,7 +3461,7 @@ static void resolve_types_in_expression(statement *parent, expression *e) {
 			type_id right_type = e->binary.right->type.type;
 			if (!types_compatible(left_type, right_type)) {
 				debug_context context = {0};
-				error(context, "Type mismatch %s vs %s", get_name(get_type(left_type)->name), get_name(get_type(right_type)->name));
+				error(context, "Type mismatch %s vs %s", _get_name(get_type(left_type)->name), _get_name(get_type(right_type)->name));
 			}
 			e->type = e->binary.left->type;
 			break;
@@ -3748,7 +3483,7 @@ static void resolve_types_in_expression(statement *parent, expression *e) {
 			break;
 		}
 		case OPERATOR_NOT: {
-			e->type.type = bool_id;
+			e->type.type = _bool_id;
 			break;
 		}
 		case OPERATOR_EQUALS:
@@ -3777,15 +3512,15 @@ static void resolve_types_in_expression(statement *parent, expression *e) {
 		break;
 	}
 	case EXPRESSION_BOOLEAN: {
-		e->type.type = bool_id;
+		e->type.type = _bool_id;
 		break;
 	}
 	case EXPRESSION_FLOAT: {
-		e->type.type = float_id;
+		e->type.type = _float_id;
 		break;
 	}
 	case EXPRESSION_INT: {
-		e->type.type = int_id;
+		e->type.type = _int_id;
 		break;
 	}
 	case EXPRESSION_VARIABLE: {
@@ -3798,7 +3533,7 @@ static void resolve_types_in_expression(statement *parent, expression *e) {
 			if (type.type == NO_TYPE) {
 				type                  = find_local_var_type(&parent->block, e->variable);
 				debug_context context = {0};
-				error(context, "Variable %s not found", get_name(e->variable));
+				error(context, "Variable %s not found", _get_name(e->variable));
 			}
 			e->type = type;
 		}
@@ -3810,8 +3545,8 @@ static void resolve_types_in_expression(statement *parent, expression *e) {
 		break;
 	}
 	case EXPRESSION_CALL: {
-		for (function_id i = 0; get_function(i) != NULL; ++i) {
-			function *f = get_function(i);
+		for (function_id i = 0; _get_function(i) != NULL; ++i) {
+			function *f = _get_function(i);
 			if (f->name == e->call.func_name) {
 				e->type = f->return_type;
 				break;
@@ -3834,7 +3569,7 @@ static void resolve_types_in_expression(statement *parent, expression *e) {
 
 	if (e->type.type == NO_TYPE) {
 		debug_context context = {0};
-		// const char *n = get_name(e->call.func_name);
+		// const char *n = _get_name(e->call.func_name);
 		error(context, "Could not resolve type");
 	}
 }
@@ -3885,7 +3620,7 @@ static void resolve_types_in_block(statement *parent, statement *block) {
 
 			if (s->local_variable.var.type.type == NO_TYPE) {
 				debug_context context = {0};
-				error(context, "Could not find type %s for %s", get_name(var_type_name), get_name(var_name));
+				error(context, "Could not find type %s for %s", _get_name(var_type_name), _get_name(var_name));
 			}
 
 			if (s->local_variable.init != NULL) {
@@ -3901,7 +3636,7 @@ static void resolve_types_in_block(statement *parent, statement *block) {
 	}
 }
 
-static void resolve_types(void) {
+void _resolve_types(void) {
 	for (type_id i = 0; get_type(i) != NULL; ++i) {
 		type *s = get_type(i);
 		for (size_t j = 0; j < s->members.size; ++j) {
@@ -3910,14 +3645,14 @@ static void resolve_types(void) {
 				s->members.m[j].type.type = find_type_by_name(name);
 				if (s->members.m[j].type.type == NO_TYPE) {
 					debug_context context = {0};
-					error(context, "Could not find type %s in %s", get_name(name), get_name(s->name));
+					error(context, "Could not find type %s in %s", _get_name(name), _get_name(s->name));
 				}
 			}
 		}
 	}
 
-	for (function_id i = 0; get_function(i) != NULL; ++i) {
-		function *f = get_function(i);
+	for (function_id i = 0; _get_function(i) != NULL; ++i) {
+		function *f = _get_function(i);
 
 		for (uint8_t parameter_index = 0; parameter_index < f->parameters_size; ++parameter_index) {
 			if (f->parameter_types[parameter_index].type == NO_TYPE) {
@@ -3925,7 +3660,7 @@ static void resolve_types(void) {
 				f->parameter_types[parameter_index].type = find_type_by_name(parameter_type_name);
 				if (f->parameter_types[parameter_index].type == NO_TYPE) {
 					debug_context context = {0};
-					error(context, "Could not find type %s for %s", get_name(parameter_type_name), get_name(f->name));
+					error(context, "Could not find type %s for %s", _get_name(parameter_type_name), _get_name(f->name));
 				}
 			}
 		}
@@ -3934,13 +3669,13 @@ static void resolve_types(void) {
 			f->return_type.type = find_type_by_ref(&f->return_type);
 
 			if (f->return_type.type == NO_TYPE) {
-				error_no_context("Could not find type %s for %s", get_name(f->return_type.unresolved.name), get_name(f->name));
+				error_no_context("Could not find type %s for %s", _get_name(f->return_type.unresolved.name), _get_name(f->name));
 			}
 		}
 	}
 
-	for (function_id i = 0; get_function(i) != NULL; ++i) {
-		function *f = get_function(i);
+	for (function_id i = 0; _get_function(i) != NULL; ++i) {
+		function *f = _get_function(i);
 
 		if (f->block == NULL) {
 			// built in
@@ -3964,24 +3699,24 @@ static void init_type_ref(type_ref *t, name_id name) {
 	t->unresolved.array_size = 0;
 }
 
-static void types_init(void) {
+void _types_init(void) {
 	type         *new_types = realloc(types, types_size * sizeof(type));
 	debug_context context   = {0};
 	check(new_types != NULL, context, "Could not allocate types");
 	types           = new_types;
 	next_type_index = 0;
 
-	void_id                     = add_type(add_name("void"));
-	get_type(void_id)->built_in = true;
+	_void_id                     = add_type(add_name("void"));
+	get_type(_void_id)->built_in = true;
 
-	bool_id                      = add_type(add_name("bool"));
-	get_type(bool_id)->built_in  = true;
-	float_id                     = add_type(add_name("float"));
-	get_type(float_id)->built_in = true;
-	int_id                       = add_type(add_name("int"));
-	get_type(int_id)->built_in   = true;
-	uint_id                      = add_type(add_name("uint"));
-	get_type(uint_id)->built_in  = true;
+	_bool_id                      = add_type(add_name("bool"));
+	get_type(_bool_id)->built_in  = true;
+	_float_id                     = add_type(add_name("float"));
+	get_type(_float_id)->built_in = true;
+	_int_id                       = add_type(add_name("int"));
+	get_type(_int_id)->built_in   = true;
+	_uint_id                      = add_type(add_name("uint"));
+	get_type(_uint_id)->built_in  = true;
 
 	{
 		function_type_id                     = add_type(add_name("fun"));

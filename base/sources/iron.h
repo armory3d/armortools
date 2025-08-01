@@ -71,22 +71,27 @@ void js_init() {
 	#endif
 }
 
+float alang_eval(char *data);
+
 float js_eval(const char *js) {
-	if (js_runtime == NULL) {
-		js_init();
-	}
-	JSValue ret = JS_Eval(js_ctx, js, strlen(js), "iron", JS_EVAL_TYPE_GLOBAL);
-	if (JS_IsException(ret)) {
-		js_std_dump_error(js_ctx);
-		JS_ResetUncatchableError(js_ctx);
-	}
-	double d;
-	JS_ToFloat64(js_ctx, &d, ret);
-	JS_RunGC(js_runtime);
-	if (d != d) { // nan
-		d = 0.0;
-	}
-	return d;
+
+	return alang_eval(js);
+
+	// if (js_runtime == NULL) {
+	// 	js_init();
+	// }
+	// JSValue ret = JS_Eval(js_ctx, js, strlen(js), "iron", JS_EVAL_TYPE_GLOBAL);
+	// if (JS_IsException(ret)) {
+	// 	js_std_dump_error(js_ctx);
+	// 	JS_ResetUncatchableError(js_ctx);
+	// }
+	// double d;
+	// JS_ToFloat64(js_ctx, &d, ret);
+	// JS_RunGC(js_runtime);
+	// if (d != d) { // nan
+	// 	d = 0.0;
+	// }
+	// return d;
 }
 
 JSValue js_call_result;
