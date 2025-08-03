@@ -67,7 +67,7 @@ if (!flags.lite) {
 	project.add_assets("assets/themes/*.json", { destination: "data/themes/{name}" });
 
 	if (platform === "linux" && fs_exists(os_cwd() + "/icon.png")) {
-		project.add_assets("../" + dir + "/icon.png", { destination: "{name}", noprocessing: true });
+		project.add_assets("../" + dir + "/icon.png", { destination: "{name}", noprocessing: true, noembed: true });
 	}
 
 	if (flags.embed) {
