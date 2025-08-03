@@ -26,8 +26,10 @@ static const char *videoFormats[] = {"ogv", NULL};
 static NSApplication *myapp;
 static NSWindow *window;
 static BasicMTKView *view;
-static struct HIDManager *hidManager;
 static char language[3];
+#ifdef WITH_GAMEPAD
+static struct HIDManager *hidManager;
+#endif
 
 @implementation BasicMTKView
 
@@ -987,10 +989,12 @@ void iron_init(const char *name, int width, int height, iron_window_options_t *w
 		[myapp finishLaunching];
 		[[NSRunningApplication currentApplication] activateWithOptions:(NSApplicationActivateAllWindows | NSApplicationActivateIgnoringOtherApps)];
 		NSApp.activationPolicy = NSApplicationActivationPolicyRegular;
+		add_menubar();
 
+		#ifdef WITH_GAMEPAD
 		hidManager = (struct HIDManager *)malloc(sizeof(struct HIDManager));
 		HIDManager_init(hidManager);
-		add_menubar();
+		#endif
 	}
 
 	iron_window_options_t defaultWindowOptions;
