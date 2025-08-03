@@ -1,24 +1,21 @@
 
 #include "android_system.h"
-#include <iron_system.h>
-#define EGL_NO_PLATFORM_SPECIFIC_TYPES
-#include <EGL/egl.h>
-#include <iron_gpu.h>
-#include <android/sensor.h>
-#include <android/window.h>
-#include "android_native_app_glue.h"
-#include <iron_thread.h>
-#include <iron_video.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <time.h>
+#include <sys/time.h>
+#include <iron_system.h>
+#include <iron_gpu.h>
+#include <iron_file.h>
+#include <iron_thread.h>
+#include <iron_video.h>
+#include <android/sensor.h>
+#include <android/window.h>
+#include "android_native_app_glue.h"
 #include <vulkan/vulkan_android.h>
 #include <vulkan/vulkan_core.h>
-#include <sys/time.h>
-#include <time.h>
-#include <iron_file.h>
-#define CLASS_NAME "android/app/NativeActivity"
 
 typedef struct {
 	bool available;
@@ -170,6 +167,20 @@ static bool isGamepadEvent(AInputEvent *event) {
 	        (AInputEvent_getSource(event) & AINPUT_SOURCE_DPAD) == AINPUT_SOURCE_DPAD);
 }
 
+const char *iron_gamepad_vendor(int gamepad) {
+	return "Google";
+}
+
+const char *iron_gamepad_product_name(int gamepad) {
+	return "gamepad";
+}
+
+bool iron_gamepad_connected(int num) {
+	return num == 0;
+}
+
+void iron_gamepad_rumble(int gamepad, float left, float right) {}
+
 #endif
 
 static bool isPenEvent(AInputEvent *event) {
@@ -245,9 +256,9 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 			touchInput(event);
 			return 1;
 		}
-		else if ((source & AINPUT_SOURCE_JOYSTICK) == AINPUT_SOURCE_JOYSTICK) {
-			// int id = AInputEvent_getDeviceId(event);
 
+		#ifdef WITH_GAMEPAD
+		else if ((source & AINPUT_SOURCE_JOYSTICK) == AINPUT_SOURCE_JOYSTICK) {
 			float x = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_X, 0);
 			if (x != last_x) {
 				iron_internal_gamepad_trigger_axis(0, 0, x);
@@ -273,7 +284,6 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 			}
 
 			float hat_x = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_HAT_X, 0);
-
 			bool hat_left = false;
 			bool hat_right = false;
 			if (hat_x < -0.5f) {
@@ -284,7 +294,6 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 			}
 
 			float hat_y = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_HAT_Y, 0);
-
 			bool hat_up = false;
 			bool hat_down = false;
 			if (hat_y < -0.5f) {
@@ -298,25 +307,23 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 				iron_internal_gamepad_trigger_button(0, 14, hat_left ? 1.0f : 0.0f);
 				last_hat_left = hat_left;
 			}
-
 			if (hat_right != last_hat_right) {
 				iron_internal_gamepad_trigger_button(0, 15, hat_right ? 1.0f : 0.0f);
 				last_hat_right = hat_right;
 			}
-
 			if (hat_up != last_hat_up) {
 				iron_internal_gamepad_trigger_button(0, 12, hat_up ? 1.0f : 0.0f);
 				last_hat_up = hat_up;
 			}
-
 			if (hat_down != last_hat_down) {
 				iron_internal_gamepad_trigger_button(0, 13, hat_down ? 1.0f : 0.0f);
 				last_hat_down = hat_down;
 			}
-
 			return 1;
 		}
+		#endif
 	}
+
 	else if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY) {
 		int32_t code = AKeyEvent_getKeyCode(event);
 
@@ -406,19 +413,15 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 			case AKEYCODE_NUMPAD_ENTER:
 				iron_internal_keyboard_trigger_key_down(IRON_KEY_RETURN);
 				return 1;
+			case AKEYCODE_BACK:
+				iron_internal_keyboard_trigger_key_down(IRON_KEY_BACK);
+				return 1;
+
+			#ifdef WITH_GAMEPAD
 			case AKEYCODE_DPAD_CENTER:
 			case AKEYCODE_BUTTON_B:
 				iron_internal_gamepad_trigger_button(0, 1, 1);
 				return 1;
-			case AKEYCODE_BACK:
-				if (AKeyEvent_getMetaState(event) & AMETA_ALT_ON) { // Xperia Play
-					iron_internal_gamepad_trigger_button(0, 1, 1);
-					return 1;
-				}
-				else {
-					iron_internal_keyboard_trigger_key_down(IRON_KEY_BACK);
-					return 1;
-				}
 			case AKEYCODE_BUTTON_A:
 				iron_internal_gamepad_trigger_button(0, 0, 1);
 				return 1;
@@ -452,33 +455,51 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 			case AKEYCODE_BUTTON_THUMBR:
 				iron_internal_gamepad_trigger_button(0, 11, 1);
 				return 1;
-			case AKEYCODE_DPAD_UP:
-				if (isGamepadEvent(event))
-					iron_internal_gamepad_trigger_button(0, 12, 1);
-				else
-					iron_internal_keyboard_trigger_key_down(IRON_KEY_UP);
-				return 1;
-			case AKEYCODE_DPAD_DOWN:
-				if (isGamepadEvent(event))
-					iron_internal_gamepad_trigger_button(0, 13, 1);
-				else
-					iron_internal_keyboard_trigger_key_down(IRON_KEY_DOWN);
-				return 1;
-			case AKEYCODE_DPAD_LEFT:
-				if (isGamepadEvent(event))
-					iron_internal_gamepad_trigger_button(0, 14, 1);
-				else
-					iron_internal_keyboard_trigger_key_down(IRON_KEY_LEFT);
-				return 1;
-			case AKEYCODE_DPAD_RIGHT:
-				if (isGamepadEvent(event))
-					iron_internal_gamepad_trigger_button(0, 15, 1);
-				else
-					iron_internal_keyboard_trigger_key_down(IRON_KEY_RIGHT);
-				return 1;
 			case AKEYCODE_BUTTON_MODE:
 				iron_internal_gamepad_trigger_button(0, 16, 1);
 				return 1;
+			#endif
+
+			case AKEYCODE_DPAD_UP: {
+				#ifdef WITH_GAMEPAD
+				if (isGamepadEvent(event)) {
+					iron_internal_gamepad_trigger_button(0, 12, 1);
+					return 1;
+				}
+				#endif
+				iron_internal_keyboard_trigger_key_down(IRON_KEY_UP);
+				return 1;
+			}
+			case AKEYCODE_DPAD_DOWN: {
+				#ifdef WITH_GAMEPAD
+				if (isGamepadEvent(event)) {
+					iron_internal_gamepad_trigger_button(0, 13, 1);
+					return 1;
+				}
+				#endif
+				iron_internal_keyboard_trigger_key_down(IRON_KEY_DOWN);
+				return 1;
+			}
+			case AKEYCODE_DPAD_LEFT: {
+				#ifdef WITH_GAMEPAD
+				if (isGamepadEvent(event)) {
+					iron_internal_gamepad_trigger_button(0, 14, 1);
+					return 1;
+				}
+				#endif
+				iron_internal_keyboard_trigger_key_down(IRON_KEY_LEFT);
+				return 1;
+			}
+			case AKEYCODE_DPAD_RIGHT: {
+				#ifdef WITH_GAMEPAD
+				if (isGamepadEvent(event)) {
+					iron_internal_gamepad_trigger_button(0, 15, 1);
+					return 1;
+				}
+				#endif
+				iron_internal_keyboard_trigger_key_down(IRON_KEY_RIGHT);
+				return 1;
+			}
 			case AKEYCODE_STAR:
 			case AKEYCODE_NUMPAD_MULTIPLY:
 				iron_internal_keyboard_trigger_key_down(IRON_KEY_MULTIPLY);
@@ -552,21 +573,6 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 				iron_internal_keyboard_trigger_key_down(IRON_KEY_PLUS);
 				iron_internal_keyboard_trigger_key_press('+');
 				return 1;
-			// (DK) Amazon FireTV remote/controller mappings
-			// (DK) TODO handle multiple pads (up to 4 possible)
-			case AKEYCODE_MENU:
-				iron_internal_gamepad_trigger_button(0, 9, 1);
-				return 1;
-			case AKEYCODE_MEDIA_REWIND:
-				iron_internal_gamepad_trigger_button(0, 10, 1);
-				return 1;
-			case AKEYCODE_MEDIA_FAST_FORWARD:
-				iron_internal_gamepad_trigger_button(0, 11, 1);
-				return 1;
-			case AKEYCODE_MEDIA_PLAY_PAUSE:
-				iron_internal_gamepad_trigger_button(0, 12, 1);
-				return 1;
-			// (DK) /Amazon FireTV remote/controller mappings
 			default:
 				if (code >= AKEYCODE_NUMPAD_0 && code <= AKEYCODE_NUMPAD_9) {
 					iron_internal_keyboard_trigger_key_down(code + IRON_KEY_NUMPAD_0 - AKEYCODE_NUMPAD_0);
@@ -642,6 +648,7 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 					return 1;
 				}
 			}
+
 			switch (code) {
 			case AKEYCODE_SHIFT_LEFT:
 			case AKEYCODE_SHIFT_RIGHT:
@@ -653,19 +660,15 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 			case AKEYCODE_ENTER:
 				iron_internal_keyboard_trigger_key_up(IRON_KEY_RETURN);
 				return 1;
+			case AKEYCODE_BACK:
+				iron_internal_keyboard_trigger_key_up(IRON_KEY_BACK);
+				return 1;
+
+			#ifdef WITH_GAMEPAD
 			case AKEYCODE_DPAD_CENTER:
 			case AKEYCODE_BUTTON_B:
 				iron_internal_gamepad_trigger_button(0, 1, 0);
 				return 1;
-			case AKEYCODE_BACK:
-				if (AKeyEvent_getMetaState(event) & AMETA_ALT_ON) { // Xperia Play
-					iron_internal_gamepad_trigger_button(0, 1, 0);
-					return 1;
-				}
-				else {
-					iron_internal_keyboard_trigger_key_up(IRON_KEY_BACK);
-					return 1;
-				}
 			case AKEYCODE_BUTTON_A:
 				iron_internal_gamepad_trigger_button(0, 0, 0);
 				return 1;
@@ -699,33 +702,51 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 			case AKEYCODE_BUTTON_THUMBR:
 				iron_internal_gamepad_trigger_button(0, 11, 0);
 				return 1;
-			case AKEYCODE_DPAD_UP:
-				if (isGamepadEvent(event))
-					iron_internal_gamepad_trigger_button(0, 12, 0);
-				else
-					iron_internal_keyboard_trigger_key_up(IRON_KEY_UP);
-				return 1;
-			case AKEYCODE_DPAD_DOWN:
-				if (isGamepadEvent(event))
-					iron_internal_gamepad_trigger_button(0, 13, 0);
-				else
-					iron_internal_keyboard_trigger_key_up(IRON_KEY_DOWN);
-				return 1;
-			case AKEYCODE_DPAD_LEFT:
-				if (isGamepadEvent(event))
-					iron_internal_gamepad_trigger_button(0, 14, 0);
-				else
-					iron_internal_keyboard_trigger_key_up(IRON_KEY_LEFT);
-				return 1;
-			case AKEYCODE_DPAD_RIGHT:
-				if (isGamepadEvent(event))
-					iron_internal_gamepad_trigger_button(0, 15, 0);
-				else
-					iron_internal_keyboard_trigger_key_up(IRON_KEY_RIGHT);
-				return 1;
 			case AKEYCODE_BUTTON_MODE:
 				iron_internal_gamepad_trigger_button(0, 16, 0);
 				return 1;
+			#endif
+
+			case AKEYCODE_DPAD_UP: {
+				#ifdef WITH_GAMEPAD
+				if (isGamepadEvent(event)) {
+					iron_internal_gamepad_trigger_button(0, 12, 0);
+					return 1;
+				}
+				#endif
+				iron_internal_keyboard_trigger_key_up(IRON_KEY_UP);
+				return 1;
+			}
+			case AKEYCODE_DPAD_DOWN: {
+				#ifdef WITH_GAMEPAD
+				if (isGamepadEvent(event)) {
+					iron_internal_gamepad_trigger_button(0, 13, 0);
+					return 1;
+				}
+				#endif
+				iron_internal_keyboard_trigger_key_up(IRON_KEY_DOWN);
+				return 1;
+			}
+			case AKEYCODE_DPAD_LEFT: {
+				#ifdef WITH_GAMEPAD
+				if (isGamepadEvent(event)) {
+					iron_internal_gamepad_trigger_button(0, 14, 0);
+					return 1;
+				}
+				#endif
+				iron_internal_keyboard_trigger_key_up(IRON_KEY_LEFT);
+				return 1;
+			}
+			case AKEYCODE_DPAD_RIGHT: {
+				#ifdef WITH_GAMEPAD
+				if (isGamepadEvent(event)) {
+					iron_internal_gamepad_trigger_button(0, 15, 0);
+					return 1;
+				}
+				#endif
+				iron_internal_keyboard_trigger_key_up(IRON_KEY_RIGHT);
+				return 1;
+			}
 			case AKEYCODE_STAR:
 			case AKEYCODE_NUMPAD_MULTIPLY:
 				iron_internal_keyboard_trigger_key_up(IRON_KEY_MULTIPLY);
@@ -783,22 +804,7 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 			case AKEYCODE_NUMPAD_ADD:
 				iron_internal_keyboard_trigger_key_up(IRON_KEY_PLUS);
 				return 1;
-			// (DK) Amazon FireTV remote/controller mappings
-			// (DK) TODO handle multiple pads (up to 4 possible)
-			case AKEYCODE_MENU:
-				iron_internal_gamepad_trigger_button(0, 9, 0);
-				return 1;
-			case AKEYCODE_MEDIA_REWIND:
-				iron_internal_gamepad_trigger_button(0, 10, 0);
-				return 1;
-			case AKEYCODE_MEDIA_FAST_FORWARD:
-				iron_internal_gamepad_trigger_button(0, 11, 0);
-				return 1;
-			case AKEYCODE_MEDIA_PLAY_PAUSE:
-				iron_internal_gamepad_trigger_button(0, 12, 0);
-				return 1;
-			// (DK) /Amazon FireTV remote/controller mappings
-			default:
+			default: {
 				if (code >= AKEYCODE_NUMPAD_0 && code <= AKEYCODE_NUMPAD_9) {
 					iron_internal_keyboard_trigger_key_up(code + IRON_KEY_NUMPAD_0 - AKEYCODE_NUMPAD_0);
 					return 1;
@@ -811,6 +817,7 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 					iron_internal_keyboard_trigger_key_up(code + IRON_KEY_A - AKEYCODE_A);
 					return 1;
 				}
+			}
 			}
 		}
 	}
@@ -860,12 +867,10 @@ static void cmd(struct android_app *app, int32_t cmd) {
 		break;
 	case APP_CMD_RESUME:
 		iron_internal_resume_callback();
-		//resumeAudio();
 		paused = false;
 		break;
 	case APP_CMD_PAUSE:
 		iron_internal_pause_callback();
-		//pauseAudio();
 		paused = true;
 		break;
 	case APP_CMD_STOP:
@@ -1096,16 +1101,6 @@ bool iron_internal_handle_messages(void) {
 		iron_internal_call_resize_callback(width, height);
 	}
 
-	// Get screen rotation
-	/*
-	JNIEnv* env;
-	(*activity->vm)->AttachCurrentThread(&env, NULL);
-	jclass ironActivityClass = IronAndroid::findClass(env, "org.armory3d.IronActivity");
-	jmethodID ironActivityGetRotation = (*env)->GetStaticMethodID(ironActivityClass, "getRotation", "()I");
-	screenRotation = (*env)->CallStaticIntMethod(ironActivityClass, ironActivityGetRotation);
-	(*activity->vm)->DetachCurrentThread();
-	*/
-
 	return true;
 }
 
@@ -1129,12 +1124,6 @@ void iron_mouse_get_position(int *x, int *y) {
 }
 
 void iron_mouse_set_cursor(int cursor_index) {}
-
-bool iron_gamepad_connected(int num) {
-	return num == 0;
-}
-
-void iron_gamepad_rumble(int gamepad, float left, float right) {}
 
 void initAndroidFileReader();
 void IronAndroidVideoInit();
@@ -1203,18 +1192,6 @@ void iron_internal_shutdown(void) {
 	#endif
 }
 
-#ifdef WITH_GAMEPAD
-
-const char *iron_gamepad_vendor(int gamepad) {
-	return "Google";
-}
-
-const char *iron_gamepad_product_name(int gamepad) {
-	return "gamepad";
-}
-
-#endif
-
 void initAndroidFileReader(void) {
 	if (activity == NULL) {
 		iron_error("Android activity is NULL");
@@ -1225,7 +1202,7 @@ void initAndroidFileReader(void) {
 
 	(*activity->vm)->AttachCurrentThread(activity->vm, &env, NULL);
 
-	jclass android_app_NativeActivity = (*env)->FindClass(env, CLASS_NAME);
+	jclass android_app_NativeActivity = (*env)->FindClass(env, "android/app/NativeActivity");
 	jmethodID getExternalFilesDir = (*env)->GetMethodID(env, android_app_NativeActivity, "getExternalFilesDir", "(Ljava/lang/String;)Ljava/io/File;");
 	jobject file = (*env)->CallObjectMethod(env, activity->clazz, getExternalFilesDir, NULL);
 	jclass java_io_File = (*env)->FindClass(env, "java/io/File");
