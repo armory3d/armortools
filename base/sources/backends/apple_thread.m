@@ -48,7 +48,3 @@ void iron_threads_quit(void) {}
 int iron_hardware_threads(void) {
 	return (int)[[NSProcessInfo processInfo] processorCount];
 }
-
-int iron_cpu_cores(void) {
-	return iron_hardware_threads();
-}

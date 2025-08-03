@@ -22,11 +22,7 @@ typedef struct iron_display_mode {
 void iron_display_init(void);
 int iron_primary_display(void);
 int iron_count_displays(void);
-bool iron_display_available(int display_index);
-const char *iron_display_name(int display_index);
 iron_display_mode_t iron_display_current_mode(int display_index);
-int iron_display_count_available_modes(int display_index);
-iron_display_mode_t iron_display_available_mode(int display_index, int mode_index);
 
 typedef enum {
 	IRON_WINDOW_MODE_WINDOW,
@@ -61,7 +57,6 @@ void iron_window_options_set_defaults(iron_window_options_t *win);
 void iron_window_resize(int width, int height);
 void iron_window_move(int x, int y);
 void iron_window_change_mode(iron_window_mode_t mode);
-void iron_window_change_features(int features);
 int iron_window_x();
 int iron_window_y();
 int iron_window_width();
@@ -88,7 +83,6 @@ const char *iron_language(void);
 
 double iron_frequency(void);
 uint64_t iron_timestamp(void);
-int iron_cpu_cores(void);
 int iron_hardware_threads(void);
 double iron_time(void);
 void iron_start(void);

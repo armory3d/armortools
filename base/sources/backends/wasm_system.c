@@ -16,31 +16,7 @@ int iron_count_displays(void) {
 	return 1;
 }
 
-bool iron_display_available(int display_index) {
-	return false;
-}
-
-const char *iron_display_name(int display_index) {
-	return "Browser";
-}
-
 iron_display_mode_t iron_display_current_mode(int display_index) {
-	iron_display_mode_t mode;
-	mode.x = 0;
-	mode.y = 0;
-	mode.width = 800;
-	mode.height = 600;
-	mode.pixels_per_inch = 96;
-	mode.frequency = 60;
-	mode.bits_per_pixel = 32;
-	return mode;
-}
-
-int iron_display_count_available_modes(int display_index) {
-	return 1;
-}
-
-iron_display_mode_t iron_display_available_mode(int display_index, int mode_index) {
 	iron_display_mode_t mode;
 	mode.x = 0;
 	mode.y = 0;
@@ -104,10 +80,6 @@ uint64_t iron_timestamp(void) {
 
 double iron_time(void) {
 	return js_time() / 1000.0;
-}
-
-int iron_cpu_cores(void) {
-	return 4;
 }
 
 int iron_hardware_threads(void) {
@@ -174,8 +146,6 @@ int iron_window_height() {
 void iron_window_resize(int width, int height) {}
 
 void iron_window_move(int x, int y) {}
-
-void iron_window_change_features(int features) {}
 
 // In HTML5 fullscreen is activable only from user input.
 void iron_window_change_mode(iron_window_mode_t mode) {

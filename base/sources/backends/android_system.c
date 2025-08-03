@@ -86,22 +86,6 @@ static int refreshRate() {
 
 void iron_display_init() {}
 
-iron_display_mode_t iron_display_available_mode(int display_index, int mode_index) {
-	iron_display_mode_t mode;
-	mode.x = 0;
-	mode.y = 0;
-	mode.width = width();
-	mode.height = height();
-	mode.frequency = refreshRate();
-	mode.bits_per_pixel = 32;
-	mode.pixels_per_inch = pixelsPerInch();
-	return mode;
-}
-
-int iron_display_count_available_modes(int display_index) {
-	return 1;
-}
-
 iron_display_mode_t iron_display_current_mode(int display) {
 	iron_display_mode_t mode;
 	mode.x = 0;
@@ -112,14 +96,6 @@ iron_display_mode_t iron_display_current_mode(int display) {
 	mode.bits_per_pixel = 32;
 	mode.pixels_per_inch = pixelsPerInch();
 	return mode;
-}
-
-const char *iron_display_name(int display) {
-	return "Display";
-}
-
-bool iron_display_available(int display) {
-	return display == 0;
 }
 
 void pauseAudio();
@@ -1293,10 +1269,6 @@ bool iron_file_reader_open(iron_file_reader_t *reader, const char *filename, int
 	       iron_aasset_reader_open(reader, filename, type);
 }
 
-int iron_cpu_cores(void) {
-	return iron_hardware_threads();
-}
-
 int iron_hardware_threads(void) {
 	return sysconf(_SC_NPROCESSORS_ONLN);
 }
@@ -1327,8 +1299,6 @@ int iron_window_height() {
 void iron_window_resize(int width, int height) {}
 
 void iron_window_move(int x, int y) {}
-
-void iron_window_change_features(int features) {}
 
 void iron_window_change_mode(iron_window_mode_t mode) {}
 

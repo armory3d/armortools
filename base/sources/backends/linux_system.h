@@ -5,10 +5,9 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/XInput.h>
-#include <X11/extensions/Xinerama.h>
 #include <X11/extensions/Xrandr.h>
 
-#define MAXIMUM_DISPLAYS 16
+#define MAXIMUM_DISPLAYS 8
 
 struct iron_x11_window {
 	int display_index;
@@ -22,15 +21,11 @@ struct iron_x11_window {
 
 struct iron_x11_display {
 	int index;
-	int current_mode;
-	int num_modes;
 	int x;
 	int y;
 	int width;
 	int height;
 	bool primary;
-	char name[64];
-
 	RROutput output;
 	RRCrtc crtc;
 };
@@ -60,7 +55,6 @@ struct iron_x11_atoms {
 	Atom NET_WM_ICON_NAME;
 	Atom NET_WM_STATE;
 	Atom NET_WM_STATE_FULLSCREEN;
-
 	Atom MOUSE;
 	Atom TABLET;
 	Atom KEYBOARD;
@@ -86,7 +80,6 @@ struct iron_x11_libs {
 	void *X11;
 	void *Xcursor;
 	void *Xi;
-	void *Xinerama;
 	void *Xrandr;
 };
 
@@ -136,17 +129,11 @@ struct iron_x11_procs {
 	int (*XUnmapWindow)(Display *, Window);
 	int (*XSetWMProtocols)(Display *, Window, Atom *, int);
 	int (*XAllocColor)(Display *, Colormap, XColor *);
-
 	XDeviceInfo *(*XListInputDevices)(Display *, int *);
 	void (*XFreeDeviceList)(XDeviceInfo *);
 	XDevice *(*XOpenDevice)(Display *display, XID device_id);
 	int (*XCloseDevice)(Display *display, XDevice *device);
 	int (*XSelectExtensionEvent)(Display *, Window, XEventClass *, int);
-
-	int (*XineramaQueryExtension)(Display *dpy, int *event_base, int *error_base);
-	int (*XineramaIsActive)(Display *dpy);
-	XineramaScreenInfo *(*XineramaQueryScreens)(Display *dpy, int *number);
-
 	XRRScreenResources *(*XRRGetScreenResourcesCurrent)(Display *dpy, Window window);
 	RROutput (*XRRGetOutputPrimary)(Display *dpy, Window window);
 	XRROutputInfo *(*XRRGetOutputInfo)(Display *dpy, XRRScreenResources *resources, RROutput output);
@@ -173,10 +160,8 @@ struct x11_context {
 	struct iron_x11_libs libs;
 	struct iron_x11_atoms atoms;
 	struct iron_x11_mouse mouse;
-
 	struct x11_pen_device pen;
 	struct x11_pen_device eraser;
-
 	struct iron_x11_window windows[1];
 	int num_displays;
 	struct iron_x11_display displays[MAXIMUM_DISPLAYS];

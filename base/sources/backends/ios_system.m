@@ -476,27 +476,6 @@ void IronUpdateKeyboard(void);
 
 void iron_display_init(void) {}
 
-iron_display_mode_t iron_display_available_mode(int display, int mode) {
-	iron_display_mode_t dm;
-	dm.width = iron_window_width();
-	dm.height = iron_window_height();
-	dm.frequency = 60;
-	dm.bits_per_pixel = 32;
-	return dm;
-}
-
-int iron_display_count_available_modes(int display) {
-	return 1;
-}
-
-bool iron_display_available(int display) {
-	return true;
-}
-
-const char *iron_display_name(int display) {
-	return "Display";
-}
-
 iron_display_mode_t iron_display_current_mode(int display) {
 	iron_display_mode_t dm;
 	dm.width = iron_window_width();
@@ -703,8 +682,6 @@ int iron_window_y() {
 void iron_window_resize(int width, int height) {}
 
 void iron_window_move(int x, int y) {}
-
-void iron_window_change_features(int features) {}
 
 void iron_window_change_mode(iron_window_mode_t mode) {}
 

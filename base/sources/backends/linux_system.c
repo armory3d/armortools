@@ -1,6 +1,8 @@
-#include "iron_gpu.h"
+#include "linux_system.h"
+#include <iron_gpu.h>
 #include <iron_video.h>
 #include <iron_system.h>
+
 #include <assert.h>
 #include <limits.h>
 #include <stdio.h>
@@ -8,23 +10,34 @@
 #include <string.h>
 #include <errno.h>
 #include <pwd.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
-#include "linux_system.h"
-#include <X11/Xlib.h>
 #include <ctype.h>
-#include <dlfcn.h>
-#include <vulkan/vulkan.h>
-#include <vulkan/vulkan_xlib.h>
-#include <sys/time.h>
 #include <time.h>
-#include <xkbcommon/xkbcommon.h>
+#include <dlfcn.h>
 #include <fcntl.h>
 #include <libudev.h>
+#include <X11/Xlib.h>
+#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_xlib.h>
+#include <xkbcommon/xkbcommon.h>
 #include <linux/joystick.h>
-#include <sys/ioctl.h>
 
+#define Button6 6
+#define Button7 7
+
+struct iron_x11_procs xlib = {0};
+struct x11_context x11_ctx = {0};
+
+static size_t clipboardStringSize = 1024;
+static char *clipboardString = NULL;
+char buffer[1024];
+static char save[2000];
+static bool saveInitialized = false;
+static const char *videoFormats[] = {"ogv", NULL};
+static struct timeval start;
+static bool mouse_hidden = false;
+
+static void init_pen_device(XDeviceInfo *info, struct x11_pen_device *pen, bool eraser);
 bool iron_x11_init();
 
 void iron_display_init() {
@@ -34,16 +47,6 @@ void iron_display_init() {
 	}
 
 	iron_x11_init();
-
-	int eventBase;
-	int errorBase;
-
-	bool hasXinerama = (xlib.XineramaQueryExtension(x11_ctx.display, &eventBase, &errorBase) && xlib.XineramaIsActive(x11_ctx.display));
-	XineramaScreenInfo *xinerama_screens = NULL;
-	int xinerama_screen_count = 0;
-	if (hasXinerama) {
-		xinerama_screens = xlib.XineramaQueryScreens(x11_ctx.display, &xinerama_screen_count);
-	}
 
 	Window root_window = RootWindow(x11_ctx.display, DefaultScreen(x11_ctx.display));
 	XRRScreenResources *screen_resources = xlib.XRRGetScreenResourcesCurrent(x11_ctx.display, root_window);
@@ -65,7 +68,6 @@ void iron_display_init() {
 
 		struct iron_x11_display *display = &x11_ctx.displays[x11_ctx.num_displays++];
 		display->index = i;
-		strncpy(display->name, output_info->name, sizeof(display->name));
 		display->x = crtc_info->x;
 		display->y = crtc_info->y;
 		display->width = crtc_info->width;
@@ -79,110 +81,10 @@ void iron_display_init() {
 	}
 
 	xlib.XRRFreeScreenResources(screen_resources);
-	if (hasXinerama) {
-		xlib.XFree(xinerama_screens);
-	}
-
 	display_initialized = true;
 }
 
-iron_display_mode_t iron_display_available_mode(int display_index, int mode_index) {
-	if (display_index >= MAXIMUM_DISPLAYS)
-		display_index = 0;
-	struct iron_x11_display *display = &x11_ctx.displays[display_index];
-	iron_display_mode_t mode;
-	mode.x = 0;
-	mode.y = 0;
-	mode.width = display->width;
-	mode.height = display->height;
-	mode.frequency = 60;
-	mode.bits_per_pixel = 32;
-	mode.pixels_per_inch = 96;
-
-	Window root_window = RootWindow(x11_ctx.display, DefaultScreen(x11_ctx.display));
-	XRRScreenResources *screen_resources = xlib.XRRGetScreenResourcesCurrent(x11_ctx.display, root_window);
-
-	XRROutputInfo *output_info = xlib.XRRGetOutputInfo(x11_ctx.display, screen_resources, screen_resources->outputs[display->index]);
-	if (output_info->connection != RR_Connected || output_info->crtc == None) {
-		iron_error("Display %i not connected.", display_index);
-		xlib.XRRFreeOutputInfo(output_info);
-		xlib.XRRFreeScreenResources(screen_resources);
-		return mode;
-	}
-
-	if (mode_index >= output_info->nmode) {
-		iron_error("Invalid mode index %i.", mode_index);
-	}
-
-	RRMode rr_mode = output_info->modes[mode_index];
-	XRRModeInfo *mode_info = NULL;
-
-	for (int k = 0; k < screen_resources->nmode; k++) {
-		if (screen_resources->modes[k].id == rr_mode) {
-			mode_info = &screen_resources->modes[k];
-			break;
-		}
-	}
-
-	if (mode_info != NULL) {
-		mode.x = display->x;
-		mode.y = display->y;
-		mode.width = mode_info->width;
-		mode.height = mode_info->height;
-		mode.pixels_per_inch = 96;
-		mode.bits_per_pixel = 32;
-		if (mode_info->hTotal && mode_info->vTotal) {
-			mode.frequency = (mode_info->dotClock / (mode_info->hTotal * mode_info->vTotal));
-		}
-		else {
-			mode.frequency = 60;
-		}
-	}
-
-	xlib.XRRFreeOutputInfo(output_info);
-	xlib.XRRFreeScreenResources(screen_resources);
-	return mode;
-}
-
-int iron_display_count_available_modes(int display_index) {
-	if (display_index >= MAXIMUM_DISPLAYS)
-		display_index = 0;
-	struct iron_x11_display *display = &x11_ctx.displays[display_index];
-
-	Window root_window = RootWindow(x11_ctx.display, DefaultScreen(x11_ctx.display));
-	XRRScreenResources *screen_resources = xlib.XRRGetScreenResourcesCurrent(x11_ctx.display, root_window);
-
-	XRROutputInfo *output_info = xlib.XRRGetOutputInfo(x11_ctx.display, screen_resources, screen_resources->outputs[display->index]);
-	if (output_info->connection != RR_Connected || output_info->crtc == None) {
-		iron_error("Display %i not connected.", display_index);
-		xlib.XRRFreeOutputInfo(output_info);
-		xlib.XRRFreeScreenResources(screen_resources);
-		return 0;
-	}
-
-	int num_modes = output_info->nmode;
-	xlib.XRRFreeOutputInfo(output_info);
-	xlib.XRRFreeScreenResources(screen_resources);
-	return num_modes;
-}
-
-bool iron_display_available(int display_index) {
-	if (display_index >= MAXIMUM_DISPLAYS) {
-		return false;
-	}
-	return x11_ctx.displays[display_index].output != None;
-}
-
-const char *iron_display_name(int display_index) {
-	if (display_index >= MAXIMUM_DISPLAYS) {
-		return "";
-	}
-	return x11_ctx.displays[display_index].name;
-}
-
 iron_display_mode_t iron_display_current_mode(int display_index) {
-	if (display_index >= MAXIMUM_DISPLAYS)
-		display_index = 0;
 	struct iron_x11_display *display = &x11_ctx.displays[display_index];
 	iron_display_mode_t mode;
 	mode.x = 0;
@@ -198,7 +100,6 @@ iron_display_mode_t iron_display_current_mode(int display_index) {
 
 	XRROutputInfo *output_info = xlib.XRRGetOutputInfo(x11_ctx.display, screen_resources, screen_resources->outputs[display->index]);
 	if (output_info->connection != RR_Connected || output_info->crtc == None) {
-		iron_error("Display %i not connected.", display_index);
 		xlib.XRRFreeOutputInfo(output_info);
 		xlib.XRRFreeScreenResources(screen_resources);
 		return mode;
@@ -227,9 +128,6 @@ iron_display_mode_t iron_display_current_mode(int display_index) {
 		if (mode_info->hTotal && mode_info->vTotal) {
 			mode.frequency = (mode_info->dotClock / (mode_info->hTotal * mode_info->vTotal));
 		}
-		else {
-			mode.frequency = 60;
-		}
 	}
 	xlib.XRRFreeOutputInfo(output_info);
 	xlib.XRRFreeCrtcInfo(crtc_info);
@@ -249,16 +147,6 @@ int iron_primary_display(void) {
 int iron_count_displays(void) {
 	return x11_ctx.num_displays;
 }
-
-struct MwmHints {
-	// These correspond to XmRInt resources. (VendorSE.c)
-	int flags;
-	int functions;
-	int decorations;
-	int input_mode;
-	int status;
-};
-#define MWM_HINTS_DECORATIONS (1L << 1)
 
 int iron_window_x() {
 	return 0;
@@ -286,51 +174,23 @@ void iron_window_move(int x, int y) {
 	xlib.XMoveWindow(x11_ctx.display, window->window, x, y);
 }
 
-void iron_window_change_features(int features) {}
-
 void iron_window_change_mode(iron_window_mode_t mode) {
 	struct iron_x11_window *window = &x11_ctx.windows[0];
 	if (mode == window->mode) {
 		return;
 	}
-
-	bool fullscreen = false;
-
-	switch (mode) {
-	case IRON_WINDOW_MODE_WINDOW:
-		if (window->mode == IRON_WINDOW_MODE_FULLSCREEN) {
-			window->mode = IRON_WINDOW_MODE_WINDOW;
-			fullscreen = false;
-		}
-		else {
-			return;
-		}
-		break;
-	case IRON_WINDOW_MODE_FULLSCREEN:
-		if (window->mode == IRON_WINDOW_MODE_WINDOW) {
-			window->mode = IRON_WINDOW_MODE_FULLSCREEN;
-			fullscreen = true;
-		}
-		else {
-			return;
-		}
-		break;
-	}
-
+	window->mode = mode;
 	XEvent xev;
 	memset(&xev, 0, sizeof(xev));
 	xev.type = ClientMessage;
 	xev.xclient.window = window->window;
 	xev.xclient.message_type = x11_ctx.atoms.NET_WM_STATE;
 	xev.xclient.format = 32;
-	xev.xclient.data.l[0] = fullscreen ? 1 : 0;
+	xev.xclient.data.l[0] = mode == IRON_WINDOW_MODE_FULLSCREEN ? 1 : 0;
 	xev.xclient.data.l[1] = x11_ctx.atoms.NET_WM_STATE_FULLSCREEN;
 	xev.xclient.data.l[2] = 0;
-
 	xlib.XMapWindow(x11_ctx.display, window->window);
-
 	xlib.XSendEvent(x11_ctx.display, DefaultRootWindow(x11_ctx.display), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev);
-
 	xlib.XFlush(x11_ctx.display);
 }
 
@@ -362,12 +222,8 @@ void iron_window_hide() {
 void iron_window_set_title(const char *_title) {
 	const char *title = _title == NULL ? "" : _title;
 	struct iron_x11_window *window = &x11_ctx.windows[0];
-	xlib.XChangeProperty(x11_ctx.display, window->window, x11_ctx.atoms.NET_WM_NAME, x11_ctx.atoms.UTF8_STRING, 8, PropModeReplace, (unsigned char *)title,
-						 strlen(title));
-
-	xlib.XChangeProperty(x11_ctx.display, window->window, x11_ctx.atoms.NET_WM_ICON_NAME, x11_ctx.atoms.UTF8_STRING, 8, PropModeReplace, (unsigned char *)title,
-						 strlen(title));
-
+	xlib.XChangeProperty(x11_ctx.display, window->window, x11_ctx.atoms.NET_WM_NAME, x11_ctx.atoms.UTF8_STRING, 8, PropModeReplace, (unsigned char *)title, strlen(title));
+	xlib.XChangeProperty(x11_ctx.display, window->window, x11_ctx.atoms.NET_WM_ICON_NAME, x11_ctx.atoms.UTF8_STRING, 8, PropModeReplace, (unsigned char *)title, strlen(title));
 	xlib.XFlush(x11_ctx.display);
 }
 
@@ -425,7 +281,6 @@ void iron_window_create(iron_window_options_t *win) {
 	if (x11_ctx.pen.id != -1) {
 		xlib.XSelectExtensionEvent(x11_ctx.display, window->window, &x11_ctx.pen.motionClass, 1);
 	}
-
 	if (x11_ctx.eraser.id != -1) {
 		xlib.XSelectExtensionEvent(x11_ctx.display, window->window, &x11_ctx.eraser.motionClass, 1);
 	}
@@ -439,7 +294,7 @@ static struct {
 	void *ppi_data;
 	bool (*close_callback)(void *data);
 	void *close_data;
-} iron_internal_window_callbacks[16];
+} iron_internal_window_callbacks[1];
 
 void iron_window_set_resize_callback(void (*callback)(int width, int height, void *data), void *data) {
 	iron_internal_window_callbacks[0].resize_callback = callback;
@@ -470,19 +325,6 @@ iron_window_mode_t iron_window_get_mode() {
 	return x11_ctx.windows[0].mode;
 }
 
-#define Button6 6
-#define Button7 7
-
-struct iron_x11_procs xlib = {0};
-struct x11_context x11_ctx = {0};
-
-static size_t clipboardStringSize = 1024;
-static char *clipboardString = NULL;
-
-char buffer[1024];
-
-static void init_pen_device(XDeviceInfo *info, struct x11_pen_device *pen, bool eraser);
-
 static void load_lib(void **lib, const char *name) {
 	char libname[64];
 	sprintf(libname, "lib%s.so", name);
@@ -509,17 +351,15 @@ int iron_x11_error_handler(Display *display, XErrorEvent *error_event) {
 bool iron_x11_init() {
 #undef LOAD_LIB
 #undef LOAD_FUN
-#define LOAD_LIB(name)                                                                                                                                         \
-	{                                                                                                                                                          \
-		load_lib(&x11_ctx.libs.name, #name);                                                                                                                   \
-																																							   \
-		if (x11_ctx.libs.name == NULL) {                                                                                                                       \
-			iron_error("Failed to load lib%s.so", #name);                                                                                  \
-			return false;                                                                                                                                      \
-		}                                                                                                                                                      \
-	}                                                                                                                                                          \
-	// manually check for libX11, and return false if not present
-	// only error for further libs
+#define LOAD_LIB(name)                                                                                                       \
+	{                                                                                                                        \
+		load_lib(&x11_ctx.libs.name, #name);                                                                                 \
+																															 \
+		if (x11_ctx.libs.name == NULL) {                                                                                     \
+			iron_error("Failed to load lib%s.so", #name);                                                                    \
+			return false;                                                                                                    \
+		}                                                                                                                    \
+	}                                                                                                                        \
 
 	load_lib(&x11_ctx.libs.X11, "X11");
 	if (x11_ctx.libs.X11 == NULL) {
@@ -528,12 +368,11 @@ bool iron_x11_init() {
 
 	LOAD_LIB(Xi);
 	LOAD_LIB(Xcursor);
-	LOAD_LIB(Xinerama);
 	LOAD_LIB(Xrandr);
-#define LOAD_FUN(lib, symbol)                                                                                                                                  \
-	xlib.symbol = dlsym(x11_ctx.libs.lib, #symbol);                                                                                                            \
-	if (xlib.symbol == NULL) {                                                                                                                                 \
-		iron_error("Did not find symbol %s in library %s.", #symbol, #lib);                                                                \
+#define LOAD_FUN(lib, symbol)                                                                                               \
+	xlib.symbol = dlsym(x11_ctx.libs.lib, #symbol);                                                                         \
+	if (xlib.symbol == NULL) {                                                                                              \
+		iron_error("Did not find symbol %s in library %s.", #symbol, #lib);                                                 \
 	}
 	LOAD_FUN(X11, XOpenDisplay)
 	LOAD_FUN(X11, XCloseDisplay)
@@ -579,16 +418,11 @@ bool iron_x11_init() {
 	LOAD_FUN(X11, XSetWMProtocols)
 	LOAD_FUN(X11, XPeekEvent)
 	LOAD_FUN(X11, XAllocColor)
-
 	LOAD_FUN(Xi, XListInputDevices)
 	LOAD_FUN(Xi, XFreeDeviceList)
 	LOAD_FUN(Xi, XOpenDevice)
 	LOAD_FUN(Xi, XCloseDevice)
 	LOAD_FUN(Xi, XSelectExtensionEvent)
-
-	LOAD_FUN(Xinerama, XineramaQueryExtension)
-	LOAD_FUN(Xinerama, XineramaIsActive)
-	LOAD_FUN(Xinerama, XineramaQueryScreens)
 	LOAD_FUN(Xrandr, XRRGetScreenResourcesCurrent)
 	LOAD_FUN(Xrandr, XRRGetOutputPrimary)
 	LOAD_FUN(Xrandr, XRRGetOutputInfo)
@@ -596,7 +430,6 @@ bool iron_x11_init() {
 	LOAD_FUN(Xrandr, XRRGetCrtcInfo)
 	LOAD_FUN(Xrandr, XRRFreeCrtcInfo)
 	LOAD_FUN(Xrandr, XRRFreeScreenResources)
-
 #undef LOAD_FUN
 #undef LOAD_LIB
 
@@ -664,7 +497,6 @@ bool iron_x11_init() {
 		for (int j = 0; buffer[j]; j++) {
 			buffer[j] = tolower(buffer[j]);
 		}
-
 		if (strstr(buffer, "stylus") || strstr(buffer, "pen") || strstr(buffer, "wacom")) {
 			init_pen_device(&devices[i], &x11_ctx.pen, false);
 		}
@@ -772,19 +604,16 @@ static bool _handle_messages() {
 		switch (event.type) {
 		case MappingNotify: {
 			xlib.XRefreshKeyboardMapping(&event.xmapping);
-		} break;
+			break;
+		}
 		case KeyPress: {
-
 			XKeyEvent *key = (XKeyEvent *)&event;
 			KeySym keysym;
-
 			wchar_t wchar;
-
 			bool wcConverted = xlib.XwcLookupString(k_window->xInputContext, key, &wchar, 1, &keysym, NULL);
 
 			bool isIgnoredKeySym = keysym == XK_Escape || keysym == XK_BackSpace || keysym == XK_Delete;
 			if (!controlDown && !xlib.XFilterEvent(&event, window) && !isIgnoredKeySym) {
-
 				if (wcConverted) {
 					iron_internal_keyboard_trigger_key_press(wchar);
 				}
@@ -796,13 +625,12 @@ static bool _handle_messages() {
 				continue;
 			}
 
-#define KEY(xkey, ironkey)                                                                                                                                     \
-	case xkey:                                                                                                                                                 \
-		iron_internal_keyboard_trigger_key_down(ironkey);                                                                                                      \
+#define KEY(xkey, ironkey)                                                         \
+	case xkey:                                                                     \
+		iron_internal_keyboard_trigger_key_down(ironkey);                          \
 		break;
 
 			KeySym ksKey = xlib.XkbKeycodeToKeysym(x11_ctx.display, event.xkey.keycode, 0, 0);
-
 			if (ksKey == XK_Control_L || ksKey == XK_Control_R) {
 				controlDown = true;
 			}
@@ -983,25 +811,21 @@ static bool _handle_messages() {
 				}
 			}
 			KeySym keysym;
-
 			char c;
 			xlib.XLookupString(key, &c, 1, &keysym, NULL);
 
-#define KEY(xkey, ironkey)                                                                                                                                     \
-	case xkey:                                                                                                                                                 \
-		iron_internal_keyboard_trigger_key_up(ironkey);                                                                                                        \
+#define KEY(xkey, ironkey)                                                                  \
+	case xkey:                                                                              \
+		iron_internal_keyboard_trigger_key_up(ironkey);                                     \
 		break;
 
 			KeySym ksKey = xlib.XkbKeycodeToKeysym(x11_ctx.display, event.xkey.keycode, 0, 0);
-
 			if (ksKey == XK_Control_L || ksKey == XK_Control_R) {
 				controlDown = false;
 			}
-
 			if (event.xkey.keycode == ignoreKeycode) {
 				ignoreKeycode = 0;
 			}
-
 			if (ksKey < 97 || ksKey > 122) {
 				ksKey = keysym;
 			}
@@ -1238,7 +1062,8 @@ static bool _handle_messages() {
 					iron_stop();
 				}
 			}
-		}; break;
+			break;
+		}
 		case SelectionNotify: {
 			if (event.xselection.selection == x11_ctx.atoms.CLIPBOARD) {
 				char *result;
@@ -1302,8 +1127,9 @@ static bool _handle_messages() {
 			}
 			break;
 		}
-		case Expose:
+		case Expose: {
 			break;
+		}
 		case FocusIn: {
 			iron_internal_foreground_callback();
 			break;
@@ -1314,10 +1140,12 @@ static bool _handle_messages() {
 			iron_internal_background_callback();
 			break;
 		}
-		case LeaveNotify:
+		case LeaveNotify: {
 			break;
-		case EnterNotify:
+		}
+		case EnterNotify: {
 			break;
+		}
 		}
 	}
 
@@ -1328,9 +1156,7 @@ bool iron_internal_handle_messages() {
 	if (!_handle_messages()) {
 		return false;
 	}
-
 	iron_linux_updateHIDGamepads();
-
 	return true;
 }
 
@@ -1349,28 +1175,19 @@ bool iron_keyboard_active() {
 }
 
 void iron_load_url(const char *url) {
-#define MAX_COMMAND_BUFFER_SIZE 256
-#define HTTP "http://"
-#define HTTPS "https://"
-	if (strncmp(url, HTTP, sizeof(HTTP) - 1) == 0 || strncmp(url, HTTPS, sizeof(HTTPS) - 1) == 0) {
-		char openUrlCommand[MAX_COMMAND_BUFFER_SIZE];
-		snprintf(openUrlCommand, MAX_COMMAND_BUFFER_SIZE, "xdg-open %s", url);
+	if (strncmp(url, "http://", sizeof("http://") - 1) == 0 || strncmp(url, "https://", sizeof("https://") - 1) == 0) {
+		char openUrlCommand[256];
+		snprintf(openUrlCommand, 256, "xdg-open %s", url);
 		int err = system(openUrlCommand);
 		if (err != 0) {
 			iron_log("Error opening url %s", url);
 		}
 	}
-#undef HTTPS
-#undef HTTP
-#undef MAX_COMMAND_BUFFER_SIZE
 }
 
 const char *iron_language() {
 	return "en";
 }
-
-static char save[2000];
-static bool saveInitialized = false;
 
 const char *iron_internal_save_path() {
 	// first check for an existing directory in $HOME
@@ -1378,7 +1195,6 @@ const char *iron_internal_save_path() {
 	// See: https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
 	if (!saveInitialized) {
 		const char *homedir;
-
 		if ((homedir = getenv("HOME")) == NULL) {
 			homedir = getpwuid(getuid())->pw_dir;
 		}
@@ -1413,13 +1229,10 @@ const char *iron_internal_save_path() {
 				iron_error("Could not create save directory '%s'. Error %d", save, errno);
 			}
 		}
-
 		saveInitialized = true;
 	}
 	return save;
 }
-
-static const char *videoFormats[] = {"ogv", NULL};
 
 const char **iron_video_formats() {
 	return videoFormats;
@@ -1428,8 +1241,6 @@ const char **iron_video_formats() {
 double iron_frequency(void) {
 	return 1000000.0;
 }
-
-static struct timeval start;
 
 uint64_t iron_timestamp(void) {
 	struct timeval now;
@@ -1494,64 +1305,6 @@ static int parse_number_at_end_of_line(char *line) {
 		--end;
 	}
 	return num;
-}
-
-int iron_cpu_cores(void) {
-	char line[1024];
-	FILE *file = fopen("/proc/cpuinfo", "r");
-
-	if (file != NULL) {
-		int cores[1024];
-		memset(cores, 0, sizeof(cores));
-
-		int cpu_count = 0;
-		int physical_id = -1;
-		int per_cpu_cores = -1;
-		int processor_count = 0;
-
-		while (fgets(line, sizeof(line), file)) {
-			if (strncmp(line, "processor", 9) == 0) {
-				++processor_count;
-				if (physical_id >= 0 && per_cpu_cores > 0) {
-					if (physical_id + 1 > cpu_count) {
-						cpu_count = physical_id + 1;
-					}
-					cores[physical_id] = per_cpu_cores;
-					physical_id = -1;
-					per_cpu_cores = -1;
-				}
-			}
-			else if (strncmp(line, "physical id", 11) == 0) {
-				physical_id = parse_number_at_end_of_line(line);
-			}
-			else if (strncmp(line, "cpu cores", 9) == 0) {
-				per_cpu_cores = parse_number_at_end_of_line(line);
-			}
-		}
-		fclose(file);
-
-		if (physical_id >= 0 && per_cpu_cores > 0) {
-			if (physical_id + 1 > cpu_count) {
-				cpu_count = physical_id + 1;
-			}
-			cores[physical_id] = per_cpu_cores;
-		}
-
-		int proper_cpu_count = 0;
-		for (int i = 0; i < cpu_count; ++i) {
-			proper_cpu_count += cores[i];
-		}
-
-		if (proper_cpu_count > 0) {
-			return proper_cpu_count;
-		}
-		else {
-			return processor_count == 0 ? 1 : processor_count;
-		}
-	}
-	else {
-		return 1;
-	};
 }
 
 int iron_hardware_threads(void) {
@@ -1699,8 +1452,6 @@ int xkb_to_iron(xkb_keysym_t symbol) {
 #undef KEY
 }
 
-static bool mouse_hidden = false;
-
 void iron_internal_mouse_lock() {
 	iron_mouse_hide();
 	int width = iron_window_width();
@@ -1708,30 +1459,20 @@ void iron_internal_mouse_lock() {
 
 	int x, y;
 	iron_mouse_get_position(&x, &y);
-
-	// Guess the new position of X and Y
 	int newX = x;
 	int newY = y;
-
-	// Correct the position of the X coordinate
-	// if the mouse is out the window
 	if (x < 0) {
 		newX -= x;
 	}
 	else if (x > width) {
 		newX -= x - width;
 	}
-
-	// Correct the position of the Y coordinate
-	// if the mouse is out the window
 	if (y < 0) {
 		newY -= y;
 	}
 	else if (y > height) {
 		newY -= y - height;
 	}
-
-	// Force the mouse to stay inside the window
 	iron_mouse_set_position(newX, newY);
 }
 
@@ -1774,68 +1515,50 @@ void iron_mouse_set_cursor(int cursor_index) {
 	struct iron_x11_window *window = &x11_ctx.windows[0];
 	if (!mouse_hidden) {
 		Cursor cursor;
-		switch (cursor_index) {
-		case 0: {
-			// cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "arrow");
-			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "left_ptr");
-			break;
+		if (cursor_index == 0) {
+			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "left_ptr"); // "arrow"
 		}
-		case 1: {
+		else if (cursor_index == 1) {
 			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "hand1");
-			break;
 		}
-		case 2: {
+		else if (cursor_index == 2) {
 			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "xterm");
-			break;
 		}
-		case 3: {
+		else if (cursor_index == 3) {
 			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "sb_h_double_arrow");
-			break;
 		}
-		case 4: {
+		else if (cursor_index == 4) {
 			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "sb_v_double_arrow");
-			break;
 		}
-		case 5: {
+		else if (cursor_index == 5) {
 			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "top_right_corner");
-			break;
 		}
-		case 6: {
+		else if (cursor_index == 6) {
 			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "bottom_right_corner");
-			break;
 		}
-		case 7: {
+		else if (cursor_index == 7) {
 			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "top_left_corner");
-			break;
 		}
-		case 8: {
+		else if (cursor_index == 8) {
 			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "bottom_left_corner");
-			break;
 		}
-		case 9: {
+		else if (cursor_index == 9) {
 			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "grab");
-			break;
 		}
-		case 10: {
+		else if (cursor_index == 10) {
 			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "grabbing");
-			break;
 		}
-		case 11: {
+		else if (cursor_index == 11) {
 			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "not-allowed");
-			break;
 		}
-		case 12: {
+		else if (cursor_index == 12) {
 			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "watch");
-			break;
 		}
-		case 13: {
+		else if (cursor_index == 13) {
 			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "crosshair");
-			break;
 		}
-		default: {
+		else {
 			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "arrow");
-			break;
-		}
 		}
 		xlib.XDefineCursor(x11_ctx.display, window->window, cursor);
 	}
@@ -1843,9 +1566,8 @@ void iron_mouse_set_cursor(int cursor_index) {
 
 void iron_mouse_set_position(int x, int y) {
 	struct iron_x11_window *window = &x11_ctx.windows[0];
-
 	xlib.XWarpPointer(x11_ctx.display, None, window->window, 0, 0, 0, 0, x, y);
-	xlib.XFlush(x11_ctx.display); // Flushes the output buffer, therefore updates the cursor's position.
+	xlib.XFlush(x11_ctx.display);
 }
 
 void iron_mouse_get_position(int *x, int *y) {
@@ -1854,7 +1576,6 @@ void iron_mouse_get_position(int *x, int *y) {
 	Window inchildwin;
 	int rootx, rooty;
 	unsigned int mask;
-
 	xlib.XQueryPointer(x11_ctx.display, window->window, &inwin, &inchildwin, &rootx, &rooty, x, y, &mask);
 }
 

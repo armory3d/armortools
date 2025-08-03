@@ -275,30 +275,6 @@ int iron_primary_display() {
 	return -1;
 }
 
-iron_display_mode_t iron_display_available_mode(int display_index, int mode_index) {
-	DEVMODEA dev_mode = {0};
-	dev_mode.dmSize = sizeof(DEVMODEA);
-	EnumDisplaySettingsA(displays[display_index].name, mode_index, &dev_mode);
-	iron_display_mode_t mode;
-	mode.x = displays[display_index].x;
-	mode.y = displays[display_index].y;
-	mode.width = dev_mode.dmPelsWidth;
-	mode.height = dev_mode.dmPelsHeight;
-	mode.frequency = dev_mode.dmDisplayFrequency;
-	mode.bits_per_pixel = dev_mode.dmBitsPerPel;
-	mode.pixels_per_inch = displays[display_index].ppi * mode.width / original_modes[display_index].dmPelsWidth;
-	return mode;
-}
-
-int iron_display_count_available_modes(int display_index) {
-	DEVMODEA dev_mode = {0};
-	dev_mode.dmSize = sizeof(DEVMODEA);
-	int i = 0;
-	for (; EnumDisplaySettingsA(displays[display_index].name, i, &dev_mode) != FALSE; ++i)
-		;
-	return i;
-}
-
 bool iron_windows_set_display_mode(int display_index, int width, int height, int bpp, int frequency) {
 	DisplayData *display = &displays[display_index];
 	display->mode_changed = true;
@@ -331,17 +307,6 @@ void iron_windows_restore_displays() {
 	for (int i = 0; i < MAXIMUM_DISPLAYS; ++i) {
 		iron_windows_restore_display(i);
 	}
-}
-
-bool iron_display_available(int display_index) {
-	if (display_index < 0 || display_index >= MAXIMUM_DISPLAYS) {
-		return false;
-	}
-	return displays[display_index].available;
-}
-
-const char *iron_display_name(int display_index) {
-	return displays[display_index].name;
 }
 
 iron_display_mode_t iron_display_current_mode(int display_index) {
@@ -1708,32 +1673,6 @@ void iron_copy_to_clipboard(const char *text) {
 	CloseClipboard();
 }
 
-int iron_cpu_cores(void) {
-	SYSTEM_LOGICAL_PROCESSOR_INFORMATION info[1024];
-	DWORD returnLength = sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION) * 1024;
-	BOOL success = GetLogicalProcessorInformation(&info[0], &returnLength);
-
-	int proper_cpu_count = 0;
-
-	if (success) {
-		DWORD byteOffset = 0;
-		PSYSTEM_LOGICAL_PROCESSOR_INFORMATION ptr = &info[0];
-		while (byteOffset + sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION) <= returnLength) {
-			if (ptr->Relationship == RelationProcessorCore) {
-				++proper_cpu_count;
-			}
-
-			byteOffset += sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION);
-			++ptr;
-		}
-	}
-	else {
-		proper_cpu_count = 1;
-	}
-
-	return proper_cpu_count;
-}
-
 int iron_hardware_threads(void) {
 	SYSTEM_INFO sysinfo;
 	GetSystemInfo(&sysinfo);
@@ -1968,18 +1907,6 @@ void iron_window_move(int x, int y) {
 	SetWindowPos(win->handle, NULL, x, y, rect.right - rect.left, rect.bottom - rect.top, 0);
 }
 
-void iron_window_change_features(int features) {
-	WindowData *win = &windows[0];
-	win->features = features;
-	SetWindowLongW(win->handle, GWL_STYLE, getStyle(features));
-	SetWindowLongW(win->handle, GWL_EXSTYLE, getExStyle(features));
-
-	HWND on_top = (features & IRON_WINDOW_FEATURE_ON_TOP) ? HWND_TOPMOST : HWND_NOTOPMOST;
-	SetWindowPos(win->handle, on_top, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED);
-
-	iron_window_show();
-}
-
 void iron_window_change_mode(iron_window_mode_t mode) {
 	WindowData *win = &windows[0];
 	int display_index = iron_window_display();
@@ -1987,7 +1914,10 @@ void iron_window_change_mode(iron_window_mode_t mode) {
 	switch (mode) {
 	case IRON_WINDOW_MODE_WINDOW: {
 		iron_windows_restore_display(display_index);
-		iron_window_change_features(win->features);
+		SetWindowLongW(win->handle, GWL_STYLE, getStyle(win->features));
+		SetWindowLongW(win->handle, GWL_EXSTYLE, getExStyle(win->features));
+		HWND on_top = (win->features & IRON_WINDOW_FEATURE_ON_TOP) ? HWND_TOPMOST : HWND_NOTOPMOST;
+		SetWindowPos(win->handle, on_top, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED);
 		iron_window_show();
 		break;
 	}
