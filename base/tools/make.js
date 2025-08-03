@@ -135,8 +135,7 @@ function os_exec(exe, params = [], ops = {}) {
 	let res = { status: 0 };
 
 	if (os_platform() === "win32") {
-		res.stdout = amake.os_exec_win(params, ops);
-		res.status = 0;
+		res = amake.os_exec_win(params, ops); // { status, stdout }
 	}
 	else {
 		res.status = os.exec(params, ops);

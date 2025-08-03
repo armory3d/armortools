@@ -73,11 +73,17 @@ static JSValue js_os_exec_win(JSContext *ctx, JSValue this_val, int argc, JSValu
 
     CloseHandle(hReadPipe);
     WaitForSingleObject(pi.hProcess, INFINITE);
+    DWORD exit_code;
+    GetExitCodeProcess(pi.hProcess, &exit_code);
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
 
     printf("%s", buf);
-    return JS_NewString(ctx, buf);
+
+    JSValue result = JS_NewObject(ctx);
+    JS_SetPropertyStr(ctx, result, "stdout", JS_NewString(ctx, buf));
+    JS_SetPropertyStr(ctx, result, "status", JS_NewInt32(ctx, (int32_t)exit_code));
+    return result;
 }
 
 #endif
