@@ -589,6 +589,8 @@ void iron_internal_surface_trigger_touch_end(int index, int x, int y) {
 	}
 }
 
+#ifdef WITH_GAMEPAD
+
 static void (*gamepad_connect_callback)(int /*gamepad*/, void * /*userdata*/) = NULL;
 static void *gamepad_connect_callback_userdata = NULL;
 static void (*gamepad_disconnect_callback)(int /*gamepad*/, void * /*userdata*/) = NULL;
@@ -641,3 +643,5 @@ void iron_internal_gamepad_trigger_button(int gamepad, int button, float value) 
 		gamepad_button_callback(gamepad, button, value, gamepad_button_callback_userdata);
 	}
 }
+
+#endif

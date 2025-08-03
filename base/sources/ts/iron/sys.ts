@@ -72,8 +72,10 @@ function sys_start(ops: iron_window_options_t) {
 	iron_set_pen_down_callback(sys_pen_down_callback);
 	iron_set_pen_up_callback(sys_pen_up_callback);
 	iron_set_pen_move_callback(sys_pen_move_callback);
+	///if WITH_GAMEPAD
 	iron_set_gamepad_axis_callback(sys_gamepad_axis_callback);
 	iron_set_gamepad_button_callback(sys_gamepad_button_callback);
+	///end
 	input_register();
 }
 
@@ -239,6 +241,7 @@ function sys_pen_move_callback(x: i32, y: i32, pressure: f32) {
 	pen_move_listener(x, y, pressure);
 }
 
+///if WITH_GAMEPAD
 function sys_gamepad_axis_callback(gamepad: i32, axis: i32, value: f32) {
 	gamepad_axis_listener(gamepad, axis, value);
 }
@@ -246,6 +249,7 @@ function sys_gamepad_axis_callback(gamepad: i32, axis: i32, value: f32) {
 function sys_gamepad_button_callback(gamepad: i32, button: i32, value: f32) {
 	gamepad_button_listener(gamepad, button, value);
 }
+///end
 
 function sys_title(): string {
 	return _sys_window_title;

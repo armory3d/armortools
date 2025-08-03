@@ -162,11 +162,15 @@ static void updateAppForegroundStatus(bool displayIsInitializedValue, bool appIs
 	}
 }
 
+#ifdef WITH_GAMEPAD
+
 static bool isGamepadEvent(AInputEvent *event) {
 	return ((AInputEvent_getSource(event) & AINPUT_SOURCE_GAMEPAD) == AINPUT_SOURCE_GAMEPAD ||
 	        (AInputEvent_getSource(event) & AINPUT_SOURCE_JOYSTICK) == AINPUT_SOURCE_JOYSTICK ||
 	        (AInputEvent_getSource(event) & AINPUT_SOURCE_DPAD) == AINPUT_SOURCE_DPAD);
 }
+
+#endif
 
 static bool isPenEvent(AInputEvent *event) {
 	return (AInputEvent_getSource(event) & AINPUT_SOURCE_STYLUS) == AINPUT_SOURCE_STYLUS;
@@ -1188,12 +1192,18 @@ void iron_init(const char *name, int width, int height, struct iron_window_optio
 
 	gpu_init(win->depth_bits, true);
 
+	#ifdef WITH_GAMEPAD
 	iron_internal_gamepad_trigger_connect(0);
+	#endif
 }
 
 void iron_internal_shutdown(void) {
+	#ifdef WITH_GAMEPAD
 	iron_internal_gamepad_trigger_disconnect(0);
+	#endif
 }
+
+#ifdef WITH_GAMEPAD
 
 const char *iron_gamepad_vendor(int gamepad) {
 	return "Google";
@@ -1202,6 +1212,8 @@ const char *iron_gamepad_vendor(int gamepad) {
 const char *iron_gamepad_product_name(int gamepad) {
 	return "gamepad";
 }
+
+#endif
 
 void initAndroidFileReader(void) {
 	if (activity == NULL) {
@@ -1297,19 +1309,12 @@ int iron_window_height() {
 }
 
 void iron_window_resize(int width, int height) {}
-
 void iron_window_move(int x, int y) {}
-
 void iron_window_change_mode(iron_window_mode_t mode) {}
-
 void iron_window_destroy() {}
-
 void iron_window_show() {}
-
 void iron_window_hide() {}
-
 void iron_window_set_title(const char *title) {}
-
 void iron_window_create(iron_window_options_t *win) {}
 
 void iron_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {

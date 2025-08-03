@@ -18,7 +18,7 @@ jobs:
     - name: Apt Update
       run: sudo apt-get update
     - name: Apt Install
-      run: sudo apt install make clang libvulkan-dev libgtk-3-dev libudev-dev libasound2-dev --yes --quiet
+      run: sudo apt install make clang libvulkan-dev libgtk-3-dev --yes --quiet
     - name: Compile
       run: |
         cd armorpaint

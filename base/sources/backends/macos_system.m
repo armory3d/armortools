@@ -428,6 +428,8 @@ void iron_copy_to_clipboard(const char *text) {
 	[board setString:[NSString stringWithUTF8String:text] forType:NSStringPboardType];
 }
 
+#ifdef WITH_GAMEPAD
+
 static void inputValueCallback(void *inContext, IOReturn inResult, void *inSender, IOHIDValueRef inIOHIDValueRef);
 static void valueAvailableCallback(void *inContext, IOReturn inResult, void *inSender);
 static void reset(struct HIDGamepad *gamepad);
@@ -726,6 +728,8 @@ void deviceRemoved(void *inContext, IOReturn inResult, void *inSender, IOHIDDevi
 	}
 }
 
+#endif
+
 int iron_count_displays(void) {
 	NSArray *screens = [NSScreen screens];
 	return (int)[screens count];
@@ -841,11 +845,15 @@ uint64_t iron_timestamp(void) {
 	return mach_absolute_time();
 }
 
+#ifdef WITH_GAMEPAD
+
 bool iron_gamepad_connected(int num) {
 	return true;
 }
 
 void iron_gamepad_rumble(int gamepad, float left, float right) {}
+
+#endif
 
 bool withAutoreleasepool(bool (*f)(void)) {
 	@autoreleasepool {

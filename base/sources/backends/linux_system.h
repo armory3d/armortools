@@ -172,6 +172,8 @@ struct x11_context x11_ctx;
 
 void iron_copy_to_clipboard(const char *text);
 
+#ifdef WITH_GAMEPAD
 void iron_linux_initHIDGamepads();
 void iron_linux_updateHIDGamepads();
 void iron_linux_closeHIDGamepads();
+#endif

@@ -240,8 +240,10 @@ void (*iron_touch_move)(int, int, int);
 void (*iron_pen_down)(int, int, float);
 void (*iron_pen_up)(int, int, float);
 void (*iron_pen_move)(int, int, float);
+#ifdef WITH_GAMEPAD
 void (*iron_gamepad_axis)(int, int, float);
 void (*iron_gamepad_button)(int, int, float);
+#endif
 void (*iron_save_and_quit)(bool);
 
 char *_substring(char *s, int32_t start, int32_t end) {
@@ -665,6 +667,8 @@ void _pen_move(int x, int y, float pressure) {
 	#endif
 }
 
+#ifdef WITH_GAMEPAD
+
 void _gamepad_axis(int gamepad, int axis, float value, void *data) {
 	iron_gamepad_axis(gamepad, axis, value);
 
@@ -680,6 +684,8 @@ void _gamepad_button(int gamepad, int button, float value, void *data) {
 	paused_frames = 0;
 	#endif
 }
+
+#endif
 
 void _drop_files(wchar_t *file_path, void *data) {
 // Update mouse position
@@ -933,6 +939,8 @@ void iron_set_pen_move_callback(void (*callback)(int, int, float)) {
 	iron_pen_set_move_callback(_pen_move);
 }
 
+#ifdef WITH_GAMEPAD
+
 void iron_set_gamepad_axis_callback(void (*callback)(int, int, float)) {
 	iron_gamepad_axis = callback;
 	iron_gamepad_set_axis_callback(_gamepad_axis, NULL);
@@ -942,6 +950,8 @@ void iron_set_gamepad_button_callback(void (*callback)(int, int, float)) {
 	iron_gamepad_button = callback;
 	iron_gamepad_set_button_callback(_gamepad_button, NULL);
 }
+
+#endif
 
 void gpu_delete_buffer(gpu_buffer_t *buffer) {
 	buffers_to_destroy[buffers_to_destroy_count] = buffer;

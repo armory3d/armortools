@@ -7,14 +7,18 @@ function input_reset() {
 	mouse_reset();
 	pen_reset();
 	keyboard_reset();
+	///if WITH_GAMEPAD
 	gamepad_reset();
+	///end
 }
 
 function input_end_frame() {
 	mouse_end_frame();
 	pen_end_frame();
 	keyboard_end_frame();
+	///if WITH_GAMEPAD
 	gamepad_end_frame();
+	///end
 }
 
 function _input_on_foreground() {
@@ -31,7 +35,9 @@ function input_register() {
 	// Reset mouse delta on foreground
 	sys_notify_on_app_state(_input_on_foreground, null, null, null, null);
 	keyboard_reset();
+	///if WITH_GAMEPAD
 	gamepad_reset();
+	///end
 }
 
 let _mouse_buttons: string[] = ["left", "right", "middle", "side1", "side2"];
@@ -686,6 +692,8 @@ function keyboard_up_listener(code: key_code_t) {
 
 function keyboard_press_listener(c: string) {}
 
+///if WITH_GAMEPAD
+
 let gamepad_buttons_ps: string[] = ["cross", "circle", "square", "triangle", "l1", "r1", "l2", "r2", "share", "options", "l3", "r3", "up", "down", "left", "right", "home", "touchpad"];
 let gamepad_buttons_xbox: string[] = ["a", "b", "x", "y", "l1", "r1", "l2", "r2", "share", "options", "l3", "r3", "up", "down", "left", "right", "home", "touchpad"];
 let gamepad_buttons: string[] = gamepad_buttons_ps;
@@ -821,6 +829,8 @@ type gamepad_t = {
 	left_stick?: gamepad_stick_t;
 	right_stick?: gamepad_stick_t;
 };
+
+///end
 
 enum key_code_t {
 	UNKNOWN = 0,

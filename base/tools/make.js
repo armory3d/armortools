@@ -2225,6 +2225,7 @@ function load_project(directory, is_root_project) {
 			with_audio: false,
 			with_iron: false,
 			with_eval: false,
+			with_gamepad: false,
 			embed: false
 		};
 	}

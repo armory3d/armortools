@@ -2,7 +2,6 @@
 #include <iron_gpu.h>
 #include <iron_video.h>
 #include <iron_system.h>
-
 #include <assert.h>
 #include <limits.h>
 #include <stdio.h>
@@ -14,13 +13,12 @@
 #include <ctype.h>
 #include <time.h>
 #include <dlfcn.h>
-#include <fcntl.h>
-#include <libudev.h>
 #include <X11/Xlib.h>
+#include <sys/stat.h>
+#include <sys/time.h>
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_xlib.h>
 #include <xkbcommon/xkbcommon.h>
-#include <linux/joystick.h>
 
 #define Button6 6
 #define Button7 7
@@ -1156,7 +1154,9 @@ bool iron_internal_handle_messages() {
 	if (!_handle_messages()) {
 		return false;
 	}
+	#ifdef WITH_GAMEPAD
 	iron_linux_updateHIDGamepads();
+	#endif
 	return true;
 }
 
@@ -1252,7 +1252,11 @@ uint64_t iron_timestamp(void) {
 
 void iron_init(const char *name, int width, int height, iron_window_options_t *win) {
 	gettimeofday(&start, NULL);
+
+	#ifdef WITH_GAMEPAD
 	iron_linux_initHIDGamepads();
+	#endif
+
 	iron_x11_init();
 	iron_display_init();
 	iron_set_app_name(name);
@@ -1273,7 +1277,11 @@ void iron_init(const char *name, int width, int height, iron_window_options_t *w
 
 void iron_internal_shutdown() {
 	gpu_destroy();
+
+	#ifdef WITH_GAMEPAD
 	iron_linux_closeHIDGamepads();
+	#endif
+
 	free(clipboardString);
 	xlib.XCloseDisplay(x11_ctx.display);
 	iron_internal_shutdown_callback();
@@ -1579,6 +1587,12 @@ void iron_mouse_get_position(int *x, int *y) {
 	xlib.XQueryPointer(x11_ctx.display, window->window, &inwin, &inchildwin, &rootx, &rooty, x, y, &mask);
 }
 
+#ifdef WITH_GAMEPAD
+
+#include <fcntl.h>
+#include <libudev.h>
+#include <linux/joystick.h>
+
 struct HIDGamepad {
 	int idx;
 	char gamepad_dev_name[256];
@@ -1766,3 +1780,5 @@ bool iron_gamepad_connected(int gamepad) {
 }
 
 void iron_gamepad_rumble(int gamepad, float left, float right) {}
+
+#endif

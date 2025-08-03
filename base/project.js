@@ -251,10 +251,14 @@ if (!flags.lite) {
 		project.add_define("IRON_VULKAN");
 		project.add_define("_POSIX_C_SOURCE=200112L");
 		project.add_define("_XOPEN_SOURCE=600");
-		project.add_lib("asound");
 		project.add_lib("dl");
-		project.add_lib("udev");
 		project.add_lib("vulkan");
+		if (flags.with_audio) {
+			project.add_lib("asound");
+		}
+		if (flags.with_gamepad) {
+			project.add_lib("udev");
+		}
 	}
 }
 
@@ -288,6 +292,10 @@ if (flags.with_eval) {
 
 	project.add_cfiles("tools/amake/alang.c");
 	project.add_cfiles("tools/amake/alang_eval.c");
+}
+
+if (flags.with_gamepad) {
+	project.add_define("WITH_GAMEPAD");
 }
 
 if (flags.with_iron) {

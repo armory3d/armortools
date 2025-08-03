@@ -645,6 +645,8 @@ uint64_t iron_timestamp(void) {
 	return time;
 }
 
+#ifdef WITH_GAMEPAD
+
 const char *iron_gamepad_vendor(int gamepad) {
 	return "nobody";
 }
@@ -658,6 +660,8 @@ bool iron_gamepad_connected(int num) {
 }
 
 void iron_gamepad_rumble(int gamepad, float left, float right) {}
+
+#endif
 
 int main(int argc, char *argv[]) {
 	int retVal = 0;

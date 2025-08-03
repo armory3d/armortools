@@ -560,8 +560,13 @@ static void initKeyTranslation() {
 	keyTranslated[VK_OEM_7] = IRON_KEY_QUOTE;
 }
 
+#ifdef WITH_GAMEPAD
+
 static bool detectGamepad = true;
 static bool gamepadFound = false;
+
+#endif
+
 static unsigned r = 0;
 
 static wchar_t toUnicode(WPARAM wParam, LPARAM lParam) {
@@ -952,7 +957,9 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		}
 		break;
 	case WM_DEVICECHANGE:
+		#ifdef WITH_GAMEPAD
 		detectGamepad = true;
+		#endif
 		break;
 	case WM_DROPFILES: {
 		HDROP hDrop = (HDROP)wParam;
@@ -969,6 +976,8 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 	}
 	return DefWindowProcW(hWnd, msg, wParam, lParam);
 }
+
+#ifdef WITH_GAMEPAD
 
 static float axes[12 * 6];
 static float buttons[12 * 16];
@@ -1434,6 +1443,8 @@ bool iron_internal_handle_messages() {
 	return true;
 }
 
+#endif
+
 static bool keyboardshown = false;
 static char language[3] = {0};
 
@@ -1534,6 +1545,8 @@ const char **iron_video_formats() {
 	return videoFormats;
 }
 
+#ifdef WITH_GAMEPAD
+
 bool iron_gamepad_connected(int num) {
 	return isXInputGamepad(num) || isDirectInputGamepad(num);
 }
@@ -1547,6 +1560,8 @@ void iron_gamepad_rumble(int gamepad, float left, float right) {
 		InputSetState(gamepad, &vibration);
 	}
 }
+
+#endif
 
 double iron_frequency() {
 	return (double)frequency.QuadPart;

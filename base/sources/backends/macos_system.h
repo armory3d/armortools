@@ -4,9 +4,6 @@
 #include <IOKit/hid/IOHIDKeys.h>
 #include <IOKit/hid/IOHIDManager.h>
 #include <iron_global.h>
-#include <IOKit/IOKitLib.h>
-#include <IOKit/hid/IOHIDKeys.h>
-#include <IOKit/hid/IOHIDManager.h>
 
 @interface BasicMTKView : MTKView {
 @private
@@ -39,6 +36,8 @@
 
 @end
 
+#ifdef WITH_GAMEPAD
+
 struct HIDGamepad {
 	int padIndex;
 	IOHIDDeviceRef hidDeviceRef;
@@ -57,7 +56,7 @@ void HIDGamepad_destroy(struct HIDGamepad *gamepad);
 void HIDGamepad_bind(struct HIDGamepad *gamepad, IOHIDDeviceRef deviceRef, int padIndex);
 void HIDGamepad_unbind(struct HIDGamepad *gamepad);
 
-static const int IRON_MAX_HID_DEVICES = 12;
+static const int IRON_MAX_HID_DEVICES = 8;
 
 // Slots to hold details on connected devices
 struct HIDManagerDeviceRecord {
@@ -73,3 +72,5 @@ struct HIDManager {
 
 void HIDManager_init(struct HIDManager *manager);
 void HIDManager_destroy(struct HIDManager *manager);
+
+#endif
