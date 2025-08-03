@@ -167,13 +167,17 @@ if (!flags.lite) {
 		project.add_define("_WINSOCK_DEPRECATED_NO_WARNINGS");
 		project.add_define("IRON_DIRECT3D12");
 		project.add_lib("dxguid");
-		project.add_lib("dsound");
-		project.add_lib("dinput8");
 		project.add_lib("ws2_32");
 		project.add_lib("Winhttp");
 		project.add_lib("wbemuuid");
 		project.add_lib("dxgi");
 		project.add_lib("d3d12");
+		if (flags.with_audio) {
+			project.add_lib("dsound");
+		}
+		if (flags.with_gamepad) {
+			project.add_lib("dinput8");
+		}
 	}
 	else if (platform === "macos") {
 		add_sys_backend("macos");
@@ -230,10 +234,9 @@ if (!flags.lite) {
 		project.add_lib("vulkan");
 		project.add_lib("log");
 		project.add_lib("android");
-		project.add_lib("EGL");
-		project.add_lib("GLESv3");
-		project.add_lib("OpenSLES");
-		project.add_lib("OpenMAXAL");
+		if (flags.with_audio) {
+			project.add_lib("OpenSLES");
+		}
 	}
 	else if (platform === "wasm") {
 		add_sys_backend("wasm");
