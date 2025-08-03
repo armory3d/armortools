@@ -30,11 +30,6 @@ struct iron_x11_display {
 	RRCrtc crtc;
 };
 
-struct iron_x11_mouse {
-	int x;
-	int y;
-};
-
 struct iron_x11_atoms {
 	Atom XdndAware;
 	Atom XdndDrop;
@@ -159,7 +154,6 @@ struct x11_context {
 	Display *display;
 	struct iron_x11_libs libs;
 	struct iron_x11_atoms atoms;
-	struct iron_x11_mouse mouse;
 	struct x11_pen_device pen;
 	struct x11_pen_device eraser;
 	struct iron_x11_window windows[1];
@@ -169,7 +163,6 @@ struct x11_context {
 
 struct iron_x11_procs xlib;
 struct x11_context x11_ctx;
-
 void iron_copy_to_clipboard(const char *text);
 
 #ifdef WITH_GAMEPAD

@@ -18,7 +18,6 @@
 #include <sys/time.h>
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_xlib.h>
-#include <xkbcommon/xkbcommon.h>
 
 #define Button6 6
 #define Button7 7
@@ -28,7 +27,7 @@ struct x11_context x11_ctx = {0};
 
 static size_t clipboardStringSize = 1024;
 static char *clipboardString = NULL;
-char buffer[1024];
+static char buffer[1024];
 static char save[2000];
 static bool saveInitialized = false;
 static const char *videoFormats[] = {"ogv", NULL};
@@ -338,6 +337,7 @@ static void load_lib(void **lib, const char *name) {
 			return;
 		}
 	}
+	iron_error("Failed to load lib%s.so", name);
 }
 
 int iron_x11_error_handler(Display *display, XErrorEvent *error_event) {
@@ -347,89 +347,67 @@ int iron_x11_error_handler(Display *display, XErrorEvent *error_event) {
 }
 
 bool iron_x11_init() {
-#undef LOAD_LIB
-#undef LOAD_FUN
-#define LOAD_LIB(name)                                                                                                       \
-	{                                                                                                                        \
-		load_lib(&x11_ctx.libs.name, #name);                                                                                 \
-																															 \
-		if (x11_ctx.libs.name == NULL) {                                                                                     \
-			iron_error("Failed to load lib%s.so", #name);                                                                    \
-			return false;                                                                                                    \
-		}                                                                                                                    \
-	}                                                                                                                        \
-
 	load_lib(&x11_ctx.libs.X11, "X11");
-	if (x11_ctx.libs.X11 == NULL) {
-		return false;
-	}
+	load_lib(&x11_ctx.libs.Xi, "Xi");
+	load_lib(&x11_ctx.libs.Xcursor, "Xcursor");
+	load_lib(&x11_ctx.libs.Xrandr, "Xrandr");
 
-	LOAD_LIB(Xi);
-	LOAD_LIB(Xcursor);
-	LOAD_LIB(Xrandr);
-#define LOAD_FUN(lib, symbol)                                                                                               \
-	xlib.symbol = dlsym(x11_ctx.libs.lib, #symbol);                                                                         \
-	if (xlib.symbol == NULL) {                                                                                              \
-		iron_error("Did not find symbol %s in library %s.", #symbol, #lib);                                                 \
-	}
-	LOAD_FUN(X11, XOpenDisplay)
-	LOAD_FUN(X11, XCloseDisplay)
-	LOAD_FUN(X11, XSetErrorHandler)
-	LOAD_FUN(X11, XGetErrorText)
-	LOAD_FUN(X11, XInternAtoms)
-	LOAD_FUN(X11, XPending)
-	LOAD_FUN(X11, XFlush)
-	LOAD_FUN(X11, XNextEvent)
-	LOAD_FUN(X11, XRefreshKeyboardMapping)
-	LOAD_FUN(X11, XwcLookupString)
-	LOAD_FUN(X11, XFilterEvent)
-	LOAD_FUN(X11, XConvertSelection)
-	LOAD_FUN(X11, XSetSelectionOwner)
-	LOAD_FUN(X11, XLookupString)
-	LOAD_FUN(X11, XkbKeycodeToKeysym)
-	LOAD_FUN(X11, XSendEvent)
-	LOAD_FUN(X11, XGetWindowProperty)
-	LOAD_FUN(X11, XFree)
-	LOAD_FUN(X11, XChangeProperty)
-	LOAD_FUN(X11, XDefineCursor)
-	LOAD_FUN(X11, XUndefineCursor)
-	LOAD_FUN(X11, XCreateBitmapFromData)
-	LOAD_FUN(X11, XCreatePixmapCursor)
-	LOAD_FUN(X11, XFreePixmap)
-	LOAD_FUN(Xcursor, XcursorLibraryLoadCursor)
-	LOAD_FUN(X11, XWarpPointer)
-	LOAD_FUN(X11, XQueryPointer)
-	LOAD_FUN(X11, XCreateColormap)
-	LOAD_FUN(X11, XCreateWindow)
-	LOAD_FUN(X11, XMoveWindow)
-	LOAD_FUN(X11, XResizeWindow)
-	LOAD_FUN(X11, XDestroyWindow)
-	LOAD_FUN(X11, XSetClassHint)
-	LOAD_FUN(X11, XSetLocaleModifiers)
-	LOAD_FUN(X11, XOpenIM)
-	LOAD_FUN(X11, XCloseIM)
-	LOAD_FUN(X11, XCreateIC)
-	LOAD_FUN(X11, XDestroyIC)
-	LOAD_FUN(X11, XSetICFocus)
-	LOAD_FUN(X11, XMapWindow)
-	LOAD_FUN(X11, XUnmapWindow)
-	LOAD_FUN(X11, XSetWMProtocols)
-	LOAD_FUN(X11, XPeekEvent)
-	LOAD_FUN(X11, XAllocColor)
-	LOAD_FUN(Xi, XListInputDevices)
-	LOAD_FUN(Xi, XFreeDeviceList)
-	LOAD_FUN(Xi, XOpenDevice)
-	LOAD_FUN(Xi, XCloseDevice)
-	LOAD_FUN(Xi, XSelectExtensionEvent)
-	LOAD_FUN(Xrandr, XRRGetScreenResourcesCurrent)
-	LOAD_FUN(Xrandr, XRRGetOutputPrimary)
-	LOAD_FUN(Xrandr, XRRGetOutputInfo)
-	LOAD_FUN(Xrandr, XRRFreeOutputInfo)
-	LOAD_FUN(Xrandr, XRRGetCrtcInfo)
-	LOAD_FUN(Xrandr, XRRFreeCrtcInfo)
-	LOAD_FUN(Xrandr, XRRFreeScreenResources)
-#undef LOAD_FUN
-#undef LOAD_LIB
+	xlib.XOpenDisplay = dlsym(x11_ctx.libs.X11, "XOpenDisplay");
+	xlib.XCloseDisplay = dlsym(x11_ctx.libs.X11, "XCloseDisplay");
+	xlib.XSetErrorHandler = dlsym(x11_ctx.libs.X11, "XSetErrorHandler");
+	xlib.XGetErrorText = dlsym(x11_ctx.libs.X11, "XGetErrorText");
+	xlib.XInternAtoms = dlsym(x11_ctx.libs.X11, "XInternAtoms");
+	xlib.XPending = dlsym(x11_ctx.libs.X11, "XPending");
+	xlib.XFlush = dlsym(x11_ctx.libs.X11, "XFlush");
+	xlib.XNextEvent = dlsym(x11_ctx.libs.X11, "XNextEvent");
+	xlib.XRefreshKeyboardMapping = dlsym(x11_ctx.libs.X11, "XRefreshKeyboardMapping");
+	xlib.XwcLookupString = dlsym(x11_ctx.libs.X11, "XwcLookupString");
+	xlib.XFilterEvent = dlsym(x11_ctx.libs.X11, "XFilterEvent");
+	xlib.XConvertSelection = dlsym(x11_ctx.libs.X11, "XConvertSelection");
+	xlib.XSetSelectionOwner = dlsym(x11_ctx.libs.X11, "XSetSelectionOwner");
+	xlib.XLookupString = dlsym(x11_ctx.libs.X11, "XLookupString");
+	xlib.XkbKeycodeToKeysym = dlsym(x11_ctx.libs.X11, "XkbKeycodeToKeysym");
+	xlib.XSendEvent = dlsym(x11_ctx.libs.X11, "XSendEvent");
+	xlib.XGetWindowProperty = dlsym(x11_ctx.libs.X11, "XGetWindowProperty");
+	xlib.XFree = dlsym(x11_ctx.libs.X11, "XFree");
+	xlib.XChangeProperty = dlsym(x11_ctx.libs.X11, "XChangeProperty");
+	xlib.XDefineCursor = dlsym(x11_ctx.libs.X11, "XDefineCursor");
+	xlib.XUndefineCursor = dlsym(x11_ctx.libs.X11, "XUndefineCursor");
+	xlib.XCreateBitmapFromData = dlsym(x11_ctx.libs.X11, "XCreateBitmapFromData");
+	xlib.XCreatePixmapCursor = dlsym(x11_ctx.libs.X11, "XCreatePixmapCursor");
+	xlib.XFreePixmap = dlsym(x11_ctx.libs.X11, "XFreePixmap");
+	xlib.XWarpPointer = dlsym(x11_ctx.libs.X11, "XWarpPointer");
+	xlib.XQueryPointer = dlsym(x11_ctx.libs.X11, "XQueryPointer");
+	xlib.XCreateColormap = dlsym(x11_ctx.libs.X11, "XCreateColormap");
+	xlib.XCreateWindow = dlsym(x11_ctx.libs.X11, "XCreateWindow");
+	xlib.XMoveWindow = dlsym(x11_ctx.libs.X11, "XMoveWindow");
+	xlib.XResizeWindow = dlsym(x11_ctx.libs.X11, "XResizeWindow");
+	xlib.XDestroyWindow = dlsym(x11_ctx.libs.X11, "XDestroyWindow");
+	xlib.XSetClassHint = dlsym(x11_ctx.libs.X11, "XSetClassHint");
+	xlib.XSetLocaleModifiers = dlsym(x11_ctx.libs.X11, "XSetLocaleModifiers");
+	xlib.XOpenIM = dlsym(x11_ctx.libs.X11, "XOpenIM");
+	xlib.XCloseIM = dlsym(x11_ctx.libs.X11, "XCloseIM");
+	xlib.XCreateIC = dlsym(x11_ctx.libs.X11, "XCreateIC");
+	xlib.XDestroyIC = dlsym(x11_ctx.libs.X11, "XDestroyIC");
+	xlib.XSetICFocus = dlsym(x11_ctx.libs.X11, "XSetICFocus");
+	xlib.XMapWindow = dlsym(x11_ctx.libs.X11, "XMapWindow");
+	xlib.XUnmapWindow = dlsym(x11_ctx.libs.X11, "XUnmapWindow");
+	xlib.XSetWMProtocols = dlsym(x11_ctx.libs.X11, "XSetWMProtocols");
+	xlib.XPeekEvent = dlsym(x11_ctx.libs.X11, "XPeekEvent");
+	xlib.XAllocColor = dlsym(x11_ctx.libs.X11, "XAllocColor");
+	xlib.XListInputDevices = dlsym(x11_ctx.libs.Xi, "XListInputDevices");
+	xlib.XFreeDeviceList = dlsym(x11_ctx.libs.Xi, "XFreeDeviceList");
+	xlib.XOpenDevice = dlsym(x11_ctx.libs.Xi, "XOpenDevice");
+	xlib.XCloseDevice = dlsym(x11_ctx.libs.Xi, "XCloseDevice");
+	xlib.XSelectExtensionEvent = dlsym(x11_ctx.libs.Xi, "XSelectExtensionEvent");
+	xlib.XcursorLibraryLoadCursor = dlsym(x11_ctx.libs.Xcursor, "XcursorLibraryLoadCursor");
+	xlib.XRRGetScreenResourcesCurrent = dlsym(x11_ctx.libs.Xrandr, "XRRGetScreenResourcesCurrent");
+	xlib.XRRGetOutputPrimary = dlsym(x11_ctx.libs.Xrandr, "XRRGetOutputPrimary");
+	xlib.XRRGetOutputInfo = dlsym(x11_ctx.libs.Xrandr, "XRRGetOutputInfo");
+	xlib.XRRFreeOutputInfo = dlsym(x11_ctx.libs.Xrandr, "XRRFreeOutputInfo");
+	xlib.XRRGetCrtcInfo = dlsym(x11_ctx.libs.Xrandr, "XRRGetCrtcInfo");
+	xlib.XRRFreeCrtcInfo = dlsym(x11_ctx.libs.Xrandr, "XRRFreeCrtcInfo");
+	xlib.XRRFreeScreenResources = dlsym(x11_ctx.libs.Xrandr, "XRRFreeScreenResources");
 
 	x11_ctx.display = xlib.XOpenDisplay(NULL);
 	if (!x11_ctx.display) {
@@ -584,6 +562,140 @@ VkResult iron_vulkan_create_surface(VkInstance instance, VkSurfaceKHR *surface) 
 	return vkCreateXlibSurfaceKHR(instance, &info, NULL, surface);
 }
 
+static int xk_to_iron(KeySym symbol) {
+	if (symbol == XK_Right) return IRON_KEY_RIGHT;
+	if (symbol == XK_Left) return IRON_KEY_LEFT;
+	if (symbol == XK_Up) return IRON_KEY_UP;
+	if (symbol == XK_Down) return IRON_KEY_DOWN;
+	if (symbol == XK_space) return IRON_KEY_SPACE;
+	if (symbol == XK_BackSpace) return IRON_KEY_BACKSPACE;
+	if (symbol == XK_Tab) return IRON_KEY_TAB;
+	if (symbol == XK_Return) return IRON_KEY_RETURN;
+	if (symbol == XK_Shift_L) return IRON_KEY_SHIFT;
+	if (symbol == XK_Shift_R) return IRON_KEY_SHIFT;
+	if (symbol == XK_Control_L) return IRON_KEY_CONTROL;
+	if (symbol == XK_Control_R) return IRON_KEY_CONTROL;
+	if (symbol == XK_Alt_L) return IRON_KEY_ALT;
+	if (symbol == XK_Alt_R) return IRON_KEY_ALT;
+	if (symbol == XK_Delete) return IRON_KEY_DELETE;
+	if (symbol == XK_comma) return IRON_KEY_COMMA;
+	if (symbol == XK_period) return IRON_KEY_PERIOD;
+	if (symbol == XK_bracketleft) return IRON_KEY_OPEN_BRACKET;
+	if (symbol == XK_bracketright) return IRON_KEY_CLOSE_BRACKET;
+	if (symbol == XK_braceleft) return IRON_KEY_OPEN_CURLY_BRACKET;
+	if (symbol == XK_braceright) return IRON_KEY_CLOSE_CURLY_BRACKET;
+	if (symbol == XK_parenleft) return IRON_KEY_OPEN_PAREN;
+	if (symbol == XK_parenright) return IRON_KEY_CLOSE_PAREN;
+	if (symbol == XK_backslash) return IRON_KEY_BACK_SLASH;
+	if (symbol == XK_apostrophe) return IRON_KEY_QUOTE;
+	if (symbol == XK_colon) return IRON_KEY_COLON;
+	if (symbol == XK_semicolon) return IRON_KEY_SEMICOLON;
+	if (symbol == XK_minus) return IRON_KEY_HYPHEN_MINUS;
+	if (symbol == XK_underscore) return IRON_KEY_UNDERSCORE;
+	if (symbol == XK_slash) return IRON_KEY_SLASH;
+	if (symbol == XK_bar) return IRON_KEY_PIPE;
+	if (symbol == XK_question) return IRON_KEY_QUESTIONMARK;
+	if (symbol == XK_less) return IRON_KEY_LESS_THAN;
+	if (symbol == XK_greater) return IRON_KEY_GREATER_THAN;
+	if (symbol == XK_asterisk) return IRON_KEY_ASTERISK;
+	if (symbol == XK_ampersand) return IRON_KEY_AMPERSAND;
+	if (symbol == XK_asciicircum) return IRON_KEY_CIRCUMFLEX;
+	if (symbol == XK_percent) return IRON_KEY_PERCENT;
+	if (symbol == XK_dollar) return IRON_KEY_DOLLAR;
+	if (symbol == XK_numbersign) return IRON_KEY_HASH;
+	if (symbol == XK_at) return IRON_KEY_AT;
+	if (symbol == XK_exclam) return IRON_KEY_EXCLAMATION;
+	if (symbol == XK_equal) return IRON_KEY_EQUALS;
+	if (symbol == XK_plus) return IRON_KEY_ADD;
+	if (symbol == XK_quoteleft) return IRON_KEY_BACK_QUOTE;
+	if (symbol == XK_quotedbl) return IRON_KEY_DOUBLE_QUOTE;
+	if (symbol == XK_asciitilde) return IRON_KEY_TILDE;
+	if (symbol == XK_Pause) return IRON_KEY_PAUSE;
+	if (symbol == XK_Scroll_Lock) return IRON_KEY_SCROLL_LOCK;
+	if (symbol == XK_Home) return IRON_KEY_HOME;
+	if (symbol == XK_Page_Up) return IRON_KEY_PAGE_UP;
+	if (symbol == XK_Page_Down) return IRON_KEY_PAGE_DOWN;
+	if (symbol == XK_End) return IRON_KEY_END;
+	if (symbol == XK_Insert) return IRON_KEY_INSERT;
+	if (symbol == XK_KP_Enter) return IRON_KEY_RETURN;
+	if (symbol == XK_KP_Multiply) return IRON_KEY_MULTIPLY;
+	if (symbol == XK_KP_Add) return IRON_KEY_ADD;
+	if (symbol == XK_KP_Subtract) return IRON_KEY_SUBTRACT;
+	if (symbol == XK_KP_Decimal) return IRON_KEY_DECIMAL;
+	if (symbol == XK_KP_Divide) return IRON_KEY_DIVIDE;
+	if (symbol == XK_KP_0) return IRON_KEY_NUMPAD_0;
+	if (symbol == XK_KP_1) return IRON_KEY_NUMPAD_1;
+	if (symbol == XK_KP_2) return IRON_KEY_NUMPAD_2;
+	if (symbol == XK_KP_3) return IRON_KEY_NUMPAD_3;
+	if (symbol == XK_KP_4) return IRON_KEY_NUMPAD_4;
+	if (symbol == XK_KP_5) return IRON_KEY_NUMPAD_5;
+	if (symbol == XK_KP_6) return IRON_KEY_NUMPAD_6;
+	if (symbol == XK_KP_7) return IRON_KEY_NUMPAD_7;
+	if (symbol == XK_KP_8) return IRON_KEY_NUMPAD_8;
+	if (symbol == XK_KP_9) return IRON_KEY_NUMPAD_9;
+	if (symbol == XK_KP_Insert) return IRON_KEY_INSERT;
+	if (symbol == XK_KP_Delete) return IRON_KEY_DELETE;
+	if (symbol == XK_KP_End) return IRON_KEY_END;
+	if (symbol == XK_KP_Home) return IRON_KEY_HOME;
+	if (symbol == XK_KP_Left) return IRON_KEY_LEFT;
+	if (symbol == XK_KP_Up) return IRON_KEY_UP;
+	if (symbol == XK_KP_Right) return IRON_KEY_RIGHT;
+	if (symbol == XK_KP_Down) return IRON_KEY_DOWN;
+	if (symbol == XK_KP_Page_Up) return IRON_KEY_PAGE_UP;
+	if (symbol == XK_KP_Page_Down) return IRON_KEY_PAGE_DOWN;
+	if (symbol == XK_Menu) return IRON_KEY_CONTEXT_MENU;
+	if (symbol == XK_a) return IRON_KEY_A;
+	if (symbol == XK_b) return IRON_KEY_B;
+	if (symbol == XK_c) return IRON_KEY_C;
+	if (symbol == XK_d) return IRON_KEY_D;
+	if (symbol == XK_e) return IRON_KEY_E;
+	if (symbol == XK_f) return IRON_KEY_F;
+	if (symbol == XK_g) return IRON_KEY_G;
+	if (symbol == XK_h) return IRON_KEY_H;
+	if (symbol == XK_i) return IRON_KEY_I;
+	if (symbol == XK_j) return IRON_KEY_J;
+	if (symbol == XK_k) return IRON_KEY_K;
+	if (symbol == XK_l) return IRON_KEY_L;
+	if (symbol == XK_m) return IRON_KEY_M;
+	if (symbol == XK_n) return IRON_KEY_N;
+	if (symbol == XK_o) return IRON_KEY_O;
+	if (symbol == XK_p) return IRON_KEY_P;
+	if (symbol == XK_q) return IRON_KEY_Q;
+	if (symbol == XK_r) return IRON_KEY_R;
+	if (symbol == XK_s) return IRON_KEY_S;
+	if (symbol == XK_t) return IRON_KEY_T;
+	if (symbol == XK_u) return IRON_KEY_U;
+	if (symbol == XK_v) return IRON_KEY_V;
+	if (symbol == XK_w) return IRON_KEY_W;
+	if (symbol == XK_x) return IRON_KEY_X;
+	if (symbol == XK_y) return IRON_KEY_Y;
+	if (symbol == XK_z) return IRON_KEY_Z;
+	if (symbol == XK_1) return IRON_KEY_1;
+	if (symbol == XK_2) return IRON_KEY_2;
+	if (symbol == XK_3) return IRON_KEY_3;
+	if (symbol == XK_4) return IRON_KEY_4;
+	if (symbol == XK_5) return IRON_KEY_5;
+	if (symbol == XK_6) return IRON_KEY_6;
+	if (symbol == XK_7) return IRON_KEY_7;
+	if (symbol == XK_8) return IRON_KEY_8;
+	if (symbol == XK_9) return IRON_KEY_9;
+	if (symbol == XK_0) return IRON_KEY_0;
+	if (symbol == XK_Escape) return IRON_KEY_ESCAPE;
+	if (symbol == XK_F1) return IRON_KEY_F1;
+	if (symbol == XK_F2) return IRON_KEY_F2;
+	if (symbol == XK_F3) return IRON_KEY_F3;
+	if (symbol == XK_F4) return IRON_KEY_F4;
+	if (symbol == XK_F5) return IRON_KEY_F5;
+	if (symbol == XK_F6) return IRON_KEY_F6;
+	if (symbol == XK_F7) return IRON_KEY_F7;
+	if (symbol == XK_F8) return IRON_KEY_F8;
+	if (symbol == XK_F9) return IRON_KEY_F9;
+	if (symbol == XK_F10) return IRON_KEY_F10;
+	if (symbol == XK_F11) return IRON_KEY_F11;
+	if (symbol == XK_F12) return IRON_KEY_F12;
+	return IRON_KEY_UNKNOWN;
+}
+
 static bool _handle_messages() {
 	static bool controlDown = false;
 	static int ignoreKeycode = 0;
@@ -623,11 +735,6 @@ static bool _handle_messages() {
 				continue;
 			}
 
-#define KEY(xkey, ironkey)                                                         \
-	case xkey:                                                                     \
-		iron_internal_keyboard_trigger_key_down(ironkey);                          \
-		break;
-
 			KeySym ksKey = xlib.XkbKeycodeToKeysym(x11_ctx.display, event.xkey.keycode, 0, 0);
 			if (ksKey == XK_Control_L || ksKey == XK_Control_R) {
 				controlDown = true;
@@ -659,140 +766,12 @@ static bool _handle_messages() {
 				ksKey = keysym;
 			}
 
-			switch (ksKey) {
-				KEY(XK_Right, IRON_KEY_RIGHT)
-				KEY(XK_Left, IRON_KEY_LEFT)
-				KEY(XK_Up, IRON_KEY_UP)
-				KEY(XK_Down, IRON_KEY_DOWN)
-				KEY(XK_space, IRON_KEY_SPACE)
-				KEY(XK_BackSpace, IRON_KEY_BACKSPACE)
-				KEY(XK_Tab, IRON_KEY_TAB)
-				KEY(XK_Return, IRON_KEY_RETURN)
-				KEY(XK_Shift_L, IRON_KEY_SHIFT)
-				KEY(XK_Shift_R, IRON_KEY_SHIFT)
-				KEY(XK_Control_L, IRON_KEY_CONTROL)
-				KEY(XK_Control_R, IRON_KEY_CONTROL)
-				KEY(XK_Alt_L, IRON_KEY_ALT)
-				KEY(XK_Alt_R, IRON_KEY_ALT)
-				KEY(XK_Delete, IRON_KEY_DELETE)
-				KEY(XK_comma, IRON_KEY_COMMA)
-				KEY(XK_period, IRON_KEY_PERIOD)
-				KEY(XK_bracketleft, IRON_KEY_OPEN_BRACKET)
-				KEY(XK_bracketright, IRON_KEY_CLOSE_BRACKET)
-				KEY(XK_braceleft, IRON_KEY_OPEN_CURLY_BRACKET)
-				KEY(XK_braceright, IRON_KEY_CLOSE_CURLY_BRACKET)
-				KEY(XK_parenleft, IRON_KEY_OPEN_PAREN)
-				KEY(XK_parenright, IRON_KEY_CLOSE_PAREN)
-				KEY(XK_backslash, IRON_KEY_BACK_SLASH)
-				KEY(XK_apostrophe, IRON_KEY_QUOTE)
-				KEY(XK_colon, IRON_KEY_COLON)
-				KEY(XK_semicolon, IRON_KEY_SEMICOLON)
-				KEY(XK_minus, IRON_KEY_HYPHEN_MINUS)
-				KEY(XK_underscore, IRON_KEY_UNDERSCORE)
-				KEY(XK_slash, IRON_KEY_SLASH)
-				KEY(XK_bar, IRON_KEY_PIPE)
-				KEY(XK_question, IRON_KEY_QUESTIONMARK)
-				KEY(XK_less, IRON_KEY_LESS_THAN)
-				KEY(XK_greater, IRON_KEY_GREATER_THAN)
-				KEY(XK_asterisk, IRON_KEY_ASTERISK)
-				KEY(XK_ampersand, IRON_KEY_AMPERSAND)
-				KEY(XK_asciicircum, IRON_KEY_CIRCUMFLEX)
-				KEY(XK_percent, IRON_KEY_PERCENT)
-				KEY(XK_dollar, IRON_KEY_DOLLAR)
-				KEY(XK_numbersign, IRON_KEY_HASH)
-				KEY(XK_at, IRON_KEY_AT)
-				KEY(XK_exclam, IRON_KEY_EXCLAMATION)
-				KEY(XK_equal, IRON_KEY_EQUALS)
-				KEY(XK_plus, IRON_KEY_ADD)
-				KEY(XK_quoteleft, IRON_KEY_BACK_QUOTE)
-				KEY(XK_quotedbl, IRON_KEY_DOUBLE_QUOTE)
-				KEY(XK_asciitilde, IRON_KEY_TILDE)
-				KEY(XK_Pause, IRON_KEY_PAUSE)
-				KEY(XK_Scroll_Lock, IRON_KEY_SCROLL_LOCK)
-				KEY(XK_Home, IRON_KEY_HOME)
-				KEY(XK_Page_Up, IRON_KEY_PAGE_UP)
-				KEY(XK_Page_Down, IRON_KEY_PAGE_DOWN)
-				KEY(XK_End, IRON_KEY_END)
-				KEY(XK_Insert, IRON_KEY_INSERT)
-				KEY(XK_KP_Enter, IRON_KEY_RETURN)
-				KEY(XK_KP_Multiply, IRON_KEY_MULTIPLY)
-				KEY(XK_KP_Add, IRON_KEY_ADD)
-				KEY(XK_KP_Subtract, IRON_KEY_SUBTRACT)
-				KEY(XK_KP_Decimal, IRON_KEY_DECIMAL)
-				KEY(XK_KP_Divide, IRON_KEY_DIVIDE)
-				KEY(XK_KP_0, IRON_KEY_NUMPAD_0)
-				KEY(XK_KP_1, IRON_KEY_NUMPAD_1)
-				KEY(XK_KP_2, IRON_KEY_NUMPAD_2)
-				KEY(XK_KP_3, IRON_KEY_NUMPAD_3)
-				KEY(XK_KP_4, IRON_KEY_NUMPAD_4)
-				KEY(XK_KP_5, IRON_KEY_NUMPAD_5)
-				KEY(XK_KP_6, IRON_KEY_NUMPAD_6)
-				KEY(XK_KP_7, IRON_KEY_NUMPAD_7)
-				KEY(XK_KP_8, IRON_KEY_NUMPAD_8)
-				KEY(XK_KP_9, IRON_KEY_NUMPAD_9)
-				KEY(XK_KP_Insert, IRON_KEY_INSERT)
-				KEY(XK_KP_Delete, IRON_KEY_DELETE)
-				KEY(XK_KP_End, IRON_KEY_END)
-				KEY(XK_KP_Home, IRON_KEY_HOME)
-				KEY(XK_KP_Left, IRON_KEY_LEFT)
-				KEY(XK_KP_Up, IRON_KEY_UP)
-				KEY(XK_KP_Right, IRON_KEY_RIGHT)
-				KEY(XK_KP_Down, IRON_KEY_DOWN)
-				KEY(XK_KP_Page_Up, IRON_KEY_PAGE_UP)
-				KEY(XK_KP_Page_Down, IRON_KEY_PAGE_DOWN)
-				KEY(XK_Menu, IRON_KEY_CONTEXT_MENU)
-				KEY(XK_a, IRON_KEY_A)
-				KEY(XK_b, IRON_KEY_B)
-				KEY(XK_c, IRON_KEY_C)
-				KEY(XK_d, IRON_KEY_D)
-				KEY(XK_e, IRON_KEY_E)
-				KEY(XK_f, IRON_KEY_F)
-				KEY(XK_g, IRON_KEY_G)
-				KEY(XK_h, IRON_KEY_H)
-				KEY(XK_i, IRON_KEY_I)
-				KEY(XK_j, IRON_KEY_J)
-				KEY(XK_k, IRON_KEY_K)
-				KEY(XK_l, IRON_KEY_L)
-				KEY(XK_m, IRON_KEY_M)
-				KEY(XK_n, IRON_KEY_N)
-				KEY(XK_o, IRON_KEY_O)
-				KEY(XK_p, IRON_KEY_P)
-				KEY(XK_q, IRON_KEY_Q)
-				KEY(XK_r, IRON_KEY_R)
-				KEY(XK_s, IRON_KEY_S)
-				KEY(XK_t, IRON_KEY_T)
-				KEY(XK_u, IRON_KEY_U)
-				KEY(XK_v, IRON_KEY_V)
-				KEY(XK_w, IRON_KEY_W)
-				KEY(XK_x, IRON_KEY_X)
-				KEY(XK_y, IRON_KEY_Y)
-				KEY(XK_z, IRON_KEY_Z)
-				KEY(XK_1, IRON_KEY_1)
-				KEY(XK_2, IRON_KEY_2)
-				KEY(XK_3, IRON_KEY_3)
-				KEY(XK_4, IRON_KEY_4)
-				KEY(XK_5, IRON_KEY_5)
-				KEY(XK_6, IRON_KEY_6)
-				KEY(XK_7, IRON_KEY_7)
-				KEY(XK_8, IRON_KEY_8)
-				KEY(XK_9, IRON_KEY_9)
-				KEY(XK_0, IRON_KEY_0)
-				KEY(XK_Escape, IRON_KEY_ESCAPE)
-				KEY(XK_F1, IRON_KEY_F1)
-				KEY(XK_F2, IRON_KEY_F2)
-				KEY(XK_F3, IRON_KEY_F3)
-				KEY(XK_F4, IRON_KEY_F4)
-				KEY(XK_F5, IRON_KEY_F5)
-				KEY(XK_F6, IRON_KEY_F6)
-				KEY(XK_F7, IRON_KEY_F7)
-				KEY(XK_F8, IRON_KEY_F8)
-				KEY(XK_F9, IRON_KEY_F9)
-				KEY(XK_F10, IRON_KEY_F10)
-				KEY(XK_F11, IRON_KEY_F11)
-				KEY(XK_F12, IRON_KEY_F12)
+			int key_code = xk_to_iron(ksKey);
+			if (key_code != IRON_KEY_UNKNOWN) {
+				iron_internal_keyboard_trigger_key_down(key_code);
 			}
+
 			break;
-#undef KEY
 		}
 		case KeyRelease: {
 			XKeyEvent *key = (XKeyEvent *)&event;
@@ -812,11 +791,6 @@ static bool _handle_messages() {
 			char c;
 			xlib.XLookupString(key, &c, 1, &keysym, NULL);
 
-#define KEY(xkey, ironkey)                                                                  \
-	case xkey:                                                                              \
-		iron_internal_keyboard_trigger_key_up(ironkey);                                     \
-		break;
-
 			KeySym ksKey = xlib.XkbKeycodeToKeysym(x11_ctx.display, event.xkey.keycode, 0, 0);
 			if (ksKey == XK_Control_L || ksKey == XK_Control_R) {
 				controlDown = false;
@@ -828,141 +802,12 @@ static bool _handle_messages() {
 				ksKey = keysym;
 			}
 
-			switch (ksKey) {
-				KEY(XK_Right, IRON_KEY_RIGHT)
-				KEY(XK_Left, IRON_KEY_LEFT)
-				KEY(XK_Up, IRON_KEY_UP)
-				KEY(XK_Down, IRON_KEY_DOWN)
-				KEY(XK_space, IRON_KEY_SPACE)
-				KEY(XK_BackSpace, IRON_KEY_BACKSPACE)
-				KEY(XK_Tab, IRON_KEY_TAB)
-				KEY(XK_Return, IRON_KEY_RETURN)
-				KEY(XK_Shift_L, IRON_KEY_SHIFT)
-				KEY(XK_Shift_R, IRON_KEY_SHIFT)
-				KEY(XK_Control_L, IRON_KEY_CONTROL)
-				KEY(XK_Control_R, IRON_KEY_CONTROL)
-				KEY(XK_Alt_L, IRON_KEY_ALT)
-				KEY(XK_ISO_Prev_Group, IRON_KEY_ALT) //// XK_ISO_Prev_Group received instead of XK_Alt_L?
-				KEY(XK_Alt_R, IRON_KEY_ALT)
-				KEY(XK_Delete, IRON_KEY_DELETE)
-				KEY(XK_comma, IRON_KEY_COMMA)
-				KEY(XK_period, IRON_KEY_PERIOD)
-				KEY(XK_bracketleft, IRON_KEY_OPEN_BRACKET)
-				KEY(XK_bracketright, IRON_KEY_CLOSE_BRACKET)
-				KEY(XK_braceleft, IRON_KEY_OPEN_CURLY_BRACKET)
-				KEY(XK_braceright, IRON_KEY_CLOSE_CURLY_BRACKET)
-				KEY(XK_parenleft, IRON_KEY_OPEN_PAREN)
-				KEY(XK_parenright, IRON_KEY_CLOSE_PAREN)
-				KEY(XK_backslash, IRON_KEY_BACK_SLASH)
-				KEY(XK_apostrophe, IRON_KEY_QUOTE)
-				KEY(XK_colon, IRON_KEY_COLON)
-				KEY(XK_semicolon, IRON_KEY_SEMICOLON)
-				KEY(XK_minus, IRON_KEY_HYPHEN_MINUS)
-				KEY(XK_underscore, IRON_KEY_UNDERSCORE)
-				KEY(XK_slash, IRON_KEY_SLASH)
-				KEY(XK_bar, IRON_KEY_PIPE)
-				KEY(XK_question, IRON_KEY_QUESTIONMARK)
-				KEY(XK_less, IRON_KEY_LESS_THAN)
-				KEY(XK_greater, IRON_KEY_GREATER_THAN)
-				KEY(XK_asterisk, IRON_KEY_ASTERISK)
-				KEY(XK_ampersand, IRON_KEY_AMPERSAND)
-				KEY(XK_asciicircum, IRON_KEY_CIRCUMFLEX)
-				KEY(XK_percent, IRON_KEY_PERCENT)
-				KEY(XK_dollar, IRON_KEY_DOLLAR)
-				KEY(XK_numbersign, IRON_KEY_HASH)
-				KEY(XK_at, IRON_KEY_AT)
-				KEY(XK_exclam, IRON_KEY_EXCLAMATION)
-				KEY(XK_equal, IRON_KEY_EQUALS)
-				KEY(XK_plus, IRON_KEY_ADD)
-				KEY(XK_quoteleft, IRON_KEY_BACK_QUOTE)
-				KEY(XK_quotedbl, IRON_KEY_DOUBLE_QUOTE)
-				KEY(XK_asciitilde, IRON_KEY_TILDE)
-				KEY(XK_Pause, IRON_KEY_PAUSE)
-				KEY(XK_Scroll_Lock, IRON_KEY_SCROLL_LOCK)
-				KEY(XK_Home, IRON_KEY_HOME)
-				KEY(XK_Page_Up, IRON_KEY_PAGE_UP)
-				KEY(XK_Page_Down, IRON_KEY_PAGE_DOWN)
-				KEY(XK_End, IRON_KEY_END)
-				KEY(XK_Insert, IRON_KEY_INSERT)
-				KEY(XK_KP_Enter, IRON_KEY_RETURN)
-				KEY(XK_KP_Multiply, IRON_KEY_MULTIPLY)
-				KEY(XK_KP_Add, IRON_KEY_ADD)
-				KEY(XK_KP_Subtract, IRON_KEY_SUBTRACT)
-				KEY(XK_KP_Decimal, IRON_KEY_DECIMAL)
-				KEY(XK_KP_Divide, IRON_KEY_DIVIDE)
-				KEY(XK_KP_0, IRON_KEY_NUMPAD_0)
-				KEY(XK_KP_1, IRON_KEY_NUMPAD_1)
-				KEY(XK_KP_2, IRON_KEY_NUMPAD_2)
-				KEY(XK_KP_3, IRON_KEY_NUMPAD_3)
-				KEY(XK_KP_4, IRON_KEY_NUMPAD_4)
-				KEY(XK_KP_5, IRON_KEY_NUMPAD_5)
-				KEY(XK_KP_6, IRON_KEY_NUMPAD_6)
-				KEY(XK_KP_7, IRON_KEY_NUMPAD_7)
-				KEY(XK_KP_8, IRON_KEY_NUMPAD_8)
-				KEY(XK_KP_9, IRON_KEY_NUMPAD_9)
-				KEY(XK_KP_Insert, IRON_KEY_INSERT)
-				KEY(XK_KP_Delete, IRON_KEY_DELETE)
-				KEY(XK_KP_End, IRON_KEY_END)
-				KEY(XK_KP_Home, IRON_KEY_HOME)
-				KEY(XK_KP_Left, IRON_KEY_LEFT)
-				KEY(XK_KP_Up, IRON_KEY_UP)
-				KEY(XK_KP_Right, IRON_KEY_RIGHT)
-				KEY(XK_KP_Down, IRON_KEY_DOWN)
-				KEY(XK_KP_Page_Up, IRON_KEY_PAGE_UP)
-				KEY(XK_KP_Page_Down, IRON_KEY_PAGE_DOWN)
-				KEY(XK_Menu, IRON_KEY_CONTEXT_MENU)
-				KEY(XK_a, IRON_KEY_A)
-				KEY(XK_b, IRON_KEY_B)
-				KEY(XK_c, IRON_KEY_C)
-				KEY(XK_d, IRON_KEY_D)
-				KEY(XK_e, IRON_KEY_E)
-				KEY(XK_f, IRON_KEY_F)
-				KEY(XK_g, IRON_KEY_G)
-				KEY(XK_h, IRON_KEY_H)
-				KEY(XK_i, IRON_KEY_I)
-				KEY(XK_j, IRON_KEY_J)
-				KEY(XK_k, IRON_KEY_K)
-				KEY(XK_l, IRON_KEY_L)
-				KEY(XK_m, IRON_KEY_M)
-				KEY(XK_n, IRON_KEY_N)
-				KEY(XK_o, IRON_KEY_O)
-				KEY(XK_p, IRON_KEY_P)
-				KEY(XK_q, IRON_KEY_Q)
-				KEY(XK_r, IRON_KEY_R)
-				KEY(XK_s, IRON_KEY_S)
-				KEY(XK_t, IRON_KEY_T)
-				KEY(XK_u, IRON_KEY_U)
-				KEY(XK_v, IRON_KEY_V)
-				KEY(XK_w, IRON_KEY_W)
-				KEY(XK_x, IRON_KEY_X)
-				KEY(XK_y, IRON_KEY_Y)
-				KEY(XK_z, IRON_KEY_Z)
-				KEY(XK_1, IRON_KEY_1)
-				KEY(XK_2, IRON_KEY_2)
-				KEY(XK_3, IRON_KEY_3)
-				KEY(XK_4, IRON_KEY_4)
-				KEY(XK_5, IRON_KEY_5)
-				KEY(XK_6, IRON_KEY_6)
-				KEY(XK_7, IRON_KEY_7)
-				KEY(XK_8, IRON_KEY_8)
-				KEY(XK_9, IRON_KEY_9)
-				KEY(XK_0, IRON_KEY_0)
-				KEY(XK_Escape, IRON_KEY_ESCAPE)
-				KEY(XK_F1, IRON_KEY_F1)
-				KEY(XK_F2, IRON_KEY_F2)
-				KEY(XK_F3, IRON_KEY_F3)
-				KEY(XK_F4, IRON_KEY_F4)
-				KEY(XK_F5, IRON_KEY_F5)
-				KEY(XK_F6, IRON_KEY_F6)
-				KEY(XK_F7, IRON_KEY_F7)
-				KEY(XK_F8, IRON_KEY_F8)
-				KEY(XK_F9, IRON_KEY_F9)
-				KEY(XK_F10, IRON_KEY_F10)
-				KEY(XK_F11, IRON_KEY_F11)
-				KEY(XK_F12, IRON_KEY_F12)
+			int key_code = xk_to_iron(ksKey);
+			if (key_code != IRON_KEY_UNKNOWN) {
+				iron_internal_keyboard_trigger_key_up(key_code);
 			}
+
 			break;
-#undef KEY
 		}
 		case ButtonPress: {
 			XButtonEvent *button = (XButtonEvent *)&event;
@@ -1317,147 +1162,6 @@ static int parse_number_at_end_of_line(char *line) {
 
 int iron_hardware_threads(void) {
 	return sysconf(_SC_NPROCESSORS_ONLN);
-}
-
-int xkb_to_iron(xkb_keysym_t symbol) {
-#define KEY(xkb, iron)                                                                                                                                         \
-	case xkb:                                                                                                                                                  \
-		return iron;
-	switch (symbol) {
-		KEY(XKB_KEY_Right, IRON_KEY_RIGHT)
-		KEY(XKB_KEY_Left, IRON_KEY_LEFT)
-		KEY(XKB_KEY_Up, IRON_KEY_UP)
-		KEY(XKB_KEY_Down, IRON_KEY_DOWN)
-		KEY(XKB_KEY_space, IRON_KEY_SPACE)
-		KEY(XKB_KEY_BackSpace, IRON_KEY_BACKSPACE)
-		KEY(XKB_KEY_Tab, IRON_KEY_TAB)
-		KEY(XKB_KEY_Return, IRON_KEY_RETURN)
-		KEY(XKB_KEY_Shift_L, IRON_KEY_SHIFT)
-		KEY(XKB_KEY_Shift_R, IRON_KEY_SHIFT)
-		KEY(XKB_KEY_Control_L, IRON_KEY_CONTROL)
-		KEY(XKB_KEY_Control_R, IRON_KEY_CONTROL)
-		KEY(XKB_KEY_Alt_L, IRON_KEY_ALT)
-		KEY(XKB_KEY_Alt_R, IRON_KEY_ALT)
-		KEY(XKB_KEY_Delete, IRON_KEY_DELETE)
-		KEY(XKB_KEY_comma, IRON_KEY_COMMA)
-		KEY(XKB_KEY_period, IRON_KEY_PERIOD)
-		KEY(XKB_KEY_bracketleft, IRON_KEY_OPEN_BRACKET)
-		KEY(XKB_KEY_bracketright, IRON_KEY_CLOSE_BRACKET)
-		KEY(XKB_KEY_braceleft, IRON_KEY_OPEN_CURLY_BRACKET)
-		KEY(XKB_KEY_braceright, IRON_KEY_CLOSE_CURLY_BRACKET)
-		KEY(XKB_KEY_parenleft, IRON_KEY_OPEN_PAREN)
-		KEY(XKB_KEY_parenright, IRON_KEY_CLOSE_PAREN)
-		KEY(XKB_KEY_backslash, IRON_KEY_BACK_SLASH)
-		KEY(XKB_KEY_apostrophe, IRON_KEY_QUOTE)
-		KEY(XKB_KEY_colon, IRON_KEY_COLON)
-		KEY(XKB_KEY_semicolon, IRON_KEY_SEMICOLON)
-		KEY(XKB_KEY_minus, IRON_KEY_HYPHEN_MINUS)
-		KEY(XKB_KEY_underscore, IRON_KEY_UNDERSCORE)
-		KEY(XKB_KEY_slash, IRON_KEY_SLASH)
-		KEY(XKB_KEY_bar, IRON_KEY_PIPE)
-		KEY(XKB_KEY_question, IRON_KEY_QUESTIONMARK)
-		KEY(XKB_KEY_less, IRON_KEY_LESS_THAN)
-		KEY(XKB_KEY_greater, IRON_KEY_GREATER_THAN)
-		KEY(XKB_KEY_asterisk, IRON_KEY_ASTERISK)
-		KEY(XKB_KEY_ampersand, IRON_KEY_AMPERSAND)
-		KEY(XKB_KEY_asciicircum, IRON_KEY_CIRCUMFLEX)
-		KEY(XKB_KEY_percent, IRON_KEY_PERCENT)
-		KEY(XKB_KEY_dollar, IRON_KEY_DOLLAR)
-		KEY(XKB_KEY_numbersign, IRON_KEY_HASH)
-		KEY(XKB_KEY_at, IRON_KEY_AT)
-		KEY(XKB_KEY_exclam, IRON_KEY_EXCLAMATION)
-		KEY(XKB_KEY_equal, IRON_KEY_EQUALS)
-		KEY(XKB_KEY_plus, IRON_KEY_ADD)
-		KEY(XKB_KEY_quoteleft, IRON_KEY_BACK_QUOTE)
-		KEY(XKB_KEY_quotedbl, IRON_KEY_DOUBLE_QUOTE)
-		KEY(XKB_KEY_asciitilde, IRON_KEY_TILDE)
-		KEY(XKB_KEY_Pause, IRON_KEY_PAUSE)
-		KEY(XKB_KEY_Scroll_Lock, IRON_KEY_SCROLL_LOCK)
-		KEY(XKB_KEY_Home, IRON_KEY_HOME)
-		KEY(XKB_KEY_Page_Up, IRON_KEY_PAGE_UP)
-		KEY(XKB_KEY_Page_Down, IRON_KEY_PAGE_DOWN)
-		KEY(XKB_KEY_End, IRON_KEY_END)
-		KEY(XKB_KEY_Insert, IRON_KEY_INSERT)
-		KEY(XKB_KEY_KP_Enter, IRON_KEY_RETURN)
-		KEY(XKB_KEY_KP_Multiply, IRON_KEY_MULTIPLY)
-		KEY(XKB_KEY_KP_Add, IRON_KEY_ADD)
-		KEY(XKB_KEY_KP_Subtract, IRON_KEY_SUBTRACT)
-		KEY(XKB_KEY_KP_Decimal, IRON_KEY_DECIMAL)
-		KEY(XKB_KEY_KP_Divide, IRON_KEY_DIVIDE)
-		KEY(XKB_KEY_KP_0, IRON_KEY_NUMPAD_0)
-		KEY(XKB_KEY_KP_1, IRON_KEY_NUMPAD_1)
-		KEY(XKB_KEY_KP_2, IRON_KEY_NUMPAD_2)
-		KEY(XKB_KEY_KP_3, IRON_KEY_NUMPAD_3)
-		KEY(XKB_KEY_KP_4, IRON_KEY_NUMPAD_4)
-		KEY(XKB_KEY_KP_5, IRON_KEY_NUMPAD_5)
-		KEY(XKB_KEY_KP_6, IRON_KEY_NUMPAD_6)
-		KEY(XKB_KEY_KP_7, IRON_KEY_NUMPAD_7)
-		KEY(XKB_KEY_KP_8, IRON_KEY_NUMPAD_8)
-		KEY(XKB_KEY_KP_9, IRON_KEY_NUMPAD_9)
-		KEY(XKB_KEY_KP_Insert, IRON_KEY_INSERT)
-		KEY(XKB_KEY_KP_Delete, IRON_KEY_DELETE)
-		KEY(XKB_KEY_KP_End, IRON_KEY_END)
-		KEY(XKB_KEY_KP_Home, IRON_KEY_HOME)
-		KEY(XKB_KEY_KP_Left, IRON_KEY_LEFT)
-		KEY(XKB_KEY_KP_Up, IRON_KEY_UP)
-		KEY(XKB_KEY_KP_Right, IRON_KEY_RIGHT)
-		KEY(XKB_KEY_KP_Down, IRON_KEY_DOWN)
-		KEY(XKB_KEY_KP_Page_Up, IRON_KEY_PAGE_UP)
-		KEY(XKB_KEY_KP_Page_Down, IRON_KEY_PAGE_DOWN)
-		KEY(XKB_KEY_Menu, IRON_KEY_CONTEXT_MENU)
-		KEY(XKB_KEY_a, IRON_KEY_A)
-		KEY(XKB_KEY_b, IRON_KEY_B)
-		KEY(XKB_KEY_c, IRON_KEY_C)
-		KEY(XKB_KEY_d, IRON_KEY_D)
-		KEY(XKB_KEY_e, IRON_KEY_E)
-		KEY(XKB_KEY_f, IRON_KEY_F)
-		KEY(XKB_KEY_g, IRON_KEY_G)
-		KEY(XKB_KEY_h, IRON_KEY_H)
-		KEY(XKB_KEY_i, IRON_KEY_I)
-		KEY(XKB_KEY_j, IRON_KEY_J)
-		KEY(XKB_KEY_k, IRON_KEY_K)
-		KEY(XKB_KEY_l, IRON_KEY_L)
-		KEY(XKB_KEY_m, IRON_KEY_M)
-		KEY(XKB_KEY_n, IRON_KEY_N)
-		KEY(XKB_KEY_o, IRON_KEY_O)
-		KEY(XKB_KEY_p, IRON_KEY_P)
-		KEY(XKB_KEY_q, IRON_KEY_Q)
-		KEY(XKB_KEY_r, IRON_KEY_R)
-		KEY(XKB_KEY_s, IRON_KEY_S)
-		KEY(XKB_KEY_t, IRON_KEY_T)
-		KEY(XKB_KEY_u, IRON_KEY_U)
-		KEY(XKB_KEY_v, IRON_KEY_V)
-		KEY(XKB_KEY_w, IRON_KEY_W)
-		KEY(XKB_KEY_x, IRON_KEY_X)
-		KEY(XKB_KEY_y, IRON_KEY_Y)
-		KEY(XKB_KEY_z, IRON_KEY_Z)
-		KEY(XKB_KEY_1, IRON_KEY_1)
-		KEY(XKB_KEY_2, IRON_KEY_2)
-		KEY(XKB_KEY_3, IRON_KEY_3)
-		KEY(XKB_KEY_4, IRON_KEY_4)
-		KEY(XKB_KEY_5, IRON_KEY_5)
-		KEY(XKB_KEY_6, IRON_KEY_6)
-		KEY(XKB_KEY_7, IRON_KEY_7)
-		KEY(XKB_KEY_8, IRON_KEY_8)
-		KEY(XKB_KEY_9, IRON_KEY_9)
-		KEY(XKB_KEY_0, IRON_KEY_0)
-		KEY(XKB_KEY_Escape, IRON_KEY_ESCAPE)
-		KEY(XKB_KEY_F1, IRON_KEY_F1)
-		KEY(XKB_KEY_F2, IRON_KEY_F2)
-		KEY(XKB_KEY_F3, IRON_KEY_F3)
-		KEY(XKB_KEY_F4, IRON_KEY_F4)
-		KEY(XKB_KEY_F5, IRON_KEY_F5)
-		KEY(XKB_KEY_F6, IRON_KEY_F6)
-		KEY(XKB_KEY_F7, IRON_KEY_F7)
-		KEY(XKB_KEY_F8, IRON_KEY_F8)
-		KEY(XKB_KEY_F9, IRON_KEY_F9)
-		KEY(XKB_KEY_F10, IRON_KEY_F10)
-		KEY(XKB_KEY_F11, IRON_KEY_F11)
-		KEY(XKB_KEY_F12, IRON_KEY_F12)
-	default:
-		return IRON_KEY_UNKNOWN;
-	}
-#undef KEY
 }
 
 void iron_internal_mouse_lock() {
