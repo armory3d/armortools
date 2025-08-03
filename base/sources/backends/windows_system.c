@@ -977,6 +977,18 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 	return DefWindowProcW(hWnd, msg, wParam, lParam);
 }
 
+bool iron_internal_handle_messages() {
+	MSG message;
+	while (PeekMessageW(&message, 0, 0, 0, PM_REMOVE)) {
+		TranslateMessage(&message);
+		DispatchMessageW(&message);
+	}
+	#ifdef WITH_GAMEPAD
+	iron_gamepad_handle_messages();
+	#endif
+	return true;
+}
+
 #ifdef WITH_GAMEPAD
 
 static float axes[12 * 6];
@@ -1377,14 +1389,7 @@ const char *iron_gamepad_product_name(int gamepad) {
 	}
 }
 
-bool iron_internal_handle_messages() {
-	MSG message;
-
-	while (PeekMessageW(&message, 0, 0, 0, PM_REMOVE)) {
-		TranslateMessage(&message);
-		DispatchMessageW(&message);
-	}
-
+void iron_gamepad_handle_messages() {
 	if (InputGetState != NULL && (detectGamepad || gamepadFound)) {
 		detectGamepad = false;
 		for (DWORD i = 0; i < IRON_DINPUT_MAX_COUNT; ++i) {
@@ -1439,8 +1444,6 @@ bool iron_internal_handle_messages() {
 			}
 		}
 	}
-
-	return true;
 }
 
 #endif
@@ -1662,8 +1665,11 @@ void iron_init(const char *name, int width, int height, iron_window_options_t *w
 	}
 
 	iron_window_create(win);
+
+	#ifdef WITH_GAMEPAD
 	loadXInput();
 	initializeDirectInput();
+	#endif
 }
 
 void iron_internal_shutdown() {
