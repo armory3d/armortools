@@ -184,17 +184,6 @@ if (!flags.lite) {
 		add_gpu_backend("metal");
 		project.add_cfiles("sources/backends/data/mac.plist");
 		project.add_define("IRON_METAL");
-		project.add_lib("Metal");
-		project.add_lib("MetalKit");
-		project.add_lib("IOKit");
-		project.add_lib("Cocoa");
-		project.add_lib("AppKit");
-		project.add_lib("CoreAudio");
-		project.add_lib("CoreData");
-		project.add_lib("CoreMedia");
-		project.add_lib("CoreVideo");
-		project.add_lib("AVFoundation");
-		project.add_lib("Foundation");
 	}
 	else if (platform === "ios") {
 		add_sys_backend("ios");
@@ -205,18 +194,6 @@ if (!flags.lite) {
 		project.add_cfiles("sources/backends/data/LaunchScreen.storyboard");
 		project.add_cfiles("sources/backends/ios_file_dialog.m");
 		project.add_define("IRON_METAL");
-		project.add_lib("Metal");
-		project.add_lib("UIKit");
-		project.add_lib("Foundation");
-		project.add_lib("CoreGraphics");
-		project.add_lib("QuartzCore");
-		project.add_lib("CoreAudio");
-		project.add_lib("AudioToolbox");
-		project.add_lib("CoreMotion");
-		project.add_lib("AVFoundation");
-		project.add_lib("CoreFoundation");
-		project.add_lib("CoreVideo");
-		project.add_lib("CoreMedia");
 	}
 	else if (platform === "android") {
 		add_sys_backend("android");
@@ -290,9 +267,8 @@ if (flags.with_eval) {
 	project.add_define("WITH_EVAL");
 	project.add_cfiles("sources/libs/quickjs-amalgam.c");
 	project.add_define("QJS_BUILD_LIBC");
-
-	project.add_cfiles("tools/amake/alang.c");
-	project.add_cfiles("tools/amake/alang_eval.c");
+	// project.add_cfiles("tools/amake/alang.c");
+	// project.add_cfiles("tools/amake/alang_eval.c");
 }
 
 if (flags.with_gamepad) {
