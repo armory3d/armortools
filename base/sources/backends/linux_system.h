@@ -163,7 +163,6 @@ struct x11_context {
 
 struct iron_x11_procs xlib;
 struct x11_context x11_ctx;
-void iron_copy_to_clipboard(const char *text);
 
 #ifdef WITH_GAMEPAD
 void iron_linux_initHIDGamepads();
