@@ -167,9 +167,7 @@ if (!flags.lite) {
 		project.add_define("_WINSOCK_DEPRECATED_NO_WARNINGS");
 		project.add_define("IRON_DIRECT3D12");
 		project.add_lib("dxguid");
-		project.add_lib("ws2_32");
 		project.add_lib("Winhttp");
-		project.add_lib("wbemuuid");
 		project.add_lib("dxgi");
 		project.add_lib("d3d12");
 		if (flags.with_audio) {
