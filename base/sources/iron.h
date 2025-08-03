@@ -71,7 +71,7 @@ void js_init() {
 	#endif
 }
 
-float alang_eval(char *data);
+// float alang_eval(char *data);
 
 float js_eval(const char *js) {
 	// return alang_eval(js);
