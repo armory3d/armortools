@@ -305,7 +305,6 @@ if (flags.with_iron) {
 }
 
 if (platform === "windows") {
-	project.add_lib("Dbghelp"); // Stack walk
 	project.add_lib("Dwmapi"); // DWMWA_USE_IMMERSIVE_DARK_MODE
 	if (flags.with_d3dcompiler) {
 		project.add_define("WITH_D3DCOMPILER");

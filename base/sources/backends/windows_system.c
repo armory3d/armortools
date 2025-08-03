@@ -1,140 +1,17 @@
-// Windows 7
-#define WINVER 0x0601
-#ifdef _WIN32_WINNT
-#undef _WIN32_WINNT
-#endif
-#define _WIN32_WINNT 0x0601
 
-#define NOATOM
-//#define NOCLIPBOARD
-#define NOCOLOR
-#define NOCOMM
-//#define NOCTLMGR
-#define NODEFERWINDOWPOS
-#define NODRAWTEXT
-//#define NOGDI
-#define NOGDICAPMASKS
-#define NOHELP
-#define NOICONS
-#define NOKANJI
-#define NOKEYSTATES
-//#define NOMB
-#define NOMCX
-#define NOMEMMGR
-#define NOMENUS
-#define NOMETAFILE
-#define NOMINMAX
-//#define NOMSG
-//#define NONLS
-#define NOOPENFILE
-#define NOPROFILER
-#define NORASTEROPS
-#define NOSCROLL
-#define NOSERVICE
-//#define NOSHOWWINDOW
-#define NOSOUND
-//#define NOSYSCOMMANDS
-#define NOSYSMETRICS
-#define NOTEXTMETRIC
-//#define NOUSER
-//#define NOVIRTUALKEYCODES
-#define NOWH
-//#define NOWINMESSAGES
-//#define NOWINOFFSETS
-//#define NOWINSTYLES
 #define WIN32_LEAN_AND_MEAN
-
 #include <Windows.h>
 #include <Windowsx.h>
-#include <assert.h>
-#include <intrin.h>
-#include <stdio.h>
 #include "windows_system.h"
-#include <iron_system.h>
-#include <stb_sprintf.h>
-#include <iron_gpu.h>
-#include <iron_thread.h>
-#include <iron_video.h>
-#define DIRECTINPUT_VERSION 0x0800
-#include <dinput.h>
-#include <oleauto.h>
 #include <stdio.h>
-#include <wbemidl.h>
-#include <XInput.h>
-#include <dbghelp.h>
 #include <shellapi.h>
 #include <shlobj.h>
 #include <dwmapi.h>
-
-// Some types for features exclusive to later versions of Windows are copied in here.
-// Use with care, make sure not to break backwards-compatibility when using them.
-
-typedef DWORD POINTER_INPUT_TYPE;
-
-typedef UINT32 POINTER_FLAGS;
-
-typedef enum tagPOINTER_BUTTON_CHANGE_TYPE {
-	POINTER_CHANGE_NONE,
-	POINTER_CHANGE_FIRSTBUTTON_DOWN,
-	POINTER_CHANGE_FIRSTBUTTON_UP,
-	POINTER_CHANGE_SECONDBUTTON_DOWN,
-	POINTER_CHANGE_SECONDBUTTON_UP,
-	POINTER_CHANGE_THIRDBUTTON_DOWN,
-	POINTER_CHANGE_THIRDBUTTON_UP,
-	POINTER_CHANGE_FOURTHBUTTON_DOWN,
-	POINTER_CHANGE_FOURTHBUTTON_UP,
-	POINTER_CHANGE_FIFTHBUTTON_DOWN,
-	POINTER_CHANGE_FIFTHBUTTON_UP,
-} POINTER_BUTTON_CHANGE_TYPE;
-
-typedef struct tagPOINTER_INFO {
-	POINTER_INPUT_TYPE pointerType;
-	UINT32 pointerId;
-	UINT32 frameId;
-	POINTER_FLAGS pointerFlags;
-	HANDLE sourceDevice;
-	HWND hwndTarget;
-	POINT ptPixelLocation;
-	POINT ptHimetricLocation;
-	POINT ptPixelLocationRaw;
-	POINT ptHimetricLocationRaw;
-	DWORD dwTime;
-	UINT32 historyCount;
-	INT32 InputData;
-	DWORD dwKeyStates;
-	UINT64 PerformanceCount;
-	POINTER_BUTTON_CHANGE_TYPE ButtonChangeType;
-} POINTER_INFO;
-
-typedef UINT32 PEN_FLAGS;
-
-typedef UINT32 PEN_MASK;
-
-typedef struct tagPOINTER_PEN_INFO {
-	POINTER_INFO pointerInfo;
-	PEN_FLAGS penFlags;
-	PEN_MASK penMask;
-	UINT32 pressure;
-	UINT32 rotation;
-	INT32 tiltX;
-	INT32 tiltY;
-} POINTER_PEN_INFO;
-
-#define WM_POINTERUPDATE 0x0245
-#define WM_POINTERDOWN 0x0246
-#define WM_POINTERUP 0x0247
-
-#define GET_POINTERID_WPARAM(wParam) (LOWORD(wParam))
-
-enum tagPOINTER_INPUT_TYPE {
-	PT_POINTER = 1,  // Generic pointer
-	PT_TOUCH = 2,    // Touch
-	PT_PEN = 3,      // Pen
-	PT_MOUSE = 4,    // Mouse
-	PT_TOUCHPAD = 5, // Touchpad
-};
-
-#define S_OK ((HRESULT)0L)
+#include <iron_system.h>
+#include <iron_gpu.h>
+#include <iron_thread.h>
+#include <iron_video.h>
+#include <stb_sprintf.h>
 
 void iron_microsoft_format(const char *format, va_list args, wchar_t *buffer) {
 	char cbuffer[4096];
@@ -161,9 +38,7 @@ void __chkstk(void) {}
 #endif
 #endif
 
-#undef RegisterClass
-
-#define MAXIMUM_DISPLAYS 16
+#define MAXIMUM_DISPLAYS 8
 
 typedef struct {
 	struct HMONITOR__ *monitor;
@@ -253,8 +128,6 @@ int iron_windows_get_display_for_monitor(struct HMONITOR__ *monitor) {
 			return i;
 		}
 	}
-
-	iron_error("Display for monitor not found");
 	return -1;
 }
 
@@ -270,8 +143,6 @@ int iron_primary_display() {
 			return i;
 		}
 	}
-
-	iron_error("No primary display defined");
 	return -1;
 }
 
@@ -286,14 +157,11 @@ bool iron_windows_set_display_mode(int display_index, int width, int height, int
 	mode.dmBitsPerPel = bpp;
 	mode.dmDisplayFrequency = frequency;
 	mode.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT | DM_DISPLAYFREQUENCY;
-
 	bool success = ChangeDisplaySettingsA(&mode, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL;
-
 	if (!success) {
 		mode.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
 		success = ChangeDisplaySettingsA(&mode, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL;
 	}
-
 	return success;
 }
 
@@ -369,20 +237,7 @@ void iron_mouse_get_position(int *x, int *y) {
 	*y = point.y;
 }
 
-#define Graphics Graphics5
-
-__declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
-__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
-
-typedef BOOL(WINAPI *GetPointerInfoType)(UINT32 pointerId, POINTER_INFO *pointerInfo);
-static GetPointerInfoType MyGetPointerInfo = NULL;
-typedef BOOL(WINAPI *GetPointerPenInfoType)(UINT32 pointerId, POINTER_PEN_INFO *penInfo);
-static GetPointerPenInfoType MyGetPointerPenInfo = NULL;
-typedef BOOL(WINAPI *EnableNonClientDpiScalingType)(HWND hwnd);
-static EnableNonClientDpiScalingType MyEnableNonClientDpiScaling = NULL;
-
 #define MAX_TOUCH_POINTS 10
-
 #define IRON_DINPUT_MAX_COUNT 8
 
 struct touchpoint {
@@ -431,9 +286,9 @@ static void ReleaseTouchIndex(int dwID) {
 }
 
 static void initKeyTranslation() {
-	for (int i = 0; i < 256; ++i)
+	for (int i = 0; i < 256; ++i) {
 		keyTranslated[i] = IRON_KEY_UNKNOWN;
-
+	}
 	keyTranslated[VK_BACK] = IRON_KEY_BACKSPACE;
 	keyTranslated[VK_TAB] = IRON_KEY_TAB;
 	keyTranslated[VK_CLEAR] = IRON_KEY_CLEAR;
@@ -561,21 +416,9 @@ static void initKeyTranslation() {
 }
 
 #ifdef WITH_GAMEPAD
-
 static bool detectGamepad = true;
 static bool gamepadFound = false;
-
 #endif
-
-static unsigned r = 0;
-
-static wchar_t toUnicode(WPARAM wParam, LPARAM lParam) {
-	wchar_t buffer[11];
-	BYTE state[256];
-	GetKeyboardState(state);
-	ToUnicode((UINT)wParam, (lParam >> 8) & 0xFFFFFF00, state, buffer, 10, 0);
-	return buffer[0];
-}
 
 #define HANDLE_ALT_ENTER
 
@@ -607,9 +450,7 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 
 	switch (msg) {
 	case WM_NCCREATE:
-		if (MyEnableNonClientDpiScaling != NULL) {
-			MyEnableNonClientDpiScaling(hWnd);
-		}
+		EnableNonClientDpiScaling(hWnd);
 		break;
 	case WM_DPICHANGED: {
 		break;
@@ -736,9 +577,9 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		break;
 	case WM_POINTERDOWN:
 		pointerId = GET_POINTERID_WPARAM(wParam);
-		MyGetPointerInfo(pointerId, &pointerInfo);
+		GetPointerInfo(pointerId, &pointerInfo);
 		if (pointerInfo.pointerType == PT_PEN) {
-			MyGetPointerPenInfo(pointerId, &penInfo);
+			GetPointerPenInfo(pointerId, &penInfo);
 			ScreenToClient(hWnd, &pointerInfo.ptPixelLocation);
 			iron_internal_pen_trigger_press(pointerInfo.ptPixelLocation.x, pointerInfo.ptPixelLocation.y,
 			                                penInfo.pressure / 1024.0f);
@@ -746,9 +587,9 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		break;
 	case WM_POINTERUP:
 		pointerId = GET_POINTERID_WPARAM(wParam);
-		MyGetPointerInfo(pointerId, &pointerInfo);
+		GetPointerInfo(pointerId, &pointerInfo);
 		if (pointerInfo.pointerType == PT_PEN) {
-			MyGetPointerPenInfo(pointerId, &penInfo);
+			GetPointerPenInfo(pointerId, &penInfo);
 			ScreenToClient(hWnd, &pointerInfo.ptPixelLocation);
 			iron_internal_pen_trigger_release(pointerInfo.ptPixelLocation.x, pointerInfo.ptPixelLocation.y,
 			                                  penInfo.pressure / 1024.0f);
@@ -756,9 +597,9 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		break;
 	case WM_POINTERUPDATE:
 		pointerId = GET_POINTERID_WPARAM(wParam);
-		MyGetPointerInfo(pointerId, &pointerInfo);
+		GetPointerInfo(pointerId, &pointerInfo);
 		if (pointerInfo.pointerType == PT_PEN) {
-			MyGetPointerPenInfo(pointerId, &penInfo);
+			GetPointerPenInfo(pointerId, &penInfo);
 			ScreenToClient(hWnd, &pointerInfo.ptPixelLocation);
 			iron_internal_pen_trigger_move(pointerInfo.ptPixelLocation.x, pointerInfo.ptPixelLocation.y,
 			                               penInfo.pressure / 1024.0f);
@@ -936,23 +777,14 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 	case WM_SYSCOMMAND:
 		switch (wParam) {
 		case SC_KEYMENU:
-			return 0; // Prevent from happening
+			return 0;
 		case SC_SCREENSAVE:
 		case SC_MONITORPOWER:
-			return 0; // Prevent from happening
-
-		// Pause game when window is minimized, continue when it's restored or maximized.
-		//
-		// Unfortunately, if the game would continue to run when minimized, the graphics in
-		// the Windows Vista/7 taskbar would not be updated, even when Direct3DDevice::Present()
-		// is called without error. I do not know why.
+			return 0;
 		case SC_MINIMIZE:
-			// Scheduler::haltTime(); // haltTime()/unhaltTime() is incremental, meaning that this doesn't interfere with when the game itself calls these
-			// functions
 			break;
 		case SC_RESTORE:
 		case SC_MAXIMIZE:
-			// Scheduler::unhaltTime();
 			break;
 		}
 		break;
@@ -989,465 +821,6 @@ bool iron_internal_handle_messages() {
 	return true;
 }
 
-#ifdef WITH_GAMEPAD
-
-static float axes[12 * 6];
-static float buttons[12 * 16];
-
-typedef DWORD(WINAPI *XInputGetStateType)(DWORD dwUserIndex, XINPUT_STATE *pState);
-typedef DWORD(WINAPI *XInputSetStateType)(DWORD dwUserIndex, XINPUT_VIBRATION *pVibration);
-static XInputGetStateType InputGetState = NULL;
-static XInputSetStateType InputSetState = NULL;
-
-void loadXInput() {
-	HMODULE lib = LoadLibraryA("xinput1_4.dll");
-	if (lib == NULL) {
-		lib = LoadLibraryA("xinput1_3.dll");
-	}
-	if (lib == NULL) {
-		lib = LoadLibraryA("xinput9_1_0.dll");
-	}
-
-	if (lib != NULL) {
-		InputGetState = (XInputGetStateType)GetProcAddress(lib, "XInputGetState");
-		InputSetState = (XInputSetStateType)GetProcAddress(lib, "XInputSetState");
-	}
-}
-
-static IDirectInput8W *di_instance = NULL;
-static IDirectInputDevice8W *di_pads[IRON_DINPUT_MAX_COUNT];
-static DIJOYSTATE2 di_padState[IRON_DINPUT_MAX_COUNT];
-static DIJOYSTATE2 di_lastPadState[IRON_DINPUT_MAX_COUNT];
-static DIDEVCAPS di_deviceCaps[IRON_DINPUT_MAX_COUNT];
-static int padCount = 0;
-
-static void cleanupPad(int padIndex) {
-	if (di_pads[padIndex] != NULL) {
-		di_pads[padIndex]->lpVtbl->Unacquire(di_pads[padIndex]);
-		di_pads[padIndex]->lpVtbl->Release(di_pads[padIndex]);
-		di_pads[padIndex] = 0;
-	}
-}
-
-#ifndef SAFE_RELEASE
-#define SAFE_RELEASE(x)                                                                                                                                        \
-	if (x != NULL) {                                                                                                                                           \
-		x->lpVtbl->Release(x);                                                                                                                                 \
-		x = NULL;                                                                                                                                              \
-	}
-#endif
-
-// From
-//-----------------------------------------------------------------------------
-// Enum each PNP device using WMI and check each device ID to see if it contains
-// "IG_" (ex. "VID_045E&PID_028E&IG_00").  If it does, then it's an XInput device
-// Unfortunately this information can not be found by just using DirectInput
-//-----------------------------------------------------------------------------
-static BOOL IsXInputDevice(const GUID *pGuidProductFromDirectInput) {
-	IWbemLocator *pIWbemLocator = NULL;
-	IEnumWbemClassObject *pEnumDevices = NULL;
-	IWbemClassObject *pDevices[20] = {0};
-	IWbemServices *pIWbemServices = NULL;
-	BSTR bstrNamespace = NULL;
-	BSTR bstrDeviceID = NULL;
-	BSTR bstrClassName = NULL;
-	DWORD uReturned = 0;
-	bool bIsXinputDevice = false;
-	UINT iDevice = 0;
-	VARIANT var;
-	HRESULT hr;
-
-	// CoInit if needed
-	hr = CoInitialize(NULL);
-	bool bCleanupCOM = SUCCEEDED(hr);
-
-	// Create WMI
-	hr = CoCreateInstance(&CLSID_WbemLocator, NULL, CLSCTX_INPROC_SERVER, &IID_IWbemLocator, (LPVOID *)&pIWbemLocator);
-	if (FAILED(hr) || pIWbemLocator == NULL)
-		goto LCleanup;
-
-	bstrNamespace = SysAllocString(L"\\\\.\\root\\cimv2");
-	if (bstrNamespace == NULL)
-		goto LCleanup;
-	bstrClassName = SysAllocString(L"Win32_PNPEntity");
-	if (bstrClassName == NULL)
-		goto LCleanup;
-	bstrDeviceID = SysAllocString(L"DeviceID");
-	if (bstrDeviceID == NULL)
-		goto LCleanup;
-
-	// Connect to WMI
-	hr = pIWbemLocator->lpVtbl->ConnectServer(pIWbemLocator, bstrNamespace, NULL, NULL, 0L, 0L, NULL, NULL, &pIWbemServices);
-	if (FAILED(hr) || pIWbemServices == NULL)
-		goto LCleanup;
-
-	// Switch security level to IMPERSONATE.
-	CoSetProxyBlanket((IUnknown *)pIWbemServices, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL,
-	                  EOAC_NONE);
-
-	hr = pIWbemServices->lpVtbl->CreateInstanceEnum(pIWbemServices, bstrClassName, 0, NULL, &pEnumDevices);
-	if (FAILED(hr) || pEnumDevices == NULL)
-		goto LCleanup;
-
-	// Loop over all devices
-	for (;;) {
-		// Get 20 at a time
-		hr = pEnumDevices->lpVtbl->Next(pEnumDevices, 10000, 20, pDevices, &uReturned);
-		if (FAILED(hr))
-			goto LCleanup;
-		if (uReturned == 0)
-			break;
-
-		for (iDevice = 0; iDevice < uReturned; iDevice++) {
-			// For each device, get its device ID
-			hr = pDevices[iDevice]->lpVtbl->Get(pDevices[iDevice], bstrDeviceID, 0L, &var, NULL, NULL);
-			if (SUCCEEDED(hr) && var.vt == VT_BSTR && var.bstrVal != NULL) {
-				// Check if the device ID contains "IG_".  If it does, then it's an XInput device
-				// This information can not be found from DirectInput
-				// TODO: Doesn't work with an Xbox Series X|S controller
-				if (wcsstr(var.bstrVal, L"IG_")) {
-					// If it does, then get the VID/PID from var.bstrVal
-					DWORD dwPid = 0, dwVid = 0;
-					WCHAR *strVid = wcsstr(var.bstrVal, L"VID_");
-#ifndef IRON_NO_CLIB
-					if (strVid && swscanf(strVid, L"VID_%4X", &dwVid) != 1) {
-						dwVid = 0;
-					}
-					WCHAR *strPid = wcsstr(var.bstrVal, L"PID_");
-					if (strPid && swscanf(strPid, L"PID_%4X", &dwPid) != 1) {
-						dwPid = 0;
-					}
-#endif
-
-					// Compare the VID/PID to the DInput device
-					DWORD dwVidPid = MAKELONG(dwVid, dwPid);
-					if (dwVidPid == pGuidProductFromDirectInput->Data1) {
-						bIsXinputDevice = true;
-						goto LCleanup;
-					}
-				}
-			}
-			SAFE_RELEASE(pDevices[iDevice]);
-		}
-	}
-
-LCleanup:
-	if (bstrNamespace)
-		SysFreeString(bstrNamespace);
-	if (bstrDeviceID)
-		SysFreeString(bstrDeviceID);
-	if (bstrClassName)
-		SysFreeString(bstrClassName);
-	for (iDevice = 0; iDevice < 20; iDevice++)
-		SAFE_RELEASE(pDevices[iDevice]);
-	SAFE_RELEASE(pEnumDevices);
-	SAFE_RELEASE(pIWbemLocator);
-	SAFE_RELEASE(pIWbemServices);
-
-	if (bCleanupCOM)
-		CoUninitialize();
-
-	return bIsXinputDevice;
-}
-
-static void cleanupDirectInput() {
-	for (int padIndex = 0; padIndex < IRON_DINPUT_MAX_COUNT; ++padIndex) {
-		cleanupPad(padIndex);
-	}
-
-	if (di_instance != NULL) {
-		di_instance->lpVtbl->Release(di_instance);
-		di_instance = NULL;
-	}
-}
-
-static BOOL CALLBACK enumerateJoystickAxesCallback(LPCDIDEVICEOBJECTINSTANCEW ddoi, LPVOID context) {
-	HWND hwnd = (HWND)context;
-
-	DIPROPRANGE propertyRange;
-	propertyRange.diph.dwSize = sizeof(DIPROPRANGE);
-	propertyRange.diph.dwHeaderSize = sizeof(DIPROPHEADER);
-	propertyRange.diph.dwHow = DIPH_BYID;
-	propertyRange.diph.dwObj = ddoi->dwType;
-	propertyRange.lMin = -32768;
-	propertyRange.lMax = 32768;
-
-	HRESULT hr = di_pads[padCount]->lpVtbl->SetProperty(di_pads[padCount], DIPROP_RANGE, &propertyRange.diph);
-
-	if (FAILED(hr)) {
-		iron_log("DirectInput8 / Pad%i / SetProperty() failed (HRESULT=0x%x)", padCount, hr);
-		return DIENUM_STOP;
-	}
-
-	return DIENUM_CONTINUE;
-}
-
-static BOOL CALLBACK enumerateJoysticksCallback(LPCDIDEVICEINSTANCEW ddi, LPVOID context) {
-	if (padCount < XUSER_MAX_COUNT && IsXInputDevice(&ddi->guidProduct)) {
-		++padCount;
-		return DIENUM_CONTINUE;
-	}
-
-	HRESULT hr = di_instance->lpVtbl->CreateDevice(di_instance, &ddi->guidInstance, &di_pads[padCount], NULL);
-
-	if (SUCCEEDED(hr)) {
-		hr = di_pads[padCount]->lpVtbl->SetDataFormat(di_pads[padCount], &c_dfDIJoystick2);
-
-		if (SUCCEEDED(hr)) {
-			di_deviceCaps[padCount].dwSize = sizeof(DIDEVCAPS);
-			hr = di_pads[padCount]->lpVtbl->GetCapabilities(di_pads[padCount], &di_deviceCaps[padCount]);
-
-			if (SUCCEEDED(hr)) {
-				hr = di_pads[padCount]->lpVtbl->EnumObjects(di_pads[padCount], enumerateJoystickAxesCallback, NULL, DIDFT_AXIS);
-
-				if (SUCCEEDED(hr)) {
-					hr = di_pads[padCount]->lpVtbl->Acquire(di_pads[padCount]);
-
-					if (SUCCEEDED(hr)) {
-						memset(&di_padState[padCount], 0, sizeof(DIJOYSTATE2));
-						hr = di_pads[padCount]->lpVtbl->GetDeviceState(di_pads[padCount], sizeof(DIJOYSTATE2), &di_padState[padCount]);
-
-						if (SUCCEEDED(hr)) {
-							iron_log("DirectInput8 / Pad%i / initialized", padCount);
-						}
-						else {
-							iron_log("DirectInput8 / Pad%i / GetDeviceState() failed (HRESULT=0x%x)", padCount, hr);
-						}
-					}
-					else {
-						iron_log("DirectInput8 / Pad%i / Acquire() failed (HRESULT=0x%x)", padCount, hr);
-						cleanupPad(padCount);
-					}
-				}
-				else {
-					iron_log("DirectInput8 / Pad%i / EnumObjects(DIDFT_AXIS) failed (HRESULT=0x%x)", padCount, hr);
-					cleanupPad(padCount);
-				}
-			}
-			else {
-				iron_log("DirectInput8 / Pad%i / GetCapabilities() failed (HRESULT=0x%x)", padCount, hr);
-				cleanupPad(padCount);
-			}
-		}
-		else {
-			iron_log("DirectInput8 / Pad%i / SetDataFormat() failed (HRESULT=0x%x)", padCount, hr);
-			cleanupPad(padCount);
-		}
-
-		++padCount;
-
-		if (padCount >= IRON_DINPUT_MAX_COUNT) {
-			return DIENUM_STOP;
-		}
-	}
-
-	return DIENUM_CONTINUE;
-}
-
-static void initializeDirectInput() {
-	HINSTANCE hinstance = GetModuleHandleW(NULL);
-
-	memset(&di_pads, 0, sizeof(IDirectInputDevice8) * IRON_DINPUT_MAX_COUNT);
-	memset(&di_padState, 0, sizeof(DIJOYSTATE2) * IRON_DINPUT_MAX_COUNT);
-	memset(&di_lastPadState, 0, sizeof(DIJOYSTATE2) * IRON_DINPUT_MAX_COUNT);
-	memset(&di_deviceCaps, 0, sizeof(DIDEVCAPS) * IRON_DINPUT_MAX_COUNT);
-
-	HRESULT hr = DirectInput8Create(hinstance, DIRECTINPUT_VERSION, &IID_IDirectInput8W, (void **)&di_instance, NULL);
-
-	if (SUCCEEDED(hr)) {
-		hr = di_instance->lpVtbl->EnumDevices(di_instance, DI8DEVCLASS_GAMECTRL, enumerateJoysticksCallback, NULL, DIEDFL_ATTACHEDONLY);
-
-		if (SUCCEEDED(hr)) {
-		}
-		else {
-			cleanupDirectInput();
-		}
-	}
-	else {
-		iron_log("DirectInput8Create failed (HRESULT=0x%x)", hr);
-	}
-}
-
-bool handleDirectInputPad(int padIndex) {
-	if (di_pads[padIndex] == NULL) {
-		return false;
-	}
-
-	HRESULT hr = di_pads[padIndex]->lpVtbl->GetDeviceState(di_pads[padIndex], sizeof(DIJOYSTATE2), &di_padState[padIndex]);
-
-	switch (hr) {
-	case S_OK: {
-		for (int axisIndex = 0; axisIndex < 2; ++axisIndex) {
-			LONG *now = NULL;
-			LONG *last = NULL;
-
-			switch (axisIndex) {
-			case 0: {
-				now = &di_padState[padIndex].lX;
-				last = &di_lastPadState[padIndex].lX;
-			} break;
-			case 1: {
-				now = &di_padState[padIndex].lY;
-				last = &di_lastPadState[padIndex].lY;
-			} break;
-			case 2: {
-				now = &di_padState[padIndex].lZ;
-				last = &di_lastPadState[padIndex].lZ;
-			} break;
-			}
-
-			if (*now != *last) {
-				iron_internal_gamepad_trigger_axis(padIndex, axisIndex, *now / 32768.0f);
-			}
-		}
-
-		for (int buttonIndex = 0; buttonIndex < 128; ++buttonIndex) {
-			BYTE *now = &di_padState[padIndex].rgbButtons[buttonIndex];
-			BYTE *last = &di_lastPadState[padIndex].rgbButtons[buttonIndex];
-
-			if (*now != *last) {
-				iron_internal_gamepad_trigger_button(padIndex, buttonIndex, *now / 255.0f);
-			}
-		}
-
-		for (int povIndex = 0; povIndex < 4; ++povIndex) {
-			DWORD *now = &di_padState[padIndex].rgdwPOV[povIndex];
-			DWORD *last = &di_lastPadState[padIndex].rgdwPOV[povIndex];
-
-			bool up = (*now == 0 || *now == 31500 || *now == 4500);
-			bool down = (*now == 18000 || *now == 13500 || *now == 22500);
-			bool left = (*now == 27000 || *now == 22500 || *now == 31500);
-			bool right = (*now == 9000 || *now == 4500 || *now == 13500);
-
-			bool lastUp = (*last == 0 || *last == 31500 || *last == 4500);
-			bool lastDown = (*last == 18000 || *last == 13500 || *last == 22500);
-			bool lastLeft = (*last == 27000 || *last == 22500 || *last == 31500);
-			bool lastRight = (*last == 9000 || *last == 4500 || *last == 13500);
-
-			if (up != lastUp) {
-				iron_internal_gamepad_trigger_button(padIndex, 12, up ? 1.0f : 0.0f);
-			}
-			if (down != lastDown) {
-				iron_internal_gamepad_trigger_button(padIndex, 13, down ? 1.0f : 0.0f);
-			}
-			if (left != lastLeft) {
-				iron_internal_gamepad_trigger_button(padIndex, 14, left ? 1.0f : 0.0f);
-			}
-			if (right != lastRight) {
-				iron_internal_gamepad_trigger_button(padIndex, 15, right ? 1.0f : 0.0f);
-			}
-		}
-
-		memcpy(&di_lastPadState[padIndex], &di_padState[padIndex], sizeof(DIJOYSTATE2));
-		break;
-	}
-	case DIERR_INPUTLOST: // fall through
-	case DIERR_NOTACQUIRED: {
-		hr = di_pads[padIndex]->lpVtbl->Acquire(di_pads[padIndex]);
-		break;
-	}
-	}
-
-	return hr == S_OK;
-}
-
-static bool isXInputGamepad(int gamepad) {
-	//if gamepad is greater than XInput max, treat it as DINPUT.
-	if (gamepad >= XUSER_MAX_COUNT)
-	{
-		return false;
-	}
-	XINPUT_STATE state;
-	memset(&state, 0, sizeof(XINPUT_STATE));
-	DWORD dwResult = InputGetState(gamepad, &state);
-	return dwResult == ERROR_SUCCESS;
-}
-
-static bool isDirectInputGamepad(int gamepad) {
-	if (di_pads[gamepad] == NULL) {
-		return false;
-	}
-	HRESULT hr = di_pads[gamepad]->lpVtbl->GetDeviceState(di_pads[gamepad], sizeof(DIJOYSTATE2), &di_padState[gamepad]);
-	return hr == S_OK;
-}
-
-const char *iron_gamepad_vendor(int gamepad) {
-	if (isXInputGamepad(gamepad)) {
-		return "Microsoft";
-	}
-	else {
-		return "DirectInput8";
-	}
-}
-
-const char *iron_gamepad_product_name(int gamepad) {
-	if (isXInputGamepad(gamepad)) {
-		return "Xbox 360 Controller";
-	}
-	else {
-		return "Generic Gamepad";
-	}
-}
-
-void iron_gamepad_handle_messages() {
-	if (InputGetState != NULL && (detectGamepad || gamepadFound)) {
-		detectGamepad = false;
-		for (DWORD i = 0; i < IRON_DINPUT_MAX_COUNT; ++i) {
-			XINPUT_STATE state;
-			memset(&state, 0, sizeof(XINPUT_STATE));
-			DWORD dwResult = InputGetState(i, &state);
-
-			if (dwResult == ERROR_SUCCESS) {
-				gamepadFound = true;
-
-				float newaxes[6];
-				newaxes[0] = state.Gamepad.sThumbLX / 32768.0f;
-				newaxes[1] = state.Gamepad.sThumbLY / 32768.0f;
-				newaxes[2] = state.Gamepad.sThumbRX / 32768.0f;
-				newaxes[3] = state.Gamepad.sThumbRY / 32768.0f;
-				newaxes[4] = state.Gamepad.bLeftTrigger / 255.0f;
-				newaxes[5] = state.Gamepad.bRightTrigger / 255.0f;
-				for (int i2 = 0; i2 < 6; ++i2) {
-					if (axes[i * 6 + i2] != newaxes[i2]) {
-						iron_internal_gamepad_trigger_axis(i, i2, newaxes[i2]);
-						axes[i * 6 + i2] = newaxes[i2];
-					}
-				}
-				float newbuttons[16];
-				newbuttons[0] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_A) ? 1.0f : 0.0f;
-				newbuttons[1] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_B) ? 1.0f : 0.0f;
-				newbuttons[2] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_X) ? 1.0f : 0.0f;
-				newbuttons[3] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_Y) ? 1.0f : 0.0f;
-				newbuttons[4] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) ? 1.0f : 0.0f;
-				newbuttons[5] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) ? 1.0f : 0.0f;
-				newbuttons[6] = state.Gamepad.bLeftTrigger / 255.0f;
-				newbuttons[7] = state.Gamepad.bRightTrigger / 255.0f;
-				newbuttons[8] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) ? 1.0f : 0.0f;
-				newbuttons[9] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_START) ? 1.0f : 0.0f;
-				newbuttons[10] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) ? 1.0f : 0.0f;
-				newbuttons[11] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) ? 1.0f : 0.0f;
-				newbuttons[12] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) ? 1.0f : 0.0f;
-				newbuttons[13] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) ? 1.0f : 0.0f;
-				newbuttons[14] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) ? 1.0f : 0.0f;
-				newbuttons[15] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) ? 1.0f : 0.0f;
-				for (int i2 = 0; i2 < 16; ++i2) {
-					if (buttons[i * 16 + i2] != newbuttons[i2]) {
-						iron_internal_gamepad_trigger_button(i, i2, newbuttons[i2]);
-						buttons[i * 16 + i2] = newbuttons[i2];
-					}
-				}
-			}
-			else {
-					if (handleDirectInputPad(i)) {
-						gamepadFound = true;
-					}
-			}
-		}
-	}
-}
-
-#endif
-
 static bool keyboardshown = false;
 static char language[3] = {0};
 
@@ -1464,21 +837,14 @@ bool iron_keyboard_active() {
 }
 
 void iron_load_url(const char *url) {
-#define WURL_SIZE 1024
-#define HTTP "http://"
-#define HTTPS "https://"
-	if (strncmp(url, HTTP, sizeof(HTTP) - 1) == 0 || strncmp(url, HTTPS, sizeof(HTTPS) - 1) == 0) {
-		wchar_t wurl[WURL_SIZE];
-		MultiByteToWideChar(CP_UTF8, 0, url, -1, wurl, WURL_SIZE);
+	if (strncmp(url, "http://", sizeof("http://") - 1) == 0 || strncmp(url, "https://", sizeof("https://") - 1) == 0) {
+		wchar_t wurl[1024];
+		MultiByteToWideChar(CP_UTF8, 0, url, -1, wurl, 1024);
 		INT_PTR ret = (INT_PTR)ShellExecuteW(NULL, L"open", wurl, NULL, NULL, SW_SHOWNORMAL);
-		// According to ShellExecuteW's documentation return values > 32 indicate a success.
 		if (ret <= 32) {
 			iron_log("Error opening url %s", url);
 		}
 	}
-#undef HTTPS
-#undef HTTP
-#undef WURL_SIZE
 }
 
 void iron_set_keep_screen_on(bool on) {}
@@ -1548,24 +914,6 @@ const char **iron_video_formats() {
 	return videoFormats;
 }
 
-#ifdef WITH_GAMEPAD
-
-bool iron_gamepad_connected(int num) {
-	return isXInputGamepad(num) || isDirectInputGamepad(num);
-}
-
-void iron_gamepad_rumble(int gamepad, float left, float right) {
-	if (isXInputGamepad(gamepad)) {
-		XINPUT_VIBRATION vibration;
-		memset(&vibration, 0, sizeof(XINPUT_VIBRATION));
-		vibration.wLeftMotorSpeed = (WORD)(65535.f * left);
-		vibration.wRightMotorSpeed = (WORD)(65535.f * right);
-		InputSetState(gamepad, &vibration);
-	}
-}
-
-#endif
-
 double iron_frequency() {
 	return (double)frequency.QuadPart;
 }
@@ -1596,42 +944,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 }
 #endif
 
-typedef BOOL(__stdcall *MiniDumpWriteDumpType)(IN HANDLE hProcess, IN DWORD ProcessId, IN HANDLE hFile, IN MINIDUMP_TYPE DumpType,
-                                               IN CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
-                                               OPTIONAL IN CONST PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam,
-                                               OPTIONAL IN CONST PMINIDUMP_CALLBACK_INFORMATION CallbackParam OPTIONAL);
-
-static MiniDumpWriteDumpType MyMiniDumpWriteDump;
-
-static LONG __stdcall MyCrashHandlerExceptionFilter(EXCEPTION_POINTERS *pEx) {
-	HANDLE file = CreateFileA("iron.dmp", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (file != INVALID_HANDLE_VALUE) {
-		MINIDUMP_EXCEPTION_INFORMATION stMDEI;
-		stMDEI.ThreadId = GetCurrentThreadId();
-		stMDEI.ExceptionPointers = pEx;
-		stMDEI.ClientPointers = TRUE;
-		MyMiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), file, MiniDumpNormal, &stMDEI, NULL, NULL);
-		CloseHandle(file);
-	}
-	return EXCEPTION_CONTINUE_SEARCH;
-}
-
-static void init_crash_handler() {
-	HMODULE dbghelp = LoadLibraryA("dbghelp.dll");
-	if (dbghelp != NULL) {
-		MyMiniDumpWriteDump = (MiniDumpWriteDumpType)GetProcAddress(dbghelp, "MiniDumpWriteDump");
-		SetUnhandledExceptionFilter(MyCrashHandlerExceptionFilter);
-	}
-}
-
 void iron_init(const char *name, int width, int height, iron_window_options_t *win) {
-	init_crash_handler();
-
-	// Pen functions are only in Windows 8 and later, so load them dynamically
-	HMODULE user32 = LoadLibraryA("user32.dll");
-	MyGetPointerInfo = (GetPointerInfoType)GetProcAddress(user32, "GetPointerInfo");
-	MyGetPointerPenInfo = (GetPointerPenInfoType)GetProcAddress(user32, "GetPointerPenInfo");
-	MyEnableNonClientDpiScaling = (EnableNonClientDpiScalingType)GetProcAddress(user32, "EnableNonClientDpiScaling");
 	initKeyTranslation();
 	for (int i = 0; i < 256; ++i) {
 		keyPressed[i] = false;
@@ -1700,8 +1013,6 @@ int iron_hardware_threads(void) {
 	return sysinfo.dwNumberOfProcessors;
 }
 
-#undef CreateWindow
-
 struct HWND__;
 typedef unsigned long DWORD;
 
@@ -1750,37 +1061,29 @@ static void RegisterWindowClass(HINSTANCE hInstance, const wchar_t *className) {
 
 static DWORD getStyle(int features) {
 	DWORD style = WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP;
-
 	if ((features & IRON_WINDOW_FEATURE_RESIZEABLE) && ((features & IRON_WINDOW_FEATURE_BORDERLESS) == 0)) {
 		style |= WS_SIZEBOX;
 	}
-
 	if (features & IRON_WINDOW_FEATURE_MAXIMIZABLE) {
 		style |= WS_MAXIMIZEBOX;
 	}
-
 	if (features & IRON_WINDOW_FEATURE_MINIMIZABLE) {
 		style |= WS_MINIMIZEBOX;
 	}
-
 	if ((features & IRON_WINDOW_FEATURE_BORDERLESS) == 0) {
 		style |= WS_CAPTION | WS_SYSMENU;
 	}
-
 	return style;
 }
 
 static DWORD getExStyle(int features) {
 	DWORD exStyle = WS_EX_APPWINDOW;
-
 	if ((features & IRON_WINDOW_FEATURE_BORDERLESS) == 0) {
 		exStyle |= WS_EX_WINDOWEDGE;
 	}
-
 	if (features & IRON_WINDOW_FEATURE_ON_TOP) {
 		exStyle |= WS_EX_TOPMOST;
 	}
-
 	return exStyle;
 }
 
@@ -2053,3 +1356,479 @@ bool iron_internal_call_close_callback() {
 	}
 	return true;
 }
+
+#ifdef WITH_GAMEPAD
+
+bool iron_gamepad_connected(int num) {
+	return isXInputGamepad(num) || isDirectInputGamepad(num);
+}
+
+void iron_gamepad_rumble(int gamepad, float left, float right) {
+	if (isXInputGamepad(gamepad)) {
+		XINPUT_VIBRATION vibration;
+		memset(&vibration, 0, sizeof(XINPUT_VIBRATION));
+		vibration.wLeftMotorSpeed = (WORD)(65535.f * left);
+		vibration.wRightMotorSpeed = (WORD)(65535.f * right);
+		InputSetState(gamepad, &vibration);
+	}
+}
+
+#include <dinput.h>
+#include <XInput.h>
+
+static float axes[12 * 6];
+static float buttons[12 * 16];
+typedef DWORD(WINAPI *XInputGetStateType)(DWORD dwUserIndex, XINPUT_STATE *pState);
+typedef DWORD(WINAPI *XInputSetStateType)(DWORD dwUserIndex, XINPUT_VIBRATION *pVibration);
+static XInputGetStateType InputGetState = NULL;
+static XInputSetStateType InputSetState = NULL;
+
+void loadXInput() {
+	HMODULE lib = LoadLibraryA("xinput1_4.dll");
+	if (lib == NULL) {
+		lib = LoadLibraryA("xinput1_3.dll");
+	}
+	if (lib == NULL) {
+		lib = LoadLibraryA("xinput9_1_0.dll");
+	}
+
+	if (lib != NULL) {
+		InputGetState = (XInputGetStateType)GetProcAddress(lib, "XInputGetState");
+		InputSetState = (XInputSetStateType)GetProcAddress(lib, "XInputSetState");
+	}
+}
+
+static IDirectInput8W *di_instance = NULL;
+static IDirectInputDevice8W *di_pads[IRON_DINPUT_MAX_COUNT];
+static DIJOYSTATE2 di_padState[IRON_DINPUT_MAX_COUNT];
+static DIJOYSTATE2 di_lastPadState[IRON_DINPUT_MAX_COUNT];
+static DIDEVCAPS di_deviceCaps[IRON_DINPUT_MAX_COUNT];
+static int padCount = 0;
+
+static void cleanupPad(int padIndex) {
+	if (di_pads[padIndex] != NULL) {
+		di_pads[padIndex]->lpVtbl->Unacquire(di_pads[padIndex]);
+		di_pads[padIndex]->lpVtbl->Release(di_pads[padIndex]);
+		di_pads[padIndex] = 0;
+	}
+}
+
+#ifndef SAFE_RELEASE
+#define SAFE_RELEASE(x)                                                                                                                                        \
+	if (x != NULL) {                                                                                                                                           \
+		x->lpVtbl->Release(x);                                                                                                                                 \
+		x = NULL;                                                                                                                                              \
+	}
+#endif
+
+// From
+//-----------------------------------------------------------------------------
+// Enum each PNP device using WMI and check each device ID to see if it contains
+// "IG_" (ex. "VID_045E&PID_028E&IG_00").  If it does, then it's an XInput device
+// Unfortunately this information can not be found by just using DirectInput
+//-----------------------------------------------------------------------------
+static BOOL IsXInputDevice(const GUID *pGuidProductFromDirectInput) {
+	IWbemLocator *pIWbemLocator = NULL;
+	IEnumWbemClassObject *pEnumDevices = NULL;
+	IWbemClassObject *pDevices[20] = {0};
+	IWbemServices *pIWbemServices = NULL;
+	BSTR bstrNamespace = NULL;
+	BSTR bstrDeviceID = NULL;
+	BSTR bstrClassName = NULL;
+	DWORD uReturned = 0;
+	bool bIsXinputDevice = false;
+	UINT iDevice = 0;
+	VARIANT var;
+	HRESULT hr;
+
+	// CoInit if needed
+	hr = CoInitialize(NULL);
+	bool bCleanupCOM = SUCCEEDED(hr);
+
+	// Create WMI
+	hr = CoCreateInstance(&CLSID_WbemLocator, NULL, CLSCTX_INPROC_SERVER, &IID_IWbemLocator, (LPVOID *)&pIWbemLocator);
+	if (FAILED(hr) || pIWbemLocator == NULL)
+		goto LCleanup;
+
+	bstrNamespace = SysAllocString(L"\\\\.\\root\\cimv2");
+	if (bstrNamespace == NULL)
+		goto LCleanup;
+	bstrClassName = SysAllocString(L"Win32_PNPEntity");
+	if (bstrClassName == NULL)
+		goto LCleanup;
+	bstrDeviceID = SysAllocString(L"DeviceID");
+	if (bstrDeviceID == NULL)
+		goto LCleanup;
+
+	// Connect to WMI
+	hr = pIWbemLocator->lpVtbl->ConnectServer(pIWbemLocator, bstrNamespace, NULL, NULL, 0L, 0L, NULL, NULL, &pIWbemServices);
+	if (FAILED(hr) || pIWbemServices == NULL)
+		goto LCleanup;
+
+	// Switch security level to IMPERSONATE.
+	CoSetProxyBlanket((IUnknown *)pIWbemServices, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL,
+	                  EOAC_NONE);
+
+	hr = pIWbemServices->lpVtbl->CreateInstanceEnum(pIWbemServices, bstrClassName, 0, NULL, &pEnumDevices);
+	if (FAILED(hr) || pEnumDevices == NULL)
+		goto LCleanup;
+
+	// Loop over all devices
+	for (;;) {
+		// Get 20 at a time
+		hr = pEnumDevices->lpVtbl->Next(pEnumDevices, 10000, 20, pDevices, &uReturned);
+		if (FAILED(hr))
+			goto LCleanup;
+		if (uReturned == 0)
+			break;
+
+		for (iDevice = 0; iDevice < uReturned; iDevice++) {
+			// For each device, get its device ID
+			hr = pDevices[iDevice]->lpVtbl->Get(pDevices[iDevice], bstrDeviceID, 0L, &var, NULL, NULL);
+			if (SUCCEEDED(hr) && var.vt == VT_BSTR && var.bstrVal != NULL) {
+				// Check if the device ID contains "IG_".  If it does, then it's an XInput device
+				// This information can not be found from DirectInput
+				// TODO: Doesn't work with an Xbox Series X|S controller
+				if (wcsstr(var.bstrVal, L"IG_")) {
+					// If it does, then get the VID/PID from var.bstrVal
+					DWORD dwPid = 0, dwVid = 0;
+					WCHAR *strVid = wcsstr(var.bstrVal, L"VID_");
+#ifndef IRON_NO_CLIB
+					if (strVid && swscanf(strVid, L"VID_%4X", &dwVid) != 1) {
+						dwVid = 0;
+					}
+					WCHAR *strPid = wcsstr(var.bstrVal, L"PID_");
+					if (strPid && swscanf(strPid, L"PID_%4X", &dwPid) != 1) {
+						dwPid = 0;
+					}
+#endif
+
+					// Compare the VID/PID to the DInput device
+					DWORD dwVidPid = MAKELONG(dwVid, dwPid);
+					if (dwVidPid == pGuidProductFromDirectInput->Data1) {
+						bIsXinputDevice = true;
+						goto LCleanup;
+					}
+				}
+			}
+			SAFE_RELEASE(pDevices[iDevice]);
+		}
+	}
+
+LCleanup:
+	if (bstrNamespace)
+		SysFreeString(bstrNamespace);
+	if (bstrDeviceID)
+		SysFreeString(bstrDeviceID);
+	if (bstrClassName)
+		SysFreeString(bstrClassName);
+	for (iDevice = 0; iDevice < 20; iDevice++)
+		SAFE_RELEASE(pDevices[iDevice]);
+	SAFE_RELEASE(pEnumDevices);
+	SAFE_RELEASE(pIWbemLocator);
+	SAFE_RELEASE(pIWbemServices);
+
+	if (bCleanupCOM)
+		CoUninitialize();
+
+	return bIsXinputDevice;
+}
+
+static void cleanupDirectInput() {
+	for (int padIndex = 0; padIndex < IRON_DINPUT_MAX_COUNT; ++padIndex) {
+		cleanupPad(padIndex);
+	}
+
+	if (di_instance != NULL) {
+		di_instance->lpVtbl->Release(di_instance);
+		di_instance = NULL;
+	}
+}
+
+static BOOL CALLBACK enumerateJoystickAxesCallback(LPCDIDEVICEOBJECTINSTANCEW ddoi, LPVOID context) {
+	HWND hwnd = (HWND)context;
+
+	DIPROPRANGE propertyRange;
+	propertyRange.diph.dwSize = sizeof(DIPROPRANGE);
+	propertyRange.diph.dwHeaderSize = sizeof(DIPROPHEADER);
+	propertyRange.diph.dwHow = DIPH_BYID;
+	propertyRange.diph.dwObj = ddoi->dwType;
+	propertyRange.lMin = -32768;
+	propertyRange.lMax = 32768;
+
+	HRESULT hr = di_pads[padCount]->lpVtbl->SetProperty(di_pads[padCount], DIPROP_RANGE, &propertyRange.diph);
+
+	if (FAILED(hr)) {
+		iron_log("DirectInput8 / Pad%i / SetProperty() failed (HRESULT=0x%x)", padCount, hr);
+		return DIENUM_STOP;
+	}
+
+	return DIENUM_CONTINUE;
+}
+
+static BOOL CALLBACK enumerateJoysticksCallback(LPCDIDEVICEINSTANCEW ddi, LPVOID context) {
+	if (padCount < XUSER_MAX_COUNT && IsXInputDevice(&ddi->guidProduct)) {
+		++padCount;
+		return DIENUM_CONTINUE;
+	}
+
+	HRESULT hr = di_instance->lpVtbl->CreateDevice(di_instance, &ddi->guidInstance, &di_pads[padCount], NULL);
+
+	if (SUCCEEDED(hr)) {
+		hr = di_pads[padCount]->lpVtbl->SetDataFormat(di_pads[padCount], &c_dfDIJoystick2);
+
+		if (SUCCEEDED(hr)) {
+			di_deviceCaps[padCount].dwSize = sizeof(DIDEVCAPS);
+			hr = di_pads[padCount]->lpVtbl->GetCapabilities(di_pads[padCount], &di_deviceCaps[padCount]);
+
+			if (SUCCEEDED(hr)) {
+				hr = di_pads[padCount]->lpVtbl->EnumObjects(di_pads[padCount], enumerateJoystickAxesCallback, NULL, DIDFT_AXIS);
+
+				if (SUCCEEDED(hr)) {
+					hr = di_pads[padCount]->lpVtbl->Acquire(di_pads[padCount]);
+
+					if (SUCCEEDED(hr)) {
+						memset(&di_padState[padCount], 0, sizeof(DIJOYSTATE2));
+						hr = di_pads[padCount]->lpVtbl->GetDeviceState(di_pads[padCount], sizeof(DIJOYSTATE2), &di_padState[padCount]);
+
+						if (SUCCEEDED(hr)) {
+							iron_log("DirectInput8 / Pad%i / initialized", padCount);
+						}
+						else {
+							iron_log("DirectInput8 / Pad%i / GetDeviceState() failed (HRESULT=0x%x)", padCount, hr);
+						}
+					}
+					else {
+						iron_log("DirectInput8 / Pad%i / Acquire() failed (HRESULT=0x%x)", padCount, hr);
+						cleanupPad(padCount);
+					}
+				}
+				else {
+					iron_log("DirectInput8 / Pad%i / EnumObjects(DIDFT_AXIS) failed (HRESULT=0x%x)", padCount, hr);
+					cleanupPad(padCount);
+				}
+			}
+			else {
+				iron_log("DirectInput8 / Pad%i / GetCapabilities() failed (HRESULT=0x%x)", padCount, hr);
+				cleanupPad(padCount);
+			}
+		}
+		else {
+			iron_log("DirectInput8 / Pad%i / SetDataFormat() failed (HRESULT=0x%x)", padCount, hr);
+			cleanupPad(padCount);
+		}
+
+		++padCount;
+
+		if (padCount >= IRON_DINPUT_MAX_COUNT) {
+			return DIENUM_STOP;
+		}
+	}
+
+	return DIENUM_CONTINUE;
+}
+
+static void initializeDirectInput() {
+	HINSTANCE hinstance = GetModuleHandleW(NULL);
+
+	memset(&di_pads, 0, sizeof(IDirectInputDevice8) * IRON_DINPUT_MAX_COUNT);
+	memset(&di_padState, 0, sizeof(DIJOYSTATE2) * IRON_DINPUT_MAX_COUNT);
+	memset(&di_lastPadState, 0, sizeof(DIJOYSTATE2) * IRON_DINPUT_MAX_COUNT);
+	memset(&di_deviceCaps, 0, sizeof(DIDEVCAPS) * IRON_DINPUT_MAX_COUNT);
+
+	// #define DIRECTINPUT_VERSION 0x0800
+	HRESULT hr = DirectInput8Create(hinstance, 0x0800, &IID_IDirectInput8W, (void **)&di_instance, NULL);
+
+	if (SUCCEEDED(hr)) {
+		hr = di_instance->lpVtbl->EnumDevices(di_instance, DI8DEVCLASS_GAMECTRL, enumerateJoysticksCallback, NULL, DIEDFL_ATTACHEDONLY);
+
+		if (SUCCEEDED(hr)) {
+		}
+		else {
+			cleanupDirectInput();
+		}
+	}
+	else {
+		iron_log("DirectInput8Create failed (HRESULT=0x%x)", hr);
+	}
+}
+
+bool handleDirectInputPad(int padIndex) {
+	if (di_pads[padIndex] == NULL) {
+		return false;
+	}
+
+	HRESULT hr = di_pads[padIndex]->lpVtbl->GetDeviceState(di_pads[padIndex], sizeof(DIJOYSTATE2), &di_padState[padIndex]);
+
+	switch (hr) {
+	case S_OK: {
+		for (int axisIndex = 0; axisIndex < 2; ++axisIndex) {
+			LONG *now = NULL;
+			LONG *last = NULL;
+
+			switch (axisIndex) {
+			case 0: {
+				now = &di_padState[padIndex].lX;
+				last = &di_lastPadState[padIndex].lX;
+			} break;
+			case 1: {
+				now = &di_padState[padIndex].lY;
+				last = &di_lastPadState[padIndex].lY;
+			} break;
+			case 2: {
+				now = &di_padState[padIndex].lZ;
+				last = &di_lastPadState[padIndex].lZ;
+			} break;
+			}
+
+			if (*now != *last) {
+				iron_internal_gamepad_trigger_axis(padIndex, axisIndex, *now / 32768.0f);
+			}
+		}
+
+		for (int buttonIndex = 0; buttonIndex < 128; ++buttonIndex) {
+			BYTE *now = &di_padState[padIndex].rgbButtons[buttonIndex];
+			BYTE *last = &di_lastPadState[padIndex].rgbButtons[buttonIndex];
+
+			if (*now != *last) {
+				iron_internal_gamepad_trigger_button(padIndex, buttonIndex, *now / 255.0f);
+			}
+		}
+
+		for (int povIndex = 0; povIndex < 4; ++povIndex) {
+			DWORD *now = &di_padState[padIndex].rgdwPOV[povIndex];
+			DWORD *last = &di_lastPadState[padIndex].rgdwPOV[povIndex];
+
+			bool up = (*now == 0 || *now == 31500 || *now == 4500);
+			bool down = (*now == 18000 || *now == 13500 || *now == 22500);
+			bool left = (*now == 27000 || *now == 22500 || *now == 31500);
+			bool right = (*now == 9000 || *now == 4500 || *now == 13500);
+
+			bool lastUp = (*last == 0 || *last == 31500 || *last == 4500);
+			bool lastDown = (*last == 18000 || *last == 13500 || *last == 22500);
+			bool lastLeft = (*last == 27000 || *last == 22500 || *last == 31500);
+			bool lastRight = (*last == 9000 || *last == 4500 || *last == 13500);
+
+			if (up != lastUp) {
+				iron_internal_gamepad_trigger_button(padIndex, 12, up ? 1.0f : 0.0f);
+			}
+			if (down != lastDown) {
+				iron_internal_gamepad_trigger_button(padIndex, 13, down ? 1.0f : 0.0f);
+			}
+			if (left != lastLeft) {
+				iron_internal_gamepad_trigger_button(padIndex, 14, left ? 1.0f : 0.0f);
+			}
+			if (right != lastRight) {
+				iron_internal_gamepad_trigger_button(padIndex, 15, right ? 1.0f : 0.0f);
+			}
+		}
+
+		memcpy(&di_lastPadState[padIndex], &di_padState[padIndex], sizeof(DIJOYSTATE2));
+		break;
+	}
+	case DIERR_INPUTLOST: // fall through
+	case DIERR_NOTACQUIRED: {
+		hr = di_pads[padIndex]->lpVtbl->Acquire(di_pads[padIndex]);
+		break;
+	}
+	}
+
+	return hr == S_OK;
+}
+
+static bool isXInputGamepad(int gamepad) {
+	//if gamepad is greater than XInput max, treat it as DINPUT.
+	if (gamepad >= XUSER_MAX_COUNT)
+	{
+		return false;
+	}
+	XINPUT_STATE state;
+	memset(&state, 0, sizeof(XINPUT_STATE));
+	DWORD dwResult = InputGetState(gamepad, &state);
+	return dwResult == ERROR_SUCCESS;
+}
+
+static bool isDirectInputGamepad(int gamepad) {
+	if (di_pads[gamepad] == NULL) {
+		return false;
+	}
+	HRESULT hr = di_pads[gamepad]->lpVtbl->GetDeviceState(di_pads[gamepad], sizeof(DIJOYSTATE2), &di_padState[gamepad]);
+	return hr == S_OK;
+}
+
+const char *iron_gamepad_vendor(int gamepad) {
+	if (isXInputGamepad(gamepad)) {
+		return "Microsoft";
+	}
+	else {
+		return "DirectInput8";
+	}
+}
+
+const char *iron_gamepad_product_name(int gamepad) {
+	if (isXInputGamepad(gamepad)) {
+		return "Xbox 360 Controller";
+	}
+	else {
+		return "Generic Gamepad";
+	}
+}
+
+void iron_gamepad_handle_messages() {
+	if (InputGetState != NULL && (detectGamepad || gamepadFound)) {
+		detectGamepad = false;
+		for (DWORD i = 0; i < IRON_DINPUT_MAX_COUNT; ++i) {
+			XINPUT_STATE state;
+			memset(&state, 0, sizeof(XINPUT_STATE));
+			DWORD dwResult = InputGetState(i, &state);
+
+			if (dwResult == ERROR_SUCCESS) {
+				gamepadFound = true;
+
+				float newaxes[6];
+				newaxes[0] = state.Gamepad.sThumbLX / 32768.0f;
+				newaxes[1] = state.Gamepad.sThumbLY / 32768.0f;
+				newaxes[2] = state.Gamepad.sThumbRX / 32768.0f;
+				newaxes[3] = state.Gamepad.sThumbRY / 32768.0f;
+				newaxes[4] = state.Gamepad.bLeftTrigger / 255.0f;
+				newaxes[5] = state.Gamepad.bRightTrigger / 255.0f;
+				for (int i2 = 0; i2 < 6; ++i2) {
+					if (axes[i * 6 + i2] != newaxes[i2]) {
+						iron_internal_gamepad_trigger_axis(i, i2, newaxes[i2]);
+						axes[i * 6 + i2] = newaxes[i2];
+					}
+				}
+				float newbuttons[16];
+				newbuttons[0] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_A) ? 1.0f : 0.0f;
+				newbuttons[1] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_B) ? 1.0f : 0.0f;
+				newbuttons[2] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_X) ? 1.0f : 0.0f;
+				newbuttons[3] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_Y) ? 1.0f : 0.0f;
+				newbuttons[4] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) ? 1.0f : 0.0f;
+				newbuttons[5] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) ? 1.0f : 0.0f;
+				newbuttons[6] = state.Gamepad.bLeftTrigger / 255.0f;
+				newbuttons[7] = state.Gamepad.bRightTrigger / 255.0f;
+				newbuttons[8] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) ? 1.0f : 0.0f;
+				newbuttons[9] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_START) ? 1.0f : 0.0f;
+				newbuttons[10] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) ? 1.0f : 0.0f;
+				newbuttons[11] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) ? 1.0f : 0.0f;
+				newbuttons[12] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) ? 1.0f : 0.0f;
+				newbuttons[13] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) ? 1.0f : 0.0f;
+				newbuttons[14] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) ? 1.0f : 0.0f;
+				newbuttons[15] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) ? 1.0f : 0.0f;
+				for (int i2 = 0; i2 < 16; ++i2) {
+					if (buttons[i * 16 + i2] != newbuttons[i2]) {
+						iron_internal_gamepad_trigger_button(i, i2, newbuttons[i2]);
+						buttons[i * 16 + i2] = newbuttons[i2];
+					}
+				}
+			}
+			else {
+					if (handleDirectInputPad(i)) {
+						gamepadFound = true;
+					}
+			}
+		}
+	}
+}
+
+#endif
