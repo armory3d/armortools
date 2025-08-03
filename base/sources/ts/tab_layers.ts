@@ -110,7 +110,9 @@ function tab_layers_button_new(text: string) {
 				}, m);
 				context_raw.layer_preview_dirty = true;
 				history_new_black_mask();
-				layers_update_fill_layers();
+				sys_notify_on_init(function () {
+					layers_update_fill_layers();
+				});
 			}
 			if (ui_menu_button(tr("White Mask"))) {
 				if (slot_layer_is_mask(l)) {
@@ -124,7 +126,9 @@ function tab_layers_button_new(text: string) {
 				}, m);
 				context_raw.layer_preview_dirty = true;
 				history_new_white_mask();
-				layers_update_fill_layers();
+				sys_notify_on_init(function () {
+					layers_update_fill_layers();
+				});
 			}
 			if (ui_menu_button(tr("Fill Mask"))) {
 				if (slot_layer_is_mask(l)) {
@@ -138,7 +142,9 @@ function tab_layers_button_new(text: string) {
 				}, m);
 				context_raw.layer_preview_dirty = true;
 				history_new_fill_mask();
-				layers_update_fill_layers();
+				sys_notify_on_init(function () {
+					layers_update_fill_layers();
+				});
 			}
 			ui.enabled = !slot_layer_is_group(context_raw.layer) && !slot_layer_is_in_group(context_raw.layer);
 			if (ui_menu_button(tr("Group"))) {
