@@ -216,9 +216,6 @@ struct HWND__ *iron_windows_window_handle();
 
 void (*iron_update)(void);
 void (*iron_drop_files)(char *);
-char *(*iron_cut)(void *);
-char *(*iron_copy)(void *);
-void (*iron_paste)(char *, void *);
 void (*iron_foreground)(void);
 void (*iron_resume)(void);
 void (*iron_pause)(void);
@@ -822,6 +819,9 @@ void _iron_init(iron_window_options_t *ops) {
 	ops->color_bits = 32;
 	iron_init(ops->title, ops->width, ops->height, ops);
 	iron_random_init((int)(iron_time() * 1000));
+	iron_set_cut_callback(_cut, NULL);
+	iron_set_copy_callback(_copy, NULL);
+	iron_set_paste_callback(_paste, NULL);
 
 	#ifdef IRON_WINDOWS
 	// Maximized window has x < -1, prevent window centering
@@ -848,15 +848,6 @@ void _iron_set_update_callback(void (*callback)(void)) {
 void _iron_set_drop_files_callback(void (*callback)(char *)) {
 	iron_drop_files = callback;
 	iron_set_drop_files_callback(_drop_files, NULL);
-}
-
-void iron_set_cut_copy_paste_callback(char *(*on_cut)(void *), char *(*on_copy)(void *), void (*on_paste)(char *, void *)) {
-	iron_set_cut_callback(_cut, NULL);
-	iron_set_copy_callback(_copy, NULL);
-	iron_set_paste_callback(_paste, NULL);
-	iron_cut = on_cut;
-	iron_copy = on_copy;
-	iron_paste = on_paste;
 }
 
 void iron_set_application_state_callback(void (*on_foreground)(void), void (*on_resume)(void), void (*on_pause)(void), void (*on_background)(void), void (*on_shutdown)(void)) {

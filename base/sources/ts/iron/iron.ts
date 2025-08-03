@@ -186,7 +186,6 @@ declare function iron_set_app_name(name: string): void;
 declare function iron_log(v: any): void;
 declare function _iron_set_update_callback(callback: ()=>void): void;
 declare function _iron_set_drop_files_callback(callback: (file: string)=>void): void;
-declare function iron_set_cut_copy_paste_callback(on_cut: ()=>string, on_copy: ()=>string, on_paste: (text: string)=>void): void;
 declare function iron_set_application_state_callback(on_foreground: ()=>void, on_resume: ()=>void, on_pause: ()=>void, on_background: ()=>void, on_shutdown: ()=>void): void;
 declare function iron_set_keyboard_down_callback(callback: (code: i32)=>void): void;
 declare function iron_set_keyboard_up_callback(callback: (code: i32)=>void): void;

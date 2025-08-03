@@ -179,9 +179,7 @@ static bool cmd = false;
 			if (ch == 'c' && [theEvent modifierFlags] & NSCommandKeyMask) {
 				char *text = iron_internal_copy_callback();
 				if (text != NULL) {
-					NSPasteboard *board = [NSPasteboard generalPasteboard];
-					[board clearContents];
-					[board setString:[NSString stringWithUTF8String:text] forType:NSStringPboardType];
+					iron_copy_to_clipboard(text);
 				}
 			}
 			if (ch == 'v' && [theEvent modifierFlags] & NSCommandKeyMask) {

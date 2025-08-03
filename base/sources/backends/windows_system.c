@@ -692,17 +692,7 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 				if (controlDown && keyTranslated[wParam] == IRON_KEY_C) {
 					char *text = iron_internal_copy_callback();
 					if (text != NULL) {
-						wchar_t wtext[4096];
-						MultiByteToWideChar(CP_UTF8, 0, text, -1, wtext, 4096);
-						OpenClipboard(hWnd);
-						EmptyClipboard();
-						size_t size = (wcslen(wtext) + 1) * sizeof(wchar_t);
-						HANDLE handle = GlobalAlloc(GMEM_MOVEABLE, size);
-						void *data = GlobalLock(handle);
-						memcpy(data, wtext, size);
-						GlobalUnlock(handle);
-						SetClipboardData(CF_UNICODETEXT, handle);
-						CloseClipboard();
+						iron_copy_to_clipboard(text);
 					}
 				}
 
