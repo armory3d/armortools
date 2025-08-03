@@ -111,13 +111,20 @@ static bool cmd = false;
 		case 32:
 			iron_internal_keyboard_trigger_key_down(IRON_KEY_SPACE);
 			break;
-		case 45: // we need breaks because EQUALS triggered too for some reason
+		case 42:
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_ASTERISK);
+			break;
+		case 43:
+			iron_internal_keyboard_trigger_key_down(IRON_KEY_PLUS);
+			break;
+		case 45:
 			iron_internal_keyboard_trigger_key_down(IRON_KEY_HYPHEN_MINUS);
 			break;
 		case 61:
 			iron_internal_keyboard_trigger_key_down(IRON_KEY_EQUALS);
 			break;
 		}
+
 		switch (ch) {
 		case NSRightArrowFunctionKey:
 			iron_internal_keyboard_trigger_key_down(IRON_KEY_RIGHT);
@@ -255,6 +262,12 @@ static bool cmd = false;
 			break;
 		case 32:
 			iron_internal_keyboard_trigger_key_up(IRON_KEY_SPACE);
+			break;
+		case 42:
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_ASTERISK);
+			break;
+		case 43:
+			iron_internal_keyboard_trigger_key_up(IRON_KEY_PLUS);
 			break;
 		default:
 			if (ch >= L'a' && ch <= L'z') {
