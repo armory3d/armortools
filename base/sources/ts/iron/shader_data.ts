@@ -264,7 +264,8 @@ function shader_context_parse_data(data: string): vertex_data_t {
 }
 
 function shader_context_parse_vertex_struct(raw: shader_context_t) {
-	raw._.structure = {};
+	let structure: gpu_vertex_structure_t = {};
+	raw._.structure = structure;
 
 	for (let i: i32 = 0; i < raw.vertex_elements.length; ++i) {
 		let elem: vertex_element_t = raw.vertex_elements[i];
