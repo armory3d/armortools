@@ -85,7 +85,11 @@ static VkFormat convert_image_format(gpu_texture_format_t format) {
 	case GPU_TEXTURE_FORMAT_D32:
 		return VK_FORMAT_D32_SFLOAT;
 	default:
+		#ifdef IRON_ANDROID
+		return VK_FORMAT_R8G8B8A8_UNORM;
+		#else
 		return VK_FORMAT_B8G8R8A8_UNORM;
+		#endif
 	}
 }
 
@@ -464,8 +468,11 @@ static void create_swapchain() {
 	present_mode_count = present_mode_count > 256 ? 256 : present_mode_count;
 	vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, window_surface, &present_mode_count, present_modes);
 
-	uint32_t image_count = GPU_FRAMEBUFFER_COUNT; // caps.minImageCount + 1;
-	if (caps.maxImageCount > 0 && image_count > caps.maxImageCount) {
+	uint32_t image_count = GPU_FRAMEBUFFER_COUNT;
+	if (image_count < caps.minImageCount) {
+		image_count = caps.minImageCount;
+	}
+	else if (image_count > caps.maxImageCount) {
 		image_count = caps.maxImageCount;
 	}
 
@@ -1374,7 +1381,7 @@ static VkDescriptorSet get_descriptor_set(VkBuffer buffer) {
 	memset(&buffer_descs, 0, sizeof(buffer_descs));
 	buffer_descs[0].buffer = buffer;
 	buffer_descs[0].offset = 0;
-	buffer_descs[0].range = 256 ;
+	buffer_descs[0].range = GPU_CONSTANT_BUFFER_SIZE;
 
 	VkDescriptorImageInfo tex_desc[GPU_MAX_TEXTURES];
 	memset(&tex_desc, 0, sizeof(tex_desc));

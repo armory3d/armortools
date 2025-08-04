@@ -28,6 +28,38 @@ typedef struct {
 } iron_display_t;
 
 static iron_display_t display;
+static struct android_app *app = NULL;
+static ANativeActivity *activity = NULL;
+static ASensorManager *sensorManager = NULL;
+static const ASensor *accelerometerSensor = NULL;
+static const ASensor *gyroSensor = NULL;
+static ASensorEventQueue *sensorEventQueue = NULL;
+static bool started = false;
+static bool paused = true;
+static bool displayIsInitialized = false;
+static bool appIsForeground = false;
+static bool activityJustResized = false;
+static uint16_t unicode_stack[256];
+static int unicode_stack_index = 0;
+static iron_mutex_t unicode_mutex;
+static bool keyboard_active = false;
+static const char *videoFormats[] = {"ts", NULL};
+static __kernel_time_t start_sec = 0;
+static void (*resizeCallback)(int x, int y, void *data) = NULL;
+static void *resizeCallbackData = NULL;
+#ifdef WITH_GAMEPAD
+static float last_x = 0.0f;
+static float last_y = 0.0f;
+static float last_l = 0.0f;
+static float last_r = 0.0f;
+static bool last_hat_left = false;
+static bool last_hat_right = false;
+static bool last_hat_up = false;
+static bool last_hat_down = false;
+#endif
+
+void iron_vulkan_init_window();
+bool iron_vulkan_internal_get_size(int *width, int *height);
 
 int iron_count_displays(void) {
 	return 1;
@@ -95,22 +127,6 @@ iron_display_mode_t iron_display_current_mode(int display) {
 	return mode;
 }
 
-void pauseAudio();
-void resumeAudio();
-
-static struct android_app *app = NULL;
-static ANativeActivity *activity = NULL;
-static ASensorManager *sensorManager = NULL;
-static const ASensor *accelerometerSensor = NULL;
-static const ASensor *gyroSensor = NULL;
-static ASensorEventQueue *sensorEventQueue = NULL;
-
-static bool started = false;
-static bool paused = true;
-static bool displayIsInitialized = false;
-static bool appIsForeground = false;
-static bool activityJustResized = false;
-
 VkResult iron_vulkan_create_surface(VkInstance instance, VkSurfaceKHR *surface) {
 	assert(app->window != NULL);
 	VkAndroidSurfaceCreateInfoKHR createInfo = {};
@@ -126,22 +142,7 @@ void iron_vulkan_get_instance_extensions(const char **names, int *index) {
 }
 
 VkBool32 iron_vulkan_get_physical_device_presentation_support(VkPhysicalDevice physicalDevice, uint32_t queueFamilyIndex) {
-	// https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VK_KHR_android_surface.html#_issues
-	//
-	// 1) Does Android need a way to query for compatibility between a particular physical device (and queue family?)
-	// and a specific Android display?
-	// RESOLVED: No. Currently on Android, any physical device is expected to be able to present to the system compositor,
-	// and all queue families must support the necessary image layout transitions and synchronization operations.
 	return true;
-}
-
-void iron_vulkan_init_window();
-
-static void initDisplay() {
-	iron_vulkan_init_window(0);
-}
-
-static void termDisplay() {
 }
 
 static void updateAppForegroundStatus(bool displayIsInitializedValue, bool appIsForegroundValue) {
@@ -158,30 +159,6 @@ static void updateAppForegroundStatus(bool displayIsInitializedValue, bool appIs
 		}
 	}
 }
-
-#ifdef WITH_GAMEPAD
-
-static bool isGamepadEvent(AInputEvent *event) {
-	return ((AInputEvent_getSource(event) & AINPUT_SOURCE_GAMEPAD) == AINPUT_SOURCE_GAMEPAD ||
-	        (AInputEvent_getSource(event) & AINPUT_SOURCE_JOYSTICK) == AINPUT_SOURCE_JOYSTICK ||
-	        (AInputEvent_getSource(event) & AINPUT_SOURCE_DPAD) == AINPUT_SOURCE_DPAD);
-}
-
-const char *iron_gamepad_vendor(int gamepad) {
-	return "Google";
-}
-
-const char *iron_gamepad_product_name(int gamepad) {
-	return "gamepad";
-}
-
-bool iron_gamepad_connected(int num) {
-	return num == 0;
-}
-
-void iron_gamepad_rumble(int gamepad, float left, float right) {}
-
-#endif
 
 static bool isPenEvent(AInputEvent *event) {
 	return (AInputEvent_getSource(event) & AINPUT_SOURCE_STYLUS) == AINPUT_SOURCE_STYLUS;
@@ -239,15 +216,6 @@ static void touchInput(AInputEvent *event) {
 		break;
 	}
 }
-
-static float last_x = 0.0f;
-static float last_y = 0.0f;
-static float last_l = 0.0f;
-static float last_r = 0.0f;
-static bool last_hat_left = false;
-static bool last_hat_right = false;
-static bool last_hat_up = false;
-static bool last_hat_down = false;
 
 static int32_t input(struct android_app *app, AInputEvent *event) {
 	if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
@@ -834,14 +802,13 @@ static void cmd(struct android_app *app, int32_t cmd) {
 				started = true;
 			}
 			else {
-				initDisplay();
+				iron_vulkan_init_window();
 			}
 
 			updateAppForegroundStatus(true, appIsForeground);
 		}
 		break;
 	case APP_CMD_TERM_WINDOW:
-		termDisplay();
 		updateAppForegroundStatus(false, appIsForeground);
 		break;
 	case APP_CMD_GAINED_FOCUS:
@@ -911,17 +878,12 @@ jclass iron_android_find_class(JNIEnv *env, const char *name) {
 	return clazz;
 }
 
-#define UNICODE_STACK_SIZE 256
-static uint16_t unicode_stack[UNICODE_STACK_SIZE];
-static int unicode_stack_index = 0;
-static iron_mutex_t unicode_mutex;
-
 JNIEXPORT void JNICALL Java_org_armory3d_IronActivity_nativeIronKeyPress(JNIEnv *env, jobject jobj, jstring chars) {
 	const jchar *text = (*env)->GetStringChars(env, chars, NULL);
 	const jsize length = (*env)->GetStringLength(env, chars);
 
 	iron_mutex_lock(&unicode_mutex);
-	for (jsize i = 0; i < length && unicode_stack_index < UNICODE_STACK_SIZE; ++i) {
+	for (jsize i = 0; i < length && unicode_stack_index < 256; ++i) {
 		unicode_stack[unicode_stack_index++] = text[i];
 	}
 	iron_mutex_unlock(&unicode_mutex);
@@ -932,23 +894,15 @@ JNIEXPORT void JNICALL Java_org_armory3d_IronActivity_nativeIronKeyPress(JNIEnv 
 void IronAndroidKeyboardInit() {
 	JNIEnv *env;
 	(*activity->vm)->AttachCurrentThread(activity->vm, &env, NULL);
-
 	jclass clazz = iron_android_find_class(env, "org.armory3d.IronActivity");
-
-	// String chars
 	JNINativeMethod methodTable[] = {{"nativeIronKeyPress", "(Ljava/lang/String;)V", (void *)Java_org_armory3d_IronActivity_nativeIronKeyPress}};
-
 	int methodTableSize = sizeof(methodTable) / sizeof(methodTable[0]);
-
 	int failure = (*env)->RegisterNatives(env, clazz, methodTable, methodTableSize);
 	if (failure != 0) {
 		iron_log("Failed to register IronActivity.nativeIronKeyPress");
 	}
-
 	(*activity->vm)->DetachCurrentThread(activity->vm);
 }
-
-static bool keyboard_active = false;
 
 void iron_keyboard_show() {
 	keyboard_active = true;
@@ -992,16 +946,12 @@ const char *iron_language() {
 	return str;
 }
 
-bool iron_vulkan_internal_get_size(int *width, int *height);
-
 int iron_android_width() {
 	int width, height;
 	if (iron_vulkan_internal_get_size(&width, &height)) {
 		return width;
 	}
-	else {
-		return ANativeWindow_getWidth(app->window);
-	}
+	return ANativeWindow_getWidth(app->window);
 }
 
 int iron_android_height() {
@@ -1009,9 +959,7 @@ int iron_android_height() {
 	if (iron_vulkan_internal_get_size(&width, &height)) {
 		return height;
 	}
-	else {
-		return ANativeWindow_getHeight(app->window);
-	}
+	return ANativeWindow_getHeight(app->window);
 }
 
 const char *iron_internal_save_path() {
@@ -1021,8 +969,6 @@ const char *iron_internal_save_path() {
 const char *iron_system_id() {
 	return "Android";
 }
-
-static const char *videoFormats[] = {"ts", NULL};
 
 const char **iron_video_formats() {
 	return videoFormats;
@@ -1036,8 +982,6 @@ void iron_set_keep_screen_on(bool on) {
 		ANativeActivity_setWindowFlags(activity, 0, AWINDOW_FLAG_KEEP_SCREEN_ON);
 	}
 }
-
-static __kernel_time_t start_sec = 0;
 
 double iron_frequency() {
 	return 1000000.0;
@@ -1087,7 +1031,6 @@ bool iron_internal_handle_messages(void) {
 		}
 
 		if (app->destroyRequested != 0) {
-			termDisplay();
 			iron_stop();
 			return true;
 		}
@@ -1126,7 +1069,7 @@ void iron_mouse_get_position(int *x, int *y) {
 void iron_mouse_set_cursor(int cursor_index) {}
 
 void initAndroidFileReader();
-void IronAndroidVideoInit();
+// void IronAndroidVideoInit();
 
 void android_main(struct android_app *application) {
 	app_dummy();
@@ -1151,12 +1094,12 @@ void android_main(struct android_app *application) {
 	JNIEnv *env = NULL;
 	(*iron_android_get_activity()->vm)->AttachCurrentThread(iron_android_get_activity()->vm, &env, NULL);
 
-	jclass ironMoviePlayerClass = iron_android_find_class(env, "org.armory3d.IronMoviePlayer");
-	jmethodID updateAll = (*env)->GetStaticMethodID(env, ironMoviePlayerClass, "updateAll", "()V");
+	// jclass ironMoviePlayerClass = iron_android_find_class(env, "org.armory3d.IronMoviePlayer");
+	// jmethodID updateAll = (*env)->GetStaticMethodID(env, ironMoviePlayerClass, "updateAll", "()V");
 
 	while (!started) {
 		iron_internal_handle_messages();
-		(*env)->CallStaticVoidMethod(env, ironMoviePlayerClass, updateAll);
+		// (*env)->CallStaticVoidMethod(env, ironMoviePlayerClass, updateAll);
 	}
 	(*iron_android_get_activity()->vm)->DetachCurrentThread(iron_android_get_activity()->vm);
 	kickstart(0, NULL);
@@ -1262,9 +1205,6 @@ int iron_hardware_threads(void) {
 	return sysconf(_SC_NPROCESSORS_ONLN);
 }
 
-static void (*resizeCallback)(int x, int y, void *data) = NULL;
-static void *resizeCallbackData = NULL;
-
 int iron_window_x() {
 	return 0;
 }
@@ -1274,13 +1214,11 @@ int iron_window_y() {
 }
 
 int iron_android_width();
-
 int iron_window_width() {
 	return iron_android_width();
 }
 
 int iron_android_height();
-
 int iron_window_height() {
 	return iron_android_height();
 }
@@ -1314,3 +1252,27 @@ iron_window_mode_t iron_window_get_mode() {
 int iron_window_display() {
 	return 0;
 }
+
+#ifdef WITH_GAMEPAD
+
+static bool isGamepadEvent(AInputEvent *event) {
+	return ((AInputEvent_getSource(event) & AINPUT_SOURCE_GAMEPAD) == AINPUT_SOURCE_GAMEPAD ||
+	        (AInputEvent_getSource(event) & AINPUT_SOURCE_JOYSTICK) == AINPUT_SOURCE_JOYSTICK ||
+	        (AInputEvent_getSource(event) & AINPUT_SOURCE_DPAD) == AINPUT_SOURCE_DPAD);
+}
+
+const char *iron_gamepad_vendor(int gamepad) {
+	return "Google";
+}
+
+const char *iron_gamepad_product_name(int gamepad) {
+	return "gamepad";
+}
+
+bool iron_gamepad_connected(int num) {
+	return num == 0;
+}
+
+void iron_gamepad_rumble(int gamepad, float left, float right) {}
+
+#endif
