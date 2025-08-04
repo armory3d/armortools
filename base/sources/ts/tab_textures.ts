@@ -86,7 +86,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 					let uix: f32 = ui._x;
 					let uiy: f32 = ui._y;
 					let sw: i32 = img.height < img.width ? img.height : 0;
-					if (_ui_image(img, 0xffffffff, slotw, 0, 0, sw, sw) == ui_state_t.STARTED && ui.input_y > ui._window_y) {
+					if (ui_sub_image(img, 0xffffffff, slotw, 0, 0, sw, sw) == ui_state_t.STARTED && ui.input_y > ui._window_y) {
 						base_drag_off_x = -(mouse_x - uix - ui._window_x - 3);
 						base_drag_off_y = -(mouse_y - uiy - ui._window_y + 1);
 						base_drag_asset = asset;
@@ -222,7 +222,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 		else {
 			let img: gpu_texture_t = resource_get("icons.k");
 			let r: rect_t = resource_tile50(img, 0, 1);
-			_ui_image(img, ui.ops.theme.BUTTON_COL, r.h, r.x, r.y, r.w, r.h);
+			ui_sub_image(img, ui.ops.theme.BUTTON_COL, r.h, r.x, r.y, r.w, r.h);
 			if (ui.is_hovered) {
 				ui_tooltip(tr("Drag and drop files here"));
 			}

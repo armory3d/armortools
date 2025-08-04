@@ -40,7 +40,7 @@ let line_draw_camera_look: vec4_t = vec4_create();
 
 function line_draw_init() {
 	if (line_draw_pipeline == null) {
-		let structure: gpu_vertex_structure_t = gpu_vertex_struct_create();
+		let structure: gpu_vertex_structure_t = {};
 		gpu_vertex_struct_add(structure, "pos", vertex_data_t.F32_3X);
 		line_draw_pipeline = gpu_create_pipeline();
 		line_draw_pipeline.input_layout = structure;
@@ -62,7 +62,7 @@ function line_draw_init() {
 		line_draw_index_buffer = gpu_create_index_buffer(line_draw_max_indices);
 	}
 	if (line_draw_overlay_pipeline == null) {
-		let structure: gpu_vertex_structure_t = gpu_vertex_struct_create();
+		let structure: gpu_vertex_structure_t = {};
 		gpu_vertex_struct_add(structure, "pos", vertex_data_t.F32_3X);
 		line_draw_overlay_pipeline = gpu_create_pipeline();
 		line_draw_overlay_pipeline.input_layout = structure;
@@ -259,7 +259,7 @@ function shape_draw_sphere(mat: mat4_t) {
     	let md: mesh_data_t = sphere.data;
 
 		let posa: i16_array_t = md.vertex_arrays[0].values;
-		let structure: gpu_vertex_structure_t = gpu_vertex_struct_create();
+		let structure: gpu_vertex_structure_t = {};
 		gpu_vertex_struct_add(structure, "pos", vertex_data_t.F32_3X);
 		_shape_draw_sphere_vb = gpu_create_vertex_buffer(posa.length, structure);
 		let data: buffer_t = gpu_lock_vertex_buffer(_shape_draw_sphere_vb);

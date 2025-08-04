@@ -124,7 +124,7 @@ function box_projects_tab(ui: ui_t) {
 				if (icon != null) {
 					ui_fill(0, 0, 128, 128, ui.ops.theme.SEPARATOR_COL);
 
-					let state: i32 = _ui_image(icon, 0xffffffff, 128  * ui_SCALE(ui));
+					let state: i32 = ui_image(icon, 0xffffffff, 128  * ui_SCALE(ui));
 					if (state == ui_state_t.RELEASED) {
 						let _uix: i32 = ui._x;
 						ui._x = uix;
@@ -242,7 +242,7 @@ function box_projects_recent_tab(ui: ui_t) {
 
 function box_projects_draw_badge(ui: ui_t) {
 	let img: gpu_texture_t = data_get_image("badge.k");
-	_ui_image(img);
+	ui_image(img);
 	_ui_end_element();
 }
 

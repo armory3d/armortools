@@ -13,7 +13,7 @@ function import_envmap_run(path: string, image: gpu_texture_t) {
 		import_envmap_pipeline = gpu_create_pipeline();
 		import_envmap_pipeline.vertex_shader = sys_get_shader("prefilter_envmap.vert");
 		import_envmap_pipeline.fragment_shader = sys_get_shader("prefilter_envmap.frag");
-		let vs: gpu_vertex_structure_t = gpu_vertex_struct_create();
+		let vs: gpu_vertex_structure_t = {};
 		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
 		import_envmap_pipeline.input_layout = vs;
 		import_envmap_pipeline.color_attachment_count = 1;

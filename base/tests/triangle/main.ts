@@ -31,7 +31,7 @@ function main() {
 	_iron_init(ops);
 
 	pipeline = gpu_create_pipeline();
-	let vs: gpu_vertex_structure_t = gpu_vertex_struct_create();
+	let vs: gpu_vertex_structure_t = {};
 	gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
 	let vs_buffer: buffer_t = iron_load_blob("./data/test.vert" + sys_shader_ext());
 	let fs_buffer: buffer_t = iron_load_blob("./data/test.frag" + sys_shader_ext());

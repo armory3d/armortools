@@ -35,7 +35,7 @@ function tab_plugins_draw(htab: ui_handle_t) {
 		for (let i: i32 = 0; i < rt_keys.length; ++i) {
 			let rt: render_target_t = map_get(render_path_render_targets, rt_keys[i]);
 			ui_text(rt_keys[i]);
-			_ui_image(rt._image);
+			ui_image(rt._image);
 		}
 		///end
 	}

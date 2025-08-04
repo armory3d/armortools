@@ -71,7 +71,7 @@ function tab_brushes_draw(htab: ui_handle_t) {
 				let uix: f32 = ui._x;
 				//let uiy: f32 = ui._y;
 				let tile: i32 = ui_SCALE(ui) > 1 ? 100 : 50;
-				let state: ui_state_t = project_brushes[i].preview_ready ? _ui_image(img) : _ui_image(resource_get("icons.k"), -1, -1.0, tile * 5, tile, tile, tile);
+				let state: ui_state_t = project_brushes[i].preview_ready ? ui_image(img) : ui_sub_image(resource_get("icons.k"), -1, -1.0, tile * 5, tile, tile, tile);
 				if (state == ui_state_t.STARTED) {
 					if (context_raw.brush != project_brushes[i]) {
 						context_select_brush(i);

@@ -448,7 +448,7 @@ function util_render_create_screen_aligned_full_data() {
 	let indices: u32[] = [0, 1, 2];
 
 	// Mandatory vertex data names and sizes
-	let structure: gpu_vertex_structure_t = gpu_vertex_struct_create();
+	let structure: gpu_vertex_structure_t = {};
 	gpu_vertex_struct_add(structure, "pos", vertex_data_t.I16_4X_NORM);
 	gpu_vertex_struct_add(structure, "nor", vertex_data_t.I16_2X_NORM);
 	gpu_vertex_struct_add(structure, "tex", vertex_data_t.I16_2X_NORM);

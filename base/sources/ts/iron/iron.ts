@@ -569,12 +569,6 @@ type vec4_box_t = {
 declare function f32_nan(): f32;
 declare function f32_isnan(f: f32): bool;
 
-
-function gpu_vertex_struct_create(): gpu_vertex_structure_t {
-	let raw: gpu_vertex_structure_t = {};
-	return raw;
-}
-
 function gpu_vertex_struct_add(raw: gpu_vertex_structure_t, name: string, data: vertex_data_t) {
 	let e: gpu_vertex_element_t = ADDRESS(ARRAY_ACCESS(raw.elements, raw.size));
 	e.name = name;
@@ -589,25 +583,20 @@ declare type gpu_pipeline_t = {
 	input_layout?: any;
 	vertex_shader?: any;
 	fragment_shader?: any;
-
 	cull_mode?: cull_mode_t;
 	depth_write?: bool;
 	depth_mode?: compare_mode_t;
-
 	blend_source?: blend_factor_t;
 	blend_destination?: blend_factor_t;
 	alpha_blend_source?: blend_factor_t;
 	alpha_blend_destination?: blend_factor_t;
-
 	color_write_mask_red?: any;
 	color_write_mask_green?: any;
 	color_write_mask_blue?: any;
 	color_write_mask_alpha?: any;
-
 	color_attachment?: any;
 	color_attachment_count?: i32;
 	depth_attachment_bits?: i32;
-
 	impl?: any;
 };
 
@@ -721,9 +710,7 @@ declare function ui_tooltip(s: string): void;
 declare function ui_tooltip_image(tex: any, max_width: i32 = 0): void;
 declare function ui_separator(h: i32 = 4, fill: bool = true): void;
 declare function ui_text_area(handle: ui_handle_t, align: ui_align_t = ui_align_t.LEFT, editable: bool = true, label: string = "", word_wrap: bool = false): string;
-declare function _ui_window(handle: ui_handle_t, x: i32, y: i32, w: i32, h: i32, drag: bool = false): bool;
 declare function ui_begin(ui: ui_t): void;
-declare function _ui_end(last: bool = true): void;
 declare function ui_end_window(): void;
 declare function ui_end_region(last: bool = true): void;
 declare function ui_float_input(handle: ui_handle_t, label: string = "", align: ui_align_t = ui_align_t.LEFT, precision: f32 = 1000.0): f32;
@@ -951,11 +938,15 @@ enum ui_state_t {
 	HOVERED,
 }
 
-let ui_children: map_t<string, ui_handle_t> = map_create();
-let ui_nodes_custom_buttons: map_t<string, (i: i32)=>void> = map_create();
-
 declare function UI_OUTPUTS_H(sockets_count: i32, length: i32 = -1): f32;
 declare function ui_tooltip_image(image: gpu_texture_t, max_width: i32 = 0);
+declare function ui_image(image: gpu_texture_t, tint: i32 = 0xffffffff, h: f32 = -1.0): ui_state_t;
+declare function ui_sub_image(image: gpu_texture_t, tint: i32 = 0xffffffff, h: f32 = -1.0, sx: i32 = 0, sy: i32 = 0, sw: i32 = 0, sh: i32 = 0): ui_state_t;
+declare function ui_window(handle: ui_handle_t, x: i32, y: i32, w: i32, h: i32, drag: bool = false): bool;
+declare function ui_end(last: bool = true);
+
+let ui_children: map_t<string, ui_handle_t> = map_create();
+let ui_nodes_custom_buttons: map_t<string, (i: i32)=>void> = map_create();
 
 function ui_SCALE(ui: ui_t): f32 {
 	let current: ui_t = ui_get_current();
@@ -996,18 +987,6 @@ function ui_MENUBAR_H(ui: ui_t): f32 {
 
 function ui_nodes_INPUT_Y(canvas: ui_node_canvas_t, sockets: ui_node_socket_t[], pos: i32): f32 {
 	return UI_INPUT_Y(canvas, sockets.buffer, sockets.length, pos);
-}
-
-function _ui_image(image: gpu_texture_t, tint: i32 = 0xffffffff, h: f32 = -1.0, sx: i32 = 0, sy: i32 = 0, sw: i32 = 0, sh: i32 = 0): ui_state_t {
-	return ui_sub_image(image, tint, h, sx, sy, sw, sh);
-}
-
-function ui_window(handle: ui_handle_t, x: i32, y: i32, w: i32, h: i32, drag: bool = false): bool {
-	return _ui_window(handle, x, y, w, h, drag);
-}
-
-function ui_end(last: bool = true) {
-	_ui_end(last);
 }
 
 function _ui_set_scale(ui: ui_t, factor: f32) {

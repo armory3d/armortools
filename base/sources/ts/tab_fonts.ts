@@ -81,11 +81,11 @@ function tab_fonts_draw(htab: ui_handle_t) {
 				if (project_fonts[i].preview_ready) {
 					// draw_set_pipeline(pipe); // L8
 					// gpu_set_int(channel_location, 1);
-					state = _ui_image(img);
+					state = ui_image(img);
 					// draw_set_pipeline(null);
 				}
 				else {
-					state = _ui_image(resource_get("icons.k"), -1, -1.0, tile * 6, tile, tile, tile);
+					state = ui_sub_image(resource_get("icons.k"), -1, -1.0, tile * 6, tile, tile, tile);
 				}
 
 				if (state == ui_state_t.STARTED) {

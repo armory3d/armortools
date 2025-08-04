@@ -235,7 +235,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 		col -= 0x99000000;
 	}
 
-	if (_ui_image(icons, col, -1.0, r.x, r.y, r.w, r.h) == ui_state_t.RELEASED) {
+	if (ui_sub_image(icons, col, -1.0, r.x, r.y, r.w, r.h) == ui_state_t.RELEASED) {
 		tab_layers_layer_toggle_visible(l);
 	}
 	ui._x -= 2;

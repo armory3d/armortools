@@ -6,7 +6,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 		ui_text(tr("Picked Color"));
 		if (context_raw.colorid_picked) {
 			let rt: render_target_t = map_get(render_path_render_targets, "texpaint_colorid");
-			_ui_image(rt._image, 0xffffffff, 64);
+			ui_image(rt._image, 0xffffffff, 64);
 		}
 		ui.enabled = context_raw.colorid_picked;
 		if (ui_button(tr("Clear"))) {
@@ -22,7 +22,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 				context_raw.colorid_picked = false;
 				ui_toolbar_handle.redraws = 1;
 			}
-			_ui_image(project_get_image(project_assets[cid]));
+			ui_image(project_get_image(project_assets[cid]));
 			if (ui.is_hovered) {
 				ui_tooltip_image(project_get_image(project_assets[cid]), 256);
 			}

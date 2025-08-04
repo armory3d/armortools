@@ -364,7 +364,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 		col -= 0x99000000;
 	}
 
-	if (_ui_image(icons, col, -1.0, r.x, r.y, r.w, r.h) == ui_state_t.RELEASED) {
+	if (ui_sub_image(icons, col, -1.0, r.x, r.y, r.w, r.h) == ui_state_t.RELEASED) {
 		tab_layers_layer_toggle_visible(l);
 	}
 	ui._x -= 2;
@@ -653,7 +653,7 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 			let _x: f32 = ui._x;
 			let _y: f32 = ui._y;
 			let _w: f32 = ui._w;
-			_ui_image(icons, 0xffffffff, icon_h, r.x, r.y, r.w, r.h);
+			ui_sub_image(icons, 0xffffffff, icon_h, r.x, r.y, r.w, r.h);
 			ui.current_ratio--;
 			ui._x = _x;
 			ui._y = _y;
@@ -664,7 +664,7 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 			gpu_set_int(ui_view2d_channel_loc, 1);
 		}
 
-		let state: ui_state_t = _ui_image(icon, 0xffffffff, icon_h);
+		let state: ui_state_t = ui_image(icon, 0xffffffff, icon_h);
 
 		if (l.fill_layer == null && slot_layer_is_mask(l)) {
 			draw_set_pipeline(null);
@@ -690,7 +690,7 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 		let folder_closed: rect_t = resource_tile50(icons, 2, 1);
 		let folder_open: rect_t = resource_tile50(icons, 8, 1);
 		let folder: rect_t = l.show_panel ? folder_open : folder_closed;
-		return _ui_image(icons, ui.ops.theme.LABEL_COL - 0x00202020, icon_h, folder.x, folder.y, folder.w, folder.h);
+		return ui_sub_image(icons, ui.ops.theme.LABEL_COL - 0x00202020, icon_h, folder.x, folder.y, folder.w, folder.h);
 	}
 }
 

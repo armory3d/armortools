@@ -108,8 +108,8 @@ function tab_materials_draw_slots(mini: bool) {
 			let tile: i32 = ui_SCALE(ui) > 1 ? 100 : 50;
 			let imgh: f32 = mini ? ui_base_default_sidebar_mini_w * 0.85 * ui_SCALE(ui) : -1.0;
 			let state: ui_state_t = project_materials[i].preview_ready ?
-				_ui_image(img, 0xffffffff, imgh) :
-				_ui_image(resource_get("icons.k"), 0xffffffff, -1.0, tile, tile, tile, tile);
+				ui_image(img, 0xffffffff, imgh) :
+				ui_sub_image(resource_get("icons.k"), 0xffffffff, -1.0, tile, tile, tile, tile);
 
 			// Draw material numbers when selecting a material via keyboard shortcut
 			let is_typing: bool = ui.is_typing || ui_view2d_ui.is_typing || ui_nodes_ui.is_typing;

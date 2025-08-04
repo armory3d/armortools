@@ -35,7 +35,7 @@ function ui_view2d_init() {
 	ui_view2d_pipe = gpu_create_pipeline();
 	ui_view2d_pipe.vertex_shader = sys_get_shader("layer_view.vert");
 	ui_view2d_pipe.fragment_shader = sys_get_shader("layer_view.frag");
-	let vs: gpu_vertex_structure_t = gpu_vertex_struct_create();
+	let vs: gpu_vertex_structure_t = {};
 	gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
 	ui_view2d_pipe.input_layout = vs;
 	ui_view2d_pipe.blend_source = blend_factor_t.BLEND_ONE;

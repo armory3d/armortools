@@ -39,7 +39,7 @@ function ui_toolbar_draw_tool(i: i32, ui: ui_t, img: gpu_texture_t, icon_accent:
 	let rect: rect_t = resource_tile50(img, tile_x, tile_y);
 	let _y: i32 = ui._y;
 
-	let image_state: ui_state_t = _ui_image(img, icon_accent, -1.0, rect.x, rect.y, rect.w, rect.h);
+	let image_state: ui_state_t = ui_sub_image(img, icon_accent, -1.0, rect.x, rect.y, rect.w, rect.h);
 	if (image_state == ui_state_t.STARTED) {
 		_ui_toolbar_i = i;
 		sys_notify_on_next_frame(function() {
@@ -115,7 +115,7 @@ function ui_toolbar_render_ui() {
 		// Properties icon
 		if (config_raw.layout[layout_size_t.HEADER] == 1) {
 			let rect: rect_t = resource_tile50(img, 7, 1);
-			if (_ui_image(img, light ? 0xff666666 : ui.ops.theme.BUTTON_COL, -1.0, rect.x, rect.y, rect.w, rect.h) == ui_state_t.RELEASED) {
+			if (ui_sub_image(img, light ? 0xff666666 : ui.ops.theme.BUTTON_COL, -1.0, rect.x, rect.y, rect.w, rect.h) == ui_state_t.RELEASED) {
 				config_raw.layout[layout_size_t.HEADER] = 0;
 			}
 		}

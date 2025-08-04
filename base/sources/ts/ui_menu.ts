@@ -530,7 +530,7 @@ function ui_menu_render() {
 					if (ui_tab(ui_handle(__ID__), tr("About"), tab_vertical)) {
 
 						let img: gpu_texture_t = data_get_image("badge.k");
-						_ui_image(img);
+						ui_image(img);
 						_ui_end_element();
 
 						let h: ui_handle_t = ui_handle(__ID__);

@@ -107,7 +107,7 @@ function util_uv_cache_dilate_map() {
 		util_uv_pipe_dilate = gpu_create_pipeline();
 		util_uv_pipe_dilate.vertex_shader = sys_get_shader("dilate_map.vert");
 		util_uv_pipe_dilate.fragment_shader = sys_get_shader("dilate_map.frag");
-		let vs: gpu_vertex_structure_t = gpu_vertex_struct_create();
+		let vs: gpu_vertex_structure_t = {};
 		gpu_vertex_struct_add(vs, "pos", vertex_data_t.I16_4X_NORM);
 		gpu_vertex_struct_add(vs, "nor", vertex_data_t.I16_2X_NORM);
 		gpu_vertex_struct_add(vs, "tex", vertex_data_t.I16_2X_NORM);

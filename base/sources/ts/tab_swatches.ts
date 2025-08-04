@@ -121,7 +121,7 @@ function tab_swatches_draw(htab: ui_handle_t) {
 					ui_fill(-1, -2 , 2, 32, ui.ops.theme.HIGHLIGHT_COL);
 				}
 
-				let state: ui_state_t = _ui_image(tab_swatches_empty_get(), project_raw.swatches[i].base, slotw);
+				let state: ui_state_t = ui_image(tab_swatches_empty_get(), project_raw.swatches[i].base, slotw);
 
 				if (state == ui_state_t.STARTED) {
 					context_set_swatch(project_raw.swatches[i]);

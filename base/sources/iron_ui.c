@@ -1667,7 +1667,7 @@ bool ui_window_dirty(ui_handle_t *handle, int x, int y, int w, int h) {
 	return current->always_redraw || current->is_scrolling || input_changed;
 }
 
-bool _ui_window(ui_handle_t *handle, int x, int y, int w, int h, bool drag) {
+bool ui_window(ui_handle_t *handle, int x, int y, int w, int h, bool drag) {
 	if (handle->texture.width == 0 || w != handle->texture.width || h != handle->texture.height) {
 		ui_resize(handle, w, h);
 	}
@@ -2281,7 +2281,7 @@ void ui_tooltip_image(gpu_texture_t *image, int max_width) {
 	current->tooltip_y = current->_y + current->_window_y;
 }
 
-void _ui_end(bool last) {
+void ui_end(bool last) {
 	if (!current->window_ended) {
 		ui_end_window();
 	}

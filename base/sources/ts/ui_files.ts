@@ -240,7 +240,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 						ui_fill(-2,         0,     2, w + 4, ui.ops.theme.HIGHLIGHT_COL);
 						ui_fill(w + 2 ,    -2,     2, w + 6, ui.ops.theme.HIGHLIGHT_COL);
 					}
-					state = _ui_image(icon, 0xffffffff, w * ui_SCALE(ui));
+					state = ui_image(icon, 0xffffffff, w * ui_SCALE(ui));
 					if (ui.is_hovered) {
 						ui_tooltip_image(icon);
 						ui_tooltip(f);
@@ -293,7 +293,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 						ui_fill(-2,         0,     2, w + 4, ui.ops.theme.HIGHLIGHT_COL);
 						ui_fill(w + 2 ,    -2,     2, w + 6, ui.ops.theme.HIGHLIGHT_COL);
 					}
-					state = _ui_image(icon, 0xffffffff, w * ui_SCALE(ui));
+					state = ui_image(icon, 0xffffffff, w * ui_SCALE(ui));
 					if (ui.is_hovered) {
 						ui_tooltip_image(icon);
 						ui_tooltip(f);
@@ -329,13 +329,13 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 						ui_fill(-2,         0,     2, w + 4, ui.ops.theme.HIGHLIGHT_COL);
 						ui_fill(w + 2 ,    -2,     2, w + 6, ui.ops.theme.HIGHLIGHT_COL);
 					}
-					state = _ui_image(icon, 0xffffffff, icon.height * ui_SCALE(ui));
+					state = ui_image(icon, 0xffffffff, icon.height * ui_SCALE(ui));
 					generic = false;
 				}
 			}
 
 			if (generic) {
-				state = _ui_image(icons, col, 50 * ui_SCALE(ui), rect.x, rect.y, rect.w, rect.h);
+				state = ui_sub_image(icons, col, 50 * ui_SCALE(ui), rect.x, rect.y, rect.w, rect.h);
 			}
 
 			if (ui.is_hovered && ui.input_released_r && context_menu != null) {

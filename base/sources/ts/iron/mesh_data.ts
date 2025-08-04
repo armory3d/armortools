@@ -105,7 +105,7 @@ function mesh_data_create(raw: mesh_data_t): mesh_data_t {
 }
 
 function mesh_data_get_vertex_struct(vertex_arrays: vertex_array_t[]): gpu_vertex_structure_t {
-	let structure: gpu_vertex_structure_t = gpu_vertex_struct_create();
+	let structure: gpu_vertex_structure_t = {};
 	for (let i: i32 = 0; i < vertex_arrays.length; ++i) {
 		gpu_vertex_struct_add(structure, vertex_arrays[i].attrib, mesh_data_get_vertex_data(vertex_arrays[i].data));
 	}
