@@ -3,11 +3,11 @@
 #import <UIKit/UIKit.h>
 
 void IOSFileDialogOpen() {
-	UIViewController<UIDocumentPickerDelegate> *glViewController = [UIApplication sharedApplication].keyWindow.rootViewController;
+	UIViewController<UIDocumentPickerDelegate> *myViewController = [UIApplication sharedApplication].keyWindow.rootViewController;
 	UIDocumentPickerViewController *documentPicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[@"public.data"] inMode:UIDocumentPickerModeOpen];
-	documentPicker.delegate = glViewController;
+	documentPicker.delegate = myViewController;
 	documentPicker.modalPresentationStyle = UIModalPresentationFormSheet;
-	[glViewController presentViewController:documentPicker animated:YES completion:nil];
+	[myViewController presentViewController:documentPicker animated:YES completion:nil];
 }
 
 wchar_t* IOSFileDialogSave() {

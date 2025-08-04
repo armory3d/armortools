@@ -121,7 +121,7 @@ static void (*paste_callback)(char *, void *) = NULL;
 static void *paste_callback_data = NULL;
 
 #if defined(IRON_IOS) || defined(IRON_MACOS)
-bool withAutoreleasepool(bool (*f)(void));
+bool with_autoreleasepool(bool (*f)(void));
 #endif
 
 void iron_set_update_callback(void (*callback)(void *), void *data) {
@@ -263,7 +263,7 @@ void iron_start(void) {
 #if !defined(IRON_WASM)
 
 #if defined(IRON_IOS) || defined(IRON_MACOS)
-	while (withAutoreleasepool(iron_internal_frame)) {
+	while (with_autoreleasepool(iron_internal_frame)) {
 	}
 #else
 	while (iron_internal_frame()) {

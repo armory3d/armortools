@@ -96,7 +96,11 @@ bool execute_sync(const char *command, uint32_t *exit_code) {
 
 	return success != FALSE;
 #elif defined(__APPLE__)
+	#ifdef TARGET_OS_IPHONE
+	int status = -1;
+	#else
 	int status = system(command);
+	#endif
 
 	if (status < 0) {
 		return false;

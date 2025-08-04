@@ -936,7 +936,7 @@ class File {
 	}
 
 	isBuildFile() {
-		return this.filename.endsWith(".c") || this.filename.endsWith(".cpp") || this.filename.endsWith(".m") || this.filename.endsWith(".mm") || this.filename.endsWith(".cc") || this.filename.endsWith(".metal") || this.filename.endsWith(".storyboard");
+		return this.filename.endsWith(".c") || this.filename.endsWith(".cpp") || this.filename.endsWith(".m") || this.filename.endsWith(".mm") || this.filename.endsWith(".cc") || this.filename.endsWith(".metal");
 	}
 
 	getName() {
@@ -1196,8 +1196,6 @@ class XCodeExporter extends Exporter {
 		for (let file of files) {
 			let filetype = "unknown";
 			let fileencoding = "";
-			if (file.getName().endsWith(".storyboard"))
-				filetype = "file.storyboard";
 			if (file.getName().endsWith(".plist"))
 				filetype = "text.plist.xml";
 			if (file.getName().endsWith(".h"))

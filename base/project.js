@@ -191,7 +191,6 @@ if (!flags.lite) {
 		add_thread_backend("apple");
 		add_gpu_backend("metal");
 		project.add_cfiles("sources/backends/data/ios.plist");
-		project.add_cfiles("sources/backends/data/LaunchScreen.storyboard");
 		project.add_cfiles("sources/backends/ios_file_dialog.m");
 		project.add_define("IRON_METAL");
 	}

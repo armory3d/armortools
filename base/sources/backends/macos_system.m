@@ -892,7 +892,7 @@ void iron_gamepad_rumble(int gamepad, float left, float right) {}
 
 #endif
 
-bool withAutoreleasepool(bool (*f)(void)) {
+bool with_autoreleasepool(bool (*f)(void)) {
 	@autoreleasepool {
 		return f();
 	}
@@ -1079,7 +1079,7 @@ const char *iron_language(void) {
 
 void iron_internal_shutdown(void) {}
 
-static const char *getSavePath(void) {
+const char *iron_internal_save_path(void) {
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
 	NSString *resolvedPath = [paths objectAtIndex:0];
 	NSString *appName = [NSString stringWithUTF8String:iron_application_name()];
@@ -1092,10 +1092,6 @@ static const char *getSavePath(void) {
 
 	resolvedPath = [resolvedPath stringByAppendingString:@"/"];
 	return [resolvedPath cStringUsingEncoding:NSUTF8StringEncoding];
-}
-
-const char *iron_internal_save_path(void) {
-	return getSavePath();
 }
 
 #ifndef IRON_NO_MAIN

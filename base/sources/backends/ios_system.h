@@ -4,9 +4,7 @@
 #import <QuartzCore/CAMetalLayer.h>
 #import <CoreMotion/CMMotionManager.h>
 
-struct gpu_texture;
-
-@interface GLView : UIView <UIKeyInput> {
+@interface MyView : UIView <UIKeyInput> {
 @private
 	id<MTLDevice> device;
 	id<MTLCommandQueue> commandQueue;
@@ -15,12 +13,10 @@ struct gpu_texture;
 	id<CAMetalDrawable> drawable;
 	id<MTLLibrary> library;
 	MTLRenderPassDescriptor *renderPassDescriptor;
-
 	CMMotionManager *motionManager;
 	bool hasAccelerometer;
 	float lastAccelerometerX, lastAccelerometerY, lastAccelerometerZ;
 }
-
 - (void)begin;
 - (void)end;
 - (void)showKeyboard;
@@ -28,28 +24,18 @@ struct gpu_texture;
 - (CAMetalLayer *)metalLayer;
 - (id<MTLDevice>)metalDevice;
 - (id<MTLCommandQueue>)metalQueue;
-
+- (BOOL)hasText;
+- (void)insertText:(NSString *)text;
+- (void)deleteBackward;
 @end
 
-@interface GLViewController : UIViewController <UIDocumentPickerDelegate, UIDropInteractionDelegate> {
-@private
-}
-
+@interface MyViewController : UIViewController <UIDocumentPickerDelegate, UIDropInteractionDelegate> {}
 - (void)loadView;
-
 - (void)setVisible:(BOOL)value;
-
+- (UIRectEdge)preferredScreenEdgesDeferringSystemGestures;
 @end
 
-@class GLView;
 
-@interface IronAppDelegate : NSObject <UIApplicationDelegate> {
-}
-
-@end
-
-@interface Motion : NSObject <UIAccelerometerDelegate> {
-
-}
-
+@interface IronSceneDelegate : UIResponder <UIWindowSceneDelegate> {}
+@property (strong, nonatomic) UIWindow *window;
 @end
