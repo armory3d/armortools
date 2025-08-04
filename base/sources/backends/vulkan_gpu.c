@@ -55,6 +55,7 @@ static bool window_vsynced;
 static VkSurfaceKHR window_surface;
 static VkSurfaceFormatKHR window_format;
 static VkSwapchainKHR window_swapchain;
+static VkImage window_images[GPU_FRAMEBUFFER_COUNT];
 static uint32_t framebuffer_count;
 static bool framebuffer_acquired = false;
 static VkBuffer readback_buffer;
@@ -463,8 +464,8 @@ static void create_swapchain() {
 	present_mode_count = present_mode_count > 256 ? 256 : present_mode_count;
 	vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, window_surface, &present_mode_count, present_modes);
 
-	uint32_t image_count = caps.minImageCount;// + 1;
-	if ((caps.maxImageCount > 0) && (image_count > caps.maxImageCount)) {
+	uint32_t image_count = GPU_FRAMEBUFFER_COUNT; // caps.minImageCount + 1;
+	if (caps.maxImageCount > 0 && image_count > caps.maxImageCount) {
 		image_count = caps.maxImageCount;
 	}
 
@@ -516,15 +517,16 @@ static void create_swapchain() {
 	vkCreateSwapchainKHR(device, &swapchain_info, NULL, &window_swapchain);
 
 	if (old_swapchain != VK_NULL_HANDLE) {
+		gpu_execute_and_wait();
 		vkDestroySwapchainKHR(device, old_swapchain, NULL);
 	}
 
-	vkGetSwapchainImagesKHR(device, window_swapchain, &framebuffer_count, NULL);
-	VkImage *window_images = (VkImage *)malloc(framebuffer_count * sizeof(VkImage));
+	int framebuffer_count = GPU_FRAMEBUFFER_COUNT;
 	vkGetSwapchainImagesKHR(device, window_swapchain, &framebuffer_count, window_images);
 
 	for (uint32_t i = 0; i < framebuffer_count; i++) {
 		framebuffers[i].impl.image = window_images[i];
+		set_image_layout(window_images[i], VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 		VkImageViewCreateInfo color_attachment_view = {
 			.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
 			.pNext = NULL,
@@ -540,9 +542,8 @@ static void create_swapchain() {
 			.subresourceRange.layerCount = 1,
 			.viewType = VK_IMAGE_VIEW_TYPE_2D,
 			.flags = 0,
+			.image = window_images[i],
 		};
-		set_image_layout(window_images[i], VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-		color_attachment_view.image = window_images[i];
 		vkCreateImageView(device, &color_attachment_view, NULL, &framebuffers[i].impl.view);
 	}
 
@@ -1209,14 +1210,12 @@ void gpu_present_internal() {
 		.pCommandBuffers = &command_buffer,
 		.signalSemaphoreCount = 1,
 		.pSignalSemaphores = &rendering_finished_semaphores[framebuffer_index],
+		.waitSemaphoreCount = 1,
+		.pWaitSemaphores = &framebuffer_available_semaphore,
+		.pWaitDstStageMask = (VkPipelineStageFlags[]){VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT},
 	};
-
-	VkSemaphore wait_semaphores[1] = {framebuffer_available_semaphore};
-	VkPipelineStageFlags wait_stages[1] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-	submit_info.waitSemaphoreCount = 1;
-	submit_info.pWaitSemaphores = wait_semaphores;
-	submit_info.pWaitDstStageMask = wait_stages;
 	vkQueueSubmit(queue, 1, &submit_info, fence);
+	gpu_wait();
 
 	VkPresentInfoKHR present = {
 		.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
@@ -1229,9 +1228,6 @@ void gpu_present_internal() {
 	};
 	vkQueuePresentKHR(queue, &present);
 
-	gpu_wait();
-	framebuffer_acquired = false;
-
 	vkResetCommandBuffer(command_buffer, 0);
 	VkCommandBufferBeginInfo begin_info = {
 		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -1240,6 +1236,8 @@ void gpu_present_internal() {
 		.pInheritanceInfo = NULL,
 	};
 	vkBeginCommandBuffer(command_buffer, &begin_info);
+
+	framebuffer_acquired = false;
 }
 
 void gpu_draw_internal() {
