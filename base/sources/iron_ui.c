@@ -25,7 +25,6 @@ static bool ui_combo_first = true;
 static ui_handle_t *ui_combo_search_handle = NULL;
 ui_t *ui_instances[UI_MAX_INSTANCES];
 int ui_instances_count;
-bool ui_always_redraw_window = true; // Redraw cached window texture each frame or on changes only
 bool ui_touch_scroll = false; // Pan with finger to scroll
 bool ui_touch_hold = false; // Touch and hold finger for right click
 bool ui_touch_tooltip = false; // Show extra tooltips above finger / on-screen keyboard
@@ -1652,15 +1651,13 @@ void ui_end_window() {
 	current->window_ended = true;
 
 	// Draw window texture
-	if (ui_always_redraw_window || handle->redraws > -4) {
-		draw_begin(NULL, false, 0);
-		draw_set_color(0xffffffff);
-		draw_image(&handle->texture, current->_window_x, current->_window_y);
-		if (handle->redraws <= 0) {
-			handle->redraws--;
-		}
-		draw_end();
+	draw_begin(NULL, false, 0);
+	draw_set_color(0xffffffff);
+	draw_image(&handle->texture, current->_window_x, current->_window_y);
+	if (handle->redraws <= 0) {
+		handle->redraws--;
 	}
+	draw_end();
 }
 
 bool ui_window_dirty(ui_handle_t *handle, int x, int y, int w, int h) {

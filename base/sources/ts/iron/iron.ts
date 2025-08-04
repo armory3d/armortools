@@ -685,7 +685,6 @@ declare let ui_nodes_enum_texts: (s: string)=>string[];
 declare let ui_touch_scroll: bool;
 declare let ui_touch_hold : bool;
 declare let ui_touch_tooltip: bool;
-declare let ui_always_redraw_window: bool;
 declare let ui_on_border_hover: any;
 declare let ui_on_text_hover: any;
 declare let ui_on_deselect_text: any;

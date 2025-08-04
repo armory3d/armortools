@@ -447,21 +447,7 @@ function base_update() {
 
 	base_handle_drop_paths();
 
-	///if arm_windows
-	let is_picker: bool = context_is_picker();
-	let decal: bool = context_is_decal();
-	ui_always_redraw_window = //!context_raw.cache_draws ||
-							  ui_menu_show ||
-							  ui_box_show ||
-							  base_is_dragging ||
-							  is_picker ||
-							  decal ||
-							  ui_view2d_show ||
-							  !config_raw.brush_3d ||
-							  context_raw.frame < 3;
-	///end
-
-	if (ui_always_redraw_window && context_raw.ddirty < 0) {
+	if (context_raw.ddirty < 0) {
 		context_raw.ddirty = 0;
 	}
 
