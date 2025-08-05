@@ -53,7 +53,6 @@ typedef struct iron_window_options {
 
 void iron_window_create(iron_window_options_t *win);
 void iron_window_destroy();
-void iron_window_options_set_defaults(iron_window_options_t *win);
 void iron_window_resize(int width, int height);
 void iron_window_move(int x, int y);
 void iron_window_change_mode(iron_window_mode_t mode);
@@ -71,7 +70,7 @@ void iron_window_set_close_callback(bool (*callback)(void *data), void *data);
 void iron_internal_call_resize_callback(int width, int height);
 bool iron_internal_call_close_callback();
 
-void iron_init(const char *name, int width, int height, iron_window_options_t *win);
+void iron_init(iron_window_options_t *win);
 const char *iron_application_name(void);
 void iron_set_app_name(const char *name);
 void iron_load_url(const char *url);

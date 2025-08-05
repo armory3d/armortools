@@ -934,7 +934,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 }
 #endif
 
-void iron_init(const char *name, int width, int height, iron_window_options_t *win) {
+void iron_init(iron_window_options_t *win) {
 	initKeyTranslation();
 	for (int i = 0; i < 256; ++i) {
 		keyPressed[i] = false;
@@ -955,18 +955,7 @@ void iron_init(const char *name, int width, int height, iron_window_options_t *w
 		keyPressed[i] = false;
 	}
 
-	iron_set_app_name(name);
-	iron_window_options_t defaultWin;
-	if (win == NULL) {
-		iron_window_options_set_defaults(&defaultWin);
-		win = &defaultWin;
-	}
-	win->width = width;
-	win->height = height;
-	if (win->title == NULL) {
-		win->title = name;
-	}
-
+	iron_set_app_name(win->title);
 	iron_window_create(win);
 
 	#ifdef WITH_GAMEPAD
@@ -1293,24 +1282,10 @@ void iron_window_set_title(const char *title) {
 }
 
 void iron_window_create(iron_window_options_t *win) {
-	iron_window_options_t defaultWin;
-
-	if (win == NULL) {
-		iron_window_options_set_defaults(&defaultWin);
-		win = &defaultWin;
-	}
-
-	if (win->title == NULL) {
-		win->title = "";
-	}
-
 	wchar_t wbuffer[1024];
 	MultiByteToWideChar(CP_UTF8, 0, win->title, -1, wbuffer, 1024);
-
 	createWindow(wbuffer, win->x, win->y, win->width, win->height, win->color_bits, win->frequency, win->features, win->mode, win->display_index);
-
 	gpu_init(win->depth_bits, win->vsync);
-
 	if (win->visible) {
 		iron_window_show();
 	}

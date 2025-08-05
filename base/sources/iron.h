@@ -376,10 +376,10 @@ int usleep(unsigned int usec);
 #endif
 
 #ifdef IRON_MACOS
-const char *macgetresourcepath();
+const char *iron_get_resource_path();
 #endif
 #ifdef IRON_IOS
-const char *iphonegetresourcepath();
+const char *iron_get_resource_path();
 #endif
 
 #if defined(IRON_IOS) || defined(IRON_ANDROID)
@@ -817,7 +817,7 @@ void _iron_init(iron_window_options_t *ops) {
 	ops->display_index = -1;
 	ops->visible = enable_window;
 	ops->color_bits = 32;
-	iron_init(ops->title, ops->width, ops->height, ops);
+	iron_init(ops);
 	iron_random_init((int)(iron_time() * 1000));
 	iron_set_cut_callback(_cut, NULL);
 	iron_set_copy_callback(_copy, NULL);
@@ -1394,14 +1394,14 @@ i32 iron_sys_command(string_t *cmd) {
 string_t *iron_get_files_location() {
 	#ifdef IRON_MACOS
 	char path[1024];
-	strcpy(path, macgetresourcepath());
+	strcpy(path, iron_get_resource_path());
 	strcat(path, "/");
 	strcat(path, IRON_OUTDIR);
 	strcat(path, "/");
 	return path;
 	#elif defined(IRON_IOS)
 	char path[1024];
-	strcpy(path, iphonegetresourcepath());
+	strcpy(path, iron_get_resource_path());
 	strcat(path, "/");
 	strcat(path, IRON_OUTDIR);
 	strcat(path, "/");

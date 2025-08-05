@@ -49,18 +49,9 @@ __attribute__((import_module("imports"), import_name("js_time"))) int js_time();
 extern int iron_internal_window_width;
 extern int iron_internal_window_height;
 
-void iron_init(const char *name, int width, int height, iron_window_options_t *win) {
-	iron_window_options_t defaultWin;
-	if (win == NULL) {
-		iron_window_options_set_defaults(&defaultWin);
-		win = &defaultWin;
-	}
-	win->width = width;
-	win->height = height;
-
-	iron_internal_window_width = width;
-	iron_internal_window_height = height;
-
+void iron_init(iron_window_options_t *win) {
+	iron_internal_window_width = win->width;
+	iron_internal_window_height = win->height;
 	gpu_init(win->depth_bits, true);
 }
 

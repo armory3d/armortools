@@ -9,8 +9,7 @@
 // #include <stdlib.h>
 // #include <string.h>
 
-// extern const char *iphonegetresourcepath(void);
-// extern const char *macgetresourcepath(void);
+// extern const char *iron_get_resource_path(void);
 
 // void iron_internal_video_sound_stream_init(iron_internal_video_sound_stream_t *stream, int channel_count, int frequency) {
 // 	stream->bufferSize = 1024 * 100;
@@ -126,9 +125,9 @@
 // 	video->impl.image_initialized = false;
 // 	char name[2048];
 // #ifdef IRON_IOS
-// 	strcpy(name, iphonegetresourcepath());
+// 	strcpy(name, iron_get_resource_path());
 // #else
-// 	strcpy(name, macgetresourcepath());
+// 	strcpy(name, iron_get_resource_path());
 // #endif
 // 	strcat(name, "/");
 // 	strcat(name, IRON_OUTDIR);

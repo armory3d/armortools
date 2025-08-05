@@ -8,16 +8,16 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-#define touchmaxcount 20
+#define MAX_TOUCH_COUNT 10
 
 extern char mobile_title[1024];
-static void *touches[touchmaxcount];
+static void *touches[MAX_TOUCH_COUNT];
 static int backing_width;
 static int backing_height;
 static bool shift_down = false;
 static bool visible;
-static MyView *myView;
-static MyViewController *myViewController;
+static MyView *my_view;
+static MyViewController *my_view_controller;
 static bool keyboard_shown = false;
 static char language[3];
 static char sysid[512];
@@ -25,10 +25,14 @@ static const char *video_formats[] = {"mp4", NULL};
 static void (*resize_callback)(int x, int y, void *data) = NULL;
 static void *resize_callback_data = NULL;
 
-void iron_internal_call_resize_callback(int width, int height);
+void iron_internal_call_resize_callback(int width, int height) {
+	if (resize_callback != NULL) {
+		resize_callback(width, height, resize_callback_data);
+	}
+}
 
 static int get_touch_index(void *touch) {
-	for (int i = 0; i < touchmaxcount; ++i) {
+	for (int i = 0; i < MAX_TOUCH_COUNT; ++i) {
 		if (touches[i] == touch) {
 			return i;
 		}
@@ -37,7 +41,7 @@ static int get_touch_index(void *touch) {
 }
 
 static int add_touch(void *touch) {
-	for (int i = 0; i < touchmaxcount; ++i) {
+	for (int i = 0; i < MAX_TOUCH_COUNT; ++i) {
 		if (touches[i] == NULL) {
 			touches[i] = touch;
 			return i;
@@ -47,7 +51,7 @@ static int add_touch(void *touch) {
 }
 
 static int remove_touch(void *touch) {
-	for (int i = 0; i < touchmaxcount; ++i) {
+	for (int i = 0; i < MAX_TOUCH_COUNT; ++i) {
 		if (touches[i] == touch) {
 			touches[i] = NULL;
 			return i;
@@ -62,6 +66,180 @@ int iron_window_width() {
 
 int iron_window_height() {
 	return backing_height;
+}
+
+CAMetalLayer *get_metal_layer(void) {
+	return [my_view metal_layer];
+}
+
+id get_metal_device(void) {
+	return [my_view metal_device];
+}
+
+id get_metal_queue(void) {
+	return [my_view metal_queue];
+}
+
+void iron_display_init(void) {}
+
+iron_display_mode_t iron_display_current_mode(int display) {
+	iron_display_mode_t dm;
+	dm.width = iron_window_width();
+	dm.height = iron_window_height();
+	dm.frequency = (int)[[UIScreen mainScreen] maximumFramesPerSecond];
+	dm.bits_per_pixel = 32;
+	return dm;
+}
+
+int iron_count_displays(void) {
+	return 1;
+}
+
+int iron_primary_display(void) {
+	return 0;
+}
+
+void iron_internal_mouse_lock(void) {}
+void iron_internal_mouse_unlock(void) {}
+
+bool iron_mouse_can_lock(void) {
+	return false;
+}
+
+void iron_mouse_show(void) {}
+void iron_mouse_hide(void) {}
+void iron_mouse_set_position(int x, int y) {}
+void iron_mouse_get_position(int *x, int *y) {}
+void iron_mouse_set_cursor(int cursor_index) {}
+
+bool with_autoreleasepool(bool (*f)(void)) {
+	@autoreleasepool {
+		return f();
+	}
+}
+
+const char *iron_get_resource_path(void) {
+	return [[[NSBundle mainBundle] resourcePath] cStringUsingEncoding:1];
+}
+
+bool iron_internal_handle_messages(void) {
+	SInt32 result;
+	do {
+		result = CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, TRUE);
+	} while (result == kCFRunLoopRunHandledSource);
+	return true;
+}
+
+void iron_set_keep_screen_on(bool on) {}
+
+void iron_keyboard_show(void) {
+	keyboard_shown = true;
+	[my_view show_keyboard];
+}
+
+void iron_keyboard_hide(void) {
+	keyboard_shown = false;
+	[my_view hide_keyboard];
+}
+
+bool iron_keyboard_active(void) {
+	return keyboard_shown;
+}
+
+void iron_load_url(const char *url) {
+	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithUTF8String:url]]];
+}
+
+const char *iron_language(void) {
+	NSString *nsstr = [[NSLocale preferredLanguages] objectAtIndex:0];
+	const char *lang = [nsstr UTF8String];
+	language[0] = lang[0];
+	language[1] = lang[1];
+	language[2] = 0;
+	return language;
+}
+
+void iron_internal_shutdown(void) {}
+
+void iron_init(iron_window_options_t *win) {
+	gpu_init(win->depth_bits, true);
+}
+
+const char *iron_system_id(void) {
+	const char *name = [[[UIDevice currentDevice] name] UTF8String];
+	const char *vendorId = [[[[UIDevice currentDevice] identifierForVendor] UUIDString] UTF8String];
+	strcpy(sysid, name);
+	strcat(sysid, "-");
+	strcat(sysid, vendorId);
+	return sysid;
+}
+
+const char *iron_internal_save_path(void) {
+	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
+	NSString *resolvedPath = [paths objectAtIndex:0];
+	NSString *appName = [NSString stringWithUTF8String:iron_application_name()];
+	resolvedPath = [resolvedPath stringByAppendingPathComponent:appName];
+	NSFileManager *fileMgr = [[NSFileManager alloc] init];
+	NSError *error;
+	[fileMgr createDirectoryAtPath:resolvedPath withIntermediateDirectories:YES attributes:nil error:&error];
+	resolvedPath = [resolvedPath stringByAppendingString:@"/"];
+	return [resolvedPath cStringUsingEncoding:1];
+}
+
+const char **iron_video_formats(void) {
+	return video_formats;
+}
+
+double iron_frequency(void) {
+	mach_timebase_info_data_t info;
+	mach_timebase_info(&info);
+	return (double)info.denom / (double)info.numer / 1e-9;
+}
+
+uint64_t iron_timestamp(void) {
+	uint64_t time = mach_absolute_time();
+	return time;
+}
+
+int main(int argc, char *argv[]) {
+	int res = 0;
+	@autoreleasepool {
+		[IronSceneDelegate description]; // otherwise removed by the linker
+		res = UIApplicationMain(argc, argv, nil, nil);
+	}
+	return res;
+}
+
+int iron_window_x() {
+	return 0;
+}
+
+int iron_window_y() {
+	return 0;
+}
+
+void iron_window_resize(int width, int height) {}
+void iron_window_move(int x, int y) {}
+void iron_window_change_mode(iron_window_mode_t mode) {}
+void iron_window_destroy() {}
+void iron_window_show() {}
+void iron_window_hide() {}
+void iron_window_set_title(const char *title) {}
+void iron_window_create(iron_window_options_t *win) {}
+
+void iron_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {
+	resize_callback = callback;
+	resize_callback_data = data;
+}
+
+void iron_window_set_close_callback(bool (*callback)(void *), void *data) {}
+
+iron_window_mode_t iron_window_get_mode() {
+	return IRON_WINDOW_MODE_FULLSCREEN;
+}
+
+int iron_window_display() {
+	return 0;
 }
 
 @implementation MyView
@@ -83,33 +261,28 @@ int iron_window_height() {
 	backing_width = frame.size.width * self.contentScaleFactor;
 	backing_height = frame.size.height * self.contentScaleFactor;
 
-	for (int i = 0; i < touchmaxcount; ++i) {
+	for (int i = 0; i < MAX_TOUCH_COUNT; ++i) {
 		touches[i] = NULL;
 	}
 
 	device = MTLCreateSystemDefaultDevice();
-	commandQueue = [device newCommandQueue];
+	queue = [device newCommandQueue];
 	library = [device newDefaultLibrary];
 
-	CAMetalLayer *metalLayer = (CAMetalLayer *)self.layer;
-	metalLayer.device = device;
-	metalLayer.pixelFormat = MTLPixelFormatBGRA8Unorm;
-	metalLayer.framebufferOnly = YES;
-	metalLayer.opaque = YES;
-	metalLayer.backgroundColor = nil;
+	CAMetalLayer *layer = (CAMetalLayer *)self.layer;
+	layer.device = device;
+	layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
+	layer.framebufferOnly = YES;
+	layer.opaque = YES;
+	layer.backgroundColor = nil;
 
 	[self addGestureRecognizer:[[UIHoverGestureRecognizer alloc] initWithTarget:self action:@selector(hoverGesture:)]];
 	return self;
 }
 
-- (void)begin {}
-- (void)end {}
-- (void)dealloc {}
-
 - (void)layoutSubviews {
 	backing_width = self.frame.size.width * self.contentScaleFactor;
 	backing_height = self.frame.size.height * self.contentScaleFactor;
-
 	gpu_resize(backing_width, backing_height);
 	iron_internal_call_resize_callback(backing_width, backing_height);
 }
@@ -197,11 +370,11 @@ int iron_window_height() {
 	}
 }
 
-- (void)showKeyboard {
+- (void)show_keyboard {
 	[self becomeFirstResponder];
 }
 
-- (void)hideKeyboard {
+- (void)hide_keyboard {
 	[self resignFirstResponder];
 }
 
@@ -277,45 +450,25 @@ int iron_window_height() {
 	iron_keyboard_hide();
 }
 
-- (CAMetalLayer *)metalLayer {
+- (CAMetalLayer *)metal_layer {
 	return (CAMetalLayer *)self.layer;
 }
 
-- (id<MTLDevice>)metalDevice {
+- (id<MTLDevice>)metal_device {
 	return device;
 }
 
-- (id<MTLCommandQueue>)metalQueue {
-	return commandQueue;
+- (id<MTLCommandQueue>)metal_queue {
+	return queue;
 }
 
 @end
-
-void showKeyboard(void) {
-	[myView showKeyboard];
-}
-
-void hideKeyboard(void) {
-	[myView hideKeyboard];
-}
-
-CAMetalLayer *getMetalLayer(void) {
-	return [myView metalLayer];
-}
-
-id getMetalDevice(void) {
-	return [myView metalDevice];
-}
-
-id getMetalQueue(void) {
-	return [myView metalQueue];
-}
 
 @implementation MyViewController
 
 - (void)loadView {
 	visible = true;
-	self.view = myView = [[MyView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+	self.view = my_view = [[MyView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
 	[self.view addInteraction: [[UIDropInteraction alloc] initWithDelegate: self]];
 	[self setNeedsUpdateOfScreenEdgesDeferringSystemGestures];
 }
@@ -352,8 +505,8 @@ void importFile(NSURL *url) {
 
 - (void)dropInteraction:(UIDropInteraction *)interaction performDrop:(id<UIDropSession>)session {
 	CGPoint point = [session locationInView:self.view];
-	float x = point.x * myView.contentScaleFactor;
-	float y = point.y * myView.contentScaleFactor;
+	float x = point.x * my_view.contentScaleFactor;
+	float y = point.y * my_view.contentScaleFactor;
 	iron_internal_mouse_trigger_move(x, y);
 	iron_internal_surface_trigger_move(0, x, y);
 	for (UIDragItem *item in session.items) {
@@ -375,10 +528,6 @@ void importFile(NSURL *url) {
 
 @implementation IronSceneDelegate
 
-void loadURL(const char *url) {
-	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithUTF8String:url]]];
-}
-
 - (void)mainLoop {
 	@autoreleasepool {
 		kickstart(0, NULL);
@@ -395,22 +544,18 @@ void loadURL(const char *url) {
 
 	UIWindowScene *windowScene = (UIWindowScene *)scene;
     self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
-    // self.window.frame = windowScene.coordinateSpace.bounds;
 	self.window.frame = [UIScreen mainScreen].bounds;
     [self.window setBackgroundColor:[UIColor blackColor]];
 
-	myViewController = [[MyViewController alloc] init];
-	myViewController.view.multipleTouchEnabled = YES;
-	[self.window setRootViewController:myViewController];
+	my_view_controller = [[MyViewController alloc] init];
+	my_view_controller.view.multipleTouchEnabled = YES;
+	[self.window setRootViewController:my_view_controller];
 	[self.window makeKeyAndVisible];
-
-	[myViewController setVisible:YES];
-    // iron_internal_foreground_callback();
+	[my_view_controller setVisible:YES];
 	[self performSelectorOnMainThread:@selector(mainLoop) withObject:nil waitUntilDone:NO];
 }
 
 - (void)sceneDidDisconnect:(UIScene *)scene {
-	[myViewController setVisible:NO];
 	iron_internal_shutdown_callback();
 }
 
@@ -423,189 +568,14 @@ void loadURL(const char *url) {
 }
 
 - (void)sceneWillEnterForeground:(UIScene *)scene {
-	[myViewController setVisible:YES];
     iron_internal_foreground_callback();
 }
 
 - (void)sceneDidEnterBackground:(UIScene *)scene {
-	[myViewController setVisible:NO];
     iron_internal_background_callback();
 }
 
 @end
-
-void iron_display_init(void) {}
-
-iron_display_mode_t iron_display_current_mode(int display) {
-	iron_display_mode_t dm;
-	dm.width = iron_window_width();
-	dm.height = iron_window_height();
-	dm.frequency = (int)[[UIScreen mainScreen] maximumFramesPerSecond];
-	dm.bits_per_pixel = 32;
-	return dm;
-}
-
-int iron_count_displays(void) {
-	return 1;
-}
-
-int iron_primary_display(void) {
-	return 0;
-}
-
-void iron_internal_mouse_lock(void) {}
-void iron_internal_mouse_unlock(void) {}
-
-bool iron_mouse_can_lock(void) {
-	return false;
-}
-
-void iron_mouse_show(void) {}
-void iron_mouse_hide(void) {}
-void iron_mouse_set_position(int x, int y) {}
-void iron_mouse_get_position(int *x, int *y) {}
-void iron_mouse_set_cursor(int cursor_index) {}
-
-bool with_autoreleasepool(bool (*f)(void)) {
-	@autoreleasepool {
-		return f();
-	}
-}
-
-const char *iphonegetresourcepath(void) {
-	return [[[NSBundle mainBundle] resourcePath] cStringUsingEncoding:1];
-}
-
-bool iron_internal_handle_messages(void) {
-	SInt32 result;
-	do {
-		result = CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, TRUE);
-	} while (result == kCFRunLoopRunHandledSource);
-	return true;
-}
-
-void iron_set_keep_screen_on(bool on) {}
-
-void iron_keyboard_show(void) {
-	keyboard_shown = true;
-	showKeyboard();
-}
-
-void iron_keyboard_hide(void) {
-	keyboard_shown = false;
-	hideKeyboard();
-}
-
-bool iron_keyboard_active(void) {
-	return keyboard_shown;
-}
-
-void iron_load_url(const char *url) {
-	loadURL(url);
-}
-
-const char *iron_language(void) {
-	NSString *nsstr = [[NSLocale preferredLanguages] objectAtIndex:0];
-	const char *lang = [nsstr UTF8String];
-	language[0] = lang[0];
-	language[1] = lang[1];
-	language[2] = 0;
-	return language;
-}
-
-void iron_internal_shutdown(void) {}
-
-void iron_init(const char *name, int width, int height, struct iron_window_options *win) {
-	iron_window_options_t default_win;
-	if (win == NULL) {
-		iron_window_options_set_defaults(&default_win);
-		win = &default_win;
-	}
-	gpu_init(win->depth_bits, true);
-}
-
-const char *iron_system_id(void) {
-	const char *name = [[[UIDevice currentDevice] name] UTF8String];
-	const char *vendorId = [[[[UIDevice currentDevice] identifierForVendor] UUIDString] UTF8String];
-	strcpy(sysid, name);
-	strcat(sysid, "-");
-	strcat(sysid, vendorId);
-	return sysid;
-}
-
-const char *iron_internal_save_path(void) {
-	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
-	NSString *resolvedPath = [paths objectAtIndex:0];
-	NSString *appName = [NSString stringWithUTF8String:iron_application_name()];
-	resolvedPath = [resolvedPath stringByAppendingPathComponent:appName];
-	NSFileManager *fileMgr = [[NSFileManager alloc] init];
-	NSError *error;
-	[fileMgr createDirectoryAtPath:resolvedPath withIntermediateDirectories:YES attributes:nil error:&error];
-	resolvedPath = [resolvedPath stringByAppendingString:@"/"];
-	return [resolvedPath cStringUsingEncoding:1];
-}
-
-const char **iron_video_formats(void) {
-	return video_formats;
-}
-
-double iron_frequency(void) {
-	mach_timebase_info_data_t info;
-	mach_timebase_info(&info);
-	return (double)info.denom / (double)info.numer / 1e-9;
-}
-
-uint64_t iron_timestamp(void) {
-	uint64_t time = mach_absolute_time();
-	return time;
-}
-
-int main(int argc, char *argv[]) {
-	int res = 0;
-	@autoreleasepool {
-		[IronSceneDelegate description]; // otherwise removed by the linker
-		res = UIApplicationMain(argc, argv, nil, nil);
-	}
-	return res;
-}
-
-int iron_window_x() {
-	return 0;
-}
-
-int iron_window_y() {
-	return 0;
-}
-
-void iron_window_resize(int width, int height) {}
-void iron_window_move(int x, int y) {}
-void iron_window_change_mode(iron_window_mode_t mode) {}
-void iron_window_destroy() {}
-void iron_window_show() {}
-void iron_window_hide() {}
-void iron_window_set_title(const char *title) {}
-void iron_window_create(iron_window_options_t *win) {}
-
-void iron_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {
-	resize_callback = callback;
-	resize_callback_data = data;
-}
-
-void iron_internal_call_resize_callback(int width, int height) {
-	if (resize_callback != NULL) {
-		resize_callback(width, height, resize_callback_data);
-	}
-}
-
-void iron_window_set_close_callback(bool (*callback)(void *), void *data) {}
-
-iron_window_mode_t iron_window_get_mode() {
-	return IRON_WINDOW_MODE_FULLSCREEN;
-}
-
-int iron_window_display() {
-	return 0;
-}
 
 #ifdef WITH_GAMEPAD
 

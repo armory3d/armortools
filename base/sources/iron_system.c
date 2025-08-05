@@ -76,23 +76,6 @@ void iron_error(const char *format, ...) {
 #endif
 }
 
-void iron_window_options_set_defaults(iron_window_options_t *win) {
-	iron_display_init();
-	win->title = NULL;
-	win->display_index = iron_primary_display();
-	win->mode = IRON_WINDOW_MODE_WINDOW;
-	win->x = -1;
-	win->y = -1;
-	win->width = 800;
-	win->height = 600;
-	win->visible = true;
-	win->features = IRON_WINDOW_FEATURE_RESIZEABLE | IRON_WINDOW_FEATURE_MINIMIZABLE | IRON_WINDOW_FEATURE_MAXIMIZABLE;
-	win->frequency = 60;
-	win->vsync = true;
-	win->color_bits = 32;
-	win->depth_bits = 32;
-}
-
 #if !defined(IRON_WASM) && !defined(IRON_ANDROID) && !defined(IRON_WINDOWS)
 double iron_time(void) {
 	return iron_timestamp() / iron_frequency();

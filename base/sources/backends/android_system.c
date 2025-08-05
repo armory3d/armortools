@@ -1111,19 +1111,9 @@ void android_main(struct android_app *application) {
 	(*activity->vm)->DetachCurrentThread(activity->vm);
 }
 
-void iron_init(const char *name, int width, int height, struct iron_window_options *win) {
+void iron_init(iron_window_options_t *win) {
 	iron_mutex_init(&unicode_mutex);
-
-	iron_window_options_t default_win;
-	if (win == NULL) {
-		iron_window_options_set_defaults(&default_win);
-		win = &default_win;
-	}
-	win->width = width;
-	win->height = height;
-
 	gpu_init(win->depth_bits, true);
-
 	#ifdef WITH_GAMEPAD
 	iron_internal_gamepad_trigger_connect(0);
 	#endif

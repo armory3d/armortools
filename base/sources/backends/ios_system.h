@@ -7,23 +7,14 @@
 @interface MyView : UIView <UIKeyInput> {
 @private
 	id<MTLDevice> device;
-	id<MTLCommandQueue> commandQueue;
-	id<MTLCommandBuffer> commandBuffer;
-	id<MTLRenderCommandEncoder> commandEncoder;
-	id<CAMetalDrawable> drawable;
+	id<MTLCommandQueue> queue;
 	id<MTLLibrary> library;
-	MTLRenderPassDescriptor *renderPassDescriptor;
-	CMMotionManager *motionManager;
-	bool hasAccelerometer;
-	float lastAccelerometerX, lastAccelerometerY, lastAccelerometerZ;
 }
-- (void)begin;
-- (void)end;
-- (void)showKeyboard;
-- (void)hideKeyboard;
-- (CAMetalLayer *)metalLayer;
-- (id<MTLDevice>)metalDevice;
-- (id<MTLCommandQueue>)metalQueue;
+- (void)show_keyboard;
+- (void)hide_keyboard;
+- (CAMetalLayer *)metal_layer;
+- (id<MTLDevice>)metal_device;
+- (id<MTLCommandQueue>)metal_queue;
 - (BOOL)hasText;
 - (void)insertText:(NSString *)text;
 - (void)deleteBackward;

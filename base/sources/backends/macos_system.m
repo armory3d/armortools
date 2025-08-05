@@ -898,7 +898,7 @@ bool with_autoreleasepool(bool (*f)(void)) {
 	}
 }
 
-const char *macgetresourcepath(void) {
+const char *iron_get_resource_path(void) {
 	return [[[NSBundle mainBundle] resourcePath] cStringUsingEncoding:NSUTF8StringEncoding];
 }
 
@@ -919,15 +919,15 @@ const char *macgetresourcepath(void) {
 
 static IronAppDelegate *delegate;
 
-CAMetalLayer *getMetalLayer(void) {
+CAMetalLayer *get_metal_layer(void) {
 	return [view metalLayer];
 }
 
-id getMetalDevice(void) {
+id get_metal_device(void) {
 	return [view metalDevice];
 }
 
-id getMetalQueue(void) {
+id get_metal_queue(void) {
 	return [view metalQueue];
 }
 
@@ -1018,7 +1018,7 @@ static void add_menubar(void) {
 	[NSApp setMainMenu:menubar];
 }
 
-void iron_init(const char *name, int width, int height, iron_window_options_t *win) {
+void iron_init(iron_window_options_t *win) {
 	@autoreleasepool {
 		myapp = [IronApplication sharedApplication];
 		[myapp finishLaunching];
@@ -1030,18 +1030,6 @@ void iron_init(const char *name, int width, int height, iron_window_options_t *w
 		hidManager = (struct HIDManager *)malloc(sizeof(struct HIDManager));
 		HIDManager_init(hidManager);
 		#endif
-	}
-
-	iron_window_options_t defaultWindowOptions;
-	if (win == NULL) {
-		iron_window_options_set_defaults(&defaultWindowOptions);
-		win = &defaultWindowOptions;
-	}
-
-	win->width = width;
-	win->height = height;
-	if (win->title == NULL) {
-		win->title = name;
 	}
 
 	createWindow(win);

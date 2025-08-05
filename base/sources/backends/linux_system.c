@@ -216,8 +216,7 @@ void iron_window_hide() {
 	xlib.XUnmapWindow(x11_ctx.display, window->window);
 }
 
-void iron_window_set_title(const char *_title) {
-	const char *title = _title == NULL ? "" : _title;
+void iron_window_set_title(const char *title) {
 	struct iron_x11_window *window = &x11_ctx.windows[0];
 	xlib.XChangeProperty(x11_ctx.display, window->window, x11_ctx.atoms.NET_WM_NAME, x11_ctx.atoms.UTF8_STRING, 8, PropModeReplace, (unsigned char *)title, strlen(title));
 	xlib.XChangeProperty(x11_ctx.display, window->window, x11_ctx.atoms.NET_WM_ICON_NAME, x11_ctx.atoms.UTF8_STRING, 8, PropModeReplace, (unsigned char *)title, strlen(title));
@@ -1095,28 +1094,14 @@ uint64_t iron_timestamp(void) {
 	return (uint64_t)now.tv_sec * 1000000 + (uint64_t)now.tv_usec;
 }
 
-void iron_init(const char *name, int width, int height, iron_window_options_t *win) {
+void iron_init(iron_window_options_t *win) {
 	gettimeofday(&start, NULL);
-
 	#ifdef WITH_GAMEPAD
 	iron_linux_initHIDGamepads();
 	#endif
-
 	iron_x11_init();
 	iron_display_init();
-	iron_set_app_name(name);
-
-	iron_window_options_t defaultWin;
-	if (win == NULL) {
-		iron_window_options_set_defaults(&defaultWin);
-		win = &defaultWin;
-	}
-	win->width = width;
-	win->height = height;
-	if (win->title == NULL) {
-		win->title = name;
-	}
-
+	iron_set_app_name(win->title);
 	iron_window_create(win);
 }
 

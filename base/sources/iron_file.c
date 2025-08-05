@@ -44,11 +44,11 @@ bool iron_file_reader_from_memory(iron_file_reader_t *reader, void *data, size_t
 }
 
 #ifdef IRON_IOS
-const char *iphonegetresourcepath(void);
+const char *iron_get_resource_path(void);
 #endif
 
 #ifdef IRON_MACOS
-const char *macgetresourcepath(void);
+const char *iron_get_resource_path(void);
 #endif
 
 #ifdef IRON_WINDOWS
@@ -125,7 +125,7 @@ static size_t iron_libc_file_reader_pos(iron_file_reader_t *reader) {
 bool iron_internal_file_reader_open(iron_file_reader_t *reader, const char *filename, int type) {
 	char filepath[1001];
 #ifdef IRON_IOS
-	strcpy(filepath, type == IRON_FILE_TYPE_SAVE ? iron_internal_save_path() : iphonegetresourcepath());
+	strcpy(filepath, type == IRON_FILE_TYPE_SAVE ? iron_internal_save_path() : iron_get_resource_path());
 	if (type != IRON_FILE_TYPE_SAVE) {
 		strcat(filepath, "/");
 		strcat(filepath, IRON_OUTDIR);
@@ -135,7 +135,7 @@ bool iron_internal_file_reader_open(iron_file_reader_t *reader, const char *file
 	strcat(filepath, filename);
 #endif
 #ifdef IRON_MACOS
-	strcpy(filepath, type == IRON_FILE_TYPE_SAVE ? iron_internal_save_path() : macgetresourcepath());
+	strcpy(filepath, type == IRON_FILE_TYPE_SAVE ? iron_internal_save_path() : iron_get_resource_path());
 	if (type != IRON_FILE_TYPE_SAVE) {
 		strcat(filepath, "/");
 		strcat(filepath, IRON_OUTDIR);

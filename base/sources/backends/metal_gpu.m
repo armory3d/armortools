@@ -7,9 +7,9 @@
 #import <Metal/Metal.h>
 #import <MetalKit/MTKView.h>
 
-id getMetalLayer(void);
-id getMetalDevice(void);
-id getMetalQueue(void);
+id get_metal_layer(void);
+id get_metal_device(void);
+id get_metal_queue(void);
 
 bool gpu_transpose_mat = true;
 static id<MTLCommandBuffer> command_buffer = nil;
@@ -101,7 +101,7 @@ void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_t
 	target->buffer = NULL;
 
 	if (framebuffer_index < 0) {
-		id<MTLDevice> device = getMetalDevice();
+		id<MTLDevice> device = get_metal_device();
 		MTLTextureDescriptor *descriptor = [MTLTextureDescriptor new];
 		descriptor.textureType = MTLTextureType2D;
 		descriptor.width = width;
@@ -126,13 +126,13 @@ void gpu_resize_internal(int width, int height) {
 }
 
 static void next_drawable() {
-	CAMetalLayer *layer = getMetalLayer();
+	CAMetalLayer *layer = get_metal_layer();
 	drawable = [layer nextDrawable];
 	framebuffers[framebuffer_index].impl._tex = (__bridge void *)drawable.texture;
 }
 
 void gpu_init_internal(int depth_buffer_bits, bool vsync) {
-	id<MTLDevice> device = getMetalDevice();
+	id<MTLDevice> device = get_metal_device();
 
     MTLSamplerDescriptor *linear_desc = [MTLSamplerDescriptor new];
     linear_desc.minFilter = MTLSamplerMinMagFilterLinear;
@@ -201,7 +201,7 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t *depth
 		render_pass_desc.depthAttachment.storeAction = MTLStoreActionStore;
 	}
 
-	id<MTLCommandQueue> queue = getMetalQueue();
+	id<MTLCommandQueue> queue = get_metal_queue();
 
 	if (command_buffer == nil) {
 		command_buffer = [queue commandBuffer];
@@ -234,7 +234,7 @@ void gpu_execute_and_wait() {
 
 	[command_buffer commit];
 	gpu_wait();
-	id<MTLCommandQueue> queue = getMetalQueue();
+	id<MTLCommandQueue> queue = get_metal_queue();
 	command_buffer = [queue commandBuffer];
 
 	if (gpu_in_use) {
@@ -266,7 +266,7 @@ void gpu_present_internal() {
 	command_encoder = nil;
 
 	if (resized) {
-		CAMetalLayer *layer = getMetalLayer();
+		CAMetalLayer *layer = get_metal_layer();
 		layer.drawableSize = CGSizeMake(iron_window_width(), iron_window_height());
 		for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
 			// gpu_texture_destroy(&framebuffers[i]);
@@ -355,12 +355,12 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 			id<MTLTexture> readback = (__bridge_transfer id<MTLTexture>)readback_buffer;
 			readback = nil;
 		}
-		id<MTLDevice> device = getMetalDevice();
+		id<MTLDevice> device = get_metal_device();
 		readback_buffer = (__bridge_retained void *)[device newBufferWithLength:buffer_size options:MTLResourceStorageModeShared];
 	}
 
 	// Copy render target to readback buffer
-	id<MTLCommandQueue> queue = getMetalQueue();
+	id<MTLCommandQueue> queue = get_metal_queue();
 	id<MTLCommandBuffer> command_buffer = [queue commandBuffer];
 	id<MTLBlitCommandEncoder> command_encoder = [command_buffer blitCommandEncoder];
 	[command_encoder copyFromTexture:(__bridge id<MTLTexture>)render_target->impl._tex
@@ -414,7 +414,7 @@ void gpu_pipeline_destroy(gpu_pipeline_t *pipeline) {
 }
 
 void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
-	id<MTLDevice> device = getMetalDevice();
+	id<MTLDevice> device = get_metal_device();
 	NSError *error = nil;
 	id<MTLLibrary> library = [device newLibraryWithSource:[[NSString alloc] initWithBytes:pipeline->vertex_shader->impl.source length:pipeline->vertex_shader->impl.length encoding:NSUTF8StringEncoding] options:nil error:&error];
 	if (library == nil) {
@@ -546,7 +546,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	descriptor.mipmapLevelCount = 1;
 	descriptor.usage = MTLTextureUsageShaderRead; // MTLTextureUsageShaderWrite
 
-	id<MTLDevice> device = getMetalDevice();
+	id<MTLDevice> device = get_metal_device();
 	id<MTLTexture> tex = [device newTextureWithDescriptor:descriptor];
 	texture->impl._tex = (__bridge_retained void *)tex;
 	[tex replaceRegion:MTLRegionMake2D(0, 0, width, height)
@@ -574,7 +574,7 @@ void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structur
 		buffer->stride += gpu_vertex_data_size(element.data);
 	}
 
-	id<MTLDevice> device = getMetalDevice();
+	id<MTLDevice> device = get_metal_device();
 	MTLResourceOptions options = MTLResourceCPUCacheModeWriteCombined;
 	options |= MTLResourceStorageModeShared;
 
@@ -593,7 +593,7 @@ void gpu_vertex_buffer_unlock(gpu_buffer_t *buf) {
 void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size) {
 	buffer->count = size;
 	buffer->data = NULL;
-	buffer->impl.metal_buffer = (__bridge_retained void *)[getMetalDevice() newBufferWithLength:size options:MTLResourceOptionCPUCacheModeDefault];
+	buffer->impl.metal_buffer = (__bridge_retained void *)[get_metal_device() newBufferWithLength:size options:MTLResourceOptionCPUCacheModeDefault];
 }
 
 void gpu_constant_buffer_destroy(gpu_buffer_t *buffer) {
@@ -614,7 +614,7 @@ void gpu_constant_buffer_unlock(gpu_buffer_t *buffer) {
 void gpu_index_buffer_init(gpu_buffer_t *buffer, int indexCount) {
 	buffer->count = indexCount;
 
-	id<MTLDevice> device = getMetalDevice();
+	id<MTLDevice> device = get_metal_device();
 	MTLResourceOptions options = MTLResourceCPUCacheModeWriteCombined;
 	options |= MTLResourceStorageModeShared;
 
@@ -667,7 +667,7 @@ static inst_t instances[1024];
 static int instances_count = 0;
 
 void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *ray_shader, int ray_shader_size, gpu_buffer_t *constant_buffer) {
-	id<MTLDevice> device = getMetalDevice();
+	id<MTLDevice> device = get_metal_device();
 	if (!device.supportsRaytracing) return;
 	constant_buf = constant_buffer;
 
@@ -690,13 +690,13 @@ void gpu_raytrace_pipeline_destroy(gpu_raytrace_pipeline_t *pipeline) {
 }
 
 bool gpu_raytrace_supported() {
-	id<MTLDevice> device = getMetalDevice();
+	id<MTLDevice> device = get_metal_device();
 	return device.supportsRaytracing;
 }
 
 id<MTLAccelerationStructure> create_acceleration_sctructure(MTLAccelerationStructureDescriptor *descriptor) {
-	id<MTLDevice> device = getMetalDevice();
-	id<MTLCommandQueue> queue = getMetalQueue();
+	id<MTLDevice> device = get_metal_device();
+	id<MTLCommandQueue> queue = get_metal_queue();
 
 	MTLAccelerationStructureSizes accel_sizes = [device accelerationStructureSizesWithDescriptor:descriptor];
 	id<MTLAccelerationStructure> acceleration_structure = [device newAccelerationStructureWithSize:accel_sizes.accelerationStructureSize];
@@ -786,7 +786,7 @@ void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structu
 		return;
 	}
 
-	id<MTLDevice> device = getMetalDevice();
+	id<MTLDevice> device = get_metal_device();
 	if (!device.supportsRaytracing) {
 		return;
 	}
@@ -850,11 +850,11 @@ void gpu_raytrace_set_target(gpu_texture_t *_output) {
 }
 
 void gpu_raytrace_dispatch_rays() {
-	id<MTLDevice> device = getMetalDevice();
+	id<MTLDevice> device = get_metal_device();
 	if (!device.supportsRaytracing) return;
 	dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
 
-	id<MTLCommandQueue> queue = getMetalQueue();
+	id<MTLCommandQueue> queue = get_metal_queue();
 	id<MTLCommandBuffer> command_buffer = [queue commandBuffer];
 	__block dispatch_semaphore_t sem = _semaphore;
 	[command_buffer addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
