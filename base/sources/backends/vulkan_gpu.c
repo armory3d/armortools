@@ -1079,7 +1079,7 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t * dept
 			.resolveMode        = VK_RESOLVE_MODE_NONE,
 			.resolveImageView   = VK_NULL_HANDLE,
 			.resolveImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			.loadOp             = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+			.loadOp             = (flags & GPU_CLEAR_COLOR) ? VK_ATTACHMENT_LOAD_OP_DONT_CARE : VK_ATTACHMENT_LOAD_OP_LOAD,
 			.storeOp            = VK_ATTACHMENT_STORE_OP_STORE,
 			.clearValue = clear_value,
 		};
@@ -1094,7 +1094,7 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t * dept
 			.resolveMode        = VK_RESOLVE_MODE_NONE,
 			.resolveImageView   = VK_NULL_HANDLE,
 			.resolveImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			.loadOp             = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+			.loadOp             = (flags & GPU_CLEAR_DEPTH) ? VK_ATTACHMENT_LOAD_OP_DONT_CARE : VK_ATTACHMENT_LOAD_OP_LOAD,
 			.storeOp            = VK_ATTACHMENT_STORE_OP_STORE,
 			.clearValue         = 1.0,
 		};
@@ -1336,7 +1336,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 		mem_alloc.allocationSize = 0;
 		mem_alloc.memoryTypeIndex = 0;
 		mem_alloc.allocationSize = mem_reqs.size;
-		memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &mem_alloc.memoryTypeIndex);
+		memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &mem_alloc.memoryTypeIndex);
 		vkAllocateMemory(device, &mem_alloc, NULL, &readback_mem);
 		vkBindBufferMemory(device, readback_buffer, readback_mem, 0);
 	}
@@ -1826,7 +1826,7 @@ void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structur
 	vkGetBufferMemoryRequirements(device, buffer->impl.buf, &mem_reqs);
 
 	buffer->impl.mem_alloc.allocationSize = mem_reqs.size;
-	memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &buffer->impl.mem_alloc.memoryTypeIndex);
+	memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &buffer->impl.mem_alloc.memoryTypeIndex);
 
 	VkMemoryAllocateFlagsInfo memory_allocate_flags_info = {0};
 	if (gpu_raytrace_supported()) {
@@ -1870,7 +1870,7 @@ void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size) {
 	buffer->impl.mem_alloc.allocationSize = mem_reqs.size;
 	buffer->impl.mem_alloc.memoryTypeIndex = 0;
 
-	memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &buffer->impl.mem_alloc.memoryTypeIndex);
+	memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &buffer->impl.mem_alloc.memoryTypeIndex);
 	vkAllocateMemory(device, &buffer->impl.mem_alloc, NULL, &buffer->impl.mem);
 	vkBindBufferMemory(device, buffer->impl.buf, buffer->impl.mem, 0);
 
@@ -1923,7 +1923,7 @@ void gpu_index_buffer_init(gpu_buffer_t *buffer, int count) {
 	vkGetBufferMemoryRequirements(device, buffer->impl.buf, &mem_reqs);
 
 	buffer->impl.mem_alloc.allocationSize = mem_reqs.size;
-	memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &buffer->impl.mem_alloc.memoryTypeIndex);
+	memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &buffer->impl.mem_alloc.memoryTypeIndex);
 
 	VkMemoryAllocateFlagsInfo memory_allocate_flags_info = {0};
 	if (gpu_raytrace_supported()) {
