@@ -19,17 +19,14 @@ function console_draw_toast(s: string) {
 	draw_end();
 }
 
-function _console_toast_render(s: string) {
-	console_draw_toast(s);
-	gpu_present();
-	sys_remove_render_2d(_console_toast_render);
-}
-
 function console_toast(s: string) {
 	// Show a popup message
-	sys_notify_on_render_2d(_console_toast_render, s);
+	let current: gpu_texture_t = _draw_current;
+	if (current != null) draw_end();
 	console_trace(s);
+	console_draw_toast(s);
 	gpu_present();
+	if (current != null) draw_begin(current);
 }
 
 function console_draw_progress() {
@@ -50,13 +47,11 @@ function console_progress(s: string) {
 	console_progress_text = s;
 
 	// Pass one frame to immediately show the message
-	///if (!arm_vulkan) // TODO
 	ui_end_input();
 	draw_end();
 	sys_render();
 	draw_begin();
 	gpu_present();
-	///end
 }
 
 function console_info(s: string) {

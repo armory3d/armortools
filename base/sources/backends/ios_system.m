@@ -544,7 +544,7 @@ void importFile(NSURL *url) {
 
 	UIWindowScene *windowScene = (UIWindowScene *)scene;
     self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
-	self.window.frame = [UIScreen mainScreen].bounds;
+	self.window.frame = windowScene.coordinateSpace.bounds;
     [self.window setBackgroundColor:[UIColor blackColor]];
 
 	my_view_controller = [[MyViewController alloc] init];

@@ -872,8 +872,10 @@ function ui_base_update_ui() {
 
 	// Same mapping for paint and rotate (predefined in touch keymap)
 	if (context_in_viewport()) {
-		if (mouse_started() && map_get(config_keymap, "action_paint") == map_get(config_keymap, "action_rotate")) {
-			ui_base_action_paint_remap = map_get(config_keymap, "action_paint");
+		let paint_key: string = map_get(config_keymap, "action_paint");
+		let rotate_key: string = map_get(config_keymap, "action_rotate");
+		if (mouse_started() && paint_key == rotate_key) {
+			ui_base_action_paint_remap = paint_key;
 			util_render_pick_pos_nor_tex();
 			let is_mesh: bool = math_abs(context_raw.posx_picked) < 50 && math_abs(context_raw.posy_picked) < 50 && math_abs(context_raw.posz_picked) < 50;
 			///if arm_android
