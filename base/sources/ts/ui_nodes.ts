@@ -1292,7 +1292,7 @@ function ui_nodes_render() {
 
 		for (let i: i32 = 0; i < category.length; ++i) {
 			let n: ui_node_t = category[i];
-			if (ui_menu_button(ui_nodes_ui, tr(n.name))) {
+			if (ui_menu_button(tr(n.name))) {
 				ui_nodes_push_undo();
 				let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
 				let nodes: ui_nodes_t = ui_nodes_get_nodes();
