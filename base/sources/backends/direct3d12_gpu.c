@@ -803,6 +803,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	texture->format = format;
 	texture->state = GPU_TEXTURE_STATE_SHADER_RESOURCE;
 	texture->buffer = NULL;
+	texture->impl.rtv_descriptor_heap = NULL;
 	DXGI_FORMAT dxgi_format = convert_format(format);
 	int format_size = gpu_texture_format_size(format);
 
