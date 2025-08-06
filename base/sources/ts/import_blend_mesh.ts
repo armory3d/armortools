@@ -33,7 +33,7 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 
 	let save: string = "tmp.obj";
 	if (path_is_protected()) {
-		save = iron_internal_save_path() + save;
+		save = iron_internal_save_path() + "data/" + save;
 	}
 
 	///if arm_windows
@@ -44,7 +44,7 @@ function import_blend_mesh_run(path: string, replace_existing: bool = true) {
 	// Have to use ; instead of \n on windows
 	let py: string = "\
 import bpy;\
-bpy.ops.wm.obj_export(filepath='" + save + "',export_triangulated_mesh=True,export_materials=False,check_existing=False)";
+bpy.ops.wm.obj_export(filepath='data/" + save + "',export_triangulated_mesh=True,export_materials=False,check_existing=False)";
 
 	let bl: string = string_replace_all(config_raw.blender, " ", "\\ ");
 	iron_sys_command(bl + " \"" + path + "\" -b --python-expr \"" + py + "\"");
