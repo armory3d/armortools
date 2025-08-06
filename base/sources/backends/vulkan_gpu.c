@@ -472,7 +472,7 @@ static void create_swapchain() {
 	if (image_count < caps.minImageCount) {
 		image_count = caps.minImageCount;
 	}
-	else if (image_count > caps.maxImageCount) {
+	else if (image_count > caps.maxImageCount && caps.maxImageCount > 0) {
 		image_count = caps.maxImageCount;
 	}
 
