@@ -64,6 +64,7 @@ function base_init() {
 			///if (arm_android || arm_ios)
 			project_save();
 			///end
+			config_save();
 		}
 	);
 
