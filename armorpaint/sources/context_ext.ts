@@ -5,9 +5,6 @@ function context_ext_init(c: context_t) {
     c.brush_radius = 0.5;
     c.brush_radius_handle.value = 0.5;
 	c.brush_hardness = 0.8;
-	///if is_sculpt
-	c.brush_hardness = 0.05;
-	///end
 }
 
 function context_ext_select_paint_object(o: mesh_object_t) {

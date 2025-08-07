@@ -74,7 +74,7 @@ function ui_menu_render() {
 				});
 			}
 
-			///if (is_paint || is_sculpt)
+			///if is_paint
 			if (ui_menu_button(tr("Import Font..."))) {
 				project_import_asset("ttf,ttc,otf");
 			}
@@ -197,7 +197,7 @@ function ui_menu_render() {
 				context_raw.ddirty = 2;
 			}
 
-			///if (is_paint || is_sculpt)
+			///if is_paint
 			let split_view_handle: ui_handle_t = ui_handle(__ID__);
 			if (split_view_handle.init) {
 				split_view_handle.selected = context_raw.split_view;
@@ -241,7 +241,7 @@ function ui_menu_render() {
 				make_material_parse_mesh_material();
 			}
 
-			///if (is_paint || is_sculpt)
+			///if is_paint
 			context_raw.draw_wireframe = ui_check(context_raw.wireframe_handle, " " + tr("Wireframe"));
 			if (context_raw.wireframe_handle.changed) {
 				let current: gpu_texture_t = _draw_current;
@@ -303,7 +303,7 @@ function ui_menu_render() {
 				tr("Emission"),
 				tr("Subsurface"),
 				///end
-				///if (is_paint || is_sculpt)
+				///if is_paint
 				tr("TexCoord"),
 				tr("Object Normal"),
 				tr("Material ID"),

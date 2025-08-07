@@ -23,7 +23,6 @@ let source_paths = [
     "base/sources", "base/sources/nodes",
     "armorpaint/sources", "armorpaint/sources/nodes",
     "armorlab/sources", "armorlab/sources/nodes",
-    "armorsculpt/sources", "armorsculpt/sources/nodes",
     "armorforge/sources", "armorforge/sources/nodes"
 ];
 

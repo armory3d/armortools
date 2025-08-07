@@ -209,7 +209,7 @@ function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool =
 										if (ends_with(data.f, ".arm")) { // Used for material sphere alpha cutout
 											draw_begin(icon);
 
-											///if (is_paint || is_sculpt)
+											///if is_paint
 											draw_image(project_materials[0].image, 0, 0);
 											///end
 										}

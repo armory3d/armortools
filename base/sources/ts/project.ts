@@ -100,7 +100,7 @@ function project_save_as(save_and_quit: bool = false) {
 }
 
 function project_new_box() {
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	ui_box_show_custom(function (ui: ui_t) {
 		if (ui_tab(ui_handle(__ID__), tr("New Project"))) {
 			if (project_mesh_list == null) {
@@ -200,14 +200,6 @@ function project_new(reset_layers: bool = true) {
 				geom_make_plane(1, 1, 512, 512);
 			mesh.name = "Tessellated";
 			raw = import_mesh_raw_mesh(mesh);
-
-			///if is_sculpt
-			sys_notify_on_next_frame(function (mesh: raw_mesh_t) {
-				sys_notify_on_init(function (mesh: raw_mesh_t) {
-					import_mesh_pack_to_texture(mesh);
-				}, mesh);
-			}, mesh);
-			///end
 		}
 		else {
 			let b: buffer_t = data_get_blob("meshes/" + project_mesh_list[context_raw.project_type] + ".arm");
@@ -239,20 +231,20 @@ function project_new(reset_layers: bool = true) {
 	transform_build_matrix(context_raw.paint_object.base.transform);
 	context_raw.paint_object.base.name = n;
 	project_paint_objects = [context_raw.paint_object];
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	while (project_materials.length > 0) {
 		slot_material_unload(array_pop(project_materials));
 	}
 	///end
 	let m: material_data_t = data_get_material("Scene", "Material");
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	array_push(project_materials, slot_material_create(m));
 	///end
 	///if is_lab
 	project_material_data = m;
 	///end
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	context_raw.material = project_materials[0];
 	///end
 
@@ -260,7 +252,7 @@ function project_new(reset_layers: bool = true) {
 	ui_nodes_group_stack = [];
 	project_material_groups = [];
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	project_brushes = [slot_brush_create()];
 	context_raw.brush = project_brushes[0];
 
@@ -278,7 +270,7 @@ function project_new(reset_layers: bool = true) {
 	make_material_parse_paint_material();
 	make_material_parse_brush();
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	util_render_make_material_preview();
 	///end
 
@@ -293,14 +285,14 @@ function project_new(reset_layers: bool = true) {
 	project_raw.packed_assets = [];
 	context_raw.ddirty = 4;
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 	///end
 
 	if (reset_layers) {
 
-		///if (is_paint || is_sculpt)
+		///if is_paint
 		let aspect_ratio_changed: bool = project_layers[0].texpaint.width != config_get_texture_res_x() || project_layers[0].texpaint.height != config_get_texture_res_y();
 		while (project_layers.length > 0) {
 			slot_layer_unload(array_pop(project_layers));
@@ -328,7 +320,7 @@ function project_new(reset_layers: bool = true) {
 	scene_world._.irradiance = context_raw.default_irradiance;
 	scene_world.strength = 4.0;
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	context_init_tool();
 	///end
 
@@ -441,7 +433,7 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 				}
 			}
 
-			///if (is_paint || is_sculpt)
+			///if is_paint
 			if (ends_with(to_lower_case(path), ".fbx")) {
 				let h: ui_handle_t = ui_handle(__ID__);
 				h.selected = context_raw.parse_vcols;
@@ -468,7 +460,7 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 				console_toast(tr("Importing mesh"));
 				///end
 
-				///if (is_paint || is_sculpt)
+				///if is_paint
 				import_mesh_run(path, clear_layers, replace_existing);
 				///end
 				///if is_lab
@@ -611,7 +603,7 @@ function project_reimport_texture_load(path: string, asset: asset_t) {
 	array_insert(project_assets, i, array_pop(project_assets));
 	array_insert(project_asset_names, i, array_pop(project_asset_names));
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	if (context_raw.texture == old_asset) {
 		context_raw.texture = project_assets[i];
 	}
@@ -620,7 +612,7 @@ function project_reimport_texture_load(path: string, asset: asset_t) {
 	sys_notify_on_next_frame(function () {
 		make_material_parse_paint_material();
 
-		///if (is_paint || is_sculpt)
+		///if is_paint
 		util_render_make_material_preview();
 		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 		///end

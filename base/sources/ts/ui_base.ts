@@ -56,7 +56,7 @@ function ui_base_init_hwnd_tabs(): tab_draw_array_t[] {
 }
 
 function ui_base_init() {
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	ui_toolbar_init();
 	context_raw.text_tool_text = tr("Text");
 	///end
@@ -68,7 +68,7 @@ function ui_base_init() {
 	ui_header_h = math_floor(ui_header_default_h * config_raw.window_scale);
 	ui_menubar_w = math_floor(ui_menubar_default_w * config_raw.window_scale);
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	if (project_materials == null) {
 		project_materials = [];
 		let m: material_data_t = data_get_material("Scene", "Material");
@@ -159,14 +159,14 @@ function ui_base_init() {
 	ui_on_deselect_text = ui_base_on_deselect_text;
 	ui_on_tab_drop = ui_base_on_tab_drop;
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	let resources: string[] = ["cursor.k", "icons.k"];
 	///end
 	///if is_lab
 	let resources: string[] = ["cursor.k", "icons.k", "placeholder.k"];
 	///end
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	context_raw.gizmo = scene_get_child(".Gizmo");
 	context_raw.gizmo_translate_x = object_get_child(context_raw.gizmo, ".TranslateX");
 	context_raw.gizmo_translate_y = object_get_child(context_raw.gizmo, ".TranslateY");
@@ -219,7 +219,7 @@ function ui_base_update() {
 
 	if (!ui_nodes_ui.is_typing && !ui_base_ui.is_typing) {
 		if (operator_shortcut(map_get(config_keymap, "toggle_node_editor"))) {
-			///if (is_paint || is_sculpt)
+			///if is_paint
 			ui_nodes_canvas_type == canvas_type_t.MATERIAL ? ui_base_show_material_nodes() : ui_base_show_brush_nodes();
 			///end
 			///if is_lab
@@ -231,7 +231,7 @@ function ui_base_update() {
 		}
 
 		else if (operator_shortcut(map_get(config_keymap, "toggle_2d_view"))) {
-			///if (is_paint || is_sculpt)
+			///if is_paint
 			ui_base_show_2d_view(view_2d_type_t.LAYER);
 			///else
 			ui_base_show_2d_view(view_2d_type_t.ASSET);
@@ -292,7 +292,7 @@ function ui_base_update() {
 	}
 	///end
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	let decal: bool = context_is_decal();
 	let decal_mask: bool = context_is_decal_mask();
 
@@ -358,7 +358,7 @@ function ui_base_update() {
 
 	let is_typing: bool = ui_base_ui.is_typing || ui_view2d_ui.is_typing || ui_nodes_ui.is_typing;
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	if (!is_typing) {
 		if (operator_shortcut(map_get(config_keymap, "select_material"), shortcut_type_t.DOWN)) {
 			ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
@@ -577,7 +577,7 @@ function ui_base_update() {
 						tr("Metallic"),
 						tr("Opacity"),
 						tr("Height"),
-						///if (is_paint || is_sculpt)
+						///if is_paint
 						tr("Emission"),
 						tr("Subsurface"),
 						tr("TexCoord"),
@@ -624,7 +624,7 @@ function ui_base_update() {
 			context_raw.brush_can_unlock = false;
 		}
 
-		///if (is_paint || is_sculpt)
+		///if is_paint
 		let b: bool = (context_raw.brush_can_lock || context_raw.brush_locked) &&
 			!operator_shortcut(map_get(config_keymap, "brush_radius"), shortcut_type_t.DOWN) &&
 			!operator_shortcut(map_get(config_keymap, "brush_opacity"), shortcut_type_t.DOWN) &&
@@ -960,7 +960,7 @@ function ui_base_update_ui() {
 	let decal: bool = context_is_decal();
 	let decal_mask: bool = context_is_decal_mask_paint();
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	let down: bool = operator_shortcut(map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN) ||
 					 decal_mask ||
 					 set_clone_source ||
@@ -1145,7 +1145,7 @@ function ui_base_update_ui() {
 		history_redo();
 	}
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	gizmo_update();
 	///end
 }
@@ -1183,14 +1183,14 @@ function ui_base_render() {
 
 	ui_begin(ui_base_ui);
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	ui_toolbar_render_ui();
 	///end
 	ui_menubar_render_ui();
 	ui_header_render_ui();
 	ui_status_render_ui();
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	ui_base_draw_sidebar();
 	///end
 
@@ -1427,7 +1427,7 @@ function ui_base_show_material_nodes() {
 	// Clear input state as ui receives input events even when not drawn
 	_ui_end_input(ui_nodes_ui);
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	ui_nodes_show = !ui_nodes_show || ui_nodes_canvas_type != canvas_type_t.MATERIAL;
 	ui_nodes_canvas_type = canvas_type_t.MATERIAL;
 	///end

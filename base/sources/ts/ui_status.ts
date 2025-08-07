@@ -5,7 +5,7 @@ function ui_status_init() {
 }
 
 function ui_status_width(): i32 {
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	return iron_window_width() - ui_toolbar_w(true) - config_raw.layout[layout_size_t.SIDEBAR_W];
 	///end
 	///if is_lab

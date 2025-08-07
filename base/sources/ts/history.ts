@@ -609,7 +609,7 @@ function history_push(name: string): step_t {
 		history_redos = 0;
 	}
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	let opos: i32 = array_index_of(project_paint_objects, context_raw.paint_object);
 	let lpos: i32 = array_index_of(project_layers, context_raw.layer);
 	let mpos: i32 = array_index_of(project_materials, context_raw.material);
@@ -670,10 +670,6 @@ function history_swap_active() {
 }
 
 function history_copy_to_undo(from_id: i32, to_id: i32, is_mask: bool) {
-	///if is_sculpt
-	is_mask = true;
-	///end
-
 	if (is_mask) {
 		render_path_set_target("texpaint_undo" + to_id);
 		render_path_bind_target("texpaint" + from_id, "tex");
@@ -724,7 +720,7 @@ function history_set_canvas(step: step_t, canvas: ui_node_canvas_t) {
 }
 
 function history_swap_canvas(step: step_t) {
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	if (step.canvas_type == 0) {
 		let _canvas: ui_node_canvas_t = history_get_canvas(step);
 		history_set_canvas(step, step.canvas);

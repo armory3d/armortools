@@ -21,7 +21,7 @@ let _layers_roughness: f32;
 let _layers_metallic: f32;
 
 function layers_init() {
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	slot_layer_clear(project_layers[0], color_from_floats(layers_default_base, layers_default_base, layers_default_base, 1.0));
 	///end
 
@@ -119,7 +119,7 @@ function layers_set_bits() {
 }
 
 function layers_make_temp_img() {
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	let l: slot_layer_t = project_layers[0];
 	///end
 	///if is_lab
@@ -162,7 +162,7 @@ function layers_make_temp_mask_img() {
 }
 
 function layers_make_export_img() {
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	let l: slot_layer_t = project_layers[0];
 	///end
 	///if is_lab
@@ -409,10 +409,6 @@ function layers_update_fill_layer(parse_paint: bool = true) {
 }
 
 function layers_set_object_mask() {
-	///if is_sculpt
-	return;
-	///end
-
 	let ar: string[] = [tr("None")];
 	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 		let p: mesh_object_t = project_paint_objects[i];

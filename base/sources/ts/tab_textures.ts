@@ -39,7 +39,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 
 		if (project_assets.length > 0) {
 
-			///if (is_paint || is_sculpt)
+			///if is_paint
 			let statusw: i32 = iron_window_width() - ui_toolbar_w(true) - config_raw.layout[layout_size_t.SIDEBAR_W];
 			///end
 			///if is_lab
@@ -166,7 +166,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 								project_reimport_texture(_tab_textures_draw_asset);
 							}
 
-							///if (is_paint || is_sculpt)
+							///if is_paint
 							if (ui_menu_button(tr("To Mask"))) {
 								sys_notify_on_next_frame(function () {
 									layers_create_image_mask(_tab_textures_draw_asset);
@@ -283,13 +283,13 @@ function tab_textures_delete_texture(asset: asset_t) {
 	sys_notify_on_next_frame(function () {
 		make_material_parse_paint_material();
 
-		///if (is_paint || is_sculpt)
+		///if is_paint
 		util_render_make_material_preview();
 		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 		///end
 	});
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	for (let i: i32 = 0; i < project_materials.length; ++i) {
 		let m: slot_material_t = project_materials[i];
 		tab_textures_update_texture_pointers(m.canvas.nodes, i);

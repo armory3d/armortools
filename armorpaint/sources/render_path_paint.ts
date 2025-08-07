@@ -117,11 +117,6 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 	let tid: i32 = context_raw.layer.id;
 
 	if (context_raw.pdirty > 0) {
-		///if is_sculpt
-		render_path_sculpt_commands();
-		return;
-		///end
-
 		if (context_raw.tool == workspace_tool_t.COLORID) {
 			render_path_set_target("texpaint_colorid", null, null, clear_flag_t.COLOR, 0xff000000);
 			render_path_bind_target("gbuffer2", "gbuffer2");
@@ -529,12 +524,6 @@ function render_path_paint_live_brush_dirty() {
 }
 
 function render_path_paint_begin() {
-
-	///if is_sculpt
-	render_path_sculpt_begin();
-	return;
-	///end
-
 	if (!render_path_paint_dilated) {
 		render_path_paint_dilate(config_raw.dilate == dilate_type_t.DELAYED, true);
 		render_path_paint_dilated = true;
@@ -813,11 +802,6 @@ function render_path_paint_restore_plane_mesh() {
 }
 
 function render_path_paint_bind_layers() {
-	///if is_sculpt
-	render_path_sculpt_bind_layers();
-	return;
-	///end
-
 	let is_live: bool = config_raw.brush_live && render_path_paint_live_layer_drawn > 0;
 	let is_material_tool: bool = context_raw.tool == workspace_tool_t.MATERIAL;
 	if (is_live || is_material_tool) {
@@ -836,10 +820,6 @@ function render_path_paint_bind_layers() {
 }
 
 function render_path_paint_unbind_layers() {
-	///if is_sculpt
-	return;
-	///end
-
 	let is_live: bool = config_raw.brush_live && render_path_paint_live_layer_drawn > 0;
 	let is_material_tool: bool = context_raw.tool == workspace_tool_t.MATERIAL;
 	if (is_live || is_material_tool) {

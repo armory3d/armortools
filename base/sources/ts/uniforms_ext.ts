@@ -20,7 +20,7 @@ function uniforms_ext_i32_link(object: object_t, mat: material_data_t, link: str
 
 function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: string): f32 {
 	if (link == "_brush_radius") {
-		///if (is_paint || is_sculpt)
+		///if is_paint
 		let decal: bool = context_is_decal();
 		let decal_mask: bool = decal && operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
 		let brush_decal_mask_radius: f32 = context_raw.brush_decal_mask_radius;
@@ -396,7 +396,7 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 	}
 
 	if (starts_with(link, "_texpaint_vert")) {
-		///if (is_paint || is_sculpt)
+		///if is_paint
 		let tid: i32 = parse_int(substring(link, link.length - 1, link.length));
 		return tid < project_layers.length ? project_layers[tid].texpaint : null;
 		///end
@@ -426,7 +426,7 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 		///end
 	}
 	if (starts_with(link, "_texpaint")) {
-		///if (is_paint || is_sculpt)
+		///if is_paint
 		let tid: i32 = parse_int(substring(link, link.length - 1, link.length));
 		return tid < project_layers.length ? project_layers[tid].texpaint : null;
 		///end

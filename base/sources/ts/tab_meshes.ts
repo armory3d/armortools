@@ -8,7 +8,7 @@ function tab_meshes_draw(htab: ui_handle_t) {
 
 		ui_begin_sticky();
 
-		///if (is_paint || is_sculpt)
+		///if is_paint
 		if (config_raw.touch_ui) {
 			ui_row6();
 		}

@@ -69,7 +69,7 @@ function _pipes_make_merge(red: bool, green: bool, blue: bool, alpha: bool): gpu
 }
 
 function pipes_init() {
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	pipes_merge = _pipes_make_merge(true, true, true, true);
 	pipes_merge_r = _pipes_make_merge(true, false, false, false);
 	pipes_merge_g = _pipes_make_merge(false, true, false, false);
@@ -140,7 +140,7 @@ function pipes_init() {
 		gpu_pipeline_compile(pipes_copy128);
 	}
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	{
 		pipes_invert8 = gpu_create_pipeline();
 		pipes_invert8.vertex_shader = sys_get_shader("layer_invert.vert");

@@ -18,7 +18,7 @@ function ui_menubar_render_ui() {
 	let item_w: i32 = ui_toolbar_w();
 	let panel_x: i32 = sys_x();
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	if (config_raw.layout[layout_size_t.HEADER] == 1) {
 		panel_x = sys_x() - item_w;
 	}
@@ -31,7 +31,7 @@ function ui_menubar_render_ui() {
 
 		if (config_raw.touch_ui) {
 
-			///if (is_paint || is_sculpt)
+			///if is_paint
 			ui._w = item_w;
 			///end
 			///if is_lab
@@ -103,7 +103,7 @@ function ui_menubar_render_ui() {
 		if (ui_menubar_w < ui._x + 10) {
 			ui_menubar_w = math_floor(ui._x + 10);
 
-			///if (is_paint || is_sculpt)
+			///if is_paint
 			ui_toolbar_handle.redraws = 2;
 			///end
 		}
@@ -124,7 +124,7 @@ function ui_menubar_draw_tab_header() {
 	let panel_x: i32 = sys_x();
 
 	let nodesw: i32 = (ui_nodes_show || ui_view2d_show) ? config_raw.layout[layout_size_t.NODES_W] : 0;
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	let ww: i32 = iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - ui_menubar_w - nodesw;
 	panel_x = (sys_x() - item_w) + ui_menubar_w;
 	///else

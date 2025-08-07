@@ -18,7 +18,7 @@ function export_arm_run_mesh(path: string, paint_objects: mesh_object_t[]) {
 }
 
 function export_arm_run_project() {
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	let mnodes: ui_node_canvas_t[] = [];
 	for (let i: i32 = 0; i < project_materials.length; ++i) {
 		let m: slot_material_t = project_materials[i];
@@ -59,7 +59,7 @@ function export_arm_run_project() {
 		}
 	}
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	let md: mesh_data_t[] = [];
 	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 		let p: mesh_object_t = project_paint_objects[i];
@@ -73,7 +73,7 @@ function export_arm_run_project() {
 
 	let texture_files: string[] = export_arm_assets_to_files(project_filepath, project_assets);
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	let font_files: string[] = export_arm_fonts_to_files(project_filepath, project_fonts);
 	let mesh_files: string[] = export_arm_meshes_to_files(project_filepath);
 
@@ -140,7 +140,7 @@ function export_arm_run_project() {
 	project_raw.camera_origin = export_arm_vec3f32(camera_origins[0].v);
 	project_raw.camera_fov = scene_camera.data.fov;
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	// project_raw.mesh_datas = md; // TODO: fix GC ref
 	if (project_raw.mesh_datas == null) {
 		project_raw.mesh_datas = md;
@@ -201,7 +201,7 @@ function export_arm_run_project() {
 	iron_write_png(substring(project_filepath, 0, project_filepath.length - 4) + "_icon.png", mesh_icon_pixels, 256, 256, 0);
 	///end
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	let is_packed: bool = ends_with(project_filepath, "_packed_.arm");
 	if (is_packed) { // Pack textures
 		export_arm_pack_assets(project_raw, project_assets);
@@ -230,7 +230,7 @@ function export_arm_run_project() {
 }
 
 function export_arm_texture_node_name(): string {
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	return "TEX_IMAGE";
 	///else
 	return "image_texture_node";

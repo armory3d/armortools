@@ -182,7 +182,7 @@ function util_encode_project(raw: project_format_t): buffer_t {
 		armpack_encode_null();
 	}
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	armpack_encode_string("brush_nodes");
 	if (raw.brush_nodes != null) {
 		armpack_encode_array(raw.brush_nodes.length);

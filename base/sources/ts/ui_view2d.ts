@@ -5,7 +5,7 @@ let ui_view2d_text_input_hover: bool = false;
 let ui_view2d_uvmap_show: bool = false;
 let ui_view2d_tex_type: paint_tex_t = paint_tex_t.BASE;
 let ui_view2d_layer_mode: view_2d_layer_mode_t = view_2d_layer_mode_t.SELECTED;
-///if (is_paint || is_sculpt)
+///if is_paint
 let ui_view2d_type: view_2d_type_t = view_2d_type_t.LAYER;
 ///else
 let ui_view2d_type: view_2d_type_t = view_2d_type_t.ASSET;
@@ -31,7 +31,7 @@ let ui_view2d_grid: gpu_texture_t = null;
 let ui_view2d_grid_redraw: bool = true;
 
 function ui_view2d_init() {
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	ui_view2d_pipe = gpu_create_pipeline();
 	ui_view2d_pipe.vertex_shader = sys_get_shader("layer_view.vert");
 	ui_view2d_pipe.fragment_shader = sys_get_shader("layer_view.frag");
@@ -66,7 +66,7 @@ function ui_view2d_render() {
 
 	ui_view2d_ww = config_raw.layout[layout_size_t.NODES_W];
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	ui_view2d_wx = math_floor(sys_w()) + ui_toolbar_w(true);
 	///else
 	ui_view2d_wx = math_floor(sys_w());
@@ -74,7 +74,7 @@ function ui_view2d_render() {
 
 	ui_view2d_wy = 0;
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	if (!ui_base_show) {
 		ui_view2d_ww += config_raw.layout[layout_size_t.SIDEBAR_W] + ui_toolbar_w(true);
 		ui_view2d_wx -= ui_toolbar_w(true);
@@ -102,14 +102,14 @@ function ui_view2d_render() {
 	}
 
 	// Ensure UV map is drawn
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	if (ui_view2d_uvmap_show) {
 		util_uv_cache_uv_map();
 	}
 	///end
 
 	// Ensure font image is drawn
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	if (context_raw.font.image == null) {
 		util_render_make_font_preview();
 	}
@@ -153,7 +153,7 @@ function ui_view2d_render() {
 			tex = project_get_image(context_raw.texture);
 		}
 		else if (ui_view2d_type == view_2d_type_t.NODE) {
-			///if (is_paint || is_sculpt)
+			///if is_paint
 
 			tex = context_raw.node_preview;
 
@@ -218,7 +218,7 @@ function ui_view2d_render() {
 			th = tw * (tex.height / tex.width);
 			ty = apph / 2 - th / 2 + ui_view2d_pan_y;
 
-			///if (is_paint || is_sculpt)
+			///if is_paint
 			if (ui_view2d_type == view_2d_type_t.LAYER) {
 				draw_set_pipeline(ui_view2d_pipe);
 				if (!context_raw.texture_filter) {
@@ -241,7 +241,7 @@ function ui_view2d_render() {
 				draw_scaled_image(tex, tx, ty + th, tw, th);
 			}
 
-			///if (is_paint || is_sculpt)
+			///if is_paint
 			if (ui_view2d_type == view_2d_type_t.LAYER) {
 				draw_set_pipeline(null);
 				if (!context_raw.texture_filter) {
@@ -283,7 +283,7 @@ function ui_view2d_render() {
 			///end
 		}
 
-		///if (is_paint || is_sculpt)
+		///if is_paint
 		// UV map
 		if (ui_view2d_type == view_2d_type_t.LAYER && ui_view2d_uvmap_show) {
 			draw_scaled_image(util_uv_uvmap, tx, ty, tw, th);
@@ -304,7 +304,7 @@ function ui_view2d_render() {
 		// Editable layer name
 		let h: ui_handle_t = ui_handle(__ID__);
 
-		///if (is_paint || is_sculpt)
+		///if is_paint
 		let text: string = ui_view2d_type == view_2d_type_t.NODE ? context_raw.node_preview_name : h.text;
 		///else
 		let text: string = h.text;
@@ -323,7 +323,7 @@ function ui_view2d_render() {
 			}
 		}
 		else if (ui_view2d_type == view_2d_type_t.NODE) {
-			///if (is_paint || is_sculpt)
+			///if is_paint
 
 			ui_text(context_raw.node_preview_name);
 
@@ -336,7 +336,7 @@ function ui_view2d_render() {
 
 			///end
 		}
-		///if (is_paint || is_sculpt)
+		///if is_paint
 		else if (ui_view2d_type == view_2d_type_t.LAYER) {
 			h.text = l.name;
 			l.name = ui_text_input(h, "");
@@ -355,7 +355,7 @@ function ui_view2d_render() {
 		ui_view2d_ui._y = 2 + start_y;
 		ui_view2d_ui._w = ew;
 
-		///if (is_paint || is_sculpt)
+		///if is_paint
 		if (ui_view2d_type == view_2d_type_t.LAYER) {
 			let h_layer_mode: ui_handle_t = ui_handle(__ID__);
 			if (h_layer_mode.init) {
@@ -409,7 +409,7 @@ function ui_view2d_render() {
 		}
 
 		// Picked position
-		///if (is_paint || is_sculpt)
+		///if is_paint
 		if (context_raw.tool == workspace_tool_t.PICKER && (ui_view2d_type == view_2d_type_t.LAYER || ui_view2d_type == view_2d_type_t.ASSET)) {
 			let cursor_img: gpu_texture_t = resource_get("cursor.k");
 			let hsize: f32 = 16 * ui_SCALE(ui_view2d_ui);
@@ -424,7 +424,7 @@ function ui_view2d_render() {
 function ui_view2d_update() {
 	let headerh: f32 = ui_ELEMENT_H(ui_view2d_ui) * 1.4;
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	context_raw.paint2d = false;
 	///end
 
@@ -466,7 +466,7 @@ function ui_view2d_update() {
 		ui_view2d_grid_redraw = true;
 	}
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	let decal_mask: bool = context_is_decal_mask_paint();
 	let set_clone_source: bool = context_raw.tool == workspace_tool_t.CLONE &&
 		operator_shortcut(map_get(config_keymap, "set_clone_source") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);

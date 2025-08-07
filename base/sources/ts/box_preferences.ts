@@ -423,7 +423,7 @@ function box_preferences_show() {
 			}
 			config_raw.server = ui_text_input(server_handle, tr("Cloud Server"));
 
-			///if (is_paint || is_sculpt)
+			///if is_paint
 			let material_live_handle: ui_handle_t = ui_handle(__ID__);
 			if (material_live_handle.init) {
 				material_live_handle.selected = config_raw.material_live;
@@ -520,7 +520,7 @@ function box_preferences_show() {
 			}
 			config_raw.pressure_sensitivity = ui_slider(h_pressure_sensitivity, tr("Sensitivity"), 0.0, 10.0, true);
 
-			///if (is_paint || is_sculpt)
+			///if is_paint
 			let h_pressure_hardness: ui_handle_t = ui_handle(__ID__);
 			if (h_pressure_hardness.init) {
 				h_pressure_hardness.selected = config_raw.pressure_hardness;

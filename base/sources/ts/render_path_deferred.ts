@@ -81,27 +81,6 @@ function render_path_deferred_init() {
 		map_set(render_path_render_targets, t.name, t);
 	}
 
-	///if is_sculpt
-	{
-		let t: render_target_t = render_target_create();
-		t.name = "gbuffer0_undo";
-		t.width = 0;
-		t.height = 0;
-		t.format = "RGBA64";
-		t.scale = render_path_base_get_super_sampling();
-		render_path_create_render_target(t);
-	}
-	{
-		let t: render_target_t = render_target_create();
-		t.name = "gbufferD_undo";
-		t.width = 0;
-		t.height = 0;
-		t.format = "R32";
-		t.scale = render_path_base_get_super_sampling();
-		render_path_create_render_target(t);
-	}
-	///end
-
 	if (config_raw.rp_ssao) {
 		render_path_base_init_ssao();
 	}
@@ -119,7 +98,7 @@ function render_path_deferred_init() {
 
 	render_path_paint_init();
 
-	///if (is_paint || is_sculpt)
+	///if is_paint
 	render_path_preview_init();
 	///end
 

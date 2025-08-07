@@ -79,9 +79,6 @@ function slot_layer_create(ext: string = "", type: layer_slot_type_t = layer_slo
 		let format: string = base_bits_handle.position == texture_bits_t.BITS8  ? "RGBA32" :
 							 base_bits_handle.position == texture_bits_t.BITS16 ? "RGBA64" :
 																				  "RGBA128";
-		///if is_sculpt
-		format = "RGBA128";
-		///end
 
 		{
 			let t: render_target_t = render_target_create();
@@ -368,10 +365,6 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 			base_bits_handle.position == texture_bits_t.BITS16 ? tex_format_t.RGBA64 :
 																 tex_format_t.RGBA128;
 
-		///if is_sculpt
-		format = tex_format_t.RGBA128;
-		///end
-
 		let pipe: gpu_pipeline_t = format == tex_format_t.RGBA32 ? pipes_copy :
 								   format == tex_format_t.RGBA64 ? pipes_copy64 :
 								   								   pipes_copy128;
@@ -567,10 +560,6 @@ function slot_layer_get_object_mask(raw: slot_layer_t): i32 {
 }
 
 function slot_layer_is_layer(raw: slot_layer_t): bool {
-	///if is_sculpt
-	return raw.texpaint != null;
-	///end
-
 	return raw.texpaint != null && raw.texpaint_nor != null;
 }
 
@@ -591,26 +580,14 @@ function slot_layer_get_containing_group(raw: slot_layer_t): slot_layer_t {
 }
 
 function slot_layer_is_mask(raw: slot_layer_t): bool {
-	///if is_sculpt
-	return false;
-	///end
-
 	return raw.texpaint != null && raw.texpaint_nor == null;
 }
 
 function slot_layer_is_group_mask(raw: slot_layer_t): bool {
-	///if is_sculpt
-	return false;
-	///end
-
 	return raw.texpaint != null && raw.texpaint_nor == null && slot_layer_is_group(raw.parent);
 }
 
 function slot_layer_is_layer_mask(raw: slot_layer_t): bool {
-	///if is_sculpt
-	return false;
-	///end
-
 	return raw.texpaint != null && raw.texpaint_nor == null && slot_layer_is_layer(raw.parent);
 }
 

@@ -406,7 +406,7 @@ function base_update() {
 				base_drop_x = mouse_x;
 				base_drop_y = mouse_y;
 
-				///if (is_paint || is_sculpt)
+				///if is_paint
 				_base_material_count = project_materials.length;
 				import_asset_run(base_drag_file, base_drop_x, base_drop_y, true, true, function () {
 					// Asset was material
@@ -703,7 +703,7 @@ function base_get_uis(): ui_t[] {
 }
 
 function base_is_decal_layer(): bool {
-	///if (is_sculpt || is_lab)
+	///if is_lab
 	return false;
 	///end
 

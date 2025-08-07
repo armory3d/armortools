@@ -155,7 +155,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 						});
 					}
 
-					///if (is_paint || is_sculpt)
+					///if is_paint
 					if (ui_menu_button(tr("Set as Mask"))) {
 						import_asset_run(file, -1.0, -1.0, true, true, function () {
 							sys_notify_on_next_frame(function () {
