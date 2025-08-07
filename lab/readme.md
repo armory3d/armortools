@@ -11,7 +11,7 @@ armorlab
 
 ```bash
 git clone https://github.com/armory3d/armortools
-cd armortools/armorlab
+cd armortools/lab
 # Unpack `models.zip` from https://github.com/armory3d/armorai/releases into `assets/models` using 7-Zip - Extract Here
 ```
 

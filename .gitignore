@@ -2,7 +2,7 @@
 .vscode
 *.DS_Store
 *.blend1
-armorlab/assets/models/*.onnx
-armorlab/assets/models/*.json
-armorlab/assets/models/*.txt
-armorlab/assets/models/*.zip
+lab/assets/models/*.onnx
+lab/assets/models/*.json
+lab/assets/models/*.txt
+lab/assets/models/*.zip

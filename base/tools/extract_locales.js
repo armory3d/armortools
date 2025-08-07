@@ -21,9 +21,9 @@ if (fs_exists(locale_path)) {
 
 let source_paths = [
     "base/sources", "base/sources/nodes",
-    "armorpaint/sources", "armorpaint/sources/nodes",
-    "armorlab/sources", "armorlab/sources/nodes",
-    "armorforge/sources", "armorforge/sources/nodes"
+    "paint/sources", "paint/sources/nodes",
+    "lab/sources", "lab/sources/nodes",
+    "forge/sources", "forge/sources/nodes"
 ];
 
 for (let path of source_paths) {

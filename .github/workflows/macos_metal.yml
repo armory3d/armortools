@@ -17,5 +17,5 @@ jobs:
     - uses: actions/checkout@v3
     - name: Compile
       run: |
-        cd armorpaint
-        ../base/make --graphics metal --compile
+        cd paint
+        ../base/make --compile

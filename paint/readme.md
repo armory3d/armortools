@@ -11,7 +11,7 @@ armorpaint
 
 ```bash
 git clone https://github.com/armory3d/armortools
-cd armortools/armorpaint
+cd armortools/paint
 ```
 
 **Windows (x64)**
