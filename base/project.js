@@ -11,7 +11,8 @@ flags.with_eval = true;
 flags.with_plugins = true;
 
 let project = new Project("Base");
-let dir = flags.name.toLowerCase();
+let dir = flags.name.substr(5).toLowerCase(); // ArmorPaint -> paint
+console.log(dir);
 
 if (!flags.lite) {
 	project.add_define("IDLE_SLEEP");
@@ -107,7 +108,7 @@ if (!flags.lite) {
 
 	let export_version_info = true;
 	if (export_version_info) {
-		let dir = "../" + flags.name.toLowerCase() + "/build";
+		let dir = "../" + flags.name.substr(5).toLowerCase() + "/build";
 		let sha = os_popen(`git log --pretty=format:"%h" -n 1`).stdout.substr(1, 7);
 		let date = new Date().toISOString().split("T")[0];
 		let data = `{ "sha": "${sha}", "date": "${date}" }`;
@@ -119,7 +120,7 @@ if (!flags.lite) {
 
 	let export_data_list = platform === "android"; // .apk contents
 	if (export_data_list) {
-		let root = "../" + flags.name.toLowerCase();
+		let root = "../" + flags.name.substr(5).toLowerCase();
 		let data_list = {
 			"/data/plugins": fs_readdir("../base/assets/plugins").concat(fs_readdir(root + "/assets/plugins")).join(","),
 			"/data/export_presets": fs_readdir(root + "/assets/export_presets").join(","),
@@ -128,7 +129,7 @@ if (!flags.lite) {
 			"/data/meshes": fs_readdir(root + "/assets/meshes").join(","),
 			"/data/themes": fs_readdir("../base/assets/themes").join(","),
 		};
-		let dir = "../" + flags.name.toLowerCase() + "/build";
+		let dir = "../" + flags.name.substr(5).toLowerCase() + "/build";
 		fs_ensuredir(dir);
 		fs_writefile(dir + "/data_list.json", JSON.stringify(data_list));
 		project.add_assets(dir + "/data_list.json", { destination: "data/{name}" });
