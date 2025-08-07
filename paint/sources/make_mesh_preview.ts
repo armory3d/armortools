@@ -85,7 +85,7 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	node_shader_write_frag(kong, "var height: float = " + height + ";");
 
 	if (decal) {
-		if (context_raw.tool == workspace_tool_t.TEXT) {
+		if (context_raw.tool == tool_type_t.TEXT) {
 			node_shader_add_texture(kong, "textexttool", "_textexttool");
 			node_shader_write_frag(kong, "opacity *= sample_lod(textexttool, sampler_linear, tex_coord / float(" + brush_scale + "), 0.0).r;");
 		}

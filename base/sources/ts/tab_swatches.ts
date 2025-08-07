@@ -146,7 +146,7 @@ function tab_swatches_draw(htab: ui_handle_t) {
 
 							context_raw.swatch.base = ui_color_wheel(h, false, -1, 11 * ui.ops.theme.ELEMENT_H * ui_SCALE(ui), true, function () {
 								context_raw.color_picker_previous_tool = context_raw.tool;
-								context_select_tool(workspace_tool_t.PICKER);
+								context_select_tool(tool_type_t.PICKER);
 
 								context_raw.color_picker_callback = function (color: swatch_color_t) {
 									let i: i32 = _tab_swatches_draw_i;

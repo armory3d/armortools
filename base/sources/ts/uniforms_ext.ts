@@ -80,7 +80,7 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 	}
 	else if (link == "_brush_hardness") {
 		let decal_mask: bool = context_is_decal_mask_paint();
-		if (context_raw.tool != workspace_tool_t.BRUSH && context_raw.tool != workspace_tool_t.ERASER && context_raw.tool != workspace_tool_t.CLONE && !decal_mask) {
+		if (context_raw.tool != tool_type_t.BRUSH && context_raw.tool != tool_type_t.ERASER && context_raw.tool != tool_type_t.CLONE && !decal_mask) {
 			return 1.0;
 		}
 		let val: f32 = context_raw.brush_hardness * context_raw.brush_nodes_hardness;

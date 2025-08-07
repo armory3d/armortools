@@ -2,7 +2,7 @@
 let _ui_header_draw_tool_properties_h: ui_handle_t;
 
 function ui_header_draw_tool_properties(ui: ui_t) {
-	if (context_raw.tool == workspace_tool_t.COLORID) {
+	if (context_raw.tool == tool_type_t.COLORID) {
 		ui_text(tr("Picked Color"));
 		if (context_raw.colorid_picked) {
 			let rt: render_target_t = map_get(render_path_render_targets, "texpaint_colorid");
@@ -71,7 +71,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 		}
 		ui.enabled = true;
 	}
-	else if (context_raw.tool == workspace_tool_t.PICKER || context_raw.tool == workspace_tool_t.MATERIAL) {
+	else if (context_raw.tool == tool_type_t.PICKER || context_raw.tool == tool_type_t.MATERIAL) {
 		let base_r_picked: f32 = math_round(color_get_rb(context_raw.picked_color.base) / 255 * 10) / 10;
 		let base_g_picked: f32 = math_round(color_get_gb(context_raw.picked_color.base) / 255 * 10) / 10;
 		let base_b_picked: f32 = math_round(color_get_bb(context_raw.picked_color.base) / 255 * 10) / 10;
@@ -140,7 +140,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			make_material_parse_paint_material();
 		}
 	}
-	else if (context_raw.tool == workspace_tool_t.BAKE) {
+	else if (context_raw.tool == tool_type_t.BAKE) {
 		ui.changed = false;
 
 		let baking: bool = context_raw.pdirty > 0;
@@ -288,19 +288,19 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			make_material_parse_paint_material();
 		}
 	}
-	else if (context_raw.tool == workspace_tool_t.BRUSH ||
-			 context_raw.tool == workspace_tool_t.ERASER ||
-			 context_raw.tool == workspace_tool_t.FILL ||
-			 context_raw.tool == workspace_tool_t.DECAL ||
-			 context_raw.tool == workspace_tool_t.TEXT ||
-			 context_raw.tool == workspace_tool_t.CLONE ||
-			 context_raw.tool == workspace_tool_t.BLUR ||
-			 context_raw.tool == workspace_tool_t.SMUDGE ||
-			 context_raw.tool == workspace_tool_t.PARTICLE) {
+	else if (context_raw.tool == tool_type_t.BRUSH ||
+			 context_raw.tool == tool_type_t.ERASER ||
+			 context_raw.tool == tool_type_t.FILL ||
+			 context_raw.tool == tool_type_t.DECAL ||
+			 context_raw.tool == tool_type_t.TEXT ||
+			 context_raw.tool == tool_type_t.CLONE ||
+			 context_raw.tool == tool_type_t.BLUR ||
+			 context_raw.tool == tool_type_t.SMUDGE ||
+			 context_raw.tool == tool_type_t.PARTICLE) {
 
 		let decal: bool = context_is_decal();
 		let decal_mask: bool = context_is_decal_mask();
-		if (context_raw.tool != workspace_tool_t.FILL) {
+		if (context_raw.tool != tool_type_t.FILL) {
 			if (decal_mask) {
 				context_raw.brush_decal_mask_radius = ui_slider(context_raw.brush_decal_mask_radius_handle, tr("Radius"), 0.01, 2.0, true);
 				if (ui.is_hovered) {
@@ -323,21 +323,21 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			}
 		}
 
-		if (context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT) {
+		if (context_raw.tool == tool_type_t.DECAL || context_raw.tool == tool_type_t.TEXT) {
 			context_raw.brush_scale_x = ui_slider(context_raw.brush_scale_x_handle, tr("Scale X"), 0.01, 2.0, true);
 		}
 
-		if (context_raw.tool == workspace_tool_t.BRUSH  ||
-			context_raw.tool == workspace_tool_t.FILL   ||
-			context_raw.tool == workspace_tool_t.DECAL  ||
-			context_raw.tool == workspace_tool_t.TEXT) {
+		if (context_raw.tool == tool_type_t.BRUSH  ||
+			context_raw.tool == tool_type_t.FILL   ||
+			context_raw.tool == tool_type_t.DECAL  ||
+			context_raw.tool == tool_type_t.TEXT) {
 			let brush_scale_handle: ui_handle_t = ui_handle(__ID__);
 			if (brush_scale_handle.init) {
 				brush_scale_handle.value = context_raw.brush_scale;
 			}
 			context_raw.brush_scale = ui_slider(brush_scale_handle, tr("UV Scale"), 0.01, 5.0, true);
 			if (brush_scale_handle.changed) {
-				if (context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT) {
+				if (context_raw.tool == tool_type_t.DECAL || context_raw.tool == tool_type_t.TEXT) {
 					let current: gpu_texture_t = _draw_current;
 					draw_end();
 					util_render_make_decal_preview();
@@ -364,7 +364,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			ui_tooltip(tr("Hold {brush_opacity} and move mouse to the left to decrease the opacity\nHold {brush_opacity} and move mouse to the right to increase the opacity", vars));
 		}
 
-		if (context_raw.tool == workspace_tool_t.BRUSH || context_raw.tool == workspace_tool_t.ERASER || context_raw.tool == workspace_tool_t.CLONE || decal_mask) {
+		if (context_raw.tool == tool_type_t.BRUSH || context_raw.tool == tool_type_t.ERASER || context_raw.tool == tool_type_t.CLONE || decal_mask) {
 			let h: ui_handle_t = ui_handle(__ID__);
 			if (h.init) {
 				h.value = context_raw.brush_hardness;
@@ -372,7 +372,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			context_raw.brush_hardness = ui_slider(h, tr("Hardness"), 0.0, 1.0, true);
 		}
 
-		if (context_raw.tool != workspace_tool_t.ERASER) {
+		if (context_raw.tool != tool_type_t.ERASER) {
 			let brush_blending_handle: ui_handle_t = ui_handle(__ID__);
 			if (brush_blending_handle.init) {
 				brush_blending_handle.value = context_raw.brush_blending;
@@ -403,7 +403,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			}
 		}
 
-		if (context_raw.tool == workspace_tool_t.BRUSH || context_raw.tool == workspace_tool_t.FILL) {
+		if (context_raw.tool == tool_type_t.BRUSH || context_raw.tool == tool_type_t.FILL) {
 			let paint_handle: ui_handle_t = ui_handle(__ID__);
 			let texcoord_combo: string[] = [tr("UV Map"), tr("Triplanar"), tr("Project")];
 			context_raw.brush_paint = ui_combo(paint_handle, texcoord_combo, tr("TexCoord"));
@@ -411,7 +411,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 				make_material_parse_paint_material();
 			}
 		}
-		if (context_raw.tool == workspace_tool_t.TEXT) {
+		if (context_raw.tool == tool_type_t.TEXT) {
 			let h: ui_handle_t = ui_handle(__ID__);
 			h.text = context_raw.text_tool_text;
 			let w: i32 = ui._w;
@@ -431,7 +431,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			}
 		}
 
-		if (context_raw.tool == workspace_tool_t.FILL) {
+		if (context_raw.tool == tool_type_t.FILL) {
 			let fill_mode_combo: string[] = [tr("Object"), tr("Face"), tr("Angle"), tr("UV Island")];
 			ui_combo(context_raw.fill_type_handle, fill_mode_combo, tr("Fill Mode"));
 			if (context_raw.fill_type_handle.changed) {

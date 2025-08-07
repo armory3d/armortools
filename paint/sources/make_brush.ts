@@ -3,7 +3,7 @@ function make_brush_run(kong: node_shader_t) {
 
 	node_shader_write_frag(kong, "var dist: float = 0.0;");
 
-	if (context_raw.tool == workspace_tool_t.PARTICLE) {
+	if (context_raw.tool == tool_type_t.PARTICLE) {
 		return;
 	}
 

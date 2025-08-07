@@ -80,7 +80,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	kong.frag_n = true;
 	node_shader_add_function(kong, str_pack_float_int16);
 
-	if (context_raw.tool == workspace_tool_t.COLORID) {
+	if (context_raw.tool == tool_type_t.COLORID) {
 		texture_count++;
 		node_shader_add_texture(kong, "texcolorid", "_texcolorid");
 		node_shader_write_frag(kong, "output[0] = float4(n.xy, 1.0, pack_f32_i16(0.0, uint(0)));");
@@ -162,7 +162,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		make_mesh_layer_pass_count = 1;
 		let layers: slot_layer_t[] = [];
 		let start_count: i32 = texture_count;
-		let is_material_tool: bool = context_raw.tool == workspace_tool_t.MATERIAL;
+		let is_material_tool: bool = context_raw.tool == tool_type_t.MATERIAL;
 		for (let i: i32 = 0; i < project_layers.length; ++i) {
 			let l: slot_layer_t = project_layers[i];
 			if (is_material_tool && l != context_raw.layer) {

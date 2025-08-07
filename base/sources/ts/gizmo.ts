@@ -5,7 +5,7 @@ let gizmo_q: quat_t = quat_create();
 let gizmo_q0: quat_t = quat_create();
 
 function gizmo_update() {
-	let is_object: bool = context_raw.tool == workspace_tool_t.GIZMO;
+	let is_object: bool = context_raw.tool == tool_type_t.GIZMO;
 	let is_decal: bool = base_is_decal_layer();
 
 	let gizmo: object_t = context_raw.gizmo;
@@ -16,6 +16,7 @@ function gizmo_update() {
 	}
 
 	let paint_object: object_t = context_raw.paint_object.base;
+
 	///if is_forge
 	if (context_raw.selected_object != null) {
 		paint_object = context_raw.selected_object;

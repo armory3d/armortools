@@ -266,7 +266,7 @@ function layers_commands_merge_pack(pipe: gpu_pipeline_t, i0: gpu_texture_t, i1:
 }
 
 function layers_is_fill_material(): bool {
-	if (context_raw.tool == workspace_tool_t.MATERIAL) {
+	if (context_raw.tool == tool_type_t.MATERIAL) {
 		return true;
 	}
 
@@ -282,11 +282,11 @@ function layers_is_fill_material(): bool {
 
 function layers_update_fill_layers() {
 	let _layer: slot_layer_t = context_raw.layer;
-	let _tool: workspace_tool_t = context_raw.tool;
+	let _tool: tool_type_t = context_raw.tool;
 	let _fill_type: i32 = context_raw.fill_type_handle.position;
 	let current: gpu_texture_t = null;
 
-	if (context_raw.tool == workspace_tool_t.MATERIAL) {
+	if (context_raw.tool == tool_type_t.MATERIAL) {
 		if (render_path_paint_live_layer == null) {
 			render_path_paint_live_layer = slot_layer_create("_live");
 		}
@@ -294,7 +294,7 @@ function layers_update_fill_layers() {
 		current = _draw_current;
 		if (current != null) draw_end();
 
-		context_raw.tool = workspace_tool_t.FILL;
+		context_raw.tool = tool_type_t.FILL;
 		context_raw.fill_type_handle.position = fill_type_t.OBJECT;
 		make_material_parse_paint_material(false);
 		context_raw.pdirty = 1;
@@ -332,7 +332,7 @@ function layers_update_fill_layers() {
 			draw_end();
 		}
 		context_raw.pdirty = 1;
-		context_raw.tool = workspace_tool_t.FILL;
+		context_raw.tool = tool_type_t.FILL;
 		context_raw.fill_type_handle.position = fill_type_t.OBJECT;
 
 		if (has_fill_layer) {
@@ -388,9 +388,9 @@ function layers_update_fill_layer(parse_paint: bool = true) {
 	let in_use: bool = gpu_in_use;
 	if (in_use) draw_end();
 
-	let _tool: workspace_tool_t = context_raw.tool;
+	let _tool: tool_type_t = context_raw.tool;
 	let _fill_type: i32 = context_raw.fill_type_handle.position;
-	context_raw.tool = workspace_tool_t.FILL;
+	context_raw.tool = tool_type_t.FILL;
 	context_raw.fill_type_handle.position = fill_type_t.OBJECT;
 	context_raw.pdirty = 1;
 
@@ -513,6 +513,7 @@ function layers_create_fill_layer(uv_type: uv_type_t = uv_type_t.UVMAP, decal_ma
 	///if is_forge
 	return;
 	///end
+
 	_layers_uv_type = uv_type;
 	_layers_decal_mat = decal_mat;
 	_layers_position = position;

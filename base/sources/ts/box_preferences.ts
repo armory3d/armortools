@@ -403,19 +403,15 @@ function box_preferences_show() {
 				config_raw.layer_res = layer_res_handle.position;
 			}
 
-			///if is_forge
-			let atlas_res_handle: ui_handle_t = ui_handle(__ID__);
-			if (atlas_res_handle.init) {
-				atlas_res_handle.position = config_raw.atlas_res;
+			let scene_atlas_res_handle: ui_handle_t = ui_handle(__ID__);
+			if (scene_atlas_res_handle.init) {
+				scene_atlas_res_handle.position = config_raw.scene_atlas_res;
 			}
 
-			ui_combo(atlas_res_handle, res_combo, tr("Atlas Resolution"), true);
-			if (atlas_res_handle.changed) {
-				config_raw.atlas_res = atlas_res_handle.position;
+			ui_combo(scene_atlas_res_handle, res_combo, tr("Scene Atlas Resolution"), true);
+			if (scene_atlas_res_handle.changed) {
+				config_raw.scene_atlas_res = scene_atlas_res_handle.position;
 			}
-			///end
-
-
 
 			let server_handle: ui_handle_t = ui_handle(__ID__);
 			if (server_handle.init) {

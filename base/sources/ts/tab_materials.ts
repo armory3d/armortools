@@ -130,7 +130,7 @@ function tab_materials_draw_slots(mini: bool) {
 				if (context_raw.material != project_materials[i]) {
 					context_select_material(i);
 					///if is_paint
-					if (context_raw.tool == workspace_tool_t.MATERIAL) {
+					if (context_raw.tool == tool_type_t.MATERIAL) {
 						sys_notify_on_init(layers_update_fill_layers);
 					}
 					///end

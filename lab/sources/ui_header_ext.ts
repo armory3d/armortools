@@ -1,12 +1,12 @@
 
 function ui_header_draw_tool_properties(ui: ui_t) {
-	if (context_raw.tool == workspace_tool_t.PICKER) {
+	if (context_raw.tool == tool_type_t.PICKER) {
 
 	}
-	else if (context_raw.tool == workspace_tool_t.ERASER ||
-			 context_raw.tool == workspace_tool_t.CLONE  ||
-			 context_raw.tool == workspace_tool_t.BLUR   ||
-			 context_raw.tool == workspace_tool_t.SMUDGE) {
+	else if (context_raw.tool == tool_type_t.ERASER ||
+			 context_raw.tool == tool_type_t.CLONE  ||
+			 context_raw.tool == tool_type_t.BLUR   ||
+			 context_raw.tool == tool_type_t.SMUDGE) {
 
 		let nodes: ui_nodes_t = ui_nodes_get_nodes();
 		let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);

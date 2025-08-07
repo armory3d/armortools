@@ -1,7 +1,7 @@
 
 function context_ext_init(c: context_t) {
-    c.tool = workspace_tool_t.ERASER;
-	c.color_picker_previous_tool = workspace_tool_t.ERASER;
+    c.tool = tool_type_t.ERASER;
+	c.color_picker_previous_tool = tool_type_t.ERASER;
 	c.brush_radius = 0.25;
 	c.brush_radius_handle.value = 0.25;
 	c.brush_hardness = 0.8;

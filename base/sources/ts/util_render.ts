@@ -228,8 +228,8 @@ function util_render_make_brush_preview() {
 	context_raw.material.nodes.pan_y = context_raw.brush.nodes.pan_y;
 	context_raw.material.nodes.zoom = context_raw.brush.nodes.zoom;
 
-	let _tool: workspace_tool_t = context_raw.tool;
-	context_raw.tool = workspace_tool_t.BRUSH;
+	let _tool: tool_type_t = context_raw.tool;
+	context_raw.tool = tool_type_t.BRUSH;
 
 	let _layer: slot_layer_t = context_raw.layer;
 	if (slot_layer_is_mask(context_raw.layer)) {
@@ -413,8 +413,8 @@ function util_render_make_node_preview(canvas: ui_node_canvas_t, node: ui_node_t
 function util_render_pick_pos_nor_tex() {
 	context_raw.pick_pos_nor_tex = true;
 	context_raw.pdirty = 1;
-	let _tool: workspace_tool_t = context_raw.tool;
-	context_raw.tool = workspace_tool_t.PICKER;
+	let _tool: tool_type_t = context_raw.tool;
+	context_raw.tool = tool_type_t.PICKER;
 	make_material_parse_paint_material();
 	if (context_raw.paint2d) {
 		render_path_paint_set_plane_mesh();

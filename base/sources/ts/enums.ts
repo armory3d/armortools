@@ -237,7 +237,7 @@ enum space_type_t {
 	SPACE2D = 1,
 }
 
-enum workspace_tool_t {
+enum tool_type_t {
 	BRUSH = 0,
 	ERASER = 1,
 	FILL = 2,

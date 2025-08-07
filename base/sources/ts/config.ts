@@ -98,7 +98,7 @@ function config_save() {
 	json_encode_i32("dilate_radius", config_raw.dilate_radius);
 	json_encode_bool("gpu_inference", config_raw.gpu_inference);
 	json_encode_string("blender", config_raw.blender);
-	json_encode_i32("atlas_res", config_raw.atlas_res);
+	json_encode_i32("scene_atlas_res", config_raw.scene_atlas_res);
 	json_encode_bool("grid_snap", config_raw.grid_snap);
 	let config_json: string = json_encode_end();
 
@@ -141,7 +141,7 @@ function config_init() {
 		config_raw.rp_gi = false;
 		config_raw.rp_vignette = 0.2;
 		config_raw.rp_grain = 0.09;
-		///if (arm_android || arm_ios || is_forge)
+		///if (arm_android || arm_ios)
 		config_raw.rp_ssao = false;
 		///else
 		config_raw.rp_ssao = true;
@@ -294,8 +294,8 @@ function config_get_layer_res(): i32 {
 	return config_texture_res_size(res);
 }
 
-function config_get_atlas_res(): i32 {
-	let res: i32 = config_raw.atlas_res;
+function config_get_scene_atlas_res(): i32 {
+	let res: i32 = config_raw.scene_atlas_res;
 	return config_texture_res_size(res);
 }
 
@@ -440,6 +440,6 @@ type config_t = {
 
 	gpu_inference?: bool;
 	blender?: string;
-	atlas_res: i32; // Forge
+	scene_atlas_res: i32;
 	grid_snap: bool;
 };

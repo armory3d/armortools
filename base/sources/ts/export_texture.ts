@@ -116,8 +116,8 @@ function export_texture_run_bake_material(path: string) {
 		render_path_paint_live_layer = slot_layer_create("_live");
 	}
 
-	let _tool: workspace_tool_t = context_raw.tool;
-	context_raw.tool = workspace_tool_t.FILL;
+	let _tool: tool_type_t = context_raw.tool;
+	context_raw.tool = tool_type_t.FILL;
 	make_material_parse_paint_material();
 	let _paint_object: mesh_object_t = context_raw.paint_object;
 	let planeo: mesh_object_t = scene_get_child(".Plane").ext;

@@ -250,7 +250,7 @@ function ui_view2d_render() {
 			}
 
 			// Texture and node preview color picking
-			if ((context_in_2d_view(view_2d_type_t.ASSET) || context_in_2d_view(view_2d_type_t.NODE)) && context_raw.tool == workspace_tool_t.PICKER && ui_view2d_ui.input_down) {
+			if ((context_in_2d_view(view_2d_type_t.ASSET) || context_in_2d_view(view_2d_type_t.NODE)) && context_raw.tool == tool_type_t.PICKER && ui_view2d_ui.input_down) {
 				_ui_view2d_render_tex = tex;
 				_ui_view2d_render_x = ui_view2d_ui.input_x - tx - ui_view2d_wx;;
 				_ui_view2d_render_y = ui_view2d_ui.input_y - ty - ui_view2d_wy;
@@ -410,7 +410,7 @@ function ui_view2d_render() {
 
 		// Picked position
 		///if is_paint
-		if (context_raw.tool == workspace_tool_t.PICKER && (ui_view2d_type == view_2d_type_t.LAYER || ui_view2d_type == view_2d_type_t.ASSET)) {
+		if (context_raw.tool == tool_type_t.PICKER && (ui_view2d_type == view_2d_type_t.LAYER || ui_view2d_type == view_2d_type_t.ASSET)) {
 			let cursor_img: gpu_texture_t = resource_get("cursor.k");
 			let hsize: f32 = 16 * ui_SCALE(ui_view2d_ui);
 			let size: f32 = hsize * 2;
@@ -468,9 +468,9 @@ function ui_view2d_update() {
 
 	///if is_paint
 	let decal_mask: bool = context_is_decal_mask_paint();
-	let set_clone_source: bool = context_raw.tool == workspace_tool_t.CLONE &&
+	let set_clone_source: bool = context_raw.tool == tool_type_t.CLONE &&
 		operator_shortcut(map_get(config_keymap, "set_clone_source") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
-	let bake: bool = context_raw.tool == workspace_tool_t.BAKE;
+	let bake: bool = context_raw.tool == tool_type_t.BAKE;
 
 	if (ui_view2d_type == view_2d_type_t.LAYER &&
 		!ui_view2d_text_input_hover &&

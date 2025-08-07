@@ -317,10 +317,10 @@ function make_material_bake_node_preview(node: ui_node_t, group: ui_node_canvas_
 		}
 
 		let _space: i32 = ui_header_worktab.position;
-		let _tool: workspace_tool_t = context_raw.tool;
+		let _tool: tool_type_t = context_raw.tool;
 		let _bake_type: bake_type_t = context_raw.bake_type;
 		ui_header_worktab.position = space_type_t.SPACE3D;
-		context_raw.tool = workspace_tool_t.BAKE;
+		context_raw.tool = tool_type_t.BAKE;
 		context_raw.bake_type = bake_type_t.CURVATURE;
 
 		parser_material_bake_passthrough = true;

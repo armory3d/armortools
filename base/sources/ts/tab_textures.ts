@@ -185,7 +185,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 								context_raw.colorid_handle.position = _tab_textures_draw_i;
 								context_raw.colorid_picked = false;
 								ui_toolbar_handle.redraws = 1;
-								if (context_raw.tool == workspace_tool_t.COLORID) {
+								if (context_raw.tool == tool_type_t.COLORID) {
 									ui_header_handle.redraws = 2;
 									context_raw.ddirty = 2;
 								}
@@ -269,7 +269,7 @@ function tab_textures_delete_texture(asset: asset_t) {
 	}
 	ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 
-	if (context_raw.tool == workspace_tool_t.COLORID && i == context_raw.colorid_handle.position) {
+	if (context_raw.tool == tool_type_t.COLORID && i == context_raw.colorid_handle.position) {
 		ui_header_handle.redraws = 2;
 		context_raw.ddirty = 2;
 		context_raw.colorid_picked = false;

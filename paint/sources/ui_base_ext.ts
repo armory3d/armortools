@@ -13,8 +13,8 @@ function ui_base_ext_init_hwnd_tabs(): tab_draw_array_t[] {
 	];
 	let a2: tab_draw_array_t = [
 		_draw_callback_create(tab_browser_draw),
-		_draw_callback_create(tab_textures_draw),
 		_draw_callback_create(tab_meshes_draw),
+		_draw_callback_create(tab_textures_draw),
 		_draw_callback_create(tab_fonts_draw),
 		_draw_callback_create(tab_swatches_draw),
 		_draw_callback_create(tab_script_draw),

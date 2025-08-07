@@ -100,7 +100,7 @@ type context_t = {
 	layer?: slot_layer_t;
 	brush?: slot_brush_t;
 	font?: slot_font_t;
-	tool?: workspace_tool_t;
+	tool?: tool_type_t;
 
 	layer_preview_dirty?: bool;
 	layers_preview_dirty?: bool;
@@ -116,7 +116,7 @@ type context_t = {
 	material_preview?: bool;
 	saved_camera?: mat4_t;
 
-	color_picker_previous_tool?: workspace_tool_t;
+	color_picker_previous_tool?: tool_type_t;
 	materialid_picked?: i32;
 	uvx_picked?: f32;
 	uvy_picked?: f32;
@@ -420,7 +420,7 @@ function context_create(): context_t {
 	c.brush_opacity_handle = ui_handle_create();
 	c.brush_opacity_handle.value = 1.0;
 	///if is_forge
-	let atlas_w: i32 = config_get_atlas_res();
+	let atlas_w: i32 = config_get_scene_atlas_res();
 	let item_w: i32 = config_get_layer_res();
 	let atlas_stride: i32 = atlas_w / item_w;
 	c.brush_scale = atlas_stride;
@@ -469,7 +469,7 @@ function context_init() {
 function context_use_deferred(): bool {
 	return context_raw.render_mode != render_mode_t.FORWARD &&
 		(context_raw.viewport_mode == viewport_mode_t.LIT || context_raw.viewport_mode == viewport_mode_t.PATH_TRACE) &&
-		context_raw.tool != workspace_tool_t.COLORID;
+		context_raw.tool != tool_type_t.COLORID;
 }
 
 function context_select_material(i: i32) {
@@ -576,22 +576,22 @@ function context_select_tool(i: i32) {
 function context_init_tool() {
 	let decal: bool = context_is_decal();
 	if (decal) {
-		if (context_raw.tool == workspace_tool_t.TEXT) {
+		if (context_raw.tool == tool_type_t.TEXT) {
 			util_render_make_text_preview();
 		}
 		util_render_make_decal_preview();
 	}
 
-	else if (context_raw.tool == workspace_tool_t.PARTICLE) {
+	else if (context_raw.tool == tool_type_t.PARTICLE) {
 		util_particle_init();
 	}
-	else if (context_raw.tool == workspace_tool_t.BAKE) {
+	else if (context_raw.tool == tool_type_t.BAKE) {
 		// Bake in lit mode for now
 		if (context_raw.viewport_mode == viewport_mode_t.PATH_TRACE) {
 			context_raw.viewport_mode = viewport_mode_t.LIT;
 		}
 	}
-	else if (context_raw.tool == workspace_tool_t.MATERIAL) {
+	else if (context_raw.tool == tool_type_t.MATERIAL) {
 		layers_update_fill_layers();
 		context_main_object().skip_context = null;
 	}
@@ -687,11 +687,11 @@ function context_in_browser(): bool {
 }
 
 function context_is_picker(): bool {
-	return context_raw.tool == workspace_tool_t.PICKER || context_raw.tool == workspace_tool_t.MATERIAL;
+	return context_raw.tool == tool_type_t.PICKER || context_raw.tool == tool_type_t.MATERIAL;
 }
 
 function context_is_decal(): bool {
-	return context_raw.tool == workspace_tool_t.DECAL || context_raw.tool == workspace_tool_t.TEXT;
+	return context_raw.tool == tool_type_t.DECAL || context_raw.tool == tool_type_t.TEXT;
 }
 
 function context_is_decal_mask(): bool {

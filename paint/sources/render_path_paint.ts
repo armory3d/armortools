@@ -117,13 +117,13 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 	let tid: i32 = context_raw.layer.id;
 
 	if (context_raw.pdirty > 0) {
-		if (context_raw.tool == workspace_tool_t.COLORID) {
+		if (context_raw.tool == tool_type_t.COLORID) {
 			render_path_set_target("texpaint_colorid", null, null, clear_flag_t.COLOR, 0xff000000);
 			render_path_bind_target("gbuffer2", "gbuffer2");
 			render_path_paint_draw_fullscreen_triangle("paint");
 			ui_header_handle.redraws = 2;
 		}
-		else if (context_raw.tool == workspace_tool_t.PICKER || context_raw.tool == workspace_tool_t.MATERIAL) {
+		else if (context_raw.tool == tool_type_t.PICKER || context_raw.tool == tool_type_t.MATERIAL) {
 			if (context_raw.pick_pos_nor_tex) {
 				if (context_raw.paint2d) {
 					let additional: string[] = ["gbuffer1", "gbuffer2"];
@@ -155,7 +155,7 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 				render_path_set_target("texpaint_picker", additional);
 				render_path_bind_target("gbuffer2", "gbuffer2");
 				tid = context_raw.layer.id;
-				let use_live_layer: bool = context_raw.tool == workspace_tool_t.MATERIAL;
+				let use_live_layer: bool = context_raw.tool == tool_type_t.MATERIAL;
 				if (use_live_layer) {
 					render_path_paint_use_live_layer(true);
 				}
@@ -226,7 +226,7 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 		else {
 
 			let texpaint: string = "texpaint" + tid;
-			if (context_raw.tool == workspace_tool_t.BAKE && context_raw.brush_time == sys_delta()) {
+			if (context_raw.tool == tool_type_t.BAKE && context_raw.brush_time == sys_delta()) {
 				// Clear to black on bake start
 				render_path_set_target(texpaint, null, null, clear_flag_t.COLOR, 0xff000000);
 			}
@@ -261,17 +261,17 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 			}
 
 			// Read texcoords from gbuffer
-			let read_tc: bool = (context_raw.tool == workspace_tool_t.FILL && context_raw.fill_type_handle.position == fill_type_t.FACE) ||
-									context_raw.tool == workspace_tool_t.CLONE ||
-									context_raw.tool == workspace_tool_t.BLUR ||
-									context_raw.tool == workspace_tool_t.SMUDGE;
+			let read_tc: bool = (context_raw.tool == tool_type_t.FILL && context_raw.fill_type_handle.position == fill_type_t.FACE) ||
+									context_raw.tool == tool_type_t.CLONE ||
+									context_raw.tool == tool_type_t.BLUR ||
+									context_raw.tool == tool_type_t.SMUDGE;
 			if (read_tc) {
 				render_path_bind_target("gbuffer2", "gbuffer2");
 			}
 
 			render_path_draw_meshes("paint");
 
-			if (context_raw.tool == workspace_tool_t.BAKE && context_raw.bake_type == bake_type_t.CURVATURE && context_raw.bake_curv_smooth > 0) {
+			if (context_raw.tool == tool_type_t.BAKE && context_raw.bake_type == bake_type_t.CURVATURE && context_raw.bake_curv_smooth > 0) {
 				if (map_get(render_path_render_targets, "texpaint_blur") == null) {
 					let t: render_target_t = render_target_create();
 					t.name = "texpaint_blur";
@@ -331,14 +331,14 @@ function render_path_paint_use_live_layer(use: bool) {
 }
 
 function render_path_paint_commands_live_brush() {
-	let tool: workspace_tool_t = context_raw.tool;
-	if (tool != workspace_tool_t.BRUSH &&
-		tool != workspace_tool_t.ERASER &&
-		tool != workspace_tool_t.CLONE &&
-		tool != workspace_tool_t.DECAL &&
-		tool != workspace_tool_t.TEXT &&
-		tool != workspace_tool_t.BLUR &&
-		tool != workspace_tool_t.SMUDGE) {
+	let tool: tool_type_t = context_raw.tool;
+	if (tool != tool_type_t.BRUSH &&
+		tool != tool_type_t.ERASER &&
+		tool != tool_type_t.CLONE &&
+		tool != tool_type_t.DECAL &&
+		tool != tool_type_t.TEXT &&
+		tool != tool_type_t.BLUR &&
+		tool != tool_type_t.SMUDGE) {
 			return;
 	}
 
@@ -405,13 +405,13 @@ function render_path_paint_commands_cursor() {
 		return;
 	}
 	let decal_mask: bool = context_is_decal_mask();
-	let tool: workspace_tool_t = context_raw.tool;
-	if (tool != workspace_tool_t.BRUSH &&
-		tool != workspace_tool_t.ERASER &&
-		tool != workspace_tool_t.CLONE &&
-		tool != workspace_tool_t.BLUR &&
-		tool != workspace_tool_t.SMUDGE &&
-		tool != workspace_tool_t.PARTICLE &&
+	let tool: tool_type_t = context_raw.tool;
+	if (tool != tool_type_t.BRUSH &&
+		tool != tool_type_t.ERASER &&
+		tool != tool_type_t.CLONE &&
+		tool != tool_type_t.BLUR &&
+		tool != tool_type_t.SMUDGE &&
+		tool != tool_type_t.PARTICLE &&
 		!decal_mask) {
 			return;
 	}
@@ -504,9 +504,9 @@ function render_path_paint_commands_symmetry() {
 }
 
 function render_path_paint_paint_enabled(): bool {
-	let fill_layer: bool = context_raw.layer.fill_layer != null && context_raw.tool != workspace_tool_t.PICKER && context_raw.tool != workspace_tool_t.MATERIAL && context_raw.tool != workspace_tool_t.COLORID;
+	let fill_layer: bool = context_raw.layer.fill_layer != null && context_raw.tool != tool_type_t.PICKER && context_raw.tool != tool_type_t.MATERIAL && context_raw.tool != tool_type_t.COLORID;
 	let group_layer: bool = slot_layer_is_group(context_raw.layer);
-	let gizmo: bool = context_raw.tool == workspace_tool_t.GIZMO;
+	let gizmo: bool = context_raw.tool == tool_type_t.GIZMO;
 	return !fill_layer && !group_layer && !context_raw.foreground_event && !gizmo;
 }
 
@@ -626,7 +626,7 @@ function render_path_paint_draw() {
 			render_path_paint_dilated = false;
 		}
 
-		if (context_raw.tool == workspace_tool_t.BAKE) {
+		if (context_raw.tool == tool_type_t.BAKE) {
 
 			if (context_raw.bake_type == bake_type_t.NORMAL || context_raw.bake_type == bake_type_t.HEIGHT || context_raw.bake_type == bake_type_t.DERIVATIVE) {
 				if (!render_path_paint_baking && context_raw.pdirty > 0) {
@@ -803,7 +803,7 @@ function render_path_paint_restore_plane_mesh() {
 
 function render_path_paint_bind_layers() {
 	let is_live: bool = config_raw.brush_live && render_path_paint_live_layer_drawn > 0;
-	let is_material_tool: bool = context_raw.tool == workspace_tool_t.MATERIAL;
+	let is_material_tool: bool = context_raw.tool == tool_type_t.MATERIAL;
 	if (is_live || is_material_tool) {
 		render_path_paint_use_live_layer(true);
 	}
@@ -821,7 +821,7 @@ function render_path_paint_bind_layers() {
 
 function render_path_paint_unbind_layers() {
 	let is_live: bool = config_raw.brush_live && render_path_paint_live_layer_drawn > 0;
-	let is_material_tool: bool = context_raw.tool == workspace_tool_t.MATERIAL;
+	let is_material_tool: bool = context_raw.tool == tool_type_t.MATERIAL;
 	if (is_live || is_material_tool) {
 		render_path_paint_use_live_layer(false);
 	}

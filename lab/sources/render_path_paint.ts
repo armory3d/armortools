@@ -62,7 +62,7 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 
 	if (context_raw.pdirty > 0) {
 
-		if (context_raw.tool == workspace_tool_t.PICKER) {
+		if (context_raw.tool == tool_type_t.PICKER) {
 				let additional: string[] = ["texpaint_nor_picker", "texpaint_pack_picker", "texpaint_uv_picker"];
 				render_path_set_target("texpaint_picker", additional);
 				render_path_bind_target("gbuffer2", "gbuffer2");
@@ -132,9 +132,9 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 			render_path_bind_target("texpaint_blend1", "paintmask");
 
 			// Read texcoords from gbuffer
-			let read_tc: bool = context_raw.tool == workspace_tool_t.CLONE ||
-								context_raw.tool == workspace_tool_t.BLUR ||
-								context_raw.tool == workspace_tool_t.SMUDGE;
+			let read_tc: bool = context_raw.tool == tool_type_t.CLONE ||
+								context_raw.tool == tool_type_t.BLUR ||
+								context_raw.tool == tool_type_t.SMUDGE;
 			if (read_tc) {
 				render_path_bind_target("gbuffer2", "gbuffer2");
 			}
@@ -145,11 +145,11 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 }
 
 function render_path_paint_commands_cursor() {
-	let tool: workspace_tool_t = context_raw.tool;
-	if (tool != workspace_tool_t.ERASER &&
-		tool != workspace_tool_t.CLONE &&
-		tool != workspace_tool_t.BLUR &&
-		tool != workspace_tool_t.SMUDGE) {
+	let tool: tool_type_t = context_raw.tool;
+	if (tool != tool_type_t.ERASER &&
+		tool != tool_type_t.CLONE &&
+		tool != tool_type_t.BLUR &&
+		tool != tool_type_t.SMUDGE) {
 		return;
 	}
 

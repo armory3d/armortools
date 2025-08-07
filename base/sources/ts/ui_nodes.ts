@@ -972,7 +972,7 @@ function ui_nodes_render() {
 
 		if (nodes.color_picker_callback != null) {
 			context_raw.color_picker_previous_tool = context_raw.tool;
-			context_select_tool(workspace_tool_t.PICKER);
+			context_select_tool(tool_type_t.PICKER);
 			_ui_nodes_render_tmp = nodes.color_picker_callback;
 
 			context_raw.color_picker_callback = function (color: swatch_color_t) {
@@ -1182,6 +1182,10 @@ function ui_nodes_render() {
 			}
 		}
 		///end
+
+		// let type_combo: string[] = [tr("Shader"), tr("Neural")];
+		// let type_handle: ui_handle_t = ui_handle(__ID__);
+		// let type: i32 = ui_combo(type_handle, type_combo, tr("Type"), true);
 
 		///if is_lab
 		ui_nodes_ui.window_border_top = 0;

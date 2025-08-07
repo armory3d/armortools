@@ -54,7 +54,7 @@ function ui_toolbar_draw_tool(i: i32, ui: ui_t, img: gpu_texture_t, icon_accent:
 	}
 
 	///if is_paint
-	if (i == workspace_tool_t.COLORID && context_raw.colorid_picked) {
+	if (i == tool_type_t.COLORID && context_raw.colorid_picked) {
 		let rt: render_target_t = map_get(render_path_render_targets, "texpaint_colorid");
 		draw_scaled_sub_image(rt._image, 0, 0, 1, 1, 0, _y + 1.5 * ui_SCALE(ui), 5 * ui_SCALE(ui), 34 * ui_SCALE(ui));
 	}

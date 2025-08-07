@@ -11,13 +11,13 @@ function make_colorid_picker_run(kong: node_shader_t) {
 	node_shader_write_frag(kong, "var tex_coord_inp4: float4 = gbuffer2[uint2(uint(constants.inp.x * constants.gbuffer_size.x), uint(constants.inp.y * constants.gbuffer_size.y))];");
 	node_shader_write_frag(kong, "var tex_coord_inp: float2 = tex_coord_inp4.ba;");
 
-	if (context_raw.tool == workspace_tool_t.COLORID) {
+	if (context_raw.tool == tool_type_t.COLORID) {
 		kong.frag_out = "float4";
 		node_shader_add_texture(kong, "texcolorid", "_texcolorid");
 		node_shader_write_frag(kong, "var idcol: float3 = sample_lod(texcolorid, sampler_linear, tex_coord_inp, 0.0).rgb;");
 		node_shader_write_frag(kong, "output = float4(idcol, 1.0);");
 	}
-	else if (context_raw.tool == workspace_tool_t.PICKER || context_raw.tool == workspace_tool_t.MATERIAL) {
+	else if (context_raw.tool == tool_type_t.PICKER || context_raw.tool == tool_type_t.MATERIAL) {
 		if (context_raw.pick_pos_nor_tex) {
 			kong.frag_out = "float4[2]";
 			node_shader_add_texture(kong, "gbufferD");

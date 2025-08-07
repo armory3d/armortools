@@ -385,61 +385,61 @@ function ui_base_update() {
 		///if is_paint
 		if (!mouse_down("right")) { // Fly mode off
 			if (operator_shortcut(map_get(config_keymap, "tool_brush"))) {
-				context_select_tool(workspace_tool_t.BRUSH);
+				context_select_tool(tool_type_t.BRUSH);
 			}
 			else if (operator_shortcut(map_get(config_keymap, "tool_eraser"))) {
-				context_select_tool(workspace_tool_t.ERASER);
+				context_select_tool(tool_type_t.ERASER);
 			}
 			else if (operator_shortcut(map_get(config_keymap, "tool_fill"))) {
-				context_select_tool(workspace_tool_t.FILL);
+				context_select_tool(tool_type_t.FILL);
 			}
 			else if (operator_shortcut(map_get(config_keymap, "tool_colorid"))) {
-				context_select_tool(workspace_tool_t.COLORID);
+				context_select_tool(tool_type_t.COLORID);
 			}
 			else if (operator_shortcut(map_get(config_keymap, "tool_decal"))) {
-				context_select_tool(workspace_tool_t.DECAL);
+				context_select_tool(tool_type_t.DECAL);
 			}
 			else if (operator_shortcut(map_get(config_keymap, "tool_text"))) {
-				context_select_tool(workspace_tool_t.TEXT);
+				context_select_tool(tool_type_t.TEXT);
 			}
 			else if (operator_shortcut(map_get(config_keymap, "tool_clone"))) {
-				context_select_tool(workspace_tool_t.CLONE);
+				context_select_tool(tool_type_t.CLONE);
 			}
 			else if (operator_shortcut(map_get(config_keymap, "tool_blur"))) {
-				context_select_tool(workspace_tool_t.BLUR);
+				context_select_tool(tool_type_t.BLUR);
 			}
 			else if (operator_shortcut(map_get(config_keymap, "tool_smudge"))) {
-				context_select_tool(workspace_tool_t.SMUDGE);
+				context_select_tool(tool_type_t.SMUDGE);
 			}
 			else if (operator_shortcut(map_get(config_keymap, "tool_particle"))) {
-				context_select_tool(workspace_tool_t.PARTICLE);
+				context_select_tool(tool_type_t.PARTICLE);
 			}
 			else if (operator_shortcut(map_get(config_keymap, "tool_picker"))) {
-				context_select_tool(workspace_tool_t.PICKER);
+				context_select_tool(tool_type_t.PICKER);
 			}
 			else if (operator_shortcut(map_get(config_keymap, "tool_bake"))) {
-				context_select_tool(workspace_tool_t.BAKE);
+				context_select_tool(tool_type_t.BAKE);
 			}
 			else if (operator_shortcut(map_get(config_keymap, "tool_gizmo"))) {
-				context_select_tool(workspace_tool_t.GIZMO);
+				context_select_tool(tool_type_t.GIZMO);
 			}
 			else if (operator_shortcut(map_get(config_keymap, "tool_material"))) {
-				context_select_tool(workspace_tool_t.MATERIAL);
+				context_select_tool(tool_type_t.MATERIAL);
 			}
 			else if (operator_shortcut(map_get(config_keymap, "swap_brush_eraser"))) {
-				context_select_tool(context_raw.tool == workspace_tool_t.BRUSH ? workspace_tool_t.ERASER : workspace_tool_t.BRUSH);
+				context_select_tool(context_raw.tool == tool_type_t.BRUSH ? tool_type_t.ERASER : tool_type_t.BRUSH);
 			}
 		}
 
 		// Radius
-		if (context_raw.tool == workspace_tool_t.BRUSH  ||
-			context_raw.tool == workspace_tool_t.ERASER ||
-			context_raw.tool == workspace_tool_t.DECAL  ||
-			context_raw.tool == workspace_tool_t.TEXT   ||
-			context_raw.tool == workspace_tool_t.CLONE  ||
-			context_raw.tool == workspace_tool_t.BLUR   ||
-			context_raw.tool == workspace_tool_t.SMUDGE   ||
-			context_raw.tool == workspace_tool_t.PARTICLE) {
+		if (context_raw.tool == tool_type_t.BRUSH  ||
+			context_raw.tool == tool_type_t.ERASER ||
+			context_raw.tool == tool_type_t.DECAL  ||
+			context_raw.tool == tool_type_t.TEXT   ||
+			context_raw.tool == tool_type_t.CLONE  ||
+			context_raw.tool == tool_type_t.BLUR   ||
+			context_raw.tool == tool_type_t.SMUDGE   ||
+			context_raw.tool == tool_type_t.PARTICLE) {
 			if (operator_shortcut(map_get(config_keymap, "brush_radius")) ||
 				operator_shortcut(map_get(config_keymap, "brush_opacity")) ||
 				operator_shortcut(map_get(config_keymap, "brush_angle")) ||
@@ -487,10 +487,10 @@ function ui_base_update() {
 		///if is_lab
 		if (ui_header_worktab.position == space_type_t.SPACE3D) {
 			// Radius
-			if (context_raw.tool == workspace_tool_t.ERASER ||
-				context_raw.tool == workspace_tool_t.CLONE  ||
-				context_raw.tool == workspace_tool_t.BLUR   ||
-				context_raw.tool == workspace_tool_t.SMUDGE) {
+			if (context_raw.tool == tool_type_t.ERASER ||
+				context_raw.tool == tool_type_t.CLONE  ||
+				context_raw.tool == tool_type_t.BLUR   ||
+				context_raw.tool == tool_type_t.SMUDGE) {
 				if (operator_shortcut(map_get(config_keymap, "brush_radius"))) {
 					context_raw.brush_can_lock = true;
 					if (!pen_connected) {
@@ -706,7 +706,7 @@ function ui_base_update() {
 	}
 
 	///if arm_physics
-	if (context_raw.tool == workspace_tool_t.PARTICLE && context_in_paint_area() && !context_raw.paint2d) {
+	if (context_raw.tool == tool_type_t.PARTICLE && context_in_paint_area() && !context_raw.paint2d) {
 		util_particle_init_physics();
 		let world: physics_world_t = physics_world_active;
 		physics_world_update(world);
@@ -955,7 +955,7 @@ function ui_base_update_ui() {
 		context_raw.brush_stencil_y += (old_h - new_h) / base_h() / 2;
 	}
 
-	let set_clone_source: bool = context_raw.tool == workspace_tool_t.CLONE && operator_shortcut(map_get(config_keymap, "set_clone_source") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
+	let set_clone_source: bool = context_raw.tool == tool_type_t.CLONE && operator_shortcut(map_get(config_keymap, "set_clone_source") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
 
 	let decal: bool = context_is_decal();
 	let decal_mask: bool = context_is_decal_mask_paint();
@@ -984,7 +984,7 @@ function ui_base_update_ui() {
 	}
 
 	///if arm_physics
-	if (context_raw.tool == workspace_tool_t.PARTICLE) {
+	if (context_raw.tool == tool_type_t.PARTICLE) {
 		down = false;
 	}
 	///end
@@ -1032,12 +1032,12 @@ function ui_base_update_ui() {
 
 					history_push_undo = true;
 
-					if (context_raw.tool == workspace_tool_t.CLONE && context_raw.clone_start_x >= 0.0) { // Clone delta
+					if (context_raw.tool == tool_type_t.CLONE && context_raw.clone_start_x >= 0.0) { // Clone delta
 						context_raw.clone_delta_x = (context_raw.clone_start_x - mx) / ww;
 						context_raw.clone_delta_y = (context_raw.clone_start_y - my) / sys_h();
 						context_raw.clone_start_x = -1;
 					}
-					else if (context_raw.tool == workspace_tool_t.FILL && context_raw.fill_type_handle.position == fill_type_t.UV_ISLAND) {
+					else if (context_raw.tool == tool_type_t.FILL && context_raw.fill_type_handle.position == fill_type_t.UV_ISLAND) {
 						util_uv_uvislandmap_cached = false;
 					}
 				}
@@ -1062,7 +1062,7 @@ function ui_base_update_ui() {
 		context_raw.layer_preview_dirty = true; // Update layer preview
 
 		// New color id picked, update fill layer
-		if (context_raw.tool == workspace_tool_t.COLORID && context_raw.layer.fill_layer != null) {
+		if (context_raw.tool == tool_type_t.COLORID && context_raw.layer.fill_layer != null) {
 			sys_notify_on_next_frame(function () {
 				layers_update_fill_layer();
 				make_material_parse_paint_material(false);
@@ -1275,7 +1275,7 @@ function ui_base_render_cursor() {
 		return;
 	}
 
-	if (context_raw.tool == workspace_tool_t.MATERIAL || context_raw.tool == workspace_tool_t.BAKE) {
+	if (context_raw.tool == tool_type_t.MATERIAL || context_raw.tool == tool_type_t.BAKE) {
 		return;
 	}
 
@@ -1294,10 +1294,10 @@ function ui_base_render_cursor() {
 	}
 
 	if (context_raw.brush_stencil_image != null &&
-		context_raw.tool != workspace_tool_t.BAKE &&
-		context_raw.tool != workspace_tool_t.PICKER &&
-		context_raw.tool != workspace_tool_t.MATERIAL &&
-		context_raw.tool != workspace_tool_t.COLORID) {
+		context_raw.tool != tool_type_t.BAKE &&
+		context_raw.tool != tool_type_t.PICKER &&
+		context_raw.tool != tool_type_t.MATERIAL &&
+		context_raw.tool != tool_type_t.COLORID) {
 		let r: rect_t = ui_base_get_brush_stencil_rect();
 		if (!operator_shortcut(map_get(config_keymap, "stencil_hide"), shortcut_type_t.DOWN)) {
 			draw_set_color(0x88ffffff);
@@ -1330,13 +1330,13 @@ function ui_base_render_cursor() {
 	}
 
 	// Show picked material next to cursor
-	if (context_raw.tool == workspace_tool_t.PICKER && context_raw.picker_select_material && context_raw.color_picker_callback == null) {
+	if (context_raw.tool == tool_type_t.PICKER && context_raw.picker_select_material && context_raw.color_picker_callback == null) {
 		let img: gpu_texture_t = context_raw.material.image_icon;
 		draw_image(img, mx + 10, my + 10);
 	}
-	if (context_raw.tool == workspace_tool_t.PICKER && context_raw.color_picker_callback != null) {
+	if (context_raw.tool == tool_type_t.PICKER && context_raw.color_picker_callback != null) {
 		let img: gpu_texture_t = resource_get("icons.k");
-		let rect: rect_t = resource_tile50(img, workspace_tool_t.PICKER, 0);
+		let rect: rect_t = resource_tile50(img, tool_type_t.PICKER, 0);
 		draw_sub_image(img, mx + 10, my + 10, rect.x, rect.y, rect.w, rect.h);
 	}
 
@@ -1344,7 +1344,7 @@ function ui_base_render_cursor() {
 	let psize: i32 = math_floor(182 * (context_raw.brush_radius * context_raw.brush_nodes_radius) * ui_SCALE(ui_base_ui));
 
 	// Clone source cursor
-	if (context_raw.tool == workspace_tool_t.CLONE && !keyboard_down("alt") && (mouse_down() || pen_down())) {
+	if (context_raw.tool == tool_type_t.CLONE && !keyboard_down("alt") && (mouse_down() || pen_down())) {
 		draw_set_color(0x66ffffff);
 		draw_scaled_image(cursor_img, mx + context_raw.clone_delta_x * sys_w() - psize / 2, my + context_raw.clone_delta_y * sys_h() - psize / 2, psize, psize);
 		draw_set_color(0xffffffff);
@@ -1385,12 +1385,12 @@ function ui_base_render_cursor() {
 				draw_set_color(0xffffffff);
 			}
 		}
-		if (context_raw.tool == workspace_tool_t.BRUSH  ||
-			context_raw.tool == workspace_tool_t.ERASER ||
-			context_raw.tool == workspace_tool_t.CLONE  ||
-			context_raw.tool == workspace_tool_t.BLUR   ||
-			context_raw.tool == workspace_tool_t.SMUDGE   ||
-			context_raw.tool == workspace_tool_t.PARTICLE ||
+		if (context_raw.tool == tool_type_t.BRUSH  ||
+			context_raw.tool == tool_type_t.ERASER ||
+			context_raw.tool == tool_type_t.CLONE  ||
+			context_raw.tool == tool_type_t.BLUR   ||
+			context_raw.tool == tool_type_t.SMUDGE   ||
+			context_raw.tool == tool_type_t.PARTICLE ||
 			(decal_mask && !config_raw.brush_3d) ||
 			(decal_mask && context_in_2d_view())) {
 			if (decal_mask) {
@@ -1404,14 +1404,14 @@ function ui_base_render_cursor() {
 	}
 
 	if (context_raw.brush_lazy_radius > 0 && !context_raw.brush_locked &&
-		(context_raw.tool == workspace_tool_t.BRUSH ||
-			context_raw.tool == workspace_tool_t.ERASER ||
-			context_raw.tool == workspace_tool_t.DECAL ||
-			context_raw.tool == workspace_tool_t.TEXT ||
-			context_raw.tool == workspace_tool_t.CLONE ||
-			context_raw.tool == workspace_tool_t.BLUR ||
-			context_raw.tool == workspace_tool_t.SMUDGE ||
-			context_raw.tool == workspace_tool_t.PARTICLE)) {
+		(context_raw.tool == tool_type_t.BRUSH ||
+			context_raw.tool == tool_type_t.ERASER ||
+			context_raw.tool == tool_type_t.DECAL ||
+			context_raw.tool == tool_type_t.TEXT ||
+			context_raw.tool == tool_type_t.CLONE ||
+			context_raw.tool == tool_type_t.BLUR ||
+			context_raw.tool == tool_type_t.SMUDGE ||
+			context_raw.tool == tool_type_t.PARTICLE)) {
 		draw_filled_rect(mx - 1, my - 1, 2, 2);
 		mx = context_raw.brush_lazy_x * base_w() + base_x();
 		my = context_raw.brush_lazy_y * base_h() + base_y();

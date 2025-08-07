@@ -193,7 +193,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 									context_raw.colorid_handle.position = asset_index;
 									context_raw.colorid_picked = false;
 									ui_toolbar_handle.redraws = 1;
-									if (context_raw.tool == workspace_tool_t.COLORID) {
+									if (context_raw.tool == tool_type_t.COLORID) {
 										ui_header_handle.redraws = 2;
 										context_raw.ddirty = 2;
 									}

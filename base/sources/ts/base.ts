@@ -707,7 +707,7 @@ function base_is_decal_layer(): bool {
 	return false;
 	///end
 
-	let is_painting: bool = context_raw.tool != workspace_tool_t.MATERIAL && context_raw.tool != workspace_tool_t.BAKE;
+	let is_painting: bool = context_raw.tool != tool_type_t.MATERIAL && context_raw.tool != tool_type_t.BAKE;
 	return is_painting && context_raw.layer.fill_layer != null && context_raw.layer.uv_type == uv_type_t.PROJECT;
 }
 
@@ -824,7 +824,7 @@ function base_init_config() {
 	raw.dilate_radius = 2;
 	raw.gpu_inference = true;
 	raw.blender = "";
-	raw.atlas_res = 0;
+	raw.scene_atlas_res = 0;
 	raw.pathtrace_mode = pathtrace_mode_t.FAST;
 	raw.grid_snap = false;
 

@@ -1,6 +1,6 @@
 
 function make_paint_color_attachments(): string[] {
-	if (context_raw.tool == workspace_tool_t.PICKER) {
+	if (context_raw.tool == tool_type_t.PICKER) {
 		let res: string[] = ["RGBA32", "RGBA32", "RGBA32", "RGBA32"];
 		return res;
 	}
@@ -40,7 +40,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 
 	let kong: node_shader_t = node_shader_context_make_kong(con_paint);
 
-	if (context_raw.tool == workspace_tool_t.PICKER) {
+	if (context_raw.tool == tool_type_t.PICKER) {
 		// Mangle vertices to form full screen triangle
 		node_shader_write_vert(kong, "output.pos = float4(-1.0 + float((vertex_id() & 1) << 2), -1.0 + float((vertex_id() & 2) << 1), 0.0, 1.0);");
 
@@ -93,10 +93,10 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	node_shader_add_constant(kong, "brush_opacity: float", "_brush_opacity");
 	node_shader_add_constant(kong, "brush_hardness: float", "_brush_hardness");
 
-	if (context_raw.tool == workspace_tool_t.ERASER ||
-		context_raw.tool == workspace_tool_t.CLONE  ||
-		context_raw.tool == workspace_tool_t.BLUR   ||
-		context_raw.tool == workspace_tool_t.SMUDGE) {
+	if (context_raw.tool == tool_type_t.ERASER ||
+		context_raw.tool == tool_type_t.CLONE  ||
+		context_raw.tool == tool_type_t.BLUR   ||
+		context_raw.tool == tool_type_t.SMUDGE) {
 
 		node_shader_write_frag(kong, "var dist: float = 0.0;");
 
@@ -124,14 +124,14 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		node_shader_write_frag(kong, "if (dist > constants.brush_radius) { discard; }");
 	}
 
-	if (context_raw.tool == workspace_tool_t.CLONE || context_raw.tool == workspace_tool_t.BLUR || context_raw.tool == workspace_tool_t.SMUDGE) {
+	if (context_raw.tool == tool_type_t.CLONE || context_raw.tool == tool_type_t.BLUR || context_raw.tool == tool_type_t.SMUDGE) {
 		node_shader_add_texture(kong, "gbuffer2");
 		node_shader_add_constant(kong, "gbuffer_size: float2", "_gbuffer_size");
 		node_shader_add_texture(kong, "texpaint_undo", "_texpaint_undo");
 		node_shader_add_texture(kong, "texpaint_nor_undo", "_texpaint_nor_undo");
 		node_shader_add_texture(kong, "texpaint_pack_undo", "_texpaint_pack_undo");
 
-		if (context_raw.tool == workspace_tool_t.CLONE) {
+		if (context_raw.tool == tool_type_t.CLONE) {
 		}
 		else { // Blur
 		}
@@ -153,7 +153,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	node_shader_add_texture(kong, "texpaint_undo", "_texpaint_undo");
 	node_shader_write_frag(kong, "var sample_undo: float4 = sample_lod(texpaint_undo, sampler_linear, sample_tc, 0.0);");
 
-	if (context_raw.tool == workspace_tool_t.ERASER) {
+	if (context_raw.tool == tool_type_t.ERASER) {
 		node_shader_write_frag(kong, "output[0] = float4(0.0, 0.0, 0.0, 0.0);");
 		node_shader_write_frag(kong, "output[1] = float4(0.5, 0.5, 1.0, 0.0);");
 		node_shader_write_frag(kong, "output[2] = float4(1.0, 0.0, 0.0, 0.0);");

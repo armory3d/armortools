@@ -69,9 +69,9 @@ function render_path_base_begin() {
 	let skip_taa: bool =
 		context_raw.split_view ||
 		context_raw.viewport_mode == viewport_mode_t.PATH_TRACE ||
-		((context_raw.tool == workspace_tool_t.CLONE ||
-			context_raw.tool == workspace_tool_t.BLUR ||
-			context_raw.tool == workspace_tool_t.SMUDGE) && context_raw.pdirty > 0);
+		((context_raw.tool == tool_type_t.CLONE ||
+			context_raw.tool == tool_type_t.BLUR ||
+			context_raw.tool == tool_type_t.SMUDGE) && context_raw.pdirty > 0);
 	scene_camera.frame = skip_taa ? 0 : render_path_base_taa_frame;
 	camera_object_proj_jitter(scene_camera);
 	camera_object_build_mat(scene_camera);
@@ -147,7 +147,7 @@ function render_path_base_commands(draw_commands: ()=>void) {
 	render_path_paint_draw();
 
 	if (context_raw.viewport_mode == viewport_mode_t.PATH_TRACE) {
-		let use_live_layer: bool = context_raw.tool == workspace_tool_t.MATERIAL;
+		let use_live_layer: bool = context_raw.tool == tool_type_t.MATERIAL;
 		render_path_raytrace_draw(use_live_layer);
 		context_raw.foreground_event = false;
 		render_path_base_end();
@@ -217,7 +217,7 @@ function render_path_base_draw_split(draw_commands: ()=>void) {
 
 		render_path_base_draw_gbuffer();
 
-		let use_live_layer: bool = context_raw.tool == workspace_tool_t.MATERIAL;
+		let use_live_layer: bool = context_raw.tool == tool_type_t.MATERIAL;
 		context_raw.viewport_mode == viewport_mode_t.PATH_TRACE ?
 			render_path_raytrace_draw(use_live_layer) :
 			draw_commands();

@@ -102,9 +102,9 @@ function brush_output_node_run(self: brush_output_node_t, from: i32) {
 
 	// Do not paint over fill layer
 	let fill_layer: bool = context_raw.layer.fill_layer != null &&
-		context_raw.tool != workspace_tool_t.PICKER &&
-		context_raw.tool != workspace_tool_t.MATERIAL &&
-		context_raw.tool != workspace_tool_t.COLORID;
+		context_raw.tool != tool_type_t.PICKER &&
+		context_raw.tool != tool_type_t.MATERIAL &&
+		context_raw.tool != tool_type_t.COLORID;
 	if (fill_layer) {
 		return;
 	}
@@ -133,14 +133,14 @@ function brush_output_paint(self: brush_output_node_t) {
 	let down: bool = mouse_down() || pen_down();
 
 	// Set color pick
-	if (down && context_raw.tool == workspace_tool_t.COLORID && project_assets.length > 0) {
+	if (down && context_raw.tool == tool_type_t.COLORID && project_assets.length > 0) {
 		context_raw.colorid_picked = true;
 		ui_toolbar_handle.redraws = 1;
 	}
 
 	// Prevent painting the same spot
 	let same_spot: bool = context_raw.paint_vec.x == context_raw.last_paint_x && context_raw.paint_vec.y == context_raw.last_paint_y;
-	let lazy: bool = context_raw.tool == workspace_tool_t.BRUSH && context_raw.brush_lazy_radius > 0;
+	let lazy: bool = context_raw.tool == tool_type_t.BRUSH && context_raw.brush_lazy_radius > 0;
 	if (down && (same_spot || lazy)) {
 		context_raw.painted++;
 	}
@@ -150,7 +150,7 @@ function brush_output_paint(self: brush_output_node_t) {
 	context_raw.last_paint_x = context_raw.paint_vec.x;
 	context_raw.last_paint_y = context_raw.paint_vec.y;
 
-	if (context_raw.tool == workspace_tool_t.PARTICLE) {
+	if (context_raw.tool == tool_type_t.PARTICLE) {
 		context_raw.painted = 0; // Always paint particles
 	}
 
