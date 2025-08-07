@@ -65,7 +65,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		return con_paint;
 	}
 
-	node_shader_write_vert(kong, "var tpos: float2 = float2(tex.x * 2.0 - 1.0, (1.0 - tex.y) * 2.0 - 1.0);");
+	node_shader_write_vert(kong, "var tpos: float2 = float2(input.tex.x * 2.0 - 1.0, (1.0 - input.tex.y) * 2.0 - 1.0);");
 
 	node_shader_write_vert(kong, "output.pos = float4(tpos, 0.0, 1.0);");
 
@@ -74,9 +74,9 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	node_shader_add_out(kong, "ndc: float4");
 	node_shader_write_attrib_vert(kong, "output.ndc = constants.WVP * float4(input.pos.xyz, 1.0);");
 
-	node_shader_write_attrib_vert(kong, "var sp: float3 = float3((output.ndc.xyz / output.ndc.w) * 0.5 + 0.5);");
-	node_shader_write_attrib_vert(kong, "sp.y = 1.0 - sp.y;");
-	node_shader_write_attrib_vert(kong, "sp.z -= 0.0001;"); // small bias
+	node_shader_write_attrib_frag(kong, "var sp: float3 = (input.ndc.xyz / input.ndc.w) * 0.5 + 0.5;");
+	node_shader_write_attrib_frag(kong, "sp.y = 1.0 - sp.y;");
+	node_shader_write_attrib_frag(kong, "sp.z -= 0.0001;"); // small bias
 
 	node_shader_add_constant(kong, "inp: float4", "_input_brush");
 	node_shader_add_constant(kong, "inplast: float4", "_input_brush_last");
@@ -105,14 +105,14 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		node_shader_add_constant(kong, "invVP: float4x4", "_inv_view_proj_matrix");
 		node_shader_write_frag(kong, "var winp: float4 = float4(float2(constants.inp.x, 1.0 - constants.inp.y) * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);");
 		node_shader_write_frag(kong, "winp = constants.invVP * winp;");
-		node_shader_write_frag(kong, "winp.xyz /= winp.w;");
+		node_shader_write_frag(kong, "winp.xyz = winp.xyz / winp.w;");
 		kong.frag_wposition = true;
 
 		node_shader_write_frag(kong, "var depthlast: float = sample_lod(gbufferD, sampler_linear, constants.inplast.xy, 0.0).r;");
 
 		node_shader_write_frag(kong, "var winplast: float4 = float4(float2(constants.inplast.x, 1.0 - constants.inplast.y) * 2.0 - 1.0, depthlast * 2.0 - 1.0, 1.0);");
 		node_shader_write_frag(kong, "winplast = constants.invVP * winplast;");
-		node_shader_write_frag(kong, "winplast.xyz /= winplast.w;");
+		node_shader_write_frag(kong, "winplast.xyz = winplast.xyz / winplast.w;");
 
 		node_shader_write_frag(kong, "var pa: float3 = input.wposition - winp.xyz;");
 		node_shader_write_frag(kong, "var ba: float3 = winplast.xyz - winp.xyz;");
@@ -144,7 +144,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 
 	// Manual blending to preserve memory
 	kong.frag_wvpposition = true;
-	node_shader_write_frag(kong, "var sample_tc: float2 = float2(input.wvpposition.xy / input.wvpposition.w) * 0.5 + 0.5;");
+	node_shader_write_frag(kong, "var sample_tc: float2 = float2(input.wvpposition.x / input.wvpposition.w, input.wvpposition.y / input.wvpposition.w) * 0.5 + 0.5;");
 	node_shader_write_frag(kong, "sample_tc.y = 1.0 - sample_tc.y;");
 	node_shader_add_texture(kong, "paintmask");
 	node_shader_write_frag(kong, "var sample_mask: float = sample_lod(paintmask, sampler_linear, sample_tc, 0.0).r;");

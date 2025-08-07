@@ -41,7 +41,6 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	node_shader_add_constant(kong, "VP: float4x4", "_view_proj_matrix");
 	kong.frag_wposition = true;
 
-	let texture_count: i32 = 0;
 	let displace_strength: f32 = make_material_get_displace_strength();
 	if (make_material_height_used && displace_strength > 0.0) {
 		kong.vert_n = true;
@@ -54,7 +53,8 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	node_shader_write_vert(kong, "output.pos = constants.VP * float4(output.wposition.xyz, 1.0);");
 	let brush_scale: f32 = context_raw.brush_scale;
 	node_shader_add_constant(kong, "tex_scale: float", "_tex_unpack");
-	node_shader_write_vert(kong, "output.tex_coord = input.tex * " + brush_scale + " * constants.tex_scale;");
+	node_shader_write_vert(kong, "output.tex_coord = input.tex * float(" + brush_scale + ") * constants.tex_scale;");
+	node_shader_write_attrib_frag(kong, "var tex_coord: float2 = input.tex_coord;");
 
 	kong.frag_out = "float4[3]";
 	kong.frag_n = true;
@@ -207,7 +207,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		node_shader_write_frag(kong, "output[1].rgb = pow3(output[1].rgb, float3(2.2, 2.2, 2.2));");
 	}
 
-	node_shader_write_frag(kong, "n /= (abs(n.x) + abs(n.y) + abs(n.z));");
+	node_shader_write_frag(kong, "n = n / (abs(n.x) + abs(n.y) + abs(n.z));");
 	// node_shader_write_frag(kong, "n.xy = n.z >= 0.0 ? n.xy : octahedron_wrap(n.xy);");
 	node_shader_write_frag(kong, "if (n.z < 0.0) { n.xy = octahedron_wrap(n.xy); }");
 	node_shader_write_frag(kong, "output[0] = float4(n.xy, roughness, pack_f32_i16(metallic, uint(float(int(matid * 255.0)) % float(3))));");
