@@ -678,7 +678,7 @@ function history_copy_to_undo(from_id: i32, to_id: i32, is_mask: bool) {
 		render_path_set_target("texpaint_undo" + to_id);
 		render_path_bind_target("texpaint" + from_id, "tex");
 		// render_path_draw_shader("shader_datas/copy_pass/copyR8_pass");
-		render_path_draw_shader("shader_datas/copy_pass/copy_pass");
+		render_path_draw_shader("shader_datas/copy_pass/copyRGBA128_pass");
 	}
 	else {
 		let additional: string[] = ["texpaint_nor_undo" + to_id, "texpaint_pack_undo" + to_id];

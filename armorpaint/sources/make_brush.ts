@@ -20,6 +20,7 @@ function make_brush_run(kong: node_shader_t) {
 		node_shader_write_frag(kong, "var winp: float4 = float4(float2(constants.inp.x, 1.0 - constants.inp.y) * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);");
 		node_shader_write_frag(kong, "winp = constants.invVP * winp;");
 		node_shader_write_frag(kong, "winp.xyz = winp.xyz / winp.w;");
+
 		kong.frag_wposition = true;
 
 		if (config_raw.brush_angle_reject || context_raw.xray) {

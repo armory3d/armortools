@@ -14,9 +14,7 @@ function make_sculpt_run(data: material_t, matcon: material_context_t): node_sha
 			}
 		],
 		color_attachments: [
-			"RGBA32",
-			"RGBA32",
-			"RGBA32",
+			"RGBA128",
 			"R8"
 		]
 	};
@@ -71,7 +69,7 @@ function make_sculpt_run(data: material_t, matcon: material_context_t): node_sha
 	node_shader_add_texture(kong, "texpaint_undo", "_texpaint_undo");
 	node_shader_write_frag(kong, "var sample_undo: float4 = sample_lod(texpaint_undo, sampler_linear, tex_coord, 0.0);");
 
-	node_shader_write_frag(kong, "if (sample_undo.r == 0 && sample_undo.g == 0 && sample_undo.b == 0) { discard; }");
+	node_shader_write_frag(kong, "if (sample_undo.r == 0.0 && sample_undo.g == 0.0 && sample_undo.b == 0.0) { discard; }");
 
 	node_shader_add_function(kong, str_octahedron_wrap);
 	node_shader_add_texture(kong, "gbuffer0_undo");

@@ -245,7 +245,7 @@ function slot_layer_clear(raw: slot_layer_t, base_color: i32 = 0x00000000, base_
 		draw_end();
 	}
 
-	if (slot_layer_is_layer(raw)) {
+	if (slot_layer_is_layer(raw) && raw.texpaint_nor != null) {
 		// Nor
 		_gpu_begin(raw.texpaint_nor, null, null, clear_flag_t.COLOR, color_from_floats(0.5, 0.5, 1.0, 0.0));
 		gpu_end();

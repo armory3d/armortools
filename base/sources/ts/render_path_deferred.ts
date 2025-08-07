@@ -111,6 +111,7 @@ function render_path_deferred_init() {
 	render_path_load_shader("shader_datas/compositor_pass/compositor_pass");
 	render_path_load_shader("shader_datas/copy_pass/copy_pass");
 	render_path_load_shader("shader_datas/copy_pass/copyR8_pass");
+	render_path_load_shader("shader_datas/copy_pass/copyR32_pass");
 	render_path_load_shader("shader_datas/copy_pass/copyRGBA64_pass");
 	render_path_load_shader("shader_datas/copy_pass/copyRGBA128_pass");
 	render_path_load_shader("shader_datas/taa_pass/taa_pass");
