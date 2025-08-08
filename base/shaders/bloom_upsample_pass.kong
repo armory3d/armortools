@@ -4,6 +4,7 @@ const constants: {
 	screen_size_inv: float2;
 	current_mip_level: int;
 	sample_scale: float;
+	bloom_strength: float;
 };
 
 #[set(everything)]
@@ -20,8 +21,6 @@ struct vert_out {
 	pos: float4;
 	tex: float2;
 }
-
-const bloom_strength: float = 0.02;
 
 fun bloom_upsample_pass_vert(input: vert_in): vert_out {
 	var output: vert_out;
@@ -52,7 +51,7 @@ fun bloom_upsample_pass_frag(input: vert_out): float4 {
 	color.rgb = upsample_dual_filter(input.tex, constants.screen_size_inv);
 
 	if (constants.current_mip_level == 0) {
-		color.rgb = color.rgb * float3(bloom_strength, bloom_strength, bloom_strength);
+		color.rgb = color.rgb * float3(constants.bloom_strength, constants.bloom_strength, constants.bloom_strength);
 	}
 
 	color.a = 1.0;

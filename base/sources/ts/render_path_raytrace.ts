@@ -221,7 +221,6 @@ function render_path_raytrace_draw(use_live_layer: bool) {
 	///end
 
 	render_path_raytrace_commands(use_live_layer);
-	render_path_base_draw_bloom();
 	render_path_set_target("buf");
 	render_path_draw_meshes("overlay");
 	render_path_set_target("buf");
@@ -229,6 +228,7 @@ function render_path_raytrace_draw(use_live_layer: bool) {
 	render_path_set_target("last");
 	render_path_bind_target("buf", "tex");
 	render_path_draw_shader("shader_datas/compositor_pass/compositor_pass");
+	render_path_base_draw_bloom("buf", "last");
 	render_path_set_target("");
 	render_path_bind_target("last", "tex");
 	render_path_draw_shader("shader_datas/copy_pass/copy_pass");

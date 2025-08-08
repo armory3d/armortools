@@ -160,7 +160,7 @@ function render_path_base_commands(draw_commands: ()=>void) {
 	render_path_base_end();
 }
 
-function render_path_base_draw_bloom() {
+function render_path_base_draw_bloom(source: string, target: string) {
 	if (config_raw.rp_bloom == false) {
 		return;
 	}
@@ -193,13 +193,13 @@ function render_path_base_draw_bloom() {
 	for (let i: i32 = 0; i < num_mips; ++i) {
 		render_path_base_bloom_current_mip = i;
 		render_path_set_target(render_path_base_bloom_mipmaps[i].name, null, null, clear_flag_t.COLOR, 0x00000000);
-		render_path_bind_target(i == 0 ? "buf" : render_path_base_bloom_mipmaps[i - 1].name, "tex");
+		render_path_bind_target(i == 0 ? source : render_path_base_bloom_mipmaps[i - 1].name, "tex");
 		render_path_draw_shader("shader_datas/bloom_pass/bloom_downsample_pass");
 	}
 	for (let i: i32 = 0; i < num_mips; ++i) {
 		let mip_level: i32 = num_mips - 1 - i;
 		render_path_base_bloom_current_mip = mip_level;
-		render_path_set_target(mip_level == 0 ? "buf" : render_path_base_bloom_mipmaps[mip_level - 1].name);
+		render_path_set_target(mip_level == 0 ? target : render_path_base_bloom_mipmaps[mip_level - 1].name);
 		render_path_bind_target(render_path_base_bloom_mipmaps[mip_level].name, "tex");
 		render_path_draw_shader("shader_datas/bloom_pass/bloom_upsample_pass");
 	}

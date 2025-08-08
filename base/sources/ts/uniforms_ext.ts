@@ -68,6 +68,9 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 	else if (link == "_bloom_sample_scale") {
 		return render_path_base_bloom_sample_scale;
 	}
+	else if (link == "_bloom_strength") {
+		return context_raw.viewport_mode == viewport_mode_t.PATH_TRACE ? 0.2 : 0.02;
+	}
 	else if (link == "_brush_scale_x") {
 		return 1 / context_raw.brush_scale_x;
 	}
