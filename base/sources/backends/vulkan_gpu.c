@@ -38,6 +38,9 @@ static VkRenderingAttachmentInfo current_depth_attachment_info;
 static VkPhysicalDeviceMemoryProperties memory_properties;
 static VkSampler immutable_sampler;
 static VkCommandBuffer command_buffer;
+static VkBuffer buffers_to_destroy[256];
+static VkDeviceMemory buffer_memories_to_destroy[256];
+static int buffers_to_destroy_count = 0;
 
 static VkInstance instance;
 static VkPhysicalDevice gpu;
@@ -1245,6 +1248,12 @@ void gpu_present_internal() {
 	vkBeginCommandBuffer(command_buffer, &begin_info);
 
 	framebuffer_acquired = false;
+
+	while (buffers_to_destroy_count > 0) {
+		buffers_to_destroy_count--;
+		vkFreeMemory(device, buffer_memories_to_destroy[buffers_to_destroy_count], NULL);
+		vkDestroyBuffer(device, buffers_to_destroy[buffers_to_destroy_count], NULL);
+	}
 }
 
 void gpu_draw_internal() {
@@ -1791,6 +1800,49 @@ void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_te
 	gpu_render_target_init2(target, width, height, format, -1);
 }
 
+void _gpu_buffer_init(gpu_buffer_impl_t *buffer, int size, int usage, int memory_requirements) {
+	if (buffer->buf != NULL) {
+		assert(buffers_to_destroy_count < 256);
+		buffers_to_destroy[buffers_to_destroy_count] = buffer->buf;
+		buffer_memories_to_destroy[buffers_to_destroy_count] = buffer->mem;
+		buffers_to_destroy_count++;
+	}
+
+	VkBufferCreateInfo buf_info = {
+		.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+		.pNext = NULL,
+		.size = size,
+		.usage = usage,
+		.flags = 0,
+	};
+	bool raytrace = gpu_raytrace_supported() && (usage == VK_BUFFER_USAGE_VERTEX_BUFFER_BIT || usage == VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+	if (raytrace) {
+		buf_info.usage |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+		buf_info.usage |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+		buf_info.usage |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
+	}
+	vkCreateBuffer(device, &buf_info, NULL, &buffer->buf);
+	VkMemoryRequirements mem_reqs = {0};
+	vkGetBufferMemoryRequirements(device, buffer->buf, &mem_reqs);
+
+	memset(&buffer->mem_alloc, 0, sizeof(VkMemoryAllocateInfo));
+	buffer->mem_alloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	buffer->mem_alloc.pNext = NULL;
+	buffer->mem_alloc.allocationSize = mem_reqs.size;
+	buffer->mem_alloc.memoryTypeIndex = 0;
+	memory_type_from_properties(mem_reqs.memoryTypeBits, memory_requirements, &buffer->mem_alloc.memoryTypeIndex);
+
+	VkMemoryAllocateFlagsInfo memory_allocate_flags_info = {0};
+	if (raytrace) {
+		memory_allocate_flags_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO;
+		memory_allocate_flags_info.flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR;
+		buffer->mem_alloc.pNext = &memory_allocate_flags_info;
+	}
+
+	vkAllocateMemory(device, &buffer->mem_alloc, NULL, &buffer->mem);
+	vkBindBufferMemory(device, buffer->buf, buffer->mem, 0);
+}
+
 void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structure_t *structure) {
 	buffer->count = count;
 	buffer->stride = 0;
@@ -1798,46 +1850,11 @@ void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structur
 		gpu_vertex_element_t element = structure->elements[i];
 		buffer->stride += gpu_vertex_data_size(element.data);
 	}
-
-	VkBufferCreateInfo buf_info = {
-		.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-		.pNext = NULL,
-		.size = count * buffer->stride,
-		.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-		.flags = 0,
-	};
-
-	if (gpu_raytrace_supported()) {
-		buf_info.usage |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
-		buf_info.usage |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-		buf_info.usage |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
-	}
-
-	memset(&buffer->impl.mem_alloc, 0, sizeof(VkMemoryAllocateInfo));
-	buffer->impl.mem_alloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	buffer->impl.mem_alloc.pNext = NULL;
-	buffer->impl.mem_alloc.allocationSize = 0;
-	buffer->impl.mem_alloc.memoryTypeIndex = 0;
-
-	vkCreateBuffer(device, &buf_info, NULL, &buffer->impl.buf);
-	VkMemoryRequirements mem_reqs = {0};
-	vkGetBufferMemoryRequirements(device, buffer->impl.buf, &mem_reqs);
-
-	buffer->impl.mem_alloc.allocationSize = mem_reqs.size;
-	memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &buffer->impl.mem_alloc.memoryTypeIndex);
-
-	VkMemoryAllocateFlagsInfo memory_allocate_flags_info = {0};
-	if (gpu_raytrace_supported()) {
-		memory_allocate_flags_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO;
-		memory_allocate_flags_info.flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR;
-		buffer->impl.mem_alloc.pNext = &memory_allocate_flags_info;
-	}
-
-	vkAllocateMemory(device, &buffer->impl.mem_alloc, NULL, &buffer->impl.mem);
-	vkBindBufferMemory(device, buffer->impl.buf, buffer->impl.mem, 0);
+	buffer->impl.buf = NULL;
 }
 
 void *gpu_vertex_buffer_lock(gpu_buffer_t *buffer) {
+	_gpu_buffer_init(&buffer->impl, buffer->count * buffer->stride, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 	void *p;
 	vkMapMemory(device, buffer->impl.mem, 0, buffer->count * buffer->stride, 0, (void **)&p);
 	return p;
@@ -1847,40 +1864,27 @@ void gpu_vertex_buffer_unlock(gpu_buffer_t *buffer) {
 	vkUnmapMemory(device, buffer->impl.mem);
 }
 
-void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size) {
-	buffer->count = size;
-	buffer->data = NULL;
+void gpu_index_buffer_init(gpu_buffer_t *buffer, int count) {
+	buffer->count = count;
+	buffer->impl.buf = NULL;
+}
 
-	VkBufferCreateInfo buf_info;
-	memset(&buf_info, 0, sizeof(buf_info));
-	buf_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-	buf_info.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-	buf_info.usage |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-
-	buf_info.size = size;
-	vkCreateBuffer(device, &buf_info, NULL, &buffer->impl.buf);
-
-	VkMemoryRequirements mem_reqs;
-	vkGetBufferMemoryRequirements(device, buffer->impl.buf, &mem_reqs);
-
-	buffer->impl.mem_alloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	buffer->impl.mem_alloc.pNext = NULL;
-	buffer->impl.mem_alloc.allocationSize = mem_reqs.size;
-	buffer->impl.mem_alloc.memoryTypeIndex = 0;
-
-	memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &buffer->impl.mem_alloc.memoryTypeIndex);
-	vkAllocateMemory(device, &buffer->impl.mem_alloc, NULL, &buffer->impl.mem);
-	vkBindBufferMemory(device, buffer->impl.buf, buffer->impl.mem, 0);
-
-	void *p;
+void *gpu_index_buffer_lock(gpu_buffer_t *buffer) {
+	_gpu_buffer_init(&buffer->impl, buffer->count * sizeof(uint32_t), VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	uint8_t *p;
 	vkMapMemory(device, buffer->impl.mem, 0, buffer->impl.mem_alloc.allocationSize, 0, (void **)&p);
-	memset(p, 0, buffer->impl.mem_alloc.allocationSize);
+	return p;
+}
+
+void gpu_index_buffer_unlock(gpu_buffer_t *buffer) {
 	vkUnmapMemory(device, buffer->impl.mem);
 }
 
-void gpu_constant_buffer_destroy(gpu_buffer_t *buffer) {
-	vkFreeMemory(device, buffer->impl.mem, NULL);
-	vkDestroyBuffer(device, buffer->impl.buf, NULL);
+void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size) {
+	buffer->count = size;
+	buffer->data = NULL;
+	buffer->impl.buf = NULL;
+	_gpu_buffer_init(&buffer->impl, size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 }
 
 void gpu_constant_buffer_lock(gpu_buffer_t *buffer, int start, int count) {
@@ -1892,61 +1896,9 @@ void gpu_constant_buffer_unlock(gpu_buffer_t *buffer) {
 	buffer->data = NULL;
 }
 
-void gpu_index_buffer_init(gpu_buffer_t *buffer, int count) {
-	buffer->count = count;
-
-	VkBufferCreateInfo buf_info = {
-		.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-		.pNext = NULL,
-		.size = count * sizeof(uint32_t),
-		.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-		.flags = 0,
-	};
-
-	if (gpu_raytrace_supported()) {
-		buf_info.usage |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
-		buf_info.usage |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-		buf_info.usage |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
-	}
-
-	memset(&buffer->impl.mem_alloc, 0, sizeof(VkMemoryAllocateInfo));
-	buffer->impl.mem_alloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	buffer->impl.mem_alloc.pNext = NULL;
-	buffer->impl.mem_alloc.allocationSize = 0;
-	buffer->impl.mem_alloc.memoryTypeIndex = 0;
-
-	vkCreateBuffer(device, &buf_info, NULL, &buffer->impl.buf);
-
-	VkMemoryRequirements mem_reqs = {0};
-	vkGetBufferMemoryRequirements(device, buffer->impl.buf, &mem_reqs);
-
-	buffer->impl.mem_alloc.allocationSize = mem_reqs.size;
-	memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &buffer->impl.mem_alloc.memoryTypeIndex);
-
-	VkMemoryAllocateFlagsInfo memory_allocate_flags_info = {0};
-	if (gpu_raytrace_supported()) {
-		memory_allocate_flags_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO;
-		memory_allocate_flags_info.flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR;
-		buffer->impl.mem_alloc.pNext = &memory_allocate_flags_info;
-	}
-
-	vkAllocateMemory(device, &buffer->impl.mem_alloc, NULL, &buffer->impl.mem);
-	vkBindBufferMemory(device, buffer->impl.buf, buffer->impl.mem, 0);
-}
-
 void gpu_buffer_destroy(gpu_buffer_t *buffer) {
 	vkFreeMemory(device, buffer->impl.mem, NULL);
 	vkDestroyBuffer(device, buffer->impl.buf, NULL);
-}
-
-void *gpu_index_buffer_lock(gpu_buffer_t *buffer) {
-	uint8_t *data;
-	vkMapMemory(device, buffer->impl.mem, 0, buffer->impl.mem_alloc.allocationSize, 0, (void **)&data);
-	return data;
-}
-
-void gpu_index_buffer_unlock(gpu_buffer_t *buffer) {
-	vkUnmapMemory(device, buffer->impl.mem);
 }
 
 static const int INDEX_RAYGEN = 0;
