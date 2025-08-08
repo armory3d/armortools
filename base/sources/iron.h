@@ -1335,8 +1335,7 @@ buffer_t *gpu_get_texture_pixels(gpu_texture_t *image) {
 		image->buffer->buffer = malloc(image->buffer->length);
 	}
 
-	uint8_t *b = (uint8_t *)image->buffer->buffer;
-	gpu_get_render_target_pixels(image, b);
+	gpu_get_render_target_pixels(image, image->buffer->buffer);
 	return image->buffer;
 }
 
@@ -2044,7 +2043,7 @@ void iron_ml_unload() {
 
 void iron_raytrace_init(buffer_t *shader) {
 	if (rt_created) {
-		gpu_constant_buffer_destroy(&rt_constant_buffer);
+		gpu_buffer_destroy(&rt_constant_buffer);
 		gpu_raytrace_pipeline_destroy(&rt_pipeline);
 	}
 	rt_created = true;

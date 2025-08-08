@@ -271,6 +271,7 @@ function base_resize() {
 		cam.data.ortho[3] =  2 * (sys_h() / sys_w());
 	}
 	camera_object_build_proj(cam);
+	render_path_base_taa_frame = 0;
 
 	if (context_raw.camera_type == camera_type_t.ORTHOGRAPHIC) {
 		viewport_update_camera_type(context_raw.camera_type);
@@ -824,7 +825,7 @@ function base_init_config() {
 	raw.dilate_radius = 2;
 	raw.gpu_inference = true;
 	raw.blender = "";
-	raw.scene_atlas_res = 0;
+	raw.scene_atlas_res = texture_res_t.RES8192;
 	raw.pathtrace_mode = pathtrace_mode_t.FAST;
 	raw.grid_snap = false;
 

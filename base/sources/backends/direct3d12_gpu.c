@@ -1059,10 +1059,6 @@ void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size) {
 	_gpu_buffer_init(&buffer->impl.buffer, size, D3D12_HEAP_TYPE_UPLOAD);
 }
 
-void gpu_constant_buffer_destroy(gpu_buffer_t *buffer) {
-	buffer->impl.buffer->lpVtbl->Release(buffer->impl.buffer);
-}
-
 void gpu_constant_buffer_lock(gpu_buffer_t *buffer, int start, int count) {
 	buffer->impl.last_start = start;
 	buffer->impl.last_count = count;

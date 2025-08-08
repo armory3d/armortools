@@ -98,7 +98,7 @@ function ui_toolbar_render_ui() {
 	if (context_is_floating_toolbar()) {
 		x += ui_toolbar_x();
 		y += ui_toolbar_x();
-		h = ui_toolbar_tool_names.length * (ui_toolbar_w() + 2);
+		h = (ui_toolbar_tool_names.length + 1) * (ui_toolbar_w() + 2);
 		ui.ops.theme.WINDOW_BG_COL = ui.ops.theme.SEPARATOR_COL;
 	}
 

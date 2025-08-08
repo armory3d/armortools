@@ -8,25 +8,13 @@ function tab_meshes_draw(htab: ui_handle_t) {
 
 		ui_begin_sticky();
 
-		///if is_paint
 		if (config_raw.touch_ui) {
-			ui_row6();
+			ui_row2();
 		}
 		else {
-			let row: f32[] = [1 / 14, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 14];
+			let row: f32[] = [1 / 14, 1 / 14];
 			ui_row(row);
 		}
-		///end
-
-		///if is_lab
-		if (config_raw.touch_ui) {
-			ui_row7();
-		}
-		else {
-			let row: f32[] = [1 / 14, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 14];
-			ui_row(row);
-		}
-		///end
 
 		if (ui_button(tr("Import"))) {
 			ui_menu_draw(function (ui: ui_t) {
@@ -40,77 +28,92 @@ function tab_meshes_draw(htab: ui_handle_t) {
 		}
 		if (ui.is_hovered) ui_tooltip(tr("Import mesh file"));
 
-		///if is_lab
-		if (ui_button(tr("Set Default"))) {
+
+		if (ui_button(tr("Edit"))) {
+
 			ui_menu_draw(function (ui: ui_t) {
-				if (ui_menu_button(tr("Cube"))) {
-					tab_meshes_set_default_mesh(".Cube");
-				}
-				if (ui_menu_button(tr("Plane"))) {
-					tab_meshes_set_default_mesh(".Plane");
-				}
-				if (ui_menu_button(tr("Sphere"))) {
-					tab_meshes_set_default_mesh(".Sphere");
-				}
-				if (ui_menu_button(tr("Cylinder"))) {
-					tab_meshes_set_default_mesh(".Cylinder");
-				}
-			});
-		}
-		///end
 
-		if (ui_button(tr("Flip Normals"))) {
-			util_mesh_flip_normals();
-			context_raw.ddirty = 2;
-		}
-
-		if (ui_button(tr("Calculate Normals"))) {
-			ui_menu_draw(function (ui: ui_t) {
-				if (ui_menu_button(tr("Smooth"))) {
-					util_mesh_calc_normals(true);
-					context_raw.ddirty = 2;
+				///if is_lab
+				if (ui_menu_button(tr("Set Default"))) {
+					ui_menu_draw(function (ui: ui_t) {
+						if (ui_menu_button(tr("Cube"))) {
+							tab_meshes_set_default_mesh(".Cube");
+						}
+						if (ui_menu_button(tr("Plane"))) {
+							tab_meshes_set_default_mesh(".Plane");
+						}
+						if (ui_menu_button(tr("Sphere"))) {
+							tab_meshes_set_default_mesh(".Sphere");
+						}
+						if (ui_menu_button(tr("Cylinder"))) {
+							tab_meshes_set_default_mesh(".Cylinder");
+						}
+					});
 				}
-				if (ui_menu_button(tr("Flat"))) {
-					util_mesh_calc_normals(false);
-					context_raw.ddirty = 2;
-				}
-			});
-		}
+				///end
 
-		if (ui_button(tr("Geometry to Origin"))) {
-			util_mesh_to_origin();
-			context_raw.ddirty = 2;
-		}
-
-		if (ui_button(tr("Apply Displacement"))) {
-			///if is_paint
-			util_mesh_apply_displacement(project_layers[0].texpaint_pack);
-			///end
-			///if is_lab
-			let displace_strength: f32 = config_raw.displace_strength > 0 ? config_raw.displace_strength : 1.0;
-			let uv_scale: f32 = scene_meshes[0].data.scale_tex * context_raw.brush_scale;
-			util_mesh_apply_displacement(context_raw.brush_output_node_inst.texpaint_pack, 0.05 * displace_strength, uv_scale);
-			///end
-
-			util_mesh_calc_normals();
-			context_raw.ddirty = 2;
-		}
-
-		if (ui_button(tr("Rotate"))) {
-			ui_menu_draw(function (ui: ui_t) {
-				if (ui_menu_button(tr("Rotate X"))) {
-					util_mesh_swap_axis(1, 2);
+				if (ui_menu_button(tr("Flip Normals"))) {
+					util_mesh_flip_normals();
 					context_raw.ddirty = 2;
 				}
 
-				if (ui_menu_button(tr("Rotate Y"))) {
-					util_mesh_swap_axis(2, 0);
+				if (ui_menu_button(tr("Calculate Normals"))) {
+					ui_menu_draw(function (ui: ui_t) {
+						if (ui_menu_button(tr("Smooth"))) {
+							util_mesh_calc_normals(true);
+							context_raw.ddirty = 2;
+						}
+						if (ui_menu_button(tr("Flat"))) {
+							util_mesh_calc_normals(false);
+							context_raw.ddirty = 2;
+						}
+					});
+				}
+
+				if (ui_menu_button(tr("Geometry to Origin"))) {
+					util_mesh_to_origin();
 					context_raw.ddirty = 2;
 				}
 
-				if (ui_menu_button(tr("Rotate Z"))) {
-					util_mesh_swap_axis(0, 1);
+				if (ui_menu_button(tr("Apply Displacement"))) {
+					///if is_paint
+					util_mesh_apply_displacement(project_layers[0].texpaint_pack);
+					///end
+					///if is_lab
+					let displace_strength: f32 = config_raw.displace_strength > 0 ? config_raw.displace_strength : 1.0;
+					let uv_scale: f32 = scene_meshes[0].data.scale_tex * context_raw.brush_scale;
+					util_mesh_apply_displacement(context_raw.brush_output_node_inst.texpaint_pack, 0.05 * displace_strength, uv_scale);
+					///end
+
+					util_mesh_calc_normals();
 					context_raw.ddirty = 2;
+				}
+
+				if (ui_menu_button(tr("Rotate"))) {
+					ui_menu_draw(function (ui: ui_t) {
+						if (ui_menu_button(tr("Rotate X"))) {
+							util_mesh_swap_axis(1, 2);
+							context_raw.ddirty = 2;
+						}
+
+						if (ui_menu_button(tr("Rotate Y"))) {
+							util_mesh_swap_axis(2, 0);
+							context_raw.ddirty = 2;
+						}
+
+						if (ui_menu_button(tr("Rotate Z"))) {
+							util_mesh_swap_axis(0, 1);
+							context_raw.ddirty = 2;
+						}
+					});
+				}
+
+				if (ui_menu_button(tr("UV Unwrap"))) {
+					let f: string = "uv_unwrap.js";
+					if (array_index_of(config_raw.plugins, f) == -1) {
+						config_enable_plugin(f);
+					}
+					plugin_uv_unwrap_button();
 				}
 			});
 		}
