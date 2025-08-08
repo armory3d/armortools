@@ -183,7 +183,6 @@ void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structur
 void *gpu_vertex_buffer_lock(gpu_buffer_t *buffer);
 void gpu_vertex_buffer_unlock(gpu_buffer_t *buffer);
 void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size);
-void gpu_constant_buffer_destroy(gpu_buffer_t *buffer);
 void gpu_constant_buffer_lock(gpu_buffer_t *buffer, int start, int count);
 void gpu_constant_buffer_unlock(gpu_buffer_t *buffer);
 void gpu_index_buffer_init(gpu_buffer_t *buffer, int count);

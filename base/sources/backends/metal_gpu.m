@@ -596,12 +596,6 @@ void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size) {
 	buffer->impl.metal_buffer = (__bridge_retained void *)[get_metal_device() newBufferWithLength:size options:MTLResourceOptionCPUCacheModeDefault];
 }
 
-void gpu_constant_buffer_destroy(gpu_buffer_t *buffer) {
-	id<MTLBuffer> buf = (__bridge_transfer id<MTLBuffer>)buffer->impl.metal_buffer;
-	buf = nil;
-	buffer->impl.metal_buffer = NULL;
-}
-
 void gpu_constant_buffer_lock(gpu_buffer_t *buffer, int start, int count) {
 	id<MTLBuffer> buf = (__bridge id<MTLBuffer>)buffer->impl.metal_buffer;
 	uint8_t *data = (uint8_t *)[buf contents];

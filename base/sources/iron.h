@@ -2043,7 +2043,7 @@ void iron_ml_unload() {
 
 void iron_raytrace_init(buffer_t *shader) {
 	if (rt_created) {
-		gpu_constant_buffer_destroy(&rt_constant_buffer);
+		gpu_buffer_destroy(&rt_constant_buffer);
 		gpu_raytrace_pipeline_destroy(&rt_pipeline);
 	}
 	rt_created = true;
