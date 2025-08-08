@@ -401,11 +401,12 @@ static int getMouseY(NSEvent *event) {
 
 - (BOOL)performDragOperation:(id<NSDraggingInfo>)sender {
 	NSPasteboard *pboard = [sender draggingPasteboard];
-	// NSDragOperation sourceDragMask = [sender draggingSourceOperationMask];
 	if ([[pboard types] containsObject:NSURLPboardType]) {
-		NSURL *fileURL = [NSURL URLFromPasteboard:pboard];
-		wchar_t *filePath = (wchar_t *)[fileURL.path cStringUsingEncoding:NSUTF32LittleEndianStringEncoding];
-		iron_internal_drop_files_callback(filePath);
+		NSArray *urls = [pboard readObjectsForClasses:@[[NSURL class]] options:nil];
+		for (NSURL *fileURL in urls) {
+			wchar_t *filePath = (wchar_t *)[fileURL.path cStringUsingEncoding:NSUTF32LittleEndianStringEncoding];
+			iron_internal_drop_files_callback(filePath);
+		}
 	}
 	return YES;
 }
@@ -933,9 +934,9 @@ id get_metal_queue(void) {
 
 bool iron_internal_handle_messages(void) {
 	NSEvent *event = [myapp nextEventMatchingMask:NSAnyEventMask
-	                                    untilDate:[NSDate distantPast]
-	                                       inMode:NSDefaultRunLoopMode
-	                                      dequeue:YES]; // distantPast: non-blocking
+										untilDate:[NSDate distantPast]
+										   inMode:NSDefaultRunLoopMode
+										  dequeue:YES]; // distantPast: non-blocking
 	if (event != nil) {
 		[myapp sendEvent:event];
 		[myapp updateWindows];
