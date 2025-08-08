@@ -1301,10 +1301,6 @@ void gpu_set_index_buffer(gpu_buffer_t *buffer) {
 }
 
 void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
-	if (gpu_in_use) {
-		vkCmdEndRendering(command_buffer);
-	}
-
 	int buffer_size = render_target->width * render_target->height * gpu_texture_format_size(render_target->format);
 	int new_readback_buffer_size = buffer_size;
 	if (new_readback_buffer_size < (2048 * 2048 * 4)) {
@@ -1336,7 +1332,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 		mem_alloc.allocationSize = 0;
 		mem_alloc.memoryTypeIndex = 0;
 		mem_alloc.allocationSize = mem_reqs.size;
-		memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &mem_alloc.memoryTypeIndex);
+		memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT, &mem_alloc.memoryTypeIndex);
 		vkAllocateMemory(device, &mem_alloc, NULL, &readback_mem);
 		vkBindBufferMemory(device, readback_buffer, readback_mem, 0);
 	}
@@ -1357,7 +1353,13 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	region.imageExtent.width = (uint32_t)render_target->width;
 	region.imageExtent.height = (uint32_t)render_target->height;
 	region.imageExtent.depth = 1;
+	if (gpu_in_use) {
+		vkCmdEndRendering(command_buffer);
+	}
 	vkCmdCopyImageToBuffer(command_buffer, render_target->impl.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, readback_buffer, 1, &region);
+	if (gpu_in_use) {
+		vkCmdBeginRendering(command_buffer, &current_rendering_info);
+	}
 
 	set_image_layout(render_target->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
@@ -1368,10 +1370,6 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	vkMapMemory(device, readback_mem, 0, VK_WHOLE_SIZE, 0, (void **)&p);
 	memcpy(data, p, buffer_size);
 	vkUnmapMemory(device, readback_mem);
-
-	if (gpu_in_use) {
-		vkCmdBeginRendering(command_buffer, &current_rendering_info);
-	}
 }
 
 static VkDescriptorSet get_descriptor_set(VkBuffer buffer) {
