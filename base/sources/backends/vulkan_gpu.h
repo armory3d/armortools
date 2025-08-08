@@ -25,7 +25,6 @@ typedef struct {
 typedef struct {
 	VkBuffer buf;
 	VkDeviceMemory mem;
-	VkMemoryAllocateInfo mem_alloc;
 } gpu_buffer_impl_t;
 
 typedef struct {
