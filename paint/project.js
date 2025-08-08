@@ -2,6 +2,7 @@
 let flags = globalThis.flags;
 flags.name = "ArmorPaint";
 flags.package = "org.armorpaint";
+flags.with_video_write = true;
 
 let project = new Project(flags.name);
 project.add_define("is_paint");

@@ -824,7 +824,7 @@ function base_init_config() {
 	raw.dilate_radius = 2;
 	raw.gpu_inference = true;
 	raw.blender = "";
-	raw.scene_atlas_res = 0;
+	raw.scene_atlas_res = texture_res_t.RES8192;
 	raw.pathtrace_mode = pathtrace_mode_t.FAST;
 	raw.grid_snap = false;
 

@@ -167,7 +167,7 @@ enum mesh_format_t {
 	ARM = 1,
 }
 
-enum menu_category_t {
+enum menubar_category_t {
 	FILE = 0,
 	EDIT = 1,
 	VIEWPORT = 2,

@@ -13,6 +13,11 @@ function context_ext_select_paint_object(o: mesh_object_t) {
 		let p: mesh_object_t = project_paint_objects[i];
 		p.skip_context = "paint";
 	}
+
+	///if_forge
+	context_raw.paint_object.skip_context = "";
+	///end
+
 	context_raw.paint_object = o;
 
 	let mask: i32 = slot_layer_get_object_mask(context_raw.layer);
