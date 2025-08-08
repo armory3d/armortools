@@ -2811,7 +2811,7 @@ class Project {
 				if (!sub.lto) {
 					this.lto = false;
 				}
-				if (sub.icon) {
+				if (sub.icon != "icon.png") {
 					this.icon = sub.icon;
 				}
 				let subbasedir = sub.basedir;
