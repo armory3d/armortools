@@ -271,6 +271,7 @@ function base_resize() {
 		cam.data.ortho[3] =  2 * (sys_h() / sys_w());
 	}
 	camera_object_build_proj(cam);
+	render_path_base_taa_frame = 0;
 
 	if (context_raw.camera_type == camera_type_t.ORTHOGRAPHIC) {
 		viewport_update_camera_type(context_raw.camera_type);
