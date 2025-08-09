@@ -407,8 +407,7 @@ function ui_menubar_draw_category_items(ui: ui_t) {
 		}
 		context_raw.texture_filter = ui_check(filter_handle, " " + tr("Filter Textures"));
 		if (filter_handle.changed) {
-			make_material_parse_paint_material();
-			make_material_parse_mesh_material();
+			gpu_use_linear_sampling(context_raw.texture_filter);
 		}
 
 		///if is_paint

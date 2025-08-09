@@ -266,18 +266,7 @@ void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height
 	device->lpVtbl->CreateShaderResourceView(device, render_target->impl.image, &srv_desc, handle);
 }
 
-void gpu_init_internal(int depth_buffer_bits, bool vsync) {
-	window_vsync = vsync;
-	#ifdef _DEBUG
-	ID3D12Debug *debug_controller = NULL;
-	if (D3D12GetDebugInterface(&IID_ID3D12Debug, &debug_controller) == S_OK) {
-		debug_controller->lpVtbl->EnableDebugLayer(debug_controller);
-	}
-	#endif
-
-	D3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, &IID_ID3D12Device, &device);
-
-	// Root signature
+void create_root_signature(bool linear_sampling) {
 	ID3DBlob *root_blob;
 	ID3DBlob *error_blob;
 	D3D12_ROOT_PARAMETER parameters[2] = {};
@@ -299,7 +288,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	D3D12_STATIC_SAMPLER_DESC samplers[GPU_MAX_TEXTURES];
 	for (int i = 0; i < GPU_MAX_TEXTURES; ++i) {
  		samplers[i].ShaderRegister = i;
- 		samplers[i].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+		samplers[i].Filter = linear_sampling ? D3D12_FILTER_MIN_MAG_MIP_LINEAR : D3D12_FILTER_MIN_MAG_MIP_POINT;
  		samplers[i].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
  		samplers[i].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
  		samplers[i].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -321,12 +310,24 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	};
 	D3D12SerializeRootSignature(&root_signature_desc, D3D_ROOT_SIGNATURE_VERSION_1, &root_blob, &error_blob);
 	device->lpVtbl->CreateRootSignature(device, 0, root_blob->lpVtbl->GetBufferPointer(root_blob), root_blob->lpVtbl->GetBufferSize(root_blob), &IID_ID3D12RootSignature, &root_signature);
+}
+
+void gpu_init_internal(int depth_buffer_bits, bool vsync) {
+	window_vsync = vsync;
+	#ifdef _DEBUG
+	ID3D12Debug *debug_controller = NULL;
+	if (D3D12GetDebugInterface(&IID_ID3D12Debug, &debug_controller) == S_OK) {
+		debug_controller->lpVtbl->EnableDebugLayer(debug_controller);
+	}
+	#endif
+
+	D3D12CreateDevice(NULL, D3D_FEATURE_LEVEL_11_0, &IID_ID3D12Device, &device);
+	create_root_signature(true);
 
 	D3D12_COMMAND_QUEUE_DESC queue_desc = {
 		.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE,
 		.Type = D3D12_COMMAND_LIST_TYPE_DIRECT,
 	};
-
 	device->lpVtbl->CreateCommandQueue(device, &queue_desc, &IID_ID3D12CommandQueue, &queue);
 
 	HWND hwnd = iron_windows_window_handle();
@@ -672,6 +673,10 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 
 void gpu_set_texture(int unit, gpu_texture_t *texture) {
 	current_textures[unit] = texture;
+}
+
+void gpu_use_linear_sampling(bool b) {
+	create_root_signature(b);
 }
 
 void gpu_pipeline_destroy(gpu_pipeline_t *pipe) {

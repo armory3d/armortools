@@ -36,7 +36,7 @@ static VkRenderingInfo current_rendering_info;
 static VkRenderingAttachmentInfo current_color_attachment_infos[8];
 static VkRenderingAttachmentInfo current_depth_attachment_info;
 static VkPhysicalDeviceMemoryProperties memory_properties;
-static VkSampler immutable_sampler;
+static VkSampler current_sampler;
 static VkCommandBuffer command_buffer;
 static VkBuffer buffers_to_destroy[256];
 static VkDeviceMemory buffer_memories_to_destroy[256];
@@ -285,6 +285,28 @@ static void set_image_layout(VkImage image, VkImageAspectFlags aspect_mask, VkIm
 	}
 }
 
+static void create_sampler(bool linear_sampling) {
+	VkSamplerCreateInfo sampler_info = {
+		.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+		.magFilter = linear_sampling ? VK_FILTER_LINEAR : VK_FILTER_NEAREST,
+		.minFilter = linear_sampling ? VK_FILTER_LINEAR : VK_FILTER_NEAREST,
+		.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+		.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+		.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+		.anisotropyEnable = VK_FALSE,
+		.maxAnisotropy = 1.0f,
+		.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
+		.unnormalizedCoordinates = VK_FALSE,
+		.compareEnable = VK_FALSE,
+		.compareOp = VK_COMPARE_OP_ALWAYS,
+		.mipmapMode = linear_sampling ? VK_SAMPLER_MIPMAP_MODE_LINEAR : VK_SAMPLER_MIPMAP_MODE_NEAREST,
+		.mipLodBias = 0.0f,
+		.minLod = 0.0f,
+		.maxLod = 0.0f,
+	};
+	vkCreateSampler(device, &sampler_info, NULL, &current_sampler);
+}
+
 static void create_descriptors(void) {
 	VkDescriptorSetLayoutBinding bindings[18];
 	memset(bindings, 0, sizeof(bindings));
@@ -295,31 +317,12 @@ static void create_descriptors(void) {
 	bindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 	bindings[0].pImmutableSamplers = NULL;
 
-	VkSamplerCreateInfo sampler_info = {
-		.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
-		.magFilter = VK_FILTER_LINEAR,
-		.minFilter = VK_FILTER_LINEAR,
-		.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT,
-		.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT,
-		.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT,
-		.anisotropyEnable = VK_FALSE,
-		.maxAnisotropy = 1.0f,
-		.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
-		.unnormalizedCoordinates = VK_FALSE,
-		.compareEnable = VK_FALSE,
-		.compareOp = VK_COMPARE_OP_ALWAYS,
-		.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
-		.mipLodBias = 0.0f,
-		.minLod = 0.0f,
-		.maxLod = 0.0f,
-	};
-	vkCreateSampler(device, &sampler_info, NULL, &immutable_sampler);
-
+	create_sampler(true);
 	bindings[1].binding = 1;
 	bindings[1].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
 	bindings[1].descriptorCount = 1;
 	bindings[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-	bindings[1].pImmutableSamplers = &immutable_sampler;
+	bindings[1].pImmutableSamplers = &current_sampler;
 
 	for (int i = 2; i < 2 + GPU_MAX_TEXTURES; ++i) {
 		bindings[i].binding = i;
@@ -1435,6 +1438,10 @@ void gpu_set_constant_buffer(gpu_buffer_t *buffer, int offset, size_t size) {
 
 void gpu_set_texture(int unit, gpu_texture_t *texture) {
 	current_textures[unit] = texture;
+}
+
+void gpu_use_linear_sampling(bool b) {
+	create_sampler(b);
 }
 
 void gpu_pipeline_destroy(gpu_pipeline_t *pipeline) {
