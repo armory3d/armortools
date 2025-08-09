@@ -287,20 +287,20 @@ void create_root_signature(bool linear_sampling) {
 	parameters[1].Descriptor.RegisterSpace = 0;
 	D3D12_STATIC_SAMPLER_DESC samplers[GPU_MAX_TEXTURES];
 	for (int i = 0; i < GPU_MAX_TEXTURES; ++i) {
- 		samplers[i].ShaderRegister = i;
+		samplers[i].ShaderRegister = i;
 		samplers[i].Filter = linear_sampling ? D3D12_FILTER_MIN_MAG_MIP_LINEAR : D3D12_FILTER_MIN_MAG_MIP_POINT;
- 		samplers[i].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
- 		samplers[i].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
- 		samplers[i].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
- 		samplers[i].MipLODBias = 0;
- 		samplers[i].MaxAnisotropy = 16;
- 		samplers[i].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
- 		samplers[i].BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
- 		samplers[i].MinLOD = 0.0f;
- 		samplers[i].MaxLOD = D3D12_FLOAT32_MAX;
- 		samplers[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
- 		samplers[i].RegisterSpace = 0;
- 	}
+		samplers[i].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+		samplers[i].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+		samplers[i].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+		samplers[i].MipLODBias = 0;
+		samplers[i].MaxAnisotropy = 16;
+		samplers[i].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+		samplers[i].BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+		samplers[i].MinLOD = 0.0f;
+		samplers[i].MaxLOD = D3D12_FLOAT32_MAX;
+		samplers[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+		samplers[i].RegisterSpace = 0;
+	}
 	D3D12_ROOT_SIGNATURE_DESC root_signature_desc = {
 		.NumParameters = 2,
 		.pParameters = parameters,
