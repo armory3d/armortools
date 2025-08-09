@@ -705,7 +705,6 @@ function ui_base_update() {
 		base_is_resizing = false;
 	}
 
-	///if arm_physics
 	if (context_raw.tool == tool_type_t.PARTICLE && context_in_paint_area() && !context_raw.paint2d) {
 		util_particle_init_physics();
 		let world: physics_world_t = physics_world_active;
@@ -760,7 +759,6 @@ function ui_base_update() {
 			}
 		}
 	}
-	///end
 }
 
 function ui_base_view_top() {
@@ -983,11 +981,9 @@ function ui_base_update_ui() {
 		}
 	}
 
-	///if arm_physics
 	if (context_raw.tool == tool_type_t.PARTICLE) {
 		down = false;
 	}
-	///end
 
 	///if arm_ios
 	// No hover on iPad, decals are painted by pen release

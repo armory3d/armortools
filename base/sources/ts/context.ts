@@ -253,7 +253,6 @@ type context_t = {
 
 	selected_object?: object_t;
 
-	///if arm_physics
 	particle_hit_x?: f32;
 	particle_hit_y?: f32;
 	particle_hit_z?: f32;
@@ -262,7 +261,6 @@ type context_t = {
 	last_particle_hit_z?: f32;
 	particle_timer?: tween_anim_t;
 	paint_body?: physics_body_t;
-	///end
 }
 
 let context_raw: context_t;
@@ -371,14 +369,12 @@ function context_create(): context_t {
 	c.decal_y = 0.0;
 	// c.cache_draws = false;
 	c.write_icon_on_export = false;
-	///if arm_physics
 	c.particle_hit_x = 0.0;
 	c.particle_hit_y = 0.0;
 	c.particle_hit_z = 0.0;
 	c.last_particle_hit_x = 0.0;
 	c.last_particle_hit_y = 0.0;
 	c.last_particle_hit_z = 0.0;
-	///end
 	c.layer_filter = 0;
 	c.gizmo_started = false;
 	c.gizmo_offset = 0.0;

@@ -234,7 +234,6 @@ function uniforms_ext_vec3_link(object: object_t, mat: material_data_t, link: st
 		);
 		return v;
 	}
-	///if arm_physics
 	else if (link == "_particle_hit") {
 		v = _uniforms_vec;
 		v = vec4_create(context_raw.particle_hit_x, context_raw.particle_hit_y, context_raw.particle_hit_z);
@@ -245,7 +244,6 @@ function uniforms_ext_vec3_link(object: object_t, mat: material_data_t, link: st
 		v = vec4_create(context_raw.last_particle_hit_x, context_raw.last_particle_hit_y, context_raw.last_particle_hit_z);
 		return v;
 	}
-	///end
 
 	return v;
 }

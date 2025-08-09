@@ -103,9 +103,7 @@ function import_mesh_finish_import() {
 
 	render_path_raytrace_ready = false;
 
-	///if arm_physics
 	context_raw.paint_body = null;
-	///end
 }
 
 function _import_mesh_make_mesh(mesh: raw_mesh_t) {

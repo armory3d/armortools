@@ -47,7 +47,6 @@ function util_particle_init() {
 	mo.base.raw = util_clone_obj(mo.base.raw);
 }
 
-///if arm_physics
 
 function util_particle_init_physics() {
 	if (physics_world_active != null) {
@@ -74,5 +73,3 @@ function util_particle_init_mesh() {
 	context_raw.paint_body.shape = physics_shape_t.MESH;
 	physics_body_init(context_raw.paint_body, po.base);
 }
-
-///end

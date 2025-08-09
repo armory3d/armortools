@@ -286,12 +286,11 @@ function tab_meshes_draw(htab: ui_handle_t) {
 						context_raw.selected_object.transform.rot = quat_from_euler(rot.x, rot.y, rot.z);
 						transform_build_matrix(context_raw.selected_object.transform);
 						transform_compute_dim(context_raw.selected_object.transform);
-						///if arm_physics
+
 						let pb: physics_body_t = map_get(physics_body_object_map, context_raw.selected_object.uid);
 						if (pb != null) {
 							physics_body_sync_transform(pb);
 						}
-						///end
 					}
 
 					let pb: physics_body_t = map_get(physics_body_object_map, context_raw.selected_object.uid);

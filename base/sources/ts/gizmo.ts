@@ -80,12 +80,11 @@ function gizmo_update() {
 			context_raw.gizmo_drag_last = context_raw.gizmo_drag;
 
 			transform_build_matrix(paint_object.transform);
-			///if arm_physics
+
 			let pb: physics_body_t = map_get(physics_body_object_map, paint_object.uid);
 			if (pb != null) {
 				physics_body_sync_transform(pb);
 			}
-			///end
 		}
 	}
 	// Decal layer control
