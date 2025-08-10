@@ -32,6 +32,7 @@ static gpu_texture_t *current_textures[GPU_MAX_TEXTURES] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
 static bool window_vsync;
+static ID3D12DescriptorHeap *sampler_heap;
 static ID3D12DescriptorHeap *srv_heap;
 static int srv_heap_index = 0;
 static UINT64 fence_value;
@@ -269,7 +270,7 @@ void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height
 void create_root_signature(bool linear_sampling) {
 	ID3DBlob *root_blob;
 	ID3DBlob *error_blob;
-	D3D12_ROOT_PARAMETER parameters[2] = {};
+	D3D12_ROOT_PARAMETER parameters[3] = {};
 	D3D12_DESCRIPTOR_RANGE range = {
 		.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV,
 		.NumDescriptors = (UINT)GPU_MAX_TEXTURES,
@@ -285,27 +286,21 @@ void create_root_signature(bool linear_sampling) {
 	parameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	parameters[1].Descriptor.ShaderRegister = 0;
 	parameters[1].Descriptor.RegisterSpace = 0;
-	D3D12_STATIC_SAMPLER_DESC samplers[GPU_MAX_TEXTURES];
-	for (int i = 0; i < GPU_MAX_TEXTURES; ++i) {
-		samplers[i].ShaderRegister = i;
-		samplers[i].Filter = linear_sampling ? D3D12_FILTER_MIN_MAG_MIP_LINEAR : D3D12_FILTER_MIN_MAG_MIP_POINT;
-		samplers[i].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		samplers[i].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		samplers[i].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		samplers[i].MipLODBias = 0;
-		samplers[i].MaxAnisotropy = 16;
-		samplers[i].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
-		samplers[i].BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
-		samplers[i].MinLOD = 0.0f;
-		samplers[i].MaxLOD = D3D12_FLOAT32_MAX;
-		samplers[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-		samplers[i].RegisterSpace = 0;
-	}
+	D3D12_DESCRIPTOR_RANGE sampler_range = {
+		.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER,
+		.NumDescriptors = 1,
+		.BaseShaderRegister = 0,
+		.RegisterSpace = 0,
+		.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND,
+	};
+	parameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	parameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	parameters[2].DescriptorTable.NumDescriptorRanges = 1;
+	parameters[2].DescriptorTable.pDescriptorRanges = &sampler_range;
+
 	D3D12_ROOT_SIGNATURE_DESC root_signature_desc = {
-		.NumParameters = 2,
+		.NumParameters = 3,
 		.pParameters = parameters,
-		.NumStaticSamplers = GPU_MAX_TEXTURES,
-		.pStaticSamplers = samplers,
 		.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT,
 	};
 	D3D12SerializeRootSignature(&root_signature_desc, D3D_ROOT_SIGNATURE_VERSION_1, &root_blob, &error_blob);
@@ -359,6 +354,14 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 		.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
 	};
 	device->lpVtbl->CreateDescriptorHeap(device, &heap_desc, &IID_ID3D12DescriptorHeap, &srv_heap);
+
+	D3D12_DESCRIPTOR_HEAP_DESC sampler_heap_desc = {
+		.NumDescriptors = 1,
+		.Type = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
+		.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
+	};
+	device->lpVtbl->CreateDescriptorHeap(device, &sampler_heap_desc, &IID_ID3D12DescriptorHeap, &sampler_heap);
+	gpu_use_linear_sampling(true);
 
 	device->lpVtbl->CreateCommandAllocator(device, D3D12_COMMAND_LIST_TYPE_DIRECT, &IID_ID3D12CommandAllocator, &command_allocator);
 	device->lpVtbl->CreateCommandList(device, 0, D3D12_COMMAND_LIST_TYPE_DIRECT, command_allocator, NULL, &IID_ID3D12CommandList, &command_list);
@@ -514,9 +517,13 @@ void gpu_internal_set_textures() {
 		}
 	}
 
-	ID3D12DescriptorHeap *heaps[] = {srv_heap};
-	command_list->lpVtbl->SetDescriptorHeaps(command_list, 1, heaps);
+	ID3D12DescriptorHeap *heaps[] = {srv_heap, sampler_heap};
+	command_list->lpVtbl->SetDescriptorHeaps(command_list, 2, heaps);
 	command_list->lpVtbl->SetGraphicsRootDescriptorTable(command_list, 0, gpu_base);
+
+	D3D12_GPU_DESCRIPTOR_HANDLE sampler_gpu_base;
+	sampler_heap->lpVtbl->GetGPUDescriptorHandleForHeapStart(sampler_heap, &sampler_gpu_base);
+	command_list->lpVtbl->SetGraphicsRootDescriptorTable(command_list, 2, sampler_gpu_base);
 }
 
 void gpu_draw_internal() {
@@ -676,7 +683,21 @@ void gpu_set_texture(int unit, gpu_texture_t *texture) {
 }
 
 void gpu_use_linear_sampling(bool b) {
-	create_root_signature(b);
+	D3D12_SAMPLER_DESC sampler_desc = {
+		.Filter = b ? D3D12_FILTER_MIN_MAG_MIP_LINEAR : D3D12_FILTER_MIN_MAG_MIP_POINT,
+		.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP,
+		.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP,
+		.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP,
+		.MipLODBias = 0,
+		.MaxAnisotropy = 16,
+		.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER,
+		.BorderColor = {0.0f, 0.0f, 0.0f, 0.0f},
+		.MinLOD = 0.0f,
+		.MaxLOD = D3D12_FLOAT32_MAX,
+	};
+	D3D12_CPU_DESCRIPTOR_HANDLE sampler_handle;
+	sampler_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(sampler_heap, &sampler_handle);
+	device->lpVtbl->CreateSampler(device, &sampler_desc, sampler_handle);
 }
 
 void gpu_pipeline_destroy(gpu_pipeline_t *pipe) {
