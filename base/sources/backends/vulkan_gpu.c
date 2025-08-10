@@ -1412,17 +1412,17 @@ static VkDescriptorSet get_descriptor_set(VkBuffer buffer) {
 	write_count++;
 
 	VkDescriptorImageInfo sampler_info = {
-        .sampler = linear_sampling ? linear_sampler : point_sampler,
-        .imageView = VK_NULL_HANDLE,
-        .imageLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-    };
-    writes[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    writes[1].dstSet = descriptor_set;
-    writes[1].dstBinding = 1;
-    writes[1].descriptorCount = 1;
-    writes[1].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-    writes[1].pImageInfo = &sampler_info;
-    write_count++;
+		.sampler = linear_sampling ? linear_sampler : point_sampler,
+		.imageView = VK_NULL_HANDLE,
+		.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+	};
+	writes[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	writes[1].dstSet = descriptor_set;
+	writes[1].dstBinding = 1;
+	writes[1].descriptorCount = 1;
+	writes[1].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+	writes[1].pImageInfo = &sampler_info;
+	write_count++;
 
 	for (int i = 0; i < GPU_MAX_TEXTURES; ++i) {
 		if (current_textures[i] != NULL) {
