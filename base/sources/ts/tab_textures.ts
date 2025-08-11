@@ -141,7 +141,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 
 									sys_notify_on_next_frame(function () {
 										let img: gpu_texture_t = _tab_textures_draw_img;
-										let target: gpu_texture_t = gpu_create_render_target(tab_textures_to_pow2(img.width), tab_textures_to_pow2(img.height));
+										let target: gpu_texture_t = gpu_create_render_target(img.width, img.height);
 										draw_begin(target);
 										draw_set_pipeline(pipes_copy);
 										draw_scaled_image(img, 0, 0, target.width, target.height);
@@ -235,17 +235,6 @@ function tab_textures_draw(htab: ui_handle_t) {
 			tab_textures_delete_texture(context_raw.texture);
 		}
 	}
-}
-
-function tab_textures_to_pow2(i: i32): i32 {
-	i--;
-	i |= i >> 1;
-	i |= i >> 2;
-	i |= i >> 4;
-	i |= i >> 8;
-	i |= i >> 16;
-	i++;
-	return i;
 }
 
 function tab_textures_update_texture_pointers(nodes: ui_node_t[], i: i32) {
