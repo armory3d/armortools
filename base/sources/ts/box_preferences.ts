@@ -248,6 +248,7 @@ function box_preferences_show() {
 			// Theme fields
 			let hlist: ui_handle_t = ui_handle(__ID__);
 			let u32_theme: u32_ptr = base_theme;
+			ui.input_enabled = !ui_menu_show;
 			for (let i: i32 = 0; i < ui_theme_keys_count; ++i) {
 				let key: string = ARRAY_ACCESS(ui_theme_keys, i);
 				let h: ui_handle_t = ui_nest(hlist, i);
@@ -313,6 +314,7 @@ function box_preferences_show() {
 					}
 				}
 			}
+			ui.input_enabled = true;
 		}
 
 		if (ui_tab(box_preferences_htab, tr("Usage"), true)) {
