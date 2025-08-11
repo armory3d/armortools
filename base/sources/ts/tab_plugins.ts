@@ -56,7 +56,6 @@ function plugin_uv_unwrap_button() {
 		md.vertex_arrays[1].values = mesh.nora;
 		md.vertex_arrays[2].values = mesh.texa;
 		md.index_arrays[0].values = mesh.inda;
-		md._.indices[0] = mesh.inda;
 		md._.ready = false;
 		mesh_data_build(md);
 	}

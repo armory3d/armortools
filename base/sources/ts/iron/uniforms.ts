@@ -588,7 +588,7 @@ function current_material(object: object_t): material_data_t {
 	if (object != null && object.ext != null) {
 		let mo: mesh_object_t = object.ext;
 		if (mo.materials != null) {
-			return mo.materials[mo.material_index];
+			return mo.materials[0];
 		}
 	}
 	return null;

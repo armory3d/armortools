@@ -479,9 +479,6 @@ type mesh_data_runtime_t = {
 	vertex_buffer_map?: map_t<string, gpu_buffer_t>;
 	index_buffers?: gpu_buffer_t[];
 	ready?: bool;
-	vertices?: buffer_t;
-	indices?: u32_array_t[];
-	material_indices?: i32[];
 	structure?: gpu_vertex_structure_t;
 	///if arm_skin
 	skeleton_transforms_inv?: mat4_t[];

@@ -57,8 +57,7 @@ function physics_body_init(body: physics_body_t, obj: object_t) {
 		let scale: vec4_t = obj.transform.scale;
 
 		let positions: i16_array_t = mesh_data_get_vertex_array(data, "pos").values;
-		let indices: u32_array_t[] = data._.indices;
-		let indices0: u32_array_t = indices[0];
+		let indices0: u32_array_t = data.index_arrays[0].values;
 
 		scale_pos = scale.x * data.scale_pos;
 		posa = positions;

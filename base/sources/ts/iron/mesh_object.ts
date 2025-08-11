@@ -3,7 +3,6 @@ type mesh_object_t = {
 	base?: object_t;
 	data?: mesh_data_t;
 	materials?: material_data_t[];
-	material_index?: i32;
 	camera_dist?: f32;
 	screen_size?: f32;
 	frustum_culling?: bool;
@@ -17,7 +16,6 @@ let _mesh_object_shader_contexts: shader_context_t[] = [];
 
 function mesh_object_create(data: mesh_data_t, materials: material_data_t[]): mesh_object_t {
 	let raw: mesh_object_t = {};
-	raw.material_index = 0;
 	raw.screen_size = 0.0;
 	raw.frustum_culling = true;
 	raw.base = object_create(false);
@@ -154,35 +152,21 @@ function mesh_object_render(raw: mesh_object_t, context: string, bind_params: st
 	transform_update(raw.base.transform);
 
 	// Render mesh
-	for (let i: i32 = 0; i < raw.data._.index_buffers.length; ++i) {
+	let scontext: shader_context_t = shader_contexts[0];
+	let elems: vertex_element_t[] = scontext.vertex_elements;
 
-		let mi: i32 = raw.data._.material_indices[i];
-		if (shader_contexts.length <= mi || shader_contexts[mi] == null) {
-			continue;
-		}
-		raw.material_index = mi;
-
-		let scontext: shader_context_t = shader_contexts[mi];
-		if (scontext == null) {
-			continue;
-		}
-		let elems: vertex_element_t[] = scontext.vertex_elements;
-
-		// Uniforms
-		if (scontext._.pipe_state != _mesh_object_last_pipeline) {
-			gpu_set_pipeline(scontext._.pipe_state);
-			_mesh_object_last_pipeline = scontext._.pipe_state;
-		}
-		uniforms_set_context_consts(scontext, bind_params);
-		uniforms_set_obj_consts(scontext, raw.base);
-		if (material_contexts.length > mi) {
-			uniforms_set_material_consts(scontext, material_contexts[mi]);
-		}
-
-		gpu_set_vertex_buffer(mesh_data_get(raw.data, elems));
-		gpu_set_index_buffer(raw.data._.index_buffers[i]);
-		gpu_draw();
+	// Uniforms
+	if (scontext._.pipe_state != _mesh_object_last_pipeline) {
+		gpu_set_pipeline(scontext._.pipe_state);
+		_mesh_object_last_pipeline = scontext._.pipe_state;
 	}
+	uniforms_set_context_consts(scontext, bind_params);
+	uniforms_set_obj_consts(scontext, raw.base);
+	uniforms_set_material_consts(scontext, material_contexts[0]);
+
+	gpu_set_vertex_buffer(mesh_data_get(raw.data, elems));
+	gpu_set_index_buffer(raw.data._.index_buffers[0]);
+	gpu_draw();
 }
 
 function mesh_object_valid_context(raw: mesh_object_t, mats: material_data_t[], context: string): bool {

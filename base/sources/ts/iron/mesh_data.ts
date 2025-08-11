@@ -42,17 +42,7 @@ function mesh_data_create(raw: mesh_data_t): mesh_data_t {
 	raw._.vertex_buffer_map = map_create();
 	raw._.ready = false;
 
-	// Mesh data
-	let indices: u32_array_t[] = [];
-	let material_indices: i32[] = [];
-
-	for (let i: i32 = 0; i < raw.index_arrays.length; ++i) {
-		let ind: index_array_t = raw.index_arrays[i];
-		array_push(indices, ind.values);
-		array_push(material_indices, ind.material);
-	}
-
-	// Skinning
+	///if arm_skin
 	// Prepare vertex array for skinning and fill size data
 	let vertex_arrays: vertex_array_t[] = raw.vertex_arrays;
 	if (raw.skin != null) {
@@ -95,10 +85,9 @@ function mesh_data_create(raw: mesh_data_t): mesh_data_t {
 		vertex_arrays[vertex_arrays.length - 2].values = bonea;
 		vertex_arrays[vertex_arrays.length - 1].values = weighta;
 	}
+	///end
 
 	// Make vertex buffers
-	raw._.indices = indices;
-	raw._.material_indices = material_indices;
 	raw._.structure = mesh_data_get_vertex_struct(raw.vertex_arrays);
 
 	return raw;
@@ -199,8 +188,8 @@ function mesh_data_get(raw: mesh_data_t, vs: vertex_element_t[]): gpu_buffer_t {
 		let vstruct: gpu_vertex_structure_t = mesh_data_get_vertex_struct(vertex_arrays);
 		let size: i32 = mesh_data_get_vertex_size(positions.data);
 		vb = gpu_create_vertex_buffer(math_floor(positions.values.length / size), vstruct);
-		raw._.vertices = gpu_lock_vertex_buffer(vb);
-		mesh_data_build_vertices(raw._.vertices, vertex_arrays, 0, has_tex && uvs == null, tex_offset);
+		let vertices: buffer_t = gpu_lock_vertex_buffer(vb);
+		mesh_data_build_vertices(vertices, vertex_arrays, 0, has_tex && uvs == null, tex_offset);
 		gpu_vertex_buffer_unlock(vb);
 		map_set(raw._.vertex_buffer_map, key, vb);
 		if (has_tex && uvs == null) {
@@ -221,8 +210,8 @@ function mesh_data_build(raw: mesh_data_t) {
 	let positions: vertex_array_t = mesh_data_get_vertex_array(raw, "pos");
 	let size: i32 = mesh_data_get_vertex_size(positions.data);
 	raw._.vertex_buffer = gpu_create_vertex_buffer(math_floor(positions.values.length / size), raw._.structure);
-	raw._.vertices = gpu_lock_vertex_buffer(raw._.vertex_buffer);
-	mesh_data_build_vertices(raw._.vertices, raw.vertex_arrays);
+	let vertices: buffer_t = gpu_lock_vertex_buffer(raw._.vertex_buffer);
+	mesh_data_build_vertices(vertices, raw.vertex_arrays);
 	gpu_vertex_buffer_unlock(raw._.vertex_buffer);
 
 	let struct_str: string = "";
@@ -234,18 +223,13 @@ function mesh_data_build(raw: mesh_data_t) {
 
 	raw._.index_buffers = [];
 
-	for (let i: i32 = 0; i < raw._.indices.length; ++i) {
-		let id: u32_array_t = raw._.indices[i];
-		if (id.length == 0) {
-			continue;
-		}
+	for (let i: i32 = 0; i < raw.index_arrays.length; ++i) {
+		let id: u32_array_t = raw.index_arrays[i].values;
 		let index_buffer: gpu_buffer_t = gpu_create_index_buffer(id.length);
-
 		let indices_array: u32_array_t = gpu_lock_index_buffer(index_buffer);
 		for (let i: i32 = 0; i < indices_array.length; ++i) {
 			indices_array[i] = id[i];
 		}
-
 		gpu_index_buffer_unlock(index_buffer);
 		array_push(raw._.index_buffers, index_buffer);
 	}

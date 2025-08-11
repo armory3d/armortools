@@ -97,7 +97,8 @@ function ui_nodes_ext_run() {
 			if (ui_nodes_ext_last_vertices == null || ui_nodes_ext_last_vertices.length != vertices.length) {
 				ui_nodes_ext_last_vertices = buffer_create(vertices.length);
 				for (let i: i32 = 0; i < math_floor((vertices.length) / 2); ++i) {
-					buffer_set_i16(ui_nodes_ext_last_vertices, i * 2, buffer_get_i16(vertices, i * 2));
+					// buffer_set_i16(ui_nodes_ext_last_vertices, i * 2, buffer_get_i16(vertices, i * 2)); ////
+					buffer_set_i16(ui_nodes_ext_last_vertices, i * 2, buffer_get_i16(g._.vertices, i * 2));
 				}
 			}
 			else {
