@@ -1033,13 +1033,13 @@ void hlsl_export2(char **vs, char **fs, api_kind d3d, bool debug);
 void spirv_export2(char **vs, char **fs, int *vs_size, int *fs_size, bool debug);
 
 static struct { char *key; name_id value; } *_clone_hash(struct { char *key; name_id value; } *hash) {
-    struct { char *key; name_id value; } *clone = NULL;
-    sh_new_arena(clone);
-    ptrdiff_t len = shlen(hash);
-    for (ptrdiff_t i = 0; i < len; i++) {
-        shput(clone, hash[i].key, hash[i].value);
-    }
-    return clone;
+	struct { char *key; name_id value; } *clone = NULL;
+	sh_new_arena(clone);
+	ptrdiff_t len = shlen(hash);
+	for (ptrdiff_t i = 0; i < len; i++) {
+		shput(clone, hash[i].key, hash[i].value);
+	}
+	return clone;
 }
 
 void gpu_create_shaders_from_kong(char *kong, char **vs, char **fs, int *vs_size, int *fs_size) {
@@ -1377,11 +1377,30 @@ void iron_file_save_bytes(string_t *path, buffer_t *bytes, u64 length) {
 
 i32 iron_sys_command(string_t *cmd) {
 	#ifdef IRON_WINDOWS
+
 	int wlen = MultiByteToWideChar(CP_UTF8, 0, cmd, -1, NULL, 0);
 	wchar_t *wstr = malloc(sizeof(wchar_t) * wlen);
 	MultiByteToWideChar(CP_UTF8, 0, cmd, -1, wstr, wlen);
-	int result = _wsystem(wstr);
+	wchar_t comspec[MAX_PATH];
+	GetEnvironmentVariableW(L"ComSpec", comspec, MAX_PATH);
+	wchar_t cmdline[2048];
+	swprintf(cmdline, 2048, L"\"%s\" /c %s", comspec, wstr);
+	STARTUPINFO si;
+	memset(&si, 0, sizeof(si));
+	si.cb = sizeof(si);
+	si.dwFlags = STARTF_USESHOWWINDOW;
+	si.wShowWindow = SW_HIDE;
+	PROCESS_INFORMATION pi;
+	memset(&pi, 0, sizeof(pi));
+	CreateProcessW(NULL, cmdline, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
 	free(wstr);
+	WaitForSingleObject(pi.hProcess, INFINITE);
+	DWORD exit_code = 0;
+	GetExitCodeProcess(pi.hProcess, &exit_code);
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
+	int result = (int)exit_code;
+
 	#elif defined(IRON_IOS)
 	int result = 0;
 	#else
@@ -1584,9 +1603,9 @@ char *iron_read_directory(char *path) {
 	files[0] = 0;
 
 	directory dir = open_dir(path);
-    if (dir.handle == NULL) {
-        return files;
-    }
+	if (dir.handle == NULL) {
+		return files;
+	}
 
 	while (true) {
 		file f = read_next_file(&dir);
@@ -1776,23 +1795,23 @@ static char iron_mp4_path_264[512];
 static char *iron_mp4_yuv_buf;
 
 static size_t iron_mp4_get_nal_size(uint8_t *buf, size_t size) {
-    size_t pos = 3;
-    while ((size - pos) > 3) {
-        if (buf[pos] == 0 && buf[pos + 1] == 0 && buf[pos + 2] == 1) {
-            return pos;
+	size_t pos = 3;
+	while ((size - pos) > 3) {
+		if (buf[pos] == 0 && buf[pos + 1] == 0 && buf[pos + 2] == 1) {
+			return pos;
 		}
-        if (buf[pos] == 0 && buf[pos + 1] == 0 && buf[pos + 2] == 0 && buf[pos + 3] == 1) {
-            return pos;
+		if (buf[pos] == 0 && buf[pos + 1] == 0 && buf[pos + 2] == 0 && buf[pos + 3] == 1) {
+			return pos;
 		}
-        pos++;
-    }
-    return size;
+		pos++;
+	}
+	return size;
 }
 
 static int iron_mp4_write_callback(int64_t offset, const void *buffer, size_t size, void *token) {
-    FILE *f = (FILE *)token;
-    fseek(f, offset, SEEK_SET);
-    return fwrite(buffer, 1, size, f) != size;
+	FILE *f = (FILE *)token;
+	fseek(f, offset, SEEK_SET);
+	return fwrite(buffer, 1, size, f) != size;
 }
 
 void iron_mp4_begin(char *path, i32 w, i32 h) {
@@ -1815,8 +1834,8 @@ void iron_mp4_begin(char *path, i32 w, i32 h) {
 	H264E_sizeof(&create_param, &sizeof_persist, &sizeof_scratch);
 
 	iron_mp4_enc = (H264E_persist_t *)malloc(sizeof_persist);
-    iron_mp4_scratch = (H264E_scratch_t *)malloc(sizeof_scratch);
-    H264E_init(iron_mp4_enc, &create_param);
+	iron_mp4_scratch = (H264E_scratch_t *)malloc(sizeof_scratch);
+	H264E_init(iron_mp4_enc, &create_param);
 
 	iron_mp4_fp = fopen(iron_mp4_path_264, "wb");
 	int frame_size = (int)(iron_mp4_w * iron_mp4_h * 1.5);
@@ -1881,7 +1900,7 @@ void iron_mp4_encode(buffer_t *pixels) {
 
 	H264E_run_param_t run_param = {0};
 	run_param.frame_type = 0;
-    run_param.encode_speed = H264E_SPEED_SLOWEST; // H264E_SPEED_FASTEST;
+	run_param.encode_speed = H264E_SPEED_SLOWEST; // H264E_SPEED_FASTEST;
 	run_param.desired_frame_bytes = (2048 * 4) * 1000 / 8 / 30; // 2048 * 4 kbps
 	run_param.qp_min = 10;
 	run_param.qp_max = 50;
@@ -1889,9 +1908,9 @@ void iron_mp4_encode(buffer_t *pixels) {
 	H264E_io_yuv_t yuv;
 	yuv.yuv[0] = iron_mp4_yuv_buf;
 	yuv.stride[0] = iron_mp4_w;
-    yuv.yuv[1] = iron_mp4_yuv_buf + iron_mp4_w * iron_mp4_h;
+	yuv.yuv[1] = iron_mp4_yuv_buf + iron_mp4_w * iron_mp4_h;
 	yuv.stride[1] = iron_mp4_w / 2;
-    yuv.yuv[2] = iron_mp4_yuv_buf + (int)(iron_mp4_w * iron_mp4_h * 1.25);
+	yuv.yuv[2] = iron_mp4_yuv_buf + (int)(iron_mp4_w * iron_mp4_h * 1.25);
 	yuv.stride[2] = iron_mp4_w / 2;
 
 	uint8_t *coded_data;
