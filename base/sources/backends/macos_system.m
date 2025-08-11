@@ -18,7 +18,7 @@ struct WindowData {
 	void *closeCallbackData;
 };
 
-static struct WindowData windows[1] = {};
+static struct WindowData windows[1] = {0};
 static bool controlKeyMouseButton = false;
 static int mouseX, mouseY;
 static bool keyboardShown = false;

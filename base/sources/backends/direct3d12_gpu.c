@@ -270,7 +270,7 @@ void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height
 void create_root_signature(bool linear_sampling) {
 	ID3DBlob *root_blob;
 	ID3DBlob *error_blob;
-	D3D12_ROOT_PARAMETER parameters[3] = {};
+	D3D12_ROOT_PARAMETER parameters[3] = {0};
 	D3D12_DESCRIPTOR_RANGE range = {
 		.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV,
 		.NumDescriptors = (UINT)GPU_MAX_TEXTURES,
@@ -1241,7 +1241,7 @@ void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *ray_sha
 		.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND,
 	};
 
-	D3D12_ROOT_PARAMETER rootParameters[12] = {};
+	D3D12_ROOT_PARAMETER rootParameters[12] = {0};
 	// Output view
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
@@ -1340,7 +1340,7 @@ void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *ray_sha
 		.MaxTraceRecursionDepth = 1, // ~ primary rays only
 	};
 
-	D3D12_STATE_SUBOBJECT subobjects[5] = {};
+	D3D12_STATE_SUBOBJECT subobjects[5] = {0};
 	subobjects[0].Type = D3D12_STATE_SUBOBJECT_TYPE_DXIL_LIBRARY;
 	subobjects[0].pDesc = &dxilLibrary;
 	subobjects[1].Type = D3D12_STATE_SUBOBJECT_TYPE_HIT_GROUP;

@@ -1150,7 +1150,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 			}
 		}
 		if (copy_nodes_count > 0) {
-			ui_node_canvas_t copy_canvas = {};
+			ui_node_canvas_t copy_canvas = {0};
 			copy_canvas.name = canvas->name;
 			ui_node_array_t nodes = { .buffer = copy_nodes, .length = copy_nodes_count };
 			ui_node_link_array_t links = { .buffer = copy_links, .length = copy_links_count };

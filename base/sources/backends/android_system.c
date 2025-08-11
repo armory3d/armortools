@@ -129,7 +129,7 @@ iron_display_mode_t iron_display_current_mode(int display) {
 
 VkResult iron_vulkan_create_surface(VkInstance instance, VkSurfaceKHR *surface) {
 	assert(app->window != NULL);
-	VkAndroidSurfaceCreateInfoKHR createInfo = {};
+	VkAndroidSurfaceCreateInfoKHR createInfo = {0};
 	createInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
 	createInfo.pNext = NULL;
 	createInfo.flags = 0;
