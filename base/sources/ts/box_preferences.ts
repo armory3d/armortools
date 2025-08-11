@@ -826,7 +826,7 @@ plugin_notify_on_ui(plugin, function() {\
 						}
 						if (ui_menu_button(tr("Edit in Script Tab"))) {
 							let blob: buffer_t = data_get_blob("plugins/" + _box_preferences_f);
-							tab_script_hscript.text = sys_buffer_to_string(blob);
+							tab_scripts_hscript.text = sys_buffer_to_string(blob);
 							data_delete_blob("plugins/" + _box_preferences_f);
 							console_info(tr("Script opened"));
 						}

@@ -9,7 +9,7 @@ function ui_base_ext_init_hwnd_tabs(): tab_draw_array_t[] {
 		_draw_callback_create(tab_textures_draw),
 		_draw_callback_create(tab_swatches_draw),
 		_draw_callback_create(tab_plugins_draw),
-		_draw_callback_create(tab_script_draw),
+		_draw_callback_create(tab_scripts_draw),
 		_draw_callback_create(tab_console_draw),
 		_draw_callback_create(ui_status_draw_version_tab)
 	];

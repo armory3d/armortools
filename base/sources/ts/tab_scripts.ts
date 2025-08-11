@@ -1,36 +1,35 @@
 
-let tab_script_hscript: ui_handle_t = ui_handle_create();
-let tab_script_text_coloring: ui_text_coloring_t = null;
+let tab_scripts_hscript: ui_handle_t = ui_handle_create();
+let tab_scripts_text_coloring: ui_text_coloring_t = null;
 
-function tab_script_draw(htab: ui_handle_t) {
+function tab_scripts_draw(htab: ui_handle_t) {
 	let ui: ui_t = ui_base_ui;
-	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-	if (ui_tab(htab, tr("Script")) && statush > ui_status_default_status_h * ui_SCALE(ui)) {
+	if (ui_tab(htab, tr("Scripts"))) {
 
 		ui_begin_sticky();
-		if (config_raw.touch_ui) {
+		// if (config_raw.touch_ui) {
 			ui_row4();
-		}
-		else {
-			let row: f32[] = [1 / 14, 1 / 14, 1 / 14, 1 / 14];
-			ui_row(row);
-		}
+		// }
+		// else {
+			// let row: f32[] = [1 / 14, 1 / 14, 1 / 14, 1 / 14];
+			// ui_row(row);
+		// }
 		if (ui_button(tr("Run"))) {
-			js_eval(tab_script_hscript.text);
+			js_eval(tab_scripts_hscript.text);
 		}
 		if (ui_button(tr("Clear"))) {
-			tab_script_hscript.text = "";
+			tab_scripts_hscript.text = "";
 		}
 		if (ui_button(tr("Import"))) {
 			ui_files_show("js", false, false, function (path: string) {
 				let b: buffer_t = data_get_blob(path);
-				tab_script_hscript.text = sys_buffer_to_string(b);
+				tab_scripts_hscript.text = sys_buffer_to_string(b);
 				data_delete_blob(path);
 			});
 		}
 		if (ui_button(tr("Export"))) {
 			ui_files_show("js", true, false, function (path: string) {
-				let str: string = tab_script_hscript.text;
+				let str: string = tab_scripts_hscript.text;
 				let f: string = ui_files_filename;
 				if (f == "") {
 					f = tr("untitled");
@@ -51,8 +50,8 @@ function tab_script_draw(htab: ui_handle_t) {
 		ui.font_size = math_floor(15 * ui_SCALE(ui));
 		ui_text_area_line_numbers = true;
 		ui_text_area_scroll_past_end = true;
-		ui_text_area_coloring = tab_script_get_text_coloring();
-		ui_text_area(tab_script_hscript);
+		ui_text_area_coloring = tab_scripts_get_text_coloring();
+		ui_text_area(tab_scripts_hscript);
 		ui_text_area_line_numbers = false;
 		ui_text_area_scroll_past_end = false;
 		ui_text_area_coloring = null;
@@ -61,10 +60,10 @@ function tab_script_draw(htab: ui_handle_t) {
 	}
 }
 
-function tab_script_get_text_coloring(): ui_text_coloring_t {
-	if (tab_script_text_coloring == null) {
+function tab_scripts_get_text_coloring(): ui_text_coloring_t {
+	if (tab_scripts_text_coloring == null) {
 		let blob: buffer_t = data_get_blob("text_coloring.json");
-		tab_script_text_coloring = json_parse(sys_buffer_to_string(blob));
+		tab_scripts_text_coloring = json_parse(sys_buffer_to_string(blob));
 	}
-	return tab_script_text_coloring;
+	return tab_scripts_text_coloring;
 }
