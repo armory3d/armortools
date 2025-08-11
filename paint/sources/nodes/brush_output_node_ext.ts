@@ -35,8 +35,10 @@ function brush_output_node_parse_inputs(self: brush_output_node_t) {
 		opac._str = substring(opac._str, 0, string_last_index_of(opac._str, "."));
 		context_raw.brush_nodes_opacity = 1.0;
 		let index: i32 = array_index_of(project_asset_names, opac._str);
-		let asset: asset_t = project_assets[index];
-		context_raw.brush_mask_image = project_get_image(asset);
+		if (index != -1) {
+			let asset: asset_t = project_assets[index];
+			context_raw.brush_mask_image = project_get_image(asset);
+		}
 	}
 	else {
 		context_raw.brush_nodes_opacity = opac._f32;
@@ -53,8 +55,10 @@ function brush_output_node_parse_inputs(self: brush_output_node_t) {
 		context_raw.brush_stencil_image_is_alpha = ends_with(stencil._str, ".a");
 		stencil._str = substring(stencil._str, 0, string_last_index_of(stencil._str, "."));
 		let index: i32 = array_index_of(project_asset_names, stencil._str);
-		let asset: asset_t = project_assets[index];
-		context_raw.brush_stencil_image = project_get_image(asset);
+		if (index != -1) {
+			let asset: asset_t = project_assets[index];
+			context_raw.brush_stencil_image = project_get_image(asset);
+		}
 	}
 	else {
 		context_raw.brush_stencil_image = null;
