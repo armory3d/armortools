@@ -859,10 +859,10 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, NULL, &IID_ID3D12Resource, &texture->impl.image);
 
 	D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint;
-	UINT64 _upload_size;
-	device->lpVtbl->GetCopyableFootprints(device, &resource_desc, 0, 1, 0, &footprint, NULL, NULL, &_upload_size);
+	UINT64 upload_size;
+	device->lpVtbl->GetCopyableFootprints(device, &resource_desc, 0, 1, 0, &footprint, NULL, NULL, &upload_size);
 
-	int new_upload_buffer_size = _upload_size;
+	int new_upload_buffer_size = upload_size;
 	if (new_upload_buffer_size < (1024 * 1024 * 4)) {
 		new_upload_buffer_size = (1024 * 1024 * 4);
 	}
@@ -883,7 +883,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 		D3D12_RESOURCE_DESC resource_desc_upload = {
 			.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER,
 			.Alignment = 0,
-			.Width = _upload_size,
+			.Width = upload_buffer_size,
 			.Height = 1,
 			.DepthOrArraySize = 1,
 			.MipLevels = 1,
@@ -898,11 +898,11 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 			D3D12_RESOURCE_STATE_GENERIC_READ, NULL, &IID_ID3D12Resource, &upload_buffer);
 	}
 
-	int stride = (int)ceilf(_upload_size / (float)(height * D3D12_TEXTURE_DATA_PITCH_ALIGNMENT)) * D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
 	BYTE *pixel;
 	upload_buffer->lpVtbl->Map(upload_buffer, 0, NULL, (void **)&pixel);
+	UINT row_pitch = footprint.Footprint.RowPitch;
 	for (int y = 0; y < texture->height; ++y) {
-		memcpy(&pixel[y * stride], &((uint8_t *)data)[y * texture->width * format_size], texture->width * format_size);
+		memcpy(pixel + y * row_pitch, ((uint8_t *)data) + y * width * format_size, width * format_size);
 	}
 	upload_buffer->lpVtbl->Unmap(upload_buffer, 0, NULL);
 
@@ -1111,76 +1111,66 @@ void gpu_buffer_destroy(gpu_buffer_t *buffer) {
 	buffer->impl.buffer = NULL;
 }
 
-static const wchar_t *hit_group_name = L"hitgroup";
-static const wchar_t *raygen_shader_name = L"raygeneration";
-static const wchar_t *closesthit_shader_name = L"closesthit";
-static const wchar_t *miss_shader_name = L"miss";
-
 typedef struct inst {
 	iron_matrix4x4_t m;
 	int i;
 } inst_t;
 
-static ID3D12Device5 *dxrDevice = NULL;
-static ID3D12GraphicsCommandList4 *dxrCommandList = NULL;
-static ID3D12RootSignature *dxrRootSignature = NULL;
-static ID3D12DescriptorHeap *descriptorHeap = NULL;
-static gpu_raytrace_acceleration_structure_t *accel;
-static gpu_raytrace_pipeline_t *pipeline;
-static gpu_texture_t *output = NULL;
-static D3D12_CPU_DESCRIPTOR_HANDLE outputCpuDescriptor;
-static D3D12_GPU_DESCRIPTOR_HANDLE outputDescriptorHandle;
-static D3D12_GPU_DESCRIPTOR_HANDLE vbgpuDescriptorHandle;
-static D3D12_GPU_DESCRIPTOR_HANDLE ibgpuDescriptorHandle;
-static D3D12_GPU_DESCRIPTOR_HANDLE tex0gpuDescriptorHandle;
-static D3D12_GPU_DESCRIPTOR_HANDLE tex1gpuDescriptorHandle;
-static D3D12_GPU_DESCRIPTOR_HANDLE tex2gpuDescriptorHandle;
-static D3D12_GPU_DESCRIPTOR_HANDLE texenvgpuDescriptorHandle;
-static D3D12_GPU_DESCRIPTOR_HANDLE texsobolgpuDescriptorHandle;
-static D3D12_GPU_DESCRIPTOR_HANDLE texscramblegpuDescriptorHandle;
-static D3D12_GPU_DESCRIPTOR_HANDLE texrankgpuDescriptorHandle;
-static int descriptorsAllocated = 0;
-static UINT descriptorSize;
-static gpu_buffer_t *vb[16];
-static gpu_buffer_t *vb_last[16];
-static gpu_buffer_t *ib[16];
-static int vb_count = 0;
-static int vb_count_last = 0;
-static inst_t instances[1024];
-static int instances_count = 0;
+static ID3D12Device5 *dxr_device = NULL;
+static ID3D12GraphicsCommandList4 *dxr_command_list = NULL;
+static ID3D12RootSignature *dxr_root_signature = NULL;
+static ID3D12DescriptorHeap *dxr_descriptor_heap = NULL;
+static gpu_raytrace_acceleration_structure_t *dxr_accel;
+static gpu_raytrace_pipeline_t *dxr_pipeline;
+static gpu_texture_t *dxr_output = NULL;
+static D3D12_CPU_DESCRIPTOR_HANDLE dxr_output_cpu_descriptor;
+static D3D12_GPU_DESCRIPTOR_HANDLE dxr_output_descriptor_handle;
+static D3D12_GPU_DESCRIPTOR_HANDLE dxr_vbgpu_descriptor_handle;
+static D3D12_GPU_DESCRIPTOR_HANDLE dxr_ibgpu_descriptor_handle;
+static D3D12_GPU_DESCRIPTOR_HANDLE dxr_tex0gpu_descriptor_handle;
+static D3D12_GPU_DESCRIPTOR_HANDLE dxr_tex1gpu_descriptor_handle;
+static D3D12_GPU_DESCRIPTOR_HANDLE dxr_tex2gpu_descriptor_handle;
+static D3D12_GPU_DESCRIPTOR_HANDLE dxr_texenvgpu_descriptor_handle;
+static D3D12_GPU_DESCRIPTOR_HANDLE dxr_texsobolgpu_descriptor_handle;
+static D3D12_GPU_DESCRIPTOR_HANDLE dxr_texscramblegpu_descriptor_handle;
+static D3D12_GPU_DESCRIPTOR_HANDLE dxr_texrankgpu_descriptor_handle;
+static int dxr_descriptors_allocated = 0;
+static UINT dxr_descriptor_size;
+static gpu_buffer_t *dxr_vb[16];
+static gpu_buffer_t *dxr_vb_last[16];
+static gpu_buffer_t *dxr_ib[16];
+static int dxr_vb_count = 0;
+static int dxr_vb_count_last = 0;
+static inst_t dxr_instances[1024];
+static int dxr_instances_count = 0;
 
 void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *ray_shader, int ray_shader_size, gpu_buffer_t *constant_buffer) {
-	output = NULL;
-	descriptorsAllocated = 0;
-	pipeline->_constant_buffer = constant_buffer;
-	// Descriptor heap
-	// Allocate a heap for 3 descriptors:
-	// 2 - bottom and top level acceleration structure
-	// 1 - raytracing output texture SRV
+	dxr_output = NULL;
+	dxr_descriptors_allocated = 0;
+	pipeline->constant_buffer = constant_buffer;
+
 	D3D12_DESCRIPTOR_HEAP_DESC descriptor_heap_desc = {
 		.NumDescriptors = 12,
 		.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
 		.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
 		.NodeMask = 0,
 	};
-	if (descriptorHeap != NULL) {
-		descriptorHeap->lpVtbl->Release(descriptorHeap);
+	if (dxr_descriptor_heap != NULL) {
+		dxr_descriptor_heap->lpVtbl->Release(dxr_descriptor_heap);
 	}
-	device->lpVtbl->CreateDescriptorHeap(device, &descriptor_heap_desc, &IID_ID3D12DescriptorHeap, &descriptorHeap);
-	descriptorSize = device->lpVtbl->GetDescriptorHandleIncrementSize(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	device->lpVtbl->CreateDescriptorHeap(device, &descriptor_heap_desc, &IID_ID3D12DescriptorHeap, &dxr_descriptor_heap);
+	dxr_descriptor_size = device->lpVtbl->GetDescriptorHandleIncrementSize(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
-	// Device
-	if (dxrDevice != NULL) {
-		dxrDevice->lpVtbl->Release(dxrDevice);
+	if (dxr_device != NULL) {
+		dxr_device->lpVtbl->Release(dxr_device);
 	}
-	device->lpVtbl->QueryInterface(device, &IID_ID3D12Device5, &dxrDevice);
-	if (dxrCommandList != NULL) {
-		dxrCommandList->lpVtbl->Release(dxrCommandList);
+	if (dxr_command_list != NULL) {
+		dxr_command_list->lpVtbl->Release(dxr_command_list);
 	}
-	command_list->lpVtbl->QueryInterface(command_list , &IID_ID3D12GraphicsCommandList4, &dxrCommandList);
+	device->lpVtbl->QueryInterface(device, &IID_ID3D12Device5, &dxr_device);
+	command_list->lpVtbl->QueryInterface(command_list , &IID_ID3D12GraphicsCommandList4, &dxr_command_list);
 
 	// Root signatures
-	// This is a root signature that is shared across all raytracing shaders invoked during a DispatchRays() call.
 	D3D12_DESCRIPTOR_RANGE UAVDescriptor = {
 		.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV,
 		.NumDescriptors = 1,
@@ -1309,11 +1299,11 @@ void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *ray_sha
 	ID3DBlob *blob = NULL;
 	ID3DBlob *error = NULL;
 	D3D12SerializeRootSignature(&dxrRootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &blob, &error);
-	if (dxrRootSignature != NULL) {
-		dxrRootSignature->lpVtbl->Release(dxrRootSignature);
+	if (dxr_root_signature != NULL) {
+		dxr_root_signature->lpVtbl->Release(dxr_root_signature);
 	}
 	device->lpVtbl->CreateRootSignature(device, 1, blob->lpVtbl->GetBufferPointer(blob), blob->lpVtbl->GetBufferSize(blob), &IID_ID3D12RootSignature,
-										&dxrRootSignature);
+										&dxr_root_signature);
 
 	// Pipeline
 	D3D12_STATE_OBJECT_DESC raytracingPipeline = {
@@ -1329,15 +1319,15 @@ void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *ray_sha
 		.DXILLibrary = shaderBytecode,
 	};
 	D3D12_EXPORT_DESC exports[3] = {0};
-	exports[0].Name = raygen_shader_name;
-	exports[1].Name = closesthit_shader_name;
-	exports[2].Name = miss_shader_name;
+	exports[0].Name = L"raygeneration";
+	exports[1].Name = L"closesthit";
+	exports[2].Name = L"miss";
 	dxilLibrary.pExports = exports;
 	dxilLibrary.NumExports = 3;
 
 	D3D12_HIT_GROUP_DESC hitGroup = {
-		.ClosestHitShaderImport = closesthit_shader_name,
-		.HitGroupExport = hit_group_name,
+		.ClosestHitShaderImport = L"closesthit",
+		.HitGroupExport = L"hitgroup",
 		.Type = D3D12_HIT_GROUP_TYPE_TRIANGLES,
 	};
 
@@ -1358,21 +1348,21 @@ void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *ray_sha
 	subobjects[2].Type = D3D12_STATE_SUBOBJECT_TYPE_RAYTRACING_SHADER_CONFIG;
 	subobjects[2].pDesc = &shaderConfig;
 	subobjects[3].Type = D3D12_STATE_SUBOBJECT_TYPE_GLOBAL_ROOT_SIGNATURE;
-	subobjects[3].pDesc = &dxrRootSignature;
+	subobjects[3].pDesc = &dxr_root_signature;
 	subobjects[4].Type = D3D12_STATE_SUBOBJECT_TYPE_RAYTRACING_PIPELINE_CONFIG;
 	subobjects[4].pDesc = &pipelineConfig;
 	raytracingPipeline.NumSubobjects = 5;
 	raytracingPipeline.pSubobjects = subobjects;
 
-	dxrDevice->lpVtbl->CreateStateObject(dxrDevice, &raytracingPipeline, &IID_ID3D12StateObject, &pipeline->impl.dxr_state);
+	dxr_device->lpVtbl->CreateStateObject(dxr_device, &raytracingPipeline, &IID_ID3D12StateObject, &pipeline->impl.state);
 
 	// Shader tables
 	// Get shader identifiers
 	ID3D12StateObjectProperties *stateObjectProps = NULL;
-	pipeline->impl.dxr_state->lpVtbl->QueryInterface(pipeline->impl.dxr_state , &IID_ID3D12StateObjectProperties, &stateObjectProps);
-	const void *rayGenShaderId = stateObjectProps->lpVtbl->GetShaderIdentifier(stateObjectProps, raygen_shader_name);
-	const void *missShaderId = stateObjectProps->lpVtbl->GetShaderIdentifier(stateObjectProps, miss_shader_name);
-	const void *hitGroupShaderId = stateObjectProps->lpVtbl->GetShaderIdentifier(stateObjectProps, hit_group_name);
+	pipeline->impl.state->lpVtbl->QueryInterface(pipeline->impl.state , &IID_ID3D12StateObjectProperties, &stateObjectProps);
+	const void *rayGenShaderId = stateObjectProps->lpVtbl->GetShaderIdentifier(stateObjectProps, L"raygeneration");
+	const void *missShaderId = stateObjectProps->lpVtbl->GetShaderIdentifier(stateObjectProps, L"miss");
+	const void *hitGroupShaderId = stateObjectProps->lpVtbl->GetShaderIdentifier(stateObjectProps, L"hitgroup");
 	UINT shaderIdSize = D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
 	int align = D3D12_RAYTRACING_SHADER_RECORD_BYTE_ALIGNMENT;
 
@@ -1488,16 +1478,16 @@ void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *ray_sha
 
 	// Output descriptor
 	D3D12_CPU_DESCRIPTOR_HANDLE handle;
-	descriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(descriptorHeap, &handle);
-	outputCpuDescriptor.ptr = handle.ptr + (INT64)(descriptorsAllocated) * (UINT64)(descriptorSize);
+	dxr_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(dxr_descriptor_heap, &handle);
+	dxr_output_cpu_descriptor.ptr = handle.ptr + (INT64)(dxr_descriptors_allocated) * (UINT64)(dxr_descriptor_size);
 
-	descriptorHeap->lpVtbl->GetGPUDescriptorHandleForHeapStart(descriptorHeap, &handle);
-	int descriptorHeapIndex = descriptorsAllocated++;
-	outputDescriptorHandle.ptr = handle.ptr + (INT64)(descriptorHeapIndex) * (UINT64)(descriptorSize);
+	dxr_descriptor_heap->lpVtbl->GetGPUDescriptorHandleForHeapStart(dxr_descriptor_heap, &handle);
+	int descriptorHeapIndex = dxr_descriptors_allocated++;
+	dxr_output_descriptor_handle.ptr = handle.ptr + (INT64)(descriptorHeapIndex) * (UINT64)(dxr_descriptor_size);
 }
 
 void gpu_raytrace_pipeline_destroy(gpu_raytrace_pipeline_t *pipeline) {
-	pipeline->impl.dxr_state->lpVtbl->Release(pipeline->impl.dxr_state);
+	pipeline->impl.state->lpVtbl->Release(pipeline->impl.state);
 	pipeline->impl.raygen_shader_table->lpVtbl->Release(pipeline->impl.raygen_shader_table);
 	pipeline->impl.miss_shader_table->lpVtbl->Release(pipeline->impl.miss_shader_table);
 	pipeline->impl.hitgroup_shader_table->lpVtbl->Release(pipeline->impl.hitgroup_shader_table);
@@ -1522,15 +1512,15 @@ UINT create_srv_vb(gpu_buffer_t *vb, UINT numElements, UINT elementSize) {
 	}
 
 	D3D12_CPU_DESCRIPTOR_HANDLE handle;
-	descriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(descriptorHeap, &handle);
+	dxr_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(dxr_descriptor_heap, &handle);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptor = {
-		.ptr = handle.ptr + (INT64)(descriptorsAllocated) * (UINT64)(descriptorSize),
+		.ptr = handle.ptr + (INT64)(dxr_descriptors_allocated) * (UINT64)(dxr_descriptor_size),
 	};
-	UINT descriptorIndex = descriptorsAllocated++;
+	UINT descriptorIndex = dxr_descriptors_allocated++;
 	device->lpVtbl->CreateShaderResourceView(device, vb->impl.buffer, &srvDesc, cpuDescriptor);
-	descriptorHeap->lpVtbl->GetGPUDescriptorHandleForHeapStart(descriptorHeap, &handle);
-	vbgpuDescriptorHandle.ptr = handle.ptr + (INT64)(descriptorIndex) * (UINT64)(descriptorSize);
+	dxr_descriptor_heap->lpVtbl->GetGPUDescriptorHandleForHeapStart(dxr_descriptor_heap, &handle);
+	dxr_vbgpu_descriptor_handle.ptr = handle.ptr + (INT64)(descriptorIndex) * (UINT64)(dxr_descriptor_size);
 
 	return descriptorIndex;
 }
@@ -1554,49 +1544,48 @@ UINT create_srv_ib(gpu_buffer_t *ib, UINT numElements, UINT elementSize) {
 	}
 
 	D3D12_CPU_DESCRIPTOR_HANDLE handle;
-	descriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(descriptorHeap, &handle);
+	dxr_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(dxr_descriptor_heap, &handle);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptor = {
-		.ptr = handle.ptr + (INT64)(descriptorsAllocated) * (UINT64)(descriptorSize),
+		.ptr = handle.ptr + (INT64)(dxr_descriptors_allocated) * (UINT64)(dxr_descriptor_size),
 	};
 
-	UINT descriptorIndex = descriptorsAllocated++;
-	descriptorHeap->lpVtbl->GetGPUDescriptorHandleForHeapStart(descriptorHeap, &handle);
+	UINT descriptorIndex = dxr_descriptors_allocated++;
+	dxr_descriptor_heap->lpVtbl->GetGPUDescriptorHandleForHeapStart(dxr_descriptor_heap, &handle);
 	device->lpVtbl->CreateShaderResourceView(device, ib->impl.buffer, &srvDesc, cpuDescriptor);
-	ibgpuDescriptorHandle.ptr = handle.ptr + (INT64)(descriptorIndex) * (UINT64)(descriptorSize);
+	dxr_ibgpu_descriptor_handle.ptr = handle.ptr + (INT64)(descriptorIndex) * (UINT64)(dxr_descriptor_size);
 
 	return descriptorIndex;
 }
 
 void gpu_raytrace_acceleration_structure_init(gpu_raytrace_acceleration_structure_t *accel) {
-	vb_count = 0;
-	instances_count = 0;
+	dxr_vb_count = 0;
+	dxr_instances_count = 0;
 }
 
-void gpu_raytrace_acceleration_structure_add(gpu_raytrace_acceleration_structure_t *accel, gpu_buffer_t *_vb, gpu_buffer_t *_ib,
-	iron_matrix4x4_t _transform) {
+void gpu_raytrace_acceleration_structure_add(gpu_raytrace_acceleration_structure_t *accel, gpu_buffer_t *vb, gpu_buffer_t *ib, iron_matrix4x4_t transform) {
 
 	int vb_i = -1;
-	for (int i = 0; i < vb_count; ++i) {
-		if (_vb == vb[i]) {
+	for (int i = 0; i < dxr_vb_count; ++i) {
+		if (vb == dxr_vb[i]) {
 			vb_i = i;
 			break;
 		}
 	}
 	if (vb_i == -1) {
-		vb_i = vb_count;
-		vb[vb_count] = _vb;
-		ib[vb_count] = _ib;
-		vb_count++;
+		vb_i = dxr_vb_count;
+		dxr_vb[dxr_vb_count] = vb;
+		dxr_ib[dxr_vb_count] = ib;
+		dxr_vb_count++;
 	}
 
-	inst_t inst = { .i = vb_i, .m =  _transform };
-	instances[instances_count] = inst;
-	instances_count++;
+	inst_t inst = { .i = vb_i, .m =  transform };
+	dxr_instances[dxr_instances_count] = inst;
+	dxr_instances_count++;
 }
 
 void _gpu_raytrace_acceleration_structure_destroy_bottom(gpu_raytrace_acceleration_structure_t *accel) {
-	for (int i = 0; i < vb_count_last; ++i) {
+	for (int i = 0; i < dxr_vb_count_last; ++i) {
 		accel->impl.bottom_level_accel[i]->lpVtbl->Release(accel->impl.bottom_level_accel[i]);
 	}
 }
@@ -1605,37 +1594,37 @@ void _gpu_raytrace_acceleration_structure_destroy_top(gpu_raytrace_acceleration_
 	accel->impl.top_level_accel->lpVtbl->Release(accel->impl.top_level_accel);
 }
 
-void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structure_t *accel, gpu_buffer_t *_vb_full, gpu_buffer_t *_ib_full) {
+void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structure_t *accel, gpu_buffer_t *vb_full, gpu_buffer_t *ib_full) {
 
 	bool build_bottom = false;
 	for (int i = 0; i < 16; ++i) {
-		if (vb_last[i] != vb[i]) {
+		if (dxr_vb_last[i] != dxr_vb[i]) {
 			build_bottom = true;
 		}
-		vb_last[i] = vb[i];
+		dxr_vb_last[i] = dxr_vb[i];
 	}
 
-	if (vb_count_last > 0) {
+	if (dxr_vb_count_last > 0) {
 		if (build_bottom) {
 			_gpu_raytrace_acceleration_structure_destroy_bottom(accel);
 		}
 		_gpu_raytrace_acceleration_structure_destroy_top(accel);
 	}
 
-	vb_count_last = vb_count;
+	dxr_vb_count_last = dxr_vb_count;
 
-	if (vb_count == 0) {
+	if (dxr_vb_count == 0) {
 		return;
 	}
 
-	descriptorsAllocated = 1; // 1 descriptor already allocated in gpu_raytrace_pipeline_init
+	dxr_descriptors_allocated = 1; // 1 descriptor already allocated in gpu_raytrace_pipeline_init
 
 	#ifdef is_forge
-	create_srv_ib(_ib_full, _ib_full->count, 0);
-	create_srv_vb(_vb_full, _vb_full->count, vb[0]->stride);
+	create_srv_ib(ib_full, ib_full->count, 0);
+	create_srv_vb(vb_full, vb_full->count, dxr_vb[0]->stride);
 	#else
-	create_srv_ib(ib[0], ib[0]->count, 0);
-	create_srv_vb(vb[0], vb[0]->count, vb[0]->stride);
+	create_srv_ib(dxr_ib[0], dxr_ib[0]->count, 0);
+	create_srv_vb(dxr_vb[0], dxr_vb[0]->count, dxr_vb[0]->stride);
 	#endif
 
 	// Reset the command list for the acceleration structure construction
@@ -1650,7 +1639,7 @@ void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structu
 	};
 
 	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO topLevelPrebuildInfo = {0};
-	dxrDevice->lpVtbl->GetRaytracingAccelerationStructurePrebuildInfo(dxrDevice, &topLevelInputs, &topLevelPrebuildInfo);
+	dxr_device->lpVtbl->GetRaytracingAccelerationStructurePrebuildInfo(dxr_device, &topLevelInputs, &topLevelPrebuildInfo);
 
 	UINT64 scratch_size = topLevelPrebuildInfo.ScratchDataSizeInBytes;
 
@@ -1658,22 +1647,22 @@ void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structu
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS bottomLevelInputs[16];
 	D3D12_RAYTRACING_GEOMETRY_DESC geometryDescs[16];
 	if (build_bottom) {
-		for (int i = 0; i < vb_count; ++i) {
+		for (int i = 0; i < dxr_vb_count; ++i) {
 			D3D12_RAYTRACING_GEOMETRY_DESC geometryDesc = {
 				.Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES,
-				.Triangles.IndexBuffer = ib[i]->impl.buffer->lpVtbl->GetGPUVirtualAddress(ib[i]->impl.buffer),
-				.Triangles.IndexCount = ib[i]->count,
+				.Triangles.IndexBuffer = dxr_ib[i]->impl.buffer->lpVtbl->GetGPUVirtualAddress(dxr_ib[i]->impl.buffer),
+				.Triangles.IndexCount = dxr_ib[i]->count,
 				.Triangles.IndexFormat = DXGI_FORMAT_R32_UINT,
 				.Triangles.Transform3x4 = 0,
 				.Triangles.VertexFormat = DXGI_FORMAT_R16G16B16A16_SNORM,
-				.Triangles.VertexCount = vb[i]->count,
+				.Triangles.VertexCount = dxr_vb[i]->count,
 			};
 
 			D3D12_RESOURCE_DESC desc;
-			vb[i]->impl.buffer->lpVtbl->GetDesc(vb[i]->impl.buffer, &desc);
+			dxr_vb[i]->impl.buffer->lpVtbl->GetDesc(dxr_vb[i]->impl.buffer, &desc);
 
-			geometryDesc.Triangles.VertexBuffer.StartAddress = vb[i]->impl.buffer->lpVtbl->GetGPUVirtualAddress(vb[i]->impl.buffer);
-			geometryDesc.Triangles.VertexBuffer.StrideInBytes = desc.Width / vb[i]->count;
+			geometryDesc.Triangles.VertexBuffer.StartAddress = dxr_vb[i]->impl.buffer->lpVtbl->GetGPUVirtualAddress(dxr_vb[i]->impl.buffer);
+			geometryDesc.Triangles.VertexBuffer.StrideInBytes = desc.Width / dxr_vb[i]->count;
 			geometryDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
 			geometryDescs[i] = geometryDesc;
 
@@ -1685,7 +1674,7 @@ void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structu
 				.pGeometryDescs = &geometryDescs[i],
 				.Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE,
 			};
-			dxrDevice->lpVtbl->GetRaytracingAccelerationStructurePrebuildInfo(dxrDevice, &inputs, &bottomLevelPrebuildInfo);
+			dxr_device->lpVtbl->GetRaytracingAccelerationStructurePrebuildInfo(dxr_device, &inputs, &bottomLevelPrebuildInfo);
 			bottomLevelInputs[i] = inputs;
 
 			UINT64 blSize = bottomLevelPrebuildInfo.ScratchDataSizeInBytes;
@@ -1715,7 +1704,7 @@ void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structu
 					.VisibleNodeMask = 1,
 				};
 
-				device->lpVtbl->CreateCommittedResource(dxrDevice, &uploadHeapProperties, D3D12_HEAP_FLAG_NONE, &bufferDesc, D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE, NULL,
+				device->lpVtbl->CreateCommittedResource(dxr_device, &uploadHeapProperties, D3D12_HEAP_FLAG_NONE, &bufferDesc, D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE, NULL,
 														&IID_ID3D12Resource, &accel->impl.bottom_level_accel[i]);
 			}
 		}
@@ -1742,13 +1731,13 @@ void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structu
 			.VisibleNodeMask = 1,
 		};
 
-		device->lpVtbl->CreateCommittedResource(dxrDevice, &uploadHeapProperties, D3D12_HEAP_FLAG_NONE, &bufferDesc, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, NULL,
+		device->lpVtbl->CreateCommittedResource(dxr_device, &uploadHeapProperties, D3D12_HEAP_FLAG_NONE, &bufferDesc, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, NULL,
 												&IID_ID3D12Resource, &scratchResource);
 	}
 
 	// Bottom AS
 	if (build_bottom) {
-		for (int i = 0; i < vb_count; ++i) {
+		for (int i = 0; i < dxr_vb_count; ++i) {
 			// Bottom Level Acceleration Structure desc
 			D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC bottomLevelBuildDesc = {
 				.Inputs = bottomLevelInputs[i],
@@ -1757,7 +1746,7 @@ void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structu
 			};
 
 			// Build acceleration structure
-			dxrCommandList->lpVtbl->BuildRaytracingAccelerationStructure(dxrCommandList, &bottomLevelBuildDesc, 0, NULL);
+			dxr_command_list->lpVtbl->BuildRaytracingAccelerationStructure(dxr_command_list, &bottomLevelBuildDesc, 0, NULL);
 		}
 	}
 
@@ -1788,7 +1777,7 @@ void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structu
 	// Create an instance desc for the bottom-level acceleration structure
 	D3D12_RESOURCE_DESC bufferDesc = {
 		.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER,
-		.Width = sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * instances_count,
+		.Width = sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * dxr_instances_count,
 		.Height = 1,
 		.DepthOrArraySize = 1,
 		.MipLevels = 1,
@@ -1809,30 +1798,30 @@ void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structu
 	void *mappedData;
 	instanceDescs->lpVtbl->Map(instanceDescs, 0, NULL, &mappedData);
 
-	for (int i = 0; i < instances_count; ++i) {
+	for (int i = 0; i < dxr_instances_count; ++i) {
 		D3D12_RAYTRACING_INSTANCE_DESC instanceDesc = {0};
 
-		instanceDesc.Transform[0][0] = instances[i].m.m[0];
-		instanceDesc.Transform[0][1] = instances[i].m.m[1];
-		instanceDesc.Transform[0][2] = instances[i].m.m[2];
-		instanceDesc.Transform[0][3] = instances[i].m.m[3];
-		instanceDesc.Transform[1][0] = instances[i].m.m[4];
-		instanceDesc.Transform[1][1] = instances[i].m.m[5];
-		instanceDesc.Transform[1][2] = instances[i].m.m[6];
-		instanceDesc.Transform[1][3] = instances[i].m.m[7];
-		instanceDesc.Transform[2][0] = instances[i].m.m[8];
-		instanceDesc.Transform[2][1] = instances[i].m.m[9];
-		instanceDesc.Transform[2][2] = instances[i].m.m[10];
-		instanceDesc.Transform[2][3] = instances[i].m.m[11];
+		instanceDesc.Transform[0][0] = dxr_instances[i].m.m[0];
+		instanceDesc.Transform[0][1] = dxr_instances[i].m.m[1];
+		instanceDesc.Transform[0][2] = dxr_instances[i].m.m[2];
+		instanceDesc.Transform[0][3] = dxr_instances[i].m.m[3];
+		instanceDesc.Transform[1][0] = dxr_instances[i].m.m[4];
+		instanceDesc.Transform[1][1] = dxr_instances[i].m.m[5];
+		instanceDesc.Transform[1][2] = dxr_instances[i].m.m[6];
+		instanceDesc.Transform[1][3] = dxr_instances[i].m.m[7];
+		instanceDesc.Transform[2][0] = dxr_instances[i].m.m[8];
+		instanceDesc.Transform[2][1] = dxr_instances[i].m.m[9];
+		instanceDesc.Transform[2][2] = dxr_instances[i].m.m[10];
+		instanceDesc.Transform[2][3] = dxr_instances[i].m.m[11];
 
 		int ib_off = 0;
-		for (int j = 0; j < instances[i].i; ++j) {
-			ib_off += ib[j]->count * 4;
+		for (int j = 0; j < dxr_instances[i].i; ++j) {
+			ib_off += dxr_ib[j]->count * 4;
 		}
 		instanceDesc.InstanceID = ib_off;
 		instanceDesc.InstanceMask = 1;
 		instanceDesc.AccelerationStructure =
-			accel->impl.bottom_level_accel[instances[i].i]->lpVtbl->GetGPUVirtualAddress(accel->impl.bottom_level_accel[instances[i].i]);
+			accel->impl.bottom_level_accel[dxr_instances[i].i]->lpVtbl->GetGPUVirtualAddress(accel->impl.bottom_level_accel[dxr_instances[i].i]);
 		memcpy((uint8_t *)mappedData + i * sizeof(D3D12_RAYTRACING_INSTANCE_DESC), &instanceDesc, sizeof(D3D12_RAYTRACING_INSTANCE_DESC));
 	}
 
@@ -1850,7 +1839,7 @@ void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structu
 		.UAV.pResource = accel->impl.bottom_level_accel[0],
 	};
 	command_list->lpVtbl->ResourceBarrier(command_list, 1, &barrier);
-	dxrCommandList->lpVtbl->BuildRaytracingAccelerationStructure(dxrCommandList, &topLevelBuildDesc, 0, NULL);
+	dxr_command_list->lpVtbl->BuildRaytracingAccelerationStructure(dxr_command_list, &topLevelBuildDesc, 0, NULL);
 
 	gpu_execute_and_wait();
 
@@ -1865,75 +1854,75 @@ void gpu_raytrace_acceleration_structure_destroy(gpu_raytrace_acceleration_struc
 
 void gpu_raytrace_set_textures(gpu_texture_t *texpaint0, gpu_texture_t *texpaint1, gpu_texture_t *texpaint2, gpu_texture_t *texenv, gpu_texture_t *texsobol, gpu_texture_t *texscramble, gpu_texture_t *texrank) {
 	D3D12_CPU_DESCRIPTOR_HANDLE handle;
-	descriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(descriptorHeap, &handle);
+	dxr_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(dxr_descriptor_heap, &handle);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptor = {0};
-	cpuDescriptor.ptr = handle.ptr + 5 * (UINT64)(descriptorSize);
+	cpuDescriptor.ptr = handle.ptr + 5 * (UINT64)(dxr_descriptor_size);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE sourceCpu;
 	texpaint0->impl.srv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(texpaint0->impl.srv_descriptor_heap, &sourceCpu);
 	device->lpVtbl->CopyDescriptorsSimple(device, 1, cpuDescriptor, sourceCpu, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	D3D12_GPU_DESCRIPTOR_HANDLE ghandle;
-	descriptorHeap->lpVtbl->GetGPUDescriptorHandleForHeapStart(descriptorHeap, &ghandle);
-	tex0gpuDescriptorHandle.ptr = ghandle.ptr + 5 * (UINT64)(descriptorSize);
+	dxr_descriptor_heap->lpVtbl->GetGPUDescriptorHandleForHeapStart(dxr_descriptor_heap, &ghandle);
+	dxr_tex0gpu_descriptor_handle.ptr = ghandle.ptr + 5 * (UINT64)(dxr_descriptor_size);
 
-	descriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(descriptorHeap, &handle);
-	cpuDescriptor.ptr = handle.ptr + 6 * (UINT64)(descriptorSize);
+	dxr_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(dxr_descriptor_heap, &handle);
+	cpuDescriptor.ptr = handle.ptr + 6 * (UINT64)(dxr_descriptor_size);
 	texpaint1->impl.srv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(texpaint1->impl.srv_descriptor_heap, &sourceCpu);
 	device->lpVtbl->CopyDescriptorsSimple(device, 1, cpuDescriptor, sourceCpu, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	descriptorHeap->lpVtbl->GetGPUDescriptorHandleForHeapStart(descriptorHeap, &ghandle);
-	tex1gpuDescriptorHandle.ptr = ghandle.ptr + 6 * (UINT64)(descriptorSize);
+	dxr_descriptor_heap->lpVtbl->GetGPUDescriptorHandleForHeapStart(dxr_descriptor_heap, &ghandle);
+	dxr_tex1gpu_descriptor_handle.ptr = ghandle.ptr + 6 * (UINT64)(dxr_descriptor_size);
 
-	descriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(descriptorHeap, &handle);
-	cpuDescriptor.ptr = handle.ptr + 7 * (UINT64)(descriptorSize);
+	dxr_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(dxr_descriptor_heap, &handle);
+	cpuDescriptor.ptr = handle.ptr + 7 * (UINT64)(dxr_descriptor_size);
 	texpaint2->impl.srv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(texpaint2->impl.srv_descriptor_heap, &sourceCpu);
 	device->lpVtbl->CopyDescriptorsSimple(device, 1, cpuDescriptor, sourceCpu, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	descriptorHeap->lpVtbl->GetGPUDescriptorHandleForHeapStart(descriptorHeap, &ghandle);
-	tex2gpuDescriptorHandle.ptr = ghandle.ptr + 7 * (UINT64)(descriptorSize);
+	dxr_descriptor_heap->lpVtbl->GetGPUDescriptorHandleForHeapStart(dxr_descriptor_heap, &ghandle);
+	dxr_tex2gpu_descriptor_handle.ptr = ghandle.ptr + 7 * (UINT64)(dxr_descriptor_size);
 
-	descriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(descriptorHeap, &handle);
-	cpuDescriptor.ptr = handle.ptr + 8 * (UINT64)(descriptorSize);
+	dxr_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(dxr_descriptor_heap, &handle);
+	cpuDescriptor.ptr = handle.ptr + 8 * (UINT64)(dxr_descriptor_size);
 	texenv->impl.srv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(texenv->impl.srv_descriptor_heap, &sourceCpu);
 	device->lpVtbl->CopyDescriptorsSimple(device, 1, cpuDescriptor, sourceCpu, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	descriptorHeap->lpVtbl->GetGPUDescriptorHandleForHeapStart(descriptorHeap, &ghandle);
-	texenvgpuDescriptorHandle.ptr = ghandle.ptr + 8 * (UINT64)(descriptorSize);
+	dxr_descriptor_heap->lpVtbl->GetGPUDescriptorHandleForHeapStart(dxr_descriptor_heap, &ghandle);
+	dxr_texenvgpu_descriptor_handle.ptr = ghandle.ptr + 8 * (UINT64)(dxr_descriptor_size);
 
-	descriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(descriptorHeap, &handle);
-	cpuDescriptor.ptr = handle.ptr + 9 * (UINT64)(descriptorSize);
+	dxr_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(dxr_descriptor_heap, &handle);
+	cpuDescriptor.ptr = handle.ptr + 9 * (UINT64)(dxr_descriptor_size);
 	texsobol->impl.srv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(texsobol->impl.srv_descriptor_heap, &sourceCpu);
 	device->lpVtbl->CopyDescriptorsSimple(device, 1, cpuDescriptor, sourceCpu, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	descriptorHeap->lpVtbl->GetGPUDescriptorHandleForHeapStart(descriptorHeap, &ghandle);
-	texsobolgpuDescriptorHandle.ptr = ghandle.ptr + 9 * (UINT64)(descriptorSize);
+	dxr_descriptor_heap->lpVtbl->GetGPUDescriptorHandleForHeapStart(dxr_descriptor_heap, &ghandle);
+	dxr_texsobolgpu_descriptor_handle.ptr = ghandle.ptr + 9 * (UINT64)(dxr_descriptor_size);
 
-	descriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(descriptorHeap, &handle);
-	cpuDescriptor.ptr = handle.ptr + 10 * (UINT64)(descriptorSize);
+	dxr_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(dxr_descriptor_heap, &handle);
+	cpuDescriptor.ptr = handle.ptr + 10 * (UINT64)(dxr_descriptor_size);
 	texscramble->impl.srv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(texscramble->impl.srv_descriptor_heap , &sourceCpu);
 	device->lpVtbl->CopyDescriptorsSimple(device, 1, cpuDescriptor, sourceCpu, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	descriptorHeap->lpVtbl->GetGPUDescriptorHandleForHeapStart(descriptorHeap, &ghandle);
-	texscramblegpuDescriptorHandle.ptr = ghandle.ptr + 10 * (UINT64)(descriptorSize);
+	dxr_descriptor_heap->lpVtbl->GetGPUDescriptorHandleForHeapStart(dxr_descriptor_heap, &ghandle);
+	dxr_texscramblegpu_descriptor_handle.ptr = ghandle.ptr + 10 * (UINT64)(dxr_descriptor_size);
 
-	descriptorHeap->lpVtbl->GetCPUDescriptorHandleForHeapStart(descriptorHeap, &handle);
-	cpuDescriptor.ptr = handle.ptr + 11 * (UINT64)(descriptorSize);
+	dxr_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(dxr_descriptor_heap, &handle);
+	cpuDescriptor.ptr = handle.ptr + 11 * (UINT64)(dxr_descriptor_size);
 	texrank->impl.srv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(texrank->impl.srv_descriptor_heap , &sourceCpu);
 	device->lpVtbl->CopyDescriptorsSimple(device, 1, cpuDescriptor, sourceCpu, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	descriptorHeap->lpVtbl->GetGPUDescriptorHandleForHeapStart(descriptorHeap, &ghandle);
-	texrankgpuDescriptorHandle.ptr = ghandle.ptr + 11 * (UINT64)(descriptorSize);
+	dxr_descriptor_heap->lpVtbl->GetGPUDescriptorHandleForHeapStart(dxr_descriptor_heap, &ghandle);
+	dxr_texrankgpu_descriptor_handle.ptr = ghandle.ptr + 11 * (UINT64)(dxr_descriptor_size);
 }
 
-void gpu_raytrace_set_acceleration_structure(gpu_raytrace_acceleration_structure_t *_accel) {
-	accel = _accel;
+void gpu_raytrace_set_acceleration_structure(gpu_raytrace_acceleration_structure_t *accel) {
+	dxr_accel = accel;
 }
 
-void gpu_raytrace_set_pipeline(gpu_raytrace_pipeline_t *_pipeline) {
-	pipeline = _pipeline;
+void gpu_raytrace_set_pipeline(gpu_raytrace_pipeline_t *pipeline) {
+	dxr_pipeline = pipeline;
 }
 
-void gpu_raytrace_set_target(gpu_texture_t *_output) {
-	if (_output != output) {
-		_output->impl.image->lpVtbl->Release(_output->impl.image);
-		_output->impl.rtv_descriptor_heap->lpVtbl->Release(_output->impl.rtv_descriptor_heap);
-		_output->impl.srv_descriptor_heap->lpVtbl->Release(_output->impl.srv_descriptor_heap);
+void gpu_raytrace_set_target(gpu_texture_t *output) {
+	if (output != dxr_output) {
+		output->impl.image->lpVtbl->Release(output->impl.image);
+		output->impl.rtv_descriptor_heap->lpVtbl->Release(output->impl.rtv_descriptor_heap);
+		output->impl.srv_descriptor_heap->lpVtbl->Release(output->impl.srv_descriptor_heap);
 
 		D3D12_HEAP_PROPERTIES heap_properties = {
 			.Type = D3D12_HEAP_TYPE_DEFAULT,
@@ -1942,8 +1931,8 @@ void gpu_raytrace_set_target(gpu_texture_t *_output) {
 		};
 		D3D12_RESOURCE_DESC desc = {
 			.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D,
-			.Width = _output->width,
-			.Height = _output->height,
+			.Width = output->width,
+			.Height = output->height,
 			.DepthOrArraySize = 1,
 			.MipLevels = 1,
 			.Format = DXGI_FORMAT_R16G16B16A16_FLOAT,
@@ -1960,7 +1949,7 @@ void gpu_raytrace_set_target(gpu_texture_t *_output) {
 		clear_value.Color[3] = 0.0f;
 
 		device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &desc,
-										D3D12_RESOURCE_STATE_COMMON, &clear_value, &IID_ID3D12Resource, &_output->impl.image);
+										D3D12_RESOURCE_STATE_COMMON, &clear_value, &IID_ID3D12Resource, &output->impl.image);
 
 		D3D12_RENDER_TARGET_VIEW_DESC view = {
 			.Format = DXGI_FORMAT_R16G16B16A16_FLOAT,
@@ -1973,10 +1962,10 @@ void gpu_raytrace_set_target(gpu_texture_t *_output) {
 			.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
 			.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
 		};
-		device->lpVtbl->CreateDescriptorHeap(device, &heap_desc, &IID_ID3D12DescriptorHeap, &_output->impl.rtv_descriptor_heap);
+		device->lpVtbl->CreateDescriptorHeap(device, &heap_desc, &IID_ID3D12DescriptorHeap, &output->impl.rtv_descriptor_heap);
 		D3D12_CPU_DESCRIPTOR_HANDLE handle;
-		_output->impl.rtv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(_output->impl.rtv_descriptor_heap, &handle);
-		device->lpVtbl->CreateRenderTargetView(device, _output->impl.image, &view, handle);
+		output->impl.rtv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(output->impl.rtv_descriptor_heap, &handle);
+		device->lpVtbl->CreateRenderTargetView(device, output->impl.image, &view, handle);
 
 		D3D12_DESCRIPTOR_HEAP_DESC descriptor_heap_desc = {
 			.NumDescriptors = 1,
@@ -1984,7 +1973,7 @@ void gpu_raytrace_set_target(gpu_texture_t *_output) {
 			.NodeMask = 0,
 			.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
 		};
-		device->lpVtbl->CreateDescriptorHeap(device, &descriptor_heap_desc, &IID_ID3D12DescriptorHeap, &_output->impl.srv_descriptor_heap);
+		device->lpVtbl->CreateDescriptorHeap(device, &descriptor_heap_desc, &IID_ID3D12DescriptorHeap, &output->impl.srv_descriptor_heap);
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {
 			.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D,
@@ -1994,53 +1983,53 @@ void gpu_raytrace_set_target(gpu_texture_t *_output) {
 			.Texture2D.MostDetailedMip = 0,
 			.Texture2D.ResourceMinLODClamp = 0.0f,
 		};
-		_output->impl.srv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(_output->impl.srv_descriptor_heap, &handle);
-		device->lpVtbl->CreateShaderResourceView(device, _output->impl.image, &srv_desc,
+		output->impl.srv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(output->impl.srv_descriptor_heap, &handle);
+		device->lpVtbl->CreateShaderResourceView(device, output->impl.image, &srv_desc,
 												 handle);
 
 		D3D12_UNORDERED_ACCESS_VIEW_DESC UAVDesc = {
 			.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D,
 		};
-		device->lpVtbl->CreateUnorderedAccessView(device, _output->impl.image, NULL, &UAVDesc, outputCpuDescriptor);
+		device->lpVtbl->CreateUnorderedAccessView(device, output->impl.image, NULL, &UAVDesc, dxr_output_cpu_descriptor);
 	}
-	output = _output;
+	dxr_output = output;
 }
 
 void gpu_raytrace_dispatch_rays() {
-	command_list->lpVtbl->SetComputeRootSignature(command_list, dxrRootSignature);
+	command_list->lpVtbl->SetComputeRootSignature(command_list, dxr_root_signature);
 
 	// Bind the heaps, acceleration structure and dispatch rays
-	command_list->lpVtbl->SetDescriptorHeaps(command_list, 1, &descriptorHeap);
-	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 0, outputDescriptorHandle);
-	command_list->lpVtbl->SetComputeRootShaderResourceView(command_list, 1, accel->impl.top_level_accel->lpVtbl->GetGPUVirtualAddress(accel->impl.top_level_accel));
-	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 2, ibgpuDescriptorHandle);
-	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 3, vbgpuDescriptorHandle);
-	command_list->lpVtbl->SetComputeRootConstantBufferView(command_list, 4, pipeline->_constant_buffer->impl.buffer->lpVtbl->GetGPUVirtualAddress(pipeline->_constant_buffer->impl.buffer));
-	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 5, tex0gpuDescriptorHandle);
-	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 6, tex1gpuDescriptorHandle);
-	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 7, tex2gpuDescriptorHandle);
-	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 8, texenvgpuDescriptorHandle);
-	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 9, texsobolgpuDescriptorHandle);
-	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 10, texscramblegpuDescriptorHandle);
-	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 11, texrankgpuDescriptorHandle);
+	command_list->lpVtbl->SetDescriptorHeaps(command_list, 1, &dxr_descriptor_heap);
+	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 0, dxr_output_descriptor_handle);
+	command_list->lpVtbl->SetComputeRootShaderResourceView(command_list, 1, dxr_accel->impl.top_level_accel->lpVtbl->GetGPUVirtualAddress(dxr_accel->impl.top_level_accel));
+	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 2, dxr_ibgpu_descriptor_handle);
+	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 3, dxr_vbgpu_descriptor_handle);
+	command_list->lpVtbl->SetComputeRootConstantBufferView(command_list, 4, dxr_pipeline->constant_buffer->impl.buffer->lpVtbl->GetGPUVirtualAddress(dxr_pipeline->constant_buffer->impl.buffer));
+	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 5, dxr_tex0gpu_descriptor_handle);
+	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 6, dxr_tex1gpu_descriptor_handle);
+	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 7, dxr_tex2gpu_descriptor_handle);
+	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 8, dxr_texenvgpu_descriptor_handle);
+	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 9, dxr_texsobolgpu_descriptor_handle);
+	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 10, dxr_texscramblegpu_descriptor_handle);
+	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 11, dxr_texrankgpu_descriptor_handle);
 
 	// Since each shader table has only one shader record, the stride is same as the size.
 	D3D12_DISPATCH_RAYS_DESC dispatchDesc = {0};
 	D3D12_RESOURCE_DESC desc;
-	pipeline->impl.hitgroup_shader_table->lpVtbl->GetDesc(pipeline->impl.hitgroup_shader_table, &desc);
-	dispatchDesc.HitGroupTable.StartAddress = pipeline->impl.hitgroup_shader_table->lpVtbl->GetGPUVirtualAddress(pipeline->impl.hitgroup_shader_table);
+	dxr_pipeline->impl.hitgroup_shader_table->lpVtbl->GetDesc(dxr_pipeline->impl.hitgroup_shader_table, &desc);
+	dispatchDesc.HitGroupTable.StartAddress = dxr_pipeline->impl.hitgroup_shader_table->lpVtbl->GetGPUVirtualAddress(dxr_pipeline->impl.hitgroup_shader_table);
 	dispatchDesc.HitGroupTable.SizeInBytes = desc.Width;
 	dispatchDesc.HitGroupTable.StrideInBytes = dispatchDesc.HitGroupTable.SizeInBytes;
-	dispatchDesc.MissShaderTable.StartAddress = pipeline->impl.miss_shader_table->lpVtbl->GetGPUVirtualAddress(pipeline->impl.miss_shader_table);
-	pipeline->impl.miss_shader_table->lpVtbl->GetDesc(pipeline->impl.miss_shader_table, &desc);
+	dispatchDesc.MissShaderTable.StartAddress = dxr_pipeline->impl.miss_shader_table->lpVtbl->GetGPUVirtualAddress(dxr_pipeline->impl.miss_shader_table);
+	dxr_pipeline->impl.miss_shader_table->lpVtbl->GetDesc(dxr_pipeline->impl.miss_shader_table, &desc);
 	dispatchDesc.MissShaderTable.SizeInBytes = desc.Width;
 	dispatchDesc.MissShaderTable.StrideInBytes = dispatchDesc.MissShaderTable.SizeInBytes;
-	dispatchDesc.RayGenerationShaderRecord.StartAddress = pipeline->impl.raygen_shader_table->lpVtbl->GetGPUVirtualAddress(pipeline->impl.raygen_shader_table);
-	pipeline->impl.raygen_shader_table->lpVtbl->GetDesc(pipeline->impl.raygen_shader_table, &desc);
+	dispatchDesc.RayGenerationShaderRecord.StartAddress = dxr_pipeline->impl.raygen_shader_table->lpVtbl->GetGPUVirtualAddress(dxr_pipeline->impl.raygen_shader_table);
+	dxr_pipeline->impl.raygen_shader_table->lpVtbl->GetDesc(dxr_pipeline->impl.raygen_shader_table, &desc);
 	dispatchDesc.RayGenerationShaderRecord.SizeInBytes = desc.Width;
-	dispatchDesc.Width = output->width;
-	dispatchDesc.Height = output->height;
+	dispatchDesc.Width = dxr_output->width;
+	dispatchDesc.Height = dxr_output->height;
 	dispatchDesc.Depth = 1;
-	dxrCommandList->lpVtbl->SetPipelineState1(dxrCommandList, pipeline->impl.dxr_state);
-	dxrCommandList->lpVtbl->DispatchRays(dxrCommandList, &dispatchDesc);
+	dxr_command_list->lpVtbl->SetPipelineState1(dxr_command_list, dxr_pipeline->impl.state);
+	dxr_command_list->lpVtbl->DispatchRays(dxr_command_list, &dispatchDesc);
 }

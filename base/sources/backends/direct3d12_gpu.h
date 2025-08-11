@@ -64,7 +64,7 @@ typedef struct {
 } gpu_buffer_impl_t;
 
 typedef struct {
-	struct ID3D12StateObject *dxr_state;
+	struct ID3D12StateObject *state;
 	struct ID3D12Resource *raygen_shader_table;
 	struct ID3D12Resource *miss_shader_table;
 	struct ID3D12Resource *hitgroup_shader_table;

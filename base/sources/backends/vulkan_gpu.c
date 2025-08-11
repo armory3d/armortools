@@ -2029,7 +2029,7 @@ bool gpu_raytrace_supported() {
 
 void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *ray_shader, int ray_shader_size, gpu_buffer_t *constant_buffer) {
 	output = NULL;
-	pipeline->_constant_buffer = constant_buffer;
+	pipeline->constant_buffer = constant_buffer;
 
 	{
 		VkDescriptorSetLayoutBinding acceleration_structure_layout_binding = {
@@ -3093,7 +3093,7 @@ void gpu_raytrace_dispatch_rays() {
 	};
 
 	VkDescriptorBufferInfo buffer_descriptor = {
-		.buffer = pipeline->_constant_buffer->impl.buf,
+		.buffer = pipeline->constant_buffer->impl.buf,
 		.range = VK_WHOLE_SIZE,
 		.offset = 0,
 	};

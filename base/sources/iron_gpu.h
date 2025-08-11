@@ -135,7 +135,7 @@ typedef struct gpu_pipeline {
 } gpu_pipeline_t;
 
 typedef struct gpu_raytrace_pipeline {
-	gpu_buffer_t *_constant_buffer;
+	gpu_buffer_t *constant_buffer;
 	gpu_raytrace_pipeline_impl_t impl;
 } gpu_raytrace_pipeline_t;
 
