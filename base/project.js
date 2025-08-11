@@ -83,7 +83,6 @@ if (!flags.lite) {
 		project.add_define("arm_physics");
 	}
 
-	// project.add_define("arm_skin");
 	// project.add_define("arm_audio");
 
 	if (platform === "android") {

@@ -2,13 +2,9 @@
 ///if arm_anim
 
 type anim_raw_t = {
-	ext?: any; // anim_bone_t | anim_object_t
+	ext?: any; // anim_object_t
 	ext_type?: string;
-	is_skinned?: bool;
 	action?: string;
-	///if arm_skin
-	armature?: armature_t; // Bone
-	///end
 	time?: f32;
 	speed?: f32;
 	loop?: bool;
@@ -77,11 +73,6 @@ function anim_play(raw: anim_raw_t, action: string = "", on_complete: ()=>void =
 	if (raw.ext_type == "anim_object_t") {
 		anim_object_play(raw.ext, action, on_complete, blend_time, speed, loop);
 	}
-	///if arm_skin
-	else if (raw.ext_type == "anim_bone_t") {
-		anim_bone_play(raw.ext, action, on_complete, blend_time, speed, loop);
-	}
-	///end
 	else {
 		anim_play_super(raw, action, on_complete, blend_time, speed, loop);
 	}
@@ -94,11 +85,6 @@ function anim_blend_super(raw: anim_raw_t, action1: string, action2: string, fac
 
 function anim_blend(raw: anim_raw_t, action1: string, action2: string, factor: f32) {
 	if (raw.ext != null)  {
-		///if arm_skin
-		if (raw.ext_type == "anim_bone_t") {
-			anim_bone_blend(raw.ext, action1, action2, factor);
-		}
-		///end
 	}
 	else {
 		anim_blend_super(raw, action1, action2, factor);
@@ -135,11 +121,6 @@ function anim_update(raw: anim_raw_t, delta: f32) {
 	if (raw.ext_type == "anim_object_t") {
 		anim_object_update(raw.ext, delta);
 	}
-	///if arm_skin
-	else if (raw.ext_type == "anim_bone_t") {
-		anim_bone_update(raw.ext, delta);
-	}
-	///end
 	else {
 		anim_update_super(raw, delta);
 	}

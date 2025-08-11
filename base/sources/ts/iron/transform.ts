@@ -12,17 +12,11 @@ type transform_t = {
 	object?: object_t;
 	dim?: vec4_t;
 	radius?: f32;
-
-	///if arm_skin
-	bone_parent?: mat4_t;
-	///end
-
 	///if arm_anim
 	// Wrong order returned from get_euler(), store last state for animation
 	_euler_x?: f32;
 	_euler_y?: f32;
 	_euler_z?: f32;
-
 	// Animated delta transform
 	dloc?: vec4_t;
 	drot?: quat_t;
@@ -78,12 +72,6 @@ function transform_build_matrix(raw: transform_t) {
 	// else {
 		// transform_compose_delta(raw);
 	// }
-
-	///if arm_skin
-	if (raw.bone_parent != null) {
-		raw.local = mat4_mult_mat(raw.local, raw.bone_parent);
-	}
-	///end
 
 	if (raw.object.parent != null && !raw.local_only) {
 		raw.world = mat4_mult_mat3x4(raw.local, raw.object.parent.transform.world);

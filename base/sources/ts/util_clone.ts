@@ -305,11 +305,6 @@ function util_clone_anim(a: anim_t): anim_t {
 	}
 	let r: anim_t = {};
 	r.object_actions = util_clone_string_array(a.object_actions);
-	r.bone_actions = util_clone_string_array(a.bone_actions);
-	r.parent_bone = a.parent_bone;
-	r.parent_bone_tail = util_clone_f32_array(a.parent_bone_tail);
-	r.parent_bone_tail_pose = util_clone_f32_array(a.parent_bone_tail_pose);
-	r.parent_bone_connected = a.parent_bone_connected;
 	r.tracks = util_clone_tracks(a.tracks);
 	r.begin = a.begin;
 	r.end = a.end;

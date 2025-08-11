@@ -45,20 +45,6 @@ function mesh_object_remove(raw: mesh_object_t) {
 }
 
 function mesh_object_setup_animation(raw: mesh_object_t, oactions: scene_t[] = null) {
-	///if arm_skin
-	let has_action: bool = raw.base.parent != null && raw.base.parent.raw != null && raw.base.parent.raw.anim != null && raw.base.parent.raw.anim.bone_actions != null;
-	if (has_action) {
-		let armature_name: string = raw.base.parent.name;
-		raw.base.animation = object_get_parent_armature(raw.base, armature_name).base;
-		if (raw.base.animation == null) {
-			raw.base.animation = anim_bone_create(armature_name).base;
-		}
-		if (raw.data.skin != null) {
-			anim_bone_set_skin(raw.base.animation.ext, raw);
-		}
-	}
-	///end
-
 	///if arm_anim
 	object_setup_animation_super(raw.base, oactions);
 	///end

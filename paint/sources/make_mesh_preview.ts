@@ -31,26 +31,6 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 
 	let pos: string = "input.pos";
 
-	///if arm_skin
-	let skin: bool = mesh_data_get_vertex_array(context_raw.paint_object.data, "bone") != null;
-	if (skin) {
-		pos = "spos";
-		node_shader_context_add_elem(con_mesh, "bone", "short4norm");
-		node_shader_context_add_elem(con_mesh, "weight", "short4norm");
-		node_shader_add_function(kong, str_get_skinning_dual_quat);
-		node_shader_add_constant(kong, "skin_bones float4[128 * 2]", "_skin_bones");
-		node_shader_add_constant(kong, "pos_unpack: float", "_pos_unpack");
-		node_shader_write_attrib_vert(kong, "var skin_a: float4;");
-		node_shader_write_attrib_vert(kong, "var skin_b: float4;");
-		node_shader_write_attrib_vert(kong, "get_skinning_dual_quat(int4(bone * 32767), weight, skin_a, skin_b);");
-		node_shader_write_attrib_vert(kong, "var spos: float3 = input.pos.xyz;");
-		node_shader_write_attrib_vert(kong, "spos.xyz *= constants.pos_unpack;");
-		node_shader_write_attrib_vert(kong, "spos.xyz += 2.0 * cross(skin_a.xyz, cross(skin_a.xyz, spos.xyz) + skin_a.w * spos.xyz);");
-		node_shader_write_attrib_vert(kong, "spos.xyz += 2.0 * (skin_a.w * skin_b.xyz - skin_b.w * skin_a.xyz + cross(skin_a.xyz, skin_b.xyz));");
-		node_shader_write_attrib_vert(kong, "spos.xyz /= constants.pos_unpack;");
-	}
-	///end
-
 	node_shader_add_constant(kong, "WVP: float4x4", "_world_view_proj_matrix");
 	node_shader_write_attrib_vert(kong, "output.pos = constants.WVP * float4(" + pos + ".xyz, 1.0);");
 
@@ -141,12 +121,6 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	node_shader_write_frag(kong, "output[2] = float4(0.0, 0.0, 0.0, 0.0);");
 
 	parser_material_finalize(con_mesh);
-
-	///if arm_skin
-	if (skin) {
-		node_shader_write_vert(kong, "wnormal = normalize(constants.N * float3(input.nor.xy, input.pos.w) + 2.0 * cross(skin_a.xyz, cross(skin_a.xyz, float3(input.nor.xy, input.pos.w)) + skin_a.w * float3(input.nor.xy, input.pos.w)));");
-	}
-	///end
 
 	con_mesh.data.shader_from_source = true;
 	gpu_create_shaders_from_kong(node_shader_get(kong), ADDRESS(con_mesh.data.vertex_shader), ADDRESS(con_mesh.data.fragment_shader), ADDRESS(con_mesh.data._.vertex_shader_size), ADDRESS(con_mesh.data._.fragment_shader_size));

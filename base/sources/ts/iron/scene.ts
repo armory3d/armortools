@@ -10,9 +10,6 @@ let scene_empties: object_t[];
 ///if arm_anim
 let scene_animations: anim_raw_t[];
 ///end
-///if arm_skin
-let scene_armatures: armature_t[];
-///end
 let scene_embedded: map_t<string, gpu_texture_t>;
 
 let _scene_ready: bool;
@@ -34,9 +31,6 @@ function scene_create(format: scene_t): object_t {
 	scene_empties = [];
 	///if arm_anim
 	scene_animations = [];
-	///end
-	///if arm_skin
-	scene_armatures = [];
 	///end
 	scene_embedded = map_create();
 	_scene_root = object_create();
@@ -328,43 +322,6 @@ function scene_create_mesh_object(o: obj_t, format: scene_t, parent: object_t, p
 		data_ref = o.data_ref;
 	}
 
-	// Bone objects are stored in armature parent
-	///if arm_skin
-	if (parent_object != null && parent_object.anim != null && parent_object.anim.bone_actions != null) {
-		let bactions: scene_t[] = [];
-		for (let i: i32 = 0; i < parent_object.anim.bone_actions.length; ++i) {
-			let ref: string = parent_object.anim.bone_actions[i];
-			let action: scene_t = data_get_scene_raw(ref);
-			array_push(bactions, action);
-		}
-		let armature: armature_t = null;
-		// Check if armature exists
-		for (let j: i32 = 0; j < scene_armatures.length; ++j) {
-			let a: armature_t = scene_armatures[j];
-			if (a.uid == parent.uid) {
-				armature = a;
-				break;
-			}
-		}
-		// Create new one
-		if (armature == null) {
-			// Unique name if armature was already instantiated for different object
-			for (let j: i32 = 0; j < scene_armatures.length; ++j) {
-				let a: armature_t = scene_armatures[j];
-				let aname: string = a.name;
-				if (aname == parent.name) {
-					parent.name += "." + parent.uid;
-					break;
-				}
-			}
-			armature = armature_create(parent.uid, parent.name, bactions);
-			array_push(scene_armatures, armature);
-		}
-		return scene_return_mesh_object(
-			object_file, data_ref, scene_name, armature, materials, parent, parent_object, o);
-	}
-	///end
-
 	return scene_return_mesh_object(object_file, data_ref, scene_name, null, materials, parent, parent_object, o);
 }
 
@@ -372,11 +329,6 @@ function scene_return_mesh_object(object_file: string, data_ref: string, scene_n
 	materials: material_data_t[], parent: object_t, parent_object: obj_t, o: obj_t): object_t {
 
 	let mesh: mesh_data_t = data_get_mesh(object_file, data_ref);
-	///if arm_skin
-	if (mesh.skin != null) {
-		armature != null ? mesh_data_add_armature(mesh, armature) : mesh_data_add_action(mesh, _scene_raw.objects, "none");
-	}
-	///end
 	let object: mesh_object_t = scene_add_mesh_object(mesh, materials, parent);
 
 	return scene_return_object(object.base, o);
@@ -466,7 +418,6 @@ type mesh_data_t = {
 	name?: string;
 	scale_pos?: f32; // Unpack pos from (-1,1) coords
 	scale_tex?: f32; // Unpack tex from (-1,1) coords
-	skin?: skin_t;
 	vertex_arrays?: vertex_array_t[];
 	index_arrays?: index_array_t[];
 	_?: mesh_data_runtime_t;
@@ -480,21 +431,6 @@ type mesh_data_runtime_t = {
 	index_buffers?: gpu_buffer_t[];
 	ready?: bool;
 	structure?: gpu_vertex_structure_t;
-	///if arm_skin
-	skeleton_transforms_inv?: mat4_t[];
-	actions?: map_t<string, obj_t[]>;
-	mats?: map_t<string, mat4_t[]>;
-	///end
-};
-
-type skin_t = {
-	transform?: f32_array_t;
-	bone_ref_array?: string[];
-	bone_len_array?: f32_array_t;
-	transforms_inv?: f32_array_t[]; // per-bone, size = 16, with skin.transform, pre-inverted
-	bone_count_array?: i16_array_t;
-	bone_index_array?: i16_array_t;
-	bone_weight_array?: i16_array_t;
 };
 
 type vertex_array_t = {
@@ -652,7 +588,7 @@ type obj_t = {
 	dimensions?: f32_array_t; // Geometry objects
 	visible?: bool;
 	spawn?: bool; // Auto add object when creating scene
-	anim?: anim_t; // Bone/object animation
+	anim?: anim_t; // Object animation
 	material_refs?: string[];
 	children?: obj_t[];
 	_?: obj_runtime_t;
@@ -664,11 +600,6 @@ type obj_runtime_t = {
 
 type anim_t = {
 	object_actions?: string[];
-	bone_actions?: string[];
-	parent_bone?: string;
-	parent_bone_tail?: f32_array_t; // Translate from head to tail
-	parent_bone_tail_pose?: f32_array_t;
-	parent_bone_connected?: bool;
 	tracks?: track_t[];
 	begin?: i32; // Frames, for non-sampled
 	end?: i32;

@@ -303,30 +303,6 @@ fun pack_f32_i16(f: float, i: uint): float { \
 // } \
 // ";
 
-///if arm_skin
-let str_get_skinning_dual_quat: string = "\
-fun get_skinning_dual_quat(bone: int4, weight: float4, out A: float4, inout B: float4) { \
-	var bonei: int4 = bone * 2; \
-	var mat_a: float4x4 = float4x4( \
-		skin_bones[bonei.x], \
-		skin_bones[bonei.y], \
-		skin_bones[bonei.z], \
-		skin_bones[bonei.w]); \
-	var mat_b: float4x4 = float4x4( \
-		skin_bones[bonei.x + 1], \
-		skin_bones[bonei.y + 1], \
-		skin_bones[bonei.z + 1], \
-		skin_bones[bonei.w + 1]); \
-	weight.xyz *= sign(mat_a[3] * mat_a).xyz; \
-	A = mat_a * weight; \
-	B = mat_b * weight; \
-	var inv_norm_a: float = 1.0 / length(A); \
-	A *= inv_norm_a; \
-	B *= inv_norm_a; \
-} \
-";
-///end
-
 let str_create_basis: string = "\
 fun create_basis(normal: float3, out tangent: float3, out binormal: float3) { \
 	tangent = normalize(camera_right - normal * dot(camera_right, normal)); \

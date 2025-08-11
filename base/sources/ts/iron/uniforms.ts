@@ -514,14 +514,7 @@ function uniforms_set_obj_const(obj: object_t, loc: i32, c: shader_const_t) {
 	else if (c.type == "floats") {
 		let fa: f32_array_t = null;
 
-		if (c.link == "_skin_bones") {
-			///if arm_skin
-			if (obj.animation != null) {
-				fa = obj.animation.ext.skin_buffer;
-			}
-			///end
-		}
-		else if (uniforms_f32_array_links != null) {
+		if (uniforms_f32_array_links != null) {
 			fa = uniforms_f32_array_links(obj, current_material(obj), c.link);
 		}
 

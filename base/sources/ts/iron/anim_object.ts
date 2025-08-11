@@ -12,10 +12,9 @@ function anim_object_create(object: object_t, oactions: scene_t[]): anim_object_
 	let raw: anim_object_t = {};
 	raw.base = anim_create();
 	raw.base.ext = raw;
-	raw.base.ext_type = "anim_bone_t";
+	raw.base.ext_type = "anim_object_t";
 	raw.object = object;
 	raw.oactions = oactions;
-	raw.base.is_skinned = false;
 	anim_object_play(raw);
 	return raw;
 }
@@ -209,9 +208,7 @@ function anim_object_update(raw: anim_object_t, delta: f32) {
 	if (raw.base.paused) {
 		return;
 	}
-	if (!raw.base.is_skinned) {
-		anim_object_update_object_anim(raw);
-	}
+	anim_object_update_object_anim(raw);
 }
 
 function anim_object_is_track_end(raw: anim_object_t, track: track_t): bool {

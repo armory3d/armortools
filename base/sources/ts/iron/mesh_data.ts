@@ -8,11 +8,6 @@ function mesh_data_parse(name: string, id: string): mesh_data_t {
 	}
 
 	let data: mesh_data_t = mesh_data_create(raw);
-	///if arm_skin
-	if (raw.skin != null) {
-		mesh_data_init_skeleton_transforms(data, raw.skin.transforms_inv);
-	}
-	///end
 	return data;
 }
 
@@ -41,53 +36,6 @@ function mesh_data_create(raw: mesh_data_t): mesh_data_t {
 	raw._.refcount = 0;
 	raw._.vertex_buffer_map = map_create();
 	raw._.ready = false;
-
-	///if arm_skin
-	// Prepare vertex array for skinning and fill size data
-	let vertex_arrays: vertex_array_t[] = raw.vertex_arrays;
-	if (raw.skin != null) {
-		let va_bone: vertex_array_t = {};
-		va_bone.attrib = "bone";
-		va_bone.values = null;
-		va_bone.data = "short4norm";
-		let va_weight: vertex_array_t = {};
-		va_weight.attrib = "weight";
-		va_weight.values = null;
-		va_weight.data = "short4norm";
-		array_push(vertex_arrays, va_bone);
-		array_push(vertex_arrays, va_weight);
-	}
-
-	if (raw.skin != null) {
-		let size: i32 = mesh_data_get_vertex_size(vertex_arrays[0].data);
-		let vertex_length: i32 = math_floor(vertex_arrays[0].values.length / size);
-		let l: i32 = vertex_length * 4;
-		let bonea: i16_array_t = i16_array_create(l);
-		let weighta: i16_array_t = i16_array_create(l);
-
-		let index: i32 = 0;
-		let ai: i32 = 0;
-		for (let i: i32 = 0; i < vertex_length; ++i) {
-			let bone_count: i32 = raw.skin.bone_count_array[i];
-			for (let j: i32 = index; j < index + bone_count; ++j) {
-				bonea[ai] = raw.skin.bone_index_array[j];
-				weighta[ai] = raw.skin.bone_weight_array[j];
-				ai++;
-			}
-			// Fill unused weights
-			for (let j: i32 = bone_count; j < 4; ++j) {
-				bonea[ai] = 0;
-				weighta[ai] = 0;
-				ai++;
-			}
-			index += bone_count;
-		}
-		vertex_arrays[vertex_arrays.length - 2].values = bonea;
-		vertex_arrays[vertex_arrays.length - 1].values = weighta;
-	}
-	///end
-
-	// Make vertex buffers
 	raw._.structure = mesh_data_get_vertex_struct(raw.vertex_arrays);
 
 	return raw;
@@ -236,57 +184,6 @@ function mesh_data_build(raw: mesh_data_t) {
 
 	raw._.ready = true;
 }
-
-///if arm_skin
-function mesh_data_add_armature(raw: mesh_data_t, armature: armature_t) {
-	for (let i: i32 = 0; i < armature.actions.length; ++i) {
-		let a: armature_action_t = armature.actions[i];
-		mesh_data_add_action(raw, a.bones, a.name);
-	}
-}
-
-function mesh_data_add_action(raw: mesh_data_t, bones: obj_t[], name: string) {
-	if (bones == null) {
-		return;
-	}
-	if (raw._.actions == null) {
-		raw._.actions = map_create();
-		raw._.mats = map_create();
-	}
-	if (map_get(raw._.actions, name) != null) {
-		return;
-	}
-	let action_bones: obj_t[] = [];
-
-	// Set bone references
-	for (let i: i32 = 0; i < raw.skin.bone_ref_array.length; ++i) {
-		let s: string = raw.skin.bone_ref_array[i];
-		for (let j: i32 = 0; j < bones.length; ++j) {
-			let b: obj_t = bones[j];
-			if (b.name == s) {
-				array_push(action_bones, b);
-			}
-		}
-	}
-	map_set(raw._.actions, name, action_bones);
-
-	let action_mats: mat4_t[] = [];
-	for (let i: i32 = 0; i < action_bones.length; ++i) {
-		let b: obj_t = action_bones[i];
-		array_push(action_mats, mat4_from_f32_array(b.transform));
-	}
-	map_set(raw._.mats, name, action_mats);
-}
-
-function mesh_data_init_skeleton_transforms(raw: mesh_data_t, transforms_inv: f32_array_t[]) {
-	raw._.skeleton_transforms_inv = [];
-	for (let i: i32 = 0; i < transforms_inv.length; ++i) {
-		let t: f32_array_t = transforms_inv[i];
-		let mi = mat4_from_f32_array(t);
-		array_push(raw._.skeleton_transforms_inv, mi);
-	}
-}
-///end
 
 function mesh_data_calculate_aabb(raw: mesh_data_t): vec4_t {
 	let aabb_min: vec4_t = vec4_create(-0.01, -0.01, -0.01);
