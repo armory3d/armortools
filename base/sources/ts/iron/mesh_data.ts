@@ -88,14 +88,12 @@ function mesh_data_build(raw: mesh_data_t) {
 	mesh_data_build_vertices(vertices, raw.vertex_arrays);
 	gpu_vertex_buffer_unlock(raw._.vertex_buffer);
 
-	let id: u32_array_t = raw.index_array;
-	let index_buffer: gpu_buffer_t = gpu_create_index_buffer(id.length);
-	let indices_array: u32_array_t = gpu_lock_index_buffer(index_buffer);
-	for (let i: i32 = 0; i < indices_array.length; ++i) {
-		indices_array[i] = id[i];
+	raw._.index_buffer = gpu_create_index_buffer(raw.index_array.length);
+	let ia: u32_array_t = gpu_lock_index_buffer(raw._.index_buffer);
+	for (let i: i32 = 0; i < ia.length; ++i) {
+		ia[i] = raw.index_array[i];
 	}
-	gpu_index_buffer_unlock(index_buffer);
-	raw._.index_buffer = index_buffer;
+	gpu_index_buffer_unlock(raw._.index_buffer);
 }
 
 function mesh_data_calculate_aabb(raw: mesh_data_t): vec4_t {

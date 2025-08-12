@@ -19,11 +19,10 @@ function make_material_get_mout(): bool {
 function make_material_parse_mesh_material() {
 	let m: material_data_t = project_materials[0].data;
 
-	for (let i: i32 = 0; i < m._.shader._.contexts.length; ++i) {
-		let c: shader_context_t = m._.shader._.contexts[i];
+	for (let i: i32 = 0; i < m._.shader.contexts.length; ++i) {
+		let c: shader_context_t = m._.shader.contexts[i];
 		if (c.name == "mesh") {
 			array_remove(m._.shader.contexts, c);
-			array_remove(m._.shader._.contexts, c);
 			make_material_delete_context(c);
 			break;
 		}
@@ -31,13 +30,12 @@ function make_material_parse_mesh_material() {
 
 	if (make_mesh_layer_pass_count > 1) {
 		let i: i32 = 0;
-		while (i < m._.shader._.contexts.length) {
-			let c: shader_context_t = m._.shader._.contexts[i];
+		while (i < m._.shader.contexts.length) {
+			let c: shader_context_t = m._.shader.contexts[i];
 			for (let j: i32 = 1; j < make_mesh_layer_pass_count; ++j) {
 				let name: string = "mesh" + j;
 				if (c.name == name) {
 					array_remove(m._.shader.contexts, c);
-					array_remove(m._.shader._.contexts, c);
 					make_material_delete_context(c);
 					i--;
 					break;
@@ -47,13 +45,12 @@ function make_material_parse_mesh_material() {
 		}
 
 		i = 0;
-		while (i < m._.contexts.length) {
-			let c: material_context_t = m._.contexts[i];
+		while (i < m.contexts.length) {
+			let c: material_context_t = m.contexts[i];
 			for (let j: i32 = 1; j < make_mesh_layer_pass_count; ++j) {
 				let name: string = "mesh" + j;
 				if (c.name == name) {
 					array_remove(m.contexts, c);
-					array_remove(m._.contexts, c);
 					i--;
 					break;
 				}
@@ -68,9 +65,8 @@ function make_material_parse_mesh_material() {
 	};
 
 	let con: node_shader_context_t = make_mesh_run(mm);
-	let scon: shader_context_t = shader_context_create(con.data);
-	array_push(m._.shader.contexts, scon);
-	array_push(m._.shader._.contexts, scon);
+	shader_context_load(con.data);
+	array_push(m._.shader.contexts, con.data);
 
 	for (let i: i32 = 1; i < make_mesh_layer_pass_count; ++i) {
 		let mm: material_t = {
@@ -78,19 +74,16 @@ function make_material_parse_mesh_material() {
 			canvas: null
 		};
 		let con: node_shader_context_t = make_mesh_run(mm, i);
-		let scon: shader_context_t = shader_context_create(con.data);
+		shader_context_load(con.data);
 
-		array_push(m._.shader.contexts, scon);
-		array_push(m._.shader._.contexts, scon);
+		array_push(m._.shader.contexts, con.data);
 
-		let mcon: material_context_t;
-		let mmcon: material_context_t = {
+		let mcon: material_context_t = {
 			name: "mesh" + i,
 			bind_textures: []
 		};
-		mcon = material_context_create(mmcon);
+		material_context_load(mcon);
 		array_push(m.contexts, mcon);
-		array_push(m._.contexts, mcon);
 	}
 
 	context_raw.ddirty = 2;
@@ -105,8 +98,8 @@ function make_material_parse_mesh_preview_material(md: material_data_t = null) {
 
 	let m: material_data_t = md == null ? project_materials[0].data : md;
 	let scon: shader_context_t = null;
-	for (let i: i32 = 0; i < m._.shader._.contexts.length; ++i) {
-		let c: shader_context_t = m._.shader._.contexts[i];
+	for (let i: i32 = 0; i < m._.shader.contexts.length; ++i) {
+		let c: shader_context_t = m._.shader.contexts[i];
 		if (c.name == "mesh") {
 			scon = c;
 			break;
@@ -114,7 +107,6 @@ function make_material_parse_mesh_preview_material(md: material_data_t = null) {
 	}
 
 	array_remove(m._.shader.contexts, scon);
-	array_remove(m._.shader._.contexts, scon);
 
 	let mcon: material_context_t = {
 		name: "mesh",
@@ -127,9 +119,10 @@ function make_material_parse_mesh_preview_material(md: material_data_t = null) {
 	};
 	let con: node_shader_context_t = make_mesh_preview_run(sd, mcon);
 
-	for (let i: i32 = 0; i < m._.contexts.length; ++i) {
-		if (m._.contexts[i].name == "mesh") {
-			m._.contexts[i] = material_context_create(mcon);
+	for (let i: i32 = 0; i < m.contexts.length; ++i) {
+		if (m.contexts[i].name == "mesh") {
+			material_context_load(mcon);
+			m.contexts[i] = mcon;
 			break;
 		}
 	}
@@ -139,17 +132,16 @@ function make_material_parse_mesh_preview_material(md: material_data_t = null) {
 	}
 
 	let compile_error: bool = false;
-	let _scon: shader_context_t = shader_context_create(con.data);
-	if (_scon == null) {
+	shader_context_load(con.data);
+	if (con.data == null) {
 		compile_error = true;
 	}
-	scon = _scon;
+	scon = con.data;
 	if (compile_error) {
 		return;
 	}
 
 	array_push(m._.shader.contexts, scon);
-	array_push(m._.shader._.contexts, scon);
 }
 
 function make_material_parse_paint_material(bake_previews: bool = true) {
@@ -166,24 +158,20 @@ function make_material_parse_paint_material(bake_previews: bool = true) {
 	}
 
 	let m: material_data_t = project_materials[0].data;
-	// let scon: TShaderContext = null;
-	// let mcon: TMaterialContext = null;
-	for (let i: i32 = 0; i < m._.shader._.contexts.length; ++i) {
-		let c: shader_context_t = m._.shader._.contexts[i];
+	for (let i: i32 = 0; i < m._.shader.contexts.length; ++i) {
+		let c: shader_context_t = m._.shader.contexts[i];
 		if (c.name == "paint") {
 			array_remove(m._.shader.contexts, c);
-			array_remove(m._.shader._.contexts, c);
 			if (c != make_material_default_scon) {
 				make_material_delete_context(c);
 			}
 			break;
 		}
 	}
-	for (let i: i32 = 0; i < m._.contexts.length; ++i) {
-		let c: material_context_t = m._.contexts[i];
+	for (let i: i32 = 0; i < m.contexts.length; ++i) {
+		let c: material_context_t = m.contexts[i];
 		if (c.name == "paint") {
 			array_remove(m.contexts, c);
-			array_remove(m._.contexts, c);
 			break;
 		}
 	}
@@ -200,20 +188,19 @@ function make_material_parse_paint_material(bake_previews: bool = true) {
 
 	let compile_error: bool = false;
 	let scon: shader_context_t;
-	let _scon: shader_context_t = shader_context_create(con.data);
-	if (_scon == null) {
+	shader_context_load(con.data);
+	if (con.data == null) {
 		compile_error = true;
 	}
-	scon = _scon;
+	scon = con.data;
 	if (compile_error) {
 		return;
 	}
-	let mcon: material_context_t = material_context_create(tmcon);
+	material_context_load(tmcon);
+	let mcon: material_context_t = tmcon;
 
 	array_push(m._.shader.contexts, scon);
-	array_push(m._.shader._.contexts, scon);
 	array_push(m.contexts, mcon);
-	array_push(m._.contexts, mcon);
 
 	if (make_material_default_scon == null) {
 		make_material_default_scon = scon;
@@ -373,15 +360,16 @@ function make_material_parse_node_preview_material(node: ui_node_t, group: ui_no
 	let con: node_shader_context_t = make_node_preview_run(sdata, mcon_raw, node, group, parents);
 	let compile_error: bool = false;
 	let scon: shader_context_t;
-	let _scon: shader_context_t = shader_context_create(con.data);
-	if (_scon == null) {
+	shader_context_load(con.data);
+	if (con.data == null) {
 		compile_error = true;
 	}
-	scon = _scon;
+	scon = con.data;
 	if (compile_error) {
 		return null;
 	}
-	let mcon: material_context_t = material_context_create(mcon_raw);
+	material_context_load(mcon_raw);
+	let mcon: material_context_t = mcon_raw;
 	let result: parse_node_preview_result_t = {
 		scon: scon,
 		mcon: mcon

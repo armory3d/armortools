@@ -95,7 +95,7 @@ typedef struct gpu_texture {
 typedef struct gpu_buffer {
 	int count;
 	int stride;
-	uint8_t *data;
+	uint8_t *data; // constant buffer data
 	gpu_buffer_impl_t impl;
 } gpu_buffer_t;
 

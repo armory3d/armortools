@@ -396,7 +396,7 @@ function util_render_make_node_preview(canvas: ui_node_canvas_t, node: ui_node_t
 	transform_build_matrix(context_raw.paint_object.base.transform);
 
 	_gpu_begin(image);
-	gpu_set_pipeline(res.scon._.pipe_state);
+	gpu_set_pipeline(res.scon._.pipe);
 	let empty: string[] = [""];
 	uniforms_set_context_consts(res.scon, empty);
 	uniforms_set_obj_consts(res.scon, context_raw.paint_object.base);

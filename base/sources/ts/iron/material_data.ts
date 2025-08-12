@@ -19,17 +19,9 @@ function material_data_create(raw: material_data_t, file: string = ""): material
 
 	let b: shader_data_t = data_get_shader(object_file, data_ref);
 	raw._.shader = b;
-
-	// Contexts have to be in the same order as in raw data for now
-	raw._.contexts = [];
-	while (raw._.contexts.length < raw.contexts.length) {
-		array_push(raw._.contexts, null);
-	}
-
 	for (let i: i32 = 0; i < raw.contexts.length; ++i) {
 		let c: material_context_t = raw.contexts[i];
-		let self: material_context_t = material_context_create(c);
-		raw._.contexts[i] = self;
+		material_context_load(c);
 	}
 	return raw;
 }
@@ -57,8 +49,8 @@ function material_data_get_raw_by_name(datas: material_data_t[], name: string): 
 }
 
 function material_data_get_context(raw: material_data_t, name: string): material_context_t {
-	for (let i: i32 = 0; i < raw._.contexts.length; ++i) {
-		let c: material_context_t = raw._.contexts[i];
+	for (let i: i32 = 0; i < raw.contexts.length; ++i) {
+		let c: material_context_t = raw.contexts[i];
 		if (c.name == name) {
 			return c;
 		}
@@ -66,7 +58,7 @@ function material_data_get_context(raw: material_data_t, name: string): material
 	return null;
 }
 
-function material_context_create(raw: material_context_t): material_context_t {
+function material_context_load(raw: material_context_t) {
 	raw._ = {};
 	if (raw.bind_textures != null && raw.bind_textures.length > 0) {
 		raw._.textures = [];
@@ -79,6 +71,4 @@ function material_context_create(raw: material_context_t): material_context_t {
 			array_push(raw._.textures, image);
 		}
 	}
-
-	return raw;
 }

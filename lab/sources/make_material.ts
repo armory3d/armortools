@@ -15,7 +15,6 @@ function make_material_parse_mesh_material() {
 		let c: shader_context_t = m._.shader.contexts[i];
 		if (c.name == "mesh") {
 			array_remove(m._.shader.contexts, c);
-			array_remove(m._.shader._.contexts, c);
 			make_material_delete_context(c);
 			break;
 		}
@@ -27,9 +26,8 @@ function make_material_parse_mesh_material() {
 	};
 
 	let con: node_shader_context_t = make_mesh_run(mm);
-	let scon: shader_context_t = shader_context_create(con.data);
-	array_push(m._.shader.contexts, scon);
-	array_push(m._.shader._.contexts, scon);
+	shader_context_load(con.data);
+	array_push(m._.shader.contexts, con.data);
 
 	context_raw.ddirty = 2;
 
@@ -40,13 +38,10 @@ function make_material_parse_mesh_material() {
 
 function make_material_parse_paint_material() {
 	let m: material_data_t = project_material_data;
-	let scon: shader_context_t = null;
-	let mcon: material_context_t = null;
 	for (let i: i32 = 0; i < m._.shader.contexts.length; ++i) {
 		let c: shader_context_t = m._.shader.contexts[i];
 		if (c.name == "paint") {
 			array_remove(m._.shader.contexts, c);
-			array_remove(m._.shader._.contexts, c);
 			if (c != make_material_default_scon) {
 				make_material_delete_context(c);
 			}
@@ -57,7 +52,6 @@ function make_material_parse_paint_material() {
 		let c: material_context_t = m.contexts[i];
 		if (c.name == "paint") {
 			array_remove(m.contexts, c);
-			array_remove(m._.contexts, c);
 			break;
 		}
 	}
@@ -68,28 +62,26 @@ function make_material_parse_paint_material() {
 
 	let compile_error: bool = false;
 	let scon2: shader_context_t;
-	let _scon: shader_context_t = shader_context_create(con.data);
-	if (_scon == null) {
+	shader_context_load(con.data);
+	if (con.data == null) {
 		compile_error = true;
 	}
-	scon2 = _scon;
+	scon2 = con.data;
 
 	if (compile_error) {
 		return;
 	}
 
-	let mcon3: material_context_t = material_context_create(mcon2);
+	material_context_load(mcon2);
 
 	array_push(m._.shader.contexts, scon2);
-	array_push(m._.shader._.contexts, scon2);
-	array_push(m.contexts, mcon3);
-	array_push(m._.contexts, mcon3);
+	array_push(m.contexts, mcon2);
 
 	if (make_material_default_scon == null) {
 		make_material_default_scon = scon2;
 	}
 	if (make_material_default_mcon == null) {
-		make_material_default_mcon = mcon3;
+		make_material_default_mcon = mcon2;
 	}
 }
 

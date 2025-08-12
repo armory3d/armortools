@@ -456,7 +456,6 @@ type material_data_t = {
 type material_data_runtime_t = {
 	uid?: f32;
 	shader?: shader_data_t;
-	contexts?: material_context_t[];
 };
 
 type material_context_t = {
@@ -482,11 +481,6 @@ type bind_tex_t = {
 
 type shader_data_t = {
 	name?: string;
-	contexts?: shader_context_t[];
-	_?: shader_data_runtime_t;
-};
-
-type shader_data_runtime_t = {
 	contexts?: shader_context_t[];
 };
 
@@ -515,7 +509,7 @@ type shader_context_t = {
 };
 
 type shader_context_runtime_t = {
-	pipe_state?: gpu_pipeline_t;
+	pipe?: gpu_pipeline_t;
 	constants?: i32[];
 	tex_units?: i32[];
 	structure?: gpu_vertex_structure_t;

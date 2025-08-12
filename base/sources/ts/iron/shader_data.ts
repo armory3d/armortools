@@ -1,11 +1,8 @@
 
 function shader_data_create(raw: shader_data_t): shader_data_t {
-	raw._ = {};
-	raw._.contexts = [];
 	for (let i: i32 = 0; i < raw.contexts.length; ++i) {
 		let c: shader_context_t = raw.contexts[i];
-		let con: shader_context_t = shader_context_create(c);
-		array_push(raw._.contexts, con);
+		shader_context_load(c);
 	}
 	return raw;
 }
@@ -43,15 +40,15 @@ function shader_data_get_raw_by_name(datas: shader_data_t[], name: string): shad
 }
 
 function shader_data_delete(raw: shader_data_t) {
-	for (let i: i32 = 0; i < raw._.contexts.length; ++i) {
-		let c: shader_context_t = raw._.contexts[i];
+	for (let i: i32 = 0; i < raw.contexts.length; ++i) {
+		let c: shader_context_t = raw.contexts[i];
 		shader_context_delete(c);
 	}
 }
 
 function shader_data_get_context(raw: shader_data_t, name: string): shader_context_t {
-	for (let i: i32 = 0; i < raw._.contexts.length; ++i) {
-		let c: shader_context_t = raw._.contexts[i];
+	for (let i: i32 = 0; i < raw.contexts.length; ++i) {
+		let c: shader_context_t = raw.contexts[i];
 		if (c.name == name) {
 			return c;
 		}
@@ -59,106 +56,90 @@ function shader_data_get_context(raw: shader_data_t, name: string): shader_conte
 	return null;
 }
 
-function shader_context_create(raw: shader_context_t): shader_context_t {
+function shader_context_load(raw: shader_context_t) {
 	if (raw._ == null) {
 		raw._ = {};
 	}
 	shader_context_parse_vertex_struct(raw);
-	return shader_context_compile(raw);
+	shader_context_compile(raw);
 }
 
-function shader_context_compile(raw: shader_context_t): shader_context_t {
-	if (raw._.pipe_state != null) {
-		gpu_delete_pipeline(raw._.pipe_state);
+function shader_context_compile(raw: shader_context_t) {
+	if (raw._.pipe != null) {
+		gpu_delete_pipeline(raw._.pipe);
 	}
-	raw._.pipe_state = gpu_create_pipeline();
+	raw._.pipe = gpu_create_pipeline();
 	raw._.constants = [];
 	raw._.tex_units = [];
-
-	raw._.pipe_state.input_layout = raw._.structure;
-
-	// Depth
-	raw._.pipe_state.depth_write = raw.depth_write;
-	raw._.pipe_state.depth_mode = shader_context_get_compare_mode(raw.compare_mode);
-
-	// Cull
-	raw._.pipe_state.cull_mode = shader_context_get_cull_mode(raw.cull_mode);
-
-	// Blending
+	raw._.pipe.input_layout = raw._.structure;
+	raw._.pipe.depth_write = raw.depth_write;
+	raw._.pipe.depth_mode = shader_context_get_compare_mode(raw.compare_mode);
+	raw._.pipe.cull_mode = shader_context_get_cull_mode(raw.cull_mode);
 	if (raw.blend_source != null) {
-		raw._.pipe_state.blend_source = shader_context_get_blend_fac(raw.blend_source);
+		raw._.pipe.blend_source = shader_context_get_blend_fac(raw.blend_source);
 	}
 	if (raw.blend_destination != null) {
-		raw._.pipe_state.blend_destination = shader_context_get_blend_fac(raw.blend_destination);
+		raw._.pipe.blend_destination = shader_context_get_blend_fac(raw.blend_destination);
 	}
 	if (raw.alpha_blend_source != null) {
-		raw._.pipe_state.alpha_blend_source = shader_context_get_blend_fac(raw.alpha_blend_source);
+		raw._.pipe.alpha_blend_source = shader_context_get_blend_fac(raw.alpha_blend_source);
 	}
 	if (raw.alpha_blend_destination != null) {
-		raw._.pipe_state.alpha_blend_destination = shader_context_get_blend_fac(raw.alpha_blend_destination);
+		raw._.pipe.alpha_blend_destination = shader_context_get_blend_fac(raw.alpha_blend_destination);
 	}
-
-	// Per-target color write mask
 	if (raw.color_writes_red != null) {
 		for (let i: i32 = 0; i < raw.color_writes_red.length; ++i) {
-			ARRAY_ACCESS(raw._.pipe_state.color_write_mask_red, i) = raw.color_writes_red[i];
+			ARRAY_ACCESS(raw._.pipe.color_write_mask_red, i) = raw.color_writes_red[i];
 		}
 	}
 	if (raw.color_writes_green != null) {
 		for (let i: i32 = 0; i < raw.color_writes_green.length; ++i) {
-			ARRAY_ACCESS(raw._.pipe_state.color_write_mask_green, i) = raw.color_writes_green[i];
+			ARRAY_ACCESS(raw._.pipe.color_write_mask_green, i) = raw.color_writes_green[i];
 		}
 	}
 	if (raw.color_writes_blue != null) {
 		for (let i: i32 = 0; i < raw.color_writes_blue.length; ++i) {
-			ARRAY_ACCESS(raw._.pipe_state.color_write_mask_blue, i) = raw.color_writes_blue[i];
+			ARRAY_ACCESS(raw._.pipe.color_write_mask_blue, i) = raw.color_writes_blue[i];
 		}
 	}
 	if (raw.color_writes_alpha != null) {
 		for (let i: i32 = 0; i < raw.color_writes_alpha.length; ++i) {
-			ARRAY_ACCESS(raw._.pipe_state.color_write_mask_alpha, i) = raw.color_writes_alpha[i];
+			ARRAY_ACCESS(raw._.pipe.color_write_mask_alpha, i) = raw.color_writes_alpha[i];
 		}
 	}
-
-	// Color attachment format
 	if (raw.color_attachments != null) {
-		raw._.pipe_state.color_attachment_count = raw.color_attachments.length;
+		raw._.pipe.color_attachment_count = raw.color_attachments.length;
 		for (let i: i32 = 0; i < raw.color_attachments.length; ++i) {
-			ARRAY_ACCESS(raw._.pipe_state.color_attachment, i) = shader_context_get_tex_format(raw.color_attachments[i]);
+			ARRAY_ACCESS(raw._.pipe.color_attachment, i) = shader_context_get_tex_format(raw.color_attachments[i]);
 		}
 	}
-
-	// Depth attachment format
 	if (raw.depth_attachment != null) {
-		raw._.pipe_state.depth_attachment_bits = raw.depth_attachment == "NONE" ? 0 : 32;
+		raw._.pipe.depth_attachment_bits = raw.depth_attachment == "NONE" ? 0 : 32;
 	}
 
-	// Shaders
 	if (raw.shader_from_source) {
-		raw._.pipe_state.vertex_shader = gpu_create_shader_from_source(raw.vertex_shader, raw._.vertex_shader_size, shader_type_t.VERTEX);
-		raw._.pipe_state.fragment_shader = gpu_create_shader_from_source(raw.fragment_shader, raw._.fragment_shader_size, shader_type_t.FRAGMENT);
-
-		// Shader compile error
-		if (raw._.pipe_state.vertex_shader == null || raw._.pipe_state.fragment_shader == null) {
-			return null;
+		raw._.pipe.vertex_shader = gpu_create_shader_from_source(raw.vertex_shader, raw._.vertex_shader_size, shader_type_t.VERTEX);
+		raw._.pipe.fragment_shader = gpu_create_shader_from_source(raw.fragment_shader, raw._.fragment_shader_size, shader_type_t.FRAGMENT);
+		if (raw._.pipe.vertex_shader == null || raw._.pipe.fragment_shader == null) {
+			return;
 		}
 	}
 	else {
 		///if arm_embed
 
-		raw._.pipe_state.fragment_shader = sys_get_shader(raw.fragment_shader);
-		raw._.pipe_state.vertex_shader = sys_get_shader(raw.vertex_shader);
+		raw._.pipe.fragment_shader = sys_get_shader(raw.fragment_shader);
+		raw._.pipe.vertex_shader = sys_get_shader(raw.vertex_shader);
 
 		///else // Load shaders manually
 
 		let vs_buffer: buffer_t = data_get_blob(raw.vertex_shader + shader_data_ext());
-		raw._.pipe_state.vertex_shader = gpu_create_shader(vs_buffer, shader_type_t.VERTEX);
+		raw._.pipe.vertex_shader = gpu_create_shader(vs_buffer, shader_type_t.VERTEX);
 		let fs_buffer: buffer_t = data_get_blob(raw.fragment_shader + shader_data_ext());
-		raw._.pipe_state.fragment_shader = gpu_create_shader(fs_buffer, shader_type_t.FRAGMENT);
+		raw._.pipe.fragment_shader = gpu_create_shader(fs_buffer, shader_type_t.FRAGMENT);
 		///end
 	}
 
-	return shader_context_finish_compile(raw);
+	shader_context_finish_compile(raw);
 }
 
 ///if arm_direct3d12
@@ -217,28 +198,24 @@ function shader_context_type_pad(offset: i32, size: i32): i32 {
 
 ///end
 
-function shader_context_finish_compile(raw: shader_context_t): shader_context_t {
-	gpu_pipeline_compile(raw._.pipe_state);
-
+function shader_context_finish_compile(raw: shader_context_t) {
+	gpu_pipeline_compile(raw._.pipe);
 	if (raw.constants != null) {
 		let offset: i32 = 0;
 		for (let i: i32 = 0; i < raw.constants.length; ++i) {
 			let c: shader_const_t = raw.constants[i];
 			let size: i32 = shader_context_type_size(c.type);
 			offset += shader_context_type_pad(offset, size);
-			shader_context_add_const(raw, c, offset);
+			shader_context_add_const(raw, offset);
 			offset += size;
 		}
 	}
-
 	if (raw.texture_units != null) {
 		for (let i: i32 = 0; i < raw.texture_units.length; ++i) {
 			let tu: tex_unit_t = raw.texture_units[i];
-			shader_context_add_tex(raw, tu, i);
+			shader_context_add_tex(raw, i);
 		}
 	}
-
-	return raw;
 }
 
 function shader_context_parse_data(data: string): vertex_data_t {
@@ -274,13 +251,13 @@ function shader_context_parse_vertex_struct(raw: shader_context_t) {
 }
 
 function shader_context_delete(raw: shader_context_t) {
-	if (raw._.pipe_state.fragment_shader != null) {
-		gpu_shader_destroy(raw._.pipe_state.fragment_shader);
+	if (raw._.pipe.fragment_shader != null) {
+		gpu_shader_destroy(raw._.pipe.fragment_shader);
 	}
-	if (raw._.pipe_state.vertex_shader != null) {
-		gpu_shader_destroy(raw._.pipe_state.vertex_shader);
+	if (raw._.pipe.vertex_shader != null) {
+		gpu_shader_destroy(raw._.pipe.vertex_shader);
 	}
-	gpu_delete_pipeline(raw._.pipe_state);
+	gpu_delete_pipeline(raw._.pipe);
 }
 
 function shader_context_get_compare_mode(s: string): compare_mode_t {
@@ -350,10 +327,10 @@ function shader_context_get_tex_format(s: string): tex_format_t {
 	return tex_format_t.RGBA32;
 }
 
-function shader_context_add_const(raw: shader_context_t, c: shader_const_t, offset: i32) {
+function shader_context_add_const(raw: shader_context_t, offset: i32) {
 	array_push(raw._.constants, offset);
 }
 
-function shader_context_add_tex(raw: shader_context_t, tu: tex_unit_t, i: i32) {
+function shader_context_add_tex(raw: shader_context_t, i: i32) {
 	array_push(raw._.tex_units, i);
 }

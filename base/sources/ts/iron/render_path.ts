@@ -164,7 +164,7 @@ function render_path_draw_skydome(handle: string) {
 	if (cc.context == null) {
 		return; // World data not specified
 	}
-	gpu_set_pipeline(cc.context._.pipe_state);
+	gpu_set_pipeline(cc.context._.pipe);
 	uniforms_set_context_consts(cc.context, _render_path_bind_params);
 	uniforms_set_obj_consts(cc.context, null); // External hosek
 	gpu_set_vertex_buffer(const_data_skydome_vb);
@@ -190,7 +190,7 @@ function render_path_draw_shader(handle: string) {
 	if (const_data_screen_aligned_vb == null) {
 		const_data_create_screen_aligned_data();
 	}
-	gpu_set_pipeline(cc.context._.pipe_state);
+	gpu_set_pipeline(cc.context._.pipe);
 	uniforms_set_context_consts(cc.context, _render_path_bind_params);
 	uniforms_set_obj_consts(cc.context, null);
 	gpu_set_vertex_buffer(const_data_screen_aligned_vb);
