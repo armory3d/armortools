@@ -419,17 +419,14 @@ type mesh_data_t = {
 	scale_pos?: f32; // Unpack pos from (-1,1) coords
 	scale_tex?: f32; // Unpack tex from (-1,1) coords
 	vertex_arrays?: vertex_array_t[];
-	index_arrays?: index_array_t[];
+	index_array?: u32_array_t; // size = 3
 	_?: mesh_data_runtime_t;
 };
 
 type mesh_data_runtime_t = {
-	refcount?: i32; // Number of users
 	handle?: string; // Handle used to retrieve this object in Data
 	vertex_buffer?: gpu_buffer_t;
-	vertex_buffer_map?: map_t<string, gpu_buffer_t>;
-	index_buffers?: gpu_buffer_t[];
-	ready?: bool;
+	index_buffer?: gpu_buffer_t;
 	structure?: gpu_vertex_structure_t;
 };
 
@@ -437,11 +434,6 @@ type vertex_array_t = {
 	attrib?: string;
 	data?: string; // short4norm, short2norm
 	values?: i16_array_t;
-};
-
-type index_array_t = {
-	material?: i32;
-	values?: u32_array_t; // size = 3
 };
 
 type camera_data_t = {

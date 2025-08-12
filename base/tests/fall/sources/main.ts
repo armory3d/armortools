@@ -146,7 +146,7 @@ function scene_ready() {
 
 	asim_world_create();
 	body = asim_body_create(1, 1, 1, 1, 1, 0, 0, 5, null, null, 1);
-	asim_body_create(0, 1, 1, 1, 1, 0, 0, 0, mesh.data.vertex_arrays[0].values, mesh.data.index_arrays[0].values, mesh.data.scale_pos);
+	asim_body_create(0, 1, 1, 1, 1, 0, 0, 0, mesh.data.vertex_arrays[0].values, mesh.data.index_array, mesh.data.scale_pos);
 }
 
 function scene_update() {

@@ -400,10 +400,7 @@ function box_export_tab_export_mesh(ui: ui_t, htab: ui_handle_t) {
 		}
 		for (let i: i32 = 0; i < paint_objects.length; ++i) {
 			let po: mesh_object_t = paint_objects[i];
-			for (let i: i32 = 0; i < po.data.index_arrays.length; ++i) {
-				let inda: index_array_t = po.data.index_arrays[i];
-				tris += math_floor(inda.values.length / 3);
-			}
+			tris += math_floor(po.data.index_array.length / 3);
 		}
 		ui_text(tris + " " + tr("triangles"));
 

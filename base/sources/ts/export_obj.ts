@@ -136,7 +136,7 @@ function export_obj_run(path: string, paint_objects: mesh_object_t[], apply_disp
 			export_obj_write_string(o, "\n");
 		}
 
-		let inda: u32_array_t = mesh.index_arrays[0].values;
+		let inda: u32_array_t = mesh.index_array;
 		for (let i: i32 = 0; i < math_floor(inda.length / 3); ++i) {
 			let pi1: i32 = posmap[inda[i * 3    ]] + 1 + poff;
 			let pi2: i32 = posmap[inda[i * 3 + 1]] + 1 + poff;
@@ -235,7 +235,7 @@ function export_obj_run_fast(path: string, paint_objects: mesh_object_t[]) {
 			export_obj_write_string(o, "\n");
 		}
 
-		let inda: u32_array_t = mesh.index_arrays[0].values;
+		let inda: u32_array_t = mesh.index_array;
 		for (let i: i32 = 0; i < math_floor(inda.length / 3); ++i) {
 			let pi1: i32 = inda[i * 3    ] + 1 + poff;
 			let pi2: i32 = inda[i * 3 + 1] + 1 + poff;

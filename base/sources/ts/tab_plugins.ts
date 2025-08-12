@@ -49,14 +49,13 @@ function plugin_uv_unwrap_button() {
 			posa: md.vertex_arrays[0].values,
 			nora: md.vertex_arrays[1].values,
 			texa: null,
-			inda: md.index_arrays[0].values
+			inda: md.index_array
 		};
 		js_call_ptr(cb, mesh);
 		md.vertex_arrays[0].values = mesh.posa;
 		md.vertex_arrays[1].values = mesh.nora;
 		md.vertex_arrays[2].values = mesh.texa;
-		md.index_arrays[0].values = mesh.inda;
-		md._.ready = false;
+		md.index_array = mesh.inda;
 		mesh_data_build(md);
 	}
 	util_mesh_merge();

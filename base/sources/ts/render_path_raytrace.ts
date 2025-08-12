@@ -164,14 +164,14 @@ function render_path_raytrace_raytrace_init(shader_name: string, build: bool = t
 			if (!po.base.visible) {
 				continue;
 			}
-			iron_raytrace_as_add(po.data._.vertex_buffer, po.data._.index_buffers[0], po.base.transform.world_unpack);
+			iron_raytrace_as_add(po.data._.vertex_buffer, po.data._.index_buffer, po.base.transform.world_unpack);
 		}
 		///else
 		iron_raytrace_as_add(render_path_raytrace_vb, render_path_raytrace_ib, render_path_raytrace_transform);
 		///end
 
 		let vb_full: gpu_buffer_t = context_raw.merged_object.data._.vertex_buffer;
-		let ib_full: gpu_buffer_t = context_raw.merged_object.data._.index_buffers[0];
+		let ib_full: gpu_buffer_t = context_raw.merged_object.data._.index_buffer;
 
 		iron_raytrace_as_build(vb_full, ib_full);
 	}
@@ -203,7 +203,7 @@ function render_path_raytrace_build_data(bake: bool = false) {
 	}
 
 	render_path_raytrace_vb = mo.data._.vertex_buffer;
-	render_path_raytrace_ib = mo.data._.index_buffers[0];
+	render_path_raytrace_ib = mo.data._.index_buffer;
 }
 
 function render_path_raytrace_draw(use_live_layer: bool) {

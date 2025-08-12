@@ -285,12 +285,7 @@ function import_mesh_raw_mesh(mesh: raw_mesh_t): mesh_data_t {
 				data: "short2norm"
 			}
 		],
-		index_arrays: [
-			{
-				values: mesh.inda,
-				material: 0
-			}
-		],
+		index_array: mesh.inda,
 		scale_pos: mesh.scale_pos,
 		scale_tex: mesh.scale_tex
 	};

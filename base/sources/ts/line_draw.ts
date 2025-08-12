@@ -269,7 +269,7 @@ function shape_draw_sphere(mat: mat4_t) {
 			buffer_set_f32(data, (i * 3 + 2) * 4, posa[i * 4 + 2] / 32767);
 		}
 		gpu_vertex_buffer_unlock(_shape_draw_sphere_vb);
-		_shape_draw_sphere_ib = md._.index_buffers[0];
+		_shape_draw_sphere_ib = md._.index_buffer;
 	}
 
 	gpu_set_vertex_buffer(_shape_draw_sphere_vb);

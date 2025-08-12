@@ -22,7 +22,7 @@ typedef struct raw_mesh {
 	int udims_u; // Number of horizontal udim tiles
 	int udims_v;
 	void *vertex_arrays; // vertex_array_t[]
-	void *index_arrays; // index_array_t[]
+	struct u32_array *index_array;
 } raw_mesh_t;
 
 raw_mesh_t *obj_parse(buffer_t *file_bytes, char split_code, uint64_t start_pos, bool udim);

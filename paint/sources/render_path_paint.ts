@@ -451,7 +451,7 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	let inv_vp: mat4_t = mat4_inv(scene_camera.vp);
 	gpu_set_matrix4(pipes_cursor_inv_vp, inv_vp);
 	gpu_set_vertex_buffer(geom._.vertex_buffer);
-	gpu_set_index_buffer(geom._.index_buffers[0]);
+	gpu_set_index_buffer(geom._.index_buffer);
 	gpu_draw();
 	render_path_end();
 }
@@ -754,9 +754,7 @@ function render_path_paint_set_plane_mesh() {
 				{ attrib: "nor", values: i16_array_create_from_array(nora), data: "short2norm" },
 				{ attrib: "tex", values: i16_array_create_from_array(texa), data: "short2norm" }
 			],
-			index_arrays: [
-				{ values: u32_array_create_from_array(inda), material: 0 }
-			],
+			index_array: u32_array_create_from_array(inda),
 			scale_pos: 1.5,
 			scale_tex: 1.0
 		};

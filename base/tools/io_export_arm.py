@@ -333,8 +333,6 @@ class ArmoryExporter(bpy.types.Operator, ExportHelper):
         for poly in exportMesh.polygons:
             poly_map[poly.material_index].append(poly)
 
-        o["index_arrays"] = []
-
         # map polygon indices to triangle loops
         tri_loops = {}
         for loop in exportMesh.loop_triangles:
@@ -358,15 +356,7 @@ class ArmoryExporter(bpy.types.Operator, ExportHelper):
                     prim[i + 2] = loops[loop.loops[2]].index
                     i += 3
 
-            ia = {}
-            ia["material"] = 0
-            if len(mats) > 1:
-                for i in range(len(mats)):  # Multi-mat mesh
-                    if mats[i] == mats[index]:  # Default material for empty slots
-                        ia["material"] = i
-                        break
-            ia["values"] = prim
-            o["index_arrays"].append(ia)
+            o["index_array"] = prim
 
     def export_mesh(self, objectRef):
         # This function exports a single mesh object

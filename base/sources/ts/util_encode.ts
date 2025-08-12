@@ -45,9 +45,7 @@ function util_encode_mesh_data_size(datas: mesh_data_t[]): i32 {
 		for (let j: i32 = 0; j < datas[i].vertex_arrays.length; ++j) {
 			size += datas[i].vertex_arrays[j].values.length * 2;
 		}
-		for (let j: i32 = 0; j < datas[i].index_arrays.length; ++j) {
-			size += datas[i].index_arrays[j].values.length * 4;
-		}
+		size += datas[i].index_array.length * 4;
 	}
 	return size;
 }
@@ -103,15 +101,8 @@ function util_encode_mesh_datas(datas: mesh_data_t[]) {
 			armpack_encode_string("values");
 			armpack_encode_array_i16(datas[i].vertex_arrays[j].values);
 		}
-		armpack_encode_string("index_arrays");
-		armpack_encode_array(datas[i].index_arrays.length);
-		for (let j: i32 = 0; j < datas[i].index_arrays.length; ++j) {
-			armpack_encode_map(2);
-			armpack_encode_string("material");
-			armpack_encode_i32(datas[i].index_arrays[j].material);
-			armpack_encode_string("values");
-			armpack_encode_array_i32(datas[i].index_arrays[j].values);
-		}
+		armpack_encode_string("index_array");
+		armpack_encode_array_i32(datas[i].index_array);
 	}
 }
 

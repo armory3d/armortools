@@ -371,9 +371,7 @@ function tab_meshes_set_default_mesh(name: string) {
 				{ values: mesh.nora, attrib: "nor", data: "short2norm" },
 				{ values: mesh.texa, attrib: "tex", data: "short2norm" }
 			],
-			index_arrays: [
-				{ values: mesh.inda, material: 0 }
-			],
+			index_array: mesh.inda,
 			scale_pos: mesh.scale_pos,
 			scale_tex: mesh.scale_tex
 		};

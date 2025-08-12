@@ -59,8 +59,7 @@ function material_data_get_raw_by_name(datas: material_data_t[], name: string): 
 function material_data_get_context(raw: material_data_t, name: string): material_context_t {
 	for (let i: i32 = 0; i < raw._.contexts.length; ++i) {
 		let c: material_context_t = raw._.contexts[i];
-		// "mesh" will fetch both "mesh" and "meshheight" contexts
-		if (substring(c.name, 0, name.length) == name) {
+		if (c.name == name) {
 			return c;
 		}
 	}
@@ -71,14 +70,11 @@ function material_context_create(raw: material_context_t): material_context_t {
 	raw._ = {};
 	if (raw.bind_textures != null && raw.bind_textures.length > 0) {
 		raw._.textures = [];
-
 		for (let i: i32 = 0; i < raw.bind_textures.length; ++i) {
 			let tex: bind_tex_t = raw.bind_textures[i];
-
 			if (tex.file == "") { // Empty texture
 				continue;
 			}
-
 			let image: gpu_texture_t = data_get_image(tex.file);
 			array_push(raw._.textures, image);
 		}

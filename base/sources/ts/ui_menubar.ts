@@ -184,12 +184,7 @@ function ui_menubar_draw_tab_header() {
 								data: "short2norm"
 							}
 						],
-						index_arrays: [
-							{
-								values: mesh.inda,
-								material: 0
-							}
-						],
+						index_array: mesh.inda,
 						scale_pos: mesh.scale_pos,
 						scale_tex: mesh.scale_tex
 					};

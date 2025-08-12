@@ -33,7 +33,7 @@ function util_uv_cache_uv_map() {
 				merged.data : context_raw.paint_object.data;
 
 	let texa: i16_array_t = mesh.vertex_arrays[2].values;
-	let inda: u32_array_t = mesh.index_arrays[0].values;
+	let inda: u32_array_t = mesh.index_array;
 	draw_begin(util_uv_uvmap, true, 0x00000000);
 	draw_set_color(0xffffffff);
 	let strength: f32 = res_x > 2048 ? 2.0 : 1.0;
@@ -71,7 +71,7 @@ function util_uv_cache_triangle_map() {
 	let merged: mesh_data_t = context_raw.merged_object != null ? context_raw.merged_object.data : context_raw.paint_object.data;
 	let mesh: mesh_data_t = merged;
 	let texa: i16_array_t = mesh.vertex_arrays[2].values;
-	let inda: u32_array_t = mesh.index_arrays[0].values;
+	let inda: u32_array_t = mesh.index_array;
 	draw_begin(util_uv_trianglemap, true, 0xff000000);
 	let f: f32 = (1 / 32767) * util_uv_trianglemap.width;
 	let color: i32 = 0xff000001;
@@ -127,7 +127,7 @@ function util_uv_cache_dilate_map() {
 	_gpu_begin(util_uv_dilatemap, null, null, clear_flag_t.COLOR, 0x00000000);
 	gpu_set_pipeline(util_uv_pipe_dilate);
 	gpu_set_vertex_buffer(geom._.vertex_buffer);
-	gpu_set_index_buffer(geom._.index_buffers[0]);
+	gpu_set_index_buffer(geom._.index_buffer);
 	gpu_draw();
 	gpu_end();
 	util_uv_dilatemap_cached = true;

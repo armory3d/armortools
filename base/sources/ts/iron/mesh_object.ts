@@ -30,7 +30,6 @@ function mesh_object_create(data: mesh_data_t, materials: material_data_t[]): me
 
 function mesh_object_set_data(raw: mesh_object_t, data: mesh_data_t) {
 	raw.data = data;
-	data._.refcount++;
 	mesh_data_build(data);
 
 	// Scale-up packed (-1,1) mesh coords
@@ -39,8 +38,6 @@ function mesh_object_set_data(raw: mesh_object_t, data: mesh_data_t) {
 
 function mesh_object_remove(raw: mesh_object_t) {
 	array_remove(scene_meshes, raw);
-	raw.data._.refcount--;
-
 	object_remove_super(raw.base);
 }
 
@@ -113,9 +110,6 @@ function mesh_object_get_contexts(raw: mesh_object_t, context: string, materials
 }
 
 function mesh_object_render(raw: mesh_object_t, context: string, bind_params: string[]) {
-	if (raw.data == null || !raw.data._.ready) {
-		return; // Data not yet streamed
-	}
 	if (!raw.base.visible) {
 		return; // Skip render if object is hidden
 	}
@@ -139,7 +133,6 @@ function mesh_object_render(raw: mesh_object_t, context: string, bind_params: st
 
 	// Render mesh
 	let scontext: shader_context_t = shader_contexts[0];
-	let elems: vertex_element_t[] = scontext.vertex_elements;
 
 	// Uniforms
 	if (scontext._.pipe_state != _mesh_object_last_pipeline) {
@@ -150,8 +143,8 @@ function mesh_object_render(raw: mesh_object_t, context: string, bind_params: st
 	uniforms_set_obj_consts(scontext, raw.base);
 	uniforms_set_material_consts(scontext, material_contexts[0]);
 
-	gpu_set_vertex_buffer(mesh_data_get(raw.data, elems));
-	gpu_set_index_buffer(raw.data._.index_buffers[0]);
+	gpu_set_vertex_buffer(raw.data._.vertex_buffer);
+	gpu_set_index_buffer(raw.data._.index_buffer);
 	gpu_draw();
 }
 

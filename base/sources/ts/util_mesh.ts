@@ -18,7 +18,7 @@ function util_mesh_merge(paint_objects: mesh_object_t[] = null) {
 	let max_scale: f32 = 0.0;
 	for (let i: i32 = 0; i < paint_objects.length; ++i) {
 		vlen += paint_objects[i].data.vertex_arrays[0].values.length;
-		ilen += paint_objects[i].data.index_arrays[0].values.length;
+		ilen += paint_objects[i].data.index_array.length;
 		if (paint_objects[i].data.scale_pos > max_scale) {
 			max_scale = paint_objects[i].data.scale_pos;
 		}
@@ -34,7 +34,7 @@ function util_mesh_merge(paint_objects: mesh_object_t[] = null) {
 	let ioff: i32 = 0;
 	for (let i: i32 = 0; i < paint_objects.length; ++i) {
 		let vas: vertex_array_t[] = paint_objects[i].data.vertex_arrays;
-		let ias: index_array_t[] = paint_objects[i].data.index_arrays;
+		let ia: u32_array_t = paint_objects[i].data.index_array;
 		let scale: f32 = paint_objects[i].data.scale_pos;
 
 		// Pos
@@ -71,12 +71,12 @@ function util_mesh_merge(paint_objects: mesh_object_t[] = null) {
 			}
 		}
 		// Indices
-		for (let j: i32 = 0; j < ias[0].values.length; ++j) {
-			ia[j + ioff] = ias[0].values[j] + voff;
+		for (let j: i32 = 0; j < ia.length; ++j) {
+			ia[j + ioff] = ia[j] + voff;
 		}
 
 		voff += math_floor(vas[0].values.length / 4);
-		ioff += math_floor(ias[0].values.length);
+		ioff += math_floor(ia.length);
 	}
 
 	let raw: mesh_data_t = {
@@ -98,12 +98,7 @@ function util_mesh_merge(paint_objects: mesh_object_t[] = null) {
 				data: "short2norm"
 			}
 		],
-		index_arrays: [
-			{
-				values: ia,
-				material: 0
-			}
-		],
+		index_array: ia,
 		scale_pos: max_scale,
 		scale_tex: 1.0
 	};
@@ -211,7 +206,7 @@ function util_mesh_calc_normals(smooth: bool = false) {
 		let o: mesh_object_t = objects[i];
 		let g: mesh_data_t = o.data;
 		let l: i32 = gpu_vertex_struct_size(g._.structure) / 2;
-		let inda: u32_array_t = g.index_arrays[0].values;
+		let inda: u32_array_t = g.index_array;
 		let vertices: buffer_t = gpu_lock_vertex_buffer(g._.vertex_buffer); // posnortex
 		for (let i: i32 = 0; i < math_floor(inda.length / 3); ++i) {
 			let i1: i32 = inda[i * 3    ];
@@ -457,7 +452,7 @@ function util_mesh_decimate() {
 	let posa: i16_array_t = vas[0].values;
 	let nora: i16_array_t = vas[1].values;
 	let texa: i16_array_t = vas[2].values;
-	let inda: u32_array_t = o.data.index_arrays[0].values;
+	let inda: u32_array_t = o.data.index_array;
 
 	let mesh: raw_mesh_t = {
 		posa: posa,

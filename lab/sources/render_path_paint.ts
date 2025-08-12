@@ -190,7 +190,7 @@ function render_path_paint_draw_cursor(mx: f32, my: f32, radius: f32, tint_r: f3
 	let inv_vp: mat4_t = mat4_inv(scene_camera.vp);
 	gpu_set_matrix4(pipes_cursor_inv_vp, inv_vp);
 	gpu_set_vertex_buffer(geom._.vertex_buffer);
-	gpu_set_index_buffer(geom._.index_buffers[0]);
+	gpu_set_index_buffer(geom._.index_buffer);
 	gpu_draw();
 	render_path_end();
 }

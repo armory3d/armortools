@@ -146,5 +146,5 @@ declare type raw_mesh_t = {
 	udims_u?: i32;
 	udims_v?: i32;
 	vertex_arrays?: vertex_array_t[];
-	index_arrays?: index_array_t[];
+	index_array?: u32_array_t;
 };
