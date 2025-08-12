@@ -34,7 +34,7 @@ function util_mesh_merge(paint_objects: mesh_object_t[] = null) {
 	let ioff: i32 = 0;
 	for (let i: i32 = 0; i < paint_objects.length; ++i) {
 		let vas: vertex_array_t[] = paint_objects[i].data.vertex_arrays;
-		let ia: u32_array_t = paint_objects[i].data.index_array;
+		let ias: u32_array_t = paint_objects[i].data.index_array;
 		let scale: f32 = paint_objects[i].data.scale_pos;
 
 		// Pos
@@ -71,12 +71,12 @@ function util_mesh_merge(paint_objects: mesh_object_t[] = null) {
 			}
 		}
 		// Indices
-		for (let j: i32 = 0; j < ia.length; ++j) {
-			ia[j + ioff] = ia[j] + voff;
+		for (let j: i32 = 0; j < ias.length; ++j) {
+			ia[j + ioff] = ias[j] + voff;
 		}
 
 		voff += math_floor(vas[0].values.length / 4);
-		ioff += math_floor(ia.length);
+		ioff += math_floor(ias.length);
 	}
 
 	let raw: mesh_data_t = {
