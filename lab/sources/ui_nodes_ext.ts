@@ -91,22 +91,23 @@ function ui_nodes_ext_run() {
 		if (ui_header_worktab.position == space_type_t.SPACE3D && !is_float_node) {
 
 			// Make copy of vertices before displacement
-			let o: mesh_object_t = project_paint_objects[0];
-			let g: mesh_data_t = o.data;
-			let vertices: buffer_t = gpu_lock_vertex_buffer(g._.vertex_buffer);
-			if (ui_nodes_ext_last_vertices == null || ui_nodes_ext_last_vertices.length != vertices.length) {
-				ui_nodes_ext_last_vertices = buffer_create(vertices.length);
-				for (let i: i32 = 0; i < math_floor((vertices.length) / 2); ++i) {
-					// buffer_set_i16(ui_nodes_ext_last_vertices, i * 2, buffer_get_i16(vertices, i * 2)); ////
-					buffer_set_i16(ui_nodes_ext_last_vertices, i * 2, buffer_get_i16(g._.vertices, i * 2));
-				}
-			}
-			else {
-				for (let i: i32 = 0; i < math_floor((vertices.length) / 2); ++i) {
-					buffer_set_i16(vertices, i * 2, buffer_get_i16(ui_nodes_ext_last_vertices, i * 2));
-				}
-			}
-			gpu_vertex_buffer_unlock(g._.vertex_buffer);
+			////
+			// let o: mesh_object_t = project_paint_objects[0];
+			// let g: mesh_data_t = o.data;
+			// let vertices: buffer_t = gpu_lock_vertex_buffer(g._.vertex_buffer);
+			// if (ui_nodes_ext_last_vertices == null || ui_nodes_ext_last_vertices.length != vertices.length) {
+			// 	ui_nodes_ext_last_vertices = buffer_create(vertices.length);
+			// 	for (let i: i32 = 0; i < math_floor((vertices.length) / 2); ++i) {
+			// 		// buffer_set_i16(ui_nodes_ext_last_vertices, i * 2, buffer_get_i16(vertices, i * 2));
+			// 	}
+			// }
+			// else {
+			// 	for (let i: i32 = 0; i < math_floor((vertices.length) / 2); ++i) {
+			// 		buffer_set_i16(vertices, i * 2, buffer_get_i16(ui_nodes_ext_last_vertices, i * 2));
+			// 	}
+			// }
+			// gpu_vertex_buffer_unlock(g._.vertex_buffer);
+			////
 
 			// Apply displacement
 			if (config_raw.displace_strength > 0) {

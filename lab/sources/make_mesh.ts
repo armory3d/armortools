@@ -45,7 +45,6 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	if (make_material_height_used && displace_strength > 0.0) {
 		kong.vert_n = true;
 		node_shader_write_vert(kong, "var height: float = 0.0;");
-		let num_layers: i32 = 1;
 		let displace_3: string = displace_strength + ", " + displace_strength + ", " + displace_strength;
 		node_shader_write_vert(kong, "output.wposition += wnormal * float3(height, height, height) * float3(" + displace_3 + ");");
 	}

@@ -57,7 +57,8 @@ function mesh_data_get_vertex_size(vertex_data: string): i32 {
 	return 2; // short2norm
 }
 
-function mesh_data_build_vertices(vertices: buffer_t, vertex_arrays: vertex_array_t[]) {
+function mesh_data_build_vertices(vertex_buffer: gpu_buffer_t, vertex_arrays: vertex_array_t[]) {
+	let vertices: buffer_t = gpu_lock_vertex_buffer(vertex_buffer);
 	let size: i32 = mesh_data_get_vertex_size(vertex_arrays[0].data);
 	let num_verts: i32 = vertex_arrays[0].values.length / size;
 	let di: i32 = -1;
@@ -69,6 +70,16 @@ function mesh_data_build_vertices(vertices: buffer_t, vertex_arrays: vertex_arra
 			}
 		}
 	}
+	gpu_vertex_buffer_unlock(vertex_buffer);
+}
+
+function mesh_data_build_indices(index_buffer: gpu_buffer_t, index_array: u32_array_t) {
+	let ia: u32_array_t = gpu_lock_index_buffer(index_buffer);
+	// for (let i: i32 = 0; i < ia.length; ++i) {
+	// 	ia[i] = index_array[i];
+	// }
+	memcpy(ia.buffer, index_array.buffer, ia.length * 4);
+	gpu_index_buffer_unlock(index_buffer);
 }
 
 function mesh_data_get_vertex_array(raw: mesh_data_t, name: string): vertex_array_t {
@@ -84,16 +95,10 @@ function mesh_data_build(raw: mesh_data_t) {
 	let positions: vertex_array_t = mesh_data_get_vertex_array(raw, "pos");
 	let size: i32 = mesh_data_get_vertex_size(positions.data);
 	raw._.vertex_buffer = gpu_create_vertex_buffer(math_floor(positions.values.length / size), raw._.structure);
-	let vertices: buffer_t = gpu_lock_vertex_buffer(raw._.vertex_buffer);
-	mesh_data_build_vertices(vertices, raw.vertex_arrays);
-	gpu_vertex_buffer_unlock(raw._.vertex_buffer);
+	mesh_data_build_vertices(raw._.vertex_buffer, raw.vertex_arrays);
 
 	raw._.index_buffer = gpu_create_index_buffer(raw.index_array.length);
-	let ia: u32_array_t = gpu_lock_index_buffer(raw._.index_buffer);
-	for (let i: i32 = 0; i < ia.length; ++i) {
-		ia[i] = raw.index_array[i];
-	}
-	gpu_index_buffer_unlock(raw._.index_buffer);
+	mesh_data_build_indices(raw._.index_buffer, raw.index_array);
 }
 
 function mesh_data_calculate_aabb(raw: mesh_data_t): vec4_t {
