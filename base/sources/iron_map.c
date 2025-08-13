@@ -213,7 +213,7 @@ void *any_imap_get(any_imap_t *m, int k) {
 void imap_delete(any_imap_t *m, int k) {
 	int i = i32_array_index_of(m->keys, k);
 	if (i > -1) {
-		array_splice(m->keys, i, 1);
+		i32_array_splice(m->keys, i, 1);
 		array_splice(m->values, i, 1);
 	}
 }
