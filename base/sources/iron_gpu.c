@@ -3,6 +3,12 @@
 
 static gpu_buffer_t constant_buffer;
 static bool gpu_thrown = false;
+static gpu_texture_t textures_to_destroy[128];
+static gpu_buffer_t buffers_to_destroy[128];
+static gpu_pipeline_t pipelines_to_destroy[32];
+static int textures_to_destroy_count = 0;
+static int buffers_to_destroy_count = 0;
+static int pipelines_to_destroy_count = 0;
 
 int constant_buffer_index = 0;
 int draw_calls = 0;
@@ -91,6 +97,19 @@ void gpu_present() {
 	gpu_present_internal();
 	draw_calls_last = draw_calls;
 	draw_calls = 0;
+
+	while (textures_to_destroy_count > 0) {
+		textures_to_destroy_count--;
+		gpu_texture_destroy_internal(&textures_to_destroy[textures_to_destroy_count]);
+	}
+	while (buffers_to_destroy_count > 0) {
+		buffers_to_destroy_count--;
+		gpu_buffer_destroy_internal(&buffers_to_destroy[buffers_to_destroy_count]);
+	}
+	while (pipelines_to_destroy_count > 0) {
+		pipelines_to_destroy_count--;
+		gpu_pipeline_destroy_internal(&pipelines_to_destroy[pipelines_to_destroy_count]);
+	}
 }
 
 void gpu_resize(int width, int height) {
@@ -252,6 +271,21 @@ void gpu_create_framebuffers(int depth_buffer_bits) {
 	else {
 		framebuffer_depth.width = framebuffer_depth.height = 0;
 	}
+}
+
+void gpu_texture_destroy(gpu_texture_t *texture) {
+	textures_to_destroy[textures_to_destroy_count] = *texture;
+	textures_to_destroy_count++;
+}
+
+void gpu_pipeline_destroy(gpu_pipeline_t *pipeline) {
+	pipelines_to_destroy[pipelines_to_destroy_count] = *pipeline;
+	pipelines_to_destroy_count++;
+}
+
+void gpu_buffer_destroy(gpu_buffer_t *buffer) {
+	buffers_to_destroy[buffers_to_destroy_count] = *buffer;
+	buffers_to_destroy_count++;
 }
 
 int gpu_vertex_data_size(gpu_vertex_data_t data) {

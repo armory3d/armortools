@@ -280,7 +280,7 @@ void gpu_present_internal() {
 		CAMetalLayer *layer = get_metal_layer();
 		layer.drawableSize = CGSizeMake(iron_window_width(), iron_window_height());
 		for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
-			// gpu_texture_destroy(&framebuffers[i]);
+			// gpu_texture_destroy_internal(&framebuffers[i]);
 			gpu_render_target_init2(&framebuffers[i], iron_window_width(), iron_window_height(), GPU_TEXTURE_FORMAT_RGBA32, i);
 		}
 		resized = false;
@@ -418,7 +418,7 @@ void gpu_use_linear_sampling(bool b) {
 	linear_sampling = b;
 }
 
-void gpu_pipeline_destroy(gpu_pipeline_t *pipeline) {
+void gpu_pipeline_destroy_internal(gpu_pipeline_t *pipeline) {
 	id<MTLRenderPipelineState> pipe = (__bridge_transfer id<MTLRenderPipelineState>)pipeline->impl._pipeline;
 	pipe = nil;
 	pipeline->impl._pipeline = NULL;
@@ -572,7 +572,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 						bytesPerImage:width * gpu_texture_format_size(format) * height];
 }
 
-void gpu_texture_destroy(gpu_texture_t *target) {
+void gpu_texture_destroy_internal(gpu_texture_t *target) {
 	id<MTLTexture> tex = (__bridge_transfer id<MTLTexture>)target->impl._tex;
 	tex = nil;
 	target->impl._tex = NULL;
@@ -632,7 +632,7 @@ void gpu_index_buffer_init(gpu_buffer_t *buffer, int indexCount) {
 					options:options];
 }
 
-void gpu_buffer_destroy(gpu_buffer_t *buffer) {
+void gpu_buffer_destroy_internal(gpu_buffer_t *buffer) {
 	id<MTLBuffer> buf = (__bridge_transfer id<MTLBuffer>)buffer->impl.metal_buffer;
 	buf = nil;
 	buffer->impl.metal_buffer = NULL;

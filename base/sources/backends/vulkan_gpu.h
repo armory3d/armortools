@@ -20,6 +20,7 @@ typedef struct {
 	VkImage image;
 	VkDeviceMemory mem;
 	VkImageView view;
+	bool has_storage_bit;
 } gpu_texture_impl_t;
 
 typedef struct {

@@ -392,12 +392,6 @@ static gpu_raytrace_acceleration_structure_t rt_accel;
 static bool rt_created = false;
 static bool rt_accel_created = false;
 const int rt_constant_buffer_size = 24;
-static gpu_texture_t *textures_to_destroy[128];
-static gpu_buffer_t *buffers_to_destroy[128];
-static gpu_pipeline_t *pipelines_to_destroy[32];
-static int textures_to_destroy_count = 0;
-static int buffers_to_destroy_count = 0;
-static int pipelines_to_destroy_count = 0;
 
 void _update(void *data) {
 	#ifdef IRON_WINDOWS
@@ -434,22 +428,6 @@ void _update(void *data) {
 	#ifdef WITH_AUDIO
 	iron_a2_update();
 	#endif
-
-	while (textures_to_destroy_count > 0) {
-		textures_to_destroy_count--;
-		gpu_texture_destroy(textures_to_destroy[textures_to_destroy_count]);
-		free(textures_to_destroy[textures_to_destroy_count]);
-	}
-	while (buffers_to_destroy_count > 0) {
-		buffers_to_destroy_count--;
-		gpu_buffer_destroy(buffers_to_destroy[buffers_to_destroy_count]);
-		free(buffers_to_destroy[buffers_to_destroy_count]);
-	}
-	while (pipelines_to_destroy_count > 0) {
-		pipelines_to_destroy_count--;
-		gpu_pipeline_destroy(pipelines_to_destroy[pipelines_to_destroy_count]);
-		free(pipelines_to_destroy[pipelines_to_destroy_count]);
-	}
 
 	iron_update();
 	gpu_present();
@@ -943,8 +921,8 @@ void iron_set_gamepad_button_callback(void (*callback)(int, int, float)) {
 #endif
 
 void gpu_delete_buffer(gpu_buffer_t *buffer) {
-	buffers_to_destroy[buffers_to_destroy_count] = buffer;
-	buffers_to_destroy_count++;
+	gpu_buffer_destroy(buffer);
+	free(buffer);
 }
 
 any gpu_create_index_buffer(i32 count) {
@@ -1163,8 +1141,8 @@ gpu_pipeline_t *gpu_create_pipeline() {
 }
 
 void gpu_delete_pipeline(gpu_pipeline_t *pipeline) {
-	pipelines_to_destroy[pipelines_to_destroy_count] = pipeline;
-	pipelines_to_destroy_count++;
+	gpu_pipeline_destroy(pipeline);
+	free(pipeline);
 }
 
 gpu_texture_t *gpu_create_render_target(i32 width, i32 height, i32 format) {
@@ -1253,8 +1231,8 @@ gpu_texture_t *iron_load_texture(string_t *file) {
 }
 
 void iron_delete_texture(gpu_texture_t *texture) {
-	textures_to_destroy[textures_to_destroy_count] = texture;
-	textures_to_destroy_count++;
+	gpu_texture_destroy(texture);
+	free(texture);
 }
 
 #ifdef WITH_AUDIO

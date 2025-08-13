@@ -159,10 +159,10 @@ static VkBool32 vk_debug_utils_messenger_callback_ext(
 	const VkDebugUtilsMessengerCallbackDataEXT *pcallback_data,
 	void *puser_data) {
 	if (message_severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
-		iron_error("Vulkan ERROR: Code %d : %s", pcallback_data->messageIdNumber, pcallback_data->pMessage);
+		iron_error("Vulkan ERROR: Code %d : %s\n", pcallback_data->messageIdNumber, pcallback_data->pMessage);
 	}
 	else if (message_severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
-		iron_log("Vulkan WARNING: Code %d : %s", pcallback_data->messageIdNumber, pcallback_data->pMessage);
+		iron_log("Vulkan WARNING: Code %d : %s\n", pcallback_data->messageIdNumber, pcallback_data->pMessage);
 	}
 	return VK_FALSE;
 }
@@ -386,7 +386,7 @@ static void create_descriptors(void) {
 
 VkSwapchainKHR cleanup_swapchain() {
 	// for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
-	// 	gpu_texture_destroy(&framebuffers[i]);
+	// 	gpu_texture_destroy_internal(&framebuffers[i]);
 	// }
 	VkSwapchainKHR chain = window_swapchain;
 	window_swapchain = VK_NULL_HANDLE;
@@ -399,6 +399,7 @@ void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_t
 	target->format = format;
 	target->state = (framebuffer_index >= 0) ? GPU_TEXTURE_STATE_PRESENT : GPU_TEXTURE_STATE_SHADER_RESOURCE;
 	target->buffer = NULL;
+	target->impl.has_storage_bit = false;
 
 	if (framebuffer_index >= 0) {
 		return;
@@ -627,7 +628,7 @@ static void acquire_next_image() {
 		acquire_next_image();
 
 		for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
-			// gpu_texture_destroy(&framebuffers[i]);
+			// gpu_texture_destroy_internal(&framebuffers[i]);
 			// gpu_render_target_init2(&framebuffers[i], iron_window_width(), iron_window_height(), GPU_TEXTURE_FORMAT_RGBA32, i);
 			framebuffers[i].width = iron_window_width();
 			framebuffers[i].height = iron_window_height();
@@ -1298,6 +1299,9 @@ void gpu_disable_scissor() {
 void gpu_set_pipeline(gpu_pipeline_t *pipeline) {
 	current_pipeline = pipeline;
 	vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, current_pipeline->impl.pipeline);
+	for (int i = 0; i < GPU_MAX_TEXTURES; ++i) {
+		current_textures[i] = NULL;
+	}
 }
 
 void gpu_set_vertex_buffer(gpu_buffer_t *buffer) {
@@ -1457,7 +1461,7 @@ void gpu_use_linear_sampling(bool b) {
 	linear_sampling = b;
 }
 
-void gpu_pipeline_destroy(gpu_pipeline_t *pipeline) {
+void gpu_pipeline_destroy_internal(gpu_pipeline_t *pipeline) {
 	vkDestroyPipeline(device, pipeline->impl.pipeline, NULL);
 	vkDestroyPipelineLayout(device, pipeline->impl.pipeline_layout, NULL);
 }
@@ -1804,7 +1808,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	gpu_execute_and_wait(); ////
 }
 
-void gpu_texture_destroy(gpu_texture_t *target) {
+void gpu_texture_destroy_internal(gpu_texture_t *target) {
 	if (target->impl.image != NULL) {
 		vkDestroyImage(device, target->impl.image, NULL);
 		vkFreeMemory(device, target->impl.mem, NULL);
@@ -1934,7 +1938,7 @@ void gpu_constant_buffer_unlock(gpu_buffer_t *buffer) {
 	buffer->data = NULL;
 }
 
-void gpu_buffer_destroy(gpu_buffer_t *buffer) {
+void gpu_buffer_destroy_internal(gpu_buffer_t *buffer) {
 	vkFreeMemory(device, buffer->impl.mem, NULL);
 	vkDestroyBuffer(device, buffer->impl.buf, NULL);
 }
@@ -3030,8 +3034,9 @@ void gpu_raytrace_set_pipeline(gpu_raytrace_pipeline_t *_pipeline) {
 }
 
 void gpu_raytrace_set_target(gpu_texture_t *_output) {
-	if (_output != output) {
-		vkDestroyImage(device, _output->impl.image, NULL);
+	if (!_output->impl.has_storage_bit) {
+		_output->impl.has_storage_bit = true;
+		gpu_texture_destroy(_output);
 
 		VkImageCreateInfo image_info = {
 			.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
@@ -3049,6 +3054,17 @@ void gpu_raytrace_set_target(gpu_texture_t *_output) {
 			.flags = 0,
 		};
 		vkCreateImage(device, &image_info, NULL, &_output->impl.image);
+
+		VkMemoryRequirements memory_reqs;
+		vkGetImageMemoryRequirements(device, _output->impl.image, &memory_reqs);
+
+		VkMemoryAllocateInfo allocation_nfo = {
+			.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+			.pNext = NULL,
+			.allocationSize = memory_reqs.size,
+		};
+		allocation_nfo.memoryTypeIndex = memory_type_from_properties(memory_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+		vkAllocateMemory(device, &allocation_nfo, NULL, &_output->impl.mem);
 		vkBindImageMemory(device, _output->impl.image, _output->impl.mem, 0);
 
 		VkImageViewCreateInfo image_view_info = {

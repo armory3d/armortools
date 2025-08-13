@@ -152,10 +152,10 @@ void gpu_barrier(gpu_texture_t *render_target, gpu_texture_state_t state_after) 
 void gpu_destroy() {
 	gpu_wait();
 	for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
-		gpu_texture_destroy(&framebuffers[i]);
+		gpu_texture_destroy_internal(&framebuffers[i]);
 	}
 	if (framebuffer_depth.width > 0) {
-		gpu_texture_destroy(&framebuffer_depth);
+		gpu_texture_destroy_internal(&framebuffer_depth);
 	}
 	if (readback_buffer != NULL) {
 		readback_buffer->lpVtbl->Release(readback_buffer);
@@ -448,10 +448,10 @@ void gpu_present_internal() {
 		framebuffer_index = 0;
 
 		for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
-			gpu_texture_destroy(&framebuffers[i]);
+			gpu_texture_destroy_internal(&framebuffers[i]);
 		}
 		if (framebuffer_depth.width > 0) {
-			gpu_texture_destroy(&framebuffer_depth);
+			gpu_texture_destroy_internal(&framebuffer_depth);
 		}
 
 		window_swapchain->lpVtbl->ResizeBuffers(window_swapchain, GPU_FRAMEBUFFER_COUNT, iron_window_width(), iron_window_height(), DXGI_FORMAT_R8G8B8A8_UNORM, 0);
@@ -707,7 +707,7 @@ void gpu_use_linear_sampling(bool b) {
 	device->lpVtbl->CreateSampler(device, &sampler_desc, sampler_handle);
 }
 
-void gpu_pipeline_destroy(gpu_pipeline_t *pipe) {
+void gpu_pipeline_destroy_internal(gpu_pipeline_t *pipe) {
 	if (pipe->impl.pso != NULL) {
 		pipe->impl.pso->lpVtbl->Release(pipe->impl.pso);
 		pipe->impl.pso = NULL;
@@ -965,7 +965,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	gpu_execute_and_wait(); ////
 }
 
-void gpu_texture_destroy(gpu_texture_t *render_target) {
+void gpu_texture_destroy_internal(gpu_texture_t *render_target) {
 	if (render_target->impl.image != NULL) {
 		render_target->impl.image->lpVtbl->Release(render_target->impl.image);
 	}
@@ -1113,7 +1113,7 @@ void gpu_constant_buffer_unlock(gpu_buffer_t *buffer) {
 	buffer->data = NULL;
 }
 
-void gpu_buffer_destroy(gpu_buffer_t *buffer) {
+void gpu_buffer_destroy_internal(gpu_buffer_t *buffer) {
 	buffer->impl.buffer->lpVtbl->Release(buffer->impl.buffer);
 	buffer->impl.buffer = NULL;
 }

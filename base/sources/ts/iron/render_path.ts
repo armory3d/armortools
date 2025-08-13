@@ -245,8 +245,7 @@ function render_path_resize() {
 	for (let i: i32 = 0; i < render_targets_keys.length; ++i) {
 		let rt: render_target_t = map_get(render_path_render_targets, render_targets_keys[i]);
 		if (rt != null && rt.width == 0) {
-			let _image: gpu_texture_t = rt._image;
-			iron_delete_texture(_image);
+			iron_delete_texture(rt._image);
 			rt._image = render_path_create_image(rt);
 		}
 	}
