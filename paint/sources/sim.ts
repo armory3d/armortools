@@ -117,10 +117,8 @@ function sim_duplicate() {
         physics_body_init(pbdup, dup.base);
     }
 
-    ///if is_forge
     _tab_scene_paint_object_length++;
     tab_scene_sort();
-    ///end
 }
 
 function sim_delete() {
@@ -129,8 +127,6 @@ function sim_delete() {
     mesh_object_remove(so);
     sim_remove_body(so.base.uid);
 
-    ///if is_forge
     _tab_scene_paint_object_length--;
     tab_scene_sort();
-    ///end
 }

@@ -250,13 +250,14 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		node_shader_write_frag(kong, "var height: float = " + height + ";");
 		node_shader_write_frag(kong, "var mat_opacity: float = " + opac + ";");
 		node_shader_write_frag(kong, "var opacity: float = mat_opacity;");
-		///if is_forge
-		node_shader_write_frag(kong, "opacity = 1.0;");
-		///else
-		if (context_raw.layer.fill_layer == null) {
-			node_shader_write_frag(kong, "opacity *= constants.brush_opacity;");
+		if (context_raw.tool == tool_type_t.GIZMO) {
+			node_shader_write_frag(kong, "opacity = 1.0;");
 		}
-		///end
+		else {
+			if (context_raw.layer.fill_layer == null) {
+				node_shader_write_frag(kong, "opacity *= constants.brush_opacity;");
+			}
+		}
 		if (context_raw.material.paint_emis) {
 			node_shader_write_frag(kong, "var emis: float = " + emis + ";");
 		}
@@ -441,11 +442,12 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 			node_shader_add_texture(kong, "texpaint_pack_undo", "_texpaint_pack_undo");
 			node_shader_write_frag(kong, "var sample_nor_undo: float4 = sample_lod(texpaint_nor_undo, sampler_linear, sample_tc, 0.0);");
 			node_shader_write_frag(kong, "var sample_pack_undo: float4 = sample_lod(texpaint_pack_undo, sampler_linear, sample_tc, 0.0);");
-			///if is_forge
-			node_shader_write_frag(kong, "output[0] = float4(" + make_material_blend_mode(kong, context_raw.brush_blending, "sample_undo.rgb", "basecol", "str") + ", mat_opacity);");
-			///else
-			node_shader_write_frag(kong, "output[0] = float4(" + make_material_blend_mode(kong, context_raw.brush_blending, "sample_undo.rgb", "basecol", "str") + ", max(str, sample_undo.a));");
-			///end
+			if (context_raw.tool == tool_type_t.GIZMO) {
+				node_shader_write_frag(kong, "output[0] = float4(" + make_material_blend_mode(kong, context_raw.brush_blending, "sample_undo.rgb", "basecol", "str") + ", mat_opacity);");
+			}
+			else {
+				node_shader_write_frag(kong, "output[0] = float4(" + make_material_blend_mode(kong, context_raw.brush_blending, "sample_undo.rgb", "basecol", "str") + ", max(str, sample_undo.a));");
+			}
 			node_shader_write_frag(kong, "output[1] = float4(lerp3(sample_nor_undo.rgb, nortan, str), matid);");
 			if (context_raw.material.paint_height && make_material_height_used) {
 				node_shader_write_frag(kong, "output[2] = lerp4(sample_pack_undo, float4(occlusion, roughness, metallic, height), str);");

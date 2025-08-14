@@ -17,11 +17,9 @@ function gizmo_update() {
 
 	let paint_object: object_t = context_raw.paint_object.base;
 
-	///if is_forge
-	if (context_raw.selected_object != null) {
+	if (context_raw.tool == tool_type_t.GIZMO && context_raw.selected_object != null) {
 		paint_object = context_raw.selected_object;
 	}
-	///end
 
 	if (is_object) {
 		gizmo.transform.loc = vec4_clone(paint_object.transform.loc);

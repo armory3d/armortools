@@ -52,28 +52,29 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 			draw_set_pipeline(null);
 			draw_end();
 
-			///if is_forge
-			// Do not multiply basecol by alpha
-			draw_begin(layers_expa); // Copy to temp
-			draw_set_pipeline(pipes_copy);
-			draw_image(l1.texpaint, 0, 0);
-			draw_set_pipeline(null);
-			draw_end();
-			///else
-			_gpu_begin(layers_expa);
-			gpu_set_pipeline(pipes_merge);
-			gpu_set_texture(pipes_tex0, l1.texpaint);
-			gpu_set_texture(pipes_tex1, empty);
-			gpu_set_texture(pipes_texmask, mask);
-			gpu_set_texture(pipes_texa, layers_temp_image);
-			gpu_set_float(pipes_opac, slot_layer_get_opacity(l1));
-			gpu_set_float(pipes_tex1w, empty.width);
-			gpu_set_int(pipes_blending, layers.length > 1 ? l1.blending : 0);
-			gpu_set_vertex_buffer(const_data_screen_aligned_vb);
-			gpu_set_index_buffer(const_data_screen_aligned_ib);
-			gpu_draw();
-			gpu_end();
-			///end
+			if (context_raw.tool == tool_type_t.GIZMO) {
+				// Do not multiply basecol by alpha
+				draw_begin(layers_expa); // Copy to temp
+				draw_set_pipeline(pipes_copy);
+				draw_image(l1.texpaint, 0, 0);
+				draw_set_pipeline(null);
+				draw_end();
+			}
+			else {
+				_gpu_begin(layers_expa);
+				gpu_set_pipeline(pipes_merge);
+				gpu_set_texture(pipes_tex0, l1.texpaint);
+				gpu_set_texture(pipes_tex1, empty);
+				gpu_set_texture(pipes_texmask, mask);
+				gpu_set_texture(pipes_texa, layers_temp_image);
+				gpu_set_float(pipes_opac, slot_layer_get_opacity(l1));
+				gpu_set_float(pipes_tex1w, empty.width);
+				gpu_set_int(pipes_blending, layers.length > 1 ? l1.blending : 0);
+				gpu_set_vertex_buffer(const_data_screen_aligned_vb);
+				gpu_set_index_buffer(const_data_screen_aligned_ib);
+				gpu_draw();
+				gpu_end();
+			}
 		}
 
 		if (l1.paint_nor) {

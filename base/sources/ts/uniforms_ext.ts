@@ -101,6 +101,13 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 		return val;
 	}
 	else if (link == "_brush_scale") {
+		if (context_raw.tool == tool_type_t.GIZMO) {
+			let atlas_w: i32 = config_get_scene_atlas_res();
+			let item_w: i32 = config_get_layer_res();
+			let atlas_stride: i32 = atlas_w / item_w;
+			return atlas_stride;
+		}
+
 		let fill: bool = context_raw.layer.fill_layer != null;
 		let val: f32 = (fill ? context_raw.layer.scale : context_raw.brush_scale) * context_raw.brush_nodes_scale;
 		return val;

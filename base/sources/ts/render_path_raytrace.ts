@@ -31,9 +31,9 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 		render_path_raytrace_ready = true;
 		render_path_raytrace_is_bake = false;
 		let ext: string = "";
-		///if is_forge
-		ext = "forge_";
-		///end
+		if (context_raw.tool == tool_type_t.GIZMO) {
+			ext = "forge_";
+		}
 		let mode: string = config_raw.pathtrace_mode == pathtrace_mode_t.FAST ? "core" : "full";
 		render_path_raytrace_raytrace_init("raytrace_brute_" + ext + mode + render_path_raytrace_ext);
 		render_path_raytrace_last_envmap = null;
@@ -135,9 +135,9 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 
 	// context_raw.ddirty = 1; // _RENDER
 
-	///if is_forge
-	context_raw.ddirty = 1;
-	///end
+	if (context_raw.tool == tool_type_t.GIZMO) {
+		context_raw.ddirty = 1;
+	}
 }
 
 function render_path_raytrace_raytrace_init(shader_name: string, build: bool = true, bake: bool = false) {
@@ -158,17 +158,18 @@ function render_path_raytrace_raytrace_init(shader_name: string, build: bool = t
 	{
 		iron_raytrace_as_init();
 
-		///if is_forge
-		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
-			let po: mesh_object_t = project_paint_objects[i];
-			if (!po.base.visible) {
-				continue;
+		if (context_raw.tool == tool_type_t.GIZMO) {
+			for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+				let po: mesh_object_t = project_paint_objects[i];
+				if (!po.base.visible) {
+					continue;
+				}
+				iron_raytrace_as_add(po.data._.vertex_buffer, po.data._.index_buffer, po.base.transform.world_unpack);
 			}
-			iron_raytrace_as_add(po.data._.vertex_buffer, po.data._.index_buffer, po.base.transform.world_unpack);
 		}
-		///else
-		iron_raytrace_as_add(render_path_raytrace_vb, render_path_raytrace_ib, render_path_raytrace_transform);
-		///end
+		else {
+			iron_raytrace_as_add(render_path_raytrace_vb, render_path_raytrace_ib, render_path_raytrace_transform);
+		}
 
 		let vb_full: gpu_buffer_t = context_raw.merged_object.data._.vertex_buffer;
 		let ib_full: gpu_buffer_t = context_raw.merged_object.data._.index_buffer;
@@ -188,11 +189,12 @@ function render_path_raytrace_build_data(bake: bool = false) {
 	let mo: mesh_object_t = scene_meshes[0];
 	///end
 
-	///if is_forge
-	render_path_raytrace_transform = mo.base.transform.world_unpack;
-	///else
-	render_path_raytrace_transform = mat4_identity();
-	///end
+	if (context_raw.tool == tool_type_t.GIZMO) {
+		render_path_raytrace_transform = mo.base.transform.world_unpack;
+	}
+	else {
+		render_path_raytrace_transform = mat4_identity();
+	}
 
 	if (!bake) {
 		let sc: f32 = mo.base.transform.scale.x * mo.data.scale_pos;
