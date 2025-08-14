@@ -239,7 +239,6 @@ void gpu_barrier(gpu_texture_t *render_target, gpu_texture_state_t state_after) 
 
 	VkImageMemoryBarrier barrier = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		.pNext = NULL,
 		.srcAccessMask = access_mask(convert_texture_state(render_target->state)),
 		.dstAccessMask = access_mask(convert_texture_state(state_after)),
 		.oldLayout = convert_texture_state(render_target->state),
@@ -265,7 +264,6 @@ static void set_image_layout(VkImage image, VkImageAspectFlags aspect_mask, VkIm
 
 	VkImageMemoryBarrier barrier = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		.pNext = NULL,
 		.srcAccessMask = 0,
 		.dstAccessMask = 0,
 		.oldLayout = old_layout,
@@ -303,25 +301,19 @@ static void create_descriptors(void) {
 	bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	bindings[0].descriptorCount = 1;
 	bindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-	bindings[0].pImmutableSamplers = NULL;
-
 	bindings[1].binding = 1;
 	bindings[1].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
 	bindings[1].descriptorCount = 1;
 	bindings[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-	bindings[1].pImmutableSamplers = NULL;
-
 	for (int i = 2; i < 2 + GPU_MAX_TEXTURES; ++i) {
 		bindings[i].binding = i;
 		bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
 		bindings[i].descriptorCount = 1;
 		bindings[i].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-		bindings[i].pImmutableSamplers = NULL;
 	}
 
 	VkDescriptorSetLayoutCreateInfo layout_create_info = {
 		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-		.pNext = NULL,
 		.bindingCount = 2 + GPU_MAX_TEXTURES,
 		.pBindings = bindings,
 	};
@@ -333,16 +325,13 @@ static void create_descriptors(void) {
 
 	type_counts[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	type_counts[0].descriptorCount = GPU_CONSTANT_BUFFER_MULTIPLE;
-
 	type_counts[1].type = VK_DESCRIPTOR_TYPE_SAMPLER;
 	type_counts[1].descriptorCount = GPU_CONSTANT_BUFFER_MULTIPLE;
-
 	type_counts[2].type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
 	type_counts[2].descriptorCount = GPU_CONSTANT_BUFFER_MULTIPLE * GPU_MAX_TEXTURES;
 
 	VkDescriptorPoolCreateInfo pool_info = {
 		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-		.pNext = NULL,
 		.maxSets = GPU_CONSTANT_BUFFER_MULTIPLE,
 		.poolSizeCount = 3,
 		.pPoolSizes = type_counts,
@@ -358,7 +347,6 @@ static void create_descriptors(void) {
 
 	VkDescriptorSetAllocateInfo alloc_info = {
 		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-		.pNext = NULL,
 		.descriptorPool = descriptor_pool,
 		.descriptorSetCount = GPU_CONSTANT_BUFFER_MULTIPLE,
 		.pSetLayouts = layouts,
@@ -410,7 +398,6 @@ void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_t
 
 	VkImageCreateInfo image = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-		.pNext = NULL,
 		.imageType = VK_IMAGE_TYPE_2D,
 		.format = convert_image_format(target->format),
 		.extent.width = width,
@@ -420,7 +407,6 @@ void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_t
 		.arrayLayers = 1,
 		.samples = VK_SAMPLE_COUNT_1_BIT,
 		.tiling = VK_IMAGE_TILING_OPTIMAL,
-		.flags = 0,
 	};
 
 	if (format == GPU_TEXTURE_FORMAT_D32) {
@@ -432,10 +418,8 @@ void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_t
 
 	VkImageViewCreateInfo color_image_view = {
 		.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-		.pNext = NULL,
 		.viewType = VK_IMAGE_VIEW_TYPE_2D,
 		.format = convert_image_format(target->format),
-		.flags = 0,
 		.subresourceRange.aspectMask = format == GPU_TEXTURE_FORMAT_D32 ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT,
 		.subresourceRange.baseMipLevel = 0,
 		.subresourceRange.levelCount = 1,
@@ -449,7 +433,6 @@ void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_t
 
 	VkMemoryAllocateInfo allocation_nfo = {
 		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-		.pNext = NULL,
 		.allocationSize = memory_reqs.size,
 	};
 	allocation_nfo.memoryTypeIndex = memory_type_from_properties(memory_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
@@ -500,7 +483,6 @@ static void create_swapchain() {
 
 	VkSwapchainCreateInfoKHR swapchain_info = {
 		.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-		.pNext = NULL,
 		.surface = window_surface,
 		.minImageCount = image_count,
 		.imageFormat = window_format.format,
@@ -547,7 +529,6 @@ static void create_swapchain() {
 		set_image_layout(window_images[i], VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 		VkImageViewCreateInfo color_attachment_view = {
 			.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-			.pNext = NULL,
 			.format = window_format.format,
 			.components.r = VK_COMPONENT_SWIZZLE_R,
 			.components.g = VK_COMPONENT_SWIZZLE_G,
@@ -570,7 +551,6 @@ static void create_swapchain() {
 	if (window_depth_bits > 0) {
 		VkImageCreateInfo image = {
 			.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-			.pNext = NULL,
 			.imageType = VK_IMAGE_TYPE_2D,
 			.format = VK_FORMAT_D16_UNORM,
 			.extent.width = iron_window_width(),
@@ -586,21 +566,6 @@ static void create_swapchain() {
 
 		VkMemoryAllocateInfo mem_alloc = {
 			.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-			.pNext = NULL,
-		};
-
-		VkImageViewCreateInfo view = {
-			.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-			.pNext = NULL,
-			.image = VK_NULL_HANDLE,
-			.format = VK_FORMAT_D16_UNORM,
-			.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
-			.subresourceRange.baseMipLevel = 0,
-			.subresourceRange.levelCount = 1,
-			.subresourceRange.baseArrayLayer = 0,
-			.subresourceRange.layerCount = 1,
-			.flags = 0,
-			.viewType = VK_IMAGE_VIEW_TYPE_2D,
 		};
 
 		VkMemoryRequirements mem_reqs = {0};
@@ -612,7 +577,17 @@ static void create_swapchain() {
 		vkBindImageMemory(device, framebuffer_depth.impl.image, framebuffer_depth.impl.mem, 0);
 		set_image_layout(framebuffer_depth.impl.image, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-		view.image = framebuffer_depth.impl.image;
+		VkImageViewCreateInfo view = {
+			.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+			.image = framebuffer_depth.impl.image,
+			.format = VK_FORMAT_D16_UNORM,
+			.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
+			.subresourceRange.baseMipLevel = 0,
+			.subresourceRange.levelCount = 1,
+			.subresourceRange.baseArrayLayer = 0,
+			.subresourceRange.layerCount = 1,
+			.viewType = VK_IMAGE_VIEW_TYPE_2D,
+		};
 		vkCreateImageView(device, &view, NULL, &framebuffer_depth.impl.view);
 	}
 }
@@ -688,7 +663,6 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 
 	VkApplicationInfo app = {
 		.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-		.pNext = NULL,
 		.pApplicationName = iron_application_name(),
 		.applicationVersion = 0,
 		.pEngineName = "Iron",
@@ -698,7 +672,6 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 
 	VkInstanceCreateInfo info = {0};
 	info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-	info.pNext = NULL;
 	info.pApplicationInfo = &app;
 #ifdef VALIDATE
 	if (validation_found) {
@@ -838,10 +811,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	if (validation_found) {
 		VkDebugUtilsMessengerCreateInfoEXT create_info = {
 			.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
-			.flags = 0,
 			.pfnUserCallback = vk_debug_utils_messenger_callback_ext,
-			.pUserData = NULL,
-			.pNext = NULL,
 			.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT,
 			.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT,
 		};
@@ -898,7 +868,6 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 		float queue_priorities[1] = { 0.0 };
 		VkDeviceQueueCreateInfo queue = {
 			.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-			.pNext = NULL,
 			.queueFamilyIndex = graphics_queue_node_index,
 			.queueCount = 1,
 			.pQueuePriorities = queue_priorities,
@@ -951,7 +920,6 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	vkGetPhysicalDeviceMemoryProperties(gpu, &memory_properties);
 	VkCommandPoolCreateInfo cmd_pool_info = {
 		.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-		.pNext = NULL,
 		.queueFamilyIndex = graphics_queue_node_index,
 		.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
 	};
@@ -962,7 +930,6 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 
 	VkSemaphoreCreateInfo sem_info = {
 		.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-		.pNext = NULL,
 		.flags = 0,
 	};
 
@@ -1002,7 +969,6 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 
 	VkCommandBufferAllocateInfo cmd = {
 		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-		.pNext = NULL,
 		.commandPool = cmd_pool,
 		.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
 		.commandBufferCount = 1,
@@ -1011,19 +977,15 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 
 	VkCommandBufferBeginInfo begin_info = {
 		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-		.pNext = NULL,
 		.flags = 0,
-		.pInheritanceInfo = NULL,
 	};
 	vkBeginCommandBuffer(command_buffer, &begin_info);
 
 	gpu_create_framebuffers(depth_buffer_bits);
-
 	create_swapchain();
 
 	VkFenceCreateInfo fence_info = {
 		.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-		.pNext = NULL,
 		.flags = VK_FENCE_CREATE_SIGNALED_BIT,
 	};
 	vkCreateFence(device, &fence_info, NULL, &fence);
@@ -1082,11 +1044,9 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t * dept
 	for (size_t i = 0; i < current_render_targets_count; ++i) {
 		current_color_attachment_infos[i] = (VkRenderingAttachmentInfo){
 			.sType              = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
-			.pNext              = NULL,
 			.imageView          = current_render_targets[i]->impl.view,
 			.imageLayout        = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 			.resolveMode        = VK_RESOLVE_MODE_NONE,
-			.resolveImageView   = VK_NULL_HANDLE,
 			.resolveImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 			.loadOp             = (flags & GPU_CLEAR_COLOR) ? VK_ATTACHMENT_LOAD_OP_DONT_CARE : VK_ATTACHMENT_LOAD_OP_LOAD,
 			.storeOp            = VK_ATTACHMENT_STORE_OP_STORE,
@@ -1097,11 +1057,9 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t * dept
 	if (depth_buffer != NULL) {
 		current_depth_attachment_info = (VkRenderingAttachmentInfo) {
 			.sType              = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
-			.pNext              = NULL,
 			.imageView          = depth_buffer->impl.view,
 			.imageLayout        = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
 			.resolveMode        = VK_RESOLVE_MODE_NONE,
-			.resolveImageView   = VK_NULL_HANDLE,
 			.resolveImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 			.loadOp             = (flags & GPU_CLEAR_DEPTH) ? VK_ATTACHMENT_LOAD_OP_DONT_CARE : VK_ATTACHMENT_LOAD_OP_LOAD,
 			.storeOp            = VK_ATTACHMENT_STORE_OP_STORE,
@@ -1111,15 +1069,12 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t * dept
 
 	current_rendering_info = (VkRenderingInfo) {
 		.sType                = VK_STRUCTURE_TYPE_RENDERING_INFO,
-		.pNext                = NULL,
-		.flags                = 0,
 		.renderArea           = render_area,
 		.layerCount           = 1,
 		.viewMask             = 0,
 		.colorAttachmentCount = (uint32_t)current_render_targets_count,
 		.pColorAttachments    = current_color_attachment_infos,
 		.pDepthAttachment     = depth_buffer == NULL ? VK_NULL_HANDLE : &current_depth_attachment_info,
-		.pStencilAttachment   = VK_NULL_HANDLE,
 	};
 	vkCmdBeginRendering(command_buffer, &current_rendering_info);
 
@@ -1185,7 +1140,6 @@ void gpu_execute_and_wait() {
 
 	VkSubmitInfo submit_info = {
 		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-		.pNext = NULL,
 		.commandBufferCount = 1,
 		.pCommandBuffers = &command_buffer,
 	};
@@ -1195,9 +1149,6 @@ void gpu_execute_and_wait() {
 	vkResetCommandBuffer(command_buffer, 0);
 	VkCommandBufferBeginInfo begin_info = {
 		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-		.pNext = NULL,
-		.flags = 0,
-		.pInheritanceInfo = NULL,
 	};
 	vkBeginCommandBuffer(command_buffer, &begin_info);
 
@@ -1221,7 +1172,6 @@ void gpu_present_internal() {
 
 	VkSubmitInfo submit_info = {
 		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-		.pNext = NULL,
 		.commandBufferCount = 1,
 		.pCommandBuffers = &command_buffer,
 		.signalSemaphoreCount = 1,
@@ -1235,7 +1185,6 @@ void gpu_present_internal() {
 
 	VkPresentInfoKHR present = {
 		.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-		.pNext = NULL,
 		.swapchainCount = 1,
 		.pSwapchains = &window_swapchain,
 		.pImageIndices = &framebuffer_index,
@@ -1247,9 +1196,6 @@ void gpu_present_internal() {
 	vkResetCommandBuffer(command_buffer, 0);
 	VkCommandBufferBeginInfo begin_info = {
 		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-		.pNext = NULL,
-		.flags = 0,
-		.pInheritanceInfo = NULL,
 	};
 	vkBeginCommandBuffer(command_buffer, &begin_info);
 
@@ -1333,20 +1279,16 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 
 		VkBufferCreateInfo buf_info = {
 			.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-			.pNext = NULL,
 			.size = readback_buffer_size,
 			.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-			.flags = 0,
 		};
 		vkCreateBuffer(device, &buf_info, NULL, &readback_buffer);
 
 		VkMemoryRequirements mem_reqs = {0};
 		vkGetBufferMemoryRequirements(device, readback_buffer, &mem_reqs);
 
-		VkMemoryAllocateInfo mem_alloc;
-		memset(&mem_alloc, 0, sizeof(VkMemoryAllocateInfo));
+		VkMemoryAllocateInfo mem_alloc = {0};
 		mem_alloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		mem_alloc.pNext = NULL;
 		mem_alloc.allocationSize = mem_reqs.size;
 		mem_alloc.memoryTypeIndex = memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT);
 		vkAllocateMemory(device, &mem_alloc, NULL, &readback_mem);
@@ -1420,8 +1362,6 @@ static VkDescriptorSet get_descriptor_set(VkBuffer buffer) {
 
 	VkDescriptorImageInfo sampler_info = {
 		.sampler = linear_sampling ? linear_sampler : point_sampler,
-		.imageView = VK_NULL_HANDLE,
-		.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED,
 	};
 	writes[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 	writes[1].dstSet = descriptor_set;
@@ -1467,12 +1407,10 @@ void gpu_pipeline_destroy_internal(gpu_pipeline_t *pipeline) {
 }
 
 static VkShaderModule create_shader_module(const void *code, size_t size) {
-	VkShaderModuleCreateInfo module_create_info;
+	VkShaderModuleCreateInfo module_create_info = {0};
 	module_create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-	module_create_info.pNext = NULL;
 	module_create_info.codeSize = size;
 	module_create_info.pCode = (const uint32_t *)code;
-	module_create_info.flags = 0;
 	VkShaderModule module;
 	vkCreateShaderModule(device, &module_create_info, NULL, &module);
 	return module;
@@ -1481,7 +1419,6 @@ static VkShaderModule create_shader_module(const void *code, size_t size) {
 void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
 	VkPipelineLayoutCreateInfo pipeline_layout_create_info = {
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-		.pNext = NULL,
 		.setLayoutCount = 1,
 		.pSetLayouts = &descriptor_layout,
 	};
@@ -1511,7 +1448,6 @@ void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
 
 	VkPipelineVertexInputStateCreateInfo vi = {
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
-		.pNext = NULL,
 		.vertexBindingDescriptionCount = 1,
 		.pVertexBindingDescriptions = vi_bindings,
 		.vertexAttributeDescriptionCount = vertexAttributeCount,
@@ -1612,7 +1548,6 @@ void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
 
 	memset(&ms, 0, sizeof(ms));
 	ms.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-	ms.pSampleMask = NULL;
 	ms.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
 	pipeline_info.stageCount = 2;
@@ -1832,10 +1767,8 @@ void _gpu_buffer_init(gpu_buffer_impl_t *buffer, int size, int usage, int memory
 
 	VkBufferCreateInfo buf_info = {
 		.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-		.pNext = NULL,
 		.size = size,
 		.usage = usage,
-		.flags = 0,
 	};
 	bool raytrace = gpu_raytrace_supported() && ((usage & VK_BUFFER_USAGE_VERTEX_BUFFER_BIT) || (usage & VK_BUFFER_USAGE_INDEX_BUFFER_BIT));
 	if (raytrace) {
@@ -1849,7 +1782,6 @@ void _gpu_buffer_init(gpu_buffer_impl_t *buffer, int size, int usage, int memory
 
 	VkMemoryAllocateInfo mem_alloc = {
 		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-		.pNext = NULL,
 		.allocationSize = mem_reqs.size,
 	};
 	mem_alloc.memoryTypeIndex = memory_type_from_properties(mem_reqs.memoryTypeBits, memory_requirements);
@@ -1943,13 +1875,6 @@ void gpu_buffer_destroy_internal(gpu_buffer_t *buffer) {
 	vkDestroyBuffer(device, buffer->impl.buf, NULL);
 }
 
-static const int INDEX_RAYGEN = 0;
-static const int INDEX_MISS = 1;
-static const int INDEX_CLOSEST_HIT = 2;
-static const char *raygen_shader_name = "raygeneration";
-static const char *closesthit_shader_name = "closesthit";
-static const char *miss_shader_name = "miss";
-
 typedef struct inst {
 	iron_matrix4x4_t m;
 	int i;
@@ -2036,108 +1961,23 @@ void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *ray_sha
 	pipeline->constant_buffer = constant_buffer;
 
 	{
-		VkDescriptorSetLayoutBinding acceleration_structure_layout_binding = {
-			.binding = 0,
-			.descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR,
-			.descriptorCount = 1,
-			.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR,
-		};
-
-		VkDescriptorSetLayoutBinding result_image_layout_binding = {
-			.binding = 10,
-			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-			.descriptorCount = 1,
-			.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR,
-		};
-
-		VkDescriptorSetLayoutBinding uniform_buffer_binding = {
-			.binding = 11,
-			.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-			.descriptorCount = 1,
-			.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR,
-		};
-
-		VkDescriptorSetLayoutBinding ib_binding = {
-			.binding = 1,
-			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-			.descriptorCount = 1,
-			.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR,
-		};
-
-		VkDescriptorSetLayoutBinding vb_binding = {
-			.binding = 2,
-			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-			.descriptorCount = 1,
-			.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR,
-		};
-
-		VkDescriptorSetLayoutBinding tex0_binding = {
-			.binding = 3,
-			.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
-			.descriptorCount = 1,
-			.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR,
-		};
-
-		VkDescriptorSetLayoutBinding tex1_binding = {
-			.binding = 4,
-			.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
-			.descriptorCount = 1,
-			.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR,
-		};
-
-		VkDescriptorSetLayoutBinding tex2_binding = {
-			.binding = 5,
-			.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
-			.descriptorCount = 1,
-			.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR,
-		};
-
-		VkDescriptorSetLayoutBinding texenv_binding = {
-			.binding = 6,
-			.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
-			.descriptorCount = 1,
-			.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR,
-		};
-
-		VkDescriptorSetLayoutBinding texsobol_binding = {
-			.binding = 7,
-			.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
-			.descriptorCount = 1,
-			.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR,
-		};
-
-		VkDescriptorSetLayoutBinding texscramble_binding = {
-			.binding = 8,
-			.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
-			.descriptorCount = 1,
-			.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR,
-		};
-
-		VkDescriptorSetLayoutBinding texrank_binding = {
-			.binding = 9,
-			.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
-			.descriptorCount = 1,
-			.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR,
-		};
-
-		VkDescriptorSetLayoutBinding bindings[12] = {
-			acceleration_structure_layout_binding,
-			result_image_layout_binding,
-			uniform_buffer_binding,
-			vb_binding,
-			ib_binding,
-			tex0_binding,
-			tex1_binding,
-			tex2_binding,
-			texenv_binding,
-			texsobol_binding,
-			texscramble_binding,
-			texrank_binding
+		VkDescriptorSetLayoutBinding bindings[] = {
+			{0, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, 1, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR},
+			{1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR},
+			{2, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR},
+			{3, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR},
+			{4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR},
+			{5, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR},
+			{6, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR},
+			{7, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR},
+			{8, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR},
+			{9, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR},
+			{10, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR},
+			{11, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR}
 		};
 
 		VkDescriptorSetLayoutCreateInfo layout_info = {
 			.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-			.pNext = NULL,
 			.bindingCount = 12,
 			.pBindings = &bindings[0],
 		};
@@ -2145,80 +1985,33 @@ void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *ray_sha
 
 		VkPipelineLayoutCreateInfo pipeline_layout_create_info = {
 			.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-			.pNext = NULL,
 			.setLayoutCount = 1,
 			.pSetLayouts = &pipeline->impl.descriptor_set_layout,
 		};
-
 		vkCreatePipelineLayout(device, &pipeline_layout_create_info, NULL, &pipeline->impl.pipeline_layout);
 
 		VkShaderModuleCreateInfo module_create_info = {
 			.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
 			.codeSize = ray_shader_size,
 			.pCode = (const uint32_t *)ray_shader,
-			.pNext = NULL,
-			.flags = 0,
 		};
 		VkShaderModule shader_module;
 		vkCreateShaderModule(device, &module_create_info, NULL, &shader_module);
 
-		VkPipelineShaderStageCreateInfo shader_stages[3];
-		shader_stages[INDEX_RAYGEN].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		shader_stages[INDEX_RAYGEN].pNext = NULL;
-		shader_stages[INDEX_RAYGEN].stage = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
-		shader_stages[INDEX_RAYGEN].module = shader_module;
-		shader_stages[INDEX_RAYGEN].pName = raygen_shader_name;
-		shader_stages[INDEX_RAYGEN].flags = 0;
-		shader_stages[INDEX_RAYGEN].pSpecializationInfo = NULL;
+		VkPipelineShaderStageCreateInfo shader_stages[3] = {
+			{ .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO, .stage = VK_SHADER_STAGE_RAYGEN_BIT_KHR, .module = shader_module, .pName = "raygeneration" },
+			{ .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO, .stage = VK_SHADER_STAGE_MISS_BIT_KHR, .module = shader_module, .pName = "miss" },
+			{ .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO, .stage = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR, .module = shader_module, .pName = "closesthit" }
+		};
 
-		shader_stages[INDEX_MISS].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		shader_stages[INDEX_MISS].pNext = NULL;
-		shader_stages[INDEX_MISS].stage = VK_SHADER_STAGE_MISS_BIT_KHR;
-		shader_stages[INDEX_MISS].module = shader_module;
-		shader_stages[INDEX_MISS].pName = miss_shader_name;
-		shader_stages[INDEX_MISS].flags = 0;
-		shader_stages[INDEX_MISS].pSpecializationInfo = NULL;
-
-		shader_stages[INDEX_CLOSEST_HIT].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		shader_stages[INDEX_CLOSEST_HIT].pNext = NULL;
-		shader_stages[INDEX_CLOSEST_HIT].stage = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
-		shader_stages[INDEX_CLOSEST_HIT].module = shader_module;
-		shader_stages[INDEX_CLOSEST_HIT].pName = closesthit_shader_name;
-		shader_stages[INDEX_CLOSEST_HIT].flags = 0;
-		shader_stages[INDEX_CLOSEST_HIT].pSpecializationInfo = NULL;
-
-		VkRayTracingShaderGroupCreateInfoKHR groups[3];
-		groups[INDEX_RAYGEN].sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
-		groups[INDEX_RAYGEN].pNext = NULL;
-		groups[INDEX_RAYGEN].generalShader = VK_SHADER_UNUSED_KHR;
-		groups[INDEX_RAYGEN].closestHitShader = VK_SHADER_UNUSED_KHR;
-		groups[INDEX_RAYGEN].anyHitShader = VK_SHADER_UNUSED_KHR;
-		groups[INDEX_RAYGEN].intersectionShader = VK_SHADER_UNUSED_KHR;
-		groups[INDEX_RAYGEN].type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR;
-		groups[INDEX_RAYGEN].generalShader = INDEX_RAYGEN;
-
-		groups[INDEX_MISS].sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
-		groups[INDEX_MISS].pNext = NULL;
-		groups[INDEX_MISS].generalShader = VK_SHADER_UNUSED_KHR;
-		groups[INDEX_MISS].closestHitShader = VK_SHADER_UNUSED_KHR;
-		groups[INDEX_MISS].anyHitShader = VK_SHADER_UNUSED_KHR;
-		groups[INDEX_MISS].intersectionShader = VK_SHADER_UNUSED_KHR;
-		groups[INDEX_MISS].type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR;
-		groups[INDEX_MISS].generalShader = INDEX_MISS;
-
-		groups[INDEX_CLOSEST_HIT].sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
-		groups[INDEX_CLOSEST_HIT].pNext = NULL;
-		groups[INDEX_CLOSEST_HIT].generalShader = VK_SHADER_UNUSED_KHR;
-		groups[INDEX_CLOSEST_HIT].closestHitShader = VK_SHADER_UNUSED_KHR;
-		groups[INDEX_CLOSEST_HIT].anyHitShader = VK_SHADER_UNUSED_KHR;
-		groups[INDEX_CLOSEST_HIT].intersectionShader = VK_SHADER_UNUSED_KHR;
-		groups[INDEX_CLOSEST_HIT].type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
-		groups[INDEX_CLOSEST_HIT].closestHitShader = INDEX_CLOSEST_HIT;
+		VkRayTracingShaderGroupCreateInfoKHR groups[3] = {
+			{ .sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR, .type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, .generalShader = 0, .closestHitShader = VK_SHADER_UNUSED_KHR, .anyHitShader = VK_SHADER_UNUSED_KHR, .intersectionShader = VK_SHADER_UNUSED_KHR },
+			{ .sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR, .type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR, .generalShader = 1, .closestHitShader = VK_SHADER_UNUSED_KHR, .anyHitShader = VK_SHADER_UNUSED_KHR, .intersectionShader = VK_SHADER_UNUSED_KHR },
+			{ .sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR, .type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR, .generalShader = VK_SHADER_UNUSED_KHR, .closestHitShader = 2, .anyHitShader = VK_SHADER_UNUSED_KHR, .intersectionShader = VK_SHADER_UNUSED_KHR }
+		};
 
 		VkRayTracingPipelineCreateInfoKHR raytracing_pipeline_create_info = {
 			.sType = VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR,
-			.pNext = NULL,
-			.flags = 0,
 			.stageCount = 3,
 			.pStages = &shader_stages[0],
 			.groupCount = 3,
@@ -2231,9 +2024,8 @@ void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *ray_sha
 	}
 
 	{
-		VkPhysicalDeviceRayTracingPipelinePropertiesKHR ray_tracing_pipeline_properties;
+		VkPhysicalDeviceRayTracingPipelinePropertiesKHR ray_tracing_pipeline_properties = {0};
 		ray_tracing_pipeline_properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
-		ray_tracing_pipeline_properties.pNext = NULL;
 		VkPhysicalDeviceProperties2 device_properties = {
 			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2,
 			.pNext = &ray_tracing_pipeline_properties,
@@ -2248,7 +2040,6 @@ void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *ray_sha
 
 		VkBufferCreateInfo buf_info = {
 			.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-			.pNext = NULL,
 			.size = handle_size,
 			.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
 			.flags = 0,
@@ -2306,48 +2097,23 @@ void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *ray_sha
 	}
 
 	{
-		VkDescriptorPoolSize type_counts[12];
-		memset(type_counts, 0, sizeof(type_counts));
-
-		type_counts[0].type = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
-		type_counts[0].descriptorCount = 1;
-
-		type_counts[1].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-		type_counts[1].descriptorCount = 1;
-
-		type_counts[2].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-		type_counts[2].descriptorCount = 1;
-
-		type_counts[3].type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-		type_counts[3].descriptorCount = 1;
-
-		type_counts[4].type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-		type_counts[4].descriptorCount = 1;
-
-		type_counts[5].type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-		type_counts[5].descriptorCount = 1;
-
-		type_counts[6].type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-		type_counts[6].descriptorCount = 1;
-
-		type_counts[7].type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-		type_counts[7].descriptorCount = 1;
-
-		type_counts[8].type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-		type_counts[8].descriptorCount = 1;
-
-		type_counts[9].type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-		type_counts[9].descriptorCount = 1;
-
-		type_counts[10].type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-		type_counts[10].descriptorCount = 1;
-
-		type_counts[11].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		type_counts[11].descriptorCount = 1;
+		VkDescriptorPoolSize type_counts[] = {
+			{VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, 1},
+			{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1},
+			{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1},
+			{VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1},
+			{VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1},
+			{VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1},
+			{VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1},
+			{VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1},
+			{VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1},
+			{VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1},
+			{VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1},
+			{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1}
+		};
 
 		VkDescriptorPoolCreateInfo descriptor_pool_create_info = {
 			.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-			.pNext = NULL,
 			.maxSets = 1024,
 			.poolSizeCount = 12,
 			.pPoolSizes = type_counts,
@@ -2572,9 +2338,6 @@ void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structu
 
 			VkAccelerationStructureBuildRangeInfoKHR acceleration_build_range_info = {
 				.primitiveCount = prim_count,
-				.primitiveOffset = 0x0,
-				.firstVertex = 0,
-				.transformOffset = 0x0,
 			};
 
 			const VkAccelerationStructureBuildRangeInfoKHR *acceleration_build_infos[1] = {&acceleration_build_range_info};
@@ -2608,7 +2371,6 @@ void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structu
 
 				VkFenceCreateInfo fence_info = {
 					.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-					.flags = 0,
 				};
 
 				VkFence fence;
@@ -2640,16 +2402,14 @@ void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structu
 	{
 		VkBufferCreateInfo buf_info = {
 			.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-			.pNext = NULL,
 			.size = instances_count * sizeof(VkAccelerationStructureInstanceKHR),
 			.usage = VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
 			.flags = 0,
 		};
 
-		VkMemoryAllocateInfo mem_alloc;
+		VkMemoryAllocateInfo mem_alloc = {0};
 		memset(&mem_alloc, 0, sizeof(VkMemoryAllocateInfo));
 		mem_alloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		mem_alloc.pNext = NULL;
 
 		VkBuffer instances_buffer;
 		vkCreateBuffer(device, &buf_info, NULL, &instances_buffer);
@@ -2812,9 +2572,6 @@ void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structu
 
 		VkAccelerationStructureBuildRangeInfoKHR acceleration_build_range_info = {
 			.primitiveCount = instances_count,
-			.primitiveOffset = 0x0,
-			.firstVertex = 0,
-			.transformOffset = 0x0,
 		};
 
 		const VkAccelerationStructureBuildRangeInfoKHR *acceleration_build_infos[1] = {&acceleration_build_range_info};
@@ -2848,16 +2605,13 @@ void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structu
 
 			VkFenceCreateInfo fence_info = {
 				.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-				.flags = 0,
 			};
 
 			VkFence fence;
 			vkCreateFence(device, &fence_info, NULL, &fence);
-
 			vkQueueSubmit(queue, 1, &submit_info, fence);
 			vkWaitForFences(device, 1, &fence, VK_TRUE, 100000000000);
 			vkDestroyFence(device, fence, NULL);
-
 			vkFreeCommandBuffers(device, cmd_pool, 1, &command_buffer);
 		}
 
@@ -3040,7 +2794,6 @@ void gpu_raytrace_set_target(gpu_texture_t *_output) {
 
 		VkImageCreateInfo image_info = {
 			.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-			.pNext = NULL,
 			.imageType = VK_IMAGE_TYPE_2D,
 			.format = convert_image_format(_output->format),
 			.extent.width = _output->width,
@@ -3051,7 +2804,6 @@ void gpu_raytrace_set_target(gpu_texture_t *_output) {
 			.samples = VK_SAMPLE_COUNT_1_BIT,
 			.tiling = VK_IMAGE_TILING_OPTIMAL,
 			.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT,
-			.flags = 0,
 		};
 		vkCreateImage(device, &image_info, NULL, &_output->impl.image);
 
@@ -3060,7 +2812,6 @@ void gpu_raytrace_set_target(gpu_texture_t *_output) {
 
 		VkMemoryAllocateInfo allocation_nfo = {
 			.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-			.pNext = NULL,
 			.allocationSize = memory_reqs.size,
 		};
 		allocation_nfo.memoryTypeIndex = memory_type_from_properties(memory_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
@@ -3069,10 +2820,8 @@ void gpu_raytrace_set_target(gpu_texture_t *_output) {
 
 		VkImageViewCreateInfo image_view_info = {
 			.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-			.pNext = NULL,
 			.viewType = VK_IMAGE_VIEW_TYPE_2D,
 			.format = convert_image_format(_output->format),
-			.flags = 0,
 			.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
 			.subresourceRange.baseMipLevel = 0,
 			.subresourceRange.levelCount = 1,
@@ -3111,12 +2860,10 @@ void gpu_raytrace_dispatch_rays() {
 	VkDescriptorBufferInfo buffer_descriptor = {
 		.buffer = pipeline->constant_buffer->impl.buf,
 		.range = VK_WHOLE_SIZE,
-		.offset = 0,
 	};
 
 	VkWriteDescriptorSet result_image_write = {
 		.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-		.pNext = NULL,
 		.dstSet = pipeline->impl.descriptor_set,
 		.dstBinding = 10,
 		.descriptorCount = 1,
@@ -3126,7 +2873,6 @@ void gpu_raytrace_dispatch_rays() {
 
 	VkWriteDescriptorSet uniform_buffer_write = {
 		.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-		.pNext = NULL,
 		.dstSet = pipeline->impl.descriptor_set,
 		.dstBinding = 11,
 		.descriptorCount = 1,
@@ -3137,12 +2883,10 @@ void gpu_raytrace_dispatch_rays() {
 	VkDescriptorBufferInfo ib_descriptor = {
 		.buffer = ib_full,
 		.range = VK_WHOLE_SIZE,
-		.offset = 0,
 	};
 
 	VkWriteDescriptorSet ib_write = {
 		.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-		.pNext = NULL,
 		.dstSet = pipeline->impl.descriptor_set,
 		.dstBinding = 1,
 		.descriptorCount = 1,
@@ -3153,12 +2897,10 @@ void gpu_raytrace_dispatch_rays() {
 	VkDescriptorBufferInfo vb_descriptor = {
 		.buffer = vb_full,
 		.range = VK_WHOLE_SIZE,
-		.offset = 0,
 	};
 
 	VkWriteDescriptorSet vb_write = {
 		.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-		.pNext = NULL,
 		.dstSet = pipeline->impl.descriptor_set,
 		.dstBinding = 2,
 		.descriptorCount = 1,
@@ -3173,7 +2915,6 @@ void gpu_raytrace_dispatch_rays() {
 
 	VkWriteDescriptorSet tex0_image_write = {
 		.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-		.pNext = NULL,
 		.dstSet = pipeline->impl.descriptor_set,
 		.dstBinding = 3,
 		.descriptorCount = 1,
@@ -3188,7 +2929,6 @@ void gpu_raytrace_dispatch_rays() {
 
 	VkWriteDescriptorSet tex1_image_write = {
 		.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-		.pNext = NULL,
 		.dstSet = pipeline->impl.descriptor_set,
 		.dstBinding = 4,
 		.descriptorCount = 1,
@@ -3203,7 +2943,6 @@ void gpu_raytrace_dispatch_rays() {
 
 	VkWriteDescriptorSet tex2_image_write = {
 		.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-		.pNext = NULL,
 		.dstSet = pipeline->impl.descriptor_set,
 		.dstBinding = 5,
 		.descriptorCount = 1,
@@ -3218,7 +2957,6 @@ void gpu_raytrace_dispatch_rays() {
 
 	VkWriteDescriptorSet texenv_image_write = {
 		.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-		.pNext = NULL,
 		.dstSet = pipeline->impl.descriptor_set,
 		.dstBinding = 6,
 		.descriptorCount = 1,
@@ -3233,7 +2971,6 @@ void gpu_raytrace_dispatch_rays() {
 
 	VkWriteDescriptorSet texsobol_image_write = {
 		.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-		.pNext = NULL,
 		.dstSet = pipeline->impl.descriptor_set,
 		.dstBinding = 7,
 		.descriptorCount = 1,
@@ -3248,7 +2985,6 @@ void gpu_raytrace_dispatch_rays() {
 
 	VkWriteDescriptorSet texscramble_image_write = {
 		.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-		.pNext = NULL,
 		.dstSet = pipeline->impl.descriptor_set,
 		.dstBinding = 8,
 		.descriptorCount = 1,
@@ -3263,7 +2999,6 @@ void gpu_raytrace_dispatch_rays() {
 
 	VkWriteDescriptorSet texrank_image_write = {
 		.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-		.pNext = NULL,
 		.dstSet = pipeline->impl.descriptor_set,
 		.dstBinding = 9,
 		.descriptorCount = 1,
@@ -3289,7 +3024,7 @@ void gpu_raytrace_dispatch_rays() {
 
 	set_image_layout(output->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 
-	VkPhysicalDeviceRayTracingPipelinePropertiesKHR ray_tracing_pipeline_properties;
+	VkPhysicalDeviceRayTracingPipelinePropertiesKHR ray_tracing_pipeline_properties = {0};
 	ray_tracing_pipeline_properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
 	ray_tracing_pipeline_properties.pNext = NULL;
 	VkPhysicalDeviceProperties2 device_properties = {
