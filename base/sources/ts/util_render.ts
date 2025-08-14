@@ -79,10 +79,6 @@ function util_render_make_material_preview() {
 }
 
 function util_render_make_decal_preview() {
-	let current: gpu_texture_t = _draw_current;
-	let in_use: bool = gpu_in_use;
-	if (in_use) draw_end();
-
 	if (context_raw.decal_image == null) {
 		context_raw.decal_image = gpu_create_render_target(util_render_decal_preview_size, util_render_decal_preview_size, tex_format_t.RGBA64);
 	}
@@ -138,8 +134,6 @@ function util_render_make_decal_preview() {
 
 	make_material_parse_mesh_material();
 	context_raw.ddirty = 1; // Refresh depth for decal paint
-
-	if (in_use) draw_begin(current);
 }
 
 function util_render_make_text_preview() {
