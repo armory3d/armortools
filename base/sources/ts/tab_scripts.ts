@@ -7,40 +7,48 @@ function tab_scripts_draw(htab: ui_handle_t) {
 	if (ui_tab(htab, tr("Scripts"))) {
 
 		ui_begin_sticky();
-		// if (config_raw.touch_ui) {
-			ui_row4();
-		// }
-		// else {
-			// let row: f32[] = [1 / 14, 1 / 14, 1 / 14, 1 / 14];
-			// ui_row(row);
-		// }
+		let row: f32[] = [1 / 4, 1 / 4, 1 / 2];
+		ui_row(row);
+
 		if (ui_button(tr("Run"))) {
 			js_eval(tab_scripts_hscript.text);
 		}
-		if (ui_button(tr("Clear"))) {
-			tab_scripts_hscript.text = "";
-		}
-		if (ui_button(tr("Import"))) {
-			ui_files_show("js", false, false, function (path: string) {
-				let b: buffer_t = data_get_blob(path);
-				tab_scripts_hscript.text = sys_buffer_to_string(b);
-				data_delete_blob(path);
-			});
-		}
-		if (ui_button(tr("Export"))) {
-			ui_files_show("js", true, false, function (path: string) {
-				let str: string = tab_scripts_hscript.text;
-				let f: string = ui_files_filename;
-				if (f == "") {
-					f = tr("untitled");
+
+		if (ui_button(tr("Edit"))) {
+
+			ui_menu_draw(function (ui: ui_t) {
+				if (ui_menu_button(tr("Clear"))) {
+					tab_scripts_hscript.text = "";
 				}
-				path = path + path_sep + f;
-				if (!ends_with(path, ".js")) {
-					path += ".js";
+				if (ui_menu_button(tr("Import"))) {
+					ui_files_show("js", false, false, function (path: string) {
+						let b: buffer_t = data_get_blob(path);
+						tab_scripts_hscript.text = sys_buffer_to_string(b);
+						data_delete_blob(path);
+					});
 				}
-				iron_file_save_bytes(path, sys_string_to_buffer(str), 0);
+				if (ui_menu_button(tr("Export"))) {
+					ui_files_show("js", true, false, function (path: string) {
+						let str: string = tab_scripts_hscript.text;
+						let f: string = ui_files_filename;
+						if (f == "") {
+							f = tr("untitled");
+						}
+						path = path + path_sep + f;
+						if (!ends_with(path, ".js")) {
+							path += ".js";
+						}
+						iron_file_save_bytes(path, sys_string_to_buffer(str), 0);
+					});
+				}
 			});
+
 		}
+
+		let ar: string[] = ["script.js"];
+		let file_handle: ui_handle_t = ui_handle(__ID__);
+		ui_combo(file_handle, ar, tr("File"), false, ui_align_t.LEFT);
+
 		ui_end_sticky();
 
 		let _font: draw_font_t = ui.ops.font;
