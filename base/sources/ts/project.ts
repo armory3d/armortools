@@ -310,6 +310,16 @@ function project_new(reset_layers: bool = true) {
 
 	if (in_use) draw_begin(current);
 
+	project_set_default_envmap();
+
+	///if is_paint
+	context_init_tool();
+	///end
+
+	render_path_raytrace_ready = false;
+}
+
+function project_set_default_envmap() {
 	context_raw.saved_envmap = null;
 	context_raw.envmap_loaded = false;
 	scene_world._.envmap = context_raw.empty_envmap;
@@ -319,12 +329,6 @@ function project_new(reset_layers: bool = true) {
 	scene_world._.radiance_mipmaps = context_raw.default_radiance_mipmaps;
 	scene_world._.irradiance = context_raw.default_irradiance;
 	scene_world.strength = 4.0;
-
-	///if is_paint
-	context_init_tool();
-	///end
-
-	render_path_raytrace_ready = false;
 }
 
 function project_import_material() {
