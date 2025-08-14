@@ -59,22 +59,11 @@ function render_path_preview_init() {
 		t.scale = render_path_base_get_super_sampling();
 		render_path_create_render_target(t);
 	}
-
-	{
-		let t: render_target_t = render_target_create();
-		t.name = "mgbuffer2";
-		t.width = size;
-		t.height = size;
-		t.format = "RGBA64";
-		t.scale = render_path_base_get_super_sampling();
-		render_path_create_render_target(t);
-	}
 }
 
 function render_path_preview_commands_preview() {
-	render_path_set_target("mgbuffer2", null, null, clear_flag_t.COLOR, 0xff000000);
 	render_path_set_target("mgbuffer0", null, "mmain", clear_flag_t.COLOR | clear_flag_t.DEPTH, 0xffffffff, 1.0);
-	let additional: string[] = ["mgbuffer1", "mgbuffer2"];
+	let additional: string[] = ["mgbuffer1"];
 	render_path_set_target("mgbuffer0", additional, "mmain");
 	render_path_draw_meshes("mesh");
 
@@ -83,9 +72,7 @@ function render_path_preview_commands_preview() {
 	render_path_bind_target("mmain", "gbufferD");
 	render_path_bind_target("mgbuffer0", "gbuffer0");
 	render_path_bind_target("mgbuffer1", "gbuffer1");
-	{
-		render_path_bind_target("empty_white", "ssaotex");
-	}
+	render_path_bind_target("empty_white", "ssaotex");
 	render_path_draw_shader("shader_datas/deferred_light/deferred_light");
 
 	render_path_set_target("mtex", null, "mmain");
@@ -108,23 +95,21 @@ function render_path_preview_commands_preview() {
 }
 
 function render_path_preview_commands_decal() {
-	render_path_set_target("gbuffer2", null, null, clear_flag_t.COLOR, 0xff000000);
 	render_path_set_target("gbuffer0", null, "main", clear_flag_t.COLOR | clear_flag_t.DEPTH, 0xffffffff, 1.0);
-	let additional: string[] = ["gbuffer1", "gbuffer2"];
+	let additional: string[] = ["gbuffer1"];
 	render_path_set_target("gbuffer0", additional, "main");
 	render_path_draw_meshes("mesh");
 
 	// Deferred light
-	render_path_set_target("buf");
+	let output: string = "gbuffer2";
+	render_path_set_target(output);
 	render_path_bind_target("main", "gbufferD");
 	render_path_bind_target("gbuffer0", "gbuffer0");
 	render_path_bind_target("gbuffer1", "gbuffer1");
-	{
-		render_path_bind_target("empty_white", "ssaotex");
-	}
+	render_path_bind_target("empty_white", "ssaotex");
 	render_path_draw_shader("shader_datas/deferred_light/deferred_light");
 
-	render_path_set_target("buf", null, "main");
+	render_path_set_target(output, null, "main");
 	render_path_draw_skydome("shader_datas/world_pass/world_pass");
 
 	let framebuffer: string = "texpreview";
@@ -133,6 +118,6 @@ function render_path_preview_commands_decal() {
 
 	render_path_set_target(framebuffer);
 
-	render_path_bind_target("buf", "tex");
+	render_path_bind_target(output, "tex");
 	render_path_draw_shader("shader_datas/compositor_pass/compositor_pass");
 }

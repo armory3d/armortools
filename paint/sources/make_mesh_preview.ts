@@ -22,7 +22,7 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 				data: "short2norm"
 			}
 		],
-		color_attachments: ["RGBA64", "RGBA64", "RGBA64"],
+		color_attachments: ["RGBA64", "RGBA64"],
 		depth_attachment: "D32"
 	};
 	let con_mesh: node_shader_context_t = node_shader_context_create(data, props);
@@ -118,7 +118,6 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 		node_shader_write_frag(kong, "output[0] = float4(n.x, n.y, lerp(1.0, roughness, opacity), pack_f32_i16(lerp(1.0, metallic, opacity), uint(0)));"); // metallic/matid
 		node_shader_write_frag(kong, "output[1] = float4(lerp3(float3(0.0, 0.0, 0.0), basecol, opacity), occlusion);");
 	}
-	node_shader_write_frag(kong, "output[2] = float4(0.0, 0.0, 0.0, 0.0);");
 
 	parser_material_finalize(con_mesh);
 
