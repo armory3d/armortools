@@ -265,6 +265,10 @@ function tab_textures_delete_texture(asset: asset_t) {
 		ui_toolbar_handle.redraws = 1;
 	}
 
+	if (data_get_image(asset.file) == scene_world._.envmap) {
+		project_set_default_envmap();
+	}
+
 	data_delete_image(asset.file);
 	map_delete(project_asset_map, asset.id);
 	array_splice(project_assets, i, 1);
