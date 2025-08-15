@@ -11,7 +11,7 @@
 #include <iron_file.h>
 #include <iron_thread.h>
 #include <iron_video.h>
-#include <android/sensor.h>
+// #include <android/sensor.h>
 #include <android/window.h>
 #include "android_native_app_glue.h"
 #include <vulkan/vulkan_android.h>
@@ -30,10 +30,10 @@ typedef struct {
 static iron_display_t display;
 static struct android_app *app = NULL;
 static ANativeActivity *activity = NULL;
-static ASensorManager *sensorManager = NULL;
-static const ASensor *accelerometerSensor = NULL;
-static const ASensor *gyroSensor = NULL;
-static ASensorEventQueue *sensorEventQueue = NULL;
+// static ASensorManager *sensorManager = NULL;
+// static const ASensor *accelerometerSensor = NULL;
+// static const ASensor *gyroSensor = NULL;
+// static ASensorEventQueue *sensorEventQueue = NULL;
 static bool started = false;
 static bool paused = true;
 static bool displayIsInitialized = false;
@@ -58,8 +58,8 @@ static bool last_hat_up = false;
 static bool last_hat_down = false;
 #endif
 
-void iron_vulkan_init_window();
-bool iron_vulkan_internal_get_size(int *width, int *height);
+void iron_vulkan_surface_destroyed();
+bool iron_vulkan_get_size(int *width, int *height);
 
 int iron_count_displays(void) {
 	return 1;
@@ -802,9 +802,8 @@ static void cmd(struct android_app *app, int32_t cmd) {
 				started = true;
 			}
 			else {
-				iron_vulkan_init_window();
+				iron_vulkan_surface_destroyed();
 			}
-
 			updateAppForegroundStatus(true, appIsForeground);
 		}
 		break;
@@ -812,22 +811,22 @@ static void cmd(struct android_app *app, int32_t cmd) {
 		updateAppForegroundStatus(false, appIsForeground);
 		break;
 	case APP_CMD_GAINED_FOCUS:
-		if (accelerometerSensor != NULL) {
-			ASensorEventQueue_enableSensor(sensorEventQueue, accelerometerSensor);
-			ASensorEventQueue_setEventRate(sensorEventQueue, accelerometerSensor, (1000L / 60) * 1000);
-		}
-		if (gyroSensor != NULL) {
-			ASensorEventQueue_enableSensor(sensorEventQueue, gyroSensor);
-			ASensorEventQueue_setEventRate(sensorEventQueue, gyroSensor, (1000L / 60) * 1000);
-		}
+		// if (accelerometerSensor != NULL) {
+		// 	ASensorEventQueue_enableSensor(sensorEventQueue, accelerometerSensor);
+		// 	ASensorEventQueue_setEventRate(sensorEventQueue, accelerometerSensor, (1000L / 60) * 1000);
+		// }
+		// if (gyroSensor != NULL) {
+		// 	ASensorEventQueue_enableSensor(sensorEventQueue, gyroSensor);
+		// 	ASensorEventQueue_setEventRate(sensorEventQueue, gyroSensor, (1000L / 60) * 1000);
+		// }
 		break;
 	case APP_CMD_LOST_FOCUS:
-		if (accelerometerSensor != NULL) {
-			ASensorEventQueue_disableSensor(sensorEventQueue, accelerometerSensor);
-		}
-		if (gyroSensor != NULL) {
-			ASensorEventQueue_disableSensor(sensorEventQueue, gyroSensor);
-		}
+		// if (accelerometerSensor != NULL) {
+		// 	ASensorEventQueue_disableSensor(sensorEventQueue, accelerometerSensor);
+		// }
+		// if (gyroSensor != NULL) {
+		// 	ASensorEventQueue_disableSensor(sensorEventQueue, gyroSensor);
+		// }
 		break;
 	case APP_CMD_START:
 		updateAppForegroundStatus(displayIsInitialized, true);
@@ -847,7 +846,6 @@ static void cmd(struct android_app *app, int32_t cmd) {
 		iron_internal_shutdown_callback();
 		break;
 	case APP_CMD_CONFIG_CHANGED: {
-
 		break;
 	}
 	}
@@ -948,7 +946,7 @@ const char *iron_language() {
 
 int iron_android_width() {
 	int width, height;
-	if (iron_vulkan_internal_get_size(&width, &height)) {
+	if (iron_vulkan_get_size(&width, &height)) {
 		return width;
 	}
 	return ANativeWindow_getWidth(app->window);
@@ -956,7 +954,7 @@ int iron_android_width() {
 
 int iron_android_height() {
 	int width, height;
-	if (iron_vulkan_internal_get_size(&width, &height)) {
+	if (iron_vulkan_get_size(&width, &height)) {
 		return height;
 	}
 	return ANativeWindow_getHeight(app->window);
@@ -1017,17 +1015,17 @@ bool iron_internal_handle_messages(void) {
 		}
 
 		if (ident == LOOPER_ID_USER) {
-			if (accelerometerSensor != NULL) {
-				ASensorEvent event;
-				while (ASensorEventQueue_getEvents(sensorEventQueue, &event, 1) > 0) {
-					if (event.type == ASENSOR_TYPE_ACCELEROMETER) {
-						// iron_internal_on_acceleration(event.acceleration.x, event.acceleration.y, event.acceleration.z);
-					}
-					else if (event.type == ASENSOR_TYPE_GYROSCOPE) {
-						// iron_internal_on_rotation(event.vector.x, event.vector.y, event.vector.z);
-					}
-				}
-			}
+			// if (accelerometerSensor != NULL) {
+			// 	ASensorEvent event;
+			// 	while (ASensorEventQueue_getEvents(sensorEventQueue, &event, 1) > 0) {
+			// 		if (event.type == ASENSOR_TYPE_ACCELEROMETER) {
+			// 			// iron_internal_on_acceleration(event.acceleration.x, event.acceleration.y, event.acceleration.z);
+			// 		}
+			// 		else if (event.type == ASENSOR_TYPE_GYROSCOPE) {
+			// 			// iron_internal_on_rotation(event.vector.x, event.vector.y, event.vector.z);
+			// 		}
+			// 	}
+			// }
 		}
 
 		if (app->destroyRequested != 0) {
@@ -1086,10 +1084,10 @@ void android_main(struct android_app *application) {
 	application->onAppCmd = cmd;
 	application->onInputEvent = input;
 	activity->callbacks->onNativeWindowResized = resize;
-	sensorManager = ASensorManager_getInstance();
-	accelerometerSensor = ASensorManager_getDefaultSensor(sensorManager, ASENSOR_TYPE_ACCELEROMETER);
-	gyroSensor = ASensorManager_getDefaultSensor(sensorManager, ASENSOR_TYPE_GYROSCOPE);
-	sensorEventQueue = ASensorManager_createEventQueue(sensorManager, application->looper, LOOPER_ID_USER, NULL, NULL);
+	// sensorManager = ASensorManager_getInstance();
+	// accelerometerSensor = ASensorManager_getDefaultSensor(sensorManager, ASENSOR_TYPE_ACCELEROMETER);
+	// gyroSensor = ASensorManager_getDefaultSensor(sensorManager, ASENSOR_TYPE_GYROSCOPE);
+	// sensorEventQueue = ASensorManager_createEventQueue(sensorManager, application->looper, LOOPER_ID_USER, NULL, NULL);
 
 	JNIEnv *env = NULL;
 	(*iron_android_get_activity()->vm)->AttachCurrentThread(iron_android_get_activity()->vm, &env, NULL);

@@ -54,12 +54,12 @@ static bool validation_found;
 static VkDebugUtilsMessengerEXT debug_messenger;
 #endif
 
-static bool window_surface_destroyed;
+static bool surface_destroyed;
 static int window_depth_bits;
-static bool window_vsynced;
-static VkSurfaceKHR window_surface;
-static VkSurfaceFormatKHR window_format;
-static VkSwapchainKHR window_swapchain;
+static bool window_vsync;
+static VkSurfaceKHR surface;
+static VkSurfaceFormatKHR surface_format;
+static VkSwapchainKHR swapchain;
 static VkImage window_images[GPU_FRAMEBUFFER_COUNT];
 static uint32_t framebuffer_count;
 static bool framebuffer_acquired = false;
@@ -376,8 +376,8 @@ VkSwapchainKHR cleanup_swapchain() {
 	// for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
 	// 	gpu_texture_destroy_internal(&framebuffers[i]);
 	// }
-	VkSwapchainKHR chain = window_swapchain;
-	window_swapchain = VK_NULL_HANDLE;
+	VkSwapchainKHR chain = swapchain;
+	swapchain = VK_NULL_HANDLE;
 	return chain;
 }
 
@@ -445,22 +445,22 @@ void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_t
 
 static void create_swapchain() {
 	VkSwapchainKHR old_swapchain = cleanup_swapchain();
-	if (window_surface_destroyed) {
+	if (surface_destroyed) {
 		vkDestroySwapchainKHR(device, old_swapchain, NULL);
 		old_swapchain = VK_NULL_HANDLE;
-		vkDestroySurfaceKHR(instance, window_surface, NULL);
-		iron_vulkan_create_surface(instance, &window_surface);
-		window_surface_destroyed = false;
+		vkDestroySurfaceKHR(instance, surface, NULL);
+		iron_vulkan_create_surface(instance, &surface);
+		surface_destroyed = false;
 	}
 
 	VkSurfaceCapabilitiesKHR caps = {0};
-	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(gpu, window_surface, &caps);
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(gpu, surface, &caps);
 
 	VkPresentModeKHR present_modes[256];
 	uint32_t present_mode_count;
-	vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, window_surface, &present_mode_count, NULL);
+	vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &present_mode_count, NULL);
 	present_mode_count = present_mode_count > 256 ? 256 : present_mode_count;
-	vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, window_surface, &present_mode_count, present_modes);
+	vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &present_mode_count, present_modes);
 
 	uint32_t image_count = GPU_FRAMEBUFFER_COUNT;
 	if (image_count < caps.minImageCount) {
@@ -483,10 +483,10 @@ static void create_swapchain() {
 
 	VkSwapchainCreateInfoKHR swapchain_info = {
 		.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-		.surface = window_surface,
+		.surface = surface,
 		.minImageCount = image_count,
-		.imageFormat = window_format.format,
-		.imageColorSpace = window_format.colorSpace,
+		.imageFormat = surface_format.format,
+		.imageColorSpace = surface_format.colorSpace,
 		.imageExtent.width = iron_window_width(),
 		.imageExtent.height = iron_window_height(),
 		.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
@@ -510,11 +510,11 @@ static void create_swapchain() {
 	swapchain_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	swapchain_info.queueFamilyIndexCount = 0;
 	swapchain_info.pQueueFamilyIndices = NULL;
-	swapchain_info.presentMode = window_vsynced ? VK_PRESENT_MODE_FIFO_KHR : VK_PRESENT_MODE_MAILBOX_KHR;
+	swapchain_info.presentMode = window_vsync ? VK_PRESENT_MODE_FIFO_KHR : VK_PRESENT_MODE_MAILBOX_KHR;
 	swapchain_info.oldSwapchain = old_swapchain;
 	swapchain_info.clipped = true;
 
-	vkCreateSwapchainKHR(device, &swapchain_info, NULL, &window_swapchain);
+	vkCreateSwapchainKHR(device, &swapchain_info, NULL, &swapchain);
 
 	if (old_swapchain != VK_NULL_HANDLE) {
 		gpu_execute_and_wait();
@@ -522,14 +522,14 @@ static void create_swapchain() {
 	}
 
 	int framebuffer_count = GPU_FRAMEBUFFER_COUNT;
-	vkGetSwapchainImagesKHR(device, window_swapchain, &framebuffer_count, window_images);
+	vkGetSwapchainImagesKHR(device, swapchain, &framebuffer_count, window_images);
 
 	for (uint32_t i = 0; i < framebuffer_count; i++) {
 		framebuffers[i].impl.image = window_images[i];
 		set_image_layout(window_images[i], VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 		VkImageViewCreateInfo color_attachment_view = {
 			.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-			.format = window_format.format,
+			.format = surface_format.format,
 			.components.r = VK_COMPONENT_SWIZZLE_R,
 			.components.g = VK_COMPONENT_SWIZZLE_G,
 			.components.b = VK_COMPONENT_SWIZZLE_B,
@@ -593,9 +593,9 @@ static void create_swapchain() {
 }
 
 static void acquire_next_image() {
-	VkResult err = vkAcquireNextImageKHR(device, window_swapchain, UINT64_MAX, framebuffer_available_semaphore, VK_NULL_HANDLE, &framebuffer_index);
-	if (err == VK_ERROR_SURFACE_LOST_KHR || err == VK_ERROR_OUT_OF_DATE_KHR) {
-		window_surface_destroyed = (err == VK_ERROR_SURFACE_LOST_KHR);
+	VkResult err = vkAcquireNextImageKHR(device, swapchain, UINT64_MAX, framebuffer_available_semaphore, VK_NULL_HANDLE, &framebuffer_index);
+	if (err == VK_ERROR_SURFACE_LOST_KHR || err == VK_ERROR_OUT_OF_DATE_KHR || surface_destroyed) {
+		surface_destroyed = surface_destroyed || (err == VK_ERROR_SURFACE_LOST_KHR);
 
 		gpu_in_use = false;
 		create_swapchain();
@@ -939,31 +939,31 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	}
 
 	window_depth_bits = depth_buffer_bits;
-	window_vsynced = vsync;
+	window_vsync = vsync;
 
-	iron_vulkan_create_surface(instance, &window_surface);
+	iron_vulkan_create_surface(instance, &surface);
 
 	VkBool32 surface_supported;
-	vkGetPhysicalDeviceSurfaceSupportKHR(gpu, graphics_queue_node_index, window_surface, &surface_supported);
+	vkGetPhysicalDeviceSurfaceSupportKHR(gpu, graphics_queue_node_index, surface, &surface_supported);
 
 	VkSurfaceFormatKHR surf_formats[256];
 	uint32_t formatCount = sizeof(surf_formats) / sizeof(surf_formats[0]);
-	VkResult result = vkGetPhysicalDeviceSurfaceFormatsKHR(gpu, window_surface, &formatCount, surf_formats);
+	VkResult result = vkGetPhysicalDeviceSurfaceFormatsKHR(gpu, surface, &formatCount, surf_formats);
 
 	if (formatCount == 1 && surf_formats[0].format == VK_FORMAT_UNDEFINED) {
-		window_format = surf_formats[0];
+		surface_format = surf_formats[0];
 	}
 	else {
 		bool found = false;
 		for (uint32_t i = 0; i < formatCount; ++i) {
 			if (surf_formats[i].format != VK_FORMAT_B8G8R8A8_SRGB) {
-				window_format = surf_formats[i];
+				surface_format = surf_formats[i];
 				found = true;
 				break;
 			}
 		}
 		if (!found) {
-			window_format = surf_formats[0];
+			surface_format = surf_formats[0];
 		}
 	}
 
@@ -1000,19 +1000,17 @@ void gpu_destroy() {
 	vkDestroyFence(device, fence, NULL);
 	VkSwapchainKHR swapchain = cleanup_swapchain();
 	vkDestroySwapchainKHR(device, swapchain, NULL);
-	vkDestroySurfaceKHR(instance, window_surface, NULL);
+	vkDestroySurfaceKHR(instance, surface, NULL);
 }
 
-void iron_vulkan_init_window() {
-	// This function is used in the android backend
-	window_surface_destroyed = true;
+void iron_vulkan_surface_destroyed() {
+	surface_destroyed = true;
 }
 
-bool iron_vulkan_internal_get_size(int *width, int *height) {
-	// This function is used in the android backend
-	if (window_surface) {
+bool iron_vulkan_get_size(int *width, int *height) {
+	if (surface) {
 		VkSurfaceCapabilitiesKHR capabilities;
-		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(gpu, window_surface, &capabilities);
+		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(gpu, surface, &capabilities);
 		*width = capabilities.currentExtent.width;
 		*height = capabilities.currentExtent.height;
 		return true;
@@ -1186,7 +1184,7 @@ void gpu_present_internal() {
 	VkPresentInfoKHR present = {
 		.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
 		.swapchainCount = 1,
-		.pSwapchains = &window_swapchain,
+		.pSwapchains = &swapchain,
 		.pImageIndices = &framebuffer_index,
 		.pWaitSemaphores = &rendering_finished_semaphores[framebuffer_index],
 		.waitSemaphoreCount = 1,
