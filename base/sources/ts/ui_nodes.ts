@@ -1240,6 +1240,10 @@ function ui_nodes_render() {
 		if (ui_nodes_group_stack.length > 0 && _ui_menu_button(tr("Close"))) {
 			array_pop(ui_nodes_group_stack);
 		}
+
+		ui.window_border_right = 0;
+		ui.window_border_top = 0;
+		ui.window_border_bottom = 0;
 	}
 
 	ui_end();

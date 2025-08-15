@@ -937,14 +937,14 @@ enum ui_state_t {
 	HOVERED,
 }
 
-declare function ui_tooltip_image(image: gpu_texture_t, max_width: i32 = 0);
+declare function ui_tooltip_image(image: gpu_texture_t, max_width: i32 = 0): void;
 declare function ui_image(image: gpu_texture_t, tint: i32 = 0xffffffff, h: f32 = -1.0): ui_state_t;
 declare function ui_sub_image(image: gpu_texture_t, tint: i32 = 0xffffffff, h: f32 = -1.0, sx: i32 = 0, sy: i32 = 0, sw: i32 = 0, sh: i32 = 0): ui_state_t;
 declare function ui_window(handle: ui_handle_t, x: i32, y: i32, w: i32, h: i32, drag: bool = false): bool;
-declare function ui_end();
+declare function ui_end(): void;
 declare function ui_set_scale(factor: f32);
 declare function ui_end_element(): void;
-declare function ui_end_element_of_size(element_size: f32);
+declare function ui_end_element_of_size(element_size: f32): void;
 declare function UI_SCALE(): f32;
 declare function UI_ELEMENT_OFFSET(): f32;
 declare function UI_ELEMENT_W(): f32;

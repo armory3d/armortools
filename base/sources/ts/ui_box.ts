@@ -25,7 +25,7 @@ function ui_box_init() {
 function ui_box_render() {
 	if (!ui_menu_show) {
 		let in_use: bool = ui.combo_selected_handle != null;
-		let is_escape: bool = keyboard_started("escape");
+		let is_escape: bool = ui.is_escape_down;
 		if (ui_box_draws > 2 && (ui.input_released || is_escape) && !in_use && !ui.is_typing) {
 			let appw: i32 = iron_window_width();
 			let apph: i32 = iron_window_height();
