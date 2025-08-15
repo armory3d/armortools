@@ -19,7 +19,7 @@ function tab_history_draw(htab: ui_handle_t) {
 					history_undo();
 				}
 			}
-			ui_fill(0, 0, (ui._window_w / ui_SCALE(ui) - 2), 1 * ui_SCALE(ui), ui.ops.theme.SEPARATOR_COL);
+			ui_fill(0, 0, (ui._window_w / UI_SCALE() - 2), 1 * UI_SCALE(), ui.ops.theme.SEPARATOR_COL);
 		}
 	}
 }

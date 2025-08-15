@@ -602,7 +602,7 @@ char *ui_lower_case(char *dest, char *src) {
 	return dest;
 }
 
-void ui_draw_tooltip_text(bool bind_global_g) {
+void ui_draw_tooltip_text() {
 	int line_count = ui_line_count(current->tooltip_text);
 	float tooltip_w = 0.0;
 	for (int i = 0; i < line_count; ++i) {
@@ -612,7 +612,7 @@ void ui_draw_tooltip_text(bool bind_global_g) {
 		}
 	}
 	current->tooltip_x = fmin(current->tooltip_x, iron_window_width() - tooltip_w - 20);
-	if (bind_global_g) draw_begin(NULL, false, 0);
+	draw_begin(NULL, false, 0);
 	float font_height = draw_font_height(current->ops->font, current->font_size);
 	float off = 0;
 	if (current->tooltip_img != NULL) {
@@ -636,10 +636,10 @@ void ui_draw_tooltip_text(bool bind_global_g) {
 	for (int i = 0; i < line_count; ++i) {
 		draw_string(ui_extract_line(current->tooltip_text, i), current->tooltip_x + 5, current->tooltip_y + off + i * current->font_size);
 	}
-	if (bind_global_g) draw_end();
+	draw_end();
 }
 
-void ui_draw_tooltip_image(bool bind_global_g) {
+void ui_draw_tooltip_image() {
 	float w = current->tooltip_img->width;
 	if (current->tooltip_img_max_width != 0 && w > current->tooltip_img_max_width) {
 		w = current->tooltip_img_max_width;
@@ -647,24 +647,20 @@ void ui_draw_tooltip_image(bool bind_global_g) {
 	float h = current->tooltip_img->height * (w / current->tooltip_img->width);
 	current->tooltip_x = fmin(current->tooltip_x, iron_window_width() - w - 20);
 	current->tooltip_y = fmin(current->tooltip_y, iron_window_height() - h - 20);
-	if (bind_global_g) {
-		draw_begin(NULL, false, 0);
-	}
+	draw_begin(NULL, false, 0);
 	draw_set_color(0xff000000);
 	draw_filled_rect(current->tooltip_x, current->tooltip_y, w, h);
 	draw_set_color(0xffffffff);
 	current->tooltip_invert_y ?
 		draw_scaled_image(current->tooltip_img, current->tooltip_x, current->tooltip_y + h, w, -h) :
 		draw_scaled_image(current->tooltip_img, current->tooltip_x, current->tooltip_y, w, h);
-	if (bind_global_g) draw_end();
+	draw_end();
 }
 
-void ui_draw_tooltip(bool bind_global_g) {
+void ui_draw_tooltip() {
 	static char temp[1024];
 	if (current->slider_tooltip) {
-		if (bind_global_g) {
-			draw_begin(NULL, false, 0);
-		}
+		draw_begin(NULL, false, 0);
 		draw_set_font(current->ops->font, current->font_size * 2);
 		sprintf(temp, "%f", round(current->scroll_handle->value * 100.0) / 100.0);
 		string_strip_trailing_zeros(temp);
@@ -676,12 +672,10 @@ void ui_draw_tooltip(bool bind_global_g) {
 		draw_filled_rect(x - x_off, current->slider_tooltip_y - y_off, x_off * 2.0, y_off);
 		draw_set_color(theme->TEXT_COL);
 		draw_string(text, x - x_off, current->slider_tooltip_y - y_off);
-		if (bind_global_g) draw_end();
+		draw_end();
 	}
 	if (ui_touch_tooltip && current->text_selected_handle != NULL) {
-		if (bind_global_g) {
-			draw_begin(NULL, false, 0);
-		}
+		draw_begin(NULL, false, 0);
 		draw_set_font(current->ops->font, current->font_size * 2.0);
 		float x_off = draw_string_width(current->ops->font, current->font_size * 2.0, current->text_selected) / 2.0;
 		float y_off = draw_font_height(current->ops->font, current->font_size * 2.0) / 2.0;
@@ -691,7 +685,7 @@ void ui_draw_tooltip(bool bind_global_g) {
 		draw_filled_rect(x - x_off, y - y_off, x_off * 2.0, y_off * 2.0);
 		draw_set_color(theme->TEXT_COL);
 		draw_string(current->text_selected, x - x_off, y - y_off);
-		if (bind_global_g) draw_end();
+		draw_end();
 	}
 
 	if (current->tooltip_text[0] != '\0' || current->tooltip_img != NULL) {
@@ -706,24 +700,22 @@ void ui_draw_tooltip(bool bind_global_g) {
 		}
 		if (!current->tooltip_wait && iron_time() - current->tooltip_time > UI_TOOLTIP_DELAY()) {
 			if (current->tooltip_img != NULL) {
-				ui_draw_tooltip_image(bind_global_g);
+				ui_draw_tooltip_image();
 			}
 			if (current->tooltip_text[0] != '\0') {
-				ui_draw_tooltip_text(bind_global_g);
+				ui_draw_tooltip_text();
 			}
 		}
 	}
 	else current->tooltip_shown = false;
 }
 
-void ui_draw_combo(bool begin /*= true*/) {
+void ui_draw_combo() {
 	if (current->combo_selected_handle == NULL) {
 		return;
 	}
 	draw_set_color(theme->SEPARATOR_COL);
-	if (begin) {
-		draw_begin(NULL, false, 0);
-	}
+	draw_begin(NULL, false, 0);
 
 	float combo_h = (current->combo_selected_texts->length + (current->combo_selected_label != NULL ? 1 : 0) + (current->combo_search_bar ? 1 : 0)) * UI_ELEMENT_H();
 	float dist_top = current->combo_selected_y - combo_h - UI_ELEMENT_H() - current->window_border_top;
@@ -892,10 +884,14 @@ void ui_draw_combo(bool begin /*= true*/) {
 		ui_combo_first = false;
 	}
 	current->input_enabled = current->combo_selected_handle == NULL;
-	ui_end_region(false);
-	if (begin) {
-		draw_end();
-	}
+	ui_end_region();
+	draw_end();
+}
+
+void ui_end_frame() {
+	ui_draw_combo(); // Handle active combo
+	ui_draw_tooltip();
+	ui_end_input();
 }
 
 void ui_bake_elements() {
@@ -978,13 +974,8 @@ void ui_begin_region(ui_t *ui, int x, int y, int w) {
 	current->_h = 0;
 }
 
-void ui_end_region(bool last) {
-	ui_draw_tooltip(false);
+void ui_end_region() {
 	current->tab_pressed_handle = NULL;
-	if (last) {
-		ui_draw_combo(false); // Handle active combo
-		ui_end_input();
-	}
 }
 
 void ui_set_cursor_to_input(int align) {
@@ -2281,16 +2272,11 @@ void ui_tooltip_image(gpu_texture_t *image, int max_width) {
 	current->tooltip_y = current->_y + current->_window_y;
 }
 
-void ui_end(bool last) {
+void ui_end() {
 	if (!current->window_ended) {
 		ui_end_window();
 	}
-	ui_draw_combo(true); // Handle active combo
-	ui_draw_tooltip(true);
 	current->tab_pressed_handle = NULL;
-	if (last) {
-		ui_end_input();
-	}
 }
 
 void ui_set_input_position(ui_t *ui, int x, int y) {

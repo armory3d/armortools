@@ -6,7 +6,7 @@ function tab_console_draw(htab: ui_handle_t) {
 	let color: i32 = console_message_timer > 0 ? console_message_color : -1;
 
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-	if (ui_tab(htab, title, false, color) && statush > ui_status_default_status_h * ui_SCALE(ui)) {
+	if (ui_tab(htab, title, false, color) && statush > ui_status_default_status_h * UI_SCALE()) {
 
 		ui_begin_sticky();
 		///if (arm_windows || arm_linux || arm_macos) // Copy
@@ -59,7 +59,7 @@ function tab_console_draw(htab: ui_handle_t) {
 		let _font_size: i32 = ui.font_size;
 		let f: draw_font_t = data_get_font("font_mono.ttf");
 		ui_set_font(ui, f);
-		ui.font_size = math_floor(15 * ui_SCALE(ui));
+		ui.font_size = math_floor(15 * UI_SCALE());
 		for (let i: i32 = 0; i < console_last_traces.length; ++i) {
 			let t: string = console_last_traces[i];
 			ui_text(t);

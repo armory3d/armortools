@@ -155,7 +155,7 @@ function box_export_tab_export_textures(ui: ui_t, title: string, bake_material: 
 		let layers_destination_combo: string[] = [tr("Disk"), tr("Packed")];
 		context_raw.layers_destination = ui_combo(layers_destination_handle, layers_destination_combo, tr("Destination"), true);
 
-		_ui_end_element();
+		ui_end_element();
 
 		ui_row2();
 		if (ui_button(tr("Cancel"))) {

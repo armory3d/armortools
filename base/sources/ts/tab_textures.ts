@@ -8,7 +8,7 @@ let _tab_textures_draw_is_packed: bool;
 function tab_textures_draw(htab: ui_handle_t) {
 	let ui: ui_t = ui_base_ui;
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-	if (ui_tab(htab, tr("Textures")) && statush > ui_status_default_status_h * ui_SCALE(ui)) {
+	if (ui_tab(htab, tr("Textures")) && statush > ui_status_default_status_h * UI_SCALE()) {
 
 		ui_begin_sticky();
 
@@ -46,7 +46,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 			let statusw: i32 = iron_window_width();
 			///end
 
-			let slotw: i32 = math_floor(52 * ui_SCALE(ui));
+			let slotw: i32 = math_floor(52 * UI_SCALE());
 			let num: i32 = math_floor(statusw / slotw);
 			if (num == 0) {
 				return;
@@ -61,18 +61,18 @@ function tab_textures_draw(htab: ui_handle_t) {
 				ui_row(ar);
 
 				ui._x += 2;
-				let off: f32 = config_raw.show_asset_names ? ui_ELEMENT_OFFSET(ui) * 10.0 : 6;
+				let off: f32 = config_raw.show_asset_names ? UI_ELEMENT_OFFSET() * 10.0 : 6;
 				if (row > 0) {
 					ui._y += off;
 				}
 
 				for (let j: i32 = 0; j < num; ++j) {
-					let imgw: i32 = math_floor(50 * ui_SCALE(ui));
+					let imgw: i32 = math_floor(50 * UI_SCALE());
 					let i: i32 = j + row * num;
 					if (i >= project_assets.length) {
-						_ui_end_element(imgw);
+						ui_end_element_of_size(imgw);
 						if (config_raw.show_asset_names) {
-							_ui_end_element(0);
+							ui_end_element_of_size(0);
 						}
 						continue;
 					}
@@ -213,7 +213,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 						}
 						ui._y -= slotw * 0.9;
 						if (i == project_assets.length - 1) {
-							ui._y += j == num - 1 ? imgw : imgw + ui_ELEMENT_H(ui) + ui_ELEMENT_OFFSET(ui);
+							ui._y += j == num - 1 ? imgw : imgw + UI_ELEMENT_H() + UI_ELEMENT_OFFSET();
 						}
 					}
 				}

@@ -9,7 +9,7 @@ function console_draw_toast(s: string) {
 	draw_begin();
 	draw_set_color(0x55000000);
 	draw_filled_rect(0, 0, iron_window_width(), iron_window_height());
-	let scale: f32 = ui_SCALE(base_get_uis()[0]);
+	let scale: f32 = UI_SCALE();
 	let x: f32 = iron_window_width() / 2;
 	let y: f32 = iron_window_height() - 200 * scale;
 	draw_filled_rect(x - 200 * scale, y, 400 * scale, 80 * scale);
@@ -47,11 +47,11 @@ function console_progress(s: string) {
 	console_progress_text = s;
 
 	// Pass one frame to immediately show the message
-	ui_end_input();
 	draw_end();
 	sys_render();
 	draw_begin();
 	gpu_present();
+	ui_end_input();
 }
 
 function console_info(s: string) {

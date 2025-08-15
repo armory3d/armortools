@@ -16,7 +16,7 @@ function ui_header_render_ui() {
 	else {
 		ui_header_h = ui_header_default_h;
 	}
-	ui_header_h = math_floor(ui_header_h * ui_SCALE(ui));
+	ui_header_h = math_floor(ui_header_h * UI_SCALE());
 
 	if (config_raw.layout[layout_size_t.HEADER] == 0) {
 		return;

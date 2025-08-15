@@ -166,12 +166,9 @@ function translator_init_font(cjk: bool, font_path: string, font_scale: f32) {
 		// Scale up the font size and elements width a bit
 		base_theme.FONT_SIZE = math_floor(base_default_font_size * font_scale);
 		base_theme.ELEMENT_W = math_floor(base_default_element_w * (config_raw.locale != "en" ? 1.4 : 1.0));
-		let uis: ui_t[] = base_get_uis();
-		for (let i: i32 = 0; i < uis.length; ++i) {
-			let ui: ui_t = uis[i];
-			ui_set_font(ui, f);
-			_ui_set_scale(ui, ui_SCALE(ui));
-		}
+
+		ui_set_font(ui_base_ui, f);
+		ui_set_scale(UI_SCALE());
 	});
 }
 

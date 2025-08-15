@@ -15,7 +15,7 @@ function tab_layers_draw_mini(htab: ui_handle_t) {
 	ui_set_hovered_tab_name(tr("Layers"));
 
 	let _ELEMENT_H: i32 = ui.ops.theme.ELEMENT_H;
-	ui.ops.theme.ELEMENT_H = math_floor(ui_base_sidebar_mini_w / 2 / ui_SCALE(ui));
+	ui.ops.theme.ELEMENT_H = math_floor(ui_base_sidebar_mini_w / 2 / UI_SCALE());
 
 	ui_begin_sticky();
 	ui_separator(5);
@@ -79,7 +79,7 @@ function tab_layers_highlight_odd_lines() {
 	let full_h: i32 = ui._window_h - ui_base_hwnds[0].scroll_offset;
 	for (let i: i32 = 0; i < math_floor(full_h / step); ++i) {
 		if (i % 2 == 0) {
-			ui_fill(0, i * step, (ui._w / ui_SCALE(ui) - 2), step, ui.ops.theme.WINDOW_BG_COL - 0x00040404);
+			ui_fill(0, i * step, (ui._w / UI_SCALE() - 2), step, ui.ops.theme.WINDOW_BG_COL - 0x00040404);
 		}
 	}
 }
@@ -270,7 +270,7 @@ function tab_layers_draw_layer_slot(l: slot_layer_t, i: i32, mini: bool) {
 	}
 
 	let step: i32 = ui.ops.theme.ELEMENT_H;
-	let checkw: f32 = (ui._window_w / 100 * 8) / ui_SCALE(ui);
+	let checkw: f32 = (ui._window_w / 100 * 8) / UI_SCALE();
 
 	// Highlight drag destination
 	let absy: f32 = ui._window_y + ui._y;
@@ -285,14 +285,14 @@ function tab_layers_draw_layer_slot(l: slot_layer_t, i: i32, mini: bool) {
 			let nested_group: bool = slot_layer_is_group(base_drag_layer) && to_group;
 			if (!nested_group) {
 				if (slot_layer_can_move(context_raw.layer, context_raw.drag_dest)) {
-					ui_fill(checkw, step * 2, (ui._window_w / ui_SCALE(ui) - 2) - checkw, 2 * ui_SCALE(ui), ui.ops.theme.HIGHLIGHT_COL);
+					ui_fill(checkw, step * 2, (ui._window_w / UI_SCALE() - 2) - checkw, 2 * UI_SCALE(), ui.ops.theme.HIGHLIGHT_COL);
 				}
 			}
 		}
 		else if (i == project_layers.length - 1 && mouse_y < absy + step) {
 			context_raw.drag_dest = project_layers.length - 1;
 			if (slot_layer_can_move(context_raw.layer, context_raw.drag_dest)) {
-				ui_fill(checkw, 0, (ui._window_w / ui_SCALE(ui) - 2) - checkw, 2 * ui_SCALE(ui), ui.ops.theme.HIGHLIGHT_COL);
+				ui_fill(checkw, 0, (ui._window_w / UI_SCALE() - 2) - checkw, 2 * UI_SCALE(), ui.ops.theme.HIGHLIGHT_COL);
 			}
 		}
 	}
@@ -300,13 +300,13 @@ function tab_layers_draw_layer_slot(l: slot_layer_t, i: i32, mini: bool) {
 		if (mouse_y > absy + step && mouse_y < absy + step * 3) {
 			context_raw.drag_dest = i;
 			if (tab_layers_can_drop_new_layer(i)) {
-				ui_fill(checkw, 2 * step, (ui._window_w / ui_SCALE(ui) - 2) - checkw, 2 * ui_SCALE(ui), ui.ops.theme.HIGHLIGHT_COL);
+				ui_fill(checkw, 2 * step, (ui._window_w / UI_SCALE() - 2) - checkw, 2 * UI_SCALE(), ui.ops.theme.HIGHLIGHT_COL);
 			}
 		}
 		else if (i == project_layers.length - 1 && mouse_y < absy + step) {
 			context_raw.drag_dest = project_layers.length;
 			if (tab_layers_can_drop_new_layer(project_layers.length)) {
-				ui_fill(checkw, 0, (ui._window_w / ui_SCALE(ui) - 2) - checkw, 2 * ui_SCALE(ui), ui.ops.theme.HIGHLIGHT_COL);
+				ui_fill(checkw, 0, (ui._window_w / UI_SCALE() - 2) - checkw, 2 * UI_SCALE(), ui.ops.theme.HIGHLIGHT_COL);
 			}
 		}
 	}
@@ -329,10 +329,10 @@ function tab_layers_draw_layer_slot_mini(l: slot_layer_t, i: i32) {
 	let uiy: f32 = ui._y;
 	let state: ui_state_t = tab_layers_draw_layer_icon(l, i, uix, uiy, true);
 	tab_layers_handle_layer_icon_state(l, i, state, uix, uiy);
-	_ui_end_element();
+	ui_end_element();
 
-	ui._y += ui_ELEMENT_H(ui);
-	ui._y -= ui_ELEMENT_OFFSET(ui);
+	ui._y += UI_ELEMENT_H();
+	ui._y -= UI_ELEMENT_OFFSET();
 }
 
 function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
@@ -354,7 +354,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	// Draw eye icon
 	let icons: gpu_texture_t = resource_get("icons.k");
 	let r: rect_t = resource_tile18(icons, l.visible ? 0 : 1, 0);
-	let center: f32 = (step / 2) * ui_SCALE(ui);
+	let center: f32 = (step / 2) * UI_SCALE();
 	ui._x += 2;
 	ui._y += 3;
 	ui._y += center;
@@ -376,8 +376,8 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	ui._x += 2;
 	ui._y += 3;
 	if (l.parent != null) {
-		ui._x += 10 * ui_SCALE(ui);
-		if (l.parent.parent != null) ui._x += 10 * ui_SCALE(ui);
+		ui._x += 10 * UI_SCALE();
+		if (l.parent.parent != null) ui._x += 10 * UI_SCALE();
 	}
 
 	let state: ui_state_t = tab_layers_draw_layer_icon(l, i, uix, uiy, false);
@@ -386,7 +386,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	ui._y -= 3;
 
 	if (config_raw.touch_ui) {
-		ui._x += 12 * ui_SCALE(ui);
+		ui._x += 12 * UI_SCALE();
 	}
 
 	tab_layers_handle_layer_icon_state(l, i, state, uix, uiy);
@@ -403,7 +403,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	else {
 		if (ui.enabled && ui.input_enabled && ui.combo_selected_handle == null &&
 			ui.input_x > ui._window_x + ui._x && ui.input_x < ui._window_x + uiw &&
-			ui.input_y > ui._window_y + ui._y - center && ui.input_y < ui._window_y + ui._y - center + (step * ui_SCALE(ui)) * 2) {
+			ui.input_y > ui._window_y + ui._y - center && ui.input_y < ui._window_y + ui._y - center + (step * UI_SCALE()) * 2) {
 			if (ui.input_started) {
 				context_set_layer(l);
 				tab_layers_set_drag_layer(context_raw.layer, -(mouse_x - uix - ui._window_x - 3), -(mouse_y - uiy - ui._window_y + 1));
@@ -436,12 +436,12 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	ui._y -= center;
 
 	if (l.parent != null) {
-		ui._x -= 10 * ui_SCALE(ui);
-		if (l.parent.parent != null) ui._x -= 10 * ui_SCALE(ui);
+		ui._x -= 10 * UI_SCALE();
+		if (l.parent.parent != null) ui._x -= 10 * UI_SCALE();
 	}
 
 	if (slot_layer_is_group(l)) {
-		_ui_end_element();
+		ui_end_element();
 	}
 	else {
 		if (slot_layer_is_mask(l)) {
@@ -464,27 +464,27 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	}
 
 	if (slot_layer_is_group(l) || slot_layer_is_mask(l)) {
-		ui._y -= ui_ELEMENT_OFFSET(ui);
-		_ui_end_element();
+		ui._y -= UI_ELEMENT_OFFSET();
+		ui_end_element();
 	}
 	else {
-		ui._y -= ui_ELEMENT_OFFSET(ui);
+		ui._y -= UI_ELEMENT_OFFSET();
 
 		let row: f32[] = [8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100];
 		ui_row(row);
-		_ui_end_element();
-		_ui_end_element();
-		_ui_end_element();
+		ui_end_element();
+		ui_end_element();
+		ui_end_element();
 
 		if (config_raw.touch_ui) {
-			ui._x += 12 * ui_SCALE(ui);
+			ui._x += 12 * UI_SCALE();
 		}
 
 		tab_layers_combo_object(ui, l);
-		_ui_end_element();
+		ui_end_element();
 	}
 
-	ui._y -= ui_ELEMENT_OFFSET(ui);
+	ui._y -= UI_ELEMENT_OFFSET();
 }
 
 function tab_layers_combo_object(ui: ui_t, l: slot_layer_t, label: bool = false): ui_handle_t {
@@ -564,15 +564,15 @@ function tab_layers_draw_layer_highlight(l: slot_layer_t, mini: bool) {
 	let step: i32 = ui.ops.theme.ELEMENT_H;
 
 	// Separator line
-	ui_fill(0, 0, (ui._w / ui_SCALE(ui) - 2), 1 * ui_SCALE(ui), ui.ops.theme.SEPARATOR_COL);
+	ui_fill(0, 0, (ui._w / UI_SCALE() - 2), 1 * UI_SCALE(), ui.ops.theme.SEPARATOR_COL);
 
 	// Highlight selected
 	if (context_raw.layer == l) {
 		if (mini) {
-			ui_rect(1, -step * 2, ui._w / ui_SCALE(ui) - 1, step * 2 + (mini ? -1 : 1), ui.ops.theme.HIGHLIGHT_COL, 3);
+			ui_rect(1, -step * 2, ui._w / UI_SCALE() - 1, step * 2 + (mini ? -1 : 1), ui.ops.theme.HIGHLIGHT_COL, 3);
 		}
 		else {
-			ui_rect(1, -step * 2 - 1, ui._w / ui_SCALE(ui) - 2, step * 2 + (mini ? -2 : 1), ui.ops.theme.HIGHLIGHT_COL, 2);
+			ui_rect(1, -step * 2 - 1, ui._w / UI_SCALE() - 2, step * 2 + (mini ? -2 : 1), ui.ops.theme.HIGHLIGHT_COL, 2);
 		}
 	}
 }
@@ -628,10 +628,10 @@ function tab_layers_handle_layer_icon_state(l: slot_layer_t, i: i32, state: ui_s
 function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32, mini: bool): ui_state_t {
 	let ui: ui_t = ui_base_ui;
 	let icons: gpu_texture_t = resource_get("icons.k");
-	let icon_h: i32 = (ui_ELEMENT_H(ui) - (mini ? 2 : 3)) * 2;
+	let icon_h: i32 = (UI_ELEMENT_H() - (mini ? 2 : 3)) * 2;
 
-	if (mini && ui_SCALE(ui) > 1) {
-		ui._x -= 1 * ui_SCALE(ui);
+	if (mini && UI_SCALE() > 1) {
+		ui._x -= 1 * UI_SCALE();
 	}
 
 	if (l.parent != null) {
@@ -671,7 +671,7 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 		}
 
 		// Draw layer numbers when selecting a layer via keyboard shortcut
-		let is_typing: bool = ui.is_typing || ui_view2d_ui.is_typing || ui_nodes_ui.is_typing;
+		let is_typing: bool = ui.is_typing;
 		if (!is_typing) {
 			if (i < 9 && operator_shortcut(map_get(config_keymap, "select_layer"), shortcut_type_t.DOWN)) {
 				let number: string = i32_to_string(i + 1) ;
@@ -891,7 +891,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			}
 			ui._y = _y;
 			ui_draw_string(tr("Res"), -1, 0, ui_align_t.RIGHT, true);
-			_ui_end_element();
+			ui_end_element();
 
 			ui_menu_align(ui);
 			///if (arm_android || arm_ios)

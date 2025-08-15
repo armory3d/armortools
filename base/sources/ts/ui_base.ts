@@ -4,8 +4,8 @@ type tab_draw_t = {
 };
 type tab_draw_array_t = tab_draw_t[];
 
-let ui_base_show: bool = true;
 let ui_base_ui: ui_t;
+let ui_base_show: bool = true;
 let ui_base_border_started: i32 = 0;
 let ui_base_border_handle: ui_handle_t = null;
 let ui_base_action_paint_remap: string = "";
@@ -181,7 +181,7 @@ function ui_base_init() {
 
 	resource_load(resources);
 
-	if (ui_SCALE(ui_base_ui) > 1) {
+	if (UI_SCALE() > 1) {
 		ui_base_set_icon_scale();
 	}
 
@@ -217,7 +217,7 @@ function ui_base_update() {
 		return;
 	}
 
-	if (!ui_nodes_ui.is_typing && !ui_base_ui.is_typing) {
+	if (!ui_base_ui.is_typing) {
 		if (operator_shortcut(map_get(config_keymap, "toggle_node_editor"))) {
 			///if is_paint
 			ui_nodes_canvas_type == canvas_type_t.MATERIAL ? ui_base_show_material_nodes() : ui_base_show_brush_nodes();
@@ -356,7 +356,7 @@ function ui_base_update() {
 	}
 	///end
 
-	let is_typing: bool = ui_base_ui.is_typing || ui_view2d_ui.is_typing || ui_nodes_ui.is_typing;
+	let is_typing: bool = ui_base_ui.is_typing;
 
 	///if is_paint
 	if (!is_typing) {
@@ -563,7 +563,7 @@ function ui_base_update() {
 				viewport_zoom(-0.2);
 			}
 			else if (operator_shortcut(map_get(config_keymap, "viewport_mode"))) {
-				base_ui_menu.is_key_pressed = false;
+				ui_base_ui.is_key_pressed = false;
 				ui_menu_draw(function (ui: ui_t) {
 					let mode_handle: ui_handle_t = ui_handle(__ID__);
 					mode_handle.position = context_raw.viewport_mode;
@@ -762,7 +762,7 @@ function ui_base_update() {
 }
 
 function ui_base_view_top() {
-	let is_typing: bool = ui_base_ui.is_typing || ui_view2d_ui.is_typing || ui_nodes_ui.is_typing;
+	let is_typing: bool = ui_base_ui.is_typing;
 
 	if (context_in_paint_area() && !is_typing) {
 		if (mouse_view_x() < sys_w()) {
@@ -775,7 +775,7 @@ function ui_base_operator_search() {
 	_ui_base_operator_search_first = true;
 
 	ui_menu_draw(function (ui: ui_t) {
-		ui_menu_h = ui_ELEMENT_H(ui) * 8;
+		ui_menu_h = UI_ELEMENT_H() * 8;
 		let search_handle: ui_handle_t = ui_handle(__ID__);
 		let search: string = ui_text_input(search_handle, "", ui_align_t.LEFT, true, true);
 		ui.changed = false;
@@ -862,7 +862,7 @@ function ui_base_update_ui() {
 		}
 	}
 
-	ui_base_sidebar_mini_w = math_floor(ui_base_default_sidebar_mini_w * ui_SCALE(ui_base_ui));
+	ui_base_sidebar_mini_w = math_floor(ui_base_default_sidebar_mini_w * UI_SCALE());
 
 	if (!base_ui_enabled) {
 		return;
@@ -1150,7 +1150,7 @@ function ui_base_render() {
 	if (!ui_base_show && config_raw.touch_ui) {
 		ui_base_ui.input_enabled = true;
 		ui_begin(ui_base_ui);
-		if (ui_window(ui_handle(__ID__), 0, 0, 150, math_floor(ui_ELEMENT_H(ui_base_ui) + ui_ELEMENT_OFFSET(ui_base_ui) + 1))) {
+		if (ui_window(ui_handle(__ID__), 0, 0, 150, math_floor(UI_ELEMENT_H() + UI_ELEMENT_OFFSET() + 1))) {
 			if (ui_button(tr("Close"))) {
 				ui_base_toggle_distract_free();
 			}
@@ -1191,12 +1191,14 @@ function ui_base_render() {
 	///end
 
 	ui_end();
+
+	ui_base_ui.input_enabled = true;
 }
 
 function ui_base_draw_sidebar() {
 	// Tabs
 	let mini: bool = config_raw.layout[layout_size_t.SIDEBAR_W] <= ui_base_sidebar_mini_w;
-	let expand_button_offset: i32 = config_raw.touch_ui ? math_floor(ui_ELEMENT_H(ui_base_ui) + ui_ELEMENT_OFFSET(ui_base_ui)) : 0;
+	let expand_button_offset: i32 = config_raw.touch_ui ? math_floor(UI_ELEMENT_H() + UI_ELEMENT_OFFSET()) : 0;
 	ui_base_tabx = iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W];
 
 	let _SCROLL_W: i32 = ui_base_ui.ops.theme.SCROLL_W;
@@ -1223,7 +1225,7 @@ function ui_base_draw_sidebar() {
 	// Collapse / expand button for mini sidebar
 	if (config_raw.touch_ui) {
 		let width: i32 = config_raw.layout[layout_size_t.SIDEBAR_W];
-		let height: i32 = math_floor(ui_ELEMENT_H(ui_base_ui) + ui_ELEMENT_OFFSET(ui_base_ui));
+		let height: i32 = math_floor(UI_ELEMENT_H() + UI_ELEMENT_OFFSET());
 		if (ui_window(ui_handle(__ID__), iron_window_width() - width, iron_window_height() - height, width, height + 1)) {
 			ui_base_ui._w = width;
 			let _BUTTON_H: i32 = ui_base_ui.ops.theme.BUTTON_H;
@@ -1232,7 +1234,7 @@ function ui_base_draw_sidebar() {
 			ui_base_ui.ops.theme.BUTTON_COL = ui_base_ui.ops.theme.WINDOW_BG_COL;
 			if (ui_button(mini ? "<<" : ">>")) {
 				config_raw.layout[layout_size_t.SIDEBAR_W] = mini ? ui_base_default_sidebar_full_w : ui_base_default_sidebar_mini_w;
-				config_raw.layout[layout_size_t.SIDEBAR_W] = math_floor(config_raw.layout[layout_size_t.SIDEBAR_W] * ui_SCALE(ui_base_ui));
+				config_raw.layout[layout_size_t.SIDEBAR_W] = math_floor(config_raw.layout[layout_size_t.SIDEBAR_W] * UI_SCALE());
 			}
 			ui_base_ui.ops.theme.BUTTON_H = _BUTTON_H;
 			ui_base_ui.ops.theme.BUTTON_COL = _BUTTON_COL;
@@ -1241,8 +1243,8 @@ function ui_base_draw_sidebar() {
 
 	// Expand button
 	if (config_raw.layout[layout_size_t.SIDEBAR_W] == 0) {
-		let width: i32 = math_floor(draw_string_width(ui_base_ui.ops.font, ui_base_ui.font_size, "<<") + 25 * ui_SCALE(ui_base_ui));
-		if (ui_window(ui_base_hminimized, iron_window_width() - width, 0, width, math_floor(ui_ELEMENT_H(ui_base_ui) + ui_ELEMENT_OFFSET(ui_base_ui) + 1))) {
+		let width: i32 = math_floor(draw_string_width(ui_base_ui.ops.font, ui_base_ui.font_size, "<<") + 25 * UI_SCALE());
+		if (ui_window(ui_base_hminimized, iron_window_width() - width, 0, width, math_floor(UI_ELEMENT_H() + UI_ELEMENT_OFFSET() + 1))) {
 			ui_base_ui._w = width;
 			let _BUTTON_H: i32 = ui_base_ui.ops.theme.BUTTON_H;
 			let _BUTTON_COL: i32 = ui_base_ui.ops.theme.BUTTON_COL;
@@ -1337,7 +1339,7 @@ function ui_base_render_cursor() {
 	}
 
 	let cursor_img: gpu_texture_t = resource_get("cursor.k");
-	let psize: i32 = math_floor(182 * (context_raw.brush_radius * context_raw.brush_nodes_radius) * ui_SCALE(ui_base_ui));
+	let psize: i32 = math_floor(182 * (context_raw.brush_radius * context_raw.brush_nodes_radius) * UI_SCALE());
 
 	// Clone source cursor
 	if (context_raw.tool == tool_type_t.CLONE && !keyboard_down("alt") && (mouse_down() || pen_down())) {
@@ -1365,8 +1367,8 @@ function ui_base_render_cursor() {
 			}
 
 			if (!config_raw.brush_live) {
-				let psizex: i32 = math_floor(256 * ui_SCALE(ui_base_ui) * (context_raw.brush_radius * context_raw.brush_nodes_radius * context_raw.brush_scale_x));
-				let psizey: i32 = math_floor(256 * ui_SCALE(ui_base_ui) * (context_raw.brush_radius * context_raw.brush_nodes_radius));
+				let psizex: i32 = math_floor(256 * UI_SCALE() * (context_raw.brush_radius * context_raw.brush_nodes_radius * context_raw.brush_scale_x));
+				let psizey: i32 = math_floor(256 * UI_SCALE() * (context_raw.brush_radius * context_raw.brush_nodes_radius));
 
 				context_raw.view_index = context_raw.view_index_last;
 				let decalx: f32 = base_x() + context_raw.decal_x * base_w() - psizex / 2;
@@ -1390,7 +1392,7 @@ function ui_base_render_cursor() {
 			(decal_mask && !config_raw.brush_3d) ||
 			(decal_mask && context_in_2d_view())) {
 			if (decal_mask) {
-				psize = math_floor(cursor_img.width * (context_raw.brush_decal_mask_radius * context_raw.brush_nodes_radius) * ui_SCALE(ui_base_ui));
+				psize = math_floor(cursor_img.width * (context_raw.brush_decal_mask_radius * context_raw.brush_nodes_radius) * UI_SCALE());
 			}
 			if (config_raw.brush_3d && context_in_2d_view()) {
 				psize = math_floor(psize * ui_view2d_pan_scale);
@@ -1421,7 +1423,7 @@ function ui_base_render_cursor() {
 
 function ui_base_show_material_nodes() {
 	// Clear input state as ui receives input events even when not drawn
-	_ui_end_input(ui_nodes_ui);
+	ui_end_input();
 
 	///if is_paint
 	ui_nodes_show = !ui_nodes_show || ui_nodes_canvas_type != canvas_type_t.MATERIAL;
@@ -1436,7 +1438,7 @@ function ui_base_show_material_nodes() {
 
 function ui_base_show_brush_nodes() {
 	// Clear input state as ui receives input events even when not drawn
-	_ui_end_input(ui_nodes_ui);
+	ui_end_input();
 	ui_nodes_show = !ui_nodes_show || ui_nodes_canvas_type != canvas_type_t.BRUSH;
 	ui_nodes_canvas_type = canvas_type_t.BRUSH;
 	base_resize();
@@ -1444,7 +1446,7 @@ function ui_base_show_brush_nodes() {
 
 function ui_base_show_2d_view(type: view_2d_type_t) {
 	// Clear input state as ui receives input events even when not drawn
-	_ui_end_input(ui_view2d_ui);
+	ui_end_input();
 	if (ui_view2d_type != type) {
 		ui_view2d_show = true;
 	}
@@ -1463,7 +1465,7 @@ function ui_base_toggle_browser() {
 }
 
 function ui_base_set_icon_scale() {
-	if (ui_SCALE(ui_base_ui) > 1) {
+	if (UI_SCALE() > 1) {
 		let res: string[] = ["icons2x.k"];
 		resource_load(res);
 		map_set(resource_bundled, "icons.k", resource_get("icons2x.k"));
@@ -1475,7 +1477,9 @@ function ui_base_set_icon_scale() {
 }
 
 function ui_base_on_border_hover(handle: ui_handle_t, side: i32) {
-	if (!base_ui_enabled) return;
+	if (!base_ui_enabled) {
+		return;
+	}
 
 	if (handle != ui_base_hwnds[tab_area_t.SIDEBAR0] &&
 		handle != ui_base_hwnds[tab_area_t.SIDEBAR1] &&

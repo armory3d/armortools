@@ -713,7 +713,7 @@ declare function ui_separator(h: i32 = 4, fill: bool = true): void;
 declare function ui_text_area(handle: ui_handle_t, align: ui_align_t = ui_align_t.LEFT, editable: bool = true, label: string = "", word_wrap: bool = false): string;
 declare function ui_begin(ui: ui_t): void;
 declare function ui_end_window(): void;
-declare function ui_end_region(last: bool = true): void;
+declare function ui_end_region(): void;
 declare function ui_float_input(handle: ui_handle_t, label: string = "", align: ui_align_t = ui_align_t.LEFT, precision: f32 = 1000.0): f32;
 declare function ui_get_current(): ui_t;
 declare function ui_remove_node(n: ui_node_t, canvas: ui_node_canvas_t): void;
@@ -738,7 +738,6 @@ declare function ui_begin_menu(): void;
 declare function ui_end_menu(): void;
 declare function _ui_menu_button(s: string): bool;
 declare function ui_begin_region(ui: ui_t, x: i32, y: i32, w: i32): void;
-declare function ui_end_region(last: bool): void;
 declare function ui_inline_radio(handle: ui_handle_t, texts: string[], align: i32): i32;
 declare function ui_end_input(): void;
 declare function ui_panel(handle: ui_handle_t, text: string, is_tree: bool, filled: bool): bool;
@@ -939,79 +938,31 @@ enum ui_state_t {
 	HOVERED,
 }
 
-declare function UI_OUTPUTS_H(sockets_count: i32, length: i32 = -1): f32;
 declare function ui_tooltip_image(image: gpu_texture_t, max_width: i32 = 0);
 declare function ui_image(image: gpu_texture_t, tint: i32 = 0xffffffff, h: f32 = -1.0): ui_state_t;
 declare function ui_sub_image(image: gpu_texture_t, tint: i32 = 0xffffffff, h: f32 = -1.0, sx: i32 = 0, sy: i32 = 0, sw: i32 = 0, sh: i32 = 0): ui_state_t;
 declare function ui_window(handle: ui_handle_t, x: i32, y: i32, w: i32, h: i32, drag: bool = false): bool;
-declare function ui_end(last: bool = true);
-
-let ui_children: map_t<string, ui_handle_t> = map_create();
-let ui_nodes_custom_buttons: map_t<string, (i: i32)=>void> = map_create();
-
-function ui_SCALE(ui: ui_t): f32 {
-	let current: ui_t = ui_get_current();
-	ui_set_current(ui);
-	let f: f32 = UI_SCALE();
-	ui_set_current(current);
-	return f;
-}
-
-function ui_ELEMENT_OFFSET(ui: ui_t): f32 {
-	let current: ui_t = ui_get_current();
-	ui_set_current(ui);
-	let f: f32 = UI_ELEMENT_OFFSET();
-	ui_set_current(current);
-	return f;
-}
-
-function ui_ELEMENT_W(ui: ui_t): f32 {
-	let current: ui_t = ui_get_current();
-	ui_set_current(ui);
-	let f: f32 = UI_ELEMENT_W();
-	ui_set_current(current);
-	return f;
-}
-
-function ui_ELEMENT_H(ui: ui_t): f32 {
-	let current: ui_t = ui_get_current();
-	ui_set_current(ui);
-	let f: f32 = UI_ELEMENT_H();
-	ui_set_current(current);
-	return f;
-}
+declare function ui_end();
+declare function ui_set_scale(factor: f32);
+declare function ui_end_element(): void;
+declare function ui_end_element_of_size(element_size: f32);
+declare function UI_SCALE(): f32;
+declare function UI_ELEMENT_OFFSET(): f32;
+declare function UI_ELEMENT_W(): f32;
+declare function UI_ELEMENT_H(): f32;
+declare function UI_OUTPUTS_H(sockets_count: i32, length: i32 = -1): f32;
 
 function ui_MENUBAR_H(ui: ui_t): f32 {
-	let button_offset_y: f32 = (ui.ops.theme.ELEMENT_H * ui_SCALE(ui) - ui.ops.theme.BUTTON_H * ui_SCALE(ui)) / 2;
-	return ui.ops.theme.BUTTON_H * ui_SCALE(ui) * 1.1 + 2 + button_offset_y;
+	let button_offset_y: f32 = (ui.ops.theme.ELEMENT_H * UI_SCALE() - ui.ops.theme.BUTTON_H * UI_SCALE()) / 2;
+	return ui.ops.theme.BUTTON_H * UI_SCALE() * 1.1 + 2 + button_offset_y;
 }
 
 function ui_nodes_INPUT_Y(canvas: ui_node_canvas_t, sockets: ui_node_socket_t[], pos: i32): f32 {
 	return UI_INPUT_Y(canvas, sockets.buffer, sockets.length, pos);
 }
 
-function _ui_set_scale(ui: ui_t, factor: f32) {
-	let current: ui_t = ui_get_current();
-	ui_set_current(ui);
-	ui_set_scale(factor);
-	ui_set_current(current);
-}
-
-function _ui_end_element(element_size: f32 = -1.0) {
-	if (element_size < 0) {
-		ui_end_element();
-	}
-	else {
-		ui_end_element_of_size(element_size);
-	}
-}
-
-function _ui_end_input(ui: ui_t) {
-	let current: ui_t = ui_get_current();
-	ui_set_current(ui);
-	ui_end_input();
-	ui_set_current(current);
-}
+let ui_children: map_t<string, ui_handle_t> = map_create();
+let ui_nodes_custom_buttons: map_t<string, (i: i32)=>void> = map_create();
 
 function ui_handle(s: string): ui_handle_t {
 	let h: ui_handle_t = map_get(ui_children, s);

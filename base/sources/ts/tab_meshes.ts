@@ -4,7 +4,7 @@ let _tab_meshes_draw_i: i32;
 function tab_meshes_draw(htab: ui_handle_t) {
 	let ui: ui_t = ui_base_ui;
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-	if (ui_tab(htab, tr("Meshes")) && statush > ui_status_default_status_h * ui_SCALE(ui)) {
+	if (ui_tab(htab, tr("Meshes")) && statush > ui_status_default_status_h * UI_SCALE()) {
 
 		ui_begin_sticky();
 
@@ -331,7 +331,7 @@ function tab_meshes_draw(htab: ui_handle_t) {
 					let _font_size: i32 = ui.font_size;
 					let fmono: draw_font_t = data_get_font("font_mono.ttf");
 					ui_set_font(ui, fmono);
-					ui.font_size = math_floor(15 * ui_SCALE(ui));
+					ui.font_size = math_floor(15 * UI_SCALE());
 					ui_text_area_coloring = tab_scripts_get_text_coloring();
 					ui_text_area(hscript);
 					ui_text_area_coloring = null;
@@ -455,14 +455,14 @@ function tab_scene_draw_list(ui: ui_t, list_handle: ui_handle_t, current_object:
 	// Highlight every other line
 	if (tab_scene_line_counter % 2 == 0) {
 		draw_set_color(ui.ops.theme.SEPARATOR_COL);
-		draw_filled_rect(0, ui._y, ui._window_w, ui_ELEMENT_H(ui));
+		draw_filled_rect(0, ui._y, ui._window_w, UI_ELEMENT_H());
 		draw_set_color(0xffffffff);
 	}
 
 	// Highlight selected line
 	if (current_object == context_raw.selected_object) {
 		draw_set_color(0xff205d9c);
-		draw_filled_rect(0, ui._y, ui._window_w, ui_ELEMENT_H(ui));
+		draw_filled_rect(0, ui._y, ui._window_w, UI_ELEMENT_H());
 		draw_set_color(0xffffffff);
 	}
 
@@ -481,7 +481,7 @@ function tab_scene_draw_list(ui: ui_t, list_handle: ui_handle_t, current_object:
 
 		// Draw line that shows parent relations
 		draw_set_color(ui.ops.theme.BUTTON_COL);
-		draw_line(ui._x - 10, ui._y + ui_ELEMENT_H(ui) / 2, ui._x, ui._y + ui_ELEMENT_H(ui) / 2);
+		draw_line(ui._x - 10, ui._y + UI_ELEMENT_H() / 2, ui._x, ui._y + UI_ELEMENT_H() / 2);
 		draw_set_color(0xffffffff);
 
 		ui_text(current_object.name);
@@ -490,7 +490,7 @@ function tab_scene_draw_list(ui: ui_t, list_handle: ui_handle_t, current_object:
 
 	tab_scene_line_counter++;
 	// Undo applied offset for row drawing caused by end_element()
-	ui._y -= ui_ELEMENT_OFFSET(ui);
+	ui._y -= UI_ELEMENT_OFFSET();
 
 	if (ui.is_released) {
 		tab_scene_select_object(current_object.ext);
@@ -520,7 +520,7 @@ function tab_scene_draw_list(ui: ui_t, list_handle: ui_handle_t, current_object:
 
 		// Draw line that shows parent relations
 		draw_set_color(ui.ops.theme.BUTTON_COL);
-		draw_line(ui._x + 14, current_y, ui._x + 14, ui._y - ui_ELEMENT_H(ui) / 2);
+		draw_line(ui._x + 14, current_y, ui._x + 14, ui._y - UI_ELEMENT_H() / 2);
 		draw_set_color(0xffffffff);
 	}
 }
@@ -577,7 +577,7 @@ function tab_scene_draw(htab: ui_handle_t) {
 		ui_end_sticky();
 
 		{
-			ui._y -= ui_ELEMENT_OFFSET(ui);
+			ui._y -= UI_ELEMENT_OFFSET();
 
 			tab_scene_line_counter = 0;
 

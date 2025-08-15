@@ -3985,7 +3985,7 @@ function nodes_material_init() {
 }
 
 function nodes_material_vector_curves_button(node_id: i32) {
-	let ui: ui_t = ui_nodes_ui;
+	let ui: ui_t = ui_base_ui;
 	let nodes: ui_nodes_t = ui_nodes_get_nodes();
 	let node: ui_node_t = ui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
 
@@ -4053,7 +4053,7 @@ function nodes_material_vector_curves_button(node_id: i32) {
 }
 
 function nodes_material_color_ramp_button(node_id: i32) {
-	let ui: ui_t = ui_nodes_ui;
+	let ui: ui_t = ui_base_ui;
 	let nodes: ui_nodes_t = ui_nodes_get_nodes();
 	let node: ui_node_t = ui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
 
@@ -4120,7 +4120,7 @@ function nodes_material_color_ramp_button(node_id: i32) {
 		let rx: f32 = nx + ui._w - ui_p(37);
 		let ry: f32 = ny - ui_p(5);
 		nodes._input_started = ui.input_started = false;
-		ui_nodes_rgba_popup(chandle, vals.buffer + i * 5, math_floor(rx), math_floor(ry + ui_ELEMENT_H(ui)));
+		ui_nodes_rgba_popup(chandle, vals.buffer + i * 5, math_floor(rx), math_floor(ry + UI_ELEMENT_H()));
 	}
 	vals[i * 5 + 0] = color_get_rb(chandle.color) / 255;
 	vals[i * 5 + 1] = color_get_gb(chandle.color) / 255;
@@ -4128,7 +4128,7 @@ function nodes_material_color_ramp_button(node_id: i32) {
 }
 
 function nodes_material_new_group_button(node_id: i32) {
-	let ui: ui_t = ui_nodes_ui;
+	let ui: ui_t = ui_base_ui;
 	let nodes: ui_nodes_t = ui_nodes_get_nodes();
 	let node: ui_node_t = ui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
 
@@ -4213,7 +4213,7 @@ function nodes_material_new_group_button(node_id: i32) {
 }
 
 function nodes_material_group_input_button(node_id: i32) {
-	let ui: ui_t = ui_nodes_ui;
+	let ui: ui_t = ui_base_ui;
 	let nodes: ui_nodes_t = ui_nodes_get_nodes();
 	let node: ui_node_t = ui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
 
@@ -4221,7 +4221,7 @@ function nodes_material_group_input_button(node_id: i32) {
 }
 
 function nodes_material_group_output_button(node_id: i32) {
-	let ui: ui_t = ui_nodes_ui;
+	let ui: ui_t = ui_base_ui;
 	let nodes: ui_nodes_t = ui_nodes_get_nodes();
 	let node: ui_node_t = ui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
 

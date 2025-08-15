@@ -430,6 +430,7 @@ void _update(void *data) {
 	#endif
 
 	iron_update();
+	ui_end_frame();
 	gpu_present();
 }
 

@@ -128,7 +128,7 @@ function project_new_box() {
 			let project_aspect_ratio_combo: string[] = ["1:1", "2:1", "1:2"];
 			context_raw.project_aspect_ratio = ui_combo(h_project_aspect_ratio, project_aspect_ratio_combo, tr("Aspect Ratio"), true);
 
-			_ui_end_element();
+			ui_end_element();
 			ui_row2();
 			if (ui_button(tr("Cancel"))) {
 				ui_box_hide();

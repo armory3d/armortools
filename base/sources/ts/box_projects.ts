@@ -68,7 +68,7 @@ function box_projects_tab(ui: ui_t) {
 		ui_end_sticky();
 		ui_separator(3, false);
 
-		let slotw: i32 = math_floor(150 * ui_SCALE(ui));
+		let slotw: i32 = math_floor(150 * UI_SCALE());
 		let num: i32 = math_floor(iron_window_width() / slotw);
 		if (num == 0) {
 			return;
@@ -85,18 +85,18 @@ function box_projects_tab(ui: ui_t) {
 			ui_row(ar);
 
 			ui._x += 2;
-			let off: f32 = show_asset_names ? ui_ELEMENT_OFFSET(ui) * 16.0 : 6;
+			let off: f32 = show_asset_names ? UI_ELEMENT_OFFSET() * 16.0 : 6;
 			if (row > 0) {
 				ui._y += off;
 			}
 
 			for (let j: i32 = 0; j < num; ++j) {
-				let imgw: i32 = math_floor(128 * ui_SCALE(ui));
+				let imgw: i32 = math_floor(128 * UI_SCALE());
 				let i: i32 = j + row * num;
 				if (i >= recent_projects.length) {
-					_ui_end_element(imgw);
+					ui_end_element_of_size(imgw);
 					if (show_asset_names) {
-						_ui_end_element(0);
+						ui_end_element_of_size(0);
 					}
 					continue;
 				}
@@ -124,7 +124,7 @@ function box_projects_tab(ui: ui_t) {
 				if (icon != null) {
 					ui_fill(0, 0, 128, 128, ui.ops.theme.SEPARATOR_COL);
 
-					let state: i32 = ui_image(icon, 0xffffffff, 128  * ui_SCALE(ui));
+					let state: i32 = ui_image(icon, 0xffffffff, 128  * UI_SCALE());
 					if (state == ui_state_t.RELEASED) {
 						let _uix: i32 = ui._x;
 						ui._x = uix;
@@ -168,14 +168,14 @@ function box_projects_tab(ui: ui_t) {
 						}
 						ui._y -= slotw * 0.9;
 						if (i == recent_projects.length - 1) {
-							ui._y += j == num - 1 ? imgw : imgw + ui_ELEMENT_H(ui) + ui_ELEMENT_OFFSET(ui);
+							ui._y += j == num - 1 ? imgw : imgw + UI_ELEMENT_H() + UI_ELEMENT_OFFSET();
 						}
 					}
 				}
 				else {
-					_ui_end_element(0);
+					ui_end_element_of_size(0);
 					if (show_asset_names) {
-						_ui_end_element(0);
+						ui_end_element_of_size(0);
 					}
 					ui._x = uix;
 				}
@@ -230,7 +230,7 @@ function box_projects_recent_tab(ui: ui_t) {
 		}
 		ui.enabled = true;
 
-		_ui_end_element();
+		ui_end_element();
 		if (ui_button(tr("New Project..."), ui_align_t.LEFT)) {
 			project_new_box();
 		}
@@ -243,7 +243,7 @@ function box_projects_recent_tab(ui: ui_t) {
 function box_projects_draw_badge(ui: ui_t) {
 	let img: gpu_texture_t = data_get_image("badge.k");
 	ui_image(img);
-	_ui_end_element();
+	ui_end_element();
 }
 
 function box_projects_get_started_tab(ui: ui_t) {
@@ -261,8 +261,8 @@ function box_projects_get_started_tab(ui: ui_t) {
 }
 
 function box_projects_align_to_fullscreen() {
-	ui_box_modalw = math_floor(iron_window_width() / ui_SCALE(base_ui_box));
-	ui_box_modalh = math_floor(iron_window_height() / ui_SCALE(base_ui_box));
+	ui_box_modalw = math_floor(iron_window_width() / UI_SCALE());
+	ui_box_modalh = math_floor(iron_window_height() / UI_SCALE());
 	let appw: i32 = iron_window_width();
 	let apph: i32 = iron_window_height();
 	let mw: i32 = appw;

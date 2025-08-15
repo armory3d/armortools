@@ -9,7 +9,6 @@ let box_preferences_themes: string[] = null;
 let _box_preferences_f: string;
 let _box_preferences_h: ui_handle_t;
 let _box_preferences_i: i32;
-let _box_preferences_ui: ui_t;
 
 function box_preferences_show() {
 	ui_box_show_custom(function (ui: ui_t) {
@@ -131,7 +130,7 @@ function box_preferences_show() {
 			config_raw.grid_snap = ui_check(h_grid_snap, tr("Grid Snap"));
 			ui_nodes_grid_snap = config_raw.grid_snap;
 
-			_ui_end_element();
+			ui_end_element();
 
 			ui_row2();
 			if (ui_button(tr("Restore")) && !ui_menu_show) {
@@ -155,12 +154,11 @@ function box_preferences_show() {
 						}, ui);
 					}
 					if (ui_menu_button(tr("Import..."))) {
-						_box_preferences_ui = ui;
 						ui_files_show("json", false, false, function (path: string) {
 							let b: buffer_t = data_get_blob(path);
 							let raw: config_t = json_parse(sys_buffer_to_string(b));
 							sys_notify_on_init(function (raw: config_t) {
-								_box_preferences_ui.ops.theme.ELEMENT_H = base_default_element_h;
+								ui_base_ui.ops.theme.ELEMENT_H = base_default_element_h;
 								config_import_from(raw);
 								box_preferences_set_scale();
 								make_material_parse_mesh_material();
@@ -265,7 +263,7 @@ function box_preferences_show() {
 						_box_preferences_i = i;
 						ui_menu_draw(function (ui: ui_t) {
 							ui.changed = false;
-							let color: i32 = ui_color_wheel(_box_preferences_h, false, -1, 11 * ui.ops.theme.ELEMENT_H * ui_SCALE(ui), true);
+							let color: i32 = ui_color_wheel(_box_preferences_h, false, -1, 11 * ui.ops.theme.ELEMENT_H * UI_SCALE(), true);
 							let u32_theme: u32_ptr = base_theme;
 							DEREFERENCE(u32_theme + _box_preferences_i) = color;
 							if (ui.changed) {
@@ -308,10 +306,7 @@ function box_preferences_show() {
 				}
 
 				if (ui.changed) {
-					for (let i: i32 = 0; i < base_get_uis().length; ++i) {
-						let ui: ui_t = base_get_uis()[i];
-						ui.elements_baked = false;
-					}
+					ui_base_ui.elements_baked = false;
 				}
 			}
 			ui.input_enabled = true;
@@ -538,7 +533,7 @@ function box_preferences_show() {
 			config_raw.pressure_angle = ui_check(h_pressure_angle, tr("Brush Angle"));
 			///end
 
-			_ui_end_element();
+			ui_end_element();
 			let row: f32[] = [0.5];
 			ui_row(row);
 			if (ui_button(tr("Help"))) {
@@ -889,15 +884,11 @@ function box_preferences_get_preset_index(): i32 {
 
 function box_preferences_set_scale() {
 	let scale: f32 = config_raw.window_scale;
-	_ui_set_scale(ui_base_ui, scale);
+	ui_set_scale(scale);
 	ui_header_h = math_floor(ui_header_default_h * scale);
 	config_raw.layout[layout_size_t.STATUS_H] = math_floor(ui_status_default_status_h * scale);
 	ui_menubar_w = math_floor(ui_menubar_default_w * scale);
 	ui_base_set_icon_scale();
-	_ui_set_scale(ui_nodes_ui, scale);
-	_ui_set_scale(ui_view2d_ui, scale);
-	_ui_set_scale(base_ui_box, scale);
-	_ui_set_scale(base_ui_menu, scale);
 	base_resize();
 	config_raw.layout[layout_size_t.SIDEBAR_W] = math_floor(ui_base_default_sidebar_w * scale);
 }

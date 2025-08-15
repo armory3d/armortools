@@ -56,7 +56,7 @@ function ui_toolbar_draw_tool(i: i32, ui: ui_t, img: gpu_texture_t, icon_accent:
 	///if is_paint
 	if (i == tool_type_t.COLORID && context_raw.colorid_picked) {
 		let rt: render_target_t = map_get(render_path_render_targets, "texpaint_colorid");
-		draw_scaled_sub_image(rt._image, 0, 0, 1, 1, 0, _y + 1.5 * ui_SCALE(ui), 5 * ui_SCALE(ui), 34 * ui_SCALE(ui));
+		draw_scaled_sub_image(rt._image, 0, 0, 1, 1, 0, _y + 1.5 * UI_SCALE(), 5 * UI_SCALE(), 34 * UI_SCALE());
 	}
 	///end
 
@@ -85,7 +85,7 @@ function ui_toolbar_w(screen_size_request: bool = false): i32 {
 
 function ui_toolbar_x(): i32 {
 	let ui: ui_t = ui_base_ui;
-	return 5 * ui_SCALE(ui);
+	return 5 * UI_SCALE();
 }
 
 function ui_toolbar_render_ui() {
@@ -103,7 +103,7 @@ function ui_toolbar_render_ui() {
 	}
 
 	if (ui_window(ui_toolbar_handle, x, y, ui_toolbar_w(), h)) {
-		ui._y -= 4 * ui_SCALE(ui);
+		ui._y -= 4 * UI_SCALE();
 
 		ui.image_scroll_align = false;
 		let img: gpu_texture_t = resource_get("icons.k");
@@ -129,7 +129,7 @@ function ui_toolbar_render_ui() {
 			ui.ops.theme.BUTTON_H = ui.ops.theme.ELEMENT_H;
 			ui.ops.theme.BUTTON_COL = ui.ops.theme.WINDOW_BG_COL;
 			let font_height: i32 = draw_font_height(ui.ops.font, ui.font_size);
-			ui.font_offset_y = (ui_ELEMENT_H(ui) - font_height) / 2;
+			ui.font_offset_y = (UI_ELEMENT_H() - font_height) / 2;
 			let _w: i32 = ui._w;
 			ui._w = ui_toolbar_w();
 
@@ -146,7 +146,7 @@ function ui_toolbar_render_ui() {
 		if (ui.is_hovered) {
 			ui_tooltip(tr("Toggle header"));
 		}
-		ui._y -= 4 * ui_SCALE(ui);
+		ui._y -= 4 * UI_SCALE();
 
 		let vars_brush: map_t<string, string> = map_create();
 		map_set(vars_brush, "key", map_get(config_keymap, "brush_ruler"));
@@ -237,7 +237,7 @@ function ui_toolbar_tool_properties_menu() {
 		if (ui_button(tr("Pin to Header"), ui_align_t.LEFT)) {
 			config_raw.layout[layout_size_t.HEADER] = 1;
 		}
-	}, math_floor(ui._x + ui._w + 2), math_floor(ui._y - 6 * ui_SCALE(ui)));
+	}, math_floor(ui._x + ui._w + 2), math_floor(ui._y - 6 * UI_SCALE()));
 }
 
 function ui_toolbar_draw_highlight() {

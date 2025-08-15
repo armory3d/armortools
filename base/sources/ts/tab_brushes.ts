@@ -22,7 +22,7 @@ function tab_brushes_draw(htab: ui_handle_t) {
 		ui_end_sticky();
 		ui_separator(3, false);
 
-		let slotw: i32 = math_floor(51 * ui_SCALE(ui));
+		let slotw: i32 = math_floor(51 * UI_SCALE());
 		let num: i32 = math_floor(config_raw.layout[layout_size_t.SIDEBAR_W] / slotw);
 		if (num == 0) {
 			return;
@@ -37,22 +37,22 @@ function tab_brushes_draw(htab: ui_handle_t) {
 			ui_row(ar);
 
 			ui._x += 2;
-			let off: f32 = config_raw.show_asset_names ? ui_ELEMENT_OFFSET(ui) * 10.0 : 6;
+			let off: f32 = config_raw.show_asset_names ? UI_ELEMENT_OFFSET() * 10.0 : 6;
 			if (row > 0) {
 				ui._y += off;
 			}
 
 			for (let j: i32 = 0; j < num; ++j) {
-				let imgw: i32 = math_floor(50 * ui_SCALE(ui));
+				let imgw: i32 = math_floor(50 * UI_SCALE());
 				let i: i32 = j + row * num;
 				if (i >= project_brushes.length) {
-					_ui_end_element(imgw);
+					ui_end_element_of_size(imgw);
 					if (config_raw.show_asset_names) {
-						_ui_end_element(0);
+						ui_end_element_of_size(0);
 					}
 					continue;
 				}
-				let img: gpu_texture_t = ui_SCALE(ui) > 1 ? project_brushes[i].image : project_brushes[i].image_icon;
+				let img: gpu_texture_t = UI_SCALE() > 1 ? project_brushes[i].image : project_brushes[i].image_icon;
 				let img_full: gpu_texture_t = project_brushes[i].image;
 
 				if (context_raw.brush == project_brushes[i]) {
@@ -70,7 +70,7 @@ function tab_brushes_draw(htab: ui_handle_t) {
 
 				let uix: f32 = ui._x;
 				//let uiy: f32 = ui._y;
-				let tile: i32 = ui_SCALE(ui) > 1 ? 100 : 50;
+				let tile: i32 = UI_SCALE() > 1 ? 100 : 50;
 				let state: ui_state_t = project_brushes[i].preview_ready ? ui_image(img) : ui_sub_image(resource_get("icons.k"), -1, -1.0, tile * 5, tile, tile, tile);
 				if (state == ui_state_t.STARTED) {
 					if (context_raw.brush != project_brushes[i]) {
@@ -147,7 +147,7 @@ function tab_brushes_draw(htab: ui_handle_t) {
 					}
 					ui._y -= slotw * 0.9;
 					if (i == project_brushes.length - 1) {
-						ui._y += j == num - 1 ? imgw : imgw + ui_ELEMENT_H(ui) + ui_ELEMENT_OFFSET(ui);
+						ui._y += j == num - 1 ? imgw : imgw + UI_ELEMENT_H() + UI_ELEMENT_OFFSET();
 					}
 				}
 			}

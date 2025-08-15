@@ -18,8 +18,6 @@ let base_font: draw_font_t = null;
 let base_theme: ui_theme_t;
 let base_color_wheel: gpu_texture_t;
 let base_color_wheel_gradient: gpu_texture_t;
-let base_ui_box: ui_t;
-let base_ui_menu: ui_t;
 let base_default_element_w: i32 = 100;
 let base_default_element_h: i32 = 28;
 let base_default_font_size: i32 = 13;
@@ -96,15 +94,6 @@ function base_init() {
 	base_color_wheel = image_color_wheel;
 	base_color_wheel_gradient = image_color_wheel_gradient;
 	ui_nodes_enum_texts = base_enum_texts;
-	let ops: ui_options_t = {
-		theme: base_theme,
-		font: font,
-		scale_factor: config_raw.window_scale,
-		color_wheel: base_color_wheel,
-		black_white_gradient: base_color_wheel_gradient
-	};
-	base_ui_box = ui_create(ops);
-	base_ui_menu = ui_create(ops);
 
 	// Init plugins
 	if (config_raw.plugins != null) {
@@ -573,7 +562,7 @@ function base_render() {
 	if (base_is_dragging) {
 		iron_set_mouse_cursor(1); // Hand
 		let img: gpu_texture_t = base_get_drag_image();
-		let scale_factor: f32 = ui_SCALE(ui_base_ui);
+		let scale_factor: f32 = UI_SCALE();
 		let size: f32 = (base_drag_size == -1 ? 50 : base_drag_size) * scale_factor;
 		let ratio: f32 = size / img.width;
 		let h: f32 = img.height * ratio;
@@ -679,28 +668,11 @@ function base_toggle_fullscreen() {
 }
 
 function base_is_scrolling(): bool {
-	for (let i: i32 = 0; i < base_get_uis().length; ++i) {
-		let ui: ui_t = base_get_uis()[i];
-		if (ui.is_scrolling) {
-			return true;
-		}
-	}
-	return false;
+	return ui_base_ui.is_scrolling;
 }
 
 function base_is_combo_selected(): bool {
-	for (let i: i32 = 0; i < base_get_uis().length; ++i) {
-		let ui: ui_t = base_get_uis()[i];
-		if (ui.combo_selected_handle != null) {
-			return true;
-		}
-	}
-	return false;
-}
-
-function base_get_uis(): ui_t[] {
-	let uis: ui_t[] = [base_ui_box, base_ui_menu, ui_base_ui, ui_nodes_ui, ui_view2d_ui];
-	return uis;
+	return ui_base_ui.combo_selected_handle != null;
 }
 
 function base_is_decal_layer(): bool {
@@ -718,7 +690,7 @@ function base_redraw_status() {
 
 function base_redraw_console() {
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-	if (ui_base_ui != null && statush > ui_status_default_status_h * ui_SCALE(ui_base_ui)) {
+	if (ui_base_ui != null && statush > ui_status_default_status_h * UI_SCALE()) {
 		ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 	}
 }

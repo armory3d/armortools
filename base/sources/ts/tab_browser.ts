@@ -15,13 +15,13 @@ function tab_browser_show_directory(directory: string) {
 function tab_browser_draw(htab: ui_handle_t) {
 	let ui: ui_t = ui_base_ui;
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-	if (ui_tab(htab, tr("Browser")) && statush > ui_status_default_status_h * ui_SCALE(ui)) {
+	if (ui_tab(htab, tr("Browser")) && statush > ui_status_default_status_h * UI_SCALE()) {
 
 		if (config_raw.bookmarks == null) {
 			config_raw.bookmarks = [];
 		}
 
-		let bookmarks_w: i32 = math_floor(100 * ui_SCALE(ui));
+		let bookmarks_w: i32 = math_floor(100 * UI_SCALE());
 
 		if (tab_browser_hpath.text == "" && config_raw.bookmarks.length > 0) { // Init to first bookmark
 			tab_browser_hpath.text = config_raw.bookmarks[0];

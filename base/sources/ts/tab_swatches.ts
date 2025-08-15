@@ -22,7 +22,7 @@ function tab_swatches_empty_get(): gpu_texture_t {
 function tab_swatches_draw(htab: ui_handle_t) {
 	let ui: ui_t = ui_base_ui;
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-	if (ui_tab(htab, tr("Swatches")) && statush > ui_status_default_status_h * ui_SCALE(ui)) {
+	if (ui_tab(htab, tr("Swatches")) && statush > ui_status_default_status_h * UI_SCALE()) {
 
 		ui_begin_sticky();
 		if (config_raw.touch_ui) {
@@ -80,7 +80,7 @@ function tab_swatches_draw(htab: ui_handle_t) {
 		ui_end_sticky();
 		ui_separator(3, false);
 
-		let slotw: i32 = math_floor(26 * ui_SCALE(ui));
+		let slotw: i32 = math_floor(26 * UI_SCALE());
 		let num: i32 = math_floor(ui._w / (slotw + 3));
 		if (num == 0) {
 			return;
@@ -104,7 +104,7 @@ function tab_swatches_draw(htab: ui_handle_t) {
 			for (let j: i32 = 0; j < num; ++j) {
 				let i: i32 = j + row * num;
 				if (i >= project_raw.swatches.length) {
-					_ui_end_element(slotw);
+					ui_end_element_of_size(slotw);
 					continue;
 				}
 
@@ -144,7 +144,7 @@ function tab_swatches_draw(htab: ui_handle_t) {
 							let h: ui_handle_t = ui_handle(__ID__);
 							h.color = context_raw.swatch.base;
 
-							context_raw.swatch.base = ui_color_wheel(h, false, -1, 11 * ui.ops.theme.ELEMENT_H * ui_SCALE(ui), true, function () {
+							context_raw.swatch.base = ui_color_wheel(h, false, -1, 11 * ui.ops.theme.ELEMENT_H * UI_SCALE(), true, function () {
 								context_raw.color_picker_previous_tool = context_raw.tool;
 								context_select_tool(tool_type_t.PICKER);
 

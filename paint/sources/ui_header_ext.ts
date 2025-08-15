@@ -104,9 +104,9 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 		if (ui.is_hovered && ui.input_released) {
 			_ui_header_draw_tool_properties_h = h;
 			ui_menu_draw(function (ui: ui_t) {
-				ui_fill(0, 0, ui._w / ui_SCALE(ui), ui.ops.theme.ELEMENT_H * 9, ui.ops.theme.SEPARATOR_COL);
+				ui_fill(0, 0, ui._w / UI_SCALE(), ui.ops.theme.ELEMENT_H * 9, ui.ops.theme.SEPARATOR_COL);
 				ui.changed = false;
-				ui_color_wheel(_ui_header_draw_tool_properties_h, false, -1, 10 * ui.ops.theme.ELEMENT_H * ui_SCALE(ui), false);
+				ui_color_wheel(_ui_header_draw_tool_properties_h, false, -1, 10 * ui.ops.theme.ELEMENT_H * UI_SCALE(), false);
 				if (ui.changed) {
 					ui_menu_keep_open = true;
 				}
@@ -242,9 +242,9 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 			if (progress > 1.0) progress = 1.0;
 			// Progress bar
 			draw_set_color(ui.ops.theme.SEPARATOR_COL);
-			ui_draw_rect(true, ui._x + 1, ui._y, ui._w - 2, ui_ELEMENT_H(ui));
+			ui_draw_rect(true, ui._x + 1, ui._y, ui._w - 2, UI_ELEMENT_H());
 			draw_set_color(ui.ops.theme.HIGHLIGHT_COL);
-			ui_draw_rect(true, ui._x + 1, ui._y, (ui._w - 2) * progress, ui_ELEMENT_H(ui));
+			ui_draw_rect(true, ui._x + 1, ui._y, (ui._w - 2) * progress, UI_ELEMENT_H());
 			draw_set_color(0xffffffff);
 			ui_text(tr("Samples") + ": " + render_path_raytrace_bake_current_sample);
 			ui_text(tr("Rays/pixel") + ": " + render_path_raytrace_bake_rays_pix);
@@ -449,7 +449,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 		}
 		else {
 			let _w: i32 = ui._w;
-			let sc: f32 = ui_SCALE(ui);
+			let sc: f32 = UI_SCALE();
 			let touch_header: bool = (config_raw.touch_ui && config_raw.layout[layout_size_t.HEADER] == 1);
 			if (touch_header) {
 				ui._x -= 4 * sc;

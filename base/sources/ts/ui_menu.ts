@@ -12,10 +12,10 @@ let ui_menu_hide_flag: bool = false;
 let _ui_menu_render_msg: string;
 
 function ui_menu_render() {
-	let ui: ui_t = base_ui_menu;
+	let ui: ui_t = ui_base_ui;
 	let menu_w: i32 = ui_menu_commands != null ?
-		math_floor(base_default_element_w * ui_SCALE(base_ui_menu) * 2.3) :
-		math_floor(ui_ELEMENT_W(ui) * 2.3);
+		math_floor(base_default_element_w * UI_SCALE() * 2.3) :
+		math_floor(UI_ELEMENT_W() * 2.3);
 
 	let _FILL_BUTTON_BG: i32 = ui.ops.theme.FILL_BUTTON_BG;
 	ui.ops.theme.FILL_BUTTON_BG = false;
@@ -55,6 +55,7 @@ function ui_menu_render() {
 
 	if (ui_menu_show_first) {
 		ui_menu_show_first = false;
+		ui_menu_keep_open = true;
 		ui_menu_h = ui._y - ui_menu_y;
 		ui_menu_x += iron_window_width() * 2;
 		ui_menu_y += iron_window_height() * 2;
@@ -89,7 +90,7 @@ function ui_menu_draw(commands: (ui: ui_t)=>void = null, x: i32 = -1, y: i32 = -
 
 function ui_menu_fit_to_screen() {
 	// Prevent the menu going out of screen
-	let menu_w: f32 = base_default_element_w * ui_SCALE(base_ui_menu) * 2.3;
+	let menu_w: f32 = base_default_element_w * UI_SCALE() * 2.3;
 	if (ui_menu_x + menu_w > iron_window_width()) {
 		if (ui_menu_x - menu_w > 0) {
 			ui_menu_x = math_floor(ui_menu_x - menu_w);
@@ -112,10 +113,10 @@ function ui_menu_fit_to_screen() {
 function ui_menu_separator(ui: ui_t) {
 	ui._y++;
 	if (config_raw.touch_ui) {
-		ui_fill(0, 0, ui._w / ui_SCALE(ui), 1, ui.ops.theme.BUTTON_COL);
+		ui_fill(0, 0, ui._w / UI_SCALE(), 1, ui.ops.theme.BUTTON_COL);
 	}
 	else {
-		ui_fill(26, 0, ui._w / ui_SCALE(ui) - 26, 1, ui.ops.theme.BUTTON_COL);
+		ui_fill(26, 0, ui._w / UI_SCALE() - 26, 1, ui.ops.theme.BUTTON_COL);
 	}
 }
 
@@ -130,7 +131,7 @@ function ui_menu_align(ui: ui_t) {
 	if (!config_raw.touch_ui) {
 		let row: f32[] = [12 / 100, 88 / 100];
 		ui_row(row);
-		_ui_end_element();
+		ui_end_element();
 	}
 }
 

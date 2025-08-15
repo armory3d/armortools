@@ -55,7 +55,7 @@ function tab_scripts_draw(htab: ui_handle_t) {
 		let _font_size: i32 = ui.font_size;
 		let f: draw_font_t = data_get_font("font_mono.ttf");
 		ui_set_font(ui, f);
-		ui.font_size = math_floor(15 * ui_SCALE(ui));
+		ui.font_size = math_floor(15 * UI_SCALE());
 		ui_text_area_line_numbers = true;
 		ui_text_area_scroll_past_end = true;
 		ui_text_area_coloring = tab_scripts_get_text_coloring();

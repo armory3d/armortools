@@ -24,14 +24,14 @@ function ui_box_init() {
 
 function ui_box_render() {
 	if (!ui_menu_show) {
-		let ui: ui_t = base_ui_box;
+		let ui: ui_t = ui_base_ui;
 		let in_use: bool = ui.combo_selected_handle != null;
 		let is_escape: bool = keyboard_started("escape");
 		if (ui_box_draws > 2 && (ui.input_released || is_escape) && !in_use && !ui.is_typing) {
 			let appw: i32 = iron_window_width();
 			let apph: i32 = iron_window_height();
-			let mw: i32 = math_floor(ui_box_modalw * ui_SCALE(ui));
-			let mh: i32 = math_floor(ui_box_modalh * ui_SCALE(ui));
+			let mw: i32 = math_floor(ui_box_modalw * UI_SCALE());
+			let mh: i32 = math_floor(ui_box_modalh * UI_SCALE());
 			let left: f32 = (appw / 2 - mw / 2) + ui_box_hwnd.drag_x;
 			let right: f32 = (appw / 2 + mw / 2) + ui_box_hwnd.drag_x;
 			let top: f32 = (apph / 2 - mh / 2) + ui_box_hwnd.drag_y;
@@ -55,11 +55,11 @@ function ui_box_render() {
 		draw_end();
 	}
 
-	let ui: ui_t = base_ui_box;
+	let ui: ui_t = ui_base_ui;
 	let appw: i32 = iron_window_width();
 	let apph: i32 = iron_window_height();
-	let mw: i32 = math_floor(ui_box_modalw * ui_SCALE(ui));
-	let mh: i32 = math_floor(ui_box_modalh * ui_SCALE(ui));
+	let mw: i32 = math_floor(ui_box_modalw * UI_SCALE());
+	let mh: i32 = math_floor(ui_box_modalh * UI_SCALE());
 	if (mw > appw) {
 		mw = appw;
 	}
@@ -83,7 +83,7 @@ function ui_box_render() {
 				else {
 					ui_text(ui_box_text);
 				}
-				_ui_end_element();
+				ui_end_element();
 
 				///if (arm_windows || arm_linux || arm_macos)
 				if (ui_box_copyable) {
@@ -98,7 +98,7 @@ function ui_box_render() {
 				ui_row(row);
 				///end
 
-				_ui_end_element();
+				ui_end_element();
 
 				///if (arm_windows || arm_linux || arm_macos)
 				if (ui_box_copyable && ui_button(tr("Copy"))) {

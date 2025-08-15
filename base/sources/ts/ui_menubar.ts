@@ -62,7 +62,7 @@ function ui_menubar_render_ui() {
 				box_export_show_textures();
 			}
 			///end
-			let size: i32 = math_floor(ui._w / ui_SCALE(ui));
+			let size: i32 = math_floor(ui._w / UI_SCALE());
 			if (ui_menu_show && ui_menubar_category == menubar_category_t.VIEWPORT) {
 				ui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
 			}
@@ -696,7 +696,7 @@ function ui_menubar_draw_category_items(ui: ui_t) {
 
 					let img: gpu_texture_t = data_get_image("badge.k");
 					ui_image(img);
-					_ui_end_element();
+					ui_end_element();
 
 					let h: ui_handle_t = ui_handle(__ID__);
 					if (h.init) {
@@ -711,7 +711,7 @@ function ui_menubar_draw_category_items(ui: ui_t) {
 						iron_copy_to_clipboard(_ui_menu_render_msg);
 					}
 					///else
-					_ui_end_element();
+					ui_end_element();
 					///end
 
 					if (ui_button(tr("Contributors"))) {
@@ -739,10 +739,10 @@ function ui_menubar_show_menu(ui: ui_t, category: i32) {
 	ui_menu_x = math_floor(ui._x - ui._w);
 	ui_menu_y = math_floor(ui_MENUBAR_H(ui));
 	if (config_raw.touch_ui) {
-		let menu_w: i32 = math_floor(base_default_element_w * ui_SCALE(base_ui_menu) * 2.0);
+		let menu_w: i32 = math_floor(base_default_element_w * UI_SCALE() * 2.0);
 		ui_menu_x -= math_floor((menu_w - ui._w) / 2) + math_floor(ui_header_h / 2);
-		ui_menu_x += math_floor(2 * ui_SCALE(base_ui_menu));
-		ui_menu_y -= math_floor(2 * ui_SCALE(base_ui_menu));
+		ui_menu_x += math_floor(2 * UI_SCALE());
+		ui_menu_y -= math_floor(2 * UI_SCALE());
 		ui_menu_keep_open = true;
 	}
 }
