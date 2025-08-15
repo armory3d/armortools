@@ -6,7 +6,6 @@ let _tab_textures_draw_i: i32;
 let _tab_textures_draw_is_packed: bool;
 
 function tab_textures_draw(htab: ui_handle_t) {
-	let ui: ui_t = ui_base_ui;
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
 	if (ui_tab(htab, tr("Textures")) && statush > ui_status_default_status_h * UI_SCALE()) {
 
@@ -134,7 +133,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 						_tab_textures_draw_i = i;
 						_tab_textures_draw_is_packed = is_packed;
 
-						ui_menu_draw(function (ui: ui_t) {
+						ui_menu_draw(function () {
 							if (ui_menu_button(tr("Export"))) {
 								ui_files_show("png", true, false, function (path: string) {
 									_tab_textures_draw_path = path;

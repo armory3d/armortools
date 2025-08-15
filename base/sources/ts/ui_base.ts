@@ -4,7 +4,7 @@ type tab_draw_t = {
 };
 type tab_draw_array_t = tab_draw_t[];
 
-let ui_base_ui: ui_t;
+let ui: ui_t;
 let ui_base_show: bool = true;
 let ui_base_border_started: i32 = 0;
 let ui_base_border_handle: ui_handle_t = null;
@@ -153,7 +153,7 @@ function ui_base_init() {
 		color_wheel: base_color_wheel,
 		black_white_gradient: base_color_wheel_gradient
 	};
-	ui_base_ui = ui_create(ops);
+	ui = ui_create(ops);
 	ui_on_border_hover = ui_base_on_border_hover;
 	ui_on_text_hover = ui_base_on_text_hover;
 	ui_on_deselect_text = ui_base_on_deselect_text;
@@ -217,7 +217,7 @@ function ui_base_update() {
 		return;
 	}
 
-	if (!ui_base_ui.is_typing) {
+	if (!ui.is_typing) {
 		if (operator_shortcut(map_get(config_keymap, "toggle_node_editor"))) {
 			///if is_paint
 			ui_nodes_canvas_type == canvas_type_t.MATERIAL ? ui_base_show_material_nodes() : ui_base_show_brush_nodes();
@@ -356,7 +356,7 @@ function ui_base_update() {
 	}
 	///end
 
-	let is_typing: bool = ui_base_ui.is_typing;
+	let is_typing: bool = ui.is_typing;
 
 	///if is_paint
 	if (!is_typing) {
@@ -563,8 +563,8 @@ function ui_base_update() {
 				viewport_zoom(-0.2);
 			}
 			else if (operator_shortcut(map_get(config_keymap, "viewport_mode"))) {
-				ui_base_ui.is_key_pressed = false;
-				ui_menu_draw(function (ui: ui_t) {
+				ui.is_key_pressed = false;
+				ui_menu_draw(function () {
 					let mode_handle: ui_handle_t = ui_handle(__ID__);
 					mode_handle.position = context_raw.viewport_mode;
 					ui_text(tr("Viewport Mode"), ui_align_t.RIGHT);
@@ -762,7 +762,7 @@ function ui_base_update() {
 }
 
 function ui_base_view_top() {
-	let is_typing: bool = ui_base_ui.is_typing;
+	let is_typing: bool = ui.is_typing;
 
 	if (context_in_paint_area() && !is_typing) {
 		if (mouse_view_x() < sys_w()) {
@@ -774,7 +774,7 @@ function ui_base_view_top() {
 function ui_base_operator_search() {
 	_ui_base_operator_search_first = true;
 
-	ui_menu_draw(function (ui: ui_t) {
+	ui_menu_draw(function () {
 		ui_menu_h = UI_ELEMENT_H() * 8;
 		let search_handle: ui_handle_t = ui_handle(__ID__);
 		let search: string = ui_text_input(search_handle, "", ui_align_t.LEFT, true, true);
@@ -1148,8 +1148,8 @@ function ui_base_update_ui() {
 
 function ui_base_render() {
 	if (!ui_base_show && config_raw.touch_ui) {
-		ui_base_ui.input_enabled = true;
-		ui_begin(ui_base_ui);
+		ui.input_enabled = true;
+		ui_begin(ui);
 		if (ui_window(ui_handle(__ID__), 0, 0, 150, math_floor(UI_ELEMENT_H() + UI_ELEMENT_OFFSET() + 1))) {
 			if (ui_button(tr("Close"))) {
 				ui_base_toggle_distract_free();
@@ -1162,7 +1162,7 @@ function ui_base_render() {
 		return;
 	}
 
-	ui_base_ui.input_enabled = base_ui_enabled;
+	ui.input_enabled = base_ui_enabled;
 
 	// Remember last tab positions
 	for (let i: i32 = 0; i < ui_base_htabs.length; ++i) {
@@ -1177,7 +1177,7 @@ function ui_base_render() {
 		ui_base_htabs[i].position = config_raw.layout_tabs[i];
 	}
 
-	ui_begin(ui_base_ui);
+	ui_begin(ui);
 
 	///if is_paint
 	ui_toolbar_render_ui();
@@ -1192,7 +1192,7 @@ function ui_base_render() {
 
 	ui_end();
 
-	ui_base_ui.input_enabled = true;
+	ui.input_enabled = true;
 }
 
 function ui_base_draw_sidebar() {
@@ -1201,9 +1201,9 @@ function ui_base_draw_sidebar() {
 	let expand_button_offset: i32 = config_raw.touch_ui ? math_floor(UI_ELEMENT_H() + UI_ELEMENT_OFFSET()) : 0;
 	ui_base_tabx = iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W];
 
-	let _SCROLL_W: i32 = ui_base_ui.ops.theme.SCROLL_W;
+	let _SCROLL_W: i32 = ui.ops.theme.SCROLL_W;
 	if (mini) {
-		ui_base_ui.ops.theme.SCROLL_W = ui_base_ui.ops.theme.SCROLL_MINI_W;
+		ui.ops.theme.SCROLL_W = ui.ops.theme.SCROLL_MINI_W;
 	}
 
 	if (ui_window(ui_base_hwnds[tab_area_t.SIDEBAR0], ui_base_tabx, 0, config_raw.layout[layout_size_t.SIDEBAR_W], config_raw.layout[layout_size_t.SIDEBAR_H0])) {
@@ -1220,42 +1220,42 @@ function ui_base_draw_sidebar() {
 	}
 
 	ui_end_window();
-	ui_base_ui.ops.theme.SCROLL_W = _SCROLL_W;
+	ui.ops.theme.SCROLL_W = _SCROLL_W;
 
 	// Collapse / expand button for mini sidebar
 	if (config_raw.touch_ui) {
 		let width: i32 = config_raw.layout[layout_size_t.SIDEBAR_W];
 		let height: i32 = math_floor(UI_ELEMENT_H() + UI_ELEMENT_OFFSET());
 		if (ui_window(ui_handle(__ID__), iron_window_width() - width, iron_window_height() - height, width, height + 1)) {
-			ui_base_ui._w = width;
-			let _BUTTON_H: i32 = ui_base_ui.ops.theme.BUTTON_H;
-			let _BUTTON_COL: i32 = ui_base_ui.ops.theme.BUTTON_COL;
-			ui_base_ui.ops.theme.BUTTON_H = ui_base_ui.ops.theme.ELEMENT_H;
-			ui_base_ui.ops.theme.BUTTON_COL = ui_base_ui.ops.theme.WINDOW_BG_COL;
+			ui._w = width;
+			let _BUTTON_H: i32 = ui.ops.theme.BUTTON_H;
+			let _BUTTON_COL: i32 = ui.ops.theme.BUTTON_COL;
+			ui.ops.theme.BUTTON_H = ui.ops.theme.ELEMENT_H;
+			ui.ops.theme.BUTTON_COL = ui.ops.theme.WINDOW_BG_COL;
 			if (ui_button(mini ? "<<" : ">>")) {
 				config_raw.layout[layout_size_t.SIDEBAR_W] = mini ? ui_base_default_sidebar_full_w : ui_base_default_sidebar_mini_w;
 				config_raw.layout[layout_size_t.SIDEBAR_W] = math_floor(config_raw.layout[layout_size_t.SIDEBAR_W] * UI_SCALE());
 			}
-			ui_base_ui.ops.theme.BUTTON_H = _BUTTON_H;
-			ui_base_ui.ops.theme.BUTTON_COL = _BUTTON_COL;
+			ui.ops.theme.BUTTON_H = _BUTTON_H;
+			ui.ops.theme.BUTTON_COL = _BUTTON_COL;
 		}
 	}
 
 	// Expand button
 	if (config_raw.layout[layout_size_t.SIDEBAR_W] == 0) {
-		let width: i32 = math_floor(draw_string_width(ui_base_ui.ops.font, ui_base_ui.font_size, "<<") + 25 * UI_SCALE());
+		let width: i32 = math_floor(draw_string_width(ui.ops.font, ui.font_size, "<<") + 25 * UI_SCALE());
 		if (ui_window(ui_base_hminimized, iron_window_width() - width, 0, width, math_floor(UI_ELEMENT_H() + UI_ELEMENT_OFFSET() + 1))) {
-			ui_base_ui._w = width;
-			let _BUTTON_H: i32 = ui_base_ui.ops.theme.BUTTON_H;
-			let _BUTTON_COL: i32 = ui_base_ui.ops.theme.BUTTON_COL;
-			ui_base_ui.ops.theme.BUTTON_H = ui_base_ui.ops.theme.ELEMENT_H;
-			ui_base_ui.ops.theme.BUTTON_COL = ui_base_ui.ops.theme.SEPARATOR_COL;
+			ui._w = width;
+			let _BUTTON_H: i32 = ui.ops.theme.BUTTON_H;
+			let _BUTTON_COL: i32 = ui.ops.theme.BUTTON_COL;
+			ui.ops.theme.BUTTON_H = ui.ops.theme.ELEMENT_H;
+			ui.ops.theme.BUTTON_COL = ui.ops.theme.SEPARATOR_COL;
 
 			if (ui_button("<<")) {
 				config_raw.layout[layout_size_t.SIDEBAR_W] = context_raw.maximized_sidebar_width != 0 ? context_raw.maximized_sidebar_width : math_floor(ui_base_default_sidebar_w * config_raw.window_scale);
 			}
-			ui_base_ui.ops.theme.BUTTON_H = _BUTTON_H;
-			ui_base_ui.ops.theme.BUTTON_COL = _BUTTON_COL;
+			ui.ops.theme.BUTTON_H = _BUTTON_H;
+			ui.ops.theme.BUTTON_COL = _BUTTON_COL;
 		}
 	}
 	else if (ui_base_htabs[tab_area_t.SIDEBAR0].changed && ui_base_htabs[tab_area_t.SIDEBAR0].position == context_raw.last_htab0_pos) {
@@ -1512,7 +1512,7 @@ function ui_base_on_border_hover(handle: ui_handle_t, side: i32) {
 		iron_set_mouse_cursor(3) : // Horizontal
 		iron_set_mouse_cursor(4);  // Vertical
 
-	if (ui_get_current().input_started) {
+	if (ui.input_started) {
 		ui_base_border_started = side;
 		ui_base_border_handle = handle;
 		base_is_resizing = true;

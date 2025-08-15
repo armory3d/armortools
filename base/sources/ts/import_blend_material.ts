@@ -5,7 +5,7 @@ function import_blend_material_run(path: string) {
 
 	_import_blend_material_path = path;
 
-	ui_box_show_custom(function (ui: ui_t) {
+	ui_box_show_custom(function () {
 		if (ui_tab(ui_handle(__ID__), tr("Import Material"))) {
 			import_blend_mesh_ui();
 

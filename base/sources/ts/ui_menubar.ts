@@ -19,8 +19,6 @@ function ui_menubar_init() {
 }
 
 function ui_menubar_render_ui() {
-	let ui: ui_t = ui_base_ui;
-
 	let item_w: i32 = ui_toolbar_w();
 	let panel_x: i32 = sys_x();
 
@@ -44,8 +42,8 @@ function ui_menubar_render_ui() {
 			ui._w = 36;
 			///end
 
-			if (ui_menubar_icon_button(ui, 0, 2)) box_preferences_show();
-			if (ui_menubar_icon_button(ui, 0, 3)) {
+			if (ui_menubar_icon_button(0, 2)) box_preferences_show();
+			if (ui_menubar_icon_button(0, 3)) {
 				///if (arm_android || arm_ios)
 				console_toast(tr("Saving project"));
 				project_save();
@@ -54,11 +52,11 @@ function ui_menubar_render_ui() {
 					box_projects_show();
 				});
 			}
-			if (ui_menubar_icon_button(ui, 4, 2)) {
+			if (ui_menubar_icon_button(4, 2)) {
 				project_import_asset();
 			}
 			///if (is_paint || is_lab)
-			if (ui_menubar_icon_button(ui, 5, 2)) {
+			if (ui_menubar_icon_button(5, 2)) {
 				box_export_show_textures();
 			}
 			///end
@@ -66,33 +64,33 @@ function ui_menubar_render_ui() {
 			if (ui_menu_show && ui_menubar_category == menubar_category_t.VIEWPORT) {
 				ui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
 			}
-			if (ui_menubar_icon_button(ui, 8, 2)) {
-				ui_menubar_show_menu(ui, menubar_category_t.VIEWPORT);
+			if (ui_menubar_icon_button(8, 2)) {
+				ui_menubar_show_menu(menubar_category_t.VIEWPORT);
 			}
 			if (ui_menu_show && ui_menubar_category == menubar_category_t.MODE) {
 				ui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
 			}
-			if (ui_menubar_icon_button(ui, 9, 2)) {
-				ui_menubar_show_menu(ui, menubar_category_t.MODE);
+			if (ui_menubar_icon_button(9, 2)) {
+				ui_menubar_show_menu(menubar_category_t.MODE);
 			}
 			if (ui_menu_show && ui_menubar_category == menubar_category_t.CAMERA) {
 				ui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
 			}
-			if (ui_menubar_icon_button(ui, 10, 2)) {
-				ui_menubar_show_menu(ui, menubar_category_t.CAMERA);
+			if (ui_menubar_icon_button(10, 2)) {
+				ui_menubar_show_menu(menubar_category_t.CAMERA);
 			}
 			if (ui_menu_show && ui_menubar_category == menubar_category_t.HELP) {
 				ui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
 			}
-			if (ui_menubar_icon_button(ui, 11, 2)) {
-				ui_menubar_show_menu(ui, menubar_category_t.HELP);
+			if (ui_menubar_icon_button(11, 2)) {
+				ui_menubar_show_menu(menubar_category_t.HELP);
 			}
 			ui.enabled = history_undos > 0;
-			if (ui_menubar_icon_button(ui, 6, 2)) {
+			if (ui_menubar_icon_button(6, 2)) {
 				history_undo();
 			}
 			ui.enabled = history_redos > 0;
-			if (ui_menubar_icon_button(ui, 7, 2)) {
+			if (ui_menubar_icon_button(7, 2)) {
 				history_redo();
 			}
 			ui.enabled = true;
@@ -101,7 +99,7 @@ function ui_menubar_render_ui() {
 			let categories: string[] = [tr("File"), tr("Edit"), tr("Viewport"), tr("Mode"), tr("Camera"), tr("Help")];
 			for (let i: i32 = 0; i < categories.length; ++i) {
 				if (_ui_menu_button(categories[i]) || (ui_menu_show && ui_menu_commands == ui_menubar_draw_category_items && ui.is_hovered)) {
-					ui_menubar_show_menu(ui, i);
+					ui_menubar_show_menu(i);
 				}
 			}
 		}
@@ -124,8 +122,6 @@ function ui_menubar_render_ui() {
 }
 
 function ui_menubar_draw_tab_header() {
-	let ui: ui_t = ui_base_ui;
-
 	let item_w: i32 = ui_toolbar_w();
 	let panel_x: i32 = sys_x();
 
@@ -208,7 +204,7 @@ function ui_menubar_draw_tab_header() {
 	}
 }
 
-function ui_menubar_draw_category_items(ui: ui_t) {
+function ui_menubar_draw_category_items() {
 	if (ui_menubar_category == menubar_category_t.FILE) {
 		if (ui_menu_button(tr("New Project..."), map_get(config_keymap, "file_new"))) {
 			project_new_box();
@@ -225,7 +221,7 @@ function ui_menubar_draw_category_items(ui: ui_t) {
 		if (ui_menu_button(tr("Save As..."), map_get(config_keymap, "file_save_as"))) {
 			project_save_as();
 		}
-		ui_menu_separator(ui);
+		ui_menu_separator();
 		if (ui_menu_button(tr("Import Texture..."), map_get(config_keymap, "file_import_assets"))) {
 			project_import_asset(string_array_join(path_texture_formats, ","), false);
 		}
@@ -265,7 +261,7 @@ function ui_menubar_draw_category_items(ui: ui_t) {
 		if (ui_menu_button(tr("Reimport Textures"), map_get(config_keymap, "file_reimport_textures"))) {
 			project_reimport_textures();
 		}
-		ui_menu_separator(ui);
+		ui_menu_separator();
 		///if (is_paint || is_lab)
 		if (ui_menu_button(tr("Export Textures..."), map_get(config_keymap, "file_export_textures_as"))) {
 			context_raw.layers_export = export_mode_t.VISIBLE;
@@ -286,7 +282,7 @@ function ui_menubar_draw_category_items(ui: ui_t) {
 		}
 		///end
 
-		ui_menu_separator(ui);
+		ui_menu_separator();
 		if (ui_menu_button(tr("Exit"))) {
 			iron_stop();
 		}
@@ -315,7 +311,7 @@ function ui_menubar_draw_category_items(ui: ui_t) {
 			history_redo();
 		}
 		ui.enabled = true;
-		ui_menu_separator(ui);
+		ui_menu_separator();
 		if (ui_menu_button(tr("Preferences..."), map_get(config_keymap, "edit_prefs"))) {
 			box_preferences_show();
 		}
@@ -323,7 +319,7 @@ function ui_menubar_draw_category_items(ui: ui_t) {
 	else if (ui_menubar_category == menubar_category_t.VIEWPORT) {
 		if (ui_menu_button(tr("Distract Free"), map_get(config_keymap, "view_distract_free"))) {
 			ui_base_toggle_distract_free();
-			ui_base_ui.is_hovered = false;
+			ui.is_hovered = false;
 		}
 
 		///if !(arm_android || arm_ios)
@@ -337,7 +333,7 @@ function ui_menubar_draw_category_items(ui: ui_t) {
 		let p: world_data_t = scene_world;
 		let env_handle: ui_handle_t = ui_handle(__ID__);
 		env_handle.value = p.strength;
-		ui_menu_align(ui);
+		ui_menu_align();
 		p.strength = ui_slider(env_handle, tr("Environment"), 0.0, 8.0, true);
 		if (env_handle.changed) {
 			context_raw.ddirty = 2;
@@ -351,7 +347,7 @@ function ui_menubar_draw_category_items(ui: ui_t) {
 		else if (enva_handle.value > 360) {
 			enva_handle.value -= math_floor(enva_handle.value / 360) * 360;
 		}
-		ui_menu_align(ui);
+		ui_menu_align();
 		context_raw.envmap_angle = ui_slider(enva_handle, tr("Environment Angle"), 0.0, 360.0, true, 1) / 180.0 * math_pi();
 		if (ui.is_hovered) {
 			let vars: map_t<string, string> = map_create();
@@ -378,7 +374,7 @@ function ui_menubar_draw_category_items(ui: ui_t) {
 		if (brush_scale_handle.init) {
 			brush_scale_handle.value = context_raw.brush_scale;
 		}
-		ui_menu_align(ui);
+		ui_menu_align();
 		context_raw.brush_scale = ui_slider(brush_scale_handle, tr("UV Scale"), 0.01, 5.0, true);
 		if (brush_scale_handle.changed) {
 			make_material_parse_mesh_material();
@@ -502,7 +498,7 @@ function ui_menubar_draw_category_items(ui: ui_t) {
 			viewport_reset();
 			viewport_scale_to_bounds();
 		}
-		ui_menu_separator(ui);
+		ui_menu_separator();
 		if (ui_menu_button(tr("Front"), map_get(config_keymap, "view_front"))) {
 			viewport_set_view(0, -1, 0, math_pi() / 2, 0, 0);
 		}
@@ -521,7 +517,7 @@ function ui_menubar_draw_category_items(ui: ui_t) {
 		if (ui_menu_button(tr("Bottom"), map_get(config_keymap, "view_bottom"))) {
 			viewport_set_view(0, 0, -1, math_pi(), 0, math_pi());
 		}
-		ui_menu_separator(ui);
+		ui_menu_separator();
 
 		ui.changed = false;
 
@@ -552,13 +548,13 @@ function ui_menubar_draw_category_items(ui: ui_t) {
 		if (context_raw.fov_handle.init) {
 			context_raw.fov_handle.value = math_floor(cam.data.fov * 100) / 100;
 		}
-		ui_menu_align(ui);
+		ui_menu_align();
 		cam.data.fov = ui_slider(context_raw.fov_handle, tr("FoV"), 0.3, 1.4, true);
 		if (context_raw.fov_handle.changed) {
 			viewport_update_camera_type(context_raw.camera_type);
 		}
 
-		ui_menu_align(ui);
+		ui_menu_align();
 		let camera_controls_handle: ui_handle_t = ui_handle(__ID__);
 		camera_controls_handle.position = context_raw.camera_controls;
 		let camera_controls_items: string[] = [tr("Orbit"), tr("Rotate"), tr("Fly")];
@@ -574,7 +570,7 @@ function ui_menubar_draw_category_items(ui: ui_t) {
 			ui_tooltip(orbit_and_rotate_tooltip + "\n\n" + fly_tooltip);
 		}
 
-		ui_menu_align(ui);
+		ui_menu_align();
 		let camera_type_items: string[] = [tr("Perspective"), tr("Orthographic")];
 		context_raw.camera_type = ui_inline_radio(context_raw.cam_handle, camera_type_items, ui_align_t.LEFT);
 		if (ui.is_hovered) {
@@ -615,7 +611,7 @@ function ui_menubar_draw_category_items(ui: ui_t) {
 			file_load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id() + "*%0A%0A**Feature description:**%0A%0A");
 			///end
 		}
-		ui_menu_separator(ui);
+		ui_menu_separator();
 
 		if (ui_menu_button(tr("Check for Updates..."))) {
 			///if arm_android
@@ -690,7 +686,7 @@ function ui_menubar_draw_category_items(ui: ui_t) {
 
 			_ui_menu_render_msg = msg;
 
-			ui_box_show_custom(function (ui: ui_t) {
+			ui_box_show_custom(function () {
 				let tab_vertical: bool = config_raw.touch_ui;
 				if (ui_tab(ui_handle(__ID__), tr("About"), tab_vertical)) {
 
@@ -726,7 +722,7 @@ function ui_menubar_draw_category_items(ui: ui_t) {
 	}
 }
 
-function ui_menubar_show_menu(ui: ui_t, category: i32) {
+function ui_menubar_show_menu(category: i32) {
 	if (ui_menu_show && ui_menubar_category == category) {
 		return;
 	}
@@ -737,7 +733,7 @@ function ui_menubar_show_menu(ui: ui_t, category: i32) {
 	ui_menubar_category = category;
 
 	ui_menu_x = math_floor(ui._x - ui._w);
-	ui_menu_y = math_floor(ui_MENUBAR_H(ui));
+	ui_menu_y = math_floor(ui_MENUBAR_H());
 	if (config_raw.touch_ui) {
 		let menu_w: i32 = math_floor(base_default_element_w * UI_SCALE() * 2.0);
 		ui_menu_x -= math_floor((menu_w - ui._w) / 2) + math_floor(ui_header_h / 2);
@@ -747,7 +743,7 @@ function ui_menubar_show_menu(ui: ui_t, category: i32) {
 	}
 }
 
-function ui_menubar_icon_button(ui: ui_t, i: i32, j: i32): bool {
+function ui_menubar_icon_button(i: i32, j: i32): bool {
 	let col: u32 = ui.ops.theme.WINDOW_BG_COL;
 	let light: bool = col > 0xff666666 ;
 	let icon_accent: i32 = light ? 0xff666666 : 0xffaaaaaa;

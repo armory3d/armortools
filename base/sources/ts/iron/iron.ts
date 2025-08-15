@@ -715,7 +715,6 @@ declare function ui_begin(ui: ui_t): void;
 declare function ui_end_window(): void;
 declare function ui_end_region(): void;
 declare function ui_float_input(handle: ui_handle_t, label: string = "", align: ui_align_t = ui_align_t.LEFT, precision: f32 = 1000.0): f32;
-declare function ui_get_current(): ui_t;
 declare function ui_remove_node(n: ui_node_t, canvas: ui_node_canvas_t): void;
 declare function ui_next_link_id(links: ui_node_link_t[]): i32;
 declare function ui_set_hovered_tab_name(s: string): void;
@@ -952,7 +951,7 @@ declare function UI_ELEMENT_W(): f32;
 declare function UI_ELEMENT_H(): f32;
 declare function UI_OUTPUTS_H(sockets_count: i32, length: i32 = -1): f32;
 
-function ui_MENUBAR_H(ui: ui_t): f32 {
+function ui_MENUBAR_H(): f32 {
 	let button_offset_y: f32 = (ui.ops.theme.ELEMENT_H * UI_SCALE() - ui.ops.theme.BUTTON_H * UI_SCALE()) / 2;
 	return ui.ops.theme.BUTTON_H * UI_SCALE() * 1.1 + 2 + button_offset_y;
 }
@@ -1024,7 +1023,7 @@ function ui_get_socket(nodes: ui_node_t[], id: i32): ui_node_socket_t {
 	return null;
 }
 
-function ui_set_font(raw: ui_t, font: draw_font_t) {
+function ui_set_font(font: draw_font_t) {
 	draw_font_init(font); // Make sure font is ready
-	raw.ops.font = font;
+	ui.ops.font = font;
 }

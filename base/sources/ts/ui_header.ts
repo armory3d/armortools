@@ -9,7 +9,6 @@ function ui_header_init() {
 }
 
 function ui_header_render_ui() {
-	let ui: ui_t = ui_base_ui;
 	if (config_raw.touch_ui) {
 		ui_header_h = ui_header_default_h + 6;
 	}
@@ -31,6 +30,6 @@ function ui_header_render_ui() {
 
 	if (ui_window(ui_header_handle, sys_x(), ui_header_h, ww, ui_header_h)) {
 		ui._y += 2;
-		ui_header_draw_tool_properties(ui);
+		ui_header_draw_tool_properties();
 	}
 }

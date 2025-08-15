@@ -3985,8 +3985,6 @@ function nodes_material_init() {
 }
 
 function nodes_material_vector_curves_button(node_id: i32) {
-	let ui: ui_t = ui_base_ui;
-	let nodes: ui_nodes_t = ui_nodes_get_nodes();
 	let node: ui_node_t = ui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
 
 	let but: ui_node_button_t = node.buttons[0];
@@ -4053,7 +4051,6 @@ function nodes_material_vector_curves_button(node_id: i32) {
 }
 
 function nodes_material_color_ramp_button(node_id: i32) {
-	let ui: ui_t = ui_base_ui;
 	let nodes: ui_nodes_t = ui_nodes_get_nodes();
 	let node: ui_node_t = ui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
 
@@ -4128,8 +4125,6 @@ function nodes_material_color_ramp_button(node_id: i32) {
 }
 
 function nodes_material_new_group_button(node_id: i32) {
-	let ui: ui_t = ui_base_ui;
-	let nodes: ui_nodes_t = ui_nodes_get_nodes();
 	let node: ui_node_t = ui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
 
 	if (node.name == "New Group") {
@@ -4213,27 +4208,23 @@ function nodes_material_new_group_button(node_id: i32) {
 }
 
 function nodes_material_group_input_button(node_id: i32) {
-	let ui: ui_t = ui_base_ui;
 	let nodes: ui_nodes_t = ui_nodes_get_nodes();
 	let node: ui_node_t = ui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
-
-	nodes_material_add_socket_button(ui, nodes, node, node.outputs);
+	nodes_material_add_socket_button(nodes, node, node.outputs);
 }
 
 function nodes_material_group_output_button(node_id: i32) {
-	let ui: ui_t = ui_base_ui;
 	let nodes: ui_nodes_t = ui_nodes_get_nodes();
 	let node: ui_node_t = ui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
-
-	nodes_material_add_socket_button(ui, nodes, node, node.inputs);
+	nodes_material_add_socket_button(nodes, node, node.inputs);
 }
 
-function nodes_material_add_socket_button(ui: ui_t, nodes: ui_nodes_t, node: ui_node_t, sockets: ui_node_socket_t[]) {
+function nodes_material_add_socket_button(nodes: ui_nodes_t, node: ui_node_t, sockets: ui_node_socket_t[]) {
 	if (ui_button(tr("Add"))) {
 		_nodes_material_nodes = nodes;
 		_nodes_material_node = node;
 		_nodes_material_sockets = sockets;
-		ui_menu_draw(function (ui: ui_t) {
+		ui_menu_draw(function () {
 			let nodes: ui_nodes_t = _nodes_material_nodes;
 			let node: ui_node_t = _nodes_material_node;
 			let sockets: ui_node_socket_t[] = _nodes_material_sockets;

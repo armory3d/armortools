@@ -2,7 +2,6 @@
 let _tab_brushes_draw_i: i32;
 
 function tab_brushes_draw(htab: ui_handle_t) {
-	let ui: ui_t = ui_base_ui;
 	if (ui_tab(htab, tr("Brushes"))) {
 		ui_begin_sticky();
 		let row: f32[] = [1 / 4, 1 / 4, 1 / 4];
@@ -89,7 +88,7 @@ function tab_brushes_draw(htab: ui_handle_t) {
 
 					_tab_brushes_draw_i = i;
 
-					ui_menu_draw(function (ui: ui_t) {
+					ui_menu_draw(function () {
 						let i: i32 = _tab_brushes_draw_i;
 
 						//let b: slot_brush_t = brushes[i];

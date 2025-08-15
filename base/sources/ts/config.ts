@@ -330,7 +330,7 @@ function config_load_theme(theme: string, tag_redraw: bool = true) {
 	base_theme.FILL_WINDOW_BG = true;
 
 	if (tag_redraw) {
-		ui_base_ui.ops.theme = base_theme;
+		ui.ops.theme = base_theme;
 		ui_base_tag_ui_redraw();
 	}
 

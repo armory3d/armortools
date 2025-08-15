@@ -101,7 +101,7 @@ function project_save_as(save_and_quit: bool = false) {
 
 function project_new_box() {
 	///if is_paint
-	ui_box_show_custom(function (ui: ui_t) {
+	ui_box_show_custom(function () {
 		if (ui_tab(ui_handle(__ID__), tr("New Project"))) {
 			if (project_mesh_list == null) {
 				project_mesh_list = file_read_directory(path_data() + path_sep + "meshes");
@@ -419,7 +419,7 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 	// data_get_blob(path);
 	///end
 
-	ui_box_show_custom(function (ui: ui_t) {
+	ui_box_show_custom(function () {
 
 		let path: string = _project_import_mesh_box_path;
 		let replace_existing: bool = _project_import_mesh_box_replace_existing;
@@ -519,7 +519,7 @@ function project_unwrap_mesh_box(mesh: raw_mesh_t, done: (a: raw_mesh_t)=>void, 
 		return;
 	}
 
-	ui_box_show_custom(function (ui: ui_t) {
+	ui_box_show_custom(function () {
 		let mesh: raw_mesh_t = _project_unwrap_mesh_box_mesh;
 		let done: (a: raw_mesh_t)=>void = _project_unwrap_mesh_box_done;
 

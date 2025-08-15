@@ -4,7 +4,7 @@ let ui_box_draggable: bool = true;
 let ui_box_hwnd: ui_handle_t = ui_handle_create();
 let ui_box_title: string = "";
 let ui_box_text: string = "";
-let ui_box_commands: (ui: ui_t)=>void = null;
+let ui_box_commands: ()=>void = null;
 let ui_box_click_to_hide: bool = true;
 let ui_box_modalw: i32 = 400;
 let ui_box_modalh: i32 = 170;
@@ -24,7 +24,6 @@ function ui_box_init() {
 
 function ui_box_render() {
 	if (!ui_menu_show) {
-		let ui: ui_t = ui_base_ui;
 		let in_use: bool = ui.combo_selected_handle != null;
 		let is_escape: bool = keyboard_started("escape");
 		if (ui_box_draws > 2 && (ui.input_released || is_escape) && !in_use && !ui.is_typing) {
@@ -55,7 +54,6 @@ function ui_box_render() {
 		draw_end();
 	}
 
-	let ui: ui_t = ui_base_ui;
 	let appw: i32 = iron_window_width();
 	let apph: i32 = iron_window_height();
 	let mw: i32 = math_floor(ui_box_modalw * UI_SCALE());
@@ -109,17 +107,19 @@ function ui_box_render() {
 					ui_box_hide();
 				}
 			}
-			ui_box_window_border(ui);
+			ui_box_window_border();
 		}
 		ui_end();
 	}
 	else {
 		ui_begin(ui);
+		ui.input_enabled = !ui_menu_show && ui.combo_selected_handle == null;
 		if (ui_window(ui_box_hwnd, left, top, mw, mh, ui_box_draggable)) {
 			ui._y += 10;
-			ui_box_commands(ui);
-			ui_box_window_border(ui);
+			ui_box_commands();
+			ui_box_window_border();
 		}
+		ui.input_enabled = true;
 		ui_end();
 	}
 
@@ -140,7 +140,7 @@ function ui_box_show_message(title: string, text: string, copyable: bool = false
 	///end
 }
 
-function ui_box_show_custom(commands: (ui: ui_t)=>void = null, mw: i32 = 400, mh: i32 = 200, on_hide: ()=>void = null, draggable: bool = true) {
+function ui_box_show_custom(commands: ()=>void = null, mw: i32 = 400, mh: i32 = 200, on_hide: ()=>void = null, draggable: bool = true) {
 	ui_box_init();
 	ui_box_modalw = mw;
 	ui_box_modalh = mh;
@@ -191,7 +191,7 @@ function ui_box_tween_tick() {
 	base_redraw_ui();
 }
 
-function ui_box_window_border(ui: ui_t) {
+function ui_box_window_border() {
 	if (ui.scissor) {
 		ui.scissor = false;
 		gpu_disable_scissor();

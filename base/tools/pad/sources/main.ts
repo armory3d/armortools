@@ -367,7 +367,7 @@ function on_border_hover(handle: ui_handle_t, side: i32) {
 
 	iron_set_mouse_cursor(3); // Horizontal
 
-	if (ui_get_current().input_started) {
+	if (ui.input_started) {
 		resizing_sidebar = true;
 	}
 }

@@ -1706,7 +1706,9 @@ bool ui_window(ui_handle_t *handle, int x, int y, int w, int h, bool drag) {
 		current->_x = handle->scroll_offset;
 		current->_y = 0;
 	}
-	if (handle->layout == UI_LAYOUT_HORIZONTAL) w = UI_ELEMENT_W();
+	if (handle->layout == UI_LAYOUT_HORIZONTAL) {
+		w = UI_ELEMENT_W();
+	}
 	current->_w = !handle->scroll_enabled ? w : w - UI_SCROLL_W(); // Exclude scrollbar if present
 	current->_h = h;
 	current->tooltip_text[0] = 0;

@@ -505,7 +505,7 @@ function base_get_drag_image(): gpu_texture_t {
 		}
 		let icons: gpu_texture_t = resource_get("icons.k");
 		base_drag_rect = string_index_of(base_drag_file, ".") > 0 ? resource_tile50(icons, 3, 1) : resource_tile50(icons, 2, 1);
-		base_drag_tint = ui_base_ui.ops.theme.HIGHLIGHT_COL;
+		base_drag_tint = ui.ops.theme.HIGHLIGHT_COL;
 		return icons;
 	}
 
@@ -517,7 +517,7 @@ function base_get_drag_image(): gpu_texture_t {
 		let folder_closed: rect_t = resource_tile50(icons, 2, 1);
 		let folder_open: rect_t = resource_tile50(icons, 8, 1);
 		base_drag_rect = base_drag_layer.show_panel ? folder_open : folder_closed;
-		base_drag_tint = ui_base_ui.ops.theme.LABEL_COL - 0x00202020;
+		base_drag_tint = ui.ops.theme.LABEL_COL - 0x00202020;
 		return icons;
 	}
 	if (base_drag_layer != null && slot_layer_is_mask(base_drag_layer) && base_drag_layer.fill_layer == null) {
@@ -668,11 +668,11 @@ function base_toggle_fullscreen() {
 }
 
 function base_is_scrolling(): bool {
-	return ui_base_ui.is_scrolling;
+	return ui.is_scrolling;
 }
 
 function base_is_combo_selected(): bool {
-	return ui_base_ui.combo_selected_handle != null;
+	return ui.combo_selected_handle != null;
 }
 
 function base_is_decal_layer(): bool {
@@ -690,7 +690,7 @@ function base_redraw_status() {
 
 function base_redraw_console() {
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-	if (ui_base_ui != null && statush > ui_status_default_status_h * UI_SCALE()) {
+	if (ui != null && statush > ui_status_default_status_h * UI_SCALE()) {
 		ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 	}
 }

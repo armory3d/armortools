@@ -2,7 +2,6 @@
 let _tab_meshes_draw_i: i32;
 
 function tab_meshes_draw(htab: ui_handle_t) {
-	let ui: ui_t = ui_base_ui;
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
 	if (ui_tab(htab, tr("Meshes")) && statush > ui_status_default_status_h * UI_SCALE()) {
 
@@ -17,7 +16,7 @@ function tab_meshes_draw(htab: ui_handle_t) {
 		}
 
 		if (ui_button(tr("Import"))) {
-			ui_menu_draw(function (ui: ui_t) {
+			ui_menu_draw(function () {
 				if (ui_menu_button(tr("Replace Existing"), map_get(config_keymap, "file_import_assets"))) {
 					project_import_mesh(true);
 				}
@@ -31,11 +30,11 @@ function tab_meshes_draw(htab: ui_handle_t) {
 
 		if (ui_button(tr("Edit"))) {
 
-			ui_menu_draw(function (ui: ui_t) {
+			ui_menu_draw(function () {
 
 				///if is_lab
 				if (ui_menu_button(tr("Set Default"))) {
-					ui_menu_draw(function (ui: ui_t) {
+					ui_menu_draw(function () {
 						if (ui_menu_button(tr("Cube"))) {
 							tab_meshes_set_default_mesh(".Cube");
 						}
@@ -58,7 +57,7 @@ function tab_meshes_draw(htab: ui_handle_t) {
 				}
 
 				if (ui_menu_button(tr("Calculate Normals"))) {
-					ui_menu_draw(function (ui: ui_t) {
+					ui_menu_draw(function () {
 						if (ui_menu_button(tr("Smooth"))) {
 							util_mesh_calc_normals(true);
 							context_raw.ddirty = 2;
@@ -90,7 +89,7 @@ function tab_meshes_draw(htab: ui_handle_t) {
 				}
 
 				if (ui_menu_button(tr("Rotate"))) {
-					ui_menu_draw(function (ui: ui_t) {
+					ui_menu_draw(function () {
 						if (ui_menu_button(tr("Rotate X"))) {
 							util_mesh_swap_axis(1, 2);
 							context_raw.ddirty = 2;
@@ -129,7 +128,7 @@ function tab_meshes_draw(htab: ui_handle_t) {
 			if (ui.is_hovered && ui.input_released_r) {
 				_tab_meshes_draw_i = i;
 
-				ui_menu_draw(function (ui: ui_t) {
+				ui_menu_draw(function () {
 					let i: i32 = _tab_meshes_draw_i;
 					let o: mesh_object_t = project_paint_objects[i];
 
@@ -330,12 +329,12 @@ function tab_meshes_draw(htab: ui_handle_t) {
 					let _font: draw_font_t = ui.ops.font;
 					let _font_size: i32 = ui.font_size;
 					let fmono: draw_font_t = data_get_font("font_mono.ttf");
-					ui_set_font(ui, fmono);
+					ui_set_font(fmono);
 					ui.font_size = math_floor(15 * UI_SCALE());
 					ui_text_area_coloring = tab_scripts_get_text_coloring();
 					ui_text_area(hscript);
 					ui_text_area_coloring = null;
-					ui_set_font(ui, _font);
+					ui_set_font(_font);
 					ui.font_size = _font_size;
 
 					script = hscript.text;
@@ -445,7 +444,7 @@ function tab_scene_import_mesh_done() {
 	});
 }
 
-function tab_scene_draw_list(ui: ui_t, list_handle: ui_handle_t, current_object: object_t) {
+function tab_scene_draw_list(list_handle: ui_handle_t, current_object: object_t) {
 	if (char_at(current_object.name, 0) == ".") {
 		return; // Hidden
 	}
@@ -499,7 +498,7 @@ function tab_scene_draw_list(ui: ui_t, list_handle: ui_handle_t, current_object:
 	if (ui.is_hovered && ui.input_released_r) {
 		tab_scene_select_object(current_object.ext);
 
-		ui_menu_draw(function (ui: ui_t) {
+		ui_menu_draw(function () {
 			if (ui_menu_button(tr("Duplicate"))) {
 				sim_duplicate();
 			}
@@ -514,7 +513,7 @@ function tab_scene_draw_list(ui: ui_t, list_handle: ui_handle_t, current_object:
 		for (let i: i32 = 0; i < current_object.children.length; ++i) {
 			let child: object_t = current_object.children[i];
 			ui._x += 8;
-			tab_scene_draw_list(ui, list_handle, child);
+			tab_scene_draw_list(list_handle, child);
 			ui._x -= 8;
 		}
 
@@ -544,7 +543,7 @@ function tab_scene_new_object(mesh_name: string) {
 	}, mo);
 }
 
-function tab_scene_new_menu(ui: ui_t) {
+function tab_scene_new_menu() {
 	for (let i: i32 = 0; i < tab_scene_new_meshes.length; ++i) {
 		let mesh_name: string = tab_scene_new_meshes[i];
 		if (ui_menu_button(mesh_name)) {
@@ -554,7 +553,6 @@ function tab_scene_new_menu(ui: ui_t) {
 }
 
 function tab_scene_draw(htab: ui_handle_t) {
-	let ui: ui_t = ui_base_ui;
 	if (ui_tab(htab, tr("Scene"))) {
 
 		ui_begin_sticky();
@@ -584,7 +582,7 @@ function tab_scene_draw(htab: ui_handle_t) {
 			let scene: object_t = _scene_root.children[0];
 			for (let i: i32 = 0; i < scene.children.length; ++i) {
 				let c: object_t = scene.children[i];
-				tab_scene_draw_list(ui, ui_handle(__ID__), c);
+				tab_scene_draw_list(ui_handle(__ID__), c);
 			}
 
 			// Select object with arrow keys

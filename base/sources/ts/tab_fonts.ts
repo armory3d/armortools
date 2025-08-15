@@ -2,7 +2,6 @@
 let _tab_fonts_draw_i: i32;
 
 function tab_fonts_draw(htab: ui_handle_t) {
-	let ui: ui_t = ui_base_ui;
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
 	if (ui_tab(htab, tr("Fonts")) && statush > ui_status_default_status_h * UI_SCALE()) {
 
@@ -107,7 +106,7 @@ function tab_fonts_draw(htab: ui_handle_t) {
 					context_select_font(i);
 					_tab_fonts_draw_i = i;
 
-					ui_menu_draw(function (ui: ui_t) {
+					ui_menu_draw(function () {
 						let i: i32 = _tab_fonts_draw_i;
 
 						if (project_fonts.length > 1 && ui_menu_button(tr("Delete"), "delete") && project_fonts[i].file != "") {

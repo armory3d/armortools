@@ -11,7 +11,7 @@ let _box_preferences_h: ui_handle_t;
 let _box_preferences_i: i32;
 
 function box_preferences_show() {
-	ui_box_show_custom(function (ui: ui_t) {
+	ui_box_show_custom(function () {
 		if (ui_tab(box_preferences_htab, tr("Interface"), true)) {
 
 			if (box_preferences_locales == null) {
@@ -134,9 +134,9 @@ function box_preferences_show() {
 
 			ui_row2();
 			if (ui_button(tr("Restore")) && !ui_menu_show) {
-				ui_menu_draw(function (ui: ui_t) {
+				ui_menu_draw(function () {
 					if (ui_menu_button(tr("Confirm"))) {
-						sys_notify_on_init(function (ui: ui_t) {
+						sys_notify_on_init(function () {
 							ui.ops.theme.ELEMENT_H = base_default_element_h;
 							config_restore();
 							box_preferences_set_scale();
@@ -151,14 +151,14 @@ function box_preferences_show() {
 							make_material_parse_mesh_material();
 							make_material_parse_paint_material();
 							ui_base_set_viewport_col(ui.ops.theme.VIEWPORT_COL);
-						}, ui);
+						});
 					}
 					if (ui_menu_button(tr("Import..."))) {
 						ui_files_show("json", false, false, function (path: string) {
 							let b: buffer_t = data_get_blob(path);
 							let raw: config_t = json_parse(sys_buffer_to_string(b));
 							sys_notify_on_init(function (raw: config_t) {
-								ui_base_ui.ops.theme.ELEMENT_H = base_default_element_h;
+								ui.ops.theme.ELEMENT_H = base_default_element_h;
 								config_import_from(raw);
 								box_preferences_set_scale();
 								make_material_parse_mesh_material();
@@ -169,7 +169,7 @@ function box_preferences_show() {
 				});
 			}
 			if (ui_button(tr("Reset Layout")) && !ui_menu_show) {
-				ui_menu_draw(function (ui: ui_t) {
+				ui_menu_draw(function () {
 					if (ui_menu_button(tr("Confirm"))) {
 						base_init_layout();
 						config_save();
@@ -198,7 +198,7 @@ function box_preferences_show() {
 			}
 
 			if (ui_button(tr("New"))) {
-				ui_box_show_custom(function (ui: ui_t) {
+				ui_box_show_custom(function () {
 					if (ui_tab(ui_handle(__ID__), tr("New Theme"))) {
 						ui_row2();
 						let h: ui_handle_t = ui_handle(__ID__);
@@ -261,7 +261,7 @@ function box_preferences_show() {
 						h.color = val;
 						_box_preferences_h = h;
 						_box_preferences_i = i;
-						ui_menu_draw(function (ui: ui_t) {
+						ui_menu_draw(function () {
 							ui.changed = false;
 							let color: i32 = ui_color_wheel(_box_preferences_h, false, -1, 11 * ui.ops.theme.ELEMENT_H * UI_SCALE(), true);
 							let u32_theme: u32_ptr = base_theme;
@@ -306,7 +306,7 @@ function box_preferences_show() {
 				}
 
 				if (ui.changed) {
-					ui_base_ui.elements_baked = false;
+					ui.elements_baked = false;
 				}
 			}
 			ui.input_enabled = true;
@@ -681,7 +681,7 @@ function box_preferences_show() {
 			}
 
 			if (ui_button(tr("New"))) {
-				ui_box_show_custom(function (ui: ui_t) {
+				ui_box_show_custom(function () {
 					if (ui_tab(ui_handle(__ID__), tr("New Keymap"))) {
 						ui_row2();
 						let h: ui_handle_t = ui_handle(__ID__);
@@ -747,7 +747,7 @@ function box_preferences_show() {
 			let row: f32[] = [1 / 4, 1 / 4];
 			ui_row(row);
 			if (ui_button(tr("New"))) {
-				ui_box_show_custom(function (ui: ui_t) {
+				ui_box_show_custom(function () {
 					if (ui_tab(ui_handle(__ID__), tr("New Plugin"))) {
 						ui_row2();
 						let h: ui_handle_t = ui_handle(__ID__);
@@ -814,7 +814,7 @@ plugin_notify_on_ui(plugin, function() {\
 				}
 				if (ui.is_hovered && ui.input_released_r) {
 					_box_preferences_f = f;
-					ui_menu_draw(function (ui: ui_t) {
+					ui_menu_draw(function () {
 						let path: string = path_data() + path_sep + "plugins" + path_sep + _box_preferences_f;
 						if (ui_menu_button(tr("Edit in Text Editor"))) {
 							file_start(path);

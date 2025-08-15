@@ -1,6 +1,5 @@
 
 function tab_plugins_draw(htab: ui_handle_t) {
-	let ui: ui_t = ui_base_ui;
 	if (ui_tab(htab, tr("Plugins"))) {
 
 		ui_begin_sticky();

@@ -24,26 +24,26 @@ function box_projects_show() {
 	draggable = true;
 	///end
 
-	ui_box_show_custom(function (ui: ui_t) {
+	ui_box_show_custom(function () {
 		///if (arm_android || arm_ios)
 		box_projects_align_to_fullscreen();
 		///end
 
 		///if (arm_android || arm_ios)
-		box_projects_tab(ui);
-		box_projects_get_started_tab(ui);
+		box_projects_tab();
+		box_projects_get_started_tab();
 		///else
-		box_projects_recent_tab(ui);
+		box_projects_recent_tab();
 		///end
 
 	}, 600, 400, null, draggable);
 }
 
-function box_projects_tab(ui: ui_t) {
+function box_projects_tab() {
 	if (ui_tab(box_projects_htab, tr("Projects"), true)) {
 		ui_begin_sticky();
 
-		box_projects_draw_badge(ui);
+		box_projects_draw_badge();
 
 		if (ui_button(tr("New"))) {
 			project_new();
@@ -144,7 +144,7 @@ function box_projects_tab(ui: ui_t) {
 						_box_projects_path = path;
 						_box_projects_icon_path = icon_path;
 						_box_projects_i = i;
-						ui_menu_draw(function (ui: ui_t) {
+						ui_menu_draw(function () {
 							// if (ui_menu_button(tr("Duplicate"))) {}
 							if (ui_menu_button(tr("Delete"))) {
 								sys_notify_on_init(function () {
@@ -186,10 +186,10 @@ function box_projects_tab(ui: ui_t) {
 	}
 }
 
-function box_projects_recent_tab(ui: ui_t) {
+function box_projects_recent_tab() {
 	if (ui_tab(box_projects_htab, tr("Recent"), true)) {
 
-		box_projects_draw_badge(ui);
+		box_projects_draw_badge();
 
 		ui.enabled = config_raw.recent_projects.length > 0;
 		box_projects_hsearch.text = ui_text_input(box_projects_hsearch, tr("Search"), ui_align_t.LEFT, true, true);
@@ -240,13 +240,13 @@ function box_projects_recent_tab(ui: ui_t) {
 	}
 }
 
-function box_projects_draw_badge(ui: ui_t) {
+function box_projects_draw_badge() {
 	let img: gpu_texture_t = data_get_image("badge.k");
 	ui_image(img);
 	ui_end_element();
 }
 
-function box_projects_get_started_tab(ui: ui_t) {
+function box_projects_get_started_tab() {
 	if (ui_tab(box_projects_htab, tr("Get Started"), true)) {
 		if (ui_button(tr("Manual"))) {
 			file_load_url(manifest_url + "/manual");

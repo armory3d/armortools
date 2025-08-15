@@ -3,7 +3,6 @@ let tab_scripts_hscript: ui_handle_t = ui_handle_create();
 let tab_scripts_text_coloring: ui_text_coloring_t = null;
 
 function tab_scripts_draw(htab: ui_handle_t) {
-	let ui: ui_t = ui_base_ui;
 	if (ui_tab(htab, tr("Scripts"))) {
 
 		ui_begin_sticky();
@@ -16,7 +15,7 @@ function tab_scripts_draw(htab: ui_handle_t) {
 
 		if (ui_button(tr("Edit"))) {
 
-			ui_menu_draw(function (ui: ui_t) {
+			ui_menu_draw(function () {
 				if (ui_menu_button(tr("Clear"))) {
 					tab_scripts_hscript.text = "";
 				}
@@ -54,7 +53,7 @@ function tab_scripts_draw(htab: ui_handle_t) {
 		let _font: draw_font_t = ui.ops.font;
 		let _font_size: i32 = ui.font_size;
 		let f: draw_font_t = data_get_font("font_mono.ttf");
-		ui_set_font(ui, f);
+		ui_set_font(f);
 		ui.font_size = math_floor(15 * UI_SCALE());
 		ui_text_area_line_numbers = true;
 		ui_text_area_scroll_past_end = true;
@@ -63,7 +62,7 @@ function tab_scripts_draw(htab: ui_handle_t) {
 		ui_text_area_line_numbers = false;
 		ui_text_area_scroll_past_end = false;
 		ui_text_area_coloring = null;
-		ui_set_font(ui, _font);
+		ui_set_font(_font);
 		ui.font_size = _font_size;
 	}
 }

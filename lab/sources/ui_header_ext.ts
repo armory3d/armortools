@@ -1,5 +1,5 @@
 
-function ui_header_draw_tool_properties(ui: ui_t) {
+function ui_header_draw_tool_properties() {
 	if (context_raw.tool == tool_type_t.PICKER) {
 
 	}

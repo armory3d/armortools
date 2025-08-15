@@ -13,7 +13,6 @@ function tab_browser_show_directory(directory: string) {
 }
 
 function tab_browser_draw(htab: ui_handle_t) {
-	let ui: ui_t = ui_base_ui;
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
 	if (ui_tab(htab, tr("Browser")) && statush > ui_status_default_status_h * UI_SCALE()) {
 
@@ -118,7 +117,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 		ui._x = bookmarks_w;
 		ui._w -= bookmarks_w;
 
-		ui_files_file_browser(ui, tab_browser_hpath, true, tab_browser_hsearch.text, refresh, function (file: string) {
+		ui_files_file_browser(tab_browser_hpath, true, tab_browser_hsearch.text, refresh, function (file: string) {
 
 			let file_name: string = substring(file, string_last_index_of(file, path_sep) + 1, file.length);
 			if (file_name == "..") {
@@ -128,7 +127,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 			_tab_browser_draw_file = file;
 
 			// Context menu
-			ui_menu_draw(function (ui: ui_t) {
+			ui_menu_draw(function () {
 				let file: string = _tab_browser_draw_file;
 
 				if (ui_menu_button(tr("Import"))) {
@@ -235,7 +234,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 
 		if (ui_button(tr("Disk"), ui_align_t.LEFT)) {
 			///if arm_android
-			ui_menu_draw(function (ui: ui_t) {
+			ui_menu_draw(function () {
 				if (ui_menu_button(tr("Download"))) {
 					tab_browser_hpath.text = ui_files_default_path;
 				}
@@ -267,7 +266,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 
 			if (ui.is_hovered && ui.input_released_r) {
 				_tab_browser_draw_b = b;
-				ui_menu_draw(function (ui: ui_t) {
+				ui_menu_draw(function () {
 					if (ui_menu_button(tr("Delete"))) {
 						array_remove(config_raw.bookmarks, _tab_browser_draw_b);
 						config_save();

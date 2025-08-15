@@ -76,7 +76,7 @@ function make_draw_cloud_icon_data(f: string, image: gpu_texture_t): draw_cloud_
 	return data;
 }
 
-function ui_files_file_browser(ui: ui_t, handle: ui_handle_t, drag_files: bool = false, search: string = "", refresh: bool = false, context_menu: (s: string)=>void = null): string {
+function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, search: string = "", refresh: bool = false, context_menu: (s: string)=>void = null): string {
 
 	let icons: gpu_texture_t = resource_get("icons.k");
 	let folder: rect_t = resource_tile50(icons, 2, 1);

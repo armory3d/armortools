@@ -11,7 +11,6 @@ function tab_layers_draw(htab: ui_handle_t) {
 }
 
 function tab_layers_draw_mini(htab: ui_handle_t) {
-	let ui: ui_t = ui_base_ui;
 	ui_set_hovered_tab_name(tr("Layers"));
 
 	let _ELEMENT_H: i32 = ui.ops.theme.ELEMENT_H;
@@ -34,7 +33,6 @@ function tab_layers_draw_mini(htab: ui_handle_t) {
 }
 
 function tab_layers_draw_full(htab: ui_handle_t) {
-	let ui: ui_t = ui_base_ui;
 	if (ui_tab(htab, tr("Layers"))) {
 		ui_begin_sticky();
 		let row: f32[] = [1 / 4, 1 / 4, 1 / 2];
@@ -53,7 +51,6 @@ function tab_layers_draw_full(htab: ui_handle_t) {
 }
 
 function tab_layers_button_2d_view() {
-	let ui: ui_t = ui_base_ui;
 	if (ui_button(tr("2D View"))) {
 		ui_base_show_2d_view(view_2d_type_t.LAYER);
 	}
@@ -74,7 +71,6 @@ function tab_layers_draw_slots(mini: bool) {
 }
 
 function tab_layers_highlight_odd_lines() {
-	let ui: ui_t = ui_base_ui;
 	let step: i32 = ui.ops.theme.ELEMENT_H * 2;
 	let full_h: i32 = ui._window_h - ui_base_hwnds[0].scroll_offset;
 	for (let i: i32 = 0; i < math_floor(full_h / step); ++i) {
@@ -86,7 +82,7 @@ function tab_layers_highlight_odd_lines() {
 
 function tab_layers_button_new(text: string) {
 	if (ui_button(text)) {
-		ui_menu_draw(function (ui: ui_t) {
+		ui_menu_draw(function () {
 			let l: slot_layer_t = context_raw.layer;
 			if (ui_menu_button(tr("Paint Layer"))) {
 				layers_new_layer();
@@ -254,7 +250,6 @@ function tab_layers_set_drag_layer(layer: slot_layer_t, off_x: f32, off_y: f32) 
 }
 
 function tab_layers_draw_layer_slot(l: slot_layer_t, i: i32, mini: bool) {
-	let ui: ui_t = ui_base_ui;
 
 	if (context_raw.layer_filter > 0 &&
 		slot_layer_get_object_mask(l) > 0 &&
@@ -321,7 +316,6 @@ function tab_layers_draw_layer_slot(l: slot_layer_t, i: i32, mini: bool) {
 }
 
 function tab_layers_draw_layer_slot_mini(l: slot_layer_t, i: i32) {
-	let ui: ui_t = ui_base_ui;
 
 	let row: f32[] = [1, 1];
 	ui_row(row);
@@ -336,7 +330,6 @@ function tab_layers_draw_layer_slot_mini(l: slot_layer_t, i: i32) {
 }
 
 function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
-	let ui: ui_t = ui_base_ui;
 
 	let step: i32 = ui.ops.theme.ELEMENT_H;
 	let uiw: f32 = ui._w;
@@ -448,7 +441,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 			ui._y += center;
 		}
 
-		tab_layers_combo_blending(ui, l);
+		tab_layers_combo_blending(l);
 
 		if (slot_layer_is_mask(l)) {
 			ui._y -= center;
@@ -480,14 +473,14 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 			ui._x += 12 * UI_SCALE();
 		}
 
-		tab_layers_combo_object(ui, l);
+		tab_layers_combo_object(l);
 		ui_end_element();
 	}
 
 	ui._y -= UI_ELEMENT_OFFSET();
 }
 
-function tab_layers_combo_object(ui: ui_t, l: slot_layer_t, label: bool = false): ui_handle_t {
+function tab_layers_combo_object(l: slot_layer_t, label: bool = false): ui_handle_t {
 	let ar: string[] = [tr("Shared")];
 	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 		let p: mesh_object_t = project_paint_objects[i];
@@ -520,7 +513,7 @@ function tab_layers_combo_object(ui: ui_t, l: slot_layer_t, label: bool = false)
 	return object_handle;
 }
 
-function tab_layers_combo_blending(ui: ui_t, l: slot_layer_t, label: bool = false): ui_handle_t {
+function tab_layers_combo_blending(l: slot_layer_t, label: bool = false): ui_handle_t {
 	let blending_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
 	blending_handle.position = l.blending;
 	let blending_combo: string[] = [
@@ -560,7 +553,6 @@ function tab_layers_layer_toggle_visible(l: slot_layer_t) {
 }
 
 function tab_layers_draw_layer_highlight(l: slot_layer_t, mini: bool) {
-	let ui: ui_t = ui_base_ui;
 	let step: i32 = ui.ops.theme.ELEMENT_H;
 
 	// Separator line
@@ -578,7 +570,6 @@ function tab_layers_draw_layer_highlight(l: slot_layer_t, mini: bool) {
 }
 
 function tab_layers_handle_layer_icon_state(l: slot_layer_t, i: i32, state: ui_state_t, uix: f32, uiy: f32) {
-	let ui: ui_t = ui_base_ui;
 
 	let texpaint_preview: gpu_texture_t = l.texpaint_preview;
 
@@ -626,7 +617,6 @@ function tab_layers_handle_layer_icon_state(l: slot_layer_t, i: i32, state: ui_s
 }
 
 function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32, mini: bool): ui_state_t {
-	let ui: ui_t = ui_base_ui;
 	let icons: gpu_texture_t = resource_get("icons.k");
 	let icon_h: i32 = (UI_ELEMENT_H() - (mini ? 2 : 3)) * 2;
 
@@ -720,7 +710,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 	tab_layers_l = l;
 	tab_layers_mini = mini;
 
-	ui_menu_draw(function (ui: ui_t) {
+	ui_menu_draw(function () {
 
 		let l: slot_layer_t = tab_layers_l;
 		let mini: bool = tab_layers_mini;
@@ -735,12 +725,12 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			}
 
 			if (!slot_layer_is_group(l)) {
-				if (tab_layers_combo_blending(ui, l, true).changed) {
+				if (tab_layers_combo_blending(l, true).changed) {
 					ui_menu_keep_open = true;
 				}
 			}
 			if (slot_layer_is_layer(l)) {
-				if (tab_layers_combo_object(ui, l, true).changed) {
+				if (tab_layers_combo_object(l, true).changed) {
 					ui_menu_keep_open = true;
 				}
 			}
@@ -859,7 +849,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			});
 		}
 
-		ui_menu_align(ui);
+		ui_menu_align();
 		let layer_opac_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
 		layer_opac_handle.value = l.mask_opacity;
 		ui_slider(layer_opac_handle, tr("Opacity"), 0.0, 1.0, true);
@@ -873,7 +863,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 		}
 
 		if (!slot_layer_is_group(l)) {
-			ui_menu_align(ui);
+			ui_menu_align();
 			let res_handle_changed_last: bool = base_res_handle.changed;
 			///if (arm_android || arm_ios)
 			let ar: string[] = ["128", "256", "512", "1K", "2K", "4K"];
@@ -893,7 +883,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			ui_draw_string(tr("Res"), -1, 0, ui_align_t.RIGHT, true);
 			ui_end_element();
 
-			ui_menu_align(ui);
+			ui_menu_align();
 			///if (arm_android || arm_ios)
 			let bits_items: string[] = ["8bit"];
 			ui_inline_radio(base_bits_handle, bits_items, ui_align_t.LEFT);
@@ -909,7 +899,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 		}
 
 		if (l.fill_layer != null) {
-			ui_menu_align(ui);
+			ui_menu_align();
 			let scale_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
 			scale_handle.value = l.scale;
 			l.scale = ui_slider(scale_handle, tr("UV Scale"), 0.0, 5.0, true);
@@ -922,7 +912,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 				ui_menu_keep_open = true;
 			}
 
-			ui_menu_align(ui);
+			ui_menu_align();
 			let angle_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
 			angle_handle.value = l.angle;
 			l.angle = ui_slider(angle_handle, tr("Angle"), 0.0, 360, true, 1);
@@ -936,7 +926,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 				ui_menu_keep_open = true;
 			}
 
-			ui_menu_align(ui);
+			ui_menu_align();
 			let uv_type_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
 			uv_type_handle.position = l.uv_type;
 			let uv_type_items: string[] = [tr("UV Map"), tr("Triplanar"), tr("Project")];

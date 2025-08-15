@@ -6,7 +6,6 @@ function ui_nodes_ext_delay_idle_sleep() {
 }
 
 function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
-	let ui: ui_t = ui_base_ui;
 	if (ui_button(tr("Run"))) {
 		// sys_notify_on_init(function() {
 			ui_nodes_ext_run();

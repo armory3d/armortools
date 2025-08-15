@@ -5,14 +5,13 @@ let ui_menu_x: i32 = 0;
 let ui_menu_y: i32 = 0;
 let ui_menu_h: i32 = 0;
 let ui_menu_keep_open: bool = false;
-let ui_menu_commands: (ui: ui_t)=>void = null;
+let ui_menu_commands: ()=>void = null;
 let ui_menu_show_first: bool = true;
 let ui_menu_hide_flag: bool = false;
 
 let _ui_menu_render_msg: string;
 
 function ui_menu_render() {
-	let ui: ui_t = ui_base_ui;
 	let menu_w: i32 = ui_menu_commands != null ?
 		math_floor(base_default_element_w * UI_SCALE() * 2.3) :
 		math_floor(UI_ELEMENT_W() * 2.3);
@@ -37,10 +36,10 @@ function ui_menu_render() {
 
 	draw_begin();
 	ui_begin_region(ui, ui_menu_x, ui_menu_y, menu_w);
-	ui_menu_start(ui);
+	ui_menu_start();
 
 	if (ui_menu_commands != null) {
-		ui_menu_commands(ui);
+		ui_menu_commands();
 	}
 
 	ui_menu_hide_flag = ui.combo_selected_handle == null && !ui_menu_keep_open && !ui_menu_show_first && (ui.changed || ui.input_released || ui.input_released_r || ui.is_escape_down);
@@ -49,7 +48,7 @@ function ui_menu_render() {
 	ui.ops.theme.FILL_BUTTON_BG = _FILL_BUTTON_BG;
 	ui.ops.theme.ELEMENT_OFFSET = _ELEMENT_OFFSET;
 	ui.ops.theme.ELEMENT_H = _ELEMENT_H;
-	ui_menu_end(ui);
+	ui_menu_end();
 	ui_end_region();
 	draw_end();
 
@@ -75,7 +74,7 @@ function ui_menu_hide() {
 	base_redraw_ui();
 }
 
-function ui_menu_draw(commands: (ui: ui_t)=>void = null, x: i32 = -1, y: i32 = -1) {
+function ui_menu_draw(commands: ()=>void = null, x: i32 = -1, y: i32 = -1) {
 	ui_end_input();
 	if (ui_menu_show) {
 		ui_menu_nested = true;
@@ -110,7 +109,7 @@ function ui_menu_fit_to_screen() {
 	}
 }
 
-function ui_menu_separator(ui: ui_t) {
+function ui_menu_separator() {
 	ui._y++;
 	if (config_raw.touch_ui) {
 		ui_fill(0, 0, ui._w / UI_SCALE(), 1, ui.ops.theme.BUTTON_COL);
@@ -127,7 +126,7 @@ function ui_menu_button(text: string, label: string = ""): bool {
 	return ui_button(config_button_spacing + text, config_button_align, label);
 }
 
-function ui_menu_align(ui: ui_t) {
+function ui_menu_align() {
 	if (!config_raw.touch_ui) {
 		let row: f32[] = [12 / 100, 88 / 100];
 		ui_row(row);
@@ -135,7 +134,7 @@ function ui_menu_align(ui: ui_t) {
 	}
 }
 
-function ui_menu_start(ui: ui_t) {
+function ui_menu_start() {
 	ui_draw_shadow(ui._x, ui._y, ui._w, ui_menu_h);
 
 	draw_set_color(ui.ops.theme.SEPARATOR_COL);
@@ -143,5 +142,5 @@ function ui_menu_start(ui: ui_t) {
 	draw_set_color(0xffffffff);
 }
 
-function ui_menu_end(ui: ui_t) {
+function ui_menu_end() {
 }

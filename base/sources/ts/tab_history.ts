@@ -1,6 +1,5 @@
 
 function tab_history_draw(htab: ui_handle_t) {
-	let ui: ui_t = ui_base_ui;
 	if (ui_tab(htab, tr("History"))) {
 		for (let i: i32 = 0; i < history_steps.length; ++i) {
 			let active: i32 = history_steps.length - 1 - history_redos;

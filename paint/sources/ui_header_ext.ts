@@ -1,7 +1,7 @@
 
 let _ui_header_draw_tool_properties_h: ui_handle_t;
 
-function ui_header_draw_tool_properties(ui: ui_t) {
+function ui_header_draw_tool_properties() {
 	if (context_raw.tool == tool_type_t.COLORID) {
 		ui_text(tr("Picked Color"));
 		if (context_raw.colorid_picked) {
@@ -103,7 +103,7 @@ function ui_header_draw_tool_properties(ui: ui_t) {
 		}
 		if (ui.is_hovered && ui.input_released) {
 			_ui_header_draw_tool_properties_h = h;
-			ui_menu_draw(function (ui: ui_t) {
+			ui_menu_draw(function () {
 				ui_fill(0, 0, ui._w / UI_SCALE(), ui.ops.theme.ELEMENT_H * 9, ui.ops.theme.SEPARATOR_COL);
 				ui.changed = false;
 				ui_color_wheel(_ui_header_draw_tool_properties_h, false, -1, 10 * ui.ops.theme.ELEMENT_H * UI_SCALE(), false);

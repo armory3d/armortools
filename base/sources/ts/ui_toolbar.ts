@@ -29,7 +29,7 @@ let _ui_toolbar_i: i32;
 function ui_toolbar_init() {
 }
 
-function ui_toolbar_draw_tool(i: i32, ui: ui_t, img: gpu_texture_t, icon_accent: i32, keys: string[]) {
+function ui_toolbar_draw_tool(i: i32, img: gpu_texture_t, icon_accent: i32, keys: string[]) {
 	ui._x += 2;
 	if (context_raw.tool == i) {
 		ui_toolbar_draw_highlight();
@@ -84,12 +84,10 @@ function ui_toolbar_w(screen_size_request: bool = false): i32 {
 }
 
 function ui_toolbar_x(): i32 {
-	let ui: ui_t = ui_base_ui;
 	return 5 * UI_SCALE();
 }
 
 function ui_toolbar_render_ui() {
-	let ui: ui_t = ui_base_ui;
 	let x: i32 = 0;
 	let y: i32 = ui_header_h;
 	let h: i32 = iron_window_height() - ui_header_h;
@@ -205,7 +203,7 @@ function ui_toolbar_render_ui() {
 			key_tool_material
 		];
 
-		ui_toolbar_ext_draw_tools(ui, img, icon_accent, keys);
+		ui_toolbar_ext_draw_tools(img, icon_accent, keys);
 
 		ui.image_scroll_align = true;
 	}
@@ -224,11 +222,10 @@ function ui_toolbar_render_ui() {
 }
 
 function ui_toolbar_tool_properties_menu() {
-	let ui: ui_t = ui_base_ui;
-	ui_menu_draw(function (ui: ui_t) {
+	ui_menu_draw(function () {
 		ui.changed = false;
 
-		ui_header_draw_tool_properties(ui);
+		ui_header_draw_tool_properties();
 
 		if (ui.changed) {
 			ui_menu_keep_open = true;
@@ -241,7 +238,6 @@ function ui_toolbar_tool_properties_menu() {
 }
 
 function ui_toolbar_draw_highlight() {
-	let ui: ui_t = ui_base_ui;
 	let size: i32 = ui_toolbar_w() - 4;
 	draw_set_color(ui.ops.theme.HIGHLIGHT_COL);
 	ui_draw_rect(true, ui._x + -1,  ui._y + 2, size + 2, size + 2);

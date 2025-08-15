@@ -122,7 +122,7 @@ function brush_output_node_run(self: brush_output_node_t, from: i32) {
 		return;
 	}
 
-	if (ui_base_ui.is_hovered ||
+	if (ui.is_hovered ||
 		base_is_dragging ||
 		base_is_resizing ||
 		base_is_scrolling() ||

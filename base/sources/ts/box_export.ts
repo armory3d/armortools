@@ -35,7 +35,7 @@ let _box_export_apply_displacement: bool;
 let _box_export_merge_vertices: bool;
 
 function box_export_show_textures() {
-	ui_box_show_custom(function (ui: ui_t) {
+	ui_box_show_custom(function () {
 
 		if (box_export_files == null) {
 			box_export_fetch_presets();
@@ -46,13 +46,13 @@ function box_export_show_textures() {
 			box_export_hpreset.children = null;
 		}
 
-		box_export_tab_export_textures(ui, tr("Export Textures"));
-		box_export_tab_presets(ui);
+		box_export_tab_export_textures(tr("Export Textures"));
+		box_export_tab_presets();
 
 		///if is_paint
-		box_export_tab_atlases(ui);
+		box_export_tab_atlases();
 		///if (arm_android || arm_ios)
-		box_export_tab_export_mesh(ui, box_export_htab);
+		box_export_tab_export_mesh(box_export_htab);
 		///end
 		///end
 
@@ -60,7 +60,7 @@ function box_export_show_textures() {
 }
 
 function box_export_show_bake_material() {
-	ui_box_show_custom(function (ui: ui_t) {
+	ui_box_show_custom(function () {
 
 		if (box_export_files == null) {
 			box_export_fetch_presets();
@@ -71,13 +71,13 @@ function box_export_show_bake_material() {
 			box_export_hpreset.children = null;
 		}
 
-		box_export_tab_export_textures(ui, tr("Bake to Textures"), true);
-		box_export_tab_presets(ui);
+		box_export_tab_export_textures(tr("Bake to Textures"), true);
+		box_export_tab_presets();
 
 	}, 540, 310);
 }
 
-function box_export_tab_export_textures(ui: ui_t, title: string, bake_material: bool = false) {
+function box_export_tab_export_textures(title: string, bake_material: bool = false) {
 	let tab_vertical: bool = config_raw.touch_ui;
 	if (ui_tab(box_export_htab, title, tab_vertical)) {
 
@@ -192,7 +192,7 @@ function box_export_tab_export_textures(ui: ui_t, title: string, bake_material: 
 	}
 }
 
-function box_export_tab_presets(ui: ui_t) {
+function box_export_tab_presets() {
 	let tab_vertical: bool = config_raw.touch_ui;
 	if (ui_tab(box_export_htab, tr("Presets"), tab_vertical)) {
 
@@ -205,7 +205,7 @@ function box_export_tab_presets(ui: ui_t) {
 		}
 
 		if (ui_button(tr("New"))) {
-			ui_box_show_custom(function (ui: ui_t) {
+			ui_box_show_custom(function () {
 				let tab_vertical: bool = config_raw.touch_ui;
 				if (ui_tab(ui_handle(__ID__), tr("New Preset"), tab_vertical)) {
 					ui_row2();
@@ -269,7 +269,7 @@ function box_export_tab_presets(ui: ui_t) {
 
 			if (ui.is_hovered && ui.input_released_r) {
 				_box_export_t = t;
-				ui_menu_draw(function (ui: ui_t) {
+				ui_menu_draw(function () {
 					if (ui_menu_button(tr("Delete"))) {
 						array_remove(box_export_preset.textures, _box_export_t);
 						box_export_save_preset();
@@ -330,7 +330,7 @@ function box_export_tab_presets(ui: ui_t) {
 	}
 }
 
-function box_export_tab_atlases(ui: ui_t) {
+function box_export_tab_atlases() {
 	let tab_vertical: bool = config_raw.touch_ui;
 	if (ui_tab(box_export_htab, tr("Atlases"), tab_vertical)) {
 		if (project_atlas_objects == null || project_atlas_objects.length != project_paint_objects.length) {
@@ -354,13 +354,13 @@ function box_export_tab_atlases(ui: ui_t) {
 
 function box_export_show_mesh() {
 	box_export_mesh_handle.position = context_raw.export_mesh_index;
-	ui_box_show_custom(function (ui: ui_t) {
+	ui_box_show_custom(function () {
 		let htab: ui_handle_t = ui_handle(__ID__);
-		box_export_tab_export_mesh(ui, htab);
+		box_export_tab_export_mesh(htab);
 	}, 400, 240);
 }
 
-function box_export_tab_export_mesh(ui: ui_t, htab: ui_handle_t) {
+function box_export_tab_export_mesh(htab: ui_handle_t) {
 	let tab_vertical: bool = config_raw.touch_ui;
 	if (ui_tab(htab, tr("Export Mesh"), tab_vertical)) {
 
@@ -441,7 +441,7 @@ function box_export_tab_export_mesh(ui: ui_t, htab: ui_handle_t) {
 }
 
 function box_export_show_material() {
-	ui_box_show_custom(function (ui: ui_t) {
+	ui_box_show_custom(function () {
 		let htab: ui_handle_t = ui_handle(__ID__);
 		let tab_vertical: bool = config_raw.touch_ui;
 		if (ui_tab(htab, tr("Export Material"), tab_vertical)) {
@@ -472,7 +472,7 @@ function box_export_show_material() {
 }
 
 function box_export_show_brush() {
-	ui_box_show_custom(function (ui: ui_t) {
+	ui_box_show_custom(function () {
 		let htab: ui_handle_t = ui_handle(__ID__);
 		let tab_vertical: bool = config_raw.touch_ui;
 		if (ui_tab(htab, tr("Export Brush"), tab_vertical)) {

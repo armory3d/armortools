@@ -39,7 +39,6 @@ function tab_materials_draw_full(htab: ui_handle_t) {
 }
 
 function tab_materials_button_nodes() {
-	let ui: ui_t = ui_base_ui;
 	if (ui_button(tr("Nodes"))) {
 		ui_base_show_material_nodes();
 	}
@@ -49,7 +48,6 @@ function tab_materials_button_nodes() {
 }
 
 function tab_materials_draw_slots(mini: bool) {
-	let ui: ui_t = ui_base_ui;
 	let slotw: i32 = math_floor(51 * UI_SCALE());
 	let num: i32 = math_floor(config_raw.layout[layout_size_t.SIDEBAR_W] / slotw);
 	if (num == 0) {
@@ -152,7 +150,7 @@ function tab_materials_draw_slots(mini: bool) {
 				context_select_material(i);
 				_tab_materials_draw_slots = i;
 
-				ui_menu_draw(function (ui: ui_t) {
+				ui_menu_draw(function () {
 					let i: i32 = _tab_materials_draw_slots;
 					let m: slot_material_t = project_materials[i];
 
