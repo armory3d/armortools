@@ -99,7 +99,7 @@ function tab_brushes_draw(htab: ui_handle_t) {
 						}
 
 						if (ui_menu_button(tr("Duplicate"))) {
-							sys_notify_on_init(function () {
+							sys_notify_on_next_frame(function () {
 								let i: i32 = _tab_brushes_draw_i;
 
 								context_raw.brush = slot_brush_create();
@@ -121,7 +121,7 @@ function tab_brushes_draw(htab: ui_handle_t) {
 					if (img_full == null) {
 						_tab_brushes_draw_i = i;
 
-						sys_notify_on_init(function () {
+						sys_notify_on_next_frame(function () {
 							let i: i32 = _tab_brushes_draw_i;
 
 							let _brush: slot_brush_t = context_raw.brush;

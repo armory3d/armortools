@@ -7,7 +7,7 @@ function ui_nodes_ext_delay_idle_sleep() {
 
 function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 	if (ui_button(tr("Run"))) {
-		// sys_notify_on_init(function() {
+		// sys_notify_on_next_frame(function() {
 			ui_nodes_ext_run();
 		// });
 	}
@@ -30,7 +30,7 @@ function ui_nodes_ext_draw_buttons(ew: f32, start_y: f32) {
 }
 
 function ui_nodes_ext_run() {
-	sys_notify_on_render_2d(ui_nodes_ext_delay_idle_sleep);
+	sys_notify_on_render(ui_nodes_ext_delay_idle_sleep);
 
 	console_progress(tr("Processing"));
 

@@ -102,7 +102,7 @@ function box_export_tab_export_textures(title: string, bake_material: bool = fal
 
 		ui_combo(base_bits_handle, base_bits_combo, tr("Color"), true);
 		if (base_bits_handle.changed) {
-			sys_notify_on_init(layers_set_bits);
+			sys_notify_on_next_frame(layers_set_bits);
 		}
 
 		ui_row2();
@@ -166,7 +166,7 @@ function box_export_tab_export_textures(title: string, bake_material: bool = fal
 			if (context_raw.layers_destination == export_destination_t.PACKED) {
 				_box_export_bake_material = bake_material;
 				context_raw.texture_export_path = "/";
-				sys_notify_on_init(function () {
+				sys_notify_on_next_frame(function () {
 					export_texture_run(context_raw.texture_export_path, _box_export_bake_material);
 				});
 			}
@@ -178,7 +178,7 @@ function box_export_tab_export_textures(title: string, bake_material: bool = fal
 					///if (arm_android || arm_ios)
 					console_toast(tr("Exporting textures"));
 					///end
-					sys_notify_on_init(function () {
+					sys_notify_on_next_frame(function () {
 						export_texture_run(context_raw.texture_export_path, _box_export_bake_material);
 					});
 				});
@@ -462,7 +462,7 @@ function box_export_show_material() {
 					if (f == "") {
 						f = tr("untitled");
 					}
-					sys_notify_on_init(function (path: string) {
+					sys_notify_on_next_frame(function (path: string) {
 						export_arm_run_material(path);
 					}, path + path_sep + f);
 				});
@@ -491,7 +491,7 @@ function box_export_show_brush() {
 				ui_files_show("arm", true, false, function (path: string) {
 					let f: string = ui_files_filename;
 					if (f == "") f = tr("untitled");
-					sys_notify_on_init(function (path: string) {
+					sys_notify_on_next_frame(function (path: string) {
 						export_arm_run_brush(path);
 					}, path + path_sep + f);
 				});

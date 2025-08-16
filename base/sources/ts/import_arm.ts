@@ -408,7 +408,7 @@ function import_arm_run_mesh(raw: project_format_t) {
 		util_mesh_merge();
 		viewport_scale_to_bounds();
 	}
-	sys_notify_on_init(layers_init);
+	sys_notify_on_next_frame(layers_init);
 	history_reset();
 }
 
@@ -481,7 +481,7 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 		}
 	}
 
-	sys_notify_on_init(function (imported: slot_material_t[]) {
+	sys_notify_on_next_frame(function (imported: slot_material_t[]) {
 		for (let i: i32 = 0; i < imported.length; ++i) {
 			let m: slot_material_t = imported[i];
 			context_set_material(m);
@@ -571,7 +571,7 @@ function import_arm_run_brush_from_project(project: project_format_t, path: stri
 		array_push(imported, context_raw.brush);
 	}
 
-	sys_notify_on_init(function (imported: slot_brush_t[]) {
+	sys_notify_on_next_frame(function (imported: slot_brush_t[]) {
 		for (let i: i32 = 0; i < imported.length; ++i) {
 			let b: slot_brush_t = imported[i];
 			context_set_brush(b);

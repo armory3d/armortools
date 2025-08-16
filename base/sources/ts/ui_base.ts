@@ -189,7 +189,7 @@ function ui_base_init() {
 	project_paint_objects = [context_raw.paint_object];
 
 	if (project_filepath == "") {
-		sys_notify_on_init(layers_init);
+		sys_notify_on_next_frame(layers_init);
 	}
 
 	context_raw.project_objects = [];
@@ -266,7 +266,7 @@ function ui_base_update() {
 			box_export_show_textures();
 		}
 		else {
-			sys_notify_on_init(function () {
+			sys_notify_on_next_frame(function () {
 				export_texture_run(context_raw.texture_export_path);
 			});
 		}

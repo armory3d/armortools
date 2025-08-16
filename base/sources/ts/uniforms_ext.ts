@@ -373,18 +373,18 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 
 	else if (link == "_texuvmap") {
 		if (!util_uv_uvmap_cached) {
-			sys_notify_on_init(util_uv_cache_uv_map);
+			sys_notify_on_next_frame(util_uv_cache_uv_map);
 		}
 		return util_uv_uvmap;
 	}
 	else if (link == "_textrianglemap") {
 		if (!util_uv_trianglemap_cached) {
-			sys_notify_on_init(util_uv_cache_triangle_map);
+			sys_notify_on_next_frame(util_uv_cache_triangle_map);
 		}
 		return util_uv_trianglemap;
 	}
 	else if (link == "_texuvislandmap") {
-		sys_notify_on_init(util_uv_cache_uv_island_map);
+		sys_notify_on_next_frame(util_uv_cache_uv_island_map);
 		if (util_uv_uvislandmap_cached) {
 			return util_uv_uvislandmap;
 		}

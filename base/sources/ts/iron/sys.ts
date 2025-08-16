@@ -112,6 +112,7 @@ function sys_foreground() {
 	for (let i: i32 = 0; i < _sys_foreground_listeners.length; ++i) {
 		_sys_foreground_listeners[i].f();
 	}
+	input_on_foreground();
 }
 
 function sys_resume() {
@@ -343,10 +344,8 @@ enum window_mode_t {
 let _sys_on_resets: callback_t[] = [];
 let _sys_on_next_frames: callback_t[] = [];
 let _sys_on_end_frames: callback_t[] = [];
-let _sys_on_inits: callback_t[] = [];
 let _sys_on_updates: callback_t[] = [];
 let _sys_on_renders: callback_t[] = [];
-let _sys_on_renders_2d: callback_t[] = [];
 let _sys_lastw: i32 = -1;
 let _sys_lasth: i32 = -1;
 let sys_on_resize: ()=>void = null;
@@ -386,14 +385,13 @@ function sys_y(): i32 {
 function sys_reset() {
 	_sys_on_next_frames = [];
 	_sys_on_end_frames = [];
-	_sys_on_inits = [];
 	_sys_on_updates = [];
 	_sys_on_renders = [];
-	_sys_on_renders_2d = [];
 	for (let i: i32 = 0; i < _sys_on_resets.length; ++i) {
 		let cb: callback_t = _sys_on_resets[i];
 		cb.f(cb.data);
 	}
+	input_reset();
 }
 
 function _sys_run_callbacks(cbs: callback_t[]) {
@@ -401,10 +399,6 @@ function _sys_run_callbacks(cbs: callback_t[]) {
 		let cb: callback_t = cbs[i];
 		cb.f(cb.data);
 	}
-}
-
-function sys_update() {
-
 }
 
 let _sys_time_last: f32 = 0.0;
@@ -432,15 +426,14 @@ function sys_render() {
 		array_splice(_sys_on_next_frames, 0, _sys_on_next_frames.length);
 	}
 
-	scene_update_frame();
+	_sys_run_callbacks(_sys_on_updates);
 
-	if (_sys_on_inits.length > 0) {
-		_sys_run_callbacks(_sys_on_inits);
-		array_splice(_sys_on_inits, 0, _sys_on_inits.length);
+	if (_sys_on_end_frames.length > 0) {
+		_sys_run_callbacks(_sys_on_end_frames);
+		array_splice(_sys_on_end_frames, 0, _sys_on_end_frames.length);
 	}
 
-	_sys_run_callbacks(_sys_on_updates);
-	_sys_run_callbacks(_sys_on_end_frames);
+	input_end_frame();
 
 	// Rebuild projection on window resize
 	if (_sys_lastw == -1) {
@@ -463,7 +456,6 @@ function sys_render() {
 
 	scene_render_frame();
 	_sys_run_callbacks(_sys_on_renders);
-	_sys_run_callbacks(_sys_on_renders_2d);
 }
 
 function _callback_create(f: (data?: any)=>void, data: any): callback_t {
@@ -474,20 +466,12 @@ function _callback_create(f: (data?: any)=>void, data: any): callback_t {
 }
 
 // Hooks
-function sys_notify_on_init(f: (data?: any)=>void, data: any = null) {
-	array_push(_sys_on_inits, _callback_create(f, data));
-}
-
 function sys_notify_on_update(f: (data?: any)=>void, data: any = null) {
 	array_push(_sys_on_updates, _callback_create(f, data));
 }
 
 function sys_notify_on_render(f: (data?: any)=>void, data: any = null) {
 	array_push(_sys_on_renders, _callback_create(f, data));
-}
-
-function sys_notify_on_render_2d(f: (data?: any)=>void, data: any = null) {
-	array_push(_sys_on_renders_2d, _callback_create(f, data));
 }
 
 function sys_notify_on_reset(f: (data?: any)=>void, data: any = null) {
@@ -511,20 +495,12 @@ function _sys_remove_callback(ar: callback_t[], f: (data?: any)=>void) {
 	}
 }
 
-function sys_remove_init(f: (data?: any)=>void) {
-	_sys_remove_callback(_sys_on_inits, f);
-}
-
 function sys_remove_update(f: (data?: any)=>void) {
 	_sys_remove_callback(_sys_on_updates, f);
 }
 
 function sys_remove_render(f: (data?: any)=>void) {
 	_sys_remove_callback(_sys_on_renders, f);
-}
-
-function sys_remove_render_2d(f: (data?: any)=>void) {
-	_sys_remove_callback(_sys_on_renders_2d, f);
 }
 
 function sys_remove_reset(f: (data?: any)=>void) {
@@ -534,4 +510,3 @@ function sys_remove_reset(f: (data?: any)=>void) {
 function sys_remove_end_frame(f: (data?: any)=>void) {
 	_sys_remove_callback(_sys_on_end_frames, f);
 }
-

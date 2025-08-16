@@ -472,7 +472,7 @@ function layers_new_layer(clear: bool = true, position: i32 = -1): slot_layer_t 
 		}
 	}
 	if (clear) {
-		sys_notify_on_init(function (l: slot_layer_t) {
+		sys_notify_on_next_frame(function (l: slot_layer_t) {
 			slot_layer_clear(l);
 		}, l);
 	}
@@ -491,7 +491,7 @@ function layers_new_mask(clear: bool = true, parent: slot_layer_t, position: i32
 	array_insert(project_layers, position, l);
 	context_set_layer(l);
 	if (clear) {
-		sys_notify_on_init(function (l: slot_layer_t) {
+		sys_notify_on_next_frame(function (l: slot_layer_t) {
 			slot_layer_clear(l);
 		}, l);
 	}
@@ -517,7 +517,7 @@ function layers_create_fill_layer(uv_type: uv_type_t = uv_type_t.UVMAP, decal_ma
 	_layers_uv_type = uv_type;
 	_layers_decal_mat = decal_mat;
 	_layers_position = position;
-	sys_notify_on_init(function () {
+	sys_notify_on_next_frame(function () {
 		let l: slot_layer_t = layers_new_layer(false, _layers_position);
 		history_new_layer();
 		l.uv_type = _layers_uv_type;
@@ -549,7 +549,7 @@ function layers_create_color_layer(base_color: i32, occlusion: f32 = 1.0, roughn
 	_layers_metallic = metallic;
 	_layers_position = position;
 
-	sys_notify_on_init(function () {
+	sys_notify_on_next_frame(function () {
 		let l: slot_layer_t = layers_new_layer(false, _layers_position);
 		history_new_layer();
 		l.uv_type = uv_type_t.UVMAP;

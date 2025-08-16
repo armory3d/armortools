@@ -63,7 +63,7 @@ function args_parse() {
 
 function args_run() {
 	if (args_use) {
-		sys_notify_on_init(function () {
+		sys_notify_on_next_frame(function () {
 			if (project_filepath != "") {
 				import_arm_run_project(project_filepath);
 			}
@@ -121,7 +121,7 @@ function args_run() {
 						data_delete_blob("export_presets/" + file);
 
 						// Export queue
-						sys_notify_on_init(function () {
+						sys_notify_on_next_frame(function () {
 							export_texture_run(args_export_textures_path);
 						});
 					}

@@ -76,7 +76,7 @@ function project_save(save_and_quit: bool = false) {
 
 	_project_save_and_quit = save_and_quit;
 
-	sys_notify_on_init(function () {
+	sys_notify_on_next_frame(function () {
 		export_arm_run_project();
 		if (_project_save_and_quit) {
 			iron_stop();
@@ -301,11 +301,11 @@ function project_new(reset_layers: bool = true) {
 		array_push(project_layers, layer);
 		context_set_layer(layer);
 		if (aspect_ratio_changed) {
-			sys_notify_on_init(layers_resize);
+			sys_notify_on_next_frame(layers_resize);
 		}
 		///end
 
-		sys_notify_on_init(layers_init);
+		sys_notify_on_next_frame(layers_init);
 	}
 
 	if (in_use) draw_begin(current);
@@ -381,7 +381,7 @@ function project_import_brush() {
 			// Parse brush
 			make_material_parse_brush();
 			ui_nodes_hwnd.redraws = 2;
-			sys_notify_on_init(util_render_make_brush_preview);
+			sys_notify_on_next_frame(util_render_make_brush_preview);
 		}
 		// Import from project file
 		else {

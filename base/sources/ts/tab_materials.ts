@@ -129,7 +129,7 @@ function tab_materials_draw_slots(mini: bool) {
 					context_select_material(i);
 					///if is_paint
 					if (context_raw.tool == tool_type_t.MATERIAL) {
-						sys_notify_on_init(layers_update_fill_layers);
+						sys_notify_on_next_frame(layers_update_fill_layers);
 					}
 					///end
 				}
@@ -172,7 +172,7 @@ function tab_materials_draw_slots(mini: bool) {
 					///end
 
 					if (ui_menu_button(tr("Duplicate"))) {
-						sys_notify_on_init(function () {
+						sys_notify_on_next_frame(function () {
 							let i: i32 = _tab_materials_draw_slots;
 
 							context_raw.material = slot_material_create(project_materials[0].data);
@@ -300,7 +300,7 @@ function tab_materials_draw_slots(mini: bool) {
 
 function tab_materials_button_new(text: string) {
 	if (ui_button(text)) {
-		sys_notify_on_init(function() {
+		sys_notify_on_next_frame(function() {
 			context_raw.material = slot_material_create(project_materials[0].data);
 			array_push(project_materials, context_raw.material);
 			tab_materials_update_material();

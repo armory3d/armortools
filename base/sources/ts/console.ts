@@ -36,10 +36,10 @@ function console_draw_progress() {
 function console_progress(s: string) {
 	// Keep popup message displayed until s == null
 	if (s == null) {
-		sys_remove_render_2d(console_draw_progress);
+		sys_remove_render(console_draw_progress);
 	}
 	else if (console_progress_text == null) {
-		sys_notify_on_render_2d(console_draw_progress);
+		sys_notify_on_render(console_draw_progress);
 	}
 	if (s != null) {
 		console_trace(s);

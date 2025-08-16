@@ -142,7 +142,7 @@ function history_undo() {
 			context_set_layer(context_raw.layer);
 		}
 		else if (step.name == tr("Invert Mask")) {
-			sys_notify_on_init(function (step: step_t) {
+			sys_notify_on_next_frame(function (step: step_t) {
 				context_raw.layer = project_layers[step.layer];
 				slot_layer_invert_mask(context_raw.layer);
 			}, step);
@@ -312,8 +312,8 @@ function history_redo() {
 		}
 		else if (step.name == tr("Merge Layers")) {
 			context_raw.layer = project_layers[step.layer + 1];
-			sys_notify_on_init(history_redo_merge_layers);
-			sys_notify_on_init(layers_merge_down);
+			sys_notify_on_next_frame(history_redo_merge_layers);
+			sys_notify_on_next_frame(layers_merge_down);
 		}
 		else if (step.name == tr("Apply Mask")) {
 			context_raw.layer = project_layers[step.layer];
@@ -335,7 +335,7 @@ function history_redo() {
 			});
 		}
 		else if (step.name == tr("Invert Mask")) {
-			sys_notify_on_init(function (step: step_t) {
+			sys_notify_on_next_frame(function (step: step_t) {
 				context_raw.layer = project_layers[step.layer];
 				slot_layer_invert_mask(context_raw.layer);
 			}, step);

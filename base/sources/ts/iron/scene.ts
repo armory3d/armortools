@@ -85,10 +85,11 @@ function scene_set_active(scene_name: string): object_t {
 	return o;
 }
 
-function scene_update_frame() {
-	if (!_scene_ready) {
+function scene_render_frame() {
+	if (!_scene_ready || render_path_commands == null) {
 		return;
 	}
+
 	///if arm_anim
 	for (let i: i32 = 0; i < scene_animations.length; ++i) {
 		let anim: anim_raw_t = scene_animations[i];
@@ -100,12 +101,6 @@ function scene_update_frame() {
 		if (e != null && e.parent != null) {
 			transform_update(e.transform);
 		}
-	}
-}
-
-function scene_render_frame() {
-	if (!_scene_ready || render_path_commands == null) {
-		return;
 	}
 
 	// Render active camera

@@ -112,15 +112,15 @@ function base_init() {
 	base_ext_init();
 
 	sys_notify_on_update(base_update);
-	sys_notify_on_render_2d(ui_view2d_render);
+	sys_notify_on_render(ui_view2d_render);
 	sys_notify_on_update(ui_view2d_update);
-	sys_notify_on_render_2d(ui_base_render_cursor);
+	sys_notify_on_render(ui_base_render_cursor);
 	sys_notify_on_update(ui_nodes_update);
-	sys_notify_on_render_2d(ui_nodes_render);
+	sys_notify_on_render(ui_nodes_render);
 	sys_notify_on_update(ui_base_update);
-	sys_notify_on_render_2d(ui_base_render);
+	sys_notify_on_render(ui_base_render);
 	sys_notify_on_update(camera_update);
-	sys_notify_on_render_2d(base_render);
+	sys_notify_on_render(base_render);
 
 	base_appx = ui_toolbar_w(true);
 	base_appy = 0;

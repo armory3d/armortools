@@ -210,7 +210,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 
 		if (tab_browser_known) {
 			let path: string = tab_browser_hpath.text;
-			sys_notify_on_init(function (path: string) {
+			sys_notify_on_next_frame(function (path: string) {
 				import_asset_run(path);
 			}, path);
 			tab_browser_hpath.text = substring(tab_browser_hpath.text, 0, string_last_index_of(tab_browser_hpath.text, path_sep));

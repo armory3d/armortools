@@ -157,7 +157,7 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 }
 
 function layers_ext_on_resized() {
-	sys_notify_on_init(function () {
+	sys_notify_on_next_frame(function () {
 		layers_resize();
 		let _layer: slot_layer_t = context_raw.layer;
 		let _material: slot_material_t = context_raw.material;

@@ -331,7 +331,7 @@ function util_render_make_brush_preview() {
 	context_raw.layer = _layer;
 	context_raw.material = _material;
 	context_raw.tool = _tool;
-	sys_notify_on_init(function () {
+	sys_notify_on_next_frame(function () {
 		make_material_parse_paint_material(false);
 	});
 

@@ -26,7 +26,7 @@ function speaker_object_create(data: speaker_data_t): speaker_object_t {
 	}
 
 	raw.sound = data_get_sound(data.sound);
-	sys_notify_on_init(_speaker_object_create_on_init, raw);
+	sys_notify_on_next_frame(_speaker_object_create_on_init, raw);
 	return raw;
 }
 

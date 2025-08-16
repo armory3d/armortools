@@ -133,7 +133,7 @@ function box_projects_tab() {
 						///if (arm_android || arm_ios)
 						console_toast(tr("Opening project"));
 						///end
-						sys_notify_on_init(function (path: string) {
+						sys_notify_on_next_frame(function (path: string) {
 							ui_box_hide();
 							import_arm_run_project(path);
 						}, path);
@@ -147,7 +147,7 @@ function box_projects_tab() {
 						ui_menu_draw(function () {
 							// if (ui_menu_button(tr("Duplicate"))) {}
 							if (ui_menu_button(tr("Delete"))) {
-								sys_notify_on_init(function () {
+								sys_notify_on_next_frame(function () {
 									file_delete(_box_projects_path);
 									file_delete(_box_projects_icon_path);
 									let data_path: string = substring(_box_projects_path, 0, _box_projects_path.length - 4);

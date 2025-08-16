@@ -1223,7 +1223,7 @@ function ui_nodes_render() {
 				ui_nodes_node_search_x = ui._window_x + ui._x;
 				ui_nodes_node_search_y = ui._window_y + ui._y;
 				// Allow for node menu to be closed first
-				sys_notify_on_init(function() {
+				sys_notify_on_next_frame(function() {
 					ui_nodes_node_search(math_floor(ui_nodes_node_search_x), math_floor(ui_nodes_node_search_y));
 				});
 			}

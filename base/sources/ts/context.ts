@@ -769,7 +769,7 @@ function context_set_render_path() {
 	else {
 		render_path_commands = render_path_deferred_commands;
 	}
-	sys_notify_on_init(make_material_parse_mesh_material);
+	sys_notify_on_next_frame(make_material_parse_mesh_material);
 }
 
 function context_enable_import_plugin(file: string): bool {
