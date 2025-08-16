@@ -42,7 +42,6 @@ function ui_view2d_init() {
 	ARRAY_ACCESS(ui_view2d_pipe.color_write_mask_alpha, 0) = false;
 	gpu_pipeline_compile(ui_view2d_pipe);
 	pipes_offset = 0;
-	pipes_get_constant_location("mat4");
 	pipes_get_constant_location("float4");
 	pipes_get_constant_location("float4");
 	pipes_get_constant_location("float4");
@@ -197,7 +196,7 @@ function ui_view2d_render() {
 				ui_view2d_tex_type == paint_tex_t.OPACITY   ? 4 :
 				ui_view2d_tex_type == paint_tex_t.HEIGHT    ? 4 :
 				ui_view2d_tex_type == paint_tex_t.NORMAL    ? 5 :
-														0;
+															  0;
 		}
 		else if (ui_view2d_type == view_2d_type_t.FONT) {
 			tex = context_raw.font.image;
