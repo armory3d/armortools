@@ -550,6 +550,7 @@ void ui_end_input() {
 	}
 	if (ui_touch_hold && current->input_down && current->input_x == current->input_started_x && current->input_y == current->input_started_y && current->input_started_time > 0 && iron_time() - current->input_started_time > 0.7) {
 		current->touch_hold_activated = true;
+		current->input_released = true;
 		current->input_released_r = true;
 		current->input_started_time = 0;
 	}
