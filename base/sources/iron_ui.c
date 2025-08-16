@@ -23,8 +23,6 @@ static ui_t *ui_copy_receiver = NULL;
 static int ui_copy_frame = 0;
 static bool ui_combo_first = true;
 static ui_handle_t *ui_combo_search_handle = NULL;
-ui_t *ui_instances[UI_MAX_INSTANCES];
-int ui_instances_count;
 bool ui_touch_scroll = false; // Pan with finger to scroll
 bool ui_touch_hold = false; // Touch and hold finger for right click
 bool ui_touch_tooltip = false; // Show extra tooltips above finger / on-screen keyboard
@@ -1479,9 +1477,7 @@ void ui_set_scale(float factor) {
 }
 
 void ui_init(ui_t *ui, ui_options_t *ops) {
-	assert(ui_instances_count < UI_MAX_INSTANCES);
 	memset(ui, 0, sizeof(ui_t));
-	ui_instances[ui_instances_count++] = ui;
 	ui->ops = ops;
 	ui_set_current(ui);
 	ui_set_scale(ops->scale_factor);

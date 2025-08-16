@@ -365,9 +365,6 @@ float UI_HEADER_DRAG_H();
 float UI_FLASH_SPEED();
 float UI_TOOLTIP_DELAY();
 
-#define UI_MAX_INSTANCES 8
-extern ui_t *ui_instances[UI_MAX_INSTANCES];
-extern int ui_instances_count;
 extern bool ui_touch_scroll;
 extern bool ui_touch_hold;
 extern bool ui_touch_tooltip;

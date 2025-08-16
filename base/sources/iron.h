@@ -473,10 +473,7 @@ void _shutdown(void *data) {
 
 void _key_down(int code, void *data) {
 	iron_key_down(code);
-
-	for (int i = 0; i < ui_instances_count; ++i) {
-		ui_key_down(ui_instances[i], code);
-	}
+	ui_key_down(ui_get_current(), code);
 
 	#ifdef IDLE_SLEEP
 	input_down = true;
@@ -486,10 +483,7 @@ void _key_down(int code, void *data) {
 
 void _key_up(int code, void *data) {
 	iron_key_up(code);
-
-	for (int i = 0; i < ui_instances_count; ++i) {
-		ui_key_up(ui_instances[i], code);
-	}
+	ui_key_up(ui_get_current(), code);
 
 	#ifdef IDLE_SLEEP
 	input_down = false;
@@ -499,10 +493,7 @@ void _key_up(int code, void *data) {
 
 void _key_press(unsigned int character, void *data) {
 	iron_key_press(character);
-
-	for (int i = 0; i < ui_instances_count; ++i) {
-		ui_key_press(ui_instances[i], character);
-	}
+	ui_key_press(ui_get_current(), character);
 
 	#ifdef IDLE_SLEEP
 	paused_frames = 0;
@@ -511,10 +502,7 @@ void _key_press(unsigned int character, void *data) {
 
 void _mouse_down(int button, int x, int y, void *data) {
 	iron_mouse_down(button, x, y);
-
-	for (int i = 0; i < ui_instances_count; ++i) {
-		ui_mouse_down(ui_instances[i], button, x, y);
-	}
+	ui_mouse_down(ui_get_current(), button, x, y);
 
 	#ifdef IDLE_SLEEP
 	input_down = true;
@@ -524,10 +512,7 @@ void _mouse_down(int button, int x, int y, void *data) {
 
 void _mouse_up(int button, int x, int y, void *data) {
 	iron_mouse_up(button, x, y);
-
-	for (int i = 0; i < ui_instances_count; ++i) {
-		ui_mouse_up(ui_instances[i], button, x, y);
-	}
+	ui_mouse_up(ui_get_current(), button, x, y);
 
 	#ifdef IDLE_SLEEP
 	input_down = false;
@@ -537,10 +522,7 @@ void _mouse_up(int button, int x, int y, void *data) {
 
 void _mouse_move(int x, int y, int mx, int my, void *data) {
 	iron_mouse_move(x, y, mx, my);
-
-	for (int i = 0; i < ui_instances_count; ++i) {
-		ui_mouse_move(ui_instances[i], x, y, mx, my);
-	}
+	ui_mouse_move(ui_get_current(), x, y, mx, my);
 
 	#ifdef IDLE_SLEEP
 	paused_frames = 0;
@@ -549,10 +531,7 @@ void _mouse_move(int x, int y, int mx, int my, void *data) {
 
 void _mouse_wheel(int delta, void *data) {
 	iron_mouse_wheel(delta);
-
-	for (int i = 0; i < ui_instances_count; ++i) {
-		ui_mouse_wheel(ui_instances[i], delta);
-	}
+	ui_mouse_wheel(ui_get_current(), delta);
 
 	#ifdef IDLE_SLEEP
 	paused_frames = 0;
@@ -563,9 +542,7 @@ void _touch_move(int index, int x, int y) {
 	iron_touch_move(index, x, y);
 
 	#if defined(IRON_ANDROID) || defined(IRON_IOS)
-	for (int i = 0; i < ui_instances_count; ++i) {
-		ui_touch_move(ui_instances[i], index, x, y);
-	}
+	ui_touch_move(ui_get_current(), index, x, y);
 	#endif
 
 	#ifdef IDLE_SLEEP
@@ -577,9 +554,7 @@ void _touch_down(int index, int x, int y) {
 	iron_touch_down(index, x, y);
 
 	#if defined(IRON_ANDROID) || defined(IRON_IOS)
-	for (int i = 0; i < ui_instances_count; ++i) {
-		ui_touch_down(ui_instances[i], index, x, y);
-	}
+	ui_touch_down(ui_get_current(), index, x, y);
 	#endif
 
 	#ifdef IDLE_SLEEP
@@ -592,9 +567,7 @@ void _touch_up(int index, int x, int y) {
 	iron_touch_up(index, x, y);
 
 	#if defined(IRON_ANDROID) || defined(IRON_IOS)
-	for (int i = 0; i < ui_instances_count; ++i) {
-		ui_touch_up(ui_instances[i], index, x, y);
-	}
+	ui_touch_up(ui_get_current(), index, x, y);
 	#endif
 
 	#ifdef IDLE_SLEEP
@@ -605,10 +578,7 @@ void _touch_up(int index, int x, int y) {
 
 void _pen_down(int x, int y, float pressure) {
 	iron_pen_down(x, y, pressure);
-
-	for (int i = 0; i < ui_instances_count; ++i) {
-		ui_pen_down(ui_instances[i], x, y, pressure);
-	}
+	ui_pen_down(ui_get_current(), x, y, pressure);
 
 	#ifdef IDLE_SLEEP
 	input_down = true;
@@ -618,10 +588,7 @@ void _pen_down(int x, int y, float pressure) {
 
 void _pen_up(int x, int y, float pressure) {
 	iron_pen_up(x, y, pressure);
-
-	for (int i = 0; i < ui_instances_count; ++i) {
-		ui_pen_up(ui_instances[i], x, y, pressure);
-	}
+	ui_pen_up(ui_get_current(), x, y, pressure);
 
 	#ifdef IDLE_SLEEP
 	input_down = false;
@@ -631,10 +598,7 @@ void _pen_up(int x, int y, float pressure) {
 
 void _pen_move(int x, int y, float pressure) {
 	iron_pen_move(x, y, pressure);
-
-	for (int i = 0; i < ui_instances_count; ++i) {
-		ui_pen_move(ui_instances[i], x, y, pressure);
-	}
+	ui_pen_move(ui_get_current(), x, y, pressure);
 
 	#ifdef IDLE_SLEEP
 	paused_frames = 0;
