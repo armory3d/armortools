@@ -847,7 +847,7 @@ plugin_notify_on_ui(plugin, function() {\
 			}
 		}
 
-	}, 620, config_raw.touch_ui ? 480 : 420, function () {
+	}, 620, config_raw.touch_ui ? 510 : 420, function () {
 		config_save();
 	});
 }

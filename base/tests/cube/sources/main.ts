@@ -14,7 +14,6 @@ function main() {
 		depth_bits: 32
 	};
 	sys_start(ops);
-	sys_init();
 	ready();
 }
 

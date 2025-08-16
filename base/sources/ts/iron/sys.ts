@@ -12,7 +12,6 @@ type callback_t = {
 	data?: any;
 };
 
-let _sys_render_listeners: sys_callback_t[] = [];
 let _sys_foreground_listeners: sys_callback_t[] = [];
 let _sys_resume_listeners: sys_callback_t[] = [];
 let _sys_pause_listeners: sys_callback_t[] = [];
@@ -56,7 +55,7 @@ function sys_start(ops: iron_window_options_t) {
 		iron_load_blob(data_path() + "draw_text.vert" + sys_shader_ext()),
 		iron_load_blob(data_path() + "draw_text.frag" + sys_shader_ext())
 	);
-	_iron_set_update_callback(sys_render_callback);
+	_iron_set_update_callback(sys_render);
 	_iron_set_drop_files_callback(sys_drop_files_callback);
 	iron_set_application_state_callback(sys_foreground_callback, sys_resume_callback, sys_pause_callback, sys_background_callback, sys_shutdown_callback);
 	iron_set_keyboard_down_callback(sys_keyboard_down_callback);
@@ -83,10 +82,6 @@ function _sys_callback_create(f: ()=>void): sys_callback_t {
 	let cb: sys_callback_t = {};
 	cb.f = f;
 	return cb;
-}
-
-function sys_notify_on_frames(listener: ()=>void) {
-	array_push(_sys_render_listeners, _sys_callback_create(listener));
 }
 
 function sys_notify_on_app_state(on_foreground: ()=>void, on_resume: ()=>void, on_pause: ()=>void, on_background: ()=>void, on_shutdown: ()=>void) {
@@ -151,12 +146,6 @@ function sys_drop_files(file_path: string) {
 
 function sys_time(): f32 {
 	return iron_time() - _sys_start_time;
-}
-
-function sys_render_callback() {
-	for (let i: i32 = 0; i < _sys_render_listeners.length; ++i) {
-		_sys_render_listeners[i].f();
-	}
 }
 
 function sys_drop_files_callback(file_path: string) {
@@ -358,7 +347,6 @@ let _sys_on_inits: callback_t[] = [];
 let _sys_on_updates: callback_t[] = [];
 let _sys_on_renders: callback_t[] = [];
 let _sys_on_renders_2d: callback_t[] = [];
-let _sys_pause_updates: bool = false;
 let _sys_lastw: i32 = -1;
 let _sys_lasth: i32 = -1;
 let sys_on_resize: ()=>void = null;
@@ -395,10 +383,6 @@ function sys_y(): i32 {
 	return 0;
 }
 
-function sys_init() {
-	sys_notify_on_frames(sys_render);
-}
-
 function sys_reset() {
 	_sys_on_next_frames = [];
 	_sys_on_end_frames = [];
@@ -420,57 +404,7 @@ function _sys_run_callbacks(cbs: callback_t[]) {
 }
 
 function sys_update() {
-	if (!_scene_ready) {
-		return;
-	}
-	if (_sys_pause_updates) {
-		return;
-	}
 
-	if (_sys_on_next_frames.length > 0) {
-		_sys_run_callbacks(_sys_on_next_frames);
-		array_splice(_sys_on_next_frames, 0, _sys_on_next_frames.length);
-	}
-
-	scene_update_frame();
-
-	let i: i32 = 0;
-	let l: i32 = _sys_on_updates.length;
-	while (i < l) {
-		if (_sys_on_inits.length > 0) {
-			_sys_run_callbacks(_sys_on_inits);
-			array_splice(_sys_on_inits, 0, _sys_on_inits.length);
-		}
-
-		let cb: callback_t = _sys_on_updates[i];
-		cb.f(cb.data);
-
-		// Account for removed traits
-		if (l <= _sys_on_updates.length) {
-			i++;
-		}
-		else {
-			l = _sys_on_updates.length;
-		}
-	}
-
-	_sys_run_callbacks(_sys_on_end_frames);
-
-	// Rebuild projection on window resize
-	if (_sys_lastw == -1) {
-		_sys_lastw = sys_w();
-		_sys_lasth = sys_h();
-	}
-	if (_sys_lastw != sys_w() || _sys_lasth != sys_h()) {
-		if (sys_on_resize != null) {
-			sys_on_resize();
-		}
-		else if (scene_camera != null) {
-			camera_object_build_proj(scene_camera);
-		}
-	}
-	_sys_lastw = sys_w();
-	_sys_lasth = sys_h();
 }
 
 let _sys_time_last: f32 = 0.0;
@@ -489,30 +423,47 @@ function sys_real_delta(): f32 {
 }
 
 function sys_render() {
-	sys_update();
-
-	_sys_time_real_delta = sys_time() - _sys_time_last;
-	_sys_time_last = sys_time();
-
 	if (!_scene_ready) {
-		sys_render_2d();
 		return;
 	}
+
+	if (_sys_on_next_frames.length > 0) {
+		_sys_run_callbacks(_sys_on_next_frames);
+		array_splice(_sys_on_next_frames, 0, _sys_on_next_frames.length);
+	}
+
+	scene_update_frame();
 
 	if (_sys_on_inits.length > 0) {
 		_sys_run_callbacks(_sys_on_inits);
 		array_splice(_sys_on_inits, 0, _sys_on_inits.length);
 	}
 
+	_sys_run_callbacks(_sys_on_updates);
+	_sys_run_callbacks(_sys_on_end_frames);
+
+	// Rebuild projection on window resize
+	if (_sys_lastw == -1) {
+		_sys_lastw = sys_w();
+		_sys_lasth = sys_h();
+	}
+	if (_sys_lastw != sys_w() || _sys_lasth != sys_h()) {
+		if (sys_on_resize != null) {
+			sys_on_resize();
+		}
+		else if (scene_camera != null) {
+			camera_object_build_proj(scene_camera);
+		}
+	}
+	_sys_lastw = sys_w();
+	_sys_lasth = sys_h();
+
+	_sys_time_real_delta = sys_time() - _sys_time_last;
+	_sys_time_last = sys_time();
+
 	scene_render_frame();
 	_sys_run_callbacks(_sys_on_renders);
-	sys_render_2d();
-}
-
-function sys_render_2d() {
-	if (_sys_on_renders_2d.length > 0) {
-		_sys_run_callbacks(_sys_on_renders_2d);
-	}
+	_sys_run_callbacks(_sys_on_renders_2d);
 }
 
 function _callback_create(f: (data?: any)=>void, data: any): callback_t {

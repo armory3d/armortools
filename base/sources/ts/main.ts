@@ -18,7 +18,6 @@ function main() {
 		base_init_layout();
 	}
 	iron_set_app_name(manifest_title);
-	sys_init();
 	scene_set_active("Scene");
 	uniforms_ext_init();
 	render_path_base_init();
