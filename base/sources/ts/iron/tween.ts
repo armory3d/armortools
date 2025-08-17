@@ -2,15 +2,9 @@
 let _tween_anims: tween_anim_t[] = [];
 let _tween_registered: bool = false;
 
-function tween_on_reset() {
-	sys_notify_on_update(tween_update);
-	tween_reset();
-}
-
 function _tween_register() {
 	_tween_registered = true;
 	sys_notify_on_update(tween_update);
-	sys_notify_on_reset(tween_on_reset);
 }
 
 function tween_to(anim: tween_anim_t): tween_anim_t {

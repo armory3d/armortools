@@ -180,7 +180,7 @@ function scene_add_speaker_object(data: speaker_data_t, parent: object_t = null)
 }
 ///end
 
-function scene_traverse_objects(format: scene_t, parent: object_t, objects: obj_t[], parent_object: obj_t) {
+function scene_traverse_objects(format: scene_t, parent: object_t, objects: obj_t[]) {
 	if (objects == null) {
 		return;
 	}
@@ -190,8 +190,8 @@ function scene_traverse_objects(format: scene_t, parent: object_t, objects: obj_
 			continue; // Do not auto-create Scene object
 		}
 
-		let object: object_t = scene_create_object(o, format, parent, parent_object);
-		scene_traverse_objects(format, object, o.children, o);
+		let object: object_t = scene_create_object(o, format, parent);
+		scene_traverse_objects(format, object, o.children);
 	}
 }
 
@@ -206,7 +206,7 @@ function scene_add_scene(scene_name: string, parent: object_t): object_t {
 	_scene_objects_count = scene_get_objects_count(format.objects);
 
 	if (format.objects != null && format.objects.length > 0) {
-		scene_traverse_objects(format, parent, format.objects, null); // Scene objects
+		scene_traverse_objects(format, parent, format.objects); // Scene objects
 	}
 	return parent;
 }
@@ -228,12 +228,12 @@ function scene_get_objects_count(objects: obj_t[]): i32 {
 	return result;
 }
 
-function _scene_spawn_object_tree(obj: obj_t, parent: object_t, parent_object: obj_t, spawn_children: bool): object_t {
-	let object: object_t = scene_create_object(obj, _scene_raw, parent, parent_object);
+function _scene_spawn_object_tree(obj: obj_t, parent: object_t, spawn_children: bool): object_t {
+	let object: object_t = scene_create_object(obj, _scene_raw, parent);
 	if (spawn_children && obj.children != null) {
 		for (let i: i32 = 0; i < obj.children.length; ++i) {
 			let child: obj_t = obj.children[i];
-			_scene_spawn_object_tree(child, object, obj, spawn_children);
+			_scene_spawn_object_tree(child, object, spawn_children);
 		}
 	}
 	return object;
@@ -241,7 +241,7 @@ function _scene_spawn_object_tree(obj: obj_t, parent: object_t, parent_object: o
 
 function scene_spawn_object(name: string, parent: object_t = null, spawn_children: bool = true): object_t {
 	let obj: obj_t = scene_get_raw_object_by_name(_scene_raw, name);
-	return _scene_spawn_object_tree(obj, parent, null, spawn_children);
+	return _scene_spawn_object_tree(obj, parent, spawn_children);
 }
 
 function scene_get_raw_object_by_name(format: scene_t, name: string): obj_t {
@@ -264,7 +264,7 @@ function scene_traverse_objs(children: obj_t[], name: string): obj_t {
 	return null;
 }
 
-function scene_create_object(o: obj_t, format: scene_t, parent: object_t, parent_object: obj_t): object_t {
+function scene_create_object(o: obj_t, format: scene_t, parent: object_t): object_t {
 	let scene_name: string = format.name;
 
 	if (o.type == "camera_object") {
@@ -274,7 +274,7 @@ function scene_create_object(o: obj_t, format: scene_t, parent: object_t, parent
 	}
 	else if (o.type == "mesh_object") {
 		if (o.material_refs == null || o.material_refs.length == 0) {
-			return scene_create_mesh_object(o, format, parent, parent_object, null);
+			return scene_create_mesh_object(o, format, parent, null);
 		}
 		else {
 			// Materials
@@ -284,7 +284,7 @@ function scene_create_object(o: obj_t, format: scene_t, parent: object_t, parent
 				let mat: material_data_t = data_get_material(scene_name, ref);
 				array_push(materials, mat);
 			}
-			return scene_create_mesh_object(o, format, parent, parent_object, materials);
+			return scene_create_mesh_object(o, format, parent, materials);
 		}
 	}
 	///if arm_audio
@@ -302,7 +302,7 @@ function scene_create_object(o: obj_t, format: scene_t, parent: object_t, parent
 	}
 }
 
-function scene_create_mesh_object(o: obj_t, format: scene_t, parent: object_t, parent_object: obj_t, materials: material_data_t[]): object_t {
+function scene_create_mesh_object(o: obj_t, format: scene_t, parent: object_t, materials: material_data_t[]): object_t {
 	// Mesh reference
 	let ref: string[] = string_split(o.data_ref, "/");
 	let object_file: string = "";
@@ -317,15 +317,12 @@ function scene_create_mesh_object(o: obj_t, format: scene_t, parent: object_t, p
 		data_ref = o.data_ref;
 	}
 
-	return scene_return_mesh_object(object_file, data_ref, scene_name, null, materials, parent, parent_object, o);
+	return scene_return_mesh_object(object_file, data_ref, materials, parent, o);
 }
 
-function scene_return_mesh_object(object_file: string, data_ref: string, scene_name: string, armature: any, // armature_t
-	materials: material_data_t[], parent: object_t, parent_object: obj_t, o: obj_t): object_t {
-
+function scene_return_mesh_object(object_file: string, data_ref: string, materials: material_data_t[], parent: object_t, o: obj_t): object_t {
 	let mesh: mesh_data_t = data_get_mesh(object_file, data_ref);
 	let object: mesh_object_t = scene_add_mesh_object(mesh, materials, parent);
-
 	return scene_return_object(object.base, o);
 }
 

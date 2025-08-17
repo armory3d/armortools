@@ -8,7 +8,8 @@ function tab_meshes_draw(htab: ui_handle_t) {
 		ui_begin_sticky();
 
 		if (config_raw.touch_ui) {
-			ui_row2();
+			let row: f32[] = [1 / 4, 1 / 4];
+			ui_row(row);
 		}
 		else {
 			let row: f32[] = [1 / 14, 1 / 14];

@@ -5,6 +5,7 @@ let nodes_material_categories: string[] = [
 	_tr("Color"),
 	_tr("Vector"),
 	_tr("Converter"),
+	// _tr("Neural"),
 	_tr("Group")
 ];
 
@@ -3934,6 +3935,57 @@ let nodes_material_converter: ui_node_t[] = [
 	}
 ];
 
+let nodes_material_neural: ui_node_t[] = [
+	{
+		id: 0,
+		name: _tr("Text to Photo"),
+		type: "text_to_photo_node",
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: _tr("tiling"),
+				type: "BOOL",
+				output: 0,
+				default_value: f32_array_create_x(0),
+				data: null,
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			},
+			{
+				name: "text_to_photo_node_button",
+				type: "CUSTOM",
+				output: -1,
+				default_value: f32_array_create_x(0),
+				data: null,
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 1
+			}
+		],
+		width: 0
+	}
+];
+
 let nodes_material_group: ui_node_t[] = [
 	{
 		id: 0,
@@ -3969,6 +4021,7 @@ let nodes_material_list: node_list_t[] = [
 	nodes_material_color,
 	nodes_material_vector,
 	nodes_material_converter,
+	// nodes_material_neural,
 	nodes_material_group
 ];
 

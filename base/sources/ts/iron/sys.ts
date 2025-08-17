@@ -341,7 +341,6 @@ enum window_mode_t {
 	FULLSCREEN,
 }
 
-let _sys_on_resets: callback_t[] = [];
 let _sys_on_next_frames: callback_t[] = [];
 let _sys_on_end_frames: callback_t[] = [];
 let _sys_on_updates: callback_t[] = [];
@@ -382,18 +381,6 @@ function sys_y(): i32 {
 	return 0;
 }
 
-function sys_reset() {
-	_sys_on_next_frames = [];
-	_sys_on_end_frames = [];
-	_sys_on_updates = [];
-	_sys_on_renders = [];
-	for (let i: i32 = 0; i < _sys_on_resets.length; ++i) {
-		let cb: callback_t = _sys_on_resets[i];
-		cb.f(cb.data);
-	}
-	input_reset();
-}
-
 function _sys_run_callbacks(cbs: callback_t[]) {
 	for (let i: i32 = 0; i < cbs.length; ++i) {
 		let cb: callback_t = cbs[i];
@@ -427,6 +414,8 @@ function sys_render() {
 	}
 
 	_sys_run_callbacks(_sys_on_updates);
+	scene_render_frame();
+	_sys_run_callbacks(_sys_on_renders);
 
 	if (_sys_on_end_frames.length > 0) {
 		_sys_run_callbacks(_sys_on_end_frames);
@@ -444,18 +433,11 @@ function sys_render() {
 		if (sys_on_resize != null) {
 			sys_on_resize();
 		}
-		else if (scene_camera != null) {
-			camera_object_build_proj(scene_camera);
-		}
 	}
 	_sys_lastw = sys_w();
 	_sys_lasth = sys_h();
-
 	_sys_time_real_delta = sys_time() - _sys_time_last;
 	_sys_time_last = sys_time();
-
-	scene_render_frame();
-	_sys_run_callbacks(_sys_on_renders);
 }
 
 function _callback_create(f: (data?: any)=>void, data: any): callback_t {
@@ -472,10 +454,6 @@ function sys_notify_on_update(f: (data?: any)=>void, data: any = null) {
 
 function sys_notify_on_render(f: (data?: any)=>void, data: any = null) {
 	array_push(_sys_on_renders, _callback_create(f, data));
-}
-
-function sys_notify_on_reset(f: (data?: any)=>void, data: any = null) {
-	array_push(_sys_on_resets, _callback_create(f, data));
 }
 
 function sys_notify_on_next_frame(f: (data?: any)=>void, data: any = null) {
@@ -501,10 +479,6 @@ function sys_remove_update(f: (data?: any)=>void) {
 
 function sys_remove_render(f: (data?: any)=>void) {
 	_sys_remove_callback(_sys_on_renders, f);
-}
-
-function sys_remove_reset(f: (data?: any)=>void) {
-	_sys_remove_callback(_sys_on_resets, f);
 }
 
 function sys_remove_end_frame(f: (data?: any)=>void) {
