@@ -335,9 +335,11 @@ function ui_viewnodes_on_canvas_released() {
 				ui.enabled = !is_protected;
 				if (ui_menu_button(tr("Delete"), "delete")) {
 					sys_notify_on_next_frame(function () {
-						ui_nodes_hwnd.redraws = 2;
-						ui.is_delete_down = true;
-						ui_nodes_is_node_menu_op = true;
+						sys_notify_on_end_frame(function () {
+							ui_nodes_hwnd.redraws = 2;
+							ui.is_delete_down = true;
+							ui_nodes_is_node_menu_op = true;
+						});
 					});
 				}
 				if (ui_menu_button(tr("Duplicate"))) {
