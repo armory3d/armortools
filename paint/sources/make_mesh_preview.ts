@@ -75,7 +75,7 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 		node_shader_write_frag(kong, "if (opacity < " + opac + ") { discard; }");
 	}
 
-	kong.frag_out = "float4[3]";
+	kong.frag_out = "float4[2]";
 	kong.frag_n = true;
 
 	node_shader_add_function(kong, str_pack_float_int16);
