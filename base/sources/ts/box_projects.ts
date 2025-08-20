@@ -52,14 +52,14 @@ function box_projects_tab() {
 			// Pick unique name
 			let i: i32 = 0;
 			let j: i32 = 0;
-			let title: string = tr("untitled") + i;
+			let title: string = "" + tr("untitled") + i;
 			while (j < config_raw.recent_projects.length) {
 				let base: string = config_raw.recent_projects[j];
 				base = substring(base, string_last_index_of(base, path_sep) + 1, string_last_index_of(base, "."));
 				j++;
 				if (title == base) {
 					i++;
-					title = tr("untitled") + i;
+					title = "" + tr("untitled") + i;
 					j = 0;
 				}
 			}

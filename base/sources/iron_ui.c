@@ -23,6 +23,8 @@ static ui_t *ui_copy_receiver = NULL;
 static int ui_copy_frame = 0;
 static bool ui_combo_first = true;
 static ui_handle_t *ui_combo_search_handle = NULL;
+static int touch_hold_x = -1;
+static int touch_hold_y = -1;
 bool ui_touch_scroll = false; // Pan with finger to scroll
 bool ui_touch_hold = false; // Touch and hold finger for right click
 bool ui_touch_tooltip = false; // Show extra tooltips above finger / on-screen keyboard
@@ -548,10 +550,20 @@ void ui_end_input() {
 			current->is_key_pressed = true;
 		}
 	}
-	if (ui_touch_hold && current->input_down && current->input_x == current->input_started_x && current->input_y == current->input_started_y && current->input_started_time > 0 && iron_time() - current->input_started_time > 0.7) {
+	if (touch_hold_x > -1) {
+		current->input_x = touch_hold_x;
+		current->input_y = touch_hold_y;
+		touch_hold_x = -1;
+		touch_hold_y = -1;
+		current->input_released_r = true;
+	}
+	if (ui_touch_hold && current->input_down && current->input_x == current->input_started_x && current->input_y == current->input_started_y && current->input_started_time > 0 && iron_time() - current->input_started_time > 0.5) {
 		current->touch_hold_activated = true;
 		current->input_released = true;
-		current->input_released_r = true;
+		touch_hold_x = current->input_x;
+		touch_hold_y = current->input_y;
+		current->input_x = -1;
+		current->input_y = -1;
 		current->input_started_time = 0;
 	}
 }
