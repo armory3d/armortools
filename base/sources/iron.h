@@ -1656,7 +1656,7 @@ void _write_image(char *path, buffer_t *bytes, i32 w, i32 h, i32 format, int ima
 		comp = 3;
 		pixels = (unsigned char *)malloc(w * h * comp);
 		for (int i = 0; i < w * h; ++i) {
-			#if defined(IRON_METAL) || defined(IRON_VULKAN)
+			#ifdef IRON_BGRA
 			pixels[i * 3    ] = rgba[i * 4 + 2];
 			pixels[i * 3 + 1] = rgba[i * 4 + 1];
 			pixels[i * 3 + 2] = rgba[i * 4    ];
@@ -1671,7 +1671,7 @@ void _write_image(char *path, buffer_t *bytes, i32 w, i32 h, i32 format, int ima
 		comp = 1;
 		pixels = (unsigned char *)malloc(w * h * comp);
 		int off = format - 3;
-		#if defined(IRON_METAL) || defined(IRON_VULKAN)
+		#ifdef IRON_BGRA
 		off = 2 - off;
 		#endif
 		for (int i = 0; i < w * h; ++i) {
