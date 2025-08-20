@@ -166,7 +166,7 @@ function export_arm_run_project() {
 	project_raw.material = c;
 	///end
 
-	///if (arm_metal || arm_vulkan)
+	///if IRON_BGRA
 	project_raw.is_bgra = true;
 	///else
 	project_raw.is_bgra = false;
@@ -186,19 +186,19 @@ function export_arm_run_project() {
 	for (let i: i32 = 0; i < 256 * 256 * 4; ++i) {
 		u8a[i] = math_floor(math_pow(u8a[i] / 255, 1.0 / 2.2) * 255);
 	}
-	///if (arm_metal || arm_vulkan)
+	///if IRON_BGRA
 	export_arm_bgra_swap(mesh_icon_pixels);
 	///end
 
-	iron_delete_texture(mesh_icon);
-
 	// raw.mesh_icons =
-	// 	///if (arm_metal || arm_vulkan)
+	// 	///if IRON_BGRA
 	// 	[encode(bgra_swap(mesh_icon_pixels)];
 	// 	///else
 	// 	[encode(mesh_icon_pixels)];
 	// 	///end
+
 	iron_write_png(substring(project_filepath, 0, project_filepath.length - 4) + "_icon.png", mesh_icon_pixels, 256, 256, 0);
+	iron_delete_texture(mesh_icon);
 	///end
 
 	///if is_paint
@@ -289,7 +289,7 @@ function export_arm_run_material(path: string) {
 
 	let micons: buffer_t[] = null;
 	if (!is_cloud) {
-		///if (arm_metal || arm_vulkan)
+		///if IRON_BGRA
 		let buf: buffer_t = lz4_encode(export_arm_bgra_swap(gpu_get_texture_pixels(m.image)));
 		///else
 		let buf: buffer_t = lz4_encode(gpu_get_texture_pixels(m.image));
@@ -356,7 +356,7 @@ function export_arm_run_brush(path: string) {
 
 	let bicons: buffer_t[] = null;
 	if (!is_cloud) {
-		///if (arm_metal || arm_vulkan)
+		///if IRON_BGRA
 		let buf: buffer_t = lz4_encode(export_arm_bgra_swap(gpu_get_texture_pixels(b.image)));
 		///else
 		let buf: buffer_t = lz4_encode(gpu_get_texture_pixels(b.image));

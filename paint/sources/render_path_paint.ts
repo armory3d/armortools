@@ -184,7 +184,7 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 				}
 
 				// Picked surface values
-				///if (arm_metal || arm_vulkan)
+				///if IRON_BGRA
 				let i0: i32 = 2;
 				let i1: i32 = 1;
 				let i2: i32 = 0;

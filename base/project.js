@@ -4,7 +4,7 @@ flags.embed = os_argv().indexOf("--embed") >= 0; // os_argv().indexOf("--debug")
 flags.physics = true;
 flags.with_d3dcompiler = true;
 flags.with_nfd = true;
-flags.with_compress = true;
+flags.with_compress = platform != "android";
 flags.with_image_write = true;
 flags.with_iron = true;
 flags.with_eval = true;
@@ -335,6 +335,10 @@ if (flags.with_video_write) {
 	project.add_define("WITH_VIDEO_WRITE");
 	project.add_cfiles("sources/libs/minimp4.c");
 	project.add_cfiles("sources/libs/minih264e.c");
+}
+
+if (graphics === "metal" || (graphics === "vulkan" && platform != "android")) {
+	project.add_define("IRON_BGRA");
 }
 
 project.flatten();

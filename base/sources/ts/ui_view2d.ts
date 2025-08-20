@@ -253,7 +253,7 @@ function ui_view2d_render() {
 					draw_scaled_image(_ui_view2d_render_tex, -_ui_view2d_render_x, -_ui_view2d_render_y, _ui_view2d_render_tw, _ui_view2d_render_th);
 					draw_end();
 					let a: buffer_t = gpu_get_texture_pixels(texpaint_picker);
-					///if (arm_metal || arm_vulkan)
+					///if IRON_BGRA
 					let i0: i32 = 2;
 					let i1: i32 = 1;
 					let i2: i32 = 0;

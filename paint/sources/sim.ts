@@ -39,7 +39,7 @@ function sim_update() {
         if (sim_record) {
             let rt: render_target_t = map_get(render_path_render_targets, "last");
             let pixels: buffer_t = gpu_get_texture_pixels(rt._image);
-            ///if (arm_metal || arm_vulkan)
+            ///if IRON_BGRA
             export_arm_bgra_swap(pixels);
             ///end
             iron_mp4_encode(pixels);

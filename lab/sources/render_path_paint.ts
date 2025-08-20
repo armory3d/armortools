@@ -87,7 +87,7 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 				}
 
 				// Picked surface values
-				// ///if (arm_metal || arm_vulkan)
+				// ///if IRON_BGRA
 				// context_raw.picked_color.base.Rb = a.get(2);
 				// context_raw.picked_color.base.Gb = a.get(1);
 				// context_raw.picked_color.base.Bb = a.get(0);

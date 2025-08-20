@@ -147,7 +147,7 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): g
 			}
 		}
 
-		///if (arm_metal || arm_vulkan)
+		///if IRON_BGRA
 		if (from == channel_type_t.BASE_COLOR) {
 			photo_to_pbr_node_bgra_swap(u8a);
 		}
@@ -163,7 +163,7 @@ function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): g
 	return photo_to_pbr_node_images[from];
 }
 
-///if (arm_metal || arm_vulkan)
+///if IRON_BGRA
 function photo_to_pbr_node_bgra_swap(buffer: buffer_t): buffer_t {
 	let u8a: buffer_t = buffer;
 	for (let i: i32 = 0; i < math_floor(buffer.length / 4); ++i) {
