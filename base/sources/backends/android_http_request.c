@@ -17,6 +17,13 @@ void android_http_request(const char *url, const char *path, const char *data, i
 
     jstring jstr = (*env)->NewStringUTF(env, url);
     jbyteArray bytes_array = (jbyteArray)((*env)->CallStaticObjectMethod(env, activityClass, (*env)->GetStaticMethodID(env, activityClass, "androidHttpRequest", "(Ljava/lang/String;)[B"), jstr));
+
+    if (bytes_array == NULL) {
+        callback(0, 200, NULL, callbackdata);
+        (*vm)->DetachCurrentThread(vm);
+        return;
+    }
+
     jsize num_bytes = (*env)->GetArrayLength(env, bytes_array);
     jbyte *elements = (*env)->GetByteArrayElements(env, bytes_array, NULL);
     if (elements != NULL) {
