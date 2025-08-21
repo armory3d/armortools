@@ -95,7 +95,7 @@ function ui_toolbar_render_ui() {
 
 	if (context_is_floating_toolbar()) {
 		x += ui_toolbar_x();
-		y += ui_toolbar_x();
+		y += ui_toolbar_x() + 3 * UI_SCALE();
 		h = (ui_toolbar_tool_names.length + 1) * (ui_toolbar_w() + 2);
 		ui.ops.theme.WINDOW_BG_COL = ui.ops.theme.SEPARATOR_COL;
 	}
@@ -234,7 +234,7 @@ function ui_toolbar_tool_properties_menu() {
 		if (ui_button(tr("Pin to Header"), ui_align_t.LEFT)) {
 			config_raw.layout[layout_size_t.HEADER] = 1;
 		}
-	}, math_floor(ui._x + ui._w + 2), math_floor(ui._y - 6 * UI_SCALE()));
+	}, math_floor(ui._x + ui._w + 6 * UI_SCALE()), math_floor(ui._y - 2 * UI_SCALE()));
 }
 
 function ui_toolbar_draw_highlight() {

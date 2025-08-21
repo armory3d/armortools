@@ -140,7 +140,7 @@ typedef struct ui {
 	int window_border_bottom;
 	int window_border_left;
 	int window_border_right;
-	char hovered_tab_name[64];
+	char hovered_tab_name[256];
 	float hovered_tab_x;
 	float hovered_tab_y;
 	float hovered_tab_w;
@@ -251,7 +251,7 @@ typedef struct ui {
 	bool tooltip_shown;
 	bool tooltip_wait;
 	double tooltip_time;
-	char tab_names[16][64];
+	char tab_names[16][256];
 	uint32_t tab_colors[16];
 	bool tab_enabled[16];
 	int tab_count; // Number of tab calls since window begin

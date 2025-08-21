@@ -18,17 +18,38 @@ function ui_menubar_init() {
 	ui_menubar_menu_handle.layout = ui_layout_t.HORIZONTAL;
 }
 
-function ui_menubar_render_ui() {
-	let item_w: i32 = ui_toolbar_w();
+function ui_menu_panel_x(): i32 {
 	let panel_x: i32 = sys_x();
-
 	///if is_paint
 	if (config_raw.layout[layout_size_t.HEADER] == 1) {
+		let item_w: i32 = ui_toolbar_w();
 		panel_x = sys_x() - item_w;
 	}
+	else {
+		panel_x += 5 * UI_SCALE();
+	}
 	///end
+	return panel_x;
+}
 
-	if (ui_window(ui_menubar_menu_handle, panel_x, 0, ui_menubar_w, ui_header_h)) {
+function ui_menu_panel_y(): i32 {
+	let panel_y: i32 = 0;
+	///if is_paint
+	if (config_raw.layout[layout_size_t.HEADER] == 1) {
+	}
+	else {
+		panel_y += 5 * UI_SCALE();
+	}
+	///end
+	return panel_y;
+}
+
+function ui_menubar_render_ui() {
+	let item_w: i32 = ui_toolbar_w();
+	let panel_x: i32 = ui_menu_panel_x();
+	let panel_y: i32 = ui_menu_panel_y();
+
+	if (ui_window(ui_menubar_menu_handle, panel_x, panel_y, ui_menubar_w, ui_header_h)) {
 		ui._x += 1; // Prevent "File" button highlight on startup
 
 		ui_begin_menu();
@@ -732,8 +753,10 @@ function ui_menubar_show_menu(category: i32) {
 	ui_menu_commands = ui_menubar_draw_category_items;
 	ui_menubar_category = category;
 
-	ui_menu_x = math_floor(ui._x - ui._w);
-	ui_menu_y = math_floor(ui_MENUBAR_H());
+	let panel_x: i32 = ui_menu_panel_x();
+	let panel_y: i32 = ui_menu_panel_y();
+	ui_menu_x = math_floor(ui._x - ui._w) + panel_x;
+	ui_menu_y = math_floor(ui_MENUBAR_H()) + panel_y;
 	if (config_raw.touch_ui) {
 		let menu_w: i32 = math_floor(base_default_element_w * UI_SCALE() * 2.0);
 		ui_menu_x -= math_floor((menu_w - ui._w) / 2) + math_floor(ui_header_h / 2);
