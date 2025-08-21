@@ -36,6 +36,7 @@ function ui_menu_render() {
 
 	draw_begin();
 	ui_begin_region(ui, ui_menu_x, ui_menu_y, menu_w);
+	ui.input_enabled = ui.combo_selected_handle == null;
 	ui_menu_start();
 
 	if (ui_menu_commands != null) {
@@ -50,6 +51,7 @@ function ui_menu_render() {
 	ui.ops.theme.ELEMENT_H = _ELEMENT_H;
 	ui_menu_end();
 	ui_end_region();
+	ui.input_enabled = true;
 	draw_end();
 
 	if (ui_menu_show_first) {

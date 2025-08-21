@@ -186,6 +186,10 @@ function ui_header_draw_tool_properties() {
 
 		context_raw.bake_type = ui_combo(bake_handle, bakes, tr("Bake"));
 
+		if (bake_handle.changed && ui_menu_show) {
+			ui_menu_nested = true; // Update menu height
+		}
+
 		if (rt_bake) {
 			let samples_handle: ui_handle_t = ui_handle(__ID__);
 			if (samples_handle.init) {
