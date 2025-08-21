@@ -756,7 +756,7 @@ function base_init_config() {
 	raw.server = "https://armorpaint.fra1.digitaloceanspaces.com";
 	raw.undo_steps = 4;
 	raw.pressure_radius = true;
-	raw.pressure_sensitivity = 1.0;
+	raw.pressure_sensitivity = 3.0;
 	raw.camera_zoom_speed = 1.0;
 	raw.camera_pan_speed = 1.0;
 	raw.camera_rotation_speed = 1.0;
