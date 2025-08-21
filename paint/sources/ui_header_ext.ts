@@ -166,7 +166,6 @@ function ui_header_draw_tool_properties() {
 			bake_handle.position = context_raw.bake_type;
 		}
 		let bakes: string[] = [
-			tr("AO"),
 			tr("Curvature"),
 			tr("Normal"),
 			tr("Object Normal"),
@@ -179,19 +178,13 @@ function ui_header_draw_tool_properties() {
 			tr("Vertex Color"),
 		];
 		if (gpu_raytrace_supported()) {
+			array_push(bakes, tr("AO"));
 			array_push(bakes, tr("Lightmap"));
 			array_push(bakes, tr("Bent Normal"));
 			array_push(bakes, tr("Thickness"));
 		}
-		else {
-			array_shift(bakes); // Remove AO
-		}
 
 		context_raw.bake_type = ui_combo(bake_handle, bakes, tr("Bake"));
-
-		if (!gpu_raytrace_supported()) {
-			context_raw.bake_type += 1; // Offset for removed AO
-		}
 
 		if (rt_bake) {
 			let samples_handle: ui_handle_t = ui_handle(__ID__);
