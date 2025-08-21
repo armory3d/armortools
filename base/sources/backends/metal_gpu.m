@@ -367,7 +367,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 			readback = nil;
 		}
 		id<MTLDevice> device = get_metal_device();
-		readback_buffer = (__bridge_retained void *)[device newBufferWithLength:buffer_size options:MTLResourceStorageModeShared];
+		readback_buffer = (__bridge_retained void *)[device newBufferWithLength:new_readback_buffer_size options:MTLResourceStorageModeShared];
 	}
 
 	// Copy render target to readback buffer
