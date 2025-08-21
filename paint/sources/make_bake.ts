@@ -24,8 +24,7 @@ function make_bake_run(con: node_shader_context_t, kong: node_shader_t) {
 		node_shader_add_texture(kong, "texpaint_undo", "_texpaint_undo"); // Baked high-poly normals
 		node_shader_write_frag(kong, "var n0: float3 = sample_lod(texpaint_undo, sampler_linear, tex_coord, 0.0).rgb * float3(2.0, 2.0, 2.0) - float3(1.0, 1.0, 1.0);");
 		node_shader_add_function(kong, str_cotangent_frame);
-		node_shader_add_function(kong, str_transpose);
-		node_shader_write_frag(kong, "var invTBN: float3x3 = _transpose(cotangent_frame(n, n, tex_coord));");
+		node_shader_write_frag(kong, "var invTBN: float3x3 = transpose(cotangent_frame(n, n, tex_coord));");
 		node_shader_write_frag(kong, "var res: float3 = normalize(invTBN * n0) * float3(0.5, 0.5, 0.5) + float3(0.5, 0.5, 0.5);");
 		node_shader_write_frag(kong, "output[0] = float4(res, 1.0);");
 	}
@@ -47,9 +46,9 @@ function make_bake_run(con: node_shader_context_t, kong: node_shader_t) {
 		node_shader_add_texture(kong, "texpaint_undo", "_texpaint_undo"); // Baked height
 		node_shader_write_frag(kong, "var tex_dx: float2 = ddx2(tex_coord);");
 		node_shader_write_frag(kong, "var tex_dy: float2 = ddy2(tex_coord);");
-		node_shader_write_frag(kong, "var h0: float = sample_lod(texpaint_undo, sampler_linear, tex_coord, 0.0).r * 100;");
-		node_shader_write_frag(kong, "var h1: float = sample_lod(texpaint_undo, sampler_linear, tex_coord + tex_dx, 0.0).r * 100;");
-		node_shader_write_frag(kong, "var h2: float = sample_lod(texpaint_undo, sampler_linear, tex_coord + tex_dy, 0.0).r * 100;");
+		node_shader_write_frag(kong, "var h0: float = sample_lod(texpaint_undo, sampler_linear, tex_coord, 0.0).r * 100.0;");
+		node_shader_write_frag(kong, "var h1: float = sample_lod(texpaint_undo, sampler_linear, tex_coord + tex_dx, 0.0).r * 100.0;");
+		node_shader_write_frag(kong, "var h2: float = sample_lod(texpaint_undo, sampler_linear, tex_coord + tex_dy, 0.0).r * 100.0;");
 		node_shader_write_frag(kong, "output[0] = float4((h1 - h0) * 0.5 + 0.5, (h2 - h0) * 0.5 + 0.5, 0.0, 1.0);");
 	}
 	else if (context_raw.bake_type == bake_type_t.POSITION) {

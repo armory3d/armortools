@@ -878,6 +878,9 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 			.dynamicRendering = VK_TRUE,
 		};
 
+		VkPhysicalDeviceFeatures enabled_features = {};
+		enabled_features.independentBlend = VK_TRUE;
+
 		VkDeviceCreateInfo deviceinfo = {
 			.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
 			.pNext = &dynamic_rendering_features,
@@ -887,6 +890,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 			.ppEnabledLayerNames = (const char *const *)wanted_device_layers,
 			.enabledExtensionCount = wanted_device_extension_count,
 			.ppEnabledExtensionNames = (const char *const *)wanted_device_extensions,
+			.pEnabledFeatures = &enabled_features,
 		};
 
 		VkPhysicalDeviceRayTracingPipelineFeaturesKHR raytracing_pipeline_ext = {0};

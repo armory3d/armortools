@@ -191,6 +191,9 @@ typedef enum spirv_opcode {
 	SPIRV_OPCODE_MEMBER_DECORATE           = 72,
 	SPIRV_OPCODE_COMPOSITE_CONSTRUCT       = 80,
 	SPIRV_OPCODE_COMPOSITE_EXTRACT         = 81,
+	////
+	SPIRV_OPCODE_TRANSPOSE                 = 84,
+	////
 	SPIRV_OPCODE_SAMPLED_IMAGE             = 86,
 	SPIRV_OPCODE_IMAGE_SAMPLE_IMPLICIT_LOD = 87,
 	SPIRV_OPCODE_IMAGE_SAMPLE_EXPLICIT_LOD = 88,
@@ -1501,6 +1504,14 @@ static spirv_id write_op_image_fetch(instructions_buffer *instructions, spirv_id
 	return result;
 }
 
+static spirv_id write_op_transpose(instructions_buffer *instructions, spirv_id type, spirv_id operand) {
+	spirv_id result = allocate_index();
+
+	uint32_t operands[] = {type.id, result.id, operand.id};
+	write_instruction(instructions, WORD_COUNT(operands), SPIRV_OPCODE_TRANSPOSE, operands);
+	return result;
+}
+
 ////
 
 static spirv_id write_op_ext_inst(instructions_buffer *instructions, spirv_id result_type, spirv_id set, uint32_t instruction, spirv_id operand) {
@@ -2580,6 +2591,11 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 				}
 
 				spirv_id id = write_op_ext_inst3(instructions, spirv_float4_type, glsl_import, SPIRV_GLSL_STD_FMIX, operand1, operand2, operand3);
+				hmput(index_map, o->op_call.var.index, id);
+			}
+			else if (func == add_name("transpose")) {
+				spirv_id operand = get_var(instructions, o->op_call.parameters[0]);
+				spirv_id id      = write_op_transpose(instructions, spirv_float3x3_type, operand);
 				hmput(index_map, o->op_call.var.index, id);
 			}
 

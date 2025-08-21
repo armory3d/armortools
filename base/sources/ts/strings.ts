@@ -262,10 +262,6 @@ fun cotangent_frame(n: float3, p: float3, tex_coord: float2): float3x3 { \
 } \
 ";
 
-let str_transpose: string = "\
-fun _transpose(m: float3x3): float3x3 { return float3x3(m[0][0], m[1][0], m[2][0], m[0][1], m[1][1], m[2][1], m[0][2], m[1][2], m[2][2]); }\
-";
-
 let str_octahedron_wrap: string = "\
 fun octahedron_wrap(v: float2): float2 { \
 	var a: float2; \

@@ -425,7 +425,7 @@ function context_create(): context_t {
 	c.brush_lazy_y = 0.0;
 	c.brush_paint = uv_type_t.UVMAP;
 	c.brush_angle_reject_dot = 0.5;
-	c.bake_type = bake_type_t.AO;
+	c.bake_type = bake_type_t.CURVATURE;
 	c.bake_axis = bake_axis_t.XYZ;
 	c.bake_up_axis = bake_up_axis_t.Z;
 	c.bake_samples = 128;
