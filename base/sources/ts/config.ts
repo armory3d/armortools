@@ -147,6 +147,12 @@ function config_init() {
 		config_raw.rp_ssao = true;
 		///end
 		config_raw.rp_supersample = 1.0;
+		///if arm_android
+		if (sys_display_width() >= 3200 && sys_display_height() >= 2136) {
+			config_raw.window_scale = 3.0;
+			config_raw.rp_supersample = 0.5;
+		}
+		///end
 		config_raw.version = manifest_version;
 		config_raw.sha = config_get_sha();
 		base_init_config();
