@@ -25,7 +25,6 @@ function console_toast(s: string) {
 	if (current != null) draw_end();
 	console_trace(s);
 	console_draw_toast(s);
-	gpu_present();
 	if (current != null) draw_begin(current);
 }
 

@@ -227,7 +227,7 @@ function ui_toolbar_tool_properties_menu() {
 
 		ui_header_draw_tool_properties();
 
-		if (ui.changed) {
+		if (ui.changed || ui.is_typing) {
 			ui_menu_keep_open = true;
 		}
 
