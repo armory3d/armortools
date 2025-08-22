@@ -1899,9 +1899,9 @@ function parser_material_texture_store(node: ui_node_t, tex: bind_tex_t, tex_nam
 
 	if (parser_material_triplanar) {
 		parser_material_write(parser_material_kong, "var " + tex_store + ": float4 = float4(0.0, 0.0, 0.0, 0.0);");
-		parser_material_write(parser_material_kong, "if (tex_coord_blend.x > 0) {" + tex_store + " += sample(" + tex_name + ", sampler_linear, " + uv_name + ".xy) * tex_coord_blend.x; }");
-		parser_material_write(parser_material_kong, "if (tex_coord_blend.y > 0) {" + tex_store + " += sample(" + tex_name + ", sampler_linear, " + uv_name + "1.xy) * tex_coord_blend.y; }");
-		parser_material_write(parser_material_kong, "if (tex_coord_blend.z > 0) {" + tex_store + " += sample(" + tex_name + ", sampler_linear, " + uv_name + "2.xy) * tex_coord_blend.z; }");
+		parser_material_write(parser_material_kong, "if (tex_coord_blend.x > 0.0) {" + tex_store + " += sample(" + tex_name + ", sampler_linear, " + uv_name + ".xy) * tex_coord_blend.x; }");
+		parser_material_write(parser_material_kong, "if (tex_coord_blend.y > 0.0) {" + tex_store + " += sample(" + tex_name + ", sampler_linear, " + uv_name + "1.xy) * tex_coord_blend.y; }");
+		parser_material_write(parser_material_kong, "if (tex_coord_blend.z > 0.0) {" + tex_store + " += sample(" + tex_name + ", sampler_linear, " + uv_name + "2.xy) * tex_coord_blend.z; }");
 	}
 	else {
 		if (parser_material_is_frag) {
