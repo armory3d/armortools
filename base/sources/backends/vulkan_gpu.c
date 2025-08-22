@@ -1,4 +1,3 @@
-
 #ifndef NDEBUG
 #define VALIDATE
 #endif
@@ -951,15 +950,15 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	vkGetPhysicalDeviceSurfaceSupportKHR(gpu, graphics_queue_node_index, surface, &surface_supported);
 
 	VkSurfaceFormatKHR surf_formats[256];
-	uint32_t formatCount = sizeof(surf_formats) / sizeof(surf_formats[0]);
-	VkResult result = vkGetPhysicalDeviceSurfaceFormatsKHR(gpu, surface, &formatCount, surf_formats);
+	uint32_t format_count = sizeof(surf_formats) / sizeof(surf_formats[0]);
+	VkResult result = vkGetPhysicalDeviceSurfaceFormatsKHR(gpu, surface, &format_count, surf_formats);
 
-	if (formatCount == 1 && surf_formats[0].format == VK_FORMAT_UNDEFINED) {
+	if (format_count == 1 && surf_formats[0].format == VK_FORMAT_UNDEFINED) {
 		surface_format = surf_formats[0];
 	}
 	else {
 		bool found = false;
-		for (uint32_t i = 0; i < formatCount; ++i) {
+		for (uint32_t i = 0; i < format_count; ++i) {
 			if (surf_formats[i].format != VK_FORMAT_B8G8R8A8_SRGB) {
 				surface_format = surf_formats[i];
 				found = true;
