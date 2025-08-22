@@ -149,7 +149,7 @@ function config_init() {
 		config_raw.rp_supersample = 1.0;
 		///if arm_android
 		if (sys_display_width() >= 3200 && sys_display_height() >= 2136) {
-			config_raw.window_scale = 3.0;
+			config_raw.window_scale = 2.5;
 			config_raw.rp_supersample = 0.5;
 		}
 		///end
