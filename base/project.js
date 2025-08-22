@@ -289,11 +289,18 @@ if (platform === "windows") {
 else if (platform === "android") {
 	project.add_define("IDLE_SLEEP");
 	project.target_options.android.package = flags.package;
-	project.target_options.android.permissions = ["android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.READ_EXTERNAL_STORAGE", "android.permission.INTERNET"];
+	project.target_options.android.permissions = ["android.permission.READ_MEDIA_IMAGES", "android.permission.INTERNET"];
 	project.target_options.android.screenOrientation = ["sensorLandscape"];
 	project.target_options.android.minSdkVersion = 33; // android 13
 	project.target_options.android.targetSdkVersion = 36;
-	project.target_options.android.versionCode = 250601;
+	function get_version_code() {
+		const now = new Date();
+		const year = now.getFullYear().toString().slice(-2);
+		const month = (now.getMonth() + 1).toString().padStart(2, '0');
+		const day = now.getDate().toString().padStart(2, '0');
+		return parseInt(year + month + day, 10);
+	}
+	project.target_options.android.versionCode = get_version_code();
 	project.target_options.android.versionName = "1.0 alpha";
 }
 else if (platform === "ios") {
