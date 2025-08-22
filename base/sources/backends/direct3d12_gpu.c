@@ -150,7 +150,7 @@ void gpu_barrier(gpu_texture_t *render_target, gpu_texture_state_t state_after) 
 }
 
 void gpu_destroy() {
-	gpu_wait();
+	wait_for_fence(fence, fence_value, fence_event);
 	for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
 		gpu_texture_destroy_internal(&framebuffers[i]);
 	}
@@ -411,16 +411,12 @@ void gpu_end_internal() {
 	current_render_targets_count = 0;
 }
 
-void gpu_wait() {
-	wait_for_fence(fence, fence_value, fence_event);
-}
-
 void gpu_execute_and_wait() {
 	command_list->lpVtbl->Close(command_list);
 	ID3D12CommandList *command_lists[] = {(ID3D12CommandList *)command_list};
 	queue->lpVtbl->ExecuteCommandLists(queue, 1, command_lists);
 	queue->lpVtbl->Signal(queue, fence, ++fence_value);
-	gpu_wait();
+	wait_for_fence(fence, fence_value, fence_event);
 	command_allocator->lpVtbl->Reset(command_allocator);
 	command_list->lpVtbl->Reset(command_list, command_allocator, NULL);
 

@@ -234,17 +234,13 @@ void gpu_end_internal() {
 	current_render_targets_count = 0;
 }
 
-void gpu_wait() {
-	[command_buffer waitUntilCompleted];
-}
-
 void gpu_execute_and_wait() {
 	if (gpu_in_use) {
 		[command_encoder endEncoding];
 	}
 
 	[command_buffer commit];
-	gpu_wait();
+	[command_buffer waitUntilCompleted];
 	id<MTLCommandQueue> queue = get_metal_queue();
 	command_buffer = [queue commandBuffer];
 

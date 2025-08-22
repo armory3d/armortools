@@ -285,7 +285,6 @@ void gpu_set_index_buffer(struct gpu_buffer *buffer) {
 }
 
 void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {}
-void gpu_wait() {}
 void gpu_execute_and_wait() {}
 void gpu_set_constant_buffer(struct gpu_buffer *buffer, int offset, size_t size) {}
 void gpu_set_texture(int unit, gpu_texture_t *texture) {}

@@ -148,7 +148,6 @@ void gpu_begin(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, 
 void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, unsigned flags, unsigned color, float depth);
 void gpu_end(void);
 void gpu_end_internal(void);
-void gpu_wait(void);
 void gpu_execute_and_wait(void);
 void gpu_present(void);
 void gpu_present_internal(void);

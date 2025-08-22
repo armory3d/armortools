@@ -1128,10 +1128,6 @@ void gpu_end_internal() {
 	}
 }
 
-void gpu_wait() {
-	vkWaitForFences(device, 1, &fence, VK_TRUE, UINT64_MAX);
-}
-
 void gpu_execute_and_wait() {
 	if (gpu_in_use) {
 		vkCmdEndRendering(command_buffer);
@@ -1145,7 +1141,7 @@ void gpu_execute_and_wait() {
 		.pCommandBuffers = &command_buffer,
 	};
 	vkQueueSubmit(queue, 1, &submit_info, fence);
-	gpu_wait();
+	vkWaitForFences(device, 1, &fence, VK_TRUE, UINT64_MAX);
 
 	vkResetCommandBuffer(command_buffer, 0);
 	VkCommandBufferBeginInfo begin_info = {
@@ -1182,7 +1178,7 @@ void gpu_present_internal() {
 		.pWaitDstStageMask = (VkPipelineStageFlags[]){VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT},
 	};
 	vkQueueSubmit(queue, 1, &submit_info, fence);
-	gpu_wait();
+	vkWaitForFences(device, 1, &fence, VK_TRUE, UINT64_MAX);
 
 	VkPresentInfoKHR present = {
 		.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
