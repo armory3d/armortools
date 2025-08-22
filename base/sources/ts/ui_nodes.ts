@@ -908,6 +908,9 @@ function ui_nodes_render() {
 		if (config_raw.layout[layout_size_t.HEADER] == 1) {
 			ui_nodes_wy += ui_header_h;
 		}
+		else {
+			ui_nodes_wy -= ui_header_h;
+		}
 		if (!ui_base_show) {
 			ui_nodes_wy -= ui_header_h * 2;
 		}
