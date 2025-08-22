@@ -81,9 +81,8 @@ void android_request_file_permissions(struct android_app *app) {
 	JNIEnv *env;
 	JavaVM *vm = iron_android_get_activity()->vm;
 	(*vm)->AttachCurrentThread(vm, &env, NULL);
-	jobjectArray perm_array = (*env)->NewObjectArray(env, 2, (*env)->FindClass(env, "java/lang/String"), (*env)->NewStringUTF(env, ""));
-	(*env)->SetObjectArrayElement(env, perm_array, 0, android_permission_name(env, "READ_EXTERNAL_STORAGE"));
-	(*env)->SetObjectArrayElement(env, perm_array, 1, android_permission_name(env, "WRITE_EXTERNAL_STORAGE"));
+	jobjectArray perm_array = (*env)->NewObjectArray(env, 1, (*env)->FindClass(env, "java/lang/String"), (*env)->NewStringUTF(env, ""));
+	(*env)->SetObjectArrayElement(env, perm_array, 0, android_permission_name(env, "READ_MEDIA_IMAGES")); // MANAGE_EXTERNAL_STORAGE
 	jobject jactivity = app->activity->clazz;
 	jclass ClassActivity = (*env)->FindClass(env, "android/app/Activity");
 	jmethodID MethodrequestPermissions = (*env)->GetMethodID(env, ClassActivity, "requestPermissions", "([Ljava/lang/String;I)V");
@@ -94,7 +93,7 @@ void android_request_file_permissions(struct android_app *app) {
 void android_check_permissions() {
 	ANativeActivity *activity = iron_android_get_activity();
 	struct android_app *app = (struct android_app *)activity->instance;
-	bool hasPermissions = android_has_permission(app, "READ_EXTERNAL_STORAGE") && android_has_permission(app, "WRITE_EXTERNAL_STORAGE");
+	bool hasPermissions = android_has_permission(app, "READ_MEDIA_IMAGES"); // MANAGE_EXTERNAL_STORAGE
 	if (!hasPermissions) android_request_file_permissions(app);
 
 	JNIEnv *env;
