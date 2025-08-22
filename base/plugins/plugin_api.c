@@ -439,8 +439,8 @@ VOID_FN_CB(context_set_viewport_shader)
 
 void node_shader_add_constant(void *p, char *s0, char *s1, bool b);
 FN(node_shader_add_constant) {
-	int64_t p;
-	JS_ToInt64(ctx, &p, argv[0]);
+	uint64_t p;
+	JS_ToBigUint64(ctx, &p, argv[0]);
 	char *s0 = (char *)JS_ToCString(ctx, argv[1]);
 	char *s1 = (char *)JS_ToCString(ctx, argv[2]);
 	node_shader_add_constant((void *)p, s0, s1, false);
@@ -458,8 +458,8 @@ FN(gpu_create_texture_from_bytes) {
 	JS_ToInt64(ctx, &w, argv[1]);
 	int64_t h;
 	JS_ToInt64(ctx, &h, argv[2]);
-	int64_t result = (int64_t)gpu_create_texture_from_bytes(&b, w, h, 0);
-	return JS_NewInt64(ctx, result);
+	uint64_t result = (uint64_t)gpu_create_texture_from_bytes(&b, w, h, 0);
+	return JS_NewBigUint64(ctx, result);
 }
 
 extern char *project_filepath;
@@ -474,14 +474,14 @@ FN(project_save) {
 }
 
 FN(ui_handle_create) {
-	int64_t result = (int64_t)ui_handle_create();
+	uint64_t result = (uint64_t)ui_handle_create();
 	any_array_push(plugin_gc, (void *)result);
-	return JS_NewInt64(ctx, result);
+	return JS_NewBigUint64(ctx, result);
 }
 
 FN(ui_handle_set_value) {
-	int64_t p;
-	JS_ToInt64(ctx, &p, argv[0]);
+	uint64_t p;
+	JS_ToBigUint64(ctx, &p, argv[0]);
 	ui_handle_t *h = (ui_handle_t *)p;
 	double d;
 	JS_ToFloat64(ctx, &d, argv[1]);
@@ -490,15 +490,15 @@ FN(ui_handle_set_value) {
 }
 
 FN(ui_handle_get_value) {
-	int64_t p;
-	JS_ToInt64(ctx, &p, argv[0]);
+	uint64_t p;
+	JS_ToBigUint64(ctx, &p, argv[0]);
 	ui_handle_t *h = (ui_handle_t *)p;
 	return JS_NewFloat64(ctx, h->value);
 }
 
 FN(ui_panel) {
-	int64_t p;
-	JS_ToInt64(ctx, &p, argv[0]);
+	uint64_t p;
+	JS_ToBigUint64(ctx, &p, argv[0]);
 	char *s = (char *)JS_ToCString(ctx, argv[1]);
 	bool result = ui_panel((void *)p, s, false, false);
 	return JS_NewBool(ctx, result);
@@ -517,16 +517,16 @@ FN(ui_text) {
 }
 
 FN(ui_text_input) {
-	int64_t p;
-	JS_ToInt64(ctx, &p, argv[0]);
+	uint64_t p;
+	JS_ToBigUint64(ctx, &p, argv[0]);
 	char *s = (char *)JS_ToCString(ctx, argv[1]);
 	ui_text_input((void *)p, s, UI_ALIGN_LEFT, true, false);
 	return JS_UNDEFINED;
 }
 
 FN(ui_slider) {
-	int64_t p;
-	JS_ToInt64(ctx, &p, argv[0]);
+	uint64_t p;
+	JS_ToBigUint64(ctx, &p, argv[0]);
 	char *s = (char *)JS_ToCString(ctx, argv[1]);
 	double from = 0.0;
 	double to = 1.0;
@@ -549,16 +549,16 @@ FN(ui_slider) {
 }
 
 FN(ui_check) {
-	int64_t p;
-	JS_ToInt64(ctx, &p, argv[0]);
+	uint64_t p;
+	JS_ToBigUint64(ctx, &p, argv[0]);
 	char *s = (char *)JS_ToCString(ctx, argv[1]);
 	ui_check((void *)p, s, "");
 	return JS_UNDEFINED;
 }
 
 FN(ui_radio) {
-	int64_t p;
-	JS_ToInt64(ctx, &p, argv[0]);
+	uint64_t p;
+	JS_ToBigUint64(ctx, &p, argv[0]);
 	int32_t pos;
 	JS_ToInt32(ctx, &pos, argv[1]);
 	char *s = (char *)JS_ToCString(ctx, argv[2]);
@@ -582,8 +582,8 @@ FN(ui_row) {
 }
 
 FN(ui_combo) {
-	int64_t p;
-	JS_ToInt64(ctx, &p, argv[0]);
+	uint64_t p;
+	JS_ToBigUint64(ctx, &p, argv[0]);
 
 	JSValue val_len = JS_GetPropertyStr(ctx, argv[1], "length");
 	int len;
@@ -639,13 +639,13 @@ FN(parser_material_custom_nodes_delete) {
 
 extern void *parser_material_kong;
 FN(parser_material_kong_get) {
-	return JS_NewInt64(ctx, (int64_t)parser_material_kong);
+	return JS_NewBigUint64(ctx, (uint64_t)parser_material_kong);
 }
 
 char *parser_material_parse_value_input(void *inp, bool vector_as_grayscale);
 FN(parser_material_parse_value_input) {
-	int64_t *node;
-	JS_ToInt64(ctx, &node, argv[0]);
+	uint64_t *node;
+	JS_ToBigUint64(ctx, &node, argv[0]);
 	int64_t i;
 	JS_ToInt64(ctx, &i, argv[1]);
 	char *s = parser_material_parse_value_input(((ui_node_t *)node)->inputs->buffer[i], false);
@@ -771,13 +771,13 @@ FN(plugin_api_make_raw_mesh) {
 	JS_ToFloat64(ctx, &d, argv[4]);
 	mesh->scale_pos = d;
 	mesh->scale_tex = 1.0;
-	return JS_NewInt64(ctx, (int64_t)mesh);
+	return JS_NewBigUint64(ctx, (uint64_t)mesh);
 }
 
 void transform_rotate(void *raw, vec4_t axis, float f);
 FN(transform_rotate) {
-	int64_t p;
-	JS_ToInt64(ctx, &p, argv[0]);
+	uint64_t p;
+	JS_ToBigUint64(ctx, &p, argv[0]);
 	vec4_t axis;
 	axis.x = 0.0;
 	axis.y = 0.0;

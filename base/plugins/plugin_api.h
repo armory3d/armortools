@@ -7,9 +7,9 @@
 
 extern JSRuntime *js_runtime;
 extern JSContext *js_ctx;
-void js_eval(const char *s);
-void js_call(void *p);
-void js_call_arg(void *p, int argc, void *argv);
+float js_eval(const char *s);
+char *js_call(void *p);
+JSValue js_call_arg(void *p, int argc, void *argv);
 
 // ██████╗ ███████╗███████╗██╗███╗   ██╗███████╗███████╗
 // ██╔══██╗██╔════╝██╔════╝██║████╗  ██║██╔════╝██╔════╝
@@ -31,8 +31,8 @@ void js_call_arg(void *p, int argc, void *argv);
 #define PTR_FN(name)\
     void *name();\
     FN(name) {\
-        int64_t result = (int64_t)name();\
-        return JS_NewInt64(ctx, result);\
+        uint64_t result = (uint64_t)name();\
+        return JS_NewBigUint64(ctx, result);\
     }
 
 #define VOID_FN_STR(name)\
@@ -46,8 +46,8 @@ void js_call_arg(void *p, int argc, void *argv);
 #define VOID_FN_PTR_STR(name)\
     void name(void *p, char *s);\
     FN(name) {\
-        int64_t p;\
-        JS_ToInt64(ctx, &p, argv[0]);\
+        uint64_t p;\
+        JS_ToBigUint64(ctx, &p, argv[0]);\
         char *s = (char *)JS_ToCString(ctx, argv[1]);\
         name((void *)p, s);\
         return JS_UNDEFINED;\
@@ -67,8 +67,8 @@ void js_call_arg(void *p, int argc, void *argv);
 #define VOID_FN_PTR_CB(name)\
     void name(void *p0, void *p1);\
     FN(name) {\
-        int64_t p0;\
-        JS_ToInt64(ctx, &p0, argv[0]);\
+        uint64_t p0;\
+        JS_ToBigUint64(ctx, &p0, argv[0]);\
         JSValue *p1 = malloc(sizeof(JSValue));\
         JSValue dup = JS_DupValue(ctx, argv[1]);\
         memcpy(p1, &dup, sizeof(JSValue));\
