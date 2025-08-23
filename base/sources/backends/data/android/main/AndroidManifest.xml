@@ -20,5 +20,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="org.armory3d.ErrorActivity" />
     </application>
 </manifest>

@@ -1,5 +1,6 @@
 package org.armory3d
 
+import android.app.Activity
 import android.app.NativeActivity
 import android.content.Context
 import android.content.Intent
@@ -33,6 +34,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import kotlin.math.log
+import android.app.AlertDialog
+
+class ErrorActivity: Activity() {
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		AlertDialog.Builder(this)
+			.setTitle("Error")
+			.setMessage("This device does not support Vulkan 1.3. :(")
+			.setCancelable(false)
+			.show()
+	}
+}
 
 class IronActivity: NativeActivity(), KeyEvent.Callback {
 	companion object {
@@ -132,6 +145,13 @@ class IronActivity: NativeActivity(), KeyEvent.Callback {
 
 	override fun onCreate(state: Bundle?) {
 		super.onCreate(state)
+
+		if (!packageManager.hasSystemFeature(PackageManager.FEATURE_VULKAN_HARDWARE_VERSION, 0x00403000)) { // 1.3
+			startActivity(Intent(this, ErrorActivity::class.java))
+			finish()
+			return
+		}
+
 		hideSystemUI()
 		instance = this
 		inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -159,26 +179,26 @@ class IronActivity: NativeActivity(), KeyEvent.Callback {
 		);
 	}
 
-    private fun hideSystemUI() {
-        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-    }
+	private fun hideSystemUI() {
+		window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+	}
 
-    private fun delayedHideSystemUI() {
-        hideSystemUIHandler.removeMessages(0)
-        if (!isDisabledStickyImmersiveMode) {
-            hideSystemUIHandler.sendEmptyMessageDelayed(0, 300)
-        }
-    }
+	private fun delayedHideSystemUI() {
+		hideSystemUIHandler.removeMessages(0)
+		if (!isDisabledStickyImmersiveMode) {
+			hideSystemUIHandler.sendEmptyMessageDelayed(0, 300)
+		}
+	}
 
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        super.onWindowFocusChanged(hasFocus)
-        if (hasFocus) {
-            delayedHideSystemUI()
-        }
-        else {
-            hideSystemUIHandler.removeMessages(0)
-        }
-    }
+	override fun onWindowFocusChanged(hasFocus: Boolean) {
+		super.onWindowFocusChanged(hasFocus)
+		if (hasFocus) {
+			delayedHideSystemUI()
+		}
+		else {
+			hideSystemUIHandler.removeMessages(0)
+		}
+	}
 
 	override fun onKeyMultiple(keyCode: Int, count: Int, event: KeyEvent): Boolean {
 		this.nativeIronKeyPress(event.characters)
