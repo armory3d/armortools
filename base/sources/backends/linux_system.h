@@ -82,6 +82,7 @@ struct iron_x11_procs {
 	Display *(*XOpenDisplay)(const char *name);
 	Status (*XInternAtoms)(Display *display, char **names, int count, Bool only_if_exists, Atom *atoms_return);
 	int (*XCloseDisplay)(Display *display);
+	int (*XInitThreads)(void);
 	XErrorHandler (*XSetErrorHandler)(XErrorHandler handler);
 	int (*XGetErrorText)(Display *, int, char *, int);
 	int (*XPending)(Display *display);

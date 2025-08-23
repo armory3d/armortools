@@ -353,6 +353,7 @@ bool iron_x11_init() {
 
 	xlib.XOpenDisplay = dlsym(x11_ctx.libs.X11, "XOpenDisplay");
 	xlib.XCloseDisplay = dlsym(x11_ctx.libs.X11, "XCloseDisplay");
+	xlib.XInitThreads = dlsym(x11_ctx.libs.X11, "XInitThreads");
 	xlib.XSetErrorHandler = dlsym(x11_ctx.libs.X11, "XSetErrorHandler");
 	xlib.XGetErrorText = dlsym(x11_ctx.libs.X11, "XGetErrorText");
 	xlib.XInternAtoms = dlsym(x11_ctx.libs.X11, "XInternAtoms");
@@ -407,6 +408,8 @@ bool iron_x11_init() {
 	xlib.XRRGetCrtcInfo = dlsym(x11_ctx.libs.Xrandr, "XRRGetCrtcInfo");
 	xlib.XRRFreeCrtcInfo = dlsym(x11_ctx.libs.Xrandr, "XRRFreeCrtcInfo");
 	xlib.XRRFreeScreenResources = dlsym(x11_ctx.libs.Xrandr, "XRRFreeScreenResources");
+
+	xlib.XInitThreads(); // Fixes random ubuntu22 crash
 
 	x11_ctx.display = xlib.XOpenDisplay(NULL);
 	if (!x11_ctx.display) {
