@@ -807,8 +807,6 @@ iron_display_mode_t iron_display_current_mode(int display) {
 	return dm;
 }
 
-NSWindow *iron_get_mac_window_handle();
-
 void iron_internal_mouse_lock() {
 	iron_mouse_hide();
 }
@@ -830,7 +828,7 @@ void iron_mouse_hide(void) {
 }
 
 void iron_mouse_set_position(int x, int y) {
-	NSWindow *window = iron_get_mac_window_handle();
+	NSWindow *window = windows[0].handle;
 	float scale = [window backingScaleFactor];
 	NSRect rect = [[NSScreen mainScreen] frame];
 
@@ -843,7 +841,7 @@ void iron_mouse_set_position(int x, int y) {
 }
 
 void iron_mouse_get_position(int *x, int *y) {
-	NSWindow *window = iron_get_mac_window_handle();
+	NSWindow *window = windows[0].handle;
 	NSPoint point = [window mouseLocationOutsideOfEventStream];
 	*x = (int)point.x;
 	*y = (int)point.y;
@@ -1049,10 +1047,6 @@ int iron_window_height() {
 	return [[window contentView] frame].size.height * scale;
 }
 
-NSWindow *iron_get_mac_window_handle() {
-	return windows[0].handle;
-}
-
 void iron_load_url(const char *url) {
 	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:[NSString stringWithUTF8String:url]]];
 }
@@ -1165,8 +1159,12 @@ void iron_window_change_mode(iron_window_mode_t mode) {}
 void iron_window_destroy() {}
 void iron_window_show() {}
 void iron_window_hide() {}
-void iron_window_set_title(const char *title) {}
 void iron_window_create(iron_window_options_t *win) {}
+
+void iron_window_set_title(const char *title) {
+	NSWindow *window = windows[0].handle;
+	[window setTitle:[NSString stringWithUTF8String:title]];
+}
 
 void iron_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {
 	windows[0].resizeCallback = callback;
