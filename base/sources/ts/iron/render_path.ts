@@ -42,7 +42,7 @@ function render_path_ready(): bool {
 }
 
 function render_path_render_frame() {
-	if (!render_path_ready() || _render_path_paused || sys_w() == 0 || sys_h() == 0) {
+	if (!render_path_ready() || _render_path_paused) {
 		return;
 	}
 

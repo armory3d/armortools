@@ -770,7 +770,7 @@ function ui_nodes_draw_grid(zoom: f32): gpu_texture_t {
 
 let _ui_nodes_render_tmp: (col: i32)=>void;
 
-function ui_nodes_render() {
+function ui_nodes_recompile() {
 	if (ui_nodes_recompile_mat) {
 		///if is_paint
 		if (ui_nodes_canvas_type == canvas_type_t.BRUSH) {
@@ -829,19 +829,22 @@ function ui_nodes_render() {
 
 		ui_nodes_recompile_mat_final = false;
 	}
+}
 
+function ui_nodes_render() {
+	ui_nodes_recompile();
+
+	// Node preview
 	let nodes: ui_nodes_t = ui_nodes_get_nodes();
 	if (nodes.nodes_selected_id.length > 0 && nodes.nodes_selected_id[0] != ui_nodes_last_node_selected_id) {
 		ui_nodes_last_node_selected_id = nodes.nodes_selected_id[0];
 		///if is_paint
 		context_raw.node_preview_dirty = true;
 		///end
-
 		///if is_lab
 		context_raw.ddirty = 2; // Show selected node texture in viewport
 		ui_header_handle.redraws = 2;
 		///end
-
 		context_raw.node_preview_socket = 0;
 	}
 
@@ -853,7 +856,7 @@ function ui_nodes_render() {
 	}
 	ui_nodes_release_link = ui.input_released;
 
-	if (!ui_nodes_show || iron_window_width() == 0 || iron_window_height() == 0) {
+	if (!ui_nodes_show) {
 		return;
 	}
 
@@ -917,7 +920,6 @@ function ui_nodes_render() {
 	}
 
 	if (ui_window(ui_nodes_hwnd, ui_nodes_wx, ui_nodes_wy, ui_nodes_ww, ui_nodes_wh)) {
-
 		ui_tab(ui_nodes_htab, tr("Nodes"));
 
 		// Additional tabs
@@ -1119,128 +1121,7 @@ function ui_nodes_render() {
 			}
 		}
 
-		// Menu
-		draw_set_color(ui.ops.theme.SEPARATOR_COL);
-		draw_filled_rect(0, UI_ELEMENT_H(), ui_nodes_ww, UI_ELEMENT_H() + UI_ELEMENT_OFFSET() * 2);
-		draw_set_color(0xffffffff);
-
-		let start_y: i32 = UI_ELEMENT_H() + UI_ELEMENT_OFFSET();
-		ui._x = 0;
-		ui._y = 2 + start_y;
-		ui._w = ew;
-
-		///if is_paint
-		// Editable canvas name
-		let h: ui_handle_t = ui_handle(__ID__);
-		h.text = c.name;
-		ui._w = math_floor(math_min(draw_string_width(ui.ops.font, ui.font_size, h.text) + 15 * UI_SCALE(), 100 * UI_SCALE()));
-		let new_name: string = ui_text_input(h, "");
-		ui._x += ui._w + 3;
-		ui._y = 2 + start_y;
-		ui._w = ew;
-
-		if (h.changed) { // Check whether renaming is possible and update group links
-			if (ui_nodes_group_stack.length > 0) {
-				let can_rename: bool = true;
-				for (let i: i32 = 0; i < project_material_groups.length; ++i) {
-					let m: node_group_t = project_material_groups[i];
-					if (m.canvas.name == new_name) {
-						can_rename = false; // Name already used
-					}
-				}
-
-				if (can_rename) {
-					let old_name: string = c.name;
-					c.name = new_name;
-					let canvases: ui_node_canvas_t[] = [];
-					for (let i: i32 = 0; i < project_materials.length; ++i) {
-						let m: slot_material_t = project_materials[i];
-						array_push(canvases, m.canvas);
-					}
-					for (let i: i32 = 0; i < project_material_groups.length; ++i) {
-						let m: node_group_t = project_material_groups[i];
-						array_push(canvases, m.canvas);
-					}
-					for (let i: i32 = 0; i < canvases.length; ++i) {
-						let canvas: ui_node_canvas_t = canvases[i];
-						for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
-							let n: ui_node_t = canvas.nodes[i];
-							if (n.type == "GROUP" && n.name == old_name) {
-								n.name = c.name;
-							}
-						}
-					}
-				}
-			}
-			else {
-				c.name = new_name;
-			}
-		}
-		///end
-
-		///if is_lab
-		ui.window_border_top = 0;
-		ui_nodes_ext_draw_buttons(ew, start_y);
-		///end
-
-		let _BUTTON_COL: i32 = ui.ops.theme.BUTTON_COL;
-		ui.ops.theme.BUTTON_COL = ui.ops.theme.SEPARATOR_COL;
-
-		///if is_paint
-		let cats: string[] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_categories : nodes_brush_categories;
-		///end
-		///if is_lab
-		let cats: string[] = nodes_brush_categories;
-		///end
-
-		for (let i: i32 = 0; i < cats.length; ++i) {
-			if ((_ui_menu_button(tr(cats[i]))) || (ui.is_hovered && ui_nodes_show_menu)) {
-				ui_nodes_show_menu = true;
-				ui_nodes_menu_category = i;
-				ui_nodes_popup_x = ui_nodes_wx + ui._x;
-				ui_nodes_popup_y = ui_nodes_wy + ui._y;
-				if (config_raw.touch_ui) {
-					ui_nodes_show_menu_first = true;
-					let menuw: i32 = math_floor(ew * 2.3);
-					ui_nodes_popup_x -= menuw / 2;
-					ui_nodes_popup_x += ui._w / 2;
-				}
-			}
-			ui._x += ui._w + 3;
-			ui._y = 2 + start_y;
-		}
-
-		if (config_raw.touch_ui) {
-			let _w: i32 = ui._w;
-			ui._w = math_floor(36 * UI_SCALE());
-			ui._y = 4 * UI_SCALE() + start_y;
-			if (ui_menubar_icon_button(2, 3)) {
-				ui_nodes_node_search(math_floor(ui._window_x + ui._x), math_floor(ui._window_y + ui._y));
-			}
-			ui._w = _w;
-		}
-		else {
-			if (_ui_menu_button(tr("Search"))) {
-				ui_nodes_node_search_x = ui._window_x + ui._x;
-				ui_nodes_node_search_y = ui._window_y + ui._y;
-				// Allow for node menu to be closed first
-				sys_notify_on_next_frame(function() {
-					ui_nodes_node_search(math_floor(ui_nodes_node_search_x), math_floor(ui_nodes_node_search_y));
-				});
-			}
-		}
-		if (ui.is_hovered) {
-			ui_tooltip(tr("Search for nodes") + " (" + map_get(config_keymap, "node_search") + ")");
-		}
-		ui._x += ui._w + 3;
-		ui._y = 2 + start_y;
-
-		ui.ops.theme.BUTTON_COL = _BUTTON_COL;
-
-		// Close node group
-		if (ui_nodes_group_stack.length > 0 && _ui_menu_button(tr("Close"))) {
-			array_pop(ui_nodes_group_stack);
-		}
+		ui_nodes_draw_menubar();
 
 		ui.window_border_right = 0;
 		ui.window_border_top = 0;
@@ -1354,6 +1235,133 @@ function ui_nodes_render() {
 	}
 
 	ui.input_enabled = true;
+}
+
+function ui_nodes_draw_menubar() {
+	let c: ui_node_canvas_t = ui_nodes_get_canvas(true);
+	let ew: i32 = math_floor(UI_ELEMENT_W() * 0.7);
+
+	draw_set_color(ui.ops.theme.SEPARATOR_COL);
+	draw_filled_rect(0, UI_ELEMENT_H(), ui_nodes_ww, UI_ELEMENT_H() + UI_ELEMENT_OFFSET() * 2);
+	draw_set_color(0xffffffff);
+
+	let start_y: i32 = UI_ELEMENT_H() + UI_ELEMENT_OFFSET();
+	ui._x = 0;
+	ui._y = 2 + start_y;
+	ui._w = ew;
+
+	///if is_paint
+	// Editable canvas name
+	let h: ui_handle_t = ui_handle(__ID__);
+	h.text = c.name;
+	ui._w = math_floor(math_min(draw_string_width(ui.ops.font, ui.font_size, h.text) + 15 * UI_SCALE(), 100 * UI_SCALE()));
+	let new_name: string = ui_text_input(h, "");
+	ui._x += ui._w + 3;
+	ui._y = 2 + start_y;
+	ui._w = ew;
+
+	if (h.changed) { // Check whether renaming is possible and update group links
+		if (ui_nodes_group_stack.length > 0) {
+			let can_rename: bool = true;
+			for (let i: i32 = 0; i < project_material_groups.length; ++i) {
+				let m: node_group_t = project_material_groups[i];
+				if (m.canvas.name == new_name) {
+					can_rename = false; // Name already used
+				}
+			}
+
+			if (can_rename) {
+				let old_name: string = c.name;
+				c.name = new_name;
+				let canvases: ui_node_canvas_t[] = [];
+				for (let i: i32 = 0; i < project_materials.length; ++i) {
+					let m: slot_material_t = project_materials[i];
+					array_push(canvases, m.canvas);
+				}
+				for (let i: i32 = 0; i < project_material_groups.length; ++i) {
+					let m: node_group_t = project_material_groups[i];
+					array_push(canvases, m.canvas);
+				}
+				for (let i: i32 = 0; i < canvases.length; ++i) {
+					let canvas: ui_node_canvas_t = canvases[i];
+					for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
+						let n: ui_node_t = canvas.nodes[i];
+						if (n.type == "GROUP" && n.name == old_name) {
+							n.name = c.name;
+						}
+					}
+				}
+			}
+		}
+		else {
+			c.name = new_name;
+		}
+	}
+	///end
+
+	///if is_lab
+	ui.window_border_top = 0;
+	ui_nodes_ext_draw_buttons(ew, start_y);
+	///end
+
+	let _BUTTON_COL: i32 = ui.ops.theme.BUTTON_COL;
+	ui.ops.theme.BUTTON_COL = ui.ops.theme.SEPARATOR_COL;
+
+	///if is_paint
+	let cats: string[] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_categories : nodes_brush_categories;
+	///end
+	///if is_lab
+	let cats: string[] = nodes_brush_categories;
+	///end
+
+	for (let i: i32 = 0; i < cats.length; ++i) {
+		if ((_ui_menu_button(tr(cats[i]))) || (ui.is_hovered && ui_nodes_show_menu)) {
+			ui_nodes_show_menu = true;
+			ui_nodes_menu_category = i;
+			ui_nodes_popup_x = ui_nodes_wx + ui._x;
+			ui_nodes_popup_y = ui_nodes_wy + ui._y;
+			if (config_raw.touch_ui) {
+				ui_nodes_show_menu_first = true;
+				let menuw: i32 = math_floor(ew * 2.3);
+				ui_nodes_popup_x -= menuw / 2;
+				ui_nodes_popup_x += ui._w / 2;
+			}
+		}
+		ui._x += ui._w + 3;
+		ui._y = 2 + start_y;
+	}
+
+	if (config_raw.touch_ui) {
+		let _w: i32 = ui._w;
+		ui._w = math_floor(36 * UI_SCALE());
+		ui._y = 4 * UI_SCALE() + start_y;
+		if (ui_menubar_icon_button(2, 3)) {
+			ui_nodes_node_search(math_floor(ui._window_x + ui._x), math_floor(ui._window_y + ui._y));
+		}
+		ui._w = _w;
+	}
+	else {
+		if (_ui_menu_button(tr("Search"))) {
+			ui_nodes_node_search_x = ui._window_x + ui._x;
+			ui_nodes_node_search_y = ui._window_y + ui._y;
+			// Allow for node menu to be closed first
+			sys_notify_on_next_frame(function() {
+				ui_nodes_node_search(math_floor(ui_nodes_node_search_x), math_floor(ui_nodes_node_search_y));
+			});
+		}
+	}
+	if (ui.is_hovered) {
+		ui_tooltip(tr("Search for nodes") + " (" + map_get(config_keymap, "node_search") + ")");
+	}
+	ui._x += ui._w + 3;
+	ui._y = 2 + start_y;
+
+	ui.ops.theme.BUTTON_COL = _BUTTON_COL;
+
+	// Close node group
+	if (ui_nodes_group_stack.length > 0 && _ui_menu_button(tr("Close"))) {
+		array_pop(ui_nodes_group_stack);
+	}
 }
 
 function ui_nodes_contains_node_group_recursive(group: node_group_t, group_name: string): bool {

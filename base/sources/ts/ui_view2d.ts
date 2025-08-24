@@ -73,9 +73,6 @@ function ui_view2d_render() {
 	if (!ui_view2d_show) {
 		return;
 	}
-	if (iron_window_width() == 0 || iron_window_height() == 0) {
-		return;
-	}
 
 	if (context_raw.pdirty >= 0) {
 		ui_view2d_hwnd.redraws = 2; // Paint was active

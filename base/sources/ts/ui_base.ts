@@ -1158,7 +1158,7 @@ function ui_base_render() {
 		ui_end();
 	}
 
-	if (!ui_base_show || iron_window_width() == 0 || iron_window_height() == 0) {
+	if (!ui_base_show) {
 		return;
 	}
 

@@ -532,10 +532,6 @@ function base_get_drag_image(): gpu_texture_t {
 }
 
 function base_render() {
-	if (iron_window_width() == 0 || iron_window_height() == 0) {
-		return;
-	}
-
 	base_ext_render();
 
 	if (context_raw.frame == 2) {

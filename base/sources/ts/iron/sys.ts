@@ -414,8 +414,11 @@ function sys_render() {
 	}
 
 	_sys_run_callbacks(_sys_on_updates);
-	scene_render_frame();
-	_sys_run_callbacks(_sys_on_renders);
+
+	if (iron_window_width() > 0 && iron_window_height() > 0) {
+		scene_render_frame();
+		_sys_run_callbacks(_sys_on_renders);
+	}
 
 	if (_sys_on_end_frames.length > 0) {
 		_sys_run_callbacks(_sys_on_end_frames);
