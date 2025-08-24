@@ -957,7 +957,9 @@ function ui_nodes_render() {
 
 		// Nodes
 		let _input_enabled: bool = ui.input_enabled;
-		ui.input_enabled = _input_enabled && !ui_nodes_show_menu;
+		let header_h: i32 = UI_ELEMENT_H() * 2 + UI_ELEMENT_OFFSET() * 2;
+		let header_hover: bool = ui.input_y < ui._window_y + header_h;
+		ui.input_enabled = _input_enabled && !ui_nodes_show_menu && !header_hover;
 		///if is_paint
 		ui.window_border_right = config_raw.layout[layout_size_t.SIDEBAR_W];
 		///end
