@@ -3,8 +3,8 @@
 
 void proc_xatlas_unwrap(void *mesh);
 FN(proc_xatlas_unwrap) {
-	int64_t mesh;
-	JS_ToInt64(ctx, &mesh, argv[0]);
+	uint64_t mesh;
+	JS_ToBigUint64(ctx, &mesh, argv[0]);
 	proc_xatlas_unwrap((void *)mesh);
 	return JS_UNDEFINED;
 }
@@ -19,14 +19,14 @@ void *io_svg_parse(char *buf);
 FN(io_svg_parse) {
 	size_t len;
 	void *ab = JS_GetArrayBuffer(ctx, &len, argv[0]);
-	return JS_NewInt64(ctx, (int64_t)io_svg_parse(ab));
+	return JS_NewBigUint64(ctx, (uint64_t)io_svg_parse(ab));
 }
 
 void *io_usd_parse(char *buf, size_t size);
 FN(io_usd_parse) {
 	size_t len;
 	void *ab = JS_GetArrayBuffer(ctx, &len, argv[0]);
-	return JS_NewInt64(ctx, (int64_t)io_usd_parse(ab, len));
+	return JS_NewBigUint64(ctx, (uint64_t)io_usd_parse(ab, len));
 }
 
 void *io_gltf_parse(char *buf, size_t size, const char *path);
@@ -34,14 +34,14 @@ FN(io_gltf_parse) {
 	size_t len;
 	void *ab = JS_GetArrayBuffer(ctx, &len, argv[0]);
 	const char *path = JS_ToCString(ctx, argv[1]);
-	return JS_NewInt64(ctx, (int64_t)io_gltf_parse(ab, len, path));
+	return JS_NewBigUint64(ctx, (uint64_t)io_gltf_parse(ab, len, path));
 }
 
 void *io_fbx_parse(char *buf, size_t size);
 FN(io_fbx_parse) {
 	size_t len;
 	void *ab = JS_GetArrayBuffer(ctx, &len, argv[0]);
-	return JS_NewInt64(ctx, (int64_t)io_fbx_parse(ab, len));
+	return JS_NewBigUint64(ctx, (uint64_t)io_fbx_parse(ab, len));
 }
 
 void plugin_embed() {
