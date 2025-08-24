@@ -541,6 +541,25 @@ void iron_mouse_get_position(int *x, int *y) {
 }
 
 void iron_mouse_set_cursor(int cursor_index) {
+	if (current_cursor_index == cursor_index) {
+		return;
+	}
+	current_cursor_index = cursor_index;
+	if (cursor_index == 1) {
+		[[NSCursor pointingHandCursor] set];
+	}
+	else if (cursor_index == 2) {
+		[[NSCursor IBeamCursor] set];
+	}
+	else if (cursor_index == 3) {
+		[[NSCursor resizeLeftRightCursor] set];
+	}
+	else if (cursor_index == 4) {
+		[[NSCursor resizeUpDownCursor] set];
+	}
+	else {
+		[[NSCursor arrowCursor] set];
+	}
 }
 
 void iron_keyboard_show(void) {
