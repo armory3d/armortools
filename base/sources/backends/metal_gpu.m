@@ -643,6 +643,10 @@ void *gpu_index_buffer_lock(gpu_buffer_t *buffer) {
 void gpu_index_buffer_unlock(gpu_buffer_t *buffer) {
 }
 
+char *gpu_device_name() {
+	return "";
+}
+
 typedef struct inst {
 	iron_matrix4x4_t m;
 	int i;

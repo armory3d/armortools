@@ -46,6 +46,7 @@ static ID3D12Resource *upload_buffer = NULL;
 static int upload_buffer_size = 0;
 static ID3D12Resource *resources_to_destroy[256];
 static int resources_to_destroy_count = 0;
+static char device_name[256];
 
 static D3D12_BLEND convert_blend_factor(gpu_blending_factor_t factor) {
 	switch (factor) {
@@ -1112,6 +1113,10 @@ void gpu_constant_buffer_unlock(gpu_buffer_t *buffer) {
 void gpu_buffer_destroy_internal(gpu_buffer_t *buffer) {
 	buffer->impl.buffer->lpVtbl->Release(buffer->impl.buffer);
 	buffer->impl.buffer = NULL;
+}
+
+char *gpu_device_name() {
+    return device_name;
 }
 
 typedef struct inst {

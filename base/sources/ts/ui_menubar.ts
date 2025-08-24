@@ -674,36 +674,8 @@ function ui_menubar_draw_category_items() {
 			let msg: string = manifest_title + ".org - v" + manifest_version + " (" + config_get_date() + ") - " + config_get_sha() + "\n";
 			msg += iron_system_id() + " - " + strings_graphics_api();
 
-			///if arm_windows
-			let save: string;
-			if (path_is_protected()) {
-				save = iron_internal_save_path();
-			}
-			else {
-				save = path_data();
-			}
-			save += path_sep + "tmp.txt";
-			iron_sys_command("wmic path win32_VideoController get name > \"" + save + "\"");
-			let blob: buffer_t = iron_load_blob(save);
-			let u8: u8_array_t = blob;
-			let gpu_raw: string = "";
-			for (let i: i32 = 0; i < math_floor(u8.length / 2); ++i) {
-				let c: string = string_from_char_code(u8[i * 2]);
-				gpu_raw += c;
-			}
-
-			let gpus: string[] = string_split(gpu_raw, "\n");
-			array_splice(gpus, 1, gpus.length - 2);
-			let gpu: string = "";
-			for (let i: i32 = 0; i < gpus.length; ++i) {
-				let g: string = gpus[i];
-				gpu += trim_end(g) + ", ";
-			}
-			gpu = substring(gpu, 0, gpu.length - 2);
+			let gpu: string = gpu_device_name();
 			msg += "\n" + gpu;
-			///else
-			// { lshw -C display }
-			///end
 
 			_ui_menu_render_msg = msg;
 

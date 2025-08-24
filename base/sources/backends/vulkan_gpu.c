@@ -42,6 +42,7 @@ static VkCommandBuffer command_buffer;
 static VkBuffer buffers_to_destroy[256];
 static VkDeviceMemory buffer_memories_to_destroy[256];
 static int buffers_to_destroy_count = 0;
+static char device_name[256];
 
 static VkInstance instance;
 static VkPhysicalDevice gpu;
@@ -753,6 +754,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 		VkPhysicalDeviceProperties properties;
 		vkGetPhysicalDeviceProperties(gpu, &properties);
 		iron_log("Chosen Vulkan device: %s", properties.deviceName);
+		strcpy(device_name, properties.deviceName);
 		is_amd = properties.vendorID == 0x1002;
 		free(physical_devices);
 	}
@@ -1870,6 +1872,10 @@ void gpu_constant_buffer_unlock(gpu_buffer_t *buffer) {
 void gpu_buffer_destroy_internal(gpu_buffer_t *buffer) {
 	vkFreeMemory(device, buffer->impl.mem, NULL);
 	vkDestroyBuffer(device, buffer->impl.buf, NULL);
+}
+
+char *gpu_device_name() {
+	return device_name;
 }
 
 typedef struct inst {

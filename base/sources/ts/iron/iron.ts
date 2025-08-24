@@ -249,6 +249,7 @@ declare function gpu_set_floats(location: i32, values: f32_array_t): void;
 declare function gpu_set_matrix4(location: i32, matrix: mat4_t): void;
 declare function gpu_set_matrix3(location: i32, matrix: mat3_t): void;
 declare function gpu_use_linear_sampling(b: bool): void;
+declare function gpu_device_name(): string;
 
 declare function iron_time(): f32;
 declare function iron_window_width(): i32;
