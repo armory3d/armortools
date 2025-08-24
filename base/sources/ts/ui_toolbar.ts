@@ -39,14 +39,21 @@ function ui_toolbar_draw_tool(i: i32, img: gpu_texture_t, icon_accent: i32, keys
 	let rect: rect_t = resource_tile50(img, tile_x, tile_y);
 	let _y: i32 = ui._y;
 
+	let visible: bool = true;
+	if (config_raw.layout[layout_size_t.HEADER] == 0) {
+		let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
+		let statusy: i32 = iron_window_height() - statush;
+		visible = ui._y + ui._w * 2 < statusy;
+	}
+
 	let image_state: ui_state_t = ui_sub_image(img, icon_accent, -1.0, rect.x, rect.y, rect.w, rect.h);
-	if (image_state == ui_state_t.STARTED) {
+	if (image_state == ui_state_t.STARTED && visible) {
 		_ui_toolbar_i = i;
 		sys_notify_on_next_frame(function() {
 			context_select_tool(_ui_toolbar_i);
 		});
 	}
-	else if (image_state == ui_state_t.RELEASED && config_raw.layout[layout_size_t.HEADER] == 0) {
+	else if (image_state == ui_state_t.RELEASED && config_raw.layout[layout_size_t.HEADER] == 0 && visible) {
 		if (ui_toolbar_last_tool == i) {
 			ui_toolbar_tool_properties_menu();
 		}
