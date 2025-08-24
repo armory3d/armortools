@@ -1116,7 +1116,16 @@ void gpu_buffer_destroy_internal(gpu_buffer_t *buffer) {
 }
 
 char *gpu_device_name() {
-    return device_name;
+	IDXGIFactory *factory;
+	CreateDXGIFactory(&IID_IDXGIFactory, (void **)&factory);
+	IDXGIAdapter *adapter;
+	factory->lpVtbl->EnumAdapters(factory, 0, &adapter);
+	DXGI_ADAPTER_DESC desc;
+	adapter->lpVtbl->GetDesc(adapter, &desc);
+	WideCharToMultiByte(CP_UTF8, 0, desc.Description, -1, device_name, sizeof(device_name), NULL, NULL);
+	adapter->lpVtbl->Release(adapter);
+	factory->lpVtbl->Release(factory);
+	return device_name;
 }
 
 typedef struct inst {
