@@ -27,7 +27,6 @@
 - (void)scrollWheel:(NSEvent *)theEvent;
 - (NSDragOperation)draggingEntered:(id<NSDraggingInfo>)sender;
 - (BOOL)performDragOperation:(id<NSDraggingInfo>)sender;
-- (void)update;
 - (BOOL)acceptsFirstResponder;
 - (BOOL)becomeFirstResponder;
 - (BOOL)resignFirstResponder;

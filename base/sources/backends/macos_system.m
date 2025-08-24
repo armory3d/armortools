@@ -27,9 +27,7 @@ static NSApplication *myapp;
 static NSWindow *window;
 static BasicMTKView *view;
 static char language[3];
-#ifdef WITH_GAMEPAD
-static struct HIDManager *hidManager;
-#endif
+static int current_cursor_index = 0;
 
 @implementation BasicMTKView
 
@@ -411,9 +409,6 @@ static int getMouseY(NSEvent *event) {
 	return YES;
 }
 
-- (void)update {
-}
-
 - (id)initWithFrame:(NSRect)frameRect {
 	self = [super initWithFrame:frameRect];
 
@@ -466,7 +461,417 @@ void iron_copy_to_clipboard(const char *text) {
 	[board setString:[NSString stringWithUTF8String:text] forType:NSStringPboardType];
 }
 
+int iron_count_displays(void) {
+	NSArray *screens = [NSScreen screens];
+	return (int)[screens count];
+}
+
+int iron_primary_display(void) {
+	NSArray *screens = [NSScreen screens];
+	NSScreen *mainScreen = [NSScreen mainScreen];
+	int max_displays = 8;
+	for (int i = 0; i < max_displays; ++i) {
+		if (mainScreen == screens[i]) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+void iron_display_init(void) {}
+
+iron_display_mode_t iron_display_current_mode(int display) {
+	NSArray *screens = [NSScreen screens];
+	NSScreen *screen = screens[display];
+	NSRect screenRect = [screen frame];
+	iron_display_mode_t dm;
+	dm.width = screenRect.size.width;
+	dm.height = screenRect.size.height;
+	dm.frequency = 60;
+	dm.bits_per_pixel = 32;
+
+	NSDictionary *description = [screen deviceDescription];
+	NSSize displayPixelSize = [[description objectForKey:NSDeviceSize] sizeValue];
+	NSNumber *screenNumber = [description objectForKey:@"NSScreenNumber"];
+	CGSize displayPhysicalSize = CGDisplayScreenSize([screenNumber unsignedIntValue]); // in millimeters
+	double ppi = displayPixelSize.width / (displayPhysicalSize.width * 0.039370);      // Convert MM to INCH
+	dm.pixels_per_inch = round(ppi);
+
+	return dm;
+}
+
+void iron_internal_mouse_lock() {
+	iron_mouse_hide();
+}
+
+void iron_internal_mouse_unlock(void) {
+	iron_mouse_show();
+}
+
+bool iron_mouse_can_lock(void) {
+	return true;
+}
+
+void iron_mouse_show(void) {
+	CGDisplayShowCursor(kCGDirectMainDisplay);
+}
+
+void iron_mouse_hide(void) {
+	CGDisplayHideCursor(kCGDirectMainDisplay);
+}
+
+void iron_mouse_set_position(int x, int y) {
+	NSWindow *window = windows[0].handle;
+	float scale = [window backingScaleFactor];
+	NSRect rect = [[NSScreen mainScreen] frame];
+
+	CGPoint point;
+	point.x = window.frame.origin.x + (x / scale);
+	point.y = rect.size.height - (window.frame.origin.y + (y / scale));
+
+	CGDisplayMoveCursorToPoint(0, point);
+	CGAssociateMouseAndMouseCursorPosition(true);
+}
+
+void iron_mouse_get_position(int *x, int *y) {
+	NSWindow *window = windows[0].handle;
+	NSPoint point = [window mouseLocationOutsideOfEventStream];
+	*x = (int)point.x;
+	*y = (int)point.y;
+}
+
+void iron_mouse_set_cursor(int cursor_index) {
+}
+
+void iron_keyboard_show(void) {
+	keyboardShown = true;
+}
+
+void iron_keyboard_hide(void) {
+	keyboardShown = false;
+}
+
+bool iron_keyboard_active(void) {
+	return keyboardShown;
+}
+
+const char *iron_system_id(void) {
+	return "macOS";
+}
+
+const char **iron_video_formats(void) {
+	return videoFormats;
+}
+
+void iron_set_keep_screen_on(bool on) {}
+
+double iron_frequency(void) {
+	mach_timebase_info_data_t info;
+	mach_timebase_info(&info);
+	return (double)info.denom / (double)info.numer / 1e-9;
+}
+
+uint64_t iron_timestamp(void) {
+	return mach_absolute_time();
+}
+
+bool with_autoreleasepool(bool (*f)(void)) {
+	@autoreleasepool {
+		return f();
+	}
+}
+
+const char *iron_get_resource_path(void) {
+	return [[[NSBundle mainBundle] resourcePath] cStringUsingEncoding:NSUTF8StringEncoding];
+}
+
+@interface IronApplication : NSApplication {
+}
+- (void)terminate:(id)sender;
+@end
+
+@interface IronAppDelegate : NSObject <NSWindowDelegate> {
+}
+- (void)windowWillClose:(NSNotification *)notification;
+- (void)windowDidResize:(NSNotification *)notification;
+- (void)windowWillMiniaturize:(NSNotification *)notification;
+- (void)windowDidDeminiaturize:(NSNotification *)notification;
+- (void)windowDidResignMain:(NSNotification *)notification;
+- (void)windowDidBecomeMain:(NSNotification *)notification;
+@end
+
+static IronAppDelegate *delegate;
+
+CAMetalLayer *get_metal_layer(void) {
+	return [view metalLayer];
+}
+
+id get_metal_device(void) {
+	return [view metalDevice];
+}
+
+id get_metal_queue(void) {
+	return [view metalQueue];
+}
+
+bool iron_internal_handle_messages(void) {
+	NSEvent *event = [myapp nextEventMatchingMask:NSAnyEventMask
+										untilDate:[NSDate distantPast]
+										   inMode:NSDefaultRunLoopMode
+										  dequeue:YES]; // distantPast: non-blocking
+	if (event != nil) {
+		[myapp sendEvent:event];
+		[myapp updateWindows];
+	}
+
+	// Sleep for a frame to limit the calls when the window is not visible.
+	if (!window.visible) {
+		[NSThread sleepForTimeInterval:1.0 / 60];
+	}
+	return true;
+}
+
+static void createWindow(iron_window_options_t *options) {
+	int width = options->width / [[NSScreen mainScreen] backingScaleFactor];
+	int height = options->height / [[NSScreen mainScreen] backingScaleFactor];
+	int styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable;
+	if ((options->features & IRON_WINDOW_FEATURE_RESIZEABLE) || (options->features & IRON_WINDOW_FEATURE_MAXIMIZABLE)) {
+		styleMask |= NSWindowStyleMaskResizable;
+	}
+	if (options->features & IRON_WINDOW_FEATURE_MINIMIZABLE) {
+		styleMask |= NSWindowStyleMaskMiniaturizable;
+	}
+
+	view = [[BasicMTKView alloc] initWithFrame:NSMakeRect(0, 0, width, height)];
+	[view registerForDraggedTypes:[NSArray arrayWithObjects:NSURLPboardType, nil]];
+	window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, width, height) styleMask:styleMask backing:NSBackingStoreBuffered defer:TRUE];
+	delegate = [IronAppDelegate alloc];
+	[window setDelegate:delegate];
+	[window setTitle:[NSString stringWithCString:options->title encoding:NSUTF8StringEncoding]];
+	[window setAcceptsMouseMovedEvents:YES];
+	[[window contentView] addSubview:view];
+	[window center];
+
+	windows[0].handle = window;
+	windows[0].view = view;
+
+	[window makeKeyAndOrderFront:nil];
+
+	if (options->mode == IRON_WINDOW_MODE_FULLSCREEN) {
+		[window toggleFullScreen:nil];
+		windows[0].fullscreen = true;
+	}
+}
+
+void iron_window_change_window_mode(iron_window_mode_t mode) {
+	switch (mode) {
+	case IRON_WINDOW_MODE_WINDOW:
+		if (windows[0].fullscreen) {
+			[window toggleFullScreen:nil];
+			windows[0].fullscreen = false;
+		}
+		break;
+	case IRON_WINDOW_MODE_FULLSCREEN:
+		if (!windows[0].fullscreen) {
+			[window toggleFullScreen:nil];
+			windows[0].fullscreen = true;
+		}
+		break;
+	}
+}
+
+void iron_window_set_close_callback(bool (*callback)(void *), void *data) {
+	windows[0].closeCallback = callback;
+	windows[0].closeCallbackData = data;
+}
+
+static void add_menubar(void) {
+	NSString *appName = [[NSProcessInfo processInfo] processName];
+
+	NSMenu *appMenu = [NSMenu new];
+	NSString *quitTitle = [@"Quit " stringByAppendingString:appName];
+	NSMenuItem *quitMenuItem = [[NSMenuItem alloc] initWithTitle:quitTitle action:@selector(terminate:) keyEquivalent:@"q"];
+	[appMenu addItem:quitMenuItem];
+
+	NSMenuItem *appMenuItem = [NSMenuItem new];
+	[appMenuItem setSubmenu:appMenu];
+
+	NSMenu *menubar = [NSMenu new];
+	[menubar addItem:appMenuItem];
+	[NSApp setMainMenu:menubar];
+}
+
+void iron_init(iron_window_options_t *win) {
+	@autoreleasepool {
+		myapp = [IronApplication sharedApplication];
+		[myapp finishLaunching];
+		[[NSRunningApplication currentApplication] activateWithOptions:(NSApplicationActivateAllWindows | NSApplicationActivateIgnoringOtherApps)];
+		NSApp.activationPolicy = NSApplicationActivationPolicyRegular;
+		add_menubar();
+
+		#ifdef WITH_GAMEPAD
+		hidManager = (struct HIDManager *)malloc(sizeof(struct HIDManager));
+		HIDManager_init(hidManager);
+		#endif
+	}
+
+	createWindow(win);
+	gpu_init(win->depth_bits, true);
+}
+
+int iron_window_width() {
+	NSWindow *window = windows[0].handle;
+	float scale = [window backingScaleFactor];
+	return [[window contentView] frame].size.width * scale;
+}
+
+int iron_window_height() {
+	NSWindow *window = windows[0].handle;
+	float scale = [window backingScaleFactor];
+	return [[window contentView] frame].size.height * scale;
+}
+
+void iron_load_url(const char *url) {
+	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:[NSString stringWithUTF8String:url]]];
+}
+
+const char *iron_language(void) {
+	NSString *nsstr = [[NSLocale preferredLanguages] objectAtIndex:0];
+	const char *lang = [nsstr UTF8String];
+	language[0] = lang[0];
+	language[1] = lang[1];
+	language[2] = 0;
+	return language;
+}
+
+void iron_internal_shutdown(void) {}
+
+const char *iron_internal_save_path(void) {
+	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
+	NSString *resolvedPath = [paths objectAtIndex:0];
+	NSString *appName = [NSString stringWithUTF8String:iron_application_name()];
+	resolvedPath = [resolvedPath stringByAppendingPathComponent:appName];
+
+	NSFileManager *fileMgr = [[NSFileManager alloc] init];
+
+	NSError *error;
+	[fileMgr createDirectoryAtPath:resolvedPath withIntermediateDirectories:YES attributes:nil error:&error];
+
+	resolvedPath = [resolvedPath stringByAppendingString:@"/"];
+	return [resolvedPath cStringUsingEncoding:NSUTF8StringEncoding];
+}
+
+#ifndef IRON_NO_MAIN
+int main(int argc, char **argv) {
+	return kickstart(argc, argv);
+}
+#endif
+
+@implementation IronApplication
+
+- (void)terminate:(id)sender {
+	iron_stop();
+}
+
+@end
+
+@implementation IronAppDelegate
+- (BOOL)windowShouldClose:(NSWindow *)sender {
+	if (windows[0].closeCallback != NULL) {
+		if (windows[0].closeCallback(windows[0].closeCallbackData)) {
+			return YES;
+		}
+		else {
+			return NO;
+		}
+	}
+	return YES;
+}
+
+- (void)windowWillClose:(NSNotification *)notification {
+	iron_stop();
+}
+
+void iron_internal_call_resize_callback(int width, int height) {
+	if (windows[0].resizeCallback != NULL) {
+		windows[0].resizeCallback(width, height, windows[0].resizeCallbackData);
+	}
+}
+
+- (void)windowDidResize:(NSNotification *)notification {
+	NSWindow *window = [notification object];
+	NSSize size = [[window contentView] frame].size;
+	[view resize:size];
+
+	float scale = [window backingScaleFactor];
+	int w = size.width * scale;
+	int h = size.height * scale;
+
+	gpu_resize(w, h);
+	iron_internal_call_resize_callback(w, h);
+}
+
+- (void)windowWillMiniaturize:(NSNotification *)notification {
+	iron_internal_background_callback();
+}
+
+- (void)windowDidDeminiaturize:(NSNotification *)notification {
+	iron_internal_foreground_callback();
+}
+
+- (void)windowDidResignMain:(NSNotification *)notification {
+	iron_internal_pause_callback();
+}
+
+- (void)windowDidBecomeMain:(NSNotification *)notification {
+	iron_internal_resume_callback();
+}
+
+@end
+
+int iron_window_x() {
+	return 0;
+}
+
+int iron_window_y() {
+	return 0;
+}
+
+void iron_window_resize(int width, int height) {}
+void iron_window_move(int x, int y) {}
+void iron_window_change_mode(iron_window_mode_t mode) {}
+void iron_window_destroy() {}
+void iron_window_show() {}
+void iron_window_hide() {}
+void iron_window_create(iron_window_options_t *win) {}
+
+void iron_window_set_title(const char *title) {
+	NSWindow *window = windows[0].handle;
+	[window setTitle:[NSString stringWithUTF8String:title]];
+}
+
+void iron_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {
+	windows[0].resizeCallback = callback;
+	windows[0].resizeCallbackData = data;
+}
+
+iron_window_mode_t iron_window_get_mode() {
+	return IRON_WINDOW_MODE_WINDOW;
+}
+
+int iron_window_display() {
+	return 0;
+}
+
 #ifdef WITH_GAMEPAD
+
+static struct HIDManager *hidManager;
+
+bool iron_gamepad_connected(int num) {
+	return true;
+}
+
+void iron_gamepad_rumble(int gamepad, float left, float right) {}
 
 static void inputValueCallback(void *inContext, IOReturn inResult, void *inSender, IOHIDValueRef inIOHIDValueRef);
 static void valueAvailableCallback(void *inContext, IOReturn inResult, void *inSender);
@@ -767,414 +1172,3 @@ void deviceRemoved(void *inContext, IOReturn inResult, void *inSender, IOHIDDevi
 }
 
 #endif
-
-int iron_count_displays(void) {
-	NSArray *screens = [NSScreen screens];
-	return (int)[screens count];
-}
-
-int iron_primary_display(void) {
-	NSArray *screens = [NSScreen screens];
-	NSScreen *mainScreen = [NSScreen mainScreen];
-	int max_displays = 8;
-	for (int i = 0; i < max_displays; ++i) {
-		if (mainScreen == screens[i]) {
-			return i;
-		}
-	}
-	return -1;
-}
-
-void iron_display_init(void) {}
-
-iron_display_mode_t iron_display_current_mode(int display) {
-	NSArray *screens = [NSScreen screens];
-	NSScreen *screen = screens[display];
-	NSRect screenRect = [screen frame];
-	iron_display_mode_t dm;
-	dm.width = screenRect.size.width;
-	dm.height = screenRect.size.height;
-	dm.frequency = 60;
-	dm.bits_per_pixel = 32;
-
-	NSDictionary *description = [screen deviceDescription];
-	NSSize displayPixelSize = [[description objectForKey:NSDeviceSize] sizeValue];
-	NSNumber *screenNumber = [description objectForKey:@"NSScreenNumber"];
-	CGSize displayPhysicalSize = CGDisplayScreenSize([screenNumber unsignedIntValue]); // in millimeters
-	double ppi = displayPixelSize.width / (displayPhysicalSize.width * 0.039370);      // Convert MM to INCH
-	dm.pixels_per_inch = round(ppi);
-
-	return dm;
-}
-
-void iron_internal_mouse_lock() {
-	iron_mouse_hide();
-}
-
-void iron_internal_mouse_unlock(void) {
-	iron_mouse_show();
-}
-
-bool iron_mouse_can_lock(void) {
-	return true;
-}
-
-void iron_mouse_show(void) {
-	CGDisplayShowCursor(kCGDirectMainDisplay);
-}
-
-void iron_mouse_hide(void) {
-	CGDisplayHideCursor(kCGDirectMainDisplay);
-}
-
-void iron_mouse_set_position(int x, int y) {
-	NSWindow *window = windows[0].handle;
-	float scale = [window backingScaleFactor];
-	NSRect rect = [[NSScreen mainScreen] frame];
-
-	CGPoint point;
-	point.x = window.frame.origin.x + (x / scale);
-	point.y = rect.size.height - (window.frame.origin.y + (y / scale));
-
-	CGDisplayMoveCursorToPoint(0, point);
-	CGAssociateMouseAndMouseCursorPosition(true);
-}
-
-void iron_mouse_get_position(int *x, int *y) {
-	NSWindow *window = windows[0].handle;
-	NSPoint point = [window mouseLocationOutsideOfEventStream];
-	*x = (int)point.x;
-	*y = (int)point.y;
-}
-
-void iron_mouse_set_cursor(int cursor_index) {}
-
-void iron_keyboard_show(void) {
-	keyboardShown = true;
-}
-
-void iron_keyboard_hide(void) {
-	keyboardShown = false;
-}
-
-bool iron_keyboard_active(void) {
-	return keyboardShown;
-}
-
-const char *iron_system_id(void) {
-	return "macOS";
-}
-
-const char **iron_video_formats(void) {
-	return videoFormats;
-}
-
-void iron_set_keep_screen_on(bool on) {}
-
-double iron_frequency(void) {
-	mach_timebase_info_data_t info;
-	mach_timebase_info(&info);
-	return (double)info.denom / (double)info.numer / 1e-9;
-}
-
-uint64_t iron_timestamp(void) {
-	return mach_absolute_time();
-}
-
-#ifdef WITH_GAMEPAD
-
-bool iron_gamepad_connected(int num) {
-	return true;
-}
-
-void iron_gamepad_rumble(int gamepad, float left, float right) {}
-
-#endif
-
-bool with_autoreleasepool(bool (*f)(void)) {
-	@autoreleasepool {
-		return f();
-	}
-}
-
-const char *iron_get_resource_path(void) {
-	return [[[NSBundle mainBundle] resourcePath] cStringUsingEncoding:NSUTF8StringEncoding];
-}
-
-@interface IronApplication : NSApplication {
-}
-- (void)terminate:(id)sender;
-@end
-
-@interface IronAppDelegate : NSObject <NSWindowDelegate> {
-}
-- (void)windowWillClose:(NSNotification *)notification;
-- (void)windowDidResize:(NSNotification *)notification;
-- (void)windowWillMiniaturize:(NSNotification *)notification;
-- (void)windowDidDeminiaturize:(NSNotification *)notification;
-- (void)windowDidResignMain:(NSNotification *)notification;
-- (void)windowDidBecomeMain:(NSNotification *)notification;
-@end
-
-static IronAppDelegate *delegate;
-
-CAMetalLayer *get_metal_layer(void) {
-	return [view metalLayer];
-}
-
-id get_metal_device(void) {
-	return [view metalDevice];
-}
-
-id get_metal_queue(void) {
-	return [view metalQueue];
-}
-
-bool iron_internal_handle_messages(void) {
-	NSEvent *event = [myapp nextEventMatchingMask:NSAnyEventMask
-										untilDate:[NSDate distantPast]
-										   inMode:NSDefaultRunLoopMode
-										  dequeue:YES]; // distantPast: non-blocking
-	if (event != nil) {
-		[myapp sendEvent:event];
-		[myapp updateWindows];
-	}
-
-	// Sleep for a frame to limit the calls when the window is not visible.
-	if (!window.visible) {
-		[NSThread sleepForTimeInterval:1.0 / 60];
-	}
-	return true;
-}
-
-static void createWindow(iron_window_options_t *options) {
-	int width = options->width / [[NSScreen mainScreen] backingScaleFactor];
-	int height = options->height / [[NSScreen mainScreen] backingScaleFactor];
-	int styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable;
-	if ((options->features & IRON_WINDOW_FEATURE_RESIZEABLE) || (options->features & IRON_WINDOW_FEATURE_MAXIMIZABLE)) {
-		styleMask |= NSWindowStyleMaskResizable;
-	}
-	if (options->features & IRON_WINDOW_FEATURE_MINIMIZABLE) {
-		styleMask |= NSWindowStyleMaskMiniaturizable;
-	}
-
-	view = [[BasicMTKView alloc] initWithFrame:NSMakeRect(0, 0, width, height)];
-	[view registerForDraggedTypes:[NSArray arrayWithObjects:NSURLPboardType, nil]];
-	window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, width, height) styleMask:styleMask backing:NSBackingStoreBuffered defer:TRUE];
-	delegate = [IronAppDelegate alloc];
-	[window setDelegate:delegate];
-	[window setTitle:[NSString stringWithCString:options->title encoding:NSUTF8StringEncoding]];
-	[window setAcceptsMouseMovedEvents:YES];
-	[[window contentView] addSubview:view];
-	[window center];
-
-	windows[0].handle = window;
-	windows[0].view = view;
-
-	[window makeKeyAndOrderFront:nil];
-
-	if (options->mode == IRON_WINDOW_MODE_FULLSCREEN) {
-		[window toggleFullScreen:nil];
-		windows[0].fullscreen = true;
-	}
-}
-
-void iron_window_change_window_mode(iron_window_mode_t mode) {
-	switch (mode) {
-	case IRON_WINDOW_MODE_WINDOW:
-		if (windows[0].fullscreen) {
-			[window toggleFullScreen:nil];
-			windows[0].fullscreen = false;
-		}
-		break;
-	case IRON_WINDOW_MODE_FULLSCREEN:
-		if (!windows[0].fullscreen) {
-			[window toggleFullScreen:nil];
-			windows[0].fullscreen = true;
-		}
-		break;
-	}
-}
-
-void iron_window_set_close_callback(bool (*callback)(void *), void *data) {
-	windows[0].closeCallback = callback;
-	windows[0].closeCallbackData = data;
-}
-
-static void add_menubar(void) {
-	NSString *appName = [[NSProcessInfo processInfo] processName];
-
-	NSMenu *appMenu = [NSMenu new];
-	NSString *quitTitle = [@"Quit " stringByAppendingString:appName];
-	NSMenuItem *quitMenuItem = [[NSMenuItem alloc] initWithTitle:quitTitle action:@selector(terminate:) keyEquivalent:@"q"];
-	[appMenu addItem:quitMenuItem];
-
-	NSMenuItem *appMenuItem = [NSMenuItem new];
-	[appMenuItem setSubmenu:appMenu];
-
-	NSMenu *menubar = [NSMenu new];
-	[menubar addItem:appMenuItem];
-	[NSApp setMainMenu:menubar];
-}
-
-void iron_init(iron_window_options_t *win) {
-	@autoreleasepool {
-		myapp = [IronApplication sharedApplication];
-		[myapp finishLaunching];
-		[[NSRunningApplication currentApplication] activateWithOptions:(NSApplicationActivateAllWindows | NSApplicationActivateIgnoringOtherApps)];
-		NSApp.activationPolicy = NSApplicationActivationPolicyRegular;
-		add_menubar();
-
-		#ifdef WITH_GAMEPAD
-		hidManager = (struct HIDManager *)malloc(sizeof(struct HIDManager));
-		HIDManager_init(hidManager);
-		#endif
-	}
-
-	createWindow(win);
-	gpu_init(win->depth_bits, true);
-}
-
-int iron_window_width() {
-	NSWindow *window = windows[0].handle;
-	float scale = [window backingScaleFactor];
-	return [[window contentView] frame].size.width * scale;
-}
-
-int iron_window_height() {
-	NSWindow *window = windows[0].handle;
-	float scale = [window backingScaleFactor];
-	return [[window contentView] frame].size.height * scale;
-}
-
-void iron_load_url(const char *url) {
-	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:[NSString stringWithUTF8String:url]]];
-}
-
-const char *iron_language(void) {
-	NSString *nsstr = [[NSLocale preferredLanguages] objectAtIndex:0];
-	const char *lang = [nsstr UTF8String];
-	language[0] = lang[0];
-	language[1] = lang[1];
-	language[2] = 0;
-	return language;
-}
-
-void iron_internal_shutdown(void) {}
-
-const char *iron_internal_save_path(void) {
-	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
-	NSString *resolvedPath = [paths objectAtIndex:0];
-	NSString *appName = [NSString stringWithUTF8String:iron_application_name()];
-	resolvedPath = [resolvedPath stringByAppendingPathComponent:appName];
-
-	NSFileManager *fileMgr = [[NSFileManager alloc] init];
-
-	NSError *error;
-	[fileMgr createDirectoryAtPath:resolvedPath withIntermediateDirectories:YES attributes:nil error:&error];
-
-	resolvedPath = [resolvedPath stringByAppendingString:@"/"];
-	return [resolvedPath cStringUsingEncoding:NSUTF8StringEncoding];
-}
-
-#ifndef IRON_NO_MAIN
-int main(int argc, char **argv) {
-	return kickstart(argc, argv);
-}
-#endif
-
-@implementation IronApplication
-
-- (void)terminate:(id)sender {
-	iron_stop();
-}
-
-@end
-
-@implementation IronAppDelegate
-- (BOOL)windowShouldClose:(NSWindow *)sender {
-	if (windows[0].closeCallback != NULL) {
-		if (windows[0].closeCallback(windows[0].closeCallbackData)) {
-			return YES;
-		}
-		else {
-			return NO;
-		}
-	}
-	return YES;
-}
-
-- (void)windowWillClose:(NSNotification *)notification {
-	iron_stop();
-}
-
-void iron_internal_call_resize_callback(int width, int height) {
-	if (windows[0].resizeCallback != NULL) {
-		windows[0].resizeCallback(width, height, windows[0].resizeCallbackData);
-	}
-}
-
-- (void)windowDidResize:(NSNotification *)notification {
-	NSWindow *window = [notification object];
-	NSSize size = [[window contentView] frame].size;
-	[view resize:size];
-
-	float scale = [window backingScaleFactor];
-	int w = size.width * scale;
-	int h = size.height * scale;
-
-	gpu_resize(w, h);
-	iron_internal_call_resize_callback(w, h);
-}
-
-- (void)windowWillMiniaturize:(NSNotification *)notification {
-	iron_internal_background_callback();
-}
-
-- (void)windowDidDeminiaturize:(NSNotification *)notification {
-	iron_internal_foreground_callback();
-}
-
-- (void)windowDidResignMain:(NSNotification *)notification {
-	iron_internal_pause_callback();
-}
-
-- (void)windowDidBecomeMain:(NSNotification *)notification {
-	iron_internal_resume_callback();
-}
-
-@end
-
-int iron_window_x() {
-	return 0;
-}
-
-int iron_window_y() {
-	return 0;
-}
-
-void iron_window_resize(int width, int height) {}
-void iron_window_move(int x, int y) {}
-void iron_window_change_mode(iron_window_mode_t mode) {}
-void iron_window_destroy() {}
-void iron_window_show() {}
-void iron_window_hide() {}
-void iron_window_create(iron_window_options_t *win) {}
-
-void iron_window_set_title(const char *title) {
-	NSWindow *window = windows[0].handle;
-	[window setTitle:[NSString stringWithUTF8String:title]];
-}
-
-void iron_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {
-	windows[0].resizeCallback = callback;
-	windows[0].resizeCallbackData = data;
-}
-
-iron_window_mode_t iron_window_get_mode() {
-	return IRON_WINDOW_MODE_WINDOW;
-}
-
-int iron_window_display() {
-	return 0;
-}
