@@ -540,21 +540,21 @@ void iron_mouse_get_position(int *x, int *y) {
 	*y = (int)point.y;
 }
 
-void iron_mouse_set_cursor(int cursor_index) {
+void iron_mouse_set_cursor(iron_cursor_t cursor_index) {
 	if (current_cursor_index == cursor_index) {
 		return;
 	}
 	current_cursor_index = cursor_index;
-	if (cursor_index == 1) {
+	if (cursor_index == IRON_CURSOR_HAND) {
 		[[NSCursor pointingHandCursor] set];
 	}
-	else if (cursor_index == 2) {
+	else if (cursor_index == IRON_CURSOR_IBEAM) {
 		[[NSCursor IBeamCursor] set];
 	}
-	else if (cursor_index == 3) {
+	else if (cursor_index == IRON_CURSOR_SIZEWE) {
 		[[NSCursor resizeLeftRightCursor] set];
 	}
-	else if (cursor_index == 4) {
+	else if (cursor_index == IRON_CURSOR_SIZENS) {
 		[[NSCursor resizeUpDownCursor] set];
 	}
 	else {

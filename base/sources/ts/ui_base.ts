@@ -1509,8 +1509,8 @@ function ui_base_on_border_hover(handle: ui_handle_t, side: i32) {
 	}
 
 	side == border_side_t.LEFT || side == border_side_t.RIGHT ?
-		iron_set_mouse_cursor(3) : // Horizontal
-		iron_set_mouse_cursor(4);  // Vertical
+		iron_mouse_set_cursor(cursor_t.SIZEWE) :
+		iron_mouse_set_cursor(cursor_t.SIZENS);
 
 	if (ui.input_started) {
 		ui_base_border_started = side;
@@ -1520,7 +1520,7 @@ function ui_base_on_border_hover(handle: ui_handle_t, side: i32) {
 }
 
 function ui_base_on_text_hover() {
-	iron_set_mouse_cursor(2); // I-cursor
+	iron_mouse_set_cursor(cursor_t.IBEAM);
 }
 
 function ui_base_on_deselect_text() {

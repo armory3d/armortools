@@ -308,7 +308,7 @@ function base_redraw_ui() {
 
 function base_update() {
 	if (mouse_movement_x != 0 || mouse_movement_y != 0) {
-		iron_set_mouse_cursor(0); // Arrow
+		iron_mouse_set_cursor(cursor_t.ARROW);
 	}
 
 	let has_drag: bool = base_drag_asset != null ||
@@ -428,7 +428,7 @@ function base_update() {
 			base_drag_layer = null;
 		}
 
-		iron_set_mouse_cursor(0); // Arrow
+		iron_mouse_set_cursor(cursor_t.ARROW);
 		base_is_dragging = false;
 	}
 	if (context_raw.color_picker_callback != null && (mouse_released() || mouse_released("right"))) {
@@ -556,7 +556,7 @@ function base_render() {
 	context_raw.frame++;
 
 	if (base_is_dragging) {
-		iron_set_mouse_cursor(1); // Hand
+		iron_mouse_set_cursor(cursor_t.HAND);
 		let img: gpu_texture_t = base_get_drag_image();
 		let scale_factor: f32 = UI_SCALE();
 		let size: f32 = (base_drag_size == -1 ? 50 : base_drag_size) * scale_factor;

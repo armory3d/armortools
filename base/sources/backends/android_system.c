@@ -1064,7 +1064,7 @@ void iron_mouse_get_position(int *x, int *y) {
 	y = 0;
 }
 
-void iron_mouse_set_cursor(int cursor_index) {}
+void iron_mouse_set_cursor(iron_cursor_t cursor_index) {}
 
 void initAndroidFileReader();
 // void IronAndroidVideoInit();

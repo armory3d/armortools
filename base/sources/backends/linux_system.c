@@ -1211,57 +1211,29 @@ void iron_mouse_hide() {
 	}
 }
 
-void iron_mouse_set_cursor(int cursor_index) {
-	struct iron_x11_window *window = &x11_ctx.windows[0];
-	if (!mouse_hidden) {
-		Cursor cursor;
-		if (cursor_index == 0) {
-			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "left_ptr"); // "arrow"
-		}
-		else if (cursor_index == 1) {
-			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "hand1");
-		}
-		else if (cursor_index == 2) {
-			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "xterm");
-		}
-		else if (cursor_index == 3) {
-			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "sb_h_double_arrow");
-		}
-		else if (cursor_index == 4) {
-			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "sb_v_double_arrow");
-		}
-		else if (cursor_index == 5) {
-			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "top_right_corner");
-		}
-		else if (cursor_index == 6) {
-			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "bottom_right_corner");
-		}
-		else if (cursor_index == 7) {
-			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "top_left_corner");
-		}
-		else if (cursor_index == 8) {
-			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "bottom_left_corner");
-		}
-		else if (cursor_index == 9) {
-			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "grab");
-		}
-		else if (cursor_index == 10) {
-			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "grabbing");
-		}
-		else if (cursor_index == 11) {
-			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "not-allowed");
-		}
-		else if (cursor_index == 12) {
-			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "watch");
-		}
-		else if (cursor_index == 13) {
-			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "crosshair");
-		}
-		else {
-			cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "arrow");
-		}
-		xlib.XDefineCursor(x11_ctx.display, window->window, cursor);
+void iron_mouse_set_cursor(iron_cursor_t cursor_index) {
+	if (mouse_hidden) {
+		return;
 	}
+
+	Cursor cursor;
+	if (cursor_index == IRON_CURSOR_HAND) {
+		cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "hand1");
+	}
+	else if (cursor_index == IRON_CURSOR_IBEAM) {
+		cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "xterm");
+	}
+	else if (cursor_index == IRON_CURSOR_SIZEWE) {
+		cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "sb_h_double_arrow");
+	}
+	else if (cursor_index == IRON_CURSOR_SIZENS) {
+		cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "sb_v_double_arrow");
+	}
+	else {
+		cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "left_ptr"); // "arrow"
+	}
+	struct iron_x11_window *window = &x11_ctx.windows[0];
+	xlib.XDefineCursor(x11_ctx.display, window->window, cursor);
 }
 
 void iron_mouse_set_position(int x, int y) {

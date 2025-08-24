@@ -527,10 +527,10 @@ bool ui_input_changed() {
 void ui_end_input() {
 	if (ui_on_tab_drop != NULL && current->drag_tab_handle != NULL) {
 		if (current->input_dx != 0 || current->input_dy != 0) {
-			iron_mouse_set_cursor(1); // Hand
+			iron_mouse_set_cursor(IRON_CURSOR_HAND);
 		}
 		if (current->input_released) {
-			iron_mouse_set_cursor(0); // Default
+			iron_mouse_set_cursor(IRON_CURSOR_ARROW);
 			current->drag_tab_handle = NULL;
 		}
 	}

@@ -332,7 +332,7 @@ declare type draw_font_t = {
 };
 
 declare function iron_set_save_and_quit_callback(callback: (save: bool)=>void): void;
-declare function iron_set_mouse_cursor(id: i32): void;
+declare function iron_mouse_set_cursor(id: cursor_t): void;
 declare function iron_delay_idle_sleep(): void;
 declare function iron_open_dialog(filter_list: string, default_path: string, open_multiple: bool): string[];
 declare function iron_save_dialog(filter_list: string, default_path: string): string;
@@ -670,6 +670,14 @@ enum cull_mode_t {
 enum shader_type_t {
 	VERTEX,
 	FRAGMENT,
+}
+
+enum cursor_t {
+	ARROW,
+	HAND,
+	IBEAM,
+	SIZEWE,
+	SIZENS,
 }
 
 declare let ui_nodes_enum_texts: (s: string)=>string[];

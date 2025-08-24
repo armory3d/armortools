@@ -110,7 +110,7 @@ void iron_mouse_show(void) {}
 void iron_mouse_hide(void) {}
 void iron_mouse_set_position(int x, int y) {}
 void iron_mouse_get_position(int *x, int *y) {}
-void iron_mouse_set_cursor(int cursor_index) {}
+void iron_mouse_set_cursor(iron_cursor_t cursor_index) {}
 
 bool with_autoreleasepool(bool (*f)(void)) {
 	@autoreleasepool {

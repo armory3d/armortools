@@ -424,14 +424,17 @@ static bool gamepadFound = false;
 
 static bool cursors_initialized = false;
 static int cursor = 0;
-#define NUM_CURSORS 14
-static HCURSOR cursors[NUM_CURSORS];
+static HCURSOR cursors[5];
 static bool bg_erased = false;
 
-void iron_mouse_set_cursor(int set_cursor) {
-	cursor = set_cursor >= NUM_CURSORS ? 0 : set_cursor;
+void iron_mouse_set_cursor(iron_cursor_t set_cursor) {
+	cursor = set_cursor;
 	if (cursors_initialized) {
 		SetCursor(cursors[cursor]);
+	}
+	// Set hand icon for drag even when mouse button is pressed
+	if (set_cursor == IRON_CURSOR_HAND) {
+		SetCursor(LoadCursor(NULL, IDC_HAND));
 	}
 }
 
@@ -508,19 +511,7 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		cursors[2] = LoadCursor(0, IDC_IBEAM);
 		cursors[3] = LoadCursor(0, IDC_SIZEWE);
 		cursors[4] = LoadCursor(0, IDC_SIZENS);
-		cursors[5] = LoadCursor(0, IDC_SIZENESW);
-		cursors[6] = LoadCursor(0, IDC_SIZENWSE);
-		cursors[7] = LoadCursor(0, IDC_SIZENWSE);
-		cursors[8] = LoadCursor(0, IDC_SIZENESW);
-		cursors[9] = LoadCursor(0, IDC_SIZEALL);
-		cursors[10] = LoadCursor(0, IDC_SIZEALL);
-		cursors[11] = LoadCursor(0, IDC_NO);
-		cursors[12] = LoadCursor(0, IDC_WAIT);
-		cursors[13] = LoadCursor(0, IDC_CROSS);
 		cursors_initialized = true;
-		if (cursor != 0) {
-			SetCursor(cursors[cursor]);
-		}
 		return TRUE;
 	case WM_SETCURSOR:
 		if (LOWORD(lParam) == HTCLIENT) {

@@ -25,6 +25,14 @@ int iron_count_displays(void);
 iron_display_mode_t iron_display_current_mode(int display_index);
 
 typedef enum {
+	IRON_CURSOR_ARROW,
+	IRON_CURSOR_HAND,
+	IRON_CURSOR_IBEAM,
+	IRON_CURSOR_SIZEWE,
+	IRON_CURSOR_SIZENS
+} iron_cursor_t;
+
+typedef enum {
 	IRON_WINDOW_MODE_WINDOW,
 	IRON_WINDOW_MODE_FULLSCREEN
 } iron_window_mode_t;
@@ -317,7 +325,7 @@ bool iron_mouse_can_lock(void);
 bool iron_mouse_is_locked(void);
 void iron_mouse_lock();
 void iron_mouse_unlock(void);
-void iron_mouse_set_cursor(int cursor);
+void iron_mouse_set_cursor(iron_cursor_t cursor);
 void iron_mouse_show(void);
 void iron_mouse_hide(void);
 void iron_mouse_set_position(int x, int y);

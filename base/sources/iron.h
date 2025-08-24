@@ -1457,16 +1457,6 @@ void iron_set_save_and_quit_callback(void (*callback)(bool)) {
 	iron_window_set_close_callback(_window_close_callback, NULL);
 }
 
-void iron_set_mouse_cursor(i32 id) {
-	iron_mouse_set_cursor(id);
-	#ifdef IRON_WINDOWS
-	// Set hand icon for drag even when mouse button is pressed
-	if (id == 1) {
-		SetCursor(LoadCursor(NULL, IDC_HAND));
-	}
-	#endif
-}
-
 void iron_delay_idle_sleep() {
 	paused_frames = 0;
 }
