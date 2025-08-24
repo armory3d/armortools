@@ -644,7 +644,8 @@ void gpu_index_buffer_unlock(gpu_buffer_t *buffer) {
 }
 
 char *gpu_device_name() {
-	return "";
+	id<MTLDevice> device = get_metal_device();
+	return (char *)[device.name UTF8String];
 }
 
 typedef struct inst {
