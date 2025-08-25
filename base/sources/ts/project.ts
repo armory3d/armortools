@@ -830,7 +830,6 @@ type project_format_t = {
 	camera_origin?: f32_array_t;
 	camera_fov?: f32;
 	swatches?: swatch_color_t[];
-
 	brush_nodes?: ui_node_canvas_t[];
 	brush_icons?: buffer_t[];
 	material_nodes?: ui_node_canvas_t[];
@@ -841,10 +840,8 @@ type project_format_t = {
 	mesh_datas?: mesh_data_t[];
 	mesh_assets?: string[];
 	mesh_icons?: buffer_t[];
-
 	atlas_objects?: i32[];
 	atlas_names?: string[];
-
 	///if is_lab
 	material?: ui_node_canvas_t;
 	mesh_data?: mesh_data_t;

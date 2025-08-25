@@ -83,7 +83,7 @@ function util_encode_mesh_datas(datas: mesh_data_t[]) {
 
 	armpack_encode_array(datas.length);
 	for (let i: i32 = 0; i < datas.length; ++i) {
-		armpack_encode_map(6);
+		armpack_encode_map(5);
 		armpack_encode_string("name");
 		armpack_encode_string(datas[i].name);
 		armpack_encode_string("scale_pos");

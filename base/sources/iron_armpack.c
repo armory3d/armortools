@@ -145,8 +145,10 @@ static uint32_t traverse(int di, bool count_arrays) {
 	case 0xdd: { // array
 		uint32_t len = 0;
 		uint32_t count = read_u32();
-		uint8_t flag2 = read_u8();
+		uint8_t flag2 = count > 0 ? read_u8() : 0x0;
 		switch (flag2) {
+		case 0x0: // Empty array
+			break;
 		case 0xca: // Typed f32
 			ei += 4 * count;
 			len += 4 * count;
@@ -210,7 +212,6 @@ static uint32_t get_struct_length() {
 }
 
 static void read_store_map(uint32_t count) {
-
 	ei -= 5; // u8 map, i32 count
 	uint32_t size = get_struct_length();
 	size += pad(size, PTR_SIZE);
@@ -455,7 +456,7 @@ void armpack_encode_map(uint32_t count) {
 	armpack_write_i32(count);
 }
 
-void armpack_encode_array(uint32_t count) { // array of arrays / array of maps / array of strings
+void armpack_encode_array(uint32_t count) { // array of arrays / array of maps
 	armpack_write_u8(0xdd);
 	armpack_write_u32(count);
 }
@@ -467,9 +468,11 @@ void armpack_encode_array_f32(f32_array_t *f32a) {
 	}
 	armpack_write_u8(0xdd);
 	armpack_write_u32(f32a->length);
-	armpack_write_u8(0xca);
-	for (uint32_t i = 0; i < f32a->length; ++i) {
-		armpack_write_f32(f32a->buffer[i]);
+	if (f32a->length > 0) {
+		armpack_write_u8(0xca);
+		for (uint32_t i = 0; i < f32a->length; ++i) {
+			armpack_write_f32(f32a->buffer[i]);
+		}
 	}
 }
 
@@ -480,9 +483,11 @@ void armpack_encode_array_i32(i32_array_t *i32a) {
 	}
 	armpack_write_u8(0xdd);
 	armpack_write_u32(i32a->length);
-	armpack_write_u8(0xd2);
-	for (uint32_t i = 0; i < i32a->length; ++i) {
-		armpack_write_i32(i32a->buffer[i]);
+	if (i32a->length > 0) {
+		armpack_write_u8(0xd2);
+		for (uint32_t i = 0; i < i32a->length; ++i) {
+			armpack_write_i32(i32a->buffer[i]);
+		}
 	}
 }
 
@@ -493,9 +498,11 @@ void armpack_encode_array_i16(i16_array_t *i16a) {
 	}
 	armpack_write_u8(0xdd);
 	armpack_write_u32(i16a->length);
-	armpack_write_u8(0xd1);
-	for (uint32_t i = 0; i < i16a->length; ++i) {
-		armpack_write_i16(i16a->buffer[i]);
+	if (i16a->length > 0) {
+		armpack_write_u8(0xd1);
+		for (uint32_t i = 0; i < i16a->length; ++i) {
+			armpack_write_i16(i16a->buffer[i]);
+		}
 	}
 }
 
@@ -506,9 +513,11 @@ void armpack_encode_array_u8(u8_array_t *u8a) {
 	}
 	armpack_write_u8(0xdd);
 	armpack_write_u32(u8a->length);
-	armpack_write_u8(0xc4);
-	for (uint32_t i = 0; i < u8a->length; ++i) {
-		armpack_write_u8(u8a->buffer[i]);
+	if (u8a->length > 0) {
+		armpack_write_u8(0xc4);
+		for (uint32_t i = 0; i < u8a->length; ++i) {
+			armpack_write_u8(u8a->buffer[i]);
+		}
 	}
 }
 
