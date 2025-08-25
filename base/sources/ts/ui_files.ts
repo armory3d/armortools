@@ -178,6 +178,8 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 			if (is_cloud && f != ".." && !ui_files_offline) {
 				if (ui_files_icon_map == null) {
 					ui_files_icon_map = map_create();
+				}
+				if (ui_files_icon_file_map == null) {
 					ui_files_icon_file_map = map_create();
 				}
 				icon = map_get(ui_files_icon_map, handle.text + path_sep + f);
@@ -192,7 +194,14 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 							map_set(ui_files_icon_map, handle.text + path_sep + f, empty);
 
 							_ui_files_file_browser_handle = handle;
+
+							///if arm_ios
+							let icon_file_full: string = handle.text + path_sep + icon_file;
+							icon_file_full = string_replace_all(icon_file_full, "/", "_");
+							map_set(ui_files_icon_file_map, icon_file_full, f);
+							///else
 							map_set(ui_files_icon_file_map, icon_file, f);
+							///end
 
 							file_cache_cloud(handle.text + path_sep + icon_file, function (abs: string) {
 								if (abs != null) {
@@ -308,6 +317,9 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 					ui_files_icon_map = map_create();
 				}
 				let shandle: string = handle.text + path_sep + f;
+				///if arm_ios
+				shandle = document_directory + shandle;
+				///end
 				icon = map_get(ui_files_icon_map, shandle);
 				if (icon == null) {
 					let rt: render_target_t = map_get(render_path_render_targets, "empty_black");
