@@ -5,9 +5,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import androidx.annotation.Keep;
 
 class AndroidHttpRequest {
 
+	@Keep
 	public static byte[] androidHttpRequest(String address) throws Exception {
 		try {
 			// https://developer.android.com/reference/java/net/HttpURLConnection.html
