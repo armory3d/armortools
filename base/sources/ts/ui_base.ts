@@ -1433,6 +1433,12 @@ function ui_base_show_material_nodes() {
 	ui_nodes_show = !ui_nodes_show;
 	///end
 
+	///if (arm_ios || arm_android)
+	if (ui_view2d_show) {
+		ui_view2d_show = false;
+	}
+	///end
+
 	base_resize();
 }
 
@@ -1441,6 +1447,13 @@ function ui_base_show_brush_nodes() {
 	ui_end_input();
 	ui_nodes_show = !ui_nodes_show || ui_nodes_canvas_type != canvas_type_t.BRUSH;
 	ui_nodes_canvas_type = canvas_type_t.BRUSH;
+
+	///if (arm_ios || arm_android)
+	if (ui_view2d_show) {
+		ui_view2d_show = false;
+	}
+	///end
+
 	base_resize();
 }
 
@@ -1455,6 +1468,13 @@ function ui_base_show_2d_view(type: view_2d_type_t) {
 	}
 	ui_view2d_type = type;
 	ui_view2d_hwnd.redraws = 2;
+
+	///if (arm_ios || arm_android)
+	if (ui_nodes_show) {
+		ui_nodes_show = false;
+	}
+	///end
+
 	base_resize();
 }
 
