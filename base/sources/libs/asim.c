@@ -5,7 +5,6 @@
 #include <math.h>
 
 #define GRAVITY -9.81f
-#define TIME_STEP (1.0 / 60.0)
 #define MAX_BVH_DEPTH 20
 
 typedef struct {
@@ -189,13 +188,13 @@ void asim_world_destroy() {
 	mesh.root = NULL;
 }
 
-void asim_world_update() {
+void asim_world_update(float time_step) {
 	ppair.pos_a_x = 0;
 	ppair.pos_a_y = 0;
 	ppair.pos_a_z = 0;
 
 	const int sub_steps = 2;
-	float dt = TIME_STEP / sub_steps;
+	float dt = time_step / sub_steps;
 	for (int i = 0; i < sub_steps; i++) {
 		sphere.velocity.z += GRAVITY * dt;
 		sphere.position = vec4_add(sphere.position, vec4_mult(sphere.velocity, dt));

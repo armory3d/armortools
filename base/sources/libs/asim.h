@@ -12,7 +12,7 @@ typedef struct physics_pair {
 
 void asim_world_create();
 void asim_world_destroy();
-void asim_world_update();
+void asim_world_update(float time_step);
 physics_pair_t *asim_world_get_contact();
 
 void *asim_body_create(int shape, float mass, float dimx, float dimy, float dimz, float x, float y, float z, void *posa, void *inda, float scale_pos);

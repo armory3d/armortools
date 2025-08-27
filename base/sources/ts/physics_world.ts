@@ -5,7 +5,7 @@
 
 declare function asim_world_create(): void;
 declare function asim_world_destroy(): void;
-declare function asim_world_update(): void;
+declare function asim_world_update(time_step: f32): void;
 declare function asim_world_get_contact(): physics_pair_t;
 declare type physics_pair_t = {
     pos_a_x: f32;
@@ -27,7 +27,7 @@ function physics_world_create(): physics_world_t {
 }
 
 function physics_world_update(world: physics_world_t) {
-    asim_world_update();
+    asim_world_update(sys_delta());
 
     let keys: i32[] = imap_keys(physics_body_object_map);
 	for (let i: i32 = 0; i < keys.length; ++i) {
