@@ -883,11 +883,11 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			ui_draw_string(tr("Res"), -1, 0, ui_align_t.RIGHT, true);
 			ui_end_element();
 
-			ui_menu_align();
 			///if (arm_android || arm_ios)
-			let bits_items: string[] = ["8bit"];
-			ui_inline_radio(base_bits_handle, bits_items, ui_align_t.LEFT);
+			// let bits_items: string[] = ["8bit"];
+			// ui_inline_radio(base_bits_handle, bits_items, ui_align_t.LEFT);
 			///else
+			ui_menu_align();
 			let bits_items: string[] = ["8bit", "16bit", "32bit"];
 			ui_inline_radio(base_bits_handle, bits_items, ui_align_t.LEFT);
 			///end
