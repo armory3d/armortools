@@ -760,12 +760,7 @@ function base_init_config() {
 	raw.displace_strength = 0.0;
 	raw.wrap_mouse = false;
 	raw.workspace = space_type_t.SPACE3D;
-	///if (arm_android || arm_ios)
-	raw.camera_controls = camera_controls_t.ROTATE;
-	///else
 	raw.camera_controls = camera_controls_t.ORBIT;
-	///end
-
 	raw.layer_res = texture_res_t.RES2048;
 	///if (arm_android || arm_ios)
 	raw.touch_ui = true;
@@ -775,7 +770,6 @@ function base_init_config() {
 	raw.splash_screen = false;
 	///end
 	raw.node_preview = true;
-
 	raw.pressure_hardness = true;
 	raw.pressure_angle = false;
 	raw.pressure_opacity = false;
