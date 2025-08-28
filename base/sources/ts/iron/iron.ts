@@ -311,7 +311,6 @@ declare function draw_font_init_glyphs(from: i32, to: i32): void;
 declare function draw_font_count(font: draw_font_t): i32;
 declare function draw_font_height(font: draw_font_t, size: i32): i32;
 declare function draw_string_width(font: draw_font_t, size: i32, text: string): i32;
-declare function draw_set_bilinear_filter(bilinear: bool): void;
 declare function draw_set_color(color: i32): void;
 declare function draw_set_pipeline(pipeline: any): void;
 declare function draw_set_transform(matrix: mat3_t): void;

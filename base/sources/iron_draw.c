@@ -17,7 +17,6 @@ int draw_font_size;
 gpu_texture_t *_draw_current = NULL;
 
 static iron_matrix3x3_t draw_transform;
-static bool draw_bilinear_filter = true;
 static uint32_t draw_color = 0;
 static gpu_pipeline_t *draw_custom_pipeline = NULL;
 
@@ -706,10 +705,6 @@ bool draw_set_font(draw_font_t *font, int size) {
 	draw_font = font;
 	draw_font_size = size;
 	return draw_font_load(font, size);
-}
-
-void draw_set_bilinear_filter(bool bilinear) {
-	draw_bilinear_filter = bilinear;
 }
 
 void draw_filled_circle(float cx, float cy, float radius, int segments) {
