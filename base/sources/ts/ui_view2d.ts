@@ -51,6 +51,15 @@ function ui_view2d_init() {
 	// ui.scroll_enabled = false;
 }
 
+function ui_view2d_draw_image(image: gpu_texture_t, dx: f32, dy: f32, dw: f32, dh: f32, channel: i32) {
+	///if is_paint
+	if (ui_view2d_type == view_2d_type_t.LAYER) {
+		gpu_set_int(ui_view2d_channel_loc, channel);
+	}
+	///end
+	draw_scaled_image(image, dx, dy, dw, dh);
+}
+
 function ui_view2d_render() {
 
 	ui_view2d_ww = config_raw.layout[layout_size_t.NODES_W];
@@ -207,32 +216,24 @@ function ui_view2d_render() {
 			///if is_paint
 			if (ui_view2d_type == view_2d_type_t.LAYER) {
 				draw_set_pipeline(ui_view2d_pipe);
-				if (!context_raw.texture_filter) {
-					draw_set_bilinear_filter(false);
-				}
-				gpu_set_int(ui_view2d_channel_loc, channel);
 			}
 			///end
 
-			draw_scaled_image(tex, tx, ty, tw, th);
-
+			ui_view2d_draw_image(tex, tx, ty, tw, th, channel);
 			if (ui_view2d_tiled_show) {
-				draw_scaled_image(tex, tx - tw, ty, tw, th);
-				draw_scaled_image(tex, tx - tw, ty - th, tw, th);
-				draw_scaled_image(tex, tx - tw, ty + th, tw, th);
-				draw_scaled_image(tex, tx + tw, ty, tw, th);
-				draw_scaled_image(tex, tx + tw, ty - th, tw, th);
-				draw_scaled_image(tex, tx + tw, ty + th, tw, th);
-				draw_scaled_image(tex, tx, ty - th, tw, th);
-				draw_scaled_image(tex, tx, ty + th, tw, th);
+				ui_view2d_draw_image(tex, tx - tw, ty, tw, th, channel);
+				ui_view2d_draw_image(tex, tx - tw, ty - th, tw, th, channel);
+				ui_view2d_draw_image(tex, tx - tw, ty + th, tw, th, channel);
+				ui_view2d_draw_image(tex, tx + tw, ty, tw, th, channel);
+				ui_view2d_draw_image(tex, tx + tw, ty - th, tw, th, channel);
+				ui_view2d_draw_image(tex, tx + tw, ty + th, tw, th, channel);
+				ui_view2d_draw_image(tex, tx, ty - th, tw, th, channel);
+				ui_view2d_draw_image(tex, tx, ty + th, tw, th, channel);
 			}
 
 			///if is_paint
 			if (ui_view2d_type == view_2d_type_t.LAYER) {
 				draw_set_pipeline(null);
-				if (!context_raw.texture_filter) {
-					draw_set_bilinear_filter(true);
-				}
 			}
 
 			// Texture and node preview color picking
