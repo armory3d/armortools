@@ -466,7 +466,30 @@ function ui_view2d_update() {
 			decal_mask ||
 			set_clone_source ||
 			config_raw.brush_live)) {
-		context_raw.paint2d = true;
+
+		// Same mapping for paint and rotate (predefined in touch keymap)
+		let paint_key: string = map_get(config_keymap, "action_paint");
+		let rotate_key: string = map_get(config_keymap, "action_rotate");
+		if (paint_key == rotate_key) {
+			// Paint only when clicking on the layer rect
+			let layer: slot_layer_t = context_raw.layer;
+			let tex: gpu_texture_t = layer.texpaint;
+			let ratio: f32 = tex.height / tex.width;
+			let tw: f32 = ui_view2d_ww * 0.95 * ui_view2d_pan_scale;
+			let th: f32 = tw * ratio;
+			let tx: f32 = ui_view2d_ww / 2 - tw / 2 + ui_view2d_pan_x;
+			let headerh: i32 = config_raw.layout[layout_size_t.HEADER] == 1 ? ui_header_h * 2 : ui_header_h;
+			let apph: i32 = iron_window_height() - config_raw.layout[layout_size_t.STATUS_H] + headerh;
+			let ty: f32 = apph / 2 - th / 2 + ui_view2d_pan_y;
+			let mx: f32 = mouse_x - ui_view2d_wx;
+			let my: f32 = mouse_y - ui_view2d_wy;
+			if (mx > tx && mx < tx + tw && my > ty && my < ty + th) {
+				context_raw.paint2d = true;
+			}
+		}
+		else {
+			context_raw.paint2d = true;
+		}
 	}
 	///end
 
