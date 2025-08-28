@@ -336,7 +336,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 
 	let has_panel: bool = slot_layer_is_group(l) || (slot_layer_is_layer(l) && slot_layer_get_masks(l, false) != null);
 	if (has_panel) {
-		let row: f32[] = [8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100];
+		let row: f32[] = [8 / 100, 16 / 100, 36 / 100, 25 / 100, 15 / 100];
 		ui_row(row);
 	}
 	else {
