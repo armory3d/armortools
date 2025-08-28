@@ -63,7 +63,7 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 		sys_notify_on_next_frame(parse_paint_material);
 
 		render_path_raytrace_first = true;
-		render_path_raytrace_raytrace_init(render_path_raytrace_bake_get_bake_shader_name(), rebuild, true);
+		render_path_raytrace_raytrace_init(render_path_raytrace_bake_get_bake_shader_name(), rebuild);
 
 		return false;
 	}

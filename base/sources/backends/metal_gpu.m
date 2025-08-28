@@ -757,7 +757,7 @@ void gpu_raytrace_acceleration_structure_add(gpu_raytrace_acceleration_structure
 		vb_count++;
 	}
 
-	inst_t inst = { .i = vb_i, .m =  _transform };
+	inst_t inst = { .i = vb_i, .m = _transform };
 	instances[instances_count] = inst;
 	instances_count++;
 }

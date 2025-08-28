@@ -140,7 +140,7 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	}
 }
 
-function render_path_raytrace_raytrace_init(shader_name: string, build: bool = true, bake: bool = false) {
+function render_path_raytrace_raytrace_init(shader_name: string, build: bool = true) {
 	if (render_path_raytrace_first) {
 		render_path_raytrace_first = false;
 		scene_embed_data("bnoise_sobol.k");
@@ -152,7 +152,7 @@ function render_path_raytrace_raytrace_init(shader_name: string, build: bool = t
 	}
 
 	if (build) {
-		render_path_raytrace_build_data(bake);
+		render_path_raytrace_build_data();
 	}
 
 	{
@@ -178,7 +178,7 @@ function render_path_raytrace_raytrace_init(shader_name: string, build: bool = t
 	}
 }
 
-function render_path_raytrace_build_data(bake: bool = false) {
+function render_path_raytrace_build_data() {
 	if (context_raw.merged_object == null) {
 		util_mesh_merge();
 	}
@@ -196,13 +196,11 @@ function render_path_raytrace_build_data(bake: bool = false) {
 		render_path_raytrace_transform = mat4_identity();
 	}
 
-	if (!bake) {
-		let sc: f32 = mo.base.transform.scale.x * mo.data.scale_pos;
-		if (mo.base.parent != null) {
-			sc *= mo.base.parent.transform.scale.x;
-		}
-		render_path_raytrace_transform = mat4_scale(render_path_raytrace_transform, vec4_create(sc, sc, sc));
+	let sc: f32 = mo.base.transform.scale.x * mo.data.scale_pos;
+	if (mo.base.parent != null) {
+		sc *= mo.base.parent.transform.scale.x;
 	}
+	render_path_raytrace_transform = mat4_scale(render_path_raytrace_transform, vec4_create(sc, sc, sc));
 
 	render_path_raytrace_vb = mo.data._.vertex_buffer;
 	render_path_raytrace_ib = mo.data._.index_buffer;
