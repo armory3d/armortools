@@ -3,7 +3,7 @@ let render_path_raytrace_frame: i32 = 0;
 let render_path_raytrace_ready: bool = false;
 let render_path_raytrace_dirty: i32 = 0;
 let render_path_raytrace_uv_scale: f32 = 1.0;
-let render_path_raytrace_first: bool = true;
+let render_path_raytrace_init_shader: bool = true;
 let render_path_raytrace_f32a: f32_array_t = f32_array_create(24);
 let render_path_raytrace_help_mat: mat4_t = mat4_identity();
 let render_path_raytrace_transform: mat4_t;
@@ -29,7 +29,10 @@ function render_path_raytrace_init() {
 function render_path_raytrace_commands(use_live_layer: bool) {
 	if (!render_path_raytrace_ready || render_path_raytrace_is_bake) {
 		render_path_raytrace_ready = true;
-		render_path_raytrace_is_bake = false;
+		if (render_path_raytrace_is_bake) {
+			render_path_raytrace_is_bake = false;
+			render_path_raytrace_init_shader = true;
+		}
 		let ext: string = "";
 		if (context_raw.tool == tool_type_t.GIZMO) {
 			ext = "forge_";
@@ -141,8 +144,8 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 }
 
 function render_path_raytrace_raytrace_init(shader_name: string, build: bool = true) {
-	if (render_path_raytrace_first) {
-		render_path_raytrace_first = false;
+	if (render_path_raytrace_init_shader) {
+		render_path_raytrace_init_shader = false;
 		scene_embed_data("bnoise_sobol.k");
 		scene_embed_data("bnoise_scramble.k");
 		scene_embed_data("bnoise_rank.k");

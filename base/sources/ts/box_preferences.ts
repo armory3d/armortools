@@ -585,7 +585,7 @@ function box_preferences_show() {
 			config_raw.pathtrace_mode = ui_combo(hpathtrace_mode, pathtrace_mode_combo, tr("Path Tracer"), true);
 			if (hpathtrace_mode.changed) {
 				render_path_raytrace_ready = false;
-				render_path_raytrace_first = true;
+				render_path_raytrace_init_shader = true;
 				context_raw.ddirty = 2;
 			}
 
