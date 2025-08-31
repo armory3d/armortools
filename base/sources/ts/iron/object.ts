@@ -28,7 +28,7 @@ function object_create(is_empty: bool = true): object_t {
 	raw.uid = _object_uid_counter++;
 	raw.transform = transform_create(raw);
 	raw.is_empty = is_empty;
-	if (raw.is_empty && _scene_ready) {
+	if (raw.is_empty) {
 		array_push(scene_empties, raw);
 	}
 	return raw;
@@ -59,7 +59,7 @@ function object_set_parent(raw: object_t, parent_object: object_t, parent_inv: b
 }
 
 function object_remove_super(raw: object_t) {
-	if (raw.is_empty && _scene_ready) {
+	if (raw.is_empty) {
 		array_remove(scene_empties, raw);
 	}
 	///if arm_anim

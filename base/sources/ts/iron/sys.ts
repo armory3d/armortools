@@ -404,10 +404,6 @@ function sys_real_delta(): f32 {
 }
 
 function sys_render() {
-	if (!_scene_ready) {
-		return;
-	}
-
 	if (_sys_on_next_frames.length > 0) {
 		_sys_run_callbacks(_sys_on_next_frames);
 		array_splice(_sys_on_next_frames, 0, _sys_on_next_frames.length);

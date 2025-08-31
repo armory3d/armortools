@@ -12,7 +12,6 @@ let scene_animations: anim_raw_t[];
 ///end
 let scene_embedded: map_t<string, gpu_texture_t>;
 
-let _scene_ready: bool;
 let _scene_uid_counter: i32 = 0;
 let _scene_uid: i32;
 let _scene_raw: scene_t;
@@ -35,8 +34,6 @@ function scene_create(format: scene_t): object_t {
 	scene_embedded = map_create();
 	_scene_root = object_create();
 	_scene_root.name = "Root";
-
-	_scene_ready = false;
 	_scene_raw = format;
 
 	scene_world = data_get_world(format.name, format.world_ref);
@@ -49,7 +46,6 @@ function scene_create(format: scene_t): object_t {
 
 	scene_camera = scene_get_camera(format.camera_ref);
 	_scene_scene_parent = scene_object;
-	_scene_ready = true;
 	return scene_object;
 }
 
@@ -86,7 +82,7 @@ function scene_set_active(scene_name: string): object_t {
 }
 
 function scene_render_frame() {
-	if (!_scene_ready || render_path_commands == null) {
+	if (render_path_commands == null) {
 		return;
 	}
 
