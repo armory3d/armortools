@@ -1198,7 +1198,9 @@ void gpu_present_internal() {
 	};
 	vkBeginCommandBuffer(command_buffer, &begin_info);
 
+	// acquire_next_image(); // Breaks window resize
 	framebuffer_acquired = false;
+	framebuffer_index = (framebuffer_index + 1) % GPU_FRAMEBUFFER_COUNT;
 
 	while (buffers_to_destroy_count > 0) {
 		buffers_to_destroy_count--;
