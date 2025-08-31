@@ -26,7 +26,9 @@ function mesh_object_create(data: mesh_data_t, materials: material_data_t[]): me
 
 function mesh_object_set_data(raw: mesh_object_t, data: mesh_data_t) {
 	raw.data = data;
-	mesh_data_build(data);
+	if (data._.vertex_buffer == null) {
+		mesh_data_build(data);
+	}
 
 	// Scale-up packed (-1,1) mesh coords
 	raw.base.transform.scale_world = data.scale_pos;
