@@ -88,6 +88,10 @@ function main() {
 		mode: window_mode_t.WINDOWED,
 		frequency: 60,
 		vsync: true,
+		display_index: 0,
+		visible: true,
+		color_bits: 32,
+		depth_bits: 0
 	};
 	sys_start(ops);
 
@@ -116,7 +120,7 @@ function main() {
 	ui_text_area_line_numbers = true;
 	ui_text_area_scroll_past_end = true;
 
-	sys_notify_on_frames(render);
+	sys_notify_on_render(render);
 	_iron_set_drop_files_callback(drop_files);
 	iron_set_application_state_callback(null, null, null, null, on_shutdown);
 }
@@ -379,6 +383,7 @@ function on_text_hover() {
 ////
 type config_t = { server: string; };
 let config_raw: config_t;
-function strings_check_internet_connection(): string { return ""; };
-function console_error(s: string) { };
-function plugin_embed() { }
+function strings_check_internet_connection(): string { return ""; }
+function console_error(s: string) {}
+function plugin_embed() {}
+function tr(id: string, vars: map_t<string, string> = null): string {}

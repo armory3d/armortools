@@ -149,7 +149,7 @@ function scene_ready() {
 }
 
 function scene_update() {
-	asim_world_update();
+	asim_world_update(sys_delta());
 	camera_update();
 
 	if (keyboard_started("space")) {
