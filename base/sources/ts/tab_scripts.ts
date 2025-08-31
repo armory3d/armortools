@@ -53,7 +53,7 @@ function tab_scripts_draw(htab: ui_handle_t) {
 		let _font: draw_font_t = ui.ops.font;
 		let _font_size: i32 = ui.font_size;
 		let f: draw_font_t = data_get_font("font_mono.ttf");
-		ui_set_font(f);
+		ui_set_font(ui, f);
 		ui.font_size = math_floor(15 * UI_SCALE());
 		ui_text_area_line_numbers = true;
 		ui_text_area_scroll_past_end = true;
@@ -62,7 +62,7 @@ function tab_scripts_draw(htab: ui_handle_t) {
 		ui_text_area_line_numbers = false;
 		ui_text_area_scroll_past_end = false;
 		ui_text_area_coloring = null;
-		ui_set_font(_font);
+		ui_set_font(ui, _font);
 		ui.font_size = _font_size;
 	}
 }

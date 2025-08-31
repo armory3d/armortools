@@ -728,7 +728,7 @@ function ui_menubar_show_menu(category: i32) {
 	let panel_x: i32 = ui_menu_panel_x();
 	let panel_y: i32 = ui_menu_panel_y();
 	ui_menu_x = math_floor(ui._x - ui._w) + panel_x;
-	ui_menu_y = math_floor(ui_MENUBAR_H()) + panel_y;
+	ui_menu_y = math_floor(ui_MENUBAR_H(ui)) + panel_y;
 	if (config_raw.touch_ui) {
 		let menu_w: i32 = math_floor(base_default_element_w * UI_SCALE() * 2.0);
 		ui_menu_x -= math_floor((menu_w - ui._w) / 2) + math_floor(ui_header_h / 2);

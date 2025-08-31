@@ -50,7 +50,7 @@ void gpu_init_internal(int depth_bits, bool vsync) {
 	swapChain = wgpuDeviceCreateSwapChain(device, surface, &scDesc);
 }
 
-void gpu_begin_internal(struct gpu_texture **targets, int count, gpu_texture_t *depth_buffer, unsigned flags, unsigned color, float depth) {
+void gpu_begin_internal(unsigned flags, unsigned color, float depth) {
 	WGPUCommandEncoderDescriptor ceDesc;
 	memset(&ceDesc, 0, sizeof(ceDesc));
 	encoder = wgpuDeviceCreateCommandEncoder(device, &ceDesc);

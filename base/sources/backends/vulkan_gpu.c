@@ -1023,7 +1023,7 @@ bool iron_vulkan_get_size(int *width, int *height) {
 	return false;
 }
 
-void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t * depth_buffer, unsigned flags, unsigned color, float depth) {
+void gpu_begin_internal(unsigned flags, unsigned color, float depth) {
 	if (!framebuffer_acquired) {
 		acquire_next_image();
 		framebuffer_acquired = true;
@@ -1057,10 +1057,10 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t * dept
 		};
 	}
 
-	if (depth_buffer != NULL) {
+	if (current_depth_buffer != NULL) {
 		current_depth_attachment_info = (VkRenderingAttachmentInfo) {
 			.sType              = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
-			.imageView          = depth_buffer->impl.view,
+			.imageView          = current_depth_buffer->impl.view,
 			.imageLayout        = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
 			.resolveMode        = VK_RESOLVE_MODE_NONE,
 			.resolveImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
@@ -1077,7 +1077,7 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t * dept
 		.viewMask             = 0,
 		.colorAttachmentCount = (uint32_t)current_render_targets_count,
 		.pColorAttachments    = current_color_attachment_infos,
-		.pDepthAttachment     = depth_buffer == NULL ? VK_NULL_HANDLE : &current_depth_attachment_info,
+		.pDepthAttachment     = current_depth_buffer == NULL ? VK_NULL_HANDLE : &current_depth_attachment_info,
 	};
 	vkCmdBeginRendering(command_buffer, &current_rendering_info);
 
@@ -1107,8 +1107,8 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t * dept
 		VkClearRect clear_rect = {
 			.rect.offset.x = 0,
 			.rect.offset.y = 0,
-			.rect.extent.width = targets[0]->width,
-			.rect.extent.height = targets[0]->height,
+			.rect.extent.width = current_render_targets[0]->width,
+			.rect.extent.height = current_render_targets[0]->height,
 			.baseArrayLayer = 0,
 			.layerCount = 1,
 		};

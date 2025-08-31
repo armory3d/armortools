@@ -167,7 +167,7 @@ function translator_init_font(cjk: bool, font_path: string, font_scale: f32) {
 		base_theme.FONT_SIZE = math_floor(base_default_font_size * font_scale);
 		base_theme.ELEMENT_W = math_floor(base_default_element_w * (config_raw.locale != "en" ? 1.4 : 1.0));
 
-		ui_set_font(f);
+		ui_set_font(ui, f);
 		ui_set_scale(UI_SCALE());
 	});
 }

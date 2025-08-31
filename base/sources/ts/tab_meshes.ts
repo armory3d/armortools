@@ -330,12 +330,12 @@ function tab_meshes_draw(htab: ui_handle_t) {
 					let _font: draw_font_t = ui.ops.font;
 					let _font_size: i32 = ui.font_size;
 					let fmono: draw_font_t = data_get_font("font_mono.ttf");
-					ui_set_font(fmono);
+					ui_set_font(ui, fmono);
 					ui.font_size = math_floor(15 * UI_SCALE());
 					ui_text_area_coloring = tab_scripts_get_text_coloring();
 					ui_text_area(hscript);
 					ui_text_area_coloring = null;
-					ui_set_font(_font);
+					ui_set_font(ui, _font);
 					ui.font_size = _font_size;
 
 					script = hscript.text;

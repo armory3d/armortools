@@ -145,7 +145,7 @@ typedef struct gpu_raytrace_acceleration_structure {
 
 int gpu_max_bound_textures(void);
 void gpu_begin(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, unsigned flags, unsigned color, float depth);
-void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, unsigned flags, unsigned color, float depth);
+void gpu_begin_internal(unsigned flags, unsigned color, float depth);
 void gpu_end(void);
 void gpu_end_internal(void);
 void gpu_execute_and_wait(void);
@@ -232,6 +232,7 @@ extern bool gpu_transpose_mat;
 extern bool gpu_in_use;
 extern gpu_texture_t *current_render_targets[8];
 extern int current_render_targets_count;
+extern gpu_texture_t *current_depth_buffer;
 extern int constant_buffer_index;
 extern gpu_texture_t framebuffers[GPU_FRAMEBUFFER_COUNT];
 extern gpu_texture_t framebuffer_depth;

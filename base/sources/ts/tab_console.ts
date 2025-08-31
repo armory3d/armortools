@@ -56,13 +56,13 @@ function tab_console_draw(htab: ui_handle_t) {
 		let _font: draw_font_t = ui.ops.font;
 		let _font_size: i32 = ui.font_size;
 		let f: draw_font_t = data_get_font("font_mono.ttf");
-		ui_set_font(f);
+		ui_set_font(ui, f);
 		ui.font_size = math_floor(15 * UI_SCALE());
 		for (let i: i32 = 0; i < console_last_traces.length; ++i) {
 			let t: string = console_last_traces[i];
 			ui_text(t);
 		}
-		ui_set_font(_font);
+		ui_set_font(ui, _font);
 		ui.font_size = _font_size;
 	}
 }

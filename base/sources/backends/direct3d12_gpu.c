@@ -368,13 +368,13 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	device->lpVtbl->CreateCommandList(device, 0, D3D12_COMMAND_LIST_TYPE_DIRECT, command_allocator, NULL, &IID_ID3D12CommandList, &command_list);
 }
 
-void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, unsigned flags, unsigned color, float depth) {
+void gpu_begin_internal(unsigned flags, unsigned color, float depth) {
 	for (int i = 0; i < current_render_targets_count; ++i) {
 		current_render_targets[i]->impl.rtv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(current_render_targets[i]->impl.rtv_descriptor_heap, &target_descriptors[i]);
 	}
 
-	if (depth_buffer != NULL) {
-		depth_buffer->impl.rtv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(depth_buffer->impl.rtv_descriptor_heap, &depth_handle);
+	if (current_depth_buffer != NULL) {
+		current_depth_buffer->impl.rtv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(current_depth_buffer->impl.rtv_descriptor_heap, &depth_handle);
 		current_depth_handle = &depth_handle;
 	}
 	else {
@@ -397,9 +397,9 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t *depth
 		target->impl.rtv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(target->impl.rtv_descriptor_heap, &handle);
 		command_list->lpVtbl->ClearRenderTargetView(command_list, handle, clear_color, 0, NULL);
 	}
-	if (flags & GPU_CLEAR_DEPTH && depth_buffer != NULL) {
+	if (flags & GPU_CLEAR_DEPTH && current_depth_buffer != NULL) {
 		D3D12_CPU_DESCRIPTOR_HANDLE handle;
-		depth_buffer->impl.rtv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(depth_buffer->impl.rtv_descriptor_heap, &handle);
+		current_depth_buffer->impl.rtv_descriptor_heap->lpVtbl->GetCPUDescriptorHandleForHeapStart(current_depth_buffer->impl.rtv_descriptor_heap, &handle);
 		command_list->lpVtbl->ClearDepthStencilView(command_list, handle, D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0, NULL);
 	}
 }

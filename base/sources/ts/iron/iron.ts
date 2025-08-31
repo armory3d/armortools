@@ -959,7 +959,7 @@ declare function UI_ELEMENT_W(): f32;
 declare function UI_ELEMENT_H(): f32;
 declare function UI_OUTPUTS_H(sockets_count: i32, length: i32 = -1): f32;
 
-function ui_MENUBAR_H(): f32 {
+function ui_MENUBAR_H(ui: ui_t): f32 {
 	let button_offset_y: f32 = (ui.ops.theme.ELEMENT_H * UI_SCALE() - ui.ops.theme.BUTTON_H * UI_SCALE()) / 2;
 	return ui.ops.theme.BUTTON_H * UI_SCALE() * 1.1 + 2 + button_offset_y;
 }
@@ -1031,7 +1031,7 @@ function ui_get_socket(nodes: ui_node_t[], id: i32): ui_node_socket_t {
 	return null;
 }
 
-function ui_set_font(font: draw_font_t) {
+function ui_set_font(ui: ui_t, font: draw_font_t) {
 	draw_font_init(font); // Make sure font is ready
 	ui.ops.font = font;
 }

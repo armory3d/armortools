@@ -179,7 +179,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	next_drawable();
 }
 
-void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, unsigned flags, unsigned color, float depth) {
+void gpu_begin_internal(unsigned flags, unsigned color, float depth) {
 	render_pass_desc = [MTLRenderPassDescriptor renderPassDescriptor];
 	for (int i = 0; i < current_render_targets_count; ++i) {
 		render_pass_desc.colorAttachments[i].texture = (__bridge id<MTLTexture>)current_render_targets[i]->impl._tex;
@@ -197,8 +197,8 @@ void gpu_begin_internal(gpu_texture_t **targets, int count, gpu_texture_t *depth
 		}
 	}
 
-	if (depth_buffer != NULL) {
-		render_pass_desc.depthAttachment.texture = (__bridge id<MTLTexture>)depth_buffer->impl._tex;
+	if (current_depth_buffer != NULL) {
+		render_pass_desc.depthAttachment.texture = (__bridge id<MTLTexture>)current_depth_buffer->impl._tex;
 	}
 
 	if (flags & GPU_CLEAR_DEPTH) {

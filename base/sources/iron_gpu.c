@@ -62,7 +62,7 @@ void gpu_begin(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, 
 		gpu_barrier(current_depth_buffer, GPU_TEXTURE_STATE_RENDER_TARGET_DEPTH);
 	}
 
-	gpu_begin_internal(targets, count, depth_buffer, flags, color, depth);
+	gpu_begin_internal(flags, color, depth);
 }
 
 void gpu_draw() {
