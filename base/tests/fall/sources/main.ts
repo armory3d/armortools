@@ -161,3 +161,5 @@ function scene_update() {
 	asim_body_get_pos(body, ADDRESS(t.loc));
 	transform_build_matrix(t);
 }
+
+function tr(id: string, vars: map_t<string, string> = null): string {}

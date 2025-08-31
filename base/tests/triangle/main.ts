@@ -3,8 +3,8 @@
 // ../../make --run
 
 let pipeline: gpu_pipeline_t;
-let vb: any;
-let ib: any;
+let vb: gpu_buffer_t;
+let ib: gpu_buffer_t;
 
 function render() {
 	_gpu_begin(null, null, null, clear_flag_t.COLOR | clear_flag_t.DEPTH, 0xff000000, 1.0);
@@ -35,8 +35,8 @@ function main() {
 	gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
 	let vs_buffer: buffer_t = iron_load_blob("./data/test.vert" + sys_shader_ext());
 	let fs_buffer: buffer_t = iron_load_blob("./data/test.frag" + sys_shader_ext());
-	let vert: any = gpu_create_shader(vs_buffer, shader_type_t.VERTEX);
-	let frag: any = gpu_create_shader(fs_buffer, shader_type_t.FRAGMENT);
+	let vert: gpu_shader_t = gpu_create_shader(vs_buffer, shader_type_t.VERTEX);
+	let frag: gpu_shader_t = gpu_create_shader(fs_buffer, shader_type_t.FRAGMENT);
 	pipeline.vertex_shader = vert;
 	pipeline.fragment_shader = frag;
 	pipeline.input_layout = vs;
@@ -49,7 +49,7 @@ function main() {
 	];
 	let indices: i32[] = [0, 1, 2];
 
-	vb = gpu_create_vertex_buffer(vertices.length / 3, vs.elements, 0);
+	vb = gpu_create_vertex_buffer(vertices.length / 3, vs.elements);
 	let vb_data: buffer_t = gpu_lock_vertex_buffer(vb);
 	for (let i: i32 = 0; i < vertices.length; i++) {
 		buffer_set_f32(vb_data, i * 4, vertices[i]);
@@ -65,3 +65,5 @@ function main() {
 
 	_iron_set_update_callback(render);
 }
+
+function tr(id: string, vars: map_t<string, string> = null): string {}
