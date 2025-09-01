@@ -2,13 +2,7 @@
 let import_mesh_clear_layers: bool = true;
 let import_mesh_meshes_to_unwrap: any[] = null;
 
-///if is_paint
 function import_mesh_run(path: string, _clear_layers: bool = true, replace_existing: bool = true) {
-///end
-
-///if is_lab
-function import_mesh_run(path: string, replace_existing: bool = true) {
-///end
 
 	if (!path_is_mesh(path)) {
 		if (!context_enable_import_plugin(path)) {
@@ -17,10 +11,8 @@ function import_mesh_run(path: string, replace_existing: bool = true) {
 		}
 	}
 
-	///if is_paint
 	import_mesh_clear_layers = _clear_layers;
 	context_raw.layer_filter = 0;
-	///end
 
 	import_mesh_meshes_to_unwrap = null;
 
@@ -97,12 +89,8 @@ function import_mesh_finish_import() {
 	make_material_parse_paint_material();
 	make_material_parse_mesh_material();
 
-	///if is_paint
 	ui_view2d_hwnd.redraws = 2;
-	///end
-
 	render_path_raytrace_ready = false;
-
 	context_raw.paint_body = null;
 }
 
@@ -139,15 +127,12 @@ function _import_mesh_make_mesh(mesh: raw_mesh_t) {
 
 	context_raw.ddirty = 4;
 
-	///if is_paint
 	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 	util_uv_uvmap_cached = false;
 	util_uv_trianglemap_cached = false;
 	util_uv_dilatemap_cached = false;
-	///end
 
-	///if is_paint
 	if (import_mesh_clear_layers) {
 		while (project_layers.length > 0) {
 			let l: slot_layer_t = array_pop(project_layers);
@@ -157,7 +142,6 @@ function _import_mesh_make_mesh(mesh: raw_mesh_t) {
 		sys_notify_on_next_frame(layers_init);
 		history_reset();
 	}
-	///end
 
 	// Wait for add_mesh calls to finish
 	if (import_mesh_meshes_to_unwrap != null) {
@@ -243,12 +227,10 @@ function _import_mesh_add_mesh(mesh: raw_mesh_t) {
 
 	context_raw.ddirty = 4;
 
-	///if is_paint
 	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 	util_uv_uvmap_cached = false;
 	util_uv_trianglemap_cached = false;
 	util_uv_dilatemap_cached = false;
-	///end
 }
 
 function import_mesh_add_mesh(mesh: raw_mesh_t) {

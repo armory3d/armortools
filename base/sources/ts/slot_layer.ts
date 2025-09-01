@@ -89,7 +89,6 @@ function slot_layer_create(ext: string = "", type: layer_slot_type_t = layer_slo
 			raw.texpaint = render_path_create_render_target(t)._image;
 		}
 
-		///if is_paint
 		{
 			let t: render_target_t = render_target_create();
 			t.name = "texpaint_nor" + ext;
@@ -108,7 +107,6 @@ function slot_layer_create(ext: string = "", type: layer_slot_type_t = layer_slo
 		}
 
 		raw.texpaint_preview = gpu_create_render_target(util_render_layer_preview_size, util_render_layer_preview_size, tex_format_t.RGBA32);
-		///end
 	}
 
 	else { // Mask

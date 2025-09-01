@@ -595,10 +595,6 @@ function context_select_paint_object(o: mesh_object_t) {
 }
 
 function context_main_object(): mesh_object_t {
-	///if is_lab
-	return project_paint_objects[0];
-	///end
-
 	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 		let po: mesh_object_t = project_paint_objects[i];
 		if (po.base.children.length > 0) {
@@ -609,18 +605,10 @@ function context_main_object(): mesh_object_t {
 }
 
 function context_layer_filter_used(): bool {
-	///if is_lab
-	return true;
-	///end
-
 	return context_raw.layer_filter > 0 && context_raw.layer_filter <= project_paint_objects.length;
 }
 
 function context_object_mask_used(): bool {
-	///if is_lab
-	return false;
-	///end
-
 	return slot_layer_get_object_mask(context_raw.layer) > 0 && slot_layer_get_object_mask(context_raw.layer) <= project_paint_objects.length;
 }
 
@@ -630,10 +618,6 @@ function context_in_viewport(): bool {
 }
 
 function context_in_paint_area(): bool {
-	///if is_lab
-	return context_in_viewport();
-	///end
-
 	let right: i32 = sys_w();
 	if (ui_view2d_show) {
 		right += ui_view2d_ww;

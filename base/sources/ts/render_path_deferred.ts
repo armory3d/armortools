@@ -97,18 +97,12 @@ function render_path_deferred_init() {
 	render_path_load_shader("shader_datas/supersample_resolve/supersample_resolveRGBA64");
 
 	render_path_paint_init();
-
-	///if is_paint
 	render_path_preview_init();
-	///end
-
 	render_path_raytrace_init();
 }
 
 function render_path_deferred_commands() {
-	///if is_paint
 	render_path_paint_live_brush_dirty();
-	///end
 	render_path_base_commands(render_path_deferred_draw_deferred);
 }
 

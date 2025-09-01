@@ -1,6 +1,4 @@
 
-///if is_paint
-
 function make_paint_is_raytraced_bake(): bool {
 	return context_raw.bake_type == bake_type_t.INIT;
 }
@@ -514,5 +512,3 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 
 	return con_paint;
 }
-
-///end

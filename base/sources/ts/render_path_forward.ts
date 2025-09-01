@@ -3,9 +3,7 @@ function render_path_forward_init() {
 }
 
 function render_path_forward_commands() {
-	///if is_paint
 	render_path_paint_live_brush_dirty();
-	///end
 	render_path_base_commands(render_path_forward_draw_forward);
 }
 

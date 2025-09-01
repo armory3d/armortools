@@ -20,7 +20,6 @@ function ui_menubar_init() {
 
 function ui_menu_panel_x(): i32 {
 	let panel_x: i32 = sys_x();
-	///if is_paint
 	if (config_raw.layout[layout_size_t.HEADER] == 1) {
 		let item_w: i32 = ui_toolbar_w();
 		panel_x = sys_x() - item_w;
@@ -28,19 +27,16 @@ function ui_menu_panel_x(): i32 {
 	else {
 		panel_x += 5 * UI_SCALE();
 	}
-	///end
 	return panel_x;
 }
 
 function ui_menu_panel_y(): i32 {
 	let panel_y: i32 = 0;
-	///if is_paint
 	if (config_raw.layout[layout_size_t.HEADER] == 1) {
 	}
 	else {
 		panel_y += 5 * UI_SCALE();
 	}
-	///end
 	return panel_y;
 }
 
@@ -55,13 +51,7 @@ function ui_menubar_render_ui() {
 		ui_begin_menu();
 
 		if (config_raw.touch_ui) {
-
-			///if is_paint
 			ui._w = item_w;
-			///end
-			///if is_lab
-			ui._w = 36;
-			///end
 
 			if (ui_menubar_icon_button(0, 2)) box_preferences_show();
 			if (ui_menubar_icon_button(0, 3)) {
@@ -76,11 +66,9 @@ function ui_menubar_render_ui() {
 			if (ui_menubar_icon_button(4, 2)) {
 				project_import_asset();
 			}
-			///if (is_paint || is_lab)
 			if (ui_menubar_icon_button(5, 2)) {
 				box_export_show_textures();
 			}
-			///end
 			let size: i32 = math_floor(ui._w / UI_SCALE());
 			if (ui_menu_show && ui_menubar_category == menubar_category_t.VIEWPORT) {
 				ui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
@@ -127,10 +115,7 @@ function ui_menubar_render_ui() {
 
 		if (ui_menubar_w < ui._x + 10) {
 			ui_menubar_w = math_floor(ui._x + 10);
-
-			///if is_paint
 			ui_toolbar_handle.redraws = 2;
-			///end
 		}
 
 		ui_end_menu();
@@ -147,13 +132,8 @@ function ui_menubar_draw_tab_header() {
 	let panel_x: i32 = sys_x();
 
 	let nodesw: i32 = (ui_nodes_show || ui_view2d_show) ? config_raw.layout[layout_size_t.NODES_W] : 0;
-	///if is_paint
 	let ww: i32 = iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - ui_menubar_w - nodesw;
 	panel_x = (sys_x() - item_w) + ui_menubar_w;
-	///else
-	let ww: i32 = iron_window_width() - ui_menubar_w - nodesw;
-	panel_x = (sys_x()) + ui_menubar_w;
-	///end
 
 	if (ui_window(ui_menubar_workspace_handle, panel_x, 0, ww, ui_header_h)) {
 
@@ -163,65 +143,6 @@ function ui_menubar_draw_tab_header() {
 		else {
 			ui_fill(0, 0, ui._window_w, ui._window_h + 4, ui.ops.theme.SEPARATOR_COL);
 		}
-
-		///if is_lab
-		ui_tab(ui_header_worktab, tr("2D View"));
-		if (ui_header_worktab.changed) {
-			context_raw.ddirty = 2;
-			context_raw.brush_blend_dirty = true;
-			ui_header_handle.redraws = 2;
-			context_main_object().skip_context = null;
-
-			if (ui_header_worktab.position == space_type_t.SPACE3D) {
-				if (!mat4_isnan(_ui_menubar_saved_camera)) {
-					transform_set_matrix(scene_camera.base.transform, _ui_menubar_saved_camera);
-					_ui_menubar_saved_camera = mat4_nan();
-				}
-				scene_meshes = [context_main_object()];
-			}
-			else { // Space2D
-				if (_ui_menubar_plane == null) {
-					let mesh: raw_mesh_t = geom_make_plane(1, 1, 2, 2);
-					let raw: mesh_data_t = {
-						name: "2DView",
-						vertex_arrays: [
-							{
-								values: mesh.posa,
-								attrib: "pos",
-								data: "short4norm"
-							},
-							{
-								values: mesh.nora,
-								attrib: "nor",
-								data: "short2norm"
-							},
-							{
-								values: mesh.texa,
-								attrib: "tex",
-								data: "short2norm"
-							}
-						],
-						index_array: mesh.inda,
-						scale_pos: mesh.scale_pos,
-						scale_tex: mesh.scale_tex
-					};
-					let md: mesh_data_t = mesh_data_create(raw);
-					let dot_plane: mesh_object_t = scene_get_child(".Plane").ext;
-					_ui_menubar_plane = mesh_object_create(md, dot_plane.materials);
-					array_remove(scene_meshes, _ui_menubar_plane);
-				}
-
-				if (mat4_isnan(_ui_menubar_saved_camera)) {
-					_ui_menubar_saved_camera = mat4_clone(scene_camera.base.transform.local);
-				}
-				scene_meshes = [_ui_menubar_plane];
-				let m: mat4_t = mat4_identity();
-				m = mat4_translate(m, 0, 0, 1.6);
-				transform_set_matrix(scene_camera.base.transform, m);
-			}
-			render_path_raytrace_ready = false;
-		}
-		///end
 	}
 }
 
@@ -256,7 +177,6 @@ function ui_menubar_draw_category_items() {
 			});
 		}
 
-		///if is_paint
 		if (ui_menu_button(tr("Import Font..."))) {
 			project_import_asset("ttf,ttc,otf");
 		}
@@ -266,13 +186,10 @@ function ui_menubar_draw_category_items() {
 		if (ui_menu_button(tr("Import Brush..."))) {
 			project_import_brush();
 		}
-		///end
 
-		///if (is_paint || is_lab)
 		if (ui_menu_button(tr("Import Swatches..."))) {
 			project_import_swatches();
 		}
-		///end
 		if (ui_menu_button(tr("Import Mesh..."))) {
 			project_import_mesh();
 		}
@@ -283,7 +200,6 @@ function ui_menubar_draw_category_items() {
 			project_reimport_textures();
 		}
 		ui_menu_separator();
-		///if (is_paint || is_lab)
 		if (ui_menu_button(tr("Export Textures..."), map_get(config_keymap, "file_export_textures_as"))) {
 			context_raw.layers_export = export_mode_t.VISIBLE;
 			box_export_show_textures();
@@ -291,17 +207,13 @@ function ui_menubar_draw_category_items() {
 		if (ui_menu_button(tr("Export Swatches..."))) {
 			project_export_swatches();
 		}
-		///end
 		if (ui_menu_button(tr("Export Mesh..."))) {
 			context_raw.export_mesh_index = 0; // All
 			box_export_show_mesh();
 		}
-
-		///if is_paint
 		if (ui_menu_button(tr("Bake Material..."))) {
 			box_export_show_bake_material();
 		}
-		///end
 
 		ui_menu_separator();
 		if (ui_menu_button(tr("Exit"))) {
@@ -379,7 +291,6 @@ function ui_menubar_draw_category_items() {
 			context_raw.ddirty = 2;
 		}
 
-		///if is_paint
 		let split_view_handle: ui_handle_t = ui_handle(__ID__);
 		if (split_view_handle.init) {
 			split_view_handle.selected = context_raw.split_view;
@@ -388,21 +299,6 @@ function ui_menubar_draw_category_items() {
 		if (split_view_handle.changed) {
 			base_resize();
 		}
-		///end
-
-		///if is_lab
-		let brush_scale_handle: ui_handle_t = ui_handle(__ID__);
-		if (brush_scale_handle.init) {
-			brush_scale_handle.value = context_raw.brush_scale;
-		}
-		ui_menu_align();
-		context_raw.brush_scale = ui_slider(brush_scale_handle, tr("UV Scale"), 0.01, 5.0, true);
-		if (brush_scale_handle.changed) {
-			make_material_parse_mesh_material();
-			render_path_raytrace_uv_scale = context_raw.brush_scale;
-			render_path_raytrace_ready = false;
-		}
-		///end
 
 		let cull_handle: ui_handle_t = ui_handle(__ID__);
 		if (cull_handle.init) {
@@ -422,7 +318,6 @@ function ui_menubar_draw_category_items() {
 			gpu_use_linear_sampling(context_raw.texture_filter);
 		}
 
-		///if is_paint
 		context_raw.draw_wireframe = ui_check(context_raw.wireframe_handle, " " + tr("Wireframe"));
 		if (context_raw.wireframe_handle.changed) {
 			let current: gpu_texture_t = _draw_current;
@@ -431,14 +326,11 @@ function ui_menubar_draw_category_items() {
 			draw_begin(current);
 			make_material_parse_mesh_material();
 		}
-		///end
 
-		///if is_paint
 		context_raw.draw_texels = ui_check(context_raw.texels_handle, " " + tr("Texels"));
 		if (context_raw.texels_handle.changed) {
 			make_material_parse_mesh_material();
 		}
-		///end
 
 		let compass_handle: ui_handle_t = ui_handle(__ID__);
 		if (compass_handle.init) {
@@ -472,25 +364,19 @@ function ui_menubar_draw_category_items() {
 		let modes: string[] = [
 			tr("Lit"),
 			tr("Base Color"),
-			///if (is_paint || is_lab)
 			tr("Normal"),
 			tr("Occlusion"),
 			tr("Roughness"),
 			tr("Metallic"),
 			tr("Opacity"),
 			tr("Height"),
-			///end
-			///if (is_paint)
 			tr("Emission"),
 			tr("Subsurface"),
-			///end
-			///if is_paint
 			tr("TexCoord"),
 			tr("Object Normal"),
 			tr("Material ID"),
 			tr("Object ID"),
 			tr("Mask")
-			///end
 		];
 		let shortcuts: string[] = ["l", "b", "n", "o", "r", "m", "a", "h", "e", "s", "t", "1", "2", "3", "4"];
 

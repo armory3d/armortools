@@ -69,7 +69,6 @@ function _pipes_make_merge(red: bool, green: bool, blue: bool, alpha: bool): gpu
 }
 
 function pipes_init() {
-	///if is_paint
 	pipes_merge = _pipes_make_merge(true, true, true, true);
 	pipes_merge_r = _pipes_make_merge(true, false, false, false);
 	pipes_merge_g = _pipes_make_merge(false, true, false, false);
@@ -82,7 +81,6 @@ function pipes_init() {
 	pipes_opac = pipes_get_constant_location("float");
 	pipes_blending = pipes_get_constant_location("int");
 	pipes_tex1w = pipes_get_constant_location("float");
-	///end
 
 	{
 		pipes_copy = gpu_create_pipeline();
@@ -140,7 +138,6 @@ function pipes_init() {
 		gpu_pipeline_compile(pipes_copy128);
 	}
 
-	///if is_paint
 	{
 		pipes_invert8 = gpu_create_pipeline();
 		pipes_invert8.vertex_shader = sys_get_shader("layer_invert.vert");
@@ -191,61 +188,6 @@ function pipes_init() {
 		pipes_texpaint_colorid = 0;
 		pipes_tex_colorid = 1;
 	}
-	///end
-
-	///if is_lab
-	{
-		pipes_copy_r = gpu_create_pipeline();
-		pipes_copy_r.vertex_shader = sys_get_shader("layer_copy.vert");
-		pipes_copy_r.fragment_shader = sys_get_shader("layer_copy.frag");
-		let vs: gpu_vertex_structure_t = {};
-		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
-		pipes_copy_r.input_layout = vs;
-		ARRAY_ACCESS(pipes_copy_r.color_write_mask_green, 0) = false;
-		ARRAY_ACCESS(pipes_copy_r.color_write_mask_blue, 0) = false;
-		ARRAY_ACCESS(pipes_copy_r.color_write_mask_alpha, 0) = false;
-		gpu_pipeline_compile(pipes_copy_r);
-	}
-
-	{
-		pipes_copy_g = gpu_create_pipeline();
-		pipes_copy_g.vertex_shader = sys_get_shader("layer_copy.vert");
-		pipes_copy_g.fragment_shader = sys_get_shader("layer_copy.frag");
-		let vs: gpu_vertex_structure_t = {};
-		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
-		pipes_copy_g.input_layout = vs;
-		ARRAY_ACCESS(pipes_copy_g.color_write_mask_red, 0) = false;
-		ARRAY_ACCESS(pipes_copy_g.color_write_mask_blue, 0) = false;
-		ARRAY_ACCESS(pipes_copy_g.color_write_mask_alpha, 0) = false;
-		gpu_pipeline_compile(pipes_copy_g);
-	}
-
-	{
-		pipes_inpaint_preview = gpu_create_pipeline();
-		pipes_inpaint_preview.vertex_shader = sys_get_shader("inpaint_preview.vert");
-		pipes_inpaint_preview.fragment_shader = sys_get_shader("inpaint_preview.frag");
-		let vs: gpu_vertex_structure_t = {};
-		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
-		pipes_inpaint_preview.input_layout = vs;
-		gpu_pipeline_compile(pipes_inpaint_preview);
-		pipes_tex0_inpaint_preview = 0;
-		pipes_texa_inpaint_preview = 1;
-	}
-
-	{
-		pipes_copy_a = gpu_create_pipeline();
-		pipes_copy_a.vertex_shader = sys_get_shader("layer_copy_rrrr.vert");
-		pipes_copy_a.fragment_shader = sys_get_shader("layer_copy_rrrr.frag");
-		let vs: gpu_vertex_structure_t = {};
-		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
-		pipes_copy_a.input_layout = vs;
-		ARRAY_ACCESS(pipes_copy_a.color_write_mask_red, 0) = false;
-		ARRAY_ACCESS(pipes_copy_a.color_write_mask_green, 0) = false;
-		ARRAY_ACCESS(pipes_copy_a.color_write_mask_blue, 0) = false;
-		gpu_pipeline_compile(pipes_copy_a);
-		pipes_copy_a_tex = 0;
-	}
-	///end
 
 	{
 		pipes_copy_rgb = gpu_create_pipeline();

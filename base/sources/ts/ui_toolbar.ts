@@ -1,10 +1,5 @@
 
-///if is_lab
-let ui_toolbar_default_w: i32 = 0;
-///else
 let ui_toolbar_default_w: i32 = 36;
-///end
-
 let ui_toolbar_handle: ui_handle_t = ui_handle_create();
 let ui_toolbar_last_tool: i32 = 0;
 let ui_toolbar_tool_names: string[] = [
@@ -60,12 +55,10 @@ function ui_toolbar_draw_tool(i: i32, img: gpu_texture_t, icon_accent: i32, keys
 		ui_toolbar_last_tool = i;
 	}
 
-	///if is_paint
 	if (i == tool_type_t.COLORID && context_raw.colorid_picked) {
 		let rt: render_target_t = map_get(render_path_render_targets, "texpaint_colorid");
 		draw_scaled_sub_image(rt._image, 0, 0, 1, 1, 0, _y + 1.5 * UI_SCALE(), 5 * UI_SCALE(), 34 * UI_SCALE());
 	}
-	///end
 
 	if (ui.is_hovered) {
 		ui_tooltip(tr(ui_toolbar_tool_names[i]) + " " + keys[i]);

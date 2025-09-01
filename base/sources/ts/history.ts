@@ -609,7 +609,6 @@ function history_push(name: string): step_t {
 		history_redos = 0;
 	}
 
-	///if is_paint
 	let opos: i32 = array_index_of(project_paint_objects, context_raw.paint_object);
 	let lpos: i32 = array_index_of(project_layers, context_raw.layer);
 	let mpos: i32 = array_index_of(project_materials, context_raw.material);
@@ -627,13 +626,6 @@ function history_push(name: string): step_t {
 		layer_object: context_raw.layer.object_mask,
 		layer_blending: context_raw.layer.blending
 	};
-	///end
-
-	///if is_lab
-	let step: step_t = {
-		name: name
-	};
-	///end
 
 	array_push(history_steps, step);
 
@@ -698,10 +690,6 @@ function history_copy_to_undo(from_id: i32, to_id: i32, is_mask: bool) {
 }
 
 function history_get_canvas(step: step_t): ui_node_canvas_t {
-	///if is_lab
-	return null;
-	///end
-
 	if (step.canvas_group == -1) {
 		return project_materials[step.material].canvas;
 	}
@@ -720,7 +708,6 @@ function history_set_canvas(step: step_t, canvas: ui_node_canvas_t) {
 }
 
 function history_swap_canvas(step: step_t) {
-	///if is_paint
 	if (step.canvas_type == 0) {
 		let _canvas: ui_node_canvas_t = history_get_canvas(step);
 		history_set_canvas(step, step.canvas);
@@ -733,13 +720,6 @@ function history_swap_canvas(step: step_t) {
 		step.canvas = _canvas;
 		context_raw.brush = project_brushes[step.brush];
 	}
-	///end
-
-	///if is_lab
-	let _canvas: ui_node_canvas_t = history_get_canvas(step);
-	history_set_canvas(step, step.canvas);
-	step.canvas = _canvas;
-	///end
 
 	ui_nodes_canvas_changed();
 	ui_nodes_hwnd.redraws = 2;

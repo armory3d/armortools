@@ -3,7 +3,6 @@ let export_texture_gamma: f32 = 1.0 / 2.2;
 
 function export_texture_run(path: string, bake_material: bool = false) {
 
-	///if is_paint
 	if (bake_material) {
 		export_texture_run_bake_material(path);
 	}
@@ -94,12 +93,6 @@ function export_texture_run(path: string, bake_material: bool = false) {
 			export_texture_run_layers(path, layers);
 		}
 	}
-	///end
-
-	///if is_lab
-	let layers: slot_layer_t[] = [context_raw.brush_output_node_inst];
-	export_texture_run_layers(path, layers);
-	///end
 
 	///if arm_ios
 	console_info(tr("Textures exported") + " (\"Files/On My iPad/" + manifest_title + "\")");
@@ -169,7 +162,6 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 		f = substring(f, 0, f.length - 4);
 	}
 
-	///if is_paint
 	let is_udim: bool = context_raw.layers_export == export_mode_t.PER_UDIM_TILE;
 	if (is_udim) {
 		ext = object_name + ext;
@@ -299,17 +291,9 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 		}
 	}
 
-	///end
-
 	let texpaint: gpu_texture_t = layers_expa;
 	let texpaint_nor: gpu_texture_t = layers_expb;
 	let texpaint_pack: gpu_texture_t = layers_expc;
-
-	///if is_lab
-	texpaint = context_raw.brush_output_node_inst.texpaint;
-	texpaint_nor = context_raw.brush_output_node_inst.texpaint_nor;
-	texpaint_pack = context_raw.brush_output_node_inst.texpaint_pack;
-	///end
 
 	let pixpaint: buffer_t = null;
 	let pixpaint_nor: buffer_t = null;

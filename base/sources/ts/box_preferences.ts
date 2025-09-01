@@ -341,7 +341,6 @@ function box_preferences_show() {
 				draw_begin(current);
 			}
 
-			///if is_paint
 			let h_dilate_radius: ui_handle_t = ui_handle(__ID__);
 			if (h_dilate_radius.init) {
 				h_dilate_radius.value = config_raw.dilate_radius;
@@ -360,19 +359,6 @@ function box_preferences_show() {
 			if (dilate_handle.changed) {
 				config_raw.dilate = dilate_handle.position;
 			}
-			///end
-
-			///if is_lab
-			let workspace_handle: ui_handle_t = ui_handle(__ID__);
-			if (workspace_handle.init) {
-				workspace_handle.position = config_raw.workspace;
-			}
-			let workspace_combo: string[] = [tr("3D View"), tr("2D View")];
-			ui_combo(workspace_handle, workspace_combo, tr("Default Workspace"), true);
-			if (workspace_handle.changed) {
-				config_raw.workspace = workspace_handle.position;
-			}
-			///end
 
 			let camera_controls_handle: ui_handle_t = ui_handle(__ID__);
 			if (camera_controls_handle.init) {
@@ -416,7 +402,6 @@ function box_preferences_show() {
 			}
 			config_raw.server = ui_text_input(server_handle, tr("Cloud Server"));
 
-			///if is_paint
 			let material_live_handle: ui_handle_t = ui_handle(__ID__);
 			if (material_live_handle.init) {
 				material_live_handle.selected = config_raw.material_live;
@@ -478,18 +463,15 @@ function box_preferences_show() {
 				make_material_parse_paint_material();
 			}
 			ui.enabled = true;
-			///end
 
-			///if is_lab
 			let h_gpu_inference: ui_handle_t = ui_handle(__ID__);
 			if (h_gpu_inference.init) {
 				h_gpu_inference.selected = config_raw.gpu_inference;
 			}
-			config_raw.gpu_inference = ui_check(h_gpu_inference, tr("Use GPU"));
+			config_raw.gpu_inference = ui_check(h_gpu_inference, tr("GPU Inference"));
 			if (ui.is_hovered) {
-				ui_tooltip(tr("Use GPU to accelerate node graph processing"));
+				ui_tooltip(tr("Use GPU to accelerate neural node processing"));
 			}
-			///end
 		}
 
 		let pen_name: string;
@@ -513,7 +495,6 @@ function box_preferences_show() {
 			}
 			config_raw.pressure_sensitivity = ui_slider(h_pressure_sensitivity, tr("Sensitivity"), 0.0, 10.0, true);
 
-			///if is_paint
 			let h_pressure_hardness: ui_handle_t = ui_handle(__ID__);
 			if (h_pressure_hardness.init) {
 				h_pressure_hardness.selected = config_raw.pressure_hardness;
@@ -531,7 +512,6 @@ function box_preferences_show() {
 				h_pressure_angle.selected = config_raw.pressure_angle;
 			}
 			config_raw.pressure_angle = ui_check(h_pressure_angle, tr("Brush Angle"));
-			///end
 
 			ui_end_element();
 			let row: f32[] = [0.5];

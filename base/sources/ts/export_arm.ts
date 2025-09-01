@@ -18,7 +18,6 @@ function export_arm_run_mesh(path: string, paint_objects: mesh_object_t[]) {
 }
 
 function export_arm_run_project() {
-	///if is_paint
 	let mnodes: ui_node_canvas_t[] = [];
 	for (let i: i32 = 0; i < project_materials.length; ++i) {
 		let m: slot_material_t = project_materials[i];
@@ -35,15 +34,6 @@ function export_arm_run_project() {
 		let b: slot_brush_t = project_brushes[i];
 		array_push(bnodes, b.canvas);
 	}
-	///end
-
-	///if is_lab
-	let c: ui_node_canvas_t = util_clone_canvas(project_canvas);
-	for (let i: i32 = 0; i < c.nodes.length; ++i) {
-		let n: ui_node_t = c.nodes[i];
-		export_arm_export_node(n);
-	}
-	///end
 
 	let mgroups: ui_node_canvas_t[] = null;
 	if (project_material_groups.length > 0) {
@@ -59,21 +49,14 @@ function export_arm_run_project() {
 		}
 	}
 
-	///if is_paint
 	let md: mesh_data_t[] = [];
 	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 		let p: mesh_object_t = project_paint_objects[i];
 		array_push(md, p.data);
 	}
-	///end
-
-	///if is_lab
-	let md: mesh_data_t = project_paint_objects[0].data;
-	///end
 
 	let texture_files: string[] = export_arm_assets_to_files(project_filepath, project_assets);
 
-	///if is_paint
 	let font_files: string[] = export_arm_fonts_to_files(project_filepath, project_fonts);
 	let mesh_files: string[] = export_arm_meshes_to_files(project_filepath);
 
@@ -98,7 +81,6 @@ function export_arm_run_project() {
 			blending: l.blending,
 			parent: l.parent != null ? array_index_of(project_layers, l.parent) : -1,
 			visible: l.visible,
-			///if is_paint
 			texpaint_nor: l.texpaint_nor != null ? lz4_encode(gpu_get_texture_pixels(l.texpaint_nor)) : null,
 			texpaint_pack: l.texpaint_pack != null ? lz4_encode(gpu_get_texture_pixels(l.texpaint_pack)) : null,
 			paint_base: l.paint_base,
@@ -112,11 +94,9 @@ function export_arm_run_project() {
 			paint_height_blend: l.paint_height_blend,
 			paint_emis: l.paint_emis,
 			paint_subs: l.paint_subs
-			///end
 		};
 		array_push(ld, d);
 	}
-	///end
 
 	let packed_assets: packed_asset_t[] = (project_raw.packed_assets == null || project_raw.packed_assets.length == 0) ? null : project_raw.packed_assets;
 	///if arm_ios
@@ -140,7 +120,6 @@ function export_arm_run_project() {
 	project_raw.camera_origin = export_arm_vec3f32(camera_origins[0].v);
 	project_raw.camera_fov = scene_camera.data.fov;
 
-	///if is_paint
 	// project_raw.mesh_datas = md; // TODO: fix GC ref
 	if (project_raw.mesh_datas == null) {
 		project_raw.mesh_datas = md;
@@ -159,12 +138,6 @@ function export_arm_run_project() {
 	project_raw.mesh_assets = mesh_files;
 	project_raw.atlas_objects = project_atlas_objects;
 	project_raw.atlas_names = project_atlas_names;
-	///end
-
-	///if is_lab
-	project_raw.mesh_data = md;
-	project_raw.material = c;
-	///end
 
 	///if IRON_BGRA
 	project_raw.is_bgra = true;
@@ -201,12 +174,10 @@ function export_arm_run_project() {
 	iron_delete_texture(mesh_icon);
 	///end
 
-	///if is_paint
 	let is_packed: bool = ends_with(project_filepath, "_packed_.arm");
 	if (is_packed) { // Pack textures
 		export_arm_pack_assets(project_raw, project_assets);
 	}
-	///end
 
 	let buffer: buffer_t = util_encode_project(project_raw);
 	iron_file_save_bytes(project_filepath, buffer, buffer.length + 1);
@@ -230,11 +201,7 @@ function export_arm_run_project() {
 }
 
 function export_arm_texture_node_name(): string {
-	///if is_paint
 	return "TEX_IMAGE";
-	///else
-	return "image_texture_node";
-	///end
 }
 
 function export_arm_export_node(n: ui_node_t, assets: asset_t[] = null) {

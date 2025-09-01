@@ -217,10 +217,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 										let icon: gpu_texture_t = gpu_create_render_target(data.image.width, data.image.height);
 										if (ends_with(data.f, ".arm")) { // Used for material sphere alpha cutout
 											draw_begin(icon);
-
-											///if is_paint
 											draw_image(project_materials[0].image, 0, 0);
-											///end
 										}
 										else {
 											draw_begin(icon, true, 0xffffffff);
@@ -284,13 +281,6 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 						let bytes_icon: any = raw.brush_icons[0];
 						icon = gpu_create_texture_from_bytes(lz4_decode(bytes_icon, 256 * 256 * 4), 256, 256);
 					}
-
-					///if is_lab
-					if (raw.mesh_icon != null) {
-						let bytes_icon: buffer_t = raw.mesh_icon;
-						icon = gpu_create_texture_from_bytes(lz4_decode(bytes_icon, 256 * 256 * 4), 256, 256);
-					}
-					///end
 
 					map_set(ui_files_icon_map, key, icon);
 				}

@@ -171,7 +171,6 @@ function util_encode_project(raw: project_format_t): buffer_t {
 		armpack_encode_null();
 	}
 
-	///if is_paint
 	armpack_encode_string("brush_nodes");
 	if (raw.brush_nodes != null) {
 		armpack_encode_array(raw.brush_nodes.length);
@@ -263,7 +262,6 @@ function util_encode_project(raw: project_format_t): buffer_t {
 			armpack_encode_i32(raw.layer_datas[i].parent);
 			armpack_encode_string("visible");
 			armpack_encode_bool(raw.layer_datas[i].visible);
-			///if is_paint
 			armpack_encode_string("texpaint_nor");
 			armpack_encode_array_u8(raw.layer_datas[i].texpaint_nor);
 			armpack_encode_string("texpaint_pack");
@@ -290,7 +288,6 @@ function util_encode_project(raw: project_format_t): buffer_t {
 			armpack_encode_bool(raw.layer_datas[i].paint_emis);
 			armpack_encode_string("paint_subs");
 			armpack_encode_bool(raw.layer_datas[i].paint_subs);
-			///end
 		}
 	}
 	else {
@@ -312,21 +309,11 @@ function util_encode_project(raw: project_format_t): buffer_t {
 	else {
 		armpack_encode_null();
 	}
-	///end
 
-	///if is_paint
 	armpack_encode_string("atlas_objects");
 	armpack_encode_array_i32(raw.atlas_objects);
 	armpack_encode_string("atlas_names");
 	armpack_encode_array_string(raw.atlas_names);
-	///end
-
-	///if is_lab
-	// material?: ui_node_canvas_t;
-	// material_groups?: ui_node_canvas_t[];
-	// mesh_data?: mesh_data_t;
-	// mesh_icon?: buffer_t;
-	///end
 
 	let ei: i32 = armpack_encode_end();
 	encoded.length = ei;

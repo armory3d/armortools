@@ -127,11 +127,9 @@ function tab_materials_draw_slots(mini: bool) {
 			if (state == ui_state_t.STARTED && ui.input_y > ui._window_y) {
 				if (context_raw.material != project_materials[i]) {
 					context_select_material(i);
-					///if is_paint
 					if (context_raw.tool == tool_type_t.MATERIAL) {
 						sys_notify_on_next_frame(layers_update_fill_layers);
 					}
-					///end
 				}
 				base_drag_off_x = -(mouse_x - uix - ui._window_x - 3);
 				base_drag_off_y = -(mouse_y - uiy - ui._window_y + 1);
@@ -164,12 +162,10 @@ function tab_materials_draw_slots(mini: bool) {
 						box_export_show_material();
 					}
 
-					///if is_paint
 					if (ui_menu_button(tr("Bake"))) {
 						context_select_material(i);
 						box_export_show_bake_material();
 					}
-					///end
 
 					if (ui_menu_button(tr("Duplicate"))) {
 						sys_notify_on_next_frame(function () {

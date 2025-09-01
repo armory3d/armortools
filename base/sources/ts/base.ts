@@ -396,7 +396,6 @@ function base_update() {
 				base_drop_x = mouse_x;
 				base_drop_y = mouse_y;
 
-				///if is_paint
 				_base_material_count = project_materials.length;
 				import_asset_run(base_drag_file, base_drop_x, base_drop_y, true, true, function () {
 					// Asset was material
@@ -405,11 +404,6 @@ function base_update() {
 						base_material_dropped();
 					}
 				});
-				///end
-
-				///if is_lab
-				import_asset_run(base_drag_file, base_drop_x, base_drop_y);
-				///end
 			}
 			base_drag_file = null;
 			base_drag_file_icon = null;
@@ -672,10 +666,6 @@ function base_is_combo_selected(): bool {
 }
 
 function base_is_decal_layer(): bool {
-	///if is_lab
-	return false;
-	///end
-
 	let is_painting: bool = context_raw.tool != tool_type_t.MATERIAL && context_raw.tool != tool_type_t.BAKE;
 	return is_painting && context_raw.layer.fill_layer != null && context_raw.layer.uv_type == uv_type_t.PROJECT;
 }

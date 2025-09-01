@@ -20,7 +20,6 @@ function uniforms_ext_i32_link(object: object_t, mat: material_data_t, link: str
 
 function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: string): f32 {
 	if (link == "_brush_radius") {
-		///if is_paint
 		let decal: bool = context_is_decal();
 		let decal_mask: bool = decal && operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
 		let brush_decal_mask_radius: f32 = context_raw.brush_decal_mask_radius;
@@ -40,16 +39,6 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 		else {
 			val *= scale2d; // Projection ratio
 		}
-		///end
-
-		///if is_lab
-		let radius: f32 = context_raw.brush_radius;
-		let val: f32 = radius / 15.0;
-		if (config_raw.pressure_radius && pen_down()) {
-			val *= pen_pressure * config_raw.pressure_sensitivity;
-		}
-		val *= 2;
-		///end
 
 		return val;
 	}
@@ -322,28 +311,16 @@ function uniforms_ext_mat4_link(object: object_t, mat: material_data_t, link: st
 
 function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: string): gpu_texture_t {
 	if (link == "_texpaint_undo") {
-		///if is_lab
-		return null;
-		///end
-
 		let i: i32 = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
 		let rt: render_target_t = map_get(render_path_render_targets, "texpaint_undo" + i);
 		return rt._image;
 	}
 	else if (link == "_texpaint_nor_undo") {
-		///if is_lab
-		return null;
-		///end
-
 		let i: i32 = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
 		let rt: render_target_t = map_get(render_path_render_targets, "texpaint_nor_undo" + i);
 		return rt._image;
 	}
 	else if (link == "_texpaint_pack_undo") {
-		///if is_lab
-		return null;
-		///end
-
 		let i: i32 = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
 		let rt: render_target_t = map_get(render_path_render_targets, "texpaint_pack_undo" + i);
 		return rt._image;
@@ -404,44 +381,20 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 	}
 
 	if (starts_with(link, "_texpaint_vert")) {
-		///if is_paint
 		let tid: i32 = parse_int(substring(link, link.length - 1, link.length));
 		return tid < project_layers.length ? project_layers[tid].texpaint : null;
-		///end
-
-		///if is_lab
-		return context_raw.brush_output_node_inst.texpaint;
-		///end
 	}
 	if (starts_with(link, "_texpaint_nor")) {
-		///if is_paint
 		let tid: i32 = parse_int(substring(link, link.length - 1, link.length));
 		return tid < project_layers.length ? project_layers[tid].texpaint_nor : null;
-		///end
-
-		///if is_lab
-		return context_raw.brush_output_node_inst.texpaint_nor;
-		///end
 	}
 	if (starts_with(link, "_texpaint_pack")) {
-		///if is_paint
 		let tid: i32 = parse_int(substring(link, link.length - 1, link.length));
 		return tid < project_layers.length ? project_layers[tid].texpaint_pack : null;
-		///end
-
-		///if is_lab
-		return context_raw.brush_output_node_inst.texpaint_pack;
-		///end
 	}
 	if (starts_with(link, "_texpaint")) {
-		///if is_paint
 		let tid: i32 = parse_int(substring(link, link.length - 1, link.length));
 		return tid < project_layers.length ? project_layers[tid].texpaint : null;
-		///end
-
-		///if is_lab
-		return context_raw.brush_output_node_inst.texpaint;
-		///end
 	}
 	if (starts_with(link, "_texblur_")) {
 		let id: string = substring(link, 9, link.length);

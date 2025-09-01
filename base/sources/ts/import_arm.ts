@@ -20,7 +20,6 @@ function import_arm_run_project(path: string) {
 		project = armpack_decode(b);
 	}
 
-	///if is_paint
 	if (project.version != null && project.layer_datas == null) {
 		// Import as material
 		if (project.material_nodes != null) {
@@ -38,7 +37,6 @@ function import_arm_run_project(path: string) {
 	}
 	context_raw.layers_preview_dirty = true;
 	context_raw.layer_filter = 0;
-	///end
 
 	project_new(import_as_mesh);
 	project_filepath = path;
@@ -49,13 +47,11 @@ function import_arm_run_project(path: string) {
 	sys_title_set(ui_files_filename + " - " + manifest_title);
 	///end
 
-	///if is_paint
 	// Import as mesh instead
 	if (import_as_mesh) {
 		import_arm_run_mesh(project);
 		return;
 	}
-	///end
 
 	// Save to recent
 	///if arm_ios
@@ -73,14 +69,12 @@ function import_arm_run_project(path: string) {
 
 	project_raw = project;
 
-	///if is_paint
 	let l0: layer_data_t = project.layer_datas[0];
 	base_res_handle.position = config_get_texture_res_pos(l0.res);
 	let bits_pos: texture_bits_t = l0.bpp == 8 ? texture_bits_t.BITS8 : l0.bpp == 16 ? texture_bits_t.BITS16 : texture_bits_t.BITS32;
 	base_bits_handle.position = bits_pos;
 	let bytes_per_pixel: i32 = math_floor(l0.bpp / 8);
 	let format: tex_format_t = l0.bpp == 8 ? tex_format_t.RGBA32 : l0.bpp == 16 ? tex_format_t.RGBA64 : tex_format_t.RGBA128;
-	///end
 
 	let base: string = path_base_dir(path);
 	if (project_raw.envmap != null) {
@@ -117,7 +111,6 @@ function import_arm_run_project(path: string) {
 		import_texture_run(abs, hdr_as_envmap);
 	}
 
-	///if is_paint
 	if (project.font_assets != null) {
 		for (let i: i32 = 0; i < project.font_assets.length; ++i) {
 			let file: string = project.font_assets[i];
@@ -133,15 +126,8 @@ function import_arm_run_project(path: string) {
 			}
 		}
 	}
-	///end
 
-	///if is_paint
 	let md: mesh_data_t = mesh_data_create(project.mesh_datas[0]);
-	///end
-
-	///if is_lab
-	let md: mesh_data_t = mesh_data_create(project.mesh_data);
-	///end
 
 	mesh_object_set_data(context_raw.paint_object, md);
 	context_raw.paint_object.base.transform.scale = vec4_create(1, 1, 1);
@@ -149,7 +135,6 @@ function import_arm_run_project(path: string) {
 	context_raw.paint_object.base.name = md.name;
 	project_paint_objects = [context_raw.paint_object];
 
-	///if is_paint
 	for (let i: i32 = 1; i < project.mesh_datas.length; ++i) {
 		let raw: mesh_data_t = project.mesh_datas[i];
 		let md: mesh_data_t = mesh_data_create(raw);
@@ -165,27 +150,23 @@ function import_arm_run_project(path: string) {
 		project_mesh_assets = [abs];
 	}
 
-	///if is_paint
 	if (project.atlas_objects != null) {
 		project_atlas_objects = project.atlas_objects;
 	}
 	if (project.atlas_names != null) {
 		project_atlas_names = project.atlas_names;
 	}
-	///end
 
 	// No mask by default
 	if (context_raw.merged_object == null) {
 		util_mesh_merge();
 	}
-	///end
 
 	context_select_paint_object(context_main_object());
 	viewport_scale_to_bounds();
 	context_raw.paint_object.skip_context = "paint";
 	context_raw.merged_object.base.visible = true;
 
-	///if is_paint
 	let tex: gpu_texture_t = project_layers[0].texpaint;
 	if (tex.width != config_get_texture_res_x() || tex.height != config_get_texture_res_y()) {
 		if (history_undo_layers != null) {
@@ -218,10 +199,7 @@ function import_arm_run_project(path: string) {
 	for (let i: i32 = 0; i < project.layer_datas.length; ++i) {
 		let ld: layer_data_t = project.layer_datas[i];
 		let is_group: bool = ld.texpaint == null;
-
-		///if is_paint
 		let is_mask: bool = ld.texpaint != null && ld.texpaint_nor == null;
-		///end
 
 		let l: slot_layer_t = slot_layer_create("", is_group ? layer_slot_type_t.GROUP : is_mask ? layer_slot_type_t.MASK : layer_slot_type_t.LAYER);
 		if (ld.name != null) {
@@ -253,7 +231,6 @@ function import_arm_run_project(path: string) {
 				draw_set_pipeline(null);
 				draw_end();
 
-				///if is_paint
 				_texpaint_nor = gpu_create_texture_from_bytes(lz4_decode(ld.texpaint_nor, ld.res * ld.res * 4 * bytes_per_pixel), ld.res, ld.res, format);
 				draw_begin(l.texpaint_nor);
 				draw_set_pipeline(project.is_bgra ? pipes_copy_bgra : pipes_copy);
@@ -267,7 +244,6 @@ function import_arm_run_project(path: string) {
 				draw_image(_texpaint_pack, 0, 0);
 				draw_set_pipeline(null);
 				draw_end();
-				///end
 			}
 
 			l.scale = ld.uv_scale;
@@ -280,7 +256,6 @@ function import_arm_run_project(path: string) {
 			l.object_mask = ld.object_mask;
 			l.blending = ld.blending;
 
-			///if is_paint
 			l.paint_base = ld.paint_base;
 			l.paint_opac = ld.paint_opac;
 			l.paint_occ = ld.paint_occ;
@@ -292,18 +267,15 @@ function import_arm_run_project(path: string) {
 			l.paint_height_blend = ld.paint_height_blend;
 			l.paint_emis = ld.paint_emis;
 			l.paint_subs = ld.paint_subs;
-			///end
 
 			iron_delete_texture(_texpaint);
 
-			///if is_paint
 			if (_texpaint_nor != null) {
 				iron_delete_texture(_texpaint_nor);
 			}
 			if (_texpaint_pack != null) {
 				iron_delete_texture(_texpaint_pack);
 			}
-			///end
 		}
 	}
 
@@ -327,7 +299,6 @@ function import_arm_run_project(path: string) {
 		context_raw.material = slot_material_create(m0, n);
 		array_push(project_materials, context_raw.material);
 	}
-	///end
 
 	ui_nodes_hwnd.redraws = 2;
 	ui_nodes_group_stack = [];
@@ -343,7 +314,6 @@ function import_arm_run_project(path: string) {
 		}
 	}
 
-	///if is_paint
 	for (let i: i32 = 0; i < project_materials.length; ++i) {
 		let m: slot_material_t = project_materials[i];
 		context_raw.material = m;
@@ -373,13 +343,6 @@ function import_arm_run_project(path: string) {
 
 	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
-	///end
-
-	///if is_lab
-	import_arm_init_nodes(project.material.nodes);
-	project_canvas = project.material;
-	parser_logic_parse(project_canvas);
-	///end
 
 	context_raw.ddirty = 4;
 	data_delete_blob(path);
@@ -625,11 +588,7 @@ function import_arm_make_pink(abs: string) {
 }
 
 function import_arm_texture_node_name(): string {
-	///if is_paint
 	return "TEX_IMAGE";
-	///else
-	return "image_texture_node";
-	///end
 }
 
 function import_arm_init_nodes(nodes: ui_node_t[]) {

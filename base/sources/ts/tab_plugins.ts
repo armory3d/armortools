@@ -4,14 +4,8 @@ function tab_plugins_draw(htab: ui_handle_t) {
 
 		ui_begin_sticky();
 
-		///if is_paint
 		let row: f32[] = [1 / 4];
 		ui_row(row);
-		///end
-		///if is_lab
-		let row: f32[] = [1 / 14];
-		ui_row(row);
-		///end
 
 		if (ui_button(tr("Manager"))) {
 			box_preferences_htab.position = 6; // Plugins

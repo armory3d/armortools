@@ -21,32 +21,7 @@ let _layers_roughness: f32;
 let _layers_metallic: f32;
 
 function layers_init() {
-	///if is_paint
 	slot_layer_clear(project_layers[0], color_from_floats(layers_default_base, layers_default_base, layers_default_base, 1.0));
-	///end
-
-	///if is_lab
-	let texpaint: render_target_t = map_get(render_path_render_targets, "texpaint");
-	let texpaint_nor: render_target_t = map_get(render_path_render_targets, "texpaint_nor");
-	let texpaint_pack: render_target_t = map_get(render_path_render_targets, "texpaint_pack");
-	draw_begin(texpaint._image);
-	draw_scaled_image(resource_get("placeholder.k"), 0, 0, config_get_texture_res_x(), config_get_texture_res_y()); // Base
-	draw_end();
-	// Nor
-	_gpu_begin(texpaint_nor._image, null, null, clear_flag_t.COLOR, color_from_floats(0.5, 0.5, 1.0, 0.0));
-	gpu_end();
-	// Occ, rough, met
-	_gpu_begin(texpaint_pack._image, null, null, clear_flag_t.COLOR, color_from_floats(1.0, 0.4, 0.0, 0.0));
-	gpu_end();
-	let texpaint_nor_empty: render_target_t = map_get(render_path_render_targets, "texpaint_nor_empty");
-	let texpaint_pack_empty: render_target_t = map_get(render_path_render_targets, "texpaint_pack_empty");
-	// Nor
-	_gpu_begin(texpaint_nor_empty._image, null, null, clear_flag_t.COLOR, color_from_floats(0.5, 0.5, 1.0, 0.0));
-	gpu_end();
-	// Occ, rough, met
-	_gpu_begin(texpaint_pack_empty._image, null, null, clear_flag_t.COLOR, color_from_floats(1.0, 0.4, 0.0, 0.0));
-	gpu_end();
-	///end
 }
 
 function layers_resize() {
@@ -119,12 +94,7 @@ function layers_set_bits() {
 }
 
 function layers_make_temp_img() {
-	///if is_paint
 	let l: slot_layer_t = project_layers[0];
-	///end
-	///if is_lab
-	let l: brush_output_node_t = context_raw.brush_output_node_inst;
-	///end
 
 	if (layers_temp_image != null && (layers_temp_image.width != l.texpaint.width || layers_temp_image.height != l.texpaint.height || layers_temp_image.format != l.texpaint.format)) {
 		let _temptex0: render_target_t = map_get(render_path_render_targets, "temptex0");
@@ -136,9 +106,6 @@ function layers_make_temp_img() {
 		let format: string = base_bits_handle.position == texture_bits_t.BITS8  ? "RGBA32" :
 							 base_bits_handle.position == texture_bits_t.BITS16 ? "RGBA64" :
 																				  "RGBA128";
-		///if is_lab
-		format = "RGBA32";
-		///end
 
 		let t: render_target_t = render_target_create();
 		t.name = "temptex0";
@@ -162,12 +129,7 @@ function layers_make_temp_mask_img() {
 }
 
 function layers_make_export_img() {
-	///if is_paint
 	let l: slot_layer_t = project_layers[0];
-	///end
-	///if is_lab
-	let l: brush_output_node_t = context_raw.brush_output_node_inst;
-	///end
 
 	if (layers_expa != null && (layers_expa.width != l.texpaint.width || layers_expa.height != l.texpaint.height || layers_expa.format != l.texpaint.format)) {
 		let _expa: gpu_texture_t = layers_expa;
@@ -188,9 +150,6 @@ function layers_make_export_img() {
 							 base_bits_handle.position == texture_bits_t.BITS16 ? "RGBA64" :
 																				  "RGBA128";
 
-		///if is_lab
-		format = "RGBA32";
-		///end
 
 		{
 			let t: render_target_t = render_target_create();

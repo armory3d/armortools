@@ -5,11 +5,7 @@ let ui_view2d_text_input_hover: bool = false;
 let ui_view2d_uvmap_show: bool = false;
 let ui_view2d_tex_type: paint_tex_t = paint_tex_t.BASE;
 let ui_view2d_layer_mode: view_2d_layer_mode_t = view_2d_layer_mode_t.SELECTED;
-///if is_paint
 let ui_view2d_type: view_2d_type_t = view_2d_type_t.LAYER;
-///else
-let ui_view2d_type: view_2d_type_t = view_2d_type_t.ASSET;
-///end
 let ui_view2d_show: bool = false;
 let ui_view2d_wx: i32;
 let ui_view2d_wy: i32;
@@ -30,7 +26,6 @@ let ui_view2d_grid: gpu_texture_t = null;
 let ui_view2d_grid_redraw: bool = true;
 
 function ui_view2d_init() {
-	///if is_paint
 	ui_view2d_pipe = gpu_create_pipeline();
 	ui_view2d_pipe.vertex_shader = sys_get_shader("layer_view.vert");
 	ui_view2d_pipe.fragment_shader = sys_get_shader("layer_view.frag");
@@ -46,38 +41,26 @@ function ui_view2d_init() {
 	pipes_get_constant_location("float4");
 	pipes_get_constant_location("float4");
 	ui_view2d_channel_loc = pipes_get_constant_location("int");
-	///end
 
 	// ui.scroll_enabled = false;
 }
 
 function ui_view2d_draw_image(image: gpu_texture_t, dx: f32, dy: f32, dw: f32, dh: f32, channel: i32) {
-	///if is_paint
 	if (ui_view2d_type == view_2d_type_t.LAYER) {
 		gpu_set_int(ui_view2d_channel_loc, channel);
 	}
-	///end
 	draw_scaled_image(image, dx, dy, dw, dh);
 }
 
 function ui_view2d_render() {
-
 	ui_view2d_ww = config_raw.layout[layout_size_t.NODES_W];
-
-	///if is_paint
 	ui_view2d_wx = math_floor(sys_w()) + ui_toolbar_w(true);
-	///else
-	ui_view2d_wx = math_floor(sys_w());
-	///end
-
 	ui_view2d_wy = 0;
 
-	///if is_paint
 	if (!ui_base_show) {
 		ui_view2d_ww += config_raw.layout[layout_size_t.SIDEBAR_W] + ui_toolbar_w(true);
 		ui_view2d_wx -= ui_toolbar_w(true);
 	}
-	///end
 
 	if (!ui_view2d_show) {
 		return;
@@ -97,18 +80,14 @@ function ui_view2d_render() {
 	}
 
 	// Ensure UV map is drawn
-	///if is_paint
 	if (ui_view2d_uvmap_show) {
 		util_uv_cache_uv_map();
 	}
-	///end
 
 	// Ensure font image is drawn
-	///if is_paint
 	if (context_raw.font.image == null) {
 		util_render_make_font_preview();
 	}
-	///end
 
 	ui_begin(ui);
 
@@ -148,22 +127,7 @@ function ui_view2d_render() {
 			tex = project_get_image(context_raw.texture);
 		}
 		else if (ui_view2d_type == view_2d_type_t.NODE) {
-			///if is_paint
-
 			tex = context_raw.node_preview;
-
-			///else
-
-			let nodes: ui_nodes_t = ui_nodes_get_nodes();
-			if (nodes.nodes_selected_id.length > 0) {
-				let sel: ui_node_t = ui_get_node(ui_nodes_get_canvas(true).nodes, nodes.nodes_selected_id[0]);
-				let brush_node: logic_node_ext_t = parser_logic_get_logic_node(sel);
-				if (brush_node != null) {
-					tex = logic_node_get_cached_image(brush_node.base);
-				}
-			}
-
-			///end
 		}
 		else if (ui_view2d_type == view_2d_type_t.LAYER) {
 			let layer: slot_layer_t = l;
@@ -212,12 +176,9 @@ function ui_view2d_render() {
 		if (tex != null) {
 			th = tw * (tex.height / tex.width);
 			ty = apph / 2 - th / 2 + ui_view2d_pan_y;
-
-			///if is_paint
 			if (ui_view2d_type == view_2d_type_t.LAYER) {
 				draw_set_pipeline(ui_view2d_pipe);
 			}
-			///end
 
 			ui_view2d_draw_image(tex, tx, ty, tw, th, channel);
 			if (ui_view2d_tiled_show) {
@@ -231,7 +192,6 @@ function ui_view2d_render() {
 				ui_view2d_draw_image(tex, tx, ty + th, tw, th, channel);
 			}
 
-			///if is_paint
 			if (ui_view2d_type == view_2d_type_t.LAYER) {
 				draw_set_pipeline(null);
 			}
@@ -267,15 +227,12 @@ function ui_view2d_render() {
 					ui_header_handle.redraws = 2;
 				});
 			}
-			///end
 		}
 
-		///if is_paint
 		// UV map
 		if (ui_view2d_type == view_2d_type_t.LAYER && ui_view2d_uvmap_show) {
 			draw_scaled_image(util_uv_uvmap, tx, ty, tw, th);
 		}
-		///end
 
 		// Menu
 		let ew: i32 = math_floor(UI_ELEMENT_W());
@@ -290,12 +247,7 @@ function ui_view2d_render() {
 
 		// Editable layer name
 		let h: ui_handle_t = ui_handle(__ID__);
-
-		///if is_paint
 		let text: string = ui_view2d_type == view_2d_type_t.NODE ? context_raw.node_preview_name : h.text;
-		///else
-		let text: string = h.text;
-		///end
 
 		ui._w = math_floor(math_min(draw_string_width(ui.ops.font, ui.font_size, text) + 15 * UI_SCALE(), 100 * UI_SCALE()));
 
@@ -310,20 +262,8 @@ function ui_view2d_render() {
 			}
 		}
 		else if (ui_view2d_type == view_2d_type_t.NODE) {
-			///if is_paint
-
 			ui_text(context_raw.node_preview_name);
-
-			///else
-
-			let nodes: ui_nodes_t = ui_nodes_get_nodes();
-			if (nodes.nodes_selected_id.length > 0) {
-				ui_text(ui_get_node(ui_nodes_get_canvas(true).nodes, nodes.nodes_selected_id[0]).name);
-			}
-
-			///end
 		}
-		///if is_paint
 		else if (ui_view2d_type == view_2d_type_t.LAYER) {
 			h.text = l.name;
 			l.name = ui_text_input(h, "");
@@ -333,7 +273,6 @@ function ui_view2d_render() {
 			h.text = context_raw.font.name;
 			context_raw.font.name = ui_text_input(h, "");
 		}
-		///end
 
 		if (h.changed) {
 			ui_base_hwnds[0].redraws = 2;
@@ -342,7 +281,6 @@ function ui_view2d_render() {
 		ui._y = 2 + start_y;
 		ui._w = ew;
 
-		///if is_paint
 		if (ui_view2d_type == view_2d_type_t.LAYER) {
 			let h_layer_mode: ui_handle_t = ui_handle(__ID__);
 			if (h_layer_mode.init) {
@@ -381,7 +319,6 @@ function ui_view2d_render() {
 			ui._x += ew * 0.7 + 3;
 			ui._y = 2 + start_y;
 		}
-		///end
 
 		let h_tiled_show: ui_handle_t = ui_handle(__ID__);
 		if (h_tiled_show.init) {
@@ -396,14 +333,12 @@ function ui_view2d_render() {
 		}
 
 		// Picked position
-		///if is_paint
 		if (context_raw.tool == tool_type_t.PICKER && (ui_view2d_type == view_2d_type_t.LAYER || ui_view2d_type == view_2d_type_t.ASSET)) {
 			let cursor_img: gpu_texture_t = resource_get("cursor.k");
 			let hsize: f32 = 16 * UI_SCALE();
 			let size: f32 = hsize * 2;
 			draw_scaled_image(cursor_img, tx + tw * context_raw.uvx_picked - hsize, ty + th * context_raw.uvy_picked - hsize, size, size);
 		}
-		///end
 	}
 	ui_end();
 }
@@ -411,9 +346,7 @@ function ui_view2d_render() {
 function ui_view2d_update() {
 	let headerh: f32 = UI_ELEMENT_H() * 1.4;
 
-	///if is_paint
 	context_raw.paint2d = false;
-	///end
 
 	if (!base_ui_enabled ||
 		!ui_view2d_show ||
@@ -453,7 +386,6 @@ function ui_view2d_update() {
 		ui_view2d_grid_redraw = true;
 	}
 
-	///if is_paint
 	let decal_mask: bool = context_is_decal_mask_paint();
 	let set_clone_source: bool = context_raw.tool == tool_type_t.CLONE &&
 		operator_shortcut(map_get(config_keymap, "set_clone_source") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
@@ -492,7 +424,6 @@ function ui_view2d_update() {
 			context_raw.paint2d = true;
 		}
 	}
-	///end
 
 	if (ui.is_typing) {
 		return;

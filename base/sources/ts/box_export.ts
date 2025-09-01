@@ -49,11 +49,9 @@ function box_export_show_textures() {
 		box_export_tab_export_textures(tr("Export Textures"));
 		box_export_tab_presets();
 
-		///if is_paint
 		box_export_tab_atlases();
 		///if (arm_android || arm_ios)
 		box_export_tab_export_mesh(box_export_htab);
-		///end
 		///end
 
 	}, 540, 310);
@@ -94,7 +92,7 @@ function box_export_tab_export_textures(title: string, bake_material: bool = fal
 			layers_on_resized();
 		}
 
-		///if (is_lab || arm_android || arm_ios)
+		///if (arm_android || arm_ios)
 		let base_bits_combo: string[] = ["8bit"];
 		///else
 		let base_bits_combo: string[] = ["8bit", "16bit", "32bit"];
@@ -134,7 +132,6 @@ function box_export_tab_export_textures(title: string, bake_material: bool = fal
 
 		ui.enabled = true;
 
-		///if is_paint
 		ui_row2();
 		ui.enabled = !bake_material;
 		let layers_export_handle: ui_handle_t = ui_handle(__ID__);
@@ -142,7 +139,6 @@ function box_export_tab_export_textures(title: string, bake_material: bool = fal
 		let layers_export_combo: string[] = [tr("Visible"), tr("Selected"), tr("Per Object"), tr("Per Udim Tile")];
 		context_raw.layers_export = ui_combo(layers_export_handle, layers_export_combo, tr("Layers"), true);
 		ui.enabled = true;
-		///end
 
 		ui_combo(box_export_hpreset, box_export_files, tr("Preset"), true);
 		if (box_export_hpreset.changed) {
