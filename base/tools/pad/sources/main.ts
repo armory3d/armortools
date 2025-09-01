@@ -386,4 +386,4 @@ let config_raw: config_t;
 function strings_check_internet_connection(): string { return ""; }
 function console_error(s: string) {}
 function plugin_embed() {}
-function tr(id: string, vars: map_t<string, string> = null): string {}
+function tr(id: string, vars: map_t<string, string> = null): string { return id; }

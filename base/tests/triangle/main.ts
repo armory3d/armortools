@@ -66,4 +66,4 @@ function main() {
 	_iron_set_update_callback(render);
 }
 
-function tr(id: string, vars: map_t<string, string> = null): string {}
+function tr(id: string, vars: map_t<string, string> = null): string { return id; }

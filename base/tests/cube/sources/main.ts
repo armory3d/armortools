@@ -131,4 +131,4 @@ function spin_cube() {
 	transform_rotate(cube.transform, vec4_create(0, 0, 1), 0.01);
 }
 
-function tr(id: string, vars: map_t<string, string> = null): string {}
+function tr(id: string, vars: map_t<string, string> = null): string { return id; }
