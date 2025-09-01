@@ -607,38 +607,38 @@ function ui_menubar_draw_category_items() {
 	}
 	else if (ui_menubar_category == menubar_category_t.HELP) {
 		if (ui_menu_button(tr("Manual"))) {
-			file_load_url(manifest_url + "/manual");
+			iron_load_url(manifest_url + "/manual");
 		}
 		if (ui_menu_button(tr("How To"))) {
-			file_load_url(manifest_url + "/howto");
+			iron_load_url(manifest_url + "/howto");
 		}
 		if (ui_menu_button(tr("What's New"))) {
-			file_load_url(manifest_url + "/notes");
+			iron_load_url(manifest_url + "/notes");
 		}
 		if (ui_menu_button(tr("Issue Tracker"))) {
-			file_load_url("https://github.com/armory3d/armortools/issues");
+			iron_load_url("https://github.com/armory3d/armortools/issues");
 		}
 		if (ui_menu_button(tr("Report Bug"))) {
 			///if (arm_macos || arm_ios) // Limited url length
-			file_load_url("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id());
+			iron_load_url("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id());
 			///else
-			file_load_url("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id() + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A");
+			iron_load_url("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id() + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A");
 			///end
 		}
 		if (ui_menu_button(tr("Request Feature"))) {
 			///if (arm_macos || arm_ios) // Limited url length
-			file_load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id());
+			iron_load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id());
 			///else
-			file_load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id() + "*%0A%0A**Feature description:**%0A%0A");
+			iron_load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id() + "*%0A%0A**Feature description:**%0A%0A");
 			///end
 		}
 		ui_menu_separator();
 
 		if (ui_menu_button(tr("Check for Updates..."))) {
 			///if arm_android
-			file_load_url(manifest_url_android);
+			iron_load_url(manifest_url_android);
 			///elseif arm_ios
-			file_load_url(manifest_url_ios);
+			iron_load_url(manifest_url_ios);
 			///else
 			// Retrieve latest version number
 			file_download_bytes("https://server.armorpaint.org/" + to_lower_case(manifest_title) + ".html", function (url: string, buffer: buffer_t) {
@@ -704,7 +704,7 @@ function ui_menubar_draw_category_items() {
 					///end
 
 					if (ui_button(tr("Contributors"))) {
-						file_load_url("https://github.com/armory3d/armortools/graphs/contributors");
+						iron_load_url("https://github.com/armory3d/armortools/graphs/contributors");
 					}
 					if (ui_button(tr("OK"))) {
 						ui_box_hide();

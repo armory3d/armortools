@@ -110,7 +110,7 @@ function import_arm_run_project(path: string) {
 			abs = path_normalize(abs);
 			import_arm_unpack_asset(project, abs, file);
 		}
-		if (map_get(data_cached_images, abs) == null && !file_exists(abs)) {
+		if (map_get(data_cached_images, abs) == null && !iron_file_exists(abs)) {
 			import_arm_make_pink(abs);
 		}
 		let hdr_as_envmap: bool = ends_with(abs, ".hdr") && project_raw.envmap == abs;
@@ -128,7 +128,7 @@ function import_arm_run_project(path: string) {
 			///end
 			// Convert font path from relative to absolute
 			let abs: string = data_is_abs(file) ? file : base + file;
-			if (file_exists(abs)) {
+			if (iron_file_exists(abs)) {
 				import_font_run(abs);
 			}
 		}
@@ -444,7 +444,7 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 			abs = path_normalize(abs);
 			import_arm_unpack_asset(project, abs, file);
 		}
-		if (map_get(data_cached_images, abs) == null && !file_exists(abs)) {
+		if (map_get(data_cached_images, abs) == null && !iron_file_exists(abs)) {
 			import_arm_make_pink(abs);
 		}
 		import_texture_run(abs);
@@ -555,7 +555,7 @@ function import_arm_run_brush_from_project(project: project_format_t, path: stri
 			abs = path_normalize(abs);
 			import_arm_unpack_asset(project, abs, file);
 		}
-		if (map_get(data_cached_images, abs) == null && !file_exists(abs)) {
+		if (map_get(data_cached_images, abs) == null && !iron_file_exists(abs)) {
 			import_arm_make_pink(abs);
 		}
 		import_texture_run(abs);

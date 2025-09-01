@@ -96,18 +96,6 @@ function file_start(path: string) {
 	///end
 }
 
-function file_load_url(url: string) {
-	iron_load_url(url);
-}
-
-function file_delete(path: string) {
-	iron_delete_file(path);
-}
-
-function file_exists(path: string): bool {
-	return iron_file_exists(path);
-}
-
 function file_download(url: string, dst_path: string, done: (url: string)=>void, size: i32 = 0) {
 	///if (arm_windows || arm_macos || arm_ios || arm_android)
 	let fdd: file_download_data_t = { dst_path: dst_path, done: done };
@@ -162,7 +150,7 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 	}
 	dest += path2;
 
-	if (file_exists(dest)) {
+	if (iron_file_exists(dest)) {
 		///if (arm_macos || arm_ios)
 		done(dest);
 		///else
@@ -193,7 +181,7 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 
 	file_download(url, dest, function (url: string) {
 		let fccd: file_cache_cloud_data_t = map_get(_file_cache_cloud_map, url);
-		if (!file_exists(fccd.dest)) {
+		if (!iron_file_exists(fccd.dest)) {
 			console_error(strings_check_internet_connection());
 			fccd.done(null);
 			return;

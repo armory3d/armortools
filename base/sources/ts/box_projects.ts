@@ -148,10 +148,10 @@ function box_projects_tab() {
 							// if (ui_menu_button(tr("Duplicate"))) {}
 							if (ui_menu_button(tr("Delete"))) {
 								sys_notify_on_next_frame(function () {
-									file_delete(_box_projects_path);
-									file_delete(_box_projects_icon_path);
+									iron_delete_file(_box_projects_path);
+									iron_delete_file(_box_projects_icon_path);
 									let data_path: string = substring(_box_projects_path, 0, _box_projects_path.length - 4);
-									file_delete(data_path);
+									iron_delete_file(data_path);
 									let recent_projects: string[] = config_raw.recent_projects;
 									array_splice(recent_projects, _box_projects_i, 1);
 								});
@@ -208,7 +208,7 @@ function box_projects_recent_tab() {
 				continue; // Search filter
 			}
 
-			if (ui_button(file, ui_align_t.LEFT) && file_exists(path)) {
+			if (ui_button(file, ui_align_t.LEFT) && iron_file_exists(path)) {
 				let current: gpu_texture_t = _draw_current;
 				let in_use: bool = gpu_in_use;
 				if (in_use) draw_end();
@@ -249,13 +249,13 @@ function box_projects_draw_badge() {
 function box_projects_get_started_tab() {
 	if (ui_tab(box_projects_htab, tr("Get Started"), true)) {
 		if (ui_button(tr("Manual"))) {
-			file_load_url(manifest_url + "/manual");
+			iron_load_url(manifest_url + "/manual");
 		}
 		if (ui_button(tr("How To"))) {
-			file_load_url(manifest_url + "/howto");
+			iron_load_url(manifest_url + "/howto");
 		}
 		if (ui_button(tr("What's New"))) {
-			file_load_url(manifest_url + "/notes");
+			iron_load_url(manifest_url + "/notes");
 		}
 	}
 }

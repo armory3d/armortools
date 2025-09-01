@@ -475,7 +475,7 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 				}
 			}
 			if (ui_button(tr("?"))) {
-				file_load_url("https://github.com/armory3d/armorpaint_web/blob/main/manual.md#faq");
+				iron_load_url("https://github.com/armory3d/armorpaint_web/blob/main/manual.md#faq");
 			}
 		}
 	});
@@ -484,7 +484,7 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 }
 
 function project_reimport_mesh() {
-	if (project_mesh_assets != null && project_mesh_assets.length > 0 && file_exists(project_mesh_assets[0])) {
+	if (project_mesh_assets != null && project_mesh_assets.length > 0 && iron_file_exists(project_mesh_assets[0])) {
 		project_import_mesh_box(project_mesh_assets[0], true, false);
 	}
 	else {
@@ -624,7 +624,7 @@ function project_reimport_texture_load(path: string, asset: asset_t) {
 }
 
 function project_reimport_texture(asset: asset_t) {
-	if (!file_exists(asset.file)) {
+	if (!iron_file_exists(asset.file)) {
 		let filters: string = string_array_join(path_texture_formats, ",");
 		_project_reimport_texture_asset = asset;
 		ui_files_show(filters, false, false, function (path: string) {

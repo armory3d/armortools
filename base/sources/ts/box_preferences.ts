@@ -541,7 +541,7 @@ function box_preferences_show() {
 				let name: string = to_lower_case(manifest_title);
 				url += name;
 				url += "_docs#pen";
-				file_load_url(url);
+				iron_load_url(url);
 			}
 		}
 
@@ -840,7 +840,7 @@ plugin_notify_on_ui(plugin, function() {\
 								plugin_stop(_box_preferences_f);
 							}
 							array_remove(box_preferences_files_plugin, _box_preferences_f);
-							file_delete(path);
+							iron_delete_file(path);
 						}
 					});
 				}

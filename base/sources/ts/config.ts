@@ -106,7 +106,7 @@ function config_save() {
 	iron_file_save_bytes(path, buffer, 0);
 
 	///if arm_linux // Protected directory
-	if (!file_exists(path)) {
+	if (!iron_file_exists(path)) {
 		iron_file_save_bytes(iron_internal_save_path() + "config.json", buffer, 0);
 	}
 	///end
