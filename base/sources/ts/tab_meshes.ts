@@ -33,25 +33,6 @@ function tab_meshes_draw(htab: ui_handle_t) {
 
 			ui_menu_draw(function () {
 
-				///if is_lab
-				if (ui_menu_button(tr("Set Default"))) {
-					ui_menu_draw(function () {
-						if (ui_menu_button(tr("Cube"))) {
-							tab_meshes_set_default_mesh(".Cube");
-						}
-						if (ui_menu_button(tr("Plane"))) {
-							tab_meshes_set_default_mesh(".Plane");
-						}
-						if (ui_menu_button(tr("Sphere"))) {
-							tab_meshes_set_default_mesh(".Sphere");
-						}
-						if (ui_menu_button(tr("Cylinder"))) {
-							tab_meshes_set_default_mesh(".Cylinder");
-						}
-					});
-				}
-				///end
-
 				if (ui_menu_button(tr("Flip Normals"))) {
 					util_mesh_flip_normals();
 					context_raw.ddirty = 2;

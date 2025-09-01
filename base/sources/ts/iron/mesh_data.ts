@@ -32,6 +32,7 @@ function mesh_data_create(raw: mesh_data_t): mesh_data_t {
 		raw.scale_tex = 1.0;
 	}
 	raw._.structure = mesh_data_get_vertex_struct(raw.vertex_arrays);
+	mesh_data_build(raw);
 	return raw;
 }
 

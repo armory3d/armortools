@@ -210,13 +210,6 @@ enum paint_tex_t {
 	HEIGHT = 6,
 }
 
-enum project_model_t {
-	ROUNDED_CUBE = 0,
-	SPHERE = 1,
-	TESSELLATED_PLANE = 2,
-	CUSTOM = 3,
-}
-
 enum zoom_direction_t {
 	VERTICAL = 0,
 	VERTICAL_INVERTED = 1,

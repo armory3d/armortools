@@ -109,9 +109,8 @@ function project_new_box() {
 					let s: string = project_mesh_list[i];
 					project_mesh_list[i] = substring(project_mesh_list[i], 0, s.length - 4); // Trim .arm
 				}
-				array_insert(project_mesh_list, 0, "plane");
-				array_insert(project_mesh_list, 0, "sphere");
-				array_insert(project_mesh_list, 0, "rounded_cube");
+				array_push(project_mesh_list, "plane");
+				array_push(project_mesh_list, "sphere");
 			}
 
 			ui_row2();
@@ -150,7 +149,7 @@ function project_new_box() {
 
 function project_new(reset_layers: bool = true) {
 	///if (arm_windows || arm_linux || arm_macos)
-	sys_title_set(manifest_title);
+	// sys_title_set(manifest_title);
 	///end
 	project_filepath = "";
 
@@ -192,31 +191,29 @@ function project_new(reset_layers: bool = true) {
 		data_delete_mesh(handle);
 	}
 
-	if (context_raw.project_type != project_model_t.ROUNDED_CUBE) {
-		let raw: mesh_data_t = null;
-		if (context_raw.project_type == project_model_t.SPHERE || context_raw.project_type == project_model_t.TESSELLATED_PLANE) {
-			let mesh: raw_mesh_t = context_raw.project_type == project_model_t.SPHERE ?
-				geom_make_uv_sphere(1, 512, 256) :
-				geom_make_plane(1, 1, 512, 512);
-			mesh.name = "Tessellated";
-			raw = import_mesh_raw_mesh(mesh);
-		}
-		else {
-			let b: buffer_t = data_get_blob("meshes/" + project_mesh_list[context_raw.project_type] + ".arm");
-			_project_scene_mesh_gc = armpack_decode(b);
-			raw = _project_scene_mesh_gc.mesh_datas[0];
-		}
+	let raw: mesh_data_t = null;
+	// if (context_raw.project_type == project_model_t.SPHERE || context_raw.project_type == project_model_t.TESSELLATED_PLANE) {
+	// 	let mesh: raw_mesh_t = context_raw.project_type == project_model_t.SPHERE ?
+	// 		geom_make_uv_sphere(1, 512, 256) :
+	// 		geom_make_plane(1, 1, 512, 512);
+	// 	mesh.name = "Tessellated";
+	// 	raw = import_mesh_raw_mesh(mesh);
+	// }
+	// else {
+		let b: buffer_t = data_get_blob("meshes/" + project_mesh_list[context_raw.project_type] + ".arm");
+		_project_scene_mesh_gc = armpack_decode(b);
+		raw = _project_scene_mesh_gc.mesh_datas[0];
+	// }
 
-		let md: mesh_data_t = mesh_data_create(raw);
-		map_set(data_cached_meshes, "SceneTessellated", md);
+	let md: mesh_data_t = mesh_data_create(raw);
+	map_set(data_cached_meshes, "SceneTessellated", md);
 
-		if (context_raw.project_type == project_model_t.TESSELLATED_PLANE) {
-			viewport_set_view(0, 0, 0.75, 0, 0, 0); // Top
-		}
-	}
+	// if (context_raw.project_type == project_model_t.TESSELLATED_PLANE) {
+	// 	viewport_set_view(0, 0, 0.75, 0, 0, 0); // Top
+	// }
 
-	let n: string = context_raw.project_type == project_model_t.ROUNDED_CUBE ? ".Cube" : "Tessellated";
-	let md: mesh_data_t = data_get_mesh("Scene", n);
+	let n: string = "Tessellated";
+	// let md: mesh_data_t = data_get_mesh("Scene", n);
 
 	let current: gpu_texture_t = _draw_current;
 	let in_use: bool = gpu_in_use;
@@ -408,7 +405,6 @@ function project_append_mesh() {
 }
 
 function project_import_mesh_box(path: string, replace_existing: bool = true, clear_layers: bool = true, done: ()=>void = null) {
-
 	_project_import_mesh_box_path = path;
 	_project_import_mesh_box_replace_existing = replace_existing;
 	_project_import_mesh_box_clear_layers = clear_layers;
@@ -420,7 +416,6 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 	///end
 
 	ui_box_show_custom(function () {
-
 		let path: string = _project_import_mesh_box_path;
 		let replace_existing: bool = _project_import_mesh_box_replace_existing;
 		let clear_layers: bool = _project_import_mesh_box_clear_layers;
@@ -510,7 +505,6 @@ function project_get_unwrap_plugins(): string[] {
 }
 
 function project_unwrap_mesh_box(mesh: raw_mesh_t, done: (a: raw_mesh_t)=>void, skip_ui: bool = false) {
-
 	_project_unwrap_mesh_box_mesh = mesh;
 	_project_unwrap_mesh_box_done = done;
 

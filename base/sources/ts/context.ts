@@ -64,7 +64,7 @@ type context_t = {
 	clone_delta_y?: f32;
 
 	show_compass?: bool;
-	project_type?: project_model_t;
+	project_type?: i32;
 	project_aspect_ratio?: i32;
 	project_objects?: mesh_object_t[];
 
@@ -316,7 +316,6 @@ function context_create(): context_t {
 	c.clone_delta_x = 0.0;
 	c.clone_delta_y = 0.0;
 	c.show_compass = true;
-	c.project_type = project_model_t.ROUNDED_CUBE;
 	c.project_aspect_ratio = 0; // 1:1, 2:1, 1:2
 	c.last_paint_vec_x = -1.0;
 	c.last_paint_vec_y = -1.0;

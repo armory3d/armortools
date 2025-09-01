@@ -185,7 +185,9 @@ function ui_base_init() {
 		ui_base_set_icon_scale();
 	}
 
-	context_raw.paint_object = scene_get_child(".Cube").ext;
+	// context_raw.paint_object = scene_get_child(".Cube").ext;
+	project_new(false);
+
 	project_paint_objects = [context_raw.paint_object];
 
 	if (project_filepath == "") {
