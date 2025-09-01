@@ -3983,6 +3983,326 @@ let nodes_material_neural: ui_node_t[] = [
 			}
 		],
 		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Inpaint"),
+		type: "inpaint_node",
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(1.0, 1.0, 1.0, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: _tr("auto"),
+				type: "BOOL",
+				output: 0,
+				default_value: f32_array_create_x(1),
+				data: null,
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			},
+			{
+				name: "inpaint_node_button",
+				type: "CUSTOM",
+				output: -1,
+				default_value: f32_array_create_x(0),
+				data: null,
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			}
+		],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Photo to PBR"),
+		type: "photo_to_pbr_node",
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Base Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Occlusion"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Roughness"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Metallic"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Normal Map"),
+				type: "VECTOR",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Height"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Tiling"),
+		type: "tiling_node",
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: _tr("auto"),
+				type: "BOOL",
+				output: 0,
+				default_value: f32_array_create_x(1),
+				data: null,
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			},
+			{
+				name: "tiling_node_button",
+				type: "CUSTOM",
+				output: -1,
+				default_value: f32_array_create_x(0),
+				data: null,
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 0
+			}
+		],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Upscale"),
+		type: "upscale_node",
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [],
+		width: 0
+	},
+	{
+		id: 0,
+		name: _tr("Variance"),
+		type: "variance_node",
+		x: 0,
+		y: 0,
+		color: 0xff4982a0,
+		inputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			},
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Strength"),
+				type: "VALUE",
+				color: 0xffa1a1a1,
+				default_value: f32_array_create_x(0.5),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		outputs: [
+			{
+				id: 0,
+				node_id: 0,
+				name: _tr("Color"),
+				type: "RGBA",
+				color: 0xffc7c729,
+				default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				display: 0
+			}
+		],
+		buttons: [
+			{
+				name: "variance_node_button",
+				type: "CUSTOM",
+				output: -1,
+				default_value: f32_array_create_x(0),
+				data: null,
+				min: 0.0,
+				max: 1.0,
+				precision: 100,
+				height: 1
+			}
+		],
+		width: 0
 	}
 ];
 

@@ -9,7 +9,7 @@ project.add_define("is_paint");
 project.add_project("../base");
 
 project.add_tsfiles("sources");
-project.add_tsfiles("sources/nodes");
+project.add_tsfiles("sources/brush_nodes");
 project.add_shaders("shaders/*.kong");
 project.add_assets("assets/*", { destination: "data/{name}" });
 project.add_assets("assets/export_presets/*", { destination: "data/export_presets/{name}" });
