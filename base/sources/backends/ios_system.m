@@ -147,7 +147,8 @@ bool iron_keyboard_active(void) {
 }
 
 void iron_load_url(const char *url) {
-	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithUTF8String:url]]];
+	NSURL *nsURL = [NSURL URLWithString:[NSString stringWithUTF8String:url]];
+	[[UIApplication sharedApplication] openURL:nsURL options:@{} completionHandler:nil];
 }
 
 const char *iron_language(void) {
