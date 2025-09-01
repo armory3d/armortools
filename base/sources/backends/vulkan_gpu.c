@@ -552,7 +552,7 @@ static void create_swapchain() {
 		VkImageCreateInfo image = {
 			.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
 			.imageType = VK_IMAGE_TYPE_2D,
-			.format = VK_FORMAT_D16_UNORM,
+			.format = VK_FORMAT_D32_SFLOAT,
 			.extent.width = iron_window_width(),
 			.extent.height = iron_window_height(),
 			.extent.depth = 1,
@@ -560,7 +560,7 @@ static void create_swapchain() {
 			.arrayLayers = 1,
 			.samples = VK_SAMPLE_COUNT_1_BIT,
 			.tiling = VK_IMAGE_TILING_OPTIMAL,
-			.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+			.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
 			.flags = 0,
 		};
 
@@ -580,7 +580,7 @@ static void create_swapchain() {
 		VkImageViewCreateInfo view = {
 			.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
 			.image = framebuffer_depth.impl.image,
-			.format = VK_FORMAT_D16_UNORM,
+			.format = VK_FORMAT_D32_SFLOAT,
 			.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
 			.subresourceRange.baseMipLevel = 0,
 			.subresourceRange.levelCount = 1,

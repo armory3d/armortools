@@ -46,14 +46,15 @@ void gpu_begin(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, 
 	if (targets == NULL) {
 		current_render_targets[0] = &framebuffers[framebuffer_index];
 		current_render_targets_count = 1;
+		current_depth_buffer = framebuffer_depth.width > 0 ? &framebuffer_depth : NULL;
 	}
 	else {
 		for (int i = 0; i < count; ++i) {
 			current_render_targets[i] = targets[i];
 		}
 		current_render_targets_count = count;
+		current_depth_buffer = depth_buffer;
 	}
-	current_depth_buffer = depth_buffer;
 
 	for (int i = 0; i < current_render_targets_count; ++i) {
 		gpu_barrier(current_render_targets[i], GPU_TEXTURE_STATE_RENDER_TARGET);
