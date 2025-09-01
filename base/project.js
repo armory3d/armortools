@@ -56,14 +56,10 @@ if (!flags.lite) {
 	}
 
 	project.add_tsfiles("sources/ts");
-	project.add_tsfiles("sources/ts/iron");
-	project.add_tsfiles("sources/ts/nodes");
-	project.add_shaders("shaders/*.kong");
 	project.add_shaders("shaders/draw/*.kong");
 	project.add_assets("assets/*", { destination: "data/{name}" });
 	project.add_assets("assets/locale/*", { destination: "data/locale/{name}" });
 	project.add_assets("assets/licenses/**", { destination: "data/licenses/{name}" });
-	project.add_assets("assets/plugins/*", { destination: "data/plugins/{name}" });
 	project.add_assets("assets/themes/*.json", { destination: "data/themes/{name}" });
 
 	if (platform === "linux" && fs_exists(os_cwd() + "/icon.png")) {
@@ -120,7 +116,7 @@ if (!flags.lite) {
 	if (export_data_list) {
 		let root = "../" + flags.name.substr(5).toLowerCase();
 		let data_list = {
-			"/data/plugins": fs_readdir("../base/assets/plugins").concat(fs_readdir(root + "/assets/plugins")).join(","),
+			"/data/plugins": fs_readdir(root + "/assets/plugins").join(","),
 			"/data/export_presets": fs_readdir(root + "/assets/export_presets").join(","),
 			"/data/keymap_presets": fs_readdir(root + "/assets/keymap_presets").join(","),
 			"/data/locale": fs_readdir("../base/assets/locale").join(","),
