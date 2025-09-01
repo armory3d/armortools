@@ -52,16 +52,18 @@ char *ui_tr(char *id) {
 }
 
 void ui_nodes_init(ui_nodes_t *nodes) {
-	current_nodes = nodes;
-	memset(current_nodes, 0, sizeof(ui_nodes_t));
-	current_nodes->zoom = 1.0;
-	current_nodes->scale_factor = 1.0;
-	current_nodes->ELEMENT_H = 25.0;
-	current_nodes->snap_from_id = -1;
-	current_nodes->snap_to_id = -1;
-	current_nodes->link_drag_id = -1;
-	current_nodes->nodes_selected_id = gc_alloc(sizeof(i32_array_t));
-	current_nodes->handle = ui_handle_create();
+	if (current_nodes == NULL) {
+		current_nodes = nodes;
+	}
+	memset(nodes, 0, sizeof(ui_nodes_t));
+	nodes->zoom = 1.0;
+	nodes->scale_factor = 1.0;
+	nodes->ELEMENT_H = 25.0;
+	nodes->snap_from_id = -1;
+	nodes->snap_to_id = -1;
+	nodes->link_drag_id = -1;
+	nodes->nodes_selected_id = gc_alloc(sizeof(i32_array_t));
+	nodes->handle = ui_handle_create();
 }
 
 float UI_NODES_SCALE() {
