@@ -323,7 +323,7 @@ function render_path_base_draw_taa(bufa: string, bufb: string) {
 
 	let skip_taa: bool = context_raw.split_view;
 	if (skip_taa) {
-		render_path_draw_shader("shader_datas/copy_pass/copy_pass");
+		render_path_draw_shader("shader_datas/copy_pass/copyRGBA64_pass");
 	}
 	else {
 		render_path_bind_target("last", "tex2");
