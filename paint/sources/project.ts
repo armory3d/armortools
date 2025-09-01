@@ -140,34 +140,24 @@ function project_new_box() {
 	});
 }
 
-function project_new(reset_layers: bool = true) {
-	///if (arm_windows || arm_linux || arm_macos)
-	// sys_title_set(manifest_title);
-	///end
-	project_filepath = "";
-
+function project_cleanup() {
 	if (context_raw.merged_object != null) {
 		mesh_object_remove(context_raw.merged_object);
 		data_delete_mesh(context_raw.merged_object.data._.handle);
 		context_raw.merged_object = null;
 	}
-	context_raw.layer_preview_dirty = true;
-	context_raw.layer_filter = 0;
-	context_raw.texture = null;
-	project_mesh_assets = [];
 
-	viewport_reset();
-	context_raw.paint_object = context_main_object();
-
-	context_select_paint_object(context_main_object());
-	for (let i: i32 = 1; i < project_paint_objects.length; ++i) {
-		let p: mesh_object_t = project_paint_objects[i];
-		if (p == context_raw.paint_object) {
-			continue;
+	if (project_paint_objects != null) {
+		for (let i: i32 = 1; i < project_paint_objects.length; ++i) {
+			let p: mesh_object_t = project_paint_objects[i];
+			if (p == context_raw.paint_object) {
+				continue;
+			}
+			data_delete_mesh(p.data._.handle);
+			mesh_object_remove(p);
 		}
-		data_delete_mesh(p.data._.handle);
-		mesh_object_remove(p);
 	}
+
 	let meshes: mesh_object_t[] = scene_meshes;
 	let len: i32 = meshes.length;
 	for (let i: i32 = 0; i < len; ++i) {
@@ -179,10 +169,29 @@ function project_new(reset_layers: bool = true) {
 			mesh_object_remove(m);
 		}
 	}
-	let handle: string = context_raw.paint_object.data._.handle;
-	if (handle != "SceneSphere" && handle != "ScenePlane") {
+
+	if (context_raw.paint_object != null) {
+		let handle: string = context_raw.paint_object.data._.handle;
 		data_delete_mesh(handle);
 	}
+
+	for (let i: i32 = 0; i < project_assets.length; ++i) {
+		let a: asset_t = project_assets[i];
+		data_delete_image(a.file);
+	}
+}
+
+function project_new(reset_layers: bool = true) {
+	let first: bool = context_raw.paint_object == null;
+	if (!first) {
+		project_cleanup();
+	}
+
+	project_filepath = "";
+	context_raw.layer_preview_dirty = true;
+	context_raw.layer_filter = 0;
+	context_raw.texture = null;
+	project_mesh_assets = [];
 
 	let raw: mesh_data_t = null;
 	// if (context_raw.project_type == project_model_t.SPHERE || context_raw.project_type == project_model_t.TESSELLATED_PLANE) {
@@ -193,6 +202,11 @@ function project_new(reset_layers: bool = true) {
 	// 	raw = import_mesh_raw_mesh(mesh);
 	// }
 	// else {
+
+		if (project_mesh_list == null) {
+			project_mesh_list = ["box_bevel"];
+		}
+
 		let b: buffer_t = data_get_blob("meshes/" + project_mesh_list[context_raw.project_type] + ".arm");
 		_project_scene_mesh_gc = armpack_decode(b);
 		raw = _project_scene_mesh_gc.mesh_datas[0];
@@ -212,9 +226,20 @@ function project_new(reset_layers: bool = true) {
 	let in_use: bool = gpu_in_use;
 	if (in_use) draw_end();
 
-	context_raw.picker_mask_handle.position = picker_mask_t.NONE;
+	let m: material_data_t = data_get_material("Scene", "Material");
+	if (first) {
+		let ms: material_data_t[] = [m];
+		context_raw.paint_object = mesh_object_create(md, ms);
+		context_raw.paint_object.base.name = "paint_object";
+	}
+	else {
+		mesh_object_set_data(context_raw.paint_object, md);
+	}
 
-	mesh_object_set_data(context_raw.paint_object, md);
+	project_paint_objects = [context_raw.paint_object];
+	context_raw.paint_object = context_main_object();
+	context_select_paint_object(context_main_object());
+
 	context_raw.paint_object.base.transform.scale = vec4_create(1, 1, 1);
 	transform_build_matrix(context_raw.paint_object.base.transform);
 	context_raw.paint_object.base.name = n;
@@ -222,37 +247,26 @@ function project_new(reset_layers: bool = true) {
 	while (project_materials.length > 0) {
 		slot_material_unload(array_pop(project_materials));
 	}
-	let m: material_data_t = data_get_material("Scene", "Material");
 	array_push(project_materials, slot_material_create(m));
 
+	context_raw.picker_mask_handle.position = picker_mask_t.NONE;
 	context_raw.material = project_materials[0];
-
 	ui_nodes_hwnd.redraws = 2;
 	ui_nodes_group_stack = [];
 	project_material_groups = [];
-
 	project_brushes = [slot_brush_create()];
 	context_raw.brush = project_brushes[0];
-
 	project_fonts = [slot_font_create("default.ttf", base_font)];
 	context_raw.font = project_fonts[0];
-
 	project_set_default_swatches();
 	context_raw.swatch = project_raw.swatches[0];
-
 	context_raw.picked_color = make_swatch();
 	context_raw.color_picker_callback = null;
 	history_reset();
-
 	make_material_parse_paint_material();
 	make_material_parse_brush();
-
 	util_render_make_material_preview();
 
-	for (let i: i32 = 0; i < project_assets.length; ++i) {
-		let a: asset_t = project_assets[i];
-		data_delete_image(a.file);
-	}
 	project_assets = [];
 	project_asset_names = [];
 	project_asset_map = map_create();
@@ -264,7 +278,6 @@ function project_new(reset_layers: bool = true) {
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 
 	if (reset_layers) {
-
 		let aspect_ratio_changed: bool = project_layers[0].texpaint.width != config_get_texture_res_x() || project_layers[0].texpaint.height != config_get_texture_res_y();
 		while (project_layers.length > 0) {
 			slot_layer_unload(array_pop(project_layers));
@@ -275,16 +288,15 @@ function project_new(reset_layers: bool = true) {
 		if (aspect_ratio_changed) {
 			sys_notify_on_next_frame(layers_resize);
 		}
-
 		sys_notify_on_next_frame(layers_init);
 	}
 
 	if (in_use) draw_begin(current);
 
 	project_set_default_envmap();
-
 	context_init_tool();
-
+	viewport_reset();
+	viewport_scale_to_bounds();
 	render_path_raytrace_ready = false;
 }
 
