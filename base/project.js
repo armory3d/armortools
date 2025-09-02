@@ -19,6 +19,14 @@ function add_thread_backend(name) {
 	project.add_define("BACKEND_THREAD_H=\"backends/" + name + "_thread.h\"");
 }
 
+function get_version_code() {
+	const now = new Date();
+	const year = now.getFullYear().toString().slice(-2);
+	const month = (now.getMonth() + 1).toString().padStart(2, '0');
+	const day = now.getDate().toString().padStart(2, '0');
+	return parseInt(year + month + day, 10);
+}
+
 // flags: make.js/load_project
 let flags = globalThis.flags;
 let dir = flags.name.substr(5).toLowerCase(); // ArmorPaint -> paint
@@ -94,6 +102,8 @@ else if (platform == "ios") {
 	project.add_cfiles("sources/backends/data/ios.plist");
 	project.add_cfiles("sources/backends/ios_file_dialog.m");
 	project.add_define("IRON_METAL");
+	project.target_options.ios.build = get_version_code() + "";
+	project.target_options.ios.version = get_version_code() + "";
 }
 else if (platform == "android") {
 	add_sys_backend("android");
@@ -113,19 +123,11 @@ else if (platform == "android") {
 	if (flags.with_audio) {
 		project.add_lib("OpenSLES");
 	}
-
 	project.target_options.android.package = flags.package;
 	project.target_options.android.permissions = ["android.permission.READ_MEDIA_IMAGES", "android.permission.INTERNET"];
 	project.target_options.android.screenOrientation = ["sensorLandscape"];
 	project.target_options.android.minSdkVersion = 33; // android 13
 	project.target_options.android.targetSdkVersion = 36;
-	function get_version_code() {
-		const now = new Date();
-		const year = now.getFullYear().toString().slice(-2);
-		const month = (now.getMonth() + 1).toString().padStart(2, '0');
-		const day = now.getDate().toString().padStart(2, '0');
-		return parseInt(year + month + day, 10);
-	}
 	project.target_options.android.versionCode = get_version_code();
 	project.target_options.android.versionName = "1.0 alpha";
 }
@@ -237,6 +239,9 @@ if (fs_exists(os_cwd() + "/icon.png")) {
 	project.icon = "icon.png";
 	if (platform == "macos" && fs_exists(os_cwd() + "/icon_macos.png")) {
 		project.icon = "icon_macos.png";
+	}
+	else if (platform == "ios" && fs_exists(os_cwd() + "/icon_ios.png")) {
+		project.icon = "icon_ios.png";
 	}
 	else if (platform == "linux") {
 		project.add_assets("../" + dir + "/icon.png", { destination: "{name}", noprocessing: true, noembed: true });
