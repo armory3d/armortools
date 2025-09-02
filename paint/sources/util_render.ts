@@ -16,7 +16,7 @@ function util_render_make_material_preview() {
 	let painto: mesh_object_t = context_raw.paint_object;
 	context_raw.paint_object = sphere;
 
-	sphere.materials[0] = project_materials[0].data;
+	sphere.material = project_materials[0].data;
 	context_raw.material.preview_ready = true;
 
 	context_raw.saved_camera = mat4_clone(scene_camera.base.transform.local);

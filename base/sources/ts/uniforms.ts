@@ -580,9 +580,7 @@ function uniforms_set_material_consts(context: shader_context_t, material_contex
 function current_material(object: object_t): material_data_t {
 	if (object != null && object.ext != null) {
 		let mo: mesh_object_t = object.ext;
-		if (mo.materials != null) {
-			return mo.materials[0];
-		}
+		return mo.material;
 	}
 	return null;
 }

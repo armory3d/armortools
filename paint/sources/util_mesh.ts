@@ -114,7 +114,7 @@ function util_mesh_merge(paint_objects: mesh_object_t[] = null) {
 
 	util_mesh_remove_merged();
 	let md: mesh_data_t = mesh_data_create(raw);
-	context_raw.merged_object = mesh_object_create(md, context_raw.paint_object.materials);
+	context_raw.merged_object = mesh_object_create(md, context_raw.paint_object.material);
 	context_raw.merged_object.base.name = context_raw.paint_object.base.name + "_merged";
 	context_raw.merged_object.force_context = "paint";
 	object_set_parent(context_raw.merged_object.base, context_main_object().base);

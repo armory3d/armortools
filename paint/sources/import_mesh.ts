@@ -206,7 +206,7 @@ function _import_mesh_add_mesh(mesh: raw_mesh_t) {
 
 	let md: mesh_data_t = mesh_data_create(raw);
 
-	let object: mesh_object_t = scene_add_mesh_object(md, context_raw.paint_object.materials, context_raw.paint_object.base);
+	let object: mesh_object_t = scene_add_mesh_object(md, context_raw.paint_object.material, context_raw.paint_object.base);
 	object.base.name = mesh.name;
 	object.skip_context = "paint";
 

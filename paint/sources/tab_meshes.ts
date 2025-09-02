@@ -350,7 +350,7 @@ function tab_meshes_set_default_mesh(name: string) {
 			scale_tex: mesh.scale_tex
 		};
 		let md: mesh_data_t = mesh_data_create(raw);
-		mo = mesh_object_create(md, context_raw.paint_object.materials);
+		mo = mesh_object_create(md, context_raw.paint_object.material);
 		array_remove(scene_meshes, mo);
 		mo.base.name = "Tessellated";
 	}
@@ -505,7 +505,7 @@ function tab_scene_new_object(mesh_name: string) {
 	util_mesh_ext_pack_uvs(raw.mesh_datas[0].vertex_arrays[2].values);
 	let md: mesh_data_t = mesh_data_create(raw.mesh_datas[0]);
 	md._.handle = md.name;
-	let mo: mesh_object_t = scene_add_mesh_object(md, project_paint_objects[0].materials);
+	let mo: mesh_object_t = scene_add_mesh_object(md, project_paint_objects[0].material);
 	mo.base.name = md.name;
 	let o: obj_t = {};
 	o._ = { _gc: raw };

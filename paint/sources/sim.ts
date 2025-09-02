@@ -103,7 +103,7 @@ function sim_remove_body(uid: i32) {
 function sim_duplicate() {
     // Mesh
     let so: mesh_object_t = context_raw.selected_object.ext;
-    let dup: mesh_object_t = scene_add_mesh_object(so.data, so.materials, so.base.parent);
+    let dup: mesh_object_t = scene_add_mesh_object(so.data, so.material, so.base.parent);
     transform_set_matrix(dup.base.transform, so.base.transform.local);
     array_push(project_paint_objects, dup);
     dup.base.name = so.base.name;

@@ -192,32 +192,27 @@ function project_new(reset_layers: bool = true) {
 	project_mesh_assets = [];
 
 	let raw: mesh_data_t = null;
-	// if (context_raw.project_type == project_model_t.SPHERE || context_raw.project_type == project_model_t.TESSELLATED_PLANE) {
-	// 	let mesh: raw_mesh_t = context_raw.project_type == project_model_t.SPHERE ?
-	// 		geom_make_uv_sphere(1, 512, 256) :
-	// 		geom_make_plane(1, 1, 512, 512);
-	// 	mesh.name = "Tessellated";
-	// 	raw = import_mesh_raw_mesh(mesh);
-	// }
-	// else {
-		if (project_mesh_list == null) {
-			project_mesh_list = ["box_bevel"];
-		}
+	let mesh_name: string = project_mesh_list == null ? "box_bevel" : project_mesh_list[context_raw.project_type];
 
-		let b: buffer_t = data_get_blob("meshes/" + project_mesh_list[context_raw.project_type] + ".arm");
+	if (mesh_name == "sphere") {
+		let mesh: raw_mesh_t = geom_make_uv_sphere(1, 512, 256);
+		mesh.name = "Tessellated";
+		raw = import_mesh_raw_mesh(mesh);
+	}
+	else if (mesh_name == "plane") {
+		let mesh: raw_mesh_t = geom_make_plane(1, 1, 512, 512);
+		mesh.name = "Tessellated";
+		raw = import_mesh_raw_mesh(mesh);
+		viewport_set_view(0, 0, 0.75, 0, 0, 0); // Top
+	}
+	else {
+		let b: buffer_t = data_get_blob("meshes/" + mesh_name + ".arm");
 		_project_scene_mesh_gc = armpack_decode(b);
 		raw = _project_scene_mesh_gc.mesh_datas[0];
-	// }
+	}
 
 	let md: mesh_data_t = mesh_data_create(raw);
 	map_set(data_cached_meshes, "SceneTessellated", md);
-
-	// if (context_raw.project_type == project_model_t.TESSELLATED_PLANE) {
-	// 	viewport_set_view(0, 0, 0.75, 0, 0, 0); // Top
-	// }
-
-	let n: string = "Tessellated";
-	// let md: mesh_data_t = data_get_mesh("Scene", n);
 
 	let current: gpu_texture_t = _draw_current;
 	let in_use: bool = gpu_in_use;
@@ -225,8 +220,7 @@ function project_new(reset_layers: bool = true) {
 
 	let m: material_data_t = data_get_material("Scene", "Material");
 	if (context_raw.paint_object == null) {
-		let ms: material_data_t[] = [m];
-		context_raw.paint_object = mesh_object_create(md, ms);
+		context_raw.paint_object = mesh_object_create(md, m);
 		context_raw.paint_object.base.name = "paint_object";
 	}
 	else {
@@ -239,7 +233,7 @@ function project_new(reset_layers: bool = true) {
 
 	context_raw.paint_object.base.transform.scale = vec4_create(1, 1, 1);
 	transform_build_matrix(context_raw.paint_object.base.transform);
-	context_raw.paint_object.base.name = n;
+	context_raw.paint_object.base.name = "Tessellated";
 	project_paint_objects = [context_raw.paint_object];
 	while (project_materials.length > 0) {
 		slot_material_unload(array_pop(project_materials));
@@ -274,7 +268,8 @@ function project_new(reset_layers: bool = true) {
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 
 	if (reset_layers) {
-		let aspect_ratio_changed: bool = project_layers[0].texpaint.width != config_get_texture_res_x() || project_layers[0].texpaint.height != config_get_texture_res_y();
+		let aspect_ratio_changed: bool = project_layers[0].texpaint.width != config_get_texture_res_x() ||
+										 project_layers[0].texpaint.height != config_get_texture_res_y();
 		while (project_layers.length > 0) {
 			slot_layer_unload(array_pop(project_layers));
 		}

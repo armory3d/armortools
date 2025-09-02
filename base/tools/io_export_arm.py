@@ -125,7 +125,7 @@ class ArmoryExporter(bpy.types.Operator, ExportHelper):
             o["visible"] = True
             o["spawn"] = True
             o["anim"] = None
-            o["material_refs"] = None
+            o["material_ref"] = None
             o["children"] = None
 
             if bobjectRef["objectType"] == NodeTypeMesh:

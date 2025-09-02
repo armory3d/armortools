@@ -36,7 +36,7 @@ function ready() {
 				name: "Cube",
 				type: "mesh_object",
 				data_ref: "cube.arm/Cube",
-				material_refs: ["MyMaterial"],
+				material_ref: "MyMaterial",
 				visible: true,
 				spawn: true
 			},
@@ -44,7 +44,7 @@ function ready() {
 				name: "Sphere",
 				type: "mesh_object",
 				data_ref: "sphere.arm/Sphere",
-				material_refs: ["MyMaterial"],
+				material_ref: "MyMaterial",
 				visible: true,
 				spawn: true
 			},

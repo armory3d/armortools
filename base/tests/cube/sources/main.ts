@@ -32,7 +32,7 @@ function ready() {
 				name: "Cube",
 				type: "mesh_object",
 				data_ref: "cube.arm/Cube",
-				material_refs: ["MyMaterial"],
+				material_ref: "MyMaterial",
 				visible: true,
 				spawn: true
 			},

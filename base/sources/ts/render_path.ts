@@ -116,7 +116,7 @@ function render_path_sort_meshes_dist(meshes: mesh_object_t[]) {
 function _render_path_sort_shader(a: any_ptr, b: any_ptr): i32 {
 	let ma: mesh_object_t = DEREFERENCE(a);
 	let mb: mesh_object_t = DEREFERENCE(b);
-	return strcmp(ma.materials[0].name, mb.materials[0].name);
+	return strcmp(ma.material.name, mb.material.name);
 }
 
 function render_path_sort_meshes_shader(meshes: mesh_object_t[]) {

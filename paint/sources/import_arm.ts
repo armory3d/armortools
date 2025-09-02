@@ -138,7 +138,7 @@ function import_arm_run_project(path: string) {
 	for (let i: i32 = 1; i < project.mesh_datas.length; ++i) {
 		let raw: mesh_data_t = project.mesh_datas[i];
 		let md: mesh_data_t = mesh_data_create(raw);
-		let object: mesh_object_t = scene_add_mesh_object(md, context_raw.paint_object.materials, context_raw.paint_object.base);
+		let object: mesh_object_t = scene_add_mesh_object(md, context_raw.paint_object.material, context_raw.paint_object.base);
 		object.base.name = md.name;
 		object.skip_context = "paint";
 		array_push(project_paint_objects, object);
@@ -358,7 +358,7 @@ function import_arm_run_mesh(raw: project_format_t) {
 			object = context_raw.paint_object;
 		}
 		else {
-			object = scene_add_mesh_object(md, context_raw.paint_object.materials, context_raw.paint_object.base);
+			object = scene_add_mesh_object(md, context_raw.paint_object.material, context_raw.paint_object.base);
 			object.base.name = md.name;
 			object.skip_context = "paint";
 			md._.handle = md.name;

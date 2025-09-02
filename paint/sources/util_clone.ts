@@ -327,7 +327,7 @@ function util_clone_obj(o: obj_t): obj_t {
 	r.visible = o.visible;
 	r.spawn = o.spawn;
 	r.anim = util_clone_anim(o.anim);
-	r.material_refs = util_clone_string_array(o.material_refs);
+	r.material_ref = o.material_ref;
 	if (o.children != null) {
 		r.children = [];
 		for (let i: i32 = 0; i < o.children.length; ++i) {

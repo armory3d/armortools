@@ -2,7 +2,7 @@
 type mesh_object_t = {
 	base?: object_t;
 	data?: mesh_data_t;
-	materials?: material_data_t[];
+	material?: material_data_t;
 	camera_dist?: f32;
 	frustum_culling?: bool;
 	skip_context?: string; // Do not draw this context
@@ -11,14 +11,14 @@ type mesh_object_t = {
 
 let _mesh_object_last_pipeline: gpu_pipeline_t = null;
 
-function mesh_object_create(data: mesh_data_t, materials: material_data_t[]): mesh_object_t {
+function mesh_object_create(data: mesh_data_t, material: material_data_t): mesh_object_t {
 	let raw: mesh_object_t = {};
 	raw.frustum_culling = true;
 	raw.base = object_create(false);
 	raw.base.ext = raw;
 	raw.base.ext_type = "mesh_object_t";
 
-	raw.materials = materials;
+	raw.material = material;
 	mesh_object_set_data(raw, data);
 	array_push(scene_meshes, raw);
 	return raw;
@@ -43,7 +43,7 @@ function mesh_object_setup_animation(raw: mesh_object_t, oactions: scene_t[] = n
 
 function mesh_object_cull_material(raw: mesh_object_t, context: string): bool {
 	// Skip render if material does not contain current context
-	if (!mesh_object_valid_context(raw, raw.materials, context)) {
+	if (!mesh_object_valid_context(raw, raw.material, context)) {
 		raw.base.culled = true;
 		return true;
 	}
@@ -89,14 +89,12 @@ function mesh_object_render(raw: mesh_object_t, context: string, bind_params: st
 
 	let scontext: shader_context_t = null;
 	let mcontext: material_context_t = null;
-	for (let i: i32 = 0; i < raw.materials.length; ++i) {
-		let mat: material_data_t = raw.materials[i];
-		for (let j: i32 = 0; j < mat.contexts.length; ++j) {
-			if (mat.contexts[j].name == context) {
-				scontext = shader_data_get_context(mat._.shader, context);
-				mcontext = mat.contexts[j];
-				break;
-			}
+	let mat: material_data_t = raw.material;
+	for (let j: i32 = 0; j < mat.contexts.length; ++j) {
+		if (mat.contexts[j].name == context) {
+			scontext = shader_data_get_context(mat._.shader, context);
+			mcontext = mat.contexts[j];
+			break;
 		}
 	}
 
@@ -112,14 +110,8 @@ function mesh_object_render(raw: mesh_object_t, context: string, bind_params: st
 	gpu_draw();
 }
 
-function mesh_object_valid_context(raw: mesh_object_t, mats: material_data_t[], context: string): bool {
-	for (let i: i32 = 0; i < mats.length; ++i) {
-		let mat: material_data_t = mats[i];
-		if (material_data_get_context(mat, context) != null) {
-			return true;
-		}
-	}
-	return false;
+function mesh_object_valid_context(raw: mesh_object_t, mat: material_data_t, context: string): bool {
+	return material_data_get_context(mat, context) != null;
 }
 
 function mesh_object_compute_camera_dist(raw: mesh_object_t, cam_x: f32, cam_y: f32, cam_z: f32) {

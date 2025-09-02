@@ -32,7 +32,7 @@ function util_particle_init() {
 		if (obj.name == ".Sphere") {
 			let particle: obj_t = util_clone_obj(obj);
 			particle.name = ".Particle";
-			particle.material_refs = ["MaterialParticle"];
+			particle.material_ref = "MaterialParticle";
 			array_push(_scene_raw.objects, particle);
 			for (let i: i32 = 0; i < 16; ++i) {
 				particle.transform[i] *= 0.01;

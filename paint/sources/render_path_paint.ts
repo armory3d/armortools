@@ -760,8 +760,8 @@ function render_path_paint_set_plane_mesh() {
 		};
 		let md: mesh_data_t = mesh_data_create(raw);
 		let mo: mesh_object_t = scene_get_child(".Plane").ext;
-		let materials: material_data_t[] = mo.materials;
-		let o: mesh_object_t = scene_add_mesh_object(md, materials);
+		let material: material_data_t = mo.material;
+		let o: mesh_object_t = scene_add_mesh_object(md, material);
 		o.base.name = ".PlaneTiled";
 	}
 
