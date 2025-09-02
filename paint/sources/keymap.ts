@@ -74,6 +74,7 @@ function keymap_get_default(): map_t<string, string> {
 	map_set(keymap, "toggle_node_editor", "tab");
 	map_set(keymap, "toggle_2d_view", "shift+tab");
 	map_set(keymap, "toggle_browser", "`");
+	map_set(keymap, "node_overview", "z");
 	map_set(keymap, "node_search", "space");
 	map_set(keymap, "operator_search", "space");
 	map_set(keymap, "decal_mask", "ctrl");

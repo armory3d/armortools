@@ -34,6 +34,7 @@ let ui_nodes_group_stack: node_group_t[] = [];
 let ui_nodes_controls_down: bool = false;
 let ui_nodes_tabs: slot_material_t[] = null;
 let ui_nodes_htab: ui_handle_t = ui_handle_create();
+let ui_nodes_last_zoom: f32 = 1.0;
 
 let _ui_nodes_on_link_drag_link_drag: ui_node_link_t;
 let _ui_nodes_on_link_drag_node: ui_node_t;
@@ -568,6 +569,12 @@ function ui_nodes_update() {
 		nodes.pan_y = 0.0;
 		nodes.zoom = 1.0;
 	}
+
+	if (operator_shortcut(map_get(config_keymap, "node_overview"))) {
+		nodes.zoom = nodes.zoom == 1.0 ? 0.2 : 1.0;
+		nodes.uiw = ui_nodes_ww;
+		nodes.uih = ui_nodes_wh;
+	}
 }
 
 function ui_nodes_canvas_changed() {
@@ -795,11 +802,16 @@ function ui_nodes_render() {
 
 	ui.input_enabled = base_ui_enabled;
 
+	let ui_nodes: ui_nodes_t = ui_nodes_get_nodes();
+	if (ui_nodes_last_zoom != ui_nodes.zoom) {
+		ui_nodes_last_zoom = ui_nodes.zoom;
+		ui_nodes_grid_redraw = true;
+	}
+
 	if (ui_nodes_grid_redraw) {
 		if (ui_nodes_grid != null) {
 			iron_delete_texture(ui_nodes_grid);
 		}
-		let ui_nodes: ui_nodes_t = ui_nodes_get_nodes();
 		ui_nodes_grid = ui_nodes_draw_grid(ui_nodes.zoom);
 		ui_nodes_grid_redraw = false;
 	}
