@@ -105,6 +105,9 @@ function ui_base_init() {
 	scene_world._.envmap = context_raw.show_envmap ? context_raw.saved_envmap : context_raw.empty_envmap;
 	context_raw.ddirty = 1;
 
+	let resources: string[] = ["cursor.k", "icons.k"];
+	resource_load(resources);
+
 	let scale: f32 = config_raw.window_scale;
 	let ops: ui_options_t = {
 		theme: base_theme,
@@ -132,9 +135,6 @@ function ui_base_init() {
 	context_raw.gizmo_rotate_x = object_get_child(context_raw.gizmo, ".RotateX");
 	context_raw.gizmo_rotate_y = object_get_child(context_raw.gizmo, ".RotateY");
 	context_raw.gizmo_rotate_z = object_get_child(context_raw.gizmo, ".RotateZ");
-
-	let resources: string[] = ["cursor.k", "icons.k"];
-	resource_load(resources);
 
 	project_new(false);
 
