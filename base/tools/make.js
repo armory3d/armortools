@@ -2214,16 +2214,20 @@ function load_project(directory, is_root_project) {
 			package: "org.armory3d",
 			dirname: __dirname,
 			release: os_argv().indexOf("--debug") == -1,
+			embed: false,
+			with_physics: false,
 			with_d3dcompiler: false,
 			with_nfd: false,
 			with_compress: false,
 			with_image_write: false,
 			with_video_write: false,
-			with_audio: false,
-			with_iron: false,
 			with_eval: false,
-			with_gamepad: false,
-			embed: false
+			with_plugins: false,
+			with_kong: false,
+			with_raytrace: false,
+			idle_sleep: false,
+			export_version_info: false,
+			export_data_list: false
 		};
 	}
 

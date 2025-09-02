@@ -1,253 +1,213 @@
 
+function add_gpu_backend(name) {
+	project.add_cfiles("sources/backends/" + name + "_gpu.*");
+	project.add_define("BACKEND_GPU_H=\"backends/" + name + "_gpu.h\"");
+}
+
+function add_sys_backend(name) {
+	project.add_cfiles("sources/backends/" + name + "_system.*");
+	project.add_define("BACKEND_SYS_H=\"backends/" + name + "_system.h\"");
+}
+
+function add_net_backend(name) {
+	project.add_cfiles("sources/backends/" + name + "_net.*");
+	project.add_define("BACKEND_NET_H=\"backends/" + name + "_net.h\"");
+}
+
+function add_thread_backend(name) {
+	project.add_cfiles("sources/backends/" + name + "_thread.*");
+	project.add_define("BACKEND_THREAD_H=\"backends/" + name + "_thread.h\"");
+}
+
+// flags: make.js/load_project
 let flags = globalThis.flags;
-flags.embed = os_argv().indexOf("--embed") >= 0; // os_argv().indexOf("--debug") == -1; // clang 19
-flags.physics = true;
-flags.with_d3dcompiler = true;
-flags.with_nfd = true;
-flags.with_compress = platform != "android";
-flags.with_image_write = true;
-flags.with_iron = true;
-flags.with_eval = true;
-flags.with_plugins = true;
-
-let project = new Project("Base");
 let dir = flags.name.substr(5).toLowerCase(); // ArmorPaint -> paint
+let project = new Project("Base");
+project.add_include_dir("sources");
+project.add_include_dir("sources/libs");
+project.add_tsfiles("sources/ts");
+project.add_shaders("shaders/*.kong");
+project.add_assets("assets/*", { destination: "data/{name}" });
+project.add_assets("assets/licenses/**", { destination: "data/licenses/{name}" });
+project.add_assets("assets/themes/*.json", { destination: "data/themes/{name}" });
+project.add_cfiles("sources/*.c");
+// project.add_cfiles("sources/iron.c");
+project.add_cfiles("sources/libs/gc.c");
+project.add_cfiles("sources/libs/kong/dir.c");
+project.add_define("IRON_C_PATH=\"" + os_cwd() + "/build/iron.c" + "\"");
+project.add_define("EMBED_H_PATH=\"" + os_cwd() + "/build/embed.h" + "\"");
 
-if (!flags.lite) {
-	project.add_define("IDLE_SLEEP");
+if (platform == "windows") {
+	add_sys_backend("windows");
+	add_net_backend("windows");
+	add_thread_backend("windows");
+	add_gpu_backend("direct3d12");
+	project.add_define("_CRT_SECURE_NO_WARNINGS");
+	project.add_define("_WINSOCK_DEPRECATED_NO_WARNINGS");
+	project.add_define("IRON_DIRECT3D12");
+	project.add_lib("dxguid");
+	project.add_lib("Winhttp");
+	project.add_lib("dxgi");
+	project.add_lib("d3d12");
+	project.add_lib("Dwmapi"); // DWMWA_USE_IMMERSIVE_DARK_MODE
+	if (flags.with_audio) {
+		project.add_lib("dsound");
+	}
+	if (flags.with_gamepad) {
+		project.add_lib("dinput8");
+	}
+	if (flags.with_d3dcompiler) {
+		project.add_define("WITH_D3DCOMPILER");
+		project.add_lib("d3d11");
+		project.add_lib("d3dcompiler");
+	}
+}
+else if (platform == "linux") {
+	add_sys_backend("linux");
+	add_thread_backend("posix");
+	add_gpu_backend("vulkan");
+	project.add_define("IRON_VULKAN");
+	project.add_define("_POSIX_C_SOURCE=200112L");
+	project.add_define("_XOPEN_SOURCE=600");
+	project.add_lib("dl");
+	project.add_lib("vulkan");
+	if (flags.with_audio) {
+		project.add_lib("asound");
+	}
+	if (flags.with_gamepad) {
+		project.add_lib("udev");
+	}
+}
+else if (platform == "macos") {
+	add_sys_backend("macos");
+	add_net_backend("apple");
+	add_thread_backend("apple");
+	add_gpu_backend("metal");
+	project.add_cfiles("sources/backends/data/mac.plist");
+	project.add_define("IRON_METAL");
+}
+else if (platform == "ios") {
+	add_sys_backend("ios");
+	add_net_backend("apple");
+	add_thread_backend("apple");
+	add_gpu_backend("metal");
+	project.add_cfiles("sources/backends/data/ios.plist");
+	project.add_cfiles("sources/backends/ios_file_dialog.m");
+	project.add_define("IRON_METAL");
+}
+else if (platform == "android") {
+	add_sys_backend("android");
+	add_net_backend("posix");
+	add_thread_backend("posix");
+	add_gpu_backend("vulkan");
+	project.add_cfiles("sources/backends/android_file_dialog.c");
+	project.add_cfiles("sources/backends/android_http_request.c");
+	project.add_cfiles("sources/backends/android_native_app_glue.c");
+	project.add_define("IRON_ANDROID");
+	project.add_define("IRON_VULKAN");
+	project.add_define("VK_USE_PLATFORM_ANDROID_KHR");
+	project.add_define("arm_android_rmb");
+	project.add_lib("vulkan");
+	project.add_lib("log");
+	project.add_lib("android");
+	if (flags.with_audio) {
+		project.add_lib("OpenSLES");
+	}
 
+	project.target_options.android.package = flags.package;
+	project.target_options.android.permissions = ["android.permission.READ_MEDIA_IMAGES", "android.permission.INTERNET"];
+	project.target_options.android.screenOrientation = ["sensorLandscape"];
+	project.target_options.android.minSdkVersion = 33; // android 13
+	project.target_options.android.targetSdkVersion = 36;
+	function get_version_code() {
+		const now = new Date();
+		const year = now.getFullYear().toString().slice(-2);
+		const month = (now.getMonth() + 1).toString().padStart(2, '0');
+		const day = now.getDate().toString().padStart(2, '0');
+		return parseInt(year + month + day, 10);
+	}
+	project.target_options.android.versionCode = get_version_code();
+	project.target_options.android.versionName = "1.0 alpha";
+}
+else if (platform == "wasm") {
+	add_sys_backend("wasm");
+	add_thread_backend("wasm");
+	add_gpu_backend("webgpu");
+	project.add_cfiles("sources/libs/miniclib/**");
+	project.add_define("IRON_WASM");
+	project.add_define("IRON_WEBGPU");
+	project.add_include_dir("miniclib");
+}
+
+if (graphics == "metal" || (graphics == "vulkan" && platform != "android")) {
+	project.add_define("IRON_BGRA");
+}
+
+if (flags.with_kong) {
+	project.add_define("WITH_KONG");
 	project.add_cfiles("sources/libs/kong/libs/*.c");
 	project.add_cfiles("sources/libs/kong/*.c");
 	project.add_cfiles("sources/libs/kong/backends/*.c");
-	project.add_define("WITH_KONG");
+}
 
-	if (platform === "windows") {
-		project.add_define("_CRT_SECURE_NO_WARNINGS");
-		project.add_lib("d3dcompiler");
+if (flags.with_plugins) {
+	project.add_define("WITH_PLUGINS");
+	project.add_project("../" + dir + "/plugins");
+	project.add_cfiles("sources/plugins/plugin_api.c");
+}
+
+if (flags.embed) {
+	project.add_define("WITH_EMBED");
+	project.add_define("arm_embed");
+}
+else {
+	project.add_assets("assets/extra/*", { destination: "data/{name}" });
+}
+
+if (flags.with_physics) {
+	project.add_define("arm_physics");
+	project.add_cfiles("sources/libs/asim.c");
+}
+
+if (flags.with_raytrace) {
+	project.add_assets("assets/raytrace/*", { destination: "data/{name}" });
+	if (graphics == "direct3d12") {
+		project.add_assets("shaders/raytrace/*.cso", { destination: "data/{name}" });
 	}
-
-	if (flags.with_onnx) {
-		project.add_define("WITH_ONNX");
-		project.add_include_dir("../" + dir + "/onnx/include");
-		if (platform === "windows") {
-			project.add_lib("../" + dir + "/onnx/win32/onnxruntime");
-		}
-		else if (platform === "linux") {
-			// patchelf --set-rpath . ArmorLab
-			project.add_lib("onnxruntime -L" + flags.dirname + "/../" + dir + "/onnx/linux");
-			// project.add_lib("onnxruntime_providers_cuda");
-			// project.add_lib("onnxruntime_providers_shared");
-			// project.add_lib("cublasLt");
-			// project.add_lib("cublas");
-			// project.add_lib("cudart");
-			// project.add_lib("cudnn");
-			// project.add_lib("cufft");
-			// project.add_lib("curand");
-		}
-		else if (platform === "macos") {
-			project.add_lib("../" + dir + "/onnx/macos/libonnxruntime.1.14.1.dylib");
-		}
+	else if (graphics == "vulkan") {
+		project.add_assets("shaders/raytrace/*.spirv", { destination: "data/{name}" });
 	}
-
-	if (flags.with_plugins) {
-		project.add_define("WITH_PLUGINS");
-		project.add_project("../" + dir + "/plugins");
-		project.add_project("plugins");
-	}
-
-	project.add_tsfiles("sources/ts");
-	project.add_shaders("shaders/draw/*.kong");
-	project.add_assets("assets/*", { destination: "data/{name}" });
-	project.add_assets("assets/locale/*", { destination: "data/locale/{name}" });
-	project.add_assets("assets/licenses/**", { destination: "data/licenses/{name}" });
-	project.add_assets("assets/themes/*.json", { destination: "data/themes/{name}" });
-
-	if (platform === "linux" && fs_exists(os_cwd() + "/icon.png")) {
-		project.add_assets("../" + dir + "/icon.png", { destination: "{name}", noprocessing: true, noembed: true });
-	}
-
-	if (flags.embed) {
-		project.add_define("WITH_EMBED");
-		project.add_define("arm_embed");
-	}
-	else {
-		project.add_assets("assets/extra/*", { destination: "data/{name}" });
-	}
-
-	if (flags.physics) {
-		project.add_cfiles("sources/libs/asim.c");
-		project.add_define("arm_physics");
-	}
-
-	// project.add_define("arm_audio");
-
-	if (platform === "android") {
-		project.add_define("arm_android_rmb");
-	}
-
-	let raytrace = true;
-	if (raytrace) {
-		project.add_assets("assets/raytrace/*", { destination: "data/{name}" });
-
-		if (graphics === "direct3d12") {
-			project.add_assets("shaders/raytrace/*.cso", { destination: "data/{name}" });
-		}
-		else if (graphics === "vulkan") {
-			project.add_assets("shaders/raytrace/*.spirv", { destination: "data/{name}" });
-		}
-		else if (graphics === "metal") {
-			project.add_assets("shaders/raytrace/*.metal", { destination: "data/{name}" });
-		}
-	}
-
-	let export_version_info = true;
-	if (export_version_info) {
-		let dir = "../" + flags.name.substr(5).toLowerCase() + "/build";
-		let sha = os_popen(`git log --pretty=format:"%h" -n 1`).stdout.substr(1, 7);
-		let date = new Date().toISOString().split("T")[0];
-		let data = `{ "sha": "${sha}", "date": "${date}" }`;
-		fs_ensuredir(dir);
-		fs_writefile(dir + "/version.json", data);
-		// Adds version.json to embed.txt list
-		project.add_assets(dir + "/version.json", { destination: "data/{name}" });
-	}
-
-	let export_data_list = platform === "android"; // .apk contents
-	if (export_data_list) {
-		let root = "../" + flags.name.substr(5).toLowerCase();
-		let data_list = {
-			"/data/plugins": fs_readdir(root + "/assets/plugins").join(","),
-			"/data/export_presets": fs_readdir(root + "/assets/export_presets").join(","),
-			"/data/keymap_presets": fs_readdir(root + "/assets/keymap_presets").join(","),
-			"/data/locale": fs_readdir("../base/assets/locale").join(","),
-			"/data/meshes": fs_readdir(root + "/assets/meshes").join(","),
-			"/data/themes": fs_readdir("../base/assets/themes").join(","),
-		};
-		let dir = "../" + flags.name.substr(5).toLowerCase() + "/build";
-		fs_ensuredir(dir);
-		fs_writefile(dir + "/data_list.json", JSON.stringify(data_list));
-		project.add_assets(dir + "/data_list.json", { destination: "data/{name}" });
+	else if (graphics == "metal") {
+		project.add_assets("shaders/raytrace/*.metal", { destination: "data/{name}" });
 	}
 }
 
-{
-	project.add_include_dir("sources");
-
-	function add_gpu_backend(name) {
-		project.add_cfiles("sources/backends/" + name + "_gpu.*");
-		project.add_define("BACKEND_GPU_H=\"backends/" + name + "_gpu.h\"");
-	}
-
-	function add_sys_backend(name) {
-		project.add_cfiles("sources/backends/" + name + "_system.*");
-		project.add_define("BACKEND_SYS_H=\"backends/" + name + "_system.h\"");
-	}
-
-	function add_net_backend(name) {
-		project.add_cfiles("sources/backends/" + name + "_net.*");
-		project.add_define("BACKEND_NET_H=\"backends/" + name + "_net.h\"");
-	}
-
-	function add_thread_backend(name) {
-		project.add_cfiles("sources/backends/" + name + "_thread.*");
-		project.add_define("BACKEND_THREAD_H=\"backends/" + name + "_thread.h\"");
-	}
-
-	if (platform === "windows") {
-		add_sys_backend("windows");
-		add_net_backend("windows");
-		add_thread_backend("windows");
-		add_gpu_backend("direct3d12");
-		project.add_define("_CRT_SECURE_NO_WARNINGS");
-		project.add_define("_WINSOCK_DEPRECATED_NO_WARNINGS");
-		project.add_define("IRON_DIRECT3D12");
-		project.add_lib("dxguid");
-		project.add_lib("Winhttp");
-		project.add_lib("dxgi");
-		project.add_lib("d3d12");
-		if (flags.with_audio) {
-			project.add_lib("dsound");
-		}
-		if (flags.with_gamepad) {
-			project.add_lib("dinput8");
-		}
-	}
-	else if (platform === "macos") {
-		add_sys_backend("macos");
-		add_net_backend("apple");
-		add_thread_backend("apple");
-		add_gpu_backend("metal");
-		project.add_cfiles("sources/backends/data/mac.plist");
-		project.add_define("IRON_METAL");
-	}
-	else if (platform === "ios") {
-		add_sys_backend("ios");
-		add_net_backend("apple");
-		add_thread_backend("apple");
-		add_gpu_backend("metal");
-		project.add_cfiles("sources/backends/data/ios.plist");
-		project.add_cfiles("sources/backends/ios_file_dialog.m");
-		project.add_define("IRON_METAL");
-	}
-	else if (platform === "android") {
-		add_sys_backend("android");
-		add_net_backend("posix");
-		add_thread_backend("posix");
-		add_gpu_backend("vulkan");
-		project.add_cfiles("sources/backends/android_file_dialog.c");
-		project.add_cfiles("sources/backends/android_http_request.c");
-		project.add_cfiles("sources/backends/android_native_app_glue.c");
-		project.add_define("IRON_ANDROID");
-		project.add_define("IRON_VULKAN");
-		project.add_define("VK_USE_PLATFORM_ANDROID_KHR");
-		project.add_lib("vulkan");
-		project.add_lib("log");
-		project.add_lib("android");
-		if (flags.with_audio) {
-			project.add_lib("OpenSLES");
-		}
-	}
-	else if (platform === "wasm") {
-		add_sys_backend("wasm");
-		add_thread_backend("wasm");
-		add_gpu_backend("webgpu");
-		project.add_cfiles("sources/libs/miniclib/**");
-		project.add_define("IRON_WASM");
-		project.add_define("IRON_WEBGPU");
-		project.add_include_dir("miniclib");
-	}
-	else if (platform === "linux") {
-		add_sys_backend("linux");
-		add_thread_backend("posix");
-		add_gpu_backend("vulkan");
-		project.add_define("IRON_VULKAN");
-		project.add_define("_POSIX_C_SOURCE=200112L");
-		project.add_define("_XOPEN_SOURCE=600");
-		project.add_lib("dl");
-		project.add_lib("vulkan");
-		if (flags.with_audio) {
-			project.add_lib("asound");
-		}
-		if (flags.with_gamepad) {
-			project.add_lib("udev");
-		}
-	}
+if (flags.export_version_info) {
+	let dir = "../" + flags.name.substr(5).toLowerCase() + "/build";
+	let sha = os_popen(`git log --pretty=format:"%h" -n 1`).stdout.substr(1, 7);
+	let date = new Date().toISOString().split("T")[0];
+	let data = `{ "sha": "${sha}", "date": "${date}" }`;
+	fs_ensuredir(dir);
+	fs_writefile(dir + "/version.json", data);
+	// Adds version.json to embed.txt list
+	project.add_assets(dir + "/version.json", { destination: "data/{name}" });
 }
 
-if (fs_exists(os_cwd() + "/icon.png")) {
-	project.icon = "icon.png";
-	if (platform === "macos" && fs_exists(os_cwd() + "/icon_macos.png")) {
-		project.icon = "icon_macos.png";
-	}
+if (flags.export_data_list) {
+	let root = "../" + flags.name.substr(5).toLowerCase();
+	let data_list = {
+		"/data/plugins": fs_readdir(root + "/assets/plugins").join(","),
+		"/data/export_presets": fs_readdir(root + "/assets/export_presets").join(","),
+		"/data/keymap_presets": fs_readdir(root + "/assets/keymap_presets").join(","),
+		"/data/locale": fs_readdir(root + "/assets/locale").join(","),
+		"/data/meshes": fs_readdir(root + "/assets/meshes").join(","),
+		"/data/themes": fs_readdir("../base/assets/themes").join(","),
+	};
+	let dir = "../" + flags.name.substr(5).toLowerCase() + "/build";
+	fs_ensuredir(dir);
+	fs_writefile(dir + "/data_list.json", JSON.stringify(data_list));
+	project.add_assets(dir + "/data_list.json", { destination: "data/{name}" });
 }
-
-project.add_include_dir("sources/libs");
-project.add_cfiles("sources/libs/gc.c");
-project.add_cfiles("sources/libs/kong/dir.c");
-project.add_include_dir("sources");
-project.add_cfiles("sources/iron.c");
-project.add_define("IRON_C_PATH=\"" + os_cwd() + "/build/iron.c" + "\"");
-project.add_define("EMBED_H_PATH=\"" + os_cwd() + "/build/embed.h" + "\"");
 
 if (flags.with_audio) {
 	project.add_define("IRON_A1");
@@ -269,44 +229,24 @@ if (flags.with_gamepad) {
 	project.add_define("WITH_GAMEPAD");
 }
 
-if (flags.with_iron) {
-	project.add_define("WITH_IRON");
-	project.add_cfiles("sources/*.c");
-}
-
-if (platform === "windows") {
-	project.add_lib("Dwmapi"); // DWMWA_USE_IMMERSIVE_DARK_MODE
-	if (flags.with_d3dcompiler) {
-		project.add_define("WITH_D3DCOMPILER");
-		project.add_lib("d3d11");
-		project.add_lib("d3dcompiler");
-	}
-}
-else if (platform === "android") {
-	project.add_define("IDLE_SLEEP");
-	project.target_options.android.package = flags.package;
-	project.target_options.android.permissions = ["android.permission.READ_MEDIA_IMAGES", "android.permission.INTERNET"];
-	project.target_options.android.screenOrientation = ["sensorLandscape"];
-	project.target_options.android.minSdkVersion = 33; // android 13
-	project.target_options.android.targetSdkVersion = 36;
-	function get_version_code() {
-		const now = new Date();
-		const year = now.getFullYear().toString().slice(-2);
-		const month = (now.getMonth() + 1).toString().padStart(2, '0');
-		const day = now.getDate().toString().padStart(2, '0');
-		return parseInt(year + month + day, 10);
-	}
-	project.target_options.android.versionCode = get_version_code();
-	project.target_options.android.versionName = "1.0 alpha";
-}
-else if (platform === "ios") {
+if (flags.idle_sleep) {
 	project.add_define("IDLE_SLEEP");
 }
 
-if (flags.with_nfd && (platform === "windows" || platform === "linux" || platform === "macos")) {
+if (fs_exists(os_cwd() + "/icon.png")) {
+	project.icon = "icon.png";
+	if (platform == "macos" && fs_exists(os_cwd() + "/icon_macos.png")) {
+		project.icon = "icon_macos.png";
+	}
+	else if (platform == "linux") {
+		project.add_assets("../" + dir + "/icon.png", { destination: "{name}", noprocessing: true, noembed: true });
+	}
+}
+
+if (flags.with_nfd && (platform == "windows" || platform == "linux" || platform == "macos")) {
 	project.add_define("WITH_NFD");
 	project.add_cfiles("sources/libs/nfd.c");
-	if (platform === "linux") {
+	if (platform == "linux") {
 		project.add_include_dir("/usr/include/gtk-3.0");
 		project.add_include_dir("/usr/include/glib-2.0");
 		project.add_include_dir("/usr/lib/x86_64-linux-gnu/glib-2.0/include");
@@ -338,10 +278,6 @@ if (flags.with_video_write) {
 	project.add_define("WITH_VIDEO_WRITE");
 	project.add_cfiles("sources/libs/minimp4.c");
 	project.add_cfiles("sources/libs/minih264e.c");
-}
-
-if (graphics === "metal" || (graphics === "vulkan" && platform != "android")) {
-	project.add_define("IRON_BGRA");
 }
 
 project.flatten();

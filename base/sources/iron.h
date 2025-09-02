@@ -35,18 +35,6 @@
 #ifdef WITH_EMBED
 #include EMBED_H_PATH
 #endif
-#ifdef WITH_ONNX
-#include <onnxruntime_c_api.h>
-#ifdef IRON_WINDOWS
-#include <dml_provider_factory.h>
-#elif defined(IRON_MACOS)
-#include <coreml_provider_factory.h>
-#endif
-const OrtApi *ort = NULL;
-OrtEnv *ort_env;
-OrtSessionOptions *ort_session_options;
-OrtSession *session = NULL;
-#endif
 
 int _argc;
 char **_argv;
@@ -132,7 +120,7 @@ char *js_call(void *p) {
 
 void js_init() {}
 float js_eval(const char *js) { return 0.0; }
-void js_call_arg(void *p, int argc, void *argv) { return NULL; }
+void js_call_arg(void *p, int argc, void *argv) { }
 char *js_call_ptr(void *p, void *arg) { return NULL; }
 char *js_call_ptr_str(void *p, void *arg0, char *arg1) { return NULL; }
 void *js_pcall_str(void *p, char *arg0) { return NULL; }
@@ -296,12 +284,7 @@ int kickstart(int argc, char **argv) {
 	#ifdef WITH_AUDIO
 	iron_a2_shutdown();
 	#endif
-	#ifdef WITH_ONNX
-	if (ort != NULL) {
-		ort->ReleaseEnv(ort_env);
-		ort->ReleaseSessionOptions(ort_session_options);
-	}
-	#endif
+
 	gc_stop();
 	return 0;
 }
@@ -1848,146 +1831,6 @@ void iron_mp4_encode(buffer_t *pixels) {
 	int sizeof_coded_data;
 	H264E_encode(iron_mp4_enc, iron_mp4_scratch, &run_param, &yuv, &coded_data, &sizeof_coded_data);
 	fwrite(coded_data, sizeof_coded_data, 1, iron_mp4_fp);
-}
-#endif
-
-#ifdef WITH_ONNX
-buffer_t *iron_ml_inference(buffer_t *model, any_array_t *tensors, any_array_t *input_shape, i32_array_t *output_shape, bool use_gpu) {
-	OrtStatus *onnx_status = NULL;
-	static bool use_gpu_last = false;
-	if (ort == NULL || use_gpu_last != use_gpu) {
-		use_gpu_last = use_gpu;
-		ort = OrtGetApiBase()->GetApi(ORT_API_VERSION);
-		ort->CreateEnv(ORT_LOGGING_LEVEL_WARNING, "iron", &ort_env);
-
-		ort->CreateSessionOptions(&ort_session_options);
-		ort->SetIntraOpNumThreads(ort_session_options, 8);
-		ort->SetInterOpNumThreads(ort_session_options, 8);
-
-		if (use_gpu) {
-			#ifdef IRON_WINDOWS
-			ort->SetSessionExecutionMode(ort_session_options, ORT_SEQUENTIAL);
-			ort->DisableMemPattern(ort_session_options);
-			onnx_status = OrtSessionOptionsAppendExecutionProvider_DML(ort_session_options, 0);
-			#elif defined(IRON_LINUX)
-			// onnx_status = OrtSessionOptionsAppendExecutionProvider_CUDA(ort_session_options, 0);
-			#elif defined(IRON_MACOS)
-			onnx_status = OrtSessionOptionsAppendExecutionProvider_CoreML(ort_session_options, 0);
-			#endif
-			if (onnx_status != NULL) {
-				const char *msg = ort->GetErrorMessage(onnx_status);
-				iron_error("%s", msg);
-				ort->ReleaseStatus(onnx_status);
-			}
-		}
-	}
-
-	static void *content_last = 0;
-	if (content_last != model->buffer || session == NULL) {
-		if (session != NULL) {
-			ort->ReleaseSession(session);
-			session = NULL;
-		}
-		onnx_status = ort->CreateSessionFromArray(ort_env, model->buffer, (int)model->length, ort_session_options, &session);
-		if (onnx_status != NULL) {
-			const char* msg = ort->GetErrorMessage(onnx_status);
-			iron_error("%s", msg);
-			ort->ReleaseStatus(onnx_status);
-		}
-	}
-	content_last = model->buffer;
-
-	OrtAllocator *allocator;
-	ort->GetAllocatorWithDefaultOptions(&allocator);
-	OrtMemoryInfo *memory_info;
-	ort->CreateCpuMemoryInfo(OrtArenaAllocator, OrtMemTypeDefault, &memory_info);
-
-	int32_t length = tensors->length;
-	if (length > 4) {
-		length = 4;
-	}
-	char *input_node_names[4];
-	OrtValue *input_tensors[4];
-	for (int32_t i = 0; i < length; ++i) {
-		ort->SessionGetInputName(session, i, allocator, &input_node_names[i]);
-
-		OrtTypeInfo *input_type_info;
-		ort->SessionGetInputTypeInfo(session, i, &input_type_info);
-		const OrtTensorTypeAndShapeInfo *input_tensor_info;
-		ort->CastTypeInfoToTensorInfo(input_type_info, &input_tensor_info);
-		size_t num_input_dims;
-		ort->GetDimensionsCount(input_tensor_info, &num_input_dims);
-		int64_t input_node_dims[32];
-
-		if (input_shape != NULL) {
-			for (int32_t j = 0; j < num_input_dims; ++j) {
-				i32_array_t *a = input_shape->buffer[i];
-				input_node_dims[j] = a->buffer[j];
-			}
-		}
-		else {
-			ort->GetDimensions(input_tensor_info, (int64_t *)input_node_dims, num_input_dims);
-		}
-		ONNXTensorElementDataType tensor_element_type;
-		ort->GetTensorElementType(input_tensor_info, &tensor_element_type);
-
-		buffer_t *b = tensors->buffer[i];
-		ort->CreateTensorWithDataAsOrtValue(memory_info, b->buffer, (int)b->length, input_node_dims, num_input_dims,  tensor_element_type, &input_tensors[i]);
-		ort->ReleaseTypeInfo(input_type_info);
-	}
-
-	char *output_node_name;
-	ort->SessionGetOutputName(session, 0, allocator, &output_node_name);
-	OrtValue *output_tensor = NULL;
-	onnx_status = ort->Run(session, NULL, input_node_names, input_tensors, length, &output_node_name, 1, &output_tensor);
-	if (onnx_status != NULL) {
-		const char* msg = ort->GetErrorMessage(onnx_status);
-		iron_error("%s", msg);
-		ort->ReleaseStatus(onnx_status);
-	}
-	float *float_array;
-	ort->GetTensorMutableData(output_tensor, (void **)&float_array);
-
-	size_t output_byte_length = 4;
-	if (output_shape != NULL) {
-		int32_t length = output_shape->length;
-		for (int i = 0; i < length; ++i) {
-			output_byte_length *= output_shape->buffer[i];
-		}
-	}
-	else {
-		OrtTypeInfo *output_type_info;
-		ort->SessionGetOutputTypeInfo(session, 0, &output_type_info);
-		const OrtTensorTypeAndShapeInfo *output_tensor_info;
-		ort->CastTypeInfoToTensorInfo(output_type_info, &output_tensor_info);
-		size_t num_output_dims;
-		ort->GetDimensionsCount(output_tensor_info, &num_output_dims);
-		int64_t output_node_dims[32];
-		ort->GetDimensions(output_tensor_info, (int64_t *)output_node_dims, num_output_dims);
-		ort->ReleaseTypeInfo(output_type_info);
-		for (int i = 0; i < num_output_dims; ++i) {
-			if (output_node_dims[i] > 1) {
-				output_byte_length *= output_node_dims[i];
-			}
-		}
-	}
-
-	buffer_t *output = buffer_create(output_byte_length);
-	memcpy(output->buffer, float_array, output_byte_length);
-
-	ort->ReleaseMemoryInfo(memory_info);
-	ort->ReleaseValue(output_tensor);
-	for (int i = 0; i < length; ++i) {
-		ort->ReleaseValue(input_tensors[i]);
-	}
-	return output;
-}
-
-void iron_ml_unload() {
-	if (session != NULL) {
-		ort->ReleaseSession(session);
-		session = NULL;
-	}
 }
 #endif
 

@@ -2,7 +2,7 @@
 // This script can create new translations or update existing ones.
 // Usage:
 // `../make --js extract_locales.js <locale code>`
-// Generates a `base/assets/locale/<locale code>.json` file
+// Generates a `paint/assets/locale/<locale code>.json` file
 
 let locale = scriptArgs[4];
 
@@ -11,7 +11,7 @@ if (!locale) {
     std.exit();
 }
 
-let locale_path = "./base/assets/locale/" + locale + ".json";
+let locale_path = "./paint/assets/locale/" + locale + ".json";
 
 let out = {};
 let old = {};
@@ -20,8 +20,7 @@ if (fs_exists(locale_path)) {
 }
 
 let source_paths = [
-    "base/sources", "base/sources/nodes",
-    "paint/sources", "paint/sources/nodes"
+    "paint/sources", "paint/sources/brush_nodes", "paint/sources/neural_nodes"
 ];
 
 for (let path of source_paths) {
