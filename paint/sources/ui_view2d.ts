@@ -41,8 +41,6 @@ function ui_view2d_init() {
 	pipes_get_constant_location("float4");
 	pipes_get_constant_location("float4");
 	ui_view2d_channel_loc = pipes_get_constant_location("int");
-
-	// ui.scroll_enabled = false;
 }
 
 function ui_view2d_draw_image(image: gpu_texture_t, dx: f32, dy: f32, dw: f32, dh: f32, channel: i32) {

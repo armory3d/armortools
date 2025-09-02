@@ -58,8 +58,6 @@ function ui_viewnodes_init() {
 	ui_nodes_on_canvas_control = ui_viewnodes_on_canvas_control;
 	ui_nodes_grid_snap = config_raw.grid_snap;
 	nodes_material_init();
-
-	// ui.scroll_enabled = false;
 }
 
 function ui_viewnodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {

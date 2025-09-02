@@ -47,7 +47,6 @@ function box_projects_tab() {
 
 		if (ui_button(tr("New"))) {
 			project_new();
-			viewport_scale_to_bounds();
 			ui_box_hide();
 			// Pick unique name
 			let i: i32 = 0;

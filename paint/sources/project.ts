@@ -10,18 +10,12 @@ let project_paint_objects: mesh_object_t[] = null;
 let project_asset_map: map_t<i32, any> = map_create(); // gpu_texture_t | font_t
 let project_mesh_list: string[] = null;
 
-let project_materials: slot_material_t[] = null;
-let project_brushes: slot_brush_t[] = null;
-let project_layers: slot_layer_t[] = null;
-let project_fonts: slot_font_t[] = null;
+let project_materials: slot_material_t[] = [];
+let project_brushes: slot_brush_t[] = [];
+let project_layers: slot_layer_t[] = [];
+let project_fonts: slot_font_t[] = [];
 let project_atlas_objects: i32[] = null;
 let project_atlas_names: string[] = null;
-
-// lab
-let project_material_data: material_data_t = null;
-let project_nodes: ui_nodes_t;
-let project_canvas: ui_node_canvas_t;
-let project_default_canvas: buffer_t = null;
 
 let _project_save_and_quit: bool;
 let _project_import_mesh_replace_existing: bool;
@@ -182,12 +176,16 @@ function project_cleanup() {
 }
 
 function project_new(reset_layers: bool = true) {
-	let first: bool = context_raw.paint_object == null;
-	if (!first) {
+	if (context_raw.paint_object != null) {
 		project_cleanup();
+		project_filepath = "";
 	}
 
-	project_filepath = "";
+	if (project_layers.length == 0) {
+		array_push(project_layers, slot_layer_create());
+		context_raw.layer = project_layers[0];
+	}
+
 	context_raw.layer_preview_dirty = true;
 	context_raw.layer_filter = 0;
 	context_raw.texture = null;
@@ -202,7 +200,6 @@ function project_new(reset_layers: bool = true) {
 	// 	raw = import_mesh_raw_mesh(mesh);
 	// }
 	// else {
-
 		if (project_mesh_list == null) {
 			project_mesh_list = ["box_bevel"];
 		}
@@ -227,7 +224,7 @@ function project_new(reset_layers: bool = true) {
 	if (in_use) draw_end();
 
 	let m: material_data_t = data_get_material("Scene", "Material");
-	if (first) {
+	if (context_raw.paint_object == null) {
 		let ms: material_data_t[] = [m];
 		context_raw.paint_object = mesh_object_create(md, ms);
 		context_raw.paint_object.base.name = "paint_object";
@@ -273,7 +270,6 @@ function project_new(reset_layers: bool = true) {
 	project_asset_id = 0;
 	project_raw.packed_assets = [];
 	context_raw.ddirty = 4;
-
 	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 

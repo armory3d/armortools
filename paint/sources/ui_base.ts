@@ -46,50 +46,43 @@ function _draw_callback_create(f: (h: ui_handle_t)=>void): tab_draw_t {
 }
 
 function ui_base_init_hwnd_tabs(): tab_draw_array_t[] {
-	return ui_base_ext_init_hwnd_tabs();
+	let a0: tab_draw_array_t = [
+		_draw_callback_create(tab_layers_draw),
+		_draw_callback_create(tab_history_draw),
+		_draw_callback_create(tab_plugins_draw)
+	];
+	let a1: tab_draw_array_t = [
+		_draw_callback_create(tab_materials_draw),
+		_draw_callback_create(tab_brushes_draw),
+		_draw_callback_create(tab_scripts_draw)
+
+	];
+	let a2: tab_draw_array_t = [
+		_draw_callback_create(tab_browser_draw),
+		_draw_callback_create(tab_meshes_draw),
+		_draw_callback_create(tab_textures_draw),
+		_draw_callback_create(tab_fonts_draw),
+		_draw_callback_create(tab_swatches_draw),
+		_draw_callback_create(tab_console_draw),
+		_draw_callback_create(ui_status_draw_version_tab)
+	];
+
+    let r: tab_draw_array_t[] = [];
+	array_push(r, a0);
+	array_push(r, a1);
+	array_push(r, a2);
+	return r;
 }
 
 function ui_base_init() {
 	ui_toolbar_init();
 	context_raw.text_tool_text = tr("Text");
-
 	ui_header_init();
 	ui_status_init();
 	ui_menubar_init();
 
 	ui_header_h = math_floor(ui_header_default_h * config_raw.window_scale);
 	ui_menubar_w = math_floor(ui_menubar_default_w * config_raw.window_scale);
-
-	if (project_materials == null) {
-		project_materials = [];
-		let m: material_data_t = data_get_material("Scene", "Material");
-		array_push(project_materials, slot_material_create(m));
-		context_raw.material = project_materials[0];
-	}
-
-	if (project_brushes == null) {
-		project_brushes = [];
-		array_push(project_brushes, slot_brush_create());
-		context_raw.brush = project_brushes[0];
-		make_material_parse_brush();
-	}
-
-	if (project_fonts == null) {
-		project_fonts = [];
-		array_push(project_fonts, slot_font_create("default.ttf", base_font));
-		context_raw.font = project_fonts[0];
-	}
-
-	if (project_layers == null) {
-		project_layers = [];
-		array_push(project_layers, slot_layer_create());
-		context_raw.layer = project_layers[0];
-	}
-
-	if (project_raw.swatches == null) {
-		project_set_default_swatches();
-		context_raw.swatch = project_raw.swatches[0];
-	}
 
 	if (context_raw.empty_envmap == null) {
 		ui_base_make_empty_envmap(base_theme.VIEWPORT_COL);
@@ -103,17 +96,14 @@ function ui_base_init() {
 		context_raw.preview_envmap = gpu_create_texture_from_bytes(b, 1, 1);
 	}
 
-	let world: world_data_t = scene_world;
 	if (context_raw.saved_envmap == null) {
-		// raw.saved_envmap = world._envmap;
-		context_raw.default_irradiance = world._.irradiance;
-		context_raw.default_radiance = world._.radiance;
-		context_raw.default_radiance_mipmaps = world._.radiance_mipmaps;
+		// raw.saved_envmap = scene_world._envmap;
+		context_raw.default_irradiance = scene_world._.irradiance;
+		context_raw.default_radiance = scene_world._.radiance;
+		context_raw.default_radiance_mipmaps = scene_world._.radiance_mipmaps;
 	}
-	world._.envmap = context_raw.show_envmap ? context_raw.saved_envmap : context_raw.empty_envmap;
+	scene_world._.envmap = context_raw.show_envmap ? context_raw.saved_envmap : context_raw.empty_envmap;
 	context_raw.ddirty = 1;
-
-	history_reset();
 
 	let scale: f32 = config_raw.window_scale;
 	let ops: ui_options_t = {
@@ -128,8 +118,9 @@ function ui_base_init() {
 	ui_on_text_hover = ui_base_on_text_hover;
 	ui_on_deselect_text = ui_base_on_deselect_text;
 	ui_on_tab_drop = ui_base_on_tab_drop;
-
-	let resources: string[] = ["cursor.k", "icons.k"];
+	if (UI_SCALE() > 1) {
+		ui_base_set_icon_scale();
+	}
 
 	context_raw.gizmo = scene_get_child(".Gizmo");
 	context_raw.gizmo_translate_x = object_get_child(context_raw.gizmo, ".TranslateX");
@@ -142,11 +133,8 @@ function ui_base_init() {
 	context_raw.gizmo_rotate_y = object_get_child(context_raw.gizmo, ".RotateY");
 	context_raw.gizmo_rotate_z = object_get_child(context_raw.gizmo, ".RotateZ");
 
+	let resources: string[] = ["cursor.k", "icons.k"];
 	resource_load(resources);
-
-	if (UI_SCALE() > 1) {
-		ui_base_set_icon_scale();
-	}
 
 	project_new(false);
 
@@ -1469,35 +1457,3 @@ function ui_base_set_viewport_col(col: i32) {
 		scene_world._.envmap = context_raw.empty_envmap;
 	}
 }
-
-
-function ui_base_ext_init_hwnd_tabs(): tab_draw_array_t[] {
-
-	let a0: tab_draw_array_t = [
-		_draw_callback_create(tab_layers_draw),
-		_draw_callback_create(tab_history_draw),
-		_draw_callback_create(tab_plugins_draw)
-	];
-	let a1: tab_draw_array_t = [
-		_draw_callback_create(tab_materials_draw),
-		_draw_callback_create(tab_brushes_draw),
-		_draw_callback_create(tab_scripts_draw)
-
-	];
-	let a2: tab_draw_array_t = [
-		_draw_callback_create(tab_browser_draw),
-		_draw_callback_create(tab_meshes_draw),
-		_draw_callback_create(tab_textures_draw),
-		_draw_callback_create(tab_fonts_draw),
-		_draw_callback_create(tab_swatches_draw),
-		_draw_callback_create(tab_console_draw),
-		_draw_callback_create(ui_status_draw_version_tab)
-	];
-
-    let r: tab_draw_array_t[] = [];
-	array_push(r, a0);
-	array_push(r, a1);
-	array_push(r, a2);
-	return r;
-}
-

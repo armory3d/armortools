@@ -68,11 +68,9 @@ function base_init() {
 
 	iron_set_save_and_quit_callback(base_save_and_quit_callback);
 
-	let font: draw_font_t = data_get_font("font.ttf");
-	let image_color_wheel: gpu_texture_t = data_get_image("color_wheel.k");
-	let image_color_wheel_gradient: gpu_texture_t = data_get_image("color_wheel_gradient.k");
-
-	base_font = font;
+	base_font = data_get_font("font.ttf");
+	base_color_wheel = data_get_image("color_wheel.k");
+	base_color_wheel_gradient = data_get_image("color_wheel_gradient.k");
 	config_load_theme(config_raw.theme, false);
 	base_default_element_w = base_theme.ELEMENT_W;
 	base_default_element_h = base_theme.ELEMENT_H;
@@ -91,8 +89,6 @@ function base_init() {
 		draw_font_init(base_font);
 	}
 
-	base_color_wheel = image_color_wheel;
-	base_color_wheel_gradient = image_color_wheel_gradient;
 	ui_nodes_enum_texts = base_enum_texts;
 
 	// Init plugins
@@ -104,22 +100,21 @@ function base_init() {
 	}
 
 	args_parse();
-
 	camera_init();
 	ui_base_init();
 	ui_viewnodes_init();
 	ui_view2d_init();
-	base_ext_init();
 
 	sys_notify_on_update(base_update);
-	sys_notify_on_render(ui_view2d_render);
 	sys_notify_on_update(ui_view2d_update);
-	sys_notify_on_render(ui_base_render_cursor);
 	sys_notify_on_update(ui_nodes_update);
-	sys_notify_on_render(ui_nodes_render);
 	sys_notify_on_update(ui_base_update);
-	sys_notify_on_render(ui_base_render);
 	sys_notify_on_update(camera_update);
+
+	sys_notify_on_render(ui_view2d_render);
+	sys_notify_on_render(ui_base_render_cursor);
+	sys_notify_on_render(ui_nodes_render);
+	sys_notify_on_render(ui_base_render);
 	sys_notify_on_render(base_render);
 
 	base_appx = ui_toolbar_w(true);
@@ -127,9 +122,8 @@ function base_init() {
 	if (config_raw.layout[layout_size_t.HEADER] == 1) {
 		base_appy = ui_header_h * 2;
 	}
-	let cam: camera_object_t = scene_camera;
-	cam.data.fov = math_floor(cam.data.fov * 100) / 100;
-	camera_object_build_proj(cam);
+	scene_camera.data.fov = math_floor(scene_camera.data.fov * 100) / 100;
+	camera_object_build_proj(scene_camera);
 
 	args_run();
 
@@ -436,7 +430,16 @@ function base_update() {
 		context_raw.ddirty = 0;
 	}
 
-	base_ext_update();
+	if (context_raw.tool == tool_type_t.GIZMO) {
+		if (keyboard_down("control") && keyboard_started("d")) {
+			sim_duplicate();
+		}
+
+		if (keyboard_started("delete")) {
+			sim_delete();
+		}
+	}
+
 	compass_update();
 }
 
@@ -526,7 +529,17 @@ function base_get_drag_image(): gpu_texture_t {
 }
 
 function base_render() {
-	base_ext_render();
+	if (context_raw.frame == 2) {
+		util_render_make_material_preview();
+		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
+
+		base_init_undo_layers();
+    }
+
+    if (context_raw.tool == tool_type_t.GIZMO) {
+		sim_init();
+		sim_update();
+    }
 
 	if (context_raw.frame == 2) {
 		make_material_parse_mesh_material();
@@ -780,40 +793,4 @@ function base_init_config() {
 	raw.scene_atlas_res = texture_res_t.RES8192;
 	raw.pathtrace_mode = pathtrace_mode_t.FAST;
 	raw.grid_snap = false;
-
-	base_ext_init_config(raw);
-}
-
-
-function base_ext_init() {
-}
-
-function base_ext_render() {
-    if (context_raw.frame == 2) {
-		util_render_make_material_preview();
-		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
-
-		base_init_undo_layers();
-    }
-
-    if (context_raw.tool == tool_type_t.GIZMO) {
-		sim_init();
-		sim_update();
-    }
-}
-
-function base_ext_init_config(raw: config_t) {
-
-}
-
-function base_ext_update() {
-	if (context_raw.tool == tool_type_t.GIZMO) {
-		if (keyboard_down("control") && keyboard_started("d")) {
-			sim_duplicate();
-		}
-
-		if (keyboard_started("delete")) {
-			sim_delete();
-		}
-	}
 }
