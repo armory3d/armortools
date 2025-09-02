@@ -2,11 +2,15 @@
 
 #import <UIKit/UIKit.h>
 
+static UIDocumentPickerViewController *documentPicker = nil;
+
 void IOSFileDialogOpen() {
 	UIViewController<UIDocumentPickerDelegate> *myViewController = [UIApplication sharedApplication].keyWindow.rootViewController;
-	UIDocumentPickerViewController *documentPicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[@"public.data"] inMode:UIDocumentPickerModeOpen];
-	documentPicker.delegate = myViewController;
-	documentPicker.modalPresentationStyle = UIModalPresentationFormSheet;
+	if (documentPicker == nil) {
+		documentPicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[@"public.data"] inMode:UIDocumentPickerModeOpen];
+		documentPicker.delegate = myViewController;
+		documentPicker.modalPresentationStyle = UIModalPresentationFormSheet;
+	}
 	[myViewController presentViewController:documentPicker animated:YES completion:nil];
 }
 
