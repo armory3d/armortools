@@ -50,6 +50,30 @@ function util_encode_mesh_data_size(datas: mesh_data_t[]): i32 {
 	return size;
 }
 
+function util_encode_packed_assets_size(assets: packed_asset_t[]): i32 {
+	if (assets == null) {
+		return 0;
+	}
+	let size: i32 = 0;
+	for (let i: i32 = 0; i < assets.length; ++i) {
+		let asset: packed_asset_t = assets[i];
+		let bytes: buffer_t = asset.bytes;
+		size += bytes.length;
+	}
+	return size;
+}
+
+function util_encode_buffers_size(buffers: buffer_t[]): i32 {
+	if (buffers == null) {
+		return 0;
+	}
+	let size: i32 = 0;
+	for (let i: i32 = 0; i < buffers.length; ++i) {
+		size += buffers[i].length;
+	}
+	return size;
+}
+
 function util_encode_layer_data_size(datas: layer_data_t[]): i32 {
 	if (datas == null) {
 		return 0;
@@ -107,7 +131,13 @@ function util_encode_mesh_datas(datas: mesh_data_t[]) {
 }
 
 function util_encode_project(raw: project_format_t): buffer_t {
-    let size: i32 = 32 * 1024 * 1024 + util_encode_layer_data_size(raw.layer_datas) + util_encode_mesh_data_size(raw.mesh_datas);
+    let size: i32 = 32 * 1024 * 1024
+		+ util_encode_layer_data_size(raw.layer_datas)
+		+ util_encode_mesh_data_size(raw.mesh_datas)
+		+ util_encode_packed_assets_size(raw.packed_assets)
+		+ util_encode_buffers_size(raw.brush_icons)
+		+ util_encode_buffers_size(raw.material_icons)
+		+ util_encode_buffers_size(raw.mesh_icons);
     let encoded: buffer_t = buffer_create(size);
 
     armpack_encode_start(encoded.buffer);
