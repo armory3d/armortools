@@ -569,7 +569,6 @@ function context_init_tool() {
 		}
 		util_render_make_decal_preview();
 	}
-
 	else if (context_raw.tool == tool_type_t.PARTICLE) {
 		util_particle_init();
 	}
@@ -583,11 +582,6 @@ function context_init_tool() {
 		layers_update_fill_layers();
 		context_main_object().skip_context = null;
 	}
-
-	///if arm_ios
-	// No hover on iPad, decals are painted by pen release
-	config_raw.brush_live = decal;
-	///end
 }
 
 function context_select_paint_object(o: mesh_object_t) {

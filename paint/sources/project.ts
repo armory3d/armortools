@@ -203,7 +203,7 @@ function project_new(reset_layers: bool = true) {
 		let mesh: raw_mesh_t = geom_make_plane(1, 1, 512, 512);
 		mesh.name = "Tessellated";
 		raw = import_mesh_raw_mesh(mesh);
-		viewport_set_view(0, 0, 0.75, 0, 0, 0); // Top
+		// viewport_set_view(0, 0, 0.75, 0, 0, 0); // Top
 	}
 	else {
 		let b: buffer_t = data_get_blob("meshes/" + mesh_name + ".arm");

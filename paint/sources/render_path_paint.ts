@@ -612,12 +612,10 @@ function render_path_paint_draw() {
 		return;
 	}
 
-	///if (!arm_ios) // No hover on iPad, decals are painted by pen release
 	if (config_raw.brush_live && context_raw.pdirty <= 0 && context_raw.ddirty > 0 && context_raw.brush_time == 0) {
 		// gbuffer has been updated now but brush will lag 1 frame
 		render_path_paint_commands_live_brush();
 	}
-	///end
 
 	if (history_undo_layers != null) {
 		render_path_paint_commands_symmetry();

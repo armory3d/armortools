@@ -855,16 +855,6 @@ function ui_base_update_ui() {
 		down = false;
 	}
 
-	///if arm_ios
-	// No hover on iPad, decals are painted by pen release
-	if (decal) {
-		down = pen_released();
-		if (!context_raw.pen_painting_only) {
-			down = down || mouse_released();
-		}
-	}
-	///end
-
 	if (down) {
 		let mx: i32 = mouse_view_x();
 		let my: i32 = mouse_view_y();
