@@ -56,6 +56,10 @@ function ui_menubar_render_ui() {
 			if (ui_menubar_icon_button(0, 2)) box_preferences_show();
 			if (ui_menubar_icon_button(0, 3)) {
 				///if (arm_android || arm_ios)
+				// Save project icon in lit mode
+				if (context_raw.viewport_mode == viewport_mode_t.PATH_TRACE) {
+					context_raw.viewport_mode = viewport_mode_t.LIT;
+				}
 				console_toast(tr("Saving project"));
 				project_save();
 				///end
