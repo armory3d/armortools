@@ -572,6 +572,8 @@ function _render_path_paint_final() {
 	render_path_paint_commands_paint();
 	context_raw.pdirty = 0;
 	render_path_paint_baking = false;
+
+	render_path_paint_update_bake_layer(texture_bits_t.BITS8);
 }
 
 function _render_path_paint_deriv() {
@@ -594,16 +596,9 @@ function render_path_paint_is_rt_bake(): bool {
 }
 
 function render_path_paint_update_bake_layer(bits: texture_bits_t) {
-	// Use RGBA128 texture format for high poly to low poly baking to prevent artifacts
-	// Existing undo layers are used during the baking process for now
-	if (base_bits_handle.position != texture_bits_t.BITS32) {
+	if (base_bits_handle.position != bits) {
 		base_bits_handle.position = bits;
-		slot_layer_resize_and_set_bits(context_raw.layer);
-		for (let i: i32 = 0; i < history_undo_layers.length; ++i) {
-			let l: slot_layer_t = history_undo_layers[i];
-			slot_layer_resize_and_set_bits(l);
-		}
-		base_bits_handle.position = texture_bits_t.BITS8;
+		layers_set_bits();
 	}
 }
 
@@ -629,6 +624,7 @@ function render_path_paint_draw() {
 			if (context_raw.bake_type == bake_type_t.NORMAL || context_raw.bake_type == bake_type_t.HEIGHT || context_raw.bake_type == bake_type_t.DERIVATIVE) {
 				if (!render_path_paint_baking && context_raw.pdirty > 0) {
 
+					// Use RGBA128 texture format for high poly to low poly baking to prevent artifacts
 					render_path_paint_update_bake_layer(texture_bits_t.BITS32);
 
 					render_path_paint_baking = true;
