@@ -392,11 +392,6 @@ function ui_menubar_draw_category_items() {
 
 		if (mode_handle.changed) {
 			context_set_viewport_mode(mode_handle.position);
-			// Rotate mode is not supported for path tracing yet
-			if (mode_handle.position == viewport_mode_t.PATH_TRACE && context_raw.camera_controls == camera_controls_t.ROTATE) {
-				context_raw.camera_controls = camera_controls_t.ORBIT;
-				viewport_reset();
-			}
 			ui_menu_keep_open = true;
 		}
 	}

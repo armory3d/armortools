@@ -711,6 +711,16 @@ function context_set_viewport_mode(mode: viewport_mode_t) {
 	ui_header_worktab.position = 0;
 	make_material_parse_mesh_material();
 	ui_header_worktab.position = _workspace;
+
+	// Rotate mode is not supported for path tracing yet
+	if (context_raw.viewport_mode == viewport_mode_t.PATH_TRACE && context_raw.camera_controls == camera_controls_t.ROTATE) {
+		context_raw.camera_controls = camera_controls_t.ORBIT;
+		viewport_reset();
+	}
+	// Bake in lit mode for now
+	if (context_raw.viewport_mode == viewport_mode_t.PATH_TRACE && context_raw.tool == tool_type_t.BAKE) {
+		context_raw.viewport_mode = viewport_mode_t.LIT;
+	}
 }
 
 function context_load_envmap() {
