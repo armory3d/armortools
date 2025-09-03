@@ -1100,7 +1100,7 @@ class XCodeExporter extends Exporter {
 			frameworks.push(new Framework(lib));
 		}
 		let target_options = {
-			bundle: 'org.$(PRODUCT_NAME)',
+			bundle: 'org.armory3d.' + project.getName().toLowerCase(),
 			version: "1.0",
 			build: "1",
 			organizationName: "Armory3D",
@@ -1108,16 +1108,10 @@ class XCodeExporter extends Exporter {
 		};
 		if (project.target_options && project.target_options.ios) {
 			let userOptions = project.target_options.ios;
-			if (userOptions.bundle)
-				target_options.bundle = userOptions.bundle;
 			if (userOptions.version)
 				target_options.version = userOptions.version;
 			if (userOptions.build)
 				target_options.build = userOptions.build;
-			if (userOptions.organizationName)
-				target_options.organizationName = userOptions.organizationName;
-			if (userOptions.developmentTeam)
-				target_options.developmentTeam = userOptions.developmentTeam;
 		}
 		let projectId = new_path_id("_projectId");
 		let appFileId = new_path_id("_appFileId");
@@ -2779,6 +2773,7 @@ class Project {
 		this.includes = [];
 		this.target_options = {
 			android: {},
+			ios: {}
 		};
 		this.executable_name = null;
 		this.sources = [];

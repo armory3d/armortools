@@ -495,13 +495,10 @@ void importFile(NSURL *url) {
 	iron_internal_drop_files_callback(wpath);
 }
 
-- (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentAtURL:(NSURL *)url {
-	// wchar_t *filePath = (wchar_t *)[url.path cStringUsingEncoding:NSUTF32LittleEndianStringEncoding];
-	// CFURLRef cfurl = (__bridge CFURLRef)url;
-	// CFURLStartAccessingSecurityScopedResource(cfurl);
-	// iron_internal_drop_files_callback(filePath);
-	// CFURLStopAccessingSecurityScopedResource(cfurl);
-	importFile(url);
+- (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls {
+	for (NSURL *url in urls) {
+		importFile(url);
+	}
 }
 
 - (void)dropInteraction:(UIDropInteraction *)interaction performDrop:(id<UIDropSession>)session {
@@ -522,7 +519,7 @@ void importFile(NSURL *url) {
 }
 
 - (UIRectEdge)preferredScreenEdgesDeferringSystemGestures {
-    return UIRectEdgeAll;
+	return UIRectEdgeAll;
 }
 
 @end
@@ -544,9 +541,9 @@ void importFile(NSURL *url) {
 	#endif
 
 	UIWindowScene *windowScene = (UIWindowScene *)scene;
-    self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
+	self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
 	self.window.frame = windowScene.coordinateSpace.bounds;
-    [self.window setBackgroundColor:[UIColor blackColor]];
+	[self.window setBackgroundColor:[UIColor blackColor]];
 
 	my_view_controller = [[MyViewController alloc] init];
 	my_view_controller.view.multipleTouchEnabled = YES;
@@ -561,19 +558,19 @@ void importFile(NSURL *url) {
 }
 
 - (void)sceneDidBecomeActive:(UIScene *)scene {
-    iron_internal_resume_callback();
+	iron_internal_resume_callback();
 }
 
 - (void)sceneWillResignActive:(UIScene *)scene {
-    iron_internal_pause_callback();
+	iron_internal_pause_callback();
 }
 
 - (void)sceneWillEnterForeground:(UIScene *)scene {
-    iron_internal_foreground_callback();
+	iron_internal_foreground_callback();
 }
 
 - (void)sceneDidEnterBackground:(UIScene *)scene {
-    iron_internal_background_callback();
+	iron_internal_background_callback();
 }
 
 @end

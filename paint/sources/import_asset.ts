@@ -8,8 +8,10 @@ let _import_asset_done: ()=>void;
 function import_asset_run(path: string, drop_x: f32 = -1.0, drop_y: f32 = -1.0, show_box: bool = true, hdr_as_envmap: bool = true, done: ()=>void = null) {
 
 	if (starts_with(path, "cloud")) {
-		///if (arm_android || arm_ios)
+		///if arm_android
 		console_toast(tr("Downloading"));
+		///else
+		console_info(tr("Downloading"));
 		///end
 
 		_import_asset_drop_x = drop_x;

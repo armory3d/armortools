@@ -345,6 +345,7 @@ function ui_menubar_draw_category_items() {
 			context_raw.ddirty = 2;
 		}
 
+		context_raw.show_envmap_handle.selected = context_raw.show_envmap;
 		context_raw.show_envmap = ui_check(context_raw.show_envmap_handle, " " + tr("Envmap"));
 		if (context_raw.show_envmap_handle.changed) {
 			context_load_envmap();

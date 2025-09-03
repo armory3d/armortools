@@ -57,6 +57,7 @@ function import_envmap_run(path: string, image: gpu_texture_t) {
 	scene_world._.radiance = import_envmap_radiance;
 	scene_world._.radiance_mipmaps = import_envmap_mips;
 	context_raw.saved_envmap = image;
+	context_raw.show_envmap = true;
 	if (context_raw.show_envmap_blur) {
 		scene_world._.envmap = scene_world._.radiance_mipmaps[0];
 	}
