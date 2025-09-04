@@ -302,6 +302,8 @@ function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: st
 function uniforms_ext_mat4_link(object: object_t, mat: material_data_t, link: string): mat4_t {
 	if (link == "_decal_layer_matrix") { // Decal layer
 		let m: mat4_t = mat4_inv(context_raw.layer.decal_mat);
+		let f: f32 = object.parent.transform.scale.x * object.transform.scale_world;
+		m = mat4_scale(m, vec4_create(f, f, f, 1.0));
 		m = mat4_mult_mat(m, uniforms_ext_ortho_p);
 		return m;
 	}
