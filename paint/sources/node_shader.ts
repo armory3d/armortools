@@ -89,14 +89,11 @@ function node_shader_add_constant(raw: node_shader_t, s: string, link: string = 
 	}
 }
 
-function node_shader_add_texture(raw: node_shader_t, s: string, link: string = null) {
+function node_shader_add_texture(raw: node_shader_t, name: string, link: string = null) {
 	// mytex: tex2d
-	if (array_index_of(raw.textures, s) == -1) {
-		let ar: string[] = string_split(s, ": ");
-		let uname: string = ar[0];
-		let utype: string = ar[1];
-		array_push(raw.textures, s);
-		node_shader_context_add_texture_unit(raw.context, utype, uname, link);
+	if (array_index_of(raw.textures, name) == -1) {
+		array_push(raw.textures, name);
+		node_shader_context_add_texture_unit(raw.context, name, link);
 	}
 }
 

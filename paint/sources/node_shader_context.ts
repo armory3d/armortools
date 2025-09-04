@@ -110,7 +110,7 @@ function node_shader_context_add_constant(raw: node_shader_context_t, ctype: str
 	array_push(consts, c);
 }
 
-function node_shader_context_add_texture_unit(raw: node_shader_context_t, ctype: string, name: string, link: string = null) {
+function node_shader_context_add_texture_unit(raw: node_shader_context_t, name: string, link: string = null) {
 	for (let i: i32 = 0; i < raw.data.texture_units.length; ++i) {
 		let c: tex_unit_t = raw.data.texture_units[i];
 		if (c.name == name) {

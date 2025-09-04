@@ -254,6 +254,7 @@ function project_new(reset_layers: bool = true) {
 	context_raw.picked_color = make_swatch();
 	context_raw.color_picker_callback = null;
 	history_reset();
+
 	make_material_parse_paint_material();
 	make_material_parse_brush();
 	util_render_make_material_preview();

@@ -39,8 +39,8 @@ static VkSampler linear_sampler;
 static VkSampler point_sampler;
 static bool linear_sampling = true;
 static VkCommandBuffer command_buffer;
-static VkBuffer buffers_to_destroy[256];
-static VkDeviceMemory buffer_memories_to_destroy[256];
+static VkBuffer buffers_to_destroy[512];
+static VkDeviceMemory buffer_memories_to_destroy[512];
 static int buffers_to_destroy_count = 0;
 static char device_name[256];
 
@@ -1760,7 +1760,7 @@ void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_te
 
 void _gpu_buffer_init(gpu_buffer_impl_t *buffer, int size, int usage, int memory_requirements) {
 	if (buffer->buf != NULL) {
-		assert(buffers_to_destroy_count < 256);
+		assert(buffers_to_destroy_count < 512);
 		buffers_to_destroy[buffers_to_destroy_count] = buffer->buf;
 		buffer_memories_to_destroy[buffers_to_destroy_count] = buffer->mem;
 		buffers_to_destroy_count++;

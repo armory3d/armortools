@@ -44,7 +44,7 @@ static ID3D12Resource *readback_buffer = NULL;
 static int readback_buffer_size = 0;
 static ID3D12Resource *upload_buffer = NULL;
 static int upload_buffer_size = 0;
-static ID3D12Resource *resources_to_destroy[256];
+static ID3D12Resource *resources_to_destroy[512];
 static int resources_to_destroy_count = 0;
 static char device_name[256];
 
@@ -980,7 +980,7 @@ void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_te
 
 void _gpu_buffer_init(ID3D12Resource **buffer, int size, D3D12_HEAP_TYPE heap_type) {
 	if (*buffer != NULL) {
-		assert(resources_to_destroy_count < 256);
+		assert(resources_to_destroy_count < 512);
 		resources_to_destroy[resources_to_destroy_count] = *buffer;
 		resources_to_destroy_count++;
 	}
