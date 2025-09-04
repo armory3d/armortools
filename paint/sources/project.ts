@@ -234,7 +234,7 @@ function project_new(reset_layers: bool = true) {
 	context_raw.paint_object.base.transform.scale = vec4_create(1, 1, 1);
 	transform_build_matrix(context_raw.paint_object.base.transform);
 	context_raw.paint_object.base.name = "Tessellated";
-	project_paint_objects = [context_raw.paint_object];
+
 	while (project_materials.length > 0) {
 		slot_material_unload(array_pop(project_materials));
 	}
@@ -257,7 +257,6 @@ function project_new(reset_layers: bool = true) {
 
 	make_material_parse_paint_material();
 	make_material_parse_brush();
-	util_render_make_material_preview();
 
 	project_assets = [];
 	project_asset_names = [];
@@ -290,6 +289,11 @@ function project_new(reset_layers: bool = true) {
 	viewport_reset();
 	viewport_scale_to_bounds();
 	render_path_raytrace_ready = false;
+
+	sys_notify_on_next_frame(function() {
+		// Once layers and meshes are populated on project open
+		util_render_make_material_preview();
+	});
 }
 
 function project_set_default_envmap() {
