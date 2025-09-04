@@ -301,6 +301,7 @@ function project_set_default_envmap() {
 	scene_world._.radiance_mipmaps = context_raw.default_radiance_mipmaps;
 	scene_world._.irradiance = context_raw.default_irradiance;
 	scene_world.strength = 4.0;
+	context_raw.envmap_angle = 0.0;
 }
 
 function project_import_material() {

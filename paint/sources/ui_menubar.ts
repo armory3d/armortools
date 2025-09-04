@@ -357,6 +357,10 @@ function ui_menubar_draw_category_items() {
 			context_raw.ddirty = 2;
 		}
 
+		if (ui_menu_button(tr("Reset Envmap"))) {
+			project_set_default_envmap();
+		}
+
 		context_update_envmap();
 
 		if (ui.changed) {
