@@ -265,6 +265,7 @@ function layers_update_fill_layers() {
 		context_raw.fill_type_handle.position = _fill_type;
 		context_raw.pdirty = 0;
 		context_raw.rdirty = 2;
+		make_material_parse_paint_material();
 
 		if (current != null) draw_begin(current);
 		return;
