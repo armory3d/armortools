@@ -63,12 +63,13 @@ function util_particle_init_mesh() {
 		return;
 	}
 
-	let po: mesh_object_t = context_raw.merged_object != null ? context_raw.merged_object : context_raw.paint_object;
-
+	if (context_raw.merged_object == null) {
+		util_mesh_merge();
+	}
+	let po: mesh_object_t = context_raw.merged_object;
 	po.base.transform.scale.x = po.base.parent.transform.scale.x;
 	po.base.transform.scale.y = po.base.parent.transform.scale.y;
 	po.base.transform.scale.z = po.base.parent.transform.scale.z;
-
 	context_raw.paint_body = physics_body_create();
 	context_raw.paint_body.shape = physics_shape_t.MESH;
 	physics_body_init(context_raw.paint_body, po.base);
