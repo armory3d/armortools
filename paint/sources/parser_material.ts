@@ -2022,6 +2022,9 @@ function parser_material_make_bind_tex(tex_name: string, file: string): bind_tex
 
 function parser_material_make_texture(image_node: ui_node_t, tex_name: string): bind_tex_t {
 	let i: i32 = image_node.buttons[0].default_value[0];
+	if (i > 9000) { // 9999 - Texture deleted, use pink now
+		return null;
+	}
 	let filepath: string = parser_material_enum_data(base_enum_texts(image_node.type)[i]);
 	if (filepath == "" || string_index_of(filepath, ".") == -1) {
 		return null;

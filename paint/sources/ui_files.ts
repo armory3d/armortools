@@ -427,7 +427,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 	return handle.text;
 }
 
-function ui_files_make_icon (args: ui_files_make_icon_t) {
+function ui_files_make_icon(args: ui_files_make_icon_t) {
 	let w: i32 = args.w;
 	let image: gpu_texture_t = args.image;
 	let sw: i32 = image.width > image.height ? w : math_floor(1.0 * image.width / image.height * w);
@@ -440,7 +440,19 @@ function ui_files_make_icon (args: ui_files_make_icon_t) {
 	draw_end();
 	map_set(ui_files_icon_map, args.shandle, icon);
 	ui_base_hwnds[tab_area_t.STATUS].redraws = 3;
-	data_delete_image(args.shandle); // The big image is not needed anymore
+
+	let found: bool = false;
+	for (let i: i32 = 0; i < project_assets.length; ++i) {
+		let a: asset_t = project_assets[i];
+		if (a.file == args.shandle) {
+			found = true;
+			break;
+		}
+	}
+
+	if (!found) {
+		data_delete_image(args.shandle); // The big image is not needed anymore
+	}
 }
 
 function ui_files_go_up(handle: ui_handle_t) {
