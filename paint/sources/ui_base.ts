@@ -118,8 +118,6 @@ function ui_base_init() {
 	};
 	ui = ui_create(ops);
 	ui_on_border_hover = ui_base_on_border_hover;
-	ui_on_text_hover = ui_base_on_text_hover;
-	ui_on_deselect_text = ui_base_on_deselect_text;
 	ui_on_tab_drop = ui_base_on_tab_drop;
 	if (UI_SCALE() > 1) {
 		ui_base_set_icon_scale();
@@ -1383,16 +1381,6 @@ function ui_base_on_border_hover(handle: ui_handle_t, side: i32) {
 		ui_base_border_handle = handle;
 		base_is_resizing = true;
 	}
-}
-
-function ui_base_on_text_hover() {
-	iron_mouse_set_cursor(cursor_t.IBEAM);
-}
-
-function ui_base_on_deselect_text() {
-	///if arm_ios
-	keyboard_up_listener(key_code_t.SHIFT);
-	///end
 }
 
 function ui_base_on_tab_drop(to: ui_handle_t, to_position: i32, from: ui_handle_t, from_position: i32) {

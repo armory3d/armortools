@@ -32,8 +32,6 @@ bool ui_is_cut = false;
 bool ui_is_copy = false;
 bool ui_is_paste = false;
 void (*ui_on_border_hover)(ui_handle_t *, int) = NULL; // Mouse over window border, use for resizing
-void (*ui_on_text_hover)(void) = NULL; // Mouse over text input, use to set I-cursor
-void (*ui_on_deselect_text)(void) = NULL; // Text editing finished
 void (*ui_on_tab_drop)(ui_handle_t *, int, ui_handle_t *, int) = NULL; // Tab reorder via drag and drop
 #ifdef WITH_EVAL
 float js_eval(char *str);
@@ -1027,6 +1025,8 @@ void ui_submit_text_edit() {
 	current->text_selected[0] = '\0';
 }
 
+void keyboard_up_listener(int key_code);
+
 void ui_deselect_text(ui_t *ui) {
 	if (ui->text_selected_handle == NULL) {
 		return;
@@ -1040,9 +1040,9 @@ void ui_deselect_text(ui_t *ui) {
 	}
 	iron_keyboard_hide();
 	ui->highlight_anchor = ui->cursor_x;
-	if (ui_on_deselect_text != NULL) {
-		ui_on_deselect_text();
-	}
+	#ifdef IRON_IOS
+	keyboard_up_listener(IRON_KEY_SHIFT);
+	#endif
 }
 
 void ui_remove_char_at(char *str, int at) {
@@ -1976,8 +1976,8 @@ char *ui_text_input(ui_handle_t *handle, char *label, int align, bool editable, 
 	}
 
 	bool hover = ui_get_hover(UI_ELEMENT_H());
-	if (hover && ui_on_text_hover != NULL) {
-		ui_on_text_hover();
+	if (hover) {
+		iron_mouse_set_cursor(IRON_CURSOR_IBEAM);
 	}
 	draw_set_color(hover ? theme->HOVER_COL : theme->BUTTON_COL); // Text bg
 	ui_draw_rect(false, current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w - current->button_offset_y * 2, UI_BUTTON_H());

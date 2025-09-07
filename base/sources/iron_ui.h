@@ -372,8 +372,6 @@ extern bool ui_is_cut;
 extern bool ui_is_copy;
 extern bool ui_is_paste;
 extern void (*ui_on_border_hover)(ui_handle_t *, int);
-extern void (*ui_on_text_hover)(void);
-extern void (*ui_on_deselect_text)(void);
 extern void (*ui_on_tab_drop)(ui_handle_t *, int, ui_handle_t *, int);
 extern const char *ui_theme_keys[];
 extern int ui_theme_keys_count;

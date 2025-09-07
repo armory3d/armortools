@@ -391,11 +391,6 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 	_project_import_mesh_box_clear_layers = clear_layers;
 	_project_import_mesh_box_done = done;
 
-	///if arm_ios
-	// Import immediately while access to resource is unlocked
-	// data_get_blob(path);
-	///end
-
 	ui_box_show_custom(function () {
 		let path: string = _project_import_mesh_box_path;
 		let replace_existing: bool = _project_import_mesh_box_replace_existing;

@@ -116,7 +116,6 @@ function main() {
 	let text_coloring: ui_text_coloring_t = json_parse(sys_buffer_to_string(blob_coloring));
 	ui_text_area_coloring = text_coloring;
 	ui_on_border_hover = on_border_hover;
-	ui_on_text_hover = on_text_hover;
 	ui_text_area_line_numbers = true;
 	ui_text_area_scroll_past_end = true;
 
@@ -374,10 +373,6 @@ function on_border_hover(handle: ui_handle_t, side: i32) {
 	if (ui.input_started) {
 		resizing_sidebar = true;
 	}
-}
-
-function on_text_hover() {
-	iron_mouse_set_cursor(cursor_t.IBEAM);
 }
 
 ////
