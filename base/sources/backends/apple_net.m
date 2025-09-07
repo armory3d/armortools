@@ -6,24 +6,20 @@ static NSURLSession *session = nil;
 
 void iron_http_request(const char *url, const char *path, const char *data, int port, bool secure, int method, const char *header,
                        iron_http_callback_t callback, void *callbackdata) {
+	if (session == nil) {
+		NSURLSessionConfiguration *sessionConfiguration = [NSURLSessionConfiguration defaultSessionConfiguration];
+		session = [NSURLSession sessionWithConfiguration:sessionConfiguration];
+	}
+
 	NSString *urlstring = secure ? @"https://" : @"http://";
 	urlstring = [urlstring stringByAppendingString:[NSString stringWithUTF8String:url]];
 	urlstring = [urlstring stringByAppendingString:@":"];
 	urlstring = [urlstring stringByAppendingString:[[NSNumber numberWithInt:port] stringValue]];
 	urlstring = [urlstring stringByAppendingString:@"/"];
 	urlstring = [urlstring stringByAppendingString:[NSString stringWithUTF8String:path]];
-
 	NSURL *aUrl = [NSURL URLWithString:urlstring];
-
-	if (session == nil) {
-		NSURLSessionConfiguration *sessionConfiguration = [NSURLSessionConfiguration defaultSessionConfiguration];
-		sessionConfiguration.HTTPAdditionalHeaders = @{@"Content-Type" : @"application/json"};
-		session = [NSURLSession sessionWithConfiguration:sessionConfiguration];
-	}
-
 	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:aUrl];
 	if (data != 0) {
-		// printf("Sending %s\n\n", data);
 		NSString *datastring = [NSString stringWithUTF8String:data];
 		request.HTTPBody = [datastring dataUsingEncoding:NSUTF8StringEncoding];
 	}
@@ -48,13 +44,8 @@ void iron_http_request(const char *url, const char *path, const char *data, int 
 		completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
 			NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
 			int statusCode = (int)[httpResponse statusCode];
-
-			NSMutableData *responseData = [[NSMutableData alloc] init];
-			[responseData appendData:data];
-			[responseData appendBytes:"\0" length:1];
-
 			dispatch_async(dispatch_get_main_queue(), ^{
-				callback(error ? 1 : 0, statusCode, (const char *)[responseData bytes], callbackdata);
+				callback(error ? 1 : 0, statusCode, (const char *)[data bytes], callbackdata);
 			});
 		}
 	];
