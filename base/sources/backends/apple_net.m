@@ -2,6 +2,8 @@
 
 #import <Foundation/Foundation.h>
 
+static NSURLSession *session = nil;
+
 void iron_http_request(const char *url, const char *path, const char *data, int port, bool secure, int method, const char *header,
                        iron_http_callback_t callback, void *callbackdata) {
 	NSString *urlstring = secure ? @"https://" : @"http://";
@@ -13,9 +15,12 @@ void iron_http_request(const char *url, const char *path, const char *data, int 
 
 	NSURL *aUrl = [NSURL URLWithString:urlstring];
 
-	NSURLSessionConfiguration *sessionConfiguration = [NSURLSessionConfiguration defaultSessionConfiguration];
-	sessionConfiguration.HTTPAdditionalHeaders = @{@"Content-Type" : @"application/json"};
-	NSURLSession *session = [NSURLSession sessionWithConfiguration:sessionConfiguration];
+	if (session == nil) {
+		NSURLSessionConfiguration *sessionConfiguration = [NSURLSessionConfiguration defaultSessionConfiguration];
+		sessionConfiguration.HTTPAdditionalHeaders = @{@"Content-Type" : @"application/json"};
+		session = [NSURLSession sessionWithConfiguration:sessionConfiguration];
+	}
+
 	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:aUrl];
 	if (data != 0) {
 		// printf("Sending %s\n\n", data);
@@ -38,18 +43,20 @@ void iron_http_request(const char *url, const char *path, const char *data, int 
 		break;
 	}
 
-	NSURLSessionDataTask *dataTask = [session dataTaskWithRequest:request
-	                                            completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-		                                            NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
-		                                            int statusCode = (int)[httpResponse statusCode];
+	NSURLSessionDataTask *dataTask = [
+		session dataTaskWithRequest:request
+		completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+			NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+			int statusCode = (int)[httpResponse statusCode];
 
-		                                            NSMutableData *responseData = [[NSMutableData alloc] init];
-		                                            [responseData appendData:data];
-		                                            [responseData appendBytes:"\0" length:1];
+			NSMutableData *responseData = [[NSMutableData alloc] init];
+			[responseData appendData:data];
+			[responseData appendBytes:"\0" length:1];
 
-													dispatch_async(dispatch_get_main_queue(), ^{
-														callback(error ? 1 : 0, statusCode, (const char *)[responseData bytes], callbackdata);
-													});
-	                                            }];
+			dispatch_async(dispatch_get_main_queue(), ^{
+				callback(error ? 1 : 0, statusCode, (const char *)[responseData bytes], callbackdata);
+			});
+		}
+	];
 	[dataTask resume];
 }
