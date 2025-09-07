@@ -27,8 +27,6 @@ typedef struct iron_file_reader {
 } iron_file_reader_t;
 
 bool iron_file_reader_open(iron_file_reader_t *reader, const char *filepath, int type);
-bool iron_file_reader_from_memory(iron_file_reader_t *reader, void *data, size_t size);
-void iron_file_reader_set_callback(bool (*callback)(iron_file_reader_t *reader, const char *filename, int type));
 bool iron_file_reader_close(iron_file_reader_t *reader);
 size_t iron_file_reader_read(iron_file_reader_t *reader, void *data, size_t size);
 size_t iron_file_reader_size(iron_file_reader_t *reader);
@@ -53,7 +51,6 @@ int8_t iron_read_s8(uint8_t *data);
 
 void iron_internal_set_files_location(char *dir);
 char *iron_internal_get_files_location(void);
-bool iron_internal_file_reader_callback(iron_file_reader_t *reader, const char *filename, int type);
 bool iron_internal_file_reader_open(iron_file_reader_t *reader, const char *filename, int type);
 
 typedef struct iron_file_writer {

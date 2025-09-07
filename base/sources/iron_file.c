@@ -12,37 +12,6 @@
 #include <memory.h>
 #endif
 
-static bool memory_close_callback(iron_file_reader_t *reader) {
-	return true;
-}
-
-static size_t memory_read_callback(iron_file_reader_t *reader, void *data, size_t size) {
-	size_t read_size = reader->size - reader->offset < size ? reader->size - reader->offset : size;
-	memcpy(data, (uint8_t *)reader->data + reader->offset, read_size);
-	reader->offset += read_size;
-	return read_size;
-}
-
-static size_t memory_pos_callback(iron_file_reader_t *reader) {
-	return reader->offset;
-}
-
-static bool memory_seek_callback(iron_file_reader_t *reader, size_t pos) {
-	reader->offset = pos;
-	return true;
-}
-
-bool iron_file_reader_from_memory(iron_file_reader_t *reader, void *data, size_t size) {
-	memset(reader, 0, sizeof(iron_file_reader_t));
-	reader->data = data;
-	reader->size = size;
-	reader->read = memory_read_callback;
-	reader->pos = memory_pos_callback;
-	reader->seek = memory_seek_callback;
-	reader->close = memory_close_callback;
-	return true;
-}
-
 #ifdef IRON_IOS
 const char *iron_get_resource_path(void);
 #endif
@@ -56,7 +25,6 @@ const char *iron_get_resource_path(void);
 #endif
 
 static char *fileslocation = NULL;
-static bool (*file_reader_callback)(iron_file_reader_t *reader, const char *filename, int type) = NULL;
 #ifdef IRON_WINDOWS
 static wchar_t wfilepath[1001];
 #endif
@@ -67,10 +35,6 @@ void iron_internal_set_files_location(char *dir) {
 
 char *iron_internal_get_files_location(void) {
 	return fileslocation;
-}
-
-bool iron_internal_file_reader_callback(iron_file_reader_t *reader, const char *filename, int type) {
-	return file_reader_callback ? file_reader_callback(reader, filename, type) : false;
 }
 
 #ifdef IRON_WINDOWS
@@ -218,14 +182,9 @@ bool iron_internal_file_reader_open(iron_file_reader_t *reader, const char *file
 #if !defined(IRON_ANDROID)
 bool iron_file_reader_open(iron_file_reader_t *reader, const char *filename, int type) {
 	memset(reader, 0, sizeof(*reader));
-	return iron_internal_file_reader_callback(reader, filename, type) ||
-	       iron_internal_file_reader_open(reader, filename, type);
+	return iron_internal_file_reader_open(reader, filename, type);
 }
 #endif
-
-void iron_file_reader_set_callback(bool (*callback)(iron_file_reader_t *reader, const char *filename, int type)) {
-	file_reader_callback = callback;
-}
 
 size_t iron_file_reader_read(iron_file_reader_t *reader, void *data, size_t size) {
 	return reader->read(reader, data, size);

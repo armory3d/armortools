@@ -1184,8 +1184,7 @@ static bool iron_aasset_reader_open(iron_file_reader_t *reader, const char *file
 
 bool iron_file_reader_open(iron_file_reader_t *reader, const char *filename, int type) {
 	memset(reader, 0, sizeof(*reader));
-	return iron_internal_file_reader_callback(reader, filename, type) ||
-	       iron_internal_file_reader_open(reader, filename, type) ||
+	return iron_internal_file_reader_open(reader, filename, type) ||
 	       iron_aasset_reader_open(reader, filename, type);
 }
 
