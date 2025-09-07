@@ -95,7 +95,7 @@ void string_strip_trailing_zeros(char *str) {
 int32_t string_index_of_pos(char *s, char *search, int pos) {
 	char *found = strstr(s + pos, search);
 	if (found != NULL) {
-	    return found - s;
+		return found - s;
 	}
 	return -1;
 }
@@ -107,45 +107,37 @@ int32_t string_index_of(char *s, char *search) {
 int32_t string_last_index_of(char *str, char *search) {
 	char *s = str;
 	char *found = NULL;
-    while (1) {
-        char *p = strstr(s, search);
-        if (p == NULL) {
-            break;
+	while (1) {
+		char *p = strstr(s, search);
+		if (p == NULL) {
+			break;
 		}
-        found = p;
-        s = p + 1;
-    }
-	if (found != NULL) {
-	    return found - str;
+		found = p;
+		s = p + 1;
 	}
-    return -1;
+	if (found != NULL) {
+		return found - str;
+	}
+	return -1;
 }
 
 any_array_t *string_split(char *s, char *sep) {
-	char *r = string_alloc(strlen(s) + 1); // Modified by strtok
 	any_array_t *a = gc_alloc(sizeof(any_array_t));
-
-	strcpy(r, s);
-	int count = 0;
-	char *token = strtok(r, sep);
-	while (token != NULL) {
-		count++;
-		token = strtok(NULL, sep);
+	int sep_len = strlen(sep);
+	char *pos = s;
+	while (true) {
+		char *next = strstr(pos, sep);
+		if (next == NULL) {
+			any_array_push(a, string_copy(pos));
+			break;
+		}
+		int part_len = next - pos;
+		char *part = string_alloc(part_len + 1);
+		strncpy(part, pos, part_len);
+		part[part_len] = '\0';
+		any_array_push(a, part);
+		pos = next + sep_len;
 	}
-	any_array_resize(a, count);
-
-	strcpy(r, s);
-	token = strtok(r, sep);
-	while (token != NULL) {
-		any_array_push(a, string_copy(token)); // Make a copy to keep gc ref
-		// TODO: this works only for single char sep
-		token = strtok(NULL, sep);
-	}
-
-	if (a->length == 0) { // Separator not found
-		any_array_push(a, r);
-	}
-
 	return a;
 }
 
@@ -171,22 +163,22 @@ char *string_array_join(any_array_t *a, char *separator) {
 
 char *string_replace_all(char *s, char *search, char *replace) {
 	char *buffer = string_alloc(1024);
-    char *buffer_pos = buffer;
-    size_t search_len = strlen(search);
-    size_t replace_len = strlen(replace);
-    while (1) {
-        char *p = strstr(s, search);
-        if (p == NULL) {
-            strcpy(buffer_pos, s);
-            break;
-        }
-        memcpy(buffer_pos, s, p - s);
-        buffer_pos += p - s;
-        memcpy(buffer_pos, replace, replace_len);
-        buffer_pos += replace_len;
-        s = p + search_len;
-    }
-    return buffer;
+	char *buffer_pos = buffer;
+	size_t search_len = strlen(search);
+	size_t replace_len = strlen(replace);
+	while (1) {
+		char *p = strstr(s, search);
+		if (p == NULL) {
+			strcpy(buffer_pos, s);
+			break;
+		}
+		memcpy(buffer_pos, s, p - s);
+		buffer_pos += p - s;
+		memcpy(buffer_pos, replace, replace_len);
+		buffer_pos += replace_len;
+		s = p + search_len;
+	}
+	return buffer;
 }
 
 char *substring(char *s, int32_t start, int32_t end) {
