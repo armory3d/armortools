@@ -2632,6 +2632,8 @@ void ui_rgb_to_hsv(float cr, float cg, float cb, float *out) {
 }
 
 float ui_float_input(ui_handle_t *handle, char *label, int align, float precision) {
+	char tmp[256];
+	handle->text = tmp;
 	sprintf(handle->text, "%f", round(handle->value * precision) / precision);
 	char *text = ui_text_input(handle, label, align, true, false);
 	handle->value = atof(text);
