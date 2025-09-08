@@ -79,6 +79,11 @@ function import_arm_run_project(path: string) {
 	let base: string = path_base_dir(path);
 	if (project_raw.envmap != null) {
 		project_raw.envmap = data_is_abs(project_raw.envmap) ? project_raw.envmap : base + project_raw.envmap;
+		///if arm_windows
+		project_raw.envmap = string_replace_all(project_raw.envmap, "/", "\\");
+		///else
+		project_raw.envmap = string_replace_all(project_raw.envmap, "\\", "/");
+		///end
 	}
 	scene_world.strength = project_raw.envmap_strength;
 
