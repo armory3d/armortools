@@ -4681,7 +4681,8 @@ function nodes_material_create_socket(nodes: ui_nodes_t, node: ui_node_t, name: 
 		color: nodes_material_get_socket_color(type),
 		default_value: default_value == null ? nodes_material_get_socket_default_value(type) : default_value,
 		min: min,
-		max: max
+		max: max,
+		precision: 100
 	};
 	return soc;
 }
