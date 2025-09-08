@@ -716,11 +716,21 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 			out_col = "lerp3(" + col1 + ", " + col1 + " + " + col2 + ", " + fac_var + ")";
 		}
 		else if (blend == "OVERLAY") {
-			out_col = "lerp3(" + col1 + ", float3( \
-				" + col1 + ".r < 0.5 ? 2.0 * " + col1 + ".r * " + col2 + ".r : 1.0 - 2.0 * (1.0 - " + col1 + ".r) * (1.0 - " + col2 + ".r), \
-				" + col1 + ".g < 0.5 ? 2.0 * " + col1 + ".g * " + col2 + ".g : 1.0 - 2.0 * (1.0 - " + col1 + ".g) * (1.0 - " + col2 + ".g), \
-				" + col1 + ".b < 0.5 ? 2.0 * " + col1 + ".b * " + col2 + ".b : 1.0 - 2.0 * (1.0 - " + col1 + ".b) * (1.0 - " + col2 + ".b) \
-			), " + fac_var + ")";
+			// out_col = "lerp3(" + col1 + ", float3( \
+			// 	" + col1 + ".r < 0.5 ? 2.0 * " + col1 + ".r * " + col2 + ".r : 1.0 - 2.0 * (1.0 - " + col1 + ".r) * (1.0 - " + col2 + ".r), \
+			// 	" + col1 + ".g < 0.5 ? 2.0 * " + col1 + ".g * " + col2 + ".g : 1.0 - 2.0 * (1.0 - " + col1 + ".g) * (1.0 - " + col2 + ".g), \
+			// 	" + col1 + ".b < 0.5 ? 2.0 * " + col1 + ".b * " + col2 + ".b : 1.0 - 2.0 * (1.0 - " + col1 + ".b) * (1.0 - " + col2 + ".b) \
+			// ), " + fac_var + ")";
+			let res_r: string = parser_material_node_name(node) + "_res_r";
+			let res_g: string = parser_material_node_name(node) + "_res_g";
+			let res_b: string = parser_material_node_name(node) + "_res_b";
+			parser_material_write(parser_material_kong, "var " + res_r + ": float;");
+			parser_material_write(parser_material_kong, "var " + res_g + ": float;");
+			parser_material_write(parser_material_kong, "var " + res_b + ": float;");
+			parser_material_write(parser_material_kong, "if (" + col1 + ".r < 0.5) { " + res_r + " = 2.0 * " + col1 + ".r * " + col2 + ".r; } else { " + res_r + " = 1.0 - 2.0 * (1.0 - " + col1 + ".r) * (1.0 - " + col2 + ".r); }");
+			parser_material_write(parser_material_kong, "if (" + col1 + ".g < 0.5) { " + res_g + " = 2.0 * " + col1 + ".g * " + col2 + ".g; } else { " + res_g + " = 1.0 - 2.0 * (1.0 - " + col1 + ".g) * (1.0 - " + col2 + ".g); }");
+			parser_material_write(parser_material_kong, "if (" + col1 + ".b < 0.5) { " + res_b + " = 2.0 * " + col1 + ".b * " + col2 + ".b; } else { " + res_b + " = 1.0 - 2.0 * (1.0 - " + col1 + ".b) * (1.0 - " + col2 + ".b); }");
+			out_col = "lerp3(" + col1 + ", float3(" + res_r + ", " + res_g + ", " + res_b + "), " + fac_var + ")";
 		}
 		else if (blend == "SOFT_LIGHT") {
 			out_col = "((1.0 - " + fac_var + ") * " + col1 + " + " + fac_var + " * ((float3(1.0, 1.0, 1.0) - " + col1 + ") * " + col2 + " * " + col1 + " + " + col1 + " * (float3(1.0, 1.0, 1.0) - (float3(1.0, 1.0, 1.0) - " + col2 + ") * (float3(1.0, 1.0, 1.0) - " + col1 + "))))";
@@ -737,7 +747,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		else if (blend == "DIVIDE") {
 			let eps: f32 = 0.000001;
 			col2 = "max3(" + col2 + ", float3(" + eps + ", " + eps + ", " + eps + "))";
-			let v3: string = parser_material_to_vec3("(1.0 - " + fac_var + ") * " + col1 + " + " + fac_var + " * " + col1 + " / " + col2);
+			let v3: string = "(float3(1.0, 1.0, 1.0) - float3(" + fac_var + ", " + fac_var + ", " + fac_var + ")) * " + col1 + " + float3(" + fac_var + ", " + fac_var + ", " + fac_var + ") * " + col1 + " / " + col2;
 			out_col = "(" + v3 + ")";
 		}
 		else if (blend == "HUE") {

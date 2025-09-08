@@ -242,7 +242,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 						node_shader_write_frag(kong, "{"); // Group mask is sampled across multiple layers
 						node_shader_write_frag(kong, "var texpaint_mask_sample" + m.id + ": float = sample_lod(texpaint" + m.id + ", sampler_linear, tex_coord, 0.0).r;");
 						let opac: f32 = slot_layer_get_opacity(m);
-						let mask: string = make_material_blend_mode_mask(m.blending, texpaint_mask, "texpaint_mask_sample" + m.id, "float(" + opac + ")");
+						let mask: string = make_material_blend_mode_mask(kong, m.blending, texpaint_mask, "texpaint_mask_sample" + m.id, "float(" + opac + ")");
 						node_shader_write_frag(kong, texpaint_mask + " = " + mask + ";");
 						node_shader_write_frag(kong, "}");
 					}
@@ -503,7 +503,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 					}
 					node_shader_write_frag(kong, "var mask_sample" + m.id + ": float = sample_lod(texpaint_view_mask" + m.id + ", sampler_linear, tex_coord, 0.0).r;");
 					let opac: f32 = slot_layer_get_opacity(m);
-					let mask: string = make_material_blend_mode_mask(m.blending, "mask_view", "mask_sample" + m.id, "float(" + opac + ")");
+					let mask: string = make_material_blend_mode_mask(kong, m.blending, "mask_view", "mask_sample" + m.id, "float(" + opac + ")");
 					node_shader_write_frag(kong, "mask_view = " + mask + ";");
 				}
 			}

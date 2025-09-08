@@ -407,11 +407,21 @@ function make_material_blend_mode(kong: node_shader_t, blending: i32, cola: stri
 		return "lerp3(" + cola + ", " + cola + " + " + colb + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.OVERLAY) {
-		return "lerp3(" + cola + ", float3( \
-			" + cola + ".r < 0.5 ? 2.0 * " + cola + ".r * " + colb + ".r : 1.0 - 2.0 * (1.0 - " + cola + ".r) * (1.0 - " + colb + ".r), \
-			" + cola + ".g < 0.5 ? 2.0 * " + cola + ".g * " + colb + ".g : 1.0 - 2.0 * (1.0 - " + cola + ".g) * (1.0 - " + colb + ".g), \
-			" + cola + ".b < 0.5 ? 2.0 * " + cola + ".b * " + colb + ".b : 1.0 - 2.0 * (1.0 - " + cola + ".b) * (1.0 - " + colb + ".b) \
-		), " + opac + ")";
+		// return "lerp3(" + cola + ", float3( \
+		// 	" + cola + ".r < 0.5 ? 2.0 * " + cola + ".r * " + colb + ".r : 1.0 - 2.0 * (1.0 - " + cola + ".r) * (1.0 - " + colb + ".r), \
+		// 	" + cola + ".g < 0.5 ? 2.0 * " + cola + ".g * " + colb + ".g : 1.0 - 2.0 * (1.0 - " + cola + ".g) * (1.0 - " + colb + ".g), \
+		// 	" + cola + ".b < 0.5 ? 2.0 * " + cola + ".b * " + colb + ".b : 1.0 - 2.0 * (1.0 - " + cola + ".b) * (1.0 - " + colb + ".b) \
+		// ), " + opac + ")";
+		let res_r: string = string_replace_all(cola, ".", "_") + "_res_r";
+		let res_g: string = string_replace_all(cola, ".", "_") + "_res_g";
+		let res_b: string = string_replace_all(cola, ".", "_") + "_res_b";
+		node_shader_write_frag(kong, "var " + res_r + ": float;");
+		node_shader_write_frag(kong, "var " + res_g + ": float;");
+		node_shader_write_frag(kong, "var " + res_b + ": float;");
+		node_shader_write_frag(kong, "if (" + cola + ".r < 0.5) { " + res_r + " = 2.0 * " + cola + ".r * " + colb + ".r; } else { " + res_r + " = 1.0 - 2.0 * (1.0 - " + cola + ".r) * (1.0 - " + colb + ".r); }");
+		node_shader_write_frag(kong, "if (" + cola + ".g < 0.5) { " + res_g + " = 2.0 * " + cola + ".g * " + colb + ".g; } else { " + res_g + " = 1.0 - 2.0 * (1.0 - " + cola + ".g) * (1.0 - " + colb + ".g); }");
+		node_shader_write_frag(kong, "if (" + cola + ".b < 0.5) { " + res_b + " = 2.0 * " + cola + ".b * " + colb + ".b; } else { " + res_b + " = 1.0 - 2.0 * (1.0 - " + cola + ".b) * (1.0 - " + colb + ".b); }");
+		return "lerp3(" + cola + ", float3(" + res_r + ", " + res_g + ", " + res_b + "), " + opac + ")";
 	}
 	else if (blending == blend_type_t.SOFT_LIGHT) {
 		return "((1.0 - " + opac + ") * " + cola + " + " + opac + " * ((float3(1.0, 1.0, 1.0) - " + cola + ") * " + colb + " * " + cola + " + " + cola + " * (float3(1.0, 1.0, 1.0) - (float3(1.0, 1.0, 1.0) - " + colb + ") * (float3(1.0, 1.0, 1.0) - " + cola + "))))";
@@ -446,7 +456,7 @@ function make_material_blend_mode(kong: node_shader_t, blending: i32, cola: stri
 	}
 }
 
-function make_material_blend_mode_mask(blending: i32, cola: string, colb: string, opac: string): string {
+function make_material_blend_mode_mask(kong: node_shader_t, blending: i32, cola: string, colb: string, opac: string): string {
 	if (blending == blend_type_t.MIX) {
 		return "lerp(" + cola + ", " + colb + ", " + opac + ")";
 	}
@@ -472,7 +482,11 @@ function make_material_blend_mode_mask(blending: i32, cola: string, colb: string
 		return "lerp(" + cola + ", " + cola + " + " + colb + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.OVERLAY) {
-		return "lerp(" + cola + ", " + cola + " < 0.5 ? 2.0 * " + cola + " * " + colb + " : 1.0 - 2.0 * (1.0 - " + cola + ") * (1.0 - " + colb + "), " + opac + ")";
+		// return "lerp(" + cola + ", " + cola + " < 0.5 ? 2.0 * " + cola + " * " + colb + " : 1.0 - 2.0 * (1.0 - " + cola + ") * (1.0 - " + colb + "), " + opac + ")";
+		let res: string = string_replace_all(cola, ".", "_") + "_res";
+		node_shader_write_frag(kong, "var " + res + ": float;");
+		node_shader_write_frag(kong, "if (" + cola + " < 0.5) { " + res + " = 2.0 * " + cola + " * " + colb + "; } else { " + res + " = 1.0 - 2.0 * (1.0 - " + cola + ") * (1.0 - " + colb + "); }");
+		return "lerp(" + cola + ", " + res + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.SOFT_LIGHT) {
 		return "((1.0 - " + opac + ") * " + cola + " + " + opac + " * ((1.0 - " + cola + ") * " + colb + " * " + cola + " + " + cola + " * (1.0 - (1.0 - " + colb + ") * (1.0 - " + cola + "))))";
