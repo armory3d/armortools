@@ -29,6 +29,8 @@ static size_t bytes_length = 0;
 static f32_array_t *pos_first;
 static f32_array_t *uv_first;
 static f32_array_t *nor_first;
+void console_info(char *s);
+static bool check_uvmap = true;
 
 static int read_int() {
 	int bi = 0;
@@ -234,6 +236,7 @@ raw_mesh_t *obj_parse(buffer_t *file_bytes, char split_code, uint64_t start_pos,
 	bool reading_faces = false;
 	bool reading_object = false;
 	bool full_attrib = false;
+	check_uvmap = true;
 
 	if (start_pos == 0) {
 		vind_off = tind_off = nind_off = 0;
@@ -319,6 +322,10 @@ raw_mesh_t *obj_parse(buffer_t *file_bytes, char split_code, uint64_t start_pos,
 						i32_array_push(&uv_indices, ua[0]);
 						i32_array_push(&uv_indices, ua[i - 1]);
 						i32_array_push(&uv_indices, ua[i]);
+					}
+					if (check_uvmap && ua[0] == 0 && ua[1] == 0 && ua[2] == 0) { // Blender points faces with no UV to 0.0 (vt index 0)
+						check_uvmap = false;
+						console_info("Warning: Mesh is not fully UV unwrapped");
 					}
 				}
 				if (nor_temp.length > 0) {
@@ -619,6 +626,7 @@ raw_mesh_t *obj_parse(buffer_t *file_bytes, char split_code, uint64_t start_pos,
 			part->texa->buffer[i * 2 + 1] = (int)((1.0 - uvy) * 32767);
 		}
 	}
+
 	bytes = NULL;
 	if (!part->has_next) {
 		pos_first = nor_first = uv_first = NULL;
