@@ -192,7 +192,7 @@ int last_window_width = 0;
 int last_window_height = 0;
 #endif
 
-char temp_string[1024 * 32];
+char temp_string[1024 * 128];
 char temp_string_vs[1024 * 128];
 char temp_string_fs[1024 * 128];
 #ifdef IRON_WINDOWS
