@@ -2565,9 +2565,6 @@ void ui_theme_default(ui_theme_t *t) {
 }
 
 #define MATH_PI 3.14159265358979323846
-
-static char data_path[128] = "";
-static char last_path[512];
 static ui_handle_t *wheel_selected_handle = NULL;
 static ui_handle_t *gradient_selected_handle = NULL;
 static ui_handle_t radio_handle;
@@ -2639,93 +2636,6 @@ float ui_float_input(ui_handle_t *handle, char *label, int align, float precisio
 	char *text = ui_text_input(handle, label, align, true, false);
 	handle->value = atof(text);
 	return handle->value;
-}
-
-void ui_init_path(ui_handle_t *handle, const char *system_id) {
-	strcpy(handle->text, strcmp(system_id, "Windows") == 0 ? "C:\\Users" : "/");
-	// %HOMEDRIVE% + %HomePath%
-	// ~
-}
-
-char *ui_file_browser(ui_handle_t *handle, bool folders_only) {
-	ui_t *current = ui_get_current();
-	const char *sep = "/";
-
-	char cmd[64];
-	strcpy(cmd, "ls ");
-	const char *system_id = iron_system_id();
-	if (strcmp(system_id, "Windows") == 0) {
-		strcpy(cmd, "dir /b ");
-		if (folders_only) {
-			strcat(cmd, "/ad ");
-		}
-		sep = "\\";
-		handle->text = string_replace_all(handle->text, "\\\\", "\\");
-		handle->text = string_replace_all(handle->text, "\r", "");
-	}
-	if (handle->text[0] == '\0') {
-		ui_init_path(handle, system_id);
-	}
-
-	char save[256];
-	strcpy(save, iron_internal_get_files_location());
-	strcat(save, sep);
-	strcat(save, data_path);
-	strcat(save, "dir.txt");
-	if (strcmp(handle->text, last_path) != 0) {
-		char str[512];
-		strcpy(str, cmd);
-		strcat(str, "\"");
-		strcat(str, handle->text);
-		strcat(str, "\" > \"");
-		strcat(str, save);
-		strcat(str, "\"");
-	}
-	strcpy(last_path, handle->text);
-
-	iron_file_reader_t reader;
-	if (!iron_file_reader_open(&reader, save, IRON_FILE_TYPE_ASSET)) {
-		return NULL;
-	}
-	int reader_size = (int)iron_file_reader_size(&reader);
-
-	char str[2048]; // reader_size
-	iron_file_reader_read(&reader, str, reader_size);
-	iron_file_reader_close(&reader);
-
-	// Up directory
-	int i1 = strstr(handle->text, "/") - handle->text;
-	int i2 = strstr(handle->text, "\\") - handle->text;
-	bool nested =
-		(i1 > -1 && strlen(handle->text) - 1 > i1) ||
-		(i2 > -1 && strlen(handle->text) - 1 > i2);
-	handle->changed = false;
-	if (nested && ui_button("..", UI_ALIGN_LEFT, "")) {
-		handle->changed = current->changed = true;
-		handle->text[strrchr(handle->text, sep[0]) - handle->text] = 0;
-		// Drive root
-		if (strlen(handle->text) == 2 && handle->text[1] == ':') {
-			strcat(handle->text, sep);
-		}
-	}
-
-	// Directory contents
-	int count = ui_line_count(str);
-	for (int i = 0; i < count; ++i) {
-		char *f = ui_extract_line(str, i);
-		if (f[0] == '\0' || f[0] == '.') {
-			continue; // Skip hidden
-		}
-		if (ui_button(f, UI_ALIGN_LEFT, "")) {
-			handle->changed = current->changed = true;
-			if (handle->text[strlen(handle->text) - 1] != sep[0]) {
-				strcat(handle->text, sep);
-			}
-			strcat(handle->text, f);
-		}
-	}
-
-	return handle->text;
 }
 
 int ui_inline_radio(ui_handle_t *handle, char_ptr_array_t *texts, int align) {

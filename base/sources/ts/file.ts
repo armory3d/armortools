@@ -136,11 +136,6 @@ function file_download_bytes(url: string, done: (url: string, ab: buffer_t)=>voi
 }
 
 function file_cache_cloud(path: string, done: (s: string)=>void) {
-	///if arm_ios
-	let path2: string = string_replace_all(path, "/", "_"); // Cache everything into root folder
-	///else
-	let path2: string = path;
-	///end
 	let dest: string;
 	if (path_is_protected()) {
 		dest = iron_internal_save_path();
@@ -148,7 +143,7 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 	else {
 		dest = iron_get_files_location() + path_sep;
 	}
-	dest += path2;
+	dest += path;
 
 	if (iron_file_exists(dest)) {
 		///if (arm_macos || arm_ios)

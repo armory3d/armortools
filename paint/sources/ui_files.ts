@@ -175,7 +175,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 			let generic: bool = true;
 			let icon: gpu_texture_t = null;
 
-			if (is_cloud && f != ".." && !ui_files_offline) {
+			if (is_cloud && !ui_files_offline) {
 				if (ui_files_icon_map == null) {
 					ui_files_icon_map = map_create();
 				}
@@ -194,14 +194,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 							map_set(ui_files_icon_map, handle.text + path_sep + f, empty);
 
 							_ui_files_file_browser_handle = handle;
-
-							///if arm_ios
-							let icon_file_full: string = handle.text + path_sep + icon_file;
-							icon_file_full = string_replace_all(icon_file_full, "/", "_");
-							map_set(ui_files_icon_file_map, icon_file_full, f);
-							///else
 							map_set(ui_files_icon_file_map, icon_file, f);
-							///end
 
 							file_cache_cloud(handle.text + path_sep + icon_file, function (abs: string) {
 								if (abs != null) {
@@ -345,7 +338,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 			}
 
 			if (state == ui_state_t.STARTED) {
-				if (f != ".." && drag_files) {
+				if (drag_files) {
 					base_drag_off_x = -(mouse_x - uix - ui._window_x - 3);
 					base_drag_off_y = -(mouse_y - uiy - ui._window_y + 1);
 					base_drag_file = handle.text;
@@ -367,19 +360,10 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 					base_drag_file_icon = null;
 					base_is_dragging = false;
 					handle.changed = ui.changed = true;
-					if (f == "..") { // Up
-						handle.text = substring(handle.text, 0, string_last_index_of(handle.text, path_sep));
-						// Drive root
-						if (handle.text.length == 2 && char_at(handle.text, 1) == ":") {
-							handle.text += path_sep;
-						}
+					if (char_at(handle.text, handle.text.length - 1) != path_sep) {
+						handle.text += path_sep;
 					}
-					else {
-						if (char_at(handle.text, handle.text.length - 1) != path_sep) {
-							handle.text += path_sep;
-						}
-						handle.text += f;
-					}
+					handle.text += f;
 					ui_files_selected = -1;
 				}
 				context_raw.select_time = sys_time();

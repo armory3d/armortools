@@ -377,7 +377,6 @@ extern const char *ui_theme_keys[];
 extern int ui_theme_keys_count;
 
 float ui_float_input(ui_handle_t *handle, char *label, int align, float precision);
-char *ui_file_browser(ui_handle_t *handle, bool folders_only);
 int ui_inline_radio(ui_handle_t *handle, char_ptr_array_t *texts, int align);
 int ui_color_wheel(ui_handle_t *handle, bool alpha, float w, float h, bool color_preview, void (*picker)(void *), void *data);
 char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, bool word_wrap);
