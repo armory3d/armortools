@@ -336,6 +336,7 @@ declare function iron_delay_idle_sleep(): void;
 declare function iron_open_dialog(filter_list: string, default_path: string, open_multiple: bool): string[];
 declare function iron_save_dialog(filter_list: string, default_path: string): string;
 declare function iron_read_directory(path: string): string;
+declare function iron_create_directory(path: string): void;
 declare function iron_file_exists(path: string): bool;
 declare function iron_delete_file(path: string): void;
 declare function iron_inflate(bytes: buffer_t, raw: bool): buffer_t;

@@ -21,10 +21,8 @@ let _file_download_bytes_map: map_t<string, file_download_bytes_data_t> = map_cr
 let _file_cache_cloud_map: map_t<string, file_cache_cloud_data_t> = map_create();
 
 ///if arm_windows
-let file_cmd_mkdir: string = "mkdir";
 let file_cmd_copy: string = "copy";
 ///else
-let file_cmd_mkdir: string = "mkdir -p";
 let file_cmd_copy: string = "cp";
 ///end
 
@@ -79,7 +77,7 @@ function file_read_directory(path: string): string[] {
 }
 
 function file_create_directory(path: string) {
-	iron_sys_command(file_cmd_mkdir + " \"" + path + "\"");
+	iron_create_directory(path);
 }
 
 function file_copy(src_path: string, dst_path: string) {

@@ -1546,6 +1546,24 @@ char *iron_read_directory(char *path) {
 	return files;
 }
 
+void iron_create_directory(char *path) {
+	#ifdef IRON_IOS
+	IOSCreateDirectory(path);
+	#elif defined(IRON_WINDOWS)
+	char cmd[1024];
+	strcpy(cmd, "mkdir \"");
+	strcat(cmd, path);
+	strcat(cmd, "\"");
+	iron_sys_command(cmd);
+	#else
+	char cmd[1024];
+	strcpy(cmd, "mkdir -p \"");
+	strcat(cmd, path);
+	strcat(cmd, "\"");
+	iron_sys_command(cmd);
+	#endif
+}
+
 bool iron_file_exists(char *path) {
 	iron_file_reader_t reader;
 	if (iron_file_reader_open(&reader, path, IRON_FILE_TYPE_ASSET)) {

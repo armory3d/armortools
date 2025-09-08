@@ -27,3 +27,9 @@ void IOSDeleteFile(const char *path) {
 	NSString *nspath = [NSString stringWithUTF8String:path];
 	[[NSFileManager defaultManager] removeItemAtPath:nspath error:&error];
 }
+
+void IOSCreateDirectory(const char *path) {
+	NSError *error = nil;
+	NSString *nspath = [NSString stringWithUTF8String:path];
+	[[NSFileManager defaultManager] createDirectoryAtPath:nspath withIntermediateDirectories:YES attributes:nil error:&error];
+}
