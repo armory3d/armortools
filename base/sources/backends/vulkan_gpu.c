@@ -1416,6 +1416,11 @@ static VkShaderModule create_shader_module(const void *code, size_t size) {
 }
 
 void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
+	if (pipeline->vertex_shader->impl.length == 0 || pipeline->fragment_shader->impl.length == 0) {
+		// Shader compilation error
+		return;
+	}
+
 	VkPipelineLayoutCreateInfo pipeline_layout_create_info = {
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
 		.setLayoutCount = 1,
