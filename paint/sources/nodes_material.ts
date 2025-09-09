@@ -4385,10 +4385,11 @@ function nodes_material_vector_curves_button(node_id: i32) {
 	let row: f32[] = [1 / 5, 1 / 5, 3 / 5];
 	ui_row(row);
 	if (ui_button("+")) {
-		val[axis * 32 + num * 2 + 0] = 0.0;
-		val[axis * 32 + num * 2 + 1] = 0.0;
-		num++;
-		val[96 + axis] = num;
+		// TODO:
+		// val[axis * 32 + num * 2 + 0] = 0.0;
+		// val[axis * 32 + num * 2 + 1] = 0.0;
+		// num++;
+		// val[96 + axis] = num;
 	}
 	if (ui_button("-")) {
 		if (num > 1) {
@@ -4446,12 +4447,13 @@ function nodes_material_color_ramp_button(node_id: i32) {
 	let row: f32[] = [1 / 4, 1 / 4, 2 / 4];
 	ui_row(row);
 	if (ui_button("+")) {
-		array_push(vals, vals[vals.length - 5]); // r
-		array_push(vals, vals[vals.length - 5]); // g
-		array_push(vals, vals[vals.length - 5]); // b
-		array_push(vals, vals[vals.length - 5]); // a
-		array_push(vals, 1.0); // pos
-		ihandle.value += 1;
+		// TODO:
+		// array_push(vals, vals[vals.length - 5]); // r
+		// array_push(vals, vals[vals.length - 5]); // g
+		// array_push(vals, vals[vals.length - 5]); // b
+		// array_push(vals, vals[vals.length - 5]); // a
+		// array_push(vals, 1.0); // pos
+		// ihandle.value += 1;
 	}
 	if (ui_button("-") && vals.length > 5) {
 		array_pop(vals);
