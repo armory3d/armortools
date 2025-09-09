@@ -1150,7 +1150,12 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 			return "(" + vec1 + " * " + vec2 + ")";
 		}
 		else if (op == "DIVIDE") {
-			return "float3(" + vec1 + ".x / (" + vec2 + ".x == 0 ? 0.000001 : " + vec2 + ".x), " + vec1 + ".y / (" + vec2 + ".y == 0 ? 0.000001 : " + vec2 + ".y), " + vec1 + ".z / (" + vec2 + ".z == 0 ? 0.000001 : " + vec2 + ".z))";
+			let store: string = parser_material_store_var_name(node) + "_vec2";
+			parser_material_write(parser_material_kong, "var " + store + ": float3 = " + vec2 + ";");
+			parser_material_write(parser_material_kong, "if (" + store + ".x == 0.0) { " + store + ".x = 0.000001; }");
+			parser_material_write(parser_material_kong, "if (" + store + ".y == 0.0) { " + store + ".y = 0.000001; }");
+			parser_material_write(parser_material_kong, "if (" + store + ".z == 0.0) { " + store + ".z = 0.000001; }");
+			return "(" + vec1 + " / " + vec2 + ")";
 		}
 		else if (op == "PROJECT") {
 			return "(dot(" + vec1 + ", " + vec2 + ") / dot(" + vec2 + ", " + vec2 + ") * " + vec2 + ")";
@@ -1186,13 +1191,13 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 			return "(floor3(" + vec1 + " / " + vec2 + ") * " + vec2 + ")";
 		}
 		else if (op == "SINE") {
-			return "sin(" + vec1 + ")";
+			return "float3(sin(" + vec1 + ".x), sin(" + vec1 + ".y), sin(" + vec1 + ".z))";
 		}
 		else if (op == "COSINE") {
-			return "cos(" + vec1 + ")";
+			return "float3(cos(" + vec1 + ".x), cos(" + vec1 + ".y), cos(" + vec1 + ".z))";
 		}
 		else if (op == "TANGENT") {
-			return "tan(" + vec1 + ")";
+			return "float3(tan(" + vec1 + ".x), tan(" + vec1 + ".y), tan(" + vec1 + ".z))";
 		}
 	}
 	else if (node.type == "Displacement") {
@@ -1561,8 +1566,10 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 			out_val = "(" + val1 + " * " + val2 + ")";
 		}
 		else if (op == "DIVIDE") {
-			val2 = "(" + val2 + " == 0.0 ? " + parser_material_eps + " : " + val2 + ")";
-			out_val = "(" + val1 + " / " + val2 + ")";
+			let store: string = parser_material_store_var_name(node) + "_divide";
+			parser_material_write(parser_material_kong, "var " + store + ": float = " + val2 + ";");
+			parser_material_write(parser_material_kong, "if (" + store + " == 0.0) { " + store + " = " + parser_material_eps + "; }");
+			out_val = "(" + val1 + " / " + store + ")";
 		}
 		else if (op == "POWER") {
 			out_val = "pow(" + val1 + ", " + val2 + ")";
@@ -1619,7 +1626,10 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 			out_val = "(" + val1 + " % " + val2 + ")";
 		}
 		else if (op == "PING-PONG") {
-			out_val = "((" + val2 + " != 0.0) ? abs(frac((" + val1 + " - " + val2 + ") / (" + val2 + " * 2.0)) * " + val2 + " * 2.0 - " + val2 + ") : 0.0)";
+			let store: string = parser_material_store_var_name(node) + "_pingpong";
+			parser_material_write(parser_material_kong, "var " + store + ": float = 0.0;");
+			parser_material_write(parser_material_kong, "if (" + val2 + " != 0.0) { " + store + " = abs(frac((" + val1 + " - " + val2 + ") / (" + val2 + " * 2.0)) * " + val2 + " * 2.0 - " + val2 + "); }");
+			out_val = store;
 		}
 		else if (op == "SINE") {
 			out_val = "sin(" + val1 + ")";

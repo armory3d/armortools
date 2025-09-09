@@ -853,6 +853,16 @@ void functions_init(void) {
 	////
 	// add_func_float3_float3("abs");
 	add_func_float_float("abs");
+	add_func_float_float("tan");
+	add_func_float_float("log");
+	add_func_float_float("exp");
+	add_func_float_float("sign");
+	add_func_float_float("trunc");
+	add_func_float_float("sinh");
+	add_func_float_float("cosh");
+	add_func_float_float("tanh");
+	add_func_float_float("radians");
+	add_func_float_float("degrees");
 	////
 	add_func_float_float_float("floor");
 	add_func_float_float_float("ceil");
