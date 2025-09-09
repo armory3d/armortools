@@ -19,7 +19,6 @@ static IDXGISwapChain *window_swapchain;
 static ID3D12RootSignature *root_signature = NULL;
 static ID3D12CommandAllocator *command_allocator;
 static ID3D12GraphicsCommandList *command_list;
-static gpu_pipeline_t *current_pipeline;
 static D3D12_VIEWPORT current_viewport;
 static D3D12_RECT current_scissor;
 static gpu_buffer_t *current_vb;
@@ -27,10 +26,6 @@ static gpu_buffer_t *current_ib;
 static D3D12_CPU_DESCRIPTOR_HANDLE target_descriptors[GPU_MAX_TEXTURES];
 static D3D12_CPU_DESCRIPTOR_HANDLE depth_handle;
 static D3D12_CPU_DESCRIPTOR_HANDLE *current_depth_handle;
-static gpu_texture_t *current_textures[GPU_MAX_TEXTURES] = {
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
-};
 static bool window_vsync;
 static ID3D12DescriptorHeap *sampler_heap;
 static ID3D12DescriptorHeap *srv_heap;
@@ -423,7 +418,7 @@ void gpu_execute_and_wait() {
 
 	if (gpu_in_use) {
 		command_list->lpVtbl->OMSetRenderTargets(command_list, current_render_targets_count, &target_descriptors[0], false, current_depth_handle);
-		command_list->lpVtbl->SetPipelineState(command_list, current_pipeline->impl.pso);
+		command_list->lpVtbl->SetPipelineState(command_list, current_pipeline->impl.pipeline);
 		command_list->lpVtbl->SetGraphicsRootSignature(command_list, root_signature);
 		command_list->lpVtbl->IASetVertexBuffers(command_list, 0, 1, (D3D12_VERTEX_BUFFER_VIEW *)&current_vb->impl.vertex_buffer_view);
 		command_list->lpVtbl->IASetIndexBuffer(command_list, (D3D12_INDEX_BUFFER_VIEW *)&current_ib->impl.index_buffer_view);
@@ -561,13 +556,9 @@ void gpu_disable_scissor() {
 	command_list->lpVtbl->RSSetScissorRects(command_list, 1, &current_scissor);
 }
 
-void gpu_set_pipeline(gpu_pipeline_t *pipeline) {
-	current_pipeline = pipeline;
-	command_list->lpVtbl->SetPipelineState(command_list, pipeline->impl.pso);
+void gpu_set_pipeline_internal(gpu_pipeline_t *pipeline) {
+	command_list->lpVtbl->SetPipelineState(command_list, pipeline->impl.pipeline);
 	command_list->lpVtbl->SetGraphicsRootSignature(command_list, root_signature);
-	for (int i = 0; i < GPU_MAX_TEXTURES; ++i) {
-		current_textures[i] = NULL;
-	}
 }
 
 void gpu_set_vertex_buffer(gpu_buffer_t *buffer) {
@@ -705,9 +696,9 @@ void gpu_use_linear_sampling(bool b) {
 }
 
 void gpu_pipeline_destroy_internal(gpu_pipeline_t *pipe) {
-	if (pipe->impl.pso != NULL) {
-		pipe->impl.pso->lpVtbl->Release(pipe->impl.pso);
-		pipe->impl.pso = NULL;
+	if (pipe->impl.pipeline != NULL) {
+		pipe->impl.pipeline->lpVtbl->Release(pipe->impl.pipeline);
+		pipe->impl.pipeline = NULL;
 	}
 }
 
@@ -813,7 +804,7 @@ void gpu_pipeline_compile(gpu_pipeline_t *pipe) {
 			(pipe->color_write_mask_alpha[i] ? D3D12_COLOR_WRITE_ENABLE_ALPHA : 0);
 	}
 
-	device->lpVtbl->CreateGraphicsPipelineState(device, &psoDesc, &IID_ID3D12PipelineState, &pipe->impl.pso);
+	device->lpVtbl->CreateGraphicsPipelineState(device, &psoDesc, &IID_ID3D12PipelineState, &pipe->impl.pipeline);
 }
 
 void gpu_shader_init(gpu_shader_t *shader, const void *_data, size_t length, gpu_shader_type_t type) {

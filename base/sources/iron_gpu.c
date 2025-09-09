@@ -1,4 +1,5 @@
 #include "iron_gpu.h"
+#include <string.h>
 #include <iron_system.h>
 
 static gpu_buffer_t constant_buffer;
@@ -14,9 +15,14 @@ int constant_buffer_index = 0;
 int draw_calls = 0;
 int draw_calls_last = 0;
 bool gpu_in_use = false;
+gpu_texture_t *current_textures[GPU_MAX_TEXTURES] = {
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+};
 gpu_texture_t *current_render_targets[8] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 int current_render_targets_count = 0;
 gpu_texture_t *current_depth_buffer = NULL;
+gpu_pipeline_t *current_pipeline = NULL;
 gpu_texture_t framebuffers[GPU_FRAMEBUFFER_COUNT];
 gpu_texture_t framebuffer_depth;
 int framebuffer_index = 0;
@@ -263,6 +269,7 @@ void gpu_pipeline_init(gpu_pipeline_t *pipe) {
 	}
 	pipe->color_attachment_count = 1;
 	pipe->depth_attachment_bits = 0;
+	memset(&pipe->impl, 0, sizeof(gpu_pipeline_impl_t));
 }
 
 void gpu_create_framebuffers(int depth_buffer_bits) {
@@ -284,6 +291,17 @@ void gpu_texture_destroy(gpu_texture_t *texture) {
 		gpu_execute_and_wait();
 		gpu_cleanup();
 	}
+}
+
+void gpu_set_pipeline(gpu_pipeline_t *pipeline) {
+	for (int i = 0; i < GPU_MAX_TEXTURES; ++i) {
+		current_textures[i] = NULL;
+	}
+	if (pipeline->impl.pipeline == NULL) {
+		return;
+	}
+	current_pipeline = pipeline;
+	gpu_set_pipeline_internal(pipeline);
 }
 
 void gpu_pipeline_destroy(gpu_pipeline_t *pipeline) {

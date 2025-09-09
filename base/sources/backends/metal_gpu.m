@@ -22,15 +22,10 @@ static id<MTLSamplerState> point_sampler;
 static int argument_buffer_step;
 static gpu_buffer_t *current_vb;
 static gpu_buffer_t *current_ib;
-static gpu_pipeline_t *current_pipeline;
 static MTLViewport current_viewport;
 static MTLScissorRect current_scissor;
 static MTLRenderPassDescriptor *render_pass_desc;
 static bool resized = false;
-static gpu_texture_t *current_textures[GPU_MAX_TEXTURES] = {
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
-};
 static void *readback_buffer;
 static int readback_buffer_size = 0;
 static bool linear_sampling = true;
@@ -250,9 +245,9 @@ void gpu_execute_and_wait() {
 		}
 		render_pass_desc.depthAttachment.loadAction = MTLLoadActionLoad;
 		command_encoder = [command_buffer renderCommandEncoderWithDescriptor:render_pass_desc];
-		id<MTLRenderPipelineState> pipe = (__bridge id<MTLRenderPipelineState>)current_pipeline->impl._pipeline;
+		id<MTLRenderPipelineState> pipe = (__bridge id<MTLRenderPipelineState>)current_pipeline->impl.pipeline;
 		[command_encoder setRenderPipelineState:pipe];
-		id<MTLDepthStencilState> depth_state = (__bridge id<MTLDepthStencilState>)current_pipeline->impl._depth;
+		id<MTLDepthStencilState> depth_state = (__bridge id<MTLDepthStencilState>)current_pipeline->impl.depth;
 		[command_encoder setDepthStencilState:depth_state];
 		[command_encoder setFrontFacingWinding:MTLWindingClockwise];
 		[command_encoder setCullMode:convert_cull_mode(current_pipeline->cull_mode)];
@@ -325,17 +320,20 @@ void gpu_disable_scissor() {
 	[command_encoder setScissorRect:current_scissor];
 }
 
-void gpu_set_pipeline(gpu_pipeline_t *pipeline) {
-	current_pipeline = pipeline;
-	id<MTLRenderPipelineState> pipe = (__bridge id<MTLRenderPipelineState>)pipeline->impl._pipeline;
-	[command_encoder setRenderPipelineState:pipe];
-	id<MTLDepthStencilState> depth_state = (__bridge id<MTLDepthStencilState>)pipeline->impl._depth;
-	[command_encoder setDepthStencilState:depth_state];
-	[command_encoder setFrontFacingWinding:MTLWindingClockwise];
-	[command_encoder setCullMode:convert_cull_mode(pipeline->cull_mode)];
+void gpu_set_pipeline_internal(gpu_pipeline_t *pipeline) {
 	for (int i = 0; i < GPU_MAX_TEXTURES; ++i) {
 		current_textures[i] = NULL;
 	}
+	if (pipeline->impl.pipeline == NULL) {
+		return;
+	}
+	current_pipeline = pipeline;
+	id<MTLRenderPipelineState> pipe = (__bridge id<MTLRenderPipelineState>)pipeline->impl.pipeline;
+	[command_encoder setRenderPipelineState:pipe];
+	id<MTLDepthStencilState> depth_state = (__bridge id<MTLDepthStencilState>)pipeline->impl.depth;
+	[command_encoder setDepthStencilState:depth_state];
+	[command_encoder setFrontFacingWinding:MTLWindingClockwise];
+	[command_encoder setCullMode:convert_cull_mode(pipeline->cull_mode)];
 }
 
 void gpu_set_vertex_buffer(gpu_buffer_t *buffer) {
@@ -415,13 +413,13 @@ void gpu_use_linear_sampling(bool b) {
 }
 
 void gpu_pipeline_destroy_internal(gpu_pipeline_t *pipeline) {
-	id<MTLRenderPipelineState> pipe = (__bridge_transfer id<MTLRenderPipelineState>)pipeline->impl._pipeline;
+	id<MTLRenderPipelineState> pipe = (__bridge_transfer id<MTLRenderPipelineState>)pipeline->impl.pipeline;
 	pipe = nil;
-	pipeline->impl._pipeline = NULL;
+	pipeline->impl.pipeline = NULL;
 
-	id<MTLDepthStencilState> depth_state = (__bridge_transfer id<MTLDepthStencilState>)pipeline->impl._depth;
+	id<MTLDepthStencilState> depth_state = (__bridge_transfer id<MTLDepthStencilState>)pipeline->impl.depth;
 	depth_state = nil;
-	pipeline->impl._depth = NULL;
+	pipeline->impl.depth = NULL;
 }
 
 void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
@@ -499,7 +497,7 @@ void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
 	NSError *errors = nil;
 	MTLRenderPipelineReflection *reflection = nil;
 
-	pipeline->impl._pipeline = (__bridge_retained void *)[
+	pipeline->impl.pipeline = (__bridge_retained void *)[
 		device newRenderPipelineStateWithDescriptor:render_pipeline_desc
 											options:MTLPipelineOptionBufferTypeInfo
 										 reflection:&reflection
@@ -508,7 +506,7 @@ void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
 	MTLDepthStencilDescriptor *depth_descriptor = [MTLDepthStencilDescriptor new];
 	depth_descriptor.depthCompareFunction = convert_compare_mode(pipeline->depth_mode);
 	depth_descriptor.depthWriteEnabled = pipeline->depth_write;
-	pipeline->impl._depth = (__bridge_retained void *)[device newDepthStencilStateWithDescriptor:depth_descriptor];
+	pipeline->impl.depth = (__bridge_retained void *)[device newDepthStencilStateWithDescriptor:depth_descriptor];
 }
 
 void gpu_shader_destroy(gpu_shader_t *shader) {
@@ -851,8 +849,8 @@ void gpu_raytrace_set_acceleration_structure(gpu_raytrace_acceleration_structure
 	accel = _accel;
 }
 
-void gpu_raytrace_set_pipeline(gpu_raytrace_pipeline_t *_pipeline) {
-	pipeline = _pipeline;
+void gpu_raytrace_set_pipeline(gpu_raytrace_pipeline_t *_rt_pipeline) {
+	pipeline = _rt_pipeline;
 }
 
 void gpu_raytrace_set_target(gpu_texture_t *_output) {

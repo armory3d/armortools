@@ -17,14 +17,9 @@
 bool gpu_transpose_mat = true;
 extern int constant_buffer_index;
 
-static gpu_texture_t *current_textures[GPU_MAX_TEXTURES] = {
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
-};
 static VkSemaphore framebuffer_available_semaphore;
 static VkSemaphore rendering_finished_semaphores[GPU_FRAMEBUFFER_COUNT];
 static VkFence fence;
-static gpu_pipeline_t *current_pipeline = NULL;
 static VkViewport current_viewport;
 static VkRect2D current_scissor;
 static gpu_buffer_t *current_vb;
@@ -1243,12 +1238,15 @@ void gpu_disable_scissor() {
 	vkCmdSetScissor(command_buffer, 0, 1, &current_scissor);
 }
 
-void gpu_set_pipeline(gpu_pipeline_t *pipeline) {
-	current_pipeline = pipeline;
-	vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, current_pipeline->impl.pipeline);
+void gpu_set_pipeline_internal(gpu_pipeline_t *pipeline) {
 	for (int i = 0; i < GPU_MAX_TEXTURES; ++i) {
 		current_textures[i] = NULL;
 	}
+	if (pipeline->impl.pipeline == NULL) {
+		return;
+	}
+	current_pipeline = pipeline;
+	vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, current_pipeline->impl.pipeline);
 }
 
 void gpu_set_vertex_buffer(gpu_buffer_t *buffer) {

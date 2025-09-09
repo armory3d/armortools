@@ -267,7 +267,7 @@ void gpu_viewport(int x, int y, int width, int height) {}
 void gpu_scissor(int x, int y, int width, int height) {}
 void gpu_disable_scissor() {}
 
-void gpu_set_pipeline(struct gpu_pipeline *pipeline) {
+void gpu_set_pipeline_internal(struct gpu_pipeline *pipeline) {
 	wgpuRenderPassEncoderSetPipeline(pass, pipeline->impl.pipeline);
 }
 

@@ -1,8 +1,8 @@
 #pragma once
 
 typedef struct {
-	void *_pipeline;
-	void *_depth;
+	void *pipeline;
+	void *depth;
 } gpu_pipeline_impl_t;
 
 typedef struct {

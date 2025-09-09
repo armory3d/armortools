@@ -41,7 +41,7 @@ struct D3D12IndexBufferView {
 };
 
 typedef struct {
-	struct ID3D12PipelineState *pso;
+	struct ID3D12PipelineState *pipeline;
 } gpu_pipeline_impl_t;
 
 typedef struct {
