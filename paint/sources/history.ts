@@ -721,6 +721,9 @@ function history_swap_canvas(step: step_t) {
 		context_raw.brush = project_brushes[step.brush];
 	}
 
+	let nodes: ui_nodes_t = ui_nodes_get_nodes();
+	nodes.nodes_selected_id.length = 0;
+
 	ui_nodes_canvas_changed();
 	ui_nodes_hwnd.redraws = 2;
 }
