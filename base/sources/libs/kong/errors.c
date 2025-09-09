@@ -23,6 +23,10 @@ static void debug_break(void) {
 #endif
 }
 
+////
+bool kong_error = false;
+////
+
 void error_args(debug_context context, const char *message, va_list args) {
 	char buffer[4096];
 
@@ -37,15 +41,20 @@ void error_args(debug_context context, const char *message, va_list args) {
 
 	kong_log_args(LOG_LEVEL_ERROR, buffer, args);
 
-	debug_break();
-
-	exit(1);
+	////
+	// debug_break();
+	// exit(1);
+	kong_error = true;
+	////
 }
 
 void error_args_no_context(const char *message, va_list args) {
 	kong_log_args(LOG_LEVEL_ERROR, message, args);
 
-	exit(1);
+	////
+	// exit(1);
+	kong_error = true;
+	////
 }
 
 void error(debug_context context, const char *message, ...) {

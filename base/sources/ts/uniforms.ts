@@ -18,7 +18,8 @@ let uniforms_pos_unpack: f32 = 1.0;
 let uniforms_tex_unpack: f32 = 1.0;
 
 function uniforms_set_context_consts(context: shader_context_t, bind_params: string[]) {
-	if (context.constants != null) {
+	// On shader compile error, _.constants.length will be 0
+	if (context.constants != null && context.constants.length == context._.constants.length) {
 		for (let i: i32 = 0; i < context.constants.length; ++i) {
 			let c: shader_const_t = context.constants[i];
 			uniforms_set_context_const(context._.constants[i], c);
@@ -37,7 +38,7 @@ function uniforms_set_context_consts(context: shader_context_t, bind_params: str
 	}
 
 	// Texture links
-	if (context.texture_units != null) {
+	if (context.texture_units != null && context.texture_units.length == context._.tex_units.length) {
 		for (let j: i32 = 0; j < context.texture_units.length; ++j) {
 			let tulink: string = context.texture_units[j].link;
 			if (tulink == null) {
@@ -94,7 +95,7 @@ function uniforms_set_context_consts(context: shader_context_t, bind_params: str
 }
 
 function uniforms_set_obj_consts(context: shader_context_t, object: object_t) {
-	if (context.constants != null) {
+	if (context.constants != null && context.constants.length == context._.constants.length) {
 		for (let i: i32 = 0; i < context.constants.length; ++i) {
 			let c: shader_const_t = context.constants[i];
 			uniforms_set_obj_const(object, context._.constants[i], c);
@@ -103,7 +104,7 @@ function uniforms_set_obj_consts(context: shader_context_t, object: object_t) {
 
 	// Texture object constants
 	// External
-	if (uniforms_tex_links != null && context.texture_units != null) {
+	if (uniforms_tex_links != null && context.texture_units != null && context.texture_units.length == context._.tex_units.length) {
 		for (let j: i32 = 0; j < context.texture_units.length; ++j) {
 			let tu: tex_unit_t = context.texture_units[j];
 			if (tu.link == null) {
@@ -123,10 +124,11 @@ function uniforms_bind_render_target(rt: render_target_t, context: shader_contex
 		return;
 	}
 
-	let tus: tex_unit_t[] = context.texture_units;
-	for (let j: i32 = 0; j < tus.length; ++j) { // Set texture
-		if (sampler_id == tus[j].name) {
-			gpu_set_texture(context._.tex_units[j], rt._image);
+	if (context.texture_units != null && context.texture_units.length == context._.tex_units.length) {
+		for (let j: i32 = 0; j < context.texture_units.length; ++j) { // Set texture
+			if (sampler_id == context.texture_units[j].name) {
+				gpu_set_texture(context._.tex_units[j], rt._image);
+			}
 		}
 	}
 }

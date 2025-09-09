@@ -938,6 +938,7 @@ extern size_t fragment_functions_size;
 extern struct { char *key; name_id value; } *hash;
 extern int expression_index;
 extern int statement_index;
+extern bool kong_error;
 
 uint64_t _next_variable_id;
 size_t _allocated_globals_size;
@@ -955,6 +956,7 @@ int _expression_index;
 int _statement_index;
 void hlsl_export2(char **vs, char **fs, api_kind d3d, bool debug);
 void spirv_export2(char **vs, char **fs, int *vs_size, int *fs_size, bool debug);
+void console_info(char *s);
 
 static struct { char *key; name_id value; } *_clone_hash(struct { char *key; name_id value; } *hash) {
 	struct { char *key; name_id value; } *clone = NULL;
@@ -1008,10 +1010,16 @@ void gpu_create_shaders_from_kong(char *kong, char **vs, char **fs, int *vs_size
 		statement_index = _statement_index;
 	}
 
+	kong_error = false;
 	char *from = "";
 	tokens tokens = tokenize(from, kong);
 	parse(from, &tokens);
 	resolve_types();
+	if (kong_error) {
+		console_info("Warning: Shader compilation failed");
+		free(tokens.t);
+		return;
+	}
 	allocate_globals();
 	for (function_id i = 0; get_function(i) != NULL; ++i) {
 		compile_function_block(&get_function(i)->code, get_function(i)->block);
