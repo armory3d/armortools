@@ -73,6 +73,9 @@ void gpu_begin(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, 
 }
 
 void gpu_draw() {
+	if (current_pipeline == NULL || current_pipeline->impl.pipeline == NULL) {
+		return;
+	}
 	gpu_constant_buffer_unlock(&constant_buffer);
 	gpu_set_constant_buffer(&constant_buffer, constant_buffer_index * GPU_CONSTANT_BUFFER_SIZE, GPU_CONSTANT_BUFFER_SIZE);
 	gpu_draw_internal();
@@ -294,13 +297,13 @@ void gpu_texture_destroy(gpu_texture_t *texture) {
 }
 
 void gpu_set_pipeline(gpu_pipeline_t *pipeline) {
+	current_pipeline = pipeline;
 	for (int i = 0; i < GPU_MAX_TEXTURES; ++i) {
 		current_textures[i] = NULL;
 	}
 	if (pipeline->impl.pipeline == NULL) {
 		return;
 	}
-	current_pipeline = pipeline;
 	gpu_set_pipeline_internal(pipeline);
 }
 

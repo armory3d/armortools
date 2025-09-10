@@ -1018,6 +1018,10 @@ void gpu_create_shaders_from_kong(char *kong, char **vs, char **fs, int *vs_size
 	if (kong_error) {
 		console_info("Warning: Shader compilation failed");
 		free(tokens.t);
+		#if defined(__APPLE__)
+		*vs = "";
+		*fs = "";
+		#endif
 		return;
 	}
 	allocate_globals();

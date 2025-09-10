@@ -321,13 +321,6 @@ void gpu_disable_scissor() {
 }
 
 void gpu_set_pipeline_internal(gpu_pipeline_t *pipeline) {
-	for (int i = 0; i < GPU_MAX_TEXTURES; ++i) {
-		current_textures[i] = NULL;
-	}
-	if (pipeline->impl.pipeline == NULL) {
-		return;
-	}
-	current_pipeline = pipeline;
 	id<MTLRenderPipelineState> pipe = (__bridge id<MTLRenderPipelineState>)pipeline->impl.pipeline;
 	[command_encoder setRenderPipelineState:pipe];
 	id<MTLDepthStencilState> depth_state = (__bridge id<MTLDepthStencilState>)pipeline->impl.depth;
@@ -423,6 +416,11 @@ void gpu_pipeline_destroy_internal(gpu_pipeline_t *pipeline) {
 }
 
 void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
+	if (pipeline->vertex_shader->impl.length == 0 || pipeline->fragment_shader->impl.length == 0) {
+		// Shader compilation error
+		return;
+	}
+
 	id<MTLDevice> device = get_metal_device();
 	NSError *error = nil;
 	id<MTLLibrary> library = [device newLibraryWithSource:[[NSString alloc] initWithBytes:pipeline->vertex_shader->impl.source length:pipeline->vertex_shader->impl.length encoding:NSUTF8StringEncoding] options:nil error:&error];
