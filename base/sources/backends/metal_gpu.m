@@ -426,13 +426,11 @@ void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
 	id<MTLLibrary> library = [device newLibraryWithSource:[[NSString alloc] initWithBytes:pipeline->vertex_shader->impl.source length:pipeline->vertex_shader->impl.length encoding:NSUTF8StringEncoding] options:nil error:&error];
 	if (library == nil) {
 		iron_error("%s", error.localizedDescription.UTF8String);
+		return;
 	}
 
 	pipeline->vertex_shader->impl.mtl_function = (__bridge_retained void *)[library newFunctionWithName:[NSString stringWithCString:pipeline->vertex_shader->impl.name encoding:NSUTF8StringEncoding]];
-	assert(pipeline->vertex_shader->impl.mtl_function);
-
 	pipeline->fragment_shader->impl.mtl_function = (__bridge_retained void *)[library newFunctionWithName:[NSString stringWithCString:pipeline->fragment_shader->impl.name encoding:NSUTF8StringEncoding]];
-	assert(pipeline->fragment_shader->impl.mtl_function);
 
 	MTLRenderPipelineDescriptor *render_pipeline_desc = [[MTLRenderPipelineDescriptor alloc] init];
 	render_pipeline_desc.vertexFunction = (__bridge id<MTLFunction>)pipeline->vertex_shader->impl.mtl_function;
