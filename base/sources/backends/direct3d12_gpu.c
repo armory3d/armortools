@@ -612,7 +612,7 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 			.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR,
 			.Flags = D3D12_RESOURCE_FLAG_NONE,
 		};
-		device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc, D3D12_RESOURCE_STATE_COMMON, NULL,
+		device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc, D3D12_RESOURCE_STATE_COPY_DEST, NULL,
 												&IID_ID3D12Resource, &readback_buffer);
 	}
 
