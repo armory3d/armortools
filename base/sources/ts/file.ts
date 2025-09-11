@@ -105,11 +105,9 @@ function file_download(url: string, dst_path: string, done: (url: string)=>void,
 		}
 		fdd.done(url);
 	});
-	///elseif arm_linux
-	iron_sys_command("wget -O \"" + dst_path + "\" \"" + url + "\"");
-	done(url);
 	///else
-	iron_sys_command("curl -L " + url + " -o \"" + dst_path + "\"");
+	iron_sys_command("wget -O \"" + dst_path + "\" \"" + url + "\"");
+	// iron_sys_command("curl -L " + url + " -o \"" + dst_path + "\"");
 	done(url);
 	///end
 }
@@ -201,7 +199,11 @@ function file_init_cloud_bytes(done: ()=>void, append: string = "") {
 		if (buffer == null) {
 			let empty: string[] = [];
 			map_set(file_cloud, "cloud", empty);
+			///if arm_linux
+			console_error(strings_ensure_wget_is_installed());
+			///else
 			console_error(strings_check_internet_connection());
+			///end
 			return;
 		}
 		let files: string[] = [];
