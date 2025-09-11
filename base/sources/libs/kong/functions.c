@@ -131,8 +131,8 @@ static void add_func_float3_float_float_float(char *name) {
 	f->parameter_names[1] = add_name("b");
 	f->parameter_names[2] = add_name("c");
 	for (int i = 0; i < 3; ++i) {
-		init_type_ref(&f->parameter_types[0], add_name("float"));
-		f->parameter_types[0].type = find_type_by_ref(&f->parameter_types[0]);
+		init_type_ref(&f->parameter_types[i], add_name("float"));
+		f->parameter_types[i].type = find_type_by_ref(&f->parameter_types[i]);
 	}
 	f->parameters_size = 3;
 	f->block           = NULL;
@@ -323,10 +323,8 @@ static void add_func_void_uint_uint(char *name) {
 	f->parameter_names[0] = add_name("a");
 	f->parameter_names[1] = add_name("b");
 	for (int i = 0; i < 2; ++i) {
-		////
 		init_type_ref(&f->parameter_types[i], add_name("uint"));
 		f->parameter_types[i].type = find_type_by_ref(&f->parameter_types[i]);
-		////
 	}
 	f->parameters_size = 2;
 
