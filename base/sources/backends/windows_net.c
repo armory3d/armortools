@@ -25,20 +25,19 @@ void iron_https_request(const char *url_base, const char *url_path, const char *
 	if (hConnect) {
 		wchar_t wurl_path[4096];
 		MultiByteToWideChar(CP_UTF8, 0, url_path, -1, wurl_path, 4096);
-		hRequest =
-		    WinHttpOpenRequest(hConnect, method == IRON_HTTP_GET ? L"GET" : L"POST", wurl_path, NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, WINHTTP_FLAG_SECURE);
+		hRequest = WinHttpOpenRequest(hConnect, method == IRON_HTTP_GET ? L"GET" : L"POST", wurl_path, NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, WINHTTP_FLAG_SECURE);
 	}
 
 	BOOL bResults = FALSE;
-
 	if (hRequest) {
 		DWORD optionalLength = (data != 0 && strlen(data) > 0) ? (DWORD)strlen(data) : 0;
 		bResults = WinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0,
 		                              data == 0 ? WINHTTP_NO_REQUEST_DATA : (LPVOID)data, optionalLength, optionalLength, 0);
 	}
 
-	if (bResults)
+	if (bResults) {
 		bResults = WinHttpReceiveResponse(hRequest, NULL);
+	}
 
 	int returnDataIndex = 0;
 	if (bResults) {
@@ -50,14 +49,8 @@ void iron_https_request(const char *url_base, const char *url_path, const char *
 			}
 
 			if ((int)dwSize + 1 > returnDataSize - returnDataIndex) {
-				int newReturnDataSize = (returnDataIndex + dwSize + 1) * 2;
-				char *newReturnData = (char *)malloc(newReturnDataSize);
-				if (newReturnData == 0) {
-					iron_error("Out of memory\n");
-				}
-				memcpy(newReturnData, returnData, returnDataSize);
-				returnDataSize = newReturnDataSize;
-				returnData = newReturnData;
+				returnDataSize = (returnDataIndex + dwSize + 1) * 2;
+				returnData = realloc(returnData, returnDataSize);
 			}
 
 			DWORD dwDownloaded = 0;

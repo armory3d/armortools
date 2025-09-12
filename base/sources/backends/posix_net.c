@@ -59,6 +59,7 @@ void iron_https_request(const char *url_base, const char *url_path, const char *
 			buf = realloc(buf, buf_len);
 		}
 	}
+	buf[pos] = '\0';
 
 	// Parse
 	const char *body_ptr = "";

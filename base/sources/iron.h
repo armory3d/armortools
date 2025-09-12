@@ -1378,7 +1378,8 @@ void _http_callback(const char *body, void *callback_data) {
 	if (body != NULL) {
 		buffer = malloc(sizeof(buffer_t));
 		buffer->length = cbd->size > 0 ? cbd->size : strlen(body);
-		buffer->buffer = body;
+		buffer->buffer = malloc(buffer->length);
+		memcpy(buffer->buffer, body, buffer->length);
 	}
 	cbd->func(cbd->url, buffer);
 	free(cbd);

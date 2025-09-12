@@ -19,11 +19,11 @@ void iron_https_request(const char *url_base, const char *url_path, const char *
 	urlstring = [urlstring stringByAppendingString:[NSString stringWithUTF8String:url_path]];
 	NSURL *aUrl = [NSURL URLWithString:urlstring];
 	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:aUrl];
+	request.HTTPMethod = method == IRON_HTTP_GET ? @"GET" : @"POST";
 	if (data != 0) {
 		NSString *datastring = [NSString stringWithUTF8String:data];
 		request.HTTPBody = [datastring dataUsingEncoding:NSUTF8StringEncoding];
 	}
-	request.HTTPMethod = method == IRON_HTTP_GET ? @"GET" : @"POST";
 
 	NSURLSessionDataTask *dataTask = [
 		session dataTaskWithRequest:request
