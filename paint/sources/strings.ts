@@ -19,10 +19,6 @@ function strings_check_internet_connection(): string {
 	return tr("Error: Check internet connection to access the cloud");
 }
 
-function strings_ensure_wget_is_installed(): string {
-	return tr("Error: Ensure wget is installed");
-}
-
 function strings_asset_already_imported(): string {
 	return tr("Info: Asset already imported");
 }

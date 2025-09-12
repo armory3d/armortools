@@ -72,11 +72,13 @@ if (platform == "windows") {
 }
 else if (platform == "linux") {
 	add_sys_backend("linux");
+	add_net_backend("posix");
 	add_thread_backend("posix");
 	add_gpu_backend("vulkan");
 	project.add_define("IRON_VULKAN");
 	project.add_define("_POSIX_C_SOURCE=200809L");
 	project.add_lib("dl");
+	project.add_lib("ssl");
 	project.add_lib("vulkan");
 	if (flags.with_audio) {
 		project.add_lib("asound");
@@ -106,7 +108,6 @@ else if (platform == "ios") {
 }
 else if (platform == "android") {
 	add_sys_backend("android");
-	add_net_backend("posix");
 	add_thread_backend("posix");
 	add_gpu_backend("vulkan");
 	project.add_cfiles("sources/backends/android_file_dialog.c");

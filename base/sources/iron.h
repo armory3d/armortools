@@ -1415,8 +1415,6 @@ void _iron_http_request(string_t *url, i32 size, void (*callback)(char *, buffer
 	url_path[j] = 0;
 	#ifdef IRON_ANDROID
 	iron_http_request(curl, url_path, NULL, 443, true, 0, NULL, &_http_callback, cbd);
-	#elif defined(IRON_LINUX)
-	// TODO
 	#else
 	iron_http_request(url_base, url_path, NULL, 443, true, 0, NULL, &_http_callback, cbd);
 	#endif

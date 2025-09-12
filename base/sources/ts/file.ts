@@ -95,7 +95,6 @@ function file_start(path: string) {
 }
 
 function file_download(url: string, dst_path: string, done: (url: string)=>void, size: i32 = 0) {
-	///if (arm_windows || arm_macos || arm_ios || arm_android)
 	let fdd: file_download_data_t = { dst_path: dst_path, done: done };
 	map_set(_file_download_map, url, fdd);
 	_iron_http_request(url, size, function (url: string, ab: buffer_t) {
@@ -105,11 +104,6 @@ function file_download(url: string, dst_path: string, done: (url: string)=>void,
 		}
 		fdd.done(url);
 	});
-	///else
-	iron_sys_command("wget -O \"" + dst_path + "\" \"" + url + "\"");
-	// iron_sys_command("curl -L " + url + " -o \"" + dst_path + "\"");
-	done(url);
-	///end
 }
 
 function file_download_bytes(url: string, done: (url: string, ab: buffer_t)=>void) {
@@ -199,11 +193,7 @@ function file_init_cloud_bytes(done: ()=>void, append: string = "") {
 		if (buffer == null) {
 			let empty: string[] = [];
 			map_set(file_cloud, "cloud", empty);
-			///if arm_linux
-			console_error(strings_ensure_wget_is_installed());
-			///else
 			console_error(strings_check_internet_connection());
-			///end
 			return;
 		}
 		let files: string[] = [];
