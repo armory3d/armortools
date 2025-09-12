@@ -12,8 +12,6 @@ void iron_threads_init() {}
 
 void iron_threads_quit() {}
 
-void iron_thread_sleep(int milliseconds) {}
-
 void iron_mutex_init(iron_mutex_t *mutex) {}
 
 void iron_mutex_destroy(iron_mutex_t *mutex) {}

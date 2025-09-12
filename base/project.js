@@ -75,8 +75,7 @@ else if (platform == "linux") {
 	add_thread_backend("posix");
 	add_gpu_backend("vulkan");
 	project.add_define("IRON_VULKAN");
-	project.add_define("_POSIX_C_SOURCE=200112L");
-	project.add_define("_XOPEN_SOURCE=600");
+	project.add_define("_POSIX_C_SOURCE=200809L");
 	project.add_lib("dl");
 	project.add_lib("vulkan");
 	if (flags.with_audio) {

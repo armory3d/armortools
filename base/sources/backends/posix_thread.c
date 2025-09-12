@@ -95,7 +95,3 @@ void iron_thread_set_name(const char *name) {
 	pthread_setname_np(name);
 #endif
 }
-
-void iron_thread_sleep(int milliseconds) {
-	usleep(1000 * (useconds_t)milliseconds);
-}

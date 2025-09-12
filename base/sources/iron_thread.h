@@ -14,7 +14,6 @@ void iron_thread_init(iron_thread_t *thread, void (*func)(void *param), void *pa
 void iron_thread_wait_and_destroy(iron_thread_t *thread);
 bool iron_thread_try_to_destroy(iron_thread_t *thread);
 void iron_thread_set_name(const char *name);
-void iron_thread_sleep(int milliseconds);
 
 typedef struct iron_mutex {
 	iron_mutex_impl_t impl;

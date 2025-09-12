@@ -66,10 +66,6 @@ void iron_thread_set_name(const char *name) {
 	}
 }
 
-void iron_thread_sleep(int milliseconds) {
-	Sleep(milliseconds);
-}
-
 void iron_mutex_init(iron_mutex_t *mutex) {
 	InitializeCriticalSection((LPCRITICAL_SECTION)&mutex->impl.criticalSection);
 }

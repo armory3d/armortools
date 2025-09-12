@@ -352,8 +352,7 @@ unsigned char *iron_deflate_raw(unsigned char *data, int data_len, int *out_len,
 #include "sinfl.h"
 #endif
 #if defined(IDLE_SLEEP) && !defined(IRON_WINDOWS)
-// #include <unistd.h>
-int usleep(unsigned int usec);
+#include <time.h>
 #endif
 
 #ifdef IRON_MACOS
@@ -397,7 +396,10 @@ void _update(void *data) {
 		#ifdef IRON_WINDOWS
 		Sleep(1);
 		#else
-		usleep(1000);
+		struct timespec t;
+		t.tv_sec = 0;
+		t.tv_nsec = 1000000;
+		nanosleep(&t, NULL);
 		#endif
 		return;
 	}
