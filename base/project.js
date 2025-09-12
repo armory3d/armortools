@@ -111,7 +111,7 @@ else if (platform == "android") {
 	add_thread_backend("posix");
 	add_gpu_backend("vulkan");
 	project.add_cfiles("sources/backends/android_file_dialog.c");
-	project.add_cfiles("sources/backends/android_http_request.c");
+	project.add_cfiles("sources/backends/android_net.c");
 	project.add_cfiles("sources/backends/android_native_app_glue.c");
 	project.add_define("IRON_ANDROID");
 	project.add_define("IRON_VULKAN");

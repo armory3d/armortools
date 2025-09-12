@@ -1,13 +1,14 @@
-#include "android_http_request.h"
+
 #include <iron_system.h>
-#include <jni.h>
+#include <iron_net.h>
 #include <string.h>
+#include <jni.h>
 #include "android_native_app_glue.h"
 
 ANativeActivity *iron_android_get_activity(void);
 jclass iron_android_find_class(JNIEnv *env, const char *name);
 
-void iron_http_request(const char *url, const char *path, const char *data, int port, bool secure, int method, const char *header,
+void iron_https_request(const char *url_base, const char *url_path, const char *data, int port, int method,
                        iron_http_callback_t callback, void *callbackdata) {
     ANativeActivity *activity = iron_android_get_activity();
     JNIEnv *env;
@@ -15,11 +16,12 @@ void iron_http_request(const char *url, const char *path, const char *data, int 
     (*vm)->AttachCurrentThread(vm, &env, NULL);
     jclass activityClass = iron_android_find_class(env, "arm.AndroidHttpRequest");
 
-    jstring jstr = (*env)->NewStringUTF(env, url);
-    jbyteArray bytes_array = (jbyteArray)((*env)->CallStaticObjectMethod(env, activityClass, (*env)->GetStaticMethodID(env, activityClass, "androidHttpRequest", "(Ljava/lang/String;)[B"), jstr));
+    jstring jurl_base = (*env)->NewStringUTF(env, url_base);
+    jstring jurl_path = (*env)->NewStringUTF(env, url_path);
+    jbyteArray bytes_array = (jbyteArray)((*env)->CallStaticObjectMethod(env, activityClass, (*env)->GetStaticMethodID(env, activityClass, "androidHttpRequest", "(Ljava/lang/String;Ljava/lang/String;)[B"), jurl_base, jurl_path));
 
     if (bytes_array == NULL) {
-        callback(0, 200, NULL, callbackdata);
+        callback(NULL, callbackdata);
         (*vm)->DetachCurrentThread(vm);
         return;
     }
@@ -27,7 +29,7 @@ void iron_http_request(const char *url, const char *path, const char *data, int 
     jsize num_bytes = (*env)->GetArrayLength(env, bytes_array);
     jbyte *elements = (*env)->GetByteArrayElements(env, bytes_array, NULL);
     if (elements != NULL) {
-        callback(0, 200, (char *)elements, callbackdata);
+        callback((char *)elements, callbackdata);
         // (*env)->ReleaseByteArrayElements(env, bytes_array, elements, JNI_ABORT);
     }
 

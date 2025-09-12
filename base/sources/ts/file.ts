@@ -1,12 +1,6 @@
 
 type file_download_data_t = {
-	dst_path: string;
-	done: (url: string)=>void;
-};
-
-type file_download_bytes_data_t = {
-	url: string;
-	save: string;
+	path: string;
 	done: (url: string, ab: buffer_t)=>void;
 };
 
@@ -17,7 +11,6 @@ type file_cache_cloud_data_t = {
 };
 
 let _file_download_map: map_t<string, file_download_data_t> = map_create();
-let _file_download_bytes_map: map_t<string, file_download_bytes_data_t> = map_create();
 let _file_cache_cloud_map: map_t<string, file_cache_cloud_data_t> = map_create();
 
 ///if arm_windows
@@ -94,35 +87,16 @@ function file_start(path: string) {
 	///end
 }
 
-function file_download(url: string, dst_path: string, done: (url: string)=>void, size: i32 = 0) {
-	let fdd: file_download_data_t = { dst_path: dst_path, done: done };
+function file_download_to(url: string, dst_path: string, done: (url: string, ab: buffer_t)=>void, size: i32 = 0) {
+	let fdd: file_download_data_t = { path: dst_path, done: done };
 	map_set(_file_download_map, url, fdd);
-	_iron_http_request(url, size, function (url: string, ab: buffer_t) {
+	iron_file_download(url, function (url: string, ab: buffer_t) {
 		let fdd: file_download_data_t = map_get(_file_download_map, url);
 		if (ab != null) {
-			iron_file_save_bytes(fdd.dst_path, ab, 0);
+			iron_file_save_bytes(fdd.path, ab, 0);
 		}
-		fdd.done(url);
-	});
-}
-
-function file_download_bytes(url: string, done: (url: string, ab: buffer_t)=>void) {
-	let save: string;
-	if (path_is_protected()) {
-		save = iron_internal_save_path();
-	}
-	else {
-		save = path_data() + path_sep;
-	}
-	save += "download.bin";
-
-	let fdbd: file_download_bytes_data_t = { url: url, save: save, done: done };
-	map_set(_file_download_bytes_map, url, fdbd);
-	file_download(url, save, function (url: string) {
-		let fdbd: file_download_bytes_data_t = map_get(_file_download_bytes_map, url);
-		let buffer: buffer_t = iron_load_blob(fdbd.save);
-		fdbd.done(fdbd.url, buffer);
-	});
+		fdd.done(url, ab);
+	}, size);
 }
 
 function file_cache_cloud(path: string, done: (s: string)=>void) {
@@ -164,7 +138,7 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 	let fccd: file_cache_cloud_data_t = { dest: dest, path: path, done: done };
 	map_set(_file_cache_cloud_map, url, fccd);
 
-	file_download(url, dest, function (url: string) {
+	file_download_to(url, dest, function (url: string) {
 		let fccd: file_cache_cloud_data_t = map_get(_file_cache_cloud_map, url);
 		if (!iron_file_exists(fccd.dest)) {
 			console_error(strings_check_internet_connection());
@@ -189,7 +163,7 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 
 function file_init_cloud_bytes(done: ()=>void, append: string = "") {
 	_file_init_cloud_bytes_done = done;
-	file_download_bytes(config_raw.server + "/?list-type=2" + append, function (url: string, buffer: buffer_t) {
+	iron_file_download(config_raw.server + "/?list-type=2" + append, function (url: string, buffer: buffer_t) {
 		if (buffer == null) {
 			let empty: string[] = [];
 			map_set(file_cloud, "cloud", empty);

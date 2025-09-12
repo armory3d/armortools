@@ -327,7 +327,6 @@ string_t *iron_get_arg(i32 index) {
 #include <nfd.h>
 #elif defined(IRON_ANDROID)
 #include "backends/android_file_dialog.h"
-#include "backends/android_http_request.h"
 #elif defined(IRON_IOS)
 #include <wchar.h>
 #include "backends/ios_file_dialog.h"
@@ -1373,7 +1372,7 @@ typedef struct _callback_data {
 	void (*func)(char *, buffer_t *);
 } _callback_data_t;
 
-void _http_callback(int error, int response, const char *body, void *callback_data) {
+void _http_callback(const char *body, void *callback_data) {
 	_callback_data_t *cbd = (_callback_data_t *)callback_data;
 	buffer_t *buffer = NULL;
 	if (body != NULL) {
@@ -1385,7 +1384,7 @@ void _http_callback(int error, int response, const char *body, void *callback_da
 	free(cbd);
 }
 
-void _iron_http_request(string_t *url, i32 size, void (*callback)(char *, buffer_t *)) {
+void iron_file_download(string_t *url, void (*callback)(char *, buffer_t *), i32 size) {
 	_callback_data_t *cbd = malloc(sizeof(_callback_data_t));
 	cbd->size = size;
 	strcpy(cbd->url, url);
@@ -1393,31 +1392,27 @@ void _iron_http_request(string_t *url, i32 size, void (*callback)(char *, buffer
 
 	char url_base[512];
 	char url_path[512];
-	const char *curl = url;
 	int i = 0;
-	for (; i < strlen(curl) - 8; ++i) {
-		if (curl[i + 8] == '/') {
+	for (; i < strlen(url) - 8; ++i) {
+		if (url[i + 8] == '/') {
 			break;
 		}
-		url_base[i] = curl[i + 8]; // Strip https://
+		url_base[i] = url[i + 8]; // Strip https://
 	}
 	url_base[i] = 0;
 	int j = 0;
-	if (strlen(url_base) < strlen(curl) - 8) {
+	if (strlen(url_base) < strlen(url) - 8) {
 		++i; // Skip /
 	}
-	for (; j < strlen(curl) - 8 - i; ++j) {
-		if (curl[i + 8 + j] == 0) {
+	for (; j < strlen(url) - 8 - i; ++j) {
+		if (url[i + 8 + j] == 0) {
 			break;
 		}
-		url_path[j] = curl[i + 8 + j];
+		url_path[j] = url[i + 8 + j];
 	}
 	url_path[j] = 0;
-	#ifdef IRON_ANDROID
-	iron_http_request(curl, url_path, NULL, 443, true, 0, NULL, &_http_callback, cbd);
-	#else
-	iron_http_request(url_base, url_path, NULL, 443, true, 0, NULL, &_http_callback, cbd);
-	#endif
+
+	iron_https_request(url_base, url_path, NULL, 443, 0, &_http_callback, cbd);
 }
 
 bool _window_close_callback(void *data) {

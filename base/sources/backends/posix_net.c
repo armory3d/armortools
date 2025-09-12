@@ -11,11 +11,11 @@ static SSL_CTX *ctx = NULL;
 static char *buf = NULL;
 static int buf_len = 1024 * 1024;
 
-void iron_http_request(const char *url, const char *path, const char *data, int port, bool secure, int method, const char *header,
-					   iron_http_callback_t callback, void *callbackdata) {
+void iron_https_request(const char *url_base, const char *url_path, const char *data, int port, int method,
+					    iron_http_callback_t callback, void *callbackdata) {
 
 	int sock_fd = socket(AF_INET, SOCK_STREAM, 0);
-	struct hostent *server = gethostbyname(url);
+	struct hostent *server = gethostbyname(url_base);
 	struct sockaddr_in server_addr = {0};
 	server_addr.sin_family = AF_INET;
 	memmove(&server_addr.sin_addr.s_addr, server->h_addr_list[0], server->h_length);
@@ -23,7 +23,7 @@ void iron_http_request(const char *url, const char *path, const char *data, int 
 
 	if (connect(sock_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
 		close(sock_fd);
-		callback(1, 0, NULL, callbackdata);
+		callback(NULL, callbackdata);
 		return;
 	}
 
@@ -37,13 +37,13 @@ void iron_http_request(const char *url, const char *path, const char *data, int 
 	if (SSL_connect(ssl) <= 0) {
 		SSL_free(ssl);
 		close(sock_fd);
-		callback(1, 0, NULL, callbackdata);
+		callback(NULL, callbackdata);
 		return;
 	}
 
 	// For HTTP/1.1, implement "transfer-encoding: chunked"
 	char request[1024];
-	int request_len = snprintf(request, sizeof(request), "GET /%s HTTP/1.0\r\nHost: %s:%d\r\nConnection: close\r\n\r\n", path, url, port);
+	int request_len = snprintf(request, sizeof(request), "GET /%s HTTP/1.0\r\nHost: %s:%d\r\nConnection: close\r\n\r\n", url_path, url_base, port);
 	SSL_write(ssl, request, request_len);
 
 	// Read
@@ -61,11 +61,10 @@ void iron_http_request(const char *url, const char *path, const char *data, int 
 	}
 
 	// Parse
-	int status_code = 0;
 	const char *body_ptr = "";
 	char *headers_end = strstr(buf, "\r\n\r\n");
 	body_ptr = headers_end + 4;
-	callback(0, status_code, body_ptr, callbackdata);
+	callback(body_ptr, callbackdata);
 
 	SSL_free(ssl);
 	close(sock_fd);

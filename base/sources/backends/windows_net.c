@@ -5,25 +5,11 @@
 #include <Windows.h>
 #include <winhttp.h>
 
-static const wchar_t *convert(int method) {
-	switch (method) {
-	case IRON_HTTP_GET:
-	default:
-		return L"GET";
-	case IRON_HTTP_POST:
-		return L"POST";
-	case IRON_HTTP_PUT:
-		return L"PUT";
-	case IRON_HTTP_DELETE:
-		return L"DELETE";
-	}
-}
-
 static char *returnData = NULL;
 static int returnDataSize = 0;
 
-void iron_http_request(const char *url, const char *path, const char *data, int port, bool secure, int method, const char *header,
-                       iron_http_callback_t callback, void *callbackdata) {
+void iron_https_request(const char *url_base, const char *url_path, const char *data, int port, int method,
+                        iron_http_callback_t callback, void *callbackdata) {
 	// based on https://docs.microsoft.com/en-us/windows/desktop/winhttp/winhttp-sessions-overview
 
 	HINTERNET hSession = WinHttpOpen(L"WinHTTP via Iron/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
@@ -31,27 +17,23 @@ void iron_http_request(const char *url, const char *path, const char *data, int 
 	HINTERNET hConnect = NULL;
 	if (hSession) {
 		wchar_t wurl[4096];
-		MultiByteToWideChar(CP_UTF8, 0, url, -1, wurl, 4096);
+		MultiByteToWideChar(CP_UTF8, 0, url_base, -1, wurl, 4096);
 		hConnect = WinHttpConnect(hSession, wurl, port, 0);
 	}
 
 	HINTERNET hRequest = NULL;
 	if (hConnect) {
-		wchar_t wpath[4096];
-		MultiByteToWideChar(CP_UTF8, 0, path, -1, wpath, 4096);
+		wchar_t wurl_path[4096];
+		MultiByteToWideChar(CP_UTF8, 0, url_path, -1, wurl_path, 4096);
 		hRequest =
-		    WinHttpOpenRequest(hConnect, convert(method), wpath, NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, secure ? WINHTTP_FLAG_SECURE : 0);
+		    WinHttpOpenRequest(hConnect, method == IRON_HTTP_GET ? L"GET" : L"POST", wurl_path, NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, WINHTTP_FLAG_SECURE);
 	}
 
 	BOOL bResults = FALSE;
 
 	if (hRequest) {
-		wchar_t wheader[4096];
-		if (header) {
-			MultiByteToWideChar(CP_UTF8, 0, header, -1, wheader, 4096);
-		}
 		DWORD optionalLength = (data != 0 && strlen(data) > 0) ? (DWORD)strlen(data) : 0;
-		bResults = WinHttpSendRequest(hRequest, header == 0 ? WINHTTP_NO_ADDITIONAL_HEADERS : wheader, header == 0 ? 0 : -1L,
+		bResults = WinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0,
 		                              data == 0 ? WINHTTP_NO_REQUEST_DATA : (LPVOID)data, optionalLength, optionalLength, 0);
 	}
 
@@ -86,7 +68,7 @@ void iron_http_request(const char *url, const char *path, const char *data, int 
 		} while (dwSize > 0);
 	}
 	else {
-		callback(1, 404, NULL, callbackdata);
+		callback(NULL, callbackdata);
 		return;
 	}
 
@@ -106,5 +88,5 @@ void iron_http_request(const char *url, const char *path, const char *data, int 
 		WinHttpCloseHandle(hSession);
 	}
 
-	callback(0, 200, returnData, callbackdata);
+	callback(returnData, callbackdata);
 }

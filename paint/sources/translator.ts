@@ -119,7 +119,7 @@ function translator_load_translations(new_locale: string) {
 		_translator_load_translations_cjk_font_disk_path += "font_cjk.ttc";
 
 		if (!iron_file_exists(_translator_load_translations_cjk_font_disk_path)) {
-			file_download("https://github.com/armory3d/armorbase/raw/main/Assets/common/extra/font_cjk.ttc", _translator_load_translations_cjk_font_disk_path, function () {
+			file_download_to("https://github.com/armory3d/armorbase/raw/main/Assets/common/extra/font_cjk.ttc", _translator_load_translations_cjk_font_disk_path, function () {
 
 				if (!iron_file_exists(_translator_load_translations_cjk_font_disk_path)) {
 					// Fall back to English
