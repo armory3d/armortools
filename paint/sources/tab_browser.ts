@@ -5,6 +5,7 @@ let tab_browser_known: bool = false;
 let tab_browser_last_path: string =  "";
 let _tab_browser_draw_file: string;
 let _tab_browser_draw_b: string;
+let tab_browser_refresh: bool = false;
 
 function tab_browser_show_directory(directory: string) {
 	tab_browser_hpath.text = directory;
@@ -54,11 +55,10 @@ function tab_browser_draw(htab: ui_handle_t) {
 		}
 
 		// Refresh
-		let refresh: bool = false;
 		let in_focus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
 							 ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
 		if (ui_button(tr("Refresh")) || (in_focus && ui.is_key_pressed && ui.key_code == key_code_t.F5)) {
-			refresh = true;
+			tab_browser_refresh = true;
 		}
 
 		// Previous folder
@@ -117,7 +117,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 		ui._x = bookmarks_w;
 		ui._w -= bookmarks_w;
 
-		ui_files_file_browser(tab_browser_hpath, true, tab_browser_hsearch.text, refresh, function (file: string) {
+		ui_files_file_browser(tab_browser_hpath, true, tab_browser_hsearch.text, tab_browser_refresh, function (file: string) {
 
 			let file_name: string = substring(file, string_last_index_of(file, path_sep) + 1, file.length);
 			_tab_browser_draw_file = file;
@@ -199,6 +199,8 @@ function tab_browser_draw(htab: ui_handle_t) {
 				}
 			});
 		});
+
+		tab_browser_refresh = false;
 
 		if (tab_browser_known) {
 			let path: string = tab_browser_hpath.text;

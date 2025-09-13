@@ -86,6 +86,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 	if (is_cloud && file_cloud == null) {
 		file_init_cloud(function () {
 			ui_base_hwnds[tab_area_t.STATUS].redraws = 3;
+			tab_browser_refresh = true;
 		});
 	}
 	if (is_cloud && file_read_directory("cloud").length == 0) {

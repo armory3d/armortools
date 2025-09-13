@@ -221,6 +221,7 @@ function file_init_cloud_bytes(done: ()=>void, append: string = "") {
 			pos_start += 23;
 			let pos_end: i32 = string_index_of_pos(str, "</NextContinuationToken>", pos_start);
 			file_init_cloud_bytes(_file_init_cloud_bytes_done, "&start-after=" + substring(str, pos_start, pos_end));
+			_file_init_cloud_bytes_done();
 		}
 		else {
 			_file_init_cloud_bytes_done();
