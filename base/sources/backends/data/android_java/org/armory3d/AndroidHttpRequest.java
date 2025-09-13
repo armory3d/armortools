@@ -23,6 +23,7 @@ class AndroidHttpRequest {
 			while ((i = in.read(data, 0, data.length)) != -1) {
 				buffer.write(data, 0, i);
 			}
+			buffer.write(0);
 			buffer.flush();
 			byte[] result = buffer.toByteArray();
 

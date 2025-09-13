@@ -30,7 +30,13 @@ void iron_https_request(const char *url_base, const char *url_path, const char *
 		completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
 			NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
 			dispatch_async(dispatch_get_main_queue(), ^{
-				callback((const char *)[data bytes], callbackdata);
+				char *b = (char *)[data bytes];
+				int len = [data length];
+				char *result = malloc(len + 1);
+				memcpy(result, b, len);
+				result[len] = 0;
+				callback(result, callbackdata);
+				free(result);
 			});
 		}
 	];
