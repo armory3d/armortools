@@ -21,9 +21,20 @@ function tab_meshes_draw(htab: ui_handle_t) {
 				if (ui_menu_button(tr("Replace Existing"), map_get(config_keymap, "file_import_assets"))) {
 					project_import_mesh(true);
 				}
-				if (ui_menu_button(tr("Append"))) {
+				if (ui_menu_button(tr("Append File"))) {
 					project_append_mesh();
 				}
+
+				// project_fetch_default_meshes();
+				// if (ui_menu_button(tr("Append Shape"))) {
+				// 	ui_menu_draw(function () {
+				// 		for (let i: i32 = 0; i < project_mesh_list.length; ++i) {
+				// 			if (ui_menu_button(project_mesh_list[i])) {
+				// 				tab_meshes_append_shape(project_mesh_list[i]);
+				// 			}
+				// 		}
+				// 	});
+				// }
 			});
 		}
 		if (ui.is_hovered) ui_tooltip(tr("Import mesh file"));
@@ -333,46 +344,28 @@ function tab_meshes_draw(htab: ui_handle_t) {
 	}
 }
 
-function tab_meshes_set_default_mesh(name: string) {
-	let mo: mesh_object_t = null;
-	if (name == ".Plane" || name == ".Sphere") {
-		let res: i32 = config_raw.rp_supersample > 1.0 ? 2048 : 1024;
-		let mesh: raw_mesh_t = name == ".Plane" ? geom_make_plane(1, 1, res, res) : geom_make_uv_sphere(1.0, res, math_floor(res / 2), false, 2.0);
-		let raw: mesh_data_t = {
-			name: "Tessellated",
-			vertex_arrays: [
-				{ values: mesh.posa, attrib: "pos", data: "short4norm" },
-				{ values: mesh.nora, attrib: "nor", data: "short2norm" },
-				{ values: mesh.texa, attrib: "tex", data: "short2norm" }
-			],
-			index_array: mesh.inda,
-			scale_pos: mesh.scale_pos,
-			scale_tex: mesh.scale_tex
-		};
-		let md: mesh_data_t = mesh_data_create(raw);
-		mo = mesh_object_create(md, context_raw.paint_object.material);
-		array_remove(scene_meshes, mo);
-		mo.base.name = "Tessellated";
-	}
-	else {
-		mo = scene_get_child(name).ext;
-	}
-
-	mo.base.visible = true;
-	context_raw.ddirty = 2;
-	context_raw.paint_object = mo;
-	project_paint_objects[0] = mo;
-	if (ui_header_worktab.position == space_type_t.SPACE3D) {
-		scene_meshes = [mo];
-	}
-
-	render_path_raytrace_ready = false;
+function tab_meshes_append_shape(mesh_name: string) {
+	let blob: buffer_t = iron_load_blob(data_path() + "meshes/" + mesh_name + ".arm");
+	let raw: scene_t = armpack_decode(blob);
+	util_mesh_ext_pack_uvs(raw.mesh_datas[0].vertex_arrays[2].values);
+	let md: mesh_data_t = mesh_data_create(raw.mesh_datas[0]);
+	md._.handle = md.name;
+	let mo: mesh_object_t = scene_add_mesh_object(md, project_paint_objects[0].material);
+	mo.base.name = md.name;
+	let o: obj_t = {};
+	o._ = { _gc: raw };
+	mo.base.raw = o;
+	map_set(data_cached_meshes, md._.handle, md);
+	array_push(project_paint_objects, mo);
+	// tab_scene_import_mesh_done();
+	// sys_notify_on_next_frame(function(mo: mesh_object_t) {
+	// 	tab_scene_select_object(mo);
+	// }, mo);
 }
 
 ////
 
 let tab_scene_line_counter: i32 = 0;
-let tab_scene_new_meshes: string[] = null;
 let _tab_scene_paint_object_length: i32 = 1;
 
 function tab_scene_select_object(mo: mesh_object_t) {
@@ -499,79 +492,28 @@ function tab_scene_draw_list(list_handle: ui_handle_t, current_object: object_t)
 	}
 }
 
-function tab_scene_new_object(mesh_name: string) {
-	let blob: buffer_t = iron_load_blob(data_path() + "meshes/" + mesh_name);
-	let raw: scene_t = armpack_decode(blob);
-	util_mesh_ext_pack_uvs(raw.mesh_datas[0].vertex_arrays[2].values);
-	let md: mesh_data_t = mesh_data_create(raw.mesh_datas[0]);
-	md._.handle = md.name;
-	let mo: mesh_object_t = scene_add_mesh_object(md, project_paint_objects[0].material);
-	mo.base.name = md.name;
-	let o: obj_t = {};
-	o._ = { _gc: raw };
-	mo.base.raw = o;
-	map_set(data_cached_meshes, md._.handle, md);
-	array_push(project_paint_objects, mo);
-	tab_scene_import_mesh_done();
-	sys_notify_on_next_frame(function(mo: mesh_object_t) {
-		tab_scene_select_object(mo);
-	}, mo);
-}
-
-function tab_scene_new_menu() {
-	for (let i: i32 = 0; i < tab_scene_new_meshes.length; ++i) {
-		let mesh_name: string = tab_scene_new_meshes[i];
-		if (ui_menu_button(mesh_name)) {
-			tab_scene_new_object(mesh_name);
-		}
-	}
-}
-
 function tab_scene_draw(htab: ui_handle_t) {
 	if (ui_tab(htab, tr("Scene"))) {
 
-		ui_begin_sticky();
+		tab_scene_line_counter = 0;
 
-		let row: f32[] = [1 / 4, 1 / 4];
-		ui_row(row);
-
-		if (ui_button("New")) {
-			if (tab_scene_new_meshes == null) {
-				tab_scene_new_meshes = file_read_directory(path_data() + path_sep + "meshes");
-			}
-
-			ui_menu_draw(tab_scene_new_menu);
+		let scene: object_t = _scene_root.children[0];
+		for (let i: i32 = 0; i < scene.children.length; ++i) {
+			let c: object_t = scene.children[i];
+			tab_scene_draw_list(ui_handle(__ID__), c);
 		}
 
-		if (ui_button("Import")) {
-			project_import_mesh(false, tab_scene_import_mesh_done);
+		// Select object with arrow keys
+		if (ui.is_key_pressed && ui.key_code == key_code_t.DOWN) {
+			let i: i32 = array_index_of(project_paint_objects, context_raw.selected_object.ext);
+			if (i < project_paint_objects.length - 1) {
+				tab_scene_select_object(project_paint_objects[i + 1]);
+			}
 		}
-
-		ui_end_sticky();
-
-		{
-			ui._y -= UI_ELEMENT_OFFSET();
-
-			tab_scene_line_counter = 0;
-
-			let scene: object_t = _scene_root.children[0];
-			for (let i: i32 = 0; i < scene.children.length; ++i) {
-				let c: object_t = scene.children[i];
-				tab_scene_draw_list(ui_handle(__ID__), c);
-			}
-
-			// Select object with arrow keys
-			if (ui.is_key_pressed && ui.key_code == key_code_t.DOWN) {
-				let i: i32 = array_index_of(project_paint_objects, context_raw.selected_object.ext);
-				if (i < project_paint_objects.length - 1) {
-					tab_scene_select_object(project_paint_objects[i + 1]);
-				}
-			}
-			if (ui.is_key_pressed && ui.key_code == key_code_t.UP) {
-				let i: i32 = array_index_of(project_paint_objects, context_raw.selected_object.ext);
-				if (i > 1) {
-					tab_scene_select_object(project_paint_objects[i - 1]);
-				}
+		if (ui.is_key_pressed && ui.key_code == key_code_t.UP) {
+			let i: i32 = array_index_of(project_paint_objects, context_raw.selected_object.ext);
+			if (i > 1) {
+				tab_scene_select_object(project_paint_objects[i - 1]);
 			}
 		}
 	}

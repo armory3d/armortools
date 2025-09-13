@@ -93,19 +93,22 @@ function project_save_as(save_and_quit: bool = false) {
 	});
 }
 
+function project_fetch_default_meshes() {
+	if (project_mesh_list == null) {
+		project_mesh_list = file_read_directory(path_data() + path_sep + "meshes");
+		for (let i: i32 = 0; i < project_mesh_list.length; ++i) {
+			let s: string = project_mesh_list[i];
+			project_mesh_list[i] = substring(project_mesh_list[i], 0, s.length - 4); // Trim .arm
+		}
+		array_push(project_mesh_list, "plane");
+		array_push(project_mesh_list, "sphere");
+	}
+}
+
 function project_new_box() {
 	ui_box_show_custom(function () {
 		if (ui_tab(ui_handle(__ID__), tr("New Project"))) {
-			if (project_mesh_list == null) {
-				project_mesh_list = file_read_directory(path_data() + path_sep + "meshes");
-				for (let i: i32 = 0; i < project_mesh_list.length; ++i) {
-					let s: string = project_mesh_list[i];
-					project_mesh_list[i] = substring(project_mesh_list[i], 0, s.length - 4); // Trim .arm
-				}
-				array_push(project_mesh_list, "plane");
-				array_push(project_mesh_list, "sphere");
-			}
-
+			project_fetch_default_meshes();
 			ui_row2();
 			let h_project_type: ui_handle_t = ui_handle(__ID__);
 			if (h_project_type.init) {
