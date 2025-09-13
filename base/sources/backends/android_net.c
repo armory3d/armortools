@@ -30,7 +30,7 @@ void iron_https_request(const char *url_base, const char *url_path, const char *
     jbyte *elements = (*env)->GetByteArrayElements(env, bytes_array, NULL);
     if (elements != NULL) {
         callback((char *)elements, callbackdata);
-        (*env)->ReleaseByteArrayElements(env, bytes_array, elements, JNI_ABORT);
+        // (*env)->ReleaseByteArrayElements(env, bytes_array, elements, JNI_ABORT);
     }
 
     (*vm)->DetachCurrentThread(vm);

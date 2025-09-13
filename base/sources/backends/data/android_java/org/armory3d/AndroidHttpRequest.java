@@ -13,7 +13,7 @@ class AndroidHttpRequest {
 	public static byte[] androidHttpRequest(String url_base, String url_path) throws Exception {
 		try {
 			// https://developer.android.com/reference/java/net/HttpURLConnection.html
-			URL url = new URL(url_base + "/" + url_path);
+			URL url = new URL("https://" + url_base + "/" + url_path);
 			HttpURLConnection urlConnection = (HttpURLConnection)url.openConnection();
 			InputStream in = new BufferedInputStream(urlConnection.getInputStream());
 
