@@ -755,7 +755,7 @@ function base_init_config() {
 	raw.server = "https://armorpaint.fra1.digitaloceanspaces.com";
 	raw.undo_steps = 4;
 	raw.pressure_radius = true;
-	///if arm_ios
+	///if (arm_ios || arm_linux)
 	raw.pressure_sensitivity = 1.0;
 	///else
 	raw.pressure_sensitivity = 2.0;
