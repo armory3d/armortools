@@ -77,7 +77,10 @@ else if (platform == "linux") {
 	add_gpu_backend("vulkan");
 	project.add_define("IRON_VULKAN");
 	project.add_define("_POSIX_C_SOURCE=200809L");
-	project.add_lib("dl");
+	project.add_lib("X11");
+	project.add_lib("Xi");
+	project.add_lib("Xcursor");
+	project.add_lib("Xrandr");
 	project.add_lib("ssl");
 	project.add_lib("vulkan");
 	if (flags.with_audio) {
@@ -265,10 +268,6 @@ if (flags.with_nfd && (platform == "windows" || platform == "linux" || platform 
 		project.add_lib("gtk-3");
 		project.add_lib("gobject-2.0");
 		project.add_lib("glib-2.0");
-		project.add_lib("X11");
-		project.add_lib("Xi");
-		project.add_lib("Xcursor");
-		project.add_lib("Xrandr");
 	}
 	else if (platform == "macos") {
 		project.add_cfiles("sources/libs/nfd.m");
