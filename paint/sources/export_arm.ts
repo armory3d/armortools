@@ -32,7 +32,12 @@ function export_arm_run_project() {
 	let bnodes: ui_node_canvas_t[] = [];
 	for (let i: i32 = 0; i < project_brushes.length; ++i) {
 		let b: slot_brush_t = project_brushes[i];
-		array_push(bnodes, b.canvas);
+		let c: ui_node_canvas_t = util_clone_canvas(b.canvas);
+		for (let i: i32 = 0; i < c.nodes.length; ++i) {
+			let n: ui_node_t = c.nodes[i];
+			export_arm_export_node(n);
+		}
+		array_push(bnodes, c);
 	}
 
 	let mgroups: ui_node_canvas_t[] = null;
