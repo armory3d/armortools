@@ -267,6 +267,8 @@ if (flags.with_nfd && (platform == "windows" || platform == "linux" || platform 
 		project.add_lib("glib-2.0");
 		project.add_lib("X11");
 		project.add_lib("Xi");
+		project.add_lib("Xcursor");
+		project.add_lib("Xrandr");
 	}
 	else if (platform == "macos") {
 		project.add_cfiles("sources/libs/nfd.m");

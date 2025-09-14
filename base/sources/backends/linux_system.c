@@ -1,8 +1,6 @@
 #include "linux_system.h"
 #include <iron_gpu.h>
-#include <iron_video.h>
 #include <iron_system.h>
-#include <assert.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,19 +10,18 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <time.h>
-#include <dlfcn.h>
-#include <X11/Xlib.h>
 #include <sys/stat.h>
 #include <sys/time.h>
+#include <X11/Xlib.h>
+#include <X11/XKBlib.h>
+#include <X11/Xcursor/Xcursor.h>
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_xlib.h>
 
 #define Button6 6
 #define Button7 7
 
-struct iron_x11_procs xlib = {0};
-struct x11_context x11_ctx = {0};
-
+static struct x11_context x11_ctx = {0};
 static size_t clipboardStringSize = 1024;
 static char *clipboardString = NULL;
 static char buffer[1024];
@@ -34,261 +31,24 @@ static const char *videoFormats[] = {"ogv", NULL};
 static struct timeval start;
 static bool mouse_hidden = false;
 static int xi_extension = -1;
-
-bool iron_x11_init();
-
-void iron_display_init() {
-	static bool display_initialized = false;
-	if (display_initialized) {
-		return;
-	}
-
-	iron_x11_init();
-
-	Window root_window = RootWindow(x11_ctx.display, DefaultScreen(x11_ctx.display));
-	XRRScreenResources *screen_resources = xlib.XRRGetScreenResourcesCurrent(x11_ctx.display, root_window);
-	RROutput primary_output = xlib.XRRGetOutputPrimary(x11_ctx.display, root_window);
-
-	for (int i = 0; i < screen_resources->noutput; i++) {
-		if (i >= MAXIMUM_DISPLAYS) {
-			iron_error("Too many screens (maximum %i)", MAXIMUM_DISPLAYS);
-			break;
-		}
-
-		XRROutputInfo *output_info = xlib.XRRGetOutputInfo(x11_ctx.display, screen_resources, screen_resources->outputs[i]);
-		if (output_info->connection != RR_Connected || output_info->crtc == None) {
-			xlib.XRRFreeOutputInfo(output_info);
-			continue;
-		}
-
-		XRRCrtcInfo *crtc_info = xlib.XRRGetCrtcInfo(x11_ctx.display, screen_resources, output_info->crtc);
-
-		struct iron_x11_display *display = &x11_ctx.displays[x11_ctx.num_displays++];
-		display->index = i;
-		display->x = crtc_info->x;
-		display->y = crtc_info->y;
-		display->width = crtc_info->width;
-		display->height = crtc_info->height;
-		display->primary = screen_resources->outputs[i] == primary_output;
-		display->crtc = output_info->crtc;
-		display->output = screen_resources->outputs[i];
-
-		xlib.XRRFreeOutputInfo(output_info);
-		xlib.XRRFreeCrtcInfo(crtc_info);
-	}
-
-	xlib.XRRFreeScreenResources(screen_resources);
-	display_initialized = true;
-}
-
-iron_display_mode_t iron_display_current_mode(int display_index) {
-	struct iron_x11_display *display = &x11_ctx.displays[display_index];
-	iron_display_mode_t mode;
-	mode.x = 0;
-	mode.y = 0;
-	mode.width = display->width;
-	mode.height = display->height;
-	mode.frequency = 60;
-	mode.bits_per_pixel = 32;
-	mode.pixels_per_inch = 96;
-
-	Window root_window = DefaultRootWindow(x11_ctx.display);
-	XRRScreenResources *screen_resources = xlib.XRRGetScreenResourcesCurrent(x11_ctx.display, root_window);
-
-	XRROutputInfo *output_info = xlib.XRRGetOutputInfo(x11_ctx.display, screen_resources, screen_resources->outputs[display->index]);
-	if (output_info->connection != RR_Connected || output_info->crtc == None) {
-		xlib.XRRFreeOutputInfo(output_info);
-		xlib.XRRFreeScreenResources(screen_resources);
-		return mode;
-	}
-
-	XRRCrtcInfo *crtc_info = xlib.XRRGetCrtcInfo(x11_ctx.display, screen_resources, output_info->crtc);
-	for (int j = 0; j < output_info->nmode; j++) {
-		RRMode rr_mode = crtc_info->mode;
-		XRRModeInfo *mode_info = NULL;
-		for (int k = 0; k < screen_resources->nmode; k++) {
-			if (screen_resources->modes[k].id == rr_mode) {
-				mode_info = &screen_resources->modes[k];
-				break;
-			}
-		}
-
-		if (mode_info == NULL) {
-			continue;
-		}
-		mode.x = display->x;
-		mode.y = display->y;
-		mode.width = mode_info->width;
-		mode.height = mode_info->height;
-		mode.pixels_per_inch = 96;
-		mode.bits_per_pixel = 32;
-		if (mode_info->hTotal && mode_info->vTotal) {
-			mode.frequency = (mode_info->dotClock / (mode_info->hTotal * mode_info->vTotal));
-		}
-	}
-	xlib.XRRFreeOutputInfo(output_info);
-	xlib.XRRFreeCrtcInfo(crtc_info);
-	xlib.XRRFreeScreenResources(screen_resources);
-	return mode;
-}
-
-int iron_primary_display(void) {
-	for (int i = 0; i < x11_ctx.num_displays; i++) {
-		if (x11_ctx.displays[i].primary) {
-			return i;
-		}
-	}
-	return 0;
-}
-
-int iron_count_displays(void) {
-	return x11_ctx.num_displays;
-}
-
-int iron_window_x() {
-	return 0;
-}
-
-int iron_window_y() {
-	return 0;
-}
-
-int iron_window_width() {
-	return x11_ctx.windows[0].width;
-}
-
-int iron_window_height() {
-	return x11_ctx.windows[0].height;
-}
-
-void iron_window_resize(int width, int height) {
-	struct iron_x11_window *window = &x11_ctx.windows[0];
-	xlib.XResizeWindow(x11_ctx.display, window->window, width, height);
-}
-
-void iron_window_move(int x, int y) {
-	struct iron_x11_window *window = &x11_ctx.windows[0];
-	xlib.XMoveWindow(x11_ctx.display, window->window, x, y);
-}
-
-void iron_window_change_mode(iron_window_mode_t mode) {
-	struct iron_x11_window *window = &x11_ctx.windows[0];
-	if (mode == window->mode) {
-		return;
-	}
-	window->mode = mode;
-	XEvent xev;
-	memset(&xev, 0, sizeof(xev));
-	xev.type = ClientMessage;
-	xev.xclient.window = window->window;
-	xev.xclient.message_type = x11_ctx.atoms.NET_WM_STATE;
-	xev.xclient.format = 32;
-	xev.xclient.data.l[0] = mode == IRON_WINDOW_MODE_FULLSCREEN ? 1 : 0;
-	xev.xclient.data.l[1] = x11_ctx.atoms.NET_WM_STATE_FULLSCREEN;
-	xev.xclient.data.l[2] = 0;
-	xlib.XMapWindow(x11_ctx.display, window->window);
-	xlib.XSendEvent(x11_ctx.display, DefaultRootWindow(x11_ctx.display), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev);
-	xlib.XFlush(x11_ctx.display);
-}
-
-int iron_window_display() {
-	struct iron_x11_window *window = &x11_ctx.windows[0];
-	return window->display_index;
-}
-
-void iron_window_destroy() {
-	xlib.XFlush(x11_ctx.display);
-	struct iron_x11_window *window = &x11_ctx.windows[0];
-	xlib.XDestroyIC(window->xInputContext);
-	xlib.XCloseIM(window->xInputMethod);
-	xlib.XDestroyWindow(x11_ctx.display, window->window);
-	xlib.XFlush(x11_ctx.display);
-	*window = (struct iron_x11_window){0};
-}
-
-void iron_window_show() {
-	struct iron_x11_window *window = &x11_ctx.windows[0];
-	xlib.XMapWindow(x11_ctx.display, window->window);
-}
-
-void iron_window_hide() {
-	struct iron_x11_window *window = &x11_ctx.windows[0];
-	xlib.XUnmapWindow(x11_ctx.display, window->window);
-}
-
-void iron_window_set_title(const char *title) {
-	struct iron_x11_window *window = &x11_ctx.windows[0];
-	xlib.XChangeProperty(x11_ctx.display, window->window, x11_ctx.atoms.NET_WM_NAME, x11_ctx.atoms.UTF8_STRING, 8, PropModeReplace, (unsigned char *)title, strlen(title));
-	xlib.XChangeProperty(x11_ctx.display, window->window, x11_ctx.atoms.NET_WM_ICON_NAME, x11_ctx.atoms.UTF8_STRING, 8, PropModeReplace, (unsigned char *)title, strlen(title));
-	xlib.XFlush(x11_ctx.display);
-}
-
-void iron_window_create(iron_window_options_t *win) {
-	struct iron_x11_window *window = &x11_ctx.windows[0];
-	window->width = win->width;
-	window->height = win->height;
-
-	Visual *visual = NULL;
-	XSetWindowAttributes set_window_attribs = {0};
-
-	XColor color;
-	Colormap colormap = DefaultColormap(x11_ctx.display, DefaultScreen(x11_ctx.display));
-	color.red = (32 * 65535) / 255;
-	color.green = (32 * 65535) / 255;
-	color.blue = (32 * 65535) / 255;
-	xlib.XAllocColor(x11_ctx.display, colormap, &color);
-	set_window_attribs.background_pixel = color.pixel;
-
-	set_window_attribs.border_pixel = 0;
-	set_window_attribs.event_mask =
-		KeyPressMask | KeyReleaseMask | ExposureMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask | StructureNotifyMask | FocusChangeMask;
-	int screen = DefaultScreen(x11_ctx.display);
-	visual = DefaultVisual(x11_ctx.display, screen);
-	int depth = DefaultDepth(x11_ctx.display, screen);
-	set_window_attribs.colormap = xlib.XCreateColormap(x11_ctx.display, RootWindow(x11_ctx.display, screen), visual, AllocNone);
-	window->window = xlib.XCreateWindow(x11_ctx.display, RootWindow(x11_ctx.display, DefaultScreen(x11_ctx.display)), 0, 0, win->width, win->height, 0, depth,
-										InputOutput, visual, CWBackPixel | CWBorderPixel | CWColormap | CWEventMask, &set_window_attribs);
-
-	static char nameClass[256];
-	static const char *nameClassAddendum = "_IronApplication";
-	strncpy(nameClass, iron_application_name(), sizeof(nameClass) - strlen(nameClassAddendum) - 1);
-	strcat(nameClass, nameClassAddendum);
-	char resNameBuffer[256];
-	strncpy(resNameBuffer, iron_application_name(), 256);
-	XClassHint classHint = {.res_name = resNameBuffer, .res_class = nameClass};
-	xlib.XSetClassHint(x11_ctx.display, window->window, &classHint);
-
-	xlib.XSetLocaleModifiers("@im=none");
-	window->xInputMethod = xlib.XOpenIM(x11_ctx.display, NULL, NULL, NULL);
-	window->xInputContext = xlib.XCreateIC(window->xInputMethod, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, window->window, NULL);
-	xlib.XSetICFocus(window->xInputContext);
-
-	window->mode = IRON_WINDOW_MODE_WINDOW;
-	iron_window_change_mode(win->mode);
-
-	xlib.XMapWindow(x11_ctx.display, window->window);
-
-	Atom XdndVersion = 5;
-	xlib.XChangeProperty(x11_ctx.display, window->window, x11_ctx.atoms.XdndAware, XA_ATOM, 32, PropModeReplace, (unsigned char *)&XdndVersion, 1);
-	xlib.XSetWMProtocols(x11_ctx.display, window->window, &x11_ctx.atoms.WM_DELETE_WINDOW, 1);
-
-	iron_window_set_title(win->title);
-
-	if (x11_ctx.pen.id != -1) {
-		XIEventMask mask;
-		unsigned char mask_data[XIMaskLen(XI_LASTEVENT)];
-		memset(mask_data, 0, sizeof(mask_data));
-		mask.deviceid = x11_ctx.pen.id;
-		mask.mask_len = sizeof(mask_data);
-		mask.mask = mask_data;
-		XISetMask(mask.mask, XI_Motion);
-		XISetMask(mask.mask, XI_ButtonPress);
-		XISetMask(mask.mask, XI_ButtonRelease);
-		XISelectEvents(x11_ctx.display, window->window, &mask, 1);
-	}
-
-	gpu_init(win->depth_bits, win->vsync);
-}
+static Atom XdndAware;
+static Atom XdndDrop;
+static Atom XdndEnter;
+static Atom XdndTextUriList;
+static Atom XdndStatus;
+static Atom XdndActionCopy;
+static Atom XdndSelection;
+static Atom CLIPBOARD;
+static Atom UTF8_STRING;
+static Atom XSEL_DATA;
+static Atom TARGETS;
+static Atom MULTIPLE;
+static Atom TEXT_PLAIN;
+static Atom WM_DELETE_WINDOW;
+static Atom NET_WM_NAME;
+static Atom NET_WM_ICON_NAME;
+static Atom NET_WM_STATE;
+static Atom NET_WM_STATE_FULLSCREEN;
 
 static struct {
 	void (*resize_callback)(int width, int height, void *data);
@@ -298,175 +58,38 @@ static struct {
 	void *close_data;
 } iron_internal_window_callbacks[1];
 
-void iron_window_set_resize_callback(void (*callback)(int width, int height, void *data), void *data) {
-	iron_internal_window_callbacks[0].resize_callback = callback;
-	iron_internal_window_callbacks[0].resize_data = data;
-}
-
-void iron_internal_call_resize_callback(int width, int height) {
-	if (iron_internal_window_callbacks[0].resize_callback != NULL) {
-		iron_internal_window_callbacks[0].resize_callback(width, height, iron_internal_window_callbacks[0].resize_data);
-	}
-}
-
-void iron_window_set_close_callback(bool (*callback)(void *data), void *data) {
-	iron_internal_window_callbacks[0].close_callback = callback;
-	iron_internal_window_callbacks[0].close_data = data;
-}
-
-bool iron_internal_call_close_callback() {
-	if (iron_internal_window_callbacks[0].close_callback != NULL) {
-		return iron_internal_window_callbacks[0].close_callback(iron_internal_window_callbacks[0].close_data);
-	}
-	return true;
-}
-
-iron_window_mode_t iron_window_get_mode() {
-	return x11_ctx.windows[0].mode;
-}
-
-static void load_lib(void **lib, const char *name) {
-	char libname[64];
-	sprintf(libname, "lib%s.so", name);
-	*lib = dlopen(libname, RTLD_LAZY);
-	if (*lib != NULL) {
-		return;
-	}
-	// Ubuntu and Fedora only ship libFoo.so.major by default, so look for those.
-	for (int i = 0; i < 10; i++) {
-		sprintf(libname, "lib%s.so.%i", name, i);
-		*lib = dlopen(libname, RTLD_LAZY);
-		if (*lib != NULL) {
-			return;
-		}
-	}
-	iron_error("Failed to load lib%s.so", name);
-}
-
 int iron_x11_error_handler(Display *display, XErrorEvent *error_event) {
-	xlib.XGetErrorText(display, error_event->error_code, buffer, 1024);
+	XGetErrorText(display, error_event->error_code, buffer, 1024);
 	iron_error("X Error: %s", buffer);
 	return 0;
 }
 
-bool iron_x11_init() {
-	load_lib(&x11_ctx.libs.X11, "X11");
-	load_lib(&x11_ctx.libs.Xi, "Xi");
-	load_lib(&x11_ctx.libs.Xcursor, "Xcursor");
-	load_lib(&x11_ctx.libs.Xrandr, "Xrandr");
-
-	xlib.XOpenDisplay = dlsym(x11_ctx.libs.X11, "XOpenDisplay");
-	xlib.XCloseDisplay = dlsym(x11_ctx.libs.X11, "XCloseDisplay");
-	xlib.XInitThreads = dlsym(x11_ctx.libs.X11, "XInitThreads");
-	xlib.XSetErrorHandler = dlsym(x11_ctx.libs.X11, "XSetErrorHandler");
-	xlib.XGetErrorText = dlsym(x11_ctx.libs.X11, "XGetErrorText");
-	xlib.XInternAtoms = dlsym(x11_ctx.libs.X11, "XInternAtoms");
-	xlib.XPending = dlsym(x11_ctx.libs.X11, "XPending");
-	xlib.XFlush = dlsym(x11_ctx.libs.X11, "XFlush");
-	xlib.XNextEvent = dlsym(x11_ctx.libs.X11, "XNextEvent");
-	xlib.XRefreshKeyboardMapping = dlsym(x11_ctx.libs.X11, "XRefreshKeyboardMapping");
-	xlib.XwcLookupString = dlsym(x11_ctx.libs.X11, "XwcLookupString");
-	xlib.XFilterEvent = dlsym(x11_ctx.libs.X11, "XFilterEvent");
-	xlib.XConvertSelection = dlsym(x11_ctx.libs.X11, "XConvertSelection");
-	xlib.XSetSelectionOwner = dlsym(x11_ctx.libs.X11, "XSetSelectionOwner");
-	xlib.XLookupString = dlsym(x11_ctx.libs.X11, "XLookupString");
-	xlib.XkbKeycodeToKeysym = dlsym(x11_ctx.libs.X11, "XkbKeycodeToKeysym");
-	xlib.XSendEvent = dlsym(x11_ctx.libs.X11, "XSendEvent");
-	xlib.XGetWindowProperty = dlsym(x11_ctx.libs.X11, "XGetWindowProperty");
-	xlib.XFree = dlsym(x11_ctx.libs.X11, "XFree");
-	xlib.XChangeProperty = dlsym(x11_ctx.libs.X11, "XChangeProperty");
-	xlib.XDefineCursor = dlsym(x11_ctx.libs.X11, "XDefineCursor");
-	xlib.XUndefineCursor = dlsym(x11_ctx.libs.X11, "XUndefineCursor");
-	xlib.XCreateBitmapFromData = dlsym(x11_ctx.libs.X11, "XCreateBitmapFromData");
-	xlib.XCreatePixmapCursor = dlsym(x11_ctx.libs.X11, "XCreatePixmapCursor");
-	xlib.XFreePixmap = dlsym(x11_ctx.libs.X11, "XFreePixmap");
-	xlib.XWarpPointer = dlsym(x11_ctx.libs.X11, "XWarpPointer");
-	xlib.XQueryPointer = dlsym(x11_ctx.libs.X11, "XQueryPointer");
-	xlib.XCreateColormap = dlsym(x11_ctx.libs.X11, "XCreateColormap");
-	xlib.XCreateWindow = dlsym(x11_ctx.libs.X11, "XCreateWindow");
-	xlib.XMoveWindow = dlsym(x11_ctx.libs.X11, "XMoveWindow");
-	xlib.XResizeWindow = dlsym(x11_ctx.libs.X11, "XResizeWindow");
-	xlib.XDestroyWindow = dlsym(x11_ctx.libs.X11, "XDestroyWindow");
-	xlib.XSetClassHint = dlsym(x11_ctx.libs.X11, "XSetClassHint");
-	xlib.XSetLocaleModifiers = dlsym(x11_ctx.libs.X11, "XSetLocaleModifiers");
-	xlib.XOpenIM = dlsym(x11_ctx.libs.X11, "XOpenIM");
-	xlib.XCloseIM = dlsym(x11_ctx.libs.X11, "XCloseIM");
-	xlib.XCreateIC = dlsym(x11_ctx.libs.X11, "XCreateIC");
-	xlib.XDestroyIC = dlsym(x11_ctx.libs.X11, "XDestroyIC");
-	xlib.XSetICFocus = dlsym(x11_ctx.libs.X11, "XSetICFocus");
-	xlib.XMapWindow = dlsym(x11_ctx.libs.X11, "XMapWindow");
-	xlib.XUnmapWindow = dlsym(x11_ctx.libs.X11, "XUnmapWindow");
-	xlib.XSetWMProtocols = dlsym(x11_ctx.libs.X11, "XSetWMProtocols");
-	xlib.XPeekEvent = dlsym(x11_ctx.libs.X11, "XPeekEvent");
-	xlib.XAllocColor = dlsym(x11_ctx.libs.X11, "XAllocColor");
-	xlib.XListInputDevices = dlsym(x11_ctx.libs.Xi, "XListInputDevices");
-	xlib.XFreeDeviceList = dlsym(x11_ctx.libs.Xi, "XFreeDeviceList");
-	xlib.XOpenDevice = dlsym(x11_ctx.libs.Xi, "XOpenDevice");
-	xlib.XCloseDevice = dlsym(x11_ctx.libs.Xi, "XCloseDevice");
-	xlib.XSelectExtensionEvent = dlsym(x11_ctx.libs.Xi, "XSelectExtensionEvent");
-	xlib.XcursorLibraryLoadCursor = dlsym(x11_ctx.libs.Xcursor, "XcursorLibraryLoadCursor");
-	xlib.XRRGetScreenResourcesCurrent = dlsym(x11_ctx.libs.Xrandr, "XRRGetScreenResourcesCurrent");
-	xlib.XRRGetOutputPrimary = dlsym(x11_ctx.libs.Xrandr, "XRRGetOutputPrimary");
-	xlib.XRRGetOutputInfo = dlsym(x11_ctx.libs.Xrandr, "XRRGetOutputInfo");
-	xlib.XRRFreeOutputInfo = dlsym(x11_ctx.libs.Xrandr, "XRRFreeOutputInfo");
-	xlib.XRRGetCrtcInfo = dlsym(x11_ctx.libs.Xrandr, "XRRGetCrtcInfo");
-	xlib.XRRFreeCrtcInfo = dlsym(x11_ctx.libs.Xrandr, "XRRFreeCrtcInfo");
-	xlib.XRRFreeScreenResources = dlsym(x11_ctx.libs.Xrandr, "XRRFreeScreenResources");
-
-	xlib.XInitThreads(); // Fixes random ubuntu22 crash
-
-	x11_ctx.display = xlib.XOpenDisplay(NULL);
+void iron_x11_init() {
+	XInitThreads(); // Fixes random ubuntu22 crash
+	x11_ctx.display = XOpenDisplay(NULL);
 	if (!x11_ctx.display) {
-		return false;
+		return;
 	}
-
-	xlib.XSetErrorHandler(iron_x11_error_handler);
-
-	// this should be kept in sync with the x11_atoms struct
-	static char *atom_names[] = {
-		"XdndAware",
-		"XdndDrop",
-		"XdndEnter",
-		"text/uri-list",
-		"XdndStatus",
-		"XdndActionCopy",
-		"XdndSelection",
-		"CLIPBOARD",
-		"UTF8_STRING",
-		"XSEL_DATA",
-		"TARGETS",
-		"MULTIPLE",
-		"text/plain;charset=utf-8",
-		"WM_DELETE_WINDOW",
-		"_MOTIF_WM_HINTS",
-		"_NET_WM_NAME",
-		"_NET_WM_ICON_NAME",
-		"_NET_WM_STATE",
-		"_NET_WM_STATE_FULLSCREEN",
-		XI_MOUSE,
-		XI_TABLET,
-		XI_KEYBOARD,
-		XI_TOUCHSCREEN,
-		XI_TOUCHPAD,
-		XI_BUTTONBOX,
-		XI_BARCODE,
-		XI_TRACKBALL,
-		XI_QUADRATURE,
-		XI_ID_MODULE,
-		XI_ONE_KNOB,
-		XI_NINE_KNOB,
-		XI_KNOB_BOX,
-		XI_SPACEBALL,
-		XI_DATAGLOVE,
-		XI_EYETRACKER,
-		XI_CURSORKEYS,
-		XI_FOOTMOUSE,
-		XI_JOYSTICK,
-	};
-
-	assert((sizeof atom_names / sizeof atom_names[0]) == (sizeof(struct iron_x11_atoms) / sizeof(Atom)));
-	xlib.XInternAtoms(x11_ctx.display, atom_names, sizeof atom_names / sizeof atom_names[0], False, (Atom *)&x11_ctx.atoms);
+	XSetErrorHandler(iron_x11_error_handler);
 	clipboardString = (char *)malloc(clipboardStringSize);
+
+	XdndAware = XInternAtom(x11_ctx.display, "XdndAware", False);
+	XdndDrop = XInternAtom(x11_ctx.display, "XdndDrop", False);
+	XdndEnter = XInternAtom(x11_ctx.display, "XdndEnter", False);
+	XdndTextUriList = XInternAtom(x11_ctx.display, "text/uri-list", False);
+	XdndStatus = XInternAtom(x11_ctx.display, "XdndStatus", False);
+	XdndActionCopy = XInternAtom(x11_ctx.display, "XdndActionCopy", False);
+	XdndSelection = XInternAtom(x11_ctx.display, "XdndSelection", False);
+	UTF8_STRING = XInternAtom(x11_ctx.display, "UTF8_STRING", False);
+	XSEL_DATA = XInternAtom(x11_ctx.display, "XSEL_DATA", False);
+	TARGETS = XInternAtom(x11_ctx.display, "TARGETS", False);
+	MULTIPLE = XInternAtom(x11_ctx.display, "MULTIPLE", False);
+	TEXT_PLAIN = XInternAtom(x11_ctx.display, "text/plain;charset=utf-8", False);
+	WM_DELETE_WINDOW = XInternAtom(x11_ctx.display, "WM_DELETE_WINDOW", False);
+	NET_WM_NAME = XInternAtom(x11_ctx.display, "_NET_WM_NAME", False);
+	NET_WM_ICON_NAME = XInternAtom(x11_ctx.display, "_NET_WM_ICON_NAME", False);
+	NET_WM_STATE = XInternAtom(x11_ctx.display, "_NET_WM_STATE", False);
+	NET_WM_STATE_FULLSCREEN = XInternAtom(x11_ctx.display, "_NET_WM_STATE_FULLSCREEN", False);
 
 	int event, error;
 	XQueryExtension(x11_ctx.display, "XInputExtension", &xi_extension, &event, &error);
@@ -511,8 +134,286 @@ bool iron_x11_init() {
 		d->release = is_pen ? iron_internal_pen_trigger_release : iron_internal_eraser_trigger_release;
 	}
 	XIFreeDeviceInfo(devices);
+}
 
+void iron_display_init() {
+	static bool display_initialized = false;
+	if (display_initialized) {
+		return;
+	}
+
+	iron_x11_init();
+
+	Window root_window = RootWindow(x11_ctx.display, DefaultScreen(x11_ctx.display));
+	XRRScreenResources *screen_resources = XRRGetScreenResourcesCurrent(x11_ctx.display, root_window);
+	RROutput primary_output = XRRGetOutputPrimary(x11_ctx.display, root_window);
+
+	for (int i = 0; i < screen_resources->noutput; i++) {
+		if (i >= MAXIMUM_DISPLAYS) {
+			iron_error("Too many screens (maximum %i)", MAXIMUM_DISPLAYS);
+			break;
+		}
+
+		XRROutputInfo *output_info = XRRGetOutputInfo(x11_ctx.display, screen_resources, screen_resources->outputs[i]);
+		if (output_info->connection != RR_Connected || output_info->crtc == None) {
+			XRRFreeOutputInfo(output_info);
+			continue;
+		}
+
+		XRRCrtcInfo *crtc_info = XRRGetCrtcInfo(x11_ctx.display, screen_resources, output_info->crtc);
+
+		struct iron_x11_display *display = &x11_ctx.displays[x11_ctx.num_displays++];
+		display->index = i;
+		display->x = crtc_info->x;
+		display->y = crtc_info->y;
+		display->width = crtc_info->width;
+		display->height = crtc_info->height;
+		display->primary = screen_resources->outputs[i] == primary_output;
+		display->crtc = output_info->crtc;
+		display->output = screen_resources->outputs[i];
+
+		XRRFreeOutputInfo(output_info);
+		XRRFreeCrtcInfo(crtc_info);
+	}
+
+	XRRFreeScreenResources(screen_resources);
+	display_initialized = true;
+}
+
+iron_display_mode_t iron_display_current_mode(int display_index) {
+	struct iron_x11_display *display = &x11_ctx.displays[display_index];
+	iron_display_mode_t mode;
+	mode.x = 0;
+	mode.y = 0;
+	mode.width = display->width;
+	mode.height = display->height;
+	mode.frequency = 60;
+	mode.bits_per_pixel = 32;
+	mode.pixels_per_inch = 96;
+
+	Window root_window = DefaultRootWindow(x11_ctx.display);
+	XRRScreenResources *screen_resources = XRRGetScreenResourcesCurrent(x11_ctx.display, root_window);
+
+	XRROutputInfo *output_info = XRRGetOutputInfo(x11_ctx.display, screen_resources, screen_resources->outputs[display->index]);
+	if (output_info->connection != RR_Connected || output_info->crtc == None) {
+		XRRFreeOutputInfo(output_info);
+		XRRFreeScreenResources(screen_resources);
+		return mode;
+	}
+
+	XRRCrtcInfo *crtc_info = XRRGetCrtcInfo(x11_ctx.display, screen_resources, output_info->crtc);
+	for (int j = 0; j < output_info->nmode; j++) {
+		RRMode rr_mode = crtc_info->mode;
+		XRRModeInfo *mode_info = NULL;
+		for (int k = 0; k < screen_resources->nmode; k++) {
+			if (screen_resources->modes[k].id == rr_mode) {
+				mode_info = &screen_resources->modes[k];
+				break;
+			}
+		}
+
+		if (mode_info == NULL) {
+			continue;
+		}
+		mode.x = display->x;
+		mode.y = display->y;
+		mode.width = mode_info->width;
+		mode.height = mode_info->height;
+		mode.pixels_per_inch = 96;
+		mode.bits_per_pixel = 32;
+		if (mode_info->hTotal && mode_info->vTotal) {
+			mode.frequency = (mode_info->dotClock / (mode_info->hTotal * mode_info->vTotal));
+		}
+	}
+	XRRFreeOutputInfo(output_info);
+	XRRFreeCrtcInfo(crtc_info);
+	XRRFreeScreenResources(screen_resources);
+	return mode;
+}
+
+int iron_primary_display(void) {
+	for (int i = 0; i < x11_ctx.num_displays; i++) {
+		if (x11_ctx.displays[i].primary) {
+			return i;
+		}
+	}
+	return 0;
+}
+
+int iron_count_displays(void) {
+	return x11_ctx.num_displays;
+}
+
+int iron_window_x() {
+	return 0;
+}
+
+int iron_window_y() {
+	return 0;
+}
+
+int iron_window_width() {
+	return x11_ctx.windows[0].width;
+}
+
+int iron_window_height() {
+	return x11_ctx.windows[0].height;
+}
+
+void iron_window_resize(int width, int height) {
+	struct iron_x11_window *window = &x11_ctx.windows[0];
+	XResizeWindow(x11_ctx.display, window->window, width, height);
+}
+
+void iron_window_move(int x, int y) {
+	struct iron_x11_window *window = &x11_ctx.windows[0];
+	XMoveWindow(x11_ctx.display, window->window, x, y);
+}
+
+void iron_window_change_mode(iron_window_mode_t mode) {
+	struct iron_x11_window *window = &x11_ctx.windows[0];
+	if (mode == window->mode) {
+		return;
+	}
+	window->mode = mode;
+	XEvent xev;
+	memset(&xev, 0, sizeof(xev));
+	xev.type = ClientMessage;
+	xev.xclient.window = window->window;
+	xev.xclient.message_type = NET_WM_STATE;
+	xev.xclient.format = 32;
+	xev.xclient.data.l[0] = mode == IRON_WINDOW_MODE_FULLSCREEN ? 1 : 0;
+	xev.xclient.data.l[1] = NET_WM_STATE_FULLSCREEN;
+	xev.xclient.data.l[2] = 0;
+	XMapWindow(x11_ctx.display, window->window);
+	XSendEvent(x11_ctx.display, DefaultRootWindow(x11_ctx.display), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev);
+	XFlush(x11_ctx.display);
+}
+
+int iron_window_display() {
+	struct iron_x11_window *window = &x11_ctx.windows[0];
+	return window->display_index;
+}
+
+void iron_window_destroy() {
+	XFlush(x11_ctx.display);
+	struct iron_x11_window *window = &x11_ctx.windows[0];
+	XDestroyIC(window->xInputContext);
+	XCloseIM(window->xInputMethod);
+	XDestroyWindow(x11_ctx.display, window->window);
+	XFlush(x11_ctx.display);
+	*window = (struct iron_x11_window){0};
+}
+
+void iron_window_show() {
+	struct iron_x11_window *window = &x11_ctx.windows[0];
+	XMapWindow(x11_ctx.display, window->window);
+}
+
+void iron_window_hide() {
+	struct iron_x11_window *window = &x11_ctx.windows[0];
+	XUnmapWindow(x11_ctx.display, window->window);
+}
+
+void iron_window_set_title(const char *title) {
+	struct iron_x11_window *window = &x11_ctx.windows[0];
+	XChangeProperty(x11_ctx.display, window->window, NET_WM_NAME, UTF8_STRING, 8, PropModeReplace, (unsigned char *)title, strlen(title));
+	XChangeProperty(x11_ctx.display, window->window, NET_WM_ICON_NAME, UTF8_STRING, 8, PropModeReplace, (unsigned char *)title, strlen(title));
+	XFlush(x11_ctx.display);
+}
+
+void iron_window_create(iron_window_options_t *win) {
+	struct iron_x11_window *window = &x11_ctx.windows[0];
+	window->width = win->width;
+	window->height = win->height;
+
+	Visual *visual = NULL;
+	XSetWindowAttributes set_window_attribs = {0};
+
+	XColor color;
+	Colormap colormap = DefaultColormap(x11_ctx.display, DefaultScreen(x11_ctx.display));
+	color.red = (32 * 65535) / 255;
+	color.green = (32 * 65535) / 255;
+	color.blue = (32 * 65535) / 255;
+	XAllocColor(x11_ctx.display, colormap, &color);
+	set_window_attribs.background_pixel = color.pixel;
+
+	set_window_attribs.border_pixel = 0;
+	set_window_attribs.event_mask =
+		KeyPressMask | KeyReleaseMask | ExposureMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask | StructureNotifyMask | FocusChangeMask;
+	int screen = DefaultScreen(x11_ctx.display);
+	visual = DefaultVisual(x11_ctx.display, screen);
+	int depth = DefaultDepth(x11_ctx.display, screen);
+	set_window_attribs.colormap = XCreateColormap(x11_ctx.display, RootWindow(x11_ctx.display, screen), visual, AllocNone);
+	window->window = XCreateWindow(x11_ctx.display, RootWindow(x11_ctx.display, DefaultScreen(x11_ctx.display)), 0, 0, win->width, win->height, 0, depth,
+										InputOutput, visual, CWBackPixel | CWBorderPixel | CWColormap | CWEventMask, &set_window_attribs);
+
+	static char nameClass[256];
+	static const char *nameClassAddendum = "_IronApplication";
+	strncpy(nameClass, iron_application_name(), sizeof(nameClass) - strlen(nameClassAddendum) - 1);
+	strcat(nameClass, nameClassAddendum);
+	char resNameBuffer[256];
+	strncpy(resNameBuffer, iron_application_name(), 256);
+	XClassHint classHint = {.res_name = resNameBuffer, .res_class = nameClass};
+	XSetClassHint(x11_ctx.display, window->window, &classHint);
+
+	XSetLocaleModifiers("@im=none");
+	window->xInputMethod = XOpenIM(x11_ctx.display, NULL, NULL, NULL);
+	window->xInputContext = XCreateIC(window->xInputMethod, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, window->window, NULL);
+	XSetICFocus(window->xInputContext);
+
+	window->mode = IRON_WINDOW_MODE_WINDOW;
+	iron_window_change_mode(win->mode);
+
+	XMapWindow(x11_ctx.display, window->window);
+
+	Atom XdndVersion = 5;
+	XChangeProperty(x11_ctx.display, window->window, XdndAware, XA_ATOM, 32, PropModeReplace, (unsigned char *)&XdndVersion, 1);
+	XSetWMProtocols(x11_ctx.display, window->window, &WM_DELETE_WINDOW, 1);
+
+	iron_window_set_title(win->title);
+
+	if (x11_ctx.pen.id != -1) {
+		XIEventMask mask;
+		unsigned char mask_data[XIMaskLen(XI_LASTEVENT)];
+		memset(mask_data, 0, sizeof(mask_data));
+		mask.deviceid = x11_ctx.pen.id;
+		mask.mask_len = sizeof(mask_data);
+		mask.mask = mask_data;
+		XISetMask(mask.mask, XI_Motion);
+		XISetMask(mask.mask, XI_ButtonPress);
+		XISetMask(mask.mask, XI_ButtonRelease);
+		XISelectEvents(x11_ctx.display, window->window, &mask, 1);
+	}
+
+	gpu_init(win->depth_bits, win->vsync);
+}
+
+void iron_window_set_resize_callback(void (*callback)(int width, int height, void *data), void *data) {
+	iron_internal_window_callbacks[0].resize_callback = callback;
+	iron_internal_window_callbacks[0].resize_data = data;
+}
+
+void iron_internal_call_resize_callback(int width, int height) {
+	if (iron_internal_window_callbacks[0].resize_callback != NULL) {
+		iron_internal_window_callbacks[0].resize_callback(width, height, iron_internal_window_callbacks[0].resize_data);
+	}
+}
+
+void iron_window_set_close_callback(bool (*callback)(void *data), void *data) {
+	iron_internal_window_callbacks[0].close_callback = callback;
+	iron_internal_window_callbacks[0].close_data = data;
+}
+
+bool iron_internal_call_close_callback() {
+	if (iron_internal_window_callbacks[0].close_callback != NULL) {
+		return iron_internal_window_callbacks[0].close_callback(iron_internal_window_callbacks[0].close_data);
+	}
 	return true;
+}
+
+iron_window_mode_t iron_window_get_mode() {
+	return x11_ctx.windows[0].mode;
 }
 
 static void check_pen_device(struct iron_x11_window *window, XEvent *event, struct x11_pen_device *pen) {
@@ -716,9 +617,9 @@ static bool _handle_messages() {
 	static int ignoreKeycode = 0;
 	static bool preventNextKeyDownEvent = false;
 
-	while (xlib.XPending(x11_ctx.display)) {
+	while (XPending(x11_ctx.display)) {
 		XEvent event;
-		xlib.XNextEvent(x11_ctx.display, &event);
+		XNextEvent(x11_ctx.display, &event);
 
 		if (event.type == GenericEvent && event.xcookie.extension == xi_extension) {
 			check_pen_device(&x11_ctx.windows[0], &event, &x11_ctx.pen);
@@ -734,17 +635,17 @@ static bool _handle_messages() {
 
 		switch (event.type) {
 		case MappingNotify: {
-			xlib.XRefreshKeyboardMapping(&event.xmapping);
+			XRefreshKeyboardMapping(&event.xmapping);
 			break;
 		}
 		case KeyPress: {
 			XKeyEvent *key = (XKeyEvent *)&event;
 			KeySym keysym;
 			wchar_t wchar;
-			bool wcConverted = xlib.XwcLookupString(k_window->xInputContext, key, &wchar, 1, &keysym, NULL);
+			bool wcConverted = XwcLookupString(k_window->xInputContext, key, &wchar, 1, &keysym, NULL);
 
 			bool isIgnoredKeySym = keysym == XK_Escape || keysym == XK_BackSpace || keysym == XK_Delete;
-			if (!controlDown && !xlib.XFilterEvent(&event, window) && !isIgnoredKeySym) {
+			if (!controlDown && !XFilterEvent(&event, window) && !isIgnoredKeySym) {
 				if (wcConverted) {
 					iron_internal_keyboard_trigger_key_press(wchar);
 				}
@@ -756,21 +657,21 @@ static bool _handle_messages() {
 				continue;
 			}
 
-			KeySym ksKey = xlib.XkbKeycodeToKeysym(x11_ctx.display, event.xkey.keycode, 0, 0);
+			KeySym ksKey = XkbKeycodeToKeysym(x11_ctx.display, event.xkey.keycode, 0, 0);
 			if (ksKey == XK_Control_L || ksKey == XK_Control_R) {
 				controlDown = true;
 			}
 			else if (controlDown && (ksKey == XK_v || ksKey == XK_V)) {
-				xlib.XConvertSelection(x11_ctx.display, x11_ctx.atoms.CLIPBOARD, x11_ctx.atoms.UTF8_STRING, x11_ctx.atoms.XSEL_DATA, window, CurrentTime);
+				XConvertSelection(x11_ctx.display, CLIPBOARD, UTF8_STRING, XSEL_DATA, window, CurrentTime);
 			}
 			else if (controlDown && (ksKey == XK_c || ksKey == XK_C)) {
-				xlib.XSetSelectionOwner(x11_ctx.display, x11_ctx.atoms.CLIPBOARD, window, CurrentTime);
+				XSetSelectionOwner(x11_ctx.display, CLIPBOARD, window, CurrentTime);
 				char *text = iron_internal_copy_callback();
 				if (text != NULL)
 					iron_copy_to_clipboard(text);
 			}
 			else if (controlDown && (ksKey == XK_x || ksKey == XK_X)) {
-				xlib.XSetSelectionOwner(x11_ctx.display, x11_ctx.atoms.CLIPBOARD, window, CurrentTime);
+				XSetSelectionOwner(x11_ctx.display, CLIPBOARD, window, CurrentTime);
 				char *text = iron_internal_cut_callback();
 				if (text != NULL)
 					iron_copy_to_clipboard(text);
@@ -799,8 +700,8 @@ static bool _handle_messages() {
 
 			// peek next-event to determine if this a repeated-keystroke
 			XEvent nev;
-			if (xlib.XPending(x11_ctx.display)) {
-				xlib.XPeekEvent(x11_ctx.display, &nev);
+			if (XPending(x11_ctx.display)) {
+				XPeekEvent(x11_ctx.display, &nev);
 
 				if (nev.type == KeyPress && nev.xkey.time == event.xkey.time && nev.xkey.keycode == event.xkey.keycode) {
 					// repeated keystroke! prevent this keyup-event and next keydown-event from being fired
@@ -810,9 +711,9 @@ static bool _handle_messages() {
 			}
 			KeySym keysym;
 			char c;
-			xlib.XLookupString(key, &c, 1, &keysym, NULL);
+			XLookupString(key, &c, 1, &keysym, NULL);
 
-			KeySym ksKey = xlib.XkbKeycodeToKeysym(x11_ctx.display, event.xkey.keycode, 0, 0);
+			KeySym ksKey = XkbKeycodeToKeysym(x11_ctx.display, event.xkey.keycode, 0, 0);
 			if (ksKey == XK_Control_L || ksKey == XK_Control_R) {
 				controlDown = false;
 			}
@@ -900,27 +801,27 @@ static bool _handle_messages() {
 			break;
 		}
 		case ClientMessage: {
-			if (event.xclient.message_type == x11_ctx.atoms.XdndEnter) {
+			if (event.xclient.message_type == XdndEnter) {
 				Window source_window = event.xclient.data.l[0];
 				XEvent m;
 				memset(&m, 0, sizeof(m));
 				m.type = ClientMessage;
 				m.xclient.window = event.xclient.data.l[0];
-				m.xclient.message_type = x11_ctx.atoms.XdndStatus;
+				m.xclient.message_type = XdndStatus;
 				m.xclient.format = 32;
 				m.xclient.data.l[0] = window;
 				m.xclient.data.l[2] = 0;
 				m.xclient.data.l[3] = 0;
 				m.xclient.data.l[1] = 1;
-				m.xclient.data.l[4] = x11_ctx.atoms.XdndActionCopy;
-				xlib.XSendEvent(x11_ctx.display, source_window, false, NoEventMask, (XEvent *)&m);
-				xlib.XFlush(x11_ctx.display);
+				m.xclient.data.l[4] = XdndActionCopy;
+				XSendEvent(x11_ctx.display, source_window, false, NoEventMask, (XEvent *)&m);
+				XFlush(x11_ctx.display);
 			}
-			else if (event.xclient.message_type == x11_ctx.atoms.XdndDrop) {
-				xlib.XConvertSelection(x11_ctx.display, x11_ctx.atoms.XdndSelection, x11_ctx.atoms.XdndTextUriList, x11_ctx.atoms.XdndSelection, window,
+			else if (event.xclient.message_type == XdndDrop) {
+				XConvertSelection(x11_ctx.display, XdndSelection, XdndTextUriList, XdndSelection, window,
 									   event.xclient.data.l[2]);
 			}
-			else if (event.xclient.data.l[0] == x11_ctx.atoms.WM_DELETE_WINDOW) {
+			else if (event.xclient.data.l[0] == WM_DELETE_WINDOW) {
 				if (iron_internal_call_close_callback()) {
 					iron_window_destroy();
 					iron_stop();
@@ -929,22 +830,22 @@ static bool _handle_messages() {
 			break;
 		}
 		case SelectionNotify: {
-			if (event.xselection.selection == x11_ctx.atoms.CLIPBOARD) {
+			if (event.xselection.selection == CLIPBOARD) {
 				char *result;
 				unsigned long ressize, restail;
 				int resbits;
-				xlib.XGetWindowProperty(x11_ctx.display, window, x11_ctx.atoms.XSEL_DATA, 0, LONG_MAX / 4, False, AnyPropertyType, &x11_ctx.atoms.UTF8_STRING,
+				XGetWindowProperty(x11_ctx.display, window, XSEL_DATA, 0, LONG_MAX / 4, False, AnyPropertyType, &UTF8_STRING,
 										&resbits, &ressize, &restail, (unsigned char **)&result);
 				iron_internal_paste_callback(result);
-				xlib.XFree(result);
+				XFree(result);
 			}
-			else if (event.xselection.property == x11_ctx.atoms.XdndSelection) {
+			else if (event.xselection.property == XdndSelection) {
 				Atom type;
 				int format;
 				unsigned long numItems;
 				unsigned long bytesAfter = 1;
 				unsigned char *data = 0;
-				xlib.XGetWindowProperty(x11_ctx.display, event.xselection.requestor, event.xselection.property, 0, LONG_MAX, False, event.xselection.target,
+				XGetWindowProperty(x11_ctx.display, event.xselection.requestor, event.xselection.property, 0, LONG_MAX, False, event.xselection.target,
 										&type, &format, &numItems, &bytesAfter, &data);
 				size_t pos = 0;
 				size_t len = 0;
@@ -959,12 +860,12 @@ static bool _handle_messages() {
 					}
 					buffer[len++] = data[pos++];
 				}
-				xlib.XFree(data);
+				XFree(data);
 			}
 			break;
 		}
 		case SelectionRequest: {
-			if (event.xselectionrequest.target == x11_ctx.atoms.TARGETS) {
+			if (event.xselectionrequest.target == TARGETS) {
 				XEvent send;
 				send.xselection.type = SelectionNotify;
 				send.xselection.requestor = event.xselectionrequest.requestor;
@@ -972,12 +873,12 @@ static bool _handle_messages() {
 				send.xselection.target = event.xselectionrequest.target;
 				send.xselection.property = event.xselectionrequest.property;
 				send.xselection.time = event.xselectionrequest.time;
-				Atom available[] = {x11_ctx.atoms.TARGETS, x11_ctx.atoms.MULTIPLE, x11_ctx.atoms.TEXT_PLAIN, x11_ctx.atoms.UTF8_STRING};
-				xlib.XChangeProperty(x11_ctx.display, send.xselection.requestor, send.xselection.property, XA_ATOM, 32, PropModeReplace,
+				Atom available[] = {TARGETS, MULTIPLE, TEXT_PLAIN, UTF8_STRING};
+				XChangeProperty(x11_ctx.display, send.xselection.requestor, send.xselection.property, XA_ATOM, 32, PropModeReplace,
 									 (unsigned char *)&available[0], 4);
-				xlib.XSendEvent(x11_ctx.display, send.xselection.requestor, True, 0, &send);
+				XSendEvent(x11_ctx.display, send.xselection.requestor, True, 0, &send);
 			}
-			if (event.xselectionrequest.target == x11_ctx.atoms.TEXT_PLAIN || event.xselectionrequest.target == x11_ctx.atoms.UTF8_STRING) {
+			if (event.xselectionrequest.target == TEXT_PLAIN || event.xselectionrequest.target == UTF8_STRING) {
 				XEvent send;
 				send.xselection.type = SelectionNotify;
 				send.xselection.requestor = event.xselectionrequest.requestor;
@@ -985,9 +886,9 @@ static bool _handle_messages() {
 				send.xselection.target = event.xselectionrequest.target;
 				send.xselection.property = event.xselectionrequest.property;
 				send.xselection.time = event.xselectionrequest.time;
-				xlib.XChangeProperty(x11_ctx.display, send.xselection.requestor, send.xselection.property, send.xselection.target, 8, PropModeReplace,
+				XChangeProperty(x11_ctx.display, send.xselection.requestor, send.xselection.property, send.xselection.target, 8, PropModeReplace,
 									 (const unsigned char *)clipboardString, strlen(clipboardString));
-				xlib.XSendEvent(x11_ctx.display, send.xselection.requestor, True, 0, &send);
+				XSendEvent(x11_ctx.display, send.xselection.requestor, True, 0, &send);
 			}
 			break;
 		}
@@ -1031,9 +932,7 @@ const char *iron_system_id() {
 }
 
 void iron_set_keep_screen_on(bool on) {}
-
 void iron_keyboard_show() {}
-
 void iron_keyboard_hide() {}
 
 bool iron_keyboard_active() {
@@ -1132,7 +1031,7 @@ void iron_internal_shutdown() {
 	#endif
 
 	free(clipboardString);
-	xlib.XCloseDisplay(x11_ctx.display);
+	XCloseDisplay(x11_ctx.display);
 	iron_internal_shutdown_callback();
 }
 
@@ -1191,7 +1090,7 @@ bool iron_mouse_can_lock(void) {
 void iron_mouse_show() {
 	struct iron_x11_window *window = &x11_ctx.windows[0];
 	if (mouse_hidden) {
-		xlib.XUndefineCursor(x11_ctx.display, window->window);
+		XUndefineCursor(x11_ctx.display, window->window);
 		mouse_hidden = false;
 	}
 }
@@ -1207,10 +1106,10 @@ void iron_mouse_hide() {
 		col.flags = DoRed | DoGreen | DoBlue;
 		col.pad = 0;
 		char data[1] = {'\0'};
-		Pixmap blank = xlib.XCreateBitmapFromData(x11_ctx.display, window->window, data, 1, 1);
-		Cursor cursor = xlib.XCreatePixmapCursor(x11_ctx.display, blank, blank, &col, &col, 0, 0);
-		xlib.XDefineCursor(x11_ctx.display, window->window, cursor);
-		xlib.XFreePixmap(x11_ctx.display, blank);
+		Pixmap blank = XCreateBitmapFromData(x11_ctx.display, window->window, data, 1, 1);
+		Cursor cursor = XCreatePixmapCursor(x11_ctx.display, blank, blank, &col, &col, 0, 0);
+		XDefineCursor(x11_ctx.display, window->window, cursor);
+		XFreePixmap(x11_ctx.display, blank);
 		mouse_hidden = true;
 	}
 }
@@ -1222,28 +1121,28 @@ void iron_mouse_set_cursor(iron_cursor_t cursor_index) {
 
 	Cursor cursor;
 	if (cursor_index == IRON_CURSOR_HAND) {
-		cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "hand1");
+		cursor = XcursorLibraryLoadCursor(x11_ctx.display, "hand1");
 	}
 	else if (cursor_index == IRON_CURSOR_IBEAM) {
-		cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "xterm");
+		cursor = XcursorLibraryLoadCursor(x11_ctx.display, "xterm");
 	}
 	else if (cursor_index == IRON_CURSOR_SIZEWE) {
-		cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "sb_h_double_arrow");
+		cursor = XcursorLibraryLoadCursor(x11_ctx.display, "sb_h_double_arrow");
 	}
 	else if (cursor_index == IRON_CURSOR_SIZENS) {
-		cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "sb_v_double_arrow");
+		cursor = XcursorLibraryLoadCursor(x11_ctx.display, "sb_v_double_arrow");
 	}
 	else {
-		cursor = xlib.XcursorLibraryLoadCursor(x11_ctx.display, "left_ptr"); // "arrow"
+		cursor = XcursorLibraryLoadCursor(x11_ctx.display, "left_ptr"); // "arrow"
 	}
 	struct iron_x11_window *window = &x11_ctx.windows[0];
-	xlib.XDefineCursor(x11_ctx.display, window->window, cursor);
+	XDefineCursor(x11_ctx.display, window->window, cursor);
 }
 
 void iron_mouse_set_position(int x, int y) {
 	struct iron_x11_window *window = &x11_ctx.windows[0];
-	xlib.XWarpPointer(x11_ctx.display, None, window->window, 0, 0, 0, 0, x, y);
-	xlib.XFlush(x11_ctx.display);
+	XWarpPointer(x11_ctx.display, None, window->window, 0, 0, 0, 0, x, y);
+	XFlush(x11_ctx.display);
 }
 
 void iron_mouse_get_position(int *x, int *y) {
@@ -1252,7 +1151,7 @@ void iron_mouse_get_position(int *x, int *y) {
 	Window inchildwin;
 	int rootx, rooty;
 	unsigned int mask;
-	xlib.XQueryPointer(x11_ctx.display, window->window, &inwin, &inchildwin, &rootx, &rooty, x, y, &mask);
+	XQueryPointer(x11_ctx.display, window->window, &inwin, &inchildwin, &rootx, &rooty, x, y, &mask);
 }
 
 #ifdef WITH_GAMEPAD
