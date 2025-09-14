@@ -33,8 +33,8 @@ static bool saveInitialized = false;
 static const char *videoFormats[] = {"ogv", NULL};
 static struct timeval start;
 static bool mouse_hidden = false;
+static int xi_extension = -1;
 
-static void init_pen_device(XDeviceInfo *info, struct x11_pen_device *pen, bool eraser);
 bool iron_x11_init();
 
 void iron_display_init() {
@@ -275,10 +275,16 @@ void iron_window_create(iron_window_options_t *win) {
 	iron_window_set_title(win->title);
 
 	if (x11_ctx.pen.id != -1) {
-		xlib.XSelectExtensionEvent(x11_ctx.display, window->window, &x11_ctx.pen.motionClass, 1);
-	}
-	if (x11_ctx.eraser.id != -1) {
-		xlib.XSelectExtensionEvent(x11_ctx.display, window->window, &x11_ctx.eraser.motionClass, 1);
+		XIEventMask mask;
+		unsigned char mask_data[XIMaskLen(XI_LASTEVENT)];
+		memset(mask_data, 0, sizeof(mask_data));
+		mask.deviceid = x11_ctx.pen.id;
+		mask.mask_len = sizeof(mask_data);
+		mask.mask = mask_data;
+		XISetMask(mask.mask, XI_Motion);
+		XISetMask(mask.mask, XI_ButtonPress);
+		XISetMask(mask.mask, XI_ButtonRelease);
+		XISelectEvents(x11_ctx.display, window->window, &mask, 1);
 	}
 
 	gpu_init(win->depth_bits, win->vsync);
@@ -312,9 +318,7 @@ bool iron_internal_call_close_callback() {
 	if (iron_internal_window_callbacks[0].close_callback != NULL) {
 		return iron_internal_window_callbacks[0].close_callback(iron_internal_window_callbacks[0].close_data);
 	}
-	else {
-		return true;
-	}
+	return true;
 }
 
 iron_window_mode_t iron_window_get_mode() {
@@ -464,77 +468,86 @@ bool iron_x11_init() {
 	xlib.XInternAtoms(x11_ctx.display, atom_names, sizeof atom_names / sizeof atom_names[0], False, (Atom *)&x11_ctx.atoms);
 	clipboardString = (char *)malloc(clipboardStringSize);
 
+	int event, error;
+	XQueryExtension(x11_ctx.display, "XInputExtension", &xi_extension, &event, &error);
+	int num_devices;
+	XIDeviceInfo *devices = XIQueryDevice(x11_ctx.display, XIAllDevices, &num_devices);
 	x11_ctx.pen.id = -1;
 	x11_ctx.eraser.id = -1;
-
-	int count;
-	XDeviceInfoPtr devices = (XDeviceInfoPtr)xlib.XListInputDevices(x11_ctx.display, &count);
-	for (int i = 0; i < count; i++) {
-		strncpy(buffer, devices[i].name, 1023);
+	for (int i = 0; i < num_devices; i++) {
+		XIDeviceInfo *info = &devices[i];
+		strncpy(buffer, info->name, 1023);
 		buffer[1023] = 0;
 		for (int j = 0; buffer[j]; j++) {
 			buffer[j] = tolower(buffer[j]);
 		}
-		if (strstr(buffer, "stylus") || strstr(buffer, "pen") || strstr(buffer, "wacom")) {
-			init_pen_device(&devices[i], &x11_ctx.pen, false);
-		}
-		if (strstr(buffer, "eraser")) {
-			init_pen_device(&devices[i], &x11_ctx.eraser, true);
-		}
-	}
 
-	if (devices != NULL) {
-		xlib.XFreeDeviceList(devices);
+		bool is_pen = strstr(buffer, "stylus") || strstr(buffer, "pen") || strstr(buffer, "wacom");
+		bool is_eraser = strstr(buffer, "eraser");
+		if (!is_pen && !is_eraser) {
+			continue;
+		}
+
+		int pressure_index = -1;
+		double max = 0;
+		for (int j = 0; j < info->num_classes; j++) {
+			if (info->classes[j]->type == XIValuatorClass) {
+				XIValuatorClassInfo *val = (XIValuatorClassInfo *)info->classes[j];
+				if (val->label == XInternAtom(x11_ctx.display, "Abs Pressure", False)) {
+					pressure_index = val->number;
+					max = val->max;
+					break;
+				}
+			}
+		}
+		if (pressure_index == -1) continue;
+
+		struct x11_pen_device *d = is_pen ? &x11_ctx.pen : &x11_ctx.eraser;
+		d->id = info->deviceid;
+		d->pressure_index = pressure_index;
+		d->pressure_max = max;
+		d->press = is_pen ? iron_internal_pen_trigger_press : iron_internal_eraser_trigger_press;
+		d->move = is_pen ? iron_internal_pen_trigger_move : iron_internal_eraser_trigger_move;
+		d->release = is_pen ? iron_internal_pen_trigger_release : iron_internal_eraser_trigger_release;
 	}
+	XIFreeDeviceInfo(devices);
 
 	return true;
 }
 
-static void init_pen_device(XDeviceInfo *info, struct x11_pen_device *pen, bool eraser) {
-	XDevice *device = xlib.XOpenDevice(x11_ctx.display, info->id);
-	XAnyClassPtr c = info->inputclassinfo;
-	for (int j = 0; j < device->num_classes; j++) {
-		if (c->class == ValuatorClass) {
-			XValuatorInfo *valuator_info = (XValuatorInfo *)c;
-			if (valuator_info->num_axes > 2) {
-				pen->maxPressure = valuator_info->axes[2].max_value;
-			}
-			pen->id = info->id;
-			DeviceMotionNotify(device, pen->motionEvent, pen->motionClass);
-			if (eraser) {
-				pen->press = iron_internal_eraser_trigger_press;
-				pen->move = iron_internal_eraser_trigger_move;
-				pen->release = iron_internal_eraser_trigger_release;
-			}
-			else {
-				pen->press = iron_internal_pen_trigger_press;
-				pen->move = iron_internal_pen_trigger_move;
-				pen->release = iron_internal_pen_trigger_release;
-			}
-			return;
-		}
-		c = (XAnyClassPtr)((uint8_t *)c + c->length);
-	}
-	xlib.XCloseDevice(x11_ctx.display, device);
-}
-
 static void check_pen_device(struct iron_x11_window *window, XEvent *event, struct x11_pen_device *pen) {
-	if (event->type == pen->motionEvent) {
-		XDeviceMotionEvent *motion = (XDeviceMotionEvent *)(event);
-		if (motion->deviceid == pen->id) {
-			float p = (float)motion->axis_data[2] / (float)pen->maxPressure;
-			if (p > 0 && x11_ctx.pen.current_pressure == 0) {
-				pen->press(motion->x, motion->y, p);
-			}
-			else if (p == 0 && pen->current_pressure > 0) {
-				pen->release(motion->x, motion->y, p);
-			}
-			else if (p > 0) {
-				pen->move(motion->x, motion->y, p);
-			}
-			pen->current_pressure = p;
-		}
+	if (!XGetEventData(x11_ctx.display, &event->xcookie)) {
+		return;
 	}
+
+	XIDeviceEvent *dev_event = (XIDeviceEvent *)event->xcookie.data;
+	if (dev_event->event != window->window || dev_event->deviceid != pen->id) {
+		XFreeEventData(x11_ctx.display, &event->xcookie);
+		return;
+	}
+
+	float p = pen->pressure_current;
+	if (XIMaskIsSet(dev_event->valuators.mask, pen->pressure_index)) {
+		double *values = dev_event->valuators.values;
+		int idx = 0;
+		for (int i = 0; i < pen->pressure_index; i++) {
+			if (XIMaskIsSet(dev_event->valuators.mask, i)) idx++;
+		}
+		p = values[idx] / pen->pressure_max;
+	}
+
+	if (event->xcookie.evtype == XI_ButtonPress && dev_event->detail == 1) {
+		pen->press(dev_event->event_x, dev_event->event_y, p);
+	}
+	else if (event->xcookie.evtype == XI_ButtonRelease && dev_event->detail == 1) {
+		pen->release(dev_event->event_x, dev_event->event_y, p);
+	}
+	else if (event->xcookie.evtype == XI_Motion && p > 0) {
+		pen->move(dev_event->event_x, dev_event->event_y, p);
+	}
+	pen->pressure_current = p;
+
+	XFreeEventData(x11_ctx.display, &event->xcookie);
 }
 
 struct iron_x11_window *window_from_window(Window window) {
@@ -706,13 +719,19 @@ static bool _handle_messages() {
 	while (xlib.XPending(x11_ctx.display)) {
 		XEvent event;
 		xlib.XNextEvent(x11_ctx.display, &event);
+
+		if (event.type == GenericEvent && event.xcookie.extension == xi_extension) {
+			check_pen_device(&x11_ctx.windows[0], &event, &x11_ctx.pen);
+			check_pen_device(&x11_ctx.windows[0], &event, &x11_ctx.eraser);
+			continue;
+		}
+
 		Window window = event.xclient.window;
 		struct iron_x11_window *k_window = window_from_window(window);
 		if (k_window == NULL) {
 			continue;
 		}
-		check_pen_device(k_window, &event, &x11_ctx.pen);
-		check_pen_device(k_window, &event, &x11_ctx.eraser);
+
 		switch (event.type) {
 		case MappingNotify: {
 			xlib.XRefreshKeyboardMapping(&event.xmapping);
@@ -1025,10 +1044,7 @@ void iron_load_url(const char *url) {
 	if (strncmp(url, "http://", sizeof("http://") - 1) == 0 || strncmp(url, "https://", sizeof("https://") - 1) == 0) {
 		char openUrlCommand[256];
 		snprintf(openUrlCommand, 256, "xdg-open %s", url);
-		int err = system(openUrlCommand);
-		if (err != 0) {
-			iron_log("Error opening url %s", url);
-		}
+		system(openUrlCommand);
 	}
 }
 
@@ -1134,18 +1150,6 @@ void iron_copy_to_clipboard(const char *text) {
 		clipboardString = (char *)malloc(clipboardStringSize);
 	}
 	strcpy(clipboardString, text);
-}
-
-static int parse_number_at_end_of_line(char *line) {
-	char *end = &line[strlen(line) - 2];
-	int num = 0;
-	int multi = 1;
-	while (*end >= '0' && *end <= '9') {
-		num += (*end - '0') * multi;
-		multi *= 10;
-		--end;
-	}
-	return num;
 }
 
 int iron_hardware_threads(void) {

@@ -5,6 +5,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/XInput.h>
+#include <X11/extensions/XInput2.h>
 #include <X11/extensions/Xrandr.h>
 
 #define MAXIMUM_DISPLAYS 8
@@ -140,12 +141,10 @@ struct iron_x11_procs {
 };
 
 struct x11_pen_device {
-	XID id;
-	uint32_t motionEvent;
-	XEventClass motionClass;
-	uint32_t maxPressure;
-	float current_pressure;
-
+	int id;
+	int pressure_index;
+	double pressure_max;
+	float pressure_current;
 	void (*press)(int /*x*/, int /*y*/, float /*pressure*/);
 	void (*move)(int /*x*/, int /*y*/, float /*pressure*/);
 	void (*release)(int /*x*/, int /*y*/, float /*pressure*/);
