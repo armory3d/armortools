@@ -752,15 +752,6 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 }
 
 function layers_flatten(height_to_normal: bool = false, layers: slot_layer_t[] = null): slot_layer_t {
-	return layers_ext_flatten(height_to_normal, layers);
-}
-
-function layers_on_resized() {
-	layers_ext_on_resized();
-}
-
-
-function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t[] = null): slot_layer_t {
 	if (layers == null) {
 		layers = project_layers;
 	}
@@ -917,7 +908,7 @@ function layers_ext_flatten(height_to_normal: bool = false, layers: slot_layer_t
 	return l0;
 }
 
-function layers_ext_on_resized() {
+function layers_on_resized() {
 	sys_notify_on_next_frame(function () {
 		layers_resize();
 		let _layer: slot_layer_t = context_raw.layer;
@@ -941,4 +932,3 @@ function layers_ext_on_resized() {
 	util_uv_dilatemap_cached = false;
 	render_path_raytrace_ready = false;
 }
-
