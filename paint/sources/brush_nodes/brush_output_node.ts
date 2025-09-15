@@ -130,6 +130,15 @@ function brush_output_node_run(self: brush_output_node_t, from: i32) {
 		return;
 	}
 
+	// Do not paint while scaling the brush
+	let brush_scaling: bool = operator_shortcut(map_get(config_keymap, "brush_radius"), shortcut_type_t.DOWN) ||
+		operator_shortcut(map_get(config_keymap, "brush_opacity"), shortcut_type_t.DOWN) ||
+		operator_shortcut(map_get(config_keymap, "brush_angle"), shortcut_type_t.DOWN);
+
+	if (context_raw.brush_locked || brush_scaling) {
+		return;
+	}
+
 	if (!slot_layer_is_visible(context_raw.layer) && !context_raw.paint2d) {
 		return;
 	}
