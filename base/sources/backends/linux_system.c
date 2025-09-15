@@ -80,6 +80,7 @@ void iron_x11_init() {
 	XdndStatus = XInternAtom(x11_ctx.display, "XdndStatus", False);
 	XdndActionCopy = XInternAtom(x11_ctx.display, "XdndActionCopy", False);
 	XdndSelection = XInternAtom(x11_ctx.display, "XdndSelection", False);
+	CLIPBOARD = XInternAtom(x11_ctx.display, "CLIPBOARD", False);
 	UTF8_STRING = XInternAtom(x11_ctx.display, "UTF8_STRING", False);
 	XSEL_DATA = XInternAtom(x11_ctx.display, "XSEL_DATA", False);
 	TARGETS = XInternAtom(x11_ctx.display, "TARGETS", False);
