@@ -169,7 +169,7 @@ function base_w(): i32 {
 		res = iron_window_width();
 	}
 	if (context_raw.view_index > -1) {
-		res = math_floor(res / 2);
+		res = math_ceil(res / 2);
 	}
 	if (context_raw.paint2d_view) {
 		res = ui_view2d_ww;
