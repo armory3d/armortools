@@ -90,7 +90,6 @@ function node_shader_add_constant(raw: node_shader_t, s: string, link: string = 
 }
 
 function node_shader_add_texture(raw: node_shader_t, name: string, link: string = null) {
-	// mytex: tex2d
 	if (array_index_of(raw.textures, name) == -1) {
 		array_push(raw.textures, name);
 		node_shader_context_add_texture_unit(raw.context, name, link);

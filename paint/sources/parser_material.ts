@@ -889,7 +889,7 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 		return "vvec_cam";
 	}
 	else if (node.type == "LAYER") {
-		let l: any = node.buttons[0].default_value;
+		let l: i32 = node.buttons[0].default_value[0];
 		if (socket == node.outputs[0]) { // Base
 			node_shader_add_texture(parser_material_kong, "texpaint" + l, "_texpaint" + l);
 			return "sample(texpaint" + l + ", sampler_linear, tex_coord).rgb";
@@ -1275,7 +1275,7 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 	}
 	else if (node.type == "WIREFRAME") {
 		node_shader_add_texture(parser_material_kong, "texuvmap", "_texuvmap");
-		// let use_pixel_size: bool = node.buttons[0].default_value == "true";
+		// let use_pixel_size: bool = node.buttons[0].default_value[0] > 0.0;
 		// let pixel_size: f32 = parse_value_input(node.inputs[0]);
 		return "sample_lod(texuvmap, sampler_linear, tex_coord, 0.0).r";
 	}
@@ -1292,7 +1292,7 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 		}
 	}
 	else if (node.type == "LAYER") {
-		let l: any = node.buttons[0].default_value;
+		let l: i32 = node.buttons[0].default_value[0];
 		if (socket == node.outputs[1]) { // Opac
 			node_shader_add_texture(parser_material_kong, "texpaint" + l, "_texpaint" + l);
 			return "sample(texpaint" + l + ", sampler_linear, tex_coord).a";
@@ -1316,7 +1316,7 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 	}
 	else if (node.type == "LAYER_MASK") {
 		if (socket == node.outputs[0]) {
-			let l: any = node.buttons[0].default_value;
+			let l: i32 = node.buttons[0].default_value[0];
 			node_shader_add_texture(parser_material_kong, "texpaint" + l, "_texpaint" + l);
 			return "sample(texpaint" + l + ", sampler_linear, tex_coord).r";
 		}
