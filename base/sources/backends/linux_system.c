@@ -1357,5 +1357,4 @@ bool _save_and_quit_callback_internal() {
 	iron_save_and_quit(save);
 	return false;
 }
-
 #endif
