@@ -48,7 +48,7 @@ function tab_materials_button_nodes() {
 }
 
 function tab_materials_draw_slots(mini: bool) {
-	let slotw: i32 = math_floor(51 * UI_SCALE());
+	let slotw: i32 = math_floor((51 + math_floor(config_raw.window_scale * 2)) * UI_SCALE());
 	let num: i32 = math_floor(config_raw.layout[layout_size_t.SIDEBAR_W] / slotw);
 	if (num == 0) {
 		return;
@@ -89,10 +89,7 @@ function tab_materials_draw_slots(mini: bool) {
 				}
 				else {
 					let off: i32 = row % 2 == 1 ? 1 : 0;
-					let w: i32 = 50;
-					if (config_raw.window_scale > 1) {
-						w += math_floor(config_raw.window_scale * 2);
-					}
+					let w: i32 = 50 + math_floor(config_raw.window_scale * 2);
 					ui_fill(-1,         -2, w + 3,       2, ui.ops.theme.HIGHLIGHT_COL);
 					ui_fill(-1,    w - off, w + 3, 2 + off, ui.ops.theme.HIGHLIGHT_COL);
 					ui_fill(-1,         -2,     2,   w + 3, ui.ops.theme.HIGHLIGHT_COL);
@@ -104,7 +101,7 @@ function tab_materials_draw_slots(mini: bool) {
 			let uix: f32 = ui._x;
 			let uiy: f32 = ui._y;
 			let tile: i32 = UI_SCALE() > 1 ? 100 : 50;
-			let imgh: f32 = mini ? ui_sidebar_default_w_mini * 0.85 * UI_SCALE() : -1.0;
+			let imgh: f32 = mini ? ui_sidebar_default_w_mini * 0.85 * UI_SCALE() : 50 * UI_SCALE();
 			let state: ui_state_t = project_materials[i].preview_ready ?
 				ui_image(img, 0xffffffff, imgh) :
 				ui_sub_image(resource_get("icons.k"), 0xffffffff, -1.0, tile, tile, tile, tile);
