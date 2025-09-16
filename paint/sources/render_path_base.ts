@@ -105,7 +105,7 @@ function render_path_base_is_cached(): bool {
 	render_path_base_last_y = mouse_view_y();
 
 	if (context_raw.ddirty <= 0 && context_raw.rdirty <= 0 && context_raw.pdirty <= 0) {
-		if (mx != render_path_base_last_x || my != render_path_base_last_y || mouse_locked) {
+		if (mx != render_path_base_last_x || my != render_path_base_last_y || iron_mouse_is_locked()) {
 			context_raw.ddirty = 0;
 		}
 

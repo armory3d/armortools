@@ -41,15 +41,12 @@ let _mouse_buttons: string[] = ["left", "right", "middle", "side1", "side2"];
 let _mouse_buttons_down: bool[] = [false, false, false, false, false];
 let _mouse_buttons_started: bool[] = [false, false, false, false, false];
 let _mouse_buttons_released: bool[] = [false, false, false, false, false];
-
 let mouse_x: f32 = 0.0;
 let mouse_y: f32 = 0.0;
 let mouse_moved: bool = false;
 let mouse_movement_x: f32 = 0.0;
 let mouse_movement_y: f32 = 0.0;
 let mouse_wheel_delta: f32 = 0.0;
-let mouse_locked: bool = false;
-let mouse_hidden: bool = false;
 let mouse_last_x: f32 = -1.0;
 let mouse_last_y: f32 = -1.0;
 
@@ -96,32 +93,6 @@ function mouse_released(button: string = "left"): bool {
 	return _mouse_buttons_released[mouse_button_index(button)];
 }
 
-function mouse_lock() {
-	if (iron_mouse_can_lock()) {
-		iron_mouse_lock();
-		mouse_locked = true;
-		mouse_hidden = true;
-	}
-}
-
-function mouse_unlock() {
-	if (iron_mouse_can_lock()) {
-		iron_mouse_unlock();
-		mouse_locked = false;
-		mouse_hidden = false;
-	}
-}
-
-function mouse_hide() {
-	iron_mouse_hide();
-	mouse_hidden = true;
-}
-
-function mouse_show() {
-	iron_mouse_show();
-	mouse_hidden = false;
-}
-
 function mouse_down_listener(index: i32, x: i32, y: i32) {
 	if (pen_in_use) {
 		return;
@@ -155,7 +126,7 @@ function mouse_move_listener(x: i32, y: i32, movement_x: i32, movement_y: i32) {
 		mouse_last_x = x;
 		mouse_last_y = y;
 	}
-	if (mouse_locked) {
+	if (iron_mouse_is_locked()) {
 		// Can be called multiple times per frame
 		mouse_movement_x += movement_x;
 		mouse_movement_y += movement_y;
@@ -234,7 +205,6 @@ let pen_buttons: string[] = ["tip"];
 let pen_buttons_down: bool[] = [false];
 let pen_buttons_started: bool[] = [false];
 let pen_buttons_released: bool[] = [false];
-
 let pen_x: f32 = 0.0;
 let pen_y: f32 = 0.0;
 let pen_moved: bool = false;
@@ -405,257 +375,255 @@ function keyboard_key_code(key: key_code_t): string {
 	if (key == key_code_t.SPACE) {
 		return "space";
 	}
-	else if (key == key_code_t.BACKSPACE) {
+	if (key == key_code_t.BACKSPACE) {
 		return "backspace";
 	}
-	else if (key == key_code_t.TAB) {
+	if (key == key_code_t.TAB) {
 		return "tab";
 	}
-	else if (key == key_code_t.RETURN) {
+	if (key == key_code_t.RETURN) {
 		return "enter";
 	}
-	else if (key == key_code_t.SHIFT) {
+	if (key == key_code_t.SHIFT) {
 		return "shift";
 	}
-	else if (key == key_code_t.CONTROL) {
+	if (key == key_code_t.CONTROL) {
 		return "control";
 	}
 	///if arm_macos
-	else if (key == key_code_t.META) {
+	if (key == key_code_t.META) {
 		return "control";
 	}
 	///end
-	else if (key == key_code_t.ALT) {
+	if (key == key_code_t.ALT) {
 		return "alt";
 	}
-	else if (key == key_code_t.WIN) {
+	if (key == key_code_t.WIN) {
 		return "win";
 	}
-	else if (key == key_code_t.ESCAPE) {
+	if (key == key_code_t.ESCAPE) {
 		return "escape";
 	}
-	else if (key == key_code_t.DELETE) {
+	if (key == key_code_t.DELETE) {
 		return "delete";
 	}
-	else if (key == key_code_t.UP) {
+	if (key == key_code_t.UP) {
 		return "up";
 	}
-	else if (key == key_code_t.DOWN) {
+	if (key == key_code_t.DOWN) {
 		return "down";
 	}
-	else if (key == key_code_t.LEFT) {
+	if (key == key_code_t.LEFT) {
 		return "left";
 	}
-	else if (key == key_code_t.RIGHT) {
+	if (key == key_code_t.RIGHT) {
 		return "right";
 	}
-	else if (key == key_code_t.BACK) {
+	if (key == key_code_t.BACK) {
 		return "back";
 	}
-	else if (key == key_code_t.COMMA) {
+	if (key == key_code_t.COMMA) {
 		return ",";
 	}
-	else if (key == key_code_t.PERIOD) {
+	if (key == key_code_t.PERIOD) {
 		return ".";
 	}
-	else if (key == key_code_t.COLON) {
+	if (key == key_code_t.COLON) {
 		return ":";
 	}
-	else if (key == key_code_t.SEMICOLON) {
+	if (key == key_code_t.SEMICOLON) {
 		return ";";
 	}
-	else if (key == key_code_t.LESS_THAN) {
+	if (key == key_code_t.LESS_THAN) {
 		return "<";
 	}
-	else if (key == key_code_t.EQUALS) {
+	if (key == key_code_t.EQUALS) {
 		return "=";
 	}
-	else if (key == key_code_t.GREATER_THAN) {
+	if (key == key_code_t.GREATER_THAN) {
 		return ">";
 	}
-	else if (key == key_code_t.QUESTION_MARK) {
+	if (key == key_code_t.QUESTION_MARK) {
 		return "?";
 	}
-	else if (key == key_code_t.EXCLAMATION) {
+	if (key == key_code_t.EXCLAMATION) {
 		return "!";
 	}
-	else if (key == key_code_t.DOUBLE_QUOTE) {
+	if (key == key_code_t.DOUBLE_QUOTE) {
 		return "\"";
 	}
-	else if (key == key_code_t.HASH) {
+	if (key == key_code_t.HASH) {
 		return "#";
 	}
-	else if (key == key_code_t.DOLLAR) {
+	if (key == key_code_t.DOLLAR) {
 		return "$";
 	}
-	else if (key == key_code_t.PERCENT) {
+	if (key == key_code_t.PERCENT) {
 		return "%";
 	}
-	else if (key == key_code_t.AMPERSAND) {
+	if (key == key_code_t.AMPERSAND) {
 		return "&";
 	}
-	else if (key == key_code_t.UNDERSCORE) {
+	if (key == key_code_t.UNDERSCORE) {
 		return "_";
 	}
-	else if (key == key_code_t.OPEN_PAREN) {
+	if (key == key_code_t.OPEN_PAREN) {
 		return "(";
 	}
-	else if (key == key_code_t.CLOSE_PAREN) {
+	if (key == key_code_t.CLOSE_PAREN) {
 		return ")";
 	}
-	else if (key == key_code_t.ASTERISK) {
+	if (key == key_code_t.ASTERISK) {
 		return "*";
 	}
-	else if (key == key_code_t.PIPE) {
+	if (key == key_code_t.PIPE) {
 		return "|";
 	}
-	else if (key == key_code_t.OPEN_CURLY_BRACKET) {
+	if (key == key_code_t.OPEN_CURLY_BRACKET) {
 		return "{";
 	}
-	else if (key == key_code_t.CLOSE_CURLY_BRACKET) {
+	if (key == key_code_t.CLOSE_CURLY_BRACKET) {
 		return "}";
 	}
-	else if (key == key_code_t.OPEN_BRACKET) {
+	if (key == key_code_t.OPEN_BRACKET) {
 		return "[";
 	}
-	else if (key == key_code_t.CLOSE_BRACKET) {
+	if (key == key_code_t.CLOSE_BRACKET) {
 		return "]";
 	}
-	else if (key == key_code_t.TILDE) {
+	if (key == key_code_t.TILDE) {
 		return "~";
 	}
-	else if (key == key_code_t.BACK_QUOTE) {
+	if (key == key_code_t.BACK_QUOTE) {
 		return "`";
 	}
-	else if (key == key_code_t.SLASH) {
+	if (key == key_code_t.SLASH) {
 		return "/";
 	}
-	else if (key == key_code_t.BACK_SLASH) {
+	if (key == key_code_t.BACK_SLASH) {
 		return "\\";
 	}
-	else if (key == key_code_t.AT) {
+	if (key == key_code_t.AT) {
 		return "@";
 	}
-	else if (key == key_code_t.ADD) {
+	if (key == key_code_t.ADD) {
 		return "+";
 	}
-	else if (key == key_code_t.PLUS) {
+	if (key == key_code_t.PLUS) {
 		return "+";
 	}
-	else if (key == key_code_t.SUBTRACT) {
+	if (key == key_code_t.SUBTRACT) {
 		return "-";
 	}
-	else if (key == key_code_t.HYPHEN_MINUS) {
+	if (key == key_code_t.HYPHEN_MINUS) {
 		return "-";
 	}
-	else if (key == key_code_t.MULTIPLY) {
+	if (key == key_code_t.MULTIPLY) {
 		return "*";
 	}
-	else if (key == key_code_t.DIVIDE) {
+	if (key == key_code_t.DIVIDE) {
 		return "/";
 	}
-	else if (key == key_code_t.DECIMAL) {
+	if (key == key_code_t.DECIMAL) {
 		return ".";
 	}
-	else if (key == key_code_t.ZERO) {
+	if (key == key_code_t.ZERO) {
 		return "0";
 	}
-	else if (key == key_code_t.NUMPAD0) {
+	if (key == key_code_t.NUMPAD0) {
 		return "0";
 	}
-	else if (key == key_code_t.ONE) {
+	if (key == key_code_t.ONE) {
 		return "1";
 	}
-	else if (key == key_code_t.NUMPAD1) {
+	if (key == key_code_t.NUMPAD1) {
 		return "1";
 	}
-	else if (key == key_code_t.TWO) {
+	if (key == key_code_t.TWO) {
 		return "2";
 	}
-	else if (key == key_code_t.NUMPAD2) {
+	if (key == key_code_t.NUMPAD2) {
 		return "2";
 	}
-	else if (key == key_code_t.THREE) {
+	if (key == key_code_t.THREE) {
 		return "3";
 	}
-	else if (key == key_code_t.NUMPAD3) {
+	if (key == key_code_t.NUMPAD3) {
 		return "3";
 	}
-	else if (key == key_code_t.FOUR) {
+	if (key == key_code_t.FOUR) {
 		return "4";
 	}
-	else if (key == key_code_t.NUMPAD4) {
+	if (key == key_code_t.NUMPAD4) {
 		return "4";
 	}
-	else if (key == key_code_t.FIVE) {
+	if (key == key_code_t.FIVE) {
 		return "5";
 	}
-	else if (key == key_code_t.NUMPAD5) {
+	if (key == key_code_t.NUMPAD5) {
 		return "5";
 	}
-	else if (key == key_code_t.SIX) {
+	if (key == key_code_t.SIX) {
 		return "6";
 	}
-	else if (key == key_code_t.NUMPAD6) {
+	if (key == key_code_t.NUMPAD6) {
 		return "6";
 	}
-	else if (key == key_code_t.SEVEN) {
+	if (key == key_code_t.SEVEN) {
 		return "7";
 	}
-	else if (key == key_code_t.NUMPAD7) {
+	if (key == key_code_t.NUMPAD7) {
 		return "7";
 	}
-	else if (key == key_code_t.EIGHT) {
+	if (key == key_code_t.EIGHT) {
 		return "8";
 	}
-	else if (key == key_code_t.NUMPAD8) {
+	if (key == key_code_t.NUMPAD8) {
 		return "8";
 	}
-	else if (key == key_code_t.NINE) {
+	if (key == key_code_t.NINE) {
 		return "9";
 	}
-	else if (key == key_code_t.NUMPAD9) {
+	if (key == key_code_t.NUMPAD9) {
 		return "9";
 	}
-	else if (key == key_code_t.F1) {
+	if (key == key_code_t.F1) {
 		return "f1";
 	}
-	else if (key == key_code_t.F2) {
+	if (key == key_code_t.F2) {
 		return "f2";
 	}
-	else if (key == key_code_t.F3) {
+	if (key == key_code_t.F3) {
 		return "f3";
 	}
-	else if (key == key_code_t.F4) {
+	if (key == key_code_t.F4) {
 		return "f4";
 	}
-	else if (key == key_code_t.F5) {
+	if (key == key_code_t.F5) {
 		return "f5";
 	}
-	else if (key == key_code_t.F6) {
+	if (key == key_code_t.F6) {
 		return "f6";
 	}
-	else if (key == key_code_t.F7) {
+	if (key == key_code_t.F7) {
 		return "f7";
 	}
-	else if (key == key_code_t.F8) {
+	if (key == key_code_t.F8) {
 		return "f8";
 	}
-	else if (key == key_code_t.F9) {
+	if (key == key_code_t.F9) {
 		return "f9";
 	}
-	else if (key == key_code_t.F10) {
+	if (key == key_code_t.F10) {
 		return "f10";
 	}
-	else if (key == key_code_t.F11) {
+	if (key == key_code_t.F11) {
 		return "f11";
 	}
-	else if (key == key_code_t.F12) {
+	if (key == key_code_t.F12) {
 		return "f12";
 	}
-	else {
-		return to_lower_case(string_from_char_code(key));
-	}
+	return to_lower_case(string_from_char_code(key));
 }
 
 function keyboard_down_listener(code: key_code_t) {
@@ -686,8 +654,6 @@ function keyboard_up_listener(code: key_code_t) {
 	}
 	///end
 }
-
-function keyboard_press_listener(c: string) {}
 
 ///if WITH_GAMEPAD
 

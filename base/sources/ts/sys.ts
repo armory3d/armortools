@@ -60,7 +60,6 @@ function sys_start(ops: iron_window_options_t) {
 	iron_set_application_state_callback(sys_foreground_callback, sys_resume_callback, sys_pause_callback, sys_background_callback, sys_shutdown_callback);
 	iron_set_keyboard_down_callback(sys_keyboard_down_callback);
 	iron_set_keyboard_up_callback(sys_keyboard_up_callback);
-	iron_set_keyboard_press_callback(sys_keyboard_press_callback);
 	iron_set_mouse_down_callback(sys_mouse_down_callback);
 	iron_set_mouse_up_callback(sys_mouse_up_callback);
 	iron_set_mouse_move_callback(sys_mouse_move_callback);
@@ -179,10 +178,6 @@ function sys_keyboard_down_callback(code: i32) {
 
 function sys_keyboard_up_callback(code: i32) {
 	keyboard_up_listener(code);
-}
-
-function sys_keyboard_press_callback(char_code: i32) {
-	keyboard_press_listener(string_from_char_code(char_code));
 }
 
 function sys_mouse_down_callback(button: i32, x: i32, y: i32) {

@@ -1050,14 +1050,8 @@ bool iron_mouse_can_lock(void) {
 }
 
 void iron_mouse_show() {}
-
 void iron_mouse_hide() {}
-
 void iron_mouse_set_position(int x, int y) {}
-
-void iron_internal_mouse_lock() {}
-
-void iron_internal_mouse_unlock(void) {}
 
 void iron_mouse_get_position(int *x, int *y) {
 	x = 0;

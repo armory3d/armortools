@@ -386,22 +386,19 @@ void iron_internal_mouse_trigger_scroll(int delta) {
 
 void iron_internal_mouse_window_activated() {
 	if (iron_mouse_is_locked()) {
-		iron_internal_mouse_lock();
+		iron_mouse_hide();
 	}
 }
 void iron_internal_mouse_window_deactivated() {
 	if (iron_mouse_is_locked()) {
-		iron_internal_mouse_unlock();
+		iron_mouse_show();
 	}
 }
 
 static bool moved = false;
 static bool locked = false;
-static int preLockWindow = 0;
 static int preLockX = 0;
 static int preLockY = 0;
-static int centerX = 0;
-static int centerY = 0;
 static int lastX = 0;
 static int lastY = 0;
 
@@ -417,12 +414,12 @@ void iron_internal_mouse_trigger_move(int x, int y) {
 	int movementX = 0;
 	int movementY = 0;
 	if (iron_mouse_is_locked()) {
-		movementX = x - centerX;
-		movementY = y - centerY;
+		movementX = x - preLockX;
+		movementY = y - preLockY;
 		if (movementX != 0 || movementY != 0) {
-			iron_mouse_set_position(centerX, centerY);
-			x = centerX;
-			y = centerY;
+			iron_mouse_set_position(preLockX, preLockY);
+			x = preLockX;
+			y = preLockY;
 		}
 	}
 	else if (moved) {
@@ -443,31 +440,22 @@ bool iron_mouse_is_locked(void) {
 }
 
 void iron_mouse_lock() {
-	if (iron_mouse_is_locked()) {
-		return;
-	}
-	if (!iron_mouse_can_lock()) {
+	if (iron_mouse_is_locked() || !iron_mouse_can_lock()) {
 		return;
 	}
 	locked = true;
-	iron_internal_mouse_lock();
 	iron_mouse_get_position(&preLockX, &preLockY);
-	centerX = iron_window_width() / 2;
-	centerY = iron_window_height() / 2;
-	iron_mouse_set_position(centerX, centerY);
+	iron_mouse_hide();
 }
 
 void iron_mouse_unlock(void) {
-	if (!iron_mouse_is_locked()) {
-		return;
-	}
-	if (!iron_mouse_can_lock()) {
+	if (!iron_mouse_is_locked() || !iron_mouse_can_lock()) {
 		return;
 	}
 	moved = false;
 	locked = false;
-	iron_internal_mouse_unlock();
 	iron_mouse_set_position(preLockX, preLockY);
+	iron_mouse_show();
 }
 
 static void (*pen_press_callback)(int /*x*/, int /*y*/, float /*pressure*/) = NULL;

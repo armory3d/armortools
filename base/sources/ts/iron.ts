@@ -189,7 +189,6 @@ declare function _iron_set_drop_files_callback(callback: (file: string)=>void): 
 declare function iron_set_application_state_callback(on_foreground: ()=>void, on_resume: ()=>void, on_pause: ()=>void, on_background: ()=>void, on_shutdown: ()=>void): void;
 declare function iron_set_keyboard_down_callback(callback: (code: i32)=>void): void;
 declare function iron_set_keyboard_up_callback(callback: (code: i32)=>void): void;
-declare function iron_set_keyboard_press_callback(callback: (char_code: i32)=>void): void;
 declare function iron_set_mouse_down_callback(callback: (button: i32, x: i32, y: i32)=>void): void;
 declare function iron_set_mouse_up_callback(callback: (button: i32, x: i32, y: i32)=>void): void;
 declare function iron_set_mouse_move_callback(callback: (x: i32, y: i32, mx: i32, my: i32)=>void): void;

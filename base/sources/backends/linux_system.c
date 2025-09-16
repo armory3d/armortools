@@ -1056,34 +1056,6 @@ int iron_hardware_threads(void) {
 	return sysconf(_SC_NPROCESSORS_ONLN);
 }
 
-void iron_internal_mouse_lock() {
-	iron_mouse_hide();
-	int width = iron_window_width();
-	int height = iron_window_height();
-
-	int x, y;
-	iron_mouse_get_position(&x, &y);
-	int newX = x;
-	int newY = y;
-	if (x < 0) {
-		newX -= x;
-	}
-	else if (x > width) {
-		newX -= x - width;
-	}
-	if (y < 0) {
-		newY -= y;
-	}
-	else if (y > height) {
-		newY -= y - height;
-	}
-	iron_mouse_set_position(newX, newY);
-}
-
-void iron_internal_mouse_unlock() {
-	iron_mouse_show();
-}
-
 bool iron_mouse_can_lock(void) {
 	return true;
 }

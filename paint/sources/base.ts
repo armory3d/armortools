@@ -1083,7 +1083,7 @@ function ui_base_update() {
 				(decal_mask && operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "brush_radius")))) {
 				context_raw.brush_can_lock = true;
 				if (!pen_connected) {
-					mouse_lock();
+					iron_mouse_lock();
 				}
 				context_raw.lock_started_x = mouse_x;
 				context_raw.lock_started_y = mouse_y;
@@ -1234,7 +1234,7 @@ function ui_base_update() {
 			!(decal_mask && operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "brush_radius"), shortcut_type_t.DOWN));
 
 		if (b) {
-			mouse_unlock();
+			iron_mouse_unlock();
 			context_raw.last_paint_x = -1;
 			context_raw.last_paint_y = -1;
 			if (context_raw.brush_can_lock) {
@@ -1782,12 +1782,6 @@ function ui_base_render_cursor() {
 	let mx: i32 = base_x() + context_raw.paint_vec.x * base_w();
 	let my: i32 = base_y() + context_raw.paint_vec.y * base_h();
 	context_raw.view_index = -1;
-
-	// Radius being scaled
-	if (context_raw.brush_locked) {
-		mx += context_raw.lock_started_x - iron_window_width() / 2;
-		my += context_raw.lock_started_y - iron_window_height() / 2;
-	}
 
 	if (context_raw.brush_stencil_image != null &&
 		context_raw.tool != tool_type_t.BAKE &&

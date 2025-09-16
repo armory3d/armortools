@@ -210,7 +210,6 @@ void (*iron_shutdown)(void);
 void (*iron_pause)(void);
 void (*iron_key_down)(int);
 void (*iron_key_up)(int);
-void (*iron_key_press)(int);
 void (*iron_mouse_down)(int, int, int);
 void (*iron_mouse_up)(int, int, int);
 void (*iron_mouse_move)(int, int, int, int);
@@ -474,7 +473,6 @@ void _key_up(int code, void *data) {
 }
 
 void _key_press(unsigned int character, void *data) {
-	iron_key_press(character);
 	if (ui_get_current()) ui_key_press(ui_get_current(), character);
 
 	#ifdef IDLE_SLEEP
@@ -747,6 +745,7 @@ void _iron_init(iron_window_options_t *ops) {
 	iron_set_cut_callback(_cut, NULL);
 	iron_set_copy_callback(_copy, NULL);
 	iron_set_paste_callback(_paste, NULL);
+	iron_keyboard_set_key_press_callback(_key_press, NULL);
 
 	#ifdef IRON_WINDOWS
 	// Maximized window has x < -1, prevent window centering
@@ -796,11 +795,6 @@ void iron_set_keyboard_down_callback(void (*callback)(int)) {
 void iron_set_keyboard_up_callback(void (*callback)(int)) {
 	iron_key_up = callback;
 	iron_keyboard_set_key_up_callback(_key_up, NULL);
-}
-
-void iron_set_keyboard_press_callback(void (*callback)(int)) {
-	iron_key_press = callback;
-	iron_keyboard_set_key_press_callback(_key_press, NULL);
 }
 
 void iron_set_mouse_down_callback(void (*callback)(int, int, int)) {

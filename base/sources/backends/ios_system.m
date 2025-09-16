@@ -99,9 +99,6 @@ int iron_primary_display(void) {
 	return 0;
 }
 
-void iron_internal_mouse_lock(void) {}
-void iron_internal_mouse_unlock(void) {}
-
 bool iron_mouse_can_lock(void) {
 	return false;
 }

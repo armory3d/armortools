@@ -500,14 +500,6 @@ iron_display_mode_t iron_display_current_mode(int display) {
 	return dm;
 }
 
-void iron_internal_mouse_lock() {
-	iron_mouse_hide();
-}
-
-void iron_internal_mouse_unlock(void) {
-	iron_mouse_show();
-}
-
 bool iron_mouse_can_lock(void) {
 	return true;
 }

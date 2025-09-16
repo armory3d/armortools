@@ -334,8 +334,6 @@ void iron_internal_mouse_trigger_press(int button, int x, int y);
 void iron_internal_mouse_trigger_release(int button, int x, int y);
 void iron_internal_mouse_trigger_move(int x, int y);
 void iron_internal_mouse_trigger_scroll(int delta);
-void iron_internal_mouse_lock();
-void iron_internal_mouse_unlock(void);
 void iron_internal_mouse_window_activated();
 void iron_internal_mouse_window_deactivated();
 void iron_pen_set_press_callback(void (*value)(int /*x*/, int /*y*/, float /*pressure*/));

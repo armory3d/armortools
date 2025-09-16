@@ -28,10 +28,6 @@ iron_display_mode_t iron_display_current_mode(int display_index) {
 	return mode;
 }
 
-void iron_internal_mouse_lock() {}
-
-void iron_internal_mouse_unlock(void) {}
-
 bool iron_mouse_can_lock(void) {
 	return false;
 }
