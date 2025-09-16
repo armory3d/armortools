@@ -660,9 +660,7 @@ void ui_draw_tooltip_image() {
 	draw_set_color(0xff000000);
 	draw_filled_rect(current->tooltip_x, current->tooltip_y, w, h);
 	draw_set_color(0xffffffff);
-	current->tooltip_invert_y ?
-		draw_scaled_image(current->tooltip_img, current->tooltip_x, current->tooltip_y + h, w, -h) :
-		draw_scaled_image(current->tooltip_img, current->tooltip_x, current->tooltip_y, w, h);
+	draw_scaled_image(current->tooltip_img, current->tooltip_x, current->tooltip_y, w, h);
 	draw_end();
 }
 
@@ -761,7 +759,6 @@ void ui_draw_combo() {
 						break;
 					}
 				}
-
 				// Corner case: current position is the top one according to the search pattern
 				ui_lower_case(str, current->combo_selected_texts->buffer[current->combo_to_submit - step]);
 				if (strstr(str, search) == NULL) {
@@ -786,7 +783,6 @@ void ui_draw_combo() {
 						break;
 					}
 				}
-
 				// Corner case: current position is the top one according to the search pattern
 				ui_lower_case(str, current->combo_selected_texts->buffer[current->combo_to_submit + step]);
 				if (strstr(str, search) == NULL) {
@@ -1330,7 +1326,6 @@ void ui_draw_tabs() {
 		else {
 			tab_x += current->_w + 1;
 		}
-		// ui_draw_rect(true, current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w, tab_h); // Round corners
 		draw_filled_rect(current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w, tab_h);
 		draw_set_color(theme->TEXT_COL);
 		if (!selected) {
@@ -1340,9 +1335,6 @@ void ui_draw_tabs() {
 
 		if (selected) { // Hide underline for active tab
 			if (current->tab_vertical) {
-				// Hide underline
-				// draw_set_color(theme->WINDOW_BG_COL);
-				// draw_filled_rect(current->_x + current->button_offset_y + current->_w - 1, current->_y + current->button_offset_y - 1, 2, tab_h + current->button_offset_y);
 				// Highlight
 				draw_set_color(theme->HIGHLIGHT_COL);
 				draw_filled_rect(current->_x + current->button_offset_y, current->_y + current->button_offset_y - 1, 2, tab_h + current->button_offset_y);
@@ -1785,12 +1777,7 @@ bool ui_button(char *text, int align, char *label/*, gpu_texture_t *icon, int sx
 	/*
 	if (icon != NULL) {
 		draw_set_color(0xffffffff);
-		if (current->image_invert_y) {
-			draw_scaled_sub_image(icon, sx, sy, sw, sh, _x + current->button_offset_y, _y - 1 + sh, sw, -sh);
-		}
-		else {
-			draw_scaled_sub_image(icon, sx, sy, sw, sh, _x + current->button_offset_y, _y - 1, sw, sh);
-		}
+		draw_scaled_sub_image(icon, sx, sy, sw, sh, _x + current->button_offset_y, _y - 1, sw, sh);
 	}
 	*/
 
@@ -1933,32 +1920,15 @@ int ui_sub_image(gpu_texture_t *image, uint32_t tint, int h, int sx, int sy, int
 	bool released = ui_get_released(h);
 	bool hover = ui_get_hover(h);
 
-	// Limit input to image width
-	// if (current->current_ratio == -1 && (started || down || released || hover)) {
-	// 	if (current->input_x < current->_window_x + current->_x || current->input_x > current->_window_x + current->_x + w) {
-	// 		started = down = released = hover = false;
-	// 	}
-	// }
-
 	draw_set_color(tint);
 	if (!current->enabled) {
 		ui_fade_color(0.25);
 	}
 	if (sw > 0) { // Source rect specified
-		if (current->image_invert_y) {
-			draw_scaled_sub_image(image, sx, sy, sw, sh, x, current->_y + h, w, -h);
-		}
-		else {
-			draw_scaled_sub_image(image, sx, sy, sw, sh, x, current->_y, w, h);
-		}
+		draw_scaled_sub_image(image, sx, sy, sw, sh, x, current->_y, w, h);
 	}
 	else {
-		if (current->image_invert_y) {
-			draw_scaled_image(image, x, current->_y + h, w, -h);
-		}
-		else {
-			draw_scaled_image(image, x, current->_y, w, h);
-		}
+		draw_scaled_image(image, x, current->_y, w, h);
 	}
 
 	ui_end_element_of_size(h);
@@ -2135,15 +2105,8 @@ int ui_combo(ui_handle_t *handle, char_ptr_array_t *texts, char *label, bool sho
 
 	int x = current->_x + current->_w - current->arrow_offset_x - 8;
 	int y = current->_y + current->arrow_offset_y + 3;
-
 	draw_set_color(theme->HOVER_COL);
-	// if (handle == current->combo_selected_handle) {
-	//	// Flip arrow when combo is open
-	//	draw_filled_triangle(x, y, x + UI_ARROW_SIZE(), y, x + UI_ARROW_SIZE() / 2.0, y - UI_ARROW_SIZE() / 2.0);
-	// }
-	// else {
-		draw_filled_triangle(x, y, x + UI_ARROW_SIZE(), y, x + UI_ARROW_SIZE() / 2.0, y + UI_ARROW_SIZE() / 2.0);
-	// }
+	draw_filled_triangle(x, y, x + UI_ARROW_SIZE(), y, x + UI_ARROW_SIZE() / 2.0, y + UI_ARROW_SIZE() / 2.0);
 
 	if (show_label && label[0] != '\0') {
 		if (align == UI_ALIGN_LEFT) {
@@ -2279,7 +2242,6 @@ void ui_tooltip(char *text) {
 void ui_tooltip_image(gpu_texture_t *image, int max_width) {
 	current->tooltip_img = image;
 	current->tooltip_img_max_width = max_width;
-	current->tooltip_invert_y = current->image_invert_y;
 	current->tooltip_y = current->_y + current->_window_y;
 }
 

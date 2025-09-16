@@ -130,7 +130,6 @@ typedef struct ui {
 	bool is_hovered;
 	bool is_released;
 	bool changed; // Global elements change check
-	bool image_invert_y;
 	bool scroll_enabled;
 	bool always_redraw; // Hurts performance
 	bool highlight_on_select; // Highlight text edit contents on selection
@@ -245,7 +244,6 @@ typedef struct ui {
 	char tooltip_text[512];
 	gpu_texture_t *tooltip_img;
 	int tooltip_img_max_width;
-	bool tooltip_invert_y;
 	float tooltip_x;
 	float tooltip_y;
 	bool tooltip_shown;

@@ -806,7 +806,6 @@ declare type ui_t = {
 	submit_text_handle: ui_handle_t;
 	combo_selected_handle: ui_handle_t;
 	current_ratio: i32;
-	image_invert_y: bool;
 	elements_baked: bool;
 	window_border_right: i32;
 	window_border_top: i32;
