@@ -23,9 +23,7 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 		let decal: bool = context_is_decal();
 		let decal_mask: bool = decal && operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
 		let brush_decal_mask_radius: f32 = context_raw.brush_decal_mask_radius;
-		if (config_raw.brush_3d) {
-			brush_decal_mask_radius *= context_raw.paint2d ? 0.55 * ui_view2d_pan_scale : 2.0;
-		}
+		brush_decal_mask_radius *= context_raw.paint2d ? 0.55 * ui_view2d_pan_scale : 2.0;
 		let radius: f32 = decal_mask ? brush_decal_mask_radius : context_raw.brush_radius;
 		let val: f32 = (radius * context_raw.brush_nodes_radius) / 15.0;
 		if (config_raw.pressure_radius && pen_down()) {
@@ -33,7 +31,7 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 		}
 		let scale2d: f32 = (900 / base_h()) * config_raw.window_scale;
 
-		if (config_raw.brush_3d && !decal) {
+		if (!decal) {
 			val *= context_raw.paint2d ? 0.55 * scale2d * ui_view2d_pan_scale : 2;
 		}
 		else {
@@ -79,13 +77,11 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 		if (config_raw.pressure_hardness && pen_down()) {
 			val *= pen_pressure * config_raw.pressure_sensitivity;
 		}
-		if (config_raw.brush_3d) {
-			if (context_raw.paint2d) {
-				val *= 1.0 / ui_view2d_pan_scale;
-			}
-			else {
-				val *= val;
-			}
+		if (context_raw.paint2d) {
+			val *= 1.0 / ui_view2d_pan_scale;
+		}
+		else {
+			val *= val;
 		}
 		return val;
 	}

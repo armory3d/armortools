@@ -75,6 +75,16 @@ function box_preferences_show() {
 				config_raw.zoom_direction = zoom_direction_handle.position;
 			}
 
+			let h_node_preview: ui_handle_t = ui_handle(__ID__);
+			if (h_node_preview.init) {
+				h_node_preview.position = config_raw.node_preview;
+			}
+			let node_preview_combo: string[] = [tr("Off"), tr("Selected Node")]; // , tr("All Nodes")];
+			ui_combo(h_node_preview, node_preview_combo, tr("Node Preview"), true);
+			if (h_node_preview.changed) {
+				config_raw.node_preview = h_node_preview.position;
+			}
+
 			let h_wrap_mouse: ui_handle_t = ui_handle(__ID__);
 			if (h_wrap_mouse.init) {
 				h_wrap_mouse.selected = config_raw.wrap_mouse;
@@ -83,12 +93,6 @@ function box_preferences_show() {
 			if (ui.is_hovered) {
 				ui_tooltip(tr("Wrap mouse around view boundaries during camera control"));
 			}
-
-			let h_node_preview: ui_handle_t = ui_handle(__ID__);
-			if (h_node_preview.init) {
-				h_node_preview.selected = config_raw.node_preview;
-			}
-			config_raw.node_preview = ui_check(h_node_preview, tr("Show Node Preview"));
 
 			ui.changed = false;
 			let h_show_asset_names: ui_handle_t = ui_handle(__ID__);
@@ -350,16 +354,6 @@ function box_preferences_show() {
 				ui_tooltip(tr("Dilate painted textures to prevent seams"));
 			}
 
-			let dilate_handle: ui_handle_t = ui_handle(__ID__);
-			if (dilate_handle.init) {
-				dilate_handle.position = config_raw.dilate;
-			}
-			let dilate_combo: string[] = [tr("Instant"), tr("Delayed")];
-			ui_combo(dilate_handle, dilate_combo, tr("Dilate"), true);
-			if (dilate_handle.changed) {
-				config_raw.dilate = dilate_handle.position;
-			}
-
 			let camera_controls_handle: ui_handle_t = ui_handle(__ID__);
 			if (camera_controls_handle.init) {
 				camera_controls_handle.position = config_raw.camera_controls;
@@ -423,16 +417,6 @@ function box_preferences_show() {
 				context_raw.ddirty = 2;
 			}
 
-			let brush_3d_handle: ui_handle_t = ui_handle(__ID__);
-			if (brush_3d_handle.init) {
-				brush_3d_handle.selected = config_raw.brush_3d;
-			}
-			config_raw.brush_3d = ui_check(brush_3d_handle, tr("3D Cursor"));
-			if (brush_3d_handle.changed) {
-				make_material_parse_paint_material();
-			}
-
-			ui.enabled = config_raw.brush_3d;
 			let brush_depth_reject_handle: ui_handle_t = ui_handle(__ID__);
 			if (brush_depth_reject_handle.init) {
 				brush_depth_reject_handle.selected = config_raw.brush_depth_reject;
@@ -453,7 +437,9 @@ function box_preferences_show() {
 				make_material_parse_paint_material();
 			}
 
-			if (!config_raw.brush_angle_reject) ui.enabled = false;
+			if (!config_raw.brush_angle_reject) {
+				ui.enabled = false;
+			}
 			let angle_dot_handle: ui_handle_t = ui_handle(__ID__);
 			if (angle_dot_handle.init) {
 				angle_dot_handle.value = context_raw.brush_angle_reject_dot;

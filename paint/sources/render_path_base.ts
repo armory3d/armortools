@@ -55,7 +55,7 @@ function render_path_base_begin() {
 
 		let decal: bool = context_is_decal();
 
-		if (context_raw.view_index_last != context_raw.view_index || decal || !config_raw.brush_3d) {
+		if (context_raw.view_index_last != context_raw.view_index || decal) {
 			// Redraw on current viewport change
 			context_raw.ddirty = 1;
 		}

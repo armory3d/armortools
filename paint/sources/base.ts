@@ -1848,7 +1848,7 @@ function ui_base_render_cursor() {
 
 	let decal: bool = context_is_decal();
 
-	if (!config_raw.brush_3d || context_in_2d_view() || decal) {
+	if (context_in_2d_view() || decal) {
 		let decal_mask: bool = context_is_decal_mask();
 		if (decal && !context_in_nodes()) {
 			let decal_alpha: f32 = 0.5;
@@ -1887,12 +1887,11 @@ function ui_base_render_cursor() {
 			context_raw.tool == tool_type_t.BLUR   ||
 			context_raw.tool == tool_type_t.SMUDGE   ||
 			context_raw.tool == tool_type_t.PARTICLE ||
-			(decal_mask && !config_raw.brush_3d) ||
 			(decal_mask && context_in_2d_view())) {
 			if (decal_mask) {
 				psize = math_floor(cursor_img.width * (context_raw.brush_decal_mask_radius * context_raw.brush_nodes_radius) * UI_SCALE());
 			}
-			if (config_raw.brush_3d && context_in_2d_view()) {
+			if (context_in_2d_view()) {
 				psize = math_floor(psize * ui_view2d_pan_scale);
 			}
 			draw_scaled_image(cursor_img, mx - psize / 2, my - psize / 2, psize, psize);

@@ -86,15 +86,13 @@ function config_save() {
 	json_encode_f32("displace_strength", config_raw.displace_strength);
 	json_encode_i32("layer_res", config_raw.layer_res);
 	json_encode_bool("brush_live", config_raw.brush_live);
-	json_encode_bool("brush_3d", config_raw.brush_3d);
-	json_encode_bool("node_preview", config_raw.node_preview);
+	json_encode_i32("node_preview", config_raw.node_preview);
 	json_encode_bool("pressure_hardness", config_raw.pressure_hardness);
 	json_encode_bool("pressure_angle", config_raw.pressure_angle);
 	json_encode_bool("pressure_opacity", config_raw.pressure_opacity);
 	json_encode_bool("material_live", config_raw.material_live);
 	json_encode_bool("brush_depth_reject", config_raw.brush_depth_reject);
 	json_encode_bool("brush_angle_reject", config_raw.brush_angle_reject);
-	json_encode_i32("dilate", config_raw.dilate);
 	json_encode_i32("dilate_radius", config_raw.dilate_radius);
 	json_encode_bool("gpu_inference", config_raw.gpu_inference);
 	json_encode_string("blender", config_raw.blender);
@@ -189,7 +187,7 @@ function config_init() {
 		config_raw.touch_ui = false;
 		config_raw.splash_screen = false;
 		///end
-		config_raw.node_preview = true;
+		config_raw.node_preview = node_preview_t.SELECTED_NODE;
 		config_raw.pressure_hardness = true;
 		config_raw.pressure_angle = false;
 		config_raw.pressure_opacity = false;
@@ -198,12 +196,10 @@ function config_init() {
 		///else
 		config_raw.material_live = true;
 		///end
-		config_raw.brush_3d = true;
 		config_raw.brush_depth_reject = true;
 		config_raw.brush_angle_reject = true;
 		config_raw.brush_live = false;
 		config_raw.show_asset_names = false;
-		config_raw.dilate = dilate_type_t.INSTANT;
 		config_raw.dilate_radius = 2;
 		config_raw.gpu_inference = true;
 		config_raw.blender = "";
@@ -476,25 +472,19 @@ type config_t = {
 	server?: string;
 	viewport_mode: i32;
 	pathtrace_mode: i32;
-
 	pressure_radius?: bool; // Pen pressure controls
 	pressure_sensitivity?: f32;
 	displace_strength?: f32;
 	layer_res?: i32;
 	brush_live?: bool;
-	brush_3d?: bool;
-	node_preview?: bool;
-
+	node_preview?: i32;
 	pressure_hardness?: bool;
 	pressure_angle?: bool;
 	pressure_opacity?: bool;
 	material_live?: bool;
 	brush_depth_reject?: bool;
 	brush_angle_reject?: bool;
-
-	dilate?: i32;
 	dilate_radius?: i32;
-
 	gpu_inference?: bool;
 	blender?: string;
 	scene_atlas_res: i32;

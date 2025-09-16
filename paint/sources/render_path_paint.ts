@@ -252,7 +252,7 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 				render_path_set_target(texpaint, additional);
 			}
 			render_path_bind_target("main", "gbufferD");
-			if ((context_raw.xray || config_raw.brush_angle_reject) && config_raw.brush_3d) {
+			if (context_raw.xray || config_raw.brush_angle_reject) {
 				render_path_bind_target("gbuffer0", "gbuffer0");
 			}
 			render_path_bind_target("texpaint_blend1", "paintmask");
@@ -291,7 +291,7 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 				}
 			}
 
-			if (dilation && config_raw.dilate == dilate_type_t.INSTANT) {
+			if (dilation) {
 				render_path_paint_dilate(true, false);
 			}
 		}
@@ -401,9 +401,6 @@ function render_path_paint_commands_live_brush() {
 }
 
 function render_path_paint_commands_cursor() {
-	if (!config_raw.brush_3d) {
-		return;
-	}
 	let decal_mask: bool = context_is_decal_mask();
 	let tool: tool_type_t = context_raw.tool;
 	if (tool != tool_type_t.BRUSH &&
@@ -525,7 +522,7 @@ function render_path_paint_live_brush_dirty() {
 
 function render_path_paint_begin() {
 	if (!render_path_paint_dilated) {
-		render_path_paint_dilate(config_raw.dilate == dilate_type_t.DELAYED, true);
+		render_path_paint_dilate(false, true);
 		render_path_paint_dilated = true;
 	}
 
@@ -674,9 +671,7 @@ function render_path_paint_draw() {
 			else if (render_path_paint_is_rt_bake()) {
 				let dirty: bool = render_path_raytrace_bake_commands(make_material_parse_paint_material);
 				if (dirty) ui_header_handle.redraws = 2;
-				if (config_raw.dilate == dilate_type_t.INSTANT) { // && raw.pdirty == 1
-					render_path_paint_dilate(true, false);
-				}
+				render_path_paint_dilate(true, false);
 			}
 			else {
 				render_path_paint_commands_paint();

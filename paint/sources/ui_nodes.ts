@@ -816,7 +816,7 @@ function ui_nodes_render() {
 		ui_nodes_grid_redraw = false;
 	}
 
-	if (config_raw.node_preview && context_raw.node_preview_dirty) {
+	if (config_raw.node_preview == node_preview_t.SELECTED_NODE && context_raw.node_preview_dirty) {
 		ui_nodes_make_node_preview();
 	}
 
@@ -969,7 +969,7 @@ function ui_nodes_render() {
 		ui_nodes_uichanged_last = ui.changed;
 
 		// Node previews
-		if (config_raw.node_preview && nodes.nodes_selected_id.length > 0) {
+		if (config_raw.node_preview == node_preview_t.SELECTED_NODE && nodes.nodes_selected_id.length > 0) {
 			let img: gpu_texture_t = null;
 			let sel: ui_node_t = ui_get_node(c.nodes, nodes.nodes_selected_id[0]);
 

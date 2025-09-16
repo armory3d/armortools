@@ -143,13 +143,13 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		decal) {
 
 		let depth_reject: bool = !context_raw.xray;
-		if (config_raw.brush_3d && !config_raw.brush_depth_reject) {
+		if (!config_raw.brush_depth_reject) {
 			depth_reject = false;
 		}
 
 		// TODO: sp.z needs to take height channel into account
 		let particle: bool = context_raw.tool == tool_type_t.PARTICLE;
-		if (config_raw.brush_3d && !decal && !particle) {
+		if (!decal && !particle) {
 			if (make_material_height_used || context_raw.sym_x || context_raw.sym_y || context_raw.sym_z) {
 				depth_reject = false;
 			}
@@ -333,10 +333,8 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 			node_shader_write_frag(kong, "pa_mask.xy = float2(pa_mask.x * constants.brush_angle.x - pa_mask.y * constants.brush_angle.y, pa_mask.x * constants.brush_angle.y + pa_mask.y * constants.brush_angle.x);");
 		}
 		node_shader_write_frag(kong, "pa_mask = pa_mask / constants.brush_radius;");
-		if (config_raw.brush_3d) {
-			node_shader_add_constant(kong, "eye: float3", "_camera_pos");
-			node_shader_write_frag(kong, "pa_mask = pa_mask * (distance(constants.eye, winp.xyz) / 1.5);");
-		}
+		node_shader_add_constant(kong, "eye: float3", "_camera_pos");
+		node_shader_write_frag(kong, "pa_mask = pa_mask * (distance(constants.eye, winp.xyz) / 1.5);");
 		node_shader_write_frag(kong, "pa_mask = pa_mask.xy * 0.5 + 0.5;");
 		node_shader_write_frag(kong, "var mask_sample: float4 = sample_lod(texbrushmask, sampler_linear, pa_mask, 0.0);");
 		if (context_raw.brush_mask_image_is_alpha) {

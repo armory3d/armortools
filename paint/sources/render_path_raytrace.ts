@@ -215,7 +215,5 @@ function render_path_raytrace_draw(use_live_layer: bool) {
 	render_path_set_target("");
 	render_path_bind_target("last", "tex");
 	render_path_draw_shader("shader_datas/copy_pass/copy_pass");
-	if (config_raw.brush_3d) {
-		render_path_paint_commands_cursor();
-	}
+	render_path_paint_commands_cursor();
 }
