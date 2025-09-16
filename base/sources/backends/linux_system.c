@@ -1322,3 +1322,40 @@ bool iron_gamepad_connected(int gamepad) {
 void iron_gamepad_rumble(int gamepad, float left, float right) {}
 
 #endif
+
+#ifdef WITH_NFD // Has gtk
+#include <gtk/gtk.h>
+extern void (*iron_save_and_quit)(bool);
+
+bool _save_and_quit_callback_internal() {
+	bool save = false;
+	XTextProperty text_prop;
+	XGetTextProperty(x11_ctx.display, x11_ctx.windows[0].window, &text_prop, NET_WM_NAME);
+	char *title = (char *)text_prop.value;
+	bool dirty = strstr(title, "* - ArmorPaint") != NULL;
+	// XFree(title);
+	if (dirty) {
+		gtk_init(NULL, NULL);
+		GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO, "Project has been modified, save changes?");
+		gtk_window_set_title(GTK_WINDOW(dialog), "Save Changes?");
+		gtk_widget_realize(dialog);
+		gint res = gtk_dialog_run(GTK_DIALOG(dialog));
+		gtk_widget_destroy(dialog);
+		while (g_main_context_pending(NULL)) {
+			g_main_context_iteration(NULL, FALSE);
+		}
+		if (res == GTK_RESPONSE_YES) {
+			save = true;
+		}
+		else if (res == GTK_RESPONSE_NO) {
+			save = false;
+		}
+		else {
+			return false;
+		}
+	}
+	iron_save_and_quit(save);
+	return false;
+}
+
+#endif

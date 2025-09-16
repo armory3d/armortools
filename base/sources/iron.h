@@ -185,7 +185,6 @@ void _kickstart();
 bool enable_window = true;
 bool in_background = false;
 int paused_frames = 0;
-bool save_and_quit_callback_set = false;
 #ifdef IDLE_SLEEP
 bool input_down = false;
 int last_window_width = 0;
@@ -1405,7 +1404,11 @@ void iron_file_download(string_t *url, void (*callback)(char *, buffer_t *), i32
 	iron_https_request(url_base, url_path, NULL, 443, 0, &_https_callback, cbd);
 }
 
-bool _window_close_callback(void *data) {
+#ifdef IRON_LINUX
+bool _save_and_quit_callback_internal();
+#endif
+
+bool _save_and_quit_callback(void *data) {
 	#ifdef IRON_WINDOWS
 	bool save = false;
 	wchar_t title[1024];
@@ -1423,18 +1426,21 @@ bool _window_close_callback(void *data) {
 			return false;
 		}
 	}
-	if (save_and_quit_callback_set) {
-		iron_save_and_quit(save);
-		return false;
-	}
+	iron_save_and_quit(save);
+	return false;
 	#endif
+
+	#if defined(IRON_LINUX) && defined(WITH_NFD) // Has gtk
+	_save_and_quit_callback_internal();
+	return false;
+	#endif
+
 	return true;
 }
 
 void iron_set_save_and_quit_callback(void (*callback)(bool)) {
 	iron_save_and_quit = callback;
-	save_and_quit_callback_set = true;
-	iron_window_set_close_callback(_window_close_callback, NULL);
+	iron_window_set_close_callback(_save_and_quit_callback, NULL);
 }
 
 void iron_delay_idle_sleep() {
