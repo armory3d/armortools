@@ -428,7 +428,7 @@ function ui_nodes_get_canvas_control(controls_down: bool): ui_canvas_control_t {
 		zoom: ui.input_wheel_delta != 0.0 ? -ui.input_wheel_delta / 10 : zoom_delta,
 		controls_down: controls_down
 	};
-	if (base_is_combo_selected()) {
+	if (ui.combo_selected_handle != null) {
 		control.zoom = 0.0;
 	}
 	if (control.zoom != 0.0) {

@@ -2,49 +2,49 @@
 // https://github.com/aras-p/miniexr
 // https://www.openexr.com/documentation/openexrfilelayout.pdf
 
-let _parser_exr_width: i32;
-let _parser_exr_stride: i32;
-let _parser_exr_out: u8[];
-let _parser_exr_src_view: buffer_t;
-let _parser_exr_write_line: (byte_pos: i32)=> void;
+let _export_exr_width: i32;
+let _export_exr_stride: i32;
+let _export_exr_out: u8[];
+let _export_exr_src_view: buffer_t;
+let _export_exr_write_line: (byte_pos: i32)=> void;
 
-function parser_exr_write_string(out: u8[], str: string) {
+function export_exr_write_string(out: u8[], str: string) {
 	for (let i: i32 = 0; i < str.length; ++i) {
 		array_push(out, char_code_at(str, i));
 	}
 }
 
-function parser_exr_write_line16(byte_pos: i32) {
-	for (let x: i32 = 0; x < _parser_exr_width; ++x) {
-		array_push(_parser_exr_out, buffer_get_u8(_parser_exr_src_view, byte_pos    ));
-		array_push(_parser_exr_out, buffer_get_u8(_parser_exr_src_view, byte_pos + 1));
-		byte_pos += _parser_exr_stride;
+function export_exr_write_line16(byte_pos: i32) {
+	for (let x: i32 = 0; x < _export_exr_width; ++x) {
+		array_push(_export_exr_out, buffer_get_u8(_export_exr_src_view, byte_pos    ));
+		array_push(_export_exr_out, buffer_get_u8(_export_exr_src_view, byte_pos + 1));
+		byte_pos += _export_exr_stride;
 	}
 }
 
-function parser_exr_write_line32(byte_pos: i32) {
-	for (let x: i32 = 0; x < _parser_exr_width; ++x) {
-		array_push(_parser_exr_out, buffer_get_u8(_parser_exr_src_view, byte_pos    ));
-		array_push(_parser_exr_out, buffer_get_u8(_parser_exr_src_view, byte_pos + 1));
-		array_push(_parser_exr_out, buffer_get_u8(_parser_exr_src_view, byte_pos + 2));
-		array_push(_parser_exr_out, buffer_get_u8(_parser_exr_src_view, byte_pos + 3));
-		byte_pos += _parser_exr_stride;
+function export_exr_write_line32(byte_pos: i32) {
+	for (let x: i32 = 0; x < _export_exr_width; ++x) {
+		array_push(_export_exr_out, buffer_get_u8(_export_exr_src_view, byte_pos    ));
+		array_push(_export_exr_out, buffer_get_u8(_export_exr_src_view, byte_pos + 1));
+		array_push(_export_exr_out, buffer_get_u8(_export_exr_src_view, byte_pos + 2));
+		array_push(_export_exr_out, buffer_get_u8(_export_exr_src_view, byte_pos + 3));
+		byte_pos += _export_exr_stride;
 	}
 }
 
-function parser_exr_write_bgr(off: i32, pos: i32, byte_size: i32) {
-	_parser_exr_write_line(pos + byte_size * 2);
-	_parser_exr_write_line(pos + byte_size);
-	_parser_exr_write_line(pos);
+function export_exr_write_bgr(off: i32, pos: i32, byte_size: i32) {
+	_export_exr_write_line(pos + byte_size * 2);
+	_export_exr_write_line(pos + byte_size);
+	_export_exr_write_line(pos);
 }
 
-function parser_exr_write_single(off: i32, pos: i32, byte_size: i32) {
-	_parser_exr_write_line(pos + off * byte_size);
-	_parser_exr_write_line(pos + off * byte_size);
-	_parser_exr_write_line(pos + off * byte_size);
+function export_exr_write_single(off: i32, pos: i32, byte_size: i32) {
+	_export_exr_write_line(pos + off * byte_size);
+	_export_exr_write_line(pos + off * byte_size);
+	_export_exr_write_line(pos + off * byte_size);
 }
 
-function parser_exr_run(width: i32, height: i32, src: buffer_t, bits: i32 = 16, type: i32 = 1, off: i32 = 0): buffer_t {
+function export_exr_run(width: i32, height: i32, src: buffer_t, bits: i32 = 16, type: i32 = 1, off: i32 = 0): buffer_t {
 	let out: u8[] = [];
 	array_push(out, 0x76); // magic
 	array_push(out, 0x2f);
@@ -54,9 +54,9 @@ function parser_exr_run(width: i32, height: i32, src: buffer_t, bits: i32 = 16, 
 	array_push(out, 0);
 	array_push(out, 0);
 	array_push(out, 0);
-	parser_exr_write_string(out, "channels");
+	export_exr_write_string(out, "channels");
 	array_push(out, 0);
-	parser_exr_write_string(out, "chlist");
+	export_exr_write_string(out, "chlist");
 	array_push(out, 0);
 
 	array_push(out, 55);
@@ -137,9 +137,9 @@ function parser_exr_run(width: i32, height: i32, src: buffer_t, bits: i32 = 16, 
 
 	array_push(out, 0);
 
-	parser_exr_write_string(out, "compression");
+	export_exr_write_string(out, "compression");
 	array_push(out, 0);
-	parser_exr_write_string(out, "compression");
+	export_exr_write_string(out, "compression");
 	array_push(out, 0);
 
 	array_push(out, 1);
@@ -148,9 +148,9 @@ function parser_exr_run(width: i32, height: i32, src: buffer_t, bits: i32 = 16, 
 	array_push(out, 0);
 	array_push(out, 0); // no compression
 
-	parser_exr_write_string(out, "dataWindow");
+	export_exr_write_string(out, "dataWindow");
 	array_push(out, 0);
-	parser_exr_write_string(out, "box2i");
+	export_exr_write_string(out, "box2i");
 	array_push(out, 0);
 
 	array_push(out, 16);
@@ -181,9 +181,9 @@ function parser_exr_run(width: i32, height: i32, src: buffer_t, bits: i32 = 16, 
 	array_push(out, (hh >> 16) & 0xff);
 	array_push(out, (hh >> 24) & 0xff);
 
-	parser_exr_write_string(out, "displayWindow");
+	export_exr_write_string(out, "displayWindow");
 	array_push(out, 0);
-	parser_exr_write_string(out, "box2i");
+	export_exr_write_string(out, "box2i");
 	array_push(out, 0);
 
 	array_push(out, 16);
@@ -211,9 +211,9 @@ function parser_exr_run(width: i32, height: i32, src: buffer_t, bits: i32 = 16, 
 	array_push(out, (hh >> 16) & 0xff);
 	array_push(out, (hh >> 24) & 0xff);
 
-	parser_exr_write_string(out, "lineOrder");
+	export_exr_write_string(out, "lineOrder");
 	array_push(out, 0);
-	parser_exr_write_string(out, "lineOrder");
+	export_exr_write_string(out, "lineOrder");
 	array_push(out, 0);
 
 	array_push(out, 1);
@@ -222,9 +222,9 @@ function parser_exr_run(width: i32, height: i32, src: buffer_t, bits: i32 = 16, 
 	array_push(out, 0);
 	array_push(out, 0); // increasing Y
 
-	parser_exr_write_string(out, "pixelAspectRatio");
+	export_exr_write_string(out, "pixelAspectRatio");
 	array_push(out, 0);
-	parser_exr_write_string(out, "float");
+	export_exr_write_string(out, "float");
 	array_push(out, 0);
 
 	array_push(out, 4);
@@ -237,10 +237,10 @@ function parser_exr_run(width: i32, height: i32, src: buffer_t, bits: i32 = 16, 
 	array_push(out, 0x80);
 	array_push(out, 0x3f);
 
-	parser_exr_write_string(out, "screenWindowCenter");
+	export_exr_write_string(out, "screenWindowCenter");
 	array_push(out, 0);
 
-	parser_exr_write_string(out, "v2f");
+	export_exr_write_string(out, "v2f");
 	array_push(out, 0);
 
 	array_push(out, 8);
@@ -258,10 +258,10 @@ function parser_exr_run(width: i32, height: i32, src: buffer_t, bits: i32 = 16, 
 	array_push(out, 0);
 	array_push(out, 0);
 
-	parser_exr_write_string(out, "screenWindowWidth");
+	export_exr_write_string(out, "screenWindowWidth");
 	array_push(out, 0);
 
-	parser_exr_write_string(out, "float");
+	export_exr_write_string(out, "float");
 	array_push(out, 0);
 
 	array_push(out, 4);
@@ -301,13 +301,13 @@ function parser_exr_run(width: i32, height: i32, src: buffer_t, bits: i32 = 16, 
 	let stride: i32 = channels * byte_size;
 	let pos: i32 = 0;
 
-	_parser_exr_width = width;
-	_parser_exr_stride = stride;
-	_parser_exr_out = out;
-	_parser_exr_src_view = src;
+	_export_exr_width = width;
+	_export_exr_stride = stride;
+	_export_exr_out = out;
+	_export_exr_src_view = src;
 
-	_parser_exr_write_line = bits == 16 ? parser_exr_write_line16 : parser_exr_write_line32;
-	let write_data: (off: i32, pos: i32, byte_size: i32)=>void = type == 1 ? parser_exr_write_bgr : parser_exr_write_single;
+	_export_exr_write_line = bits == 16 ? export_exr_write_line16 : export_exr_write_line32;
+	let write_data: (off: i32, pos: i32, byte_size: i32)=>void = type == 1 ? export_exr_write_bgr : export_exr_write_single;
 
 	for (let y: i32 = 0; y < height; ++y) {
 		// coordinate

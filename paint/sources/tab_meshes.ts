@@ -3,7 +3,7 @@ let _tab_meshes_draw_i: i32;
 
 function tab_meshes_draw(htab: ui_handle_t) {
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-	if (ui_tab(htab, tr("Meshes")) && statush > ui_status_default_status_h * UI_SCALE()) {
+	if (ui_tab(htab, tr("Meshes")) && statush > ui_statusbar_default_h * UI_SCALE()) {
 
 		ui_begin_sticky();
 
@@ -347,7 +347,7 @@ function tab_meshes_draw(htab: ui_handle_t) {
 function tab_meshes_append_shape(mesh_name: string) {
 	let blob: buffer_t = iron_load_blob(data_path() + "meshes/" + mesh_name + ".arm");
 	let raw: scene_t = armpack_decode(blob);
-	util_mesh_ext_pack_uvs(raw.mesh_datas[0].vertex_arrays[2].values);
+	util_mesh_pack_uvs(raw.mesh_datas[0].vertex_arrays[2].values);
 	let md: mesh_data_t = mesh_data_create(raw.mesh_datas[0]);
 	md._.handle = md.name;
 	let mo: mesh_object_t = scene_add_mesh_object(md, project_paint_objects[0].material);

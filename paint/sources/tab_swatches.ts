@@ -21,7 +21,7 @@ function tab_swatches_empty_get(): gpu_texture_t {
 
 function tab_swatches_draw(htab: ui_handle_t) {
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-	if (ui_tab(htab, tr("Swatches")) && statush > ui_status_default_status_h * UI_SCALE()) {
+	if (ui_tab(htab, tr("Swatches")) && statush > ui_statusbar_default_h * UI_SCALE()) {
 
 		ui_begin_sticky();
 		if (config_raw.touch_ui) {

@@ -103,8 +103,8 @@ function brush_output_node_run(from: i32) {
 		context_raw.paint_vec.y < 1 &&
 		!base_is_dragging &&
 		!base_is_resizing &&
-		!base_is_scrolling() &&
-		!base_is_combo_selected()) {
+		!ui.is_scrolling &&
+		ui.combo_selected_handle == null) {
 
 		let down: bool = mouse_down() || pen_down();
 

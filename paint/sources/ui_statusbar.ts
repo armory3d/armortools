@@ -1,17 +1,17 @@
 
-let ui_status_default_status_h: i32 = 33;
+let ui_statusbar_default_h: i32 = 33;
 
-function ui_status_init() {
+function ui_statusbar_init() {
 }
 
-function ui_status_width(): i32 {
+function ui_statusbar_width(): i32 {
 	return iron_window_width() - ui_toolbar_w(true) - config_raw.layout[layout_size_t.SIDEBAR_W];
 }
 
-function ui_status_render_ui() {
+function ui_statusbar_render_ui() {
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
 
-	if (ui_window(ui_base_hwnds[tab_area_t.STATUS], sys_x(), iron_window_height() - statush, ui_status_width(), statush)) {
+	if (ui_window(ui_base_hwnds[tab_area_t.STATUS], sys_x(), iron_window_height() - statush, ui_statusbar_width(), statush)) {
 		ui._y += 2;
 
 		// Border
@@ -27,7 +27,7 @@ function ui_status_render_ui() {
 			draw.f(htab);
 		}
 
-		let minimized: bool = statush <= ui_status_default_status_h * config_raw.window_scale;
+		let minimized: bool = statush <= ui_statusbar_default_h * config_raw.window_scale;
 		if (htab.changed && (htab.position == context_raw.last_status_position || minimized)) {
 			ui_base_toggle_browser();
 		}
@@ -35,7 +35,7 @@ function ui_status_render_ui() {
 	}
 }
 
-function ui_status_draw_version_tab(htab: ui_handle_t) {
+function ui_statusbar_draw_version_tab(htab: ui_handle_t) {
 	// Version label
 	if (!config_raw.touch_ui) {
 		ui.enabled = false;

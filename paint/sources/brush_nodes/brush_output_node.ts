@@ -146,8 +146,8 @@ function brush_output_node_run(self: brush_output_node_t, from: i32) {
 	if (ui.is_hovered ||
 		base_is_dragging ||
 		base_is_resizing ||
-		base_is_scrolling() ||
-		base_is_combo_selected()) {
+		ui.is_scrolling ||
+		ui.combo_selected_handle != null) {
 		return;
 	}
 

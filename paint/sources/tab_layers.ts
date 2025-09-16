@@ -6,7 +6,7 @@ let tab_layers_l: slot_layer_t;
 let tab_layers_mini: bool;
 
 function tab_layers_draw(htab: ui_handle_t) {
-	let mini: bool = config_raw.layout[layout_size_t.SIDEBAR_W] <= ui_base_sidebar_mini_w;
+	let mini: bool = config_raw.layout[layout_size_t.SIDEBAR_W] <= ui_sidebar_w_mini;
 	mini ? tab_layers_draw_mini(htab) : tab_layers_draw_full(htab);
 }
 
@@ -14,7 +14,7 @@ function tab_layers_draw_mini(htab: ui_handle_t) {
 	ui_set_hovered_tab_name(tr("Layers"));
 
 	let _ELEMENT_H: i32 = ui.ops.theme.ELEMENT_H;
-	ui.ops.theme.ELEMENT_H = math_floor(ui_base_sidebar_mini_w / 2 / UI_SCALE());
+	ui.ops.theme.ELEMENT_H = math_floor(ui_sidebar_w_mini / 2 / UI_SCALE());
 
 	ui_begin_sticky();
 	ui_separator(5);

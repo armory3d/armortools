@@ -155,7 +155,61 @@ function config_init() {
 		///end
 		config_raw.version = manifest_version;
 		config_raw.sha = config_get_sha();
-		base_init_config();
+
+		config_raw.recent_projects = [];
+		config_raw.bookmarks = [];
+		config_raw.plugins = [];
+		///if (arm_android || arm_ios)
+		config_raw.keymap = "touch.json";
+		///else
+		config_raw.keymap = "default.json";
+		///end
+		config_raw.theme = "default.json";
+		config_raw.server = "https://armorpaint.fra1.digitaloceanspaces.com";
+		config_raw.undo_steps = 4;
+		config_raw.pressure_radius = true;
+		///if (arm_ios || arm_linux)
+		config_raw.pressure_sensitivity = 1.0;
+		///else
+		config_raw.pressure_sensitivity = 2.0;
+		///end
+		config_raw.camera_zoom_speed = 1.0;
+		config_raw.camera_pan_speed = 1.0;
+		config_raw.camera_rotation_speed = 1.0;
+		config_raw.zoom_direction = zoom_direction_t.VERTICAL;
+		config_raw.displace_strength = 0.0;
+		config_raw.wrap_mouse = false;
+		config_raw.workspace = space_type_t.SPACE3D;
+		config_raw.camera_controls = camera_controls_t.ORBIT;
+		config_raw.layer_res = texture_res_t.RES2048;
+		///if (arm_android || arm_ios)
+		config_raw.touch_ui = true;
+		config_raw.splash_screen = true;
+		///else
+		config_raw.touch_ui = false;
+		config_raw.splash_screen = false;
+		///end
+		config_raw.node_preview = true;
+		config_raw.pressure_hardness = true;
+		config_raw.pressure_angle = false;
+		config_raw.pressure_opacity = false;
+		///if (arm_android || arm_ios)
+		config_raw.material_live = false;
+		///else
+		config_raw.material_live = true;
+		///end
+		config_raw.brush_3d = true;
+		config_raw.brush_depth_reject = true;
+		config_raw.brush_angle_reject = true;
+		config_raw.brush_live = false;
+		config_raw.show_asset_names = false;
+		config_raw.dilate = dilate_type_t.INSTANT;
+		config_raw.dilate_radius = 2;
+		config_raw.gpu_inference = true;
+		config_raw.blender = "";
+		config_raw.scene_atlas_res = texture_res_t.RES8192;
+		config_raw.pathtrace_mode = pathtrace_mode_t.FAST;
+		config_raw.grid_snap = false;
 	}
 	else {
 		// Upgrade config format created by older ArmorPaint build

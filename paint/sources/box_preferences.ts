@@ -866,11 +866,11 @@ function box_preferences_set_scale() {
 	let scale: f32 = config_raw.window_scale;
 	ui_set_scale(scale);
 	ui_header_h = math_floor(ui_header_default_h * scale);
-	config_raw.layout[layout_size_t.STATUS_H] = math_floor(ui_status_default_status_h * scale);
+	config_raw.layout[layout_size_t.STATUS_H] = math_floor(ui_statusbar_default_h * scale);
 	ui_menubar_w = math_floor(ui_menubar_default_w * scale);
 	ui_base_set_icon_scale();
 	base_resize();
-	config_raw.layout[layout_size_t.SIDEBAR_W] = math_floor(ui_base_default_sidebar_w * scale);
+	config_raw.layout[layout_size_t.SIDEBAR_W] = math_floor(ui_sidebar_default_w * scale);
 }
 
 function box_preferences_theme_to_json(theme: ui_theme_t): string {

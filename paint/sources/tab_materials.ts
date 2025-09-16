@@ -2,7 +2,7 @@
 let _tab_materials_draw_slots: i32;
 
 function tab_materials_draw(htab: ui_handle_t) {
-	let mini: bool = config_raw.layout[layout_size_t.SIDEBAR_W] <= ui_base_sidebar_mini_w;
+	let mini: bool = config_raw.layout[layout_size_t.SIDEBAR_W] <= ui_sidebar_w_mini;
 	mini ? tab_materials_draw_mini(htab) : tab_materials_draw_full(htab);
 }
 
@@ -104,7 +104,7 @@ function tab_materials_draw_slots(mini: bool) {
 			let uix: f32 = ui._x;
 			let uiy: f32 = ui._y;
 			let tile: i32 = UI_SCALE() > 1 ? 100 : 50;
-			let imgh: f32 = mini ? ui_base_default_sidebar_mini_w * 0.85 * UI_SCALE() : -1.0;
+			let imgh: f32 = mini ? ui_sidebar_default_w_mini * 0.85 * UI_SCALE() : -1.0;
 			let state: ui_state_t = project_materials[i].preview_ready ?
 				ui_image(img, 0xffffffff, imgh) :
 				ui_sub_image(resource_get("icons.k"), 0xffffffff, -1.0, tile, tile, tile, tile);

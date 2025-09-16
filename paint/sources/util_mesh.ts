@@ -4,7 +4,7 @@ let util_mesh_unwrappers: map_t<string, any> = map_create(); // JSValue * -> ((a
 function util_mesh_merge(paint_objects: mesh_object_t[] = null) {
 	if (paint_objects == null) {
 		if (context_raw.tool == tool_type_t.GIZMO) {
-			paint_objects = util_mesh_ext_get_unique();
+			paint_objects = util_mesh_get_unique();
 		}
 		else {
 			paint_objects = project_paint_objects;
@@ -432,4 +432,45 @@ function util_mesh_decimate() {
 	};
 	// decimate_mesh(mesh);
 	import_mesh_add_mesh(mesh);
+}
+
+function _util_mesh_unique_data_count(): i32 {
+	return util_mesh_get_unique().length;
+}
+
+function util_mesh_pack_uvs(texa: i16_array_t) {
+    // Scale tex coords into global atlas
+	let atlas_w: i32 = config_get_scene_atlas_res();
+	let item_i: i32 = _util_mesh_unique_data_count() - 1; // Add the one being imported
+	let item_w: i32 = config_get_layer_res();
+	let atlas_stride: i32 = atlas_w / item_w;
+	let atlas_step: i32 = 32767 / atlas_stride;
+	let item_x: i32 = (item_i % atlas_stride) * atlas_step;
+	let item_y: i32 = math_floor(item_i / atlas_stride) * atlas_step;
+	for (let i: i32 = 0; i < texa.length / 2; ++i) {
+		texa[i * 2] = texa[i * 2] / atlas_stride + item_x;
+		texa[i * 2 + 1] = texa[i * 2 + 1] / atlas_stride + item_y;
+	}
+}
+
+function util_mesh_get_unique(): mesh_object_t[] {
+	let ar: mesh_object_t[] = [];
+
+	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+		if (!project_paint_objects[i].base.visible) {
+			continue;
+		}
+		let found: bool = false;
+		for (let j: i32 = 0; j < i; ++j) {
+			if (project_paint_objects[i].data == project_paint_objects[j].data) {
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			array_push(ar, project_paint_objects[i]);
+		}
+	}
+
+	return ar;
 }

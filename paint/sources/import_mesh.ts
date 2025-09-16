@@ -201,7 +201,7 @@ function _import_mesh_add_mesh(mesh: raw_mesh_t) {
 	let raw: mesh_data_t = import_mesh_raw_mesh(mesh);
 
 	if (context_raw.tool == tool_type_t.GIZMO) {
-		util_mesh_ext_pack_uvs(mesh.texa);
+		util_mesh_pack_uvs(mesh.texa);
 	}
 
 	let md: mesh_data_t = mesh_data_create(raw);

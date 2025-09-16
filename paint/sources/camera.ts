@@ -64,7 +64,7 @@ function camera_update() {
 		camera_controls_down = false;
 	}
 
-	if (_input_occupied || !base_ui_enabled || base_is_dragging || base_is_scrolling() || base_is_combo_selected() || !camera_controls_down) {
+	if (_input_occupied || !base_ui_enabled || base_is_dragging || ui.is_scrolling || ui.combo_selected_handle != null || !camera_controls_down) {
 		return;
 	}
 

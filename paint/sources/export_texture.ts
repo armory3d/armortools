@@ -465,7 +465,7 @@ function export_texture_write_texture(file: string, pixels: buffer_t, type: i32 
 		iron_write_jpg(file, pixels, res_x, res_y, format, math_floor(context_raw.format_quality));
 	}
 	else { // Exr
-		let b: buffer_t = parser_exr_run(res_x, res_y, pixels, bits, type, off);
+		let b: buffer_t = export_exr_run(res_x, res_y, pixels, bits, type, off);
 		iron_file_save_bytes(file, b, b.length);
 	}
 }

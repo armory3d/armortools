@@ -7,7 +7,7 @@ let _tab_textures_draw_is_packed: bool;
 
 function tab_textures_draw(htab: ui_handle_t) {
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-	if (ui_tab(htab, tr("Textures")) && statush > ui_status_default_status_h * UI_SCALE()) {
+	if (ui_tab(htab, tr("Textures")) && statush > ui_statusbar_default_h * UI_SCALE()) {
 
 		ui_begin_sticky();
 
