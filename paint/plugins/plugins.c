@@ -26,6 +26,13 @@ FN(io_svg_parse) {
 	return JS_NewBigUint64(ctx, (uint64_t)io_svg_parse(ab));
 }
 
+void *io_exr_parse(char *buf);
+FN(io_exr_parse) {
+	size_t len;
+	void *ab = JS_GetArrayBuffer(ctx, &len, argv[0]);
+	return JS_NewBigUint64(ctx, (uint64_t)io_exr_parse(ab));
+}
+
 void *io_usd_parse(char *buf, size_t size);
 FN(io_usd_parse) {
 	size_t len;
@@ -258,6 +265,7 @@ void plugin_embed() {
 	BIND(proc_xatlas_unwrap, 1);
 	BIND(plugin_uv_unwrap_button, 0);
 	BIND(io_svg_parse, 1);
+	BIND(io_exr_parse, 1);
 	BIND(io_usd_parse, 1);
 	BIND(io_gltf_parse, 2);
 	BIND(io_fbx_parse, 1);

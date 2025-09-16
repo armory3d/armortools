@@ -51,7 +51,10 @@ function import_texture_run(path: string, hdr_as_envmap: bool = true) {
 	array_push(project_asset_names, name);
 	map_set(project_asset_map, asset.id, image);
 	ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
-	console_info(tr("Texture imported:") + " " + name);
+
+	if (image != null) {
+		console_info(tr("Texture imported:") + " " + name);
+	}
 
 	// Set as envmap
 	if (hdr_as_envmap && ends_with(to_lower_case(path), ".hdr")) {

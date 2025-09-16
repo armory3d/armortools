@@ -409,7 +409,11 @@ FN(gpu_create_texture_from_bytes) {
 	JS_ToInt64(ctx, &w, argv[1]);
 	int64_t h;
 	JS_ToInt64(ctx, &h, argv[2]);
-	uint64_t result = (uint64_t)gpu_create_texture_from_bytes(&b, w, h, 0);
+	int64_t format = 0;
+	if (argc > 3) {
+		JS_ToInt64(ctx, &format, argv[3]);
+	}
+	uint64_t result = (uint64_t)gpu_create_texture_from_bytes(&b, w, h, format);
 	return JS_NewBigUint64(ctx, result);
 }
 
@@ -596,7 +600,7 @@ void plugin_api_init() {
 	BIND(data_get_blob, 1);
 	BIND(data_delete_blob, 1);
 	BIND(iron_file_save_bytes, 3);
-	BIND(gpu_create_texture_from_bytes, 3);
+	BIND(gpu_create_texture_from_bytes, 4);
 
 	BIND(ui_handle_create, 0);
 	BIND(ui_handle_set_value, 2);
