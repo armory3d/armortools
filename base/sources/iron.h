@@ -220,10 +220,6 @@ void (*iron_touch_move)(int, int, int);
 void (*iron_pen_down)(int, int, float);
 void (*iron_pen_up)(int, int, float);
 void (*iron_pen_move)(int, int, float);
-#ifdef WITH_GAMEPAD
-void (*iron_gamepad_axis)(int, int, float);
-void (*iron_gamepad_button)(int, int, float);
-#endif
 void (*iron_save_and_quit)(bool);
 
 char *_substring(char *s, int32_t start, int32_t end) {
@@ -585,26 +581,6 @@ void _pen_move(int x, int y, float pressure) {
 	#endif
 }
 
-#ifdef WITH_GAMEPAD
-
-void _gamepad_axis(int gamepad, int axis, float value, void *data) {
-	iron_gamepad_axis(gamepad, axis, value);
-
-	#ifdef IDLE_SLEEP
-	paused_frames = 0;
-	#endif
-}
-
-void _gamepad_button(int gamepad, int button, float value, void *data) {
-	iron_gamepad_button(gamepad, button, value);
-
-	#ifdef IDLE_SLEEP
-	paused_frames = 0;
-	#endif
-}
-
-#endif
-
 void _drop_files(wchar_t *file_path, void *data) {
 // Update mouse position
 #ifdef IRON_WINDOWS
@@ -848,6 +824,25 @@ void iron_set_pen_move_callback(void (*callback)(int, int, float)) {
 }
 
 #ifdef WITH_GAMEPAD
+
+void (*iron_gamepad_axis)(int, int, float);
+void (*iron_gamepad_button)(int, int, float);
+
+void _gamepad_axis(int gamepad, int axis, float value, void *data) {
+	iron_gamepad_axis(gamepad, axis, value);
+
+	#ifdef IDLE_SLEEP
+	paused_frames = 0;
+	#endif
+}
+
+void _gamepad_button(int gamepad, int button, float value, void *data) {
+	iron_gamepad_button(gamepad, button, value);
+
+	#ifdef IDLE_SLEEP
+	paused_frames = 0;
+	#endif
+}
 
 void iron_set_gamepad_axis_callback(void (*callback)(int, int, float)) {
 	iron_gamepad_axis = callback;
@@ -1366,7 +1361,7 @@ typedef struct _callback_data {
 	void (*func)(char *, buffer_t *);
 } _callback_data_t;
 
-void _http_callback(const char *body, void *callback_data) {
+void _https_callback(const char *body, void *callback_data) {
 	_callback_data_t *cbd = (_callback_data_t *)callback_data;
 	buffer_t *buffer = NULL;
 	if (body != NULL) {
@@ -1407,7 +1402,7 @@ void iron_file_download(string_t *url, void (*callback)(char *, buffer_t *), i32
 	}
 	url_path[j] = 0;
 
-	iron_https_request(url_base, url_path, NULL, 443, 0, &_http_callback, cbd);
+	iron_https_request(url_base, url_path, NULL, 443, 0, &_https_callback, cbd);
 }
 
 bool _window_close_callback(void *data) {
