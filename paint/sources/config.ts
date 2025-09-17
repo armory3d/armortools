@@ -118,8 +118,8 @@ function config_init() {
 		config_raw.window_resizable = true;
 		config_raw.window_minimizable = true;
 		config_raw.window_maximizable = true;
-		config_raw.window_w = 1600;
-		config_raw.window_h = 900;
+		config_raw.window_w = 1720;
+		config_raw.window_h = 960;
 		///if arm_macos
 		config_raw.window_w *= 2;
 		config_raw.window_h *= 2;
