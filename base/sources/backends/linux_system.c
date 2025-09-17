@@ -494,6 +494,7 @@ static int xk_to_iron(KeySym symbol) {
 	if (symbol == XK_Control_R) return IRON_KEY_CONTROL;
 	if (symbol == XK_Alt_L) return IRON_KEY_ALT;
 	if (symbol == XK_Alt_R) return IRON_KEY_ALT;
+	if (symbol == XK_ISO_Prev_Group) return IRON_KEY_ALT; // XK_ISO_Prev_Group received instead of XK_Alt_L?
 	if (symbol == XK_Delete) return IRON_KEY_DELETE;
 	if (symbol == XK_comma) return IRON_KEY_COMMA;
 	if (symbol == XK_period) return IRON_KEY_PERIOD;
