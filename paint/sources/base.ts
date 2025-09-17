@@ -1276,14 +1276,21 @@ function ui_base_update() {
 				config_raw.layout[layout_size_t.STATUS_H] -= my;
 			}
 		}
-		else {
+		else { // Sidebar
 			if (ui_base_border_started == border_side_t.LEFT) {
 				config_raw.layout[layout_size_t.SIDEBAR_W] -= math_floor(mouse_movement_x);
 				if (config_raw.layout[layout_size_t.SIDEBAR_W] < ui_sidebar_w_mini) {
 					config_raw.layout[layout_size_t.SIDEBAR_W] = ui_sidebar_w_mini;
 				}
-				else if (config_raw.layout[layout_size_t.SIDEBAR_W] > iron_window_width() - ui_sidebar_w_mini) {
-					config_raw.layout[layout_size_t.SIDEBAR_W] = iron_window_width() - ui_sidebar_w_mini;
+				else if (config_raw.layout[layout_size_t.SIDEBAR_W] > iron_window_width() - ui_sidebar_w_mini * 2) {
+					config_raw.layout[layout_size_t.SIDEBAR_W] = iron_window_width() - ui_sidebar_w_mini * 2;
+				}
+
+				if (ui_nodes_show || ui_base_show) {
+					// Scale down node view if viewport is already at minimal size
+					if (config_raw.layout[layout_size_t.NODES_W] + config_raw.layout[layout_size_t.SIDEBAR_W] + ui_sidebar_w_mini > iron_window_width()) {
+						config_raw.layout[layout_size_t.NODES_W] = iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - ui_sidebar_w_mini;
+					}
 				}
 			}
 			else {

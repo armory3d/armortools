@@ -115,8 +115,15 @@ function ui_menubar_render_ui() {
 			}
 		}
 
+		// Store real menubar w
 		if (ui_menubar_w < ui._x + 10) {
 			ui_menubar_w = math_floor(ui._x + 10);
+			ui_toolbar_handle.redraws = 2;
+		}
+		// Crop menubar if sidebar + nodes are overlapping
+		let nodesw: i32 = (ui_nodes_show || ui_view2d_show) ? config_raw.layout[layout_size_t.NODES_W] : 0;
+		if (ui_menubar_w > iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - nodesw) {
+			ui_menubar_w = iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - nodesw;
 			ui_toolbar_handle.redraws = 2;
 		}
 
