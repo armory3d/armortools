@@ -130,7 +130,6 @@ function project_new_box() {
 			}
 			if (ui_button(tr("OK")) || ui.is_return_down) {
 				project_new();
-				viewport_scale_to_bounds();
 				ui_box_hide();
 			}
 		}
@@ -290,7 +289,7 @@ function project_new(reset_layers: bool = true) {
 	project_set_default_envmap();
 	context_init_tool();
 	viewport_reset();
-	viewport_scale_to_bounds();
+	viewport_scale_to_bounds(1.8);
 	render_path_raytrace_ready = false;
 
 	sys_notify_on_next_frame(function() {

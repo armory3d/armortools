@@ -1,5 +1,5 @@
 
-function viewport_scale_to_bounds() {
+function viewport_scale_to_bounds(bounds: f32 = 2.0) {
 	let po: mesh_object_t = context_raw.merged_object == null ? context_main_object() : context_raw.merged_object;
 	let md: mesh_data_t = po.data;
 	let aabb: vec4_t = mesh_data_calculate_aabb(md);
@@ -8,7 +8,7 @@ function viewport_scale_to_bounds() {
 	po.base.transform.dim.x = aabb.x;
 	po.base.transform.dim.y = aabb.y;
 	po.base.transform.dim.z = aabb.z;
-	po.base.transform.scale = vec4_create(2 / r, 2 / r, 2 / r);
+	po.base.transform.scale = vec4_create(bounds / r, bounds / r, bounds / r);
 	po.base.transform.loc = vec4_create(0, 0, 0);
 	transform_build_matrix(po.base.transform);
 	for (let i: i32 = 0; i < po.base.children.length; ++i) {
