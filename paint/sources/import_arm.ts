@@ -410,7 +410,7 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 		let abs: string = data_is_abs(file) ? file : base + file;
 		if (project.packed_assets != null) {
 			abs = path_normalize(abs);
-			import_arm_unpack_asset(project, abs, file);
+			import_arm_unpack_asset(project, abs, file, true);
 		}
 		if (map_get(data_cached_images, abs) == null && !iron_file_exists(abs)) {
 			import_arm_make_pink(abs);
@@ -521,7 +521,7 @@ function import_arm_run_brush_from_project(project: project_format_t, path: stri
 		let abs: string = data_is_abs(file) ? file : base + file;
 		if (project.packed_assets != null) {
 			abs = path_normalize(abs);
-			import_arm_unpack_asset(project, abs, file);
+			import_arm_unpack_asset(project, abs, file, true);
 		}
 		if (map_get(data_cached_images, abs) == null && !iron_file_exists(abs)) {
 			import_arm_make_pink(abs);
@@ -606,7 +606,7 @@ function import_arm_init_nodes(nodes: ui_node_t[]) {
 	}
 }
 
-function import_arm_unpack_asset(project: project_format_t, abs: string, file: string) {
+function import_arm_unpack_asset(project: project_format_t, abs: string, file: string, gc_copy: bool = false) {
 	if (project_raw.packed_assets == null) {
 		project_raw.packed_assets = [];
 	}
@@ -623,6 +623,15 @@ function import_arm_unpack_asset(project: project_format_t, abs: string, file: s
 		}
 		if (pa.name == abs) {
 			if (!project_packed_asset_exists(project_raw.packed_assets, pa.name)) {
+
+				if (gc_copy) {
+					let pa_gc: packed_asset_t = { // project will get GCed
+						name: string_copy(pa.name),
+						bytes: u8_array_create_from_array(pa.bytes)
+					};
+					pa = pa_gc;
+				}
+
 				array_push(project_raw.packed_assets, pa);
 			}
 			let image: gpu_texture_t = gpu_create_texture_from_encoded_bytes(pa.bytes, ends_with(pa.name, ".jpg") ? ".jpg" : ".png");
