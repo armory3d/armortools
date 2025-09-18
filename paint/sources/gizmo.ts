@@ -64,11 +64,11 @@ function gizmo_update() {
 				paint_object.transform.scale.z += context_raw.gizmo_drag - context_raw.gizmo_drag_last;
 			}
 			else if (context_raw.rotate_x) {
-				gizmo_q0 = quat_from_axis_angle(vec4_x_axis(), context_raw.gizmo_drag - context_raw.gizmo_drag_last);
+				gizmo_q0 = quat_from_axis_angle(vec4_x_axis(), -(context_raw.gizmo_drag - context_raw.gizmo_drag_last));
 				paint_object.transform.rot = quat_mult(paint_object.transform.rot, gizmo_q0);
 			}
 			else if (context_raw.rotate_y) {
-				gizmo_q0 = quat_from_axis_angle(vec4_y_axis(), context_raw.gizmo_drag - context_raw.gizmo_drag_last);
+				gizmo_q0 = quat_from_axis_angle(vec4_y_axis(), -(context_raw.gizmo_drag - context_raw.gizmo_drag_last));
 				paint_object.transform.rot = quat_mult(paint_object.transform.rot, gizmo_q0);
 			}
 			else if (context_raw.rotate_z) {
