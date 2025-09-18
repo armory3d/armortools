@@ -1697,6 +1697,14 @@ void _encode_image_func(void *context, void *data, int size) {
 }
 
 buffer_t *_encode_image(buffer_t *bytes, i32 w, i32 h, i32 format, i32 quality) {
+	#ifdef IRON_BGRA
+	unsigned char *pixels = bytes->buffer;
+	for (int i = 0; i < w * h; ++i) {
+		unsigned char c = pixels[i * 4];
+		pixels[i * 4    ] = pixels[i * 4 + 2];
+		pixels[i * 4 + 2] = c;
+	}
+	#endif
 	_encode_data = (unsigned char *)malloc(w * h * 4);
 	_encode_size = 0;
 	format == 0 ?
