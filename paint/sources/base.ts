@@ -2049,6 +2049,9 @@ function ui_base_on_tab_drop(to: ui_handle_t, to_position: i32, from: ui_handle_
 	if (i > -1 && j > -1) {
 		let tabsi: tab_draw_t[] = ui_base_hwnd_tabs[i];
 		let tabsj: tab_draw_t[] = ui_base_hwnd_tabs[j];
+		if (tabsj.length == 1) {
+			return; // Keep at least one tab in place
+		}
 		let element: tab_draw_t = tabsj[from_position];
 		array_splice(tabsj, from_position, 1);
 		array_insert(tabsi, to_position, element);

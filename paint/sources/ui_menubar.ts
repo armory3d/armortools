@@ -145,12 +145,20 @@ function ui_menubar_draw_tab_header() {
 	panel_x = (sys_x() - item_w) + ui_menubar_w;
 
 	if (ui_window(ui_menubar_workspace_handle, panel_x, 0, ww, ui_header_h)) {
-
-		if (!config_raw.touch_ui) {
-			ui_tab(ui_header_worktab, tr("3D View"));
+		if (config_raw.touch_ui) {
+			ui_fill(0, 0, ui._window_w, ui._window_h + 4, ui.ops.theme.SEPARATOR_COL);
 		}
 		else {
-			ui_fill(0, 0, ui._window_w, ui._window_h + 4, ui.ops.theme.SEPARATOR_COL);
+			ui_tab(ui_header_worktab, tr("3D View"));
+
+			if (ui_tab(ui_header_worktab, tr(">"))) {
+				ui_header_worktab.position = 0;
+				ui_menu_draw(function () {
+					if (ui_menu_button(tr("3D View"))) {}
+					if (ui_menu_button(tr("2D View"))) {}
+					if (ui_menu_button(tr("Nodes"))) {}
+				});
+			}
 		}
 	}
 }

@@ -24,6 +24,7 @@ let _ui_view2d_render_tw: f32;
 let _ui_view2d_render_th: f32;
 let ui_view2d_grid: gpu_texture_t = null;
 let ui_view2d_grid_redraw: bool = true;
+let ui_view2d_htab: ui_handle_t = ui_handle_create();
 
 function ui_view2d_init() {
 	ui_view2d_pipe = gpu_create_pipeline();
@@ -102,7 +103,11 @@ function ui_view2d_render() {
 
 	if (ui_window(ui_view2d_hwnd, ui_view2d_wx, ui_view2d_wy, ui_view2d_ww, ui_view2d_wh)) {
 
-		ui_tab(ui_handle(__ID__), tr("2D View"));
+		ui_tab(ui_view2d_htab, tr("2D View"));
+
+		if (ui_tab(ui_view2d_htab, tr("+"))) {
+			ui_view2d_htab.position = 0;
+		}
 
 		// Grid
 		draw_set_color(0xffffffff);
@@ -234,7 +239,7 @@ function ui_view2d_render() {
 
 		// Menu
 		let ew: i32 = math_floor(UI_ELEMENT_W());
-		draw_set_color(ui.ops.theme.SEPARATOR_COL);
+		draw_set_color(ui.ops.theme.WINDOW_BG_COL);
 		draw_filled_rect(0, UI_ELEMENT_H(), ui_view2d_ww, UI_ELEMENT_H() + UI_ELEMENT_OFFSET() * 2);
 		draw_set_color(0xffffffff);
 
@@ -329,6 +334,13 @@ function ui_view2d_render() {
 		if (ui_view2d_type == view_2d_type_t.ASSET && tex != null) { // Texture resolution
 			ui_text(tex.width + "x" + tex.height);
 		}
+
+		ui.enabled = false;
+		let view_type: string = ui_view2d_type == view_2d_type_t.ASSET ? "Asset" :
+								ui_view2d_type == view_2d_type_t.NODE ? "Node" :
+								ui_view2d_type == view_2d_type_t.FONT ? "Font" : "Layer";
+		ui_text(view_type);
+		ui.enabled = true;
 
 		// Picked position
 		if (context_raw.tool == tool_type_t.PICKER && (ui_view2d_type == view_2d_type_t.LAYER || ui_view2d_type == view_2d_type_t.ASSET)) {

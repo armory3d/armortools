@@ -1121,7 +1121,7 @@ function ui_nodes_draw_menubar() {
 	let c: ui_node_canvas_t = ui_nodes_get_canvas(true);
 	let ew: i32 = math_floor(UI_ELEMENT_W() * 0.7);
 
-	draw_set_color(ui.ops.theme.SEPARATOR_COL);
+	draw_set_color(ui.ops.theme.WINDOW_BG_COL);
 	draw_filled_rect(0, UI_ELEMENT_H(), ui_nodes_ww, UI_ELEMENT_H() + UI_ELEMENT_OFFSET() * 2);
 	draw_set_color(0xffffffff);
 
@@ -1178,7 +1178,7 @@ function ui_nodes_draw_menubar() {
 	}
 
 	let _BUTTON_COL: i32 = ui.ops.theme.BUTTON_COL;
-	ui.ops.theme.BUTTON_COL = ui.ops.theme.SEPARATOR_COL;
+	ui.ops.theme.BUTTON_COL = ui.ops.theme.WINDOW_BG_COL;
 
 	let cats: string[] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_categories : nodes_brush_categories;
 

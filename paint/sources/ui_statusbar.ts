@@ -5,13 +5,13 @@ function ui_statusbar_init() {
 }
 
 function ui_statusbar_width(): i32 {
-	return iron_window_width() - ui_toolbar_w(true) - config_raw.layout[layout_size_t.SIDEBAR_W];
+	return iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W];
 }
 
 function ui_statusbar_render_ui() {
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
 
-	if (ui_window(ui_base_hwnds[tab_area_t.STATUS], sys_x(), iron_window_height() - statush, ui_statusbar_width(), statush)) {
+	if (ui_window(ui_base_hwnds[tab_area_t.STATUS], 0, iron_window_height() - statush, ui_statusbar_width(), statush)) {
 		ui._y += 2;
 
 		// Border

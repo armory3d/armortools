@@ -90,7 +90,7 @@ function ui_toolbar_x(): i32 {
 function ui_toolbar_render_ui() {
 	let x: i32 = 0;
 	let y: i32 = ui_header_h;
-	let h: i32 = iron_window_height() - ui_header_h;
+	let h: i32 = iron_window_height() - ui_header_h - config_raw.layout[layout_size_t.STATUS_H];
 	let _WINDOW_BG_COL: i32 = ui.ops.theme.WINDOW_BG_COL;
 
 	if (context_is_floating_toolbar()) {
