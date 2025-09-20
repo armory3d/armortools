@@ -1308,6 +1308,7 @@ function ui_base_update() {
 				}
 			}
 		}
+		base_resize();
 	}
 
 	if (!mouse_down()) {
@@ -1989,6 +1990,7 @@ function ui_base_toggle_browser() {
 	let minimized: bool = config_raw.layout[layout_size_t.STATUS_H] <= (ui_statusbar_default_h * config_raw.window_scale);
 	config_raw.layout[layout_size_t.STATUS_H] = minimized ? 240 : ui_statusbar_default_h;
 	config_raw.layout[layout_size_t.STATUS_H] = math_floor(config_raw.layout[layout_size_t.STATUS_H] * config_raw.window_scale);
+	base_resize();
 }
 
 function ui_base_set_icon_scale() {
