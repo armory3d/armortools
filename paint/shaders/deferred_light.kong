@@ -134,7 +134,7 @@ fun surface_f0(base_color: float3, metalness: float): float3 {
 
 fun get_pos(eye: float3, eye_look: float3, view_ray: float3, depth: float, camera_proj: float2): float3 {
 	// eye_look, view_ray should be normalized
-	var linear_depth: float = camera_proj.y / ((depth * 0.5 + 0.5) - camera_proj.x);
+	var linear_depth: float = camera_proj.y / (depth - camera_proj.x);
 	var view_z_dist: float = dot(eye_look, view_ray);
 	var wposition: float3 = eye + view_ray * (linear_depth / view_z_dist);
 	return wposition;
@@ -232,7 +232,7 @@ fun deferred_light_frag(input: vert_out): float4 {
 	var albedo: float3 = surface_albedo(g1.rgb, metallic);
 	var f0: float3 = surface_f0(g1.rgb, metallic);
 
-	var depth: float = sample_lod(gbufferD, sampler_linear, input.tex, 0.0).r * 2.0 - 1.0;
+	var depth: float = sample_lod(gbufferD, sampler_linear, input.tex, 0.0).r;
 	var p: float3 = get_pos(constants.eye, constants.eye_look, normalize(input.view_ray), depth, constants.camera_proj);
 	var v: float3 = normalize(constants.eye - p);
 	var dotnv: float = max(0.0, dot(n, v));

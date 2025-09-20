@@ -237,8 +237,7 @@ function line_draw_end() {
 	gpu_set_index_buffer(line_draw_index_buffer);
 	gpu_set_pipeline(line_draw_pipeline);
 	let camera: camera_object_t = scene_camera;
-	line_draw_vp = mat4_clone(camera.v);
-	line_draw_vp = mat4_mult_mat(line_draw_vp, camera.p);
+	line_draw_vp = mat4_clone(camera.vp);
 	gpu_set_matrix4(line_draw_vp_loc, line_draw_vp);
 	gpu_set_float3(line_draw_color_loc,
 		color_get_rb(line_draw_color) / 255,

@@ -110,7 +110,9 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	node_shader_add_out(kong, "ndc: float4");
 	node_shader_write_attrib_vert(kong, "output.ndc = constants.WVP * float4(input.pos.xyz, 1.0);");
 
-	node_shader_write_attrib_frag(kong, "var sp: float3 = (input.ndc.xyz / input.ndc.w) * 0.5 + 0.5;");
+	node_shader_write_attrib_frag(kong, "var sp: float3 = (input.ndc.xyz / input.ndc.w);");
+	node_shader_write_attrib_frag(kong, "sp.x = sp.x * 0.5 + 0.5;");
+	node_shader_write_attrib_frag(kong, "sp.y = sp.y * 0.5 + 0.5;");
 	node_shader_write_attrib_frag(kong, "sp.y = 1.0 - sp.y;");
 	node_shader_write_attrib_frag(kong, "sp.z -= 0.0001;"); // small bias
 

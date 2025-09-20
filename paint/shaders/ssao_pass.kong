@@ -17,7 +17,7 @@ const gbufferD: tex2d;
 const gbuffer0: tex2d;
 
 const max_steps: float = 24;
-const ray_step: float = 0.0015;
+const ray_step: float = 0.0005;
 
 struct vert_in {
 	pos: float2;
@@ -62,7 +62,7 @@ fun get_delta_depth(view_ray: float3, hit_coord: float3): float {
 	if (coord.x < 0.0 || coord.x > 1.0 || coord.y < 0.0 || coord.y > 1.0) {
 		return 1000.0;
 	}
-	var depth: float = sample_lod(gbufferD, sampler_linear, coord, 0.0).r * 2.0 - 1.0;
+	var depth: float = sample_lod(gbufferD, sampler_linear, coord, 0.0).r;
 	var p: float3 = get_pos_view(view_ray, depth);
 	return p.z - hit_coord.z;
 }
@@ -129,7 +129,7 @@ fun octahedron_wrap(v: float2): float2 {
 
 fun ssao_pass_frag(input: vert_out): float {
 	var g0: float4 = sample_lod(gbuffer0, sampler_linear, input.tex, 0.0);
-	var d: float = sample_lod(gbufferD, sampler_linear, input.tex, 0.0).r * 2.0 - 1.0;
+	var d: float = sample_lod(gbufferD, sampler_linear, input.tex, 0.0).r;
 
 	var enc: float2 = g0.rg;
 	var n: float3;
