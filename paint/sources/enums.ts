@@ -220,11 +220,6 @@ enum layer_slot_type_t {
 	GROUP = 2,
 }
 
-enum space_type_t {
-	SPACE3D = 0,
-	SPACE2D = 1,
-}
-
 enum tool_type_t {
 	BRUSH = 0,
 	ERASER = 1,
@@ -244,7 +239,7 @@ enum tool_type_t {
 
 enum area_type_t {
 	MINUS_ONE = -1,
-	VIEWPORT = 0,
+	VIEW3D = 0,
 	VIEW2D = 1,
 	LAYERS = 2,
 	MATERIALS = 3,

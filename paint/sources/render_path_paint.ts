@@ -513,7 +513,7 @@ function render_path_paint_live_brush_dirty() {
 	render_path_paint_last_x = mouse_view_x();
 	render_path_paint_last_y = mouse_view_y();
 	if (config_raw.brush_live && context_raw.pdirty <= 0) {
-		let moved: bool = (mx != render_path_paint_last_x || my != render_path_paint_last_y) && (context_in_viewport() || context_in_2d_view());
+		let moved: bool = (mx != render_path_paint_last_x || my != render_path_paint_last_y) && (context_in_3d_view() || context_in_2d_view());
 		if (moved || context_raw.brush_locked) {
 			context_raw.rdirty = 2;
 		}

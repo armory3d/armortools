@@ -198,7 +198,7 @@ function render_path_raytrace_draw(use_live_layer: bool) {
 	///if arm_metal
 	// Delay path tracing additional samples while painting
 	let down: bool = mouse_down() || pen_down();
-	if (context_in_viewport() && down) {
+	if (context_in_3d_view() && down) {
 		render_path_raytrace_frame = 0;
 	}
 	///end

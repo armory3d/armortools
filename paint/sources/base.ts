@@ -1,5 +1,6 @@
 
 let base_ui_enabled: bool = true;
+let base_view3d_show: bool = true;
 let base_is_dragging: bool = false;
 let base_is_resizing: bool = false;
 let base_drag_asset: asset_t = null;
@@ -174,6 +175,11 @@ function base_w(): i32 {
 		return util_render_decal_preview_size;
 	}
 
+	// 3D view is hidden
+	if (!base_view3d_show) {
+		return 1;
+	}
+
 	let res: i32 = 0;
 	if (config_raw.layout == null) {
 		let sidebarw: i32 = ui_sidebar_default_w;
@@ -210,7 +216,6 @@ function base_h(): i32 {
 	}
 
 	let res: i32 = iron_window_height();
-
 	if (config_raw.layout == null) {
 		res -= ui_header_default_h * 2 + ui_statusbar_default_h;
 		///if (arm_android || arm_ios)
@@ -304,7 +309,6 @@ function base_redraw_ui() {
 	ui_header_handle.redraws = 2;
 	ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 	ui_menubar_menu_handle.redraws = 2;
-	ui_menubar_workspace_handle.redraws = 2;
 	ui_nodes_hwnd.redraws = 2;
 	ui_box_hwnd.redraws = 2;
 	ui_view2d_hwnd.redraws = 2;
@@ -369,7 +373,7 @@ function base_update() {
 			if (context_in_nodes()) {
 				ui_nodes_accept_asset_drag(array_index_of(project_assets, base_drag_asset));
 			}
-			else if (context_in_viewport()) {
+			else if (context_in_3d_view()) {
 				if (ends_with(to_lower_case(base_drag_asset.file), ".hdr")) {
 					let image: gpu_texture_t = project_get_image(base_drag_asset);
 					import_envmap_run(base_drag_asset.file, image);
@@ -392,7 +396,7 @@ function base_update() {
 			else if (context_in_materials()) {
 				tab_materials_accept_swatch_drag(base_drag_swatch);
 			}
-			else if (context_in_viewport()) {
+			else if (context_in_3d_view()) {
 				let color: i32 = base_drag_swatch.base;
 				color = color_set_ab(color, base_drag_swatch.opacity * 255);
 				layers_create_color_layer(color, base_drag_swatch.occlusion, base_drag_swatch.roughness, base_drag_swatch.metallic);
@@ -465,7 +469,7 @@ function base_update() {
 
 function base_material_dropped() {
 	// Material drag and dropped onto viewport or layers tab
-	if (context_in_viewport()) {
+	if (context_in_3d_view()) {
 		let uv_type: uv_type_t = keyboard_down("control") ? uv_type_t.PROJECT : uv_type_t.UVMAP;
 		let decal_mat: mat4_t = uv_type == uv_type_t.PROJECT ? util_render_get_decal_mat() : mat4_nan();
 		layers_create_fill_layer(uv_type, decal_mat);
@@ -565,13 +569,6 @@ function base_render() {
 		make_material_parse_mesh_material();
 		make_material_parse_paint_material();
 		context_raw.ddirty = 0;
-
-		// Default workspace
-		if (config_raw.workspace != 0) {
-			ui_header_worktab.position = config_raw.workspace;
-			ui_menubar_workspace_handle.redraws = 2;
-			ui_header_worktab.changed = true;
-		}
 
 		// Default camera controls
 		context_raw.camera_controls = config_raw.camera_controls;
@@ -1474,7 +1471,7 @@ function ui_base_update_ui() {
 	}
 
 	// Same mapping for paint and rotate (predefined in touch keymap)
-	if (context_in_viewport()) {
+	if (context_in_3d_view()) {
 		let paint_key: string = map_get(config_keymap, "action_paint");
 		let rotate_key: string = map_get(config_keymap, "action_rotate");
 		if (mouse_started() && paint_key == rotate_key) {
@@ -1704,7 +1701,7 @@ function ui_base_update_ui() {
 							 (keyboard_down("control") && keyboard_started("y"));
 
 	// Two-finger tap to undo, three-finger tap to redo
-	if (context_in_viewport() && config_raw.touch_ui) {
+	if (context_in_3d_view() && config_raw.touch_ui) {
 		if (mouse_started("middle")) {
 			ui_base_redo_tap_time = sys_time();
 		}
@@ -2063,7 +2060,6 @@ function ui_base_on_tab_drop(to: ui_handle_t, to_position: i32, from: ui_handle_
 function ui_base_tag_ui_redraw() {
 	ui_header_handle.redraws = 2;
 	ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
-	ui_menubar_workspace_handle.redraws = 2;
 	ui_menubar_menu_handle.redraws = 2;
 	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;

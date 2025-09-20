@@ -117,7 +117,7 @@ function ui_toolbar_render_ui() {
 				config_raw.layout[layout_size_t.HEADER] = 0;
 			}
 		}
-		// Draw ">>" button if header is hidden
+		// Draw ">" button if header is hidden
 		else {
 			let _ELEMENT_H: i32 = ui.ops.theme.ELEMENT_H;
 			let _BUTTON_H: i32 = ui.ops.theme.BUTTON_H;
@@ -131,7 +131,7 @@ function ui_toolbar_render_ui() {
 			let _w: i32 = ui._w;
 			ui._w = ui_toolbar_w();
 
-			if (ui_button(">>")) {
+			if (ui_button(">")) {
 				ui_toolbar_tool_properties_menu();
 			}
 

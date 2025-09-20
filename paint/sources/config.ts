@@ -76,7 +76,6 @@ function config_save() {
 	json_encode_bool("splash_screen", config_raw.splash_screen);
 	json_encode_i32_array("layout", config_raw.layout);
 	json_encode_i32_array("layout_tabs", config_raw.layout_tabs);
-	json_encode_i32("workspace", config_raw.workspace);
 	json_encode_i32("camera_controls", config_raw.camera_controls);
 	json_encode_string("server", config_raw.server);
 	json_encode_i32("viewport_mode", config_raw.viewport_mode);
@@ -177,7 +176,6 @@ function config_init() {
 		config_raw.zoom_direction = zoom_direction_t.VERTICAL;
 		config_raw.displace_strength = 0.0;
 		config_raw.wrap_mouse = false;
-		config_raw.workspace = space_type_t.SPACE3D;
 		config_raw.camera_controls = camera_controls_t.ORBIT;
 		config_raw.layer_res = texture_res_t.RES2048;
 		///if (arm_android || arm_ios)
@@ -467,7 +465,6 @@ type config_t = {
 	splash_screen?: bool;
 	layout?: i32[]; // Sizes
 	layout_tabs?: i32[]; // Active tabs
-	workspace?: i32;
 	camera_controls?: i32; // Orbit, rotate
 	server?: string;
 	viewport_mode: i32;

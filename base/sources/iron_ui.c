@@ -1317,7 +1317,7 @@ void ui_draw_tabs() {
 		bool selected = current->tab_handle->position == i;
 
 		draw_set_color((pushed || hover) ? theme->HOVER_COL :
-			current->tab_colors[i] != -1 ? current->tab_colors[i] :
+			(current->tab_colors[i] != -1 && current->tab_colors[i] != -2) ? current->tab_colors[i] :
 			selected ? theme->WINDOW_BG_COL :
 			theme->SEPARATOR_COL);
 		if (current->tab_vertical) {
@@ -1328,7 +1328,10 @@ void ui_draw_tabs() {
 		}
 		draw_filled_rect(current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w, tab_h);
 		draw_set_color(theme->TEXT_COL);
-		if (!selected) {
+		if (current->tab_colors[i] == -2) { // Faded
+			ui_fade_color(0.25);
+		}
+		else if (!selected) {
 			ui_fade_color(0.65);
 		}
 		ui_draw_string(current->tab_names[i], theme->TEXT_OFFSET, (tab_h - tab_h_min) / 2.0, (theme->FULL_TABS || !current->tab_vertical) ? UI_ALIGN_CENTER : UI_ALIGN_LEFT, true);

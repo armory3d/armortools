@@ -236,7 +236,6 @@ type context_t = {
 
 	paint2d?: bool;
 
-	last_htab0_pos?: i32;
 	maximized_sidebar_width?: i32;
 	drag_dest?: i32;
 
@@ -442,7 +441,6 @@ function context_create(): context_t {
 	c.sym_z = false;
 	c.fill_type_handle = ui_handle_create();
 	c.paint2d = false;
-	c.last_htab0_pos = 0;
 	c.maximized_sidebar_width = 0;
 	c.drag_dest = 0;
 
@@ -606,7 +604,7 @@ function context_object_mask_used(): bool {
 	return slot_layer_get_object_mask(context_raw.layer) > 0 && slot_layer_get_object_mask(context_raw.layer) <= project_paint_objects.length;
 }
 
-function context_in_viewport(): bool {
+function context_in_3d_view(): bool {
 	return context_raw.paint_vec.x < 1 && context_raw.paint_vec.x > 0 &&
 		   context_raw.paint_vec.y < 1 && context_raw.paint_vec.y > 0;
 }
@@ -674,8 +672,8 @@ function context_is_floating_toolbar(): bool {
 }
 
 function context_get_area_type(): area_type_t {
-	if (context_in_viewport()) {
-		return area_type_t.VIEWPORT;
+	if (context_in_3d_view()) {
+		return area_type_t.VIEW3D;
 	}
 	if (context_in_nodes()) {
 		return area_type_t.NODES;
@@ -707,10 +705,7 @@ function context_set_viewport_mode(mode: viewport_mode_t) {
 	else {
 		render_path_commands = render_path_forward_commands;
 	}
-	let _workspace: i32 = ui_header_worktab.position;
-	ui_header_worktab.position = 0;
 	make_material_parse_mesh_material();
-	ui_header_worktab.position = _workspace;
 
 	// Rotate mode is not supported for path tracing yet
 	if (context_raw.viewport_mode == viewport_mode_t.PATH_TRACE && context_raw.camera_controls == camera_controls_t.ROTATE) {

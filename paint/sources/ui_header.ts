@@ -2,7 +2,6 @@
 let ui_header_default_h: i32 = 28;
 let ui_header_h: i32 = ui_header_default_h;
 let ui_header_handle: ui_handle_t = ui_handle_create();
-let ui_header_worktab: ui_handle_t = ui_handle_create();
 
 function ui_header_init() {
 	ui_header_handle.layout = ui_layout_t.HORIZONTAL;

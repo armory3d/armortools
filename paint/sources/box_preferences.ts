@@ -535,7 +535,7 @@ function box_preferences_show() {
 
 			let mode_handle: ui_handle_t = ui_handle(__ID__);
 			if (mode_handle.init) {
-				mode_handle.position = config_raw.workspace;
+				mode_handle.position = config_raw.viewport_mode;
 			}
 			let mode_combo: string[] = [tr("Lit"), tr("Path Traced")];
 			ui_combo(mode_handle, mode_combo, tr("Default Mode"), true);

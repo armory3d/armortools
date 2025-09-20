@@ -1,7 +1,8 @@
 
 let ui_menubar_default_w: i32 = 330;
-let ui_menubar_workspace_handle: ui_handle_t = ui_handle_create();
+let ui_menubar_hwnd: ui_handle_t = ui_handle_create();
 let ui_menubar_menu_handle: ui_handle_t = ui_handle_create();
+let ui_menubar_tab: ui_handle_t = ui_handle_create();
 let ui_menubar_w: i32 = ui_menubar_default_w;
 let ui_menubar_category: i32 = 0;
 
@@ -14,7 +15,7 @@ type update_info_t = {
 };
 
 function ui_menubar_init() {
-	ui_menubar_workspace_handle.layout = ui_layout_t.HORIZONTAL;
+	ui_menubar_hwnd.layout = ui_layout_t.HORIZONTAL;
 	ui_menubar_menu_handle.layout = ui_layout_t.HORIZONTAL;
 }
 
@@ -144,20 +145,16 @@ function ui_menubar_draw_tab_header() {
 	let ww: i32 = iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - ui_menubar_w - nodesw;
 	panel_x = (sys_x() - item_w) + ui_menubar_w;
 
-	if (ui_window(ui_menubar_workspace_handle, panel_x, 0, ww, ui_header_h)) {
+	if (ui_window(ui_menubar_hwnd, panel_x, 0, ww, ui_header_h)) {
 		if (config_raw.touch_ui) {
 			ui_fill(0, 0, ui._window_w, ui._window_h + 4, ui.ops.theme.SEPARATOR_COL);
 		}
 		else {
-			ui_tab(ui_header_worktab, tr("3D View"));
+			ui_tab(ui_menubar_tab, tr("3D View"));
 
-			if (ui_tab(ui_header_worktab, tr(">"))) {
-				ui_header_worktab.position = 0;
-				ui_menu_draw(function () {
-					if (ui_menu_button(tr("3D View"))) {}
-					if (ui_menu_button(tr("2D View"))) {}
-					if (ui_menu_button(tr("Nodes"))) {}
-				});
+			if (ui_tab(ui_menubar_tab, base_view3d_show ? ">" : "<", false, -2)) {
+				base_view3d_show = !base_view3d_show;
+				ui_menubar_tab.position = 0;
 			}
 		}
 	}

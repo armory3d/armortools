@@ -303,10 +303,8 @@ function make_material_bake_node_preview(node: ui_node_t, group: ui_node_canvas_
 			render_path_paint_live_layer = slot_layer_create("_live");
 		}
 
-		let _space: i32 = ui_header_worktab.position;
 		let _tool: tool_type_t = context_raw.tool;
 		let _bake_type: bake_type_t = context_raw.bake_type;
-		ui_header_worktab.position = space_type_t.SPACE3D;
 		context_raw.tool = tool_type_t.BAKE;
 		context_raw.bake_type = bake_type_t.CURVATURE;
 
@@ -326,7 +324,6 @@ function make_material_bake_node_preview(node: ui_node_t, group: ui_node_canvas_
 		render_path_paint_use_live_layer(false);
 		context_raw.pdirty = 0;
 
-		ui_header_worktab.position = _space;
 		context_raw.tool = _tool;
 		context_raw.bake_type = _bake_type;
 		make_material_parse_paint_material(false);
