@@ -1,4 +1,3 @@
-
 #[set(everything)]
 const constants: {
 	invP: float4x4;
@@ -16,8 +15,8 @@ const gbufferD: tex2d;
 #[set(everything)]
 const gbuffer0: tex2d;
 
-const max_steps: float = 24;
-const ray_step: float = 0.0005;
+const max_steps: float = 30.0;
+const ray_step: float = 0.005;
 
 struct vert_in {
 	pos: float2;
@@ -57,39 +56,36 @@ fun get_pos_view(view_ray: float3, depth: float): float3 {
 	return view_ray * linear_depth;
 }
 
-fun get_delta_depth(view_ray: float3, hit_coord: float3): float {
+fun get_delta_depth(hit_coord: float3): float {
 	var coord: float2 = get_projected_coord(hit_coord);
 	if (coord.x < 0.0 || coord.x > 1.0 || coord.y < 0.0 || coord.y > 1.0) {
 		return 1000.0;
 	}
 	var depth: float = sample_lod(gbufferD, sampler_linear, coord, 0.0).r;
-	var p: float3 = get_pos_view(view_ray, depth);
-	return p.z - hit_coord.z;
+	var linear_depth: float = constants.camera_proj.y / (constants.camera_proj.x - depth);
+	return linear_depth - hit_coord.z;
 }
 
-fun ray_cast(view_ray: float3, dir: float3, vpos: float3): float {
-	dir = dir * ray_step;
+fun ray_cast(dir: float3, vpos: float3): float {
+	var n_dir: float3 = normalize(dir);
+	var step_vec: float3 = n_dir * ray_step;
 	var hit_coord: float3 = vpos;
-	var dist: float = 0.15;
+	var t: float = 0.0;
 
-	// for (var i: int = 0; i < max_steps; i = i + 1) {
 	var i: int = 0;
 	while (i < int(max_steps)) {
-		hit_coord += dir;
-		var delta: float = get_delta_depth(view_ray, hit_coord);
+		hit_coord += step_vec;
+		t += ray_step;
+		var delta: float = get_delta_depth(hit_coord);
 		if (delta > 0.0 && delta < 0.2) {
-			dist = distance(vpos, hit_coord);
-			return dist;
+			return t;
 		}
-		if (distance(vpos, hit_coord) > 2.0) {
-			return dist;
+		if (t > 2.0) {
+			return 0.15; // max_radius;
 		}
-
-		//
 		i += 1;
-		//
 	}
-	return dist;
+	return 0.15; // max_radius;
 }
 
 fun tangent(n: float3): float3 {
@@ -123,8 +119,6 @@ fun octahedron_wrap(v: float2): float2 {
 	r.x = 1.0 - r.x;
 	r.y = 1.0 - r.y;
 	return r * a;
-
-	// return (1.0 - abs(v.yx)) * (float2(v.x >= 0.0 ? 1.0 : -1.0, v.y >= 0.0 ? 1.0 : -1.0));
 }
 
 fun ssao_pass_frag(input: vert_out): float {
@@ -135,12 +129,10 @@ fun ssao_pass_frag(input: vert_out): float {
 	var n: float3;
 	n.z = 1.0 - abs(enc.x) - abs(enc.y);
 	if (n.z >= 0.0) {
-		//n.xy = enc.xy;
 		n.x = enc.x;
 		n.y = enc.y;
 	}
 	else {
-		//n.xy = octahedron_wrap(enc.xy);
 		var f2: float2 = octahedron_wrap(enc.xy);
 		n.x = f2.x;
 		n.y = f2.y;
@@ -153,12 +145,15 @@ fun ssao_pass_frag(input: vert_out): float {
 	var c1: float3 = 0.5 * (o1 + o2);
 	var c2: float3 = 0.5 * (o1 - o2);
 
-	var col: float = ray_cast(input.view_ray, n, vpos);
-	col += ray_cast(input.view_ray, lerp3(n, o1, 0.5), vpos);
-	col += ray_cast(input.view_ray, lerp3(n, o2, 0.5), vpos);
-	col += ray_cast(input.view_ray, lerp3(n, -c1, 0.5), vpos);
-	col += ray_cast(input.view_ray, lerp3(n, -c2, 0.5), vpos);
-	return col;
+	var col: float = ray_cast(lerp3(n, o1, 0.5), vpos);
+	col += ray_cast(lerp3(n, -o1, 0.5), vpos);
+	col += ray_cast(lerp3(n, o2, 0.5), vpos);
+	col += ray_cast(lerp3(n, -o2, 0.5), vpos);
+	col += ray_cast(lerp3(n, c1, 0.5), vpos);
+	col += ray_cast(lerp3(n, -c1, 0.5), vpos);
+	col += ray_cast(lerp3(n, c2, 0.5), vpos);
+	col += ray_cast(lerp3(n, -c2, 0.5), vpos);
+	return col * 0.5;
 }
 
 #[pipe]
