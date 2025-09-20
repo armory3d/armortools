@@ -1291,6 +1291,9 @@ void ui_draw_tabs() {
 		current->_w = current->tab_vertical ? (UI_ELEMENT_W() - 1 * UI_SCALE()) :
 			 		  theme->FULL_TABS ? (current->_window_w / current->tab_count) :
 					  (draw_string_width(current->ops->font, current->font_size, current->tab_names[i]) + current->button_offset_y * 2.0 + 18.0 * UI_SCALE());
+		if (current->tab_align_right) {
+			current->_x = current->_window_w - current->_w - current->_x;
+		}
 		bool released = ui_get_released(tab_h);
 		bool started = ui_get_started(tab_h);
 		bool pushed = ui_get_pushed(tab_h);
@@ -1499,6 +1502,8 @@ void ui_init(ui_t *ui, ui_options_t *ops) {
 	current->window_ended = true;
 	current->restore_x = -1;
 	current->restore_y = -1;
+	current->input_x = -1;
+	current->input_y = -1;
 	if (ui_combo_search_handle == NULL) {
 		ui_combo_search_handle = ui_handle_create();
 		gc_root(ui_combo_search_handle);
@@ -1820,10 +1825,11 @@ int ui_text(char *text, int align, int bg) {
 	return started ? UI_STATE_STARTED : released ? UI_STATE_RELEASED : down ? UI_STATE_DOWN : UI_STATE_IDLE;
 }
 
-bool ui_tab(ui_handle_t *handle, char *text, bool vertical, uint32_t color) {
+bool ui_tab(ui_handle_t *handle, char *text, bool vertical, uint32_t color, bool align_right) {
 	if (current->tab_count == 0) { // First tab
 		current->tab_handle = handle;
 		current->tab_vertical = vertical;
+		current->tab_align_right = align_right;
 		current->_w -= current->tab_vertical ? UI_ELEMENT_OFFSET() + UI_ELEMENT_W() - 1 * UI_SCALE() : 0; // Shrink window area by width of vertical tabs
 		if (vertical) {
 			current->window_header_w += UI_ELEMENT_W();

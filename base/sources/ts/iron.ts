@@ -702,7 +702,7 @@ declare let ui_nodes_grid_snap: bool;
 
 declare function ui_nest(handle: ui_handle_t, pos: i32): ui_handle_t;
 declare function ui_theme_default(theme: ui_theme_t): void;
-declare function ui_tab(handle: ui_handle_t, text: string, vertical: bool = false, color: i32 = -1): bool;
+declare function ui_tab(handle: ui_handle_t, text: string, vertical: bool = false, color: i32 = -1, align_right: bool = false): bool;
 declare function ui_combo(handle: ui_handle_t, texts: string[], label: string = "", show_label: bool = false, align: ui_align_t = ui_align_t.LEFT, search_bar: bool = true): i32;
 declare function ui_slider(handle: ui_handle_t, text: string, from: f32 = 0.0, to: f32 = 1.0, filled: bool = false, precision: f32 = 100.0, display_value: bool = true, align: ui_align_t = ui_align_t.RIGHT, text_edit: bool = true): f32;
 declare function ui_button(text: string, align: ui_align_t = ui_align_t.CENTER, label: string = ""): bool;

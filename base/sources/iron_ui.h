@@ -256,6 +256,7 @@ typedef struct ui {
 	ui_handle_t *tab_handle;
 	float tab_scroll;
 	bool tab_vertical;
+	bool tab_align_right;
 	bool sticky;
 	bool scissor;
 
@@ -276,7 +277,7 @@ void ui_end_region();
 bool ui_window(ui_handle_t *handle, int x, int y, int w, int h, bool drag); // Returns true if redraw is needed
 bool ui_button(char *text, int align, char *label);
 int ui_text(char *text, int align, int bg);
-bool ui_tab(ui_handle_t *handle, char *text, bool vertical, uint32_t color);
+bool ui_tab(ui_handle_t *handle, char *text, bool vertical, uint32_t color, bool align_right);
 bool ui_panel(ui_handle_t *handle, char *text, bool is_tree, bool filled);
 int ui_sub_image(gpu_texture_t *image, uint32_t tint, int h, int sx, int sy, int sw, int sh);
 int ui_image(gpu_texture_t *image, uint32_t tint, int h);
