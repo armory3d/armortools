@@ -673,6 +673,9 @@ function ui_nodes_draw_grid(zoom: f32): gpu_texture_t {
 	if (!ui_base_show) {
 		ww += config_raw.layout[layout_size_t.SIDEBAR_W] + ui_toolbar_w(true);
 	}
+	if (!base_view3d_show) {
+		ww += base_view3d_w();
+	}
 
 	let wh: i32 = sys_h();
 	let step: f32 = ui_nodes_grid_cell_w * zoom;
@@ -832,6 +835,9 @@ function ui_nodes_render() {
 		ui_nodes_ww += config_raw.layout[layout_size_t.SIDEBAR_W] + ui_toolbar_w(true);
 		ui_nodes_wx -= ui_toolbar_w(true);
 	}
+	if (!base_view3d_show) {
+		ui_nodes_ww += base_view3d_w();
+	}
 
 	let ew: i32 = math_floor(UI_ELEMENT_W() * 0.7);
 	ui_nodes_wh = sys_h();
@@ -854,7 +860,7 @@ function ui_nodes_render() {
 	}
 
 	if (ui_window(ui_nodes_hwnd, ui_nodes_wx, ui_nodes_wy, ui_nodes_ww, ui_nodes_wh)) {
-		ui_tab(ui_nodes_htab, tr("Nodes"));
+		ui_tab(ui_nodes_htab, tr("Nodes"), false, -1, !base_view3d_show);
 
 		// Additional tabs
 		if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) {

@@ -180,6 +180,11 @@ function base_w(): i32 {
 		return 1;
 	}
 
+	let res: i32 = base_view3d_w();
+	return res > 0 ? res : 1; // App was minimized, force render path resize
+}
+
+function base_view3d_w(): i32 {
 	let res: i32 = 0;
 	if (config_raw.layout == null) {
 		let sidebarw: i32 = ui_sidebar_default_w;
@@ -200,8 +205,7 @@ function base_w(): i32 {
 	if (context_raw.paint2d_view) {
 		res = ui_view2d_ww;
 	}
-
-	return res > 0 ? res : 1; // App was minimized, force render path resize
+	return res;
 }
 
 function base_h(): i32 {
@@ -287,7 +291,7 @@ function base_resize() {
 
 	context_raw.ddirty = 2;
 
-	if (ui_base_show) {
+	if (ui_base_show && base_view3d_show) {
 		base_appx = ui_toolbar_w(true);
 		base_appy = 0;
 		if (config_raw.layout[layout_size_t.HEADER] == 1) {
@@ -295,7 +299,7 @@ function base_resize() {
 		}
 	}
 	else {
-		base_appx = 0;
+		base_appx = -1;
 		base_appy = 0;
 	}
 
@@ -1757,6 +1761,15 @@ function ui_base_render() {
 	// Set tab positions
 	for (let i: i32 = 0; i < ui_base_htabs.length; ++i) {
 		ui_base_htabs[i].position = config_raw.layout_tabs[i];
+	}
+
+	// Nothing to display in the main area
+	if (!base_view3d_show && !ui_nodes_show && !ui_view2d_show) {
+		draw_begin(null, true, base_theme.SEPARATOR_COL);
+		let img: gpu_texture_t = data_get_image("badge_bw.k");
+		draw_set_color(0x22ffffff);
+		draw_image(img, base_view3d_w() / 2 - img.width / 2, base_h() / 2 - img.height / 2);
+		draw_end();
 	}
 
 	ui_begin(ui);

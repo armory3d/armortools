@@ -20,10 +20,14 @@ function ui_header_render_ui() {
 		return;
 	}
 
+	if (!base_view3d_show) {
+		return;
+	}
+
 	let nodesw: i32 = (ui_nodes_show || ui_view2d_show) ? config_raw.layout[layout_size_t.NODES_W] : 0;
 	let ww: i32 = iron_window_width() - ui_toolbar_w(true) - config_raw.layout[layout_size_t.SIDEBAR_W] - nodesw;
 
-	if (ui_window(ui_header_handle, sys_x(), ui_header_h, ww, ui_header_h)) {
+	if (ui_window(ui_header_handle, base_x(), ui_header_h, ww, ui_header_h)) {
 		ui._y += 2;
 		ui_header_draw_tool_properties();
 	}

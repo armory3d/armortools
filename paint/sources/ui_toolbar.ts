@@ -72,6 +72,10 @@ function ui_toolbar_w(screen_size_request: bool = false): i32 {
 		return 0;
 	}
 
+	if (!base_view3d_show) {
+		return 0;
+	}
+
 	let w: i32 = 0;
 	if (config_raw.touch_ui) {
 		w = ui_toolbar_default_w + 6;
@@ -92,6 +96,10 @@ function ui_toolbar_render_ui() {
 	let y: i32 = ui_header_h;
 	let h: i32 = iron_window_height() - ui_header_h - config_raw.layout[layout_size_t.STATUS_H];
 	let _WINDOW_BG_COL: i32 = ui.ops.theme.WINDOW_BG_COL;
+
+	if (!base_view3d_show) {
+		return;
+	}
 
 	if (context_is_floating_toolbar()) {
 		x += ui_toolbar_x();

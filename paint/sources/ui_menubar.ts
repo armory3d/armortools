@@ -20,10 +20,10 @@ function ui_menubar_init() {
 }
 
 function ui_menu_panel_x(): i32 {
-	let panel_x: i32 = sys_x();
+	let panel_x: i32 = base_x();
 	if (config_raw.layout[layout_size_t.HEADER] == 1) {
 		let item_w: i32 = ui_toolbar_w();
-		panel_x = sys_x() - item_w;
+		panel_x = base_x() - item_w;
 	}
 	else {
 		panel_x += 5 * UI_SCALE();
@@ -47,7 +47,10 @@ function ui_menubar_render_ui() {
 	let panel_y: i32 = ui_menu_panel_y();
 
 	if (ui_window(ui_menubar_menu_handle, panel_x, panel_y, ui_menubar_w, ui_header_h)) {
-		ui._x += 1; // Prevent "File" button highlight on startup
+
+		if (!base_view3d_show) {
+			ui._x += 1;
+		}
 
 		ui_begin_menu();
 
@@ -139,22 +142,27 @@ function ui_menubar_render_ui() {
 
 function ui_menubar_draw_tab_header() {
 	let item_w: i32 = ui_toolbar_w();
-	let panel_x: i32 = sys_x();
+	let panel_x: i32 = base_x();
 
 	let nodesw: i32 = (ui_nodes_show || ui_view2d_show) ? config_raw.layout[layout_size_t.NODES_W] : 0;
 	let ww: i32 = iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - ui_menubar_w - nodesw;
-	panel_x = (sys_x() - item_w) + ui_menubar_w;
+	panel_x = (base_x() - item_w) + ui_menubar_w;
+
+	if (!base_view3d_show) {
+		panel_x += 1;
+	}
 
 	if (ui_window(ui_menubar_hwnd, panel_x, 0, ww, ui_header_h)) {
 		if (config_raw.touch_ui) {
 			ui_fill(0, 0, ui._window_w, ui._window_h + 4, ui.ops.theme.SEPARATOR_COL);
 		}
 		else {
-			ui_tab(ui_menubar_tab, tr("3D View"));
-
-			if (ui_tab(ui_menubar_tab, base_view3d_show ? ">" : "<", false, -2)) {
+			let a: bool = ui_tab(ui_menubar_tab, tr("3D View"));
+			let b: bool = ui_tab(ui_menubar_tab, base_view3d_show ? ">" : "<", false, -2);
+			if ((a && !base_view3d_show) || b) {
 				base_view3d_show = !base_view3d_show;
-				ui_menubar_tab.position = 0;
+				ui_menubar_tab.position = base_view3d_show ? 0 : -1;
+				base_resize();
 			}
 		}
 	}

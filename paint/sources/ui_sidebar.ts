@@ -23,15 +23,17 @@ function ui_sidebar_render_ui() {
 			ui._w = width;
 			let _BUTTON_H: i32 = ui.ops.theme.BUTTON_H;
 			let _BUTTON_COL: i32 = ui.ops.theme.BUTTON_COL;
+			let _TEXT_COL: i32 = ui.ops.theme.TEXT_COL;
 			ui.ops.theme.BUTTON_H = ui.ops.theme.ELEMENT_H;
 			ui.ops.theme.BUTTON_COL = ui.ops.theme.SEPARATOR_COL;
+			ui.ops.theme.TEXT_COL = ui.ops.theme.HOVER_COL;
 
 			if (ui_button("<")) {
-				// ui_base_htabs[tab_area_t.SIDEBAR0].position = ui_sidebar_last_tab;
 				config_raw.layout[layout_size_t.SIDEBAR_W] = context_raw.maximized_sidebar_width != 0 ? context_raw.maximized_sidebar_width : math_floor(ui_sidebar_default_w * config_raw.window_scale);
 			}
 			ui.ops.theme.BUTTON_H = _BUTTON_H;
 			ui.ops.theme.BUTTON_COL = _BUTTON_COL;
+			ui.ops.theme.TEXT_COL = _TEXT_COL;
 		}
 		return;
 	}
