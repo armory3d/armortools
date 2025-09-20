@@ -175,6 +175,10 @@ function base_w(): i32 {
 		return util_render_decal_preview_size;
 	}
 
+	if (context_raw.paint2d_view) {
+		return ui_view2d_ww;
+	}
+
 	// 3D view is hidden
 	if (!base_view3d_show) {
 		return 1;

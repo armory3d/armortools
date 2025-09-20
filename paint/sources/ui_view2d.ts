@@ -95,6 +95,9 @@ function ui_view2d_render() {
 
 	let headerh: i32 = config_raw.layout[layout_size_t.HEADER] == 1 ? ui_header_h * 2 : ui_header_h;
 	let apph: i32 = iron_window_height() - config_raw.layout[layout_size_t.STATUS_H] + headerh;
+	if (!base_view3d_show) {
+		apph = base_h();
+	}
 	ui_view2d_wh = iron_window_height() - config_raw.layout[layout_size_t.STATUS_H];
 
 	if (ui_nodes_show) {
