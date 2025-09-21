@@ -23,7 +23,7 @@ struct RayPayload {
 	float3 ray_dir;
 };
 
-RWTexture2D<float4> render_target : register(u0);
+RWTexture2D<half4> render_target : register(u0);
 RaytracingAccelerationStructure scene : register(t0);
 ByteAddressBuffer indices : register(t1);
 StructuredBuffer<Vertex> vertices : register(t2);
@@ -45,7 +45,7 @@ void raygeneration() {
 	float2 xy = DispatchRaysIndex().xy + 0.5f;
 	float4 tex0 = mytexture0.Load(uint3(xy, 0));
 	if (tex0.a == 0.0) {
-		render_target[DispatchRaysIndex().xy] = float4(0.0f, 0.0f, 0.0f, 0.0f);
+		render_target[DispatchRaysIndex().xy] = half4(0.0f, 0.0f, 0.0f, 0.0f);
 		return;
 	}
 	float3 pos = tex0.rgb;
@@ -79,7 +79,7 @@ void raygeneration() {
 		float b = 1.0 - a;
 		color = color * b + accum.xyz * a;
 	}
-	render_target[DispatchRaysIndex().xy] = float4(color.xyz, 1.0f);
+	render_target[DispatchRaysIndex().xy] = half4(color.xyz, 1.0f);
 }
 
 [shader("closesthit")]

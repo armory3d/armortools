@@ -32,7 +32,7 @@ struct RayPayload {
 	float3 ray_dir;
 };
 
-RWTexture2D<float4> render_target : register(u0);
+RWTexture2D<half4> render_target : register(u0);
 RaytracingAccelerationStructure scene : register(t0);
 ByteAddressBuffer indices : register(t1);
 StructuredBuffer<Vertex> vertices : register(t2);
@@ -145,14 +145,14 @@ void raygeneration() {
 	float a = 1.0 / (constant_buffer.eye.w + 1);
 	float b = 1.0 - a;
 	color = color * b + accum * a;
-	render_target[DispatchRaysIndex().xy] = float4(color, 0.0f);
+	render_target[DispatchRaysIndex().xy] = half4(color, 0.0f);
 
 	#else
 
 	if (constant_buffer.eye.w == 0) {
 		color = accum;
 	}
-	render_target[DispatchRaysIndex().xy] = float4(lerp(color, accum, 1.0 / 4.0), 0.0f);
+	render_target[DispatchRaysIndex().xy] = half4(lerp(color, accum, 1.0 / 4.0), 0.0f);
 
 	#endif
 }
