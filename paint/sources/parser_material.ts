@@ -193,7 +193,7 @@ function parser_material_finalize(con: node_shader_context_t) {
 		}
 		else if (kong.frag_ndcpos) {
 			node_shader_add_out(kong, "_bposition: float3");
-			node_shader_write_vert(kong, "output._bposition = (ndc.xyz / ndc.w);");
+			node_shader_write_vert(kong, "output._bposition = (output.ndc.xyz / output.ndc.w);");
 			node_shader_write_attrib_frag(kong, "var bposition: float3 = input._bposition;");
 		}
 		else {
@@ -217,7 +217,7 @@ function parser_material_finalize(con: node_shader_context_t) {
 	if (kong.frag_mposition) {
 		node_shader_add_out(kong, "mposition: float3");
 		if (kong.frag_ndcpos) {
-			node_shader_write_vert(kong, "output.mposition = (ndc.xyz / ndc.w);");
+			node_shader_write_vert(kong, "output.mposition = (output.ndc.xyz / output.ndc.w);");
 		}
 		else {
 			node_shader_write_attrib_vert(kong, "output.mposition = input.pos.xyz;");
