@@ -1,6 +1,6 @@
 
 let line_draw_color: color_t = 0xffff0000;
-let line_draw_strength: f32 = 0.005;
+let line_draw_strength: f32 = 0.002;
 let line_draw_mat: mat4_t = mat4_nan();
 let line_draw_dim: vec4_t = vec4_nan();
 

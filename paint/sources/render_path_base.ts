@@ -384,7 +384,7 @@ function render_path_base_draw_gbuffer() {
 	let is_decal: bool = base_is_decal_layer();
 	if (is_decal && !hide) {
 		line_draw_color = 0xff000000;
-		line_draw_strength = 0.005;
+		line_draw_strength = 0.002;
 		let additional: string[] = ["gbuffer1"];
 		render_path_set_target("gbuffer0", additional, "main");
 		line_draw_render(context_raw.layer.decal_mat);
