@@ -61,7 +61,13 @@ function ui_toolbar_draw_tool(i: i32, img: gpu_texture_t, icon_accent: i32, keys
 	}
 
 	if (ui.is_hovered) {
-		ui_tooltip(tr(ui_toolbar_tool_names[i]) + " " + keys[i]);
+		let key: string = keys[i];
+		if (key.length > 0) {
+			ui_tooltip(tr(ui_toolbar_tool_names[i]) + " " + key);
+		}
+		else {
+			ui_tooltip(tr(ui_toolbar_tool_names[i]));
+		}
 	}
 	ui._x -= 2;
 	ui._y += 2;
@@ -210,6 +216,16 @@ function ui_toolbar_render_ui() {
 			key_tool_gizmo,
 			key_tool_material
 		];
+
+		// Erase the () in case no shortcut is assigned
+		for(let i: i32 = 0; i < keys.length; ++i) {
+			let key: string = keys[i];
+			if(key.length == 2)
+				keys[i] = "";
+			else if(char_at(key,1) ==  ")") {
+				keys[i] = substring(key,5,key.length);
+			}
+		}
 
 		ui_toolbar_ext_draw_tools(img, icon_accent, keys);
 
