@@ -1071,8 +1071,6 @@ function ui_base_update() {
 				if (!pen_connected) {
 					iron_mouse_lock();
 				}
-				context_raw.lock_started_x = mouse_x;
-				context_raw.lock_started_y = mouse_y;
 			}
 			else if (operator_shortcut(map_get(config_keymap, "brush_radius_decrease"), shortcut_type_t.REPEAT)) {
 				context_raw.brush_radius -= ui_base_get_radius_increment();
@@ -1851,12 +1849,6 @@ function ui_base_render_cursor() {
 				context_raw.decal_x = context_raw.paint_vec.x;
 				context_raw.decal_y = context_raw.paint_vec.y;
 				decal_alpha = context_raw.brush_opacity;
-
-				// Radius being scaled
-				if (context_raw.brush_locked) {
-					context_raw.decal_x += (context_raw.lock_started_x - iron_window_width() / 2) / base_w();
-					context_raw.decal_y += (context_raw.lock_started_y - iron_window_height() / 2) / base_h();
-				}
 			}
 
 			if (!config_raw.brush_live) {

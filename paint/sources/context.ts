@@ -75,8 +75,6 @@ type context_t = {
 	frame?: i32;
 	paint2d_view?: bool;
 
-	lock_started_x?: f32;
-	lock_started_y?: f32;
 	brush_locked?: bool;
 	brush_can_lock?: bool;
 	brush_can_unlock?: bool;
@@ -322,8 +320,6 @@ function context_create(): context_t {
 	c.prev_paint_vec_y = -1.0;
 	c.frame = 0;
 	c.paint2d_view = false;
-	c.lock_started_x = -1.0;
-	c.lock_started_y = -1.0;
 	c.brush_locked = false;
 	c.brush_can_lock = false;
 	c.brush_can_unlock = false;

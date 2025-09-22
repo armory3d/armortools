@@ -372,10 +372,7 @@ function render_path_paint_commands_live_brush() {
 	ui_view2d_hwnd.redraws = 2;
 	let _x: f32 = context_raw.paint_vec.x;
 	let _y: f32 = context_raw.paint_vec.y;
-	if (context_raw.brush_locked) {
-		context_raw.paint_vec.x = (context_raw.lock_started_x - sys_x()) / sys_w();
-		context_raw.paint_vec.y = (context_raw.lock_started_y - sys_y()) / sys_h();
-	}
+
 	let _last_x: f32 = context_raw.last_paint_vec_x;
 	let _last_y: f32 = context_raw.last_paint_vec_y;
 	let _pdirty: i32 = context_raw.pdirty;
@@ -421,10 +418,7 @@ function render_path_paint_commands_cursor() {
 
 	let mx: f32 = context_raw.paint_vec.x;
 	let my: f32 = 1.0 - context_raw.paint_vec.y;
-	if (context_raw.brush_locked) {
-		mx = (context_raw.lock_started_x - sys_x()) / sys_w();
-		my = 1.0 - (context_raw.lock_started_y - sys_y()) / sys_h();
-	}
+
 	let radius: f32 = decal_mask ? context_raw.brush_decal_mask_radius : context_raw.brush_radius;
 	render_path_paint_draw_cursor(mx, my, context_raw.brush_nodes_radius * radius / 3.4);
 }
