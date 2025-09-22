@@ -610,12 +610,7 @@ function context_in_3d_view(): bool {
 }
 
 function context_in_paint_area(): bool {
-	let right: i32 = sys_w();
-	if (ui_view2d_show) {
-		right += ui_view2d_ww;
-	}
-	return mouse_view_x() > 0 && mouse_view_x() < right &&
-		   mouse_view_y() > 0 && mouse_view_y() < sys_h();
+	return context_in_3d_view() || context_in_2d_view();
 }
 
 function context_in_layers(): bool {
