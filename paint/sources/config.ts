@@ -385,7 +385,7 @@ function config_load_theme(theme: string, tag_redraw: bool = true) {
 
 	if (tag_redraw) {
 		ui.ops.theme = base_theme;
-		ui_base_tag_ui_redraw();
+		base_redraw_ui();
 	}
 
 	if (config_raw.touch_ui) {

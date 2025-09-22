@@ -27,7 +27,7 @@ function box_preferences_show() {
 				let locale_code: string = box_preferences_locales[locale_handle.position];
 				config_raw.locale = locale_code;
 				translator_load_translations(locale_code);
-				ui_base_tag_ui_redraw();
+				base_redraw_ui();
 			}
 
 			let hscale: ui_handle_t = ui_handle(__ID__);
@@ -101,7 +101,7 @@ function box_preferences_show() {
 			}
 			config_raw.show_asset_names = ui_check(h_show_asset_names, tr("Show Asset Names"));
 			if (ui.changed) {
-				ui_base_tag_ui_redraw();
+				base_redraw_ui();
 			}
 
 			///if !(arm_android || arm_ios)
@@ -117,7 +117,7 @@ function box_preferences_show() {
 				ui_touch_tooltip = config_raw.touch_ui;
 				config_load_theme(config_raw.theme);
 				box_preferences_set_scale();
-				ui_base_tag_ui_redraw();
+				base_redraw_ui();
 			}
 			///end
 

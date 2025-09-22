@@ -313,25 +313,6 @@ function base_resize() {
 	base_redraw_ui();
 }
 
-function base_redraw_ui() {
-	ui_header_handle.redraws = 2;
-	ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
-	ui_menubar_menu_handle.redraws = 2;
-	ui_nodes_hwnd.redraws = 2;
-	ui_box_hwnd.redraws = 2;
-	ui_view2d_hwnd.redraws = 2;
-	// Redraw viewport
-	if (context_raw.ddirty < 0) {
-		context_raw.ddirty = 0;
-	}
-	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
-	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
-	ui_toolbar_handle.redraws = 2;
-	if (context_raw.split_view) {
-		context_raw.ddirty = 1;
-	}
-}
-
 function base_update() {
 	if (mouse_movement_x != 0 || mouse_movement_y != 0) {
 		iron_mouse_set_cursor(cursor_t.ARROW);
@@ -2074,13 +2055,24 @@ function ui_base_on_tab_drop(to: ui_handle_t, to_position: i32, from: ui_handle_
 	}
 }
 
-function ui_base_tag_ui_redraw() {
+function base_redraw_ui() {
 	ui_header_handle.redraws = 2;
 	ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 	ui_menubar_menu_handle.redraws = 2;
+	ui_menubar_hwnd.redraws = 2;
+	ui_nodes_hwnd.redraws = 2;
+	ui_box_hwnd.redraws = 2;
+	ui_view2d_hwnd.redraws = 2;
+	// Redraw viewport
+	if (context_raw.ddirty < 0) {
+		context_raw.ddirty = 0;
+	}
 	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 	ui_toolbar_handle.redraws = 2;
+	if (context_raw.split_view) {
+		context_raw.ddirty = 1;
+	}
 }
 
 function ui_base_make_empty_envmap(col: i32) {
