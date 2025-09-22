@@ -76,8 +76,6 @@ type context_t = {
 	paint2d_view?: bool;
 
 	brush_locked?: bool;
-	brush_can_lock?: bool;
-	brush_can_unlock?: bool;
 	camera_type?: camera_type_t;
 	cam_handle?: ui_handle_t;
 	fov_handle?: ui_handle_t;
@@ -321,8 +319,6 @@ function context_create(): context_t {
 	c.frame = 0;
 	c.paint2d_view = false;
 	c.brush_locked = false;
-	c.brush_can_lock = false;
-	c.brush_can_unlock = false;
 	c.camera_type = camera_type_t.PERSPECTIVE;
 	c.cam_handle = ui_handle_create();
 	c.vxao_ext = 1.0;

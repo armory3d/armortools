@@ -942,7 +942,7 @@ function ui_base_update() {
 
 	let decal_mask: bool = context_is_decal_mask();
 
-	if ((context_raw.brush_can_lock || context_raw.brush_locked) && mouse_moved) {
+	if (context_raw.brush_locked && mouse_moved) {
 		if (operator_shortcut(map_get(config_keymap, "brush_radius"), shortcut_type_t.DOWN) ||
 			operator_shortcut(map_get(config_keymap, "brush_opacity"), shortcut_type_t.DOWN) ||
 			operator_shortcut(map_get(config_keymap, "brush_angle"), shortcut_type_t.DOWN) ||
@@ -975,10 +975,6 @@ function ui_base_update() {
 					context_raw.brush_radius_handle.value = context_raw.brush_radius;
 				}
 				ui_header_handle.redraws = 2;
-			}
-			else if (context_raw.brush_can_lock) {
-				context_raw.brush_can_lock = false;
-				context_raw.brush_locked = true;
 			}
 		}
 	}
@@ -1067,7 +1063,7 @@ function ui_base_update() {
 				operator_shortcut(map_get(config_keymap, "brush_opacity")) ||
 				operator_shortcut(map_get(config_keymap, "brush_angle")) ||
 				(decal_mask && operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "brush_radius")))) {
-				context_raw.brush_can_lock = true;
+				context_raw.brush_locked = true;
 				if (!pen_connected) {
 					iron_mouse_lock();
 				}
@@ -1205,13 +1201,8 @@ function ui_base_update() {
 		}
 	}
 
-	if (context_raw.brush_can_lock || context_raw.brush_locked) {
-		if (mouse_moved && context_raw.brush_can_unlock) {
-			context_raw.brush_locked = false;
-			context_raw.brush_can_unlock = false;
-		}
-
-		let b: bool = (context_raw.brush_can_lock || context_raw.brush_locked) &&
+	if (context_raw.brush_locked) {
+		let b: bool = context_raw.brush_locked &&
 			!operator_shortcut(map_get(config_keymap, "brush_radius"), shortcut_type_t.DOWN) &&
 			!operator_shortcut(map_get(config_keymap, "brush_opacity"), shortcut_type_t.DOWN) &&
 			!operator_shortcut(map_get(config_keymap, "brush_angle"), shortcut_type_t.DOWN) &&
@@ -1221,14 +1212,7 @@ function ui_base_update() {
 			iron_mouse_unlock();
 			context_raw.last_paint_x = -1;
 			context_raw.last_paint_y = -1;
-			if (context_raw.brush_can_lock) {
-				context_raw.brush_can_lock = false;
-				context_raw.brush_can_unlock = false;
-				context_raw.brush_locked = false;
-			}
-			else {
-				context_raw.brush_can_unlock = true;
-			}
+			context_raw.brush_locked = false;
 		}
 	}
 

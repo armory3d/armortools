@@ -372,7 +372,6 @@ function render_path_paint_commands_live_brush() {
 	ui_view2d_hwnd.redraws = 2;
 	let _x: f32 = context_raw.paint_vec.x;
 	let _y: f32 = context_raw.paint_vec.y;
-
 	let _last_x: f32 = context_raw.last_paint_vec_x;
 	let _last_y: f32 = context_raw.last_paint_vec_y;
 	let _pdirty: i32 = context_raw.pdirty;
