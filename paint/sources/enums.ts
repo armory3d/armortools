@@ -233,8 +233,8 @@ enum tool_type_t {
 	COLORID = 9,
 	PICKER = 10,
 	BAKE = 11,
-	GIZMO = 12,
-	MATERIAL = 13,
+	MATERIAL = 12,
+	GIZMO = 13,
 }
 
 enum area_type_t {
