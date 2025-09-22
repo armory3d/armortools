@@ -124,7 +124,6 @@ function ui_view2d_render() {
 
 		// Texture
 		let tex: gpu_texture_t = null;
-
 		let l: slot_layer_t = context_raw.layer;
 		let channel: i32 = 0;
 
@@ -142,6 +141,10 @@ function ui_view2d_render() {
 			let layer: slot_layer_t = l;
 
 			if (config_raw.brush_live && render_path_paint_live_layer_drawn > 0) {
+				layer = render_path_paint_live_layer;
+			}
+
+			if (context_raw.tool == tool_type_t.MATERIAL) {
 				layer = render_path_paint_live_layer;
 			}
 

@@ -255,6 +255,7 @@ function layers_update_fill_layers() {
 
 		context_raw.tool = tool_type_t.FILL;
 		context_raw.fill_type_handle.position = fill_type_t.OBJECT;
+		render_path_paint_set_plane_mesh();
 		make_material_parse_paint_material(false);
 		context_raw.pdirty = 1;
 		render_path_paint_use_live_layer(true);
@@ -265,7 +266,9 @@ function layers_update_fill_layers() {
 		context_raw.fill_type_handle.position = _fill_type;
 		context_raw.pdirty = 0;
 		context_raw.rdirty = 2;
+		render_path_paint_restore_plane_mesh();
 		make_material_parse_paint_material();
+		ui_view2d_hwnd.redraws = 2;
 
 		if (current != null) draw_begin(current);
 		return;

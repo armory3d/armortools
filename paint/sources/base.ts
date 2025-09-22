@@ -1806,9 +1806,7 @@ function ui_base_render_cursor() {
 	context_raw.view_index = -1;
 
 	if (context_raw.brush_stencil_image != null &&
-		context_raw.tool != tool_type_t.BAKE &&
 		context_raw.tool != tool_type_t.PICKER &&
-		context_raw.tool != tool_type_t.MATERIAL &&
 		context_raw.tool != tool_type_t.COLORID) {
 		let r: rect_t = ui_base_get_brush_stencil_rect();
 		if (!operator_shortcut(map_get(config_keymap, "stencil_hide"), shortcut_type_t.DOWN)) {
