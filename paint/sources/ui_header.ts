@@ -107,37 +107,20 @@ function ui_header_draw_tool_properties() {
 		ui.enabled = true;
 	}
 	else if (context_raw.tool == tool_type_t.PICKER || context_raw.tool == tool_type_t.MATERIAL) {
-		let base_r_picked: f32 = math_round(color_get_rb(context_raw.picked_color.base) / 255 * 10) / 10;
-		let base_g_picked: f32 = math_round(color_get_gb(context_raw.picked_color.base) / 255 * 10) / 10;
-		let base_b_picked: f32 = math_round(color_get_bb(context_raw.picked_color.base) / 255 * 10) / 10;
-		let normal_r_picked: f32 = math_round(color_get_rb(context_raw.picked_color.normal) / 255 * 10) / 10;
-		let normal_g_picked: f32 = math_round(color_get_gb(context_raw.picked_color.normal) / 255 * 10) / 10;
-		let normal_b_picked: f32 = math_round(color_get_bb(context_raw.picked_color.normal) / 255 * 10) / 10;
-		let occlusion_picked: f32 = math_round(context_raw.picked_color.occlusion * 100) / 100;
-		let roughness_picked: f32 = math_round(context_raw.picked_color.roughness * 100) / 100;
-		let metallic_picked: f32 = math_round(context_raw.picked_color.metallic * 100) / 100;
-		let height_picked: f32 = math_round(context_raw.picked_color.height * 100) / 100;
-		let opacity_picked: f32 = math_round(context_raw.picked_color.opacity * 100) / 100;
 
-		let h: ui_handle_t = ui_handle(__ID__);
-		let color: color_t = 0xffffffff;
-		color = color_set_rb(color, base_r_picked * 255);
-		color = color_set_gb(color, base_g_picked * 255);
-		color = color_set_bb(color, base_b_picked * 255);
-		h.color = color;
-		let state: ui_state_t = ui_text("", 0, h.color);
+		let h_color: ui_handle_t = ui_handle(__ID__);
+		h_color.color = context_raw.picked_color.base;
+		let state: ui_state_t = ui_text("", 0, h_color.color);
 		if (state == ui_state_t.STARTED) {
-			let uix: i32 = ui._x;
-			let uiy: i32 = ui._y;
-			base_drag_off_x = -(mouse_x - uix - ui._window_x - 3);
-			base_drag_off_y = -(mouse_y - uiy - ui._window_y + 1);
+			base_drag_off_x = -(mouse_x - ui._x - ui._window_x - 3);
+			base_drag_off_y = -(mouse_y - ui._y - ui._window_y + 1);
 			base_drag_swatch = project_clone_swatch(context_raw.picked_color);
 		}
 		if (ui.is_hovered) {
 			ui_tooltip(tr("Drag and drop picked color to swatches, materials, layers or to the node editor"));
 		}
 		if (ui.is_hovered && ui.input_released) {
-			_ui_header_draw_tool_properties_h = h;
+			_ui_header_draw_tool_properties_h = h_color;
 			ui_menu_draw(function () {
 				ui_fill(0, 0, ui._w / UI_SCALE(), ui.ops.theme.ELEMENT_H * 9, ui.ops.theme.SEPARATOR_COL);
 				ui.changed = false;
@@ -157,13 +140,45 @@ function ui_header_draw_tool_properties() {
 			ui_tooltip(tr("Add picked color to swatches"));
 		}
 
-		ui_text(tr("Base") + " (" + base_r_picked + "," + base_g_picked + "," + base_b_picked + ")");
-		ui_text(tr("Normal") + " (" + normal_r_picked + "," + normal_g_picked + "," + normal_b_picked + ")");
-		ui_text(tr("Occlusion") + " (" + occlusion_picked + ")");
-		ui_text(tr("Roughness") + " (" + roughness_picked + ")");
-		ui_text(tr("Metallic") + " (" + metallic_picked + ")");
-		ui_text(tr("Height") + " (" + height_picked + ")");
-		ui_text(tr("Opacity") + " (" + opacity_picked + ")");
+		let _w: i32 = ui._w;
+		ui._w /= 2;
+		let h_normal: ui_handle_t = ui_handle(__ID__);
+		h_normal.color = context_raw.picked_color.normal;
+		ui_text("", 0, h_normal.color);
+		if (ui.is_hovered && ui.input_released) {
+			_ui_header_draw_tool_properties_h = h_normal;
+			ui_menu_draw(function () {
+				ui_fill(0, 0, ui._w / UI_SCALE(), ui.ops.theme.ELEMENT_H * 9, ui.ops.theme.SEPARATOR_COL);
+				ui.changed = false;
+				ui_color_wheel(_ui_header_draw_tool_properties_h, false, -1, 10 * ui.ops.theme.ELEMENT_H * UI_SCALE(), false);
+				if (ui.changed) {
+					ui_menu_keep_open = true;
+				}
+			});
+		}
+		ui_text(tr("Normal"));
+		ui._w = _w;
+
+		let hocc: ui_handle_t = ui_handle(__ID__);
+		hocc.value = context_raw.picked_color.occlusion;
+		ui_slider(hocc, tr("Occlusion"), 0.0, 1.0, true);
+
+		let hrough: ui_handle_t = ui_handle(__ID__);
+		hrough.value = context_raw.picked_color.roughness;
+		ui_slider(hrough, tr("Roughness"), 0.0, 1.0, true);
+
+		let hmet: ui_handle_t = ui_handle(__ID__);
+		hmet.value = context_raw.picked_color.metallic;
+		ui_slider(hmet, tr("Metallic"), 0.0, 1.0, true);
+
+		let hheight: ui_handle_t = ui_handle(__ID__);
+		hheight.value = context_raw.picked_color.height;
+		ui_slider(hheight, tr("Height"), 0.0, 1.0, true);
+
+		let hopac: ui_handle_t = ui_handle(__ID__);
+		hopac.value = context_raw.picked_color.opacity;
+		ui_slider(hopac, tr("Opacity"), 0.0, 1.0, true);
+
 		let h_select_mat: ui_handle_t = ui_handle(__ID__);
 		if (h_select_mat.init) {
 			h_select_mat.selected = context_raw.picker_select_material;
