@@ -78,23 +78,37 @@ typedef struct ui_handle_array {
 } ui_handle_array_t;
 
 typedef struct ui_handle {
-	bool selected;
-	int position;
+	union {
+		float value;
+		int position;
+		bool selected;
+	};
+	union {
+		struct { // window
+			int layout;
+			int drag_x;
+			int drag_y;
+			float last_max_x;
+			float last_max_y;
+			float scroll_offset;
+		};
+		struct { // color_wheel
+			float hue;
+			float sat;
+			float val;
+			float red;
+			float green;
+			float blue;
+		};
+	};
 	uint32_t color;
-	float value;
-	char *text;
-	gpu_texture_t texture;
 	int redraws;
-	float scroll_offset;
+	char *text;
 	bool scroll_enabled;
-	int layout;
-	float last_max_x;
-	float last_max_y;
 	bool drag_enabled;
-	int drag_x;
-	int drag_y;
 	bool changed;
 	bool init;
+	gpu_texture_t texture;
 	ui_handle_array_t *children;
 } ui_handle_t;
 

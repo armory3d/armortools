@@ -2572,7 +2572,6 @@ static const float kx = 1.0;
 static const float ky = 2.0 / 3.0;
 static const float kz = 1.0 / 3.0;
 static const float kw = 3.0;
-static float ar[] = {0.0, 0.0, 0.0};
 void ui_hsv_to_rgb(float cr, float cg, float cb, float *out) {
 	float px = fabs(ui_fract(cr + kx) * 6.0 - kw);
 	float py = fabs(ui_fract(cr + ky) * 6.0 - kw);
@@ -2689,14 +2688,16 @@ int ui_color_wheel(ui_handle_t *handle, bool alpha, float w, float h, bool color
 	if (w < 0) {
 		w = current->_w;
 	}
+
 	float r = ui_color_r(handle->color) / 255.0f;
 	float g = ui_color_g(handle->color) / 255.0f;
 	float b = ui_color_b(handle->color) / 255.0f;
-	ui_rgb_to_hsv(r, g, b, ar);
-	float chue = ar[0];
-	float csat = ar[1];
-	float cval = ar[2];
-	float calpha = ui_color_a(handle->color) / 255.0f;
+	if (fabs(handle->red - r) > 0.01 || fabs(handle->green - g) > 0.01 || fabs(handle->blue - b) > 0.01) {
+		handle->red = r;
+		handle->green = g;
+		handle->blue = b;
+		ui_rgb_to_hsv(r, g, b, &handle->hue);
+	}
 
 	// Wheel
 	float px = current->_x;
@@ -2720,7 +2721,7 @@ int ui_color_wheel(ui_handle_t *handle, bool alpha, float w, float h, bool color
 	current->_y = _y;
 	current->_w = _w;
 
-	uint32_t col = ui_color(round(cval * 255.0f), round(cval * 255.0f), round(cval * 255.0f), 255);
+	uint32_t col = ui_color(round(handle->val * 255.0f), round(handle->val * 255.0f), round(handle->val * 255.0f), 255);
 	ui_image(current->ops->color_wheel, col, -1);
 
 	// Picker
@@ -2730,13 +2731,13 @@ int ui_color_wheel(ui_handle_t *handle, bool alpha, float w, float h, bool color
 	float cw = w * 0.7;
 	float cwh = cw / 2.0;
 	float cx = ox;
-	float cy = oy + csat * cwh; // Sat is distance from center
+	float cy = oy + handle->sat * cwh; // Sat is distance from center
 	float grad_tx = px + 0.897 * w;
 	float grad_ty = oy - cwh;
 	float grad_w = 0.0777 * w;
 	float grad_h = cw;
 	// Rotate around origin by hue
-	float theta = chue * (MATH_PI * 2.0);
+	float theta = handle->hue * (MATH_PI * 2.0);
 	float cx2 = cos(theta) * (cx - ox) - sin(theta) * (cy - oy) + ox;
 	float cy2 = sin(theta) * (cx - ox) + cos(theta) * (cy - oy) + oy;
 	cx = cx2;
@@ -2752,20 +2753,22 @@ int ui_color_wheel(ui_handle_t *handle, bool alpha, float w, float h, bool color
 	draw_filled_rect(cx - 2.0 * UI_SCALE(), cy - 2.0 * UI_SCALE(), 4.0 * UI_SCALE(), 4.0 * UI_SCALE());
 
 	draw_set_color(0xff000000);
-	draw_filled_rect(grad_tx + grad_w / 2.0 - 3.0 * UI_SCALE(), grad_ty + (1.0 - cval) * grad_h - 3.0 * UI_SCALE(), 6.0 * UI_SCALE(), 6.0 * UI_SCALE());
+	draw_filled_rect(grad_tx + grad_w / 2.0 - 3.0 * UI_SCALE(), grad_ty + (1.0 - handle->val) * grad_h - 3.0 * UI_SCALE(), 6.0 * UI_SCALE(), 6.0 * UI_SCALE());
 	draw_set_color(0xffffffff);
-	draw_filled_rect(grad_tx + grad_w / 2.0 - 2.0 * UI_SCALE(), grad_ty + (1.0 - cval) * grad_h - 2.0 * UI_SCALE(), 4.0 * UI_SCALE(), 4.0 * UI_SCALE());
+	draw_filled_rect(grad_tx + grad_w / 2.0 - 2.0 * UI_SCALE(), grad_ty + (1.0 - handle->val) * grad_h - 2.0 * UI_SCALE(), 4.0 * UI_SCALE(), 4.0 * UI_SCALE());
 
+	float a = ui_color_a(handle->color) / 255.0f;
 	if (alpha) {
 		ui_handle_t *alpha_handle = ui_nest(handle, 1);
 		if (alpha_handle->init) {
-			alpha_handle->value = round(calpha * 100.0) / 100.0;
+			alpha_handle->value = round(a * 100.0) / 100.0;
 		}
-		calpha = ui_slider(alpha_handle, "Alpha", 0.0, 1.0, true, 100, true, UI_ALIGN_LEFT, true);
+		a = ui_slider(alpha_handle, "Alpha", 0.0, 1.0, true, 100, true, UI_ALIGN_LEFT, true);
 		if (alpha_handle->changed) {
 			handle->changed = current->changed = true;
 		}
 	}
+
 	// Mouse picking for color wheel
 	float gx = ox + current->_window_x;
 	float gy = oy + current->_window_y;
@@ -2777,16 +2780,16 @@ int ui_color_wheel(ui_handle_t *handle, bool alpha, float w, float h, bool color
 		handle->changed = current->changed = true;
 	}
 	if (current->input_down && wheel_selected_handle == handle) {
-		csat = fmin(ui_dist(gx, gy, current->input_x, current->input_y), cwh) / cwh;
+		handle->sat = fmin(ui_dist(gx, gy, current->input_x, current->input_y), cwh) / cwh;
 		float angle = atan2(current->input_x - gx, current->input_y - gy);
 		if (angle < 0) {
 			angle = MATH_PI + (MATH_PI - fabs(angle));
 		}
 		angle = MATH_PI * 2.0 - angle;
-		chue = angle / (MATH_PI * 2.0);
+		handle->hue = angle / (MATH_PI * 2.0);
 		handle->changed = current->changed = true;
 	}
-	// Mouse picking for cval
+	// Mouse picking for val
 	if (current->input_started && ui_input_in_rect(grad_tx + current->_window_x, grad_ty + current->_window_y, grad_w, grad_h)) {
 		gradient_selected_handle = handle;
 	}
@@ -2795,12 +2798,13 @@ int ui_color_wheel(ui_handle_t *handle, bool alpha, float w, float h, bool color
 		handle->changed = current->changed = true;
 	}
 	if (current->input_down && gradient_selected_handle == handle) {
-		cval = fmax(0.01, fmin(1.0, 1.0 - (current->input_y - grad_ty - current->_window_y) / grad_h));
+		handle->val = fmax(0.01, fmin(1.0, 1.0 - (current->input_y - grad_ty - current->_window_y) / grad_h));
 		handle->changed = current->changed = true;
 	}
+
 	// Save as rgb
-	ui_hsv_to_rgb(chue, csat, cval, ar);
-	handle->color = ui_color(round(ar[0] * 255.0), round(ar[1] * 255.0), round(ar[2] * 255.0), round(calpha * 255.0));
+	ui_hsv_to_rgb(handle->hue, handle->sat, handle->val, &handle->red);
+	handle->color = ui_color(round(handle->red * 255.0), round(handle->green * 255.0), round(handle->blue * 255.0), round(a * 255.0));
 
 	if (color_preview) {
 		ui_text("", UI_ALIGN_RIGHT, handle->color);
@@ -2816,24 +2820,24 @@ int ui_color_wheel(ui_handle_t *handle, bool alpha, float w, float h, bool color
 	ui_handle_t *h1 = ui_nest(ui_nest(handle, 0), 1);
 	ui_handle_t *h2 = ui_nest(ui_nest(handle, 0), 2);
 	if (pos == 0) {
-		h0->value = ui_color_r(handle->color) / 255.0f;
-		float r = ui_slider(h0, "R", 0, 1, true, 100, true, UI_ALIGN_LEFT, true);
-		h1->value = ui_color_g(handle->color) / 255.0f;
-		float g = ui_slider(h1, "G", 0, 1, true, 100, true, UI_ALIGN_LEFT, true);
-		h2->value = ui_color_b(handle->color) / 255.0f;
-		float b = ui_slider(h2, "B", 0, 1, true, 100, true, UI_ALIGN_LEFT, true);
-		handle->color = ui_color(r * 255.0, g * 255.0, b * 255.0, 255.0);
+		h0->value = handle->red;
+		h1->value = handle->green;
+		h2->value = handle->blue;
+		handle->red = ui_slider(h0, "R", 0, 1, true, 100, true, UI_ALIGN_LEFT, true);
+		handle->green = ui_slider(h1, "G", 0, 1, true, 100, true, UI_ALIGN_LEFT, true);
+		handle->blue = ui_slider(h2, "B", 0, 1, true, 100, true, UI_ALIGN_LEFT, true);
+		ui_rgb_to_hsv(handle->red, handle->green, handle->blue, &handle->hue);
+		handle->color = ui_color(round(handle->red * 255.0), round(handle->green * 255.0), round(handle->blue * 255.0), round(a * 255.0));
 	}
 	else if (pos == 1) {
-		ui_rgb_to_hsv(ui_color_r(handle->color) / 255.0f, ui_color_g(handle->color) / 255.0f, ui_color_b(handle->color) / 255.0f, ar);
-		h0->value = ar[0];
-		h1->value = ar[1];
-		h2->value = ar[2];
-		float chue = ui_slider(h0, "H", 0, 1, true, 100, true, UI_ALIGN_LEFT, true);
-		float csat = ui_slider(h1, "S", 0, 1, true, 100, true, UI_ALIGN_LEFT, true);
-		float cval = ui_slider(h2, "V", 0, 1, true, 100, true, UI_ALIGN_LEFT, true);
-		ui_hsv_to_rgb(chue, csat, cval, ar);
-		handle->color = ui_color(ar[0] * 255.0, ar[1] * 255.0, ar[2] * 255.0, 255.0);
+		h0->value = handle->hue;
+		h1->value = handle->sat;
+		h2->value = handle->val;
+		handle->hue = ui_slider(h0, "H", 0, 1, true, 100, true, UI_ALIGN_LEFT, true);
+		handle->sat = ui_slider(h1, "S", 0, 1, true, 100, true, UI_ALIGN_LEFT, true);
+		handle->val = ui_slider(h2, "V", 0, 1, true, 100, true, UI_ALIGN_LEFT, true);
+		ui_hsv_to_rgb(handle->hue, handle->sat, handle->val, &handle->red);
+		handle->color = ui_color(round(handle->red * 255.0), round(handle->green * 255.0), round(handle->blue * 255.0), round(a * 255.0));
 	}
 	else if (pos == 2) {
 		char tmp[16];

@@ -813,12 +813,11 @@ declare type ui_t = {
 };
 
 declare type ui_handle_t = {
-	selected: bool;
-	position: i32;
-	color: u32;
 	value: f32;
+	position: i32;
+	selected: bool;
+	color: u32;
 	text: string;
-	// gpu_texture_t texture;
 	redraws: i32;
 	scroll_offset: f32;
 	scroll_enabled: bool;
