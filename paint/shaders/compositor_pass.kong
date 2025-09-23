@@ -3,6 +3,7 @@
 const constants: {
 	vignette_strength: float;
 	grain_strength: float;
+	tonemap_strength: float; // 0.0 or 1.0
 };
 
 #[set(everything)]
@@ -49,6 +50,7 @@ fun compositor_pass_frag(input: vert_out): float4 {
 	var g: float = (((x % 13.0) + 1.0) * ((x % 123.0) + 1.0) % 0.01) - 0.005;
 	color.rgb = color.rgb + (float3(g, g, g) * constants.grain_strength);
 
+	// Vignette
 	color.rgb = color.rgb * ((1.0 - constants.vignette_strength) + constants.vignette_strength * pow(16.0 * input.tex.x * input.tex.y * (1.0 - input.tex.x) * (1.0 - input.tex.y), 0.2));
 
 	// Auto exposure
@@ -56,7 +58,8 @@ fun compositor_pass_frag(input: vert_out): float4 {
 	// var expo: float = 2.0 - clamp(length(sample_lod(histogram, sampler_linear, float2(0.5, 0.5), 0.0).rgb), 0.0, 1.0);
 	// color.rgb *= pow(expo, auto_exposure_strength * 2.0);
 
-	color.rgb = tonemap_filmic(color.rgb); // With gamma
+	// Tonemap with gamma
+	color.rgb = lerp3(color.rgb, tonemap_filmic(color.rgb), constants.tonemap_strength);
 	return color;
 }
 

@@ -55,7 +55,6 @@ function config_save() {
 	json_encode_f32("rp_supersample", config_raw.rp_supersample);
 	json_encode_bool("rp_ssao", config_raw.rp_ssao);
 	json_encode_bool("rp_bloom", config_raw.rp_bloom);
-	json_encode_bool("rp_gi", config_raw.rp_gi);
 	json_encode_f32("rp_vignette", config_raw.rp_vignette);
 	json_encode_f32("rp_grain", config_raw.rp_grain);
 	json_encode_string("version", config_raw.version);
@@ -135,7 +134,6 @@ function config_init() {
 		config_raw.window_vsync = true;
 		config_raw.window_frequency = sys_display_frequency();
 		config_raw.rp_bloom = false;
-		config_raw.rp_gi = false;
 		config_raw.rp_vignette = 0.2;
 		config_raw.rp_grain = 0.09;
 		///if (arm_android || arm_ios)
@@ -299,7 +297,6 @@ function config_import_from(from: config_t) {
 function config_apply() {
 	config_raw.rp_ssao = context_raw.hssao.selected;
 	config_raw.rp_bloom = context_raw.hbloom.selected;
-	config_raw.rp_gi = context_raw.hvxao.selected;
 	config_raw.rp_supersample = config_get_super_sample_size(context_raw.hsupersample.position);
 	config_save();
 	context_raw.ddirty = 2;
@@ -443,7 +440,6 @@ type config_t = {
 	rp_supersample?: f32;
 	rp_ssao?: bool;
 	rp_bloom?: bool;
-	rp_gi?: bool;
 	rp_vignette?: f32;
 	rp_grain?: f32;
 	// Application

@@ -526,11 +526,6 @@ function box_preferences_show() {
 			context_raw.hsupersample.position = config_get_super_sample_quality(config_raw.rp_supersample);
 		}
 
-		context_raw.hvxao = ui_handle(__ID__);
-		if (context_raw.hvxao.init) {
-			context_raw.hvxao.selected = config_raw.rp_gi;
-		}
-
 		if (ui_tab(box_preferences_htab, tr("Viewport"), true)) {
 
 			let mode_handle: ui_handle_t = ui_handle(__ID__);

@@ -83,10 +83,6 @@ type context_t = {
 	hssao?: ui_handle_t;
 	hbloom?: ui_handle_t;
 	hsupersample?: ui_handle_t;
-	hvxao?: ui_handle_t;
-	vxao_ext?: f32;
-	vxao_offset?: f32;
-	vxao_aperture?: f32;
 	texture_export_path?: string;
 	last_status_position?: i32;
 	camera_controls?: camera_controls_t;
@@ -321,9 +317,6 @@ function context_create(): context_t {
 	c.brush_locked = false;
 	c.camera_type = camera_type_t.PERSPECTIVE;
 	c.cam_handle = ui_handle_create();
-	c.vxao_ext = 1.0;
-	c.vxao_offset = 1.5;
-	c.vxao_aperture = 1.2;
 	c.texture_export_path = "";
 	c.last_status_position = 0;
 	c.camera_controls = camera_controls_t.ORBIT;

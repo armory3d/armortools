@@ -46,11 +46,9 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 	else if (link == "_grain_strength") {
 		return config_raw.rp_grain;
 	}
-	else if (link == "_cone_offset") {
-		return context_raw.vxao_offset;
-	}
-	else if (link == "_cone_aperture") {
-		return context_raw.vxao_aperture;
+	else if (link == "_tonemap_strength") {
+		let tonemap: bool = context_raw.viewport_mode == viewport_mode_t.LIT || context_raw.viewport_mode == viewport_mode_t.PATH_TRACE;
+		return tonemap ? 1.0 : 0.0;
 	}
 	else if (link == "_bloom_sample_scale") {
 		return render_path_base_bloom_sample_scale;
@@ -271,7 +269,8 @@ function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: st
 		return vec4_create(context_raw.envmap_angle, math_sin(-context_raw.envmap_angle), math_cos(-context_raw.envmap_angle), scene_world.strength * 1.5);
 	}
 	else if (link == "_envmap_data_world") {
-		return vec4_create(context_raw.envmap_angle, 0.0, 0.0, context_raw.show_envmap ? scene_world.strength : 1.0);
+		let tonemap: bool = context_raw.viewport_mode == viewport_mode_t.LIT || context_raw.viewport_mode == viewport_mode_t.PATH_TRACE;
+		return vec4_create(context_raw.envmap_angle, tonemap ? 0.0 : 1.0, 0.0, context_raw.show_envmap ? scene_world.strength : 1.0);
 	}
 	else if (link == "_stencil_transform") {
 		let v: vec4_t = vec4_create(context_raw.brush_stencil_x, context_raw.brush_stencil_y, context_raw.brush_stencil_scale, context_raw.brush_stencil_angle);
