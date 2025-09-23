@@ -864,19 +864,21 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 
 		if (!slot_layer_is_group(l)) {
 			ui_menu_align();
-			let res_handle_changed_last: bool = base_res_handle.changed;
 			///if (arm_android || arm_ios)
 			let ar: string[] = ["128", "256", "512", "1K", "2K", "4K"];
 			///else
 			let ar: string[] = ["128", "256", "512", "1K", "2K", "4K", "8K", "16K"];
 			///end
 			let _y: i32 = ui._y;
-			base_res_handle.value = base_res_handle.position;
-			base_res_handle.position = math_floor(ui_slider(base_res_handle, ar[base_res_handle.position], 0, ar.length - 1, false, 1, false, ui_align_t.LEFT, false));
-			if (base_res_handle.changed) {
+
+			let h: ui_handle_t = ui_handle(__ID__);
+			let changed_last: bool = h.changed;
+			h.value = base_res_handle.position;
+			base_res_handle.position = math_floor(ui_slider(h, ar[base_res_handle.position], 0, ar.length - 1, false, 1, false, ui_align_t.LEFT, false));
+			if (h.changed) {
 				ui_menu_keep_open = true;
 			}
-			if (res_handle_changed_last && !base_res_handle.changed) {
+			if (changed_last && !h.changed) {
 				layers_on_resized();
 			}
 			ui._y = _y;
