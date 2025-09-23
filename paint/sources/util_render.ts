@@ -367,7 +367,7 @@ function util_render_make_brush_preview() {
 	texpreview_icon._image = context_raw.brush.image_icon;
 	render_path_set_target("texpreview_icon");
 	render_path_bind_target("texpreview", "tex");
-	render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolve");
+	render_path_draw_shader("Scene/supersample_resolve/supersample_resolve");
 
 	context_raw.brush.preview_ready = true;
 	context_raw.brush_blend_dirty = true;

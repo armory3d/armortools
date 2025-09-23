@@ -85,16 +85,16 @@ function render_path_deferred_init() {
 		render_path_base_init_ssao();
 	}
 
-	render_path_load_shader("shader_datas/world_pass/world_pass");
-	render_path_load_shader("shader_datas/deferred_light/deferred_light");
-	render_path_load_shader("shader_datas/compositor_pass/compositor_pass");
-	render_path_load_shader("shader_datas/copy_pass/copy_pass");
-	render_path_load_shader("shader_datas/copy_pass/copyR8_pass");
-	render_path_load_shader("shader_datas/copy_pass/copyRGBA64_pass");
-	render_path_load_shader("shader_datas/copy_pass/copyRGBA128_pass");
-	render_path_load_shader("shader_datas/taa_pass/taa_pass");
-	render_path_load_shader("shader_datas/supersample_resolve/supersample_resolve");
-	render_path_load_shader("shader_datas/supersample_resolve/supersample_resolveRGBA64");
+	render_path_load_shader("Scene/world_pass/world_pass");
+	render_path_load_shader("Scene/deferred_light/deferred_light");
+	render_path_load_shader("Scene/compositor_pass/compositor_pass");
+	render_path_load_shader("Scene/copy_pass/copy_pass");
+	render_path_load_shader("Scene/copy_pass/copyR8_pass");
+	render_path_load_shader("Scene/copy_pass/copyRGBA64_pass");
+	render_path_load_shader("Scene/copy_pass/copyRGBA128_pass");
+	render_path_load_shader("Scene/taa_pass/taa_pass");
+	render_path_load_shader("Scene/supersample_resolve/supersample_resolve");
+	render_path_load_shader("Scene/supersample_resolve/supersample_resolveRGBA64");
 
 	render_path_paint_init();
 	render_path_preview_init();
@@ -115,7 +115,7 @@ function render_path_deferred_draw_deferred() {
 	render_path_set_target("gbuffer1");
 	render_path_bind_target("buf", "tex");
 	// render_path_bind_target("histogram", "histogram");
-	render_path_draw_shader("shader_datas/compositor_pass/compositor_pass");
+	render_path_draw_shader("Scene/compositor_pass/compositor_pass");
 
 	render_path_set_target("gbuffer1");
 	render_path_base_draw_compass();

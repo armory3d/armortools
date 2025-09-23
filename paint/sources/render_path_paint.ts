@@ -94,12 +94,12 @@ function render_path_paint_init() {
 		render_path_create_render_target(t);
 	}
 
-	render_path_load_shader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
-	render_path_load_shader("shader_datas/copy_mrt3_pass/copy_mrt3RGBA64_pass");
-	render_path_load_shader("shader_datas/copy_mrt3_pass/copy_mrt3RGBA128_pass");
-	render_path_load_shader("shader_datas/dilate_pass/dilate_pass");
-	render_path_load_shader("shader_datas/dilate_pass/dilateRGBA64_pass");
-	render_path_load_shader("shader_datas/dilate_pass/dilateRGBA128_pass");
+	render_path_load_shader("Scene/copy_mrt3_pass/copy_mrt3_pass");
+	render_path_load_shader("Scene/copy_mrt3_pass/copy_mrt3RGBA64_pass");
+	render_path_load_shader("Scene/copy_mrt3_pass/copy_mrt3RGBA128_pass");
+	render_path_load_shader("Scene/dilate_pass/dilate_pass");
+	render_path_load_shader("Scene/dilate_pass/dilateRGBA64_pass");
+	render_path_load_shader("Scene/dilate_pass/dilateRGBA128_pass");
 }
 
 function render_path_paint_draw_fullscreen_triangle(context: string) {
@@ -233,7 +233,7 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 
 			render_path_set_target("texpaint_blend1");
 			render_path_bind_target("texpaint_blend0", "tex");
-			render_path_draw_shader("shader_datas/copy_pass/copyR8_pass");
+			render_path_draw_shader("Scene/copy_pass/copyR8_pass");
 			let is_mask: bool = slot_layer_is_mask(context_raw.layer);
 			if (is_mask) {
 				let ptid: i32 = context_raw.layer.parent.id;
@@ -284,10 +284,10 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 				for (let i: i32 = 0; i < blurs; ++i) {
 					render_path_set_target("texpaint_blur");
 					render_path_bind_target(texpaint, "tex");
-					render_path_draw_shader("shader_datas/copy_pass/copy_pass");
+					render_path_draw_shader("Scene/copy_pass/copy_pass");
 					render_path_set_target(texpaint);
 					render_path_bind_target("texpaint_blur", "tex");
-					render_path_draw_shader("shader_datas/copy_pass/copy_pass");
+					render_path_draw_shader("Scene/copy_pass/copy_pass");
 				}
 			}
 
@@ -354,7 +354,7 @@ function render_path_paint_commands_live_brush() {
 	if (slot_layer_is_mask(context_raw.layer)) {
 		render_path_set_target("texpaint_live");
 		render_path_bind_target("texpaint" + tid, "tex");
-		render_path_draw_shader("shader_datas/copy_pass/copy_pass");
+		render_path_draw_shader("Scene/copy_pass/copy_pass");
 	}
 	else {
 		let additional: string[] = ["texpaint_nor_live", "texpaint_pack_live"];
@@ -362,7 +362,7 @@ function render_path_paint_commands_live_brush() {
 		render_path_bind_target("texpaint" + tid, "tex0");
 		render_path_bind_target("texpaint_nor" + tid, "tex1");
 		render_path_bind_target("texpaint_pack" + tid, "tex2");
-		render_path_draw_shader("shader_datas/copy_mrt3_pass/copy_mrt3_pass");
+		render_path_draw_shader("Scene/copy_mrt3_pass/copy_mrt3_pass");
 	}
 
 	render_path_paint_use_live_layer(true);
@@ -829,25 +829,25 @@ function render_path_paint_dilate(base: bool, nor_pack: bool) {
 			let texpaint: string = "texpaint";
 			render_path_set_target("temptex0");
 			render_path_bind_target(texpaint + tid, "tex");
-			render_path_draw_shader("shader_datas/copy_pass/" + copy_pass);
+			render_path_draw_shader("Scene/copy_pass/" + copy_pass);
 			render_path_set_target(texpaint + tid);
 			render_path_bind_target("temptex0", "tex");
-			render_path_draw_shader("shader_datas/dilate_pass/" + dilate_pass);
+			render_path_draw_shader("Scene/dilate_pass/" + dilate_pass);
 		}
 		if (nor_pack && !slot_layer_is_mask(context_raw.layer)) {
 			render_path_set_target("temptex0");
 			render_path_bind_target("texpaint_nor" + tid, "tex");
-			render_path_draw_shader("shader_datas/copy_pass/" + copy_pass);
+			render_path_draw_shader("Scene/copy_pass/" + copy_pass);
 			render_path_set_target("texpaint_nor" + tid);
 			render_path_bind_target("temptex0", "tex");
-			render_path_draw_shader("shader_datas/dilate_pass/" + dilate_pass);
+			render_path_draw_shader("Scene/dilate_pass/" + dilate_pass);
 
 			render_path_set_target("temptex0");
 			render_path_bind_target("texpaint_pack" + tid, "tex");
-			render_path_draw_shader("shader_datas/copy_pass/" + copy_pass);
+			render_path_draw_shader("Scene/copy_pass/" + copy_pass);
 			render_path_set_target("texpaint_pack" + tid);
 			render_path_bind_target("temptex0", "tex");
-			render_path_draw_shader("shader_datas/dilate_pass/" + dilate_pass);
+			render_path_draw_shader("Scene/dilate_pass/" + dilate_pass);
 		}
 	}
 }

@@ -73,10 +73,10 @@ function render_path_preview_commands_preview() {
 	render_path_bind_target("mgbuffer0", "gbuffer0");
 	render_path_bind_target("mgbuffer1", "gbuffer1");
 	render_path_bind_target("empty_white", "ssaotex");
-	render_path_draw_shader("shader_datas/deferred_light/deferred_light");
+	render_path_draw_shader("Scene/deferred_light/deferred_light");
 
 	render_path_set_target("mtex", null, "mmain");
-	render_path_draw_skydome("shader_datas/world_pass/world_pass");
+	render_path_draw_skydome("Scene/world_pass/world_pass");
 
 	let framebuffer: string = "texpreview";
 	let selected_mat: slot_material_t = context_raw.material;
@@ -87,11 +87,11 @@ function render_path_preview_commands_preview() {
 
 	render_path_set_target(framebuffer);
 	render_path_bind_target("mtex", "tex");
-	render_path_draw_shader("shader_datas/compositor_pass/compositor_pass");
+	render_path_draw_shader("Scene/compositor_pass/compositor_pass");
 
 	render_path_set_target("texpreview_icon");
 	render_path_bind_target("texpreview", "tex");
-	render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolveRGBA64");
+	render_path_draw_shader("Scene/supersample_resolve/supersample_resolveRGBA64");
 }
 
 function render_path_preview_commands_decal() {
@@ -107,10 +107,10 @@ function render_path_preview_commands_decal() {
 	render_path_bind_target("gbuffer0", "gbuffer0");
 	render_path_bind_target("gbuffer1", "gbuffer1");
 	render_path_bind_target("empty_white", "ssaotex");
-	render_path_draw_shader("shader_datas/deferred_light/deferred_light");
+	render_path_draw_shader("Scene/deferred_light/deferred_light");
 
 	render_path_set_target(output, null, "main");
-	render_path_draw_skydome("shader_datas/world_pass/world_pass");
+	render_path_draw_skydome("Scene/world_pass/world_pass");
 
 	let framebuffer: string = "texpreview";
 	let texpreview: render_target_t = map_get(render_path_render_targets, "texpreview");
@@ -119,5 +119,5 @@ function render_path_preview_commands_decal() {
 	render_path_set_target(framebuffer);
 
 	render_path_bind_target(output, "tex");
-	render_path_draw_shader("shader_datas/compositor_pass/compositor_pass");
+	render_path_draw_shader("Scene/compositor_pass/compositor_pass");
 }

@@ -210,10 +210,10 @@ function render_path_raytrace_draw(use_live_layer: bool) {
 	render_path_base_draw_compass();
 	render_path_set_target("last");
 	render_path_bind_target("buf", "tex");
-	render_path_draw_shader("shader_datas/compositor_pass/compositor_pass");
+	render_path_draw_shader("Scene/compositor_pass/compositor_pass");
 	render_path_base_draw_bloom("buf", "last");
 	render_path_set_target("");
 	render_path_bind_target("last", "tex");
-	render_path_draw_shader("shader_datas/copy_pass/copy_pass");
+	render_path_draw_shader("Scene/copy_pass/copy_pass");
 	render_path_paint_commands_cursor();
 }

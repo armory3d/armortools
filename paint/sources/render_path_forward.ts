@@ -9,11 +9,11 @@ function render_path_forward_commands() {
 
 function render_path_forward_draw_forward() {
 	render_path_set_target("gbuffer1", null, "main");
-	render_path_draw_skydome("shader_datas/world_pass/world_pass");
+	render_path_draw_skydome("Scene/world_pass/world_pass");
 
 	render_path_set_target("buf");
 	render_path_bind_target("gbuffer1", "tex");
-	render_path_draw_shader("shader_datas/compositor_pass/compositor_pass");
+	render_path_draw_shader("Scene/compositor_pass/compositor_pass");
 
 	render_path_set_target("buf");
 	render_path_base_draw_compass();

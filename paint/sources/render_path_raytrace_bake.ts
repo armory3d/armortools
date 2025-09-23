@@ -130,7 +130,7 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 		let texpaint_id: string = "texpaint" + id;
 		render_path_set_target(texpaint_id);
 		render_path_bind_target("baketex2", "tex");
-		render_path_draw_shader("shader_datas/copy_pass/copy_pass");
+		render_path_draw_shader("Scene/copy_pass/copy_pass");
 
 		///if arm_metal
 		let samples_per_frame: i32 = 4;

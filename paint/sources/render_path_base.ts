@@ -119,10 +119,10 @@ function render_path_base_is_cached(): bool {
 			render_path_set_target("");
 			render_path_bind_target("last", "tex");
 			if (render_path_base_ssaa4()) {
-				render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolveRGBA64");
+				render_path_draw_shader("Scene/supersample_resolve/supersample_resolveRGBA64");
 			}
 			else {
-				render_path_draw_shader("shader_datas/copy_pass/copy_pass");
+				render_path_draw_shader("Scene/copy_pass/copy_pass");
 			}
 			render_path_paint_commands_cursor();
 			context_raw.ddirty--;
@@ -180,8 +180,8 @@ function render_path_base_draw_bloom(source: string, target: string) {
 			array_push(render_path_base_bloom_mipmaps, render_path_create_render_target(t));
 		}
 
-		render_path_load_shader("shader_datas/bloom_pass/bloom_downsample_pass");
-		render_path_load_shader("shader_datas/bloom_pass/bloom_upsample_pass");
+		render_path_load_shader("Scene/bloom_pass/bloom_downsample_pass");
+		render_path_load_shader("Scene/bloom_pass/bloom_upsample_pass");
 	}
 
 	let bloom_radius: f32 = 6.5;
@@ -194,14 +194,14 @@ function render_path_base_draw_bloom(source: string, target: string) {
 		render_path_base_bloom_current_mip = i;
 		render_path_set_target(render_path_base_bloom_mipmaps[i].name, null, null, clear_flag_t.COLOR, 0x00000000);
 		render_path_bind_target(i == 0 ? source : render_path_base_bloom_mipmaps[i - 1].name, "tex");
-		render_path_draw_shader("shader_datas/bloom_pass/bloom_downsample_pass");
+		render_path_draw_shader("Scene/bloom_pass/bloom_downsample_pass");
 	}
 	for (let i: i32 = 0; i < num_mips; ++i) {
 		let mip_level: i32 = num_mips - 1 - i;
 		render_path_base_bloom_current_mip = mip_level;
 		render_path_set_target(mip_level == 0 ? target : render_path_base_bloom_mipmaps[mip_level - 1].name);
 		render_path_bind_target(render_path_base_bloom_mipmaps[mip_level].name, "tex");
-		render_path_draw_shader("shader_datas/bloom_pass/bloom_upsample_pass");
+		render_path_draw_shader("Scene/bloom_pass/bloom_upsample_pass");
 	}
 }
 
@@ -254,9 +254,9 @@ function render_path_base_init_ssao() {
 		t.scale = scale * render_path_base_get_super_sampling();
 		render_path_create_render_target(t);
 	}
-	render_path_load_shader("shader_datas/ssao_pass/ssao_pass");
-	render_path_load_shader("shader_datas/ssao_blur_pass/ssao_blur_pass_x");
-	render_path_load_shader("shader_datas/ssao_blur_pass/ssao_blur_pass_y");
+	render_path_load_shader("Scene/ssao_pass/ssao_pass");
+	render_path_load_shader("Scene/ssao_blur_pass/ssao_blur_pass_x");
+	render_path_load_shader("Scene/ssao_blur_pass/ssao_blur_pass_y");
 }
 
 function render_path_base_draw_ssao() {
@@ -269,17 +269,17 @@ function render_path_base_draw_ssao() {
 		render_path_set_target("singlea");
 		render_path_bind_target("main", "gbufferD");
 		render_path_bind_target("gbuffer0", "gbuffer0");
-		render_path_draw_shader("shader_datas/ssao_pass/ssao_pass");
+		render_path_draw_shader("Scene/ssao_pass/ssao_pass");
 
 		render_path_set_target("singleb");
 		render_path_bind_target("singlea", "tex");
 		render_path_bind_target("gbuffer0", "gbuffer0");
-		render_path_draw_shader("shader_datas/ssao_blur_pass/ssao_blur_pass_x");
+		render_path_draw_shader("Scene/ssao_blur_pass/ssao_blur_pass_x");
 
 		render_path_set_target("singlea");
 		render_path_bind_target("singleb", "tex");
 		render_path_bind_target("gbuffer0", "gbuffer0");
-		render_path_draw_shader("shader_datas/ssao_blur_pass/ssao_blur_pass_y");
+		render_path_draw_shader("Scene/ssao_blur_pass/ssao_blur_pass_y");
 	}
 }
 
@@ -296,10 +296,10 @@ function render_path_base_draw_deferred_light() {
 		render_path_bind_target("empty_white", "ssaotex");
 	}
 
-	render_path_draw_shader("shader_datas/deferred_light/deferred_light");
+	render_path_draw_shader("Scene/deferred_light/deferred_light");
 
 	render_path_set_target("buf", null, "main");
-	render_path_draw_skydome("shader_datas/world_pass/world_pass");
+	render_path_draw_skydome("Scene/world_pass/world_pass");
 }
 
 // function render_path_base_draw_histogram() {
@@ -310,11 +310,11 @@ function render_path_base_draw_deferred_light() {
 // 		t.height = 1;
 // 		t.format = "RGBA64";
 // 		render_path_create_render_target(t);
-// 		render_path_load_shader("shader_datas/histogram_pass/histogram_pass");
+// 		render_path_load_shader("Scene/histogram_pass/histogram_pass");
 // 	}
 // 	render_path_set_target("histogram");
 // 	render_path_bind_target("last", "tex");
-// 	render_path_draw_shader("shader_datas/histogram_pass/histogram_pass");
+// 	render_path_draw_shader("Scene/histogram_pass/histogram_pass");
 // }
 
 function render_path_base_draw_taa(bufa: string, bufb: string) {
@@ -323,21 +323,21 @@ function render_path_base_draw_taa(bufa: string, bufb: string) {
 
 	let skip_taa: bool = context_raw.split_view;
 	if (skip_taa) {
-		render_path_draw_shader("shader_datas/copy_pass/copyRGBA64_pass");
+		render_path_draw_shader("Scene/copy_pass/copyRGBA64_pass");
 	}
 	else {
 		render_path_bind_target("last", "tex2");
-		render_path_draw_shader("shader_datas/taa_pass/taa_pass");
+		render_path_draw_shader("Scene/taa_pass/taa_pass");
 	}
 
 	render_path_set_target("");
 	render_path_bind_target(bufb, "tex");
 
 	if (render_path_base_ssaa4()) {
-		render_path_draw_shader("shader_datas/supersample_resolve/supersample_resolveRGBA64");
+		render_path_draw_shader("Scene/supersample_resolve/supersample_resolveRGBA64");
 	}
 	else {
-		render_path_draw_shader("shader_datas/copy_pass/copy_pass");
+		render_path_draw_shader("Scene/copy_pass/copy_pass");
 	}
 
 	// Swap buf and last targets
@@ -431,5 +431,5 @@ function render_path_base_copy_to_gbuffer() {
 	render_path_bind_target("gbuffer0_copy", "tex0");
 	render_path_bind_target("gbuffer1_copy", "tex1");
 	render_path_bind_target("gbuffer2_copy", "tex2");
-	render_path_draw_shader("shader_datas/copy_mrt3_pass/copy_mrt3RGBA64_pass");
+	render_path_draw_shader("Scene/copy_mrt3_pass/copy_mrt3RGBA64_pass");
 }

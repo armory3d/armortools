@@ -665,8 +665,8 @@ function history_copy_to_undo(from_id: i32, to_id: i32, is_mask: bool) {
 	if (is_mask) {
 		render_path_set_target("texpaint_undo" + to_id);
 		render_path_bind_target("texpaint" + from_id, "tex");
-		// render_path_draw_shader("shader_datas/copy_pass/copyR8_pass");
-		render_path_draw_shader("shader_datas/copy_pass/copy_pass");
+		// render_path_draw_shader("Scene/copy_pass/copyR8_pass");
+		render_path_draw_shader("Scene/copy_pass/copy_pass");
 	}
 	else {
 		let additional: string[] = ["texpaint_nor_undo" + to_id, "texpaint_pack_undo" + to_id];
@@ -684,7 +684,7 @@ function history_copy_to_undo(from_id: i32, to_id: i32, is_mask: bool) {
 						   format == tex_format_t.RGBA64 ? "copy_mrt3RGBA64_pass" :
 								   						   "copy_mrt3RGBA128_pass";
 
-		render_path_draw_shader("shader_datas/copy_mrt3_pass/" + pipe);
+		render_path_draw_shader("Scene/copy_mrt3_pass/" + pipe);
 	}
 	history_undo_i = (history_undo_i + 1) % config_raw.undo_steps;
 }
