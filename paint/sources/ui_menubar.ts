@@ -161,7 +161,7 @@ function ui_menubar_draw_tab_header() {
 			let b: bool = ui_tab(ui_menubar_tab, base_view3d_show ? ">" : "<", false, -2);
 			if ((a && !base_view3d_show) || b) {
 				base_view3d_show = !base_view3d_show;
-				ui_menubar_tab.position = base_view3d_show ? 0 : -1;
+				ui_menubar_tab.i = base_view3d_show ? 0 : -1;
 				base_resize();
 			}
 		}
@@ -287,7 +287,7 @@ function ui_menubar_draw_category_items() {
 
 		let p: world_data_t = scene_world;
 		let env_handle: ui_handle_t = ui_handle(__ID__);
-		env_handle.value = p.strength;
+		env_handle.f = p.strength;
 		ui_menu_align();
 		p.strength = ui_slider(env_handle, tr("Environment"), 0.0, 8.0, true);
 		if (env_handle.changed) {
@@ -295,12 +295,12 @@ function ui_menubar_draw_category_items() {
 		}
 
 		let enva_handle: ui_handle_t = ui_handle(__ID__);
-		enva_handle.value = context_raw.envmap_angle / math_pi() * 180.0;
-		if (enva_handle.value < 0) {
-			enva_handle.value += (math_floor(-enva_handle.value / 360) + 1) * 360;
+		enva_handle.f = context_raw.envmap_angle / math_pi() * 180.0;
+		if (enva_handle.f < 0) {
+			enva_handle.f += (math_floor(-enva_handle.f / 360) + 1) * 360;
 		}
-		else if (enva_handle.value > 360) {
-			enva_handle.value -= math_floor(enva_handle.value / 360) * 360;
+		else if (enva_handle.f > 360) {
+			enva_handle.f -= math_floor(enva_handle.f / 360) * 360;
 		}
 		ui_menu_align();
 		context_raw.envmap_angle = ui_slider(enva_handle, tr("Environment Angle"), 0.0, 360.0, true, 1) / 180.0 * math_pi();
@@ -315,7 +315,7 @@ function ui_menubar_draw_category_items() {
 
 		let split_view_handle: ui_handle_t = ui_handle(__ID__);
 		if (split_view_handle.init) {
-			split_view_handle.selected = context_raw.split_view;
+			split_view_handle.b = context_raw.split_view;
 		}
 		context_raw.split_view = ui_check(split_view_handle, " " + tr("Split View"));
 		if (split_view_handle.changed) {
@@ -324,7 +324,7 @@ function ui_menubar_draw_category_items() {
 
 		let cull_handle: ui_handle_t = ui_handle(__ID__);
 		if (cull_handle.init) {
-			cull_handle.selected = context_raw.cull_backfaces;
+			cull_handle.b = context_raw.cull_backfaces;
 		}
 		context_raw.cull_backfaces = ui_check(cull_handle, " " + tr("Cull Backfaces"));
 		if (cull_handle.changed) {
@@ -333,7 +333,7 @@ function ui_menubar_draw_category_items() {
 
 		let filter_handle: ui_handle_t = ui_handle(__ID__);
 		if (filter_handle.init) {
-			filter_handle.selected = context_raw.texture_filter;
+			filter_handle.b = context_raw.texture_filter;
 		}
 		context_raw.texture_filter = ui_check(filter_handle, " " + tr("Filter Textures"));
 		if (filter_handle.changed) {
@@ -356,14 +356,14 @@ function ui_menubar_draw_category_items() {
 
 		let compass_handle: ui_handle_t = ui_handle(__ID__);
 		if (compass_handle.init) {
-			compass_handle.selected = context_raw.show_compass;
+			compass_handle.b = context_raw.show_compass;
 		}
 		context_raw.show_compass = ui_check(compass_handle, " " + tr("Compass"));
 		if (compass_handle.changed) {
 			context_raw.ddirty = 2;
 		}
 
-		context_raw.show_envmap_handle.selected = context_raw.show_envmap;
+		context_raw.show_envmap_handle.b = context_raw.show_envmap;
 		context_raw.show_envmap = ui_check(context_raw.show_envmap_handle, " " + tr("Envmap"));
 		if (context_raw.show_envmap_handle.changed) {
 			context_load_envmap();
@@ -387,7 +387,7 @@ function ui_menubar_draw_category_items() {
 	}
 	else if (ui_menubar_category == menubar_category_t.MODE) {
 		let mode_handle: ui_handle_t = ui_handle(__ID__);
-		mode_handle.position = context_raw.viewport_mode;
+		mode_handle.i = context_raw.viewport_mode;
 		let modes: string[] = [
 			tr("Lit"),
 			tr("Base Color"),
@@ -418,7 +418,7 @@ function ui_menubar_draw_category_items() {
 		}
 
 		if (mode_handle.changed) {
-			context_set_viewport_mode(mode_handle.position);
+			context_set_viewport_mode(mode_handle.i);
 			ui_menu_keep_open = true;
 		}
 	}
@@ -475,7 +475,7 @@ function ui_menubar_draw_category_items() {
 		let cam: camera_object_t = scene_camera;
 		context_raw.fov_handle = ui_handle(__ID__);
 		if (context_raw.fov_handle.init) {
-			context_raw.fov_handle.value = math_floor(cam.data.fov * 100) / 100;
+			context_raw.fov_handle.f = math_floor(cam.data.fov * 100) / 100;
 		}
 		ui_menu_align();
 		cam.data.fov = ui_slider(context_raw.fov_handle, tr("FoV"), 0.3, 1.4, true);
@@ -485,7 +485,7 @@ function ui_menubar_draw_category_items() {
 
 		ui_menu_align();
 		let camera_controls_handle: ui_handle_t = ui_handle(__ID__);
-		camera_controls_handle.position = context_raw.camera_controls;
+		camera_controls_handle.i = context_raw.camera_controls;
 		let camera_controls_items: string[] = [tr("Orbit"), tr("Rotate"), tr("Fly")];
 		context_raw.camera_controls = ui_inline_radio(camera_controls_handle, camera_controls_items, ui_align_t.LEFT);
 

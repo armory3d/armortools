@@ -108,7 +108,7 @@ function tab_meshes_draw(htab: ui_handle_t) {
 		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 			let o: mesh_object_t = project_paint_objects[i];
 			let h: ui_handle_t = ui_handle(__ID__);
-			h.selected = o.base.visible;
+			h.b = o.base.visible;
 			o.base.visible = ui_check(h, o.base.name);
 
 			if (ui.is_hovered && ui.input_released_r) {
@@ -145,7 +145,7 @@ function tab_meshes_draw(htab: ui_handle_t) {
 
 					context_raw.selected_object = o.base;
 					let h: ui_handle_t = ui_handle(__ID__);
-					// h.selected = context_raw.selected_object.visible;
+					// h.b = context_raw.selected_object.visible;
 					// context_raw.selected_object.visible = ui_check(h, "Visible");
 					// if (h.changed) {
 						// Rebuild full vb for path-tracing
@@ -288,17 +288,17 @@ function tab_meshes_draw(htab: ui_handle_t) {
 						tr("Terrain"),
 						tr("Mesh"),
 					];
-					hshape.position = pb != null ? pb.shape + 1 : 0;
+					hshape.i = pb != null ? pb.shape + 1 : 0;
 					ui_combo(hshape, shape_combo, tr("Shape"), true);
 
 					let hdynamic: ui_handle_t = ui_handle(__ID__);
-					hdynamic.selected = pb != null ? pb.mass > 0 : false;
+					hdynamic.b = pb != null ? pb.mass > 0 : false;
 					ui_check(hdynamic, "Dynamic");
 
 					if (hshape.changed || hdynamic.changed) {
 						sim_remove_body(context_raw.selected_object.uid);
-						if (hshape.position > 0) {
-							sim_add_body(context_raw.selected_object, hshape.position - 1, hdynamic.selected ? 1.0 : 0.0);
+						if (hshape.i > 0) {
+							sim_add_body(context_raw.selected_object, hshape.i - 1, hdynamic.b ? 1.0 : 0.0);
 						}
 					}
 
@@ -438,7 +438,7 @@ function tab_scene_draw_list(list_handle: ui_handle_t, current_object: object_t)
 		ui_row(row);
 		let h: ui_handle_t = ui_nest(list_handle, tab_scene_line_counter);
 		if (h.init) {
-			h.selected = true;
+			h.b = true;
 		}
 		b = ui_panel(h, "", true, false);
 		ui_text(current_object.name);

@@ -10,7 +10,7 @@ let tab_browser_refresh: bool = false;
 function tab_browser_show_directory(directory: string) {
 	tab_browser_hpath.text = directory;
 	tab_browser_hsearch.text = "";
-	ui_base_htabs[tab_area_t.STATUS].position = 0;
+	ui_base_htabs[tab_area_t.STATUS].i = 0;
 }
 
 function tab_browser_draw(htab: ui_handle_t) {
@@ -182,7 +182,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 									}
 								}
 								if (asset_index != -1) {
-									context_raw.colorid_handle.position = asset_index;
+									context_raw.colorid_handle.i = asset_index;
 									context_raw.colorid_picked = false;
 									ui_toolbar_handle.redraws = 1;
 									if (context_raw.tool == tool_type_t.COLORID) {

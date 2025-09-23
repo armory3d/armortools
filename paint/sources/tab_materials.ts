@@ -183,47 +183,47 @@ function tab_materials_draw_slots(mini: bool) {
 
 					let base_handle: ui_handle_t = ui_nest(ui_handle(__ID__), m.id);
 					if (base_handle.init) {
-						base_handle.selected = m.paint_base;
+						base_handle.b = m.paint_base;
 					}
 
 					let opac_handle: ui_handle_t = ui_nest(ui_handle(__ID__), m.id);
 					if (opac_handle.init) {
-						opac_handle.selected = m.paint_opac;
+						opac_handle.b = m.paint_opac;
 					}
 
 					let nor_handle: ui_handle_t = ui_nest(ui_handle(__ID__), m.id);
 					if (nor_handle.init) {
-						nor_handle.selected = m.paint_nor;
+						nor_handle.b = m.paint_nor;
 					}
 
 					let occ_handle: ui_handle_t = ui_nest(ui_handle(__ID__), m.id);
 					if (occ_handle.init) {
-						occ_handle.selected = m.paint_occ;
+						occ_handle.b = m.paint_occ;
 					}
 
 					let rough_handle: ui_handle_t = ui_nest(ui_handle(__ID__), m.id);
 					if (rough_handle.init) {
-						rough_handle.selected = m.paint_rough;
+						rough_handle.b = m.paint_rough;
 					}
 
 					let met_handle: ui_handle_t = ui_nest(ui_handle(__ID__), m.id);
 					if (met_handle.init) {
-						met_handle.selected = m.paint_met;
+						met_handle.b = m.paint_met;
 					}
 
 					let height_handle: ui_handle_t = ui_nest(ui_handle(__ID__), m.id);
 					if (height_handle.init) {
-						height_handle.selected = m.paint_height;
+						height_handle.b = m.paint_height;
 					}
 
 					let emis_handle: ui_handle_t = ui_nest(ui_handle(__ID__), m.id);
 					if (emis_handle.init) {
-						emis_handle.selected = m.paint_emis;
+						emis_handle.b = m.paint_emis;
 					}
 
 					let subs_handle: ui_handle_t = ui_nest(ui_handle(__ID__), m.id);
 					if (subs_handle.init) {
-						subs_handle.selected = m.paint_subs;
+						subs_handle.b = m.paint_subs;
 					}
 
 					m.paint_base = ui_check(base_handle, tr("Base Color"));

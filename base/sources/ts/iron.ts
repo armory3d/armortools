@@ -813,9 +813,9 @@ declare type ui_t = {
 };
 
 declare type ui_handle_t = {
-	value: f32;
-	position: i32;
-	selected: bool;
+	f: f32;
+	i: i32;
+	b: bool;
 	color: u32;
 	text: string;
 	redraws: i32;

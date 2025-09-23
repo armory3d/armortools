@@ -70,9 +70,9 @@ function import_arm_run_project(path: string) {
 	project_raw = project;
 
 	let l0: layer_data_t = project.layer_datas[0];
-	base_res_handle.position = config_get_texture_res_pos(l0.res);
+	base_res_handle.i = config_get_texture_res_pos(l0.res);
 	let bits_pos: texture_bits_t = l0.bpp == 8 ? texture_bits_t.BITS8 : l0.bpp == 16 ? texture_bits_t.BITS16 : texture_bits_t.BITS32;
-	base_bits_handle.position = bits_pos;
+	base_bits_handle.i = bits_pos;
 	let bytes_per_pixel: i32 = math_floor(l0.bpp / 8);
 	let format: tex_format_t = l0.bpp == 8 ? tex_format_t.RGBA32 : l0.bpp == 16 ? tex_format_t.RGBA64 : tex_format_t.RGBA128;
 

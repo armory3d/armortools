@@ -156,7 +156,7 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 		f = tr("untitled");
 	}
 	let format_type: texture_ldr_format_t = context_raw.format_type;
-	let bits: i32 = base_bits_handle.position == texture_bits_t.BITS8 ? 8 : 16;
+	let bits: i32 = base_bits_handle.i == texture_bits_t.BITS8 ? 8 : 16;
 	let ext: string = bits == 16 ? ".exr" : format_type == texture_ldr_format_t.PNG ? ".png" : ".jpg";
 	if (ends_with(f, ext)) {
 		f = substring(f, 0, f.length - 4);
@@ -417,7 +417,7 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 function export_texture_write_texture(file: string, pixels: buffer_t, type: i32 = 1, off: i32 = 0) {
 	let res_x: i32 = config_get_texture_res_x();
 	let res_y: i32 = config_get_texture_res_y();
-	let bits_handle: i32 = base_bits_handle.position;
+	let bits_handle: i32 = base_bits_handle.i;
 	let bits: i32 = bits_handle == texture_bits_t.BITS8 ? 8 : bits_handle == texture_bits_t.BITS16 ? 16 : 32;
 	let format: i32 = 0; // RGBA
 	if (type == 1) {

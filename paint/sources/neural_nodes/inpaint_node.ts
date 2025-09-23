@@ -55,7 +55,7 @@ function inpaint_node_button(node_id: i32) {
 
 		let inpaint_node_strength_handle: ui_handle_t = ui_handle(__ID__);
 		if (inpaint_node_strength_handle.init) {
-			inpaint_node_strength_handle.value = inpaint_node_strength;
+			inpaint_node_strength_handle.f = inpaint_node_strength;
 		}
 
 		inpaint_node_strength = ui_slider(inpaint_node_strength_handle, tr("strength"), 0, 1, true);

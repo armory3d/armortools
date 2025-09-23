@@ -504,15 +504,15 @@ void ui_draw_node(ui_node_t *node, ui_node_canvas_t *canvas) {
 			ui_handle_t *h = ui_nest(nhandle, buti);
 			ui_handle_t *h0 = ui_nest(h, 0);
 			if (h0->init) {
-				h0->value = val[0];
+				h0->f = val[0];
 			}
 			ui_handle_t *h1 = ui_nest(h, 1);
 			if (h1->init) {
-				h1->value = val[1];
+				h1->f = val[1];
 			}
 			ui_handle_t *h2 = ui_nest(h, 2);
 			if (h2->init) {
-				h2->value = val[2];
+				h2->f = val[2];
 			}
 
 			val[0] = ui_slider(h0, "X", min, max, true, 100, true, UI_ALIGN_LEFT, true);
@@ -537,7 +537,7 @@ void ui_draw_node(ui_node_t *node, ui_node_canvas_t *canvas) {
 			current->ops->theme->TEXT_OFFSET = 6;
 			ui_handle_t *soc_handle = ui_nest(nhandle, buti);
 			if (soc_handle->init) {
-				soc_handle->value = ((float *)soc->default_value->buffer)[0];
+				soc_handle->f = ((float *)soc->default_value->buffer)[0];
 			}
 			((float *)soc->default_value->buffer)[0] = ui_slider(soc_handle, "Value", min, max, true, prec, true, UI_ALIGN_LEFT, true);
 			current->ops->theme->TEXT_OFFSET = text_off;
@@ -565,7 +565,7 @@ void ui_draw_node(ui_node_t *node, ui_node_canvas_t *canvas) {
 			current->_w = w;
 
 			ui_handle_t *but_handle = ui_nest(nhandle, buti);
-			but_handle->position = ((float *)but->default_value->buffer)[0];
+			but_handle->i = ((float *)but->default_value->buffer)[0];
 
 			bool combo_select = current->combo_selected_handle == NULL && ui_get_released(UI_ELEMENT_H());
 			char *label = combo_select ? temp_label : enum_label;
@@ -617,7 +617,7 @@ void ui_draw_node(ui_node_t *node, ui_node_canvas_t *canvas) {
 			current->_w = w;
 			ui_handle_t *h = ui_nest(nhandle, buti);
 			if (h->init) {
-				h->selected = ((float *)but->default_value->buffer)[0];
+				h->b = ((float *)but->default_value->buffer)[0];
 			}
 			((float *)but->default_value->buffer)[0] = ui_check(h, ui_tr(but->name), "");
 		}
@@ -653,7 +653,7 @@ void ui_draw_node(ui_node_t *node, ui_node_canvas_t *canvas) {
 			ui_handle_t *_handle = ui_nest(nhandle, ui_max_buttons);
 			ui_handle_t *soc_handle = ui_nest(_handle, i);
 			if (soc_handle->init) {
-				soc_handle->value = ((float *)soc->default_value->buffer)[0];
+				soc_handle->f = ((float *)soc->default_value->buffer)[0];
 			}
 			((float *)soc->default_value->buffer)[0] = ui_slider(soc_handle, ui_tr(inp->name), min, max, true, prec, true, UI_ALIGN_LEFT, true);
 			current->ops->theme->TEXT_OFFSET = text_off;
@@ -716,15 +716,15 @@ void ui_draw_node(ui_node_t *node, ui_node_canvas_t *canvas) {
 			ui_handle_t *hi = ui_nest(h, i);
 			ui_handle_t *h0 = ui_nest(hi, 0);
 			if (h0->init) {
-				h0->value = val[0];
+				h0->f = val[0];
 			}
 			ui_handle_t *h1 = ui_nest(hi, 1);
 			if (h1->init) {
-				h1->value = val[1];
+				h1->f = val[1];
 			}
 			ui_handle_t *h2 = ui_nest(hi, 2);
 			if (h2->init) {
-				h2->value = val[2];
+				h2->f = val[2];
 			}
 			val[0] = ui_slider(h0, "X", min, max, true, 100, true, UI_ALIGN_LEFT, true);
 			val[1] = ui_slider(h1, "Y", min, max, true, 100, true, UI_ALIGN_LEFT, true);

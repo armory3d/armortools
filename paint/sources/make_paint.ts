@@ -22,8 +22,8 @@ function make_paint_color_attachments(): string[] {
 	}
 
 	let format: tex_format_t =
-		base_bits_handle.position == texture_bits_t.BITS8  ? tex_format_t.RGBA32 :
-		base_bits_handle.position == texture_bits_t.BITS16 ? tex_format_t.RGBA64 :
+		base_bits_handle.i == texture_bits_t.BITS8  ? tex_format_t.RGBA32 :
+		base_bits_handle.i == texture_bits_t.BITS16 ? tex_format_t.RGBA64 :
 															 tex_format_t.RGBA128;
 
 	if (format == tex_format_t.RGBA64) {
@@ -91,8 +91,8 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		return con_paint;
 	}
 
-	let face_fill: bool = context_raw.tool == tool_type_t.FILL && context_raw.fill_type_handle.position == fill_type_t.FACE;
-	let uv_island_fill: bool = context_raw.tool == tool_type_t.FILL && context_raw.fill_type_handle.position == fill_type_t.UV_ISLAND;
+	let face_fill: bool = context_raw.tool == tool_type_t.FILL && context_raw.fill_type_handle.i == fill_type_t.FACE;
+	let uv_island_fill: bool = context_raw.tool == tool_type_t.FILL && context_raw.fill_type_handle.i == fill_type_t.UV_ISLAND;
 	let decal: bool = context_is_decal();
 
 	node_shader_write_vert(kong, "var tpos: float2 = float2(input.tex.x * 2.0 - 1.0, (1.0 - input.tex.y) * 2.0 - 1.0);");
@@ -165,7 +165,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	}
 	else { // Fill, Bake
 		node_shader_write_frag(kong, "var dist: float = 0.0;");
-		let angle_fill: bool = context_raw.tool == tool_type_t.FILL && context_raw.fill_type_handle.position == fill_type_t.ANGLE;
+		let angle_fill: bool = context_raw.tool == tool_type_t.FILL && context_raw.fill_type_handle.i == fill_type_t.ANGLE;
 		if (angle_fill) {
 			node_shader_add_function(kong, str_octahedron_wrap);
 			node_shader_add_texture(kong, "gbuffer0");
@@ -199,7 +199,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		}
 	}
 
-	if (context_raw.picker_mask_handle.position == picker_mask_t.MATERIAL) {
+	if (context_raw.picker_mask_handle.i == picker_mask_t.MATERIAL) {
 		make_discard_material_id(kong);
 	}
 
@@ -371,7 +371,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	node_shader_write_frag(kong, "var sample_undo: float4 = sample_lod(texpaint_undo, sampler_linear, sample_tc, 0.0);");
 
 	let matid: f32 = context_raw.material.id / 255;
-	if (context_raw.picker_mask_handle.position == picker_mask_t.MATERIAL) {
+	if (context_raw.picker_mask_handle.i == picker_mask_t.MATERIAL) {
 		matid = context_raw.materialid_picked / 255; // Keep existing material id in place when mask is set
 	}
 	let matid_string: string = parser_material_vec1(matid * 3.0);

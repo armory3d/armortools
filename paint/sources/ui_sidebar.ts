@@ -54,13 +54,13 @@ function ui_sidebar_render_ui() {
 			tabs[i].f(ui_base_htabs[tab_area_t.SIDEBAR0]);
 		}
 
-		if (ui_base_htabs[tab_area_t.SIDEBAR0].position < tabs.length) {
-			ui_sidebar_last_tab = ui_base_htabs[tab_area_t.SIDEBAR0].position;
+		if (ui_base_htabs[tab_area_t.SIDEBAR0].i < tabs.length) {
+			ui_sidebar_last_tab = ui_base_htabs[tab_area_t.SIDEBAR0].i;
 		}
 
 		if (!config_raw.touch_ui) {
 			if (ui_tab(ui_base_htabs[tab_area_t.SIDEBAR0], ">", false, -2)) {
-				ui_base_htabs[tab_area_t.SIDEBAR0].position = ui_sidebar_last_tab;
+				ui_base_htabs[tab_area_t.SIDEBAR0].i = ui_sidebar_last_tab;
 				config_raw.layout_tabs[tab_area_t.SIDEBAR0] = ui_sidebar_last_tab;
 				context_raw.maximized_sidebar_width = config_raw.layout[layout_size_t.SIDEBAR_W];
 				config_raw.layout[layout_size_t.SIDEBAR_W] = 0;

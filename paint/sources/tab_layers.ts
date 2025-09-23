@@ -184,7 +184,7 @@ function tab_layers_combo_filter() {
 		}
 	}
 	let filter_handle: ui_handle_t = ui_handle(__ID__);
-	filter_handle.position = context_raw.layer_filter;
+	filter_handle.i = context_raw.layer_filter;
 	context_raw.layer_filter = ui_combo(filter_handle, ar, tr("Filter"), false, ui_align_t.LEFT);
 	if (filter_handle.changed) {
 		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
@@ -451,7 +451,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	if (has_panel) {
 		ui._y += center;
 		let layer_panel: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
-		layer_panel.selected = l.show_panel;
+		layer_panel.b = l.show_panel;
 		l.show_panel = ui_panel(layer_panel, "", true, false);
 		ui._y -= center;
 	}
@@ -494,7 +494,7 @@ function tab_layers_combo_object(l: slot_layer_t, label: bool = false): ui_handl
 		}
 	}
 	let object_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
-	object_handle.position = l.object_mask;
+	object_handle.i = l.object_mask;
 	l.object_mask = ui_combo(object_handle, ar, tr("Object"), label, ui_align_t.LEFT);
 	if (object_handle.changed) {
 		context_set_layer(l);
@@ -515,7 +515,7 @@ function tab_layers_combo_object(l: slot_layer_t, label: bool = false): ui_handl
 
 function tab_layers_combo_blending(l: slot_layer_t, label: bool = false): ui_handle_t {
 	let blending_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
-	blending_handle.position = l.blending;
+	blending_handle.i = l.blending;
 	let blending_combo: string[] = [
 		tr("Mix"),
 		tr("Darken"),
@@ -540,7 +540,7 @@ function tab_layers_combo_blending(l: slot_layer_t, label: bool = false): ui_han
 	if (blending_handle.changed) {
 		context_set_layer(l);
 		history_layer_blending();
-		l.blending = blending_handle.position;
+		l.blending = blending_handle.i;
 		make_material_parse_mesh_material();
 	}
 	return blending_handle;
@@ -717,7 +717,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 
 		if (mini) {
 			let visible_handle: ui_handle_t = ui_handle(__ID__);
-			visible_handle.selected = l.visible;
+			visible_handle.b = l.visible;
 			ui_check(visible_handle, tr("Visible"));
 			if (visible_handle.changed) {
 				tab_layers_layer_toggle_visible(l);
@@ -851,13 +851,13 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 
 		ui_menu_align();
 		let layer_opac_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
-		layer_opac_handle.value = l.mask_opacity;
+		layer_opac_handle.f = l.mask_opacity;
 		ui_slider(layer_opac_handle, tr("Opacity"), 0.0, 1.0, true);
 		if (layer_opac_handle.changed) {
 			if (ui.input_started) {
 				history_layer_opacity();
 			}
-			l.mask_opacity = layer_opac_handle.value;
+			l.mask_opacity = layer_opac_handle.f;
 			make_material_parse_mesh_material();
 			ui_menu_keep_open = true;
 		}
@@ -873,8 +873,8 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 
 			let h: ui_handle_t = ui_handle(__ID__);
 			let changed_last: bool = h.changed;
-			h.value = base_res_handle.position;
-			base_res_handle.position = math_floor(ui_slider(h, ar[base_res_handle.position], 0, ar.length - 1, false, 1, false, ui_align_t.LEFT, false));
+			h.f = base_res_handle.i;
+			base_res_handle.i = math_floor(ui_slider(h, ar[base_res_handle.i], 0, ar.length - 1, false, 1, false, ui_align_t.LEFT, false));
 			if (h.changed) {
 				ui_menu_keep_open = true;
 			}
@@ -903,7 +903,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 		if (l.fill_layer != null) {
 			ui_menu_align();
 			let scale_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
-			scale_handle.value = l.scale;
+			scale_handle.f = l.scale;
 			l.scale = ui_slider(scale_handle, tr("UV Scale"), 0.0, 5.0, true);
 			if (scale_handle.changed) {
 				context_set_material(l.fill_layer);
@@ -916,7 +916,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 
 			ui_menu_align();
 			let angle_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
-			angle_handle.value = l.angle;
+			angle_handle.f = l.angle;
 			l.angle = ui_slider(angle_handle, tr("Angle"), 0.0, 360, true, 1);
 			if (angle_handle.changed) {
 				context_set_material(l.fill_layer);
@@ -930,7 +930,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 
 			ui_menu_align();
 			let uv_type_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
-			uv_type_handle.position = l.uv_type;
+			uv_type_handle.i = l.uv_type;
 			let uv_type_items: string[] = [tr("UV Map"), tr("Triplanar"), tr("Project")];
 			l.uv_type = ui_inline_radio(uv_type_handle, uv_type_items, ui_align_t.LEFT);
 			if (uv_type_handle.changed) {
@@ -956,17 +956,17 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			let height_blend_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
 			let emis_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
 			let subs_handle: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
-			base_handle.selected = l.paint_base;
-			opac_handle.selected = l.paint_opac;
-			nor_handle.selected = l.paint_nor;
-			nor_blend_handle.selected = l.paint_nor_blend;
-			occ_handle.selected = l.paint_occ;
-			rough_handle.selected = l.paint_rough;
-			met_handle.selected = l.paint_met;
-			height_handle.selected = l.paint_height;
-			height_blend_handle.selected = l.paint_height_blend;
-			emis_handle.selected = l.paint_emis;
-			subs_handle.selected = l.paint_subs;
+			base_handle.b = l.paint_base;
+			opac_handle.b = l.paint_opac;
+			nor_handle.b = l.paint_nor;
+			nor_blend_handle.b = l.paint_nor_blend;
+			occ_handle.b = l.paint_occ;
+			rough_handle.b = l.paint_rough;
+			met_handle.b = l.paint_met;
+			height_handle.b = l.paint_height;
+			height_blend_handle.b = l.paint_height_blend;
+			emis_handle.b = l.paint_emis;
+			subs_handle.b = l.paint_subs;
 			l.paint_base = ui_check(base_handle, tr("Base Color"));
 			l.paint_opac = ui_check(opac_handle, tr("Opacity"));
 			l.paint_nor = ui_check(nor_handle, tr("Normal"));

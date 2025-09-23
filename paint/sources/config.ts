@@ -219,7 +219,7 @@ function config_init() {
 	ui_touch_scroll = config_raw.touch_ui;
 	ui_touch_hold = config_raw.touch_ui;
 	ui_touch_tooltip = config_raw.touch_ui;
-	base_res_handle.position = config_raw.layer_res;
+	base_res_handle.i = config_raw.layer_res;
 	keymap_load();
 }
 
@@ -295,9 +295,9 @@ function config_import_from(from: config_t) {
 }
 
 function config_apply() {
-	config_raw.rp_ssao = context_raw.hssao.selected;
-	config_raw.rp_bloom = context_raw.hbloom.selected;
-	config_raw.rp_supersample = config_get_super_sample_size(context_raw.hsupersample.position);
+	config_raw.rp_ssao = context_raw.hssao.b;
+	config_raw.rp_bloom = context_raw.hbloom.b;
+	config_raw.rp_supersample = config_get_super_sample_size(context_raw.hsupersample.i);
 	config_save();
 	context_raw.ddirty = 2;
 
@@ -336,7 +336,7 @@ function config_texture_res_size(pos: i32): i32 {
 }
 
 function config_get_texture_res(): i32 {
-	let res: i32 = base_res_handle.position;
+	let res: i32 = base_res_handle.i;
 	return config_texture_res_size(res);
 }
 

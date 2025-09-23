@@ -83,18 +83,18 @@ function args_run() {
 				}
 
 				if (args_export_textures_type == "png") {
-					base_bits_handle.position = texture_bits_t.BITS8;
+					base_bits_handle.i = texture_bits_t.BITS8;
 					context_raw.format_type = texture_ldr_format_t.PNG;
 				}
 				else if (args_export_textures_type == "jpg") {
-					base_bits_handle.position = texture_bits_t.BITS8;
+					base_bits_handle.i = texture_bits_t.BITS8;
 					context_raw.format_type = texture_ldr_format_t.JPG;
 				}
 				else if (args_export_textures_type == "exr16") {
-					base_bits_handle.position = texture_bits_t.BITS16;
+					base_bits_handle.i = texture_bits_t.BITS16;
 				}
 				else if (args_export_textures_type == "exr32") {
-					base_bits_handle.position = texture_bits_t.BITS32;
+					base_bits_handle.i = texture_bits_t.BITS32;
 				}
 				else {
 					iron_log(tr("Invalid texture type"));

@@ -155,19 +155,19 @@ function tab_swatches_draw(htab: ui_handle_t) {
 							});
 
 							let hopacity: ui_handle_t = ui_handle(__ID__);
-							hopacity.value = context_raw.swatch.opacity;
+							hopacity.f = context_raw.swatch.opacity;
 							context_raw.swatch.opacity = ui_slider(hopacity, "Opacity", 0, 1, true);
 							let hocclusion: ui_handle_t = ui_handle(__ID__);
-							hocclusion.value = context_raw.swatch.occlusion;
+							hocclusion.f = context_raw.swatch.occlusion;
 							context_raw.swatch.occlusion = ui_slider(hocclusion, "Occlusion", 0, 1, true);
 							let hroughness: ui_handle_t = ui_handle(__ID__);
-							hroughness.value = context_raw.swatch.roughness;
+							hroughness.f = context_raw.swatch.roughness;
 							context_raw.swatch.roughness = ui_slider(hroughness, "Roughness", 0, 1, true);
 							let hmetallic: ui_handle_t = ui_handle(__ID__);
-							hmetallic.value = context_raw.swatch.metallic;
+							hmetallic.f = context_raw.swatch.metallic;
 							context_raw.swatch.metallic = ui_slider(hmetallic, "Metallic", 0, 1, true);
 							let hheight: ui_handle_t = ui_handle(__ID__);
-							hheight.value = context_raw.swatch.height;
+							hheight.f = context_raw.swatch.height;
 							context_raw.swatch.height = ui_slider(hheight, "Height", 0, 1, true);
 
 							if (ui.changed || ui.is_typing) {

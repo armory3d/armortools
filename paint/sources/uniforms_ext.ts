@@ -328,7 +328,7 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 			return rt._image;
 		}
 		else {
-			return project_get_image(project_assets[context_raw.colorid_handle.position]);
+			return project_get_image(project_assets[context_raw.colorid_handle.i]);
 		}
 	}
 	else if (link == "_textexttool") { // Opacity map for text

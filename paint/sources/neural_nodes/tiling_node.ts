@@ -31,7 +31,7 @@ function tiling_node_button(node_id: i32) {
 	if (!tiling_node_auto) {
 		let tiling_node_strength_handle: ui_handle_t = ui_handle(__ID__);
 		if (tiling_node_strength_handle.init) {
-			tiling_node_strength_handle.value = tiling_node_strength;
+			tiling_node_strength_handle.f = tiling_node_strength;
 		}
 
 		tiling_node_strength = ui_slider(tiling_node_strength_handle, tr("strength"), 0, 1, true);

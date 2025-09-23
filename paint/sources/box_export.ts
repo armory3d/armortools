@@ -39,7 +39,7 @@ function box_export_show_textures() {
 
 		if (box_export_files == null) {
 			box_export_fetch_presets();
-			box_export_hpreset.position = array_index_of(box_export_files, "generic");
+			box_export_hpreset.i = array_index_of(box_export_files, "generic");
 		}
 		if (box_export_preset == null) {
 			box_export_parse_preset();
@@ -62,7 +62,7 @@ function box_export_show_bake_material() {
 
 		if (box_export_files == null) {
 			box_export_fetch_presets();
-			box_export_hpreset.position = array_index_of(box_export_files, "generic");
+			box_export_hpreset.i = array_index_of(box_export_files, "generic");
 		}
 		if (box_export_preset == null) {
 			box_export_parse_preset();
@@ -104,10 +104,10 @@ function box_export_tab_export_textures(title: string, bake_material: bool = fal
 		}
 
 		ui_row2();
-		if (base_bits_handle.position == texture_bits_t.BITS8) {
+		if (base_bits_handle.i == texture_bits_t.BITS8) {
 			let h: ui_handle_t = ui_handle(__ID__);
 			if (h.init) {
-				h.position = context_raw.format_type;
+				h.i = context_raw.format_type;
 			}
 			let format_combo: string[] = ["png", "jpg"];
 			context_raw.format_type = ui_combo(h, format_combo, tr("Format"), true);
@@ -115,18 +115,18 @@ function box_export_tab_export_textures(title: string, bake_material: bool = fal
 		else {
 			let h: ui_handle_t = ui_handle(__ID__);
 			if (h.init) {
-				h.position = context_raw.format_type;
+				h.i = context_raw.format_type;
 			}
 			let format_combo: string[] = ["exr"];
 			context_raw.format_type = ui_combo(h, format_combo, tr("Format"), true);
 		}
 
 		ui.enabled = context_raw.format_type == texture_ldr_format_t.JPG &&
-					 base_bits_handle.position == texture_bits_t.BITS8;
+					 base_bits_handle.i == texture_bits_t.BITS8;
 
 		let h_quality: ui_handle_t = ui_handle(__ID__);
 		if (h_quality.init) {
-			h_quality.value = context_raw.format_quality;
+			h_quality.f = context_raw.format_quality;
 		}
 		context_raw.format_quality = ui_slider(h_quality, tr("Quality"), 0.0, 100.0, true, 1);
 
@@ -135,7 +135,7 @@ function box_export_tab_export_textures(title: string, bake_material: bool = fal
 		ui_row2();
 		ui.enabled = !bake_material;
 		let layers_export_handle: ui_handle_t = ui_handle(__ID__);
-		layers_export_handle.position = context_raw.layers_export;
+		layers_export_handle.i = context_raw.layers_export;
 		let layers_export_combo: string[] = [tr("Visible"), tr("Selected"), tr("Per Object"), tr("Per Udim Tile")];
 		context_raw.layers_export = ui_combo(layers_export_handle, layers_export_combo, tr("Layers"), true);
 		ui.enabled = true;
@@ -146,7 +146,7 @@ function box_export_tab_export_textures(title: string, bake_material: bool = fal
 		}
 
 		let layers_destination_handle: ui_handle_t = ui_handle(__ID__);
-		layers_destination_handle.position = context_raw.layers_destination;
+		layers_destination_handle.i = context_raw.layers_destination;
 
 		let layers_destination_combo: string[] = [tr("Disk"), tr("Packed")];
 		context_raw.layers_destination = ui_combo(layers_destination_handle, layers_destination_combo, tr("Destination"), true);
@@ -167,7 +167,7 @@ function box_export_tab_export_textures(title: string, bake_material: bool = fal
 				});
 			}
 			else {
-				let filters: string = base_bits_handle.position != texture_bits_t.BITS8 ? "exr" : context_raw.format_type == texture_ldr_format_t.PNG ? "png" : "jpg";
+				let filters: string = base_bits_handle.i != texture_bits_t.BITS8 ? "exr" : context_raw.format_type == texture_ldr_format_t.PNG ? "png" : "jpg";
 				_box_export_bake_material = bake_material;
 				ui_files_show(filters, true, false, function (path: string) {
 					context_raw.texture_export_path = path;
@@ -214,9 +214,9 @@ function box_export_tab_presets() {
 						box_export_new_preset(preset_name);
 						box_export_fetch_presets();
 						box_export_preset = null;
-						box_export_hpreset.position = array_index_of(box_export_files, preset_name);
+						box_export_hpreset.i = array_index_of(box_export_files, preset_name);
 						ui_box_hide();
-						box_export_htab.position = 1; // Presets
+						box_export_htab.i = 1; // Presets
 						box_export_show_textures();
 					}
 				}
@@ -232,7 +232,7 @@ function box_export_tab_presets() {
 					file_copy(path, dst_path); // Copy to presets folder
 					box_export_fetch_presets();
 					box_export_preset = null;
-					box_export_hpreset.position = array_index_of(box_export_files, substring(filename, 0, filename.length - 5)); // Strip .json
+					box_export_hpreset.i = array_index_of(box_export_files, substring(filename, 0, filename.length - 5)); // Strip .json
 					console_info(tr("Preset imported:") + " " + filename);
 				}
 				else {
@@ -274,36 +274,36 @@ function box_export_tab_presets() {
 			}
 
 			let hr: ui_handle_t = ui_nest(htex, 0);
-			hr.position = array_index_of(box_export_channels, t.channels[0]);
+			hr.i = array_index_of(box_export_channels, t.channels[0]);
 			let hg: ui_handle_t = ui_nest(htex, 1);
-			hg.position = array_index_of(box_export_channels, t.channels[1]);
+			hg.i = array_index_of(box_export_channels, t.channels[1]);
 			let hb: ui_handle_t = ui_nest(htex, 2);
-			hb.position = array_index_of(box_export_channels, t.channels[2]);
+			hb.i = array_index_of(box_export_channels, t.channels[2]);
 			let ha: ui_handle_t = ui_nest(htex, 3);
-			ha.position = array_index_of(box_export_channels, t.channels[3]);
+			ha.i = array_index_of(box_export_channels, t.channels[3]);
 
 			ui_combo(hr, box_export_channels, tr("R"));
 			if (hr.changed) {
-				t.channels[0] = box_export_channels[hr.position];
+				t.channels[0] = box_export_channels[hr.i];
 			}
 			ui_combo(hg, box_export_channels, tr("G"));
 			if (hg.changed) {
-				t.channels[1] = box_export_channels[hg.position];
+				t.channels[1] = box_export_channels[hg.i];
 			}
 			ui_combo(hb, box_export_channels, tr("B"));
 			if (hb.changed) {
-				t.channels[2] = box_export_channels[hb.position];
+				t.channels[2] = box_export_channels[hb.i];
 			}
 			ui_combo(ha, box_export_channels, tr("A"));
 			if (ha.changed) {
-				t.channels[3] = box_export_channels[ha.position];
+				t.channels[3] = box_export_channels[ha.i];
 			}
 
 			let hspace: ui_handle_t = ui_nest(htex, 4);
-			hspace.position = array_index_of(box_export_color_spaces, t.color_space);
+			hspace.i = array_index_of(box_export_color_spaces, t.color_space);
 			ui_combo(hspace, box_export_color_spaces, tr("Color Space"));
 			if (hspace.changed) {
-				t.color_space = box_export_color_spaces[hspace.position];
+				t.color_space = box_export_color_spaces[hspace.i];
 			}
 		}
 
@@ -342,14 +342,14 @@ function box_export_tab_atlases() {
 			ui_row2();
 			ui_text(project_paint_objects[i].base.name);
 			let hatlas: ui_handle_t = ui_nest(ui_handle(__ID__), i);
-			hatlas.position = project_atlas_objects[i];
+			hatlas.i = project_atlas_objects[i];
 			project_atlas_objects[i] = ui_combo(hatlas, project_atlas_names, tr("Atlas"));
 		}
 	}
 }
 
 function box_export_show_mesh() {
-	box_export_mesh_handle.position = context_raw.export_mesh_index;
+	box_export_mesh_handle.i = context_raw.export_mesh_index;
 	ui_box_show_custom(function () {
 		let htab: ui_handle_t = ui_handle(__ID__);
 		box_export_tab_export_mesh(htab);
@@ -364,7 +364,7 @@ function box_export_tab_export_mesh(htab: ui_handle_t) {
 
 		let h_export_mesh_format: ui_handle_t = ui_handle(__ID__);
 		if (h_export_mesh_format.init) {
-			h_export_mesh_format.position = context_raw.export_mesh_format;
+			h_export_mesh_format.i = context_raw.export_mesh_format;
 		}
 		let export_mesh_format_combo: string[] = ["obj", "arm"];
 		context_raw.export_mesh_format = ui_combo(h_export_mesh_format, export_mesh_format_combo, tr("Format"), true);
@@ -380,12 +380,12 @@ function box_export_tab_export_mesh(htab: ui_handle_t) {
 
 		let hmerge: ui_handle_t = ui_handle(__ID__);
 		if (hmerge.init) {
-			hmerge.selected = true;
+			hmerge.b = true;
 		}
 		let merge_vertices: bool = ui_check(hmerge, tr("Merge Shared Vertices"));
 
 		let tris: i32 = 0;
-		let pos: i32 = box_export_mesh_handle.position;
+		let pos: i32 = box_export_mesh_handle.i;
 		let paint_objects: mesh_object_t[];
 		if (pos == 0) {
 			paint_objects = project_paint_objects;
@@ -422,11 +422,11 @@ function box_export_tab_export_mesh(htab: ui_handle_t) {
 				///end
 
 				let paint_objects: mesh_object_t[];
-				if (box_export_mesh_handle.position == 0) {
+				if (box_export_mesh_handle.i == 0) {
 					paint_objects = null;
 				}
 				else {
-					let po: mesh_object_t = project_paint_objects[box_export_mesh_handle.position - 1];
+					let po: mesh_object_t = project_paint_objects[box_export_mesh_handle.i - 1];
 					paint_objects = [po];
 				}
 
@@ -443,8 +443,8 @@ function box_export_show_material() {
 		if (ui_tab(htab, tr("Export Material"), tab_vertical)) {
 			let h1: ui_handle_t = ui_handle(__ID__);
 			let h2: ui_handle_t = ui_handle(__ID__);
-			h1.selected = context_raw.pack_assets_on_export;
-			h2.selected = context_raw.write_icon_on_export;
+			h1.b = context_raw.pack_assets_on_export;
+			h2.b = context_raw.write_icon_on_export;
 			context_raw.pack_assets_on_export = ui_check(h1, tr("Pack Assets"));
 			context_raw.write_icon_on_export = ui_check(h2, tr("Export Icon"));
 			ui_row2();
@@ -474,8 +474,8 @@ function box_export_show_brush() {
 		if (ui_tab(htab, tr("Export Brush"), tab_vertical)) {
 			let h1: ui_handle_t = ui_handle(__ID__);
 			let h2: ui_handle_t = ui_handle(__ID__);
-			h1.selected = context_raw.pack_assets_on_export;
-			h2.selected = context_raw.write_icon_on_export;
+			h1.b = context_raw.pack_assets_on_export;
+			h2.b = context_raw.write_icon_on_export;
 			context_raw.pack_assets_on_export = ui_check(h1, tr("Pack Assets"));
 			context_raw.write_icon_on_export = ui_check(h2, tr("Export Icon"));
 			ui_row2();
@@ -505,7 +505,7 @@ function box_export_fetch_presets() {
 }
 
 function box_export_parse_preset() {
-	let file: string = "export_presets/" + box_export_files[box_export_hpreset.position] + ".json";
+	let file: string = "export_presets/" + box_export_files[box_export_hpreset.i] + ".json";
 	let blob: buffer_t = data_get_blob(file);
 	box_export_preset = json_parse(sys_buffer_to_string(blob));
 	data_delete_blob(file);
@@ -527,7 +527,7 @@ function box_export_new_preset(name: string) {
 }
 
 function box_export_save_preset() {
-	let name: string = box_export_files[box_export_hpreset.position];
+	let name: string = box_export_files[box_export_hpreset.i];
 	if (name == "generic") {
 		return; // generic is const
 	}

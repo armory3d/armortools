@@ -65,7 +65,7 @@ function export_arm_run_project() {
 	let font_files: string[] = export_arm_fonts_to_files(project_filepath, project_fonts);
 	let mesh_files: string[] = export_arm_meshes_to_files(project_filepath);
 
-	let bits_pos: i32 = base_bits_handle.position;
+	let bits_pos: i32 = base_bits_handle.i;
 	let bpp: i32 = bits_pos == texture_bits_t.BITS8 ? 8 : bits_pos == texture_bits_t.BITS16 ? 16 : 32;
 
 	let ld: layer_data_t[] = [];

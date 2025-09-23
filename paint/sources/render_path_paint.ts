@@ -261,7 +261,7 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 			}
 
 			// Read texcoords from gbuffer
-			let read_tc: bool = (context_raw.tool == tool_type_t.FILL && context_raw.fill_type_handle.position == fill_type_t.FACE) ||
+			let read_tc: bool = (context_raw.tool == tool_type_t.FILL && context_raw.fill_type_handle.i == fill_type_t.FACE) ||
 									context_raw.tool == tool_type_t.CLONE ||
 									context_raw.tool == tool_type_t.BLUR ||
 									context_raw.tool == tool_type_t.SMUDGE;
@@ -586,8 +586,8 @@ function render_path_paint_is_rt_bake(): bool {
 }
 
 function render_path_paint_update_bake_layer(bits: texture_bits_t) {
-	if (base_bits_handle.position != bits) {
-		base_bits_handle.position = bits;
+	if (base_bits_handle.i != bits) {
+		base_bits_handle.i = bits;
 		layers_set_bits();
 	}
 }
@@ -813,8 +813,8 @@ function render_path_paint_dilate(base: bool, nor_pack: bool) {
 		layers_make_temp_img();
 		let tid: i32 = context_raw.layer.id;
 
-		let format: string = base_bits_handle.position == texture_bits_t.BITS8  ? "RGBA32" :
-							 base_bits_handle.position == texture_bits_t.BITS16 ? "RGBA64" :
+		let format: string = base_bits_handle.i == texture_bits_t.BITS8  ? "RGBA32" :
+							 base_bits_handle.i == texture_bits_t.BITS16 ? "RGBA64" :
 																				  "RGBA128";
 
 		let copy_pass: string = format == "RGBA64"  ? "copyRGBA64_pass"  :

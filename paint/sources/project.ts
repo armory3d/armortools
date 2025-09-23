@@ -112,13 +112,13 @@ function project_new_box() {
 			ui_row2();
 			let h_project_type: ui_handle_t = ui_handle(__ID__);
 			if (h_project_type.init) {
-				h_project_type.position = context_raw.project_type;
+				h_project_type.i = context_raw.project_type;
 			}
 			context_raw.project_type = ui_combo(h_project_type, project_mesh_list, tr("Template"), true);
 
 			let h_project_aspect_ratio: ui_handle_t = ui_handle(__ID__);
 			if (h_project_aspect_ratio.init) {
-				h_project_aspect_ratio.position = context_raw.project_aspect_ratio;
+				h_project_aspect_ratio.i = context_raw.project_aspect_ratio;
 			}
 			let project_aspect_ratio_combo: string[] = ["1:1", "2:1", "1:2"];
 			context_raw.project_aspect_ratio = ui_combo(h_project_aspect_ratio, project_aspect_ratio_combo, tr("Aspect Ratio"), true);
@@ -242,7 +242,7 @@ function project_new(reset_layers: bool = true) {
 	}
 	array_push(project_materials, slot_material_create(m));
 
-	context_raw.picker_mask_handle.position = picker_mask_t.NONE;
+	context_raw.picker_mask_handle.i = picker_mask_t.NONE;
 	context_raw.material = project_materials[0];
 	ui_nodes_hwnd.redraws = 2;
 	ui_nodes_group_stack = [];
@@ -303,7 +303,7 @@ function project_set_default_envmap() {
 	context_raw.envmap_loaded = false;
 	scene_world._.envmap = context_raw.empty_envmap;
 	scene_world.envmap = "World_radiance.k";
-	context_raw.show_envmap_handle.selected = context_raw.show_envmap = false;
+	context_raw.show_envmap_handle.b = context_raw.show_envmap = false;
 	scene_world._.radiance = context_raw.default_radiance;
 	scene_world._.radiance_mipmaps = context_raw.default_radiance_mipmaps;
 	scene_world._.irradiance = context_raw.default_irradiance;
@@ -412,7 +412,7 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 
 			if (ends_with(to_lower_case(path), ".fbx")) {
 				let h: ui_handle_t = ui_handle(__ID__);
-				h.selected = context_raw.parse_vcols;
+				h.b = context_raw.parse_vcols;
 				context_raw.parse_vcols = ui_check(h, tr("Parse Vertex Colors"));
 				if (ui.is_hovered) {
 					ui_tooltip(tr("Import vertex color data"));

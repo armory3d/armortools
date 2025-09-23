@@ -76,8 +76,8 @@ function slot_layer_create(ext: string = "", type: layer_slot_type_t = layer_slo
 	else if (type == layer_slot_type_t.LAYER) {
 		let id: i32 = (raw.id + 1);
 		raw.name = "Layer " + id;
-		let format: string = base_bits_handle.position == texture_bits_t.BITS8  ? "RGBA32" :
-							 base_bits_handle.position == texture_bits_t.BITS16 ? "RGBA64" :
+		let format: string = base_bits_handle.i == texture_bits_t.BITS8  ? "RGBA32" :
+							 base_bits_handle.i == texture_bits_t.BITS16 ? "RGBA64" :
 																				  "RGBA128";
 
 		{
@@ -359,8 +359,8 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 
 	if (slot_layer_is_layer(raw)) {
 		let format: tex_format_t =
-			base_bits_handle.position == texture_bits_t.BITS8  ? tex_format_t.RGBA32 :
-			base_bits_handle.position == texture_bits_t.BITS16 ? tex_format_t.RGBA64 :
+			base_bits_handle.i == texture_bits_t.BITS8  ? tex_format_t.RGBA32 :
+			base_bits_handle.i == texture_bits_t.BITS16 ? tex_format_t.RGBA64 :
 																 tex_format_t.RGBA128;
 
 		let pipe: gpu_pipeline_t = format == tex_format_t.RGBA32 ? pipes_copy :

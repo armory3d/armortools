@@ -952,27 +952,27 @@ function ui_base_update() {
 					context_raw.brush_opacity += mouse_movement_x / 500;
 					context_raw.brush_opacity = math_max(0.0, math_min(1.0, context_raw.brush_opacity));
 					context_raw.brush_opacity = math_round(context_raw.brush_opacity * 100) / 100;
-					context_raw.brush_opacity_handle.value = context_raw.brush_opacity;
+					context_raw.brush_opacity_handle.f = context_raw.brush_opacity;
 				}
 				else if (operator_shortcut(map_get(config_keymap, "brush_angle"), shortcut_type_t.DOWN)) {
 					context_raw.brush_angle += mouse_movement_x / 5;
 					let i: i32 = math_floor(context_raw.brush_angle);
 					context_raw.brush_angle = i % 360;
 					if (context_raw.brush_angle < 0) context_raw.brush_angle += 360;
-					context_raw.brush_angle_handle.value = context_raw.brush_angle;
+					context_raw.brush_angle_handle.f = context_raw.brush_angle;
 					make_material_parse_paint_material();
 				}
 				else if (decal_mask && operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "brush_radius"), shortcut_type_t.DOWN)) {
 					context_raw.brush_decal_mask_radius += mouse_movement_x / 150;
 					context_raw.brush_decal_mask_radius = math_max(0.01, math_min(4.0, context_raw.brush_decal_mask_radius));
 					context_raw.brush_decal_mask_radius = math_round(context_raw.brush_decal_mask_radius * 100) / 100;
-					context_raw.brush_decal_mask_radius_handle.value = context_raw.brush_decal_mask_radius;
+					context_raw.brush_decal_mask_radius_handle.f = context_raw.brush_decal_mask_radius;
 				}
 				else {
 					context_raw.brush_radius += mouse_movement_x / 150;
 					context_raw.brush_radius = math_max(0.01, math_min(4.0, context_raw.brush_radius));
 					context_raw.brush_radius = math_round(context_raw.brush_radius * 100) / 100;
-					context_raw.brush_radius_handle.value = context_raw.brush_radius;
+					context_raw.brush_radius_handle.f = context_raw.brush_radius;
 				}
 				ui_header_handle.redraws = 2;
 			}
@@ -1071,26 +1071,26 @@ function ui_base_update() {
 			else if (operator_shortcut(map_get(config_keymap, "brush_radius_decrease"), shortcut_type_t.REPEAT)) {
 				context_raw.brush_radius -= ui_base_get_radius_increment();
 				context_raw.brush_radius = math_max(math_round(context_raw.brush_radius * 100) / 100, 0.01);
-				context_raw.brush_radius_handle.value = context_raw.brush_radius;
+				context_raw.brush_radius_handle.f = context_raw.brush_radius;
 				ui_header_handle.redraws = 2;
 			}
 			else if (operator_shortcut(map_get(config_keymap, "brush_radius_increase"), shortcut_type_t.REPEAT)) {
 				context_raw.brush_radius += ui_base_get_radius_increment();
 				context_raw.brush_radius = math_round(context_raw.brush_radius * 100) / 100;
-				context_raw.brush_radius_handle.value = context_raw.brush_radius;
+				context_raw.brush_radius_handle.f = context_raw.brush_radius;
 				ui_header_handle.redraws = 2;
 			}
 			else if (decal_mask) {
 				if (operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "brush_radius_decrease"), shortcut_type_t.REPEAT)) {
 					context_raw.brush_decal_mask_radius -= ui_base_get_radius_increment();
 					context_raw.brush_decal_mask_radius = math_max(math_round(context_raw.brush_decal_mask_radius * 100) / 100, 0.01);
-					context_raw.brush_decal_mask_radius_handle.value = context_raw.brush_decal_mask_radius;
+					context_raw.brush_decal_mask_radius_handle.f = context_raw.brush_decal_mask_radius;
 					ui_header_handle.redraws = 2;
 				}
 				else if (operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "brush_radius_increase"), shortcut_type_t.REPEAT)) {
 					context_raw.brush_decal_mask_radius += ui_base_get_radius_increment();
 					context_raw.brush_decal_mask_radius = math_round(context_raw.brush_decal_mask_radius * 100) / 100;
-					context_raw.brush_decal_mask_radius_handle.value = context_raw.brush_decal_mask_radius;
+					context_raw.brush_decal_mask_radius_handle.f = context_raw.brush_decal_mask_radius;
 					ui_header_handle.redraws = 2;
 				}
 			}
@@ -1123,7 +1123,7 @@ function ui_base_update() {
 			}
 			else if (operator_shortcut(map_get(config_keymap, "view_camera_type"))) {
 				context_raw.camera_type = context_raw.camera_type == camera_type_t.PERSPECTIVE ? camera_type_t.ORTHOGRAPHIC : camera_type_t.PERSPECTIVE;
-				context_raw.cam_handle.position = context_raw.camera_type;
+				context_raw.cam_handle.i = context_raw.camera_type;
 				viewport_update_camera_type(context_raw.camera_type);
 			}
 			else if (operator_shortcut(map_get(config_keymap, "view_orbit_left"), shortcut_type_t.REPEAT)) {
@@ -1151,7 +1151,7 @@ function ui_base_update() {
 				ui.is_key_pressed = false;
 				ui_menu_draw(function () {
 					let mode_handle: ui_handle_t = ui_handle(__ID__);
-					mode_handle.position = context_raw.viewport_mode;
+					mode_handle.i = context_raw.viewport_mode;
 					ui_text(tr("Viewport Mode"), ui_align_t.RIGHT);
 					let modes: string[] = [
 						tr("Lit"),
@@ -1184,12 +1184,12 @@ function ui_base_update() {
 
 					let index: i32 = array_index_of(shortcuts, keyboard_key_code(ui.key_code));
 					if (ui.is_key_pressed && index != -1) {
-						mode_handle.position = index;
+						mode_handle.i = index;
 						ui.changed = true;
-						context_set_viewport_mode(mode_handle.position);
+						context_set_viewport_mode(mode_handle.i);
 					}
 					else if (mode_handle.changed) {
-						context_set_viewport_mode(mode_handle.position);
+						context_set_viewport_mode(mode_handle.i);
 						ui.changed = true;
 					}
 				});
@@ -1589,7 +1589,7 @@ function ui_base_update_ui() {
 						context_raw.clone_delta_y = (context_raw.clone_start_y - my) / sys_h();
 						context_raw.clone_start_x = -1;
 					}
-					else if (context_raw.tool == tool_type_t.FILL && context_raw.fill_type_handle.position == fill_type_t.UV_ISLAND) {
+					else if (context_raw.tool == tool_type_t.FILL && context_raw.fill_type_handle.i == fill_type_t.UV_ISLAND) {
 						util_uv_uvislandmap_cached = false;
 					}
 				}
@@ -1721,14 +1721,14 @@ function ui_base_render() {
 	// Remember last tab positions
 	for (let i: i32 = 0; i < ui_base_htabs.length; ++i) {
 		if (ui_base_htabs[i].changed) {
-			config_raw.layout_tabs[i] = ui_base_htabs[i].position;
+			config_raw.layout_tabs[i] = ui_base_htabs[i].i;
 			config_save();
 		}
 	}
 
 	// Set tab positions
 	for (let i: i32 = 0; i < ui_base_htabs.length; ++i) {
-		ui_base_htabs[i].position = config_raw.layout_tabs[i];
+		ui_base_htabs[i].i = config_raw.layout_tabs[i];
 	}
 
 	// Nothing to display in the main area

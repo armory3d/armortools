@@ -145,20 +145,20 @@ function ui_viewnodes_on_socket_released(socket_id: i32) {
 					let node: ui_node_t = _ui_nodes_on_socket_released_node;
 
 					if (ui_menu_button(tr("Edit"))) {
-						_ui_nodes_htype.position = socket.type == "RGBA" ? 0 : socket.type == "VECTOR" ? 1 : 2;
+						_ui_nodes_htype.i = socket.type == "RGBA" ? 0 : socket.type == "VECTOR" ? 1 : 2;
 						_ui_nodes_hname.text = socket.name;
-						_ui_nodes_hmin.value = socket.min;
-						_ui_nodes_hmax.value = socket.max;
+						_ui_nodes_hmin.f = socket.min;
+						_ui_nodes_hmax.f = socket.max;
 						if (socket.type == "RGBA" || socket.type == "VECTOR") {
-							_ui_nodes_hval0.value = socket.default_value[0];
-							_ui_nodes_hval1.value = socket.default_value[1];
-							_ui_nodes_hval2.value = socket.default_value[2];
+							_ui_nodes_hval0.f = socket.default_value[0];
+							_ui_nodes_hval1.f = socket.default_value[1];
+							_ui_nodes_hval2.f = socket.default_value[2];
 							if (socket.type == "RGBA") {
-								_ui_nodes_hval3.value = socket.default_value[3];
+								_ui_nodes_hval3.f = socket.default_value[3];
 							}
 						}
 						else {
-							_ui_nodes_hval0.value = socket.default_value[0];
+							_ui_nodes_hval0.f = socket.default_value[0];
 						}
 
 						sys_notify_on_next_frame(function () {
@@ -186,15 +186,15 @@ function ui_viewnodes_on_socket_released(socket_id: i32) {
 										ui_float_input(_ui_nodes_hval2, tr("B"));
 										ui_float_input(_ui_nodes_hval3, tr("A"));
 										default_value = f32_array_create_xyzw(
-											_ui_nodes_hval0.value, _ui_nodes_hval1.value, _ui_nodes_hval2.value, _ui_nodes_hval3.value);
+											_ui_nodes_hval0.f, _ui_nodes_hval1.f, _ui_nodes_hval2.f, _ui_nodes_hval3.f);
 									}
 									else if (type == 1) {
 										ui_row3();
-										_ui_nodes_hval0.value = ui_float_input(_ui_nodes_hval0, tr("X"));
-										_ui_nodes_hval1.value = ui_float_input(_ui_nodes_hval1, tr("Y"));
-										_ui_nodes_hval2.value = ui_float_input(_ui_nodes_hval2, tr("Z"));
+										_ui_nodes_hval0.f = ui_float_input(_ui_nodes_hval0, tr("X"));
+										_ui_nodes_hval1.f = ui_float_input(_ui_nodes_hval1, tr("Y"));
+										_ui_nodes_hval2.f = ui_float_input(_ui_nodes_hval2, tr("Z"));
 										default_value = f32_array_create_xyz(
-											_ui_nodes_hval0.value, _ui_nodes_hval1.value, _ui_nodes_hval2.value);
+											_ui_nodes_hval0.f, _ui_nodes_hval1.f, _ui_nodes_hval2.f);
 									}
 									else {
 										let f: f32 = ui_float_input(_ui_nodes_hval0, tr("default_value"));
@@ -447,13 +447,13 @@ function ui_nodes_get_zoom_delta(): f32 {
 }
 
 function ui_nodes_is_tab_selected(): bool {
-	return ui_nodes_htab.position > 0 &&
-		ui_nodes_htab.position % 2 == 1 && // [tab0, tab1, x, tab2, x, +]
-		ui_nodes_tabs.length >= ui_nodes_htab.position / 2;
+	return ui_nodes_htab.i > 0 &&
+		ui_nodes_htab.i % 2 == 1 && // [tab0, tab1, x, tab2, x, +]
+		ui_nodes_tabs.length >= ui_nodes_htab.i / 2;
 }
 
 function ui_nodes_tab_index(): i32 {
-	return (int)(ui_nodes_htab.position / 2);
+	return (int)(ui_nodes_htab.i / 2);
 }
 
 function ui_nodes_get_canvas(groups: bool = false): ui_node_canvas_t {
@@ -872,7 +872,7 @@ function ui_nodes_render() {
 				ui_tab(ui_nodes_htab, ui_nodes_tabs[i].canvas.name);
 				if (ui_tab(ui_nodes_htab, tr("x"))) {
 					array_splice(ui_nodes_tabs, i, 1);
-					ui_nodes_htab.position = 0;
+					ui_nodes_htab.i = 0;
 				}
 			}
 

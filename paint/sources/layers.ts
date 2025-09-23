@@ -26,10 +26,10 @@ function layers_init() {
 
 function layers_resize() {
 	let conf: config_t = config_raw;
-	if (base_res_handle.position >= math_floor(texture_res_t.RES16384)) { // Save memory for >=16k
+	if (base_res_handle.i >= math_floor(texture_res_t.RES16384)) { // Save memory for >=16k
 		conf.undo_steps = 1;
 		if (context_raw.undo_handle != null) {
-			context_raw.undo_handle.value = conf.undo_steps;
+			context_raw.undo_handle.f = conf.undo_steps;
 		}
 		while (history_undo_layers.length > conf.undo_steps) {
 			let l: slot_layer_t = array_pop(history_undo_layers);
@@ -103,8 +103,8 @@ function layers_make_temp_img() {
 		layers_temp_image = null;
 	}
 	if (layers_temp_image == null) {
-		let format: string = base_bits_handle.position == texture_bits_t.BITS8  ? "RGBA32" :
-							 base_bits_handle.position == texture_bits_t.BITS16 ? "RGBA64" :
+		let format: string = base_bits_handle.i == texture_bits_t.BITS8  ? "RGBA32" :
+							 base_bits_handle.i == texture_bits_t.BITS16 ? "RGBA64" :
 																				  "RGBA128";
 
 		let t: render_target_t = render_target_create();
@@ -146,8 +146,8 @@ function layers_make_export_img() {
 		map_delete(render_path_render_targets, "expc");
 	}
 	if (layers_expa == null) {
-		let format: string = base_bits_handle.position == texture_bits_t.BITS8  ? "RGBA32" :
-							 base_bits_handle.position == texture_bits_t.BITS16 ? "RGBA64" :
+		let format: string = base_bits_handle.i == texture_bits_t.BITS8  ? "RGBA32" :
+							 base_bits_handle.i == texture_bits_t.BITS16 ? "RGBA64" :
 																				  "RGBA128";
 
 
@@ -242,7 +242,7 @@ function layers_is_fill_material(): bool {
 function layers_update_fill_layers() {
 	let _layer: slot_layer_t = context_raw.layer;
 	let _tool: tool_type_t = context_raw.tool;
-	let _fill_type: i32 = context_raw.fill_type_handle.position;
+	let _fill_type: i32 = context_raw.fill_type_handle.i;
 	let current: gpu_texture_t = null;
 
 	if (context_raw.tool == tool_type_t.MATERIAL) {
@@ -254,7 +254,7 @@ function layers_update_fill_layers() {
 		if (current != null) draw_end();
 
 		context_raw.tool = tool_type_t.FILL;
-		context_raw.fill_type_handle.position = fill_type_t.OBJECT;
+		context_raw.fill_type_handle.i = fill_type_t.OBJECT;
 		render_path_paint_set_plane_mesh();
 		make_material_parse_paint_material(false);
 		context_raw.pdirty = 1;
@@ -263,7 +263,7 @@ function layers_update_fill_layers() {
 		render_path_paint_dilate(true, true);
 		render_path_paint_use_live_layer(false);
 		context_raw.tool = _tool;
-		context_raw.fill_type_handle.position = _fill_type;
+		context_raw.fill_type_handle.i = _fill_type;
 		context_raw.pdirty = 0;
 		context_raw.rdirty = 2;
 		render_path_paint_restore_plane_mesh();
@@ -296,7 +296,7 @@ function layers_update_fill_layers() {
 		}
 		context_raw.pdirty = 1;
 		context_raw.tool = tool_type_t.FILL;
-		context_raw.fill_type_handle.position = fill_type_t.OBJECT;
+		context_raw.fill_type_handle.i = fill_type_t.OBJECT;
 
 		if (has_fill_layer) {
 			let first: bool = true;
@@ -341,7 +341,7 @@ function layers_update_fill_layers() {
 		context_raw.layer = _layer;
 		layers_set_object_mask();
 		context_raw.tool = _tool;
-		context_raw.fill_type_handle.position = _fill_type;
+		context_raw.fill_type_handle.i = _fill_type;
 		make_material_parse_paint_material(false);
 	}
 }
@@ -352,9 +352,9 @@ function layers_update_fill_layer(parse_paint: bool = true) {
 	if (in_use) draw_end();
 
 	let _tool: tool_type_t = context_raw.tool;
-	let _fill_type: i32 = context_raw.fill_type_handle.position;
+	let _fill_type: i32 = context_raw.fill_type_handle.i;
 	context_raw.tool = tool_type_t.FILL;
-	context_raw.fill_type_handle.position = fill_type_t.OBJECT;
+	context_raw.fill_type_handle.i = fill_type_t.OBJECT;
 	context_raw.pdirty = 1;
 
 	slot_layer_clear(context_raw.layer);
@@ -367,7 +367,7 @@ function layers_update_fill_layer(parse_paint: bool = true) {
 
 	context_raw.rdirty = 2;
 	context_raw.tool = _tool;
-	context_raw.fill_type_handle.position = _fill_type;
+	context_raw.fill_type_handle.i = _fill_type;
 	if (in_use) draw_begin(current);
 }
 

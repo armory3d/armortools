@@ -676,8 +676,8 @@ function history_copy_to_undo(from_id: i32, to_id: i32, is_mask: bool) {
 		render_path_bind_target("texpaint_pack" + from_id, "tex2");
 
 		let format: tex_format_t =
-			base_bits_handle.position == texture_bits_t.BITS8  ? tex_format_t.RGBA32 :
-			base_bits_handle.position == texture_bits_t.BITS16 ? tex_format_t.RGBA64 :
+			base_bits_handle.i == texture_bits_t.BITS8  ? tex_format_t.RGBA32 :
+			base_bits_handle.i == texture_bits_t.BITS16 ? tex_format_t.RGBA64 :
 																 tex_format_t.RGBA128;
 
 		let pipe: string = format == tex_format_t.RGBA32 ? "copy_mrt3_pass" :

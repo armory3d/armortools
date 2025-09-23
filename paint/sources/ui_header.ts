@@ -66,12 +66,12 @@ function ui_header_draw_tool_properties() {
 			ui_files_show(string_array_join(path_texture_formats, ","), false, true, function (path: string) {
 				import_asset_run(path, -1.0, -1.0, true, false);
 
-				context_raw.colorid_handle.position = project_asset_names.length - 1;
+				context_raw.colorid_handle.i = project_asset_names.length - 1;
 				for (let i: i32 = 0; i < project_assets.length; ++i) {
 					let a: asset_t = project_assets[i];
 					// Already imported
 					if (a.file == path) {
-						context_raw.colorid_handle.position = array_index_of(project_assets, a);
+						context_raw.colorid_handle.i = array_index_of(project_assets, a);
 					}
 				}
 				context_raw.ddirty = 2;
@@ -91,7 +91,7 @@ function ui_header_draw_tool_properties() {
 				gpu_set_pipeline(pipes_colorid_to_mask);
 				let rt: render_target_t = map_get(render_path_render_targets, "texpaint_colorid");
 				gpu_set_texture(pipes_texpaint_colorid, rt._image);
-				gpu_set_texture(pipes_tex_colorid, project_get_image(project_assets[context_raw.colorid_handle.position]));
+				gpu_set_texture(pipes_tex_colorid, project_get_image(project_assets[context_raw.colorid_handle.i]));
 				gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 				gpu_set_index_buffer(const_data_screen_aligned_ib);
 				gpu_draw();
@@ -160,28 +160,28 @@ function ui_header_draw_tool_properties() {
 		ui._w = _w;
 
 		let hocc: ui_handle_t = ui_handle(__ID__);
-		hocc.value = context_raw.picked_color.occlusion;
+		hocc.f = context_raw.picked_color.occlusion;
 		ui_slider(hocc, tr("Occlusion"), 0.0, 1.0, true);
 
 		let hrough: ui_handle_t = ui_handle(__ID__);
-		hrough.value = context_raw.picked_color.roughness;
+		hrough.f = context_raw.picked_color.roughness;
 		ui_slider(hrough, tr("Roughness"), 0.0, 1.0, true);
 
 		let hmet: ui_handle_t = ui_handle(__ID__);
-		hmet.value = context_raw.picked_color.metallic;
+		hmet.f = context_raw.picked_color.metallic;
 		ui_slider(hmet, tr("Metallic"), 0.0, 1.0, true);
 
 		let hheight: ui_handle_t = ui_handle(__ID__);
-		hheight.value = context_raw.picked_color.height;
+		hheight.f = context_raw.picked_color.height;
 		ui_slider(hheight, tr("Height"), 0.0, 1.0, true);
 
 		let hopac: ui_handle_t = ui_handle(__ID__);
-		hopac.value = context_raw.picked_color.opacity;
+		hopac.f = context_raw.picked_color.opacity;
 		ui_slider(hopac, tr("Opacity"), 0.0, 1.0, true);
 
 		let h_select_mat: ui_handle_t = ui_handle(__ID__);
 		if (h_select_mat.init) {
-			h_select_mat.selected = context_raw.picker_select_material;
+			h_select_mat.b = context_raw.picker_select_material;
 		}
 		context_raw.picker_select_material = ui_check(h_select_mat, tr("Select Material"));
 		let picker_mask_combo: string[] = [tr("None"), tr("Material")];
@@ -213,7 +213,7 @@ function ui_header_draw_tool_properties() {
 
 		let bake_handle: ui_handle_t = ui_handle(__ID__);
 		if (bake_handle.init) {
-			bake_handle.position = context_raw.bake_type;
+			bake_handle.i = context_raw.bake_type;
 		}
 		let bakes: string[] = [
 			tr("Curvature"),
@@ -243,7 +243,7 @@ function ui_header_draw_tool_properties() {
 		if (rt_bake) {
 			let samples_handle: ui_handle_t = ui_handle(__ID__);
 			if (samples_handle.init) {
-				samples_handle.value = context_raw.bake_samples;
+				samples_handle.f = context_raw.bake_samples;
 			}
 			context_raw.bake_samples = math_floor(ui_slider(samples_handle, tr("Samples"), 1, 512, true, 1));
 		}
@@ -254,7 +254,7 @@ function ui_header_draw_tool_properties() {
 		) {
 			let bake_up_axis_handle: ui_handle_t = ui_handle(__ID__);
 			if (bake_up_axis_handle.init) {
-				bake_up_axis_handle.position = context_raw.bake_up_axis;
+				bake_up_axis_handle.i = context_raw.bake_up_axis;
 			}
 			let bake_up_axis_combo: string[] = [tr("Z"), tr("Y")];
 			context_raw.bake_up_axis = ui_combo(bake_up_axis_handle, bake_up_axis_combo, tr("Up Axis"), true);
@@ -262,7 +262,7 @@ function ui_header_draw_tool_properties() {
 		if (context_raw.bake_type == bake_type_t.AO || context_raw.bake_type == bake_type_t.CURVATURE) {
 			let bake_axis_handle: ui_handle_t = ui_handle(__ID__);
 			if (bake_axis_handle.init) {
-				bake_axis_handle.position = context_raw.bake_axis;
+				bake_axis_handle.i = context_raw.bake_axis;
 			}
 			let bake_axis_combo: string[] = [tr("XYZ"), tr("X"), tr("Y"), tr("Z"), tr("-X"), tr("-Y"), tr("-Z")];
 			context_raw.bake_axis = ui_combo(bake_axis_handle, bake_axis_combo, tr("Axis"), true);
@@ -270,17 +270,17 @@ function ui_header_draw_tool_properties() {
 		if (context_raw.bake_type == bake_type_t.AO) {
 			let strength_handle: ui_handle_t = ui_handle(__ID__);
 			if (strength_handle.init) {
-				strength_handle.value = context_raw.bake_ao_strength;
+				strength_handle.f = context_raw.bake_ao_strength;
 			}
 			context_raw.bake_ao_strength = ui_slider(strength_handle, tr("Strength"), 0.0, 2.0, true);
 			let radius_handle: ui_handle_t = ui_handle(__ID__);
 			if (radius_handle.init) {
-				radius_handle.value = context_raw.bake_ao_radius;
+				radius_handle.f = context_raw.bake_ao_radius;
 			}
 			context_raw.bake_ao_radius = ui_slider(radius_handle, tr("Radius"), 0.0, 2.0, true);
 			let offset_handle: ui_handle_t = ui_handle(__ID__);
 			if (offset_handle.init) {
-				offset_handle.value = context_raw.bake_ao_offset;
+				offset_handle.f = context_raw.bake_ao_offset;
 			}
 			context_raw.bake_ao_offset = ui_slider(offset_handle, tr("Offset"), 0.0, 2.0, true);
 		}
@@ -300,22 +300,22 @@ function ui_header_draw_tool_properties() {
 		if (context_raw.bake_type == bake_type_t.CURVATURE) {
 			let strength_handle: ui_handle_t = ui_handle(__ID__);
 			if (strength_handle.init) {
-				strength_handle.value = context_raw.bake_curv_strength;
+				strength_handle.f = context_raw.bake_curv_strength;
 			}
 			context_raw.bake_curv_strength = ui_slider(strength_handle, tr("Strength"), 0.0, 2.0, true);
 			let radius_handle: ui_handle_t = ui_handle(__ID__);
 			if (radius_handle.init) {
-				radius_handle.value = context_raw.bake_curv_radius;
+				radius_handle.f = context_raw.bake_curv_radius;
 			}
 			context_raw.bake_curv_radius = ui_slider(radius_handle, tr("Radius"), 0.0, 2.0, true);
 			let offset_handle: ui_handle_t = ui_handle(__ID__);
 			if (offset_handle.init) {
-				offset_handle.value = context_raw.bake_curv_offset;
+				offset_handle.f = context_raw.bake_curv_offset;
 			}
 			context_raw.bake_curv_offset = ui_slider(offset_handle, tr("Offset"), -2.0, 2.0, true);
 			let smooth_handle: ui_handle_t = ui_handle(__ID__);
 			if (smooth_handle.init) {
-				smooth_handle.value = context_raw.bake_curv_smooth;
+				smooth_handle.f = context_raw.bake_curv_smooth;
 			}
 			context_raw.bake_curv_smooth = math_floor(ui_slider(smooth_handle, tr("Smooth"), 0, 5, false, 1));
 		}
@@ -327,7 +327,7 @@ function ui_header_draw_tool_properties() {
 			}
 			let poly_handle: ui_handle_t = ui_handle(__ID__);
 			if (poly_handle.init) {
-				poly_handle.position = context_raw.bake_high_poly;
+				poly_handle.i = context_raw.bake_high_poly;
 			}
 			context_raw.bake_high_poly = ui_combo(poly_handle, ar, tr("High Poly"));
 		}
@@ -380,7 +380,7 @@ function ui_header_draw_tool_properties() {
 			context_raw.tool == tool_type_t.TEXT) {
 			let brush_scale_handle: ui_handle_t = ui_handle(__ID__);
 			if (brush_scale_handle.init) {
-				brush_scale_handle.value = context_raw.brush_scale;
+				brush_scale_handle.f = context_raw.brush_scale;
 			}
 			context_raw.brush_scale = ui_slider(brush_scale_handle, tr("UV Scale"), 0.01, 5.0, true);
 			if (brush_scale_handle.changed) {
@@ -414,7 +414,7 @@ function ui_header_draw_tool_properties() {
 		if (context_raw.tool == tool_type_t.BRUSH || context_raw.tool == tool_type_t.ERASER || context_raw.tool == tool_type_t.CLONE || decal_mask) {
 			let h: ui_handle_t = ui_handle(__ID__);
 			if (h.init) {
-				h.value = context_raw.brush_hardness;
+				h.f = context_raw.brush_hardness;
 			}
 			context_raw.brush_hardness = ui_slider(h, tr("Hardness"), 0.0, 1.0, true);
 		}
@@ -422,7 +422,7 @@ function ui_header_draw_tool_properties() {
 		if (context_raw.tool != tool_type_t.ERASER) {
 			let brush_blending_handle: ui_handle_t = ui_handle(__ID__);
 			if (brush_blending_handle.init) {
-				brush_blending_handle.value = context_raw.brush_blending;
+				brush_blending_handle.f = context_raw.brush_blending;
 			}
 			let brush_blending_combo: string[] = [
 				tr("Mix"),
@@ -482,13 +482,13 @@ function ui_header_draw_tool_properties() {
 			let fill_mode_combo: string[] = [tr("Object"), tr("Face"), tr("Angle"), tr("UV Island")];
 			ui_combo(context_raw.fill_type_handle, fill_mode_combo, tr("Fill Mode"));
 			if (context_raw.fill_type_handle.changed) {
-				if (context_raw.fill_type_handle.position == fill_type_t.FACE) {
+				if (context_raw.fill_type_handle.i == fill_type_t.FACE) {
 					let current: gpu_texture_t = _draw_current;
 					draw_end();
 					// cache_uv_map();
 					util_uv_cache_triangle_map();
 					draw_begin(current);
-					// wireframe_handle.selected = draw_wireframe = true;
+					// wireframe_handle.b = draw_wireframe = true;
 				}
 				make_material_parse_paint_material();
 				make_material_parse_mesh_material();
@@ -505,7 +505,7 @@ function ui_header_draw_tool_properties() {
 
 			let xray_handle: ui_handle_t = ui_handle(__ID__);
 			if (xray_handle.init) {
-				xray_handle.selected = context_raw.xray;
+				xray_handle.b = context_raw.xray;
 			}
 			context_raw.xray = ui_check(xray_handle, tr("X-Ray"));
 			if (xray_handle.changed) {
@@ -514,15 +514,15 @@ function ui_header_draw_tool_properties() {
 
 			let sym_x_handle: ui_handle_t = ui_handle(__ID__);
 			if (sym_x_handle.init) {
-				sym_x_handle.selected = false;
+				sym_x_handle.b = false;
 			}
 			let sym_y_handle: ui_handle_t = ui_handle(__ID__);
 			if (sym_y_handle.init) {
-				sym_y_handle.selected = false;
+				sym_y_handle.b = false;
 			}
 			let sym_z_handle: ui_handle_t = ui_handle(__ID__);
 			if (sym_z_handle.init) {
-				sym_z_handle.selected = false;
+				sym_z_handle.b = false;
 			}
 
 			if (config_raw.layout[layout_size_t.HEADER] == 1) {

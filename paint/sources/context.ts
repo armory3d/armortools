@@ -391,17 +391,17 @@ function context_create(): context_t {
 	c.brush_scale_x = 1.0;
 	c.brush_decal_mask_radius = 0.5;
 	c.brush_decal_mask_radius_handle = ui_handle_create();
-	c.brush_decal_mask_radius_handle.value = 0.5;
+	c.brush_decal_mask_radius_handle.f = 0.5;
 	c.brush_scale_x_handle = ui_handle_create();
-	c.brush_scale_x_handle.value = 1.0;
+	c.brush_scale_x_handle.f = 1.0;
 	c.brush_blending = blend_type_t.MIX;
 	c.brush_opacity = 1.0;
 	c.brush_opacity_handle = ui_handle_create();
-	c.brush_opacity_handle.value = 1.0;
+	c.brush_opacity_handle.f = 1.0;
 	c.brush_scale = 1.0;
 	c.brush_angle = 0.0;
 	c.brush_angle_handle = ui_handle_create();
-	c.brush_angle_handle.value = 0.0;
+	c.brush_angle_handle.f = 0.0;
 	c.brush_lazy_radius = 0.0;
 	c.brush_lazy_step = 0.0;
 	c.brush_lazy_x = 0.0;
@@ -760,7 +760,7 @@ function context_ext_init(c: context_t) {
     c.tool = tool_type_t.BRUSH;
     c.color_picker_previous_tool = tool_type_t.BRUSH;
     c.brush_radius = 0.5;
-    c.brush_radius_handle.value = 0.5;
+    c.brush_radius_handle.f = 0.5;
 	c.brush_hardness = 0.8;
 }
 

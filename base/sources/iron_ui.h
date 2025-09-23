@@ -79,9 +79,9 @@ typedef struct ui_handle_array {
 
 typedef struct ui_handle {
 	union {
-		float value;
-		int position;
-		bool selected;
+		float f;
+		int i;
+		bool b;
 	};
 	union {
 		struct { // window

@@ -4368,7 +4368,7 @@ function nodes_material_vector_curves_button(node_id: i32) {
 	ui_radio(ui_nest(ui_nest(nhandle, 0), 1), 2, "Z");
 
 	// Preview
-	let axis: i32 = ui_nest(ui_nest(nhandle, 0), 1).position;
+	let axis: i32 = ui_nest(ui_nest(nhandle, 0), 1).i;
 	let val: f32[] = but.default_value;
 	ui._y += UI_LINE_H() * 5;
 
@@ -4400,25 +4400,25 @@ function nodes_material_vector_curves_button(node_id: i32) {
 
 	let ihandle: ui_handle_t = ui_nest(ui_nest(ui_nest(nhandle, 0), 2), axis);
 	if (ihandle.init) {
-		ihandle.position = 0;
+		ihandle.i = 0;
 	}
 
 	let i: i32 = math_floor(ui_slider(ihandle, "Index", 0, num - 1, false, 1, true, ui_align_t.LEFT));
 	if (i >= num || i < 0) {
-		ihandle.value = i = num - 1; // Stay in bounds
+		ihandle.f = i = num - 1; // Stay in bounds
 	}
 
 	ui_row2();
-	ui_nest(ui_nest(nhandle, 0), 3).value = val[axis * 32 + i * 2 + 0];
-	ui_nest(ui_nest(nhandle, 0), 4).value = val[axis * 32 + i * 2 + 1];
+	ui_nest(ui_nest(nhandle, 0), 3).f = val[axis * 32 + i * 2 + 0];
+	ui_nest(ui_nest(nhandle, 0), 4).f = val[axis * 32 + i * 2 + 1];
 
 	let h1: ui_handle_t = ui_nest(ui_nest(nhandle, 0), 3);
 	if (h1.init) {
-		h1.value = 0.0;
+		h1.f = 0.0;
 	}
 	let h2: ui_handle_t = ui_nest(ui_nest(nhandle, 0), 4);
 	if (h2.init) {
-		h2.value = 0.0;
+		h2.f = 0.0;
 	}
 	val[axis * 32 + i * 2 + 0] = ui_slider(h1, "X", -1, 1, true, 100, true, ui_align_t.LEFT);
 	val[axis * 32 + i * 2 + 1] = ui_slider(h2, "Y", -1, 1, true, 100, true, ui_align_t.LEFT);
@@ -4453,7 +4453,7 @@ function nodes_material_color_ramp_button(node_id: i32) {
 		// array_push(vals, vals[vals.length - 5]); // b
 		// array_push(vals, vals[vals.length - 5]); // a
 		// array_push(vals, 1.0); // pos
-		// ihandle.value += 1;
+		// ihandle.f += 1;
 	}
 	if (ui_button("-") && vals.length > 5) {
 		array_pop(vals);
@@ -4461,12 +4461,12 @@ function nodes_material_color_ramp_button(node_id: i32) {
 		array_pop(vals);
 		array_pop(vals);
 		array_pop(vals);
-		ihandle.value -= 1;
+		ihandle.f -= 1;
 	}
 
 	let h: ui_handle_t = ui_nest(ui_nest(nhandle, 0), 1);
 	if (h.init) {
-		h.position = but.data[0];
+		h.i = but.data[0];
 	}
 	let interpolate_combo: string[] = [tr("Linear"), tr("Constant")];
 	but.data[0] = ui_combo(h, interpolate_combo, tr("Interpolate"));
@@ -4474,10 +4474,10 @@ function nodes_material_color_ramp_button(node_id: i32) {
 	ui_row2();
 	let i: i32 = math_floor(ui_slider(ihandle, "Index", 0, (vals.length / 5) - 1, false, 1, true, ui_align_t.LEFT));
 	if (i >= (vals.length * 5) || i < 0) {
-		ihandle.value = i = (vals.length / 5) - 1; // Stay in bounds
+		ihandle.f = i = (vals.length / 5) - 1; // Stay in bounds
 	}
 
-	ui_nest(ui_nest(nhandle, 0), 3).value = vals[i * 5 + 4];
+	ui_nest(ui_nest(nhandle, 0), 3).f = vals[i * 5 + 4];
 	vals[i * 5 + 4] = ui_slider(ui_nest(ui_nest(nhandle, 0), 3), "Pos", 0, 1, true, 100, true, ui_align_t.LEFT);
 	if (vals[i * 5 + 4] > 1.0) {
 		vals[i * 5 + 4] = 1.0; // Stay in bounds

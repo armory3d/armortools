@@ -112,7 +112,7 @@ function ui_view2d_render() {
 		ui_tab(ui_view2d_htab, tr("2D View"), false, -1, !base_view3d_show);
 
 		if (ui_tab(ui_view2d_htab, tr("+"))) {
-			ui_view2d_htab.position = 0;
+			ui_view2d_htab.i = 0;
 		}
 
 		// Grid
@@ -296,7 +296,7 @@ function ui_view2d_render() {
 		if (ui_view2d_type == view_2d_type_t.LAYER) {
 			let h_layer_mode: ui_handle_t = ui_handle(__ID__);
 			if (h_layer_mode.init) {
-				h_layer_mode.position = ui_view2d_layer_mode;
+				h_layer_mode.i = ui_view2d_layer_mode;
 			}
 			let layer_mode_combo: string[] = [tr("Visible"), tr("Selected")];
 			ui_view2d_layer_mode = ui_combo(h_layer_mode, layer_mode_combo, tr("Layers"));
@@ -306,7 +306,7 @@ function ui_view2d_render() {
 			if (!slot_layer_is_mask(context_raw.layer)) {
 				let h_tex_type: ui_handle_t = ui_handle(__ID__);
 				if (h_tex_type.init) {
-					h_tex_type.position = ui_view2d_tex_type;
+					h_tex_type.i = ui_view2d_tex_type;
 				}
 				let tex_type_combo: string[] = [
 					tr("Base Color"),
@@ -325,7 +325,7 @@ function ui_view2d_render() {
 			ui._w = math_floor(ew * 0.7 + 3);
 			let h_uvmap_show: ui_handle_t = ui_handle(__ID__);
 			if (h_uvmap_show.init) {
-				h_uvmap_show.selected = ui_view2d_uvmap_show;
+				h_uvmap_show.b = ui_view2d_uvmap_show;
 			}
 			ui_view2d_uvmap_show = ui_check(h_uvmap_show, tr("UV Map"));
 			ui._x += ew * 0.7 + 3;
@@ -334,7 +334,7 @@ function ui_view2d_render() {
 
 		let h_tiled_show: ui_handle_t = ui_handle(__ID__);
 		if (h_tiled_show.init) {
-			h_tiled_show.selected = ui_view2d_tiled_show;
+			h_tiled_show.b = ui_view2d_tiled_show;
 		}
 		ui_view2d_tiled_show = ui_check(h_tiled_show, tr("Tiled"));
 		ui._x += ew * 0.7 + 3;

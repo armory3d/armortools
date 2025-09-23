@@ -429,7 +429,7 @@ FN(ui_handle_set_value) {
 	ui_handle_t *h = (ui_handle_t *)p;
 	double d;
 	JS_ToFloat64(ctx, &d, argv[1]);
-	h->value = d;
+	h->f = d;
 	return JS_UNDEFINED;
 }
 
@@ -437,7 +437,7 @@ FN(ui_handle_get_value) {
 	uint64_t p;
 	JS_ToBigUint64(ctx, &p, argv[0]);
 	ui_handle_t *h = (ui_handle_t *)p;
-	return JS_NewFloat64(ctx, h->value);
+	return JS_NewFloat64(ctx, h->f);
 }
 
 FN(ui_panel) {
