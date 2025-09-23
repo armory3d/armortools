@@ -515,21 +515,21 @@ void iron_mouse_hide(void) {
 void iron_mouse_set_position(int x, int y) {
 	NSWindow *window = windows[0].handle;
 	float scale = [window backingScaleFactor];
-	NSRect rect = [[NSScreen mainScreen] frame];
-
-	CGPoint point;
-	point.x = window.frame.origin.x + (x / scale);
-	point.y = rect.size.height - (window.frame.origin.y + (y / scale));
-
-	CGDisplayMoveCursorToPoint(0, point);
+	NSRect rect = [[window contentView] bounds];
+	NSPoint windowpoint = NSMakePoint(x / scale, rect.size.height - y / scale);
+	NSPoint screenpoint = [window convertPointToScreen:windowpoint];
+	CGPoint cgpoint = CGPointMake(screenpoint.x, [[NSScreen mainScreen] frame].size.height - screenpoint.y);
+	CGDisplayMoveCursorToPoint(kCGDirectMainDisplay, cgpoint);
 	CGAssociateMouseAndMouseCursorPosition(true);
 }
 
 void iron_mouse_get_position(int *x, int *y) {
 	NSWindow *window = windows[0].handle;
+	float scale = [window backingScaleFactor];
+	NSRect rect = [[window contentView] bounds];
 	NSPoint point = [window mouseLocationOutsideOfEventStream];
-	*x = (int)point.x;
-	*y = (int)point.y;
+	*x = (int)(point.x * scale);
+	*y = (int)((rect.size.height - point.y) * scale);
 }
 
 void iron_mouse_set_cursor(iron_cursor_t cursor_index) {
