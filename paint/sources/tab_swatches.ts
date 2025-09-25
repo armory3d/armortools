@@ -147,10 +147,8 @@ function tab_swatches_draw(htab: ui_handle_t) {
 							context_raw.swatch.base = ui_color_wheel(h, false, -1, 11 * ui.ops.theme.ELEMENT_H * UI_SCALE(), true, function () {
 								context_raw.color_picker_previous_tool = context_raw.tool;
 								context_select_tool(tool_type_t.PICKER);
-
 								context_raw.color_picker_callback = function (color: swatch_color_t) {
 									let i: i32 = _tab_swatches_draw_i;
-
 									project_raw.swatches[i] = project_clone_swatch(color);
 								};
 							});
@@ -176,6 +174,8 @@ function tab_swatches_draw(htab: ui_handle_t) {
 							}
 							if (ui.input_released) {
 								context_set_swatch(context_raw.swatch); // Trigger material preview update
+								context_raw.picked_color = util_clone_swatch_color(context_raw.swatch);
+								ui_header_handle.redraws = 2;
 							}
 						});
 					}
