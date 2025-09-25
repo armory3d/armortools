@@ -237,6 +237,10 @@ function ui_view2d_render() {
 					context_raw.picked_color.base = color_set_gb(context_raw.picked_color.base, buffer_get_u8(a, i1));
 					context_raw.picked_color.base = color_set_bb(context_raw.picked_color.base, buffer_get_u8(a, i2));
 					ui_header_handle.redraws = 2;
+
+					if (context_raw.color_picker_callback != null) {
+						context_raw.color_picker_callback(context_raw.picked_color);
+					}
 				});
 			}
 		}
