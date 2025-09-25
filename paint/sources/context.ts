@@ -332,7 +332,7 @@ function context_create(): context_t {
 	c.materialid_picked = 0;
 	c.uvx_picked = 0.0;
 	c.uvy_picked = 0.0;
-	c.picker_select_material = true;
+	c.picker_select_material = false;
 	c.picker_mask_handle = ui_handle_create();
 	c.pick_pos_nor_tex = false;
 	c.posx_picked = 0.0;
