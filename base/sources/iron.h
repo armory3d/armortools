@@ -1596,13 +1596,16 @@ void iron_delete_file(char *path) {
 
 #ifdef WITH_COMPRESS
 buffer_t *iron_inflate(buffer_t *bytes, bool raw) {
-	unsigned char *inflated;
+	unsigned char *inflated = NULL;
 	int inflated_len = bytes->length * 2;
-	int out_len = -1;
-	while (out_len == -1) {
-		inflated_len *= 2;
+	int out_len;
+	while(1) {
 		inflated = (unsigned char *)realloc(inflated, inflated_len);
-		out_len = sinflate(inflated, inflated_len, bytes->buffer, bytes->length);
+		out_len = raw ? sinflate(inflated, inflated_len, bytes->buffer, bytes->length) : zsinflate(inflated, inflated_len, bytes->buffer, bytes->length);
+		if (out_len >= 0 && out_len < inflated_len) {
+			break;
+		}
+		inflated_len *= 2;
 	}
 	buffer_t *output = buffer_create(0);
 	output->buffer = inflated;
@@ -1614,8 +1617,7 @@ buffer_t *iron_deflate(buffer_t *bytes, bool raw) {
 	struct sdefl sdefl;
 	memset(&sdefl, 0, sizeof(sdefl));
 	void *deflated = malloc(sdefl_bound(bytes->length));
-	// raw == sdeflate
-	int out_len = zsdeflate(&sdefl, deflated, bytes->buffer, bytes->length, SDEFL_LVL_MIN);
+	int out_len = raw ? sdeflate(&sdefl, deflated, bytes->buffer, bytes->length, SDEFL_LVL_MIN) : zsdeflate(&sdefl, deflated, bytes->buffer, bytes->length, SDEFL_LVL_MIN);
 	buffer_t *output = buffer_create(0);
 	output->buffer = deflated;
 	output->length = out_len;
