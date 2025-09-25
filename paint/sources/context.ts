@@ -98,9 +98,9 @@ type context_t = {
 	layers_preview_dirty?: bool;
 	node_preview_dirty?: bool;
 	node_preview?: gpu_texture_t;
+	node_preview_name?: string;
 	node_previews?: map_t<string, gpu_texture_t>;
 	node_previews_used?: string[];
-	node_preview_name?: string;
 	mask_preview_rgba32?: gpu_texture_t;
 	mask_preview_last?: slot_layer_t;
 

@@ -442,10 +442,38 @@ void ui_draw_node(ui_node_t *node, ui_node_canvas_t *canvas) {
 	draw_set_color(node->color);
 	draw_filled_rect(nx, ny + lineh - ui_p(3), w, ui_p(3));
 
+	// Collapse button
+	bool hover = current->input_x > wx + nx && current->input_x < wx + nx + ui_p(20) &&
+				 current->input_y > wy + ny && current->input_y < wy + ny + ui_p(20);
+	draw_set_color(hover ? current->ops->theme->LABEL_COL : current->ops->theme->HOVER_COL);
+	int bx = nx + ui_p(4);
+	int by = ny + ui_p(8);
+	draw_filled_triangle(bx, by, bx + UI_ARROW_SIZE() * 2, by, bx + UI_ARROW_SIZE(), by + UI_ARROW_SIZE());
+
+	// Eye button
+	hover = current->input_x > wx + nx + w - ui_p(20) && current->input_x < wx + nx + w &&
+			current->input_y > wy + ny && current->input_y < wy + ny + ui_p(20);
+	draw_set_color(hover ? current->ops->theme->LABEL_COL : current->ops->theme->HOVER_COL);
+	float ex = nx + w - ui_p(10);
+	float ey = ny + ui_p(10);
+	float hw = ui_p(6);
+	float hh = ui_p(3);
+	float x[4] = {ex - hw, ex - hw * 0.5, ex + hw * 0.5, ex + hw};
+	float y_upper[4] = {ey, ey - hh * 1.5, ey - hh * 1.5, ey};
+	f32_array_t xa;
+	f32_array_t ya;
+	xa.buffer = x;
+	ya.buffer = y_upper;
+	draw_cubic_bezier(&xa, &ya, 15, 1.0);
+	float y_lower[4] = {ey, ey + hh * 1.5, ey + hh * 1.5, ey};
+	ya.buffer = y_lower;
+	draw_cubic_bezier(&xa, &ya, 15, 1.0);
+	draw_filled_circle(ex, ey, ui_p(2), 0);
+
 	// Title
 	draw_set_color(current->ops->theme->TEXT_COL);
 	float textw = draw_string_width(current->ops->font, current->font_size, text);
-	draw_string(text, nx + ui_p(10), ny + ui_p(6));
+	draw_string(text, nx + ui_p(20), ny + ui_p(6));
 	ny += lineh * 0.5;
 
 	// Outputs

@@ -819,7 +819,7 @@ function ui_nodes_render() {
 		ui_nodes_grid_redraw = false;
 	}
 
-	if (config_raw.node_preview == node_preview_t.SELECTED_NODE && context_raw.node_preview_dirty) {
+	if (config_raw.selected_node_preview && context_raw.node_preview_dirty) {
 		ui_nodes_make_node_preview();
 	}
 
@@ -975,54 +975,23 @@ function ui_nodes_render() {
 		ui_nodes_uichanged_last = ui.changed;
 
 		// Node previews
-		if (config_raw.node_preview == node_preview_t.SELECTED_NODE && nodes.nodes_selected_id.length > 0) {
-			let img: gpu_texture_t = null;
+		if (config_raw.selected_node_preview && nodes.nodes_selected_id.length > 0) {
 			let sel: ui_node_t = ui_get_node(c.nodes, nodes.nodes_selected_id[0]);
-
-			let single_channel: bool = sel.type == "LAYER_MASK";
-			if (sel.type == "LAYER" || sel.type == "LAYER_MASK") {
-				let id: i32 = sel.buttons[0].default_value[0];
-				if (id < project_layers.length) {
-					img = project_layers[id].texpaint_preview;
-				}
-			}
-			else if (sel.type == "MATERIAL") {
-				let id: i32 = sel.buttons[0].default_value[0];
-				if (id < project_materials.length) {
-					img = project_materials[id].image;
-				}
-			}
-			else if (sel.type == "OUTPUT_MATERIAL_PBR") {
-				img = context_raw.material.image;
-			}
-			else if (sel.type == "brush_output_node") {
-				img = context_raw.brush.image;
-			}
-			else if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) {
-				img = context_raw.node_preview;
-			}
-
-			if (img != null) {
-				let tw: f32 = 128 * UI_SCALE();
-				let th: f32 = tw * (img.height / img.width);
-				let tx: f32 = ui_nodes_ww - tw - 8 * UI_SCALE();
-				let ty: f32 = ui_nodes_wh - th - 8 * UI_SCALE();
-				let invert_y: bool = false;
-				if (single_channel) {
-					draw_set_pipeline(ui_view2d_pipe);
-					gpu_set_int(ui_view2d_channel_loc, 1);
-				}
-
-				draw_set_color(0xffffffff);
-				invert_y ?
-					draw_scaled_image(img, tx, ty + th, tw, -th) :
-					draw_scaled_image(img, tx, ty, tw, th);
-
-				if (single_channel) {
-					draw_set_pipeline(null);
-				}
-			}
+			let tw: f32 = 128 * UI_SCALE();
+			let tx: f32 = ui_nodes_ww - tw - 8 * UI_SCALE();
+			let ty: f32 = ui_nodes_wh - tw - 8 * UI_SCALE();
+			ui_nodes_draw_node_preview(sel, tx, ty, tw);
 		}
+
+		// if (config_raw.selected_node_preview) {
+		// 	for (let i: i32 = 0; i < c.nodes.length; ++i) {
+		// 		let n: ui_node_t = c.nodes[i];
+		// 		let tw: f32 = 128 * UI_SCALE() * UI_NODES_SCALE();
+		// 		let tx: f32 = UI_NODE_X(n) + UI_NODE_W(n) / 2 - tw / 2;
+		// 		let ty: f32 = UI_NODE_Y(n) - tw - 6;
+		// 		ui_nodes_draw_node_preview(n, tx, ty, tw);
+		// 	}
+		// }
 
 		ui_nodes_draw_menubar();
 
@@ -1121,6 +1090,53 @@ function ui_nodes_render() {
 	}
 
 	ui.input_enabled = true;
+}
+
+function ui_nodes_get_node_preview_image(n: ui_node_t): gpu_texture_t {
+	let img: gpu_texture_t = null;
+	if (n.type == "LAYER" || n.type == "LAYER_MASK") {
+		let id: i32 = n.buttons[0].default_value[0];
+		if (id < project_layers.length) {
+			img = project_layers[id].texpaint_preview;
+		}
+	}
+	else if (n.type == "MATERIAL") {
+		let id: i32 = n.buttons[0].default_value[0];
+		if (id < project_materials.length) {
+			img = project_materials[id].image;
+		}
+	}
+	else if (n.type == "OUTPUT_MATERIAL_PBR") {
+		img = context_raw.material.image;
+	}
+	else if (n.type == "brush_output_node") {
+		img = context_raw.brush.image;
+	}
+	else if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) {
+		img = context_raw.node_preview;
+	}
+	return img;
+}
+
+function ui_nodes_draw_node_preview(n: ui_node_t, tx: i32, ty: i32, tw: i32) {
+	let img: gpu_texture_t = ui_nodes_get_node_preview_image(n);
+	if (img != null) {
+
+		if (img == context_raw.node_preview) {
+			ui_draw_shadow(tx, ty, tw, tw);
+		}
+
+		let single_channel: bool = n.type == "LAYER_MASK";
+		if (single_channel) {
+			draw_set_pipeline(ui_view2d_pipe);
+			gpu_set_int(ui_view2d_channel_loc, 1);
+		}
+		draw_set_color(0xffffffff);
+		draw_scaled_image(img, tx, ty, tw, tw);
+		if (single_channel) {
+			draw_set_pipeline(null);
+		}
+	}
 }
 
 function ui_nodes_draw_menubar() {

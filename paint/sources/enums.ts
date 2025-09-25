@@ -273,9 +273,3 @@ enum layout_size_t {
 	STATUS_H = 5,
 	HEADER = 6, // 0 - hidden, 1 - visible
 }
-
-enum node_preview_t {
-	OFF = 0,
-	SELECTED_NODE = 1,
-	ALL_NODES = 2,
-}

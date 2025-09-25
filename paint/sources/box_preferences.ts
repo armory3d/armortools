@@ -47,42 +47,22 @@ function box_preferences_show() {
 				context_raw.hscale_was_changed = true;
 			}
 
-			let hspeed: ui_handle_t = ui_handle(__ID__);
-			if (hspeed.init) {
-				hspeed.f = config_raw.camera_zoom_speed;
+			let h_selected_node_preview: ui_handle_t = ui_handle(__ID__);
+			if (h_selected_node_preview.init) {
+				h_selected_node_preview.b = config_raw.selected_node_preview;
 			}
-			config_raw.camera_zoom_speed = ui_slider(hspeed, tr("Camera Zoom Speed"), 0.1, 4.0, true);
-
-			hspeed = ui_handle(__ID__);
-			if (hspeed.init) {
-				hspeed.f = config_raw.camera_rotation_speed;
-			}
-			config_raw.camera_rotation_speed = ui_slider(hspeed, tr("Camera Rotation Speed"), 0.1, 4.0, true);
-
-			hspeed = ui_handle(__ID__);
-			if (hspeed.init) {
-				hspeed.f = config_raw.camera_pan_speed;
-			}
-			config_raw.camera_pan_speed = ui_slider(hspeed, tr("Camera Pan Speed"), 0.1, 4.0, true);
-
-			let zoom_direction_handle: ui_handle_t = ui_handle(__ID__);
-			if (zoom_direction_handle.init) {
-				zoom_direction_handle.i = config_raw.zoom_direction;
-			}
-			let zoom_direction_combo: string[] = [tr("Vertical"), tr("Vertical Inverted"), tr("Horizontal"), tr("Horizontal Inverted"), tr("Vertical and Horizontal"), tr("Vertical and Horizontal Inverted")];
-			ui_combo(zoom_direction_handle, zoom_direction_combo, tr("Direction to Zoom"), true);
-			if (zoom_direction_handle.changed) {
-				config_raw.zoom_direction = zoom_direction_handle.i;
+			ui_check(h_selected_node_preview, tr("Selected Node Preview"));
+			if (h_selected_node_preview.changed) {
+				config_raw.selected_node_preview = h_selected_node_preview.b;
 			}
 
-			let h_node_preview: ui_handle_t = ui_handle(__ID__);
-			if (h_node_preview.init) {
-				h_node_preview.i = config_raw.node_preview;
+			let h_node_previews: ui_handle_t = ui_handle(__ID__);
+			if (h_node_previews.init) {
+				h_node_previews.b = config_raw.node_previews;
 			}
-			let node_preview_combo: string[] = [tr("Off"), tr("Selected Node")]; // , tr("All Nodes")];
-			ui_combo(h_node_preview, node_preview_combo, tr("Node Preview"), true);
-			if (h_node_preview.changed) {
-				config_raw.node_preview = h_node_preview.i;
+			config_raw.node_previews = ui_check(h_node_previews, tr("Node Previews"));
+			if (ui.is_hovered) {
+				ui_tooltip(tr("Show node preview on each node by default"));
 			}
 
 			let h_wrap_mouse: ui_handle_t = ui_handle(__ID__);
@@ -362,6 +342,34 @@ function box_preferences_show() {
 			ui_combo(camera_controls_handle, camera_controls_combo, tr("Default Camera Controls"), true);
 			if (camera_controls_handle.changed) {
 				config_raw.camera_controls = camera_controls_handle.i;
+			}
+
+			let hspeed: ui_handle_t = ui_handle(__ID__);
+			if (hspeed.init) {
+				hspeed.f = config_raw.camera_zoom_speed;
+			}
+			config_raw.camera_zoom_speed = ui_slider(hspeed, tr("Camera Zoom Speed"), 0.1, 4.0, true);
+
+			hspeed = ui_handle(__ID__);
+			if (hspeed.init) {
+				hspeed.f = config_raw.camera_rotation_speed;
+			}
+			config_raw.camera_rotation_speed = ui_slider(hspeed, tr("Camera Rotation Speed"), 0.1, 4.0, true);
+
+			hspeed = ui_handle(__ID__);
+			if (hspeed.init) {
+				hspeed.f = config_raw.camera_pan_speed;
+			}
+			config_raw.camera_pan_speed = ui_slider(hspeed, tr("Camera Pan Speed"), 0.1, 4.0, true);
+
+			let zoom_direction_handle: ui_handle_t = ui_handle(__ID__);
+			if (zoom_direction_handle.init) {
+				zoom_direction_handle.i = config_raw.zoom_direction;
+			}
+			let zoom_direction_combo: string[] = [tr("Vertical"), tr("Vertical Inverted"), tr("Horizontal"), tr("Horizontal Inverted"), tr("Vertical and Horizontal"), tr("Vertical and Horizontal Inverted")];
+			ui_combo(zoom_direction_handle, zoom_direction_combo, tr("Direction to Zoom"), true);
+			if (zoom_direction_handle.changed) {
+				config_raw.zoom_direction = zoom_direction_handle.i;
 			}
 
 			let layer_res_handle: ui_handle_t = ui_handle(__ID__);

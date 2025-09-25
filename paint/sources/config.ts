@@ -84,7 +84,8 @@ function config_save() {
 	json_encode_f32("displace_strength", config_raw.displace_strength);
 	json_encode_i32("layer_res", config_raw.layer_res);
 	json_encode_bool("brush_live", config_raw.brush_live);
-	json_encode_i32("node_preview", config_raw.node_preview);
+	json_encode_bool("selected_node_preview", config_raw.selected_node_preview);
+	json_encode_bool("node_previews", config_raw.node_previews);
 	json_encode_bool("pressure_hardness", config_raw.pressure_hardness);
 	json_encode_bool("pressure_angle", config_raw.pressure_angle);
 	json_encode_bool("pressure_opacity", config_raw.pressure_opacity);
@@ -183,7 +184,8 @@ function config_init() {
 		config_raw.touch_ui = false;
 		config_raw.splash_screen = false;
 		///end
-		config_raw.node_preview = node_preview_t.SELECTED_NODE;
+		config_raw.selected_node_preview = true;
+		config_raw.node_previews = false;
 		config_raw.pressure_hardness = true;
 		config_raw.pressure_angle = false;
 		config_raw.pressure_opacity = false;
@@ -470,7 +472,8 @@ type config_t = {
 	displace_strength?: f32;
 	layer_res?: i32;
 	brush_live?: bool;
-	node_preview?: i32;
+	selected_node_preview?: bool;
+	node_previews?: bool;
 	pressure_hardness?: bool;
 	pressure_angle?: bool;
 	pressure_opacity?: bool;
