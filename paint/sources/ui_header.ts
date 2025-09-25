@@ -110,6 +110,7 @@ function ui_header_draw_tool_properties() {
 
 		let h_color: ui_handle_t = ui_handle(__ID__);
 		h_color.color = context_raw.picked_color.base;
+		h_color.color = color_set_ab(h_color.color, 255);
 		let state: ui_state_t = ui_text("", 0, h_color.color);
 		if (state == ui_state_t.STARTED) {
 			base_drag_off_x = -(mouse_x - ui._x - ui._window_x - 3);
