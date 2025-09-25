@@ -7,13 +7,14 @@
 #include "iron_gpu.h"
 void *gpu_create_texture_from_bytes(void *buffer, int width, int height, int format);
 void console_info(char *s);
+buffer_t *iron_inflate(buffer_t *bytes, bool raw);
 
 typedef struct {
 	char name[256];
 	int pixel_type;
 } channel_t;
 
-void *io_exr_parse(uint8_t *buf) {
+void *io_exr_parse(uint8_t *buf, size_t buf_size) {
 	if (buf[0] != 0x76 || buf[1] != 0x2f || buf[2] != 0x31 || buf[3] != 0x01) {
 		return NULL;
 	}
@@ -27,6 +28,7 @@ void *io_exr_parse(uint8_t *buf) {
 	int pixel_type = 0;
 	channel_t channels[4];
 	int num_channels = 0;
+	int compression = 0;
 
 	while (1) {
 		char name[256];
@@ -70,10 +72,11 @@ void *io_exr_parse(uint8_t *buf) {
 				}
 
 				int32_t chpixel_type = *(int32_t *)(buf + chpos); chpos += 4;
-				chpos += 4; // pLinear
-				chpos += 4; // reserved
-				chpos += 4; // xSampling
-				chpos += 4; // ySampling
+				uint8_t pLinear = buf[chpos]; chpos += 1;  // 1 byte
+				chpos += 3;  // Skip reserved (3 bytes)
+				int32_t xSampling = *(int32_t *)(buf + chpos); chpos += 4;
+				int32_t ySampling = *(int32_t *)(buf + chpos); chpos += 4;
+
 				strcpy(channels[num_channels].name, chname);
 				channels[num_channels].pixel_type = chpixel_type;
 				num_channels++;
@@ -90,9 +93,9 @@ void *io_exr_parse(uint8_t *buf) {
 			}
 		}
 		else if (strcmp(name, "compression") == 0) {
-			uint8_t comp = buf[pos];
-			if (comp != 0) {
-				console_info("Error: Compressed exr files not yet implemented");
+			compression = buf[pos];
+			if (compression != 0 && compression != 2) {
+				console_info("Error: This exr compression type is not yet implemented");
 				return NULL;
 			}
 		}
@@ -109,56 +112,104 @@ void *io_exr_parse(uint8_t *buf) {
 		pos += 8;
 	}
 
-	int is_bgr = (num_channels == 3 && strcmp(channels[0].name, "B") == 0 && strcmp(channels[1].name, "G") == 0 && strcmp(channels[2].name, "R") == 0);
-	int is_16bit = (bits == 16);
+	int r_idx = -1;
+	int g_idx = -1;
+	int b_idx = -1;
+	int a_idx = -1;
+	for (int c = 0; c < num_channels; c++) {
+		if (strcmp(channels[c].name, "R") == 0) r_idx = c;
+		else if (strcmp(channels[c].name, "G") == 0) g_idx = c;
+		else if (strcmp(channels[c].name, "B") == 0) b_idx = c;
+		else if (strcmp(channels[c].name, "A") == 0) a_idx = c;
+	}
+
+	bool is_16bit = bits == 16;
 	int channel_bytes = is_16bit ? 2 : 4;
 	size_t image_size = (size_t)width * height * 4 * channel_bytes;
 	uint8_t *pixels = (uint8_t *)malloc(image_size);
+	uint8_t *reordered = NULL;
 
 	for (int y = 0; y < height; y++) {
 		uint32_t scan_line_pos = line_offset_table[y];
+		uint32_t compressed_len = *(uint32_t *)(buf + scan_line_pos + 4);
 		uint32_t off = scan_line_pos + 8;
+		uint8_t *line_data = NULL;
+		buffer_t *decomp;
 
-		for (int x = 0; x < width; x++) {
-			size_t outi = ((size_t)y * width + x) * 4 * channel_bytes;
-			float r = 0.0f;
-			float g = 0.0f;
-			float b = 0.0f;
-			float a = 1.0f;
+		if (compression == 0) { // None
+			line_data = buf + off;
+		}
+		// else if (compression == 1) {} // RLE
+		else if (compression == 2) { // ZIPS
+			buffer_t compressed;
+			compressed.buffer = buf + off;
+			compressed.length = compressed.capacity = compressed_len;
+			decomp = iron_inflate(&compressed, false);
+			line_data = decomp->buffer;
 
-			if (is_bgr) {
+			uint8_t *t = line_data + 1;
+			uint8_t *stop = line_data + decomp->length;
+			int p = line_data[0];
+			while (t < stop) {
+				int d = *t;
+				int orig = (d - 128 + p) & 0xFF;
+				p = orig;
+				*t = (uint8_t)orig;
+				++t;
+			}
+
+			if (reordered == NULL) {
+				reordered = malloc(decomp->length);
+			}
+			size_t half = (decomp->length + 1) / 2;
+			for (size_t i = 0; i < half; i++) {
+				reordered[i * 2] = decomp->buffer[i];
+				if (i * 2 + 1 < decomp->length) {
+					reordered[i * 2 + 1] = decomp->buffer[half + i];
+				}
+			}
+			line_data = reordered;
+		}
+		// else if (compression == 3) {} // ZIP
+
+		if (line_data) {
+			uint8_t *plane_starts[4];
+			size_t plane_size = (size_t)width * channel_bytes;
+			for (int c = 0; c < num_channels; c++) {
+				plane_starts[c] = line_data + (size_t)c * plane_size;
+			}
+
+			for (int x = 0; x < width; x++) {
+				size_t outi = ((size_t)y * width + x) * 4 * channel_bytes;
+
 				if (is_16bit) {
-					uint16_t b_h = *(uint16_t *)(buf + off); off += 2;
-					uint16_t g_h = *(uint16_t *)(buf + off); off += 2;
-					uint16_t r_h = *(uint16_t *)(buf + off); off += 2;
+					uint16_t vals[4] = {0};
+					for (int c = 0; c < num_channels; c++) {
+						vals[c] = *(uint16_t *)(plane_starts[c] + (size_t)x * channel_bytes);
+					}
+					uint16_t r_h = (r_idx >= 0 ? vals[r_idx] : (num_channels > 0 ? vals[0] : 0));
+					uint16_t g_h = (g_idx >= 0 ? vals[g_idx] : r_h);
+					uint16_t b_h = (b_idx >= 0 ? vals[b_idx] : r_h);
+					uint16_t a_h = (a_idx >= 0 ? vals[a_idx] : 0x3c00);
+
 					*(uint16_t *)(pixels + outi + 0 * channel_bytes) = r_h;
 					*(uint16_t *)(pixels + outi + 1 * channel_bytes) = g_h;
 					*(uint16_t *)(pixels + outi + 2 * channel_bytes) = b_h;
-					*(uint16_t *)(pixels + outi + 3 * channel_bytes) = 0x3c00;
+					*(uint16_t *)(pixels + outi + 3 * channel_bytes) = a_h;
 				}
 				else {
-					float b = *(float *)(buf + off); off += 4;
-					float g = *(float *)(buf + off); off += 4;
-					float r = *(float *)(buf + off); off += 4;
+					float vals_f[4] = {0.0f};
+					for (int c = 0; c < num_channels; c++) {
+						vals_f[c] = *(float *)(plane_starts[c] + (size_t)x * channel_bytes);
+					}
+					float r = (r_idx >= 0 ? vals_f[r_idx] : (num_channels > 0 ? vals_f[0] : 0.0f));
+					float g = (g_idx >= 0 ? vals_f[g_idx] : r);
+					float b = (b_idx >= 0 ? vals_f[b_idx] : r);
+					float a = (a_idx >= 0 ? vals_f[a_idx] : 1.0f);
+
 					*(float *)(pixels + outi + 0) = r;
 					*(float *)(pixels + outi + 4) = g;
 					*(float *)(pixels + outi + 8) = b;
-					*(float *)(pixels + outi + 12) = a;
-				}
-			}
-			else {
-				if (is_16bit) {
-					uint16_t v_h = *(uint16_t *)(buf + off); off += 2;
-					*(uint16_t *)(pixels + outi + 0 * channel_bytes) = v_h;
-					*(uint16_t *)(pixels + outi + 1 * channel_bytes) = v_h;
-					*(uint16_t *)(pixels + outi + 2 * channel_bytes) = v_h;
-					*(uint16_t *)(pixels + outi + 3 * channel_bytes) = 0x3c00;
-				}
-				else {
-					float v = *(float *)(buf + off); off += 4;
-					*(float *)(pixels + outi + 0) = v;
-					*(float *)(pixels + outi + 4) = v;
-					*(float *)(pixels + outi + 8) = v;
 					*(float *)(pixels + outi + 12) = a;
 				}
 			}

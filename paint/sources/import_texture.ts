@@ -40,6 +40,10 @@ function import_texture_run(path: string, hdr_as_envmap: bool = true) {
 		image = js_pcall_str(importer, path);
 	}
 
+	if (image == null) {
+		return;
+	}
+
 	map_set(data_cached_images, path, image);
 	let ar: string[] = string_split(path, path_sep);
 	let name: string = ar[ar.length - 1];
@@ -51,10 +55,7 @@ function import_texture_run(path: string, hdr_as_envmap: bool = true) {
 	array_push(project_asset_names, name);
 	map_set(project_asset_map, asset.id, image);
 	ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
-
-	if (image != null) {
-		console_info(tr("Texture imported:") + " " + name);
-	}
+	console_info(tr("Texture imported:") + " " + name);
 
 	// Set as envmap
 	if (hdr_as_envmap && ends_with(to_lower_case(path), ".hdr")) {

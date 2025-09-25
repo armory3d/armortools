@@ -26,11 +26,11 @@ FN(io_svg_parse) {
 	return JS_NewBigUint64(ctx, (uint64_t)io_svg_parse(ab));
 }
 
-void *io_exr_parse(char *buf);
+void *io_exr_parse(char *buf, size_t len);
 FN(io_exr_parse) {
 	size_t len;
 	void *ab = JS_GetArrayBuffer(ctx, &len, argv[0]);
-	return JS_NewBigUint64(ctx, (uint64_t)io_exr_parse(ab));
+	return JS_NewBigUint64(ctx, (uint64_t)io_exr_parse(ab, len));
 }
 
 void *io_usd_parse(char *buf, size_t size);
