@@ -124,10 +124,11 @@ function tab_swatches_draw(htab: ui_handle_t) {
 
 				if (state == ui_state_t.STARTED) {
 					context_set_swatch(project_raw.swatches[i]);
-
 					base_drag_off_x = -(mouse_x - uix - ui._window_x - 2 * slotw);
 					base_drag_off_y = -(mouse_y - uiy - ui._window_y + 1);
 					base_drag_swatch = context_raw.swatch;
+					context_raw.picked_color = util_clone_swatch_color(context_raw.swatch);
+					ui_header_handle.redraws = 2;
 				}
 				else if (state == ui_state_t.HOVERED) {
 					tab_swatches_drag_pos = (mouse_x > uix + ui._window_x + slotw / 2) ? i + 1 : i; // Switch to the next position if the mouse crosses the swatch rectangle center

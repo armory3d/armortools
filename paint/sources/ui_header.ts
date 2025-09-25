@@ -126,6 +126,8 @@ function ui_header_draw_tool_properties() {
 				ui.changed = false;
 				ui_color_wheel(_ui_header_draw_tool_properties_h, false, -1, 10 * ui.ops.theme.ELEMENT_H * UI_SCALE(), false);
 				if (ui.changed) {
+					context_raw.picked_color.base = _ui_header_draw_tool_properties_h.color;
+					ui_header_handle.redraws = 2;
 					ui_menu_keep_open = true;
 				}
 			});
@@ -152,6 +154,8 @@ function ui_header_draw_tool_properties() {
 				ui.changed = false;
 				ui_color_wheel(_ui_header_draw_tool_properties_h, false, -1, 10 * ui.ops.theme.ELEMENT_H * UI_SCALE(), false);
 				if (ui.changed) {
+					context_raw.picked_color.normal = _ui_header_draw_tool_properties_h.color;
+					ui_header_handle.redraws = 2;
 					ui_menu_keep_open = true;
 				}
 			});
@@ -161,23 +165,23 @@ function ui_header_draw_tool_properties() {
 
 		let hocc: ui_handle_t = ui_handle(__ID__);
 		hocc.f = context_raw.picked_color.occlusion;
-		ui_slider(hocc, tr("Occlusion"), 0.0, 1.0, true);
+		context_raw.picked_color.occlusion = ui_slider(hocc, tr("Occlusion"), 0.0, 1.0, true);
 
 		let hrough: ui_handle_t = ui_handle(__ID__);
 		hrough.f = context_raw.picked_color.roughness;
-		ui_slider(hrough, tr("Roughness"), 0.0, 1.0, true);
+		context_raw.picked_color.roughness = ui_slider(hrough, tr("Roughness"), 0.0, 1.0, true);
 
 		let hmet: ui_handle_t = ui_handle(__ID__);
 		hmet.f = context_raw.picked_color.metallic;
-		ui_slider(hmet, tr("Metallic"), 0.0, 1.0, true);
+		context_raw.picked_color.metallic = ui_slider(hmet, tr("Metallic"), 0.0, 1.0, true);
 
 		let hheight: ui_handle_t = ui_handle(__ID__);
 		hheight.f = context_raw.picked_color.height;
-		ui_slider(hheight, tr("Height"), 0.0, 1.0, true);
+		context_raw.picked_color.height = ui_slider(hheight, tr("Height"), 0.0, 1.0, true);
 
 		let hopac: ui_handle_t = ui_handle(__ID__);
 		hopac.f = context_raw.picked_color.opacity;
-		ui_slider(hopac, tr("Opacity"), 0.0, 1.0, true);
+		context_raw.picked_color.opacity = ui_slider(hopac, tr("Opacity"), 0.0, 1.0, true);
 
 		let h_select_mat: ui_handle_t = ui_handle(__ID__);
 		if (h_select_mat.init) {
