@@ -101,7 +101,7 @@ float UI_HEADER_DRAG_H() {
 }
 
 float UI_TOOLTIP_DELAY() {
-	return 1.0;
+	return 0.7;
 }
 
 ui_t *ui_get_current() {
