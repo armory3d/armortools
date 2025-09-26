@@ -69,7 +69,8 @@ let nodes_material_input: ui_node_t[] = [
 				height: 0
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -118,7 +119,8 @@ let nodes_material_input: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -168,7 +170,8 @@ let nodes_material_input: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -289,7 +292,8 @@ let nodes_material_input: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -422,7 +426,8 @@ let nodes_material_input: ui_node_t[] = [
 				height: 0
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -459,7 +464,8 @@ let nodes_material_input: ui_node_t[] = [
 				height: 0
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -521,7 +527,8 @@ let nodes_material_input: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -654,7 +661,8 @@ let nodes_material_input: ui_node_t[] = [
 				height: 0
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -727,7 +735,8 @@ let nodes_material_input: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -848,7 +857,8 @@ let nodes_material_input: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -885,7 +895,8 @@ let nodes_material_input: ui_node_t[] = [
 				height: 0
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -922,7 +933,8 @@ let nodes_material_input: ui_node_t[] = [
 				height: 0
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -959,7 +971,8 @@ let nodes_material_input: ui_node_t[] = [
 				height: 0
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -984,7 +997,8 @@ let nodes_material_input: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -1105,7 +1119,8 @@ let nodes_material_input: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -1142,7 +1157,8 @@ let nodes_material_input: ui_node_t[] = [
 				height: 0
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -1179,7 +1195,8 @@ let nodes_material_input: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -1229,7 +1246,8 @@ let nodes_material_input: ui_node_t[] = [
 				height: 0
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 ];
 
@@ -1353,7 +1371,8 @@ let nodes_material_input: ui_node_t[] = [
 // 		],
 // 		outputs: [],
 // 		buttons: [],
-//		width: 0
+//		width: 0,
+// 		flags: 0
 // 	}
 // ];
 
@@ -1454,7 +1473,8 @@ let nodes_material_texture: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -1540,7 +1560,8 @@ let nodes_material_texture: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -1602,7 +1623,8 @@ let nodes_material_texture: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -1664,7 +1686,8 @@ let nodes_material_texture: ui_node_t[] = [
 				height: 0
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -1737,7 +1760,8 @@ let nodes_material_texture: ui_node_t[] = [
 				height: 0
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -1799,7 +1823,8 @@ let nodes_material_texture: ui_node_t[] = [
 				height: 0
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -1861,7 +1886,8 @@ let nodes_material_texture: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -1911,7 +1937,8 @@ let nodes_material_texture: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -1973,7 +2000,8 @@ let nodes_material_texture: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -2047,7 +2075,8 @@ let nodes_material_texture: ui_node_t[] = [
 				height: 0
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -2109,7 +2138,8 @@ let nodes_material_texture: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	}
 ];
 
@@ -2162,7 +2192,8 @@ let nodes_material_color: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -2224,7 +2255,8 @@ let nodes_material_color: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -2274,7 +2306,8 @@ let nodes_material_color: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -2360,7 +2393,8 @@ let nodes_material_color: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -2410,7 +2444,8 @@ let nodes_material_color: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -2495,7 +2530,8 @@ let nodes_material_color: ui_node_t[] = [
 				height: 0
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -2545,7 +2581,8 @@ let nodes_material_color: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -2676,7 +2713,8 @@ let nodes_material_color: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	}
 ];
 
@@ -2753,7 +2791,8 @@ let nodes_material_vector: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -2827,7 +2866,8 @@ let nodes_material_vector: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -2889,7 +2929,8 @@ let nodes_material_vector: ui_node_t[] = [
 				height: 0
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -2951,7 +2992,8 @@ let nodes_material_vector: ui_node_t[] = [
 				height: 0
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -3001,7 +3043,8 @@ let nodes_material_vector: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -3063,7 +3106,8 @@ let nodes_material_vector: ui_node_t[] = [
 				height: 8.5
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	}
 ];
 
@@ -3140,7 +3184,8 @@ let nodes_material_converter: ui_node_t[] = [
 				height: 0
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -3202,7 +3247,8 @@ let nodes_material_converter: ui_node_t[] = [
 				height: 4.5
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -3276,7 +3322,8 @@ let nodes_material_converter: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -3338,7 +3385,8 @@ let nodes_material_converter: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -3400,7 +3448,8 @@ let nodes_material_converter: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -3462,7 +3511,8 @@ let nodes_material_converter: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -3560,7 +3610,8 @@ let nodes_material_converter: ui_node_t[] = [
 				height: 0
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -3633,7 +3684,8 @@ let nodes_material_converter: ui_node_t[] = [
 				height: 0
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -3671,7 +3723,8 @@ let nodes_material_converter: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -3733,7 +3786,8 @@ let nodes_material_converter: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -3795,7 +3849,8 @@ let nodes_material_converter: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -3857,7 +3912,8 @@ let nodes_material_converter: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -3931,7 +3987,8 @@ let nodes_material_converter: ui_node_t[] = [
 				height: 0
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	}
 ];
 
@@ -3982,7 +4039,8 @@ let nodes_material_neural: ui_node_t[] = [
 				height: 1
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -4043,7 +4101,8 @@ let nodes_material_neural: ui_node_t[] = [
 				height: 0
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -4141,7 +4200,8 @@ let nodes_material_neural: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -4202,7 +4262,8 @@ let nodes_material_neural: ui_node_t[] = [
 				height: 0
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -4240,7 +4301,8 @@ let nodes_material_neural: ui_node_t[] = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	},
 	{
 		id: 0,
@@ -4302,7 +4364,8 @@ let nodes_material_neural: ui_node_t[] = [
 				height: 1
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	}
 ];
 
@@ -4329,7 +4392,8 @@ let nodes_material_group: ui_node_t[] = [
 				height: 1
 			}
 		],
-		width: 0
+		width: 0,
+		flags: 0
 	}
 ];
 
@@ -4538,7 +4602,9 @@ function nodes_material_new_group_button(node_id: i32) {
 							type: "CUSTOM",
 							height: 1
 						}
-					]
+					],
+					width: 0,
+					flags: 0
 				},
 				{
 					id: 1,
@@ -4555,7 +4621,9 @@ function nodes_material_new_group_button(node_id: i32) {
 							type: "CUSTOM",
 							height: 1
 						}
-					]
+					],
+					width: 0,
+					flags: 0
 				}
 			],
 			links: []

@@ -1402,7 +1402,9 @@ void ui_node_canvas_encode(ui_node_canvas_t *canvas) {
 		}
 
 		armpack_encode_string("width");
-		armpack_encode_i32(canvas->nodes->buffer[i]->width);
+		armpack_encode_f32(canvas->nodes->buffer[i]->width);
+		armpack_encode_string("flags");
+		armpack_encode_i32(canvas->nodes->buffer[i]->flags);
 	}
 
 	armpack_encode_string("links");
@@ -1524,6 +1526,8 @@ uint32_t ui_node_canvas_encoded_size(ui_node_canvas_t *canvas) {
 
 		size += armpack_size_string("width");
 		size += armpack_size_f32();
+		size += armpack_size_string("flags");
+		size += armpack_size_i32();
 	}
 
 	size += armpack_size_string("links");
@@ -1616,6 +1620,8 @@ char *ui_node_canvas_to_json(ui_node_canvas_t *canvas) {
 		json_encode_end_array();
 
 		json_encode_f32("width", canvas->nodes->buffer[i]->width);
+		json_encode_end_object();
+		json_encode_i32("flags", canvas->nodes->buffer[i]->flags);
 		json_encode_end_object();
 	}
 	json_encode_end_array();

@@ -291,6 +291,7 @@ function brush_output_paint(self: brush_output_node_t) {
 //			height: 0
 // 		}
 // 	],
-//	width: 0
+//	width: 0,
+//	flags: 0
 // };
 

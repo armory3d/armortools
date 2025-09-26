@@ -271,5 +271,6 @@ let photo_to_pbr_node_def: ui_node_t = {
 		}
 	],
 	buttons: [],
-	width: 0
+	width: 0,
+	flags: 0
 };

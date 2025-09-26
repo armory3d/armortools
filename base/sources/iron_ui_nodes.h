@@ -47,6 +47,12 @@ typedef struct ui_node_button_array {
 	int capacity;
 } ui_node_button_array_t;
 
+typedef enum ui_node_flag {
+	NONE = 0,
+	COLLAPSED = 1,
+	PREVIEW = 2,
+} ui_node_flag_t;
+
 typedef struct ui_node {
 	int id;
 	char *name;
@@ -58,6 +64,7 @@ typedef struct ui_node {
 	ui_node_socket_array_t *outputs;
 	ui_node_button_array_t *buttons;
 	float width;
+	int flags; // ui_node_flag_t
 } ui_node_t;
 
 typedef struct ui_node_link {

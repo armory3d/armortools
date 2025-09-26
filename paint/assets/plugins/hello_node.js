@@ -55,7 +55,8 @@ let node_list = [
 			}
 		],
 		buttons: [],
-		width: 0
+		width: 0,
+		flags: 0
 	}
 ];
 

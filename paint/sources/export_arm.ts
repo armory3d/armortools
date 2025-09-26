@@ -110,7 +110,7 @@ function export_arm_run_project() {
 	let same_drive: bool = project_raw.envmap != null ? char_at(project_filepath, 0) == char_at(project_raw.envmap, 0) : true;
 	///end
 
-	project_raw.version = manifest_version;
+	project_raw.version = manifest_version_project;
 	project_raw.material_groups = mgroups;
 	project_raw.assets = texture_files;
 	project_raw.packed_assets = packed_assets;
@@ -270,7 +270,7 @@ function export_arm_run_material(path: string) {
 	}
 
 	let raw: project_format_t = {
-		version: manifest_version,
+		version: manifest_version_project,
 		material_nodes: mnodes,
 		material_groups: mgroups,
 		material_icons: micons,
@@ -337,7 +337,7 @@ function export_arm_run_brush(path: string) {
 	}
 
 	let raw: project_format_t = {
-		version: manifest_version,
+		version: manifest_version_project,
 		brush_nodes: bnodes,
 		brush_icons: bicons,
 		assets: texture_files,
@@ -477,7 +477,7 @@ function export_arm_run_swatches(path: string) {
 		path += ".arm";
 	}
 	let raw: project_format_t = {
-		version: manifest_version,
+		version: manifest_version_project,
 		swatches: project_raw.swatches
 	};
 	let buffer: buffer_t = util_encode_project(raw);

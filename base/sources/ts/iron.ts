@@ -876,6 +876,7 @@ declare type ui_node_t = {
 	outputs?: ui_node_socket_t[];
 	buttons?: ui_node_button_t[];
 	width?: f32;
+	flags?: i32;
 };
 
 declare type ui_node_socket_t = {

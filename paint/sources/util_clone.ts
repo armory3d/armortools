@@ -102,6 +102,7 @@ function util_clone_canvas_node(n: ui_node_t): ui_node_t {
 	r.outputs = util_clone_canvas_sockets(n.outputs);
 	r.buttons = util_clone_canvas_buttons(n.buttons);
 	r.width = n.width;
+	r.flags = n.flags;
 	return r;
 }
 

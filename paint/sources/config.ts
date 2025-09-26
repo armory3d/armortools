@@ -40,6 +40,8 @@ function config_save() {
 	path += "config.json";
 
 	json_encode_begin();
+	json_encode_string("version", config_raw.version);
+	json_encode_string("sha", config_raw.sha);
 	json_encode_string("locale", config_raw.locale);
 	json_encode_i32("window_mode", config_raw.window_mode);
 	json_encode_i32("window_w", config_raw.window_w);
@@ -57,8 +59,6 @@ function config_save() {
 	json_encode_bool("rp_bloom", config_raw.rp_bloom);
 	json_encode_f32("rp_vignette", config_raw.rp_vignette);
 	json_encode_f32("rp_grain", config_raw.rp_grain);
-	json_encode_string("version", config_raw.version);
-	json_encode_string("sha", config_raw.sha);
 	json_encode_string_array("recent_projects", config_raw.recent_projects);
 	json_encode_string_array("bookmarks", config_raw.bookmarks);
 	json_encode_string_array("plugins", config_raw.plugins);
@@ -112,6 +112,8 @@ function config_save() {
 function config_init() {
 	if (!config_loaded || config_raw == null) {
 		config_raw = {};
+		config_raw.version = manifest_version_config;
+		config_raw.sha = config_get_sha();
 		config_raw.locale = "system";
 		config_raw.window_mode = 0;
 		config_raw.window_resizable = true;
@@ -149,9 +151,6 @@ function config_init() {
 			config_raw.rp_supersample = 0.5;
 		}
 		///end
-		config_raw.version = manifest_version;
-		config_raw.sha = config_get_sha();
-
 		config_raw.recent_projects = [];
 		config_raw.bookmarks = [];
 		config_raw.plugins = [];
@@ -206,11 +205,7 @@ function config_init() {
 		config_raw.grid_snap = false;
 	}
 	else {
-		// Upgrade config format created by older ArmorPaint build
-		// if (config_raw.version != manifest_version) {
-		// 	config_raw.version = manifest_version;
-		// 	save();
-		// }
+		// Discard old config
 		if (config_raw.sha != config_get_sha()) {
 			config_loaded = false;
 			config_init();
@@ -422,6 +417,8 @@ type version_t = {
 };
 
 type config_t = {
+	version?: string;
+	sha?: string; // Commit id
 	// The locale should be specified in ISO 639-1 format:
 	// https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
 	// "system" is a special case that will use the system locale
@@ -445,8 +442,6 @@ type config_t = {
 	rp_vignette?: f32;
 	rp_grain?: f32;
 	// Application
-	version?: string;
-	sha?: string; // Commit id
 	recent_projects?: string[]; // Recently opened projects
 	bookmarks?: string[]; // Bookmarked folders in browser
 	plugins?: string[]; // List of enabled plugins

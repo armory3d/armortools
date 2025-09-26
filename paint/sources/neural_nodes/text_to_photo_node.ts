@@ -336,7 +336,8 @@ let text_to_photo_node_def: ui_node_t = {
 			height: 1
 		}
 	],
-	width: 0
+	width: 0,
+	flags: 0
 };
 
 let text_to_photo_node_text_input_ids: i32[] = [49406, 49407, 49407, 49407, 49407, 49407, 49407, 49407, 49407,
