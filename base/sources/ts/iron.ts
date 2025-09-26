@@ -680,6 +680,7 @@ enum cursor_t {
 }
 
 declare let ui_nodes_enum_texts: (s: string)=>string[];
+declare let ui_nodes_preview_image: (n: ui_node_t)=>gpu_texture_t;
 declare let ui_touch_scroll: bool;
 declare let ui_touch_hold : bool;
 declare let ui_touch_tooltip: bool;
@@ -940,6 +941,12 @@ enum ui_state_t {
 	DOWN,
 	RELEASED,
 	HOVERED,
+}
+
+enum _ui_node_flag_t {
+	NONE = 0,
+	COLLAPSED = 1,
+	PREVIEW = 2,
 }
 
 declare function ui_tooltip_image(image: gpu_texture_t, max_width: i32 = 0): void;

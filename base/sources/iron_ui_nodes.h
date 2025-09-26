@@ -131,6 +131,7 @@ extern char *ui_clipboard;
 extern char_ptr_array_t *ui_nodes_exclude_remove;
 extern bool ui_nodes_socket_released;
 extern char_ptr_array_t *(*ui_nodes_enum_texts)(char *);
+extern gpu_texture_t *(*ui_nodes_preview_image)(ui_node_t *);
 extern void (*ui_nodes_on_custom_button)(int, char *);
 extern ui_canvas_control_t *(*ui_nodes_on_canvas_control)(void);
 extern void (*ui_nodes_on_canvas_released)(void);

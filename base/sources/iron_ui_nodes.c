@@ -27,6 +27,7 @@ char *ui_clipboard = "";
 char_ptr_array_t *ui_nodes_exclude_remove = NULL; // No removal for listed node types
 bool ui_nodes_socket_released = false;
 char_ptr_array_t *(*ui_nodes_enum_texts)(char *) = NULL; // Retrieve combo items for buttons of type ENUM
+gpu_texture_t *(*ui_nodes_preview_image)(ui_node_t *) = NULL; // Retrieve preview image
 void (*ui_nodes_on_custom_button)(int, char *) = NULL; // Call external function
 ui_canvas_control_t *(*ui_nodes_on_canvas_control)(void) = NULL;
 void (*ui_nodes_on_canvas_released)(void) = NULL;
@@ -735,6 +736,16 @@ void ui_node_draw(ui_node_t *node, ui_node_canvas_t *canvas) {
 		// ny = ui_nodes_snap(node->y) + UI_NODES_PAN_Y();
 	}
 
+	// Node preview
+	if ((node->flags & NODE_FLAG_PREVIEW) && ui_nodes_preview_image != NULL) {
+		// ui_draw_shadow(nx, ny - w, w * 0.98, w * 0.98);
+		gpu_texture_t *image = ui_nodes_preview_image(node);
+		if (image != NULL) {
+			draw_set_color(0xffffffff);
+			draw_scaled_image(image, nx, ny - w, w, w);
+		}
+	}
+
 	// Shadow
 	ui_draw_shadow(nx, ny, w, h);
 
@@ -764,6 +775,9 @@ void ui_node_draw(ui_node_t *node, ui_node_canvas_t *canvas) {
 	// Eye button
 	hover = current->input_x > wx + nx + w - ui_p(20) && current->input_x < wx + nx + w &&
 			current->input_y > wy + ny && current->input_y < wy + ny + ui_p(20);
+	if (hover && current->input_started) {
+		node->flags ^= NODE_FLAG_PREVIEW;
+	}
 	draw_set_color(hover ? current->ops->theme->LABEL_COL : current->ops->theme->HOVER_COL);
 	float ex = nx + w - ui_p(10);
 	float ey = ny + ui_p(10);
@@ -1324,7 +1338,7 @@ void ui_node_canvas_encode(ui_node_canvas_t *canvas) {
 	armpack_encode_string("nodes");
 	armpack_encode_array(canvas->nodes->length);
 	for (int i = 0; i < canvas->nodes->length; ++i) {
-		armpack_encode_map(10);
+		armpack_encode_map(11);
 		armpack_encode_string("id");
 		armpack_encode_i32(canvas->nodes->buffer[i]->id);
 		armpack_encode_string("name");
