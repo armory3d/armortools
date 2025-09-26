@@ -819,7 +819,7 @@ function ui_nodes_render() {
 		ui_nodes_grid_redraw = false;
 	}
 
-	if (config_raw.selected_node_preview && context_raw.node_preview_dirty) {
+	if (context_raw.selected_node_preview && context_raw.node_preview_dirty) {
 		ui_nodes_make_node_preview();
 	}
 
@@ -975,7 +975,7 @@ function ui_nodes_render() {
 		ui_nodes_uichanged_last = ui.changed;
 
 		// Node previews
-		if (config_raw.selected_node_preview && nodes.nodes_selected_id.length > 0) {
+		if (context_raw.selected_node_preview && nodes.nodes_selected_id.length > 0) {
 			let sel: ui_node_t = ui_get_node(c.nodes, nodes.nodes_selected_id[0]);
 			let tw: f32 = 128 * UI_SCALE();
 			let tx: f32 = ui_nodes_ww - tw - 8 * UI_SCALE();
@@ -983,7 +983,7 @@ function ui_nodes_render() {
 			ui_nodes_draw_node_preview(sel, tx, ty, tw);
 		}
 
-		// if (config_raw.selected_node_preview) {
+		// if (context_raw.selected_node_preview) {
 		// 	for (let i: i32 = 0; i < c.nodes.length; ++i) {
 		// 		let n: ui_node_t = c.nodes[i];
 		// 		let tw: f32 = 128 * UI_SCALE() * UI_NODES_SCALE();

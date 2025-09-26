@@ -101,6 +101,7 @@ type context_t = {
 	node_preview_name?: string;
 	node_previews?: map_t<string, gpu_texture_t>;
 	node_previews_used?: string[];
+	selected_node_preview: bool;
 	mask_preview_rgba32?: gpu_texture_t;
 	mask_preview_last?: slot_layer_t;
 
@@ -326,6 +327,7 @@ function context_create(): context_t {
 	c.layers_preview_dirty = false;
 	c.node_preview_dirty = false;
 	c.node_preview_name = "";
+	c.selected_node_preview = true;
 	c.colorid_picked = false;
 	c.material_preview = false; // Drawing material previews
 	c.saved_camera = mat4_identity();

@@ -47,15 +47,6 @@ function box_preferences_show() {
 				context_raw.hscale_was_changed = true;
 			}
 
-			let h_selected_node_preview: ui_handle_t = ui_handle(__ID__);
-			if (h_selected_node_preview.init) {
-				h_selected_node_preview.b = config_raw.selected_node_preview;
-			}
-			ui_check(h_selected_node_preview, tr("Selected Node Preview"));
-			if (h_selected_node_preview.changed) {
-				config_raw.selected_node_preview = h_selected_node_preview.b;
-			}
-
 			let h_node_previews: ui_handle_t = ui_handle(__ID__);
 			if (h_node_previews.init) {
 				h_node_previews.b = config_raw.node_previews;
