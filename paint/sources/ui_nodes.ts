@@ -512,6 +512,9 @@ function ui_nodes_update() {
 		ui_nodes_wx -= ui_toolbar_w(true);
 		ui_nodes_wy = 0;
 	}
+	if (!base_view3d_show) {
+		ww += base_view3d_w();
+	}
 
 	let mx: i32 = mouse_x;
 	let my: i32 = mouse_y;
