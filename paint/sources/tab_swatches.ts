@@ -135,7 +135,7 @@ function tab_swatches_draw(htab: ui_handle_t) {
 					drag_pos_set = true;
 				}
 				else if (state == ui_state_t.RELEASED) {
-					if (sys_time() - context_raw.select_time < 0.25) {
+					if (sys_time() - context_raw.select_time < 0.2) {
 
 						_tab_swatches_draw_i = i;
 

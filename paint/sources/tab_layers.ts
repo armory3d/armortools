@@ -409,7 +409,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 
 		let state: ui_state_t = ui_text(l.name);
 		if (state == ui_state_t.RELEASED) {
-			if (sys_time() - context_raw.select_time < 0.25) {
+			if (sys_time() - context_raw.select_time < 0.2) {
 				tab_layers_layer_name_edit = l.id;
 				tab_layers_layer_name_handle.text = l.name;
 				ui_start_text_edit(tab_layers_layer_name_handle);

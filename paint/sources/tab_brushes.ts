@@ -75,7 +75,7 @@ function tab_brushes_draw(htab: ui_handle_t) {
 					if (context_raw.brush != project_brushes[i]) {
 						context_select_brush(i);
 					}
-					if (sys_time() - context_raw.select_time < 0.25) {
+					if (sys_time() - context_raw.select_time < 0.2) {
 						ui_base_show_brush_nodes();
 					}
 					context_raw.select_time = sys_time();

@@ -356,7 +356,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 				}
 
 				ui_files_selected = i;
-				if (sys_time() - context_raw.select_time < 0.25) {
+				if (sys_time() - context_raw.select_time < 0.2) {
 					base_drag_file = null;
 					base_drag_file_icon = null;
 					base_is_dragging = false;

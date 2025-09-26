@@ -363,7 +363,7 @@ function ui_viewnodes_on_canvas_released() {
 			if (ui_input_in_rect(ui._window_x + UI_NODE_X(node), ui._window_y + UI_NODE_Y(node), UI_NODE_W(node), UI_NODE_H(canvas, node))) {
 				if (nodes.nodes_selected_id.length > 0 && node.id == nodes.nodes_selected_id[0]) {
 					ui_view2d_hwnd.redraws = 2;
-					if (sys_time() - context_raw.select_time < 0.25) ui_base_show_2d_view(view_2d_type_t.NODE);
+					if (sys_time() - context_raw.select_time < 0.2) ui_base_show_2d_view(view_2d_type_t.NODE);
 					context_raw.select_time = sys_time();
 				}
 				break;

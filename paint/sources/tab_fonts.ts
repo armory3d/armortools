@@ -97,7 +97,7 @@ function tab_fonts_draw(htab: ui_handle_t) {
 							context_select_font(i);
 						});
 					}
-					if (sys_time() - context_raw.select_time < 0.25) {
+					if (sys_time() - context_raw.select_time < 0.2) {
 						ui_base_show_2d_view(view_2d_type_t.FONT);
 					}
 					context_raw.select_time = sys_time();
