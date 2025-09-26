@@ -984,7 +984,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 				}
 			}
 		}
-		if (current->input_started && ui_input_in_rect(wx + UI_NODE_X(node) - UI_LINE_H() / 2, wy + UI_NODE_Y(node) - UI_LINE_H() / 2, UI_NODE_W(node) + UI_LINE_H(), node_h + UI_LINE_H())) {
+		if (current->input_started && !(node->flags & NODE_FLAG_COLLAPSED) && ui_input_in_rect(wx + UI_NODE_X(node) - UI_LINE_H() / 2, wy + UI_NODE_Y(node) - UI_LINE_H() / 2, UI_NODE_W(node) + UI_LINE_H(), node_h + UI_LINE_H())) {
 			// Check sockets
 			if (current_nodes->link_drag_id == -1) {
 				for (int j = 0; j < node->outputs->length; ++j) {
