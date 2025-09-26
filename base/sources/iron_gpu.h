@@ -9,9 +9,6 @@
 #include <iron_array.h>
 #include BACKEND_GPU_H
 
-#define GPU_CLEAR_NONE 0
-#define GPU_CLEAR_COLOR 1
-#define GPU_CLEAR_DEPTH 2
 #define GPU_MAX_VERTEX_ELEMENTS 16
 #define GPU_MAX_TEXTURES 16
 #define GPU_CONSTANT_BUFFER_SIZE 512
@@ -21,6 +18,12 @@
 #else
 #define GPU_FRAMEBUFFER_COUNT 3
 #endif
+
+typedef enum gpu_clear {
+	GPU_CLEAR_NONE = 0,
+	GPU_CLEAR_COLOR = 1,
+	GPU_CLEAR_DEPTH = 2,
+} gpu_clear_t;
 
 typedef enum gpu_texture_state {
 	GPU_TEXTURE_STATE_SHADER_RESOURCE,
@@ -144,8 +147,8 @@ typedef struct gpu_raytrace_acceleration_structure {
 } gpu_raytrace_acceleration_structure_t;
 
 int gpu_max_bound_textures(void);
-void gpu_begin(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, unsigned flags, unsigned color, float depth);
-void gpu_begin_internal(unsigned flags, unsigned color, float depth);
+void gpu_begin(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, gpu_clear_t flags, unsigned color, float depth);
+void gpu_begin_internal(gpu_clear_t flags, unsigned color, float depth);
 void gpu_end(void);
 void gpu_end_internal(void);
 void gpu_execute_and_wait(void);

@@ -1018,7 +1018,7 @@ bool iron_vulkan_get_size(int *width, int *height) {
 	return false;
 }
 
-void gpu_begin_internal(unsigned flags, unsigned color, float depth) {
+void gpu_begin_internal(gpu_clear_t flags, unsigned color, float depth) {
 	if (!framebuffer_acquired) {
 		acquire_next_image();
 		framebuffer_acquired = true;

@@ -174,7 +174,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	next_drawable();
 }
 
-void gpu_begin_internal(unsigned flags, unsigned color, float depth) {
+void gpu_begin_internal(gpu_clear_t flags, unsigned color, float depth) {
 	render_pass_desc = [MTLRenderPassDescriptor renderPassDescriptor];
 	for (int i = 0; i < current_render_targets_count; ++i) {
 		render_pass_desc.colorAttachments[i].texture = (__bridge id<MTLTexture>)current_render_targets[i]->impl._tex;

@@ -33,7 +33,7 @@ void gpu_init(int depth_buffer_bits, bool vsync) {
 	gpu_constant_buffer_lock(&constant_buffer, 0, GPU_CONSTANT_BUFFER_SIZE);
 }
 
-void gpu_begin(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, unsigned flags, unsigned color, float depth) {
+void gpu_begin(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, gpu_clear_t flags, unsigned color, float depth) {
 	if (gpu_in_use && !gpu_thrown) {
 		gpu_thrown = true;
 		iron_log("End before you begin");
