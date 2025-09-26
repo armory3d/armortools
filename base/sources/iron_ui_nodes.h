@@ -48,9 +48,9 @@ typedef struct ui_node_button_array {
 } ui_node_button_array_t;
 
 typedef enum ui_node_flag {
-	NONE = 0,
-	COLLAPSED = 1,
-	PREVIEW = 2,
+	NODE_FLAG_NONE = 0,
+	NODE_FLAG_COLLAPSED = 1,
+	NODE_FLAG_PREVIEW = 2,
 } ui_node_flag_t;
 
 typedef struct ui_node {
@@ -146,8 +146,8 @@ float UI_NODE_X(ui_node_t *node);
 float UI_NODE_Y(ui_node_t *node);
 float UI_NODE_W(ui_node_t *node);
 float UI_NODE_H(ui_node_canvas_t *canvas, ui_node_t *node);
-float UI_OUTPUT_Y(int sockets_count, int pos);
-float UI_INPUT_Y(ui_node_canvas_t *canvas, ui_node_socket_t **sockets, int sockets_count, int pos);
+float UI_OUTPUT_Y(ui_node_t *node, int pos);
+float UI_INPUT_Y(ui_node_canvas_t *canvas, ui_node_t *node, int pos);
 float UI_OUTPUTS_H(int sockets_count, int length);
 float UI_BUTTONS_H(ui_node_t *node);
 float UI_LINE_H();

@@ -75,10 +75,10 @@ function ui_viewnodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 	let link_y: i32 = ui._window_y + UI_NODE_Y(node);
 	if (link_drag.from_id > -1) {
 		link_x += UI_NODE_W(node);
-		link_y += UI_OUTPUT_Y(node.outputs.length, link_drag.from_socket);
+		link_y += UI_OUTPUT_Y(node, link_drag.from_socket);
 	}
 	else {
-		link_y += ui_nodes_INPUT_Y(ui_nodes_get_canvas(true), node.inputs, link_drag.to_socket) +
+		link_y += ui_nodes_INPUT_Y(ui_nodes_get_canvas(true), node, link_drag.to_socket) +
 			UI_OUTPUTS_H(node.outputs.length) + UI_BUTTONS_H(node);
 	}
 

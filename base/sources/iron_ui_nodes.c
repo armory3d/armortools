@@ -136,6 +136,7 @@ float UI_INPUTS_H(ui_node_canvas_t *canvas, ui_node_socket_t **sockets, int sock
 }
 
 float UI_NODE_H(ui_node_canvas_t *canvas, ui_node_t *node) {
+	if (node->flags & NODE_FLAG_COLLAPSED) return UI_LINE_H() * 1.2;;
 	return UI_LINE_H() * 1.2 + UI_INPUTS_H(canvas, node->inputs->buffer, node->inputs->length, -1) + UI_OUTPUTS_H(node->outputs->length, -1) + UI_BUTTONS_H(node);
 }
 
@@ -151,12 +152,14 @@ float UI_NODE_Y(ui_node_t *node) {
 	return node->y * UI_NODES_SCALE() + UI_NODES_PAN_Y();
 }
 
-float UI_INPUT_Y(ui_node_canvas_t *canvas, ui_node_socket_t **sockets, int sockets_count, int pos) {
-	return UI_LINE_H() * 1.62 + UI_INPUTS_H(canvas, sockets, sockets_count, pos);
+float UI_INPUT_Y(ui_node_canvas_t *canvas, ui_node_t *node, int pos) {
+	if (node->flags & NODE_FLAG_COLLAPSED) return UI_LINE_H() * 0.5;
+	return UI_LINE_H() * 1.62 + UI_INPUTS_H(canvas, node->inputs->buffer, node->inputs->length, pos);
 }
 
-float UI_OUTPUT_Y(int sockets_count, int pos) {
-	return UI_LINE_H() * 1.62 + UI_OUTPUTS_H(sockets_count, pos);
+float UI_OUTPUT_Y(ui_node_t *node, int pos) {
+	if (node->flags & NODE_FLAG_COLLAPSED) return UI_LINE_H() * 0.5;
+	return UI_LINE_H() * 1.62 + UI_OUTPUTS_H(node->outputs->length, pos);
 }
 
 float ui_p(float f) {
@@ -387,94 +390,13 @@ static char temp_label[64];
 static char temp_texts_data[64][64];
 static char *temp_texts[64];
 
-void ui_draw_node(ui_node_t *node, ui_node_canvas_t *canvas) {
+void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, float ny) {
 	ui_t *current = ui_get_current();
 	float wx = current->_window_x;
 	float wy = current->_window_y;
-	float ui_x = current->_x;
-	float ui_y = current->_y;
-	float ui_w = current->_w;
 	float w = UI_NODE_W(node);
 	float h = UI_NODE_H(canvas, node);
-	float nx = UI_NODE_X(node);
-	float ny = UI_NODE_Y(node);
-	char *text = ui_tr(node->name);
 	float lineh = UI_LINE_H();
-
-	// Disallow input if node is overlapped by another node
-	current_nodes->_input_started = current->input_started;
-	if (current->input_started) {
-		for (int i = ui_get_node_index(canvas->nodes->buffer, canvas->nodes->length, node->id) + 1; i < canvas->nodes->length; ++i) {
-			ui_node_t *n = canvas->nodes->buffer[i];
-			if (UI_NODE_X(n) < current->input_x - current->_window_x && UI_NODE_X(n) + UI_NODE_W(n) > current->input_x - current->_window_x &&
-				UI_NODE_Y(n) < current->input_y - current->_window_y && UI_NODE_Y(n) + UI_NODE_H(canvas, n) > current->input_y - current->_window_y) {
-				current->input_started = false;
-				break;
-			}
-		}
-	}
-
-	// Grid snap preview
-	if (ui_nodes_grid_snap && ui_is_selected(node) && current_nodes->nodes_drag) {
-		draw_set_color(current->ops->theme->BUTTON_COL);
-		ui_draw_rect(false,
-			ui_nodes_snap(node->x) + UI_NODES_PAN_X(),
-			ui_nodes_snap(node->y) + UI_NODES_PAN_Y(),
-			w + 2,
-			h + 2
-		);
-		// nx = ui_nodes_snap(node->x) + UI_NODES_PAN_X();
-		// ny = ui_nodes_snap(node->y) + UI_NODES_PAN_Y();
-	}
-
-	// Shadow
-	ui_draw_shadow(nx, ny, w, h);
-
-	// Outline
-	draw_set_color(ui_is_selected(node) ? current->ops->theme->LABEL_COL : current->ops->theme->PRESSED_COL);
-	ui_draw_rect(true, nx - 1, ny - 1, w + 2, h + 2);
-
-	// Body
-	draw_set_color(current->ops->theme->WINDOW_BG_COL);
-	ui_draw_rect(true, nx, ny, w, h);
-
-	// Header line
-	draw_set_color(node->color);
-	draw_filled_rect(nx, ny + lineh - ui_p(3), w, ui_p(3));
-
-	// Collapse button
-	bool hover = current->input_x > wx + nx && current->input_x < wx + nx + ui_p(20) &&
-				 current->input_y > wy + ny && current->input_y < wy + ny + ui_p(20);
-	draw_set_color(hover ? current->ops->theme->LABEL_COL : current->ops->theme->HOVER_COL);
-	int bx = nx + ui_p(4);
-	int by = ny + ui_p(8);
-	draw_filled_triangle(bx, by, bx + UI_ARROW_SIZE() * 2, by, bx + UI_ARROW_SIZE(), by + UI_ARROW_SIZE());
-
-	// Eye button
-	hover = current->input_x > wx + nx + w - ui_p(20) && current->input_x < wx + nx + w &&
-			current->input_y > wy + ny && current->input_y < wy + ny + ui_p(20);
-	draw_set_color(hover ? current->ops->theme->LABEL_COL : current->ops->theme->HOVER_COL);
-	float ex = nx + w - ui_p(10);
-	float ey = ny + ui_p(10);
-	float hw = ui_p(6);
-	float hh = ui_p(3);
-	float x[4] = {ex - hw, ex - hw * 0.5, ex + hw * 0.5, ex + hw};
-	float y_upper[4] = {ey, ey - hh * 1.5, ey - hh * 1.5, ey};
-	f32_array_t xa;
-	f32_array_t ya;
-	xa.buffer = x;
-	ya.buffer = y_upper;
-	draw_cubic_bezier(&xa, &ya, 15, 1.0);
-	float y_lower[4] = {ey, ey + hh * 1.5, ey + hh * 1.5, ey};
-	ya.buffer = y_lower;
-	draw_cubic_bezier(&xa, &ya, 15, 1.0);
-	draw_filled_circle(ex, ey, ui_p(2), 0);
-
-	// Title
-	draw_set_color(current->ops->theme->TEXT_COL);
-	float textw = draw_string_width(current->ops->font, current->font_size, text);
-	draw_string(text, nx + ui_p(20), ny + ui_p(6));
-	ny += lineh * 0.5;
 
 	// Outputs
 	for (int i = 0; i < node->outputs->length; ++i) {
@@ -771,6 +693,103 @@ void ui_draw_node(ui_node_t *node, ui_node_canvas_t *canvas) {
 			}
 		}
 	}
+}
+
+void ui_node_draw(ui_node_t *node, ui_node_canvas_t *canvas) {
+	ui_t *current = ui_get_current();
+	float wx = current->_window_x;
+	float wy = current->_window_y;
+	float ui_x = current->_x;
+	float ui_y = current->_y;
+	float ui_w = current->_w;
+	float w = UI_NODE_W(node);
+	float h = UI_NODE_H(canvas, node);
+	float nx = UI_NODE_X(node);
+	float ny = UI_NODE_Y(node);
+	char *text = ui_tr(node->name);
+	float lineh = UI_LINE_H();
+
+	// Disallow input if node is overlapped by another node
+	current_nodes->_input_started = current->input_started;
+	if (current->input_started) {
+		for (int i = ui_get_node_index(canvas->nodes->buffer, canvas->nodes->length, node->id) + 1; i < canvas->nodes->length; ++i) {
+			ui_node_t *n = canvas->nodes->buffer[i];
+			if (UI_NODE_X(n) < current->input_x - current->_window_x && UI_NODE_X(n) + UI_NODE_W(n) > current->input_x - current->_window_x &&
+				UI_NODE_Y(n) < current->input_y - current->_window_y && UI_NODE_Y(n) + UI_NODE_H(canvas, n) > current->input_y - current->_window_y) {
+				current->input_started = false;
+				break;
+			}
+		}
+	}
+
+	// Grid snap preview
+	if (ui_nodes_grid_snap && ui_is_selected(node) && current_nodes->nodes_drag) {
+		draw_set_color(current->ops->theme->BUTTON_COL);
+		ui_draw_rect(false,
+			ui_nodes_snap(node->x) + UI_NODES_PAN_X(),
+			ui_nodes_snap(node->y) + UI_NODES_PAN_Y(),
+			w + 2,
+			h + 2
+		);
+		// nx = ui_nodes_snap(node->x) + UI_NODES_PAN_X();
+		// ny = ui_nodes_snap(node->y) + UI_NODES_PAN_Y();
+	}
+
+	// Shadow
+	ui_draw_shadow(nx, ny, w, h);
+
+	// Outline
+	draw_set_color(ui_is_selected(node) ? current->ops->theme->LABEL_COL : current->ops->theme->PRESSED_COL);
+	ui_draw_rect(true, nx - 1, ny - 1, w + 2, h + 2);
+
+	// Body
+	draw_set_color(current->ops->theme->WINDOW_BG_COL);
+	ui_draw_rect(true, nx, ny, w, h);
+
+	// Header line
+	draw_set_color(node->color);
+	draw_filled_rect(nx, ny + lineh - ui_p(3), w, ui_p(3));
+
+	// Collapse button
+	bool hover = current->input_x > wx + nx && current->input_x < wx + nx + ui_p(20) &&
+				 current->input_y > wy + ny && current->input_y < wy + ny + ui_p(20);
+	if (hover && current->input_started) {
+		node->flags ^= NODE_FLAG_COLLAPSED;
+	}
+	draw_set_color(hover ? current->ops->theme->LABEL_COL : current->ops->theme->HOVER_COL);
+	int bx = nx + ui_p(4);
+	int by = ny + ui_p(8);
+	draw_filled_triangle(bx, by, bx + UI_ARROW_SIZE() * 2, by, bx + UI_ARROW_SIZE(), by + UI_ARROW_SIZE());
+
+	// Eye button
+	hover = current->input_x > wx + nx + w - ui_p(20) && current->input_x < wx + nx + w &&
+			current->input_y > wy + ny && current->input_y < wy + ny + ui_p(20);
+	draw_set_color(hover ? current->ops->theme->LABEL_COL : current->ops->theme->HOVER_COL);
+	float ex = nx + w - ui_p(10);
+	float ey = ny + ui_p(10);
+	float hw = ui_p(6);
+	float hh = ui_p(3);
+	float x[4] = {ex - hw, ex - hw * 0.5, ex + hw * 0.5, ex + hw};
+	float y_upper[4] = {ey, ey - hh * 1.5, ey - hh * 1.5, ey};
+	f32_array_t xa;
+	f32_array_t ya;
+	xa.buffer = x;
+	ya.buffer = y_upper;
+	draw_cubic_bezier(&xa, &ya, 15, 1.0);
+	float y_lower[4] = {ey, ey + hh * 1.5, ey + hh * 1.5, ey};
+	ya.buffer = y_lower;
+	draw_cubic_bezier(&xa, &ya, 15, 1.0);
+	draw_filled_circle(ex, ey, ui_p(2), 0);
+
+	// Title
+	draw_set_color(current->ops->theme->TEXT_COL);
+	float textw = draw_string_width(current->ops->font, current->font_size, text);
+	draw_string(text, nx + ui_p(20), ny + ui_p(6));
+	ny += lineh * 0.5;
+
+	if (!(node->flags & NODE_FLAG_COLLAPSED)) {
+		ui_node_draw_body(node, canvas, nx, ny);
+	}
 
 	current->_x = ui_x;
 	current->_y = ui_y;
@@ -843,9 +862,9 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 		ui_node_t *from = ui_get_node(canvas->nodes, link->from_id);
 		ui_node_t *to = ui_get_node(canvas->nodes, link->to_id);
 		float from_x = from == NULL ? current->input_x : wx + UI_NODE_X(from) + UI_NODE_W(from);
-		float from_y = from == NULL ? current->input_y : wy + UI_NODE_Y(from) + UI_OUTPUT_Y(from->outputs->length, link->from_socket);
+		float from_y = from == NULL ? current->input_y : wy + UI_NODE_Y(from) + UI_OUTPUT_Y(from, link->from_socket);
 		float to_x = to == NULL ? current->input_x : wx + UI_NODE_X(to);
-		float to_y = to == NULL ? current->input_y : wy + UI_NODE_Y(to) + UI_INPUT_Y(canvas, to->inputs->buffer, to->inputs->length, link->to_socket) + UI_OUTPUTS_H(to->outputs->length, -1) + UI_BUTTONS_H(to);
+		float to_y = to == NULL ? current->input_y : wy + UI_NODE_Y(to) + UI_INPUT_Y(canvas, to, link->to_socket) + UI_OUTPUTS_H(to->outputs->length, -1) + UI_BUTTONS_H(to);
 
 		// Cull
 		float left = to_x > from_x ? from_x : to_x;
@@ -871,8 +890,6 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 
 			for (int j = 0; j < canvas->nodes->length; ++j) {
 				ui_node_t *node = canvas->nodes->buffer[j];
-				ui_node_socket_t **inps = node->inputs->buffer;
-				ui_node_socket_t **outs = node->outputs->buffer;
 				float node_h = UI_NODE_H(canvas, node);
 				float rx = wx + UI_NODE_X(node) - UI_LINE_H() / 2;
 				float ry = wy + UI_NODE_Y(node) - UI_LINE_H() / 2;
@@ -882,7 +899,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 					if (from == NULL && node->id != to->id) { // Snap to output
 						for (int k = 0; k < node->outputs->length; ++k) {
 							float sx = wx + UI_NODE_X(node) + UI_NODE_W(node);
-							float sy = wy + UI_NODE_Y(node) + UI_OUTPUT_Y(node->outputs->length, k);
+							float sy = wy + UI_NODE_Y(node) + UI_OUTPUT_Y(node, k);
 							float rx = sx - UI_LINE_H() / 2;
 							float ry = sy - UI_LINE_H() / 2;
 							if (ui_input_in_rect(rx, ry, UI_LINE_H(), UI_LINE_H())) {
@@ -897,7 +914,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 					else if (to == NULL && node->id != from->id) { // Snap to input
 						for (int k = 0; k < node->inputs->length; ++k) {
 							float sx = wx + UI_NODE_X(node);
-							float sy = wy + UI_NODE_Y(node) + UI_INPUT_Y(canvas, inps, node->inputs->length, k) + UI_OUTPUTS_H(node->outputs->length, -1) + UI_BUTTONS_H(node);
+							float sy = wy + UI_NODE_Y(node) + UI_INPUT_Y(canvas, node, k) + UI_OUTPUTS_H(node->outputs->length, -1) + UI_BUTTONS_H(node);
 							float rx = sx - UI_LINE_H() / 2.0;
 							float ry = sy - UI_LINE_H() / 2.0;
 							if (ui_input_in_rect(rx, ry, UI_LINE_H(), UI_LINE_H())) {
@@ -936,9 +953,6 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 			}
 		}
 
-		ui_node_socket_t **inps = node->inputs->buffer;
-		ui_node_socket_t **outs = node->outputs->buffer;
-
 		// Drag node
 		float node_h = UI_NODE_H(canvas, node);
 		if (current->input_enabled && ui_input_in_rect(wx + UI_NODE_X(node) - UI_LINE_H() / 2.0, wy + UI_NODE_Y(node), UI_NODE_W(node) + UI_LINE_H(), UI_LINE_H())) {
@@ -975,7 +989,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 			if (current_nodes->link_drag_id == -1) {
 				for (int j = 0; j < node->outputs->length; ++j) {
 					float sx = wx + UI_NODE_X(node) + UI_NODE_W(node);
-					float sy = wy + UI_NODE_Y(node) + UI_OUTPUT_Y(node->outputs->length, j);
+					float sy = wy + UI_NODE_Y(node) + UI_OUTPUT_Y(node, j);
 					if (ui_input_in_rect(sx - UI_LINE_H() / 2.0, sy - UI_LINE_H() / 2.0, UI_LINE_H(), UI_LINE_H())) {
 						// New link from output
 						ui_node_link_t *l = (ui_node_link_t *)malloc(sizeof(ui_node_link_t)); // TODO: store at canvas->links without malloc
@@ -994,7 +1008,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 			if (current_nodes->link_drag_id == -1) {
 				for (int j = 0; j < node->inputs->length; ++j) {
 					float sx = wx + UI_NODE_X(node);
-					float sy = wy + UI_NODE_Y(node) + UI_INPUT_Y(canvas, inps, node->inputs->length, j) + UI_OUTPUTS_H(node->outputs->length, -1) + UI_BUTTONS_H(node);
+					float sy = wy + UI_NODE_Y(node) + UI_INPUT_Y(canvas, node, j) + UI_OUTPUTS_H(node->outputs->length, -1) + UI_BUTTONS_H(node);
 					if (ui_input_in_rect(sx - UI_LINE_H() / 2.0, sy - UI_LINE_H() / 2.0, UI_LINE_H(), UI_LINE_H())) {
 						// Already has a link - disconnect
 						for (int k = 0; k < canvas->links->length; ++k) {
@@ -1071,7 +1085,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 			node->y = ui_nodes_snap(node->y) / UI_NODES_SCALE();
 		}
 
-		ui_draw_node(node, canvas);
+		ui_node_draw(node, canvas);
 	}
 
 	if (ui_nodes_on_canvas_released != NULL && current->input_enabled && (current->input_released || current->input_released_r) && !ui_nodes_socket_released) {

@@ -961,8 +961,8 @@ function ui_MENUBAR_H(ui: ui_t): f32 {
 	return ui.ops.theme.BUTTON_H * UI_SCALE() * 1.1 + 2 + button_offset_y;
 }
 
-function ui_nodes_INPUT_Y(canvas: ui_node_canvas_t, sockets: ui_node_socket_t[], pos: i32): f32 {
-	return UI_INPUT_Y(canvas, sockets.buffer, sockets.length, pos);
+function ui_nodes_INPUT_Y(canvas: ui_node_canvas_t, node: ui_node_t, pos: i32): f32 {
+	return UI_INPUT_Y(canvas, node, pos);
 }
 
 let ui_children: map_t<string, ui_handle_t> = map_create();
