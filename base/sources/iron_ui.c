@@ -1882,17 +1882,9 @@ bool ui_panel(ui_handle_t *handle, char *text, bool is_tree, bool filled) {
 	return handle->b;
 }
 
-static int image_width(void *image) {
-	return ((gpu_texture_t *)image)->width;
-}
-
-static int image_height(void *image) {
-	return ((gpu_texture_t *)image)->height;
-}
-
 int ui_sub_image(gpu_texture_t *image, uint32_t tint, int h, int sx, int sy, int sw, int sh) {
-	float iw = (sw > 0 ? sw : image_width(image)) * UI_SCALE();
-	float ih = (sh > 0 ? sh : image_height(image)) * UI_SCALE();
+	float iw = (sw > 0 ? sw : image->width) * UI_SCALE();
+	float ih = (sh > 0 ? sh : image->height) * UI_SCALE();
 	float w = fmin(iw, current->_w);
 	float x = current->_x;
 	float scroll = current->current_window != NULL ? current->current_window->scroll_enabled : false;
@@ -1945,7 +1937,7 @@ int ui_sub_image(gpu_texture_t *image, uint32_t tint, int h, int sx, int sy, int
 }
 
 int ui_image(gpu_texture_t *image, uint32_t tint, int h) {
-	return ui_sub_image(image, tint, h, 0, 0, image_width(image), image_height(image));
+	return ui_sub_image(image, tint, h, 0, 0, image->width, image->height);
 }
 
 char *ui_text_input(ui_handle_t *handle, char *label, int align, bool editable, bool live_update) {
@@ -2722,7 +2714,8 @@ int ui_color_wheel(ui_handle_t *handle, bool alpha, float w, float h, bool color
 	current->_w = _w;
 
 	uint32_t col = ui_color(round(handle->val * 255.0f), round(handle->val * 255.0f), round(handle->val * 255.0f), 255);
-	ui_image(current->ops->color_wheel, col, -1);
+	float wheel_h = current->ops->color_wheel->height * (w / current->ops->color_wheel->width);
+	ui_image(current->ops->color_wheel, col, wheel_h - 2);
 
 	// Picker
 	float ph = current->_y - py;
@@ -2745,7 +2738,7 @@ int ui_color_wheel(ui_handle_t *handle, bool alpha, float w, float h, bool color
 
 	current->_x = px - (scroll ? 0 : UI_SCROLL_W() / 2.0);
 	current->_y = py;
-	ui_image(current->ops->black_white_gradient, 0xffffffff, -1);
+	ui_image(current->ops->black_white_gradient, 0xffffffff, wheel_h);
 
 	draw_set_color(0xff000000);
 	draw_filled_rect(cx - 3.0 * UI_SCALE(), cy - 3.0 * UI_SCALE(), 6.0 * UI_SCALE(), 6.0 * UI_SCALE());

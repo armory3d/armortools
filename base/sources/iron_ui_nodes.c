@@ -22,6 +22,7 @@ static const int ui_max_buttons = 9;
 static void (*ui_on_header_released)(ui_node_t *) = NULL;
 static void (*ui_nodes_on_node_remove)(ui_node_t *) = NULL;
 static int ui_node_id = -1;
+static ui_node_t *node_resize = NULL;
 
 char *ui_clipboard = "";
 char_ptr_array_t *ui_nodes_exclude_remove = NULL; // No removal for listed node types
@@ -90,7 +91,8 @@ float UI_BUTTONS_H(ui_node_t *node) {
 	for (int i = 0; i < node->buttons->length; ++i) {
 		ui_node_button_t *but = node->buttons->buffer[i];
 		if (strcmp(but->type, "RGBA") == 0) {
-			h += 102.0 * UI_NODES_SCALE() + UI_LINE_H() * 5.0; // Color wheel + controls
+			float ratio = node->width > 0 ? node->width / 140.0 : 1.0; // Node resized
+			h += 104.0 * ratio * UI_NODES_SCALE() + UI_LINE_H() * 5.0; // Color wheel + controls
 		}
 		else if (strcmp(but->type, "VECTOR") == 0) {
 			h += UI_LINE_H() * 4.0;
@@ -137,7 +139,7 @@ float UI_INPUTS_H(ui_node_canvas_t *canvas, ui_node_socket_t **sockets, int sock
 }
 
 float UI_NODE_H(ui_node_canvas_t *canvas, ui_node_t *node) {
-	if (node->flags & NODE_FLAG_COLLAPSED) return UI_LINE_H() * 1.2;;
+	if (node->flags & NODE_FLAG_COLLAPSED) return UI_LINE_H() * 1.2;
 	return UI_LINE_H() * 1.2 + UI_INPUTS_H(canvas, node->inputs->buffer, node->inputs->length, -1) + UI_OUTPUTS_H(node->outputs->length, -1) + UI_BUTTONS_H(node);
 }
 
@@ -967,8 +969,16 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 			}
 		}
 
-		// Drag node
+		// Resize node
 		float node_h = UI_NODE_H(canvas, node);
+		if (current->input_enabled && ui_input_in_rect(wx + UI_NODE_X(node) + UI_NODE_W(node), wy + UI_NODE_Y(node), 5, node_h)) {
+			iron_mouse_set_cursor(IRON_CURSOR_SIZEWE);
+			if (current->input_started) {
+				node_resize = node;
+			}
+		}
+
+		// Drag node
 		if (current->input_enabled && ui_input_in_rect(wx + UI_NODE_X(node) - UI_LINE_H() / 2.0, wy + UI_NODE_Y(node), UI_NODE_W(node) + UI_LINE_H(), UI_LINE_H())) {
 			if (current->input_started) {
 				if (current->is_shift_down || current->is_ctrl_down) {
@@ -998,6 +1008,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 				}
 			}
 		}
+
 		if (current->input_started && !(node->flags & NODE_FLAG_COLLAPSED) && ui_input_in_rect(wx + UI_NODE_X(node) - UI_LINE_H() / 2, wy + UI_NODE_Y(node) - UI_LINE_H() / 2, UI_NODE_W(node) + UI_LINE_H(), node_h + UI_LINE_H())) {
 			// Check sockets
 			if (current_nodes->link_drag_id == -1) {
@@ -1084,6 +1095,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 			current_nodes->link_drag_id = -1;
 			current_nodes->nodes_drag = false;
 		}
+
 		if (current_nodes->nodes_drag && ui_is_selected(node) && !current->input_down_r) {
 			if (current->input_dx != 0 || current->input_dy != 0) {
 				current_nodes->dragged = true;
@@ -1106,56 +1118,68 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 		ui_nodes_on_canvas_released();
 	}
 
-	if (ui_box_select) {
-		draw_set_color(0x223333dd);
-		draw_filled_rect(ui_box_select_x, ui_box_select_y, current->input_x - ui_box_select_x - current->_window_x, current->input_y - ui_box_select_y - current->_window_y);
-		draw_set_color(0x773333dd);
-		draw_rect(ui_box_select_x, ui_box_select_y, current->input_x - ui_box_select_x - current->_window_x, current->input_y - ui_box_select_y - current->_window_y, 1);
-		draw_set_color(0xffffffff);
+	if (node_resize != NULL) {
+		iron_mouse_set_cursor(IRON_CURSOR_SIZEWE);
+		node_resize->width += current->input_dx / UI_NODES_SCALE();
+		if (node_resize->width < 140) {
+			node_resize->width = 140;
+		}
+		if (current->input_released) {
+			node_resize = NULL;
+		}
 	}
-	if (current->input_enabled && current->input_started && !current->is_alt_down &&
-		current_nodes->link_drag_id == -1 && !current_nodes->nodes_drag && !current->changed &&
-		ui_input_in_rect(current->_window_x, current->_window_y, current->_window_w, current->_window_h)) {
+	else {
+		if (ui_box_select) {
+			draw_set_color(0x223333dd);
+			draw_filled_rect(ui_box_select_x, ui_box_select_y, current->input_x - ui_box_select_x - current->_window_x, current->input_y - ui_box_select_y - current->_window_y);
+			draw_set_color(0x773333dd);
+			draw_rect(ui_box_select_x, ui_box_select_y, current->input_x - ui_box_select_x - current->_window_x, current->input_y - ui_box_select_y - current->_window_y, 1);
+			draw_set_color(0xffffffff);
+		}
+		if (current->input_enabled && current->input_started && !current->is_alt_down &&
+			current_nodes->link_drag_id == -1 && !current_nodes->nodes_drag && !current->changed &&
+			ui_input_in_rect(current->_window_x, current->_window_y, current->_window_w, current->_window_h)) {
 
-		ui_box_select = true;
-		ui_box_select_x = current->input_x - current->_window_x;
-		ui_box_select_y = current->input_y - current->_window_y;
-	}
-	else if (ui_box_select && !current->input_down) {
-		ui_box_select = false;
-		int left = ui_box_select_x;
-		int top = ui_box_select_y;
-		int right = current->input_x - current->_window_x;
-		int bottom = current->input_y - current->_window_y;
-		if (left > right) {
-			int t = left;
-			left = right;
-			right = t;
+			ui_box_select = true;
+			ui_box_select_x = current->input_x - current->_window_x;
+			ui_box_select_y = current->input_y - current->_window_y;
 		}
-		if (top > bottom) {
-			int t = top;
-			top = bottom;
-			bottom = t;
-		}
-		ui_node_t *nodes[32];
-		int nodes_count = 0;
-		for (int j = 0; j < canvas->nodes->length; ++j) {
-			ui_node_t *n = canvas->nodes->buffer[j];
-			if (UI_NODE_X(n) + UI_NODE_W(n) > left && UI_NODE_X(n) < right &&
-				UI_NODE_Y(n) + UI_NODE_H(canvas, n) > top && UI_NODE_Y(n) < bottom) {
-				nodes[nodes_count] = n;
-				nodes_count++;
+		else if (ui_box_select && !current->input_down) {
+			ui_box_select = false;
+			int left = ui_box_select_x;
+			int top = ui_box_select_y;
+			int right = current->input_x - current->_window_x;
+			int bottom = current->input_y - current->_window_y;
+			if (left > right) {
+				int t = left;
+				left = right;
+				right = t;
 			}
-		}
-		if (current->is_shift_down || current->is_ctrl_down) {
-			for (int j = 0; j < nodes_count; ++j) {
-				add_to_selection(nodes[j]);
+			if (top > bottom) {
+				int t = top;
+				top = bottom;
+				bottom = t;
 			}
-		}
-		else {
-			current_nodes->nodes_selected_id->length = 0;
-			for (int j = 0; j < nodes_count; ++j) {
-				add_to_selection(nodes[j]);
+			ui_node_t *nodes[32];
+			int nodes_count = 0;
+			for (int j = 0; j < canvas->nodes->length; ++j) {
+				ui_node_t *n = canvas->nodes->buffer[j];
+				if (UI_NODE_X(n) + UI_NODE_W(n) > left && UI_NODE_X(n) < right &&
+					UI_NODE_Y(n) + UI_NODE_H(canvas, n) > top && UI_NODE_Y(n) < bottom) {
+					nodes[nodes_count] = n;
+					nodes_count++;
+				}
+			}
+			if (current->is_shift_down || current->is_ctrl_down) {
+				for (int j = 0; j < nodes_count; ++j) {
+					add_to_selection(nodes[j]);
+				}
+			}
+			else {
+				current_nodes->nodes_selected_id->length = 0;
+				for (int j = 0; j < nodes_count; ++j) {
+					add_to_selection(nodes[j]);
+				}
 			}
 		}
 	}
