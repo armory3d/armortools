@@ -746,7 +746,8 @@ void ui_node_draw(ui_node_t *node, ui_node_canvas_t *canvas) {
 		gpu_texture_t *image = ui_nodes_preview_image(node);
 		if (image != NULL) {
 			draw_set_color(0xffffffff);
-			draw_scaled_image(image, nx, ny - w, w, w);
+			float ph = w * (image->height / (float)image->width);
+			draw_scaled_image(image, nx, ny - ph, w, ph);
 		}
 	}
 

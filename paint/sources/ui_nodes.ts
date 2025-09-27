@@ -53,17 +53,13 @@ let _ui_nodes_node_search_first: bool;
 let _ui_nodes_node_search_done: ()=>void;
 
 function ui_viewnodes_init() {
-	ui_nodes_preview_image = uiviewnodes_preview_image;
+	ui_nodes_preview_image = ui_nodes_get_node_preview_image;
 	ui_nodes_on_link_drag = ui_viewnodes_on_link_drag;
 	ui_nodes_on_socket_released = ui_viewnodes_on_socket_released;
 	ui_nodes_on_canvas_released = ui_viewnodes_on_canvas_released;
 	ui_nodes_on_canvas_control = ui_viewnodes_on_canvas_control;
 	ui_nodes_grid_snap = config_raw.grid_snap;
 	nodes_material_init();
-}
-
-function uiviewnodes_preview_image(n: ui_node_t): gpu_texture_t {
-	return ui_nodes_get_node_preview_image(n);
 }
 
 function ui_viewnodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
@@ -975,13 +971,14 @@ function ui_nodes_render() {
 		// Node previews
 		if (context_raw.selected_node_preview && nodes.nodes_selected_id.length > 0) {
 			let sel: ui_node_t = ui_get_node(c.nodes, nodes.nodes_selected_id[0]);
-			let tw: f32 = 128 * UI_SCALE();
-			let tx: f32 = ui_nodes_ww - tw - 8 * UI_SCALE();
-			let ty: f32 = ui_nodes_wh - tw - 8 * UI_SCALE();
 			let img: gpu_texture_t = ui_nodes_get_node_preview_image(sel);
 			if (img != null && !(sel.flags & _ui_node_flag_t.PREVIEW)) {
+				let tw: f32 = 128 * UI_SCALE();
+				let th: f32 = tw * (img.height / img.width);
+				let tx: f32 = ui_nodes_ww - tw - 8 * UI_SCALE();
+				let ty: f32 = ui_nodes_wh - th - 8 * UI_SCALE();
 				if (img == context_raw.node_preview) {
-					ui_draw_shadow(tx, ty, tw, tw);
+					ui_draw_shadow(tx, ty, tw, th);
 				}
 				let single_channel: bool = sel.type == "LAYER_MASK";
 				if (single_channel) {
@@ -989,7 +986,7 @@ function ui_nodes_render() {
 					gpu_set_int(ui_view2d_channel_loc, 1);
 				}
 				draw_set_color(0xffffffff);
-				draw_scaled_image(img, tx, ty, tw, tw);
+				draw_scaled_image(img, tx, ty, tw, th);
 				if (single_channel) {
 					draw_set_pipeline(null);
 				}

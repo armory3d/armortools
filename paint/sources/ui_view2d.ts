@@ -135,7 +135,13 @@ function ui_view2d_render() {
 			tex = project_get_image(context_raw.texture);
 		}
 		else if (ui_view2d_type == view_2d_type_t.NODE) {
-			tex = context_raw.node_preview;
+			let nodes: ui_nodes_t = ui_nodes_get_nodes();
+			let c: ui_node_canvas_t = ui_nodes_get_canvas(true);
+			let sel: ui_node_t = ui_get_node(c.nodes, nodes.nodes_selected_id[0]);
+			let img: gpu_texture_t = ui_nodes_get_node_preview_image(sel);
+			if (img != null) {
+				tex = ui_nodes_get_node_preview_image(sel);
+			}
 		}
 		else if (ui_view2d_type == view_2d_type_t.LAYER) {
 			let layer: slot_layer_t = l;
