@@ -97,7 +97,7 @@ type context_t = {
 	layer_preview_dirty?: bool;
 	layers_preview_dirty?: bool;
 	node_preview_dirty?: bool;
-	node_preview?: gpu_texture_t;
+	node_preview_map?: map_t<ui_node_t, gpu_texture_t>;
 	node_preview_name?: string;
 	node_previews?: map_t<string, gpu_texture_t>;
 	node_previews_used?: string[];
@@ -327,6 +327,7 @@ function context_create(): context_t {
 	c.layers_preview_dirty = false;
 	c.node_preview_dirty = false;
 	c.node_preview_name = "";
+	c.node_preview_map = map_create();
 	c.selected_node_preview = true;
 	c.colorid_picked = false;
 	c.material_preview = false; // Drawing material previews
@@ -791,4 +792,3 @@ function context_ext_select_paint_object(o: mesh_object_t) {
 	util_uv_trianglemap_cached = false;
 	util_uv_dilatemap_cached = false;
 }
-

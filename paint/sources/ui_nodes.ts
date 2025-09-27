@@ -977,7 +977,7 @@ function ui_nodes_render() {
 				let th: f32 = tw * (img.height / img.width);
 				let tx: f32 = ui_nodes_ww - tw - 8 * UI_SCALE();
 				let ty: f32 = ui_nodes_wh - th - 8 * UI_SCALE();
-				if (img == context_raw.node_preview) {
+				if (img == map_get(context_raw.node_preview_map, sel)) {
 					ui_draw_shadow(tx, ty, tw, th);
 				}
 				let single_channel: bool = sel.type == "LAYER_MASK";
@@ -1129,7 +1129,7 @@ function ui_nodes_get_node_preview_image(n: ui_node_t): gpu_texture_t {
 		}
 	}
 	else if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) {
-		img = context_raw.node_preview;
+		img = map_get(context_raw.node_preview_map, n);
 	}
 	return img;
 }
@@ -1471,13 +1471,15 @@ function ui_nodes_make_node_preview() {
 		return;
 	}
 
-	if (context_raw.node_preview == null) {
-		context_raw.node_preview = gpu_create_render_target(util_render_material_preview_size, util_render_material_preview_size);
+	let img: gpu_texture_t = map_get(context_raw.node_preview_map, node);
+	if (img == null) {
+		img = gpu_create_render_target(util_render_material_preview_size, util_render_material_preview_size);
+		map_set(context_raw.node_preview_map, node, img);
 	}
 
 	context_raw.node_preview_dirty = false;
 	ui_nodes_hwnd.redraws = 2;
-	util_render_make_node_preview(ui_nodes_get_canvas(), node, context_raw.node_preview);
+	util_render_make_node_preview(ui_nodes_get_canvas(), node, img);
 }
 
 function ui_nodes_has_group(c: ui_node_canvas_t): bool {
