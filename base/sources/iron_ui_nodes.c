@@ -87,6 +87,7 @@ float UI_LINE_H() {
 }
 
 float UI_BUTTONS_H(ui_node_t *node) {
+	if (node->flags & NODE_FLAG_COLLAPSED) return 0.0;
 	float h = 0.0;
 	for (int i = 0; i < node->buttons->length; ++i) {
 		ui_node_button_t *but = node->buttons->buffer[i];
@@ -107,9 +108,10 @@ float UI_BUTTONS_H(ui_node_t *node) {
 	return h;
 }
 
-float UI_OUTPUTS_H(int sockets_count, int length) {
+float UI_OUTPUTS_H(ui_node_t *node, int length) {
+	if (node->flags & NODE_FLAG_COLLAPSED) return 0.0;
 	float h = 0.0;
-	for (int i = 0; i < (length < 0 ? sockets_count : length); ++i) {
+	for (int i = 0; i < (length < 0 ? node->outputs->length : length); ++i) {
 		h += UI_LINE_H();
 	}
 	return h;
@@ -140,7 +142,7 @@ float UI_INPUTS_H(ui_node_canvas_t *canvas, ui_node_socket_t **sockets, int sock
 
 float UI_NODE_H(ui_node_canvas_t *canvas, ui_node_t *node) {
 	if (node->flags & NODE_FLAG_COLLAPSED) return UI_LINE_H() * 1.2;
-	return UI_LINE_H() * 1.2 + UI_INPUTS_H(canvas, node->inputs->buffer, node->inputs->length, -1) + UI_OUTPUTS_H(node->outputs->length, -1) + UI_BUTTONS_H(node);
+	return UI_LINE_H() * 1.2 + UI_INPUTS_H(canvas, node->inputs->buffer, node->inputs->length, -1) + UI_OUTPUTS_H(node, -1) + UI_BUTTONS_H(node);
 }
 
 float UI_NODE_W(ui_node_t *node) {
@@ -162,7 +164,7 @@ float UI_INPUT_Y(ui_node_canvas_t *canvas, ui_node_t *node, int pos) {
 
 float UI_OUTPUT_Y(ui_node_t *node, int pos) {
 	if (node->flags & NODE_FLAG_COLLAPSED) return UI_LINE_H() * 0.5;
-	return UI_LINE_H() * 1.62 + UI_OUTPUTS_H(node->outputs->length, pos);
+	return UI_LINE_H() * 1.62 + UI_OUTPUTS_H(node, pos);
 }
 
 float ui_p(float f) {
@@ -880,7 +882,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 		float from_x = from == NULL ? current->input_x : wx + UI_NODE_X(from) + UI_NODE_W(from);
 		float from_y = from == NULL ? current->input_y : wy + UI_NODE_Y(from) + UI_OUTPUT_Y(from, link->from_socket);
 		float to_x = to == NULL ? current->input_x : wx + UI_NODE_X(to);
-		float to_y = to == NULL ? current->input_y : wy + UI_NODE_Y(to) + UI_INPUT_Y(canvas, to, link->to_socket) + UI_OUTPUTS_H(to->outputs->length, -1) + UI_BUTTONS_H(to);
+		float to_y = to == NULL ? current->input_y : wy + UI_NODE_Y(to) + UI_INPUT_Y(canvas, to, link->to_socket) + UI_OUTPUTS_H(to, -1) + UI_BUTTONS_H(to);
 
 		// Cull
 		float left = to_x > from_x ? from_x : to_x;
@@ -930,7 +932,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 					else if (to == NULL && node->id != from->id) { // Snap to input
 						for (int k = 0; k < node->inputs->length; ++k) {
 							float sx = wx + UI_NODE_X(node);
-							float sy = wy + UI_NODE_Y(node) + UI_INPUT_Y(canvas, node, k) + UI_OUTPUTS_H(node->outputs->length, -1) + UI_BUTTONS_H(node);
+							float sy = wy + UI_NODE_Y(node) + UI_INPUT_Y(canvas, node, k) + UI_OUTPUTS_H(node, -1) + UI_BUTTONS_H(node);
 							float rx = sx - UI_LINE_H() / 2.0;
 							float ry = sy - UI_LINE_H() / 2.0;
 							if (ui_input_in_rect(rx, ry, UI_LINE_H(), UI_LINE_H())) {
@@ -971,7 +973,11 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 
 		// Resize node
 		float node_h = UI_NODE_H(canvas, node);
-		if (current->input_enabled && ui_input_in_rect(wx + UI_NODE_X(node) + UI_NODE_W(node), wy + UI_NODE_Y(node), 5, node_h)) {
+		float top_h = UI_LINE_H() + UI_OUTPUTS_H(node, -1) + ui_p(5);
+		if (current->input_enabled &&
+			(ui_input_in_rect(wx + UI_NODE_X(node) + UI_NODE_W(node), wy + UI_NODE_Y(node), 5, UI_LINE_H()) ||
+			 ui_input_in_rect(wx + UI_NODE_X(node) + UI_NODE_W(node), wy + UI_NODE_Y(node) + top_h, 5, node_h - top_h))) {
+
 			iron_mouse_set_cursor(IRON_CURSOR_SIZEWE);
 			if (current->input_started) {
 				node_resize = node;
@@ -1033,7 +1039,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 			if (current_nodes->link_drag_id == -1) {
 				for (int j = 0; j < node->inputs->length; ++j) {
 					float sx = wx + UI_NODE_X(node);
-					float sy = wy + UI_NODE_Y(node) + UI_INPUT_Y(canvas, node, j) + UI_OUTPUTS_H(node->outputs->length, -1) + UI_BUTTONS_H(node);
+					float sy = wy + UI_NODE_Y(node) + UI_INPUT_Y(canvas, node, j) + UI_OUTPUTS_H(node, -1) + UI_BUTTONS_H(node);
 					if (ui_input_in_rect(sx - UI_LINE_H() / 2.0, sy - UI_LINE_H() / 2.0, UI_LINE_H(), UI_LINE_H())) {
 						// Already has a link - disconnect
 						for (int k = 0; k < canvas->links->length; ++k) {

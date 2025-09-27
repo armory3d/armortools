@@ -228,7 +228,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		parser_material_triplanar = uv_type == uv_type_t.TRIPLANAR && !decal;
 		parser_material_sample_keep_aspect = decal;
 		parser_material_sample_uv_scale = "constants.brush_scale";
-		let sout: shader_out_t = parser_material_parse(ui_nodes_get_canvas_material(), con_paint, kong, matcon);
+		let sout: shader_out_t = parser_material_parse(context_raw.material.canvas, con_paint, kong, matcon);
 		parser_material_parse_emission = false;
 		parser_material_parse_subsurface = false;
 		parser_material_parse_height_as_channel = false;

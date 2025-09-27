@@ -7,8 +7,8 @@ let make_material_emis_used: bool = false;
 let make_material_subs_used: bool = false;
 
 function make_material_get_mout(): bool {
-	for (let i: i32 = 0; i < ui_nodes_get_canvas_material().nodes.length; ++i) {
-		let n: ui_node_t = ui_nodes_get_canvas_material().nodes[i];
+	for (let i: i32 = 0; i < context_raw.material.canvas.nodes.length; ++i) {
+		let n: ui_node_t = context_raw.material.canvas.nodes[i];
 		if (n.type == "OUTPUT_MATERIAL_PBR") {
 			return true;
 		}
@@ -178,7 +178,7 @@ function make_material_parse_paint_material(bake_previews: bool = true) {
 
 	let sdata: material_t = {
 		name: "Material",
-		canvas: ui_nodes_get_canvas_material()
+		canvas: context_raw.material.canvas
 	};
 	let tmcon: material_context_t = {
 		name: "paint",
@@ -216,7 +216,7 @@ function make_material_bake_node_previews() {
 		context_raw.node_previews = map_create();
 	}
 	let empty: ui_node_t[] = [];
-	make_material_traverse_nodes(ui_nodes_get_canvas_material().nodes, null, empty);
+	make_material_traverse_nodes(context_raw.material.canvas.nodes, null, empty);
 
 	let keys: string[] = map_keys(context_raw.node_previews);
 	for (let i: i32 = 0; i < keys.length; ++i) {
@@ -264,7 +264,7 @@ function make_material_bake_node_preview(node: ui_node_t, group: ui_node_canvas_
 		}
 
 		parser_material_blur_passthrough = true;
-		util_render_make_node_preview(ui_nodes_get_canvas_material(), node, image, group, parents);
+		util_render_make_node_preview(context_raw.material.canvas, node, image, group, parents);
 		parser_material_blur_passthrough = false;
 	}
 	else if (node.type == "DIRECT_WARP") {
@@ -282,7 +282,7 @@ function make_material_bake_node_preview(node: ui_node_t, group: ui_node_canvas_
 		}
 
 		parser_material_warp_passthrough = true;
-		util_render_make_node_preview(ui_nodes_get_canvas_material(), node, image, group, parents);
+		util_render_make_node_preview(context_raw.material.canvas, node, image, group, parents);
 		parser_material_warp_passthrough = false;
 	}
 	else if (node.type == "BAKE_CURVATURE") {
@@ -348,7 +348,7 @@ function make_material_parse_node_preview_material(node: ui_node_t, group: ui_no
 	}
 	let sdata: material_t = {
 		name: "Material",
-		canvas: ui_nodes_get_canvas_material()
+		canvas: context_raw.material.canvas
 	};
 	let mcon_raw: material_context_t = {
 		name: "mesh",

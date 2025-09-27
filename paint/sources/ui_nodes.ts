@@ -84,7 +84,7 @@ function ui_viewnodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 	}
 	else {
 		link_y += ui_nodes_INPUT_Y(ui_nodes_get_canvas(true), node, link_drag.to_socket) +
-			UI_OUTPUTS_H(node.outputs.length) + UI_BUTTONS_H(node);
+			UI_OUTPUTS_H(node) + UI_BUTTONS_H(node);
 	}
 
 	if (math_abs(mouse_x - link_x) > 5 || math_abs(mouse_y - link_y) > 5) { // Link length
@@ -470,16 +470,12 @@ function ui_nodes_get_canvas(groups: bool = false): ui_node_canvas_t {
 			return ui_nodes_tabs[ui_nodes_tab_index()].canvas;
 		}
 		else {
-			return ui_nodes_get_canvas_material();
+			return context_raw.material.canvas;
 		}
 	}
 	else {
 		return context_raw.brush.canvas;
 	}
-}
-
-function ui_nodes_get_canvas_material(): ui_node_canvas_t {
-	return context_raw.material.canvas;
 }
 
 function ui_nodes_get_nodes(): ui_nodes_t {
@@ -743,17 +739,11 @@ function ui_nodes_recompile() {
 			ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 		}
 		else {
-
 			let _material: slot_material_t = context_raw.material;
-
 			if (ui_nodes_is_tab_selected()) {
 				context_raw.material = ui_nodes_tabs[ui_nodes_tab_index()];
 			}
-
-			layers_is_fill_material() ?
-				layers_update_fill_layers() :
-				util_render_make_material_preview();
-
+			layers_is_fill_material() ? layers_update_fill_layers() : util_render_make_material_preview();
 			context_raw.material = _material;
 
 			if (ui_view2d_show && ui_view2d_type == view_2d_type_t.NODE) {
@@ -1314,7 +1304,7 @@ function ui_nodes_push_undo(last_canvas: ui_node_canvas_t = null) {
 	history_edit_nodes(last_canvas, ui_nodes_canvas_type, canvas_group);
 }
 
-function ui_nodes_accept_asset_drag(index: i32) {
+function ui_nodes_accept_asset_drop(index: i32) {
 	ui_nodes_push_undo();
 	let g: node_group_t = ui_nodes_group_stack.length > 0 ? ui_nodes_group_stack[ui_nodes_group_stack.length - 1] : null;
 	let n: ui_node_t =
@@ -1326,7 +1316,7 @@ function ui_nodes_accept_asset_drag(index: i32) {
 	ui_nodes_get_nodes().nodes_selected_id = [n.id];
 }
 
-function ui_nodes_accept_layer_drag(index: i32) {
+function ui_nodes_accept_layer_drop(index: i32) {
 	ui_nodes_push_undo();
 	if (slot_layer_is_group(project_layers[index])) {
 		return;
@@ -1337,7 +1327,7 @@ function ui_nodes_accept_layer_drag(index: i32) {
 	ui_nodes_get_nodes().nodes_selected_id = [n.id];
 }
 
-function ui_nodes_accept_material_drag(index: i32) {
+function ui_nodes_accept_material_drop(index: i32) {
 	ui_nodes_push_undo();
 	let g: node_group_t = ui_nodes_group_stack.length > 0 ? ui_nodes_group_stack[ui_nodes_group_stack.length - 1] : null;
 	let n: ui_node_t = nodes_material_create_node("MATERIAL", g);
@@ -1345,7 +1335,7 @@ function ui_nodes_accept_material_drag(index: i32) {
 	ui_nodes_get_nodes().nodes_selected_id = [n.id];
 }
 
-function ui_nodes_accept_swatch_drag(swatch: swatch_color_t) {
+function ui_nodes_accept_swatch_drop(swatch: swatch_color_t) {
 	ui_nodes_push_undo();
 	let g: node_group_t = ui_nodes_group_stack.length > 0 ? ui_nodes_group_stack[ui_nodes_group_stack.length - 1] : null;
 	let n: ui_node_t = nodes_material_create_node("RGB", g);
@@ -1464,12 +1454,12 @@ function ui_nodes_make_group_node(group_canvas: ui_node_canvas_t, nodes: ui_node
 }
 
 function ui_nodes_make_node_preview() {
-	let ui_nodes: ui_nodes_t = context_raw.material.nodes;
+	let ui_nodes: ui_nodes_t = ui_nodes_get_nodes();
 	if (ui_nodes.nodes_selected_id.length == 0) {
 		return;
 	}
 
-	let nodes: ui_node_t[] = context_raw.material.canvas.nodes;
+	let nodes: ui_node_t[] = ui_nodes_get_canvas().nodes;
 	let node: ui_node_t = ui_get_node(nodes, ui_nodes.nodes_selected_id[0]);
 	context_raw.node_preview_name = node.name;
 
@@ -1490,7 +1480,7 @@ function ui_nodes_make_node_preview() {
 
 	context_raw.node_preview_dirty = false;
 	ui_nodes_hwnd.redraws = 2;
-	util_render_make_node_preview(context_raw.material.canvas, node, context_raw.node_preview);
+	util_render_make_node_preview(ui_nodes_get_canvas(), node, context_raw.node_preview);
 }
 
 function ui_nodes_has_group(c: ui_node_canvas_t): bool {

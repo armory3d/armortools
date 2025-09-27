@@ -45,7 +45,7 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	parser_material_sample_uv_scale = brush_scale;
 	parser_material_parse_height = make_material_height_used;
 	parser_material_parse_height_as_channel = true;
-	let sout: shader_out_t = parser_material_parse(ui_nodes_get_canvas_material(), con_mesh, kong, matcon);
+	let sout: shader_out_t = parser_material_parse(context_raw.material.canvas, con_mesh, kong, matcon);
 	parser_material_parse_height = false;
 	parser_material_parse_height_as_channel = false;
 	parser_material_sample_keep_aspect = false;

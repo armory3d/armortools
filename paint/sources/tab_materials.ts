@@ -328,7 +328,7 @@ function tab_materials_update_material_pointers(nodes: ui_node_t[], i: i32) {
 	}
 }
 
-function tab_materials_accept_swatch_drag(swatch: swatch_color_t) {
+function tab_materials_accept_swatch_drop(swatch: swatch_color_t) {
 	context_raw.material = slot_material_create(project_materials[0].data);
 	for (let i: i32 = 0; i < context_raw.material.canvas.nodes.length; ++i) {
 		let node: ui_node_t = context_raw.material.canvas.nodes[i];

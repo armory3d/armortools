@@ -206,7 +206,7 @@ function tab_swatches_draw(htab: ui_handle_t) {
 							tab_swatches_delete_swatch(project_raw.swatches[i]);
 						}
 						else if (ui_menu_button(tr("Create Material"))) {
-							tab_materials_accept_swatch_drag(project_raw.swatches[i]);
+							tab_materials_accept_swatch_drop(project_raw.swatches[i]);
 						}
 						else if (ui_menu_button(tr("Create Color Layer"))) {
 							let color: i32 = project_raw.swatches[i].base;
@@ -245,7 +245,7 @@ function tab_swatches_draw(htab: ui_handle_t) {
 	}
 }
 
-function tab_swatches_accept_swatch_drag(swatch: swatch_color_t) {
+function tab_swatches_accept_swatch_drop(swatch: swatch_color_t) {
 	// No valid position available
 	if (tab_swatches_drag_pos == -1) {
 		return;

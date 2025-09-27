@@ -360,7 +360,7 @@ function base_update() {
 
 			// Create image texture
 			if (context_in_nodes()) {
-				ui_nodes_accept_asset_drag(array_index_of(project_assets, base_drag_asset));
+				ui_nodes_accept_asset_drop(array_index_of(project_assets, base_drag_asset));
 			}
 			else if (context_in_3d_view()) {
 				if (ends_with(to_lower_case(base_drag_asset.file), ".hdr")) {
@@ -377,13 +377,13 @@ function base_update() {
 		else if (base_drag_swatch != null) {
 			// Create RGB node
 			if (context_in_nodes()) {
-				ui_nodes_accept_swatch_drag(base_drag_swatch);
+				ui_nodes_accept_swatch_drop(base_drag_swatch);
 			}
 			else if (context_in_swatches()) {
-				tab_swatches_accept_swatch_drag(base_drag_swatch);
+				tab_swatches_accept_swatch_drop(base_drag_swatch);
 			}
 			else if (context_in_materials()) {
-				tab_materials_accept_swatch_drag(base_drag_swatch);
+				tab_materials_accept_swatch_drop(base_drag_swatch);
 			}
 			else if (context_in_3d_view()) {
 				let color: i32 = base_drag_swatch.base;
@@ -420,7 +420,7 @@ function base_update() {
 		}
 		else if (base_drag_layer != null) {
 			if (context_in_nodes()) {
-				ui_nodes_accept_layer_drag(array_index_of(project_layers, base_drag_layer));
+				ui_nodes_accept_layer_drop(array_index_of(project_layers, base_drag_layer));
 			}
 			else if (context_in_layers() && base_is_dragging) {
 				slot_layer_move(base_drag_layer, context_raw.drag_dest);
@@ -469,7 +469,7 @@ function base_material_dropped() {
 		layers_create_fill_layer(uv_type, decal_mat, context_raw.drag_dest);
 	}
 	else if (context_in_nodes()) {
-		ui_nodes_accept_material_drag(array_index_of(project_materials, base_drag_material));
+		ui_nodes_accept_material_drop(array_index_of(project_materials, base_drag_material));
 	}
 	base_drag_material = null;
 }

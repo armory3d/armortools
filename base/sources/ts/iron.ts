@@ -961,7 +961,7 @@ declare function UI_SCALE(): f32;
 declare function UI_ELEMENT_OFFSET(): f32;
 declare function UI_ELEMENT_W(): f32;
 declare function UI_ELEMENT_H(): f32;
-declare function UI_OUTPUTS_H(sockets_count: i32, length: i32 = -1): f32;
+declare function UI_OUTPUTS_H(node: ui_node_t, length: i32 = -1): f32;
 
 function ui_MENUBAR_H(ui: ui_t): f32 {
 	let button_offset_y: f32 = (ui.ops.theme.ELEMENT_H * UI_SCALE() - ui.ops.theme.BUTTON_H * UI_SCALE()) / 2;

@@ -149,7 +149,7 @@ float UI_NODE_W(ui_node_t *node);
 float UI_NODE_H(ui_node_canvas_t *canvas, ui_node_t *node);
 float UI_OUTPUT_Y(ui_node_t *node, int pos);
 float UI_INPUT_Y(ui_node_canvas_t *canvas, ui_node_t *node, int pos);
-float UI_OUTPUTS_H(int sockets_count, int length);
+float UI_OUTPUTS_H(ui_node_t *node, int length);
 float UI_BUTTONS_H(ui_node_t *node);
 float UI_LINE_H();
 float UI_NODES_PAN_X();

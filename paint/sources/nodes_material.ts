@@ -4775,7 +4775,7 @@ function nodes_material_create_node(node_type: string, group: node_group_t = nul
 	if (n == null) {
 		return null;
 	}
-	let canvas: ui_node_canvas_t = group != null ? group.canvas : context_raw.material.canvas;
+	let canvas: ui_node_canvas_t = group != null ? group.canvas : ui_nodes_get_canvas();
 	let nodes: ui_nodes_t = group != null ? group.nodes : context_raw.material.nodes;
 	let node: ui_node_t = ui_nodes_make_node(n, nodes, canvas);
 	array_push(canvas.nodes, node);
