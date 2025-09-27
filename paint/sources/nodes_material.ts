@@ -3933,7 +3933,7 @@ let nodes_material_converter: ui_node_t[] = [
 				min: 0.0,
 				max: 1.0,
 				precision: 100,
-				display: 0
+				display: 1
 			},
 			{
 				id: 0,
@@ -3945,7 +3945,7 @@ let nodes_material_converter: ui_node_t[] = [
 				min: 0.0,
 				max: 1.0,
 				precision: 100,
-				display: 0
+				display: 1
 			}
 		],
 		outputs: [
