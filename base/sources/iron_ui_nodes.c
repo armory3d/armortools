@@ -979,7 +979,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 		}
 
 		// Drag node
-		if (current->input_enabled && ui_input_in_rect(wx + UI_NODE_X(node) - UI_LINE_H() / 2.0, wy + UI_NODE_Y(node), UI_NODE_W(node) + UI_LINE_H(), UI_LINE_H())) {
+		if (current->input_enabled && node_resize == NULL && ui_input_in_rect(wx + UI_NODE_X(node) - UI_LINE_H() / 2.0, wy + UI_NODE_Y(node), UI_NODE_W(node) + UI_LINE_H(), UI_LINE_H())) {
 			if (current->input_started) {
 				if (current->is_shift_down || current->is_ctrl_down) {
 					// Add to selection or deselect
