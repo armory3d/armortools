@@ -1680,7 +1680,6 @@ char *ui_node_canvas_to_json(ui_node_canvas_t *canvas) {
 		json_encode_end_array();
 
 		json_encode_f32("width", canvas->nodes->buffer[i]->width);
-		json_encode_end_object();
 		json_encode_i32("flags", canvas->nodes->buffer[i]->flags);
 		json_encode_end_object();
 	}
