@@ -266,8 +266,8 @@ fun deferred_light_frag(input: vert_out): float4 {
 
 	envl.rgb = envl.rgb * albedo;
 	// Indirect specular
-	// var env_brdf: float2 = senvmap_brdf[uint2(roughness * 256.0, (1.0 - dotnv) * 256.0)].xy;
-	var env_brdf: float4 = senvmap_brdf[uint2(uint(roughness * 256.0), uint((1.0 - dotnv) * 256.0))];
+	// var env_brdf: float2 = senvmap_brdf[uint2(roughness * 255.0, (1.0 - dotnv) * 255.0)].xy;
+	var env_brdf: float4 = senvmap_brdf[uint2(uint(roughness * 255.0), uint((1.0 - dotnv) * 255.0))];
 
 	//envl.rgb += prefiltered_color * (f0 * env_brdf.x + env_brdf.y) * 1.5;
 	envl.rgb = envl.rgb + (prefiltered_color * (f0 * env_brdf.x + env_brdf.y) * 1.5);
