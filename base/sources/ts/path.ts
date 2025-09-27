@@ -5,11 +5,11 @@ let path_sep: string = "\\";
 let path_sep: string = "/";
 ///end
 
-///if arm_windows
-let path_pwd: string = "cd";
-///else
-let path_pwd: string = "echo $PWD";
-///end
+// ///if arm_windows
+// let path_pwd: string = "cd";
+// ///else
+// let path_pwd: string = "echo $PWD";
+// ///end
 
 let path_mesh_formats: string[] = ["obj", "blend"];
 let path_texture_formats: string[] = ["jpg", "jpeg", "png", "tga", "bmp", "psd", "gif", "hdr", "k"];
@@ -25,7 +25,7 @@ let path_roughness_ext: string[] = ["roughness", "rough", "r", "rgh"];
 let path_metallic_ext: string[] = ["metallic", "metal", "metalness", "m", "met"];
 let path_displacement_ext: string[] = ["displacement", "height", "h", "disp"];
 
-let path_working_dir_cache: string = null;
+// let path_working_dir_cache: string = null;
 
 function path_data(): string {
 	return iron_get_files_location() + path_sep + data_path();
@@ -75,23 +75,23 @@ function path_base_name(path: string): string {
 	return substring(path, string_last_index_of(path, path_sep) + 1, string_last_index_of(path, "."));
 }
 
-function path_working_dir(): string {
-	if (path_working_dir_cache == null) {
-		let cmd: string = path_pwd;
-		let save: string;
-		if (path_is_protected()) {
-			save = iron_internal_save_path();
-		}
-		else {
-			save = path_data() + path_sep;
-		}
-		save += "working_dir.txt";
-		iron_sys_command(cmd + " > \"" + save + "\"");
-		path_working_dir_cache = sys_buffer_to_string(iron_load_blob(save));
-		path_working_dir_cache = trim_end(path_working_dir_cache);
-	}
-	return path_working_dir_cache;
-}
+// function path_working_dir(): string {
+// 	if (path_working_dir_cache == null) {
+// 		let cmd: string = path_pwd;
+// 		let save: string;
+// 		if (path_is_protected()) {
+// 			save = iron_internal_save_path();
+// 		}
+// 		else {
+// 			save = path_data() + path_sep;
+// 		}
+// 		save += "working_dir.txt";
+// 		iron_sys_command(cmd + " > \"" + save + "\"");
+// 		path_working_dir_cache = sys_buffer_to_string(iron_load_blob(save));
+// 		path_working_dir_cache = trim_end(path_working_dir_cache);
+// 	}
+// 	return path_working_dir_cache;
+// }
 
 function path_is_mesh(path: string): bool {
 	let p: string = to_lower_case(path);

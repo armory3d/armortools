@@ -110,19 +110,7 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 	dest += path;
 
 	if (iron_file_exists(dest)) {
-		///if (arm_macos || arm_ios)
 		done(dest);
-		///else
-		let p: string;
-		if (path_is_protected()) {
-			p = iron_internal_save_path();
-		}
-		else {
-			p = path_working_dir() + path_sep;
-		}
-		p += path;
-		done(p);
-		///end
 		return;
 	}
 
@@ -145,19 +133,7 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 			fccd.done(null);
 			return;
 		}
-		///if (arm_macos || arm_ios)
 		fccd.done(fccd.dest);
-		///else
-		let p: string;
-		if (path_is_protected()) {
-			p = iron_internal_save_path();
-		}
-		else {
-			p = path_working_dir() + path_sep;
-		}
-		p += fccd.path;
-		fccd.done(p);
-		///end
 	}, map_get(file_cloud_sizes, path));
 }
 
