@@ -965,8 +965,9 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 		ui_node_t *node = canvas->nodes->buffer[i];
 
 		// Cull
+		float preview_h =  (node->flags & NODE_FLAG_PREVIEW) ? UI_NODE_W(node) : 0.0;
 		if (UI_NODE_X(node) > current->_window_w || UI_NODE_X(node) + UI_NODE_W(node) < 0 ||
-			UI_NODE_Y(node) > current->_window_h || UI_NODE_Y(node) + UI_NODE_H(canvas, node) < 0) {
+			UI_NODE_Y(node) - preview_h > current->_window_h || UI_NODE_Y(node) + UI_NODE_H(canvas, node) < 0) {
 			if (!ui_is_selected(node)) {
 				continue;
 			}
