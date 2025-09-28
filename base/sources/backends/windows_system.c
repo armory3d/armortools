@@ -1300,6 +1300,8 @@ bool iron_internal_call_close_callback() {
 	return true;
 }
 
+extern void (*iron_save_and_quit)(bool);
+
 bool _save_and_quit_callback_internal() {
 	bool save = false;
 	wchar_t title[1024];
