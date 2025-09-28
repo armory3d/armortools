@@ -80,8 +80,8 @@ function slot_material_create(m: material_data_t = null, c: ui_node_canvas_t = n
 }
 
 function slot_material_unload(raw: slot_material_t) {
-	iron_delete_texture(raw.image);
-	iron_delete_texture(raw.image_icon);
+	gpu_delete_texture(raw.image);
+	gpu_delete_texture(raw.image_icon);
 }
 
 function slot_material_delete(raw: slot_material_t) {

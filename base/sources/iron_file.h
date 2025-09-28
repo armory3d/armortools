@@ -50,7 +50,7 @@ uint8_t iron_read_u8(uint8_t *data);
 int8_t iron_read_s8(uint8_t *data);
 
 void iron_internal_set_files_location(char *dir);
-char *iron_internal_get_files_location(void);
+char *iron_internal_files_location(void);
 bool iron_internal_file_reader_open(iron_file_reader_t *reader, const char *filename, int type);
 
 typedef struct iron_file_writer {

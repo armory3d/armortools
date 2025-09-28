@@ -105,7 +105,7 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 		dest = iron_internal_save_path();
 	}
 	else {
-		dest = iron_get_files_location() + path_sep;
+		dest = iron_internal_files_location() + path_sep;
 	}
 	dest += path;
 

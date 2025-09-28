@@ -47,6 +47,7 @@ static const char *videoFormats[] = {"ts", NULL};
 static __kernel_time_t start_sec = 0;
 static void (*resizeCallback)(int x, int y, void *data) = NULL;
 static void *resizeCallbackData = NULL;
+static char ios_title[1024];
 #ifdef WITH_GAMEPAD
 static float last_x = 0.0f;
 static float last_y = 0.0f;
@@ -1210,8 +1211,11 @@ void iron_window_change_mode(iron_window_mode_t mode) {}
 void iron_window_destroy() {}
 void iron_window_show() {}
 void iron_window_hide() {}
-void iron_window_set_title(const char *title) {}
 void iron_window_create(iron_window_options_t *win) {}
+
+void iron_window_set_title(const char *title) {
+	strcpy(android_title, title);
+}
 
 void iron_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {
 	resizeCallback = callback;

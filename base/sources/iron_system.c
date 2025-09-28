@@ -94,7 +94,7 @@ static void (*resume_callback)(void *) = NULL;
 static void *resume_callback_data = NULL;
 static void (*shutdown_callback)(void *) = NULL;
 static void *shutdown_callback_data = NULL;
-static void (*drop_files_callback)(wchar_t *, void *) = NULL;
+static void (*drop_files_callback)(char *, void *) = NULL;
 static void *drop_files_callback_data = NULL;
 static char *(*cut_callback)(void *) = NULL;
 static void *cut_callback_data = NULL;
@@ -137,7 +137,7 @@ void iron_set_shutdown_callback(void (*callback)(void *), void *data) {
 	shutdown_callback_data = data;
 }
 
-void iron_set_drop_files_callback(void (*callback)(wchar_t *, void *), void *data) {
+void iron_set_drop_files_callback(void (*callback)(char *, void *), void *data) {
 	drop_files_callback = callback;
 	drop_files_callback_data = data;
 }
@@ -193,7 +193,7 @@ void iron_internal_shutdown_callback(void) {
 	}
 }
 
-void iron_internal_drop_files_callback(wchar_t *filePath) {
+void iron_internal_drop_files_callback(char *filePath) {
 	if (drop_files_callback != NULL) {
 		drop_files_callback(filePath, drop_files_callback_data);
 	}

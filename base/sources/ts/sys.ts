@@ -241,7 +241,7 @@ function sys_title(): string {
 }
 
 function sys_title_set(value: string) {
-	iron_set_window_title(value);
+	iron_window_set_title(value);
 	_sys_window_title = value;
 }
 

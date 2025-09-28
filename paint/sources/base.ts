@@ -59,9 +59,6 @@ function base_init() {
 	base_last_window_height = iron_window_height();
 
 	sys_notify_on_drop_files(function (drop_path: string) {
-		///if arm_linux
-		drop_path = uri_decode(drop_path);
-		///end
 		drop_path = trim_end(drop_path);
 		array_push(base_drop_paths, drop_path);
 	});
@@ -667,10 +664,10 @@ function base_toggle_fullscreen() {
 		config_raw.window_h = iron_window_height();
 		config_raw.window_x = iron_window_x();
 		config_raw.window_y = iron_window_y();
-		iron_set_window_mode(window_mode_t.FULLSCREEN);
+		iron_window_change_mode(window_mode_t.FULLSCREEN);
 	}
 	else {
-		iron_set_window_mode(window_mode_t.WINDOWED);
+		iron_window_change_mode(window_mode_t.WINDOWED);
 		iron_window_resize(config_raw.window_w, config_raw.window_h);
 		iron_window_move(config_raw.window_x, config_raw.window_y);
 	}

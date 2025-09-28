@@ -181,7 +181,6 @@ bool f32_isnan(f32 f) {
 }
 
 void _kickstart();
-
 bool enable_window = true;
 bool in_background = false;
 int paused_frames = 0;
@@ -190,7 +189,6 @@ bool input_down = false;
 int last_window_width = 0;
 int last_window_height = 0;
 #endif
-
 char temp_string[1024 * 128];
 char temp_string_vs[1024 * 128];
 char temp_string_fs[1024 * 128];
@@ -271,14 +269,12 @@ int kickstart(int argc, char **argv) {
 
 	iron_threads_init();
 	iron_display_init();
-
 	gc_start(&argc);
 	_kickstart();
 
 	#ifdef WITH_AUDIO
 	iron_a2_shutdown();
 	#endif
-
 	gc_stop();
 	return 0;
 }
@@ -347,24 +343,6 @@ unsigned char *iron_deflate_raw(unsigned char *data, int data_len, int *out_len,
 #if defined(IDLE_SLEEP) && !defined(IRON_WINDOWS)
 #include <time.h>
 #endif
-
-#ifdef IRON_MACOS
-const char *iron_get_resource_path();
-#endif
-#ifdef IRON_IOS
-const char *iron_get_resource_path();
-#endif
-
-#if defined(IRON_IOS) || defined(IRON_ANDROID)
-char mobile_title[1024];
-#endif
-
-static gpu_buffer_t rt_constant_buffer;
-static gpu_raytrace_pipeline_t rt_pipeline;
-static gpu_raytrace_acceleration_structure_t rt_accel;
-static bool rt_created = false;
-static bool rt_accel_created = false;
-const int rt_constant_buffer_size = 24;
 
 void _update(void *data) {
 	#ifdef IRON_WINDOWS
@@ -580,68 +558,21 @@ void _pen_move(int x, int y, float pressure) {
 	#endif
 }
 
-void _drop_files(wchar_t *file_path, void *data) {
-// Update mouse position
-#ifdef IRON_WINDOWS
+void _drop_files(char *file_path, void *data) {
+	// Update mouse position
+	#ifdef IRON_WINDOWS
 	POINT p;
 	GetCursorPos(&p);
 	ScreenToClient(iron_windows_window_handle(), &p);
 	_mouse_move(p.x, p.y, 0, 0, NULL);
-#endif
+	#endif
 
-	char buffer[1024];
+	iron_drop_files(file_path);
 
-#ifdef IRON_WINDOWS
-	WideCharToMultiByte(CP_UTF8, 0, file_path, wcslen(file_path) + 1, buffer, sizeof(buffer), NULL, NULL);
-#else
-	wcstombs(buffer, file_path, sizeof(buffer));
-#endif
-
-	iron_drop_files(buffer);
 	in_background = false;
-
-#ifdef IDLE_SLEEP
+	#ifdef IDLE_SLEEP
 	paused_frames = 0;
-#endif
-}
-
-char *uri_decode(const char *src) {
-	char *res = gc_alloc(1024);
-	char *dst = res;
-	char a, b;
-	while (*src) {
-		if ((*src == '%') && ((a = src[1]) && (b = src[2])) && (isxdigit(a) && isxdigit(b))) {
-			if (a >= 'a') {
-				a -= 'a' - 'A';
-			}
-			if (a >= 'A') {
-				a -= ('A' - 10);
-			}
-			else {
-				a -= '0';
-			}
-			if (b >= 'a') {
-				b -= 'a' - 'A';
-			}
-			if (b >= 'A') {
-				b -= ('A' - 10);
-			}
-			else {
-				b -= '0';
-			}
-			*dst++ = 16 * a + b;
-			src += 3;
-		}
-		else if (*src == '+') {
-			*dst++ = ' ';
-			src++;
-		}
-		else {
-			*dst++ = *src++;
-		}
-	}
-	*dst++ = '\0';
-	return res;
+	#endif
 }
 
 f32 math_floor(f32 x) { return floorf(x); }
@@ -1154,6 +1085,11 @@ gpu_texture_t *gpu_create_texture_from_encoded_bytes(buffer_t *data, string_t *f
 	return texture;
 }
 
+void gpu_delete_texture(gpu_texture_t *texture) {
+	gpu_texture_destroy(texture);
+	free(texture);
+}
+
 gpu_texture_t *iron_load_texture(string_t *file) {
 	#ifdef WITH_EMBED
 	buffer_t *b = embed_get(file);
@@ -1166,7 +1102,6 @@ gpu_texture_t *iron_load_texture(string_t *file) {
 	if (!iron_file_reader_open(&reader, file, IRON_FILE_TYPE_ASSET)) {
 		return NULL;
 	}
-
 	int size = (int)iron_file_reader_size(&reader);
 	unsigned char *data = (unsigned char *)malloc(size);
 	iron_file_reader_read(&reader, data, size);
@@ -1175,11 +1110,6 @@ gpu_texture_t *iron_load_texture(string_t *file) {
 	buf.buffer = data;
 	buf.length = size;
 	return gpu_create_texture_from_encoded_bytes(&buf, file);
-}
-
-void iron_delete_texture(gpu_texture_t *texture) {
-	gpu_texture_destroy(texture);
-	free(texture);
 }
 
 #ifdef WITH_AUDIO
@@ -1208,17 +1138,6 @@ buffer_t *iron_load_blob(string_t *file) {
 	iron_file_reader_read(&reader, buffer->buffer, reader_size);
 	iron_file_reader_close(&reader);
 	return buffer;
-}
-
-void iron_set_window_title(string_t *title) {
-	iron_window_set_title(title);
-	#if defined(IRON_IOS) || defined(IRON_ANDROID)
-	strcpy(mobile_title, title);
-	#endif
-}
-
-void iron_set_window_mode(i32 mode) {
-	iron_window_change_mode((iron_window_mode_t)mode);
 }
 
 i32 iron_screen_dpi() {
@@ -1334,26 +1253,6 @@ i32 iron_sys_command(string_t *cmd) {
 	return result;
 }
 
-string_t *iron_get_files_location() {
-	#ifdef IRON_MACOS
-	char path[1024];
-	strcpy(path, iron_get_resource_path());
-	strcat(path, "/");
-	strcat(path, IRON_OUTDIR);
-	strcat(path, "/");
-	return path;
-	#elif defined(IRON_IOS)
-	char path[1024];
-	strcpy(path, iron_get_resource_path());
-	strcat(path, "/");
-	strcat(path, IRON_OUTDIR);
-	strcat(path, "/");
-	return path;
-	#else
-	return iron_internal_get_files_location();
-	#endif
-}
-
 typedef struct _callback_data {
 	int32_t size;
 	char url[512];
@@ -1404,37 +1303,14 @@ void iron_file_download(string_t *url, void (*callback)(char *, buffer_t *), i32
 	iron_https_request(url_base, url_path, NULL, 443, 0, &_https_callback, cbd);
 }
 
-#ifdef IRON_LINUX
+#if defined(IRON_WINDOWS) || (defined(IRON_LINUX) && defined(WITH_NFD))
 bool _save_and_quit_callback_internal();
 #endif
 
 bool _save_and_quit_callback(void *data) {
-	#ifdef IRON_WINDOWS
-	bool save = false;
-	wchar_t title[1024];
-	GetWindowTextW(iron_windows_window_handle(), title, sizeof(title));
-	bool dirty = wcsstr(title, L"* - ArmorPaint") != NULL;
-	if (dirty) {
-		int res = MessageBox(iron_windows_window_handle(), L"Project has been modified, save changes?", L"Save Changes?", MB_YESNOCANCEL | MB_ICONEXCLAMATION);
-		if (res == IDYES) {
-			save = true;
-		}
-		else if (res == IDNO) {
-			save = false;
-		}
-		else { // Cancel
-			return false;
-		}
-	}
-	iron_save_and_quit(save);
-	return false;
+	#if defined(IRON_WINDOWS) || (defined(IRON_LINUX) && defined(WITH_NFD)) // Has gtk
+	return _save_and_quit_callback_internal();
 	#endif
-
-	#if defined(IRON_LINUX) && defined(WITH_NFD) // Has gtk
-	_save_and_quit_callback_internal();
-	return false;
-	#endif
-
 	return true;
 }
 
@@ -1864,6 +1740,13 @@ void iron_mp4_encode(buffer_t *pixels) {
 	fwrite(coded_data, sizeof_coded_data, 1, iron_mp4_fp);
 }
 #endif
+
+static gpu_buffer_t rt_constant_buffer;
+static gpu_raytrace_pipeline_t rt_pipeline;
+static gpu_raytrace_acceleration_structure_t rt_accel;
+static bool rt_created = false;
+static bool rt_accel_created = false;
+const int rt_constant_buffer_size = 24;
 
 void iron_raytrace_init(buffer_t *shader) {
 	if (rt_created) {

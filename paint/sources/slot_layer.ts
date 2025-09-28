@@ -179,15 +179,15 @@ function slot_layer_unload(raw: slot_layer_t) {
 	let _texpaint_pack: gpu_texture_t = raw.texpaint_pack;
 	let _texpaint_preview: gpu_texture_t = raw.texpaint_preview;
 
-	iron_delete_texture(_texpaint);
+	gpu_delete_texture(_texpaint);
 	if (_texpaint_nor != null) {
-		iron_delete_texture(_texpaint_nor);
+		gpu_delete_texture(_texpaint_nor);
 	}
 	if (_texpaint_pack != null) {
-		iron_delete_texture(_texpaint_pack);
+		gpu_delete_texture(_texpaint_pack);
 	}
 	if (_texpaint_preview != null) {
-		iron_delete_texture(_texpaint_preview);
+		gpu_delete_texture(_texpaint_preview);
 	}
 
 	map_delete(render_path_render_targets, "texpaint" + raw.ext);
@@ -261,7 +261,7 @@ function slot_layer_invert_mask(raw: slot_layer_t) {
 	draw_set_pipeline(null);
 	draw_end();
 	let _texpaint: gpu_texture_t = raw.texpaint;
-	iron_delete_texture(_texpaint);
+	gpu_delete_texture(_texpaint);
 	let rt: render_target_t = map_get(render_path_render_targets, "texpaint" + raw.id);
 	raw.texpaint = rt._image = inverted;
 	context_raw.layer_preview_dirty = true;
@@ -397,12 +397,12 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 			draw_end();
 		}
 
-		iron_delete_texture(_texpaint);
+		gpu_delete_texture(_texpaint);
 		if (_texpaint_nor != null) {
-			iron_delete_texture(_texpaint_nor);
+			gpu_delete_texture(_texpaint_nor);
 		}
 		if (_texpaint_pack != null) {
-			iron_delete_texture(_texpaint_pack);
+			gpu_delete_texture(_texpaint_pack);
 		}
 
 		let rt: render_target_t = map_get(rts, "texpaint" + raw.ext);
@@ -428,7 +428,7 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 		draw_set_pipeline(null);
 		draw_end();
 
-		iron_delete_texture(_texpaint);
+		gpu_delete_texture(_texpaint);
 
 		let rt: render_target_t = map_get(rts, "texpaint" + raw.ext);
 		rt._image = raw.texpaint;

@@ -614,6 +614,47 @@ static int xk_to_iron(KeySym symbol) {
 	return IRON_KEY_UNKNOWN;
 }
 
+void *gc_alloc(size_t size);
+
+static char *uri_decode(const char *src) {
+	char *res = gc_alloc(1024);
+	char *dst = res;
+	char a, b;
+	while (*src) {
+		if ((*src == '%') && ((a = src[1]) && (b = src[2])) && (isxdigit(a) && isxdigit(b))) {
+			if (a >= 'a') {
+				a -= 'a' - 'A';
+			}
+			if (a >= 'A') {
+				a -= ('A' - 10);
+			}
+			else {
+				a -= '0';
+			}
+			if (b >= 'a') {
+				b -= 'a' - 'A';
+			}
+			if (b >= 'A') {
+				b -= ('A' - 10);
+			}
+			else {
+				b -= '0';
+			}
+			*dst++ = 16 * a + b;
+			src += 3;
+		}
+		else if (*src == '+') {
+			*dst++ = ' ';
+			src++;
+		}
+		else {
+			*dst++ = *src++;
+		}
+	}
+	*dst++ = '\0';
+	return res;
+}
+
 static bool _handle_messages() {
 	static bool controlDown = false;
 	static int ignoreKeycode = 0;
@@ -853,12 +894,11 @@ static bool _handle_messages() {
 				size_t len = 0;
 				while (pos < numItems) {
 					if (data[pos] == '\r') { // Found a file
-						wchar_t filePath[len + 1];
-						mbstowcs(filePath, buffer, len);
-						filePath[len] = 0;
-						iron_internal_drop_files_callback(filePath + 7); // Strip file://
-						pos += 2;                                        // Avoid \n
+						buffer[len] = 0;
 						len = 0;
+						pos += 2; // Avoid \n
+						char *res = uri_decode(buffer + 7); // + 7 -> strip file://
+						iron_internal_drop_files_callback(res);
 					}
 					buffer[len++] = data[pos++];
 				}

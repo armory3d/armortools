@@ -765,7 +765,9 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		for (unsigned i = 0; i < count; ++i) {
 			wchar_t filePath[260];
 			if (DragQueryFileW(hDrop, i, filePath, 260)) {
-				iron_internal_drop_files_callback(filePath);
+				char buffer[1024];
+				WideCharToMultiByte(CP_UTF8, 0, filePath, wcslen(filePath) + 1, buffer, sizeof(buffer), NULL, NULL);
+				iron_internal_drop_files_callback(buffer);
 			}
 		}
 		DragFinish(hDrop);
@@ -1296,6 +1298,27 @@ bool iron_internal_call_close_callback() {
 		return windows[0].closeCallback(windows[0].closeCallbackData);
 	}
 	return true;
+}
+
+bool _save_and_quit_callback_internal() {
+	bool save = false;
+	wchar_t title[1024];
+	GetWindowTextW(iron_windows_window_handle(), title, sizeof(title));
+	bool dirty = wcsstr(title, L"* - ArmorPaint") != NULL;
+	if (dirty) {
+		int res = MessageBox(iron_windows_window_handle(), L"Project has been modified, save changes?", L"Save Changes?", MB_YESNOCANCEL | MB_ICONEXCLAMATION);
+		if (res == IDYES) {
+			save = true;
+		}
+		else if (res == IDNO) {
+			save = false;
+		}
+		else { // Cancel
+			return false;
+		}
+	}
+	iron_save_and_quit(save);
+	return false;
 }
 
 #ifdef WITH_GAMEPAD

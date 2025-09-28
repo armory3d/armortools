@@ -16,7 +16,7 @@ function rgb_node_create(raw: ui_node_t, args: f32_array_t): rgb_node_t {
 
 function rgb_node_get_as_image(self: rgb_node_t, from: i32): gpu_texture_t {
 	if (self.image != null) {
-		iron_delete_texture(self.image);
+		gpu_delete_texture(self.image);
 	}
 
 	let f32a: f32_array_t = f32_array_create(4);

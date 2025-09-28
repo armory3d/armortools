@@ -7,7 +7,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-extern char mobile_title[1024];
+extern char android_title[1024];
 
 ANativeActivity *iron_android_get_activity(void);
 jclass iron_android_find_class(JNIEnv *env, const char *name);
@@ -15,17 +15,12 @@ jclass iron_android_find_class(JNIEnv *env, const char *name);
 JNIEXPORT void JNICALL Java_org_armory3d_IronActivity_onAndroidFilePicked(JNIEnv *env, jobject jobj, jstring jstr) {
 	if (jstr == NULL) return;
 	const char *str = (*env)->GetStringUTFChars(env, jstr, 0);
-	size_t len = strlen(str);
-	wchar_t filePath[len + 1];
-	mbstowcs(filePath, (char *)str, len);
-	filePath[len] = 0;
-
-	iron_internal_drop_files_callback(filePath);
+	iron_internal_drop_files_callback(str);
 	(*env)->ReleaseStringUTFChars(env, jstr, str);
 }
 
 JNIEXPORT jstring JNICALL Java_org_armory3d_IronActivity_getMobileTitle(JNIEnv *env, jobject jobj) {
-	jstring result = (*env)->NewStringUTF(env, mobile_title);
+	jstring result = (*env)->NewStringUTF(env, android_title);
 	return result;
 }
 

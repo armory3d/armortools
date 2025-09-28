@@ -402,7 +402,7 @@ static int getMouseY(NSEvent *event) {
 	if ([[pboard types] containsObject:NSURLPboardType]) {
 		NSArray *urls = [pboard readObjectsForClasses:@[[NSURL class]] options:nil];
 		for (NSURL *fileURL in urls) {
-			wchar_t *filePath = (wchar_t *)[fileURL.path cStringUsingEncoding:NSUTF32LittleEndianStringEncoding];
+			const char *filePath = [fileURL.path cStringUsingEncoding:NSUTF8StringEncoding];
 			iron_internal_drop_files_callback(filePath);
 		}
 	}

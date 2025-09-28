@@ -183,13 +183,13 @@ function import_arm_run_project(path: string) {
 		let rts: map_t<string, render_target_t> = render_path_render_targets;
 		let blend0: render_target_t = map_get(rts, "texpaint_blend0");
 		let _texpaint_blend0: gpu_texture_t = blend0._image;
-		iron_delete_texture(_texpaint_blend0);
+		gpu_delete_texture(_texpaint_blend0);
 		blend0.width = config_get_texture_res_x();
 		blend0.height = config_get_texture_res_y();
 		blend0._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 		let blend1: render_target_t = map_get(rts, "texpaint_blend1");
 		let _texpaint_blend1: gpu_texture_t = blend1._image;
-		iron_delete_texture(_texpaint_blend1);
+		gpu_delete_texture(_texpaint_blend1);
 		blend1.width = config_get_texture_res_x();
 		blend1.height = config_get_texture_res_y();
 		blend1._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
@@ -273,13 +273,13 @@ function import_arm_run_project(path: string) {
 			l.paint_emis = ld.paint_emis;
 			l.paint_subs = ld.paint_subs;
 
-			iron_delete_texture(_texpaint);
+			gpu_delete_texture(_texpaint);
 
 			if (_texpaint_nor != null) {
-				iron_delete_texture(_texpaint_nor);
+				gpu_delete_texture(_texpaint_nor);
 			}
 			if (_texpaint_pack != null) {
-				iron_delete_texture(_texpaint_pack);
+				gpu_delete_texture(_texpaint_pack);
 			}
 		}
 	}

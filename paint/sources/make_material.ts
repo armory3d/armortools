@@ -223,7 +223,7 @@ function make_material_bake_node_previews() {
 		let key: string = keys[i];
 		if (array_index_of(context_raw.node_previews_used, key) == -1) {
 			let image: gpu_texture_t = map_get(context_raw.node_previews, key);
-			iron_delete_texture(image);
+			gpu_delete_texture(image);
 			map_delete(context_raw.node_previews, key);
 		}
 	}
@@ -257,7 +257,7 @@ function make_material_bake_node_preview(node: ui_node_t, group: ui_node_canvas_
 		let res_y: i32 = math_floor(config_get_texture_res_y() / 4);
 		if (image == null || image.width != res_x || image.height != res_y) {
 			if (image != null) {
-				iron_delete_texture(image);
+				gpu_delete_texture(image);
 			}
 			image = gpu_create_render_target(res_x, res_y);
 			map_set(context_raw.node_previews, id, image);
@@ -275,7 +275,7 @@ function make_material_bake_node_preview(node: ui_node_t, group: ui_node_canvas_
 		let res_y: i32 = math_floor(config_get_texture_res_y());
 		if (image == null || image.width != res_x || image.height != res_y) {
 			if (image != null) {
-				iron_delete_texture(image);
+				gpu_delete_texture(image);
 			}
 			image = gpu_create_render_target(res_x, res_y);
 			map_set(context_raw.node_previews, id, image);
@@ -293,7 +293,7 @@ function make_material_bake_node_preview(node: ui_node_t, group: ui_node_canvas_
 		let res_y: i32 = math_floor(config_get_texture_res_y());
 		if (image == null || image.width != res_x || image.height != res_y) {
 			if (image != null) {
-				iron_delete_texture(image);
+				gpu_delete_texture(image);
 			}
 			image = gpu_create_render_target(res_x, res_y, tex_format_t.R8);
 			map_set(context_raw.node_previews, id, image);

@@ -176,7 +176,7 @@ function export_arm_run_project() {
 	// 	///end
 
 	iron_write_png(substring(project_filepath, 0, project_filepath.length - 4) + "_icon.png", mesh_icon_pixels, 256, 256, 0);
-	iron_delete_texture(mesh_icon);
+	gpu_delete_texture(mesh_icon);
 	///end
 
 	let is_packed: bool = ends_with(project_filepath, "_packed_.arm");
@@ -468,7 +468,7 @@ function export_arm_pack_assets(raw: project_format_t, assets: asset_t[]) {
 
 	for (let i: i32 = 0; i < temp_images.length; ++i) {
 		let image: gpu_texture_t = temp_images[i];
-		iron_delete_texture(image);
+		gpu_delete_texture(image);
 	}
 }
 

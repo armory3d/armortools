@@ -10,7 +10,7 @@
 
 #define MAX_TOUCH_COUNT 10
 
-extern char mobile_title[1024];
+static char ios_title[1024];
 static void *touches[MAX_TOUCH_COUNT];
 static int backing_width;
 static int backing_height;
@@ -222,8 +222,11 @@ void iron_window_change_mode(iron_window_mode_t mode) {}
 void iron_window_destroy() {}
 void iron_window_show() {}
 void iron_window_hide() {}
-void iron_window_set_title(const char *title) {}
 void iron_window_create(iron_window_options_t *win) {}
+
+void iron_window_set_title(const char *title) {
+	strcpy(ios_title, title);
+}
 
 void iron_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {
 	resize_callback = callback;
@@ -477,7 +480,7 @@ int iron_window_display() {
 
 void importFile(NSURL *url) {
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-	NSString *folderName = [NSString stringWithUTF8String:mobile_title];
+	NSString *folderName = [NSString stringWithUTF8String:ios_title];
 	NSString *filePath = [[paths objectAtIndex:0] stringByAppendingPathComponent:folderName];
 	if (![[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
 		[[NSFileManager defaultManager] createDirectoryAtPath:filePath withIntermediateDirectories:NO attributes:nil error:nil];
@@ -488,8 +491,8 @@ void importFile(NSURL *url) {
 	CFURLStartAccessingSecurityScopedResource(cfurl);
 	[[NSFileManager defaultManager] copyItemAtPath:url.path toPath:filePath error:nil];
 	CFURLStopAccessingSecurityScopedResource(cfurl);
-	wchar_t *wpath = (wchar_t *)[filePath cStringUsingEncoding:NSUTF32LittleEndianStringEncoding];
-	iron_internal_drop_files_callback(wpath);
+	const char *cpath = [filePath cStringUsingEncoding:NSUTF8StringEncoding];
+	iron_internal_drop_files_callback(cpath);
 }
 
 - (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls {

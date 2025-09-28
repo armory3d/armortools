@@ -161,7 +161,7 @@ function list_folder(path: string) {
 				storage.text = string_replace_all(storage.text, "\r", "");
 				text_handle.text = storage.text;
 				editor_handle.redraws = 1;
-				iron_set_window_title(abs);
+				iron_window_set_title(abs);
 			}
 			// Expand folder
 			else {
@@ -318,7 +318,7 @@ function draw_minimap() {
 	if (minimap_h != iron_window_height()) {
 		minimap_h = iron_window_height();
 		if (minimap != null) {
-			iron_delete_texture(minimap);
+			gpu_delete_texture(minimap);
 		}
 		minimap = gpu_create_render_target(minimap_w, minimap_h);
 	}

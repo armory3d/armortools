@@ -66,7 +66,7 @@ function ui_viewnodes_init() {
 function ui_viewnodes_on_node_remove(n: ui_node_t) {
 	let img: gpu_texture_t = map_get(context_raw.node_preview_map, n);
 	if (img != null) {
-		iron_delete_texture(img);
+		gpu_delete_texture(img);
 		map_delete(context_raw.node_preview_map, n);
 	}
 }
@@ -816,7 +816,7 @@ function ui_nodes_render() {
 
 	if (ui_nodes_grid_redraw) {
 		if (ui_nodes_grid != null) {
-			iron_delete_texture(ui_nodes_grid);
+			gpu_delete_texture(ui_nodes_grid);
 		}
 		ui_nodes_grid = ui_nodes_draw_grid(ui_nodes.zoom);
 		ui_nodes_grid_redraw = false;

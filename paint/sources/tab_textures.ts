@@ -151,7 +151,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 												f += ".png";
 											}
 											iron_write_png(path + path_sep + f, gpu_get_texture_pixels(target), target.width, target.height, 0);
-											iron_delete_texture(target);
+											gpu_delete_texture(target);
 										}, target);
 									});
 								});

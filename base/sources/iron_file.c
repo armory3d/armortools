@@ -11,15 +11,6 @@
 #include <malloc.h>
 #include <memory.h>
 #endif
-
-#ifdef IRON_IOS
-const char *iron_get_resource_path(void);
-#endif
-
-#ifdef IRON_MACOS
-const char *iron_get_resource_path(void);
-#endif
-
 #ifdef IRON_WINDOWS
 #include <backends/windows_mini.h>
 #endif
@@ -28,13 +19,32 @@ static char *fileslocation = NULL;
 #ifdef IRON_WINDOWS
 static wchar_t wfilepath[1001];
 #endif
+#if defined(IRON_MACOS) || defined(IRON_IOS)
+const char *iron_get_resource_path();
+#endif
 
 void iron_internal_set_files_location(char *dir) {
 	fileslocation = dir;
 }
 
-char *iron_internal_get_files_location(void) {
+char *iron_internal_files_location(void) {
+	#ifdef IRON_MACOS
+	char path[1024];
+	strcpy(path, iron_get_resource_path());
+	strcat(path, "/");
+	strcat(path, IRON_OUTDIR);
+	strcat(path, "/");
+	return path;
+	#elif defined(IRON_IOS)
+	char path[1024];
+	strcpy(path, iron_get_resource_path());
+	strcat(path, "/");
+	strcat(path, IRON_OUTDIR);
+	strcat(path, "/");
+	return path;
+	#else
 	return fileslocation;
+	#endif
 }
 
 #ifdef IRON_WINDOWS

@@ -245,7 +245,7 @@ function render_path_resize() {
 	for (let i: i32 = 0; i < render_targets_keys.length; ++i) {
 		let rt: render_target_t = map_get(render_path_render_targets, render_targets_keys[i]);
 		if (rt != null && rt.width == 0) {
-			iron_delete_texture(rt._image);
+			gpu_delete_texture(rt._image);
 			rt._image = render_path_create_image(rt);
 		}
 	}
@@ -305,6 +305,6 @@ function render_target_create(): render_target_t {
 
 function render_target_unload(raw: render_target_t) {
 	if (raw._image != null) {
-		iron_delete_texture(raw._image);
+		gpu_delete_texture(raw._image);
 	}
 }

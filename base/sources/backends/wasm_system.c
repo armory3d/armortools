@@ -33,11 +33,8 @@ bool iron_mouse_can_lock(void) {
 }
 
 void iron_mouse_show() {}
-
 void iron_mouse_hide() {}
-
 void iron_mouse_set_position(int x, int y) {}
-
 void iron_mouse_get_position(int *x, int *y) {}
 
 __attribute__((import_module("imports"), import_name("js_time"))) int js_time();
@@ -131,44 +128,32 @@ int iron_window_height() {
 }
 
 void iron_window_resize(int width, int height) {}
-
 void iron_window_move(int x, int y) {}
 
-// In HTML5 fullscreen is activable only from user input.
 void iron_window_change_mode(iron_window_mode_t mode) {
 	if (mode == IRON_WINDOW_MODE_FULLSCREEN) {
 		if (iron_internal_window_mode == IRON_WINDOW_MODE_FULLSCREEN) {
 			iron_internal_window_mode = mode;
 			return;
 		}
-		// TODO: call js Fullscreen API
 		iron_internal_window_mode = mode;
 	}
 	else {
 		if (mode == iron_internal_window_mode) {
 			return;
 		}
-		// TODO: call js Fullscreen API
 		iron_internal_window_mode = mode;
 	}
 }
 
 void iron_window_destroy() {}
-
 void iron_window_show() {}
-
 void iron_window_hide() {}
-
-// TODO: change browser title.
 void iron_window_set_title(const char *title) {}
-
 void iron_window_create(iron_window_options_t *win) {}
-
 void iron_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {}
-
 void iron_window_set_close_callback(bool (*callback)(void *), void *data) {}
 
 iron_window_mode_t iron_window_get_mode() {
 	return iron_internal_window_mode;
 }
-
