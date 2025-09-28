@@ -58,7 +58,7 @@ function ui_sidebar_render_ui() {
 			ui_sidebar_last_tab = ui_base_htabs[tab_area_t.SIDEBAR0].i;
 		}
 
-		if (!config_raw.touch_ui) {
+		if (!config_raw.touch_ui && !mini) {
 			if (ui_tab(ui_base_htabs[tab_area_t.SIDEBAR0], ">", false, -2)) {
 				ui_base_htabs[tab_area_t.SIDEBAR0].i = ui_sidebar_last_tab;
 				config_raw.layout_tabs[tab_area_t.SIDEBAR0] = ui_sidebar_last_tab;
