@@ -687,6 +687,7 @@ declare let ui_touch_tooltip: bool;
 declare let ui_on_border_hover: any;
 declare let ui_on_tab_drop: any;
 declare let ui_nodes_on_link_drag: any;
+declare let ui_nodes_on_node_remove: any;
 declare let ui_nodes_on_socket_released: any;
 declare let ui_nodes_on_canvas_released: any;
 declare let ui_nodes_on_canvas_control: any;

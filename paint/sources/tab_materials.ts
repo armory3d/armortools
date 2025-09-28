@@ -369,4 +369,8 @@ function tab_materials_delete_material(m: slot_material_t) {
 		let m: slot_material_t = project_materials[i];
 		tab_materials_update_material_pointers(m.canvas.nodes, i);
 	}
+	for (let i: i32 = 0; i < m.canvas.nodes.length; ++i) {
+		let n: ui_node_t = m.canvas.nodes[i];
+		ui_viewnodes_on_node_remove(n);
+	}
 }

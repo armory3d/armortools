@@ -55,11 +55,20 @@ let _ui_nodes_node_search_done: ()=>void;
 function ui_viewnodes_init() {
 	ui_nodes_preview_image = ui_nodes_get_node_preview_image;
 	ui_nodes_on_link_drag = ui_viewnodes_on_link_drag;
+	ui_nodes_on_node_remove = ui_viewnodes_on_node_remove;
 	ui_nodes_on_socket_released = ui_viewnodes_on_socket_released;
 	ui_nodes_on_canvas_released = ui_viewnodes_on_canvas_released;
 	ui_nodes_on_canvas_control = ui_viewnodes_on_canvas_control;
 	ui_nodes_grid_snap = config_raw.grid_snap;
 	nodes_material_init();
+}
+
+function ui_viewnodes_on_node_remove(n: ui_node_t) {
+	let img: gpu_texture_t = map_get(context_raw.node_preview_map, n);
+	if (img != null) {
+		iron_delete_texture(img);
+		map_delete(context_raw.node_preview_map, n);
+	}
 }
 
 function ui_viewnodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {

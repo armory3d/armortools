@@ -19,8 +19,6 @@ static bool ui_box_select = false;
 static int ui_box_select_x = 0;
 static int ui_box_select_y = 0;
 static const int ui_max_buttons = 9;
-static void (*ui_on_header_released)(ui_node_t *) = NULL;
-static void (*ui_nodes_on_node_remove)(ui_node_t *) = NULL;
 static int ui_node_id = -1;
 static ui_node_t *node_resize = NULL;
 
@@ -34,6 +32,7 @@ ui_canvas_control_t *(*ui_nodes_on_canvas_control)(void) = NULL;
 void (*ui_nodes_on_canvas_released)(void) = NULL;
 void (*ui_nodes_on_socket_released)(int) = NULL;
 void (*ui_nodes_on_link_drag)(int, bool) = NULL;
+void (*ui_nodes_on_node_remove)(ui_node_t *) = NULL;
 bool ui_nodes_grid_snap = true;
 int ui_nodes_grid_snap_w = 40;
 
@@ -1011,9 +1010,6 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 				// No drag performed, select single node
 				current_nodes->nodes_selected_id->length = 0;
 				i32_array_push(current_nodes->nodes_selected_id, node->id);
-				if (ui_on_header_released != NULL) {
-					ui_on_header_released(node);
-				}
 			}
 		}
 
