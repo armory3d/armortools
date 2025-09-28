@@ -228,6 +228,13 @@ void gpu_raytrace_set_pipeline(gpu_raytrace_pipeline_t *pipeline);
 void gpu_raytrace_set_target(gpu_texture_t *output);
 void gpu_raytrace_dispatch_rays();
 
+void _gpu_raytrace_init(buffer_t *shader);
+void _gpu_raytrace_as_init();
+void _gpu_raytrace_as_add(gpu_buffer_t *vb, gpu_buffer_t *ib, iron_matrix4x4_t transform);
+void _gpu_raytrace_as_build(gpu_buffer_t *vb_full, gpu_buffer_t *ib_full);
+void gpu_raytrace_set_textures(gpu_texture_t *tex0, gpu_texture_t *tex1, gpu_texture_t *tex2, gpu_texture_t *texenv, gpu_texture_t *texsobol, gpu_texture_t *texscramble, gpu_texture_t *texrank);
+void _gpu_raytrace_dispatch_rays(gpu_texture_t *render_target, buffer_t *buffer);
+
 int gpu_vertex_data_size(gpu_vertex_data_t data);
 int gpu_vertex_struct_size(gpu_vertex_structure_t *s);
 int gpu_texture_format_size(gpu_texture_format_t format);

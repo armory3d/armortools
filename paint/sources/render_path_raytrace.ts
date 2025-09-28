@@ -59,7 +59,7 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 		let bnoise_rank: gpu_texture_t = map_get(scene_embedded, "bnoise_rank.k");
 
 		let l: slot_layer_t = layers_flatten(true);
-		iron_raytrace_set_textures(l.texpaint, l.texpaint_nor, l.texpaint_pack, saved_envmap, bnoise_sobol, bnoise_scramble, bnoise_rank);
+		gpu_raytrace_set_textures(l.texpaint, l.texpaint_nor, l.texpaint_pack, saved_envmap, bnoise_sobol, bnoise_scramble, bnoise_rank);
 	}
 	////
 
@@ -107,7 +107,7 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	render_path_raytrace_f32a[22] = render_path_raytrace_uv_scale;
 
 	let framebuffer: render_target_t = map_get(render_path_render_targets, "buf");
-	iron_raytrace_dispatch_rays(framebuffer._image, render_path_raytrace_f32a);
+	_gpu_raytrace_dispatch_rays(framebuffer._image, render_path_raytrace_f32a);
 
 	if (context_raw.ddirty == 1 || context_raw.pdirty == 1) {
 		///if arm_metal
@@ -135,7 +135,7 @@ function render_path_raytrace_raytrace_init(shader_name: string, build: bool = t
 		scene_embed_data("bnoise_rank.k");
 
 		let shader: buffer_t = data_get_blob(shader_name);
-		iron_raytrace_init(shader);
+		_gpu_raytrace_init(shader);
 	}
 
 	if (build) {
@@ -143,7 +143,7 @@ function render_path_raytrace_raytrace_init(shader_name: string, build: bool = t
 	}
 
 	{
-		iron_raytrace_as_init();
+		_gpu_raytrace_as_init();
 
 		if (context_raw.tool == tool_type_t.GIZMO) {
 			for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
@@ -151,17 +151,17 @@ function render_path_raytrace_raytrace_init(shader_name: string, build: bool = t
 				if (!po.base.visible) {
 					continue;
 				}
-				iron_raytrace_as_add(po.data._.vertex_buffer, po.data._.index_buffer, po.base.transform.world_unpack);
+				_gpu_raytrace_as_add(po.data._.vertex_buffer, po.data._.index_buffer, po.base.transform.world_unpack);
 			}
 		}
 		else {
-			iron_raytrace_as_add(render_path_raytrace_vb, render_path_raytrace_ib, render_path_raytrace_transform);
+			_gpu_raytrace_as_add(render_path_raytrace_vb, render_path_raytrace_ib, render_path_raytrace_transform);
 		}
 
 		let vb_full: gpu_buffer_t = context_raw.merged_object.data._.vertex_buffer;
 		let ib_full: gpu_buffer_t = context_raw.merged_object.data._.index_buffer;
 
-		iron_raytrace_as_build(vb_full, ib_full);
+		_gpu_raytrace_as_build(vb_full, ib_full);
 	}
 }
 

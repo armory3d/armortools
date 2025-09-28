@@ -350,13 +350,12 @@ declare function iron_ml_inference(model: buffer_t, tensors: buffer_t[], input_s
 declare function iron_ml_unload(): void;
 
 declare function gpu_raytrace_supported(): bool;
-declare function iron_raytrace_init(shader: buffer_t): void;
-declare function iron_raytrace_as_init(): void;
-declare function iron_raytrace_as_add(vb: any, ib: any, transform: mat4_t): void;
-declare function iron_raytrace_as_build(vb_full: any, ib_full: any): void;
-
-declare function iron_raytrace_set_textures(tex0: gpu_texture_t, tex1: gpu_texture_t, tex2: gpu_texture_t, texenv: any, tex_sobol: any, tex_scramble: any, tex_rank: any): void;
-declare function iron_raytrace_dispatch_rays(target: any, cb: buffer_t): void;
+declare function _gpu_raytrace_init(shader: buffer_t): void;
+declare function _gpu_raytrace_as_init(): void;
+declare function _gpu_raytrace_as_add(vb: any, ib: any, transform: mat4_t): void;
+declare function _gpu_raytrace_as_build(vb_full: any, ib_full: any): void;
+declare function gpu_raytrace_set_textures(tex0: gpu_texture_t, tex1: gpu_texture_t, tex2: gpu_texture_t, texenv: any, tex_sobol: any, tex_scramble: any, tex_rank: any): void;
+declare function _gpu_raytrace_dispatch_rays(target: any, cb: buffer_t): void;
 
 declare function iron_window_x(): i32;
 declare function iron_window_y(): i32;

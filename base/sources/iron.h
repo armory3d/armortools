@@ -1113,12 +1113,10 @@ gpu_texture_t *iron_load_texture(string_t *file) {
 }
 
 #ifdef WITH_AUDIO
-
 any iron_load_sound(string_t *file) {
 	iron_a1_sound_t *sound = iron_a1_sound_create(file);
 	return sound;
 }
-
 #endif
 
 buffer_t *iron_load_blob(string_t *file) {
@@ -1741,56 +1739,4 @@ void iron_mp4_encode(buffer_t *pixels) {
 }
 #endif
 
-static gpu_buffer_t rt_constant_buffer;
-static gpu_raytrace_pipeline_t rt_pipeline;
-static gpu_raytrace_acceleration_structure_t rt_accel;
-static bool rt_created = false;
-static bool rt_accel_created = false;
-const int rt_constant_buffer_size = 24;
-
-void iron_raytrace_init(buffer_t *shader) {
-	if (rt_created) {
-		gpu_buffer_destroy(&rt_constant_buffer);
-		gpu_raytrace_pipeline_destroy(&rt_pipeline);
-	}
-	rt_created = true;
-	gpu_constant_buffer_init(&rt_constant_buffer, rt_constant_buffer_size * 4);
-	gpu_raytrace_pipeline_init(&rt_pipeline, shader->buffer, (int)shader->length, &rt_constant_buffer);
-}
-
-void iron_raytrace_as_init() {
-	if (rt_accel_created) {
-		gpu_raytrace_acceleration_structure_destroy(&rt_accel);
-	}
-	rt_accel_created = true;
-	gpu_raytrace_acceleration_structure_init(&rt_accel);
-}
-
-void iron_raytrace_as_add(struct gpu_buffer *vb, gpu_buffer_t *ib, iron_matrix4x4_t transform) {
-	gpu_raytrace_acceleration_structure_add(&rt_accel, vb, ib, transform);
-}
-
-void iron_raytrace_as_build(struct gpu_buffer *vb_full, gpu_buffer_t *ib_full) {
-	gpu_raytrace_acceleration_structure_build(&rt_accel, vb_full, ib_full);
-}
-
-void iron_raytrace_set_textures(gpu_texture_t *tex0, gpu_texture_t *tex1, gpu_texture_t *tex2, gpu_texture_t *texenv, gpu_texture_t *texsobol, gpu_texture_t *texscramble, gpu_texture_t *texrank) {
-	gpu_raytrace_set_textures(tex0, tex1, tex2, texenv, texsobol, texscramble, texrank);
-}
-
-void iron_raytrace_dispatch_rays(gpu_texture_t *render_target, buffer_t *buffer) {
-	float *cb = (float *)buffer->buffer;
-	gpu_constant_buffer_lock(&rt_constant_buffer, 0, rt_constant_buffer.count);
-	for (int i = 0; i < rt_constant_buffer_size; ++i) {
-		float *floats = (float *)(&rt_constant_buffer.data[i * 4]);
-		floats[0] = cb[i];
-	}
-	gpu_constant_buffer_unlock(&rt_constant_buffer);
-
-	gpu_raytrace_set_acceleration_structure(&rt_accel);
-	gpu_raytrace_set_pipeline(&rt_pipeline);
-	gpu_raytrace_set_target(render_target);
-	gpu_raytrace_dispatch_rays();
-}
-
-#endif
+#endif // NO_IRON_API

@@ -105,7 +105,7 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 			tex2 = texpaint_undo._image;
 		}
 
-		iron_raytrace_set_textures(baketex0._image, baketex1._image, tex2, saved_envmap, bnoise_sobol, bnoise_scramble, bnoise_rank);
+		gpu_raytrace_set_textures(baketex0._image, baketex1._image, tex2, saved_envmap, bnoise_sobol, bnoise_scramble, bnoise_rank);
 	}
 
 	if (context_raw.brush_time > 0) {
@@ -124,7 +124,7 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool)=>vo
 		f32a[6] = context_raw.envmap_angle;
 
 		let framebuffer: render_target_t = map_get(render_path_render_targets, "baketex2");
-		iron_raytrace_dispatch_rays(framebuffer._image, f32a);
+		_gpu_raytrace_dispatch_rays(framebuffer._image, f32a);
 
 		let id: i32 = context_raw.layer.id;
 		let texpaint_id: string = "texpaint" + id;
