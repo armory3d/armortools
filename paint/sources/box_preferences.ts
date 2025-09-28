@@ -52,6 +52,21 @@ function box_preferences_show() {
 				h_node_previews.b = config_raw.node_previews;
 			}
 			config_raw.node_previews = ui_check(h_node_previews, tr("Node Previews"));
+			if (h_node_previews.changed) {
+				for (let i: i32 = 0; i < project_materials.length; ++i) {
+					let c: ui_node_canvas_t = project_materials[i].canvas;
+					for (let j: i32 = 0; j < c.nodes.length; ++j) {
+						let n: ui_node_t = c.nodes[j];
+						if (config_raw.node_previews) {
+							n.flags |= _ui_node_flag_t.PREVIEW;
+						}
+						else {
+							n.flags &= ~_ui_node_flag_t.PREVIEW;
+						}
+					}
+				}
+				ui_nodes_hwnd.redraws = 2;
+			}
 			if (ui.is_hovered) {
 				ui_tooltip(tr("Show node preview on each node by default"));
 			}

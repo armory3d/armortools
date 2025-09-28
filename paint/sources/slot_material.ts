@@ -62,9 +62,19 @@ function slot_material_create(m: material_data_t = null, c: ui_node_canvas_t = n
 		raw.canvas = util_clone_canvas(c);
 	}
 
+	if (config_raw.node_previews) {
+		for (let i: i32 = 0; i < raw.canvas.nodes.length; ++i) {
+			let n: ui_node_t = raw.canvas.nodes[i];
+			n.flags |= _ui_node_flag_t.PREVIEW;
+		}
+	}
+
 	///if (arm_android || arm_ios)
 	raw.nodes.pan_x -= 50; // Center initial position
+	///else
+	raw.nodes.pan_x += 110;
 	///end
+	raw.nodes.pan_y += 120;
 
 	return raw;
 }

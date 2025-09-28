@@ -1458,6 +1458,9 @@ function ui_nodes_make_node_preview() {
 
 	let nodes: ui_node_t[] = ui_nodes_get_canvas().nodes;
 	let node: ui_node_t = ui_get_node(nodes, ui_nodes.nodes_selected_id[0]);
+	if (node == null) {
+		return;
+	}
 	context_raw.node_preview_name = node.name;
 
 	if (node.type == "LAYER" ||
