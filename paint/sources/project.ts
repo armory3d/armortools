@@ -9,14 +9,12 @@ let project_material_groups: node_group_t[] = [];
 let project_paint_objects: mesh_object_t[] = null;
 let project_asset_map: map_t<i32, any> = map_create(); // gpu_texture_t | font_t
 let project_mesh_list: string[] = null;
-
 let project_materials: slot_material_t[] = [];
 let project_brushes: slot_brush_t[] = [];
 let project_layers: slot_layer_t[] = [];
 let project_fonts: slot_font_t[] = [];
 let project_atlas_objects: i32[] = null;
 let project_atlas_names: string[] = null;
-
 let _project_save_and_quit: bool;
 let _project_import_mesh_replace_existing: bool;
 let _project_import_mesh_done: ()=>void;

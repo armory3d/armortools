@@ -592,14 +592,10 @@ function import_arm_make_pink(abs: string) {
 	map_set(data_cached_images, abs, pink);
 }
 
-function import_arm_texture_node_name(): string {
-	return "TEX_IMAGE";
-}
-
 function import_arm_init_nodes(nodes: ui_node_t[]) {
 	for (let i: i32 = 0; i < nodes.length; ++i) {
 		let node: ui_node_t = nodes[i];
-		if (node.type == import_arm_texture_node_name()) {
+		if (node.type == "TEX_IMAGE") {
 			node.buttons[0].default_value = f32_array_create_x(base_get_asset_index(u8_array_to_string(node.buttons[0].data)));
 			node.buttons[0].data = u8_array_create_from_string("");
 		}

@@ -2,7 +2,6 @@
 let box_projects_htab: ui_handle_t = ui_handle_create();
 let box_projects_hsearch: ui_handle_t = ui_handle_create();
 let box_projects_icon_map: map_t<string, gpu_texture_t> = null;
-
 let _box_projects_path: string;
 let _box_projects_icon_path: string;
 let _box_projects_i: i32;

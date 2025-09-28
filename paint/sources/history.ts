@@ -1,5 +1,5 @@
 
-let history_steps: step_t[];
+let history_steps: history_step_t[];
 let history_undo_i: i32 = 0; // Undo layer
 let history_undos: i32 = 0; // Undos available
 let history_redos: i32 = 0; // Redos available
@@ -10,7 +10,7 @@ let history_push_undo2: bool = false;
 function history_undo() {
 	if (history_undos > 0) {
 		let active: i32 = history_steps.length - 1 - history_redos;
-		let step: step_t = history_steps[active];
+		let step: history_step_t = history_steps[active];
 
 		if (step.name == tr("Edit Nodes")) {
 			history_swap_canvas(step);
@@ -142,7 +142,7 @@ function history_undo() {
 			context_set_layer(context_raw.layer);
 		}
 		else if (step.name == tr("Invert Mask")) {
-			sys_notify_on_next_frame(function (step: step_t) {
+			sys_notify_on_next_frame(function (step: history_step_t) {
 				context_raw.layer = project_layers[step.layer];
 				slot_layer_invert_mask(context_raw.layer);
 			}, step);
@@ -236,7 +236,7 @@ function history_undo() {
 function history_redo() {
 	if (history_redos > 0) {
 		let active: i32 = history_steps.length - history_redos;
-		let step: step_t = history_steps[active];
+		let step: history_step_t = history_steps[active];
 
 		if (step.name == tr("Edit Nodes")) {
 			history_swap_canvas(step);
@@ -335,7 +335,7 @@ function history_redo() {
 			});
 		}
 		else if (step.name == tr("Invert Mask")) {
-			sys_notify_on_next_frame(function (step: step_t) {
+			sys_notify_on_next_frame(function (step: history_step_t) {
 				context_raw.layer = project_layers[step.layer];
 				slot_layer_invert_mask(context_raw.layer);
 			}, step);
@@ -442,7 +442,7 @@ function history_reset() {
 }
 
 function history_edit_nodes(canvas: ui_node_canvas_t, canvas_type: i32, canvas_group: i32 = -1) {
-	let step: step_t = history_push(tr("Edit Nodes"));
+	let step: history_step_t = history_push(tr("Edit Nodes"));
 	step.canvas_group = canvas_group;
 	step.canvas_type = canvas_type;
 	step.canvas = util_clone_canvas(canvas);
@@ -491,14 +491,14 @@ function history_clear_layer() {
 }
 
 function history_order_layers(prev_order: i32) {
-	let step: step_t = history_push(tr("Order Layers"));
+	let step: history_step_t = history_push(tr("Order Layers"));
 	step.prev_order = prev_order;
 }
 
 function history_merge_layers() {
 	history_copy_merging_layers();
 
-	let step: step_t = history_push(tr("Merge Layers"));
+	let step: history_step_t = history_push(tr("Merge Layers"));
 	step.layer -= 1; // Merge down
 	if (slot_layer_has_masks(context_raw.layer)) {
 		step.layer -= slot_layer_get_masks(context_raw.layer).length;
@@ -564,31 +564,31 @@ function history_layer_blending() {
 }
 
 function history_new_material() {
-	let step: step_t = history_push(tr("New Material"));
+	let step: history_step_t = history_push(tr("New Material"));
 	step.canvas_type = 0;
 	step.canvas = util_clone_canvas(context_raw.material.canvas);
 }
 
 function history_delete_material() {
-	let step: step_t = history_push(tr("Delete Material"));
+	let step: history_step_t = history_push(tr("Delete Material"));
 	step.canvas_type = 0;
 	step.canvas = util_clone_canvas(context_raw.material.canvas);
 }
 
 function history_duplicate_material() {
-	let step: step_t = history_push(tr("Duplicate Material"));
+	let step: history_step_t = history_push(tr("Duplicate Material"));
 	step.canvas_type = 0;
 	step.canvas = util_clone_canvas(context_raw.material.canvas);
 }
 
 function history_delete_material_group(group: node_group_t) {
-	let step: step_t = history_push(tr("Delete Node Group"));
+	let step: history_step_t = history_push(tr("Delete Node Group"));
 	step.canvas_type = canvas_type_t.MATERIAL;
 	step.canvas_group = array_index_of(project_material_groups, group);
 	step.canvas = util_clone_canvas(group.canvas);
 }
 
-function history_push(name: string): step_t {
+function history_push(name: string): history_step_t {
 	///if (arm_windows || arm_linux || arm_macos)
 	let filename: string = project_filepath == "" ? ui_files_filename : substring(project_filepath, string_last_index_of(project_filepath, path_sep) + 1, project_filepath.length - 4);
 	sys_title_set(filename + "* - " + manifest_title);
@@ -614,7 +614,7 @@ function history_push(name: string): step_t {
 	let mpos: i32 = array_index_of(project_materials, context_raw.material);
 	let bpos: i32 = array_index_of(project_brushes, context_raw.brush);
 
-	let step: step_t = {
+	let step: history_step_t = {
 		name: name,
 		layer: lpos,
 		layer_type: slot_layer_is_mask(context_raw.layer) ? layer_slot_type_t.MASK : slot_layer_is_group(context_raw.layer) ? layer_slot_type_t.GROUP : layer_slot_type_t.LAYER,
@@ -689,7 +689,7 @@ function history_copy_to_undo(from_id: i32, to_id: i32, is_mask: bool) {
 	history_undo_i = (history_undo_i + 1) % config_raw.undo_steps;
 }
 
-function history_get_canvas(step: step_t): ui_node_canvas_t {
+function history_get_canvas(step: history_step_t): ui_node_canvas_t {
 	if (step.canvas_group == -1) {
 		return project_materials[step.material].canvas;
 	}
@@ -698,7 +698,7 @@ function history_get_canvas(step: step_t): ui_node_canvas_t {
 	}
 }
 
-function history_set_canvas(step: step_t, canvas: ui_node_canvas_t) {
+function history_set_canvas(step: history_step_t, canvas: ui_node_canvas_t) {
 	if (step.canvas_group == -1) {
 		project_materials[step.material].canvas = canvas;
 	}
@@ -707,7 +707,7 @@ function history_set_canvas(step: step_t, canvas: ui_node_canvas_t) {
 	}
 }
 
-function history_swap_canvas(step: step_t) {
+function history_swap_canvas(step: history_step_t) {
 	if (step.canvas_type == 0) {
 		let _canvas: ui_node_canvas_t = history_get_canvas(step);
 		history_set_canvas(step, step.canvas);
@@ -728,7 +728,7 @@ function history_swap_canvas(step: step_t) {
 	ui_nodes_hwnd.redraws = 2;
 }
 
-type step_t = {
+type history_step_t = {
 	name?: string;
 	canvas?: ui_node_canvas_t; // Node history
 	canvas_group?: i32;

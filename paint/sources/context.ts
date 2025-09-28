@@ -437,7 +437,11 @@ function context_create(): context_t {
 
 function context_init() {
 	context_raw = context_create();
-	context_ext_init(context_raw);
+	context_raw.tool = tool_type_t.BRUSH;
+    context_raw.color_picker_previous_tool = tool_type_t.BRUSH;
+    context_raw.brush_radius = 0.5;
+    context_raw.brush_radius_handle.f = 0.5;
+	context_raw.brush_hardness = 0.8;
 }
 
 function context_use_deferred(): bool {
@@ -571,7 +575,29 @@ function context_init_tool() {
 }
 
 function context_select_paint_object(o: mesh_object_t) {
-	context_ext_select_paint_object(o);
+	ui_header_handle.redraws = 2;
+	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+		let p: mesh_object_t = project_paint_objects[i];
+		p.skip_context = "paint";
+	}
+
+	///if_forge
+	context_raw.paint_object.skip_context = "";
+	///end
+
+	context_raw.paint_object = o;
+
+	let mask: i32 = slot_layer_get_object_mask(context_raw.layer);
+	if (context_layer_filter_used()) {
+		mask = context_raw.layer_filter;
+	}
+
+	if (context_raw.merged_object == null || mask > 0) {
+		context_raw.paint_object.skip_context = "";
+	}
+	util_uv_uvmap_cached = false;
+	util_uv_trianglemap_cached = false;
+	util_uv_dilatemap_cached = false;
 }
 
 function context_main_object(): mesh_object_t {
@@ -756,39 +782,4 @@ function context_enable_import_plugin(file: string): bool {
 
 function context_set_swatch(s: swatch_color_t) {
 	context_raw.swatch = s;
-}
-
-
-function context_ext_init(c: context_t) {
-    c.tool = tool_type_t.BRUSH;
-    c.color_picker_previous_tool = tool_type_t.BRUSH;
-    c.brush_radius = 0.5;
-    c.brush_radius_handle.f = 0.5;
-	c.brush_hardness = 0.8;
-}
-
-function context_ext_select_paint_object(o: mesh_object_t) {
-	ui_header_handle.redraws = 2;
-	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
-		let p: mesh_object_t = project_paint_objects[i];
-		p.skip_context = "paint";
-	}
-
-	///if_forge
-	context_raw.paint_object.skip_context = "";
-	///end
-
-	context_raw.paint_object = o;
-
-	let mask: i32 = slot_layer_get_object_mask(context_raw.layer);
-	if (context_layer_filter_used()) {
-		mask = context_raw.layer_filter;
-	}
-
-	if (context_raw.merged_object == null || mask > 0) {
-		context_raw.paint_object.skip_context = "";
-	}
-	util_uv_uvmap_cached = false;
-	util_uv_trianglemap_cached = false;
-	util_uv_dilatemap_cached = false;
 }

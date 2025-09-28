@@ -205,12 +205,8 @@ function export_arm_run_project() {
 	console_info(tr("Project saved"));
 }
 
-function export_arm_texture_node_name(): string {
-	return "TEX_IMAGE";
-}
-
 function export_arm_export_node(n: ui_node_t, assets: asset_t[] = null) {
-	if (n.type == export_arm_texture_node_name()) {
+	if (n.type == "TEX_IMAGE") {
 		let index: i32 = n.buttons[0].default_value[0];
 		n.buttons[0].data = u8_array_create_from_string(base_enum_texts(n.type)[index]);
 
