@@ -48,10 +48,11 @@ function make_node_preview_run(data: material_t, matcon: material_context_t, nod
 		parser_material_parents = parents;
 	}
 	let links: ui_node_link_t[] = parser_material_links;
+	let socket_preview: i32 = i32_imap_get(context_raw.node_preview_socket_map, node.id);
 	let link: ui_node_link_t = {
 		id: ui_next_link_id(links),
 		from_id: node.id,
-		from_socket: context_raw.node_preview_socket,
+		from_socket: socket_preview == -1 ? 0 : socket_preview,
 		to_id: -1,
 		to_socket: -1
 	};

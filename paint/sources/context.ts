@@ -82,8 +82,8 @@ type context_t = {
 	tool?: tool_type_t;
 	layer_preview_dirty?: bool;
 	layers_preview_dirty?: bool;
-	node_preview_socket?: i32;
-	node_preview_map?: map_t<ui_node_t, gpu_texture_t>;
+	node_preview_socket_map?: map_t<i32, i32>;
+	node_preview_map?: map_t<i32, gpu_texture_t>;
 	node_preview_name?: string;
 	node_previews?: map_t<string, gpu_texture_t>;
 	node_previews_used?: string[];
@@ -291,8 +291,8 @@ function context_create(): context_t {
 	c.pen_painting_only = false; // Reject painting with finger when using pen
 	c.layer_preview_dirty = true;
 	c.layers_preview_dirty = false;
-	c.node_preview_socket = 0;
 	c.node_preview_name = "";
+	c.node_preview_socket_map = map_create();
 	c.node_preview_map = map_create();
 	c.selected_node_preview = true;
 	c.colorid_picked = false;

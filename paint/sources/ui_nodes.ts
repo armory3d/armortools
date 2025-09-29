@@ -66,10 +66,10 @@ function ui_viewnodes_init() {
 }
 
 function ui_viewnodes_on_node_remove(n: ui_node_t) {
-	let img: gpu_texture_t = map_get(context_raw.node_preview_map, n);
+	let img: gpu_texture_t = any_imap_get(context_raw.node_preview_map, n.id);
 	if (img != null) {
 		gpu_delete_texture(img);
-		map_delete(context_raw.node_preview_map, n);
+		imap_delete(context_raw.node_preview_map, n.id);
 	}
 }
 
@@ -82,7 +82,6 @@ function ui_viewnodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 		return;
 	}
 
-	let ui_nodes: ui_nodes_t = ui_nodes_get_nodes();
 	let links: ui_node_link_t[] = ui_nodes_get_canvas(true).links;
 	let link_drag: ui_node_link_t = ui_get_link(links, link_drag_id);
 	let nodes: ui_node_t[] = ui_nodes_get_canvas(true).nodes;
@@ -137,14 +136,13 @@ function ui_viewnodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 		});
 	}
 	// Selecting which node socket to preview
-	else if (ui_nodes.nodes_selected_id.length > 0 && node.id == ui_nodes.nodes_selected_id[0]) {
-		context_raw.node_preview_socket = link_drag.from_id > -1 ? link_drag.from_socket : 0;
+	else if (link_drag.from_id > -1) {
+		i32_imap_set(context_raw.node_preview_socket_map, node.id, link_drag.from_socket);
 		ui_nodes_node_changed = node;
 	}
 }
 
 function ui_viewnodes_on_socket_released(socket_id: i32) {
-	let nodes: ui_nodes_t = ui_nodes_get_nodes();
 	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
 	let socket: ui_node_socket_t = ui_get_socket(canvas.nodes, socket_id);
 	let node: ui_node_t = ui_get_node(canvas.nodes, socket.node_id);
@@ -253,16 +251,18 @@ function ui_viewnodes_on_socket_released(socket_id: i32) {
 				});
 			});
 		}
-		else ui_viewnodes_on_canvas_released();
-	}
-	// Selecting which node socket to preview
-	else if (nodes.nodes_selected_id.length > 0 && node.id == nodes.nodes_selected_id[0]) {
-		let i: i32 = array_index_of(node.outputs, socket);
-		if (i > -1) {
-			context_raw.node_preview_socket = i;
-			ui_nodes_node_changed = node;
+		else {
+			ui_viewnodes_on_canvas_released();
 		}
 	}
+	// Selecting which node socket to preview
+	// else {
+	// 	let i: i32 = array_index_of(node.outputs, socket);
+	// 	if (i > -1) {
+	// 		i32_imap_set(context_raw.node_preview_socket_map, node.id, i);
+	// 		ui_nodes_node_changed = node;
+	// 	}
+	// }
 }
 
 function ui_viewnodes_on_canvas_released() {
@@ -836,7 +836,6 @@ function ui_nodes_render() {
 	if (ui_nodes.nodes_selected_id.length > 0 && ui_nodes.nodes_selected_id[0] != ui_nodes_last_node_selected_id) {
 		ui_nodes_last_node_selected_id = ui_nodes.nodes_selected_id[0];
 		let sel: ui_node_t = ui_get_node(c.nodes, ui_nodes.nodes_selected_id[0]);
-		context_raw.node_preview_socket = 0;
 		ui_nodes_make_node_preview(sel);
 	}
 	else if (ui_nodes.nodes_selected_id.length == 0) {
@@ -853,12 +852,9 @@ function ui_nodes_render() {
 			array_push(linked_nodes, sel);
 		}
 
-		let _node_preview_socket: i32 = context_raw.node_preview_socket;
 		for (let i: i32 = 0; i < linked_nodes.length; ++i) {
-			context_raw.node_preview_socket = linked_nodes[i] == sel ? _node_preview_socket : 0;
 			ui_nodes_make_node_preview(linked_nodes[i]);
 		}
-		context_raw.node_preview_socket = _node_preview_socket;
 		ui_nodes_node_changed = null;
 	}
 
@@ -1022,7 +1018,7 @@ function ui_nodes_render() {
 				let th: f32 = tw * (img.height / img.width);
 				let tx: f32 = ui_nodes_ww - tw - 8 * UI_SCALE();
 				let ty: f32 = ui_nodes_wh - th - 8 * UI_SCALE();
-				if (img == map_get(context_raw.node_preview_map, sel)) {
+				if (img == any_imap_get(context_raw.node_preview_map, sel.id)) {
 					ui_draw_shadow(tx, ty, tw, th);
 				}
 				let single_channel: bool = sel.type == "LAYER_MASK";
@@ -1174,7 +1170,7 @@ function ui_nodes_get_node_preview_image(n: ui_node_t): gpu_texture_t {
 		}
 	}
 	else if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) {
-		img = map_get(context_raw.node_preview_map, n);
+		img = any_imap_get(context_raw.node_preview_map, n.id);
 	}
 	return img;
 }
@@ -1511,10 +1507,10 @@ function ui_nodes_make_node_preview(node: ui_node_t) {
 		return;
 	}
 
-	let img: gpu_texture_t = map_get(context_raw.node_preview_map, node);
+	let img: gpu_texture_t = any_imap_get(context_raw.node_preview_map, node.id);
 	if (img == null) {
 		img = gpu_create_render_target(util_render_material_preview_size, util_render_material_preview_size);
-		map_set(context_raw.node_preview_map, node, img);
+		any_imap_set(context_raw.node_preview_map, node.id, img);
 	}
 
 	ui_nodes_hwnd.redraws = 2;
