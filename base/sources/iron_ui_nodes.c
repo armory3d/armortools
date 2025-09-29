@@ -33,6 +33,7 @@ void (*ui_nodes_on_canvas_released)(void) = NULL;
 void (*ui_nodes_on_socket_released)(int) = NULL;
 void (*ui_nodes_on_link_drag)(int, bool) = NULL;
 void (*ui_nodes_on_node_remove)(ui_node_t *) = NULL;
+void (*ui_nodes_on_node_changed)(ui_node_t *) = NULL;
 bool ui_nodes_grid_snap = true;
 int ui_nodes_grid_snap_w = 40;
 
@@ -311,6 +312,9 @@ void ui_remove_node(ui_node_t *n, ui_node_canvas_t *canvas) {
 		ui_node_link_t *l = canvas->links->buffer[i];
 		if (l->from_id == n->id || l->to_id == n->id) {
 			ui_remove_link_at(canvas, i);
+			if (ui_nodes_on_node_changed != NULL && l->from_id == n->id) {
+				ui_nodes_on_node_changed(ui_get_node(canvas->nodes, l->to_id));
+			}
 		}
 		else {
 			i++;
@@ -806,7 +810,13 @@ void ui_node_draw(ui_node_t *node, ui_node_canvas_t *canvas) {
 	ny += lineh * 0.5;
 
 	if (!(node->flags & NODE_FLAG_COLLAPSED)) {
+		bool _changed = current->changed;
+		current->changed = false;
 		ui_node_draw_body(node, canvas, nx, ny);
+		if (ui_nodes_on_node_changed != NULL && current->changed) {
+			ui_nodes_on_node_changed(node);
+		}
+		current->changed = _changed || current->changed;
 	}
 
 	current->_x = ui_x;
@@ -1046,6 +1056,9 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 								l->to_id = l->to_socket = -1;
 								current_nodes->link_drag_id = l->id;
 								current_nodes->is_new_link = false;
+								if (ui_nodes_on_node_changed != NULL) {
+									ui_nodes_on_node_changed(node);
+								}
 								break;
 							}
 						}
@@ -1081,12 +1094,18 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 				link_drag->to_id = current_nodes->snap_to_id;
 				link_drag->to_socket = current_nodes->snap_socket;
 				current->changed = true;
+				if (ui_nodes_on_node_changed != NULL) {
+					ui_nodes_on_node_changed(ui_get_node(canvas->nodes, link_drag->to_id));
+				}
 			}
 			else if (current_nodes->snap_from_id != -1) { // Connect to output
 				ui_node_link_t *link_drag = ui_get_link(canvas->links, current_nodes->link_drag_id);
 				link_drag->from_id = current_nodes->snap_from_id;
 				link_drag->from_socket = current_nodes->snap_socket;
 				current->changed = true;
+				if (ui_nodes_on_node_changed != NULL) {
+					ui_nodes_on_node_changed(ui_get_node(canvas->nodes, link_drag->to_id));
+				}
 			}
 			else if (current_nodes->link_drag_id != -1) { // Remove dragged link
 				current->changed = true;
@@ -1353,6 +1372,8 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 		bool hide = (current->input_started || current->input_started_r) && (current->input_x - wx < ui_popup_x - 6 || current->input_x - wx > ui_popup_x + ui_popup_w + 6 || current->input_y - wy < ui_popup_y - 6 || current->input_y - wy > ui_popup_y + ui_popup_h * UI_SCALE() + 6);
 		if (hide || current->is_escape_down) {
 			ui_popup_commands = NULL;
+			ui_nodes_on_node_changed(ui_get_node(canvas->nodes, ui_popup_handle_node_id));
+			current->changed = false;
 		}
 	}
 }

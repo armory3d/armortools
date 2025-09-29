@@ -51,11 +51,13 @@ let _ui_nodes_hval3: ui_handle_t = ui_handle_create();
 let _ui_nodes_on_canvas_released_selected: ui_node_t;
 let _ui_nodes_node_search_first: bool;
 let _ui_nodes_node_search_done: ()=>void;
+let ui_nodes_node_changed: ui_node_t = null;
 
 function ui_viewnodes_init() {
 	ui_nodes_preview_image = ui_nodes_get_node_preview_image;
 	ui_nodes_on_link_drag = ui_viewnodes_on_link_drag;
 	ui_nodes_on_node_remove = ui_viewnodes_on_node_remove;
+	ui_nodes_on_node_changed = ui_viewnodes_on_node_changed;
 	ui_nodes_on_socket_released = ui_viewnodes_on_socket_released;
 	ui_nodes_on_canvas_released = ui_viewnodes_on_canvas_released;
 	ui_nodes_on_canvas_control = ui_viewnodes_on_canvas_control;
@@ -69,6 +71,10 @@ function ui_viewnodes_on_node_remove(n: ui_node_t) {
 		gpu_delete_texture(img);
 		map_delete(context_raw.node_preview_map, n);
 	}
+}
+
+function ui_viewnodes_on_node_changed(n: ui_node_t) {
+	ui_nodes_node_changed = n;
 }
 
 function ui_viewnodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
@@ -133,7 +139,7 @@ function ui_viewnodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 	// Selecting which node socket to preview
 	else if (ui_nodes.nodes_selected_id.length > 0 && node.id == ui_nodes.nodes_selected_id[0]) {
 		context_raw.node_preview_socket = link_drag.from_id > -1 ? link_drag.from_socket : 0;
-		context_raw.node_preview_dirty = true;
+		ui_nodes_node_changed = node;
 	}
 }
 
@@ -254,7 +260,7 @@ function ui_viewnodes_on_socket_released(socket_id: i32) {
 		let i: i32 = array_index_of(node.outputs, socket);
 		if (i > -1) {
 			context_raw.node_preview_socket = i;
-			context_raw.node_preview_dirty = true;
+			ui_nodes_node_changed = node;
 		}
 	}
 }
@@ -777,28 +783,33 @@ function ui_nodes_recompile() {
 		}
 
 		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
-		context_raw.node_preview_dirty = true;
-
 		ui_nodes_recompile_mat_final = false;
+	}
+}
+
+function ui_nodes_get_linked_nodes(linked_nodes: ui_node_t[], n: ui_node_t, c: ui_node_canvas_t) {
+	if (array_index_of(linked_nodes, n) == -1 && (n.flags & _ui_node_flag_t.PREVIEW)) {
+		array_push(linked_nodes, n);
+	}
+	for (let i: i32 = 0; i < c.links.length; ++i) {
+		let l: ui_node_link_t = c.links[i];
+		if (l.from_id == n.id) {
+			let nn: ui_node_t = ui_get_node(c.nodes, l.to_id);
+			ui_nodes_get_linked_nodes(linked_nodes, nn, c);
+		}
 	}
 }
 
 function ui_nodes_render() {
 	ui_nodes_recompile();
 
-	// Node preview
-	let nodes: ui_nodes_t = ui_nodes_get_nodes();
-	if (nodes.nodes_selected_id.length > 0 && nodes.nodes_selected_id[0] != ui_nodes_last_node_selected_id) {
-		ui_nodes_last_node_selected_id = nodes.nodes_selected_id[0];
-		context_raw.node_preview_dirty = true;
-		context_raw.node_preview_socket = 0;
-	}
+	let ui_nodes: ui_nodes_t = ui_nodes_get_nodes();
 
 	// Remove dragged link when mouse is released out of the node viewport
 	let c: ui_node_canvas_t = ui_nodes_get_canvas(true);
-	if (ui_nodes_release_link && nodes.link_drag_id != -1) {
-		array_remove(c.links, ui_get_link(c.links, nodes.link_drag_id));
-		nodes.link_drag_id = -1;
+	if (ui_nodes_release_link && ui_nodes.link_drag_id != -1) {
+		array_remove(c.links, ui_get_link(c.links, ui_nodes.link_drag_id));
+		ui_nodes.link_drag_id = -1;
 	}
 	ui_nodes_release_link = ui.input_released;
 
@@ -808,7 +819,6 @@ function ui_nodes_render() {
 
 	ui.input_enabled = base_ui_enabled;
 
-	let ui_nodes: ui_nodes_t = ui_nodes_get_nodes();
 	if (ui_nodes_last_zoom != ui_nodes.zoom) {
 		ui_nodes_last_zoom = ui_nodes.zoom;
 		ui_nodes_grid_redraw = true;
@@ -822,8 +832,34 @@ function ui_nodes_render() {
 		ui_nodes_grid_redraw = false;
 	}
 
-	if (context_raw.selected_node_preview && context_raw.node_preview_dirty) {
-		ui_nodes_make_node_preview();
+	// Selected node preview
+	if (ui_nodes.nodes_selected_id.length > 0 && ui_nodes.nodes_selected_id[0] != ui_nodes_last_node_selected_id) {
+		ui_nodes_last_node_selected_id = ui_nodes.nodes_selected_id[0];
+		let sel: ui_node_t = ui_get_node(c.nodes, ui_nodes.nodes_selected_id[0]);
+		context_raw.node_preview_socket = 0;
+		ui_nodes_make_node_preview(sel);
+	}
+	else if (ui_nodes.nodes_selected_id.length == 0) {
+		ui_nodes_last_node_selected_id = -1;
+	}
+
+	// Update node previews
+	if (ui_nodes_node_changed != null && !ui.input_down) {
+		let linked_nodes: ui_node_t[] = [];
+		ui_nodes_get_linked_nodes(linked_nodes, ui_nodes_node_changed, c);
+
+		let sel: ui_node_t = ui_nodes.nodes_selected_id.length > 0 ? ui_get_node(c.nodes, ui_nodes.nodes_selected_id[0]) : null;
+		if (sel != null && array_index_of(linked_nodes, sel) == -1) {
+			array_push(linked_nodes, sel);
+		}
+
+		let _node_preview_socket: i32 = context_raw.node_preview_socket;
+		for (let i: i32 = 0; i < linked_nodes.length; ++i) {
+			context_raw.node_preview_socket = linked_nodes[i] == sel ? _node_preview_socket : 0;
+			ui_nodes_make_node_preview(linked_nodes[i]);
+		}
+		context_raw.node_preview_socket = _node_preview_socket;
+		ui_nodes_node_changed = null;
 	}
 
 	// Start with UI
@@ -886,7 +922,7 @@ function ui_nodes_render() {
 
 		// Grid
 		draw_set_color(0xffffffff);
-		let step: f32 = ui_nodes_grid_cell_w * nodes.zoom;
+		let step: f32 = ui_nodes_grid_cell_w * ui_nodes.zoom;
 		let x: f32 = math_fmod(UI_NODES_PAN_X(), step) - step;
 		let y: f32 = math_fmod(UI_NODES_PAN_Y(), step) - step;
 		draw_image(ui_nodes_grid, x, y);
@@ -905,13 +941,13 @@ function ui_nodes_render() {
 		ui.window_border_top = ui_header_h * 2;
 		ui.window_border_bottom = config_raw.layout[layout_size_t.STATUS_H];
 
-		ui_node_canvas(nodes, c);
+		ui_node_canvas(ui_nodes, c);
 		ui.input_enabled = _input_enabled;
 
-		if (nodes.color_picker_callback != null) {
+		if (ui_nodes.color_picker_callback != null) {
 			context_raw.color_picker_previous_tool = context_raw.tool;
 			context_select_tool(tool_type_t.PICKER);
-			_ui_nodes_render_tmp = nodes.color_picker_callback;
+			_ui_nodes_render_tmp = ui_nodes.color_picker_callback;
 
 			context_raw.color_picker_callback = function (color: swatch_color_t) {
 				_ui_nodes_render_tmp(color.base);
@@ -922,7 +958,7 @@ function ui_nodes_render() {
 					ui_nodes_canvas_changed();
 				}
 			};
-			nodes.color_picker_callback = null;
+			ui_nodes.color_picker_callback = null;
 		}
 
 		// Remove nodes with unknown id for this canvas type
@@ -954,7 +990,7 @@ function ui_nodes_render() {
 				}
 				if (!found) {
 					ui_remove_node(canvas_node, c);
-					array_remove(nodes.nodes_selected_id, canvas_node.id);
+					array_remove(ui_nodes.nodes_selected_id, canvas_node.id);
 					i--;
 				}
 			}
@@ -978,8 +1014,8 @@ function ui_nodes_render() {
 		ui_nodes_uichanged_last = ui.changed;
 
 		// Node previews
-		if (context_raw.selected_node_preview && nodes.nodes_selected_id.length > 0) {
-			let sel: ui_node_t = ui_get_node(c.nodes, nodes.nodes_selected_id[0]);
+		if (context_raw.selected_node_preview && ui_nodes.nodes_selected_id.length > 0) {
+			let sel: ui_node_t = ui_get_node(c.nodes, ui_nodes.nodes_selected_id[0]);
 			let img: gpu_texture_t = ui_nodes_get_node_preview_image(sel);
 			if (img != null && !(sel.flags & _ui_node_flag_t.PREVIEW)) {
 				let tw: f32 = 128 * UI_SCALE();
@@ -1417,6 +1453,7 @@ function ui_nodes_make_node(n: ui_node_t, nodes: ui_nodes_t, canvas: ui_node_can
 		array_push(node.buttons, but);
 	}
 
+	ui_nodes_node_changed = node;
 	return node;
 }
 
@@ -1459,17 +1496,7 @@ function ui_nodes_make_group_node(group_canvas: ui_node_canvas_t, nodes: ui_node
 	return node;
 }
 
-function ui_nodes_make_node_preview() {
-	let ui_nodes: ui_nodes_t = ui_nodes_get_nodes();
-	if (ui_nodes.nodes_selected_id.length == 0) {
-		return;
-	}
-
-	let nodes: ui_node_t[] = ui_nodes_get_canvas().nodes;
-	let node: ui_node_t = ui_get_node(nodes, ui_nodes.nodes_selected_id[0]);
-	if (node == null) {
-		return;
-	}
+function ui_nodes_make_node_preview(node: ui_node_t) {
 	context_raw.node_preview_name = node.name;
 
 	if (node.type == "LAYER" ||
@@ -1479,6 +1506,7 @@ function ui_nodes_make_node_preview() {
 		return;
 	}
 
+	let nodes: ui_node_t[] = ui_nodes_get_canvas().nodes;
 	if (array_index_of(nodes, node) == -1) {
 		return;
 	}
@@ -1489,7 +1517,6 @@ function ui_nodes_make_node_preview() {
 		map_set(context_raw.node_preview_map, node, img);
 	}
 
-	context_raw.node_preview_dirty = false;
 	ui_nodes_hwnd.redraws = 2;
 	util_render_make_node_preview(ui_nodes_get_canvas(), node, img);
 }

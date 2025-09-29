@@ -4,21 +4,16 @@ type context_t = {
 	paint_object?: mesh_object_t;
 	merged_object?: mesh_object_t;
 	merged_object_is_atlas?: bool;
-
 	ddirty?: i32;
 	pdirty?: i32;
 	rdirty?: i32;
 	brush_blend_dirty?: bool;
-	node_preview_socket?: i32;
-
 	split_view?: bool;
 	view_index?: i32;
 	view_index_last?: i32;
-
 	swatch?: swatch_color_t;
 	picked_color?: swatch_color_t;
 	color_picker_callback?: (sc: swatch_color_t)=>void;
-
 	default_irradiance?: f32_array_t;
 	default_radiance?: gpu_texture_t;
 	default_radiance_mipmaps?: gpu_texture_t[];
@@ -34,24 +29,20 @@ type context_t = {
 	light_angle?: f32;
 	cull_backfaces?: bool;
 	texture_filter?: bool;
-
 	format_type?: texture_ldr_format_t;
 	format_quality?: f32;
 	layers_destination?: export_destination_t;
 	split_by?: split_type_t;
 	parse_transform?: bool;
 	parse_vcols?: bool;
-
 	select_time?: f32;
 	viewport_mode?: viewport_mode_t;
 	render_mode?: render_mode_t;
-
 	viewport_shader?: any; // JSValue * -> (ns: node_shader_t)=>void;
 	hscale_was_changed?: bool;
 	export_mesh_format?: mesh_format_t;
 	export_mesh_index?: i32;
 	pack_assets_on_export?: bool;
-
 	paint_vec?: vec4_t;
 	last_paint_x?: f32;
 	last_paint_y?: f32;
@@ -62,19 +53,16 @@ type context_t = {
 	clone_start_y?: f32;
 	clone_delta_x?: f32;
 	clone_delta_y?: f32;
-
 	show_compass?: bool;
 	project_type?: i32;
 	project_aspect_ratio?: i32;
 	project_objects?: mesh_object_t[];
-
 	last_paint_vec_x?: f32;
 	last_paint_vec_y?: f32;
 	prev_paint_vec_x?: f32;
 	prev_paint_vec_y?: f32;
 	frame?: i32;
 	paint2d_view?: bool;
-
 	brush_locked?: bool;
 	camera_type?: camera_type_t;
 	cam_handle?: ui_handle_t;
@@ -87,16 +75,14 @@ type context_t = {
 	last_status_position?: i32;
 	camera_controls?: camera_controls_t;
 	pen_painting_only?: bool;
-
 	material?: slot_material_t;
 	layer?: slot_layer_t;
 	brush?: slot_brush_t;
 	font?: slot_font_t;
 	tool?: tool_type_t;
-
 	layer_preview_dirty?: bool;
 	layers_preview_dirty?: bool;
-	node_preview_dirty?: bool;
+	node_preview_socket?: i32;
 	node_preview_map?: map_t<ui_node_t, gpu_texture_t>;
 	node_preview_name?: string;
 	node_previews?: map_t<string, gpu_texture_t>;
@@ -104,11 +90,9 @@ type context_t = {
 	selected_node_preview: bool;
 	mask_preview_rgba32?: gpu_texture_t;
 	mask_preview_last?: slot_layer_t;
-
 	colorid_picked?: bool;
 	material_preview?: bool;
 	saved_camera?: mat4_t;
-
 	color_picker_previous_tool?: tool_type_t;
 	materialid_picked?: i32;
 	uvx_picked?: f32;
@@ -122,32 +106,25 @@ type context_t = {
 	norx_picked?: f32;
 	nory_picked?: f32;
 	norz_picked?: f32;
-
 	draw_wireframe?: bool;
 	wireframe_handle?: ui_handle_t;
 	draw_texels?: bool;
 	texels_handle?: ui_handle_t;
-
 	colorid_handle?: ui_handle_t;
 	layers_export?: export_mode_t;
-
 	decal_image?: gpu_texture_t;
 	decal_preview?: bool;
 	decal_x?: f32;
 	decal_y?: f32;
-
 	// cache_draws?: bool;
 	write_icon_on_export?: bool;
-
 	text_tool_image?: gpu_texture_t;
 	text_tool_text?: string;
 	particle_material?: material_data_t;
-
 	layer_filter?: i32;
 	brush_output_node_inst?: brush_output_node_t;
 	run_brush?: (self: any, i: i32)=>void;
 	parse_brush_inputs?: (self: any)=>void;
-
 	gizmo?: object_t;
 	gizmo_translate_x?: object_t;
 	gizmo_translate_y?: object_t;
@@ -171,7 +148,6 @@ type context_t = {
 	rotate_x?: bool;
 	rotate_y?: bool;
 	rotate_z?: bool;
-
 	brush_nodes_radius?: f32;
 	brush_nodes_opacity?: f32;
 	brush_mask_image?: gpu_texture_t;
@@ -188,7 +164,6 @@ type context_t = {
 	brush_nodes_angle?: f32;
 	brush_nodes_hardness?: f32;
 	brush_directional?: bool;
-
 	brush_radius?: f32;
 	brush_radius_handle?: ui_handle_t;
 	brush_scale_x?: f32;
@@ -220,31 +195,24 @@ type context_t = {
 	bake_curv_offset?: f32;
 	bake_curv_smooth?: i32;
 	bake_high_poly?: i32;
-
 	xray?: bool;
 	sym_x?: bool;
 	sym_y?: bool;
 	sym_z?: bool;
 	fill_type_handle?: ui_handle_t;
-
 	paint2d?: bool;
-
 	maximized_sidebar_width?: i32;
 	drag_dest?: i32;
-
 	coords?: vec4_t;
 	start_x?: f32;
 	start_y?: f32;
-
 	lock_begin?: bool;
 	lock_x?: bool;
 	lock_y?: bool;
 	lock_start_x?: f32;
 	lock_start_y?: f32;
 	registered?: bool;
-
 	selected_object?: object_t;
-
 	particle_hit_x?: f32;
 	particle_hit_y?: f32;
 	particle_hit_z?: f32;
@@ -264,7 +232,6 @@ function context_create(): context_t {
 	c.pdirty = 0; // paint
 	c.rdirty = 0; // render
 	c.brush_blend_dirty = true;
-	c.node_preview_socket = 0;
 	c.split_view = false;
 	c.view_index = -1;
 	c.view_index_last = -1;
@@ -322,10 +289,9 @@ function context_create(): context_t {
 	c.last_status_position = 0;
 	c.camera_controls = camera_controls_t.ORBIT;
 	c.pen_painting_only = false; // Reject painting with finger when using pen
-
 	c.layer_preview_dirty = true;
 	c.layers_preview_dirty = false;
-	c.node_preview_dirty = false;
+	c.node_preview_socket = 0;
 	c.node_preview_name = "";
 	c.node_preview_map = map_create();
 	c.selected_node_preview = true;
@@ -389,7 +355,6 @@ function context_create(): context_t {
 	c.brush_nodes_angle = 0.0;
 	c.brush_nodes_hardness = 1.0;
 	c.brush_directional = false;
-
 	c.brush_radius_handle = ui_handle_create();
 	c.brush_scale_x = 1.0;
 	c.brush_decal_mask_radius = 0.5;
@@ -431,7 +396,6 @@ function context_create(): context_t {
 	c.paint2d = false;
 	c.maximized_sidebar_width = 0;
 	c.drag_dest = 0;
-
 	return c;
 }
 

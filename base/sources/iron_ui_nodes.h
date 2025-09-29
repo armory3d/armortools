@@ -138,6 +138,7 @@ extern void (*ui_nodes_on_canvas_released)(void);
 extern void (*ui_nodes_on_socket_released)(int);
 extern void (*ui_nodes_on_link_drag)(int, bool);
 extern void (*ui_nodes_on_node_remove)(ui_node_t *);
+extern void (*ui_nodes_on_node_changed)(ui_node_t *);
 extern bool ui_nodes_grid_snap;
 
 void ui_node_canvas_encode(ui_node_canvas_t *canvas);
