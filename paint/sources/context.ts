@@ -285,6 +285,12 @@ function context_create(): context_t {
 	c.brush_locked = false;
 	c.camera_type = camera_type_t.PERSPECTIVE;
 	c.cam_handle = ui_handle_create();
+	c.hssao = ui_handle_create();
+	c.hbloom = ui_handle_create();
+	c.hsupersample = ui_handle_create();
+	c.hssao.b = config_raw.rp_ssao;
+	c.hbloom.b = config_raw.rp_bloom;
+	c.hsupersample.i = config_get_super_sample_quality(config_raw.rp_supersample);
 	c.texture_export_path = "";
 	c.last_status_position = 0;
 	c.camera_controls = camera_controls_t.ORBIT;

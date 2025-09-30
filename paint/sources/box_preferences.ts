@@ -515,21 +515,6 @@ function box_preferences_pen_tab() {
 }
 
 function box_preferences_viewport_tab() {
-	context_raw.hssao = ui_handle(__ID__);
-	if (context_raw.hssao.init) {
-		context_raw.hssao.b = config_raw.rp_ssao;
-	}
-
-	context_raw.hbloom = ui_handle(__ID__);
-	if (context_raw.hbloom.init) {
-		context_raw.hbloom.b = config_raw.rp_bloom;
-	}
-
-	context_raw.hsupersample = ui_handle(__ID__);
-	if (context_raw.hsupersample.init) {
-		context_raw.hsupersample.i = config_get_super_sample_quality(config_raw.rp_supersample);
-	}
-
 	let mode_handle: ui_handle_t = ui_handle(__ID__);
 	if (mode_handle.init) {
 		mode_handle.i = config_raw.viewport_mode;
