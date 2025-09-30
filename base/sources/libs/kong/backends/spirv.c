@@ -264,6 +264,18 @@ typedef enum spirv_glsl_std {
 	SPIRV_GLSL_STD_FRACT        = 10,
 	SPIRV_GLSL_STD_SIN          = 13,
 	SPIRV_GLSL_STD_COS          = 14,
+	////
+	SPIRV_GLSL_STD_TRUNC        = 3,
+	SPIRV_GLSL_STD_FSIGN        = 6,
+	SPIRV_GLSL_STD_RADIANS      = 11,
+	SPIRV_GLSL_STD_DEGREES      = 12,
+	SPIRV_GLSL_STD_TAN          = 15,
+	SPIRV_GLSL_STD_SINH         = 19,
+	SPIRV_GLSL_STD_COSH         = 20,
+	SPIRV_GLSL_STD_TANH         = 21,
+	SPIRV_GLSL_STD_EXP          = 27,
+	SPIRV_GLSL_STD_LOG          = 28,
+	////
 	SPIRV_GLSL_STD_ASIN         = 16,
 	SPIRV_GLSL_STD_ACOS         = 17,
 	SPIRV_GLSL_STD_ATAN         = 18,
@@ -2489,6 +2501,56 @@ static void write_function(instructions_buffer *instructions, function *f, spirv
 
 			////
 
+			else if (func == add_name("tan")) {
+				spirv_id operand = get_var(instructions, o->op_call.parameters[0]);
+				spirv_id id      = write_op_ext_inst(instructions, spirv_float_type, glsl_import, SPIRV_GLSL_STD_TAN, operand);
+				hmput(index_map, o->op_call.var.index, id);
+			}
+			else if (func == add_name("log")) {
+				spirv_id operand = get_var(instructions, o->op_call.parameters[0]);
+				spirv_id id      = write_op_ext_inst(instructions, spirv_float_type, glsl_import, SPIRV_GLSL_STD_LOG, operand);
+				hmput(index_map, o->op_call.var.index, id);
+			}
+			else if (func == add_name("exp")) {
+				spirv_id operand = get_var(instructions, o->op_call.parameters[0]);
+				spirv_id id      = write_op_ext_inst(instructions, spirv_float_type, glsl_import, SPIRV_GLSL_STD_EXP, operand);
+				hmput(index_map, o->op_call.var.index, id);
+			}
+			else if (func == add_name("sign")) {
+				spirv_id operand = get_var(instructions, o->op_call.parameters[0]);
+				spirv_id id      = write_op_ext_inst(instructions, spirv_float_type, glsl_import, SPIRV_GLSL_STD_FSIGN, operand);
+				hmput(index_map, o->op_call.var.index, id);
+			}
+			else if (func == add_name("trunc")) {
+				spirv_id operand = get_var(instructions, o->op_call.parameters[0]);
+				spirv_id id      = write_op_ext_inst(instructions, spirv_float_type, glsl_import, SPIRV_GLSL_STD_TRUNC, operand);
+				hmput(index_map, o->op_call.var.index, id);
+			}
+			else if (func == add_name("sinh")) {
+				spirv_id operand = get_var(instructions, o->op_call.parameters[0]);
+				spirv_id id      = write_op_ext_inst(instructions, spirv_float_type, glsl_import, SPIRV_GLSL_STD_SINH, operand);
+				hmput(index_map, o->op_call.var.index, id);
+			}
+			else if (func == add_name("cosh")) {
+				spirv_id operand = get_var(instructions, o->op_call.parameters[0]);
+				spirv_id id      = write_op_ext_inst(instructions, spirv_float_type, glsl_import, SPIRV_GLSL_STD_COSH, operand);
+				hmput(index_map, o->op_call.var.index, id);
+			}
+			else if (func == add_name("tanh")) {
+				spirv_id operand = get_var(instructions, o->op_call.parameters[0]);
+				spirv_id id      = write_op_ext_inst(instructions, spirv_float_type, glsl_import, SPIRV_GLSL_STD_TANH, operand);
+				hmput(index_map, o->op_call.var.index, id);
+			}
+			else if (func == add_name("radians")) {
+				spirv_id operand = get_var(instructions, o->op_call.parameters[0]);
+				spirv_id id      = write_op_ext_inst(instructions, spirv_float_type, glsl_import, SPIRV_GLSL_STD_RADIANS, operand);
+				hmput(index_map, o->op_call.var.index, id);
+			}
+			else if (func == add_name("degrees")) {
+				spirv_id operand = get_var(instructions, o->op_call.parameters[0]);
+				spirv_id id      = write_op_ext_inst(instructions, spirv_float_type, glsl_import, SPIRV_GLSL_STD_DEGREES, operand);
+				hmput(index_map, o->op_call.var.index, id);
+			}
 			else if (func == add_name("ddx2")) {
 				spirv_id operand = get_var(instructions, o->op_call.parameters[0]);
 				spirv_id id = write_op_dpdx(instructions, spirv_float2_type, operand);

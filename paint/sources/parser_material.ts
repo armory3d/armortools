@@ -1596,10 +1596,18 @@ function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t):
 			out_val = "max(" + val1 + ", " + val2 + ")";
 		}
 		else if (op == "LESS_THAN") {
-			out_val = "float(" + val1 + " < " + val2 + ")";
+			// out_val = "float(" + val1 + " < " + val2 + ")";
+			let store: string = parser_material_store_var_name(node) + "_lessthan";
+			parser_material_write(parser_material_kong, "var " + store + ": float = 0.0;");
+			parser_material_write(parser_material_kong, "if (" + val1 + " < " + val2 + ") { " + store + " = 1.0; }");
+			out_val = store;
 		}
 		else if (op == "GREATER_THAN") {
-			out_val = "float(" + val1 + " > " + val2 + ")";
+			// out_val = "float(" + val1 + " > " + val2 + ")";
+			let store: string = parser_material_store_var_name(node) + "_greaterthan";
+			parser_material_write(parser_material_kong, "var " + store + ": float = 0.0;");
+			parser_material_write(parser_material_kong, "if (" + val1 + " > " + val2 + ") { " + store + " = 1.0; }");
+			out_val = store;
 		}
 		else if (op == "SIGN") {
 			out_val = "sign(" + val1 + ")";
