@@ -1636,8 +1636,8 @@ char *ui_node_canvas_to_json(ui_node_canvas_t *canvas) {
 		json_encode_i32("id", canvas->nodes->buffer[i]->id);
 		json_encode_string("name", canvas->nodes->buffer[i]->name);
 		json_encode_string("type", canvas->nodes->buffer[i]->type);
-		json_encode_i32("x", canvas->nodes->buffer[i]->x);
-		json_encode_i32("y", canvas->nodes->buffer[i]->y);
+		json_encode_f32("x", canvas->nodes->buffer[i]->x);
+		json_encode_f32("y", canvas->nodes->buffer[i]->y);
 		json_encode_i32("color", canvas->nodes->buffer[i]->color);
 
 		json_encode_begin_array("inputs");
