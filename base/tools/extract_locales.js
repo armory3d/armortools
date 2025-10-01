@@ -20,7 +20,7 @@ if (fs_exists(locale_path)) {
 }
 
 let source_paths = [
-    "paint/sources", "paint/sources/brush_nodes", "paint/sources/neural_nodes"
+    "paint/sources", "paint/sources/material_nodes", "paint/sources/brush_nodes", "paint/sources/neural_nodes"
 ];
 
 for (let path of source_paths) {

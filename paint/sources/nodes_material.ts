@@ -1,4 +1,25 @@
 
+let nodes_material_categories: string[] = [
+	_tr("Input"),
+	_tr("Texture"),
+	_tr("Color"),
+	_tr("Vector"),
+	_tr("Converter"),
+	// _tr("Neural"),
+	_tr("Group")
+];
+
+let nodes_material_input: ui_node_t[];
+// let nodes_material_output: ui_node_t[];
+let nodes_material_texture: ui_node_t[];
+let nodes_material_color: ui_node_t[];
+let nodes_material_vector: ui_node_t[];
+let nodes_material_converter: ui_node_t[];
+// let nodes_material_neural: ui_node_t[];
+let nodes_material_group: ui_node_t[];
+
+type node_list_t = ui_node_t[];
+let nodes_material_list: node_list_t[];
 let _nodes_material_nodes: ui_nodes_t;
 let _nodes_material_node: ui_node_t;
 let _nodes_material_sockets: ui_node_socket_t[];
@@ -9,6 +30,114 @@ function nodes_material_init() {
 	map_set(ui_nodes_custom_buttons, "nodes_material_new_group_button", nodes_material_new_group_button);
 	map_set(ui_nodes_custom_buttons, "nodes_material_group_input_button", nodes_material_group_input_button);
 	map_set(ui_nodes_custom_buttons, "nodes_material_group_output_button", nodes_material_group_output_button);
+
+	nodes_material_list_init();
+}
+
+function nodes_material_list_init() {
+	if (nodes_material_list != null) {
+		return;
+	}
+
+	nodes_material_input = [
+		attribute_node_def,
+		camera_data_node_def,
+		fresnel_node_def,
+		geometry_node_def,
+		layer_node_def,
+		layer_mask_node_def,
+		layer_weight_node_def,
+		material_node_def,
+		object_info_node_def,
+		picker_node_def,
+		rgb_node_def,
+		script_node_def,
+		shader_node_def,
+		tangent_node_def,
+		texture_coordinate_node_def,
+		uv_map_node_def,
+		value_node_def,
+		vertex_color_node_def,
+		wireframe_node_def,
+	];
+
+	// nodes_material_output = [
+	// 	material_output_node_def
+	// ];
+
+	nodes_material_texture = [
+		brick_texture_node_def,
+		checker_texture_node_def,
+		curvature_bake_node_def,
+		gradient_texture_node_def,
+		image_texture_node_def,
+		text_texture_node_def,
+		magic_texture_node_def,
+		musgrave_texture_node_def,
+		noise_texture_node_def,
+		voronoi_texture_node_def,
+		wave_texture_node_def
+	];
+
+	nodes_material_color = [
+		blur_node_def,
+		brightness_contrast_node_def,
+		gamma_node_def,
+		hue_saturation_value_node_def,
+		invert_node_def,
+		mix_color_node_def,
+		quantize_node_def,
+		replace_color_node_def,
+		warp_node_def
+	];
+
+	nodes_material_vector = [
+		bump_node_def,
+		mapping_node_def,
+		mix_normal_map_node_def,
+		normal_node_def,
+		normal_map_node_def,
+		vector_curves_node_def
+	];
+
+	nodes_material_converter = [
+		clamp_node_def,
+		color_ramp_node_def,
+		color_mask_node_def,
+		combine_hsv_node_def,
+		combine_rgb_node_def,
+		combine_xyz_node_def,
+		map_range_node_def,
+		math2_node_def,
+		rgb_to_bw_node_def,
+		separate_hsv_node_def,
+		separate_rgb_node_def,
+		separate_xyz_node_def,
+		vector_math2_node_def
+	];
+
+	// nodes_material_neural = [
+	// 	text_to_photo_node_def,
+	// 	inpaint_node_def,
+	// 	photo_to_pbr_node_def,
+	// 	tiling_node_def,
+	// 	upscale_node_def,
+	// 	variance_node_def
+	// ];
+
+	nodes_material_group = [
+		group_node_def
+	];
+
+	nodes_material_list = [
+		nodes_material_input,
+		nodes_material_texture,
+		nodes_material_color,
+		nodes_material_vector,
+		nodes_material_converter,
+		// nodes_material_neural,
+		nodes_material_group
+	];
 }
 
 function nodes_material_vector_curves_button(node_id: i32) {
