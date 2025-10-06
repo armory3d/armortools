@@ -5,7 +5,7 @@ function layer_weight_node_value(node: ui_node_t, socket: ui_node_socket_t): str
         parser_material_kong.frag_dotnv = true;
         return "clamp(pow(1.0 - dotnv, (1.0 - " + blend + ") * 10.0), 0.0, 1.0)";
     }
-    else if (socket == node.outputs[1]) { // Facing
+    else { // Facing
         parser_material_kong.frag_dotnv = true;
         return "((1.0 - dotnv) * " + blend + ")";
     }

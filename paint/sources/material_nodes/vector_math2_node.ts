@@ -79,7 +79,7 @@ function vector_math2_node_vector(node: ui_node_t, socket: ui_node_socket_t): st
     else if (op == "COSINE") {
         return "float3(cos(" + vec1 + ".x), cos(" + vec1 + ".y), cos(" + vec1 + ".z))";
     }
-    else if (op == "TANGENT") {
+    else { // TANGENT
         return "float3(tan(" + vec1 + ".x), tan(" + vec1 + ".y), tan(" + vec1 + ".z))";
     }
 }

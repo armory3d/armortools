@@ -20,7 +20,7 @@ function geometry_node_vector(node: ui_node_t, socket: ui_node_socket_t): string
         parser_material_kong.frag_vvec = true;
         return "vvec";
     }
-    else if (socket == node.outputs[5]) { // Parametric
+    else { // Parametric
         parser_material_kong.frag_mposition = true;
         return "input.mposition";
     }
@@ -43,7 +43,7 @@ function geometry_node_value(node: ui_node_t, socket: ui_node_socket_t): string 
         parser_material_write(parser_material_kong, store + "_curvature = clamp(pow(" + store + "_curvature, (1.0 / " + radius + ") * 0.25) * " + strength + " * 2.0 + " + offset + " / 10.0, 0.0, 1.0);");
         return store + "_curvature";
     }
-    else if (socket == node.outputs[8]) { // Random Per Island
+    else { // Random Per Island
         return "0.0";
     }
 }

@@ -7,7 +7,7 @@ function separate_rgb_node_value(node: ui_node_t, socket: ui_node_socket_t): str
     else if (socket == node.outputs[1]) {
         return col + ".g";
     }
-    else if (socket == node.outputs[2]) {
+    else {
         return col + ".b";
     }
 }

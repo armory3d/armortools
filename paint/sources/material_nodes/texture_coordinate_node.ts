@@ -24,7 +24,7 @@ function texture_coordinate_node_vector(node: ui_node_t, socket: ui_node_socket_
         parser_material_kong.frag_wvpposition = true;
         return "input.wvpposition.xyz";
     }
-    else if (socket == node.outputs[6]) { // Reflection
+    else { // Reflection
         return "float3(0.0, 0.0, 0.0)";
     }
 }

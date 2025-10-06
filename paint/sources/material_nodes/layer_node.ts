@@ -5,7 +5,7 @@ function layer_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
         node_shader_add_texture(parser_material_kong, "texpaint" + l, "_texpaint" + l);
         return "sample(texpaint" + l + ", sampler_linear, tex_coord).rgb";
     }
-    else if (socket == node.outputs[5]) { // Normal
+    else { // Normal
         node_shader_add_texture(parser_material_kong, "texpaint_nor" + l, "_texpaint_nor" + l);
         return "sample(texpaint_nor" + l + ", sampler_linear, tex_coord).rgb";
     }
@@ -29,10 +29,12 @@ function layer_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
         node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
         return "sample(texpaint_pack" + l + ", sampler_linear, tex_coord).b";
     }
+    else if (socket == node.outputs[6]) { return "0.0"; } // Emission
     else if (socket == node.outputs[7]) { // Height
         node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
         return "sample(texpaint_pack" + l + ", sampler_linear, tex_coord).a";
     }
+    else { return "0.0"; } // Subsurface
 }
 
 let layer_node_def: ui_node_t = {

@@ -9,7 +9,7 @@ function clamp_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
     if (op == "MIN_MAX") {
         return "(clamp(" + val + ", " + min + ", " + max + "))";
     }
-    else if (op == "RANGE") {
+    else { // RANGE
         return "(clamp(" + val + ", min(" + min + ", " + max + "), max(" + min + ", " + max + ")))";
     }
 }

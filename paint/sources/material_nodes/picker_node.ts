@@ -4,7 +4,7 @@ function picker_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
         node_shader_add_constant(parser_material_kong, "picker_base: float3", "_picker_base");
         return "constants.picker_base";
     }
-    else if (socket == node.outputs[5]) { // Normal
+    else { // Normal
         node_shader_add_constant(parser_material_kong, "picker_normal: float3", "_picker_normal");
         return "constants.picker_normal";
     }
@@ -27,10 +27,12 @@ function picker_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
         node_shader_add_constant(parser_material_kong, "picker_metallic: float", "_picker_metallic");
         return "constants.picker_metallic";
     }
+    else if (socket == node.outputs[6]) { return "0.0"; } // Emission
     else if (socket == node.outputs[7]) {
         node_shader_add_constant(parser_material_kong, "picker_height: float", "_picker_height");
         return "constants.picker_height";
     }
+    else { return "0.0"; } // Subsurface
 }
 
 let picker_node_def: ui_node_t = {

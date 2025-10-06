@@ -7,7 +7,7 @@ function separate_xyz_node_value(node: ui_node_t, socket: ui_node_socket_t): str
     else if (socket == node.outputs[1]) {
         return vec + ".y";
     }
-    else if (socket == node.outputs[2]) {
+    else {
         return vec + ".z";
     }
 }

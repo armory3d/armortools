@@ -8,7 +8,7 @@ function separate_hsv_node_value(node: ui_node_t, socket: ui_node_socket_t): str
     else if (socket == node.outputs[1]) {
         return "rgb_to_hsv(" + col + ").g";
     }
-    else if (socket == node.outputs[2]) {
+    else { // V
         return "rgb_to_hsv(" + col + ").b";
     }
 }
