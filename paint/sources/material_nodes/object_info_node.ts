@@ -1,4 +1,29 @@
 
+function object_info_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+    if (socket == node.outputs[0]) { // Location
+        parser_material_kong.frag_wposition = true;
+        return "input.wposition";
+    }
+    else if (socket == node.outputs[1]) { // Color
+        return "float3(0.0, 0.0, 0.0)";
+    }
+}
+
+function object_info_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    if (socket == node.outputs[1]) { // Object Index
+        node_shader_add_constant(parser_material_kong, "object_info_index: float", "_object_info_index");
+        return "constants.object_info_index";
+    }
+    else if (socket == node.outputs[2]) { // Material Index
+        node_shader_add_constant(parser_material_kong, "object_info_material_index: float", "_object_info_material_index");
+        return "constants.object_info_material_index";
+    }
+    else if (socket == node.outputs[3]) { // Random
+        node_shader_add_constant(parser_material_kong, "object_info_random: float", "_object_info_random");
+        return "constants.object_info_random";
+    }
+}
+
 let object_info_node_def: ui_node_t = {
     id: 0,
     name: _tr("Object Info"),

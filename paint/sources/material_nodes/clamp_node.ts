@@ -1,4 +1,19 @@
 
+function clamp_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    let val: string = parser_material_parse_value_input(node.inputs[0]);
+    let min: string = parser_material_parse_value_input(node.inputs[1]);
+    let max: string = parser_material_parse_value_input(node.inputs[2]);
+    let but: ui_node_button_t = node.buttons[0]; //operation;
+    let op: string = to_upper_case(u8_array_string_at(but.data, but.default_value[0]));
+    op = string_replace_all(op, " ", "_");
+    if (op == "MIN_MAX") {
+        return "(clamp(" + val + ", " + min + ", " + max + "))";
+    }
+    else if (op == "RANGE") {
+        return "(clamp(" + val + ", min(" + min + ", " + max + "), max(" + min + ", " + max + ")))";
+    }
+}
+
 let clamp_node_def: ui_node_t = {
     id: 0,
     name: _tr("Clamp"),

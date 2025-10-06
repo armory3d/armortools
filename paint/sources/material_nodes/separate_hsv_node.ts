@@ -1,4 +1,18 @@
 
+function separate_hsv_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    node_shader_add_function(parser_material_kong, str_hue_sat);
+    let col: string = parser_material_parse_vector_input(node.inputs[0]);
+    if (socket == node.outputs[0]) {
+        return "rgb_to_hsv(" + col + ").r";
+    }
+    else if (socket == node.outputs[1]) {
+        return "rgb_to_hsv(" + col + ").g";
+    }
+    else if (socket == node.outputs[2]) {
+        return "rgb_to_hsv(" + col + ").b";
+    }
+}
+
 let separate_hsv_node_def: ui_node_t = {
     id: 0,
     name: _tr("Separate HSV"),

@@ -1,4 +1,9 @@
 
+function uv_map_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+    node_shader_context_add_elem(parser_material_kong.context, "tex", "short2norm");
+	return "float3(tex_coord.x, tex_coord.y, 0.0)";
+}
+
 let uv_map_node_def: ui_node_t = {
     id: 0,
     name: _tr("UV Map"),

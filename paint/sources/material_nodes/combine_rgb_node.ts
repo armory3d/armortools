@@ -1,4 +1,11 @@
 
+function combine_rgb_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+    let r: string = parser_material_parse_value_input(node.inputs[0]);
+    let g: string = parser_material_parse_value_input(node.inputs[1]);
+    let b: string = parser_material_parse_value_input(node.inputs[2]);
+    return "float3(" + r + ", " + g + ", " + b + ")";
+}
+
 let combine_rgb_node_def: ui_node_t = {
     id: 0,
     name: _tr("Combine RGB"),

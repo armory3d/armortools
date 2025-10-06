@@ -1,4 +1,26 @@
 
+let str_tex_wave: string = "\
+fun tex_wave_f(p: float3): float { \
+	return 1.0 - sin((p.x + p.y) * 10.0); \
+} \
+";
+
+function wave_texture_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+    node_shader_add_function(parser_material_kong, str_tex_wave);
+    let co: string = parser_material_get_coord(node);
+    let scale: string = parser_material_parse_value_input(node.inputs[1]);
+    let res: string = parser_material_to_vec3("tex_wave_f(" + co + " * " + scale + ")");
+    return res;
+}
+
+function wave_texture_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    node_shader_add_function(parser_material_kong, str_tex_wave);
+    let co: string = parser_material_get_coord(node);
+    let scale: string = parser_material_parse_value_input(node.inputs[1]);
+    let res: string = "tex_wave_f(" + co + " * " + scale + ")";
+    return res;
+}
+
 let wave_texture_node_def: ui_node_t = {
     id: 0,
     name: _tr("Wave Texture"),

@@ -1,4 +1,16 @@
 
+function script_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    if (parser_material_script_links == null) {
+        parser_material_script_links = map_create();
+    }
+    let script: buffer_t = node.buttons[0].default_value;
+    let str: string = sys_buffer_to_string(script);
+    let link: string = parser_material_node_name(node);
+    map_set(parser_material_script_links, link, str);
+    node_shader_add_constant(parser_material_kong, "" + link + ": float", "_" + link);
+    return "constants." + link;
+}
+
 let script_node_def: ui_node_t = {
     id: 0,
     name: _tr("Script"),

@@ -1,4 +1,10 @@
 
+function gamma_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+    let out_col: string = parser_material_parse_vector_input(node.inputs[0]);
+    let gamma: string = parser_material_parse_value_input(node.inputs[1]);
+    return "pow3(" + out_col + ", " + parser_material_to_vec3(gamma) + ")";
+}
+
 let gamma_node_def: ui_node_t = {
     id: 0,
     name: _tr("Gamma"),

@@ -1,4 +1,22 @@
 
+let parser_material_bake_passthrough_strength: string = "0.0";
+let parser_material_bake_passthrough_radius: string = "0.0";
+let parser_material_bake_passthrough_offset: string = "0.0";
+
+function curvature_bake_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    if (parser_material_bake_passthrough) {
+        parser_material_bake_passthrough_strength = parser_material_parse_value_input(node.inputs[0]);
+        parser_material_bake_passthrough_radius = parser_material_parse_value_input(node.inputs[1]);
+        parser_material_bake_passthrough_offset = parser_material_parse_value_input(node.inputs[2]);
+        return "0.0";
+    }
+    let tex_name: string = "texbake_" + parser_material_node_name(node);
+    node_shader_add_texture(parser_material_kong, "" + tex_name, "_" + tex_name);
+    let store: string = parser_material_store_var_name(node);
+    parser_material_write(parser_material_kong, "var " + store + "_res: float = sample(" + tex_name + ", sampler_linear, tex_coord).r;");
+    return store + "_res";
+}
+
 let curvature_bake_node_def: ui_node_t = {
     id: 0,
     name: _tr("Curvature Bake"),

@@ -528,3 +528,117 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 
 	return con_mesh;
 }
+
+let str_cotangent_frame: string = "\
+fun cotangent_frame(n: float3, p: float3, tex_coord: float2): float3x3 { \
+	var duv1: float2 = ddx2(tex_coord); \
+	var duv2: float2 = ddy2(tex_coord); \
+	var dp1: float3 = ddx3(p); \
+	var dp2: float3 = ddy3(p); \
+	var dp2perp: float3 = cross(dp2, n); \
+	var dp1perp: float3 = cross(n, dp1); \
+	var t: float3 = dp2perp * duv1.x + dp1perp * duv2.x; \
+	var b: float3 = dp2perp * duv1.y + dp1perp * duv2.y; \
+	var invmax: float = rsqrt(max(dot(t, t), dot(b, b))); \
+	return float3x3(t * invmax, b * invmax, n); \
+} \
+";
+
+let str_octahedron_wrap: string = "\
+fun octahedron_wrap(v: float2): float2 { \
+	var a: float2; \
+	if (v.x >= 0.0) { a.x = 1.0; } else { a.x = -1.0; } \
+	if (v.y >= 0.0) { a.y = 1.0; } else { a.y = -1.0; } \
+	var r: float2; \
+	r.x = abs(v.y); \
+	r.y = abs(v.x); \
+	r.x = 1.0 - r.x; \
+	r.y = 1.0 - r.y; \
+	return r * a; \
+} \
+";
+
+// let str_octahedron_wrap: string = "\
+// fun octahedron_wrap(v: float2): float2 { \
+// 	return (1.0 - abs(v.yx)) * (float2(v.x >= 0.0 ? 1.0 : -1.0, v.y >= 0.0 ? 1.0 : -1.0)); \
+// } \
+// ";
+
+let str_pack_float_int16: string = "\
+fun pack_f32_i16(f: float, i: uint): float { \
+	return 0.062504762 * min(f, 0.9999) + 0.062519999 * float(i); \
+} \
+";
+
+// let str_pack_float_int16: string = "\
+// fun pack_f32_i16(f: float, i: uint): float { \
+// 	var prec: float = float(1 << 16); \
+// 	var maxi: float = float(1 << 4); \
+// 	var prec_minus_one: float = prec - 1.0; \
+// 	var t1: float = ((prec / maxi) - 1.0) / prec_minus_one; \
+// 	var t2: float = (prec / maxi) / prec_minus_one; \
+// 	return t1 * f + t2 * float(i); \
+// } \
+// ";
+
+let str_sh_irradiance: string = "\
+fun sh_irradiance(nor: float3): float3 { \
+	var c1: float = 0.429043; \
+	var c2: float = 0.511664; \
+	var c3: float = 0.743125; \
+	var c4: float = 0.886227; \
+	var c5: float = 0.247708; \
+	var cl00: float3 = float3(constants.shirr0.x, constants.shirr0.y, constants.shirr0.z); \
+	var cl1m1: float3 = float3(constants.shirr0.w, constants.shirr1.x, constants.shirr1.y); \
+	var cl10: float3 = float3(constants.shirr1.z, constants.shirr1.w, constants.shirr2.x); \
+	var cl11: float3 = float3(constants.shirr2.y, constants.shirr2.z, constants.shirr2.w); \
+	var cl2m2: float3 = float3(constants.shirr3.x, constants.shirr3.y, constants.shirr3.z); \
+	var cl2m1: float3 = float3(constants.shirr3.w, constants.shirr4.x, constants.shirr4.y); \
+	var cl20: float3 = float3(constants.shirr4.z, constants.shirr4.w, constants.shirr5.x); \
+	var cl21: float3 = float3(constants.shirr5.y, constants.shirr5.z, constants.shirr5.w); \
+	var cl22: float3 = float3(constants.shirr6.x, constants.shirr6.y, constants.shirr6.z); \
+	return ( \
+		cl22 * c1 * (nor.y * nor.y - (-nor.z) * (-nor.z)) + \
+		cl20 * c3 * nor.x * nor.x + \
+		cl00 * c4 - \
+		cl20 * c5 + \
+		cl2m2 * 2.0 * c1 * nor.y * (-nor.z) + \
+		cl21  * 2.0 * c1 * nor.y * nor.x + \
+		cl2m1 * 2.0 * c1 * (-nor.z) * nor.x + \
+		cl11  * 2.0 * c2 * nor.y + \
+		cl1m1 * 2.0 * c2 * (-nor.z) + \
+		cl10  * 2.0 * c2 * nor.x \
+	); \
+} \
+";
+
+let str_envmap_equirect: string = "\
+fun envmap_equirect(normal: float3, angle: float): float2 { \
+	var PI: float = 3.1415926535; \
+	var PI2: float = PI * 2.0; \
+	var phi: float = acos(normal.z); \
+	var theta: float = atan2(-normal.y, normal.x) + PI + angle; \
+	return float2(theta / PI2, phi / PI); \
+} \
+";
+
+let str_envmap_sample: string = "\
+fun envmap_sample(lod: float, coord: float2): float3 { \
+	if (lod == 0.0) { \
+		return sample_lod(senvmap_radiance, sampler_linear, coord, 0.0).rgb; \
+	} \
+	if (lod == 1.0) { \
+		return sample_lod(senvmap_radiance0, sampler_linear, coord, 0.0).rgb; \
+	} \
+	if (lod == 2.0) { \
+		return sample_lod(senvmap_radiance1, sampler_linear, coord, 0.0).rgb; \
+	} \
+	if (lod == 3.0) { \
+		return sample_lod(senvmap_radiance2, sampler_linear, coord, 0.0).rgb; \
+	} \
+	if (lod == 4.0) { \
+		return sample_lod(senvmap_radiance3, sampler_linear, coord, 0.0).rgb; \
+	} \
+	return sample_lod(senvmap_radiance4, sampler_linear, coord, 0.0).rgb; \
+} \
+";

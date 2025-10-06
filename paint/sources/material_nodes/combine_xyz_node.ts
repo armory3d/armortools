@@ -1,4 +1,11 @@
 
+function combine_xyz_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+    let x: string = parser_material_parse_value_input(node.inputs[0]);
+    let y: string = parser_material_parse_value_input(node.inputs[1]);
+    let z: string = parser_material_parse_value_input(node.inputs[2]);
+    return "float3(" + x + ", " + y + ", " + z + ")";
+}
+
 let combine_xyz_node_def: ui_node_t = {
     id: 0,
     name: _tr("Combine XYZ"),

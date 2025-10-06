@@ -1,4 +1,13 @@
 
+function replace_color_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+    let input_color: string = parser_material_parse_vector_input(node.inputs[0]);
+    let old_color: string = parser_material_parse_vector_input(node.inputs[1]);
+    let new_color: string = parser_material_parse_vector_input(node.inputs[2]);
+    let radius: string = parser_material_parse_value_input(node.inputs[3]);
+    let fuzziness: string = parser_material_parse_value_input(node.inputs[4]);
+    return "lerp3(" + new_color + ", " + input_color + ", clamp((distance(" + old_color + ", " + input_color + ") - " + radius + ") / max(" + fuzziness + ", " + parser_material_eps + "), 0.0, 1.0))";
+}
+
 let replace_color_node_def: ui_node_t = {
     id: 0,
     name: _tr("Replace Color"),

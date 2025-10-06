@@ -1,4 +1,22 @@
 
+function camera_data_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+    parser_material_kong.frag_vvec_cam = true;
+	return "vvec_cam";
+}
+
+function camera_data_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    if (socket == node.outputs[1]) { // View Z Depth
+        node_shader_add_constant(parser_material_kong, "camera_proj: float2", "_camera_plane_proj");
+        parser_material_kong.frag_wvpposition = true;
+        return "(constants.camera_proj.y / ((input.wvpposition.z / input.wvpposition.w) - constants.camera_proj.x))";
+    }
+    else { // View Distance
+        node_shader_add_constant(parser_material_kong, "eye: float3", "_camera_pos");
+        parser_material_kong.frag_wposition = true;
+        return "distance(constants.eye, input.wposition)";
+    }
+}
+
 let camera_data_node_def: ui_node_t = {
     id: 0,
     name: _tr("Camera Data"),

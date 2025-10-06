@@ -1,4 +1,9 @@
 
+function tangent_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+    parser_material_kong.frag_wtangent = true;
+	return "input.wtangent";
+}
+
 let tangent_node_def: ui_node_t = {
     id: 0,
     name: _tr("Tangent"),

@@ -1,4 +1,51 @@
 
+let str_tex_checker: string = "\
+fun tex_checker(co: float3, col1: float3, col2: float3, scale: float): float3 { \
+	/* Prevent precision issues on unit coordinates */ \
+	var p: float3 = (co + 0.000001 * 0.999999) * scale; \
+	var xi: float = abs(floor(p.x)); \
+	var yi: float = abs(floor(p.y)); \
+	var zi: float = abs(floor(p.z)); \
+	/* var check: bool = (xi % 2.0 == yi % 2.0) == zi % 2.0;*/ \
+	var checka: int = 0; \
+	var checkb: int = 0; \
+	if (xi % 2.0 == yi % 2.0) { checka = 1; } \
+	if (zi % 2.0 != 0.0) { checkb = 1; } \
+	if (checka == checkb) { return col1; } return col2; \
+} \
+fun tex_checker_f(co: float3, scale: float): float { \
+	var p: float3 = (co + 0.000001 * 0.999999) * scale; \
+	var xi: float = abs(floor(p.x)); \
+	var yi: float = abs(floor(p.y)); \
+	var zi: float = abs(floor(p.z)); \
+	/*return float((xi % 2.0 == yi % 2.0) == zi % 2.0);*/ \
+	var checka: int = 0; \
+	var checkb: int = 0; \
+	if (xi % 2.0 == yi % 2.0) { checka = 1; } \
+	if (zi % 2.0 != 0.0) { checkb = 1; } \
+	if (checka == checkb) { return 1.0; } return 0.0; \
+	\
+} \
+";
+
+function checker_texture_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+    node_shader_add_function(parser_material_kong, str_tex_checker);
+    let co: string = parser_material_get_coord(node);
+    let col1: string = parser_material_parse_vector_input(node.inputs[1]);
+    let col2: string = parser_material_parse_vector_input(node.inputs[2]);
+    let scale: string = parser_material_parse_value_input(node.inputs[3]);
+    let res: string = "tex_checker(" + co + ", " + col1 + ", " + col2 + ", " + scale + ")";
+    return res;
+}
+
+function checker_texture_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    node_shader_add_function(parser_material_kong, str_tex_checker);
+    let co: string = parser_material_get_coord(node);
+    let scale: string = parser_material_parse_value_input(node.inputs[3]);
+    let res: string = "tex_checker_f(" + co + ", " + scale + ")";
+    return res;
+}
+
 let checker_texture_node_def: ui_node_t = {
     id: 0,
     name: _tr("Checker Texture"),

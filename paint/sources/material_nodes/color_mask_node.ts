@@ -1,4 +1,12 @@
 
+function color_mask_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    let input_color: string = parser_material_parse_vector_input(node.inputs[0]);
+    let mask_color: string = parser_material_parse_vector_input(node.inputs[1]);
+    let radius: string = parser_material_parse_value_input(node.inputs[2]);
+    let fuzziness: string = parser_material_parse_value_input(node.inputs[3]);
+    return "clamp(1.0 - (distance(" + input_color + ", " + mask_color + ") - " + radius + ") / max(" + fuzziness + ", " + parser_material_eps + "), 0.0, 1.0)";
+}
+
 let color_mask_node_def: ui_node_t = {
     id: 0,
     name: _tr("Color Mask"),

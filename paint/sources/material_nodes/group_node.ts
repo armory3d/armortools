@@ -1,4 +1,12 @@
 
+function group_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+    return parser_material_parse_group(node, socket);
+}
+
+function group_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    return parser_material_parse_group(node, socket);
+}
+
 let group_node_def: ui_node_t = {
     id: 0,
     name: _tr("New Group"),

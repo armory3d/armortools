@@ -1,4 +1,11 @@
 
+function wireframe_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    node_shader_add_texture(parser_material_kong, "texuvmap", "_texuvmap");
+    // let use_pixel_size: bool = node.buttons[0].default_value[0] > 0.0;
+    // let pixel_size: f32 = parse_value_input(node.inputs[0]);
+    return "sample_lod(texuvmap, sampler_linear, tex_coord, 0.0).r";
+}
+
 let wireframe_node_def: ui_node_t = {
     id: 0,
     name: _tr("Wireframe"),

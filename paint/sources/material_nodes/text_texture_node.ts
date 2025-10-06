@@ -1,4 +1,46 @@
 
+function _parser_material_cache_tex_text_node(file: string, text: string) {
+	if (map_get(data_cached_images, file) == null) {
+		sys_notify_on_next_frame(function(text: string) {
+			let _text_tool_text: string = context_raw.text_tool_text;
+			let _text_tool_image: gpu_texture_t = context_raw.text_tool_image;
+			context_raw.text_tool_text = text;
+			context_raw.text_tool_image = null;
+
+			util_render_make_text_preview();
+			let file: string = "tex_text_" + text;
+
+			// TODO: remove old cache
+			map_set(data_cached_images, file, context_raw.text_tool_image);
+
+			context_raw.text_tool_text = _text_tool_text;
+			context_raw.text_tool_image = _text_tool_image;
+		}, text);
+	}
+}
+
+function text_texture_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+    let tex_name: string = parser_material_node_name(node);
+    let text_buffer: buffer_t = node.buttons[0].default_value;
+    let text: string = sys_buffer_to_string(text_buffer);
+    let file: string = "tex_text_" + text;
+    _parser_material_cache_tex_text_node(file, text);
+    let tex: bind_tex_t = parser_material_make_bind_tex(tex_name, file);
+    let texstore: string = parser_material_texture_store(node, tex, tex_name, color_space_t.AUTO);
+    return texstore + ".rrr";
+}
+
+function text_texture_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    let tex_name: string = parser_material_node_name(node);
+    let text_buffer: buffer_t = node.buttons[0].default_value;
+    let text: string = sys_buffer_to_string(text_buffer);
+    let file: string = "tex_text_" + text;
+    _parser_material_cache_tex_text_node(file, text);
+    let tex: bind_tex_t = parser_material_make_bind_tex(tex_name, file);
+    let texstore: string = parser_material_texture_store(node, tex, tex_name, color_space_t.AUTO);
+    return texstore + ".r";
+}
+
 let text_texture_node_def: ui_node_t = {
     id: 0,
     name: _tr("Text Texture"),

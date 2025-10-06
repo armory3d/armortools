@@ -1,4 +1,16 @@
 
+function normal_map_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+    let strength: string = parser_material_parse_value_input(node.inputs[0]);
+    let norm: string = parser_material_parse_vector_input(node.inputs[1]);
+
+    let store: string = parser_material_store_var_name(node);
+    parser_material_write(parser_material_kong, "var " + store + "_texn: float3 = " + norm + " * 2.0 - 1.0;");
+    parser_material_write(parser_material_kong, "" + store + "_texn.xy = " + strength + " * " + store + "_texn.xy;");
+    parser_material_write(parser_material_kong, "" + store + "_texn = normalize(" + store + "_texn);");
+
+    return "(0.5 * " + store + "_texn + 0.5)";
+}
+
 let normal_map_node_def: ui_node_t = {
     id: 0,
     name: _tr("Normal Map"),

@@ -1,4 +1,16 @@
 
+function layer_weight_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    let blend: string = parser_material_parse_value_input(node.inputs[0]);
+    if (socket == node.outputs[0]) { // Fresnel
+        parser_material_kong.frag_dotnv = true;
+        return "clamp(pow(1.0 - dotnv, (1.0 - " + blend + ") * 10.0), 0.0, 1.0)";
+    }
+    else if (socket == node.outputs[1]) { // Facing
+        parser_material_kong.frag_dotnv = true;
+        return "((1.0 - dotnv) * " + blend + ")";
+    }
+}
+
 let layer_weight_node_def: ui_node_t = {
     id: 0,
     name: _tr("Layer Weight"),

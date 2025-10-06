@@ -1,4 +1,48 @@
 
+function parser_material_get_gradient(grad: string, co: string): string {
+	if (grad == "LINEAR") {
+		return co + ".x";
+	}
+	else if (grad == "QUADRATIC") {
+		return "0.0";
+	}
+	else if (grad == "EASING") {
+		return "0.0";
+	}
+	else if (grad == "DIAGONAL") {
+		return "(" + co + ".x + " + co + ".y) * 0.5";
+	}
+	else if (grad == "RADIAL") {
+		return "atan2(" + co + ".x, " + co + ".y) / (3.141592 * 2.0) + 0.5";
+	}
+	else if (grad == "QUADRATIC_SPHERE") {
+		return "0.0";
+	}
+	else { // "SPHERICAL"
+		return "max(1.0 - sqrt(" + co + ".x * " + co + ".x + " + co + ".y * " + co + ".y + " + co + ".z * " + co + ".z), 0.0)";
+	}
+}
+
+function gradient_texture_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+    let co: string = parser_material_get_coord(node);
+    let but: ui_node_button_t = node.buttons[0]; //gradient_type;
+    let grad: string = to_upper_case(u8_array_string_at(but.data, but.default_value[0]));
+    grad = string_replace_all(grad, " ", "_");
+    let f: string = parser_material_get_gradient(grad, co);
+    let res: string = parser_material_to_vec3("clamp(" + f + ", 0.0, 1.0)");
+    return res;
+}
+
+function gradient_texture_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    let co: string = parser_material_get_coord(node);
+    let but: ui_node_button_t = node.buttons[0]; //gradient_type;
+    let grad: string = to_upper_case(u8_array_string_at(but.data, but.default_value[0]));
+    grad = string_replace_all(grad, " ", "_");
+    let f: string = parser_material_get_gradient(grad, co);
+    let res: string = "(clamp(" + f + ", 0.0, 1.0))";
+    return res;
+}
+
 let gradient_texture_node_def: ui_node_t = {
     id: 0,
     name: _tr("Gradient Texture"),

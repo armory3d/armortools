@@ -1,4 +1,15 @@
 
+function bump_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+    let strength: string = parser_material_parse_value_input(node.inputs[0]);
+    // let distance: string = parse_value_input(node.inputs[1]);
+    let height: string = parser_material_parse_value_input(node.inputs[2]);
+    let nor: string = parser_material_parse_vector_input(node.inputs[3]);
+    let sample_bump_res: string = parser_material_store_var_name(node) + "_bump";
+    parser_material_write(parser_material_kong, "var " + sample_bump_res + "_x: float = ddx(float(" + height + ")) * (" + strength + ") * 16.0;");
+    parser_material_write(parser_material_kong, "var " + sample_bump_res + "_y: float = ddy(float(" + height + ")) * (" + strength + ") * 16.0;");
+    return "(normalize(float3(" + sample_bump_res + "_x, " + sample_bump_res + "_y, 1.0) + " + nor + ") * float3(0.5, 0.5, 0.5) + float3(0.5, 0.5, 0.5))";
+}
+
 let bump_node_def: ui_node_t = {
     id: 0,
     name: _tr("Bump"),

@@ -1,4 +1,10 @@
 
+function fresnel_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    let ior: string = parser_material_parse_value_input(node.inputs[0]);
+    parser_material_kong.frag_dotnv = true;
+    return "pow(1.0 - dotnv, 7.25 / " + ior + ")";
+}
+
 let fresnel_node_def: ui_node_t = {
     id: 0,
     name: _tr("Fresnel"),

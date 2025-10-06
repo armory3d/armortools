@@ -1,4 +1,10 @@
 
+function quantize_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+    let strength: string = parser_material_parse_value_input(node.inputs[0]);
+    let col: string = parser_material_parse_vector_input(node.inputs[1]);
+    return "(floor3(100.0 * " + strength + " * " + col + ") / (100.0 * " + strength + "))";
+}
+
 let quantize_node_def: ui_node_t = {
     id: 0,
     name: _tr("Quantize"),

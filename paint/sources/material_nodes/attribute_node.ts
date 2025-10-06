@@ -1,4 +1,25 @@
 
+function attribute_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+    if (socket == node.outputs[0]) { // Color
+        if (parser_material_kong.context.allow_vcols) {
+            node_shader_context_add_elem(parser_material_kong.context, "col", "short4norm"); // Vcols only for now
+            return "input.vcolor";
+        }
+        else {
+            return("float3(0.0, 0.0, 0.0)");
+        }
+    }
+    else { // Vector
+        node_shader_context_add_elem(parser_material_kong.context, "tex", "short2norm"); // UVMaps only for now
+        return "float3(tex_coord.x, tex_coord.y, 0.0)";
+    }
+}
+
+function attribute_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    node_shader_add_constant(parser_material_kong, "time: float", "_time");
+	return "constants.time";
+}
+
 let attribute_node_def: ui_node_t = {
     id: 0,
     name: _tr("Attribute"),

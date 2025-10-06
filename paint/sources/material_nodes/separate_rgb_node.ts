@@ -1,4 +1,17 @@
 
+function separate_rgb_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    let col: string = parser_material_parse_vector_input(node.inputs[0]);
+    if (socket == node.outputs[0]) {
+        return col + ".r";
+    }
+    else if (socket == node.outputs[1]) {
+        return col + ".g";
+    }
+    else if (socket == node.outputs[2]) {
+        return col + ".b";
+    }
+}
+
 let separate_rgb_node_def: ui_node_t = {
     id: 0,
     name: _tr("Separate RGB"),

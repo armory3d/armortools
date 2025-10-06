@@ -1,4 +1,23 @@
 
+function map_range_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    let val: string = parser_material_parse_value_input(node.inputs[0]);
+    let fmin: string = parser_material_parse_value_input(node.inputs[1]);
+    let fmax: string = parser_material_parse_value_input(node.inputs[2]);
+    let tmin: string = parser_material_parse_value_input(node.inputs[3]);
+    let tmax: string = parser_material_parse_value_input(node.inputs[4]);
+
+    let use_clamp: bool = node.buttons[0].default_value[0] > 0;
+
+    let a: string = "((" + tmin + " - " + tmax + ") / (" + fmin + " - " + fmax + "))";
+    let out_val: string = "(" + a + " * " + val + " + " + tmin + " - " + a + " * " + fmin + ")";
+    if (use_clamp) {
+        return "(clamp(" + out_val + ", " + tmin + ", " + tmax + "))";
+    }
+    else {
+        return out_val;
+    }
+}
+
 let map_range_node_def: ui_node_t = {
     id: 0,
     name: _tr("Map Range"),

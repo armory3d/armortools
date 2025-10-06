@@ -1,4 +1,10 @@
 
+function invert_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+    let fac: string = parser_material_parse_value_input(node.inputs[0]);
+    let out_col: string = parser_material_parse_vector_input(node.inputs[1]);
+    return "lerp3(" + out_col + ", float3(1.0, 1.0, 1.0) - (" + out_col + "), " + fac + ")";
+}
+
 let invert_node_def: ui_node_t = {
     id: 0,
     name: _tr("Invert"),

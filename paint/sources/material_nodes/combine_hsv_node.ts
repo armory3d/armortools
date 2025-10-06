@@ -1,4 +1,12 @@
 
+function combine_hsv_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+    node_shader_add_function(parser_material_kong, str_hue_sat);
+    let h: string = parser_material_parse_value_input(node.inputs[0]);
+    let s: string = parser_material_parse_value_input(node.inputs[1]);
+    let v: string = parser_material_parse_value_input(node.inputs[2]);
+    return "hsv_to_rgb(float3(" + h + ", " + s + ", " + v + "))";
+}
+
 let combine_hsv_node_def: ui_node_t = {
     id: 0,
     name: _tr("Combine HSV"),

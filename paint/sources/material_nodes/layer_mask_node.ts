@@ -1,4 +1,12 @@
 
+function layer_mask_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    if (socket == node.outputs[0]) {
+        let l: i32 = node.buttons[0].default_value[0];
+        node_shader_add_texture(parser_material_kong, "texpaint" + l, "_texpaint" + l);
+        return "sample(texpaint" + l + ", sampler_linear, tex_coord).r";
+    }
+}
+
 let layer_mask_node_def: ui_node_t = {
     id: 0,
     name: _tr("Layer Mask"),

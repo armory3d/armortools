@@ -1,4 +1,34 @@
 
+function texture_coordinate_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+    if (socket == node.outputs[0]) { // Generated - bounds
+        parser_material_kong.frag_bposition = true;
+        return "bposition";
+    }
+    else if (socket == node.outputs[1]) { // Normal
+        parser_material_kong.frag_n = true;
+        return "n";
+    }
+    else if (socket == node.outputs[2]) {// UV
+        node_shader_context_add_elem(parser_material_kong.context, "tex", "short2norm");
+        return "float3(tex_coord.x, tex_coord.y, 0.0)";
+    }
+    else if (socket == node.outputs[3]) { // Object
+        parser_material_kong.frag_mposition = true;
+        return "input.mposition";
+    }
+    else if (socket == node.outputs[4]) { // Camera
+        parser_material_kong.frag_vposition = true;
+        return "input.vposition";
+    }
+    else if (socket == node.outputs[5]) { // Window
+        parser_material_kong.frag_wvpposition = true;
+        return "input.wvpposition.xyz";
+    }
+    else if (socket == node.outputs[6]) { // Reflection
+        return "float3(0.0, 0.0, 0.0)";
+    }
+}
+
 let texture_coordinate_node_def: ui_node_t = {
     id: 0,
     name: _tr("Texture Coordinate"),

@@ -1,4 +1,40 @@
 
+function layer_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+    let l: i32 = node.buttons[0].default_value[0];
+    if (socket == node.outputs[0]) { // Base
+        node_shader_add_texture(parser_material_kong, "texpaint" + l, "_texpaint" + l);
+        return "sample(texpaint" + l + ", sampler_linear, tex_coord).rgb";
+    }
+    else if (socket == node.outputs[5]) { // Normal
+        node_shader_add_texture(parser_material_kong, "texpaint_nor" + l, "_texpaint_nor" + l);
+        return "sample(texpaint_nor" + l + ", sampler_linear, tex_coord).rgb";
+    }
+}
+
+function layer_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    let l: i32 = node.buttons[0].default_value[0];
+    if (socket == node.outputs[1]) { // Opac
+        node_shader_add_texture(parser_material_kong, "texpaint" + l, "_texpaint" + l);
+        return "sample(texpaint" + l + ", sampler_linear, tex_coord).a";
+    }
+    else if (socket == node.outputs[2]) { // Occ
+        node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
+        return "sample(texpaint_pack" + l + ", sampler_linear, tex_coord).r";
+    }
+    else if (socket == node.outputs[3]) { // Rough
+        node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
+        return "sample(texpaint_pack" + l + ", sampler_linear, tex_coord).g";
+    }
+    else if (socket == node.outputs[4]) { // Metal
+        node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
+        return "sample(texpaint_pack" + l + ", sampler_linear, tex_coord).b";
+    }
+    else if (socket == node.outputs[7]) { // Height
+        node_shader_add_texture(parser_material_kong, "texpaint_pack" + l, "_texpaint_pack" + l);
+        return "sample(texpaint_pack" + l + ", sampler_linear, tex_coord).a";
+    }
+}
+
 let layer_node_def: ui_node_t = {
     id: 0,
     name: _tr("Layer"),

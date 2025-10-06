@@ -1,4 +1,20 @@
 
+let str_brightcontrast: string = "\
+fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
+	var a: float = 1.0 + contr; \
+	var b: float = bright - contr * 0.5; \
+	return max3(a * col + b, float3(0.0, 0.0, 0.0)); \
+} \
+";
+
+function brightness_contrast_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    let out_col: string = parser_material_parse_vector_input(node.inputs[0]);
+    let bright: string = parser_material_parse_value_input(node.inputs[1]);
+    let contr: string = parser_material_parse_value_input(node.inputs[2]);
+    node_shader_add_function(parser_material_kong, str_brightcontrast);
+	return "brightcontrast(" + out_col + ", " + bright + ", " + contr + ")";
+}
+
 let brightness_contrast_node_def: ui_node_t = {
     id: 0,
     name: _tr("Brightness/Contrast"),

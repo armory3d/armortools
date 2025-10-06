@@ -1,4 +1,17 @@
 
+function separate_xyz_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    let vec: string = parser_material_parse_vector_input(node.inputs[0]);
+    if (socket == node.outputs[0]) {
+        return vec + ".x";
+    }
+    else if (socket == node.outputs[1]) {
+        return vec + ".y";
+    }
+    else if (socket == node.outputs[2]) {
+        return vec + ".z";
+    }
+}
+
 let separate_xyz_node_def: ui_node_t = {
     id: 0,
     name: _tr("Separate XYZ"),

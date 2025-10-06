@@ -1,4 +1,18 @@
 
+function vertex_color_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+    if (parser_material_kong.context.allow_vcols) {
+        node_shader_context_add_elem(parser_material_kong.context, "col", "short4norm");
+        return "input.vcolor";
+    }
+    else {
+        return("float3(0.0, 0.0, 0.0)");
+    }
+}
+
+function vertex_color_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    return "1.0";
+}
+
 let vertex_color_node_def: ui_node_t = {
     id: 0,
     name: _tr("Vertex Color"),

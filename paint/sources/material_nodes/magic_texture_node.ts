@@ -1,4 +1,33 @@
 
+let str_tex_magic: string = "\
+fun tex_magic(p: float3): float3 { \
+	var a: float = 1.0 - (sin(p.x) + sin(p.y)); \
+	var b: float = 1.0 - sin(p.x - p.y); \
+	var c: float = 1.0 - sin(p.x + p.y); \
+	return float3(a, b, c); \
+} \
+fun tex_magic_f(p: float3): float { \
+	var c: float3 = tex_magic(p); \
+	return (c.x + c.y + c.z) / 3.0; \
+} \
+";
+
+function magic_texture_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+    node_shader_add_function(parser_material_kong, str_tex_magic);
+    let co: string = parser_material_get_coord(node);
+    let scale: string = parser_material_parse_value_input(node.inputs[1]);
+    let res: string = "tex_magic(" + co + " * " + scale + " * 4.0)";
+    return res;
+}
+
+function magic_texture_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    node_shader_add_function(parser_material_kong, str_tex_magic);
+    let co: string = parser_material_get_coord(node);
+    let scale: string = parser_material_parse_value_input(node.inputs[1]);
+    let res: string = "tex_magic_f(" + co + " * " + scale + " * 4.0)";
+    return res;
+}
+
 let magic_texture_node_def: ui_node_t = {
     id: 0,
     name: _tr("Magic Texture"),

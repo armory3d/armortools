@@ -1,4 +1,9 @@
 
+function rgb_to_bw_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    let col: string = parser_material_parse_vector_input(node.inputs[0]);
+    return "(((" + col + ".r * 0.3 + " + col + ".g * 0.59 + " + col + ".b * 0.11) / 3.0) * 2.5)";
+}
+
 let rgb_to_bw_node_def: ui_node_t = {
     id: 0,
     name: _tr("RGB to BW"),

@@ -1,4 +1,38 @@
 
+function picker_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+    if (socket == node.outputs[0]) { // Base
+        node_shader_add_constant(parser_material_kong, "picker_base: float3", "_picker_base");
+        return "constants.picker_base";
+    }
+    else if (socket == node.outputs[5]) { // Normal
+        node_shader_add_constant(parser_material_kong, "picker_normal: float3", "_picker_normal");
+        return "constants.picker_normal";
+    }
+}
+
+function picker_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    if (socket == node.outputs[1]) {
+        node_shader_add_constant(parser_material_kong, "picker_opacity: float", "_picker_opacity");
+        return "constants.picker_opacity";
+    }
+    else if (socket == node.outputs[2]) {
+        node_shader_add_constant(parser_material_kong, "picker_occlusion: float", "_picker_occlusion");
+        return "constants.picker_occlusion";
+    }
+    else if (socket == node.outputs[3]) {
+        node_shader_add_constant(parser_material_kong, "picker_roughness: float", "_picker_roughness");
+        return "constants.picker_roughness";
+    }
+    else if (socket == node.outputs[4]) {
+        node_shader_add_constant(parser_material_kong, "picker_metallic: float", "_picker_metallic");
+        return "constants.picker_metallic";
+    }
+    else if (socket == node.outputs[7]) {
+        node_shader_add_constant(parser_material_kong, "picker_height: float", "_picker_height");
+        return "constants.picker_height";
+    }
+}
+
 let picker_node_def: ui_node_t = {
     id: 0,
     name: _tr("Picker"),

@@ -1,4 +1,8 @@
 
+function value_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+    return parser_material_vec1(node.outputs[0].default_value[0]);
+}
+
 let value_node_def: ui_node_t = {
     id: 0,
     name: _tr("Value"),
