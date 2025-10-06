@@ -111,6 +111,7 @@ function image_texture_node_value(node: ui_node_t, socket: ui_node_socket_t): st
         let texstore: string = parser_material_texture_store(node, tex, tex_name, color_space);
         return texstore + ".a";
     }
+    return "0.0";
 }
 
 let image_texture_node_def: ui_node_t = {
