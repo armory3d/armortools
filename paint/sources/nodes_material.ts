@@ -74,6 +74,7 @@ function nodes_material_list_init() {
 	noise_texture_node_init();
 	voronoi_texture_node_init();
 	wave_texture_node_init();
+	gabor_texture_node_init();
 
 	nodes_material_color = [];
 	blur_node_init();
