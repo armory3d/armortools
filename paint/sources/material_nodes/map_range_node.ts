@@ -1,4 +1,9 @@
 
+function map_range_node_init() {
+    array_push(nodes_material_converter, map_range_node_def);
+    map_set(parser_material_node_values, "MAPRANGE", map_range_node_value);
+}
+
 function map_range_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
     let val: string = parser_material_parse_value_input(node.inputs[0]);
     let fmin: string = parser_material_parse_value_input(node.inputs[1]);

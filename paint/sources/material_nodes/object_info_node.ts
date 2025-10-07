@@ -1,4 +1,10 @@
 
+function object_info_node_init() {
+    array_push(nodes_material_input, object_info_node_def);
+    map_set(parser_material_node_vectors, "OBJECT_INFO", object_info_node_vector);
+	map_set(parser_material_node_values, "OBJECT_INFO", object_info_node_value);
+}
+
 function object_info_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
     if (socket == node.outputs[0]) { // Location
         parser_material_kong.frag_wposition = true;

@@ -1,4 +1,10 @@
 
+function attribute_node_init() {
+    array_push(nodes_material_input, attribute_node_def);
+    map_set(parser_material_node_vectors, "ATTRIBUTE", attribute_node_vector);
+	map_set(parser_material_node_values, "ATTRIBUTE", attribute_node_value);
+}
+
 function attribute_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
     if (socket == node.outputs[0]) { // Color
         if (parser_material_kong.context.allow_vcols) {

@@ -1,4 +1,9 @@
 
+function warp_node_init() {
+    array_push(nodes_material_color, warp_node_def);
+    map_set(parser_material_node_vectors, "DIRECT_WARP", warp_node_vector);
+}
+
 function warp_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
     if (parser_material_warp_passthrough) {
         return parser_material_parse_vector_input(node.inputs[0]);

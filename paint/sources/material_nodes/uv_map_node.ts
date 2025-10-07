@@ -1,4 +1,9 @@
 
+function uv_map_node_init() {
+    array_push(nodes_material_input, uv_map_node_def);
+    map_set(parser_material_node_vectors, "UVMAP", uv_map_node_vector);
+}
+
 function uv_map_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
     node_shader_context_add_elem(parser_material_kong.context, "tex", "short2norm");
 	return "float3(tex_coord.x, tex_coord.y, 0.0)";

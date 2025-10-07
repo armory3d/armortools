@@ -1,4 +1,9 @@
 
+function value_node_init() {
+    array_push(nodes_material_input, value_node_def);
+    map_set(parser_material_node_values, "VALUE", value_node_value);
+}
+
 function value_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
     return parser_material_vec1(node.outputs[0].default_value[0]);
 }

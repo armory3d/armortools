@@ -1,4 +1,10 @@
 
+function magic_texture_node_init() {
+    array_push(nodes_material_texture, magic_texture_node_def);
+    map_set(parser_material_node_vectors, "TEX_MAGIC", magic_texture_node_vector);
+	map_set(parser_material_node_values, "TEX_MAGIC", magic_texture_node_value);
+}
+
 let str_tex_magic: string = "\
 fun tex_magic(p: float3): float3 { \
 	var a: float = 1.0 - (sin(p.x) + sin(p.y)); \

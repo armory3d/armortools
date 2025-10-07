@@ -1,4 +1,10 @@
 
+function text_texture_node_init() {
+    array_push(nodes_material_texture, text_texture_node_def);
+    map_set(parser_material_node_vectors, "TEX_TEXT", text_texture_node_vector);
+	map_set(parser_material_node_values, "TEX_TEXT", text_texture_node_value);
+}
+
 function _parser_material_cache_tex_text_node(file: string, text: string) {
 	if (map_get(data_cached_images, file) == null) {
 		sys_notify_on_next_frame(function(text: string) {

@@ -1,4 +1,9 @@
 
+function fresnel_node_init() {
+    array_push(nodes_material_input, fresnel_node_def);
+    map_set(parser_material_node_values, "FRESNEL", fresnel_node_value);
+}
+
 function fresnel_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
     let ior: string = parser_material_parse_value_input(node.inputs[0]);
     parser_material_kong.frag_dotnv = true;

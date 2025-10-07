@@ -30,7 +30,6 @@ function nodes_material_init() {
 	map_set(ui_nodes_custom_buttons, "nodes_material_new_group_button", nodes_material_new_group_button);
 	map_set(ui_nodes_custom_buttons, "nodes_material_group_input_button", nodes_material_group_input_button);
 	map_set(ui_nodes_custom_buttons, "nodes_material_group_output_button", nodes_material_group_output_button);
-
 	nodes_material_list_init();
 }
 
@@ -39,95 +38,87 @@ function nodes_material_list_init() {
 		return;
 	}
 
-	nodes_material_input = [
-		attribute_node_def,
-		camera_data_node_def,
-		fresnel_node_def,
-		geometry_node_def,
-		layer_node_def,
-		layer_mask_node_def,
-		layer_weight_node_def,
-		material_node_def,
-		object_info_node_def,
-		picker_node_def,
-		rgb_node_def,
-		script_node_def,
-		shader_node_def,
-		tangent_node_def,
-		texture_coordinate_node_def,
-		uv_map_node_def,
-		value_node_def,
-		vertex_color_node_def,
-		wireframe_node_def,
-	];
+	nodes_material_input = [];
+	attribute_node_init();
+	camera_data_node_init();
+	fresnel_node_init();
+	geometry_node_init();
+	layer_node_init();
+	layer_mask_node_init();
+	layer_weight_node_init();
+	material_node_init();
+	object_info_node_init();
+	picker_node_init();
+	rgb_node_init();
+	script_node_init();
+	shader_node_init();
+	tangent_node_init();
+	texture_coordinate_node_init();
+	uv_map_node_init();
+	value_node_init();
+	vertex_color_node_init();
+	wireframe_node_init();
 
-	// nodes_material_output = [
-	// 	material_output_node_def
-	// ];
+	// nodes_material_output = [];
+	// material_output_node_init();
 
-	nodes_material_texture = [
-		brick_texture_node_def,
-		checker_texture_node_def,
-		curvature_bake_node_def,
-		gradient_texture_node_def,
-		image_texture_node_def,
-		text_texture_node_def,
-		magic_texture_node_def,
-		musgrave_texture_node_def,
-		noise_texture_node_def,
-		voronoi_texture_node_def,
-		wave_texture_node_def
-	];
+	nodes_material_texture = [];
+	brick_texture_node_init();
+	checker_texture_node_init();
+	curvature_bake_node_init();
+	gradient_texture_node_init();
+	image_texture_node_init();
+	text_texture_node_init();
+	magic_texture_node_init();
+	musgrave_texture_node_init();
+	noise_texture_node_init();
+	voronoi_texture_node_init();
+	wave_texture_node_init();
 
-	nodes_material_color = [
-		blur_node_def,
-		brightness_contrast_node_def,
-		gamma_node_def,
-		hue_saturation_value_node_def,
-		invert_node_def,
-		mix_color_node_def,
-		quantize_node_def,
-		replace_color_node_def,
-		warp_node_def
-	];
+	nodes_material_color = [];
+	blur_node_init();
+	brightness_contrast_node_init();
+	gamma_node_init();
+	hue_saturation_value_node_init();
+	invert_node_init();
+	mix_color_node_init();
+	quantize_node_init();
+	replace_color_node_init();
+	warp_node_init();
 
-	nodes_material_vector = [
-		bump_node_def,
-		mapping_node_def,
-		mix_normal_map_node_def,
-		normal_node_def,
-		normal_map_node_def,
-		vector_curves_node_def
-	];
+	nodes_material_vector = [];
+	bump_node_init();
+	mapping_node_init();
+	mix_normal_map_node_init();
+	normal_node_init();
+	normal_map_node_init();
+	vector_curves_node_init();
 
-	nodes_material_converter = [
-		clamp_node_def,
-		color_ramp_node_def,
-		color_mask_node_def,
-		combine_hsv_node_def,
-		combine_rgb_node_def,
-		combine_xyz_node_def,
-		map_range_node_def,
-		math2_node_def,
-		rgb_to_bw_node_def,
-		separate_hsv_node_def,
-		separate_rgb_node_def,
-		separate_xyz_node_def,
-		vector_math2_node_def
-	];
+	nodes_material_converter = [];
+	clamp_node_init();
+	color_ramp_node_init();
+	color_mask_node_init();
+	combine_hsv_node_init();
+	combine_rgb_node_init();
+	combine_xyz_node_init();
+	map_range_node_init();
+	math2_node_init();
+	rgb_to_bw_node_init();
+	separate_hsv_node_init();
+	separate_rgb_node_init();
+	separate_xyz_node_init();
+	vector_math2_node_init();
 
-	// nodes_material_neural = [
-	// 	text_to_photo_node_def,
-	// 	inpaint_node_def,
-	// 	photo_to_pbr_node_def,
-	// 	tiling_node_def,
-	// 	upscale_node_def,
-	// 	variance_node_def
-	// ];
+	// nodes_material_neural = [];
+	// text_to_photo_node_init();
+	// inpaint_node_init();
+	// photo_to_pbr_node_init();
+	// tiling_node_init();
+	// upscale_node_init();
+	// variance_node_init();
 
-	nodes_material_group = [
-		group_node_def
-	];
+	nodes_material_group = [];
+	group_node_init();
 
 	nodes_material_list = [
 		nodes_material_input,
@@ -138,86 +129,6 @@ function nodes_material_list_init() {
 		// nodes_material_neural,
 		nodes_material_group
 	];
-
-	map_set(parser_material_node_vectors, "ATTRIBUTE", attribute_node_vector);
-	map_set(parser_material_node_values, "ATTRIBUTE", attribute_node_value);
-	map_set(parser_material_node_vectors, "BLUR", blur_node_vector);
-	map_set(parser_material_node_vectors, "TEX_BRICK", brick_texture_node_vector);
-	map_set(parser_material_node_values, "TEX_BRICK", brick_texture_node_value);
-	map_set(parser_material_node_values, "BRIGHTCONTRAST", brightness_contrast_node_value);
-	map_set(parser_material_node_vectors, "BUMP", bump_node_vector);
-	map_set(parser_material_node_vectors, "CAMERA", camera_data_node_vector);
-	map_set(parser_material_node_values, "CAMERA", camera_data_node_value);
-	map_set(parser_material_node_vectors, "TEX_CHECKER", checker_texture_node_vector);
-	map_set(parser_material_node_values, "TEX_CHECKER", checker_texture_node_value);
-	map_set(parser_material_node_values, "CLAMP", clamp_node_value);
-	map_set(parser_material_node_values, "COLMASK", color_mask_node_value);
-	map_set(parser_material_node_vectors, "VALTORGB", color_ramp_node_vector);
-	map_set(parser_material_node_vectors, "COMBHSV", combine_hsv_node_vector);
-	map_set(parser_material_node_vectors, "COMBRGB", combine_rgb_node_vector);
-	map_set(parser_material_node_vectors, "COMBXYZ", combine_xyz_node_vector);
-	map_set(parser_material_node_values, "BAKE_CURVATURE", curvature_bake_node_value);
-	map_set(parser_material_node_values, "FRESNEL", fresnel_node_value);
-	map_set(parser_material_node_vectors, "GAMMA", gamma_node_vector);
-	map_set(parser_material_node_vectors, "NEW_GEOMETRY", geometry_node_vector);
-	map_set(parser_material_node_values, "NEW_GEOMETRY", geometry_node_value);
-	map_set(parser_material_node_vectors, "TEX_GRADIENT", gradient_texture_node_vector);
-	map_set(parser_material_node_values, "TEX_GRADIENT", gradient_texture_node_value);
-	map_set(parser_material_node_vectors, "GROUP", group_node_vector);
-	map_set(parser_material_node_values, "GROUP", group_node_value);
-	map_set(parser_material_node_vectors, "HUE_SAT", hue_saturation_node_vector);
-	map_set(parser_material_node_vectors, "TEX_IMAGE", image_texture_node_vector);
-	map_set(parser_material_node_values, "TEX_IMAGE", image_texture_node_value);
-	map_set(parser_material_node_vectors, "INVERT", invert_node_vector);
-	map_set(parser_material_node_values, "LAYER_MASK", layer_mask_node_value);
-	map_set(parser_material_node_vectors, "LAYER", layer_node_vector);
-	map_set(parser_material_node_values, "LAYER", layer_node_value);
-	map_set(parser_material_node_values, "LAYER_WEIGHT", layer_weight_node_value);
-	map_set(parser_material_node_vectors, "TEX_MAGIC", magic_texture_node_vector);
-	map_set(parser_material_node_values, "TEX_MAGIC", magic_texture_node_value);
-	map_set(parser_material_node_values, "MAPRANGE", map_range_node_value);
-	map_set(parser_material_node_vectors, "MAPPING", mapping_node_vector);
-	map_set(parser_material_node_vectors, "MATERIAL", material_node_vector);
-	map_set(parser_material_node_values, "MATERIAL", material_node_value);
-	map_set(parser_material_node_values, "MATH", math2_node_value);
-	map_set(parser_material_node_vectors, "MIX_RGB", mix_color_node_vector);
-	map_set(parser_material_node_vectors, "MIX_NORMAL_MAP", mix_normal_map_node_vector);
-	map_set(parser_material_node_values, "TEX_MUSGRAVE", musgrave_node_value);
-	map_set(parser_material_node_vectors, "TEX_NOISE", noise_texture_node_vector);
-	map_set(parser_material_node_values, "TEX_NOISE", noise_texture_node_value);
-	map_set(parser_material_node_vectors, "NORMAL_MAP", normal_map_node_vector);
-	map_set(parser_material_node_vectors, "NORMAL", normal_node_vector);
-	map_set(parser_material_node_values, "NORMAL", normal_node_value);
-	map_set(parser_material_node_vectors, "OBJECT_INFO", object_info_node_vector);
-	map_set(parser_material_node_values, "OBJECT_INFO", object_info_node_value);
-	map_set(parser_material_node_vectors, "PICKER", picker_node_vector);
-	map_set(parser_material_node_values, "PICKER", picker_node_value);
-	map_set(parser_material_node_vectors, "QUANTIZE", quantize_node_vector);
-	map_set(parser_material_node_vectors, "REPLACECOL", replace_color_node_vector);
-	map_set(parser_material_node_vectors, "RGB", rgb_node_vector);
-	map_set(parser_material_node_values, "RGBTOBW", rgb_to_bw_node_value);
-	map_set(parser_material_node_values, "SCRIPT_CPU", script_node_value);
-	map_set(parser_material_node_values, "SEPHSV", separate_hsv_node_value);
-	map_set(parser_material_node_values, "SEPRGB", separate_rgb_node_value);
-	map_set(parser_material_node_values, "SEPXYZ", separate_xyz_node_value);
-	map_set(parser_material_node_values, "SHADER_GPU", shader_node_value);
-	map_set(parser_material_node_vectors, "TANGENT", tangent_node_vector);
-	map_set(parser_material_node_vectors, "TEX_TEXT", text_texture_node_vector);
-	map_set(parser_material_node_values, "TEX_TEXT", text_texture_node_value);
-	map_set(parser_material_node_vectors, "TEX_COORD", texture_coordinate_node_vector);
-	map_set(parser_material_node_vectors, "UVMAP", uv_map_node_vector);
-	map_set(parser_material_node_values, "VALUE", value_node_value);
-	map_set(parser_material_node_vectors, "CURVE_VEC", vector_curves_node_vector);
-	map_set(parser_material_node_vectors, "VECT_MATH", vector_math2_node_vector);
-	map_set(parser_material_node_values, "VECT_MATH", vector_math2_node_value);
-	map_set(parser_material_node_vectors, "VERTEX_COLOR", vertex_color_node_vector);
-	map_set(parser_material_node_values, "VERTEX_COLOR", vertex_color_node_value);
-	map_set(parser_material_node_vectors, "TEX_VORONOI", voronoi_texture_node_vector);
-	map_set(parser_material_node_values, "TEX_VORONOI", voronoi_texture_node_value);
-	map_set(parser_material_node_vectors, "DIRECT_WARP", warp_node_vector);
-	map_set(parser_material_node_vectors, "TEX_WAVE", wave_texture_node_vector);
-	map_set(parser_material_node_values, "TEX_WAVE", wave_texture_node_value);
-	map_set(parser_material_node_values, "WIREFRAME", wireframe_node_value);
 }
 
 function nodes_material_vector_curves_button(node_id: i32) {

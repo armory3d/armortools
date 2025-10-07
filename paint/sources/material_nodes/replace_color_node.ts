@@ -1,4 +1,9 @@
 
+function replace_color_node_init() {
+    array_push(nodes_material_color, replace_color_node_def);
+    map_set(parser_material_node_vectors, "REPLACECOL", replace_color_node_vector);
+}
+
 function replace_color_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
     let input_color: string = parser_material_parse_vector_input(node.inputs[0]);
     let old_color: string = parser_material_parse_vector_input(node.inputs[1]);

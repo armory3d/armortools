@@ -1,4 +1,10 @@
 
+function layer_node_init() {
+    array_push(nodes_material_input, layer_node_def);
+    map_set(parser_material_node_vectors, "LAYER", layer_node_vector);
+	map_set(parser_material_node_values, "LAYER", layer_node_value);
+}
+
 function layer_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
     let l: i32 = node.buttons[0].default_value[0];
     if (socket == node.outputs[0]) { // Base

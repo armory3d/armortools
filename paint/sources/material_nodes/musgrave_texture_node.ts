@@ -1,4 +1,9 @@
 
+function musgrave_texture_node_init() {
+    array_push(nodes_material_texture, musgrave_texture_node_def);
+    map_set(parser_material_node_values, "TEX_MUSGRAVE", musgrave_texture_node_value);
+}
+
 let str_tex_musgrave: string = "\
 fun random3(c: float3): float3 { \
 	var j: float = 4096.0 * sin(dot(c, float3(17.0, 59.4, 15.0))); \
@@ -39,7 +44,7 @@ fun tex_musgrave_f(p: float3): float { \
 } \
 ";
 
-function musgrave_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+function musgrave_texture_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
     node_shader_add_function(parser_material_kong, str_tex_musgrave);
     let co: string = parser_material_get_coord(node);
     let scale: string = parser_material_parse_value_input(node.inputs[1]);

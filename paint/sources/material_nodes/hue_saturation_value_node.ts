@@ -1,4 +1,9 @@
 
+function hue_saturation_value_node_init() {
+    array_push(nodes_material_color, hue_saturation_value_node_def);
+    map_set(parser_material_node_vectors, "HUE_SAT", hue_saturation_value_node_vector);
+}
+
 let str_hue_sat: string = "\
 fun hsv_to_rgb(c: float3): float3 { \
 	var K: float4 = float4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0); \
@@ -22,7 +27,7 @@ fun hue_sat(col: float3, shift: float4): float3 { \
 } \
 ";
 
-function hue_saturation_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+function hue_saturation_value_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
     node_shader_add_function(parser_material_kong, str_hue_sat);
     let hue: string = parser_material_parse_value_input(node.inputs[0]);
     let sat: string = parser_material_parse_value_input(node.inputs[1]);

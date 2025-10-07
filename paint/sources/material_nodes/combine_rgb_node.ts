@@ -1,4 +1,9 @@
 
+function combine_rgb_node_init() {
+    array_push(nodes_material_converter, combine_rgb_node_def);
+    map_set(parser_material_node_vectors, "COMBRGB", combine_rgb_node_vector);
+}
+
 function combine_rgb_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
     let r: string = parser_material_parse_value_input(node.inputs[0]);
     let g: string = parser_material_parse_value_input(node.inputs[1]);

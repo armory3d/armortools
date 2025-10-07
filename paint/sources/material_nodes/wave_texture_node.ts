@@ -1,4 +1,10 @@
 
+function wave_texture_node_init() {
+    array_push(nodes_material_texture, wave_texture_node_def);
+    map_set(parser_material_node_vectors, "TEX_WAVE", wave_texture_node_vector);
+	map_set(parser_material_node_values, "TEX_WAVE", wave_texture_node_value);
+}
+
 let str_tex_wave: string = "\
 fun tex_wave_f(p: float3): float { \
 	return 1.0 - sin((p.x + p.y) * 10.0); \

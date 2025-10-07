@@ -1,4 +1,9 @@
 
+function tangent_node_init() {
+    array_push(nodes_material_input, tangent_node_def);
+    map_set(parser_material_node_vectors, "TANGENT", tangent_node_vector);
+}
+
 function tangent_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
     parser_material_kong.frag_wtangent = true;
 	return "input.wtangent";

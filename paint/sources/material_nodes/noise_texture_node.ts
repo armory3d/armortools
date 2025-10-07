@@ -1,4 +1,10 @@
 
+function noise_texture_node_init() {
+    array_push(nodes_material_texture, noise_texture_node_def);
+    map_set(parser_material_node_vectors, "TEX_NOISE", noise_texture_node_vector);
+	map_set(parser_material_node_values, "TEX_NOISE", noise_texture_node_value);
+}
+
 let str_tex_noise: string = "\
 fun hash(n: float): float { return frac(sin(n) * 10000.0); } \
 fun tex_noise_f(x: float3): float { \

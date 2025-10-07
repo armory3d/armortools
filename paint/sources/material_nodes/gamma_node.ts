@@ -1,4 +1,9 @@
 
+function gamma_node_init() {
+    array_push(nodes_material_color, gamma_node_def);
+    map_set(parser_material_node_vectors, "GAMMA", gamma_node_vector);
+}
+
 function gamma_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
     let out_col: string = parser_material_parse_vector_input(node.inputs[0]);
     let gamma: string = parser_material_parse_value_input(node.inputs[1]);

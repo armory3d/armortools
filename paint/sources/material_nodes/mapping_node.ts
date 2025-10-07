@@ -1,4 +1,9 @@
 
+function mapping_node_init() {
+    array_push(nodes_material_vector, mapping_node_def);
+    map_set(parser_material_node_vectors, "MAPPING", mapping_node_vector);
+}
+
 function mapping_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
     let out: string = parser_material_parse_vector_input(node.inputs[0]);
     let node_translation: string = parser_material_parse_vector_input(node.inputs[1]);

@@ -1,4 +1,9 @@
 
+function color_ramp_node_init() {
+    array_push(nodes_material_converter, color_ramp_node_def);
+    map_set(parser_material_node_vectors, "VALTORGB", color_ramp_node_vector);
+}
+
 function color_ramp_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
     let fac: string = parser_material_parse_value_input(node.inputs[0]);
     let data0: i32 = node.buttons[0].data[0];

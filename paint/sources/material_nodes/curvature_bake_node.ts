@@ -3,6 +3,11 @@ let parser_material_bake_passthrough_strength: string = "0.0";
 let parser_material_bake_passthrough_radius: string = "0.0";
 let parser_material_bake_passthrough_offset: string = "0.0";
 
+function curvature_bake_node_init() {
+    array_push(nodes_material_texture, curvature_bake_node_def);
+    map_set(parser_material_node_values, "BAKE_CURVATURE", curvature_bake_node_value);
+}
+
 function curvature_bake_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
     if (parser_material_bake_passthrough) {
         parser_material_bake_passthrough_strength = parser_material_parse_value_input(node.inputs[0]);

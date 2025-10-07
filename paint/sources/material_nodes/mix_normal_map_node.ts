@@ -1,4 +1,9 @@
 
+function mix_normal_map_node_init() {
+    array_push(nodes_material_vector, mix_normal_map_node_def);
+    map_set(parser_material_node_vectors, "MIX_NORMAL_MAP", mix_normal_map_node_vector);
+}
+
 function mix_normal_map_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
     let nm1: string = parser_material_parse_vector_input(node.inputs[0]);
     let nm2: string = parser_material_parse_vector_input(node.inputs[1]);

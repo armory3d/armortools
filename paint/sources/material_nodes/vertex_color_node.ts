@@ -1,4 +1,10 @@
 
+function vertex_color_node_init() {
+    array_push(nodes_material_input, vertex_color_node_def);
+    map_set(parser_material_node_vectors, "VERTEX_COLOR", vertex_color_node_vector);
+	map_set(parser_material_node_values, "VERTEX_COLOR", vertex_color_node_value);
+}
+
 function vertex_color_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
     if (parser_material_kong.context.allow_vcols) {
         node_shader_context_add_elem(parser_material_kong.context, "col", "short4norm");

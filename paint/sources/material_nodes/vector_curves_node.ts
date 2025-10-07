@@ -1,4 +1,9 @@
 
+function vector_curves_node_init() {
+    array_push(nodes_material_vector, vector_curves_node_def);
+    map_set(parser_material_node_vectors, "CURVE_VEC", vector_curves_node_vector);
+}
+
 function parser_material_vector_curve(name: string, fac: string, points: f32_ptr, num: i32): string {
 	// Write Ys array
 	let ys_var: string = name + "_ys";

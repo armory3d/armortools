@@ -1,4 +1,9 @@
 
+function invert_node_init() {
+    array_push(nodes_material_color, invert_node_def);
+    map_set(parser_material_node_vectors, "INVERT", invert_node_vector);
+}
+
 function invert_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
     let fac: string = parser_material_parse_value_input(node.inputs[0]);
     let out_col: string = parser_material_parse_vector_input(node.inputs[1]);

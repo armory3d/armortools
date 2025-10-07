@@ -1,4 +1,9 @@
 
+function blur_node_init() {
+    array_push(nodes_material_color, blur_node_def);
+    map_set(parser_material_node_vectors, "BLUR", blur_node_vector);
+}
+
 function blur_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
     if (parser_material_blur_passthrough) {
 			return parser_material_parse_vector_input(node.inputs[0]);

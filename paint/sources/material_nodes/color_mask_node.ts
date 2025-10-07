@@ -1,4 +1,9 @@
 
+function color_mask_node_init() {
+    array_push(nodes_material_converter, color_mask_node_def);
+    map_set(parser_material_node_values, "COLMASK", color_mask_node_value);
+}
+
 function color_mask_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
     let input_color: string = parser_material_parse_vector_input(node.inputs[0]);
     let mask_color: string = parser_material_parse_vector_input(node.inputs[1]);

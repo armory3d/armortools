@@ -1,4 +1,10 @@
 
+function gradient_texture_node_init() {
+    array_push(nodes_material_texture, gradient_texture_node_def);
+    map_set(parser_material_node_vectors, "TEX_GRADIENT", gradient_texture_node_vector);
+	map_set(parser_material_node_values, "TEX_GRADIENT", gradient_texture_node_value);
+}
+
 function parser_material_get_gradient(grad: string, co: string): string {
 	if (grad == "LINEAR") {
 		return co + ".x";

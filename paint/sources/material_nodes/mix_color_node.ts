@@ -1,4 +1,9 @@
 
+function mix_color_node_init() {
+    array_push(nodes_material_color, mix_color_node_def);
+    map_set(parser_material_node_vectors, "MIX_RGB", mix_color_node_vector);
+}
+
 function mix_color_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
     let fac: string = parser_material_parse_value_input(node.inputs[0]);
     let fac_var: string = parser_material_node_name(node) + "_fac";

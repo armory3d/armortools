@@ -1,4 +1,9 @@
 
+function script_node_init() {
+    array_push(nodes_material_input, script_node_def);
+    map_set(parser_material_node_values, "SCRIPT_CPU", script_node_value);
+}
+
 function script_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
     if (parser_material_script_links == null) {
         parser_material_script_links = map_create();

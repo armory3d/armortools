@@ -1,4 +1,9 @@
 
+function brightness_contrast_node_init() {
+    array_push(nodes_material_color, brightness_contrast_node_def);
+    map_set(parser_material_node_values, "BRIGHTCONTRAST", brightness_contrast_node_value);
+}
+
 let str_brightcontrast: string = "\
 fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
 	var a: float = 1.0 + contr; \

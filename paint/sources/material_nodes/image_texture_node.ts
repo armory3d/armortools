@@ -6,6 +6,12 @@ enum color_space_t {
 	DIRECTX_NORMAL_MAP,
 }
 
+function image_texture_node_init() {
+    array_push(nodes_material_texture, image_texture_node_def);
+    map_set(parser_material_node_vectors, "TEX_IMAGE", image_texture_node_vector);
+	map_set(parser_material_node_values, "TEX_IMAGE", image_texture_node_value);
+}
+
 function parser_material_texture_store(node: ui_node_t, tex: bind_tex_t, tex_name: string, color_space: i32): string {
 	array_push(parser_material_matcon.bind_textures, tex);
 	node_shader_context_add_elem(parser_material_kong.context, "tex", "short2norm");

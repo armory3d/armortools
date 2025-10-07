@@ -1,4 +1,10 @@
 
+function checker_texture_node_init() {
+    array_push(nodes_material_texture, checker_texture_node_def);
+    map_set(parser_material_node_vectors, "TEX_CHECKER", checker_texture_node_vector);
+	map_set(parser_material_node_values, "TEX_CHECKER", checker_texture_node_value);
+}
+
 let str_tex_checker: string = "\
 fun tex_checker(co: float3, col1: float3, col2: float3, scale: float): float3 { \
 	/* Prevent precision issues on unit coordinates */ \

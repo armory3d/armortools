@@ -1,4 +1,9 @@
 
+function texture_coordinate_node_init() {
+    array_push(nodes_material_input, texture_coordinate_node_def);
+    map_set(parser_material_node_vectors, "TEX_COORD", texture_coordinate_node_vector);
+}
+
 function texture_coordinate_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
     if (socket == node.outputs[0]) { // Generated - bounds
         parser_material_kong.frag_bposition = true;

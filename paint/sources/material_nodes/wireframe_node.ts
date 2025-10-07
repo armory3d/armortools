@@ -1,4 +1,9 @@
 
+function wireframe_node_init() {
+    array_push(nodes_material_input, wireframe_node_def);
+    map_set(parser_material_node_values, "WIREFRAME", wireframe_node_value);
+}
+
 function wireframe_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
     node_shader_add_texture(parser_material_kong, "texuvmap", "_texuvmap");
     // let use_pixel_size: bool = node.buttons[0].default_value[0] > 0.0;

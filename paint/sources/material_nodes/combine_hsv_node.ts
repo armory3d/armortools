@@ -1,4 +1,9 @@
 
+function combine_hsv_node_init() {
+    array_push(nodes_material_converter, combine_hsv_node_def);
+    map_set(parser_material_node_vectors, "COMBHSV", combine_hsv_node_vector);
+}
+
 function combine_hsv_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
     node_shader_add_function(parser_material_kong, str_hue_sat);
     let h: string = parser_material_parse_value_input(node.inputs[0]);

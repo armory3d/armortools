@@ -1,4 +1,10 @@
 
+function picker_node_init() {
+    array_push(nodes_material_input, picker_node_def);
+    map_set(parser_material_node_vectors, "PICKER", picker_node_vector);
+	map_set(parser_material_node_values, "PICKER", picker_node_value);
+}
+
 function picker_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
     if (socket == node.outputs[0]) { // Base
         node_shader_add_constant(parser_material_kong, "picker_base: float3", "_picker_base");

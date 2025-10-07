@@ -1,4 +1,9 @@
 
+function separate_hsv_node_init() {
+    array_push(nodes_material_converter, separate_hsv_node_def);
+    map_set(parser_material_node_values, "SEPHSV", separate_hsv_node_value);
+}
+
 function separate_hsv_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
     node_shader_add_function(parser_material_kong, str_hue_sat);
     let col: string = parser_material_parse_vector_input(node.inputs[0]);

@@ -1,4 +1,9 @@
 
+function math2_node_init() {
+    array_push(nodes_material_converter, math2_node_def);
+    map_set(parser_material_node_values, "MATH", math2_node_value);
+}
+
 function math2_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
     let val1: string = parser_material_parse_value_input(node.inputs[0]);
     let val2: string = parser_material_parse_value_input(node.inputs[1]);

@@ -1,4 +1,9 @@
 
+function layer_weight_node_init() {
+    array_push(nodes_material_input, layer_weight_node_def);
+    map_set(parser_material_node_values, "LAYER_WEIGHT", layer_weight_node_value);
+}
+
 function layer_weight_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
     let blend: string = parser_material_parse_value_input(node.inputs[0]);
     if (socket == node.outputs[0]) { // Fresnel

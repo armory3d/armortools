@@ -1,4 +1,10 @@
 
+function vector_math2_node_init() {
+    array_push(nodes_material_converter, vector_math2_node_def);
+    map_set(parser_material_node_vectors, "VECT_MATH", vector_math2_node_vector);
+	map_set(parser_material_node_values, "VECT_MATH", vector_math2_node_value);
+}
+
 function vector_math2_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
     let vec1: string = parser_material_parse_vector_input(node.inputs[0]);
     let vec2: string = parser_material_parse_vector_input(node.inputs[1]);

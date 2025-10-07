@@ -1,4 +1,10 @@
 
+function material_node_init() {
+    array_push(nodes_material_input, material_node_def);
+    map_set(parser_material_node_vectors, "MATERIAL", material_node_vector);
+	map_set(parser_material_node_values, "MATERIAL", material_node_value);
+}
+
 function material_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
     let result: string = "float3(0.0, 0.0, 0.0)";
     let mi: i32 = node.buttons[0].default_value[0];

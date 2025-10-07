@@ -1,4 +1,10 @@
 
+function voronoi_texture_node_init() {
+    array_push(nodes_material_texture, voronoi_texture_node_def);
+    map_set(parser_material_node_vectors, "TEX_VORONOI", voronoi_texture_node_vector);
+	map_set(parser_material_node_values, "TEX_VORONOI", voronoi_texture_node_value);
+}
+
 let str_tex_voronoi: string = "\
 fun tex_voronoi(x: float3): float4 { \
 	var p: float3 = floor3(x); \

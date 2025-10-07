@@ -1,4 +1,10 @@
 
+function brick_texture_node_init() {
+    array_push(nodes_material_texture, brick_texture_node_def);
+    map_set(parser_material_node_vectors, "TEX_BRICK", brick_texture_node_vector);
+    map_set(parser_material_node_values, "TEX_BRICK", brick_texture_node_value);
+}
+
 let str_tex_brick: string = "\
 fun tex_brick_noise(n: int): float { \
 	var nn: int; \

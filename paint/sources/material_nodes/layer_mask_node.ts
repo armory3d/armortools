@@ -1,4 +1,9 @@
 
+function layer_mask_node_init() {
+    array_push(nodes_material_input, layer_mask_node_def);
+    map_set(parser_material_node_values, "LAYER_MASK", layer_mask_node_value);
+}
+
 function layer_mask_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
     let l: i32 = node.buttons[0].default_value[0];
     node_shader_add_texture(parser_material_kong, "texpaint" + l, "_texpaint" + l);

@@ -1,4 +1,9 @@
 
+function combine_xyz_node_init() {
+    array_push(nodes_material_converter, combine_xyz_node_def);
+    map_set(parser_material_node_vectors, "COMBXYZ", combine_xyz_node_vector);
+}
+
 function combine_xyz_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
     let x: string = parser_material_parse_value_input(node.inputs[0]);
     let y: string = parser_material_parse_value_input(node.inputs[1]);

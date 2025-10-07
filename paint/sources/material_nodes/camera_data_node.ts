@@ -1,4 +1,10 @@
 
+function camera_data_node_init() {
+    array_push(nodes_material_input, camera_data_node_def);
+    map_set(parser_material_node_vectors, "CAMERA", camera_data_node_vector);
+	map_set(parser_material_node_values, "CAMERA", camera_data_node_value);
+}
+
 function camera_data_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
     parser_material_kong.frag_vvec_cam = true;
 	return "vvec_cam";

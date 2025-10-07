@@ -1,4 +1,9 @@
 
+function shader_node_init() {
+    array_push(nodes_material_input, shader_node_def);
+    map_set(parser_material_node_values, "SHADER_GPU", shader_node_value);
+}
+
 function shader_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
     let shader: buffer_t = node.buttons[0].default_value;
     let str: string = sys_buffer_to_string(shader);
