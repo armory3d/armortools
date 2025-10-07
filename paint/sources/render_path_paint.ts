@@ -116,6 +116,11 @@ function render_path_paint_draw_fullscreen_triangle(context: string) {
 function render_path_paint_commands_paint(dilation: bool = true) {
 	let tid: i32 = context_raw.layer.id;
 
+	if (context_raw.layer.texpaint_sculpt != null) {
+		render_path_sculpt_commands();
+		return;
+	}
+
 	if (context_raw.pdirty > 0) {
 		if (context_raw.tool == tool_type_t.COLORID) {
 			render_path_set_target("texpaint_colorid", null, null, clear_flag_t.COLOR, 0xff000000);
@@ -514,6 +519,11 @@ function render_path_paint_live_brush_dirty() {
 }
 
 function render_path_paint_begin() {
+	if (context_raw.layer.texpaint_sculpt != null) {
+		render_path_sculpt_begin();
+		return;
+	}
+
 	if (!render_path_paint_dilated) {
 		render_path_paint_dilate(false, true);
 		render_path_paint_dilated = true;
@@ -796,6 +806,10 @@ function render_path_paint_bind_layers() {
 			render_path_bind_target("texpaint_nor" + l.id, "texpaint_nor" + l.id);
 			render_path_bind_target("texpaint_pack" + l.id, "texpaint_pack" + l.id);
 		}
+
+		if (l.texpaint_sculpt != null) {
+			render_path_bind_target("texpaint_sculpt" + l.id, "texpaint_sculpt" + l.id);
+		}
 	}
 }
 
@@ -815,7 +829,7 @@ function render_path_paint_dilate(base: bool, nor_pack: bool) {
 
 		let format: string = base_bits_handle.i == texture_bits_t.BITS8  ? "RGBA32" :
 							 base_bits_handle.i == texture_bits_t.BITS16 ? "RGBA64" :
-																				  "RGBA128";
+																		   "RGBA128";
 
 		let copy_pass: string = format == "RGBA64"  ? "copyRGBA64_pass"  :
 								format == "RGBA128" ? "copyRGBA128_pass" :

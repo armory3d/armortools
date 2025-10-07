@@ -40,6 +40,10 @@ function make_paint_color_attachments(): string[] {
 }
 
 function make_paint_run(data: material_t, matcon: material_context_t): node_shader_context_t {
+	if (context_raw.layer.texpaint_sculpt != null) {
+		return sculpt_make_sculpt_run(data, matcon);
+	}
+
 	let context_id: string = "paint";
 	let props: shader_context_t = {
 		name: context_id,

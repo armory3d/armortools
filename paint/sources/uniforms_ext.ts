@@ -322,6 +322,11 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 		let rt: render_target_t = map_get(render_path_render_targets, "texpaint_pack_undo" + i);
 		return rt._image;
 	}
+	else if (link == "_texpaint_sculpt_undo") {
+		let i: i32 = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
+		let rt: render_target_t = map_get(render_path_render_targets, "texpaint_sculpt_undo" + i);
+		return rt._image;
+	}
 	else if (link == "_texcolorid") {
 		if (project_assets.length == 0) {
 			let rt: render_target_t = map_get(render_path_render_targets, "empty_white");
@@ -388,6 +393,10 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 	if (starts_with(link, "_texpaint_pack")) {
 		let tid: i32 = parse_int(substring(link, link.length - 1, link.length));
 		return tid < project_layers.length ? project_layers[tid].texpaint_pack : null;
+	}
+	if (starts_with(link, "_texpaint_sculpt")) {
+		let tid: i32 = parse_int(substring(link, link.length - 1, link.length));
+		return tid < project_layers.length ? project_layers[tid].texpaint_sculpt : null;
 	}
 	if (starts_with(link, "_texpaint")) {
 		let tid: i32 = parse_int(substring(link, link.length - 1, link.length));

@@ -5,7 +5,6 @@ let history_undos: i32 = 0; // Undos available
 let history_redos: i32 = 0; // Redos available
 let history_push_undo: bool = false; // Store undo on next paint
 let history_undo_layers: slot_layer_t[] = null;
-let history_push_undo2: bool = false;
 
 function history_undo() {
 	if (history_undos > 0) {
@@ -667,6 +666,11 @@ function history_copy_to_undo(from_id: i32, to_id: i32, is_mask: bool) {
 		render_path_bind_target("texpaint" + from_id, "tex");
 		// render_path_draw_shader("Scene/copy_pass/copyR8_pass");
 		render_path_draw_shader("Scene/copy_pass/copy_pass");
+	}
+	else if (context_raw.layer.texpaint_sculpt != null) {
+		render_path_set_target("texpaint_sculpt_undo" + to_id);
+		render_path_bind_target("texpaint_sculpt" + from_id, "tex");
+		render_path_draw_shader("Scene/copy_pass/copyRGBA128_pass");
 	}
 	else {
 		let additional: string[] = ["texpaint_nor_undo" + to_id, "texpaint_pack_undo" + to_id];

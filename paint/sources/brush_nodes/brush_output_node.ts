@@ -181,6 +181,7 @@ function brush_output_paint(self: brush_output_node_t) {
 	if (context_raw.painted <= 1) {
 		context_raw.pdirty = 1;
 		context_raw.rdirty = 2;
+		sculpt_push_undo = true;
 	}
 }
 

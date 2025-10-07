@@ -29,6 +29,7 @@ type slot_layer_t = {
 	paint_emis?: bool;
 	paint_subs?: bool;
 	decal_mat?: mat4_t; // Decal layer
+	texpaint_sculpt?: gpu_texture_t;
 };
 
 function slot_layer_create(ext: string = "", type: layer_slot_type_t = layer_slot_type_t.LAYER, parent: slot_layer_t = null): slot_layer_t {
@@ -78,7 +79,7 @@ function slot_layer_create(ext: string = "", type: layer_slot_type_t = layer_slo
 		raw.name = "Layer " + id;
 		let format: string = base_bits_handle.i == texture_bits_t.BITS8  ? "RGBA32" :
 							 base_bits_handle.i == texture_bits_t.BITS16 ? "RGBA64" :
-																				  "RGBA128";
+																		   "RGBA128";
 
 		{
 			let t: render_target_t = render_target_create();
@@ -361,7 +362,7 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 		let format: tex_format_t =
 			base_bits_handle.i == texture_bits_t.BITS8  ? tex_format_t.RGBA32 :
 			base_bits_handle.i == texture_bits_t.BITS16 ? tex_format_t.RGBA64 :
-																 tex_format_t.RGBA128;
+														  tex_format_t.RGBA128;
 
 		let pipe: gpu_pipeline_t = format == tex_format_t.RGBA32 ? pipes_copy :
 								   format == tex_format_t.RGBA64 ? pipes_copy64 :
@@ -871,7 +872,7 @@ function layers_make_temp_img() {
 	if (layers_temp_image == null) {
 		let format: string = base_bits_handle.i == texture_bits_t.BITS8  ? "RGBA32" :
 							 base_bits_handle.i == texture_bits_t.BITS16 ? "RGBA64" :
-																				  "RGBA128";
+																		   "RGBA128";
 
 		let t: render_target_t = render_target_create();
 		t.name = "temptex0";
@@ -914,7 +915,7 @@ function layers_make_export_img() {
 	if (layers_expa == null) {
 		let format: string = base_bits_handle.i == texture_bits_t.BITS8  ? "RGBA32" :
 							 base_bits_handle.i == texture_bits_t.BITS16 ? "RGBA64" :
-																				  "RGBA128";
+																		   "RGBA128";
 
 
 		{

@@ -80,6 +80,13 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	kong.frag_n = true;
 	node_shader_add_function(kong, str_pack_float_int16);
 
+	for (let i: i32 = 0; i < project_layers.length; ++i) {
+		let l: slot_layer_t = project_layers[i];
+		if (l.texpaint_sculpt != null) {
+			sculpt_make_mesh_run(kong, l);
+		}
+	}
+
 	if (context_raw.tool == tool_type_t.COLORID) {
 		texture_count++;
 		node_shader_add_texture(kong, "texcolorid", "_texcolorid");
