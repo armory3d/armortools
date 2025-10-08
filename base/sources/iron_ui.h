@@ -251,6 +251,7 @@ typedef struct ui {
 	int combo_selected_x;
 	int combo_selected_y;
 	int combo_selected_w;
+	int combo_selected_texts_filtered;
 	bool combo_search_bar;
 	ui_handle_t *submit_combo_handle;
 	int combo_to_submit;

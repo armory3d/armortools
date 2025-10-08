@@ -731,12 +731,13 @@ void ui_draw_combo() {
 
 	ui_begin_region(current, current->combo_selected_x, current->combo_selected_y, current->combo_selected_w);
 
+	float shadow_h = (current->combo_selected_texts_filtered + (current->combo_selected_label != NULL ? 1 : 0) + (current->combo_search_bar ? 1 : 0)) * UI_ELEMENT_H();
 	if (unroll_up) {
 		float off = current->combo_selected_label != NULL ? UI_ELEMENT_H() / UI_SCALE() : 0.0;
-		ui_draw_shadow(current->_x, current->_y - combo_h - off, current->_w, combo_h);
+		ui_draw_shadow(current->_x, current->_y - shadow_h - off, current->_w, shadow_h);
 	}
 	else {
-		ui_draw_shadow(current->_x, current->_y, current->_w, combo_h);
+		ui_draw_shadow(current->_x, current->_y, current->_w, shadow_h);
 	}
 
 	if (current->is_key_pressed || current->input_wheel_delta != 0) {
@@ -827,12 +828,14 @@ void ui_draw_combo() {
 		reset_position = ui_combo_search_handle->changed;
 	}
 
+	current->combo_selected_texts_filtered = 0;
 	for (int i = 0; i < current->combo_selected_texts->length; ++i) {
 		char str[512];
 		ui_lower_case(str, current->combo_selected_texts->buffer[i]);
 		if (strlen(search) > 0 && strstr(str, search) == NULL) {
 			continue; // Don't show items that don't fit the current search pattern
 		}
+		current->combo_selected_texts_filtered++;
 
 		if (reset_position) { // The search has changed, select first entry that matches
 			current->combo_to_submit = current->combo_selected_handle->i = i;
@@ -882,6 +885,10 @@ void ui_draw_combo() {
 	}
 
 	if ((current->input_released || current->input_released_r || current->is_escape_down || current->is_return_down) && !ui_combo_first) {
+		if (current->input_released_r || current->is_escape_down) {
+			current->submit_combo_handle = current->combo_selected_handle;
+			current->combo_to_submit = current->combo_initial_value;
+		}
 		current->combo_selected_handle = NULL;
 		ui_combo_first = true;
 	}
@@ -2066,6 +2073,7 @@ int ui_combo(ui_handle_t *handle, char_ptr_array_t *texts, char *label, bool sho
 			current->combo_selected_x = current->_x + current->_window_x;
 			current->combo_selected_y = current->_y + current->_window_y + UI_ELEMENT_H();
 			current->combo_selected_w = current->_w;
+			current->combo_selected_texts_filtered = 0;
 			current->combo_search_bar = search_bar;
 			for (int i = 0; i < texts->length; ++i) { // Adapt combo list width to combo item width
 				int w = (int)draw_string_width(current->ops->font, current->font_size, texts->buffer[i]) + 10;
@@ -2083,12 +2091,7 @@ int ui_combo(ui_handle_t *handle, char_ptr_array_t *texts, char *label, bool sho
 			current->combo_initial_value = handle->i;
 		}
 	}
-	if (handle == current->combo_selected_handle && (current->is_escape_down || current->input_released_r)) {
-		handle->i = current->combo_initial_value;
-		handle->changed = current->changed = true;
-		current->submit_combo_handle = NULL;
-	}
-	else if (handle == current->submit_combo_handle) {
+	if (handle == current->submit_combo_handle) {
 		handle->i = current->combo_to_submit;
 		current->submit_combo_handle = NULL;
 		handle->changed = current->changed = true;
