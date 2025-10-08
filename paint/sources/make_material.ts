@@ -409,15 +409,19 @@ function make_material_blend_mode(kong: node_shader_t, blending: i32, cola: stri
 		// 	" + cola + ".g < 0.5 ? 2.0 * " + cola + ".g * " + colb + ".g : 1.0 - 2.0 * (1.0 - " + cola + ".g) * (1.0 - " + colb + ".g), \
 		// 	" + cola + ".b < 0.5 ? 2.0 * " + cola + ".b * " + colb + ".b : 1.0 - 2.0 * (1.0 - " + cola + ".b) * (1.0 - " + colb + ".b) \
 		// ), " + opac + ")";
+		let cola_rgb: string = string_replace_all(cola, ".", "_") + "_rgb";
+		let colb_rgb: string = string_replace_all(colb, ".", "_") + "_rgb";
 		let res_r: string = string_replace_all(cola, ".", "_") + "_res_r";
 		let res_g: string = string_replace_all(cola, ".", "_") + "_res_g";
 		let res_b: string = string_replace_all(cola, ".", "_") + "_res_b";
 		node_shader_write_frag(kong, "var " + res_r + ": float;");
 		node_shader_write_frag(kong, "var " + res_g + ": float;");
 		node_shader_write_frag(kong, "var " + res_b + ": float;");
-		node_shader_write_frag(kong, "if (" + cola + ".r < 0.5) { " + res_r + " = 2.0 * " + cola + ".r * " + colb + ".r; } else { " + res_r + " = 1.0 - 2.0 * (1.0 - " + cola + ".r) * (1.0 - " + colb + ".r); }");
-		node_shader_write_frag(kong, "if (" + cola + ".g < 0.5) { " + res_g + " = 2.0 * " + cola + ".g * " + colb + ".g; } else { " + res_g + " = 1.0 - 2.0 * (1.0 - " + cola + ".g) * (1.0 - " + colb + ".g); }");
-		node_shader_write_frag(kong, "if (" + cola + ".b < 0.5) { " + res_b + " = 2.0 * " + cola + ".b * " + colb + ".b; } else { " + res_b + " = 1.0 - 2.0 * (1.0 - " + cola + ".b) * (1.0 - " + colb + ".b); }");
+		node_shader_write_frag(kong, "var " + cola_rgb + ": float3 = " + cola + ";"); // cola_rgb = cola.rgb
+		node_shader_write_frag(kong, "var " + colb_rgb + ": float3 = " + colb + ";");
+		node_shader_write_frag(kong, "if (" + cola_rgb + ".r < 0.5) { " + res_r + " = 2.0 * " + cola_rgb + ".r * " + colb_rgb + ".r; } else { " + res_r + " = 1.0 - 2.0 * (1.0 - " + cola_rgb + ".r) * (1.0 - " + colb_rgb + ".r); }");
+		node_shader_write_frag(kong, "if (" + cola_rgb + ".g < 0.5) { " + res_g + " = 2.0 * " + cola_rgb + ".g * " + colb_rgb + ".g; } else { " + res_g + " = 1.0 - 2.0 * (1.0 - " + cola_rgb + ".g) * (1.0 - " + colb_rgb + ".g); }");
+		node_shader_write_frag(kong, "if (" + cola_rgb + ".b < 0.5) { " + res_b + " = 2.0 * " + cola_rgb + ".b * " + colb_rgb + ".b; } else { " + res_b + " = 1.0 - 2.0 * (1.0 - " + cola_rgb + ".b) * (1.0 - " + colb_rgb + ".b); }");
 		return "lerp3(" + cola + ", float3(" + res_r + ", " + res_g + ", " + res_b + "), " + opac + ")";
 	}
 	else if (blending == blend_type_t.SOFT_LIGHT) {
