@@ -2,6 +2,3 @@
 .vscode
 *.DS_Store
 *.blend1
-paint/assets/models/*.json
-paint/assets/models/*.txt
-paint/assets/models/*.zip
