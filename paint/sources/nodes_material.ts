@@ -5,7 +5,7 @@ let nodes_material_categories: string[] = [
 	_tr("Color"),
 	_tr("Vector"),
 	_tr("Converter"),
-	_tr("Neural"),
+	// _tr("Neural"),
 	_tr("Group")
 ];
 
@@ -111,7 +111,7 @@ function nodes_material_init() {
 		nodes_material_color,
 		nodes_material_vector,
 		nodes_material_converter,
-		nodes_material_neural,
+		// nodes_material_neural,
 		nodes_material_group
 	];
 }

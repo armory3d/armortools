@@ -1798,3 +1798,8 @@ void iron_gamepad_handle_messages() {
 }
 
 #endif
+
+volatile int iron_exec_async_done = 1;
+
+void iron_exec_async(const char *path, char *argv[]) {
+}

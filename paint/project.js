@@ -21,6 +21,7 @@ let project = new Project(flags.name);
 project.add_project("../base");
 project.add_tsfiles("sources");
 project.add_tsfiles("sources/material_nodes");
+project.add_tsfiles("sources/neural_nodes");
 project.add_tsfiles("sources/brush_nodes");
 project.add_shaders("shaders/*.kong");
 project.add_assets("assets/*", { destination: "data/{name}" });
