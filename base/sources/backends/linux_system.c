@@ -1399,3 +1399,31 @@ bool _save_and_quit_callback_internal() {
 	return false;
 }
 #endif
+
+#include <sys/wait.h>
+#include <signal.h>
+static pid_t child_pid = -1;
+volatile int iron_exec_async_done = 1;
+
+void iron_exec_handler(int sig) {
+	int status;
+	if (waitpid(child_pid, &status, WNOHANG) > 0) {
+		iron_exec_async_done = 1;
+	}
+}
+
+void iron_exec_async(const char *path, char *argv[]) {
+	iron_exec_async_done = 0;
+	child_pid = fork();
+	if (child_pid == 0) {
+		execve(path, argv, NULL);
+		exit(1);
+	}
+	else {
+		struct sigaction sa = {0};
+		sa.sa_handler = iron_exec_handler;
+		sa.sa_flags = SA_RESTART;
+		sigemptyset(&sa.sa_mask);
+		sigaction(SIGCHLD, &sa, NULL);
+	}
+}
