@@ -2,6 +2,7 @@
 function color_ramp_node_init() {
     array_push(nodes_material_converter, color_ramp_node_def);
     map_set(parser_material_node_vectors, "VALTORGB", color_ramp_node_vector);
+    map_set(ui_nodes_custom_buttons, "nodes_material_color_ramp_button", nodes_material_color_ramp_button);
 }
 
 function color_ramp_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
@@ -52,6 +53,81 @@ function color_ramp_node_vector(node: ui_node_t, socket: ui_node_socket_t): stri
             fac_var + " - " + facs_var + "[" + index_var + "]) * (1.0 / (" + facs_var + "[" + index_var + " + 1] - " +
             facs_var + "[" + index_var + "]) ))";
     }
+}
+
+function nodes_material_color_ramp_button(node_id: i32) {
+	let nodes: ui_nodes_t = ui_nodes_get_nodes();
+	let node: ui_node_t = ui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
+
+	let but: ui_node_button_t = node.buttons[0];
+	let nhandle: ui_handle_t = ui_nest(ui_handle(__ID__), node.id);
+	let nx: f32 = ui._x;
+	let ny: f32 = ui._y;
+
+	// Preview
+	let vals: f32[] = but.default_value; // [r, g, b, a, pos, r, g, b, a, pos, ..]
+	let sw: f32 = ui._w / UI_NODES_SCALE();
+	for (let i: i32 = 0; i < vals.length / 5; ++i) {
+		let pos: f32 = vals[i * 5 + 4];
+		let col: i32 = color_from_floats(vals[i * 5 + 0], vals[i * 5 + 1], vals[i * 5 + 2], 1.0);
+		ui_fill(pos * sw, 0, (1.0 - pos) * sw, UI_LINE_H() - 2 * UI_NODES_SCALE(), col);
+	}
+	ui._y += UI_LINE_H();
+	// Edit
+	let ihandle: ui_handle_t = ui_nest(ui_nest(nhandle, 0), 2);
+	let row: f32[] = [1 / 4, 1 / 4, 2 / 4];
+	ui_row(row);
+	if (ui_button("+")) {
+		// TODO:
+		// array_push(vals, vals[vals.length - 5]); // r
+		// array_push(vals, vals[vals.length - 5]); // g
+		// array_push(vals, vals[vals.length - 5]); // b
+		// array_push(vals, vals[vals.length - 5]); // a
+		// array_push(vals, 1.0); // pos
+		// ihandle.f += 1;
+	}
+	if (ui_button("-") && vals.length > 5) {
+		array_pop(vals);
+		array_pop(vals);
+		array_pop(vals);
+		array_pop(vals);
+		array_pop(vals);
+		ihandle.f -= 1;
+	}
+
+	let h: ui_handle_t = ui_nest(ui_nest(nhandle, 0), 1);
+	if (h.init) {
+		h.i = but.data[0];
+	}
+	let interpolate_combo: string[] = [tr("Linear"), tr("Constant")];
+	but.data[0] = ui_combo(h, interpolate_combo, tr("Interpolate"));
+
+	ui_row2();
+	let i: i32 = math_floor(ui_slider(ihandle, "Index", 0, (vals.length / 5) - 1, false, 1, true, ui_align_t.LEFT));
+	if (i >= (vals.length * 5) || i < 0) {
+		ihandle.f = i = (vals.length / 5) - 1; // Stay in bounds
+	}
+
+	ui_nest(ui_nest(nhandle, 0), 3).f = vals[i * 5 + 4];
+	vals[i * 5 + 4] = ui_slider(ui_nest(ui_nest(nhandle, 0), 3), "Pos", 0, 1, true, 100, true, ui_align_t.LEFT);
+	if (vals[i * 5 + 4] > 1.0) {
+		vals[i * 5 + 4] = 1.0; // Stay in bounds
+	}
+	else if (vals[i * 5 + 4] < 0.0) {
+		vals[i * 5 + 4] = 0.0;
+	}
+
+	let chandle: ui_handle_t = ui_nest(ui_nest(nhandle, 0), 4);
+	chandle.color = color_from_floats(vals[i * 5 + 0], vals[i * 5 + 1], vals[i * 5 + 2], 1.0);
+	if (ui_text("", ui_align_t.RIGHT, chandle.color) == ui_state_t.STARTED) {
+		let rx: f32 = nx + ui._w - ui_p(37);
+		let ry: f32 = ny - ui_p(5);
+		nodes._input_started = ui.input_started = false;
+		ui_nodes_rgba_popup(chandle, vals.buffer + i * 5, math_floor(rx), math_floor(ry + UI_ELEMENT_H()));
+	}
+	vals[i * 5 + 0] = color_get_rb(chandle.color) / 255;
+	vals[i * 5 + 1] = color_get_gb(chandle.color) / 255;
+	vals[i * 5 + 2] = color_get_bb(chandle.color) / 255;
 }
 
 let color_ramp_node_def: ui_node_t = {
