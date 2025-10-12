@@ -652,21 +652,9 @@ void _iron_init(iron_window_options_t *ops) {
 	iron_set_copy_callback(_copy, NULL);
 	iron_set_paste_callback(_paste, NULL);
 	iron_keyboard_set_key_press_callback(_key_press, NULL);
-
-	#ifdef IRON_WINDOWS
-	// Maximized window has x < -1, prevent window centering
-	if (ops->x < -1 && ops->y < -1) {
-		iron_window_move(ops->x, ops->y);
-	}
-	#endif
-
 	#ifdef WITH_AUDIO
 	iron_a1_init();
 	iron_a2_init();
-	#endif
-
-	#ifdef IRON_ANDROID
-	android_check_permissions();
 	#endif
 }
 

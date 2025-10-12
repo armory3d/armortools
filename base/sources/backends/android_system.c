@@ -1107,6 +1107,7 @@ void android_main(struct android_app *application) {
 void iron_init(iron_window_options_t *win) {
 	iron_mutex_init(&unicode_mutex);
 	gpu_init(win->depth_bits, true);
+	android_check_permissions();
 	#ifdef WITH_GAMEPAD
 	iron_internal_gamepad_trigger_connect(0);
 	#endif

@@ -912,7 +912,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 }
 #endif
 
-void iron_init(iron_window_options_t *win) {
+void iron_init(iron_window_options_t *ops) {
 	initKeyTranslation();
 	for (int i = 0; i < 256; ++i) {
 		keyPressed[i] = false;
@@ -933,8 +933,13 @@ void iron_init(iron_window_options_t *win) {
 		keyPressed[i] = false;
 	}
 
-	iron_set_app_name(win->title);
-	iron_window_create(win);
+	iron_set_app_name(ops->title);
+	iron_window_create(ops);
+
+	// Maximized window has x < -1, prevent window centering
+	if (ops->x < -1 && ops->y < -1) {
+		iron_window_move(ops->x, ops->y);
+	}
 
 	#ifdef WITH_GAMEPAD
 	loadXInput();
