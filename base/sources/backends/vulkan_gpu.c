@@ -607,6 +607,11 @@ static void acquire_next_image() {
 }
 
 void gpu_resize_internal(int width, int height) {
+	// Initial window size was bigger than display size
+	for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
+		framebuffers[i].width = width;
+		framebuffers[i].height = height;
+	}
 	// Newest window size is fetched in create_swapchain
 }
 
