@@ -1,6 +1,6 @@
 
 
-let text_to_image_result: gpu_texture_t = null;
+let text_to_image_node_result: gpu_texture_t = null;
 
 function text_to_image_node_init() {
     array_push(nodes_material_neural, text_to_image_node_def);
@@ -9,17 +9,17 @@ function text_to_image_node_init() {
 }
 
 function text_to_image_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
-	if (text_to_image_result == null) {
+	if (text_to_image_node_result == null) {
     	return("float3(0.0, 0.0, 0.0)");
 	}
 	let tex_name: string = parser_material_node_name(node);
-	map_set(data_cached_images, tex_name, text_to_image_result);
+	map_set(data_cached_images, tex_name, text_to_image_node_result);
     let tex: bind_tex_t = parser_material_make_bind_tex(tex_name, tex_name);
     let texstore: string = parser_material_texture_store(node, tex, tex_name, color_space_t.AUTO);
     return texstore + ".rgb";
 }
 
-function text_to_image_run_qwen(dir: string, prompt: string): string[] {
+function text_to_image_node_run_qwen(dir: string, prompt: string): string[] {
 	let argv: string[] = [
 		dir + "/sd",
 		"--diffusion-model", dir + "/qwen-image-Q8_0.gguf",
@@ -38,7 +38,7 @@ function text_to_image_run_qwen(dir: string, prompt: string): string[] {
 	return argv;
 }
 
-function text_to_image_run_wan(dir: string, prompt: string): string[] {
+function text_to_image_node_run_wan(dir: string, prompt: string): string[] {
 	let argv: string[] = [
 		dir + "/sd",
 		"-M", "vid_gen",
@@ -68,7 +68,7 @@ function text_to_image_run_wan(dir: string, prompt: string): string[] {
 function text_to_image_node_button(node_id: i32) {
 	let node: ui_node_t = ui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
 
-	let models: string[] = [tr("Qwen Image"), tr("Wan")];
+	let models: string[] = ["Qwen Image", "Wan"];
 	let model: i32 = ui_combo(ui_handle(__ID__), models, tr("Model"));
 
 	// let tiling: bool = node.buttons[0].default_value[0] == 0 ? false : true;
@@ -91,23 +91,23 @@ function text_to_image_node_button(node_id: i32) {
 
 		let argv: string[];
 		if (model == 0) {
-			argv = text_to_image_run_qwen(dir, prompt);
+			argv = text_to_image_node_run_qwen(dir, prompt);
 		}
 		else {
-			argv = text_to_image_run_wan(dir, prompt);
+			argv = text_to_image_node_run_wan(dir, prompt);
 		}
 		iron_exec_async(argv[0], argv.buffer);
-		sys_notify_on_update(text_to_image_check_result, dir);
+		sys_notify_on_update(text_to_image_node_check_result, dir);
 	}
 }
 
-function text_to_image_check_result(dir: string) {
+function text_to_image_node_check_result(dir: string) {
 	if (iron_exec_async_done == 1) {
 		let file: string = dir + path_sep + "output.png";
 		if (iron_file_exists(file)) {
-			text_to_image_result = iron_load_texture(file);
+			text_to_image_node_result = iron_load_texture(file);
 		}
-		sys_remove_update(text_to_image_check_result);
+		sys_remove_update(text_to_image_node_check_result);
 	}
 }
 
