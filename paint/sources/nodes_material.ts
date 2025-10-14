@@ -96,12 +96,9 @@ function nodes_material_init() {
 
 	nodes_material_neural = [];
 	text_to_image_node_init();
-	upscale_node_init();
-	// inpaint_node_init();
+	upscale_image_node_init();
+	edit_image_node_init();
 	// photo_to_pbr_node_init();
-	// tiling_node_init();
-	// upscale_node_init();
-	// variance_node_init();
 
 	nodes_material_group = [];
 	group_node_init();

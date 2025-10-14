@@ -71,9 +71,8 @@ function text_to_image_node_button(node_id: i32) {
 	let models: string[] = ["Qwen Image", "Wan"];
 	let model: i32 = ui_combo(ui_handle(__ID__), models, tr("Model"));
 
-	// let tiling: bool = node.buttons[0].default_value[0] == 0 ? false : true;
 	let prompt: string = ui_text_area(ui_handle(__ID__), ui_align_t.LEFT, true, tr("prompt"), true);
-	node.buttons[1].height = string_split(prompt, "\n").length + 2;
+	node.buttons[0].height = string_split(prompt, "\n").length + 2;
 
 	// ui_button("Download");
 
@@ -147,17 +146,6 @@ let text_to_image_node_def: ui_node_t = {
 		}
 	],
 	buttons: [
-		{
-			name: _tr("tiling"),
-			type: "BOOL",
-			output: 0,
-			default_value: f32_array_create_x(0),
-			data: null,
-			min: 0.0,
-			max: 1.0,
-			precision: 100,
-			height: 0
-		},
 		{
 			name: "text_to_image_node_button",
 			type: "CUSTOM",

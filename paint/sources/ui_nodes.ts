@@ -1170,8 +1170,11 @@ function ui_nodes_get_node_preview_image(n: ui_node_t): gpu_texture_t {
 	else if (n.type == "NEURAL_TEXT_TO_IMAGE") {
 		img = text_to_image_node_result;
 	}
-	else if (n.type == "NEURAL_UPSCALE") {
-		img = upscale_node_result;
+	else if (n.type == "NEURAL_UPSCALE_IMAGE") {
+		img = upscale_image_node_result;
+	}
+	else if (n.type == "NEURAL_EDIT_IMAGE") {
+		img = edit_image_node_result;
 	}
 	else if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) {
 		img = any_imap_get(context_raw.node_preview_map, n.id);
