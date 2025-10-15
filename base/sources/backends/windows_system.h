@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <wchar.h>
 
 struct HWND__;
 
