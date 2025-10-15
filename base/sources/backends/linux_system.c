@@ -1499,8 +1499,10 @@ void iron_gamepad_rumble(int gamepad, float left, float right) {}
 #ifdef WITH_NFD // Has gtk
 #include <gtk/gtk.h>
 extern void (*iron_save_and_quit)(bool);
+#endif
 
 bool _save_and_quit_callback_internal() {
+#ifdef WITH_NFD // Has gtk
 	bool          save = false;
 	XTextProperty text_prop;
 	XGetTextProperty(x11_ctx.display, x11_ctx.windows[0].window, &text_prop, NET_WM_NAME);
@@ -1528,9 +1530,9 @@ bool _save_and_quit_callback_internal() {
 		}
 	}
 	iron_save_and_quit(save);
+#endif
 	return false;
 }
-#endif
 
 #include <signal.h>
 #include <sys/wait.h>

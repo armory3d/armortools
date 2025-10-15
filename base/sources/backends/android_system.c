@@ -1261,3 +1261,7 @@ bool iron_gamepad_connected(int num) {
 void iron_gamepad_rumble(int gamepad, float left, float right) {}
 
 #endif
+
+bool _save_and_quit_callback_internal() {
+	return false;
+}

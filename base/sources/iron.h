@@ -1379,15 +1379,10 @@ void iron_file_download(string_t *url, void (*callback)(char *, buffer_t *), i32
 	iron_https_request(url_base, url_path, NULL, 443, 0, &_https_callback, cbd);
 }
 
-#if defined(IRON_WINDOWS) || (defined(IRON_LINUX) && defined(WITH_NFD))
 bool _save_and_quit_callback_internal();
-#endif
 
 bool _save_and_quit_callback(void *data) {
-#if defined(IRON_WINDOWS) || (defined(IRON_LINUX) && defined(WITH_NFD)) // Has gtk
 	return _save_and_quit_callback_internal();
-#endif
-	return true;
 }
 
 void iron_set_save_and_quit_callback(void (*callback)(bool)) {
