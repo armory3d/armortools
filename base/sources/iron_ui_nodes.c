@@ -1,51 +1,51 @@
 #include "iron_ui_nodes.h"
 
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <iron_gpu.h>
-#include <iron_system.h>
-#include "iron_draw.h"
-#include "iron_ui.h"
 #include "iron_armpack.h"
 #include "iron_array.h"
-#include "iron_json.h"
+#include "iron_draw.h"
 #include "iron_gc.h"
+#include "iron_json.h"
+#include "iron_ui.h"
+#include <iron_gpu.h>
+#include <iron_system.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
 
-static ui_nodes_t *current_nodes = NULL;
-static bool ui_nodes_elements_baked = false;
+static ui_nodes_t   *current_nodes           = NULL;
+static bool          ui_nodes_elements_baked = false;
 static gpu_texture_t ui_socket_image;
-static bool ui_box_select = false;
-static int ui_box_select_x = 0;
-static int ui_box_select_y = 0;
-static const int ui_max_buttons = 9;
-static int ui_node_id = -1;
-static ui_node_t *node_resize = NULL;
+static bool          ui_box_select   = false;
+static int           ui_box_select_x = 0;
+static int           ui_box_select_y = 0;
+static const int     ui_max_buttons  = 9;
+static int           ui_node_id      = -1;
+static ui_node_t    *node_resize     = NULL;
 
-char *ui_clipboard = "";
-char_ptr_array_t *ui_nodes_exclude_remove = NULL; // No removal for listed node types
-bool ui_nodes_socket_released = false;
-char_ptr_array_t *(*ui_nodes_enum_texts)(char *) = NULL; // Retrieve combo items for buttons of type ENUM
-gpu_texture_t *(*ui_nodes_preview_image)(ui_node_t *) = NULL; // Retrieve preview image
-void (*ui_nodes_on_custom_button)(int, char *) = NULL; // Call external function
+char             *ui_clipboard                           = "";
+char_ptr_array_t *ui_nodes_exclude_remove                = NULL; // No removal for listed node types
+bool              ui_nodes_socket_released               = false;
+char_ptr_array_t *(*ui_nodes_enum_texts)(char *)         = NULL; // Retrieve combo items for buttons of type ENUM
+gpu_texture_t *(*ui_nodes_preview_image)(ui_node_t *)    = NULL; // Retrieve preview image
+void (*ui_nodes_on_custom_button)(int, char *)           = NULL; // Call external function
 ui_canvas_control_t *(*ui_nodes_on_canvas_control)(void) = NULL;
-void (*ui_nodes_on_canvas_released)(void) = NULL;
-void (*ui_nodes_on_socket_released)(int) = NULL;
-void (*ui_nodes_on_link_drag)(int, bool) = NULL;
-void (*ui_nodes_on_node_remove)(ui_node_t *) = NULL;
-void (*ui_nodes_on_node_changed)(ui_node_t *) = NULL;
-bool ui_nodes_grid_snap = true;
-int ui_nodes_grid_snap_w = 40;
+void (*ui_nodes_on_canvas_released)(void)                = NULL;
+void (*ui_nodes_on_socket_released)(int)                 = NULL;
+void (*ui_nodes_on_link_drag)(int, bool)                 = NULL;
+void (*ui_nodes_on_node_remove)(ui_node_t *)             = NULL;
+void (*ui_nodes_on_node_changed)(ui_node_t *)            = NULL;
+bool ui_nodes_grid_snap                                  = true;
+int  ui_nodes_grid_snap_w                                = 40;
 
-int ui_popup_x = 0;
-int ui_popup_y = 0;
-int ui_popup_w = 0;
-int ui_popup_h = 0;
+int ui_popup_x                                    = 0;
+int ui_popup_y                                    = 0;
+int ui_popup_w                                    = 0;
+int ui_popup_h                                    = 0;
 void (*ui_popup_commands)(ui_t *, void *, void *) = NULL;
 void *ui_popup_data;
 void *ui_popup_data2;
-int ui_popup_handle_node_id = -1;
-int ui_popup_handle_node_socket_id = -1;
+int   ui_popup_handle_node_id        = -1;
+int   ui_popup_handle_node_socket_id = -1;
 
 char *tr(char *id, void *map); // translator.ts
 
@@ -58,14 +58,14 @@ void ui_nodes_init(ui_nodes_t *nodes) {
 		current_nodes = nodes;
 	}
 	memset(nodes, 0, sizeof(ui_nodes_t));
-	nodes->zoom = 1.0;
-	nodes->scale_factor = 1.0;
-	nodes->ELEMENT_H = 25.0;
-	nodes->snap_from_id = -1;
-	nodes->snap_to_id = -1;
-	nodes->link_drag_id = -1;
+	nodes->zoom              = 1.0;
+	nodes->scale_factor      = 1.0;
+	nodes->ELEMENT_H         = 25.0;
+	nodes->snap_from_id      = -1;
+	nodes->snap_to_id        = -1;
+	nodes->link_drag_id      = -1;
 	nodes->nodes_selected_id = gc_alloc(sizeof(i32_array_t));
-	nodes->handle = ui_handle_create();
+	nodes->handle            = ui_handle_create();
 }
 
 float UI_NODES_SCALE() {
@@ -87,7 +87,8 @@ float UI_LINE_H() {
 }
 
 float UI_BUTTONS_H(ui_node_t *node) {
-	if (node->flags & NODE_FLAG_COLLAPSED) return 0.0;
+	if (node->flags & NODE_FLAG_COLLAPSED)
+		return 0.0;
 	float h = 0.0;
 	for (int i = 0; i < node->buttons->length; ++i) {
 		ui_node_button_t *but = node->buttons->buffer[i];
@@ -109,7 +110,8 @@ float UI_BUTTONS_H(ui_node_t *node) {
 }
 
 float UI_OUTPUTS_H(ui_node_t *node, int length) {
-	if (node->flags & NODE_FLAG_COLLAPSED) return 0.0;
+	if (node->flags & NODE_FLAG_COLLAPSED)
+		return 0.0;
 	float h = 0.0;
 	for (int i = 0; i < (length < 0 ? node->outputs->length : length); ++i) {
 		h += UI_LINE_H();
@@ -141,7 +143,8 @@ float UI_INPUTS_H(ui_node_canvas_t *canvas, ui_node_socket_t **sockets, int sock
 }
 
 float UI_NODE_H(ui_node_canvas_t *canvas, ui_node_t *node) {
-	if (node->flags & NODE_FLAG_COLLAPSED) return UI_LINE_H() * 1.2;
+	if (node->flags & NODE_FLAG_COLLAPSED)
+		return UI_LINE_H() * 1.2;
 	return UI_LINE_H() * 1.2 + UI_INPUTS_H(canvas, node->inputs->buffer, node->inputs->length, -1) + UI_OUTPUTS_H(node, -1) + UI_BUTTONS_H(node);
 }
 
@@ -158,12 +161,14 @@ float UI_NODE_Y(ui_node_t *node) {
 }
 
 float UI_INPUT_Y(ui_node_canvas_t *canvas, ui_node_t *node, int pos) {
-	if (node->flags & NODE_FLAG_COLLAPSED) return UI_LINE_H() * 0.5;
+	if (node->flags & NODE_FLAG_COLLAPSED)
+		return UI_LINE_H() * 0.5;
 	return UI_LINE_H() * 1.62 + UI_INPUTS_H(canvas, node->inputs->buffer, node->inputs->length, pos);
 }
 
 float UI_OUTPUT_Y(ui_node_t *node, int pos) {
-	if (node->flags & NODE_FLAG_COLLAPSED) return UI_LINE_H() * 0.5;
+	if (node->flags & NODE_FLAG_COLLAPSED)
+		return UI_LINE_H() * 0.5;
 	return UI_LINE_H() * 1.62 + UI_OUTPUTS_H(node, pos);
 }
 
@@ -261,19 +266,19 @@ void ui_nodes_bake_elements() {
 }
 
 ui_canvas_control_t *ui_on_default_canvas_control() {
-	ui_t *current = ui_get_current();
+	ui_t                      *current = ui_get_current();
 	static ui_canvas_control_t c;
 	c.pan_x = current->input_down_r ? current->input_dx : 0.0;
 	c.pan_y = current->input_down_r ? current->input_dy : 0.0;
-	c.zoom = -current->input_wheel_delta / 10.0;
+	c.zoom  = -current->input_wheel_delta / 10.0;
 	return &c;
 }
 
 void ui_draw_link(float x1, float y1, float x2, float y2, bool highlight) {
 	ui_t *current = ui_get_current();
-	int c1 = current->ops->theme->LABEL_COL;
-	int c2 = current->ops->theme->ACCENT_COL;
-	int c = highlight ? c1 : c2;
+	int   c1      = current->ops->theme->LABEL_COL;
+	int   c2      = current->ops->theme->ACCENT_COL;
+	int   c       = highlight ? c1 : c2;
 	draw_set_color(ui_color(ui_color_r(c), ui_color_g(c), ui_color_b(c), 210));
 	if (current->ops->theme->LINK_STYLE == UI_LINK_STYLE_LINE) {
 		draw_line_aa(x1, y1, x2, y2, 1.0);
@@ -281,10 +286,10 @@ void ui_draw_link(float x1, float y1, float x2, float y2, bool highlight) {
 	else if (current->ops->theme->LINK_STYLE == UI_LINK_STYLE_CUBIC_BEZIER) {
 		f32_array_t xa;
 		f32_array_t ya;
-		float x[] = { x1, x1 + fabs(x1 - x2) / 2.0, x2 - fabs(x1 - x2) / 2.0, x2 };
-		float y[] = { y1, y1, y2, y2 };
-		xa.buffer = x;
-		ya.buffer = y;
+		float       x[] = {x1, x1 + fabs(x1 - x2) / 2.0, x2 - fabs(x1 - x2) / 2.0, x2};
+		float       y[] = {y1, y1, y2, y2};
+		xa.buffer       = x;
+		ya.buffer       = y;
 		draw_cubic_bezier(&xa, &ya, 30, highlight ? 2.0 : 1.0);
 	}
 }
@@ -306,7 +311,8 @@ static void ui_remove_node_at(ui_node_canvas_t *canvas, int at) {
 }
 
 void ui_remove_node(ui_node_t *n, ui_node_canvas_t *canvas) {
-	if (n == NULL) return;
+	if (n == NULL)
+		return;
 	int i = 0;
 	while (i < canvas->links->length) {
 		ui_node_link_t *l = canvas->links->buffer[i];
@@ -344,33 +350,33 @@ static void add_to_selection(ui_node_t *node) {
 }
 
 void ui_popup(int x, int y, int w, int h, void (*commands)(ui_t *, void *, void *), void *data, void *data2) {
-	ui_popup_x = x;
-	ui_popup_y = y;
-	ui_popup_w = w;
-	ui_popup_h = h;
+	ui_popup_x        = x;
+	ui_popup_y        = y;
+	ui_popup_w        = w;
+	ui_popup_h        = h;
 	ui_popup_commands = commands;
-	ui_popup_data = data;
-	ui_popup_data2 = data2;
+	ui_popup_data     = data;
+	ui_popup_data2    = data2;
 }
 
 static void color_picker_callback(uint32_t color) {
-	ui_t *current = ui_get_current();
-	float *val = (float *)current_nodes->color_picker_callback_data;
-	val[0] = ui_color_r(color) / 255.0f;
-	val[1] = ui_color_g(color) / 255.0f;
-	val[2] = ui_color_b(color) / 255.0f;
+	ui_t  *current   = ui_get_current();
+	float *val       = (float *)current_nodes->color_picker_callback_data;
+	val[0]           = ui_color_r(color) / 255.0f;
+	val[1]           = ui_color_g(color) / 255.0f;
+	val[2]           = ui_color_b(color) / 255.0f;
 	current->changed = true;
 }
 
 void ui_color_wheel_picker(void *data) {
 	current_nodes->color_picker_callback_data = data;
-	current_nodes->color_picker_callback = &color_picker_callback;
+	current_nodes->color_picker_callback      = &color_picker_callback;
 }
 
 static void rgba_popup_commands(ui_t *ui, void *data, void *data2) {
 	ui_handle_t *nhandle = (ui_handle_t *)data;
-	float *val = (float *)data2;
-	nhandle->color = ui_color(val[0] * 255.0, val[1] * 255.0, val[2] * 255.0, 255.0);
+	float       *val     = (float *)data2;
+	nhandle->color       = ui_color(val[0] * 255.0, val[1] * 255.0, val[2] * 255.0, 255.0);
 	ui_color_wheel(nhandle, false, -1, -1, true, &ui_color_wheel_picker, val);
 	val[0] = ui_color_r(nhandle->color) / 255.0f;
 	val[1] = ui_color_g(nhandle->color) / 255.0f;
@@ -384,27 +390,27 @@ void ui_nodes_rgba_popup(ui_handle_t *nhandle, float *val, int x, int y) {
 
 static float ui_nodes_snap(float f) {
 	float w = ui_nodes_grid_snap_w * UI_NODES_SCALE();
-	f = f * UI_NODES_SCALE();
+	f       = f * UI_NODES_SCALE();
 	return roundf(f / w) * w;
 }
 
 static char_ptr_array_t enum_ar;
-static char enum_label[64];
-static char enum_texts_data[64][64];
-static char *enum_texts[64];
+static char             enum_label[64];
+static char             enum_texts_data[64][64];
+static char            *enum_texts[64];
 
 static char_ptr_array_t temp_ar;
-static char temp_label[64];
-static char temp_texts_data[64][64];
-static char *temp_texts[64];
+static char             temp_label[64];
+static char             temp_texts_data[64][64];
+static char            *temp_texts[64];
 
 void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, float ny) {
 	ui_t *current = ui_get_current();
-	float wx = current->_window_x;
-	float wy = current->_window_y;
-	float w = UI_NODE_W(node);
-	float h = UI_NODE_H(canvas, node);
-	float lineh = UI_LINE_H();
+	float wx      = current->_window_x;
+	float wy      = current->_window_y;
+	float w       = UI_NODE_W(node);
+	float h       = UI_NODE_H(canvas, node);
+	float lineh   = UI_LINE_H();
 
 	// Outputs
 	for (int i = 0; i < node->outputs->length; ++i) {
@@ -436,11 +442,11 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 		ui_node_button_t *but = node->buttons->buffer[buti];
 
 		if (strcmp(but->type, "RGBA") == 0) {
-			ny += lineh; // 18 + 2 separator
-			current->_x = nx + 1; // Offset for node selection border
-			current->_y = ny;
-			current->_w = w;
-			float *val = node->outputs->buffer[but->output]->default_value->buffer;
+			ny += lineh;             // 18 + 2 separator
+			current->_x    = nx + 1; // Offset for node selection border
+			current->_y    = ny;
+			current->_w    = w;
+			float *val     = node->outputs->buffer[but->output]->default_value->buffer;
 			nhandle->color = ui_color(val[0] * 255.0, val[1] * 255.0, val[2] * 255.0, 255.0);
 			ui_color_wheel(nhandle, false, -1, -1, true, &ui_color_wheel_picker, val);
 			val[0] = ui_color_r(nhandle->color) / 255.0f;
@@ -449,17 +455,17 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 		}
 		else if (strcmp(but->type, "VECTOR") == 0) {
 			ny += lineh;
-			current->_x = nx;
-			current->_y = ny;
-			current->_w = w;
-			float min = but->min;
-			float max = but->max;
-			float text_off = current->ops->theme->TEXT_OFFSET;
+			current->_x                      = nx;
+			current->_y                      = ny;
+			current->_w                      = w;
+			float min                        = but->min;
+			float max                        = but->max;
+			float text_off                   = current->ops->theme->TEXT_OFFSET;
 			current->ops->theme->TEXT_OFFSET = 6;
 			ui_text(ui_tr(but->name), UI_ALIGN_LEFT, 0);
 			float *val = (float *)but->default_value->buffer;
 
-			ui_handle_t *h = ui_nest(nhandle, buti);
+			ui_handle_t *h  = ui_nest(nhandle, buti);
 			ui_handle_t *h0 = ui_nest(h, 0);
 			if (h0->init) {
 				h0->f = val[0];
@@ -473,9 +479,9 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 				h2->f = val[2];
 			}
 
-			val[0] = ui_slider(h0, "X", min, max, true, 100, true, UI_ALIGN_LEFT, true);
-			val[1] = ui_slider(h1, "Y", min, max, true, 100, true, UI_ALIGN_LEFT, true);
-			val[2] = ui_slider(h2, "Z", min, max, true, 100, true, UI_ALIGN_LEFT, true);
+			val[0]                           = ui_slider(h0, "X", min, max, true, 100, true, UI_ALIGN_LEFT, true);
+			val[1]                           = ui_slider(h1, "Y", min, max, true, 100, true, UI_ALIGN_LEFT, true);
+			val[2]                           = ui_slider(h2, "Z", min, max, true, 100, true, UI_ALIGN_LEFT, true);
 			current->ops->theme->TEXT_OFFSET = text_off;
 			if (but->output >= 0) {
 				node->outputs->buffer[but->output]->default_value->buffer = but->default_value->buffer;
@@ -484,29 +490,29 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 		}
 		else if (strcmp(but->type, "VALUE") == 0) {
 			ny += lineh;
-			current->_x = nx;
-			current->_y = ny;
-			current->_w = w;
-			ui_node_socket_t *soc = node->outputs->buffer[but->output];
-			float min = but->min;
-			float max = but->max;
-			float prec = but->precision;
-			float text_off = current->ops->theme->TEXT_OFFSET;
+			current->_x                      = nx;
+			current->_y                      = ny;
+			current->_w                      = w;
+			ui_node_socket_t *soc            = node->outputs->buffer[but->output];
+			float             min            = but->min;
+			float             max            = but->max;
+			float             prec           = but->precision;
+			float             text_off       = current->ops->theme->TEXT_OFFSET;
 			current->ops->theme->TEXT_OFFSET = 6;
-			ui_handle_t *soc_handle = ui_nest(nhandle, buti);
+			ui_handle_t *soc_handle          = ui_nest(nhandle, buti);
 			if (soc_handle->init) {
 				soc_handle->f = ((float *)soc->default_value->buffer)[0];
 			}
 			((float *)soc->default_value->buffer)[0] = ui_slider(soc_handle, "Value", min, max, true, prec, true, UI_ALIGN_LEFT, true);
-			current->ops->theme->TEXT_OFFSET = text_off;
+			current->ops->theme->TEXT_OFFSET         = text_off;
 		}
 		else if (strcmp(but->type, "STRING") == 0) {
 			ny += lineh;
-			current->_x = nx;
-			current->_y = ny;
-			current->_w = w;
+			current->_x           = nx;
+			current->_y           = ny;
+			current->_w           = w;
 			ui_node_socket_t *soc = but->output >= 0 ? node->outputs->buffer[but->output] : NULL;
-			ui_handle_t *h = ui_nest(nhandle, buti);
+			ui_handle_t      *h   = ui_nest(nhandle, buti);
 			if (h->init) {
 				h->text = soc != NULL ? soc->default_value->buffer : but->default_value->buffer != NULL ? but->default_value->buffer : "";
 			}
@@ -523,13 +529,13 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 			current->_w = w;
 
 			ui_handle_t *but_handle = ui_nest(nhandle, buti);
-			but_handle->i = ((float *)but->default_value->buffer)[0];
+			but_handle->i           = ((float *)but->default_value->buffer)[0];
 
-			bool combo_select = current->combo_selected_handle == NULL && ui_get_released(UI_ELEMENT_H());
-			char *label = combo_select ? temp_label : enum_label;
-			char (*texts_data)[64] = combo_select ? temp_texts_data : enum_texts_data;
-			char **texts = combo_select ? temp_texts : enum_texts;
-			char_ptr_array_t *ar = combo_select ? &temp_ar : &enum_ar;
+			bool  combo_select      = current->combo_selected_handle == NULL && ui_get_released(UI_ELEMENT_H());
+			char *label             = combo_select ? temp_label : enum_label;
+			char(*texts_data)[64]   = combo_select ? temp_texts_data : enum_texts_data;
+			char            **texts = combo_select ? temp_texts : enum_texts;
+			char_ptr_array_t *ar    = combo_select ? &temp_ar : &enum_ar;
 
 			int texts_count = 0;
 			if (but->data != NULL && but->data->length > 1) {
@@ -570,9 +576,9 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 		}
 		else if (strcmp(but->type, "BOOL") == 0) {
 			ny += lineh;
-			current->_x = nx;
-			current->_y = ny;
-			current->_w = w;
+			current->_x    = nx;
+			current->_y    = ny;
+			current->_w    = w;
 			ui_handle_t *h = ui_nest(nhandle, buti);
 			if (h->init) {
 				h->b = ((float *)but->default_value->buffer)[0];
@@ -598,37 +604,37 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 		draw_scaled_image(&ui_socket_image, nx - ui_p(6), ny - ui_p(3), ui_p(12), ui_p(12));
 		bool is_linked = ui_input_linked(canvas, node->id, i);
 		if (!is_linked && strcmp(inp->type, "VALUE") == 0) {
-			current->_x = nx + ui_p(6);
-			current->_y = ny - ui_p(current_nodes->ELEMENT_H / 3.0);
-			current->_w = w - ui_p(6);
-			ui_node_socket_t *soc = inp;
-			float min = soc->min;
-			float max = soc->max;
-			float prec = soc->precision;
-			float text_off = current->ops->theme->TEXT_OFFSET;
+			current->_x                      = nx + ui_p(6);
+			current->_y                      = ny - ui_p(current_nodes->ELEMENT_H / 3.0);
+			current->_w                      = w - ui_p(6);
+			ui_node_socket_t *soc            = inp;
+			float             min            = soc->min;
+			float             max            = soc->max;
+			float             prec           = soc->precision;
+			float             text_off       = current->ops->theme->TEXT_OFFSET;
 			current->ops->theme->TEXT_OFFSET = 6;
 
-			ui_handle_t *_handle = ui_nest(nhandle, ui_max_buttons);
+			ui_handle_t *_handle    = ui_nest(nhandle, ui_max_buttons);
 			ui_handle_t *soc_handle = ui_nest(_handle, i);
 			if (soc_handle->init) {
 				soc_handle->f = ((float *)soc->default_value->buffer)[0];
 			}
 			((float *)soc->default_value->buffer)[0] = ui_slider(soc_handle, ui_tr(inp->name), min, max, true, prec, true, UI_ALIGN_LEFT, true);
-			current->ops->theme->TEXT_OFFSET = text_off;
+			current->ops->theme->TEXT_OFFSET         = text_off;
 		}
 		else if (!is_linked && strcmp(inp->type, "STRING") == 0) {
-			current->_x = nx + ui_p(6);
-			current->_y = ny - ui_p(9);
-			current->_w = w - ui_p(6);
-			ui_node_socket_t *soc = inp;
-			float text_off = current->ops->theme->TEXT_OFFSET;
+			current->_x                      = nx + ui_p(6);
+			current->_y                      = ny - ui_p(9);
+			current->_w                      = w - ui_p(6);
+			ui_node_socket_t *soc            = inp;
+			float             text_off       = current->ops->theme->TEXT_OFFSET;
 			current->ops->theme->TEXT_OFFSET = 6;
-			ui_handle_t *_handle = ui_nest(nhandle, ui_max_buttons);
-			ui_handle_t *h = ui_nest(_handle, i);
+			ui_handle_t *_handle             = ui_nest(nhandle, ui_max_buttons);
+			ui_handle_t *h                   = ui_nest(_handle, i);
 			if (h->init) {
 				strcpy(h->text, soc->default_value->buffer);
 			}
-			soc->default_value->buffer = ui_text_input(h, ui_tr(inp->name), UI_ALIGN_LEFT, true, false);
+			soc->default_value->buffer       = ui_text_input(h, ui_tr(inp->name), UI_ALIGN_LEFT, true, false);
 			current->ops->theme->TEXT_OFFSET = text_off;
 		}
 		else if (!is_linked && strcmp(inp->type, "RGBA") == 0) {
@@ -649,12 +655,12 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 			if (current->input_started && ix > rx && iy > ry && ix < rx + rw && iy < ry + rh) {
 				current_nodes->_input_started = current->input_started = false;
 				ui_nodes_rgba_popup(nhandle, soc->default_value->buffer, (int)(rx), (int)(ry + UI_ELEMENT_H()));
-				ui_popup_handle_node_id = node->id;
+				ui_popup_handle_node_id        = node->id;
 				ui_popup_handle_node_socket_id = soc->id;
 			}
 			if (ui_popup_commands != NULL && ui_popup_handle_node_id == node->id && ui_popup_handle_node_socket_id == soc->id) {
 				// armpack data may have been moved in memory
-				ui_popup_data = nhandle;
+				ui_popup_data  = nhandle;
 				ui_popup_data2 = soc->default_value->buffer;
 			}
 		}
@@ -662,17 +668,17 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 			draw_set_color(current->ops->theme->LABEL_COL);
 			draw_string(ui_tr(inp->name), nx + ui_p(12), ny - ui_p(3));
 			ny += lineh / 2;
-			current->_x = nx;
-			current->_y = ny;
-			current->_w = w;
-			float min = inp->min;
-			float max = inp->max;
-			float text_off = current->ops->theme->TEXT_OFFSET;
+			current->_x                      = nx;
+			current->_y                      = ny;
+			current->_w                      = w;
+			float min                        = inp->min;
+			float max                        = inp->max;
+			float text_off                   = current->ops->theme->TEXT_OFFSET;
 			current->ops->theme->TEXT_OFFSET = 6;
-			float *val = (float *)inp->default_value->buffer;
-			ui_handle_t *h = ui_nest(nhandle, ui_max_buttons);
-			ui_handle_t *hi = ui_nest(h, i);
-			ui_handle_t *h0 = ui_nest(hi, 0);
+			float       *val                 = (float *)inp->default_value->buffer;
+			ui_handle_t *h                   = ui_nest(nhandle, ui_max_buttons);
+			ui_handle_t *hi                  = ui_nest(h, i);
+			ui_handle_t *h0                  = ui_nest(hi, 0);
 			if (h0->init) {
 				h0->f = val[0];
 			}
@@ -684,9 +690,9 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 			if (h2->init) {
 				h2->f = val[2];
 			}
-			val[0] = ui_slider(h0, "X", min, max, true, 100, true, UI_ALIGN_LEFT, true);
-			val[1] = ui_slider(h1, "Y", min, max, true, 100, true, UI_ALIGN_LEFT, true);
-			val[2] = ui_slider(h2, "Z", min, max, true, 100, true, UI_ALIGN_LEFT, true);
+			val[0]                           = ui_slider(h0, "X", min, max, true, 100, true, UI_ALIGN_LEFT, true);
+			val[1]                           = ui_slider(h1, "Y", min, max, true, 100, true, UI_ALIGN_LEFT, true);
+			val[2]                           = ui_slider(h2, "Z", min, max, true, 100, true, UI_ALIGN_LEFT, true);
 			current->ops->theme->TEXT_OFFSET = text_off;
 			ny += lineh * 2.5;
 		}
@@ -705,17 +711,17 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 
 void ui_node_draw(ui_node_t *node, ui_node_canvas_t *canvas) {
 	ui_t *current = ui_get_current();
-	float wx = current->_window_x;
-	float wy = current->_window_y;
-	float ui_x = current->_x;
-	float ui_y = current->_y;
-	float ui_w = current->_w;
-	float w = UI_NODE_W(node);
-	float h = UI_NODE_H(canvas, node);
-	float nx = UI_NODE_X(node);
-	float ny = UI_NODE_Y(node);
-	char *text = ui_tr(node->name);
-	float lineh = UI_LINE_H();
+	float wx      = current->_window_x;
+	float wy      = current->_window_y;
+	float ui_x    = current->_x;
+	float ui_y    = current->_y;
+	float ui_w    = current->_w;
+	float w       = UI_NODE_W(node);
+	float h       = UI_NODE_H(canvas, node);
+	float nx      = UI_NODE_X(node);
+	float ny      = UI_NODE_Y(node);
+	char *text    = ui_tr(node->name);
+	float lineh   = UI_LINE_H();
 
 	// Disallow input if node is overlapped by another node
 	current_nodes->_input_started = current->input_started;
@@ -723,7 +729,7 @@ void ui_node_draw(ui_node_t *node, ui_node_canvas_t *canvas) {
 		for (int i = ui_get_node_index(canvas->nodes->buffer, canvas->nodes->length, node->id) + 1; i < canvas->nodes->length; ++i) {
 			ui_node_t *n = canvas->nodes->buffer[i];
 			if (UI_NODE_X(n) < current->input_x - current->_window_x && UI_NODE_X(n) + UI_NODE_W(n) > current->input_x - current->_window_x &&
-				UI_NODE_Y(n) < current->input_y - current->_window_y && UI_NODE_Y(n) + UI_NODE_H(canvas, n) > current->input_y - current->_window_y) {
+			    UI_NODE_Y(n) < current->input_y - current->_window_y && UI_NODE_Y(n) + UI_NODE_H(canvas, n) > current->input_y - current->_window_y) {
 				current->input_started = false;
 				break;
 			}
@@ -733,12 +739,7 @@ void ui_node_draw(ui_node_t *node, ui_node_canvas_t *canvas) {
 	// Grid snap preview
 	if (ui_nodes_grid_snap && ui_is_selected(node) && current_nodes->nodes_drag) {
 		draw_set_color(current->ops->theme->BUTTON_COL);
-		ui_draw_rect(false,
-			ui_nodes_snap(node->x) + UI_NODES_PAN_X(),
-			ui_nodes_snap(node->y) + UI_NODES_PAN_Y(),
-			w + 2,
-			h + 2
-		);
+		ui_draw_rect(false, ui_nodes_snap(node->x) + UI_NODES_PAN_X(), ui_nodes_snap(node->y) + UI_NODES_PAN_Y(), w + 2, h + 2);
 		// nx = ui_nodes_snap(node->x) + UI_NODES_PAN_X();
 		// ny = ui_nodes_snap(node->y) + UI_NODES_PAN_Y();
 	}
@@ -770,8 +771,7 @@ void ui_node_draw(ui_node_t *node, ui_node_canvas_t *canvas) {
 	draw_filled_rect(nx, ny + lineh - ui_p(3), w, ui_p(3));
 
 	// Collapse button
-	bool hover = current->input_x > wx + nx && current->input_x < wx + nx + ui_p(20) &&
-				 current->input_y > wy + ny && current->input_y < wy + ny + ui_p(20);
+	bool hover = current->input_x > wx + nx && current->input_x < wx + nx + ui_p(20) && current->input_y > wy + ny && current->input_y < wy + ny + ui_p(20);
 	if (hover && current->input_started) {
 		node->flags ^= NODE_FLAG_COLLAPSED;
 	}
@@ -781,25 +781,24 @@ void ui_node_draw(ui_node_t *node, ui_node_canvas_t *canvas) {
 	draw_filled_triangle(bx, by, bx + UI_ARROW_SIZE() * 2, by, bx + UI_ARROW_SIZE(), by + UI_ARROW_SIZE());
 
 	// Eye button
-	hover = current->input_x > wx + nx + w - ui_p(20) && current->input_x < wx + nx + w &&
-			current->input_y > wy + ny && current->input_y < wy + ny + ui_p(20);
+	hover = current->input_x > wx + nx + w - ui_p(20) && current->input_x < wx + nx + w && current->input_y > wy + ny && current->input_y < wy + ny + ui_p(20);
 	if (hover && current->input_started) {
 		node->flags ^= NODE_FLAG_PREVIEW;
 	}
 	draw_set_color(hover ? current->ops->theme->LABEL_COL : current->ops->theme->HOVER_COL);
-	float ex = nx + w - ui_p(10);
-	float ey = ny + ui_p(10);
-	float hw = ui_p(6);
-	float hh = ui_p(3);
-	float x[4] = {ex - hw, ex - hw * 0.5, ex + hw * 0.5, ex + hw};
-	float y_upper[4] = {ey, ey - hh * 1.5, ey - hh * 1.5, ey};
+	float       ex         = nx + w - ui_p(10);
+	float       ey         = ny + ui_p(10);
+	float       hw         = ui_p(6);
+	float       hh         = ui_p(3);
+	float       x[4]       = {ex - hw, ex - hw * 0.5, ex + hw * 0.5, ex + hw};
+	float       y_upper[4] = {ey, ey - hh * 1.5, ey - hh * 1.5, ey};
 	f32_array_t xa;
 	f32_array_t ya;
 	xa.buffer = x;
 	ya.buffer = y_upper;
 	draw_cubic_bezier(&xa, &ya, 15, 1.0);
 	float y_lower[4] = {ey, ey + hh * 1.5, ey + hh * 1.5, ey};
-	ya.buffer = y_lower;
+	ya.buffer        = y_lower;
 	draw_cubic_bezier(&xa, &ya, 15, 1.0);
 	draw_filled_circle(ex, ey, ui_p(2), 0);
 
@@ -810,7 +809,7 @@ void ui_node_draw(ui_node_t *node, ui_node_canvas_t *canvas) {
 	ny += lineh * 0.5;
 
 	if (!(node->flags & NODE_FLAG_COLLAPSED)) {
-		bool _changed = current->changed;
+		bool _changed    = current->changed;
 		current->changed = false;
 		ui_node_draw_body(node, canvas, nx, ny);
 		if (ui_nodes_on_node_changed != NULL && current->changed) {
@@ -819,9 +818,9 @@ void ui_node_draw(ui_node_t *node, ui_node_canvas_t *canvas) {
 		current->changed = _changed || current->changed;
 	}
 
-	current->_x = ui_x;
-	current->_y = ui_y;
-	current->_w = ui_w;
+	current->_x            = ui_x;
+	current->_y            = ui_y;
+	current->_w            = ui_w;
 	current->input_started = current_nodes->_input_started;
 }
 
@@ -848,12 +847,12 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 		gc_root(ui_nodes_exclude_remove);
 	}
 
-	float wx = current->_window_x;
-	float wy = current->_window_y;
-	bool _input_enabled = current->input_enabled;
-	current->input_enabled = _input_enabled && ui_popup_commands == NULL;
+	float wx                      = current->_window_x;
+	float wy                      = current->_window_y;
+	bool  _input_enabled          = current->input_enabled;
+	current->input_enabled        = _input_enabled && ui_popup_commands == NULL;
 	ui_canvas_control_t *controls = ui_nodes_on_canvas_control != NULL ? ui_nodes_on_canvas_control() : ui_on_default_canvas_control();
-	ui_nodes_socket_released = false;
+	ui_nodes_socket_released      = false;
 
 	// Pan canvas
 	if (current->input_enabled && (controls->pan_x != 0.0 || controls->pan_y != 0.0)) {
@@ -871,8 +870,8 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 			current_nodes->zoom = 1.0;
 		}
 		current_nodes->zoom = round(current_nodes->zoom * 100.0) / 100.0;
-		current_nodes->uiw = current->_w;
-		current_nodes->uih = current->_h;
+		current_nodes->uiw  = current->_w;
+		current_nodes->uih  = current->_h;
 		if (ui_touch_scroll) {
 			// Zoom to finger location
 			current_nodes->pan_x -= (current->input_x - current->_window_x - current->_window_w / 2.0) * controls->zoom * 5.0 * (1.0 - current_nodes->zoom);
@@ -880,27 +879,26 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 		}
 	}
 	current_nodes->scale_factor = UI_SCALE();
-	current_nodes->ELEMENT_H = current->ops->theme->ELEMENT_H + 2;
+	current_nodes->ELEMENT_H    = current->ops->theme->ELEMENT_H + 2;
 	ui_set_scale(UI_NODES_SCALE()); // Apply zoomed scale
 	current->elements_baked = true;
 	draw_set_font(current->ops->font, current->font_size);
 
 	for (int i = 0; i < canvas->links->length; ++i) {
-		ui_node_link_t *link = canvas->links->buffer[i];
-		ui_node_t *from = ui_get_node(canvas->nodes, link->from_id);
-		ui_node_t *to = ui_get_node(canvas->nodes, link->to_id);
-		float from_x = from == NULL ? current->input_x : wx + UI_NODE_X(from) + UI_NODE_W(from);
-		float from_y = from == NULL ? current->input_y : wy + UI_NODE_Y(from) + UI_OUTPUT_Y(from, link->from_socket);
-		float to_x = to == NULL ? current->input_x : wx + UI_NODE_X(to);
+		ui_node_link_t *link   = canvas->links->buffer[i];
+		ui_node_t      *from   = ui_get_node(canvas->nodes, link->from_id);
+		ui_node_t      *to     = ui_get_node(canvas->nodes, link->to_id);
+		float           from_x = from == NULL ? current->input_x : wx + UI_NODE_X(from) + UI_NODE_W(from);
+		float           from_y = from == NULL ? current->input_y : wy + UI_NODE_Y(from) + UI_OUTPUT_Y(from, link->from_socket);
+		float           to_x   = to == NULL ? current->input_x : wx + UI_NODE_X(to);
 		float to_y = to == NULL ? current->input_y : wy + UI_NODE_Y(to) + UI_INPUT_Y(canvas, to, link->to_socket) + UI_OUTPUTS_H(to, -1) + UI_BUTTONS_H(to);
 
 		// Cull
-		float left = to_x > from_x ? from_x : to_x;
-		float right = to_x > from_x ? to_x : from_x;
-		float top = to_y > from_y ? from_y : to_y;
+		float left   = to_x > from_x ? from_x : to_x;
+		float right  = to_x > from_x ? to_x : from_x;
+		float top    = to_y > from_y ? from_y : to_y;
 		float bottom = to_y > from_y ? to_y : from_y;
-		if (right < 0 || left > wx + current->_window_w ||
-			bottom < 0 || top > wy + current->_window_h) {
+		if (right < 0 || left > wx + current->_window_w || bottom < 0 || top > wy + current->_window_h) {
 			continue;
 		}
 
@@ -917,12 +915,12 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 			current_nodes->snap_from_id = current_nodes->snap_to_id = -1;
 
 			for (int j = 0; j < canvas->nodes->length; ++j) {
-				ui_node_t *node = canvas->nodes->buffer[j];
-				float node_h = UI_NODE_H(canvas, node);
-				float rx = wx + UI_NODE_X(node) - UI_LINE_H() / 2;
-				float ry = wy + UI_NODE_Y(node) - UI_LINE_H() / 2;
-				float rw = UI_NODE_W(node) + UI_LINE_H();
-				float rh = node_h + UI_LINE_H();
+				ui_node_t *node   = canvas->nodes->buffer[j];
+				float      node_h = UI_NODE_H(canvas, node);
+				float      rx     = wx + UI_NODE_X(node) - UI_LINE_H() / 2;
+				float      ry     = wy + UI_NODE_Y(node) - UI_LINE_H() / 2;
+				float      rw     = UI_NODE_W(node) + UI_LINE_H();
+				float      rh     = node_h + UI_LINE_H();
 				if (ui_input_in_rect(rx, ry, rw, rh)) {
 					if (from == NULL && node->id != to->id) { // Snap to output
 						for (int k = 0; k < node->outputs->length; ++k) {
@@ -931,10 +929,10 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 							float rx = sx - UI_LINE_H() / 2;
 							float ry = sy - UI_LINE_H() / 2;
 							if (ui_input_in_rect(rx, ry, UI_LINE_H(), UI_LINE_H())) {
-								current_nodes->snap_x = sx;
-								current_nodes->snap_y = sy;
+								current_nodes->snap_x       = sx;
+								current_nodes->snap_y       = sy;
 								current_nodes->snap_from_id = node->id;
-								current_nodes->snap_socket = k;
+								current_nodes->snap_socket  = k;
 								break;
 							}
 						}
@@ -946,9 +944,9 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 							float rx = sx - UI_LINE_H() / 2.0;
 							float ry = sy - UI_LINE_H() / 2.0;
 							if (ui_input_in_rect(rx, ry, UI_LINE_H(), UI_LINE_H())) {
-								current_nodes->snap_x = sx;
-								current_nodes->snap_y = sy;
-								current_nodes->snap_to_id = node->id;
+								current_nodes->snap_x      = sx;
+								current_nodes->snap_y      = sy;
+								current_nodes->snap_to_id  = node->id;
 								current_nodes->snap_socket = k;
 								break;
 							}
@@ -974,9 +972,9 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 		ui_node_t *node = canvas->nodes->buffer[i];
 
 		// Cull
-		float preview_h =  (node->flags & NODE_FLAG_PREVIEW) ? UI_NODE_W(node) : 0.0;
-		if (UI_NODE_X(node) > current->_window_w || UI_NODE_X(node) + UI_NODE_W(node) < 0 ||
-			UI_NODE_Y(node) - preview_h > current->_window_h || UI_NODE_Y(node) + UI_NODE_H(canvas, node) < 0) {
+		float preview_h = (node->flags & NODE_FLAG_PREVIEW) ? UI_NODE_W(node) : 0.0;
+		if (UI_NODE_X(node) > current->_window_w || UI_NODE_X(node) + UI_NODE_W(node) < 0 || UI_NODE_Y(node) - preview_h > current->_window_h ||
+		    UI_NODE_Y(node) + UI_NODE_H(canvas, node) < 0) {
 			if (!ui_is_selected(node)) {
 				continue;
 			}
@@ -984,10 +982,9 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 
 		// Resize node
 		float node_h = UI_NODE_H(canvas, node);
-		float top_h = UI_LINE_H() + UI_OUTPUTS_H(node, -1) + ui_p(5);
-		if (current->input_enabled &&
-			(ui_input_in_rect(wx + UI_NODE_X(node) + UI_NODE_W(node), wy + UI_NODE_Y(node), 5, UI_LINE_H()) ||
-			 ui_input_in_rect(wx + UI_NODE_X(node) + UI_NODE_W(node), wy + UI_NODE_Y(node) + top_h, 5, node_h - top_h))) {
+		float top_h  = UI_LINE_H() + UI_OUTPUTS_H(node, -1) + ui_p(5);
+		if (current->input_enabled && (ui_input_in_rect(wx + UI_NODE_X(node) + UI_NODE_W(node), wy + UI_NODE_Y(node), 5, UI_LINE_H()) ||
+		                               ui_input_in_rect(wx + UI_NODE_X(node) + UI_NODE_W(node), wy + UI_NODE_Y(node) + top_h, 5, node_h - top_h))) {
 
 			iron_mouse_set_cursor(IRON_CURSOR_SIZEWE);
 			if (current->input_started) {
@@ -996,7 +993,8 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 		}
 
 		// Drag node
-		if (current->input_enabled && node_resize == NULL && ui_input_in_rect(wx + UI_NODE_X(node) - UI_LINE_H() / 2.0, wy + UI_NODE_Y(node), UI_NODE_W(node) + UI_LINE_H(), UI_LINE_H())) {
+		if (current->input_enabled && node_resize == NULL &&
+		    ui_input_in_rect(wx + UI_NODE_X(node) - UI_LINE_H() / 2.0, wy + UI_NODE_Y(node), UI_NODE_W(node) + UI_LINE_H(), UI_LINE_H())) {
 			if (current->input_started) {
 				if (current->is_shift_down || current->is_ctrl_down) {
 					// Add to selection or deselect
@@ -1013,8 +1011,8 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 					i32_array_push(current_nodes->nodes_selected_id, node->id);
 				}
 				current_nodes->move_on_top = node; // Place selected node on top
-				current_nodes->nodes_drag = true;
-				current_nodes->dragged = false;
+				current_nodes->nodes_drag  = true;
+				current_nodes->dragged     = false;
 			}
 			else if (current->input_released && !current->is_shift_down && !current->is_ctrl_down && !current_nodes->dragged) {
 				// No drag performed, select single node
@@ -1023,7 +1021,9 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 			}
 		}
 
-		if (current->input_started && !(node->flags & NODE_FLAG_COLLAPSED) && ui_input_in_rect(wx + UI_NODE_X(node) - UI_LINE_H() / 2, wy + UI_NODE_Y(node) - UI_LINE_H() / 2, UI_NODE_W(node) + UI_LINE_H(), node_h + UI_LINE_H())) {
+		if (current->input_started && !(node->flags & NODE_FLAG_COLLAPSED) &&
+		    ui_input_in_rect(wx + UI_NODE_X(node) - UI_LINE_H() / 2, wy + UI_NODE_Y(node) - UI_LINE_H() / 2, UI_NODE_W(node) + UI_LINE_H(),
+		                     node_h + UI_LINE_H())) {
 			// Check sockets
 			if (current_nodes->link_drag_id == -1) {
 				for (int j = 0; j < node->outputs->length; ++j) {
@@ -1032,14 +1032,14 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 					if (ui_input_in_rect(sx - UI_LINE_H() / 2.0, sy - UI_LINE_H() / 2.0, UI_LINE_H(), UI_LINE_H())) {
 						// New link from output
 						ui_node_link_t *l = (ui_node_link_t *)malloc(sizeof(ui_node_link_t)); // TODO: store at canvas->links without malloc
-						l->id = ui_next_link_id(canvas->links);
-						l->from_id = node->id;
-						l->from_socket = j;
-						l->to_id = -1;
-						l->to_socket = -1;
+						l->id             = ui_next_link_id(canvas->links);
+						l->from_id        = node->id;
+						l->from_socket    = j;
+						l->to_id          = -1;
+						l->to_socket      = -1;
 						any_array_push(canvas->links, l);
 						current_nodes->link_drag_id = l->id;
-						current_nodes->is_new_link = true;
+						current_nodes->is_new_link  = true;
 						break;
 					}
 				}
@@ -1053,9 +1053,9 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 						for (int k = 0; k < canvas->links->length; ++k) {
 							ui_node_link_t *l = canvas->links->buffer[k];
 							if (l->to_id == node->id && l->to_socket == j) {
-								l->to_id = l->to_socket = -1;
+								l->to_id = l->to_socket     = -1;
 								current_nodes->link_drag_id = l->id;
-								current_nodes->is_new_link = false;
+								current_nodes->is_new_link  = false;
 								if (ui_nodes_on_node_changed != NULL) {
 									ui_nodes_on_node_changed(node);
 								}
@@ -1067,14 +1067,14 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 						}
 						// New link from input
 						ui_node_link_t *l = (ui_node_link_t *)malloc(sizeof(ui_node_link_t));
-						l->id = ui_next_link_id(canvas->links);
-						l->from_id = -1;
-						l->from_socket = -1;
-						l->to_id = node->id;
-						l->to_socket = j;
+						l->id             = ui_next_link_id(canvas->links);
+						l->from_id        = -1;
+						l->from_socket    = -1;
+						l->to_id          = node->id;
+						l->to_socket      = j;
 						any_array_push(canvas->links, l);
 						current_nodes->link_drag_id = l->id;
-						current_nodes->is_new_link = true;
+						current_nodes->is_new_link  = true;
 						break;
 					}
 				}
@@ -1091,18 +1091,18 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 					}
 				}
 				ui_node_link_t *link_drag = ui_get_link(canvas->links, current_nodes->link_drag_id);
-				link_drag->to_id = current_nodes->snap_to_id;
-				link_drag->to_socket = current_nodes->snap_socket;
-				current->changed = true;
+				link_drag->to_id          = current_nodes->snap_to_id;
+				link_drag->to_socket      = current_nodes->snap_socket;
+				current->changed          = true;
 				if (ui_nodes_on_node_changed != NULL) {
 					ui_nodes_on_node_changed(ui_get_node(canvas->nodes, link_drag->to_id));
 				}
 			}
 			else if (current_nodes->snap_from_id != -1) { // Connect to output
 				ui_node_link_t *link_drag = ui_get_link(canvas->links, current_nodes->link_drag_id);
-				link_drag->from_id = current_nodes->snap_from_id;
-				link_drag->from_socket = current_nodes->snap_socket;
-				current->changed = true;
+				link_drag->from_id        = current_nodes->snap_from_id;
+				link_drag->from_socket    = current_nodes->snap_socket;
+				current->changed          = true;
 				if (ui_nodes_on_node_changed != NULL) {
 					ui_nodes_on_node_changed(ui_get_node(canvas->nodes, link_drag->to_id));
 				}
@@ -1115,8 +1115,8 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 				ui_remove_link_at(canvas, ui_get_link_index(canvas->links, current_nodes->link_drag_id));
 			}
 			current_nodes->snap_to_id = current_nodes->snap_from_id = -1;
-			current_nodes->link_drag_id = -1;
-			current_nodes->nodes_drag = false;
+			current_nodes->link_drag_id                             = -1;
+			current_nodes->nodes_drag                               = false;
 		}
 
 		if (current_nodes->nodes_drag && ui_is_selected(node) && !current->input_down_r) {
@@ -1154,41 +1154,41 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 	else {
 		if (ui_box_select) {
 			draw_set_color(0x223333dd);
-			draw_filled_rect(ui_box_select_x, ui_box_select_y, current->input_x - ui_box_select_x - current->_window_x, current->input_y - ui_box_select_y - current->_window_y);
+			draw_filled_rect(ui_box_select_x, ui_box_select_y, current->input_x - ui_box_select_x - current->_window_x,
+			                 current->input_y - ui_box_select_y - current->_window_y);
 			draw_set_color(0x773333dd);
-			draw_rect(ui_box_select_x, ui_box_select_y, current->input_x - ui_box_select_x - current->_window_x, current->input_y - ui_box_select_y - current->_window_y, 1);
+			draw_rect(ui_box_select_x, ui_box_select_y, current->input_x - ui_box_select_x - current->_window_x,
+			          current->input_y - ui_box_select_y - current->_window_y, 1);
 			draw_set_color(0xffffffff);
 		}
-		if (current->input_enabled && current->input_started && !current->is_alt_down &&
-			current_nodes->link_drag_id == -1 && !current_nodes->nodes_drag && !current->changed &&
-			ui_input_in_rect(current->_window_x, current->_window_y, current->_window_w, current->_window_h)) {
+		if (current->input_enabled && current->input_started && !current->is_alt_down && current_nodes->link_drag_id == -1 && !current_nodes->nodes_drag &&
+		    !current->changed && ui_input_in_rect(current->_window_x, current->_window_y, current->_window_w, current->_window_h)) {
 
-			ui_box_select = true;
+			ui_box_select   = true;
 			ui_box_select_x = current->input_x - current->_window_x;
 			ui_box_select_y = current->input_y - current->_window_y;
 		}
 		else if (ui_box_select && !current->input_down) {
 			ui_box_select = false;
-			int left = ui_box_select_x;
-			int top = ui_box_select_y;
-			int right = current->input_x - current->_window_x;
-			int bottom = current->input_y - current->_window_y;
+			int left      = ui_box_select_x;
+			int top       = ui_box_select_y;
+			int right     = current->input_x - current->_window_x;
+			int bottom    = current->input_y - current->_window_y;
 			if (left > right) {
 				int t = left;
-				left = right;
+				left  = right;
 				right = t;
 			}
 			if (top > bottom) {
-				int t = top;
-				top = bottom;
+				int t  = top;
+				top    = bottom;
 				bottom = t;
 			}
 			ui_node_t *nodes[32];
-			int nodes_count = 0;
+			int        nodes_count = 0;
 			for (int j = 0; j < canvas->nodes->length; ++j) {
 				ui_node_t *n = canvas->nodes->buffer[j];
-				if (UI_NODE_X(n) + UI_NODE_W(n) > left && UI_NODE_X(n) < right &&
-					UI_NODE_Y(n) + UI_NODE_H(canvas, n) > top && UI_NODE_Y(n) < bottom) {
+				if (UI_NODE_X(n) + UI_NODE_W(n) > left && UI_NODE_X(n) < right && UI_NODE_Y(n) + UI_NODE_H(canvas, n) > top && UI_NODE_Y(n) < bottom) {
 					nodes[nodes_count] = n;
 					nodes_count++;
 				}
@@ -1219,10 +1219,10 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 	bool cut_selected = false;
 	if (ui_is_copy && !current->is_typing) {
 		ui_node_t *copy_nodes[32];
-		int copy_nodes_count = 0;
+		int        copy_nodes_count = 0;
 		for (int i = 0; i < current_nodes->nodes_selected_id->length; ++i) {
-			int id = current_nodes->nodes_selected_id->buffer[i];
-			ui_node_t *n = ui_get_node(canvas->nodes, id);
+			int        id = current_nodes->nodes_selected_id->buffer[i];
+			ui_node_t *n  = ui_get_node(canvas->nodes, id);
 			if (ui_is_node_type_excluded(n->type)) {
 				continue;
 			}
@@ -1230,10 +1230,10 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 			copy_nodes_count++;
 		}
 		ui_node_link_t *copy_links[64];
-		int copy_links_count = 0;
+		int             copy_links_count = 0;
 		for (int i = 0; i < canvas->links->length; ++i) {
-			ui_node_link_t *l = canvas->links->buffer[i];
-			ui_node_t *from = NULL;
+			ui_node_link_t *l    = canvas->links->buffer[i];
+			ui_node_t      *from = NULL;
 			for (int j = 0; j < current_nodes->nodes_selected_id->length; ++j) {
 				if (current_nodes->nodes_selected_id->buffer[j] == l->from_id) {
 					from = ui_get_node(canvas->nodes, l->from_id);
@@ -1248,26 +1248,25 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 				}
 			}
 
-			if (from != NULL && !ui_is_node_type_excluded(from->type) &&
-				to != NULL && !ui_is_node_type_excluded(to->type)) {
+			if (from != NULL && !ui_is_node_type_excluded(from->type) && to != NULL && !ui_is_node_type_excluded(to->type)) {
 				copy_links[copy_links_count] = l;
 				copy_links_count++;
 			}
 		}
 		if (copy_nodes_count > 0) {
 			ui_node_canvas_t copy_canvas = {0};
-			copy_canvas.name = canvas->name;
-			ui_node_array_t nodes = { .buffer = copy_nodes, .length = copy_nodes_count };
-			ui_node_link_array_t links = { .buffer = copy_links, .length = copy_links_count };
-			copy_canvas.nodes = &nodes;
-			copy_canvas.links = &links;
+			copy_canvas.name             = canvas->name;
+			ui_node_array_t      nodes   = {.buffer = copy_nodes, .length = copy_nodes_count};
+			ui_node_link_array_t links   = {.buffer = copy_links, .length = copy_links_count};
+			copy_canvas.nodes            = &nodes;
+			copy_canvas.links            = &links;
 			gc_unroot(ui_clipboard);
 			ui_clipboard = ui_node_canvas_to_json(&copy_canvas);
 			gc_root(ui_clipboard);
 		}
 		cut_selected = ui_is_cut;
-		ui_is_copy = false;
-		ui_is_cut = false;
+		ui_is_copy   = false;
+		ui_is_cut    = false;
 	}
 
 	if (ui_is_paste && !current->is_typing) {
@@ -1295,34 +1294,38 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 				l->id = ui_next_link_id(canvas->links);
 				any_array_push(canvas->links, l);
 			}
-			int offset_x = (int)(((int)(current->input_x / UI_SCALE()) * UI_NODES_SCALE() - wx - UI_NODES_PAN_X()) / UI_NODES_SCALE()) - paste_canvas->nodes->buffer[paste_canvas->nodes->length - 1]->x;
-			int offset_y = (int)(((int)(current->input_y / UI_SCALE()) * UI_NODES_SCALE() - wy - UI_NODES_PAN_Y()) / UI_NODES_SCALE()) - paste_canvas->nodes->buffer[paste_canvas->nodes->length - 1]->y;
+			int offset_x = (int)(((int)(current->input_x / UI_SCALE()) * UI_NODES_SCALE() - wx - UI_NODES_PAN_X()) / UI_NODES_SCALE()) -
+			               paste_canvas->nodes->buffer[paste_canvas->nodes->length - 1]->x;
+			int offset_y = (int)(((int)(current->input_y / UI_SCALE()) * UI_NODES_SCALE() - wy - UI_NODES_PAN_Y()) / UI_NODES_SCALE()) -
+			               paste_canvas->nodes->buffer[paste_canvas->nodes->length - 1]->y;
 			for (int i = 0; i < paste_canvas->nodes->length; ++i) {
 				ui_node_t *n = paste_canvas->nodes->buffer[i];
 				// Assign unique node id
 				int old_id = n->id;
-				n->id = ui_next_node_id(canvas->nodes);
+				n->id      = ui_next_node_id(canvas->nodes);
 
 				for (int j = 0; j < n->inputs->length; ++j) {
 					ui_node_socket_t *soc = n->inputs->buffer[j];
-					soc->id = ui_get_socket_id(canvas->nodes);
-					soc->node_id = n->id;
+					soc->id               = ui_get_socket_id(canvas->nodes);
+					soc->node_id          = n->id;
 				}
 				for (int j = 0; j < n->outputs->length; ++j) {
 					ui_node_socket_t *soc = n->outputs->buffer[j];
-					soc->id = ui_get_socket_id(canvas->nodes);
-					soc->node_id = n->id;
+					soc->id               = ui_get_socket_id(canvas->nodes);
+					soc->node_id          = n->id;
 				}
 				for (int j = 0; j < paste_canvas->links->length; ++j) {
 					ui_node_link_t *l = paste_canvas->links->buffer[j];
-					if (l->from_id == old_id) l->from_id = n->id;
-					else if (l->to_id == old_id) l->to_id = n->id;
+					if (l->from_id == old_id)
+						l->from_id = n->id;
+					else if (l->to_id == old_id)
+						l->to_id = n->id;
 				}
 				n->x += offset_x;
 				n->y += offset_y;
 				any_array_push(canvas->nodes, n);
 			}
-			current_nodes->nodes_drag = true;
+			current_nodes->nodes_drag                = true;
 			current_nodes->nodes_selected_id->length = 0;
 			for (int i = 0; i < paste_canvas->nodes->length; ++i) {
 				i32_array_push(current_nodes->nodes_selected_id, paste_canvas->nodes->buffer[i]->id);
@@ -1344,8 +1347,8 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 	if (node_removal || cut_selected) {
 		int i = current_nodes->nodes_selected_id->length - 1;
 		while (i >= 0) {
-			int nid = current_nodes->nodes_selected_id->buffer[i--];
-			ui_node_t *n = ui_get_node(canvas->nodes, nid);
+			int        nid = current_nodes->nodes_selected_id->buffer[i--];
+			ui_node_t *n   = ui_get_node(canvas->nodes, nid);
 			if (ui_is_node_type_excluded(n->type)) {
 				continue;
 			}
@@ -1357,7 +1360,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 
 	ui_set_scale(current_nodes->scale_factor); // Restore non-zoomed scale
 	current->elements_baked = true;
-	current->input_enabled = _input_enabled;
+	current->input_enabled  = _input_enabled;
 
 	if (ui_popup_commands != NULL) {
 		current->_x = ui_popup_x;
@@ -1369,7 +1372,9 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 		ui_draw_rect(true, current->_x - 5, current->_y - 5, current->_w + 10, ui_popup_h * UI_SCALE() + 10);
 		(*ui_popup_commands)(current, ui_popup_data, ui_popup_data2);
 
-		bool hide = (current->input_started || current->input_started_r) && (current->input_x - wx < ui_popup_x - 6 || current->input_x - wx > ui_popup_x + ui_popup_w + 6 || current->input_y - wy < ui_popup_y - 6 || current->input_y - wy > ui_popup_y + ui_popup_h * UI_SCALE() + 6);
+		bool hide = (current->input_started || current->input_started_r) &&
+		            (current->input_x - wx < ui_popup_x - 6 || current->input_x - wx > ui_popup_x + ui_popup_w + 6 || current->input_y - wy < ui_popup_y - 6 ||
+		             current->input_y - wy > ui_popup_y + ui_popup_h * UI_SCALE() + 6);
 		if (hide || current->is_escape_down) {
 			ui_popup_commands = NULL;
 			ui_nodes_on_node_changed(ui_get_node(canvas->nodes, ui_popup_handle_node_id));

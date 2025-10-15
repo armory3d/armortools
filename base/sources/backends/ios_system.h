@@ -1,14 +1,14 @@
-#import <QuartzCore/QuartzCore.h>
-#import <UIKit/UIKit.h>
+#import <CoreMotion/CMMotionManager.h>
 #import <Metal/Metal.h>
 #import <QuartzCore/CAMetalLayer.h>
-#import <CoreMotion/CMMotionManager.h>
+#import <QuartzCore/QuartzCore.h>
+#import <UIKit/UIKit.h>
 
 @interface MyView : UIView <UIKeyInput> {
 @private
-	id<MTLDevice> device;
+	id<MTLDevice>       device;
 	id<MTLCommandQueue> queue;
-	id<MTLLibrary> library;
+	id<MTLLibrary>      library;
 }
 - (void)show_keyboard;
 - (void)hide_keyboard;
@@ -20,13 +20,14 @@
 - (void)deleteBackward;
 @end
 
-@interface MyViewController : UIViewController <UIDocumentPickerDelegate, UIDropInteractionDelegate> {}
+@interface MyViewController : UIViewController <UIDocumentPickerDelegate, UIDropInteractionDelegate> {
+}
 - (void)loadView;
 - (void)setVisible:(BOOL)value;
 - (UIRectEdge)preferredScreenEdgesDeferringSystemGestures;
 @end
 
-
-@interface IronSceneDelegate : UIResponder <UIWindowSceneDelegate> {}
-@property (strong, nonatomic) UIWindow *window;
+@interface IronSceneDelegate : UIResponder <UIWindowSceneDelegate> {
+}
+@property(strong, nonatomic) UIWindow *window;
 @end

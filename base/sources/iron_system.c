@@ -1,8 +1,8 @@
 
 #include "iron_system.h"
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #ifdef IRON_WINDOWS
 #include <backends/windows_mini.h>
 #include <backends/windows_system.h>
@@ -82,78 +82,78 @@ double iron_time(void) {
 }
 #endif
 
-static void (*update_callback)(void *) = NULL;
-static void *update_callback_data = NULL;
-static void (*foreground_callback)(void *) = NULL;
-static void *foreground_callback_data = NULL;
-static void (*background_callback)(void *) = NULL;
-static void *background_callback_data = NULL;
-static void (*pause_callback)(void *) = NULL;
-static void *pause_callback_data = NULL;
-static void (*resume_callback)(void *) = NULL;
-static void *resume_callback_data = NULL;
-static void (*shutdown_callback)(void *) = NULL;
-static void *shutdown_callback_data = NULL;
+static void (*update_callback)(void *)             = NULL;
+static void *update_callback_data                  = NULL;
+static void (*foreground_callback)(void *)         = NULL;
+static void *foreground_callback_data              = NULL;
+static void (*background_callback)(void *)         = NULL;
+static void *background_callback_data              = NULL;
+static void (*pause_callback)(void *)              = NULL;
+static void *pause_callback_data                   = NULL;
+static void (*resume_callback)(void *)             = NULL;
+static void *resume_callback_data                  = NULL;
+static void (*shutdown_callback)(void *)           = NULL;
+static void *shutdown_callback_data                = NULL;
 static void (*drop_files_callback)(char *, void *) = NULL;
-static void *drop_files_callback_data = NULL;
-static char *(*cut_callback)(void *) = NULL;
-static void *cut_callback_data = NULL;
-static char *(*copy_callback)(void *) = NULL;
-static void *copy_callback_data = NULL;
-static void (*paste_callback)(char *, void *) = NULL;
-static void *paste_callback_data = NULL;
+static void *drop_files_callback_data              = NULL;
+static char *(*cut_callback)(void *)               = NULL;
+static void *cut_callback_data                     = NULL;
+static char *(*copy_callback)(void *)              = NULL;
+static void *copy_callback_data                    = NULL;
+static void (*paste_callback)(char *, void *)      = NULL;
+static void *paste_callback_data                   = NULL;
 
 #if defined(IRON_IOS) || defined(IRON_MACOS)
 bool with_autoreleasepool(bool (*f)(void));
 #endif
 
 void iron_set_update_callback(void (*callback)(void *), void *data) {
-	update_callback = callback;
+	update_callback      = callback;
 	update_callback_data = data;
 }
 
 void iron_set_foreground_callback(void (*callback)(void *), void *data) {
-	foreground_callback = callback;
+	foreground_callback      = callback;
 	foreground_callback_data = data;
 }
 
 void iron_set_resume_callback(void (*callback)(void *), void *data) {
-	resume_callback = callback;
+	resume_callback      = callback;
 	resume_callback_data = data;
 }
 
 void iron_set_pause_callback(void (*callback)(void *), void *data) {
-	pause_callback = callback;
+	pause_callback      = callback;
 	pause_callback_data = data;
 }
 
 void iron_set_background_callback(void (*callback)(void *), void *data) {
-	background_callback = callback;
+	background_callback      = callback;
 	background_callback_data = data;
 }
 
 void iron_set_shutdown_callback(void (*callback)(void *), void *data) {
-	shutdown_callback = callback;
+	shutdown_callback      = callback;
 	shutdown_callback_data = data;
 }
 
 void iron_set_drop_files_callback(void (*callback)(char *, void *), void *data) {
-	drop_files_callback = callback;
+	drop_files_callback      = callback;
 	drop_files_callback_data = data;
 }
 
 void iron_set_cut_callback(char *(*callback)(void *), void *data) {
-	cut_callback = callback;
+	cut_callback      = callback;
 	cut_callback_data = data;
 }
 
 void iron_set_copy_callback(char *(*callback)(void *), void *data) {
-	copy_callback = callback;
+	copy_callback      = callback;
 	copy_callback_data = data;
 }
 
 void iron_set_paste_callback(void (*callback)(char *, void *), void *data) {
-	paste_callback = callback;
+	paste_callback      = callback;
 	paste_callback_data = data;
 }
 
@@ -219,7 +219,7 @@ void iron_internal_paste_callback(char *value) {
 	}
 }
 
-static bool running = false;
+static bool running                = false;
 static char application_name[1024] = {"Iron Application"};
 
 const char *iron_application_name(void) {
@@ -256,8 +256,8 @@ void iron_start(void) {
 #endif
 }
 
-static uint8_t *current_file = NULL;
-static size_t current_file_size = 0;
+static uint8_t *current_file      = NULL;
+static size_t   current_file_size = 0;
 
 bool iron_save_file_loaded(void) {
 	return true;
@@ -273,13 +273,13 @@ size_t iron_get_save_file_size(void) {
 
 void iron_load_save_file(const char *filename) {
 	free(current_file);
-	current_file = NULL;
+	current_file      = NULL;
 	current_file_size = 0;
 
 	iron_file_reader_t reader;
 	if (iron_file_reader_open(&reader, filename, IRON_FILE_TYPE_SAVE)) {
 		current_file_size = iron_file_reader_size(&reader);
-		current_file = (uint8_t *)malloc(current_file_size);
+		current_file      = (uint8_t *)malloc(current_file_size);
 		iron_file_reader_read(&reader, current_file, current_file_size);
 		iron_file_reader_close(&reader);
 	}
@@ -303,25 +303,25 @@ void iron_copy_to_clipboard(const char *text) {
 }
 #endif
 
-static void (*keyboard_key_down_callback)(int /*key_code*/, void * /*data*/) = NULL;
-static void *keyboard_key_down_callback_data = NULL;
-static void (*keyboard_key_up_callback)(int /*key_code*/, void * /*data*/) = NULL;
-static void *keyboard_key_up_callback_data = NULL;
+static void (*keyboard_key_down_callback)(int /*key_code*/, void * /*data*/)        = NULL;
+static void *keyboard_key_down_callback_data                                        = NULL;
+static void (*keyboard_key_up_callback)(int /*key_code*/, void * /*data*/)          = NULL;
+static void *keyboard_key_up_callback_data                                          = NULL;
 static void (*keyboard_key_press_callback)(unsigned /*character*/, void * /*data*/) = NULL;
-static void *keyboard_key_press_callback_data = NULL;
+static void *keyboard_key_press_callback_data                                       = NULL;
 
 void iron_keyboard_set_key_down_callback(void (*value)(int /*key_code*/, void * /*data*/), void *data) {
-	keyboard_key_down_callback = value;
+	keyboard_key_down_callback      = value;
 	keyboard_key_down_callback_data = data;
 }
 
 void iron_keyboard_set_key_up_callback(void (*value)(int /*key_code*/, void * /*data*/), void *data) {
-	keyboard_key_up_callback = value;
+	keyboard_key_up_callback      = value;
 	keyboard_key_up_callback_data = data;
 }
 
 void iron_keyboard_set_key_press_callback(void (*value)(unsigned /*character*/, void * /*data*/), void *data) {
-	keyboard_key_press_callback = value;
+	keyboard_key_press_callback      = value;
 	keyboard_key_press_callback_data = data;
 }
 
@@ -343,32 +343,32 @@ void iron_internal_keyboard_trigger_key_press(unsigned character) {
 	}
 }
 
-static void (*mouse_press_callback)(int /*button*/, int /*x*/, int /*y*/, void * /*data*/) = NULL;
-static void *mouse_press_callback_data = NULL;
-static void (*mouse_release_callback)(int /*button*/, int /*x*/, int /*y*/, void * /*data*/) = NULL;
-static void *mouse_release_callback_data = NULL;
+static void (*mouse_press_callback)(int /*button*/, int /*x*/, int /*y*/, void * /*data*/)                      = NULL;
+static void *mouse_press_callback_data                                                                          = NULL;
+static void (*mouse_release_callback)(int /*button*/, int /*x*/, int /*y*/, void * /*data*/)                    = NULL;
+static void *mouse_release_callback_data                                                                        = NULL;
 static void (*mouse_move_callback)(int /*x*/, int /*y*/, int /*movementX*/, int /*movementY*/, void * /*data*/) = NULL;
-static void *mouse_move_callback_data = NULL;
-static void (*mouse_scroll_callback)(int /*delta*/, void * /*data*/) = NULL;
-static void *mouse_scroll_callback_data = NULL;
+static void *mouse_move_callback_data                                                                           = NULL;
+static void (*mouse_scroll_callback)(int /*delta*/, void * /*data*/)                                            = NULL;
+static void *mouse_scroll_callback_data                                                                         = NULL;
 
 void iron_mouse_set_press_callback(void (*value)(int /*button*/, int /*x*/, int /*y*/, void * /*data*/), void *data) {
-	mouse_press_callback = value;
+	mouse_press_callback      = value;
 	mouse_press_callback_data = data;
 }
 
 void iron_mouse_set_release_callback(void (*value)(int /*button*/, int /*x*/, int /*y*/, void * /*data*/), void *data) {
-	mouse_release_callback = value;
+	mouse_release_callback      = value;
 	mouse_release_callback_data = data;
 }
 
 void iron_mouse_set_move_callback(void (*value)(int /*x*/, int /*y*/, int /*movement_x*/, int /*movement_y*/, void * /*data*/), void *data) {
-	mouse_move_callback = value;
+	mouse_move_callback      = value;
 	mouse_move_callback_data = data;
 }
 
 void iron_mouse_set_scroll_callback(void (*value)(int /*delta*/, void * /*data*/), void *data) {
-	mouse_scroll_callback = value;
+	mouse_scroll_callback      = value;
 	mouse_scroll_callback_data = data;
 }
 
@@ -395,12 +395,12 @@ void iron_internal_mouse_window_deactivated() {
 	}
 }
 
-static bool moved = false;
-static bool locked = false;
-static int preLockX = 0;
-static int preLockY = 0;
-static int lastX = 0;
-static int lastY = 0;
+static bool moved    = false;
+static bool locked   = false;
+static int  preLockX = 0;
+static int  preLockY = 0;
+static int  lastX    = 0;
+static int  lastY    = 0;
 
 void iron_internal_mouse_trigger_press(int button, int x, int y) {
 	lastX = x;
@@ -452,18 +452,18 @@ void iron_mouse_unlock(void) {
 	if (!iron_mouse_is_locked() || !iron_mouse_can_lock()) {
 		return;
 	}
-	moved = false;
+	moved  = false;
 	locked = false;
 	iron_mouse_set_position(preLockX, preLockY);
 	iron_mouse_show();
 }
 
-static void (*pen_press_callback)(int /*x*/, int /*y*/, float /*pressure*/) = NULL;
-static void (*pen_move_callback)(int /*x*/, int /*y*/, float /*pressure*/) = NULL;
+static void (*pen_press_callback)(int /*x*/, int /*y*/, float /*pressure*/)   = NULL;
+static void (*pen_move_callback)(int /*x*/, int /*y*/, float /*pressure*/)    = NULL;
 static void (*pen_release_callback)(int /*x*/, int /*y*/, float /*pressure*/) = NULL;
 
-static void (*eraser_press_callback)(int /*x*/, int /*y*/, float /*pressure*/) = NULL;
-static void (*eraser_move_callback)(int /*x*/, int /*y*/, float /*pressure*/) = NULL;
+static void (*eraser_press_callback)(int /*x*/, int /*y*/, float /*pressure*/)   = NULL;
+static void (*eraser_move_callback)(int /*x*/, int /*y*/, float /*pressure*/)    = NULL;
 static void (*eraser_release_callback)(int /*x*/, int /*y*/, float /*pressure*/) = NULL;
 
 void iron_pen_set_press_callback(void (*value)(int /*x*/, int /*y*/, float /*pressure*/)) {
@@ -527,8 +527,8 @@ void iron_internal_eraser_trigger_release(int x, int y, float pressure) {
 }
 
 static void (*surface_touch_start_callback)(int /*index*/, int /*x*/, int /*y*/) = NULL;
-static void (*surface_move_callback)(int /*index*/, int /*x*/, int /*y*/) = NULL;
-static void (*surface_touch_end_callback)(int /*index*/, int /*x*/, int /*y*/) = NULL;
+static void (*surface_move_callback)(int /*index*/, int /*x*/, int /*y*/)        = NULL;
+static void (*surface_touch_end_callback)(int /*index*/, int /*x*/, int /*y*/)   = NULL;
 
 void iron_surface_set_touch_start_callback(void (*value)(int /*index*/, int /*x*/, int /*y*/)) {
 	surface_touch_start_callback = value;
@@ -562,32 +562,32 @@ void iron_internal_surface_trigger_touch_end(int index, int x, int y) {
 
 #ifdef WITH_GAMEPAD
 
-static void (*gamepad_connect_callback)(int /*gamepad*/, void * /*userdata*/) = NULL;
-static void *gamepad_connect_callback_userdata = NULL;
-static void (*gamepad_disconnect_callback)(int /*gamepad*/, void * /*userdata*/) = NULL;
-static void *gamepad_disconnect_callback_userdata = NULL;
-static void (*gamepad_axis_callback)(int /*gamepad*/, int /*axis*/, float /*value*/, void * /*userdata*/) = NULL;
-static void *gamepad_axis_callback_userdata = NULL;
+static void (*gamepad_connect_callback)(int /*gamepad*/, void * /*userdata*/)                                 = NULL;
+static void *gamepad_connect_callback_userdata                                                                = NULL;
+static void (*gamepad_disconnect_callback)(int /*gamepad*/, void * /*userdata*/)                              = NULL;
+static void *gamepad_disconnect_callback_userdata                                                             = NULL;
+static void (*gamepad_axis_callback)(int /*gamepad*/, int /*axis*/, float /*value*/, void * /*userdata*/)     = NULL;
+static void *gamepad_axis_callback_userdata                                                                   = NULL;
 static void (*gamepad_button_callback)(int /*gamepad*/, int /*button*/, float /*value*/, void * /*userdata*/) = NULL;
-static void *gamepad_button_callback_userdata = NULL;
+static void *gamepad_button_callback_userdata                                                                 = NULL;
 
 void iron_gamepad_set_connect_callback(void (*value)(int /*gamepad*/, void * /*userdata*/), void *userdata) {
-	gamepad_connect_callback = value;
+	gamepad_connect_callback          = value;
 	gamepad_connect_callback_userdata = userdata;
 }
 
 void iron_gamepad_set_disconnect_callback(void (*value)(int /*gamepad*/, void * /*userdata*/), void *userdata) {
-	gamepad_disconnect_callback = value;
+	gamepad_disconnect_callback          = value;
 	gamepad_disconnect_callback_userdata = userdata;
 }
 
 void iron_gamepad_set_axis_callback(void (*value)(int /*gamepad*/, int /*axis*/, float /*value*/, void * /*userdata*/), void *userdata) {
-	gamepad_axis_callback = value;
+	gamepad_axis_callback          = value;
 	gamepad_axis_callback_userdata = userdata;
 }
 
 void iron_gamepad_set_button_callback(void (*value)(int /*gamepad*/, int /*button*/, float /*value*/, void * /*userdata*/), void *userdata) {
-	gamepad_button_callback = value;
+	gamepad_button_callback          = value;
 	gamepad_button_callback_userdata = userdata;
 }
 

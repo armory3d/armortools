@@ -1,8 +1,8 @@
 #include "iron_vec4.h"
 #include "iron_quat.h"
 
-#include <math.h>
 #include <iron_math.h>
+#include <math.h>
 
 vec4_t vec4_create(float x, float y, float z, float w) {
 	vec4_t v;
@@ -74,10 +74,10 @@ vec4_t vec4_lerp(vec4_t from, vec4_t to, float s) {
 
 vec4_t vec4_apply_proj(vec4_t a, mat4_t m) {
 	vec4_t v;
-	float d = 1.0 / (m.m[3] * a.x + m.m[7] * a.y + m.m[11] * a.z + m.m[15]); // Perspective divide
-	v.x = (m.m[0] * a.x + m.m[4] * a.y + m.m[8] * a.z + m.m[12]) * d;
-	v.y = (m.m[1] * a.x + m.m[5] * a.y + m.m[9] * a.z + m.m[13]) * d;
-	v.z = (m.m[2] * a.x + m.m[6] * a.y + m.m[10] * a.z + m.m[14]) * d;
+	float  d = 1.0 / (m.m[3] * a.x + m.m[7] * a.y + m.m[11] * a.z + m.m[15]); // Perspective divide
+	v.x      = (m.m[0] * a.x + m.m[4] * a.y + m.m[8] * a.z + m.m[12]) * d;
+	v.y      = (m.m[1] * a.x + m.m[5] * a.y + m.m[9] * a.z + m.m[13]) * d;
+	v.z      = (m.m[2] * a.x + m.m[6] * a.y + m.m[10] * a.z + m.m[14]) * d;
 	return v;
 }
 
@@ -105,13 +105,13 @@ vec4_t vec4_apply_axis_angle(vec4_t a, vec4_t axis, float angle) {
 
 vec4_t vec4_apply_quat(vec4_t a, quat_t q) {
 	vec4_t v;
-	float ix = q.w * a.x + q.y * a.z - q.z * a.y;
-	float iy = q.w * a.y + q.z * a.x - q.x * a.z;
-	float iz = q.w * a.z + q.x * a.y - q.y * a.x;
-	float iw = -q.x * a.x - q.y * a.y - q.z * a.z;
-	v.x = ix * q.w + iw * -q.x + iy * -q.z - iz * -q.y;
-	v.y = iy * q.w + iw * -q.y + iz * -q.x - ix * -q.z;
-	v.z = iz * q.w + iw * -q.z + ix * -q.y - iy * -q.x;
+	float  ix = q.w * a.x + q.y * a.z - q.z * a.y;
+	float  iy = q.w * a.y + q.z * a.x - q.x * a.z;
+	float  iz = q.w * a.z + q.x * a.y - q.y * a.x;
+	float  iw = -q.x * a.x - q.y * a.y - q.z * a.z;
+	v.x       = ix * q.w + iw * -q.x + iy * -q.z - iz * -q.y;
+	v.y       = iy * q.w + iw * -q.y + iz * -q.x - ix * -q.z;
+	v.z       = iz * q.w + iw * -q.z + ix * -q.y - iy * -q.x;
 	return v;
 }
 

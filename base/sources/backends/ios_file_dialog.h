@@ -2,7 +2,7 @@
 
 #include <wchar.h>
 
-void IOSFileDialogOpen();
+void     IOSFileDialogOpen();
 wchar_t *IOSFileDialogSave();
-void IOSDeleteFile(const char *path);
-void IOSCreateDirectory(const char *path);
+void     IOSDeleteFile(const char *path);
+void     IOSCreateDirectory(const char *path);

@@ -24,13 +24,13 @@ static void affirm(OSStatus err) {
 	}
 }
 
-static bool initialized;
-static bool soundPlaying;
-static AudioDeviceID device;
-static UInt32 deviceBufferSize;
-static UInt32 size;
+static bool                        initialized;
+static bool                        soundPlaying;
+static AudioDeviceID               device;
+static UInt32                      deviceBufferSize;
+static UInt32                      size;
 static AudioStreamBasicDescription deviceFormat;
-static AudioObjectPropertyAddress address;
+static AudioObjectPropertyAddress  address;
 
 static AudioDeviceIOProcID theIOProcID = NULL;
 
@@ -43,7 +43,7 @@ uint32_t iron_a2_samples_per_second(void) {
 }
 
 static void copySample(void *buffer) {
-	float left_value = *(float *)&a2_buffer.channels[0][a2_buffer.read_location];
+	float left_value  = *(float *)&a2_buffer.channels[0][a2_buffer.read_location];
 	float right_value = *(float *)&a2_buffer.channels[1][a2_buffer.read_location];
 	a2_buffer.read_location += 1;
 	if (a2_buffer.read_location >= a2_buffer.data_size) {
@@ -80,33 +80,33 @@ void iron_a2_init(void) {
 	iron_a2_internal_init();
 	initialized = true;
 
-	a2_buffer.read_location = 0;
+	a2_buffer.read_location  = 0;
 	a2_buffer.write_location = 0;
-	a2_buffer.data_size = 128 * 1024;
-	a2_buffer.channel_count = 2;
-	a2_buffer.channels[0] = (float *)malloc(a2_buffer.data_size * sizeof(float));
-	a2_buffer.channels[1] = (float *)malloc(a2_buffer.data_size * sizeof(float));
+	a2_buffer.data_size      = 128 * 1024;
+	a2_buffer.channel_count  = 2;
+	a2_buffer.channels[0]    = (float *)malloc(a2_buffer.data_size * sizeof(float));
+	a2_buffer.channels[1]    = (float *)malloc(a2_buffer.data_size * sizeof(float));
 
 	device = kAudioDeviceUnknown;
 
 	initialized = false;
 
-	size = sizeof(AudioDeviceID);
+	size              = sizeof(AudioDeviceID);
 	address.mSelector = kAudioHardwarePropertyDefaultOutputDevice;
-	address.mScope = kAudioObjectPropertyScopeGlobal;
-	address.mElement = kAudioObjectPropertyElementMaster;
+	address.mScope    = kAudioObjectPropertyScopeGlobal;
+	address.mElement  = kAudioObjectPropertyElementMaster;
 	affirm(AudioObjectGetPropertyData(kAudioObjectSystemObject, &address, 0, NULL, &size, &device));
 
-	size = sizeof(UInt32);
+	size              = sizeof(UInt32);
 	address.mSelector = kAudioDevicePropertyBufferSize;
-	address.mScope = kAudioDevicePropertyScopeOutput;
+	address.mScope    = kAudioDevicePropertyScopeOutput;
 	affirm(AudioObjectGetPropertyData(device, &address, 0, NULL, &size, &deviceBufferSize));
 
 	iron_log("deviceBufferSize = %i\n", deviceBufferSize);
 
-	size = sizeof(AudioStreamBasicDescription);
+	size              = sizeof(AudioStreamBasicDescription);
 	address.mSelector = kAudioDevicePropertyStreamFormat;
-	address.mScope = kAudioDevicePropertyScopeOutput;
+	address.mScope    = kAudioDevicePropertyScopeOutput;
 
 	affirm(AudioObjectGetPropertyData(device, &address, 0, NULL, &size, &deviceFormat));
 

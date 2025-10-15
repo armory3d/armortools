@@ -1,11 +1,9 @@
 #include "iron_mat3.h"
 
-#include <math.h>
 #include <iron_math.h>
+#include <math.h>
 
-mat3_t mat3_create(float _00, float _10, float _20,
-				   float _01, float _11, float _21,
-				   float _02, float _12, float _22) {
+mat3_t mat3_create(float _00, float _10, float _20, float _01, float _11, float _21, float _02, float _12, float _22) {
 	mat3_t m;
 	m.m[0] = _00;
 	m.m[1] = _01;
@@ -20,27 +18,15 @@ mat3_t mat3_create(float _00, float _10, float _20,
 }
 
 mat3_t mat3_identity() {
-	return mat3_create(
-		1, 0, 0,
-		0, 1, 0,
-		0, 0, 1
-	);
+	return mat3_create(1, 0, 0, 0, 1, 0, 0, 0, 1);
 }
 
 mat3_t mat3_translation(float x, float y) {
-	return mat3_create(
-		1, 0, x,
-		0, 1, y,
-		0, 0, 1
-	);
+	return mat3_create(1, 0, x, 0, 1, y, 0, 0, 1);
 }
 
 mat3_t mat3_rotation(float alpha) {
-	return mat3_create(
-		cosf(alpha), -sinf(alpha), 0,
-		sinf(alpha), cosf(alpha), 0,
-		0, 0, 1
-	);
+	return mat3_create(cosf(alpha), -sinf(alpha), 0, sinf(alpha), cosf(alpha), 0, 0, 0, 1);
 }
 
 mat3_t mat3_scale(mat3_t m, vec4_t v) {
@@ -58,7 +44,7 @@ mat3_t mat3_scale(mat3_t m, vec4_t v) {
 
 mat3_t mat3_set_from4(mat4_t m4) {
 	mat3_t m;
-    m.m[0] = m4.m[0];
+	m.m[0] = m4.m[0];
 	m.m[1] = m4.m[1];
 	m.m[2] = m4.m[2];
 	m.m[3] = m4.m[4];
@@ -71,17 +57,11 @@ mat3_t mat3_set_from4(mat4_t m4) {
 }
 
 mat3_t mat3_multmat(mat3_t a, mat3_t b) {
-	return mat3_create(
-		a.m[0] * b.m[0] + a.m[3] * b.m[1] + a.m[6] * b.m[2],
-		a.m[0] * b.m[3] + a.m[3] * b.m[4] + a.m[6] * b.m[5],
-		a.m[0] * b.m[6] + a.m[3] * b.m[7] + a.m[6] * b.m[8],
-		a.m[1] * b.m[0] + a.m[4] * b.m[1] + a.m[7] * b.m[2],
-		a.m[1] * b.m[3] + a.m[4] * b.m[4] + a.m[7] * b.m[5],
-		a.m[1] * b.m[6] + a.m[4] * b.m[7] + a.m[7] * b.m[8],
-		a.m[2] * b.m[0] + a.m[5] * b.m[1] + a.m[8] * b.m[2],
-		a.m[2] * b.m[3] + a.m[5] * b.m[4] + a.m[8] * b.m[5],
-		a.m[2] * b.m[6] + a.m[5] * b.m[7] + a.m[8] * b.m[8]
-	);
+	return mat3_create(a.m[0] * b.m[0] + a.m[3] * b.m[1] + a.m[6] * b.m[2], a.m[0] * b.m[3] + a.m[3] * b.m[4] + a.m[6] * b.m[5],
+	                   a.m[0] * b.m[6] + a.m[3] * b.m[7] + a.m[6] * b.m[8], a.m[1] * b.m[0] + a.m[4] * b.m[1] + a.m[7] * b.m[2],
+	                   a.m[1] * b.m[3] + a.m[4] * b.m[4] + a.m[7] * b.m[5], a.m[1] * b.m[6] + a.m[4] * b.m[7] + a.m[7] * b.m[8],
+	                   a.m[2] * b.m[0] + a.m[5] * b.m[1] + a.m[8] * b.m[2], a.m[2] * b.m[3] + a.m[5] * b.m[4] + a.m[8] * b.m[5],
+	                   a.m[2] * b.m[6] + a.m[5] * b.m[7] + a.m[8] * b.m[8]);
 }
 
 mat3_t mat3_nan() {

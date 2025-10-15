@@ -1,7 +1,7 @@
 
 #include "iron_math.h"
-#include <math.h>
 #include <limits.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -65,9 +65,9 @@ iron_matrix3x3_t iron_matrix3x3_identity(void) {
 }
 
 iron_matrix3x3_t iron_matrix3x3_rotation_x(float alpha) {
-	iron_matrix3x3_t m = iron_matrix3x3_identity();
-	float ca = cosf(alpha);
-	float sa = sinf(alpha);
+	iron_matrix3x3_t m  = iron_matrix3x3_identity();
+	float            ca = cosf(alpha);
+	float            sa = sinf(alpha);
 	iron_matrix3x3_set(&m, 1, 1, ca);
 	iron_matrix3x3_set(&m, 2, 1, -sa);
 	iron_matrix3x3_set(&m, 1, 2, sa);
@@ -76,9 +76,9 @@ iron_matrix3x3_t iron_matrix3x3_rotation_x(float alpha) {
 }
 
 iron_matrix3x3_t iron_matrix3x3_rotation_y(float alpha) {
-	iron_matrix3x3_t m = iron_matrix3x3_identity();
-	float ca = cosf(alpha);
-	float sa = sinf(alpha);
+	iron_matrix3x3_t m  = iron_matrix3x3_identity();
+	float            ca = cosf(alpha);
+	float            sa = sinf(alpha);
 	iron_matrix3x3_set(&m, 0, 0, ca);
 	iron_matrix3x3_set(&m, 2, 0, sa);
 	iron_matrix3x3_set(&m, 0, 2, -sa);
@@ -87,9 +87,9 @@ iron_matrix3x3_t iron_matrix3x3_rotation_y(float alpha) {
 }
 
 iron_matrix3x3_t iron_matrix3x3_rotation_z(float alpha) {
-	iron_matrix3x3_t m = iron_matrix3x3_identity();
-	float ca = cosf(alpha);
-	float sa = sinf(alpha);
+	iron_matrix3x3_t m  = iron_matrix3x3_identity();
+	float            ca = cosf(alpha);
+	float            sa = sinf(alpha);
 	iron_matrix3x3_set(&m, 0, 0, ca);
 	iron_matrix3x3_set(&m, 1, 0, -sa);
 	iron_matrix3x3_set(&m, 0, 1, sa);
@@ -177,9 +177,9 @@ iron_matrix4x4_t iron_matrix4x4_multiply(iron_matrix4x4_t *a, iron_matrix4x4_t *
 
 void iron_color_components(uint32_t color, float *red, float *green, float *blue, float *alpha) {
 	*alpha = ((color & 0xff000000) >> 24) / 255.0f;
-	*red = ((color & 0x00ff0000) >> 16) / 255.0f;
+	*red   = ((color & 0x00ff0000) >> 16) / 255.0f;
 	*green = ((color & 0x0000ff00) >> 8) / 255.0f;
-	*blue = (color & 0x000000ff) / 255.0f;
+	*blue  = (color & 0x000000ff) / 255.0f;
 }
 
 // xoshiro256** 1.0
@@ -231,7 +231,7 @@ int64_t iron_random_get_in(int64_t min, int64_t max) {
 
 uint32_t iron_hash_djb2(unsigned char *str) {
 	unsigned long hash = 5381;
-	int c;
+	int           c;
 	while ((c = *str++)) {
 		hash = hash * 33 ^ c;
 	}

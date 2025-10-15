@@ -8,41 +8,41 @@
 #include <iron_video.h>
 
 #include <assert.h>
-#include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 struct iron_a1_channel {
 	iron_a1_sound_t *sound;
-	float position;
-	bool loop;
-	volatile float volume;
-	volatile float pitch;
+	float            position;
+	bool             loop;
+	volatile float   volume;
+	volatile float   pitch;
 };
 
 struct iron_a1_stream_channel {
 	iron_a1_sound_stream_t *stream;
-	int position;
+	int                     position;
 };
 
 struct iron_internal_video_channel {
 	struct iron_internal_video_sound_stream *stream;
-	int position;
+	int                                      position;
 };
 
 static iron_mutex_t mutex;
 
 #define CHANNEL_COUNT 16
-static iron_a1_channel_t channels[CHANNEL_COUNT];
-static iron_a1_stream_channel_t streamchannels[CHANNEL_COUNT];
+static iron_a1_channel_t             channels[CHANNEL_COUNT];
+static iron_a1_stream_channel_t      streamchannels[CHANNEL_COUNT];
 static iron_internal_video_channel_t videos[CHANNEL_COUNT];
 
 static float sampleLinear(int16_t *data, float position) {
-	int pos1 = (int)position;
-	int pos2 = (int)(position + 1);
+	int   pos1    = (int)position;
+	int   pos2    = (int)(position + 1);
 	float sample1 = data[pos1] / 32767.0f;
 	float sample2 = data[pos2] / 32767.0f;
-	float a = position - pos1;
+	float a       = position - pos1;
 	return sample1 * (1 - a) + sample2 * a;
 }
 
@@ -52,7 +52,7 @@ static void iron_a2_on_a1_mix(iron_a2_buffer_t *buffer, uint32_t samples, void *
 
 void iron_a1_mix(iron_a2_buffer_t *buffer, uint32_t samples) {
 	for (uint32_t i = 0; i < samples; ++i) {
-		float left_value = 0.0f;
+		float left_value  = 0.0f;
 		float right_value = 0.0f;
 
 		iron_mutex_lock(&mutex);
@@ -116,11 +116,11 @@ void iron_a1_mix(iron_a2_buffer_t *buffer, uint32_t samples) {
 
 void iron_a1_init(void) {
 	for (int i = 0; i < CHANNEL_COUNT; ++i) {
-		channels[i].sound = NULL;
+		channels[i].sound    = NULL;
 		channels[i].position = 0;
 	}
 	for (int i = 0; i < CHANNEL_COUNT; ++i) {
-		streamchannels[i].stream = NULL;
+		streamchannels[i].stream   = NULL;
 		streamchannels[i].position = 0;
 	}
 	iron_mutex_init(&mutex);
@@ -142,12 +142,12 @@ iron_a1_channel_t *iron_a1_play_sound(iron_a1_sound_t *sound, bool loop, float p
 	if (!found || !unique) {
 		for (int i = 0; i < CHANNEL_COUNT; ++i) {
 			if (channels[i].sound == NULL) {
-				channels[i].sound = sound;
+				channels[i].sound    = sound;
 				channels[i].position = 0;
-				channels[i].loop = loop;
-				channels[i].pitch = pitch;
-				channels[i].volume = sound->volume;
-				channel = &channels[i];
+				channels[i].loop     = loop;
+				channels[i].pitch    = pitch;
+				channels[i].volume   = sound->volume;
+				channel              = &channels[i];
 				break;
 			}
 		}
@@ -160,7 +160,7 @@ void iron_a1_stop_sound(iron_a1_sound_t *sound) {
 	iron_mutex_lock(&mutex);
 	for (int i = 0; i < CHANNEL_COUNT; ++i) {
 		if (channels[i].sound == sound) {
-			channels[i].sound = NULL;
+			channels[i].sound    = NULL;
 			channels[i].position = 0;
 			break;
 		}
@@ -173,7 +173,7 @@ void iron_a1_play_sound_stream(iron_a1_sound_stream_t *stream) {
 
 	for (int i = 0; i < CHANNEL_COUNT; ++i) {
 		if (streamchannels[i].stream == stream) {
-			streamchannels[i].stream = NULL;
+			streamchannels[i].stream   = NULL;
 			streamchannels[i].position = 0;
 			break;
 		}
@@ -181,7 +181,7 @@ void iron_a1_play_sound_stream(iron_a1_sound_stream_t *stream) {
 
 	for (int i = 0; i < CHANNEL_COUNT; ++i) {
 		if (streamchannels[i].stream == NULL) {
-			streamchannels[i].stream = stream;
+			streamchannels[i].stream   = stream;
 			streamchannels[i].position = 0;
 			break;
 		}
@@ -194,7 +194,7 @@ void iron_a1_stop_sound_stream(iron_a1_sound_stream_t *stream) {
 	iron_mutex_lock(&mutex);
 	for (int i = 0; i < CHANNEL_COUNT; ++i) {
 		if (streamchannels[i].stream == stream) {
-			streamchannels[i].stream = NULL;
+			streamchannels[i].stream   = NULL;
 			streamchannels[i].position = 0;
 			break;
 		}
@@ -206,7 +206,7 @@ void iron_internal_play_video_sound_stream(struct iron_internal_video_sound_stre
 	iron_mutex_lock(&mutex);
 	for (int i = 0; i < CHANNEL_COUNT; ++i) {
 		if (videos[i].stream == NULL) {
-			videos[i].stream = stream;
+			videos[i].stream   = stream;
 			videos[i].position = 0;
 			break;
 		}
@@ -218,7 +218,7 @@ void iron_internal_stop_video_sound_stream(struct iron_internal_video_sound_stre
 	iron_mutex_lock(&mutex);
 	for (int i = 0; i < CHANNEL_COUNT; ++i) {
 		if (videos[i].stream == stream) {
-			videos[i].stream = NULL;
+			videos[i].stream   = NULL;
 			videos[i].position = 0;
 			break;
 		}
@@ -271,16 +271,16 @@ static void readChunk(uint8_t **data, struct WaveData *wave) {
 	uint32_t chunksize = iron_read_u32le(*data);
 	*data += 4;
 	if (strcmp(fourcc, "fmt ") == 0) {
-		wave->audioFormat = iron_read_u16le(*data + 0);
-		wave->numChannels = iron_read_u16le(*data + 2);
-		wave->sampleRate = iron_read_u32le(*data + 4);
+		wave->audioFormat    = iron_read_u16le(*data + 0);
+		wave->numChannels    = iron_read_u16le(*data + 2);
+		wave->sampleRate     = iron_read_u32le(*data + 4);
 		wave->bytesPerSecond = iron_read_u32le(*data + 8);
-		wave->bitsPerSample = iron_read_u16le(*data + 14);
+		wave->bitsPerSample  = iron_read_u16le(*data + 14);
 		*data += chunksize;
 	}
 	else if (strcmp(fourcc, "data") == 0) {
 		wave->dataSize = chunksize;
-		wave->data = (uint8_t *)malloc(chunksize * sizeof(uint8_t));
+		wave->data     = (uint8_t *)malloc(chunksize * sizeof(uint8_t));
 		memcpy(wave->data, *data, chunksize);
 		*data += chunksize;
 	}
@@ -295,28 +295,28 @@ static int16_t convert8to16(uint8_t sample) {
 
 static void splitStereo8(uint8_t *data, int size, int16_t *left, int16_t *right) {
 	for (int i = 0; i < size; ++i) {
-		left[i] = convert8to16(data[i * 2 + 0]);
+		left[i]  = convert8to16(data[i * 2 + 0]);
 		right[i] = convert8to16(data[i * 2 + 1]);
 	}
 }
 
 static void splitStereo16(int16_t *data, int size, int16_t *left, int16_t *right) {
 	for (int i = 0; i < size; ++i) {
-		left[i] = data[i * 2 + 0];
+		left[i]  = data[i * 2 + 0];
 		right[i] = data[i * 2 + 1];
 	}
 }
 
 static void splitMono8(uint8_t *data, int size, int16_t *left, int16_t *right) {
 	for (int i = 0; i < size; ++i) {
-		left[i] = convert8to16(data[i]);
+		left[i]  = convert8to16(data[i]);
 		right[i] = convert8to16(data[i]);
 	}
 }
 
 static void splitMono16(int16_t *data, int size, int16_t *left, int16_t *right) {
 	for (int i = 0; i < size; ++i) {
-		left[i] = data[i];
+		left[i]  = data[i];
 		right[i] = data[i];
 	}
 }
@@ -336,13 +336,13 @@ static iron_a1_sound_t *find_sound(void) {
 iron_a1_sound_t *iron_a1_sound_create(const char *filename) {
 	iron_a1_sound_t *sound = find_sound();
 	assert(sound != NULL);
-	sound->in_use = true;
-	sound->volume = 1.0f;
-	sound->size = 0;
-	sound->left = NULL;
-	sound->right = NULL;
-	size_t filenameLength = strlen(filename);
-	uint8_t *data = NULL;
+	sound->in_use           = true;
+	sound->volume           = 1.0f;
+	sound->size             = 0;
+	sound->left             = NULL;
+	sound->right            = NULL;
+	size_t   filenameLength = strlen(filename);
+	uint8_t *data           = NULL;
 
 	if (strncmp(&filename[filenameLength - 4], ".ogg", 4) == 0) {
 		iron_file_reader_t file;
@@ -355,11 +355,11 @@ iron_a1_sound_t *iron_a1_sound_create(const char *filename) {
 		iron_file_reader_close(&file);
 
 		int channels, sample_rate;
-		int samples = stb_vorbis_decode_memory(filedata, (int)iron_file_reader_size(&file), &channels, &sample_rate, (short **)&data);
-		sound->channel_count = (uint8_t)channels;
+		int samples               = stb_vorbis_decode_memory(filedata, (int)iron_file_reader_size(&file), &channels, &sample_rate, (short **)&data);
+		sound->channel_count      = (uint8_t)channels;
 		sound->samples_per_second = (uint32_t)sample_rate;
-		sound->size = samples * 2 * sound->channel_count;
-		sound->bits_per_sample = 16;
+		sound->size               = samples * 2 * sound->channel_count;
+		sound->bits_per_sample    = 16;
 		free(filedata);
 	}
 	else if (strncmp(&filename[filenameLength - 4], ".wav", 4) == 0) {
@@ -386,11 +386,11 @@ iron_a1_sound_t *iron_a1_sound_create(const char *filename) {
 			free(filedata);
 		}
 
-		sound->bits_per_sample = (uint8_t)wave.bitsPerSample;
-		sound->channel_count = (uint8_t)wave.numChannels;
+		sound->bits_per_sample    = (uint8_t)wave.bitsPerSample;
+		sound->channel_count      = (uint8_t)wave.numChannels;
 		sound->samples_per_second = wave.sampleRate;
-		data = wave.data;
-		sound->size = wave.dataSize;
+		data                      = wave.data;
+		sound->size               = wave.dataSize;
 	}
 	else {
 		assert(false);
@@ -398,13 +398,13 @@ iron_a1_sound_t *iron_a1_sound_create(const char *filename) {
 
 	if (sound->channel_count == 1) {
 		if (sound->bits_per_sample == 8) {
-			sound->left = (int16_t *)malloc(sound->size * sizeof(int16_t));
+			sound->left  = (int16_t *)malloc(sound->size * sizeof(int16_t));
 			sound->right = (int16_t *)malloc(sound->size * sizeof(int16_t));
 			splitMono8(data, sound->size, sound->left, sound->right);
 		}
 		else if (sound->bits_per_sample == 16) {
 			sound->size /= 2;
-			sound->left = (int16_t *)malloc(sound->size * sizeof(int16_t));
+			sound->left  = (int16_t *)malloc(sound->size * sizeof(int16_t));
 			sound->right = (int16_t *)malloc(sound->size * sizeof(int16_t));
 			splitMono16((int16_t *)data, sound->size, sound->left, sound->right);
 		}
@@ -413,13 +413,13 @@ iron_a1_sound_t *iron_a1_sound_create(const char *filename) {
 		// Left and right channel are in s16 audio stream, alternating.
 		if (sound->bits_per_sample == 8) {
 			sound->size /= 2;
-			sound->left = (int16_t *)malloc(sound->size * sizeof(int16_t));
+			sound->left  = (int16_t *)malloc(sound->size * sizeof(int16_t));
 			sound->right = (int16_t *)malloc(sound->size * sizeof(int16_t));
 			splitStereo8(data, sound->size, sound->left, sound->right);
 		}
 		else if (sound->bits_per_sample == 16) {
 			sound->size /= 4;
-			sound->left = (int16_t *)malloc(sound->size * sizeof(int16_t));
+			sound->left  = (int16_t *)malloc(sound->size * sizeof(int16_t));
 			sound->right = (int16_t *)malloc(sound->size * sizeof(int16_t));
 			splitStereo16((int16_t *)data, sound->size, sound->left, sound->right);
 		}
@@ -433,8 +433,8 @@ iron_a1_sound_t *iron_a1_sound_create(const char *filename) {
 void iron_a1_sound_destroy(iron_a1_sound_t *sound) {
 	free(sound->left);
 	free(sound->right);
-	sound->left = NULL;
-	sound->right = NULL;
+	sound->left   = NULL;
+	sound->right  = NULL;
 	sound->in_use = false;
 }
 
@@ -447,16 +447,16 @@ void iron_a1_sound_set_volume(iron_a1_sound_t *sound, float value) {
 }
 
 static iron_a1_sound_stream_t streams[256];
-static int nextStream = 0;
-static uint8_t buffer[1024 * 10];
-static int bufferIndex;
+static int                    nextStream = 0;
+static uint8_t                buffer[1024 * 10];
+static int                    bufferIndex;
 
 iron_a1_sound_stream_t *iron_a1_sound_stream_create(const char *filename, bool looping) {
 	iron_a1_sound_stream_t *stream = &streams[nextStream];
-	stream->myLooping = looping;
-	stream->myVolume = 1;
-	stream->rateDecodedHack = false;
-	stream->end = false;
+	stream->myLooping              = looping;
+	stream->myVolume               = 1;
+	stream->rateDecodedHack        = false;
+	stream->end                    = false;
 	iron_file_reader_t file;
 	iron_file_reader_open(&file, filename, IRON_FILE_TYPE_ASSET);
 	stream->buffer = &buffer[bufferIndex];
@@ -469,12 +469,12 @@ iron_a1_sound_stream_t *iron_a1_sound_stream_create(const char *filename, bool l
 	stream->vorbis = stb_vorbis_open_memory(buffer, (int)iron_file_reader_size(&file), NULL, NULL);
 	if (stream->vorbis != NULL) {
 		stb_vorbis_info info = stb_vorbis_get_info(stream->vorbis);
-		stream->chans = info.channels;
-		stream->rate = info.sample_rate;
+		stream->chans        = info.channels;
+		stream->rate         = info.sample_rate;
 	}
 	else {
 		stream->chans = 2;
-		stream->rate = 22050;
+		stream->rate  = 22050;
 	}
 	++nextStream;
 	return stream;
@@ -523,7 +523,7 @@ float iron_a1_sound_stream_position(iron_a1_sound_stream_t *stream) {
 void iron_a1_sound_stream_reset(iron_a1_sound_stream_t *stream) {
 	if (stream->vorbis != NULL)
 		stb_vorbis_seek_start(stream->vorbis);
-	stream->end = false;
+	stream->end             = false;
 	stream->rateDecodedHack = false;
 }
 
@@ -541,9 +541,9 @@ float *iron_a1_sound_stream_next_frame(iron_a1_sound_stream_t *stream) {
 		}
 	}
 
-	float left, right;
+	float  left, right;
 	float *samples_array[2] = {&left, &right};
-	int read = stb_vorbis_get_samples_float(stream->vorbis, stream->chans, samples_array, 1);
+	int    read             = stb_vorbis_get_samples_float(stream->vorbis, stream->chans, samples_array, 1);
 	if (read == 0) {
 		if (iron_a1_sound_stream_looping(stream)) {
 			stb_vorbis_seek_start(stream->vorbis);

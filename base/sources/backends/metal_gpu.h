@@ -6,10 +6,10 @@ typedef struct {
 } gpu_pipeline_impl_t;
 
 typedef struct {
-	char name[256];
+	char  name[256];
 	void *mtl_function;
 	char *source;
-	int length;
+	int   length;
 } gpu_shader_impl_t;
 
 typedef struct {

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <stdbool.h>
 #include <iron_global.h>
+#include <stdbool.h>
 #include BACKEND_THREAD_H
 
 typedef struct iron_thread {

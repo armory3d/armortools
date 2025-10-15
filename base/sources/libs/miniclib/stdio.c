@@ -1,11 +1,11 @@
 #include "stdio.h"
 
 #ifdef IRON_WASM
-__attribute__((import_module("imports"), import_name("js_fprintf"))) void js_fprintf(const char *format);
-__attribute__((import_module("imports"), import_name("js_fopen"))) FILE *js_fopen(const char *filename);
+__attribute__((import_module("imports"), import_name("js_fprintf"))) void   js_fprintf(const char *format);
+__attribute__((import_module("imports"), import_name("js_fopen"))) FILE    *js_fopen(const char *filename);
 __attribute__((import_module("imports"), import_name("js_ftell"))) long int js_ftell(FILE *stream);
-__attribute__((import_module("imports"), import_name("js_fseek"))) int js_fseek(FILE *stream, long int offset, int origin);
-__attribute__((import_module("imports"), import_name("js_fread"))) size_t js_fread(void *ptr, size_t size, size_t count, FILE *stream);
+__attribute__((import_module("imports"), import_name("js_fseek"))) int      js_fseek(FILE *stream, long int offset, int origin);
+__attribute__((import_module("imports"), import_name("js_fread"))) size_t   js_fread(void *ptr, size_t size, size_t count, FILE *stream);
 #endif
 
 FILE *stdout = NULL, *stderr = NULL;

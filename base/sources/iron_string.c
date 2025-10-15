@@ -1,9 +1,9 @@
 #include "iron_string.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 void *gc_alloc(size_t size);
 void *gc_leaf(void *ptr);
@@ -42,35 +42,35 @@ bool string_equals(char *a, char *b) {
 }
 
 char *i32_to_string(int32_t i) {
-	int l = snprintf(NULL, 0, "%d", i);
+	int   l = snprintf(NULL, 0, "%d", i);
 	char *r = string_alloc(l + 1);
 	sprintf(r, "%d", i);
 	return r;
 }
 
 char *i32_to_string_hex(int32_t i) {
-	int l = snprintf(NULL, 0, "%X", i);
+	int   l = snprintf(NULL, 0, "%X", i);
 	char *r = string_alloc(l + 1);
 	sprintf(r, "%X", i);
 	return r;
 }
 
 char *i64_to_string(int64_t i) {
-	int l = snprintf(NULL, 0, "%ld", i);
+	int   l = snprintf(NULL, 0, "%ld", i);
 	char *r = string_alloc(l + 1);
 	sprintf(r, "%ld", i);
 	return r;
 }
 
 char *u64_to_string(uint64_t i) {
-	int l = snprintf(NULL, 0, "%lu", i);
+	int   l = snprintf(NULL, 0, "%lu", i);
 	char *r = string_alloc(l + 1);
 	sprintf(r, "%lu", i);
 	return r;
 }
 
 char *f32_to_string_with_zeros(float f) {
-	int l = snprintf(NULL, 0, "%f", f);
+	int   l = snprintf(NULL, 0, "%f", f);
 	char *r = string_alloc(l + 1);
 	sprintf(r, "%f", f);
 	return r;
@@ -105,7 +105,7 @@ int32_t string_index_of(char *s, char *search) {
 }
 
 int32_t string_last_index_of(char *str, char *search) {
-	char *s = str;
+	char *s     = str;
 	char *found = NULL;
 	while (1) {
 		char *p = strstr(s, search);
@@ -113,7 +113,7 @@ int32_t string_last_index_of(char *str, char *search) {
 			break;
 		}
 		found = p;
-		s = p + 1;
+		s     = p + 1;
 	}
 	if (found != NULL) {
 		return found - str;
@@ -122,17 +122,17 @@ int32_t string_last_index_of(char *str, char *search) {
 }
 
 any_array_t *string_split(char *s, char *sep) {
-	any_array_t *a = gc_alloc(sizeof(any_array_t));
-	int sep_len = strlen(sep);
-	char *pos = s;
+	any_array_t *a       = gc_alloc(sizeof(any_array_t));
+	int          sep_len = strlen(sep);
+	char        *pos     = s;
 	while (true) {
 		char *next = strstr(pos, sep);
 		if (next == NULL) {
 			any_array_push(a, string_copy(pos));
 			break;
 		}
-		int part_len = next - pos;
-		char *part = string_alloc(part_len + 1);
+		int   part_len = next - pos;
+		char *part     = string_alloc(part_len + 1);
 		strncpy(part, pos, part_len);
 		part[part_len] = '\0';
 		any_array_push(a, part);
@@ -142,7 +142,7 @@ any_array_t *string_split(char *s, char *sep) {
 }
 
 char *string_array_join(any_array_t *a, char *separator) {
-	int len = 0;
+	int len     = 0;
 	int len_sep = strlen(separator);
 	for (int i = 0; i < a->length; ++i) {
 		len += strlen(a->buffer[i]);
@@ -162,9 +162,9 @@ char *string_array_join(any_array_t *a, char *separator) {
 }
 
 char *string_replace_all(char *s, char *search, char *replace) {
-	char *buffer = string_alloc(1024);
-	char *buffer_pos = buffer;
-	size_t search_len = strlen(search);
+	char  *buffer      = string_alloc(1024);
+	char  *buffer_pos  = buffer;
+	size_t search_len  = strlen(search);
 	size_t replace_len = strlen(replace);
 	while (1) {
 		char *p = strstr(s, search);
@@ -191,8 +191,8 @@ char *substring(char *s, int32_t start, int32_t end) {
 
 char *string_from_char_code(int32_t c) {
 	char *r = string_alloc(2);
-	r[0] = c;
-	r[1] = '\0';
+	r[0]    = c;
+	r[1]    = '\0';
 	return r;
 }
 
@@ -202,8 +202,8 @@ int32_t char_code_at(char *s, int32_t i) {
 
 char *char_at(char *s, int32_t i) {
 	char *r = string_alloc(2);
-	r[0] = s[i];
-	r[1] = '\0';
+	r[0]    = s[i];
+	r[1]    = '\0';
 	return r;
 }
 
@@ -212,7 +212,7 @@ bool starts_with(char *s, char *start) {
 }
 
 bool ends_with(char *s, char *end) {
-	size_t len_s = strlen(s);
+	size_t len_s   = strlen(s);
 	size_t len_end = strlen(end);
 	return strncmp(s + len_s - len_end, end, len_end) == 0;
 }
@@ -250,7 +250,7 @@ char *trim_end(char *str) {
 #define is_unicode(c) (((c) & 0xc0) == 0xc0)
 int string_utf8_decode(const char *str, int *i) {
 	const unsigned char *s = (const unsigned char *)str;
-	int u = *s, l = 1;
+	int                  u = *s, l = 1;
 	if (is_unicode(u)) {
 		int a = (u & 0x20) ? ((u & 0x10) ? ((u & 0x08) ? ((u & 0x04) ? 6 : 5) : 4) : 3) : 2;
 		if (a < 6 || !(u & 0x02)) {
@@ -260,6 +260,7 @@ int string_utf8_decode(const char *str, int *i) {
 				u = (u << 6) | (s[l++] & 0x3f);
 		}
 	}
-	if (i) *i += l;
+	if (i)
+		*i += l;
 	return u;
 }

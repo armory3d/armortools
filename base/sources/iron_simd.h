@@ -28,7 +28,7 @@
 #endif
 
 // SSE Capability check
-#if defined(__SSE__) || _M_IX86_FP == 2 || _M_IX86_FP == 1 || (defined(IRON_WINDOWS) && !defined(__aarch64__)) ||                                              \
+#if defined(__SSE__) || _M_IX86_FP == 2 || _M_IX86_FP == 1 || (defined(IRON_WINDOWS) && !defined(__aarch64__)) || \
     (defined(IRON_WINDOWSAPP) && !defined(__aarch64__)) || (defined(IRON_MACOS) && __x86_64)
 
 #define IRON_SSE
@@ -40,14 +40,14 @@
 #endif
 
 // No SIMD Capabilities
-#if !defined(IRON_SSE4_2) && !defined(IRON_SSE4_1) && !defined(IRON_SSSE3) && !defined(IRON_SSE3) && !defined(IRON_SSE2) && !defined(IRON_SSE) &&              \
+#if !defined(IRON_SSE4_2) && !defined(IRON_SSE4_1) && !defined(IRON_SSSE3) && !defined(IRON_SSE3) && !defined(IRON_SSE2) && !defined(IRON_SSE) && \
     !defined(IRON_NEON) && !defined(IRON_NOSIMD)
 
 #define IRON_NOSIMD
 #endif
 
-#define IRON_SHUFFLE_TABLE(LANE_A1, LANE_A2, LANE_B1, LANE_B2)                                                                                                 \
-	((((LANE_B2)&0x3) << 6) | (((LANE_B1)&0x3) << 4) | (((LANE_A2)&0x3) << 2) | (((LANE_A1)&0x3) << 0))
+#define IRON_SHUFFLE_TABLE(LANE_A1, LANE_A2, LANE_B1, LANE_B2) \
+	((((LANE_B2) & 0x3) << 6) | (((LANE_B1) & 0x3) << 4) | (((LANE_A2) & 0x3) << 2) | (((LANE_A1) & 0x3) << 0))
 
 #if defined(IRON_SSE2)
 
@@ -70,7 +70,7 @@ typedef __m128 iron_float32x4_mask_t;
 #include <arm_neon.h>
 
 typedef float32x4_t iron_float32x4_t;
-typedef uint32x4_t iron_float32x4_mask_t;
+typedef uint32x4_t  iron_float32x4_mask_t;
 
 #elif defined(IRON_NOSIMD)
 
@@ -113,7 +113,7 @@ static inline void iron_float32x4_store_unaligned(float *destination, iron_float
 static inline float iron_float32x4_get(iron_float32x4_t t, int index) {
 	union {
 		__m128 value;
-		float elements[4];
+		float  elements[4];
 	} converter;
 	converter.value = t;
 	return converter.elements[index];
@@ -210,7 +210,7 @@ static inline iron_float32x4_t iron_float32x4_not(iron_float32x4_t t) {
 	return _mm_xor_ps(t, _mm_cmpeq_ps(zeroes, zeroes));
 }
 
-#define iron_float32x4_shuffle_custom(abcd, efgh, left_1, left_2, right_1, right_2)                                                                            \
+#define iron_float32x4_shuffle_custom(abcd, efgh, left_1, left_2, right_1, right_2) \
 	_mm_shuffle_ps((abcd), (efgh), IRON_SHUFFLE_TABLE((left_1), (left_2), (right_1), (right_2)))
 
 static inline iron_float32x4_t iron_float32x4_shuffle_aebf(iron_float32x4_t abcd, iron_float32x4_t efgh) {
@@ -275,9 +275,9 @@ static inline iron_float32x4_t iron_float32x4_div(iron_float32x4_t a, iron_float
 #if defined(__aarch64__)
 	return vdivq_f32(a, b);
 #else
-	float32x4_t inv = vrecpeq_f32(b);
+	float32x4_t inv    = vrecpeq_f32(b);
 	float32x4_t restep = vrecpsq_f32(b, inv);
-	inv = vmulq_f32(restep, inv);
+	inv                = vmulq_f32(restep, inv);
 	return vmulq_f32(a, inv);
 #endif
 }
@@ -373,10 +373,10 @@ static inline iron_float32x4_t iron_float32x4_not(iron_float32x4_t t) {
 	return vreinterpretq_f32_u32(vmvnq_u32(tcvt));
 }
 
-#define iron_float32x4_shuffle_custom(abcd, efgh, left_1, left_2, right_1, right_2)                                                                            \
-	(iron_float32x4_t) {                                                                                                                                       \
-		vgetq_lane_f32((abcd), ((left_1)&0x3)), vgetq_lane_f32((abcd), ((left_2)&0x3)), vgetq_lane_f32((efgh), ((right_1)&0x3)),                               \
-		    vgetq_lane_f32((efgh), ((right_2)&0x3))                                                                                                            \
+#define iron_float32x4_shuffle_custom(abcd, efgh, left_1, left_2, right_1, right_2)                                                    \
+	(iron_float32x4_t) {                                                                                                               \
+		vgetq_lane_f32((abcd), ((left_1) & 0x3)), vgetq_lane_f32((abcd), ((left_2) & 0x3)), vgetq_lane_f32((efgh), ((right_1) & 0x3)), \
+		    vgetq_lane_f32((efgh), ((right_2) & 0x3))                                                                                  \
 	}
 
 static inline iron_float32x4_t iron_float32x4_shuffle_aebf(iron_float32x4_t abcd, iron_float32x4_t efgh) {

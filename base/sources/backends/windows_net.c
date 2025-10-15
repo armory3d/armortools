@@ -1,15 +1,14 @@
-#include <iron_system.h>
+#include <Windows.h>
 #include <iron_net.h>
+#include <iron_system.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <Windows.h>
 #include <winhttp.h>
 
-static char *returnData = NULL;
-static int returnDataSize = 0;
+static char *returnData     = NULL;
+static int   returnDataSize = 0;
 
-void iron_https_request(const char *url_base, const char *url_path, const char *data, int port, int method,
-                        iron_http_callback_t callback, void *callbackdata) {
+void iron_https_request(const char *url_base, const char *url_path, const char *data, int port, int method, iron_http_callback_t callback, void *callbackdata) {
 	// based on https://docs.microsoft.com/en-us/windows/desktop/winhttp/winhttp-sessions-overview
 
 	HINTERNET hSession = WinHttpOpen(L"WinHTTP via Iron/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
@@ -25,14 +24,15 @@ void iron_https_request(const char *url_base, const char *url_path, const char *
 	if (hConnect) {
 		wchar_t wurl_path[4096];
 		MultiByteToWideChar(CP_UTF8, 0, url_path, -1, wurl_path, 4096);
-		hRequest = WinHttpOpenRequest(hConnect, method == IRON_HTTP_GET ? L"GET" : L"POST", wurl_path, NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, WINHTTP_FLAG_SECURE);
+		hRequest = WinHttpOpenRequest(hConnect, method == IRON_HTTP_GET ? L"GET" : L"POST", wurl_path, NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES,
+		                              WINHTTP_FLAG_SECURE);
 	}
 
 	BOOL bResults = FALSE;
 	if (hRequest) {
 		DWORD optionalLength = (data != 0 && strlen(data) > 0) ? (DWORD)strlen(data) : 0;
-		bResults = WinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0,
-		                              data == 0 ? WINHTTP_NO_REQUEST_DATA : (LPVOID)data, optionalLength, optionalLength, 0);
+		bResults = WinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, data == 0 ? WINHTTP_NO_REQUEST_DATA : (LPVOID)data, optionalLength,
+		                              optionalLength, 0);
 	}
 
 	if (bResults) {
@@ -50,7 +50,7 @@ void iron_https_request(const char *url_base, const char *url_path, const char *
 
 			if ((int)dwSize + 1 > returnDataSize - returnDataIndex) {
 				returnDataSize = (returnDataIndex + dwSize + 1) * 2;
-				returnData = realloc(returnData, returnDataSize);
+				returnData     = realloc(returnData, returnDataSize);
 			}
 
 			DWORD dwDownloaded = 0;

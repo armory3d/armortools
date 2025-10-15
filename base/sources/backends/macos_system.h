@@ -1,15 +1,15 @@
 
-#import <MetalKit/MTKView.h>
 #include <IOKit/IOKitLib.h>
 #include <IOKit/hid/IOHIDKeys.h>
 #include <IOKit/hid/IOHIDManager.h>
+#import <MetalKit/MTKView.h>
 #include <iron_global.h>
 
 @interface BasicMTKView : MTKView {
 @private
-	id<MTLDevice> device;
+	id<MTLDevice>       device;
 	id<MTLCommandQueue> commandQueue;
-	id<MTLLibrary> library;
+	id<MTLLibrary>      library;
 }
 
 - (CAMetalLayer *)metalLayer;
@@ -38,13 +38,13 @@
 #ifdef WITH_GAMEPAD
 
 struct HIDGamepad {
-	int padIndex;
+	int            padIndex;
 	IOHIDDeviceRef hidDeviceRef;
-	IOHIDQueueRef hidQueueRef;
-	int hidDeviceVendorID;
-	int hidDeviceProductID;
-	char hidDeviceVendor[64];
-	char hidDeviceProduct[64];
+	IOHIDQueueRef  hidQueueRef;
+	int            hidDeviceVendorID;
+	int            hidDeviceProductID;
+	char           hidDeviceVendor[64];
+	char           hidDeviceProduct[64];
 
 	IOHIDElementCookie axis[6];
 	IOHIDElementCookie buttons[15];
@@ -59,13 +59,13 @@ static const int IRON_MAX_HID_DEVICES = 8;
 
 // Slots to hold details on connected devices
 struct HIDManagerDeviceRecord {
-	bool connected;        // = false;
-	IOHIDDeviceRef device; // = NULL;
+	bool              connected; // = false;
+	IOHIDDeviceRef    device;    // = NULL;
 	struct HIDGamepad pad;
 };
 
 struct HIDManager {
-	IOHIDManagerRef managerRef;
+	IOHIDManagerRef               managerRef;
 	struct HIDManagerDeviceRecord devices[IRON_MAX_HID_DEVICES];
 };
 

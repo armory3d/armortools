@@ -28,23 +28,23 @@ void iron_internal_set_files_location(char *dir) {
 }
 
 char *iron_internal_files_location(void) {
-	#ifdef IRON_MACOS
+#ifdef IRON_MACOS
 	char path[1024];
 	strcpy(path, iron_get_resource_path());
 	strcat(path, "/");
 	strcat(path, IRON_OUTDIR);
 	strcat(path, "/");
 	return path;
-	#elif defined(IRON_IOS)
+#elif defined(IRON_IOS)
 	char path[1024];
 	strcpy(path, iron_get_resource_path());
 	strcat(path, "/");
 	strcat(path, IRON_OUTDIR);
 	strcat(path, "/");
 	return path;
-	#else
+#else
 	return fileslocation;
-	#endif
+#endif
 }
 
 #ifdef IRON_WINDOWS
@@ -181,10 +181,10 @@ bool iron_internal_file_reader_open(iron_file_reader_t *reader, const char *file
 	fseek((FILE *)reader->data, 0, SEEK_SET);
 #endif
 
-	reader->read = iron_libc_file_reader_read;
-	reader->seek = iron_libc_file_reader_seek;
+	reader->read  = iron_libc_file_reader_read;
+	reader->seek  = iron_libc_file_reader_seek;
 	reader->close = iron_libc_file_reader_close;
-	reader->pos = iron_libc_file_reader_pos;
+	reader->pos   = iron_libc_file_reader_pos;
 
 	return true;
 }

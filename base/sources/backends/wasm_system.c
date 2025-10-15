@@ -1,7 +1,7 @@
 
-#include <iron_system.h>
 #include <iron_audio.h>
 #include <iron_gpu.h>
+#include <iron_system.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,13 +18,13 @@ int iron_count_displays(void) {
 
 iron_display_mode_t iron_display_current_mode(int display_index) {
 	iron_display_mode_t mode;
-	mode.x = 0;
-	mode.y = 0;
-	mode.width = 800;
-	mode.height = 600;
+	mode.x               = 0;
+	mode.y               = 0;
+	mode.width           = 800;
+	mode.height          = 600;
 	mode.pixels_per_inch = 96;
-	mode.frequency = 60;
-	mode.bits_per_pixel = 32;
+	mode.frequency       = 60;
+	mode.bits_per_pixel  = 32;
 	return mode;
 }
 
@@ -43,7 +43,7 @@ extern int iron_internal_window_width;
 extern int iron_internal_window_height;
 
 void iron_init(iron_window_options_t *win) {
-	iron_internal_window_width = win->width;
+	iron_internal_window_width  = win->width;
 	iron_internal_window_height = win->height;
 	gpu_init(win->depth_bits, true);
 }
@@ -107,9 +107,9 @@ __attribute__((export_name("_keyup"))) void _keyup(int key) {
 	iron_internal_keyboard_trigger_key_up(key);
 }
 
-int iron_internal_window_width = 0;
-int iron_internal_window_height = 0;
-iron_window_mode_t iron_internal_window_mode = IRON_WINDOW_MODE_WINDOW;
+int                iron_internal_window_width  = 0;
+int                iron_internal_window_height = 0;
+iron_window_mode_t iron_internal_window_mode   = IRON_WINDOW_MODE_WINDOW;
 
 int iron_window_x() {
 	return 0;

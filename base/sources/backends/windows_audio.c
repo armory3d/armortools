@@ -1,9 +1,9 @@
 
 #ifdef IRON_A2
 
+#include <backends/windows_system.h>
 #include <iron_audio.h>
 #include <iron_system.h>
-#include <backends/windows_system.h>
 
 // Windows 7
 #define WINVER 0x0601
@@ -71,16 +71,16 @@ DEFINE_GUID(CLSID_MMDeviceEnumerator, 0xBCDE0395, 0xE52F, 0x467C, 0x8E, 0x3D, 0x
 static iron_a2_buffer_t a2_buffer;
 
 static IMMDeviceEnumerator *deviceEnumerator;
-static IMMDevice *device;
-static IAudioClient *audioClient = NULL;
-static IAudioRenderClient *renderClient = NULL;
-static HANDLE bufferEndEvent = 0;
-static HANDLE audioProcessingDoneEvent;
-static UINT32 bufferFrames;
-static WAVEFORMATEX requestedFormat;
-static WAVEFORMATEX *closestFormat;
-static WAVEFORMATEX *format;
-static uint32_t samples_per_second = 44100;
+static IMMDevice           *device;
+static IAudioClient        *audioClient    = NULL;
+static IAudioRenderClient  *renderClient   = NULL;
+static HANDLE               bufferEndEvent = 0;
+static HANDLE               audioProcessingDoneEvent;
+static UINT32               bufferFrames;
+static WAVEFORMATEX         requestedFormat;
+static WAVEFORMATEX        *closestFormat;
+static WAVEFORMATEX        *format;
+static uint32_t             samples_per_second = 44100;
 
 uint32_t iron_a2_samples_per_second(void) {
 	return samples_per_second;
@@ -114,13 +114,13 @@ static bool initDefaultDevice() {
 
 		format = &requestedFormat;
 		memset(&requestedFormat, 0, sizeof(WAVEFORMATEX));
-		requestedFormat.nChannels = 2;
-		requestedFormat.nSamplesPerSec = sampleRate;
-		requestedFormat.wFormatTag = WAVE_FORMAT_PCM;
-		requestedFormat.wBitsPerSample = sizeof(short) * 8;
-		requestedFormat.nBlockAlign = (requestedFormat.nChannels * requestedFormat.wBitsPerSample) / 8;
+		requestedFormat.nChannels       = 2;
+		requestedFormat.nSamplesPerSec  = sampleRate;
+		requestedFormat.wFormatTag      = WAVE_FORMAT_PCM;
+		requestedFormat.wBitsPerSample  = sizeof(short) * 8;
+		requestedFormat.nBlockAlign     = (requestedFormat.nChannels * requestedFormat.wBitsPerSample) / 8;
 		requestedFormat.nAvgBytesPerSec = requestedFormat.nSamplesPerSec * requestedFormat.nBlockAlign;
-		requestedFormat.cbSize = 0;
+		requestedFormat.cbSize          = 0;
 
 		HRESULT supported = audioClient->lpVtbl->IsFormatSupported(audioClient, AUDCLNT_SHAREMODE_SHARED, format, &closestFormat);
 		if (supported == S_FALSE) {
@@ -140,7 +140,7 @@ static bool initDefaultDevice() {
 		}
 
 		uint32_t old_samples_per_second = samples_per_second;
-		samples_per_second = format->nSamplesPerSec;
+		samples_per_second              = format->nSamplesPerSec;
 		if (samples_per_second != old_samples_per_second) {
 			iron_a2_internal_sample_rate_callback();
 		}
@@ -163,29 +163,29 @@ static bool initDefaultDevice() {
 }
 
 static void copyS16Sample(int16_t *left, int16_t *right) {
-	float left_value = *(float *)&a2_buffer.channels[0][a2_buffer.read_location];
+	float left_value  = *(float *)&a2_buffer.channels[0][a2_buffer.read_location];
 	float right_value = *(float *)&a2_buffer.channels[1][a2_buffer.read_location];
 	a2_buffer.read_location += 1;
 	if (a2_buffer.read_location >= a2_buffer.data_size) {
 		a2_buffer.read_location = 0;
 	}
-	*left = (int16_t)(left_value * 32767);
+	*left  = (int16_t)(left_value * 32767);
 	*right = (int16_t)(right_value * 32767);
 }
 
 static void copyFloatSample(float *left, float *right) {
-	float left_value = *(float *)&a2_buffer.channels[0][a2_buffer.read_location];
+	float left_value  = *(float *)&a2_buffer.channels[0][a2_buffer.read_location];
 	float right_value = *(float *)&a2_buffer.channels[1][a2_buffer.read_location];
 	a2_buffer.read_location += 1;
 	if (a2_buffer.read_location >= a2_buffer.data_size) {
 		a2_buffer.read_location = 0;
 	}
-	*left = left_value;
+	*left  = left_value;
 	*right = right_value;
 }
 
 static void submitEmptyBuffer(unsigned frames) {
-	BYTE *buffer = NULL;
+	BYTE   *buffer = NULL;
 	HRESULT result = renderClient->lpVtbl->GetBuffer(renderClient, frames, &buffer);
 	if (FAILED(result)) {
 		return;
@@ -197,7 +197,7 @@ static void submitEmptyBuffer(unsigned frames) {
 }
 
 static void submitBuffer(unsigned frames) {
-	BYTE *buffer = NULL;
+	BYTE   *buffer = NULL;
 	HRESULT result = renderClient->lpVtbl->GetBuffer(renderClient, frames, &buffer);
 	if (FAILED(result)) {
 		if (result == AUDCLNT_E_DEVICE_INVALIDATED) {
@@ -239,8 +239,8 @@ static DWORD WINAPI audioThread(LPVOID ignored) {
 	audioClient->lpVtbl->Start(audioClient);
 	while (WAIT_OBJECT_0 != WaitForSingleObject(audioProcessingDoneEvent, 0)) {
 		WaitForSingleObject(bufferEndEvent, INFINITE);
-		UINT32 padding = 0;
-		HRESULT result = audioClient->lpVtbl->GetCurrentPadding(audioClient, &padding);
+		UINT32  padding = 0;
+		HRESULT result  = audioClient->lpVtbl->GetCurrentPadding(audioClient, &padding);
 		if (FAILED(result)) {
 			if (result == AUDCLNT_E_DEVICE_INVALIDATED) {
 				initDefaultDevice();
@@ -267,12 +267,12 @@ void iron_a2_init() {
 	iron_a2_internal_init();
 	initialized = true;
 
-	a2_buffer.read_location = 0;
+	a2_buffer.read_location  = 0;
 	a2_buffer.write_location = 0;
-	a2_buffer.data_size = 128 * 1024;
-	a2_buffer.channel_count = 2;
-	a2_buffer.channels[0] = (float *)malloc(a2_buffer.data_size * sizeof(float));
-	a2_buffer.channels[1] = (float *)malloc(a2_buffer.data_size * sizeof(float));
+	a2_buffer.data_size      = 128 * 1024;
+	a2_buffer.channel_count  = 2;
+	a2_buffer.channels[0]    = (float *)malloc(a2_buffer.data_size * sizeof(float));
+	a2_buffer.channels[1]    = (float *)malloc(a2_buffer.data_size * sizeof(float));
 
 	audioProcessingDoneEvent = CreateEvent(0, FALSE, FALSE, 0);
 
@@ -286,10 +286,10 @@ void iron_a2_init() {
 
 void iron_a2_update() {}
 
-#define SAFE_RELEASE(punk)                                                                                                                                     \
-	if ((punk) != NULL) {                                                                                                                                      \
-		(punk)->Release();                                                                                                                                     \
-		(punk) = NULL;                                                                                                                                         \
+#define SAFE_RELEASE(punk) \
+	if ((punk) != NULL) {  \
+		(punk)->Release(); \
+		(punk) = NULL;     \
 	}
 
 void iron_a2_shutdown() {

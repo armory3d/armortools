@@ -10,8 +10,8 @@ typedef struct {
 
 typedef struct {
 	void *DebugInfo;
-	long LockCount;
-	long RecursionCount;
+	long  LockCount;
+	long  RecursionCount;
 	void *OwningThread;
 	void *LockSemaphore;
 	unsigned long __w64 SpinCount;

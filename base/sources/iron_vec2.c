@@ -1,7 +1,7 @@
 #include "iron_vec2.h"
 
-#include <math.h>
 #include <iron_math.h>
+#include <math.h>
 
 vec2_t vec2_create(float x, float y) {
 	vec2_t v;

@@ -1,9 +1,9 @@
 #include "iron_array.h"
 
+#include "iron_gc.h"
+#include "iron_string.h"
 #include <stdlib.h>
 #include <string.h>
-#include "iron_string.h"
-#include "iron_gc.h"
 
 void array_free(void *a) {
 	u8_array_t *tmp = (u8_array_t *)a;
@@ -23,10 +23,10 @@ static void array_alloc(void *a, uint8_t element_size) {
 	if (tmp->length >= tmp->capacity) {
 		if (tmp->capacity == 0) {
 			// If the array was created in armpack, length can already be > 0
-			tmp->capacity = tmp->length + 1;
+			tmp->capacity   = tmp->length + 1;
 			size_t old_size = tmp->length * element_size;
 			size_t new_size = tmp->capacity * element_size;
-			tmp->buffer = gc_realloc_no_free(tmp->buffer, old_size, new_size);
+			tmp->buffer     = gc_realloc_no_free(tmp->buffer, old_size, new_size);
 		}
 		else {
 			tmp->capacity *= 2;
@@ -88,55 +88,55 @@ void char_ptr_array_push(char_ptr_array_t *a, void *e) {
 
 void i8_array_resize(i8_array_t *a, uint32_t size) {
 	a->capacity = size;
-	a->buffer = gc_realloc(a->buffer, a->capacity * sizeof(int8_t));
+	a->buffer   = gc_realloc(a->buffer, a->capacity * sizeof(int8_t));
 	gc_leaf(a->buffer);
 }
 
 void u8_array_resize(u8_array_t *a, uint32_t size) {
 	a->capacity = size;
-	a->buffer = gc_realloc(a->buffer, a->capacity * sizeof(uint8_t));
+	a->buffer   = gc_realloc(a->buffer, a->capacity * sizeof(uint8_t));
 	gc_leaf(a->buffer);
 }
 
 void i16_array_resize(i16_array_t *a, uint32_t size) {
 	a->capacity = size;
-	a->buffer = gc_realloc(a->buffer, a->capacity * sizeof(int16_t));
+	a->buffer   = gc_realloc(a->buffer, a->capacity * sizeof(int16_t));
 	gc_leaf(a->buffer);
 }
 
 void u16_array_resize(u16_array_t *a, uint32_t size) {
 	a->capacity = size;
-	a->buffer = gc_realloc(a->buffer, a->capacity * sizeof(uint16_t));
+	a->buffer   = gc_realloc(a->buffer, a->capacity * sizeof(uint16_t));
 	gc_leaf(a->buffer);
 }
 
 void i32_array_resize(i32_array_t *a, uint32_t size) {
 	a->capacity = size;
-	a->buffer = gc_realloc(a->buffer, a->capacity * sizeof(int32_t));
+	a->buffer   = gc_realloc(a->buffer, a->capacity * sizeof(int32_t));
 	gc_leaf(a->buffer);
 }
 
 void u32_array_resize(u32_array_t *a, uint32_t size) {
 	a->capacity = size;
-	a->buffer = gc_realloc(a->buffer, a->capacity * sizeof(uint32_t));
+	a->buffer   = gc_realloc(a->buffer, a->capacity * sizeof(uint32_t));
 	gc_leaf(a->buffer);
 }
 
 void f32_array_resize(f32_array_t *a, uint32_t size) {
 	a->capacity = size;
-	a->buffer = gc_realloc(a->buffer, a->capacity * sizeof(float));
+	a->buffer   = gc_realloc(a->buffer, a->capacity * sizeof(float));
 	gc_leaf(a->buffer);
 }
 
 void any_array_resize(any_array_t *a, uint32_t size) {
 	a->capacity = size;
-	a->buffer = gc_realloc(a->buffer, a->capacity * sizeof(void *));
+	a->buffer   = gc_realloc(a->buffer, a->capacity * sizeof(void *));
 	gc_array(a->buffer, &a->length);
 }
 
 void char_ptr_array_resize(char_ptr_array_t *a, uint32_t size) {
 	a->capacity = size;
-	a->buffer = gc_realloc(a->buffer, a->capacity * sizeof(void *));
+	a->buffer   = gc_realloc(a->buffer, a->capacity * sizeof(void *));
 	gc_array(a->buffer, &a->length);
 }
 
@@ -213,7 +213,7 @@ void i32_array_splice(i32_array_t *ar, uint32_t start, uint32_t delete_count) {
 
 any_array_t *array_concat(any_array_t *a, any_array_t *b) {
 	any_array_t *ar = gc_alloc(sizeof(any_array_t));
-	ar->length = a->length + b->length;
+	ar->length      = a->length + b->length;
 	any_array_resize(ar, ar->length);
 	for (uint32_t i = 0; i < a->length; ++i) {
 		ar->buffer[i] = a->buffer[i];
@@ -226,7 +226,7 @@ any_array_t *array_concat(any_array_t *a, any_array_t *b) {
 
 any_array_t *array_slice(any_array_t *a, uint32_t begin, uint32_t end) {
 	any_array_t *ar = gc_alloc(sizeof(any_array_t));
-	ar->length = end - begin;
+	ar->length      = end - begin;
 	any_array_resize(ar, ar->length);
 	for (uint32_t i = 0; i < ar->length; ++i) {
 		ar->buffer[i] = a->buffer[begin + i];
@@ -293,8 +293,8 @@ int32_t i32_array_index_of(i32_array_t *ar, int e) {
 
 void array_reverse(any_array_t *ar) {
 	for (uint32_t i = 0; i < ar->length / 2; ++i) {
-		void *tmp = ar->buffer[i];
-		ar->buffer[i] = ar->buffer[ar->length - 1 - i];
+		void *tmp                      = ar->buffer[i];
+		ar->buffer[i]                  = ar->buffer[ar->length - 1 - i];
 		ar->buffer[ar->length - 1 - i] = tmp;
 	}
 }
@@ -373,15 +373,15 @@ void buffer_set_f32(buffer_t *b, uint32_t p, float n) {
 }
 
 buffer_t *buffer_create(uint32_t length) {
-	buffer_t * b = gc_alloc(sizeof(buffer_t));
+	buffer_t *b = gc_alloc(sizeof(buffer_t));
 	buffer_resize(b, length);
 	return b;
 }
 
 buffer_t *buffer_create_from_raw(char *raw, uint32_t length) {
-	buffer_t * b = gc_alloc(sizeof(buffer_t));
-	b->buffer = raw;
-	b->length = length;
+	buffer_t *b = gc_alloc(sizeof(buffer_t));
+	b->buffer   = raw;
+	b->length   = length;
 	b->capacity = length;
 	return b;
 }
@@ -397,9 +397,9 @@ f32_array_t *f32_array_create(uint32_t length) {
 
 f32_array_t *f32_array_create_from_buffer(buffer_t *b) {
 	f32_array_t *a = gc_alloc(sizeof(f32_array_t));
-	a->buffer = b->buffer;
-	a->length = b->length / 4;
-	a->capacity = b->length / 4;
+	a->buffer      = b->buffer;
+	a->length      = b->length / 4;
+	a->capacity    = b->length / 4;
 	return a;
 }
 
@@ -421,41 +421,41 @@ f32_array_t *f32_array_create_from_raw(float *raw, uint32_t length) {
 
 f32_array_t *f32_array_create_x(float x) {
 	f32_array_t *a = f32_array_create(1);
-	a->buffer[0] = x;
+	a->buffer[0]   = x;
 	return a;
 }
 
 f32_array_t *f32_array_create_xy(float x, float y) {
 	f32_array_t *a = f32_array_create(2);
-	a->buffer[0] = x;
-	a->buffer[1] = y;
+	a->buffer[0]   = x;
+	a->buffer[1]   = y;
 	return a;
 }
 
 f32_array_t *f32_array_create_xyz(float x, float y, float z) {
 	f32_array_t *a = f32_array_create(3);
-	a->buffer[0] = x;
-	a->buffer[1] = y;
-	a->buffer[2] = z;
+	a->buffer[0]   = x;
+	a->buffer[1]   = y;
+	a->buffer[2]   = z;
 	return a;
 }
 
 f32_array_t *f32_array_create_xyzw(float x, float y, float z, float w) {
 	f32_array_t *a = f32_array_create(4);
-	a->buffer[0] = x;
-	a->buffer[1] = y;
-	a->buffer[2] = z;
-	a->buffer[3] = w;
+	a->buffer[0]   = x;
+	a->buffer[1]   = y;
+	a->buffer[2]   = z;
+	a->buffer[3]   = w;
 	return a;
 }
 
 f32_array_t *f32_array_create_xyzwv(float x, float y, float z, float w, float v) {
 	f32_array_t *a = f32_array_create(5);
-	a->buffer[0] = x;
-	a->buffer[1] = y;
-	a->buffer[2] = z;
-	a->buffer[3] = w;
-	a->buffer[4] = v;
+	a->buffer[0]   = x;
+	a->buffer[1]   = y;
+	a->buffer[2]   = z;
+	a->buffer[3]   = w;
+	a->buffer[4]   = v;
 	return a;
 }
 
@@ -578,16 +578,16 @@ u8_array_t *u8_array_create_from_raw(uint8_t *raw, uint32_t length) {
 
 u8_array_t *u8_array_create_from_string(char *s) {
 	u8_array_t *a = u8_array_create(strlen(s) + 1);
-    for (uint32_t i = 0; i < strlen(s); ++i) {
-        a->buffer[i] = s[i];
-    }
-    return a;
+	for (uint32_t i = 0; i < strlen(s); ++i) {
+		a->buffer[i] = s[i];
+	}
+	return a;
 }
 
 char *u8_array_to_string(u8_array_t *a) {
 	char *r = gc_alloc(a->length + 1);
 	memcpy(r, a->buffer, a->length);
-    return r;
+	return r;
 }
 
 i8_array_t *i8_array_create(uint32_t length) {

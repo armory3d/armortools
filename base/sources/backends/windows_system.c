@@ -1,17 +1,17 @@
 
 #define WIN32_LEAN_AND_MEAN
+#include "windows_system.h"
 #include <Windows.h>
 #include <Windowsx.h>
-#include "windows_system.h"
-#include <stdio.h>
-#include <shellapi.h>
-#include <shlobj.h>
 #include <dwmapi.h>
-#include <iron_system.h>
 #include <iron_gpu.h>
+#include <iron_system.h>
 #include <iron_thread.h>
 #include <iron_video.h>
+#include <shellapi.h>
+#include <shlobj.h>
 #include <stb_sprintf.h>
+#include <stdio.h>
 
 void iron_microsoft_format(const char *format, va_list args, wchar_t *buffer) {
 	char cbuffer[4096];
@@ -32,9 +32,9 @@ void _RTC_CheckStackVars2(void) {}
 void __GSHandlerCheck(void) {}
 void __fastcall __security_check_cookie(_In_ uintptr_t _StackCookie) {}
 uintptr_t __security_cookie;
-int _fltused = 1;
-void __report_rangecheckfailure(void) {}
-void __chkstk(void) {}
+int       _fltused = 1;
+void      __report_rangecheckfailure(void) {}
+void      __chkstk(void) {}
 #endif
 #endif
 
@@ -42,17 +42,22 @@ void __chkstk(void) {}
 
 typedef struct {
 	struct HMONITOR__ *monitor;
-	char name[32];
-	bool primary, available, mode_changed;
-	int index, x, y, width, height, ppi, frequency, bpp;
+	char               name[32];
+	bool               primary, available, mode_changed;
+	int                index, x, y, width, height, ppi, frequency, bpp;
 } DisplayData;
 
 static DisplayData displays[MAXIMUM_DISPLAYS];
-static DEVMODEA original_modes[MAXIMUM_DISPLAYS];
-static int screen_counter = 0;
-static bool display_initialized = false;
+static DEVMODEA    original_modes[MAXIMUM_DISPLAYS];
+static int         screen_counter      = 0;
+static bool        display_initialized = false;
 
-typedef enum { MDT_EFFECTIVE_DPI = 0, MDT_ANGULAR_DPI = 1, MDT_RAW_DPI = 2, MDT_DEFAULT = MDT_EFFECTIVE_DPI } MONITOR_DPI_TYPE;
+typedef enum {
+	MDT_EFFECTIVE_DPI = 0,
+	MDT_ANGULAR_DPI   = 1,
+	MDT_RAW_DPI       = 2,
+	MDT_DEFAULT       = MDT_EFFECTIVE_DPI
+} MONITOR_DPI_TYPE;
 typedef HRESULT(WINAPI *GetDpiForMonitorType)(HMONITOR hmonitor, MONITOR_DPI_TYPE dpiType, UINT *dpiX, UINT *dpiY);
 static GetDpiForMonitorType MyGetDpiForMonitor = NULL;
 
@@ -78,19 +83,19 @@ static BOOL CALLBACK EnumerationCallback(HMONITOR monitor, HDC hdc_unused, LPREC
 
 	DisplayData *display = &displays[free_slot];
 	strncpy(display->name, info.szDevice, 31);
-	display->name[31] = 0;
-	display->index = free_slot;
-	display->monitor = monitor;
-	display->primary = (info.dwFlags & MONITORINFOF_PRIMARY) != 0;
+	display->name[31]  = 0;
+	display->index     = free_slot;
+	display->monitor   = monitor;
+	display->primary   = (info.dwFlags & MONITORINFOF_PRIMARY) != 0;
 	display->available = true;
-	display->x = info.rcMonitor.left;
-	display->y = info.rcMonitor.top;
-	display->width = info.rcMonitor.right - info.rcMonitor.left;
-	display->height = info.rcMonitor.bottom - info.rcMonitor.top;
+	display->x         = info.rcMonitor.left;
+	display->y         = info.rcMonitor.top;
+	display->width     = info.rcMonitor.right - info.rcMonitor.left;
+	display->height    = info.rcMonitor.bottom - info.rcMonitor.top;
 
-	HDC hdc = CreateDCA(NULL, display->name, NULL, NULL);
+	HDC hdc      = CreateDCA(NULL, display->name, NULL, NULL);
 	display->ppi = GetDeviceCaps(hdc, LOGPIXELSX);
-	int scale = GetDeviceCaps(hdc, SCALINGFACTORX);
+	int scale    = GetDeviceCaps(hdc, SCALINGFACTORX);
 	DeleteDC(hdc);
 
 	if (MyGetDpiForMonitor != NULL) {
@@ -103,7 +108,7 @@ static BOOL CALLBACK EnumerationCallback(HMONITOR monitor, HDC hdc_unused, LPREC
 	original_modes[free_slot].dmSize = sizeof(DEVMODEA);
 	EnumDisplaySettingsA(display->name, ENUM_CURRENT_SETTINGS, &original_modes[free_slot]);
 	display->frequency = original_modes[free_slot].dmDisplayFrequency;
-	display->bpp = original_modes[free_slot].dmBitsPerPel;
+	display->bpp       = original_modes[free_slot].dmBitsPerPel;
 
 	++screen_counter;
 	return TRUE;
@@ -147,20 +152,20 @@ int iron_primary_display() {
 }
 
 bool iron_windows_set_display_mode(int display_index, int width, int height, int bpp, int frequency) {
-	DisplayData *display = &displays[display_index];
+	DisplayData *display  = &displays[display_index];
 	display->mode_changed = true;
-	DEVMODEA mode = {0};
-	mode.dmSize = sizeof(mode);
+	DEVMODEA mode         = {0};
+	mode.dmSize           = sizeof(mode);
 	strcpy((char *)mode.dmDeviceName, display->name);
-	mode.dmPelsWidth = width;
-	mode.dmPelsHeight = height;
-	mode.dmBitsPerPel = bpp;
+	mode.dmPelsWidth        = width;
+	mode.dmPelsHeight       = height;
+	mode.dmBitsPerPel       = bpp;
 	mode.dmDisplayFrequency = frequency;
-	mode.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT | DM_DISPLAYFREQUENCY;
-	bool success = ChangeDisplaySettingsA(&mode, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL;
+	mode.dmFields           = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT | DM_DISPLAYFREQUENCY;
+	bool success            = ChangeDisplaySettingsA(&mode, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL;
 	if (!success) {
 		mode.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
-		success = ChangeDisplaySettingsA(&mode, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL;
+		success       = ChangeDisplaySettingsA(&mode, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL;
 	}
 	return success;
 }
@@ -178,15 +183,15 @@ void iron_windows_restore_displays() {
 }
 
 iron_display_mode_t iron_display_current_mode(int display_index) {
-	DisplayData *display = &displays[display_index];
+	DisplayData        *display = &displays[display_index];
 	iron_display_mode_t mode;
-	mode.x = display->x;
-	mode.y = display->y;
-	mode.width = display->width;
-	mode.height = display->height;
+	mode.x               = display->x;
+	mode.y               = display->y;
+	mode.width           = display->width;
+	mode.height          = display->height;
 	mode.pixels_per_inch = display->ppi;
-	mode.frequency = display->frequency;
-	mode.bits_per_pixel = display->bpp;
+	mode.frequency       = display->frequency;
+	mode.bits_per_pixel  = display->bpp;
 	return mode;
 }
 
@@ -222,7 +227,7 @@ void iron_mouse_get_position(int *x, int *y) {
 	*y = point.y;
 }
 
-#define MAX_TOUCH_POINTS 10
+#define MAX_TOUCH_POINTS      10
 #define IRON_DINPUT_MAX_COUNT 8
 
 struct touchpoint {
@@ -232,9 +237,9 @@ struct touchpoint {
 };
 
 static struct touchpoint touchPoints[MAX_TOUCH_POINTS];
-static int mouseX, mouseY;
-static bool keyPressed[256];
-static int keyTranslated[256]; // http://msdn.microsoft.com/en-us/library/windows/desktop/dd375731(v=vs.85).aspx
+static int               mouseX, mouseY;
+static bool              keyPressed[256];
+static int               keyTranslated[256]; // http://msdn.microsoft.com/en-us/library/windows/desktop/dd375731(v=vs.85).aspx
 
 static int GetTouchIndex(int dwID) {
 	for (int i = 0; i < MAX_TOUCH_POINTS; i++) {
@@ -264,8 +269,8 @@ static void ReleaseTouchIndex(int dwID) {
 	for (int i = 0; i < MAX_TOUCH_POINTS; i++) {
 		if (touchPoints[i].sysID == dwID) {
 			touchPoints[i].sysID = -1;
-			touchPoints[i].x = -1;
-			touchPoints[i].y = -1;
+			touchPoints[i].x     = -1;
+			touchPoints[i].y     = -1;
 		}
 	}
 }
@@ -274,143 +279,143 @@ static void initKeyTranslation() {
 	for (int i = 0; i < 256; ++i) {
 		keyTranslated[i] = IRON_KEY_UNKNOWN;
 	}
-	keyTranslated[VK_BACK] = IRON_KEY_BACKSPACE;
-	keyTranslated[VK_TAB] = IRON_KEY_TAB;
-	keyTranslated[VK_CLEAR] = IRON_KEY_CLEAR;
-	keyTranslated[VK_RETURN] = IRON_KEY_RETURN;
-	keyTranslated[VK_SHIFT] = IRON_KEY_SHIFT;
-	keyTranslated[VK_CONTROL] = IRON_KEY_CONTROL;
-	keyTranslated[VK_MENU] = IRON_KEY_ALT;
-	keyTranslated[VK_PAUSE] = IRON_KEY_PAUSE;
-	keyTranslated[VK_CAPITAL] = IRON_KEY_CAPS_LOCK;
-	keyTranslated[VK_KANA] = IRON_KEY_KANA;
-	keyTranslated[VK_HANGUL] = IRON_KEY_HANGUL;
-	keyTranslated[VK_JUNJA] = IRON_KEY_JUNJA;
-	keyTranslated[VK_FINAL] = IRON_KEY_FINAL;
-	keyTranslated[VK_HANJA] = IRON_KEY_HANJA;
-	keyTranslated[VK_KANJI] = IRON_KEY_KANJI;
-	keyTranslated[VK_ESCAPE] = IRON_KEY_ESCAPE;
-	keyTranslated[VK_SPACE] = IRON_KEY_SPACE;
-	keyTranslated[VK_PRIOR] = IRON_KEY_PAGE_UP;
-	keyTranslated[VK_NEXT] = IRON_KEY_PAGE_DOWN;
-	keyTranslated[VK_END] = IRON_KEY_END;
-	keyTranslated[VK_HOME] = IRON_KEY_HOME;
-	keyTranslated[VK_LEFT] = IRON_KEY_LEFT;
-	keyTranslated[VK_UP] = IRON_KEY_UP;
-	keyTranslated[VK_RIGHT] = IRON_KEY_RIGHT;
-	keyTranslated[VK_DOWN] = IRON_KEY_DOWN;
-	keyTranslated[VK_PRINT] = IRON_KEY_PRINT;
-	keyTranslated[VK_INSERT] = IRON_KEY_INSERT;
-	keyTranslated[VK_DELETE] = IRON_KEY_DELETE;
-	keyTranslated[VK_HELP] = IRON_KEY_HELP;
-	keyTranslated[0x30] = IRON_KEY_0;
-	keyTranslated[0x31] = IRON_KEY_1;
-	keyTranslated[0x32] = IRON_KEY_2;
-	keyTranslated[0x33] = IRON_KEY_3;
-	keyTranslated[0x34] = IRON_KEY_4;
-	keyTranslated[0x35] = IRON_KEY_5;
-	keyTranslated[0x36] = IRON_KEY_6;
-	keyTranslated[0x37] = IRON_KEY_7;
-	keyTranslated[0x38] = IRON_KEY_8;
-	keyTranslated[0x39] = IRON_KEY_9;
-	keyTranslated[0x41] = IRON_KEY_A;
-	keyTranslated[0x42] = IRON_KEY_B;
-	keyTranslated[0x43] = IRON_KEY_C;
-	keyTranslated[0x44] = IRON_KEY_D;
-	keyTranslated[0x45] = IRON_KEY_E;
-	keyTranslated[0x46] = IRON_KEY_F;
-	keyTranslated[0x47] = IRON_KEY_G;
-	keyTranslated[0x48] = IRON_KEY_H;
-	keyTranslated[0x49] = IRON_KEY_I;
-	keyTranslated[0x4A] = IRON_KEY_J;
-	keyTranslated[0x4B] = IRON_KEY_K;
-	keyTranslated[0x4C] = IRON_KEY_L;
-	keyTranslated[0x4D] = IRON_KEY_M;
-	keyTranslated[0x4E] = IRON_KEY_N;
-	keyTranslated[0x4F] = IRON_KEY_O;
-	keyTranslated[0x50] = IRON_KEY_P;
-	keyTranslated[0x51] = IRON_KEY_Q;
-	keyTranslated[0x52] = IRON_KEY_R;
-	keyTranslated[0x53] = IRON_KEY_S;
-	keyTranslated[0x54] = IRON_KEY_T;
-	keyTranslated[0x55] = IRON_KEY_U;
-	keyTranslated[0x56] = IRON_KEY_V;
-	keyTranslated[0x57] = IRON_KEY_W;
-	keyTranslated[0x58] = IRON_KEY_X;
-	keyTranslated[0x59] = IRON_KEY_Y;
-	keyTranslated[0x5A] = IRON_KEY_Z;
-	keyTranslated[VK_LWIN] = IRON_KEY_WIN;
-	keyTranslated[VK_RWIN] = IRON_KEY_WIN;
-	keyTranslated[VK_APPS] = IRON_KEY_CONTEXT_MENU;
-	keyTranslated[VK_NUMPAD0] = IRON_KEY_NUMPAD_0;
-	keyTranslated[VK_NUMPAD1] = IRON_KEY_NUMPAD_1;
-	keyTranslated[VK_NUMPAD2] = IRON_KEY_NUMPAD_2;
-	keyTranslated[VK_NUMPAD3] = IRON_KEY_NUMPAD_3;
-	keyTranslated[VK_NUMPAD4] = IRON_KEY_NUMPAD_4;
-	keyTranslated[VK_NUMPAD5] = IRON_KEY_NUMPAD_5;
-	keyTranslated[VK_NUMPAD6] = IRON_KEY_NUMPAD_6;
-	keyTranslated[VK_NUMPAD7] = IRON_KEY_NUMPAD_7;
-	keyTranslated[VK_NUMPAD8] = IRON_KEY_NUMPAD_8;
-	keyTranslated[VK_NUMPAD9] = IRON_KEY_NUMPAD_9;
-	keyTranslated[VK_MULTIPLY] = IRON_KEY_MULTIPLY;
-	keyTranslated[VK_ADD] = IRON_KEY_ADD;
-	keyTranslated[VK_SUBTRACT] = IRON_KEY_SUBTRACT;
-	keyTranslated[VK_DECIMAL] = IRON_KEY_DECIMAL;
-	keyTranslated[VK_DIVIDE] = IRON_KEY_DIVIDE;
-	keyTranslated[VK_F1] = IRON_KEY_F1;
-	keyTranslated[VK_F2] = IRON_KEY_F2;
-	keyTranslated[VK_F3] = IRON_KEY_F3;
-	keyTranslated[VK_F4] = IRON_KEY_F4;
-	keyTranslated[VK_F5] = IRON_KEY_F5;
-	keyTranslated[VK_F6] = IRON_KEY_F6;
-	keyTranslated[VK_F7] = IRON_KEY_F7;
-	keyTranslated[VK_F8] = IRON_KEY_F8;
-	keyTranslated[VK_F9] = IRON_KEY_F9;
-	keyTranslated[VK_F10] = IRON_KEY_F10;
-	keyTranslated[VK_F11] = IRON_KEY_F11;
-	keyTranslated[VK_F12] = IRON_KEY_F12;
-	keyTranslated[VK_F13] = IRON_KEY_F13;
-	keyTranslated[VK_F14] = IRON_KEY_F14;
-	keyTranslated[VK_F15] = IRON_KEY_F15;
-	keyTranslated[VK_F16] = IRON_KEY_F16;
-	keyTranslated[VK_F17] = IRON_KEY_F17;
-	keyTranslated[VK_F18] = IRON_KEY_F18;
-	keyTranslated[VK_F19] = IRON_KEY_F19;
-	keyTranslated[VK_F20] = IRON_KEY_F20;
-	keyTranslated[VK_F21] = IRON_KEY_F21;
-	keyTranslated[VK_F22] = IRON_KEY_F22;
-	keyTranslated[VK_F23] = IRON_KEY_F23;
-	keyTranslated[VK_F24] = IRON_KEY_F24;
-	keyTranslated[VK_NUMLOCK] = IRON_KEY_NUM_LOCK;
-	keyTranslated[VK_SCROLL] = IRON_KEY_SCROLL_LOCK;
-	keyTranslated[VK_LSHIFT] = IRON_KEY_SHIFT;
-	keyTranslated[VK_RSHIFT] = IRON_KEY_SHIFT;
-	keyTranslated[VK_LCONTROL] = IRON_KEY_CONTROL;
-	keyTranslated[VK_RCONTROL] = IRON_KEY_CONTROL;
-	keyTranslated[VK_OEM_1] = IRON_KEY_SEMICOLON;
-	keyTranslated[VK_OEM_PLUS] = IRON_KEY_PLUS;
-	keyTranslated[VK_OEM_COMMA] = IRON_KEY_COMMA;
-	keyTranslated[VK_OEM_MINUS] = IRON_KEY_HYPHEN_MINUS;
+	keyTranslated[VK_BACK]       = IRON_KEY_BACKSPACE;
+	keyTranslated[VK_TAB]        = IRON_KEY_TAB;
+	keyTranslated[VK_CLEAR]      = IRON_KEY_CLEAR;
+	keyTranslated[VK_RETURN]     = IRON_KEY_RETURN;
+	keyTranslated[VK_SHIFT]      = IRON_KEY_SHIFT;
+	keyTranslated[VK_CONTROL]    = IRON_KEY_CONTROL;
+	keyTranslated[VK_MENU]       = IRON_KEY_ALT;
+	keyTranslated[VK_PAUSE]      = IRON_KEY_PAUSE;
+	keyTranslated[VK_CAPITAL]    = IRON_KEY_CAPS_LOCK;
+	keyTranslated[VK_KANA]       = IRON_KEY_KANA;
+	keyTranslated[VK_HANGUL]     = IRON_KEY_HANGUL;
+	keyTranslated[VK_JUNJA]      = IRON_KEY_JUNJA;
+	keyTranslated[VK_FINAL]      = IRON_KEY_FINAL;
+	keyTranslated[VK_HANJA]      = IRON_KEY_HANJA;
+	keyTranslated[VK_KANJI]      = IRON_KEY_KANJI;
+	keyTranslated[VK_ESCAPE]     = IRON_KEY_ESCAPE;
+	keyTranslated[VK_SPACE]      = IRON_KEY_SPACE;
+	keyTranslated[VK_PRIOR]      = IRON_KEY_PAGE_UP;
+	keyTranslated[VK_NEXT]       = IRON_KEY_PAGE_DOWN;
+	keyTranslated[VK_END]        = IRON_KEY_END;
+	keyTranslated[VK_HOME]       = IRON_KEY_HOME;
+	keyTranslated[VK_LEFT]       = IRON_KEY_LEFT;
+	keyTranslated[VK_UP]         = IRON_KEY_UP;
+	keyTranslated[VK_RIGHT]      = IRON_KEY_RIGHT;
+	keyTranslated[VK_DOWN]       = IRON_KEY_DOWN;
+	keyTranslated[VK_PRINT]      = IRON_KEY_PRINT;
+	keyTranslated[VK_INSERT]     = IRON_KEY_INSERT;
+	keyTranslated[VK_DELETE]     = IRON_KEY_DELETE;
+	keyTranslated[VK_HELP]       = IRON_KEY_HELP;
+	keyTranslated[0x30]          = IRON_KEY_0;
+	keyTranslated[0x31]          = IRON_KEY_1;
+	keyTranslated[0x32]          = IRON_KEY_2;
+	keyTranslated[0x33]          = IRON_KEY_3;
+	keyTranslated[0x34]          = IRON_KEY_4;
+	keyTranslated[0x35]          = IRON_KEY_5;
+	keyTranslated[0x36]          = IRON_KEY_6;
+	keyTranslated[0x37]          = IRON_KEY_7;
+	keyTranslated[0x38]          = IRON_KEY_8;
+	keyTranslated[0x39]          = IRON_KEY_9;
+	keyTranslated[0x41]          = IRON_KEY_A;
+	keyTranslated[0x42]          = IRON_KEY_B;
+	keyTranslated[0x43]          = IRON_KEY_C;
+	keyTranslated[0x44]          = IRON_KEY_D;
+	keyTranslated[0x45]          = IRON_KEY_E;
+	keyTranslated[0x46]          = IRON_KEY_F;
+	keyTranslated[0x47]          = IRON_KEY_G;
+	keyTranslated[0x48]          = IRON_KEY_H;
+	keyTranslated[0x49]          = IRON_KEY_I;
+	keyTranslated[0x4A]          = IRON_KEY_J;
+	keyTranslated[0x4B]          = IRON_KEY_K;
+	keyTranslated[0x4C]          = IRON_KEY_L;
+	keyTranslated[0x4D]          = IRON_KEY_M;
+	keyTranslated[0x4E]          = IRON_KEY_N;
+	keyTranslated[0x4F]          = IRON_KEY_O;
+	keyTranslated[0x50]          = IRON_KEY_P;
+	keyTranslated[0x51]          = IRON_KEY_Q;
+	keyTranslated[0x52]          = IRON_KEY_R;
+	keyTranslated[0x53]          = IRON_KEY_S;
+	keyTranslated[0x54]          = IRON_KEY_T;
+	keyTranslated[0x55]          = IRON_KEY_U;
+	keyTranslated[0x56]          = IRON_KEY_V;
+	keyTranslated[0x57]          = IRON_KEY_W;
+	keyTranslated[0x58]          = IRON_KEY_X;
+	keyTranslated[0x59]          = IRON_KEY_Y;
+	keyTranslated[0x5A]          = IRON_KEY_Z;
+	keyTranslated[VK_LWIN]       = IRON_KEY_WIN;
+	keyTranslated[VK_RWIN]       = IRON_KEY_WIN;
+	keyTranslated[VK_APPS]       = IRON_KEY_CONTEXT_MENU;
+	keyTranslated[VK_NUMPAD0]    = IRON_KEY_NUMPAD_0;
+	keyTranslated[VK_NUMPAD1]    = IRON_KEY_NUMPAD_1;
+	keyTranslated[VK_NUMPAD2]    = IRON_KEY_NUMPAD_2;
+	keyTranslated[VK_NUMPAD3]    = IRON_KEY_NUMPAD_3;
+	keyTranslated[VK_NUMPAD4]    = IRON_KEY_NUMPAD_4;
+	keyTranslated[VK_NUMPAD5]    = IRON_KEY_NUMPAD_5;
+	keyTranslated[VK_NUMPAD6]    = IRON_KEY_NUMPAD_6;
+	keyTranslated[VK_NUMPAD7]    = IRON_KEY_NUMPAD_7;
+	keyTranslated[VK_NUMPAD8]    = IRON_KEY_NUMPAD_8;
+	keyTranslated[VK_NUMPAD9]    = IRON_KEY_NUMPAD_9;
+	keyTranslated[VK_MULTIPLY]   = IRON_KEY_MULTIPLY;
+	keyTranslated[VK_ADD]        = IRON_KEY_ADD;
+	keyTranslated[VK_SUBTRACT]   = IRON_KEY_SUBTRACT;
+	keyTranslated[VK_DECIMAL]    = IRON_KEY_DECIMAL;
+	keyTranslated[VK_DIVIDE]     = IRON_KEY_DIVIDE;
+	keyTranslated[VK_F1]         = IRON_KEY_F1;
+	keyTranslated[VK_F2]         = IRON_KEY_F2;
+	keyTranslated[VK_F3]         = IRON_KEY_F3;
+	keyTranslated[VK_F4]         = IRON_KEY_F4;
+	keyTranslated[VK_F5]         = IRON_KEY_F5;
+	keyTranslated[VK_F6]         = IRON_KEY_F6;
+	keyTranslated[VK_F7]         = IRON_KEY_F7;
+	keyTranslated[VK_F8]         = IRON_KEY_F8;
+	keyTranslated[VK_F9]         = IRON_KEY_F9;
+	keyTranslated[VK_F10]        = IRON_KEY_F10;
+	keyTranslated[VK_F11]        = IRON_KEY_F11;
+	keyTranslated[VK_F12]        = IRON_KEY_F12;
+	keyTranslated[VK_F13]        = IRON_KEY_F13;
+	keyTranslated[VK_F14]        = IRON_KEY_F14;
+	keyTranslated[VK_F15]        = IRON_KEY_F15;
+	keyTranslated[VK_F16]        = IRON_KEY_F16;
+	keyTranslated[VK_F17]        = IRON_KEY_F17;
+	keyTranslated[VK_F18]        = IRON_KEY_F18;
+	keyTranslated[VK_F19]        = IRON_KEY_F19;
+	keyTranslated[VK_F20]        = IRON_KEY_F20;
+	keyTranslated[VK_F21]        = IRON_KEY_F21;
+	keyTranslated[VK_F22]        = IRON_KEY_F22;
+	keyTranslated[VK_F23]        = IRON_KEY_F23;
+	keyTranslated[VK_F24]        = IRON_KEY_F24;
+	keyTranslated[VK_NUMLOCK]    = IRON_KEY_NUM_LOCK;
+	keyTranslated[VK_SCROLL]     = IRON_KEY_SCROLL_LOCK;
+	keyTranslated[VK_LSHIFT]     = IRON_KEY_SHIFT;
+	keyTranslated[VK_RSHIFT]     = IRON_KEY_SHIFT;
+	keyTranslated[VK_LCONTROL]   = IRON_KEY_CONTROL;
+	keyTranslated[VK_RCONTROL]   = IRON_KEY_CONTROL;
+	keyTranslated[VK_OEM_1]      = IRON_KEY_SEMICOLON;
+	keyTranslated[VK_OEM_PLUS]   = IRON_KEY_PLUS;
+	keyTranslated[VK_OEM_COMMA]  = IRON_KEY_COMMA;
+	keyTranslated[VK_OEM_MINUS]  = IRON_KEY_HYPHEN_MINUS;
 	keyTranslated[VK_OEM_PERIOD] = IRON_KEY_PERIOD;
-	keyTranslated[VK_OEM_2] = IRON_KEY_SLASH;
-	keyTranslated[VK_OEM_3] = IRON_KEY_BACK_QUOTE;
-	keyTranslated[VK_OEM_4] = IRON_KEY_OPEN_BRACKET;
-	keyTranslated[VK_OEM_5] = IRON_KEY_BACK_SLASH;
-	keyTranslated[VK_OEM_6] = IRON_KEY_CLOSE_BRACKET;
-	keyTranslated[VK_OEM_7] = IRON_KEY_QUOTE;
+	keyTranslated[VK_OEM_2]      = IRON_KEY_SLASH;
+	keyTranslated[VK_OEM_3]      = IRON_KEY_BACK_QUOTE;
+	keyTranslated[VK_OEM_4]      = IRON_KEY_OPEN_BRACKET;
+	keyTranslated[VK_OEM_5]      = IRON_KEY_BACK_SLASH;
+	keyTranslated[VK_OEM_6]      = IRON_KEY_CLOSE_BRACKET;
+	keyTranslated[VK_OEM_7]      = IRON_KEY_QUOTE;
 }
 
 #ifdef WITH_GAMEPAD
 static bool detectGamepad = true;
-static bool gamepadFound = false;
+static bool gamepadFound  = false;
 #endif
 
 #define HANDLE_ALT_ENTER
 
-static bool cursors_initialized = false;
-static int cursor = 0;
+static bool    cursors_initialized = false;
+static int     cursor              = 0;
 static HCURSOR cursors[5];
-static bool bg_erased = false;
+static bool    bg_erased = false;
 
 void iron_mouse_set_cursor(iron_cursor_t set_cursor) {
 	cursor = set_cursor;
@@ -424,17 +429,17 @@ void iron_mouse_set_cursor(iron_cursor_t set_cursor) {
 }
 
 LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-	DWORD pointerId;
-	POINTER_INFO pointerInfo = {0};
-	POINTER_PEN_INFO penInfo = {0};
-	static bool controlDown = false;
+	DWORD            pointerId;
+	POINTER_INFO     pointerInfo = {0};
+	POINTER_PEN_INFO penInfo     = {0};
+	static bool      controlDown = false;
 #ifdef HANDLE_ALT_ENTER
 	static bool altDown = false;
 #endif
-	static int last_window_width = -1;
+	static int last_window_width  = -1;
 	static int last_window_height = -1;
-	static int last_window_x = INT_MIN;
-	static int last_window_y = INT_MIN;
+	static int last_window_x      = INT_MIN;
+	static int last_window_y      = INT_MIN;
 
 	switch (msg) {
 	case WM_NCCREATE:
@@ -449,7 +454,7 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		// Scheduler::breakTime();
 		break;
 	case WM_SIZE: {
-		int width = LOWORD(lParam);
+		int width  = LOWORD(lParam);
 		int height = HIWORD(lParam);
 		gpu_resize(width, height);
 		iron_internal_call_resize_callback(width, height);
@@ -491,11 +496,11 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		iron_internal_mouse_trigger_move(mouseX, mouseY);
 		break;
 	case WM_CREATE:
-		cursors[0] = LoadCursor(0, IDC_ARROW);
-		cursors[1] = LoadCursor(0, IDC_HAND);
-		cursors[2] = LoadCursor(0, IDC_IBEAM);
-		cursors[3] = LoadCursor(0, IDC_SIZEWE);
-		cursors[4] = LoadCursor(0, IDC_SIZENS);
+		cursors[0]          = LoadCursor(0, IDC_ARROW);
+		cursors[1]          = LoadCursor(0, IDC_HAND);
+		cursors[2]          = LoadCursor(0, IDC_IBEAM);
+		cursors[3]          = LoadCursor(0, IDC_SIZEWE);
+		cursors[4]          = LoadCursor(0, IDC_SIZENS);
 		cursors_initialized = true;
 		return TRUE;
 	case WM_SETCURSOR:
@@ -557,8 +562,7 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		if (pointerInfo.pointerType == PT_PEN) {
 			GetPointerPenInfo(pointerId, &penInfo);
 			ScreenToClient(hWnd, &pointerInfo.ptPixelLocation);
-			iron_internal_pen_trigger_press(pointerInfo.ptPixelLocation.x, pointerInfo.ptPixelLocation.y,
-			                                penInfo.pressure / 1024.0f);
+			iron_internal_pen_trigger_press(pointerInfo.ptPixelLocation.x, pointerInfo.ptPixelLocation.y, penInfo.pressure / 1024.0f);
 		}
 		break;
 	case WM_POINTERUP:
@@ -567,8 +571,7 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		if (pointerInfo.pointerType == PT_PEN) {
 			GetPointerPenInfo(pointerId, &penInfo);
 			ScreenToClient(hWnd, &pointerInfo.ptPixelLocation);
-			iron_internal_pen_trigger_release(pointerInfo.ptPixelLocation.x, pointerInfo.ptPixelLocation.y,
-			                                  penInfo.pressure / 1024.0f);
+			iron_internal_pen_trigger_release(pointerInfo.ptPixelLocation.x, pointerInfo.ptPixelLocation.y, penInfo.pressure / 1024.0f);
 		}
 		break;
 	case WM_POINTERUPDATE:
@@ -577,16 +580,15 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		if (pointerInfo.pointerType == PT_PEN) {
 			GetPointerPenInfo(pointerId, &penInfo);
 			ScreenToClient(hWnd, &pointerInfo.ptPixelLocation);
-			iron_internal_pen_trigger_move(pointerInfo.ptPixelLocation.x, pointerInfo.ptPixelLocation.y,
-			                               penInfo.pressure / 1024.0f);
+			iron_internal_pen_trigger_move(pointerInfo.ptPixelLocation.x, pointerInfo.ptPixelLocation.y, penInfo.pressure / 1024.0f);
 		}
 		break;
 	case WM_TOUCH: {
-		BOOL bHandled = FALSE;
-		UINT cInputs = LOWORD(wParam);
-		PTOUCHINPUT pInputs = _alloca(cInputs * sizeof(TOUCHINPUT));
-		POINT ptInput;
-		int tindex;
+		BOOL        bHandled = FALSE;
+		UINT        cInputs  = LOWORD(wParam);
+		PTOUCHINPUT pInputs  = _alloca(cInputs * sizeof(TOUCHINPUT));
+		POINT       ptInput;
+		int         tindex;
 		if (pInputs) {
 			if (GetTouchInputInfo((HTOUCHINPUT)lParam, cInputs, pInputs, sizeof(TOUCHINPUT))) {
 				for (int i = 0; i < (int)cInputs; i++) {
@@ -603,7 +605,7 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 						}
 						else {
 							bool touchExisits = GetTouchIndex(ti.dwID) != -1;
-							tindex = GetAddTouchIndex(ti.dwID);
+							tindex            = GetAddTouchIndex(ti.dwID);
 							if (tindex >= 0) {
 								if (touchExisits) {
 									if (touchPoints[tindex].x != ptInput.x || touchPoints[tindex].y != ptInput.y) {
@@ -655,9 +657,9 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 						MultiByteToWideChar(CP_UTF8, 0, text, -1, wtext, 4096);
 						OpenClipboard(hWnd);
 						EmptyClipboard();
-						size_t size = (wcslen(wtext) + 1) * sizeof(wchar_t);
+						size_t size   = (wcslen(wtext) + 1) * sizeof(wchar_t);
 						HANDLE handle = GlobalAlloc(GMEM_MOVEABLE, size);
-						void *data = GlobalLock(handle);
+						void  *data   = GlobalLock(handle);
 						memcpy(data, wtext, size);
 						GlobalUnlock(handle);
 						SetClipboardData(CF_UNICODETEXT, handle);
@@ -692,10 +694,10 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 #ifdef HANDLE_ALT_ENTER
 				if (altDown && keyTranslated[wParam] == IRON_KEY_RETURN) {
 					if (iron_window_get_mode() == IRON_WINDOW_MODE_WINDOW) {
-						last_window_width = iron_window_width();
+						last_window_width  = iron_window_width();
 						last_window_height = iron_window_height();
-						last_window_x = iron_window_x();
-						last_window_y = iron_window_y();
+						last_window_x      = iron_window_x();
+						last_window_y      = iron_window_y();
 						iron_window_change_mode(IRON_WINDOW_MODE_FULLSCREEN);
 					}
 					else {
@@ -755,12 +757,12 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		}
 		break;
 	case WM_DEVICECHANGE:
-		#ifdef WITH_GAMEPAD
+#ifdef WITH_GAMEPAD
 		detectGamepad = true;
-		#endif
+#endif
 		break;
 	case WM_DROPFILES: {
-		HDROP hDrop = (HDROP)wParam;
+		HDROP    hDrop = (HDROP)wParam;
 		unsigned count = DragQueryFileW(hDrop, 0xFFFFFFFF, NULL, 0);
 		for (unsigned i = 0; i < count; ++i) {
 			wchar_t filePath[260];
@@ -783,14 +785,14 @@ bool iron_internal_handle_messages() {
 		TranslateMessage(&message);
 		DispatchMessageW(&message);
 	}
-	#ifdef WITH_GAMEPAD
+#ifdef WITH_GAMEPAD
 	iron_gamepad_handle_messages();
-	#endif
+#endif
 	return true;
 }
 
 static bool keyboardshown = false;
-static char language[3] = {0};
+static char language[3]   = {0};
 
 void iron_keyboard_show() {
 	keyboardshown = true;
@@ -841,7 +843,7 @@ void iron_windows_co_initialize(void) {
 }
 
 static wchar_t savePathw[2048] = {0};
-static char savePath[2048] = {0};
+static char    savePath[2048]  = {0};
 
 static void findSavePath() {
 	iron_windows_co_initialize();
@@ -874,7 +876,7 @@ const char *iron_internal_save_path() {
 	return savePath;
 }
 
-static const char *videoFormats[] = {"ogv", NULL};
+static const char   *videoFormats[] = {"ogv", NULL};
 static LARGE_INTEGER frequency;
 static LARGE_INTEGER startCount;
 
@@ -920,8 +922,8 @@ void iron_init(iron_window_options_t *ops) {
 
 	for (int i = 0; i < MAX_TOUCH_POINTS; i++) {
 		touchPoints[i].sysID = -1;
-		touchPoints[i].x = -1;
-		touchPoints[i].y = -1;
+		touchPoints[i].x     = -1;
+		touchPoints[i].y     = -1;
 	}
 
 	iron_display_init();
@@ -941,10 +943,10 @@ void iron_init(iron_window_options_t *ops) {
 		iron_window_move(ops->x, ops->y);
 	}
 
-	#ifdef WITH_GAMEPAD
+#ifdef WITH_GAMEPAD
 	loadXInput();
 	initializeDirectInput();
-	#endif
+#endif
 }
 
 void iron_internal_shutdown() {
@@ -960,9 +962,9 @@ void iron_copy_to_clipboard(const char *text) {
 	MultiByteToWideChar(CP_UTF8, 0, text, -1, wtext, 4096);
 	OpenClipboard(iron_windows_window_handle(0));
 	EmptyClipboard();
-	size_t size = (wcslen(wtext) + 1) * sizeof(wchar_t);
+	size_t size   = (wcslen(wtext) + 1) * sizeof(wchar_t);
 	HANDLE handle = GlobalAlloc(GMEM_MOVEABLE, size);
-	void *data = GlobalLock(handle);
+	void  *data   = GlobalLock(handle);
 	memcpy(data, wtext, size);
 	GlobalUnlock(handle);
 	SetClipboardData(CF_UNICODETEXT, handle);
@@ -984,15 +986,17 @@ typedef unsigned long DWORD;
 #endif
 struct HWND__ *iron_windows_window_handle();
 // Enable visual styles for ui controls
-#pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#pragma comment( \
+    linker,      \
+    "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 typedef struct {
 	struct HWND__ *handle;
-	int display_index;
-	bool mouseInside;
-	int index;
-	int x, y, mode, bpp, frequency, features;
-	int manualWidth, manualHeight;
+	int            display_index;
+	bool           mouseInside;
+	int            index;
+	int            x, y, mode, bpp, frequency, features;
+	int            manualWidth, manualHeight;
 	void (*resizeCallback)(int x, int y, void *data);
 	void *resizeCallbackData;
 	bool (*closeCallback)(void *data);
@@ -1096,16 +1100,16 @@ static DWORD getDwExStyle(iron_window_mode_t mode, int features) {
 }
 
 static void createWindow(const wchar_t *title, int x, int y, int width, int height, int bpp, int frequency, int features, iron_window_mode_t windowMode,
-                        int target_display_index) {
+                         int target_display_index) {
 	HINSTANCE inst = GetModuleHandleW(NULL);
 	RegisterWindowClass(inst, windowClassName);
 
 	int display_index = target_display_index == -1 ? iron_primary_display() : target_display_index;
 
 	RECT WindowRect;
-	WindowRect.left = 0;
-	WindowRect.right = width;
-	WindowRect.top = 0;
+	WindowRect.left   = 0;
+	WindowRect.right  = width;
+	WindowRect.top    = 0;
 	WindowRect.bottom = height;
 
 	AdjustWindowRectEx(&WindowRect, getDwStyle(windowMode, features), FALSE, getDwExStyle(windowMode, features));
@@ -1130,41 +1134,42 @@ static void createWindow(const wchar_t *title, int x, int y, int width, int heig
 		break;
 	}
 
-	HWND hwnd = CreateWindowExW(getDwExStyle(windowMode, features), windowClassName, title, getDwStyle(windowMode, features), dstx, dsty, dstw, dsth, NULL, NULL,
-	                            inst, NULL);
+	HWND hwnd = CreateWindowExW(getDwExStyle(windowMode, features), windowClassName, title, getDwStyle(windowMode, features), dstx, dsty, dstw, dsth, NULL,
+	                            NULL, inst, NULL);
 
 	SetCursor(LoadCursor(NULL, IDC_ARROW));
 	DragAcceptFiles(hwnd, true);
 
-	windows[0].handle = hwnd;
-	windows[0].x = dstx;
-	windows[0].y = dsty;
-	windows[0].mode = windowMode;
+	windows[0].handle        = hwnd;
+	windows[0].x             = dstx;
+	windows[0].y             = dsty;
+	windows[0].mode          = windowMode;
 	windows[0].display_index = display_index;
-	windows[0].bpp = bpp;
-	windows[0].frequency = frequency;
-	windows[0].features = features;
-	windows[0].manualWidth = width;
-	windows[0].manualHeight = height;
+	windows[0].bpp           = bpp;
+	windows[0].frequency     = frequency;
+	windows[0].features      = features;
+	windows[0].manualWidth   = width;
+	windows[0].manualHeight  = height;
 
 	// Dark mode
-	char vdata[4];
+	char  vdata[4];
 	DWORD cbdata = 4 * sizeof(char);
-	RegGetValueW(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", L"AppsUseLightTheme", RRF_RT_REG_DWORD, NULL, vdata, &cbdata);
+	RegGetValueW(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", L"AppsUseLightTheme", RRF_RT_REG_DWORD, NULL, vdata,
+	             &cbdata);
 	BOOL use_dark_mode = (int)(vdata[3] << 24 | vdata[2] << 16 | vdata[1] << 8 | vdata[0]) != 1;
 	DwmSetWindowAttribute(iron_windows_window_handle(0), DWMWA_USE_IMMERSIVE_DARK_MODE, &use_dark_mode, sizeof(use_dark_mode));
 }
 
 void iron_window_resize(int width, int height) {
-	WindowData *win = &windows[0];
-	win->manualWidth = width;
+	WindowData *win   = &windows[0];
+	win->manualWidth  = width;
 	win->manualHeight = height;
 	switch (win->mode) {
 	case IRON_WINDOW_MODE_WINDOW: {
 		RECT rect;
-		rect.left = 0;
-		rect.top = 0;
-		rect.right = width;
+		rect.left   = 0;
+		rect.top    = 0;
+		rect.right  = width;
 		rect.bottom = height;
 		AdjustWindowRectEx(&rect, getDwStyle((iron_window_mode_t)win->mode, win->features), FALSE, getDwExStyle((iron_window_mode_t)win->mode, win->features));
 		SetWindowPos(win->handle, NULL, iron_window_x(), iron_window_y(), rect.right - rect.left, rect.bottom - rect.top, 0);
@@ -1184,9 +1189,9 @@ void iron_window_move(int x, int y) {
 	win->y = y;
 
 	RECT rect;
-	rect.left = 0;
-	rect.top = 0;
-	rect.right = iron_window_width();
+	rect.left   = 0;
+	rect.top    = 0;
+	rect.right  = iron_window_width();
 	rect.bottom = iron_window_height();
 	AdjustWindowRectEx(&rect, getDwStyle((iron_window_mode_t)win->mode, win->features), FALSE, getDwExStyle((iron_window_mode_t)win->mode, win->features));
 
@@ -1194,9 +1199,9 @@ void iron_window_move(int x, int y) {
 }
 
 void iron_window_change_mode(iron_window_mode_t mode) {
-	WindowData *win = &windows[0];
-	int display_index = iron_window_display();
-	iron_display_mode_t display_mode = iron_display_current_mode(display_index);
+	WindowData         *win           = &windows[0];
+	int                 display_index = iron_window_display();
+	iron_display_mode_t display_mode  = iron_display_current_mode(display_index);
 	switch (mode) {
 	case IRON_WINDOW_MODE_WINDOW: {
 		iron_windows_restore_display(display_index);
@@ -1275,12 +1280,12 @@ void iron_window_create(iron_window_options_t *win) {
 }
 
 void iron_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {
-	windows[0].resizeCallback = callback;
+	windows[0].resizeCallback     = callback;
 	windows[0].resizeCallbackData = data;
 }
 
 void iron_window_set_close_callback(bool (*callback)(void *data), void *data) {
-	windows[0].closeCallback = callback;
+	windows[0].closeCallback     = callback;
 	windows[0].closeCallbackData = data;
 }
 
@@ -1308,7 +1313,7 @@ bool iron_internal_call_close_callback() {
 extern void (*iron_save_and_quit)(bool);
 
 bool _save_and_quit_callback_internal() {
-	bool save = false;
+	bool    save = false;
 	wchar_t title[1024];
 	GetWindowTextW(iron_windows_window_handle(), title, sizeof(title));
 	bool dirty = wcsstr(title, L"* - ArmorPaint") != NULL;
@@ -1338,14 +1343,14 @@ void iron_gamepad_rumble(int gamepad, float left, float right) {
 	if (isXInputGamepad(gamepad)) {
 		XINPUT_VIBRATION vibration;
 		memset(&vibration, 0, sizeof(XINPUT_VIBRATION));
-		vibration.wLeftMotorSpeed = (WORD)(65535.f * left);
+		vibration.wLeftMotorSpeed  = (WORD)(65535.f * left);
 		vibration.wRightMotorSpeed = (WORD)(65535.f * right);
 		InputSetState(gamepad, &vibration);
 	}
 }
 
-#include <dinput.h>
 #include <XInput.h>
+#include <dinput.h>
 
 static float axes[12 * 6];
 static float buttons[12 * 16];
@@ -1369,12 +1374,12 @@ void loadXInput() {
 	}
 }
 
-static IDirectInput8W *di_instance = NULL;
+static IDirectInput8W       *di_instance = NULL;
 static IDirectInputDevice8W *di_pads[IRON_DINPUT_MAX_COUNT];
-static DIJOYSTATE2 di_padState[IRON_DINPUT_MAX_COUNT];
-static DIJOYSTATE2 di_lastPadState[IRON_DINPUT_MAX_COUNT];
-static DIDEVCAPS di_deviceCaps[IRON_DINPUT_MAX_COUNT];
-static int padCount = 0;
+static DIJOYSTATE2           di_padState[IRON_DINPUT_MAX_COUNT];
+static DIJOYSTATE2           di_lastPadState[IRON_DINPUT_MAX_COUNT];
+static DIDEVCAPS             di_deviceCaps[IRON_DINPUT_MAX_COUNT];
+static int                   padCount = 0;
 
 static void cleanupPad(int padIndex) {
 	if (di_pads[padIndex] != NULL) {
@@ -1385,10 +1390,10 @@ static void cleanupPad(int padIndex) {
 }
 
 #ifndef SAFE_RELEASE
-#define SAFE_RELEASE(x)                                                                                                                                        \
-	if (x != NULL) {                                                                                                                                           \
-		x->lpVtbl->Release(x);                                                                                                                                 \
-		x = NULL;                                                                                                                                              \
+#define SAFE_RELEASE(x)        \
+	if (x != NULL) {           \
+		x->lpVtbl->Release(x); \
+		x = NULL;              \
 	}
 #endif
 
@@ -1399,21 +1404,21 @@ static void cleanupPad(int padIndex) {
 // Unfortunately this information can not be found by just using DirectInput
 //-----------------------------------------------------------------------------
 static BOOL IsXInputDevice(const GUID *pGuidProductFromDirectInput) {
-	IWbemLocator *pIWbemLocator = NULL;
-	IEnumWbemClassObject *pEnumDevices = NULL;
-	IWbemClassObject *pDevices[20] = {0};
-	IWbemServices *pIWbemServices = NULL;
-	BSTR bstrNamespace = NULL;
-	BSTR bstrDeviceID = NULL;
-	BSTR bstrClassName = NULL;
-	DWORD uReturned = 0;
-	bool bIsXinputDevice = false;
-	UINT iDevice = 0;
-	VARIANT var;
-	HRESULT hr;
+	IWbemLocator         *pIWbemLocator   = NULL;
+	IEnumWbemClassObject *pEnumDevices    = NULL;
+	IWbemClassObject     *pDevices[20]    = {0};
+	IWbemServices        *pIWbemServices  = NULL;
+	BSTR                  bstrNamespace   = NULL;
+	BSTR                  bstrDeviceID    = NULL;
+	BSTR                  bstrClassName   = NULL;
+	DWORD                 uReturned       = 0;
+	bool                  bIsXinputDevice = false;
+	UINT                  iDevice         = 0;
+	VARIANT               var;
+	HRESULT               hr;
 
 	// CoInit if needed
-	hr = CoInitialize(NULL);
+	hr               = CoInitialize(NULL);
 	bool bCleanupCOM = SUCCEEDED(hr);
 
 	// Create WMI
@@ -1462,7 +1467,7 @@ static BOOL IsXInputDevice(const GUID *pGuidProductFromDirectInput) {
 				// TODO: Doesn't work with an Xbox Series X|S controller
 				if (wcsstr(var.bstrVal, L"IG_")) {
 					// If it does, then get the VID/PID from var.bstrVal
-					DWORD dwPid = 0, dwVid = 0;
+					DWORD  dwPid = 0, dwVid = 0;
 					WCHAR *strVid = wcsstr(var.bstrVal, L"VID_");
 #ifndef IRON_NO_CLIB
 					if (strVid && swscanf(strVid, L"VID_%4X", &dwVid) != 1) {
@@ -1520,12 +1525,12 @@ static BOOL CALLBACK enumerateJoystickAxesCallback(LPCDIDEVICEOBJECTINSTANCEW dd
 	HWND hwnd = (HWND)context;
 
 	DIPROPRANGE propertyRange;
-	propertyRange.diph.dwSize = sizeof(DIPROPRANGE);
+	propertyRange.diph.dwSize       = sizeof(DIPROPRANGE);
 	propertyRange.diph.dwHeaderSize = sizeof(DIPROPHEADER);
-	propertyRange.diph.dwHow = DIPH_BYID;
-	propertyRange.diph.dwObj = ddoi->dwType;
-	propertyRange.lMin = -32768;
-	propertyRange.lMax = 32768;
+	propertyRange.diph.dwHow        = DIPH_BYID;
+	propertyRange.diph.dwObj        = ddoi->dwType;
+	propertyRange.lMin              = -32768;
+	propertyRange.lMax              = 32768;
 
 	HRESULT hr = di_pads[padCount]->lpVtbl->SetProperty(di_pads[padCount], DIPROP_RANGE, &propertyRange.diph);
 
@@ -1550,7 +1555,7 @@ static BOOL CALLBACK enumerateJoysticksCallback(LPCDIDEVICEINSTANCEW ddi, LPVOID
 
 		if (SUCCEEDED(hr)) {
 			di_deviceCaps[padCount].dwSize = sizeof(DIDEVCAPS);
-			hr = di_pads[padCount]->lpVtbl->GetCapabilities(di_pads[padCount], &di_deviceCaps[padCount]);
+			hr                             = di_pads[padCount]->lpVtbl->GetCapabilities(di_pads[padCount], &di_deviceCaps[padCount]);
 
 			if (SUCCEEDED(hr)) {
 				hr = di_pads[padCount]->lpVtbl->EnumObjects(di_pads[padCount], enumerateJoystickAxesCallback, NULL, DIDFT_AXIS);
@@ -1634,20 +1639,20 @@ bool handleDirectInputPad(int padIndex) {
 	switch (hr) {
 	case S_OK: {
 		for (int axisIndex = 0; axisIndex < 2; ++axisIndex) {
-			LONG *now = NULL;
+			LONG *now  = NULL;
 			LONG *last = NULL;
 
 			switch (axisIndex) {
 			case 0: {
-				now = &di_padState[padIndex].lX;
+				now  = &di_padState[padIndex].lX;
 				last = &di_lastPadState[padIndex].lX;
 			} break;
 			case 1: {
-				now = &di_padState[padIndex].lY;
+				now  = &di_padState[padIndex].lY;
 				last = &di_lastPadState[padIndex].lY;
 			} break;
 			case 2: {
-				now = &di_padState[padIndex].lZ;
+				now  = &di_padState[padIndex].lZ;
 				last = &di_lastPadState[padIndex].lZ;
 			} break;
 			}
@@ -1658,7 +1663,7 @@ bool handleDirectInputPad(int padIndex) {
 		}
 
 		for (int buttonIndex = 0; buttonIndex < 128; ++buttonIndex) {
-			BYTE *now = &di_padState[padIndex].rgbButtons[buttonIndex];
+			BYTE *now  = &di_padState[padIndex].rgbButtons[buttonIndex];
 			BYTE *last = &di_lastPadState[padIndex].rgbButtons[buttonIndex];
 
 			if (*now != *last) {
@@ -1667,17 +1672,17 @@ bool handleDirectInputPad(int padIndex) {
 		}
 
 		for (int povIndex = 0; povIndex < 4; ++povIndex) {
-			DWORD *now = &di_padState[padIndex].rgdwPOV[povIndex];
+			DWORD *now  = &di_padState[padIndex].rgdwPOV[povIndex];
 			DWORD *last = &di_lastPadState[padIndex].rgdwPOV[povIndex];
 
-			bool up = (*now == 0 || *now == 31500 || *now == 4500);
-			bool down = (*now == 18000 || *now == 13500 || *now == 22500);
-			bool left = (*now == 27000 || *now == 22500 || *now == 31500);
+			bool up    = (*now == 0 || *now == 31500 || *now == 4500);
+			bool down  = (*now == 18000 || *now == 13500 || *now == 22500);
+			bool left  = (*now == 27000 || *now == 22500 || *now == 31500);
 			bool right = (*now == 9000 || *now == 4500 || *now == 13500);
 
-			bool lastUp = (*last == 0 || *last == 31500 || *last == 4500);
-			bool lastDown = (*last == 18000 || *last == 13500 || *last == 22500);
-			bool lastLeft = (*last == 27000 || *last == 22500 || *last == 31500);
+			bool lastUp    = (*last == 0 || *last == 31500 || *last == 4500);
+			bool lastDown  = (*last == 18000 || *last == 13500 || *last == 22500);
+			bool lastLeft  = (*last == 27000 || *last == 22500 || *last == 31500);
 			bool lastRight = (*last == 9000 || *last == 4500 || *last == 13500);
 
 			if (up != lastUp) {
@@ -1708,9 +1713,8 @@ bool handleDirectInputPad(int padIndex) {
 }
 
 static bool isXInputGamepad(int gamepad) {
-	//if gamepad is greater than XInput max, treat it as DINPUT.
-	if (gamepad >= XUSER_MAX_COUNT)
-	{
+	// if gamepad is greater than XInput max, treat it as DINPUT.
+	if (gamepad >= XUSER_MAX_COUNT) {
 		return false;
 	}
 	XINPUT_STATE state;
@@ -1770,16 +1774,16 @@ void iron_gamepad_handle_messages() {
 					}
 				}
 				float newbuttons[16];
-				newbuttons[0] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_A) ? 1.0f : 0.0f;
-				newbuttons[1] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_B) ? 1.0f : 0.0f;
-				newbuttons[2] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_X) ? 1.0f : 0.0f;
-				newbuttons[3] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_Y) ? 1.0f : 0.0f;
-				newbuttons[4] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) ? 1.0f : 0.0f;
-				newbuttons[5] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) ? 1.0f : 0.0f;
-				newbuttons[6] = state.Gamepad.bLeftTrigger / 255.0f;
-				newbuttons[7] = state.Gamepad.bRightTrigger / 255.0f;
-				newbuttons[8] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) ? 1.0f : 0.0f;
-				newbuttons[9] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_START) ? 1.0f : 0.0f;
+				newbuttons[0]  = (state.Gamepad.wButtons & XINPUT_GAMEPAD_A) ? 1.0f : 0.0f;
+				newbuttons[1]  = (state.Gamepad.wButtons & XINPUT_GAMEPAD_B) ? 1.0f : 0.0f;
+				newbuttons[2]  = (state.Gamepad.wButtons & XINPUT_GAMEPAD_X) ? 1.0f : 0.0f;
+				newbuttons[3]  = (state.Gamepad.wButtons & XINPUT_GAMEPAD_Y) ? 1.0f : 0.0f;
+				newbuttons[4]  = (state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) ? 1.0f : 0.0f;
+				newbuttons[5]  = (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) ? 1.0f : 0.0f;
+				newbuttons[6]  = state.Gamepad.bLeftTrigger / 255.0f;
+				newbuttons[7]  = state.Gamepad.bRightTrigger / 255.0f;
+				newbuttons[8]  = (state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) ? 1.0f : 0.0f;
+				newbuttons[9]  = (state.Gamepad.wButtons & XINPUT_GAMEPAD_START) ? 1.0f : 0.0f;
 				newbuttons[10] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) ? 1.0f : 0.0f;
 				newbuttons[11] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) ? 1.0f : 0.0f;
 				newbuttons[12] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) ? 1.0f : 0.0f;
@@ -1794,9 +1798,9 @@ void iron_gamepad_handle_messages() {
 				}
 			}
 			else {
-					if (handleDirectInputPad(i)) {
-						gamepadFound = true;
-					}
+				if (handleDirectInputPad(i)) {
+					gamepadFound = true;
+				}
 			}
 		}
 	}
@@ -1806,5 +1810,4 @@ void iron_gamepad_handle_messages() {
 
 volatile int iron_exec_async_done = 1;
 
-void iron_exec_async(const char *path, char *argv[]) {
-}
+void iron_exec_async(const char *path, char *argv[]) {}

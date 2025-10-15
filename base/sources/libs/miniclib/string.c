@@ -55,7 +55,7 @@ char *strstr(const char *str1, const char *str2) {
 		}
 		for (size_t i2 = 0;; ++i2) {
 			if (str2[i2] == 0) {
-				return (char*)&str1[i1];
+				return (char *)&str1[i1];
 			}
 			if (str1[i1 + i2] != str2[i2]) {
 				break;

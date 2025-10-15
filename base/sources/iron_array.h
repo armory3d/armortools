@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 typedef struct i8_array {
-	int8_t *buffer;
+	int8_t  *buffer;
 	uint32_t length;
 	uint32_t capacity;
 } i8_array_t;
@@ -22,8 +22,8 @@ typedef struct i16_array {
 
 typedef struct u16_array {
 	uint16_t *buffer;
-	uint32_t length;
-	uint32_t capacity;
+	uint32_t  length;
+	uint32_t  capacity;
 } u16_array_t;
 
 typedef struct i32_array {
@@ -34,24 +34,24 @@ typedef struct i32_array {
 
 typedef struct u32_array {
 	uint32_t *buffer;
-	uint32_t length;
-	uint32_t capacity;
+	uint32_t  length;
+	uint32_t  capacity;
 } u32_array_t;
 
 typedef struct f32_array {
-	float *buffer;
+	float   *buffer;
 	uint32_t length;
 	uint32_t capacity;
 } f32_array_t;
 
 typedef struct any_array {
-	void **buffer;
+	void   **buffer;
 	uint32_t length;
 	uint32_t capacity;
 } any_array_t;
 
 typedef struct char_ptr_array {
-	char **buffer;
+	char   **buffer;
 	uint32_t length;
 	uint32_t capacity;
 } char_ptr_array_t;
@@ -80,71 +80,71 @@ void any_array_resize(any_array_t *a, uint32_t size);
 void char_ptr_array_resize(char_ptr_array_t *a, uint32_t size);
 void buffer_resize(buffer_t *b, uint32_t size);
 
-void array_sort(any_array_t *ar, int (*compare)(const void *, const void *));
-void i32_array_sort(i32_array_t *ar, int (*compare)(const void *, const void *));
-void *array_pop(any_array_t *ar);
-int i32_array_pop(i32_array_t *ar);
-void *array_shift(any_array_t *ar);
-void array_splice(any_array_t *ar, uint32_t start, uint32_t delete_count);
-void i32_array_splice(i32_array_t *ar, uint32_t start, uint32_t delete_count);
+void         array_sort(any_array_t *ar, int (*compare)(const void *, const void *));
+void         i32_array_sort(i32_array_t *ar, int (*compare)(const void *, const void *));
+void        *array_pop(any_array_t *ar);
+int          i32_array_pop(i32_array_t *ar);
+void        *array_shift(any_array_t *ar);
+void         array_splice(any_array_t *ar, uint32_t start, uint32_t delete_count);
+void         i32_array_splice(i32_array_t *ar, uint32_t start, uint32_t delete_count);
 any_array_t *array_concat(any_array_t *a, any_array_t *b);
 any_array_t *array_slice(any_array_t *a, uint32_t begin, uint32_t end);
-void array_insert(any_array_t *a, uint32_t at, void *e);
-void array_remove(any_array_t *ar, void *e);
-void char_ptr_array_remove(char_ptr_array_t *ar, char *e);
-void i32_array_remove(i32_array_t *ar, int e);
-int32_t array_index_of(any_array_t *ar, void *e);
-int32_t char_ptr_array_index_of(char_ptr_array_t *ar, char *e);
-int32_t i32_array_index_of(i32_array_t *ar, int e);
-void array_reverse(any_array_t *ar);
+void         array_insert(any_array_t *a, uint32_t at, void *e);
+void         array_remove(any_array_t *ar, void *e);
+void         char_ptr_array_remove(char_ptr_array_t *ar, char *e);
+void         i32_array_remove(i32_array_t *ar, int e);
+int32_t      array_index_of(any_array_t *ar, void *e);
+int32_t      char_ptr_array_index_of(char_ptr_array_t *ar, char *e);
+int32_t      i32_array_index_of(i32_array_t *ar, int e);
+void         array_reverse(any_array_t *ar);
 
 buffer_t *buffer_slice(buffer_t *a, uint32_t begin, uint32_t end);
-uint8_t buffer_get_u8(buffer_t *b, uint32_t p);
-int8_t buffer_get_i8(buffer_t *b, uint32_t p);
-uint16_t buffer_get_u16(buffer_t *b, uint32_t p);
-int16_t buffer_get_i16(buffer_t *b, uint32_t p);
-uint32_t buffer_get_u32(buffer_t *b, uint32_t p);
-int32_t buffer_get_i32(buffer_t *b, uint32_t p);
-float buffer_get_f32(buffer_t *b, uint32_t p);
-double buffer_get_f64(buffer_t *b, uint32_t p);
-int64_t buffer_get_i64(buffer_t *b, uint32_t p);
-void buffer_set_u8(buffer_t *b, uint32_t p, uint8_t n);
-void buffer_set_i8(buffer_t *b, uint32_t p, int8_t n);
-void buffer_set_u16(buffer_t *b, uint32_t p, uint16_t n);
-void buffer_set_i16(buffer_t *b, uint32_t p, uint16_t n);
-void buffer_set_u32(buffer_t *b, uint32_t p, uint32_t n);
-void buffer_set_i32(buffer_t *b, uint32_t p, int32_t n);
-void buffer_set_f32(buffer_t *b, uint32_t p, float n);
+uint8_t   buffer_get_u8(buffer_t *b, uint32_t p);
+int8_t    buffer_get_i8(buffer_t *b, uint32_t p);
+uint16_t  buffer_get_u16(buffer_t *b, uint32_t p);
+int16_t   buffer_get_i16(buffer_t *b, uint32_t p);
+uint32_t  buffer_get_u32(buffer_t *b, uint32_t p);
+int32_t   buffer_get_i32(buffer_t *b, uint32_t p);
+float     buffer_get_f32(buffer_t *b, uint32_t p);
+double    buffer_get_f64(buffer_t *b, uint32_t p);
+int64_t   buffer_get_i64(buffer_t *b, uint32_t p);
+void      buffer_set_u8(buffer_t *b, uint32_t p, uint8_t n);
+void      buffer_set_i8(buffer_t *b, uint32_t p, int8_t n);
+void      buffer_set_u16(buffer_t *b, uint32_t p, uint16_t n);
+void      buffer_set_i16(buffer_t *b, uint32_t p, uint16_t n);
+void      buffer_set_u32(buffer_t *b, uint32_t p, uint32_t n);
+void      buffer_set_i32(buffer_t *b, uint32_t p, int32_t n);
+void      buffer_set_f32(buffer_t *b, uint32_t p, float n);
 
-buffer_t *buffer_create(uint32_t length);
-buffer_t *buffer_create_from_raw(char *raw, uint32_t length);
-f32_array_t *f32_array_create(uint32_t length);
-f32_array_t *f32_array_create_from_buffer(buffer_t *b);
-f32_array_t *f32_array_create_from_array(f32_array_t *from);
-f32_array_t *f32_array_create_from_raw(float *raw, uint32_t length);
-f32_array_t *f32_array_create_x(float x);
-f32_array_t *f32_array_create_xy(float x, float y);
-f32_array_t *f32_array_create_xyz(float x, float y, float z);
-f32_array_t *f32_array_create_xyzw(float x, float y, float z, float w);
-f32_array_t *f32_array_create_xyzwv(float x, float y, float z, float w, float v);
-u32_array_t *u32_array_create(uint32_t length);
-u32_array_t *u32_array_create_from_array(u32_array_t *from);
-u32_array_t *u32_array_create_from_raw(uint32_t *raw, uint32_t length);
-i32_array_t *i32_array_create(uint32_t length);
-i32_array_t *i32_array_create_from_array(i32_array_t *from);
-i32_array_t *i32_array_create_from_raw(int32_t *raw, uint32_t length);
-u16_array_t *u16_array_create(uint32_t length);
-u16_array_t *u16_array_create_from_raw(uint16_t *raw, uint32_t length);
-i16_array_t *i16_array_create(uint32_t length);
-i16_array_t *i16_array_create_from_array(i16_array_t *from);
-i16_array_t *i16_array_create_from_raw(int16_t *raw, uint32_t length);
-u8_array_t *u8_array_create(uint32_t length);
-u8_array_t *u8_array_create_from_array(u8_array_t *from);
-u8_array_t *u8_array_create_from_raw(uint8_t *raw, uint32_t length);
-u8_array_t *u8_array_create_from_string(char *s);
-char *u8_array_to_string(u8_array_t *a);
-i8_array_t *i8_array_create(uint32_t length);
-i8_array_t *i8_array_create_from_raw(int8_t *raw, uint32_t length);
-any_array_t *any_array_create(uint32_t length);
-any_array_t *any_array_create_from_raw(void **raw, uint32_t length);
+buffer_t         *buffer_create(uint32_t length);
+buffer_t         *buffer_create_from_raw(char *raw, uint32_t length);
+f32_array_t      *f32_array_create(uint32_t length);
+f32_array_t      *f32_array_create_from_buffer(buffer_t *b);
+f32_array_t      *f32_array_create_from_array(f32_array_t *from);
+f32_array_t      *f32_array_create_from_raw(float *raw, uint32_t length);
+f32_array_t      *f32_array_create_x(float x);
+f32_array_t      *f32_array_create_xy(float x, float y);
+f32_array_t      *f32_array_create_xyz(float x, float y, float z);
+f32_array_t      *f32_array_create_xyzw(float x, float y, float z, float w);
+f32_array_t      *f32_array_create_xyzwv(float x, float y, float z, float w, float v);
+u32_array_t      *u32_array_create(uint32_t length);
+u32_array_t      *u32_array_create_from_array(u32_array_t *from);
+u32_array_t      *u32_array_create_from_raw(uint32_t *raw, uint32_t length);
+i32_array_t      *i32_array_create(uint32_t length);
+i32_array_t      *i32_array_create_from_array(i32_array_t *from);
+i32_array_t      *i32_array_create_from_raw(int32_t *raw, uint32_t length);
+u16_array_t      *u16_array_create(uint32_t length);
+u16_array_t      *u16_array_create_from_raw(uint16_t *raw, uint32_t length);
+i16_array_t      *i16_array_create(uint32_t length);
+i16_array_t      *i16_array_create_from_array(i16_array_t *from);
+i16_array_t      *i16_array_create_from_raw(int16_t *raw, uint32_t length);
+u8_array_t       *u8_array_create(uint32_t length);
+u8_array_t       *u8_array_create_from_array(u8_array_t *from);
+u8_array_t       *u8_array_create_from_raw(uint8_t *raw, uint32_t length);
+u8_array_t       *u8_array_create_from_string(char *s);
+char             *u8_array_to_string(u8_array_t *a);
+i8_array_t       *i8_array_create(uint32_t length);
+i8_array_t       *i8_array_create_from_raw(int8_t *raw, uint32_t length);
+any_array_t      *any_array_create(uint32_t length);
+any_array_t      *any_array_create_from_raw(void **raw, uint32_t length);
 char_ptr_array_t *char_ptr_array_create(uint32_t length);

@@ -1,54 +1,54 @@
 #include "linux_system.h"
+#include <X11/XKBlib.h>
+#include <X11/Xcursor/Xcursor.h>
+#include <X11/Xlib.h>
+#include <ctype.h>
+#include <errno.h>
 #include <iron_gpu.h>
 #include <iron_system.h>
 #include <limits.h>
+#include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
-#include <pwd.h>
-#include <unistd.h>
-#include <ctype.h>
-#include <time.h>
 #include <sys/stat.h>
 #include <sys/time.h>
-#include <X11/Xlib.h>
-#include <X11/XKBlib.h>
-#include <X11/Xcursor/Xcursor.h>
+#include <time.h>
+#include <unistd.h>
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_xlib.h>
 
 #define Button6 6
 #define Button7 7
 
-static struct x11_context x11_ctx = {0};
-static size_t clipboardStringSize = 1024;
-static char *clipboardString = NULL;
-static char buffer[1024];
-static char save[2000];
-static bool saveInitialized = false;
-static const char *videoFormats[] = {"ogv", NULL};
-static struct timeval start;
-static bool mouse_hidden = false;
-static int xi_extension = -1;
-static Atom XdndAware;
-static Atom XdndDrop;
-static Atom XdndEnter;
-static Atom XdndTextUriList;
-static Atom XdndStatus;
-static Atom XdndActionCopy;
-static Atom XdndSelection;
-static Atom CLIPBOARD;
-static Atom UTF8_STRING;
-static Atom XSEL_DATA;
-static Atom TARGETS;
-static Atom MULTIPLE;
-static Atom TEXT_PLAIN;
-static Atom WM_DELETE_WINDOW;
-static Atom NET_WM_NAME;
-static Atom NET_WM_ICON_NAME;
-static Atom NET_WM_STATE;
-static Atom NET_WM_STATE_FULLSCREEN;
+static struct x11_context x11_ctx             = {0};
+static size_t             clipboardStringSize = 1024;
+static char              *clipboardString     = NULL;
+static char               buffer[1024];
+static char               save[2000];
+static bool               saveInitialized = false;
+static const char        *videoFormats[]  = {"ogv", NULL};
+static struct timeval     start;
+static bool               mouse_hidden = false;
+static int                xi_extension = -1;
+static Atom               XdndAware;
+static Atom               XdndDrop;
+static Atom               XdndEnter;
+static Atom               XdndTextUriList;
+static Atom               XdndStatus;
+static Atom               XdndActionCopy;
+static Atom               XdndSelection;
+static Atom               CLIPBOARD;
+static Atom               UTF8_STRING;
+static Atom               XSEL_DATA;
+static Atom               TARGETS;
+static Atom               MULTIPLE;
+static Atom               TEXT_PLAIN;
+static Atom               WM_DELETE_WINDOW;
+static Atom               NET_WM_NAME;
+static Atom               NET_WM_ICON_NAME;
+static Atom               NET_WM_STATE;
+static Atom               NET_WM_STATE_FULLSCREEN;
 
 static struct {
 	void (*resize_callback)(int width, int height, void *data);
@@ -73,31 +73,31 @@ void iron_x11_init() {
 	XSetErrorHandler(iron_x11_error_handler);
 	clipboardString = (char *)malloc(clipboardStringSize);
 
-	XdndAware = XInternAtom(x11_ctx.display, "XdndAware", False);
-	XdndDrop = XInternAtom(x11_ctx.display, "XdndDrop", False);
-	XdndEnter = XInternAtom(x11_ctx.display, "XdndEnter", False);
-	XdndTextUriList = XInternAtom(x11_ctx.display, "text/uri-list", False);
-	XdndStatus = XInternAtom(x11_ctx.display, "XdndStatus", False);
-	XdndActionCopy = XInternAtom(x11_ctx.display, "XdndActionCopy", False);
-	XdndSelection = XInternAtom(x11_ctx.display, "XdndSelection", False);
-	CLIPBOARD = XInternAtom(x11_ctx.display, "CLIPBOARD", False);
-	UTF8_STRING = XInternAtom(x11_ctx.display, "UTF8_STRING", False);
-	XSEL_DATA = XInternAtom(x11_ctx.display, "XSEL_DATA", False);
-	TARGETS = XInternAtom(x11_ctx.display, "TARGETS", False);
-	MULTIPLE = XInternAtom(x11_ctx.display, "MULTIPLE", False);
-	TEXT_PLAIN = XInternAtom(x11_ctx.display, "text/plain;charset=utf-8", False);
-	WM_DELETE_WINDOW = XInternAtom(x11_ctx.display, "WM_DELETE_WINDOW", False);
-	NET_WM_NAME = XInternAtom(x11_ctx.display, "_NET_WM_NAME", False);
-	NET_WM_ICON_NAME = XInternAtom(x11_ctx.display, "_NET_WM_ICON_NAME", False);
-	NET_WM_STATE = XInternAtom(x11_ctx.display, "_NET_WM_STATE", False);
+	XdndAware               = XInternAtom(x11_ctx.display, "XdndAware", False);
+	XdndDrop                = XInternAtom(x11_ctx.display, "XdndDrop", False);
+	XdndEnter               = XInternAtom(x11_ctx.display, "XdndEnter", False);
+	XdndTextUriList         = XInternAtom(x11_ctx.display, "text/uri-list", False);
+	XdndStatus              = XInternAtom(x11_ctx.display, "XdndStatus", False);
+	XdndActionCopy          = XInternAtom(x11_ctx.display, "XdndActionCopy", False);
+	XdndSelection           = XInternAtom(x11_ctx.display, "XdndSelection", False);
+	CLIPBOARD               = XInternAtom(x11_ctx.display, "CLIPBOARD", False);
+	UTF8_STRING             = XInternAtom(x11_ctx.display, "UTF8_STRING", False);
+	XSEL_DATA               = XInternAtom(x11_ctx.display, "XSEL_DATA", False);
+	TARGETS                 = XInternAtom(x11_ctx.display, "TARGETS", False);
+	MULTIPLE                = XInternAtom(x11_ctx.display, "MULTIPLE", False);
+	TEXT_PLAIN              = XInternAtom(x11_ctx.display, "text/plain;charset=utf-8", False);
+	WM_DELETE_WINDOW        = XInternAtom(x11_ctx.display, "WM_DELETE_WINDOW", False);
+	NET_WM_NAME             = XInternAtom(x11_ctx.display, "_NET_WM_NAME", False);
+	NET_WM_ICON_NAME        = XInternAtom(x11_ctx.display, "_NET_WM_ICON_NAME", False);
+	NET_WM_STATE            = XInternAtom(x11_ctx.display, "_NET_WM_STATE", False);
 	NET_WM_STATE_FULLSCREEN = XInternAtom(x11_ctx.display, "_NET_WM_STATE_FULLSCREEN", False);
 
 	int event, error;
 	XQueryExtension(x11_ctx.display, "XInputExtension", &xi_extension, &event, &error);
-	int num_devices;
+	int           num_devices;
 	XIDeviceInfo *devices = XIQueryDevice(x11_ctx.display, XIAllDevices, &num_devices);
-	x11_ctx.pen.id = -1;
-	x11_ctx.eraser.id = -1;
+	x11_ctx.pen.id        = -1;
+	x11_ctx.eraser.id     = -1;
 	for (int i = 0; i < num_devices; i++) {
 		XIDeviceInfo *info = &devices[i];
 		strncpy(buffer, info->name, 1023);
@@ -106,33 +106,34 @@ void iron_x11_init() {
 			buffer[j] = tolower(buffer[j]);
 		}
 
-		bool is_pen = strstr(buffer, "stylus") || strstr(buffer, "pen") || strstr(buffer, "wacom");
+		bool is_pen    = strstr(buffer, "stylus") || strstr(buffer, "pen") || strstr(buffer, "wacom");
 		bool is_eraser = strstr(buffer, "eraser");
 		if (!is_pen && !is_eraser) {
 			continue;
 		}
 
-		int pressure_index = -1;
-		double max = 0;
+		int    pressure_index = -1;
+		double max            = 0;
 		for (int j = 0; j < info->num_classes; j++) {
 			if (info->classes[j]->type == XIValuatorClass) {
 				XIValuatorClassInfo *val = (XIValuatorClassInfo *)info->classes[j];
 				if (val->label == XInternAtom(x11_ctx.display, "Abs Pressure", False)) {
 					pressure_index = val->number;
-					max = val->max;
+					max            = val->max;
 					break;
 				}
 			}
 		}
-		if (pressure_index == -1) continue;
+		if (pressure_index == -1)
+			continue;
 
 		struct x11_pen_device *d = is_pen ? &x11_ctx.pen : &x11_ctx.eraser;
-		d->id = info->deviceid;
-		d->pressure_index = pressure_index;
-		d->pressure_max = max;
-		d->press = is_pen ? iron_internal_pen_trigger_press : iron_internal_eraser_trigger_press;
-		d->move = is_pen ? iron_internal_pen_trigger_move : iron_internal_eraser_trigger_move;
-		d->release = is_pen ? iron_internal_pen_trigger_release : iron_internal_eraser_trigger_release;
+		d->id                    = info->deviceid;
+		d->pressure_index        = pressure_index;
+		d->pressure_max          = max;
+		d->press                 = is_pen ? iron_internal_pen_trigger_press : iron_internal_eraser_trigger_press;
+		d->move                  = is_pen ? iron_internal_pen_trigger_move : iron_internal_eraser_trigger_move;
+		d->release               = is_pen ? iron_internal_pen_trigger_release : iron_internal_eraser_trigger_release;
 	}
 	XIFreeDeviceInfo(devices);
 }
@@ -145,9 +146,9 @@ void iron_display_init() {
 
 	iron_x11_init();
 
-	Window root_window = RootWindow(x11_ctx.display, DefaultScreen(x11_ctx.display));
+	Window              root_window      = RootWindow(x11_ctx.display, DefaultScreen(x11_ctx.display));
 	XRRScreenResources *screen_resources = XRRGetScreenResourcesCurrent(x11_ctx.display, root_window);
-	RROutput primary_output = XRRGetOutputPrimary(x11_ctx.display, root_window);
+	RROutput            primary_output   = XRRGetOutputPrimary(x11_ctx.display, root_window);
 
 	for (int i = 0; i < screen_resources->noutput; i++) {
 		if (i >= MAXIMUM_DISPLAYS) {
@@ -164,14 +165,14 @@ void iron_display_init() {
 		XRRCrtcInfo *crtc_info = XRRGetCrtcInfo(x11_ctx.display, screen_resources, output_info->crtc);
 
 		struct iron_x11_display *display = &x11_ctx.displays[x11_ctx.num_displays++];
-		display->index = i;
-		display->x = crtc_info->x;
-		display->y = crtc_info->y;
-		display->width = crtc_info->width;
-		display->height = crtc_info->height;
-		display->primary = screen_resources->outputs[i] == primary_output;
-		display->crtc = output_info->crtc;
-		display->output = screen_resources->outputs[i];
+		display->index                   = i;
+		display->x                       = crtc_info->x;
+		display->y                       = crtc_info->y;
+		display->width                   = crtc_info->width;
+		display->height                  = crtc_info->height;
+		display->primary                 = screen_resources->outputs[i] == primary_output;
+		display->crtc                    = output_info->crtc;
+		display->output                  = screen_resources->outputs[i];
 
 		XRRFreeOutputInfo(output_info);
 		XRRFreeCrtcInfo(crtc_info);
@@ -183,16 +184,16 @@ void iron_display_init() {
 
 iron_display_mode_t iron_display_current_mode(int display_index) {
 	struct iron_x11_display *display = &x11_ctx.displays[display_index];
-	iron_display_mode_t mode;
-	mode.x = 0;
-	mode.y = 0;
-	mode.width = display->width;
-	mode.height = display->height;
-	mode.frequency = 60;
-	mode.bits_per_pixel = 32;
+	iron_display_mode_t      mode;
+	mode.x               = 0;
+	mode.y               = 0;
+	mode.width           = display->width;
+	mode.height          = display->height;
+	mode.frequency       = 60;
+	mode.bits_per_pixel  = 32;
 	mode.pixels_per_inch = 96;
 
-	Window root_window = DefaultRootWindow(x11_ctx.display);
+	Window              root_window      = DefaultRootWindow(x11_ctx.display);
 	XRRScreenResources *screen_resources = XRRGetScreenResourcesCurrent(x11_ctx.display, root_window);
 
 	XRROutputInfo *output_info = XRRGetOutputInfo(x11_ctx.display, screen_resources, screen_resources->outputs[display->index]);
@@ -204,7 +205,7 @@ iron_display_mode_t iron_display_current_mode(int display_index) {
 
 	XRRCrtcInfo *crtc_info = XRRGetCrtcInfo(x11_ctx.display, screen_resources, output_info->crtc);
 	for (int j = 0; j < output_info->nmode; j++) {
-		RRMode rr_mode = crtc_info->mode;
+		RRMode       rr_mode   = crtc_info->mode;
 		XRRModeInfo *mode_info = NULL;
 		for (int k = 0; k < screen_resources->nmode; k++) {
 			if (screen_resources->modes[k].id == rr_mode) {
@@ -216,12 +217,12 @@ iron_display_mode_t iron_display_current_mode(int display_index) {
 		if (mode_info == NULL) {
 			continue;
 		}
-		mode.x = display->x;
-		mode.y = display->y;
-		mode.width = mode_info->width;
-		mode.height = mode_info->height;
+		mode.x               = display->x;
+		mode.y               = display->y;
+		mode.width           = mode_info->width;
+		mode.height          = mode_info->height;
 		mode.pixels_per_inch = 96;
-		mode.bits_per_pixel = 32;
+		mode.bits_per_pixel  = 32;
 		if (mode_info->hTotal && mode_info->vTotal) {
 			mode.frequency = (mode_info->dotClock / (mode_info->hTotal * mode_info->vTotal));
 		}
@@ -279,13 +280,13 @@ void iron_window_change_mode(iron_window_mode_t mode) {
 	window->mode = mode;
 	XEvent xev;
 	memset(&xev, 0, sizeof(xev));
-	xev.type = ClientMessage;
-	xev.xclient.window = window->window;
+	xev.type                 = ClientMessage;
+	xev.xclient.window       = window->window;
 	xev.xclient.message_type = NET_WM_STATE;
-	xev.xclient.format = 32;
-	xev.xclient.data.l[0] = mode == IRON_WINDOW_MODE_FULLSCREEN ? 1 : 0;
-	xev.xclient.data.l[1] = NET_WM_STATE_FULLSCREEN;
-	xev.xclient.data.l[2] = 0;
+	xev.xclient.format       = 32;
+	xev.xclient.data.l[0]    = mode == IRON_WINDOW_MODE_FULLSCREEN ? 1 : 0;
+	xev.xclient.data.l[1]    = NET_WM_STATE_FULLSCREEN;
+	xev.xclient.data.l[2]    = 0;
 	XMapWindow(x11_ctx.display, window->window);
 	XSendEvent(x11_ctx.display, DefaultRootWindow(x11_ctx.display), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev);
 	XFlush(x11_ctx.display);
@@ -325,31 +326,31 @@ void iron_window_set_title(const char *title) {
 
 void iron_window_create(iron_window_options_t *win) {
 	struct iron_x11_window *window = &x11_ctx.windows[0];
-	window->width = win->width;
-	window->height = win->height;
+	window->width                  = win->width;
+	window->height                 = win->height;
 
-	Visual *visual = NULL;
+	Visual              *visual             = NULL;
 	XSetWindowAttributes set_window_attribs = {0};
 
-	XColor color;
+	XColor   color;
 	Colormap colormap = DefaultColormap(x11_ctx.display, DefaultScreen(x11_ctx.display));
-	color.red = (32 * 65535) / 255;
-	color.green = (32 * 65535) / 255;
-	color.blue = (32 * 65535) / 255;
+	color.red         = (32 * 65535) / 255;
+	color.green       = (32 * 65535) / 255;
+	color.blue        = (32 * 65535) / 255;
 	XAllocColor(x11_ctx.display, colormap, &color);
 	set_window_attribs.background_pixel = color.pixel;
 
 	set_window_attribs.border_pixel = 0;
 	set_window_attribs.event_mask =
-		KeyPressMask | KeyReleaseMask | ExposureMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask | StructureNotifyMask | FocusChangeMask;
-	int screen = DefaultScreen(x11_ctx.display);
-	visual = DefaultVisual(x11_ctx.display, screen);
-	int depth = DefaultDepth(x11_ctx.display, screen);
+	    KeyPressMask | KeyReleaseMask | ExposureMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask | StructureNotifyMask | FocusChangeMask;
+	int screen                  = DefaultScreen(x11_ctx.display);
+	visual                      = DefaultVisual(x11_ctx.display, screen);
+	int depth                   = DefaultDepth(x11_ctx.display, screen);
 	set_window_attribs.colormap = XCreateColormap(x11_ctx.display, RootWindow(x11_ctx.display, screen), visual, AllocNone);
 	window->window = XCreateWindow(x11_ctx.display, RootWindow(x11_ctx.display, DefaultScreen(x11_ctx.display)), 0, 0, win->width, win->height, 0, depth,
-										InputOutput, visual, CWBackPixel | CWBorderPixel | CWColormap | CWEventMask, &set_window_attribs);
+	                               InputOutput, visual, CWBackPixel | CWBorderPixel | CWColormap | CWEventMask, &set_window_attribs);
 
-	static char nameClass[256];
+	static char        nameClass[256];
 	static const char *nameClassAddendum = "_IronApplication";
 	strncpy(nameClass, iron_application_name(), sizeof(nameClass) - strlen(nameClassAddendum) - 1);
 	strcat(nameClass, nameClassAddendum);
@@ -359,7 +360,7 @@ void iron_window_create(iron_window_options_t *win) {
 	XSetClassHint(x11_ctx.display, window->window, &classHint);
 
 	XSetLocaleModifiers("@im=none");
-	window->xInputMethod = XOpenIM(x11_ctx.display, NULL, NULL, NULL);
+	window->xInputMethod  = XOpenIM(x11_ctx.display, NULL, NULL, NULL);
 	window->xInputContext = XCreateIC(window->xInputMethod, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, window->window, NULL);
 	XSetICFocus(window->xInputContext);
 
@@ -375,12 +376,12 @@ void iron_window_create(iron_window_options_t *win) {
 	iron_window_set_title(win->title);
 
 	if (x11_ctx.pen.id != -1) {
-		XIEventMask mask;
+		XIEventMask   mask;
 		unsigned char mask_data[XIMaskLen(XI_LASTEVENT)];
 		memset(mask_data, 0, sizeof(mask_data));
 		mask.deviceid = x11_ctx.pen.id;
 		mask.mask_len = sizeof(mask_data);
-		mask.mask = mask_data;
+		mask.mask     = mask_data;
 		XISetMask(mask.mask, XI_Motion);
 		XISetMask(mask.mask, XI_ButtonPress);
 		XISetMask(mask.mask, XI_ButtonRelease);
@@ -392,7 +393,7 @@ void iron_window_create(iron_window_options_t *win) {
 
 void iron_window_set_resize_callback(void (*callback)(int width, int height, void *data), void *data) {
 	iron_internal_window_callbacks[0].resize_callback = callback;
-	iron_internal_window_callbacks[0].resize_data = data;
+	iron_internal_window_callbacks[0].resize_data     = data;
 }
 
 void iron_internal_call_resize_callback(int width, int height) {
@@ -403,7 +404,7 @@ void iron_internal_call_resize_callback(int width, int height) {
 
 void iron_window_set_close_callback(bool (*callback)(void *data), void *data) {
 	iron_internal_window_callbacks[0].close_callback = callback;
-	iron_internal_window_callbacks[0].close_data = data;
+	iron_internal_window_callbacks[0].close_data     = data;
 }
 
 bool iron_internal_call_close_callback() {
@@ -431,9 +432,10 @@ static void check_pen_device(struct iron_x11_window *window, XEvent *event, stru
 	float p = pen->pressure_current;
 	if (XIMaskIsSet(dev_event->valuators.mask, pen->pressure_index)) {
 		double *values = dev_event->valuators.values;
-		int idx = 0;
+		int     idx    = 0;
 		for (int i = 0; i < pen->pressure_index; i++) {
-			if (XIMaskIsSet(dev_event->valuators.mask, i)) idx++;
+			if (XIMaskIsSet(dev_event->valuators.mask, i))
+				idx++;
 		}
 		p = values[idx] / pen->pressure_max;
 	}
@@ -467,150 +469,281 @@ void iron_vulkan_get_instance_extensions(const char **names, int *index) {
 
 VkBool32 iron_vulkan_get_physical_device_presentation_support(VkPhysicalDevice physicalDevice, uint32_t queueFamilyIndex) {
 	return vkGetPhysicalDeviceXlibPresentationSupportKHR(physicalDevice, queueFamilyIndex, x11_ctx.display,
-														 DefaultVisual(x11_ctx.display, DefaultScreen(x11_ctx.display))->visualid);
+	                                                     DefaultVisual(x11_ctx.display, DefaultScreen(x11_ctx.display))->visualid);
 }
 VkResult iron_vulkan_create_surface(VkInstance instance, VkSurfaceKHR *surface) {
 	VkXlibSurfaceCreateInfoKHR info = {0};
-	info.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
-	info.pNext = NULL;
-	info.flags = 0;
-	info.dpy = x11_ctx.display;
-	info.window = x11_ctx.windows[0].window;
+	info.sType                      = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
+	info.pNext                      = NULL;
+	info.flags                      = 0;
+	info.dpy                        = x11_ctx.display;
+	info.window                     = x11_ctx.windows[0].window;
 	return vkCreateXlibSurfaceKHR(instance, &info, NULL, surface);
 }
 
 static int xk_to_iron(KeySym symbol) {
-	if (symbol == XK_Right) return IRON_KEY_RIGHT;
-	if (symbol == XK_Left) return IRON_KEY_LEFT;
-	if (symbol == XK_Up) return IRON_KEY_UP;
-	if (symbol == XK_Down) return IRON_KEY_DOWN;
-	if (symbol == XK_space) return IRON_KEY_SPACE;
-	if (symbol == XK_BackSpace) return IRON_KEY_BACKSPACE;
-	if (symbol == XK_Tab) return IRON_KEY_TAB;
-	if (symbol == XK_Return) return IRON_KEY_RETURN;
-	if (symbol == XK_Shift_L) return IRON_KEY_SHIFT;
-	if (symbol == XK_Shift_R) return IRON_KEY_SHIFT;
-	if (symbol == XK_Control_L) return IRON_KEY_CONTROL;
-	if (symbol == XK_Control_R) return IRON_KEY_CONTROL;
-	if (symbol == XK_Alt_L) return IRON_KEY_ALT;
-	if (symbol == XK_Alt_R) return IRON_KEY_ALT;
-	if (symbol == XK_ISO_Prev_Group) return IRON_KEY_ALT; // XK_ISO_Prev_Group received instead of XK_Alt_L?
-	if (symbol == XK_Delete) return IRON_KEY_DELETE;
-	if (symbol == XK_comma) return IRON_KEY_COMMA;
-	if (symbol == XK_period) return IRON_KEY_PERIOD;
-	if (symbol == XK_bracketleft) return IRON_KEY_OPEN_BRACKET;
-	if (symbol == XK_bracketright) return IRON_KEY_CLOSE_BRACKET;
-	if (symbol == XK_braceleft) return IRON_KEY_OPEN_CURLY_BRACKET;
-	if (symbol == XK_braceright) return IRON_KEY_CLOSE_CURLY_BRACKET;
-	if (symbol == XK_parenleft) return IRON_KEY_OPEN_PAREN;
-	if (symbol == XK_parenright) return IRON_KEY_CLOSE_PAREN;
-	if (symbol == XK_backslash) return IRON_KEY_BACK_SLASH;
-	if (symbol == XK_apostrophe) return IRON_KEY_QUOTE;
-	if (symbol == XK_colon) return IRON_KEY_COLON;
-	if (symbol == XK_semicolon) return IRON_KEY_SEMICOLON;
-	if (symbol == XK_minus) return IRON_KEY_HYPHEN_MINUS;
-	if (symbol == XK_underscore) return IRON_KEY_UNDERSCORE;
-	if (symbol == XK_slash) return IRON_KEY_SLASH;
-	if (symbol == XK_bar) return IRON_KEY_PIPE;
-	if (symbol == XK_question) return IRON_KEY_QUESTIONMARK;
-	if (symbol == XK_less) return IRON_KEY_LESS_THAN;
-	if (symbol == XK_greater) return IRON_KEY_GREATER_THAN;
-	if (symbol == XK_asterisk) return IRON_KEY_ASTERISK;
-	if (symbol == XK_ampersand) return IRON_KEY_AMPERSAND;
-	if (symbol == XK_asciicircum) return IRON_KEY_CIRCUMFLEX;
-	if (symbol == XK_percent) return IRON_KEY_PERCENT;
-	if (symbol == XK_dollar) return IRON_KEY_DOLLAR;
-	if (symbol == XK_numbersign) return IRON_KEY_HASH;
-	if (symbol == XK_at) return IRON_KEY_AT;
-	if (symbol == XK_exclam) return IRON_KEY_EXCLAMATION;
-	if (symbol == XK_equal) return IRON_KEY_EQUALS;
-	if (symbol == XK_plus) return IRON_KEY_ADD;
-	if (symbol == XK_quoteleft) return IRON_KEY_BACK_QUOTE;
-	if (symbol == XK_quotedbl) return IRON_KEY_DOUBLE_QUOTE;
-	if (symbol == XK_asciitilde) return IRON_KEY_TILDE;
-	if (symbol == XK_Pause) return IRON_KEY_PAUSE;
-	if (symbol == XK_Scroll_Lock) return IRON_KEY_SCROLL_LOCK;
-	if (symbol == XK_Home) return IRON_KEY_HOME;
-	if (symbol == XK_Page_Up) return IRON_KEY_PAGE_UP;
-	if (symbol == XK_Page_Down) return IRON_KEY_PAGE_DOWN;
-	if (symbol == XK_End) return IRON_KEY_END;
-	if (symbol == XK_Insert) return IRON_KEY_INSERT;
-	if (symbol == XK_KP_Enter) return IRON_KEY_RETURN;
-	if (symbol == XK_KP_Multiply) return IRON_KEY_MULTIPLY;
-	if (symbol == XK_KP_Add) return IRON_KEY_ADD;
-	if (symbol == XK_KP_Subtract) return IRON_KEY_SUBTRACT;
-	if (symbol == XK_KP_Decimal) return IRON_KEY_DECIMAL;
-	if (symbol == XK_KP_Divide) return IRON_KEY_DIVIDE;
-	if (symbol == XK_KP_0) return IRON_KEY_NUMPAD_0;
-	if (symbol == XK_KP_1) return IRON_KEY_NUMPAD_1;
-	if (symbol == XK_KP_2) return IRON_KEY_NUMPAD_2;
-	if (symbol == XK_KP_3) return IRON_KEY_NUMPAD_3;
-	if (symbol == XK_KP_4) return IRON_KEY_NUMPAD_4;
-	if (symbol == XK_KP_5) return IRON_KEY_NUMPAD_5;
-	if (symbol == XK_KP_6) return IRON_KEY_NUMPAD_6;
-	if (symbol == XK_KP_7) return IRON_KEY_NUMPAD_7;
-	if (symbol == XK_KP_8) return IRON_KEY_NUMPAD_8;
-	if (symbol == XK_KP_9) return IRON_KEY_NUMPAD_9;
-	if (symbol == XK_KP_Insert) return IRON_KEY_INSERT;
-	if (symbol == XK_KP_Delete) return IRON_KEY_DELETE;
-	if (symbol == XK_KP_End) return IRON_KEY_END;
-	if (symbol == XK_KP_Home) return IRON_KEY_HOME;
-	if (symbol == XK_KP_Left) return IRON_KEY_LEFT;
-	if (symbol == XK_KP_Up) return IRON_KEY_UP;
-	if (symbol == XK_KP_Right) return IRON_KEY_RIGHT;
-	if (symbol == XK_KP_Down) return IRON_KEY_DOWN;
-	if (symbol == XK_KP_Page_Up) return IRON_KEY_PAGE_UP;
-	if (symbol == XK_KP_Page_Down) return IRON_KEY_PAGE_DOWN;
-	if (symbol == XK_Menu) return IRON_KEY_CONTEXT_MENU;
-	if (symbol == XK_a) return IRON_KEY_A;
-	if (symbol == XK_b) return IRON_KEY_B;
-	if (symbol == XK_c) return IRON_KEY_C;
-	if (symbol == XK_d) return IRON_KEY_D;
-	if (symbol == XK_e) return IRON_KEY_E;
-	if (symbol == XK_f) return IRON_KEY_F;
-	if (symbol == XK_g) return IRON_KEY_G;
-	if (symbol == XK_h) return IRON_KEY_H;
-	if (symbol == XK_i) return IRON_KEY_I;
-	if (symbol == XK_j) return IRON_KEY_J;
-	if (symbol == XK_k) return IRON_KEY_K;
-	if (symbol == XK_l) return IRON_KEY_L;
-	if (symbol == XK_m) return IRON_KEY_M;
-	if (symbol == XK_n) return IRON_KEY_N;
-	if (symbol == XK_o) return IRON_KEY_O;
-	if (symbol == XK_p) return IRON_KEY_P;
-	if (symbol == XK_q) return IRON_KEY_Q;
-	if (symbol == XK_r) return IRON_KEY_R;
-	if (symbol == XK_s) return IRON_KEY_S;
-	if (symbol == XK_t) return IRON_KEY_T;
-	if (symbol == XK_u) return IRON_KEY_U;
-	if (symbol == XK_v) return IRON_KEY_V;
-	if (symbol == XK_w) return IRON_KEY_W;
-	if (symbol == XK_x) return IRON_KEY_X;
-	if (symbol == XK_y) return IRON_KEY_Y;
-	if (symbol == XK_z) return IRON_KEY_Z;
-	if (symbol == XK_1) return IRON_KEY_1;
-	if (symbol == XK_2) return IRON_KEY_2;
-	if (symbol == XK_3) return IRON_KEY_3;
-	if (symbol == XK_4) return IRON_KEY_4;
-	if (symbol == XK_5) return IRON_KEY_5;
-	if (symbol == XK_6) return IRON_KEY_6;
-	if (symbol == XK_7) return IRON_KEY_7;
-	if (symbol == XK_8) return IRON_KEY_8;
-	if (symbol == XK_9) return IRON_KEY_9;
-	if (symbol == XK_0) return IRON_KEY_0;
-	if (symbol == XK_Escape) return IRON_KEY_ESCAPE;
-	if (symbol == XK_F1) return IRON_KEY_F1;
-	if (symbol == XK_F2) return IRON_KEY_F2;
-	if (symbol == XK_F3) return IRON_KEY_F3;
-	if (symbol == XK_F4) return IRON_KEY_F4;
-	if (symbol == XK_F5) return IRON_KEY_F5;
-	if (symbol == XK_F6) return IRON_KEY_F6;
-	if (symbol == XK_F7) return IRON_KEY_F7;
-	if (symbol == XK_F8) return IRON_KEY_F8;
-	if (symbol == XK_F9) return IRON_KEY_F9;
-	if (symbol == XK_F10) return IRON_KEY_F10;
-	if (symbol == XK_F11) return IRON_KEY_F11;
-	if (symbol == XK_F12) return IRON_KEY_F12;
+	if (symbol == XK_Right)
+		return IRON_KEY_RIGHT;
+	if (symbol == XK_Left)
+		return IRON_KEY_LEFT;
+	if (symbol == XK_Up)
+		return IRON_KEY_UP;
+	if (symbol == XK_Down)
+		return IRON_KEY_DOWN;
+	if (symbol == XK_space)
+		return IRON_KEY_SPACE;
+	if (symbol == XK_BackSpace)
+		return IRON_KEY_BACKSPACE;
+	if (symbol == XK_Tab)
+		return IRON_KEY_TAB;
+	if (symbol == XK_Return)
+		return IRON_KEY_RETURN;
+	if (symbol == XK_Shift_L)
+		return IRON_KEY_SHIFT;
+	if (symbol == XK_Shift_R)
+		return IRON_KEY_SHIFT;
+	if (symbol == XK_Control_L)
+		return IRON_KEY_CONTROL;
+	if (symbol == XK_Control_R)
+		return IRON_KEY_CONTROL;
+	if (symbol == XK_Alt_L)
+		return IRON_KEY_ALT;
+	if (symbol == XK_Alt_R)
+		return IRON_KEY_ALT;
+	if (symbol == XK_ISO_Prev_Group)
+		return IRON_KEY_ALT; // XK_ISO_Prev_Group received instead of XK_Alt_L?
+	if (symbol == XK_Delete)
+		return IRON_KEY_DELETE;
+	if (symbol == XK_comma)
+		return IRON_KEY_COMMA;
+	if (symbol == XK_period)
+		return IRON_KEY_PERIOD;
+	if (symbol == XK_bracketleft)
+		return IRON_KEY_OPEN_BRACKET;
+	if (symbol == XK_bracketright)
+		return IRON_KEY_CLOSE_BRACKET;
+	if (symbol == XK_braceleft)
+		return IRON_KEY_OPEN_CURLY_BRACKET;
+	if (symbol == XK_braceright)
+		return IRON_KEY_CLOSE_CURLY_BRACKET;
+	if (symbol == XK_parenleft)
+		return IRON_KEY_OPEN_PAREN;
+	if (symbol == XK_parenright)
+		return IRON_KEY_CLOSE_PAREN;
+	if (symbol == XK_backslash)
+		return IRON_KEY_BACK_SLASH;
+	if (symbol == XK_apostrophe)
+		return IRON_KEY_QUOTE;
+	if (symbol == XK_colon)
+		return IRON_KEY_COLON;
+	if (symbol == XK_semicolon)
+		return IRON_KEY_SEMICOLON;
+	if (symbol == XK_minus)
+		return IRON_KEY_HYPHEN_MINUS;
+	if (symbol == XK_underscore)
+		return IRON_KEY_UNDERSCORE;
+	if (symbol == XK_slash)
+		return IRON_KEY_SLASH;
+	if (symbol == XK_bar)
+		return IRON_KEY_PIPE;
+	if (symbol == XK_question)
+		return IRON_KEY_QUESTIONMARK;
+	if (symbol == XK_less)
+		return IRON_KEY_LESS_THAN;
+	if (symbol == XK_greater)
+		return IRON_KEY_GREATER_THAN;
+	if (symbol == XK_asterisk)
+		return IRON_KEY_ASTERISK;
+	if (symbol == XK_ampersand)
+		return IRON_KEY_AMPERSAND;
+	if (symbol == XK_asciicircum)
+		return IRON_KEY_CIRCUMFLEX;
+	if (symbol == XK_percent)
+		return IRON_KEY_PERCENT;
+	if (symbol == XK_dollar)
+		return IRON_KEY_DOLLAR;
+	if (symbol == XK_numbersign)
+		return IRON_KEY_HASH;
+	if (symbol == XK_at)
+		return IRON_KEY_AT;
+	if (symbol == XK_exclam)
+		return IRON_KEY_EXCLAMATION;
+	if (symbol == XK_equal)
+		return IRON_KEY_EQUALS;
+	if (symbol == XK_plus)
+		return IRON_KEY_ADD;
+	if (symbol == XK_quoteleft)
+		return IRON_KEY_BACK_QUOTE;
+	if (symbol == XK_quotedbl)
+		return IRON_KEY_DOUBLE_QUOTE;
+	if (symbol == XK_asciitilde)
+		return IRON_KEY_TILDE;
+	if (symbol == XK_Pause)
+		return IRON_KEY_PAUSE;
+	if (symbol == XK_Scroll_Lock)
+		return IRON_KEY_SCROLL_LOCK;
+	if (symbol == XK_Home)
+		return IRON_KEY_HOME;
+	if (symbol == XK_Page_Up)
+		return IRON_KEY_PAGE_UP;
+	if (symbol == XK_Page_Down)
+		return IRON_KEY_PAGE_DOWN;
+	if (symbol == XK_End)
+		return IRON_KEY_END;
+	if (symbol == XK_Insert)
+		return IRON_KEY_INSERT;
+	if (symbol == XK_KP_Enter)
+		return IRON_KEY_RETURN;
+	if (symbol == XK_KP_Multiply)
+		return IRON_KEY_MULTIPLY;
+	if (symbol == XK_KP_Add)
+		return IRON_KEY_ADD;
+	if (symbol == XK_KP_Subtract)
+		return IRON_KEY_SUBTRACT;
+	if (symbol == XK_KP_Decimal)
+		return IRON_KEY_DECIMAL;
+	if (symbol == XK_KP_Divide)
+		return IRON_KEY_DIVIDE;
+	if (symbol == XK_KP_0)
+		return IRON_KEY_NUMPAD_0;
+	if (symbol == XK_KP_1)
+		return IRON_KEY_NUMPAD_1;
+	if (symbol == XK_KP_2)
+		return IRON_KEY_NUMPAD_2;
+	if (symbol == XK_KP_3)
+		return IRON_KEY_NUMPAD_3;
+	if (symbol == XK_KP_4)
+		return IRON_KEY_NUMPAD_4;
+	if (symbol == XK_KP_5)
+		return IRON_KEY_NUMPAD_5;
+	if (symbol == XK_KP_6)
+		return IRON_KEY_NUMPAD_6;
+	if (symbol == XK_KP_7)
+		return IRON_KEY_NUMPAD_7;
+	if (symbol == XK_KP_8)
+		return IRON_KEY_NUMPAD_8;
+	if (symbol == XK_KP_9)
+		return IRON_KEY_NUMPAD_9;
+	if (symbol == XK_KP_Insert)
+		return IRON_KEY_INSERT;
+	if (symbol == XK_KP_Delete)
+		return IRON_KEY_DELETE;
+	if (symbol == XK_KP_End)
+		return IRON_KEY_END;
+	if (symbol == XK_KP_Home)
+		return IRON_KEY_HOME;
+	if (symbol == XK_KP_Left)
+		return IRON_KEY_LEFT;
+	if (symbol == XK_KP_Up)
+		return IRON_KEY_UP;
+	if (symbol == XK_KP_Right)
+		return IRON_KEY_RIGHT;
+	if (symbol == XK_KP_Down)
+		return IRON_KEY_DOWN;
+	if (symbol == XK_KP_Page_Up)
+		return IRON_KEY_PAGE_UP;
+	if (symbol == XK_KP_Page_Down)
+		return IRON_KEY_PAGE_DOWN;
+	if (symbol == XK_Menu)
+		return IRON_KEY_CONTEXT_MENU;
+	if (symbol == XK_a)
+		return IRON_KEY_A;
+	if (symbol == XK_b)
+		return IRON_KEY_B;
+	if (symbol == XK_c)
+		return IRON_KEY_C;
+	if (symbol == XK_d)
+		return IRON_KEY_D;
+	if (symbol == XK_e)
+		return IRON_KEY_E;
+	if (symbol == XK_f)
+		return IRON_KEY_F;
+	if (symbol == XK_g)
+		return IRON_KEY_G;
+	if (symbol == XK_h)
+		return IRON_KEY_H;
+	if (symbol == XK_i)
+		return IRON_KEY_I;
+	if (symbol == XK_j)
+		return IRON_KEY_J;
+	if (symbol == XK_k)
+		return IRON_KEY_K;
+	if (symbol == XK_l)
+		return IRON_KEY_L;
+	if (symbol == XK_m)
+		return IRON_KEY_M;
+	if (symbol == XK_n)
+		return IRON_KEY_N;
+	if (symbol == XK_o)
+		return IRON_KEY_O;
+	if (symbol == XK_p)
+		return IRON_KEY_P;
+	if (symbol == XK_q)
+		return IRON_KEY_Q;
+	if (symbol == XK_r)
+		return IRON_KEY_R;
+	if (symbol == XK_s)
+		return IRON_KEY_S;
+	if (symbol == XK_t)
+		return IRON_KEY_T;
+	if (symbol == XK_u)
+		return IRON_KEY_U;
+	if (symbol == XK_v)
+		return IRON_KEY_V;
+	if (symbol == XK_w)
+		return IRON_KEY_W;
+	if (symbol == XK_x)
+		return IRON_KEY_X;
+	if (symbol == XK_y)
+		return IRON_KEY_Y;
+	if (symbol == XK_z)
+		return IRON_KEY_Z;
+	if (symbol == XK_1)
+		return IRON_KEY_1;
+	if (symbol == XK_2)
+		return IRON_KEY_2;
+	if (symbol == XK_3)
+		return IRON_KEY_3;
+	if (symbol == XK_4)
+		return IRON_KEY_4;
+	if (symbol == XK_5)
+		return IRON_KEY_5;
+	if (symbol == XK_6)
+		return IRON_KEY_6;
+	if (symbol == XK_7)
+		return IRON_KEY_7;
+	if (symbol == XK_8)
+		return IRON_KEY_8;
+	if (symbol == XK_9)
+		return IRON_KEY_9;
+	if (symbol == XK_0)
+		return IRON_KEY_0;
+	if (symbol == XK_Escape)
+		return IRON_KEY_ESCAPE;
+	if (symbol == XK_F1)
+		return IRON_KEY_F1;
+	if (symbol == XK_F2)
+		return IRON_KEY_F2;
+	if (symbol == XK_F3)
+		return IRON_KEY_F3;
+	if (symbol == XK_F4)
+		return IRON_KEY_F4;
+	if (symbol == XK_F5)
+		return IRON_KEY_F5;
+	if (symbol == XK_F6)
+		return IRON_KEY_F6;
+	if (symbol == XK_F7)
+		return IRON_KEY_F7;
+	if (symbol == XK_F8)
+		return IRON_KEY_F8;
+	if (symbol == XK_F9)
+		return IRON_KEY_F9;
+	if (symbol == XK_F10)
+		return IRON_KEY_F10;
+	if (symbol == XK_F11)
+		return IRON_KEY_F11;
+	if (symbol == XK_F12)
+		return IRON_KEY_F12;
 	return IRON_KEY_UNKNOWN;
 }
 
@@ -619,7 +752,7 @@ void *gc_alloc(size_t size);
 static char *uri_decode(const char *src) {
 	char *res = gc_alloc(1024);
 	char *dst = res;
-	char a, b;
+	char  a, b;
 	while (*src) {
 		if ((*src == '%') && ((a = src[1]) && (b = src[2])) && (isxdigit(a) && isxdigit(b))) {
 			if (a >= 'a') {
@@ -656,8 +789,8 @@ static char *uri_decode(const char *src) {
 }
 
 static bool _handle_messages() {
-	static bool controlDown = false;
-	static int ignoreKeycode = 0;
+	static bool controlDown             = false;
+	static int  ignoreKeycode           = 0;
 	static bool preventNextKeyDownEvent = false;
 
 	while (XPending(x11_ctx.display)) {
@@ -670,7 +803,7 @@ static bool _handle_messages() {
 			continue;
 		}
 
-		Window window = event.xclient.window;
+		Window                  window   = event.xclient.window;
 		struct iron_x11_window *k_window = window_from_window(window);
 		if (k_window == NULL) {
 			continue;
@@ -683,9 +816,9 @@ static bool _handle_messages() {
 		}
 		case KeyPress: {
 			XKeyEvent *key = (XKeyEvent *)&event;
-			KeySym keysym;
-			wchar_t wchar;
-			bool wcConverted = XwcLookupString(k_window->xInputContext, key, &wchar, 1, &keysym, NULL);
+			KeySym     keysym;
+			wchar_t    wchar;
+			bool       wcConverted = XwcLookupString(k_window->xInputContext, key, &wchar, 1, &keysym, NULL);
 
 			bool isIgnoredKeySym = keysym == XK_Escape || keysym == XK_BackSpace || keysym == XK_Delete;
 			if (!controlDown && !XFilterEvent(&event, window) && !isIgnoredKeySym) {
@@ -753,7 +886,7 @@ static bool _handle_messages() {
 				}
 			}
 			KeySym keysym;
-			char c;
+			char   c;
 			XLookupString(key, &c, 1, &keysym, NULL);
 
 			KeySym ksKey = XkbKeycodeToKeysym(x11_ctx.display, event.xkey.keycode, 0, 0);
@@ -836,7 +969,7 @@ static bool _handle_messages() {
 		}
 		case ConfigureNotify: {
 			if (event.xconfigure.width != k_window->width || event.xconfigure.height != k_window->height) {
-				k_window->width = event.xconfigure.width;
+				k_window->width  = event.xconfigure.width;
 				k_window->height = event.xconfigure.height;
 				gpu_resize(event.xconfigure.width, event.xconfigure.height);
 				iron_internal_call_resize_callback(event.xconfigure.width, event.xconfigure.height);
@@ -848,21 +981,20 @@ static bool _handle_messages() {
 				Window source_window = event.xclient.data.l[0];
 				XEvent m;
 				memset(&m, 0, sizeof(m));
-				m.type = ClientMessage;
-				m.xclient.window = event.xclient.data.l[0];
+				m.type                 = ClientMessage;
+				m.xclient.window       = event.xclient.data.l[0];
 				m.xclient.message_type = XdndStatus;
-				m.xclient.format = 32;
-				m.xclient.data.l[0] = window;
-				m.xclient.data.l[2] = 0;
-				m.xclient.data.l[3] = 0;
-				m.xclient.data.l[1] = 1;
-				m.xclient.data.l[4] = XdndActionCopy;
+				m.xclient.format       = 32;
+				m.xclient.data.l[0]    = window;
+				m.xclient.data.l[2]    = 0;
+				m.xclient.data.l[3]    = 0;
+				m.xclient.data.l[1]    = 1;
+				m.xclient.data.l[4]    = XdndActionCopy;
 				XSendEvent(x11_ctx.display, source_window, false, NoEventMask, (XEvent *)&m);
 				XFlush(x11_ctx.display);
 			}
 			else if (event.xclient.message_type == XdndDrop) {
-				XConvertSelection(x11_ctx.display, XdndSelection, XdndTextUriList, XdndSelection, window,
-									   event.xclient.data.l[2]);
+				XConvertSelection(x11_ctx.display, XdndSelection, XdndTextUriList, XdndSelection, window, event.xclient.data.l[2]);
 			}
 			else if (event.xclient.data.l[0] == WM_DELETE_WINDOW) {
 				if (iron_internal_call_close_callback()) {
@@ -874,29 +1006,29 @@ static bool _handle_messages() {
 		}
 		case SelectionNotify: {
 			if (event.xselection.selection == CLIPBOARD) {
-				char *result;
+				char         *result;
 				unsigned long ressize, restail;
-				int resbits;
-				XGetWindowProperty(x11_ctx.display, window, XSEL_DATA, 0, LONG_MAX / 4, False, AnyPropertyType, &UTF8_STRING,
-										&resbits, &ressize, &restail, (unsigned char **)&result);
+				int           resbits;
+				XGetWindowProperty(x11_ctx.display, window, XSEL_DATA, 0, LONG_MAX / 4, False, AnyPropertyType, &UTF8_STRING, &resbits, &ressize, &restail,
+				                   (unsigned char **)&result);
 				iron_internal_paste_callback(result);
 				XFree(result);
 			}
 			else if (event.xselection.property == XdndSelection) {
-				Atom type;
-				int format;
-				unsigned long numItems;
-				unsigned long bytesAfter = 1;
-				unsigned char *data = 0;
-				XGetWindowProperty(x11_ctx.display, event.xselection.requestor, event.xselection.property, 0, LONG_MAX, False, event.xselection.target,
-										&type, &format, &numItems, &bytesAfter, &data);
+				Atom           type;
+				int            format;
+				unsigned long  numItems;
+				unsigned long  bytesAfter = 1;
+				unsigned char *data       = 0;
+				XGetWindowProperty(x11_ctx.display, event.xselection.requestor, event.xselection.property, 0, LONG_MAX, False, event.xselection.target, &type,
+				                   &format, &numItems, &bytesAfter, &data);
 				size_t pos = 0;
 				size_t len = 0;
 				while (pos < numItems) {
 					if (data[pos] == '\r') { // Found a file
 						buffer[len] = 0;
-						len = 0;
-						pos += 2; // Avoid \n
+						len         = 0;
+						pos += 2;                           // Avoid \n
 						char *res = uri_decode(buffer + 7); // + 7 -> strip file://
 						iron_internal_drop_files_callback(res);
 					}
@@ -909,27 +1041,27 @@ static bool _handle_messages() {
 		case SelectionRequest: {
 			if (event.xselectionrequest.target == TARGETS) {
 				XEvent send;
-				send.xselection.type = SelectionNotify;
+				send.xselection.type      = SelectionNotify;
 				send.xselection.requestor = event.xselectionrequest.requestor;
 				send.xselection.selection = event.xselectionrequest.selection;
-				send.xselection.target = event.xselectionrequest.target;
-				send.xselection.property = event.xselectionrequest.property;
-				send.xselection.time = event.xselectionrequest.time;
-				Atom available[] = {TARGETS, MULTIPLE, TEXT_PLAIN, UTF8_STRING};
+				send.xselection.target    = event.xselectionrequest.target;
+				send.xselection.property  = event.xselectionrequest.property;
+				send.xselection.time      = event.xselectionrequest.time;
+				Atom available[]          = {TARGETS, MULTIPLE, TEXT_PLAIN, UTF8_STRING};
 				XChangeProperty(x11_ctx.display, send.xselection.requestor, send.xselection.property, XA_ATOM, 32, PropModeReplace,
-									 (unsigned char *)&available[0], 4);
+				                (unsigned char *)&available[0], 4);
 				XSendEvent(x11_ctx.display, send.xselection.requestor, True, 0, &send);
 			}
 			if (event.xselectionrequest.target == TEXT_PLAIN || event.xselectionrequest.target == UTF8_STRING) {
 				XEvent send;
-				send.xselection.type = SelectionNotify;
+				send.xselection.type      = SelectionNotify;
 				send.xselection.requestor = event.xselectionrequest.requestor;
 				send.xselection.selection = event.xselectionrequest.selection;
-				send.xselection.target = event.xselectionrequest.target;
-				send.xselection.property = event.xselectionrequest.property;
-				send.xselection.time = event.xselectionrequest.time;
+				send.xselection.target    = event.xselectionrequest.target;
+				send.xselection.property  = event.xselectionrequest.property;
+				send.xselection.time      = event.xselectionrequest.time;
 				XChangeProperty(x11_ctx.display, send.xselection.requestor, send.xselection.property, send.xselection.target, 8, PropModeReplace,
-									 (const unsigned char *)clipboardString, strlen(clipboardString));
+				                (const unsigned char *)clipboardString, strlen(clipboardString));
 				XSendEvent(x11_ctx.display, send.xselection.requestor, True, 0, &send);
 			}
 			break;
@@ -942,7 +1074,7 @@ static bool _handle_messages() {
 			break;
 		}
 		case FocusOut: {
-			controlDown = false;
+			controlDown   = false;
 			ignoreKeycode = 0;
 			iron_internal_background_callback();
 			break;
@@ -963,9 +1095,9 @@ bool iron_internal_handle_messages() {
 	if (!_handle_messages()) {
 		return false;
 	}
-	#ifdef WITH_GAMEPAD
+#ifdef WITH_GAMEPAD
 	iron_linux_updateHIDGamepads();
-	#endif
+#endif
 	return true;
 }
 
@@ -1056,9 +1188,9 @@ uint64_t iron_timestamp(void) {
 
 void iron_init(iron_window_options_t *ops) {
 	gettimeofday(&start, NULL);
-	#ifdef WITH_GAMEPAD
+#ifdef WITH_GAMEPAD
 	iron_linux_initHIDGamepads();
-	#endif
+#endif
 	iron_x11_init();
 	iron_display_init();
 	iron_set_app_name(ops->title);
@@ -1068,9 +1200,9 @@ void iron_init(iron_window_options_t *ops) {
 void iron_internal_shutdown() {
 	gpu_destroy();
 
-	#ifdef WITH_GAMEPAD
+#ifdef WITH_GAMEPAD
 	iron_linux_closeHIDGamepads();
-	#endif
+#endif
 
 	free(clipboardString);
 	XCloseDisplay(x11_ctx.display);
@@ -1088,7 +1220,7 @@ void iron_copy_to_clipboard(const char *text) {
 	if (textLength >= clipboardStringSize) {
 		free(clipboardString);
 		clipboardStringSize = textLength + 1;
-		clipboardString = (char *)malloc(clipboardStringSize);
+		clipboardString     = (char *)malloc(clipboardStringSize);
 	}
 	strcpy(clipboardString, text);
 }
@@ -1113,15 +1245,15 @@ void iron_mouse_hide() {
 	struct iron_x11_window *window = &x11_ctx.windows[0];
 	if (!mouse_hidden) {
 		XColor col;
-		col.pixel = 0;
-		col.red = 0;
-		col.green = 0;
-		col.blue = 0;
-		col.flags = DoRed | DoGreen | DoBlue;
-		col.pad = 0;
-		char data[1] = {'\0'};
-		Pixmap blank = XCreateBitmapFromData(x11_ctx.display, window->window, data, 1, 1);
-		Cursor cursor = XCreatePixmapCursor(x11_ctx.display, blank, blank, &col, &col, 0, 0);
+		col.pixel      = 0;
+		col.red        = 0;
+		col.green      = 0;
+		col.blue       = 0;
+		col.flags      = DoRed | DoGreen | DoBlue;
+		col.pad        = 0;
+		char   data[1] = {'\0'};
+		Pixmap blank   = XCreateBitmapFromData(x11_ctx.display, window->window, data, 1, 1);
+		Cursor cursor  = XCreatePixmapCursor(x11_ctx.display, blank, blank, &col, &col, 0, 0);
 		XDefineCursor(x11_ctx.display, window->window, cursor);
 		XFreePixmap(x11_ctx.display, blank);
 		mouse_hidden = true;
@@ -1161,10 +1293,10 @@ void iron_mouse_set_position(int x, int y) {
 
 void iron_mouse_get_position(int *x, int *y) {
 	struct iron_x11_window *window = &x11_ctx.windows[0];
-	Window inwin;
-	Window inchildwin;
-	int rootx, rooty;
-	unsigned int mask;
+	Window                  inwin;
+	Window                  inchildwin;
+	int                     rootx, rooty;
+	unsigned int            mask;
 	XQueryPointer(x11_ctx.display, window->window, &inwin, &inchildwin, &rootx, &rooty, x, y, &mask);
 }
 
@@ -1175,11 +1307,11 @@ void iron_mouse_get_position(int *x, int *y) {
 #include <linux/joystick.h>
 
 struct HIDGamepad {
-	int idx;
-	char gamepad_dev_name[256];
-	char name[385];
-	int file_descriptor;
-	bool connected;
+	int             idx;
+	char            gamepad_dev_name[256];
+	char            name[385];
+	int             file_descriptor;
+	bool            connected;
 	struct js_event gamepadEvent;
 };
 
@@ -1202,8 +1334,8 @@ static void HIDGamepad_open(struct HIDGamepad *pad) {
 }
 
 static void HIDGamepad_init(struct HIDGamepad *pad, int index) {
-	pad->file_descriptor = -1;
-	pad->connected = false;
+	pad->file_descriptor     = -1;
+	pad->connected           = false;
 	pad->gamepad_dev_name[0] = 0;
 	if (index >= 0 && index < 12) {
 		pad->idx = index;
@@ -1217,7 +1349,7 @@ static void HIDGamepad_close(struct HIDGamepad *pad) {
 		iron_internal_gamepad_trigger_disconnect(pad->idx);
 		close(pad->file_descriptor);
 		pad->file_descriptor = -1;
-		pad->connected = false;
+		pad->connected       = false;
 	}
 }
 
@@ -1245,9 +1377,9 @@ void HIDGamepad_update(struct HIDGamepad *pad) {
 }
 
 struct HIDGamepadUdevHelper {
-	struct udev *udevPtr;
+	struct udev         *udevPtr;
 	struct udev_monitor *udevMonitorPtr;
-	int udevMonitorFD;
+	int                  udevMonitorFD;
 };
 
 static struct HIDGamepadUdevHelper udev_helper;
@@ -1297,8 +1429,8 @@ static void HIDGamepadUdevHelper_init(struct HIDGamepadUdevHelper *helper) {
 	struct udev_list_entry *entry;
 
 	udev_list_entry_foreach(entry, devices) {
-		const char *path = udev_list_entry_get_name(entry);
-		struct udev_device *dev = udev_device_new_from_syspath(udevPtrNew, path);
+		const char         *path = udev_list_entry_get_name(entry);
+		struct udev_device *dev  = udev_device_new_from_syspath(udevPtrNew, path);
 		HIDGamepadUdevHelper_processDevice(helper, dev);
 	}
 
@@ -1369,11 +1501,11 @@ void iron_gamepad_rumble(int gamepad, float left, float right) {}
 extern void (*iron_save_and_quit)(bool);
 
 bool _save_and_quit_callback_internal() {
-	bool save = false;
+	bool          save = false;
 	XTextProperty text_prop;
 	XGetTextProperty(x11_ctx.display, x11_ctx.windows[0].window, &text_prop, NET_WM_NAME);
 	char *title = (char *)text_prop.value;
-	bool dirty = strstr(title, "* - ArmorPaint") != NULL;
+	bool  dirty = strstr(title, "* - ArmorPaint") != NULL;
 	// XFree(title);
 	if (dirty) {
 		gtk_init(NULL, NULL);
@@ -1400,9 +1532,9 @@ bool _save_and_quit_callback_internal() {
 }
 #endif
 
-#include <sys/wait.h>
 #include <signal.h>
-static pid_t child_pid = -1;
+#include <sys/wait.h>
+static pid_t child_pid            = -1;
 volatile int iron_exec_async_done = 1;
 
 void iron_exec_handler(int sig) {
@@ -1414,15 +1546,15 @@ void iron_exec_handler(int sig) {
 
 void iron_exec_async(const char *path, char *argv[]) {
 	iron_exec_async_done = 0;
-	child_pid = fork();
+	child_pid            = fork();
 	if (child_pid == 0) {
 		execve(path, argv, NULL);
 		exit(1);
 	}
 	else {
 		struct sigaction sa = {0};
-		sa.sa_handler = iron_exec_handler;
-		sa.sa_flags = SA_RESTART;
+		sa.sa_handler       = iron_exec_handler;
+		sa.sa_flags         = SA_RESTART;
 		sigemptyset(&sa.sa_mask);
 		sigaction(SIGCHLD, &sa, NULL);
 	}

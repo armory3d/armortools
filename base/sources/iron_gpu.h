@@ -1,17 +1,17 @@
 #pragma once
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <stddef.h>
-#include <iron_global.h>
-#include <iron_math.h>
-#include <iron_gpu.h>
 #include <iron_array.h>
+#include <iron_global.h>
+#include <iron_gpu.h>
+#include <iron_math.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 #include BACKEND_GPU_H
 
-#define GPU_MAX_VERTEX_ELEMENTS 16
-#define GPU_MAX_TEXTURES 16
-#define GPU_CONSTANT_BUFFER_SIZE 512
+#define GPU_MAX_VERTEX_ELEMENTS      16
+#define GPU_MAX_TEXTURES             16
+#define GPU_CONSTANT_BUFFER_SIZE     512
 #define GPU_CONSTANT_BUFFER_MULTIPLE 2048
 #ifdef IRON_ANDROID
 #define GPU_FRAMEBUFFER_COUNT 7
@@ -20,7 +20,7 @@
 #endif
 
 typedef enum gpu_clear {
-	GPU_CLEAR_NONE = 0,
+	GPU_CLEAR_NONE  = 0,
 	GPU_CLEAR_COLOR = 1,
 	GPU_CLEAR_DEPTH = 2,
 } gpu_clear_t;
@@ -86,30 +86,30 @@ typedef enum gpu_compare_mode {
 } gpu_compare_mode_t;
 
 typedef struct gpu_texture {
-	int width;
-	int height;
-	gpu_texture_format_t format;
+	int                       width;
+	int                       height;
+	gpu_texture_format_t      format;
 	gpu_texture_compression_t compression;
-	gpu_texture_state_t state;
-	buffer_t *buffer;
-	gpu_texture_impl_t impl;
+	gpu_texture_state_t       state;
+	buffer_t                 *buffer;
+	gpu_texture_impl_t        impl;
 } gpu_texture_t;
 
 typedef struct gpu_buffer {
-	int count;
-	int stride;
-	uint8_t *data; // constant buffer data
+	int               count;
+	int               stride;
+	uint8_t          *data; // constant buffer data
 	gpu_buffer_impl_t impl;
 } gpu_buffer_t;
 
 typedef struct gpu_vertex_element {
-	const char *name;
+	const char       *name;
 	gpu_vertex_data_t data;
 } gpu_vertex_element_t;
 
 typedef struct gpu_vertex_structure {
 	gpu_vertex_element_t elements[GPU_MAX_VERTEX_ELEMENTS];
-	int size;
+	int                  size;
 } gpu_vertex_structure_t;
 
 typedef struct gpu_shader {
@@ -118,27 +118,27 @@ typedef struct gpu_shader {
 
 typedef struct gpu_pipeline {
 	gpu_vertex_structure_t *input_layout;
-	gpu_shader_t *vertex_shader;
-	gpu_shader_t *fragment_shader;
-	gpu_cull_mode_t cull_mode;
-	bool depth_write;
-	gpu_compare_mode_t depth_mode;
-	gpu_blending_factor_t blend_source;
-	gpu_blending_factor_t blend_destination;
-	gpu_blending_factor_t alpha_blend_source;
-	gpu_blending_factor_t alpha_blend_destination;
-	bool color_write_mask_red[8];
-	bool color_write_mask_green[8];
-	bool color_write_mask_blue[8];
-	bool color_write_mask_alpha[8];
-	gpu_texture_format_t color_attachment[8];
-	int color_attachment_count;
-	int depth_attachment_bits;
-	gpu_pipeline_impl_t impl;
+	gpu_shader_t           *vertex_shader;
+	gpu_shader_t           *fragment_shader;
+	gpu_cull_mode_t         cull_mode;
+	bool                    depth_write;
+	gpu_compare_mode_t      depth_mode;
+	gpu_blending_factor_t   blend_source;
+	gpu_blending_factor_t   blend_destination;
+	gpu_blending_factor_t   alpha_blend_source;
+	gpu_blending_factor_t   alpha_blend_destination;
+	bool                    color_write_mask_red[8];
+	bool                    color_write_mask_green[8];
+	bool                    color_write_mask_blue[8];
+	bool                    color_write_mask_alpha[8];
+	gpu_texture_format_t    color_attachment[8];
+	int                     color_attachment_count;
+	int                     depth_attachment_bits;
+	gpu_pipeline_impl_t     impl;
 } gpu_pipeline_t;
 
 typedef struct gpu_raytrace_pipeline {
-	gpu_buffer_t *constant_buffer;
+	gpu_buffer_t                *constant_buffer;
 	gpu_raytrace_pipeline_impl_t impl;
 } gpu_raytrace_pipeline_t;
 
@@ -146,7 +146,7 @@ typedef struct gpu_raytrace_acceleration_structure {
 	gpu_raytrace_acceleration_structure_impl_t impl;
 } gpu_raytrace_acceleration_structure_t;
 
-int gpu_max_bound_textures(void);
+int  gpu_max_bound_textures(void);
 void gpu_begin(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, gpu_clear_t flags, unsigned color, float depth);
 void gpu_begin_internal(gpu_clear_t flags, unsigned color, float depth);
 void gpu_end(void);
@@ -176,23 +176,23 @@ void gpu_set_bool(int location, bool value);
 void gpu_set_matrix3(int location, iron_matrix3x3_t value);
 void gpu_set_matrix4(int location, iron_matrix4x4_t value);
 
-void gpu_vertex_structure_add(gpu_vertex_structure_t *structure, const char *name, gpu_vertex_data_t data);
-void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, gpu_texture_format_t format);
-void gpu_texture_destroy(gpu_texture_t *texture);
-void gpu_texture_destroy_internal(gpu_texture_t *texture);
-void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format);
-void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height, gpu_texture_format_t format, int framebuffer_index);
-void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structure_t *structure);
+void  gpu_vertex_structure_add(gpu_vertex_structure_t *structure, const char *name, gpu_vertex_data_t data);
+void  gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, int height, gpu_texture_format_t format);
+void  gpu_texture_destroy(gpu_texture_t *texture);
+void  gpu_texture_destroy_internal(gpu_texture_t *texture);
+void  gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_texture_format_t format);
+void  gpu_render_target_init2(gpu_texture_t *render_target, int width, int height, gpu_texture_format_t format, int framebuffer_index);
+void  gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structure_t *structure);
 void *gpu_vertex_buffer_lock(gpu_buffer_t *buffer);
-void gpu_vertex_buffer_unlock(gpu_buffer_t *buffer);
-void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size);
-void gpu_constant_buffer_lock(gpu_buffer_t *buffer, int start, int count);
-void gpu_constant_buffer_unlock(gpu_buffer_t *buffer);
-void gpu_index_buffer_init(gpu_buffer_t *buffer, int count);
-void gpu_buffer_destroy(gpu_buffer_t *buffer);
-void gpu_buffer_destroy_internal(gpu_buffer_t *buffer);
+void  gpu_vertex_buffer_unlock(gpu_buffer_t *buffer);
+void  gpu_constant_buffer_init(gpu_buffer_t *buffer, int size);
+void  gpu_constant_buffer_lock(gpu_buffer_t *buffer, int start, int count);
+void  gpu_constant_buffer_unlock(gpu_buffer_t *buffer);
+void  gpu_index_buffer_init(gpu_buffer_t *buffer, int count);
+void  gpu_buffer_destroy(gpu_buffer_t *buffer);
+void  gpu_buffer_destroy_internal(gpu_buffer_t *buffer);
 void *gpu_index_buffer_lock(gpu_buffer_t *buffer);
-void gpu_index_buffer_unlock(gpu_buffer_t *buffer);
+void  gpu_index_buffer_unlock(gpu_buffer_t *buffer);
 
 void gpu_pipeline_init(gpu_pipeline_t *pipeline);
 void gpu_pipeline_destroy(gpu_pipeline_t *pipeline);
@@ -201,18 +201,18 @@ void gpu_pipeline_compile(gpu_pipeline_t *pipeline);
 void gpu_shader_init(gpu_shader_t *shader, const void *source, size_t length, gpu_shader_type_t type);
 void gpu_shader_destroy(gpu_shader_t *shader);
 
-void gpu_draw_internal();
-void gpu_viewport(int x, int y, int width, int height);
-void gpu_scissor(int x, int y, int width, int height);
-void gpu_disable_scissor();
-void gpu_set_pipeline(gpu_pipeline_t *pipeline);
-void gpu_set_pipeline_internal(gpu_pipeline_t *pipeline);
-void gpu_set_vertex_buffer(gpu_buffer_t *buffer);
-void gpu_set_index_buffer(gpu_buffer_t *buffer);
-void gpu_set_constant_buffer(gpu_buffer_t *buffer, int offset, size_t size);
-void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data);
-void gpu_set_texture(int unit, gpu_texture_t *texture);
-void gpu_use_linear_sampling(bool b);
+void  gpu_draw_internal();
+void  gpu_viewport(int x, int y, int width, int height);
+void  gpu_scissor(int x, int y, int width, int height);
+void  gpu_disable_scissor();
+void  gpu_set_pipeline(gpu_pipeline_t *pipeline);
+void  gpu_set_pipeline_internal(gpu_pipeline_t *pipeline);
+void  gpu_set_vertex_buffer(gpu_buffer_t *buffer);
+void  gpu_set_index_buffer(gpu_buffer_t *buffer);
+void  gpu_set_constant_buffer(gpu_buffer_t *buffer, int offset, size_t size);
+void  gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data);
+void  gpu_set_texture(int unit, gpu_texture_t *texture);
+void  gpu_use_linear_sampling(bool b);
 char *gpu_device_name();
 
 bool gpu_raytrace_supported(void);
@@ -222,7 +222,8 @@ void gpu_raytrace_acceleration_structure_init(gpu_raytrace_acceleration_structur
 void gpu_raytrace_acceleration_structure_add(gpu_raytrace_acceleration_structure_t *accel, gpu_buffer_t *vb, gpu_buffer_t *ib, iron_matrix4x4_t transform);
 void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structure_t *accel, gpu_buffer_t *_vb_full, gpu_buffer_t *_ib_full);
 void gpu_raytrace_acceleration_structure_destroy(gpu_raytrace_acceleration_structure_t *accel);
-void gpu_raytrace_set_textures(gpu_texture_t *texpaint0, gpu_texture_t *texpaint1, gpu_texture_t *texpaint2, gpu_texture_t *texenv, gpu_texture_t *texsobol, gpu_texture_t *texscramble, gpu_texture_t *texrank);
+void gpu_raytrace_set_textures(gpu_texture_t *texpaint0, gpu_texture_t *texpaint1, gpu_texture_t *texpaint2, gpu_texture_t *texenv, gpu_texture_t *texsobol,
+                               gpu_texture_t *texscramble, gpu_texture_t *texrank);
 void gpu_raytrace_set_acceleration_structure(gpu_raytrace_acceleration_structure_t *accel);
 void gpu_raytrace_set_pipeline(gpu_raytrace_pipeline_t *pipeline);
 void gpu_raytrace_set_target(gpu_texture_t *output);
@@ -232,21 +233,22 @@ void _gpu_raytrace_init(buffer_t *shader);
 void _gpu_raytrace_as_init();
 void _gpu_raytrace_as_add(gpu_buffer_t *vb, gpu_buffer_t *ib, iron_matrix4x4_t transform);
 void _gpu_raytrace_as_build(gpu_buffer_t *vb_full, gpu_buffer_t *ib_full);
-void gpu_raytrace_set_textures(gpu_texture_t *tex0, gpu_texture_t *tex1, gpu_texture_t *tex2, gpu_texture_t *texenv, gpu_texture_t *texsobol, gpu_texture_t *texscramble, gpu_texture_t *texrank);
+void gpu_raytrace_set_textures(gpu_texture_t *tex0, gpu_texture_t *tex1, gpu_texture_t *tex2, gpu_texture_t *texenv, gpu_texture_t *texsobol,
+                               gpu_texture_t *texscramble, gpu_texture_t *texrank);
 void _gpu_raytrace_dispatch_rays(gpu_texture_t *render_target, buffer_t *buffer);
 
 int gpu_vertex_data_size(gpu_vertex_data_t data);
 int gpu_vertex_struct_size(gpu_vertex_structure_t *s);
 int gpu_texture_format_size(gpu_texture_format_t format);
 
-extern bool gpu_transpose_mat;
-extern bool gpu_in_use;
-extern gpu_texture_t *current_textures[GPU_MAX_TEXTURES];
-extern gpu_texture_t *current_render_targets[8];
-extern int current_render_targets_count;
-extern gpu_texture_t *current_depth_buffer;
+extern bool            gpu_transpose_mat;
+extern bool            gpu_in_use;
+extern gpu_texture_t  *current_textures[GPU_MAX_TEXTURES];
+extern gpu_texture_t  *current_render_targets[8];
+extern int             current_render_targets_count;
+extern gpu_texture_t  *current_depth_buffer;
 extern gpu_pipeline_t *current_pipeline;
-extern int constant_buffer_index;
-extern gpu_texture_t framebuffers[GPU_FRAMEBUFFER_COUNT];
-extern gpu_texture_t framebuffer_depth;
-extern int framebuffer_index;
+extern int             constant_buffer_index;
+extern gpu_texture_t   framebuffers[GPU_FRAMEBUFFER_COUNT];
+extern gpu_texture_t   framebuffer_depth;
+extern int             framebuffer_index;

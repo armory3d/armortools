@@ -1,9 +1,9 @@
 
 #ifdef IRON_A2
 
-#include <iron_audio.h>
 #include <alsa/asoundlib.h>
 #include <errno.h>
+#include <iron_audio.h>
 #include <poll.h>
 #include <pthread.h>
 #include <stdio.h>
@@ -13,10 +13,10 @@
 
 iron_a2_buffer_t a2_buffer;
 
-pthread_t threadid;
-bool audioRunning = false;
+pthread_t  threadid;
+bool       audioRunning = false;
 snd_pcm_t *playback_handle;
-short buf[4096 * 4];
+short      buf[4096 * 4];
 
 static unsigned int samples_per_second = 44100;
 
@@ -25,7 +25,7 @@ uint32_t iron_a2_samples_per_second(void) {
 }
 
 void copySample(void *buffer) {
-	float left_value = *(float *)&a2_buffer.channels[0][a2_buffer.read_location];
+	float left_value  = *(float *)&a2_buffer.channels[0][a2_buffer.read_location];
 	float right_value = *(float *)&a2_buffer.channels[1][a2_buffer.read_location];
 	a2_buffer.read_location += 1;
 	if (a2_buffer.read_location >= a2_buffer.data_size) {
@@ -59,8 +59,7 @@ bool tryToRecover(snd_pcm_t *handle, int errorCode) {
 	case EINTR:
 	case EPIPE:
 	case ESPIPE:
-	case ESTRPIPE:
-	{
+	case ESTRPIPE: {
 		int recovered = snd_pcm_recover(playback_handle, errorCode, 1);
 
 		if (recovered != 0) {
@@ -81,8 +80,8 @@ bool tryToRecover(snd_pcm_t *handle, int errorCode) {
 void *doAudio(void *arg) {
 	snd_pcm_hw_params_t *hw_params;
 	snd_pcm_sw_params_t *sw_params;
-	snd_pcm_sframes_t frames_to_deliver;
-	int err;
+	snd_pcm_sframes_t    frames_to_deliver;
+	int                  err;
 
 	if ((err = snd_pcm_open(&playback_handle, "default", SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
 		fprintf(stderr, "cannot open audio device default (%s)\n", snd_strerror(err));
@@ -215,12 +214,12 @@ void iron_a2_init() {
 	iron_a2_internal_init();
 	initialized = true;
 
-	a2_buffer.read_location = 0;
+	a2_buffer.read_location  = 0;
 	a2_buffer.write_location = 0;
-	a2_buffer.data_size = 128 * 1024;
-	a2_buffer.channel_count = 2;
-	a2_buffer.channels[0] = (float *)malloc(a2_buffer.data_size * sizeof(float));
-	a2_buffer.channels[1] = (float *)malloc(a2_buffer.data_size * sizeof(float));
+	a2_buffer.data_size      = 128 * 1024;
+	a2_buffer.channel_count  = 2;
+	a2_buffer.channels[0]    = (float *)malloc(a2_buffer.data_size * sizeof(float));
+	a2_buffer.channels[1]    = (float *)malloc(a2_buffer.data_size * sizeof(float));
 
 	audioRunning = true;
 	pthread_create(&threadid, NULL, &doAudio, NULL);

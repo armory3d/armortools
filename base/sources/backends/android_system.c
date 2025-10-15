@@ -1,62 +1,62 @@
 
 #include "android_system.h"
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
 #include <assert.h>
-#include <time.h>
-#include <sys/time.h>
-#include <iron_system.h>
-#include <iron_gpu.h>
 #include <iron_file.h>
+#include <iron_gpu.h>
+#include <iron_system.h>
 #include <iron_thread.h>
 #include <iron_video.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/time.h>
+#include <time.h>
+#include <unistd.h>
 // #include <android/sensor.h>
-#include <android/window.h>
 #include "android_native_app_glue.h"
+#include <android/window.h>
 #include <vulkan/vulkan_android.h>
 #include <vulkan/vulkan_core.h>
 
 typedef struct {
 	bool available;
-	int x;
-	int y;
-	int width;
-	int height;
+	int  x;
+	int  y;
+	int  width;
+	int  height;
 	bool primary;
-	int number;
+	int  number;
 } iron_display_t;
 
-static iron_display_t display;
-static struct android_app *app = NULL;
-static ANativeActivity *activity = NULL;
+static iron_display_t      display;
+static struct android_app *app      = NULL;
+static ANativeActivity    *activity = NULL;
 // static ASensorManager *sensorManager = NULL;
 // static const ASensor *accelerometerSensor = NULL;
 // static const ASensor *gyroSensor = NULL;
 // static ASensorEventQueue *sensorEventQueue = NULL;
-static bool started = false;
-static bool paused = true;
-static bool displayIsInitialized = false;
-static bool appIsForeground = false;
-static bool activityJustResized = false;
-static uint16_t unicode_stack[256];
-static int unicode_stack_index = 0;
-static iron_mutex_t unicode_mutex;
-static bool keyboard_active = false;
-static const char *videoFormats[] = {"ts", NULL};
-static __kernel_time_t start_sec = 0;
+static bool            started              = false;
+static bool            paused               = true;
+static bool            displayIsInitialized = false;
+static bool            appIsForeground      = false;
+static bool            activityJustResized  = false;
+static uint16_t        unicode_stack[256];
+static int             unicode_stack_index = 0;
+static iron_mutex_t    unicode_mutex;
+static bool            keyboard_active                  = false;
+static const char     *videoFormats[]                   = {"ts", NULL};
+static __kernel_time_t start_sec                        = 0;
 static void (*resizeCallback)(int x, int y, void *data) = NULL;
-static void *resizeCallbackData = NULL;
-static char ios_title[1024];
+static void *resizeCallbackData                         = NULL;
+static char  ios_title[1024];
 #ifdef WITH_GAMEPAD
-static float last_x = 0.0f;
-static float last_y = 0.0f;
-static float last_l = 0.0f;
-static float last_r = 0.0f;
-static bool last_hat_left = false;
-static bool last_hat_right = false;
-static bool last_hat_up = false;
-static bool last_hat_down = false;
+static float last_x         = 0.0f;
+static float last_y         = 0.0f;
+static float last_l         = 0.0f;
+static float last_r         = 0.0f;
+static bool  last_hat_left  = false;
+static bool  last_hat_right = false;
+static bool  last_hat_up    = false;
+static bool  last_hat_down  = false;
 #endif
 
 void iron_vulkan_surface_destroyed();
@@ -74,9 +74,9 @@ static int width() {
 	JNIEnv *env;
 	JavaVM *vm = iron_android_get_activity()->vm;
 	(*vm)->AttachCurrentThread(vm, &env, NULL);
-	jclass ironActivityClass = iron_android_find_class(env, "org.armory3d.IronActivity");
+	jclass    ironActivityClass        = iron_android_find_class(env, "org.armory3d.IronActivity");
 	jmethodID ironActivityGetScreenDpi = (*env)->GetStaticMethodID(env, ironActivityClass, "getDisplayWidth", "()I");
-	int width = (*env)->CallStaticIntMethod(env, ironActivityClass, ironActivityGetScreenDpi);
+	int       width                    = (*env)->CallStaticIntMethod(env, ironActivityClass, ironActivityGetScreenDpi);
 	(*vm)->DetachCurrentThread(vm);
 	return width;
 }
@@ -85,9 +85,9 @@ static int height() {
 	JNIEnv *env;
 	JavaVM *vm = iron_android_get_activity()->vm;
 	(*vm)->AttachCurrentThread(vm, &env, NULL);
-	jclass ironActivityClass = iron_android_find_class(env, "org.armory3d.IronActivity");
+	jclass    ironActivityClass        = iron_android_find_class(env, "org.armory3d.IronActivity");
 	jmethodID ironActivityGetScreenDpi = (*env)->GetStaticMethodID(env, ironActivityClass, "getDisplayHeight", "()I");
-	int height = (*env)->CallStaticIntMethod(env, ironActivityClass, ironActivityGetScreenDpi);
+	int       height                   = (*env)->CallStaticIntMethod(env, ironActivityClass, ironActivityGetScreenDpi);
 	(*vm)->DetachCurrentThread(vm);
 	return height;
 }
@@ -96,9 +96,9 @@ static int pixelsPerInch() {
 	JNIEnv *env;
 	JavaVM *vm = iron_android_get_activity()->vm;
 	(*vm)->AttachCurrentThread(vm, &env, NULL);
-	jclass ironActivityClass = iron_android_find_class(env, "org.armory3d.IronActivity");
+	jclass    ironActivityClass        = iron_android_find_class(env, "org.armory3d.IronActivity");
 	jmethodID ironActivityGetScreenDpi = (*env)->GetStaticMethodID(env, ironActivityClass, "getScreenDpi", "()I");
-	int dpi = (*env)->CallStaticIntMethod(env, ironActivityClass, ironActivityGetScreenDpi);
+	int       dpi                      = (*env)->CallStaticIntMethod(env, ironActivityClass, ironActivityGetScreenDpi);
 	(*vm)->DetachCurrentThread(vm);
 	return dpi;
 }
@@ -107,9 +107,9 @@ static int refreshRate() {
 	JNIEnv *env;
 	JavaVM *vm = iron_android_get_activity()->vm;
 	(*vm)->AttachCurrentThread(vm, &env, NULL);
-	jclass ironActivityClass = iron_android_find_class(env, "org.armory3d.IronActivity");
+	jclass    ironActivityClass        = iron_android_find_class(env, "org.armory3d.IronActivity");
 	jmethodID ironActivityGetScreenDpi = (*env)->GetStaticMethodID(env, ironActivityClass, "getRefreshRate", "()I");
-	int dpi = (*env)->CallStaticIntMethod(env, ironActivityClass, ironActivityGetScreenDpi);
+	int       dpi                      = (*env)->CallStaticIntMethod(env, ironActivityClass, ironActivityGetScreenDpi);
 	(*vm)->DetachCurrentThread(vm);
 	return dpi;
 }
@@ -118,12 +118,12 @@ void iron_display_init() {}
 
 iron_display_mode_t iron_display_current_mode(int display) {
 	iron_display_mode_t mode;
-	mode.x = 0;
-	mode.y = 0;
-	mode.width = width();
-	mode.height = height();
-	mode.frequency = refreshRate();
-	mode.bits_per_pixel = 32;
+	mode.x               = 0;
+	mode.y               = 0;
+	mode.width           = width();
+	mode.height          = height();
+	mode.frequency       = refreshRate();
+	mode.bits_per_pixel  = 32;
 	mode.pixels_per_inch = pixelsPerInch();
 	return mode;
 }
@@ -131,10 +131,10 @@ iron_display_mode_t iron_display_current_mode(int display) {
 VkResult iron_vulkan_create_surface(VkInstance instance, VkSurfaceKHR *surface) {
 	assert(app->window != NULL);
 	VkAndroidSurfaceCreateInfoKHR createInfo = {0};
-	createInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
-	createInfo.pNext = NULL;
-	createInfo.flags = 0;
-	createInfo.window = app->window;
+	createInfo.sType                         = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
+	createInfo.pNext                         = NULL;
+	createInfo.flags                         = 0;
+	createInfo.window                        = app->window;
 	return vkCreateAndroidSurfaceKHR(instance, &createInfo, NULL, surface);
 }
 
@@ -147,10 +147,10 @@ VkBool32 iron_vulkan_get_physical_device_presentation_support(VkPhysicalDevice p
 }
 
 static void updateAppForegroundStatus(bool displayIsInitializedValue, bool appIsForegroundValue) {
-	bool oldStatus = displayIsInitialized && appIsForeground;
+	bool oldStatus       = displayIsInitialized && appIsForeground;
 	displayIsInitialized = displayIsInitializedValue;
-	appIsForeground = appIsForegroundValue;
-	bool newStatus = displayIsInitialized && appIsForeground;
+	appIsForeground      = appIsForegroundValue;
+	bool newStatus       = displayIsInitialized && appIsForeground;
 	if (oldStatus != newStatus) {
 		if (newStatus) {
 			iron_internal_foreground_callback();
@@ -166,11 +166,11 @@ static bool isPenEvent(AInputEvent *event) {
 }
 
 static void touchInput(AInputEvent *event) {
-	int action = AMotionEvent_getAction(event);
-	int index = (action & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK) >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
-	int id = AMotionEvent_getPointerId(event, index);
-	float x = AMotionEvent_getX(event, index);
-	float y = AMotionEvent_getY(event, index);
+	int   action = AMotionEvent_getAction(event);
+	int   index  = (action & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK) >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+	int   id     = AMotionEvent_getPointerId(event, index);
+	float x      = AMotionEvent_getX(event, index);
+	float y      = AMotionEvent_getY(event, index);
 	switch (action & AMOTION_EVENT_ACTION_MASK) {
 	case AMOTION_EVENT_ACTION_DOWN:
 	case AMOTION_EVENT_ACTION_POINTER_DOWN:
@@ -187,8 +187,8 @@ static void touchInput(AInputEvent *event) {
 		size_t count = AMotionEvent_getPointerCount(event);
 		for (int i = 0; i < count; ++i) {
 			id = AMotionEvent_getPointerId(event, i);
-			x = AMotionEvent_getX(event, i);
-			y = AMotionEvent_getY(event, i);
+			x  = AMotionEvent_getX(event, i);
+			y  = AMotionEvent_getY(event, i);
 			if (id == 0) {
 				iron_internal_mouse_trigger_move(x, y);
 			}
@@ -226,7 +226,7 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 			return 1;
 		}
 
-		#ifdef WITH_GAMEPAD
+#ifdef WITH_GAMEPAD
 		else if ((source & AINPUT_SOURCE_JOYSTICK) == AINPUT_SOURCE_JOYSTICK) {
 			float x = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_X, 0);
 			if (x != last_x) {
@@ -252,9 +252,9 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 				last_r = r;
 			}
 
-			float hat_x = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_HAT_X, 0);
-			bool hat_left = false;
-			bool hat_right = false;
+			float hat_x     = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_HAT_X, 0);
+			bool  hat_left  = false;
+			bool  hat_right = false;
 			if (hat_x < -0.5f) {
 				hat_left = true;
 			}
@@ -262,9 +262,9 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 				hat_right = true;
 			}
 
-			float hat_y = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_HAT_Y, 0);
-			bool hat_up = false;
-			bool hat_down = false;
+			float hat_y    = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_HAT_Y, 0);
+			bool  hat_up   = false;
+			bool  hat_down = false;
 			if (hat_y < -0.5f) {
 				hat_up = true;
 			}
@@ -290,7 +290,7 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 			}
 			return 1;
 		}
-		#endif
+#endif
 	}
 
 	else if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY) {
@@ -386,7 +386,7 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 				iron_internal_keyboard_trigger_key_down(IRON_KEY_BACK);
 				return 1;
 
-			#ifdef WITH_GAMEPAD
+#ifdef WITH_GAMEPAD
 			case AKEYCODE_DPAD_CENTER:
 			case AKEYCODE_BUTTON_B:
 				iron_internal_gamepad_trigger_button(0, 1, 1);
@@ -427,45 +427,45 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 			case AKEYCODE_BUTTON_MODE:
 				iron_internal_gamepad_trigger_button(0, 16, 1);
 				return 1;
-			#endif
+#endif
 
 			case AKEYCODE_DPAD_UP: {
-				#ifdef WITH_GAMEPAD
+#ifdef WITH_GAMEPAD
 				if (isGamepadEvent(event)) {
 					iron_internal_gamepad_trigger_button(0, 12, 1);
 					return 1;
 				}
-				#endif
+#endif
 				iron_internal_keyboard_trigger_key_down(IRON_KEY_UP);
 				return 1;
 			}
 			case AKEYCODE_DPAD_DOWN: {
-				#ifdef WITH_GAMEPAD
+#ifdef WITH_GAMEPAD
 				if (isGamepadEvent(event)) {
 					iron_internal_gamepad_trigger_button(0, 13, 1);
 					return 1;
 				}
-				#endif
+#endif
 				iron_internal_keyboard_trigger_key_down(IRON_KEY_DOWN);
 				return 1;
 			}
 			case AKEYCODE_DPAD_LEFT: {
-				#ifdef WITH_GAMEPAD
+#ifdef WITH_GAMEPAD
 				if (isGamepadEvent(event)) {
 					iron_internal_gamepad_trigger_button(0, 14, 1);
 					return 1;
 				}
-				#endif
+#endif
 				iron_internal_keyboard_trigger_key_down(IRON_KEY_LEFT);
 				return 1;
 			}
 			case AKEYCODE_DPAD_RIGHT: {
-				#ifdef WITH_GAMEPAD
+#ifdef WITH_GAMEPAD
 				if (isGamepadEvent(event)) {
 					iron_internal_gamepad_trigger_button(0, 15, 1);
 					return 1;
 				}
-				#endif
+#endif
 				iron_internal_keyboard_trigger_key_down(IRON_KEY_RIGHT);
 				return 1;
 			}
@@ -633,7 +633,7 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 				iron_internal_keyboard_trigger_key_up(IRON_KEY_BACK);
 				return 1;
 
-			#ifdef WITH_GAMEPAD
+#ifdef WITH_GAMEPAD
 			case AKEYCODE_DPAD_CENTER:
 			case AKEYCODE_BUTTON_B:
 				iron_internal_gamepad_trigger_button(0, 1, 0);
@@ -674,45 +674,45 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 			case AKEYCODE_BUTTON_MODE:
 				iron_internal_gamepad_trigger_button(0, 16, 0);
 				return 1;
-			#endif
+#endif
 
 			case AKEYCODE_DPAD_UP: {
-				#ifdef WITH_GAMEPAD
+#ifdef WITH_GAMEPAD
 				if (isGamepadEvent(event)) {
 					iron_internal_gamepad_trigger_button(0, 12, 0);
 					return 1;
 				}
-				#endif
+#endif
 				iron_internal_keyboard_trigger_key_up(IRON_KEY_UP);
 				return 1;
 			}
 			case AKEYCODE_DPAD_DOWN: {
-				#ifdef WITH_GAMEPAD
+#ifdef WITH_GAMEPAD
 				if (isGamepadEvent(event)) {
 					iron_internal_gamepad_trigger_button(0, 13, 0);
 					return 1;
 				}
-				#endif
+#endif
 				iron_internal_keyboard_trigger_key_up(IRON_KEY_DOWN);
 				return 1;
 			}
 			case AKEYCODE_DPAD_LEFT: {
-				#ifdef WITH_GAMEPAD
+#ifdef WITH_GAMEPAD
 				if (isGamepadEvent(event)) {
 					iron_internal_gamepad_trigger_button(0, 14, 0);
 					return 1;
 				}
-				#endif
+#endif
 				iron_internal_keyboard_trigger_key_up(IRON_KEY_LEFT);
 				return 1;
 			}
 			case AKEYCODE_DPAD_RIGHT: {
-				#ifdef WITH_GAMEPAD
+#ifdef WITH_GAMEPAD
 				if (isGamepadEvent(event)) {
 					iron_internal_gamepad_trigger_button(0, 15, 0);
 					return 1;
 				}
-				#endif
+#endif
 				iron_internal_keyboard_trigger_key_up(IRON_KEY_RIGHT);
 				return 1;
 			}
@@ -865,21 +865,21 @@ AAssetManager *iron_android_get_asset_manager(void) {
 }
 
 jclass iron_android_find_class(JNIEnv *env, const char *name) {
-	jobject nativeActivity = activity->clazz;
-	jclass acl = (*env)->GetObjectClass(env, nativeActivity);
+	jobject   nativeActivity = activity->clazz;
+	jclass    acl            = (*env)->GetObjectClass(env, nativeActivity);
 	jmethodID getClassLoader = (*env)->GetMethodID(env, acl, "getClassLoader", "()Ljava/lang/ClassLoader;");
-	jobject cls = (*env)->CallObjectMethod(env, nativeActivity, getClassLoader);
-	jclass classLoader = (*env)->FindClass(env, "java/lang/ClassLoader");
-	jmethodID findClass = (*env)->GetMethodID(env, classLoader, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
-	jstring strClassName = (*env)->NewStringUTF(env, name);
-	jclass clazz = (jclass)((*env)->CallObjectMethod(env, cls, findClass, strClassName));
+	jobject   cls            = (*env)->CallObjectMethod(env, nativeActivity, getClassLoader);
+	jclass    classLoader    = (*env)->FindClass(env, "java/lang/ClassLoader");
+	jmethodID findClass      = (*env)->GetMethodID(env, classLoader, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
+	jstring   strClassName   = (*env)->NewStringUTF(env, name);
+	jclass    clazz          = (jclass)((*env)->CallObjectMethod(env, cls, findClass, strClassName));
 	(*env)->DeleteLocalRef(env, strClassName);
 	return clazz;
 }
 
 JNIEXPORT void JNICALL Java_org_armory3d_IronActivity_nativeIronKeyPress(JNIEnv *env, jobject jobj, jstring chars) {
-	const jchar *text = (*env)->GetStringChars(env, chars, NULL);
-	const jsize length = (*env)->GetStringLength(env, chars);
+	const jchar *text   = (*env)->GetStringChars(env, chars, NULL);
+	const jsize  length = (*env)->GetStringLength(env, chars);
 
 	iron_mutex_lock(&unicode_mutex);
 	for (jsize i = 0; i < length && unicode_stack_index < 256; ++i) {
@@ -893,10 +893,10 @@ JNIEXPORT void JNICALL Java_org_armory3d_IronActivity_nativeIronKeyPress(JNIEnv 
 void IronAndroidKeyboardInit() {
 	JNIEnv *env;
 	(*activity->vm)->AttachCurrentThread(activity->vm, &env, NULL);
-	jclass clazz = iron_android_find_class(env, "org.armory3d.IronActivity");
-	JNINativeMethod methodTable[] = {{"nativeIronKeyPress", "(Ljava/lang/String;)V", (void *)Java_org_armory3d_IronActivity_nativeIronKeyPress}};
-	int methodTableSize = sizeof(methodTable) / sizeof(methodTable[0]);
-	int failure = (*env)->RegisterNatives(env, clazz, methodTable, methodTableSize);
+	jclass          clazz           = iron_android_find_class(env, "org.armory3d.IronActivity");
+	JNINativeMethod methodTable[]   = {{"nativeIronKeyPress", "(Ljava/lang/String;)V", (void *)Java_org_armory3d_IronActivity_nativeIronKeyPress}};
+	int             methodTableSize = sizeof(methodTable) / sizeof(methodTable[0]);
+	int             failure         = (*env)->RegisterNatives(env, clazz, methodTable, methodTableSize);
 	if (failure != 0) {
 		iron_log("Failed to register IronActivity.nativeIronKeyPress");
 	}
@@ -928,8 +928,8 @@ bool iron_keyboard_active() {
 void iron_load_url(const char *url) {
 	JNIEnv *env;
 	(*activity->vm)->AttachCurrentThread(activity->vm, &env, NULL);
-	jclass ironActivityClass = iron_android_find_class(env, "org.armory3d.IronActivity");
-	jstring jurl = (*env)->NewStringUTF(env, url);
+	jclass  ironActivityClass = iron_android_find_class(env, "org.armory3d.IronActivity");
+	jstring jurl              = (*env)->NewStringUTF(env, url);
 	(*env)->CallStaticVoidMethod(env, ironActivityClass, (*env)->GetStaticMethodID(env, ironActivityClass, "loadURL", "(Ljava/lang/String;)V"), jurl);
 	(*activity->vm)->DetachCurrentThread(activity->vm);
 }
@@ -937,10 +937,10 @@ void iron_load_url(const char *url) {
 const char *iron_language() {
 	JNIEnv *env;
 	(*activity->vm)->AttachCurrentThread(activity->vm, &env, NULL);
-	jclass ironActivityClass = iron_android_find_class(env, "org.armory3d.IronActivity");
-	jstring s = (jstring)(*env)->CallStaticObjectMethod(env, ironActivityClass,
-	                                                    (*env)->GetStaticMethodID(env, ironActivityClass, "getLanguage", "()Ljava/lang/String;"));
-	const char *str = (*env)->GetStringUTFChars(env, s, 0);
+	jclass      ironActivityClass = iron_android_find_class(env, "org.armory3d.IronActivity");
+	jstring     s                 = (jstring)(*env)->CallStaticObjectMethod(env, ironActivityClass,
+	                                                                        (*env)->GetStaticMethodID(env, ironActivityClass, "getLanguage", "()Ljava/lang/String;"));
+	const char *str               = (*env)->GetStringUTFChars(env, s, 0);
 	(*activity->vm)->DetachCurrentThread(activity->vm);
 	return str;
 }
@@ -1006,8 +1006,8 @@ bool iron_internal_handle_messages(void) {
 	unicode_stack_index = 0;
 	iron_mutex_unlock(&unicode_mutex);
 
-	int ident;
-	int events;
+	int                         ident;
+	int                         events;
 	struct android_poll_source *source;
 
 	while ((ident = ALooper_pollOnce(paused ? -1 : 0, NULL, &events, (void **)&source)) >= 0) {
@@ -1037,8 +1037,8 @@ bool iron_internal_handle_messages(void) {
 
 	if (activityJustResized && app->window != NULL) {
 		activityJustResized = false;
-		int32_t width = iron_android_width();
-		int32_t height = iron_android_height();
+		int32_t width       = iron_android_width();
+		int32_t height      = iron_android_height();
 		gpu_resize(width, height);
 		iron_internal_call_resize_callback(width, height);
 	}
@@ -1071,13 +1071,13 @@ void android_main(struct android_app *application) {
 	gettimeofday(&now, NULL);
 	start_sec = now.tv_sec;
 
-	app = application;
+	app      = application;
 	activity = application->activity;
 	initAndroidFileReader();
-	//IronAndroidVideoInit();
+	// IronAndroidVideoInit();
 	IronAndroidKeyboardInit();
-	application->onAppCmd = cmd;
-	application->onInputEvent = input;
+	application->onAppCmd                      = cmd;
+	application->onInputEvent                  = input;
 	activity->callbacks->onNativeWindowResized = resize;
 	// sensorManager = ASensorManager_getInstance();
 	// accelerometerSensor = ASensorManager_getDefaultSensor(sensorManager, ASENSOR_TYPE_ACCELEROMETER);
@@ -1098,8 +1098,8 @@ void android_main(struct android_app *application) {
 	kickstart(0, NULL);
 
 	(*activity->vm)->AttachCurrentThread(activity->vm, &env, NULL);
-	jclass ironActivityClass = iron_android_find_class(env, "org.armory3d.IronActivity");
-	jmethodID FinishHim = (*env)->GetStaticMethodID(env, ironActivityClass, "stop", "()V");
+	jclass    ironActivityClass = iron_android_find_class(env, "org.armory3d.IronActivity");
+	jmethodID FinishHim         = (*env)->GetStaticMethodID(env, ironActivityClass, "stop", "()V");
 	(*env)->CallStaticVoidMethod(env, ironActivityClass, FinishHim);
 	(*activity->vm)->DetachCurrentThread(activity->vm);
 }
@@ -1108,15 +1108,15 @@ void iron_init(iron_window_options_t *win) {
 	iron_mutex_init(&unicode_mutex);
 	gpu_init(win->depth_bits, true);
 	android_check_permissions();
-	#ifdef WITH_GAMEPAD
+#ifdef WITH_GAMEPAD
 	iron_internal_gamepad_trigger_connect(0);
-	#endif
+#endif
 }
 
 void iron_internal_shutdown(void) {
-	#ifdef WITH_GAMEPAD
+#ifdef WITH_GAMEPAD
 	iron_internal_gamepad_trigger_disconnect(0);
-	#endif
+#endif
 }
 
 void initAndroidFileReader(void) {
@@ -1129,15 +1129,15 @@ void initAndroidFileReader(void) {
 
 	(*activity->vm)->AttachCurrentThread(activity->vm, &env, NULL);
 
-	jclass android_app_NativeActivity = (*env)->FindClass(env, "android/app/NativeActivity");
-	jmethodID getExternalFilesDir = (*env)->GetMethodID(env, android_app_NativeActivity, "getExternalFilesDir", "(Ljava/lang/String;)Ljava/io/File;");
-	jobject file = (*env)->CallObjectMethod(env, activity->clazz, getExternalFilesDir, NULL);
-	jclass java_io_File = (*env)->FindClass(env, "java/io/File");
-	jmethodID getPath = (*env)->GetMethodID(env, java_io_File, "getPath", "()Ljava/lang/String;");
-	jstring jPath = (*env)->CallObjectMethod(env, file, getPath);
+	jclass    android_app_NativeActivity = (*env)->FindClass(env, "android/app/NativeActivity");
+	jmethodID getExternalFilesDir        = (*env)->GetMethodID(env, android_app_NativeActivity, "getExternalFilesDir", "(Ljava/lang/String;)Ljava/io/File;");
+	jobject   file                       = (*env)->CallObjectMethod(env, activity->clazz, getExternalFilesDir, NULL);
+	jclass    java_io_File               = (*env)->FindClass(env, "java/io/File");
+	jmethodID getPath                    = (*env)->GetMethodID(env, java_io_File, "getPath", "()Ljava/lang/String;");
+	jstring   jPath                      = (*env)->CallObjectMethod(env, file, getPath);
 
-	const char *path = (*env)->GetStringUTFChars(env, jPath, NULL);
-	char *externalFilesDir = malloc(strlen(path) + 1);
+	const char *path             = (*env)->GetStringUTFChars(env, jPath, NULL);
+	char       *externalFilesDir = malloc(strlen(path) + 1);
 	strcpy(externalFilesDir, path);
 	iron_internal_set_files_location(externalFilesDir);
 
@@ -1170,18 +1170,17 @@ static bool iron_aasset_reader_open(iron_file_reader_t *reader, const char *file
 	reader->data = AAssetManager_open(iron_android_get_asset_manager(), filename, AASSET_MODE_RANDOM);
 	if (reader->data == NULL)
 		return false;
-	reader->size = AAsset_getLength((struct AAsset *)reader->data);
+	reader->size  = AAsset_getLength((struct AAsset *)reader->data);
 	reader->close = iron_aasset_reader_close;
-	reader->read = iron_aasset_reader_read;
-	reader->pos = iron_aasset_reader_pos;
-	reader->seek = iron_aasset_reader_seek;
+	reader->read  = iron_aasset_reader_read;
+	reader->pos   = iron_aasset_reader_pos;
+	reader->seek  = iron_aasset_reader_seek;
 	return true;
 }
 
 bool iron_file_reader_open(iron_file_reader_t *reader, const char *filename, int type) {
 	memset(reader, 0, sizeof(*reader));
-	return iron_internal_file_reader_open(reader, filename, type) ||
-	       iron_aasset_reader_open(reader, filename, type);
+	return iron_internal_file_reader_open(reader, filename, type) || iron_aasset_reader_open(reader, filename, type);
 }
 
 int iron_hardware_threads(void) {
@@ -1219,7 +1218,7 @@ void iron_window_set_title(const char *title) {
 }
 
 void iron_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {
-	resizeCallback = callback;
+	resizeCallback     = callback;
 	resizeCallbackData = data;
 }
 

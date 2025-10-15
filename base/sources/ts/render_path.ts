@@ -52,7 +52,7 @@ function render_path_render_frame() {
 	_render_path_last_w = sys_w();
 	_render_path_last_h = sys_h();
 
-	_render_path_frame_time = sys_time() -_render_path_last_frame_time;
+	_render_path_frame_time = sys_time() - _render_path_last_frame_time;
 	_render_path_last_frame_time = sys_time();
 
 	render_path_current_w = sys_w();

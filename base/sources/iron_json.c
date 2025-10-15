@@ -1,22 +1,22 @@
 
 #include "iron_json.h"
 #include "iron_string.h"
+#include <jsmn.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
-#include <jsmn.h>
 
 void *gc_alloc(size_t size);
 
-static const int PTR_SIZE = 8;
-static char *source;
+static const int  PTR_SIZE = 8;
+static char      *source;
 static jsmntok_t *tokens;
-static int num_tokens;
-static uint32_t ti; // token index
-static uint8_t *decoded;
-static uint32_t wi; // write index
-static uint32_t bottom;
-static uint32_t array_count;
+static int        num_tokens;
+static uint32_t   ti; // token index
+static uint8_t   *decoded;
+static uint32_t   wi; // write index
+static uint32_t   bottom;
+static uint32_t   array_count;
 
 static inline uint64_t pad(uint32_t di, int n) {
 	return (n - (di % n)) % n;
@@ -120,7 +120,7 @@ static int traverse(uint32_t wi) {
 static int token_size() {
 	uint32_t _ti = ti;
 	uint32_t len = traverse(0);
-	ti = _ti;
+	ti           = _ti;
 	return len;
 }
 
@@ -156,13 +156,12 @@ static void token_write() {
 			store_ptr_abs(NULL);
 		}
 		else {
-			has_dot(source + t.start, t.end - t.start) ?
-				store_f32(strtof(source + t.start, NULL)) :
-				#ifdef _WIN32
-				store_i32(_strtoi64(source + t.start, NULL, 10));
-				#else
-				store_i32(strtol(source + t.start, NULL, 10));
-				#endif
+			has_dot(source + t.start, t.end - t.start) ? store_f32(strtof(source + t.start, NULL)) :
+#ifdef _WIN32
+			                                           store_i32(_strtoi64(source + t.start, NULL, 10));
+#else
+			                                           store_i32(strtol(source + t.start, NULL, 10));
+#endif
 		}
 	}
 	else if (t.type == JSMN_ARRAY) {
@@ -170,10 +169,10 @@ static void token_write() {
 		store_ptr(bottom);
 
 		uint32_t _wi = wi;
-		wi = bottom;
+		wi           = bottom;
 		store_ptr(bottom + PTR_SIZE + 4 + 4); // Pointer to buffer contents
-		store_u32(t.size); // Element count
-		store_u32(0); // Capacity = 0 -> do not free on first realloc
+		store_u32(t.size);                    // Element count
+		store_u32(0);                         // Capacity = 0 -> do not free on first realloc
 		bottom = wi;
 
 		if (t.size == 0) {
@@ -182,8 +181,8 @@ static void token_write() {
 		}
 
 		uint32_t count = t.size;
-		array_count = count;
-		t = get_token();
+		array_count    = count;
+		t              = get_token();
 
 		if (t.type == JSMN_OBJECT) {
 			// Struct pointers
@@ -203,7 +202,7 @@ static void token_write() {
 		}
 		else if (t.type == JSMN_STRING) {
 			// String pointers
-			uint32_t _ti = ti;
+			uint32_t _ti            = ti;
 			uint32_t strings_length = 0;
 			for (uint32_t i = 0; i < count; ++i) {
 				store_ptr(bottom + count * PTR_SIZE + strings_length);
@@ -214,7 +213,7 @@ static void token_write() {
 				t = get_token();
 			}
 			ti = _ti;
-			t = get_token();
+			t  = get_token();
 
 			// String bytes
 			for (uint32_t i = 0; i < count; ++i) {
@@ -232,7 +231,7 @@ static void token_write() {
 			bottom = pad(wi, PTR_SIZE) + wi;
 		}
 
-		wi = _wi;
+		wi          = _wi;
 		array_count = 1;
 	}
 	else if (t.type == JSMN_STRING) {
@@ -240,10 +239,10 @@ static void token_write() {
 		store_ptr(bottom);
 
 		uint32_t _wi = wi;
-		wi = bottom;
+		wi           = bottom;
 		store_string_bytes(source + t.start, t.end - t.start);
 		bottom = pad(wi, PTR_SIZE) + wi;
-		wi = _wi;
+		wi     = _wi;
 	}
 }
 
@@ -257,17 +256,17 @@ static void load_tokens(char *s) {
 	jsmn_parse(&parser, s, strlen(s), tokens, num_tokens);
 
 	source = s;
-	ti = 0;
+	ti     = 0;
 }
 
 void *json_parse(char *s) {
 	load_tokens(s);
 
 	uint32_t out_size = strlen(s) * 2;
-	decoded = gc_alloc(out_size);
-	wi = 0;
-	bottom = 0;
-	array_count = 1;
+	decoded           = gc_alloc(out_size);
+	wi                = 0;
+	bottom            = 0;
+	array_count       = 1;
 	token_write();
 
 	free(tokens);
@@ -310,11 +309,11 @@ any_map_t *json_parse_to_map(char *s) {
 }
 
 static char *encoded;
-static int keys;
+static int   keys;
 
 void json_encode_begin() {
 	encoded = "{";
-	keys = 0;
+	keys    = 0;
 }
 
 char *json_encode_end() {
@@ -406,7 +405,7 @@ void json_encode_end_array() {
 }
 
 void json_encode_begin_object() {
-	keys = 0;
+	keys    = 0;
 	encoded = string_join(encoded, "{");
 }
 

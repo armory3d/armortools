@@ -1,23 +1,22 @@
 #include <iron_net.h>
-#include <unistd.h>
+#include <netdb.h>
+#include <openssl/ssl.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
-#include <netdb.h>
 #include <sys/socket.h>
-#include <openssl/ssl.h>
+#include <unistd.h>
 
-static SSL_CTX *ctx = NULL;
-static char *buf = NULL;
-static int buf_len = 1024 * 1024;
+static SSL_CTX *ctx     = NULL;
+static char    *buf     = NULL;
+static int      buf_len = 1024 * 1024;
 
-void iron_https_request(const char *url_base, const char *url_path, const char *data, int port, int method,
-					    iron_http_callback_t callback, void *callbackdata) {
+void iron_https_request(const char *url_base, const char *url_path, const char *data, int port, int method, iron_http_callback_t callback, void *callbackdata) {
 
-	int sock_fd = socket(AF_INET, SOCK_STREAM, 0);
-	struct hostent *server = gethostbyname(url_base);
+	int                sock_fd     = socket(AF_INET, SOCK_STREAM, 0);
+	struct hostent    *server      = gethostbyname(url_base);
 	struct sockaddr_in server_addr = {0};
-	server_addr.sin_family = AF_INET;
+	server_addr.sin_family         = AF_INET;
 	memmove(&server_addr.sin_addr.s_addr, server->h_addr_list[0], server->h_length);
 	server_addr.sin_port = htons(port);
 
@@ -43,7 +42,7 @@ void iron_https_request(const char *url_base, const char *url_path, const char *
 
 	// For HTTP/1.1, implement "transfer-encoding: chunked"
 	char request[1024];
-	int request_len = snprintf(request, sizeof(request), "GET /%s HTTP/1.0\r\nHost: %s:%d\r\nConnection: close\r\n\r\n", url_path, url_base, port);
+	int  request_len = snprintf(request, sizeof(request), "GET /%s HTTP/1.0\r\nHost: %s:%d\r\nConnection: close\r\n\r\n", url_path, url_base, port);
 	SSL_write(ssl, request, request_len);
 
 	// Read
@@ -62,9 +61,9 @@ void iron_https_request(const char *url_base, const char *url_path, const char *
 	buf[pos] = '\0';
 
 	// Parse
-	const char *body_ptr = "";
-	char *headers_end = strstr(buf, "\r\n\r\n");
-	body_ptr = headers_end + 4;
+	const char *body_ptr    = "";
+	char       *headers_end = strstr(buf, "\r\n\r\n");
+	body_ptr                = headers_end + 4;
 	callback(body_ptr, callbackdata);
 
 	SSL_free(ssl);

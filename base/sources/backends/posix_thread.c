@@ -1,5 +1,5 @@
-#include <iron_thread.h>
 #include <assert.h>
+#include <iron_thread.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -37,7 +37,7 @@ struct thread_start {
 
 #define THREAD_STARTS 64
 static struct thread_start starts[THREAD_STARTS];
-static int thread_start_index = 0;
+static int                 thread_start_index = 0;
 
 static void *ThreadProc(void *arg) {
 	intptr_t start_index = (intptr_t)arg;
@@ -47,7 +47,7 @@ static void *ThreadProc(void *arg) {
 }
 
 void iron_thread_init(iron_thread_t *t, void (*thread)(void *param), void *param) {
-	t->impl.param = param;
+	t->impl.param  = param;
 	t->impl.thread = thread;
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
@@ -61,8 +61,8 @@ void iron_thread_init(iron_thread_t *t, void (*thread)(void *param), void *param
 		thread_start_index = 0;
 	}
 	starts[start_index].thread = thread;
-	starts[start_index].param = param;
-	int ret = pthread_create(&t->impl.pthread, &attr, &ThreadProc, (void *)start_index);
+	starts[start_index].param  = param;
+	int ret                    = pthread_create(&t->impl.pthread, &attr, &ThreadProc, (void *)start_index);
 	assert(ret == 0);
 	pthread_attr_destroy(&attr);
 }

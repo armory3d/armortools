@@ -1,37 +1,37 @@
 #include "iron_ui.h"
+#include "iron_draw.h"
+#include "iron_gc.h"
+#include "iron_string.h"
 #include <assert.h>
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <ctype.h>
+#include <iron_file.h>
 #include <iron_gpu.h>
 #include <iron_system.h>
-#include "iron_draw.h"
-#include "iron_string.h"
-#include "iron_gc.h"
-#include <iron_file.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-static ui_t *current = NULL;
-static ui_theme_t *theme;
-static bool ui_key_repeat = true; // Emulate key repeat for non-character keys
-static bool ui_dynamic_glyph_load = true; // Allow text input fields to push new glyphs into the font atlas
-static float ui_key_repeat_time = 0.0;
-static char ui_text_to_paste[1024];
-static char ui_text_to_copy[1024];
-static ui_t *ui_copy_receiver = NULL;
-static int ui_copy_frame = 0;
-static bool ui_combo_first = true;
-static ui_handle_t *ui_combo_search_handle = NULL;
-static int touch_hold_x = -1;
-static int touch_hold_y = -1;
-bool ui_touch_scroll = false; // Pan with finger to scroll
-bool ui_touch_hold = false; // Touch and hold finger for right click
-bool ui_touch_tooltip = false; // Show extra tooltips above finger / on-screen keyboard
-bool ui_is_cut = false;
-bool ui_is_copy = false;
-bool ui_is_paste = false;
-void (*ui_on_border_hover)(ui_handle_t *, int) = NULL; // Mouse over window border, use for resizing
+static ui_t        *current = NULL;
+static ui_theme_t  *theme;
+static bool         ui_key_repeat         = true; // Emulate key repeat for non-character keys
+static bool         ui_dynamic_glyph_load = true; // Allow text input fields to push new glyphs into the font atlas
+static float        ui_key_repeat_time    = 0.0;
+static char         ui_text_to_paste[1024];
+static char         ui_text_to_copy[1024];
+static ui_t        *ui_copy_receiver                           = NULL;
+static int          ui_copy_frame                              = 0;
+static bool         ui_combo_first                             = true;
+static ui_handle_t *ui_combo_search_handle                     = NULL;
+static int          touch_hold_x                               = -1;
+static int          touch_hold_y                               = -1;
+bool                ui_touch_scroll                            = false; // Pan with finger to scroll
+bool                ui_touch_hold                              = false; // Touch and hold finger for right click
+bool                ui_touch_tooltip                           = false; // Show extra tooltips above finger / on-screen keyboard
+bool                ui_is_cut                                  = false;
+bool                ui_is_copy                                 = false;
+bool                ui_is_paste                                = false;
+void (*ui_on_border_hover)(ui_handle_t *, int)                 = NULL; // Mouse over window border, use for resizing
 void (*ui_on_tab_drop)(ui_handle_t *, int, ui_handle_t *, int) = NULL; // Tab reorder via drag and drop
 #ifdef WITH_EVAL
 float js_eval(char *str);
@@ -110,24 +110,24 @@ ui_t *ui_get_current() {
 
 void ui_set_current(ui_t *_current) {
 	current = _current;
-	theme = current->ops->theme;
+	theme   = current->ops->theme;
 }
 
 ui_handle_t *ui_handle_create() {
 	ui_handle_t *h = (ui_handle_t *)gc_alloc(sizeof(ui_handle_t));
 	memset(h, 0, sizeof(ui_handle_t));
 	h->redraws = 2;
-	h->color = 0xffffffff;
-	h->text = "";
-	h->init = true;
+	h->color   = 0xffffffff;
+	h->text    = "";
+	h->init    = true;
 	return h;
 }
 
-ui_handle_t *ui_nest(ui_handle_t *handle, int  pos) {
+ui_handle_t *ui_nest(ui_handle_t *handle, int pos) {
 	if (handle->children == NULL) {
 		handle->children = any_array_create(0);
 	}
-	while(pos >= handle->children->length) {
+	while (pos >= handle->children->length) {
 		ui_handle_t *h = ui_handle_create();
 		any_array_push(handle->children, h);
 		if (pos == handle->children->length - 1) {
@@ -142,10 +142,10 @@ ui_handle_t *ui_nest(ui_handle_t *handle, int  pos) {
 
 void ui_fade_color(float alpha) {
 	uint32_t color = draw_get_color();
-	uint8_t r = (color & 0x00ff0000) >> 16;
-	uint8_t g = (color & 0x0000ff00) >> 8;
-	uint8_t b = (color & 0x000000ff);
-	uint8_t a = (uint8_t)(255.0 * alpha);
+	uint8_t  r     = (color & 0x00ff0000) >> 16;
+	uint8_t  g     = (color & 0x0000ff00) >> 8;
+	uint8_t  b     = (color & 0x000000ff);
+	uint8_t  a     = (uint8_t)(255.0 * alpha);
 	draw_set_color((a << 24) | (r << 16) | (g << 8) | b);
 }
 
@@ -178,7 +178,7 @@ void ui_draw_shadow(float x, float y, float w, float h) {
 		float max_offset = 4.0 * UI_SCALE();
 		for (int i = 0; i < 4; i++) {
 			float offset = (max_offset / 4) * (i + 1);
-			float a = 0.1 - (0.1 / 4) * i;
+			float a      = 0.1 - (0.1 / 4) * i;
 			draw_set_color(((uint8_t)(a * 255) << 24) | (0 << 16) | (0 << 8) | 0);
 			ui_draw_rect(true, x + offset, y + offset, w + (max_offset - offset) * 2, h + (max_offset - offset) * 2);
 		}
@@ -261,46 +261,48 @@ int ui_check_start(int i, char *text, char **start, int start_count) {
 
 ui_text_extract_t ui_extract_coloring(char *text, ui_coloring_t *col) {
 	ui_text_extract_t res;
-	res.colored[0] = '\0';
-	res.uncolored[0] = '\0';
-	bool coloring = false;
-	int start_from = 0;
-	int start_length = 0;
+	res.colored[0]    = '\0';
+	res.uncolored[0]  = '\0';
+	bool coloring     = false;
+	int  start_from   = 0;
+	int  start_length = 0;
 	for (int i = 0; i < strlen(text); ++i) {
 		bool skip_first = false;
 		// Check if upcoming text should be colored
 		int length = ui_check_start(i, text, col->start->buffer, col->start->length);
 		// Not touching another character
-		bool separated_left = i == 0 || !ui_is_char(text[i - 1]);
+		bool separated_left  = i == 0 || !ui_is_char(text[i - 1]);
 		bool separated_right = i + length >= strlen(text) || !ui_is_char(text[i + length]);
-		bool is_separated = separated_left && separated_right;
+		bool is_separated    = separated_left && separated_right;
 		// Start coloring
 		if (length > 0 && (!coloring || col->end[0] == '\0') && (!col->separated || is_separated)) {
-			coloring = true;
-			start_from = i;
+			coloring     = true;
+			start_from   = i;
 			start_length = length;
-			if (col->end[0] != '\0' && col->end[0] != '\n') skip_first = true;
+			if (col->end[0] != '\0' && col->end[0] != '\n')
+				skip_first = true;
 		}
 		// End coloring
 		else if (col->end[0] == '\0') {
-			if (i == start_from + start_length) coloring = false;
+			if (i == start_from + start_length)
+				coloring = false;
 		}
 		else if (strncmp(text + i, col->end, strlen(col->end)) == 0) {
 			coloring = false;
 		}
 		// If true, add current character to colored string
-		int len_c = strlen(res.colored);
+		int len_c  = strlen(res.colored);
 		int len_uc = strlen(res.uncolored);
 		if (coloring && !skip_first) {
-			res.colored[len_c] = text[i];
-			res.colored[len_c + 1] = '\0';
-			res.uncolored[len_uc] = ' ';
+			res.colored[len_c]        = text[i];
+			res.colored[len_c + 1]    = '\0';
+			res.uncolored[len_uc]     = ' ';
 			res.uncolored[len_uc + 1] = '\0';
 		}
 		else {
-			res.colored[len_c] = ' ';
-			res.colored[len_c + 1] = '\0';
-			res.uncolored[len_uc] = text[i];
+			res.colored[len_c]        = ' ';
+			res.colored[len_c + 1]    = '\0';
+			res.uncolored[len_uc]     = text[i];
 			res.uncolored[len_uc + 1] = '\0';
 		}
 	}
@@ -367,8 +369,8 @@ void ui_draw_string(char *text, float x_offset, float y_offset, int align, bool 
 		// Monospace fonts only for now
 		strcpy(temp, text);
 		for (int i = 0; i < current->text_coloring->colorings->length; ++i) {
-			ui_coloring_t *coloring = current->text_coloring->colorings->buffer[i];
-			ui_text_extract_t result = ui_extract_coloring(temp, coloring);
+			ui_coloring_t    *coloring = current->text_coloring->colorings->buffer[i];
+			ui_text_extract_t result   = ui_extract_coloring(temp, coloring);
 			if (result.colored[0] != '\0') {
 				draw_set_color(coloring->color);
 				draw_string(result.colored, current->_x + x_offset, current->_y + current->font_offset_y + y_offset);
@@ -384,18 +386,18 @@ bool ui_get_initial_hover(float elem_h) {
 	if (current->scissor && current->input_y < current->_window_y + current->window_header_h) {
 		return false;
 	}
-	return current->enabled && current->input_enabled &&
-		current->input_started_x >= current->_window_x + current->_x && current->input_started_x < (current->_window_x + current->_x + current->_w) &&
-		current->input_started_y >= current->_window_y + current->_y && current->input_started_y < (current->_window_y + current->_y + elem_h);
+	return current->enabled && current->input_enabled && current->input_started_x >= current->_window_x + current->_x &&
+	       current->input_started_x < (current->_window_x + current->_x + current->_w) && current->input_started_y >= current->_window_y + current->_y &&
+	       current->input_started_y < (current->_window_y + current->_y + elem_h);
 }
 
 bool ui_get_hover(float elem_h) {
 	if (current->scissor && current->input_y < current->_window_y + current->window_header_h) {
 		return false;
 	}
-	current->is_hovered = current->enabled && current->input_enabled &&
-		current->input_x >= current->_window_x + current->_x && current->input_x < (current->_window_x + current->_x + current->_w) &&
-		current->input_y >= current->_window_y + current->_y && current->input_y < (current->_window_y + current->_y + elem_h);
+	current->is_hovered = current->enabled && current->input_enabled && current->input_x >= current->_window_x + current->_x &&
+	                      current->input_x < (current->_window_x + current->_x + current->_w) && current->input_y >= current->_window_y + current->_y &&
+	                      current->input_y < (current->_window_y + current->_y + elem_h);
 	return current->is_hovered;
 }
 
@@ -415,7 +417,8 @@ bool ui_get_started(float elem_h) {
 }
 
 bool ui_is_visible(float elem_h) {
-	if (current->current_window == NULL) return true;
+	if (current->current_window == NULL)
+		return true;
 	return (current->_y + elem_h > current->window_header_h && current->_y < current->current_window->texture.height);
 }
 
@@ -430,11 +433,11 @@ void ui_row(f32_array_t *ratios) {
 		current->ratios = NULL;
 		return;
 	}
-	current->ratios = ratios;
-	current->current_ratio = 0;
+	current->ratios         = ratios;
+	current->current_ratio  = 0;
 	current->x_before_split = current->_x;
 	current->w_before_split = current->_w;
-	current->_w = ui_get_ratio(ratios->buffer[current->current_ratio], current->_w);
+	current->_w             = ui_get_ratio(ratios->buffer[current->current_ratio], current->_w);
 }
 
 void ui_row2() {
@@ -478,9 +481,9 @@ void ui_end_element_of_size(float element_size) {
 
 			if ((current->ratios != NULL && current->current_ratio == current->ratios->length - 1)) { // Last row element
 				current->current_ratio = -1;
-				current->ratios = NULL;
-				current->_x = current->x_before_split;
-				current->_w = current->w_before_split;
+				current->ratios        = NULL;
+				current->_x            = current->x_before_split;
+				current->_w            = current->w_before_split;
 			}
 		}
 		else { // Row
@@ -513,13 +516,13 @@ void ui_resize(ui_handle_t *handle, int w, int h) {
 }
 
 bool ui_input_in_rect(float x, float y, float w, float h) {
-	return current->enabled && current->input_enabled &&
-		current->input_x >= x && current->input_x < (x + w) &&
-		current->input_y >= y && current->input_y < (y + h);
+	return current->enabled && current->input_enabled && current->input_x >= x && current->input_x < (x + w) && current->input_y >= y &&
+	       current->input_y < (y + h);
 }
 
 bool ui_input_changed() {
-	return current->input_dx != 0 || current->input_dy != 0 || current->input_wheel_delta != 0 || current->input_started || current->input_started_r || current->input_released || current->input_released_r || current->input_down || current->input_down_r || current->is_key_pressed;
+	return current->input_dx != 0 || current->input_dy != 0 || current->input_wheel_delta != 0 || current->input_started || current->input_started_r ||
+	       current->input_released || current->input_released_r || current->input_down || current->input_down_r || current->is_key_pressed;
 }
 
 void ui_end_input() {
@@ -533,36 +536,38 @@ void ui_end_input() {
 		}
 	}
 
-	current->is_key_pressed = false;
-	current->input_started = false;
-	current->input_started_r = false;
-	current->input_released = false;
-	current->input_released_r = false;
-	current->input_dx = 0;
-	current->input_dy = 0;
+	current->is_key_pressed    = false;
+	current->input_started     = false;
+	current->input_started_r   = false;
+	current->input_released    = false;
+	current->input_released_r  = false;
+	current->input_dx          = 0;
+	current->input_dy          = 0;
 	current->input_wheel_delta = 0;
-	current->pen_in_use = false;
+	current->pen_in_use        = false;
 	if (ui_key_repeat && current->is_key_down && iron_time() - ui_key_repeat_time > 0.05) {
-		if (current->key_code == IRON_KEY_BACKSPACE || current->key_code == IRON_KEY_DELETE || current->key_code == IRON_KEY_LEFT || current->key_code == IRON_KEY_RIGHT || current->key_code == IRON_KEY_UP || current->key_code == IRON_KEY_DOWN) {
-			ui_key_repeat_time = iron_time();
+		if (current->key_code == IRON_KEY_BACKSPACE || current->key_code == IRON_KEY_DELETE || current->key_code == IRON_KEY_LEFT ||
+		    current->key_code == IRON_KEY_RIGHT || current->key_code == IRON_KEY_UP || current->key_code == IRON_KEY_DOWN) {
+			ui_key_repeat_time      = iron_time();
 			current->is_key_pressed = true;
 		}
 	}
 	if (touch_hold_x > -1) {
-		current->input_x = touch_hold_x;
-		current->input_y = touch_hold_y;
-		touch_hold_x = -1;
-		touch_hold_y = -1;
+		current->input_x          = touch_hold_x;
+		current->input_y          = touch_hold_y;
+		touch_hold_x              = -1;
+		touch_hold_y              = -1;
 		current->input_released_r = true;
 	}
-	if (ui_touch_hold && current->input_down && current->input_x == current->input_started_x && current->input_y == current->input_started_y && current->input_started_time > 0 && iron_time() - current->input_started_time > 0.5) {
+	if (ui_touch_hold && current->input_down && current->input_x == current->input_started_x && current->input_y == current->input_started_y &&
+	    current->input_started_time > 0 && iron_time() - current->input_started_time > 0.5) {
 		current->touch_hold_activated = true;
-		current->input_released = true;
-		touch_hold_x = current->input_x;
-		touch_hold_y = current->input_y;
-		current->input_x = -1;
-		current->input_y = -1;
-		current->input_started_time = 0;
+		current->input_released       = true;
+		touch_hold_x                  = current->input_x;
+		touch_hold_y                  = current->input_y;
+		current->input_x              = -1;
+		current->input_y              = -1;
+		current->input_started_time   = 0;
 	}
 }
 
@@ -571,11 +576,13 @@ void ui_scroll(float delta) {
 }
 
 int ui_line_count(char *str) {
-	if (str == NULL) return 0;
-	int i = 0;
+	if (str == NULL)
+		return 0;
+	int i     = 0;
 	int count = 1;
 	while (str[i] != '\0') {
-		if (str[i] == '\n') count++;
+		if (str[i] == '\n')
+			count++;
 		i++;
 	}
 	return count;
@@ -583,12 +590,13 @@ int ui_line_count(char *str) {
 
 char *ui_extract_line(char *str, int line) {
 	static char temp[1024];
-	int pos = 0;
-	int len = strlen(str);
-	int line_i = 0;
+	int         pos    = 0;
+	int         len    = strlen(str);
+	int         line_i = 0;
 	for (int i = 0; i < len; ++i) {
 		if (str[i] == '\n') {
-			line_i++; continue;
+			line_i++;
+			continue;
 		}
 		if (line_i < line) {
 			continue;
@@ -612,8 +620,8 @@ char *ui_lower_case(char *dest, char *src) {
 }
 
 void ui_draw_tooltip_text() {
-	int line_count = ui_line_count(current->tooltip_text);
-	float tooltip_w = 0.0;
+	int   line_count = ui_line_count(current->tooltip_text);
+	float tooltip_w  = 0.0;
 	for (int i = 0; i < line_count; ++i) {
 		float line_tooltip_w = draw_string_width(current->ops->font, current->font_size, ui_extract_line(current->tooltip_text, i));
 		if (line_tooltip_w > tooltip_w) {
@@ -623,7 +631,7 @@ void ui_draw_tooltip_text() {
 	current->tooltip_x = fmin(current->tooltip_x, iron_window_width() - tooltip_w - 20);
 	draw_begin(NULL, false, 0);
 	float font_height = draw_font_height(current->ops->font, current->font_size);
-	float off = 0;
+	float off         = 0;
 	if (current->tooltip_img != NULL) {
 		float w = current->tooltip_img->width;
 		if (current->tooltip_img_max_width != 0 && w > current->tooltip_img_max_width) {
@@ -653,7 +661,7 @@ void ui_draw_tooltip_image() {
 	if (current->tooltip_img_max_width != 0 && w > current->tooltip_img_max_width) {
 		w = current->tooltip_img_max_width;
 	}
-	float h = current->tooltip_img->height * (w / current->tooltip_img->width);
+	float h            = current->tooltip_img->height * (w / current->tooltip_img->width);
 	current->tooltip_x = fmin(current->tooltip_x, iron_window_width() - w - 20);
 	current->tooltip_y = fmin(current->tooltip_y, iron_window_height() - h - 20);
 	draw_begin(NULL, false, 0);
@@ -671,10 +679,10 @@ void ui_draw_tooltip() {
 		draw_set_font(current->ops->font, current->font_size * 2);
 		sprintf(temp, "%f", round(current->scroll_handle->f * 100.0) / 100.0);
 		string_strip_trailing_zeros(temp);
-		char *text = temp;
+		char *text  = temp;
 		float x_off = draw_string_width(current->ops->font, current->font_size * 2.0, text) / 2.0;
 		float y_off = draw_font_height(current->ops->font, current->font_size * 2.0);
-		float x = fmin(fmax(current->slider_tooltip_x, current->input_x), current->slider_tooltip_x + current->slider_tooltip_w);
+		float x     = fmin(fmax(current->slider_tooltip_x, current->input_x), current->slider_tooltip_x + current->slider_tooltip_w);
 		draw_set_color(theme->BUTTON_COL);
 		draw_filled_rect(x - x_off, current->slider_tooltip_y - y_off, x_off * 2.0, y_off);
 		draw_set_color(theme->TEXT_COL);
@@ -686,8 +694,8 @@ void ui_draw_tooltip() {
 		draw_set_font(current->ops->font, current->font_size * 2.0);
 		float x_off = draw_string_width(current->ops->font, current->font_size * 2.0, current->text_selected) / 2.0;
 		float y_off = draw_font_height(current->ops->font, current->font_size * 2.0) / 2.0;
-		float x = iron_window_width() / 2.0;
-		float y = iron_window_height() / 3.0;
+		float x     = iron_window_width() / 2.0;
+		float y     = iron_window_height() / 3.0;
 		draw_set_color(theme->BUTTON_COL);
 		draw_filled_rect(x - x_off, y - y_off, x_off * 2.0, y_off * 2.0);
 		draw_set_color(theme->TEXT_COL);
@@ -698,12 +706,12 @@ void ui_draw_tooltip() {
 	if (current->tooltip_text[0] != '\0' || current->tooltip_img != NULL) {
 		if (ui_input_changed()) {
 			current->tooltip_shown = false;
-			current->tooltip_wait = current->input_dx == 0 && current->input_dy == 0; // Wait for movement before showing up again
+			current->tooltip_wait  = current->input_dx == 0 && current->input_dy == 0; // Wait for movement before showing up again
 		}
 		if (!current->tooltip_shown) {
 			current->tooltip_shown = true;
-			current->tooltip_x = current->input_x;
-			current->tooltip_time = iron_time();
+			current->tooltip_x     = current->input_x;
+			current->tooltip_time  = iron_time();
 		}
 		if (!current->tooltip_wait && iron_time() - current->tooltip_time > UI_TOOLTIP_DELAY()) {
 			if (current->tooltip_img != NULL) {
@@ -714,7 +722,8 @@ void ui_draw_tooltip() {
 			}
 		}
 	}
-	else current->tooltip_shown = false;
+	else
+		current->tooltip_shown = false;
 }
 
 void ui_draw_combo() {
@@ -724,14 +733,16 @@ void ui_draw_combo() {
 	draw_set_color(theme->SEPARATOR_COL);
 	draw_begin(NULL, false, 0);
 
-	float combo_h = (current->combo_selected_texts->length + (current->combo_selected_label != NULL ? 1 : 0) + (current->combo_search_bar ? 1 : 0)) * UI_ELEMENT_H();
-	float dist_top = current->combo_selected_y - combo_h - UI_ELEMENT_H() - current->window_border_top;
-	float dist_bottom = iron_window_height() - current->window_border_bottom - (current->combo_selected_y + combo_h );
-	bool unroll_up = dist_bottom < 0 && dist_bottom < dist_top;
+	float combo_h =
+	    (current->combo_selected_texts->length + (current->combo_selected_label != NULL ? 1 : 0) + (current->combo_search_bar ? 1 : 0)) * UI_ELEMENT_H();
+	float dist_top    = current->combo_selected_y - combo_h - UI_ELEMENT_H() - current->window_border_top;
+	float dist_bottom = iron_window_height() - current->window_border_bottom - (current->combo_selected_y + combo_h);
+	bool  unroll_up   = dist_bottom < 0 && dist_bottom < dist_top;
 
 	ui_begin_region(current, current->combo_selected_x, current->combo_selected_y, current->combo_selected_w);
 
-	float shadow_h = (current->combo_selected_texts_filtered + (current->combo_selected_label != NULL ? 1 : 0) + (current->combo_search_bar ? 1 : 0)) * UI_ELEMENT_H();
+	float shadow_h =
+	    (current->combo_selected_texts_filtered + (current->combo_selected_label != NULL ? 1 : 0) + (current->combo_search_bar ? 1 : 0)) * UI_ELEMENT_H();
 	if (unroll_up) {
 		float off = current->combo_selected_label != NULL ? UI_ELEMENT_H() / UI_SCALE() : 0.0;
 		ui_draw_shadow(current->_x, current->_y - shadow_h - off, current->_w, shadow_h);
@@ -741,9 +752,9 @@ void ui_draw_combo() {
 	}
 
 	if (current->is_key_pressed || current->input_wheel_delta != 0) {
-		int arrow_up = current->is_key_pressed && current->key_code == (unroll_up ? IRON_KEY_DOWN : IRON_KEY_UP);
+		int arrow_up   = current->is_key_pressed && current->key_code == (unroll_up ? IRON_KEY_DOWN : IRON_KEY_UP);
 		int arrow_down = current->is_key_pressed && current->key_code == (unroll_up ? IRON_KEY_UP : IRON_KEY_DOWN);
-		int wheel_up = (unroll_up && current->input_wheel_delta > 0) || (!unroll_up && current->input_wheel_delta < 0);
+		int wheel_up   = (unroll_up && current->input_wheel_delta > 0) || (!unroll_up && current->input_wheel_delta < 0);
 		int wheel_down = (unroll_up && current->input_wheel_delta < 0) || (!unroll_up && current->input_wheel_delta > 0);
 		if ((arrow_up || wheel_up) && current->combo_to_submit > 0) {
 			int step = 1;
@@ -800,12 +811,12 @@ void ui_draw_combo() {
 	}
 
 	current->input_enabled = true;
-	int _BUTTON_COL = theme->BUTTON_COL;
-	int _ELEMENT_OFFSET = theme->ELEMENT_OFFSET;
-	theme->ELEMENT_OFFSET = 0;
-	float unroll_right = current->_x + current->combo_selected_w * 2.0 < iron_window_width() - current->window_border_right ? 1 : -1;
-	bool reset_position = false;
-	char search[512];
+	int _BUTTON_COL        = theme->BUTTON_COL;
+	int _ELEMENT_OFFSET    = theme->ELEMENT_OFFSET;
+	theme->ELEMENT_OFFSET  = 0;
+	float unroll_right     = current->_x + current->combo_selected_w * 2.0 < iron_window_width() - current->window_border_right ? 1 : -1;
+	bool  reset_position   = false;
+	char  search[512];
 	search[0] = '\0';
 	if (current->combo_search_bar) {
 		if (unroll_up) {
@@ -821,9 +832,9 @@ void ui_draw_combo() {
 			ui_combo_first = true; // Keep combo open
 		}
 		if (ui_combo_first) {
-			#if !defined(IRON_ANDROID) && !defined(IRON_IOS)
+#if !defined(IRON_ANDROID) && !defined(IRON_IOS)
 			ui_start_text_edit(ui_combo_search_handle, UI_ALIGN_LEFT); // Focus search bar
-			#endif
+#endif
 		}
 		reset_position = ui_combo_search_handle->changed;
 	}
@@ -839,30 +850,29 @@ void ui_draw_combo() {
 
 		if (reset_position) { // The search has changed, select first entry that matches
 			current->combo_to_submit = current->combo_selected_handle->i = i;
-			current->submit_combo_handle = current->combo_selected_handle;
-			reset_position = false;
+			current->submit_combo_handle                                 = current->combo_selected_handle;
+			reset_position                                               = false;
 		}
 		if (unroll_up) {
 			current->_y -= UI_ELEMENT_H() * 2.0;
 		}
-		theme->BUTTON_COL = i == current->combo_selected_handle->i ?
-			theme->HIGHLIGHT_COL :
-			theme->SEPARATOR_COL;
+		theme->BUTTON_COL = i == current->combo_selected_handle->i ? theme->HIGHLIGHT_COL : theme->SEPARATOR_COL;
 		ui_fill(0, 0, current->_w / UI_SCALE(), UI_ELEMENT_H() / UI_SCALE(), theme->SEPARATOR_COL);
 		if (ui_button(current->combo_selected_texts->buffer[i], current->combo_selected_align, "")) {
-			current->combo_to_submit = i;
+			current->combo_to_submit     = i;
 			current->submit_combo_handle = current->combo_selected_handle;
 			if (current->combo_selected_window != NULL) {
 				current->combo_selected_window->redraws = 2;
 			}
 			break;
 		}
-		if (current->_y + UI_ELEMENT_H() > iron_window_height() - current->window_border_bottom || current->_y - UI_ELEMENT_H() * 2 < current->window_border_top) {
+		if (current->_y + UI_ELEMENT_H() > iron_window_height() - current->window_border_bottom ||
+		    current->_y - UI_ELEMENT_H() * 2 < current->window_border_top) {
 			current->_x += current->combo_selected_w * unroll_right; // Next column
 			current->_y = current->combo_selected_y;
 		}
 	}
-	theme->BUTTON_COL = _BUTTON_COL;
+	theme->BUTTON_COL     = _BUTTON_COL;
 	theme->ELEMENT_OFFSET = _ELEMENT_OFFSET;
 
 	if (current->combo_selected_label != NULL) { // Unroll down
@@ -887,10 +897,10 @@ void ui_draw_combo() {
 	if ((current->input_released || current->input_released_r || current->is_escape_down || current->is_return_down) && !ui_combo_first) {
 		if (current->input_released_r || current->is_escape_down) {
 			current->submit_combo_handle = current->combo_selected_handle;
-			current->combo_to_submit = current->combo_initial_value;
+			current->combo_to_submit     = current->combo_initial_value;
 		}
 		current->combo_selected_handle = NULL;
-		ui_combo_first = true;
+		ui_combo_first                 = true;
 	}
 	else {
 		ui_combo_first = false;
@@ -973,17 +983,17 @@ void ui_begin_region(ui_t *ui, int x, int y, int w) {
 		ui_bake_elements();
 		draw_begin(NULL, false, 0);
 	}
-	current->changed = false;
-	current->current_window = NULL;
+	current->changed         = false;
+	current->current_window  = NULL;
 	current->tooltip_text[0] = '\0';
-	current->tooltip_img = NULL;
-	current->_window_x = 0;
-	current->_window_y = 0;
-	current->_window_w = w;
-	current->_x = x;
-	current->_y = y;
-	current->_w = w;
-	current->_h = 0;
+	current->tooltip_img     = NULL;
+	current->_window_x       = 0;
+	current->_window_y       = 0;
+	current->_window_w       = w;
+	current->_x              = x;
+	current->_y              = y;
+	current->_w              = w;
+	current->_h              = 0;
 }
 
 void ui_end_region() {
@@ -992,40 +1002,41 @@ void ui_end_region() {
 
 void ui_set_cursor_to_input(int align) {
 	float off = align == UI_ALIGN_LEFT ? UI_TEXT_OFFSET() : current->_w - draw_string_width(current->ops->font, current->font_size, current->text_selected);
-	float x = current->input_x - (current->_window_x + current->_x + off);
+	float x   = current->input_x - (current->_window_x + current->_x + off);
 	current->cursor_x = 0;
-	while (current->cursor_x < strlen(current->text_selected) && draw_sub_string_width(current->ops->font, current->font_size, current->text_selected, 0, current->cursor_x) < x) {
+	while (current->cursor_x < strlen(current->text_selected) &&
+	       draw_sub_string_width(current->ops->font, current->font_size, current->text_selected, 0, current->cursor_x) < x) {
 		current->cursor_x++;
 	}
 	current->highlight_anchor = current->cursor_x;
 }
 
 void ui_start_text_edit(ui_handle_t *handle, int align) {
-	current->is_typing = true;
+	current->is_typing          = true;
 	current->submit_text_handle = current->text_selected_handle;
 	strcpy(current->text_to_submit, current->text_selected);
 	current->text_selected_handle = handle;
 	strcpy(current->text_selected, handle->text);
 	current->cursor_x = strlen(handle->text);
 	if (current->tab_pressed) {
-		current->tab_pressed = false;
+		current->tab_pressed    = false;
 		current->is_key_pressed = false; // Prevent text deselect after tab press
 	}
 	else if (!current->highlight_on_select) { // Set cursor to click location
 		ui_set_cursor_to_input(align);
 	}
 	current->tab_pressed_handle = handle;
-	current->highlight_anchor = current->highlight_on_select ? 0 : current->cursor_x;
+	current->highlight_anchor   = current->highlight_on_select ? 0 : current->cursor_x;
 	iron_keyboard_show();
 }
 
 void ui_submit_text_edit() {
-	current->changed = strcmp(current->submit_text_handle->text, current->text_to_submit) != 0;
+	current->changed                     = strcmp(current->submit_text_handle->text, current->text_to_submit) != 0;
 	current->submit_text_handle->changed = current->changed;
-	current->submit_text_handle->text = string_copy(current->text_to_submit);
-	current->submit_text_handle = NULL;
-	current->text_to_submit[0] = '\0';
-	current->text_selected[0] = '\0';
+	current->submit_text_handle->text    = string_copy(current->text_to_submit);
+	current->submit_text_handle          = NULL;
+	current->text_to_submit[0]           = '\0';
+	current->text_selected[0]            = '\0';
 }
 
 void keyboard_up_listener(int key_code);
@@ -1037,15 +1048,15 @@ void ui_deselect_text(ui_t *ui) {
 	ui->submit_text_handle = ui->text_selected_handle;
 	strcpy(ui->text_to_submit, ui->text_selected);
 	ui->text_selected_handle = NULL;
-	ui->is_typing = false;
+	ui->is_typing            = false;
 	if (ui->current_window != NULL) {
 		ui->current_window->redraws = 2;
 	}
 	iron_keyboard_hide();
 	ui->highlight_anchor = ui->cursor_x;
-	#ifdef IRON_IOS
+#ifdef IRON_IOS
 	keyboard_up_listener(IRON_KEY_SHIFT);
-	#endif
+#endif
 }
 
 void ui_remove_char_at(char *str, int at) {
@@ -1079,7 +1090,7 @@ void ui_insert_chars_at(char *str, int at, char *cs) {
 void ui_update_text_edit(int align, bool editable, bool live_update) {
 	char text[256];
 	strcpy(text, current->text_selected);
-	if (current->is_key_pressed) { // Process input
+	if (current->is_key_pressed) {                // Process input
 		if (current->key_code == IRON_KEY_LEFT) { // Move cursor
 			if (current->cursor_x > 0) {
 				current->cursor_x--;
@@ -1138,24 +1149,20 @@ void ui_update_text_edit(int align, bool editable, bool live_update) {
 			current->cursor_x = strlen(text);
 		}
 		else if (current->is_ctrl_down && current->is_a_down) { // Select all
-			current->cursor_x = strlen(text);
+			current->cursor_x         = strlen(text);
 			current->highlight_anchor = 0;
 		}
 		else if (editable && // Write
-				 current->key_code != IRON_KEY_SHIFT &&
-				 current->key_code != IRON_KEY_CAPS_LOCK &&
-				 current->key_code != IRON_KEY_CONTROL &&
-				 current->key_code != IRON_KEY_META &&
-				 current->key_code != IRON_KEY_ALT &&
-				 current->key_code != IRON_KEY_UP &&
-				 current->key_code != IRON_KEY_DOWN &&
-				 current->key_char >= 32) {
+		         current->key_code != IRON_KEY_SHIFT && current->key_code != IRON_KEY_CAPS_LOCK && current->key_code != IRON_KEY_CONTROL &&
+		         current->key_code != IRON_KEY_META && current->key_code != IRON_KEY_ALT && current->key_code != IRON_KEY_UP &&
+		         current->key_code != IRON_KEY_DOWN && current->key_char >= 32) {
 			ui_remove_chars_at(text, current->highlight_anchor, current->cursor_x - current->highlight_anchor);
 			ui_insert_char_at(text, current->highlight_anchor, current->key_char);
 
 			current->cursor_x = current->cursor_x + 1 > strlen(text) ? strlen(text) : current->cursor_x + 1;
 		}
-		bool selecting = current->is_shift_down && (current->key_code == IRON_KEY_LEFT || current->key_code == IRON_KEY_RIGHT || current->key_code == IRON_KEY_SHIFT);
+		bool selecting =
+		    current->is_shift_down && (current->key_code == IRON_KEY_LEFT || current->key_code == IRON_KEY_RIGHT || current->key_code == IRON_KEY_SHIFT);
 		// isCtrlDown && isAltDown is the condition for AltGr was pressed
 		// AltGr is part of the German keyboard layout and part of key combinations like AltGr + e -> €
 		if (!selecting && (!current->is_ctrl_down || (current->is_ctrl_down && current->is_alt_down))) {
@@ -1168,8 +1175,8 @@ void ui_update_text_edit(int align, bool editable, bool live_update) {
 		ui_insert_chars_at(text, current->highlight_anchor, ui_text_to_paste);
 		current->cursor_x += strlen(ui_text_to_paste);
 		current->highlight_anchor = current->cursor_x;
-		ui_text_to_paste[0] = 0;
-		ui_is_paste = false;
+		ui_text_to_paste[0]       = 0;
+		ui_is_paste               = false;
 	}
 	if (current->highlight_anchor == current->cursor_x) {
 		strcpy(ui_text_to_copy, text); // Copy
@@ -1197,21 +1204,21 @@ void ui_update_text_edit(int align, bool editable, bool live_update) {
 		}
 	}
 
-	float off = UI_TEXT_OFFSET();
-	float line_height = UI_ELEMENT_H();
+	float off           = UI_TEXT_OFFSET();
+	float line_height   = UI_ELEMENT_H();
 	float cursor_height = line_height - current->button_offset_y * 3.0;
 	// Draw highlight
 	if (current->highlight_anchor != current->cursor_x) {
 		float istart = current->cursor_x;
-		float iend = current->highlight_anchor;
+		float iend   = current->highlight_anchor;
 		if (current->highlight_anchor < current->cursor_x) {
 			istart = current->highlight_anchor;
-			iend = current->cursor_x;
+			iend   = current->cursor_x;
 		}
 
-		float hlstrw = draw_sub_string_width(current->ops->font, current->font_size, text, istart, iend);
+		float hlstrw    = draw_sub_string_width(current->ops->font, current->font_size, text, istart, iend);
 		float start_off = draw_sub_string_width(current->ops->font, current->font_size, text, 0, istart);
-		float hl_start = align == UI_ALIGN_LEFT ? current->_x + start_off + off : current->_x + current->_w - hlstrw - off;
+		float hl_start  = align == UI_ALIGN_LEFT ? current->_x + start_off + off : current->_x + current->_w - hlstrw - off;
 		if (align == UI_ALIGN_RIGHT) {
 			hl_start -= draw_sub_string_width(current->ops->font, current->font_size, text, iend, strlen(text));
 		}
@@ -1220,17 +1227,17 @@ void ui_update_text_edit(int align, bool editable, bool live_update) {
 	}
 
 	// Draw cursor
-	int str_start = align == UI_ALIGN_LEFT ? 0 : current->cursor_x;
-	int str_length = align == UI_ALIGN_LEFT ? current->cursor_x : (strlen(text) - current->cursor_x);
-	float strw = draw_sub_string_width(current->ops->font, current->font_size, text, str_start, str_length);
-	float cursor_x = align == UI_ALIGN_LEFT ? current->_x + strw + off : current->_x + current->_w - strw - off;
+	int   str_start  = align == UI_ALIGN_LEFT ? 0 : current->cursor_x;
+	int   str_length = align == UI_ALIGN_LEFT ? current->cursor_x : (strlen(text) - current->cursor_x);
+	float strw       = draw_sub_string_width(current->ops->font, current->font_size, text, str_start, str_length);
+	float cursor_x   = align == UI_ALIGN_LEFT ? current->_x + strw + off : current->_x + current->_w - strw - off;
 	draw_set_color(theme->TEXT_COL); // Cursor
 	draw_filled_rect(cursor_x, current->_y + current->button_offset_y * 1.5, 1.0 * UI_SCALE(), cursor_height);
 
 	strcpy(current->text_selected, text);
 	if (live_update && current->text_selected_handle != NULL) {
 		current->text_selected_handle->changed = strcmp(current->text_selected_handle->text, current->text_selected) != 0;
-		current->text_selected_handle->text = string_copy(current->text_selected);
+		current->text_selected_handle->text    = string_copy(current->text_selected);
 	}
 }
 
@@ -1250,13 +1257,13 @@ void ui_draw_tabs() {
 	if (current->current_window == NULL) {
 		return;
 	}
-	float tab_x = 0.0;
-	float tab_y = 0.0;
-	float tab_h_min = UI_BUTTON_H() * 1.1;
-	float header_h = current->current_window->drag_enabled ? UI_HEADER_DRAG_H() : 0;
-	float tab_h = (theme->FULL_TABS && current->tab_vertical) ? ((current->_window_h - header_h) / current->tab_count) : tab_h_min;
-	float orig_y = current->_y;
-	current->_y = header_h;
+	float tab_x                  = 0.0;
+	float tab_y                  = 0.0;
+	float tab_h_min              = UI_BUTTON_H() * 1.1;
+	float header_h               = current->current_window->drag_enabled ? UI_HEADER_DRAG_H() : 0;
+	float tab_h                  = (theme->FULL_TABS && current->tab_vertical) ? ((current->_window_h - header_h) / current->tab_count) : tab_h_min;
+	float orig_y                 = current->_y;
+	current->_y                  = header_h;
 	current->tab_handle->changed = false;
 
 	if (current->is_ctrl_down && current->is_tab_down) { // Next tab
@@ -1265,7 +1272,7 @@ void ui_draw_tabs() {
 			current->tab_handle->i = 0;
 		}
 		current->tab_handle->changed = true;
-		current->is_tab_down = false;
+		current->is_tab_down         = false;
 	}
 
 	if (current->tab_handle->i >= current->tab_count) {
@@ -1288,26 +1295,28 @@ void ui_draw_tabs() {
 		draw_filled_rect(current->button_offset_y, current->_y + current->button_offset_y + tab_h + 2, current->_window_w - current->button_offset_y * 2.0, 1);
 	}
 
-	float base_y = current->tab_vertical ? current->_y : current->_y + 2;
-	bool _enabled = current->enabled;
+	float base_y   = current->tab_vertical ? current->_y : current->_y + 2;
+	bool  _enabled = current->enabled;
 
 	for (int i = 0; i < current->tab_count; ++i) {
 		current->enabled = current->tab_enabled[i];
-		current->_x = tab_x;
-		current->_y = base_y + tab_y;
-		current->_w = current->tab_vertical ? (UI_ELEMENT_W() - 1 * UI_SCALE()) :
-			 		  theme->FULL_TABS ? (current->_window_w / current->tab_count) :
-					  (draw_string_width(current->ops->font, current->font_size, current->tab_names[i]) + current->button_offset_y * 2.0 + 18.0 * UI_SCALE());
+		current->_x      = tab_x;
+		current->_y      = base_y + tab_y;
+		current->_w =
+		    current->tab_vertical ? (UI_ELEMENT_W() - 1 * UI_SCALE())
+		    : theme->FULL_TABS
+		        ? (current->_window_w / current->tab_count)
+		        : (draw_string_width(current->ops->font, current->font_size, current->tab_names[i]) + current->button_offset_y * 2.0 + 18.0 * UI_SCALE());
 		if (current->tab_align_right) {
 			current->_x = current->_window_w - current->_w - current->_x;
 		}
 		bool released = ui_get_released(tab_h);
-		bool started = ui_get_started(tab_h);
-		bool pushed = ui_get_pushed(tab_h);
-		bool hover = ui_get_hover(tab_h);
+		bool started  = ui_get_started(tab_h);
+		bool pushed   = ui_get_pushed(tab_h);
+		bool hover    = ui_get_hover(tab_h);
 		if (ui_on_tab_drop != NULL) {
 			if (started) {
-				current->drag_tab_handle = current->tab_handle;
+				current->drag_tab_handle   = current->tab_handle;
 				current->drag_tab_position = i;
 			}
 			if (current->drag_tab_handle != NULL && hover && current->input_released) {
@@ -1316,20 +1325,20 @@ void ui_draw_tabs() {
 			}
 		}
 		if (released) {
-			ui_handle_t *h = ui_nest(current->tab_handle, current->tab_handle->i); // Restore tab scroll
-			h->scroll_offset = current->current_window->scroll_offset;
-			h = ui_nest(current->tab_handle, i);
-			current->tab_scroll = h->scroll_offset;
-			current->tab_handle->i = i; // Set new tab
+			ui_handle_t *h                   = ui_nest(current->tab_handle, current->tab_handle->i); // Restore tab scroll
+			h->scroll_offset                 = current->current_window->scroll_offset;
+			h                                = ui_nest(current->tab_handle, i);
+			current->tab_scroll              = h->scroll_offset;
+			current->tab_handle->i           = i; // Set new tab
 			current->current_window->redraws = 3;
-			current->tab_handle->changed = true;
+			current->tab_handle->changed     = true;
 		}
 		bool selected = current->tab_handle->i == i;
 
-		draw_set_color((pushed || hover) ? theme->HOVER_COL :
-			(current->tab_colors[i] != -1 && current->tab_colors[i] != -2) ? current->tab_colors[i] :
-			selected ? theme->WINDOW_BG_COL :
-			theme->SEPARATOR_COL);
+		draw_set_color((pushed || hover)                                                ? theme->HOVER_COL
+		               : (current->tab_colors[i] != -1 && current->tab_colors[i] != -2) ? current->tab_colors[i]
+		               : selected                                                       ? theme->WINDOW_BG_COL
+		                                                                                : theme->SEPARATOR_COL);
 		if (current->tab_vertical) {
 			tab_y += tab_h + 1;
 		}
@@ -1344,7 +1353,8 @@ void ui_draw_tabs() {
 		else if (!selected) {
 			ui_fade_color(0.65);
 		}
-		ui_draw_string(current->tab_names[i], theme->TEXT_OFFSET, (tab_h - tab_h_min) / 2.0, (theme->FULL_TABS || !current->tab_vertical) ? UI_ALIGN_CENTER : UI_ALIGN_LEFT, true);
+		ui_draw_string(current->tab_names[i], theme->TEXT_OFFSET, (tab_h - tab_h_min) / 2.0,
+		               (theme->FULL_TABS || !current->tab_vertical) ? UI_ALIGN_CENTER : UI_ALIGN_LEFT, true);
 
 		if (selected) { // Hide underline for active tab
 			if (current->tab_vertical) {
@@ -1391,21 +1401,17 @@ void ui_draw_arrow(bool selected) {
 	float y = current->_y + current->arrow_offset_y;
 	draw_set_color(theme->TEXT_COL);
 	if (selected) {
-		draw_filled_triangle(x, y,
-						 x + UI_ARROW_SIZE(), y,
-						 x + UI_ARROW_SIZE() / 2.0, y + UI_ARROW_SIZE());
+		draw_filled_triangle(x, y, x + UI_ARROW_SIZE(), y, x + UI_ARROW_SIZE() / 2.0, y + UI_ARROW_SIZE());
 	}
 	else {
-		draw_filled_triangle(x, y,
-						 x, y + UI_ARROW_SIZE(),
-						 x + UI_ARROW_SIZE(), y + UI_ARROW_SIZE() / 2.0);
+		draw_filled_triangle(x, y, x, y + UI_ARROW_SIZE(), x + UI_ARROW_SIZE(), y + UI_ARROW_SIZE() / 2.0);
 	}
 }
 
 void ui_draw_tree(bool selected) {
 	float SIGN_W = 7.0 * UI_SCALE();
-	float x = current->_x + current->arrow_offset_x + 1;
-	float y = current->_y + current->arrow_offset_y + 1;
+	float x      = current->_x + current->arrow_offset_x + 1;
+	float y      = current->_y + current->arrow_offset_y + 1;
 	draw_set_color(theme->TEXT_COL);
 	if (selected) {
 		draw_filled_rect(x, y + SIGN_W / 2.0 - 1, SIGN_W, SIGN_W / 8.0);
@@ -1465,33 +1471,33 @@ void ui_draw_slider(float value, float from, float to, bool filled, bool hover) 
 	}
 
 	draw_set_color(hover ? theme->HOVER_COL : theme->BUTTON_COL);
-	float offset = (value - from) / (to - from);
-	float bar_w = 8.0 * UI_SCALE(); // Unfilled bar
+	float offset   = (value - from) / (to - from);
+	float bar_w    = 8.0 * UI_SCALE(); // Unfilled bar
 	float slider_x = filled ? x : x + (w - bar_w) * offset;
-	slider_x = fmax(fmin(slider_x, x + (w - bar_w)), x);
+	slider_x       = fmax(fmin(slider_x, x + (w - bar_w)), x);
 	float slider_w = filled ? w * offset : bar_w;
-	slider_w = fmax(fmin(slider_w, w), 0);
+	slider_w       = fmax(fmin(slider_w, w), 0);
 	ui_draw_rect(true, slider_x, y, slider_w, UI_BUTTON_H());
 }
 
 void ui_set_scale(float factor) {
-	current->ops->scale_factor = factor;
-	current->font_size = UI_FONT_SIZE();
-	float font_height = draw_font_height(current->ops->font, current->font_size);
-	current->font_offset_y = (UI_ELEMENT_H() - font_height) / 2.0; // Precalculate offsets
-	current->arrow_offset_y = (UI_ELEMENT_H() - UI_ARROW_SIZE()) / 2.0;
-	current->arrow_offset_x = current->arrow_offset_y;
-	current->title_offset_x = (current->arrow_offset_x * 2.0 + UI_ARROW_SIZE()) / UI_SCALE();
-	current->button_offset_y = (UI_ELEMENT_H() - UI_BUTTON_H()) / 2.0;
-	current->check_offset_y = (UI_ELEMENT_H() - UI_CHECK_SIZE()) / 2.0;
-	current->check_offset_x = current->check_offset_y;
+	current->ops->scale_factor     = factor;
+	current->font_size             = UI_FONT_SIZE();
+	float font_height              = draw_font_height(current->ops->font, current->font_size);
+	current->font_offset_y         = (UI_ELEMENT_H() - font_height) / 2.0; // Precalculate offsets
+	current->arrow_offset_y        = (UI_ELEMENT_H() - UI_ARROW_SIZE()) / 2.0;
+	current->arrow_offset_x        = current->arrow_offset_y;
+	current->title_offset_x        = (current->arrow_offset_x * 2.0 + UI_ARROW_SIZE()) / UI_SCALE();
+	current->button_offset_y       = (UI_ELEMENT_H() - UI_BUTTON_H()) / 2.0;
+	current->check_offset_y        = (UI_ELEMENT_H() - UI_CHECK_SIZE()) / 2.0;
+	current->check_offset_x        = current->check_offset_y;
 	current->check_select_offset_y = (UI_CHECK_SIZE() - UI_CHECK_SELECT_SIZE()) / 2.0;
 	current->check_select_offset_x = current->check_select_offset_y;
-	current->radio_offset_y = (UI_ELEMENT_H() - UI_CHECK_SIZE()) / 2.0;
-	current->radio_offset_x = current->radio_offset_y;
+	current->radio_offset_y        = (UI_ELEMENT_H() - UI_CHECK_SIZE()) / 2.0;
+	current->radio_offset_x        = current->radio_offset_y;
 	current->radio_select_offset_y = (UI_CHECK_SIZE() - UI_CHECK_SELECT_SIZE()) / 2.0;
 	current->radio_select_offset_x = current->radio_select_offset_y;
-	current->elements_baked = false;
+	current->elements_baked        = false;
 }
 
 void ui_init(ui_t *ui, ui_options_t *ops) {
@@ -1499,18 +1505,18 @@ void ui_init(ui_t *ui, ui_options_t *ops) {
 	ui->ops = ops;
 	ui_set_current(ui);
 	ui_set_scale(ops->scale_factor);
-	current->enabled = true;
-	current->scroll_enabled = true;
+	current->enabled             = true;
+	current->scroll_enabled      = true;
 	current->highlight_on_select = true;
-	current->tab_switch_enabled = true;
-	current->input_enabled = true;
-	current->current_ratio = -1;
-	current->image_scroll_align = true;
-	current->window_ended = true;
-	current->restore_x = -1;
-	current->restore_y = -1;
-	current->input_x = -1;
-	current->input_y = -1;
+	current->tab_switch_enabled  = true;
+	current->input_enabled       = true;
+	current->current_ratio       = -1;
+	current->image_scroll_align  = true;
+	current->window_ended        = true;
+	current->restore_x           = -1;
+	current->restore_y           = -1;
+	current->input_x             = -1;
+	current->input_y             = -1;
 	if (ui_combo_search_handle == NULL) {
 		ui_combo_search_handle = ui_handle_create();
 		gc_root(ui_combo_search_handle);
@@ -1537,10 +1543,10 @@ void ui_begin(ui_t *ui) {
 		ui_bake_elements();
 	}
 	current->changed = false;
-	current->_x = 0; // Reset cursor
-	current->_y = 0;
-	current->_w = 0;
-	current->_h = 0;
+	current->_x      = 0; // Reset cursor
+	current->_y      = 0;
+	current->_w      = 0;
+	current->_h      = 0;
 }
 
 // Sticky region ignores window scrolling
@@ -1553,7 +1559,7 @@ void ui_begin_sticky() {
 }
 
 void ui_end_sticky() {
-	current->sticky = false;
+	current->sticky  = false;
 	current->scissor = true;
 	gpu_scissor(0, current->_y, current->_window_w, current->_window_h - current->_y);
 	current->window_header_h += current->_y - current->window_header_h;
@@ -1566,7 +1572,8 @@ void ui_end_sticky() {
 
 void ui_end_window() {
 	ui_handle_t *handle = current->current_window;
-	if (handle == NULL) return;
+	if (handle == NULL)
+		return;
 	if (handle->redraws > 0 || current->is_scrolling) {
 		if (current->scissor) {
 			current->scissor = false;
@@ -1582,13 +1589,14 @@ void ui_end_window() {
 			draw_filled_rect(0, 0, current->_window_w, UI_HEADER_DRAG_H());
 		}
 
-		float window_size = handle->layout == UI_LAYOUT_VERTICAL ? current->_window_h - current->window_header_h : current->_window_w - current->window_header_w; // Exclude header
-		float full_size = handle->layout == UI_LAYOUT_VERTICAL ? current->_y - current->window_header_h : current->_x - current->window_header_w;
+		float window_size = handle->layout == UI_LAYOUT_VERTICAL ? current->_window_h - current->window_header_h
+		                                                         : current->_window_w - current->window_header_w; // Exclude header
+		float full_size   = handle->layout == UI_LAYOUT_VERTICAL ? current->_y - current->window_header_h : current->_x - current->window_header_w;
 		full_size -= handle->scroll_offset;
 
 		if (full_size < window_size || !current->scroll_enabled) { // Disable scrollbar
 			handle->scroll_enabled = false;
-			handle->scroll_offset = 0;
+			handle->scroll_offset  = 0;
 		}
 		else { // Draw window scrollbar if necessary
 			if (handle->layout == UI_LAYOUT_VERTICAL) {
@@ -1596,34 +1604,36 @@ void ui_end_window() {
 			}
 			if (current->tab_scroll < 0) { // Restore tab
 				handle->scroll_offset = current->tab_scroll;
-				current->tab_scroll = 0;
+				current->tab_scroll   = 0;
 			}
-			float wy = current->_window_y + current->window_header_h;
+			float wy               = current->_window_y + current->window_header_h;
 			float amount_to_scroll = full_size - window_size;
-			float amount_scrolled = -handle->scroll_offset;
-			float ratio = amount_scrolled / amount_to_scroll;
-			float bar_h = window_size * fabs(window_size / full_size);
-			bar_h = fmax(bar_h, UI_ELEMENT_H());
+			float amount_scrolled  = -handle->scroll_offset;
+			float ratio            = amount_scrolled / amount_to_scroll;
+			float bar_h            = window_size * fabs(window_size / full_size);
+			bar_h                  = fmax(bar_h, UI_ELEMENT_H());
 
 			float total_scrollable_area = window_size - bar_h;
-			float e = amount_to_scroll / total_scrollable_area;
-			float bar_y = total_scrollable_area * ratio + current->window_header_h;
-			bool bar_focus = ui_input_in_rect(current->_window_x + current->_window_w - UI_SCROLL_W(), bar_y + current->_window_y, UI_SCROLL_W(), bar_h);
+			float e                     = amount_to_scroll / total_scrollable_area;
+			float bar_y                 = total_scrollable_area * ratio + current->window_header_h;
+			bool  bar_focus = ui_input_in_rect(current->_window_x + current->_window_w - UI_SCROLL_W(), bar_y + current->_window_y, UI_SCROLL_W(), bar_h);
 
 			if (handle->scroll_enabled && current->input_started && bar_focus) { // Start scrolling
 				current->scroll_handle = handle;
-				current->is_scrolling = true;
+				current->is_scrolling  = true;
 			}
 
 			float scroll_delta = current->input_wheel_delta;
-			if (handle->scroll_enabled && ui_touch_scroll && current->input_down && current->input_dy != 0 && current->input_x > current->_window_x + current->window_header_w && current->input_y > current->_window_y + current->window_header_h) {
+			if (handle->scroll_enabled && ui_touch_scroll && current->input_down && current->input_dy != 0 &&
+			    current->input_x > current->_window_x + current->window_header_w && current->input_y > current->_window_y + current->window_header_h) {
 				current->is_scrolling = true;
-				scroll_delta = -current->input_dy / 20.0;
+				scroll_delta          = -current->input_dy / 20.0;
 			}
 			if (handle == current->scroll_handle) { // Scroll
 				ui_scroll(current->input_dy * e);
 			}
-			else if (scroll_delta != 0 && current->combo_selected_handle == NULL && ui_input_in_rect(current->_window_x, wy, current->_window_w, window_size)) { // Wheel
+			else if (scroll_delta != 0 && current->combo_selected_handle == NULL &&
+			         ui_input_in_rect(current->_window_x, wy, current->_window_w, window_size)) { // Wheel
 				ui_scroll(scroll_delta * UI_ELEMENT_H());
 			}
 
@@ -1637,8 +1647,8 @@ void ui_end_window() {
 
 			if (handle->layout == UI_LAYOUT_VERTICAL) {
 				draw_set_color(theme->BUTTON_COL); // Bar
-				bool scrollbar_focus = ui_input_in_rect(current->_window_x + current->_window_w - UI_SCROLL_W(), wy, UI_SCROLL_W(), window_size);
-				float bar_w = (scrollbar_focus || handle == current->scroll_handle) ? UI_SCROLL_W() : UI_SCROLL_MINI_W();
+				bool  scrollbar_focus = ui_input_in_rect(current->_window_x + current->_window_w - UI_SCROLL_W(), wy, UI_SCROLL_W(), window_size);
+				float bar_w           = (scrollbar_focus || handle == current->scroll_handle) ? UI_SCROLL_W() : UI_SCROLL_MINI_W();
 				ui_draw_rect(true, current->_window_w - bar_w - current->scroll_align, bar_y, bar_w, bar_h);
 			}
 		}
@@ -1668,8 +1678,8 @@ void ui_end_window() {
 }
 
 bool ui_window_dirty(ui_handle_t *handle, int x, int y, int w, int h) {
-	float wx = x + handle->drag_x;
-	float wy = y + handle->drag_y;
+	float wx            = x + handle->drag_x;
+	float wy            = y + handle->drag_y;
 	float input_changed = ui_input_in_rect(wx, wy, w, h) && ui_input_changed();
 	return current->always_redraw || current->is_scrolling || input_changed;
 }
@@ -1682,12 +1692,12 @@ bool ui_window(ui_handle_t *handle, int x, int y, int w, int h, bool drag) {
 	if (!current->window_ended) {
 		ui_end_window(); // End previous window if necessary
 	}
-	current->window_ended = false;
-	current->current_window = handle;
-	current->_window_x = x + handle->drag_x;
-	current->_window_y = y + handle->drag_y;
-	current->_window_w = w;
-	current->_window_h = h;
+	current->window_ended    = false;
+	current->current_window  = handle;
+	current->_window_x       = x + handle->drag_x;
+	current->_window_y       = y + handle->drag_y;
+	current->_window_w       = w;
+	current->_window_h       = h;
 	current->window_header_w = 0;
 	current->window_header_h = 0;
 
@@ -1725,11 +1735,11 @@ bool ui_window(ui_handle_t *handle, int x, int y, int w, int h, bool drag) {
 	if (handle->layout == UI_LAYOUT_HORIZONTAL) {
 		w = UI_ELEMENT_W();
 	}
-	current->_w = !handle->scroll_enabled ? w : w - UI_SCROLL_W(); // Exclude scrollbar if present
-	current->_h = h;
+	current->_w              = !handle->scroll_enabled ? w : w - UI_SCROLL_W(); // Exclude scrollbar if present
+	current->_h              = h;
 	current->tooltip_text[0] = 0;
-	current->tooltip_img = NULL;
-	current->tab_count = 0;
+	current->tooltip_img     = NULL;
+	current->tab_count       = 0;
 
 	if (theme->FILL_WINDOW_BG) {
 		draw_begin(&handle->texture, true, theme->WINDOW_BG_COL);
@@ -1760,26 +1770,23 @@ bool ui_window(ui_handle_t *handle, int x, int y, int w, int h, bool drag) {
 	return true;
 }
 
-bool ui_button(char *text, int align, char *label/*, gpu_texture_t *icon, int sx, int sy, int sw, int sh*/) {
+bool ui_button(char *text, int align, char *label /*, gpu_texture_t *icon, int sx, int sy, int sw, int sh*/) {
 	if (!ui_is_visible(UI_ELEMENT_H())) {
 		ui_end_element();
 		return false;
 	}
 	bool released = ui_get_released(UI_ELEMENT_H());
-	bool pushed = ui_get_pushed(UI_ELEMENT_H());
-	bool hover = ui_get_hover(UI_ELEMENT_H());
+	bool pushed   = ui_get_pushed(UI_ELEMENT_H());
+	bool hover    = ui_get_hover(UI_ELEMENT_H());
 	if (released) {
 		current->changed = true;
 	}
 
-	draw_set_color(pushed ? theme->PRESSED_COL :
-		(!theme->FILL_BUTTON_BG && hover) ? theme->HIGHLIGHT_COL :
-				 	  hover ? theme->HOVER_COL :
-				 	  theme->BUTTON_COL);
+	draw_set_color(pushed ? theme->PRESSED_COL : (!theme->FILL_BUTTON_BG && hover) ? theme->HIGHLIGHT_COL : hover ? theme->HOVER_COL : theme->BUTTON_COL);
 
 	if (theme->FILL_BUTTON_BG || pushed || hover) {
-		ui_draw_rect(true, current->_x + current->button_offset_y, current->_y + current->button_offset_y,
-			current->_w - current->button_offset_y * 2, UI_BUTTON_H());
+		ui_draw_rect(true, current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w - current->button_offset_y * 2,
+		             UI_BUTTON_H());
 	}
 
 	draw_set_color(theme->TEXT_COL);
@@ -1791,8 +1798,8 @@ bool ui_button(char *text, int align, char *label/*, gpu_texture_t *icon, int sx
 
 	/*
 	if (icon != NULL) {
-		draw_set_color(0xffffffff);
-		draw_scaled_sub_image(icon, sx, sy, sw, sh, _x + current->button_offset_y, _y - 1, sw, sh);
+	    draw_set_color(0xffffffff);
+	    draw_scaled_sub_image(icon, sx, sy, sw, sh, _x + current->button_offset_y, _y - 1, sw, sh);
 	}
 	*/
 
@@ -1817,13 +1824,14 @@ int ui_text(char *text, int align, int bg) {
 		ui_end_element_of_size(h + UI_ELEMENT_OFFSET());
 		return UI_STATE_IDLE;
 	}
-	bool started = ui_get_started(h);
-	bool down = ui_get_pushed(h);
+	bool started  = ui_get_started(h);
+	bool down     = ui_get_pushed(h);
 	bool released = ui_get_released(h);
-	bool hover = ui_get_hover(h);
+	bool hover    = ui_get_hover(h);
 	if (bg != 0x0000000) {
 		draw_set_color(bg);
-		draw_filled_rect(current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w - current->button_offset_y * 2, UI_BUTTON_H());
+		draw_filled_rect(current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w - current->button_offset_y * 2,
+		                 UI_BUTTON_H());
 	}
 	draw_set_color(theme->TEXT_COL);
 	ui_draw_string(text, theme->TEXT_OFFSET, 0, align, true);
@@ -1834,8 +1842,8 @@ int ui_text(char *text, int align, int bg) {
 
 bool ui_tab(ui_handle_t *handle, char *text, bool vertical, uint32_t color, bool align_right) {
 	if (current->tab_count == 0) { // First tab
-		current->tab_handle = handle;
-		current->tab_vertical = vertical;
+		current->tab_handle      = handle;
+		current->tab_vertical    = vertical;
 		current->tab_align_right = align_right;
 		current->_w -= current->tab_vertical ? UI_ELEMENT_OFFSET() + UI_ELEMENT_W() - 1 * UI_SCALE() : 0; // Shrink window area by width of vertical tabs
 		if (vertical) {
@@ -1859,7 +1867,7 @@ bool ui_tab(ui_handle_t *handle, char *text, bool vertical, uint32_t color, bool
 	}
 	assert(current->tab_count < 16);
 	strcpy(current->tab_names[current->tab_count], text);
-	current->tab_colors[current->tab_count] = color;
+	current->tab_colors[current->tab_count]  = color;
 	current->tab_enabled[current->tab_count] = current->enabled;
 	current->tab_count++;
 	return handle->i == current->tab_count - 1;
@@ -1871,7 +1879,7 @@ bool ui_panel(ui_handle_t *handle, char *text, bool is_tree, bool filled) {
 		return handle->b;
 	}
 	if (ui_get_released(UI_ELEMENT_H())) {
-		handle->b = !handle->b;
+		handle->b       = !handle->b;
 		handle->changed = current->changed = true;
 	}
 
@@ -1890,12 +1898,12 @@ bool ui_panel(ui_handle_t *handle, char *text, bool is_tree, bool filled) {
 }
 
 int ui_sub_image(gpu_texture_t *image, uint32_t tint, int h, int sx, int sy, int sw, int sh) {
-	float iw = (sw > 0 ? sw : image->width) * UI_SCALE();
-	float ih = (sh > 0 ? sh : image->height) * UI_SCALE();
-	float w = fmin(iw, current->_w);
-	float x = current->_x;
+	float iw     = (sw > 0 ? sw : image->width) * UI_SCALE();
+	float ih     = (sh > 0 ? sh : image->height) * UI_SCALE();
+	float w      = fmin(iw, current->_w);
+	float x      = current->_x;
 	float scroll = current->current_window != NULL ? current->current_window->scroll_enabled : false;
-	float r = current->current_ratio == -1 ? 1.0 : ui_get_ratio(current->ratios->buffer[current->current_ratio], 1);
+	float r      = current->current_ratio == -1 ? 1.0 : ui_get_ratio(current->ratios->buffer[current->current_ratio], 1);
 	if (current->image_scroll_align) { // Account for scrollbar size
 		w = fmin(iw, current->_w - current->button_offset_y * 2.0);
 		x += current->button_offset_y;
@@ -1909,9 +1917,7 @@ int ui_sub_image(gpu_texture_t *image, uint32_t tint, int h, int sx, int sy, int
 	}
 
 	// Image size
-	float ratio = h == -1 ?
-		w / iw :
-		h / ih;
+	float ratio = h == -1 ? w / iw : h / ih;
 	if (h == -1) {
 		h = ih * ratio;
 	}
@@ -1923,10 +1929,10 @@ int ui_sub_image(gpu_texture_t *image, uint32_t tint, int h, int sx, int sy, int
 		ui_end_element_of_size(h);
 		return UI_STATE_IDLE;
 	}
-	bool started = ui_get_started(h);
-	bool down = ui_get_pushed(h);
+	bool started  = ui_get_started(h);
+	bool down     = ui_get_pushed(h);
 	bool released = ui_get_released(h);
-	bool hover = ui_get_hover(h);
+	bool hover    = ui_get_hover(h);
 
 	draw_set_color(tint);
 	if (!current->enabled) {
@@ -1958,13 +1964,14 @@ char *ui_text_input(ui_handle_t *handle, char *label, int align, bool editable, 
 		iron_mouse_set_cursor(IRON_CURSOR_IBEAM);
 	}
 	draw_set_color(hover ? theme->HOVER_COL : theme->BUTTON_COL); // Text bg
-	ui_draw_rect(false, current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w - current->button_offset_y * 2, UI_BUTTON_H());
+	ui_draw_rect(false, current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w - current->button_offset_y * 2,
+	             UI_BUTTON_H());
 
 	bool released = ui_get_released(UI_ELEMENT_H());
 	if (current->submit_text_handle == handle && released) { // Keep editing selected text
-		current->is_typing = true;
+		current->is_typing            = true;
 		current->text_selected_handle = current->submit_text_handle;
-		current->submit_text_handle = NULL;
+		current->submit_text_handle   = NULL;
 		ui_set_cursor_to_input(align);
 	}
 	bool start_edit = released || current->tab_pressed;
@@ -2007,10 +2014,11 @@ bool ui_check(ui_handle_t *handle, char *text, char *label) {
 		return handle->b;
 	}
 	if (ui_get_released(UI_ELEMENT_H())) {
-		handle->b = !handle->b;
+		handle->b       = !handle->b;
 		handle->changed = current->changed = true;
 	}
-	else handle->changed = false;
+	else
+		handle->changed = false;
 
 	bool hover = ui_get_hover(UI_ELEMENT_H());
 	ui_draw_check(handle->b, hover); // Check
@@ -2037,7 +2045,7 @@ bool ui_radio(ui_handle_t *handle, int position, char *text, char *label) {
 		handle->changed = false;
 	}
 	if (ui_get_released(UI_ELEMENT_H())) {
-		handle->i = position;
+		handle->i       = position;
 		handle->changed = current->changed = true;
 	}
 
@@ -2064,17 +2072,17 @@ int ui_combo(ui_handle_t *handle, char_ptr_array_t *texts, char *label, bool sho
 	}
 	if (ui_get_released(UI_ELEMENT_H())) {
 		if (current->combo_selected_handle == NULL) {
-			current->input_enabled = false;
-			current->combo_selected_handle = handle;
-			current->combo_selected_window = current->current_window;
-			current->combo_selected_align = align;
-			current->combo_selected_texts = texts;
-			current->combo_selected_label = (char *)label;
-			current->combo_selected_x = current->_x + current->_window_x;
-			current->combo_selected_y = current->_y + current->_window_y + UI_ELEMENT_H();
-			current->combo_selected_w = current->_w;
+			current->input_enabled                 = false;
+			current->combo_selected_handle         = handle;
+			current->combo_selected_window         = current->current_window;
+			current->combo_selected_align          = align;
+			current->combo_selected_texts          = texts;
+			current->combo_selected_label          = (char *)label;
+			current->combo_selected_x              = current->_x + current->_window_x;
+			current->combo_selected_y              = current->_y + current->_window_y + UI_ELEMENT_H();
+			current->combo_selected_w              = current->_w;
 			current->combo_selected_texts_filtered = 0;
-			current->combo_search_bar = search_bar;
+			current->combo_search_bar              = search_bar;
 			for (int i = 0; i < texts->length; ++i) { // Adapt combo list width to combo item width
 				int w = (int)draw_string_width(current->ops->font, current->font_size, texts->buffer[i]) + 10;
 				if (current->combo_selected_w < w) {
@@ -2087,12 +2095,12 @@ int ui_combo(ui_handle_t *handle, char_ptr_array_t *texts, char *label, bool sho
 			if (current->combo_selected_w > current->_w) {
 				current->combo_selected_w += UI_TEXT_OFFSET();
 			}
-			current->combo_to_submit = handle->i;
+			current->combo_to_submit     = handle->i;
 			current->combo_initial_value = handle->i;
 		}
 	}
 	if (handle == current->submit_combo_handle) {
-		handle->i = current->combo_to_submit;
+		handle->i                    = current->combo_to_submit;
 		current->submit_combo_handle = NULL;
 		handle->changed = current->changed = true;
 	}
@@ -2101,11 +2109,13 @@ int ui_combo(ui_handle_t *handle, char_ptr_array_t *texts, char *label, bool sho
 	}
 
 	draw_set_color(theme->PRESSED_COL); // Bg
-	ui_draw_rect(true, current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w - current->button_offset_y * 2, UI_BUTTON_H());
+	ui_draw_rect(true, current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w - current->button_offset_y * 2,
+	             UI_BUTTON_H());
 
 	bool hover = ui_get_hover(UI_ELEMENT_H());
 	draw_set_color(hover ? theme->HOVER_COL : theme->BUTTON_COL);
-	ui_draw_rect(false, current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w - current->button_offset_y * 2, UI_BUTTON_H());
+	ui_draw_rect(false, current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w - current->button_offset_y * 2,
+	             UI_BUTTON_H());
 
 	int x = current->_x + current->_w - current->arrow_offset_x - 8;
 	int y = current->_y + current->arrow_offset_y + 3;
@@ -2146,10 +2156,10 @@ float ui_slider(ui_handle_t *handle, char *text, float from, float to, bool fill
 	}
 	if (ui_get_started(UI_ELEMENT_H())) {
 		current->scroll_handle = handle;
-		current->is_scrolling = true;
+		current->is_scrolling  = true;
 		current->changed = handle->changed = true;
 		if (ui_touch_tooltip) {
-			current->slider_tooltip = true;
+			current->slider_tooltip   = true;
 			current->slider_tooltip_x = current->_x + current->_window_x;
 			current->slider_tooltip_y = current->_y + current->_window_y;
 			current->slider_tooltip_w = current->_w;
@@ -2159,17 +2169,17 @@ float ui_slider(ui_handle_t *handle, char *text, float from, float to, bool fill
 		handle->changed = false;
 	}
 
-	#if !defined(IRON_ANDROID) && !defined(IRON_IOS)
+#if !defined(IRON_ANDROID) && !defined(IRON_IOS)
 	if (handle == current->scroll_handle && current->input_dx != 0) { // Scroll
-	#else
+#else
 	if (handle == current->scroll_handle) { // Scroll
-	#endif
-		float range = to - from;
+#endif
+		float range    = to - from;
 		float slider_x = current->_x + current->_window_x + current->button_offset_y;
 		float slider_w = current->_w - current->button_offset_y * 2;
-		float step = range / slider_w;
-		float value = from + (current->input_x - slider_x) * step;
-		handle->f = round(value * precision) / precision;
+		float step     = range / slider_w;
+		float value    = from + (current->input_x - slider_x) * step;
+		handle->f      = round(value * precision) / precision;
 		if (handle->f < from) {
 			handle->f = from; // Stay in bounds
 		}
@@ -2198,11 +2208,11 @@ float ui_slider(ui_handle_t *handle, char *text, float from, float to, bool fill
 	}
 	if (current->submit_text_handle == handle) {
 		ui_submit_text_edit();
-		#ifdef WITH_EVAL
+#ifdef WITH_EVAL
 		handle->f = js_eval(handle->text);
-		#else
+#else
 		handle->f = atof(handle->text);
-		#endif
+#endif
 		handle->changed = current->changed = true;
 	}
 
@@ -2244,9 +2254,9 @@ void ui_tooltip(char *text) {
 }
 
 void ui_tooltip_image(gpu_texture_t *image, int max_width) {
-	current->tooltip_img = image;
+	current->tooltip_img           = image;
 	current->tooltip_img_max_width = max_width;
-	current->tooltip_y = current->_y + current->_window_y;
+	current->tooltip_y             = current->_y + current->_window_y;
 }
 
 void ui_end() {
@@ -2279,17 +2289,17 @@ void ui_mouse_down(ui_t *ui, int button, int x, int y) {
 		ui->input_started_r = ui->input_down_r = true;
 	}
 	ui->input_started_time = iron_time();
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	ui_set_input_position(ui, x, y);
-	#endif
+#endif
 	ui->input_started_x = x;
 	ui->input_started_y = y;
 }
 
 void ui_mouse_move(ui_t *ui, int x, int y, int movement_x, int movement_y) {
-	#if !defined(IRON_ANDROID) && !defined(IRON_IOS)
+#if !defined(IRON_ANDROID) && !defined(IRON_IOS)
 	ui_set_input_position(ui, x, y);
-	#endif
+#endif
 }
 
 void ui_mouse_up(ui_t *ui, int button, int x, int y) {
@@ -2303,12 +2313,14 @@ void ui_mouse_up(ui_t *ui, int button, int x, int y) {
 	}
 
 	if (ui->is_scrolling) { // Prevent action when scrolling is active
-		ui->is_scrolling = false;
-		ui->scroll_handle = NULL;
+		ui->is_scrolling   = false;
+		ui->scroll_handle  = NULL;
 		ui->slider_tooltip = false;
 		if (x == ui->input_started_x && y == ui->input_started_y) { // Mouse not moved
-			if (button == 0) ui->input_released = true;
-			else ui->input_released_r = true;
+			if (button == 0)
+				ui->input_released = true;
+			else
+				ui->input_released_r = true;
 		}
 	}
 	else {
@@ -2326,9 +2338,9 @@ void ui_mouse_up(ui_t *ui, int button, int x, int y) {
 	else {
 		ui->input_down_r = false;
 	}
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	ui_set_input_position(ui, x, y);
-	#endif
+#endif
 	ui_deselect_text(ui);
 }
 
@@ -2337,21 +2349,21 @@ void ui_mouse_wheel(ui_t *ui, int delta) {
 }
 
 void ui_pen_down(ui_t *ui, int x, int y, float pressure) {
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	return;
-	#endif
+#endif
 
 	ui_mouse_down(ui, 0, x, y);
 }
 
 void ui_pen_up(ui_t *ui, int x, int y, float pressure) {
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	return;
-	#endif
+#endif
 
 	if (ui->input_started) {
 		ui->input_started = false;
-		ui->pen_in_use = true;
+		ui->pen_in_use    = true;
 		return;
 	}
 	ui_mouse_up(ui, 0, x, y);
@@ -2359,7 +2371,7 @@ void ui_pen_up(ui_t *ui, int x, int y, float pressure) {
 }
 
 void ui_pen_move(ui_t *ui, int x, int y, float pressure) {
-	#if defined(IRON_IOS)
+#if defined(IRON_IOS)
 	// Listen to pen hover if no other input is active
 	if (pressure == 0.0) {
 		if (!ui->input_down && !ui->input_down_r) {
@@ -2367,85 +2379,132 @@ void ui_pen_move(ui_t *ui, int x, int y, float pressure) {
 		}
 		return;
 	}
-	#endif
+#endif
 
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	return;
-	#endif
+#endif
 
 	ui_mouse_move(ui, x, y, 0, 0);
 }
 
 void ui_key_down(ui_t *ui, int key_code) {
-	ui->key_code = key_code;
+	ui->key_code       = key_code;
 	ui->is_key_pressed = true;
-	ui->is_key_down = true;
+	ui->is_key_down    = true;
 	ui_key_repeat_time = iron_time() + 0.4;
 	switch (key_code) {
-		case IRON_KEY_SHIFT: ui->is_shift_down = true; break;
-		case IRON_KEY_CONTROL: ui->is_ctrl_down = true; break;
-		#ifdef IRON_DARWIN
-		case IRON_KEY_META: ui->is_ctrl_down = true; break;
-		#endif
-		case IRON_KEY_ALT: ui->is_alt_down = true; break;
-		case IRON_KEY_BACKSPACE: ui->is_backspace_down = true; break;
-		case IRON_KEY_DELETE: ui->is_delete_down = true; break;
-		case IRON_KEY_ESCAPE: ui->is_escape_down = true; break;
-		case IRON_KEY_RETURN: ui->is_return_down = true; break;
-		case IRON_KEY_TAB: ui->is_tab_down = true; break;
-		case IRON_KEY_A: ui->is_a_down = true; break;
-		case IRON_KEY_SPACE: ui->key_char = ' '; break;
-		#ifdef UI_ANDROID_RMB // Detect right mouse button on Android..
-		case IRON_KEY_BACK: if (!ui->input_down_r) ui_mouse_down(ui, 1, ui->input_x, ui->input_y); break;
-		#endif
+	case IRON_KEY_SHIFT:
+		ui->is_shift_down = true;
+		break;
+	case IRON_KEY_CONTROL:
+		ui->is_ctrl_down = true;
+		break;
+#ifdef IRON_DARWIN
+	case IRON_KEY_META:
+		ui->is_ctrl_down = true;
+		break;
+#endif
+	case IRON_KEY_ALT:
+		ui->is_alt_down = true;
+		break;
+	case IRON_KEY_BACKSPACE:
+		ui->is_backspace_down = true;
+		break;
+	case IRON_KEY_DELETE:
+		ui->is_delete_down = true;
+		break;
+	case IRON_KEY_ESCAPE:
+		ui->is_escape_down = true;
+		break;
+	case IRON_KEY_RETURN:
+		ui->is_return_down = true;
+		break;
+	case IRON_KEY_TAB:
+		ui->is_tab_down = true;
+		break;
+	case IRON_KEY_A:
+		ui->is_a_down = true;
+		break;
+	case IRON_KEY_SPACE:
+		ui->key_char = ' ';
+		break;
+#ifdef UI_ANDROID_RMB // Detect right mouse button on Android..
+	case IRON_KEY_BACK:
+		if (!ui->input_down_r)
+			ui_mouse_down(ui, 1, ui->input_x, ui->input_y);
+		break;
+#endif
 	}
 }
 
 void ui_key_up(ui_t *ui, int key_code) {
 	ui->is_key_down = false;
 	switch (key_code) {
-		case IRON_KEY_SHIFT: ui->is_shift_down = false; break;
-		case IRON_KEY_CONTROL: ui->is_ctrl_down = false; break;
-		#ifdef IRON_DARWIN
-		case IRON_KEY_META: ui->is_ctrl_down = false; break;
-		#endif
-		case IRON_KEY_ALT: ui->is_alt_down = false; break;
-		case IRON_KEY_BACKSPACE: ui->is_backspace_down = false; break;
-		case IRON_KEY_DELETE: ui->is_delete_down = false; break;
-		case IRON_KEY_ESCAPE: ui->is_escape_down = false; break;
-		case IRON_KEY_RETURN: ui->is_return_down = false; break;
-		case IRON_KEY_TAB: ui->is_tab_down = false; break;
-		case IRON_KEY_A: ui->is_a_down = false; break;
-		#ifdef UI_ANDROID_RMB
-		case IRON_KEY_BACK: ui_mouse_down(ui, 1, ui->input_x, ui->input_y); break;
-		#endif
+	case IRON_KEY_SHIFT:
+		ui->is_shift_down = false;
+		break;
+	case IRON_KEY_CONTROL:
+		ui->is_ctrl_down = false;
+		break;
+#ifdef IRON_DARWIN
+	case IRON_KEY_META:
+		ui->is_ctrl_down = false;
+		break;
+#endif
+	case IRON_KEY_ALT:
+		ui->is_alt_down = false;
+		break;
+	case IRON_KEY_BACKSPACE:
+		ui->is_backspace_down = false;
+		break;
+	case IRON_KEY_DELETE:
+		ui->is_delete_down = false;
+		break;
+	case IRON_KEY_ESCAPE:
+		ui->is_escape_down = false;
+		break;
+	case IRON_KEY_RETURN:
+		ui->is_return_down = false;
+		break;
+	case IRON_KEY_TAB:
+		ui->is_tab_down = false;
+		break;
+	case IRON_KEY_A:
+		ui->is_a_down = false;
+		break;
+#ifdef UI_ANDROID_RMB
+	case IRON_KEY_BACK:
+		ui_mouse_down(ui, 1, ui->input_x, ui->input_y);
+		break;
+#endif
 	}
 }
 
 void ui_key_press(ui_t *ui, unsigned key_char) {
-	ui->key_char = key_char;
+	ui->key_char       = key_char;
 	ui->is_key_pressed = true;
 }
 
 #if defined(IRON_ANDROID) || defined(IRON_IOS)
 static float ui_pinch_distance = 0.0;
-static float ui_pinch_total = 0.0;
-static bool ui_pinch_started = false;
+static float ui_pinch_total    = 0.0;
+static bool  ui_pinch_started  = false;
 
 void ui_touch_down(ui_t *ui, int index, int x, int y) {
 	// Reset movement delta on touch start
 	if (index == 0) {
 		ui->input_dx = 0;
 		ui->input_dy = 0;
-		ui->input_x = x;
-		ui->input_y = y;
+		ui->input_x  = x;
+		ui->input_y  = y;
 	}
 	// Two fingers down - right mouse button
 	else if (index == 1) {
 		ui->input_down = false;
 		ui_mouse_down(ui, 1, ui->input_x, ui->input_y);
-		ui_pinch_started = true;
-		ui_pinch_total = 0.0;
+		ui_pinch_started  = true;
+		ui_pinch_total    = 0.0;
 		ui_pinch_distance = 0.0;
 	}
 	// Three fingers down - middle mouse button
@@ -2469,9 +2528,9 @@ void ui_touch_move(ui_t *ui, int index, int x, int y) {
 	// Pinch to zoom - mouse wheel
 	if (index == 1) {
 		float last_distance = ui_pinch_distance;
-		float dx = ui->input_x - x;
-		float dy = ui->input_y - y;
-		ui_pinch_distance = sqrtf(dx * dx + dy * dy);
+		float dx            = ui->input_x - x;
+		float dy            = ui->input_y - y;
+		ui_pinch_distance   = sqrtf(dx * dx + dy * dy);
 		ui_pinch_total += last_distance != 0 ? last_distance - ui_pinch_distance : 0;
 		if (!ui_pinch_started) {
 			ui->input_wheel_delta = ui_pinch_total / 50;
@@ -2500,46 +2559,46 @@ void ui_paste(char *s) {
 }
 
 void ui_theme_default(ui_theme_t *t) {
-	t->WINDOW_BG_COL = 0xff292929;
-	t->HOVER_COL = 0xff434343;
-	t->ACCENT_COL = 0xff606060;
-	t->BUTTON_COL = 0xff383838;
-	t->PRESSED_COL = 0xff222222;
-	t->TEXT_COL = 0xffe8e8e8;
-	t->LABEL_COL = 0xffc8c8c8;
-	t->SEPARATOR_COL = 0xff202020;
-	t->HIGHLIGHT_COL = 0xff205d9c;
-	t->FONT_SIZE = 13;
-	t->ELEMENT_W = 100;
-	t->ELEMENT_H = 24;
-	t->ELEMENT_OFFSET = 4;
-	t->ARROW_SIZE = 5;
-	t->BUTTON_H = 22;
-	t->CHECK_SIZE = 16;
+	t->WINDOW_BG_COL     = 0xff292929;
+	t->HOVER_COL         = 0xff434343;
+	t->ACCENT_COL        = 0xff606060;
+	t->BUTTON_COL        = 0xff383838;
+	t->PRESSED_COL       = 0xff222222;
+	t->TEXT_COL          = 0xffe8e8e8;
+	t->LABEL_COL         = 0xffc8c8c8;
+	t->SEPARATOR_COL     = 0xff202020;
+	t->HIGHLIGHT_COL     = 0xff205d9c;
+	t->FONT_SIZE         = 13;
+	t->ELEMENT_W         = 100;
+	t->ELEMENT_H         = 24;
+	t->ELEMENT_OFFSET    = 4;
+	t->ARROW_SIZE        = 5;
+	t->BUTTON_H          = 22;
+	t->CHECK_SIZE        = 16;
 	t->CHECK_SELECT_SIZE = 12;
-	t->SCROLL_W = 9;
-	t->SCROLL_MINI_W = 3;
-	t->TEXT_OFFSET = 8;
-	t->TAB_W = 6;
-	t->FILL_WINDOW_BG = true;
-	t->FILL_BUTTON_BG = true;
-	t->LINK_STYLE = UI_LINK_STYLE_LINE;
-	t->FULL_TABS = false;
-	t->ROUND_CORNERS = true;
-	t->SHADOWS = true;
-	t->VIEWPORT_COL = 0xff080808;
+	t->SCROLL_W          = 9;
+	t->SCROLL_MINI_W     = 3;
+	t->TEXT_OFFSET       = 8;
+	t->TAB_W             = 6;
+	t->FILL_WINDOW_BG    = true;
+	t->FILL_BUTTON_BG    = true;
+	t->LINK_STYLE        = UI_LINK_STYLE_LINE;
+	t->FULL_TABS         = false;
+	t->ROUND_CORNERS     = true;
+	t->SHADOWS           = true;
+	t->VIEWPORT_COL      = 0xff080808;
 }
 
 #define MATH_PI 3.14159265358979323846
-static ui_handle_t *wheel_selected_handle = NULL;
+static ui_handle_t *wheel_selected_handle    = NULL;
 static ui_handle_t *gradient_selected_handle = NULL;
-static ui_handle_t radio_handle;
-static int _ELEMENT_OFFSET = 0;
-static int _BUTTON_COL = 0;
-static int text_area_selection_start = -1;
-bool ui_text_area_line_numbers = false;
-bool ui_text_area_scroll_past_end = false;
-ui_text_coloring_t *ui_text_area_coloring = NULL;
+static ui_handle_t  radio_handle;
+static int          _ELEMENT_OFFSET              = 0;
+static int          _BUTTON_COL                  = 0;
+static int          text_area_selection_start    = -1;
+bool                ui_text_area_line_numbers    = false;
+bool                ui_text_area_scroll_past_end = false;
+ui_text_coloring_t *ui_text_area_coloring        = NULL;
 
 float ui_dist(float x1, float y1, float x2, float y2) {
 	float vx = x1 - x2;
@@ -2567,33 +2626,33 @@ static const float kx = 1.0;
 static const float ky = 2.0 / 3.0;
 static const float kz = 1.0 / 3.0;
 static const float kw = 3.0;
-void ui_hsv_to_rgb(float cr, float cg, float cb, float *out) {
-	float px = fabs(ui_fract(cr + kx) * 6.0 - kw);
-	float py = fabs(ui_fract(cr + ky) * 6.0 - kw);
-	float pz = fabs(ui_fract(cr + kz) * 6.0 - kw);
-	out[0] = cb * ui_mix(kx, ui_clamp(px - kx, 0.0, 1.0), cg);
-	out[1] = cb * ui_mix(kx, ui_clamp(py - kx, 0.0, 1.0), cg);
-	out[2] = cb * ui_mix(kx, ui_clamp(pz - kx, 0.0, 1.0), cg);
+void               ui_hsv_to_rgb(float cr, float cg, float cb, float *out) {
+    float px = fabs(ui_fract(cr + kx) * 6.0 - kw);
+    float py = fabs(ui_fract(cr + ky) * 6.0 - kw);
+    float pz = fabs(ui_fract(cr + kz) * 6.0 - kw);
+    out[0]   = cb * ui_mix(kx, ui_clamp(px - kx, 0.0, 1.0), cg);
+    out[1]   = cb * ui_mix(kx, ui_clamp(py - kx, 0.0, 1.0), cg);
+    out[2]   = cb * ui_mix(kx, ui_clamp(pz - kx, 0.0, 1.0), cg);
 }
 
 static const float Kx = 0.0;
 static const float Ky = -1.0 / 3.0;
 static const float Kz = 2.0 / 3.0;
 static const float Kw = -1.0;
-static const float e = 1.0e-10;
-void ui_rgb_to_hsv(float cr, float cg, float cb, float *out) {
-	float px = ui_mix(cb, cg, ui_step(cb, cg));
-	float py = ui_mix(cg, cb, ui_step(cb, cg));
-	float pz = ui_mix(Kw, Kx, ui_step(cb, cg));
-	float pw = ui_mix(Kz, Ky, ui_step(cb, cg));
-	float qx = ui_mix(px, cr, ui_step(px, cr));
-	float qy = ui_mix(py, py, ui_step(px, cr));
-	float qz = ui_mix(pw, pz, ui_step(px, cr));
-	float qw = ui_mix(cr, px, ui_step(px, cr));
-	float d = qx - fmin(qw, qy);
-	out[0] = fabs(qz + (qw - qy) / (6.0 * d + e));
-	out[1] = d / (qx + e);
-	out[2] = qx;
+static const float e  = 1.0e-10;
+void               ui_rgb_to_hsv(float cr, float cg, float cb, float *out) {
+    float px = ui_mix(cb, cg, ui_step(cb, cg));
+    float py = ui_mix(cg, cb, ui_step(cb, cg));
+    float pz = ui_mix(Kw, Kx, ui_step(cb, cg));
+    float pw = ui_mix(Kz, Ky, ui_step(cb, cg));
+    float qx = ui_mix(px, cr, ui_step(px, cr));
+    float qy = ui_mix(py, py, ui_step(px, cr));
+    float qz = ui_mix(pw, pz, ui_step(px, cr));
+    float qw = ui_mix(cr, px, ui_step(px, cr));
+    float d  = qx - fmin(qw, qy);
+    out[0]   = fabs(qz + (qw - qy) / (6.0 * d + e));
+    out[1]   = d / (qx + e);
+    out[2]   = qx;
 }
 
 float ui_float_input(ui_handle_t *handle, char *label, int align, float precision) {
@@ -2601,7 +2660,7 @@ float ui_float_input(ui_handle_t *handle, char *label, int align, float precisio
 	handle->text = tmp;
 	sprintf(handle->text, "%f", round(handle->f * precision) / precision);
 	char *text = ui_text_input(handle, label, align, true, false);
-	handle->f = atof(text);
+	handle->f  = atof(text);
 	return handle->f;
 }
 
@@ -2612,8 +2671,8 @@ int ui_inline_radio(ui_handle_t *handle, char_ptr_array_t *texts, int align) {
 		ui_end_element();
 		return handle->i;
 	}
-	float step = current->_w / texts->length;
-	int hovered = -1;
+	float step    = current->_w / texts->length;
+	int   hovered = -1;
 	if (ui_get_hover(UI_ELEMENT_H())) {
 		int ix = current->input_x - current->_x - current->_window_x;
 		for (int i = 0; i < texts->length; ++i) {
@@ -2624,7 +2683,7 @@ int ui_inline_radio(ui_handle_t *handle, char_ptr_array_t *texts, int align) {
 		}
 	}
 	if (ui_get_released(UI_ELEMENT_H())) {
-		handle->i = hovered;
+		handle->i       = hovered;
 		handle->changed = current->changed = true;
 	}
 	else {
@@ -2648,7 +2707,7 @@ int ui_inline_radio(ui_handle_t *handle, char_ptr_array_t *texts, int align) {
 		}
 		draw_set_color(current->ops->theme->TEXT_COL); // Text
 		current->_x += step * i;
-		float _w = current->_w;
+		float _w    = current->_w;
 		current->_w = (int)step;
 		ui_draw_string(texts->buffer[i], current->ops->theme->TEXT_OFFSET, 0, align, true);
 		current->_x -= step * i;
@@ -2663,7 +2722,7 @@ uint8_t ui_color_r(uint32_t color) {
 }
 
 uint8_t ui_color_g(uint32_t color) {
-	return (color & 0x0000ff00) >>  8;
+	return (color & 0x0000ff00) >> 8;
 }
 
 uint8_t ui_color_b(uint32_t color) {
@@ -2688,56 +2747,56 @@ int ui_color_wheel(ui_handle_t *handle, bool alpha, float w, float h, bool color
 	float g = ui_color_g(handle->color) / 255.0f;
 	float b = ui_color_b(handle->color) / 255.0f;
 	if (fabs(handle->red - r) > 0.01 || fabs(handle->green - g) > 0.01 || fabs(handle->blue - b) > 0.01) {
-		handle->red = r;
+		handle->red   = r;
 		handle->green = g;
-		handle->blue = b;
+		handle->blue  = b;
 		ui_rgb_to_hsv(r, g, b, &handle->hue);
 	}
 
 	// Wheel
-	float px = current->_x;
-	float py = current->_y;
-	bool scroll = current->current_window != NULL ? current->current_window->scroll_enabled : false;
+	float px     = current->_x;
+	float py     = current->_y;
+	bool  scroll = current->current_window != NULL ? current->current_window->scroll_enabled : false;
 	if (!scroll) {
 		w -= UI_SCROLL_W();
 		px += UI_SCROLL_W() / 2.0;
 	}
-	float _x = current->_x;
-	float _y = current->_y;
-	float _w = current->_w;
+	float _x    = current->_x;
+	float _y    = current->_y;
+	float _w    = current->_w;
 	current->_w = (int)(28.0 * UI_SCALE());
 	if (picker != NULL && ui_button("P", UI_ALIGN_CENTER, "")) {
 		(*picker)(data);
 		current->changed = false;
-		handle->changed = false;
+		handle->changed  = false;
 		return handle->color;
 	}
 	current->_x = _x;
 	current->_y = _y;
 	current->_w = _w;
 
-	uint32_t col = ui_color(round(handle->val * 255.0f), round(handle->val * 255.0f), round(handle->val * 255.0f), 255);
-	float wheel_h = current->ops->color_wheel->height * (w / current->ops->color_wheel->width);
+	uint32_t col     = ui_color(round(handle->val * 255.0f), round(handle->val * 255.0f), round(handle->val * 255.0f), 255);
+	float    wheel_h = current->ops->color_wheel->height * (w / current->ops->color_wheel->width);
 	ui_image(current->ops->color_wheel, col, wheel_h - 2);
 
 	// Picker
-	float ph = current->_y - py;
-	float ox = px + w / 2.0;
-	float oy = py + ph / 2.0;
-	float cw = w * 0.7;
-	float cwh = cw / 2.0;
-	float cx = ox;
-	float cy = oy + handle->sat * cwh; // Sat is distance from center
+	float ph      = current->_y - py;
+	float ox      = px + w / 2.0;
+	float oy      = py + ph / 2.0;
+	float cw      = w * 0.7;
+	float cwh     = cw / 2.0;
+	float cx      = ox;
+	float cy      = oy + handle->sat * cwh; // Sat is distance from center
 	float grad_tx = px + 0.897 * w;
 	float grad_ty = oy - cwh;
-	float grad_w = 0.0777 * w;
-	float grad_h = cw;
+	float grad_w  = 0.0777 * w;
+	float grad_h  = cw;
 	// Rotate around origin by hue
 	float theta = handle->hue * (MATH_PI * 2.0);
-	float cx2 = cos(theta) * (cx - ox) - sin(theta) * (cy - oy) + ox;
-	float cy2 = sin(theta) * (cx - ox) + cos(theta) * (cy - oy) + oy;
-	cx = cx2;
-	cy = cy2;
+	float cx2   = cos(theta) * (cx - ox) - sin(theta) * (cy - oy) + ox;
+	float cy2   = sin(theta) * (cx - ox) + cos(theta) * (cy - oy) + oy;
+	cx          = cx2;
+	cy          = cy2;
 
 	current->_x = px - (scroll ? 0 : UI_SCROLL_W() / 2.0);
 	current->_y = py;
@@ -2781,8 +2840,8 @@ int ui_color_wheel(ui_handle_t *handle, bool alpha, float w, float h, bool color
 		if (angle < 0) {
 			angle = MATH_PI + (MATH_PI - fabs(angle));
 		}
-		angle = MATH_PI * 2.0 - angle;
-		handle->hue = angle / (MATH_PI * 2.0);
+		angle           = MATH_PI * 2.0 - angle;
+		handle->hue     = angle / (MATH_PI * 2.0);
 		handle->changed = current->changed = true;
 	}
 	// Mouse picking for val
@@ -2794,7 +2853,7 @@ int ui_color_wheel(ui_handle_t *handle, bool alpha, float w, float h, bool color
 		handle->changed = current->changed = true;
 	}
 	if (current->input_down && gradient_selected_handle == handle) {
-		handle->val = fmax(0.01, fmin(1.0, 1.0 - (current->input_y - grad_ty - current->_window_y) / grad_h));
+		handle->val     = fmax(0.01, fmin(1.0, 1.0 - (current->input_y - grad_ty - current->_window_y) / grad_h));
 		handle->changed = current->changed = true;
 	}
 
@@ -2806,29 +2865,29 @@ int ui_color_wheel(ui_handle_t *handle, bool alpha, float w, float h, bool color
 		ui_text("", UI_ALIGN_RIGHT, handle->color);
 	}
 
-	char *strings[] = {"RGB", "HSV", "Hex"};
+	char            *strings[] = {"RGB", "HSV", "Hex"};
 	char_ptr_array_t car;
 	car.buffer = strings;
 	car.length = 3;
-	int pos = ui_inline_radio(&radio_handle, &car, UI_ALIGN_LEFT);
+	int pos    = ui_inline_radio(&radio_handle, &car, UI_ALIGN_LEFT);
 
 	ui_handle_t *h0 = ui_nest(ui_nest(handle, 0), 0);
 	ui_handle_t *h1 = ui_nest(ui_nest(handle, 0), 1);
 	ui_handle_t *h2 = ui_nest(ui_nest(handle, 0), 2);
 	if (pos == 0) {
-		h0->f = handle->red;
-		h1->f = handle->green;
-		h2->f = handle->blue;
-		handle->red = ui_slider(h0, "R", 0, 1, true, 100, true, UI_ALIGN_LEFT, true);
+		h0->f         = handle->red;
+		h1->f         = handle->green;
+		h2->f         = handle->blue;
+		handle->red   = ui_slider(h0, "R", 0, 1, true, 100, true, UI_ALIGN_LEFT, true);
 		handle->green = ui_slider(h1, "G", 0, 1, true, 100, true, UI_ALIGN_LEFT, true);
-		handle->blue = ui_slider(h2, "B", 0, 1, true, 100, true, UI_ALIGN_LEFT, true);
+		handle->blue  = ui_slider(h2, "B", 0, 1, true, 100, true, UI_ALIGN_LEFT, true);
 		ui_rgb_to_hsv(handle->red, handle->green, handle->blue, &handle->hue);
 		handle->color = ui_color(round(handle->red * 255.0), round(handle->green * 255.0), round(handle->blue * 255.0), round(a * 255.0));
 	}
 	else if (pos == 1) {
-		h0->f = handle->hue;
-		h1->f = handle->sat;
-		h2->f = handle->val;
+		h0->f       = handle->hue;
+		h1->f       = handle->sat;
+		h2->f       = handle->val;
 		handle->hue = ui_slider(h0, "H", 0, 1, true, 100, true, UI_ALIGN_LEFT, true);
 		handle->sat = ui_slider(h1, "S", 0, 1, true, 100, true, UI_ALIGN_LEFT, true);
 		handle->val = ui_slider(h2, "V", 0, 1, true, 100, true, UI_ALIGN_LEFT, true);
@@ -2871,18 +2930,19 @@ int ui_color_wheel(ui_handle_t *handle, bool alpha, float w, float h, bool color
 			hex_code[0] = 'f';
 			hex_code[1] = 'f';
 		}
-		#ifdef _WIN32
+#ifdef _WIN32
 		handle->color = _strtoi64(hex_code, NULL, 16);
-		#else
+#else
 		handle->color = strtol(hex_code, NULL, 16);
-		#endif
+#endif
 	}
 	if (h0->changed || h1->changed || h2->changed) {
 		handle->changed = current->changed = true;
 	}
 
 	// Do not close if user clicks
-	if (current->input_released && ui_input_in_rect(current->_window_x + px, current->_window_y + py, w, h < 0 ? (current->_y - py) : h) && current->input_released) {
+	if (current->input_released && ui_input_in_rect(current->_window_x + px, current->_window_y + py, w, h < 0 ? (current->_y - py) : h) &&
+	    current->input_released) {
 		current->changed = true;
 	}
 
@@ -2918,14 +2978,15 @@ static void handle_line_select(ui_t *current, ui_handle_t *handle) {
 			text_area_selection_start = handle->i;
 		}
 	}
-	else text_area_selection_start = -1;
+	else
+		text_area_selection_start = -1;
 }
 
 static int ui_word_count(char *str) {
 	if (str == NULL || str[0] == '\0') {
 		return 0;
 	}
-	int i = 0;
+	int i     = 0;
 	int count = 1;
 	while (str[i] != '\0') {
 		if (str[i] == ' ' || str[i] == '\n') {
@@ -2939,8 +3000,8 @@ static int ui_word_count(char *str) {
 static char temp[128];
 
 static char *ui_extract_word(char *str, int word) {
-	int pos = 0;
-	int len = strlen(str);
+	int pos    = 0;
+	int len    = strlen(str);
 	int word_i = 0;
 	for (int i = 0; i < len; ++i) {
 		if (str[i] == ' ' || str[i] == '\n') {
@@ -2960,7 +3021,7 @@ static char *ui_extract_word(char *str, int word) {
 }
 
 static int ui_line_pos(char *str, int line) {
-	int i = 0;
+	int i            = 0;
 	int current_line = 0;
 	while (str[i] != '\0' && current_line < line) {
 		if (str[i] == '\n') {
@@ -2973,33 +3034,33 @@ static int ui_line_pos(char *str, int line) {
 
 char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, bool word_wrap) {
 	ui_t *current = ui_get_current();
-	handle->text = string_replace_all(handle->text, "\t", "    ");
+	handle->text  = string_replace_all(handle->text, "\t", "    ");
 	bool selected = current->text_selected_handle == handle; // Text being edited
 
 	char lines[4096];
 	strcpy(lines, handle->text);
-	int line_count = ui_line_count(lines);
-	bool show_label = (line_count == 1 && lines[0] == '\0');
-	bool key_pressed = selected && current->is_key_pressed;
+	int  line_count              = ui_line_count(lines);
+	bool show_label              = (line_count == 1 && lines[0] == '\0');
+	bool key_pressed             = selected && current->is_key_pressed;
 	current->highlight_on_select = false;
-	current->tab_switch_enabled = false;
+	current->tab_switch_enabled  = false;
 
 	if (word_wrap && handle->text[0] != '\0') {
 		bool cursor_set = false;
-		int cursor_pos = current->cursor_x;
+		int  cursor_pos = current->cursor_x;
 		for (int i = 0; i < handle->i; ++i) {
 			cursor_pos += strlen(ui_extract_line(lines, i)) + 1; // + '\n'
 		}
-		int word_count = ui_word_count(lines);
+		int  word_count = ui_word_count(lines);
 		char line[1024];
 		line[0] = '\0';
 		char new_lines[4096];
 		new_lines[0] = '\0';
 		for (int i = 0; i < word_count; ++i) {
-			char *w = ui_extract_word(lines, i);
+			char *w      = ui_extract_word(lines, i);
 			float spacew = draw_string_width(current->ops->font, current->font_size, " ");
-			float wordw = spacew + draw_string_width(current->ops->font, current->font_size, w);
-			float linew = wordw + draw_string_width(current->ops->font, current->font_size, line);
+			float wordw  = spacew + draw_string_width(current->ops->font, current->font_size, w);
+			float linew  = wordw + draw_string_width(current->ops->font, current->font_size, line);
 			if (linew > current->_w - 10 && linew > wordw) {
 				if (new_lines[0] != '\0') {
 					strcat(new_lines, "\n");
@@ -3017,14 +3078,14 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 			}
 
 			int new_line_count = new_lines[0] == '\0' ? 0 : ui_line_count(new_lines);
-			int lines_len = new_line_count;
+			int lines_len      = new_line_count;
 			for (int i = 0; i < new_line_count; ++i) {
 				lines_len += strlen(ui_extract_line(new_lines, i));
 			}
 
 			if (selected && !cursor_set && cursor_pos <= lines_len + strlen(line)) {
-				cursor_set = true;
-				handle->i = new_line_count;
+				cursor_set        = true;
+				handle->i         = new_line_count;
 				current->cursor_x = current->highlight_anchor = cursor_pos - lines_len;
 			}
 		}
@@ -3041,17 +3102,17 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 	int cursor_start_x = current->cursor_x;
 
 	if (ui_text_area_line_numbers) {
-		float _y = current->_y;
-		int _TEXT_COL = current->ops->theme->TEXT_COL;
+		float _y                      = current->_y;
+		int   _TEXT_COL               = current->ops->theme->TEXT_COL;
 		current->ops->theme->TEXT_COL = current->ops->theme->HOVER_COL;
-		int max_length = ceil(log(line_count + 0.5) / log(10)); // Express log_10 with natural log
+		int  max_length               = ceil(log(line_count + 0.5) / log(10)); // Express log_10 with natural log
 		char s[64];
 		for (int i = 0; i < line_count; ++i) {
 			ui_text(right_align_number(&s[0], i + 1, max_length), UI_ALIGN_LEFT, 0x00000000);
 			current->_y -= UI_ELEMENT_OFFSET();
 		}
 		current->ops->theme->TEXT_COL = _TEXT_COL;
-		current->_y = _y;
+		current->_y                   = _y;
 
 		sprintf(s, "%d", line_count);
 		float numbers_w = (strlen(s) * 16 + 4) * UI_SCALE();
@@ -3060,10 +3121,11 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 	}
 
 	draw_set_color(current->ops->theme->SEPARATOR_COL); // Background
-	ui_draw_rect(true, current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w - current->button_offset_y * 2, line_count * UI_ELEMENT_H() - current->button_offset_y * 2);
+	ui_draw_rect(true, current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w - current->button_offset_y * 2,
+	             line_count * UI_ELEMENT_H() - current->button_offset_y * 2);
 
 	ui_text_coloring_t *_text_coloring = current->text_coloring;
-	current->text_coloring = ui_text_area_coloring;
+	current->text_coloring             = ui_text_area_coloring;
 
 	if (current->input_started) {
 		text_area_selection_start = -1;
@@ -3087,19 +3149,17 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 		// Text
 		else {
 			if (show_label) {
-				int TEXT_COL = current->ops->theme->TEXT_COL;
+				int TEXT_COL                  = current->ops->theme->TEXT_COL;
 				current->ops->theme->TEXT_COL = current->ops->theme->LABEL_COL;
 				ui_text(label, UI_ALIGN_RIGHT, 0x00000000);
 				current->ops->theme->TEXT_COL = TEXT_COL;
 			}
 			else {
 				// Multi-line selection highlight
-				if (text_area_selection_start > -1 &&
-					(i >= text_area_selection_start && i < handle->i) ||
-					(i <= text_area_selection_start && i > handle->i)) {
-					int line_height = UI_ELEMENT_H();
+				if (text_area_selection_start > -1 && (i >= text_area_selection_start && i < handle->i) || (i <= text_area_selection_start && i > handle->i)) {
+					int line_height   = UI_ELEMENT_H();
 					int cursor_height = line_height - current->button_offset_y * 3.0;
-					int linew = draw_string_width(current->ops->font, current->font_size, line);
+					int linew         = draw_string_width(current->ops->font, current->font_size, line);
 					draw_set_color(current->ops->theme->ACCENT_COL);
 					draw_filled_rect(current->_x + UI_ELEMENT_OFFSET() * 2.0, current->_y + current->button_offset_y * 1.5, linew, cursor_height);
 				}
@@ -3146,8 +3206,8 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 	}
 
 	current->highlight_on_select = true;
-	current->tab_switch_enabled = true;
-	handle->text = string_copy(lines);
+	current->tab_switch_enabled  = true;
+	handle->text                 = string_copy(lines);
 	return handle->text;
 }
 
@@ -3157,56 +3217,30 @@ float UI_MENUBAR_H() {
 }
 
 void ui_begin_menu() {
-	ui_t *current = ui_get_current();
-	_ELEMENT_OFFSET = current->ops->theme->ELEMENT_OFFSET;
-	_BUTTON_COL = current->ops->theme->BUTTON_COL;
+	ui_t *current                       = ui_get_current();
+	_ELEMENT_OFFSET                     = current->ops->theme->ELEMENT_OFFSET;
+	_BUTTON_COL                         = current->ops->theme->BUTTON_COL;
 	current->ops->theme->ELEMENT_OFFSET = 0;
-	current->ops->theme->BUTTON_COL = current->ops->theme->SEPARATOR_COL;
+	current->ops->theme->BUTTON_COL     = current->ops->theme->SEPARATOR_COL;
 	draw_set_color(current->ops->theme->SEPARATOR_COL);
 	draw_filled_rect(0, 0, current->_window_w, UI_MENUBAR_H());
 }
 
 void ui_end_menu() {
-	ui_t *current = ui_get_current();
+	ui_t *current                       = ui_get_current();
 	current->ops->theme->ELEMENT_OFFSET = _ELEMENT_OFFSET;
-	current->ops->theme->BUTTON_COL = _BUTTON_COL;
+	current->ops->theme->BUTTON_COL     = _BUTTON_COL;
 }
 
 bool _ui_menu_button(char *text) {
 	ui_t *current = ui_get_current();
-	current->_w = draw_string_width(current->ops->font, current->font_size, text) + 25.0 * UI_SCALE();
+	current->_w   = draw_string_width(current->ops->font, current->font_size, text) + 25.0 * UI_SCALE();
 	return ui_button(text, UI_ALIGN_CENTER, "");
 }
 
-const char *ui_theme_keys[] = {
-	"WINDOW_BG_COL",
-	"HOVER_COL",
-	"ACCENT_COL",
-	"BUTTON_COL",
-	"PRESSED_COL",
-	"TEXT_COL",
-	"LABEL_COL",
-	"SEPARATOR_COL",
-	"HIGHLIGHT_COL",
-	"FONT_SIZE",
-	"ELEMENT_W",
-	"ELEMENT_H",
-	"ELEMENT_OFFSET",
-	"ARROW_SIZE",
-	"BUTTON_H",
-	"CHECK_SIZE",
-	"CHECK_SELECT_SIZE",
-	"SCROLL_W",
-	"SCROLL_MINI_W",
-	"TEXT_OFFSET",
-	"TAB_W",
-	"FILL_WINDOW_BG",
-	"FILL_BUTTON_BG",
-	"LINK_STYLE",
-	"FULL_TABS",
-	"ROUND_CORNERS",
-	"SHADOWS",
-	"VIEWPORT_COL"
-};
+const char *ui_theme_keys[] = {"WINDOW_BG_COL",  "HOVER_COL",      "ACCENT_COL",        "BUTTON_COL", "PRESSED_COL",   "TEXT_COL",       "LABEL_COL",
+                               "SEPARATOR_COL",  "HIGHLIGHT_COL",  "FONT_SIZE",         "ELEMENT_W",  "ELEMENT_H",     "ELEMENT_OFFSET", "ARROW_SIZE",
+                               "BUTTON_H",       "CHECK_SIZE",     "CHECK_SELECT_SIZE", "SCROLL_W",   "SCROLL_MINI_W", "TEXT_OFFSET",    "TAB_W",
+                               "FILL_WINDOW_BG", "FILL_BUTTON_BG", "LINK_STYLE",        "FULL_TABS",  "ROUND_CORNERS", "SHADOWS",        "VIEWPORT_COL"};
 
 int ui_theme_keys_count = sizeof(ui_theme_keys) / sizeof(ui_theme_keys[0]);

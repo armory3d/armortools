@@ -1,5 +1,5 @@
-#include <iron_thread.h>
 #include <Windows.h>
+#include <iron_thread.h>
 
 void iron_threads_init() {}
 
@@ -12,7 +12,7 @@ struct thread_start {
 
 #define THREAD_STARTS 64
 static struct thread_start starts[THREAD_STARTS];
-static int thread_start_index = 0;
+static int                 thread_start_index = 0;
 
 static DWORD WINAPI ThreadProc(LPVOID arg) {
 	intptr_t start_index = (intptr_t)arg;
@@ -21,7 +21,7 @@ static DWORD WINAPI ThreadProc(LPVOID arg) {
 }
 
 void iron_thread_init(iron_thread_t *thread, void (*func)(void *param), void *param) {
-	thread->impl.func = func;
+	thread->impl.func  = func;
 	thread->impl.param = param;
 
 	intptr_t start_index = thread_start_index++;
@@ -29,8 +29,8 @@ void iron_thread_init(iron_thread_t *thread, void (*func)(void *param), void *pa
 		thread_start_index = 0;
 	}
 	starts[start_index].thread = func;
-	starts[start_index].param = param;
-	thread->impl.handle = CreateThread(0, 65536, ThreadProc, (LPVOID)start_index, 0, 0);
+	starts[start_index].param  = param;
+	thread->impl.handle        = CreateThread(0, 65536, ThreadProc, (LPVOID)start_index, 0, 0);
 }
 
 void iron_thread_wait_and_destroy(iron_thread_t *thread) {
@@ -49,13 +49,13 @@ bool iron_thread_try_to_destroy(iron_thread_t *thread) {
 }
 
 typedef HRESULT(WINAPI *SetThreadDescriptionType)(HANDLE hThread, PCWSTR lpThreadDescription);
-static SetThreadDescriptionType MySetThreadDescription = NULL;
-static bool set_thread_description_loaded = false;
+static SetThreadDescriptionType MySetThreadDescription        = NULL;
+static bool                     set_thread_description_loaded = false;
 
 void iron_thread_set_name(const char *name) {
 	if (!set_thread_description_loaded) {
-		HMODULE kernel32 = LoadLibraryA("kernel32.dll");
-		MySetThreadDescription = (SetThreadDescriptionType)GetProcAddress(kernel32, "SetThreadDescription");
+		HMODULE kernel32              = LoadLibraryA("kernel32.dll");
+		MySetThreadDescription        = (SetThreadDescriptionType)GetProcAddress(kernel32, "SetThreadDescription");
 		set_thread_description_loaded = true;
 	}
 

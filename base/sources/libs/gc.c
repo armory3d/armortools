@@ -35,52 +35,52 @@
 #define GC_TAG_LEAF 0x1
 #define GC_TAG_MARK 0x2
 #define GC_TAG_ROOT 0x4
-#define GC_TAG_CUT 0x8
+#define GC_TAG_CUT  0x8
 
 #if defined(_MSC_VER) && !defined(__clang__)
-#define __builtin_frame_address(x)  ((void)(x), _AddressOfReturnAddress())
+#define __builtin_frame_address(x) ((void)(x), _AddressOfReturnAddress())
 #endif
 
 typedef struct gc_allocation {
-	void *ptr; // mem pointer
-	size_t size; // allocated size in bytes
-	int *array_length; // if this alloc is an array
-	char tag; // the tag for mark-and-sweep
-	char roots; // number of root users
-	struct gc_allocation *next; // separate chaining
+	void                 *ptr;          // mem pointer
+	size_t                size;         // allocated size in bytes
+	int                  *array_length; // if this alloc is an array
+	char                  tag;          // the tag for mark-and-sweep
+	char                  roots;        // number of root users
+	struct gc_allocation *next;         // separate chaining
 	struct gc_allocation *cut;
 } gc_allocation_t;
 
 typedef struct gc_allocation_map {
-	size_t capacity;
-	size_t min_capacity;
-	double downsize_factor;
-	double upsize_factor;
-	double sweep_factor;
-	size_t sweep_limit;
-	size_t size;
+	size_t            capacity;
+	size_t            min_capacity;
+	double            downsize_factor;
+	double            upsize_factor;
+	double            sweep_factor;
+	size_t            sweep_limit;
+	size_t            size;
 	gc_allocation_t **allocs;
 } gc_allocation_map_t;
 
 typedef struct garbage_collector {
-    struct gc_allocation_map *allocs; // allocation map
-    // struct gc_allocation_map *roots; // root map
-    bool paused; // (temporarily) switch gc on/off
-    void *bos; // bottom of stack
+	struct gc_allocation_map *allocs; // allocation map
+	// struct gc_allocation_map *roots; // root map
+	bool  paused; // (temporarily) switch gc on/off
+	void *bos;    // bottom of stack
 } garbage_collector_t;
 
-garbage_collector_t _gc;
+garbage_collector_t  _gc;
 garbage_collector_t *gc = &_gc;
 
 static gc_allocation_t *gc_allocation_new(void *ptr, size_t size) {
 	gc_allocation_t *a = (gc_allocation_t *)malloc(sizeof(gc_allocation_t));
-	a->ptr = ptr;
-	a->size = size;
-	a->array_length = NULL;
-	a->tag = GC_TAG_NONE;
-	a->roots = 0;
-	a->next = NULL;
-	a->cut = NULL;
+	a->ptr             = ptr;
+	a->size            = size;
+	a->array_length    = NULL;
+	a->tag             = GC_TAG_NONE;
+	a->roots           = 0;
+	a->next            = NULL;
+	a->cut             = NULL;
 	return a;
 }
 
@@ -88,17 +88,16 @@ static void gc_allocation_delete(gc_allocation_t *a) {
 	free(a);
 }
 
-static gc_allocation_map_t *gc_allocation_map_new(size_t min_capacity, size_t capacity,
-		double sweep_factor, double downsize_factor, double upsize_factor) {
+static gc_allocation_map_t *gc_allocation_map_new(size_t min_capacity, size_t capacity, double sweep_factor, double downsize_factor, double upsize_factor) {
 	gc_allocation_map_t *am = (gc_allocation_map_t *)malloc(sizeof(gc_allocation_map_t));
-	am->min_capacity = min_capacity;
-	am->capacity = capacity;
-	am->sweep_factor = sweep_factor;
-	am->sweep_limit = (int)(sweep_factor * am->capacity);
-	am->downsize_factor = downsize_factor;
-	am->upsize_factor = upsize_factor;
-	am->allocs = (gc_allocation_t **)calloc(am->capacity, sizeof(gc_allocation_t *));
-	am->size = 0;
+	am->min_capacity        = min_capacity;
+	am->capacity            = capacity;
+	am->sweep_factor        = sweep_factor;
+	am->sweep_limit         = (int)(sweep_factor * am->capacity);
+	am->downsize_factor     = downsize_factor;
+	am->upsize_factor       = upsize_factor;
+	am->allocs              = (gc_allocation_t **)calloc(am->capacity, sizeof(gc_allocation_t *));
+	am->size                = 0;
 	return am;
 }
 
@@ -110,7 +109,7 @@ static void gc_allocation_map_delete(gc_allocation_map_t *am) {
 		if ((alloc = am->allocs[i])) {
 			// Make sure to follow the chain inside a bucket
 			while (alloc) {
-				tmp = alloc;
+				tmp   = alloc;
 				alloc = alloc->next;
 				// free the management structure
 				gc_allocation_delete(tmp);
@@ -137,15 +136,15 @@ static void gc_allocation_map_resize(gc_allocation_map_t *am, size_t new_capacit
 		gc_allocation_t *alloc = am->allocs[i];
 		while (alloc) {
 			gc_allocation_t *next_alloc = alloc->next;
-			size_t new_index = gc_hash(alloc->ptr) & (new_capacity - 1);
-			alloc->next = resized_allocs[new_index];
-			resized_allocs[new_index] = alloc;
-			alloc = next_alloc;
+			size_t           new_index  = gc_hash(alloc->ptr) & (new_capacity - 1);
+			alloc->next                 = resized_allocs[new_index];
+			resized_allocs[new_index]   = alloc;
+			alloc                       = next_alloc;
 		}
 	}
 	free(am->allocs);
-	am->capacity = new_capacity;
-	am->allocs = resized_allocs;
+	am->capacity    = new_capacity;
+	am->allocs      = resized_allocs;
 	am->sweep_limit = am->size + am->sweep_factor * (am->capacity - am->size);
 }
 
@@ -163,9 +162,9 @@ static bool gc_allocation_map_resize_to_fit(gc_allocation_map_t *am) {
 }
 
 static gc_allocation_t *gc_allocation_map_get(gc_allocation_map_t *am, void *ptr) {
-	size_t index = gc_hash(ptr) & (am->capacity - 1); // % am->capacity
-	gc_allocation_t *cur = am->allocs[index];
-	while(cur) {
+	size_t           index = gc_hash(ptr) & (am->capacity - 1); // % am->capacity
+	gc_allocation_t *cur   = am->allocs[index];
+	while (cur) {
 		if (cur->ptr == ptr) {
 			return cur;
 		}
@@ -175,9 +174,9 @@ static gc_allocation_t *gc_allocation_map_get(gc_allocation_map_t *am, void *ptr
 }
 
 static gc_allocation_t *gc_allocation_map_put(gc_allocation_map_t *am, gc_allocation_t *alloc) {
-	size_t index = gc_hash(alloc->ptr) & (am->capacity - 1);
-	gc_allocation_t *cur = am->allocs[index];
-	gc_allocation_t *prev = NULL;
+	size_t           index = gc_hash(alloc->ptr) & (am->capacity - 1);
+	gc_allocation_t *cur   = am->allocs[index];
+	gc_allocation_t *prev  = NULL;
 	/* Upsert if ptr is already known */
 	while (cur != NULL) {
 		if (cur->ptr == alloc->ptr) {
@@ -193,14 +192,13 @@ static gc_allocation_t *gc_allocation_map_put(gc_allocation_map_t *am, gc_alloca
 			}
 			gc_allocation_delete(cur);
 			return alloc;
-
 		}
 		prev = cur;
-		cur = cur->next;
+		cur  = cur->next;
 	}
 	/* Insert at the front of the separate chaining list */
-	cur = am->allocs[index];
-	alloc->next = cur;
+	cur               = am->allocs[index];
+	alloc->next       = cur;
 	am->allocs[index] = alloc;
 	am->size++;
 	void *p = alloc->ptr;
@@ -212,9 +210,9 @@ static gc_allocation_t *gc_allocation_map_put(gc_allocation_map_t *am, gc_alloca
 
 static void gc_allocation_map_remove(gc_allocation_map_t *am, void *ptr, bool allow_resize) {
 	// ignores unknown keys
-	size_t index = gc_hash(ptr) & (am->capacity - 1);
-	gc_allocation_t *cur = am->allocs[index];
-	gc_allocation_t *prev = NULL;
+	size_t           index = gc_hash(ptr) & (am->capacity - 1);
+	gc_allocation_t *cur   = am->allocs[index];
+	gc_allocation_t *prev  = NULL;
 	gc_allocation_t *next;
 	while (cur != NULL) {
 		next = cur->next;
@@ -242,7 +240,7 @@ static void gc_allocation_map_remove(gc_allocation_map_t *am, void *ptr, bool al
 	}
 }
 
-static void* gc_mcalloc(size_t count, size_t size) {
+static void *gc_mcalloc(size_t count, size_t size) {
 	if (!count) {
 		return malloc(size);
 	}
@@ -256,7 +254,7 @@ static void *gc_allocate(size_t count, size_t size) {
 		size_t freed_mem = _gc_run();
 	}
 	/* With cleanup out of the way, attempt to allocate memory */
-	void *ptr = gc_mcalloc(count, size);
+	void  *ptr        = gc_mcalloc(count, size);
 	size_t alloc_size = count ? count * size : size;
 	/* If allocation fails, force an out-of-policy run to free some memory and try again. */
 	if (!ptr && !gc->paused) {
@@ -398,7 +396,7 @@ static size_t gc_sweep() {
 	size_t total = 0;
 	for (size_t i = 0; i < gc->allocs->capacity; ++i) {
 		gc_allocation_t *chunk = gc->allocs->allocs[i];
-		gc_allocation_t *next = NULL;
+		gc_allocation_t *next  = NULL;
 		/* Iterate over separate chaining */
 		while (chunk) {
 			if (chunk->tag & GC_TAG_MARK) {
@@ -414,7 +412,7 @@ static size_t gc_sweep() {
 				total += chunk->size;
 				free(chunk->ptr);
 				/* and remove it from the bookkeeping */
-				next = chunk->next;
+				next                 = chunk->next;
 				gc_allocation_t *cut = chunk->cut;
 				gc_allocation_map_remove(gc->allocs, chunk->ptr, false);
 				while (cut) {
@@ -472,7 +470,7 @@ void _gc_free(void *ptr) {
 
 void _gc_start(void *bos) {
 	gc->paused = false;
-	gc->bos = bos;
+	gc->bos    = bos;
 	// Create allocation map with no downsizing
 	// Capacity must be a power of two
 	gc->allocs = gc_allocation_map_new(1024 * 1024, 1024 * 1024, 0.5, 0.0, 0.8);

@@ -14,8 +14,8 @@ quat_t quat_create(float x, float y, float z, float w) {
 }
 
 quat_t quat_from_axis_angle(vec4_t axis, float angle) {
-	float s = sinf(angle * 0.5);
-    quat_t q;
+	float  s = sinf(angle * 0.5);
+	quat_t q;
 	q.x = axis.x * s;
 	q.y = axis.y * s;
 	q.z = axis.z * s;
@@ -30,42 +30,42 @@ quat_t quat_from_mat(mat4_t m) {
 
 quat_t quat_from_rot_mat(mat4_t m) {
 	// Assumes the upper 3x3 is a pure rotation matrix
-	float m11 = m.m[0];
-	float m12 = m.m[4];
-	float m13 = m.m[8];
-	float m21 = m.m[1];
-	float m22 = m.m[5];
-	float m23 = m.m[9];
-	float m31 = m.m[2];
-	float m32 = m.m[6];
-	float m33 = m.m[10];
-	float tr = m11 + m22 + m33;
-	float s = 0.0;
-    quat_t q;
+	float  m11 = m.m[0];
+	float  m12 = m.m[4];
+	float  m13 = m.m[8];
+	float  m21 = m.m[1];
+	float  m22 = m.m[5];
+	float  m23 = m.m[9];
+	float  m31 = m.m[2];
+	float  m32 = m.m[6];
+	float  m33 = m.m[10];
+	float  tr  = m11 + m22 + m33;
+	float  s   = 0.0;
+	quat_t q;
 
 	if (tr > 0) {
-		s = 0.5 / sqrtf(tr + 1.0);
+		s   = 0.5 / sqrtf(tr + 1.0);
 		q.w = 0.25 / s;
 		q.x = (m32 - m23) * s;
 		q.y = (m13 - m31) * s;
 		q.z = (m21 - m12) * s;
 	}
 	else if (m11 > m22 && m11 > m33) {
-		s = 2.0 * sqrtf(1.0 + m11 - m22 - m33);
+		s   = 2.0 * sqrtf(1.0 + m11 - m22 - m33);
 		q.w = (m32 - m23) / s;
 		q.x = 0.25 * s;
 		q.y = (m12 + m21) / s;
 		q.z = (m13 + m31) / s;
 	}
 	else if (m22 > m33) {
-		s = 2.0 * sqrtf(1.0 + m22 - m11 - m33);
+		s   = 2.0 * sqrtf(1.0 + m22 - m11 - m33);
 		q.w = (m13 - m31) / s;
 		q.x = (m12 + m21) / s;
 		q.y = 0.25 * s;
 		q.z = (m23 + m32) / s;
 	}
 	else {
-		s = 2.0 * sqrtf(1.0 + m33 - m11 - m22);
+		s   = 2.0 * sqrtf(1.0 + m33 - m11 - m22);
 		q.w = (m21 - m12) / s;
 		q.x = (m13 + m31) / s;
 		q.y = (m23 + m32) / s;
@@ -75,7 +75,7 @@ quat_t quat_from_rot_mat(mat4_t m) {
 }
 
 quat_t quat_mult(quat_t a, quat_t b) {
-    quat_t q;
+	quat_t q;
 	q.x = a.x * b.w + a.w * b.x + a.y * b.z - a.z * b.y;
 	q.y = a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x;
 	q.z = a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w;
@@ -107,25 +107,25 @@ quat_t quat_clone(quat_t q) {
 
 vec4_t quat_get_euler(quat_t q) {
 	float a = -2 * (q.x * q.z - q.w * q.y);
-	float b =  q.w *  q.w + q.x * q.x - q.y * q.y - q.z * q.z;
-	float c =  2 * (q.x * q.y + q.w * q.z);
+	float b = q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z;
+	float c = 2 * (q.x * q.y + q.w * q.z);
 	float d = -2 * (q.y * q.z - q.w * q.x);
-	float e =  q.w *  q.w - q.x * q.x + q.y * q.y - q.z * q.z;
+	float e = q.w * q.w - q.x * q.x + q.y * q.y - q.z * q.z;
 	return vec4_create(atan2f(d, e), atan2f(a, b), asinf(c), 1.0);
 }
 
 quat_t quat_from_euler(float x, float y, float z) {
-	float f = x / 2;
+	float f  = x / 2;
 	float c1 = cosf(f);
 	float s1 = sinf(f);
-	f = y / 2;
+	f        = y / 2;
 	float c2 = cosf(f);
 	float s2 = sinf(f);
-	f = z / 2;
+	f        = z / 2;
 	float c3 = cosf(f);
 	float s3 = sinf(f);
 	// YZX
-    quat_t q;
+	quat_t q;
 	q.x = s1 * c2 * c3 + c1 * s2 * s3;
 	q.y = c1 * s2 * c3 + s1 * c2 * s3;
 	q.z = c1 * c2 * s3 - s1 * s2 * c3;
@@ -176,10 +176,10 @@ quat_t quat_from_to(vec4_t v0, vec4_t v1) {
 
 quat_t quat_inv(quat_t q) {
 	float l = q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w;
-	l = -1.0 / l;
-	q.x = q.x * l;
-	q.y = q.y * l;
-	q.z = q.z * l;
-	q.w = -q.w * l;
+	l       = -1.0 / l;
+	q.x     = q.x * l;
+	q.y     = q.y * l;
+	q.z     = q.z * l;
+	q.w     = -q.w * l;
 	return q;
 }

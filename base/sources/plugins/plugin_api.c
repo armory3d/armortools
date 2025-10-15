@@ -1,13 +1,13 @@
 
 #include "plugin_api.h"
-#include "iron_ui.h"
-#include "iron_ui_nodes.h"
+#include "iron_armpack.h"
 #include "iron_array.h"
 #include "iron_map.h"
-#include "iron_armpack.h"
-#include "iron_obj.h"
-#include "iron_vec4.h"
 #include "iron_mat4.h"
+#include "iron_obj.h"
+#include "iron_ui.h"
+#include "iron_ui_nodes.h"
+#include "iron_vec4.h"
 
 void plugin_embed();
 
@@ -377,9 +377,9 @@ VOID_FN(gc_run)
 
 void *data_get_blob(char *s);
 FN(data_get_blob) {
-	char *s = (char *)JS_ToCString(ctx, argv[0]);
-	buffer_t *b = data_get_blob(s);
-	JSValue val = JS_NewArrayBuffer(ctx, b->buffer, b->length, NULL, NULL, 0);
+	char     *s   = (char *)JS_ToCString(ctx, argv[0]);
+	buffer_t *b   = data_get_blob(s);
+	JSValue   val = JS_NewArrayBuffer(ctx, b->buffer, b->length, NULL, NULL, 0);
 	return val;
 }
 
@@ -392,20 +392,20 @@ FN(data_delete_blob) {
 
 void *iron_file_save_bytes(char *s, buffer_t *b, int l);
 FN(iron_file_save_bytes) {
-	char *to = (char *)JS_ToCString(ctx, argv[0]);
-	size_t len;
-	void *ab = JS_GetArrayBuffer(ctx, &len, argv[1]);
-	buffer_t b = { .buffer = ab, .length = len, .capacity = len };
+	char    *to = (char *)JS_ToCString(ctx, argv[0]);
+	size_t   len;
+	void    *ab = JS_GetArrayBuffer(ctx, &len, argv[1]);
+	buffer_t b  = {.buffer = ab, .length = len, .capacity = len};
 	iron_file_save_bytes(to, &b, len);
 	return JS_UNDEFINED;
 }
 
 void *gpu_create_texture_from_bytes(void *p, int w, int h, int format);
 FN(gpu_create_texture_from_bytes) {
-	size_t len;
-	void *ab = JS_GetArrayBuffer(ctx, &len, argv[0]);
-	buffer_t b = { .buffer = ab, .length = len, .capacity = len };
-	int64_t w;
+	size_t   len;
+	void    *ab = JS_GetArrayBuffer(ctx, &len, argv[0]);
+	buffer_t b  = {.buffer = ab, .length = len, .capacity = len};
+	int64_t  w;
 	JS_ToInt64(ctx, &w, argv[1]);
 	int64_t h;
 	JS_ToInt64(ctx, &h, argv[2]);
@@ -427,7 +427,7 @@ FN(ui_handle_set_value) {
 	uint64_t p;
 	JS_ToBigUint64(ctx, &p, argv[0]);
 	ui_handle_t *h = (ui_handle_t *)p;
-	double d;
+	double       d;
 	JS_ToFloat64(ctx, &d, argv[1]);
 	h->f = d;
 	return JS_UNDEFINED;
@@ -443,14 +443,14 @@ FN(ui_handle_get_value) {
 FN(ui_panel) {
 	uint64_t p;
 	JS_ToBigUint64(ctx, &p, argv[0]);
-	char *s = (char *)JS_ToCString(ctx, argv[1]);
-	bool result = ui_panel((void *)p, s, false, false);
+	char *s      = (char *)JS_ToCString(ctx, argv[1]);
+	bool  result = ui_panel((void *)p, s, false, false);
 	return JS_NewBool(ctx, result);
 }
 
 FN(ui_button) {
-	char *s = (char *)JS_ToCString(ctx, argv[0]);
-	bool result = ui_button(s, UI_ALIGN_CENTER, "");
+	char *s      = (char *)JS_ToCString(ctx, argv[0]);
+	bool  result = ui_button(s, UI_ALIGN_CENTER, "");
 	return JS_NewBool(ctx, result);
 }
 
@@ -471,11 +471,11 @@ FN(ui_text_input) {
 FN(ui_slider) {
 	uint64_t p;
 	JS_ToBigUint64(ctx, &p, argv[0]);
-	char *s = (char *)JS_ToCString(ctx, argv[1]);
-	double from = 0.0;
-	double to = 1.0;
-	bool filled = true;
-	double prec = 100.0;
+	char  *s      = (char *)JS_ToCString(ctx, argv[1]);
+	double from   = 0.0;
+	double to     = 1.0;
+	bool   filled = true;
+	double prec   = 100.0;
 	if (argc > 2) {
 		JS_ToFloat64(ctx, &from, argv[2]);
 	}
@@ -512,12 +512,12 @@ FN(ui_radio) {
 
 FN(ui_row) {
 	JSValue val_len = JS_GetPropertyStr(ctx, argv[0], "length");
-	int len;
+	int     len;
 	JS_ToInt32(ctx, &len, val_len);
 	f32_array_t *ratios = f32_array_create(len);
 	for (int i = 0; i < len; ++i) {
 		JSValue val = JS_GetPropertyUint32(ctx, argv[0], i);
-		double f;
+		double  f;
 		JS_ToFloat64(ctx, &f, val);
 		ratios->buffer[i] = f;
 	}
@@ -530,12 +530,12 @@ FN(ui_combo) {
 	JS_ToBigUint64(ctx, &p, argv[0]);
 
 	JSValue val_len = JS_GetPropertyStr(ctx, argv[1], "length");
-	int len;
+	int     len;
 	JS_ToInt32(ctx, &len, val_len);
 	char_ptr_array_t *texts = any_array_create(len);
 	for (int i = 0; i < len; ++i) {
-		JSValue val = JS_GetPropertyUint32(ctx, argv[1], i);
-		char *s = (char *)JS_ToCString(ctx, val);
+		JSValue val      = JS_GetPropertyUint32(ctx, argv[1], i);
+		char   *s        = (char *)JS_ToCString(ctx, val);
 		texts->buffer[i] = s;
 	}
 
@@ -547,23 +547,23 @@ FN(ui_combo) {
 
 FN(plugin_api_make_raw_mesh) {
 	raw_mesh_t *mesh = calloc(sizeof(raw_mesh_t), 1);
-	mesh->name = (char *)JS_ToCString(ctx, argv[0]);
+	mesh->name       = (char *)JS_ToCString(ctx, argv[0]);
 
 	size_t len;
-	void *ab = JS_GetArrayBuffer(ctx, &len, argv[1]);
-	mesh->posa = malloc(sizeof(i16_array_t));
+	void  *ab          = JS_GetArrayBuffer(ctx, &len, argv[1]);
+	mesh->posa         = malloc(sizeof(i16_array_t));
 	mesh->posa->buffer = malloc(len);
 	memcpy(mesh->posa->buffer, ab, len);
 	mesh->posa->length = len / 2;
 
-	ab = JS_GetArrayBuffer(ctx, &len, argv[2]);
-	mesh->nora = malloc(sizeof(i16_array_t));
+	ab                 = JS_GetArrayBuffer(ctx, &len, argv[2]);
+	mesh->nora         = malloc(sizeof(i16_array_t));
 	mesh->nora->buffer = malloc(len);
 	memcpy(mesh->nora->buffer, ab, len);
 	mesh->nora->length = len / 2;
 
-	ab = JS_GetArrayBuffer(ctx, &len, argv[3]);
-	mesh->inda = malloc(sizeof(u32_array_t));
+	ab                 = JS_GetArrayBuffer(ctx, &len, argv[3]);
+	mesh->inda         = malloc(sizeof(u32_array_t));
 	mesh->inda->buffer = malloc(len);
 	memcpy(mesh->inda->buffer, ab, len);
 	mesh->inda->length = len / 4;
