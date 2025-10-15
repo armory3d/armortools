@@ -1184,6 +1184,34 @@ void deviceRemoved(void *inContext, IOReturn inResult, void *inSender, IOHIDDevi
 
 #endif
 
+extern void (*iron_save_and_quit)(bool);
+
+bool _save_and_quit_callback_internal() {
+	bool save = false;
+	NSString *title = [window title];
+	bool dirty = [title rangeOfString:@"* - ArmorPaint"].location != NSNotFound;
+	if (dirty) {
+		NSAlert *alert = [[NSAlert alloc] init];
+		[alert setMessageText:@"Project has been modified, save changes?"];
+		[alert addButtonWithTitle:@"Yes"];
+		[alert addButtonWithTitle:@"Cancel"];
+		[alert addButtonWithTitle:@"No"];
+		[alert setAlertStyle:NSAlertStyleWarning];
+		NSInteger res = [alert runModal];
+		if (res == NSAlertFirstButtonReturn) {
+			save = true;
+		}
+		else if (res == NSAlertThirdButtonReturn) {
+			save = false;
+		}
+		else { // Cancel
+			return false;
+		}
+	}
+	iron_save_and_quit(save);
+	return false;
+}
+
 volatile int iron_exec_async_done = 1;
 
 void iron_exec_async(const char *path, char *argv[]) {}
