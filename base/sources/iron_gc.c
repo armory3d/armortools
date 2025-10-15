@@ -3,6 +3,7 @@
 
 #ifdef NO_GC
 
+#include <memory.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -34,8 +35,11 @@ void *gc_cut(void *ptr, size_t pos, size_t size) {
 
 void *gc_realloc(void *ptr, size_t size) {
 #ifdef HEAP_SIZE
-	// NOTE: gc_realloc is not implemented when HEAP_SIZE is defined
-	return gc_alloc(size);
+	void *new_ptr = gc_alloc(size);
+	if (ptr != NULL) {
+		memcpy(new_ptr, ptr, size);
+	}
+	return new_ptr;
 #else
 	return realloc(ptr, size);
 #endif
