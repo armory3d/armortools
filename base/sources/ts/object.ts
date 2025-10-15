@@ -7,11 +7,11 @@ type object_t = {
 	transform?: transform_t;
 	parent?: object_t;
 	children?: object_t[];
-	///if arm_anim
+	/// if arm_anim
 	animation?: anim_raw_t;
-	///end
+	/// end
 	visible?: bool; // Skip render, keep updating
-	culled?: bool; // base_object_t was culled last frame
+	culled?: bool;  // base_object_t was culled last frame
 	is_empty?: bool;
 	ext?: any; // mesh_object_t | camera_object_t | speaker_object_t
 	ext_type?: string;
@@ -21,13 +21,13 @@ let _object_uid_counter: i32 = 0;
 
 function object_create(is_empty: bool = true): object_t {
 	let raw: object_t = {};
-	raw.name = "";
-	raw.children = [];
-	raw.visible = true;
-	raw.culled = false;
-	raw.uid = _object_uid_counter++;
-	raw.transform = transform_create(raw);
-	raw.is_empty = is_empty;
+	raw.name          = "";
+	raw.children      = [];
+	raw.visible       = true;
+	raw.culled        = false;
+	raw.uid           = _object_uid_counter++;
+	raw.transform     = transform_create(raw);
+	raw.is_empty      = is_empty;
 	if (raw.is_empty) {
 		array_push(scene_empties, raw);
 	}
@@ -62,11 +62,11 @@ function object_remove_super(raw: object_t) {
 	if (raw.is_empty) {
 		array_remove(scene_empties, raw);
 	}
-	///if arm_anim
+	/// if arm_anim
 	if (raw.animation != null) {
 		anim_remove(raw.animation);
 	}
-	///end
+	/// end
 	while (raw.children.length > 0) {
 		object_remove(raw.children[0]);
 	}
@@ -83,11 +83,11 @@ function object_remove(raw: object_t) {
 	else if (raw.ext_type == "camera_object_t") {
 		camera_object_remove(raw.ext);
 	}
-	///if arm_audio
+	/// if arm_audio
 	else if (raw.ext_type == "speaker_object_t") {
 		speaker_object_remove(raw.ext);
 	}
-	///end
+	/// end
 	else {
 		object_remove_super(raw);
 	}
@@ -117,12 +117,12 @@ function object_get_children(raw: object_t, recursive: bool = false): object_t[]
 	let ret_children: object_t[] = array_slice(raw.children, 0, raw.children.length);
 	for (let i: i32 = 0; i < raw.children.length; ++i) {
 		let c: object_t = raw.children[i];
-		ret_children = array_concat(ret_children, object_get_children(c, recursive));
+		ret_children    = array_concat(ret_children, object_get_children(c, recursive));
 	}
 	return ret_children;
 }
 
-///if arm_anim
+/// if arm_anim
 
 function object_setup_animation_super(raw: object_t, oactions: scene_t[] = null) {
 	// object_t actions
@@ -141,4 +141,4 @@ function object_setup_animation(raw: object_t, oactions: scene_t[] = null) {
 	}
 }
 
-///end
+/// end

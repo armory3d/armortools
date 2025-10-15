@@ -1,39 +1,39 @@
 
 function tab_console_draw(htab: ui_handle_t) {
 	let title: string = console_message_timer > 0 ? console_message + "        " : tr("Console");
-	let color: i32 = console_message_timer > 0 ? console_message_color : -1;
+	let color: i32    = console_message_timer > 0 ? console_message_color : -1;
 
 	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
 	if (ui_tab(htab, title, false, color) && statush > ui_statusbar_default_h * UI_SCALE()) {
 
 		ui_begin_sticky();
-		///if (arm_windows || arm_linux || arm_macos) // Copy
+		/// if (arm_windows || arm_linux || arm_macos) // Copy
 		if (config_raw.touch_ui) {
-			let row: f32[] = [1 / 4, 1 / 4, 1 / 4];
+			let row: f32[] = [ 1 / 4, 1 / 4, 1 / 4 ];
 			ui_row(row);
 		}
 		else {
-			let row: f32[] = [1 / 14, 1 / 14, 1 / 14];
+			let row: f32[] = [ 1 / 14, 1 / 14, 1 / 14 ];
 			ui_row(row);
 		}
-		///else
+		/// else
 		if (config_raw.touch_ui) {
-			let row: f32[] = [1 / 4, 1 / 4];
+			let row: f32[] = [ 1 / 4, 1 / 4 ];
 			ui_row(row);
 		}
 		else {
-			let row: f32[] = [1 / 14, 1 / 14];
+			let row: f32[] = [ 1 / 14, 1 / 14 ];
 			ui_row(row);
 		}
-		///end
+		/// end
 
 		if (ui_button(tr("Clear"))) {
 			console_last_traces = [];
 		}
 		if (ui_button(tr("Export"))) {
-			ui_files_show("txt", true, false, function (path: string) {
+			ui_files_show("txt", true, false, function(path: string) {
 				let str: string = string_array_join(console_last_traces, "\n");
-				let f: string = ui_files_filename;
+				let f: string   = ui_files_filename;
 				if (f == "") {
 					f = tr("untitled");
 				}
@@ -44,18 +44,18 @@ function tab_console_draw(htab: ui_handle_t) {
 				iron_file_save_bytes(path, sys_string_to_buffer(str), 0);
 			});
 		}
-		///if (arm_windows || arm_linux || arm_macos)
+		/// if (arm_windows || arm_linux || arm_macos)
 		if (ui_button(tr("Copy"))) {
 			let str: string = string_array_join(console_last_traces, "\n");
 			iron_copy_to_clipboard(str);
 		}
-		///end
+		/// end
 
 		ui_end_sticky();
 
 		let _font: draw_font_t = ui.ops.font;
-		let _font_size: i32 = ui.font_size;
-		let f: draw_font_t = data_get_font("font_mono.ttf");
+		let _font_size: i32    = ui.font_size;
+		let f: draw_font_t     = data_get_font("font_mono.ttf");
 		ui_set_font(ui, f);
 		ui.font_size = math_floor(15 * UI_SCALE());
 		for (let i: i32 = 0; i < console_last_traces.length; ++i) {

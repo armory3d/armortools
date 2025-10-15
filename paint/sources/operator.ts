@@ -1,14 +1,14 @@
 
 
-let operator_ops: map_t<string, ()=>void> = map_create();
+let operator_ops: map_t<string, () => void> = map_create();
 
-function operator_register(name: string, call: ()=>void) {
+function operator_register(name: string, call: () => void) {
 	map_set(operator_ops, name, call);
 }
 
 function operator_run(name: string) {
 	if (map_get(operator_ops, name) != null) {
-		let cb: ()=>void = map_get(operator_ops, name);
+		let cb: () => void = map_get(operator_ops, name);
 		cb();
 	}
 }
@@ -30,9 +30,9 @@ function operator_shortcut(s: string, type: shortcut_type_t = shortcut_type_t.ST
 		return false;
 	}
 	let shift: bool = string_index_of(s, "shift") >= 0;
-	let ctrl: bool = string_index_of(s, "ctrl") >= 0;
-	let alt: bool = string_index_of(s, "alt") >= 0;
-	let flag: bool = shift == keyboard_down("shift") && ctrl == keyboard_down("control") && alt == keyboard_down("alt");
+	let ctrl: bool  = string_index_of(s, "ctrl") >= 0;
+	let alt: bool   = string_index_of(s, "alt") >= 0;
+	let flag: bool  = shift == keyboard_down("shift") && ctrl == keyboard_down("control") && alt == keyboard_down("alt");
 
 	if (string_index_of(s, "+") > 0) {
 		s = substring(s, string_last_index_of(s, "+") + 1, s.length);

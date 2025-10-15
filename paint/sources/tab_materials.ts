@@ -23,7 +23,7 @@ function tab_materials_draw_mini(htab: ui_handle_t) {
 function tab_materials_draw_full(htab: ui_handle_t) {
 	if (ui_tab(htab, tr("Materials"))) {
 		ui_begin_sticky();
-		let row: f32[] = [1 / 4, 1 / 4, 1 / 4];
+		let row: f32[] = [ 1 / 4, 1 / 4, 1 / 4 ];
 		ui_row(row);
 
 		tab_materials_button_new(tr("New"));
@@ -49,7 +49,7 @@ function tab_materials_button_nodes() {
 
 function tab_materials_draw_slots(mini: bool) {
 	let slotw: i32 = math_floor((51 + math_floor(config_raw.window_scale * 2)) * UI_SCALE());
-	let num: i32 = math_floor(config_raw.layout[layout_size_t.SIDEBAR_W] / slotw);
+	let num: i32   = math_floor(config_raw.layout[layout_size_t.SIDEBAR_W] / slotw);
 	if (num == 0) {
 		return;
 	}
@@ -70,7 +70,7 @@ function tab_materials_draw_slots(mini: bool) {
 
 		for (let j: i32 = 0; j < num; ++j) {
 			let imgw: i32 = math_floor(50 * UI_SCALE());
-			let i: i32 = j + row * num;
+			let i: i32    = j + row * num;
 			if (i >= project_materials.length) {
 				ui_end_element_of_size(imgw);
 				if (config_raw.show_asset_names) {
@@ -78,7 +78,7 @@ function tab_materials_draw_slots(mini: bool) {
 				}
 				continue;
 			}
-			let img: gpu_texture_t = UI_SCALE() > 1 ? project_materials[i].image : project_materials[i].image_icon;
+			let img: gpu_texture_t      = UI_SCALE() > 1 ? project_materials[i].image : project_materials[i].image_icon;
 			let img_full: gpu_texture_t = project_materials[i].image;
 
 			// Highligh selected
@@ -89,30 +89,29 @@ function tab_materials_draw_slots(mini: bool) {
 				}
 				else {
 					let off: i32 = row % 2 == 1 ? 1 : 0;
-					let w: i32 = 50 + math_floor(config_raw.window_scale * 2);
-					ui_fill(-1,         -2, w + 3,       2, ui.ops.theme.HIGHLIGHT_COL);
-					ui_fill(-1,    w - off, w + 3, 2 + off, ui.ops.theme.HIGHLIGHT_COL);
-					ui_fill(-1,         -2,     2,   w + 3, ui.ops.theme.HIGHLIGHT_COL);
-					ui_fill(w + 1,      -2,     2,   w + 4, ui.ops.theme.HIGHLIGHT_COL);
+					let w: i32   = 50 + math_floor(config_raw.window_scale * 2);
+					ui_fill(-1, -2, w + 3, 2, ui.ops.theme.HIGHLIGHT_COL);
+					ui_fill(-1, w - off, w + 3, 2 + off, ui.ops.theme.HIGHLIGHT_COL);
+					ui_fill(-1, -2, 2, w + 3, ui.ops.theme.HIGHLIGHT_COL);
+					ui_fill(w + 1, -2, 2, w + 4, ui.ops.theme.HIGHLIGHT_COL);
 				}
 			}
 
 			// Draw material icon
-			let uix: f32 = ui._x;
-			let uiy: f32 = ui._y;
-			let tile: i32 = UI_SCALE() > 1 ? 100 : 50;
-			let imgh: f32 = mini ? ui_sidebar_default_w_mini * 0.85 * UI_SCALE() : 50 * UI_SCALE();
-			let state: ui_state_t = project_materials[i].preview_ready ?
-				ui_image(img, 0xffffffff, imgh) :
-				ui_sub_image(resource_get("icons.k"), 0xffffffff, -1.0, tile, tile, tile, tile);
+			let uix: f32          = ui._x;
+			let uiy: f32          = ui._y;
+			let tile: i32         = UI_SCALE() > 1 ? 100 : 50;
+			let imgh: f32         = mini ? ui_sidebar_default_w_mini * 0.85 * UI_SCALE() : 50 * UI_SCALE();
+			let state: ui_state_t = project_materials[i].preview_ready ? ui_image(img, 0xffffffff, imgh)
+			                                                           : ui_sub_image(resource_get("icons.k"), 0xffffffff, -1.0, tile, tile, tile, tile);
 
 			// Draw material numbers when selecting a material via keyboard shortcut
 			let is_typing: bool = ui.is_typing;
 			if (!is_typing) {
 				if (i < 9 && operator_shortcut(map_get(config_keymap, "select_material"), shortcut_type_t.DOWN)) {
 					let number: string = i32_to_string(i + 1);
-					let width: i32 = draw_string_width(ui.ops.font, ui.font_size, number) + 10;
-					let height: i32 = draw_font_height(ui.ops.font, ui.font_size);
+					let width: i32     = draw_string_width(ui.ops.font, ui.font_size, number) + 10;
+					let height: i32    = draw_font_height(ui.ops.font, ui.font_size);
 					draw_set_color(ui.ops.theme.TEXT_COL);
 					draw_filled_rect(uix, uiy, width, height);
 					draw_set_color(ui.ops.theme.BUTTON_COL);
@@ -128,14 +127,14 @@ function tab_materials_draw_slots(mini: bool) {
 						sys_notify_on_next_frame(layers_update_fill_layers);
 					}
 				}
-				base_drag_off_x = -(mouse_x - uix - ui._window_x - 3);
-				base_drag_off_y = -(mouse_y - uiy - ui._window_y + 1);
+				base_drag_off_x    = -(mouse_x - uix - ui._window_x - 3);
+				base_drag_off_y    = -(mouse_y - uiy - ui._window_y + 1);
 				base_drag_material = context_raw.material;
 				// Double click to show nodes
 				if (sys_time() - context_raw.select_time < 0.2) {
 					ui_base_show_material_nodes();
 					base_drag_material = null;
-					base_is_dragging = false;
+					base_is_dragging   = false;
 				}
 				context_raw.select_time = sys_time();
 			}
@@ -145,8 +144,8 @@ function tab_materials_draw_slots(mini: bool) {
 				context_select_material(i);
 				_tab_materials_draw_slots = i;
 
-				ui_menu_draw(function () {
-					let i: i32 = _tab_materials_draw_slots;
+				ui_menu_draw(function() {
+					let i: i32             = _tab_materials_draw_slots;
 					let m: slot_material_t = project_materials[i];
 
 					if (ui_menu_button(tr("To Fill Layer"))) {
@@ -165,13 +164,13 @@ function tab_materials_draw_slots(mini: bool) {
 					}
 
 					if (ui_menu_button(tr("Duplicate"))) {
-						sys_notify_on_next_frame(function () {
+						sys_notify_on_next_frame(function() {
 							let i: i32 = _tab_materials_draw_slots;
 
 							context_raw.material = slot_material_create(project_materials[0].data);
 							array_push(project_materials, context_raw.material);
 							let cloned: ui_node_canvas_t = util_clone_canvas(project_materials[i].canvas);
-							context_raw.material.canvas = cloned;
+							context_raw.material.canvas  = cloned;
 							tab_materials_update_material();
 							history_duplicate_material();
 						});
@@ -226,24 +225,17 @@ function tab_materials_draw_slots(mini: bool) {
 						subs_handle.b = m.paint_subs;
 					}
 
-					m.paint_base = ui_check(base_handle, tr("Base Color"));
-					m.paint_opac = ui_check(opac_handle, tr("Opacity"));
-					m.paint_nor = ui_check(nor_handle, tr("Normal"));
-					m.paint_occ = ui_check(occ_handle, tr("Occlusion"));
-					m.paint_rough = ui_check(rough_handle, tr("Roughness"));
-					m.paint_met = ui_check(met_handle, tr("Metallic"));
+					m.paint_base   = ui_check(base_handle, tr("Base Color"));
+					m.paint_opac   = ui_check(opac_handle, tr("Opacity"));
+					m.paint_nor    = ui_check(nor_handle, tr("Normal"));
+					m.paint_occ    = ui_check(occ_handle, tr("Occlusion"));
+					m.paint_rough  = ui_check(rough_handle, tr("Roughness"));
+					m.paint_met    = ui_check(met_handle, tr("Metallic"));
 					m.paint_height = ui_check(height_handle, tr("Height"));
-					m.paint_emis = ui_check(emis_handle, tr("Emission"));
-					m.paint_subs = ui_check(subs_handle, tr("Subsurface"));
-					if (base_handle.changed ||
-						opac_handle.changed ||
-						nor_handle.changed ||
-						occ_handle.changed ||
-						rough_handle.changed ||
-						met_handle.changed ||
-						height_handle.changed ||
-						emis_handle.changed ||
-						subs_handle.changed) {
+					m.paint_emis   = ui_check(emis_handle, tr("Emission"));
+					m.paint_subs   = ui_check(subs_handle, tr("Subsurface"));
+					if (base_handle.changed || opac_handle.changed || nor_handle.changed || occ_handle.changed || rough_handle.changed || met_handle.changed ||
+					    height_handle.changed || emis_handle.changed || subs_handle.changed) {
 						make_material_parse_paint_material();
 						ui_menu_keep_open = true;
 					}
@@ -283,8 +275,8 @@ function tab_materials_draw_slots(mini: bool) {
 		ui._y += mini ? 0 : 6;
 	}
 
-	let in_focus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
-						 ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
+	let in_focus: bool =
+	    ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w && ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
 	if (in_focus && ui.is_delete_down && project_materials.length > 1) {
 		ui.is_delete_down = false;
 		tab_materials_delete_material(context_raw.material);
@@ -304,8 +296,8 @@ function tab_materials_button_new(text: string) {
 
 function tab_materials_update_material() {
 	ui_header_handle.redraws = 2;
-	ui_nodes_hwnd.redraws = 2;
-	ui_nodes_group_stack = [];
+	ui_nodes_hwnd.redraws    = 2;
+	ui_nodes_group_stack     = [];
 	make_material_parse_paint_material();
 	util_render_make_material_preview();
 	let decal: bool = context_is_decal();
@@ -332,13 +324,9 @@ function tab_materials_accept_swatch_drop(swatch: swatch_color_t) {
 	context_raw.material = slot_material_create(project_materials[0].data);
 	for (let i: i32 = 0; i < context_raw.material.canvas.nodes.length; ++i) {
 		let node: ui_node_t = context_raw.material.canvas.nodes[i];
-		if (node.type == "RGB" ) {
-			node.outputs[0].default_value = f32_array_create_xyzw(
-				color_get_rb(swatch.base) / 255,
-				color_get_gb(swatch.base) / 255,
-				color_get_bb(swatch.base) / 255,
-				color_get_ab(swatch.base) / 255
-			);
+		if (node.type == "RGB") {
+			node.outputs[0].default_value = f32_array_create_xyzw(color_get_rb(swatch.base) / 255, color_get_gb(swatch.base) / 255,
+			                                                      color_get_bb(swatch.base) / 255, color_get_ab(swatch.base) / 255);
 		}
 		else if (node.type == "OUTPUT_MATERIAL_PBR") {
 			node.inputs[1].default_value[0] = swatch.opacity;

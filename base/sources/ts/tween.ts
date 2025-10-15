@@ -1,6 +1,6 @@
 
 let _tween_anims: tween_anim_t[] = [];
-let _tween_registered: bool = false;
+let _tween_registered: bool      = false;
 
 function _tween_register() {
 	_tween_registered = true;
@@ -19,8 +19,8 @@ function tween_to(anim: tween_anim_t): tween_anim_t {
 	return anim;
 }
 
-function tween_timer(delay: f32, done: (data: any)=>void, data: any = null): tween_anim_t {
-	let a: tween_anim_t = { delay: delay, done: done, done_data: data };
+function tween_timer(delay: f32, done: (data: any) => void, data: any = null): tween_anim_t {
+	let a: tween_anim_t = {delay : delay, done : done, done_data : data};
 	return tween_to(a);
 }
 
@@ -67,15 +67,22 @@ function tween_update() {
 	}
 }
 
-function _tween_ease_linear(k: f32): f32 { return k; }
+function _tween_ease_linear(k: f32): f32 {
+	return k;
+}
 // function _tween_ease_quad_in(k: f32): f32 { return k * k; }
 // function _tween_ease_quad_out(k: f32): f32 { return -k * (k - 2); }
 // function _tween_ease_quad_in_out(k: f32): f32 { return (k < 0.5) ? 2 * k * k : -2 * ((k -= 1) * k) + 1; }
-function _tween_ease_expo_in(k: f32): f32 { return k == 0 ? 0 : math_pow(2, 10 * (k - 1)); }
-function _tween_ease_expo_out(k: f32): f32 { return k == 1 ? 1 : (1 - math_pow(2, -10 * k)); }
-// function _tween_ease_expo_in_out(k: f32): f32 { if (k == 0) { return 0; } if (k == 1) { return 1; } if ((k /= 1 / 2.0) < 1.0) { return 0.5 * math_pow(2, 10 * (k - 1)); } return 0.5 * (2 - math_pow(2, -10 * --k)); }
-// function _tween_ease_bounce_in(k: f32): f32 { return 1 - _tween_ease_bounce_out(1 - k); }
-// function _tween_ease_bounce_out(k: f32): f32 { if (k < (1 / 2.75)) { return 7.5625 * k * k; } else if (k < (2 / 2.75)) { return 7.5625 * (k -= (1.5 / 2.75)) * k + 0.75; } else if (k < (2.5 / 2.75)) { return 7.5625 * (k -= (2.25 / 2.75)) * k + 0.9375; } else { return 7.5625 * (k -= (2.625 / 2.75)) * k + 0.984375; } }
+function _tween_ease_expo_in(k: f32): f32 {
+	return k == 0 ? 0 : math_pow(2, 10 * (k - 1));
+}
+function _tween_ease_expo_out(k: f32): f32 {
+	return k == 1 ? 1 : (1 - math_pow(2, -10 * k));
+}
+// function _tween_ease_expo_in_out(k: f32): f32 { if (k == 0) { return 0; } if (k == 1) { return 1; } if ((k /= 1 / 2.0) < 1.0) { return 0.5 * math_pow(2, 10 *
+// (k - 1)); } return 0.5 * (2 - math_pow(2, -10 * --k)); } function _tween_ease_bounce_in(k: f32): f32 { return 1 - _tween_ease_bounce_out(1 - k); } function
+// _tween_ease_bounce_out(k: f32): f32 { if (k < (1 / 2.75)) { return 7.5625 * k * k; } else if (k < (2 / 2.75)) { return 7.5625 * (k -= (1.5 / 2.75)) * k +
+// 0.75; } else if (k < (2.5 / 2.75)) { return 7.5625 * (k -= (2.25 / 2.75)) * k + 0.9375; } else { return 7.5625 * (k -= (2.625 / 2.75)) * k + 0.984375; } }
 // function _tween_ease_bounce_in_out(k: f32): f32 { return (k < 0.5) ? _tween_ease_bounce_in(k * 2) * 0.5 : _tween_ease_bounce_out(k * 2 - 1) * 0.5 + 0.5; }
 
 // function _tween_ease_elastic_in(k: f32): f32 {
@@ -190,8 +197,8 @@ type tween_anim_t = {
 	duration?: f32;
 	delay?: f32;
 	ease?: ease_t;
-	done?: (data?: any)=>void;
-	tick?: ()=>void;
+	done?: (data?: any) => void;
+	tick?: ()           => void;
 	done_data?: any;
 	_from?: f32;
 	_time?: f32;

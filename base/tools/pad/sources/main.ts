@@ -14,20 +14,20 @@ type storage_t = {
 
 let ui: ui_t;
 let theme: ui_theme_t;
-let text_handle: ui_handle_t = ui_handle_create();
+let text_handle: ui_handle_t    = ui_handle_create();
 let sidebar_handle: ui_handle_t = ui_handle_create();
-let editor_handle: ui_handle_t = ui_handle_create();
-let storage: storage_t = null;
-let resizing_sidebar: bool = false;
-let minimap_w: i32 = 150;
-let minimap_h: i32 = 0;
-let minimap_box_h: i32 = 0;
-let minimap_scrolling: bool = false;
-let minimap: gpu_texture_t = null;
-let window_header_h: i32 = 0;
+let editor_handle: ui_handle_t  = ui_handle_create();
+let storage: storage_t          = null;
+let resizing_sidebar: bool      = false;
+let minimap_w: i32              = 150;
+let minimap_h: i32              = 0;
+let minimap_box_h: i32          = 0;
+let minimap_scrolling: bool     = false;
+let minimap: gpu_texture_t      = null;
+let window_header_h: i32        = 0;
 
 function drop_files(path: string) {
-	storage.project = path;
+	storage.project        = path;
 	sidebar_handle.redraws = 1;
 }
 
@@ -58,16 +58,16 @@ function main() {
 
 	let blob_storage: buffer_t = iron_load_blob(iron_internal_save_path() + "/config.json");
 	if (blob_storage == null) {
-		storage = {};
-		storage.project = "";
-		storage.file = "untitled";
-		storage.text = "";
-		storage.modified = false;
-		storage.expanded = [];
-		storage.window_w = 1600;
-		storage.window_h = 900;
-		storage.window_x = -1;
-		storage.window_y = -1;
+		storage           = {};
+		storage.project   = "";
+		storage.file      = "untitled";
+		storage.text      = "";
+		storage.modified  = false;
+		storage.expanded  = [];
+		storage.window_w  = 1600;
+		storage.window_h  = 900;
+		storage.window_x  = -1;
+		storage.window_y  = -1;
 		storage.sidebar_w = 230;
 	}
 	else {
@@ -77,21 +77,19 @@ function main() {
 	text_handle.text = storage.text;
 
 	let ops: iron_window_options_t = {
-		title: "ArmorPad",
-		x: storage.window_x,
-		y: storage.window_y,
-		width: storage.window_w,
-		height: storage.window_h,
-		features: window_features_t.RESIZABLE |
-				  window_features_t.MAXIMIZABLE |
-				  window_features_t.MINIMIZABLE,
-		mode: window_mode_t.WINDOWED,
-		frequency: 60,
-		vsync: true,
-		display_index: 0,
-		visible: true,
-		color_bits: 32,
-		depth_bits: 0
+		title : "ArmorPad",
+		x : storage.window_x,
+		y : storage.window_y,
+		width : storage.window_w,
+		height : storage.window_h,
+		features : window_features_t.RESIZABLE | window_features_t.MAXIMIZABLE | window_features_t.MINIMIZABLE,
+		mode : window_mode_t.WINDOWED,
+		frequency : 60,
+		vsync : true,
+		display_index : 0,
+		visible : true,
+		color_bits : 32,
+		depth_bits : 0
 	};
 	sys_start(ops);
 
@@ -102,22 +100,18 @@ function main() {
 	ui_theme_default(theme);
 	theme.WINDOW_BG_COL = 0xff000000;
 	theme.SEPARATOR_COL = 0xff000000;
-	theme.BUTTON_COL = 0xff000000;
-	theme.FONT_SIZE = 18;
+	theme.BUTTON_COL    = 0xff000000;
+	theme.FONT_SIZE     = 18;
 
-	let ui_ops: ui_options_t = {
-		scale_factor: 1.0,
-		theme: theme,
-		font: font
-	};
-	ui = ui_create(ui_ops);
+	let ui_ops: ui_options_t = {scale_factor : 1.0, theme : theme, font : font};
+	ui                       = ui_create(ui_ops);
 
-	let blob_coloring: buffer_t = data_get_blob("text_coloring.json");
+	let blob_coloring: buffer_t           = data_get_blob("text_coloring.json");
 	let text_coloring: ui_text_coloring_t = json_parse(sys_buffer_to_string(blob_coloring));
-	ui_text_area_coloring = text_coloring;
-	ui_on_border_hover = on_border_hover;
-	ui_text_area_line_numbers = true;
-	ui_text_area_scroll_past_end = true;
+	ui_text_area_coloring                 = text_coloring;
+	ui_on_border_hover                    = on_border_hover;
+	ui_text_area_line_numbers             = true;
+	ui_text_area_scroll_past_end          = true;
 
 	sys_notify_on_render(render);
 	_iron_set_drop_files_callback(drop_files);
@@ -132,9 +126,9 @@ function armpack_to_string(bytes: buffer_t): string {
 function list_folder(path: string) {
 	let files: string[] = file_read_directory(path);
 	for (let i: i32 = 0; i < files.length; ++i) {
-		let f: string = files[i];
-		let abs: string = path + "/" + f;
-		let is_file: bool = string_index_of(f, ".") >= 0;
+		let f: string         = files[i];
+		let abs: string       = path + "/" + f;
+		let is_file: bool     = string_index_of(f, ".") >= 0;
 		let is_expanded: bool = array_index_of(storage.expanded, abs) >= 0;
 
 		// Active file
@@ -150,7 +144,7 @@ function list_folder(path: string) {
 		if (ui_button(prefix + f, UI_ALIGN_LEFT, "")) {
 			// Open file
 			if (is_file) {
-				storage.file = abs;
+				storage.file        = abs;
 				let bytes: buffer_t = iron_load_blob(storage.file);
 				if (ends_with(f, ".arm")) {
 					storage.text = armpack_to_string(bytes);
@@ -158,8 +152,8 @@ function list_folder(path: string) {
 				else {
 					storage.text = sys_buffer_to_string(bytes);
 				}
-				storage.text = string_replace_all(storage.text, "\r", "");
-				text_handle.text = storage.text;
+				storage.text          = string_replace_all(storage.text, "\r", "");
+				text_handle.text      = storage.text;
 				editor_handle.redraws = 1;
 				iron_window_set_title(abs);
 			}
@@ -208,10 +202,10 @@ function render() {
 	let editor_updated: bool = false;
 
 	if (ui_window(editor_handle, storage.sidebar_w + 1, 0, iron_window_width() - storage.sidebar_w - minimap_w, iron_window_height(), false)) {
-		editor_updated = true;
-		let htab: ui_handle_t = ui_handle(__ID__);
-		let file_name: string = substring(storage.file, string_last_index_of(storage.file, "/") + 1, storage.file.length);
-		let file_names: string[] = [file_name];
+		editor_updated           = true;
+		let htab: ui_handle_t    = ui_handle(__ID__);
+		let file_name: string    = substring(storage.file, string_last_index_of(storage.file, "/") + 1, storage.file.length);
+		let file_names: string[] = [ file_name ];
 
 		for (let i: i32 = 0; i < file_names.length; ++i) {
 			let tab_name: string = file_names[i];
@@ -233,7 +227,7 @@ function render() {
 			}
 		}
 
-		window_header_h = 32;//math_floor(ui.windowHeaderH);
+		window_header_h = 32; // math_floor(ui.windowHeaderH);
 	}
 
 	if (resizing_sidebar) {
@@ -246,7 +240,7 @@ function render() {
 	// Minimap controls
 	let minimap_x: i32 = iron_window_width() - minimap_w;
 	let minimap_y: i32 = window_header_h + 1;
-	let redraw: bool = false;
+	let redraw: bool   = false;
 	if (ui.input_started && hit_test(ui.input_x, ui.input_y, minimap_x + 5, minimap_y, minimap_w, minimap_h)) {
 		minimap_scrolling = true;
 	}
@@ -288,7 +282,7 @@ function save_file() {
 	}
 	storage.text = string_array_join(lines, "\n");
 	// Spaces to tabs
-	storage.text = string_replace_all(storage.text, "    ", "\t");
+	storage.text     = string_replace_all(storage.text, "    ", "\t");
 	text_handle.text = storage.text;
 	// Write bytes
 	// let bytes: buffer_t;
@@ -303,11 +297,11 @@ function save_file() {
 }
 
 function build_file(): string {
-	///if arm_windows
+	/// if arm_windows
 	return "\\build.bat";
-	///else
+	/// else
 	return "/build.sh";
-	///end
+	/// end
 }
 
 function build_project() {
@@ -325,10 +319,10 @@ function draw_minimap() {
 
 	draw_begin(minimap, true, theme.SEPARATOR_COL);
 	draw_set_color(0xff333333);
-	let lines: string[] = string_split(storage.text, "\n");
-	let minimap_full_h: i32 = lines.length * 2;
+	let lines: string[]      = string_split(storage.text, "\n");
+	let minimap_full_h: i32  = lines.length * 2;
 	let scroll_progress: f32 = -editor_handle.scroll_offset / (lines.length * UI_ELEMENT_H());
-	let out_of_screen: i32 = minimap_full_h - minimap_h;
+	let out_of_screen: i32   = minimap_full_h - minimap_h;
 	if (out_of_screen < 0) {
 		out_of_screen = 0;
 	}
@@ -340,7 +334,7 @@ function draw_minimap() {
 			break;
 		}
 		let words: string[] = string_split(lines[i + offset], " ");
-		let x: i32 = 0;
+		let x: i32          = 0;
 		for (let j: i32 = 0; j < words.length; ++j) {
 			let word: string = words[j];
 			draw_filled_rect(x, i * 2, word.length, 2);
@@ -376,12 +370,20 @@ function on_border_hover(handle: ui_handle_t, side: i32) {
 }
 
 ////
-type config_t = { server: string; };
-let config_raw: config_t;
-function strings_check_internet_connection(): string { return ""; }
+type config_t = {
+	server: string;
+};
+let      config_raw: config_t;
+function strings_check_internet_connection(): string {
+	return "";
+}
 function console_error(s: string) {}
 function console_info(s: string) {}
 function plugin_embed() {}
-function tr(id: string, vars: map_t<string, string> = null): string { return id; }
-let pipes_offset: i32;
-function pipes_get_constant_location(s: string): i32 { return 0; }
+function tr(id: string, vars: map_t<string, string> = null): string {
+	return id;
+}
+let      pipes_offset: i32;
+function pipes_get_constant_location(s: string): i32 {
+	return 0;
+}

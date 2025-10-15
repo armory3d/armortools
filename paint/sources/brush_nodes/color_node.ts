@@ -6,16 +6,16 @@ type color_node_t = {
 };
 
 function color_node_create(raw: ui_node_t, args: f32_array_t): color_node_t {
-	let r: f32 = args == null ? 0.8 : args[0];
-	let g: f32 = args == null ? 0.8 : args[1];
-	let b: f32 = args == null ? 0.8 : args[2];
-	let a: f32 = args == null ? 1.0 : args[3];
+	let r: f32          = args == null ? 0.8 : args[0];
+	let g: f32          = args == null ? 0.8 : args[1];
+	let b: f32          = args == null ? 0.8 : args[2];
+	let a: f32          = args == null ? 1.0 : args[3];
 	let n: color_node_t = {};
-	n.base = logic_node_create(n);
-	n.base.get = color_node_get;
+	n.base              = logic_node_create(n);
+	n.base.get          = color_node_get;
 	n.base.get_as_image = color_node_get_as_image;
-	n.base.set = color_node_set;
-	n.value = vec4_create(r, g, b, a);
+	n.base.set          = color_node_set;
+	n.value             = vec4_create(r, g, b, a);
 	return n;
 }
 
@@ -24,7 +24,7 @@ function color_node_get(self: color_node_t, from: i32): logic_node_value_t {
 		return logic_node_input_get(self.base.inputs[0]);
 	}
 	else {
-		let v: logic_node_value_t = { _vec4: self.value };
+		let v: logic_node_value_t = {_vec4 : self.value};
 		return v;
 	}
 }

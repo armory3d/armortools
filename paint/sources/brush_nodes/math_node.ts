@@ -7,15 +7,15 @@ type math_node_t = {
 
 function math_node_create(raw: ui_node_t, args: f32_array_t): math_node_t {
 	let n: math_node_t = {};
-	n.base = logic_node_create(n);
-	n.base.get = math_node_get;
+	n.base             = logic_node_create(n);
+	n.base.get         = math_node_get;
 	return n;
 }
 
 function math_node_get(self: math_node_t, from: i32): logic_node_value_t {
-	let v1: f32 = logic_node_input_get(self.base.inputs[0])._f32;
-	let v2: f32 = logic_node_input_get(self.base.inputs[1])._f32;
-	let f: f32 = 0.0;
+	let v1: f32    = logic_node_input_get(self.base.inputs[0])._f32;
+	let v2: f32    = logic_node_input_get(self.base.inputs[1])._f32;
+	let f: f32     = 0.0;
 	let op: string = self.operation;
 	if (op == "Add") {
 		f = v1 + v2;
@@ -127,83 +127,80 @@ function math_node_get(self: math_node_t, from: i32): logic_node_value_t {
 		f = f < 0.0 ? 0.0 : (f > 1.0 ? 1.0 : f);
 	}
 
-	let v: logic_node_value_t = {
-		_f32: f
-	};
+	let v: logic_node_value_t = {_f32 : f};
 	return v;
 }
 
 let math_node_def: ui_node_t = {
-	id: 0,
-	name: _tr("Math"),
-	type: "math_node",
-	x: 0,
-	y: 0,
-	color: 0xff4982a0,
-	inputs: [
+	id : 0,
+	name : _tr("Math"),
+	type : "math_node",
+	x : 0,
+	y : 0,
+	color : 0xff4982a0,
+	inputs : [
 		{
-			id: 0,
-			node_id: 0,
-			name: _tr("Value"),
-			type: "VALUE",
-			color: 0xffa1a1a1,
-			default_value: f32_array_create_x(0.5),
-			min: 0.0,
-			max: 1.0,
-			precision: 100,
-			display: 0
+			id : 0,
+			node_id : 0,
+			name : _tr("Value"),
+			type : "VALUE",
+			color : 0xffa1a1a1,
+			default_value : f32_array_create_x(0.5),
+			min : 0.0,
+			max : 1.0,
+			precision : 100,
+			display : 0
 		},
 		{
-			id: 0,
-			node_id: 0,
-			name: _tr("Value"),
-			type: "VALUE",
-			color: 0xffa1a1a1,
-			default_value: f32_array_create_x(0.5),
-			min: 0.0,
-			max: 1.0,
-			precision: 100,
-			display: 0
+			id : 0,
+			node_id : 0,
+			name : _tr("Value"),
+			type : "VALUE",
+			color : 0xffa1a1a1,
+			default_value : f32_array_create_x(0.5),
+			min : 0.0,
+			max : 1.0,
+			precision : 100,
+			display : 0
 		}
 	],
-	outputs: [
+	outputs : [ {
+		id : 0,
+		node_id : 0,
+		name : _tr("Value"),
+		type : "VALUE",
+		color : 0xffa1a1a1,
+		default_value : f32_array_create_x(0.0),
+		min : 0.0,
+		max : 1.0,
+		precision : 100,
+		display : 0
+	} ],
+	buttons : [
 		{
-			id: 0,
-			node_id: 0,
-			name: _tr("Value"),
-			type: "VALUE",
-			color: 0xffa1a1a1,
-			default_value: f32_array_create_x(0.0),
-			min: 0.0,
-			max: 1.0,
-			precision: 100,
-			display: 0
-		}
-	],
-	buttons: [
-		{
-			name: _tr("operation"),
-			type: "ENUM",
-			output: 0,
-			default_value: f32_array_create_x(0),
-			data: u8_array_create_from_string("Add\nSubtract\nMultiply\nDivide\nPower\nLogarithm\nSquare Root\nInverse Square Root\nAbsolute\nExponent\nMinimum\nMaximum\nLess Than\nGreater Than\nSign\nRound\nFloor\nCeil\nTruncate\nFraction\nModulo\nSnap\nPing-Pong\nSine\nCosine\nTangent\nArcsine\nArccosine\nArctangent\nArctan2\nHyperbolic Sine\nHyperbolic Cosine\nHyperbolic Tangent\nTo Radians\nTo Degrees"),
-			min: 0.0,
-			max: 1.0,
-			precision: 100,
-			height: 0
+			name : _tr("operation"),
+			type : "ENUM",
+			output : 0,
+			default_value : f32_array_create_x(0),
+			data : u8_array_create_from_string(
+			    "Add\nSubtract\nMultiply\nDivide\nPower\nLogarithm\nSquare Root\nInverse Square Root\nAbsolute\nExponent\nMinimum\nMaximum\nLess Than\nGreater Than\nSign\nRound\nFloor\nCeil\nTruncate\nFraction\nModulo\nSnap\nPing-Pong\nSine\nCosine\nTangent\nArcsine\nArccosine\nArctangent\nArctan2\nHyperbolic Sine\nHyperbolic Cosine\nHyperbolic Tangent\nTo Radians\nTo Degrees"),
+			min : 0.0,
+			max : 1.0,
+			precision : 100,
+			height : 0
 		},
 		{
-			name: _tr("use_clamp"),
-			type: "BOOL",
-			output: 0,
-			default_value: f32_array_create_x(0),
-			data: null,
-			min: 0.0,
-			max: 1.0,
-			precision: 100,
-			height: 0
+			name : _tr("use_clamp"),
+			type : "BOOL",
+			output : 0,
+			default_value : f32_array_create_x(0),
+			data : null,
+			min : 0.0,
+			max : 1.0,
+			precision : 100,
+			height : 0
 		}
 	],
-	width: 0,
-	flags: 0
+	width : 0,
+	flags : 0
 };

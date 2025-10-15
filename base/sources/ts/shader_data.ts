@@ -8,17 +8,17 @@ function shader_data_create(raw: shader_data_t): shader_data_t {
 }
 
 function shader_data_ext(): string {
-	///if arm_vulkan
+	/// if arm_vulkan
 	return ".spirv";
-	///elseif arm_metal
+	/// elseif arm_metal
 	return ".metal";
-	///else
+	/// else
 	return ".d3d11";
-	///end
+	/// end
 }
 
 function shader_data_parse(file: string, name: string): shader_data_t {
-	let format: scene_t = data_get_scene_raw(file);
+	let format: scene_t    = data_get_scene_raw(file);
 	let raw: shader_data_t = shader_data_get_raw_by_name(format.shader_datas, name);
 	if (raw == null) {
 		iron_log("Shader data '" + name + "' not found!");
@@ -68,13 +68,13 @@ function shader_context_compile(raw: shader_context_t) {
 	if (raw._.pipe != null) {
 		gpu_delete_pipeline(raw._.pipe);
 	}
-	raw._.pipe = gpu_create_pipeline();
-	raw._.constants = [];
-	raw._.tex_units = [];
+	raw._.pipe              = gpu_create_pipeline();
+	raw._.constants         = [];
+	raw._.tex_units         = [];
 	raw._.pipe.input_layout = raw._.structure;
-	raw._.pipe.depth_write = raw.depth_write;
-	raw._.pipe.depth_mode = shader_context_get_compare_mode(raw.compare_mode);
-	raw._.pipe.cull_mode = shader_context_get_cull_mode(raw.cull_mode);
+	raw._.pipe.depth_write  = raw.depth_write;
+	raw._.pipe.depth_mode   = shader_context_get_compare_mode(raw.compare_mode);
+	raw._.pipe.cull_mode    = shader_context_get_cull_mode(raw.cull_mode);
 	if (raw.blend_source != null) {
 		raw._.pipe.blend_source = shader_context_get_blend_fac(raw.blend_source);
 	}
@@ -118,45 +118,57 @@ function shader_context_compile(raw: shader_context_t) {
 	}
 
 	if (raw.shader_from_source) {
-		raw._.pipe.vertex_shader = gpu_create_shader_from_source(raw.vertex_shader, raw._.vertex_shader_size, shader_type_t.VERTEX);
+		raw._.pipe.vertex_shader   = gpu_create_shader_from_source(raw.vertex_shader, raw._.vertex_shader_size, shader_type_t.VERTEX);
 		raw._.pipe.fragment_shader = gpu_create_shader_from_source(raw.fragment_shader, raw._.fragment_shader_size, shader_type_t.FRAGMENT);
 		if (raw._.pipe.vertex_shader == null || raw._.pipe.fragment_shader == null) {
 			return;
 		}
 	}
 	else {
-		///if arm_embed
+		/// if arm_embed
 
 		raw._.pipe.fragment_shader = sys_get_shader(raw.fragment_shader);
-		raw._.pipe.vertex_shader = sys_get_shader(raw.vertex_shader);
+		raw._.pipe.vertex_shader   = sys_get_shader(raw.vertex_shader);
 
-		///else // Load shaders manually
+		/// else // Load shaders manually
 
-		let vs_buffer: buffer_t = data_get_blob(raw.vertex_shader + shader_data_ext());
-		raw._.pipe.vertex_shader = gpu_create_shader(vs_buffer, shader_type_t.VERTEX);
-		let fs_buffer: buffer_t = data_get_blob(raw.fragment_shader + shader_data_ext());
+		let vs_buffer: buffer_t    = data_get_blob(raw.vertex_shader + shader_data_ext());
+		raw._.pipe.vertex_shader   = gpu_create_shader(vs_buffer, shader_type_t.VERTEX);
+		let fs_buffer: buffer_t    = data_get_blob(raw.fragment_shader + shader_data_ext());
 		raw._.pipe.fragment_shader = gpu_create_shader(fs_buffer, shader_type_t.FRAGMENT);
-		///end
+		/// end
 	}
 
 	shader_context_finish_compile(raw);
 }
 
-///if arm_direct3d12
+/// if arm_direct3d12
 
 function shader_context_type_size(t: string): i32 {
-	if (t == "int") return 4;
-	if (t == "float") return 4;
-	if (t == "vec2") return 8;
-	if (t == "vec3") return 12;
-	if (t == "vec4") return 16;
-	if (t == "mat3") return 48;
-	if (t == "mat4") return 64;
-	if (t == "float2") return 8;
-	if (t == "float3") return 12;
-	if (t == "float4") return 16;
-	if (t == "float3x3") return 48;
-	if (t == "float4x4") return 64;
+	if (t == "int")
+		return 4;
+	if (t == "float")
+		return 4;
+	if (t == "vec2")
+		return 8;
+	if (t == "vec3")
+		return 12;
+	if (t == "vec4")
+		return 16;
+	if (t == "mat3")
+		return 48;
+	if (t == "mat4")
+		return 64;
+	if (t == "float2")
+		return 8;
+	if (t == "float3")
+		return 12;
+	if (t == "float4")
+		return 16;
+	if (t == "float3x3")
+		return 48;
+	if (t == "float4x4")
+		return 64;
 	return 0;
 }
 
@@ -171,21 +183,33 @@ function shader_context_type_pad(offset: i32, size: i32): i32 {
 	return 0;
 }
 
-///else
+/// else
 
 function shader_context_type_size(t: string): i32 {
-	if (t == "int") return 4;
-	if (t == "float") return 4;
-	if (t == "vec2") return 8;
-	if (t == "vec3") return 16;
-	if (t == "vec4") return 16;
-	if (t == "mat3") return 48;
-	if (t == "mat4") return 64;
-	if (t == "float2") return 8;
-	if (t == "float3") return 16;
-	if (t == "float4") return 16;
-	if (t == "float3x3") return 48;
-	if (t == "float4x4") return 64;
+	if (t == "int")
+		return 4;
+	if (t == "float")
+		return 4;
+	if (t == "vec2")
+		return 8;
+	if (t == "vec3")
+		return 16;
+	if (t == "vec4")
+		return 16;
+	if (t == "mat3")
+		return 48;
+	if (t == "mat4")
+		return 64;
+	if (t == "float2")
+		return 8;
+	if (t == "float3")
+		return 16;
+	if (t == "float4")
+		return 16;
+	if (t == "float3x3")
+		return 48;
+	if (t == "float4x4")
+		return 64;
 	return 0;
 }
 
@@ -196,7 +220,7 @@ function shader_context_type_pad(offset: i32, size: i32): i32 {
 	return (size - (offset % size)) % size;
 }
 
-///end
+/// end
 
 function shader_context_finish_compile(raw: shader_context_t) {
 	gpu_pipeline_compile(raw._.pipe);
@@ -204,7 +228,7 @@ function shader_context_finish_compile(raw: shader_context_t) {
 		let offset: i32 = 0;
 		for (let i: i32 = 0; i < raw.constants.length; ++i) {
 			let c: shader_const_t = raw.constants[i];
-			let size: i32 = shader_context_type_size(c.type);
+			let size: i32         = shader_context_type_size(c.type);
 			offset += shader_context_type_pad(offset, size);
 			shader_context_add_const(raw, offset);
 			offset += size;
@@ -242,7 +266,7 @@ function shader_context_parse_data(data: string): vertex_data_t {
 
 function shader_context_parse_vertex_struct(raw: shader_context_t) {
 	let structure: gpu_vertex_structure_t = {};
-	raw._.structure = structure;
+	raw._.structure                       = structure;
 
 	for (let i: i32 = 0; i < raw.vertex_elements.length; ++i) {
 		let elem: vertex_element_t = raw.vertex_elements[i];

@@ -8,16 +8,16 @@ function tab_meshes_draw(htab: ui_handle_t) {
 		ui_begin_sticky();
 
 		if (config_raw.touch_ui) {
-			let row: f32[] = [1 / 4, 1 / 4];
+			let row: f32[] = [ 1 / 4, 1 / 4 ];
 			ui_row(row);
 		}
 		else {
-			let row: f32[] = [1 / 14, 1 / 14];
+			let row: f32[] = [ 1 / 14, 1 / 14 ];
 			ui_row(row);
 		}
 
 		if (ui_button(tr("Import"))) {
-			ui_menu_draw(function () {
+			ui_menu_draw(function() {
 				if (ui_menu_button(tr("Replace Existing"), map_get(config_keymap, "file_import_assets"))) {
 					project_import_mesh(true);
 				}
@@ -37,20 +37,19 @@ function tab_meshes_draw(htab: ui_handle_t) {
 				// }
 			});
 		}
-		if (ui.is_hovered) ui_tooltip(tr("Import mesh file"));
-
+		if (ui.is_hovered)
+			ui_tooltip(tr("Import mesh file"));
 
 		if (ui_button(tr("Edit"))) {
 
-			ui_menu_draw(function () {
-
+			ui_menu_draw(function() {
 				if (ui_menu_button(tr("Flip Normals"))) {
 					util_mesh_flip_normals();
 					context_raw.ddirty = 2;
 				}
 
 				if (ui_menu_button(tr("Calculate Normals"))) {
-					ui_menu_draw(function () {
+					ui_menu_draw(function() {
 						if (ui_menu_button(tr("Smooth"))) {
 							util_mesh_calc_normals(true);
 							context_raw.ddirty = 2;
@@ -75,7 +74,7 @@ function tab_meshes_draw(htab: ui_handle_t) {
 				}
 
 				if (ui_menu_button(tr("Rotate"))) {
-					ui_menu_draw(function () {
+					ui_menu_draw(function() {
 						if (ui_menu_button(tr("Rotate X"))) {
 							util_mesh_swap_axis(1, 2);
 							context_raw.ddirty = 2;
@@ -107,15 +106,15 @@ function tab_meshes_draw(htab: ui_handle_t) {
 
 		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 			let o: mesh_object_t = project_paint_objects[i];
-			let h: ui_handle_t = ui_handle(__ID__);
-			h.b = o.base.visible;
-			o.base.visible = ui_check(h, o.base.name);
+			let h: ui_handle_t   = ui_handle(__ID__);
+			h.b                  = o.base.visible;
+			o.base.visible       = ui_check(h, o.base.name);
 
 			if (ui.is_hovered && ui.input_released_r) {
 				_tab_meshes_draw_i = i;
 
-				ui_menu_draw(function () {
-					let i: i32 = _tab_meshes_draw_i;
+				ui_menu_draw(function() {
+					let i: i32           = _tab_meshes_draw_i;
 					let o: mesh_object_t = project_paint_objects[i];
 
 					if (ui_menu_button(tr("Export"))) {
@@ -142,44 +141,43 @@ function tab_meshes_draw(htab: ui_handle_t) {
 						context_raw.ddirty = 2;
 					}
 
-
 					context_raw.selected_object = o.base;
-					let h: ui_handle_t = ui_handle(__ID__);
+					let h: ui_handle_t          = ui_handle(__ID__);
 					// h.b = context_raw.selected_object.visible;
 					// context_raw.selected_object.visible = ui_check(h, "Visible");
 					// if (h.changed) {
-						// Rebuild full vb for path-tracing
-						// util_mesh_merge();
+					// Rebuild full vb for path-tracing
+					// util_mesh_merge();
 					// }
 
 					let t: transform_t = context_raw.selected_object.transform;
-					let rot: vec4_t = quat_get_euler(t.rot);
-					rot = vec4_mult(rot, 180 / 3.141592);
-					let f: f32 = 0.0;
-					let changed: bool = false;
+					let rot: vec4_t    = quat_get_euler(t.rot);
+					rot                = vec4_mult(rot, 180 / 3.141592);
+					let f: f32         = 0.0;
+					let changed: bool  = false;
 
 					ui_row4();
 					ui_text("Loc");
 
-					h = ui_handle(__ID__);
+					h      = ui_handle(__ID__);
 					h.text = f32_to_string(t.loc.x);
-					f = parse_float(ui_text_input(h, "X"));
+					f      = parse_float(ui_text_input(h, "X"));
 					if (h.changed) {
 						changed = true;
 						t.loc.x = f;
 					}
 
-					h = ui_handle(__ID__);
+					h      = ui_handle(__ID__);
 					h.text = f32_to_string(t.loc.y);
-					f = parse_float(ui_text_input(h, "Y"));
+					f      = parse_float(ui_text_input(h, "Y"));
 					if (h.changed) {
 						changed = true;
 						t.loc.y = f;
 					}
 
-					h = ui_handle(__ID__);
+					h      = ui_handle(__ID__);
 					h.text = f32_to_string(t.loc.z);
-					f = parse_float(ui_text_input(h, "Z"));
+					f      = parse_float(ui_text_input(h, "Z"));
 					if (h.changed) {
 						changed = true;
 						t.loc.z = f;
@@ -188,86 +186,86 @@ function tab_meshes_draw(htab: ui_handle_t) {
 					ui_row4();
 					ui_text("Rot");
 
-					h = ui_handle(__ID__);
+					h      = ui_handle(__ID__);
 					h.text = f32_to_string(rot.x);
-					f = parse_float(ui_text_input(h, "X"));
+					f      = parse_float(ui_text_input(h, "X"));
 					if (h.changed) {
 						changed = true;
-						rot.x = f;
+						rot.x   = f;
 					}
 
-					h = ui_handle(__ID__);
+					h      = ui_handle(__ID__);
 					h.text = f32_to_string(rot.y);
-					f = parse_float(ui_text_input(h, "Y"));
+					f      = parse_float(ui_text_input(h, "Y"));
 					if (h.changed) {
 						changed = true;
-						rot.y = f;
+						rot.y   = f;
 					}
 
-					h = ui_handle(__ID__);
+					h      = ui_handle(__ID__);
 					h.text = f32_to_string(rot.z);
-					f = parse_float(ui_text_input(h, "Z"));
+					f      = parse_float(ui_text_input(h, "Z"));
 					if (h.changed) {
 						changed = true;
-						rot.z = f;
+						rot.z   = f;
 					}
 
 					ui_row4();
 					ui_text("Scale");
 
-					h = ui_handle(__ID__);
+					h      = ui_handle(__ID__);
 					h.text = f32_to_string(t.scale.x);
-					f = parse_float(ui_text_input(h, "X"));
+					f      = parse_float(ui_text_input(h, "X"));
 					if (h.changed) {
-						changed = true;
+						changed   = true;
 						t.scale.x = f;
 					}
 
-					h = ui_handle(__ID__);
+					h      = ui_handle(__ID__);
 					h.text = f32_to_string(t.scale.y);
-					f = parse_float(ui_text_input(h, "Y"));
+					f      = parse_float(ui_text_input(h, "Y"));
 					if (h.changed) {
-						changed = true;
+						changed   = true;
 						t.scale.y = f;
 					}
 
-					h = ui_handle(__ID__);
+					h      = ui_handle(__ID__);
 					h.text = f32_to_string(t.scale.z);
-					f = parse_float(ui_text_input(h, "Z"));
+					f      = parse_float(ui_text_input(h, "Z"));
 					if (h.changed) {
-						changed = true;
+						changed   = true;
 						t.scale.z = f;
 					}
 
 					ui_row4();
 					ui_text("Dim");
 
-					h = ui_handle(__ID__);
+					h      = ui_handle(__ID__);
 					h.text = f32_to_string(t.dim.x);
-					f = parse_float(ui_text_input(h, "X"));
+					f      = parse_float(ui_text_input(h, "X"));
 					if (h.changed) {
 						changed = true;
 						t.dim.x = f;
 					}
 
-					h = ui_handle(__ID__);
+					h      = ui_handle(__ID__);
 					h.text = f32_to_string(t.dim.y);
-					f = parse_float(ui_text_input(h, "Y"));
+					f      = parse_float(ui_text_input(h, "Y"));
 					if (h.changed) {
 						changed = true;
 						t.dim.y = f;
 					}
 
-					h = ui_handle(__ID__);
+					h      = ui_handle(__ID__);
 					h.text = f32_to_string(t.dim.z);
-					f = parse_float(ui_text_input(h, "Z"));
+					f      = parse_float(ui_text_input(h, "Z"));
 					if (h.changed) {
 						changed = true;
 						t.dim.z = f;
 					}
 
 					if (changed) {
-						rot = vec4_mult(rot, 3.141592 / 180);
+						rot                                       = vec4_mult(rot, 3.141592 / 180);
 						context_raw.selected_object.transform.rot = quat_from_euler(rot.x, rot.y, rot.z);
 						transform_build_matrix(context_raw.selected_object.transform);
 						transform_compute_dim(context_raw.selected_object.transform);
@@ -278,8 +276,8 @@ function tab_meshes_draw(htab: ui_handle_t) {
 						}
 					}
 
-					let pb: physics_body_t = map_get(physics_body_object_map, context_raw.selected_object.uid);
-					let hshape: ui_handle_t = ui_handle(__ID__);
+					let pb: physics_body_t    = map_get(physics_body_object_map, context_raw.selected_object.uid);
+					let hshape: ui_handle_t   = ui_handle(__ID__);
 					let shape_combo: string[] = [
 						tr("None"),
 						tr("Box"),
@@ -292,7 +290,7 @@ function tab_meshes_draw(htab: ui_handle_t) {
 					ui_combo(hshape, shape_combo, tr("Shape"), true);
 
 					let hdynamic: ui_handle_t = ui_handle(__ID__);
-					hdynamic.b = pb != null ? pb.mass > 0 : false;
+					hdynamic.b                = pb != null ? pb.mass > 0 : false;
 					ui_check(hdynamic, "Dynamic");
 
 					if (hshape.changed || hdynamic.changed) {
@@ -310,13 +308,13 @@ function tab_meshes_draw(htab: ui_handle_t) {
 					}
 
 					let hscript: ui_handle_t = ui_handle(__ID__);
-					hscript.text = script;
+					hscript.text             = script;
 
 					let _font: draw_font_t = ui.ops.font;
-					let _font_size: i32 = ui.font_size;
+					let _font_size: i32    = ui.font_size;
 					let fmono: draw_font_t = data_get_font("font_mono.ttf");
 					ui_set_font(ui, fmono);
-					ui.font_size = math_floor(15 * UI_SCALE());
+					ui.font_size          = math_floor(15 * UI_SCALE());
 					ui_text_area_coloring = tab_scripts_get_text_coloring();
 					ui_text_area(hscript);
 					ui_text_area_coloring = null;
@@ -325,8 +323,6 @@ function tab_meshes_draw(htab: ui_handle_t) {
 
 					script = hscript.text;
 					map_set(sim_object_script_map, context_raw.selected_object, script);
-
-
 				});
 			}
 			if (h.changed) {
@@ -346,15 +342,15 @@ function tab_meshes_draw(htab: ui_handle_t) {
 
 function tab_meshes_append_shape(mesh_name: string) {
 	let blob: buffer_t = iron_load_blob(data_path() + "meshes/" + mesh_name + ".arm");
-	let raw: scene_t = armpack_decode(blob);
+	let raw: scene_t   = armpack_decode(blob);
 	util_mesh_pack_uvs(raw.mesh_datas[0].vertex_arrays[2].values);
-	let md: mesh_data_t = mesh_data_create(raw.mesh_datas[0]);
-	md._.handle = md.name;
+	let md: mesh_data_t   = mesh_data_create(raw.mesh_datas[0]);
+	md._.handle           = md.name;
 	let mo: mesh_object_t = scene_add_mesh_object(md, project_paint_objects[0].material);
-	mo.base.name = md.name;
-	let o: obj_t = {};
-	o._ = { _gc: raw };
-	mo.base.raw = o;
+	mo.base.name          = md.name;
+	let o: obj_t          = {};
+	o._                   = {_gc : raw};
+	mo.base.raw           = o;
 	map_set(data_cached_meshes, md._.handle, md);
 	array_push(project_paint_objects, mo);
 	// tab_scene_import_mesh_done();
@@ -365,7 +361,7 @@ function tab_meshes_append_shape(mesh_name: string) {
 
 ////
 
-let tab_scene_line_counter: i32 = 0;
+let tab_scene_line_counter: i32         = 0;
 let _tab_scene_paint_object_length: i32 = 1;
 
 function tab_scene_select_object(mo: mesh_object_t) {
@@ -388,7 +384,7 @@ function tab_scene_select_object(mo: mesh_object_t) {
 
 function tab_scene_sort() {
 	let scene: object_t = _scene_root.children[0];
-	array_sort(scene.children, function (pa: any_ptr, pb: any_ptr): i32 {
+	array_sort(scene.children, function(pa: any_ptr, pb: any_ptr): i32 {
 		let a: object_t = DEREFERENCE(pa);
 		let b: object_t = DEREFERENCE(pb);
 		return strcmp(a.name, b.name);
@@ -396,7 +392,7 @@ function tab_scene_sort() {
 }
 
 function tab_scene_import_mesh_done() {
-	let count: i32 = project_paint_objects.length - _tab_scene_paint_object_length;
+	let count: i32                 = project_paint_objects.length - _tab_scene_paint_object_length;
 	_tab_scene_paint_object_length = project_paint_objects.length;
 
 	for (let i: i32 = 0; i < count; ++i) {
@@ -434,7 +430,7 @@ function tab_scene_draw_list(list_handle: ui_handle_t, current_object: object_t)
 	}
 
 	if (current_object.children.length > 0) {
-		let row: f32[] = [1 / 13, 12 / 13];
+		let row: f32[] = [ 1 / 13, 12 / 13 ];
 		ui_row(row);
 		let h: ui_handle_t = ui_nest(list_handle, tab_scene_line_counter);
 		if (h.init) {
@@ -466,7 +462,7 @@ function tab_scene_draw_list(list_handle: ui_handle_t, current_object: object_t)
 	if (ui.is_hovered && ui.input_released_r) {
 		tab_scene_select_object(current_object.ext);
 
-		ui_menu_draw(function () {
+		ui_menu_draw(function() {
 			if (ui_menu_button(tr("Duplicate"))) {
 				sim_duplicate();
 			}

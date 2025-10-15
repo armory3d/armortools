@@ -22,28 +22,28 @@ FN(plugin_uv_unwrap_button) {
 void *io_svg_parse(char *buf);
 FN(io_svg_parse) {
 	size_t len;
-	void *ab = JS_GetArrayBuffer(ctx, &len, argv[0]);
+	void  *ab = JS_GetArrayBuffer(ctx, &len, argv[0]);
 	return JS_NewBigUint64(ctx, (uint64_t)io_svg_parse(ab));
 }
 
 void *io_exr_parse(char *buf, size_t len);
 FN(io_exr_parse) {
 	size_t len;
-	void *ab = JS_GetArrayBuffer(ctx, &len, argv[0]);
+	void  *ab = JS_GetArrayBuffer(ctx, &len, argv[0]);
 	return JS_NewBigUint64(ctx, (uint64_t)io_exr_parse(ab, len));
 }
 
 void *io_usd_parse(char *buf, size_t size);
 FN(io_usd_parse) {
 	size_t len;
-	void *ab = JS_GetArrayBuffer(ctx, &len, argv[0]);
+	void  *ab = JS_GetArrayBuffer(ctx, &len, argv[0]);
 	return JS_NewBigUint64(ctx, (uint64_t)io_usd_parse(ab, len));
 }
 
 void *io_gltf_parse(char *buf, size_t size, const char *path);
 FN(io_gltf_parse) {
-	size_t len;
-	void *ab = JS_GetArrayBuffer(ctx, &len, argv[0]);
+	size_t      len;
+	void       *ab   = JS_GetArrayBuffer(ctx, &len, argv[0]);
 	const char *path = JS_ToCString(ctx, argv[1]);
 	return JS_NewBigUint64(ctx, (uint64_t)io_gltf_parse(ab, len, path));
 }
@@ -51,7 +51,7 @@ FN(io_gltf_parse) {
 void *io_fbx_parse(char *buf, size_t size);
 FN(io_fbx_parse) {
 	size_t len;
-	void *ab = JS_GetArrayBuffer(ctx, &len, argv[0]);
+	void  *ab = JS_GetArrayBuffer(ctx, &len, argv[0]);
 	return JS_NewBigUint64(ctx, (uint64_t)io_fbx_parse(ab, len));
 }
 
@@ -63,28 +63,28 @@ VOID_FN_PTR_CB(plugin_notify_on_update)
 VOID_FN_PTR_CB(plugin_notify_on_delete)
 
 static JSObject *ui_files_cb;
-static void ui_files_done(char *path) {
-	JSValue path_val = JS_NewString(js_ctx, path);
-	JSValue argv[] = { path_val };
-	js_call_arg(ui_files_cb, 1, argv);
+static void      ui_files_done(char *path) {
+    JSValue path_val = JS_NewString(js_ctx, path);
+    JSValue argv[]   = {path_val};
+    js_call_arg(ui_files_cb, 1, argv);
 }
 
-void ui_files_show(char *s, bool b0, bool b1, void(*f)(char *));
+void ui_files_show(char *s, bool b0, bool b1, void (*f)(char *));
 FN(ui_files_show) {
-	char *filters = (char *)JS_ToCString(ctx, argv[0]);
-	bool is_save = JS_ToBool(ctx, argv[1]);
-	bool open_multiple = JS_ToBool(ctx, argv[2]);
-	ui_files_cb = malloc(sizeof(JSValue));
-	JSValue dup = JS_DupValue(ctx, argv[3]);
+	char *filters       = (char *)JS_ToCString(ctx, argv[0]);
+	bool  is_save       = JS_ToBool(ctx, argv[1]);
+	bool  open_multiple = JS_ToBool(ctx, argv[2]);
+	ui_files_cb         = malloc(sizeof(JSValue));
+	JSValue dup         = JS_DupValue(ctx, argv[3]);
 	memcpy(ui_files_cb, &dup, sizeof(JSValue));
 	ui_files_show(filters, is_save, open_multiple, ui_files_done);
 	return JS_UNDEFINED;
 }
 
-void ui_box_show_message(char *s0, char *s1, bool b);
+void        ui_box_show_message(char *s0, char *s1, bool b);
 extern bool ui_box_click_to_hide;
 FN(ui_box_show_message) {
-	char *title = (char *)JS_ToCString(ctx, argv[0]);
+	char *title   = (char *)JS_ToCString(ctx, argv[0]);
 	char *message = (char *)JS_ToCString(ctx, argv[1]);
 	ui_box_show_message(title, message, true);
 	ui_box_click_to_hide = false;
@@ -121,16 +121,16 @@ extern any_array_t *nodes_material_list;
 FN(nodes_material_category_add) {
 	char *category_name = (char *)JS_ToCString(ctx, argv[0]);
 	any_array_push(nodes_material_categories, category_name);
-	size_t len;
-	void *ab = JS_GetArrayBuffer(ctx, &len, argv[1]);
-	buffer_t b = { .buffer = ab, .length = len, .capacity = len };
+	size_t   len;
+	void    *ab = JS_GetArrayBuffer(ctx, &len, argv[1]);
+	buffer_t b  = {.buffer = ab, .length = len, .capacity = len};
 	any_array_push(nodes_material_list, armpack_decode(&b));
 	return JS_UNDEFINED;
 }
 
 FN(nodes_material_category_remove) {
 	char *category_name = (char *)JS_ToCString(ctx, argv[0]);
-	int i = array_index_of(nodes_material_categories, category_name);
+	int   i             = array_index_of(nodes_material_categories, category_name);
 	array_splice(nodes_material_list, i, 1);
 	array_splice(nodes_material_categories, i, 1);
 	return JS_UNDEFINED;
@@ -138,10 +138,10 @@ FN(nodes_material_category_remove) {
 
 extern any_map_t *parser_material_custom_nodes;
 FN(parser_material_custom_nodes_set) {
-	char *node_type = (char *)JS_ToCString(ctx, argv[0]);
-	JSValue *p = malloc(sizeof(JSValue));\
-	JSValue dup = JS_DupValue(ctx, argv[1]);\
-	memcpy(p, &dup, sizeof(JSValue));\
+	char    *node_type = (char *)JS_ToCString(ctx, argv[0]);
+	JSValue *p         = malloc(sizeof(JSValue));
+	JSValue  dup       = JS_DupValue(ctx, argv[1]);
+	memcpy(p, &dup, sizeof(JSValue));
 	any_map_set(parser_material_custom_nodes, node_type, p);
 	return JS_UNDEFINED;
 }
@@ -169,13 +169,13 @@ FN(parser_material_parse_value_input) {
 
 extern any_array_t *nodes_brush_categories;
 extern any_array_t *nodes_brush_list;
-void nodes_brush_list_init();
+void                nodes_brush_list_init();
 FN(nodes_brush_category_add) {
 	char *category_name = (char *)JS_ToCString(ctx, argv[0]);
 	any_array_push(nodes_brush_categories, category_name);
-	size_t len;
-	void *ab = JS_GetArrayBuffer(ctx, &len, argv[1]);
-	buffer_t b = { .buffer = ab, .length = len, .capacity = len };
+	size_t   len;
+	void    *ab = JS_GetArrayBuffer(ctx, &len, argv[1]);
+	buffer_t b  = {.buffer = ab, .length = len, .capacity = len};
 	nodes_brush_list_init();
 	any_array_push(nodes_brush_list, armpack_decode(&b));
 	return JS_UNDEFINED;
@@ -183,7 +183,7 @@ FN(nodes_brush_category_add) {
 
 FN(nodes_brush_category_remove) {
 	char *category_name = (char *)JS_ToCString(ctx, argv[0]);
-	int i = array_index_of(nodes_brush_categories, category_name);
+	int   i             = array_index_of(nodes_brush_categories, category_name);
 	array_splice(nodes_brush_list, i, 1);
 	array_splice(nodes_brush_categories, i, 1);
 	return JS_UNDEFINED;
@@ -191,10 +191,10 @@ FN(nodes_brush_category_remove) {
 
 extern any_map_t *parser_logic_custom_nodes;
 FN(parser_logic_custom_nodes_set) {
-	char *node_type = (char *)JS_ToCString(ctx, argv[0]);
-	JSValue *p = malloc(sizeof(JSValue));\
-	JSValue dup = JS_DupValue(ctx, argv[1]);\
-	memcpy(p, &dup, sizeof(JSValue));\
+	char    *node_type = (char *)JS_ToCString(ctx, argv[0]);
+	JSValue *p         = malloc(sizeof(JSValue));
+	JSValue  dup       = JS_DupValue(ctx, argv[1]);
+	memcpy(p, &dup, sizeof(JSValue));
 	any_map_set(parser_logic_custom_nodes, node_type, p);
 	return JS_UNDEFINED;
 }
@@ -207,10 +207,10 @@ FN(parser_logic_custom_nodes_delete) {
 
 extern any_map_t *util_mesh_unwrappers;
 FN(util_mesh_unwrappers_set) {
-	char *plugin_name = (char *)JS_ToCString(ctx, argv[0]);
-	JSValue *p = malloc(sizeof(JSValue));\
-	JSValue dup = JS_DupValue(ctx, argv[1]);\
-	memcpy(p, &dup, sizeof(JSValue));\
+	char    *plugin_name = (char *)JS_ToCString(ctx, argv[0]);
+	JSValue *p           = malloc(sizeof(JSValue));
+	JSValue  dup         = JS_DupValue(ctx, argv[1]);
+	memcpy(p, &dup, sizeof(JSValue));
 	any_map_set(util_mesh_unwrappers, plugin_name, p);
 	return JS_UNDEFINED;
 }
@@ -221,13 +221,13 @@ FN(util_mesh_unwrappers_delete) {
 	return JS_UNDEFINED;
 }
 
-extern any_map_t *path_mesh_importers;
+extern any_map_t        *path_mesh_importers;
 extern char_ptr_array_t *path_mesh_formats;
 FN(path_mesh_importers_set) {
-	char *format_name = (char *)JS_ToCString(ctx, argv[0]);
-	JSValue *p = malloc(sizeof(JSValue));\
-	JSValue dup = JS_DupValue(ctx, argv[1]);\
-	memcpy(p, &dup, sizeof(JSValue));\
+	char    *format_name = (char *)JS_ToCString(ctx, argv[0]);
+	JSValue *p           = malloc(sizeof(JSValue));
+	JSValue  dup         = JS_DupValue(ctx, argv[1]);
+	memcpy(p, &dup, sizeof(JSValue));
 	any_map_set(path_mesh_importers, format_name, p);
 	any_array_push(path_mesh_formats, format_name);
 	return JS_UNDEFINED;
@@ -240,13 +240,13 @@ FN(path_mesh_importers_delete) {
 	return JS_UNDEFINED;
 }
 
-extern any_map_t *path_texture_importers;
+extern any_map_t        *path_texture_importers;
 extern char_ptr_array_t *path_texture_formats;
 FN(path_texture_importers_set) {
-	char *format_name = (char *)JS_ToCString(ctx, argv[0]);
-	JSValue *p = malloc(sizeof(JSValue));\
-	JSValue dup = JS_DupValue(ctx, argv[1]);\
-	memcpy(p, &dup, sizeof(JSValue));\
+	char    *format_name = (char *)JS_ToCString(ctx, argv[0]);
+	JSValue *p           = malloc(sizeof(JSValue));
+	JSValue  dup         = JS_DupValue(ctx, argv[1]);
+	memcpy(p, &dup, sizeof(JSValue));
 	any_map_set(path_texture_importers, format_name, p);
 	any_array_push(path_texture_formats, format_name);
 	return JS_UNDEFINED;

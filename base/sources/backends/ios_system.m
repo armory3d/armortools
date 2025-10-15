@@ -1,29 +1,29 @@
 #include "ios_system.h"
-#include <wchar.h>
-#include <iron_gpu.h>
-#include <iron_system.h>
-#include <iron_math.h>
-#include <objc/runtime.h>
-#include <mach/mach_time.h>
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#include <iron_gpu.h>
+#include <iron_math.h>
+#include <iron_system.h>
+#include <mach/mach_time.h>
+#include <objc/runtime.h>
+#include <wchar.h>
 
 #define MAX_TOUCH_COUNT 10
 
-static char ios_title[1024];
-static void *touches[MAX_TOUCH_COUNT];
-static int backing_width;
-static int backing_height;
-static bool shift_down = false;
-static bool visible;
-static MyView *my_view;
+static char              ios_title[1024];
+static void             *touches[MAX_TOUCH_COUNT];
+static int               backing_width;
+static int               backing_height;
+static bool              shift_down = false;
+static bool              visible;
+static MyView           *my_view;
 static MyViewController *my_view_controller;
-static bool keyboard_shown = false;
-static char language[3];
-static char sysid[512];
-static const char *video_formats[] = {"mp4", NULL};
+static bool              keyboard_shown = false;
+static char              language[3];
+static char              sysid[512];
+static const char       *video_formats[]                 = {"mp4", NULL};
 static void (*resize_callback)(int x, int y, void *data) = NULL;
-static void *resize_callback_data = NULL;
+static void *resize_callback_data                        = NULL;
 
 void iron_internal_call_resize_callback(int width, int height) {
 	if (resize_callback != NULL) {
@@ -84,9 +84,9 @@ void iron_display_init(void) {}
 
 iron_display_mode_t iron_display_current_mode(int display) {
 	iron_display_mode_t dm;
-	dm.width = iron_window_width();
-	dm.height = iron_window_height();
-	dm.frequency = (int)[[UIScreen mainScreen] maximumFramesPerSecond];
+	dm.width          = iron_window_width();
+	dm.height         = iron_window_height();
+	dm.frequency      = (int)[[UIScreen mainScreen] maximumFramesPerSecond];
 	dm.bits_per_pixel = 32;
 	return dm;
 }
@@ -149,11 +149,11 @@ void iron_load_url(const char *url) {
 }
 
 const char *iron_language(void) {
-	NSString *nsstr = [[NSLocale preferredLanguages] objectAtIndex:0];
-	const char *lang = [nsstr UTF8String];
-	language[0] = lang[0];
-	language[1] = lang[1];
-	language[2] = 0;
+	NSString   *nsstr = [[NSLocale preferredLanguages] objectAtIndex:0];
+	const char *lang  = [nsstr UTF8String];
+	language[0]       = lang[0];
+	language[1]       = lang[1];
+	language[2]       = 0;
 	return language;
 }
 
@@ -164,7 +164,7 @@ void iron_init(iron_window_options_t *win) {
 }
 
 const char *iron_system_id(void) {
-	const char *name = [[[UIDevice currentDevice] name] UTF8String];
+	const char *name     = [[[UIDevice currentDevice] name] UTF8String];
 	const char *vendorId = [[[[UIDevice currentDevice] identifierForVendor] UUIDString] UTF8String];
 	strcpy(sysid, name);
 	strcat(sysid, "-");
@@ -173,12 +173,12 @@ const char *iron_system_id(void) {
 }
 
 const char *iron_internal_save_path(void) {
-	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
+	NSArray  *paths        = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
 	NSString *resolvedPath = [paths objectAtIndex:0];
-	NSString *appName = [NSString stringWithUTF8String:iron_application_name()];
-	resolvedPath = [resolvedPath stringByAppendingPathComponent:appName];
+	NSString *appName      = [NSString stringWithUTF8String:iron_application_name()];
+	resolvedPath           = [resolvedPath stringByAppendingPathComponent:appName];
 	NSFileManager *fileMgr = [[NSFileManager alloc] init];
-	NSError *error;
+	NSError       *error;
 	[fileMgr createDirectoryAtPath:resolvedPath withIntermediateDirectories:YES attributes:nil error:&error];
 	resolvedPath = [resolvedPath stringByAppendingString:@"/"];
 	return [resolvedPath cStringUsingEncoding:1];
@@ -229,7 +229,7 @@ void iron_window_set_title(const char *title) {
 }
 
 void iron_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {
-	resize_callback = callback;
+	resize_callback      = callback;
 	resize_callback_data = data;
 }
 
@@ -251,30 +251,30 @@ int iron_window_display() {
 
 - (void)hoverGesture:(UIHoverGestureRecognizer *)recognizer {
 	CGPoint point = [recognizer locationInView:self];
-	float x = point.x * self.contentScaleFactor;
-	float y = point.y * self.contentScaleFactor;
+	float   x     = point.x * self.contentScaleFactor;
+	float   y     = point.y * self.contentScaleFactor;
 	iron_internal_pen_trigger_move(x, y, 0.0); // Pencil hover
 }
 
 - (id)initWithFrame:(CGRect)frame {
-	self = [super initWithFrame:(CGRect)frame];
+	self                    = [super initWithFrame:(CGRect)frame];
 	self.contentScaleFactor = [UIScreen mainScreen].scale;
-	backing_width = frame.size.width * self.contentScaleFactor;
-	backing_height = frame.size.height * self.contentScaleFactor;
+	backing_width           = frame.size.width * self.contentScaleFactor;
+	backing_height          = frame.size.height * self.contentScaleFactor;
 
 	for (int i = 0; i < MAX_TOUCH_COUNT; ++i) {
 		touches[i] = NULL;
 	}
 
-	device = MTLCreateSystemDefaultDevice();
-	queue = [device newCommandQueue];
+	device  = MTLCreateSystemDefaultDevice();
+	queue   = [device newCommandQueue];
 	library = [device newDefaultLibrary];
 
-	CAMetalLayer *layer = (CAMetalLayer *)self.layer;
-	layer.device = device;
-	layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
+	CAMetalLayer *layer   = (CAMetalLayer *)self.layer;
+	layer.device          = device;
+	layer.pixelFormat     = MTLPixelFormatBGRA8Unorm;
 	layer.framebufferOnly = YES;
-	layer.opaque = YES;
+	layer.opaque          = YES;
 	layer.backgroundColor = nil;
 
 	[self addGestureRecognizer:[[UIHoverGestureRecognizer alloc] initWithTarget:self action:@selector(hoverGesture:)]];
@@ -282,7 +282,7 @@ int iron_window_display() {
 }
 
 - (void)layoutSubviews {
-	backing_width = self.frame.size.width * self.contentScaleFactor;
+	backing_width  = self.frame.size.width * self.contentScaleFactor;
 	backing_height = self.frame.size.height * self.contentScaleFactor;
 	gpu_resize(backing_width, backing_height);
 	iron_internal_call_resize_callback(backing_width, backing_height);
@@ -296,8 +296,8 @@ int iron_window_display() {
 		}
 		if (index >= 0) {
 			CGPoint point = [touch locationInView:self];
-			float x = point.x * self.contentScaleFactor;
-			float y = point.y * self.contentScaleFactor;
+			float   x     = point.x * self.contentScaleFactor;
+			float   y     = point.y * self.contentScaleFactor;
 			if (index == 0) {
 				iron_internal_mouse_trigger_press(event.buttonMask == UIEventButtonMaskSecondary ? 1 : 0, x, y);
 			}
@@ -314,8 +314,8 @@ int iron_window_display() {
 		int index = get_touch_index((__bridge void *)touch);
 		if (index >= 0) {
 			CGPoint point = [touch locationInView:self];
-			float x = point.x * self.contentScaleFactor;
-			float y = point.y * self.contentScaleFactor;
+			float   x     = point.x * self.contentScaleFactor;
+			float   y     = point.y * self.contentScaleFactor;
 			if (index == 0) {
 				iron_internal_mouse_trigger_move(x, y);
 			}
@@ -328,8 +328,8 @@ int iron_window_display() {
 	for (UITouch *touch in touches) {
 		if (touch.type == UITouchTypePencil) {
 			CGPoint point = [touch locationInView:self];
-			float x = point.x * self.contentScaleFactor;
-			float y = point.y * self.contentScaleFactor;
+			float   x     = point.x * self.contentScaleFactor;
+			float   y     = point.y * self.contentScaleFactor;
 			iron_internal_pen_trigger_move(x, y, touch.force);
 		}
 	}
@@ -340,8 +340,8 @@ int iron_window_display() {
 		int index = remove_touch((__bridge void *)touch);
 		if (index >= 0) {
 			CGPoint point = [touch locationInView:self];
-			float x = point.x * self.contentScaleFactor;
-			float y = point.y * self.contentScaleFactor;
+			float   x     = point.x * self.contentScaleFactor;
+			float   y     = point.y * self.contentScaleFactor;
 			if (index == 0) {
 				iron_internal_mouse_trigger_release(event.buttonMask == UIEventButtonMaskSecondary ? 1 : 0, x, y);
 			}
@@ -358,8 +358,8 @@ int iron_window_display() {
 		int index = remove_touch((__bridge void *)touch);
 		if (index >= 0) {
 			CGPoint point = [touch locationInView:self];
-			float x = point.x * self.contentScaleFactor;
-			float y = point.y * self.contentScaleFactor;
+			float   x     = point.x * self.contentScaleFactor;
+			float   y     = point.y * self.contentScaleFactor;
 			if (index == 0) {
 				iron_internal_mouse_trigger_release(event.buttonMask == UIEventButtonMaskSecondary ? 1 : 0, x, y);
 			}
@@ -468,9 +468,9 @@ int iron_window_display() {
 @implementation MyViewController
 
 - (void)loadView {
-	visible = true;
+	visible   = true;
 	self.view = my_view = [[MyView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-	[self.view addInteraction: [[UIDropInteraction alloc] initWithDelegate: self]];
+	[self.view addInteraction:[[UIDropInteraction alloc] initWithDelegate:self]];
 	[self setNeedsUpdateOfScreenEdgesDeferringSystemGestures];
 }
 
@@ -479,15 +479,15 @@ int iron_window_display() {
 }
 
 void importFile(NSURL *url) {
-	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSArray  *paths      = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 	NSString *folderName = [NSString stringWithUTF8String:ios_title];
-	NSString *filePath = [[paths objectAtIndex:0] stringByAppendingPathComponent:folderName];
+	NSString *filePath   = [[paths objectAtIndex:0] stringByAppendingPathComponent:folderName];
 	if (![[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
 		[[NSFileManager defaultManager] createDirectoryAtPath:filePath withIntermediateDirectories:NO attributes:nil error:nil];
 	}
 	NSString *suggestedName = url.path.lastPathComponent;
-	filePath = [filePath stringByAppendingPathComponent:suggestedName];
-	CFURLRef cfurl = (__bridge CFURLRef)url;
+	filePath                = [filePath stringByAppendingPathComponent:suggestedName];
+	CFURLRef cfurl          = (__bridge CFURLRef)url;
 	CFURLStartAccessingSecurityScopedResource(cfurl);
 	[[NSFileManager defaultManager] copyItemAtPath:url.path toPath:filePath error:nil];
 	CFURLStopAccessingSecurityScopedResource(cfurl);
@@ -503,19 +503,20 @@ void importFile(NSURL *url) {
 
 - (void)dropInteraction:(UIDropInteraction *)interaction performDrop:(id<UIDropSession>)session {
 	CGPoint point = [session locationInView:self.view];
-	float x = point.x * my_view.contentScaleFactor;
-	float y = point.y * my_view.contentScaleFactor;
+	float   x     = point.x * my_view.contentScaleFactor;
+	float   y     = point.y * my_view.contentScaleFactor;
 	iron_internal_mouse_trigger_move(x, y);
 	iron_internal_surface_trigger_move(0, x, y);
 	for (UIDragItem *item in session.items) {
-		[item.itemProvider loadInPlaceFileRepresentationForTypeIdentifier:item.itemProvider.registeredTypeIdentifiers[0] completionHandler:^(NSURL * _Nullable url, BOOL isInPlace, NSError * _Nullable error) {
-			importFile(url);
-		}];
+		[item.itemProvider loadInPlaceFileRepresentationForTypeIdentifier:item.itemProvider.registeredTypeIdentifiers[0]
+		                                                completionHandler:^(NSURL *_Nullable url, BOOL isInPlace, NSError *_Nullable error) {
+			                                                importFile(url);
+		                                                }];
 	}
 }
 
 - (UIDropProposal *)dropInteraction:(UIDropInteraction *)interaction sessionDidUpdate:(id<UIDropSession>)session {
-	return [[UIDropProposal alloc] initWithDropOperation: UIDropOperationCopy];
+	return [[UIDropProposal alloc] initWithDropOperation:UIDropOperationCopy];
 }
 
 - (UIRectEdge)preferredScreenEdgesDeferringSystemGestures {
@@ -533,19 +534,19 @@ void importFile(NSURL *url) {
 }
 
 - (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions {
-	#ifdef IRON_A2
+#ifdef IRON_A2
 	AVAudioSession *sessionInstance = [AVAudioSession sharedInstance];
-	NSError *error;
-	NSString *category = AVAudioSessionCategoryAmbient;
+	NSError        *error;
+	NSString       *category = AVAudioSessionCategoryAmbient;
 	[sessionInstance setCategory:category error:&error];
-	#endif
+#endif
 
 	UIWindowScene *windowScene = (UIWindowScene *)scene;
-	self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
-	self.window.frame = windowScene.coordinateSpace.bounds;
+	self.window                = [[UIWindow alloc] initWithWindowScene:windowScene];
+	self.window.frame          = windowScene.coordinateSpace.bounds;
 	[self.window setBackgroundColor:[UIColor blackColor]];
 
-	my_view_controller = [[MyViewController alloc] init];
+	my_view_controller                           = [[MyViewController alloc] init];
 	my_view_controller.view.multipleTouchEnabled = YES;
 	[self.window setRootViewController:my_view_controller];
 	[self.window makeKeyAndVisible];

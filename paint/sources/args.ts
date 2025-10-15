@@ -1,16 +1,16 @@
 
-let args_use: bool = false;
-let args_asset_path: string = "";
-let args_background: bool = false;
-let args_export_textures: bool = false;
-let args_export_textures_type: string = "";
+let args_use: bool                      = false;
+let args_asset_path: string             = "";
+let args_background: bool               = false;
+let args_export_textures: bool          = false;
+let args_export_textures_type: string   = "";
 let args_export_textures_preset: string = "";
-let args_export_textures_path: string = "";
-let args_reimport_mesh: bool = false;
-let args_export_mesh: bool = false;
-let args_export_mesh_path: string = "";
-let args_export_material: bool = false;
-let args_export_material_path: string = "";
+let args_export_textures_path: string   = "";
+let args_reimport_mesh: bool            = false;
+let args_export_mesh: bool              = false;
+let args_export_mesh_path: string       = "";
+let args_export_material: bool          = false;
+let args_export_material_path: string   = "";
 
 function args_parse() {
 	if (iron_get_arg_count() > 1) {
@@ -63,7 +63,7 @@ function args_parse() {
 
 function args_run() {
 	if (args_use) {
-		sys_notify_on_next_frame(function () {
+		sys_notify_on_next_frame(function() {
 			if (project_filepath != "") {
 				import_arm_run_project(project_filepath);
 			}
@@ -83,11 +83,11 @@ function args_run() {
 				}
 
 				if (args_export_textures_type == "png") {
-					base_bits_handle.i = texture_bits_t.BITS8;
+					base_bits_handle.i      = texture_bits_t.BITS8;
 					context_raw.format_type = texture_ldr_format_t.PNG;
 				}
 				else if (args_export_textures_type == "jpg") {
-					base_bits_handle.i = texture_bits_t.BITS8;
+					base_bits_handle.i      = texture_bits_t.BITS8;
 					context_raw.format_type = texture_ldr_format_t.JPG;
 				}
 				else if (args_export_textures_type == "exr16") {
@@ -105,7 +105,7 @@ function args_run() {
 				// Get export preset and apply the correct one from args
 				box_export_files = file_read_directory(path_data() + path_sep + "export_presets");
 				for (let i: i32 = 0; i < box_export_files.length; ++i) {
-					let s: string = box_export_files[i];
+					let s: string       = box_export_files[i];
 					box_export_files[i] = substring(s, 0, s.length - 5); // Strip .json
 				}
 
@@ -118,11 +118,11 @@ function args_run() {
 				}
 
 				let blob: buffer_t = data_get_blob(file);
-				box_export_preset = json_parse(sys_buffer_to_string(blob));
+				box_export_preset  = json_parse(sys_buffer_to_string(blob));
 				data_delete_blob("export_presets/" + file);
 
 				// Export queue
-				sys_notify_on_next_frame(function () {
+				sys_notify_on_next_frame(function() {
 					export_texture_run(args_export_textures_path);
 				});
 			}

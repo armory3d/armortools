@@ -10,27 +10,27 @@ type plane_t = {
 };
 
 let _raycast_vp_inv: mat4_t = mat4_identity();
-let _raycast_p_inv: mat4_t = mat4_identity();
-let _raycast_v_inv: mat4_t = mat4_identity();
+let _raycast_p_inv: mat4_t  = mat4_identity();
+let _raycast_v_inv: mat4_t  = mat4_identity();
 
 function raycast_get_ray(input_x: f32, input_y: f32, camera: camera_object_t): ray_t {
 	let start: vec4_t = vec4_create();
-	let end: vec4_t = vec4_create();
+	let end: vec4_t   = vec4_create();
 
 	// Get 3D point form screen coords
 	// Set two vectors with opposing z values
 	start.x = (input_x / sys_w()) * 2.0 - 1.0;
 	start.y = -((input_y / sys_h()) * 2.0 - 1.0);
 	start.z = -1.0;
-	end.x = start.x;
-	end.y = start.y;
-	end.z = 1.0;
+	end.x   = start.x;
+	end.y   = start.y;
+	end.z   = 1.0;
 
-	_raycast_p_inv = mat4_inv(camera.p);
-	_raycast_v_inv = mat4_inv(camera.v);
+	_raycast_p_inv  = mat4_inv(camera.p);
+	_raycast_v_inv  = mat4_inv(camera.v);
 	_raycast_vp_inv = mat4_mult_mat(_raycast_p_inv, _raycast_v_inv);
-	start = vec4_apply_proj(start, _raycast_vp_inv);
-	end = vec4_apply_proj(end, _raycast_vp_inv);
+	start           = vec4_apply_proj(start, _raycast_vp_inv);
+	end             = vec4_apply_proj(end, _raycast_vp_inv);
 
 	// Find direction from start to end
 	end = vec4_sub(end, start);
@@ -46,8 +46,8 @@ function raycast_box_intersect(transform: transform_t, input_x: f32, input_y: f3
 	let ray: ray_t = raycast_get_ray(input_x, input_y, camera);
 
 	let t: transform_t = transform;
-	let c: vec4_t = vec4_create(transform_world_x(t), transform_world_y(t), transform_world_z(t));
-	let s: vec4_t = vec4_create(t.dim.x, t.dim.y, t.dim.z);
+	let c: vec4_t      = vec4_create(transform_world_x(t), transform_world_y(t), transform_world_z(t));
+	let s: vec4_t      = vec4_create(t.dim.x, t.dim.y, t.dim.z);
 	return ray_intersect_box(ray, c, s);
 }
 
@@ -56,7 +56,7 @@ function raycast_closest_box_intersect(transforms: transform_t[], input_x: f32, 
 
 	// Get intersects
 	for (let i: i32 = 0; i < transforms.length; ++i) {
-		let t: transform_t = transforms[i];
+		let t: transform_t    = transforms[i];
 		let intersect: vec4_t = raycast_box_intersect(t, input_x, input_y, camera);
 		if (!vec4_isnan(intersect)) {
 			array_push(intersects, t);
@@ -70,14 +70,14 @@ function raycast_closest_box_intersect(transforms: transform_t[], input_x: f32, 
 
 	// Get closest intersect
 	let closest: transform_t = null;
-	let inf: f32 = 100000;
-	let min_dist: f32 = inf;
+	let inf: f32             = 100000;
+	let min_dist: f32        = inf;
 	for (let i: i32 = 0; i < intersects.length; ++i) {
 		let t: transform_t = intersects[i];
-		let dist: f32 = vec4_dist(t.loc, camera.base.transform.loc);
+		let dist: f32      = vec4_dist(t.loc, camera.base.transform.loc);
 		if (dist < min_dist) {
 			min_dist = dist;
-			closest = t;
+			closest  = t;
 		}
 	}
 
@@ -86,8 +86,8 @@ function raycast_closest_box_intersect(transforms: transform_t[], input_x: f32, 
 
 function plane_create(): plane_t {
 	let raw: plane_t = {};
-	raw.normal = vec4_create(1.0, 0.0, 0.0);
-	raw.constant = 0.0;
+	raw.normal       = vec4_create(1.0, 0.0, 0.0);
+	raw.constant     = 0.0;
 	return raw;
 }
 
@@ -102,8 +102,8 @@ function raycast_plane_intersect(normal: vec4_t, a: vec4_t, input_x: f32, input_
 
 function ray_create(origin: vec4_t, dir: vec4_t): ray_t {
 	let raw: ray_t = {};
-	raw.origin = origin;
-	raw.dir = dir;
+	raw.origin     = origin;
+	raw.dir        = dir;
 	return raw;
 }
 
@@ -112,7 +112,7 @@ function ray_at(raw: ray_t, t: f32): vec4_t {
 }
 
 function ray_dist_to_point(raw: ray_t, point: vec4_t): f32 {
-	let v1: vec4_t = vec4_create();
+	let v1: vec4_t    = vec4_create();
 	let dir_dist: f32 = vec4_dot(vec4_sub(point, raw.origin), raw.dir);
 
 	// Point behind the ray
@@ -180,9 +180,9 @@ function ray_intersect_box(raw: ray_t, center: vec4_t, dim: vec4_t): vec4_t {
 	let tzmin: f32;
 	let tzmax: f32;
 
-	let half_x: f32 = dim.x / 2;
-	let half_y: f32 = dim.y / 2;
-	let half_z: f32 = dim.z / 2;
+	let half_x: f32    = dim.x / 2;
+	let half_y: f32    = dim.y / 2;
+	let half_z: f32    = dim.z / 2;
 	let box_min_x: f32 = center.x - half_x;
 	let box_min_y: f32 = center.y - half_y;
 	let box_min_z: f32 = center.z - half_z;
@@ -191,7 +191,7 @@ function ray_intersect_box(raw: ray_t, center: vec4_t, dim: vec4_t): vec4_t {
 	let box_max_z: f32 = center.z + half_z;
 
 	let invdirx: f32 = 1 / raw.dir.x;
-	let	invdiry: f32 = 1 / raw.dir.y;
+	let invdiry: f32 = 1 / raw.dir.y;
 	let invdirz: f32 = 1 / raw.dir.z;
 
 	let origin: vec4_t = raw.origin;
@@ -256,14 +256,14 @@ function ray_intersect_box(raw: ray_t, center: vec4_t, dim: vec4_t): vec4_t {
 
 function ray_intersect_triangle(raw: ray_t, a: vec4_t, b: vec4_t, c: vec4_t, cull_backface: bool): vec4_t {
 	// Compute the offset origin, edges, and normal
-	let diff: vec4_t = vec4_create();
-	let edge1: vec4_t = vec4_create();
-	let edge2: vec4_t = vec4_create();
+	let diff: vec4_t   = vec4_create();
+	let edge1: vec4_t  = vec4_create();
+	let edge2: vec4_t  = vec4_create();
 	let normal: vec4_t = vec4_create();
 
 	// from http://www.geometrictools.com/LibMathematics/Intersection/Wm5IntrRay3Triangle3.cpp
-	edge1 = vec4_sub(b, a);
-	edge2 = vec4_sub(c, a);
+	edge1  = vec4_sub(b, a);
+	edge2  = vec4_sub(c, a);
 	normal = vec4_cross(edge1, edge2);
 
 	let ddn: f32 = vec4_dot(raw.dir, normal);
@@ -277,13 +277,13 @@ function ray_intersect_triangle(raw: ray_t, a: vec4_t, b: vec4_t, c: vec4_t, cul
 	}
 	else if (ddn < 0) {
 		sign = -1;
-		ddn = -ddn;
+		ddn  = -ddn;
 	}
 	else {
 		return vec4_nan();
 	}
 
-	diff = vec4_sub(raw.origin, a);
+	diff            = vec4_sub(raw.origin, a);
 	let ddqxe2: f32 = sign * vec4_dot(raw.dir, vec4_cross(diff, edge2));
 
 	// b1 < 0, no intersection
@@ -320,7 +320,7 @@ function plane_dist_to_point(raw: plane_t, point: vec4_t): f32 {
 }
 
 function plane_set(raw: plane_t, normal: vec4_t, point: vec4_t): plane_t {
-	raw.normal = vec4_clone(normal);
+	raw.normal   = vec4_clone(normal);
 	raw.constant = -vec4_dot(point, raw.normal);
 	return raw;
 }

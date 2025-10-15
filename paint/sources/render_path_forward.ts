@@ -1,6 +1,5 @@
 
-function render_path_forward_init() {
-}
+function render_path_forward_init() {}
 
 function render_path_forward_commands() {
 	render_path_paint_live_brush_dirty();

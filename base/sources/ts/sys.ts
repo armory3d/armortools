@@ -1,22 +1,22 @@
 
 type sys_callback_t = {
-	f?: ()=>void;
+	f?: () => void;
 };
 
 type sys_string_callback_t = {
-	f?: (s: string)=>void;
+	f?: (s: string) => void;
 };
 
 type callback_t = {
-	f?: (data?: any)=>void;
+	f?: (data?: any) => void;
 	data?: any;
 };
 
-let _sys_foreground_listeners: sys_callback_t[] = [];
-let _sys_resume_listeners: sys_callback_t[] = [];
-let _sys_pause_listeners: sys_callback_t[] = [];
-let _sys_background_listeners: sys_callback_t[] = [];
-let _sys_shutdown_listeners: sys_callback_t[] = [];
+let _sys_foreground_listeners: sys_callback_t[]        = [];
+let _sys_resume_listeners: sys_callback_t[]            = [];
+let _sys_pause_listeners: sys_callback_t[]             = [];
+let _sys_background_listeners: sys_callback_t[]        = [];
+let _sys_shutdown_listeners: sys_callback_t[]          = [];
 let _sys_drop_files_listeners: sys_string_callback_t[] = [];
 
 let _sys_start_time: f32;
@@ -43,18 +43,12 @@ function sys_start(ops: iron_window_options_t) {
 	_iron_init(ops);
 
 	_sys_start_time = iron_time();
-	draw_init(
-		iron_load_blob(data_path() + "draw_image.vert" + sys_shader_ext()),
-		iron_load_blob(data_path() + "draw_image.frag" + sys_shader_ext()),
-		iron_load_blob(data_path() + "draw_image_transform.vert" + sys_shader_ext()),
-		iron_load_blob(data_path() + "draw_image_transform.frag" + sys_shader_ext()),
-		iron_load_blob(data_path() + "draw_rect.vert" + sys_shader_ext()),
-		iron_load_blob(data_path() + "draw_rect.frag" + sys_shader_ext()),
-		iron_load_blob(data_path() + "draw_tris.vert" + sys_shader_ext()),
-		iron_load_blob(data_path() + "draw_tris.frag" + sys_shader_ext()),
-		iron_load_blob(data_path() + "draw_text.vert" + sys_shader_ext()),
-		iron_load_blob(data_path() + "draw_text.frag" + sys_shader_ext())
-	);
+	draw_init(iron_load_blob(data_path() + "draw_image.vert" + sys_shader_ext()), iron_load_blob(data_path() + "draw_image.frag" + sys_shader_ext()),
+	          iron_load_blob(data_path() + "draw_image_transform.vert" + sys_shader_ext()),
+	          iron_load_blob(data_path() + "draw_image_transform.frag" + sys_shader_ext()), iron_load_blob(data_path() + "draw_rect.vert" + sys_shader_ext()),
+	          iron_load_blob(data_path() + "draw_rect.frag" + sys_shader_ext()), iron_load_blob(data_path() + "draw_tris.vert" + sys_shader_ext()),
+	          iron_load_blob(data_path() + "draw_tris.frag" + sys_shader_ext()), iron_load_blob(data_path() + "draw_text.vert" + sys_shader_ext()),
+	          iron_load_blob(data_path() + "draw_text.frag" + sys_shader_ext()));
 	_iron_set_update_callback(sys_render);
 	_iron_set_drop_files_callback(sys_drop_files_callback);
 	iron_set_application_state_callback(sys_foreground_callback, sys_resume_callback, sys_pause_callback, sys_background_callback, sys_shutdown_callback);
@@ -70,20 +64,20 @@ function sys_start(ops: iron_window_options_t) {
 	iron_set_pen_down_callback(sys_pen_down_callback);
 	iron_set_pen_up_callback(sys_pen_up_callback);
 	iron_set_pen_move_callback(sys_pen_move_callback);
-	///if WITH_GAMEPAD
+	/// if WITH_GAMEPAD
 	iron_set_gamepad_axis_callback(sys_gamepad_axis_callback);
 	iron_set_gamepad_button_callback(sys_gamepad_button_callback);
-	///end
+	/// end
 	input_register();
 }
 
-function _sys_callback_create(f: ()=>void): sys_callback_t {
+function _sys_callback_create(f: () => void): sys_callback_t {
 	let cb: sys_callback_t = {};
-	cb.f = f;
+	cb.f                   = f;
 	return cb;
 }
 
-function sys_notify_on_app_state(on_foreground: ()=>void, on_resume: ()=>void, on_pause: ()=>void, on_background: ()=>void, on_shutdown: ()=>void) {
+function sys_notify_on_app_state(on_foreground: () => void, on_resume: () => void, on_pause: () => void, on_background: () => void, on_shutdown: () => void) {
 	if (on_foreground != null) {
 		array_push(_sys_foreground_listeners, _sys_callback_create(on_foreground));
 	}
@@ -101,9 +95,9 @@ function sys_notify_on_app_state(on_foreground: ()=>void, on_resume: ()=>void, o
 	}
 }
 
-function sys_notify_on_drop_files(drop_files_listener: (s: string)=>void) {
+function sys_notify_on_drop_files(drop_files_listener: (s: string) => void) {
 	let cb: sys_string_callback_t = {};
-	cb.f = drop_files_listener;
+	cb.f                          = drop_files_listener;
 	array_push(_sys_drop_files_listeners, cb);
 }
 
@@ -197,21 +191,21 @@ function sys_mouse_wheel_callback(delta: i32) {
 }
 
 function sys_touch_down_callback(index: i32, x: i32, y: i32) {
-	///if (arm_android || arm_ios)
+	/// if (arm_android || arm_ios)
 	mouse_on_touch_down(index, x, y);
-	///end
+	/// end
 }
 
 function sys_touch_up_callback(index: i32, x: i32, y: i32) {
-	///if (arm_android || arm_ios)
+	/// if (arm_android || arm_ios)
 	mouse_on_touch_up(index, x, y);
-	///end
+	/// end
 }
 
 function sys_touch_move_callback(index: i32, x: i32, y: i32) {
-	///if (arm_android || arm_ios)
+	/// if (arm_android || arm_ios)
 	mouse_on_touch_move(index, x, y);
-	///end
+	/// end
 }
 
 function sys_pen_down_callback(x: i32, y: i32, pressure: f32) {
@@ -226,7 +220,7 @@ function sys_pen_move_callback(x: i32, y: i32, pressure: f32) {
 	pen_move_listener(x, y, pressure);
 }
 
-///if WITH_GAMEPAD
+/// if WITH_GAMEPAD
 function sys_gamepad_axis_callback(gamepad: i32, axis: i32, value: f32) {
 	gamepad_axis_listener(gamepad, axis, value);
 }
@@ -234,7 +228,7 @@ function sys_gamepad_axis_callback(gamepad: i32, axis: i32, value: f32) {
 function sys_gamepad_button_callback(gamepad: i32, button: i32, value: f32) {
 	gamepad_button_listener(gamepad, button, value);
 }
-///end
+/// end
 
 function sys_title(): string {
 	return _sys_window_title;
@@ -279,22 +273,20 @@ function sys_string_to_buffer(str: string): buffer_t {
 }
 
 function sys_shader_ext(): string {
-	///if arm_vulkan
+	/// if arm_vulkan
 	return ".spirv";
-	///elseif arm_metal
+	/// elseif arm_metal
 	return ".metal";
-	///else
+	/// else
 	return ".d3d11";
-	///end
+	/// end
 }
 
 function sys_get_shader(name: string): gpu_shader_t {
 	let shader: gpu_shader_t = map_get(_sys_shaders, name);
 	if (shader == null) {
-		shader = gpu_create_shader(
-			iron_load_blob(data_path() + name + sys_shader_ext()),
-			ends_with(name, ".frag") ? shader_type_t.FRAGMENT : shader_type_t.VERTEX
-		);
+		shader =
+		    gpu_create_shader(iron_load_blob(data_path() + name + sys_shader_ext()), ends_with(name, ".frag") ? shader_type_t.FRAGMENT : shader_type_t.VERTEX);
 		map_set(_sys_shaders, name, shader);
 	}
 	return shader;
@@ -302,17 +294,17 @@ function sys_get_shader(name: string): gpu_shader_t {
 
 function video_unload(self: video_t) {}
 
-///if arm_audio
+/// if arm_audio
 function sound_create(sound_: any): sound_t {
 	let raw: sound_t = {};
-	raw.sound_ = sound_;
+	raw.sound_       = sound_;
 	return raw;
 }
 
 function sound_unload(raw: sound_t) {
 	iron_a1_sound_destroy(raw.sound_);
 }
-///end
+/// end
 
 type color_t = i32;
 
@@ -325,10 +317,10 @@ type sound_t = {
 };
 
 enum window_features_t {
-    NONE = 0,
-    RESIZABLE = 1,
-    MINIMIZABLE = 2,
-    MAXIMIZABLE = 4,
+	NONE        = 0,
+	RESIZABLE   = 1,
+	MINIMIZABLE = 2,
+	MAXIMIZABLE = 4,
 }
 
 enum window_mode_t {
@@ -336,17 +328,17 @@ enum window_mode_t {
 	FULLSCREEN,
 }
 
-let _sys_on_next_frames: callback_t[] = [];
-let _sys_on_end_frames: callback_t[] = [];
-let _sys_on_updates: callback_t[] = [];
-let _sys_on_renders: callback_t[] = [];
-let _sys_lastw: i32 = -1;
-let _sys_lasth: i32 = -1;
-let sys_on_resize: ()=>void = null;
-let sys_on_w: ()=>i32 = null;
-let sys_on_h: ()=>i32 = null;
-let sys_on_x: ()=>i32 = null;
-let sys_on_y: ()=>i32 = null;
+let _sys_on_next_frames: callback_t[]  = [];
+let _sys_on_end_frames: callback_t[]   = [];
+let _sys_on_updates: callback_t[]      = [];
+let _sys_on_renders: callback_t[]      = [];
+let _sys_lastw: i32                    = -1;
+let _sys_lasth: i32                    = -1;
+let sys_on_resize: () => void  = null;
+let sys_on_w: () => i32  = null;
+let sys_on_h: () => i32  = null;
+let sys_on_x: () => i32  = null;
+let sys_on_y: () => i32 = null;
 
 function sys_w(): i32 {
 	if (sys_on_w != null) {
@@ -383,9 +375,9 @@ function _sys_run_callbacks(cbs: callback_t[]) {
 	}
 }
 
-let _sys_time_last: f32 = 0.0;
+let _sys_time_last: f32       = 0.0;
 let _sys_time_real_delta: f32 = 0.0;
-let _sys_time_frequency: i32 = -1;
+let _sys_time_frequency: i32  = -1;
 
 function sys_delta(): f32 {
 	if (_sys_time_frequency < 0) {
@@ -428,37 +420,37 @@ function sys_render() {
 			sys_on_resize();
 		}
 	}
-	_sys_lastw = sys_w();
-	_sys_lasth = sys_h();
+	_sys_lastw           = sys_w();
+	_sys_lasth           = sys_h();
 	_sys_time_real_delta = sys_time() - _sys_time_last;
-	_sys_time_last = sys_time();
+	_sys_time_last       = sys_time();
 }
 
-function _callback_create(f: (data?: any)=>void, data: any): callback_t {
+function _callback_create(f: (data?: any) => void, data: any): callback_t {
 	let cb: callback_t = {};
-	cb.f = f;
-	cb.data = data;
+	cb.f               = f;
+	cb.data            = data;
 	return cb;
 }
 
 // Hooks
-function sys_notify_on_update(f: (data?: any)=>void, data: any = null) {
+function sys_notify_on_update(f: (data?: any) => void, data: any = null) {
 	array_push(_sys_on_updates, _callback_create(f, data));
 }
 
-function sys_notify_on_render(f: (data?: any)=>void, data: any = null) {
+function sys_notify_on_render(f: (data?: any) => void, data: any = null) {
 	array_push(_sys_on_renders, _callback_create(f, data));
 }
 
-function sys_notify_on_next_frame(f: (data?: any)=>void, data: any = null) {
+function sys_notify_on_next_frame(f: (data?: any) => void, data: any = null) {
 	array_push(_sys_on_next_frames, _callback_create(f, data));
 }
 
-function sys_notify_on_end_frame(f: (data?: any)=>void, data: any = null) {
+function sys_notify_on_end_frame(f: (data?: any) => void, data: any = null) {
 	array_push(_sys_on_end_frames, _callback_create(f, data));
 }
 
-function _sys_remove_callback(ar: callback_t[], f: (data?: any)=>void) {
+function _sys_remove_callback(ar: callback_t[], f: (data?: any) => void) {
 	for (let i: i32 = 0; i < ar.length; ++i) {
 		if (ar[i].f == f) {
 			array_splice(ar, i, 1);
@@ -467,14 +459,14 @@ function _sys_remove_callback(ar: callback_t[], f: (data?: any)=>void) {
 	}
 }
 
-function sys_remove_update(f: (data?: any)=>void) {
+function sys_remove_update(f: (data?: any) => void) {
 	_sys_remove_callback(_sys_on_updates, f);
 }
 
-function sys_remove_render(f: (data?: any)=>void) {
+function sys_remove_render(f: (data?: any) => void) {
 	_sys_remove_callback(_sys_on_renders, f);
 }
 
-function sys_remove_end_frame(f: (data?: any)=>void) {
+function sys_remove_end_frame(f: (data?: any) => void) {
 	_sys_remove_callback(_sys_on_end_frames, f);
 }

@@ -20,30 +20,32 @@ function add_thread_backend(name) {
 }
 
 function get_version_code() {
-	const now = new Date();
-	const year = now.getFullYear().toString().slice(-2);
+	const now   = new Date();
+	const year  = now.getFullYear().toString().slice(-2);
 	const month = (now.getMonth() + 1).toString().padStart(2, '0');
-	const day = now.getDate().toString().padStart(2, '0');
+	const day   = now.getDate().toString().padStart(2, '0');
 	return parseInt(year + month + day, 10);
 }
 
 // flags: make.js/load_project
-let flags = globalThis.flags;
-let dir = flags.name.substr(5).toLowerCase(); // ArmorPaint -> paint
+let flags   = globalThis.flags;
+let dir     = flags.name.substr(5).toLowerCase(); // ArmorPaint -> paint
 let project = new Project("Base");
 project.add_include_dir("sources");
 project.add_include_dir("sources/libs");
 project.add_tsfiles("sources/ts");
 project.add_shaders("shaders/*.kong");
-project.add_assets("assets/*", { destination: "data/{name}" });
-project.add_assets("assets/licenses/**", { destination: "data/licenses/{name}" });
-project.add_assets("assets/themes/*.json", { destination: "data/themes/{name}" });
+project.add_assets("assets/*", {destination : "data/{name}"});
+project.add_assets("assets/licenses/**", {destination : "data/licenses/{name}"});
+project.add_assets("assets/themes/*.json", {destination : "data/themes/{name}"});
 project.add_cfiles("sources/*.c");
 // project.add_cfiles("sources/iron.c");
 project.add_cfiles("sources/libs/gc.c");
 project.add_cfiles("sources/libs/kong/dir.c");
-project.add_define("IRON_C_PATH=\"" + os_cwd() + "/build/iron.c" + "\"");
-project.add_define("EMBED_H_PATH=\"" + os_cwd() + "/build/embed.h" + "\"");
+project.add_define("IRON_C_PATH=\"" + os_cwd() + "/build/iron.c" +
+                   "\"");
+project.add_define("EMBED_H_PATH=\"" + os_cwd() + "/build/embed.h" +
+                   "\"");
 
 if (platform == "windows") {
 	add_sys_backend("windows");
@@ -106,7 +108,7 @@ else if (platform == "ios") {
 	project.add_cfiles("sources/backends/data/ios.plist");
 	project.add_cfiles("sources/backends/ios_file_dialog.m");
 	project.add_define("IRON_METAL");
-	project.target_options.ios.build = get_version_code() + "";
+	project.target_options.ios.build   = get_version_code() + "";
 	project.target_options.ios.version = get_version_code() + "";
 }
 else if (platform == "android") {
@@ -126,13 +128,13 @@ else if (platform == "android") {
 	if (flags.with_audio) {
 		project.add_lib("OpenSLES");
 	}
-	project.target_options.android.package = flags.package;
-	project.target_options.android.permissions = ["android.permission.READ_MEDIA_IMAGES", "android.permission.INTERNET"];
-	project.target_options.android.screenOrientation = ["sensorLandscape"];
-	project.target_options.android.minSdkVersion = 35; // android 15
-	project.target_options.android.targetSdkVersion = 36;
-	project.target_options.android.versionCode = get_version_code();
-	project.target_options.android.versionName = "1.0 alpha";
+	project.target_options.android.package           = flags.package;
+	project.target_options.android.permissions       = [ "android.permission.READ_MEDIA_IMAGES", "android.permission.INTERNET" ];
+	project.target_options.android.screenOrientation = [ "sensorLandscape" ];
+	project.target_options.android.minSdkVersion     = 35; // android 15
+	project.target_options.android.targetSdkVersion  = 36;
+	project.target_options.android.versionCode       = get_version_code();
+	project.target_options.android.versionName       = "1.0 alpha";
 }
 else if (platform == "wasm") {
 	add_sys_backend("wasm");
@@ -166,7 +168,7 @@ if (flags.embed) {
 	project.add_define("arm_embed");
 }
 else {
-	project.add_assets("assets/extra/*", { destination: "data/{name}" });
+	project.add_assets("assets/extra/*", {destination : "data/{name}"});
 }
 
 if (flags.with_physics) {
@@ -175,43 +177,43 @@ if (flags.with_physics) {
 }
 
 if (flags.with_raytrace) {
-	project.add_assets("assets/raytrace/*", { destination: "data/{name}" });
+	project.add_assets("assets/raytrace/*", {destination : "data/{name}"});
 	if (graphics == "direct3d12") {
-		project.add_assets("shaders/raytrace/*.cso", { destination: "data/{name}" });
+		project.add_assets("shaders/raytrace/*.cso", {destination : "data/{name}"});
 	}
 	else if (graphics == "vulkan") {
-		project.add_assets("shaders/raytrace/*.spirv", { destination: "data/{name}" });
+		project.add_assets("shaders/raytrace/*.spirv", {destination : "data/{name}"});
 	}
 	else if (graphics == "metal") {
-		project.add_assets("shaders/raytrace/*.metal", { destination: "data/{name}" });
+		project.add_assets("shaders/raytrace/*.metal", {destination : "data/{name}"});
 	}
 }
 
 if (flags.export_version_info) {
-	let dir = "../" + flags.name.substr(5).toLowerCase() + "/build";
-	let sha = os_popen(`git log --pretty=format:"%h" -n 1`).stdout.substr(1, 7);
+	let dir  = "../" + flags.name.substr(5).toLowerCase() + "/build";
+	let sha  = os_popen(`git log --pretty=format:"%h" -n 1`).stdout.substr(1, 7);
 	let date = new Date().toISOString().split("T")[0];
 	let data = `{ "sha": "${sha}", "date": "${date}" }`;
 	fs_ensuredir(dir);
 	fs_writefile(dir + "/version.json", data);
 	// Adds version.json to embed.txt list
-	project.add_assets(dir + "/version.json", { destination: "data/{name}" });
+	project.add_assets(dir + "/version.json", {destination : "data/{name}"});
 }
 
 if (flags.export_data_list) {
-	let root = "../" + flags.name.substr(5).toLowerCase();
+	let root      = "../" + flags.name.substr(5).toLowerCase();
 	let data_list = {
-		"/data/plugins": fs_readdir(root + "/assets/plugins").join(","),
-		"/data/export_presets": fs_readdir(root + "/assets/export_presets").join(","),
-		"/data/keymap_presets": fs_readdir(root + "/assets/keymap_presets").join(","),
-		"/data/locale": fs_readdir(root + "/assets/locale").join(","),
-		"/data/meshes": fs_readdir(root + "/assets/meshes").join(","),
-		"/data/themes": fs_readdir("../base/assets/themes").join(","),
+		"/data/plugins" : fs_readdir(root + "/assets/plugins").join(","),
+		"/data/export_presets" : fs_readdir(root + "/assets/export_presets").join(","),
+		"/data/keymap_presets" : fs_readdir(root + "/assets/keymap_presets").join(","),
+		"/data/locale" : fs_readdir(root + "/assets/locale").join(","),
+		"/data/meshes" : fs_readdir(root + "/assets/meshes").join(","),
+		"/data/themes" : fs_readdir("../base/assets/themes").join(","),
 	};
 	let dir = "../" + flags.name.substr(5).toLowerCase() + "/build";
 	fs_ensuredir(dir);
 	fs_writefile(dir + "/data_list.json", JSON.stringify(data_list));
-	project.add_assets(dir + "/data_list.json", { destination: "data/{name}" });
+	project.add_assets(dir + "/data_list.json", {destination : "data/{name}"});
 }
 
 if (flags.with_audio) {
@@ -247,7 +249,7 @@ if (fs_exists(os_cwd() + "/icon.png")) {
 		project.icon = "icon_ios.png";
 	}
 	else if (platform == "linux") {
-		project.add_assets("../" + dir + "/icon.png", { destination: "{name}", noprocessing: true, noembed: true });
+		project.add_assets("../" + dir + "/icon.png", {destination : "{name}", noprocessing : true, noembed : true});
 	}
 }
 

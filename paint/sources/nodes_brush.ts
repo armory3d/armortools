@@ -1,12 +1,10 @@
 
-let nodes_brush_categories: string[] = [
-	_tr("Nodes")
-];
+let nodes_brush_categories: string[] = [ _tr("Nodes") ];
 
 let nodes_brush_category0: ui_node_t[];
 let nodes_brush_list: node_list_t[];
 
-let nodes_brush_creates: map_t<string, (args: f32_array_t)=>logic_node_ext_t>;
+let nodes_brush_creates: map_t<string, (args: f32_array_t) => logic_node_ext_t>;
 
 function nodes_brush_init() {
 	nodes_brush_creates = map_create();
@@ -31,19 +29,10 @@ function nodes_brush_list_init() {
 	}
 
 	nodes_brush_category0 = [
-		tex_image_node_def,
-		input_node_def,
-		math_node_def,
-		random_node_def,
-		separate_vector_node_def,
-		time_node_def,
-		float_node_def,
-		vector_node_def,
+		tex_image_node_def, input_node_def, math_node_def, random_node_def, separate_vector_node_def, time_node_def, float_node_def, vector_node_def,
 		vector_math_node_def
 	];
-	nodes_brush_list = [
-		nodes_brush_category0
-	];
+	nodes_brush_list = [ nodes_brush_category0 ];
 }
 
 function nodes_brush_create_node(node_type: string): ui_node_t {
@@ -53,8 +42,8 @@ function nodes_brush_create_node(node_type: string): ui_node_t {
 			let n: ui_node_t = c[i];
 			if (n.type == node_type) {
 				let canvas: ui_node_canvas_t = context_raw.brush.canvas;
-				let nodes: ui_nodes_t = context_raw.brush.nodes;
-				let node: ui_node_t = ui_nodes_make_node(n, nodes, canvas);
+				let nodes: ui_nodes_t        = context_raw.brush.nodes;
+				let node: ui_node_t          = ui_nodes_make_node(n, nodes, canvas);
 				array_push(canvas.nodes, node);
 				return node;
 			}

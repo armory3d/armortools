@@ -1,21 +1,20 @@
 
-let ui_menubar_default_w: i32 = 330;
-let ui_menubar_hwnd: ui_handle_t = ui_handle_create();
+let ui_menubar_default_w: i32           = 330;
+let ui_menubar_hwnd: ui_handle_t        = ui_handle_create();
 let ui_menubar_menu_handle: ui_handle_t = ui_handle_create();
-let ui_menubar_tab: ui_handle_t = ui_handle_create();
-let ui_menubar_w: i32 = ui_menubar_default_w;
-let ui_menubar_category: i32 = 0;
+let ui_menubar_tab: ui_handle_t         = ui_handle_create();
+let ui_menubar_w: i32                   = ui_menubar_default_w;
+let ui_menubar_category: i32            = 0;
 
 let _ui_menubar_saved_camera: mat4_t = mat4_nan();
 let _ui_menubar_plane: mesh_object_t = null;
 
 type update_info_t = {
-	version: i32;
-	version_name: string;
+	version: i32; version_name : string;
 };
 
 function ui_menubar_init() {
-	ui_menubar_hwnd.layout = ui_layout_t.HORIZONTAL;
+	ui_menubar_hwnd.layout        = ui_layout_t.HORIZONTAL;
 	ui_menubar_menu_handle.layout = ui_layout_t.HORIZONTAL;
 }
 
@@ -23,7 +22,7 @@ function ui_menu_panel_x(): i32 {
 	let panel_x: i32 = base_x();
 	if (config_raw.layout[layout_size_t.HEADER] == 1) {
 		let item_w: i32 = ui_toolbar_w();
-		panel_x = base_x() - item_w;
+		panel_x         = base_x() - item_w;
 	}
 	else {
 		panel_x += 5 * UI_SCALE();
@@ -42,7 +41,7 @@ function ui_menu_panel_y(): i32 {
 }
 
 function ui_menubar_render_ui() {
-	let item_w: i32 = ui_toolbar_w();
+	let item_w: i32  = ui_toolbar_w();
 	let panel_x: i32 = ui_menu_panel_x();
 	let panel_y: i32 = ui_menu_panel_y();
 
@@ -57,13 +56,14 @@ function ui_menubar_render_ui() {
 		if (config_raw.touch_ui) {
 			ui._w = item_w;
 
-			if (ui_menubar_icon_button(0, 2)) box_preferences_show();
+			if (ui_menubar_icon_button(0, 2))
+				box_preferences_show();
 			if (ui_menubar_icon_button(0, 3)) {
 				// Save project icon in lit mode
 				context_set_viewport_mode(viewport_mode_t.LIT);
 				console_toast(tr("Saving project"));
-				sys_notify_on_next_frame(function () {
-					sys_notify_on_end_frame(function () {
+				sys_notify_on_next_frame(function() {
+					sys_notify_on_end_frame(function() {
 						project_save();
 						box_projects_show();
 					});
@@ -111,7 +111,7 @@ function ui_menubar_render_ui() {
 			ui.enabled = true;
 		}
 		else {
-			let categories: string[] = [tr("File"), tr("Edit"), tr("Viewport"), tr("Mode"), tr("Camera"), tr("Help")];
+			let categories: string[] = [ tr("File"), tr("Edit"), tr("Viewport"), tr("Mode"), tr("Camera"), tr("Help") ];
 			for (let i: i32 = 0; i < categories.length; ++i) {
 				if (_ui_menu_button(categories[i]) || (ui_menu_show && ui_menu_commands == ui_menubar_draw_category_items && ui.is_hovered)) {
 					ui_menubar_show_menu(i);
@@ -121,13 +121,13 @@ function ui_menubar_render_ui() {
 
 		// Store real menubar w
 		if (ui_menubar_w < ui._x + 10) {
-			ui_menubar_w = math_floor(ui._x + 10);
+			ui_menubar_w              = math_floor(ui._x + 10);
 			ui_toolbar_handle.redraws = 2;
 		}
 		// Crop menubar if sidebar + nodes are overlapping
 		let nodesw: i32 = (ui_nodes_show || ui_view2d_show) ? config_raw.layout[layout_size_t.NODES_W] : 0;
 		if (ui_menubar_w > iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - nodesw) {
-			ui_menubar_w = iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - nodesw;
+			ui_menubar_w              = iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - nodesw;
 			ui_toolbar_handle.redraws = 2;
 		}
 
@@ -141,12 +141,12 @@ function ui_menubar_render_ui() {
 }
 
 function ui_menubar_draw_tab_header() {
-	let item_w: i32 = ui_toolbar_w();
+	let item_w: i32  = ui_toolbar_w();
 	let panel_x: i32 = base_x();
 
 	let nodesw: i32 = (ui_nodes_show || ui_view2d_show) ? config_raw.layout[layout_size_t.NODES_W] : 0;
-	let ww: i32 = iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - ui_menubar_w - nodesw;
-	panel_x = (base_x() - item_w) + ui_menubar_w;
+	let ww: i32     = iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - ui_menubar_w - nodesw;
+	panel_x         = (base_x() - item_w) + ui_menubar_w;
 
 	if (!base_view3d_show) {
 		panel_x += 1;
@@ -190,7 +190,7 @@ function ui_menubar_draw_category_items() {
 			project_import_asset(string_array_join(path_texture_formats, ","), false);
 		}
 		if (ui_menu_button(tr("Import Envmap..."))) {
-			ui_files_show("hdr", false, false, function (path: string) {
+			ui_files_show("hdr", false, false, function(path: string) {
 				if (!ends_with(path, ".hdr")) {
 					console_error(tr("Error: .hdr file expected"));
 					return;
@@ -252,14 +252,14 @@ function ui_menubar_draw_category_items() {
 			step_redo = history_steps[history_steps.length - history_redos].name;
 		}
 
-		ui.enabled = history_undos > 0;
+		ui.enabled                           = history_undos > 0;
 		let vars_undo: map_t<string, string> = map_create();
 		map_set(vars_undo, "step", step_undo);
 		if (ui_menu_button(tr("Undo {step}", vars_undo), map_get(config_keymap, "edit_undo"))) {
 			history_undo();
 		}
 
-		ui.enabled = history_redos > 0;
+		ui.enabled                           = history_redos > 0;
 		let vars_redo: map_t<string, string> = map_create();
 		map_set(vars_redo, "step", step_redo);
 		if (ui_menu_button(tr("Redo {step}", vars_redo), map_get(config_keymap, "edit_redo"))) {
@@ -277,17 +277,17 @@ function ui_menubar_draw_category_items() {
 			ui.is_hovered = false;
 		}
 
-		///if !(arm_android || arm_ios)
+		/// if !(arm_android || arm_ios)
 		if (ui_menu_button(tr("Toggle Fullscreen"), "alt+enter")) {
 			base_toggle_fullscreen();
 		}
-		///end
+		/// end
 
 		ui.changed = false;
 
-		let p: world_data_t = scene_world;
+		let p: world_data_t         = scene_world;
 		let env_handle: ui_handle_t = ui_handle(__ID__);
-		env_handle.f = p.strength;
+		env_handle.f                = p.strength;
 		ui_menu_align();
 		p.strength = ui_slider(env_handle, tr("Environment"), 0.0, 8.0, true);
 		if (env_handle.changed) {
@@ -295,7 +295,7 @@ function ui_menubar_draw_category_items() {
 		}
 
 		let enva_handle: ui_handle_t = ui_handle(__ID__);
-		enva_handle.f = context_raw.envmap_angle / math_pi() * 180.0;
+		enva_handle.f                = context_raw.envmap_angle / math_pi() * 180.0;
 		if (enva_handle.f < 0) {
 			enva_handle.f += (math_floor(-enva_handle.f / 360) + 1) * 360;
 		}
@@ -364,7 +364,7 @@ function ui_menubar_draw_category_items() {
 		}
 
 		context_raw.show_envmap_handle.b = context_raw.show_envmap;
-		context_raw.show_envmap = ui_check(context_raw.show_envmap_handle, " " + tr("Envmap"));
+		context_raw.show_envmap          = ui_check(context_raw.show_envmap_handle, " " + tr("Envmap"));
 		if (context_raw.show_envmap_handle.changed) {
 			context_load_envmap();
 			context_raw.ddirty = 2;
@@ -387,25 +387,12 @@ function ui_menubar_draw_category_items() {
 	}
 	else if (ui_menubar_category == menubar_category_t.MODE) {
 		let mode_handle: ui_handle_t = ui_handle(__ID__);
-		mode_handle.i = context_raw.viewport_mode;
-		let modes: string[] = [
-			tr("Lit"),
-			tr("Base Color"),
-			tr("Normal"),
-			tr("Occlusion"),
-			tr("Roughness"),
-			tr("Metallic"),
-			tr("Opacity"),
-			tr("Height"),
-			tr("Emission"),
-			tr("Subsurface"),
-			tr("TexCoord"),
-			tr("Object Normal"),
-			tr("Material ID"),
-			tr("Object ID"),
-			tr("Mask")
+		mode_handle.i                = context_raw.viewport_mode;
+		let modes: string[]          = [
+            tr("Lit"), tr("Base Color"), tr("Normal"), tr("Occlusion"), tr("Roughness"), tr("Metallic"), tr("Opacity"), tr("Height"), tr("Emission"),
+            tr("Subsurface"), tr("TexCoord"), tr("Object Normal"), tr("Material ID"), tr("Object ID"), tr("Mask")
 		];
-		let shortcuts: string[] = ["l", "b", "n", "o", "r", "m", "a", "h", "e", "s", "t", "1", "2", "3", "4"];
+		let shortcuts: string[] = [ "l", "b", "n", "o", "r", "m", "a", "h", "e", "s", "t", "1", "2", "3", "4" ];
 
 		if (gpu_raytrace_supported()) {
 			array_push(modes, tr("Path Traced"));
@@ -473,7 +460,7 @@ function ui_menubar_draw_category_items() {
 		}
 
 		let cam: camera_object_t = scene_camera;
-		context_raw.fov_handle = ui_handle(__ID__);
+		context_raw.fov_handle   = ui_handle(__ID__);
 		if (context_raw.fov_handle.init) {
 			context_raw.fov_handle.f = math_floor(cam.data.fov * 100) / 100;
 		}
@@ -485,23 +472,26 @@ function ui_menubar_draw_category_items() {
 
 		ui_menu_align();
 		let camera_controls_handle: ui_handle_t = ui_handle(__ID__);
-		camera_controls_handle.i = context_raw.camera_controls;
-		let camera_controls_items: string[] = [tr("Orbit"), tr("Rotate"), tr("Fly")];
-		context_raw.camera_controls = ui_inline_radio(camera_controls_handle, camera_controls_items, ui_align_t.LEFT);
+		camera_controls_handle.i                = context_raw.camera_controls;
+		let camera_controls_items: string[]     = [ tr("Orbit"), tr("Rotate"), tr("Fly") ];
+		context_raw.camera_controls             = ui_inline_radio(camera_controls_handle, camera_controls_items, ui_align_t.LEFT);
 
 		let vars: map_t<string, string> = map_create();
 		map_set(vars, "rotate_shortcut", map_get(config_keymap, "action_rotate"));
 		map_set(vars, "zoom_shortcut", map_get(config_keymap, "action_zoom"));
 		map_set(vars, "pan_shortcut", map_get(config_keymap, "action_pan"));
-		let orbit_and_rotate_tooltip: string = tr("Orbit and Rotate mode:\n{rotate_shortcut} or move right mouse button to rotate.\n{zoom_shortcut} or scroll to zoom.\n{pan_shortcut} or move middle mouse to pan.", vars);
-		let fly_tooltip: string = tr("Fly mode:\nHold the right mouse button and one of the following commands:\nmove mouse to rotate.\nw, up or scroll up to move forward.\ns, down or scroll down to move backward.\na or left to move left.\nd or right to move right.\ne to move up.\nq to move down.\nHold shift to move faster or alt to move slower.");
+		let orbit_and_rotate_tooltip: string = tr(
+		    "Orbit and Rotate mode:\n{rotate_shortcut} or move right mouse button to rotate.\n{zoom_shortcut} or scroll to zoom.\n{pan_shortcut} or move middle mouse to pan.",
+		    vars);
+		let fly_tooltip: string = tr(
+		    "Fly mode:\nHold the right mouse button and one of the following commands:\nmove mouse to rotate.\nw, up or scroll up to move forward.\ns, down or scroll down to move backward.\na or left to move left.\nd or right to move right.\ne to move up.\nq to move down.\nHold shift to move faster or alt to move slower.");
 		if (ui.is_hovered) {
 			ui_tooltip(orbit_and_rotate_tooltip + "\n\n" + fly_tooltip);
 		}
 
 		ui_menu_align();
-		let camera_type_items: string[] = [tr("Perspective"), tr("Orthographic")];
-		context_raw.camera_type = ui_inline_radio(context_raw.cam_handle, camera_type_items, ui_align_t.LEFT);
+		let camera_type_items: string[] = [ tr("Perspective"), tr("Orthographic") ];
+		context_raw.camera_type         = ui_inline_radio(context_raw.cam_handle, camera_type_items, ui_align_t.LEFT);
 		if (ui.is_hovered) {
 			ui_tooltip(tr("Camera Type") + " (" + map_get(config_keymap, "view_camera_type") + ")");
 		}
@@ -527,36 +517,41 @@ function ui_menubar_draw_category_items() {
 			iron_load_url("https://github.com/armory3d/armortools/issues");
 		}
 		if (ui_menu_button(tr("Report Bug"))) {
-			///if (arm_macos || arm_ios) // Limited url length
-			iron_load_url("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id());
-			///else
-			iron_load_url("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id() + "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A");
-			///end
+			/// if (arm_macos || arm_ios) // Limited url length
+			iron_load_url("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" +
+			              manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id());
+			/// else
+			iron_load_url("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" +
+			              manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id() +
+			              "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A");
+			/// end
 		}
 		if (ui_menu_button(tr("Request Feature"))) {
-			///if (arm_macos || arm_ios) // Limited url length
-			iron_load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id());
-			///else
-			iron_load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title + "%20" + manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id() + "*%0A%0A**Feature description:**%0A%0A");
-			///end
+			/// if (arm_macos || arm_ios) // Limited url length
+			iron_load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title +
+			              "%20" + manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id());
+			/// else
+			iron_load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title +
+			              "%20" + manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id() + "*%0A%0A**Feature description:**%0A%0A");
+			/// end
 		}
 		ui_menu_separator();
 
 		if (ui_menu_button(tr("Check for Updates..."))) {
-			///if arm_android
+			/// if arm_android
 			iron_load_url(manifest_url_android);
-			///elseif arm_ios
+			/// elseif arm_ios
 			iron_load_url(manifest_url_ios);
-			///else
+			/// else
 			// Retrieve latest version number
-			iron_file_download("https://server.armorpaint.org/" + to_lower_case(manifest_title) + ".html", function (url: string, buffer: buffer_t) {
-				if (buffer != null)  {
+			iron_file_download("https://server.armorpaint.org/" + to_lower_case(manifest_title) + ".html", function(url: string, buffer: buffer_t) {
+				if (buffer != null) {
 					// Compare versions
 					let update: update_info_t = json_parse(sys_buffer_to_string(buffer));
-					let update_version: i32 = math_floor(update.version);
+					let update_version: i32   = math_floor(update.version);
 					if (update_version > 0) {
-						let date: string = config_get_date(); // 2019 -> 19
-						date = substring(date, 2, date.length);
+						let date: string  = config_get_date(); // 2019 -> 19
+						date              = substring(date, 2, date.length);
 						let date_int: i32 = parse_int(string_replace_all(date, "-", ""));
 						if (update_version > date_int) {
 							let vars: map_t<string, string> = map_create();
@@ -574,7 +569,7 @@ function ui_menubar_draw_category_items() {
 					ui_box_show_message(tr("Update"), tr("Unable to check for updates.\nPlease visit {url}.", vars));
 				}
 			});
-			///end
+			/// end
 		}
 
 		if (ui_menu_button(tr("About..."))) {
@@ -587,7 +582,7 @@ function ui_menubar_draw_category_items() {
 
 			_ui_menu_render_msg = msg;
 
-			ui_box_show_custom(function () {
+			ui_box_show_custom(function() {
 				let tab_vertical: bool = config_raw.touch_ui;
 				if (ui_tab(ui_handle(__ID__), tr("About"), tab_vertical)) {
 
@@ -603,13 +598,13 @@ function ui_menubar_draw_category_items() {
 
 					ui_row3();
 
-					///if (arm_windows || arm_linux || arm_macos)
+					/// if (arm_windows || arm_linux || arm_macos)
 					if (ui_button(tr("Copy"))) {
 						iron_copy_to_clipboard(_ui_menu_render_msg);
 					}
-					///else
+					/// else
 					ui_end_element();
-					///end
+					/// end
 
 					if (ui_button(tr("Contributors"))) {
 						iron_load_url("https://github.com/armory3d/armortools/graphs/contributors");
@@ -628,15 +623,15 @@ function ui_menubar_show_menu(category: i32) {
 		return;
 	}
 
-	ui_menu_show = true;
-	ui_menu_show_first = true;
-	ui_menu_commands = ui_menubar_draw_category_items;
+	ui_menu_show        = true;
+	ui_menu_show_first  = true;
+	ui_menu_commands    = ui_menubar_draw_category_items;
 	ui_menubar_category = category;
 
 	let panel_x: i32 = ui_menu_panel_x();
 	let panel_y: i32 = ui_menu_panel_y();
-	ui_menu_x = math_floor(ui._x - ui._w) + panel_x;
-	ui_menu_y = math_floor(ui_MENUBAR_H(ui)) + panel_y;
+	ui_menu_x        = math_floor(ui._x - ui._w) + panel_x;
+	ui_menu_y        = math_floor(ui_MENUBAR_H(ui)) + panel_y;
 	if (config_raw.touch_ui) {
 		let menu_w: i32 = math_floor(base_default_element_w * UI_SCALE() * 2.0);
 		ui_menu_x -= math_floor((menu_w - ui._w) / 2) + math_floor(ui_header_h / 2);
@@ -647,10 +642,10 @@ function ui_menubar_show_menu(category: i32) {
 }
 
 function ui_menubar_icon_button(i: i32, j: i32): bool {
-	let col: u32 = ui.ops.theme.WINDOW_BG_COL;
-	let light: bool = col > 0xff666666 ;
-	let icon_accent: i32 = light ? 0xff666666 : 0xffaaaaaa;
+	let col: u32           = ui.ops.theme.WINDOW_BG_COL;
+	let light: bool        = col > 0xff666666;
+	let icon_accent: i32   = light ? 0xff666666 : 0xffaaaaaa;
 	let img: gpu_texture_t = resource_get("icons.k");
-	let rect: rect_t = resource_tile50(img, i, j);
+	let rect: rect_t       = resource_tile50(img, i, j);
 	return ui_sub_image(img, icon_accent, -1.0, rect.x, rect.y, rect.w, rect.h) == ui_state_t.RELEASED;
 }

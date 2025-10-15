@@ -28,17 +28,17 @@ static void affirm(OSStatus err) {
 	}
 }
 
-static bool initialized;
-static bool soundPlaying;
+static bool                        initialized;
+static bool                        soundPlaying;
 static AudioStreamBasicDescription deviceFormat;
-static AudioComponentInstance audioUnit;
-static bool isFloat = false;
-static bool isInterleaved = true;
+static AudioComponentInstance      audioUnit;
+static bool                        isFloat       = false;
+static bool                        isInterleaved = true;
 
 static iron_a2_buffer_t a2_buffer;
 
 static void copySample(void *buffer, void *secondary_buffer) {
-	float left_value = *(float *)&a2_buffer.channels[0][a2_buffer.read_location];
+	float left_value  = *(float *)&a2_buffer.channels[0][a2_buffer.read_location];
 	float right_value = *(float *)&a2_buffer.channels[1][a2_buffer.read_location];
 	a2_buffer.read_location += 1;
 	if (a2_buffer.read_location >= a2_buffer.data_size) {
@@ -68,11 +68,11 @@ static void copySample(void *buffer, void *secondary_buffer) {
 	}
 	else {
 		if (isFloat) {
-			*(float *)buffer = left_value;
+			*(float *)buffer           = left_value;
 			*(float *)secondary_buffer = right_value;
 		}
 		else {
-			*(int16_t *)buffer = (int16_t)(left_value * 32767);
+			*(int16_t *)buffer           = (int16_t)(left_value * 32767);
 			*(int16_t *)secondary_buffer = (int16_t)(right_value * 32767);
 		}
 	}
@@ -120,7 +120,7 @@ static uint32_t samples_per_second = 44100;
 
 static void sampleRateListener(void *inRefCon, AudioUnit inUnit, AudioUnitPropertyID inID, AudioUnitScope inScope, AudioUnitElement inElement) {
 	Float64 sampleRate;
-	UInt32 size = sizeof(sampleRate);
+	UInt32  size = sizeof(sampleRate);
 	affirm(AudioUnitGetProperty(inUnit, kAudioUnitProperty_SampleRate, kAudioUnitScope_Output, 0, &sampleRate, &size));
 
 	if (samples_per_second != (uint32_t)sampleRate) {
@@ -139,20 +139,20 @@ void iron_a2_init(void) {
 	iron_a2_internal_init();
 	initialized = true;
 
-	a2_buffer.read_location = 0;
+	a2_buffer.read_location  = 0;
 	a2_buffer.write_location = 0;
-	a2_buffer.data_size = 128 * 1024;
-	a2_buffer.channel_count = 2;
-	a2_buffer.channels[0] = (float *)malloc(a2_buffer.data_size * sizeof(float));
-	a2_buffer.channels[1] = (float *)malloc(a2_buffer.data_size * sizeof(float));
+	a2_buffer.data_size      = 128 * 1024;
+	a2_buffer.channel_count  = 2;
+	a2_buffer.channels[0]    = (float *)malloc(a2_buffer.data_size * sizeof(float));
+	a2_buffer.channels[1]    = (float *)malloc(a2_buffer.data_size * sizeof(float));
 
 	initialized = false;
 
 	AudioComponentDescription desc;
-	desc.componentType = kAudioUnitType_Output;
-	desc.componentSubType = kAudioUnitSubType_RemoteIO;
-	desc.componentFlags = 0;
-	desc.componentFlagsMask = 0;
+	desc.componentType         = kAudioUnitType_Output;
+	desc.componentSubType      = kAudioUnitSubType_RemoteIO;
+	desc.componentFlags        = 0;
+	desc.componentFlagsMask    = 0;
 	desc.componentManufacturer = kAudioUnitManufacturer_Apple;
 
 	AudioComponent comp = AudioComponentFindNext(NULL, &desc);
@@ -201,7 +201,7 @@ void iron_a2_init(void) {
 	}
 
 	AURenderCallbackStruct callbackStruct;
-	callbackStruct.inputProc = renderInput;
+	callbackStruct.inputProc       = renderInput;
 	callbackStruct.inputProcRefCon = NULL;
 	affirm(AudioUnitSetProperty(audioUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Global, kOutputBus, &callbackStruct, sizeof(callbackStruct)));
 

@@ -1,6 +1,6 @@
 
 function mesh_data_parse(name: string, id: string): mesh_data_t {
-	let format: scene_t = data_get_scene_raw(name);
+	let format: scene_t  = data_get_scene_raw(name);
 	let raw: mesh_data_t = mesh_data_get_raw_by_name(format.mesh_datas, id);
 	if (raw == null) {
 		iron_log("Mesh data '" + id + "' not found!");
@@ -60,9 +60,9 @@ function mesh_data_get_vertex_size(vertex_data: string): i32 {
 
 function mesh_data_build_vertices(vertex_buffer: gpu_buffer_t, vertex_arrays: vertex_array_t[]) {
 	let vertices: buffer_t = gpu_lock_vertex_buffer(vertex_buffer);
-	let size: i32 = mesh_data_get_vertex_size(vertex_arrays[0].data);
-	let num_verts: i32 = vertex_arrays[0].values.length / size;
-	let di: i32 = -1;
+	let size: i32          = mesh_data_get_vertex_size(vertex_arrays[0].data);
+	let num_verts: i32     = vertex_arrays[0].values.length / size;
+	let di: i32            = -1;
 	for (let i: i32 = 0; i < num_verts; ++i) {
 		for (let va: i32 = 0; va < vertex_arrays.length; ++va) {
 			let l: i32 = mesh_data_get_vertex_size(vertex_arrays[va].data);
@@ -94,8 +94,8 @@ function mesh_data_get_vertex_array(raw: mesh_data_t, name: string): vertex_arra
 
 function mesh_data_build(raw: mesh_data_t) {
 	let positions: vertex_array_t = mesh_data_get_vertex_array(raw, "pos");
-	let size: i32 = mesh_data_get_vertex_size(positions.data);
-	raw._.vertex_buffer = gpu_create_vertex_buffer(math_floor(positions.values.length / size), raw._.structure);
+	let size: i32                 = mesh_data_get_vertex_size(positions.data);
+	raw._.vertex_buffer           = gpu_create_vertex_buffer(math_floor(positions.values.length / size), raw._.structure);
 	mesh_data_build_vertices(raw._.vertex_buffer, raw.vertex_arrays);
 
 	raw._.index_buffer = gpu_create_index_buffer(raw.index_array.length);
@@ -103,10 +103,10 @@ function mesh_data_build(raw: mesh_data_t) {
 }
 
 function mesh_data_calculate_aabb(raw: mesh_data_t): vec4_t {
-	let aabb_min: vec4_t = vec4_create(-0.01, -0.01, -0.01);
-	let aabb_max: vec4_t = vec4_create(0.01, 0.01, 0.01);
-	let aabb: vec4_t = vec4_create();
-	let i: i32 = 0;
+	let aabb_min: vec4_t          = vec4_create(-0.01, -0.01, -0.01);
+	let aabb_max: vec4_t          = vec4_create(0.01, 0.01, 0.01);
+	let aabb: vec4_t              = vec4_create();
+	let i: i32                    = 0;
 	let positions: vertex_array_t = mesh_data_get_vertex_array(raw, "pos");
 	while (i < positions.values.length) {
 		if (positions.values[i] > aabb_max.x) {

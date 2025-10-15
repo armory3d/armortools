@@ -1,5 +1,5 @@
 
-///if arm_anim
+/// if arm_anim
 
 type anim_raw_t = {
 	ext?: any; // anim_object_t
@@ -9,7 +9,7 @@ type anim_raw_t = {
 	speed?: f32;
 	loop?: bool;
 	frame_index?: i32;
-	on_complete?: ()=>void;
+	on_complete?: () => void;
 	paused?: bool;
 	frame_time?: f32;
 	blend_time?: f32;
@@ -17,59 +17,59 @@ type anim_raw_t = {
 	blend_action?: string;
 	blend_factor?: f32;
 	last_frame_index?: i32;
-	marker_events?: map_t<string, (()=>void)[]>;
+	marker_events?: map_t<string, (() => void)[]>;
 };
 
 // Lerp
-let _anim_m1: mat4_t = mat4_identity();
-let _anim_m2: mat4_t = mat4_identity();
-let _anim_vpos: vec4_t = vec4_create();
-let _anim_vpos2: vec4_t = vec4_create();
-let _anim_vscale: vec4_t = vec4_create();
+let _anim_m1: mat4_t      = mat4_identity();
+let _anim_m2: mat4_t      = mat4_identity();
+let _anim_vpos: vec4_t    = vec4_create();
+let _anim_vpos2: vec4_t   = vec4_create();
+let _anim_vscale: vec4_t  = vec4_create();
 let _anim_vscale2: vec4_t = vec4_create();
-let _anim_q1: quat_t = quat_create();
-let _anim_q2: quat_t = quat_create();
-let _anim_q3: quat_t = quat_create();
-let _anim_vp: vec4_t = vec4_create();
-let _anim_vs: vec4_t = vec4_create();
+let _anim_q1: quat_t      = quat_create();
+let _anim_q2: quat_t      = quat_create();
+let _anim_q3: quat_t      = quat_create();
+let _anim_vp: vec4_t      = vec4_create();
+let _anim_vs: vec4_t      = vec4_create();
 
 function anim_create(): anim_raw_t {
-	let raw: anim_raw_t = {};
-	raw.action = "";
-	raw.time = 0.0;
-	raw.speed = 1.0;
-	raw.loop = true;
-	raw.frame_index = 0;
-	raw.paused = false;
-	raw.frame_time = 1 / 60;
-	raw.blend_time = 0.0;
-	raw.blend_current = 0.0;
-	raw.blend_action = "";
-	raw.blend_factor = 0.0;
+	let raw: anim_raw_t  = {};
+	raw.action           = "";
+	raw.time             = 0.0;
+	raw.speed            = 1.0;
+	raw.loop             = true;
+	raw.frame_index      = 0;
+	raw.paused           = false;
+	raw.frame_time       = 1 / 60;
+	raw.blend_time       = 0.0;
+	raw.blend_current    = 0.0;
+	raw.blend_action     = "";
+	raw.blend_factor     = 0.0;
 	raw.last_frame_index = -1;
 	array_push(scene_animations, raw);
 	return raw;
 }
 
-function anim_play_super(raw: anim_raw_t, action: string = "", on_complete: ()=>void = null, blend_time: f32 = 0.0, speed: f32 = 1.0, loop: bool = true) {
+function anim_play_super(raw: anim_raw_t, action: string = "", on_complete: () => void = null, blend_time: f32 = 0.0, speed: f32 = 1.0, loop: bool = true) {
 	if (blend_time > 0) {
-		raw.blend_time = blend_time;
+		raw.blend_time    = blend_time;
 		raw.blend_current = 0.0;
-		raw.blend_action = raw.action;
-		raw.frame_index = 0;
-		raw.time = 0.0;
+		raw.blend_action  = raw.action;
+		raw.frame_index   = 0;
+		raw.time          = 0.0;
 	}
 	else {
 		raw.frame_index = -1;
 	}
-	raw.action = action;
+	raw.action      = action;
 	raw.on_complete = on_complete;
-	raw.speed = speed;
-	raw.loop = loop;
-	raw.paused = false;
+	raw.speed       = speed;
+	raw.loop        = loop;
+	raw.paused      = false;
 }
 
-function anim_play(raw: anim_raw_t, action: string = "", on_complete: ()=>void = null, blend_time: f32 = 0.0, speed: f32 = 1.0, loop: bool = true) {
+function anim_play(raw: anim_raw_t, action: string = "", on_complete: () => void = null, blend_time: f32 = 0.0, speed: f32 = 1.0, loop: bool = true) {
 	if (raw.ext_type == "anim_object_t") {
 		anim_object_play(raw.ext, action, on_complete, blend_time, speed, loop);
 	}
@@ -79,12 +79,12 @@ function anim_play(raw: anim_raw_t, action: string = "", on_complete: ()=>void =
 }
 
 function anim_blend_super(raw: anim_raw_t, action1: string, action2: string, factor: f32) {
-	raw.blend_time = 1.0; // Enable blending
+	raw.blend_time   = 1.0; // Enable blending
 	raw.blend_factor = factor;
 }
 
 function anim_blend(raw: anim_raw_t, action1: string, action2: string, factor: f32) {
-	if (raw.ext != null)  {
+	if (raw.ext != null) {
 	}
 	else {
 		anim_blend_super(raw, action1, action2, factor);
@@ -127,20 +127,17 @@ function anim_update(raw: anim_raw_t, delta: f32) {
 }
 
 function anim_is_track_end(raw: anim_raw_t, track: track_t): bool {
-	return raw.speed > 0 ?
-		raw.frame_index >= track.frames.length - 1 :
-		raw.frame_index <= 0;
+	return raw.speed > 0 ? raw.frame_index >= track.frames.length - 1 : raw.frame_index <= 0;
 }
 
 function anim_check_frame_index(raw: anim_raw_t, frame_values: u32_array_t): bool {
-	return raw.speed > 0 ?
-		((raw.frame_index + 1) < frame_values.length && raw.time > frame_values[raw.frame_index + 1] * raw.frame_time) :
-		((raw.frame_index - 1) > -1 && raw.time < frame_values[raw.frame_index - 1] * raw.frame_time);
+	return raw.speed > 0 ? ((raw.frame_index + 1) < frame_values.length && raw.time > frame_values[raw.frame_index + 1] * raw.frame_time)
+	                     : ((raw.frame_index - 1) > -1 && raw.time < frame_values[raw.frame_index - 1] * raw.frame_time);
 }
 
 function anim_rewind(raw: anim_raw_t, track: track_t) {
 	raw.frame_index = raw.speed > 0 ? 0 : track.frames.length - 1;
-	raw.time = track.frames[raw.frame_index] * raw.frame_time;
+	raw.time        = track.frames[raw.frame_index] * raw.frame_time;
 }
 
 function anim_update_track(raw: anim_raw_t, anim: anim_t) {
@@ -195,13 +192,13 @@ function anim_update_anim_sampled(raw: anim_raw_t, anim: anim_t, m: mat4_t) {
 		return;
 	}
 	let track: track_t = anim.tracks[0];
-	let sign: i32 = raw.speed > 0 ? 1 : -1;
+	let sign: i32      = raw.speed > 0 ? 1 : -1;
 
-	let t: i32 = raw.time;
+	let t: i32  = raw.time;
 	let ti: i32 = raw.frame_index;
 	let t1: f32 = track.frames[ti] * raw.frame_time;
 	let t2: f32 = track.frames[ti + sign] * raw.frame_time;
-	let s: f32 = (t - t1) / (t2 - t1); // Linear
+	let s: f32  = (t - t1) / (t2 - t1); // Linear
 
 	_anim_m1 = mat4_from_f32_array(track.values, ti * 16); // Offset to 4x4 matrix array
 	_anim_m2 = mat4_from_f32_array(track.values, (ti + sign) * 16);
@@ -216,20 +213,20 @@ function anim_update_anim_sampled(raw: anim_raw_t, anim: anim_t, m: mat4_t) {
 	_anim_q3 = quat_lerp(_anim_q1, _anim_q2, s);
 
 	// Compose
-	m = mat4_from_quat(_anim_q3);
-	m = mat4_scale(m, _anim_vs);
+	m     = mat4_from_quat(_anim_q3);
+	m     = mat4_scale(m, _anim_vs);
 	m.m30 = _anim_vp.x;
 	m.m31 = _anim_vp.y;
 	m.m32 = _anim_vp.z;
 }
 
 function anim_set_frame(raw: anim_raw_t, frame: i32) {
-	raw.time = 0;
+	raw.time        = 0;
 	raw.frame_index = frame;
 	anim_update(raw, frame * raw.frame_time);
 }
 
-function anim_notify_on_marker(raw: anim_raw_t, name: string, on_marker: ()=>void) {
+function anim_notify_on_marker(raw: anim_raw_t, name: string, on_marker: () => void) {
 	// if (raw.marker_events == null) {
 	// 	raw.marker_events = map_create();
 	// }
@@ -241,7 +238,7 @@ function anim_notify_on_marker(raw: anim_raw_t, name: string, on_marker: ()=>voi
 	// array_push(ar, on_marker);
 }
 
-function anim_remove_marker(raw: anim_raw_t, name: string, on_marker: ()=>void) {
+function anim_remove_marker(raw: anim_raw_t, name: string, on_marker: () => void) {
 	array_remove(map_get(raw.marker_events, name), on_marker);
 }
 
@@ -253,4 +250,4 @@ function anim_total_frames(raw: anim_raw_t): i32 {
 	return 0;
 }
 
-///end
+/// end

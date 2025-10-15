@@ -11,10 +11,8 @@ function import_arm_run_project(path: string) {
 	}
 	else if (!import_arm_has_version(b)) {
 		import_as_mesh = true;
-		scene_raw_gc = armpack_decode(b);
-		project = {
-			mesh_datas: scene_raw_gc.mesh_datas
-		};
+		scene_raw_gc   = armpack_decode(b);
+		project        = {mesh_datas : scene_raw_gc.mesh_datas};
 	}
 	else {
 		project = armpack_decode(b);
@@ -36,16 +34,16 @@ function import_arm_run_project(path: string) {
 		return;
 	}
 	context_raw.layers_preview_dirty = true;
-	context_raw.layer_filter = 0;
+	context_raw.layer_filter         = 0;
 
 	project_new(import_as_mesh);
-	project_filepath = path;
+	project_filepath  = path;
 	ui_files_filename = substring(path, string_last_index_of(path, path_sep) + 1, string_last_index_of(path, "."));
-	///if (arm_android || arm_ios)
+	/// if (arm_android || arm_ios)
 	sys_title_set(ui_files_filename);
-	///else
+	/// else
 	sys_title_set(ui_files_filename + " - " + manifest_title);
-	///end
+	/// end
 
 	// Import as mesh instead
 	if (import_as_mesh) {
@@ -54,14 +52,14 @@ function import_arm_run_project(path: string) {
 	}
 
 	// Save to recent
-	///if arm_ios
+	/// if arm_ios
 	let recent_path: string = substring(path, string_last_index_of(path, "/") + 1, path.length);
-	///else
+	/// else
 	let recent_path: string = path;
-	///end
-	///if arm_windows
+	/// end
+	/// if arm_windows
 	recent_path = string_replace_all(recent_path, "\\", "/");
-	///end
+	/// end
 	let recent: string[] = config_raw.recent_projects;
 	array_remove(recent, recent_path);
 	array_insert(recent, 0, recent_path);
@@ -69,21 +67,21 @@ function import_arm_run_project(path: string) {
 
 	project_raw = project;
 
-	let l0: layer_data_t = project.layer_datas[0];
-	base_res_handle.i = config_get_texture_res_pos(l0.res);
+	let l0: layer_data_t         = project.layer_datas[0];
+	base_res_handle.i            = config_get_texture_res_pos(l0.res);
 	let bits_pos: texture_bits_t = l0.bpp == 8 ? texture_bits_t.BITS8 : l0.bpp == 16 ? texture_bits_t.BITS16 : texture_bits_t.BITS32;
-	base_bits_handle.i = bits_pos;
-	let bytes_per_pixel: i32 = math_floor(l0.bpp / 8);
-	let format: tex_format_t = l0.bpp == 8 ? tex_format_t.RGBA32 : l0.bpp == 16 ? tex_format_t.RGBA64 : tex_format_t.RGBA128;
+	base_bits_handle.i           = bits_pos;
+	let bytes_per_pixel: i32     = math_floor(l0.bpp / 8);
+	let format: tex_format_t     = l0.bpp == 8 ? tex_format_t.RGBA32 : l0.bpp == 16 ? tex_format_t.RGBA64 : tex_format_t.RGBA128;
 
 	let base: string = path_base_dir(path);
 	if (project_raw.envmap != null) {
 		project_raw.envmap = data_is_abs(project_raw.envmap) ? project_raw.envmap : base + project_raw.envmap;
-		///if arm_windows
+		/// if arm_windows
 		project_raw.envmap = string_replace_all(project_raw.envmap, "/", "\\");
-		///else
+		/// else
 		project_raw.envmap = string_replace_all(project_raw.envmap, "\\", "/");
-		///end
+		/// end
 	}
 	scene_world.strength = project_raw.envmap_strength;
 
@@ -93,16 +91,16 @@ function import_arm_run_project(path: string) {
 		scene_camera.data.fov = project_raw.camera_fov;
 		camera_object_build_proj(scene_camera);
 		let origin: f32_array_t = project_raw.camera_origin;
-		camera_origins[0].v = vec4_create(origin[0], origin[1], origin[2]);
+		camera_origins[0].v     = vec4_create(origin[0], origin[1], origin[2]);
 	}
 
 	for (let i: i32 = 0; i < project.assets.length; ++i) {
 		let file: string = project.assets[i];
-		///if arm_windows
+		/// if arm_windows
 		file = string_replace_all(file, "/", "\\");
-		///else
+		/// else
 		file = string_replace_all(file, "\\", "/");
-		///end
+		/// end
 		// Convert image path from relative to absolute
 		let abs: string = data_is_abs(file) ? file : base + file;
 		if (project.packed_assets != null) {
@@ -119,11 +117,11 @@ function import_arm_run_project(path: string) {
 	if (project.font_assets != null) {
 		for (let i: i32 = 0; i < project.font_assets.length; ++i) {
 			let file: string = project.font_assets[i];
-			///if arm_windows
+			/// if arm_windows
 			file = string_replace_all(file, "/", "\\");
-			///else
+			/// else
 			file = string_replace_all(file, "\\", "/");
-			///end
+			/// end
 			// Convert font path from relative to absolute
 			let abs: string = data_is_abs(file) ? file : base + file;
 			if (iron_file_exists(abs)) {
@@ -138,21 +136,21 @@ function import_arm_run_project(path: string) {
 	context_raw.paint_object.base.transform.scale = vec4_create(1, 1, 1);
 	transform_build_matrix(context_raw.paint_object.base.transform);
 	context_raw.paint_object.base.name = md.name;
-	project_paint_objects = [context_raw.paint_object];
+	project_paint_objects              = [ context_raw.paint_object ];
 
 	for (let i: i32 = 1; i < project.mesh_datas.length; ++i) {
-		let raw: mesh_data_t = project.mesh_datas[i];
-		let md: mesh_data_t = mesh_data_create(raw);
+		let raw: mesh_data_t      = project.mesh_datas[i];
+		let md: mesh_data_t       = mesh_data_create(raw);
 		let object: mesh_object_t = scene_add_mesh_object(md, context_raw.paint_object.material, context_raw.paint_object.base);
-		object.base.name = md.name;
-		object.skip_context = "paint";
+		object.base.name          = md.name;
+		object.skip_context       = "paint";
 		array_push(project_paint_objects, object);
 	}
 
 	if (project.mesh_assets != null && project.mesh_assets.length > 0) {
-		let file: string = project.mesh_assets[0];
-		let abs: string = data_is_abs(file) ? file : base + file;
-		project_mesh_assets = [abs];
+		let file: string    = project.mesh_assets[0];
+		let abs: string     = data_is_abs(file) ? file : base + file;
+		project_mesh_assets = [ abs ];
 	}
 
 	if (project.atlas_objects != null) {
@@ -169,7 +167,7 @@ function import_arm_run_project(path: string) {
 
 	context_select_paint_object(context_main_object());
 	viewport_scale_to_bounds();
-	context_raw.paint_object.skip_context = "paint";
+	context_raw.paint_object.skip_context  = "paint";
 	context_raw.merged_object.base.visible = true;
 
 	let tex: gpu_texture_t = project_layers[0].texpaint;
@@ -181,18 +179,18 @@ function import_arm_run_project(path: string) {
 			}
 		}
 		let rts: map_t<string, render_target_t> = render_path_render_targets;
-		let blend0: render_target_t = map_get(rts, "texpaint_blend0");
-		let _texpaint_blend0: gpu_texture_t = blend0._image;
+		let blend0: render_target_t             = map_get(rts, "texpaint_blend0");
+		let _texpaint_blend0: gpu_texture_t     = blend0._image;
 		gpu_delete_texture(_texpaint_blend0);
-		blend0.width = config_get_texture_res_x();
-		blend0.height = config_get_texture_res_y();
-		blend0._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
-		let blend1: render_target_t = map_get(rts, "texpaint_blend1");
+		blend0.width                        = config_get_texture_res_x();
+		blend0.height                       = config_get_texture_res_y();
+		blend0._image                       = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
+		let blend1: render_target_t         = map_get(rts, "texpaint_blend1");
 		let _texpaint_blend1: gpu_texture_t = blend1._image;
 		gpu_delete_texture(_texpaint_blend1);
-		blend1.width = config_get_texture_res_x();
-		blend1.height = config_get_texture_res_y();
-		blend1._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
+		blend1.width                  = config_get_texture_res_x();
+		blend1.height                 = config_get_texture_res_y();
+		blend1._image                 = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 		context_raw.brush_blend_dirty = true;
 	}
 
@@ -203,8 +201,8 @@ function import_arm_run_project(path: string) {
 	project_layers = [];
 	for (let i: i32 = 0; i < project.layer_datas.length; ++i) {
 		let ld: layer_data_t = project.layer_datas[i];
-		let is_group: bool = ld.texpaint == null;
-		let is_mask: bool = ld.texpaint != null && ld.texpaint_nor == null;
+		let is_group: bool   = ld.texpaint == null;
+		let is_mask: bool    = ld.texpaint != null && ld.texpaint_nor == null;
 
 		let l: slot_layer_t = slot_layer_create("", is_group ? layer_slot_type_t.GROUP : is_mask ? layer_slot_type_t.MASK : layer_slot_type_t.LAYER);
 		if (ld.name != null) {
@@ -214,8 +212,8 @@ function import_arm_run_project(path: string) {
 		array_push(project_layers, l);
 
 		if (!is_group) {
-			let _texpaint: gpu_texture_t = null;
-			let _texpaint_nor: gpu_texture_t = null;
+			let _texpaint: gpu_texture_t      = null;
+			let _texpaint_nor: gpu_texture_t  = null;
 			let _texpaint_pack: gpu_texture_t = null;
 
 			if (is_mask) {
@@ -251,27 +249,27 @@ function import_arm_run_project(path: string) {
 				draw_end();
 			}
 
-			l.scale = ld.uv_scale;
-			l.angle = ld.uv_rot;
+			l.scale   = ld.uv_scale;
+			l.angle   = ld.uv_rot;
 			l.uv_type = ld.uv_type;
 			if (ld.decal_mat != null) {
 				l.decal_mat = mat4_from_f32_array(ld.decal_mat);
 			}
 			l.mask_opacity = ld.opacity_mask;
-			l.object_mask = ld.object_mask;
-			l.blending = ld.blending;
+			l.object_mask  = ld.object_mask;
+			l.blending     = ld.blending;
 
-			l.paint_base = ld.paint_base;
-			l.paint_opac = ld.paint_opac;
-			l.paint_occ = ld.paint_occ;
-			l.paint_rough = ld.paint_rough;
-			l.paint_met = ld.paint_met;
-			l.paint_nor = ld.paint_nor;
-			l.paint_nor_blend = ld.paint_nor_blend;
-			l.paint_height = ld.paint_height;
+			l.paint_base         = ld.paint_base;
+			l.paint_opac         = ld.paint_opac;
+			l.paint_occ          = ld.paint_occ;
+			l.paint_rough        = ld.paint_rough;
+			l.paint_met          = ld.paint_met;
+			l.paint_nor          = ld.paint_nor;
+			l.paint_nor_blend    = ld.paint_nor_blend;
+			l.paint_height       = ld.paint_height;
 			l.paint_height_blend = ld.paint_height_blend;
-			l.paint_emis = ld.paint_emis;
-			l.paint_subs = ld.paint_subs;
+			l.paint_emis         = ld.paint_emis;
+			l.paint_subs         = ld.paint_subs;
 
 			gpu_delete_texture(_texpaint);
 
@@ -305,23 +303,20 @@ function import_arm_run_project(path: string) {
 		array_push(project_materials, context_raw.material);
 	}
 
-	ui_nodes_hwnd.redraws = 2;
-	ui_nodes_group_stack = [];
+	ui_nodes_hwnd.redraws   = 2;
+	ui_nodes_group_stack    = [];
 	project_material_groups = [];
 	if (project.material_groups != null) {
 		for (let i: i32 = 0; i < project.material_groups.length; ++i) {
 			let g: ui_node_canvas_t = project.material_groups[i];
-			let ng: node_group_t = {
-				canvas: g,
-				nodes: ui_nodes_create()
-			};
+			let ng: node_group_t    = {canvas : g, nodes : ui_nodes_create()};
 			array_push(project_material_groups, ng);
 		}
 	}
 
 	for (let i: i32 = 0; i < project_materials.length; ++i) {
 		let m: slot_material_t = project_materials[i];
-		context_raw.material = m;
+		context_raw.material   = m;
 		make_material_parse_paint_material();
 		util_render_make_material_preview();
 	}
@@ -339,8 +334,8 @@ function import_arm_run_project(path: string) {
 	// Fill layers
 	for (let i: i32 = 0; i < project.layer_datas.length; ++i) {
 		let ld: layer_data_t = project.layer_datas[i];
-		let l: slot_layer_t = project_layers[i];
-		let is_group: bool = ld.texpaint == null;
+		let l: slot_layer_t  = project_layers[i];
+		let is_group: bool   = ld.texpaint == null;
 		if (!is_group) {
 			l.fill_layer = ld.fill_layer > -1 ? project_materials[ld.fill_layer] : null;
 		}
@@ -356,17 +351,17 @@ function import_arm_run_project(path: string) {
 function import_arm_run_mesh(raw: project_format_t) {
 	project_paint_objects = [];
 	for (let i: i32 = 0; i < raw.mesh_datas.length; ++i) {
-		let md: mesh_data_t = mesh_data_create(raw.mesh_datas[i]);
+		let md: mesh_data_t       = mesh_data_create(raw.mesh_datas[i]);
 		let object: mesh_object_t = null;
 		if (i == 0) {
 			mesh_object_set_data(context_raw.paint_object, md);
 			object = context_raw.paint_object;
 		}
 		else {
-			object = scene_add_mesh_object(md, context_raw.paint_object.material, context_raw.paint_object.base);
-			object.base.name = md.name;
+			object              = scene_add_mesh_object(md, context_raw.paint_object.material, context_raw.paint_object.base);
+			object.base.name    = md.name;
 			object.skip_context = "paint";
-			md._.handle = md.name;
+			md._.handle         = md.name;
 			map_set(data_cached_meshes, md._.handle, md);
 		}
 		object.base.transform.scale = vec4_create(1, 1, 1);
@@ -401,11 +396,11 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 	let base: string = path_base_dir(path);
 	for (let i: i32 = 0; i < project.assets.length; ++i) {
 		let file: string = project.assets[i];
-		///if arm_windows
+		/// if arm_windows
 		file = string_replace_all(file, "/", "\\");
-		///else
+		/// else
 		file = string_replace_all(file, "\\", "/");
-		///end
+		/// end
 		// Convert image path from relative to absolute
 		let abs: string = data_is_abs(file) ? file : base + file;
 		if (project.packed_assets != null) {
@@ -441,15 +436,12 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 				import_arm_rename_group(c.name, imported, project.material_groups); // Ensure unique group name
 			}
 			import_arm_init_nodes(c.nodes);
-			let ng: node_group_t = {
-				canvas: c,
-				nodes: ui_nodes_create()
-			};
+			let ng: node_group_t = {canvas : c, nodes : ui_nodes_create()};
 			array_push(project_material_groups, ng);
 		}
 	}
 
-	sys_notify_on_next_frame(function (imported: slot_material_t[]) {
+	sys_notify_on_next_frame(function(imported: slot_material_t[]) {
 		for (let i: i32 = 0; i < imported.length; ++i) {
 			let m: slot_material_t = imported[i];
 			context_set_material(m);
@@ -458,7 +450,7 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 		}
 	}, imported);
 
-	ui_nodes_group_stack = [];
+	ui_nodes_group_stack                       = [];
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 	data_delete_blob(path);
 }
@@ -466,7 +458,7 @@ function import_arm_run_material_from_project(project: project_format_t, path: s
 function import_arm_group_exists(c: ui_node_canvas_t): bool {
 	for (let i: i32 = 0; i < project_material_groups.length; ++i) {
 		let g: node_group_t = project_material_groups[i];
-		let cname: string = g.canvas.name;
+		let cname: string   = g.canvas.name;
 		if (cname == c.name) {
 			return true;
 		}
@@ -499,7 +491,7 @@ function import_arm_rename_group(name: string, materials: slot_material_t[], gro
 }
 
 function import_arm_run_brush(path: string) {
-	let b: buffer_t = data_get_blob(path);
+	let b: buffer_t               = data_get_blob(path);
 	let project: project_format_t = armpack_decode(b);
 	if (project.version == null) {
 		data_delete_blob(path);
@@ -512,11 +504,11 @@ function import_arm_run_brush_from_project(project: project_format_t, path: stri
 	let base: string = path_base_dir(path);
 	for (let i: i32 = 0; i < project.assets.length; ++i) {
 		let file: string = project.assets[i];
-		///if arm_windows
+		/// if arm_windows
 		file = string_replace_all(file, "/", "\\");
-		///else
+		/// else
 		file = string_replace_all(file, "\\", "/");
-		///end
+		/// end
 		// Convert image path from relative to absolute
 		let abs: string = data_is_abs(file) ? file : base + file;
 		if (project.packed_assets != null) {
@@ -539,7 +531,7 @@ function import_arm_run_brush_from_project(project: project_format_t, path: stri
 		array_push(imported, context_raw.brush);
 	}
 
-	sys_notify_on_next_frame(function (imported: slot_brush_t[]) {
+	sys_notify_on_next_frame(function(imported: slot_brush_t[]) {
 		for (let i: i32 = 0; i < imported.length; ++i) {
 			let b: slot_brush_t = imported[i];
 			context_set_brush(b);
@@ -553,7 +545,7 @@ function import_arm_run_brush_from_project(project: project_format_t, path: stri
 }
 
 function import_arm_run_swatches(path: string, replace_existing: bool = false) {
-	let b: buffer_t = data_get_blob(path);
+	let b: buffer_t               = data_get_blob(path);
 	let project: project_format_t = armpack_decode(b);
 	if (project.version == null) {
 		data_delete_blob(path);
@@ -583,11 +575,11 @@ function import_arm_run_swatches_from_project(project: project_format_t, path: s
 
 function import_arm_make_pink(abs: string) {
 	console_error(strings_could_not_locate_texture() + " " + abs);
-	let b: u8_array_t = u8_array_create(4);
-	b[0] = 255;
-	b[1] = 0;
-	b[2] = 255;
-	b[3] = 255;
+	let b: u8_array_t       = u8_array_create(4);
+	b[0]                    = 255;
+	b[1]                    = 0;
+	b[2]                    = 255;
+	b[3]                    = 255;
 	let pink: gpu_texture_t = gpu_create_texture_from_bytes(b, 1, 1);
 	map_set(data_cached_images, abs, pink);
 }
@@ -597,7 +589,7 @@ function import_arm_init_nodes(nodes: ui_node_t[]) {
 		let node: ui_node_t = nodes[i];
 		if (node.type == "TEX_IMAGE") {
 			node.buttons[0].default_value = f32_array_create_x(base_get_asset_index(u8_array_to_string(node.buttons[0].data)));
-			node.buttons[0].data = u8_array_create_from_string("");
+			node.buttons[0].data          = u8_array_create_from_string("");
 		}
 	}
 }
@@ -608,11 +600,11 @@ function import_arm_unpack_asset(project: project_format_t, abs: string, file: s
 	}
 	for (let i: i32 = 0; i < project.packed_assets.length; ++i) {
 		let pa: packed_asset_t = project.packed_assets[i];
-		///if arm_windows
+		/// if arm_windows
 		pa.name = string_replace_all(pa.name, "/", "\\");
-		///else
+		/// else
 		pa.name = string_replace_all(pa.name, "\\", "/");
-		///end
+		/// end
 		pa.name = path_normalize(pa.name);
 		if (pa.name == file) {
 			pa.name = abs; // From relative to absolute
@@ -621,9 +613,10 @@ function import_arm_unpack_asset(project: project_format_t, abs: string, file: s
 			if (!project_packed_asset_exists(project_raw.packed_assets, pa.name)) {
 
 				if (gc_copy) {
-					let pa_gc: packed_asset_t = { // project will get GCed
-						name: string_copy(pa.name),
-						bytes: u8_array_create_from_array(pa.bytes)
+					let pa_gc: packed_asset_t = {
+						// project will get GCed
+						name : string_copy(pa.name),
+						bytes : u8_array_create_from_array(pa.bytes)
 					};
 					pa = pa_gc;
 				}

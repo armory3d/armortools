@@ -4,7 +4,7 @@ let _tab_brushes_draw_i: i32;
 function tab_brushes_draw(htab: ui_handle_t) {
 	if (ui_tab(htab, tr("Brushes"))) {
 		ui_begin_sticky();
-		let row: f32[] = [1 / 4, 1 / 4, 1 / 4];
+		let row: f32[] = [ 1 / 4, 1 / 4, 1 / 4 ];
 		ui_row(row);
 		if (ui_button(tr("New"))) {
 			context_raw.brush = slot_brush_create();
@@ -22,7 +22,7 @@ function tab_brushes_draw(htab: ui_handle_t) {
 		ui_separator(3, false);
 
 		let slotw: i32 = math_floor(51 * UI_SCALE());
-		let num: i32 = math_floor(config_raw.layout[layout_size_t.SIDEBAR_W] / slotw);
+		let num: i32   = math_floor(config_raw.layout[layout_size_t.SIDEBAR_W] / slotw);
 		if (num == 0) {
 			return;
 		}
@@ -43,7 +43,7 @@ function tab_brushes_draw(htab: ui_handle_t) {
 
 			for (let j: i32 = 0; j < num; ++j) {
 				let imgw: i32 = math_floor(50 * UI_SCALE());
-				let i: i32 = j + row * num;
+				let i: i32    = j + row * num;
 				if (i >= project_brushes.length) {
 					ui_end_element_of_size(imgw);
 					if (config_raw.show_asset_names) {
@@ -51,26 +51,27 @@ function tab_brushes_draw(htab: ui_handle_t) {
 					}
 					continue;
 				}
-				let img: gpu_texture_t = UI_SCALE() > 1 ? project_brushes[i].image : project_brushes[i].image_icon;
+				let img: gpu_texture_t      = UI_SCALE() > 1 ? project_brushes[i].image : project_brushes[i].image_icon;
 				let img_full: gpu_texture_t = project_brushes[i].image;
 
 				if (context_raw.brush == project_brushes[i]) {
 					// ui_fill(1, -2, img.width + 3, img.height + 3, ui.ops.theme.HIGHLIGHT_COL); // TODO
 					let off: i32 = row % 2 == 1 ? 1 : 0;
-					let w: i32 = 50;
+					let w: i32   = 50;
 					if (config_raw.window_scale > 1) {
 						w += math_floor(config_raw.window_scale * 2);
 					}
-					ui_fill(-1,         -2, w + 3,       2, ui.ops.theme.HIGHLIGHT_COL);
-					ui_fill(-1,    w - off, w + 3, 2 + off, ui.ops.theme.HIGHLIGHT_COL);
-					ui_fill(-1,         -2,     2,   w + 3, ui.ops.theme.HIGHLIGHT_COL);
-					ui_fill(w + 1,      -2,     2,   w + 4, ui.ops.theme.HIGHLIGHT_COL);
+					ui_fill(-1, -2, w + 3, 2, ui.ops.theme.HIGHLIGHT_COL);
+					ui_fill(-1, w - off, w + 3, 2 + off, ui.ops.theme.HIGHLIGHT_COL);
+					ui_fill(-1, -2, 2, w + 3, ui.ops.theme.HIGHLIGHT_COL);
+					ui_fill(w + 1, -2, 2, w + 4, ui.ops.theme.HIGHLIGHT_COL);
 				}
 
 				let uix: f32 = ui._x;
-				//let uiy: f32 = ui._y;
+				// let uiy: f32 = ui._y;
 				let tile: i32 = UI_SCALE() > 1 ? 100 : 50;
-				let state: ui_state_t = project_brushes[i].preview_ready ? ui_image(img) : ui_sub_image(resource_get("icons.k"), -1, -1.0, tile * 5, tile, tile, tile);
+				let state: ui_state_t =
+				    project_brushes[i].preview_ready ? ui_image(img) : ui_sub_image(resource_get("icons.k"), -1, -1.0, tile * 5, tile, tile, tile);
 				if (state == ui_state_t.STARTED) {
 					if (context_raw.brush != project_brushes[i]) {
 						context_select_brush(i);
@@ -88,10 +89,10 @@ function tab_brushes_draw(htab: ui_handle_t) {
 
 					_tab_brushes_draw_i = i;
 
-					ui_menu_draw(function () {
+					ui_menu_draw(function() {
 						let i: i32 = _tab_brushes_draw_i;
 
-						//let b: slot_brush_t = brushes[i];
+						// let b: slot_brush_t = brushes[i];
 
 						if (ui_menu_button(tr("Export"))) {
 							context_select_brush(i);
@@ -99,12 +100,12 @@ function tab_brushes_draw(htab: ui_handle_t) {
 						}
 
 						if (ui_menu_button(tr("Duplicate"))) {
-							sys_notify_on_next_frame(function () {
+							sys_notify_on_next_frame(function() {
 								let i: i32 = _tab_brushes_draw_i;
 
 								context_raw.brush = slot_brush_create();
 								array_push(project_brushes, context_raw.brush);
-								let cloned: any = util_clone_canvas(project_brushes[i].canvas);
+								let cloned: any          = util_clone_canvas(project_brushes[i].canvas);
 								context_raw.brush.canvas = cloned;
 								context_set_brush(context_raw.brush);
 								util_render_make_brush_preview();
@@ -121,11 +122,11 @@ function tab_brushes_draw(htab: ui_handle_t) {
 					if (img_full == null) {
 						_tab_brushes_draw_i = i;
 
-						sys_notify_on_next_frame(function () {
+						sys_notify_on_next_frame(function() {
 							let i: i32 = _tab_brushes_draw_i;
 
 							let _brush: slot_brush_t = context_raw.brush;
-							context_raw.brush = project_brushes[i];
+							context_raw.brush        = project_brushes[i];
 							make_material_parse_brush();
 							util_render_make_brush_preview();
 							context_raw.brush = _brush;
@@ -154,8 +155,8 @@ function tab_brushes_draw(htab: ui_handle_t) {
 			ui._y += 6;
 		}
 
-		let in_focus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
-							 ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
+		let in_focus: bool =
+		    ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w && ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
 		if (in_focus && ui.is_delete_down && project_brushes.length > 1) {
 			ui.is_delete_down = false;
 			tab_brushes_delete_brush(context_raw.brush);

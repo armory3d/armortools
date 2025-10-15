@@ -6,7 +6,7 @@ let _export_exr_width: i32;
 let _export_exr_stride: i32;
 let _export_exr_out: u8[];
 let _export_exr_src_view: buffer_t;
-let _export_exr_write_line: (byte_pos: i32)=> void;
+let _export_exr_write_line: (byte_pos: i32) => void;
 
 function export_exr_write_string(out: u8[], str: string) {
 	for (let i: i32 = 0; i < str.length; ++i) {
@@ -16,7 +16,7 @@ function export_exr_write_string(out: u8[], str: string) {
 
 function export_exr_write_line16(byte_pos: i32) {
 	for (let x: i32 = 0; x < _export_exr_width; ++x) {
-		array_push(_export_exr_out, buffer_get_u8(_export_exr_src_view, byte_pos    ));
+		array_push(_export_exr_out, buffer_get_u8(_export_exr_src_view, byte_pos));
 		array_push(_export_exr_out, buffer_get_u8(_export_exr_src_view, byte_pos + 1));
 		byte_pos += _export_exr_stride;
 	}
@@ -24,7 +24,7 @@ function export_exr_write_line16(byte_pos: i32) {
 
 function export_exr_write_line32(byte_pos: i32) {
 	for (let x: i32 = 0; x < _export_exr_width; ++x) {
-		array_push(_export_exr_out, buffer_get_u8(_export_exr_src_view, byte_pos    ));
+		array_push(_export_exr_out, buffer_get_u8(_export_exr_src_view, byte_pos));
 		array_push(_export_exr_out, buffer_get_u8(_export_exr_src_view, byte_pos + 1));
 		array_push(_export_exr_out, buffer_get_u8(_export_exr_src_view, byte_pos + 2));
 		array_push(_export_exr_out, buffer_get_u8(_export_exr_src_view, byte_pos + 3));
@@ -276,12 +276,12 @@ function export_exr_run(width: i32, height: i32, src: buffer_t, bits: i32 = 16, 
 
 	array_push(out, 0); // end of header
 
-	let channels: i32 = 4;
-	let byte_size: i32 = bits == 16 ? 2 : 4;
-	let k_header_size: i32 = out.length;
+	let channels: i32              = 4;
+	let byte_size: i32             = bits == 16 ? 2 : 4;
+	let k_header_size: i32         = out.length;
 	let k_scanline_table_size: i32 = 8 * height;
-	let pixel_row_size: i32 = width * 3 * byte_size;
-	let full_row_size: i32 = pixel_row_size + 8;
+	let pixel_row_size: i32        = width * 3 * byte_size;
+	let full_row_size: i32         = pixel_row_size + 8;
 
 	// line offset table
 	let ofs: i32 = k_header_size + k_scanline_table_size;
@@ -299,15 +299,15 @@ function export_exr_run(width: i32, height: i32, src: buffer_t, bits: i32 = 16, 
 
 	// scanline data
 	let stride: i32 = channels * byte_size;
-	let pos: i32 = 0;
+	let pos: i32    = 0;
 
-	_export_exr_width = width;
-	_export_exr_stride = stride;
-	_export_exr_out = out;
+	_export_exr_width    = width;
+	_export_exr_stride   = stride;
+	_export_exr_out      = out;
 	_export_exr_src_view = src;
 
-	_export_exr_write_line = bits == 16 ? export_exr_write_line16 : export_exr_write_line32;
-	let write_data: (off: i32, pos: i32, byte_size: i32)=>void = type == 1 ? export_exr_write_bgr : export_exr_write_single;
+	_export_exr_write_line                                = bits == 16 ? export_exr_write_line16 : export_exr_write_line32;
+	let write_data: (off: i32, pos: i32, byte_size: i32) => void = type == 1 ? export_exr_write_bgr : export_exr_write_single;
 
 	for (let y: i32 = 0; y < height; ++y) {
 		// coordinate

@@ -5,7 +5,7 @@ function import_blend_material_run(path: string) {
 
 	_import_blend_material_path = path;
 
-	ui_box_show_custom(function () {
+	ui_box_show_custom(function() {
 		if (ui_tab(ui_handle(__ID__), tr("Import Material"))) {
 			import_blend_mesh_ui();
 
@@ -31,8 +31,7 @@ function import_blend_material_run(path: string) {
 function _import_blend_material() {
 	console_toast(tr("Baking material"));
 
-	sys_notify_on_next_frame(function () {
-
+	sys_notify_on_next_frame(function() {
 		let save: string;
 		if (path_is_protected()) {
 			save = iron_internal_save_path();
@@ -59,13 +58,16 @@ for mat in bpy.data.materials:\n\
     node.image = img\n\
     mat.node_tree.nodes.active = node\n\
     bpy.ops.object.bake(type='DIFFUSE')\n\
-    img.filepath_raw = '" + save + "/blender_base.jpg'\n\
+    img.filepath_raw = '" +
+		                 save + "/blender_base.jpg'\n\
     img.save()\n\
     bpy.ops.object.bake(type='ROUGHNESS')\n\
-    img.filepath_raw = '" + save + "/blender_rough.jpg'\n\
+    img.filepath_raw = '" +
+		                 save + "/blender_rough.jpg'\n\
     img.save()\n\
     bpy.ops.object.bake(type='NORMAL')\n\
-    img.filepath_raw = '" + save + "/blender_nor.jpg'\n\
+    img.filepath_raw = '" +
+		                 save + "/blender_nor.jpg'\n\
     img.save()\n\
     break\n\
 ";

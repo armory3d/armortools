@@ -1,10 +1,10 @@
 
-let make_material_default_scon: shader_context_t = null;
+let make_material_default_scon: shader_context_t   = null;
 let make_material_default_mcon: material_context_t = null;
 
 let make_material_height_used: bool = false;
-let make_material_emis_used: bool = false;
-let make_material_subs_used: bool = false;
+let make_material_emis_used: bool   = false;
+let make_material_subs_used: bool   = false;
 
 function make_material_get_mout(): bool {
 	for (let i: i32 = 0; i < context_raw.material.canvas.nodes.length; ++i) {
@@ -59,29 +59,20 @@ function make_material_parse_mesh_material() {
 		}
 	}
 
-	let mm: material_t = {
-		name: "Material",
-		canvas: null
-	};
+	let mm: material_t = {name : "Material", canvas : null};
 
 	let con: node_shader_context_t = make_mesh_run(mm);
 	shader_context_load(con.data);
 	array_push(m._.shader.contexts, con.data);
 
 	for (let i: i32 = 1; i < make_mesh_layer_pass_count; ++i) {
-		let mm: material_t = {
-			name: "Material",
-			canvas: null
-		};
+		let mm: material_t             = {name : "Material", canvas : null};
 		let con: node_shader_context_t = make_mesh_run(mm, i);
 		shader_context_load(con.data);
 
 		array_push(m._.shader.contexts, con.data);
 
-		let mcon: material_context_t = {
-			name: "mesh" + i,
-			bind_textures: []
-		};
+		let mcon: material_context_t = {name : "mesh" + i, bind_textures : []};
 		material_context_load(mcon);
 		array_push(m.contexts, mcon);
 	}
@@ -96,7 +87,7 @@ function make_material_parse_mesh_preview_material(md: material_data_t = null) {
 		return;
 	}
 
-	let m: material_data_t = md == null ? project_materials[0].data : md;
+	let m: material_data_t     = md == null ? project_materials[0].data : md;
 	let scon: shader_context_t = null;
 	for (let i: i32 = 0; i < m._.shader.contexts.length; ++i) {
 		let c: shader_context_t = m._.shader.contexts[i];
@@ -108,15 +99,9 @@ function make_material_parse_mesh_preview_material(md: material_data_t = null) {
 
 	array_remove(m._.shader.contexts, scon);
 
-	let mcon: material_context_t = {
-		name: "mesh",
-		bind_textures: []
-	};
+	let mcon: material_context_t = {name : "mesh", bind_textures : []};
 
-	let sd: material_t = {
-		name: "Material",
-		canvas: null
-	};
+	let sd: material_t             = {name : "Material", canvas : null};
 	let con: node_shader_context_t = make_mesh_preview_run(sd, mcon);
 
 	for (let i: i32 = 0; i < m.contexts.length; ++i) {
@@ -151,10 +136,12 @@ function make_material_parse_paint_material(bake_previews: bool = true) {
 
 	if (bake_previews) {
 		let current: gpu_texture_t = _draw_current;
-		let in_use: bool = gpu_in_use;
-		if (in_use) draw_end();
+		let in_use: bool           = gpu_in_use;
+		if (in_use)
+			draw_end();
 		make_material_bake_node_previews();
-		if (in_use) draw_begin(current);
+		if (in_use)
+			draw_begin(current);
 	}
 
 	let m: material_data_t = project_materials[0].data;
@@ -176,14 +163,8 @@ function make_material_parse_paint_material(bake_previews: bool = true) {
 		}
 	}
 
-	let sdata: material_t = {
-		name: "Material",
-		canvas: context_raw.material.canvas
-	};
-	let tmcon: material_context_t = {
-		name: "paint",
-		bind_textures: []
-	};
+	let sdata: material_t          = {name : "Material", canvas : context_raw.material.canvas};
+	let tmcon: material_context_t  = {name : "paint", bind_textures : []};
 	let con: node_shader_context_t = make_paint_run(sdata, tmcon);
 
 	let compile_error: bool = false;
@@ -236,7 +217,7 @@ function make_material_traverse_nodes(nodes: ui_node_t[], group: ui_node_canvas_
 		if (node.type == "GROUP") {
 			for (let j: i32 = 0; j < project_material_groups.length; ++j) {
 				let g: node_group_t = project_material_groups[j];
-				let cname: string = g.canvas.name;
+				let cname: string   = g.canvas.name;
 				if (cname == node.name) {
 					array_push(parents, node);
 					make_material_traverse_nodes(g.canvas.nodes, g.canvas, parents);
@@ -250,7 +231,7 @@ function make_material_traverse_nodes(nodes: ui_node_t[], group: ui_node_canvas_
 
 function make_material_bake_node_preview(node: ui_node_t, group: ui_node_canvas_t, parents: ui_node_t[]) {
 	if (node.type == "BLUR") {
-		let id: string = parser_material_node_name(node, parents);
+		let id: string           = parser_material_node_name(node, parents);
 		let image: gpu_texture_t = map_get(context_raw.node_previews, id);
 		array_push(context_raw.node_previews_used, id);
 		let res_x: i32 = math_floor(config_get_texture_res_x() / 4);
@@ -268,7 +249,7 @@ function make_material_bake_node_preview(node: ui_node_t, group: ui_node_canvas_
 		parser_material_blur_passthrough = false;
 	}
 	else if (node.type == "DIRECT_WARP") {
-		let id: string = parser_material_node_name(node, parents);
+		let id: string           = parser_material_node_name(node, parents);
 		let image: gpu_texture_t = map_get(context_raw.node_previews, id);
 		array_push(context_raw.node_previews_used, id);
 		let res_x: i32 = math_floor(config_get_texture_res_x());
@@ -286,7 +267,7 @@ function make_material_bake_node_preview(node: ui_node_t, group: ui_node_canvas_
 		parser_material_warp_passthrough = false;
 	}
 	else if (node.type == "BAKE_CURVATURE") {
-		let id: string = parser_material_node_name(node, parents);
+		let id: string           = parser_material_node_name(node, parents);
 		let image: gpu_texture_t = map_get(context_raw.node_previews, id);
 		array_push(context_raw.node_previews_used, id);
 		let res_x: i32 = math_floor(config_get_texture_res_x());
@@ -303,33 +284,33 @@ function make_material_bake_node_preview(node: ui_node_t, group: ui_node_canvas_
 			render_path_paint_live_layer = slot_layer_create("_live");
 		}
 
-		let _tool: tool_type_t = context_raw.tool;
+		let _tool: tool_type_t      = context_raw.tool;
 		let _bake_type: bake_type_t = context_raw.bake_type;
-		context_raw.tool = tool_type_t.BAKE;
-		context_raw.bake_type = bake_type_t.CURVATURE;
+		context_raw.tool            = tool_type_t.BAKE;
+		context_raw.bake_type       = bake_type_t.CURVATURE;
 
 		parser_material_bake_passthrough = true;
-		parser_material_start_node = node;
-		parser_material_start_group = group;
-		parser_material_start_parents = parents;
+		parser_material_start_node       = node;
+		parser_material_start_group      = group;
+		parser_material_start_parents    = parents;
 		make_material_parse_paint_material(false);
 		parser_material_bake_passthrough = false;
-		parser_material_start_node = null;
-		parser_material_start_group = null;
-		parser_material_start_parents = null;
-		context_raw.pdirty = 1;
+		parser_material_start_node       = null;
+		parser_material_start_group      = null;
+		parser_material_start_parents    = null;
+		context_raw.pdirty               = 1;
 		render_path_paint_use_live_layer(true);
 		render_path_paint_commands_paint(false);
 		render_path_paint_dilate(true, false);
 		render_path_paint_use_live_layer(false);
 		context_raw.pdirty = 0;
 
-		context_raw.tool = _tool;
+		context_raw.tool      = _tool;
 		context_raw.bake_type = _bake_type;
 		make_material_parse_paint_material(false);
 
 		let rts: map_t<string, render_target_t> = render_path_render_targets;
-		let texpaint_live: render_target_t = map_get(rts, "texpaint_live");
+		let texpaint_live: render_target_t      = map_get(rts, "texpaint_live");
 
 		draw_begin(image);
 		draw_image(texpaint_live._image, 0, 0);
@@ -338,24 +319,17 @@ function make_material_bake_node_preview(node: ui_node_t, group: ui_node_canvas_
 }
 
 type parse_node_preview_result_t = {
-	scon: shader_context_t;
-	mcon: material_context_t;
+	scon: shader_context_t; mcon : material_context_t;
 };
 
 function make_material_parse_node_preview_material(node: ui_node_t, group: ui_node_canvas_t = null, parents: ui_node_t[] = null): parse_node_preview_result_t {
 	if (node.outputs.length == 0) {
 		return null;
 	}
-	let sdata: material_t = {
-		name: "Material",
-		canvas: context_raw.material.canvas
-	};
-	let mcon_raw: material_context_t = {
-		name: "mesh",
-		bind_textures: []
-	};
-	let con: node_shader_context_t = make_node_preview_run(sdata, mcon_raw, node, group, parents);
-	let compile_error: bool = false;
+	let sdata: material_t            = {name : "Material", canvas : context_raw.material.canvas};
+	let mcon_raw: material_context_t = {name : "mesh", bind_textures : []};
+	let con: node_shader_context_t   = make_node_preview_run(sdata, mcon_raw, node, group, parents);
+	let compile_error: bool          = false;
 	let scon: shader_context_t;
 	shader_context_load(con.data);
 	if (con.data == null) {
@@ -366,11 +340,8 @@ function make_material_parse_node_preview_material(node: ui_node_t, group: ui_no
 		return null;
 	}
 	material_context_load(mcon_raw);
-	let mcon: material_context_t = mcon_raw;
-	let result: parse_node_preview_result_t = {
-		scon: scon,
-		mcon: mcon
-	};
+	let mcon: material_context_t            = mcon_raw;
+	let result: parse_node_preview_result_t = {scon : scon, mcon : mcon};
 	return result;
 }
 
@@ -395,7 +366,8 @@ function make_material_blend_mode(kong: node_shader_t, blending: i32, cola: stri
 		return "max3(" + cola + ", " + colb + " * " + opac + ")";
 	}
 	else if (blending == blend_type_t.SCREEN) {
-		return "(float3(1.0, 1.0, 1.0) - (float3(1.0 - " + opac + ", 1.0 - " + opac + ", 1.0 - " + opac + ") + " + opac + " * (float3(1.0, 1.0, 1.0) - " + colb + ")) * (float3(1.0, 1.0, 1.0) - " + cola + "))";
+		return "(float3(1.0, 1.0, 1.0) - (float3(1.0 - " + opac + ", 1.0 - " + opac + ", 1.0 - " + opac + ") + " + opac + " * (float3(1.0, 1.0, 1.0) - " +
+		       colb + ")) * (float3(1.0, 1.0, 1.0) - " + cola + "))";
 	}
 	else if (blending == blend_type_t.DODGE) {
 		return "lerp3(" + cola + ", " + cola + " / (float3(1.0, 1.0, 1.0) - " + colb + "), " + opac + ")";
@@ -411,21 +383,25 @@ function make_material_blend_mode(kong: node_shader_t, blending: i32, cola: stri
 		// ), " + opac + ")";
 		let cola_rgb: string = string_replace_all(cola, ".", "_") + "_rgb";
 		let colb_rgb: string = string_replace_all(colb, ".", "_") + "_rgb";
-		let res_r: string = string_replace_all(cola, ".", "_") + "_res_r";
-		let res_g: string = string_replace_all(cola, ".", "_") + "_res_g";
-		let res_b: string = string_replace_all(cola, ".", "_") + "_res_b";
+		let res_r: string    = string_replace_all(cola, ".", "_") + "_res_r";
+		let res_g: string    = string_replace_all(cola, ".", "_") + "_res_g";
+		let res_b: string    = string_replace_all(cola, ".", "_") + "_res_b";
 		node_shader_write_frag(kong, "var " + res_r + ": float;");
 		node_shader_write_frag(kong, "var " + res_g + ": float;");
 		node_shader_write_frag(kong, "var " + res_b + ": float;");
 		node_shader_write_frag(kong, "var " + cola_rgb + ": float3 = " + cola + ";"); // cola_rgb = cola.rgb
 		node_shader_write_frag(kong, "var " + colb_rgb + ": float3 = " + colb + ";");
-		node_shader_write_frag(kong, "if (" + cola_rgb + ".r < 0.5) { " + res_r + " = 2.0 * " + cola_rgb + ".r * " + colb_rgb + ".r; } else { " + res_r + " = 1.0 - 2.0 * (1.0 - " + cola_rgb + ".r) * (1.0 - " + colb_rgb + ".r); }");
-		node_shader_write_frag(kong, "if (" + cola_rgb + ".g < 0.5) { " + res_g + " = 2.0 * " + cola_rgb + ".g * " + colb_rgb + ".g; } else { " + res_g + " = 1.0 - 2.0 * (1.0 - " + cola_rgb + ".g) * (1.0 - " + colb_rgb + ".g); }");
-		node_shader_write_frag(kong, "if (" + cola_rgb + ".b < 0.5) { " + res_b + " = 2.0 * " + cola_rgb + ".b * " + colb_rgb + ".b; } else { " + res_b + " = 1.0 - 2.0 * (1.0 - " + cola_rgb + ".b) * (1.0 - " + colb_rgb + ".b); }");
+		node_shader_write_frag(kong, "if (" + cola_rgb + ".r < 0.5) { " + res_r + " = 2.0 * " + cola_rgb + ".r * " + colb_rgb + ".r; } else { " + res_r +
+		                                 " = 1.0 - 2.0 * (1.0 - " + cola_rgb + ".r) * (1.0 - " + colb_rgb + ".r); }");
+		node_shader_write_frag(kong, "if (" + cola_rgb + ".g < 0.5) { " + res_g + " = 2.0 * " + cola_rgb + ".g * " + colb_rgb + ".g; } else { " + res_g +
+		                                 " = 1.0 - 2.0 * (1.0 - " + cola_rgb + ".g) * (1.0 - " + colb_rgb + ".g); }");
+		node_shader_write_frag(kong, "if (" + cola_rgb + ".b < 0.5) { " + res_b + " = 2.0 * " + cola_rgb + ".b * " + colb_rgb + ".b; } else { " + res_b +
+		                                 " = 1.0 - 2.0 * (1.0 - " + cola_rgb + ".b) * (1.0 - " + colb_rgb + ".b); }");
 		return "lerp3(" + cola + ", float3(" + res_r + ", " + res_g + ", " + res_b + "), " + opac + ")";
 	}
 	else if (blending == blend_type_t.SOFT_LIGHT) {
-		return "((1.0 - " + opac + ") * " + cola + " + " + opac + " * ((float3(1.0, 1.0, 1.0) - " + cola + ") * " + colb + " * " + cola + " + " + cola + " * (float3(1.0, 1.0, 1.0) - (float3(1.0, 1.0, 1.0) - " + colb + ") * (float3(1.0, 1.0, 1.0) - " + cola + "))))";
+		return "((1.0 - " + opac + ") * " + cola + " + " + opac + " * ((float3(1.0, 1.0, 1.0) - " + cola + ") * " + colb + " * " + cola + " + " + cola +
+		       " * (float3(1.0, 1.0, 1.0) - (float3(1.0, 1.0, 1.0) - " + colb + ") * (float3(1.0, 1.0, 1.0) - " + cola + "))))";
 	}
 	else if (blending == blend_type_t.LINEAR_LIGHT) {
 		return "(" + cola + " + " + opac + " * (float3(2.0, 2.0, 2.0) * (" + colb + " - float3(0.5, 0.5, 0.5))))";
@@ -437,7 +413,8 @@ function make_material_blend_mode(kong: node_shader_t, blending: i32, cola: stri
 		return "lerp3(" + cola + ", " + cola + " - " + colb + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.DIVIDE) {
-		return "float3(1.0 - " + opac + ", 1.0 - " + opac + ", 1.0 - " + opac + ") * " + cola + " + float3(" + opac + ", " + opac + ", " + opac + ") * " + cola + " / " + colb + "";
+		return "float3(1.0 - " + opac + ", 1.0 - " + opac + ", 1.0 - " + opac + ") * " + cola + " + float3(" + opac + ", " + opac + ", " + opac + ") * " +
+		       cola + " / " + colb + "";
 	}
 	else if (blending == blend_type_t.HUE) {
 		node_shader_add_function(kong, str_hue_sat);
@@ -483,14 +460,17 @@ function make_material_blend_mode_mask(kong: node_shader_t, blending: i32, cola:
 		return "lerp(" + cola + ", " + cola + " + " + colb + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.OVERLAY) {
-		// return "lerp(" + cola + ", " + cola + " < 0.5 ? 2.0 * " + cola + " * " + colb + " : 1.0 - 2.0 * (1.0 - " + cola + ") * (1.0 - " + colb + "), " + opac + ")";
+		// return "lerp(" + cola + ", " + cola + " < 0.5 ? 2.0 * " + cola + " * " + colb + " : 1.0 - 2.0 * (1.0 - " + cola + ") * (1.0 - " + colb + "), " + opac
+		// + ")";
 		let res: string = string_replace_all(cola, ".", "_") + "_res";
 		node_shader_write_frag(kong, "var " + res + ": float;");
-		node_shader_write_frag(kong, "if (" + cola + " < 0.5) { " + res + " = 2.0 * " + cola + " * " + colb + "; } else { " + res + " = 1.0 - 2.0 * (1.0 - " + cola + ") * (1.0 - " + colb + "); }");
+		node_shader_write_frag(kong, "if (" + cola + " < 0.5) { " + res + " = 2.0 * " + cola + " * " + colb + "; } else { " + res + " = 1.0 - 2.0 * (1.0 - " +
+		                                 cola + ") * (1.0 - " + colb + "); }");
 		return "lerp(" + cola + ", " + res + ", " + opac + ")";
 	}
 	else if (blending == blend_type_t.SOFT_LIGHT) {
-		return "((1.0 - " + opac + ") * " + cola + " + " + opac + " * ((1.0 - " + cola + ") * " + colb + " * " + cola + " + " + cola + " * (1.0 - (1.0 - " + colb + ") * (1.0 - " + cola + "))))";
+		return "((1.0 - " + opac + ") * " + cola + " + " + opac + " * ((1.0 - " + cola + ") * " + colb + " * " + cola + " + " + cola + " * (1.0 - (1.0 - " +
+		       colb + ") * (1.0 - " + cola + "))))";
 	}
 	else if (blending == blend_type_t.LINEAR_LIGHT) {
 		return "(" + cola + " + " + opac + " * (2.0 * (" + colb + " - 0.5)))";
@@ -515,7 +495,7 @@ function make_material_get_displace_strength(): f32 {
 }
 
 function make_material_delete_context(c: shader_context_t) {
-	sys_notify_on_next_frame(function (c: shader_context_t) { // Ensure pipeline is no longer in use
+	sys_notify_on_next_frame(function(c: shader_context_t) { // Ensure pipeline is no longer in use
 		shader_context_delete(c);
 	}, c);
 }

@@ -7,17 +7,17 @@ type vector_math_node_t = {
 
 function vector_math_node_create(raw: ui_node_t, args: f32_array_t): vector_math_node_t {
 	let n: vector_math_node_t = {};
-	n.base = logic_node_create(n);
-	n.base.get = vector_math_node_get;
-	n.v = vec4_create();
+	n.base                    = logic_node_create(n);
+	n.base.get                = vector_math_node_get;
+	n.v                       = vec4_create();
 	return n;
 }
 
 function vector_math_node_get(self: vector_math_node_t, from: i32): logic_node_value_t {
 	let v1: vec4_t = logic_node_input_get(self.base.inputs[0])._vec4;
 	let v2: vec4_t = logic_node_input_get(self.base.inputs[1])._vec4;
-	self.v = vec4_clone(v1);
-	let f: f32 = 0.0;
+	self.v         = vec4_clone(v1);
+	let f: f32     = 0.0;
 	let op: string = self.operation;
 	if (op == "Add") {
 		self.v = vec4_add(self.v, v2);
@@ -32,7 +32,7 @@ function vector_math_node_get(self: vector_math_node_t, from: i32): logic_node_v
 		self.v.z *= 0.5;
 	}
 	else if (op == "Dot Product") {
-		f = vec4_dot(self.v, v2);
+		f      = vec4_dot(self.v, v2);
 		self.v = vec4_create(f, f, f);
 	}
 	else if (op == "Cross Product") {
@@ -52,11 +52,11 @@ function vector_math_node_get(self: vector_math_node_t, from: i32): logic_node_v
 		self.v.z /= v2.z == 0.0 ? 0.000001 : v2.z;
 	}
 	else if (op == "Length") {
-		f = vec4_len(self.v);
+		f      = vec4_len(self.v);
 		self.v = vec4_create(f, f, f);
 	}
 	else if (op == "Distance") {
-		f = vec4_dist(self.v, v2);
+		f      = vec4_dist(self.v, v2);
 		self.v = vec4_create(f, f, f);
 	}
 	else if (op == "Project") {
@@ -65,9 +65,9 @@ function vector_math_node_get(self: vector_math_node_t, from: i32): logic_node_v
 	}
 	else if (op == "Reflect") {
 		let tmp: vec4_t = vec4_create();
-		tmp = vec4_clone(v2);
-		tmp = vec4_norm(tmp);
-		self.v = vec4_reflect(self.v, tmp);
+		tmp             = vec4_clone(v2);
+		tmp             = vec4_norm(tmp);
+		self.v          = vec4_reflect(self.v, tmp);
 	}
 	else if (op == "Scale") {
 		self.v.x *= v2.x;
@@ -131,87 +131,86 @@ function vector_math_node_get(self: vector_math_node_t, from: i32): logic_node_v
 	}
 
 	if (from == 0) {
-		let v: logic_node_value_t = { _vec4: self.v };
+		let v: logic_node_value_t = {_vec4 : self.v};
 		return v;
 	}
 	else {
-		let v: logic_node_value_t = { _f32: f };
+		let v: logic_node_value_t = {_f32 : f};
 		return v;
 	}
 }
 
 let vector_math_node_def: ui_node_t = {
-	id: 0,
-	name: _tr("Vector Math"),
-	type: "vector_math_node",
-	x: 0,
-	y: 0,
-	color: 0xff4982a0,
-	inputs: [
+	id : 0,
+	name : _tr("Vector Math"),
+	type : "vector_math_node",
+	x : 0,
+	y : 0,
+	color : 0xff4982a0,
+	inputs : [
 		{
-			id: 0,
-			node_id: 0,
-			name: _tr("Vector"),
-			type: "VECTOR",
-			color: 0xff6363c7,
-			default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-			min: 0.0,
-			max: 1.0,
-			precision: 100,
-			display: 0
+			id : 0,
+			node_id : 0,
+			name : _tr("Vector"),
+			type : "VECTOR",
+			color : 0xff6363c7,
+			default_value : f32_array_create_xyz(0.0, 0.0, 0.0),
+			min : 0.0,
+			max : 1.0,
+			precision : 100,
+			display : 0
 		},
 		{
-			id: 0,
-			node_id: 0,
-			name: _tr("Vector"),
-			type: "VECTOR",
-			color: 0xff6363c7,
-			default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-			min: 0.0,
-			max: 1.0,
-			precision: 100,
-			display: 0
+			id : 0,
+			node_id : 0,
+			name : _tr("Vector"),
+			type : "VECTOR",
+			color : 0xff6363c7,
+			default_value : f32_array_create_xyz(0.0, 0.0, 0.0),
+			min : 0.0,
+			max : 1.0,
+			precision : 100,
+			display : 0
 		}
 	],
-	outputs: [
+	outputs : [
 		{
-			id: 0,
-			node_id: 0,
-			name: _tr("Vector"),
-			type: "VECTOR",
-			color: 0xff6363c7,
-			default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-			min: 0.0,
-			max: 1.0,
-			precision: 100,
-			display: 0
+			id : 0,
+			node_id : 0,
+			name : _tr("Vector"),
+			type : "VECTOR",
+			color : 0xff6363c7,
+			default_value : f32_array_create_xyz(0.0, 0.0, 0.0),
+			min : 0.0,
+			max : 1.0,
+			precision : 100,
+			display : 0
 		},
 		{
-			id: 0,
-			node_id: 0,
-			name: _tr("Value"),
-			type: "VALUE",
-			color: 0xffa1a1a1,
-			default_value: f32_array_create_x(0.0),
-			min: 0.0,
-			max: 1.0,
-			precision: 100,
-			display: 0
+			id : 0,
+			node_id : 0,
+			name : _tr("Value"),
+			type : "VALUE",
+			color : 0xffa1a1a1,
+			default_value : f32_array_create_x(0.0),
+			min : 0.0,
+			max : 1.0,
+			precision : 100,
+			display : 0
 		}
 	],
-	buttons: [
-		{
-			name: _tr("operation"),
-			type: "ENUM",
-			output: 0,
-			default_value: f32_array_create_x(0),
-			data: u8_array_create_from_string("Add\nSubtract\nMultiply\nDivide\nAverage\nCross Product\nProject\nReflect\nDot Product\nDistance\nLength\nScale\nNormalize\nAbsolute\nMinimum\nMaximum\nFloor\nCeil\nFraction\nModulo\nSnap\nSine\nCosine\nTangent"),
-			min: 0.0,
-			max: 1.0,
-			precision: 100,
-			height: 0
-		}
-	],
-	width: 0,
-	flags: 0
+	buttons : [ {
+		name : _tr("operation"),
+		type : "ENUM",
+		output : 0,
+		default_value : f32_array_create_x(0),
+		data : u8_array_create_from_string(
+			"Add\nSubtract\nMultiply\nDivide\nAverage\nCross Product\nProject\nReflect\nDot Product\nDistance\nLength\nScale\nNormalize\nAbsolute\nMinimum\nMaximum\nFloor\nCeil\nFraction\nModulo\nSnap\nSine\nCosine\nTangent"),
+		min : 0.0,
+		max : 1.0,
+		precision : 100,
+		height : 0
+	} ],
+	width : 0,
+	flags : 0
 };

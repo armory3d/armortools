@@ -2,7 +2,7 @@
 let translator_translations: map_t<string, string> = map_create();
 // The font index is a value specific to font_cjk.ttc
 let translator_cjk_font_indices: map_t<string, i32> = null;
-let translator_last_locale: string = "en";
+let translator_last_locale: string                  = "en";
 let _translator_load_translations_cjk_font_path: string;
 let _translator_load_translations_cjk_font_disk_path: string;
 let _translator_init_font_cjk: bool;
@@ -39,7 +39,7 @@ function tr(id: string, vars: map_t<string, string> = null): string {
 		let keys: string[] = map_keys(vars);
 		for (let i: i32 = 0; i < keys.length; ++i) {
 			let search: string = "{" + keys[i] + "}";
-			translation = string_replace_all(translation, search, map_get(vars, keys[i]));
+			translation        = string_replace_all(translation, search, map_get(vars, keys[i]));
 		}
 	}
 
@@ -81,20 +81,20 @@ function translator_load_translations(new_locale: string) {
 	if (config_raw.locale != "en") {
 		// Load the translation file
 		let translation_json: string = sys_buffer_to_string(iron_load_blob("data/locale/" + config_raw.locale + ".json"));
-		translator_translations = json_parse_to_map(translation_json);
+		translator_translations      = json_parse_to_map(translation_json);
 	}
 
 	// Generate extended font atlas
 	translator_extended_glyphs();
 
 	// Push additional char codes contained in translation file
-	let cjk: bool = false;
+	let cjk: bool      = false;
 	let keys: string[] = map_keys(translator_translations);
 	for (let i: i32 = 0; i < keys.length; ++i) {
 		let s: string = map_get(translator_translations, keys[i]);
 
-		for (let i: i32 = 0; char_code_at(s, i) != 0; ) {
-			let l: i32 = 0;
+		for (let i: i32 = 0; char_code_at(s, i) != 0;) {
+			let l: i32         = 0;
 			let codepoint: i32 = string_utf8_decode((s) + i, ADDRESS(l));
 			i += l;
 
@@ -108,30 +108,30 @@ function translator_load_translations(new_locale: string) {
 
 	if (cjk) {
 		if (path_is_protected()) {
-			_translator_load_translations_cjk_font_path = iron_internal_save_path();
+			_translator_load_translations_cjk_font_path      = iron_internal_save_path();
 			_translator_load_translations_cjk_font_disk_path = iron_internal_save_path();
 		}
 		else {
-			_translator_load_translations_cjk_font_path = "";
+			_translator_load_translations_cjk_font_path      = "";
 			_translator_load_translations_cjk_font_disk_path = path_data() + path_sep;
 		}
 		_translator_load_translations_cjk_font_path += "font_cjk.ttc";
 		_translator_load_translations_cjk_font_disk_path += "font_cjk.ttc";
 
 		if (!iron_file_exists(_translator_load_translations_cjk_font_disk_path)) {
-			file_download_to("https://github.com/armory3d/armorbase/raw/main/Assets/common/extra/font_cjk.ttc", _translator_load_translations_cjk_font_disk_path, function () {
-
-				if (!iron_file_exists(_translator_load_translations_cjk_font_disk_path)) {
-					// Fall back to English
-					config_raw.locale = "en";
-					translator_extended_glyphs();
-					translator_translations = map_create();
-					translator_init_font(false, "font.ttf", 1.0);
-				}
-				else {
-					translator_init_font(true, _translator_load_translations_cjk_font_path, 1.4);
-				}
-			}, 20332392);
+			file_download_to("https://github.com/armory3d/armorbase/raw/main/Assets/common/extra/font_cjk.ttc",
+			                 _translator_load_translations_cjk_font_disk_path, function() {
+				                 if (!iron_file_exists(_translator_load_translations_cjk_font_disk_path)) {
+					                 // Fall back to English
+					                 config_raw.locale = "en";
+					                 translator_extended_glyphs();
+					                 translator_translations = map_create();
+					                 translator_init_font(false, "font.ttf", 1.0);
+				                 }
+				                 else {
+					                 translator_init_font(true, _translator_load_translations_cjk_font_path, 1.4);
+				                 }
+			                 }, 20332392);
 		}
 		else {
 			translator_init_font(true, _translator_load_translations_cjk_font_path, 1.4);
@@ -143,23 +143,21 @@ function translator_load_translations(new_locale: string) {
 }
 
 function translator_init_font(cjk: bool, font_path: string, font_scale: f32) {
-	_translator_init_font_cjk = cjk;
-	_translator_init_font_font_path = font_path;
+	_translator_init_font_cjk        = cjk;
+	_translator_init_font_font_path  = font_path;
 	_translator_init_font_font_scale = font_scale;
 
 	// Load and assign font with cjk characters
-	sys_notify_on_next_frame(function () {
-
-		let cjk: bool = _translator_init_font_cjk;
+	sys_notify_on_next_frame(function() {
+		let cjk: bool         = _translator_init_font_cjk;
 		let font_path: string = _translator_init_font_font_path;
-		let font_scale: f32 = _translator_init_font_font_scale;
+		let font_scale: f32   = _translator_init_font_font_scale;
 
 		let f: draw_font_t = data_get_font(font_path);
 		if (cjk) {
-			let font_index: i32 = map_get(translator_cjk_font_indices, config_raw.locale) != -1 ?
-				map_get(translator_cjk_font_indices, config_raw.locale) : 0;
-			f.index = font_index;
-			f.glyphs_version = 0;
+			let font_index: i32 = map_get(translator_cjk_font_indices, config_raw.locale) != -1 ? map_get(translator_cjk_font_indices, config_raw.locale) : 0;
+			f.index             = font_index;
+			f.glyphs_version    = 0;
 			draw_font_init(f);
 		}
 		base_font = f;
@@ -187,8 +185,8 @@ function translator_extended_glyphs() {
 
 // Returns a list of supported locales (plus English and the automatically detected system locale)
 function translator_get_supported_locales(): string[] {
-	let locales: string[] = ["system", "en"];
-	let files: string[] = file_read_directory(path_data() + path_sep + "locale");
+	let locales: string[] = [ "system", "en" ];
+	let files: string[]   = file_read_directory(path_data() + path_sep + "locale");
 	for (let i: i32 = 0; i < files.length; ++i) {
 		let locale_filename: string = files[i];
 		// Trim the ".json" file extension from file names

@@ -1,9 +1,8 @@
 
 let ui_statusbar_default_h: i32 = 33;
-let ui_statusbar_last_tab: i32 = 0;
+let ui_statusbar_last_tab: i32  = 0;
 
-function ui_statusbar_init() {
-}
+function ui_statusbar_init() {}
 
 function ui_statusbar_width(): i32 {
 	return iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W];
@@ -22,7 +21,7 @@ function ui_statusbar_render_ui() {
 
 		// Draw tabs
 		let hwnd_draws: tab_draw_t[] = ui_base_hwnd_tabs[tab_area_t.STATUS];
-		let htab: ui_handle_t = ui_base_htabs[tab_area_t.STATUS];
+		let htab: ui_handle_t        = ui_base_htabs[tab_area_t.STATUS];
 		for (let i: i32 = 0; i < hwnd_draws.length; ++i) {
 			let draw: tab_draw_t = hwnd_draws[i];
 			draw.f(htab);
@@ -35,7 +34,7 @@ function ui_statusbar_render_ui() {
 		if (!config_raw.touch_ui) {
 			let minimized: bool = config_raw.layout[layout_size_t.STATUS_H] <= (ui_statusbar_default_h * config_raw.window_scale);
 			if (ui_tab(ui_base_htabs[tab_area_t.STATUS], minimized ? "<" : ">", false, -2)) {
-				ui_base_htabs[tab_area_t.STATUS].i = ui_statusbar_last_tab;
+				ui_base_htabs[tab_area_t.STATUS].i        = ui_statusbar_last_tab;
 				config_raw.layout_tabs[tab_area_t.STATUS] = ui_statusbar_last_tab;
 			}
 		}

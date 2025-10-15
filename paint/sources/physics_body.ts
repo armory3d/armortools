@@ -1,7 +1,7 @@
 
-///if arm_physics
+/// if arm_physics
 
-///include "../libs/asim.h"
+/// include "../libs/asim.h"
 
 declare function asim_body_create(shape: i32, mass: f32, dimx: f32, dimy: f32, dimz: f32, x: f32, y: f32, z: f32, triangles: f32[]): any;
 declare function asim_body_apply_impulse(body: any, x: f32, y: f32, z: f32): void;
@@ -21,11 +21,11 @@ type physics_body_t = {
 };
 
 enum physics_shape_t {
-	BOX = 0,
-	SPHERE = 1,
-	HULL = 2,
+	BOX     = 0,
+	SPHERE  = 1,
+	HULL    = 2,
 	TERRAIN = 3,
-	MESH = 4,
+	MESH    = 4,
 }
 
 let physics_body_object_map: map_t<i32, physics_body_t> = map_create();
@@ -45,23 +45,20 @@ function physics_body_init(body: physics_body_t, obj: object_t) {
 	body.dimz = obj.transform.dim.z;
 
 	let scale_pos: f32 = 1.0;
-	let posa: i16[] = null;
-	let inda: u32[] = null;
+	let posa: i16[]    = null;
+	let inda: u32[]    = null;
 
-	if (body.shape == physics_shape_t.MESH ||
-		body.shape == physics_shape_t.HULL ||
-		body.shape == physics_shape_t.TERRAIN
-	) {
+	if (body.shape == physics_shape_t.MESH || body.shape == physics_shape_t.HULL || body.shape == physics_shape_t.TERRAIN) {
 		let mo: mesh_object_t = obj.ext;
 		let data: mesh_data_t = mo.data;
-		let scale: vec4_t = obj.transform.scale;
+		let scale: vec4_t     = obj.transform.scale;
 
 		let positions: i16_array_t = mesh_data_get_vertex_array(data, "pos").values;
-		let indices0: u32_array_t = data.index_array;
+		let indices0: u32_array_t  = data.index_array;
 
 		scale_pos = scale.x * data.scale_pos;
-		posa = positions;
-		inda = indices0;
+		posa      = positions;
+		inda      = indices0;
 
 		// triangles = f32_array_create(indices0.length * 3);
 		// let ar: u32_array_t = indices[0];
@@ -79,7 +76,7 @@ function physics_body_init(body: physics_body_t, obj: object_t) {
 	}
 
 	let loc: vec4_t = obj.transform.loc;
-	body._body = asim_body_create(body.shape, body.mass, body.dimx, body.dimy, body.dimz, loc.x, loc.y, loc.z, posa, inda, scale_pos);
+	body._body      = asim_body_create(body.shape, body.mass, body.dimx, body.dimy, body.dimz, loc.x, loc.y, loc.z, posa, inda, scale_pos);
 }
 
 function physics_body_remove(uid: i32) {
@@ -111,4 +108,4 @@ function physics_body_update(body: physics_body_t) {
 	transform_build_matrix(transform);
 }
 
-///end
+/// end

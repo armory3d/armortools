@@ -1,37 +1,37 @@
 
 enum bake_type_t {
-	INIT = -1,
-	CURVATURE = 0,
-	NORMAL = 1,
+	INIT          = -1,
+	CURVATURE     = 0,
+	NORMAL        = 1,
 	NORMAL_OBJECT = 2,
-	HEIGHT = 3,
-	DERIVATIVE = 4,
-	POSITION = 5,
-	TEXCOORD = 6,
-	MATERIALID = 7,
-	OBJECTID = 8,
-	VERTEX_COLOR = 9,
-	AO = 10,
-	LIGHTMAP = 11,
-	BENT_NORMAL = 12,
-	THICKNESS = 13,
+	HEIGHT        = 3,
+	DERIVATIVE    = 4,
+	POSITION      = 5,
+	TEXCOORD      = 6,
+	MATERIALID    = 7,
+	OBJECTID      = 8,
+	VERTEX_COLOR  = 9,
+	AO            = 10,
+	LIGHTMAP      = 11,
+	BENT_NORMAL   = 12,
+	THICKNESS     = 13,
 }
 
 enum split_type_t {
-	OBJECT = 0,
-	GROUP = 1,
+	OBJECT   = 0,
+	GROUP    = 1,
 	MATERIAL = 2,
-	UDIM = 3,
+	UDIM     = 3,
 }
 
 enum bake_axis_t {
 	XYZ = 0,
-	X = 1,
-	Y = 2,
-	Z = 3,
-	MX = 4,
-	MY = 5,
-	MZ = 6,
+	X   = 1,
+	Y   = 2,
+	Z   = 3,
+	MX  = 4,
+	MY  = 5,
+	MZ  = 6,
 }
 
 enum bake_up_axis_t {
@@ -41,109 +41,109 @@ enum bake_up_axis_t {
 }
 
 enum viewport_mode_t {
-	MINUS_ONE = -1,
-	LIT = 0,
-	BASE_COLOR = 1,
-	NORMAL_MAP = 2,
-	OCCLUSION = 3,
-	ROUGHNESS = 4,
-	METALLIC = 5,
-	OPACITY = 6,
-	HEIGHT = 7,
-	EMISSION = 8,
-	SUBSURFACE = 9,
-	TEXCOORD = 10,
+	MINUS_ONE     = -1,
+	LIT           = 0,
+	BASE_COLOR    = 1,
+	NORMAL_MAP    = 2,
+	OCCLUSION     = 3,
+	ROUGHNESS     = 4,
+	METALLIC      = 5,
+	OPACITY       = 6,
+	HEIGHT        = 7,
+	EMISSION      = 8,
+	SUBSURFACE    = 9,
+	TEXCOORD      = 10,
 	OBJECT_NORMAL = 11,
-	MATERIAL_ID = 12,
-	OBJECT_ID = 13,
-	MASK = 14,
-	PATH_TRACE = 15,
+	MATERIAL_ID   = 12,
+	OBJECT_ID     = 13,
+	MASK          = 14,
+	PATH_TRACE    = 15,
 }
 
 enum channel_type_t {
 	BASE_COLOR = 0,
-	OCCLUSION = 1,
-	ROUGHNESS = 2,
-	METALLIC = 3,
+	OCCLUSION  = 1,
+	ROUGHNESS  = 2,
+	METALLIC   = 3,
 	NORMAL_MAP = 4,
-	HEIGHT = 5,
+	HEIGHT     = 5,
 }
 
 enum render_mode_t {
-	DEFERRED = 0,
-	FORWARD = 1,
+	DEFERRED   = 0,
+	FORWARD    = 1,
 	PATH_TRACE = 2,
 }
 
 enum export_mode_t {
-	VISIBLE = 0,
-	SELECTED = 1,
-	PER_OBJECT = 2,
+	VISIBLE       = 0,
+	SELECTED      = 1,
+	PER_OBJECT    = 2,
 	PER_UDIM_TILE = 3,
 }
 
 enum export_destination_t {
-	DISK = 0,
+	DISK   = 0,
 	PACKED = 1,
 }
 
 enum pathtrace_mode_t {
-	FAST = 0,
+	FAST    = 0,
 	QUALITY = 1,
 }
 
 enum fill_type_t {
-	OBJECT = 0,
-	FACE = 1,
-	ANGLE = 2,
+	OBJECT    = 0,
+	FACE      = 1,
+	ANGLE     = 2,
 	UV_ISLAND = 3,
 }
 
 enum uv_type_t {
-	UVMAP = 0,
+	UVMAP     = 0,
 	TRIPLANAR = 1,
-	PROJECT = 2,
+	PROJECT   = 2,
 }
 
 enum picker_mask_t {
-	NONE = 0,
+	NONE     = 0,
 	MATERIAL = 1,
 }
 
 enum blend_type_t {
-	MIX = 0,
-	DARKEN = 1,
-	MULTIPLY = 2,
-	BURN = 3,
-	LIGHTEN = 4,
-	SCREEN = 5,
-	DODGE = 6,
-	ADD = 7,
-	OVERLAY = 8,
-	SOFT_LIGHT = 9,
+	MIX          = 0,
+	DARKEN       = 1,
+	MULTIPLY     = 2,
+	BURN         = 3,
+	LIGHTEN      = 4,
+	SCREEN       = 5,
+	DODGE        = 6,
+	ADD          = 7,
+	OVERLAY      = 8,
+	SOFT_LIGHT   = 9,
 	LINEAR_LIGHT = 10,
-	DIFFERENCE = 11,
-	SUBTRACT = 12,
-	DIVIDE = 13,
-	HUE = 14,
-	SATURATION = 15,
-	COLOR = 16,
-	VALUE = 17,
+	DIFFERENCE   = 11,
+	SUBTRACT     = 12,
+	DIVIDE       = 13,
+	HUE          = 14,
+	SATURATION   = 15,
+	COLOR        = 16,
+	VALUE        = 17,
 }
 
 enum camera_controls_t {
-	ORBIT = 0,
+	ORBIT  = 0,
 	ROTATE = 1,
-	FLY = 2,
+	FLY    = 2,
 }
 
 enum camera_type_t {
-	PERSPECTIVE = 0,
+	PERSPECTIVE  = 0,
 	ORTHOGRAPHIC = 1,
 }
 
 enum texture_bits_t {
-	BITS8 = 0,
+	BITS8  = 0,
 	BITS16 = 1,
 	BITS32 = 2,
 }
@@ -163,113 +163,113 @@ enum mesh_format_t {
 }
 
 enum menubar_category_t {
-	FILE = 0,
-	EDIT = 1,
+	FILE     = 0,
+	EDIT     = 1,
 	VIEWPORT = 2,
-	MODE = 3,
-	CAMERA = 4,
-	HELP = 5,
+	MODE     = 3,
+	CAMERA   = 4,
+	HELP     = 5,
 }
 
 enum canvas_type_t {
 	MATERIAL = 0,
-	BRUSH = 1,
+	BRUSH    = 1,
 }
 
 enum view_2d_type_t {
 	ASSET = 0,
-	NODE = 1,
-	FONT = 2,
+	NODE  = 1,
+	FONT  = 2,
 	LAYER = 3,
 }
 
 enum view_2d_layer_mode_t {
-	VISIBLE = 0,
+	VISIBLE  = 0,
 	SELECTED = 1,
 }
 
 enum border_side_t {
-	LEFT = 0,
-	RIGHT = 1,
-	TOP = 2,
+	LEFT   = 0,
+	RIGHT  = 1,
+	TOP    = 2,
 	BOTTOm = 3,
 }
 
 enum paint_tex_t {
-	BASE = 0,
-	NORMAL = 1,
+	BASE      = 0,
+	NORMAL    = 1,
 	OCCLUSION = 2,
 	ROUGHNESS = 3,
-	METALLIC = 4,
-	OPACITY = 5,
-	HEIGHT = 6,
+	METALLIC  = 4,
+	OPACITY   = 5,
+	HEIGHT    = 6,
 }
 
 enum zoom_direction_t {
-	VERTICAL = 0,
-	VERTICAL_INVERTED = 1,
-	HORIZONTAL = 2,
-	HORIZONTAL_INVERTED = 3,
-	VERTICAL_HORIZONTAL = 4,
+	VERTICAL                     = 0,
+	VERTICAL_INVERTED            = 1,
+	HORIZONTAL                   = 2,
+	HORIZONTAL_INVERTED          = 3,
+	VERTICAL_HORIZONTAL          = 4,
 	VERTICAL_HORIZONTAL_INVERTED = 5,
 }
 
 enum layer_slot_type_t {
 	LAYER = 0,
-	MASK = 1,
+	MASK  = 1,
 	GROUP = 2,
 }
 
 enum tool_type_t {
-	BRUSH = 0,
-	ERASER = 1,
-	FILL = 2,
-	DECAL = 3,
-	TEXT = 4,
-	CLONE = 5,
-	BLUR = 6,
-	SMUDGE = 7,
+	BRUSH    = 0,
+	ERASER   = 1,
+	FILL     = 2,
+	DECAL    = 3,
+	TEXT     = 4,
+	CLONE    = 5,
+	BLUR     = 6,
+	SMUDGE   = 7,
 	PARTICLE = 8,
-	COLORID = 9,
-	PICKER = 10,
-	BAKE = 11,
+	COLORID  = 9,
+	PICKER   = 10,
+	BAKE     = 11,
 	MATERIAL = 12,
-	GIZMO = 13,
+	GIZMO    = 13,
 }
 
 enum area_type_t {
 	MINUS_ONE = -1,
-	VIEW3D = 0,
-	VIEW2D = 1,
-	LAYERS = 2,
+	VIEW3D    = 0,
+	VIEW2D    = 1,
+	LAYERS    = 2,
 	MATERIALS = 3,
-	NODES = 4,
-	BROWSER = 5,
+	NODES     = 4,
+	BROWSER   = 5,
 }
 
 enum tab_area_t {
 	SIDEBAR0 = 0,
 	SIDEBAR1 = 1,
-	STATUS = 2,
+	STATUS   = 2,
 }
 
 enum texture_res_t {
-	RES128 = 0,
-	RES256 = 1,
-	RES512 = 2,
-	RES1024 = 3,
-	RES2048 = 4,
-	RES4096 = 5,
-	RES8192 = 6,
+	RES128   = 0,
+	RES256   = 1,
+	RES512   = 2,
+	RES1024  = 3,
+	RES2048  = 4,
+	RES4096  = 5,
+	RES8192  = 6,
 	RES16384 = 7,
 }
 
 enum layout_size_t {
-	SIDEBAR_W = 0,
+	SIDEBAR_W  = 0,
 	SIDEBAR_H0 = 1,
 	SIDEBAR_H1 = 2,
-	NODES_W = 3,
-	NODES_H = 4,
-	STATUS_H = 5,
-	HEADER = 6, // 0 - hidden, 1 - visible
+	NODES_W    = 3,
+	NODES_H    = 4,
+	STATUS_H   = 5,
+	HEADER     = 6, // 0 - hidden, 1 - visible
 }

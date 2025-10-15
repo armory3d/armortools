@@ -7,11 +7,11 @@ type vector_node_t = {
 
 function vector_node_create(raw: ui_node_t, args: f32_array_t): vector_node_t {
 	let n: vector_node_t = {};
-	n.base = logic_node_create(n);
-	n.base.get = vector_node_get;
-	n.base.get_as_image = vector_node_get_as_image;
-	n.base.set = vector_node_set;
-	n.value = vec4_create();
+	n.base               = logic_node_create(n);
+	n.base.get           = vector_node_get;
+	n.base.get_as_image  = vector_node_get_as_image;
+	n.base.set           = vector_node_set;
+	n.value              = vec4_create();
 
 	if (args != null) {
 		logic_node_add_input(n.base, float_node_create(null, f32_array_create_x(args[0])), 0);
@@ -23,13 +23,13 @@ function vector_node_create(raw: ui_node_t, args: f32_array_t): vector_node_t {
 }
 
 function vector_node_get(self: vector_node_t, from: i32): logic_node_value_t {
-	let x: f32 = logic_node_input_get(self.base.inputs[0])._f32;
-	let y: f32 = logic_node_input_get(self.base.inputs[1])._f32;
-	let z: f32 = logic_node_input_get(self.base.inputs[2])._f32;
-	self.value.x = x;
-	self.value.y = y;
-	self.value.z = z;
-	let v: logic_node_value_t = { _vec4: self.value };
+	let x: f32                = logic_node_input_get(self.base.inputs[0])._f32;
+	let y: f32                = logic_node_input_get(self.base.inputs[1])._f32;
+	let z: f32                = logic_node_input_get(self.base.inputs[2])._f32;
+	self.value.x              = x;
+	self.value.y              = y;
+	self.value.z              = z;
+	let v: logic_node_value_t = {_vec4 : self.value};
 	return v;
 }
 
@@ -40,7 +40,7 @@ function vector_node_get_as_image(self: vector_node_t, from: i32): gpu_texture_t
 	if (self.image != null) {
 		gpu_delete_texture(self.image);
 	}
-	let b: buffer_t = buffer_create(16);
+	let b: buffer_t      = buffer_create(16);
 	let n0: float_node_t = self.base.inputs[0].node;
 	let n1: float_node_t = self.base.inputs[1].node;
 	let n2: float_node_t = self.base.inputs[2].node;
@@ -59,65 +59,63 @@ function vector_node_set(self: vector_node_t, value: f32_array_t) {
 }
 
 let vector_node_def: ui_node_t = {
-	id: 0,
-	name: _tr("Vector"),
-	type: "vector_node",
-	x: 0,
-	y: 0,
-	color: 0xff4982a0,
-	inputs: [
+	id : 0,
+	name : _tr("Vector"),
+	type : "vector_node",
+	x : 0,
+	y : 0,
+	color : 0xff4982a0,
+	inputs : [
 		{
-			id: 0,
-			node_id: 0,
-			name: _tr("X"),
-			type: "VALUE",
-			color: 0xffa1a1a1,
-			default_value: f32_array_create_x(0.0),
-			min: 0.0,
-			max: 1.0,
-			precision: 100,
-			display: 0
+			id : 0,
+			node_id : 0,
+			name : _tr("X"),
+			type : "VALUE",
+			color : 0xffa1a1a1,
+			default_value : f32_array_create_x(0.0),
+			min : 0.0,
+			max : 1.0,
+			precision : 100,
+			display : 0
 		},
 		{
-			id: 0,
-			node_id: 0,
-			name: _tr("Y"),
-			type: "VALUE",
-			color: 0xffa1a1a1,
-			default_value: f32_array_create_x(0.0),
-			min: 0.0,
-			max: 1.0,
-			precision: 100,
-			display: 0
+			id : 0,
+			node_id : 0,
+			name : _tr("Y"),
+			type : "VALUE",
+			color : 0xffa1a1a1,
+			default_value : f32_array_create_x(0.0),
+			min : 0.0,
+			max : 1.0,
+			precision : 100,
+			display : 0
 		},
 		{
-			id: 0,
-			node_id: 0,
-			name: _tr("Z"),
-			type: "VALUE",
-			color: 0xffa1a1a1,
-			default_value: f32_array_create_x(0.0),
-			min: 0.0,
-			max: 1.0,
-			precision: 100,
-			display: 0
+			id : 0,
+			node_id : 0,
+			name : _tr("Z"),
+			type : "VALUE",
+			color : 0xffa1a1a1,
+			default_value : f32_array_create_x(0.0),
+			min : 0.0,
+			max : 1.0,
+			precision : 100,
+			display : 0
 		}
 	],
-	outputs: [
-		{
-			id: 0,
-			node_id: 0,
-			name: _tr("Vector"),
-			type: "VECTOR",
-			color: 0xff6363c7,
-			default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-			min: 0.0,
-			max: 1.0,
-			precision: 100,
-			display: 0
-		}
-	],
-	buttons: [],
-	width: 0,
-	flags: 0
+	outputs : [ {
+		id : 0,
+		node_id : 0,
+		name : _tr("Vector"),
+		type : "VECTOR",
+		color : 0xff6363c7,
+		default_value : f32_array_create_xyz(0.0, 0.0, 0.0),
+		min : 0.0,
+		max : 1.0,
+		precision : 100,
+		display : 0
+	} ],
+	buttons : [],
+	width : 0,
+	flags : 0
 };

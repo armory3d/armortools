@@ -2,26 +2,26 @@
 let _world_data_empty_irr: f32_array_t = null;
 
 function world_data_parse(name: string, id: string): world_data_t {
-	let format: scene_t = data_get_scene_raw(name);
+	let format: scene_t   = data_get_scene_raw(name);
 	let raw: world_data_t = world_data_get_raw_by_name(format.world_datas, id);
 	if (raw == null) {
 		iron_log("World data '" + id + "' not found!");
 		return null;
 	}
 
-	raw._ = {};
+	raw._                  = {};
 	raw._.radiance_mipmaps = [];
 
 	let irr: f32_array_t = world_data_set_irradiance(raw);
-	raw._.irradiance = irr;
+	raw._.irradiance     = irr;
 	if (raw.radiance != null) {
 		let rad: gpu_texture_t = data_get_image(raw.radiance);
-		raw._.radiance = rad;
+		raw._.radiance         = rad;
 		while (raw._.radiance_mipmaps.length < raw.radiance_mipmaps) {
 			array_push(raw._.radiance_mipmaps, null);
 		}
-		let dot: i32 = string_last_index_of(raw.radiance, ".");
-		let ext: string = substring(raw.radiance, dot, raw.radiance.length);
+		let dot: i32     = string_last_index_of(raw.radiance, ".");
+		let ext: string  = substring(raw.radiance, dot, raw.radiance.length);
 		let base: string = substring(raw.radiance, 0, dot);
 
 		for (let i: i32 = 0; i < raw.radiance_mipmaps; ++i) {
@@ -60,9 +60,9 @@ function world_data_set_irradiance(raw: world_data_t): f32_array_t {
 		return world_data_get_empty_irradiance();
 	}
 	else {
-		let b: buffer_t = data_get_blob(raw.irradiance + ".arm");
+		let b: buffer_t                     = data_get_blob(raw.irradiance + ".arm");
 		let irradiance_parsed: irradiance_t = armpack_decode(b);
-		let irr: f32_array_t = f32_array_create(28); // Align to mult of 4 - 27->28
+		let irr: f32_array_t                = f32_array_create(28); // Align to mult of 4 - 27->28
 		for (let i: i32 = 0; i < 27; ++i) {
 			irr[i] = irradiance_parsed.irradiance[i];
 		}
@@ -73,6 +73,6 @@ function world_data_set_irradiance(raw: world_data_t): f32_array_t {
 function world_data_load_envmap(raw: world_data_t) {
 	if (raw.envmap != null) {
 		let image: gpu_texture_t = data_get_image(raw.envmap);
-		raw._.envmap = image;
+		raw._.envmap             = image;
 	}
 }

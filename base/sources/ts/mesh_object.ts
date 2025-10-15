@@ -5,7 +5,7 @@ type mesh_object_t = {
 	material?: material_data_t;
 	camera_dist?: f32;
 	frustum_culling?: bool;
-	skip_context?: string; // Do not draw this context
+	skip_context?: string;  // Do not draw this context
 	force_context?: string; // Draw only this context
 };
 
@@ -13,10 +13,10 @@ let _mesh_object_last_pipeline: gpu_pipeline_t = null;
 
 function mesh_object_create(data: mesh_data_t, material: material_data_t): mesh_object_t {
 	let raw: mesh_object_t = {};
-	raw.frustum_culling = true;
-	raw.base = object_create(false);
-	raw.base.ext = raw;
-	raw.base.ext_type = "mesh_object_t";
+	raw.frustum_culling    = true;
+	raw.base               = object_create(false);
+	raw.base.ext           = raw;
+	raw.base.ext_type      = "mesh_object_t";
 
 	raw.material = material;
 	mesh_object_set_data(raw, data);
@@ -36,9 +36,9 @@ function mesh_object_remove(raw: mesh_object_t) {
 }
 
 function mesh_object_setup_animation(raw: mesh_object_t, oactions: scene_t[] = null) {
-	///if arm_anim
+	/// if arm_anim
 	object_setup_animation_super(raw.base, oactions);
-	///end
+	/// end
 }
 
 function mesh_object_cull_material(raw: mesh_object_t, context: string): bool {
@@ -61,7 +61,7 @@ function mesh_object_cull_material(raw: mesh_object_t, context: string): bool {
 
 function mesh_object_cull_mesh(raw: mesh_object_t, context: string, camera: camera_object_t): bool {
 	if (camera.data.frustum_culling && raw.frustum_culling) {
-		let radius_scale: f32 = 1.0;
+		let radius_scale: f32                 = 1.0;
 		let frustum_planes: frustum_plane_t[] = camera.frustum_planes;
 		if (!camera_object_sphere_in_frustum(frustum_planes, raw.base.transform, radius_scale)) {
 			raw.base.culled = true;
@@ -87,9 +87,9 @@ function mesh_object_render(raw: mesh_object_t, context: string, bind_params: st
 	uniforms_tex_unpack = raw.data.scale_tex;
 	transform_update(raw.base.transform);
 
-	let scontext: shader_context_t = null;
+	let scontext: shader_context_t   = null;
 	let mcontext: material_context_t = null;
-	let mat: material_data_t = raw.material;
+	let mat: material_data_t         = raw.material;
 	for (let j: i32 = 0; j < mat.contexts.length; ++j) {
 		if (mat.contexts[j].name == context) {
 			scontext = shader_data_get_context(mat._.shader, context);
@@ -116,5 +116,6 @@ function mesh_object_valid_context(raw: mesh_object_t, mat: material_data_t, con
 
 function mesh_object_compute_camera_dist(raw: mesh_object_t, cam_x: f32, cam_y: f32, cam_z: f32) {
 	// Render path mesh sorting
-	raw.camera_dist = vec4_fdist(cam_x, cam_y, cam_z, transform_world_x(raw.base.transform), transform_world_y(raw.base.transform), transform_world_z(raw.base.transform));
+	raw.camera_dist =
+	    vec4_fdist(cam_x, cam_y, cam_z, transform_world_x(raw.base.transform), transform_world_y(raw.base.transform), transform_world_z(raw.base.transform));
 }

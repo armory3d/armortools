@@ -6,10 +6,10 @@ type boolean_node_t = {
 
 function boolean_node_create(raw: ui_node_t, args: f32_array_t): boolean_node_t {
 	let n: boolean_node_t = {};
-	n.base = logic_node_create(n);
-	n.base.get = boolean_node_get;
-	n.base.set = boolean_node_set;
-	n.value = args == null ? false : args[0] > 0.0;
+	n.base                = logic_node_create(n);
+	n.base.get            = boolean_node_get;
+	n.base.set            = boolean_node_set;
+	n.value               = args == null ? false : args[0] > 0.0;
 	return n;
 }
 
@@ -18,9 +18,7 @@ function boolean_node_get(self: boolean_node_t, from: i32): logic_node_value_t {
 		return logic_node_input_get(self.base.inputs[0]);
 	}
 	else {
-		let v: logic_node_value_t = {
-			_f32: self.value ? 1.0 : 0.0
-		};
+		let v: logic_node_value_t = {_f32 : self.value ? 1.0 : 0.0};
 		return v;
 	}
 }

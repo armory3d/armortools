@@ -1,23 +1,23 @@
 
-///if arm_windows
+/// if arm_windows
 let path_sep: string = "\\";
-///else
+/// else
 let path_sep: string = "/";
-///end
+/// end
 
-let path_mesh_formats: string[] = ["obj", "blend"];
-let path_texture_formats: string[] = ["jpg", "jpeg", "png", "tga", "bmp", "psd", "gif", "hdr", "k"];
+let path_mesh_formats: string[]    = [ "obj", "blend" ];
+let path_texture_formats: string[] = [ "jpg", "jpeg", "png", "tga", "bmp", "psd", "gif", "hdr", "k" ];
 
-let path_mesh_importers: map_t<string, any> = map_create(); // JSValue -> (s: string)=>raw_mesh_t
+let path_mesh_importers: map_t<string, any>    = map_create(); // JSValue -> (s: string)=>raw_mesh_t
 let path_texture_importers: map_t<string, any> = map_create(); // JSValue -> (s: string)=>gpu_texture_t
 
-let path_base_color_ext: string[] = ["albedo", "alb", "basecol", "basecolor", "diffuse", "diff", "base", "bc", "d", "color", "col"];
-let path_opacity_ext: string[] = ["opac", "opacity", "alpha"];
-let path_normal_map_ext: string[] = ["normal", "nor", "n", "nrm", "normalgl"];
-let path_occlusion_ext: string[] = ["ao", "occlusion", "ambientOcclusion", "o", "occ"];
-let path_roughness_ext: string[] = ["roughness", "rough", "r", "rgh"];
-let path_metallic_ext: string[] = ["metallic", "metal", "metalness", "m", "met"];
-let path_displacement_ext: string[] = ["displacement", "height", "h", "disp"];
+let path_base_color_ext: string[]   = [ "albedo", "alb", "basecol", "basecolor", "diffuse", "diff", "base", "bc", "d", "color", "col" ];
+let path_opacity_ext: string[]      = [ "opac", "opacity", "alpha" ];
+let path_normal_map_ext: string[]   = [ "normal", "nor", "n", "nrm", "normalgl" ];
+let path_occlusion_ext: string[]    = [ "ao", "occlusion", "ambientOcclusion", "o", "occ" ];
+let path_roughness_ext: string[]    = [ "roughness", "rough", "r", "rgh" ];
+let path_metallic_ext: string[]     = [ "metallic", "metal", "metalness", "m", "met" ];
+let path_displacement_ext: string[] = [ "displacement", "height", "h", "disp" ];
 
 function path_data(): string {
 	return iron_internal_files_location() + path_sep + data_path();
@@ -46,7 +46,7 @@ function path_normalize(path: string): string {
 		path = substring(path, 0, path.length - 1);
 	}
 	let ar: string[] = string_split(path, path_sep);
-	let i: i32 = 0;
+	let i: i32       = 0;
 	while (i < ar.length) {
 		if (i > 0 && ar[i] == ".." && ar[i - 1] != "..") {
 			array_splice(ar, i - 1, 2);
@@ -91,9 +91,7 @@ function path_is_texture(path: string): bool {
 
 function path_is_font(path: string): bool {
 	let p: string = to_lower_case(path);
-	return ends_with(p, ".ttf") ||
-		   ends_with(p, ".ttc") ||
-		   ends_with(p, ".otf");
+	return ends_with(p, ".ttf") || ends_with(p, ".ttc") || ends_with(p, ".otf");
 }
 
 function path_is_project(path: string): bool {
@@ -122,15 +120,15 @@ function path_is_gimp_color_palette(path: string): bool {
 }
 
 function path_is_known(path: string): bool {
-	return path_is_mesh(path) || path_is_texture(path) || path_is_font(path) || path_is_project(path) || path_is_plugin(path) || path_is_text(path) || path_is_gimp_color_palette(path);
+	return path_is_mesh(path) || path_is_texture(path) || path_is_font(path) || path_is_project(path) || path_is_plugin(path) || path_is_text(path) ||
+	       path_is_gimp_color_palette(path);
 }
 
 function path_check_ext(p: string, exts: string[]): bool {
 	p = string_replace_all(p, "-", "_");
 	for (let i: i32 = 0; i < exts.length; ++i) {
 		let ext: string = exts[i];
-		if (ends_with(p, "_" + ext) ||
-			(string_index_of(p, "_" + ext + "_") >= 0 && !ends_with(p, "_preview") && !ends_with(p, "_icon"))) {
+		if (ends_with(p, "_" + ext) || (string_index_of(p, "_" + ext + "_") >= 0 && !ends_with(p, "_preview") && !ends_with(p, "_icon"))) {
 			return true;
 		}
 	}
@@ -165,13 +163,13 @@ function path_is_folder(p: string): bool {
 }
 
 function path_is_protected(): bool {
-	///if arm_windows
+	/// if arm_windows
 	return string_index_of(iron_internal_files_location(), "Program Files") >= 0;
-	///elseif arm_android
+	/// elseif arm_android
 	return true;
-	///elseif arm_ios
+	/// elseif arm_ios
 	return true;
-	///else
+	/// else
 	return false;
-	///end
+	/// end
 }

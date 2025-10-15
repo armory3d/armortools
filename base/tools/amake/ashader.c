@@ -1,13 +1,17 @@
 
 // kong wrapper
 
+#include "iron_string.h"
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
-#include "iron_string.h"
 
 #include "../../sources/libs/kong/analyzer.h"
+#include "../../sources/libs/kong/backends/hlsl.h"
+#include "../../sources/libs/kong/backends/metal.h"
+#include "../../sources/libs/kong/backends/spirv.h"
+#include "../../sources/libs/kong/backends/wgsl.h"
 #include "../../sources/libs/kong/compiler.h"
 #include "../../sources/libs/kong/disasm.h"
 #include "../../sources/libs/kong/errors.h"
@@ -17,17 +21,13 @@
 #include "../../sources/libs/kong/names.h"
 #include "../../sources/libs/kong/parser.h"
 #include "../../sources/libs/kong/tokenizer.h"
+#include "../../sources/libs/kong/transformer.h"
 #include "../../sources/libs/kong/typer.h"
 #include "../../sources/libs/kong/types.h"
-#include "../../sources/libs/kong/transformer.h"
-#include "../../sources/libs/kong/backends/hlsl.h"
-#include "../../sources/libs/kong/backends/metal.h"
-#include "../../sources/libs/kong/backends/spirv.h"
-#include "../../sources/libs/kong/backends/wgsl.h"
 
 #ifdef _WIN32
-#include <d3d11.h>
 #include <D3Dcompiler.h>
+#include <d3d11.h>
 
 char *hlsl_to_bin(char *source, char *shader_type, char *to) {
 	char *type;
@@ -41,38 +41,38 @@ char *hlsl_to_bin(char *source, char *shader_type, char *to) {
 	ID3DBlob *error_message;
 	ID3DBlob *shader_buffer;
 	// UINT flags = D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_SKIP_VALIDATION;
-	UINT flags = D3DCOMPILE_OPTIMIZATION_LEVEL3;
-	HRESULT hr = D3DCompile(source, strlen(source) + 1, NULL, NULL, NULL, "main", type, flags, 0, &shader_buffer, &error_message);
+	UINT    flags = D3DCOMPILE_OPTIMIZATION_LEVEL3;
+	HRESULT hr    = D3DCompile(source, strlen(source) + 1, NULL, NULL, NULL, "main", type, flags, 0, &shader_buffer, &error_message);
 	if (hr != S_OK) {
 		printf("%s\n", (char *)error_message->lpVtbl->GetBufferPointer(error_message));
 		return NULL;
 	}
 
-	FILE *fp = fopen(to, "wb");
-	int len = shader_buffer->lpVtbl->GetBufferSize(shader_buffer);
+	FILE *fp  = fopen(to, "wb");
+	int   len = shader_buffer->lpVtbl->GetBufferSize(shader_buffer);
 	fwrite((char *)shader_buffer->lpVtbl->GetBufferPointer(shader_buffer), 1, len, fp);
 	fclose(fp);
 	shader_buffer->lpVtbl->Release(shader_buffer);
 }
 #endif
 
-extern uint64_t next_variable_id;
-extern size_t allocated_globals_size;
+extern uint64_t    next_variable_id;
+extern size_t      allocated_globals_size;
 extern function_id next_function_index;
-extern global_id globals_size;
-extern name_id names_index;
-extern size_t sets_count;
-extern type_id next_type_index;
-void hlsl_export2(char **vs, char **fs, api_kind d3d, bool debug);
-void spirv_export2(char **vs, char **fs, int *vs_size, int *fs_size, bool debug);
-extern size_t vertex_inputs_size;
-extern size_t fragment_inputs_size;
-extern size_t vertex_functions_size;
-extern size_t fragment_functions_size;
+extern global_id   globals_size;
+extern name_id     names_index;
+extern size_t      sets_count;
+extern type_id     next_type_index;
+void               hlsl_export2(char **vs, char **fs, api_kind d3d, bool debug);
+void               spirv_export2(char **vs, char **fs, int *vs_size, int *fs_size, bool debug);
+extern size_t      vertex_inputs_size;
+extern size_t      fragment_inputs_size;
+extern size_t      vertex_functions_size;
+extern size_t      fragment_functions_size;
 
 void kong_compile(const char *from, const char *to) {
 	FILE *fp = fopen(from, "rb");
-	fseek(fp , 0, SEEK_END);
+	fseek(fp, 0, SEEK_END);
 	int size = ftell(fp);
 	rewind(fp);
 	char *data = malloc(size + 1);
@@ -80,16 +80,16 @@ void kong_compile(const char *from, const char *to) {
 	fread(data, size, 1, fp);
 	fclose(fp);
 
-	next_variable_id = 1;
-	allocated_globals_size = 0;
-	next_function_index = 0;
-	globals_size = 0;
-	names_index = 1;
-	sets_count = 0;
-	next_type_index = 0;
-	vertex_inputs_size = 0;
-	fragment_inputs_size = 0;
-	vertex_functions_size = 0;
+	next_variable_id        = 1;
+	allocated_globals_size  = 0;
+	next_function_index     = 0;
+	globals_size            = 0;
+	names_index             = 1;
+	sets_count              = 0;
+	next_type_index         = 0;
+	vertex_inputs_size      = 0;
+	fragment_inputs_size    = 0;
+	vertex_functions_size   = 0;
 	fragment_functions_size = 0;
 	names_init();
 	types_init();
@@ -104,7 +104,7 @@ void kong_compile(const char *from, const char *to) {
 	}
 	analyze();
 
-	#ifdef _WIN32
+#ifdef _WIN32
 
 	char *vs;
 	char *fs;
@@ -147,16 +147,16 @@ void kong_compile(const char *from, const char *to) {
 	strcat(to_, "frag.d3d11");
 	hlsl_to_bin(fs, "frag", to_);
 
-	#elif defined(__APPLE__)
+#elif defined(__APPLE__)
 
 	char *metal = metal_export("");
 
-	int i = string_last_index_of(to, "/");
+	int  i = string_last_index_of(to, "/");
 	char filename[512];
 	strcpy(filename, to);
 	char *filebase = &filename[i + 1];
-	int j = string_index_of(filebase, ".");
-	filebase[j] = '\0';
+	int   j        = string_index_of(filebase, ".");
+	filebase[j]    = '\0';
 
 	char to_[512];
 	strcpy(to_, to);
@@ -180,13 +180,13 @@ void kong_compile(const char *from, const char *to) {
 	fwrite("_frag\n", 1, 6, fp);
 	fclose(fp);
 
-	#else
+#else
 
 	transform(TRANSFORM_FLAG_ONE_COMPONENT_SWIZZLE | TRANSFORM_FLAG_BINARY_UNIFY_LENGTH);
 	char *vs;
 	char *fs;
-	int vs_size;
-	int fs_size;
+	int   vs_size;
+	int   fs_size;
 	spirv_export2(&vs, &fs, &vs_size, &fs_size, false);
 
 	char to_[512];
@@ -206,7 +206,7 @@ void kong_compile(const char *from, const char *to) {
 	fwrite(fs, 1, fs_size, fp);
 	fclose(fp);
 
-	#endif
+#endif
 }
 
 int ashader(char *shader_lang, char *from, char *to) {

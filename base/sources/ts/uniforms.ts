@@ -1,21 +1,21 @@
 
-let _uniforms_mat: mat4_t = mat4_identity();
+let _uniforms_mat: mat4_t  = mat4_identity();
 let _uniforms_mat2: mat4_t = mat4_identity();
 let _uniforms_mat3: mat3_t = mat3_identity();
-let _uniforms_vec: vec4_t = vec4_create();
+let _uniforms_vec: vec4_t  = vec4_create();
 let _uniforms_vec2: vec4_t = vec4_create();
 let _uniforms_quat: quat_t = quat_create();
 
-let uniforms_tex_links: (o: object_t, md: material_data_t, s: string)=>gpu_texture_t = null;
-let uniforms_mat4_links: (o: object_t, md: material_data_t, s: string)=>mat4_t = null;
-let uniforms_vec4_links: (o: object_t, md: material_data_t, s: string)=>vec4_t = null;
-let uniforms_vec3_links: (o: object_t, md: material_data_t, s: string)=>vec4_t = null;
-let uniforms_vec2_links: (o: object_t, md: material_data_t, s: string)=>vec2_t = null;
-let uniforms_f32_links: (o: object_t, md: material_data_t, s: string)=>f32 = null;
-let uniforms_f32_array_links: (o: object_t, md: material_data_t, s: string)=>f32_array_t = null;
-let uniforms_i32_links: (o: object_t, md: material_data_t, s: string)=>i32 = null;
-let uniforms_pos_unpack: f32 = 1.0;
-let uniforms_tex_unpack: f32 = 1.0;
+let uniforms_tex_links: (o: object_t, md: material_data_t, s: string) => gpu_texture_t  = null;
+let uniforms_mat4_links: (o: object_t, md: material_data_t, s: string) => mat4_t  = null;
+let uniforms_vec4_links: (o: object_t, md: material_data_t, s: string) => vec4_t  = null;
+let uniforms_vec3_links: (o: object_t, md: material_data_t, s: string) => vec4_t  = null;
+let uniforms_vec2_links: (o: object_t, md: material_data_t, s: string) => vec2_t  = null;
+let uniforms_f32_links: (o: object_t, md: material_data_t, s: string) => f32  = null;
+let uniforms_f32_array_links: (o: object_t, md: material_data_t, s: string) => f32_array_t  = null;
+let uniforms_i32_links: (o: object_t, md: material_data_t, s: string) => i32 = null;
+let uniforms_pos_unpack: f32                                                 = 1.0;
+let uniforms_tex_unpack: f32                                                 = 1.0;
 
 function uniforms_set_context_consts(context: shader_context_t, bind_params: string[]) {
 	// On shader compile error, _.constants.length will be 0
@@ -29,9 +29,9 @@ function uniforms_set_context_consts(context: shader_context_t, bind_params: str
 	// Texture context constants
 	if (bind_params != null) { // Bind targets
 		for (let i: i32 = 0; i < math_floor(bind_params.length / 2); ++i) {
-			let pos: i32 = i * 2; // bind params = [texture, sampler_id]
-			let rt_id: string = bind_params[pos];
-			let sampler_id: string = bind_params[pos + 1];
+			let pos: i32            = i * 2; // bind params = [texture, sampler_id]
+			let rt_id: string       = bind_params[pos];
+			let sampler_id: string  = bind_params[pos + 1];
 			let rt: render_target_t = map_get(render_path_render_targets, rt_id);
 			uniforms_bind_render_target(rt, context, sampler_id);
 		}
@@ -160,12 +160,12 @@ function uniforms_set_context_const(location: i32, c: shader_const_t): bool {
 		}
 		else if (c.link == "_skydome_matrix") {
 			let tr: transform_t = camera.base.transform;
-			let v: vec4_t = vec4_create(transform_world_x(tr), transform_world_y(tr), transform_world_z(tr));
-			let bounds: f32 = camera.data.far_plane * 0.9;
-			let v2: vec4_t = vec4_create(bounds, bounds, bounds);
-			m = mat4_compose(v, _uniforms_quat, v2);
-			m = mat4_mult_mat(m, camera.v);
-			m = mat4_mult_mat(m, camera.p);
+			let v: vec4_t       = vec4_create(transform_world_x(tr), transform_world_y(tr), transform_world_z(tr));
+			let bounds: f32     = camera.data.far_plane * 0.9;
+			let v2: vec4_t      = vec4_create(bounds, bounds, bounds);
+			m                   = mat4_compose(v, _uniforms_quat, v2);
+			m                   = mat4_mult_mat(m, camera.v);
+			m                   = mat4_mult_mat(m, camera.p);
 		}
 		else { // Unknown uniform
 			return false;
@@ -178,52 +178,52 @@ function uniforms_set_context_const(location: i32, c: shader_const_t): bool {
 		let v: vec4_t = vec4_nan();
 		if (c.link == "_envmap_irradiance0") {
 			let fa: f32_array_t = scene_world == null ? world_data_get_empty_irradiance() : scene_world._.irradiance;
-			v.x = fa[0];
-			v.y = fa[1];
-			v.z = fa[2];
-			v.w = fa[3];
+			v.x                 = fa[0];
+			v.y                 = fa[1];
+			v.z                 = fa[2];
+			v.w                 = fa[3];
 		}
 		else if (c.link == "_envmap_irradiance1") {
 			let fa: f32_array_t = scene_world == null ? world_data_get_empty_irradiance() : scene_world._.irradiance;
-			v.x = fa[4];
-			v.y = fa[5];
-			v.z = fa[6];
-			v.w = fa[7];
+			v.x                 = fa[4];
+			v.y                 = fa[5];
+			v.z                 = fa[6];
+			v.w                 = fa[7];
 		}
 		else if (c.link == "_envmap_irradiance2") {
 			let fa: f32_array_t = scene_world == null ? world_data_get_empty_irradiance() : scene_world._.irradiance;
-			v.x = fa[8];
-			v.y = fa[9];
-			v.z = fa[10];
-			v.w = fa[11];
+			v.x                 = fa[8];
+			v.y                 = fa[9];
+			v.z                 = fa[10];
+			v.w                 = fa[11];
 		}
 		else if (c.link == "_envmap_irradiance3") {
 			let fa: f32_array_t = scene_world == null ? world_data_get_empty_irradiance() : scene_world._.irradiance;
-			v.x = fa[12];
-			v.y = fa[13];
-			v.z = fa[14];
-			v.w = fa[15];
+			v.x                 = fa[12];
+			v.y                 = fa[13];
+			v.z                 = fa[14];
+			v.w                 = fa[15];
 		}
 		else if (c.link == "_envmap_irradiance4") {
 			let fa: f32_array_t = scene_world == null ? world_data_get_empty_irradiance() : scene_world._.irradiance;
-			v.x = fa[16];
-			v.y = fa[17];
-			v.z = fa[18];
-			v.w = fa[19];
+			v.x                 = fa[16];
+			v.y                 = fa[17];
+			v.z                 = fa[18];
+			v.w                 = fa[19];
 		}
 		else if (c.link == "_envmap_irradiance5") {
 			let fa: f32_array_t = scene_world == null ? world_data_get_empty_irradiance() : scene_world._.irradiance;
-			v.x = fa[20];
-			v.y = fa[21];
-			v.z = fa[22];
-			v.w = fa[23];
+			v.x                 = fa[20];
+			v.y                 = fa[21];
+			v.z                 = fa[22];
+			v.w                 = fa[23];
 		}
 		else if (c.link == "_envmap_irradiance6") {
 			let fa: f32_array_t = scene_world == null ? world_data_get_empty_irradiance() : scene_world._.irradiance;
-			v.x = fa[24];
-			v.y = fa[25];
-			v.z = fa[26];
-			v.w = fa[27];
+			v.x                 = fa[24];
+			v.y                 = fa[25];
+			v.z                 = fa[26];
+			v.w                 = fa[27];
 		}
 		else {
 			return false;
@@ -311,12 +311,12 @@ function uniforms_set_context_const(location: i32, c: shader_const_t): bool {
 		}
 		else if (c.link == "_camera_plane_proj") {
 			let znear: f32 = camera.data.near_plane;
-			let zfar: f32 = camera.data.far_plane;
-			v.x = zfar / (zfar - znear);
-			v.y = (-zfar * znear) / (zfar - znear);
+			let zfar: f32  = camera.data.far_plane;
+			v.x            = zfar / (zfar - znear);
+			v.y            = (-zfar * znear) / (zfar - znear);
 		}
 		else if (starts_with(c.link, "_size(")) {
-			let tex: string = substring(c.link, 6, c.link.length - 1);
+			let tex: string          = substring(c.link, 6, c.link.length - 1);
 			let image: gpu_texture_t = uniforms_tex_links(null, null, tex);
 			if (image != null) {
 				v.x = image.width;
@@ -324,13 +324,13 @@ function uniforms_set_context_const(location: i32, c: shader_const_t): bool {
 			}
 			else if (_render_path_bind_params != null) {
 				for (let i: i32 = 0; i < math_floor(_render_path_bind_params.length / 2); ++i) {
-					let pos: i32 = i * 2; // bind params = [texture, sampler_id]
+					let pos: i32           = i * 2; // bind params = [texture, sampler_id]
 					let sampler_id: string = _render_path_bind_params[pos + 1];
 					if (sampler_id == tex) {
-						let rt_id: string = _render_path_bind_params[pos];
+						let rt_id: string       = _render_path_bind_params[pos];
 						let rt: render_target_t = map_get(render_path_render_targets, rt_id);
-						v.x = rt.width;
-						v.y = rt.height;
+						v.x                     = rt.width;
+						v.y                     = rt.height;
 					}
 				}
 			}
@@ -380,7 +380,7 @@ function uniforms_set_context_const(location: i32, c: shader_const_t): bool {
 
 		if (c.link == "_envmap_num_mipmaps") {
 			let w: world_data_t = scene_world;
-			i = w != null ? w.radiance_mipmaps + 1 - 2 : 1; // Include basecolor and exclude 2 scaled mips
+			i                   = w != null ? w.radiance_mipmaps + 1 - 2 : 1; // Include basecolor and exclude 2 scaled mips
 		}
 		else {
 			return false;
@@ -428,8 +428,8 @@ function uniforms_set_obj_const(obj: object_t, loc: i32, c: shader_const_t) {
 
 		if (c.link == "_normal_matrix") {
 			let m4: mat4_t = mat4_inv(obj.transform.world);
-			m4 = mat4_transpose3x3(m4);
-			m = mat3_set_from4(m4);
+			m4             = mat4_transpose3x3(m4);
+			m              = mat3_set_from4(m4);
 		}
 		else if (c.link == "_view_matrix3") {
 			m = mat3_set_from4(camera.v);
@@ -458,12 +458,12 @@ function uniforms_set_obj_const(obj: object_t, loc: i32, c: shader_const_t) {
 		if (c.link == "_dim") { // Model space
 			let d: vec4_t = obj.transform.dim;
 			let s: vec4_t = obj.transform.scale;
-			v = vec4_create((d.x / s.x), (d.y / s.y), (d.z / s.z));
+			v             = vec4_create((d.x / s.x), (d.y / s.y), (d.z / s.z));
 		}
 		else if (c.link == "_half_dim") { // Model space
 			let d: vec4_t = obj.transform.dim;
 			let s: vec4_t = obj.transform.scale;
-			v = vec4_create((d.x / s.x) / 2, (d.y / s.y) / 2, (d.z / s.z) / 2);
+			v             = vec4_create((d.x / s.x) / 2, (d.y / s.y) / 2, (d.z / s.z) / 2);
 		}
 		else if (uniforms_vec3_links != null) {
 			v = uniforms_vec3_links(obj, current_material(obj), c.link);
@@ -547,7 +547,7 @@ function uniforms_set_material_consts(context: shader_context_t, material_contex
 	if (material_context.bind_constants != null) {
 		for (let i: i32 = 0; i < material_context.bind_constants.length; ++i) {
 			let matc: bind_const_t = material_context.bind_constants[i];
-			let pos: i32 = -1;
+			let pos: i32           = -1;
 			for (let i: i32 = 0; i < context.constants.length; ++i) {
 				let name: string = context.constants[i].name;
 				if (name == matc.name) {
@@ -598,7 +598,7 @@ function uniforms_set_material_const(location: i32, shader_const: shader_const_t
 		gpu_set_float2(location, material_const.vec[0], material_const.vec[1]);
 	}
 	else if (shader_const.type == "float") {
-		gpu_set_float(location,  material_const.vec[0]);
+		gpu_set_float(location, material_const.vec[0]);
 	}
 	else if (shader_const.type == "bool") {
 		gpu_set_bool(location, material_const.vec[0] > 0.0);

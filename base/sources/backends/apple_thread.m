@@ -1,11 +1,10 @@
-#include <stdio.h>
-#include <string.h>
+#include "posix_thread.c"
 #include <Foundation/Foundation.h>
 #include <iron_thread.h>
 #include <pthread.h>
 #include <stdio.h>
+#include <string.h>
 #include <wchar.h>
-#include "posix_thread.c"
 
 static void *ThreadProc(void *arg) {
 	@autoreleasepool {
@@ -17,7 +16,7 @@ static void *ThreadProc(void *arg) {
 }
 
 void iron_thread_init(iron_thread_t *t, void (*thread)(void *param), void *param) {
-	t->impl.param = param;
+	t->impl.param  = param;
 	t->impl.thread = thread;
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);

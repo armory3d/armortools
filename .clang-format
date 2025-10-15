@@ -85,3 +85,5 @@ UseTab: ForIndentation
 Language:        Cpp
 ---
 Language:        ObjC
+---
+Language:        JavaScript

@@ -7,8 +7,11 @@ function make_colorid_picker_run(kong: node_shader_t) {
 	node_shader_add_constant(kong, "gbuffer_size: float2", "_gbuffer_size");
 	node_shader_add_constant(kong, "inp: float4", "_input_brush");
 
-	// node_shader_write_frag(kong, "var tex_coord_inp: float2 = gbuffer2[uint2(constants.inp.x * constants.gbuffer_size.x, constants.inp.y * constants.gbuffer_size.y)].ba;");
-	node_shader_write_frag(kong, "var tex_coord_inp4: float4 = gbuffer2[uint2(uint(constants.inp.x * constants.gbuffer_size.x), uint(constants.inp.y * constants.gbuffer_size.y))];");
+	// node_shader_write_frag(kong, "var tex_coord_inp: float2 = gbuffer2[uint2(constants.inp.x * constants.gbuffer_size.x, constants.inp.y *
+	// constants.gbuffer_size.y)].ba;");
+	node_shader_write_frag(
+	    kong,
+	    "var tex_coord_inp4: float4 = gbuffer2[uint2(uint(constants.inp.x * constants.gbuffer_size.x), uint(constants.inp.y * constants.gbuffer_size.y))];");
 	node_shader_write_frag(kong, "var tex_coord_inp: float2 = tex_coord_inp4.ba;");
 
 	if (context_raw.tool == tool_type_t.COLORID) {
@@ -23,8 +26,11 @@ function make_colorid_picker_run(kong: node_shader_t) {
 			node_shader_add_texture(kong, "gbufferD");
 			node_shader_add_constant(kong, "invVP: float4x4", "_inv_view_proj_matrix");
 			node_shader_add_function(kong, str_get_pos_nor_from_depth);
-			node_shader_write_frag(kong, "var out_pos_from_depth: float3 = get_pos_from_depth(float2(constants.inp.x, 1.0 - constants.inp.y), constants.invVP);");
-			node_shader_write_frag(kong, "var out_nor_from_depth: float3 = get_nor_from_depth(out_pos_from_depth, float2(constants.inp.x, 1.0 - constants.inp.y), constants.invVP, float2(1.0, 1.0) / constants.gbuffer_size);");
+			node_shader_write_frag(kong,
+			                       "var out_pos_from_depth: float3 = get_pos_from_depth(float2(constants.inp.x, 1.0 - constants.inp.y), constants.invVP);");
+			node_shader_write_frag(
+			    kong,
+			    "var out_nor_from_depth: float3 = get_nor_from_depth(out_pos_from_depth, float2(constants.inp.x, 1.0 - constants.inp.y), constants.invVP, float2(1.0, 1.0) / constants.gbuffer_size);");
 			node_shader_write_frag(kong, "output[0] = float4(out_pos_from_depth, tex_coord_inp.x);");
 			node_shader_write_frag(kong, "output[1] = float4(out_nor_from_depth, tex_coord_inp.y);");
 		}

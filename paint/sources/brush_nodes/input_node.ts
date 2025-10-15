@@ -4,20 +4,20 @@ type input_node_t = {
 };
 
 let input_node_coords: vec4_t = vec4_create();
-let input_node_start_x: f32 = 0.0;
-let input_node_start_y: f32 = 0.0;
+let input_node_start_x: f32   = 0.0;
+let input_node_start_y: f32   = 0.0;
 // Brush ruler
-let input_node_lock_begin: bool = false;
-let input_node_lock_x: bool = false;
-let input_node_lock_y: bool = false;
+let input_node_lock_begin: bool  = false;
+let input_node_lock_x: bool      = false;
+let input_node_lock_y: bool      = false;
 let input_node_lock_start_x: f32 = 0.0;
 let input_node_lock_start_y: f32 = 0.0;
-let input_node_registered: bool = false;
+let input_node_registered: bool  = false;
 
 function input_node_create(raw: ui_node_t, args: f32_array_t): input_node_t {
 	let n: float_node_t = {};
-	n.base = logic_node_create(n);
-	n.base.get = input_node_get;
+	n.base              = logic_node_create(n);
+	n.base.get          = input_node_get;
 
 	if (!input_node_registered) {
 		input_node_registered = true;
@@ -34,10 +34,10 @@ function input_node_update(self: float_node_t) {
 
 	let decal_mask: bool = context_is_decal_mask_paint();
 
-	let lazy_paint: bool = context_raw.brush_lazy_radius > 0 &&
-		(operator_shortcut(map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN) ||
-			operator_shortcut(map_get(config_keymap, "brush_ruler") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN) ||
-			decal_mask);
+	let lazy_paint: bool =
+	    context_raw.brush_lazy_radius > 0 &&
+	    (operator_shortcut(map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN) ||
+	     operator_shortcut(map_get(config_keymap, "brush_ruler") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN) || decal_mask);
 
 	let paint_x: f32 = mouse_view_x() / sys_w();
 	let paint_y: f32 = mouse_view_y() / sys_h();
@@ -95,7 +95,7 @@ function input_node_update(self: float_node_t) {
 	if (keyboard_started(map_get(config_keymap, "brush_ruler"))) {
 		input_node_lock_start_x = mouse_view_x();
 		input_node_lock_start_y = mouse_view_y();
-		input_node_lock_begin = true;
+		input_node_lock_begin   = true;
 	}
 	else if (keyboard_released(map_get(config_keymap, "brush_ruler"))) {
 		input_node_lock_x = input_node_lock_y = input_node_lock_begin = false;
@@ -104,15 +104,15 @@ function input_node_update(self: float_node_t) {
 	if (context_raw.brush_lazy_radius > 0) {
 		let v1: vec4_t = vec4_create(context_raw.brush_lazy_x * sys_w(), context_raw.brush_lazy_y * sys_h(), 0.0);
 		let v2: vec4_t = vec4_create(input_node_coords.x * sys_w(), input_node_coords.y * sys_h(), 0.0);
-		let d: f32 = vec4_dist(v1, v2);
-		let r: f32 = context_raw.brush_lazy_radius * 85;
+		let d: f32     = vec4_dist(v1, v2);
+		let r: f32     = context_raw.brush_lazy_radius * 85;
 		if (d > r) {
-			let v3: vec4_t = vec4_create();
-			v3 = vec4_sub(v2, v1);
-			v3 = vec4_norm(v3);
-			v3 = vec4_mult(v3, 1.0 - context_raw.brush_lazy_step);
-			v3 = vec4_mult(v3, r);
-			v2 = vec4_add(v1, v3);
+			let v3: vec4_t      = vec4_create();
+			v3                  = vec4_sub(v2, v1);
+			v3                  = vec4_norm(v3);
+			v3                  = vec4_mult(v3, 1.0 - context_raw.brush_lazy_step);
+			v3                  = vec4_mult(v3, r);
+			v2                  = vec4_add(v1, v3);
 			input_node_coords.x = v2.x / sys_w();
 			input_node_coords.y = v2.y / sys_h();
 			// Parse brush inputs once on next draw
@@ -127,59 +127,57 @@ function input_node_update(self: float_node_t) {
 
 function input_node_get(self: input_node_t, from: i32): logic_node_value_t {
 	context_raw.brush_lazy_radius = logic_node_input_get(self.base.inputs[0])._f32;
-	context_raw.brush_lazy_step = logic_node_input_get(self.base.inputs[1])._f32;
-	let v: logic_node_value_t = { _vec4: input_node_coords };
+	context_raw.brush_lazy_step   = logic_node_input_get(self.base.inputs[1])._f32;
+	let v: logic_node_value_t     = {_vec4 : input_node_coords};
 	return v;
 }
 
 let input_node_def: ui_node_t = {
-	id: 0,
-	name: _tr("Input"),
-	type: "input_node",
-	x: 0,
-	y: 0,
-	color: 0xff4982a0,
-	inputs: [
+	id : 0,
+	name : _tr("Input"),
+	type : "input_node",
+	x : 0,
+	y : 0,
+	color : 0xff4982a0,
+	inputs : [
 		{
-			id: 0,
-			node_id: 0,
-			name: _tr("Lazy Radius"),
-			type: "VALUE",
-			color: 0xffa1a1a1,
-			default_value: f32_array_create_x(0.0),
-			min: 0.0,
-			max: 1.0,
-			precision: 100,
-			display: 0
+			id : 0,
+			node_id : 0,
+			name : _tr("Lazy Radius"),
+			type : "VALUE",
+			color : 0xffa1a1a1,
+			default_value : f32_array_create_x(0.0),
+			min : 0.0,
+			max : 1.0,
+			precision : 100,
+			display : 0
 		},
 		{
-			id: 0,
-			node_id: 0,
-			name: _tr("Lazy Step"),
-			type: "VALUE",
-			color: 0xffa1a1a1,
-			default_value: f32_array_create_x(0.0),
-			min: 0.0,
-			max: 1.0,
-			precision: 100,
-			display: 0
+			id : 0,
+			node_id : 0,
+			name : _tr("Lazy Step"),
+			type : "VALUE",
+			color : 0xffa1a1a1,
+			default_value : f32_array_create_x(0.0),
+			min : 0.0,
+			max : 1.0,
+			precision : 100,
+			display : 0
 		}
 	],
-	outputs: [
-		{
-			id: 0,
-			node_id: 0,
-			name: _tr("Position"),
-			type: "VECTOR",
-			color: 0xff63c763,
-			default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-			min: 0.0,
-			max: 1.0,
-			precision: 100,
-			display: 0
-		}
-	],
-	buttons: [],
-	width: 0,
-	flags: 0
+	outputs : [ {
+		id : 0,
+		node_id : 0,
+		name : _tr("Position"),
+		type : "VECTOR",
+		color : 0xff63c763,
+		default_value : f32_array_create_xyz(0.0, 0.0, 0.0),
+		min : 0.0,
+		max : 1.0,
+		precision : 100,
+		display : 0
+	} ],
+	buttons : [],
+	width : 0,
+	flags : 0
 };

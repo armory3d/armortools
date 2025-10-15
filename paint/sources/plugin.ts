@@ -1,7 +1,7 @@
 
 type plugin_t = {
-	on_ui?: any; // JSValue *
-	on_draw?: any; // JSValue *
+	on_ui?: any;     // JSValue *
+	on_draw?: any;   // JSValue *
 	on_update?: any; // JSValue *
 	on_delete?: any; // JSValue *
 	version?: string;
@@ -13,14 +13,14 @@ let _plugin_name: string;
 
 function plugin_create(): plugin_t {
 	let p: plugin_t = {};
-	p.name = _plugin_name;
+	p.name          = _plugin_name;
 	map_set(plugin_map, p.name, p);
 	return p;
 }
 
 function plugin_start(plugin: string) {
 	let blob: buffer_t = data_get_blob("plugins/" + plugin);
-	_plugin_name = plugin;
+	_plugin_name       = plugin;
 	js_eval("(1, eval)(`" + sys_buffer_to_string(blob) + "`)");
 	data_delete_blob("plugins/" + plugin);
 }

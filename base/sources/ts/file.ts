@@ -1,32 +1,29 @@
 
 type file_download_data_t = {
-	path: string;
-	done: (url: string, ab: buffer_t)=>void;
+	path: string; done : (url: string, ab: buffer_t) => void;
 };
 
 type file_cache_cloud_data_t = {
-	dest: string;
-	path: string;
-	done: (dest: string)=>void;
+	dest: string; path : string; done : (dest: string) => void;
 };
 
-let _file_download_map: map_t<string, file_download_data_t> = map_create();
+let _file_download_map: map_t<string, file_download_data_t>       = map_create();
 let _file_cache_cloud_map: map_t<string, file_cache_cloud_data_t> = map_create();
 
-///if arm_windows
+/// if arm_windows
 let file_cmd_copy: string = "copy";
-///else
+/// else
 let file_cmd_copy: string = "cp";
-///end
+/// end
 
-let file_cloud: map_t<string, string[]> = null;
+let file_cloud: map_t<string, string[]>  = null;
 let file_cloud_sizes: map_t<string, i32> = null;
 
-let _file_init_cloud_bytes_done: ()=>void;
+let _file_init_cloud_bytes_done: () => void;
 
-///if arm_android
+/// if arm_android
 let file_internal: map_t<string, string[]> = null; // .apk contents
-///end
+/// end
 
 function file_read_directory(path: string): string[] {
 	if (starts_with(path, "cloud")) {
@@ -40,7 +37,7 @@ function file_read_directory(path: string): string[] {
 		}
 	}
 
-	///if arm_android
+	/// if arm_android
 	path = string_replace_all(path, "//", "/");
 	if (file_internal == null) {
 		let s: string = sys_buffer_to_string(data_get_blob("data_list.json"));
@@ -49,7 +46,7 @@ function file_read_directory(path: string): string[] {
 	if (map_get(file_internal, path) != null) {
 		return string_split(map_get(file_internal, path), ",");
 	}
-	///end
+	/// end
 
 	let files: string[] = string_split(iron_read_directory(path), "\n");
 	array_sort(files, null);
@@ -78,19 +75,19 @@ function file_copy(src_path: string, dst_path: string) {
 }
 
 function file_start(path: string) {
-	///if arm_windows
+	/// if arm_windows
 	iron_sys_command("start \"\" \"" + path + "\"");
-	///elseif arm_linux
+	/// elseif arm_linux
 	iron_sys_command("xdg-open \"" + path + "\"");
-	///else
+	/// else
 	iron_sys_command("open \"" + path + "\"");
-	///end
+	/// end
 }
 
-function file_download_to(url: string, dst_path: string, done: (url: string, ab: buffer_t)=>void, size: i32 = 0) {
-	let fdd: file_download_data_t = { path: dst_path, done: done };
+function file_download_to(url: string, dst_path: string, done: (url: string, ab: buffer_t) => void, size: i32 = 0) {
+	let fdd: file_download_data_t = {path : dst_path, done : done};
 	map_set(_file_download_map, url, fdd);
-	iron_file_download(url, function (url: string, ab: buffer_t) {
+	iron_file_download(url, function(url: string, ab: buffer_t) {
 		let fdd: file_download_data_t = map_get(_file_download_map, url);
 		if (ab != null) {
 			iron_file_save_bytes(fdd.path, ab, 0);
@@ -99,7 +96,7 @@ function file_download_to(url: string, dst_path: string, done: (url: string, ab:
 	}, size);
 }
 
-function file_cache_cloud(path: string, done: (s: string)=>void) {
+function file_cache_cloud(path: string, done: (s: string) => void) {
 	let dest: string;
 	if (path_is_protected()) {
 		dest = iron_internal_save_path();
@@ -118,15 +115,15 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 	if (file_read_directory(file_dir)[0] == "") {
 		file_create_directory(file_dir);
 	}
-	///if arm_windows
+	/// if arm_windows
 	path = string_replace_all(path, "\\", "/");
-	///end
+	/// end
 	let url: string = config_raw.server + "/" + path;
 
-	let fccd: file_cache_cloud_data_t = { dest: dest, path: path, done: done };
+	let fccd: file_cache_cloud_data_t = {dest : dest, path : path, done : done};
 	map_set(_file_cache_cloud_map, url, fccd);
 
-	file_download_to(url, dest, function (url: string) {
+	file_download_to(url, dest, function(url: string) {
 		let fccd: file_cache_cloud_data_t = map_get(_file_cache_cloud_map, url);
 		if (!iron_file_exists(fccd.dest)) {
 			console_error(strings_check_internet_connection());
@@ -137,9 +134,9 @@ function file_cache_cloud(path: string, done: (s: string)=>void) {
 	}, map_get(file_cloud_sizes, path));
 }
 
-function file_init_cloud_bytes(done: ()=>void, append: string = "") {
+function file_init_cloud_bytes(done: () => void, append: string = "") {
 	_file_init_cloud_bytes_done = done;
-	iron_file_download(config_raw.server + "/?list-type=2" + append, function (url: string, buffer: buffer_t) {
+	iron_file_download(config_raw.server + "/?list-type=2" + append, function(url: string, buffer: buffer_t) {
 		if (buffer == null) {
 			let empty: string[] = [];
 			map_set(file_cloud, "cloud", empty);
@@ -147,11 +144,11 @@ function file_init_cloud_bytes(done: ()=>void, append: string = "") {
 			return;
 		}
 		let files: string[] = [];
-		let sizes: i32[] = [];
+		let sizes: i32[]    = [];
 
-		let str: string = sys_buffer_to_string(buffer);
+		let str: string    = sys_buffer_to_string(buffer);
 		let pos_start: i32 = 0;
-		let pos_end: i32 = 0;
+		let pos_end: i32   = 0;
 
 		while (true) {
 			pos_start = string_index_of_pos(str, "<Key>", pos_start);
@@ -181,9 +178,9 @@ function file_init_cloud_bytes(done: ()=>void, append: string = "") {
 			let file: string = files[i];
 			let nested: bool = string_index_of(file, "/") != string_last_index_of(file, "/");
 			if (nested) {
-				let delim: i32 = path_is_folder(file) ? string_last_index_of(substring(file, 0, file.length - 1), "/") : string_last_index_of(file, "/");
+				let delim: i32     = path_is_folder(file) ? string_last_index_of(substring(file, 0, file.length - 1), "/") : string_last_index_of(file, "/");
 				let parent: string = substring(file, 0, delim);
-				let child: string = path_is_folder(file) ? substring(file, delim + 1, file.length - 1) : substring(file, delim + 1, file.length);
+				let child: string  = path_is_folder(file) ? substring(file, delim + 1, file.length - 1) : substring(file, delim + 1, file.length);
 				array_push(map_get(file_cloud, parent), child);
 				if (!path_is_folder(file)) {
 					map_set(file_cloud_sizes, file, sizes[i]);
@@ -205,8 +202,8 @@ function file_init_cloud_bytes(done: ()=>void, append: string = "") {
 	});
 }
 
-function file_init_cloud(done: ()=>void) {
-	file_cloud = map_create();
+function file_init_cloud(done: () => void) {
+	file_cloud       = map_create();
 	file_cloud_sizes = map_create();
 	file_init_cloud_bytes(done);
 }

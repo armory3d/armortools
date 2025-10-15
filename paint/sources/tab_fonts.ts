@@ -7,11 +7,11 @@ function tab_fonts_draw(htab: ui_handle_t) {
 
 		ui_begin_sticky();
 		if (config_raw.touch_ui) {
-			let row: f32[] = [1 / 4, 1 / 4];
+			let row: f32[] = [ 1 / 4, 1 / 4 ];
 			ui_row(row);
 		}
 		else {
-			let row: f32[] = [1 / 14, 1 / 14];
+			let row: f32[] = [ 1 / 14, 1 / 14 ];
 			ui_row(row);
 		}
 
@@ -29,8 +29,8 @@ function tab_fonts_draw(htab: ui_handle_t) {
 		ui_separator(3, false);
 
 		let statusw: i32 = iron_window_width() - ui_toolbar_w(true) - config_raw.layout[layout_size_t.SIDEBAR_W];
-		let slotw: i32 = math_floor(51 * UI_SCALE());
-		let num: i32 = math_floor(statusw / slotw);
+		let slotw: i32   = math_floor(51 * UI_SCALE());
+		let num: i32     = math_floor(statusw / slotw);
 		if (num == 0) {
 			return;
 		}
@@ -51,7 +51,7 @@ function tab_fonts_draw(htab: ui_handle_t) {
 
 			for (let j: i32 = 0; j < num; ++j) {
 				let imgw: i32 = math_floor(50 * UI_SCALE());
-				let i: i32 = j + row * num;
+				let i: i32    = j + row * num;
 				if (i >= project_fonts.length) {
 					ui_end_element_of_size(imgw);
 					if (config_raw.show_asset_names) {
@@ -64,18 +64,18 @@ function tab_fonts_draw(htab: ui_handle_t) {
 				if (context_raw.font == project_fonts[i]) {
 					// ui_fill(1, -2, img.width + 3, img.height + 3, ui.ops.theme.HIGHLIGHT_COL); // TODO
 					let off: i32 = row % 2 == 1 ? 1 : 0;
-					let w: i32 = 50;
+					let w: i32   = 50;
 					if (config_raw.window_scale > 1) {
 						w += math_floor(config_raw.window_scale * 2);
 					}
-					ui_fill(-1,         -2, w + 3,       2, ui.ops.theme.HIGHLIGHT_COL);
-					ui_fill(-1,    w - off, w + 3, 2 + off, ui.ops.theme.HIGHLIGHT_COL);
-					ui_fill(-1,         -2,     2,   w + 3, ui.ops.theme.HIGHLIGHT_COL);
-					ui_fill(w + 1,      -2,     2,   w + 4, ui.ops.theme.HIGHLIGHT_COL);
+					ui_fill(-1, -2, w + 3, 2, ui.ops.theme.HIGHLIGHT_COL);
+					ui_fill(-1, w - off, w + 3, 2 + off, ui.ops.theme.HIGHLIGHT_COL);
+					ui_fill(-1, -2, 2, w + 3, ui.ops.theme.HIGHLIGHT_COL);
+					ui_fill(w + 1, -2, 2, w + 4, ui.ops.theme.HIGHLIGHT_COL);
 				}
 
-				let uix: f32 = ui._x;
-				let tile: i32 = UI_SCALE() > 1 ? 100 : 50;
+				let uix: f32          = ui._x;
+				let tile: i32         = UI_SCALE() > 1 ? 100 : 50;
 				let state: ui_state_t = ui_state_t.IDLE;
 				if (project_fonts[i].preview_ready) {
 					// draw_set_pipeline(pipe); // L8
@@ -91,7 +91,7 @@ function tab_fonts_draw(htab: ui_handle_t) {
 					if (context_raw.font != project_fonts[i]) {
 						_tab_fonts_draw_i = i;
 
-						sys_notify_on_next_frame(function () {
+						sys_notify_on_next_frame(function() {
 							let i: i32 = _tab_fonts_draw_i;
 
 							context_select_font(i);
@@ -106,7 +106,7 @@ function tab_fonts_draw(htab: ui_handle_t) {
 					context_select_font(i);
 					_tab_fonts_draw_i = i;
 
-					ui_menu_draw(function () {
+					ui_menu_draw(function() {
 						let i: i32 = _tab_fonts_draw_i;
 
 						if (project_fonts.length > 1 && ui_menu_button(tr("Delete"), "delete") && project_fonts[i].file != "") {
@@ -118,11 +118,11 @@ function tab_fonts_draw(htab: ui_handle_t) {
 					if (img == null) {
 						_tab_fonts_draw_i = i;
 
-						sys_notify_on_next_frame(function () {
+						sys_notify_on_next_frame(function() {
 							let i: i32 = _tab_fonts_draw_i;
 
 							let _font: slot_font_t = context_raw.font;
-							context_raw.font = project_fonts[i];
+							context_raw.font       = project_fonts[i];
 							util_render_make_font_preview();
 							context_raw.font = _font;
 						});
@@ -150,8 +150,8 @@ function tab_fonts_draw(htab: ui_handle_t) {
 			ui._y += 6;
 		}
 
-		let in_focus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
-							 ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
+		let in_focus: bool =
+		    ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w && ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
 		if (in_focus && ui.is_delete_down && project_fonts.length > 1 && context_raw.font.file != "") {
 			ui.is_delete_down = false;
 			tab_fonts_delete_font(context_raw.font);
@@ -160,7 +160,7 @@ function tab_fonts_draw(htab: ui_handle_t) {
 }
 
 function tab_fonts_delete_font(font: slot_font_t) {
-	sys_notify_on_next_frame(function (font: slot_font_t) {
+	sys_notify_on_next_frame(function(font: slot_font_t) {
 		let i: i32 = array_index_of(project_fonts, font);
 		context_select_font(i == project_fonts.length - 1 ? i - 1 : i + 1);
 		data_delete_font(project_fonts[i].file);

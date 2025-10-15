@@ -2,23 +2,23 @@
 let _material_data_uid_counter: i32 = 0;
 
 function material_data_create(raw: material_data_t, file: string = ""): material_data_t {
-	raw._ = {};
+	raw._     = {};
 	raw._.uid = ++_material_data_uid_counter; // Start from 1
 
-	let ref: string[] = string_split(raw.shader, "/");
+	let ref: string[]       = string_split(raw.shader, "/");
 	let object_file: string = "";
-	let data_ref: string = "";
+	let data_ref: string    = "";
 	if (ref.length == 2) { // File reference
 		object_file = ref[0];
-		data_ref = ref[1];
+		data_ref    = ref[1];
 	}
 	else { // Local data
 		object_file = file;
-		data_ref = raw.shader;
+		data_ref    = raw.shader;
 	}
 
 	let b: shader_data_t = data_get_shader(object_file, data_ref);
-	raw._.shader = b;
+	raw._.shader         = b;
 	for (let i: i32 = 0; i < raw.contexts.length; ++i) {
 		let c: material_context_t = raw.contexts[i];
 		material_context_load(c);
@@ -27,7 +27,7 @@ function material_data_create(raw: material_data_t, file: string = ""): material
 }
 
 function material_data_parse(file: string, name: string): material_data_t {
-	let format: scene_t = data_get_scene_raw(file);
+	let format: scene_t      = data_get_scene_raw(file);
 	let raw: material_data_t = material_data_get_raw_by_name(format.material_datas, name);
 	if (raw == null) {
 		iron_log("Material data '" + name + "' not found!");

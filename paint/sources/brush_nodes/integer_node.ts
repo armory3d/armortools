@@ -6,10 +6,10 @@ type integer_node_t = {
 
 function integer_node_create(raw: ui_node_t, args: f32_array_t): integer_node_t {
 	let n: float_node_t = {};
-	n.base = logic_node_create(n);
-	n.base.get = integer_node_get;
-	n.base.set = integer_node_set;
-	n.value = args == null ? 0 : args[0];
+	n.base              = logic_node_create(n);
+	n.base.get          = integer_node_get;
+	n.base.set          = integer_node_set;
+	n.value             = args == null ? 0 : args[0];
 	return n;
 }
 
@@ -18,7 +18,7 @@ function integer_node_get(self: integer_node_t, from: i32): logic_node_value_t {
 		return logic_node_input_get(self.base.inputs[0]);
 	}
 	else {
-		let v: logic_node_value_t = { _f32: self.value };
+		let v: logic_node_value_t = {_f32 : self.value};
 		return v;
 	}
 }

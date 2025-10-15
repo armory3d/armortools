@@ -1,15 +1,22 @@
 // Based on https://github.com/Kode/Kongruent by RobDangerous
 #pragma once
 
-#include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #define OPCODES_SIZE (1024 * 1024)
 
-typedef enum variable_kind { VARIABLE_GLOBAL, VARIABLE_LOCAL, VARIABLE_INTERNAL } variable_kind;
+typedef enum variable_kind {
+	VARIABLE_GLOBAL,
+	VARIABLE_LOCAL,
+	VARIABLE_INTERNAL
+} variable_kind;
 
-typedef enum access_kind { ACCESS_MEMBER, ACCESS_ELEMENT } access_kind;
+typedef enum access_kind {
+	ACCESS_MEMBER,
+	ACCESS_ELEMENT
+} access_kind;
 
 typedef enum operatorr {
 	OPERATOR_EQUALS,
@@ -39,7 +46,7 @@ typedef enum operatorr {
 } operatorr;
 
 typedef uint32_t type_id;
-typedef size_t name_id;
+typedef size_t   name_id;
 
 typedef struct attribute {
 	name_id name;
@@ -76,7 +83,7 @@ typedef struct function {
 	name_id           parameter_attributes[256];
 	uint8_t           parameters_size;
 	struct statement *block;
-	opcodes code;
+	opcodes           code;
 } function;
 
 typedef uint32_t function_id;
@@ -98,12 +105,12 @@ typedef struct global_value {
 } global_value;
 
 typedef struct global {
-	name_id                name;
-	type_id                type;
-	uint64_t               var_index;
-	global_value           value;
-	attribute_list         attributes;
-	uint32_t               usage;
+	name_id        name;
+	type_id        type;
+	uint64_t       var_index;
+	global_value   value;
+	attribute_list attributes;
+	uint32_t       usage;
 } global;
 
 typedef struct variable {
@@ -316,15 +323,15 @@ typedef struct allocated_global {
 } allocated_global;
 
 function *_get_function(function_id function);
-void _names_init(void);
-void _types_init(void);
-void _functions_init(void);
-void _globals_init(void);
-void _parse(const char *filename, tokens *tokens);
-void _resolve_types(void);
-void _compile_function_block(opcodes *code, struct statement *block);
-tokens _tokenize(const char *filename, const char *source);
-char *_get_name(name_id index);
+void      _names_init(void);
+void      _types_init(void);
+void      _functions_init(void);
+void      _globals_init(void);
+void      _parse(const char *filename, tokens *tokens);
+void      _resolve_types(void);
+void      _compile_function_block(opcodes *code, struct statement *block);
+tokens    _tokenize(const char *filename, const char *source);
+char     *_get_name(name_id index);
 
 extern type_id _void_id;
 extern type_id _float_id;

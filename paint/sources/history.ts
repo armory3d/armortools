@@ -1,14 +1,14 @@
 
 let history_steps: history_step_t[];
-let history_undo_i: i32 = 0; // Undo layer
-let history_undos: i32 = 0; // Undos available
-let history_redos: i32 = 0; // Redos available
-let history_push_undo: bool = false; // Store undo on next paint
+let history_undo_i: i32                 = 0;     // Undo layer
+let history_undos: i32                  = 0;     // Undos available
+let history_redos: i32                  = 0;     // Redos available
+let history_push_undo: bool             = false; // Store undo on next paint
 let history_undo_layers: slot_layer_t[] = null;
 
 function history_undo() {
 	if (history_undos > 0) {
-		let active: i32 = history_steps.length - 1 - history_redos;
+		let active: i32          = history_steps.length - 1 - history_redos;
 		let step: history_step_t = history_steps[active];
 
 		if (step.name == tr("Edit Nodes")) {
@@ -28,20 +28,20 @@ function history_undo() {
 		}
 		else if (step.name == tr("Delete Layer")) {
 			let parent: slot_layer_t = step.layer_parent > 0 ? project_layers[step.layer_parent - 1] : null;
-			let l: slot_layer_t = slot_layer_create("", step.layer_type, parent);
+			let l: slot_layer_t      = slot_layer_create("", step.layer_type, parent);
 			array_insert(project_layers, step.layer, l);
 			context_set_layer(l);
-			history_undo_i = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
+			history_undo_i        = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
 			let lay: slot_layer_t = history_undo_layers[history_undo_i];
 			slot_layer_swap(l, lay);
 			l.mask_opacity = step.layer_opacity;
-			l.blending = step.layer_blending;
-			l.object_mask = step.layer_object;
+			l.blending     = step.layer_blending;
+			l.object_mask  = step.layer_object;
 			make_material_parse_mesh_material();
 
 			// Undo at least second time in order to avoid empty groups
 			if (step.layer_type == layer_slot_type_t.GROUP) {
-				sys_notify_on_next_frame(function () {
+				sys_notify_on_next_frame(function() {
 					let active: i32 = history_steps.length - 1 - history_redos;
 					// 1. Undo deleting group masks
 					let n: i32 = 1;
@@ -55,14 +55,14 @@ function history_undo() {
 			}
 		}
 		else if (step.name == tr("Clear Layer")) {
-			history_undo_i = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
+			history_undo_i        = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
 			let lay: slot_layer_t = history_undo_layers[history_undo_i];
 			slot_layer_swap(context_raw.layer, lay);
 			context_raw.layer_preview_dirty = true;
 		}
 		else if (step.name == tr("Duplicate Layer")) {
 			let children: slot_layer_t[] = slot_layer_get_recursive_children(project_layers[step.layer]);
-			let position: i32 = step.layer + 1;
+			let position: i32            = step.layer + 1;
 			if (children != null) {
 				position += children.length;
 			}
@@ -71,20 +71,20 @@ function history_undo() {
 			slot_layer_delete(context_raw.layer);
 		}
 		else if (step.name == tr("Order Layers")) {
-			let target: slot_layer_t = project_layers[step.prev_order];
+			let target: slot_layer_t        = project_layers[step.prev_order];
 			project_layers[step.prev_order] = project_layers[step.layer];
-			project_layers[step.layer] = target;
+			project_layers[step.layer]      = target;
 		}
 		else if (step.name == tr("Merge Layers")) {
 			context_raw.layer = project_layers[step.layer];
 			slot_layer_delete(context_raw.layer);
 
 			let parent: slot_layer_t = step.layer_parent > 0 ? project_layers[step.layer_parent - 2] : null;
-			let l: slot_layer_t = slot_layer_create("", step.layer_type, parent);
+			let l: slot_layer_t      = slot_layer_create("", step.layer_type, parent);
 			array_insert(project_layers, step.layer, l);
 			context_set_layer(l);
 
-			history_undo_i = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
+			history_undo_i        = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
 			let lay: slot_layer_t = history_undo_layers[history_undo_i];
 			slot_layer_swap(context_raw.layer, lay);
 
@@ -93,18 +93,18 @@ function history_undo() {
 			context_set_layer(l);
 
 			history_undo_i = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
-			lay = history_undo_layers[history_undo_i];
+			lay            = history_undo_layers[history_undo_i];
 			slot_layer_swap(context_raw.layer, lay);
 
-			context_raw.layer.mask_opacity = step.layer_opacity;
-			context_raw.layer.blending = step.layer_blending;
-			context_raw.layer.object_mask = step.layer_object;
+			context_raw.layer.mask_opacity   = step.layer_opacity;
+			context_raw.layer.blending       = step.layer_blending;
+			context_raw.layer.object_mask    = step.layer_object;
 			context_raw.layers_preview_dirty = true;
 			make_material_parse_mesh_material();
 		}
 		else if (step.name == tr("Apply Mask")) {
 			// First restore the layer(s)
-			let mask_pos: i32 = step.layer;
+			let mask_pos: i32               = step.layer;
 			let current_layer: slot_layer_t = null;
 			// The layer at the old mask position is a mask, i.e. the layer had multiple masks before.
 			if (slot_layer_is_mask(project_layers[mask_pos])) {
@@ -119,21 +119,21 @@ function history_undo() {
 				layers_to_restore = slot_layer_get_children(current_layer);
 			}
 			else {
-				layers_to_restore = [current_layer];
+				layers_to_restore = [ current_layer ];
 			}
 			array_reverse(layers_to_restore);
 
 			for (let i: i32 = 0; i < layers_to_restore.length; ++i) {
 				let layer: slot_layer_t = layers_to_restore[i];
 				// Replace the current layer's content with the old one
-				context_raw.layer = layer;
-				history_undo_i = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
+				context_raw.layer           = layer;
+				history_undo_i              = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
 				let old_layer: slot_layer_t = history_undo_layers[history_undo_i];
 				slot_layer_swap(context_raw.layer, old_layer);
 			}
 
 			// Now restore the applied mask
-			history_undo_i = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
+			history_undo_i         = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
 			let mask: slot_layer_t = history_undo_layers[history_undo_i];
 			layers_new_mask(false, current_layer, mask_pos);
 			slot_layer_swap(context_raw.layer, mask);
@@ -141,13 +141,13 @@ function history_undo() {
 			context_set_layer(context_raw.layer);
 		}
 		else if (step.name == tr("Invert Mask")) {
-			sys_notify_on_next_frame(function (step: history_step_t) {
+			sys_notify_on_next_frame(function(step: history_step_t) {
 				context_raw.layer = project_layers[step.layer];
 				slot_layer_invert_mask(context_raw.layer);
 			}, step);
 		}
 		else if (step.name == "Apply Filter") {
-			history_undo_i = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
+			history_undo_i        = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
 			let lay: slot_layer_t = history_undo_layers[history_undo_i];
 			context_set_layer(project_layers[step.layer]);
 			slot_layer_swap(context_raw.layer, lay);
@@ -157,41 +157,38 @@ function history_undo() {
 		}
 		else if (step.name == tr("To Fill Layer") || step.name == tr("To Fill Mask")) {
 			slot_layer_to_paint_layer(context_raw.layer);
-			history_undo_i = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
+			history_undo_i        = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
 			let lay: slot_layer_t = history_undo_layers[history_undo_i];
 			slot_layer_swap(context_raw.layer, lay);
 		}
 		else if (step.name == tr("To Paint Layer") || step.name == tr("To Paint Mask")) {
-			history_undo_i = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
+			history_undo_i        = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
 			let lay: slot_layer_t = history_undo_layers[history_undo_i];
 			slot_layer_swap(context_raw.layer, lay);
 			context_raw.layer.fill_layer = project_materials[step.material];
 		}
 		else if (step.name == tr("Layer Opacity")) {
 			context_set_layer(project_layers[step.layer]);
-			let t: f32 = context_raw.layer.mask_opacity;
+			let t: f32                     = context_raw.layer.mask_opacity;
 			context_raw.layer.mask_opacity = step.layer_opacity;
-			step.layer_opacity = t;
+			step.layer_opacity             = t;
 			make_material_parse_mesh_material();
 		}
 		else if (step.name == tr("Layer Blending")) {
 			context_set_layer(project_layers[step.layer]);
-			let t: blend_type_t = context_raw.layer.blending;
+			let t: blend_type_t        = context_raw.layer.blending;
 			context_raw.layer.blending = step.layer_blending;
-			step.layer_blending = t;
+			step.layer_blending        = t;
 			make_material_parse_mesh_material();
 		}
 		else if (step.name == tr("Delete Node Group")) {
-			let ng: node_group_t = {
-				canvas: null,
-				nodes: ui_nodes_create()
-			};
+			let ng: node_group_t = {canvas : null, nodes : ui_nodes_create()};
 			array_insert(project_material_groups, step.canvas_group, ng);
 			history_swap_canvas(step);
 		}
 		else if (step.name == tr("New Material")) {
 			context_raw.material = project_materials[step.material];
-			step.canvas = context_raw.material.canvas;
+			step.canvas          = context_raw.material.canvas;
 			slot_material_delete(context_raw.material);
 		}
 		else if (step.name == tr("Delete Material")) {
@@ -203,11 +200,11 @@ function history_undo() {
 		}
 		else if (step.name == tr("Duplicate Material")) {
 			context_raw.material = project_materials[step.material];
-			step.canvas = context_raw.material.canvas;
+			step.canvas          = context_raw.material.canvas;
 			slot_material_delete(context_raw.material);
 		}
 		else { // Paint operation
-			history_undo_i = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
+			history_undo_i        = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
 			let lay: slot_layer_t = history_undo_layers[history_undo_i];
 			context_select_paint_object(project_paint_objects[step.object]);
 			context_set_layer(project_layers[step.layer]);
@@ -234,7 +231,7 @@ function history_undo() {
 
 function history_redo() {
 	if (history_redos > 0) {
-		let active: i32 = history_steps.length - history_redos;
+		let active: i32          = history_steps.length - history_redos;
 		let step: history_step_t = history_steps[active];
 
 		if (step.name == tr("Edit Nodes")) {
@@ -242,21 +239,21 @@ function history_redo() {
 		}
 		else if (step.name == tr("New Layer") || step.name == tr("New Black Mask") || step.name == tr("New White Mask") || step.name == tr("New Fill Mask")) {
 			let parent: slot_layer_t = step.layer_parent > 0 ? project_layers[step.layer_parent - 1] : null;
-			let l: slot_layer_t = slot_layer_create("", step.layer_type, parent);
+			let l: slot_layer_t      = slot_layer_create("", step.layer_type, parent);
 			array_insert(project_layers, step.layer, l);
 			if (step.name == tr("New Black Mask")) {
-				sys_notify_on_next_frame(function (l: slot_layer_t) {
+				sys_notify_on_next_frame(function(l: slot_layer_t) {
 					slot_layer_clear(l, 0x00000000);
 				}, l);
 			}
 			else if (step.name == tr("New White Mask")) {
-				sys_notify_on_next_frame(function (l: slot_layer_t) {
+				sys_notify_on_next_frame(function(l: slot_layer_t) {
 					slot_layer_clear(l, 0xffffffff);
 				}, l);
 			}
 			else if (step.name == tr("New Fill Mask")) {
 				context_raw.material = project_materials[step.material];
-				sys_notify_on_next_frame(function (l: slot_layer_t) {
+				sys_notify_on_next_frame(function(l: slot_layer_t) {
 					slot_layer_to_fill_layer(l);
 				}, l);
 			}
@@ -264,7 +261,7 @@ function history_redo() {
 			context_set_layer(l);
 		}
 		else if (step.name == tr("New Group")) {
-			let l: slot_layer_t = project_layers[step.layer - 1];
+			let l: slot_layer_t     = project_layers[step.layer - 1];
 			let group: slot_layer_t = layers_new_group();
 			array_remove(project_layers, group);
 			array_insert(project_layers, step.layer, group);
@@ -278,10 +275,11 @@ function history_redo() {
 
 			// Redoing the last delete would result in an empty group
 			// Redo deleting all group masks + the group itself
-			if (step.layer_type == layer_slot_type_t.LAYER && history_steps.length >= active + 2 && (history_steps[active + 1].layer_type == layer_slot_type_t.GROUP || history_steps[active + 1].layer_type == layer_slot_type_t.MASK)) {
-				sys_notify_on_next_frame(function () {
+			if (step.layer_type == layer_slot_type_t.LAYER && history_steps.length >= active + 2 &&
+			    (history_steps[active + 1].layer_type == layer_slot_type_t.GROUP || history_steps[active + 1].layer_type == layer_slot_type_t.MASK)) {
+				sys_notify_on_next_frame(function() {
 					let active: i32 = history_steps.length - history_redos;
-					let n: i32 = 1;
+					let n: i32      = 1;
 					while (history_steps[active + n].layer_type == layer_slot_type_t.MASK) {
 						++n;
 					}
@@ -300,14 +298,14 @@ function history_redo() {
 		}
 		else if (step.name == tr("Duplicate Layer")) {
 			context_raw.layer = project_layers[step.layer];
-			sys_notify_on_next_frame(function () {
+			sys_notify_on_next_frame(function() {
 				layers_duplicate_layer(context_raw.layer);
 			});
 		}
 		else if (step.name == tr("Order Layers")) {
-			let target: slot_layer_t = project_layers[step.prev_order];
+			let target: slot_layer_t        = project_layers[step.prev_order];
 			project_layers[step.prev_order] = project_layers[step.layer];
-			project_layers[step.layer] = target;
+			project_layers[step.layer]      = target;
 		}
 		else if (step.name == tr("Merge Layers")) {
 			context_raw.layer = project_layers[step.layer + 1];
@@ -317,24 +315,24 @@ function history_redo() {
 		else if (step.name == tr("Apply Mask")) {
 			context_raw.layer = project_layers[step.layer];
 			if (slot_layer_is_group_mask(context_raw.layer)) {
-				let group: slot_layer_t = context_raw.layer.parent;
+				let group: slot_layer_t    = context_raw.layer.parent;
 				let layers: slot_layer_t[] = slot_layer_get_children(group);
 				array_insert(layers, 0, context_raw.layer);
 				history_copy_merging_layers2(layers);
 			}
 			else {
-				let layers: slot_layer_t[] = [context_raw.layer, context_raw.layer.parent];
+				let layers: slot_layer_t[] = [ context_raw.layer, context_raw.layer.parent ];
 				history_copy_merging_layers2(layers);
 			}
 
-			sys_notify_on_next_frame(function () {
+			sys_notify_on_next_frame(function() {
 				slot_layer_apply_mask(context_raw.layer);
 				context_set_layer(context_raw.layer);
 				context_raw.layers_preview_dirty = true;
 			});
 		}
 		else if (step.name == tr("Invert Mask")) {
-			sys_notify_on_next_frame(function (step: history_step_t) {
+			sys_notify_on_next_frame(function(step: history_step_t) {
 				context_raw.layer = project_layers[step.layer];
 				slot_layer_invert_mask(context_raw.layer);
 			}, step);
@@ -346,13 +344,13 @@ function history_redo() {
 			layers_new_mask(false, lay);
 			slot_layer_swap(context_raw.layer, lay);
 			context_raw.layer_preview_dirty = true;
-			history_undo_i = (history_undo_i + 1) % config_raw.undo_steps;
+			history_undo_i                  = (history_undo_i + 1) % config_raw.undo_steps;
 		}
 		else if (step.name == tr("To Fill Layer") || step.name == tr("To Fill Mask")) {
 			let lay: slot_layer_t = history_undo_layers[history_undo_i];
 			slot_layer_swap(context_raw.layer, lay);
 			context_raw.layer.fill_layer = project_materials[step.material];
-			history_undo_i = (history_undo_i + 1) % config_raw.undo_steps;
+			history_undo_i               = (history_undo_i + 1) % config_raw.undo_steps;
 		}
 		else if (step.name == tr("To Paint Layer") || step.name == tr("To Paint Mask")) {
 			slot_layer_to_paint_layer(context_raw.layer);
@@ -362,16 +360,16 @@ function history_redo() {
 		}
 		else if (step.name == tr("Layer Opacity")) {
 			context_set_layer(project_layers[step.layer]);
-			let t: f32 = context_raw.layer.mask_opacity;
+			let t: f32                     = context_raw.layer.mask_opacity;
 			context_raw.layer.mask_opacity = step.layer_opacity;
-			step.layer_opacity = t;
+			step.layer_opacity             = t;
 			make_material_parse_mesh_material();
 		}
 		else if (step.name == tr("Layer Blending")) {
 			context_set_layer(project_layers[step.layer]);
-			let t: blend_type_t = context_raw.layer.blending;
+			let t: blend_type_t        = context_raw.layer.blending;
 			context_raw.layer.blending = step.layer_blending;
-			step.layer_blending = t;
+			step.layer_blending        = t;
 			make_material_parse_mesh_material();
 		}
 		else if (step.name == tr("Delete Node Group")) {
@@ -387,7 +385,7 @@ function history_redo() {
 		}
 		else if (step.name == tr("Delete Material")) {
 			context_raw.material = project_materials[step.material];
-			step.canvas = context_raw.material.canvas;
+			step.canvas          = context_raw.material.canvas;
 			slot_material_delete(context_raw.material);
 		}
 		else if (step.name == tr("Duplicate Material")) {
@@ -403,7 +401,7 @@ function history_redo() {
 			context_set_layer(project_layers[step.layer]);
 			slot_layer_swap(context_raw.layer, lay);
 			context_raw.layer_preview_dirty = true;
-			history_undo_i = (history_undo_i + 1) % config_raw.undo_steps;
+			history_undo_i                  = (history_undo_i + 1) % config_raw.undo_steps;
 		}
 
 		history_undos++;
@@ -424,27 +422,17 @@ function history_redo() {
 }
 
 function history_reset() {
-	history_steps = [
-		{
-			name: tr("New", null),
-			layer: 0,
-			layer_type: layer_slot_type_t.LAYER,
-			layer_parent: -1,
-			object: 0,
-			material: 0,
-			brush: 0
-		}
-	];
-	history_undos = 0;
-	history_redos = 0;
+	history_steps  = [ {name : tr("New", null), layer : 0, layer_type : layer_slot_type_t.LAYER, layer_parent : -1, object : 0, material : 0, brush : 0} ];
+	history_undos  = 0;
+	history_redos  = 0;
 	history_undo_i = 0;
 }
 
 function history_edit_nodes(canvas: ui_node_canvas_t, canvas_type: i32, canvas_group: i32 = -1) {
 	let step: history_step_t = history_push(tr("Edit Nodes"));
-	step.canvas_group = canvas_group;
-	step.canvas_type = canvas_type;
-	step.canvas = util_clone_canvas(canvas);
+	step.canvas_group        = canvas_group;
+	step.canvas_type         = canvas_type;
+	step.canvas              = util_clone_canvas(canvas);
 }
 
 function history_paint() {
@@ -491,7 +479,7 @@ function history_clear_layer() {
 
 function history_order_layers(prev_order: i32) {
 	let step: history_step_t = history_push(tr("Order Layers"));
-	step.prev_order = prev_order;
+	step.prev_order          = prev_order;
 }
 
 function history_merge_layers() {
@@ -509,13 +497,13 @@ function history_merge_layers() {
 
 function history_apply_mask() {
 	if (slot_layer_is_group_mask(context_raw.layer)) {
-		let group: slot_layer_t = context_raw.layer.parent;
+		let group: slot_layer_t    = context_raw.layer.parent;
 		let layers: slot_layer_t[] = slot_layer_get_children(group);
 		array_insert(layers, 0, context_raw.layer);
 		history_copy_merging_layers2(layers);
 	}
 	else {
-		let layers: slot_layer_t[] = [context_raw.layer, context_raw.layer.parent];
+		let layers: slot_layer_t[] = [ context_raw.layer, context_raw.layer.parent ];
 		history_copy_merging_layers2(layers);
 	}
 	history_push(tr("Apply Mask"));
@@ -564,34 +552,36 @@ function history_layer_blending() {
 
 function history_new_material() {
 	let step: history_step_t = history_push(tr("New Material"));
-	step.canvas_type = 0;
-	step.canvas = util_clone_canvas(context_raw.material.canvas);
+	step.canvas_type         = 0;
+	step.canvas              = util_clone_canvas(context_raw.material.canvas);
 }
 
 function history_delete_material() {
 	let step: history_step_t = history_push(tr("Delete Material"));
-	step.canvas_type = 0;
-	step.canvas = util_clone_canvas(context_raw.material.canvas);
+	step.canvas_type         = 0;
+	step.canvas              = util_clone_canvas(context_raw.material.canvas);
 }
 
 function history_duplicate_material() {
 	let step: history_step_t = history_push(tr("Duplicate Material"));
-	step.canvas_type = 0;
-	step.canvas = util_clone_canvas(context_raw.material.canvas);
+	step.canvas_type         = 0;
+	step.canvas              = util_clone_canvas(context_raw.material.canvas);
 }
 
 function history_delete_material_group(group: node_group_t) {
 	let step: history_step_t = history_push(tr("Delete Node Group"));
-	step.canvas_type = canvas_type_t.MATERIAL;
-	step.canvas_group = array_index_of(project_material_groups, group);
-	step.canvas = util_clone_canvas(group.canvas);
+	step.canvas_type         = canvas_type_t.MATERIAL;
+	step.canvas_group        = array_index_of(project_material_groups, group);
+	step.canvas              = util_clone_canvas(group.canvas);
 }
 
 function history_push(name: string): history_step_t {
-	///if (arm_windows || arm_linux || arm_macos)
-	let filename: string = project_filepath == "" ? ui_files_filename : substring(project_filepath, string_last_index_of(project_filepath, path_sep) + 1, project_filepath.length - 4);
+	/// if (arm_windows || arm_linux || arm_macos)
+	let filename: string = project_filepath == ""
+	                           ? ui_files_filename
+	                           : substring(project_filepath, string_last_index_of(project_filepath, path_sep) + 1, project_filepath.length - 4);
 	sys_title_set(filename + "* - " + manifest_title);
-	///end
+	/// end
 
 	if (config_raw.touch_ui) {
 		// Refresh undo & redo buttons
@@ -614,16 +604,18 @@ function history_push(name: string): history_step_t {
 	let bpos: i32 = array_index_of(project_brushes, context_raw.brush);
 
 	let step: history_step_t = {
-		name: name,
-		layer: lpos,
-		layer_type: slot_layer_is_mask(context_raw.layer) ? layer_slot_type_t.MASK : slot_layer_is_group(context_raw.layer) ? layer_slot_type_t.GROUP : layer_slot_type_t.LAYER,
-		layer_parent: context_raw.layer.parent == null ? -1 : array_index_of(project_layers, context_raw.layer.parent),
-		object: opos,
-		material: mpos,
-		brush: bpos,
-		layer_opacity: context_raw.layer.mask_opacity,
-		layer_object: context_raw.layer.object_mask,
-		layer_blending: context_raw.layer.blending
+		name : name,
+		layer : lpos,
+		layer_type : slot_layer_is_mask(context_raw.layer)    ? layer_slot_type_t.MASK
+		             : slot_layer_is_group(context_raw.layer) ? layer_slot_type_t.GROUP
+		                                                      : layer_slot_type_t.LAYER,
+		layer_parent : context_raw.layer.parent == null ? -1 : array_index_of(project_layers, context_raw.layer.parent),
+		object : opos,
+		material : mpos,
+		brush : bpos,
+		layer_opacity : context_raw.layer.mask_opacity,
+		layer_object : context_raw.layer.object_mask,
+		layer_blending : context_raw.layer.blending
 	};
 
 	array_push(history_steps, step);
@@ -643,7 +635,7 @@ function history_copy_merging_layers() {
 	history_copy_to_undo(lay.id, history_undo_i, slot_layer_is_mask(context_raw.layer));
 
 	let below: i32 = array_index_of(project_layers, lay) - 1;
-	lay = project_layers[below];
+	lay            = project_layers[below];
 	history_copy_to_undo(lay.id, history_undo_i, slot_layer_is_mask(context_raw.layer));
 }
 
@@ -673,20 +665,17 @@ function history_copy_to_undo(from_id: i32, to_id: i32, is_mask: bool) {
 		render_path_draw_shader("Scene/copy_pass/copyRGBA128_pass");
 	}
 	else {
-		let additional: string[] = ["texpaint_nor_undo" + to_id, "texpaint_pack_undo" + to_id];
+		let additional: string[] = [ "texpaint_nor_undo" + to_id, "texpaint_pack_undo" + to_id ];
 		render_path_set_target("texpaint_undo" + to_id, additional);
 		render_path_bind_target("texpaint" + from_id, "tex0");
 		render_path_bind_target("texpaint_nor" + from_id, "tex1");
 		render_path_bind_target("texpaint_pack" + from_id, "tex2");
 
-		let format: tex_format_t =
-			base_bits_handle.i == texture_bits_t.BITS8  ? tex_format_t.RGBA32 :
-			base_bits_handle.i == texture_bits_t.BITS16 ? tex_format_t.RGBA64 :
-																 tex_format_t.RGBA128;
+		let format: tex_format_t = base_bits_handle.i == texture_bits_t.BITS8    ? tex_format_t.RGBA32
+		                           : base_bits_handle.i == texture_bits_t.BITS16 ? tex_format_t.RGBA64
+		                                                                         : tex_format_t.RGBA128;
 
-		let pipe: string = format == tex_format_t.RGBA32 ? "copy_mrt3_pass" :
-						   format == tex_format_t.RGBA64 ? "copy_mrt3RGBA64_pass" :
-								   						   "copy_mrt3RGBA128_pass";
+		let pipe: string = format == tex_format_t.RGBA32 ? "copy_mrt3_pass" : format == tex_format_t.RGBA64 ? "copy_mrt3RGBA64_pass" : "copy_mrt3RGBA128_pass";
 
 		render_path_draw_shader("Scene/copy_mrt3_pass/" + pipe);
 	}
@@ -715,17 +704,17 @@ function history_swap_canvas(step: history_step_t) {
 	if (step.canvas_type == 0) {
 		let _canvas: ui_node_canvas_t = history_get_canvas(step);
 		history_set_canvas(step, step.canvas);
-		step.canvas = _canvas;
+		step.canvas          = _canvas;
 		context_raw.material = project_materials[step.material];
 	}
 	else {
-		let _canvas: ui_node_canvas_t = project_brushes[step.brush].canvas;
+		let _canvas: ui_node_canvas_t      = project_brushes[step.brush].canvas;
 		project_brushes[step.brush].canvas = step.canvas;
-		step.canvas = _canvas;
-		context_raw.brush = project_brushes[step.brush];
+		step.canvas                        = _canvas;
+		context_raw.brush                  = project_brushes[step.brush];
 	}
 
-	let nodes: ui_nodes_t = ui_nodes_get_nodes();
+	let nodes: ui_nodes_t          = ui_nodes_get_nodes();
 	nodes.nodes_selected_id.length = 0;
 
 	ui_nodes_canvas_changed();

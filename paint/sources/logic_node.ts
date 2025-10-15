@@ -2,10 +2,10 @@
 type logic_node_t = {
 	inputs?: logic_node_input_t[];
 	outputs?: logic_node_t[][];
-	get?: (self: any, from: i32)=>logic_node_value_t;
-	get_as_image?: (self: any, from: i32)=>gpu_texture_t;
-	get_cached_image?: (self: any)=>gpu_texture_t;
-	set?: (self: any, value: f32_array_t)=>void;
+	get?: (self: any, from: i32)          => logic_node_value_t;
+	get_as_image?: (self: any, from: i32) => gpu_texture_t;
+	get_cached_image?: (self: any)        => gpu_texture_t;
+	set?: (self: any, value: f32_array_t) => void;
 	ext?: logic_node_ext_t;
 };
 
@@ -26,9 +26,9 @@ type logic_node_input_t = {
 
 function logic_node_create(ext: logic_node_ext_t): logic_node_t {
 	let n: logic_node_t = {};
-	n.inputs = [];
-	n.outputs = [];
-	n.ext = ext;
+	n.inputs            = [];
+	n.outputs           = [];
+	n.ext               = ext;
 	return n;
 }
 
@@ -69,8 +69,8 @@ function logic_node_set(self: logic_node_t, value: any) {
 
 function logic_node_input_create(node: logic_node_ext_t, from: i32): logic_node_input_t {
 	let inp: logic_node_input_t = {};
-	inp.node = node;
-	inp.from = from;
+	inp.node                    = node;
+	inp.from                    = from;
 	return inp;
 }
 

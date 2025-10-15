@@ -4,7 +4,7 @@ function tab_plugins_draw(htab: ui_handle_t) {
 
 		ui_begin_sticky();
 
-		let row: f32[] = [1 / 4];
+		let row: f32[] = [ 1 / 4 ];
 		ui_row(row);
 
 		if (ui_button(tr("Manager"))) {
@@ -22,7 +22,7 @@ function tab_plugins_draw(htab: ui_handle_t) {
 			}
 		}
 
-		///if is_debug
+		/// if is_debug
 		let rt_keys: string[] = map_keys(render_path_render_targets);
 		array_sort(rt_keys, null);
 		for (let i: i32 = 0; i < rt_keys.length; ++i) {
@@ -30,25 +30,20 @@ function tab_plugins_draw(htab: ui_handle_t) {
 			ui_text(rt_keys[i]);
 			ui_image(rt._image);
 		}
-		///end
+		/// end
 	}
 }
 
 function plugin_uv_unwrap_button() {
 	let cb: any = map_get(util_mesh_unwrappers, "uv_unwrap.js"); // JSValue * -> (a: raw_mesh_t)=>void
 	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
-		let md: mesh_data_t = project_paint_objects[i].data;
-		let mesh: raw_mesh_t = {
-			posa: md.vertex_arrays[0].values,
-			nora: md.vertex_arrays[1].values,
-			texa: null,
-			inda: md.index_array
-		};
+		let md: mesh_data_t  = project_paint_objects[i].data;
+		let mesh: raw_mesh_t = {posa : md.vertex_arrays[0].values, nora : md.vertex_arrays[1].values, texa : null, inda : md.index_array};
 		js_call_ptr(cb, mesh);
 		md.vertex_arrays[0].values = mesh.posa;
 		md.vertex_arrays[1].values = mesh.nora;
 		md.vertex_arrays[2].values = mesh.texa;
-		md.index_array = mesh.inda;
+		md.index_array             = mesh.inda;
 		mesh_data_build(md);
 	}
 	util_mesh_merge();

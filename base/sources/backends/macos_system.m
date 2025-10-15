@@ -1,16 +1,16 @@
 #import "macos_system.h"
 #import <Cocoa/Cocoa.h>
-#include <stdbool.h>
-#include <iron_system.h>
 #include <iron_gpu.h>
 #include <iron_math.h>
+#include <iron_system.h>
 #include <iron_video.h>
-#include <objc/runtime.h>
 #include <mach/mach_time.h>
+#include <objc/runtime.h>
+#include <stdbool.h>
 
 struct WindowData {
-	id handle;
-	id view;
+	id   handle;
+	id   view;
 	bool fullscreen;
 	void (*resizeCallback)(int width, int height, void *data);
 	void *resizeCallbackData;
@@ -18,23 +18,23 @@ struct WindowData {
 	void *closeCallbackData;
 };
 
-static struct WindowData windows[1] = {0};
-static bool controlKeyMouseButton = false;
-static int mouseX, mouseY;
-static bool keyboardShown = false;
-static const char *videoFormats[] = {"ogv", NULL};
-static NSApplication *myapp;
-static NSWindow *window;
-static BasicMTKView *view;
-static char language[3];
-static int current_cursor_index = 0;
+static struct WindowData windows[1]            = {0};
+static bool              controlKeyMouseButton = false;
+static int               mouseX, mouseY;
+static bool              keyboardShown  = false;
+static const char       *videoFormats[] = {"ogv", NULL};
+static NSApplication    *myapp;
+static NSWindow         *window;
+static BasicMTKView     *view;
+static char              language[3];
+static int               current_cursor_index = 0;
 
 @implementation BasicMTKView
 
 static bool shift = false;
-static bool ctrl = false;
-static bool alt = false;
-static bool cmd = false;
+static bool ctrl  = false;
+static bool alt   = false;
+static bool cmd   = false;
 
 - (void)flagsChanged:(NSEvent *)theEvent {
 	if (shift) {
@@ -182,7 +182,7 @@ static bool cmd = false;
 			}
 			if (ch == 'v' && [theEvent modifierFlags] & NSCommandKeyMask) {
 				NSPasteboard *board = [NSPasteboard generalPasteboard];
-				NSString *data = [board stringForType:NSStringPboardType];
+				NSString     *data  = [board stringForType:NSStringPboardType];
 				if (data != nil) {
 					char charData[4096];
 					strcpy(charData, [data UTF8String]);
@@ -306,13 +306,13 @@ static bool cmd = false;
 
 static int getMouseX(NSEvent *event) {
 	NSWindow *window = [[NSApplication sharedApplication] mainWindow];
-	float scale = [window backingScaleFactor];
+	float     scale  = [window backingScaleFactor];
 	return (int)([event locationInWindow].x * scale);
 }
 
 static int getMouseY(NSEvent *event) {
 	NSWindow *window = [[NSApplication sharedApplication] mainWindow];
-	float scale = [window backingScaleFactor];
+	float     scale  = [window backingScaleFactor];
 	return (int)(iron_window_height() - [event locationInWindow].y * scale);
 }
 
@@ -387,7 +387,7 @@ static int getMouseY(NSEvent *event) {
 }
 
 - (NSDragOperation)draggingEntered:(id<NSDraggingInfo>)sender {
-	NSPasteboard *pboard = [sender draggingPasteboard];
+	NSPasteboard   *pboard         = [sender draggingPasteboard];
 	NSDragOperation sourceDragMask = [sender draggingSourceOperationMask];
 	if ([[pboard types] containsObject:NSURLPboardType]) {
 		if (sourceDragMask & NSDragOperationLink) {
@@ -400,7 +400,7 @@ static int getMouseY(NSEvent *event) {
 - (BOOL)performDragOperation:(id<NSDraggingInfo>)sender {
 	NSPasteboard *pboard = [sender draggingPasteboard];
 	if ([[pboard types] containsObject:NSURLPboardType]) {
-		NSArray *urls = [pboard readObjectsForClasses:@[[NSURL class]] options:nil];
+		NSArray *urls = [pboard readObjectsForClasses:@[ [NSURL class] ] options:nil];
 		for (NSURL *fileURL in urls) {
 			const char *filePath = [fileURL.path cStringUsingEncoding:NSUTF8StringEncoding];
 			iron_internal_drop_files_callback(filePath);
@@ -412,15 +412,15 @@ static int getMouseY(NSEvent *event) {
 - (id)initWithFrame:(NSRect)frameRect {
 	self = [super initWithFrame:frameRect];
 
-	device = MTLCreateSystemDefaultDevice();
+	device       = MTLCreateSystemDefaultDevice();
 	commandQueue = [device newCommandQueue];
-	library = [device newDefaultLibrary];
+	library      = [device newDefaultLibrary];
 
-	CAMetalLayer *metalLayer = (CAMetalLayer *)self.layer;
-	metalLayer.device = device;
-	metalLayer.pixelFormat = MTLPixelFormatBGRA8Unorm;
+	CAMetalLayer *metalLayer   = (CAMetalLayer *)self.layer;
+	metalLayer.device          = device;
+	metalLayer.pixelFormat     = MTLPixelFormatBGRA8Unorm;
 	metalLayer.framebufferOnly = YES;
-	metalLayer.opaque = YES;
+	metalLayer.opaque          = YES;
 	metalLayer.backgroundColor = nil;
 	return self;
 }
@@ -467,9 +467,9 @@ int iron_count_displays(void) {
 }
 
 int iron_primary_display(void) {
-	NSArray *screens = [NSScreen screens];
-	NSScreen *mainScreen = [NSScreen mainScreen];
-	int max_displays = 8;
+	NSArray  *screens      = [NSScreen screens];
+	NSScreen *mainScreen   = [NSScreen mainScreen];
+	int       max_displays = 8;
 	for (int i = 0; i < max_displays; ++i) {
 		if (mainScreen == screens[i]) {
 			return i;
@@ -481,21 +481,21 @@ int iron_primary_display(void) {
 void iron_display_init(void) {}
 
 iron_display_mode_t iron_display_current_mode(int display) {
-	NSArray *screens = [NSScreen screens];
-	NSScreen *screen = screens[display];
-	NSRect screenRect = [screen frame];
+	NSArray            *screens    = [NSScreen screens];
+	NSScreen           *screen     = screens[display];
+	NSRect              screenRect = [screen frame];
 	iron_display_mode_t dm;
-	dm.width = screenRect.size.width;
-	dm.height = screenRect.size.height;
-	dm.frequency = 60;
+	dm.width          = screenRect.size.width;
+	dm.height         = screenRect.size.height;
+	dm.frequency      = 60;
 	dm.bits_per_pixel = 32;
 
-	NSDictionary *description = [screen deviceDescription];
-	NSSize displayPixelSize = [[description objectForKey:NSDeviceSize] sizeValue];
-	NSNumber *screenNumber = [description objectForKey:@"NSScreenNumber"];
-	CGSize displayPhysicalSize = CGDisplayScreenSize([screenNumber unsignedIntValue]); // in millimeters
-	double ppi = displayPixelSize.width / (displayPhysicalSize.width * 0.039370);      // Convert MM to INCH
-	dm.pixels_per_inch = round(ppi);
+	NSDictionary *description         = [screen deviceDescription];
+	NSSize        displayPixelSize    = [[description objectForKey:NSDeviceSize] sizeValue];
+	NSNumber     *screenNumber        = [description objectForKey:@"NSScreenNumber"];
+	CGSize        displayPhysicalSize = CGDisplayScreenSize([screenNumber unsignedIntValue]);            // in millimeters
+	double        ppi                 = displayPixelSize.width / (displayPhysicalSize.width * 0.039370); // Convert MM to INCH
+	dm.pixels_per_inch                = round(ppi);
 
 	return dm;
 }
@@ -513,23 +513,23 @@ void iron_mouse_hide(void) {
 }
 
 void iron_mouse_set_position(int x, int y) {
-	NSWindow *window = windows[0].handle;
-	float scale = [window backingScaleFactor];
-	NSRect rect = [[window contentView] bounds];
-	NSPoint windowpoint = NSMakePoint(x / scale, rect.size.height - y / scale);
-	NSPoint screenpoint = [window convertPointToScreen:windowpoint];
-	CGPoint cgpoint = CGPointMake(screenpoint.x, [[NSScreen mainScreen] frame].size.height - screenpoint.y);
+	NSWindow *window      = windows[0].handle;
+	float     scale       = [window backingScaleFactor];
+	NSRect    rect        = [[window contentView] bounds];
+	NSPoint   windowpoint = NSMakePoint(x / scale, rect.size.height - y / scale);
+	NSPoint   screenpoint = [window convertPointToScreen:windowpoint];
+	CGPoint   cgpoint     = CGPointMake(screenpoint.x, [[NSScreen mainScreen] frame].size.height - screenpoint.y);
 	CGDisplayMoveCursorToPoint(kCGDirectMainDisplay, cgpoint);
 	CGAssociateMouseAndMouseCursorPosition(true);
 }
 
 void iron_mouse_get_position(int *x, int *y) {
 	NSWindow *window = windows[0].handle;
-	float scale = [window backingScaleFactor];
-	NSRect rect = [[window contentView] bounds];
-	NSPoint point = [window mouseLocationOutsideOfEventStream];
-	*x = (int)(point.x * scale);
-	*y = (int)((rect.size.height - point.y) * scale);
+	float     scale  = [window backingScaleFactor];
+	NSRect    rect   = [[window contentView] bounds];
+	NSPoint   point  = [window mouseLocationOutsideOfEventStream];
+	*x               = (int)(point.x * scale);
+	*y               = (int)((rect.size.height - point.y) * scale);
 }
 
 void iron_mouse_set_cursor(iron_cursor_t cursor_index) {
@@ -627,9 +627,9 @@ id get_metal_queue(void) {
 
 bool iron_internal_handle_messages(void) {
 	NSEvent *event = [myapp nextEventMatchingMask:NSAnyEventMask
-										untilDate:[NSDate distantPast]
-										   inMode:NSDefaultRunLoopMode
-										  dequeue:YES]; // distantPast: non-blocking
+	                                    untilDate:[NSDate distantPast]
+	                                       inMode:NSDefaultRunLoopMode
+	                                      dequeue:YES]; // distantPast: non-blocking
 	if (event != nil) {
 		[myapp sendEvent:event];
 		[myapp updateWindows];
@@ -643,8 +643,8 @@ bool iron_internal_handle_messages(void) {
 }
 
 static void createWindow(iron_window_options_t *options) {
-	int width = options->width / [[NSScreen mainScreen] backingScaleFactor];
-	int height = options->height / [[NSScreen mainScreen] backingScaleFactor];
+	int width     = options->width / [[NSScreen mainScreen] backingScaleFactor];
+	int height    = options->height / [[NSScreen mainScreen] backingScaleFactor];
 	int styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable;
 	if ((options->features & IRON_WINDOW_FEATURE_RESIZEABLE) || (options->features & IRON_WINDOW_FEATURE_MAXIMIZABLE)) {
 		styleMask |= NSWindowStyleMaskResizable;
@@ -655,7 +655,7 @@ static void createWindow(iron_window_options_t *options) {
 
 	view = [[BasicMTKView alloc] initWithFrame:NSMakeRect(0, 0, width, height)];
 	[view registerForDraggedTypes:[NSArray arrayWithObjects:NSURLPboardType, nil]];
-	window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, width, height) styleMask:styleMask backing:NSBackingStoreBuffered defer:TRUE];
+	window   = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, width, height) styleMask:styleMask backing:NSBackingStoreBuffered defer:TRUE];
 	delegate = [IronAppDelegate alloc];
 	[window setDelegate:delegate];
 	[window setTitle:[NSString stringWithCString:options->title encoding:NSUTF8StringEncoding]];
@@ -664,7 +664,7 @@ static void createWindow(iron_window_options_t *options) {
 	[window center];
 
 	windows[0].handle = window;
-	windows[0].view = view;
+	windows[0].view   = view;
 
 	[window makeKeyAndOrderFront:nil];
 
@@ -692,15 +692,15 @@ void iron_window_change_window_mode(iron_window_mode_t mode) {
 }
 
 void iron_window_set_close_callback(bool (*callback)(void *), void *data) {
-	windows[0].closeCallback = callback;
+	windows[0].closeCallback     = callback;
 	windows[0].closeCallbackData = data;
 }
 
 static void add_menubar(void) {
 	NSString *appName = [[NSProcessInfo processInfo] processName];
 
-	NSMenu *appMenu = [NSMenu new];
-	NSString *quitTitle = [@"Quit " stringByAppendingString:appName];
+	NSMenu     *appMenu      = [NSMenu new];
+	NSString   *quitTitle    = [@"Quit " stringByAppendingString:appName];
 	NSMenuItem *quitMenuItem = [[NSMenuItem alloc] initWithTitle:quitTitle action:@selector(terminate:) keyEquivalent:@"q"];
 	[appMenu addItem:quitMenuItem];
 
@@ -720,10 +720,10 @@ void iron_init(iron_window_options_t *win) {
 		NSApp.activationPolicy = NSApplicationActivationPolicyRegular;
 		add_menubar();
 
-		#ifdef WITH_GAMEPAD
+#ifdef WITH_GAMEPAD
 		hidManager = (struct HIDManager *)malloc(sizeof(struct HIDManager));
 		HIDManager_init(hidManager);
-		#endif
+#endif
 	}
 
 	createWindow(win);
@@ -732,13 +732,13 @@ void iron_init(iron_window_options_t *win) {
 
 int iron_window_width() {
 	NSWindow *window = windows[0].handle;
-	float scale = [window backingScaleFactor];
+	float     scale  = [window backingScaleFactor];
 	return [[window contentView] frame].size.width * scale;
 }
 
 int iron_window_height() {
 	NSWindow *window = windows[0].handle;
-	float scale = [window backingScaleFactor];
+	float     scale  = [window backingScaleFactor];
 	return [[window contentView] frame].size.height * scale;
 }
 
@@ -747,21 +747,21 @@ void iron_load_url(const char *url) {
 }
 
 const char *iron_language(void) {
-	NSString *nsstr = [[NSLocale preferredLanguages] objectAtIndex:0];
-	const char *lang = [nsstr UTF8String];
-	language[0] = lang[0];
-	language[1] = lang[1];
-	language[2] = 0;
+	NSString   *nsstr = [[NSLocale preferredLanguages] objectAtIndex:0];
+	const char *lang  = [nsstr UTF8String];
+	language[0]       = lang[0];
+	language[1]       = lang[1];
+	language[2]       = 0;
 	return language;
 }
 
 void iron_internal_shutdown(void) {}
 
 const char *iron_internal_save_path(void) {
-	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
+	NSArray  *paths        = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
 	NSString *resolvedPath = [paths objectAtIndex:0];
-	NSString *appName = [NSString stringWithUTF8String:iron_application_name()];
-	resolvedPath = [resolvedPath stringByAppendingPathComponent:appName];
+	NSString *appName      = [NSString stringWithUTF8String:iron_application_name()];
+	resolvedPath           = [resolvedPath stringByAppendingPathComponent:appName];
 
 	NSFileManager *fileMgr = [[NSFileManager alloc] init];
 
@@ -811,12 +811,12 @@ void iron_internal_call_resize_callback(int width, int height) {
 
 - (void)windowDidResize:(NSNotification *)notification {
 	NSWindow *window = [notification object];
-	NSSize size = [[window contentView] frame].size;
+	NSSize    size   = [[window contentView] frame].size;
 	[view resize:size];
 
 	float scale = [window backingScaleFactor];
-	int w = size.width * scale;
-	int h = size.height * scale;
+	int   w     = size.width * scale;
+	int   h     = size.height * scale;
 
 	gpu_resize(w, h);
 	iron_internal_call_resize_callback(w, h);
@@ -862,7 +862,7 @@ void iron_window_set_title(const char *title) {
 }
 
 void iron_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {
-	windows[0].resizeCallback = callback;
+	windows[0].resizeCallback     = callback;
 	windows[0].resizeCallbackData = data;
 }
 
@@ -912,7 +912,7 @@ void HIDGamepad_destroy(struct HIDGamepad *gamepad) {
 
 void HIDGamepad_bind(struct HIDGamepad *gamepad, IOHIDDeviceRef inDeviceRef, int inPadIndex) {
 	gamepad->hidDeviceRef = inDeviceRef;
-	gamepad->padIndex = inPadIndex;
+	gamepad->padIndex     = inPadIndex;
 
 	IOHIDDeviceOpen(gamepad->hidDeviceRef, kIOHIDOptionsTypeSeizeDevice);
 	IOHIDDeviceRegisterInputValueCallback(gamepad->hidDeviceRef, inputValueCallback, gamepad);
@@ -946,13 +946,13 @@ void HIDGamepad_bind(struct HIDGamepad *gamepad, IOHIDDeviceRef inDeviceRef, int
 static void initDeviceElements(struct HIDGamepad *gamepad, CFArrayRef elements) {
 
 	for (CFIndex i = 0, count = CFArrayGetCount(elements); i < count; ++i) {
-		IOHIDElementRef elementRef = (IOHIDElementRef)CFArrayGetValueAtIndex(elements, i);
-		IOHIDElementType elemType = IOHIDElementGetType(elementRef);
+		IOHIDElementRef  elementRef = (IOHIDElementRef)CFArrayGetValueAtIndex(elements, i);
+		IOHIDElementType elemType   = IOHIDElementGetType(elementRef);
 
 		IOHIDElementCookie cookie = IOHIDElementGetCookie(elementRef);
 
 		uint32_t usagePage = IOHIDElementGetUsagePage(elementRef);
-		uint32_t usage = IOHIDElementGetUsage(elementRef);
+		uint32_t usage     = IOHIDElementGetUsage(elementRef);
 
 		// Match up items
 		switch (usagePage) {
@@ -1012,29 +1012,29 @@ void HIDGamepad_unbind(struct HIDGamepad *gamepad) {
 }
 
 static void reset(struct HIDGamepad *gamepad) {
-	gamepad->padIndex = -1;
-	gamepad->hidDeviceRef = NULL;
-	gamepad->hidQueueRef = NULL;
-	gamepad->hidDeviceVendor[0] = '\0';
+	gamepad->padIndex            = -1;
+	gamepad->hidDeviceRef        = NULL;
+	gamepad->hidQueueRef         = NULL;
+	gamepad->hidDeviceVendor[0]  = '\0';
 	gamepad->hidDeviceProduct[0] = '\0';
-	gamepad->hidDeviceVendorID = 0;
-	gamepad->hidDeviceProductID = 0;
+	gamepad->hidDeviceVendorID   = 0;
+	gamepad->hidDeviceProductID  = 0;
 	memset(gamepad->axis, 0, sizeof(gamepad->axis));
 	memset(gamepad->buttons, 0, sizeof(gamepad->buttons));
 }
 
 static void buttonChanged(struct HIDGamepad *gamepad, IOHIDElementRef elementRef, IOHIDValueRef valueRef, int buttonIndex) {
-	double rawValue = IOHIDValueGetScaledValue(valueRef, kIOHIDValueScaleTypePhysical);
-	double min = IOHIDElementGetLogicalMin(elementRef);
-	double max = IOHIDElementGetLogicalMax(elementRef);
+	double rawValue  = IOHIDValueGetScaledValue(valueRef, kIOHIDValueScaleTypePhysical);
+	double min       = IOHIDElementGetLogicalMin(elementRef);
+	double max       = IOHIDElementGetLogicalMax(elementRef);
 	double normalize = (rawValue - min) / (max - min);
 	iron_internal_gamepad_trigger_button(gamepad->padIndex, buttonIndex, normalize);
 }
 
 static void axisChanged(struct HIDGamepad *gamepad, IOHIDElementRef elementRef, IOHIDValueRef valueRef, int axisIndex) {
-	double rawValue = IOHIDValueGetScaledValue(valueRef, kIOHIDValueScaleTypePhysical);
-	double min = IOHIDElementGetPhysicalMin(elementRef);
-	double max = IOHIDElementGetPhysicalMax(elementRef);
+	double rawValue  = IOHIDValueGetScaledValue(valueRef, kIOHIDValueScaleTypePhysical);
+	double min       = IOHIDElementGetPhysicalMin(elementRef);
+	double max       = IOHIDElementGetPhysicalMax(elementRef);
 	double normalize = normalize = (((rawValue - min) / (max - min)) * 2) - 1;
 	if (axisIndex % 2 == 1) {
 		normalize = -normalize;
@@ -1052,8 +1052,8 @@ static void valueAvailableCallback(void *inContext, IOReturn inResult, void *inS
 			break;
 		}
 
-		IOHIDElementRef elementRef = IOHIDValueGetElement(valueRef);
-		IOHIDElementCookie cookie = IOHIDElementGetCookie(elementRef);
+		IOHIDElementRef    elementRef = IOHIDValueGetElement(valueRef);
+		IOHIDElementCookie cookie     = IOHIDElementGetCookie(elementRef);
 
 		for (int i = 0, c = sizeof(pad->buttons); i < c; ++i) {
 			if (cookie == pad->buttons[i]) {
@@ -1081,11 +1081,11 @@ const char *iron_gamepad_product_name(int gamepad) {
 	return "unknown";
 }
 
-static int initHIDManager(struct HIDManager *manager);
-static bool addMatchingArray(struct HIDManager *manager, CFMutableArrayRef matchingCFArrayRef, CFDictionaryRef matchingCFDictRef);
+static int                    initHIDManager(struct HIDManager *manager);
+static bool                   addMatchingArray(struct HIDManager *manager, CFMutableArrayRef matchingCFArrayRef, CFDictionaryRef matchingCFDictRef);
 static CFMutableDictionaryRef createDeviceMatchingDictionary(struct HIDManager *manager, uint32_t inUsagePage, uint32_t inUsage);
-static void deviceConnected(void *inContext, IOReturn inResult, void *inSender, IOHIDDeviceRef inIOHIDDeviceRef);
-static void deviceRemoved(void *inContext, IOReturn inResult, void *inSender, IOHIDDeviceRef inIOHIDDeviceRef);
+static void                   deviceConnected(void *inContext, IOReturn inResult, void *inSender, IOHIDDeviceRef inIOHIDDeviceRef);
+static void                   deviceRemoved(void *inContext, IOReturn inResult, void *inSender, IOHIDDeviceRef inIOHIDDeviceRef);
 
 void HIDManager_init(struct HIDManager *manager) {
 	manager->managerRef = 0x0;
@@ -1157,12 +1157,12 @@ CFMutableDictionaryRef createDeviceMatchingDictionary(struct HIDManager *manager
 }
 
 void deviceConnected(void *inContext, IOReturn inResult, void *inSender, IOHIDDeviceRef inIOHIDDeviceRef) {
-	struct HIDManager *manager = (struct HIDManager *)inContext;
-	struct HIDManagerDeviceRecord *device = &manager->devices[0];
+	struct HIDManager             *manager = (struct HIDManager *)inContext;
+	struct HIDManagerDeviceRecord *device  = &manager->devices[0];
 	for (int i = 0; i < IRON_MAX_HID_DEVICES; ++i, ++device) {
 		if (!device->connected) {
 			device->connected = true;
-			device->device = inIOHIDDeviceRef;
+			device->device    = inIOHIDDeviceRef;
 			HIDGamepad_bind(&device->pad, inIOHIDDeviceRef, i);
 			break;
 		}
@@ -1170,12 +1170,12 @@ void deviceConnected(void *inContext, IOReturn inResult, void *inSender, IOHIDDe
 }
 
 void deviceRemoved(void *inContext, IOReturn inResult, void *inSender, IOHIDDeviceRef inIOHIDDeviceRef) {
-	struct HIDManager *manager = (struct HIDManager *)inContext;
-	struct HIDManagerDeviceRecord *device = &manager->devices[0];
+	struct HIDManager             *manager = (struct HIDManager *)inContext;
+	struct HIDManagerDeviceRecord *device  = &manager->devices[0];
 	for (int i = 0; i < IRON_MAX_HID_DEVICES; ++i, ++device) {
 		if (device->connected && device->device == inIOHIDDeviceRef) {
 			device->connected = false;
-			device->device = NULL;
+			device->device    = NULL;
 			HIDGamepad_unbind(&device->pad);
 			break;
 		}
@@ -1186,5 +1186,4 @@ void deviceRemoved(void *inContext, IOReturn inResult, void *inSender, IOHIDDevi
 
 volatile int iron_exec_async_done = 1;
 
-void iron_exec_async(const char *path, char *argv[]) {
-}
+void iron_exec_async(const char *path, char *argv[]) {}

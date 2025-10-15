@@ -2,13 +2,13 @@
 let uniforms_ext_ortho_p: mat4_t = mat4_ortho(-0.5, 0.5, -0.5, 0.5, -0.5, 0.5);
 
 function uniforms_ext_init() {
-	uniforms_i32_links = uniforms_ext_i32_link;
-	uniforms_f32_links = uniforms_ext_f32_link;
+	uniforms_i32_links  = uniforms_ext_i32_link;
+	uniforms_f32_links  = uniforms_ext_f32_link;
 	uniforms_vec2_links = uniforms_ext_vec2_link;
 	uniforms_vec3_links = uniforms_ext_vec3_link;
 	uniforms_vec4_links = uniforms_ext_vec4_link;
 	uniforms_mat4_links = uniforms_ext_mat4_link;
-	uniforms_tex_links = uniforms_ext_tex_link;
+	uniforms_tex_links  = uniforms_ext_tex_link;
 }
 
 function uniforms_ext_i32_link(object: object_t, mat: material_data_t, link: string): i32 {
@@ -21,11 +21,12 @@ function uniforms_ext_i32_link(object: object_t, mat: material_data_t, link: str
 function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: string): f32 {
 	if (link == "_brush_radius") {
 		let decal: bool = context_is_decal();
-		let decal_mask: bool = decal && operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
+		let decal_mask: bool =
+		    decal && operator_shortcut(map_get(config_keymap, "decal_mask") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
 		let brush_decal_mask_radius: f32 = context_raw.brush_decal_mask_radius;
 		brush_decal_mask_radius *= context_raw.paint2d ? 0.55 * ui_view2d_pan_scale : 2.0;
 		let radius: f32 = decal_mask ? brush_decal_mask_radius : context_raw.brush_radius;
-		let val: f32 = (radius * context_raw.brush_nodes_radius) / 15.0;
+		let val: f32    = (radius * context_raw.brush_nodes_radius) / 15.0;
 		if (config_raw.pressure_radius && pen_down()) {
 			val *= pen_pressure * config_raw.pressure_sensitivity;
 		}
@@ -85,14 +86,14 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 	}
 	else if (link == "_brush_scale") {
 		if (context_raw.tool == tool_type_t.GIZMO) {
-			let atlas_w: i32 = config_get_scene_atlas_res();
-			let item_w: i32 = config_get_layer_res();
+			let atlas_w: i32      = config_get_scene_atlas_res();
+			let item_w: i32       = config_get_layer_res();
 			let atlas_stride: i32 = atlas_w / item_w;
 			return atlas_stride;
 		}
 
 		let fill: bool = context_raw.layer.fill_layer != null;
-		let val: f32 = (fill ? context_raw.layer.scale : context_raw.brush_scale) * context_raw.brush_nodes_scale;
+		let val: f32   = (fill ? context_raw.layer.scale : context_raw.brush_scale) * context_raw.brush_nodes_scale;
 		return val;
 	}
 	else if (link == "_object_id") {
@@ -135,9 +136,9 @@ function uniforms_ext_f32_link(object: object_t, mat: material_data_t, link: str
 	if (parser_material_script_links != null) {
 		let keys: string[] = map_keys(parser_material_script_links);
 		for (let i: i32 = 0; i < keys.length; ++i) {
-			let key: string = keys[i];
+			let key: string    = keys[i];
 			let script: string = map_get(parser_material_script_links, key);
-			let result: f32 = f32_nan();
+			let result: f32    = f32_nan();
 			if (script != "") {
 				result = js_eval(script);
 			}
@@ -160,7 +161,7 @@ function uniforms_ext_vec2_link(object: object_t, mat: material_data_t, link: st
 	}
 	else if (link == "_brush_angle") {
 		let brush_angle: f32 = context_raw.brush_angle + context_raw.brush_nodes_angle;
-		let angle: f32 = context_raw.layer.fill_layer != null ? context_raw.layer.angle : brush_angle;
+		let angle: f32       = context_raw.layer.fill_layer != null ? context_raw.layer.angle : brush_angle;
 		angle *= (math_pi() / 180);
 		if (config_raw.pressure_angle && pen_down()) {
 			angle *= pen_pressure * config_raw.pressure_sensitivity;
@@ -177,20 +178,18 @@ function uniforms_ext_vec3_link(object: object_t, mat: material_data_t, link: st
 	if (link == "_brush_direction") {
 		v = _uniforms_vec;
 		// Discard first paint for directional brush
-		let allow_paint: bool = context_raw.prev_paint_vec_x != context_raw.last_paint_vec_x &&
-								context_raw.prev_paint_vec_y != context_raw.last_paint_vec_y &&
-								context_raw.prev_paint_vec_x > 0 &&
-								context_raw.prev_paint_vec_y > 0;
-		let x: f32 = context_raw.paint_vec.x;
-		let y: f32 = context_raw.paint_vec.y;
+		let allow_paint: bool = context_raw.prev_paint_vec_x != context_raw.last_paint_vec_x && context_raw.prev_paint_vec_y != context_raw.last_paint_vec_y &&
+		                        context_raw.prev_paint_vec_x > 0 && context_raw.prev_paint_vec_y > 0;
+		let x: f32     = context_raw.paint_vec.x;
+		let y: f32     = context_raw.paint_vec.y;
 		let lastx: f32 = context_raw.prev_paint_vec_x;
 		let lasty: f32 = context_raw.prev_paint_vec_y;
 		if (context_raw.paint2d) {
-			x = vec2d(x);
+			x     = vec2d(x);
 			lastx = vec2d(lastx);
 		}
-		let angle: f32 = math_atan2(-y + lasty, x - lastx) - math_pi() / 2;
-		v = vec4_create(math_cos(angle), math_sin(angle), allow_paint ? 1 : 0);
+		let angle: f32               = math_atan2(-y + lasty, x - lastx) - math_pi() / 2;
+		v                            = vec4_create(math_cos(angle), math_sin(angle), allow_paint ? 1 : 0);
 		context_raw.prev_paint_vec_x = context_raw.last_paint_vec_x;
 		context_raw.prev_paint_vec_y = context_raw.last_paint_vec_y;
 		return v;
@@ -208,20 +207,14 @@ function uniforms_ext_vec3_link(object: object_t, mat: material_data_t, link: st
 	}
 	else if (link == "_picker_base") {
 		v = _uniforms_vec;
-		v = vec4_create(
-			color_get_rb(context_raw.picked_color.base) / 255,
-			color_get_gb(context_raw.picked_color.base) / 255,
-			color_get_bb(context_raw.picked_color.base) / 255
-		);
+		v = vec4_create(color_get_rb(context_raw.picked_color.base) / 255, color_get_gb(context_raw.picked_color.base) / 255,
+		                color_get_bb(context_raw.picked_color.base) / 255);
 		return v;
 	}
 	else if (link == "_picker_normal") {
 		v = _uniforms_vec;
-		v = vec4_create(
-			color_get_rb(context_raw.picked_color.normal) / 255,
-			color_get_gb(context_raw.picked_color.normal) / 255,
-			color_get_bb(context_raw.picked_color.normal) / 255
-		);
+		v = vec4_create(color_get_rb(context_raw.picked_color.normal) / 255, color_get_gb(context_raw.picked_color.normal) / 255,
+		                color_get_bb(context_raw.picked_color.normal) / 255);
 		return v;
 	}
 	else if (link == "_particle_hit") {
@@ -241,7 +234,7 @@ function uniforms_ext_vec3_link(object: object_t, mat: material_data_t, link: st
 function vec2d(x: f32): f32 {
 	// Transform from 3d viewport coord to 2d view coord
 	context_raw.paint2d_view = false;
-	let res: f32 = (x * base_w() - base_w()) / ui_view2d_ww;
+	let res: f32             = (x * base_w() - base_w()) / ui_view2d_ww;
 	context_raw.paint2d_view = true;
 	return res;
 }
@@ -249,7 +242,7 @@ function vec2d(x: f32): f32 {
 function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: string): vec4_t {
 	if (link == "_input_brush") {
 		let down: bool = mouse_down() || pen_down();
-		let v: vec4_t = vec4_create(context_raw.paint_vec.x, context_raw.paint_vec.y, down ? 1.0 : 0.0, context_raw.paint2d ? 1.0 : 0.0);
+		let v: vec4_t  = vec4_create(context_raw.paint_vec.x, context_raw.paint_vec.y, down ? 1.0 : 0.0, context_raw.paint2d ? 1.0 : 0.0);
 		if (context_raw.paint2d) {
 			v.x = vec2d(v.x);
 		}
@@ -258,7 +251,7 @@ function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: st
 	}
 	else if (link == "_input_brush_last") {
 		let down: bool = mouse_down() || pen_down();
-		let v: vec4_t = vec4_create(context_raw.last_paint_vec_x, context_raw.last_paint_vec_y, down ? 1.0 : 0.0, context_raw.paint2d ? 1.0 : 0.0);
+		let v: vec4_t  = vec4_create(context_raw.last_paint_vec_x, context_raw.last_paint_vec_y, down ? 1.0 : 0.0, context_raw.paint2d ? 1.0 : 0.0);
 		if (context_raw.paint2d) {
 			v.x = vec2d(v.x);
 		}
@@ -281,8 +274,8 @@ function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: st
 	}
 	else if (link == "_decal_mask") {
 		let decal_mask: bool = context_is_decal_mask_paint();
-		let val: f32 = (context_raw.brush_radius * context_raw.brush_nodes_radius) / 15.0;
-		let scale2d: f32 = (900 / base_h()) * config_raw.window_scale;
+		let val: f32         = (context_raw.brush_radius * context_raw.brush_nodes_radius) / 15.0;
+		let scale2d: f32     = (900 / base_h()) * config_raw.window_scale;
 		val *= scale2d; // Projection ratio
 		let v: vec4_t = vec4_create(context_raw.decal_x, context_raw.decal_y, decal_mask ? 1 : 0, val);
 		if (context_raw.paint2d) {
@@ -297,9 +290,9 @@ function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: st
 function uniforms_ext_mat4_link(object: object_t, mat: material_data_t, link: string): mat4_t {
 	if (link == "_decal_layer_matrix") { // Decal layer
 		let m: mat4_t = mat4_inv(context_raw.layer.decal_mat);
-		let f: f32 = object.parent.transform.scale.x * object.transform.scale_world;
-		m = mat4_scale(m, vec4_create(f, f, f, 1.0));
-		m = mat4_mult_mat(m, uniforms_ext_ortho_p);
+		let f: f32    = object.parent.transform.scale.x * object.transform.scale_world;
+		m             = mat4_scale(m, vec4_create(f, f, f, 1.0));
+		m             = mat4_mult_mat(m, uniforms_ext_ortho_p);
 		return m;
 	}
 
@@ -308,22 +301,22 @@ function uniforms_ext_mat4_link(object: object_t, mat: material_data_t, link: st
 
 function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: string): gpu_texture_t {
 	if (link == "_texpaint_undo") {
-		let i: i32 = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
+		let i: i32              = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
 		let rt: render_target_t = map_get(render_path_render_targets, "texpaint_undo" + i);
 		return rt._image;
 	}
 	else if (link == "_texpaint_nor_undo") {
-		let i: i32 = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
+		let i: i32              = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
 		let rt: render_target_t = map_get(render_path_render_targets, "texpaint_nor_undo" + i);
 		return rt._image;
 	}
 	else if (link == "_texpaint_pack_undo") {
-		let i: i32 = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
+		let i: i32              = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
 		let rt: render_target_t = map_get(render_path_render_targets, "texpaint_pack_undo" + i);
 		return rt._image;
 	}
 	else if (link == "_texpaint_sculpt_undo") {
-		let i: i32 = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
+		let i: i32              = history_undo_i - 1 < 0 ? config_raw.undo_steps - 1 : history_undo_i - 1;
 		let rt: render_target_t = map_get(render_path_render_targets, "texpaint_sculpt_undo" + i);
 		return rt._image;
 	}
@@ -377,7 +370,7 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 	}
 
 	if (starts_with(link, "_texpaint_pack_vert")) {
-		let tid: string = substring(link, link.length - 1, link.length);
+		let tid: string         = substring(link, link.length - 1, link.length);
 		let rt: render_target_t = map_get(render_path_render_targets, "texpaint_pack" + tid);
 		return rt._image;
 	}

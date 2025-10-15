@@ -1,37 +1,37 @@
 
-declare type i8 = number;
-declare type i16 = number;
-declare type i32 = number;
-declare type i64 = number;
-declare type u8 = number;
-declare type u16 = number;
-declare type u32 = number;
-declare type u64 = number;
-declare type f32 = number;
-declare type f64 = number;
-declare type bool = boolean;
-declare type any_ptr = any;
-declare type i8_ptr = any;
-declare type i16_ptr = any;
-declare type i32_ptr = any;
-declare type i64_ptr = any;
-declare type u8_ptr = any;
-declare type u16_ptr = any;
-declare type u32_ptr = any;
-declare type u64_ptr = any;
-declare type f32_ptr = any;
-declare type f64_ptr = any;
-declare let __ID__: string; // file:line - ts preprocessor
+declare type i8        = number;
+declare type i16       = number;
+declare type i32       = number;
+declare type i64       = number;
+declare type u8        = number;
+declare type u16       = number;
+declare type u32       = number;
+declare type u64       = number;
+declare type f32       = number;
+declare type f64       = number;
+declare      type bool = boolean;
+declare type any_ptr   = any;
+declare type i8_ptr    = any;
+declare type i16_ptr   = any;
+declare type i32_ptr   = any;
+declare type i64_ptr   = any;
+declare type u8_ptr    = any;
+declare type u16_ptr   = any;
+declare type u32_ptr   = any;
+declare type u64_ptr   = any;
+declare type f32_ptr   = any;
+declare type f64_ptr   = any;
+declare let  __ID__: string; // file:line - ts preprocessor
 
 declare type map_t<K, V> = any;
-declare type buffer_t = u8_array_t;
+declare type buffer_t    = u8_array_t;
 declare type f32_array_t = any;
 declare type u32_array_t = any;
 declare type i32_array_t = any;
 declare type u16_array_t = any;
 declare type i16_array_t = any;
-declare type u8_array_t = any;
-declare type i8_array_t = any;
+declare type u8_array_t  = any;
+declare type i8_array_t  = any;
 
 declare function DEREFERENCE(a: any): any;
 declare function ADDRESS(a: any): any;
@@ -86,7 +86,7 @@ declare function map_get<K, V>(m: map_t<K, V>, k: any): any;
 declare function map_set<K, V>(m: map_t<K, V>, k: any, v: any): void;
 declare function map_delete<K, V>(m: map_t<K, V>, k: any): void;
 declare function map_keys(m: map_t<any, any>): any[];
-declare function array_sort(ar: any[], fn: (a: any_ptr, b: any_ptr)=>i32): void;
+declare function array_sort(ar: any[], fn: (a: any_ptr, b: any_ptr) => i32): void;
 declare function array_push(ar: any[], e: any): void;
 declare function array_pop(ar: any[]): any;
 declare function array_shift(ar: any[]): any;
@@ -167,7 +167,7 @@ declare function gc_free(ptr: any): void;
 declare function gc_root(ptr: any): void;
 declare function gc_unroot(ptr: any): void;
 declare function gc_leaf(ptr: any): void;
-declare function sizeof(ptr: any): i32;
+declare          function sizeof(ptr: any): i32;
 declare function memcpy(dst: any, src: any, n: i32): void;
 
 declare function color_from_floats(r: f32, g: f32, b: f32, a: f32): i32;
@@ -183,23 +183,24 @@ declare function color_set_ab(c: i32, i: u8): i32;
 declare function _iron_init(ops: iron_window_options_t): void;
 declare function iron_set_app_name(name: string): void;
 declare function iron_log(v: any): void;
-declare function _iron_set_update_callback(callback: ()=>void): void;
-declare function _iron_set_drop_files_callback(callback: (file: string)=>void): void;
-declare function iron_set_application_state_callback(on_foreground: ()=>void, on_resume: ()=>void, on_pause: ()=>void, on_background: ()=>void, on_shutdown: ()=>void): void;
-declare function iron_set_keyboard_down_callback(callback: (code: i32)=>void): void;
-declare function iron_set_keyboard_up_callback(callback: (code: i32)=>void): void;
-declare function iron_set_mouse_down_callback(callback: (button: i32, x: i32, y: i32)=>void): void;
-declare function iron_set_mouse_up_callback(callback: (button: i32, x: i32, y: i32)=>void): void;
-declare function iron_set_mouse_move_callback(callback: (x: i32, y: i32, mx: i32, my: i32)=>void): void;
-declare function iron_set_mouse_wheel_callback(callback: (button: i32)=>void): void;
-declare function iron_set_touch_down_callback(callback: (index: i32, x: i32, y: i32)=>void): void;
-declare function iron_set_touch_up_callback(callback: (index: i32, x: i32, y: i32)=>void): void;
-declare function iron_set_touch_move_callback(callback: (index: i32, x: i32, y: i32)=>void): void;
-declare function iron_set_pen_down_callback(callback: (x: i32, y: i32, pressure: f32)=>void): void;
-declare function iron_set_pen_up_callback(callback: (x: i32, y: i32, pressure: f32)=>void): void;
-declare function iron_set_pen_move_callback(callback: (x: i32, y: i32, pressure: f32)=>void): void;
-declare function iron_set_gamepad_axis_callback(callback: (gamepad: i32, axis: i32, value: f32)=>void): void;
-declare function iron_set_gamepad_button_callback(callback: (gamepad: i32, button: i32, value: f32)=>void): void;
+declare function _iron_set_update_callback(callback: () => void): void;
+declare function _iron_set_drop_files_callback(callback: (file: string) => void): void;
+declare function iron_set_application_state_callback(on_foreground: () => void, on_resume: () => void, on_pause: () => void, on_background: () => void,
+                                                     on_shutdown: () => void): void;
+declare function iron_set_keyboard_down_callback(callback: (code: i32) => void): void;
+declare function iron_set_keyboard_up_callback(callback: (code: i32) => void): void;
+declare function iron_set_mouse_down_callback(callback: (button: i32, x: i32, y: i32) => void): void;
+declare function iron_set_mouse_up_callback(callback: (button: i32, x: i32, y: i32) => void): void;
+declare function iron_set_mouse_move_callback(callback: (x: i32, y: i32, mx: i32, my: i32) => void): void;
+declare function iron_set_mouse_wheel_callback(callback: (button: i32) => void): void;
+declare function iron_set_touch_down_callback(callback: (index: i32, x: i32, y: i32) => void): void;
+declare function iron_set_touch_up_callback(callback: (index: i32, x: i32, y: i32) => void): void;
+declare function iron_set_touch_move_callback(callback: (index: i32, x: i32, y: i32) => void): void;
+declare function iron_set_pen_down_callback(callback: (x: i32, y: i32, pressure: f32) => void): void;
+declare function iron_set_pen_up_callback(callback: (x: i32, y: i32, pressure: f32) => void): void;
+declare function iron_set_pen_move_callback(callback: (x: i32, y: i32, pressure: f32) => void): void;
+declare function iron_set_gamepad_axis_callback(callback: (gamepad: i32, axis: i32, value: f32) => void): void;
+declare function iron_set_gamepad_button_callback(callback: (gamepad: i32, button: i32, value: f32) => void): void;
 declare function iron_mouse_lock(): void;
 declare function iron_mouse_unlock(): void;
 declare function iron_mouse_can_lock(): bool;
@@ -275,7 +276,8 @@ declare function gpu_get_texture_pixels(texture: any): buffer_t;
 declare function gpu_viewport(x: i32, y: i32, width: i32, height: i32): void;
 declare function gpu_scissor(x: i32, y: i32, width: i32, height: i32): void;
 declare function gpu_disable_scissor(): void;
-declare function _gpu_begin(render_target: gpu_texture_t, additional: gpu_texture_t[] = null, depth_buffer: gpu_texture_t = null, flags: clear_flag_t = clear_flag_t.NONE, color: i32 = 0, depth: f32 = 0.0): void;
+declare function _gpu_begin(render_target: gpu_texture_t, additional: gpu_texture_t[] = null, depth_buffer: gpu_texture_t = null,
+                            flags: clear_flag_t = clear_flag_t.NONE, color: i32 = 0, depth: f32 = 0.0): void;
 declare function gpu_end(): void;
 declare function gpu_present(): void;
 declare function iron_file_save_bytes(path: string, bytes: buffer_t, length: i32 = 0): void;
@@ -284,9 +286,10 @@ declare function iron_internal_save_path(): string;
 declare function iron_get_arg_count(): i32;
 declare function iron_get_arg(index: i32): string;
 declare function iron_internal_files_location(): string;
-declare function iron_file_download(url: string, callback: (url: string, _: buffer_t)=>void, size: i32 = 0): void;
+declare function iron_file_download(url: string, callback: (url: string, _: buffer_t) => void, size: i32 = 0): void;
 
-declare function draw_init(image_vert: buffer_t, image_frag: buffer_t, image_transform_vert: buffer_t, image_transform_frag: buffer_t, rect_vert: buffer_t, rect_frag: buffer_t, tris_vert: buffer_t, tris_frag: buffer_t, text_vert: buffer_t, text_frag: buffer_t): void;
+declare function draw_init(image_vert: buffer_t, image_frag: buffer_t, image_transform_vert: buffer_t, image_transform_frag: buffer_t, rect_vert: buffer_t,
+                           rect_frag: buffer_t, tris_vert: buffer_t, tris_frag: buffer_t, text_vert: buffer_t, text_frag: buffer_t): void;
 declare function draw_begin(render_target: gpu_texture_t = null, clear: bool = false, color: u32 = 0): void;
 declare function draw_end(): void;
 declare function draw_scaled_sub_image(image: gpu_texture_t, sx: f32, sy: f32, sw: f32, sh: f32, dx: f32, dy: f32, dw: f32, dh: f32): void;
@@ -315,11 +318,11 @@ declare function draw_set_transform(matrix: mat3_t): void;
 declare function draw_filled_circle(cx: f32, cy: f32, radius: f32, segments: i32 = 0): void;
 declare function draw_circle(cx: f32, cy: f32, radius: f32, segments: i32 = 0, strength: f32 = 1.0): void;
 declare function draw_cubic_bezier(x: f32[], y: f32[], segments: i32 = 20, strength: f32 = 1.0): void;
-declare let draw_font: draw_font_t;
-declare let draw_font_size: i32;
+declare let      draw_font: draw_font_t;
+declare let      draw_font_size: i32;
 
 declare type draw_font_t = {
-	blob?: any; // unsigned char *
+	blob?: any;   // unsigned char *
 	images?: any; // draw_font_image_t *
 	m_capacity?: i32;
 	m_images_len?: i32;
@@ -328,7 +331,7 @@ declare type draw_font_t = {
 	index?: i32;
 };
 
-declare function iron_set_save_and_quit_callback(callback: (save: bool)=>void): void;
+declare function iron_set_save_and_quit_callback(callback: (save: bool) => void): void;
 declare function iron_mouse_set_cursor(id: cursor_t): void;
 declare function iron_delay_idle_sleep(): void;
 declare function iron_open_dialog(filter_list: string, default_path: string, open_multiple: bool): string[];
@@ -354,7 +357,8 @@ declare function _gpu_raytrace_init(shader: buffer_t): void;
 declare function _gpu_raytrace_as_init(): void;
 declare function _gpu_raytrace_as_add(vb: any, ib: any, transform: mat4_t): void;
 declare function _gpu_raytrace_as_build(vb_full: any, ib_full: any): void;
-declare function gpu_raytrace_set_textures(tex0: gpu_texture_t, tex1: gpu_texture_t, tex2: gpu_texture_t, texenv: any, tex_sobol: any, tex_scramble: any, tex_rank: any): void;
+declare function gpu_raytrace_set_textures(tex0: gpu_texture_t, tex1: gpu_texture_t, tex2: gpu_texture_t, texenv: any, tex_sobol: any, tex_scramble: any,
+                                           tex_rank: any): void;
 declare function _gpu_raytrace_dispatch_rays(target: any, cb: buffer_t): void;
 
 declare function iron_window_x(): i32;
@@ -390,18 +394,15 @@ declare function armpack_map_get_f32(map: map_t<string, any>, key: string): f32;
 declare function armpack_map_get_i32(map: map_t<string, any>, key: string): i32;
 
 declare type audio_channel_t = {
-	sound: any; // iron_a1_sound_t
-	position: f32;
-	loop: bool;
-	volume: f32;
-	pitch: f32;
+	sound : any; // iron_a1_sound_t
+	position : f32;
+	loop : bool;
+	volume : f32;
+	pitch : f32;
 };
 
 declare type quat_t = {
-	x: f32;
-	y: f32;
-	z: f32;
-	w: f32;
+	x : f32; y : f32; z : f32; w : f32;
 };
 
 declare function quat_create(x: f32 = 0.0, y: f32 = 0.0, z: f32 = 0.0, w: f32 = 1.0): quat_t;
@@ -419,21 +420,10 @@ declare function quat_from_to(v0: vec4_t, v1: vec4_t): quat_t;
 declare function quat_inv(q: quat_t): quat_t;
 
 declare type mat3_t = {
-	m?: f32_ptr;
-	m00: f32;
-	m01: f32;
-	m02: f32;
-	m10: f32;
-	m11: f32;
-	m12: f32;
-	m20: f32;
-	m21: f32;
-	m22: f32;
+	m?: f32_ptr; m00 : f32; m01 : f32; m02 : f32; m10 : f32; m11 : f32; m12 : f32; m20 : f32; m21 : f32; m22 : f32;
 };
 
-declare function mat3_create(_00: f32, _10: f32, _20: f32,
-							 _01: f32, _11: f32, _21: f32,
-							 _02: f32, _12: f32, _22: f32): mat3_t;
+declare function mat3_create(_00: f32, _10: f32, _20: f32, _01: f32, _11: f32, _21: f32, _02: f32, _12: f32, _22: f32): mat3_t;
 declare function mat3_identity(): mat3_t;
 declare function mat3_translation(x: f32, y: f32): mat3_t;
 declare function mat3_rotation(alpha: f32): mat3_t;
@@ -443,35 +433,18 @@ declare function mat3_nan(): mat3_t;
 declare function mat3_isnan(m: mat3_t): bool;
 
 declare type mat4_t = {
-	m?: f32_ptr;
-	m00: f32;
-	m01: f32;
-	m02: f32;
-	m03: f32;
-	m10: f32;
-	m11: f32;
-	m12: f32;
-	m13: f32;
-	m20: f32;
-	m21: f32;
-	m22: f32;
-	m23: f32;
-	m30: f32;
-	m31: f32;
-	m32: f32;
-	m33: f32;
+	m?: f32_ptr; m00 : f32; m01 : f32; m02 : f32; m03 : f32; m10 : f32; m11 : f32; m12 : f32; m13 : f32; m20 : f32; m21 : f32; m22 : f32; m23 : f32; m30 : f32;
+	m31 : f32;
+	m32 : f32;
+	m33 : f32;
 };
 
 declare type mat4_decomposed_t = {
-	loc: vec4_t;
-	rot: quat_t;
-	scl: vec4_t;
+	loc : vec4_t; rot : quat_t; scl : vec4_t;
 }
 
-declare function mat4_create(_00: f32, _10: f32, _20: f32, _30: f32,
-							 _01: f32, _11: f32, _21: f32, _31: f32,
-							 _02: f32, _12: f32, _22: f32, _32: f32,
-							 _03: f32, _13: f32, _23: f32, _33: f32): mat4_t;
+declare function mat4_create(_00: f32, _10: f32, _20: f32, _30: f32, _01: f32, _11: f32, _21: f32, _31: f32, _02: f32, _12: f32, _22: f32, _32: f32, _03: f32,
+                             _13: f32, _23: f32, _33: f32): mat4_t;
 declare function mat4_identity(): mat4_t;
 declare function mat4_from_f32_array(a: f32_array_t, offset: i32 = 0): mat4_t;
 declare function mat4_persp(fov_y: f32, aspect: f32, zn: f32, zf: f32): mat4_t;
@@ -502,15 +475,14 @@ declare function mat4_cofactor(m0: f32, m1: f32, m2: f32, m3: f32, m4: f32, m5: 
 declare function mat4_determinant(m: mat4_t): f32;
 declare function mat4_nan(): mat4_t;
 declare function mat4_isnan(m: mat4_t): bool;
-declare let mat4nan: mat4_t;
+declare let      mat4nan: mat4_t;
 
 type mat4_box_t = {
 	v: mat4_t;
 };
 
 declare type vec2_t = {
-	x: f32;
-	y: f32;
+	x : f32; y : f32;
 };
 
 declare function vec2_create(x: f32 = 0.0, y: f32 = 0.0): vec2_t;
@@ -526,10 +498,7 @@ declare function vec2_nan(): vec2_t;
 declare function vec2_isnan(a: vec2_t): bool;
 
 declare type vec4_t = {
-	x: f32;
-	y: f32;
-	z: f32;
-	w: f32;
+	x : f32; y : f32; z : f32; w : f32;
 };
 
 declare function vec4_create(x: f32 = 0.0, y: f32 = 0.0, z: f32 = 0.0, w: f32 = 1.0): vec4_t;
@@ -570,8 +539,8 @@ declare function f32_isnan(f: f32): bool;
 
 function gpu_vertex_struct_add(raw: gpu_vertex_structure_t, name: string, data: vertex_data_t) {
 	let e: gpu_vertex_element_t = ADDRESS(ARRAY_ACCESS(raw.elements, raw.size));
-	e.name = name;
-	e.data = data;
+	e.name                      = name;
+	e.data                      = data;
 	raw.size++;
 }
 
@@ -618,7 +587,7 @@ declare type gpu_buffer_t = {
 };
 
 enum clear_flag_t {
-	NONE = 0,
+	NONE  = 0,
 	COLOR = 1,
 	DEPTH = 2,
 }
@@ -677,10 +646,10 @@ enum cursor_t {
 	SIZENS,
 }
 
-declare let ui_nodes_enum_texts: (s: string)=>string[];
-declare let ui_nodes_preview_image: (n: ui_node_t)=>gpu_texture_t;
+declare let ui_nodes_enum_texts: (s: string)       => string[];
+declare let ui_nodes_preview_image: (n: ui_node_t) => gpu_texture_t;
 declare let ui_touch_scroll: bool;
-declare let ui_touch_hold : bool;
+declare let ui_touch_hold: bool;
 declare let ui_touch_tooltip: bool;
 declare let ui_on_border_hover: any;
 declare let ui_on_tab_drop: any;
@@ -704,20 +673,25 @@ declare let ui_nodes_grid_snap: bool;
 declare function ui_nest(handle: ui_handle_t, pos: i32): ui_handle_t;
 declare function ui_theme_default(theme: ui_theme_t): void;
 declare function ui_tab(handle: ui_handle_t, text: string, vertical: bool = false, color: i32 = -1, align_right: bool = false): bool;
-declare function ui_combo(handle: ui_handle_t, texts: string[], label: string = "", show_label: bool = false, align: ui_align_t = ui_align_t.LEFT, search_bar: bool = true): i32;
-declare function ui_slider(handle: ui_handle_t, text: string, from: f32 = 0.0, to: f32 = 1.0, filled: bool = false, precision: f32 = 100.0, display_value: bool = true, align: ui_align_t = ui_align_t.RIGHT, text_edit: bool = true): f32;
+declare function ui_combo(handle: ui_handle_t, texts: string[], label: string = "", show_label: bool = false, align: ui_align_t = ui_align_t.LEFT,
+                          search_bar: bool = true): i32;
+declare function ui_slider(handle: ui_handle_t, text: string, from: f32 = 0.0, to: f32 = 1.0, filled: bool = false, precision: f32 = 100.0,
+                           display_value: bool = true, align: ui_align_t = ui_align_t.RIGHT, text_edit: bool = true): f32;
 declare function ui_button(text: string, align: ui_align_t = ui_align_t.CENTER, label: string = ""): bool;
 declare function ui_text(text: string, align: ui_align_t = ui_align_t.LEFT, bg: i32 = 0x00000000): ui_state_t;
-declare function ui_text_input(handle: ui_handle_t, label: string = "", align: ui_align_t = ui_align_t.LEFT, editable: bool = true, live_update: bool = false): string;
+declare function ui_text_input(handle: ui_handle_t, label: string = "", align: ui_align_t = ui_align_t.LEFT, editable: bool = true,
+                               live_update: bool = false): string;
 declare function ui_check(handle: ui_handle_t, text: string, label: string = ""): bool;
-declare function ui_color_wheel(handle: ui_handle_t, alpha: bool = false, w: f32 = -1.0, h: f32 = -1.0, color_preview: bool = true, picker: ()=>void = null, data: any = null): color_t;
+declare function ui_color_wheel(handle: ui_handle_t, alpha: bool = false, w: f32 = -1.0, h: f32 = -1.0, color_preview: bool = true, picker: () => void = null,
+                                data: any = null): color_t;
 declare function ui_hovered_tab_name(): string;
 declare function ui_radio(handle: ui_handle_t, position: i32, text: string, label: string = ""): bool;
 declare function ui_start_text_edit(handle: ui_handle_t, align: ui_align_t = ui_align_t.LEFT): void;
 declare function ui_tooltip(s: string): void;
 declare function ui_tooltip_image(tex: any, max_width: i32 = 0): void;
 declare function ui_separator(h: i32 = 4, fill: bool = true): void;
-declare function ui_text_area(handle: ui_handle_t, align: ui_align_t = ui_align_t.LEFT, editable: bool = true, label: string = "", word_wrap: bool = false): string;
+declare function ui_text_area(handle: ui_handle_t, align: ui_align_t = ui_align_t.LEFT, editable: bool = true, label: string = "",
+                              word_wrap: bool = false): string;
 declare function ui_begin(ui: ui_t): void;
 declare function ui_end_window(): void;
 declare function ui_end_region(): void;
@@ -757,80 +731,64 @@ declare function ui_next_node_id(nodes: ui_node_t[]): i32;
 declare function ui_node_canvas(nodes: ui_nodes_t, canvas: ui_node_canvas_t): void;
 
 declare type gpu_texture_t = {
-	width: i32;
-	height: i32;
+	width : i32; height : i32;
 };
 
 declare type ui_theme_t = any;
 
 declare type ui_t = {
-	ops: ui_options_t;
-	is_hovered: bool;
-	is_typing: bool;
-	is_escape_down: bool;
-	is_delete_down: bool;
-	is_return_down: bool;
-	is_ctrl_down: bool;
-	is_released: bool;
-	is_key_pressed: bool;
-	is_scrolling: bool;
-	key_code: i32;
-	input_started: bool;
-	input_started_r: bool;
-	input_released: bool;
-	input_released_r: bool;
-	input_x: i32;
-	input_y: i32;
-	input_started_x: i32;
-	input_started_y: i32;
-	input_enabled: bool;
-	input_down_r: bool;
-	input_dx: i32;
-	input_dy: i32;
-	input_wheel_delta: i32;
-	_x: i32;
-	_y: i32;
-	_w: i32;
-	_window_w: i32;
-	_window_h: i32;
-	_window_x: i32;
-	_window_y: i32;
-	scroll_enabled: bool;
-	input_down: bool;
-	font_size: i32;
-	image_scroll_align: bool;
-	changed: bool;
-	font_offset_y: f32;
-	enabled: bool;
-	scissor: bool;
-	text_selected_handle: ui_handle_t;
-	submit_text_handle: ui_handle_t;
-	combo_selected_handle: ui_handle_t;
-	current_ratio: i32;
-	elements_baked: bool;
-	window_border_right: i32;
-	window_border_top: i32;
-	window_border_bottom: i32;
+	ops : ui_options_t; is_hovered : bool; is_typing : bool; is_escape_down : bool; is_delete_down : bool; is_return_down : bool; is_ctrl_down : bool;
+	is_released : bool;
+	is_key_pressed : bool;
+	is_scrolling : bool;
+	key_code : i32;
+	input_started : bool;
+	input_started_r : bool;
+	input_released : bool;
+	input_released_r : bool;
+	input_x : i32;
+	input_y : i32;
+	input_started_x : i32;
+	input_started_y : i32;
+	input_enabled : bool;
+	input_down_r : bool;
+	input_dx : i32;
+	input_dy : i32;
+	input_wheel_delta : i32;
+	_x : i32;
+	_y : i32;
+	_w : i32;
+	_window_w : i32;
+	_window_h : i32;
+	_window_x : i32;
+	_window_y : i32;
+	scroll_enabled : bool;
+	input_down : bool;
+	font_size : i32;
+	image_scroll_align : bool;
+	changed : bool;
+	font_offset_y : f32;
+	enabled : bool;
+	scissor : bool;
+	text_selected_handle : ui_handle_t;
+	submit_text_handle : ui_handle_t;
+	combo_selected_handle : ui_handle_t;
+	current_ratio : i32;
+	elements_baked : bool;
+	window_border_right : i32;
+	window_border_top : i32;
+	window_border_bottom : i32;
 };
 
 declare type ui_handle_t = {
-	f: f32;
-	i: i32;
-	b: bool;
-	color: u32;
-	text: string;
-	redraws: i32;
-	scroll_offset: f32;
-	scroll_enabled: bool;
-	layout: i32;
-	last_max_x: f32;
-	last_max_y: f32;
-	drag_enabled: bool;
-	drag_x: i32;
-	drag_y: i32;
-	changed: bool;
-	init: bool;
-	children: ui_handle_t[];
+	f : f32; i : i32; b : bool; color : u32; text : string; redraws : i32; scroll_offset : f32; scroll_enabled : bool; layout : i32; last_max_x : f32;
+	last_max_y : f32;
+	drag_enabled : bool;
+	drag_x : i32;
+	drag_y : i32;
+	changed : bool;
+	init : bool;
+	children : ui_handle_t[];
 };
 
 declare type ui_options_t = {
@@ -914,7 +872,7 @@ declare type ui_node_button_t = {
 };
 
 declare type ui_nodes_t = {
-	color_picker_callback?: (col: color_t)=>void;
+	color_picker_callback?: (col: color_t) => void;
 	nodes_selected_id?: i32[];
 	_input_started?: bool;
 	nodes_drag?: bool;
@@ -944,9 +902,9 @@ enum ui_state_t {
 }
 
 enum _ui_node_flag_t {
-	NONE = 0,
+	NONE      = 0,
 	COLLAPSED = 1,
-	PREVIEW = 2,
+	PREVIEW   = 2,
 }
 
 declare function ui_tooltip_image(image: gpu_texture_t, max_width: i32 = 0): void;
@@ -972,8 +930,8 @@ function ui_nodes_INPUT_Y(canvas: ui_node_canvas_t, node: ui_node_t, pos: i32): 
 	return UI_INPUT_Y(canvas, node, pos);
 }
 
-let ui_children: map_t<string, ui_handle_t> = map_create();
-let ui_nodes_custom_buttons: map_t<string, (i: i32)=>void> = map_create();
+let ui_children: map_t<string, ui_handle_t>                  = map_create();
+let ui_nodes_custom_buttons: map_t<string, (i: i32) => void> = map_create();
 
 function ui_handle(s: string): ui_handle_t {
 	let h: ui_handle_t = map_get(ui_children, s);
@@ -987,9 +945,9 @@ function ui_handle(s: string): ui_handle_t {
 }
 
 function ui_create(ops: ui_options_t): ui_t {
-    let raw: ui_t = {};
-    ui_init(raw, ops);
-    return raw;
+	let raw: ui_t = {};
+	ui_init(raw, ops);
+	return raw;
 }
 
 function ui_theme_create(): ui_theme_t {
@@ -1006,12 +964,7 @@ function nodes_on_custom_button(node_id: i32, button_name: string) {
 function ui_nodes_create(): ui_nodes_t {
 	let raw: ui_nodes_t = {};
 	ui_nodes_init(raw);
-	ui_nodes_exclude_remove = [
-		"OUTPUT_MATERIAL_PBR",
-		"GROUP_OUTPUT",
-		"GROUP_INPUT",
-		"BrushOutputNode"
-	];
+	ui_nodes_exclude_remove   = [ "OUTPUT_MATERIAL_PBR", "GROUP_OUTPUT", "GROUP_INPUT", "BrushOutputNode" ];
 	ui_nodes_on_custom_button = nodes_on_custom_button;
 	return raw;
 }

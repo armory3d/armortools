@@ -2,28 +2,15 @@
 let make_mesh_preview_opacity_discard_decal: f32 = 0.05;
 
 function make_mesh_preview_run(data: material_t, matcon: material_context_t): node_shader_context_t {
-	let context_id: string = "mesh";
+	let context_id: string      = "mesh";
 	let props: shader_context_t = {
-		name: context_id,
-		depth_write: true,
-		compare_mode: "less",
-		cull_mode: "clockwise",
-		vertex_elements: [
-			{
-				name: "pos",
-				data: "short4norm"
-			},
-			{
-				name: "nor",
-				data: "short2norm"
-			},
-			{
-				name: "tex",
-				data: "short2norm"
-			}
-		],
-		color_attachments: ["RGBA64", "RGBA64"],
-		depth_attachment: "D32"
+		name : context_id,
+		depth_write : true,
+		compare_mode : "less",
+		cull_mode : "clockwise",
+		vertex_elements : [ {name : "pos", data : "short4norm"}, {name : "nor", data : "short2norm"}, {name : "tex", data : "short2norm"} ],
+		color_attachments : [ "RGBA64", "RGBA64" ],
+		depth_attachment : "D32"
 	};
 	let con_mesh: node_shader_context_t = node_shader_context_create(data, props);
 
@@ -34,28 +21,28 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	node_shader_add_constant(kong, "WVP: float4x4", "_world_view_proj_matrix");
 	node_shader_write_attrib_vert(kong, "output.pos = constants.WVP * float4(" + pos + ".xyz, 1.0);");
 
-	let sc: f32 = context_raw.brush_scale * context_raw.brush_nodes_scale;
+	let sc: f32             = context_raw.brush_scale * context_raw.brush_nodes_scale;
 	let brush_scale: string = sc + "";
 	node_shader_add_out(kong, "tex_coord: float2");
 	node_shader_write_attrib_vert(kong, "output.tex_coord = input.tex * float(" + brush_scale + ");");
 	node_shader_write_attrib_frag(kong, "var tex_coord: float2 = input.tex_coord;");
 
-	let decal: bool = context_raw.decal_preview;
-	parser_material_sample_keep_aspect = decal;
-	parser_material_sample_uv_scale = brush_scale;
-	parser_material_parse_height = make_material_height_used;
+	let decal: bool                         = context_raw.decal_preview;
+	parser_material_sample_keep_aspect      = decal;
+	parser_material_sample_uv_scale         = brush_scale;
+	parser_material_parse_height            = make_material_height_used;
 	parser_material_parse_height_as_channel = true;
-	let sout: shader_out_t = parser_material_parse(context_raw.material.canvas, con_mesh, kong, matcon);
-	parser_material_parse_height = false;
+	let sout: shader_out_t                  = parser_material_parse(context_raw.material.canvas, con_mesh, kong, matcon);
+	parser_material_parse_height            = false;
 	parser_material_parse_height_as_channel = false;
-	parser_material_sample_keep_aspect = false;
-	let base: string = sout.out_basecol;
-	let rough: string = sout.out_roughness;
-	let met: string = sout.out_metallic;
-	let occ: string = sout.out_occlusion;
-	let opac: string = sout.out_opacity;
-	let height: string = sout.out_height;
-	let nortan: string = parser_material_out_normaltan;
+	parser_material_sample_keep_aspect      = false;
+	let base: string                        = sout.out_basecol;
+	let rough: string                       = sout.out_roughness;
+	let met: string                         = sout.out_metallic;
+	let occ: string                         = sout.out_occlusion;
+	let opac: string                        = sout.out_opacity;
+	let height: string                      = sout.out_height;
+	let nortan: string                      = parser_material_out_normaltan;
 	node_shader_write_frag(kong, "var basecol: float3 = pow3(" + base + ", float3(2.2, 2.2, 2.2));");
 	node_shader_write_frag(kong, "var roughness: float = " + rough + ";");
 	node_shader_write_frag(kong, "var metallic: float = " + met + ";");
@@ -76,7 +63,7 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	}
 
 	kong.frag_out = "float4[2]";
-	kong.frag_n = true;
+	kong.frag_n   = true;
 
 	node_shader_add_function(kong, str_pack_float_int16);
 	node_shader_add_function(kong, str_cotangent_frame);
@@ -115,14 +102,16 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 		node_shader_write_frag(kong, "output[1] = float4(basecol, occlusion);");
 	}
 	else {
-		node_shader_write_frag(kong, "output[0] = float4(n.x, n.y, lerp(1.0, roughness, opacity), pack_f32_i16(lerp(1.0, metallic, opacity), uint(0)));"); // metallic/matid
+		node_shader_write_frag(
+		    kong, "output[0] = float4(n.x, n.y, lerp(1.0, roughness, opacity), pack_f32_i16(lerp(1.0, metallic, opacity), uint(0)));"); // metallic/matid
 		node_shader_write_frag(kong, "output[1] = float4(lerp3(float3(0.0, 0.0, 0.0), basecol, opacity), occlusion);");
 	}
 
 	parser_material_finalize(con_mesh);
 
 	con_mesh.data.shader_from_source = true;
-	gpu_create_shaders_from_kong(node_shader_get(kong), ADDRESS(con_mesh.data.vertex_shader), ADDRESS(con_mesh.data.fragment_shader), ADDRESS(con_mesh.data._.vertex_shader_size), ADDRESS(con_mesh.data._.fragment_shader_size));
+	gpu_create_shaders_from_kong(node_shader_get(kong), ADDRESS(con_mesh.data.vertex_shader), ADDRESS(con_mesh.data.fragment_shader),
+	                             ADDRESS(con_mesh.data._.vertex_shader_size), ADDRESS(con_mesh.data._.fragment_shader_size));
 
 	return con_mesh;
 }

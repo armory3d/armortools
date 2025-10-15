@@ -1,7 +1,7 @@
 
-let ui_toolbar_default_w: i32 = 36;
-let ui_toolbar_handle: ui_handle_t = ui_handle_create();
-let ui_toolbar_last_tool: i32 = 0;
+let ui_toolbar_default_w: i32       = 36;
+let ui_toolbar_handle: ui_handle_t  = ui_handle_create();
+let ui_toolbar_last_tool: i32       = 0;
 let ui_toolbar_tool_names: string[] = [
 	_tr("Brush"),
 	_tr("Eraser"),
@@ -37,24 +37,23 @@ let ui_toolbar_tooltip_extras: string[] = [
 
 let _ui_toolbar_i: i32;
 
-function ui_toolbar_init() {
-}
+function ui_toolbar_init() {}
 
 function ui_toolbar_draw_tool(tool: i32, img: gpu_texture_t, icon_accent: i32) {
 	ui._x += 2;
 	if (context_raw.tool == tool) {
 		ui_toolbar_draw_highlight();
 	}
-	let tile_y: i32 = math_floor(tool / 12);
-	let tile_x: i32 = tile_y % 2 == 0 ? tool % 12 : (11 - (tool % 12));
+	let tile_y: i32  = math_floor(tool / 12);
+	let tile_x: i32  = tile_y % 2 == 0 ? tool % 12 : (11 - (tool % 12));
 	let rect: rect_t = resource_tile50(img, tile_x, tile_y);
-	let _y: i32 = ui._y;
+	let _y: i32      = ui._y;
 
 	let visible: bool = true;
 	if (config_raw.layout[layout_size_t.HEADER] == 0) {
 		let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
 		let statusy: i32 = iron_window_height() - statush;
-		visible = ui._y + ui._w * 2 < statusy;
+		visible          = ui._y + ui._w * 2 < statusy;
 	}
 
 	let image_state: ui_state_t = ui_sub_image(img, icon_accent, -1.0, rect.x, rect.y, rect.w, rect.h);
@@ -78,7 +77,7 @@ function ui_toolbar_draw_tool(tool: i32, img: gpu_texture_t, icon_accent: i32) {
 
 	if (ui.is_hovered) {
 		let tooltip: string = tr(ui_toolbar_tool_names[tool]);
-		let key: string = map_get(config_keymap, "tool_" + to_lower_case(ui_toolbar_tool_names[tool]));
+		let key: string     = map_get(config_keymap, "tool_" + to_lower_case(ui_toolbar_tool_names[tool]));
 		if (key != "") {
 			tooltip += " (" + key + ")";
 		}
@@ -113,9 +112,9 @@ function ui_toolbar_x(): i32 {
 }
 
 function ui_toolbar_render_ui() {
-	let x: i32 = 0;
-	let y: i32 = ui_header_h;
-	let h: i32 = iron_window_height() - ui_header_h - config_raw.layout[layout_size_t.STATUS_H];
+	let x: i32              = 0;
+	let y: i32              = ui_header_h;
+	let h: i32              = iron_window_height() - ui_header_h - config_raw.layout[layout_size_t.STATUS_H];
 	let _WINDOW_BG_COL: i32 = ui.ops.theme.WINDOW_BG_COL;
 
 	if (!base_view3d_show) {
@@ -125,17 +124,17 @@ function ui_toolbar_render_ui() {
 	if (context_is_floating_toolbar()) {
 		x += ui_toolbar_x();
 		y += ui_toolbar_x() + 3 * UI_SCALE();
-		h = (ui_toolbar_tool_names.length + 1) * (ui_toolbar_w() + 2);
+		h                          = (ui_toolbar_tool_names.length + 1) * (ui_toolbar_w() + 2);
 		ui.ops.theme.WINDOW_BG_COL = ui.ops.theme.SEPARATOR_COL;
 	}
 
 	if (ui_window(ui_toolbar_handle, x, y, ui_toolbar_w(), h)) {
 		ui._y -= 4 * UI_SCALE();
-		ui.image_scroll_align = false;
+		ui.image_scroll_align  = false;
 		let img: gpu_texture_t = resource_get("icons.k");
-		let col: u32 = ui.ops.theme.WINDOW_BG_COL;
-		let light: bool = col > 0xff666666;
-		let icon_accent: i32 = light ? 0xff666666 : -1;
+		let col: u32           = ui.ops.theme.WINDOW_BG_COL;
+		let light: bool        = col > 0xff666666;
+		let icon_accent: i32   = light ? 0xff666666 : -1;
 
 		// Properties icon
 		if (config_raw.layout[layout_size_t.HEADER] == 1) {
@@ -146,27 +145,27 @@ function ui_toolbar_render_ui() {
 		}
 		// Draw ">" button if header is hidden
 		else {
-			let _ELEMENT_H: i32 = ui.ops.theme.ELEMENT_H;
-			let _BUTTON_H: i32 = ui.ops.theme.BUTTON_H;
-			let _BUTTON_COL: i32 = ui.ops.theme.BUTTON_COL;
-			let _fontOffsetY: i32 = ui.font_offset_y;
-			ui.ops.theme.ELEMENT_H = math_floor(ui.ops.theme.ELEMENT_H * 1.5);
-			ui.ops.theme.BUTTON_H = ui.ops.theme.ELEMENT_H;
+			let _ELEMENT_H: i32     = ui.ops.theme.ELEMENT_H;
+			let _BUTTON_H: i32      = ui.ops.theme.BUTTON_H;
+			let _BUTTON_COL: i32    = ui.ops.theme.BUTTON_COL;
+			let _fontOffsetY: i32   = ui.font_offset_y;
+			ui.ops.theme.ELEMENT_H  = math_floor(ui.ops.theme.ELEMENT_H * 1.5);
+			ui.ops.theme.BUTTON_H   = ui.ops.theme.ELEMENT_H;
 			ui.ops.theme.BUTTON_COL = ui.ops.theme.WINDOW_BG_COL;
-			let font_height: i32 = draw_font_height(ui.ops.font, ui.font_size);
-			ui.font_offset_y = (UI_ELEMENT_H() - font_height) / 2;
-			let _w: i32 = ui._w;
-			ui._w = ui_toolbar_w();
+			let font_height: i32    = draw_font_height(ui.ops.font, ui.font_size);
+			ui.font_offset_y        = (UI_ELEMENT_H() - font_height) / 2;
+			let _w: i32             = ui._w;
+			ui._w                   = ui_toolbar_w();
 
 			if (ui_button(">")) {
 				ui_toolbar_tool_properties_menu();
 			}
 
-			ui._w = _w;
-			ui.ops.theme.ELEMENT_H = _ELEMENT_H;
-			ui.ops.theme.BUTTON_H = _BUTTON_H;
+			ui._w                   = _w;
+			ui.ops.theme.ELEMENT_H  = _ELEMENT_H;
+			ui.ops.theme.BUTTON_H   = _BUTTON_H;
 			ui.ops.theme.BUTTON_COL = _BUTTON_COL;
-			ui.font_offset_y = _fontOffsetY;
+			ui.font_offset_y        = _fontOffsetY;
 		}
 		if (ui.is_hovered) {
 			ui_tooltip(tr("Toggle header"));
@@ -186,7 +185,7 @@ function ui_toolbar_render_ui() {
 
 	if (config_raw.touch_ui) {
 		// Hide scrollbar
-		let _SCROLL_W: i32 = ui.ops.theme.SCROLL_W;
+		let _SCROLL_W: i32    = ui.ops.theme.SCROLL_W;
 		ui.ops.theme.SCROLL_W = 0;
 		ui_end_window();
 		ui.ops.theme.SCROLL_W = _SCROLL_W;
@@ -194,7 +193,7 @@ function ui_toolbar_render_ui() {
 }
 
 function ui_toolbar_tool_properties_menu() {
-	ui_menu_draw(function () {
+	ui_menu_draw(function() {
 		ui.changed = false;
 		ui_header_draw_tool_properties();
 		if (ui.changed || ui.is_typing) {
@@ -209,5 +208,5 @@ function ui_toolbar_tool_properties_menu() {
 function ui_toolbar_draw_highlight() {
 	let size: i32 = ui_toolbar_w() - 4;
 	draw_set_color(ui.ops.theme.HIGHLIGHT_COL);
-	ui_draw_rect(true, ui._x + -1,  ui._y + 2, size + 2, size + 2);
+	ui_draw_rect(true, ui._x + -1, ui._y + 2, size + 2, size + 2);
 }

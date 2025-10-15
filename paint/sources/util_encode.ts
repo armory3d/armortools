@@ -1,6 +1,6 @@
 
 function util_encode_scene(raw: scene_t): buffer_t {
-	let size: i32 = 8 * 1024 * 1024 + util_encode_mesh_data_size(raw.mesh_datas);
+	let size: i32         = 8 * 1024 * 1024 + util_encode_mesh_data_size(raw.mesh_datas);
 	let encoded: buffer_t = buffer_create(size);
 
 	armpack_encode_start(encoded.buffer);
@@ -27,7 +27,7 @@ function util_encode_scene(raw: scene_t): buffer_t {
 	armpack_encode_string("embedded_datas");
 	armpack_encode_null();
 
-	let ei: i32 = armpack_encode_end();
+	let ei: i32    = armpack_encode_end();
 	encoded.length = ei;
 	return encoded;
 }
@@ -57,7 +57,7 @@ function util_encode_packed_assets_size(assets: packed_asset_t[]): i32 {
 	let size: i32 = 0;
 	for (let i: i32 = 0; i < assets.length; ++i) {
 		let asset: packed_asset_t = assets[i];
-		let bytes: buffer_t = asset.bytes;
+		let bytes: buffer_t       = asset.bytes;
 		size += bytes.length;
 	}
 	return size;
@@ -131,23 +131,19 @@ function util_encode_mesh_datas(datas: mesh_data_t[]) {
 }
 
 function util_encode_project(raw: project_format_t): buffer_t {
-    let size: i32 = 32 * 1024 * 1024
-		+ util_encode_layer_data_size(raw.layer_datas)
-		+ util_encode_mesh_data_size(raw.mesh_datas)
-		+ util_encode_packed_assets_size(raw.packed_assets)
-		+ util_encode_buffers_size(raw.brush_icons)
-		+ util_encode_buffers_size(raw.material_icons)
-		+ util_encode_buffers_size(raw.mesh_icons);
-    let encoded: buffer_t = buffer_create(size);
+	let size: i32 = 32 * 1024 * 1024 + util_encode_layer_data_size(raw.layer_datas) + util_encode_mesh_data_size(raw.mesh_datas) +
+	                util_encode_packed_assets_size(raw.packed_assets) + util_encode_buffers_size(raw.brush_icons) +
+	                util_encode_buffers_size(raw.material_icons) + util_encode_buffers_size(raw.mesh_icons);
+	let encoded: buffer_t = buffer_create(size);
 
-    armpack_encode_start(encoded.buffer);
-    armpack_encode_map(22);
-    armpack_encode_string("version");
-    armpack_encode_string(raw.version);
-    armpack_encode_string("assets");
-    armpack_encode_array_string(raw.assets);
-    armpack_encode_string("is_bgra");
-    armpack_encode_bool(raw.is_bgra);
+	armpack_encode_start(encoded.buffer);
+	armpack_encode_map(22);
+	armpack_encode_string("version");
+	armpack_encode_string(raw.version);
+	armpack_encode_string("assets");
+	armpack_encode_array_string(raw.assets);
+	armpack_encode_string("is_bgra");
+	armpack_encode_bool(raw.is_bgra);
 	armpack_encode_string("packed_assets");
 	if (raw.packed_assets != null) {
 		armpack_encode_array(raw.packed_assets.length);
@@ -345,7 +341,7 @@ function util_encode_project(raw: project_format_t): buffer_t {
 	armpack_encode_string("atlas_names");
 	armpack_encode_array_string(raw.atlas_names);
 
-	let ei: i32 = armpack_encode_end();
+	let ei: i32    = armpack_encode_end();
 	encoded.length = ei;
 	return encoded;
 }

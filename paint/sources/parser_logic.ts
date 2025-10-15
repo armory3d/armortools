@@ -69,8 +69,8 @@ function parser_logic_safe_src(s: string): string {
 
 function parser_logic_node_name(node: ui_node_t): string {
 	let safe: string = parser_logic_safe_src(node.name);
-	let nid: i32 = node.id;
-	let s: string = safe + nid;
+	let nid: i32     = node.id;
+	let s: string    = safe + nid;
 	return s;
 }
 
@@ -78,8 +78,8 @@ function parser_logic_parse(canvas: ui_node_canvas_t) {
 	parser_logic_nodes = canvas.nodes;
 	parser_logic_links = canvas.links;
 
-	parser_logic_parsed_nodes = [];
-	parser_logic_node_map = map_create();
+	parser_logic_parsed_nodes   = [];
+	parser_logic_node_map       = map_create();
 	let root_nodes: ui_node_t[] = parser_logic_get_root_nodes(canvas);
 
 	for (let i: i32 = 0; i < root_nodes.length; ++i) {
@@ -105,16 +105,16 @@ function parser_logic_build_node(node: ui_node_t): string {
 
 	// Create inputs
 	let inp_node: logic_node_ext_t = null;
-	let inp_from: i32 = 0;
+	let inp_from: i32              = 0;
 	for (let i: i32 = 0; i < node.inputs.length; ++i) {
 		let inp: ui_node_socket_t = node.inputs[i];
 		// Is linked - find node
 		let l: ui_node_link_t = parser_logic_get_input_link(inp);
 		if (l != null) {
 			let n: ui_node_t = parser_logic_get_node(l.from_id);
-			let s: string = parser_logic_build_node(n);
-			inp_node = map_get(parser_logic_node_map, s);
-			inp_from = l.from_socket;
+			let s: string    = parser_logic_build_node(n);
+			inp_node         = map_get(parser_logic_node_map, s);
+			inp_from         = l.from_socket;
 		}
 		// Not linked - create node with default values
 		else {
@@ -127,14 +127,14 @@ function parser_logic_build_node(node: ui_node_t): string {
 
 	// Create outputss
 	for (let i: i32 = 0; i < node.outputs.length; ++i) {
-		let out: ui_node_socket_t = node.outputs[i];
+		let out: ui_node_socket_t     = node.outputs[i];
 		let out_nodes: logic_node_t[] = [];
-		let ls: ui_node_link_t[] = parser_logic_get_output_links(out);
+		let ls: ui_node_link_t[]      = parser_logic_get_output_links(out);
 		if (ls != null && ls.length > 0) {
 			for (let i: i32 = 0; i < ls.length; ++i) {
 				let l: ui_node_link_t = ls[i];
-				let n: ui_node_t = parser_logic_get_node(l.to_id);
-				let out_name: string = parser_logic_build_node(n);
+				let n: ui_node_t      = parser_logic_get_node(l.to_id);
+				let out_name: string  = parser_logic_build_node(n);
 				array_push(out_nodes, map_get(parser_logic_node_map, out_name));
 			}
 		}
@@ -153,10 +153,10 @@ function parser_logic_get_root_nodes(node_group: ui_node_canvas_t): ui_node_t[] 
 	let roots: ui_node_t[] = [];
 	for (let i: i32 = 0; i < node_group.nodes.length; ++i) {
 		let node: ui_node_t = node_group.nodes[i];
-		let linked: bool = false;
+		let linked: bool    = false;
 		for (let i: i32 = 0; i < node.outputs.length; ++i) {
 			let out: ui_node_socket_t = node.outputs[i];
-			let ls: ui_node_link_t[] = parser_logic_get_output_links(out);
+			let ls: ui_node_link_t[]  = parser_logic_get_output_links(out);
 			if (ls != null && ls.length > 0) {
 				linked = true;
 				break;
@@ -211,10 +211,8 @@ function parser_logic_build_default_node(inp: ui_node_socket_t): logic_node_ext_
 function parser_logic_create_node_instance(node_type: string, raw: ui_node_t, args: f32_array_t): logic_node_ext_t {
 	if (map_get(parser_logic_custom_nodes, node_type) != null) {
 		let node: logic_node_t = logic_node_create(null);
-		node.get = map_get(parser_logic_custom_nodes, node_type);
-		node.ext = {
-			base: node
-		};
+		node.get               = map_get(parser_logic_custom_nodes, node_type);
+		node.ext               = {base : node};
 		return node.ext;
 	}
 
@@ -222,6 +220,6 @@ function parser_logic_create_node_instance(node_type: string, raw: ui_node_t, ar
 		nodes_brush_init();
 	}
 
-	let create: (raw: ui_node_t, args: f32_array_t)=>logic_node_ext_t = map_get(nodes_brush_creates, node_type);
+	let create: (raw: ui_node_t, args: f32_array_t) => logic_node_ext_t = map_get(nodes_brush_creates, node_type);
 	return create(raw, args);
 }

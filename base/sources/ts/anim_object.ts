@@ -1,5 +1,5 @@
 
-///if arm_anim
+/// if arm_anim
 
 type anim_object_t = {
 	base?: anim_raw_t;
@@ -10,11 +10,11 @@ type anim_object_t = {
 
 function anim_object_create(object: object_t, oactions: scene_t[]): anim_object_t {
 	let raw: anim_object_t = {};
-	raw.base = anim_create();
-	raw.base.ext = raw;
-	raw.base.ext_type = "anim_object_t";
-	raw.object = object;
-	raw.oactions = oactions;
+	raw.base               = anim_create();
+	raw.base.ext           = raw;
+	raw.base.ext_type      = "anim_object_t";
+	raw.object             = object;
+	raw.oactions           = oactions;
 	anim_object_play(raw);
 	return raw;
 }
@@ -40,9 +40,8 @@ function anim_object_interpolate_linear(t: f32, t1: f32, t2: f32, v1: f32, v2: f
 }
 
 function anim_object_check_frame_index_t(raw: anim_object_t, frame_values: u32_array_t, t: f32): bool {
-	return raw.base.speed > 0 ?
-		raw.base.frame_index < frame_values.length - 2 && t > frame_values[raw.base.frame_index + 1] * raw.base.frame_time :
-		raw.base.frame_index > 1 && t > frame_values[raw.base.frame_index - 1] * raw.base.frame_time;
+	return raw.base.speed > 0 ? raw.base.frame_index < frame_values.length - 2 && t > frame_values[raw.base.frame_index + 1] * raw.base.frame_time
+	                          : raw.base.frame_index > 1 && t > frame_values[raw.base.frame_index - 1] * raw.base.frame_time;
 }
 
 function anim_object_update_transform_anim(raw: anim_object_t, anim: anim_t, transform: transform_t) {
@@ -55,12 +54,12 @@ function anim_object_update_transform_anim(raw: anim_object_t, anim: anim_t, tra
 	if (anim.has_delta) {
 		let t: transform_t = transform;
 		if (vec4_isnan(t.dloc)) {
-			t.dloc = vec4_create();
-			t.drot = quat_create();
+			t.dloc   = vec4_create();
+			t.drot   = quat_create();
 			t.dscale = vec4_create();
 		}
-		t.dloc = vec4_create(0, 0, 0);
-		t.dscale = vec4_create(0, 0, 0);
+		t.dloc      = vec4_create(0, 0, 0);
+		t.dscale    = vec4_create(0, 0, 0);
 		t._deuler_x = t._deuler_y = t._deuler_z = 0.0;
 	}
 
@@ -189,7 +188,7 @@ function anim_object_update_transform_anim(raw: anim_object_t, anim: anim_t, tra
 	}
 }
 
-function anim_object_play(raw: anim_object_t, action: string = "", on_complete: ()=>void = null, blend_time: f32 = 0.0, speed: f32 = 1.0, loop: bool = true) {
+function anim_object_play(raw: anim_object_t, action: string = "", on_complete: () => void = null, blend_time: f32 = 0.0, speed: f32 = 1.0, loop: bool = true) {
 	anim_play_super(raw.base, action, on_complete, blend_time, speed, loop);
 
 	if (raw.base.action == "" && raw.oactions[0] != null) {
@@ -212,9 +211,7 @@ function anim_object_update(raw: anim_object_t, delta: f32) {
 }
 
 function anim_object_is_track_end(raw: anim_object_t, track: track_t): bool {
-	return raw.base.speed > 0 ?
-		raw.base.frame_index >= track.frames.length - 2 :
-		raw.base.frame_index <= 0;
+	return raw.base.speed > 0 ? raw.base.frame_index >= track.frames.length - 2 : raw.base.frame_index <= 0;
 }
 
 function anim_object_total_frames(raw: anim_object_t): i32 {
@@ -224,4 +221,4 @@ function anim_object_total_frames(raw: anim_object_t): i32 {
 	return raw.oaction.anim.end - raw.oaction.anim.begin;
 }
 
-///end
+/// end

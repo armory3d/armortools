@@ -7,34 +7,34 @@ let parser_material_canvases: ui_node_canvas_t[];
 let parser_material_nodes: ui_node_t[];
 let parser_material_links: ui_node_link_t[];
 let parser_material_cotangent_frame_written: bool;
-let parser_material_tex_coord: string = "tex_coord";
-let parser_material_eps: f32 = 0.000001;
-let parser_material_node_values: map_t<string, any> = map_create();
+let parser_material_tex_coord: string                = "tex_coord";
+let parser_material_eps: f32                         = 0.000001;
+let parser_material_node_values: map_t<string, any>  = map_create();
 let parser_material_node_vectors: map_t<string, any> = map_create();
 let parser_material_custom_nodes: map_t<string, any> = map_create(); // JSValue -> (n: ui_node_t, s: string)=>string
-let parser_material_parse_surface: bool = true;
-let parser_material_parse_opacity: bool = true;
-let parser_material_parse_height: bool = false;
-let parser_material_parse_height_as_channel: bool = false;
-let parser_material_parse_emission: bool = false;
-let parser_material_parse_subsurface: bool = false;
-let parser_material_parsing_basecolor: bool = false;
-let parser_material_triplanar: bool = false; // Sample using tex_coord/1/2 & tex_coord_blend
-let parser_material_sample_keep_aspect: bool = false; // Adjust uvs to preserve texture aspect ratio
-let parser_material_sample_uv_scale: string = "1.0";
-let parser_material_transform_color_space: bool = true;
-let parser_material_blur_passthrough: bool = false;
-let parser_material_warp_passthrough: bool = false;
-let parser_material_bake_passthrough: bool = false;
-let parser_material_start_group: ui_node_canvas_t = null;
-let parser_material_start_parents: ui_node_t[] = null;
-let parser_material_start_node: ui_node_t = null;
-let parser_material_arm_export_tangents: bool = true;
+let parser_material_parse_surface: bool              = true;
+let parser_material_parse_opacity: bool              = true;
+let parser_material_parse_height: bool               = false;
+let parser_material_parse_height_as_channel: bool    = false;
+let parser_material_parse_emission: bool             = false;
+let parser_material_parse_subsurface: bool           = false;
+let parser_material_parsing_basecolor: bool          = false;
+let parser_material_triplanar: bool                  = false; // Sample using tex_coord/1/2 & tex_coord_blend
+let parser_material_sample_keep_aspect: bool         = false; // Adjust uvs to preserve texture aspect ratio
+let parser_material_sample_uv_scale: string          = "1.0";
+let parser_material_transform_color_space: bool      = true;
+let parser_material_blur_passthrough: bool           = false;
+let parser_material_warp_passthrough: bool           = false;
+let parser_material_bake_passthrough: bool           = false;
+let parser_material_start_group: ui_node_canvas_t    = null;
+let parser_material_start_parents: ui_node_t[]       = null;
+let parser_material_start_node: ui_node_t            = null;
+let parser_material_arm_export_tangents: bool        = true;
 let parser_material_out_normaltan: string; // Raw tangent space normal parsed from normal map
 let parser_material_script_links: map_t<string, string> = null;
-let parser_material_parsed_map: map_t<string, string> = map_create();
-let parser_material_texture_map: map_t<string, string> = map_create();
-let parser_material_is_frag: bool = true;
+let parser_material_parsed_map: map_t<string, string>   = map_create();
+let parser_material_texture_map: map_t<string, string>  = map_create();
+let parser_material_is_frag: bool                       = true;
 
 function parser_material_get_node(id: i32): ui_node_t {
 	for (let i: i32 = 0; i < parser_material_nodes.length; ++i) {
@@ -63,22 +63,22 @@ function parser_material_get_input_link(inp: ui_node_socket_t): ui_node_link_t {
 }
 
 function parser_material_init() {
-	parser_material_parsed = [];
-	parser_material_parents = [];
+	parser_material_parsed                  = [];
+	parser_material_parents                 = [];
 	parser_material_cotangent_frame_written = false;
-	parser_material_out_normaltan = "float3(0.5, 0.5, 1.0)";
-	parser_material_script_links = null;
-	parser_material_parsing_basecolor = false;
+	parser_material_out_normaltan           = "float3(0.5, 0.5, 1.0)";
+	parser_material_script_links            = null;
+	parser_material_parsing_basecolor       = false;
 }
 
 function parser_material_parse(canvas: ui_node_canvas_t, _con: node_shader_context_t, _kong: node_shader_t, _matcon: material_context_t): shader_out_t {
 	parser_material_init();
-	parser_material_canvases = [canvas];
-	parser_material_nodes = canvas.nodes;
-	parser_material_links = canvas.links;
-	parser_material_con = _con;
-	parser_material_kong = _kong;
-	parser_material_matcon = _matcon;
+	parser_material_canvases = [ canvas ];
+	parser_material_nodes    = canvas.nodes;
+	parser_material_links    = canvas.links;
+	parser_material_con      = _con;
+	parser_material_kong     = _kong;
+	parser_material_matcon   = _matcon;
 
 	if (parser_material_start_group != null) {
 		parser_material_push_group(parser_material_start_group);
@@ -86,23 +86,17 @@ function parser_material_parse(canvas: ui_node_canvas_t, _con: node_shader_conte
 	}
 
 	if (parser_material_start_node != null) {
-		let link: ui_node_link_t = {
-			id: 99999,
-			from_id: parser_material_start_node.id,
-			from_socket: 0,
-			to_id: -1,
-			to_socket: -1
-		};
+		let link: ui_node_link_t = {id : 99999, from_id : parser_material_start_node.id, from_socket : 0, to_id : -1, to_socket : -1};
 		parser_material_write_result(link);
 		let sout: shader_out_t = {
-			out_basecol: "float3(0.0, 0.0, 0.0)",
-			out_roughness: "0.0",
-			out_metallic: "0.0",
-			out_occlusion: "1.0",
-			out_opacity: "1.0",
-			out_height: "0.0",
-			out_emission: "0.0",
-			out_subsurface: "0.0"
+			out_basecol : "float3(0.0, 0.0, 0.0)",
+			out_roughness : "0.0",
+			out_metallic : "0.0",
+			out_occlusion : "1.0",
+			out_opacity : "1.0",
+			out_height : "0.0",
+			out_emission : "0.0",
+			out_subsurface : "0.0"
 		};
 		return sout;
 	}
@@ -123,7 +117,7 @@ function parser_material_finalize(con: node_shader_context_t) {
 
 	if (kong.frag_dotnv) {
 		kong.frag_vvec = true;
-		kong.frag_n = true;
+		kong.frag_n    = true;
 	}
 	if (kong.frag_vvec) {
 		kong.frag_wposition = true;
@@ -245,8 +239,8 @@ function parser_material_push_group(g: ui_node_canvas_t) {
 function parser_material_pop_group() {
 	array_pop(parser_material_canvases);
 	let g: ui_node_canvas_t = parser_material_canvases[parser_material_canvases.length - 1];
-	parser_material_nodes = g.nodes;
-	parser_material_links = g.links;
+	parser_material_nodes   = g.nodes;
+	parser_material_links   = g.links;
 }
 
 function parser_material_parse_group(node: ui_node_t, socket: ui_node_socket_t): string {
@@ -256,9 +250,9 @@ function parser_material_parse_group(node: ui_node_t, socket: ui_node_socket_t):
 	if (output_node == null) {
 		return null;
 	}
-	let index: i32 = parser_material_socket_index(node, socket);
+	let index: i32            = parser_material_socket_index(node, socket);
 	let inp: ui_node_socket_t = output_node.inputs[index];
-	let out_group: string = parser_material_parse_input(inp);
+	let out_group: string     = parser_material_parse_input(inp);
 	array_pop(parser_material_parents);
 	parser_material_pop_group();
 	return out_group;
@@ -267,9 +261,9 @@ function parser_material_parse_group(node: ui_node_t, socket: ui_node_socket_t):
 function parser_material_parse_group_input(node: ui_node_t, socket: ui_node_socket_t): string {
 	let parent: ui_node_t = array_pop(parser_material_parents); // Leaving group
 	parser_material_pop_group();
-	let index: i32 = parser_material_socket_index(node, socket);
+	let index: i32            = parser_material_socket_index(node, socket);
 	let inp: ui_node_socket_t = parent.inputs[index];
-	let res: string = parser_material_parse_input(inp);
+	let res: string           = parser_material_parse_input(inp);
 	array_push(parser_material_parents, parent); // Return to group
 	parser_material_push_group(parser_material_get_group(parent.name));
 	return res;
@@ -292,21 +286,21 @@ function parser_material_parse_input(inp: ui_node_socket_t): string {
 }
 
 function parser_material_parse_shader_input(inp: ui_node_socket_t): shader_out_t {
-	let l: ui_node_link_t = parser_material_get_input_link(inp);
+	let l: ui_node_link_t    = parser_material_get_input_link(inp);
 	let from_node: ui_node_t = l != null ? parser_material_get_node(l.from_id) : null;
 	if (from_node != null) {
 		return parser_material_parse_shader(from_node, from_node.outputs[l.from_socket]);
 	}
 	else {
 		let sout: shader_out_t = {
-			out_basecol: "float3(0.8, 0.8, 0.8)",
-			out_roughness: "0.0",
-			out_metallic: "0.0",
-			out_occlusion: "1.0",
-			out_opacity: "1.0",
-			out_height: "0.0",
-			out_emission: "0.0",
-			out_subsurface: "0.0"
+			out_basecol : "float3(0.8, 0.8, 0.8)",
+			out_roughness : "0.0",
+			out_metallic : "0.0",
+			out_occlusion : "1.0",
+			out_opacity : "1.0",
+			out_height : "0.0",
+			out_emission : "0.0",
+			out_subsurface : "0.0"
 		};
 		return sout;
 	}
@@ -314,14 +308,14 @@ function parser_material_parse_shader_input(inp: ui_node_socket_t): shader_out_t
 
 function parser_material_parse_shader(node: ui_node_t, socket: ui_node_socket_t): shader_out_t {
 	let sout: shader_out_t = {
-		out_basecol: "float3(0.8, 0.8, 0.8)",
-		out_roughness: "0.0",
-		out_metallic: "0.0",
-		out_occlusion: "1.0",
-		out_opacity: "1.0",
-		out_height: "0.0",
-		out_emission: "0.0",
-		out_subsurface: "0.0"
+		out_basecol : "float3(0.8, 0.8, 0.8)",
+		out_roughness : "0.0",
+		out_metallic : "0.0",
+		out_occlusion : "1.0",
+		out_opacity : "1.0",
+		out_height : "0.0",
+		out_emission : "0.0",
+		out_subsurface : "0.0"
 	};
 
 	if (node.type == "OUTPUT_MATERIAL_PBR") {
@@ -330,7 +324,7 @@ function parser_material_parse_shader(node: ui_node_t, socket: ui_node_socket_t)
 			parse_normal_map_color_input(node.inputs[5]);
 			// Base color
 			parser_material_parsing_basecolor = true;
-			sout.out_basecol = parser_material_parse_vector_input(node.inputs[0]);
+			sout.out_basecol                  = parser_material_parse_vector_input(node.inputs[0]);
 			parser_material_parsing_basecolor = false;
 			// Occlusion
 			sout.out_occlusion = parser_material_parse_value_input(node.inputs[2]);
@@ -377,11 +371,11 @@ function parser_material_write(raw: node_shader_t, s: string) {
 }
 
 function parser_material_parse_vector_input(inp: ui_node_socket_t): string {
-	let l: ui_node_link_t = parser_material_get_input_link(inp);
+	let l: ui_node_link_t    = parser_material_get_input_link(inp);
 	let from_node: ui_node_t = l != null ? parser_material_get_node(l.from_id) : null;
 	if (from_node != null) {
 		let res_var: string = parser_material_write_result(l);
-		let st: string = from_node.outputs[l.from_socket].type;
+		let st: string      = from_node.outputs[l.from_socket].type;
 		if (st == "RGB" || st == "RGBA" || st == "VECTOR") {
 			return res_var;
 		}
@@ -395,7 +389,7 @@ function parser_material_parse_vector_input(inp: ui_node_socket_t): string {
 }
 
 function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t): string {
-	let node_vector: (node: ui_node_t, socket: ui_node_socket_t)=>string = map_get(parser_material_node_vectors, node.type);
+	let node_vector: (node: ui_node_t, socket: ui_node_socket_t) => string = map_get(parser_material_node_vectors, node.type);
 	if (node_vector != null) {
 		return node_vector(node, socket);
 	}
@@ -411,9 +405,9 @@ function parser_material_parse_vector(node: ui_node_t, socket: ui_node_socket_t)
 
 function parse_normal_map_color_input(inp: ui_node_socket_t) {
 	parser_material_kong.frag_write_normal++;
-	parser_material_out_normaltan = parser_material_parse_vector_input(inp);
+	parser_material_out_normaltan      = parser_material_parse_vector_input(inp);
 	let _parser_material_is_frag: bool = parser_material_is_frag;
-	parser_material_is_frag = true;
+	parser_material_is_frag            = true;
 	if (!parser_material_arm_export_tangents) {
 		parser_material_write(parser_material_kong, "var texn: float3 = (" + parser_material_out_normaltan + ") * 2.0 - 1.0;");
 		parser_material_write(parser_material_kong, "texn.y = -texn.y;");
@@ -431,11 +425,11 @@ function parse_normal_map_color_input(inp: ui_node_socket_t) {
 }
 
 function parser_material_parse_value_input(inp: ui_node_socket_t, vector_as_grayscale: bool = false): string {
-	let l: ui_node_link_t = parser_material_get_input_link(inp);
+	let l: ui_node_link_t    = parser_material_get_input_link(inp);
 	let from_node: ui_node_t = l != null ? parser_material_get_node(l.from_id) : null;
 	if (from_node != null) {
 		let res_var: string = parser_material_write_result(l);
-		let st: string = from_node.outputs[l.from_socket].type;
+		let st: string      = from_node.outputs[l.from_socket].type;
 		if (st == "RGB" || st == "RGBA" || st == "VECTOR") {
 			if (vector_as_grayscale) {
 				return "dot(" + res_var + ".rbg, float3(0.299, 0.587, 0.114))";
@@ -454,7 +448,7 @@ function parser_material_parse_value_input(inp: ui_node_socket_t, vector_as_gray
 }
 
 function parser_material_parse_value(node: ui_node_t, socket: ui_node_socket_t): string {
-	let node_value: (node: ui_node_t, socket: ui_node_socket_t)=>string = map_get(parser_material_node_values, node.type);
+	let node_value: (node: ui_node_t, socket: ui_node_socket_t) => string = map_get(parser_material_node_values, node.type);
 	if (node_value != null) {
 		return node_value(node, socket);
 	}
@@ -483,10 +477,10 @@ function parser_material_res_var_name(node: ui_node_t, socket: ui_node_socket_t)
 }
 
 function parser_material_write_result(l: ui_node_link_t): string {
-	let from_node: ui_node_t = parser_material_get_node(l.from_id);
+	let from_node: ui_node_t          = parser_material_get_node(l.from_id);
 	let from_socket: ui_node_socket_t = from_node.outputs[l.from_socket];
-	let res_var: string = parser_material_res_var_name(from_node, from_socket);
-	let st: string = from_socket.type;
+	let res_var: string               = parser_material_res_var_name(from_node, from_socket);
+	let st: string                    = from_socket.type;
 	if (array_index_of(parser_material_parsed, res_var) < 0) {
 		array_push(parser_material_parsed, res_var);
 		if (st == "RGB" || st == "RGBA" || st == "VECTOR") {
@@ -560,19 +554,19 @@ function parser_material_node_name(node: ui_node_t, _parents: ui_node_t[] = null
 	let s: string = node.name;
 	for (let i: i32 = 0; i < _parents.length; ++i) {
 		let p: ui_node_t = _parents[i];
-		s = p.name + p.id + "_" + s;
+		s                = p.name + p.id + "_" + s;
 	}
-	s = parser_material_safesrc(s);
+	s            = parser_material_safesrc(s);
 	let nid: i32 = node.id;
-	s = s + nid;
+	s            = s + nid;
 	return s;
 }
 
 function parser_material_safesrc(s: string): string {
 	for (let i: i32 = 0; i < s.length; ++i) {
-		let code: i32 = char_code_at(s, i);
+		let code: i32    = char_code_at(s, i);
 		let letter: bool = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
-		let digit: bool = code >= 48 && code <= 57;
+		let digit: bool  = code >= 48 && code <= 57;
 		if (!letter && !digit) {
 			s = string_replace_all(s, char_at(s, i), "_");
 		}
@@ -594,15 +588,12 @@ function parser_material_enum_data(s: string): string {
 }
 
 function parser_material_make_bind_tex(tex_name: string, file: string): bind_tex_t {
-	let tex: bind_tex_t = {
-		name: tex_name,
-		file: file
-	};
+	let tex: bind_tex_t = {name : tex_name, file : file};
 	return tex;
 }
 
 function u8_array_string_at(a: u8_array_t, i: i32): string {
-	let s: string = u8_array_to_string(a);
+	let s: string    = u8_array_to_string(a);
 	let ss: string[] = string_split(s, "\n");
 	return ss[i];
 }

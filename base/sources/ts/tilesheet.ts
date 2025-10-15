@@ -3,7 +3,7 @@ let tilesheet_datas: tilesheet_data_t[];
 
 function tilesheet_create(scene_name: string, tilesheet_ref: string, tilesheet_action_ref: string): tilesheet_t {
 	let t: tilesheet_t = {};
-	t.ready = false;
+	t.ready            = false;
 	for (let i: i32 = 0; i < tilesheet_datas.length; ++i) {
 		let ts: tilesheet_data_t = tilesheet_datas[i];
 		if (ts.name == tilesheet_ref) {
@@ -16,7 +16,7 @@ function tilesheet_create(scene_name: string, tilesheet_ref: string, tilesheet_a
 	return t;
 }
 
-function tilesheet_play(self: tilesheet_t, action_ref: string, on_action_complete: ()=>void = null) {
+function tilesheet_play(self: tilesheet_t, action_ref: string, on_action_complete: () => void = null) {
 	self.on_action_complete = on_action_complete;
 	for (let i: i32 = 0; i < self.raw.actions.length; ++i) {
 		let a: tilesheet_action_t = self.raw.actions[i];
@@ -27,7 +27,7 @@ function tilesheet_play(self: tilesheet_t, action_ref: string, on_action_complet
 	}
 	tilesheet_set_frame(self, self.action.start);
 	self.paused = false;
-	self.time = 0.0;
+	self.time   = 0.0;
 }
 
 function tilesheet_pause(self: tilesheet_t) {
@@ -54,7 +54,7 @@ function tilesheet_update(self: tilesheet_t) {
 
 	self.time += sys_real_delta();
 
-	let frame_time: f32 = 1 / self.raw.framerate;
+	let frame_time: f32        = 1 / self.raw.framerate;
 	let frames_to_advance: i32 = 0;
 
 	while (self.time >= frame_time) {
@@ -114,5 +114,5 @@ type tilesheet_t = {
 	paused?: bool;
 	frame?: i32;
 	time?: f32;
-	on_action_complete?: ()=>void;
+	on_action_complete?: () => void;
 };

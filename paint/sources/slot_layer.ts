@@ -4,12 +4,12 @@ type slot_layer_t = {
 	name?: string;
 	ext?: string;
 	visible?: bool;
-	parent?: slot_layer_t; // Group (for layers) or layer (for masks)
+	parent?: slot_layer_t;    // Group (for layers) or layer (for masks)
 	texpaint?: gpu_texture_t; // Base or mask
 	texpaint_nor?: gpu_texture_t;
 	texpaint_pack?: gpu_texture_t;
 	texpaint_preview?: gpu_texture_t; // Layer preview
-	mask_opacity?: f32; // Opacity mask
+	mask_opacity?: f32;               // Opacity mask
 	fill_layer?: slot_material_t;
 	show_panel?: bool;
 	blending?: blend_type_t;
@@ -33,29 +33,29 @@ type slot_layer_t = {
 };
 
 function slot_layer_create(ext: string = "", type: layer_slot_type_t = layer_slot_type_t.LAYER, parent: slot_layer_t = null): slot_layer_t {
-	let raw: slot_layer_t = {};
-	raw.id = 0;
-	raw.ext = "";
-	raw.visible = true;
-	raw.mask_opacity = 1.0; // Opacity mask
-	raw.show_panel = true;
-	raw.blending = blend_type_t.MIX;
-	raw.object_mask = 0;
-	raw.scale = 1.0;
-	raw.angle = 0.0;
-	raw.uv_type = uv_type_t.UVMAP;
-	raw.paint_base = true;
-	raw.paint_opac = true;
-	raw.paint_occ = true;
-	raw.paint_rough = true;
-	raw.paint_met = true;
-	raw.paint_nor = true;
-	raw.paint_nor_blend = true;
-	raw.paint_height = true;
+	let raw: slot_layer_t  = {};
+	raw.id                 = 0;
+	raw.ext                = "";
+	raw.visible            = true;
+	raw.mask_opacity       = 1.0; // Opacity mask
+	raw.show_panel         = true;
+	raw.blending           = blend_type_t.MIX;
+	raw.object_mask        = 0;
+	raw.scale              = 1.0;
+	raw.angle              = 0.0;
+	raw.uv_type            = uv_type_t.UVMAP;
+	raw.paint_base         = true;
+	raw.paint_opac         = true;
+	raw.paint_occ          = true;
+	raw.paint_rough        = true;
+	raw.paint_met          = true;
+	raw.paint_nor          = true;
+	raw.paint_nor_blend    = true;
+	raw.paint_height       = true;
 	raw.paint_height_blend = true;
-	raw.paint_emis = true;
-	raw.paint_subs = true;
-	raw.decal_mat = mat4_identity(); // Decal layer
+	raw.paint_emis         = true;
+	raw.paint_subs         = true;
+	raw.decal_mat          = mat4_identity(); // Decal layer
 
 	if (ext == "") {
 		raw.id = 0;
@@ -67,62 +67,60 @@ function slot_layer_create(ext: string = "", type: layer_slot_type_t = layer_slo
 		}
 		ext = raw.id + "";
 	}
-	raw.ext = ext;
+	raw.ext    = ext;
 	raw.parent = parent;
 
 	if (type == layer_slot_type_t.GROUP) {
 		let id: i32 = (raw.id + 1);
-		raw.name = "Group " + id;
+		raw.name    = "Group " + id;
 	}
 	else if (type == layer_slot_type_t.LAYER) {
-		let id: i32 = (raw.id + 1);
-		raw.name = "Layer " + id;
-		let format: string = base_bits_handle.i == texture_bits_t.BITS8  ? "RGBA32" :
-							 base_bits_handle.i == texture_bits_t.BITS16 ? "RGBA64" :
-																		   "RGBA128";
+		let id: i32        = (raw.id + 1);
+		raw.name           = "Layer " + id;
+		let format: string = base_bits_handle.i == texture_bits_t.BITS8 ? "RGBA32" : base_bits_handle.i == texture_bits_t.BITS16 ? "RGBA64" : "RGBA128";
 
 		{
 			let t: render_target_t = render_target_create();
-			t.name = "texpaint" + ext;
-			t.width = config_get_texture_res_x();
-			t.height = config_get_texture_res_y();
-			t.format = format;
-			raw.texpaint = render_path_create_render_target(t)._image;
+			t.name                 = "texpaint" + ext;
+			t.width                = config_get_texture_res_x();
+			t.height               = config_get_texture_res_y();
+			t.format               = format;
+			raw.texpaint           = render_path_create_render_target(t)._image;
 		}
 
 		{
 			let t: render_target_t = render_target_create();
-			t.name = "texpaint_nor" + ext;
-			t.width = config_get_texture_res_x();
-			t.height = config_get_texture_res_y();
-			t.format = format;
-			raw.texpaint_nor = render_path_create_render_target(t)._image;
+			t.name                 = "texpaint_nor" + ext;
+			t.width                = config_get_texture_res_x();
+			t.height               = config_get_texture_res_y();
+			t.format               = format;
+			raw.texpaint_nor       = render_path_create_render_target(t)._image;
 		}
 		{
 			let t: render_target_t = render_target_create();
-			t.name = "texpaint_pack" + ext;
-			t.width = config_get_texture_res_x();
-			t.height = config_get_texture_res_y();
-			t.format = format;
-			raw.texpaint_pack = render_path_create_render_target(t)._image;
+			t.name                 = "texpaint_pack" + ext;
+			t.width                = config_get_texture_res_x();
+			t.height               = config_get_texture_res_y();
+			t.format               = format;
+			raw.texpaint_pack      = render_path_create_render_target(t)._image;
 		}
 
 		raw.texpaint_preview = gpu_create_render_target(util_render_layer_preview_size, util_render_layer_preview_size, tex_format_t.RGBA32);
 	}
 
 	else { // Mask
-		let id: i32 = (raw.id + 1);
-		raw.name = "Mask " + id;
+		let id: i32        = (raw.id + 1);
+		raw.name           = "Mask " + id;
 		let format: string = "RGBA32"; // Full bits for undo support, R8 is used
-		raw.blending = blend_type_t.ADD;
+		raw.blending       = blend_type_t.ADD;
 
 		{
 			let t: render_target_t = render_target_create();
-			t.name = "texpaint" + ext;
-			t.width = config_get_texture_res_x();
-			t.height = config_get_texture_res_y();
-			t.format = format;
-			raw.texpaint = render_path_create_render_target(t)._image;
+			t.name                 = "texpaint" + ext;
+			t.width                = config_get_texture_res_x();
+			t.height               = config_get_texture_res_y();
+			t.format               = format;
+			raw.texpaint           = render_path_create_render_target(t)._image;
 		}
 
 		raw.texpaint_preview = gpu_create_render_target(util_render_layer_preview_size, util_render_layer_preview_size, tex_format_t.RGBA32);
@@ -175,9 +173,9 @@ function slot_layer_unload(raw: slot_layer_t) {
 		return;
 	}
 
-	let _texpaint: gpu_texture_t = raw.texpaint;
-	let _texpaint_nor: gpu_texture_t = raw.texpaint_nor;
-	let _texpaint_pack: gpu_texture_t = raw.texpaint_pack;
+	let _texpaint: gpu_texture_t         = raw.texpaint;
+	let _texpaint_nor: gpu_texture_t     = raw.texpaint_nor;
+	let _texpaint_pack: gpu_texture_t    = raw.texpaint_pack;
 	let _texpaint_preview: gpu_texture_t = raw.texpaint_preview;
 
 	gpu_delete_texture(_texpaint);
@@ -200,38 +198,39 @@ function slot_layer_unload(raw: slot_layer_t) {
 
 function slot_layer_swap(raw: slot_layer_t, other: slot_layer_t) {
 	if ((slot_layer_is_layer(raw) || slot_layer_is_mask(raw)) && (slot_layer_is_layer(other) || slot_layer_is_mask(other))) {
-		let rt0: render_target_t = map_get(render_path_render_targets, "texpaint" + raw.ext);
-		let rt1: render_target_t = map_get(render_path_render_targets, "texpaint" + other.ext);
-		rt0._image = other.texpaint;
-		rt1._image = raw.texpaint;
+		let rt0: render_target_t     = map_get(render_path_render_targets, "texpaint" + raw.ext);
+		let rt1: render_target_t     = map_get(render_path_render_targets, "texpaint" + other.ext);
+		rt0._image                   = other.texpaint;
+		rt1._image                   = raw.texpaint;
 		let _texpaint: gpu_texture_t = raw.texpaint;
-		raw.texpaint = other.texpaint;
-		other.texpaint = _texpaint;
+		raw.texpaint                 = other.texpaint;
+		other.texpaint               = _texpaint;
 
 		let _texpaint_preview: gpu_texture_t = raw.texpaint_preview;
-		raw.texpaint_preview = other.texpaint_preview;
-		other.texpaint_preview = _texpaint_preview;
+		raw.texpaint_preview                 = other.texpaint_preview;
+		other.texpaint_preview               = _texpaint_preview;
 	}
 
 	if (slot_layer_is_layer(raw) && slot_layer_is_layer(other)) {
-		let nor0: render_target_t = map_get(render_path_render_targets, "texpaint_nor" + raw.ext);
-		nor0._image = other.texpaint_nor;
-		let pack0: render_target_t = map_get(render_path_render_targets, "texpaint_pack" + raw.ext);
-		pack0._image = other.texpaint_pack;
-		let nor1: render_target_t = map_get(render_path_render_targets, "texpaint_nor" + other.ext);
-		nor1._image = raw.texpaint_nor;
-		let pack1: render_target_t = map_get(render_path_render_targets, "texpaint_pack" + other.ext);
-		pack1._image = raw.texpaint_pack;
-		let _texpaint_nor: gpu_texture_t = raw.texpaint_nor;
+		let nor0: render_target_t         = map_get(render_path_render_targets, "texpaint_nor" + raw.ext);
+		nor0._image                       = other.texpaint_nor;
+		let pack0: render_target_t        = map_get(render_path_render_targets, "texpaint_pack" + raw.ext);
+		pack0._image                      = other.texpaint_pack;
+		let nor1: render_target_t         = map_get(render_path_render_targets, "texpaint_nor" + other.ext);
+		nor1._image                       = raw.texpaint_nor;
+		let pack1: render_target_t        = map_get(render_path_render_targets, "texpaint_pack" + other.ext);
+		pack1._image                      = raw.texpaint_pack;
+		let _texpaint_nor: gpu_texture_t  = raw.texpaint_nor;
 		let _texpaint_pack: gpu_texture_t = raw.texpaint_pack;
-		raw.texpaint_nor = other.texpaint_nor;
-		raw.texpaint_pack = other.texpaint_pack;
-		other.texpaint_nor = _texpaint_nor;
-		other.texpaint_pack = _texpaint_pack;
+		raw.texpaint_nor                  = other.texpaint_nor;
+		raw.texpaint_pack                 = other.texpaint_pack;
+		other.texpaint_nor                = _texpaint_nor;
+		other.texpaint_pack               = _texpaint_pack;
 	}
 }
 
-function slot_layer_clear(raw: slot_layer_t, base_color: i32 = 0x00000000, base_image: gpu_texture_t = null, occlusion: f32 = 1.0, roughness: f32 = layers_default_rough, metallic: f32 = 0.0) {
+function slot_layer_clear(raw: slot_layer_t, base_color: i32 = 0x00000000, base_image: gpu_texture_t = null, occlusion: f32 = 1.0,
+                          roughness: f32 = layers_default_rough, metallic: f32 = 0.0) {
 	// Base
 	_gpu_begin(raw.texpaint, null, null, clear_flag_t.COLOR, base_color);
 	gpu_end();
@@ -251,7 +250,7 @@ function slot_layer_clear(raw: slot_layer_t, base_color: i32 = 0x00000000, base_
 	}
 
 	context_raw.layer_preview_dirty = true;
-	context_raw.ddirty = 3;
+	context_raw.ddirty              = 3;
 }
 
 function slot_layer_invert_mask(raw: slot_layer_t) {
@@ -264,9 +263,9 @@ function slot_layer_invert_mask(raw: slot_layer_t) {
 	let _texpaint: gpu_texture_t = raw.texpaint;
 	gpu_delete_texture(_texpaint);
 	let rt: render_target_t = map_get(render_path_render_targets, "texpaint" + raw.id);
-	raw.texpaint = rt._image = inverted;
+	raw.texpaint = rt._image        = inverted;
 	context_raw.layer_preview_dirty = true;
-	context_raw.ddirty = 3;
+	context_raw.ddirty              = 3;
 }
 
 function slot_layer_apply_mask(raw: slot_layer_t) {
@@ -287,8 +286,12 @@ function slot_layer_apply_mask(raw: slot_layer_t) {
 
 function slot_layer_duplicate(raw: slot_layer_t): slot_layer_t {
 	let layers: slot_layer_t[] = project_layers;
-	let i: i32 = array_index_of(layers, raw) + 1;
-	let l: slot_layer_t = slot_layer_create("", slot_layer_is_layer(raw) ? layer_slot_type_t.LAYER : slot_layer_is_mask(raw) ? layer_slot_type_t.MASK : layer_slot_type_t.GROUP, raw.parent);
+	let i: i32                 = array_index_of(layers, raw) + 1;
+	let l: slot_layer_t        = slot_layer_create("",
+                                            slot_layer_is_layer(raw)  ? layer_slot_type_t.LAYER
+	                                               : slot_layer_is_mask(raw) ? layer_slot_type_t.MASK
+	                                                                         : layer_slot_type_t.GROUP,
+	                                               raw.parent);
 	array_insert(layers, i, l);
 
 	if (slot_layer_is_layer(raw)) {
@@ -330,46 +333,43 @@ function slot_layer_duplicate(raw: slot_layer_t): slot_layer_t {
 		draw_end();
 	}
 
-	l.visible = raw.visible;
-	l.mask_opacity = raw.mask_opacity;
-	l.fill_layer = raw.fill_layer;
-	l.object_mask = raw.object_mask;
-	l.blending = raw.blending;
-	l.uv_type = raw.uv_type;
-	l.scale = raw.scale;
-	l.angle = raw.angle;
-	l.paint_base = raw.paint_base;
-	l.paint_opac = raw.paint_opac;
-	l.paint_occ = raw.paint_occ;
-	l.paint_rough = raw.paint_rough;
-	l.paint_met = raw.paint_met;
-	l.paint_nor = raw.paint_nor;
-	l.paint_nor_blend = raw.paint_nor_blend;
-	l.paint_height = raw.paint_height;
+	l.visible            = raw.visible;
+	l.mask_opacity       = raw.mask_opacity;
+	l.fill_layer         = raw.fill_layer;
+	l.object_mask        = raw.object_mask;
+	l.blending           = raw.blending;
+	l.uv_type            = raw.uv_type;
+	l.scale              = raw.scale;
+	l.angle              = raw.angle;
+	l.paint_base         = raw.paint_base;
+	l.paint_opac         = raw.paint_opac;
+	l.paint_occ          = raw.paint_occ;
+	l.paint_rough        = raw.paint_rough;
+	l.paint_met          = raw.paint_met;
+	l.paint_nor          = raw.paint_nor;
+	l.paint_nor_blend    = raw.paint_nor_blend;
+	l.paint_height       = raw.paint_height;
 	l.paint_height_blend = raw.paint_height_blend;
-	l.paint_emis = raw.paint_emis;
-	l.paint_subs = raw.paint_subs;
+	l.paint_emis         = raw.paint_emis;
+	l.paint_subs         = raw.paint_subs;
 
 	return l;
 }
 
 function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
-	let res_x: i32 = config_get_texture_res_x();
-	let res_y: i32 = config_get_texture_res_y();
+	let res_x: i32                          = config_get_texture_res_x();
+	let res_y: i32                          = config_get_texture_res_y();
 	let rts: map_t<string, render_target_t> = render_path_render_targets;
 
 	if (slot_layer_is_layer(raw)) {
-		let format: tex_format_t =
-			base_bits_handle.i == texture_bits_t.BITS8  ? tex_format_t.RGBA32 :
-			base_bits_handle.i == texture_bits_t.BITS16 ? tex_format_t.RGBA64 :
-														  tex_format_t.RGBA128;
+		let format: tex_format_t = base_bits_handle.i == texture_bits_t.BITS8    ? tex_format_t.RGBA32
+		                           : base_bits_handle.i == texture_bits_t.BITS16 ? tex_format_t.RGBA64
+		                                                                         : tex_format_t.RGBA128;
 
-		let pipe: gpu_pipeline_t = format == tex_format_t.RGBA32 ? pipes_copy :
-								   format == tex_format_t.RGBA64 ? pipes_copy64 :
-								   								   pipes_copy128;
+		let pipe: gpu_pipeline_t = format == tex_format_t.RGBA32 ? pipes_copy : format == tex_format_t.RGBA64 ? pipes_copy64 : pipes_copy128;
 
 		let _texpaint: gpu_texture_t = raw.texpaint;
-		raw.texpaint = gpu_create_render_target(res_x, res_y, format);
+		raw.texpaint                 = gpu_create_render_target(res_x, res_y, format);
 		draw_begin(raw.texpaint);
 		draw_set_pipeline(pipe);
 		draw_scaled_image(_texpaint, 0, 0, res_x, res_y);
@@ -407,21 +407,21 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 		}
 
 		let rt: render_target_t = map_get(rts, "texpaint" + raw.ext);
-		rt._image = raw.texpaint;
+		rt._image               = raw.texpaint;
 
 		if (raw.texpaint_nor != null) {
 			let rt_nor: render_target_t = map_get(rts, "texpaint_nor" + raw.ext);
-			rt_nor._image = raw.texpaint_nor;
+			rt_nor._image               = raw.texpaint_nor;
 		}
 
 		if (raw.texpaint_pack != null) {
 			let rt_pack: render_target_t = map_get(rts, "texpaint_pack" + raw.ext);
-			rt_pack._image = raw.texpaint_pack;
+			rt_pack._image               = raw.texpaint_pack;
 		}
 	}
 	else if (slot_layer_is_mask(raw)) {
 		let _texpaint: gpu_texture_t = raw.texpaint;
-		raw.texpaint = gpu_create_render_target(res_x, res_y, tex_format_t.RGBA32);
+		raw.texpaint                 = gpu_create_render_target(res_x, res_y, tex_format_t.RGBA32);
 
 		draw_begin(raw.texpaint);
 		draw_set_pipeline(pipes_copy8);
@@ -432,7 +432,7 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 		gpu_delete_texture(_texpaint);
 
 		let rt: render_target_t = map_get(rts, "texpaint" + raw.ext);
-		rt._image = raw.texpaint;
+		rt._image               = raw.texpaint;
 	}
 }
 
@@ -440,9 +440,9 @@ function slot_layer_to_fill_layer(raw: slot_layer_t) {
 	context_set_layer(raw);
 	raw.fill_layer = context_raw.material;
 	layers_update_fill_layer();
-	sys_notify_on_next_frame(function () {
+	sys_notify_on_next_frame(function() {
 		make_material_parse_paint_material();
-		context_raw.layer_preview_dirty = true;
+		context_raw.layer_preview_dirty            = true;
 		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 	});
 }
@@ -451,7 +451,7 @@ function slot_layer_to_paint_layer(raw: slot_layer_t) {
 	context_set_layer(raw);
 	raw.fill_layer = null;
 	make_material_parse_paint_material();
-	context_raw.layer_preview_dirty = true;
+	context_raw.layer_preview_dirty            = true;
 	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 }
 
@@ -611,7 +611,7 @@ function slot_layer_can_move(raw: slot_layer_t, to: i32): bool {
 	if (new_upper_layer != null && !new_upper_layer.show_panel) {
 		let children: slot_layer_t[] = slot_layer_get_recursive_children(new_upper_layer);
 		to -= children != null ? children.length : 0;
-		delta = to - old_index;
+		delta           = to - old_index;
 		new_upper_layer = delta > 0 ? (to < project_layers.length - 1 ? project_layers[to + 1] : null) : project_layers[to];
 	}
 
@@ -679,15 +679,15 @@ function slot_layer_move(raw: slot_layer_t, to: i32) {
 	}
 
 	let pointers: map_t<slot_layer_t, i32> = tab_layers_init_layer_map();
-	let old_index: i32 = array_index_of(project_layers, raw);
-	let delta: i32 = to - old_index;
-	let new_upper_layer: slot_layer_t = delta > 0 ? (to < project_layers.length - 1 ? project_layers[to + 1] : null) : project_layers[to];
+	let old_index: i32                     = array_index_of(project_layers, raw);
+	let delta: i32                         = to - old_index;
+	let new_upper_layer: slot_layer_t      = delta > 0 ? (to < project_layers.length - 1 ? project_layers[to + 1] : null) : project_layers[to];
 
 	// Group or layer is collapsed so we check below and update the upper layer
 	if (new_upper_layer != null && !new_upper_layer.show_panel) {
 		let children: slot_layer_t[] = slot_layer_get_recursive_children(new_upper_layer);
 		to -= children != null ? children.length : 0;
-		delta = to - old_index;
+		delta           = to - old_index;
 		new_upper_layer = delta > 0 ? (to < project_layers.length - 1 ? project_layers[to + 1] : null) : project_layers[to];
 	}
 
@@ -765,19 +765,18 @@ function slot_layer_move(raw: slot_layer_t, to: i32) {
 	}
 }
 
-
 let layers_temp_image: gpu_texture_t = null;
-let layers_expa: gpu_texture_t = null;
-let layers_expb: gpu_texture_t = null;
-let layers_expc: gpu_texture_t = null;
-let layers_default_base: f32 = 0.5;
-let layers_default_rough: f32 = 0.4;
+let layers_expa: gpu_texture_t       = null;
+let layers_expb: gpu_texture_t       = null;
+let layers_expc: gpu_texture_t       = null;
+let layers_default_base: f32         = 0.5;
+let layers_default_rough: f32        = 0.4;
 let layers_max_layers: i32 =
-///if (arm_android || arm_ios)
-	18;
-///else
-	255;
-///end
+    /// if (arm_android || arm_ios)
+    18;
+/// else
+255;
+/// end
 
 let _layers_uv_type: uv_type_t;
 let _layers_decal_mat: mat4_t;
@@ -800,7 +799,7 @@ function layers_resize() {
 		}
 		while (history_undo_layers.length > conf.undo_steps) {
 			let l: slot_layer_t = array_pop(history_undo_layers);
-			sys_notify_on_next_frame(function (l: slot_layer_t) {
+			sys_notify_on_next_frame(function(l: slot_layer_t) {
 				slot_layer_unload(l);
 			}, l);
 		}
@@ -816,17 +815,17 @@ function layers_resize() {
 
 	let rts: map_t<string, render_target_t> = render_path_render_targets;
 
-	let blend0: render_target_t = map_get(rts, "texpaint_blend0");
+	let blend0: render_target_t         = map_get(rts, "texpaint_blend0");
 	let _texpaint_blend0: gpu_texture_t = blend0._image;
 	gpu_delete_texture(_texpaint_blend0);
-	blend0.width = config_get_texture_res_x();
+	blend0.width  = config_get_texture_res_x();
 	blend0.height = config_get_texture_res_y();
 	blend0._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 
-	let blend1: render_target_t = map_get(rts, "texpaint_blend1");
+	let blend1: render_target_t         = map_get(rts, "texpaint_blend1");
 	let _texpaint_blend1: gpu_texture_t = blend1._image;
 	gpu_delete_texture(_texpaint_blend1);
-	blend1.width = config_get_texture_res_x();
+	blend1.width  = config_get_texture_res_x();
 	blend1.height = config_get_texture_res_y();
 	blend1._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
 
@@ -838,15 +837,15 @@ function layers_resize() {
 		gpu_delete_texture(_texpaint_blur);
 		let size_x: f32 = math_floor(config_get_texture_res_x() * 0.95);
 		let size_y: f32 = math_floor(config_get_texture_res_y() * 0.95);
-		blur.width = size_x;
-		blur.height = size_y;
-		blur._image = gpu_create_render_target(size_x, size_y);
+		blur.width      = size_x;
+		blur.height     = size_y;
+		blur._image     = gpu_create_render_target(size_x, size_y);
 	}
 	if (render_path_paint_live_layer != null) {
 		slot_layer_resize_and_set_bits(render_path_paint_live_layer);
 	}
 	render_path_raytrace_ready = false; // Rebuild baketex
-	context_raw.ddirty = 2;
+	context_raw.ddirty         = 2;
 }
 
 function layers_set_bits() {
@@ -863,29 +862,29 @@ function layers_set_bits() {
 function layers_make_temp_img() {
 	let l: slot_layer_t = project_layers[0];
 
-	if (layers_temp_image != null && (layers_temp_image.width != l.texpaint.width || layers_temp_image.height != l.texpaint.height || layers_temp_image.format != l.texpaint.format)) {
+	if (layers_temp_image != null &&
+	    (layers_temp_image.width != l.texpaint.width || layers_temp_image.height != l.texpaint.height || layers_temp_image.format != l.texpaint.format)) {
 		let _temptex0: render_target_t = map_get(render_path_render_targets, "temptex0");
 		render_target_unload(_temptex0);
 		map_delete(render_path_render_targets, "temptex0");
 		layers_temp_image = null;
 	}
 	if (layers_temp_image == null) {
-		let format: string = base_bits_handle.i == texture_bits_t.BITS8  ? "RGBA32" :
-							 base_bits_handle.i == texture_bits_t.BITS16 ? "RGBA64" :
-																		   "RGBA128";
+		let format: string = base_bits_handle.i == texture_bits_t.BITS8 ? "RGBA32" : base_bits_handle.i == texture_bits_t.BITS16 ? "RGBA64" : "RGBA128";
 
-		let t: render_target_t = render_target_create();
-		t.name = "temptex0";
-		t.width = l.texpaint.width;
-		t.height = l.texpaint.height;
-		t.format = format;
+		let t: render_target_t  = render_target_create();
+		t.name                  = "temptex0";
+		t.width                 = l.texpaint.width;
+		t.height                = l.texpaint.height;
+		t.format                = format;
 		let rt: render_target_t = render_path_create_render_target(t);
-		layers_temp_image = rt._image;
+		layers_temp_image       = rt._image;
 	}
 }
 
 function layers_make_temp_mask_img() {
-	if (pipes_temp_mask_image != null && (pipes_temp_mask_image.width != config_get_texture_res_x() || pipes_temp_mask_image.height != config_get_texture_res_y())) {
+	if (pipes_temp_mask_image != null &&
+	    (pipes_temp_mask_image.width != config_get_texture_res_x() || pipes_temp_mask_image.height != config_get_texture_res_y())) {
 		let _temp_mask_image: gpu_texture_t = pipes_temp_mask_image;
 		gpu_delete_texture(_temp_mask_image);
 		pipes_temp_mask_image = null;
@@ -913,39 +912,36 @@ function layers_make_export_img() {
 		map_delete(render_path_render_targets, "expc");
 	}
 	if (layers_expa == null) {
-		let format: string = base_bits_handle.i == texture_bits_t.BITS8  ? "RGBA32" :
-							 base_bits_handle.i == texture_bits_t.BITS16 ? "RGBA64" :
-																		   "RGBA128";
-
+		let format: string = base_bits_handle.i == texture_bits_t.BITS8 ? "RGBA32" : base_bits_handle.i == texture_bits_t.BITS16 ? "RGBA64" : "RGBA128";
 
 		{
-			let t: render_target_t = render_target_create();
-			t.name = "expa";
-			t.width = l.texpaint.width;
-			t.height = l.texpaint.height;
-			t.format = format;
+			let t: render_target_t  = render_target_create();
+			t.name                  = "expa";
+			t.width                 = l.texpaint.width;
+			t.height                = l.texpaint.height;
+			t.format                = format;
 			let rt: render_target_t = render_path_create_render_target(t);
-			layers_expa = rt._image;
+			layers_expa             = rt._image;
 		}
 
 		{
-			let t: render_target_t = render_target_create();
-			t.name = "expb";
-			t.width = l.texpaint.width;
-			t.height = l.texpaint.height;
-			t.format = format;
+			let t: render_target_t  = render_target_create();
+			t.name                  = "expb";
+			t.width                 = l.texpaint.width;
+			t.height                = l.texpaint.height;
+			t.format                = format;
 			let rt: render_target_t = render_path_create_render_target(t);
-			layers_expb = rt._image;
+			layers_expb             = rt._image;
 		}
 
 		{
-			let t: render_target_t = render_target_create();
-			t.name = "expc";
-			t.width = l.texpaint.width;
-			t.height = l.texpaint.height;
-			t.format = format;
+			let t: render_target_t  = render_target_create();
+			t.name                  = "expc";
+			t.width                 = l.texpaint.width;
+			t.height                = l.texpaint.height;
+			t.format                = format;
 			let rt: render_target_t = render_path_create_render_target(t);
-			layers_expc = rt._image;
+			layers_expc             = rt._image;
 		}
 	}
 }
@@ -975,7 +971,8 @@ function layers_apply_mask(l: slot_layer_t, m: slot_layer_t) {
 	gpu_end();
 }
 
-function layers_commands_merge_pack(pipe: gpu_pipeline_t, i0: gpu_texture_t, i1: gpu_texture_t, i1pack: gpu_texture_t, i1mask_opacity: f32, i1texmask: gpu_texture_t, i1blending: i32 = 101) {
+function layers_commands_merge_pack(pipe: gpu_pipeline_t, i0: gpu_texture_t, i1: gpu_texture_t, i1pack: gpu_texture_t, i1mask_opacity: f32,
+                                    i1texmask: gpu_texture_t, i1blending: i32 = 101) {
 	_gpu_begin(i0);
 	gpu_set_pipeline(pipe);
 	gpu_set_texture(pipes_tex0, i1);
@@ -1007,9 +1004,9 @@ function layers_is_fill_material(): bool {
 }
 
 function layers_update_fill_layers() {
-	let _layer: slot_layer_t = context_raw.layer;
-	let _tool: tool_type_t = context_raw.tool;
-	let _fill_type: i32 = context_raw.fill_type_handle.i;
+	let _layer: slot_layer_t   = context_raw.layer;
+	let _tool: tool_type_t     = context_raw.tool;
+	let _fill_type: i32        = context_raw.fill_type_handle.i;
 	let current: gpu_texture_t = null;
 
 	if (context_raw.tool == tool_type_t.MATERIAL) {
@@ -1018,9 +1015,10 @@ function layers_update_fill_layers() {
 		}
 
 		current = _draw_current;
-		if (current != null) draw_end();
+		if (current != null)
+			draw_end();
 
-		context_raw.tool = tool_type_t.FILL;
+		context_raw.tool               = tool_type_t.FILL;
 		context_raw.fill_type_handle.i = fill_type_t.OBJECT;
 		render_path_paint_set_plane_mesh();
 		make_material_parse_paint_material(false);
@@ -1029,20 +1027,21 @@ function layers_update_fill_layers() {
 		render_path_paint_commands_paint(false);
 		render_path_paint_dilate(true, true);
 		render_path_paint_use_live_layer(false);
-		context_raw.tool = _tool;
+		context_raw.tool               = _tool;
 		context_raw.fill_type_handle.i = _fill_type;
-		context_raw.pdirty = 0;
-		context_raw.rdirty = 2;
+		context_raw.pdirty             = 0;
+		context_raw.rdirty             = 2;
 		render_path_paint_restore_plane_mesh();
 		make_material_parse_paint_material();
 		ui_view2d_hwnd.redraws = 2;
 
-		if (current != null) draw_begin(current);
+		if (current != null)
+			draw_begin(current);
 		return;
 	}
 
 	let has_fill_layer: bool = false;
-	let has_fill_mask: bool = false;
+	let has_fill_mask: bool  = false;
 	for (let i: i32 = 0; i < project_layers.length; ++i) {
 		let l: slot_layer_t = project_layers[i];
 		if (slot_layer_is_layer(l) && l.fill_layer == context_raw.material) {
@@ -1061,8 +1060,8 @@ function layers_update_fill_layers() {
 		if (current != null) {
 			draw_end();
 		}
-		context_raw.pdirty = 1;
-		context_raw.tool = tool_type_t.FILL;
+		context_raw.pdirty             = 1;
+		context_raw.tool               = tool_type_t.FILL;
 		context_raw.fill_type_handle.i = fill_type_t.OBJECT;
 
 		if (has_fill_layer) {
@@ -1100,14 +1099,15 @@ function layers_update_fill_layers() {
 			}
 		}
 
-		context_raw.pdirty = 0;
-		context_raw.ddirty = 2;
-		context_raw.rdirty = 2;
+		context_raw.pdirty               = 0;
+		context_raw.ddirty               = 2;
+		context_raw.rdirty               = 2;
 		context_raw.layers_preview_dirty = true; // Repaint all layer previews as multiple layers might have changed.
-		if (current != null) draw_begin(current);
+		if (current != null)
+			draw_begin(current);
 		context_raw.layer = _layer;
 		layers_set_object_mask();
-		context_raw.tool = _tool;
+		context_raw.tool               = _tool;
 		context_raw.fill_type_handle.i = _fill_type;
 		make_material_parse_paint_material(false);
 	}
@@ -1115,14 +1115,15 @@ function layers_update_fill_layers() {
 
 function layers_update_fill_layer(parse_paint: bool = true) {
 	let current: gpu_texture_t = _draw_current;
-	let in_use: bool = gpu_in_use;
-	if (in_use) draw_end();
+	let in_use: bool           = gpu_in_use;
+	if (in_use)
+		draw_end();
 
-	let _tool: tool_type_t = context_raw.tool;
-	let _fill_type: i32 = context_raw.fill_type_handle.i;
-	context_raw.tool = tool_type_t.FILL;
+	let _tool: tool_type_t         = context_raw.tool;
+	let _fill_type: i32            = context_raw.fill_type_handle.i;
+	context_raw.tool               = tool_type_t.FILL;
 	context_raw.fill_type_handle.i = fill_type_t.OBJECT;
-	context_raw.pdirty = 1;
+	context_raw.pdirty             = 1;
 
 	slot_layer_clear(context_raw.layer);
 
@@ -1132,14 +1133,15 @@ function layers_update_fill_layer(parse_paint: bool = true) {
 	render_path_paint_commands_paint(false);
 	render_path_paint_dilate(true, true);
 
-	context_raw.rdirty = 2;
-	context_raw.tool = _tool;
+	context_raw.rdirty             = 2;
+	context_raw.tool               = _tool;
 	context_raw.fill_type_handle.i = _fill_type;
-	if (in_use) draw_begin(current);
+	if (in_use)
+		draw_begin(current);
 }
 
 function layers_set_object_mask() {
-	let ar: string[] = [tr("None")];
+	let ar: string[] = [ tr("None") ];
 	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 		let p: mesh_object_t = project_paint_objects[i];
 		array_push(ar, p.base.name);
@@ -1155,7 +1157,7 @@ function layers_set_object_mask() {
 		}
 		let o: mesh_object_t = project_paint_objects[0];
 		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
-			let p: mesh_object_t = project_paint_objects[i];
+			let p: mesh_object_t  = project_paint_objects[i];
 			let mask_name: string = ar[mask];
 			if (p.base.name == mask_name) {
 				o = p;
@@ -1171,7 +1173,7 @@ function layers_set_object_mask() {
 			util_mesh_merge(visibles);
 		}
 		context_select_paint_object(context_main_object());
-		context_raw.paint_object.skip_context = "paint";
+		context_raw.paint_object.skip_context  = "paint";
 		context_raw.merged_object.base.visible = true;
 	}
 	util_uv_dilatemap_cached = false;
@@ -1183,10 +1185,11 @@ function layers_new_layer(clear: bool = true, position: i32 = -1): slot_layer_t 
 	}
 
 	let l: slot_layer_t = slot_layer_create();
-	l.object_mask = context_raw.layer_filter;
+	l.object_mask       = context_raw.layer_filter;
 
 	if (position == -1) {
-		if (slot_layer_is_mask(context_raw.layer)) context_set_layer(context_raw.layer.parent);
+		if (slot_layer_is_mask(context_raw.layer))
+			context_set_layer(context_raw.layer.parent);
 		array_insert(project_layers, array_index_of(project_layers, context_raw.layer) + 1, l);
 	}
 	else {
@@ -1202,7 +1205,7 @@ function layers_new_layer(clear: bool = true, position: i32 = -1): slot_layer_t 
 		}
 	}
 	if (clear) {
-		sys_notify_on_next_frame(function (l: slot_layer_t) {
+		sys_notify_on_next_frame(function(l: slot_layer_t) {
 			slot_layer_clear(l);
 		}, l);
 	}
@@ -1221,7 +1224,7 @@ function layers_new_mask(clear: bool = true, parent: slot_layer_t, position: i32
 	array_insert(project_layers, position, l);
 	context_set_layer(l);
 	if (clear) {
-		sys_notify_on_next_frame(function (l: slot_layer_t) {
+		sys_notify_on_next_frame(function(l: slot_layer_t) {
 			slot_layer_clear(l);
 		}, l);
 	}
@@ -1244,10 +1247,10 @@ function layers_create_fill_layer(uv_type: uv_type_t = uv_type_t.UVMAP, decal_ma
 		return;
 	}
 
-	_layers_uv_type = uv_type;
+	_layers_uv_type   = uv_type;
 	_layers_decal_mat = decal_mat;
-	_layers_position = position;
-	sys_notify_on_next_frame(function () {
+	_layers_position  = position;
+	sys_notify_on_next_frame(function() {
 		let l: slot_layer_t = layers_new_layer(false, _layers_position);
 		history_new_layer();
 		l.uv_type = _layers_uv_type;
@@ -1274,15 +1277,15 @@ function layers_create_image_mask(asset: asset_t) {
 
 function layers_create_color_layer(base_color: i32, occlusion: f32 = 1.0, roughness: f32 = layers_default_rough, metallic: f32 = 0.0, position: i32 = -1) {
 	_layers_base_color = base_color;
-	_layers_occlusion = occlusion;
-	_layers_roughness = roughness;
-	_layers_metallic = metallic;
-	_layers_position = position;
+	_layers_occlusion  = occlusion;
+	_layers_roughness  = roughness;
+	_layers_metallic   = metallic;
+	_layers_position   = position;
 
-	sys_notify_on_next_frame(function () {
+	sys_notify_on_next_frame(function() {
 		let l: slot_layer_t = layers_new_layer(false, _layers_position);
 		history_new_layer();
-		l.uv_type = uv_type_t.UVMAP;
+		l.uv_type     = uv_type_t.UVMAP;
 		l.object_mask = context_raw.layer_filter;
 		slot_layer_clear(l, _layers_base_color, null, _layers_occlusion, _layers_roughness, _layers_metallic);
 	});
@@ -1296,8 +1299,8 @@ function layers_duplicate_layer(l: slot_layer_t) {
 		if (masks != null) {
 			for (let i: i32 = 0; i < masks.length; ++i) {
 				let m: slot_layer_t = masks[i];
-				m = slot_layer_duplicate(m);
-				m.parent = new_layer;
+				m                   = slot_layer_duplicate(m);
+				m.parent            = new_layer;
 				array_remove(project_layers, m);
 				array_insert(project_layers, array_index_of(project_layers, new_layer), m);
 			}
@@ -1310,17 +1313,17 @@ function layers_duplicate_layer(l: slot_layer_t) {
 		array_insert(project_layers, array_index_of(project_layers, l) + 1, new_group);
 		// group.show_panel = true;
 		for (let i: i32 = 0; i < slot_layer_get_children(l).length; ++i) {
-			let c: slot_layer_t = slot_layer_get_children(l)[i];
-			let masks: slot_layer_t[] = slot_layer_get_masks(c, false);
+			let c: slot_layer_t         = slot_layer_get_children(l)[i];
+			let masks: slot_layer_t[]   = slot_layer_get_masks(c, false);
 			let new_layer: slot_layer_t = slot_layer_duplicate(c);
-			new_layer.parent = new_group;
+			new_layer.parent            = new_group;
 			array_remove(project_layers, new_layer);
 			array_insert(project_layers, array_index_of(project_layers, new_group), new_layer);
 			if (masks != null) {
 				for (let i: i32 = 0; i < masks.length; ++i) {
-					let m: slot_layer_t = masks[i];
+					let m: slot_layer_t        = masks[i];
 					let new_mask: slot_layer_t = slot_layer_duplicate(m);
-					new_mask.parent = new_layer;
+					new_mask.parent            = new_layer;
 					array_remove(project_layers, new_mask);
 					array_insert(project_layers, array_index_of(project_layers, new_layer), new_mask);
 				}
@@ -1329,9 +1332,9 @@ function layers_duplicate_layer(l: slot_layer_t) {
 		let group_masks: slot_layer_t[] = slot_layer_get_masks(l);
 		if (group_masks != null) {
 			for (let i: i32 = 0; i < group_masks.length; ++i) {
-				let m: slot_layer_t = group_masks[i];
+				let m: slot_layer_t        = group_masks[i];
 				let new_mask: slot_layer_t = slot_layer_duplicate(m);
-				new_mask.parent = new_group;
+				new_mask.parent            = new_group;
 				array_remove(project_layers, new_mask);
 				array_insert(project_layers, array_index_of(project_layers, new_group), new_mask);
 			}
@@ -1408,7 +1411,7 @@ function layers_merge_group(l: slot_layer_t): slot_layer_t {
 	}
 
 	children[0].parent = null;
-	children[0].name = l.name;
+	children[0].name   = l.name;
 	if (children[0].fill_layer != null) {
 		slot_layer_to_paint_layer(children[0]);
 	}
@@ -1416,7 +1419,7 @@ function layers_merge_group(l: slot_layer_t): slot_layer_t {
 	return children[0];
 }
 
-function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool = false) {
+function layers_merge_layer(l0: slot_layer_t, l1: slot_layer_t, use_mask: bool = false) {
 	if (!l1.visible || slot_layer_is_group(l1)) {
 		return;
 	}
@@ -1430,9 +1433,9 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 	draw_end();
 
 	let empty_rt: render_target_t = map_get(render_path_render_targets, "empty_white");
-	let empty: gpu_texture_t = empty_rt._image;
-	let mask: gpu_texture_t = empty;
-	let l1masks: slot_layer_t[] =  use_mask ? slot_layer_get_masks(l1) : null;
+	let empty: gpu_texture_t      = empty_rt._image;
+	let mask: gpu_texture_t       = empty;
+	let l1masks: slot_layer_t[]   = use_mask ? slot_layer_get_masks(l1) : null;
 	if (l1masks != null) {
 		// for (let i: i32 = 1; i < l1masks.length - 1; ++i) {
 		// 	merge_layer(l1masks[i + 1], l1masks[i]);
@@ -1503,7 +1506,8 @@ function layers_merge_layer(l0 : slot_layer_t, l1: slot_layer_t, use_mask: bool 
 
 			if (l1.paint_occ || l1.paint_rough || l1.paint_met || l1.paint_height) {
 				if (l1.paint_occ && l1.paint_rough && l1.paint_met && l1.paint_height) {
-					layers_commands_merge_pack(pipes_merge, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask, l1.paint_height_blend ? 103 : 101);
+					layers_commands_merge_pack(pipes_merge, l0.texpaint_pack, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask,
+					                           l1.paint_height_blend ? 103 : 101);
 				}
 				else {
 					if (l1.paint_occ) {
@@ -1529,7 +1533,7 @@ function layers_flatten(height_to_normal: bool = false, layers: slot_layer_t[] =
 	layers_make_export_img();
 
 	let empty_rt: render_target_t = map_get(render_path_render_targets, "empty_white");
-	let empty: gpu_texture_t = empty_rt._image;
+	let empty: gpu_texture_t      = empty_rt._image;
 
 	// Clear export layer
 	_gpu_begin(layers_expa, null, null, clear_flag_t.COLOR, color_from_floats(0.0, 0.0, 0.0, 0.0));
@@ -1549,14 +1553,14 @@ function layers_flatten(height_to_normal: bool = false, layers: slot_layer_t[] =
 			continue;
 		}
 
-		let mask: gpu_texture_t = empty;
+		let mask: gpu_texture_t     = empty;
 		let l1masks: slot_layer_t[] = slot_layer_get_masks(l1);
 		if (l1masks != null) {
 			if (l1masks.length > 1) {
 				layers_make_temp_mask_img();
 				draw_begin(pipes_temp_mask_image, clear_flag_t.COLOR, 0x00000000);
 				draw_end();
-				let l1: slot_layer_t = { texpaint: pipes_temp_mask_image };
+				let l1: slot_layer_t = {texpaint : pipes_temp_mask_image};
 				for (let i: i32 = 0; i < l1masks.length; ++i) {
 					layers_merge_layer(l1, l1masks[i]);
 				}
@@ -1629,7 +1633,8 @@ function layers_flatten(height_to_normal: bool = false, layers: slot_layer_t[] =
 			draw_end();
 
 			if (l1.paint_occ && l1.paint_rough && l1.paint_met && l1.paint_height) {
-				layers_commands_merge_pack(pipes_merge, layers_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask, l1.paint_height_blend ? 103 : 101);
+				layers_commands_merge_pack(pipes_merge, layers_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask,
+				                           l1.paint_height_blend ? 103 : 101);
 			}
 			else {
 				if (l1.paint_occ) {
@@ -1645,11 +1650,7 @@ function layers_flatten(height_to_normal: bool = false, layers: slot_layer_t[] =
 		}
 	}
 
-	let l0: slot_layer_t = {
-		texpaint: layers_expa,
-		texpaint_nor: layers_expb,
-		texpaint_pack: layers_expc
-	};
+	let l0: slot_layer_t = {texpaint : layers_expa, texpaint_nor : layers_expb, texpaint_pack : layers_expc};
 
 	// Merge height map into normal map
 	if (height_to_normal && make_material_height_used) {
@@ -1679,26 +1680,26 @@ function layers_flatten(height_to_normal: bool = false, layers: slot_layer_t[] =
 }
 
 function layers_on_resized() {
-	sys_notify_on_next_frame(function () {
+	sys_notify_on_next_frame(function() {
 		layers_resize();
-		let _layer: slot_layer_t = context_raw.layer;
+		let _layer: slot_layer_t       = context_raw.layer;
 		let _material: slot_material_t = context_raw.material;
 		for (let i: i32 = 0; i < project_layers.length; ++i) {
 			let l: slot_layer_t = project_layers[i];
 			if (l.fill_layer != null) {
-				context_raw.layer = l;
+				context_raw.layer    = l;
 				context_raw.material = l.fill_layer;
 				layers_update_fill_layer();
 			}
 		}
-		context_raw.layer = _layer;
+		context_raw.layer    = _layer;
 		context_raw.material = _material;
 		make_material_parse_paint_material();
 	});
-	util_uv_uvmap = null;
-	util_uv_uvmap_cached = false;
-	util_uv_trianglemap = null;
+	util_uv_uvmap              = null;
+	util_uv_uvmap_cached       = false;
+	util_uv_trianglemap        = null;
 	util_uv_trianglemap_cached = false;
-	util_uv_dilatemap_cached = false;
+	util_uv_dilatemap_cached   = false;
 	render_path_raytrace_ready = false;
 }

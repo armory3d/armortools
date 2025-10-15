@@ -1,18 +1,19 @@
 
 function make_bake_run(con: node_shader_context_t, kong: node_shader_t) {
 	if (context_raw.bake_type == bake_type_t.CURVATURE) {
-		let pass: bool = parser_material_bake_passthrough;
+		let pass: bool       = parser_material_bake_passthrough;
 		let strength: string = pass ? parser_material_bake_passthrough_strength : context_raw.bake_curv_strength + "";
-		let radius: string = pass ? parser_material_bake_passthrough_radius : context_raw.bake_curv_radius + "";
-		let offset: string = pass ? parser_material_bake_passthrough_offset : context_raw.bake_curv_offset + "";
-		strength = "float(" + strength + ")";
-		radius = "float(" + radius + ")";
-		offset = "float(" + offset + ")";
-		kong.frag_n = true;
+		let radius: string   = pass ? parser_material_bake_passthrough_radius : context_raw.bake_curv_radius + "";
+		let offset: string   = pass ? parser_material_bake_passthrough_offset : context_raw.bake_curv_offset + "";
+		strength             = "float(" + strength + ")";
+		radius               = "float(" + radius + ")";
+		offset               = "float(" + offset + ")";
+		kong.frag_n          = true;
 		node_shader_write_frag(kong, "var dx: float3 = ddx3(n);");
 		node_shader_write_frag(kong, "var dy: float3 = ddy3(n);");
 		node_shader_write_frag(kong, "var curvature: float = max(dot(dx, dx), dot(dy, dy));");
-		node_shader_write_frag(kong, "curvature = clamp(pow(curvature, (1.0 / " + radius + ") * 0.25) * " + strength + " * 2.0 + " + offset + " / 10.0, 0.0, 1.0);");
+		node_shader_write_frag(kong,
+		                       "curvature = clamp(pow(curvature, (1.0 / " + radius + ") * 0.25) * " + strength + " * 2.0 + " + offset + " / 10.0, 0.0, 1.0);");
 		if (context_raw.bake_axis != bake_axis_t.XYZ) {
 			let axis: string = make_bake_axis_string(context_raw.bake_axis);
 			node_shader_write_frag(kong, "curvature *= dot(n, " + axis + ");");
@@ -22,7 +23,8 @@ function make_bake_run(con: node_shader_context_t, kong: node_shader_t) {
 	else if (context_raw.bake_type == bake_type_t.NORMAL) { // Tangent
 		kong.frag_n = true;
 		node_shader_add_texture(kong, "texpaint_undo", "_texpaint_undo"); // Baked high-poly normals
-		node_shader_write_frag(kong, "var n0: float3 = sample_lod(texpaint_undo, sampler_linear, tex_coord, 0.0).rgb * float3(2.0, 2.0, 2.0) - float3(1.0, 1.0, 1.0);");
+		node_shader_write_frag(
+		    kong, "var n0: float3 = sample_lod(texpaint_undo, sampler_linear, tex_coord, 0.0).rgb * float3(2.0, 2.0, 2.0) - float3(1.0, 1.0, 1.0);");
 		node_shader_add_function(kong, str_cotangent_frame);
 		node_shader_write_frag(kong, "var invTBN: float3x3 = transpose(cotangent_frame(n, n, tex_coord));");
 		node_shader_write_frag(kong, "var res: float3 = normalize(invTBN * n0) * float3(0.5, 0.5, 0.5) + float3(0.5, 0.5, 0.5);");
@@ -38,7 +40,8 @@ function make_bake_run(con: node_shader_context_t, kong: node_shader_t) {
 	else if (context_raw.bake_type == bake_type_t.HEIGHT) {
 		kong.frag_wposition = true;
 		node_shader_add_texture(kong, "texpaint_undo", "_texpaint_undo"); // Baked high-poly positions
-		node_shader_write_frag(kong, "var wpos0: float3 = sample_lod(texpaint_undo, sampler_linear, tex_coord, 0.0).rgb * float3(2.0, 2.0, 2.0) - float3(1.0, 1.0, 1.0);");
+		node_shader_write_frag(
+		    kong, "var wpos0: float3 = sample_lod(texpaint_undo, sampler_linear, tex_coord, 0.0).rgb * float3(2.0, 2.0, 2.0) - float3(1.0, 1.0, 1.0);");
 		node_shader_write_frag(kong, "var res: float = distance(wpos0, input.wposition) * 10.0;");
 		node_shader_write_frag(kong, "output[0] = float4(res, res, res, 1.0);");
 	}
@@ -103,21 +106,21 @@ function make_bake_position_normal(kong: node_shader_t) {
 
 function make_bake_set_color_writes(con_paint: node_shader_context_t) {
 	// Bake into base color, disable other slots
-	con_paint.data.color_writes_red[1] = false;
+	con_paint.data.color_writes_red[1]   = false;
 	con_paint.data.color_writes_green[1] = false;
-	con_paint.data.color_writes_blue[1] = false;
+	con_paint.data.color_writes_blue[1]  = false;
 	con_paint.data.color_writes_alpha[1] = false;
-	con_paint.data.color_writes_red[2] = false;
+	con_paint.data.color_writes_red[2]   = false;
 	con_paint.data.color_writes_green[2] = false;
-	con_paint.data.color_writes_blue[2] = false;
+	con_paint.data.color_writes_blue[2]  = false;
 	con_paint.data.color_writes_alpha[2] = false;
 }
 
 function make_bake_axis_string(i: i32): string {
-	return i == bake_axis_t.X  ? "float3(1,0,0)"  :
-		   i == bake_axis_t.Y  ? "float3(0,1,0)"  :
-		   i == bake_axis_t.Z  ? "float3(0,0,1)"  :
-		   i == bake_axis_t.MX ? "float3(-1,0,0)" :
-		   i == bake_axis_t.MY ? "float3(0,-1,0)" :
-								 "float3(0,0,-1)";
+	return i == bake_axis_t.X    ? "float3(1,0,0)"
+	       : i == bake_axis_t.Y  ? "float3(0,1,0)"
+	       : i == bake_axis_t.Z  ? "float3(0,0,1)"
+	       : i == bake_axis_t.MX ? "float3(-1,0,0)"
+	       : i == bake_axis_t.MY ? "float3(0,-1,0)"
+	                             : "float3(0,0,-1)";
 }

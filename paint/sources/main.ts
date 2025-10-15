@@ -1,10 +1,10 @@
 
 function main() {
 	sys_on_resize = base_on_resize;
-	sys_on_w = base_w;
-	sys_on_h = base_h;
-	sys_on_x = base_x;
-	sys_on_y = base_y;
+	sys_on_w      = base_w;
+	sys_on_h      = base_h;
+	sys_on_x      = base_x;
+	sys_on_y      = base_y;
 
 	iron_set_app_name(manifest_title); // Used to locate external application data folder
 	config_load();

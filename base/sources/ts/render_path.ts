@@ -15,26 +15,26 @@ type cached_shader_context_t = {
 };
 
 enum draw_order_t {
-	DIST, // Early-z
+	DIST,   // Early-z
 	SHADER, // Less state changes
 }
 
-let render_path_commands: ()=>void = null;
+let render_path_commands: () => void                           = null;
 let render_path_render_targets: map_t<string, render_target_t> = map_create();
 let render_path_current_w: i32;
 let render_path_current_h: i32;
-let _render_path_frame_time: f32 = 0.0;
-let _render_path_frame: i32 = 0;
+let _render_path_frame_time: f32                 = 0.0;
+let _render_path_frame: i32                      = 0;
 let _render_path_current_target: render_target_t = null;
-let _render_path_current_image: gpu_texture_t = null;
-let _render_path_draw_order: draw_order_t = draw_order_t.DIST;
-let _render_path_paused: bool = false;
-let _render_path_last_w: i32 = 0;
-let _render_path_last_h: i32 = 0;
+let _render_path_current_image: gpu_texture_t    = null;
+let _render_path_draw_order: draw_order_t        = draw_order_t.DIST;
+let _render_path_paused: bool                    = false;
+let _render_path_last_w: i32                     = 0;
+let _render_path_last_h: i32                     = 0;
 let _render_path_bind_params: string[];
 let _render_path_meshes_sorted: bool;
-let _render_path_last_frame_time: f32 = 0.0;
-let _render_path_loading: i32 = 0;
+let _render_path_last_frame_time: f32                                           = 0.0;
+let _render_path_loading: i32                                                   = 0;
 let _render_path_cached_shader_contexts: map_t<string, cached_shader_context_t> = map_create();
 
 function render_path_ready(): bool {
@@ -52,11 +52,11 @@ function render_path_render_frame() {
 	_render_path_last_w = sys_w();
 	_render_path_last_h = sys_h();
 
-	_render_path_frame_time = sys_time() - _render_path_last_frame_time;
+	_render_path_frame_time      = sys_time() - _render_path_last_frame_time;
 	_render_path_last_frame_time = sys_time();
 
-	render_path_current_w = sys_w();
-	render_path_current_h = sys_h();
+	render_path_current_w      = sys_w();
+	render_path_current_h      = sys_h();
 	_render_path_meshes_sorted = false;
 
 	render_path_commands();
@@ -64,33 +64,34 @@ function render_path_render_frame() {
 	_render_path_frame++;
 }
 
-function render_path_set_target(target: string, additional: string[] = null, depth_buffer: string = null, flags: clear_flag_t = clear_flag_t.NONE, color: i32 = 0, depth: f32 = 0.0) {
+function render_path_set_target(target: string, additional: string[] = null, depth_buffer: string = null, flags: clear_flag_t = clear_flag_t.NONE,
+                                color: i32 = 0, depth: f32 = 0.0) {
 	if (_render_path_current_image != null) {
 		render_path_end();
 	}
 
 	if (target == "") { // Framebuffer
 		_render_path_current_target = null;
-		render_path_current_w = sys_w();
-		render_path_current_h = sys_h();
+		render_path_current_w       = sys_w();
+		render_path_current_h       = sys_h();
 		_gpu_begin(null, null, null, flags, color, depth);
 		gpu_viewport(sys_x(), render_path_current_h - (sys_h() - sys_y()), sys_w(), sys_h());
 	}
 	else { // Render target
-		let rt: render_target_t = map_get(render_path_render_targets, target);
-		_render_path_current_target = rt;
+		let rt: render_target_t                = map_get(render_path_render_targets, target);
+		_render_path_current_target            = rt;
 		let additional_images: gpu_texture_t[] = null;
 		if (additional != null) {
 			additional_images = [];
 			for (let i: i32 = 0; i < additional.length; ++i) {
-				let s: string = additional[i];
+				let s: string          = additional[i];
 				let t: render_target_t = map_get(render_path_render_targets, s);
 				array_push(additional_images, t._image);
 			}
 		}
-		render_path_current_w = rt._image.width;
-		render_path_current_h = rt._image.height;
-		let db: render_target_t = map_get(render_path_render_targets, depth_buffer);
+		render_path_current_w      = rt._image.width;
+		render_path_current_h      = rt._image.height;
+		let db: render_target_t    = map_get(render_path_render_targets, depth_buffer);
 		_render_path_current_image = rt._image;
 		_gpu_begin(rt._image, additional_images, db != null ? db._image : null, flags, color, depth);
 	}
@@ -100,7 +101,7 @@ function render_path_set_target(target: string, additional: string[] = null, dep
 function render_path_end() {
 	gpu_end();
 	_render_path_current_image = null;
-	_render_path_bind_params = null;
+	_render_path_bind_params   = null;
 }
 
 function _render_path_sort_dist(a: any_ptr, b: any_ptr): i32 {
@@ -131,7 +132,7 @@ function render_path_draw_meshes(context: string) {
 function render_path_submit_draw(context: string) {
 	let camera: camera_object_t = scene_camera;
 	let meshes: mesh_object_t[] = scene_meshes;
-	_mesh_object_last_pipeline = null;
+	_mesh_object_last_pipeline  = null;
 
 	if (!_render_path_meshes_sorted && camera != null) { // Order max once per frame for now
 		let cam_x: f32 = transform_world_x(camera.base.transform);
@@ -179,7 +180,7 @@ function render_path_bind_target(target: string, uniform: string) {
 		array_push(_render_path_bind_params, uniform);
 	}
 	else {
-		_render_path_bind_params = [target, uniform];
+		_render_path_bind_params = [ target, uniform ];
 	}
 }
 
@@ -215,7 +216,7 @@ function render_path_load_shader(handle: string) {
 	let shader_path: string[] = string_split(handle, "/");
 
 	let res: shader_data_t = data_get_shader(shader_path[0], shader_path[1]);
-	cc.context = shader_data_get_context(res, shader_path[2]);
+	cc.context             = shader_data_get_context(res, shader_path[2]);
 	_render_path_loading--;
 }
 
@@ -258,18 +259,17 @@ function render_path_create_render_target(t: render_target_t): render_target_t {
 }
 
 function render_path_create_image(t: render_target_t): gpu_texture_t {
-	let width: i32 = t.width == 0 ? sys_w() : t.width;
+	let width: i32  = t.width == 0 ? sys_w() : t.width;
 	let height: i32 = t.height == 0 ? sys_h() : t.height;
-	width = math_floor(width * t.scale);
-	height = math_floor(height * t.scale);
+	width           = math_floor(width * t.scale);
+	height          = math_floor(height * t.scale);
 	if (width < 1) {
 		width = 1;
 	}
 	if (height < 1) {
 		height = 1;
 	}
-	return gpu_create_render_target(width, height,
-		t.format != null ? render_path_get_tex_format(t.format) : tex_format_t.RGBA32);
+	return gpu_create_render_target(width, height, t.format != null ? render_path_get_tex_format(t.format) : tex_format_t.RGBA32);
 }
 
 function render_path_get_tex_format(s: string): tex_format_t {
@@ -299,7 +299,7 @@ function render_path_get_tex_format(s: string): tex_format_t {
 
 function render_target_create(): render_target_t {
 	let raw: render_target_t = {};
-	raw.scale = 1.0;
+	raw.scale                = 1.0;
 	return raw;
 }
 

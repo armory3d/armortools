@@ -1,7 +1,7 @@
 
 let flags = globalThis.flags;
 if (flags == null) {
-	flags = {};
+	flags              = {};
 	flags.alang_source = null;
 	flags.alang_output = "./test.c";
 }
@@ -13,27 +13,27 @@ if (flags == null) {
 // ██║         ██║  ██║    ██║  ██║    ███████║    ███████╗
 // ╚═╝         ╚═╝  ╚═╝    ╚═╝  ╚═╝    ╚══════╝    ╚══════╝
 
-let specials = [":", ";", ",", "(", ")", "[", "]", "{", "}", "<", ">", "!"];
+let specials   = [ ":", ";", ",", "(", ")", "[", "]", "{", "}", "<", ">", "!" ];
 let is_comment = false;
-let is_string = false;
-let pos = 0;
-let tokens = [];
-let header = "";
+let is_string  = false;
+let pos        = 0;
+let tokens     = [];
+let header     = "";
 
 function is_alpha_numeric(code) {
 	return (code > 47 && code < 58) || // 0-9
-		   (code === 45) 			|| // -
-		   (code === 43) 			|| // +
-		   (code === 95) 			|| // _
-		   (code === 46) 			|| // .
-		   (code > 64 && code < 91) || // A-Z
-		   (code > 96 && code < 123);  // a-z
+	       (code === 45) ||            // -
+	       (code === 43) ||            // +
+	       (code === 95) ||            // _
+	       (code === 46) ||            // .
+	       (code > 64 && code < 91) || // A-Z
+	       (code > 96 && code < 123);  // a-z
 }
 
 function is_alpha(code) {
 	return (code > 96 && code < 123) || // a-z
-		   (code > 64 && code < 91)  || // A-Z
-		   (code === 95);				// _
+	       (code > 64 && code < 91) ||  // A-Z
+	       (code === 95);               // _
 }
 
 function is_numeric(code) {
@@ -42,9 +42,9 @@ function is_numeric(code) {
 
 function is_white_space(code) {
 	return code === 32 || // " "
-		   code === 9  || // "\t"
-		   code === 13 || // "\r"
-		   code === 10;   // "\n"
+	       code === 9 ||  // "\t"
+	       code === 13 || // "\r"
+	       code === 10;   // "\n"
 }
 
 function read_token() {
@@ -53,8 +53,8 @@ function read_token() {
 		pos++;
 	}
 
-	let token = "";
-	let first = true;
+	let token   = "";
+	let first   = true;
 	let is_anum = false;
 
 	while (pos < flags.alang_source.length) {
@@ -72,8 +72,8 @@ function read_token() {
 			// Comment end
 			if (c === "\n") {
 				is_comment = false;
-				if (token.startsWith("///include") || token.startsWith("///define")) {
-					header += "#" + token.substring(3, token.length);
+				if (token.startsWith("/// include") || token.startsWith("/// define")) {
+					header += "#" + token.substring(4, token.length);
 				}
 				// Remove comments
 				return null;
@@ -86,8 +86,8 @@ function read_token() {
 		// String start / end
 		if (c === "\"") {
 			// Escaped \"
-			let last = token.length > 0 ? token.charAt(token.length - 1) : "";
-			let last_last = token.length > 1 ? token.charAt(token.length - 2) : "";
+			let last       = token.length > 0 ? token.charAt(token.length - 1) : "";
+			let last_last  = token.length > 1 ? token.charAt(token.length - 2) : "";
 			let is_escaped = last === "\\" && last_last != "\\";
 
 			if (!is_escaped) {
@@ -122,7 +122,7 @@ function read_token() {
 
 		// Parsing an alphanumeric token
 		if (first) {
-			first = false;
+			first   = false;
 			is_anum = is_alpha_numeric(c.charCodeAt(0));
 		}
 
@@ -147,7 +147,7 @@ function read_token() {
 
 function alang_parse() {
 	tokens = [];
-	pos = 0;
+	pos    = 0;
 
 	while (true) {
 		let token = read_token();
@@ -173,21 +173,21 @@ function alang_parse() {
 // ╚══════╝    ╚═╝    ╚═════╝
 
 let fhandle;
-let strings = [];
-let tabs = 0;
-let new_line = false;
-let basic_types = ["i8", "u8", "i16", "u16", "i32", "u32", "f32", "i64", "u64", "f64", "bool"];
-let pass_by_value_types = ["vec4_t", "vec3_t", "vec2_t", "quat_t", "mat4_t", "mat3_t"];
-let enums = [];
-let value_types = new Map();
-let struct_types = new Map();
-let fn_declarations = new Map();
-let fn_default_params = new Map();
-let fn_call_stack = [];
-let param_pos_stack = [];
-let is_for_loop = false;
-let global_inits = [];
-let global_ptrs = [];
+let strings             = [];
+let tabs                = 0;
+let new_line            = false;
+let basic_types         = [ "i8", "u8", "i16", "u16", "i32", "u32", "f32", "i64", "u64", "f64", "bool" ];
+let pass_by_value_types = [ "vec4_t", "vec3_t", "vec2_t", "quat_t", "mat4_t", "mat3_t" ];
+let enums               = [];
+let value_types         = new Map();
+let struct_types        = new Map();
+let fn_declarations     = new Map();
+let fn_default_params   = new Map();
+let fn_call_stack       = [];
+let param_pos_stack     = [];
+let is_for_loop         = false;
+let global_inits        = [];
+let global_ptrs         = [];
 
 function handle_tabs(token) {
 	// Entering block, add tab
@@ -222,7 +222,7 @@ function handle_new_line(token) {
 	}
 }
 
-let add_space_keywords = ["return", "else"];
+let add_space_keywords = [ "return", "else" ];
 
 function handle_spaces(token) {
 	// Add space to separate keywords
@@ -233,7 +233,7 @@ function handle_spaces(token) {
 
 function get_token(off = 0) {
 	// if (pos + off < tokens.length) {
-		return tokens[pos + off];
+	return tokens[pos + off];
 	// }
 	// return "";
 }
@@ -242,7 +242,7 @@ function get_token_after_piece() {
 	let _pos = pos;
 	skip_piece();
 	let t = get_token(1);
-	pos = _pos;
+	pos   = _pos;
 	return t;
 }
 
@@ -257,7 +257,7 @@ function skip_until(s) {
 }
 
 function skip_block() { // { ... }
-	pos++; // {
+	pos++;              // {
 	let nested = 1;
 	while (true) {
 		let token = get_token();
@@ -286,7 +286,7 @@ function function_return_type() {
 	}
 	pos -= 2; // ): i32 {
 	let result = get_token() === ":" ? read_type() : "void";
-	pos = _pos;
+	pos        = _pos;
 	return result;
 }
 
@@ -333,7 +333,7 @@ function read_type() { // Cursor at ":"
 		params += ")";
 		skip_until("=>");
 		let ret = read_type();
-		type = ret + "(*NAME)" + params;
+		type    = ret + "(*NAME)" + params;
 	}
 
 	if (type === "color_t") {
@@ -420,8 +420,8 @@ function struct_access(s) {
 
 	// Accessing pass_by_value_types struct like vec4.x
 	let has_minus = s.startsWith("-");
-	let base = s.substring(has_minus ? 1 : 0, dot);
-	let type = value_types.get(base);
+	let base      = s.substring(has_minus ? 1 : 0, dot);
+	let type      = value_types.get(base);
 	if (type != null) {
 		let dot_last = s.lastIndexOf(".");
 		if (dot != dot_last) { // a.vec4.x
@@ -442,7 +442,7 @@ function struct_access(s) {
 
 			if (!type.endsWith(" *")) { // vec4_t
 				let first = s.substring(0, dot_last).replaceAll(".", "->");
-				let last = s.substring(dot_last, s.length);
+				let last  = s.substring(dot_last, s.length);
 				return first + last; // a->vec4.x
 			}
 		}
@@ -461,7 +461,7 @@ function struct_alloc(token, type = null) {
 			// let a: b = {, a = {, a.b = {
 			let i = get_token(-3) === ":" ? -4 : -2;
 			let t = struct_access(get_token(i));
-			type = value_type(t);
+			type  = value_type(t);
 			if (type.endsWith(" *")) { // my_struct * -> my_struct
 				type = type.substring(0, type.length - 2);
 			}
@@ -480,7 +480,7 @@ function struct_alloc(token, type = null) {
 			}
 
 			let tc = get_token_c();
-			tc = string_ops(tc);
+			tc     = string_ops(tc);
 			if (get_token(1) === ":" && !ternary) {
 				tc = "." + tc; // a: b -> .a = b
 			}
@@ -496,11 +496,11 @@ function struct_alloc(token, type = null) {
 				ternary++;
 			}
 			else if (t === "[" && get_token(-1) === ":") {
-				let member = get_token(-2);
-				let types = struct_types.get(type + " *");
+				let member       = get_token(-2);
+				let types        = struct_types.get(type + " *");
 				let content_type = types.get(member);
-				content_type = content_type.substring(7, content_type.length - 8); // struct my_struct_array_t * -> my_struct
-				tc = array_create("[", "", content_type);
+				content_type     = content_type.substring(7, content_type.length - 8); // struct my_struct_array_t * -> my_struct
+				tc               = array_create("[", "", content_type);
 			}
 			token += tc;
 			pos++;
@@ -526,7 +526,7 @@ function array_type(name) {
 	if (type.startsWith("struct ")) { // struct u8_array * -> u8_array_t *
 		type = type.substring(7, type.length - 2) + "_t *";
 	}
-	type = strip(type, 10); // Strip _array_t *
+	type = strip(type, 10);               // Strip _array_t *
 	if (basic_types.indexOf(type) > -1) { // u8
 		return type;
 	}
@@ -536,7 +536,7 @@ function array_type(name) {
 function array_contents(type) {
 	// [1, 2, ..] or [{a:b}, {a:b}, ..] or [a(), b(), ..]
 	let contents = [];
-	let content = "";
+	let content  = "";
 	while (true) {
 		pos++;
 		let token = get_token();
@@ -591,18 +591,18 @@ function array_create(token, name, content_type = null) {
 			name = get_token(-6); // ar: i32[] = [
 		}
 		let member = member_name(name);
-		let type = array_type(member);
+		let type   = array_type(member);
 
 		// = [], = [1, 2, ..] -> any/i32/.._array_create_from_raw
 		if (content_type == null) {
-			name = struct_access(name);
+			name         = struct_access(name);
 			content_type = value_type(name);
 			if (content_type != null) {
 				content_type = content_type.substring(0, content_type.length - 10);
 			}
 		}
 		let contents = array_contents(content_type);
-		token = type + "_array_create_from_raw((" + type + "[]){";
+		token        = type + "_array_create_from_raw((" + type + "[]){";
 		for (let e of contents) {
 			token += e + ",";
 		}
@@ -687,9 +687,9 @@ function fill_fn_params(token) {
 
 function get_token_c() {
 	let t = get_token();
-	t = enum_access(t);
-	t = struct_access(t);
-	t = array_access(t);
+	t     = enum_access(t);
+	t     = struct_access(t);
+	t     = array_access(t);
 	return t;
 }
 
@@ -697,9 +697,9 @@ function fill_default_params(piece) {
 	// fn(a, 1, ..)
 	if (get_token(1) === ")") {
 		let fn_name = "";
-		let params = 0;
-		let i = 0;
-		let nested = 1;
+		let params  = 0;
+		let i       = 0;
+		let nested  = 1;
 		while (true) {
 			let ti = get_token(i);
 			if (ti === ")") {
@@ -769,8 +769,8 @@ function skip_piece(nested = 0) {
 function read_piece(nested = 0) {
 	// call(a, b, c), a[b + c]
 	let piece = get_token_c();
-	piece = string_length(piece);
-	piece = map_ops(piece);
+	piece     = string_length(piece);
+	piece     = map_ops(piece);
 
 	let t1 = get_token(1);
 	if (t1 === "(" || t1 === "[") {
@@ -818,9 +818,9 @@ function string_length(token) {
 function value_type(value) {
 	let arrow = value.indexOf("->");
 	if (arrow > -1) {
-		let base = value.substring(0, arrow);
-		let type = value_types.get(base);
-		let member = value.substring(arrow + 2, value.length);
+		let base               = value.substring(0, arrow);
+		let type               = value_types.get(base);
+		let member             = value.substring(arrow + 2, value.length);
 		let struct_value_types = struct_types.get(type);
 		if (struct_value_types != null) {
 			return struct_value_types.get(member);
@@ -834,7 +834,7 @@ function set_fn_param_types() {
 	while (true) {
 		pos++;
 		let t = get_token(); // Param name, ) or ,
-		if (t === ")") { // Params end
+		if (t === ")") {     // Params end
 			break;
 		}
 		if (t === ",") { // Next param
@@ -890,7 +890,7 @@ function string_add(token) {
 	pos++;
 
 	let token_b = read_piece();
-	token_b = number_to_string(token_b);
+	token_b     = number_to_string(token_b);
 	token += token_b;
 	token += ")";
 	return token;
@@ -923,7 +923,7 @@ function string_ops(token) {
 		pos++;
 		if (get_token_after_piece() === "+") {
 			let token_b = read_piece();
-			token_b = number_to_string(token_b);
+			token_b     = number_to_string(token_b);
 			while (get_token_after_piece() === "+") {
 				pos++;
 				token_b = string_add(token_b);
@@ -939,12 +939,12 @@ function string_ops(token) {
 	// str = str
 	else if (p1 === "=") {
 		let _pos = pos;
-		let t1 = read_piece();
+		let t1   = read_piece();
 		pos++;
 		pos++; // =
 		let t2 = read_piece();
 		if (get_token(1) === ";" && !t2.startsWith("\"")) { // str = str;
-			token = t1 + "=string_copy(" + t2 + ")"; // Copy string
+			token = t1 + "=string_copy(" + t2 + ")";        // Copy string
 		}
 		else {
 			pos = _pos;
@@ -981,7 +981,7 @@ function array_ops(token) {
 	if (token === "array_push") {
 		let value = get_token(2);
 
-		if (get_token(3) === "[") { // raws[i].value
+		if (get_token(3) === "[") {            // raws[i].value
 			value = get_token(6).substring(1); // .value
 		}
 
@@ -989,14 +989,14 @@ function array_ops(token) {
 			value = value.substring(value.lastIndexOf(".") + 1, value.length);
 		}
 		let type = array_type(value);
-		token = type + "_array_push";
+		token    = type + "_array_push";
 	}
 
 	// array_remove -> i32_array_remove / char_ptr_array_remove
 	else if (token === "array_remove") {
 		let value = get_token(2);
-		value = struct_access(value);
-		let type = value_type(value);
+		value     = struct_access(value);
+		let type  = value_type(value);
 		if (type != null && type.startsWith("struct ")) { // struct u8_array * -> u8_array_t *
 			type = type.substring(7, type.length - 2) + "_t *";
 		}
@@ -1012,8 +1012,8 @@ function array_ops(token) {
 	// array_index_of -> i32_array_index_of / char_ptr_array_index_of
 	else if (token === "array_index_of") {
 		let value = get_token(2);
-		value = struct_access(value);
-		let type = value_type(value);
+		value     = struct_access(value);
+		let type  = value_type(value);
 		if (type != null && type.startsWith("struct ")) { // struct u8_array * -> u8_array_t *
 			type = type.substring(7, type.length - 2) + "_t *";
 		}
@@ -1097,7 +1097,7 @@ function map_ops(token) {
 function _t_to_struct(type) {
 	// type_t * -> struct type *
 	if (type.endsWith("_t *") && type != "string_t *") {
-		let type_short = strip(type, 4); // _t *
+		let type_short = strip(type, 4);     // _t *
 		if (type_short.endsWith("_array")) { // tex_format_t_array -> i32_array
 			for (let e of enums) {
 				if (type_short.startsWith(e)) {
@@ -1165,7 +1165,7 @@ function write_enums() {
 				token = get_token();
 
 				if (token === "=") { // Enum value
-					pos++; // n
+					pos++;           // n
 					token = get_token();
 					out("=" + token);
 					pos++; // ,
@@ -1193,7 +1193,7 @@ function write_types() {
 			out = get_token(-1) === "declare" ? null_write : stream_write;
 
 			pos++;
-			let struct_name = get_token();
+			let struct_name      = get_token();
 			let stuct_name_short = strip(struct_name, 2); // _t
 
 			pos++;
@@ -1209,7 +1209,7 @@ function write_types() {
 			if (token != "{") {
 				pos--;
 				let type = read_type();
-				type = _t_to_struct(type);
+				type     = _t_to_struct(type);
 
 				out("typedef " + type + " " + struct_name + ";\n\n");
 				skip_until(";");
@@ -1245,7 +1245,7 @@ function write_types() {
 				// my_struct_t*(*NAME)(my_struct_t *) -> struct my_struct*(*NAME)(struct my_struct*)
 				if (type.indexOf("(*NAME)") > -1) {
 					let args = type.substring(type.indexOf(")(") + 2, type.lastIndexOf(")"));
-					args = args.split(",");
+					args     = args.split(",");
 
 					type = type.substring(0, type.indexOf("(*NAME)"));
 					type = _t_to_struct(type);
@@ -1253,7 +1253,7 @@ function write_types() {
 
 					for (let i = 0; i < args.length; ++i) {
 						let arg = args[i];
-						arg = _t_to_struct(arg);
+						arg     = _t_to_struct(arg);
 						if (i > 0) {
 							type += ",";
 						}
@@ -1288,9 +1288,7 @@ function write_array_types() {
 			}
 			if (is_struct(type)) {
 				if (!array_structs.has(type)) {
-					let as = "typedef struct " + type + "_array{" +
-						type + "**buffer;int length;int capacity;}" +
-						type + "_array_t;";
+					let as = "typedef struct " + type + "_array{" + type + "**buffer;int length;int capacity;}" + type + "_array_t;";
 					array_structs.set(type, as);
 				}
 			}
@@ -1306,9 +1304,9 @@ function write_array_types() {
 }
 
 function write_fn_declarations() {
-	fn_declarations = new Map();
+	fn_declarations   = new Map();
 	fn_default_params = new Map();
-	let last_fn_name = "";
+	let last_fn_name  = "";
 	for (pos = 0; pos < tokens.length; ++pos) {
 		let token = get_token();
 
@@ -1319,7 +1317,7 @@ function write_fn_declarations() {
 			// Return type + name
 			pos++;
 			let fn_name = get_token();
-			let ret = function_return_type();
+			let ret     = function_return_type();
 
 			if (fn_name === "(") { // Anonymous function
 				fn_name = last_fn_name + "_" + (pos - 1);
@@ -1334,7 +1332,7 @@ function write_fn_declarations() {
 
 			// Params
 			let _param_pos = 0;
-			let params = "(";
+			let params     = "(";
 			pos++; // (
 			while (true) {
 				pos++;
@@ -1357,7 +1355,7 @@ function write_fn_declarations() {
 				// Store param default
 				if (get_token(1) === "=") {
 					let param = get_token(2);
-					param = enum_access(param);
+					param     = enum_access(param);
 					fn_default_params.set(fn_name + _param_pos, param);
 					pos += 2;
 				}
@@ -1377,7 +1375,7 @@ function write_fn_declarations() {
 
 function write_globals() {
 	global_inits = [];
-	global_ptrs = [];
+	global_ptrs  = [];
 	for (pos = 0; pos < tokens.length; ++pos) {
 		let token = get_token();
 
@@ -1391,9 +1389,7 @@ function write_globals() {
 			pos++; // :
 			let type = read_type();
 
-			if (basic_types.indexOf(type) === -1 &&
-				pass_by_value_types.indexOf(type) === -1 &&
-				enums.indexOf(type) === -1) {
+			if (basic_types.indexOf(type) === -1 && pass_by_value_types.indexOf(type) === -1 && enums.indexOf(type) === -1) {
 				global_ptrs.push(name);
 			}
 
@@ -1403,7 +1399,7 @@ function write_globals() {
 			let is_initialized = get_token(1) === "=";
 			if (is_initialized) {
 				let init = name;
-				tabs = 1;
+				tabs     = 1;
 				while (true) {
 					pos++;
 					token = get_token();
@@ -1461,7 +1457,7 @@ function write_kickstart() {
 	// Init globals
 	for (let val of global_inits) {
 		out("\t");
-		let name = val.split("=")[0];
+		let name         = val.split("=")[0];
 		let global_alloc = global_ptrs.indexOf(name) > -1 && !val.endsWith("=null") && !val.endsWith("\"");
 		if (global_alloc) {
 			out("gc_unroot(" + name + ");");
@@ -1495,10 +1491,10 @@ function write_function() {
 	set_fn_param_types();
 	skip_until("{");
 
-	tabs = 1;
-	new_line = true;
+	tabs             = 1;
+	new_line         = true;
 	let mark_as_root = null;
-	let nested = [];
+	let nested       = [];
 
 	while (true) {
 		pos++;
@@ -1517,10 +1513,10 @@ function write_function() {
 			let fn_decl = fn_declarations.get(anon_fn);
 			out(fn_decl + "{\n");
 
-			let find = fn_decl.substring(0, fn_decl.indexOf("("));
+			let find   = fn_decl.substring(0, fn_decl.indexOf("("));
 			let fn_pos = parseInt(find.substring(find.lastIndexOf("_") + 1, find.length));
-			let _pos = pos;
-			pos = fn_pos;
+			let _pos   = pos;
+			pos        = fn_pos;
 			set_fn_param_types();
 			pos = _pos;
 
@@ -1538,7 +1534,7 @@ function write_function() {
 					nested.pop();
 					out("}\n\n");
 					if (strings.length > 1) {
-						let s = strings.pop();
+						let s                       = strings.pop();
 						strings[strings.length - 1] = s + strings[strings.length - 1];
 					}
 

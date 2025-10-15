@@ -1,7 +1,6 @@
 
 type import_texture_data_t = {
-	path: string;
-	image: gpu_texture_t;
+	path: string; image : gpu_texture_t;
 };
 
 function import_texture_run(path: string, hdr_as_envmap: bool = true) {
@@ -18,9 +17,9 @@ function import_texture_run(path: string, hdr_as_envmap: bool = true) {
 		if (a.file == path) {
 			// Set as envmap
 			if (hdr_as_envmap && ends_with(to_lower_case(path), ".hdr")) {
-				let image: gpu_texture_t = data_get_image(path);
-				let itd: import_texture_data_t = { path: path, image: image };
-				sys_notify_on_next_frame(function (itd: import_texture_data_t) { // Make sure file browser process did finish
+				let image: gpu_texture_t       = data_get_image(path);
+				let itd: import_texture_data_t = {path : path, image : image};
+				sys_notify_on_next_frame(function(itd: import_texture_data_t) { // Make sure file browser process did finish
 					import_envmap_run(itd.path, itd.image);
 				}, itd);
 			}
@@ -29,9 +28,9 @@ function import_texture_run(path: string, hdr_as_envmap: bool = true) {
 		}
 	}
 
-	let ext: string = substring(path, string_last_index_of(path, ".") + 1, path.length);
-	let importer: any = map_get(path_texture_importers, ext); // JSValue -> (s: string)=>gpu_texture_t
-	let cached: bool = map_get(data_cached_images, path) != null; // Already loaded or pink texture for missing file
+	let ext: string   = substring(path, string_last_index_of(path, ".") + 1, path.length);
+	let importer: any = map_get(path_texture_importers, ext);      // JSValue -> (s: string)=>gpu_texture_t
+	let cached: bool  = map_get(data_cached_images, path) != null; // Already loaded or pink texture for missing file
 	let image: gpu_texture_t;
 	if (importer == null || cached) {
 		image = import_texture_default_importer(path);
@@ -45,9 +44,9 @@ function import_texture_run(path: string, hdr_as_envmap: bool = true) {
 	}
 
 	map_set(data_cached_images, path, image);
-	let ar: string[] = string_split(path, path_sep);
-	let name: string = ar[ar.length - 1];
-	let asset: asset_t = {name: name, file: path, id: project_asset_id++};
+	let ar: string[]   = string_split(path, path_sep);
+	let name: string   = ar[ar.length - 1];
+	let asset: asset_t = {name : name, file : path, id : project_asset_id++};
 	array_push(project_assets, asset);
 	if (context_raw.texture == null) {
 		context_raw.texture = asset;
@@ -59,8 +58,8 @@ function import_texture_run(path: string, hdr_as_envmap: bool = true) {
 
 	// Set as envmap
 	if (hdr_as_envmap && ends_with(to_lower_case(path), ".hdr")) {
-		let itd: import_texture_data_t = { path: path, image: image };
-		sys_notify_on_next_frame(function (itd: import_texture_data_t) { // Make sure file browser process did finish
+		let itd: import_texture_data_t = {path : path, image : image};
+		sys_notify_on_next_frame(function(itd: import_texture_data_t) { // Make sure file browser process did finish
 			import_envmap_run(itd.path, itd.image);
 		}, itd);
 	}

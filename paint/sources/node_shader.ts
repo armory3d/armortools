@@ -38,24 +38,24 @@ type node_shader_t = {
 
 function node_shader_create(context: node_shader_context_t): node_shader_t {
 	let raw: node_shader_t = {};
-	raw.context = context;
-	raw.ins = [];
-	raw.outs = [];
-	raw.frag_out = "float4";
-	raw.consts = [];
-	raw.textures = [];
-	raw.functions = map_create();
+	raw.context            = context;
+	raw.ins                = [];
+	raw.outs               = [];
+	raw.frag_out           = "float4";
+	raw.consts             = [];
+	raw.textures           = [];
+	raw.functions          = map_create();
 
-	raw.vert = "";
-	raw.vert_end = "";
-	raw.vert_normal = "";
-	raw.vert_attribs = "";
+	raw.vert              = "";
+	raw.vert_end          = "";
+	raw.vert_normal       = "";
+	raw.vert_attribs      = "";
 	raw.vert_write_normal = 0;
 
-	raw.frag = "";
-	raw.frag_end = "";
-	raw.frag_normal = "";
-	raw.frag_attribs = "";
+	raw.frag              = "";
+	raw.frag_end          = "";
+	raw.frag_normal       = "";
+	raw.frag_attribs      = "";
 	raw.frag_write_normal = 0;
 
 	return raw;
@@ -72,16 +72,21 @@ function node_shader_add_out(raw: node_shader_t, s: string) {
 function node_shader_add_constant(raw: node_shader_t, s: string, link: string = null) {
 	// inp: float4
 	if (array_index_of(raw.consts, s) == -1) {
-		let ar: string[] = string_split(s, ": ");
+		let ar: string[]  = string_split(s, ": ");
 		let uname: string = ar[0];
 		let utype: string = ar[1];
 
 		////
-		if (utype == "float2") utype = "vec2";
-		if (utype == "float3") utype = "vec3";
-		if (utype == "float4") utype = "vec4";
-		if (utype == "float3x3") utype = "mat3";
-		if (utype == "float4x4") utype = "mat4";
+		if (utype == "float2")
+			utype = "vec2";
+		if (utype == "float3")
+			utype = "vec3";
+		if (utype == "float4")
+			utype = "vec4";
+		if (utype == "float3x3")
+			utype = "mat3";
+		if (utype == "float4x4")
+			utype = "mat4";
 		////
 
 		array_push(raw.consts, s);
@@ -153,7 +158,8 @@ function node_shader_vstruct_to_vsin(raw: node_shader_t) {
 	let vs: vertex_element_t[] = raw.context.data.vertex_elements;
 	for (let i: i32 = 0; i < vs.length; ++i) {
 		let e: vertex_element_t = vs[i];
-		node_shader_add_in(raw, "" + e.name + ": " + "float" + node_shader_data_size(raw, e.data));
+		node_shader_add_in(raw, "" + e.name + ": " +
+		                            "float" + node_shader_data_size(raw, e.data));
 	}
 }
 
@@ -240,7 +246,6 @@ function node_shader_get(raw: node_shader_t): string {
 	return s;
 }
 
-
 type material_t = {
 	name?: string;
 	canvas?: ui_node_canvas_t;
@@ -255,37 +260,28 @@ type node_shader_context_t = {
 
 function node_shader_context_create(material: material_t, props: shader_context_t): node_shader_context_t {
 	let raw: node_shader_context_t = {};
-	raw.material = material;
+	raw.material                   = material;
 
-	let vertex_elements_default: vertex_element_t[] = [
-		{
-			name: "pos",
-			data: "short4norm"
-		},
-		{
-			name: "nor",
-			data: "short2norm"
-		}
-	];
+	let vertex_elements_default: vertex_element_t[] = [ {name : "pos", data : "short4norm"}, {name : "nor", data : "short2norm"} ];
 
 	raw.data = {
-		name: props.name,
-		depth_write: props.depth_write,
-		compare_mode: props.compare_mode,
-		cull_mode: props.cull_mode,
-		blend_source: props.blend_source,
-		blend_destination: props.blend_destination,
-		alpha_blend_source: props.alpha_blend_source,
-		alpha_blend_destination: props.alpha_blend_destination,
-		fragment_shader: "",
-		vertex_shader: "",
-		vertex_elements: props.vertex_elements != null ? props.vertex_elements : vertex_elements_default,
-		color_attachments: props.color_attachments,
-		depth_attachment: props.depth_attachment
+		name : props.name,
+		depth_write : props.depth_write,
+		compare_mode : props.compare_mode,
+		cull_mode : props.cull_mode,
+		blend_source : props.blend_source,
+		blend_destination : props.blend_destination,
+		alpha_blend_source : props.alpha_blend_source,
+		alpha_blend_destination : props.alpha_blend_destination,
+		fragment_shader : "",
+		vertex_shader : "",
+		vertex_elements : props.vertex_elements != null ? props.vertex_elements : vertex_elements_default,
+		color_attachments : props.color_attachments,
+		depth_attachment : props.depth_attachment
 	};
 
 	let rw: shader_context_t = raw.data;
-	rw._ = {};
+	rw._                     = {};
 
 	if (props.color_writes_red != null) {
 		raw.data.color_writes_red = props.color_writes_red;
@@ -301,7 +297,7 @@ function node_shader_context_create(material: material_t, props: shader_context_
 	}
 
 	raw.data.texture_units = [];
-	raw.data.constants = [];
+	raw.data.constants     = [];
 	return raw;
 }
 
@@ -312,7 +308,7 @@ function node_shader_context_add_elem(raw: node_shader_context_t, name: string, 
 			return;
 		}
 	}
-	let elem: vertex_element_t = { name: name, data: data_type };
+	let elem: vertex_element_t = {name : name, data : data_type};
 	array_push(raw.data.vertex_elements, elem);
 }
 
@@ -344,7 +340,7 @@ function node_shader_context_add_constant(raw: node_shader_context_t, ctype: str
 		}
 	}
 
-	let c: shader_const_t = { name: name, type: ctype };
+	let c: shader_const_t = {name : name, type : ctype};
 	if (link != null) {
 		c.link = link;
 	}
@@ -360,13 +356,13 @@ function node_shader_context_add_texture_unit(raw: node_shader_context_t, name: 
 		}
 	}
 
-	let c: tex_unit_t = { name: name, link: link };
+	let c: tex_unit_t = {name : name, link : link};
 	array_push(raw.data.texture_units, c);
 }
 
 function node_shader_context_make_kong(raw: node_shader_context_t): node_shader_t {
-	raw.data.vertex_shader = raw.material.name + "_" + raw.data.name + ".vert";
+	raw.data.vertex_shader   = raw.material.name + "_" + raw.data.name + ".vert";
 	raw.data.fragment_shader = raw.material.name + "_" + raw.data.name + ".frag";
-	raw.kong = node_shader_create(raw);
+	raw.kong                 = node_shader_create(raw);
 	return raw.kong;
 }

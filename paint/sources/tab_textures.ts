@@ -12,16 +12,16 @@ function tab_textures_draw(htab: ui_handle_t) {
 		ui_begin_sticky();
 
 		if (config_raw.touch_ui) {
-			let row: f32[] = [1 / 4, 1 / 4];
+			let row: f32[] = [ 1 / 4, 1 / 4 ];
 			ui_row(row);
 		}
 		else {
-			let row: f32[] = [1 / 14, 1 / 14];
+			let row: f32[] = [ 1 / 14, 1 / 14 ];
 			ui_row(row);
 		}
 
 		if (ui_button(tr("Import"))) {
-			ui_files_show(string_array_join(path_texture_formats, ","), false, true, function (path: string) {
+			ui_files_show(string_array_join(path_texture_formats, ","), false, true, function(path: string) {
 				import_asset_run(path, -1.0, -1.0, true, false);
 				ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 			});
@@ -41,7 +41,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 			let statusw: i32 = iron_window_width() - ui_toolbar_w(true) - config_raw.layout[layout_size_t.SIDEBAR_W];
 
 			let slotw: i32 = math_floor(52 * UI_SCALE());
-			let num: i32 = math_floor(statusw / slotw);
+			let num: i32   = math_floor(statusw / slotw);
 			if (num == 0) {
 				return;
 			}
@@ -62,7 +62,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 
 				for (let j: i32 = 0; j < num; ++j) {
 					let imgw: i32 = math_floor(50 * UI_SCALE());
-					let i: i32 = j + row * num;
+					let i: i32    = j + row * num;
 					if (i >= project_assets.length) {
 						ui_end_element_of_size(imgw);
 						if (config_raw.show_asset_names) {
@@ -71,39 +71,39 @@ function tab_textures_draw(htab: ui_handle_t) {
 						continue;
 					}
 
-					let asset: asset_t = project_assets[i];
+					let asset: asset_t     = project_assets[i];
 					let img: gpu_texture_t = project_get_image(asset);
 					if (img == null) {
 						let empty_rt: render_target_t = map_get(render_path_render_targets, "empty_black");
-						img = empty_rt._image;
+						img                           = empty_rt._image;
 					}
 					let uix: f32 = ui._x;
 					let uiy: f32 = ui._y;
-					let sw: i32 = img.height < img.width ? img.height : 0;
+					let sw: i32  = img.height < img.width ? img.height : 0;
 					if (ui_sub_image(img, 0xffffffff, slotw, 0, 0, sw, sw) == ui_state_t.STARTED && ui.input_y > ui._window_y) {
-						base_drag_off_x = -(mouse_x - uix - ui._window_x - 3);
-						base_drag_off_y = -(mouse_y - uiy - ui._window_y + 1);
-						base_drag_asset = asset;
+						base_drag_off_x     = -(mouse_x - uix - ui._window_x - 3);
+						base_drag_off_y     = -(mouse_y - uiy - ui._window_y + 1);
+						base_drag_asset     = asset;
 						context_raw.texture = asset;
 
 						if (sys_time() - context_raw.select_time < 0.2) {
 							ui_base_show_2d_view(view_2d_type_t.ASSET);
 						}
 						context_raw.select_time = sys_time();
-						ui_view2d_hwnd.redraws = 2;
+						ui_view2d_hwnd.redraws  = 2;
 					}
 
 					if (asset == context_raw.texture) {
 						let _uix: f32 = ui._x;
 						let _uiy: f32 = ui._y;
-						ui._x = uix;
-						ui._y = uiy;
-						let off: i32 = i % 2 == 1 ? 1 : 0;
-						let w: i32 = 50;
-						ui_fill(0,               0, w + 3,       2, ui.ops.theme.HIGHLIGHT_COL);
-						ui_fill(0,     w - off + 2, w + 3, 2 + off, ui.ops.theme.HIGHLIGHT_COL);
-						ui_fill(0,               0,     2,   w + 3, ui.ops.theme.HIGHLIGHT_COL);
-						ui_fill(w + 2,           0,     2,   w + 4, ui.ops.theme.HIGHLIGHT_COL);
+						ui._x         = uix;
+						ui._y         = uiy;
+						let off: i32  = i % 2 == 1 ? 1 : 0;
+						let w: i32    = 50;
+						ui_fill(0, 0, w + 3, 2, ui.ops.theme.HIGHLIGHT_COL);
+						ui_fill(0, w - off + 2, w + 3, 2 + off, ui.ops.theme.HIGHLIGHT_COL);
+						ui_fill(0, 0, 2, w + 3, ui.ops.theme.HIGHLIGHT_COL);
+						ui_fill(w + 2, 0, 2, w + 4, ui.ops.theme.HIGHLIGHT_COL);
 						ui._x = _uix;
 						ui._y = _uiy;
 					}
@@ -123,27 +123,27 @@ function tab_textures_draw(htab: ui_handle_t) {
 					if (ui.is_hovered && ui.input_released_r) {
 						context_raw.texture = asset;
 
-						_tab_textures_draw_img = img;
-						_tab_textures_draw_asset = asset;
-						_tab_textures_draw_i = i;
+						_tab_textures_draw_img       = img;
+						_tab_textures_draw_asset     = asset;
+						_tab_textures_draw_i         = i;
 						_tab_textures_draw_is_packed = is_packed;
 
-						ui_menu_draw(function () {
+						ui_menu_draw(function() {
 							if (ui_menu_button(tr("Export"))) {
-								ui_files_show("png", true, false, function (path: string) {
+								ui_files_show("png", true, false, function(path: string) {
 									_tab_textures_draw_path = path;
 
-									sys_notify_on_next_frame(function () {
-										let img: gpu_texture_t = _tab_textures_draw_img;
+									sys_notify_on_next_frame(function() {
+										let img: gpu_texture_t    = _tab_textures_draw_img;
 										let target: gpu_texture_t = gpu_create_render_target(img.width, img.height);
 										draw_begin(target);
 										draw_set_pipeline(pipes_copy);
 										draw_scaled_image(img, 0, 0, target.width, target.height);
 										draw_set_pipeline(null);
 										draw_end();
-										sys_notify_on_next_frame(function (target: gpu_texture_t) {
+										sys_notify_on_next_frame(function(target: gpu_texture_t) {
 											let path: string = _tab_textures_draw_path;
-											let f: string = ui_files_filename;
+											let f: string    = ui_files_filename;
 											if (f == "") {
 												f = tr("untitled");
 											}
@@ -161,24 +161,24 @@ function tab_textures_draw(htab: ui_handle_t) {
 							}
 
 							if (ui_menu_button(tr("To Mask"))) {
-								sys_notify_on_next_frame(function () {
+								sys_notify_on_next_frame(function() {
 									layers_create_image_mask(_tab_textures_draw_asset);
 								});
 							}
 
 							if (ui_menu_button(tr("Set as Envmap"))) {
-								sys_notify_on_next_frame(function () {
+								sys_notify_on_next_frame(function() {
 									import_envmap_run(_tab_textures_draw_asset.file, _tab_textures_draw_img);
 								});
 							}
 
 							if (ui_menu_button(tr("Set as Color ID Map"))) {
 								context_raw.colorid_handle.i = _tab_textures_draw_i;
-								context_raw.colorid_picked = false;
-								ui_toolbar_handle.redraws = 1;
+								context_raw.colorid_picked   = false;
+								ui_toolbar_handle.redraws    = 1;
 								if (context_raw.tool == tool_type_t.COLORID) {
 									ui_header_handle.redraws = 2;
-									context_raw.ddirty = 2;
+									context_raw.ddirty       = 2;
 								}
 							}
 
@@ -189,7 +189,8 @@ function tab_textures_draw(htab: ui_handle_t) {
 								file_start(substring(_tab_textures_draw_asset.file, 0, string_last_index_of(_tab_textures_draw_asset.file, path_sep)));
 							}
 							if (!_tab_textures_draw_is_packed && ui_menu_button(tr("Open in Browser"))) {
-								tab_browser_show_directory(substring(_tab_textures_draw_asset.file, 0, string_last_index_of(_tab_textures_draw_asset.file, path_sep)));
+								tab_browser_show_directory(
+								    substring(_tab_textures_draw_asset.file, 0, string_last_index_of(_tab_textures_draw_asset.file, path_sep)));
 							}
 						});
 					}
@@ -211,15 +212,15 @@ function tab_textures_draw(htab: ui_handle_t) {
 		}
 		else {
 			let img: gpu_texture_t = resource_get("icons.k");
-			let r: rect_t = resource_tile50(img, 0, 1);
+			let r: rect_t          = resource_tile50(img, 0, 1);
 			ui_sub_image(img, ui.ops.theme.BUTTON_COL, r.h, r.x, r.y, r.w, r.h);
 			if (ui.is_hovered) {
 				ui_tooltip(tr("Drag and drop files here"));
 			}
 		}
 
-		let in_focus: bool = ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w &&
-							 ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
+		let in_focus: bool =
+		    ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w && ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
 		if (in_focus && ui.is_delete_down && project_assets.length > 0 && array_index_of(project_assets, context_raw.texture) >= 0) {
 			ui.is_delete_down = false;
 			tab_textures_delete_texture(context_raw.texture);
@@ -249,10 +250,10 @@ function tab_textures_delete_texture(asset: asset_t) {
 	ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 
 	if (context_raw.tool == tool_type_t.COLORID && i == context_raw.colorid_handle.i) {
-		ui_header_handle.redraws = 2;
-		context_raw.ddirty = 2;
+		ui_header_handle.redraws   = 2;
+		context_raw.ddirty         = 2;
 		context_raw.colorid_picked = false;
-		ui_toolbar_handle.redraws = 1;
+		ui_toolbar_handle.redraws  = 1;
 	}
 
 	if (data_get_image(asset.file) == scene_world._.envmap) {
@@ -263,7 +264,7 @@ function tab_textures_delete_texture(asset: asset_t) {
 	map_delete(project_asset_map, asset.id);
 	array_splice(project_assets, i, 1);
 	array_splice(project_asset_names, i, 1);
-	sys_notify_on_next_frame(function () {
+	sys_notify_on_next_frame(function() {
 		make_material_parse_paint_material();
 
 		util_render_make_material_preview();

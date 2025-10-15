@@ -1,36 +1,35 @@
 
-let render_path_raytrace_frame: i32 = 0;
-let render_path_raytrace_ready: bool = false;
-let render_path_raytrace_dirty: i32 = 0;
-let render_path_raytrace_uv_scale: f32 = 1.0;
+let render_path_raytrace_frame: i32        = 0;
+let render_path_raytrace_ready: bool       = false;
+let render_path_raytrace_dirty: i32        = 0;
+let render_path_raytrace_uv_scale: f32     = 1.0;
 let render_path_raytrace_init_shader: bool = true;
 let render_path_raytrace_f32a: f32_array_t = f32_array_create(24);
-let render_path_raytrace_help_mat: mat4_t = mat4_identity();
+let render_path_raytrace_help_mat: mat4_t  = mat4_identity();
 let render_path_raytrace_transform: mat4_t;
 let render_path_raytrace_vb: gpu_buffer_t;
 let render_path_raytrace_ib: gpu_buffer_t;
 
 let render_path_raytrace_last_envmap: gpu_texture_t = null;
-let render_path_raytrace_is_bake: bool = false;
+let render_path_raytrace_is_bake: bool              = false;
 
-///if arm_direct3d12
+/// if arm_direct3d12
 let render_path_raytrace_ext: string = ".cso";
-///elseif arm_metal
+/// elseif arm_metal
 let render_path_raytrace_ext: string = ".metal";
-///else
+/// else
 let render_path_raytrace_ext: string = ".spirv";
-///end
+/// end
 
 let render_path_raytrace_last_texpaint: gpu_texture_t = null;
 
-function render_path_raytrace_init() {
-}
+function render_path_raytrace_init() {}
 
 function render_path_raytrace_commands(use_live_layer: bool) {
 	if (!render_path_raytrace_ready || render_path_raytrace_is_bake) {
 		render_path_raytrace_ready = true;
 		if (render_path_raytrace_is_bake) {
-			render_path_raytrace_is_bake = false;
+			render_path_raytrace_is_bake     = false;
 			render_path_raytrace_init_shader = true;
 		}
 		let ext: string = "";
@@ -47,16 +46,16 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 		context_update_envmap();
 	}
 
-	let probe: world_data_t = scene_world;
+	let probe: world_data_t         = scene_world;
 	let saved_envmap: gpu_texture_t = context_raw.show_envmap_blur ? probe._.radiance_mipmaps[0] : context_raw.saved_envmap;
 
 	////
 	if (render_path_raytrace_last_envmap != saved_envmap) {
 		render_path_raytrace_last_envmap = saved_envmap;
 
-		let bnoise_sobol: gpu_texture_t = map_get(scene_embedded, "bnoise_sobol.k");
+		let bnoise_sobol: gpu_texture_t    = map_get(scene_embedded, "bnoise_sobol.k");
 		let bnoise_scramble: gpu_texture_t = map_get(scene_embedded, "bnoise_scramble.k");
-		let bnoise_rank: gpu_texture_t = map_get(scene_embedded, "bnoise_rank.k");
+		let bnoise_rank: gpu_texture_t     = map_get(scene_embedded, "bnoise_rank.k");
 
 		let l: slot_layer_t = layers_flatten(true);
 		gpu_raytrace_set_textures(l.texpaint, l.texpaint_nor, l.texpaint_pack, saved_envmap, bnoise_sobol, bnoise_scramble, bnoise_rank);
@@ -67,28 +66,28 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 		layers_flatten(true);
 	}
 
-	let cam: camera_object_t = scene_camera;
-	let ct: transform_t = cam.base.transform;
+	let cam: camera_object_t      = scene_camera;
+	let ct: transform_t           = cam.base.transform;
 	render_path_raytrace_help_mat = mat4_clone(cam.v);
 	render_path_raytrace_help_mat = mat4_mult_mat(render_path_raytrace_help_mat, cam.p);
 	render_path_raytrace_help_mat = mat4_inv(render_path_raytrace_help_mat);
-	render_path_raytrace_f32a[0] = transform_world_x(ct);
-	render_path_raytrace_f32a[1] = transform_world_y(ct);
-	render_path_raytrace_f32a[2] = transform_world_z(ct);
-	render_path_raytrace_f32a[3] = render_path_raytrace_frame;
-	///if arm_metal
+	render_path_raytrace_f32a[0]  = transform_world_x(ct);
+	render_path_raytrace_f32a[1]  = transform_world_y(ct);
+	render_path_raytrace_f32a[2]  = transform_world_z(ct);
+	render_path_raytrace_f32a[3]  = render_path_raytrace_frame;
+	/// if arm_metal
 	// render_path_raytrace_frame = (render_path_raytrace_frame % (16)) + 1; // _PAINT
 	render_path_raytrace_frame = render_path_raytrace_frame + 1; // _RENDER
-	///else
+	/// else
 	render_path_raytrace_frame = (render_path_raytrace_frame % 4) + 1; // _PAINT
 	// render_path_raytrace_frame = render_path_raytrace_frame + 1; // _RENDER
-	///end
-	render_path_raytrace_f32a[4] = render_path_raytrace_help_mat.m00;
-	render_path_raytrace_f32a[5] = render_path_raytrace_help_mat.m01;
-	render_path_raytrace_f32a[6] = render_path_raytrace_help_mat.m02;
-	render_path_raytrace_f32a[7] = render_path_raytrace_help_mat.m03;
-	render_path_raytrace_f32a[8] = render_path_raytrace_help_mat.m10;
-	render_path_raytrace_f32a[9] = render_path_raytrace_help_mat.m11;
+	/// end
+	render_path_raytrace_f32a[4]  = render_path_raytrace_help_mat.m00;
+	render_path_raytrace_f32a[5]  = render_path_raytrace_help_mat.m01;
+	render_path_raytrace_f32a[6]  = render_path_raytrace_help_mat.m02;
+	render_path_raytrace_f32a[7]  = render_path_raytrace_help_mat.m03;
+	render_path_raytrace_f32a[8]  = render_path_raytrace_help_mat.m10;
+	render_path_raytrace_f32a[9]  = render_path_raytrace_help_mat.m11;
 	render_path_raytrace_f32a[10] = render_path_raytrace_help_mat.m12;
 	render_path_raytrace_f32a[11] = render_path_raytrace_help_mat.m13;
 	render_path_raytrace_f32a[12] = render_path_raytrace_help_mat.m20;
@@ -110,11 +109,11 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	_gpu_raytrace_dispatch_rays(framebuffer._image, render_path_raytrace_f32a);
 
 	if (context_raw.ddirty == 1 || context_raw.pdirty == 1) {
-		///if arm_metal
+		/// if arm_metal
 		context_raw.rdirty = 128;
-		///else
+		/// else
 		context_raw.rdirty = 4;
-		///end
+		/// end
 	}
 	context_raw.ddirty--;
 	context_raw.pdirty--;
@@ -195,13 +194,13 @@ function render_path_raytrace_draw(use_live_layer: bool) {
 		render_path_raytrace_frame = 0;
 	}
 
-	///if arm_metal
+	/// if arm_metal
 	// Delay path tracing additional samples while painting
 	let down: bool = mouse_down() || pen_down();
 	if (context_in_3d_view() && down) {
 		render_path_raytrace_frame = 0;
 	}
-	///end
+	/// end
 
 	render_path_raytrace_commands(use_live_layer);
 	render_path_set_target("buf");

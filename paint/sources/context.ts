@@ -13,7 +13,7 @@ type context_t = {
 	view_index_last?: i32;
 	swatch?: swatch_color_t;
 	picked_color?: swatch_color_t;
-	color_picker_callback?: (sc: swatch_color_t)=>void;
+	color_picker_callback?: (sc: swatch_color_t) => void;
 	default_irradiance?: f32_array_t;
 	default_radiance?: gpu_texture_t;
 	default_radiance_mipmaps?: gpu_texture_t[];
@@ -86,8 +86,7 @@ type context_t = {
 	node_preview_map?: map_t<i32, gpu_texture_t>;
 	node_preview_name?: string;
 	node_previews?: map_t<string, gpu_texture_t>;
-	node_previews_used?: string[];
-	selected_node_preview: bool;
+	node_previews_used?: string[]; selected_node_preview : bool;
 	mask_preview_rgba32?: gpu_texture_t;
 	mask_preview_last?: slot_layer_t;
 	colorid_picked?: bool;
@@ -123,8 +122,8 @@ type context_t = {
 	particle_material?: material_data_t;
 	layer_filter?: i32;
 	brush_output_node_inst?: brush_output_node_t;
-	run_brush?: (self: any, i: i32)=>void;
-	parse_brush_inputs?: (self: any)=>void;
+	run_brush?: (self: any, i: i32)  => void;
+	parse_brush_inputs?: (self: any) => void;
 	gizmo?: object_t;
 	gizmo_translate_x?: object_t;
 	gizmo_translate_y?: object_t;
@@ -226,198 +225,196 @@ type context_t = {
 let context_raw: context_t;
 
 function context_create(): context_t {
-	let c: context_t = {};
-	c.merged_object_is_atlas = false; // Only objects referenced by atlas are merged
-	c.ddirty = 0; // depth
-	c.pdirty = 0; // paint
-	c.rdirty = 0; // render
-	c.brush_blend_dirty = true;
-	c.split_view = false;
-	c.view_index = -1;
-	c.view_index_last = -1;
-	c.picked_color = make_swatch();
-	c.envmap_loaded = false;
-	c.show_envmap = false;
-	c.show_envmap_handle = ui_handle_create();
-	c.show_envmap_blur = false;
+	let c: context_t          = {};
+	c.merged_object_is_atlas  = false; // Only objects referenced by atlas are merged
+	c.ddirty                  = 0;     // depth
+	c.pdirty                  = 0;     // paint
+	c.rdirty                  = 0;     // render
+	c.brush_blend_dirty       = true;
+	c.split_view              = false;
+	c.view_index              = -1;
+	c.view_index_last         = -1;
+	c.picked_color            = make_swatch();
+	c.envmap_loaded           = false;
+	c.show_envmap             = false;
+	c.show_envmap_handle      = ui_handle_create();
+	c.show_envmap_blur        = false;
 	c.show_envmap_blur_handle = ui_handle_create();
-	c.envmap_angle = 0.0;
-	c.light_angle = 0.0;
-	c.cull_backfaces = true;
-	c.texture_filter = true;
-	c.format_type = texture_ldr_format_t.PNG;
-	c.format_quality = 100.0;
-	c.layers_destination = export_destination_t.DISK;
-	c.split_by = split_type_t.OBJECT;
-	c.parse_transform = true;
-	c.parse_vcols = false;
-	c.select_time = 0.0;
-	c.viewport_mode = config_raw.viewport_mode == 0 ?
-		viewport_mode_t.LIT :
-		viewport_mode_t.PATH_TRACE;
-	///if (arm_android || arm_ios)
+	c.envmap_angle            = 0.0;
+	c.light_angle             = 0.0;
+	c.cull_backfaces          = true;
+	c.texture_filter          = true;
+	c.format_type             = texture_ldr_format_t.PNG;
+	c.format_quality          = 100.0;
+	c.layers_destination      = export_destination_t.DISK;
+	c.split_by                = split_type_t.OBJECT;
+	c.parse_transform         = true;
+	c.parse_vcols             = false;
+	c.select_time             = 0.0;
+	c.viewport_mode           = config_raw.viewport_mode == 0 ? viewport_mode_t.LIT : viewport_mode_t.PATH_TRACE;
+	/// if (arm_android || arm_ios)
 	c.render_mode = render_mode_t.FORWARD;
-	///else
+	/// else
 	c.render_mode = render_mode_t.DEFERRED;
-	///end
-	c.hscale_was_changed = false;
-	c.export_mesh_format = mesh_format_t.OBJ;
-	c.export_mesh_index = 0;
-	c.pack_assets_on_export = true;
-	c.paint_vec = vec4_create();
-	c.last_paint_x = -1.0;
-	c.last_paint_y = -1.0;
-	c.foreground_event = false;
-	c.painted = 0;
-	c.brush_time = 0.0;
-	c.clone_start_x = -1.0;
-	c.clone_start_y = -1.0;
-	c.clone_delta_x = 0.0;
-	c.clone_delta_y = 0.0;
-	c.show_compass = true;
-	c.project_aspect_ratio = 0; // 1:1, 2:1, 1:2
-	c.last_paint_vec_x = -1.0;
-	c.last_paint_vec_y = -1.0;
-	c.prev_paint_vec_x = -1.0;
-	c.prev_paint_vec_y = -1.0;
-	c.frame = 0;
-	c.paint2d_view = false;
-	c.brush_locked = false;
-	c.camera_type = camera_type_t.PERSPECTIVE;
-	c.cam_handle = ui_handle_create();
-	c.hssao = ui_handle_create();
-	c.hbloom = ui_handle_create();
-	c.hsupersample = ui_handle_create();
-	c.hssao.b = config_raw.rp_ssao;
-	c.hbloom.b = config_raw.rp_bloom;
-	c.hsupersample.i = config_get_super_sample_quality(config_raw.rp_supersample);
-	c.texture_export_path = "";
-	c.last_status_position = 0;
-	c.camera_controls = camera_controls_t.ORBIT;
-	c.pen_painting_only = false; // Reject painting with finger when using pen
-	c.layer_preview_dirty = true;
-	c.layers_preview_dirty = false;
-	c.node_preview_name = "";
+	/// end
+	c.hscale_was_changed      = false;
+	c.export_mesh_format      = mesh_format_t.OBJ;
+	c.export_mesh_index       = 0;
+	c.pack_assets_on_export   = true;
+	c.paint_vec               = vec4_create();
+	c.last_paint_x            = -1.0;
+	c.last_paint_y            = -1.0;
+	c.foreground_event        = false;
+	c.painted                 = 0;
+	c.brush_time              = 0.0;
+	c.clone_start_x           = -1.0;
+	c.clone_start_y           = -1.0;
+	c.clone_delta_x           = 0.0;
+	c.clone_delta_y           = 0.0;
+	c.show_compass            = true;
+	c.project_aspect_ratio    = 0; // 1:1, 2:1, 1:2
+	c.last_paint_vec_x        = -1.0;
+	c.last_paint_vec_y        = -1.0;
+	c.prev_paint_vec_x        = -1.0;
+	c.prev_paint_vec_y        = -1.0;
+	c.frame                   = 0;
+	c.paint2d_view            = false;
+	c.brush_locked            = false;
+	c.camera_type             = camera_type_t.PERSPECTIVE;
+	c.cam_handle              = ui_handle_create();
+	c.hssao                   = ui_handle_create();
+	c.hbloom                  = ui_handle_create();
+	c.hsupersample            = ui_handle_create();
+	c.hssao.b                 = config_raw.rp_ssao;
+	c.hbloom.b                = config_raw.rp_bloom;
+	c.hsupersample.i          = config_get_super_sample_quality(config_raw.rp_supersample);
+	c.texture_export_path     = "";
+	c.last_status_position    = 0;
+	c.camera_controls         = camera_controls_t.ORBIT;
+	c.pen_painting_only       = false; // Reject painting with finger when using pen
+	c.layer_preview_dirty     = true;
+	c.layers_preview_dirty    = false;
+	c.node_preview_name       = "";
 	c.node_preview_socket_map = map_create();
-	c.node_preview_map = map_create();
-	c.selected_node_preview = true;
-	c.colorid_picked = false;
-	c.material_preview = false; // Drawing material previews
-	c.saved_camera = mat4_identity();
-	c.materialid_picked = 0;
-	c.uvx_picked = 0.0;
-	c.uvy_picked = 0.0;
-	c.picker_select_material = false;
-	c.picker_mask_handle = ui_handle_create();
-	c.pick_pos_nor_tex = false;
-	c.posx_picked = 0.0;
-	c.posy_picked = 0.0;
-	c.posz_picked = 0.0;
-	c.norx_picked = 0.0;
-	c.nory_picked = 0.0;
-	c.norz_picked = 0.0;
-	c.draw_wireframe = false;
-	c.wireframe_handle = ui_handle_create();
-	c.draw_texels = false;
-	c.texels_handle = ui_handle_create();
-	c.colorid_handle = ui_handle_create();
-	c.layers_export = export_mode_t.VISIBLE;
-	c.decal_preview = false;
-	c.decal_x = 0.0;
-	c.decal_y = 0.0;
+	c.node_preview_map        = map_create();
+	c.selected_node_preview   = true;
+	c.colorid_picked          = false;
+	c.material_preview        = false; // Drawing material previews
+	c.saved_camera            = mat4_identity();
+	c.materialid_picked       = 0;
+	c.uvx_picked              = 0.0;
+	c.uvy_picked              = 0.0;
+	c.picker_select_material  = false;
+	c.picker_mask_handle      = ui_handle_create();
+	c.pick_pos_nor_tex        = false;
+	c.posx_picked             = 0.0;
+	c.posy_picked             = 0.0;
+	c.posz_picked             = 0.0;
+	c.norx_picked             = 0.0;
+	c.nory_picked             = 0.0;
+	c.norz_picked             = 0.0;
+	c.draw_wireframe          = false;
+	c.wireframe_handle        = ui_handle_create();
+	c.draw_texels             = false;
+	c.texels_handle           = ui_handle_create();
+	c.colorid_handle          = ui_handle_create();
+	c.layers_export           = export_mode_t.VISIBLE;
+	c.decal_preview           = false;
+	c.decal_x                 = 0.0;
+	c.decal_y                 = 0.0;
 	// c.cache_draws = false;
-	c.write_icon_on_export = false;
-	c.particle_hit_x = 0.0;
-	c.particle_hit_y = 0.0;
-	c.particle_hit_z = 0.0;
-	c.last_particle_hit_x = 0.0;
-	c.last_particle_hit_y = 0.0;
-	c.last_particle_hit_z = 0.0;
-	c.layer_filter = 0;
-	c.gizmo_started = false;
-	c.gizmo_offset = 0.0;
-	c.gizmo_drag = 0.0;
-	c.gizmo_drag_last = 0.0;
-	c.translate_x = false;
-	c.translate_y = false;
-	c.translate_z = false;
-	c.scale_x = false;
-	c.scale_y = false;
-	c.scale_z = false;
-	c.rotate_x = false;
-	c.rotate_y = false;
-	c.rotate_z = false;
-	c.brush_nodes_radius = 1.0;
-	c.brush_nodes_opacity = 1.0;
-	c.brush_mask_image_is_alpha = false;
-	c.brush_stencil_image_is_alpha = false;
-	c.brush_stencil_x = 0.02;
-	c.brush_stencil_y = 0.02;
-	c.brush_stencil_scale = 0.9;
-	c.brush_stencil_scaling = false;
-	c.brush_stencil_angle = 0.0;
-	c.brush_stencil_rotating = false;
-	c.brush_nodes_scale = 1.0;
-	c.brush_nodes_angle = 0.0;
-	c.brush_nodes_hardness = 1.0;
-	c.brush_directional = false;
-	c.brush_radius_handle = ui_handle_create();
-	c.brush_scale_x = 1.0;
-	c.brush_decal_mask_radius = 0.5;
-	c.brush_decal_mask_radius_handle = ui_handle_create();
+	c.write_icon_on_export             = false;
+	c.particle_hit_x                   = 0.0;
+	c.particle_hit_y                   = 0.0;
+	c.particle_hit_z                   = 0.0;
+	c.last_particle_hit_x              = 0.0;
+	c.last_particle_hit_y              = 0.0;
+	c.last_particle_hit_z              = 0.0;
+	c.layer_filter                     = 0;
+	c.gizmo_started                    = false;
+	c.gizmo_offset                     = 0.0;
+	c.gizmo_drag                       = 0.0;
+	c.gizmo_drag_last                  = 0.0;
+	c.translate_x                      = false;
+	c.translate_y                      = false;
+	c.translate_z                      = false;
+	c.scale_x                          = false;
+	c.scale_y                          = false;
+	c.scale_z                          = false;
+	c.rotate_x                         = false;
+	c.rotate_y                         = false;
+	c.rotate_z                         = false;
+	c.brush_nodes_radius               = 1.0;
+	c.brush_nodes_opacity              = 1.0;
+	c.brush_mask_image_is_alpha        = false;
+	c.brush_stencil_image_is_alpha     = false;
+	c.brush_stencil_x                  = 0.02;
+	c.brush_stencil_y                  = 0.02;
+	c.brush_stencil_scale              = 0.9;
+	c.brush_stencil_scaling            = false;
+	c.brush_stencil_angle              = 0.0;
+	c.brush_stencil_rotating           = false;
+	c.brush_nodes_scale                = 1.0;
+	c.brush_nodes_angle                = 0.0;
+	c.brush_nodes_hardness             = 1.0;
+	c.brush_directional                = false;
+	c.brush_radius_handle              = ui_handle_create();
+	c.brush_scale_x                    = 1.0;
+	c.brush_decal_mask_radius          = 0.5;
+	c.brush_decal_mask_radius_handle   = ui_handle_create();
 	c.brush_decal_mask_radius_handle.f = 0.5;
-	c.brush_scale_x_handle = ui_handle_create();
-	c.brush_scale_x_handle.f = 1.0;
-	c.brush_blending = blend_type_t.MIX;
-	c.brush_opacity = 1.0;
-	c.brush_opacity_handle = ui_handle_create();
-	c.brush_opacity_handle.f = 1.0;
-	c.brush_scale = 1.0;
-	c.brush_angle = 0.0;
-	c.brush_angle_handle = ui_handle_create();
-	c.brush_angle_handle.f = 0.0;
-	c.brush_lazy_radius = 0.0;
-	c.brush_lazy_step = 0.0;
-	c.brush_lazy_x = 0.0;
-	c.brush_lazy_y = 0.0;
-	c.brush_paint = uv_type_t.UVMAP;
-	c.brush_angle_reject_dot = 0.5;
-	c.bake_type = bake_type_t.CURVATURE;
-	c.bake_axis = bake_axis_t.XYZ;
-	c.bake_up_axis = bake_up_axis_t.Z;
-	c.bake_samples = 128;
-	c.bake_ao_strength = 1.0;
-	c.bake_ao_radius = 1.0;
-	c.bake_ao_offset = 1.0;
-	c.bake_curv_strength = 1.0;
-	c.bake_curv_radius = 1.0;
-	c.bake_curv_offset = 0.0;
-	c.bake_curv_smooth = 1;
-	c.bake_high_poly = 0;
-	c.xray = false;
-	c.sym_x = false;
-	c.sym_y = false;
-	c.sym_z = false;
-	c.fill_type_handle = ui_handle_create();
-	c.paint2d = false;
-	c.maximized_sidebar_width = 0;
-	c.drag_dest = 0;
+	c.brush_scale_x_handle             = ui_handle_create();
+	c.brush_scale_x_handle.f           = 1.0;
+	c.brush_blending                   = blend_type_t.MIX;
+	c.brush_opacity                    = 1.0;
+	c.brush_opacity_handle             = ui_handle_create();
+	c.brush_opacity_handle.f           = 1.0;
+	c.brush_scale                      = 1.0;
+	c.brush_angle                      = 0.0;
+	c.brush_angle_handle               = ui_handle_create();
+	c.brush_angle_handle.f             = 0.0;
+	c.brush_lazy_radius                = 0.0;
+	c.brush_lazy_step                  = 0.0;
+	c.brush_lazy_x                     = 0.0;
+	c.brush_lazy_y                     = 0.0;
+	c.brush_paint                      = uv_type_t.UVMAP;
+	c.brush_angle_reject_dot           = 0.5;
+	c.bake_type                        = bake_type_t.CURVATURE;
+	c.bake_axis                        = bake_axis_t.XYZ;
+	c.bake_up_axis                     = bake_up_axis_t.Z;
+	c.bake_samples                     = 128;
+	c.bake_ao_strength                 = 1.0;
+	c.bake_ao_radius                   = 1.0;
+	c.bake_ao_offset                   = 1.0;
+	c.bake_curv_strength               = 1.0;
+	c.bake_curv_radius                 = 1.0;
+	c.bake_curv_offset                 = 0.0;
+	c.bake_curv_smooth                 = 1;
+	c.bake_high_poly                   = 0;
+	c.xray                             = false;
+	c.sym_x                            = false;
+	c.sym_y                            = false;
+	c.sym_z                            = false;
+	c.fill_type_handle                 = ui_handle_create();
+	c.paint2d                          = false;
+	c.maximized_sidebar_width          = 0;
+	c.drag_dest                        = 0;
 	return c;
 }
 
 function context_init() {
-	context_raw = context_create();
-	context_raw.tool = tool_type_t.BRUSH;
-    context_raw.color_picker_previous_tool = tool_type_t.BRUSH;
-    context_raw.brush_radius = 0.5;
-    context_raw.brush_radius_handle.f = 0.5;
-	context_raw.brush_hardness = 0.8;
+	context_raw                            = context_create();
+	context_raw.tool                       = tool_type_t.BRUSH;
+	context_raw.color_picker_previous_tool = tool_type_t.BRUSH;
+	context_raw.brush_radius               = 0.5;
+	context_raw.brush_radius_handle.f      = 0.5;
+	context_raw.brush_hardness             = 0.8;
 }
 
 function context_use_deferred(): bool {
 	return context_raw.render_mode != render_mode_t.FORWARD &&
-		(context_raw.viewport_mode == viewport_mode_t.LIT || context_raw.viewport_mode == viewport_mode_t.PATH_TRACE) &&
-		context_raw.tool != tool_type_t.COLORID;
+	       (context_raw.viewport_mode == viewport_mode_t.LIT || context_raw.viewport_mode == viewport_mode_t.PATH_TRACE) &&
+	       context_raw.tool != tool_type_t.COLORID;
 }
 
 function context_select_material(i: i32) {
@@ -434,9 +431,9 @@ function context_set_material(m: slot_material_t) {
 	context_raw.material = m;
 	make_material_parse_paint_material();
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
-	ui_header_handle.redraws = 2;
-	ui_nodes_hwnd.redraws = 2;
-	ui_nodes_group_stack = [];
+	ui_header_handle.redraws                   = 2;
+	ui_nodes_hwnd.redraws                      = 2;
+	ui_nodes_group_stack                       = [];
 
 	let decal: bool = context_is_decal();
 	if (decal) {
@@ -458,7 +455,7 @@ function context_set_brush(b: slot_brush_t) {
 	context_raw.brush = b;
 	make_material_parse_brush();
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
-	ui_nodes_hwnd.redraws = 2;
+	ui_nodes_hwnd.redraws                      = 2;
 }
 
 function context_select_font(i: i32) {
@@ -476,7 +473,7 @@ function context_set_font(f: slot_font_t) {
 	util_render_make_text_preview();
 	util_render_make_decal_preview();
 	ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
-	ui_view2d_hwnd.redraws = 2;
+	ui_view2d_hwnd.redraws                   = 2;
 }
 
 function context_select_layer(i: i32) {
@@ -490,34 +487,36 @@ function context_set_layer(l: slot_layer_t) {
 	if (l == context_raw.layer) {
 		return;
 	}
-	context_raw.layer = l;
+	context_raw.layer        = l;
 	ui_header_handle.redraws = 2;
 
 	let current: gpu_texture_t = _draw_current;
-	let in_use: bool = gpu_in_use;
-	if (in_use) draw_end();
+	let in_use: bool           = gpu_in_use;
+	if (in_use)
+		draw_end();
 
 	layers_set_object_mask();
 	make_material_parse_mesh_material();
 	make_material_parse_paint_material();
 
-	if (in_use) draw_begin(current);
+	if (in_use)
+		draw_begin(current);
 
 	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
-	ui_view2d_hwnd.redraws = 2;
+	ui_view2d_hwnd.redraws                     = 2;
 }
 
 function context_select_tool(i: i32) {
 	context_raw.tool = i;
 	make_material_parse_paint_material();
 	make_material_parse_mesh_material();
-	context_raw.ddirty = 3;
+	context_raw.ddirty                  = 3;
 	let _viewport_mode: viewport_mode_t = context_raw.viewport_mode;
-	context_raw.viewport_mode = viewport_mode_t.MINUS_ONE;
+	context_raw.viewport_mode           = viewport_mode_t.MINUS_ONE;
 	context_set_viewport_mode(_viewport_mode);
 
 	context_init_tool();
-	ui_header_handle.redraws = 2;
+	ui_header_handle.redraws  = 2;
 	ui_toolbar_handle.redraws = 2;
 }
 
@@ -548,12 +547,12 @@ function context_select_paint_object(o: mesh_object_t) {
 	ui_header_handle.redraws = 2;
 	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 		let p: mesh_object_t = project_paint_objects[i];
-		p.skip_context = "paint";
+		p.skip_context       = "paint";
 	}
 
-	///if_forge
+	/// if_forge
 	context_raw.paint_object.skip_context = "";
-	///end
+	/// end
 
 	context_raw.paint_object = o;
 
@@ -565,9 +564,9 @@ function context_select_paint_object(o: mesh_object_t) {
 	if (context_raw.merged_object == null || mask > 0) {
 		context_raw.paint_object.skip_context = "";
 	}
-	util_uv_uvmap_cached = false;
+	util_uv_uvmap_cached       = false;
 	util_uv_trianglemap_cached = false;
-	util_uv_dilatemap_cached = false;
+	util_uv_dilatemap_cached   = false;
 }
 
 function context_main_object(): mesh_object_t {
@@ -589,8 +588,7 @@ function context_object_mask_used(): bool {
 }
 
 function context_in_3d_view(): bool {
-	return context_raw.paint_vec.x < 1 && context_raw.paint_vec.x > 0 &&
-		   context_raw.paint_vec.y < 1 && context_raw.paint_vec.y > 0;
+	return context_raw.paint_vec.x < 1 && context_raw.paint_vec.x > 0 && context_raw.paint_vec.y < 1 && context_raw.paint_vec.y > 0;
 }
 
 function context_in_paint_area(): bool {
@@ -608,15 +606,12 @@ function context_in_materials(): bool {
 }
 
 function context_in_2d_view(type: view_2d_type_t = view_2d_type_t.LAYER): bool {
-	return ui_view2d_show && ui_view2d_type == type &&
-		   mouse_x > ui_view2d_wx && mouse_x < ui_view2d_wx + ui_view2d_ww &&
-		   mouse_y > ui_view2d_wy && mouse_y < ui_view2d_wy + ui_view2d_wh;
+	return ui_view2d_show && ui_view2d_type == type && mouse_x > ui_view2d_wx && mouse_x < ui_view2d_wx + ui_view2d_ww && mouse_y > ui_view2d_wy &&
+	       mouse_y < ui_view2d_wy + ui_view2d_wh;
 }
 
 function context_in_nodes(): bool {
-	return ui_nodes_show &&
-		   mouse_x > ui_nodes_wx && mouse_x < ui_nodes_wx + ui_nodes_ww &&
-		   mouse_y > ui_nodes_wy && mouse_y < ui_nodes_wy + ui_nodes_wh;
+	return ui_nodes_show && mouse_x > ui_nodes_wx && mouse_x < ui_nodes_wx + ui_nodes_ww && mouse_y > ui_nodes_wy && mouse_y < ui_nodes_wy + ui_nodes_wh;
 }
 
 function context_in_swatches(): bool {

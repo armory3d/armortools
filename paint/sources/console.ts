@@ -1,8 +1,8 @@
 
-let console_message: string = "";
-let console_message_timer: f32 = 0.0;
-let console_message_color: i32 = 0x00000000;
-let console_last_traces: string[] = [""];
+let console_message: string       = "";
+let console_message_timer: f32    = 0.0;
+let console_message_color: i32    = 0x00000000;
+let console_last_traces: string[] = [ "" ];
 let console_progress_text: string = null;
 
 function console_draw_toast(s: string) {
@@ -10,8 +10,8 @@ function console_draw_toast(s: string) {
 	draw_set_color(0x55000000);
 	draw_filled_rect(0, 0, iron_window_width(), iron_window_height());
 	let scale: f32 = UI_SCALE();
-	let x: f32 = iron_window_width() / 2;
-	let y: f32 = iron_window_height() - 200 * scale;
+	let x: f32     = iron_window_width() / 2;
+	let y: f32     = iron_window_height() - 200 * scale;
 	draw_filled_rect(x - 200 * scale, y, 400 * scale, 80 * scale);
 	draw_set_font(base_font, math_floor(22 * scale));
 	draw_set_color(0xffffffff);
@@ -22,10 +22,12 @@ function console_draw_toast(s: string) {
 function console_toast(s: string) {
 	// Show a popup message
 	let current: gpu_texture_t = _draw_current;
-	if (current != null) draw_end();
+	if (current != null)
+		draw_end();
 	console_trace(s);
 	console_draw_toast(s);
-	if (current != null) draw_begin(current);
+	if (current != null)
+		draw_begin(current);
 }
 
 function console_draw_progress() {
@@ -55,7 +57,7 @@ function console_progress(s: string) {
 
 function console_info(s: string) {
 	console_message_timer = 5.0;
-	console_message = s;
+	console_message       = s;
 	console_message_color = 0x00000000;
 	base_redraw_status();
 	console_trace(s);
@@ -63,7 +65,7 @@ function console_info(s: string) {
 
 function console_error(s: string) {
 	console_message_timer = 8.0;
-	console_message = s;
+	console_message       = s;
 	console_message_color = 0xffaa0000;
 	base_redraw_status();
 	console_trace(s);

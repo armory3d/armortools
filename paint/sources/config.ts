@@ -1,10 +1,10 @@
 
 let config_raw: config_t = null;
 let config_keymap: map_t<string, string>;
-let config_loaded: bool = false;
-let config_button_align: ui_align_t = ui_align_t.LEFT;
+let config_loaded: bool                   = false;
+let config_button_align: ui_align_t       = ui_align_t.LEFT;
 let config_default_button_spacing: string = "       ";
-let config_button_spacing: string = config_default_button_spacing;
+let config_button_spacing: string         = config_default_button_spacing;
 
 function config_load() {
 	let path: string = "";
@@ -14,15 +14,15 @@ function config_load() {
 	path += "config.json";
 	let blob: buffer_t = data_get_blob(path);
 
-	///if arm_linux
+	/// if arm_linux
 	if (blob == null) { // Protected directory
 		blob = data_get_blob(iron_internal_save_path() + "config.json");
 	}
-	///end
+	/// end
 
 	if (blob != null) {
 		config_loaded = true;
-		config_raw = json_parse(sys_buffer_to_string(blob));
+		config_raw    = json_parse(sys_buffer_to_string(blob));
 	}
 }
 
@@ -101,106 +101,106 @@ function config_save() {
 	let buffer: buffer_t = sys_string_to_buffer(config_json);
 	iron_file_save_bytes(path, buffer, 0);
 
-	///if arm_linux // Protected directory
+	/// if arm_linux // Protected directory
 	if (!iron_file_exists(path)) {
 		iron_file_save_bytes(iron_internal_save_path() + "config.json", buffer, 0);
 	}
-	///end
+	/// end
 }
 
 function config_init() {
 	if (!config_loaded || config_raw == null) {
-		config_raw = {};
-		config_raw.version = manifest_version_config;
-		config_raw.sha = config_get_sha();
-		config_raw.locale = "system";
-		config_raw.window_mode = 0;
-		config_raw.window_resizable = true;
+		config_raw                    = {};
+		config_raw.version            = manifest_version_config;
+		config_raw.sha                = config_get_sha();
+		config_raw.locale             = "system";
+		config_raw.window_mode        = 0;
+		config_raw.window_resizable   = true;
 		config_raw.window_minimizable = true;
 		config_raw.window_maximizable = true;
-		config_raw.window_w = 1720;
-		config_raw.window_h = 960;
-		///if arm_macos
+		config_raw.window_w           = 1720;
+		config_raw.window_h           = 960;
+		/// if arm_macos
 		config_raw.window_w *= 2;
 		config_raw.window_h *= 2;
-		///end
-		config_raw.window_x = -1;
-		config_raw.window_y = -1;
+		/// end
+		config_raw.window_x     = -1;
+		config_raw.window_y     = -1;
 		config_raw.window_scale = 1.0;
 		if (sys_display_width() >= 2560 && sys_display_height() >= 1600) {
 			config_raw.window_scale = 2.0;
 		}
-		///if (arm_android || arm_ios || arm_macos)
+		/// if (arm_android || arm_ios || arm_macos)
 		config_raw.window_scale = 2.0;
-		///end
-		config_raw.window_vsync = true;
+		/// end
+		config_raw.window_vsync     = true;
 		config_raw.window_frequency = sys_display_frequency();
-		config_raw.rp_bloom = false;
-		config_raw.rp_vignette = 0.2;
-		config_raw.rp_grain = 0.09;
-		///if (arm_android || arm_ios)
+		config_raw.rp_bloom         = false;
+		config_raw.rp_vignette      = 0.2;
+		config_raw.rp_grain         = 0.09;
+		/// if (arm_android || arm_ios)
 		config_raw.rp_ssao = false;
-		///else
+		/// else
 		config_raw.rp_ssao = true;
-		///end
+		/// end
 		config_raw.rp_supersample = 1.0;
-		///if arm_android
+		/// if arm_android
 		if (sys_display_width() >= 3200 && sys_display_height() >= 2136) {
-			config_raw.window_scale = 2.5;
+			config_raw.window_scale   = 2.5;
 			config_raw.rp_supersample = 0.5;
 		}
-		///end
+		/// end
 		config_raw.recent_projects = [];
-		config_raw.bookmarks = [];
-		config_raw.plugins = [];
-		///if (arm_android || arm_ios)
+		config_raw.bookmarks       = [];
+		config_raw.plugins         = [];
+		/// if (arm_android || arm_ios)
 		config_raw.keymap = "touch.json";
-		///else
+		/// else
 		config_raw.keymap = "default.json";
-		///end
-		config_raw.theme = "default.json";
-		config_raw.server = "https://armorpaint.fra1.digitaloceanspaces.com";
-		config_raw.undo_steps = 4;
+		/// end
+		config_raw.theme           = "default.json";
+		config_raw.server          = "https://armorpaint.fra1.digitaloceanspaces.com";
+		config_raw.undo_steps      = 4;
 		config_raw.pressure_radius = true;
-		///if (arm_ios || arm_linux)
+		/// if (arm_ios || arm_linux)
 		config_raw.pressure_sensitivity = 1.0;
-		///else
+		/// else
 		config_raw.pressure_sensitivity = 2.0;
-		///end
-		config_raw.camera_zoom_speed = 1.0;
-		config_raw.camera_pan_speed = 1.0;
+		/// end
+		config_raw.camera_zoom_speed     = 1.0;
+		config_raw.camera_pan_speed      = 1.0;
 		config_raw.camera_rotation_speed = 1.0;
-		config_raw.zoom_direction = zoom_direction_t.VERTICAL;
-		config_raw.displace_strength = 0.0;
-		config_raw.wrap_mouse = false;
-		config_raw.camera_controls = camera_controls_t.ORBIT;
-		config_raw.layer_res = texture_res_t.RES2048;
-		///if (arm_android || arm_ios)
-		config_raw.touch_ui = true;
+		config_raw.zoom_direction        = zoom_direction_t.VERTICAL;
+		config_raw.displace_strength     = 0.0;
+		config_raw.wrap_mouse            = false;
+		config_raw.camera_controls       = camera_controls_t.ORBIT;
+		config_raw.layer_res             = texture_res_t.RES2048;
+		/// if (arm_android || arm_ios)
+		config_raw.touch_ui      = true;
 		config_raw.splash_screen = true;
-		///else
-		config_raw.touch_ui = false;
+		/// else
+		config_raw.touch_ui      = false;
 		config_raw.splash_screen = false;
-		///end
-		config_raw.node_previews = false;
+		/// end
+		config_raw.node_previews     = false;
 		config_raw.pressure_hardness = true;
-		config_raw.pressure_angle = false;
-		config_raw.pressure_opacity = false;
-		///if (arm_android || arm_ios)
+		config_raw.pressure_angle    = false;
+		config_raw.pressure_opacity  = false;
+		/// if (arm_android || arm_ios)
 		config_raw.material_live = false;
-		///else
+		/// else
 		config_raw.material_live = true;
-		///end
+		/// end
 		config_raw.brush_depth_reject = true;
 		config_raw.brush_angle_reject = true;
-		config_raw.brush_live = false;
-		config_raw.show_asset_names = false;
-		config_raw.dilate_radius = 2;
-		config_raw.gpu_inference = true;
-		config_raw.blender = "";
-		config_raw.scene_atlas_res = texture_res_t.RES8192;
-		config_raw.pathtrace_mode = pathtrace_mode_t.FAST;
-		config_raw.grid_snap = false;
+		config_raw.brush_live         = false;
+		config_raw.show_asset_names   = false;
+		config_raw.dilate_radius      = 2;
+		config_raw.gpu_inference      = true;
+		config_raw.blender            = "";
+		config_raw.scene_atlas_res    = texture_res_t.RES8192;
+		config_raw.pathtrace_mode     = pathtrace_mode_t.FAST;
+		config_raw.grid_snap          = false;
 	}
 	else {
 		// Discard old config
@@ -211,9 +211,9 @@ function config_init() {
 		}
 	}
 
-	ui_touch_scroll = config_raw.touch_ui;
-	ui_touch_hold = config_raw.touch_ui;
-	ui_touch_tooltip = config_raw.touch_ui;
+	ui_touch_scroll   = config_raw.touch_ui;
+	ui_touch_hold     = config_raw.touch_ui;
+	ui_touch_tooltip  = config_raw.touch_ui;
 	base_res_handle.i = config_raw.layer_res;
 	keymap_load();
 }
@@ -237,7 +237,7 @@ function config_get_date(): string {
 }
 
 function config_get_options(): iron_window_options_t {
-	let window_mode: window_mode_t = config_raw.window_mode == 0 ? window_mode_t.WINDOWED : window_mode_t.FULLSCREEN;
+	let window_mode: window_mode_t  = config_raw.window_mode == 0 ? window_mode_t.WINDOWED : window_mode_t.FULLSCREEN;
 	let features: window_features_t = window_features_t.NONE;
 	if (config_raw.window_resizable) {
 		features |= window_features_t.RESIZABLE;
@@ -248,24 +248,24 @@ function config_get_options(): iron_window_options_t {
 	if (config_raw.window_minimizable) {
 		features |= window_features_t.MINIMIZABLE;
 	}
-	let title: string = "untitled - " + manifest_title;
+	let title: string              = "untitled - " + manifest_title;
 	let ops: iron_window_options_t = {
-		title: title,
-		width: config_raw.window_w,
-		height: config_raw.window_h,
-		x: config_raw.window_x,
-		y: config_raw.window_y,
-		mode: window_mode,
-		features: features,
-		vsync: config_raw.window_vsync,
-		frequency: config_raw.window_frequency
+		title : title,
+		width : config_raw.window_w,
+		height : config_raw.window_h,
+		x : config_raw.window_x,
+		y : config_raw.window_y,
+		mode : window_mode,
+		features : features,
+		vsync : config_raw.window_vsync,
+		frequency : config_raw.window_frequency
 	};
 	return ops;
 }
 
 function config_restore() {
-	ui_children = map_create(); // Reset ui handles
-	config_loaded = false;
+	ui_children        = map_create(); // Reset ui handles
+	config_loaded      = false;
 	let _layout: i32[] = config_raw.layout;
 	config_init();
 	config_raw.layout = _layout;
@@ -276,12 +276,12 @@ function config_restore() {
 }
 
 function config_import_from(from: config_t) {
-	let _sha: string = config_raw.sha;
+	let _sha: string     = config_raw.sha;
 	let _version: string = config_raw.version;
-	config_raw = from;
-	config_raw.sha = _sha;
-	config_raw.version = _version;
-	ui_children = map_create(); // Reset ui handles
+	config_raw           = from;
+	config_raw.sha       = _sha;
+	config_raw.version   = _version;
+	ui_children          = map_create(); // Reset ui handles
 	keymap_load();
 	base_init_layout();
 	translator_load_translations(config_raw.locale);
@@ -290,44 +290,39 @@ function config_import_from(from: config_t) {
 }
 
 function config_apply() {
-	config_raw.rp_ssao = context_raw.hssao.b;
-	config_raw.rp_bloom = context_raw.hbloom.b;
+	config_raw.rp_ssao        = context_raw.hssao.b;
+	config_raw.rp_bloom       = context_raw.hbloom.b;
 	config_raw.rp_supersample = config_get_super_sample_size(context_raw.hsupersample.i);
 	config_save();
 	context_raw.ddirty = 2;
 
 	let current: gpu_texture_t = _draw_current;
-	let in_use: bool = gpu_in_use;
-	if (in_use) draw_end();
+	let in_use: bool           = gpu_in_use;
+	if (in_use)
+		draw_end();
 	render_path_base_apply_config();
-	if (in_use) draw_begin(current);
+	if (in_use)
+		draw_begin(current);
 }
 
 function config_get_super_sample_quality(f: f32): i32 {
-	return f == 0.25 ? 0 :
-		   f == 0.5 ? 1 :
-		   f == 1.0 ? 2 :
-		   f == 1.5 ? 3 :
-		   f == 2.0 ? 4 : 5;
+	return f == 0.25 ? 0 : f == 0.5 ? 1 : f == 1.0 ? 2 : f == 1.5 ? 3 : f == 2.0 ? 4 : 5;
 }
 
 function config_get_super_sample_size(i: i32): f32 {
-	return i == 0 ? 0.25 :
-		   i == 1 ? 0.5 :
-		   i == 2 ? 1.0 :
-		   i == 3 ? 1.5 :
-		   i == 4 ? 2.0 : 4.0;
+	return i == 0 ? 0.25 : i == 1 ? 0.5 : i == 2 ? 1.0 : i == 3 ? 1.5 : i == 4 ? 2.0 : 4.0;
 }
 
 function config_texture_res_size(pos: i32): i32 {
-	return pos == texture_res_t.RES128 ? 128 :
-		   pos == texture_res_t.RES256 ? 256 :
-		   pos == texture_res_t.RES512 ? 512 :
-		   pos == texture_res_t.RES1024 ? 1024 :
-		   pos == texture_res_t.RES2048 ? 2048 :
-		   pos == texture_res_t.RES4096 ? 4096 :
-		   pos == texture_res_t.RES8192 ? 8192 :
-		   pos == texture_res_t.RES16384 ? 16384 : 0;
+	return pos == texture_res_t.RES128     ? 128
+	       : pos == texture_res_t.RES256   ? 256
+	       : pos == texture_res_t.RES512   ? 512
+	       : pos == texture_res_t.RES1024  ? 1024
+	       : pos == texture_res_t.RES2048  ? 2048
+	       : pos == texture_res_t.RES4096  ? 4096
+	       : pos == texture_res_t.RES8192  ? 8192
+	       : pos == texture_res_t.RES16384 ? 16384
+	                                       : 0;
 }
 
 function config_get_texture_res(): i32 {
@@ -354,23 +349,24 @@ function config_get_texture_res_y(): i32 {
 }
 
 function config_get_texture_res_pos(i: i32): i32 {
-	return i == 128 ? texture_res_t.RES128 :
-		   i == 256 ? texture_res_t.RES256 :
-		   i == 512 ? texture_res_t.RES512 :
-		   i == 1024 ? texture_res_t.RES1024 :
-		   i == 2048 ? texture_res_t.RES2048 :
-		   i == 4096 ? texture_res_t.RES4096 :
-		   i == 8192 ? texture_res_t.RES8192 :
-		   i == 16384 ? texture_res_t.RES16384 : 0;
+	return i == 128     ? texture_res_t.RES128
+	       : i == 256   ? texture_res_t.RES256
+	       : i == 512   ? texture_res_t.RES512
+	       : i == 1024  ? texture_res_t.RES1024
+	       : i == 2048  ? texture_res_t.RES2048
+	       : i == 4096  ? texture_res_t.RES4096
+	       : i == 8192  ? texture_res_t.RES8192
+	       : i == 16384 ? texture_res_t.RES16384
+	                    : 0;
 }
 
 function config_load_theme(theme: string, tag_redraw: bool = true) {
 	base_theme = ui_theme_create();
 
 	if (theme != "default.json") {
-		let b: buffer_t = data_get_blob("themes/" + theme);
+		let b: buffer_t        = data_get_blob("themes/" + theme);
 		let parsed: ui_theme_t = json_parse(sys_buffer_to_string(b));
-		base_theme = parsed;
+		base_theme             = parsed;
 	}
 
 	base_theme.FILL_WINDOW_BG = true;
@@ -382,19 +378,19 @@ function config_load_theme(theme: string, tag_redraw: bool = true) {
 
 	if (config_raw.touch_ui) {
 		// Enlarge elements
-		base_theme.FULL_TABS = true;
-		base_theme.ELEMENT_H = 24 + 6;
-		base_theme.BUTTON_H = 22 + 6;
-		base_theme.FONT_SIZE = 13 + 2;
-		base_theme.ARROW_SIZE = 5 + 2;
-		base_theme.CHECK_SIZE = 15 + 4;
+		base_theme.FULL_TABS         = true;
+		base_theme.ELEMENT_H         = 24 + 6;
+		base_theme.BUTTON_H          = 22 + 6;
+		base_theme.FONT_SIZE         = 13 + 2;
+		base_theme.ARROW_SIZE        = 5 + 2;
+		base_theme.CHECK_SIZE        = 15 + 4;
 		base_theme.CHECK_SELECT_SIZE = 8 + 2;
-		config_button_align = ui_align_t.LEFT;
-		config_button_spacing = "";
+		config_button_align          = ui_align_t.LEFT;
+		config_button_spacing        = "";
 	}
 	else {
-		base_theme.FULL_TABS = false;
-		config_button_align = ui_align_t.LEFT;
+		base_theme.FULL_TABS  = false;
+		config_button_align   = ui_align_t.LEFT;
 		config_button_spacing = config_default_button_spacing;
 	}
 }
@@ -410,8 +406,7 @@ function config_disable_plugin(f: string) {
 }
 
 type version_t = {
-	sha: string;
-	date: string;
+	sha: string; date : string;
 };
 
 type config_t = {
@@ -441,11 +436,11 @@ type config_t = {
 	rp_grain?: f32;
 	// Application
 	recent_projects?: string[]; // Recently opened projects
-	bookmarks?: string[]; // Bookmarked folders in browser
-	plugins?: string[]; // List of enabled plugins
-	keymap?: string; // Link to keymap file
-	theme?: string; // Link to theme file
-	undo_steps?: i32; // Number of undo steps to preserve
+	bookmarks?: string[];       // Bookmarked folders in browser
+	plugins?: string[];         // List of enabled plugins
+	keymap?: string;            // Link to keymap file
+	theme?: string;             // Link to theme file
+	undo_steps?: i32;           // Number of undo steps to preserve
 	camera_pan_speed?: f32;
 	camera_zoom_speed?: f32;
 	camera_rotation_speed?: f32;
@@ -454,12 +449,10 @@ type config_t = {
 	show_asset_names?: bool;
 	touch_ui?: bool;
 	splash_screen?: bool;
-	layout?: i32[]; // Sizes
-	layout_tabs?: i32[]; // Active tabs
+	layout?: i32[];        // Sizes
+	layout_tabs?: i32[];   // Active tabs
 	camera_controls?: i32; // Orbit, rotate
-	server?: string;
-	viewport_mode: i32;
-	pathtrace_mode: i32;
+	server?: string; viewport_mode : i32; pathtrace_mode : i32;
 	pressure_radius?: bool; // Pen pressure controls
 	pressure_sensitivity?: f32;
 	displace_strength?: f32;
@@ -474,7 +467,5 @@ type config_t = {
 	brush_angle_reject?: bool;
 	dilate_radius?: i32;
 	gpu_inference?: bool;
-	blender?: string;
-	scene_atlas_res: i32;
-	grid_snap: bool;
+	blender?: string; scene_atlas_res : i32; grid_snap : bool;
 };

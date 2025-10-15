@@ -1,13 +1,5 @@
 
-let nodes_material_categories: string[] = [
-	_tr("Input"),
-	_tr("Texture"),
-	_tr("Color"),
-	_tr("Vector"),
-	_tr("Converter"),
-	// _tr("Neural"),
-	_tr("Group")
-];
+let nodes_material_categories: string[] = [ _tr("Input"), _tr("Texture"), _tr("Color"), _tr("Vector"), _tr("Converter"), _tr("Neural"), _tr("Group") ];
 
 let nodes_material_input: ui_node_t[];
 let nodes_material_texture: ui_node_t[];
@@ -17,8 +9,8 @@ let nodes_material_converter: ui_node_t[];
 let nodes_material_neural: ui_node_t[];
 let nodes_material_group: ui_node_t[];
 
-type node_list_t = ui_node_t[];
-let nodes_material_list: node_list_t[] = null;
+type node_list_t                        = ui_node_t[];
+let  nodes_material_list: node_list_t[] = null;
 
 function nodes_material_init() {
 	if (nodes_material_list != null) {
@@ -104,12 +96,7 @@ function nodes_material_init() {
 	group_node_init();
 
 	nodes_material_list = [
-		nodes_material_input,
-		nodes_material_texture,
-		nodes_material_color,
-		nodes_material_vector,
-		nodes_material_converter,
-		// nodes_material_neural,
+		nodes_material_input, nodes_material_texture, nodes_material_color, nodes_material_vector, nodes_material_converter, nodes_material_neural,
 		nodes_material_group
 	];
 }
@@ -133,8 +120,8 @@ function nodes_material_create_node(node_type: string, group: node_group_t = nul
 		return null;
 	}
 	let canvas: ui_node_canvas_t = group != null ? group.canvas : ui_nodes_get_canvas();
-	let nodes: ui_nodes_t = group != null ? group.nodes : context_raw.material.nodes;
-	let node: ui_node_t = ui_nodes_make_node(n, nodes, canvas);
+	let nodes: ui_nodes_t        = group != null ? group.nodes : context_raw.material.nodes;
+	let node: ui_node_t          = ui_nodes_make_node(n, nodes, canvas);
 	array_push(canvas.nodes, node);
 	return node;
 }

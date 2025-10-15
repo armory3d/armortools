@@ -66,7 +66,7 @@ function export_texture_run(path: string, bake_material: bool = false) {
 						for (let i: i32 = 0; i < project_layers.length; ++i) {
 							let l: slot_layer_t = project_layers[i];
 							if (slot_layer_get_object_mask(l) == 0 || // shared object
-								slot_layer_get_object_mask(l) - 1 == object_index) {
+							    slot_layer_get_object_mask(l) - 1 == object_index) {
 								array_push(layers, l);
 							}
 						}
@@ -84,7 +84,7 @@ function export_texture_run(path: string, bake_material: bool = false) {
 					layers = slot_layer_get_children(context_raw.layer);
 				}
 				else {
-					layers = [context_raw.layer];
+					layers = [ context_raw.layer ];
 				}
 			}
 			else {
@@ -94,13 +94,13 @@ function export_texture_run(path: string, bake_material: bool = false) {
 		}
 	}
 
-	///if arm_ios
+	/// if arm_ios
 	console_info(tr("Textures exported") + " (\"Files/On My iPad/" + manifest_title + "\")");
-	///elseif arm_android
+	/// elseif arm_android
 	console_info(tr("Textures exported") + " (\"Files/Internal storage/Pictures/" + manifest_title + "\")");
-	///else
+	/// else
 	console_info(tr("Textures exported"));
-	///end
+	/// end
 	ui_files_last_path = "";
 }
 
@@ -110,13 +110,13 @@ function export_texture_run_bake_material(path: string) {
 	}
 
 	let _tool: tool_type_t = context_raw.tool;
-	context_raw.tool = tool_type_t.FILL;
+	context_raw.tool       = tool_type_t.FILL;
 	make_material_parse_paint_material();
 	let _paint_object: mesh_object_t = context_raw.paint_object;
-	let planeo: mesh_object_t = scene_get_child(".Plane").ext;
-	planeo.base.visible = true;
-	context_raw.paint_object = planeo;
-	context_raw.pdirty = 1;
+	let planeo: mesh_object_t        = scene_get_child(".Plane").ext;
+	planeo.base.visible              = true;
+	context_raw.paint_object         = planeo;
+	context_raw.pdirty               = 1;
 
 	let _visibles: bool[] = [];
 	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
@@ -131,15 +131,15 @@ function export_texture_run_bake_material(path: string) {
 
 	context_raw.tool = _tool;
 	make_material_parse_paint_material();
-	context_raw.pdirty = 0;
-	planeo.base.visible = false;
+	context_raw.pdirty       = 0;
+	planeo.base.visible      = false;
 	context_raw.paint_object = _paint_object;
 
 	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 		project_paint_objects[i].base.visible = _visibles[i];
 	}
 
-	let layers: slot_layer_t[] = [render_path_paint_live_layer];
+	let layers: slot_layer_t[] = [ render_path_paint_live_layer ];
 	export_texture_run_layers(path, layers, "", true);
 }
 
@@ -147,17 +147,17 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 
 	let texture_size_x: i32 = config_get_texture_res_x();
 	let texture_size_y: i32 = config_get_texture_res_y();
-	///if (arm_android || arm_ios)
+	/// if (arm_android || arm_ios)
 	let f: string = sys_title();
-	///else
+	/// else
 	let f: string = ui_files_filename;
-	///end
+	/// end
 	if (f == "") {
 		f = tr("untitled");
 	}
 	let format_type: texture_ldr_format_t = context_raw.format_type;
-	let bits: i32 = base_bits_handle.i == texture_bits_t.BITS8 ? 8 : 16;
-	let ext: string = bits == 16 ? ".exr" : format_type == texture_ldr_format_t.PNG ? ".png" : ".jpg";
+	let bits: i32                         = base_bits_handle.i == texture_bits_t.BITS8 ? 8 : 16;
+	let ext: string                       = bits == 16 ? ".exr" : format_type == texture_ldr_format_t.PNG ? ".png" : ".jpg";
 	if (ends_with(f, ext)) {
 		f = substring(f, 0, f.length - 4);
 	}
@@ -169,7 +169,7 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 
 	layers_make_temp_img();
 	layers_make_export_img();
-	let rt: render_target_t = map_get(render_path_render_targets, "empty_white");
+	let rt: render_target_t  = map_get(render_path_render_targets, "empty_white");
 	let empty: gpu_texture_t = rt._image;
 
 	// Append object mask name
@@ -209,16 +209,14 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 			}
 		}
 
-		let mask: gpu_texture_t = empty;
+		let mask: gpu_texture_t     = empty;
 		let l1masks: slot_layer_t[] = slot_layer_get_masks(l1);
 		if (l1masks != null && !bake_material) {
 			if (l1masks.length > 1) {
 				layers_make_temp_mask_img();
 				draw_begin(pipes_temp_mask_image, true, 0x00000000);
 				draw_end();
-				let l1: slot_layer_t = {
-					texpaint: pipes_temp_mask_image
-				};
+				let l1: slot_layer_t = {texpaint : pipes_temp_mask_image};
 				for (let i: i32 = 0; i < l1masks.length; ++i) {
 					layers_merge_layer(l1, l1masks[i]);
 				}
@@ -281,25 +279,29 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 			draw_end();
 
 			if (l1.paint_occ && l1.paint_rough && l1.paint_met && l1.paint_height) {
-				layers_commands_merge_pack(pipes_merge, layers_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask, l1.paint_height_blend ? 103 : 101);
+				layers_commands_merge_pack(pipes_merge, layers_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask,
+				                           l1.paint_height_blend ? 103 : 101);
 			}
 			else {
-				if (l1.paint_occ) layers_commands_merge_pack(pipes_merge_r, layers_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
-				if (l1.paint_rough) layers_commands_merge_pack(pipes_merge_g, layers_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
-				if (l1.paint_met) layers_commands_merge_pack(pipes_merge_b, layers_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
+				if (l1.paint_occ)
+					layers_commands_merge_pack(pipes_merge_r, layers_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
+				if (l1.paint_rough)
+					layers_commands_merge_pack(pipes_merge_g, layers_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
+				if (l1.paint_met)
+					layers_commands_merge_pack(pipes_merge_b, layers_expc, l1.texpaint, l1.texpaint_pack, slot_layer_get_opacity(l1), mask);
 			}
 		}
 	}
 
-	let texpaint: gpu_texture_t = layers_expa;
-	let texpaint_nor: gpu_texture_t = layers_expb;
+	let texpaint: gpu_texture_t      = layers_expa;
+	let texpaint_nor: gpu_texture_t  = layers_expb;
 	let texpaint_pack: gpu_texture_t = layers_expc;
 
-	let pixpaint: buffer_t = null;
-	let pixpaint_nor: buffer_t = null;
+	let pixpaint: buffer_t      = null;
+	let pixpaint_nor: buffer_t  = null;
 	let pixpaint_pack: buffer_t = null;
 	let preset: export_preset_t = box_export_preset;
-	let pix: buffer_t = null;
+	let pix: buffer_t           = null;
 
 	for (let i: i32 = 0; i < preset.textures.length; ++i) {
 		let t: export_preset_texture_t = preset.textures[i];
@@ -319,9 +321,9 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 
 	for (let i: i32 = 0; i < preset.textures.length; ++i) {
 		let t: export_preset_texture_t = preset.textures[i];
-		let c: string[] = t.channels;
-		let tex_name: string = t.name != "" ? "_" + t.name : "";
-		let single_channel: bool = c[0] == c[1] && c[1] == c[2] && c[3] == "1.0";
+		let c: string[]                = t.channels;
+		let tex_name: string           = t.name != "" ? "_" + t.name : "";
+		let single_channel: bool       = c[0] == c[1] && c[1] == c[2] && c[3] == "1.0";
 		if (c[0] == "base_r" && c[1] == "base_g" && c[2] == "base_b" && c[3] == "1.0" && t.color_space == "linear") {
 			export_texture_write_texture(path + path_sep + f + tex_name + ext, pixpaint, 1);
 		}
@@ -415,11 +417,11 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 }
 
 function export_texture_write_texture(file: string, pixels: buffer_t, type: i32 = 1, off: i32 = 0) {
-	let res_x: i32 = config_get_texture_res_x();
-	let res_y: i32 = config_get_texture_res_y();
+	let res_x: i32       = config_get_texture_res_x();
+	let res_y: i32       = config_get_texture_res_y();
 	let bits_handle: i32 = base_bits_handle.i;
-	let bits: i32 = bits_handle == texture_bits_t.BITS8 ? 8 : bits_handle == texture_bits_t.BITS16 ? 16 : 32;
-	let format: i32 = 0; // RGBA
+	let bits: i32        = bits_handle == texture_bits_t.BITS8 ? 8 : bits_handle == texture_bits_t.BITS16 ? 16 : 32;
+	let format: i32      = 0; // RGBA
 	if (type == 1) {
 		format = 2; // RGB1
 	}
@@ -439,13 +441,9 @@ function export_texture_write_texture(file: string, pixels: buffer_t, type: i32 
 	if (context_raw.layers_destination == export_destination_t.PACKED) {
 		let image: gpu_texture_t = gpu_create_texture_from_bytes(pixels, res_x, res_y);
 		map_set(data_cached_images, file, image);
-		let ar: string[] = string_split(file, path_sep);
-		let name: string = ar[ar.length - 1];
-		let asset: asset_t = {
-			name: name,
-			file: file,
-			id: project_asset_id++
-		};
+		let ar: string[]   = string_split(file, path_sep);
+		let name: string   = ar[ar.length - 1];
+		let asset: asset_t = {name : name, file : file, id : project_asset_id++};
 		array_push(project_assets, asset);
 		if (project_raw.assets == null) {
 			project_raw.assets = [];
@@ -453,7 +451,7 @@ function export_texture_write_texture(file: string, pixels: buffer_t, type: i32 
 		array_push(project_raw.assets, asset.file);
 		array_push(project_asset_names, asset.name);
 		map_set(project_asset_map, asset.id, image);
-		let assets: asset_t[] = [asset];
+		let assets: asset_t[] = [ asset ];
 		export_arm_pack_assets(project_raw, assets);
 		return;
 	}
@@ -470,16 +468,16 @@ function export_texture_write_texture(file: string, pixels: buffer_t, type: i32 
 	}
 }
 
-///if IRON_BGRA
+/// if IRON_BGRA
 function _export_texture_channel_bgra_swap(c: i32): i32 {
 	return c == 0 ? 2 : c == 2 ? 0 : c;
 }
-///end
+/// end
 
 function export_texture_copy_channel(from: buffer_t, from_channel: i32, to: buffer_t, to_channel: i32, linear: bool = true) {
-	///if IRON_BGRA
+	/// if IRON_BGRA
 	from_channel = _export_texture_channel_bgra_swap(from_channel);
-	///end
+	/// end
 	for (let i: i32 = 0; i < math_floor((to.length) / 4); ++i) {
 		buffer_set_u8(to, i * 4 + to_channel, buffer_get_u8(from, i * 4 + from_channel));
 	}
@@ -489,9 +487,9 @@ function export_texture_copy_channel(from: buffer_t, from_channel: i32, to: buff
 }
 
 function export_texture_copy_channel_inv(from: buffer_t, from_channel: i32, to: buffer_t, to_channel: i32, linear: bool = true) {
-	///if IRON_BGRA
+	/// if IRON_BGRA
 	from_channel = _export_texture_channel_bgra_swap(from_channel);
-	///end
+	/// end
 	for (let i: i32 = 0; i < math_floor((to.length) / 4); ++i) {
 		buffer_set_u8(to, i * 4 + to_channel, 255 - buffer_get_u8(from, i * 4 + from_channel));
 	}
@@ -501,9 +499,9 @@ function export_texture_copy_channel_inv(from: buffer_t, from_channel: i32, to: 
 }
 
 function export_texture_extract_channel(from: buffer_t, from_channel: i32, to: buffer_t, to_channel: i32, step: i32, mask: i32, linear: bool = true) {
-	///if IRON_BGRA
+	/// if IRON_BGRA
 	from_channel = _export_texture_channel_bgra_swap(from_channel);
-	///end
+	/// end
 	for (let i: i32 = 0; i < math_floor((to.length) / 4); ++i) {
 		buffer_set_u8(to, i * 4 + to_channel, buffer_get_u8(from, i * 4 + from_channel) % step == mask ? 255 : 0);
 	}

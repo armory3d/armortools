@@ -8,7 +8,7 @@ function make_brush_run(kong: node_shader_t) {
 	}
 
 	let fill_layer: bool = context_raw.layer.fill_layer != null;
-	let decal: bool = context_is_decal();
+	let decal: bool      = context_is_decal();
 	if (decal && !fill_layer) {
 		node_shader_write_frag(kong, "if (constants.decal_mask.z > 0.0) {");
 	}
@@ -28,14 +28,15 @@ function make_brush_run(kong: node_shader_t) {
 		node_shader_write_frag(kong, "var wn: float3;");
 		node_shader_write_frag(kong, "wn.z = 1.0 - abs(g0.x) - abs(g0.y);");
 		// node_shader_write_frag(kong, "wn.xy = wn.z >= 0.0 ? g0.xy : octahedron_wrap(g0.xy);");
-		node_shader_write_frag(kong, "if (wn.z >= 0.0) { wn.x = g0.x; wn.y = g0.y; } else { var f2: float2 = octahedron_wrap(g0.xy); wn.x = f2.x; wn.y = f2.y; }");
+		node_shader_write_frag(kong,
+		                       "if (wn.z >= 0.0) { wn.x = g0.x; wn.y = g0.y; } else { var f2: float2 = octahedron_wrap(g0.xy); wn.x = f2.x; wn.y = f2.y; }");
 		node_shader_write_frag(kong, "wn = normalize(wn);");
 		node_shader_write_frag(kong, "var plane_dist: float = dot(wn, winp.xyz - input.wposition);");
 
 		if (config_raw.brush_angle_reject && !context_raw.xray) {
 			// constants.inp.w = paint2d ? 0.0 : 1.0
 			node_shader_write_frag(kong, "if (plane_dist < -0.01 && constants.inp.w == 0.0) { discard; }");
-			kong.frag_n = true;
+			kong.frag_n    = true;
 			let angle: f32 = context_raw.brush_angle_reject_dot;
 			node_shader_write_frag(kong, "if (dot(wn, n) < " + angle + " && constants.inp.w == 0.0) { discard; }");
 		}

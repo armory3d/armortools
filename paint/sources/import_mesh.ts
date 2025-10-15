@@ -1,5 +1,5 @@
 
-let import_mesh_clear_layers: bool = true;
+let import_mesh_clear_layers: bool      = true;
 let import_mesh_meshes_to_unwrap: any[] = null;
 
 function import_mesh_run(path: string, _clear_layers: bool = true, replace_existing: bool = true) {
@@ -24,8 +24,8 @@ function import_mesh_run(path: string, _clear_layers: bool = true, replace_exist
 		import_blend_mesh_run(path, replace_existing);
 	}
 	else {
-		let ext: string = substring(path, string_last_index_of(path, ".") + 1, path.length);
-		let importer: any = map_get(path_mesh_importers, ext); // JSValue -> (s: string)=>raw_mesh_t
+		let ext: string      = substring(path, string_last_index_of(path, ".") + 1, path.length);
+		let importer: any    = map_get(path_mesh_importers, ext); // JSValue -> (s: string)=>raw_mesh_t
 		let mesh: raw_mesh_t = js_pcall_str(importer, path);
 		if (mesh.name == "") {
 			mesh.name = path_base_name(path);
@@ -44,11 +44,11 @@ function import_mesh_run(path: string, _clear_layers: bool = true, replace_exist
 		}
 	}
 
-	project_mesh_assets = [path];
+	project_mesh_assets = [ path ];
 
-	///if (arm_android || arm_ios)
+	/// if (arm_android || arm_ios)
 	sys_title_set(substring(path, string_last_index_of(path, path_sep) + 1, string_last_index_of(path, ".")));
-	///end
+	/// end
 }
 
 function import_mesh_finish_import() {
@@ -63,12 +63,12 @@ function import_mesh_finish_import() {
 	// No mask by default
 	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 		let p: mesh_object_t = project_paint_objects[i];
-		p.base.visible = true;
+		p.base.visible       = true;
 	}
 
 	if (project_paint_objects.length > 1) {
 		// Sort by name
-		array_sort(project_paint_objects, function (pa: any_ptr, pb: any_ptr): i32 {
+		array_sort(project_paint_objects, function(pa: any_ptr, pb: any_ptr): i32 {
 			let a: mesh_object_t = DEREFERENCE(pa);
 			let b: mesh_object_t = DEREFERENCE(pb);
 			return strcmp(a.base.name, b.base.name);
@@ -77,7 +77,7 @@ function import_mesh_finish_import() {
 		if (context_raw.merged_object == null) {
 			util_mesh_merge();
 		}
-		context_raw.paint_object.skip_context = "paint";
+		context_raw.paint_object.skip_context  = "paint";
 		context_raw.merged_object.base.visible = true;
 	}
 
@@ -89,15 +89,15 @@ function import_mesh_finish_import() {
 	make_material_parse_paint_material();
 	make_material_parse_mesh_material();
 
-	ui_view2d_hwnd.redraws = 2;
+	ui_view2d_hwnd.redraws     = 2;
 	render_path_raytrace_ready = false;
-	context_raw.paint_body = null;
+	context_raw.paint_body     = null;
 }
 
 function _import_mesh_make_mesh(mesh: raw_mesh_t) {
 	let raw: mesh_data_t = import_mesh_raw_mesh(mesh);
 
-	let md: mesh_data_t = mesh_data_create(raw);
+	let md: mesh_data_t      = mesh_data_create(raw);
 	context_raw.paint_object = context_main_object();
 
 	context_select_paint_object(context_main_object());
@@ -120,7 +120,7 @@ function _import_mesh_make_mesh(mesh: raw_mesh_t) {
 
 	mesh_object_set_data(context_raw.paint_object, md);
 	context_raw.paint_object.base.name = mesh.name;
-	project_paint_objects = [context_raw.paint_object];
+	project_paint_objects              = [ context_raw.paint_object ];
 
 	md._.handle = string_copy(raw.name);
 	map_set(data_cached_meshes, md._.handle, md);
@@ -129,9 +129,9 @@ function _import_mesh_make_mesh(mesh: raw_mesh_t) {
 
 	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
-	util_uv_uvmap_cached = false;
-	util_uv_trianglemap_cached = false;
-	util_uv_dilatemap_cached = false;
+	util_uv_uvmap_cached                       = false;
+	util_uv_trianglemap_cached                 = false;
+	util_uv_dilatemap_cached                   = false;
 
 	if (import_mesh_clear_layers) {
 		while (project_layers.length > 0) {
@@ -207,13 +207,13 @@ function _import_mesh_add_mesh(mesh: raw_mesh_t) {
 	let md: mesh_data_t = mesh_data_create(raw);
 
 	let object: mesh_object_t = scene_add_mesh_object(md, context_raw.paint_object.material, context_raw.paint_object.base);
-	object.base.name = mesh.name;
-	object.skip_context = "paint";
+	object.base.name          = mesh.name;
+	object.skip_context       = "paint";
 
 	// Ensure unique names
 	let oname: string = object.base.name;
-	let ext: string = "";
-	let i: i32 = 0;
+	let ext: string   = "";
+	let i: i32        = 0;
 	while (!_import_mesh_is_unique_name(oname + ext)) {
 		ext = _import_mesh_number_ext(++i);
 	}
@@ -228,9 +228,9 @@ function _import_mesh_add_mesh(mesh: raw_mesh_t) {
 	context_raw.ddirty = 4;
 
 	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
-	util_uv_uvmap_cached = false;
-	util_uv_trianglemap_cached = false;
-	util_uv_dilatemap_cached = false;
+	util_uv_uvmap_cached                       = false;
+	util_uv_trianglemap_cached                 = false;
+	util_uv_dilatemap_cached                   = false;
 }
 
 function import_mesh_add_mesh(mesh: raw_mesh_t) {
@@ -249,35 +249,18 @@ function import_mesh_add_mesh(mesh: raw_mesh_t) {
 
 function import_mesh_raw_mesh(mesh: raw_mesh_t): mesh_data_t {
 	let raw: mesh_data_t = {
-		name: mesh.name,
-		vertex_arrays: [
-			{
-				values: mesh.posa,
-				attrib: "pos",
-				data: "short4norm"
-			},
-			{
-				values: mesh.nora,
-				attrib: "nor",
-				data: "short2norm"
-			},
-			{
-				values: mesh.texa,
-				attrib: "tex",
-				data: "short2norm"
-			}
+		name : mesh.name,
+		vertex_arrays : [
+			{values : mesh.posa, attrib : "pos", data : "short4norm"}, {values : mesh.nora, attrib : "nor", data : "short2norm"},
+			{values : mesh.texa, attrib : "tex", data : "short2norm"}
 		],
-		index_array: mesh.inda,
-		scale_pos: mesh.scale_pos,
-		scale_tex: mesh.scale_tex
+		index_array : mesh.inda,
+		scale_pos : mesh.scale_pos,
+		scale_tex : mesh.scale_tex
 	};
 
 	if (mesh.cola != null) {
-		let va: vertex_array_t = {
-			values: mesh.cola,
-			attrib: "col",
-			data: "short4norm"
-		};
+		let va: vertex_array_t = {values : mesh.cola, attrib : "col", data : "short4norm"};
 		array_push(raw.vertex_arrays, va);
 	}
 

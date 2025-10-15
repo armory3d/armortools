@@ -3,76 +3,76 @@ function render_path_deferred_init() {
 
 	{
 		let t: render_target_t = render_target_create();
-		t.name = "main";
-		t.width = 0;
-		t.height = 0;
-		t.format = "D32";
-		t.scale = render_path_base_get_super_sampling();
+		t.name                 = "main";
+		t.width                = 0;
+		t.height               = 0;
+		t.format               = "D32";
+		t.scale                = render_path_base_get_super_sampling();
 		render_path_create_render_target(t);
 	}
 	{
 		let t: render_target_t = render_target_create();
-		t.name = "gbuffer0";
-		t.width = 0;
-		t.height = 0;
-		t.format = "RGBA64";
-		t.scale = render_path_base_get_super_sampling();
+		t.name                 = "gbuffer0";
+		t.width                = 0;
+		t.height               = 0;
+		t.format               = "RGBA64";
+		t.scale                = render_path_base_get_super_sampling();
 		render_path_create_render_target(t);
 	}
 	{
 		let t: render_target_t = render_target_create();
-		t.name = "gbuffer1";
-		t.width = 0;
-		t.height = 0;
-		t.format = "RGBA64";
-		t.scale = render_path_base_get_super_sampling();
+		t.name                 = "gbuffer1";
+		t.width                = 0;
+		t.height               = 0;
+		t.format               = "RGBA64";
+		t.scale                = render_path_base_get_super_sampling();
 		render_path_create_render_target(t);
 	}
 	{
 		let t: render_target_t = render_target_create();
-		t.name = "gbuffer2";
-		t.width = 0;
-		t.height = 0;
-		t.format = "RGBA64";
-		t.scale = render_path_base_get_super_sampling();
+		t.name                 = "gbuffer2";
+		t.width                = 0;
+		t.height               = 0;
+		t.format               = "RGBA64";
+		t.scale                = render_path_base_get_super_sampling();
 		render_path_create_render_target(t);
 	}
 	{
 		let t: render_target_t = render_target_create();
-		t.name = "buf";
-		t.width = 0;
-		t.height = 0;
-		t.format = "RGBA64";
-		t.scale = render_path_base_get_super_sampling();
+		t.name                 = "buf";
+		t.width                = 0;
+		t.height               = 0;
+		t.format               = "RGBA64";
+		t.scale                = render_path_base_get_super_sampling();
 		render_path_create_render_target(t);
 	}
 	{
 		let t: render_target_t = render_target_create();
-		t.name = "last";
-		t.width = 0;
-		t.height = 0;
-		t.format = "RGBA64";
-		t.scale = render_path_base_get_super_sampling();
+		t.name                 = "last";
+		t.width                = 0;
+		t.height               = 0;
+		t.format               = "RGBA64";
+		t.scale                = render_path_base_get_super_sampling();
 		render_path_create_render_target(t);
 	}
 	{
 		let t: render_target_t = render_target_create();
-		t.name = "empty_white";
-		t.width = 1;
-		t.height = 1;
-		t.format = "R8";
-		let b: buffer_t = buffer_create(1);
+		t.name                 = "empty_white";
+		t.width                = 1;
+		t.height               = 1;
+		t.format               = "R8";
+		let b: buffer_t        = buffer_create(1);
 		buffer_set_u8(b, 0, 255);
 		t._image = gpu_create_texture_from_bytes(b, t.width, t.height, tex_format_t.R8);
 		map_set(render_path_render_targets, t.name, t);
 	}
 	{
 		let t: render_target_t = render_target_create();
-		t.name = "empty_black";
-		t.width = 1;
-		t.height = 1;
-		t.format = "RGBA32";
-		let b: buffer_t = buffer_create(4);
+		t.name                 = "empty_black";
+		t.width                = 1;
+		t.height               = 1;
+		t.format               = "RGBA32";
+		let b: buffer_t        = buffer_create(4);
 		buffer_set_u8(b, 0, 0);
 		buffer_set_u8(b, 1, 0);
 		buffer_set_u8(b, 2, 0);

@@ -3,18 +3,18 @@ function render_path_preview_init() {
 
 	{
 		let t: render_target_t = render_target_create();
-		t.name = "texpreview";
-		t.width = 1;
-		t.height = 1;
-		t.format = "RGBA64";
+		t.name                 = "texpreview";
+		t.width                = 1;
+		t.height               = 1;
+		t.format               = "RGBA64";
 		render_path_create_render_target(t);
 	}
 	{
 		let t: render_target_t = render_target_create();
-		t.name = "texpreview_icon";
-		t.width = 1;
-		t.height = 1;
-		t.format = "RGBA64";
+		t.name                 = "texpreview_icon";
+		t.width                = 1;
+		t.height               = 1;
+		t.format               = "RGBA64";
 		render_path_create_render_target(t);
 	}
 
@@ -22,48 +22,48 @@ function render_path_preview_init() {
 
 	{
 		let t: render_target_t = render_target_create();
-		t.name = "mmain";
-		t.width = size;
-		t.height = size;
-		t.format = "D32";
-		t.scale = render_path_base_get_super_sampling();
+		t.name                 = "mmain";
+		t.width                = size;
+		t.height               = size;
+		t.format               = "D32";
+		t.scale                = render_path_base_get_super_sampling();
 		render_path_create_render_target(t);
 	}
 
 	{
 		let t: render_target_t = render_target_create();
-		t.name = "mtex";
-		t.width = size;
-		t.height = size;
-		t.format = "RGBA64";
-		t.scale = render_path_base_get_super_sampling();
+		t.name                 = "mtex";
+		t.width                = size;
+		t.height               = size;
+		t.format               = "RGBA64";
+		t.scale                = render_path_base_get_super_sampling();
 		render_path_create_render_target(t);
 	}
 
 	{
 		let t: render_target_t = render_target_create();
-		t.name = "mgbuffer0";
-		t.width = size;
-		t.height = size;
-		t.format = "RGBA64";
-		t.scale = render_path_base_get_super_sampling();
+		t.name                 = "mgbuffer0";
+		t.width                = size;
+		t.height               = size;
+		t.format               = "RGBA64";
+		t.scale                = render_path_base_get_super_sampling();
 		render_path_create_render_target(t);
 	}
 
 	{
 		let t: render_target_t = render_target_create();
-		t.name = "mgbuffer1";
-		t.width = size;
-		t.height = size;
-		t.format = "RGBA64";
-		t.scale = render_path_base_get_super_sampling();
+		t.name                 = "mgbuffer1";
+		t.width                = size;
+		t.height               = size;
+		t.format               = "RGBA64";
+		t.scale                = render_path_base_get_super_sampling();
 		render_path_create_render_target(t);
 	}
 }
 
 function render_path_preview_commands_preview() {
 	render_path_set_target("mgbuffer0", null, "mmain", clear_flag_t.COLOR | clear_flag_t.DEPTH, 0xffffffff, 1.0);
-	let additional: string[] = ["mgbuffer1"];
+	let additional: string[] = [ "mgbuffer1" ];
 	render_path_set_target("mgbuffer0", additional, "mmain");
 	render_path_draw_meshes("mesh");
 
@@ -78,12 +78,12 @@ function render_path_preview_commands_preview() {
 	render_path_set_target("mtex", null, "mmain");
 	render_path_draw_skydome("Scene/world_pass/world_pass");
 
-	let framebuffer: string = "texpreview";
-	let selected_mat: slot_material_t = context_raw.material;
-	let texpreview: render_target_t = map_get(render_path_render_targets, "texpreview");
+	let framebuffer: string              = "texpreview";
+	let selected_mat: slot_material_t    = context_raw.material;
+	let texpreview: render_target_t      = map_get(render_path_render_targets, "texpreview");
 	let texpreview_icon: render_target_t = map_get(render_path_render_targets, "texpreview_icon");
-	texpreview._image = selected_mat.image;
-	texpreview_icon._image = selected_mat.image_icon;
+	texpreview._image                    = selected_mat.image;
+	texpreview_icon._image               = selected_mat.image_icon;
 
 	render_path_set_target(framebuffer);
 	render_path_bind_target("mtex", "tex");
@@ -96,7 +96,7 @@ function render_path_preview_commands_preview() {
 
 function render_path_preview_commands_decal() {
 	render_path_set_target("gbuffer0", null, "main", clear_flag_t.COLOR | clear_flag_t.DEPTH, 0xffffffff, 1.0);
-	let additional: string[] = ["gbuffer1"];
+	let additional: string[] = [ "gbuffer1" ];
 	render_path_set_target("gbuffer0", additional, "main");
 	render_path_draw_meshes("mesh");
 
@@ -112,9 +112,9 @@ function render_path_preview_commands_decal() {
 	render_path_set_target(output, null, "main");
 	render_path_draw_skydome("Scene/world_pass/world_pass");
 
-	let framebuffer: string = "texpreview";
+	let framebuffer: string         = "texpreview";
 	let texpreview: render_target_t = map_get(render_path_render_targets, "texpreview");
-	texpreview._image = context_raw.decal_image;
+	texpreview._image               = context_raw.decal_image;
 
 	render_path_set_target(framebuffer);
 

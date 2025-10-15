@@ -3,24 +3,24 @@ let _import_asset_drop_x: f32;
 let _import_asset_drop_y: f32;
 let _import_asset_show_box: bool;
 let _import_asset_hdr_as_envmap: bool;
-let _import_asset_done: ()=>void;
+let _import_asset_done: () => void;
 
-function import_asset_run(path: string, drop_x: f32 = -1.0, drop_y: f32 = -1.0, show_box: bool = true, hdr_as_envmap: bool = true, done: ()=>void = null) {
+function import_asset_run(path: string, drop_x: f32 = -1.0, drop_y: f32 = -1.0, show_box: bool = true, hdr_as_envmap: bool = true, done: () => void = null) {
 
 	if (starts_with(path, "cloud")) {
-		///if arm_android
+		/// if arm_android
 		console_toast(tr("Downloading"));
-		///else
+		/// else
 		console_info(tr("Downloading"));
-		///end
+		/// end
 
-		_import_asset_drop_x = drop_x;
-		_import_asset_drop_y = drop_y;
-		_import_asset_show_box = show_box;
+		_import_asset_drop_x        = drop_x;
+		_import_asset_drop_y        = drop_y;
+		_import_asset_show_box      = show_box;
 		_import_asset_hdr_as_envmap = hdr_as_envmap;
-		_import_asset_done = done;
+		_import_asset_done          = done;
 
-		file_cache_cloud(path, function (abs: string) {
+		file_cache_cloud(path, function(abs: string) {
 			if (abs == null) {
 				return;
 			}
@@ -57,12 +57,12 @@ function import_asset_run(path: string, drop_x: f32 = -1.0, drop_y: f32 = -1.0, 
 			}
 			ui_nodes_accept_asset_drop(asset_index);
 			ui_nodes_get_nodes().nodes_drag = false;
-			ui_nodes_hwnd.redraws = 2;
+			ui_nodes_hwnd.redraws           = 2;
 		}
 
 		if (context_raw.tool == tool_type_t.COLORID && project_asset_names.length == 1) {
 			ui_header_handle.redraws = 2;
-			context_raw.ddirty = 2;
+			context_raw.ddirty       = 2;
 		}
 	}
 	else if (path_is_project(path)) {

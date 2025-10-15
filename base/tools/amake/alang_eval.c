@@ -7,18 +7,18 @@
 
 typedef union value {
 	float f;
-	int i;
-	bool b;
+	int   i;
+	bool  b;
 } value;
 
 typedef struct variable_storage {
-	value val;
+	value   val;
 	type_id type;
 } variable_storage;
 
 typedef struct interpreter_state {
 	variable_storage vars[1024];
-	size_t pos;
+	size_t           pos;
 } interpreter_state;
 
 static value get_variable_value(interpreter_state *state, variable var) {
@@ -26,13 +26,13 @@ static value get_variable_value(interpreter_state *state, variable var) {
 }
 
 static void set_variable_value(interpreter_state *state, variable var, value v) {
-	state->vars[var.index].val = v;
+	state->vars[var.index].val  = v;
 	state->vars[var.index].type = var.type.type;
 }
 
 static float eval() {
-	interpreter_state state = {0};
-	function *main_func = NULL;
+	interpreter_state state     = {0};
+	function         *main_func = NULL;
 
 	for (function_id i = 0; _get_function(i) != NULL; ++i) {
 		function *f = _get_function(i);
@@ -43,23 +43,23 @@ static float eval() {
 	}
 
 	for (size_t i = 0; i < __allocated_globals_size; ++i) {
-		global *g = __allocated_globals[i].g;
+		global  *g         = __allocated_globals[i].g;
 		uint64_t var_index = __allocated_globals[i].variable_id;
 		if (g->value.kind == GLOBAL_VALUE_FLOAT) {
 			state.vars[var_index].val.f = g->value.value.floats[0];
-			state.vars[var_index].type = g->type;
+			state.vars[var_index].type  = g->type;
 		}
 		else if (g->value.kind == GLOBAL_VALUE_INT) {
 			state.vars[var_index].val.i = g->value.value.ints[0];
-			state.vars[var_index].type = g->type;
+			state.vars[var_index].type  = g->type;
 		}
 		else if (g->value.kind == GLOBAL_VALUE_BOOL) {
 			state.vars[var_index].val.b = g->value.value.b;
-			state.vars[var_index].type = g->type;
+			state.vars[var_index].type  = g->type;
 		}
 	}
 
-	state.pos = 0;
+	state.pos     = 0;
 	opcodes *code = &main_func->code;
 
 	while (state.pos < code->size) {
@@ -94,13 +94,13 @@ static float eval() {
 			break;
 		}
 		case OPCODE_ADD: {
-			value left = get_variable_value(&state, op->op_binary.left);
-			value right = get_variable_value(&state, op->op_binary.right);
-			value result;
+			value   left  = get_variable_value(&state, op->op_binary.left);
+			value   right = get_variable_value(&state, op->op_binary.right);
+			value   result;
 			type_id result_type = op->op_binary.result.type.type;
 			if (result_type == _float_id) {
-				float l = (op->op_binary.left.type.type == _float_id) ? left.f : (float)left.i;
-				float r = (op->op_binary.right.type.type == _float_id) ? right.f : (float)right.i;
+				float l  = (op->op_binary.left.type.type == _float_id) ? left.f : (float)left.i;
+				float r  = (op->op_binary.right.type.type == _float_id) ? right.f : (float)right.i;
 				result.f = l + r;
 			}
 			else {
@@ -110,13 +110,13 @@ static float eval() {
 			break;
 		}
 		case OPCODE_SUB: {
-			value left = get_variable_value(&state, op->op_binary.left);
-			value right = get_variable_value(&state, op->op_binary.right);
-			value result;
+			value   left  = get_variable_value(&state, op->op_binary.left);
+			value   right = get_variable_value(&state, op->op_binary.right);
+			value   result;
 			type_id result_type = op->op_binary.result.type.type;
 			if (result_type == _float_id) {
-				float l = (op->op_binary.left.type.type == _float_id) ? left.f : (float)left.i;
-				float r = (op->op_binary.right.type.type == _float_id) ? right.f : (float)right.i;
+				float l  = (op->op_binary.left.type.type == _float_id) ? left.f : (float)left.i;
+				float r  = (op->op_binary.right.type.type == _float_id) ? right.f : (float)right.i;
 				result.f = l - r;
 			}
 			else {
@@ -126,13 +126,13 @@ static float eval() {
 			break;
 		}
 		case OPCODE_MULTIPLY: {
-			value left = get_variable_value(&state, op->op_binary.left);
-			value right = get_variable_value(&state, op->op_binary.right);
-			value result;
+			value   left  = get_variable_value(&state, op->op_binary.left);
+			value   right = get_variable_value(&state, op->op_binary.right);
+			value   result;
 			type_id result_type = op->op_binary.result.type.type;
 			if (result_type == _float_id) {
-				float l = (op->op_binary.left.type.type == _float_id) ? left.f : (float)left.i;
-				float r = (op->op_binary.right.type.type == _float_id) ? right.f : (float)right.i;
+				float l  = (op->op_binary.left.type.type == _float_id) ? left.f : (float)left.i;
+				float r  = (op->op_binary.right.type.type == _float_id) ? right.f : (float)right.i;
 				result.f = l * r;
 			}
 			else {
@@ -142,13 +142,13 @@ static float eval() {
 			break;
 		}
 		case OPCODE_DIVIDE: {
-			value left = get_variable_value(&state, op->op_binary.left);
-			value right = get_variable_value(&state, op->op_binary.right);
-			value result;
+			value   left  = get_variable_value(&state, op->op_binary.left);
+			value   right = get_variable_value(&state, op->op_binary.right);
+			value   result;
 			type_id result_type = op->op_binary.result.type.type;
 			if (result_type == _float_id) {
-				float l = (op->op_binary.left.type.type == _float_id) ? left.f : (float)left.i;
-				float r = (op->op_binary.right.type.type == _float_id) ? right.f : (float)right.i;
+				float l  = (op->op_binary.left.type.type == _float_id) ? left.f : (float)left.i;
+				float r  = (op->op_binary.right.type.type == _float_id) ? right.f : (float)right.i;
 				result.f = l / r;
 			}
 			else {
@@ -158,7 +158,7 @@ static float eval() {
 			break;
 		}
 		case OPCODE_MOD: {
-			value left = get_variable_value(&state, op->op_binary.left);
+			value left  = get_variable_value(&state, op->op_binary.left);
 			value right = get_variable_value(&state, op->op_binary.right);
 			value result;
 			result.i = left.i % right.i;
@@ -166,14 +166,14 @@ static float eval() {
 			break;
 		}
 		case OPCODE_EQUALS: {
-			value left = get_variable_value(&state, op->op_binary.left);
-			value right = get_variable_value(&state, op->op_binary.right);
-			value result;
-			type_id left_type = op->op_binary.left.type.type;
+			value   left  = get_variable_value(&state, op->op_binary.left);
+			value   right = get_variable_value(&state, op->op_binary.right);
+			value   result;
+			type_id left_type  = op->op_binary.left.type.type;
 			type_id right_type = op->op_binary.right.type.type;
 			if (left_type == _float_id || right_type == _float_id) {
-				float l = (left_type == _float_id) ? left.f : (float)left.i;
-				float r = (right_type == _float_id) ? right.f : (float)right.i;
+				float l  = (left_type == _float_id) ? left.f : (float)left.i;
+				float r  = (right_type == _float_id) ? right.f : (float)right.i;
 				result.b = l == r;
 			}
 			else if (left_type == _bool_id && right_type == _bool_id) {
@@ -186,14 +186,14 @@ static float eval() {
 			break;
 		}
 		case OPCODE_NOT_EQUALS: {
-			value left = get_variable_value(&state, op->op_binary.left);
-			value right = get_variable_value(&state, op->op_binary.right);
-			value result;
-			type_id left_type = op->op_binary.left.type.type;
+			value   left  = get_variable_value(&state, op->op_binary.left);
+			value   right = get_variable_value(&state, op->op_binary.right);
+			value   result;
+			type_id left_type  = op->op_binary.left.type.type;
 			type_id right_type = op->op_binary.right.type.type;
 			if (left_type == _float_id || right_type == _float_id) {
-				float l = (left_type == _float_id) ? left.f : (float)left.i;
-				float r = (right_type == _float_id) ? right.f : (float)right.i;
+				float l  = (left_type == _float_id) ? left.f : (float)left.i;
+				float r  = (right_type == _float_id) ? right.f : (float)right.i;
 				result.b = l != r;
 			}
 			else if (left_type == _bool_id && right_type == _bool_id) {
@@ -206,14 +206,14 @@ static float eval() {
 			break;
 		}
 		case OPCODE_GREATER: {
-			value left = get_variable_value(&state, op->op_binary.left);
-			value right = get_variable_value(&state, op->op_binary.right);
-			value result;
-			type_id left_type = op->op_binary.left.type.type;
+			value   left  = get_variable_value(&state, op->op_binary.left);
+			value   right = get_variable_value(&state, op->op_binary.right);
+			value   result;
+			type_id left_type  = op->op_binary.left.type.type;
 			type_id right_type = op->op_binary.right.type.type;
 			if (left_type == _float_id || right_type == _float_id) {
-				float l = (left_type == _float_id) ? left.f : (float)left.i;
-				float r = (right_type == _float_id) ? right.f : (float)right.i;
+				float l  = (left_type == _float_id) ? left.f : (float)left.i;
+				float r  = (right_type == _float_id) ? right.f : (float)right.i;
 				result.b = l > r;
 			}
 			else {
@@ -223,14 +223,14 @@ static float eval() {
 			break;
 		}
 		case OPCODE_GREATER_EQUAL: {
-			value left = get_variable_value(&state, op->op_binary.left);
-			value right = get_variable_value(&state, op->op_binary.right);
-			value result;
-			type_id left_type = op->op_binary.left.type.type;
+			value   left  = get_variable_value(&state, op->op_binary.left);
+			value   right = get_variable_value(&state, op->op_binary.right);
+			value   result;
+			type_id left_type  = op->op_binary.left.type.type;
 			type_id right_type = op->op_binary.right.type.type;
 			if (left_type == _float_id || right_type == _float_id) {
-				float l = (left_type == _float_id) ? left.f : (float)left.i;
-				float r = (right_type == _float_id) ? right.f : (float)right.i;
+				float l  = (left_type == _float_id) ? left.f : (float)left.i;
+				float r  = (right_type == _float_id) ? right.f : (float)right.i;
 				result.b = l >= r;
 			}
 			else {
@@ -240,14 +240,14 @@ static float eval() {
 			break;
 		}
 		case OPCODE_LESS: {
-			value left = get_variable_value(&state, op->op_binary.left);
-			value right = get_variable_value(&state, op->op_binary.right);
-			value result;
-			type_id left_type = op->op_binary.left.type.type;
+			value   left  = get_variable_value(&state, op->op_binary.left);
+			value   right = get_variable_value(&state, op->op_binary.right);
+			value   result;
+			type_id left_type  = op->op_binary.left.type.type;
 			type_id right_type = op->op_binary.right.type.type;
 			if (left_type == _float_id || right_type == _float_id) {
-				float l = (left_type == _float_id) ? left.f : (float)left.i;
-				float r = (right_type == _float_id) ? right.f : (float)right.i;
+				float l  = (left_type == _float_id) ? left.f : (float)left.i;
+				float r  = (right_type == _float_id) ? right.f : (float)right.i;
 				result.b = l < r;
 			}
 			else {
@@ -257,14 +257,14 @@ static float eval() {
 			break;
 		}
 		case OPCODE_LESS_EQUAL: {
-			value left = get_variable_value(&state, op->op_binary.left);
-			value right = get_variable_value(&state, op->op_binary.right);
-			value result;
-			type_id left_type = op->op_binary.left.type.type;
+			value   left  = get_variable_value(&state, op->op_binary.left);
+			value   right = get_variable_value(&state, op->op_binary.right);
+			value   result;
+			type_id left_type  = op->op_binary.left.type.type;
 			type_id right_type = op->op_binary.right.type.type;
 			if (left_type == _float_id || right_type == _float_id) {
-				float l = (left_type == _float_id) ? left.f : (float)left.i;
-				float r = (right_type == _float_id) ? right.f : (float)right.i;
+				float l  = (left_type == _float_id) ? left.f : (float)left.i;
+				float r  = (right_type == _float_id) ? right.f : (float)right.i;
 				result.b = l <= r;
 			}
 			else {
@@ -274,7 +274,7 @@ static float eval() {
 			break;
 		}
 		case OPCODE_AND: {
-			value left = get_variable_value(&state, op->op_binary.left);
+			value left  = get_variable_value(&state, op->op_binary.left);
 			value right = get_variable_value(&state, op->op_binary.right);
 			value result;
 			result.b = left.b && right.b;
@@ -282,7 +282,7 @@ static float eval() {
 			break;
 		}
 		case OPCODE_OR: {
-			value left = get_variable_value(&state, op->op_binary.left);
+			value left  = get_variable_value(&state, op->op_binary.left);
 			value right = get_variable_value(&state, op->op_binary.right);
 			value result;
 			result.b = left.b || right.b;
@@ -290,7 +290,7 @@ static float eval() {
 			break;
 		}
 		case OPCODE_BITWISE_XOR: {
-			value left = get_variable_value(&state, op->op_binary.left);
+			value left  = get_variable_value(&state, op->op_binary.left);
 			value right = get_variable_value(&state, op->op_binary.right);
 			value result;
 			result.i = left.i ^ right.i;
@@ -298,7 +298,7 @@ static float eval() {
 			break;
 		}
 		case OPCODE_BITWISE_AND: {
-			value left = get_variable_value(&state, op->op_binary.left);
+			value left  = get_variable_value(&state, op->op_binary.left);
 			value right = get_variable_value(&state, op->op_binary.right);
 			value result;
 			result.i = left.i & right.i;
@@ -306,7 +306,7 @@ static float eval() {
 			break;
 		}
 		case OPCODE_BITWISE_OR: {
-			value left = get_variable_value(&state, op->op_binary.left);
+			value left  = get_variable_value(&state, op->op_binary.left);
 			value right = get_variable_value(&state, op->op_binary.right);
 			value result;
 			result.i = left.i | right.i;
@@ -314,7 +314,7 @@ static float eval() {
 			break;
 		}
 		case OPCODE_LEFT_SHIFT: {
-			value left = get_variable_value(&state, op->op_binary.left);
+			value left  = get_variable_value(&state, op->op_binary.left);
 			value right = get_variable_value(&state, op->op_binary.right);
 			value result;
 			result.i = left.i << right.i;
@@ -322,7 +322,7 @@ static float eval() {
 			break;
 		}
 		case OPCODE_RIGHT_SHIFT: {
-			value left = get_variable_value(&state, op->op_binary.left);
+			value left  = get_variable_value(&state, op->op_binary.left);
 			value right = get_variable_value(&state, op->op_binary.right);
 			value result;
 			result.i = left.i >> right.i;
@@ -409,8 +409,8 @@ float alang_eval(char *data) {
 	strcat(buffer, data);
 	strcat(buffer, "; }");
 
-	char *filename = "main.kong";
-	tokens tokens = _tokenize(filename, buffer);
+	char  *filename = "main.kong";
+	tokens tokens   = _tokenize(filename, buffer);
 	_parse(filename, &tokens);
 	_resolve_types();
 	// allocate_globals();

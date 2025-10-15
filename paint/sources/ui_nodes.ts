@@ -6,35 +6,35 @@ let ui_nodes_ww: i32;
 let ui_nodes_wh: i32;
 
 let ui_nodes_canvas_type: canvas_type_t = canvas_type_t.MATERIAL;
-let ui_nodes_show_menu: bool = false;
-let ui_nodes_show_menu_first: bool = true;
-let ui_nodes_hide_menu: bool = false;
-let ui_nodes_menu_category: i32 = 0;
-let ui_nodes_popup_x: f32 = 0.0;
-let ui_nodes_popup_y: f32 = 0.0;
+let ui_nodes_show_menu: bool            = false;
+let ui_nodes_show_menu_first: bool      = true;
+let ui_nodes_hide_menu: bool            = false;
+let ui_nodes_menu_category: i32         = 0;
+let ui_nodes_popup_x: f32               = 0.0;
+let ui_nodes_popup_y: f32               = 0.0;
 let ui_nodes_node_search_x: i32;
 let ui_nodes_node_search_y: i32;
 
-let ui_nodes_uichanged_last: bool = false;
-let ui_nodes_recompile_mat: bool = false; // Mat preview
-let ui_nodes_recompile_mat_final: bool = false;
-let ui_nodes_node_search_spawn: ui_node_t = null;
-let ui_nodes_node_search_offset: i32 = 0;
+let ui_nodes_uichanged_last: bool          = false;
+let ui_nodes_recompile_mat: bool           = false; // Mat preview
+let ui_nodes_recompile_mat_final: bool     = false;
+let ui_nodes_node_search_spawn: ui_node_t  = null;
+let ui_nodes_node_search_offset: i32       = 0;
 let ui_nodes_last_canvas: ui_node_canvas_t = null;
-let ui_nodes_last_node_selected_id: i32 = -1;
-let ui_nodes_release_link: bool = false;
-let ui_nodes_is_node_menu_op: bool = false;
+let ui_nodes_last_node_selected_id: i32    = -1;
+let ui_nodes_release_link: bool            = false;
+let ui_nodes_is_node_menu_op: bool         = false;
 
-let ui_nodes_grid: gpu_texture_t = null;
-let ui_nodes_grid_redraw: bool = true;
-let ui_nodes_grid_cell_w: i32 = 200;
-let ui_nodes_grid_small_cell_w: i32 = 40;
-let ui_nodes_hwnd: ui_handle_t = ui_handle_create();
+let ui_nodes_grid: gpu_texture_t         = null;
+let ui_nodes_grid_redraw: bool           = true;
+let ui_nodes_grid_cell_w: i32            = 200;
+let ui_nodes_grid_small_cell_w: i32      = 40;
+let ui_nodes_hwnd: ui_handle_t           = ui_handle_create();
 let ui_nodes_group_stack: node_group_t[] = [];
-let ui_nodes_controls_down: bool = false;
-let ui_nodes_tabs: slot_material_t[] = null;
-let ui_nodes_htab: ui_handle_t = ui_handle_create();
-let ui_nodes_last_zoom: f32 = 1.0;
+let ui_nodes_controls_down: bool         = false;
+let ui_nodes_tabs: slot_material_t[]     = null;
+let ui_nodes_htab: ui_handle_t           = ui_handle_create();
+let ui_nodes_last_zoom: f32              = 1.0;
 
 let _ui_nodes_on_link_drag_link_drag: ui_node_link_t;
 let _ui_nodes_on_link_drag_node: ui_node_t;
@@ -42,26 +42,26 @@ let _ui_nodes_on_socket_released_socket: ui_node_socket_t;
 let _ui_nodes_on_socket_released_node: ui_node_t;
 let _ui_nodes_htype: ui_handle_t = ui_handle_create();
 let _ui_nodes_hname: ui_handle_t = ui_handle_create();
-let _ui_nodes_hmin: ui_handle_t = ui_handle_create();
-let _ui_nodes_hmax: ui_handle_t = ui_handle_create();
+let _ui_nodes_hmin: ui_handle_t  = ui_handle_create();
+let _ui_nodes_hmax: ui_handle_t  = ui_handle_create();
 let _ui_nodes_hval0: ui_handle_t = ui_handle_create();
 let _ui_nodes_hval1: ui_handle_t = ui_handle_create();
 let _ui_nodes_hval2: ui_handle_t = ui_handle_create();
 let _ui_nodes_hval3: ui_handle_t = ui_handle_create();
 let _ui_nodes_on_canvas_released_selected: ui_node_t;
 let _ui_nodes_node_search_first: bool;
-let _ui_nodes_node_search_done: ()=>void;
-let ui_nodes_node_changed: ui_node_t = null;
+let _ui_nodes_node_search_done: ()   => void;
+let ui_nodes_node_changed: ui_node_t  = null;
 
 function ui_viewnodes_init() {
-	ui_nodes_preview_image = ui_nodes_get_node_preview_image;
-	ui_nodes_on_link_drag = ui_viewnodes_on_link_drag;
-	ui_nodes_on_node_remove = ui_viewnodes_on_node_remove;
-	ui_nodes_on_node_changed = ui_viewnodes_on_node_changed;
+	ui_nodes_preview_image      = ui_nodes_get_node_preview_image;
+	ui_nodes_on_link_drag       = ui_viewnodes_on_link_drag;
+	ui_nodes_on_node_remove     = ui_viewnodes_on_node_remove;
+	ui_nodes_on_node_changed    = ui_viewnodes_on_node_changed;
 	ui_nodes_on_socket_released = ui_viewnodes_on_socket_released;
 	ui_nodes_on_canvas_released = ui_viewnodes_on_canvas_released;
-	ui_nodes_on_canvas_control = ui_viewnodes_on_canvas_control;
-	ui_nodes_grid_snap = config_raw.grid_snap;
+	ui_nodes_on_canvas_control  = ui_viewnodes_on_canvas_control;
+	ui_nodes_grid_snap          = config_raw.grid_snap;
 	nodes_material_init();
 }
 
@@ -82,27 +82,26 @@ function ui_viewnodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 		return;
 	}
 
-	let links: ui_node_link_t[] = ui_nodes_get_canvas(true).links;
+	let links: ui_node_link_t[]   = ui_nodes_get_canvas(true).links;
 	let link_drag: ui_node_link_t = ui_get_link(links, link_drag_id);
-	let nodes: ui_node_t[] = ui_nodes_get_canvas(true).nodes;
-	let node: ui_node_t = ui_get_node(nodes, link_drag.from_id > -1 ? link_drag.from_id : link_drag.to_id);
-	let link_x: i32 = ui._window_x + UI_NODE_X(node);
-	let link_y: i32 = ui._window_y + UI_NODE_Y(node);
+	let nodes: ui_node_t[]        = ui_nodes_get_canvas(true).nodes;
+	let node: ui_node_t           = ui_get_node(nodes, link_drag.from_id > -1 ? link_drag.from_id : link_drag.to_id);
+	let link_x: i32               = ui._window_x + UI_NODE_X(node);
+	let link_y: i32               = ui._window_y + UI_NODE_Y(node);
 	if (link_drag.from_id > -1) {
 		link_x += UI_NODE_W(node);
 		link_y += UI_OUTPUT_Y(node, link_drag.from_socket);
 	}
 	else {
-		link_y += ui_nodes_INPUT_Y(ui_nodes_get_canvas(true), node, link_drag.to_socket) +
-			UI_OUTPUTS_H(node) + UI_BUTTONS_H(node);
+		link_y += ui_nodes_INPUT_Y(ui_nodes_get_canvas(true), node, link_drag.to_socket) + UI_OUTPUTS_H(node) + UI_BUTTONS_H(node);
 	}
 
 	if (math_abs(mouse_x - link_x) > 5 || math_abs(mouse_y - link_y) > 5) { // Link length
 
 		_ui_nodes_on_link_drag_link_drag = link_drag;
-		_ui_nodes_on_link_drag_node = node;
+		_ui_nodes_on_link_drag_node      = node;
 
-		ui_nodes_node_search(-1, -1, function () {
+		ui_nodes_node_search(-1, -1, function() {
 			let ui_nodes: ui_nodes_t = ui_nodes_get_nodes();
 
 			let node_selected_id: i32 = _ui_nodes_on_link_drag_node.id;
@@ -111,10 +110,10 @@ function ui_viewnodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 			}
 
 			let link_drag: ui_node_link_t = _ui_nodes_on_link_drag_link_drag;
-			let nodes: ui_node_t[] = ui_nodes_get_canvas(true).nodes;
-			let n: ui_node_t = ui_get_node(nodes, node_selected_id);
+			let nodes: ui_node_t[]        = ui_nodes_get_canvas(true).nodes;
+			let n: ui_node_t              = ui_get_node(nodes, node_selected_id);
 			if (link_drag.to_id == -1 && n.inputs.length > 0) {
-				link_drag.to_id = n.id;
+				link_drag.to_id       = n.id;
 				let from_type: string = _ui_nodes_on_link_drag_node.outputs[link_drag.from_socket].type;
 				// Connect to the first socket
 				link_drag.to_socket = 0;
@@ -129,7 +128,7 @@ function ui_viewnodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 				array_push(ui_nodes_get_canvas(true).links, link_drag);
 			}
 			else if (link_drag.from_id == -1 && n.outputs.length > 0) {
-				link_drag.from_id = n.id;
+				link_drag.from_id     = n.id;
 				link_drag.from_socket = 0;
 				array_push(ui_nodes_get_canvas(true).links, link_drag);
 			}
@@ -145,24 +144,23 @@ function ui_viewnodes_on_link_drag(link_drag_id: i32, is_new_link: bool) {
 function ui_viewnodes_on_socket_released(socket_id: i32) {
 	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
 	let socket: ui_node_socket_t = ui_get_socket(canvas.nodes, socket_id);
-	let node: ui_node_t = ui_get_node(canvas.nodes, socket.node_id);
+	let node: ui_node_t          = ui_get_node(canvas.nodes, socket.node_id);
 	if (ui.input_released_r) {
 		if (node.type == "GROUP_INPUT" || node.type == "GROUP_OUTPUT") {
 
 			_ui_nodes_on_socket_released_socket = socket;
-			_ui_nodes_on_socket_released_node = node;
+			_ui_nodes_on_socket_released_node   = node;
 
-			sys_notify_on_next_frame(function () {
-				ui_menu_draw(function () {
-
+			sys_notify_on_next_frame(function() {
+				ui_menu_draw(function() {
 					let socket: ui_node_socket_t = _ui_nodes_on_socket_released_socket;
-					let node: ui_node_t = _ui_nodes_on_socket_released_node;
+					let node: ui_node_t          = _ui_nodes_on_socket_released_node;
 
 					if (ui_menu_button(tr("Edit"))) {
-						_ui_nodes_htype.i = socket.type == "RGBA" ? 0 : socket.type == "VECTOR" ? 1 : 2;
+						_ui_nodes_htype.i    = socket.type == "RGBA" ? 0 : socket.type == "VECTOR" ? 1 : 2;
 						_ui_nodes_hname.text = socket.name;
-						_ui_nodes_hmin.f = socket.min;
-						_ui_nodes_hmax.f = socket.max;
+						_ui_nodes_hmin.f     = socket.min;
+						_ui_nodes_hmax.f     = socket.max;
 						if (socket.type == "RGBA" || socket.type == "VECTOR") {
 							_ui_nodes_hval0.f = socket.default_value[0];
 							_ui_nodes_hval1.f = socket.default_value[1];
@@ -175,23 +173,22 @@ function ui_viewnodes_on_socket_released(socket_id: i32) {
 							_ui_nodes_hval0.f = socket.default_value[0];
 						}
 
-						sys_notify_on_next_frame(function () {
+						sys_notify_on_next_frame(function() {
 							ui_end_input();
 
-							ui_box_show_custom(function () {
-
+							ui_box_show_custom(function() {
 								let socket: ui_node_socket_t = _ui_nodes_on_socket_released_socket;
-								let node: ui_node_t = _ui_nodes_on_socket_released_node;
+								let node: ui_node_t          = _ui_nodes_on_socket_released_node;
 
 								if (ui_tab(ui_handle(__ID__), tr("Socket"))) {
-									let type_combo: string[] = [tr("Color"), tr("Vector"), tr("Value")];
-									let type: i32 = ui_combo(_ui_nodes_htype, type_combo, tr("Type"), true);
+									let type_combo: string[] = [ tr("Color"), tr("Vector"), tr("Value") ];
+									let type: i32            = ui_combo(_ui_nodes_htype, type_combo, tr("Type"), true);
 									if (_ui_nodes_htype.changed) {
 										_ui_nodes_hname.text = type == 0 ? tr("Color") : type == 1 ? tr("Vector") : tr("Value");
 									}
-									let name: string = ui_text_input(_ui_nodes_hname, tr("Name"));
-									let min: f32 = ui_float_input(_ui_nodes_hmin, tr("Min"));
-									let max: f32 = ui_float_input(_ui_nodes_hmax, tr("Max"));
+									let name: string               = ui_text_input(_ui_nodes_hname, tr("Name"));
+									let min: f32                   = ui_float_input(_ui_nodes_hmin, tr("Min"));
+									let max: f32                   = ui_float_input(_ui_nodes_hmax, tr("Max"));
 									let default_value: f32_array_t = null;
 									if (type == 0) {
 										ui_row4();
@@ -199,27 +196,25 @@ function ui_viewnodes_on_socket_released(socket_id: i32) {
 										ui_float_input(_ui_nodes_hval1, tr("G"));
 										ui_float_input(_ui_nodes_hval2, tr("B"));
 										ui_float_input(_ui_nodes_hval3, tr("A"));
-										default_value = f32_array_create_xyzw(
-											_ui_nodes_hval0.f, _ui_nodes_hval1.f, _ui_nodes_hval2.f, _ui_nodes_hval3.f);
+										default_value = f32_array_create_xyzw(_ui_nodes_hval0.f, _ui_nodes_hval1.f, _ui_nodes_hval2.f, _ui_nodes_hval3.f);
 									}
 									else if (type == 1) {
 										ui_row3();
 										_ui_nodes_hval0.f = ui_float_input(_ui_nodes_hval0, tr("X"));
 										_ui_nodes_hval1.f = ui_float_input(_ui_nodes_hval1, tr("Y"));
 										_ui_nodes_hval2.f = ui_float_input(_ui_nodes_hval2, tr("Z"));
-										default_value = f32_array_create_xyz(
-											_ui_nodes_hval0.f, _ui_nodes_hval1.f, _ui_nodes_hval2.f);
+										default_value     = f32_array_create_xyz(_ui_nodes_hval0.f, _ui_nodes_hval1.f, _ui_nodes_hval2.f);
 									}
 									else {
-										let f: f32 = ui_float_input(_ui_nodes_hval0, tr("default_value"));
+										let f: f32    = ui_float_input(_ui_nodes_hval0, tr("default_value"));
 										default_value = f32_array_create_x(f);
 									}
 									if (ui_button(tr("OK"))) { // || ui.isReturnDown
-										socket.name = name;
-										socket.type = type == 0 ? "RGBA" : type == 1 ? "VECTOR" : "VALUE";
-										socket.color = nodes_material_get_socket_color(socket.type);
-										socket.min = min;
-										socket.max = max;
+										socket.name          = name;
+										socket.type          = type == 0 ? "RGBA" : type == 1 ? "VECTOR" : "VALUE";
+										socket.color         = nodes_material_get_socket_color(socket.type);
+										socket.min           = min;
+										socket.max           = max;
 										socket.default_value = default_value;
 										ui_box_hide();
 										nodes_material_sync_sockets(node);
@@ -230,13 +225,13 @@ function ui_viewnodes_on_socket_released(socket_id: i32) {
 						});
 					}
 					if (ui_menu_button(tr("Delete"))) {
-						let i: i32 = 0;
+						let i: i32                   = 0;
 						let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
 						// Remove links connected to the socket
 						while (i < canvas.links.length) {
 							let l: ui_node_link_t = canvas.links[i];
 							if ((l.from_id == node.id && l.from_socket == array_index_of(node.outputs, socket)) ||
-								(l.to_id == node.id && l.to_socket == array_index_of(node.inputs, socket))) {
+							    (l.to_id == node.id && l.to_socket == array_index_of(node.inputs, socket))) {
 								array_splice(canvas.links, i, 1);
 							}
 							else {
@@ -266,22 +261,15 @@ function ui_viewnodes_on_socket_released(socket_id: i32) {
 }
 
 function ui_viewnodes_on_canvas_released() {
-	if (ui.input_released_r &&
-		context_in_nodes() &&
-		math_abs(ui.input_x - ui.input_started_x) < 2 &&
-		math_abs(ui.input_y - ui.input_started_y) < 2) {
+	if (ui.input_released_r && context_in_nodes() && math_abs(ui.input_x - ui.input_started_x) < 2 && math_abs(ui.input_y - ui.input_started_y) < 2) {
 
 		// Node selection
-		let nodes: ui_nodes_t = ui_nodes_get_nodes();
+		let nodes: ui_nodes_t        = ui_nodes_get_nodes();
 		let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
-		let selected: ui_node_t = null;
+		let selected: ui_node_t      = null;
 		for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
 			let node: ui_node_t = canvas.nodes[i];
-			if (ui_input_in_rect(
-					ui._window_x + UI_NODE_X(node),
-					ui._window_y + UI_NODE_Y(node),
-					UI_NODE_W(node),
-					UI_NODE_H(canvas, node))) {
+			if (ui_input_in_rect(ui._window_x + UI_NODE_X(node), ui._window_y + UI_NODE_Y(node), UI_NODE_W(node), UI_NODE_H(canvas, node))) {
 				selected = node;
 				break;
 			}
@@ -290,7 +278,7 @@ function ui_viewnodes_on_canvas_released() {
 			nodes.nodes_selected_id = [];
 		}
 		else if (array_index_of(nodes.nodes_selected_id, selected.id) == -1) {
-			nodes.nodes_selected_id = [selected.id];
+			nodes.nodes_selected_id = [ selected.id ];
 		}
 
 		// Node context menu
@@ -298,60 +286,56 @@ function ui_viewnodes_on_canvas_released() {
 
 			_ui_nodes_on_canvas_released_selected = selected;
 
-			ui_menu_draw(function () {
-
+			ui_menu_draw(function() {
 				let selected: ui_node_t = _ui_nodes_on_canvas_released_selected;
 
 				ui._y += 1;
-				let is_protected: bool = selected == null ||
-					selected.type == "OUTPUT_MATERIAL_PBR" ||
-					selected.type == "GROUP_INPUT" ||
-					selected.type == "GROUP_OUTPUT" ||
-					selected.type == "brush_output_node";
+				let is_protected: bool = selected == null || selected.type == "OUTPUT_MATERIAL_PBR" || selected.type == "GROUP_INPUT" ||
+				                         selected.type == "GROUP_OUTPUT" || selected.type == "brush_output_node";
 				ui.enabled = !is_protected;
 				if (ui_menu_button(tr("Cut"), "ctrl+x")) {
-					sys_notify_on_next_frame(function () {
-						ui_nodes_hwnd.redraws = 2;
-						ui_is_copy = true;
-						ui_is_cut = true;
+					sys_notify_on_next_frame(function() {
+						ui_nodes_hwnd.redraws    = 2;
+						ui_is_copy               = true;
+						ui_is_cut                = true;
 						ui_nodes_is_node_menu_op = true;
 					});
 				}
 				if (ui_menu_button(tr("Copy"), "ctrl+c")) {
-					sys_notify_on_next_frame(function () {
-						ui_is_copy = true;
+					sys_notify_on_next_frame(function() {
+						ui_is_copy               = true;
 						ui_nodes_is_node_menu_op = true;
 					});
 				}
 				ui.enabled = ui_clipboard != "";
 				if (ui_menu_button(tr("Paste"), "ctrl+v")) {
-					sys_notify_on_next_frame(function () {
-						ui_nodes_hwnd.redraws = 2;
-						ui_is_paste = true;
+					sys_notify_on_next_frame(function() {
+						ui_nodes_hwnd.redraws    = 2;
+						ui_is_paste              = true;
 						ui_nodes_is_node_menu_op = true;
 					});
 				}
 				ui.enabled = !is_protected;
 				if (ui_menu_button(tr("Delete"), "delete")) {
-					sys_notify_on_next_frame(function () {
-						sys_notify_on_end_frame(function () {
-							ui_nodes_hwnd.redraws = 2;
-							ui.is_delete_down = true;
+					sys_notify_on_next_frame(function() {
+						sys_notify_on_end_frame(function() {
+							ui_nodes_hwnd.redraws    = 2;
+							ui.is_delete_down        = true;
 							ui_nodes_is_node_menu_op = true;
 						});
 					});
 				}
 				if (ui_menu_button(tr("Duplicate"))) {
-					sys_notify_on_next_frame(function () {
-						ui_nodes_hwnd.redraws = 2;
-						ui_is_copy = true;
-						ui_is_paste = true;
+					sys_notify_on_next_frame(function() {
+						ui_nodes_hwnd.redraws    = 2;
+						ui_is_copy               = true;
+						ui_is_paste              = true;
 						ui_nodes_is_node_menu_op = true;
 					});
 				}
 				if (selected != null && selected.type == "RGB") {
 					if (ui_menu_button(tr("Add Swatch"))) {
-						let color: f32_array_t = selected.outputs[0].default_value;
+						let color: f32_array_t         = selected.outputs[0].default_value;
 						let new_swatch: swatch_color_t = make_swatch(color_from_floats(color[0], color[1], color[2], color[3]));
 						context_set_swatch(new_swatch);
 						array_push(project_raw.swatches, new_swatch);
@@ -372,14 +356,15 @@ function ui_viewnodes_on_canvas_released() {
 	}
 
 	if (ui.input_released) {
-		let nodes: ui_nodes_t = ui_nodes_get_nodes();
+		let nodes: ui_nodes_t        = ui_nodes_get_nodes();
 		let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
 		for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
 			let node: ui_node_t = canvas.nodes[i];
 			if (ui_input_in_rect(ui._window_x + UI_NODE_X(node), ui._window_y + UI_NODE_Y(node), UI_NODE_W(node), UI_NODE_H(canvas, node))) {
 				if (nodes.nodes_selected_id.length > 0 && node.id == nodes.nodes_selected_id[0]) {
 					ui_view2d_hwnd.redraws = 2;
-					if (sys_time() - context_raw.select_time < 0.2) ui_base_show_2d_view(view_2d_type_t.NODE);
+					if (sys_time() - context_raw.select_time < 0.2)
+						ui_base_show_2d_view(view_2d_type_t.NODE);
 					context_raw.select_time = sys_time();
 				}
 				break;
@@ -390,7 +375,7 @@ function ui_viewnodes_on_canvas_released() {
 
 function ui_viewnodes_on_canvas_control(): ui_canvas_control_t {
 	let control: ui_canvas_control_t = ui_nodes_get_canvas_control(ui_nodes_controls_down);
-	ui_nodes_controls_down = control.controls_down;
+	ui_nodes_controls_down           = control.controls_down;
 	return control;
 }
 
@@ -415,34 +400,25 @@ function ui_nodes_get_canvas_control(controls_down: bool): ui_canvas_control_t {
 	}
 
 	if (operator_shortcut(map_get(config_keymap, "action_pan"), shortcut_type_t.STARTED) ||
-		operator_shortcut(map_get(config_keymap, "action_zoom"), shortcut_type_t.STARTED) ||
-		ui.input_started_r ||
-		ui.input_wheel_delta != 0.0) {
+	    operator_shortcut(map_get(config_keymap, "action_zoom"), shortcut_type_t.STARTED) || ui.input_started_r || ui.input_wheel_delta != 0.0) {
 		controls_down = true;
 	}
 	else if (!operator_shortcut(map_get(config_keymap, "action_pan"), shortcut_type_t.DOWN) &&
-		!operator_shortcut(map_get(config_keymap, "action_zoom"), shortcut_type_t.DOWN) &&
-		!ui.input_down_r &&
-		ui.input_wheel_delta == 0.0) {
+	         !operator_shortcut(map_get(config_keymap, "action_zoom"), shortcut_type_t.DOWN) && !ui.input_down_r && ui.input_wheel_delta == 0.0) {
 		controls_down = false;
 	}
 	if (!controls_down) {
-		let cc: ui_canvas_control_t = {
-			pan_x: 0,
-			pan_y: 0,
-			zoom: 0,
-			controls_down: controls_down
-		};
+		let cc: ui_canvas_control_t = {pan_x : 0, pan_y : 0, zoom : 0, controls_down : controls_down};
 		return cc;
 	}
 
-	let pan: bool = ui.input_down_r || operator_shortcut(map_get(config_keymap, "action_pan"), shortcut_type_t.DOWN);
-	let zoom_delta: f32 = operator_shortcut(map_get(config_keymap, "action_zoom"), shortcut_type_t.DOWN) ? ui_nodes_get_zoom_delta() / 100.0 : 0.0;
+	let pan: bool                    = ui.input_down_r || operator_shortcut(map_get(config_keymap, "action_pan"), shortcut_type_t.DOWN);
+	let zoom_delta: f32              = operator_shortcut(map_get(config_keymap, "action_zoom"), shortcut_type_t.DOWN) ? ui_nodes_get_zoom_delta() / 100.0 : 0.0;
 	let control: ui_canvas_control_t = {
-		pan_x: pan ? ui.input_dx : 0.0,
-		pan_y: pan ? ui.input_dy : 0.0,
-		zoom: ui.input_wheel_delta != 0.0 ? -ui.input_wheel_delta / 10 : zoom_delta,
-		controls_down: controls_down
+		pan_x : pan ? ui.input_dx : 0.0,
+		pan_y : pan ? ui.input_dy : 0.0,
+		zoom : ui.input_wheel_delta != 0.0 ? -ui.input_wheel_delta / 10 : zoom_delta,
+		controls_down : controls_down
 	};
 	if (ui.combo_selected_handle != null) {
 		control.zoom = 0.0;
@@ -455,17 +431,16 @@ function ui_nodes_get_canvas_control(controls_down: bool): ui_canvas_control_t {
 }
 
 function ui_nodes_get_zoom_delta(): f32 {
-	return config_raw.zoom_direction == zoom_direction_t.VERTICAL ? -ui.input_dy :
-		   config_raw.zoom_direction == zoom_direction_t.VERTICAL_INVERTED ? -ui.input_dy :
-		   config_raw.zoom_direction == zoom_direction_t.HORIZONTAL ? ui.input_dx :
-		   config_raw.zoom_direction == zoom_direction_t.HORIZONTAL_INVERTED ? ui.input_dx :
-		   -(ui.input_dy - ui.input_dx);
+	return config_raw.zoom_direction == zoom_direction_t.VERTICAL              ? -ui.input_dy
+	       : config_raw.zoom_direction == zoom_direction_t.VERTICAL_INVERTED   ? -ui.input_dy
+	       : config_raw.zoom_direction == zoom_direction_t.HORIZONTAL          ? ui.input_dx
+	       : config_raw.zoom_direction == zoom_direction_t.HORIZONTAL_INVERTED ? ui.input_dx
+	                                                                           : -(ui.input_dy - ui.input_dx);
 }
 
 function ui_nodes_is_tab_selected(): bool {
-	return ui_nodes_htab.i > 0 &&
-		ui_nodes_htab.i % 2 == 1 && // [tab0, tab1, x, tab2, x, +]
-		ui_nodes_tabs.length >= ui_nodes_htab.i / 2;
+	return ui_nodes_htab.i > 0 && ui_nodes_htab.i % 2 == 1 && // [tab0, tab1, x, tab2, x, +]
+	       ui_nodes_tabs.length >= ui_nodes_htab.i / 2;
 }
 
 function ui_nodes_tab_index(): i32 {
@@ -541,28 +516,28 @@ function ui_nodes_update() {
 	if (nodes.nodes_selected_id.length > 0 && ui.is_key_pressed) {
 		if (ui.key_code == key_code_t.LEFT) {
 			for (let i: i32 = 0; i < nodes.nodes_selected_id.length; ++i) {
-				let n: i32 = nodes.nodes_selected_id[i];
+				let n: i32              = nodes.nodes_selected_id[i];
 				let _nodes: ui_node_t[] = ui_nodes_get_canvas(true).nodes;
 				ui_get_node(_nodes, n).x -= 1;
 			}
 		}
 		else if (ui.key_code == key_code_t.RIGHT) {
 			for (let i: i32 = 0; i < nodes.nodes_selected_id.length; ++i) {
-				let n: i32 = nodes.nodes_selected_id[i];
+				let n: i32              = nodes.nodes_selected_id[i];
 				let _nodes: ui_node_t[] = ui_nodes_get_canvas(true).nodes;
 				ui_get_node(_nodes, n).x += 1;
 			}
 		}
 		if (ui.key_code == key_code_t.UP) {
 			for (let i: i32 = 0; i < nodes.nodes_selected_id.length; ++i) {
-				let n: i32 = nodes.nodes_selected_id[i];
+				let n: i32              = nodes.nodes_selected_id[i];
 				let _nodes: ui_node_t[] = ui_nodes_get_canvas(true).nodes;
 				ui_get_node(_nodes, n).y -= 1;
 			}
 		}
 		else if (ui.key_code == key_code_t.DOWN) {
 			for (let i: i32 = 0; i < nodes.nodes_selected_id.length; ++i) {
-				let n: i32 = nodes.nodes_selected_id[i];
+				let n: i32              = nodes.nodes_selected_id[i];
 				let _nodes: ui_node_t[] = ui_nodes_get_canvas(true).nodes;
 				ui_get_node(_nodes, n).y += 1;
 			}
@@ -574,41 +549,41 @@ function ui_nodes_update() {
 		ui_nodes_node_search();
 	}
 	if (ui_nodes_node_search_spawn != null) {
-		ui.input_x = mouse_x; // Fix inputDX after popup removal
-		ui.input_y = mouse_y;
+		ui.input_x                 = mouse_x; // Fix inputDX after popup removal
+		ui.input_y                 = mouse_y;
 		ui_nodes_node_search_spawn = null;
 	}
 
 	if (operator_shortcut(map_get(config_keymap, "view_reset"))) {
 		nodes.pan_x = 0.0;
 		nodes.pan_y = 0.0;
-		nodes.zoom = 1.0;
+		nodes.zoom  = 1.0;
 	}
 
 	if (operator_shortcut(map_get(config_keymap, "node_overview"))) {
 		nodes.zoom = nodes.zoom == 1.0 ? 0.2 : 1.0;
-		nodes.uiw = ui_nodes_ww;
-		nodes.uih = ui_nodes_wh;
+		nodes.uiw  = ui_nodes_ww;
+		nodes.uih  = ui_nodes_wh;
 	}
 }
 
 function ui_nodes_canvas_changed() {
-	ui_nodes_recompile_mat = true;
+	ui_nodes_recompile_mat       = true;
 	ui_nodes_recompile_mat_final = true;
 }
 
-function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
+function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: () => void = null) {
 	_ui_nodes_node_search_first = true;
-	_ui_nodes_node_search_done = done;
+	_ui_nodes_node_search_done  = done;
 
-	ui_menu_draw(function () {
-		ui_menu_h = UI_ELEMENT_H() * 8;
+	ui_menu_draw(function() {
+		ui_menu_h                      = UI_ELEMENT_H() * 8;
 		let search_handle: ui_handle_t = ui_handle(__ID__);
-		let search: string = to_lower_case(ui_text_input(search_handle, "", ui_align_t.LEFT, true, true));
-		ui.changed = false;
+		let search: string             = to_lower_case(ui_text_input(search_handle, "", ui_align_t.LEFT, true, true));
+		ui.changed                     = false;
 		if (_ui_nodes_node_search_first) {
 			_ui_nodes_node_search_first = false;
-			search_handle.text = "";
+			search_handle.text          = "";
 			ui_start_text_edit(search_handle); // Focus search bar
 		}
 
@@ -624,10 +599,10 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 				ui_nodes_node_search_offset--;
 			}
 		}
-		let enter: bool = keyboard_down("enter");
-		let count: i32 = 0;
-		let BUTTON_COL: i32 = ui.ops.theme.BUTTON_COL;
-		let FILL_BUTTON_BG: bool = ui.ops.theme.FILL_BUTTON_BG;
+		let enter: bool             = keyboard_down("enter");
+		let count: i32              = 0;
+		let BUTTON_COL: i32         = ui.ops.theme.BUTTON_COL;
+		let FILL_BUTTON_BG: bool    = ui.ops.theme.FILL_BUTTON_BG;
 		ui.ops.theme.FILL_BUTTON_BG = true;
 
 		let node_list: node_list_t[] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_list : nodes_brush_list;
@@ -640,17 +615,17 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 					ui.ops.theme.BUTTON_COL = count == ui_nodes_node_search_offset ? ui.ops.theme.HIGHLIGHT_COL : ui.ops.theme.SEPARATOR_COL;
 					if (ui_button(tr(n.name), ui_align_t.LEFT) || (enter && count == ui_nodes_node_search_offset)) {
 						ui_nodes_push_undo();
-						let nodes: ui_nodes_t = ui_nodes_get_nodes();
+						let nodes: ui_nodes_t        = ui_nodes_get_nodes();
 						let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
-						ui_nodes_node_search_spawn = ui_nodes_make_node(n, nodes, canvas); // Spawn selected node
+						ui_nodes_node_search_spawn   = ui_nodes_make_node(n, nodes, canvas); // Spawn selected node
 						array_push(canvas.nodes, ui_nodes_node_search_spawn);
-						nodes.nodes_selected_id = [ui_nodes_node_search_spawn.id];
-						nodes.nodes_drag = true;
+						nodes.nodes_selected_id = [ ui_nodes_node_search_spawn.id ];
+						nodes.nodes_drag        = true;
 
 						ui_nodes_hwnd.redraws = 2;
 						if (enter) {
 							ui.changed = true;
-							count = 6; // Trigger break
+							count      = 6; // Trigger break
 						}
 						if (_ui_nodes_node_search_done != null) {
 							_ui_nodes_node_search_done();
@@ -666,10 +641,10 @@ function ui_nodes_node_search(x: i32 = -1, y: i32 = -1, done: ()=>void = null) {
 			}
 		}
 		if (enter && count == 0) { // Hide popup on enter when node is not found
-			ui.changed = true;
+			ui.changed         = true;
 			search_handle.text = "";
 		}
-		ui.ops.theme.BUTTON_COL = BUTTON_COL;
+		ui.ops.theme.BUTTON_COL     = BUTTON_COL;
 		ui.ops.theme.FILL_BUTTON_BG = FILL_BUTTON_BG;
 	}, x, y);
 }
@@ -692,11 +667,11 @@ function ui_nodes_draw_grid(zoom: f32): gpu_texture_t {
 		ww += base_view3d_w();
 	}
 
-	let wh: i32 = sys_h();
+	let wh: i32   = sys_h();
 	let step: f32 = ui_nodes_grid_cell_w * zoom;
 	let mult: i32 = 5 * UI_SCALE();
-	let w: i32 = math_floor(ww + step * mult);
-	let h: i32 = math_floor(wh + step * mult);
+	let w: i32    = math_floor(ww + step * mult);
+	let h: i32    = math_floor(wh + step * mult);
 	if (w < 1) {
 		w = 1;
 	}
@@ -707,7 +682,7 @@ function ui_nodes_draw_grid(zoom: f32): gpu_texture_t {
 	let grid: gpu_texture_t = gpu_create_render_target(w, h);
 	draw_begin(grid, true, ui.ops.theme.SEPARATOR_COL);
 
-	let sep_col: i32 = ui.ops.theme.SEPARATOR_COL;
+	let sep_col: i32      = ui.ops.theme.SEPARATOR_COL;
 	let line_primary: i32 = sep_col - 0x00050505;
 	if (line_primary < 0xff000000) {
 		line_primary = sep_col + 0x00050505;
@@ -740,7 +715,7 @@ function ui_nodes_draw_grid(zoom: f32): gpu_texture_t {
 	return grid;
 }
 
-let _ui_nodes_render_tmp: (col: i32)=>void;
+let _ui_nodes_render_tmp: (col: i32) => void;
 
 function ui_nodes_recompile() {
 	if (ui_nodes_recompile_mat) {
@@ -783,7 +758,7 @@ function ui_nodes_recompile() {
 		}
 
 		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
-		ui_nodes_recompile_mat_final = false;
+		ui_nodes_recompile_mat_final               = false;
 	}
 }
 
@@ -820,7 +795,7 @@ function ui_nodes_render() {
 	ui.input_enabled = base_ui_enabled;
 
 	if (ui_nodes_last_zoom != ui_nodes.zoom) {
-		ui_nodes_last_zoom = ui_nodes.zoom;
+		ui_nodes_last_zoom   = ui_nodes.zoom;
 		ui_nodes_grid_redraw = true;
 	}
 
@@ -828,14 +803,14 @@ function ui_nodes_render() {
 		if (ui_nodes_grid != null) {
 			gpu_delete_texture(ui_nodes_grid);
 		}
-		ui_nodes_grid = ui_nodes_draw_grid(ui_nodes.zoom);
+		ui_nodes_grid        = ui_nodes_draw_grid(ui_nodes.zoom);
 		ui_nodes_grid_redraw = false;
 	}
 
 	// Selected node preview
 	if (ui_nodes.nodes_selected_id.length > 0 && ui_nodes.nodes_selected_id[0] != ui_nodes_last_node_selected_id) {
 		ui_nodes_last_node_selected_id = ui_nodes.nodes_selected_id[0];
-		let sel: ui_node_t = ui_get_node(c.nodes, ui_nodes.nodes_selected_id[0]);
+		let sel: ui_node_t             = ui_get_node(c.nodes, ui_nodes.nodes_selected_id[0]);
 		ui_nodes_make_node_preview(sel);
 	}
 	else if (ui_nodes.nodes_selected_id.length == 0) {
@@ -919,8 +894,8 @@ function ui_nodes_render() {
 		// Grid
 		draw_set_color(0xffffffff);
 		let step: f32 = ui_nodes_grid_cell_w * ui_nodes.zoom;
-		let x: f32 = math_fmod(UI_NODES_PAN_X(), step) - step;
-		let y: f32 = math_fmod(UI_NODES_PAN_Y(), step) - step;
+		let x: f32    = math_fmod(UI_NODES_PAN_X(), step) - step;
+		let y: f32    = math_fmod(UI_NODES_PAN_Y(), step) - step;
 		draw_image(ui_nodes_grid, x, y);
 
 		// Undo
@@ -930,12 +905,12 @@ function ui_nodes_render() {
 
 		// Nodes
 		let _input_enabled: bool = ui.input_enabled;
-		let header_h: i32 = UI_ELEMENT_H() * 2 + UI_ELEMENT_OFFSET() * 2;
-		let header_hover: bool = ui.input_y < ui._window_y + header_h;
-		ui.input_enabled = _input_enabled && !ui_nodes_show_menu && !header_hover;
-		ui.window_border_right = config_raw.layout[layout_size_t.SIDEBAR_W];
-		ui.window_border_top = ui_header_h * 2;
-		ui.window_border_bottom = config_raw.layout[layout_size_t.STATUS_H];
+		let header_h: i32        = UI_ELEMENT_H() * 2 + UI_ELEMENT_OFFSET() * 2;
+		let header_hover: bool   = ui.input_y < ui._window_y + header_h;
+		ui.input_enabled         = _input_enabled && !ui_nodes_show_menu && !header_hover;
+		ui.window_border_right   = config_raw.layout[layout_size_t.SIDEBAR_W];
+		ui.window_border_top     = ui_header_h * 2;
+		ui.window_border_bottom  = config_raw.layout[layout_size_t.STATUS_H];
 
 		ui_node_canvas(ui_nodes, c);
 		ui.input_enabled = _input_enabled;
@@ -945,7 +920,7 @@ function ui_nodes_render() {
 			context_select_tool(tool_type_t.PICKER);
 			_ui_nodes_render_tmp = ui_nodes.color_picker_callback;
 
-			context_raw.color_picker_callback = function (color: swatch_color_t) {
+			context_raw.color_picker_callback = function(color: swatch_color_t) {
 				_ui_nodes_render_tmp(color.base);
 				ui_nodes_hwnd.redraws = 2;
 
@@ -993,9 +968,9 @@ function ui_nodes_render() {
 		}
 
 		if (ui_nodes_is_node_menu_op) {
-			ui_is_copy = false;
-			ui_is_cut = false;
-			ui_is_paste = false;
+			ui_is_copy        = false;
+			ui_is_cut         = false;
+			ui_is_paste       = false;
 			ui.is_delete_down = false;
 		}
 
@@ -1011,7 +986,7 @@ function ui_nodes_render() {
 
 		// Node previews
 		if (context_raw.selected_node_preview && ui_nodes.nodes_selected_id.length > 0) {
-			let sel: ui_node_t = ui_get_node(c.nodes, ui_nodes.nodes_selected_id[0]);
+			let sel: ui_node_t     = ui_get_node(c.nodes, ui_nodes.nodes_selected_id[0]);
 			let img: gpu_texture_t = ui_nodes_get_node_preview_image(sel);
 			if (img != null && !(sel.flags & _ui_node_flag_t.PREVIEW)) {
 				let tw: f32 = 128 * UI_SCALE();
@@ -1036,33 +1011,33 @@ function ui_nodes_render() {
 
 		ui_nodes_draw_menubar();
 
-		ui.window_border_right = 0;
-		ui.window_border_top = 0;
+		ui.window_border_right  = 0;
+		ui.window_border_top    = 0;
 		ui.window_border_bottom = 0;
 	}
 
 	ui_end();
 
 	if (ui_nodes_show_menu) {
-		let list: node_list_t[] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_list : nodes_brush_list;
-		let category: ui_node_t[] = list[ui_nodes_menu_category];
-		let num_nodes: i32 = category.length;
+		let list: node_list_t[]     = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_list : nodes_brush_list;
+		let category: ui_node_t[]   = list[ui_nodes_menu_category];
+		let num_nodes: i32          = category.length;
 		let is_group_category: bool = ui_nodes_canvas_type == canvas_type_t.MATERIAL && nodes_material_categories[ui_nodes_menu_category] == "Group";
 
 		if (is_group_category) {
 			num_nodes += project_material_groups.length;
 		}
 
-		let py: i32 = ui_nodes_popup_y;
+		let py: i32    = ui_nodes_popup_y;
 		let menuw: i32 = math_floor(ew * 2.3);
 		draw_begin(null);
 		ui_begin_region(ui, math_floor(ui_nodes_popup_x), math_floor(py), menuw);
-		let _FILL_BUTTON_BG: i32 = ui.ops.theme.FILL_BUTTON_BG;
+		let _FILL_BUTTON_BG: i32    = ui.ops.theme.FILL_BUTTON_BG;
 		ui.ops.theme.FILL_BUTTON_BG = false;
-		let _ELEMENT_OFFSET: i32 = ui.ops.theme.ELEMENT_OFFSET;
+		let _ELEMENT_OFFSET: i32    = ui.ops.theme.ELEMENT_OFFSET;
 		ui.ops.theme.ELEMENT_OFFSET = 0;
-		let _ELEMENT_H: i32 = ui.ops.theme.ELEMENT_H;
-		ui.ops.theme.ELEMENT_H = config_raw.touch_ui ? (28 + 2) : 28;
+		let _ELEMENT_H: i32         = ui.ops.theme.ELEMENT_H;
+		ui.ops.theme.ELEMENT_H      = config_raw.touch_ui ? (28 + 2) : 28;
 
 		ui_menu_h = category.length * UI_ELEMENT_H();
 		if (is_group_category) {
@@ -1076,11 +1051,11 @@ function ui_nodes_render() {
 			if (ui_menu_button(tr(n.name))) {
 				ui_nodes_push_undo();
 				let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
-				let nodes: ui_nodes_t = ui_nodes_get_nodes();
-				let node: ui_node_t = ui_nodes_make_node(n, nodes, canvas);
+				let nodes: ui_nodes_t        = ui_nodes_get_nodes();
+				let node: ui_node_t          = ui_nodes_make_node(n, nodes, canvas);
 				array_push(canvas.nodes, node);
-				nodes.nodes_selected_id = [node.id];
-				nodes.nodes_drag = true;
+				nodes.nodes_selected_id = [ node.id ];
+				nodes.nodes_drag        = true;
 			}
 			// Next column
 			if (ui._y - ui_nodes_wy + UI_ELEMENT_H() / 2 > ui_nodes_wh) {
@@ -1091,17 +1066,17 @@ function ui_nodes_render() {
 		if (is_group_category) {
 			for (let i: i32 = 0; i < project_material_groups.length; ++i) {
 				let g: node_group_t = project_material_groups[i];
-				ui.enabled = ui_nodes_can_place_group(g.canvas.name);
-				let row: f32[] = [5 / 6, 1 / 6];
+				ui.enabled          = ui_nodes_can_place_group(g.canvas.name);
+				let row: f32[]      = [ 5 / 6, 1 / 6 ];
 				ui_row(row);
 				if (ui_button(config_button_spacing + g.canvas.name, ui_align_t.LEFT)) {
 					ui_nodes_push_undo();
 					let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
-					let nodes: ui_nodes_t = ui_nodes_get_nodes();
-					let node: ui_node_t = ui_nodes_make_group_node(g.canvas, nodes, canvas);
+					let nodes: ui_nodes_t        = ui_nodes_get_nodes();
+					let node: ui_node_t          = ui_nodes_make_group_node(g.canvas, nodes, canvas);
 					array_push(canvas.nodes, node);
-					nodes.nodes_selected_id = [node.id];
-					nodes.nodes_drag = true;
+					nodes.nodes_selected_id = [ node.id ];
+					nodes.nodes_drag        = true;
 				}
 
 				ui.enabled = !project_is_material_group_in_use(g);
@@ -1114,19 +1089,20 @@ function ui_nodes_render() {
 			}
 		}
 
-		ui_nodes_hide_menu = ui.combo_selected_handle == null && !ui_nodes_show_menu_first && (ui.changed || ui.input_released || ui.input_released_r || ui.is_escape_down);
+		ui_nodes_hide_menu =
+		    ui.combo_selected_handle == null && !ui_nodes_show_menu_first && (ui.changed || ui.input_released || ui.input_released_r || ui.is_escape_down);
 		ui_nodes_show_menu_first = false;
 
 		ui.ops.theme.FILL_BUTTON_BG = _FILL_BUTTON_BG;
 		ui.ops.theme.ELEMENT_OFFSET = _ELEMENT_OFFSET;
-		ui.ops.theme.ELEMENT_H = _ELEMENT_H;
+		ui.ops.theme.ELEMENT_H      = _ELEMENT_H;
 		ui_menu_end();
 		ui_end_region();
 		draw_end();
 	}
 
 	if (ui_nodes_hide_menu) {
-		ui_nodes_show_menu = false;
+		ui_nodes_show_menu       = false;
 		ui_nodes_show_menu_first = true;
 	}
 
@@ -1157,7 +1133,7 @@ function ui_nodes_get_node_preview_image(n: ui_node_t): gpu_texture_t {
 		img = context_raw.brush.image;
 	}
 	else if (n.type == "TEX_IMAGE" && parser_material_get_input_link(n.inputs[0]) == null) {
-		let i: i32 = n.buttons[0].default_value[0];
+		let i: i32           = n.buttons[0].default_value[0];
 		let filepath: string = parser_material_enum_data(base_enum_texts(n.type)[i]);
 		let asset_index: i32 = -1;
 		for (let i: i32 = 0; i < project_assets.length; ++i) {
@@ -1187,21 +1163,21 @@ function ui_nodes_get_node_preview_image(n: ui_node_t): gpu_texture_t {
 
 function ui_nodes_draw_menubar() {
 	let c: ui_node_canvas_t = ui_nodes_get_canvas(true);
-	let ew: i32 = math_floor(UI_ELEMENT_W() * 0.7);
+	let ew: i32             = math_floor(UI_ELEMENT_W() * 0.7);
 
 	draw_set_color(ui.ops.theme.WINDOW_BG_COL);
 	draw_filled_rect(0, UI_ELEMENT_H(), ui_nodes_ww, UI_ELEMENT_H() + UI_ELEMENT_OFFSET() * 2);
 	draw_set_color(0xffffffff);
 
 	let start_y: i32 = UI_ELEMENT_H() + UI_ELEMENT_OFFSET();
-	ui._x = 0;
-	ui._y = 2 + start_y;
-	ui._w = ew;
+	ui._x            = 0;
+	ui._y            = 2 + start_y;
+	ui._w            = ew;
 
 	// Editable canvas name
-	let h: ui_handle_t = ui_handle(__ID__);
-	h.text = c.name;
-	ui._w = math_floor(math_min(draw_string_width(ui.ops.font, ui.font_size, h.text) + 15 * UI_SCALE(), 100 * UI_SCALE()));
+	let h: ui_handle_t   = ui_handle(__ID__);
+	h.text               = c.name;
+	ui._w                = math_floor(math_min(draw_string_width(ui.ops.font, ui.font_size, h.text) + 15 * UI_SCALE(), 100 * UI_SCALE()));
 	let new_name: string = ui_text_input(h, "");
 	ui._x += ui._w + 3;
 	ui._y = 2 + start_y;
@@ -1218,8 +1194,8 @@ function ui_nodes_draw_menubar() {
 			}
 
 			if (can_rename) {
-				let old_name: string = c.name;
-				c.name = new_name;
+				let old_name: string             = c.name;
+				c.name                           = new_name;
 				let canvases: ui_node_canvas_t[] = [];
 				for (let i: i32 = 0; i < project_materials.length; ++i) {
 					let m: slot_material_t = project_materials[i];
@@ -1245,20 +1221,20 @@ function ui_nodes_draw_menubar() {
 		}
 	}
 
-	let _BUTTON_COL: i32 = ui.ops.theme.BUTTON_COL;
+	let _BUTTON_COL: i32    = ui.ops.theme.BUTTON_COL;
 	ui.ops.theme.BUTTON_COL = ui.ops.theme.WINDOW_BG_COL;
 
 	let cats: string[] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_categories : nodes_brush_categories;
 
 	for (let i: i32 = 0; i < cats.length; ++i) {
 		if ((_ui_menu_button(tr(cats[i]))) || (ui.is_hovered && ui_nodes_show_menu)) {
-			ui_nodes_show_menu = true;
+			ui_nodes_show_menu     = true;
 			ui_nodes_menu_category = i;
-			ui_nodes_popup_x = ui_nodes_wx + ui._x;
-			ui_nodes_popup_y = ui_nodes_wy + ui._y;
+			ui_nodes_popup_x       = ui_nodes_wx + ui._x;
+			ui_nodes_popup_y       = ui_nodes_wy + ui._y;
 			if (config_raw.touch_ui) {
 				ui_nodes_show_menu_first = true;
-				let menuw: i32 = math_floor(ew * 2.3);
+				let menuw: i32           = math_floor(ew * 2.3);
 				ui_nodes_popup_x -= menuw / 2;
 				ui_nodes_popup_x += ui._w / 2;
 			}
@@ -1269,8 +1245,8 @@ function ui_nodes_draw_menubar() {
 
 	if (config_raw.touch_ui) {
 		let _w: i32 = ui._w;
-		ui._w = math_floor(36 * UI_SCALE());
-		ui._y = 4 * UI_SCALE() + start_y;
+		ui._w       = math_floor(36 * UI_SCALE());
+		ui._y       = 4 * UI_SCALE() + start_y;
 		if (ui_menubar_icon_button(2, 3)) {
 			ui_nodes_node_search(math_floor(ui._window_x + ui._x), math_floor(ui._window_y + ui._y));
 		}
@@ -1322,7 +1298,8 @@ function ui_nodes_can_place_group(group_name: string): bool {
 	if (ui_nodes_group_stack.length > 0) {
 		for (let i: i32 = 0; i < ui_nodes_group_stack.length; ++i) {
 			let g: node_group_t = ui_nodes_group_stack[i];
-			if (ui_nodes_contains_node_group_recursive(project_get_material_group_by_name(group_name), g.canvas.name)) return false;
+			if (ui_nodes_contains_node_group_recursive(project_get_material_group_by_name(group_name), g.canvas.name))
+				return false;
 		}
 	}
 	// Group was deleted / renamed
@@ -1355,13 +1332,10 @@ function ui_nodes_push_undo(last_canvas: ui_node_canvas_t = null) {
 function ui_nodes_accept_asset_drop(index: i32) {
 	ui_nodes_push_undo();
 	let g: node_group_t = ui_nodes_group_stack.length > 0 ? ui_nodes_group_stack[ui_nodes_group_stack.length - 1] : null;
-	let n: ui_node_t =
-		ui_nodes_canvas_type == canvas_type_t.MATERIAL ?
-			nodes_material_create_node("TEX_IMAGE", g) :
-			nodes_brush_create_node("TEX_IMAGE");
+	let n: ui_node_t    = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_create_node("TEX_IMAGE", g) : nodes_brush_create_node("TEX_IMAGE");
 
-	n.buttons[0].default_value[0] = index;
-	ui_nodes_get_nodes().nodes_selected_id = [n.id];
+	n.buttons[0].default_value[0]          = index;
+	ui_nodes_get_nodes().nodes_selected_id = [ n.id ];
 }
 
 function ui_nodes_accept_layer_drop(index: i32) {
@@ -1369,93 +1343,89 @@ function ui_nodes_accept_layer_drop(index: i32) {
 	if (slot_layer_is_group(project_layers[index])) {
 		return;
 	}
-	let g: node_group_t = ui_nodes_group_stack.length > 0 ? ui_nodes_group_stack[ui_nodes_group_stack.length - 1] : null;
-	let n: ui_node_t = nodes_material_create_node(slot_layer_is_mask(context_raw.layer) ? "LAYER_MASK" : "LAYER", g);
-	n.buttons[0].default_value[0] = index;
-	ui_nodes_get_nodes().nodes_selected_id = [n.id];
+	let g: node_group_t                    = ui_nodes_group_stack.length > 0 ? ui_nodes_group_stack[ui_nodes_group_stack.length - 1] : null;
+	let n: ui_node_t                       = nodes_material_create_node(slot_layer_is_mask(context_raw.layer) ? "LAYER_MASK" : "LAYER", g);
+	n.buttons[0].default_value[0]          = index;
+	ui_nodes_get_nodes().nodes_selected_id = [ n.id ];
 }
 
 function ui_nodes_accept_material_drop(index: i32) {
 	ui_nodes_push_undo();
-	let g: node_group_t = ui_nodes_group_stack.length > 0 ? ui_nodes_group_stack[ui_nodes_group_stack.length - 1] : null;
-	let n: ui_node_t = nodes_material_create_node("MATERIAL", g);
-	n.buttons[0].default_value[0] = index;
-	ui_nodes_get_nodes().nodes_selected_id = [n.id];
+	let g: node_group_t                    = ui_nodes_group_stack.length > 0 ? ui_nodes_group_stack[ui_nodes_group_stack.length - 1] : null;
+	let n: ui_node_t                       = nodes_material_create_node("MATERIAL", g);
+	n.buttons[0].default_value[0]          = index;
+	ui_nodes_get_nodes().nodes_selected_id = [ n.id ];
 }
 
 function ui_nodes_accept_swatch_drop(swatch: swatch_color_t) {
 	ui_nodes_push_undo();
-	let g: node_group_t = ui_nodes_group_stack.length > 0 ? ui_nodes_group_stack[ui_nodes_group_stack.length - 1] : null;
-	let n: ui_node_t = nodes_material_create_node("RGB", g);
-	n.outputs[0].default_value = f32_array_create_xyzw(
-		color_get_rb(swatch.base) / 255,
-		color_get_gb(swatch.base) / 255,
-		color_get_bb(swatch.base) / 255,
-		color_get_ab(swatch.base) / 255
-	);
-	ui_nodes_get_nodes().nodes_selected_id = [n.id];
+	let g: node_group_t        = ui_nodes_group_stack.length > 0 ? ui_nodes_group_stack[ui_nodes_group_stack.length - 1] : null;
+	let n: ui_node_t           = nodes_material_create_node("RGB", g);
+	n.outputs[0].default_value = f32_array_create_xyzw(color_get_rb(swatch.base) / 255, color_get_gb(swatch.base) / 255, color_get_bb(swatch.base) / 255,
+	                                                   color_get_ab(swatch.base) / 255);
+	ui_nodes_get_nodes().nodes_selected_id = [ n.id ];
 }
 
 function ui_nodes_make_node(n: ui_node_t, nodes: ui_nodes_t, canvas: ui_node_canvas_t): ui_node_t {
 	let node: ui_node_t = {};
-	node.id = ui_next_node_id(canvas.nodes);
-	node.name = n.name;
-	node.type = n.type;
-	node.x = ui_nodes_get_node_x();
-	node.y = ui_nodes_get_node_y();
-	node.color = n.color;
-	node.inputs = [];
-	node.outputs = [];
-	node.buttons = [];
-	node.width = 0;
-	node.flags = config_raw.node_previews ? _ui_node_flag_t.PREVIEW : _ui_node_flag_t.NONE;
+	node.id             = ui_next_node_id(canvas.nodes);
+	node.name           = n.name;
+	node.type           = n.type;
+	node.x              = ui_nodes_get_node_x();
+	node.y              = ui_nodes_get_node_y();
+	node.color          = n.color;
+	node.inputs         = [];
+	node.outputs        = [];
+	node.buttons        = [];
+	node.width          = 0;
+	node.flags          = config_raw.node_previews ? _ui_node_flag_t.PREVIEW : _ui_node_flag_t.NONE;
 
 	let count: i32 = 0;
 	for (let i: i32 = 0; i < n.inputs.length; ++i) {
 		let soc: ui_node_socket_t = {};
-		soc.id = ui_get_socket_id(canvas.nodes) + count;
+		soc.id                    = ui_get_socket_id(canvas.nodes) + count;
 		count++;
-		soc.node_id = node.id;
-		soc.name = n.inputs[i].name;
-		soc.type = n.inputs[i].type;
-		soc.color = n.inputs[i].color;
+		soc.node_id       = node.id;
+		soc.name          = n.inputs[i].name;
+		soc.type          = n.inputs[i].type;
+		soc.color         = n.inputs[i].color;
 		soc.default_value = f32_array_create_from_array(n.inputs[i].default_value);
-		soc.min = n.inputs[i].min;
-		soc.max = n.inputs[i].max;
-		soc.precision = n.inputs[i].precision;
-		soc.display = n.inputs[i].display;
+		soc.min           = n.inputs[i].min;
+		soc.max           = n.inputs[i].max;
+		soc.precision     = n.inputs[i].precision;
+		soc.display       = n.inputs[i].display;
 		array_push(node.inputs, soc);
 	}
 
 	for (let i: i32 = 0; i < n.outputs.length; ++i) {
 		let soc: ui_node_socket_t = {};
-		soc.id = ui_get_socket_id(canvas.nodes) + count;
+		soc.id                    = ui_get_socket_id(canvas.nodes) + count;
 		count++;
-		soc.node_id = node.id;
-		soc.name = n.outputs[i].name;
-		soc.type = n.outputs[i].type;
-		soc.color = n.outputs[i].color;
+		soc.node_id       = node.id;
+		soc.name          = n.outputs[i].name;
+		soc.type          = n.outputs[i].type;
+		soc.color         = n.outputs[i].color;
 		soc.default_value = f32_array_create_from_array(n.outputs[i].default_value);
-		soc.min = n.outputs[i].min;
-		soc.max = n.outputs[i].max;
-		soc.precision = n.outputs[i].precision;
-		soc.display = n.outputs[i].display;
+		soc.min           = n.outputs[i].min;
+		soc.max           = n.outputs[i].max;
+		soc.precision     = n.outputs[i].precision;
+		soc.display       = n.outputs[i].display;
 		array_push(node.outputs, soc);
 	}
 
 	for (let i: i32 = 0; i < n.buttons.length; ++i) {
 		let but: ui_node_button_t = {};
-		but.name = n.buttons[i].name;
-		but.type = n.buttons[i].type;
-		but.output = n.buttons[i].output;
-		but.default_value = f32_array_create_from_array(n.buttons[i].default_value);
+		but.name                  = n.buttons[i].name;
+		but.type                  = n.buttons[i].type;
+		but.output                = n.buttons[i].output;
+		but.default_value         = f32_array_create_from_array(n.buttons[i].default_value);
 		if (n.buttons[i].data != null) {
 			but.data = u8_array_create_from_array(n.buttons[i].data);
 		}
-		but.min = n.buttons[i].min;
-		but.max = n.buttons[i].max;
+		but.min       = n.buttons[i].min;
+		but.max       = n.buttons[i].max;
 		but.precision = n.buttons[i].precision;
-		but.height = n.buttons[i].height;
+		but.height    = n.buttons[i].height;
 		array_push(node.buttons, but);
 	}
 
@@ -1464,18 +1434,18 @@ function ui_nodes_make_node(n: ui_node_t, nodes: ui_nodes_t, canvas: ui_node_can
 }
 
 function ui_nodes_make_group_node(group_canvas: ui_node_canvas_t, nodes: ui_nodes_t, canvas: ui_node_canvas_t): ui_node_t {
-	let category: ui_node_t[] = nodes_material_list[5];
-	let n: ui_node_t = category[0];
-	let node: ui_node_t = util_clone_canvas_node(n);
-	node.name = group_canvas.name;
-	node.id = ui_next_node_id(canvas.nodes);
-	node.x = ui_nodes_get_node_x();
-	node.y = ui_nodes_get_node_y();
-	let group_input: ui_node_t = null;
+	let category: ui_node_t[]   = nodes_material_list[5];
+	let n: ui_node_t            = category[0];
+	let node: ui_node_t         = util_clone_canvas_node(n);
+	node.name                   = group_canvas.name;
+	node.id                     = ui_next_node_id(canvas.nodes);
+	node.x                      = ui_nodes_get_node_x();
+	node.y                      = ui_nodes_get_node_y();
+	let group_input: ui_node_t  = null;
 	let group_output: ui_node_t = null;
 	for (let i: i32 = 0; i < project_material_groups.length; ++i) {
 		let g: node_group_t = project_material_groups[i];
-		let cname: string = g.canvas.name;
+		let cname: string   = g.canvas.name;
 		if (cname == node.name) {
 			for (let i: i32 = 0; i < g.canvas.nodes.length; ++i) {
 				let n: ui_node_t = g.canvas.nodes[i];
@@ -1505,10 +1475,7 @@ function ui_nodes_make_group_node(group_canvas: ui_node_canvas_t, nodes: ui_node
 function ui_nodes_make_node_preview(node: ui_node_t) {
 	context_raw.node_preview_name = node.name;
 
-	if (node.type == "LAYER" ||
-		node.type == "LAYER_MASK" ||
-		node.type == "MATERIAL" ||
-		node.type == "OUTPUT_MATERIAL_PBR") {
+	if (node.type == "LAYER" || node.type == "LAYER_MASK" || node.type == "MATERIAL" || node.type == "OUTPUT_MATERIAL_PBR") {
 		return;
 	}
 

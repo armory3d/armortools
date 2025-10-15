@@ -5,7 +5,7 @@ let project = new Project("amake");
 project.add_define("NO_GC");
 project.add_define("NO_IRON_API");
 project.add_define("NO_IRON_START");
-project.add_tsfiles("./"); // alang.ts
+project.add_tsfiles("./");     // alang.ts
 project.add_include_dir("./"); // iron.h
 project.add_cfiles("build/iron.c");
 project.add_include_dir("../../sources");

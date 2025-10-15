@@ -1,5 +1,5 @@
 
-///if arm_audio
+/// if arm_audio
 
 type speaker_object_t = {
 	base?: object_t;
@@ -12,12 +12,12 @@ type speaker_object_t = {
 
 function speaker_object_create(data: speaker_data_t): speaker_object_t {
 	let raw: speaker_object_t = {};
-	raw.paused = false;
-	raw.channels = [];
-	raw.base = object_create(false);
-	raw.base.ext = raw;
-	raw.base.ext_type = "speaker_object_t";
-	raw.data = data;
+	raw.paused                = false;
+	raw.channels              = [];
+	raw.base                  = object_create(false);
+	raw.base.ext              = raw;
+	raw.base.ext_type         = "speaker_object_t";
+	raw.data                  = data;
 
 	array_push(scene_speakers, raw);
 
@@ -80,7 +80,7 @@ function speaker_object_update(raw: speaker_object_t) {
 	for (let i: i32 = 0; i < raw.channels.length; ++i) {
 		let c: audio_channel_t = raw.channels[i];
 		// if (c.finished) {
-			// array_remove(raw.channels, c);
+		// array_remove(raw.channels, c);
 		// }
 	}
 	if (raw.channels.length == 0) {
@@ -90,7 +90,7 @@ function speaker_object_update(raw: speaker_object_t) {
 
 	if (raw.data.attenuation > 0) {
 		let distance: f32 = vec4_dist(mat4_get_loc(scene_camera.base.transform.world), mat4_get_loc(raw.base.transform.world));
-		raw.volume = 1.0 / (1.0 + raw.data.attenuation * (distance - 1.0));
+		raw.volume        = 1.0 / (1.0 + raw.data.attenuation * (distance - 1.0));
 		raw.volume *= raw.data.volume;
 	}
 	else {
@@ -121,4 +121,4 @@ function speaker_data_get_raw_by_name(datas: speaker_data_t[], name: string): sp
 	return null;
 }
 
-///end
+/// end

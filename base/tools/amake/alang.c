@@ -1,12 +1,12 @@
 // Based on https://github.com/Kode/Kongruent by RobDangerous
 #include "alang.h"
 #include <assert.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
-#include <stdbool.h>
-#include <stdarg.h>
 // #define STB_DS_IMPLEMENTATION
 #include "../../sources/libs/kong/libs/stb_ds.h"
 #ifdef WIN32
@@ -216,22 +216,26 @@ static void error(debug_context context, const char *message, ...);
 static void error_no_context(const char *message, ...);
 static void error_args(debug_context context, const char *message, va_list args);
 static void error_args_no_context(const char *message, va_list args);
-static void          check_function(bool test, debug_context context, const char *message, ...);
+static void check_function(bool test, debug_context context, const char *message, ...);
 #define check(test, context, message, ...) \
 	assert(test);                          \
 	check_function(test, context, message, ##__VA_ARGS__)
 
-typedef enum { LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR } log_level_t;
+typedef enum {
+	LOG_LEVEL_INFO,
+	LOG_LEVEL_WARNING,
+	LOG_LEVEL_ERROR
+} log_level_t;
 static void kong_log(log_level_t log_level, const char *format, ...);
 static void kong_log_args(log_level_t log_level, const char *format, va_list args);
 
 ////
 
 #define OP_SIZE(op, opmember) offsetof(opcode, opmember) + sizeof(op.opmember)
-#define NO_FUNCTION 0xFFFFFFFF
-#define NO_NAME 0
-#define NO_TYPE 0xFFFFFFFF
-#define MAX_MEMBERS 1024
+#define NO_FUNCTION           0xFFFFFFFF
+#define NO_NAME               0
+#define NO_TYPE               0xFFFFFFFF
+#define MAX_MEMBERS           1024
 
 struct statement;
 
@@ -385,43 +389,43 @@ typedef struct type {
 	attribute_list attributes;
 	name_id        name;
 	bool           built_in;
-	members members;
-	type_id  base;
-	uint32_t array_size;
+	members        members;
+	type_id        base;
+	uint32_t       array_size;
 } type;
 
-static void allocate_globals(void);
-void _compile_function_block(opcodes *code, struct statement *block);
+static void     allocate_globals(void);
+void            _compile_function_block(opcodes *code, struct statement *block);
 static variable allocate_variable(type_ref type, variable_kind kind);
 
-void _functions_init(void);
+void               _functions_init(void);
 static function_id add_function(name_id name);
 static function_id find_function(name_id name);
-function *_get_function(function_id function);
+function          *_get_function(function_id function);
 
-void _globals_init(void);
+void             _globals_init(void);
 static global_id add_global(type_id type, attribute_list attributes, name_id name);
 static global_id add_global_with_value(type_id type, attribute_list attributes, name_id name, global_value value);
-static global *find_global(name_id name);
-static global *get_global(global_id id);
-static void assign_global_var(global_id id, uint64_t var_index);
+static global   *find_global(name_id name);
+static global   *get_global(global_id id);
+static void      assign_global_var(global_id id, uint64_t var_index);
 
-void _names_init(void);
+void           _names_init(void);
 static name_id add_name(char *name);
-char *_get_name(name_id index);
+char          *_get_name(name_id index);
 
-void _parse(const char *filename, tokens *tokens);
+void         _parse(const char *filename, tokens *tokens);
 static token tokens_get(tokens *arr, size_t index);
-tokens _tokenize(const char *filename, const char *source);
+tokens       _tokenize(const char *filename, const char *source);
 
-void _resolve_types(void);
-static void init_type_ref(type_ref *t, name_id name);
-void _types_init(void);
+void           _resolve_types(void);
+static void    init_type_ref(type_ref *t, name_id name);
+void           _types_init(void);
 static type_id add_type(name_id name);
 static type_id add_full_type(type *t);
 static type_id find_type_by_name(name_id name);
 static type_id find_type_by_ref(type_ref *t);
-static type *get_type(type_id t);
+static type   *get_type(type_id t);
 
 static void kong_log(log_level_t level, const char *format, ...) {
 	va_list args;
@@ -566,40 +570,40 @@ struct {
 	name_id value;
 } *names_hash = NULL;
 
-allocated_global __allocated_globals[1024];
-size_t           __allocated_globals_size = 0;
-static const char all_names[1024 * 1024];
-static uint64_t next_variable_id = 1;
-static variable all_variables[1024 * 1024];
+allocated_global   __allocated_globals[1024];
+size_t             __allocated_globals_size = 0;
+static const char  all_names[1024 * 1024];
+static uint64_t    next_variable_id = 1;
+static variable    all_variables[1024 * 1024];
 static function   *functions           = NULL;
 static function_id functions_size      = 128;
 static function_id next_function_index = 0;
-static global    globals[1024];
-static global_id        globals_size = 0;
-static char   *names       = NULL;
-static size_t  names_size  = 1024 * 1024;
-static name_id        names_index = 1;
-static statement statements_buffer[8192];
-static int statement_index = 0;
-static expression experessions_buffer[8192];
-static int expression_index = 0;
-static type   *types           = NULL;
-static type_id types_size      = 1024;
-static type_id        next_type_index = 0;
-type_id _void_id;
-type_id _float_id;
-type_id _int_id;
-type_id _uint_id;
-type_id _bool_id;
-static type_id function_type_id;
+static global      globals[1024];
+static global_id   globals_size = 0;
+static char       *names        = NULL;
+static size_t      names_size   = 1024 * 1024;
+static name_id     names_index  = 1;
+static statement   statements_buffer[8192];
+static int         statement_index = 0;
+static expression  experessions_buffer[8192];
+static int         expression_index = 0;
+static type       *types            = NULL;
+static type_id     types_size       = 1024;
+static type_id     next_type_index  = 0;
+type_id            _void_id;
+type_id            _float_id;
+type_id            _int_id;
+type_id            _uint_id;
+type_id            _bool_id;
+static type_id     function_type_id;
 
 static definition  parse_definition(state_t *state);
 static statement  *parse_statement(state_t *state, block *parent_block);
 static expression *parse_expression(state_t *state);
-static definition parse_struct(state_t *state);
-static definition parse_function(state_t *state);
-static definition parse_const(state_t *state, attribute_list attributes);
-static void resolve_types_in_expression(statement *parent, expression *e);
+static definition  parse_struct(state_t *state);
+static definition  parse_function(state_t *state);
+static definition  parse_const(state_t *state, attribute_list attributes);
+static void        resolve_types_in_expression(statement *parent, expression *e);
 
 static allocated_global find_allocated_global(name_id name) {
 	for (size_t i = 0; i < __allocated_globals_size; ++i) {
@@ -1429,8 +1433,8 @@ static void allocate_globals(void) {
 
 		type_ref t;
 		init_type_ref(&t, NO_NAME);
-		t.type                                                = g->type;
-		variable v                                            = allocate_variable(t, VARIABLE_GLOBAL);
+		t.type                                                    = g->type;
+		variable v                                                = allocate_variable(t, VARIABLE_GLOBAL);
 		__allocated_globals[__allocated_globals_size].g           = g;
 		__allocated_globals[__allocated_globals_size].variable_id = v.index;
 		__allocated_globals_size += 1;
@@ -1591,7 +1595,7 @@ static function_id add_function(name_id name) {
 	memset(functions[f].parameter_attributes, 0, sizeof(functions[f].parameter_attributes));
 	functions[f].block = NULL;
 	memset(functions[f].code.o, 0, sizeof(functions[f].code.o));
-	functions[f].code.size                  = 0;
+	functions[f].code.size = 0;
 
 	return f;
 }
@@ -1719,7 +1723,7 @@ char *_get_name(name_id id) {
 static statement *statement_allocate(void) {
 	////
 	// statement    *s       = (statement *)malloc(sizeof(statement));
-	statement   *s = &statements_buffer[statement_index];
+	statement *s = &statements_buffer[statement_index];
 	statement_index++;
 	////
 	debug_context context = {0};
@@ -1742,8 +1746,8 @@ static void statements_add(statements *statements, statement *statement) {
 
 static expression *expression_allocate(void) {
 	////
-	//expression   *e       = (expression *)malloc(sizeof(expression));
-	expression   *e = &experessions_buffer[expression_index];
+	// expression   *e       = (expression *)malloc(sizeof(expression));
+	expression *e = &experessions_buffer[expression_index];
 	expression_index++;
 	////
 	debug_context context = {0};
@@ -1842,7 +1846,7 @@ static statement *parse_block(state_t *state, block *parent_block) {
 // }
 
 static definition parse_definition(state_t *state) {
-	attribute_list  attributes = {0};
+	attribute_list attributes = {0};
 
 	switch (current(state).kind) {
 	case TOKEN_STRUCT: {
@@ -2501,7 +2505,7 @@ static expression *parse_call(state_t *state, name_id func_name) {
 	match_token(state, TOKEN_LEFT_PAREN, "Expected an opening bracket");
 	advance_state(state);
 
-	expression *call = NULL;
+	expression *call      = NULL;
 	call                  = expression_allocate();
 	call->kind            = EXPRESSION_CALL;
 	call->call.func_name  = func_name;

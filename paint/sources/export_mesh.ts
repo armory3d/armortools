@@ -4,9 +4,7 @@ function export_mesh_run(path: string, paint_objects: mesh_object_t[] = null, ap
 		paint_objects = project_paint_objects;
 	}
 	if (context_raw.export_mesh_format == mesh_format_t.OBJ) {
-		merge_vertices ?
-			export_obj_run(path, paint_objects, apply_disp) :
-			export_obj_run_fast(path, paint_objects);
+		merge_vertices ? export_obj_run(path, paint_objects, apply_disp) : export_obj_run_fast(path, paint_objects);
 	}
 	else {
 		export_arm_run_mesh(path, paint_objects);
