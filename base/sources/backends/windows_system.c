@@ -1808,6 +1808,40 @@ void iron_gamepad_handle_messages() {
 
 #endif
 
-volatile int iron_exec_async_done = 1;
+#include <process.h>
 
-void iron_exec_async(const char *path, char *argv[]) {}
+volatile int  iron_exec_async_done = 1;
+static HANDLE child_handle         = NULL;
+static HANDLE wait_handle          = NULL;
+
+static void CALLBACK exec_wait_callback(PVOID lparam, BOOLEAN b) {
+	iron_exec_async_done = 1;
+}
+
+void iron_exec_async(const char *path, char *argv[]) {
+	iron_exec_async_done = 0;
+
+	char cmd[4096] = {0};
+	snprintf(cmd, sizeof(cmd), "\"%s\"", path);
+	for (int i = 1; argv[i] != NULL; ++i) {
+		strncat(cmd, " \"", sizeof(cmd) - strlen(cmd) - 1);
+		strncat(cmd, argv[i], sizeof(cmd) - strlen(cmd) - 1);
+		strncat(cmd, "\"", sizeof(cmd) - strlen(cmd) - 1);
+	}
+	wchar_t wcmd[4096];
+	MultiByteToWideChar(CP_UTF8, 0, cmd, -1, wcmd, 4096);
+
+	STARTUPINFOW        si = {0};
+	PROCESS_INFORMATION pi = {0};
+	si.cb                  = sizeof(si);
+	si.dwFlags             = STARTF_USESHOWWINDOW;
+	si.wShowWindow         = SW_HIDE;
+	BOOL success           = CreateProcessW(NULL, wcmd, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
+	if (!success) {
+		iron_exec_async_done = 1;
+		return;
+	}
+	child_handle = pi.hProcess;
+	CloseHandle(pi.hThread);
+	RegisterWaitForSingleObject(&wait_handle, child_handle, exec_wait_callback, NULL, INFINITE, WT_EXECUTEONLYONCE);
+}
