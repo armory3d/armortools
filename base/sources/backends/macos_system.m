@@ -1214,4 +1214,19 @@ bool _save_and_quit_callback_internal() {
 
 volatile int iron_exec_async_done = 1;
 
-void iron_exec_async(const char *path, char *argv[]) {}
+void iron_exec_async(const char *path, char *argv[]) {
+	iron_exec_async_done = 0;
+	NSTask *task = [[NSTask alloc] init];
+	[task setLaunchPath:[NSString stringWithUTF8String:path]];
+	NSMutableArray *args = [NSMutableArray array];
+	int i = 1;
+	while (argv[i] != NULL) {
+		[args addObject:[NSString stringWithUTF8String:argv[i]]];
+		i++;
+	}
+	[task setArguments:args];
+	task.terminationHandler = ^(NSTask *t){
+		iron_exec_async_done = 1;
+	};
+	[task launch];
+}
