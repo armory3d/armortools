@@ -118,18 +118,6 @@ let text_to_image_node_def: ui_node_t = {
 	y: 0,
 	color: 0xff4982a0,
 	inputs: [
-		{
-            id: 0,
-            node_id: 0,
-            name: _tr("Vector"),
-            type: "VECTOR",
-            color: 0xff6363c7,
-            default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-            min: 0.0,
-            max: 1.0,
-            precision: 100,
-            display: 0
-        }
 	],
 	outputs: [
 		{

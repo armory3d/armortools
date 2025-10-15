@@ -1134,6 +1134,9 @@ function ui_nodes_render() {
 }
 
 function ui_nodes_get_node_preview_image(n: ui_node_t): gpu_texture_t {
+	if (n == null) {
+		return null;
+	}
 	let img: gpu_texture_t = null;
 	if (n.type == "LAYER" || n.type == "LAYER_MASK") {
 		let id: i32 = n.buttons[0].default_value[0];

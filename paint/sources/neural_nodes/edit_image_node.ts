@@ -32,7 +32,7 @@ function edit_image_node_button(node_id: i32) {
 		ui_button("Cancel...");
 	}
 	else if (ui_button("Run")) {
-		let inp: ui_node_socket_t = node.inputs[1];
+		let inp: ui_node_socket_t = node.inputs[0];
 		let from_node: ui_node_t = null;
 		for (let i: i32 = 0; i < canvas.links.length; ++i) {
 			let l: ui_node_link_t = canvas.links[i];
@@ -98,18 +98,6 @@ let edit_image_node_def: ui_node_t = {
 	y: 0,
 	color: 0xff4982a0,
 	inputs: [
-        {
-			id: 0,
-			node_id: 0,
-			name: _tr("Vector"),
-			type: "VECTOR",
-			color: 0xff6363c7,
-			default_value: f32_array_create_xyz(0.0, 0.0, 0.0),
-			min: 0.0,
-			max: 1.0,
-			precision: 100,
-			display: 0
-		},
 		{
 			id: 0,
 			node_id: 0,

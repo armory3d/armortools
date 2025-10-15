@@ -17,7 +17,7 @@ function parser_material_texture_store(node: ui_node_t, tex: bind_tex_t, tex_nam
 	node_shader_context_add_elem(parser_material_kong.context, "tex", "short2norm");
 	node_shader_add_texture(parser_material_kong, "" + tex_name);
 	let uv_name: string = "";
-	if (parser_material_get_input_link(node.inputs[0]) != null) {
+	if (node.type == "TEX_IMAGE" && parser_material_get_input_link(node.inputs[0]) != null) {
 		uv_name = parser_material_parse_vector_input(node.inputs[0]);
 	}
 	else {
