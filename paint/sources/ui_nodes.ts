@@ -1479,6 +1479,10 @@ function ui_nodes_make_node_preview(node: ui_node_t) {
 		return;
 	}
 
+	if (ui_nodes_canvas_type == canvas_type_t.BRUSH) {
+		return;
+	}
+
 	let nodes: ui_node_t[] = ui_nodes_get_canvas().nodes;
 	if (array_index_of(nodes, node) == -1) {
 		return;
