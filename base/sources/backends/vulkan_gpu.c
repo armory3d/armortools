@@ -437,6 +437,14 @@ void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_t
 	vkCreateImageView(device, &color_image_view, NULL, &target->impl.view);
 }
 
+static uint32_t umin(uint32_t a, uint32_t b) {
+	return a < b ? a : b;
+}
+
+static uint32_t umax(uint32_t a, uint32_t b) {
+	return a > b ? a : b;
+}
+
 static void create_swapchain() {
 	VkSwapchainKHR old_swapchain = cleanup_swapchain();
 	if (surface_destroyed) {
@@ -475,16 +483,21 @@ static void create_swapchain() {
 	// Fetch newest window size
 	iron_internal_handle_messages();
 
+	VkExtent2D image_extent = caps.currentExtent;
+	if (caps.currentExtent.width == UINT32_MAX) {
+		image_extent.width  = umax(caps.minImageExtent.width, umin(iron_window_width(), caps.maxImageExtent.width));
+		image_extent.height = umax(caps.minImageExtent.height, umin(iron_window_height(), caps.maxImageExtent.height));
+	}
+
 	VkSwapchainCreateInfoKHR swapchain_info = {
-	    .sType              = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-	    .surface            = surface,
-	    .minImageCount      = image_count,
-	    .imageFormat        = surface_format.format,
-	    .imageColorSpace    = surface_format.colorSpace,
-	    .imageExtent.width  = iron_window_width(),
-	    .imageExtent.height = iron_window_height(),
-	    .imageUsage         = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-	    .preTransform       = pre_transform,
+	    .sType           = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
+	    .surface         = surface,
+	    .minImageCount   = image_count,
+	    .imageFormat     = surface_format.format,
+	    .imageColorSpace = surface_format.colorSpace,
+	    .imageExtent     = image_extent,
+	    .imageUsage      = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+	    .preTransform    = pre_transform,
 	};
 
 	if (caps.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR) {
@@ -512,10 +525,12 @@ static void create_swapchain() {
 
 	if (old_swapchain != VK_NULL_HANDLE) {
 		gpu_execute_and_wait();
+		vkQueueWaitIdle(queue);
 		vkDestroySwapchainKHR(device, old_swapchain, NULL);
 	}
 
-	int framebuffer_count = GPU_FRAMEBUFFER_COUNT;
+	uint32_t framebuffer_count = GPU_FRAMEBUFFER_COUNT;
+	// vkGetSwapchainImagesKHR(device, swapchain, &framebuffer_count, NULL);
 	vkGetSwapchainImagesKHR(device, swapchain, &framebuffer_count, window_images);
 
 	for (uint32_t i = 0; i < framebuffer_count; i++) {
@@ -538,6 +553,10 @@ static void create_swapchain() {
 		    .image                           = window_images[i],
 		};
 		vkCreateImageView(device, &color_attachment_view, NULL, &framebuffers[i].impl.view);
+		// gpu_texture_destroy_internal(&framebuffers[i]);
+		// gpu_render_target_init2(&framebuffers[i], iron_window_width(), iron_window_height(), GPU_TEXTURE_FORMAT_RGBA32, i);
+		framebuffers[i].width  = image_extent.width;
+		framebuffers[i].height = image_extent.height;
 	}
 
 	framebuffer_index = 0;
@@ -547,8 +566,8 @@ static void create_swapchain() {
 		    .sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
 		    .imageType     = VK_IMAGE_TYPE_2D,
 		    .format        = VK_FORMAT_D32_SFLOAT,
-		    .extent.width  = iron_window_width(),
-		    .extent.height = iron_window_height(),
+		    .extent.width  = image_extent.width,
+		    .extent.height = image_extent.height,
 		    .extent.depth  = 1,
 		    .mipLevels     = 1,
 		    .arrayLayers   = 1,
@@ -590,27 +609,14 @@ static void acquire_next_image() {
 	VkResult err = vkAcquireNextImageKHR(device, swapchain, UINT64_MAX, framebuffer_available_semaphore, VK_NULL_HANDLE, &framebuffer_index);
 	if (err == VK_ERROR_SURFACE_LOST_KHR || err == VK_ERROR_OUT_OF_DATE_KHR || surface_destroyed) {
 		surface_destroyed = surface_destroyed || (err == VK_ERROR_SURFACE_LOST_KHR);
-
-		gpu_in_use = false;
+		gpu_in_use        = false;
 		create_swapchain();
 		gpu_in_use = true;
 		acquire_next_image();
-
-		for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
-			// gpu_texture_destroy_internal(&framebuffers[i]);
-			// gpu_render_target_init2(&framebuffers[i], iron_window_width(), iron_window_height(), GPU_TEXTURE_FORMAT_RGBA32, i);
-			framebuffers[i].width  = iron_window_width();
-			framebuffers[i].height = iron_window_height();
-		}
 	}
 }
 
 void gpu_resize_internal(int width, int height) {
-	// Initial window size was bigger than display size
-	for (int i = 0; i < GPU_FRAMEBUFFER_COUNT; ++i) {
-		framebuffers[i].width  = width;
-		framebuffers[i].height = height;
-	}
 	// Newest window size is fetched in create_swapchain
 }
 
