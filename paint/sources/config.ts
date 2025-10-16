@@ -21,8 +21,11 @@ function config_load() {
 	/// end
 
 	if (blob != null) {
-		config_loaded = true;
-		config_raw    = json_parse(sys_buffer_to_string(blob));
+		let config_string: string = sys_buffer_to_string(blob);
+		if (starts_with(config_string, "{\"version\":")) { // Ensure valid config
+			config_loaded = true;
+			config_raw    = json_parse(config_string);
+		}
 	}
 }
 
