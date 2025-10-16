@@ -607,7 +607,7 @@ static void create_swapchain() {
 
 static void acquire_next_image() {
 	VkResult err = vkAcquireNextImageKHR(device, swapchain, UINT64_MAX, framebuffer_available_semaphore, VK_NULL_HANDLE, &framebuffer_index);
-	if (err == VK_ERROR_SURFACE_LOST_KHR || err == VK_ERROR_OUT_OF_DATE_KHR || surface_destroyed) {
+	if (err == VK_ERROR_SURFACE_LOST_KHR || err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR || surface_destroyed) {
 		surface_destroyed = surface_destroyed || (err == VK_ERROR_SURFACE_LOST_KHR);
 		gpu_in_use        = false;
 		create_swapchain();
