@@ -58,7 +58,7 @@ function edit_image_node_button(node_id: i32) {
 				dir + "/Qwen2.5-VL-7B-Instruct-Q8_0.gguf", "--qwen2vl_vision", dir + "/Qwen2.5-VL-7B-Instruct.mmproj-Q8_0.gguf", "--sampling-method", "euler",
 				"--offload-to-cpu",
 				// "--diffusion-fa",
-				"--cfg-scale", "2.5", "--flow-shift", "3", "--steps", "40", "-s", "-1", "-W", "512", "-H", "512", "-p", "'" + prompt + "'", "-r",
+				"--cfg-scale", "2.5", "--flow-shift", "3", "--steps", "20", "-s", "-1", "-W", "512", "-H", "512", "-p", "'" + prompt + "'", "-r",
 				dir + "/input.png", "-o", dir + "/output.png", null
 			];
 

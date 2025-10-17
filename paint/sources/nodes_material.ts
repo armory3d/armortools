@@ -1,7 +1,7 @@
 
 let nodes_material_categories: string[] = [
 	_tr("Input"), _tr("Texture"), _tr("Color"), _tr("Vector"), _tr("Converter"),
-	// _tr("Neural"),
+	_tr("Neural"),
 	_tr("Group")
 ];
 
@@ -91,17 +91,19 @@ function nodes_material_init() {
 	vector_math2_node_init();
 
 	nodes_material_neural = [];
-	text_to_image_node_init();
-	upscale_image_node_init();
-	edit_image_node_init();
-	// photo_to_pbr_node_init();
+	if (config_raw.experimental) {
+		text_to_image_node_init();
+		upscale_image_node_init();
+		edit_image_node_init();
+		// photo_to_pbr_node_init();
+	}
 
 	nodes_material_group = [];
 	group_node_init();
 
 	nodes_material_list = [
 		nodes_material_input, nodes_material_texture, nodes_material_color, nodes_material_vector, nodes_material_converter,
-		// nodes_material_neural,
+		nodes_material_neural,
 		nodes_material_group
 	];
 }
