@@ -260,6 +260,16 @@ function tab_textures_delete_texture(asset: asset_t) {
 		project_set_default_envmap();
 	}
 
+	if (project_raw.packed_assets != null) {
+		for (let i: i32 = 0; i < project_raw.packed_assets.length; ++i) {
+			let pa: packed_asset_t = project_raw.packed_assets[i];
+			if (pa.name == asset.file) {
+				array_splice(project_raw.packed_assets, i, 1);
+				break;
+			}
+		}
+	}
+
 	data_delete_image(asset.file);
 	map_delete(project_asset_map, asset.id);
 	array_splice(project_assets, i, 1);
