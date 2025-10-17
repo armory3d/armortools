@@ -25,16 +25,18 @@ function tab_meshes_draw(htab: ui_handle_t) {
 					project_append_mesh();
 				}
 
-				// project_fetch_default_meshes();
-				// if (ui_menu_button(tr("Append Shape"))) {
-				// 	ui_menu_draw(function () {
-				// 		for (let i: i32 = 0; i < project_mesh_list.length; ++i) {
-				// 			if (ui_menu_button(project_mesh_list[i])) {
-				// 				tab_meshes_append_shape(project_mesh_list[i]);
-				// 			}
-				// 		}
-				// 	});
-				// }
+				if (config_raw.experimental) {
+					project_fetch_default_meshes();
+					if (ui_menu_button(tr("Append Shape"))) {
+						ui_menu_draw(function() {
+							for (let i: i32 = 0; i < project_mesh_list.length; ++i) {
+								if (ui_menu_button(project_mesh_list[i])) {
+									tab_meshes_append_shape(project_mesh_list[i]);
+								}
+							}
+						});
+					}
+				}
 			});
 		}
 		if (ui.is_hovered)
@@ -141,188 +143,9 @@ function tab_meshes_draw(htab: ui_handle_t) {
 						context_raw.ddirty = 2;
 					}
 
-					context_raw.selected_object = o.base;
-					let h: ui_handle_t          = ui_handle(__ID__);
-					// h.b = context_raw.selected_object.visible;
-					// context_raw.selected_object.visible = ui_check(h, "Visible");
-					// if (h.changed) {
-					// Rebuild full vb for path-tracing
-					// util_mesh_merge();
-					// }
-
-					let t: transform_t = context_raw.selected_object.transform;
-					let rot: vec4_t    = quat_get_euler(t.rot);
-					rot                = vec4_mult(rot, 180 / 3.141592);
-					let f: f32         = 0.0;
-					let changed: bool  = false;
-
-					ui_row4();
-					ui_text("Loc");
-
-					h      = ui_handle(__ID__);
-					h.text = f32_to_string(t.loc.x);
-					f      = parse_float(ui_text_input(h, "X"));
-					if (h.changed) {
-						changed = true;
-						t.loc.x = f;
+					if (config_raw.experimental) {
+						tab_meshes_draw_properties(o);
 					}
-
-					h      = ui_handle(__ID__);
-					h.text = f32_to_string(t.loc.y);
-					f      = parse_float(ui_text_input(h, "Y"));
-					if (h.changed) {
-						changed = true;
-						t.loc.y = f;
-					}
-
-					h      = ui_handle(__ID__);
-					h.text = f32_to_string(t.loc.z);
-					f      = parse_float(ui_text_input(h, "Z"));
-					if (h.changed) {
-						changed = true;
-						t.loc.z = f;
-					}
-
-					ui_row4();
-					ui_text("Rot");
-
-					h      = ui_handle(__ID__);
-					h.text = f32_to_string(rot.x);
-					f      = parse_float(ui_text_input(h, "X"));
-					if (h.changed) {
-						changed = true;
-						rot.x   = f;
-					}
-
-					h      = ui_handle(__ID__);
-					h.text = f32_to_string(rot.y);
-					f      = parse_float(ui_text_input(h, "Y"));
-					if (h.changed) {
-						changed = true;
-						rot.y   = f;
-					}
-
-					h      = ui_handle(__ID__);
-					h.text = f32_to_string(rot.z);
-					f      = parse_float(ui_text_input(h, "Z"));
-					if (h.changed) {
-						changed = true;
-						rot.z   = f;
-					}
-
-					ui_row4();
-					ui_text("Scale");
-
-					h      = ui_handle(__ID__);
-					h.text = f32_to_string(t.scale.x);
-					f      = parse_float(ui_text_input(h, "X"));
-					if (h.changed) {
-						changed   = true;
-						t.scale.x = f;
-					}
-
-					h      = ui_handle(__ID__);
-					h.text = f32_to_string(t.scale.y);
-					f      = parse_float(ui_text_input(h, "Y"));
-					if (h.changed) {
-						changed   = true;
-						t.scale.y = f;
-					}
-
-					h      = ui_handle(__ID__);
-					h.text = f32_to_string(t.scale.z);
-					f      = parse_float(ui_text_input(h, "Z"));
-					if (h.changed) {
-						changed   = true;
-						t.scale.z = f;
-					}
-
-					ui_row4();
-					ui_text("Dim");
-
-					h      = ui_handle(__ID__);
-					h.text = f32_to_string(t.dim.x);
-					f      = parse_float(ui_text_input(h, "X"));
-					if (h.changed) {
-						changed = true;
-						t.dim.x = f;
-					}
-
-					h      = ui_handle(__ID__);
-					h.text = f32_to_string(t.dim.y);
-					f      = parse_float(ui_text_input(h, "Y"));
-					if (h.changed) {
-						changed = true;
-						t.dim.y = f;
-					}
-
-					h      = ui_handle(__ID__);
-					h.text = f32_to_string(t.dim.z);
-					f      = parse_float(ui_text_input(h, "Z"));
-					if (h.changed) {
-						changed = true;
-						t.dim.z = f;
-					}
-
-					if (changed) {
-						rot                                       = vec4_mult(rot, 3.141592 / 180);
-						context_raw.selected_object.transform.rot = quat_from_euler(rot.x, rot.y, rot.z);
-						transform_build_matrix(context_raw.selected_object.transform);
-						transform_compute_dim(context_raw.selected_object.transform);
-
-						let pb: physics_body_t = map_get(physics_body_object_map, context_raw.selected_object.uid);
-						if (pb != null) {
-							physics_body_sync_transform(pb);
-						}
-					}
-
-					let pb: physics_body_t    = map_get(physics_body_object_map, context_raw.selected_object.uid);
-					let hshape: ui_handle_t   = ui_handle(__ID__);
-					let shape_combo: string[] = [
-						tr("None"),
-						tr("Box"),
-						tr("Sphere"),
-						tr("Convex Hull"),
-						tr("Terrain"),
-						tr("Mesh"),
-					];
-					hshape.i = pb != null ? pb.shape + 1 : 0;
-					ui_combo(hshape, shape_combo, tr("Shape"), true);
-
-					let hdynamic: ui_handle_t = ui_handle(__ID__);
-					hdynamic.b                = pb != null ? pb.mass > 0 : false;
-					ui_check(hdynamic, "Dynamic");
-
-					if (hshape.changed || hdynamic.changed) {
-						sim_remove_body(context_raw.selected_object.uid);
-						if (hshape.i > 0) {
-							sim_add_body(context_raw.selected_object, hshape.i - 1, hdynamic.b ? 1.0 : 0.0);
-						}
-					}
-
-					ui_text("Script", ui_align_t.LEFT, ui.ops.theme.SEPARATOR_COL);
-
-					let script: string = map_get(sim_object_script_map, context_raw.selected_object);
-					if (script == null) {
-						script = "";
-					}
-
-					let hscript: ui_handle_t = ui_handle(__ID__);
-					hscript.text             = script;
-
-					let _font: draw_font_t = ui.ops.font;
-					let _font_size: i32    = ui.font_size;
-					let fmono: draw_font_t = data_get_font("font_mono.ttf");
-					ui_set_font(ui, fmono);
-					ui.font_size          = math_floor(15 * UI_SCALE());
-					ui_text_area_coloring = tab_scripts_get_text_coloring();
-					ui_text_area(hscript);
-					ui_text_area_coloring = null;
-					ui_set_font(ui, _font);
-					ui.font_size = _font_size;
-
-					script = hscript.text;
-					map_set(sim_object_script_map, context_raw.selected_object, script);
 				});
 			}
 			if (h.changed) {
@@ -340,19 +163,223 @@ function tab_meshes_draw(htab: ui_handle_t) {
 	}
 }
 
+function tab_meshes_draw_properties(o: mesh_object_t) {
+	context_raw.selected_object = o.base;
+	let h: ui_handle_t          = ui_handle(__ID__);
+	// h.b = context_raw.selected_object.visible;
+	// context_raw.selected_object.visible = ui_check(h, "Visible");
+	// if (h.changed) {
+	// Rebuild full vb for path-tracing
+	// util_mesh_merge();
+	// }
+
+	let t: transform_t = context_raw.selected_object.transform;
+	let rot: vec4_t    = quat_get_euler(t.rot);
+	rot                = vec4_mult(rot, 180 / 3.141592);
+	let f: f32         = 0.0;
+	let changed: bool  = false;
+
+	ui_row4();
+	ui_text("Loc");
+
+	h      = ui_handle(__ID__);
+	h.text = f32_to_string(t.loc.x);
+	f      = parse_float(ui_text_input(h, "X"));
+	if (h.changed) {
+		changed = true;
+		t.loc.x = f;
+	}
+
+	h      = ui_handle(__ID__);
+	h.text = f32_to_string(t.loc.y);
+	f      = parse_float(ui_text_input(h, "Y"));
+	if (h.changed) {
+		changed = true;
+		t.loc.y = f;
+	}
+
+	h      = ui_handle(__ID__);
+	h.text = f32_to_string(t.loc.z);
+	f      = parse_float(ui_text_input(h, "Z"));
+	if (h.changed) {
+		changed = true;
+		t.loc.z = f;
+	}
+
+	ui_row4();
+	ui_text("Rot");
+
+	h      = ui_handle(__ID__);
+	h.text = f32_to_string(rot.x);
+	f      = parse_float(ui_text_input(h, "X"));
+	if (h.changed) {
+		changed = true;
+		rot.x   = f;
+	}
+
+	h      = ui_handle(__ID__);
+	h.text = f32_to_string(rot.y);
+	f      = parse_float(ui_text_input(h, "Y"));
+	if (h.changed) {
+		changed = true;
+		rot.y   = f;
+	}
+
+	h      = ui_handle(__ID__);
+	h.text = f32_to_string(rot.z);
+	f      = parse_float(ui_text_input(h, "Z"));
+	if (h.changed) {
+		changed = true;
+		rot.z   = f;
+	}
+
+	ui_row4();
+	ui_text("Scale");
+
+	h      = ui_handle(__ID__);
+	h.text = f32_to_string(t.scale.x);
+	f      = parse_float(ui_text_input(h, "X"));
+	if (h.changed) {
+		changed   = true;
+		t.scale.x = f;
+	}
+
+	h      = ui_handle(__ID__);
+	h.text = f32_to_string(t.scale.y);
+	f      = parse_float(ui_text_input(h, "Y"));
+	if (h.changed) {
+		changed   = true;
+		t.scale.y = f;
+	}
+
+	h      = ui_handle(__ID__);
+	h.text = f32_to_string(t.scale.z);
+	f      = parse_float(ui_text_input(h, "Z"));
+	if (h.changed) {
+		changed   = true;
+		t.scale.z = f;
+	}
+
+	ui_row4();
+	ui_text("Dim");
+
+	h      = ui_handle(__ID__);
+	h.text = f32_to_string(t.dim.x);
+	f      = parse_float(ui_text_input(h, "X"));
+	if (h.changed) {
+		changed = true;
+		t.dim.x = f;
+	}
+
+	h      = ui_handle(__ID__);
+	h.text = f32_to_string(t.dim.y);
+	f      = parse_float(ui_text_input(h, "Y"));
+	if (h.changed) {
+		changed = true;
+		t.dim.y = f;
+	}
+
+	h      = ui_handle(__ID__);
+	h.text = f32_to_string(t.dim.z);
+	f      = parse_float(ui_text_input(h, "Z"));
+	if (h.changed) {
+		changed = true;
+		t.dim.z = f;
+	}
+
+	if (changed) {
+		rot                                       = vec4_mult(rot, 3.141592 / 180);
+		context_raw.selected_object.transform.rot = quat_from_euler(rot.x, rot.y, rot.z);
+		transform_build_matrix(context_raw.selected_object.transform);
+		transform_compute_dim(context_raw.selected_object.transform);
+
+		let pb: physics_body_t = map_get(physics_body_object_map, context_raw.selected_object.uid);
+		if (pb != null) {
+			physics_body_sync_transform(pb);
+		}
+	}
+
+	let pb: physics_body_t    = map_get(physics_body_object_map, context_raw.selected_object.uid);
+	let hshape: ui_handle_t   = ui_handle(__ID__);
+	let shape_combo: string[] = [
+		tr("None"),
+		tr("Box"),
+		tr("Sphere"),
+		tr("Convex Hull"),
+		tr("Terrain"),
+		tr("Mesh"),
+	];
+	hshape.i = pb != null ? pb.shape + 1 : 0;
+	ui_combo(hshape, shape_combo, tr("Shape"), true);
+
+	let hdynamic: ui_handle_t = ui_handle(__ID__);
+	hdynamic.b                = pb != null ? pb.mass > 0 : false;
+	ui_check(hdynamic, "Dynamic");
+
+	if (hshape.changed || hdynamic.changed) {
+		sim_remove_body(context_raw.selected_object.uid);
+		if (hshape.i > 0) {
+			sim_add_body(context_raw.selected_object, hshape.i - 1, hdynamic.b ? 1.0 : 0.0);
+		}
+	}
+
+	ui_text("Script", ui_align_t.LEFT, ui.ops.theme.SEPARATOR_COL);
+
+	let script: string = map_get(sim_object_script_map, context_raw.selected_object);
+	if (script == null) {
+		script = "";
+	}
+
+	let hscript: ui_handle_t = ui_handle(__ID__);
+	hscript.text             = script;
+
+	let _font: draw_font_t = ui.ops.font;
+	let _font_size: i32    = ui.font_size;
+	let fmono: draw_font_t = data_get_font("font_mono.ttf");
+	ui_set_font(ui, fmono);
+	ui.font_size          = math_floor(15 * UI_SCALE());
+	ui_text_area_coloring = tab_scripts_get_text_coloring();
+	ui_text_area(hscript);
+	ui_text_area_coloring = null;
+	ui_set_font(ui, _font);
+	ui.font_size = _font_size;
+
+	script = hscript.text;
+	map_set(sim_object_script_map, context_raw.selected_object, script);
+
+	if (ui.changed || ui.is_typing) {
+		ui_menu_keep_open = true;
+	}
+}
+
 function tab_meshes_append_shape(mesh_name: string) {
-	let blob: buffer_t = iron_load_blob(data_path() + "meshes/" + mesh_name + ".arm");
-	let raw: scene_t   = armpack_decode(blob);
-	util_mesh_pack_uvs(raw.mesh_datas[0].vertex_arrays[2].values);
-	let md: mesh_data_t   = mesh_data_create(raw.mesh_datas[0]);
+	let scene_raw: scene_t = null;
+	let raw: mesh_data_t   = null;
+	if (mesh_name == "sphere") {
+		let mesh: raw_mesh_t = geom_make_uv_sphere(1, 128, 64);
+		raw                  = import_mesh_raw_mesh(mesh);
+	}
+	else if (mesh_name == "plane") {
+		let mesh: raw_mesh_t = geom_make_plane(1, 1, 4, 4);
+		raw                  = import_mesh_raw_mesh(mesh);
+	}
+	else {
+		let b: buffer_t = iron_load_blob(data_path() + "meshes/" + mesh_name + ".arm");
+		scene_raw       = armpack_decode(b);
+		raw             = scene_raw.mesh_datas[0];
+	}
+
+	util_mesh_pack_uvs(raw.vertex_arrays[2].values);
+	let md: mesh_data_t   = mesh_data_create(raw);
 	md._.handle           = md.name;
 	let mo: mesh_object_t = scene_add_mesh_object(md, project_paint_objects[0].material);
 	mo.base.name          = md.name;
 	let o: obj_t          = {};
-	o._                   = {_gc : raw};
+	o._                   = {_gc : scene_raw};
 	mo.base.raw           = o;
 	map_set(data_cached_meshes, md._.handle, md);
 	array_push(project_paint_objects, mo);
+
 	// tab_scene_import_mesh_done();
 	// sys_notify_on_next_frame(function(mo: mesh_object_t) {
 	// 	tab_scene_select_object(mo);

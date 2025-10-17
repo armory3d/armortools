@@ -4,7 +4,7 @@ function geom_make_plane(size_x: f32 = 1.0, size_y: f32 = 1.0, verts_x: i32 = 2,
 	let mesh: raw_mesh_t = {};
 	mesh.scale_pos       = 1.0;
 	mesh.scale_tex       = uv_scale;
-	mesh.name            = "";
+	mesh.name            = "Plane";
 	mesh.has_next        = false;
 
 	// Pack positions to (-1, 1) range
@@ -52,7 +52,7 @@ function geom_make_uv_sphere(radius: f32 = 1.0, width_segments: i32 = 32, height
 	let mesh: raw_mesh_t = {};
 	mesh.scale_pos       = 1.0;
 	mesh.scale_tex       = 1.0;
-	mesh.name            = "";
+	mesh.name            = "Sphere";
 	mesh.has_next        = false;
 
 	// Pack positions to (-1, 1) range
