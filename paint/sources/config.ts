@@ -99,6 +99,7 @@ function config_save() {
 	json_encode_string("blender", config_raw.blender);
 	json_encode_i32("scene_atlas_res", config_raw.scene_atlas_res);
 	json_encode_bool("grid_snap", config_raw.grid_snap);
+	json_encode_bool("experimental", config_raw.experimental);
 	let config_json: string = json_encode_end();
 
 	let buffer: buffer_t = sys_string_to_buffer(config_json);
@@ -204,6 +205,7 @@ function config_init() {
 		config_raw.scene_atlas_res    = texture_res_t.RES8192;
 		config_raw.pathtrace_mode     = pathtrace_mode_t.FAST;
 		config_raw.grid_snap          = false;
+		config_raw.experimental       = false;
 	}
 	else {
 		// Discard old config
@@ -470,5 +472,8 @@ type config_t = {
 	brush_angle_reject?: bool;
 	dilate_radius?: i32;
 	gpu_inference?: bool;
-	blender?: string; scene_atlas_res : i32; grid_snap : bool;
+	blender?: string;
+	scene_atlas_res?: i32;
+	grid_snap?: bool;
+	experimental?: bool;
 };

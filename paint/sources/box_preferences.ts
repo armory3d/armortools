@@ -117,6 +117,12 @@ function box_preferences_interface_tab() {
 	config_raw.grid_snap = ui_check(h_grid_snap, tr("Grid Snap"));
 	ui_nodes_grid_snap   = config_raw.grid_snap;
 
+	let h_experimental: ui_handle_t = ui_handle(__ID__);
+	if (h_experimental.init) {
+		h_experimental.b = config_raw.experimental;
+	}
+	config_raw.experimental = ui_check(h_experimental, tr("Experimental Features"));
+
 	ui_end_element();
 
 	ui_row2();
