@@ -3051,11 +3051,17 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 		for (int i = 0; i < handle->i; ++i) {
 			cursor_pos += strlen(ui_extract_line(lines, i)) + 1; // + '\n'
 		}
+		bool anchor_set = false;
+		int  anchor_pos = current->highlight_anchor;
+		for (int i = 0; i < handle->i; ++i) {
+			anchor_pos += strlen(ui_extract_line(lines, i)) + 1;
+		}
 		int  word_count = ui_word_count(lines);
 		char line[1024];
 		line[0] = '\0';
 		char new_lines[4096];
 		new_lines[0] = '\0';
+
 		for (int i = 0; i < word_count; ++i) {
 			char *w      = ui_extract_word(lines, i);
 			float spacew = draw_string_width(current->ops->font, current->font_size, " ");
@@ -3086,8 +3092,11 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 			if (selected && !cursor_set && cursor_pos <= lines_len + strlen(line)) {
 				cursor_set        = true;
 				handle->i         = new_line_count;
-				// current->cursor_x = current->highlight_anchor = cursor_pos - lines_len;
 				current->cursor_x = cursor_pos - lines_len;
+			}
+			if (selected && !anchor_set && anchor_pos <= lines_len + strlen(line)) {
+				anchor_set                = true;
+				current->highlight_anchor = anchor_pos - lines_len;
 			}
 		}
 		if (new_lines[0] != '\0') {
