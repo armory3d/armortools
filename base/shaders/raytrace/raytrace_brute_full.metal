@@ -373,11 +373,11 @@ kernel void raytracingKernel(
 	float a = 1.0 / (constant_buffer.eye.w + 1);
 	float b = 1.0 - a;
 	color = color * b + accum * a;
-	render_target.write(float4(color, 0.0f), tid);
+	render_target.write(float4(color, 1.0f), tid);
 	#else
 	if (constant_buffer.eye.w == 0) {
 		color = accum;
 	}
-	render_target.write(float4(mix(color, accum, 1.0 / 16.0), 0.0f), tid);
+	render_target.write(float4(mix(color, accum, 1.0 / 16.0), 1.0f), tid);
 	#endif
 }

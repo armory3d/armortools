@@ -145,14 +145,14 @@ void raygeneration() {
 	float a = 1.0 / (constant_buffer.eye.w + 1);
 	float b = 1.0 - a;
 	color = color * b + accum * a;
-	render_target[DispatchRaysIndex().xy] = half4(color, 0.0f);
+	render_target[DispatchRaysIndex().xy] = half4(color, 1.0f);
 
 	#else
 
 	if (constant_buffer.eye.w == 0) {
 		color = accum;
 	}
-	render_target[DispatchRaysIndex().xy] = half4(lerp(color, accum, 1.0 / 4.0), 0.0f);
+	render_target[DispatchRaysIndex().xy] = half4(lerp(color, accum, 1.0 / 4.0), 1.0f);
 
 	#endif
 }
