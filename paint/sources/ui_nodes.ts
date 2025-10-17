@@ -343,6 +343,12 @@ function ui_viewnodes_on_canvas_released() {
 					}
 				}
 
+				if (ui_menu_button(tr("Capture Preview"))) {
+					sys_notify_on_next_frame(function() {
+						ui_nodes_capture_preview();
+					});
+				}
+
 				if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) {
 					ui_menu_separator();
 					if (ui_menu_button(tr("2D View"))) {
@@ -1534,4 +1540,34 @@ function ui_nodes_get_group(canvases: ui_node_canvas_t[], name: string): ui_node
 		}
 	}
 	return null;
+}
+
+function ui_nodes_capture_preview() {
+	let ui_nodes: ui_nodes_t = ui_nodes_get_nodes();
+	let c: ui_node_canvas_t = ui_nodes_get_canvas(true);
+	let sel: ui_node_t     = ui_get_node(c.nodes, ui_nodes.nodes_selected_id[0]);
+	let img: gpu_texture_t = ui_nodes_get_node_preview_image(sel);
+	if (img == null) {
+		return;
+	}
+
+	if (project_raw.packed_assets == null) {
+		project_raw.packed_assets = [];
+	}
+
+	let num: i32    = 0;
+	let abs: string = "/packed/node_preview0.png";
+	for (let i: i32 = 0; i < project_raw.packed_assets.length; ++i) {
+		let pa: packed_asset_t = project_raw.packed_assets[i];
+		if (pa.name == abs) {
+			i = 0;
+			num++;
+			abs = "/packed/node_preview" + num + ".png";
+		}
+	}
+
+	let pa: packed_asset_t = {name : abs, bytes : gpu_get_texture_pixels(img)};
+	array_push(project_raw.packed_assets, pa);
+	map_set(data_cached_images, abs, img);
+	import_texture_run(abs);
 }
