@@ -379,6 +379,13 @@ function ui_menubar_draw_category_items() {
 			project_set_default_envmap();
 		}
 
+		if (ui_menu_button(tr("Capture Screenshot"))) {
+			sys_notify_on_next_frame(function() {
+				viewport_capture_screenshot();
+			});
+			ui.changed = false; // Close menu
+		}
+
 		context_update_envmap();
 
 		if (ui.changed) {

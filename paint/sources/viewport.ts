@@ -92,3 +92,33 @@ function viewport_update_camera_type(camera_type: i32) {
 	camera_object_build_proj(cam);
 	context_raw.ddirty = 2;
 }
+
+function viewport_capture_screenshot() {
+	let rt: render_target_t       = map_get(render_path_render_targets, "last");
+	let tex: gpu_texture_t        = rt._image;
+	let screenshot: gpu_texture_t = gpu_create_render_target(512, 512);
+	let r: f32                    = sys_w() / sys_h();
+	draw_begin(screenshot);
+	draw_scaled_image(tex, -(512 * r - 512) / 2, 0, 512 * r, 512);
+	draw_end();
+
+	if (project_raw.packed_assets == null) {
+		project_raw.packed_assets = [];
+	}
+
+	let num: i32    = 0;
+	let abs: string = "/packed/screenshot0.png";
+	for (let i: i32 = 0; i < project_raw.packed_assets.length; ++i) {
+		let pa: packed_asset_t = project_raw.packed_assets[i];
+		if (pa.name == abs) {
+			i = 0;
+			num++;
+			abs = "/packed/screenshot" + num + ".png";
+		}
+	}
+
+	let pa: packed_asset_t = {name : abs, bytes : gpu_get_texture_pixels(screenshot)};
+	array_push(project_raw.packed_assets, pa);
+	map_set(data_cached_images, abs, screenshot);
+	import_texture_run(abs);
+}
