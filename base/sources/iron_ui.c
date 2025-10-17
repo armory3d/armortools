@@ -3086,7 +3086,8 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 			if (selected && !cursor_set && cursor_pos <= lines_len + strlen(line)) {
 				cursor_set        = true;
 				handle->i         = new_line_count;
-				current->cursor_x = current->highlight_anchor = cursor_pos - lines_len;
+				// current->cursor_x = current->highlight_anchor = cursor_pos - lines_len;
+				current->cursor_x = cursor_pos - lines_len;
 			}
 		}
 		if (new_lines[0] != '\0') {
