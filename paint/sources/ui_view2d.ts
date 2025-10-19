@@ -354,7 +354,7 @@ function ui_view2d_render() {
 		ui._x += ew * 0.7 + 3;
 		ui._y = 2 + start_y;
 
-		if (ui_view2d_type == view_2d_type_t.ASSET && tex != null) { // Texture resolution
+		if ((ui_view2d_type == view_2d_type_t.ASSET || ui_view2d_type == view_2d_type_t.NODE) && tex != null) { // Texture resolution
 			ui_text(tex.width + "x" + tex.height);
 			ui._x += ew * 0.7 + 3;
 			ui._y = 2 + start_y;
