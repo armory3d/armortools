@@ -439,6 +439,11 @@ function export_texture_write_texture(file: string, pixels: buffer_t, type: i32 
 	}
 
 	if (context_raw.layers_destination == export_destination_t.PACK_INTO_PROJECT) {
+		/// if IRON_BGRA
+		if (format == 2) { // RGB1
+			export_arm_bgra_swap(pixels);
+		}
+		/// end
 		let image: gpu_texture_t = gpu_create_texture_from_bytes(pixels, res_x, res_y);
 		map_set(data_cached_images, file, image);
 		let ar: string[]   = string_split(file, path_sep);
