@@ -438,7 +438,7 @@ function export_texture_write_texture(file: string, pixels: buffer_t, type: i32 
 		format = 6; // AAA1
 	}
 
-	if (context_raw.layers_destination == export_destination_t.PACKED) {
+	if (context_raw.layers_destination == export_destination_t.PACK_INTO_PROJECT) {
 		let image: gpu_texture_t = gpu_create_texture_from_bytes(pixels, res_x, res_y);
 		map_set(data_cached_images, file, image);
 		let ar: string[]   = string_split(file, path_sep);

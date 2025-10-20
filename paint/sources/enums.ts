@@ -83,8 +83,8 @@ enum export_mode_t {
 }
 
 enum export_destination_t {
-	DISK   = 0,
-	PACKED = 1,
+	DISK              = 0,
+	PACK_INTO_PROJECT = 1,
 }
 
 enum pathtrace_mode_t {

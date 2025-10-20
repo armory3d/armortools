@@ -122,7 +122,7 @@ function box_export_tab_export_textures(title: string, bake_material: bool = fal
 		let layers_destination_handle: ui_handle_t = ui_handle(__ID__);
 		layers_destination_handle.i                = context_raw.layers_destination;
 
-		let layers_destination_combo: string[] = [ tr("Disk"), tr("Packed") ];
+		let layers_destination_combo: string[] = [ tr("Disk"), tr("Pack into Project") ];
 		context_raw.layers_destination         = ui_combo(layers_destination_handle, layers_destination_combo, tr("Destination"), true);
 
 		ui_end_element();
@@ -133,7 +133,7 @@ function box_export_tab_export_textures(title: string, bake_material: bool = fal
 		}
 		if (ui_button(tr("Export"))) {
 			ui_box_hide();
-			if (context_raw.layers_destination == export_destination_t.PACKED) {
+			if (context_raw.layers_destination == export_destination_t.PACK_INTO_PROJECT) {
 				_box_export_bake_material       = bake_material;
 				context_raw.texture_export_path = "/";
 				sys_notify_on_next_frame(function() {
