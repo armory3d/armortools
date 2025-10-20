@@ -139,7 +139,7 @@ let brick_texture_node_def: ui_node_t = {
 		{
 			id : 0,
 			node_id : 0,
-			name : _tr("Fac"),
+			name : _tr("Factor"),
 			type : "VALUE",
 			color : 0xffa1a1a1,
 			default_value : f32_array_create_x(1.0),

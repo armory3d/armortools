@@ -125,7 +125,7 @@
     "Export Textures": "导出纹理",
     "Export Textures...": "导出纹理...",
     "Export texture files": "导出纹理文件",
-    "Fac": "面",
+    "Factor": "面",
     "Face": "面",
     "Facing": "面",
     "File": "文件",
@@ -417,5 +417,5 @@
     "gradient_type": "渐变类型",
     "operation": "运算",
     "untitled": "无标题",
-    "use_clamp": "使用插值"
+    "Clamp": "使用插值"
 }

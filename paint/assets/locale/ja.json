@@ -199,7 +199,7 @@
     "Export texture files": "テクスチャファイルをエクスポート",
     "Exporting mesh": "メッシュのエクスポート",
     "Exporting textures": "テクスチャのエクスポート",
-    "Fac": "係数",
+    "Factor": "係数",
     "Face": "面",
     "Facing": "前方向",
     "Fast": "高速",
@@ -659,6 +659,6 @@
     "tiling": "タイル化",
     "triangles": "三角面",
     "untitled": "無題",
-    "use_clamp": "制限を使用",
+    "Clamp": "制限を使用",
     "{shortcut} and move mouse": "{shortcut}とマウス移動"
 }

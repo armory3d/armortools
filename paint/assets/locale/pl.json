@@ -157,7 +157,7 @@
     "Export Textures": "Eksportuj tekstury",
     "Export Textures...": "Wyeksportuj tekstury...",
     "Export texture files": "Wyeksportuj pliki tekstur",
-    "Fac": "Wsp.",
+    "Factor": "Wsp.",
     "Face": "Face",
     "Facing": "Zugewendet",
     "File": "Plik",
@@ -498,5 +498,5 @@
     "operation": "Operacja",
     "plugin enabled": "Plugin włączony",
     "untitled": "Nie zatytułowany",
-    "use_clamp": "Użyj limitera"
+    "Clamp": "Użyj limitera"
 }

@@ -1,6 +1,6 @@
 
 function mapping_node_init() {
-	array_push(nodes_material_vector, mapping_node_def);
+	array_push(nodes_material_utilities, mapping_node_def);
 	map_set(parser_material_node_vectors, "MAPPING", mapping_node_vector);
 }
 
@@ -53,7 +53,7 @@ let mapping_node_def: ui_node_t = {
 			min : 0.0,
 			max : 1.0,
 			precision : 100,
-			display : 0
+			display : 1
 		},
 		{
 			id : 0,

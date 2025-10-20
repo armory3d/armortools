@@ -44,7 +44,7 @@ let node_list = [
 			{
 				id: 1,
 				node_id: 0,
-				name: "Fac",
+				name: "Factor",
 				type: "VALUE",
 				color: 0xffa1a1a1,
 				default_value__f32: [1.0],
@@ -75,7 +75,7 @@ parser_material_custom_nodes_set(node_type, function(node, socket_name) {
 	if (socket_name == "Color") {
 		return "float3(" + my_out + ", " + my_out + ", " + my_out + ")";
 	}
-	else if (socket_name == "Fac") {
+	else if (socket_name == "Factor") {
 		return my_out;
 	}
 });

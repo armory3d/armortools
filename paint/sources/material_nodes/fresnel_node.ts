@@ -24,7 +24,7 @@ let fresnel_node_def: ui_node_t = {
 			name : _tr("IOR"),
 			type : "VALUE",
 			color : 0xffa1a1a1,
-			default_value : f32_array_create_x(1.45),
+			default_value : f32_array_create_x(1.5),
 			min : 0.0,
 			max : 3.0,
 			precision : 100,
@@ -46,7 +46,7 @@ let fresnel_node_def: ui_node_t = {
 	outputs : [ {
 		id : 0,
 		node_id : 0,
-		name : _tr("Fac"),
+		name : _tr("Factor"),
 		type : "VALUE",
 		color : 0xffa1a1a1,
 		default_value : f32_array_create_x(0.0),

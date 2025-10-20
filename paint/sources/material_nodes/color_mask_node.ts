@@ -1,6 +1,6 @@
 
 function color_mask_node_init() {
-	array_push(nodes_material_converter, color_mask_node_def);
+	array_push(nodes_material_utilities, color_mask_node_def);
 	map_set(parser_material_node_values, "COLMASK", color_mask_node_value);
 }
 

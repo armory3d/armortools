@@ -343,9 +343,9 @@ function ui_viewnodes_on_canvas_released() {
 					}
 				}
 
-				if (ui_menu_button(tr("Capture Preview"))) {
+				if (ui_menu_button(tr("Capture Output"))) {
 					sys_notify_on_next_frame(function() {
-						ui_nodes_capture_preview();
+						ui_nodes_capture_output();
 					});
 				}
 
@@ -1161,6 +1161,12 @@ function ui_nodes_get_node_preview_image(n: ui_node_t): gpu_texture_t {
 	else if (n.type == "NEURAL_EDIT_IMAGE") {
 		img = edit_image_node_result;
 	}
+	else if (n.type == "NEURAL_TILE_IMAGE") {
+		img = tile_image_node_result;
+	}
+	else if (n.type == "NEURAL_INPAINT_IMAGE") {
+		img = inpaint_image_node_result;
+	}
 	else if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) {
 		img = any_imap_get(context_raw.node_preview_map, n.id);
 	}
@@ -1542,7 +1548,7 @@ function ui_nodes_get_group(canvases: ui_node_canvas_t[], name: string): ui_node
 	return null;
 }
 
-function ui_nodes_capture_preview() {
+function ui_nodes_capture_output() {
 	let ui_nodes: ui_nodes_t = ui_nodes_get_nodes();
 	let c: ui_node_canvas_t = ui_nodes_get_canvas(true);
 	let sel: ui_node_t     = ui_get_node(c.nodes, ui_nodes.nodes_selected_id[0]);

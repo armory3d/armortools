@@ -123,7 +123,7 @@
     "Export Textures": "Exportar Texturas",
     "Export Textures...": "Exportar Texturas...",
     "Export texture files": "Exportar Arquvos de textura",
-    "Fac": "Fac",
+    "Factor": "Factor",
     "Face": "Rosto",
     "Facing": "Voltado para",
     "File": "Arquivo",
@@ -414,5 +414,5 @@
     "gradient_type": "Tipo de Degradê",
     "operation": "Operação",
     "untitled": "Sem Título",
-    "use_clamp": "Usar Cálculos"
+    "Clamp": "Usar Cálculos"
 }

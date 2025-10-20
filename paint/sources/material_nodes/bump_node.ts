@@ -1,6 +1,6 @@
 
 function bump_node_init() {
-	array_push(nodes_material_vector, bump_node_def);
+	array_push(nodes_material_utilities, bump_node_def);
 	map_set(parser_material_node_vectors, "BUMP", bump_node_vector);
 }
 

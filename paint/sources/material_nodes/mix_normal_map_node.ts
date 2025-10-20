@@ -1,6 +1,6 @@
 
 function mix_normal_map_node_init() {
-	array_push(nodes_material_vector, mix_normal_map_node_def);
+	array_push(nodes_material_utilities, mix_normal_map_node_def);
 	map_set(parser_material_node_vectors, "MIX_NORMAL_MAP", mix_normal_map_node_vector);
 }
 

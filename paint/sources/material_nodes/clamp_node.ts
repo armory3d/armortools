@@ -1,6 +1,6 @@
 
 function clamp_node_init() {
-	array_push(nodes_material_converter, clamp_node_def);
+	array_push(nodes_material_utilities, clamp_node_def);
 	map_set(parser_material_node_values, "CLAMP", clamp_node_value);
 }
 

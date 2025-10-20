@@ -1,6 +1,6 @@
 
 function combine_xyz_node_init() {
-	array_push(nodes_material_converter, combine_xyz_node_def);
+	array_push(nodes_material_utilities, combine_xyz_node_def);
 	map_set(parser_material_node_vectors, "COMBXYZ", combine_xyz_node_vector);
 }
 

@@ -10,7 +10,7 @@ function rgb_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
 
 let rgb_node_def: ui_node_t = {
 	id : 0,
-	name : _tr("RGB"),
+	name : _tr("Color"),
 	type : "RGB",
 	x : 0,
 	y : 0,

@@ -119,7 +119,7 @@ let mix_color_node_def: ui_node_t = {
 		{
 			id : 0,
 			node_id : 0,
-			name : _tr("Fac"),
+			name : _tr("Factor"),
 			type : "VALUE",
 			color : 0xffa1a1a1,
 			default_value : f32_array_create_x(0.5),
@@ -181,7 +181,7 @@ let mix_color_node_def: ui_node_t = {
 			height : 0
 		},
 		{
-			name : _tr("use_clamp"),
+			name : _tr("Clamp"),
 			type : "BOOL",
 			output : 0,
 			default_value : f32_array_create_x(0),

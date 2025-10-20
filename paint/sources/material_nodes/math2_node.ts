@@ -1,6 +1,6 @@
 
 function math2_node_init() {
-	array_push(nodes_material_converter, math2_node_def);
+	array_push(nodes_material_utilities, math2_node_def);
 	map_set(parser_material_node_values, "MATH", math2_node_value);
 }
 
@@ -205,7 +205,7 @@ let math2_node_def: ui_node_t = {
 			height : 0
 		},
 		{
-			name : _tr("use_clamp"),
+			name : _tr("Clamp"),
 			type : "BOOL",
 			output : 0,
 			default_value : f32_array_create_x(0),

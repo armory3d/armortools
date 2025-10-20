@@ -1,6 +1,6 @@
 
 function separate_xyz_node_init() {
-	array_push(nodes_material_converter, separate_xyz_node_def);
+	array_push(nodes_material_utilities, separate_xyz_node_def);
 	map_set(parser_material_node_values, "SEPXYZ", separate_xyz_node_value);
 }
 

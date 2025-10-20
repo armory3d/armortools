@@ -194,7 +194,7 @@
     "Export texture files": "Texturdateien exportieren",
     "Exporting mesh": "Mesh wird exportiert",
     "Exporting textures": "Texturen werden exportiert",
-    "Fac": "Faktor",
+    "Factor": "Faktor",
     "Face": "Face",
     "Facing": "Zugewendet",
     "Fast": "Schnell",
@@ -652,7 +652,7 @@
     "tiling": "Tiling",
     "triangles": "Dreiecke",
     "untitled": "unbenannt",
-    "use_clamp": "Werte begrenzen",
+    "Clamp": "Werte begrenzen",
     "x": "x",
     "{shortcut} and move mouse": "{shortcut} und Maus bewegen"
 }

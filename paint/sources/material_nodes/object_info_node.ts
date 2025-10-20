@@ -16,11 +16,14 @@ function object_info_node_vector(node: ui_node_t, socket: ui_node_socket_t): str
 }
 
 function object_info_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
-	if (socket == node.outputs[2]) { // Object Index
+	if (socket == node.outputs[2]) { // Alpha
+		return "0.0";
+	}
+	else if (socket == node.outputs[3]) { // Object Index
 		node_shader_add_constant(parser_material_kong, "object_info_index: float", "_object_info_index");
 		return "constants.object_info_index";
 	}
-	else if (socket == node.outputs[3]) { // Material Index
+	else if (socket == node.outputs[4]) { // Material Index
 		node_shader_add_constant(parser_material_kong, "object_info_material_index: float", "_object_info_material_index");
 		return "constants.object_info_material_index";
 	}
@@ -58,6 +61,18 @@ let object_info_node_def: ui_node_t = {
 			type : "RGBA",
 			color : 0xffc7c729,
 			default_value : f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+			min : 0.0,
+			max : 1.0,
+			precision : 100,
+			display : 0
+		},
+		{
+			id : 0,
+			node_id : 0,
+			name : _tr("Alpha"),
+			type : "VALUE",
+			color : 0xffa1a1a1,
+			default_value : f32_array_create_x(0.0),
 			min : 0.0,
 			max : 1.0,
 			precision : 100,

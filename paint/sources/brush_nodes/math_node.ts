@@ -190,7 +190,7 @@ let math_node_def: ui_node_t = {
 			height : 0
 		},
 		{
-			name : _tr("use_clamp"),
+			name : _tr("Clamp"),
 			type : "BOOL",
 			output : 0,
 			default_value : f32_array_create_x(0),

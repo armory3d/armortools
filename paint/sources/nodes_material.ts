@@ -1,15 +1,10 @@
 
-let nodes_material_categories: string[] = [
-	_tr("Input"), _tr("Texture"), _tr("Color"), _tr("Vector"), _tr("Converter"),
-	_tr("Neural"),
-	_tr("Group")
-];
+let nodes_material_categories: string[] = [ _tr("Input"), _tr("Texture"), _tr("Color"), _tr("Utilities"), _tr("Neural"), _tr("Group") ];
 
 let nodes_material_input: ui_node_t[];
 let nodes_material_texture: ui_node_t[];
 let nodes_material_color: ui_node_t[];
-let nodes_material_vector: ui_node_t[];
-let nodes_material_converter: ui_node_t[];
+let nodes_material_utilities: ui_node_t[];
 let nodes_material_neural: ui_node_t[];
 let nodes_material_group: ui_node_t[];
 
@@ -24,6 +19,7 @@ function nodes_material_init() {
 	nodes_material_input = [];
 	attribute_node_init();
 	camera_data_node_init();
+	rgb_node_init(); // color_node_init
 	fresnel_node_init();
 	geometry_node_init();
 	layer_node_init();
@@ -32,14 +28,12 @@ function nodes_material_init() {
 	material_node_init();
 	object_info_node_init();
 	picker_node_init();
-	rgb_node_init();
 	script_node_init();
 	shader_node_init();
 	tangent_node_init();
 	texture_coordinate_node_init();
 	uv_map_node_init();
 	value_node_init();
-	vertex_color_node_init();
 	wireframe_node_init();
 
 	nodes_material_texture = [];
@@ -50,7 +44,6 @@ function nodes_material_init() {
 	image_texture_node_init();
 	text_texture_node_init();
 	magic_texture_node_init();
-	musgrave_texture_node_init();
 	noise_texture_node_init();
 	voronoi_texture_node_init();
 	wave_texture_node_init();
@@ -61,49 +54,44 @@ function nodes_material_init() {
 	brightness_contrast_node_init();
 	gamma_node_init();
 	hue_saturation_value_node_init();
-	invert_node_init();
+	invert_color_node_init();
 	mix_color_node_init();
 	quantize_node_init();
 	replace_color_node_init();
 	warp_node_init();
 
-	nodes_material_vector = [];
+	nodes_material_utilities = [];
 	bump_node_init();
 	mapping_node_init();
 	mix_normal_map_node_init();
 	normal_node_init();
 	normal_map_node_init();
 	vector_curves_node_init();
-
-	nodes_material_converter = [];
 	clamp_node_init();
 	color_ramp_node_init();
 	color_mask_node_init();
-	combine_hsv_node_init();
-	combine_rgb_node_init();
 	combine_xyz_node_init();
 	map_range_node_init();
 	math2_node_init();
 	rgb_to_bw_node_init();
-	separate_hsv_node_init();
-	separate_rgb_node_init();
 	separate_xyz_node_init();
 	vector_math2_node_init();
 
 	nodes_material_neural = [];
 	if (config_raw.experimental) {
-		text_to_image_node_init();
-		upscale_image_node_init();
 		edit_image_node_init();
-		// photo_to_pbr_node_init();
+		// image_to_pbr_node_init();
+		inpaint_image_node_init();
+		text_to_image_node_init();
+		tile_image_node_init();
+		upscale_image_node_init();
 	}
 
 	nodes_material_group = [];
 	group_node_init();
 
 	nodes_material_list = [
-		nodes_material_input, nodes_material_texture, nodes_material_color, nodes_material_vector, nodes_material_converter,
-		nodes_material_neural,
+		nodes_material_input, nodes_material_texture, nodes_material_color, nodes_material_utilities, nodes_material_neural,
 		nodes_material_group
 	];
 }

@@ -1,6 +1,6 @@
 
 function rgb_to_bw_node_init() {
-	array_push(nodes_material_converter, rgb_to_bw_node_def);
+	array_push(nodes_material_utilities, rgb_to_bw_node_def);
 	map_set(parser_material_node_values, "RGBTOBW", rgb_to_bw_node_value);
 }
 
@@ -22,7 +22,7 @@ let rgb_to_bw_node_def: ui_node_t = {
 		name : _tr("Color"),
 		type : "RGBA",
 		color : 0xffc7c729,
-		default_value : f32_array_create_xyzw(0.0, 0.0, 0.0, 0.0),
+		default_value : f32_array_create_xyzw(0.5, 0.5, 0.5, 1.0),
 		min : 0.0,
 		max : 1.0,
 		precision : 100,

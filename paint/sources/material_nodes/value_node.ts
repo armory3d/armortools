@@ -22,7 +22,7 @@ let value_node_def: ui_node_t = {
 		name : _tr("Value"),
 		type : "VALUE",
 		color : 0xffa1a1a1,
-		default_value : f32_array_create_x(0.5),
+		default_value : f32_array_create_x(0.0),
 		min : 0.0,
 		max : 1.0,
 		precision : 100,

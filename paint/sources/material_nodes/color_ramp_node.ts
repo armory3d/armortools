@@ -1,6 +1,6 @@
 
 function color_ramp_node_init() {
-	array_push(nodes_material_converter, color_ramp_node_def);
+	array_push(nodes_material_utilities, color_ramp_node_def);
 	map_set(parser_material_node_vectors, "VALTORGB", color_ramp_node_vector);
 	map_set(ui_nodes_custom_buttons, "nodes_material_color_ramp_button", nodes_material_color_ramp_button);
 }
@@ -139,7 +139,7 @@ let color_ramp_node_def: ui_node_t = {
 	inputs : [ {
 		id : 0,
 		node_id : 0,
-		name : _tr("Fac"),
+		name : _tr("Factor"),
 		type : "VALUE",
 		color : 0xffa1a1a1,
 		default_value : f32_array_create_x(0.5),
