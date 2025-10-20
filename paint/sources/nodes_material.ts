@@ -38,6 +38,7 @@ function nodes_material_init() {
 
 	nodes_material_texture = [];
 	brick_texture_node_init();
+	camera_texture_node_init();
 	checker_texture_node_init();
 	curvature_bake_node_init();
 	gradient_texture_node_init();

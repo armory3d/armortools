@@ -425,6 +425,10 @@ function uniforms_ext_tex_link(object: object_t, mat: material_data_t, link: str
 			return rt._image;
 		}
 	}
+	if (link == "_camera_texture") {
+		let rt: render_target_t = map_get(render_path_render_targets, "last");
+		return rt._image;
+	}
 
 	return null;
 }
