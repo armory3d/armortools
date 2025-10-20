@@ -25,7 +25,7 @@ function curvature_bake_node_value(node: ui_node_t, socket: ui_node_socket_t): s
 let curvature_bake_node_def: ui_node_t = {
 	id : 0,
 	name : _tr("Curvature Bake"),
-	type : "BAKE_CURVATURE",
+	type : "BAKE_CURVATURE", // extension
 	x : 0,
 	y : 0,
 	color : 0xff4982a0,
