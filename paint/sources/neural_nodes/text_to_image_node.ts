@@ -50,16 +50,37 @@ function text_to_image_node_run_qwen(dir: string, prompt: string): string[] {
 
 function text_to_image_node_run_wan(dir: string, prompt: string): string[] {
 	let argv: string[] = [
-		dir + "/sd", "-M", "vid_gen", "--diffusion-model", dir + "/Wan2.2-T2V-A14B-LowNoise-Q8_0.gguf", "--high-noise-diffusion-model",
-		dir + "/Wan2.2-T2V-A14B-HighNoise-Q8_0.gguf", "--vae", dir + "/wan_2.1_vae.safetensors", "--t5xxl", dir + "/umt5-xxl-encoder-Q8_0.gguf",
-		"--sampling-method", "euler", "--steps", "20",
-		"--high-noise-sampling-method", "euler", "--high-noise-steps", "10", "-W", "512", "-H", "512",
+		dir + "/sd",
+		"-M",
+		"vid_gen",
+		"--diffusion-model",
+		dir + "/Wan2.2-T2V-A14B-LowNoise-Q8_0.gguf",
+		"--high-noise-diffusion-model",
+		dir + "/Wan2.2-T2V-A14B-HighNoise-Q8_0.gguf",
+		"--vae",
+		dir + "/wan_2.1_vae.safetensors",
+		"--t5xxl",
+		dir + "/umt5-xxl-encoder-Q8_0.gguf",
+		"--sampling-method",
+		"euler",
+		"--steps",
+		"20",
+		"--high-noise-sampling-method",
+		"euler",
+		"--high-noise-steps",
+		"10",
+		"-W",
+		"512",
+		"-H",
+		"512",
 		"--offload-to-cpu",
-		// "--flow-shift", "3.0",
-		// "--cfg-scale", "3.5",
-		// "--high-noise-cfg-scale", "3.5",
-		// "--diffusion-fa",
-		"-s", "-1", "-o", dir + "/output.png", "-p", "'" + prompt + "'", null
+		"-s",
+		"-1",
+		"-o",
+		dir + "/output.png",
+		"-p",
+		"'" + prompt + "'",
+		null
 	];
 	return argv;
 }
