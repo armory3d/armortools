@@ -310,6 +310,8 @@ any_map_t *json_parse_to_map(char *s) {
 
 static char *encoded;
 static int   keys;
+static int   array_nest = -1;
+static int   array_length[16];
 
 void json_encode_begin() {
 	encoded = "{";
@@ -396,15 +398,24 @@ void json_encode_bool(char *k, bool b) {
 }
 
 void json_encode_begin_array(char *k) {
+	array_nest++;
+	array_length[array_nest] = 0;
 	json_encode_key(k);
 	encoded = string_join(encoded, "[");
 }
 
 void json_encode_end_array() {
+	array_nest--;
 	encoded = string_join(encoded, "]");
 }
 
 void json_encode_begin_object() {
+	if (array_nest > -1) {
+		if (array_length[array_nest] > 0) {
+			encoded = string_join(encoded, ",");
+		}
+		array_length[array_nest]++;
+	}
 	keys    = 0;
 	encoded = string_join(encoded, "{");
 }
