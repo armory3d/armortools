@@ -1263,6 +1263,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 			gc_unroot(ui_clipboard);
 			ui_clipboard = ui_node_canvas_to_json(&copy_canvas);
 			gc_root(ui_clipboard);
+			iron_copy_to_clipboard(ui_clipboard);
 		}
 		cut_selected = ui_is_cut;
 		ui_is_copy   = false;
