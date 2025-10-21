@@ -142,6 +142,9 @@ function tab_meshes_draw(htab: ui_handle_t) {
 						util_mesh_merge();
 						context_raw.ddirty = 2;
 					}
+					if (ui_menu_button(tr("Duplicate"))) {
+						sim_duplicate();
+					}
 
 					if (config_raw.experimental) {
 						tab_meshes_draw_properties(o);
