@@ -6,7 +6,7 @@ function tab_scripts_draw(htab: ui_handle_t) {
 	if (ui_tab(htab, tr("Scripts"))) {
 
 		ui_begin_sticky();
-		let row: f32[] = [ 1 / 4, 1 / 4, 1 / 2 ];
+		let row: f32[] = [ -70, -70, -140 ];
 		ui_row(row);
 
 		if (ui_button(tr("Run"))) {

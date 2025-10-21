@@ -6,19 +6,13 @@ let _tab_textures_draw_i: i32;
 let _tab_textures_draw_is_packed: bool;
 
 function tab_textures_draw(htab: ui_handle_t) {
-	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-	if (ui_tab(htab, tr("Textures")) && statush > ui_statusbar_default_h * UI_SCALE()) {
+
+	if (ui_tab(htab, tr("Textures")) && ui._window_h > ui_statusbar_default_h * UI_SCALE()) {
 
 		ui_begin_sticky();
 
-		if (config_raw.touch_ui) {
-			let row: f32[] = [ 1 / 4, 1 / 4 ];
-			ui_row(row);
-		}
-		else {
-			let row: f32[] = [ 1 / 14, 1 / 14 ];
-			ui_row(row);
-		}
+		let row: f32[] = [ -100, -100 ];
+		ui_row(row);
 
 		if (ui_button(tr("Import"))) {
 			ui_files_show(string_array_join(path_texture_formats, ","), false, true, function(path: string) {
@@ -38,10 +32,8 @@ function tab_textures_draw(htab: ui_handle_t) {
 
 		if (project_assets.length > 0) {
 
-			let statusw: i32 = iron_window_width() - ui_toolbar_w(true) - config_raw.layout[layout_size_t.SIDEBAR_W];
-
 			let slotw: i32 = math_floor(52 * UI_SCALE());
-			let num: i32   = math_floor(statusw / slotw);
+			let num: i32   = math_floor(ui._window_w / slotw);
 			if (num == 0) {
 				return;
 			}

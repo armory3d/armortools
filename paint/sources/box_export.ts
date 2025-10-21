@@ -285,7 +285,7 @@ function box_export_tab_presets() {
 			box_export_save_preset();
 		}
 
-		row = [ 1 / 8 ];
+		row = [ 1 / 6 ];
 		ui_row(row);
 		if (ui_button(tr("Add"))) {
 			let tex: export_preset_texture_t = {name : "base", channels : [ "base_r", "base_g", "base_b", "1.0" ], color_space : "linear"};

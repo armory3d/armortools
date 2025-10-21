@@ -3,29 +3,15 @@ function tab_console_draw(htab: ui_handle_t) {
 	let title: string = console_message_timer > 0 ? console_message + "        " : tr("Console");
 	let color: i32    = console_message_timer > 0 ? console_message_color : -1;
 
-	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-	if (ui_tab(htab, title, false, color) && statush > ui_statusbar_default_h * UI_SCALE()) {
+	if (ui_tab(htab, title, false, color) && ui._window_h > ui_statusbar_default_h * UI_SCALE()) {
 
 		ui_begin_sticky();
 		/// if (arm_windows || arm_linux || arm_macos) // Copy
-		if (config_raw.touch_ui) {
-			let row: f32[] = [ 1 / 4, 1 / 4, 1 / 4 ];
-			ui_row(row);
-		}
-		else {
-			let row: f32[] = [ 1 / 14, 1 / 14, 1 / 14 ];
-			ui_row(row);
-		}
+		let row: f32[] = [ -100, -100, -100 ];
 		/// else
-		if (config_raw.touch_ui) {
-			let row: f32[] = [ 1 / 4, 1 / 4 ];
-			ui_row(row);
-		}
-		else {
-			let row: f32[] = [ 1 / 14, 1 / 14 ];
-			ui_row(row);
-		}
+		let row: f32[] = [ -100, -100 ];
 		/// end
+		ui_row(row);
 
 		if (ui_button(tr("Clear"))) {
 			console_last_traces = [];

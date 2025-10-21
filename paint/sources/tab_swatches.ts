@@ -20,18 +20,11 @@ function tab_swatches_empty_get(): gpu_texture_t {
 }
 
 function tab_swatches_draw(htab: ui_handle_t) {
-	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-	if (ui_tab(htab, tr("Swatches")) && statush > ui_statusbar_default_h * UI_SCALE()) {
+	if (ui_tab(htab, tr("Swatches")) && ui._window_h > ui_statusbar_default_h * UI_SCALE()) {
 
 		ui_begin_sticky();
-		if (config_raw.touch_ui) {
-			let row: f32[] = [ 1 / 5, 1 / 5, 1 / 5, 1 / 5, 1 / 5 ];
-			ui_row5();
-		}
-		else {
-			let row: f32[] = [ 1 / 14, 1 / 14, 1 / 14, 1 / 14, 1 / 14 ];
-			ui_row(row);
-		}
+		let row: f32[] = [ -100, -100, -100, -100, -100 ];
+		ui_row(row);
 
 		if (ui_button(tr("New"))) {
 			context_set_swatch(make_swatch());

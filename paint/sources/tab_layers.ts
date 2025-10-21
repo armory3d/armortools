@@ -35,7 +35,7 @@ function tab_layers_draw_mini(htab: ui_handle_t) {
 function tab_layers_draw_full(htab: ui_handle_t) {
 	if (ui_tab(htab, tr("Layers"))) {
 		ui_begin_sticky();
-		let row: f32[] = [ 1 / 4, 1 / 4, 1 / 2 ];
+		let row: f32[] = [ -70, -70, -140 ];
 		ui_row(row);
 
 		tab_layers_button_new(tr("New"));

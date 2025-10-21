@@ -15,14 +15,14 @@ function tab_browser_show_directory(directory: string) {
 }
 
 function tab_browser_draw(htab: ui_handle_t) {
-	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-	if (ui_tab(htab, tr("Browser")) && statush > ui_statusbar_default_h * UI_SCALE()) {
+	if (ui_tab(htab, tr("Browser")) && ui._window_h > ui_statusbar_default_h * UI_SCALE()) {
 
 		if (config_raw.bookmarks == null) {
 			config_raw.bookmarks = [];
 		}
 
 		let bookmarks_w: i32 = math_floor(100 * UI_SCALE());
+		let show_full: bool  = ui._w > (500 * UI_SCALE());
 
 		if (tab_browser_hpath.text == "" && config_raw.bookmarks.length > 0) { // Init to first bookmark
 			tab_browser_hpath.text = config_raw.bookmarks[0];
@@ -32,34 +32,42 @@ function tab_browser_draw(htab: ui_handle_t) {
 		}
 
 		ui_begin_sticky();
-		let step: f32 = (1.0 - bookmarks_w / ui._w);
-		if (tab_browser_hsearch.text != "") {
-			let row: f32[] = [ bookmarks_w / ui._w, step * 0.07, step * 0.07, step * 0.66, step * 0.17, step * 0.03 ];
-			ui_row(row);
+
+		if (show_full) {
+			let step: f32 = (1.0 - bookmarks_w / ui._w);
+			if (tab_browser_hsearch.text != "") {
+				let row: f32[] = [ bookmarks_w / ui._w, step * 0.07, step * 0.07, step * 0.66, step * 0.17, step * 0.03 ];
+				ui_row(row);
+			}
+			else {
+				let row: f32[] = [ bookmarks_w / ui._w, step * 0.07, step * 0.07, step * 0.66, step * 0.2 ];
+				ui_row(row);
+			}
+
+			// Bookmark
+			if (ui_button("+")) {
+				let bookmark: string = tab_browser_hpath.text;
+				/// if arm_windows
+				bookmark = string_replace_all(bookmark, "\\", "/");
+				/// end
+				array_push(config_raw.bookmarks, bookmark);
+				config_save();
+			}
+			if (ui.is_hovered) {
+				ui_tooltip(tr("Add bookmark"));
+			}
+
+			// Refresh
+			let in_focus: bool =
+			    ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w && ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
+			if (ui_button(tr("Refresh")) || (in_focus && ui.is_key_pressed && ui.key_code == key_code_t.F5)) {
+				tab_browser_refresh = true;
+			}
 		}
 		else {
-			let row: f32[] = [ bookmarks_w / ui._w, step * 0.07, step * 0.07, step * 0.66, step * 0.2 ];
+			// Up, Refresh
+			let row: f32[] = [ 1 / 4, 3 / 4 ];
 			ui_row(row);
-		}
-
-		// Bookmark
-		if (ui_button("+")) {
-			let bookmark: string = tab_browser_hpath.text;
-			/// if arm_windows
-			bookmark = string_replace_all(bookmark, "\\", "/");
-			/// end
-			array_push(config_raw.bookmarks, bookmark);
-			config_save();
-		}
-		if (ui.is_hovered) {
-			ui_tooltip(tr("Add bookmark"));
-		}
-
-		// Refresh
-		let in_focus: bool =
-		    ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w && ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
-		if (ui_button(tr("Refresh")) || (in_focus && ui.is_key_pressed && ui.key_code == key_code_t.F5)) {
-			tab_browser_refresh = true;
 		}
 
 		// Previous folder
@@ -97,16 +105,19 @@ function tab_browser_draw(htab: ui_handle_t) {
 		}
 		/// end
 
-		tab_browser_hsearch.text = ui_text_input(tab_browser_hsearch, tr("Search"), ui_align_t.LEFT, true, true);
-		if (ui.is_hovered) {
-			ui_tooltip(tr("ctrl+f to search") + "\n" + tr("esc to cancel"));
+		if (show_full) {
+			tab_browser_hsearch.text = ui_text_input(tab_browser_hsearch, tr("Search"), ui_align_t.LEFT, true, true);
+			if (ui.is_hovered) {
+				ui_tooltip(tr("ctrl+f to search") + "\n" + tr("esc to cancel"));
+			}
+			if (ui.is_ctrl_down && ui.is_key_pressed && ui.key_code == key_code_t.F) { // Start searching via ctrl+f
+				ui_start_text_edit(tab_browser_hsearch);
+			}
+			if (tab_browser_hsearch.text != "" && (ui_button(tr("X")) || ui.is_escape_down)) {
+				tab_browser_hsearch.text = "";
+			}
 		}
-		if (ui.is_ctrl_down && ui.is_key_pressed && ui.key_code == key_code_t.F) { // Start searching via ctrl+f
-			ui_start_text_edit(tab_browser_hsearch);
-		}
-		if (tab_browser_hsearch.text != "" && (ui_button(tr("X")) || ui.is_escape_down)) {
-			tab_browser_hsearch.text = "";
-		}
+
 		ui_end_sticky();
 
 		if (tab_browser_last_path != tab_browser_hpath.text) {
@@ -115,8 +126,10 @@ function tab_browser_draw(htab: ui_handle_t) {
 		tab_browser_last_path = tab_browser_hpath.text;
 
 		let _y: f32 = ui._y;
-		ui._x       = bookmarks_w;
-		ui._w -= bookmarks_w;
+		if (show_full) {
+			ui._x = bookmarks_w;
+			ui._w -= bookmarks_w;
+		}
 
 		ui_files_file_browser(tab_browser_hpath, true, tab_browser_hsearch.text, tab_browser_refresh, function(file: string) {
 			let file_name: string  = substring(file, string_last_index_of(file, path_sep) + 1, file.length);
@@ -218,60 +231,62 @@ function tab_browser_draw(htab: ui_handle_t) {
 		}
 		/// end
 
-		let bottom_y: i32 = ui._y;
-		ui._x             = 0;
-		ui._y             = _y;
-		ui._w             = bookmarks_w;
+		if (show_full) {
+			let bottom_y: i32 = ui._y;
+			ui._x             = 0;
+			ui._y             = _y;
+			ui._w             = bookmarks_w;
 
-		if (ui_button(tr("Cloud"), ui_align_t.LEFT)) {
-			tab_browser_hpath.text = "cloud";
-		}
+			if (ui_button(tr("Cloud"), ui_align_t.LEFT)) {
+				tab_browser_hpath.text = "cloud";
+			}
 
-		if (ui_button(tr("Disk"), ui_align_t.LEFT)) {
-			/// if arm_android
-			ui_menu_draw(function() {
-				if (ui_menu_button(tr("Download"))) {
-					tab_browser_hpath.text = ui_files_default_path;
-				}
-				if (ui_menu_button(tr("Pictures"))) {
-					tab_browser_hpath.text = "/storage/emulated/0/Pictures";
-				}
-				if (ui_menu_button(tr("Camera"))) {
-					tab_browser_hpath.text = "/storage/emulated/0/DCIM/Camera";
-				}
-				if (ui_menu_button(tr("Projects"))) {
-					tab_browser_hpath.text = iron_internal_save_path();
-				}
-			});
-			/// else
-			tab_browser_hpath.text = ui_files_default_path;
-			/// end
-		}
-
-		for (let i: i32 = 0; i < config_raw.bookmarks.length; ++i) {
-			let b: string      = config_raw.bookmarks[i];
-			let folder: string = substring(b, string_last_index_of(b, "/") + 1, b.length);
-
-			if (ui_button(folder, ui_align_t.LEFT)) {
-				tab_browser_hpath.text = b;
-				/// if arm_windows
-				tab_browser_hpath.text = string_replace_all(tab_browser_hpath.text, "/", "\\");
+			if (ui_button(tr("Disk"), ui_align_t.LEFT)) {
+				/// if arm_android
+				ui_menu_draw(function() {
+					if (ui_menu_button(tr("Download"))) {
+						tab_browser_hpath.text = ui_files_default_path;
+					}
+					if (ui_menu_button(tr("Pictures"))) {
+						tab_browser_hpath.text = "/storage/emulated/0/Pictures";
+					}
+					if (ui_menu_button(tr("Camera"))) {
+						tab_browser_hpath.text = "/storage/emulated/0/DCIM/Camera";
+					}
+					if (ui_menu_button(tr("Projects"))) {
+						tab_browser_hpath.text = iron_internal_save_path();
+					}
+				});
+				/// else
+				tab_browser_hpath.text = ui_files_default_path;
 				/// end
 			}
 
-			if (ui.is_hovered && ui.input_released_r) {
-				_tab_browser_draw_b = b;
-				ui_menu_draw(function() {
-					if (ui_menu_button(tr("Delete"))) {
-						array_remove(config_raw.bookmarks, _tab_browser_draw_b);
-						config_save();
-					}
-				});
-			}
-		}
+			for (let i: i32 = 0; i < config_raw.bookmarks.length; ++i) {
+				let b: string      = config_raw.bookmarks[i];
+				let folder: string = substring(b, string_last_index_of(b, "/") + 1, b.length);
 
-		if (ui._y < bottom_y) {
-			ui._y = bottom_y;
+				if (ui_button(folder, ui_align_t.LEFT)) {
+					tab_browser_hpath.text = b;
+					/// if arm_windows
+					tab_browser_hpath.text = string_replace_all(tab_browser_hpath.text, "/", "\\");
+					/// end
+				}
+
+				if (ui.is_hovered && ui.input_released_r) {
+					_tab_browser_draw_b = b;
+					ui_menu_draw(function() {
+						if (ui_menu_button(tr("Delete"))) {
+							array_remove(config_raw.bookmarks, _tab_browser_draw_b);
+							config_save();
+						}
+					});
+				}
+			}
+
+			if (ui._y < bottom_y) {
+				ui._y = bottom_y;
+			}
 		}
 	}
 }

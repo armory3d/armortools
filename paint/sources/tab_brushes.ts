@@ -4,7 +4,7 @@ let _tab_brushes_draw_i: i32;
 function tab_brushes_draw(htab: ui_handle_t) {
 	if (ui_tab(htab, tr("Brushes"))) {
 		ui_begin_sticky();
-		let row: f32[] = [ 1 / 4, 1 / 4, 1 / 4 ];
+		let row: f32[] = [ -70, -70, -70 ];
 		ui_row(row);
 		if (ui_button(tr("New"))) {
 			context_raw.brush = slot_brush_create();
@@ -22,7 +22,7 @@ function tab_brushes_draw(htab: ui_handle_t) {
 		ui_separator(3, false);
 
 		let slotw: i32 = math_floor(51 * UI_SCALE());
-		let num: i32   = math_floor(config_raw.layout[layout_size_t.SIDEBAR_W] / slotw);
+		let num: i32   = math_floor(ui._window_w / slotw);
 		if (num == 0) {
 			return;
 		}

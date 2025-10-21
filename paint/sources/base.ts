@@ -679,10 +679,7 @@ function base_redraw_status() {
 }
 
 function base_redraw_console() {
-	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-	if (ui != null && statush > ui_statusbar_default_h * UI_SCALE()) {
-		ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
-	}
+	ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 }
 
 function base_init_undo_layers() {

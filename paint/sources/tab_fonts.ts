@@ -2,18 +2,11 @@
 let _tab_fonts_draw_i: i32;
 
 function tab_fonts_draw(htab: ui_handle_t) {
-	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-	if (ui_tab(htab, tr("Fonts")) && statush > ui_statusbar_default_h * UI_SCALE()) {
+	if (ui_tab(htab, tr("Fonts")) && ui._window_h > ui_statusbar_default_h * UI_SCALE()) {
 
 		ui_begin_sticky();
-		if (config_raw.touch_ui) {
-			let row: f32[] = [ 1 / 4, 1 / 4 ];
-			ui_row(row);
-		}
-		else {
-			let row: f32[] = [ 1 / 14, 1 / 14 ];
-			ui_row(row);
-		}
+		let row: f32[] = [ -100, -100 ];
+		ui_row(row);
 
 		if (ui_button(tr("Import"))) {
 			project_import_asset("ttf,ttc,otf");
@@ -28,9 +21,8 @@ function tab_fonts_draw(htab: ui_handle_t) {
 		ui_end_sticky();
 		ui_separator(3, false);
 
-		let statusw: i32 = iron_window_width() - ui_toolbar_w(true) - config_raw.layout[layout_size_t.SIDEBAR_W];
-		let slotw: i32   = math_floor(51 * UI_SCALE());
-		let num: i32     = math_floor(statusw / slotw);
+		let slotw: i32 = math_floor(51 * UI_SCALE());
+		let num: i32   = math_floor(ui._window_w / slotw);
 		if (num == 0) {
 			return;
 		}

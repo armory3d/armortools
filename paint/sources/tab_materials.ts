@@ -2,7 +2,7 @@
 let _tab_materials_draw_slots: i32;
 
 function tab_materials_draw(htab: ui_handle_t) {
-	let mini: bool = config_raw.layout[layout_size_t.SIDEBAR_W] <= ui_sidebar_w_mini;
+	let mini: bool = ui._window_w <= ui_sidebar_w_mini;
 	mini ? tab_materials_draw_mini(htab) : tab_materials_draw_full(htab);
 }
 
@@ -23,7 +23,7 @@ function tab_materials_draw_mini(htab: ui_handle_t) {
 function tab_materials_draw_full(htab: ui_handle_t) {
 	if (ui_tab(htab, tr("Materials"))) {
 		ui_begin_sticky();
-		let row: f32[] = [ 1 / 4, 1 / 4, 1 / 4 ];
+		let row: f32[] = [ -70, -70, -70 ];
 		ui_row(row);
 
 		tab_materials_button_new(tr("New"));
@@ -49,7 +49,7 @@ function tab_materials_button_nodes() {
 
 function tab_materials_draw_slots(mini: bool) {
 	let slotw: i32 = math_floor((51 + math_floor(config_raw.window_scale * 2)) * UI_SCALE());
-	let num: i32   = math_floor(config_raw.layout[layout_size_t.SIDEBAR_W] / slotw);
+	let num: i32   = math_floor(ui._window_w / slotw);
 	if (num == 0) {
 		return;
 	}

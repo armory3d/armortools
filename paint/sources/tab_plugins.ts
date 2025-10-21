@@ -4,7 +4,7 @@ function tab_plugins_draw(htab: ui_handle_t) {
 
 		ui_begin_sticky();
 
-		let row: f32[] = [ 1 / 4 ];
+		let row: f32[] = [ -70 ];
 		ui_row(row);
 
 		if (ui_button(tr("Manager"))) {

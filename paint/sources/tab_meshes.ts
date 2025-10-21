@@ -2,19 +2,11 @@
 let _tab_meshes_draw_i: i32;
 
 function tab_meshes_draw(htab: ui_handle_t) {
-	let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
-	if (ui_tab(htab, tr("Meshes")) && statush > ui_statusbar_default_h * UI_SCALE()) {
+	if (ui_tab(htab, tr("Meshes")) && ui._window_h > ui_statusbar_default_h * UI_SCALE()) {
 
 		ui_begin_sticky();
-
-		if (config_raw.touch_ui) {
-			let row: f32[] = [ 1 / 4, 1 / 4 ];
-			ui_row(row);
-		}
-		else {
-			let row: f32[] = [ 1 / 14, 1 / 14 ];
-			ui_row(row);
-		}
+		let row: f32[] = [ -100, -100 ];
+		ui_row(row);
 
 		if (ui_button(tr("Import"))) {
 			ui_menu_draw(function() {
