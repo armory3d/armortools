@@ -422,8 +422,19 @@ bool ui_is_visible(float elem_h) {
 	return (current->_y + elem_h > current->window_header_h && current->_y < current->current_window->texture.height);
 }
 
-float ui_get_ratio(float ratio, float dyn) {
-	return ratio < 0 ? -ratio : ratio * dyn;
+float ui_get_ratio(f32_array_t *ratios, int current, float w) {
+	float ratio = ratios->buffer[current];
+	if (ratio < 0) {
+		float t = 0.0;
+		for (int i = 0; i < ratios->length; ++i) {
+			t += -ratios->buffer[i] * UI_SCALE();
+		}
+		float f = t > w ? w / t : 1.0;
+		return -ratio * f * UI_SCALE();
+	}
+	else {
+		return ratio * w;
+	}
 }
 
 // Draw the upcoming elements in the same row
@@ -437,7 +448,7 @@ void ui_row(f32_array_t *ratios) {
 	current->current_ratio  = 0;
 	current->x_before_split = current->_x;
 	current->w_before_split = current->_w;
-	current->_w             = ui_get_ratio(ratios->buffer[current->current_ratio], current->_w);
+	current->_w             = ui_get_ratio(ratios, current->current_ratio, current->_w);
 }
 
 void ui_row2() {
@@ -489,7 +500,7 @@ void ui_end_element_of_size(float element_size) {
 		else { // Row
 			current->current_ratio++;
 			current->_x += current->_w; // More row elements to place
-			current->_w = ui_get_ratio(current->ratios->buffer[current->current_ratio], current->w_before_split);
+			current->_w = ui_get_ratio(current->ratios, current->current_ratio, current->w_before_split);
 		}
 	}
 	else { // Horizontal
@@ -1903,7 +1914,7 @@ int ui_sub_image(gpu_texture_t *image, uint32_t tint, int h, int sx, int sy, int
 	float w      = fmin(iw, current->_w);
 	float x      = current->_x;
 	float scroll = current->current_window != NULL ? current->current_window->scroll_enabled : false;
-	float r      = current->current_ratio == -1 ? 1.0 : ui_get_ratio(current->ratios->buffer[current->current_ratio], 1);
+	float r      = current->current_ratio == -1 ? 1.0 : ui_get_ratio(current->ratios, current->current_ratio, 1);
 	if (current->image_scroll_align) { // Account for scrollbar size
 		w = fmin(iw, current->_w - current->button_offset_y * 2.0);
 		x += current->button_offset_y;
