@@ -35,9 +35,11 @@ fun tex_gabor(co: float3, scale: float, frequency: float, anisotropy: float, ori
 				var r: float3 = b - fp + h; \
 				var dir: float3 = normalize(orientation); \
 				if (anisotropy < 1.0) { \
-					var hr: float = gabor_hash1(ip + b + float3(2.2, 2.2, 2.2)); \
+					var hr_p: float3 = ip + b + float3(2.2, 2.2, 2.2);\
+					var hr: float = gabor_hash1(hr_p); \
 					if (hr > anisotropy) { \
-						dir = gabor_random_unit_vector(ip + b + float3(3.3, 3.3, 3.3)); \
+						var dir_p: float3 = ip + b + float3(3.3, 3.3, 3.3);\
+						dir = gabor_random_unit_vector(dir_p); \
 					} \
 				} \
 				var dot_rd: float = dot(r, dir); \
