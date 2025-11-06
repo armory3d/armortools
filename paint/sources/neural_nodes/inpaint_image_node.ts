@@ -56,42 +56,17 @@ function inpaint_image_node_button(node_id: i32) {
 				let negative: string = "";
 
 				let argv: string[] = [
-					dir + "/sd_qie",
-					"--diffusion-model",
-					dir + "/Qwen-Image-Edit-2509-Q4_K_S.gguf",
-					"--vae",
-					dir + "/qwen_image_vae.safetensors",
-					"--qwen2vl",
-					dir + "/Qwen2.5-VL-7B-Instruct-Q8_0.gguf",
-					"--qwen2vl_vision",
-					dir + "/Qwen2.5-VL-7B-Instruct.mmproj-Q8_0.gguf",
-					"--sampling-method",
-					"euler",
-					"--offload-to-cpu",
-					"--cfg-scale",
+					dir + "/sd_qie", "--diffusion-model", dir + "/Qwen-Image-Edit-2509-Q4_K_S.gguf", "--vae", dir + "/qwen_image_vae.safetensors", "--qwen2vl",
+					dir + "/Qwen2.5-VL-7B-Instruct-Q8_0.gguf", "--qwen2vl_vision", dir + "/Qwen2.5-VL-7B-Instruct.mmproj-Q8_0.gguf", "--sampling-method",
+					"euler", "--offload-to-cpu", "--cfg-scale",
 					"2.5", // 1.0
 					"--flow-shift",
 					"3", // 1
 					"--diffusion-fa",
 					// "--vae-tiling",
 					// "--vae-on-cpu",
-					"--steps",
-					"40",
-					"-s",
-					"-1",
-					"-W",
-					"512",
-					"-H",
-					"512",
-					"-p",
-					"'" + prompt + "'",
-					"-n",
-					"'" + negative + "'",
-					"-r",
-					dir + "/input.png",
-					"-o",
-					dir + "/output.png",
-					null
+					"--steps", "40", "-s", "-1", "-W", "512", "-H", "512", "-p", "'" + prompt + "'", "-n", "'" + negative + "'", "-r", dir + "/input.png", "-o",
+					dir + "/output.png", null
 				];
 
 				iron_exec_async(argv[0], argv.buffer);

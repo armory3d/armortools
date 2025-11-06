@@ -93,10 +93,8 @@ function nodes_material_init() {
 	nodes_material_group = [];
 	group_node_init();
 
-	nodes_material_list = [
-		nodes_material_input, nodes_material_texture, nodes_material_color, nodes_material_utilities, nodes_material_neural,
-		nodes_material_group
-	];
+	nodes_material_list =
+	    [ nodes_material_input, nodes_material_texture, nodes_material_color, nodes_material_utilities, nodes_material_neural, nodes_material_group ];
 }
 
 function nodes_material_get_node_t(node_type: string): ui_node_t {

@@ -138,8 +138,8 @@ function ui_view2d_render() {
 			let nodes: ui_nodes_t   = ui_nodes_get_nodes();
 			let c: ui_node_canvas_t = ui_nodes_get_canvas(true);
 			if (nodes.nodes_selected_id.length > 0) {
-				let sel: ui_node_t      = ui_get_node(c.nodes, nodes.nodes_selected_id[0]);
-				let img: gpu_texture_t  = ui_nodes_get_node_preview_image(sel);
+				let sel: ui_node_t     = ui_get_node(c.nodes, nodes.nodes_selected_id[0]);
+				let img: gpu_texture_t = ui_nodes_get_node_preview_image(sel);
 				if (img != null) {
 					tex = ui_nodes_get_node_preview_image(sel);
 				}

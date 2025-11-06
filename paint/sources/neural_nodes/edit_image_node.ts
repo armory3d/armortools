@@ -54,36 +54,12 @@ function edit_image_node_button(node_id: i32) {
 			iron_write_png(dir + path_sep + "input.png", gpu_get_texture_pixels(input), input.width, input.height, 0);
 
 			let argv: string[] = [
-				dir + "/sd_qie",
-				"--diffusion-model",
-				dir + "/Qwen-Image-Edit-2509-Q4_K_S.gguf",
-				"--vae",
-				dir + "/qwen_image_vae.safetensors",
-				"--qwen2vl",
-				dir + "/Qwen2.5-VL-7B-Instruct-Q8_0.gguf",
-				"--qwen2vl_vision",
-				dir + "/Qwen2.5-VL-7B-Instruct.mmproj-Q8_0.gguf",
-				"--sampling-method",
-				"euler",
-				"--offload-to-cpu",
-				"--diffusion-fa",
-				"--steps",
-				"50",
-				"-s",
-				"-1",
-				"-W",
-				"512",
-				"-H",
-				"512",
-				"-p",
-				"'" + prompt + "'",
+				dir + "/sd_qie", "--diffusion-model", dir + "/Qwen-Image-Edit-2509-Q4_K_S.gguf", "--vae", dir + "/qwen_image_vae.safetensors", "--qwen2vl",
+				dir + "/Qwen2.5-VL-7B-Instruct-Q8_0.gguf", "--qwen2vl_vision", dir + "/Qwen2.5-VL-7B-Instruct.mmproj-Q8_0.gguf", "--sampling-method", "euler",
+				"--offload-to-cpu", "--diffusion-fa", "--steps", "50", "-s", "-1", "-W", "512", "-H", "512", "-p", "'" + prompt + "'",
 				// "-n",
 				// "'" + negative + "'",
-				"-r",
-				dir + "/input.png",
-				"-o",
-				dir + "/output.png",
-				null
+				"-r", dir + "/input.png", "-o", dir + "/output.png", null
 			];
 
 			iron_exec_async(argv[0], argv.buffer);

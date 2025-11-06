@@ -1,10 +1,10 @@
 
-let image_to_pbr_node_result_base: gpu_texture_t = null;
-let image_to_pbr_node_result_normal: gpu_texture_t = null;
+let image_to_pbr_node_result_base: gpu_texture_t      = null;
+let image_to_pbr_node_result_normal: gpu_texture_t    = null;
 let image_to_pbr_node_result_occlusion: gpu_texture_t = null;
-let image_to_pbr_node_result_height: gpu_texture_t = null;
+let image_to_pbr_node_result_height: gpu_texture_t    = null;
 let image_to_pbr_node_result_roughness: gpu_texture_t = null;
-let image_to_pbr_node_result_metallic: gpu_texture_t = null;
+let image_to_pbr_node_result_metallic: gpu_texture_t  = null;
 
 function image_to_pbr_node_init() {
 	array_push(nodes_material_neural, image_to_pbr_node_def);
@@ -142,7 +142,7 @@ function image_to_pbr_node_button(node_id: i32) {
 	}
 }
 
-function image_to_pbr_node_check_result(done: (tex: gpu_texture_t)=>void) {
+function image_to_pbr_node_check_result(done: (tex: gpu_texture_t) => void) {
 	if (iron_exec_async_done == 1) {
 
 		let dir: string;

@@ -76,20 +76,18 @@ let image_to_normal_map_node_def: ui_node_t = {
 		precision : 100,
 		display : 0
 	} ],
-	outputs : [
-		{
-			id : 0,
-			node_id : 0,
-			name : _tr("Normal Map"),
-			type : "VECTOR",
-			color : 0xffc7c729,
-			default_value : f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
-			min : 0.0,
-			max : 1.0,
-			precision : 100,
-			display : 0
-		}
-	],
+	outputs : [ {
+		id : 0,
+		node_id : 0,
+		name : _tr("Normal Map"),
+		type : "VECTOR",
+		color : 0xffc7c729,
+		default_value : f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+		min : 0.0,
+		max : 1.0,
+		precision : 100,
+		display : 0
+	} ],
 	buttons : [ {
 		name : "image_to_normal_map_node_button",
 		type : "CUSTOM",
