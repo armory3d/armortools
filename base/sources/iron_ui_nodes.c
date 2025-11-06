@@ -2,6 +2,7 @@
 
 #include "iron_armpack.h"
 #include "iron_array.h"
+#include "iron_string.h"
 #include "iron_draw.h"
 #include "iron_gc.h"
 #include "iron_json.h"
@@ -1284,7 +1285,8 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 				for (int j = 0; j < paste_canvas->nodes->buffer[i]->buttons->length; ++j) {
 					ui_node_button_t *but = paste_canvas->nodes->buffer[i]->buttons->buffer[j];
 					if (but->data != NULL) {
-						but->data = u8_array_create_from_raw(but->data, strlen(but->data) + 1);
+						char *s = string_replace_all(but->data, "\\n", "\n");
+						but->data = u8_array_create_from_raw(s, strlen(s) + 1);
 					}
 				}
 			}
@@ -1689,7 +1691,8 @@ char *ui_node_canvas_to_json(ui_node_canvas_t *canvas) {
 			json_encode_f32_array("default_value", canvas->nodes->buffer[i]->buttons->buffer[j]->default_value);
 			u8_array_t *data = canvas->nodes->buffer[i]->buttons->buffer[j]->data;
 			if (data != NULL) {
-				json_encode_string("data", data->buffer);
+				char *s = string_replace_all(data->buffer, "\n", "\\n");
+				json_encode_string("data", s);
 			}
 			else {
 				json_encode_null("data");
