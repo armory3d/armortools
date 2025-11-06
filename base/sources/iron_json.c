@@ -1,7 +1,12 @@
 
 #include "iron_json.h"
+#include "iron_gc.h"
 #include "iron_string.h"
+
+#define JSMN_PARENT_LINKS
 #include <jsmn.h>
+
+#include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -429,4 +434,210 @@ void json_encode_map(any_map_t *m) {
 	for (uint32_t i = 0; i < keys->length; i++) {
 		json_encode_string(keys->buffer[i], any_map_get(m, keys->buffer[i]));
 	}
+}
+
+typedef struct _json_tokeners {
+	jsmntok_t *tokeners;
+	size_t     length;
+} _json_tokeners_t;
+
+_json_type_t _json_object_type(const char *const s, jsmntok_t *t) {
+	assert(t != NULL);
+
+	switch (t->type) {
+	case JSMN_OBJECT:
+		return JSON_TYPE_OBJECT;
+
+	case JSMN_ARRAY:
+		return JSON_TYPE_ARRAY;
+
+	case JSMN_STRING:
+		return JSON_TYPE_STRING;
+
+	case JSMN_PRIMITIVE:
+		switch (s[t->start]) {
+		case '-':
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+			return JSON_TYPE_NUMBER;
+
+		case 't':
+		case 'T':
+		case 'f':
+		case 'F':
+			return JSON_TYPE_BOOL;
+
+		case 'n':
+		case 'N':
+			return JSON_TYPE_NULL;
+		}
+	}
+	return JSON_TYPE_UNDEFINED;
+}
+
+json_object_t *json_decode(const char *const s) {
+	assert(s != NULL);
+
+	json_object_t *object = NULL;
+
+	jsmn_parser p;
+	jsmn_init(&p);
+
+	// get the count of tokeners
+	int r = jsmn_parse(&p, s, string_length(s), NULL, 0);
+	if (r > 0) {
+		jsmntok_t *ts = gc_alloc(sizeof(jsmntok_t) * r);
+
+		// re-init the parser
+		jsmn_init(&p);
+
+		// get all json tokeners
+		if (jsmn_parse(&p, s, string_length(s), ts, r) == r) {
+			_json_tokeners_t *tokeners = gc_alloc(sizeof(_json_tokeners_t));
+			tokeners->tokeners         = ts;
+			tokeners->length           = r;
+
+			object        = gc_alloc(sizeof(json_object_t));
+			object->type  = _json_object_type(s, ts);
+			object->index = 0;
+			object->data  = tokeners;
+		}
+	}
+
+	return object;
+}
+
+json_object_t *json_decode_object_value(const char *const s, json_object_t *o, const char *name) {
+	assert(s != NULL);
+	assert(o != NULL);
+	assert(o->type == JSON_TYPE_OBJECT);
+
+	if (name == NULL) {
+		if (o->index == 0) {
+			return o;
+		}
+		return NULL;
+	}
+
+	const _json_tokeners_t *const tokeners = (const _json_tokeners_t *)o->data;
+	const jsmntok_t *const        t_object = tokeners->tokeners + o->index;
+
+	json_object_t *object = NULL;
+	uint32_t       count  = 0;
+	for (int i = o->index + 1; i < tokeners->length && count < t_object->size; ++i) {
+		const jsmntok_t *const t_key = tokeners->tokeners + i;
+		if (t_key->parent != o->index) {
+			continue;
+		}
+
+		++count;
+		if (t_key->type != JSMN_STRING) {
+			continue;
+		}
+
+		if (strncmp(name, s + t_key->start, t_key->end - t_key->start) != 0) {
+			continue;
+		}
+
+		if ((i + 1) < tokeners->length) {
+			const jsmntok_t *const t_value = tokeners->tokeners + i + 1;
+			if (t_value->parent == i) {
+				object        = gc_alloc(sizeof(json_object_t));
+				object->type  = _json_object_type(s, t_value);
+				object->index = i + 1;
+				object->data  = o->data;
+			}
+		}
+		break;
+	}
+
+	return object;
+}
+
+json_object_t *json_decode_array_value(const char *const s, json_object_t *o, uint32_t index) {
+	assert(s != NULL);
+	assert(o != NULL);
+	assert(o->type == JSON_TYPE_ARRAY);
+
+	const _json_tokeners_t *const tokeners = (const _json_tokeners_t *)o->data;
+
+	const uint32_t tokener_index = o->index + index + 1;
+	if (tokener_index >= tokeners->length) {
+		return NULL;
+	}
+
+	const jsmntok_t *const t_array = tokeners->tokeners + o->index;
+	if (index >= t_array->size) {
+		return NULL;
+	}
+
+	json_object_t *object = NULL;
+	uint32_t       count  = 0;
+	for (int i = o->index + 1; i < tokeners->length && count < t_array->size; ++i) {
+		const jsmntok_t *const t_value = tokeners->tokeners + i;
+		if (t_value->parent != o->index) {
+			break;
+		}
+
+		if (count != index) {
+			++count;
+			continue;
+		}
+
+		object        = gc_alloc(sizeof(json_object_t));
+		object->type  = _json_object_type(s, t_value);
+		object->index = i;
+		object->data  = o->data;
+		break;
+	}
+
+	return object;
+}
+
+char *json_decode_string_value(const char *const s, json_object_t *o) {
+	assert(s != NULL);
+	assert(o != NULL);
+	assert(o->type == JSON_TYPE_STRING);
+
+	const _json_tokeners_t *const tokeners = (const _json_tokeners_t *)o->data;
+	assert(o->index < tokeners->length);
+	const jsmntok_t *const t = tokeners->tokeners + o->index;
+	assert(t->type == JSMN_STRING);
+
+	return substring(s, t->start, t->end);
+}
+
+float json_decode_number_value(const char *const s, json_object_t *o) {
+	assert(s != NULL);
+	assert(o != NULL);
+	assert(o->type == JSON_TYPE_NUMBER);
+
+	const _json_tokeners_t *const tokeners = (const _json_tokeners_t *)o->data;
+	assert(o->index < tokeners->length);
+	const jsmntok_t *const t = tokeners->tokeners + o->index;
+	assert(t->type == JSMN_PRIMITIVE);
+
+	return f32_from_string(substring(s, t->start, t->end));
+}
+
+bool json_decode_bool_value(const char *const s, json_object_t *o) {
+	assert(s != NULL);
+	assert(o != NULL);
+	assert(o->type == JSON_TYPE_BOOL);
+
+	const _json_tokeners_t *const tokeners = (const _json_tokeners_t *)o->data;
+	assert(o->index < tokeners->length);
+	const jsmntok_t *const t = tokeners->tokeners + o->index;
+	assert(t->type == JSMN_PRIMITIVE);
+
+	const char c = s[t->start];
+	return c == 't' || c == 'T';
 }

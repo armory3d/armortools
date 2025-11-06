@@ -82,6 +82,10 @@ char *f32_to_string(float f) {
 	return r;
 }
 
+float f32_from_string(const char *const s) {
+	return atof(s);
+}
+
 void string_strip_trailing_zeros(char *str) {
 	int len = strlen(str);
 	while (str[--len] == '0') {
