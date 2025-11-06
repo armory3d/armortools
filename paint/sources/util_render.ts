@@ -1,5 +1,6 @@
 
 let util_render_material_preview_size: i32           = 256;
+let util_render_node_preview_size: i32               = 512;
 let util_render_decal_preview_size: i32              = 512;
 let util_render_layer_preview_size: i32              = 200;
 let util_render_font_preview_size: i32               = 200;

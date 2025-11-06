@@ -1502,7 +1502,7 @@ function ui_nodes_make_node_preview(node: ui_node_t) {
 
 	let img: gpu_texture_t = any_imap_get(context_raw.node_preview_map, node.id);
 	if (img == null) {
-		img = gpu_create_render_target(util_render_material_preview_size, util_render_material_preview_size);
+		img = gpu_create_render_target(util_render_node_preview_size, util_render_node_preview_size);
 		any_imap_set(context_raw.node_preview_map, node.id, img);
 	}
 
