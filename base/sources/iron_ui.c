@@ -1099,7 +1099,7 @@ void ui_insert_chars_at(char *str, int at, char *cs) {
 }
 
 void ui_update_text_edit(int align, bool editable, bool live_update) {
-	char text[256];
+	char text[1024];
 	strcpy(text, current->text_selected);
 	if (current->is_key_pressed) {                // Process input
 		if (current->key_code == IRON_KEY_LEFT) { // Move cursor
@@ -1181,7 +1181,7 @@ void ui_update_text_edit(int align, bool editable, bool live_update) {
 		}
 	}
 
-	if (editable && ui_text_to_paste[0] != '\0') { // Process cut copy paste
+	if (editable && ui_is_paste) { // Process cut copy paste
 		ui_remove_chars_at(text, current->highlight_anchor, current->cursor_x - current->highlight_anchor);
 		ui_insert_chars_at(text, current->highlight_anchor, ui_text_to_paste);
 		current->cursor_x += strlen(ui_text_to_paste);
