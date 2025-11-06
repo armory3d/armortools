@@ -1,276 +1,271 @@
 
-// type photo_to_pbr_node_t = {
-// 	base?: logic_node_t;
-// };
+let image_to_pbr_node_result_base: gpu_texture_t = null;
+let image_to_pbr_node_result_normal: gpu_texture_t = null;
+let image_to_pbr_node_result_occlusion: gpu_texture_t = null;
+let image_to_pbr_node_result_height: gpu_texture_t = null;
+let image_to_pbr_node_result_roughness: gpu_texture_t = null;
+let image_to_pbr_node_result_metallic: gpu_texture_t = null;
 
-// let photo_to_pbr_node_temp: gpu_texture_t = null;
-// let photo_to_pbr_node_images: gpu_texture_t[] = null;
-// let photo_to_pbr_node_model_names: string[] = ["base", "occlusion", "roughness", "metallic", "normal", "height"];
+function image_to_pbr_node_init() {
+	array_push(nodes_material_neural, image_to_pbr_node_def);
+	map_set(parser_material_node_vectors, "NEURAL_IMAGE_TO_PBR", image_to_pbr_node_vector);
+	map_set(parser_material_node_values, "NEURAL_IMAGE_TO_PBR", image_to_pbr_node_value);
+	map_set(ui_nodes_custom_buttons, "image_to_pbr_node_button", image_to_pbr_node_button);
+}
 
-// let photo_to_pbr_node_cached_source: gpu_texture_t = null;
-// let photo_to_pbr_node_border_w: i32 = 64;
-// let photo_to_pbr_node_tile_w: i32 = 2048;
-// let photo_to_pbr_node_tile_with_border_w: i32 = photo_to_pbr_node_tile_w + photo_to_pbr_node_border_w * 2;
+function image_to_pbr_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
+	let result: gpu_texture_t = null;
+	if (socket == node.outputs[0]) { // base color
+		result = image_to_pbr_node_result_base;
+	}
+	else if (socket == node.outputs[4]) { // normal map
+		result = image_to_pbr_node_result_normal;
+	}
 
-// function photo_to_pbr_node_create(raw: ui_node_t, args: f32_array_t): photo_to_pbr_node_t {
-// 	let n: photo_to_pbr_node_t = {};
-// 	n.base = logic_node_create(n);
-// 	n.base.get_as_image = photo_to_pbr_node_get_as_image;
+	if (result == null) {
+		return "float3(0.0, 0.0, 0.0)";
+	}
+	let tex_name: string = string_join(parser_material_node_name(node), i32_to_string(socket.id));
+	map_set(data_cached_images, tex_name, result);
+	let tex: bind_tex_t  = parser_material_make_bind_tex(tex_name, tex_name);
+	let texstore: string = parser_material_texture_store(node, tex, tex_name, color_space_t.AUTO);
+	return texstore + ".rgb";
+}
 
-// 	if (photo_to_pbr_node_temp == null) {
-// 		photo_to_pbr_node_temp = gpu_create_render_target(photo_to_pbr_node_tile_with_border_w, photo_to_pbr_node_tile_with_border_w);
-// 	}
+function image_to_pbr_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
+	let result: gpu_texture_t = null;
+	if (socket == node.outputs[1]) { // occlusion
+		result = image_to_pbr_node_result_occlusion;
+	}
+	else if (socket == node.outputs[2]) { // roughness
+		result = image_to_pbr_node_result_roughness;
+	}
+	else if (socket == node.outputs[3]) { // metallic
+		result = image_to_pbr_node_result_metallic;
+	}
+	else if (socket == node.outputs[5]) { // height
+		result = image_to_pbr_node_result_height;
+	}
 
-// 	photo_to_pbr_node_init();
+	if (result == null) {
+		return "0.0";
+	}
 
-// 	return n;
-// }
+	let tex_name: string = string_join(parser_material_node_name(node), i32_to_string(socket.id));
+	map_set(data_cached_images, tex_name, result);
+	let tex: bind_tex_t  = parser_material_make_bind_tex(tex_name, tex_name);
+	let texstore: string = parser_material_texture_store(node, tex, tex_name, color_space_t.AUTO);
+	return texstore + ".r";
+}
 
-// function photo_to_pbr_node_init() {
-// 	if (photo_to_pbr_node_images == null) {
-// 		photo_to_pbr_node_images = [];
-// 		for (let i: i32 = 0; i < photo_to_pbr_node_model_names.length; ++i) {
-// 			array_push(photo_to_pbr_node_images, gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y()));
-// 		}
-// 	}
-// }
+function image_to_pbr_node_run_sd(model: string, prompt: string, done: (tex: gpu_texture_t) => void) {
+	let dir: string;
+	if (path_is_protected()) {
+		dir = iron_internal_save_path() + "models";
+	}
+	else {
+		dir = iron_internal_files_location() + path_sep + "models";
+	}
 
-// function photo_to_pbr_node_get_as_image(self: photo_to_pbr_node_t, from: i32): gpu_texture_t {
+	let argv: string[] = [
+		dir + "/sd",
+		"-m",
+		dir + "/" + model,
+		"--sampling-method",
+		"ddim_trailing",
+		"--steps",
+		"10",
+		"-s",
+		"-1",
+		"-W",
+		"768",
+		"-H",
+		"768",
+		"-p",
+		"'" + prompt + "'",
+		"-i",
+		dir + "/input.png",
+		"-o",
+		dir + "/output.png",
+		null
+	];
 
-// 	let source: gpu_texture_t;
-// 	if (photo_to_pbr_node_cached_source != null) {
-// 		source = photo_to_pbr_node_cached_source;
-// 	}
-// 	else {
-// 		source = logic_node_input_get_as_image(self.base.inputs[0]);
-// 	}
+	iron_exec_async(argv[0], argv.buffer);
+	sys_notify_on_update(image_to_pbr_node_check_result, done);
+}
 
-// 	photo_to_pbr_node_cached_source = source;
+function image_to_pbr_node_button(node_id: i32) {
+	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
+	let node: ui_node_t          = ui_get_node(canvas.nodes, node_id);
 
-// 	console_progress(tr("Processing") + " - " + tr("Photo to PBR"));
+	let models: string[] = [ "Marigold" ];
+	let model: i32       = ui_combo(ui_handle(__ID__), models, tr("Model"));
 
-// 	let tile_floats: f32_array_t[] = [];
-// 	let tiles_x: i32 = math_floor(config_get_texture_res_x() / photo_to_pbr_node_tile_w);
-// 	let tiles_y: i32 = math_floor(config_get_texture_res_y() / photo_to_pbr_node_tile_w);
-// 	let num_tiles: i32 = tiles_x * tiles_y;
-// 	for (let i: i32 = 0; i < num_tiles; ++i) {
-// 		let x: i32 = i % tiles_x;
-// 		let y: i32 = math_floor(i / tiles_x);
+	if (iron_exec_async_done == 0) {
+		ui_button("Cancel...");
+	}
+	else if (ui_button("Run")) {
+		let inp: ui_node_socket_t = node.inputs[0];
+		let from_node: ui_node_t  = null;
+		for (let i: i32 = 0; i < canvas.links.length; ++i) {
+			let l: ui_node_link_t = canvas.links[i];
+			if (l.to_id == inp.node_id) {
+				from_node = ui_get_node(canvas.nodes, l.from_id);
+				break;
+			}
+		}
 
-// 		draw_begin(photo_to_pbr_node_temp);
-// 		draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w, -config_get_texture_res_x(), config_get_texture_res_y());
-// 		draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w, config_get_texture_res_x(), -config_get_texture_res_y());
-// 		draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w, -config_get_texture_res_x(), -config_get_texture_res_y());
-// 		draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w + photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w + photo_to_pbr_node_tile_w, config_get_texture_res_x(), config_get_texture_res_y());
-// 		draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w + photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w + photo_to_pbr_node_tile_w, -config_get_texture_res_x(), config_get_texture_res_y());
-// 		draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w + photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w + photo_to_pbr_node_tile_w, config_get_texture_res_x(), -config_get_texture_res_y());
-// 		draw_scaled_image(source, photo_to_pbr_node_border_w - x * photo_to_pbr_node_tile_w, photo_to_pbr_node_border_w - y * photo_to_pbr_node_tile_w, config_get_texture_res_x(), config_get_texture_res_y());
-// 		draw_end();
+		let input: gpu_texture_t = ui_nodes_get_node_preview_image(from_node);
+		if (input != null) {
+			let dir: string;
+			if (path_is_protected()) {
+				dir = iron_internal_save_path() + "models";
+			}
+			else {
+				dir = iron_internal_files_location() + path_sep + "models";
+			}
+			iron_write_png(dir + path_sep + "input.png", gpu_get_texture_pixels(input), input.width, input.height, 0);
 
-// 		let bytes_img: buffer_t = gpu_get_texture_pixels(photo_to_pbr_node_temp);
-// 		let u8a: buffer_t = bytes_img;
-// 		let f32a: f32_array_t = f32_array_create(3 * photo_to_pbr_node_tile_with_border_w * photo_to_pbr_node_tile_with_border_w);
-// 		for (let i: i32 = 0; i < (photo_to_pbr_node_tile_with_border_w * photo_to_pbr_node_tile_with_border_w); ++i) {
-// 			f32a[i] = (u8a[i * 4] / 255 - 0.5) / 0.5;
-// 			f32a[i + photo_to_pbr_node_tile_with_border_w * photo_to_pbr_node_tile_with_border_w    ] = (u8a[i * 4 + 1] / 255 - 0.5) / 0.5;
-// 			f32a[i + photo_to_pbr_node_tile_with_border_w * photo_to_pbr_node_tile_with_border_w * 2] = (u8a[i * 4 + 2] / 255 - 0.5) / 0.5;
-// 		}
+			image_to_pbr_node_run_sd("marigold-normals-v1-1.safetensors", " ", function(tex: gpu_texture_t) {
+				image_to_pbr_node_result_normal = tex;
+				image_to_pbr_node_run_sd("marigold-depth-v1-1.safetensors", " ", function(tex: gpu_texture_t) {
+					image_to_pbr_node_result_height = tex;
+					image_to_pbr_node_run_sd("marigold-iid-appearance-v1-1.safetensors", " ", function(tex: gpu_texture_t) {
+						image_to_pbr_node_result_base = tex;
+						image_to_pbr_node_run_sd("marigold-iid-appearance-v1-1.safetensors", "_roughness", function(tex: gpu_texture_t) {
+							image_to_pbr_node_result_roughness = tex;
+						});
+					});
+				});
+			});
+		}
+	}
+}
 
-// 		let model_blob: buffer_t = data_get_blob("models/photo_to_" + photo_to_pbr_node_model_names[from] + ".quant.onnx");
-// 		let tensors: buffer_t[] = [buffer_create_from_raw(f32a.buffer, f32a.length * 4)];
-// 		let buf: buffer_t = iron_ml_inference(model_blob, tensors, null, null, config_raw.gpu_inference);
-// 		let ar: f32_array_t = f32_array_create_from_buffer(buf);
-// 		u8a = u8_array_create(4 * photo_to_pbr_node_tile_w * photo_to_pbr_node_tile_w);
-// 		let offset_g: i32 = (from == channel_type_t.BASE_COLOR || from == channel_type_t.NORMAL_MAP) ? photo_to_pbr_node_tile_with_border_w * photo_to_pbr_node_tile_with_border_w : 0;
-// 		let offset_b: i32 = (from == channel_type_t.BASE_COLOR || from == channel_type_t.NORMAL_MAP) ? photo_to_pbr_node_tile_with_border_w * photo_to_pbr_node_tile_with_border_w * 2 : 0;
-// 		for (let i: i32 = 0; i < (photo_to_pbr_node_tile_w * photo_to_pbr_node_tile_w); ++i) {
-// 			let x: i32 = photo_to_pbr_node_border_w + i % photo_to_pbr_node_tile_w;
-// 			let y: i32 = photo_to_pbr_node_border_w + math_floor(i / photo_to_pbr_node_tile_w);
-// 			u8a[i * 4    ] = math_floor((ar[y * photo_to_pbr_node_tile_with_border_w + x           ] * 0.5 + 0.5) * 255);
-// 			u8a[i * 4 + 1] = math_floor((ar[y * photo_to_pbr_node_tile_with_border_w + x + offset_g] * 0.5 + 0.5) * 255);
-// 			u8a[i * 4 + 2] = math_floor((ar[y * photo_to_pbr_node_tile_with_border_w + x + offset_b] * 0.5 + 0.5) * 255);
-// 			u8a[i * 4 + 3] = 255;
-// 		}
-// 		array_push(tile_floats, ar);
+function image_to_pbr_node_check_result(done: (tex: gpu_texture_t)=>void) {
+	if (iron_exec_async_done == 1) {
 
-// 		// Use border pixels to blend seams
-// 		if (i > 0) {
-// 			if (x > 0) {
-// 				let ar: f32_array_t = tile_floats[i - 1];
-// 				for (let yy: i32 = 0; yy < photo_to_pbr_node_tile_w; ++yy) {
-// 					for (let xx: i32 = 0; xx < photo_to_pbr_node_border_w; ++xx) {
-// 						let i: i32 = yy * photo_to_pbr_node_tile_w + xx;
-// 						let a: i32 = u8a[i * 4];
-// 						let b: i32 = u8a[i * 4 + 1];
-// 						let c: i32 = u8a[i * 4 + 2];
+		let dir: string;
+		if (path_is_protected()) {
+			dir = iron_internal_save_path() + "models";
+		}
+		else {
+			dir = iron_internal_files_location() + path_sep + "models";
+		}
 
-// 						let aa: i32 = math_floor((ar[(photo_to_pbr_node_border_w + yy) * photo_to_pbr_node_tile_with_border_w + photo_to_pbr_node_border_w + photo_to_pbr_node_tile_w + xx          ] * 0.5 + 0.5) * 255);
-// 						let bb: i32 = math_floor((ar[(photo_to_pbr_node_border_w + yy) * photo_to_pbr_node_tile_with_border_w + photo_to_pbr_node_border_w + photo_to_pbr_node_tile_w + xx + offset_g] * 0.5 + 0.5) * 255);
-// 						let cc: i32 = math_floor((ar[(photo_to_pbr_node_border_w + yy) * photo_to_pbr_node_tile_with_border_w + photo_to_pbr_node_border_w + photo_to_pbr_node_tile_w + xx + offset_b] * 0.5 + 0.5) * 255);
+		let file: string = dir + path_sep + "output.png";
+		if (iron_file_exists(file)) {
+			let tex: gpu_texture_t = iron_load_texture(file);
+			done(tex);
+		}
+		sys_remove_update(image_to_pbr_node_check_result);
+	}
+}
 
-// 						let f: f32 = xx / photo_to_pbr_node_border_w;
-// 						let invf: f32 = 1.0 - f;
-// 						a = math_floor(a * f + aa * invf);
-// 						b = math_floor(b * f + bb * invf);
-// 						c = math_floor(c * f + cc * invf);
-
-// 						u8a[i * 4    ] = a;
-// 						u8a[i * 4 + 1] = b;
-// 						u8a[i * 4 + 2] = c;
-// 					}
-// 				}
-// 			}
-// 			if (y > 0) {
-// 				let ar: f32_array_t = tile_floats[i - tiles_x];
-// 				for (let xx: i32 = 0; xx < photo_to_pbr_node_tile_w; ++xx) {
-// 					for (let yy: i32 = 0; yy < photo_to_pbr_node_border_w; ++yy) {
-// 						let i: i32 = yy * photo_to_pbr_node_tile_w + xx;
-// 						let a: i32 = u8a[i * 4];
-// 						let b: i32 = u8a[i * 4 + 1];
-// 						let c: i32 = u8a[i * 4 + 2];
-
-// 						let aa: i32 = math_floor((ar[(photo_to_pbr_node_border_w + photo_to_pbr_node_tile_w + yy) * photo_to_pbr_node_tile_with_border_w + photo_to_pbr_node_border_w + xx          ] * 0.5 + 0.5) * 255);
-// 						let bb: i32 = math_floor((ar[(photo_to_pbr_node_border_w + photo_to_pbr_node_tile_w + yy) * photo_to_pbr_node_tile_with_border_w + photo_to_pbr_node_border_w + xx + offset_g] * 0.5 + 0.5) * 255);
-// 						let cc: i32 = math_floor((ar[(photo_to_pbr_node_border_w + photo_to_pbr_node_tile_w + yy) * photo_to_pbr_node_tile_with_border_w + photo_to_pbr_node_border_w + xx + offset_b] * 0.5 + 0.5) * 255);
-
-// 						let f: f32 = yy / photo_to_pbr_node_border_w;
-// 						let invf: f32 = 1.0 - f;
-// 						a = math_floor(a * f + aa * invf);
-// 						b = math_floor(b * f + bb * invf);
-// 						c = math_floor(c * f + cc * invf);
-
-// 						u8a[i * 4    ] = a;
-// 						u8a[i * 4 + 1] = b;
-// 						u8a[i * 4 + 2] = c;
-// 					}
-// 				}
-// 			}
-// 		}
-
-// 		///if IRON_BGRA
-// 		if (from == channel_type_t.BASE_COLOR) {
-// 			photo_to_pbr_node_bgra_swap(u8a);
-// 		}
-// 		///end
-
-// 		let temp2: gpu_texture_t = gpu_create_texture_from_bytes(u8a, photo_to_pbr_node_tile_w, photo_to_pbr_node_tile_w);
-// 		draw_begin(photo_to_pbr_node_images[from]);
-// 		draw_image(temp2, x * photo_to_pbr_node_tile_w, y * photo_to_pbr_node_tile_w);
-// 		draw_end();
-// 		gpu_delete_texture(temp2);
-// 	}
-
-// 	return photo_to_pbr_node_images[from];
-// }
-
-// ///if IRON_BGRA
-// function photo_to_pbr_node_bgra_swap(buffer: buffer_t): buffer_t {
-// 	let u8a: buffer_t = buffer;
-// 	for (let i: i32 = 0; i < math_floor(buffer.length / 4); ++i) {
-// 		let r: i32 = u8a[i * 4];
-// 		u8a[i * 4] = u8a[i * 4 + 2];
-// 		u8a[i * 4 + 2] = r;
-// 	}
-// 	return buffer;
-// }
-// ///end
-
-// let photo_to_pbr_node_def: ui_node_t = {
-// 	id: 0,
-// 	name: _tr("Photo to PBR"),
-// 	type: "photo_to_pbr_node",
-// 	x: 0,
-// 	y: 0,
-// 	color: 0xff4982a0,
-// 	inputs: [
-// 		{
-// 			id: 0,
-// 			node_id: 0,
-// 			name: _tr("Color"),
-// 			type: "RGBA",
-// 			color: 0xffc7c729,
-// 			default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
-// 			min: 0.0,
-// 			max: 1.0,
-// 			precision: 100,
-// 			display: 0
-// 		}
-// 	],
-// 	outputs: [
-// 		{
-// 			id: 0,
-// 			node_id: 0,
-// 			name: _tr("Base Color"),
-// 			type: "RGBA",
-// 			color: 0xffc7c729,
-// 			default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
-// 			min: 0.0,
-// 			max: 1.0,
-// 			precision: 100,
-// 			display: 0
-// 		},
-// 		{
-// 			id: 0,
-// 			node_id: 0,
-// 			name: _tr("Occlusion"),
-// 			type: "VALUE",
-// 			color: 0xffa1a1a1,
-// 			default_value: f32_array_create_x(1.0),
-// 			min: 0.0,
-// 			max: 1.0,
-// 			precision: 100,
-// 			display: 0
-// 		},
-// 		{
-// 			id: 0,
-// 			node_id: 0,
-// 			name: _tr("Roughness"),
-// 			type: "VALUE",
-// 			color: 0xffa1a1a1,
-// 			default_value: f32_array_create_x(1.0),
-// 			min: 0.0,
-// 			max: 1.0,
-// 			precision: 100,
-// 			display: 0
-// 		},
-// 		{
-// 			id: 0,
-// 			node_id: 0,
-// 			name: _tr("Metallic"),
-// 			type: "VALUE",
-// 			color: 0xffa1a1a1,
-// 			default_value: f32_array_create_x(0.0),
-// 			min: 0.0,
-// 			max: 1.0,
-// 			precision: 100,
-// 			display: 0
-// 		},
-// 		{
-// 			id: 0,
-// 			node_id: 0,
-// 			name: _tr("Normal Map"),
-// 			type: "VECTOR",
-// 			color: 0xffc7c729,
-// 			default_value: f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
-// 			min: 0.0,
-// 			max: 1.0,
-// 			precision: 100,
-// 			display: 0
-// 		},
-// 		{
-// 			id: 0,
-// 			node_id: 0,
-// 			name: _tr("Height"),
-// 			type: "VALUE",
-// 			color: 0xffa1a1a1,
-// 			default_value: f32_array_create_x(1.0),
-// 			min: 0.0,
-// 			max: 1.0,
-// 			precision: 100,
-// 			display: 0
-// 		}
-// 	],
-// 	buttons: [],
-// 	width: 0,
-// 	flags: 0
-// };
+let image_to_pbr_node_def: ui_node_t = {
+	id : 0,
+	name : _tr("Image to PBR"),
+	type : "NEURAL_IMAGE_TO_PBR",
+	x : 0,
+	y : 0,
+	color : 0xff4982a0,
+	inputs : [ {
+		id : 0,
+		node_id : 0,
+		name : _tr("Color"),
+		type : "RGBA",
+		color : 0xffc7c729,
+		default_value : f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+		min : 0.0,
+		max : 1.0,
+		precision : 100,
+		display : 0
+	} ],
+	outputs : [
+		{
+			id : 0,
+			node_id : 0,
+			name : _tr("Base Color"),
+			type : "RGBA",
+			color : 0xffc7c729,
+			default_value : f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+			min : 0.0,
+			max : 1.0,
+			precision : 100,
+			display : 0
+		},
+		{
+			id : 0,
+			node_id : 0,
+			name : _tr("Occlusion"),
+			type : "VALUE",
+			color : 0xffa1a1a1,
+			default_value : f32_array_create_x(1.0),
+			min : 0.0,
+			max : 1.0,
+			precision : 100,
+			display : 0
+		},
+		{
+			id : 0,
+			node_id : 0,
+			name : _tr("Roughness"),
+			type : "VALUE",
+			color : 0xffa1a1a1,
+			default_value : f32_array_create_x(1.0),
+			min : 0.0,
+			max : 1.0,
+			precision : 100,
+			display : 0
+		},
+		{
+			id : 0,
+			node_id : 0,
+			name : _tr("Metallic"),
+			type : "VALUE",
+			color : 0xffa1a1a1,
+			default_value : f32_array_create_x(0.0),
+			min : 0.0,
+			max : 1.0,
+			precision : 100,
+			display : 0
+		},
+		{
+			id : 0,
+			node_id : 0,
+			name : _tr("Normal Map"),
+			type : "VECTOR",
+			color : 0xffc7c729,
+			default_value : f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+			min : 0.0,
+			max : 1.0,
+			precision : 100,
+			display : 0
+		},
+		{
+			id : 0,
+			node_id : 0,
+			name : _tr("Height"),
+			type : "VALUE",
+			color : 0xffa1a1a1,
+			default_value : f32_array_create_x(1.0),
+			min : 0.0,
+			max : 1.0,
+			precision : 100,
+			display : 0
+		}
+	],
+	buttons : [ {
+		name : "image_to_pbr_node_button",
+		type : "CUSTOM",
+		output : -1,
+		default_value : f32_array_create_x(0),
+		data : null,
+		min : 0.0,
+		max : 1.0,
+		precision : 100,
+		height : 2
+	} ],
+	width : 0,
+	flags : 0
+};

@@ -69,9 +69,12 @@ function inpaint_image_node_button(node_id: i32) {
 					"euler",
 					"--offload-to-cpu",
 					"--cfg-scale",
-					"1.0",
+					"2.5", // 1.0
 					"--flow-shift",
-					"1",
+					"3", // 1
+					"--diffusion-fa",
+					// "--vae-tiling",
+					// "--vae-on-cpu",
 					"--steps",
 					"40",
 					"-s",
