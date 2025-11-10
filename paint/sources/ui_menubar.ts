@@ -19,6 +19,10 @@ function ui_menubar_init() {
 }
 
 function ui_menu_panel_x(): i32 {
+	if (!base_view3d_show && ui_view2d_show) {
+		return 0;
+	}
+
 	let panel_x: i32 = base_x();
 	if (config_raw.layout[layout_size_t.HEADER] == 1) {
 		let item_w: i32 = ui_toolbar_w();
@@ -142,14 +146,17 @@ function ui_menubar_render_ui() {
 
 function ui_menubar_draw_tab_header() {
 	let item_w: i32  = ui_toolbar_w();
-	let panel_x: i32 = base_x();
-
-	let nodesw: i32 = (ui_nodes_show || ui_view2d_show) ? config_raw.layout[layout_size_t.NODES_W] : 0;
-	let ww: i32     = iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - ui_menubar_w - nodesw;
-	panel_x         = (base_x() - item_w) + ui_menubar_w;
+	let nodesw: i32  = (ui_nodes_show || ui_view2d_show) ? config_raw.layout[layout_size_t.NODES_W] : 0;
+	let ww: i32      = iron_window_width() - config_raw.layout[layout_size_t.SIDEBAR_W] - ui_menubar_w - nodesw;
+	let panel_x: i32 = (base_x() - item_w) + ui_menubar_w;
 
 	if (!base_view3d_show) {
 		panel_x += 1;
+	}
+
+	if (!base_view3d_show && ui_view2d_show) {
+		panel_x = ui_menubar_w;
+		ww -= 100 * UI_SCALE();
 	}
 
 	if (ui_window(ui_menubar_hwnd, panel_x, 0, ww, ui_header_h)) {

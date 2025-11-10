@@ -642,7 +642,7 @@ function context_is_decal_mask_paint(): bool {
 
 function context_is_floating_toolbar(): bool {
 	// Header is off -> floating toolbar
-	return config_raw.layout[layout_size_t.HEADER] == 0;
+	return config_raw.layout[layout_size_t.HEADER] == 0 || (!base_view3d_show && ui_view2d_show);
 }
 
 function context_get_area_type(): area_type_t {

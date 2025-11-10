@@ -50,7 +50,7 @@ function ui_toolbar_draw_tool(tool: i32, img: gpu_texture_t, icon_accent: i32) {
 	let _y: i32      = ui._y;
 
 	let visible: bool = true;
-	if (config_raw.layout[layout_size_t.HEADER] == 0) {
+	if (context_is_floating_toolbar()) {
 		let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
 		let statusy: i32 = iron_window_height() - statush;
 		visible          = ui._y + ui._w * 2 < statusy;
@@ -63,7 +63,7 @@ function ui_toolbar_draw_tool(tool: i32, img: gpu_texture_t, icon_accent: i32) {
 			context_select_tool(_ui_toolbar_i);
 		});
 	}
-	else if (image_state == ui_state_t.RELEASED && config_raw.layout[layout_size_t.HEADER] == 0 && visible) {
+	else if (image_state == ui_state_t.RELEASED && context_is_floating_toolbar() && visible) {
 		if (ui_toolbar_last_tool == tool) {
 			ui_toolbar_tool_properties_menu();
 		}
@@ -95,7 +95,7 @@ function ui_toolbar_w(screen_size_request: bool = false): i32 {
 	if (screen_size_request && context_is_floating_toolbar()) {
 		return 0;
 	}
-	if (!base_view3d_show) {
+	if (!base_view3d_show && !ui_view2d_show) {
 		return 0;
 	}
 
@@ -117,7 +117,11 @@ function ui_toolbar_render_ui() {
 	let h: i32              = iron_window_height() - ui_header_h - config_raw.layout[layout_size_t.STATUS_H];
 	let _WINDOW_BG_COL: i32 = ui.ops.theme.WINDOW_BG_COL;
 
-	if (!base_view3d_show) {
+	if (!base_view3d_show && !ui_view2d_show) {
+		return;
+	}
+
+	if (ui_view2d_show && ui_view2d_type != view_2d_type_t.LAYER) {
 		return;
 	}
 
@@ -126,6 +130,10 @@ function ui_toolbar_render_ui() {
 		y += ui_toolbar_x() + 3 * UI_SCALE();
 		h                          = (ui_toolbar_tool_names.length + 1) * (ui_toolbar_w() + 2);
 		ui.ops.theme.WINDOW_BG_COL = ui.ops.theme.SEPARATOR_COL;
+
+		if (!base_view3d_show && ui_view2d_show) {
+			y += ui_toolbar_w();
+		}
 	}
 
 	if (ui_window(ui_toolbar_handle, x, y, ui_toolbar_w(), h)) {
@@ -137,7 +145,7 @@ function ui_toolbar_render_ui() {
 		let icon_accent: i32   = light ? 0xff666666 : -1;
 
 		// Properties icon
-		if (config_raw.layout[layout_size_t.HEADER] == 1) {
+		if (!context_is_floating_toolbar()) {
 			let rect: rect_t = resource_tile50(img, 7, 1);
 			if (ui_sub_image(img, light ? 0xff666666 : ui.ops.theme.BUTTON_COL, -1.0, rect.x, rect.y, rect.w, rect.h) == ui_state_t.RELEASED) {
 				config_raw.layout[layout_size_t.HEADER] = 0;
@@ -193,16 +201,21 @@ function ui_toolbar_render_ui() {
 }
 
 function ui_toolbar_tool_properties_menu() {
+	let y: i32 = ui._y - 2 * UI_SCALE();
+	if (!base_view3d_show) {
+		y += ui_toolbar_w();
+	}
+
 	ui_menu_draw(function() {
 		ui.changed = false;
 		ui_header_draw_tool_properties();
 		if (ui.changed || ui.is_typing) {
 			ui_menu_keep_open = true;
 		}
-		if (ui_button(tr("Pin to Header"), ui_align_t.LEFT)) {
+		if (base_view3d_show && ui_button(tr("Pin to Header"), ui_align_t.LEFT)) {
 			config_raw.layout[layout_size_t.HEADER] = 1;
 		}
-	}, math_floor(ui._x + ui._w + 6 * UI_SCALE()), math_floor(ui._y - 2 * UI_SCALE()));
+	}, ui._x + ui._w + 6 * UI_SCALE(), y);
 }
 
 function ui_toolbar_draw_highlight() {

@@ -875,6 +875,16 @@ function ui_nodes_render() {
 		}
 	}
 
+	if (!base_view3d_show && ui_view2d_show) {
+		ui_nodes_wx = base_view3d_w();
+		ui_nodes_wy = 0;
+		ui_nodes_ww = config_raw.layout[layout_size_t.NODES_W];
+		ui_nodes_wh = sys_h();
+		if (config_raw.layout[layout_size_t.HEADER] == 1) {
+			ui_nodes_wh += ui_header_h * 2;
+		}
+	}
+
 	if (ui_window(ui_nodes_hwnd, ui_nodes_wx, ui_nodes_wy, ui_nodes_ww, ui_nodes_wh)) {
 		ui_tab(ui_nodes_htab, tr("Nodes"), false, -1, !base_view3d_show);
 

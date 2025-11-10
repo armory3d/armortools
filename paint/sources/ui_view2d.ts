@@ -107,6 +107,12 @@ function ui_view2d_render() {
 		}
 	}
 
+	if (!base_view3d_show && ui_nodes_show) {
+		ui_view2d_wx = 0;
+		ui_view2d_ww = base_view3d_w();
+		ui_view2d_wh = iron_window_height() - config_raw.layout[layout_size_t.STATUS_H];
+	}
+
 	if (ui_window(ui_view2d_hwnd, ui_view2d_wx, ui_view2d_wy, ui_view2d_ww, ui_view2d_wh)) {
 
 		ui_tab(ui_view2d_htab, tr("2D View"), false, -1, !base_view3d_show);
@@ -116,11 +122,14 @@ function ui_view2d_render() {
 		}
 
 		// Grid
+		// draw_set_color(0xffffffff);
+		// let step: f32 = ui_nodes_grid_cell_w * ui_view2d_pan_scale;
+		// let x: f32    = math_fmod(ui_view2d_pan_x, step) - step;
+		// let y: f32    = math_fmod(ui_view2d_pan_y, step) - step;
+		// draw_image(ui_view2d_grid, x, y);
+		draw_set_color(ui.ops.theme.SEPARATOR_COL + 0x00020202);
+		draw_filled_rect(0, 0, ui_view2d_ww, ui_view2d_wh);
 		draw_set_color(0xffffffff);
-		let step: f32 = ui_nodes_grid_cell_w * ui_view2d_pan_scale;
-		let x: f32    = math_fmod(ui_view2d_pan_x, step) - step;
-		let y: f32    = math_fmod(ui_view2d_pan_y, step) - step;
-		draw_image(ui_view2d_grid, x, y);
 
 		// Texture
 		let tex: gpu_texture_t = null;
