@@ -62,6 +62,21 @@ function main() {
 	_iron_set_update_callback(render);
 }
 
+////
+type config_t = {
+	server: string;
+};
+let      config_raw: config_t;
+function strings_check_internet_connection(): string {
+	return "";
+}
+function console_error(s: string) {}
+function console_info(s: string) {}
+function plugin_embed() {}
 function tr(id: string, vars: map_t<string, string> = null): string {
 	return id;
+}
+let      pipes_offset: i32;
+function pipes_get_constant_location(s: string): i32 {
+	return 0;
 }

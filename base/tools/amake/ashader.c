@@ -65,12 +65,13 @@ extern size_t      sets_count;
 extern type_id     next_type_index;
 void               hlsl_export2(char **vs, char **fs, api_kind d3d, bool debug);
 void               spirv_export2(char **vs, char **fs, int *vs_size, int *fs_size, bool debug);
+void               wgsl_export2(char **vs, char **fs);
 extern size_t      vertex_inputs_size;
 extern size_t      fragment_inputs_size;
 extern size_t      vertex_functions_size;
 extern size_t      fragment_functions_size;
 
-void kong_compile(const char *from, const char *to) {
+void kong_compile(char *shader_lang, const char *from, const char *to) {
 	FILE *fp = fopen(from, "rb");
 	fseek(fp, 0, SEEK_END);
 	int size = ftell(fp);
@@ -103,6 +104,31 @@ void kong_compile(const char *from, const char *to) {
 		compile_function_block(&get_function(i)->code, get_function(i)->block);
 	}
 	analyze();
+
+	if (strcmp(shader_lang, "wgsl") == 0) {
+		char *vs;
+		char *fs;
+		wgsl_export2(&vs, &fs);
+
+		char to_[512];
+		strcpy(to_, to);
+		to_[strlen(to_) - 4] = '\0';
+		strcat(to_, "vert.wgsl");
+
+		FILE *fp  = fopen(to_, "wb");
+		fwrite(vs, 1, strlen(vs), fp);
+		fclose(fp);
+
+		strcpy(to_, to);
+		to_[strlen(to_) - 4] = '\0';
+		strcat(to_, "frag.wgsl");
+
+		fp  = fopen(to_, "wb");
+		fwrite(fs, 1, strlen(fs), fp);
+		fclose(fp);
+
+		return;
+	}
 
 #ifdef _WIN32
 
@@ -210,7 +236,7 @@ void kong_compile(const char *from, const char *to) {
 }
 
 int ashader(char *shader_lang, char *from, char *to) {
-	// shader_lang == hlsl || metal || spirv
-	kong_compile(from, to);
+	// shader_lang == hlsl || metal || spirv || wgsl
+	kong_compile(shader_lang, from, to);
 	return 0;
 }

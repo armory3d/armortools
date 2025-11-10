@@ -143,7 +143,7 @@ else if (platform == "wasm") {
 	project.add_cfiles("sources/libs/miniclib/**");
 	project.add_define("IRON_WASM");
 	project.add_define("IRON_WEBGPU");
-	project.add_include_dir("miniclib");
+	project.add_include_dir("sources/libs/miniclib");
 }
 
 if (graphics == "metal" || (graphics == "vulkan" && platform != "android")) {

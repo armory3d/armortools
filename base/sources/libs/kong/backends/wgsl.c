@@ -1146,3 +1146,122 @@ void wgsl_export(char *directory) {
 		wgsl_export_compute(directory, get_function(compute_functions[i]));
 	}
 }
+
+////
+
+static char *wgsl_export_vertex2(function *main) {
+	char         *wgsl    = (char *)calloc(1024 * 1024, 1);
+	debug_context context = {0};
+	check(wgsl != NULL, context, "Could not allocate the wgsl string");
+
+	size_t offset = 0;
+
+	type_id vertex_inputs[64];
+	for (size_t input_index = 0; input_index < main->parameters_size; ++input_index) {
+		vertex_inputs[input_index] = main->parameter_types[input_index].type;
+	}
+	type_id vertex_output = main->return_type.type;
+
+	check(vertex_output != NO_TYPE, context, "vertex output missing");
+
+	write_types(wgsl, &offset, SHADER_STAGE_VERTEX, vertex_inputs, main->parameters_size, vertex_output, main);
+
+	bool framebuffer_texture_format = false;
+	write_globals(wgsl, &offset, main, &framebuffer_texture_format);
+
+	write_functions(wgsl, &offset, SHADER_STAGE_VERTEX, main);
+
+	char *name = get_name(main->name);
+
+	char filename[512];
+	sprintf(filename, "kong_%s", name);
+
+	char var_name[256];
+	sprintf(var_name, "%s_code", name);
+
+	return wgsl;
+}
+
+static char *wgsl_export_fragment2(function *main) {
+	char         *wgsl    = (char *)calloc(1024 * 1024, 1);
+	debug_context context = {0};
+	check(wgsl != NULL, context, "Could not allocate the wgsl string");
+
+	size_t offset = 0;
+
+	assert(main->parameters_size > 0);
+	type_id pixel_input = main->parameter_types[0].type;
+
+	check(pixel_input != NO_TYPE, context, "fragment input missing");
+
+	write_types(wgsl, &offset, SHADER_STAGE_FRAGMENT, &pixel_input, 1, NO_TYPE, main);
+
+	bool framebuffer_texture_format = false;
+	write_globals(wgsl, &offset, main, &framebuffer_texture_format);
+
+	write_functions(wgsl, &offset, SHADER_STAGE_FRAGMENT, main);
+
+	char *name = get_name(main->name);
+
+	char filename[512];
+	sprintf(filename, "kong_%s", name);
+
+	char var_name[256];
+	sprintf(var_name, "%s_code", name);
+
+	return wgsl;
+}
+
+void wgsl_export2(char **vs, char **fs) {
+	for (type_id i = 0; get_type(i) != NULL; ++i) {
+		type *t = get_type(i);
+		if (!t->built_in && has_attribute(&t->attributes, add_name("pipe"))) {
+			name_id vertex_shader_name   = NO_NAME;
+			name_id fragment_shader_name = NO_NAME;
+
+			for (size_t j = 0; j < t->members.size; ++j) {
+				if (t->members.m[j].name == add_name("vertex")) {
+					vertex_shader_name = t->members.m[j].value.identifier;
+				}
+				else if (t->members.m[j].name == add_name("fragment")) {
+					fragment_shader_name = t->members.m[j].value.identifier;
+				}
+			}
+
+			debug_context context = {0};
+			check(vertex_shader_name != NO_NAME, context, "vertex shader not found");
+			check(fragment_shader_name != NO_NAME, context, "fragment shader not found");
+
+			for (function_id i = 0; get_function(i) != NULL; ++i) {
+				function *f = get_function(i);
+				if (f->name == vertex_shader_name) {
+					vertex_functions[vertex_functions_size] = i;
+					vertex_functions_size += 1;
+
+					size_t vertex_location_offset = 0;
+
+					for (uint32_t parameter_index = 0; parameter_index < f->parameters_size; ++parameter_index) {
+						vertex_inputs[vertex_inputs_size]           = f->parameter_types[parameter_index].type;
+						vertex_location_offsets[vertex_inputs_size] = vertex_location_offset;
+
+						vertex_inputs_size += 1;
+						vertex_location_offset += get_type(f->parameter_types[parameter_index].type)->members.size;
+					}
+				}
+				else if (f->name == fragment_shader_name) {
+					fragment_functions[fragment_functions_size] = i;
+					fragment_functions_size += 1;
+
+					assert(f->parameters_size > 0);
+					fragment_inputs[fragment_inputs_size] = f->parameter_types[0].type;
+					fragment_inputs_size += 1;
+				}
+			}
+		}
+	}
+
+	*vs = wgsl_export_vertex2(get_function(vertex_functions[0]));
+	*fs = wgsl_export_fragment2(get_function(fragment_functions[0]));
+}
+
+////

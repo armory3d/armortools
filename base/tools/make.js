@@ -973,7 +973,7 @@ class WasmExporter extends Exporter {
 	constructor() {
 		super();
 		this.compile_commands = new CompilerCommandsExporter();
-		let compiler          = "clang";
+		let compiler          = "clang --target=wasm32";
 		let compilerFlags     = "--target=wasm32 -nostdlib -matomics -mbulk-memory";
 		this.make             = new MakeExporter(compiler, compiler, compilerFlags, compilerFlags,
 		                                         '--target=wasm32 -nostdlib -matomics -mbulk-memory "-Wl,--import-memory,--shared-memory"', '.wasm');
@@ -2514,6 +2514,9 @@ function shader_find_type(options) {
 	}
 	else if (options.graphics === 'direct3d12') {
 		return 'hlsl';
+	}
+	else if (options.graphics === 'webgpu') {
+		return 'wgsl';
 	}
 }
 

@@ -80,23 +80,25 @@ __attribute__((export_name("_start"))) void _start(void) {
 
 __attribute__((export_name("_update"))) void _update(void) {
 	iron_internal_update_callback();
+	#ifdef IRON_A2
 	iron_a2_update();
+	#endif
 }
 
 __attribute__((export_name("_mousedown"))) void _mousedown(int button, int x, int y) {
-	iron_internal_mouse_trigger_press(0, button, x, y);
+	iron_internal_mouse_trigger_press(button, x, y);
 }
 
 __attribute__((export_name("_mouseup"))) void _mouseup(int button, int x, int y) {
-	iron_internal_mouse_trigger_release(0, button, x, y);
+	iron_internal_mouse_trigger_release(button, x, y);
 }
 
 __attribute__((export_name("_mousemove"))) void _mousemove(int x, int y) {
-	iron_internal_mouse_trigger_move(0, x, y);
+	iron_internal_mouse_trigger_move(x, y);
 }
 
 __attribute__((export_name("_wheel"))) void _wheel(int delta) {
-	iron_internal_mouse_trigger_scroll(0, delta);
+	iron_internal_mouse_trigger_scroll(delta);
 }
 
 __attribute__((export_name("_keydown"))) void _keydown(int key) {
