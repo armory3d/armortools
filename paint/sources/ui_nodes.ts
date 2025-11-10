@@ -886,7 +886,9 @@ function ui_nodes_render() {
 	}
 
 	if (ui_window(ui_nodes_hwnd, ui_nodes_wx, ui_nodes_wy, ui_nodes_ww, ui_nodes_wh)) {
-		ui_tab(ui_nodes_htab, tr("Nodes"), false, -1, !base_view3d_show);
+
+		let expand: bool = !base_view3d_show && config_raw.layout[layout_size_t.SIDEBAR_W] == 0;
+		ui_tab(ui_nodes_htab, expand ? tr("Nodes") + "          " : tr("Nodes"), false, -1, !base_view3d_show);
 
 		// Additional tabs
 		if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) {

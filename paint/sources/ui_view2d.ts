@@ -115,7 +115,8 @@ function ui_view2d_render() {
 
 	if (ui_window(ui_view2d_hwnd, ui_view2d_wx, ui_view2d_wy, ui_view2d_ww, ui_view2d_wh)) {
 
-		ui_tab(ui_view2d_htab, tr("2D View"), false, -1, !base_view3d_show);
+		let expand: bool = !base_view3d_show && !ui_nodes_show && config_raw.layout[layout_size_t.SIDEBAR_W] == 0;
+		ui_tab(ui_view2d_htab, expand ? tr("2D View") + "          " : tr("2D View"), false, -1, !base_view3d_show);
 
 		if (ui_tab(ui_view2d_htab, tr("+"))) {
 			ui_view2d_htab.i = 0;
