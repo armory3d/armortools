@@ -73,6 +73,24 @@ function sculpt_make_sculpt_run(data: material_t, matcon: material_context_t): n
 		node_shader_write_frag(kong, "dist = distance(wposition.xyz, winp.xyz);");
 		node_shader_write_frag(kong, "if (dist > constants.brush_radius) { discard; }");
 	}
+	else if (context_raw.tool == tool_type_t.FILL) {
+		node_shader_write_frag(kong, "var dist: float = 0.0;");
+
+		node_shader_add_constant(kong, "W: float4x4", "_world_matrix");
+		node_shader_write_attrib_frag(
+		    kong, "var wposition: float3 = (constants.W * texpaint_sculpt_undo[uint2(uint(tex_coord.x * 2048.0), uint(tex_coord.y * 2048.0))]).xyz;");
+	}
+
+	parser_material_parse_height = true;
+	parser_material_parse_height_as_channel = true;
+	let sout: shader_out_t       = parser_material_parse(context_raw.material.canvas, con_paint, kong, matcon);
+	let height: string           = sout.out_height;
+	node_shader_write_frag(kong, "var height: float = " + height + ";");
+
+	if (kong.frag_bposition) {
+		kong.frag_bposition = false;
+		node_shader_write_attrib_frag(kong, "var bposition: float3 = wposition.xyz;");
+	}
 
 	node_shader_write_frag(kong, "var basecol: float3 = float3(1.0, 1.0, 1.0);");
 	node_shader_write_frag(kong, "var opacity: float = 1.0;");
@@ -89,7 +107,8 @@ function sculpt_make_sculpt_run(data: material_t, matcon: material_context_t): n
 	// node_shader_write_frag(kong, "wn.xy = wn.z >= 0.0 ? g0_undo.xy : octahedron_wrap(g0_undo.xy);");
 	node_shader_write_frag(kong, "if (wn.z >= 0.0) { wn.xy = g0_undo.xy; } else { wn.xy = octahedron_wrap(g0_undo.xy); }");
 	node_shader_write_frag(kong, "var n: float3 = normalize(wn);");
-	node_shader_write_frag(kong, "output[0] = float4(sample_undo.rgb + n * 0.1 * str, 1.0);");
+	// node_shader_write_frag(kong, "output[0] = float4(sample_undo.rgb + n * 0.1 * str, 1.0);");
+	node_shader_write_frag(kong, "output[0] = float4(sample_undo.rgb + n * (height / 10.0) * str, 1.0);");
 	node_shader_write_frag(kong, "output[1] = float4(str, 0.0, 0.0, 1.0);");
 	parser_material_finalize(con_paint);
 	con_paint.data.shader_from_source = true;

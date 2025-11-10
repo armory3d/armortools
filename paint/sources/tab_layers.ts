@@ -94,11 +94,13 @@ function tab_layers_button_new(text: string) {
 			if (ui_menu_button(tr("Decal Layer"))) {
 				layers_create_fill_layer(uv_type_t.PROJECT);
 			}
-			// if (ui_menu_button(tr("Sculpt Layer"))) {
-			// 	sys_notify_on_next_frame(function () {
-			// 		sculpt_layers_create_sculpt_layer();
-			// 	});
-			// }
+			if (config_raw.experimental) {
+				if (ui_menu_button(tr("Sculpt Layer"))) {
+					sys_notify_on_next_frame(function () {
+						sculpt_layers_create_sculpt_layer();
+					});
+				}
+			}
 			if (ui_menu_button(tr("Black Mask"))) {
 				if (slot_layer_is_mask(l)) {
 					context_set_layer(l.parent);
