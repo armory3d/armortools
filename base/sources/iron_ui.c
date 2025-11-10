@@ -1664,6 +1664,12 @@ void ui_end_window() {
 			}
 		}
 
+		// Window border
+		// draw_set_color(0xff202020);
+		// draw_rect(0, 0, current->_window_w, current->_window_h, 4);
+		// draw_set_color(0xff303030);
+		// ui_draw_rect(false, 3, 3, current->_window_w - 4, current->_window_h - 4);
+
 		handle->last_max_x = current->_x;
 		handle->last_max_y = current->_y;
 		if (handle->layout == UI_LAYOUT_VERTICAL) {
