@@ -34,8 +34,11 @@ bool iron_mouse_can_lock(void) {
 
 void iron_mouse_show() {}
 void iron_mouse_hide() {}
+void iron_mouse_set_cursor(iron_cursor_t cursor_index) {}
 void iron_mouse_set_position(int x, int y) {}
 void iron_mouse_get_position(int *x, int *y) {}
+void iron_keyboard_show() {}
+void iron_keyboard_hide() {}
 
 __attribute__((import_module("imports"), import_name("js_time"))) int js_time();
 

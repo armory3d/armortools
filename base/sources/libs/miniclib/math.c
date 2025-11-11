@@ -11,6 +11,30 @@ __attribute__((import_module("imports"), import_name("js_exp"))) float   js_exp(
 __attribute__((import_module("imports"), import_name("js_sqrt"))) float  js_sqrt(float x);
 #endif
 
+double fabs(double n) {
+	return n < 0 ? -n : n;
+}
+
+float fabsf(float n) {
+	return n < 0 ? -n : n;
+}
+
+double fmax(double x, double y) {
+	return 0.0;
+}
+
+float fmaxf(float x, float y) {
+	return 0.0f;
+}
+
+double fmin(double x, double y) {
+	return 0.0;
+}
+
+float fminf(float x, float y) {
+	return 0.0f;
+}
+
 double ldexp(double x, int exp) {
 	return 0.0;
 }
@@ -20,6 +44,13 @@ double pow(double base, double exponent) {
 	return js_pow(base, exponent);
 #endif
 	return 0.0;
+}
+
+float powf(float base, float exponent) {
+#ifdef IRON_WASM
+	return js_pow(base, exponent);
+#endif
+	return 0.0f;
 }
 
 double floor(double x) {
@@ -33,6 +64,34 @@ float floorf(float x) {
 #ifdef IRON_WASM
 	return js_floor(x);
 #endif
+	return 0.0f;
+}
+
+double ceil(double x) {
+	// #ifdef IRON_WASM
+	// 	return js_ceil(x);
+	// #endif
+	return 0.0;
+}
+
+float ceilf(float x) {
+	// #ifdef IRON_WASM
+	// 	return js_ceil(x);
+	// #endif
+	return 0.0f;
+}
+
+double round(double x) {
+	// #ifdef IRON_WASM
+	// 	return js_round(x);
+	// #endif
+	return 0.0;
+}
+
+float roundf(float x) {
+	// #ifdef IRON_WASM
+	// 	return js_round(x);
+	// #endif
 	return 0.0f;
 }
 
@@ -50,6 +109,10 @@ float sinf(float x) {
 	return 0.0f;
 }
 
+float asinf(float x) {
+	return 0.0f;
+}
+
 double cos(double x) {
 #ifdef IRON_WASM
 	return js_cos(x);
@@ -61,6 +124,14 @@ float cosf(float x) {
 #ifdef IRON_WASM
 	return js_cos(x);
 #endif
+	return 0.0f;
+}
+
+double acos(double x) {
+	return 0.0;
+}
+
+float acosf(float x) {
 	return 0.0f;
 }
 
@@ -78,6 +149,18 @@ float tanf(float x) {
 	return 0.0f;
 }
 
+float atanf(float x) {
+	return 0.0f;
+}
+
+double atan2(double x, double y) {
+	return 0.0;
+}
+
+float atan2f(float x, float y) {
+	return 0.0f;
+}
+
 double log(double x) {
 #ifdef IRON_WASM
 	return js_log(x);
@@ -85,7 +168,25 @@ double log(double x) {
 	return 0.0;
 }
 
+float logf(float x) {
+#ifdef IRON_WASM
+	return js_log(x);
+#endif
+	return 0.0f;
+}
+
+float log2f(float x) {
+	return 0.0f;
+}
+
 double exp(double x) {
+#ifdef IRON_WASM
+	return js_exp(x);
+#endif
+	return 0.0;
+}
+
+float expf(float x) {
 #ifdef IRON_WASM
 	return js_exp(x);
 #endif
@@ -97,4 +198,19 @@ double sqrt(double x) {
 	return js_sqrt(x);
 #endif
 	return 0.0;
+}
+
+float sqrtf(float x) {
+#ifdef IRON_WASM
+	return js_sqrt(x);
+#endif
+	return 0.0f;
+}
+
+double fmod(double x, double y) {
+	return 0.0;
+}
+
+int isnan(float x) {
+	return 0;
 }

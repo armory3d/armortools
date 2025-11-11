@@ -40,7 +40,10 @@ project.add_assets("assets/licenses/**", {destination : "data/licenses/{name}"})
 project.add_assets("assets/themes/*.json", {destination : "data/themes/{name}"});
 project.add_cfiles("sources/*.c");
 // project.add_cfiles("sources/iron.c");
-project.add_cfiles("sources/libs/gc.c");
+if (platform != "wasm") {
+	project.add_cfiles("sources/libs/gc.c");
+}
+
 project.add_cfiles("sources/libs/kong/dir.c");
 project.add_define("IRON_C_PATH=\"" + os_cwd() + "/build/iron.c" +
                    "\"");
@@ -143,6 +146,7 @@ else if (platform == "wasm") {
 	project.add_cfiles("sources/libs/miniclib/**");
 	project.add_define("IRON_WASM");
 	project.add_define("IRON_WEBGPU");
+	project.add_define("NO_GC");
 	project.add_include_dir("sources/libs/miniclib");
 }
 

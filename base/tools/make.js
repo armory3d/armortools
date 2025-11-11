@@ -973,8 +973,8 @@ class WasmExporter extends Exporter {
 	constructor() {
 		super();
 		this.compile_commands = new CompilerCommandsExporter();
-		let compiler          = "clang --target=wasm32";
-		let compilerFlags     = "--target=wasm32 -nostdlib -matomics -mbulk-memory";
+		let compiler          = "clang --target=wasm32 -nostdlib -matomics -mbulk-memory";
+		let compilerFlags     = "";
 		this.make             = new MakeExporter(compiler, compiler, compilerFlags, compilerFlags,
 		                                         '--target=wasm32 -nostdlib -matomics -mbulk-memory "-Wl,--import-memory,--shared-memory"', '.wasm');
 	}

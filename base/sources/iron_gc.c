@@ -6,6 +6,7 @@
 #include <memory.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define HEAP_SIZE 512 * 1024 * 1024
 static uint8_t *heap     = NULL;

@@ -2,10 +2,6 @@
 
 #include <stddef.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 void *memset(void *ptr, int value, size_t num);
 
 void *memcpy(void *destination, const void *source, size_t num);
@@ -40,7 +36,3 @@ wchar_t *wcsstr(wchar_t *str1, const wchar_t *str2);
 int wcscmp(const wchar_t *str1, const wchar_t *str2);
 
 int wcsncmp(const wchar_t *str1, const wchar_t *str2, size_t num);
-
-#ifdef __cplusplus
-}
-#endif

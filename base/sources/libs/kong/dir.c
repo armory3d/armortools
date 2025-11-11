@@ -45,10 +45,23 @@ void close_dir(directory *dir) {
 	FindClose(dir->handle);
 }
 
+#elif defined(IRON_WASM)
+
+directory open_dir(const char *dirname) {
+	directory dir;
+	return dir;
+}
+
+file read_next_file(directory *dir) {
+	file f;
+	return f;
+}
+
+void close_dir(directory *dir) {}
+
 #else
 
 #include <string.h>
-
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>

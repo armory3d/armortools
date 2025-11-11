@@ -17,6 +17,14 @@ int fprintf(FILE *stream, const char *format, ...) {
 	return 0;
 }
 
+int sprintf(char *s, const char *format, ...) {
+	return 0;
+}
+
+int snprintf(char *s, size_t n, const char *format, ...) {
+	return 0;
+}
+
 int vsnprintf(char *s, size_t n, const char *format, va_list arg) {
 	return 0;
 }

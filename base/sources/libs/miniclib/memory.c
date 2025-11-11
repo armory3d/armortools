@@ -28,6 +28,10 @@ malloc(size_t size) {
 	return NULL;
 }
 
+void *calloc(size_t num, size_t size) {
+	return NULL;
+}
+
 void *alloca(size_t size) {
 	return NULL;
 }

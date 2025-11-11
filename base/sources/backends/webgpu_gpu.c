@@ -2,7 +2,6 @@
 #include <iron_gpu.h>
 #include <iron_math.h>
 #include <iron_system.h>
-#include <malloc.h>
 #include <memory.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,9 +38,6 @@ static int                                  current_width  = 0;
 static int                                  current_height = 0;
 static WGPURenderPassColorAttachment        current_color_attachment_infos[8];
 static WGPURenderPassDepthStencilAttachment current_depth_attachment_info;
-
-void iron_webgpu_create_surface(WGPUInstance instance, WGPUSurface *surface);
-void gpu_create_framebuffers(int depth_buffer_bits);
 
 static WGPUTextureFormat convert_image_format(gpu_texture_format_t format) {
 	switch (format) {
@@ -179,6 +175,9 @@ static void create_descriptors(void) {
 	point_sampler             = wgpuDeviceCreateSampler(device, &sampler_info);
 }
 
+void gpu_barrier(gpu_texture_t *render_target, gpu_texture_state_t state_after) {
+}
+
 void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_texture_format_t format, int framebuffer_index) {
 	target->width  = width;
 	target->height = height;
@@ -254,7 +253,6 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	instance          = wgpuCreateInstance(NULL);
 	window_depth_bits = depth_buffer_bits;
 	window_vsync      = vsync;
-	iron_webgpu_create_surface(instance, &surface);
 	WGPURequestAdapterOptions options = {.compatibleSurface = surface, .powerPreference = WGPUPowerPreference_HighPerformance};
 
 	gpu                                        = NULL;
