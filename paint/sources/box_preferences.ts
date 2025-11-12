@@ -464,15 +464,6 @@ function box_preferences_usage_tab() {
 		make_material_parse_paint_material();
 	}
 	ui.enabled = true;
-
-	let h_gpu_inference: ui_handle_t = ui_handle(__ID__);
-	if (h_gpu_inference.init) {
-		h_gpu_inference.b = config_raw.gpu_inference;
-	}
-	config_raw.gpu_inference = ui_check(h_gpu_inference, tr("GPU Inference"));
-	if (ui.is_hovered) {
-		ui_tooltip(tr("Use GPU to accelerate neural node processing"));
-	}
 }
 
 function box_preferences_pen_tab() {
@@ -696,6 +687,87 @@ function box_preferences_keymap_tab() {
 	}
 }
 
+function box_preferences_neural_tab() {
+
+	ui_text(tr("All processing is done on device"));
+
+	let inference_handle: ui_handle_t = ui_handle(__ID__);
+	if (inference_handle.init) {
+		inference_handle.i = config_raw.neural_backend;
+	}
+	let inference_combo: string[] = [ "CPU", "Vulkan" ];
+	ui_combo(inference_handle, inference_combo, tr("Inference Backend"), true);
+	if (ui.is_hovered) {
+		ui_tooltip(tr("Backend for neural node processing"));
+	}
+	if (inference_handle.changed) {
+		config_raw.neural_backend = inference_handle.i;
+	}
+
+	ui_text(tr("Models"));
+
+	if (ui_panel(ui_handle(__ID__), "Stable Diffusion")) { //  (downloaded)
+		// https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.safetensors
+		ui_text("license: openrail");
+		ui_text("nodes: Text to Image");
+		if (ui_button(tr("Download (4.0GB)"))) {
+		}
+	}
+
+	if (ui_panel(ui_handle(__ID__), "Qwen Image")) { //  (downloaded)
+		ui_text("source: https://huggingface.co/QuantStack/Qwen-Image-GGUF (apache-2.0)");
+		ui_text("video ram: GB");
+		ui_text("nodes: Text to Image");
+		if (ui_button(tr("Download") + " (15.7GB)")) {
+			// https://huggingface.co/QuantStack/Qwen-Image-GGUF/resolve/main/Qwen_Image-Q4_K_S.gguf
+			// https://huggingface.co/QuantStack/Qwen-Image-GGUF/resolve/main/VAE/Qwen_Image-VAE.safetensors
+			// https://huggingface.co/unsloth/Qwen2.5-VL-7B-Instruct-GGUF/resolve/main/Qwen2.5-VL-7B-Instruct-Q4_K_S.gguf
+		}
+		// if (ui_button(tr("Remove (15.7GB)"))) {
+		// }
+	}
+
+	if (ui_panel(ui_handle(__ID__), "Qwen Image Edit")) { //  (downloaded)
+		ui_text("license: apache-2.0");
+		ui_text("nodes: Edit Image");
+		if (ui_button(tr("Download (17.0GB)"))) {
+			// https://huggingface.co/QuantStack/Qwen-Image-Edit-2509-GGUF/resolve/main/Qwen-Image-Edit-2509-Q4_K_S.gguf
+			// https://huggingface.co/QuantStack/Qwen-Image-GGUF/resolve/main/VAE/Qwen_Image-VAE.safetensors
+			// https://huggingface.co/unsloth/Qwen2.5-VL-7B-Instruct-GGUF/resolve/main/Qwen2.5-VL-7B-Instruct-Q4_K_S.gguf
+			// https://huggingface.co/unsloth/Qwen2.5-VL-7B-Instruct-GGUF/resolve/main/mmproj-F16.gguf
+		}
+	}
+
+	if (ui_panel(ui_handle(__ID__), "Wan")) { //  (downloaded)
+		ui_text("license: apache-2.0");
+		ui_text("nodes: Text to Image");
+		if (ui_button(tr("Download (19.8GB)"))) {
+			// https://huggingface.co/QuantStack/Wan2.2-T2V-A14B-GGUF/resolve/main/LowNoise/Wan2.2-T2V-A14B-LowNoise-Q4_K_S.gguf
+			// https://huggingface.co/QuantStack/Wan2.2-T2V-A14B-GGUF/resolve/main/HighNoise/Wan2.2-T2V-A14B-HighNoise-Q4_K_S.gguf
+			// https://huggingface.co/QuantStack/Wan2.2-T2V-A14B-GGUF/resolve/main/VAE/Wan2.1_VAE.safetensors
+			// https://huggingface.co/city96/umt5-xxl-encoder-gguf/resolve/main/umt5-xxl-encoder-Q4_K_S.gguf
+		}
+	}
+
+	if (ui_panel(ui_handle(__ID__), "Marigold")) { //  (downloaded)
+		ui_text("license: openrail");
+		ui_text("nodes: Image to PBR");
+		if (ui_button(tr("Download (9.6GB)"))) {
+			// https://huggingface.co/armory3d/marigold-v1-1-gguf/resolve/main/marigold-depth-v1-1.q8_0.gguf
+			// https://huggingface.co/armory3d/marigold-v1-1-gguf/resolve/main/marigold-normals-v1-1.q8_0.gguf
+			// https://huggingface.co/armory3d/marigold-v1-1-gguf/resolve/main/marigold-iid-appearance-v1-1.q8_0.gguf
+		}
+	}
+
+	if (ui_panel(ui_handle(__ID__), "RealESRGAN")) { //  (downloaded)
+		// https://huggingface.co/armory3d/Real-ESRGAN/resolve/main/RealESRGAN_x4plus.pth
+		ui_text("license: bsd-3-clause");
+		ui_text("nodes: Upscale Image");
+		if (ui_button(tr("Download (0.06GB)"))) {
+		}
+	}
+}
+
 function box_preferences_plugins_tab() {
 	ui_begin_sticky();
 	let row: f32[] = [ 1 / 4, 1 / 4 ];
@@ -828,11 +900,14 @@ function box_preferences_show() {
 		    if (ui_tab(box_preferences_htab, tr("Keymap"), true)) {
 			    box_preferences_keymap_tab();
 		    }
+			if (ui_tab(box_preferences_htab, tr("Neural"), true)) {
+				box_preferences_neural_tab();
+			}
 		    if (ui_tab(box_preferences_htab, tr("Plugins"), true)) {
 			    box_preferences_plugins_tab();
 		    }
 	    },
-	    620, config_raw.touch_ui ? 510 : 420,
+	    720, 520,
 	    function() {
 		    config_save();
 	    });

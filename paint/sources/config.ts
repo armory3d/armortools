@@ -95,11 +95,11 @@ function config_save() {
 	json_encode_bool("brush_depth_reject", config_raw.brush_depth_reject);
 	json_encode_bool("brush_angle_reject", config_raw.brush_angle_reject);
 	json_encode_i32("dilate_radius", config_raw.dilate_radius);
-	json_encode_bool("gpu_inference", config_raw.gpu_inference);
 	json_encode_string("blender", config_raw.blender);
 	json_encode_i32("scene_atlas_res", config_raw.scene_atlas_res);
 	json_encode_bool("grid_snap", config_raw.grid_snap);
 	json_encode_bool("experimental", config_raw.experimental);
+	json_encode_i32("neural_backend", config_raw.neural_backend);
 	let config_json: string = json_encode_end();
 
 	let buffer: buffer_t = sys_string_to_buffer(config_json);
@@ -200,12 +200,12 @@ function config_init() {
 		config_raw.brush_live         = false;
 		config_raw.show_asset_names   = false;
 		config_raw.dilate_radius      = 2;
-		config_raw.gpu_inference      = true;
 		config_raw.blender            = "";
 		config_raw.scene_atlas_res    = texture_res_t.RES8192;
 		config_raw.pathtrace_mode     = pathtrace_mode_t.FAST;
 		config_raw.grid_snap          = false;
 		config_raw.experimental       = false;
+		config_raw.neural_backend     = neural_backend_t.VULKAN;
 	}
 	else {
 		// Discard old config
@@ -471,9 +471,9 @@ type config_t = {
 	brush_depth_reject?: bool;
 	brush_angle_reject?: bool;
 	dilate_radius?: i32;
-	gpu_inference?: bool;
 	blender?: string;
 	scene_atlas_res?: i32;
 	grid_snap?: bool;
 	experimental?: bool;
+	neural_backend?: i32;
 };

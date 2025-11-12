@@ -8,7 +8,7 @@ function tab_plugins_draw(htab: ui_handle_t) {
 		ui_row(row);
 
 		if (ui_button(tr("Manager"))) {
-			box_preferences_htab.i = 6; // Plugins
+			box_preferences_htab.i = preference_tab_t.PLUGINS;
 			box_preferences_show();
 		}
 		ui_end_sticky();

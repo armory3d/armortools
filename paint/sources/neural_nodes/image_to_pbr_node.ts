@@ -102,7 +102,7 @@ function image_to_pbr_node_button(node_id: i32) {
 	let model: i32       = ui_combo(ui_handle(__ID__), models, tr("Model"));
 
 	if (iron_exec_async_done == 0) {
-		ui_button("Cancel...");
+		ui_button("Processing...");
 	}
 	else if (ui_button("Run")) {
 		let inp: ui_node_socket_t = node.inputs[0];
@@ -126,13 +126,13 @@ function image_to_pbr_node_button(node_id: i32) {
 			}
 			iron_write_png(dir + path_sep + "input.png", gpu_get_texture_pixels(input), input.width, input.height, 0);
 
-			image_to_pbr_node_run_sd("marigold-normals-v1-1.safetensors", " ", function(tex: gpu_texture_t) {
+			image_to_pbr_node_run_sd("marigold-normals-v1-1.q8_0.gguf", " ", function(tex: gpu_texture_t) {
 				image_to_pbr_node_result_normal = tex;
-				image_to_pbr_node_run_sd("marigold-depth-v1-1.safetensors", " ", function(tex: gpu_texture_t) {
+				image_to_pbr_node_run_sd("marigold-depth-v1-1.q8_0.gguf", " ", function(tex: gpu_texture_t) {
 					image_to_pbr_node_result_height = tex;
-					image_to_pbr_node_run_sd("marigold-iid-appearance-v1-1.safetensors", " ", function(tex: gpu_texture_t) {
+					image_to_pbr_node_run_sd("marigold-iid-appearance-v1-1.q8_0.gguf", " ", function(tex: gpu_texture_t) {
 						image_to_pbr_node_result_base = tex;
-						image_to_pbr_node_run_sd("marigold-iid-appearance-v1-1.safetensors", "_roughness", function(tex: gpu_texture_t) {
+						image_to_pbr_node_run_sd("marigold-iid-appearance-v1-1.q8_0.gguf", "_roughness", function(tex: gpu_texture_t) {
 							image_to_pbr_node_result_roughness = tex;
 						});
 					});

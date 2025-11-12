@@ -273,3 +273,19 @@ enum layout_size_t {
 	STATUS_H   = 5,
 	HEADER     = 6, // 0 - hidden, 1 - visible
 }
+
+enum neural_backend_t {
+	CPU    = 0,
+	VULKAN = 1,
+}
+
+enum preference_tab_t {
+	INTERFACE = 0,
+	THEME     = 1,
+	USAGE     = 2,
+	PEN       = 3,
+	VIEWPORT  = 4,
+	KEYMAP    = 5,
+	NEURAL    = 6,
+	PLUGINS   = 7,
+}

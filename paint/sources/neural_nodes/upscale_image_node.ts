@@ -22,11 +22,11 @@ function upscale_image_node_button(node_id: i32) {
 	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
 	let node: ui_node_t          = ui_get_node(canvas.nodes, node_id);
 
-	let models: string[] = [ "RealESRGAN_X2", "RealESRGAN_X4" ];
+	let models: string[] = [ "RealESRGAN_X4" ];
 	let model: i32       = ui_combo(ui_handle(__ID__), models, tr("Model"));
 
 	if (iron_exec_async_done == 0) {
-		ui_button("Cancel...");
+		ui_button("Processing...");
 	}
 	else if (ui_button("Run")) {
 		let inp: ui_node_socket_t = node.inputs[0];
