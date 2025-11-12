@@ -1900,6 +1900,12 @@ bool ui_panel(ui_handle_t *handle, char *text, bool is_tree, bool filled) {
 		handle->changed = current->changed = true;
 	}
 
+	if (filled) {
+		draw_set_color(theme->SEPARATOR_COL);
+		draw_filled_rect(current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w - current->button_offset_y * 2,
+		                 UI_BUTTON_H());
+	}
+
 	if (is_tree) {
 		ui_draw_tree(handle->b);
 	}
