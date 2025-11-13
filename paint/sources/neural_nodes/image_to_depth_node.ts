@@ -1,21 +1,8 @@
 
-let image_to_depth_node_result: gpu_texture_t = null;
-
 function image_to_depth_node_init() {
 	array_push(nodes_material_neural, image_to_depth_node_def);
-	map_set(parser_material_node_values, "NEURAL_IMAGE_TO_DEPTH", image_to_depth_node_value);
+	map_set(parser_material_node_values, "NEURAL_IMAGE_TO_DEPTH", neural_node_value);
 	map_set(ui_nodes_custom_buttons, "image_to_depth_node_button", image_to_depth_node_button);
-}
-
-function image_to_depth_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
-	if (image_to_depth_node_result == null) {
-		return "0.0";
-	}
-	let tex_name: string = parser_material_node_name(node);
-	map_set(data_cached_images, tex_name, image_to_depth_node_result);
-	let tex: bind_tex_t  = parser_material_make_bind_tex(tex_name, tex_name);
-	let texstore: string = parser_material_texture_store(node, tex, tex_name, color_space_t.AUTO);
-	return texstore + ".r";
 }
 
 function image_to_depth_node_button(node_id: i32) {
@@ -25,34 +12,37 @@ function image_to_depth_node_button(node_id: i32) {
 	let models: string[] = [ "Marigold" ];
 	let model: i32       = ui_combo(ui_handle(__ID__), models, tr("Model"));
 
-	if (iron_exec_async_done == 0) {
-		ui_button("Processing...");
-	}
-	else if (ui_button("Run")) {
-		let inp: ui_node_socket_t = node.inputs[0];
-		let from_node: ui_node_t  = null;
-		for (let i: i32 = 0; i < canvas.links.length; ++i) {
-			let l: ui_node_link_t = canvas.links[i];
-			if (l.to_id == inp.node_id) {
-				from_node = ui_get_node(canvas.nodes, l.from_id);
-				break;
-			}
-		}
-
+	if (neural_node_button()) {
+		let from_node: ui_node_t = neural_from_node(node.inputs[0]);
 		let input: gpu_texture_t = ui_nodes_get_node_preview_image(from_node);
 		if (input != null) {
-			let dir: string;
-			if (path_is_protected()) {
-				dir = iron_internal_save_path() + "models";
-			}
-			else {
-				dir = iron_internal_files_location() + path_sep + "models";
-			}
+			let dir: string = neural_node_dir();
 			iron_write_png(dir + path_sep + "input.png", gpu_get_texture_pixels(input), input.width, input.height, 0);
 
-			image_to_pbr_node_run_sd("marigold-depth-v1-1.q8_0.gguf", " ", function(tex: gpu_texture_t) {
-				image_to_depth_node_result = tex;
-			});
+			let argv: string[] = [
+				dir + "/sd",
+				"-m",
+				dir + "/marigold-depth-v1-1.q8_0.gguf",
+				"--sampling-method",
+				"ddim_trailing",
+				"--steps",
+				"10",
+				"-s",
+				"-1",
+				"-W",
+				"768",
+				"-H",
+				"768",
+				"-p",
+				"' '",
+				"-i",
+				dir + "/input.png",
+				"-o",
+				dir + "/output.png",
+				null
+			];
+			iron_exec_async(argv[0], argv.buffer);
+			sys_notify_on_update(neural_node_check_result, node);
 		}
 	}
 }

@@ -707,16 +707,17 @@ function box_preferences_neural_tab() {
 	ui_text(tr("Models"));
 
 	if (ui_panel(ui_handle(__ID__), "Stable Diffusion")) { //  (downloaded)
-		// https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.safetensors
-		ui_text("license: openrail");
-		ui_text("nodes: Text to Image");
+		ui_text("source: https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5 (openrail)");
+		ui_text("gpu memory: 4GB");
+		ui_text("nodes: Inpaint Image, Text to Image, Tile Image, Vary Image");
 		if (ui_button(tr("Download (4.0GB)"))) {
+			// https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.safetensors
 		}
 	}
 
 	if (ui_panel(ui_handle(__ID__), "Qwen Image")) { //  (downloaded)
 		ui_text("source: https://huggingface.co/QuantStack/Qwen-Image-GGUF (apache-2.0)");
-		ui_text("video ram: GB");
+		ui_text("gpu memory: 13GB");
 		ui_text("nodes: Text to Image");
 		if (ui_button(tr("Download") + " (15.7GB)")) {
 			// https://huggingface.co/QuantStack/Qwen-Image-GGUF/resolve/main/Qwen_Image-Q4_K_S.gguf
@@ -728,8 +729,9 @@ function box_preferences_neural_tab() {
 	}
 
 	if (ui_panel(ui_handle(__ID__), "Qwen Image Edit")) { //  (downloaded)
-		ui_text("license: apache-2.0");
-		ui_text("nodes: Edit Image");
+		ui_text("source: https://huggingface.co/QuantStack/Qwen-Image-Edit-2509-GGUF (apache-2.0)");
+		ui_text("gpu memory: 13GB");
+		ui_text("nodes: Edit Image, Inpaint Image, Tile Image, Vary Image");
 		if (ui_button(tr("Download (17.0GB)"))) {
 			// https://huggingface.co/QuantStack/Qwen-Image-Edit-2509-GGUF/resolve/main/Qwen-Image-Edit-2509-Q4_K_S.gguf
 			// https://huggingface.co/QuantStack/Qwen-Image-GGUF/resolve/main/VAE/Qwen_Image-VAE.safetensors
@@ -739,7 +741,8 @@ function box_preferences_neural_tab() {
 	}
 
 	if (ui_panel(ui_handle(__ID__), "Wan")) { //  (downloaded)
-		ui_text("license: apache-2.0");
+		ui_text("source: https://huggingface.co/QuantStack/Wan2.2-T2V-A14B-GGUF (apache-2.0)");
+		ui_text("gpu memory: 10GB");
 		ui_text("nodes: Text to Image");
 		if (ui_button(tr("Download (19.8GB)"))) {
 			// https://huggingface.co/QuantStack/Wan2.2-T2V-A14B-GGUF/resolve/main/LowNoise/Wan2.2-T2V-A14B-LowNoise-Q4_K_S.gguf
@@ -750,8 +753,9 @@ function box_preferences_neural_tab() {
 	}
 
 	if (ui_panel(ui_handle(__ID__), "Marigold")) { //  (downloaded)
-		ui_text("license: openrail");
-		ui_text("nodes: Image to PBR");
+		ui_text("source: https://huggingface.co/armory3d/marigold-v1-1-gguf (openrail)");
+		ui_text("gpu memory: 6GB");
+		ui_text("nodes: Image to Depth, Image to Normal Map, Image to PBR");
 		if (ui_button(tr("Download (9.6GB)"))) {
 			// https://huggingface.co/armory3d/marigold-v1-1-gguf/resolve/main/marigold-depth-v1-1.q8_0.gguf
 			// https://huggingface.co/armory3d/marigold-v1-1-gguf/resolve/main/marigold-normals-v1-1.q8_0.gguf
@@ -760,10 +764,11 @@ function box_preferences_neural_tab() {
 	}
 
 	if (ui_panel(ui_handle(__ID__), "RealESRGAN")) { //  (downloaded)
-		// https://huggingface.co/armory3d/Real-ESRGAN/resolve/main/RealESRGAN_x4plus.pth
-		ui_text("license: bsd-3-clause");
+		ui_text("source: https://huggingface.co/armory3d/Real-ESRGAN (bsd-3-clause)");
+		ui_text("gpu memory: 1GB");
 		ui_text("nodes: Upscale Image");
 		if (ui_button(tr("Download (0.06GB)"))) {
+			// https://huggingface.co/armory3d/Real-ESRGAN/resolve/main/RealESRGAN_x4plus.pth
 		}
 	}
 }

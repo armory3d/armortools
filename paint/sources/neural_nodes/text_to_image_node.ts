@@ -1,25 +1,11 @@
 
-
-let text_to_image_node_result: gpu_texture_t = null;
-
 function text_to_image_node_init() {
 	array_push(nodes_material_neural, text_to_image_node_def);
-	map_set(parser_material_node_vectors, "NEURAL_TEXT_TO_IMAGE", text_to_image_node_vector);
+	map_set(parser_material_node_vectors, "NEURAL_TEXT_TO_IMAGE", neural_node_vector);
 	map_set(ui_nodes_custom_buttons, "text_to_image_node_button", text_to_image_node_button);
 }
 
-function text_to_image_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
-	if (text_to_image_node_result == null) {
-		return "float3(0.0, 0.0, 0.0)";
-	}
-	let tex_name: string = parser_material_node_name(node);
-	map_set(data_cached_images, tex_name, text_to_image_node_result);
-	let tex: bind_tex_t  = parser_material_make_bind_tex(tex_name, tex_name);
-	let texstore: string = parser_material_texture_store(node, tex, tex_name, color_space_t.AUTO);
-	return texstore + ".rgb";
-}
-
-function text_to_image_node_run_sd(dir: string, prompt: string): string[] {
+function text_to_image_node_sd_args(dir: string, prompt: string): string[] {
 	let argv: string[] = [
 		dir + "/sd",
 		"-m",
@@ -42,7 +28,7 @@ function text_to_image_node_run_sd(dir: string, prompt: string): string[] {
 	return argv;
 }
 
-function text_to_image_node_run_qwen(dir: string, prompt: string): string[] {
+function text_to_image_node_qwen_args(dir: string, prompt: string): string[] {
 	let argv: string[] = [
 		dir + "/sd",
 		"--diffusion-model",
@@ -71,7 +57,7 @@ function text_to_image_node_run_qwen(dir: string, prompt: string): string[] {
 	return argv;
 }
 
-function text_to_image_node_run_wan(dir: string, prompt: string): string[] {
+function text_to_image_node_wan_args(dir: string, prompt: string): string[] {
 	let argv: string[] = [
 		dir + "/sd",
 		"-M",
@@ -117,40 +103,21 @@ function text_to_image_node_button(node_id: i32) {
 	let prompt: string     = ui_text_area(ui_handle(__ID__), ui_align_t.LEFT, true, tr("prompt"), true);
 	node.buttons[0].height = string_split(prompt, "\n").length + 2;
 
-	if (iron_exec_async_done == 0) {
-		ui_button("Processing...");
-	}
-	else if (ui_button("Run")) {
-		let dir: string;
-		if (path_is_protected()) {
-			dir = iron_internal_save_path() + "models";
-		}
-		else {
-			dir = iron_internal_files_location() + path_sep + "models";
-		}
+	if (neural_node_button()) {
+		let dir: string = neural_node_dir();
 
 		let argv: string[];
 		if (model == 0) {
-			argv = text_to_image_node_run_sd(dir, prompt);
+			argv = text_to_image_node_sd_args(dir, prompt);
 		}
 		else if (model == 1) {
-			argv = text_to_image_node_run_qwen(dir, prompt);
+			argv = text_to_image_node_qwen_args(dir, prompt);
 		}
 		else {
-			argv = text_to_image_node_run_wan(dir, prompt);
+			argv = text_to_image_node_wan_args(dir, prompt);
 		}
 		iron_exec_async(argv[0], argv.buffer);
-		sys_notify_on_update(text_to_image_node_check_result, dir);
-	}
-}
-
-function text_to_image_node_check_result(dir: string) {
-	if (iron_exec_async_done == 1) {
-		let file: string = dir + path_sep + "output.png";
-		if (iron_file_exists(file)) {
-			text_to_image_node_result = iron_load_texture(file);
-		}
-		sys_remove_update(text_to_image_node_check_result);
+		sys_notify_on_update(neural_node_check_result, node);
 	}
 }
 

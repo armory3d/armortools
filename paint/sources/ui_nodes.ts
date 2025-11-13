@@ -1164,20 +1164,8 @@ function ui_nodes_get_node_preview_image(n: ui_node_t): gpu_texture_t {
 			img = project_get_image(project_assets[asset_index]);
 		}
 	}
-	else if (n.type == "NEURAL_TEXT_TO_IMAGE") {
-		img = text_to_image_node_result;
-	}
-	else if (n.type == "NEURAL_UPSCALE_IMAGE") {
-		img = upscale_image_node_result;
-	}
-	else if (n.type == "NEURAL_EDIT_IMAGE") {
-		img = edit_image_node_result;
-	}
-	else if (n.type == "NEURAL_TILE_IMAGE") {
-		img = tile_image_node_result;
-	}
-	else if (n.type == "NEURAL_INPAINT_IMAGE") {
-		img = inpaint_image_node_result;
+	else if (starts_with(n.type, "NEURAL_") && n.type != "NEURAL_IMAGE_TO_PBR") {
+		img = any_imap_get(neural_node_results, n.id);
 	}
 	else if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) {
 		img = any_imap_get(context_raw.node_preview_map, n.id);

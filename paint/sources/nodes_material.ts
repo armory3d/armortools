@@ -88,6 +88,7 @@ function nodes_material_init() {
 		text_to_image_node_init();
 		tile_image_node_init();
 		upscale_image_node_init();
+		vary_image_node_init();
 	}
 
 	nodes_material_group = [];

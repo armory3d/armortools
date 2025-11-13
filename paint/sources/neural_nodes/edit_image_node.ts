@@ -1,21 +1,8 @@
 
-let edit_image_node_result: gpu_texture_t = null;
-
 function edit_image_node_init() {
 	array_push(nodes_material_neural, edit_image_node_def);
-	map_set(parser_material_node_vectors, "NEURAL_EDIT_IMAGE", edit_image_node_vector);
+	map_set(parser_material_node_vectors, "NEURAL_EDIT_IMAGE", neural_node_vector);
 	map_set(ui_nodes_custom_buttons, "edit_image_node_button", edit_image_node_button);
-}
-
-function edit_image_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
-	if (edit_image_node_result == null) {
-		return "float3(0.0, 0.0, 0.0)";
-	}
-	let tex_name: string = parser_material_node_name(node);
-	map_set(data_cached_images, tex_name, edit_image_node_result);
-	let tex: bind_tex_t  = parser_material_make_bind_tex(tex_name, tex_name);
-	let texstore: string = parser_material_texture_store(node, tex, tex_name, color_space_t.AUTO);
-	return texstore + ".rgb";
 }
 
 function edit_image_node_button(node_id: i32) {
@@ -28,60 +15,25 @@ function edit_image_node_button(node_id: i32) {
 	let prompt: string     = ui_text_area(ui_handle(__ID__), ui_align_t.LEFT, true, tr("prompt"), true);
 	node.buttons[0].height = string_split(prompt, "\n").length + 2;
 
-	// let found: bool = false;
-	let found: bool = true;
-
-	if (iron_exec_async_done == 0) {
-		ui_button(tr("Processing..."));
-	}
-	else if (!found && ui_button(tr("Setup"))) {
-		box_preferences_htab.i = preference_tab_t.NEURAL;
-		box_preferences_show();
-	}
-	else if (found && ui_button(tr("Run"))) {
-		let inp: ui_node_socket_t = node.inputs[0];
-		let from_node: ui_node_t  = null;
-		for (let i: i32 = 0; i < canvas.links.length; ++i) {
-			let l: ui_node_link_t = canvas.links[i];
-			if (l.to_id == inp.node_id) {
-				from_node = ui_get_node(canvas.nodes, l.from_id);
-				break;
-			}
-		}
-
+	if (neural_node_button()) {
+		let from_node: ui_node_t = neural_from_node(node.inputs[0]);
 		let input: gpu_texture_t = ui_nodes_get_node_preview_image(from_node);
 		if (input != null) {
-			let dir: string;
-			if (path_is_protected()) {
-				dir = iron_internal_save_path() + "models";
-			}
-			else {
-				dir = iron_internal_files_location() + path_sep + "models";
-			}
+			let dir: string = neural_node_dir();
 			iron_write_png(dir + path_sep + "input.png", gpu_get_texture_pixels(input), input.width, input.height, 0);
 
 			let argv: string[] = [
 				dir + "/sd", "--diffusion-model", dir + "/Qwen-Image-Edit-2509-Q4_K_S.gguf", "--vae", dir + "/Qwen_Image-VAE.safetensors", "--qwen2vl",
-				dir + "/Qwen2.5-VL-7B-Instruct-Q4_K_S.gguf", "--qwen2vl_vision", dir + "/mmproj-F16.gguf", "--sampling-method", "euler",
-				"--offload-to-cpu", "--diffusion-fa", "--steps", "30", "-s", "-1", "-W", "512", "-H", "512", "-p", "'" + prompt + "'",
+				dir + "/Qwen2.5-VL-7B-Instruct-Q4_K_S.gguf", "--qwen2vl_vision", dir + "/mmproj-F16.gguf", "--sampling-method", "euler", "--offload-to-cpu",
+				"--diffusion-fa", "--steps", "30", "-s", "-1", "-W", "512", "-H", "512", "-p", "'" + prompt + "'",
 				// "-n",
 				// "'" + negative + "'",
 				"-r", dir + "/input.png", "-o", dir + "/output.png", null
 			];
 
 			iron_exec_async(argv[0], argv.buffer);
-			sys_notify_on_update(edit_image_node_check_result, dir);
+			sys_notify_on_update(neural_node_check_result, node);
 		}
-	}
-}
-
-function edit_image_node_check_result(dir: string) {
-	if (iron_exec_async_done == 1) {
-		let file: string = dir + path_sep + "output.png";
-		if (iron_file_exists(file)) {
-			edit_image_node_result = iron_load_texture(file);
-		}
-		sys_remove_update(edit_image_node_check_result);
 	}
 }
 
