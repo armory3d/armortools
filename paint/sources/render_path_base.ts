@@ -67,7 +67,7 @@ function render_path_base_begin() {
 
 	// Match projection matrix jitter
 	let skip_taa: bool =
-	    context_raw.split_view || context_raw.viewport_mode == viewport_mode_t.PATH_TRACE ||
+	    context_raw.split_view || context_raw.viewport_mode == viewport_mode_t.PATH_TRACE || context_raw.camera_type == camera_type_t.ORTHOGRAPHIC ||
 	    ((context_raw.tool == tool_type_t.CLONE || context_raw.tool == tool_type_t.BLUR || context_raw.tool == tool_type_t.SMUDGE) && context_raw.pdirty > 0);
 	scene_camera.frame = skip_taa ? 0 : render_path_base_taa_frame;
 	camera_object_proj_jitter(scene_camera);

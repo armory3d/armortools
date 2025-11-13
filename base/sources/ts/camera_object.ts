@@ -41,7 +41,7 @@ function camera_object_create(data: camera_data_t): camera_object_t {
 
 function camera_object_build_proj(raw: camera_object_t, screen_aspect: f32 = -1.0) {
 	if (raw.data.ortho != null) {
-		raw.p = mat4_ortho(raw.data.ortho[0], raw.data.ortho[1], raw.data.ortho[2], raw.data.ortho[3], raw.data.near_plane, raw.data.far_plane);
+		raw.p = mat4_ortho(raw.data.ortho[0], raw.data.ortho[1], raw.data.ortho[2], raw.data.ortho[3], -raw.data.far_plane, raw.data.far_plane);
 	}
 	else {
 		if (screen_aspect < 0) {
