@@ -59,7 +59,7 @@ function tile_image_node_button(node_id: i32) {
 					"-H",
 					"512",
 					"-p",
-					"'" + prompt + "'",
+					prompt,
 					"-n",
 					"'" + negative + "'",
 					"-r",

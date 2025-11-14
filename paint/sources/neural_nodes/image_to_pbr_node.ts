@@ -62,7 +62,7 @@ function image_to_pbr_node_run_sd(model: string, prompt: string, done: (tex: gpu
 	let dir: string = neural_node_dir();
 
 	let argv: string[] = [
-		dir + "/sd",
+		dir + "/sd_vulkan",
 		"-m",
 		dir + "/" + model,
 		"--sampling-method",
@@ -76,7 +76,7 @@ function image_to_pbr_node_run_sd(model: string, prompt: string, done: (tex: gpu
 		"-H",
 		"768",
 		"-p",
-		"'" + prompt + "'",
+		prompt,
 		"-i",
 		dir + "/input.png",
 		"-o",
@@ -102,14 +102,54 @@ function image_to_pbr_node_button(node_id: i32) {
 			let dir: string = neural_node_dir();
 			iron_write_png(dir + path_sep + "input.png", gpu_get_texture_pixels(input), input.width, input.height, 0);
 
-			image_to_pbr_node_run_sd("marigold-normals-v1-1.q8_0.gguf", " ", function(tex: gpu_texture_t) {
+			image_to_pbr_node_run_sd("marigold-normals-v1-1.q8_0.gguf", "_normals", function(tex: gpu_texture_t) {
 				image_to_pbr_node_result_normal = tex;
-				image_to_pbr_node_run_sd("marigold-depth-v1-1.q8_0.gguf", " ", function(tex: gpu_texture_t) {
+				image_to_pbr_node_run_sd("marigold-depth-v1-1.q8_0.gguf", "_height", function(tex: gpu_texture_t) {
 					image_to_pbr_node_result_height = tex;
-					image_to_pbr_node_run_sd("marigold-iid-appearance-v1-1.q8_0.gguf", " ", function(tex: gpu_texture_t) {
+					image_to_pbr_node_run_sd("marigold-iid-lighting-v1-1.q8_0.gguf", "_base", function(tex: gpu_texture_t) {
 						image_to_pbr_node_result_base = tex;
 						image_to_pbr_node_run_sd("marigold-iid-appearance-v1-1.q8_0.gguf", "_roughness", function(tex: gpu_texture_t) {
+						// image_to_pbr_node_run_sd("marigold-iid-lighting-v1-1.q8_0.gguf", "_diffuse_shading", function(tex: gpu_texture_t) {
 							image_to_pbr_node_result_roughness = tex;
+
+							sys_notify_on_next_frame(function() {
+								let occmap: render_target_t;
+								{
+									let t: render_target_t = render_target_create();
+									t.name                 = "occmap";
+									t.width                = 2048;
+									t.height               = 2048;
+									t.format               = "RGBA32";
+									render_path_create_render_target(t);
+									occmap = t;
+								}
+								{
+									let t: render_target_t = render_target_create();
+									t.name                 = "_height_map";
+									t.width                = 768;
+									t.height               = 768;
+									t.format               = "RGBA32";
+									t._image = image_to_pbr_node_result_height;
+									map_set(render_path_render_targets, t.name, t);
+								}
+								{
+									let t: render_target_t = render_target_create();
+									t.name                 = "_normal_map";
+									t.width                = 768;
+									t.height               = 768;
+									t.format               = "RGBA32";
+									t._image = image_to_pbr_node_result_normal;
+									map_set(render_path_render_targets, t.name, t);
+								}
+
+								render_path_load_shader("Scene/depth_to_ao_pass/depth_to_ao_pass");
+								render_path_set_target("occmap");
+								render_path_bind_target("_height_map", "height_map");
+								render_path_bind_target("_normal_map", "normal_map");
+								render_path_draw_shader("Scene/depth_to_ao_pass/depth_to_ao_pass");
+								image_to_pbr_node_result_occlusion = occmap._image;
+								// blur
+							});
 						});
 					});
 				});
@@ -119,6 +159,7 @@ function image_to_pbr_node_button(node_id: i32) {
 }
 
 function image_to_pbr_node_check_result(done: (tex: gpu_texture_t) => void) {
+	iron_delay_idle_sleep();
 	if (iron_exec_async_done == 1) {
 		let dir: string = neural_node_dir();
 		let file: string = dir + path_sep + "output.png";

@@ -20,7 +20,7 @@ function image_to_normal_map_node_button(node_id: i32) {
 			iron_write_png(dir + path_sep + "input.png", gpu_get_texture_pixels(input), input.width, input.height, 0);
 
 			let argv: string[] = [
-				dir + "/sd",
+				dir + "/sd_vulkan",
 				"-m",
 				dir + "/marigold-normals-v1-1.q8_0.gguf",
 				"--sampling-method",
@@ -34,7 +34,7 @@ function image_to_normal_map_node_button(node_id: i32) {
 				"-H",
 				"768",
 				"-p",
-				"' '",
+				" ",
 				"-i",
 				dir + "/input.png",
 				"-o",

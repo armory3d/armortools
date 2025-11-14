@@ -35,7 +35,7 @@ function inpaint_image_node_button(node_id: i32) {
 					"--diffusion-fa",
 					// "--vae-tiling",
 					// "--vae-on-cpu",
-					"--steps", "40", "-s", "-1", "-W", "512", "-H", "512", "-p", "'" + prompt + "'", "-n", "'" + negative + "'", "-r", dir + "/input.png", "-o",
+					"--steps", "40", "-s", "-1", "-W", "512", "-H", "512", "-p", prompt, "-n", negative, "-r", dir + "/input.png", "-o",
 					dir + "/output.png", null
 				];
 

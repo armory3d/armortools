@@ -1,0 +1,123 @@
+
+#[set(everything)]
+const constants: {
+	empty: float4;
+};
+
+#[set(everything)]
+const sampler_linear: sampler;
+
+#[set(everything)]
+const height_map: tex2d;
+
+#[set(everything)]
+const normal_map: tex2d;
+
+const max_steps: float = 100.0;
+const ray_step: float = 0.005;
+const height_scale: float = 1.0;
+
+struct vert_in {
+	pos: float2;
+}
+
+struct vert_out {
+	pos: float4;
+	tex: float2;
+}
+
+fun depth_to_ao_pass_vert(input: vert_in): vert_out {
+	var output: vert_out;
+	output.tex = input.pos.xy * 0.5 + 0.5;
+	output.tex.y = 1.0 - output.tex.y;
+	output.pos = float4(input.pos.xy, 0.0, 1.0);
+	return output;
+}
+
+fun get_delta_height(hit_xy: float2, hit_z: float, uv: float2): float {
+	var coord: float2 = uv + hit_xy;
+	if (coord.x < 0.0 || coord.x > 1.0 || coord.y < 0.0 || coord.y > 1.0) {
+		return 1000.0;
+	}
+	var sampled: float = sample_lod(height_map, sampler_linear, coord, 0.0).r * height_scale;
+	return sampled - hit_z;
+}
+
+fun ray_cast(dir: float3, uv: float2, height: float): float {
+	var n_dir: float3 = normalize(dir);
+	var step_vec: float3 = n_dir * ray_step;
+	var hit_xy: float2 = float2(0.0, 0.0);
+	var hit_z: float = height + 0.001;
+	var hit_coord: float3 = float3(hit_xy, hit_z);
+	var prev_delta: float = get_delta_height(hit_xy, hit_z, uv);
+	var prev_t: float = 0.0;
+	hit_coord += step_vec;
+	var t: float = ray_step;
+	var i: int = 1;
+	while (i < int(max_steps)) {
+		var delta: float = get_delta_height(hit_coord.xy, hit_coord.z, uv);
+		if (delta > 0.0 && delta < 0.2) {
+			var prev_sdf: float = -prev_delta;
+			var sdf: float = -delta;
+			var fraction: float = prev_sdf / (prev_sdf - sdf);
+			return prev_t + ray_step * fraction;
+		}
+		if (t > 0.02) { // max_radius
+			return 0.02; // max_radius
+		}
+		prev_delta = delta;
+		prev_t = t;
+		hit_coord += step_vec;
+		t += ray_step;
+		i += 1;
+	}
+	return 0.02; // max_radius
+}
+
+fun tangent(n: float3): float3 {
+	var t1: float3 = cross(n, float3(0.0, 0.0, 1.0));
+	var t2: float3 = cross(n, float3(0.0, 1.0, 0.0));
+	if (length(t1) > length(t2)) {
+		return normalize(t1);
+	}
+	return normalize(t2);
+}
+
+fun depth_to_ao_pass_frag(input: vert_out): float4 {
+	var height: float = sample_lod(height_map, sampler_linear, input.tex, 0.0).r * height_scale;
+	var normal: float3 = sample_lod(normal_map, sampler_linear, input.tex, 0.0).rgb * 2.0 - 1.0;
+	var n: float3 = normalize(normal);
+	var o1: float3 = tangent(n);
+	var o2: float3 = cross(o1, n);
+	var c1: float3 = 0.5 * (o1 + o2);
+	var c2: float3 = 0.5 * (o1 - o2);
+	var col: float = ray_cast(lerp3(n, o1, 0.5), input.tex, height);
+	col += ray_cast(lerp3(n, -o1, 0.5), input.tex, height);
+	col += ray_cast(lerp3(n, o2, 0.5), input.tex, height);
+	col += ray_cast(lerp3(n, -o2, 0.5), input.tex, height);
+	col += ray_cast(lerp3(n, c1, 0.5), input.tex, height);
+	col += ray_cast(lerp3(n, -c1, 0.5), input.tex, height);
+	col += ray_cast(lerp3(n, c2, 0.5), input.tex, height);
+	col += ray_cast(lerp3(n, -c2, 0.5), input.tex, height);
+
+	var d1: float3 = normalize(o1 + 0.5 * o2);
+	var d2: float3 = normalize(o1 - 0.5 * o2);
+	var d3: float3 = normalize(o2 + 0.5 * o1);
+	var d4: float3 = normalize(o2 - 0.5 * o1);
+	col += ray_cast(lerp3(n, d1, 0.5), input.tex, height);
+	col += ray_cast(lerp3(n, -d1, 0.5), input.tex, height);
+	col += ray_cast(lerp3(n, d2, 0.5), input.tex, height);
+	col += ray_cast(lerp3(n, -d2, 0.5), input.tex, height);
+	col += ray_cast(lerp3(n, d3, 0.5), input.tex, height);
+	col += ray_cast(lerp3(n, -d3, 0.5), input.tex, height);
+	col += ray_cast(lerp3(n, d4, 0.5), input.tex, height);
+	col += ray_cast(lerp3(n, -d4, 0.5), input.tex, height);
+	var f: float = (col / (16.0 * 0.02)); // max_radius
+	return float4(f, f, f, 1.0);
+}
+
+#[pipe]
+struct pipe {
+	vertex = depth_to_ao_pass_vert;
+	fragment = depth_to_ao_pass_frag;
+}

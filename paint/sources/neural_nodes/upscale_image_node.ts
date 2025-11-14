@@ -20,7 +20,7 @@ function upscale_image_node_button(node_id: i32) {
 			iron_write_png(dir + path_sep + "input.png", gpu_get_texture_pixels(input), input.width, input.height, 0);
 
 			let argv: string[] =
-			    [ dir + "/sd", "-M", "upscale", "--upscale-model", dir + "/RealESRGAN_x4plus.pth", "-i", dir + "/input.png", "-o", dir + "/output.png", null ];
+			    [ dir + "/sd_vulkan", "-M", "upscale", "--upscale-model", dir + "/RealESRGAN_x4plus.pth", "-i", dir + "/input.png", "-o", dir + "/output.png", null ];
 			iron_exec_async(argv[0], argv.buffer);
 			sys_notify_on_update(neural_node_check_result, node);
 		}
