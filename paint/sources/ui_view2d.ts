@@ -366,18 +366,25 @@ function ui_view2d_render() {
 		ui._x += ew * 0.7 + 3;
 		ui._y = 2 + start_y;
 
+		ui.enabled = false;
+
 		if ((ui_view2d_type == view_2d_type_t.ASSET || ui_view2d_type == view_2d_type_t.NODE) && tex != null) { // Texture resolution
 			ui_text(tex.width + "x" + tex.height);
 			ui._x += ew * 0.7 + 3;
 			ui._y = 2 + start_y;
 		}
 
-		ui.enabled            = false;
 		let view_type: string = ui_view2d_type == view_2d_type_t.ASSET  ? "Asset"
 		                        : ui_view2d_type == view_2d_type_t.NODE ? "Node"
 		                        : ui_view2d_type == view_2d_type_t.FONT ? "Font"
 		                                                                : "Layer";
 		ui_text(view_type);
+		ui._x += ew * 0.5 + 3;
+		ui._y = 2 + start_y;
+
+		let scale_percent: i32 = math_round(ui_view2d_pan_scale * 100.0);
+		ui_text(scale_percent + "%");
+
 		ui.enabled = true;
 
 		// Picked position
