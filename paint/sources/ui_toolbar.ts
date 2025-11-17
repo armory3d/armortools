@@ -121,7 +121,7 @@ function ui_toolbar_render_ui() {
 		return;
 	}
 
-	if (ui_view2d_show && ui_view2d_type != view_2d_type_t.LAYER) {
+	if (!base_view3d_show && ui_view2d_show && ui_view2d_type != view_2d_type_t.LAYER) {
 		return;
 	}
 
