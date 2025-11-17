@@ -2578,7 +2578,8 @@ char *ui_cut() {
 
 void ui_paste(char *s) {
 	ui_is_paste = true;
-	strcpy(ui_text_to_paste, s);
+	strncpy(ui_text_to_paste, s, 1024);
+	ui_text_to_paste[1023] = 0;
 }
 
 void ui_theme_default(ui_theme_t *t) {
@@ -3172,11 +3173,10 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 			strcpy(handle->text, line);
 			current->submit_text_handle = NULL;
 			ui_text_input(handle, show_label ? label : "", align, editable, false);
-			if (key_pressed && current->key_code != IRON_KEY_RETURN && current->key_code != IRON_KEY_ESCAPE) { // Edit text
+			if (selected && current->key_code != IRON_KEY_RETURN && current->key_code != IRON_KEY_ESCAPE && strcmp(line, current->text_selected) != 0) {  // Edit text
 				int line_pos = ui_line_pos(lines, i);
 				ui_remove_chars_at(lines, line_pos, strlen(line));
-				strcpy(line, current->text_selected);
-				ui_insert_chars_at(lines, line_pos, line);
+				ui_insert_chars_at(lines, line_pos, current->text_selected);
 			}
 		}
 		// Text
