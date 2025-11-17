@@ -1353,6 +1353,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 			int        nid = current_nodes->nodes_selected_id->buffer[i--];
 			ui_node_t *n   = ui_get_node(canvas->nodes, nid);
 			if (ui_is_node_type_excluded(n->type)) {
+				n->flags ^= NODE_FLAG_COLLAPSED;
 				continue;
 			}
 			ui_remove_node(n, canvas);
