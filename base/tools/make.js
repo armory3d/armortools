@@ -533,53 +533,23 @@ class VisualStudioExporter extends Exporter {
 		return [ "x64" ];
 	}
 
-	write_project_builds(project, platform) {
-		for (let config of this.get_configs()) {
-			for (let system of this.get_systems()) {
-				this.p('{' + project.get_uuid().toString().toUpperCase() + '}.' + config + '|' + system + '.ActiveCfg = ' + config + '|' + system, 2);
-				this.p('{' + project.get_uuid().toString().toUpperCase() + '}.' + config + '|' + system + '.Build.0 = ' + config + '|' + system, 2);
-			}
-		}
-		for (let proj of project.getSubProjects())
-			this.write_project_builds(proj, platform);
-	}
-
 	export_solution(project) {
 		let from     = path_resolve(".");
 		let to       = path_resolve("build");
 		let platform = goptions.target;
-		this.write_file(path_resolve(to, project.get_safe_name() + '.sln'));
-		if (goptions.visualstudio === 'vs2022') {
-			this.p('Microsoft Visual Studio Solution File, Format Version 12.00');
-			this.p('# Visual Studio Version 17');
-			this.p('VisualStudioVersion = 17.0.31903.59');
-			this.p('MinimumVisualStudioVersion = 10.0.40219.1');
-		}
-		let solutionUuid = crypto_random_uuid();
-		this.write_project_declarations(project, solutionUuid);
-		this.p('Global');
-		this.p('GlobalSection(SolutionConfigurationPlatforms) = preSolution', 1);
-		for (let config of this.get_configs()) {
-			for (let system of this.get_systems()) {
-				this.p(config + '|' + system + ' = ' + config + '|' + system, 2);
-			}
-		}
-		this.p('EndGlobalSection', 1);
-		this.p('GlobalSection(ProjectConfigurationPlatforms) = postSolution', 1);
-		this.write_project_builds(project, platform);
-		this.p('EndGlobalSection', 1);
-		this.p('GlobalSection(SolutionProperties) = preSolution', 1);
-		this.p('HideSolutionNode = FALSE', 2);
-		this.p('EndGlobalSection', 1);
-		this.p('EndGlobal');
+		this.write_file(path_resolve(to, project.get_safe_name() + '.slnx'));
+		this.p('<Solution>');
+		this.p('<Configurations>', 1);
+		this.p('<Platform Name="x64" />', 2);
+		this.p('</Configurations>', 1);
+		this.p('<Project Path="' + project.get_safe_name() + '.vcxproj" Id="' + project.get_uuid().toString().toLowerCase() + '" />', 1);
+		this.p('</Solution>');
 		this.close_file();
 		this.export_project(from, to, project, platform, false, goptions);
 		this.export_filters(from, to, project, platform);
 		this.export_user_file(from, to, project, platform);
-		if (platform === 'windows') {
-			this.export_resource_script(to);
-			export_ico(project.icon, path_resolve(to, 'icon.ico'), from);
-		}
+		this.export_resource_script(to);
+		export_ico(project.icon, path_resolve(to, 'icon.ico'), from);
 	}
 
 	export_resource_script(to) {
@@ -663,7 +633,7 @@ class VisualStudioExporter extends Exporter {
 	}
 
 	get_platform_toolset() {
-		// return 'v143';
+		// return 'v145';
 		return 'ClangCL';
 	}
 
@@ -766,10 +736,8 @@ class VisualStudioExporter extends Exporter {
 	}
 
 	globals(indent) {
-		if (goptions.visualstudio === 'vs2022') {
-			this.p('<VCProjectVersion>16.0</VCProjectVersion>', indent);
-			this.p('<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>', indent);
-		}
+		this.p('<VCProjectVersion>18.0</VCProjectVersion>', indent);
+		this.p('<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>', indent);
 	}
 
 	extension_settings(indent) {
@@ -799,7 +767,7 @@ class VisualStudioExporter extends Exporter {
 		}
 		this.p('</ItemGroup>', 1);
 		this.p('<PropertyGroup Label="Globals">', 1);
-		this.p('<ProjectGuid>{' + project.get_uuid().toString().toUpperCase() + '}</ProjectGuid>', 2);
+		this.p('<ProjectGuid>{' + project.get_uuid().toString().toLowerCase() + '}</ProjectGuid>', 2);
 		this.globals(2);
 		this.p('</PropertyGroup>', 1);
 		this.p('<Import Project="$(VCTargetsPath)\\Microsoft.Cpp.Default.props" />', 1);
@@ -3332,7 +3300,7 @@ function default_target() {
 let goptions = {
 	target : default_target(),
 	graphics : 'default',
-	visualstudio : 'vs2022',
+	visualstudio : 'vs2026',
 	compile : false,
 	run : false,
 	debug : false,
