@@ -9,9 +9,6 @@ function blur_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
 		return parser_material_parse_vector_input(node.inputs[0]);
 	}
 	let strength: string = parser_material_parse_value_input(node.inputs[1]);
-	if (strength == "0.0") {
-		return "float3(0.0, 0.0, 0.0)";
-	}
 	let steps: string    = "(" + strength + " * 10.0 + 1.0)";
 	let tex_name: string = "texblur_" + parser_material_node_name(node);
 	node_shader_add_texture(parser_material_kong, "" + tex_name, "_" + tex_name);
@@ -24,7 +21,7 @@ function blur_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
 	                                                ", float(j) - " + steps + ") / constants." + tex_name + "_size).rgb;");
 	parser_material_write(parser_material_kong, "}");
 	parser_material_write(parser_material_kong, "}");
-	parser_material_write(parser_material_kong, store + "_res = " + store + "_res / (" + steps + " * 2.0 + 1.0) * (" + steps + " * 2.0 + 1.0);");
+	parser_material_write(parser_material_kong, store + "_res = " + store + "_res / ((" + steps + " * 2.0 + 1.0) * (" + steps + " * 2.0 + 1.0));");
 	return store + "_res";
 }
 
