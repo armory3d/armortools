@@ -8,16 +8,24 @@ function upscale_image_node_init() {
 function upscale_image_node_button(node_id: i32) {
 	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
 	let node: ui_node_t          = ui_get_node(canvas.nodes, node_id);
+	let node_name: string = parser_material_node_name(node);
+	let h: ui_handle_t = ui_handle(node_name);
 
 	let models: string[] = [ "RealESRGAN_X4" ];
-	let model: i32       = ui_combo(ui_handle(__ID__), models, tr("Model"));
+	let model: i32       = ui_combo(ui_nest(h, 0), models, tr("Model"));
 
-	if (neural_node_button()) {
-		let from_node: ui_node_t = neural_from_node(node.inputs[0]);
+	if (neural_node_button(node)) {
+		let from_node: ui_node_t = neural_from_node(node.inputs[0], 0);
 		let input: gpu_texture_t = ui_nodes_get_node_preview_image(from_node);
 		if (input != null) {
+			/// if IRON_BGRA
+			let input_buf: buffer_t = export_arm_bgra_swap(gpu_get_texture_pixels(input)); // Vulkan non-rt textures need a flip
+			/// else
+			let input_buf: buffer_t = gpu_get_texture_pixels(input);
+			/// end
+
 			let dir: string = neural_node_dir();
-			iron_write_png(dir + path_sep + "input.png", gpu_get_texture_pixels(input), input.width, input.height, 0);
+			iron_write_png(dir + path_sep + "input.png", input_buf, input.width, input.height, 0);
 
 			let argv: string[] =
 			    [ dir + "/sd_vulkan", "-M", "upscale", "--upscale-model", dir + "/RealESRGAN_x4plus.pth", "-i", dir + "/input.png", "-o", dir + "/output.png", null ];

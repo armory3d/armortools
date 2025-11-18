@@ -8,16 +8,26 @@ function tile_image_node_init() {
 function tile_image_node_button(node_id: i32) {
 	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
 	let node: ui_node_t          = ui_get_node(canvas.nodes, node_id);
+	let node_name: string        = parser_material_node_name(node);
+	let h: ui_handle_t           = ui_handle(node_name);
 
-	let models: string[] = [ "Qwen Image Edit" ];
-	let model: i32       = ui_combo(ui_handle(__ID__), models, tr("Model"));
+	let models: string[] = [ "Stable Diffusion", "Qwen Image Edit" ];
+	let model: i32       = ui_combo(ui_nest(h, 0), models, tr("Model"));
 
-	if (neural_node_button()) {
-		let from_node: ui_node_t = neural_from_node(node.inputs[0]);
-		let input: gpu_texture_t = ui_nodes_get_node_preview_image(from_node);
-		if (input != null) {
+	let prompt: string     = ui_text_area(ui_nest(h, 1), ui_align_t.LEFT, true, tr("prompt"), true);
+	node.buttons[0].height = string_split(prompt, "\n").length + 2;
 
-			// sys_notify_on_next_frame(function(input: gpu_texture_t) {
+	if (neural_node_button(node)) {
+
+		sys_notify_on_next_frame(function(node: ui_node_t) {
+			let from_node: ui_node_t = neural_from_node(node.inputs[0], 0);
+			let input: gpu_texture_t = ui_nodes_get_node_preview_image(from_node);
+			if (input != null) {
+
+				let node_name: string = parser_material_node_name(node);
+				let h: ui_handle_t    = ui_handle(node_name);
+				let model: i32        = ui_nest(h, 0).i;
+				let prompt: string    = ui_nest(h, 1).text;
 
 				let tile: gpu_texture_t = gpu_create_render_target(512, 512);
 				draw_begin(tile);
@@ -25,56 +35,95 @@ function tile_image_node_button(node_id: i32) {
 				draw_scaled_image(input, 256, -256, 512, 512);
 				draw_scaled_image(input, -256, 256, 512, 512);
 				draw_scaled_image(input, 256, 256, 512, 512);
+				if (model == 1) {
+					draw_set_color(0xffff0000);
+					draw_filled_triangle(0, 256, 256, 0, 512, 256);
+					draw_filled_triangle(0, 256, 256, 512, 512, 256);
+				}
 				draw_end();
+
+				// diamond
+				let u8a: u8_array_t = u8_array_create(512 * 512);
+				for (let i: i32 = 0; i < 512 * 512; ++i) {
+					let x: i32 = i % 512;
+					let y: i32 = math_floor(i / 512);
+					let l: i32 = y < 256 ? y : (511 - y);
+					u8a[i]     = (x > 256 - l && x < 256 + l) ? 255 : 0;
+					// u8a[i]     = (x > 256 - l && x < 256 + l) ? 128 : 0;
+				}
+				let mask: gpu_texture_t = gpu_create_texture_from_bytes(u8a, 512, 512, tex_format_t.R8);
 
 				let dir: string = neural_node_dir();
 				iron_write_png(dir + path_sep + "input.png", gpu_get_texture_pixels(tile), tile.width, tile.height, 0);
+				iron_write_png(dir + path_sep + "mask.png", gpu_get_texture_pixels(mask), mask.width, mask.height, 1);
 
-				let prompt: string   = "Blend seams";
-				let negative: string = "";
+				if (prompt == "") {
+					prompt = ".";
+				}
 
-				let argv: string[] = [
-					dir + "/sd_qie",
-					"--diffusion-model",
-					dir + "/Qwen-Image-Edit-2509-Q8_0.gguf",
-					"--vae",
-					dir + "/qwen_image_vae.safetensors",
-					"--qwen2vl",
-					dir + "/Qwen2.5-VL-7B-Instruct-Q8_0.gguf",
-					"--qwen2vl_vision",
-					dir + "/Qwen2.5-VL-7B-Instruct.mmproj-Q8_0.gguf",
-					"--sampling-method",
-					"euler",
-					"--offload-to-cpu",
-					"--cfg-scale",
-					"2.5",
-					"--flow-shift",
-					"3",
-					"--steps",
-					"20",
-					"-s",
-					"-1",
-					"-W",
-					"512",
-					"-H",
-					"512",
-					"-p",
-					prompt,
-					"-n",
-					"'" + negative + "'",
-					"-r",
-					dir + "/input.png",
-					"-o",
-					dir + "/output.png",
-					null
-				];
+				let argv: string[];
+				if (model == 0) {
+					argv = [
+						dir + "/sd_vulkan",
+						"-m",
+						dir + "/v1-5-pruned-emaonly.safetensors",
+						"--offload-to-cpu",
+						"--steps",
+						"30",
+						"-s",
+						"-1",
+						"-W",
+						"512",
+						"-H",
+						"512",
+						"-p",
+						prompt,
+						"-i",
+						dir + "/input.png",
+						"--mask",
+						dir + "/mask.png",
+						"-o",
+						dir + "/output.png",
+						null
+					];
+				}
+				else {
+					argv = [
+						dir + "/sd_vulkan",
+						"--diffusion-model",
+						dir + "/Qwen-Image-Edit-2509-Q4_K_S.gguf",
+						"--vae",
+						dir + "/Qwen_Image-VAE.safetensors",
+						"--qwen2vl",
+						dir + "/Qwen2.5-VL-7B-Instruct-Q4_K_S.gguf",
+						"--qwen2vl_vision",
+						dir + "/mmproj-F16.gguf",
+						"--offload-to-cpu",
+						"--diffusion-fa",
+						"--steps",
+						"50",
+						"-s",
+						"-1",
+						"-W",
+						"512",
+						"-H",
+						"512",
+						"-p",
+						"replace red area by extending image contents. modify red area only",
+						"-r",
+						dir + "/input.png",
+						"-o",
+						dir + "/output.png",
+						null
+					];
+				}
 
 				iron_exec_async(argv[0], argv.buffer);
 				sys_notify_on_update(neural_node_check_result, node);
-
-			// }, input);
-		}
+			}
+		}, node);
 	}
+}
 }
 
 let tile_image_node_def: ui_node_t = {

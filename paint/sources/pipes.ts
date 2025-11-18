@@ -5,10 +5,10 @@ let pipes_copy64: gpu_pipeline_t;
 let pipes_copy128: gpu_pipeline_t;
 let pipes_copy_bgra: gpu_pipeline_t;
 let pipes_copy_rgb: gpu_pipeline_t = null;
-let pipes_copy_r: gpu_pipeline_t;
-let pipes_copy_g: gpu_pipeline_t;
-let pipes_copy_a: gpu_pipeline_t;
-let pipes_copy_a_tex: i32;
+// let pipes_copy_r: gpu_pipeline_t;
+// let pipes_copy_g: gpu_pipeline_t;
+// let pipes_copy_a: gpu_pipeline_t;
+// let pipes_copy_a_tex: i32;
 
 let pipes_merge: gpu_pipeline_t   = null;
 let pipes_merge_r: gpu_pipeline_t = null;

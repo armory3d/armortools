@@ -8,12 +8,14 @@ function image_to_normal_map_node_init() {
 function image_to_normal_map_node_button(node_id: i32) {
 	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
 	let node: ui_node_t          = ui_get_node(canvas.nodes, node_id);
+	let node_name: string = parser_material_node_name(node);
+	let h: ui_handle_t = ui_handle(node_name);
 
 	let models: string[] = [ "Marigold" ];
-	let model: i32       = ui_combo(ui_handle(__ID__), models, tr("Model"));
+	let model: i32       = ui_combo(ui_nest(h, 0), models, tr("Model"));
 
-	if (neural_node_button()) {
-		let from_node: ui_node_t = neural_from_node(node.inputs[0]);
+	if (neural_node_button(node)) {
+		let from_node: ui_node_t = neural_from_node(node.inputs[0], 0);
 		let input: gpu_texture_t = ui_nodes_get_node_preview_image(from_node);
 		if (input != null) {
 			let dir: string = neural_node_dir();
@@ -34,7 +36,7 @@ function image_to_normal_map_node_button(node_id: i32) {
 				"-H",
 				"768",
 				"-p",
-				" ",
+				"_normals",
 				"-i",
 				dir + "/input.png",
 				"-o",

@@ -96,15 +96,21 @@ function text_to_image_node_wan_args(dir: string, prompt: string): string[] {
 
 function text_to_image_node_button(node_id: i32) {
 	let node: ui_node_t = ui_get_node(ui_nodes_get_canvas(true).nodes, node_id);
+	let node_name: string = parser_material_node_name(node);
+	let h: ui_handle_t = ui_handle(node_name);
 
 	let models: string[] = [ "Stable Diffusion", "Qwen Image", "Wan" ];
-	let model: i32       = ui_combo(ui_handle(__ID__), models, tr("Model"));
+	let model: i32       = ui_combo(ui_nest(h, 0), models, tr("Model"));
 
-	let prompt: string     = ui_text_area(ui_handle(__ID__), ui_align_t.LEFT, true, tr("prompt"), true);
+	let prompt: string     = ui_text_area(ui_nest(h, 1), ui_align_t.LEFT, true, tr("prompt"), true);
 	node.buttons[0].height = string_split(prompt, "\n").length + 2;
 
-	if (neural_node_button()) {
+	if (neural_node_button(node)) {
 		let dir: string = neural_node_dir();
+
+		if (prompt == "") {
+			prompt = ".";
+		}
 
 		let argv: string[];
 		if (model == 0) {

@@ -695,7 +695,7 @@ function box_preferences_neural_tab() {
 	if (inference_handle.init) {
 		inference_handle.i = config_raw.neural_backend;
 	}
-	let inference_combo: string[] = [ "CPU", "Vulkan" ];
+	let inference_combo: string[] = [ "CPU", "Vulkan", "CUDA" ];
 	ui_combo(inference_handle, inference_combo, tr("Inference Backend"), true);
 	if (ui.is_hovered) {
 		ui_tooltip(tr("Backend for neural node processing"));
@@ -709,11 +709,22 @@ function box_preferences_neural_tab() {
 	if (ui_panel(ui_handle(__ID__), "Stable Diffusion")) { //  (downloaded)
 		ui_text("source: https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5 (openrail)");
 		ui_text("gpu memory: 4GB");
-		ui_text("nodes: Inpaint Image, Text to Image, Tile Image, Vary Image");
+		ui_text("nodes: Inpaint Image, Outpaint Image, Text to Image, Tile Image, Vary Image");
 		if (ui_button(tr("Download (4.0GB)"))) {
 			// https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.safetensors
 		}
 	}
+
+	// if (ui_panel(ui_handle(__ID__), "Stable Diffusion Inpaint")) { //  (downloaded)
+	// 	ui_text("source: https://huggingface.co/webui/stable-diffusion-inpainting (openrail)");
+	// 	ui_text("gpu memory: 4GB");
+	// 	ui_text("nodes: Inpaint Image, Outpaint Image, Tile Image, Vary Image");
+	// 	if (ui_button(tr("Download (4.0GB)"))) {
+	// 		// https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.safetensors
+	// 	}
+	// }
+
+	// https://huggingface.co/webui/stable-diffusion-inpainting/resolve/main/sd-v1-5-inpainting.safetensors
 
 	if (ui_panel(ui_handle(__ID__), "Qwen Image")) { //  (downloaded)
 		ui_text("source: https://huggingface.co/QuantStack/Qwen-Image-GGUF (apache-2.0)");
@@ -731,7 +742,7 @@ function box_preferences_neural_tab() {
 	if (ui_panel(ui_handle(__ID__), "Qwen Image Edit")) { //  (downloaded)
 		ui_text("source: https://huggingface.co/QuantStack/Qwen-Image-Edit-2509-GGUF (apache-2.0)");
 		ui_text("gpu memory: 13GB");
-		ui_text("nodes: Edit Image, Inpaint Image, Tile Image, Vary Image");
+		ui_text("nodes: Edit Image, Inpaint Image, Outpaint Image, Tile Image, Vary Image");
 		if (ui_button(tr("Download (17.0GB)"))) {
 			// https://huggingface.co/QuantStack/Qwen-Image-Edit-2509-GGUF/resolve/main/Qwen-Image-Edit-2509-Q4_K_S.gguf
 			// https://huggingface.co/QuantStack/Qwen-Image-GGUF/resolve/main/VAE/Qwen_Image-VAE.safetensors
