@@ -86,7 +86,8 @@ type context_t = {
 	node_preview_map?: map_t<i32, gpu_texture_t>;
 	node_preview_name?: string;
 	node_previews?: map_t<string, gpu_texture_t>;
-	node_previews_used?: string[]; selected_node_preview : bool;
+	node_previews_used?: string[];
+	selected_node_preview?: bool;
 	mask_preview_rgba32?: gpu_texture_t;
 	mask_preview_last?: slot_layer_t;
 	colorid_picked?: bool;

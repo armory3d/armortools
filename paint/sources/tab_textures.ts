@@ -143,12 +143,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 												f += ".png";
 											}
 
-											/// if IRON_BGRA
-											let buf: buffer_t = export_arm_bgra_swap(gpu_get_texture_pixels(target));
-											/// else
 											let buf: buffer_t = gpu_get_texture_pixels(target);
-											/// end
-
 											iron_write_png(path + path_sep + f, buf, target.width, target.height, 0);
 											gpu_delete_texture(target);
 										}, target);

@@ -1588,7 +1588,17 @@ void _write_image(char *path, buffer_t *bytes, i32 w, i32 h, i32 format, int ima
 	unsigned char *rgba   = (unsigned char *)bytes->buffer;
 	if (format == 0) { // RGBA
 		comp   = 4;
+#ifdef IRON_BGRA
+		pixels = (unsigned char *)malloc(w * h * comp);
+		for (int i = 0; i < w * h; ++i) {
+			pixels[i * 4]     = rgba[i * 4 + 2];
+			pixels[i * 4 + 1] = rgba[i * 4 + 1];
+			pixels[i * 4 + 2] = rgba[i * 4];
+			pixels[i * 4 + 3] = rgba[i * 4 + 3];
+		}
+#else
 		pixels = rgba;
+#endif
 	}
 	else if (format == 1) { // R
 		comp   = 1;

@@ -158,16 +158,6 @@ function export_arm_run_project() {
 	for (let i: i32 = 0; i < 256 * 256 * 4; ++i) {
 		u8a[i] = math_floor(math_pow(u8a[i] / 255, 1.0 / 2.2) * 255);
 	}
-	/// if IRON_BGRA
-	export_arm_bgra_swap(mesh_icon_pixels);
-	/// end
-
-	// raw.mesh_icons =
-	// 	///if IRON_BGRA
-	// 	[encode(bgra_swap(mesh_icon_pixels)];
-	// 	///else
-	// 	[encode(mesh_icon_pixels)];
-	// 	///end
 
 	iron_write_png(substring(project_filepath, 0, project_filepath.length - 4) + "_icon.png", mesh_icon_pixels, 256, 256, 0);
 	gpu_delete_texture(mesh_icon);
