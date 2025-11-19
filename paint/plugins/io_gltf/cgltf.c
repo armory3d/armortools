@@ -55,7 +55,7 @@ void io_gltf_parse_mesh(raw_mesh_t *raw, cgltf_mesh *mesh, float *to_world, floa
 		inda = elem_size == 1 ? io_gltf_read_u8_array(a)
 			 : elem_size == 2 ? io_gltf_read_u16_array(a)
 			 : elem_size == 4 ? io_gltf_read_u32_array(a) : NULL;
-		
+
 		if (inda) {
 			break;
 		}
@@ -67,7 +67,7 @@ void io_gltf_parse_mesh(raw_mesh_t *raw, cgltf_mesh *mesh, float *to_world, floa
 	}
 
 	int index_count = prim->indices->count;
-	
+
 	int vertex_count = -1;
 	float *posa32 = NULL;
 	float *nora32 = NULL;
@@ -198,9 +198,14 @@ void io_gltf_parse_mesh(raw_mesh_t *raw, cgltf_mesh *mesh, float *to_world, floa
 	raw->nora->buffer = nora;
 	raw->nora->length = raw->nora->capacity = vertex_count * 2;
 
-	raw->texa = (i16_array_t *)malloc(sizeof(i16_array_t));
-	raw->texa->buffer = texa;
-	raw->texa->length = raw->texa->capacity = vertex_count * 2;
+	if (texa != NULL) {
+		raw->texa = (i16_array_t *)malloc(sizeof(i16_array_t));
+		raw->texa->buffer = texa;
+		raw->texa->length = raw->texa->capacity = vertex_count * 2;
+	}
+	else {
+		raw->texa = NULL;
+	}
 
 	raw->inda = (u32_array_t *)malloc(sizeof(u32_array_t));
 	raw->inda->buffer = inda;
@@ -242,8 +247,6 @@ void *io_gltf_parse(char *buf, size_t size, const char *path) {
 		}
 	}
 
-	cgltf_free(data);
-
 	current_node++;
 	has_next = false;
 	for (size_t i = current_node; i < data->nodes_count; ++i) {
@@ -253,6 +256,8 @@ void *io_gltf_parse(char *buf, size_t size, const char *path) {
 			break;
 		}
 	}
+
+	cgltf_free(data);
 
 	if (!has_next) {
 		current_node = 0;
