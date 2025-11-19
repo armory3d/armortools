@@ -8,7 +8,7 @@
 ANativeActivity *iron_android_get_activity(void);
 jclass           iron_android_find_class(JNIEnv *env, const char *name);
 
-void iron_https_request(const char *url_base, const char *url_path, const char *data, int port, int method, iron_http_callback_t callback, void *callbackdata) {
+void iron_net_request(const char *url_base, const char *url_path, const char *data, int port, int method, iron_https_callback_t callback, void *callbackdata, const char *dst_path) {
 	ANativeActivity *activity = iron_android_get_activity();
 	JNIEnv          *env;
 	JavaVM          *vm = iron_android_get_activity()->vm;
@@ -35,4 +35,7 @@ void iron_https_request(const char *url_base, const char *url_path, const char *
 	}
 
 	(*vm)->DetachCurrentThread(vm);
+}
+
+void iron_net_update() {
 }

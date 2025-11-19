@@ -391,6 +391,7 @@ void _update(void *data) {
 	iron_a2_update();
 #endif
 
+	iron_net_update();
 	iron_update();
 	if (ui_get_current())
 		ui_end_frame();
@@ -1348,7 +1349,7 @@ void _https_callback(const char *body, void *callback_data) {
 	free(cbd);
 }
 
-void iron_file_download(string_t *url, void (*callback)(char *, buffer_t *), i32 size) {
+void iron_file_download(string_t *url, void (*callback)(char *, buffer_t *), i32 size, string_t *dst_path) {
 	_callback_data_t *cbd = malloc(sizeof(_callback_data_t));
 	cbd->size             = size;
 	strcpy(cbd->url, url);
@@ -1376,7 +1377,7 @@ void iron_file_download(string_t *url, void (*callback)(char *, buffer_t *), i32
 	}
 	url_path[j] = 0;
 
-	iron_https_request(url_base, url_path, NULL, 443, 0, &_https_callback, cbd);
+	iron_net_request(url_base, url_path, NULL, 443, IRON_HTTPS_GET, &_https_callback, cbd, dst_path);
 }
 
 bool _save_and_quit_callback_internal();

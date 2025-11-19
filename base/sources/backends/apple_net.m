@@ -4,7 +4,7 @@
 
 static NSURLSession *session = nil;
 
-void iron_https_request(const char *url_base, const char *url_path, const char *data, int port, int method, iron_http_callback_t callback, void *callbackdata) {
+void iron_net_request(const char *url_base, const char *url_path, const char *data, int port, int method, iron_https_callback_t callback, void *callbackdata, const char *dst_path) {
 	if (session == nil) {
 		NSURLSessionConfiguration *sessionConfiguration = [NSURLSessionConfiguration defaultSessionConfiguration];
 		session                                         = [NSURLSession sessionWithConfiguration:sessionConfiguration];
@@ -18,7 +18,7 @@ void iron_https_request(const char *url_base, const char *url_path, const char *
 	urlstring                    = [urlstring stringByAppendingString:[NSString stringWithUTF8String:url_path]];
 	NSURL               *aUrl    = [NSURL URLWithString:urlstring];
 	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:aUrl];
-	request.HTTPMethod           = method == IRON_HTTP_GET ? @"GET" : @"POST";
+	request.HTTPMethod           = method == IRON_HTTPS_GET ? @"GET" : @"POST";
 	if (data != 0) {
 		NSString *datastring = [NSString stringWithUTF8String:data];
 		request.HTTPBody     = [datastring dataUsingEncoding:NSUTF8StringEncoding];
@@ -38,4 +38,7 @@ void iron_https_request(const char *url_base, const char *url_path, const char *
 		                                            });
 	                                            }];
 	[dataTask resume];
+}
+
+void iron_net_update() {
 }

@@ -1,6 +1,6 @@
 
 type file_download_data_t = {
-	path: string; done : (url: string, ab: buffer_t) => void;
+	done : (url: string) => void;
 };
 
 type file_cache_cloud_data_t = {
@@ -84,16 +84,13 @@ function file_start(path: string) {
 	/// end
 }
 
-function file_download_to(url: string, dst_path: string, done: (url: string, ab: buffer_t) => void, size: i32 = 0) {
-	let fdd: file_download_data_t = {path : dst_path, done : done};
+function file_download_to(url: string, dst_path: string, done: (url: string) => void, size: i32 = 0) {
+	let fdd: file_download_data_t = {done : done};
 	map_set(_file_download_map, url, fdd);
 	iron_file_download(url, function(url: string, ab: buffer_t) {
 		let fdd: file_download_data_t = map_get(_file_download_map, url);
-		if (ab != null) {
-			iron_file_save_bytes(fdd.path, ab, 0);
-		}
-		fdd.done(url, ab);
-	}, size);
+		fdd.done(url);
+	}, size, dst_path);
 }
 
 function file_cache_cloud(path: string, done: (s: string) => void) {

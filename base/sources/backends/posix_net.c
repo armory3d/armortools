@@ -11,7 +11,7 @@ static SSL_CTX *ctx     = NULL;
 static char    *buf     = NULL;
 static int      buf_len = 1024 * 1024;
 
-void iron_https_request(const char *url_base, const char *url_path, const char *data, int port, int method, iron_http_callback_t callback, void *callbackdata) {
+void iron_net_request(const char *url_base, const char *url_path, const char *data, int port, int method, iron_https_callback_t callback, void *callbackdata, const char *dst_path) {
 
 	int                sock_fd     = socket(AF_INET, SOCK_STREAM, 0);
 	struct hostent    *server      = gethostbyname(url_base);
@@ -68,4 +68,7 @@ void iron_https_request(const char *url_base, const char *url_path, const char *
 
 	SSL_free(ssl);
 	close(sock_fd);
+}
+
+void iron_net_update() {
 }

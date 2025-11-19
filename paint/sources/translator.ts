@@ -120,7 +120,7 @@ function translator_load_translations(new_locale: string) {
 
 		if (!iron_file_exists(_translator_load_translations_cjk_font_disk_path)) {
 			file_download_to("https://github.com/armory3d/armorbase/raw/main/Assets/common/extra/font_cjk.ttc",
-			                 _translator_load_translations_cjk_font_disk_path, function() {
+			                 _translator_load_translations_cjk_font_disk_path, function(url: string) {
 				                 if (!iron_file_exists(_translator_load_translations_cjk_font_disk_path)) {
 					                 // Fall back to English
 					                 config_raw.locale = "en";
