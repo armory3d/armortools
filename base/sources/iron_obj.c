@@ -34,13 +34,13 @@ static bool         check_uvmap = true;
 
 static int read_int() {
 	int bi = 0;
-	while (true) { // Read into buffer
+	while (part->pos < bytes_length) { // Read into buffer
 		char c = bytes[part->pos];
-		if (c == '/' || c == '\n' || c == '\r' || c == ' ') {
+		if (c == '/' || c == '\n' || c == '\r' || c == ' ' || c == '\t') {
 			break;
 		}
-		part->pos++;
 		buf[bi++] = c;
+		part->pos++;
 	}
 	int res = 0; // Parse buffer into int
 	int dec = 1;
@@ -56,6 +56,12 @@ static int read_int() {
 	return res;
 }
 
+static inline void skip_whitespace() {
+	while (bytes[part->pos] == ' ' || bytes[part->pos] == '\t') {
+		part->pos++;
+	}
+}
+
 static void read_face_fast() {
 	while (true) {
 		va[vi++] = read_int() - 1;
@@ -63,12 +69,8 @@ static void read_face_fast() {
 		ua[ui++] = read_int() - 1;
 		part->pos++; // '/'
 		na[ni++] = read_int() - 1;
-		if (bytes[part->pos] == '\n' || bytes[part->pos] == '\r') {
-			break;
-		}
-		part->pos++; // ' '
-		// Some exporters put space at the end of "f" line
-		if (vi >= 3 && (bytes[part->pos] == '\n' || bytes[part->pos] == '\r')) {
+		skip_whitespace();
+		if (bytes[part->pos] == '\n' || bytes[part->pos] == '\r' || part->pos >= bytes_length) {
 			break;
 		}
 	}
@@ -85,7 +87,6 @@ static void read_face() {
 			}
 
 			if (nor_temp.length > 0) {
-
 				// Some exporters put fake uv index even when uv data is not present... (f 1/1/1 instead of f 1//1)
 				bool has_bogus_uv = uv_temp.length == 0 && bytes[part->pos] != '/';
 				if (has_bogus_uv) {
@@ -101,12 +102,8 @@ static void read_face() {
 			part->pos += 2;
 		}
 
-		if (bytes[part->pos] == '\n' || bytes[part->pos] == '\r') {
-			break;
-		}
-		part->pos++; // " "
-		// Some exporters put space at the end of "f" line
-		if (vi >= 3 && (bytes[part->pos] == '\n' || bytes[part->pos] == '\r')) {
+		skip_whitespace();
+		if (bytes[part->pos] == '\n' || bytes[part->pos] == '\r' || part->pos >= bytes_length) {
 			break;
 		}
 	}
@@ -116,7 +113,7 @@ static float read_float() {
 	int bi = 0;
 	while (true) { // Read into buffer
 		char c = bytes[part->pos];
-		if (c == ' ' || c == '\n' || c == '\r') {
+		if (c == ' ' || c == '\n' || c == '\r' || c == '\t') {
 			break;
 		}
 		if (c == 'E' || c == 'e') {
@@ -130,8 +127,8 @@ static float read_float() {
 			}
 			return exp > 0 ? (float)first * dec : (float)first / dec;
 		}
-		part->pos++;
 		buf[bi++] = c;
+		part->pos++;
 	}
 	float   res = 0.0; // Parse buffer into float
 	int64_t dot = 1;
@@ -160,7 +157,7 @@ static char *read_string() {
 	size_t begin = part->pos;
 	while (true) {
 		char c = bytes[part->pos];
-		if (c == '\n' || c == '\r' || c == ' ') {
+		if (c == '\n' || c == '\r' || c == ' ' || c == '\t') {
 			break;
 		}
 		part->pos++;
@@ -173,9 +170,9 @@ static char *read_string() {
 }
 
 static void next_line() {
-	while (true) {
+	while (part->pos < bytes_length) {
 		char c = bytes[part->pos++];
-		if (c == '\n' || part->pos >= bytes_length) {
+		if (c == '\n') {
 			break; // \n, \r\n
 		}
 	}
@@ -208,7 +205,7 @@ static bool pnpoly(float v0x, float v0y, float v1x, float v1y, float v2x, float 
 	return c;
 }
 
-iron_vector4_t calc_normal(iron_vector4_t a, iron_vector4_t b, iron_vector4_t c) {
+static iron_vector4_t calc_normal(iron_vector4_t a, iron_vector4_t b, iron_vector4_t c) {
 	iron_vector4_t cb = vec4_sub(c, b);
 	iron_vector4_t ab = vec4_sub(a, b);
 	cb                = vec4_cross(cb, ab);
@@ -253,11 +250,7 @@ raw_mesh_t *obj_parse(buffer_t *file_bytes, char split_code, uint64_t start_pos,
 		memset(&nor_temp, 0, sizeof(nor_temp));
 	}
 
-	while (true) {
-		if (part->pos >= bytes_length) {
-			break;
-		}
-
+	while (part->pos < bytes_length) {
 		char c0 = bytes[part->pos++];
 		if (reading_object && reading_faces && (c0 == 'v' || c0 == split_code)) {
 			part->pos--;
@@ -268,29 +261,28 @@ raw_mesh_t *obj_parse(buffer_t *file_bytes, char split_code, uint64_t start_pos,
 		if (c0 == 'v') {
 			char c1 = bytes[part->pos++];
 			if (c1 == ' ') {
-				if (bytes[part->pos] == ' ')
-					part->pos++; // Some exporters put additional space directly after "v"
+				skip_whitespace(); // Some exporters put additional space directly after "v"
 				f32_array_push(&pos_temp, read_float());
-				part->pos++; // Space
+				skip_whitespace();
 				f32_array_push(&pos_temp, read_float());
-				part->pos++; // Space
+				skip_whitespace();
 				f32_array_push(&pos_temp, read_float());
 			}
 			else if (c1 == 't') {
-				part->pos++; // Space
+				skip_whitespace();
 				f32_array_push(&uv_temp, read_float());
-				part->pos++; // Space
+				skip_whitespace();
 				f32_array_push(&uv_temp, read_float());
 				if (nor_temp.length > 0) {
 					full_attrib = true;
 				}
 			}
 			else if (c1 == 'n') {
-				part->pos++; // Space
+				skip_whitespace();
 				f32_array_push(&nor_temp, read_float());
-				part->pos++; // Space
+				skip_whitespace();
 				f32_array_push(&nor_temp, read_float());
-				part->pos++; // Space
+				skip_whitespace();
 				f32_array_push(&nor_temp, read_float());
 				if (uv_temp.length > 0) {
 					full_attrib = true;
@@ -298,10 +290,7 @@ raw_mesh_t *obj_parse(buffer_t *file_bytes, char split_code, uint64_t start_pos,
 			}
 		}
 		else if (c0 == 'f') {
-			part->pos++; // Space
-			if (bytes[part->pos] == ' ') {
-				part->pos++; // Some exporters put additional space directly after "f"
-			}
+			skip_whitespace();
 			reading_faces = true;
 			vi = ui = ni = 0;
 			full_attrib ? read_face_fast() : read_face();
@@ -451,11 +440,14 @@ raw_mesh_t *obj_parse(buffer_t *file_bytes, char split_code, uint64_t start_pos,
 			if (split_code == 'u') {
 				part->pos += 5; // "u"semtl
 			}
-			part->pos++; // Space
+			skip_whitespace();
 			if (!udim) {
 				reading_object = true;
 			}
 			part->name = string_copy(read_string());
+		}
+		else if (c0 == '\n') { // Empty line
+			continue;
 		}
 		next_line();
 	}
