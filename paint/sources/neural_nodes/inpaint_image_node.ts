@@ -17,7 +17,7 @@ function inpaint_image_node_button(node_id: i32) {
 	let prompt: string     = ui_text_area(ui_nest(h, 1), ui_align_t.LEFT, true, tr("prompt"), true);
 	node.buttons[0].height = string_split(prompt, "\n").length + 2;
 
-	if (neural_node_button(node)) {
+	if (neural_node_button(node, models[model])) {
 
 		sys_notify_on_next_frame(function(node: ui_node_t) {
 			let from_node: ui_node_t = neural_from_node(node.inputs[0], 0);

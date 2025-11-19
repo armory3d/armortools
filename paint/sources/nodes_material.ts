@@ -79,18 +79,16 @@ function nodes_material_init() {
 	vector_math2_node_init();
 
 	nodes_material_neural = [];
-	if (config_raw.experimental) {
-		edit_image_node_init();
-		image_to_depth_node_init();
-		image_to_normal_map_node_init();
-		image_to_pbr_node_init();
-		inpaint_image_node_init();
-		outpaint_image_node_init();
-		text_to_image_node_init();
-		tile_image_node_init();
-		upscale_image_node_init();
-		vary_image_node_init();
-	}
+	edit_image_node_init();
+	image_to_depth_node_init();
+	image_to_normal_map_node_init();
+	image_to_pbr_node_init();
+	inpaint_image_node_init();
+	outpaint_image_node_init();
+	text_to_image_node_init();
+	tile_image_node_init();
+	upscale_image_node_init();
+	vary_image_node_init();
 
 	nodes_material_group = [];
 	group_node_init();

@@ -27,6 +27,8 @@ typedef struct request {
 	struct request       *next;
 } request_t;
 
+volatile uint64_t iron_net_bytes_downloaded = 0;
+
 static BOOL             initialized = FALSE;
 static request_t       *pending_head = NULL;
 static request_t       *pending_tail = NULL;
@@ -106,6 +108,7 @@ static void CALLBACK iron_winhttp_callback(HINTERNET hInternet, DWORD_PTR dwCont
 			if (ctx->hfile != INVALID_HANDLE_VALUE) {
 				DWORD written;
 				WriteFile(ctx->hfile, ctx->file_buffer, dwStatusInformationLength, &written, NULL);
+				iron_net_bytes_downloaded += dwStatusInformationLength;
 			}
 			else {
 				ctx->return_data_index += dwStatusInformationLength;

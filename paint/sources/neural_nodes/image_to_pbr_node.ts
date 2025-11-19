@@ -97,7 +97,7 @@ function image_to_pbr_node_button(node_id: i32) {
 	let models: string[] = [ "Marigold" ];
 	let model: i32       = ui_combo(ui_nest(h, 0), models, tr("Model"));
 
-	if (neural_node_button(node)) {
+	if (neural_node_button(node, models[model])) {
 		let from_node: ui_node_t = neural_from_node(node.inputs[0], 0);
 		let input: gpu_texture_t = ui_nodes_get_node_preview_image(from_node);
 		if (input != null) {

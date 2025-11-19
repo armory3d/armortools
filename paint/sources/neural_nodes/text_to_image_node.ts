@@ -105,7 +105,7 @@ function text_to_image_node_button(node_id: i32) {
 	let prompt: string     = ui_text_area(ui_nest(h, 1), ui_align_t.LEFT, true, tr("prompt"), true);
 	node.buttons[0].height = string_split(prompt, "\n").length + 2;
 
-	if (neural_node_button(node)) {
+	if (neural_node_button(node, models[model])) {
 		let dir: string = neural_node_dir();
 
 		if (prompt == "") {

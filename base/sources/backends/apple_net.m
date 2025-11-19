@@ -42,3 +42,5 @@ void iron_net_request(const char *url_base, const char *url_path, const char *da
 
 void iron_net_update() {
 }
+
+volatile uint64_t iron_net_bytes_downloaded = 0;
