@@ -87,6 +87,7 @@ else if (platform == "linux") {
 	project.add_lib("Xcursor");
 	project.add_lib("Xrandr");
 	project.add_lib("ssl");
+	project.add_lib("crypto");
 	project.add_lib("vulkan");
 	if (flags.with_audio) {
 		project.add_lib("asound");
