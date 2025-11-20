@@ -101,7 +101,7 @@ function neural_node_download(url: string) {
 	neural_node_downloading++;
 	file_download_to(url, file_path, function (url: string) {
 		neural_node_downloading--;
-		console_log(tr("Downloaded model from") + " " + url);
+		console_log(tr("Downloaded file from") + " " + url);
 	});
 }
 

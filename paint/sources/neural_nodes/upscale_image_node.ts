@@ -11,7 +11,7 @@ function upscale_image_node_button(node_id: i32) {
 	let node_name: string = parser_material_node_name(node);
 	let h: ui_handle_t = ui_handle(node_name);
 
-	let models: string[] = [ "RealESRGAN_X4" ];
+	let models: string[] = [ "Real-ESRGAN" ];
 	let model: i32       = ui_combo(ui_nest(h, 0), models, tr("Model"));
 
 	if (neural_node_button(node, models[model])) {

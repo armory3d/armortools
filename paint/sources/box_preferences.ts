@@ -703,7 +703,7 @@ function box_preferences_init_models() {
 		{
 			name : "Stable Diffusion",
 			memory : "4GB",
-			size : "4.2GB",
+			size : "4.3GB",
 			nodes : "Inpaint Image, Outpaint Image, Text to Image, Tile Image, Vary Image",
 			urls : [ "https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.safetensors" ],
 			web : "https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5",
@@ -712,7 +712,7 @@ function box_preferences_init_models() {
 		{
 			name : "Qwen Image",
 			memory : "13GB",
-			size : "15.7GB",
+			size : "16.9GB",
 			nodes : "Text to Image",
 			urls : [
 				"https://huggingface.co/QuantStack/Qwen-Image-GGUF/resolve/main/Qwen_Image-Q4_K_S.gguf",
@@ -725,7 +725,7 @@ function box_preferences_init_models() {
 		{
 			name : "Qwen Image Edit",
 			memory : "13GB",
-			size : "17.0GB",
+			size : "18.3GB",
 			nodes : "Edit Image, Inpaint Image, Outpaint Image, Tile Image, Vary Image",
 			urls : [
 				"https://huggingface.co/QuantStack/Qwen-Image-Edit-2509-GGUF/resolve/main/Qwen-Image-Edit-2509-Q4_K_S.gguf",
@@ -739,7 +739,7 @@ function box_preferences_init_models() {
 		{
 			name : "Wan",
 			memory : "10GB",
-			size : "19.8GB",
+			size : "21.3GB",
 			nodes : "Text to Image",
 			urls : [
 				"https://huggingface.co/QuantStack/Wan2.2-T2V-A14B-GGUF/resolve/main/LowNoise/Wan2.2-T2V-A14B-LowNoise-Q4_K_S.gguf",
@@ -753,7 +753,7 @@ function box_preferences_init_models() {
 		{
 			name : "Marigold",
 			memory : "6GB",
-			size : "9.6GB",
+			size : "13.7GB",
 			nodes : "Text to Image",
 			urls : [
 				"https://huggingface.co/armory3d/marigold-v1-1-gguf/resolve/main/marigold-depth-v1-1.q8_0.gguf",
@@ -767,7 +767,7 @@ function box_preferences_init_models() {
 		{
 			name : "Real-ESRGAN",
 			memory : "1GB",
-			size : "0.06GB",
+			size : "0.07GB",
 			nodes : "Upscale Image",
 			urls : [ "https://huggingface.co/armory3d/Real-ESRGAN/resolve/main/RealESRGAN_x4plus.pth" ],
 			web : "https://huggingface.co/armory3d/Real-ESRGAN",
