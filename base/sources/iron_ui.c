@@ -97,7 +97,7 @@ float UI_TAB_W() {
 }
 
 float UI_HEADER_DRAG_H() {
-	return 15.0 * UI_SCALE();
+	return 30.0 * UI_SCALE();
 }
 
 float UI_TOOLTIP_DELAY() {
@@ -1598,6 +1598,10 @@ void ui_end_window() {
 		if (handle->drag_enabled) { // Draggable header
 			draw_set_color(theme->SEPARATOR_COL);
 			draw_filled_rect(0, 0, current->_window_w, UI_HEADER_DRAG_H());
+			if (handle->text != NULL) { // Window title
+				draw_set_color(theme->TEXT_COL);
+				draw_string(handle->text, current->_window_w / 2 - draw_string_width(current->ops->font, current->font_size, handle->text) / 2, 10 * UI_SCALE());
+			}
 		}
 
 		float window_size = handle->layout == UI_LAYOUT_VERTICAL ? current->_window_h - current->window_header_h

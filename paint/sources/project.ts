@@ -107,33 +107,31 @@ function project_fetch_default_meshes() {
 
 function project_new_box() {
 	ui_box_show_custom(function() {
-		if (ui_tab(ui_handle(__ID__), tr("New Project"))) {
-			project_fetch_default_meshes();
-			ui_row2();
-			let h_project_type: ui_handle_t = ui_handle(__ID__);
-			if (h_project_type.init) {
-				h_project_type.i = context_raw.project_type;
-			}
-			context_raw.project_type = ui_combo(h_project_type, project_mesh_list, tr("Template"), true);
-
-			let h_project_aspect_ratio: ui_handle_t = ui_handle(__ID__);
-			if (h_project_aspect_ratio.init) {
-				h_project_aspect_ratio.i = context_raw.project_aspect_ratio;
-			}
-			let project_aspect_ratio_combo: string[] = [ "1:1", "2:1", "1:2" ];
-			context_raw.project_aspect_ratio         = ui_combo(h_project_aspect_ratio, project_aspect_ratio_combo, tr("Aspect Ratio"), true);
-
-			ui_end_element();
-			ui_row2();
-			if (ui_button(tr("Cancel"))) {
-				ui_box_hide();
-			}
-			if (ui_button(tr("OK")) || ui.is_return_down) {
-				project_new();
-				ui_box_hide();
-			}
+		project_fetch_default_meshes();
+		ui_row2();
+		let h_project_type: ui_handle_t = ui_handle(__ID__);
+		if (h_project_type.init) {
+			h_project_type.i = context_raw.project_type;
 		}
-	});
+		context_raw.project_type = ui_combo(h_project_type, project_mesh_list, tr("Template"), true);
+
+		let h_project_aspect_ratio: ui_handle_t = ui_handle(__ID__);
+		if (h_project_aspect_ratio.init) {
+			h_project_aspect_ratio.i = context_raw.project_aspect_ratio;
+		}
+		let project_aspect_ratio_combo: string[] = [ "1:1", "2:1", "1:2" ];
+		context_raw.project_aspect_ratio         = ui_combo(h_project_aspect_ratio, project_aspect_ratio_combo, tr("Aspect Ratio"), true);
+
+		ui_end_element();
+		ui_row2();
+		if (ui_button(tr("Cancel"))) {
+			ui_box_hide();
+		}
+		if (ui_button(tr("OK")) || ui.is_return_down) {
+			project_new();
+			ui_box_hide();
+		}
+	}, 400, 200, null, true, tr("New Project"));
 }
 
 function project_cleanup() {
@@ -391,52 +389,48 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 		let clear_layers: bool      = _project_import_mesh_box_clear_layers;
 		let done: () => void = _project_import_mesh_box_done;
 
-		let tab_vertical: bool = config_raw.touch_ui;
-		if (ui_tab(ui_handle(__ID__), tr("Import Mesh"), tab_vertical)) {
-
-			if (ends_with(to_lower_case(path), ".obj")) {
-				let split_by_combo: string[] = [ tr("Object"), tr("Group"), tr("Material"), tr("UDIM Tile") ];
-				context_raw.split_by         = ui_combo(ui_handle(__ID__), split_by_combo, tr("Split By"), true);
-				if (ui.is_hovered) {
-					ui_tooltip(tr("Split .obj mesh into objects"));
-				}
-			}
-
-			if (ends_with(to_lower_case(path), ".fbx")) {
-				let h: ui_handle_t      = ui_handle(__ID__);
-				h.b                     = context_raw.parse_vcols;
-				context_raw.parse_vcols = ui_check(h, tr("Parse Vertex Colors"));
-				if (ui.is_hovered) {
-					ui_tooltip(tr("Import vertex color data"));
-				}
-			}
-
-			if (ends_with(to_lower_case(path), ".blend")) {
-				import_blend_mesh_ui();
-			}
-
-			let row: f32[] = [ 0.45, 0.45, 0.1 ];
-			ui_row(row);
-			if (ui_button(tr("Cancel"))) {
-				ui_box_hide();
-			}
-			if (ui_button(tr("Import")) || ui.is_return_down) {
-				ui_box_hide();
-
-				/// if (arm_android || arm_ios)
-				console_toast(tr("Importing mesh"));
-				/// end
-
-				import_mesh_run(path, clear_layers, replace_existing);
-				if (done != null) {
-					done();
-				}
-			}
-			if (ui_button(tr("?"))) {
-				iron_load_url("https://github.com/armory3d/armorpaint_web/blob/main/manual.md#faq");
+		if (ends_with(to_lower_case(path), ".obj")) {
+			let split_by_combo: string[] = [ tr("Object"), tr("Group"), tr("Material"), tr("UDIM Tile") ];
+			context_raw.split_by         = ui_combo(ui_handle(__ID__), split_by_combo, tr("Split By"), true);
+			if (ui.is_hovered) {
+				ui_tooltip(tr("Split .obj mesh into objects"));
 			}
 		}
-	});
+
+		if (ends_with(to_lower_case(path), ".fbx")) {
+			let h: ui_handle_t      = ui_handle(__ID__);
+			h.b                     = context_raw.parse_vcols;
+			context_raw.parse_vcols = ui_check(h, tr("Parse Vertex Colors"));
+			if (ui.is_hovered) {
+				ui_tooltip(tr("Import vertex color data"));
+			}
+		}
+
+		if (ends_with(to_lower_case(path), ".blend")) {
+			import_blend_mesh_ui();
+		}
+
+		let row: f32[] = [ 0.45, 0.45, 0.1 ];
+		ui_row(row);
+		if (ui_button(tr("Cancel"))) {
+			ui_box_hide();
+		}
+		if (ui_button(tr("Import")) || ui.is_return_down) {
+			ui_box_hide();
+
+			/// if (arm_android || arm_ios)
+			console_toast(tr("Importing mesh"));
+			/// end
+
+			import_mesh_run(path, clear_layers, replace_existing);
+			if (done != null) {
+				done();
+			}
+		}
+		if (ui_button(tr("?"))) {
+			iron_load_url("https://github.com/armory3d/armorpaint_web/blob/main/manual.md#faq");
+		}
+	}, 400, 200, null, true, tr("Import Mesh"));
 
 	ui_box_click_to_hide = false; // Prevent closing when going back to window from file browser
 }
@@ -480,27 +474,23 @@ function project_unwrap_mesh_box(mesh: raw_mesh_t, done: (a: raw_mesh_t) => void
 		let mesh: raw_mesh_t       = _project_unwrap_mesh_box_mesh;
 		let done: (a: raw_mesh_t) => void = _project_unwrap_mesh_box_done;
 
-		let tab_vertical: bool = config_raw.touch_ui;
-		if (ui_tab(ui_handle(__ID__), tr("Unwrap Mesh"), tab_vertical)) {
+		let unwrap_plugins: string[] = project_get_unwrap_plugins();
+		_project_unwrap_by           = ui_combo(ui_handle(__ID__), unwrap_plugins, tr("Plugin"), true);
 
-			let unwrap_plugins: string[] = project_get_unwrap_plugins();
-			_project_unwrap_by           = ui_combo(ui_handle(__ID__), unwrap_plugins, tr("Plugin"), true);
-
-			ui_row2();
-			if (ui_button(tr("Cancel"))) {
-				ui_box_hide();
-			}
-			if (ui_button(tr("Unwrap")) || ui.is_return_down) {
-				ui_box_hide();
-
-				/// if (arm_android || arm_ios)
-				console_toast(tr("Unwrapping mesh"));
-				/// end
-
-				project_unwrap_mesh(mesh, done);
-			}
+		ui_row2();
+		if (ui_button(tr("Cancel"))) {
+			ui_box_hide();
 		}
-	});
+		if (ui_button(tr("Unwrap")) || ui.is_return_down) {
+			ui_box_hide();
+
+			/// if (arm_android || arm_ios)
+			console_toast(tr("Unwrapping mesh"));
+			/// end
+
+			project_unwrap_mesh(mesh, done);
+		}
+	}, 400, 200, null, true, tr("Unwrap Mesh"));
 }
 
 function project_unwrap_mesh(mesh: raw_mesh_t, done: (a: raw_mesh_t) => void) {

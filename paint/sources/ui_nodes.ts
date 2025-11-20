@@ -180,48 +180,46 @@ function ui_viewnodes_on_socket_released(socket_id: i32) {
 								let socket: ui_node_socket_t = _ui_nodes_on_socket_released_socket;
 								let node: ui_node_t          = _ui_nodes_on_socket_released_node;
 
-								if (ui_tab(ui_handle(__ID__), tr("Socket"))) {
-									let type_combo: string[] = [ tr("Color"), tr("Vector"), tr("Value") ];
-									let type: i32            = ui_combo(_ui_nodes_htype, type_combo, tr("Type"), true);
-									if (_ui_nodes_htype.changed) {
-										_ui_nodes_hname.text = type == 0 ? tr("Color") : type == 1 ? tr("Vector") : tr("Value");
-									}
-									let name: string               = ui_text_input(_ui_nodes_hname, tr("Name"));
-									let min: f32                   = ui_float_input(_ui_nodes_hmin, tr("Min"));
-									let max: f32                   = ui_float_input(_ui_nodes_hmax, tr("Max"));
-									let default_value: f32_array_t = null;
-									if (type == 0) {
-										ui_row4();
-										ui_float_input(_ui_nodes_hval0, tr("R"));
-										ui_float_input(_ui_nodes_hval1, tr("G"));
-										ui_float_input(_ui_nodes_hval2, tr("B"));
-										ui_float_input(_ui_nodes_hval3, tr("A"));
-										default_value = f32_array_create_xyzw(_ui_nodes_hval0.f, _ui_nodes_hval1.f, _ui_nodes_hval2.f, _ui_nodes_hval3.f);
-									}
-									else if (type == 1) {
-										ui_row3();
-										_ui_nodes_hval0.f = ui_float_input(_ui_nodes_hval0, tr("X"));
-										_ui_nodes_hval1.f = ui_float_input(_ui_nodes_hval1, tr("Y"));
-										_ui_nodes_hval2.f = ui_float_input(_ui_nodes_hval2, tr("Z"));
-										default_value     = f32_array_create_xyz(_ui_nodes_hval0.f, _ui_nodes_hval1.f, _ui_nodes_hval2.f);
-									}
-									else {
-										let f: f32    = ui_float_input(_ui_nodes_hval0, tr("default_value"));
-										default_value = f32_array_create_x(f);
-									}
-									if (ui_button(tr("OK"))) { // || ui.isReturnDown
-										socket.name          = name;
-										socket.type          = type == 0 ? "RGBA" : type == 1 ? "VECTOR" : "VALUE";
-										socket.color         = nodes_material_get_socket_color(socket.type);
-										socket.min           = min;
-										socket.max           = max;
-										socket.default_value = default_value;
-										ui_box_hide();
-										nodes_material_sync_sockets(node);
-										ui_nodes_hwnd.redraws = 2;
-									}
+								let type_combo: string[] = [ tr("Color"), tr("Vector"), tr("Value") ];
+								let type: i32            = ui_combo(_ui_nodes_htype, type_combo, tr("Type"), true);
+								if (_ui_nodes_htype.changed) {
+									_ui_nodes_hname.text = type == 0 ? tr("Color") : type == 1 ? tr("Vector") : tr("Value");
 								}
-							}, 400, 250);
+								let name: string               = ui_text_input(_ui_nodes_hname, tr("Name"));
+								let min: f32                   = ui_float_input(_ui_nodes_hmin, tr("Min"));
+								let max: f32                   = ui_float_input(_ui_nodes_hmax, tr("Max"));
+								let default_value: f32_array_t = null;
+								if (type == 0) {
+									ui_row4();
+									ui_float_input(_ui_nodes_hval0, tr("R"));
+									ui_float_input(_ui_nodes_hval1, tr("G"));
+									ui_float_input(_ui_nodes_hval2, tr("B"));
+									ui_float_input(_ui_nodes_hval3, tr("A"));
+									default_value = f32_array_create_xyzw(_ui_nodes_hval0.f, _ui_nodes_hval1.f, _ui_nodes_hval2.f, _ui_nodes_hval3.f);
+								}
+								else if (type == 1) {
+									ui_row3();
+									_ui_nodes_hval0.f = ui_float_input(_ui_nodes_hval0, tr("X"));
+									_ui_nodes_hval1.f = ui_float_input(_ui_nodes_hval1, tr("Y"));
+									_ui_nodes_hval2.f = ui_float_input(_ui_nodes_hval2, tr("Z"));
+									default_value     = f32_array_create_xyz(_ui_nodes_hval0.f, _ui_nodes_hval1.f, _ui_nodes_hval2.f);
+								}
+								else {
+									let f: f32    = ui_float_input(_ui_nodes_hval0, tr("default_value"));
+									default_value = f32_array_create_x(f);
+								}
+								if (ui_button(tr("OK"))) { // || ui.isReturnDown
+									socket.name          = name;
+									socket.type          = type == 0 ? "RGBA" : type == 1 ? "VECTOR" : "VALUE";
+									socket.color         = nodes_material_get_socket_color(socket.type);
+									socket.min           = min;
+									socket.max           = max;
+									socket.default_value = default_value;
+									ui_box_hide();
+									nodes_material_sync_sockets(node);
+									ui_nodes_hwnd.redraws = 2;
+								}
+							}, 400, 250, null, true, tr("Socket"));
 						});
 					}
 					if (ui_menu_button(tr("Delete"))) {

@@ -202,29 +202,27 @@ function box_preferences_theme_tab() {
 
 	if (ui_button(tr("New"))) {
 		ui_box_show_custom(function() {
-			if (ui_tab(ui_handle(__ID__), tr("New Theme"))) {
-				ui_row2();
-				let h: ui_handle_t = ui_handle(__ID__);
-				if (h.init) {
-					h.text = "new_theme";
-				}
-				let theme_name: string = ui_text_input(h, tr("Name"));
-				if (ui_button(tr("OK")) || ui.is_return_down) {
-					let template: string = box_preferences_theme_to_json(base_theme);
-					if (!ends_with(theme_name, ".json")) {
-						theme_name += ".json";
-					}
-					let path: string = path_data() + path_sep + "themes" + path_sep + theme_name;
-					iron_file_save_bytes(path, sys_string_to_buffer(template), 0);
-					box_preferences_fetch_themes(); // Refresh file list
-					config_raw.theme               = theme_name;
-					box_preferences_theme_handle.i = box_preferences_get_theme_index();
-					ui_box_hide();
-					box_preferences_htab.i = 1; // Themes
-					box_preferences_show();
-				}
+			ui_row2();
+			let h: ui_handle_t = ui_handle(__ID__);
+			if (h.init) {
+				h.text = "new_theme";
 			}
-		});
+			let theme_name: string = ui_text_input(h, tr("Name"));
+			if (ui_button(tr("OK")) || ui.is_return_down) {
+				let template: string = box_preferences_theme_to_json(base_theme);
+				if (!ends_with(theme_name, ".json")) {
+					theme_name += ".json";
+				}
+				let path: string = path_data() + path_sep + "themes" + path_sep + theme_name;
+				iron_file_save_bytes(path, sys_string_to_buffer(template), 0);
+				box_preferences_fetch_themes(); // Refresh file list
+				config_raw.theme               = theme_name;
+				box_preferences_theme_handle.i = box_preferences_get_theme_index();
+				ui_box_hide();
+				box_preferences_htab.i = 1; // Themes
+				box_preferences_show();
+			}
+		}, 400, 200, null, true, tr("New Theme"));
 	}
 
 	if (ui_button(tr("Import"))) {
@@ -637,29 +635,27 @@ function box_preferences_keymap_tab() {
 
 	if (ui_button(tr("New"))) {
 		ui_box_show_custom(function() {
-			if (ui_tab(ui_handle(__ID__), tr("New Keymap"))) {
-				ui_row2();
-				let h: ui_handle_t = ui_handle(__ID__);
-				if (h.init) {
-					h.text = "new_keymap";
-				}
-				let keymap_name: string = ui_text_input(h, tr("Name"));
-				if (ui_button(tr("OK")) || ui.is_return_down) {
-					let template: string = keymap_to_json(keymap_get_default());
-					if (!ends_with(keymap_name, ".json")) {
-						keymap_name += ".json";
-					}
-					let path: string = path_data() + path_sep + "keymap_presets" + path_sep + keymap_name;
-					iron_file_save_bytes(path, sys_string_to_buffer(template), 0);
-					box_preferences_fetch_keymaps(); // Refresh file list
-					config_raw.keymap               = keymap_name;
-					box_preferences_preset_handle.i = box_preferences_get_preset_index();
-					ui_box_hide();
-					box_preferences_htab.i = 5; // Keymap
-					box_preferences_show();
-				}
+			ui_row2();
+			let h: ui_handle_t = ui_handle(__ID__);
+			if (h.init) {
+				h.text = "new_keymap";
 			}
-		});
+			let keymap_name: string = ui_text_input(h, tr("Name"));
+			if (ui_button(tr("OK")) || ui.is_return_down) {
+				let template: string = keymap_to_json(keymap_get_default());
+				if (!ends_with(keymap_name, ".json")) {
+					keymap_name += ".json";
+				}
+				let path: string = path_data() + path_sep + "keymap_presets" + path_sep + keymap_name;
+				iron_file_save_bytes(path, sys_string_to_buffer(template), 0);
+				box_preferences_fetch_keymaps(); // Refresh file list
+				config_raw.keymap               = keymap_name;
+				box_preferences_preset_handle.i = box_preferences_get_preset_index();
+				ui_box_hide();
+				box_preferences_htab.i = 5; // Keymap
+				box_preferences_show();
+			}
+		}, 400, 200, null, true, tr("New Keymap"));
 	}
 
 	if (ui_button(tr("Import"))) {
@@ -888,15 +884,14 @@ function box_preferences_plugins_tab() {
 	ui_row(row);
 	if (ui_button(tr("New"))) {
 		ui_box_show_custom(function() {
-			if (ui_tab(ui_handle(__ID__), tr("New Plugin"))) {
-				ui_row2();
-				let h: ui_handle_t = ui_handle(__ID__);
-				if (h.init) {
-					h.text = "new_plugin";
-				}
-				let plugin_name: string = ui_text_input(h, tr("Name"));
-				if (ui_button(tr("OK")) || ui.is_return_down) {
-					let template: string = "let plugin = plugin_create();\
+			ui_row2();
+			let h: ui_handle_t = ui_handle(__ID__);
+			if (h.init) {
+				h.text = "new_plugin";
+			}
+			let plugin_name: string = ui_text_input(h, tr("Name"));
+			if (ui_button(tr("OK")) || ui.is_return_down) {
+				let template: string = "let plugin = plugin_create();\
 let h1 = ui_handle_create();\
 plugin_notify_on_ui(plugin, function() {\
 	if (ui_panel(h1, \"New Plugin\")) {\
@@ -906,18 +901,17 @@ plugin_notify_on_ui(plugin, function() {\
 	}\
 });\
 ";
-					if (!ends_with(plugin_name, ".js")) {
-						plugin_name += ".js";
-					}
-					let path: string = path_data() + path_sep + "plugins" + path_sep + plugin_name;
-					iron_file_save_bytes(path, sys_string_to_buffer(template), 0);
-					box_preferences_files_plugin = null; // Refresh file list
-					ui_box_hide();
-					box_preferences_htab.i = 6; // Plugins
-					box_preferences_show();
+				if (!ends_with(plugin_name, ".js")) {
+					plugin_name += ".js";
 				}
+				let path: string = path_data() + path_sep + "plugins" + path_sep + plugin_name;
+				iron_file_save_bytes(path, sys_string_to_buffer(template), 0);
+				box_preferences_files_plugin = null; // Refresh file list
+				ui_box_hide();
+				box_preferences_htab.i = 6; // Plugins
+				box_preferences_show();
 			}
-		});
+		}, 400, 200, null, true, tr("New Plugin"));
 	}
 	if (ui_button(tr("Import"))) {
 		ui_files_show("js,zip", false, false, function(path: string) {
@@ -1026,7 +1020,8 @@ function box_preferences_show() {
 	    720, 520,
 	    function() {
 		    config_save();
-	    });
+	    }, true, tr("Preferences")
+	);
 }
 
 function box_preferences_fetch_themes() {

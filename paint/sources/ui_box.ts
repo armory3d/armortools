@@ -66,46 +66,44 @@ function ui_box_render() {
 	}
 	let left: i32 = math_floor(appw / 2 - mw / 2);
 	let top: i32  = math_floor(apph / 2 - mh / 2);
+	ui_box_hwnd.text = ui_box_title;
 
 	if (ui_box_commands == null) {
 		ui_begin(ui);
 		if (ui_window(ui_box_hwnd, left, top, mw, mh, ui_box_draggable)) {
 			ui._y += 10;
-			let tab_vertical: bool = config_raw.touch_ui;
-			if (ui_tab(ui_handle(__ID__), ui_box_title, tab_vertical)) {
-				let htext: ui_handle_t = ui_handle(__ID__);
-				htext.text             = ui_box_text;
-				if (ui_box_copyable) {
-					ui_text_area(htext, ui_align_t.LEFT, false);
-				}
-				else {
-					ui_text(ui_box_text);
-				}
-				ui_end_element();
+			let htext: ui_handle_t = ui_handle(__ID__);
+			htext.text             = ui_box_text;
+			if (ui_box_copyable) {
+				ui_text_area(htext, ui_align_t.LEFT, false);
+			}
+			else {
+				ui_text(ui_box_text);
+			}
+			ui_end_element();
 
-				/// if (arm_windows || arm_linux || arm_macos)
-				if (ui_box_copyable) {
-					ui_row3();
-				}
-				else {
-					let row: f32[] = [ 2 / 3, 1 / 3 ];
-					ui_row(row);
-				}
-				/// else
+			/// if (arm_windows || arm_linux || arm_macos)
+			if (ui_box_copyable) {
+				ui_row3();
+			}
+			else {
 				let row: f32[] = [ 2 / 3, 1 / 3 ];
 				ui_row(row);
-				/// end
+			}
+			/// else
+			let row: f32[] = [ 2 / 3, 1 / 3 ];
+			ui_row(row);
+			/// end
 
-				ui_end_element();
+			ui_end_element();
 
-				/// if (arm_windows || arm_linux || arm_macos)
-				if (ui_box_copyable && ui_button(tr("Copy"))) {
-					iron_copy_to_clipboard(ui_box_text);
-				}
-				/// end
-				if (ui_button(tr("OK"))) {
-					ui_box_hide();
-				}
+			/// if (arm_windows || arm_linux || arm_macos)
+			if (ui_box_copyable && ui_button(tr("Copy"))) {
+				iron_copy_to_clipboard(ui_box_text);
+			}
+			/// end
+			if (ui_button(tr("OK"))) {
+				ui_box_hide();
 			}
 			ui_box_window_border();
 		}
@@ -129,7 +127,7 @@ function ui_box_render() {
 function ui_box_show_message(title: string, text: string, copyable: bool = false) {
 	ui_box_init();
 	ui_box_modalw    = 400;
-	ui_box_modalh    = 210;
+	ui_box_modalh    = 180;
 	ui_box_title     = title;
 	ui_box_text      = text;
 	ui_box_commands  = null;
@@ -140,13 +138,14 @@ function ui_box_show_message(title: string, text: string, copyable: bool = false
 	/// end
 }
 
-function ui_box_show_custom(commands: () => void = null, mw: i32 = 400, mh: i32 = 200, on_hide: () => void = null, draggable: bool = true) {
+function ui_box_show_custom(commands: () => void = null, mw: i32 = 400, mh: i32 = 200, on_hide: () => void = null, draggable: bool = true, title: string = "") {
 	ui_box_init();
 	ui_box_modalw        = mw;
 	ui_box_modalh        = mh;
 	ui_box_modal_on_hide = on_hide;
 	ui_box_commands      = commands;
 	ui_box_draggable     = draggable;
+	ui_box_title         = title;
 	/// if (arm_android || arm_ios)
 	ui_box_tween_in();
 	/// end

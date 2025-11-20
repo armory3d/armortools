@@ -597,37 +597,33 @@ function ui_menubar_draw_category_items() {
 			_ui_menu_render_msg = msg;
 
 			ui_box_show_custom(function() {
-				let tab_vertical: bool = config_raw.touch_ui;
-				if (ui_tab(ui_handle(__ID__), tr("About"), tab_vertical)) {
+				let img: gpu_texture_t = data_get_image("badge.k");
+				ui_image(img);
+				ui_end_element();
 
-					let img: gpu_texture_t = data_get_image("badge.k");
-					ui_image(img);
-					ui_end_element();
-
-					let h: ui_handle_t = ui_handle(__ID__);
-					if (h.init) {
-						h.text = _ui_menu_render_msg;
-					}
-					ui_text_area(h, ui_align_t.LEFT, false);
-
-					ui_row3();
-
-					/// if (arm_windows || arm_linux || arm_macos)
-					if (ui_button(tr("Copy"))) {
-						iron_copy_to_clipboard(_ui_menu_render_msg);
-					}
-					/// else
-					ui_end_element();
-					/// end
-
-					if (ui_button(tr("Contributors"))) {
-						iron_load_url("https://github.com/armory3d/armortools/graphs/contributors");
-					}
-					if (ui_button(tr("OK"))) {
-						ui_box_hide();
-					}
+				let h: ui_handle_t = ui_handle(__ID__);
+				if (h.init) {
+					h.text = _ui_menu_render_msg;
 				}
-			}, 400, 320);
+				ui_text_area(h, ui_align_t.LEFT, false);
+
+				ui_row3();
+
+				/// if (arm_windows || arm_linux || arm_macos)
+				if (ui_button(tr("Copy"))) {
+					iron_copy_to_clipboard(_ui_menu_render_msg);
+				}
+				/// else
+				ui_end_element();
+				/// end
+
+				if (ui_button(tr("Contributors"))) {
+					iron_load_url("https://github.com/armory3d/armortools/graphs/contributors");
+				}
+				if (ui_button(tr("OK"))) {
+					ui_box_hide();
+				}
+			}, 400, 320, null, true, tr("About"));
 		}
 	}
 }
