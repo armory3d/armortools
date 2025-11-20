@@ -1,5 +1,13 @@
 
+/// if (arm_windows || arm_linux || arm_macos)
+
 let nodes_material_categories: string[] = [ _tr("Input"), _tr("Texture"), _tr("Color"), _tr("Utilities"), _tr("Neural"), _tr("Group") ];
+
+/// else
+
+let nodes_material_categories: string[] = [ _tr("Input"), _tr("Texture"), _tr("Color"), _tr("Utilities"), _tr("Group") ];
+
+/// end
 
 let nodes_material_input: ui_node_t[];
 let nodes_material_texture: ui_node_t[];
@@ -78,6 +86,8 @@ function nodes_material_init() {
 	separate_xyz_node_init();
 	vector_math2_node_init();
 
+	/// if (arm_windows || arm_linux || arm_macos)
+
 	nodes_material_neural = [];
 	edit_image_node_init();
 	image_to_depth_node_init();
@@ -90,11 +100,21 @@ function nodes_material_init() {
 	upscale_image_node_init();
 	vary_image_node_init();
 
+	/// end
+
 	nodes_material_group = [];
 	group_node_init();
 
+	/// if (arm_windows || arm_linux || arm_macos)
+
 	nodes_material_list =
 	    [ nodes_material_input, nodes_material_texture, nodes_material_color, nodes_material_utilities, nodes_material_neural, nodes_material_group ];
+
+	/// else
+
+	nodes_material_list = [ nodes_material_input, nodes_material_texture, nodes_material_color, nodes_material_utilities, nodes_material_group ];
+
+	/// end
 }
 
 function nodes_material_get_node_t(node_type: string): ui_node_t {

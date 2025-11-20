@@ -510,7 +510,7 @@ function box_preferences_pen_tab() {
 	config_raw.pressure_angle = ui_check(h_pressure_angle, tr("Brush Angle"));
 
 	ui_end_element();
-	let row: f32[] = [ 0.5 ];
+	let row: f32[] = [ 1 / 4 ];
 	ui_row(row);
 	if (ui_button(tr("Help"))) {
 		let url: string  = "https://github.com/armory3d/";
@@ -701,77 +701,77 @@ function box_preferences_keymap_tab() {
 function box_preferences_init_models() {
 	box_preferences_models = [
 		{
-			name: "Stable Diffusion",
-			memory: "4GB",
-			size: "4.2GB",
-			nodes: "Inpaint Image, Outpaint Image, Text to Image, Tile Image, Vary Image",
-			urls: ["https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.safetensors"],
-			web: "https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5",
-			license: "openrail"
+			name : "Stable Diffusion",
+			memory : "4GB",
+			size : "4.2GB",
+			nodes : "Inpaint Image, Outpaint Image, Text to Image, Tile Image, Vary Image",
+			urls : [ "https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.safetensors" ],
+			web : "https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5",
+			license : "openrail"
 		},
 		{
-			name: "Qwen Image",
-			memory: "13GB",
-			size: "15.7GB",
-			nodes: "Text to Image",
-			urls: [
+			name : "Qwen Image",
+			memory : "13GB",
+			size : "15.7GB",
+			nodes : "Text to Image",
+			urls : [
 				"https://huggingface.co/QuantStack/Qwen-Image-GGUF/resolve/main/Qwen_Image-Q4_K_S.gguf",
 				"https://huggingface.co/QuantStack/Qwen-Image-GGUF/resolve/main/VAE/Qwen_Image-VAE.safetensors",
 				"https://huggingface.co/unsloth/Qwen2.5-VL-7B-Instruct-GGUF/resolve/main/Qwen2.5-VL-7B-Instruct-Q4_K_S.gguf"
 			],
-			web: "https://huggingface.co/QuantStack/Qwen-Image-GGUF",
-			license: "apache-2.0"
+			web : "https://huggingface.co/QuantStack/Qwen-Image-GGUF",
+			license : "apache-2.0"
 		},
 		{
-			name: "Qwen Image Edit",
-			memory: "13GB",
-			size: "17.0GB",
-			nodes: "Edit Image, Inpaint Image, Outpaint Image, Tile Image, Vary Image",
-			urls: [
+			name : "Qwen Image Edit",
+			memory : "13GB",
+			size : "17.0GB",
+			nodes : "Edit Image, Inpaint Image, Outpaint Image, Tile Image, Vary Image",
+			urls : [
 				"https://huggingface.co/QuantStack/Qwen-Image-Edit-2509-GGUF/resolve/main/Qwen-Image-Edit-2509-Q4_K_S.gguf",
 				"https://huggingface.co/QuantStack/Qwen-Image-GGUF/resolve/main/VAE/Qwen_Image-VAE.safetensors",
 				"https://huggingface.co/unsloth/Qwen2.5-VL-7B-Instruct-GGUF/resolve/main/Qwen2.5-VL-7B-Instruct-Q4_K_S.gguf",
 				"https://huggingface.co/unsloth/Qwen2.5-VL-7B-Instruct-GGUF/resolve/main/mmproj-F16.gguf"
 			],
-			web: "https://huggingface.co/QuantStack/Qwen-Image-Edit-2509-GGUF",
-			license: "apache-2.0"
+			web : "https://huggingface.co/QuantStack/Qwen-Image-Edit-2509-GGUF",
+			license : "apache-2.0"
 		},
 		{
-			name: "Wan",
-			memory: "10GB",
-			size: "19.8GB",
-			nodes: "Text to Image",
-			urls: [
+			name : "Wan",
+			memory : "10GB",
+			size : "19.8GB",
+			nodes : "Text to Image",
+			urls : [
 				"https://huggingface.co/QuantStack/Wan2.2-T2V-A14B-GGUF/resolve/main/LowNoise/Wan2.2-T2V-A14B-LowNoise-Q4_K_S.gguf",
 				"https://huggingface.co/QuantStack/Wan2.2-T2V-A14B-GGUF/resolve/main/HighNoise/Wan2.2-T2V-A14B-HighNoise-Q4_K_S.gguf",
 				"https://huggingface.co/QuantStack/Wan2.2-T2V-A14B-GGUF/resolve/main/VAE/Wan2.1_VAE.safetensors",
 				"https://huggingface.co/city96/umt5-xxl-encoder-gguf/resolve/main/umt5-xxl-encoder-Q4_K_S.gguf"
 			],
-			web: "https://huggingface.co/QuantStack/Wan2.2-T2V-A14B-GGUF",
-			license: "apache-2.0"
+			web : "https://huggingface.co/QuantStack/Wan2.2-T2V-A14B-GGUF",
+			license : "apache-2.0"
 		},
 		{
-			name: "Marigold",
-			memory: "6GB",
-			size: "9.6GB",
-			nodes: "Text to Image",
-			urls: [
+			name : "Marigold",
+			memory : "6GB",
+			size : "9.6GB",
+			nodes : "Text to Image",
+			urls : [
 				"https://huggingface.co/armory3d/marigold-v1-1-gguf/resolve/main/marigold-depth-v1-1.q8_0.gguf",
 				"https://huggingface.co/armory3d/marigold-v1-1-gguf/resolve/main/marigold-normals-v1-1.q8_0.gguf",
 				"https://huggingface.co/armory3d/marigold-v1-1-gguf/resolve/main/marigold-iid-appearance-v1-1.q8_0.gguf",
 				"https://huggingface.co/armory3d/marigold-v1-1-gguf/resolve/main/marigold-iid-lighting-v1-1.q8_0.gguf"
 			],
-			web: "https://huggingface.co/armory3d/marigold-v1-1-gguf",
-			license: "openrail"
+			web : "https://huggingface.co/armory3d/marigold-v1-1-gguf",
+			license : "openrail"
 		},
 		{
-			name: "Real-ESRGAN",
-			memory: "1GB",
-			size: "0.06GB",
-			nodes: "Upscale Image",
-			urls: ["https://huggingface.co/armory3d/Real-ESRGAN/resolve/main/RealESRGAN_x4plus.pth"],
-			web: "https://huggingface.co/armory3d/Real-ESRGAN",
-			license: "bsd-3-clause"
+			name : "Real-ESRGAN",
+			memory : "1GB",
+			size : "0.06GB",
+			nodes : "Upscale Image",
+			urls : [ "https://huggingface.co/armory3d/Real-ESRGAN/resolve/main/RealESRGAN_x4plus.pth" ],
+			web : "https://huggingface.co/armory3d/Real-ESRGAN",
+			license : "bsd-3-clause"
 		}
 	];
 	// https://huggingface.co/webui/stable-diffusion-inpainting/resolve/main/sd-v1-5-inpainting.safetensors
@@ -801,6 +801,15 @@ function box_preferences_neural_tab() {
 
 	for (let i: i32 = 0; i < box_preferences_models.length; ++i) {
 		box_preferences_model_panel(box_preferences_models[i]);
+	}
+
+	let row: f32[] = [ 1 / 4 ];
+	ui_row(row);
+	if (ui_button(tr("Models Directory..."))) {
+		if (file_read_directory(neural_node_dir())[0] == "") {
+			file_create_directory(neural_node_dir());
+		}
+		file_start(neural_node_dir());
 	}
 }
 
@@ -833,22 +842,30 @@ function box_preferences_model_panel(m: box_preferneces_model_t) {
 		ui_text(tr("gpu memory") + ": " + m.memory);
 		ui_text(tr("nodes") + ": " + m.nodes);
 
-		let url: string = m.urls[0];
+		let url: string       = m.urls[0];
 		let file_name: string = box_preferences_file_name_from_url(url);
-		let found: bool = box_preferences_model_exists(file_name);
+		let found: bool       = box_preferences_model_exists(file_name);
 
 		if (neural_node_downloading > 0) {
 			ui.enabled = false;
 
-			let u: u64 = iron_net_bytes_downloaded;
-			let i: i32 = (u / 1000000000) * 10;
-			let f: f32 = i / 10;
-			let downloaded: string = f + "GB";
-			ui_box_hwnd.redraws = 2;
+			let u: u64                   = iron_net_bytes_downloaded;
+			let i: i32                   = (u / 1000000000) * 100;
+			let f: f32                   = i / 100;
+			let downloaded: string       = f + "GB";
+			ui_box_hwnd.redraws          = 2;
 			box_preferences_htab.redraws = 2;
 			iron_delay_idle_sleep();
 
-			ui_button(tr("Downloading") + "..." + "(" + downloaded + " / " + m.size + ")");
+			let _BUTTON_COL: i32    = ui.ops.theme.BUTTON_COL;
+			ui.ops.theme.BUTTON_COL = ui.ops.theme.HIGHLIGHT_COL;
+
+			let h: ui_handle_t = ui_handle(__ID__);
+			h.f                = f / parse_float(m.size);
+			ui_slider(h, downloaded + " / " + m.size, 0.0, 1.0, true, 100, false, ui_align_t.CENTER);
+
+			ui.ops.theme.BUTTON_COL = _BUTTON_COL;
+
 			ui.enabled = true;
 		}
 		else if (!found && ui_button(tr("Download") + " (" + m.size + ")")) {
@@ -857,7 +874,7 @@ function box_preferences_model_panel(m: box_preferneces_model_t) {
 		}
 		else if (found && ui_button(tr("Remove") + " (" + m.size + ")")) {
 			for (let i: i32 = 0; i < m.urls.length; ++i) {
-				let url: string = m.urls[i];
+				let url: string       = m.urls[i];
 				let file_name: string = box_preferences_file_name_from_url(url);
 				iron_delete_file(neural_node_dir() + path_sep + file_name);
 			}
@@ -997,9 +1014,11 @@ function box_preferences_show() {
 		    if (ui_tab(box_preferences_htab, tr("Keymap"), true)) {
 			    box_preferences_keymap_tab();
 		    }
-			if (ui_tab(box_preferences_htab, tr("Neural"), true)) {
-				box_preferences_neural_tab();
-			}
+		    /// if (arm_windows || arm_linux || arm_macos)
+		    if (ui_tab(box_preferences_htab, tr("Neural"), true)) {
+			    box_preferences_neural_tab();
+		    }
+		    /// end
 		    if (ui_tab(box_preferences_htab, tr("Plugins"), true)) {
 			    box_preferences_plugins_tab();
 		    }

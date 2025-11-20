@@ -54,8 +54,10 @@ function neural_node_button(node: ui_node_t, model: string): bool {
 		}
 	}
 	else if (!found && ui_button(tr("Setup"))) {
-		box_preferences_htab.i = preference_tab_t.NEURAL;
-		box_preferences_show();
+		sys_notify_on_next_frame(function() {
+			box_preferences_htab.i = preference_tab_t.NEURAL;
+			box_preferences_show();
+		});
 	}
 	else if (found && ui_button(tr("Run"))) {
 		return true;
@@ -97,7 +99,10 @@ function neural_node_download(url: string) {
 	}
 
 	neural_node_downloading++;
-	file_download_to(url, file_path, function (url: string) { neural_node_downloading--; });
+	file_download_to(url, file_path, function (url: string) {
+		neural_node_downloading--;
+		console_log(tr("Downloaded model from") + " " + url);
+	});
 }
 
 function neural_node_download_models(models: string[]) {
@@ -116,6 +121,8 @@ function neural_node_download_models(models: string[]) {
 	neural_node_download("https://github.com/armory3d/armortools/raw/refs/heads/main/base/assets/bin/macos/sd_cpu");
 	neural_node_download("https://github.com/armory3d/armortools/raw/refs/heads/main/base/assets/bin/macos/sd_vulkan");
 	/// end
+
+	iron_net_bytes_downloaded = 0;
 
 	for (let i: i32 = 0; i < models.length; ++i) {
 		neural_node_download(models[i]);
