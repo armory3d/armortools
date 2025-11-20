@@ -102,6 +102,18 @@ function neural_node_download(url: string) {
 	file_download_to(url, file_path, function (url: string) {
 		neural_node_downloading--;
 		console_log(tr("Downloaded file from") + " " + url);
+
+		/// if arm_linux
+		// todo
+		if (ends_with(url, "sd_vulkan")) {
+			let bin: string = neural_node_dir() + "/sd_vulkan";
+			iron_sys_command("chmod +x '" + bin + "'");
+		}
+		else if (ends_with(url, "sd_cpu")) {
+			let bin: string = neural_node_dir() + "/sd_cpu";
+			iron_sys_command("chmod +x '" + bin + "'");
+		}
+		/// end
 	});
 }
 
