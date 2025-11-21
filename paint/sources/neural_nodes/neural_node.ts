@@ -107,11 +107,11 @@ function neural_node_download(url: string) {
 		// todo
 		if (ends_with(url, "sd_vulkan")) {
 			let bin: string = neural_node_dir() + "/sd_vulkan";
-			iron_sys_command("chmod +x '" + bin + "'");
+			iron_sys_command("chmod +x \"" + bin + "\"");
 		}
 		else if (ends_with(url, "sd_cpu")) {
 			let bin: string = neural_node_dir() + "/sd_cpu";
-			iron_sys_command("chmod +x '" + bin + "'");
+			iron_sys_command("chmod +x \"" + bin + "\"");
 		}
 		/// end
 	});
