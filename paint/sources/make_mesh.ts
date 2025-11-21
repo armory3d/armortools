@@ -379,6 +379,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 
 		if (context_raw.viewport_mode == viewport_mode_t.LIT || context_raw.viewport_mode == viewport_mode_t.PATH_TRACE) {
 			node_shader_write_frag(kong, "basecol = pow3(basecol, float3(2.2, 2.2, 2.2));");
+			node_shader_write_frag(kong, "basecol = max3(basecol, float3(0.0, 0.0, 0.0));");
 
 			if (context_raw.viewport_shader != null) {
 				node_shader_write_frag(kong, "var output_color: float3;");
