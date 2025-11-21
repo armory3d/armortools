@@ -43,7 +43,11 @@ import bpy;\
 bpy.ops.wm.obj_export(filepath='" +
 	                 bpy_folder + string_replace_all(save, "\\", "/") + "',export_triangulated_mesh=True,export_materials=False,check_existing=False)";
 
+	/// if arm_windows
+	let bl: string = "\"" + string_replace_all(config_raw.blender, "/", "\\") + "\"";
+	/// else
 	let bl: string = string_replace_all(config_raw.blender, " ", "\\ ");
+	/// end
 	iron_sys_command(bl + " \"" + path + "\" -b --python-expr \"" + py + "\"");
 	import_obj_run(save, replace_existing);
 }
