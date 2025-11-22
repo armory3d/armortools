@@ -382,8 +382,10 @@ function ui_view2d_render() {
 		ui._x += ew * 0.5 + 3;
 		ui._y = 2 + start_y;
 
-		let scale_percent: i32 = math_round((tw / tex.width) * 100);
-		ui_text(scale_percent + "%");
+		if (tex != null) {
+			let scale_percent: i32 = math_round((tw / tex.width) * 100);
+			ui_text(scale_percent + "%");
+		}
 
 		ui.enabled = true;
 
