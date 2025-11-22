@@ -117,7 +117,7 @@ function viewport_capture_screenshot() {
 		}
 	}
 
-	let pa: packed_asset_t = {name : abs, bytes : gpu_get_texture_pixels(screenshot)};
+	let pa: packed_asset_t = {name : abs, bytes : iron_encode_png(gpu_get_texture_pixels(screenshot), screenshot.width, screenshot.height, 0)};
 	array_push(project_raw.packed_assets, pa);
 	map_set(data_cached_images, abs, screenshot);
 	import_texture_run(abs);

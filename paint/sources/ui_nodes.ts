@@ -1570,7 +1570,7 @@ function ui_nodes_capture_output() {
 		}
 	}
 
-	let pa: packed_asset_t = {name : abs, bytes : gpu_get_texture_pixels(img)};
+	let pa: packed_asset_t = {name : abs, bytes : iron_encode_png(gpu_get_texture_pixels(img), img.width, img.height, 0)};
 	array_push(project_raw.packed_assets, pa);
 	map_set(data_cached_images, abs, img);
 	import_texture_run(abs);
