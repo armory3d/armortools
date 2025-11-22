@@ -22,3 +22,26 @@ void  json_encode_end_array();
 void  json_encode_begin_object();
 void  json_encode_end_object();
 void  json_encode_map(any_map_t *m);
+
+typedef enum {
+	JSON_TYPE_UNDEFINED = 0,
+	JSON_TYPE_OBJECT    = (1 << 0),
+	JSON_TYPE_ARRAY     = (1 << 1),
+	JSON_TYPE_STRING    = (1 << 2),
+	JSON_TYPE_NUMBER    = (1 << 3),
+	JSON_TYPE_BOOL      = (1 << 4),
+	JSON_TYPE_NULL      = (1 << 5),
+} _json_type_t;
+
+typedef struct json_object {
+	_json_type_t type;
+	int32_t      index;
+	void        *data;
+} json_object_t;
+
+json_object_t *json_decode(const char *const s);
+json_object_t *json_decode_object_value(const char *const s, json_object_t *o, const char *name);
+json_object_t *json_decode_array_value(const char *const s, json_object_t *o, uint32_t index);
+char          *json_decode_string_value(const char *const s, json_object_t *o);
+float          json_decode_number_value(const char *const s, json_object_t *o);
+bool           json_decode_bool_value(const char *const s, json_object_t *o);
