@@ -1305,7 +1305,7 @@ i32 iron_sys_command(string_t *cmd) {
 	wchar_t comspec[MAX_PATH];
 	GetEnvironmentVariableW(L"ComSpec", comspec, MAX_PATH);
 	wchar_t cmdline[2048];
-	swprintf(cmdline, 2048, L"\"%s\" /c %s", comspec, wstr);
+	swprintf(cmdline, 2048, L"\"%s\" /c \"%s\"", comspec, wstr);
 	STARTUPINFO si;
 	memset(&si, 0, sizeof(si));
 	si.cb          = sizeof(si);
