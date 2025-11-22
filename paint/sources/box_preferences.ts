@@ -750,7 +750,7 @@ function box_preferences_init_models() {
 			name : "Marigold",
 			memory : "6GB",
 			size : "13.7GB",
-			nodes : "Text to Image",
+			nodes : "Image to Depth, Image to Normal Map Node, Image to PBR",
 			urls : [
 				"https://huggingface.co/armory3d/marigold-v1-1-gguf/resolve/main/marigold-depth-v1-1.q8_0.gguf",
 				"https://huggingface.co/armory3d/marigold-v1-1-gguf/resolve/main/marigold-normals-v1-1.q8_0.gguf",
