@@ -780,7 +780,11 @@ function box_preferences_neural_tab() {
 	if (inference_handle.init) {
 		inference_handle.i = config_raw.neural_backend;
 	}
+	/// if arm_windows
 	let inference_combo: string[] = [ "CPU", "Vulkan", "CUDA" ];
+	/// else
+	let inference_combo: string[] = [ "CPU", "Vulkan" ];
+	/// end
 	ui_combo(inference_handle, inference_combo, tr("Inference Backend"), true);
 	if (ui.is_hovered) {
 		ui_tooltip(tr("Backend for neural node processing"));

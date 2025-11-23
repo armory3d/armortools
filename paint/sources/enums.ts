@@ -277,6 +277,7 @@ enum layout_size_t {
 enum neural_backend_t {
 	CPU    = 0,
 	VULKAN = 1,
+	CUDA = 2,
 }
 
 enum preference_tab_t {

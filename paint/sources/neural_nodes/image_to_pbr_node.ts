@@ -62,7 +62,7 @@ function image_to_pbr_node_run_sd(model: string, prompt: string, done: (tex: gpu
 	let dir: string = neural_node_dir();
 
 	let argv: string[] = [
-		dir + "/sd_vulkan",
+		dir + "/" + neural_node_sd_bin(),
 		"-m",
 		dir + "/" + model,
 		"--sampling-method",

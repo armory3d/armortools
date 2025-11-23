@@ -7,7 +7,7 @@ function text_to_image_node_init() {
 
 function text_to_image_node_sd_args(dir: string, prompt: string): string[] {
 	let argv: string[] = [
-		dir + "/sd_vulkan",
+		dir + "/" + neural_node_sd_bin(),
 		"-m",
 		dir + "/v1-5-pruned-emaonly.safetensors",
 		"--offload-to-cpu",
@@ -30,7 +30,7 @@ function text_to_image_node_sd_args(dir: string, prompt: string): string[] {
 
 function text_to_image_node_qwen_args(dir: string, prompt: string): string[] {
 	let argv: string[] = [
-		dir + "/sd_vulkan",
+		dir + "/" + neural_node_sd_bin(),
 		"--diffusion-model",
 		dir + "/Qwen_Image-Q4_K_S.gguf",
 		"--vae",
@@ -59,7 +59,7 @@ function text_to_image_node_qwen_args(dir: string, prompt: string): string[] {
 
 function text_to_image_node_wan_args(dir: string, prompt: string): string[] {
 	let argv: string[] = [
-		dir + "/sd_vulkan",
+		dir + "/" + neural_node_sd_bin(),
 		"-M",
 		"vid_gen",
 		"--diffusion-model",

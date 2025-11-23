@@ -22,7 +22,7 @@ function image_to_depth_node_button(node_id: i32) {
 			iron_write_png(dir + path_sep + "input.png", gpu_get_texture_pixels(input), input.width, input.height, 0);
 
 			let argv: string[] = [
-				dir + "/sd_vulkan",
+				dir + "/" + neural_node_sd_bin(),
 				"-m",
 				dir + "/marigold-depth-v1-1.q8_0.gguf",
 				"--sampling-method",

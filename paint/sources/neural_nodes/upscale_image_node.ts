@@ -8,8 +8,8 @@ function upscale_image_node_init() {
 function upscale_image_node_button(node_id: i32) {
 	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
 	let node: ui_node_t          = ui_get_node(canvas.nodes, node_id);
-	let node_name: string = parser_material_node_name(node);
-	let h: ui_handle_t = ui_handle(node_name);
+	let node_name: string        = parser_material_node_name(node);
+	let h: ui_handle_t           = ui_handle(node_name);
 
 	let models: string[] = [ "Real-ESRGAN" ];
 	let model: i32       = ui_combo(ui_nest(h, 0), models, tr("Model"));
@@ -27,8 +27,10 @@ function upscale_image_node_button(node_id: i32) {
 			let dir: string = neural_node_dir();
 			iron_write_png(dir + path_sep + "input.png", input_buf, input.width, input.height, 0);
 
-			let argv: string[] =
-			    [ dir + "/sd_vulkan", "-M", "upscale", "--upscale-model", dir + "/RealESRGAN_x4plus.pth", "-i", dir + "/input.png", "-o", dir + "/output.png", null ];
+			let argv: string[] = [
+				dir + "/" + neural_node_sd_bin(), "-M", "upscale", "--upscale-model", dir + "/RealESRGAN_x4plus.pth", "-i", dir + "/input.png", "-o",
+				dir + "/output.png", null
+			];
 			iron_exec_async(argv[0], argv.buffer);
 			sys_notify_on_update(neural_node_check_result, node);
 		}

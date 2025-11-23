@@ -77,6 +77,24 @@ function neural_node_check_result(node: ui_node_t) {
 	}
 }
 
+function neural_node_sd_bin_ext(): string {
+	/// if arm_windows
+	return ".exe";
+	/// else
+	return "";
+	/// end
+}
+
+function neural_node_sd_bin(): string {
+	if (config_raw.neural_backend == neural_backend_t.VULKAN) {
+		return "sd_vulkan" + neural_node_sd_bin_ext();
+	}
+	if (config_raw.neural_backend == neural_backend_t.CUDA) {
+		return "sd_cuda" + neural_node_sd_bin_ext();
+	}
+	return "sd_cpu" + neural_node_sd_bin_ext();
+}
+
 function neural_node_dir(): string {
 	let dir: string;
 	if (path_is_protected()) {

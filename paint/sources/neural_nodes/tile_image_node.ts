@@ -64,7 +64,7 @@ function tile_image_node_button(node_id: i32) {
 				let argv: string[];
 				if (model == 0) {
 					argv = [
-						dir + "/sd_vulkan",
+						dir + "/" + neural_node_sd_bin(),
 						"-m",
 						dir + "/v1-5-pruned-emaonly.safetensors",
 						"--offload-to-cpu",
@@ -89,7 +89,7 @@ function tile_image_node_button(node_id: i32) {
 				}
 				else {
 					argv = [
-						dir + "/sd_vulkan",
+						dir + "/" + neural_node_sd_bin(),
 						"--diffusion-model",
 						dir + "/Qwen-Image-Edit-2509-Q4_K_S.gguf",
 						"--vae",

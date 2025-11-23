@@ -35,7 +35,7 @@ function edit_image_node_button(node_id: i32) {
 			}
 
 			let argv: string[] = [
-				dir + "/sd_vulkan",
+				dir + "/" + neural_node_sd_bin(),
 				"--diffusion-model",
 				dir + "/Qwen-Image-Edit-2509-Q4_K_S.gguf",
 				"--vae",
@@ -50,6 +50,8 @@ function edit_image_node_button(node_id: i32) {
 				"30",
 				"-s",
 				"-1",
+				"--cfg-scale", "2.5",
+				"--flow-shift", "3",
 				"-W",
 				"512",
 				"-H",
