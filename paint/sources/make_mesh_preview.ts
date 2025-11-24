@@ -1,6 +1,4 @@
 
-let make_mesh_preview_opacity_discard_decal: f32 = 0.05;
-
 function make_mesh_preview_run(data: material_t, matcon: material_context_t): node_shader_context_t {
 	let context_id: string      = "mesh";
 	let props: shader_context_t = {
@@ -58,8 +56,8 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 		}
 	}
 	if (decal) {
-		let opac: f32 = make_mesh_preview_opacity_discard_decal;
-		node_shader_write_frag(kong, "if (opacity < " + opac + ") { discard; }");
+		let opac: f32 = config_raw.brush_alpha_discard;
+		node_shader_write_frag(kong, "if (opacity <= float(" + opac + ")) { discard; }");
 	}
 
 	kong.frag_out = "float4[2]";

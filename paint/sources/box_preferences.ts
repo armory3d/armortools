@@ -473,6 +473,15 @@ function box_preferences_usage_tab() {
 		make_material_parse_paint_material();
 	}
 	ui.enabled = true;
+
+	let alpha_discard_handle: ui_handle_t = ui_handle(__ID__);
+	if (alpha_discard_handle.init) {
+		alpha_discard_handle.f = config_raw.brush_alpha_discard;
+	}
+	config_raw.brush_alpha_discard = ui_slider(alpha_discard_handle, tr("Alpha Discard"), 0.0, 1.0, true);
+	if (alpha_discard_handle.changed) {
+		make_material_parse_paint_material();
+	}
 }
 
 function box_preferences_pen_tab() {

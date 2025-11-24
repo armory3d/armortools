@@ -336,7 +336,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		}
 	}
 
-	node_shader_write_frag(kong, "if (opacity == 0.0) { discard; }");
+	node_shader_write_frag(kong, "if (opacity <= float(" + config_raw.brush_alpha_discard + ")) { discard; }");
 
 	if (context_raw.tool == tool_type_t.PARTICLE) { // Particle mask
 		make_particle_mask(kong);
@@ -356,7 +356,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	node_shader_add_texture(kong, "paintmask");
 	node_shader_write_frag(kong, "var sample_mask: float = sample_lod(paintmask, sampler_linear, sample_tc, 0.0).r;");
 	node_shader_write_frag(kong, "str = max(str, sample_mask);");
-	// write(frag, "str = clamp(str + sample_mask, 0.0, 1.0);");
+	// node_shader_write_frag(kong, "str = clamp(str + sample_mask, 0.0, 1.0);");
 
 	node_shader_add_texture(kong, "texpaint_undo", "_texpaint_undo");
 	node_shader_write_frag(kong, "var sample_undo: float4 = sample_lod(texpaint_undo, sampler_linear, sample_tc, 0.0);");

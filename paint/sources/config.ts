@@ -94,6 +94,7 @@ function config_save() {
 	json_encode_bool("material_live", config_raw.material_live);
 	json_encode_bool("brush_depth_reject", config_raw.brush_depth_reject);
 	json_encode_bool("brush_angle_reject", config_raw.brush_angle_reject);
+	json_encode_f32("brush_alpha_discard", config_raw.brush_alpha_discard);
 	json_encode_i32("dilate_radius", config_raw.dilate_radius);
 	json_encode_string("blender", config_raw.blender);
 	json_encode_i32("scene_atlas_res", config_raw.scene_atlas_res);
@@ -195,17 +196,18 @@ function config_init() {
 		/// else
 		config_raw.material_live = true;
 		/// end
-		config_raw.brush_depth_reject = true;
-		config_raw.brush_angle_reject = true;
-		config_raw.brush_live         = false;
-		config_raw.show_asset_names   = false;
-		config_raw.dilate_radius      = 2;
-		config_raw.blender            = "";
-		config_raw.scene_atlas_res    = texture_res_t.RES8192;
-		config_raw.pathtrace_mode     = pathtrace_mode_t.FAST;
-		config_raw.grid_snap          = false;
-		config_raw.experimental       = false;
-		config_raw.neural_backend     = neural_backend_t.VULKAN;
+		config_raw.brush_depth_reject  = true;
+		config_raw.brush_angle_reject  = true;
+		config_raw.brush_alpha_discard = 0.1;
+		config_raw.brush_live          = false;
+		config_raw.show_asset_names    = false;
+		config_raw.dilate_radius       = 2;
+		config_raw.blender             = "";
+		config_raw.scene_atlas_res     = texture_res_t.RES8192;
+		config_raw.pathtrace_mode      = pathtrace_mode_t.FAST;
+		config_raw.grid_snap           = false;
+		config_raw.experimental        = false;
+		config_raw.neural_backend      = neural_backend_t.VULKAN;
 	}
 	else {
 		// Discard old config
@@ -470,6 +472,7 @@ type config_t = {
 	material_live?: bool;
 	brush_depth_reject?: bool;
 	brush_angle_reject?: bool;
+	brush_alpha_discard?: f32;
 	dilate_radius?: i32;
 	blender?: string;
 	scene_atlas_res?: i32;
