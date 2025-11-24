@@ -280,9 +280,9 @@ fun deferred_light_frag(input: vert_out): float4 {
 	// if (matid == uint(1)) { // Emission
 	if (matid == uint(1.0)) { // Emission
 		color.rgb = color.rgb + g1.rgb; // materialid
-		albedo = float3(0.0, 0.0, 0.0);
+		//albedo = float3(0.0, 0.0, 0.0);
 	}
-
+	color.rgb = max3(color.rgb, float3(0.0, 0.0, 0.0));
 	color.a = 1.0; // Mark as opaque
 
 	return color;
