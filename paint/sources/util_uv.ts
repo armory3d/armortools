@@ -28,7 +28,8 @@ function util_uv_cache_uv_map() {
 	}
 
 	util_uv_uvmap_cached      = true;
-	let merged: mesh_object_t = context_raw.merged_object;
+	let mask: i32             = slot_layer_get_object_mask(context_raw.layer);
+	let merged: mesh_object_t = mask > 0 ? project_paint_objects[mask - 1] : context_raw.merged_object;
 	let mesh: mesh_data_t     = (context_raw.layer_filter == 0 && merged != null) ? merged.data : context_raw.paint_object.data;
 
 	let texa: i16_array_t = mesh.vertex_arrays[2].values;
