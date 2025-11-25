@@ -96,7 +96,7 @@ function tab_layers_button_new(text: string) {
 			}
 			if (config_raw.experimental) {
 				if (ui_menu_button(tr("Sculpt Layer"))) {
-					sys_notify_on_next_frame(function () {
+					sys_notify_on_next_frame(function() {
 						sculpt_layers_create_sculpt_layer();
 					});
 				}
@@ -872,30 +872,33 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 		if (!slot_layer_is_group(l)) {
 			ui_menu_align();
 			/// if (arm_android || arm_ios)
-			let ar: string[] = [ "128", "256", "512", "1K", "2K", "4K" ];
+			let ar: string[] = [ "128", "256", "512", "1024", "2048", "4096" ];
 			/// else
-			let ar: string[] = [ "128", "256", "512", "1K", "2K", "4K", "8K", "16K" ];
+			let ar: string[] = [ "128", "256", "512", "1024", "2048", "4096", "8192", "16384" ];
 			/// end
-			let _y: i32 = ui._y;
-
 			let h: ui_handle_t     = ui_handle(__ID__);
 			let changed_last: bool = h.changed;
-			h.f                    = base_res_handle.i;
-			base_res_handle.i      = math_floor(ui_slider(h, ar[base_res_handle.i], 0, ar.length - 1, false, 1, false, ui_align_t.LEFT, false));
+			h.i                    = base_res_handle.i;
+			base_res_handle.i = ui_combo(h, ar, tr("Resolution"), true);
 			if (h.changed) {
 				ui_menu_keep_open = true;
 			}
 			if (changed_last && !h.changed) {
 				layers_on_resized();
 			}
-			ui._y = _y;
-			ui_draw_string(tr("Res"), -1, 0, ui_align_t.RIGHT, true);
-			ui_end_element();
+
+			// ui_menu_align();
+			// let hh: ui_handle_t     = ui_handle(__ID__);
+			// let aruv: string[] = [ "0" ];
+			// ui_combo(hh, aruv, tr("UV Map"), true);
 
 			/// if (arm_android || arm_ios)
 			// let bits_items: string[] = ["8bit"];
 			// ui_inline_radio(base_bits_handle, bits_items, ui_align_t.LEFT);
 			/// else
+			ui_menu_separator();
+			ui_menu_align();
+			ui_menu_label(tr("Bits"));
 			ui_menu_align();
 			let bits_items: string[] = [ "8bit", "16bit", "32bit" ];
 			ui_inline_radio(base_bits_handle, bits_items, ui_align_t.LEFT);
@@ -952,6 +955,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 		}
 
 		if (!slot_layer_is_group(l)) {
+
 			let base_handle: ui_handle_t         = ui_nest(ui_handle(__ID__), l.id);
 			let opac_handle: ui_handle_t         = ui_nest(ui_handle(__ID__), l.id);
 			let nor_handle: ui_handle_t          = ui_nest(ui_handle(__ID__), l.id);
@@ -974,17 +978,27 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			height_blend_handle.b                = l.paint_height_blend;
 			emis_handle.b                        = l.paint_emis;
 			subs_handle.b                        = l.paint_subs;
-			l.paint_base                         = ui_check(base_handle, tr("Base Color"));
-			l.paint_opac                         = ui_check(opac_handle, tr("Opacity"));
-			l.paint_nor                          = ui_check(nor_handle, tr("Normal"));
-			l.paint_nor_blend                    = ui_check(nor_blend_handle, tr("Normal Blending"));
-			l.paint_occ                          = ui_check(occ_handle, tr("Occlusion"));
-			l.paint_rough                        = ui_check(rough_handle, tr("Roughness"));
-			l.paint_met                          = ui_check(met_handle, tr("Metallic"));
-			l.paint_height                       = ui_check(height_handle, tr("Height"));
-			l.paint_height_blend                 = ui_check(height_blend_handle, tr("Height Blending"));
-			l.paint_emis                         = ui_check(emis_handle, tr("Emission"));
-			l.paint_subs                         = ui_check(subs_handle, tr("Subsurface"));
+
+			ui_menu_separator();
+			ui_menu_align();
+			ui_menu_label(tr("Channels"));
+			ui_menu_align();
+			ui_row2();
+			l.paint_base = ui_check(base_handle, tr("Base Color"));
+			l.paint_opac = ui_check(opac_handle, tr("Opacity"));
+			ui_row2();
+			l.paint_nor       = ui_check(nor_handle, tr("Normal"));
+			l.paint_nor_blend = ui_check(nor_blend_handle, tr("Normal Blend"));
+			ui_row2();
+			l.paint_rough = ui_check(rough_handle, tr("Roughness"));
+			l.paint_met   = ui_check(met_handle, tr("Metallic"));
+			ui_row2();
+			l.paint_height       = ui_check(height_handle, tr("Height"));
+			l.paint_height_blend = ui_check(height_blend_handle, tr("Height Blend"));
+			ui_row2();
+			l.paint_emis = ui_check(emis_handle, tr("Emission"));
+			l.paint_subs = ui_check(subs_handle, tr("Subsurface"));
+			l.paint_occ  = ui_check(occ_handle, tr("Occlusion"));
 			if (base_handle.changed || opac_handle.changed || nor_handle.changed || nor_blend_handle.changed || occ_handle.changed || rough_handle.changed ||
 			    met_handle.changed || height_handle.changed || height_blend_handle.changed || emis_handle.changed || subs_handle.changed) {
 				make_material_parse_mesh_material();
