@@ -641,7 +641,7 @@ void ui_draw_tooltip_text() {
 	}
 	current->tooltip_x = fmin(current->tooltip_x, iron_window_width() - tooltip_w - 20);
 	draw_begin(NULL, false, 0);
-	float font_height = draw_font_height(current->ops->font, current->font_size);
+	float font_height = draw_font_height(current->ops->font, current->font_size + 4);
 	float off         = 0;
 	if (current->tooltip_img != NULL) {
 		float w = current->tooltip_img->width;
@@ -654,7 +654,7 @@ void ui_draw_tooltip_text() {
 	int x = current->tooltip_x - 5;
 	int y = current->tooltip_y + off - 5;
 	int w = tooltip_w + 20 + 10;
-	int h = font_height * line_count + 10;
+	int h = font_height * line_count + 6;
 	ui_draw_shadow(x, y, w, h);
 	draw_set_color(theme->SEPARATOR_COL);
 	draw_filled_rect(x, y, w, h);
@@ -662,7 +662,7 @@ void ui_draw_tooltip_text() {
 	draw_set_font(current->ops->font, current->font_size);
 	draw_set_color(theme->TEXT_COL);
 	for (int i = 0; i < line_count; ++i) {
-		draw_string(ui_extract_line(current->tooltip_text, i), current->tooltip_x + 5, current->tooltip_y + off + i * current->font_size);
+		draw_string(ui_extract_line(current->tooltip_text, i), current->tooltip_x + 5, current->tooltip_y + off + i * (current->font_size + 4));
 	}
 	draw_end();
 }
