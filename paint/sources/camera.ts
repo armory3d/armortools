@@ -225,8 +225,9 @@ function camera_pan_action(modif: bool, default_keymap: bool) {
 	let camera: camera_object_t = scene_camera;
 	if (operator_shortcut(map_get(config_keymap, "action_pan"), shortcut_type_t.DOWN) || (mouse_down("middle") && !modif && default_keymap)) {
 		camera_redraws                   = 2;
-		let look: vec4_t                 = vec4_mult(transform_look(camera.base.transform), mouse_movement_y / 150 * config_raw.camera_pan_speed);
-		let right: vec4_t                = vec4_mult(transform_right(camera.base.transform), -mouse_movement_x / 150 * config_raw.camera_pan_speed);
+		let f: f32                       = 150 * (1.0 / (camera_distance() / 4.0));
+		let look: vec4_t                 = vec4_mult(transform_look(camera.base.transform), mouse_movement_y / f * config_raw.camera_pan_speed);
+		let right: vec4_t                = vec4_mult(transform_right(camera.base.transform), -mouse_movement_x / f * config_raw.camera_pan_speed);
 		camera.base.transform.loc        = vec4_add(camera.base.transform.loc, look);
 		camera.base.transform.loc        = vec4_add(camera.base.transform.loc, right);
 		camera_origins[camera_index()].v = vec4_add(camera_origins[camera_index()].v, look);
