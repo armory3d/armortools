@@ -70,6 +70,7 @@ function keymap_get_default(): map_t<string, string> {
 	map_set(keymap, "view_zoom_in", "");
 	map_set(keymap, "view_zoom_out", "");
 	map_set(keymap, "view_distract_free", "f11");
+	map_set(keymap, "view_pivot_center", "alt+middle");
 	map_set(keymap, "viewport_mode", "ctrl+m");
 	map_set(keymap, "toggle_node_editor", "tab");
 	map_set(keymap, "toggle_2d_view", "shift+tab");

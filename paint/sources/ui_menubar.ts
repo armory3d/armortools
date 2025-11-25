@@ -484,6 +484,17 @@ function ui_menubar_draw_category_items() {
 			viewport_update_camera_type(context_raw.camera_type);
 		}
 
+		ui_menu_separator();
+		ui_menu_align();
+		ui_menu_label(tr("Pivot"), map_get(config_keymap, "view_pivot_center"));
+		ui_menu_align();
+		let h: ui_handle_t               = ui_handle(__ID__);
+		let pivot_center_items: string[] = [ tr("Camera Center") ]; // tr("Paint Stroke")
+		ui_inline_radio(h, pivot_center_items, ui_align_t.LEFT);
+
+		ui_menu_separator();
+		ui_menu_align();
+		ui_menu_label(tr("Mode"));
 		ui_menu_align();
 		let camera_controls_handle: ui_handle_t = ui_handle(__ID__);
 		camera_controls_handle.i                = context_raw.camera_controls;
@@ -503,12 +514,12 @@ function ui_menubar_draw_category_items() {
 			ui_tooltip(orbit_and_rotate_tooltip + "\n\n" + fly_tooltip);
 		}
 
+		ui_menu_separator();
+		ui_menu_align();
+		ui_menu_label(tr("Type"), map_get(config_keymap, "view_camera_type"));
 		ui_menu_align();
 		let camera_type_items: string[] = [ tr("Perspective"), tr("Orthographic") ];
 		context_raw.camera_type         = ui_inline_radio(context_raw.cam_handle, camera_type_items, ui_align_t.LEFT);
-		if (ui.is_hovered) {
-			ui_tooltip(tr("Camera Type") + " (" + map_get(config_keymap, "view_camera_type") + ")");
-		}
 		if (context_raw.cam_handle.changed) {
 			viewport_update_camera_type(context_raw.camera_type);
 		}

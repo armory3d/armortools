@@ -127,6 +127,18 @@ function ui_menu_button(text: string, label: string = ""): bool {
 	return ui_button(config_button_spacing + text, config_button_align, label);
 }
 
+function ui_menu_label(text: string, shortcut: string = null) {
+	let _y: i32           = ui._y;
+	let _TEXT_COL: i32    = ui.ops.theme.TEXT_COL;
+	ui.ops.theme.TEXT_COL = ui.ops.theme.LABEL_COL;
+	ui_text(text);
+	if (shortcut != null) {
+		ui._y = _y;
+		ui_text(shortcut, ui_align_t.RIGHT);
+	}
+	ui.ops.theme.TEXT_COL = _TEXT_COL;
+}
+
 function ui_menu_align() {
 	if (!config_raw.touch_ui) {
 		let row: f32[] = [ 12 / 100, 88 / 100 ];

@@ -166,6 +166,10 @@ function camera_update() {
 		transform_rotate(camera.base.transform, camera_object_right(camera), -mouse_movement_y / 200 * config_raw.camera_rotation_speed);
 	}
 
+	if (operator_shortcut(map_get(config_keymap, "view_pivot_center"), shortcut_type_t.STARTED)) {
+		camera_set_pivot_center_to_mouse();
+	}
+
 	if (operator_shortcut(map_get(config_keymap, "rotate_envmap"), shortcut_type_t.DOWN)) {
 		camera_redraws = 2;
 		context_raw.envmap_angle -= mouse_movement_x / 100;
@@ -237,4 +241,26 @@ function camera_get_zoom_delta(): f32 {
 	       : config_raw.zoom_direction == zoom_direction_t.HORIZONTAL          ? mouse_movement_x
 	       : config_raw.zoom_direction == zoom_direction_t.HORIZONTAL_INVERTED ? mouse_movement_x
 	                                                                           : -(mouse_movement_y - mouse_movement_x);
+}
+
+function camera_set_pivot_center_to_mouse() {
+	util_render_pick_pos_nor_tex();
+	let is_mesh: bool = math_abs(context_raw.posx_picked) < 50 && math_abs(context_raw.posy_picked) < 50 && math_abs(context_raw.posz_picked) < 50;
+	if (!is_mesh) {
+		return;
+	}
+
+	let o: vec4_box_t = camera_origins[camera_index()];
+	o.v.x             = context_raw.posx_picked;
+	o.v.y             = context_raw.posy_picked;
+	o.v.z             = context_raw.posz_picked;
+
+	camera_redraws              = 2;
+	let camera: camera_object_t = scene_camera;
+	let up: vec4_t              = vec4_mult(transform_up(camera.base.transform), camera_distance());
+	camera.base.transform.loc.x = context_raw.posx_picked;
+	camera.base.transform.loc.y = context_raw.posy_picked;
+	camera.base.transform.loc.z = context_raw.posz_picked;
+	camera.base.transform.loc   = vec4_add(camera.base.transform.loc, up);
+	camera_object_build_mat(camera);
 }
