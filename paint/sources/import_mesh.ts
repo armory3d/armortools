@@ -101,6 +101,7 @@ function _import_mesh_make_mesh(mesh: raw_mesh_t) {
 	context_raw.paint_object = context_main_object();
 
 	context_select_paint_object(context_main_object());
+	viewport_reset();
 
 	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
 		let p: mesh_object_t = project_paint_objects[i];

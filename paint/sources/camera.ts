@@ -80,13 +80,13 @@ function camera_update() {
 		camera_redraws     = 2;
 		let t: transform_t = context_main_object().base.transform;
 		let up: vec4_t     = transform_up(t);
-		transform_rotate(t, up, mouse_movement_x / 100 * config_raw.camera_rotation_speed);
+		transform_rotate(t, up, (mouse_movement_x / 120) * config_raw.camera_rotation_speed);
 		let right: vec4_t = camera_object_right_world(camera);
-		transform_rotate(t, right, mouse_movement_y / 100 * config_raw.camera_rotation_speed);
+		transform_rotate(t, right, (mouse_movement_y / 120) * config_raw.camera_rotation_speed);
 		transform_build_matrix(t);
 		let tup: vec4_t = transform_up(t);
 		if (tup.z < 0) {
-			transform_rotate(t, right, -mouse_movement_y / 100 * config_raw.camera_rotation_speed);
+			transform_rotate(t, right, -(mouse_movement_y / 120) * config_raw.camera_rotation_speed);
 		}
 	}
 
@@ -95,14 +95,14 @@ function camera_update() {
 
 		if (operator_shortcut(map_get(config_keymap, "action_zoom"), shortcut_type_t.DOWN)) {
 			camera_redraws = 2;
-			let f: f32     = camera_get_zoom_delta() / 150;
+			let f: f32     = camera_get_zoom_delta() / (150 * (1.0 / (camera_distance() / 2.0)));
 			f *= camera_get_zoom_speed();
 			transform_move(camera.base.transform, camera_object_look(camera), f);
 		}
 
 		if (mouse_wheel_delta != 0 && !modif_key) {
 			camera_redraws = 2;
-			let f: f32     = mouse_wheel_delta * (-0.1);
+			let f: f32     = mouse_wheel_delta * (-0.2) * ((camera_distance() / 4.0));
 			f *= camera_get_zoom_speed();
 			transform_move(camera.base.transform, camera_object_look(camera), f);
 		}
