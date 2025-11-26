@@ -900,7 +900,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			ui_menu_align();
 			ui_menu_label(tr("Bits"));
 			ui_menu_align();
-			let bits_items: string[] = [ "8bit", "16bit", "32bit" ];
+			let bits_items: string[] = [ "8", "16", "32" ];
 			ui_inline_radio(base_bits_handle, bits_items, ui_align_t.LEFT);
 			/// end
 			if (base_bits_handle.changed) {
