@@ -118,9 +118,14 @@ float2 hit_attribute2d(float2 vertex_attribute[3], float2 barycentrics) {
 }
 
 void create_basis(float3 normal, thread float3 & tangent, thread float3 & binormal) {
-	float3 v1 = cross(normal, float3(0.0, 0.0, 1.0));
-	float3 v2 = cross(normal, float3(0.0, 1.0, 0.0));
-	tangent = length(v1) > length(v2) ? v1 : v2;
+	float3 v = cross(normal, float3(0.0, 0.0, 1.0));
+	if (dot(v, v) > 0.0001) {
+		tangent = normalize(v);
+	}
+	else {
+		v = cross(normal, float3(0.0, 1.0, 0.0));
+		tangent = normalize(v);
+	}
 	binormal = cross(tangent, normal);
 }
 

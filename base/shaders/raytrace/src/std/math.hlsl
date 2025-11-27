@@ -5,9 +5,14 @@
 #include "rand.hlsl"
 
 void create_basis(float3 normal, out float3 tangent, out float3 binormal) {
-	float3 v1 = cross(normal, float3(0.0, 0.0, 1.0));
-	float3 v2 = cross(normal, float3(0.0, 1.0, 0.0));
-	tangent = length(v1) > length(v2) ? v1 : v2;
+	float3 v = cross(normal, float3(0.0, 0.0, 1.0));
+	if (dot(v, v) > 0.0001) {
+		tangent = normalize(v);
+	}
+	else {
+		v = cross(normal, float3(0.0, 1.0, 0.0));
+		tangent = normalize(v);
+	}
 	binormal = cross(tangent, normal);
 }
 
@@ -38,6 +43,16 @@ float3 cos_weighted_hemisphere_direction(float3 n, uint sample, uint seed, int f
 	float x = r * cos(a);
 	float y = r * sin(a);
 	return normalize(n + float3(x, y, z));
+
+	// float xi1 = rand(DispatchRaysIndex().x, DispatchRaysIndex().y, sample, seed, frame, sobol, scramble, rank);
+	// float xi2 = rand(DispatchRaysIndex().x, DispatchRaysIndex().y, sample, seed + 1, frame, sobol, scramble, rank);
+	// float3 tangent, binormal;
+	// create_basis(n, tangent, binormal);
+	// float sin_theta = sqrt(xi1);
+	// float cos_theta = sqrt(1.0 - xi1);
+	// float phi = xi2 * PI2;
+	// float3 dir = cos(phi) * sin_theta * tangent + sin(phi) * sin_theta * binormal + cos_theta * n;
+	// return dir;
 }
 
 float3 surface_albedo(const float3 base_color, const float metalness) {
@@ -46,16 +61,6 @@ float3 surface_albedo(const float3 base_color, const float metalness) {
 
 float3 surface_specular(const float3 base_color, const float metalness) {
 	return lerp(float3(0.04, 0.04, 0.04), base_color, metalness);
-}
-
-// https://www.unrealengine.com/en-US/blog/physically-based-shading-on-mobile
-float3 env_brdf_approx(float3 specular, float roughness, float dotnv) {
-	const float4 c0 = float4(-1, -0.0275, -0.572, 0.022);
-	const float4 c1 = float4(1, 0.0425, 1.04, -0.04);
-	float4 r = roughness * c0 + c1;
-	float a004 = min(r.x * r.x, exp2(-9.28 * dotnv)) * r.x + r.y;
-	float2 ab = float2(-1.04, 1.04) * a004 + r.zw;
-	return specular * ab.x + ab.y;
 }
 
 float fresnel(float3 normal, float3 incident) {

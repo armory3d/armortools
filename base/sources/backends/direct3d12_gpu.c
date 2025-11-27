@@ -1202,9 +1202,27 @@ void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *ray_sha
 	                                            {D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE, {1, &ranges[8]}, D3D12_SHADER_VISIBILITY_ALL},
 	                                            {D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE, {1, &ranges[9]}, D3D12_SHADER_VISIBILITY_ALL}};
 
+	D3D12_STATIC_SAMPLER_DESC linear_sampler = {
+	    .Filter           = D3D12_FILTER_MIN_MAG_MIP_LINEAR,
+	    .AddressU         = D3D12_TEXTURE_ADDRESS_MODE_WRAP,
+	    .AddressV         = D3D12_TEXTURE_ADDRESS_MODE_WRAP,
+	    .AddressW         = D3D12_TEXTURE_ADDRESS_MODE_WRAP,
+	    .MipLODBias       = 0,
+	    .MaxAnisotropy    = 16,
+	    .ComparisonFunc   = D3D12_COMPARISON_FUNC_NEVER,
+	    .BorderColor      = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK,
+	    .MinLOD           = 0.0f,
+	    .MaxLOD           = D3D12_FLOAT32_MAX,
+	    .ShaderRegister   = 0,
+	    .RegisterSpace    = 0,
+	    .ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL,
+	};
+
 	D3D12_ROOT_SIGNATURE_DESC root_signature_desc = {
-	    .NumParameters = ARRAYSIZE(root_parameters),
-	    .pParameters   = root_parameters,
+	    .NumParameters     = ARRAYSIZE(root_parameters),
+	    .pParameters       = root_parameters,
+	    .NumStaticSamplers = 1,
+	    .pStaticSamplers   = &linear_sampler,
 	};
 	ID3DBlob *blob  = NULL;
 	ID3DBlob *error = NULL;

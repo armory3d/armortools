@@ -45,6 +45,7 @@ Texture2D<float4> mytexture_env : register(t6);
 Texture2D<float4> mytexture_sobol : register(t7);
 Texture2D<float4> mytexture_scramble : register(t8);
 Texture2D<float4> mytexture_rank : register(t9);
+SamplerState sampler_linear : register(s0);
 
 static const int SAMPLES = 64;
 #ifdef _TRANSLUCENCY
@@ -242,12 +243,24 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 		#else
 		float3 specular_dir = reflect(WorldRayDirection(), n);
 		#endif
-		payload.ray_dir = lerp(specular_dir, diffuse_dir, texpaint2.g * texpaint2.g);
 
-		float3 v = normalize(constant_buffer.eye.xyz - hit_world_position());
-		float dotnv = max(dot(n, v), 0.0);
+		float roughness = texpaint2.g;
+		float exponent = max(1.0 / (roughness * roughness) - 1.0, 0.01);
+		seed += 2;
+		float u1 = rand(DispatchRaysIndex().x, DispatchRaysIndex().y, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+		seed += 1;
+		float u2 = rand(DispatchRaysIndex().x, DispatchRaysIndex().y, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+		seed += 1;
+		float cos_theta = pow(u1, 1.0 / (exponent + 1.0));
+		float sin_theta = sqrt(1.0 - cos_theta * cos_theta);
+		float phi = u2 * 2.0 * 3.1415926535;
+		float3 tangent_r, binormal_r;
+		create_basis(specular_dir, tangent_r, binormal_r);
+		float3 dir_local = float3(cos(phi) * sin_theta, sin(phi) * sin_theta, cos_theta);
+		payload.ray_dir = mul(dir_local, float3x3(tangent_r, binormal_r, specular_dir));
 		float3 specular = surface_specular(texcolor, texpaint2.b);
-		payload.color.xyz *= env_brdf_approx(specular, texpaint2.g, dotnv);
+		payload.color.xyz *= specular;
+
 		#ifdef _FRESNEL
 		payload.color.xyz /= specular_chance;
 		#endif
@@ -267,7 +280,10 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	payload.color.xyz = lerp(_payload_color, payload.color.xyz, texpaint0.a);
 	#endif
 
-	payload.ray_origin = hit_world_position() + payload.ray_dir * 0.0001f;
+	float dotnv = abs(dot(n, -WorldRayDirection()));
+	payload.ray_origin = hit_world_position() + n * lerp(0.1f, 0.0001f, dotnv);
+
+	// payload.ray_origin = hit_world_position() + payload.ray_dir * 0.0001f;
 
 	#ifdef _EMISSION
 	if (int(texpaint1.a * 255.0f) % 3 == 1) { // matid
@@ -291,32 +307,13 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 
 [shader("miss")]
 void miss(inout RayPayload payload) {
-
 	#ifdef _EMISSION
 	if (payload.color.a == -3.0) {
 		return;
 	}
 	#endif
-
-	float2 tex_coord = frac(equirect(WorldRayDirection(), constant_buffer.params.y));
-	uint2 size;
-	mytexture_env.GetDimensions(size.x, size.y);
-	uint2 itex = tex_coord * size;
-
-	#ifdef _FULL
-	// Use .Sample() instead..
-	itex = clamp(itex, uint2(0, 0), size - uint2(2, 2));
-	float2 f = frac(tex_coord * size);
-	float3 t00 = mytexture_env.Load(int3(itex, 0)).rgb;
-	float3 t10 = mytexture_env.Load(int3(itex + uint2(1, 0), 0)).rgb;
-	float3 t01 = mytexture_env.Load(int3(itex + uint2(0, 1), 0)).rgb;
-	float3 t11 = mytexture_env.Load(int3(itex + uint2(1, 1), 0)).rgb;
-	float3 texenv = lerp(lerp(t00, t10, f.x), lerp(t01, t11, f.x), f.y);
-	#else
-	float3 texenv = mytexture_env.Load(uint3(tex_coord * size, 0)).rgb;
-	#endif
-
+	float2 tex_coord = equirect(WorldRayDirection(), constant_buffer.params.y);
+	float3 texenv = mytexture_env.SampleLevel(sampler_linear, tex_coord, 0.0).rgb;
 	texenv *= abs(constant_buffer.params.x);
-
 	payload.color = float4(payload.color.rgb * texenv.rgb, -1);
 }

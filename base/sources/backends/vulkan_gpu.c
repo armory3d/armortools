@@ -1994,11 +1994,13 @@ void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *ray_sha
 		    {8, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR},
 		    {9, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR},
 		    {10, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR},
-		    {11, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR}};
+		    {11, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR},
+		    {12, VK_DESCRIPTOR_TYPE_SAMPLER, 1, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR, NULL, 0,
+		     &linear_sampler}};
 
 		VkDescriptorSetLayoutCreateInfo layout_info = {
 		    .sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-		    .bindingCount = 12,
+		    .bindingCount = 13,
 		    .pBindings    = &bindings[0],
 		};
 		vkCreateDescriptorSetLayout(device, &layout_info, NULL, &pipeline->impl.descriptor_set_layout);
@@ -2147,12 +2149,13 @@ void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *ray_sha
 		                                      {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1},
 		                                      {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1},
 		                                      {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1},
-		                                      {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1}};
+		                                      {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1},
+		                                      {VK_DESCRIPTOR_TYPE_SAMPLER, 1}};
 
 		VkDescriptorPoolCreateInfo descriptor_pool_create_info = {
 		    .sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
 		    .maxSets       = 1024,
-		    .poolSizeCount = 12,
+		    .poolSizeCount = 13,
 		    .pPoolSizes    = type_counts,
 		};
 
