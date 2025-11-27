@@ -3035,7 +3035,19 @@ void gpu_raytrace_dispatch_rays() {
 	    .pImageInfo      = &texrankimage_descriptor,
 	};
 
-	VkWriteDescriptorSet write_descriptor_sets[12] = {acceleration_structure_write,
+	VkDescriptorImageInfo sampler_info = {
+	    .sampler = linear_sampler,
+	};
+	VkWriteDescriptorSet sampler_linear_write = {
+	    .sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+	    .dstSet          = pipeline->impl.descriptor_set,
+	    .dstBinding      = 12,
+	    .descriptorCount = 1,
+	    .descriptorType  = VK_DESCRIPTOR_TYPE_SAMPLER,
+	    .pImageInfo      = &sampler_info,
+	};
+
+	VkWriteDescriptorSet write_descriptor_sets[13] = {acceleration_structure_write,
 	                                                  result_image_write,
 	                                                  uniform_buffer_write,
 	                                                  vb_write,
@@ -3046,8 +3058,9 @@ void gpu_raytrace_dispatch_rays() {
 	                                                  texenv_image_write,
 	                                                  texsobol_image_write,
 	                                                  texscramble_image_write,
-	                                                  texrank_image_write};
-	vkUpdateDescriptorSets(device, 12, write_descriptor_sets, 0, VK_NULL_HANDLE);
+	                                                  texrank_image_write,
+													  sampler_linear_write};
+	vkUpdateDescriptorSets(device, 13, write_descriptor_sets, 0, VK_NULL_HANDLE);
 
 	set_image_layout(output->impl.image, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 
