@@ -10,6 +10,9 @@ const sampler_linear: sampler;
 #[set(everything)]
 const radiance: tex2d;
 
+#[set(everything)]
+const noise: tex2d;
+
 const PI: float = 3.14159265358979;
 const PI2: float = 6.28318530718;
 
@@ -31,12 +34,14 @@ fun prefilter_envmap_vert(input: vert_in): vert_out {
 }
 
 fun rand(co: float2): float {
-	return frac(sin(dot(co.xy, float2(12.9898, 78.233)) % 3.14) * 43758.5453);
+	// return frac(sin(dot(co.xy, float2(12.9898, 78.233)) % 3.14) * 43758.5453);
+	var uv: float2 = frac(co * 12.34);
+	return sample(noise, sampler_linear, uv).r;
 }
 
 fun equirect(normal: float3): float2 {
 	var phi: float = acos(normal.z);
-	var theta: float = atan2(normal.x, -normal.y) + PI;
+	var theta: float = atan2(-normal.y, normal.x) + PI;
 	return float2(theta / PI2, phi / PI);
 }
 
@@ -67,17 +72,15 @@ fun prefilter_envmap_frag(input: vert_out): float4 {
 	var i: int = 0;
 	while (i < int(constants.params.y)) {
 		var dir: float3 = normalize(lerp3(n, cos_weighted_hemisphere_direction(n, input.tex, float(i)), constants.params.x));
-		color.rgb = color.rgb + sample(radiance, sampler_linear, equirect(dir)).rgb;
+		var sampled: float3 = sample(radiance, sampler_linear, equirect(dir)).rgb;
+		sampled = min3(sampled, float3(10.0, 10.0, 10.0));
+		color.rgb = color.rgb + sampled;
 
 		//
 		i += 1;
 		//
 	}
 	color.rgb = color.rgb / constants.params.y;
-	// color.rgb = pow(color.rgb, float3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));
-	color.r = pow(color.r, 1.0 / 2.2);
-	color.g = pow(color.g, 1.0 / 2.2);
-	color.b = pow(color.b, 1.0 / 2.2);
 	return color;
 }
 

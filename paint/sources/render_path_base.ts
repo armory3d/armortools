@@ -6,6 +6,7 @@ let render_path_base_last_y: f32       = -1.0;
 let render_path_base_bloom_mipmaps: render_target_t[];
 let render_path_base_bloom_current_mip: i32 = 0;
 let render_path_base_bloom_sample_scale: f32;
+let render_path_base_buf_swapped: bool = false;
 
 function render_path_base_init() {
 	pipes_init();
@@ -335,6 +336,10 @@ function render_path_base_draw_taa(bufa: string, bufb: string) {
 		render_path_draw_shader("Scene/copy_pass/copy_pass");
 	}
 
+	render_path_base_swap_buf(bufb);
+}
+
+function render_path_base_swap_buf(bufb: string) {
 	// Swap buf and last targets
 	let last_target: render_target_t = map_get(render_path_render_targets, "last");
 	last_target.name                 = bufb;
@@ -342,6 +347,7 @@ function render_path_base_draw_taa(bufa: string, bufb: string) {
 	buf_target.name                  = "last";
 	map_set(render_path_render_targets, bufb, last_target);
 	map_set(render_path_render_targets, "last", buf_target);
+	render_path_base_buf_swapped = !render_path_base_buf_swapped;
 }
 
 function render_path_base_draw_gbuffer() {

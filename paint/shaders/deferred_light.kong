@@ -29,9 +29,6 @@ const gbuffer0: tex2d;
 const gbuffer1: tex2d;
 
 #[set(everything)]
-const senvmap_brdf: tex2d;
-
-#[set(everything)]
 const senvmap_radiance: tex2d;
 
 #[set(everything)]
@@ -178,7 +175,7 @@ fun mip_from_roughness(roughness: float, num_mipmaps: float): float {
 
 fun envmap_equirect(normal: float3, angle: float): float2 {
 	var phi: float = acos(normal.z);
-	var theta: float = atan2(normal.x, -normal.y) + PI + angle;
+	var theta: float = atan2(-normal.y, normal.x) + PI + angle;
 	return float2(theta / PI2, phi / PI);
 }
 
@@ -199,6 +196,16 @@ fun envmap_sample(lod: float, coord: float2): float3 {
 		return sample_lod(senvmap_radiance3, sampler_linear, coord, 0.0).rgb;
 	}
 	return sample_lod(senvmap_radiance4, sampler_linear, coord, 0.0).rgb;
+}
+
+// https://www.unrealengine.com/en-US/blog/physically-based-shading-on-mobile
+fun env_brdf_approx(specular: float3, roughness: float, dotnv: float): float3 {
+	var c0: float4 = float4(-1.0, -0.0275, -0.572, 0.022);
+	var c1: float4 = float4(1.0, 0.0425, 1.04, -0.04);
+	var r: float4 = c0 * roughness + c1;
+	var a004: float = min(r.x * r.x, exp((-9.28 * dotnv) * log(2.0))) * r.x + r.y;
+	var ab: float2 = float2(-1.04, 1.04) * a004 + r.zw;
+	return specular * ab.x + ab.y;
 }
 
 fun deferred_light_frag(input: vert_out): float4 {
@@ -236,7 +243,6 @@ fun deferred_light_frag(input: vert_out): float4 {
 	var p: float3 = get_pos(constants.eye, constants.eye_look, normalize(input.view_ray), depth, constants.camera_proj);
 	var v: float3 = normalize(constants.eye - p);
 	var dotnv: float = max(0.0, dot(n, v));
-
 	occ = lerp(1.0, occ, dotnv); // ao fresnel
 
 	// Envmap
@@ -251,10 +257,8 @@ fun deferred_light_frag(input: vert_out): float4 {
 	envl = envl / PI;
 
 	var reflection_world: float3 = reflect(-v, n);
-
 	// var lod: float = mip_from_roughness(roughness, float(constants.envmap_num_mipmaps));
 	// var prefiltered_color: float3 = sample_lod(senvmap_radiance, sampler_linear, envmap_equirect(reflection_world, constants.envmap_data.x), lod).rgb;
-
 	var lod: float = mip_from_roughness(roughness, 5.0);
 	var lod0: float = floor(lod);
 	var lod1: float = ceil(lod);
@@ -266,11 +270,11 @@ fun deferred_light_frag(input: vert_out): float4 {
 
 	envl.rgb = envl.rgb * albedo;
 	// Indirect specular
-	// var env_brdf: float2 = senvmap_brdf[uint2(roughness * 255.0, (1.0 - dotnv) * 255.0)].xy;
-	var env_brdf: float4 = senvmap_brdf[uint2(uint(roughness * 255.0), uint((1.0 - dotnv) * 255.0))];
+	// var env_brdf: float4 = senvmap_brdf[uint2(uint(dotnv * 255.0), uint(roughness * 255.0))];
+	// envl.rgb += prefiltered_color * (f0 * env_brdf.x + env_brdf.y);
+	// envl.rgb = envl.rgb + (prefiltered_color * (f0 * env_brdf.x + env_brdf.y));
+	envl.rgb = envl.rgb + prefiltered_color * env_brdf_approx(f0, roughness, dotnv) * 0.5;
 
-	//envl.rgb += prefiltered_color * (f0 * env_brdf.x + env_brdf.y) * 1.5;
-	envl.rgb = envl.rgb + (prefiltered_color * (f0 * env_brdf.x + env_brdf.y) * 1.5);
 	envl.rgb = envl.rgb * constants.envmap_data.w * occ;
 
 	var color: float4;
@@ -282,9 +286,9 @@ fun deferred_light_frag(input: vert_out): float4 {
 		color.rgb = color.rgb + g1.rgb; // materialid
 		//albedo = float3(0.0, 0.0, 0.0);
 	}
+
 	color.rgb = max3(color.rgb, float3(0.0, 0.0, 0.0));
 	color.a = 1.0; // Mark as opaque
-
 	return color;
 }
 

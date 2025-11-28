@@ -293,6 +293,7 @@ function project_new(reset_layers: bool = true) {
 	sys_notify_on_next_frame(function() {
 		// Once layers and meshes are populated on project open
 		util_render_make_material_preview();
+		context_raw.ddirty = 4;
 	});
 }
 
@@ -305,7 +306,7 @@ function project_set_default_envmap() {
 	scene_world._.radiance                                     = context_raw.default_radiance;
 	scene_world._.radiance_mipmaps                             = context_raw.default_radiance_mipmaps;
 	scene_world._.irradiance                                   = context_raw.default_irradiance;
-	scene_world.strength                                       = 4.0;
+	scene_world.strength                                       = 2.0;
 	context_raw.envmap_angle                                   = 0.0;
 }
 

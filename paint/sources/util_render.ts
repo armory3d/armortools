@@ -31,14 +31,15 @@ function util_render_make_material_preview() {
 
 	let probe: world_data_t       = scene_world;
 	let _probe_strength: f32      = probe.strength;
-	probe.strength                = 7;
+	probe.strength                = 2;
 	let _envmap_angle: f32        = context_raw.envmap_angle;
-	context_raw.envmap_angle      = 6.0;
+	context_raw.envmap_angle      = 0.0;
 	let _brush_scale: f32         = context_raw.brush_scale;
 	context_raw.brush_scale       = 1.5;
 	let _brush_nodes_scale: f32   = context_raw.brush_nodes_scale;
 	context_raw.brush_nodes_scale = 1.0;
 
+	let _envmap: gpu_texture_t = scene_world._.envmap;
 	scene_world._.envmap = context_raw.preview_envmap;
 	// No resize
 	_render_path_last_w = util_render_material_preview_size;
@@ -71,7 +72,8 @@ function util_render_make_material_preview() {
 	context_raw.envmap_angle      = _envmap_angle;
 	context_raw.brush_scale       = _brush_scale;
 	context_raw.brush_nodes_scale = _brush_nodes_scale;
-	scene_world._.envmap          = context_raw.show_envmap ? context_raw.saved_envmap : context_raw.empty_envmap;
+	scene_world._.envmap          = _envmap;
+
 	make_material_parse_mesh_material();
 	context_raw.ddirty = 0;
 }

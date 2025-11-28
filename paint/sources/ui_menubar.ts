@@ -296,7 +296,7 @@ function ui_menubar_draw_category_items() {
 		let env_handle: ui_handle_t = ui_handle(__ID__);
 		env_handle.f                = p.strength;
 		ui_menu_align();
-		p.strength = ui_slider(env_handle, tr("Environment"), 0.0, 8.0, true);
+		p.strength = ui_slider(env_handle, tr("Environment"), 0.0, 6.0, true);
 		if (env_handle.changed) {
 			context_raw.ddirty = 2;
 		}

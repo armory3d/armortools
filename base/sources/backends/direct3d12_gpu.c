@@ -1787,7 +1787,9 @@ void gpu_raytrace_set_pipeline(gpu_raytrace_pipeline_t *pipeline) {
 void gpu_raytrace_set_target(gpu_texture_t *output) {
 	if (!output->impl.has_storage_bit) {
 		output->impl.has_storage_bit = true;
-		gpu_texture_destroy(output);
+		// gpu_texture_destroy(output);
+		resources_to_destroy[resources_to_destroy_count] = output->impl.image;
+		resources_to_destroy_count++;
 
 		D3D12_HEAP_PROPERTIES heap_properties = {
 		    .Type             = D3D12_HEAP_TYPE_DEFAULT,
@@ -1800,24 +1802,24 @@ void gpu_raytrace_set_target(gpu_texture_t *output) {
 		    .Height             = output->height,
 		    .DepthOrArraySize   = 1,
 		    .MipLevels          = 1,
-		    .Format             = DXGI_FORMAT_R16G16B16A16_FLOAT,
+		    .Format             = convert_format(output->format),
 		    .SampleDesc.Count   = 1,
 		    .SampleDesc.Quality = 0,
 		    .Layout             = D3D12_TEXTURE_LAYOUT_UNKNOWN,
 		    .Flags              = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET | D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
 		};
 		D3D12_CLEAR_VALUE clear_value;
-		clear_value.Format   = DXGI_FORMAT_R16G16B16A16_FLOAT;
+		clear_value.Format   = convert_format(output->format);
 		clear_value.Color[0] = 0.0f;
 		clear_value.Color[1] = 0.0f;
 		clear_value.Color[2] = 0.0f;
 		clear_value.Color[3] = 0.0f;
 
-		device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_COMMON, &clear_value,
+		device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, &clear_value,
 		                                        &IID_ID3D12Resource, &output->impl.image);
 
 		D3D12_RENDER_TARGET_VIEW_DESC view = {
-		    .Format               = DXGI_FORMAT_R16G16B16A16_FLOAT,
+		    .Format               = convert_format(output->format),
 		    .ViewDimension        = D3D12_RTV_DIMENSION_TEXTURE2D,
 		    .Texture2D.MipSlice   = 0,
 		    .Texture2D.PlaneSlice = 0,
@@ -1843,7 +1845,7 @@ void gpu_raytrace_set_target(gpu_texture_t *output) {
 		D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {
 		    .ViewDimension                 = D3D12_SRV_DIMENSION_TEXTURE2D,
 		    .Shader4ComponentMapping       = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
-		    .Format                        = DXGI_FORMAT_R16G16B16A16_FLOAT,
+		    .Format                        = convert_format(output->format),
 		    .Texture2D.MipLevels           = 1,
 		    .Texture2D.MostDetailedMip     = 0,
 		    .Texture2D.ResourceMinLODClamp = 0.0f,

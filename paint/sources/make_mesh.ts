@@ -140,8 +140,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 		}
 
 		if (context_raw.viewport_mode == viewport_mode_t.LIT && context_raw.render_mode == render_mode_t.FORWARD) {
-			texture_count += 7;
-			node_shader_add_texture(kong, "senvmap_brdf", "$brdf.k");
+			texture_count += 6;
 			node_shader_add_texture(kong, "senvmap_radiance", "_envmap_radiance");
 			node_shader_add_texture(kong, "senvmap_radiance0", "_envmap_radiance0");
 			node_shader_add_texture(kong, "senvmap_radiance1", "_envmap_radiance1");
@@ -391,9 +390,6 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 				node_shader_write_frag(kong, "var f0: float3 = lerp3(float3(0.04, 0.04, 0.04), basecol, metallic);");
 				kong.frag_vvec = true;
 				node_shader_write_frag(kong, "var dotnv: float = max(0.0, dot(n, vvec));");
-				// node_shader_write_frag(kong, "var env_brdf: float2 = senvmap_brdf[uint2(float2(roughness, 1.0 - dotnv) * 255.0)].xy;");
-				node_shader_write_frag(kong, "var brdf_coord: float2 = float2(roughness, 1.0 - dotnv) * 255.0;");
-				node_shader_write_frag(kong, "var env_brdf: float4 = senvmap_brdf[uint2(uint(brdf_coord.x), uint(brdf_coord.y))];");
 				// node_shader_add_constant(kong, "envmap_num_mipmaps: int", "_envmap_num_mipmaps");
 				node_shader_add_constant(kong, "envmap_data: float4", "_envmap_data"); // angle, sin(angle), cos(angle), strength
 				node_shader_write_frag(kong, "var wreflect: float3 = reflect(-vvec, n);");
@@ -425,7 +421,8 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 				node_shader_write_frag(
 				    kong,
 				    "var indirect: float3 = albedo * (sh_irradiance(float3(n.x * constants.envmap_data.z - n.y * constants.envmap_data.y, n.x * constants.envmap_data.y + n.y * constants.envmap_data.z, n.z)) / 3.14159265);");
-				node_shader_write_frag(kong, "indirect = indirect + (prefiltered_color * (f0 * env_brdf.x + env_brdf.y) * 1.5);");
+				node_shader_add_function(kong, str_env_brdf_approx);
+				node_shader_write_frag(kong, "indirect = indirect + prefiltered_color * env_brdf_approx(f0, roughness, dotnv) * 0.5;");
 				node_shader_write_frag(kong, "indirect = indirect * constants.envmap_data.w * occlusion;");
 				node_shader_write_frag(kong, "output[1] = float4(indirect, 1.0);");
 			}
@@ -652,5 +649,17 @@ fun envmap_sample(lod: float, coord: float2): float3 { \
 		return sample_lod(senvmap_radiance3, sampler_linear, coord, 0.0).rgb; \
 	} \
 	return sample_lod(senvmap_radiance4, sampler_linear, coord, 0.0).rgb; \
+} \
+";
+
+// https://www.unrealengine.com/en-US/blog/physically-based-shading-on-mobile
+let str_env_brdf_approx: string = "\
+fun env_brdf_approx(specular: float3, roughness: float, dotnv: float): float3 { \
+	var c0: float4 = float4(-1.0, -0.0275, -0.572, 0.022); \
+	var c1: float4 = float4(1.0, 0.0425, 1.04, -0.04); \
+	var r: float4 = c0 * roughness + c1; \
+	var a004: float = min(r.x * r.x, exp((-9.28 * dotnv) * log(2.0))) * r.x + r.y; \
+	var ab: float2 = float2(-1.04, 1.04) * a004 + r.zw; \
+	return specular * ab.x + ab.y; \
 } \
 ";

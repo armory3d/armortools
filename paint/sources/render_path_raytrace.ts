@@ -98,12 +98,16 @@ function render_path_raytrace_commands(use_live_layer: bool) {
 	render_path_raytrace_f32a[17] = render_path_raytrace_help_mat.m31;
 	render_path_raytrace_f32a[18] = render_path_raytrace_help_mat.m32;
 	render_path_raytrace_f32a[19] = render_path_raytrace_help_mat.m33;
-	render_path_raytrace_f32a[20] = scene_world.strength * 1.5;
+	render_path_raytrace_f32a[20] = scene_world.strength;
 	if (!context_raw.show_envmap) {
 		render_path_raytrace_f32a[20] = -render_path_raytrace_f32a[20];
 	}
 	render_path_raytrace_f32a[21] = context_raw.envmap_angle;
 	render_path_raytrace_f32a[22] = render_path_raytrace_uv_scale;
+
+	if (render_path_base_buf_swapped) {
+		render_path_base_swap_buf("buf");
+	}
 
 	let framebuffer: render_target_t = map_get(render_path_render_targets, "buf");
 	_gpu_raytrace_dispatch_rays(framebuffer._image, render_path_raytrace_f32a);

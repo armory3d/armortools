@@ -5,6 +5,7 @@ let import_envmap_params: vec4_t = vec4_create();
 let import_envmap_n: vec4_t      = vec4_create();
 let import_envmap_radiance_loc: i32;
 let import_envmap_radiance: gpu_texture_t = null;
+let import_envmap_noise_loc: i32;
 let import_envmap_mips: gpu_texture_t[]   = null;
 
 function import_envmap_run(path: string, image: gpu_texture_t) {
@@ -22,6 +23,7 @@ function import_envmap_run(path: string, image: gpu_texture_t) {
 		gpu_pipeline_compile(import_envmap_pipeline);
 		import_envmap_params_loc   = 0;
 		import_envmap_radiance_loc = 0;
+		import_envmap_noise_loc    = 1;
 
 		import_envmap_radiance = gpu_create_render_target(1024, 512, tex_format_t.RGBA128);
 
@@ -70,7 +72,7 @@ function import_envmap_get_radiance_mip(mip: gpu_texture_t, level: i32, radiance
 	gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 	gpu_set_index_buffer(const_data_screen_aligned_ib);
 	gpu_set_pipeline(import_envmap_pipeline);
-	import_envmap_params.x = 0.1 + level / 8;
+	import_envmap_params.x = (level + 1) / 10;
 	/// if (arm_macos || arm_ios)
 	import_envmap_params.y = 1024 * 2; // Prevent gpu hang
 	/// else
@@ -78,6 +80,8 @@ function import_envmap_get_radiance_mip(mip: gpu_texture_t, level: i32, radiance
 	/// end
 	gpu_set_float4(import_envmap_params_loc, import_envmap_params.x, import_envmap_params.y, import_envmap_params.z, import_envmap_params.w);
 	gpu_set_texture(import_envmap_radiance_loc, radiance);
+	let noise: gpu_texture_t = data_get_image("bnoise256.k");
+	gpu_set_texture(import_envmap_noise_loc, noise);
 	gpu_draw();
 	gpu_end();
 }

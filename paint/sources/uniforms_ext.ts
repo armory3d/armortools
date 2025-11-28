@@ -259,7 +259,7 @@ function uniforms_ext_vec4_link(object: object_t, mat: material_data_t, link: st
 		return v;
 	}
 	else if (link == "_envmap_data") {
-		return vec4_create(context_raw.envmap_angle, math_sin(-context_raw.envmap_angle), math_cos(-context_raw.envmap_angle), scene_world.strength * 1.5);
+		return vec4_create(context_raw.envmap_angle, math_sin(-context_raw.envmap_angle), math_cos(-context_raw.envmap_angle), scene_world.strength * 2.0);
 	}
 	else if (link == "_envmap_data_world") {
 		let tonemap: bool = context_raw.viewport_mode == viewport_mode_t.LIT || context_raw.viewport_mode == viewport_mode_t.PATH_TRACE;

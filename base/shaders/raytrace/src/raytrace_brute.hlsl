@@ -282,7 +282,6 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 
 	float dotnv = abs(dot(n, -WorldRayDirection()));
 	payload.ray_origin = hit_world_position() + n * lerp(0.1f, 0.0001f, dotnv);
-
 	// payload.ray_origin = hit_world_position() + payload.ray_dir * 0.0001f;
 
 	#ifdef _EMISSION

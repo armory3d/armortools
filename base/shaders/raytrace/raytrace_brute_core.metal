@@ -225,6 +225,7 @@ kernel void raytracingKernel(
 				float2 tex_coord = fract(equirect(ray.direction, constant_buffer.params.y));
 				uint2 size = uint2(mytexture_env.get_width(), mytexture_env.get_height());
 				float3 texenv = mytexture_env.read(uint2(tex_coord * float2(size)), 0).rgb * abs(constant_buffer.params.x);
+				// .sample()
 				payload.color = float4(payload.color.rgb * texenv.rgb, -1);
 			}
 			else {
@@ -299,12 +300,25 @@ kernel void raytracingKernel(
 					#else
 					float3 specular_dir = reflect(ray.direction, n);
 					#endif
-					payload.ray_dir = mix(specular_dir, diffuse_dir, texpaint2.g * texpaint2.g);
 
-					float3 v = normalize(constant_buffer.eye.xyz - hit_world_position(ray, intersection));
-					float dotnv = max(dot(n, v), 0.0);
+					float roughness = texpaint2.g;
+					float exponent = max(1.0 / (roughness * roughness) - 1.0, 0.01);
+					seed += 2;
+					float u1 = rand(tid.x, tid.y, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+					seed += 1;
+					float u2 = rand(tid.x, tid.y, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+					seed += 1;
+					float cos_theta = pow(u1, 1.0 / (exponent + 1.0));
+					float sin_theta = sqrt(1.0 - cos_theta * cos_theta);
+					float phi = u2 * 2.0 * 3.1415926535;
+					float3 tangent_r;
+					float3 binormal_r;
+					create_basis(specular_dir, tangent_r, binormal_r);
+					float3 dir_local = float3(cos(phi) * sin_theta, sin(phi) * sin_theta, cos_theta);
+					payload.ray_dir = float3x3(tangent_r, binormal_r, specular_dir) * dir_local;
 					float3 specular = surface_specular(texcolor, texpaint2.b);
-					payload.color.xyz *= env_brdf_approx(specular, texpaint2.g, dotnv);
+					payload.color.xyz *= specular;
+
 					#ifdef _FRESNEL
 					payload.color.xyz /= specular_chance;
 					#endif
@@ -320,6 +334,8 @@ kernel void raytracingKernel(
 				payload.color.xyz *= 0.5;
 				#endif
 
+				// float dotnv = abs(dot(n, -WorldRayDirection()));
+				// payload.ray_origin = hit_world_position() + n * lerp(0.1f, 0.0001f, dotnv);
 				payload.ray_origin = hit_world_position(ray, intersection) + payload.ray_dir * 0.0001f;
 
 				#ifdef _EMISSION
