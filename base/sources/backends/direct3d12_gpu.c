@@ -176,6 +176,7 @@ void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height
 	render_target->format = format;
 	render_target->state  = (framebuffer_index >= 0) ? GPU_TEXTURE_STATE_PRESENT : GPU_TEXTURE_STATE_SHADER_RESOURCE;
 	render_target->buffer = NULL;
+	render_target->impl.has_storage_bit = false;
 
 	DXGI_FORMAT dxgi_format = convert_format(format);
 
@@ -1784,10 +1785,9 @@ void gpu_raytrace_set_pipeline(gpu_raytrace_pipeline_t *pipeline) {
 }
 
 void gpu_raytrace_set_target(gpu_texture_t *output) {
-	if (output != dxr_output) {
-		output->impl.image->lpVtbl->Release(output->impl.image);
-		output->impl.rtv_descriptor_heap->lpVtbl->Release(output->impl.rtv_descriptor_heap);
-		output->impl.srv_descriptor_heap->lpVtbl->Release(output->impl.srv_descriptor_heap);
+	if (!output->impl.has_storage_bit) {
+		output->impl.has_storage_bit = true;
+		gpu_texture_destroy(output);
 
 		D3D12_HEAP_PROPERTIES heap_properties = {
 		    .Type             = D3D12_HEAP_TYPE_DEFAULT,
@@ -1860,6 +1860,8 @@ void gpu_raytrace_set_target(gpu_texture_t *output) {
 }
 
 void gpu_raytrace_dispatch_rays() {
+	_gpu_barrier(dxr_output->impl.image, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
 	command_list->lpVtbl->SetComputeRootSignature(command_list, dxr_root_signature);
 	command_list->lpVtbl->SetDescriptorHeaps(command_list, 1, &dxr_descriptor_heap);
 	command_list->lpVtbl->SetComputeRootDescriptorTable(command_list, 0, dxr_output_descriptor_handle);
@@ -1896,4 +1898,6 @@ void gpu_raytrace_dispatch_rays() {
 	dispatchDesc.Depth                                 = 1;
 	dxr_command_list->lpVtbl->SetPipelineState1(dxr_command_list, dxr_pipeline->impl.state);
 	dxr_command_list->lpVtbl->DispatchRays(dxr_command_list, &dispatchDesc);
+
+	_gpu_barrier(dxr_output->impl.image, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 }
