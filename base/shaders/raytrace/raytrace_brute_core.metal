@@ -301,21 +301,7 @@ kernel void raytracingKernel(
 					float3 specular_dir = reflect(ray.direction, n);
 					#endif
 
-					float roughness = texpaint2.g;
-					float exponent = max(1.0 / (roughness * roughness) - 1.0, 0.01);
-					seed += 2;
-					float u1 = rand(tid.x, tid.y, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
-					seed += 1;
-					float u2 = rand(tid.x, tid.y, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
-					seed += 1;
-					float cos_theta = pow(u1, 1.0 / (exponent + 1.0));
-					float sin_theta = sqrt(1.0 - cos_theta * cos_theta);
-					float phi = u2 * 2.0 * 3.1415926535;
-					float3 tangent_r;
-					float3 binormal_r;
-					create_basis(specular_dir, tangent_r, binormal_r);
-					float3 dir_local = float3(cos(phi) * sin_theta, sin(phi) * sin_theta, cos_theta);
-					payload.ray_dir = float3x3(tangent_r, binormal_r, specular_dir) * dir_local;
+					payload.ray_dir = lerp(specular_dir, diffuse_dir, texpaint2.g * texpaint2.g);
 					float3 specular = surface_specular(texcolor, texpaint2.b);
 					payload.color.xyz *= specular;
 
