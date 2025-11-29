@@ -337,62 +337,53 @@ function tab_layers_draw_layer_slot_mini(l: slot_layer_t, i: i32) {
 
 function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 
-	let step: i32 = ui.ops.theme.ELEMENT_H;
-	let uiw: f32  = ui._w;
+	let step: i32   = ui.ops.theme.ELEMENT_H;
+	let center: f32 = (step / 2) * UI_SCALE();
+	let uiw: f32    = ui._w;
+	let uix: f32    = ui._x;
+	let uiy: f32    = ui._y;
 
-	let has_panel: bool = slot_layer_is_group(l) || (slot_layer_is_layer(l) && slot_layer_get_masks(l, false) != null);
-	if (has_panel) {
-		let row: f32[] = [ 8 / 100, 16 / 100, 36 / 100, 25 / 100, 15 / 100 ];
-		ui_row(row);
-	}
-	else {
-		let row: f32[] = [ 8 / 100, 16 / 100, 36 / 100, 30 / 100 ];
-		ui_row(row);
-	}
+	let has_children: bool = slot_layer_is_group(l) || (slot_layer_is_layer(l) && slot_layer_get_masks(l, false) != null);
 
 	// Draw eye icon
+	let row: f32[] = [ 0.08 ];
+	ui_row(row);
 	let icons: gpu_texture_t = resource_get("icons.k");
 	let r: rect_t            = resource_tile18(icons, l.visible ? 0 : 1, 0);
-	let center: f32          = (step / 2) * UI_SCALE();
-	ui._x += 2;
-	ui._y += 3;
-	ui._y += center;
-	let col: i32            = ui.ops.theme.ACCENT_COL;
-	let parent_hidden: bool = l.parent != null && (!l.parent.visible || (l.parent.parent != null && !l.parent.parent.visible));
+	ui._x                    = uix + 4;
+	ui._y                    = uiy + 3 + center;
+	let col: i32             = ui.ops.theme.ACCENT_COL;
+	let parent_hidden: bool  = l.parent != null && (!l.parent.visible || (l.parent.parent != null && !l.parent.parent.visible));
 	if (parent_hidden) {
 		col -= 0x99000000;
 	}
-
 	if (ui_sub_image(icons, col, -1.0, r.x, r.y, r.w, r.h) == ui_state_t.RELEASED) {
 		tab_layers_layer_toggle_visible(l);
 	}
-	ui._x -= 2;
-	ui._y -= 3;
-	ui._y -= center;
 
-	let uix: f32 = ui._x;
-	let uiy: f32 = ui._y;
-	ui._x += 2;
-	ui._y += 3;
+	// Nested offset
+	let offx: f32 = 0.0;
 	if (l.parent != null) {
-		ui._x += 10 * UI_SCALE();
-		if (l.parent.parent != null)
-			ui._x += 10 * UI_SCALE();
+		offx = 14 * UI_SCALE();
+		if (l.parent.parent != null) {
+			offx += 14 * UI_SCALE();
+		}
 	}
 
+	// Layer icon
+	ui._x                 = uix + uiw * 0.08 + offx;
+	ui._y                 = uiy + 3;
+	ui._w                 = uiw * 0.16;
 	let state: ui_state_t = tab_layers_draw_layer_icon(l, i, uix, uiy, false);
-
-	ui._x -= 2;
-	ui._y -= 3;
-
-	if (config_raw.touch_ui) {
-		ui._x += 12 * UI_SCALE();
-	}
-
 	tab_layers_handle_layer_icon_state(l, i, state, uix, uiy);
 
 	// Draw layer name
-	ui._y += center;
+	ui._x = uix + uiw * 0.24 + 2 + offx;
+	ui._y = uiy + center;
+	ui._w = uiw * 0.36;
+	if (config_raw.touch_ui) {
+		ui._x += 12 * UI_SCALE();
+	}
 	if (tab_layers_layer_name_edit == l.id) {
 		tab_layers_layer_name_handle.text = l.name;
 		l.name                            = ui_text_input(tab_layers_layer_name_handle);
@@ -432,59 +423,40 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 			});
 		}
 	}
-	ui._y -= center;
 
-	if (l.parent != null) {
-		ui._x -= 10 * UI_SCALE();
-		if (l.parent.parent != null)
-			ui._x -= 10 * UI_SCALE();
-	}
-
-	if (slot_layer_is_group(l)) {
-		ui_end_element();
-	}
-	else {
+	// Blending combo
+	if (!slot_layer_is_group(l)) {
+		ui._x = uix + uiw * 0.60;
+		ui._y = uiy;
+		ui._w = uiw * 0.30;
 		if (slot_layer_is_mask(l)) {
 			ui._y += center;
 		}
-
 		tab_layers_combo_blending(l);
-
-		if (slot_layer_is_mask(l)) {
-			ui._y -= center;
-		}
 	}
 
-	if (has_panel) {
-		ui._y += center;
+	// Object combo
+	if (!slot_layer_is_group(l) && !slot_layer_is_mask(l)) {
+		ui._x = uix + uiw * 0.60;
+		ui._y = uiy + center * 2;
+		ui._w = uiw * 0.30;
+		tab_layers_combo_object(l);
+	}
+
+	// Panel
+	if (has_children) {
+		ui._x = uix + uiw * 0.90;
+		ui._y = uiy + center;
+		ui._w = uiw * 0.15;
+
 		let layer_panel: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
 		layer_panel.b                = l.show_panel;
 		l.show_panel                 = ui_panel(layer_panel, "", true, false);
-		ui._y -= center;
 	}
 
-	if (slot_layer_is_group(l) || slot_layer_is_mask(l)) {
-		ui._y -= UI_ELEMENT_OFFSET();
-		ui_end_element();
-	}
-	else {
-		ui._y -= UI_ELEMENT_OFFSET();
-
-		let row: f32[] = [ 8 / 100, 16 / 100, 36 / 100, 30 / 100, 10 / 100 ];
-		ui_row(row);
-		ui_end_element();
-		ui_end_element();
-		ui_end_element();
-
-		if (config_raw.touch_ui) {
-			ui._x += 12 * UI_SCALE();
-		}
-
-		tab_layers_combo_object(l);
-		ui_end_element();
-	}
-
-	ui._y -= UI_ELEMENT_OFFSET();
+	ui._x = uix;
+	ui._y = uiy + step * 2 * UI_SCALE();
+	ui._w = uiw;
 }
 
 function tab_layers_combo_object(l: slot_layer_t, label: bool = false): ui_handle_t {
@@ -651,7 +623,6 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 			let _y: f32   = ui._y;
 			let _w: f32   = ui._w;
 			ui_sub_image(icons, 0xffffffff, icon_h, r.x, r.y, r.w, r.h);
-			ui.current_ratio--;
 			ui._x = _x;
 			ui._y = _y;
 			ui._w = _w;
@@ -713,7 +684,6 @@ function tab_layers_can_merge_down(l: slot_layer_t): bool {
 }
 
 function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
-
 	tab_layers_l    = l;
 	tab_layers_mini = mini;
 
@@ -879,7 +849,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			let h: ui_handle_t     = ui_handle(__ID__);
 			let changed_last: bool = h.changed;
 			h.i                    = base_res_handle.i;
-			base_res_handle.i = ui_combo(h, ar, tr("Resolution"), true);
+			base_res_handle.i      = ui_combo(h, ar, tr("Resolution"), true);
 			if (h.changed) {
 				ui_menu_keep_open = true;
 			}
@@ -889,11 +859,11 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 
 			// ui_menu_align();
 			// let hh: ui_handle_t     = ui_handle(__ID__);
-			// let aruv: string[] = [ "0" ];
+			// let aruv: string[] = [ "main" ];
 			// ui_combo(hh, aruv, tr("UV Map"), true);
 
 			/// if (arm_android || arm_ios)
-			// let bits_items: string[] = ["8bit"];
+			// let bits_items: string[] = ["8"];
 			// ui_inline_radio(base_bits_handle, bits_items, ui_align_t.LEFT);
 			/// else
 			ui_menu_separator();
