@@ -257,7 +257,6 @@ function tab_layers_set_drag_layer(layer: slot_layer_t, off_x: f32, off_y: f32) 
 }
 
 function tab_layers_draw_layer_slot(l: slot_layer_t, i: i32, mini: bool) {
-
 	if (context_raw.layer_filter > 0 && slot_layer_get_object_mask(l) > 0 && slot_layer_get_object_mask(l) != context_raw.layer_filter) {
 		return;
 	}
@@ -322,21 +321,15 @@ function tab_layers_draw_layer_slot(l: slot_layer_t, i: i32, mini: bool) {
 }
 
 function tab_layers_draw_layer_slot_mini(l: slot_layer_t, i: i32) {
-
-	let row: f32[] = [ 1, 1 ];
-	ui_row(row);
 	let uix: f32          = ui._x;
 	let uiy: f32          = ui._y;
 	let state: ui_state_t = tab_layers_draw_layer_icon(l, i, uix, uiy, true);
 	tab_layers_handle_layer_icon_state(l, i, state, uix, uiy);
-	ui_end_element();
-
-	ui._y += UI_ELEMENT_H();
-	ui._y -= UI_ELEMENT_OFFSET();
+	ui._x = uix;
+	ui._y = uiy + ui.ops.theme.ELEMENT_H * 2 * UI_SCALE();
 }
 
 function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
-
 	let step: i32   = ui.ops.theme.ELEMENT_H;
 	let center: f32 = (step / 2) * UI_SCALE();
 	let uiw: f32    = ui._w;
@@ -549,9 +542,7 @@ function tab_layers_draw_layer_highlight(l: slot_layer_t, mini: bool) {
 }
 
 function tab_layers_handle_layer_icon_state(l: slot_layer_t, i: i32, state: ui_state_t, uix: f32, uiy: f32) {
-
 	let texpaint_preview: gpu_texture_t = l.texpaint_preview;
-
 	tab_layers_show_context_menu = false;
 
 	// Layer preview tooltip
