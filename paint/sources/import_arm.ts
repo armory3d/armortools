@@ -6,8 +6,8 @@ function import_arm_run_project(path: string) {
 	let project: project_format_t;
 	let import_as_mesh: bool = false;
 
-	if (import_arm_is_legacy(b)) {
-		project = import_arm_from_legacy(b);
+	if (import_arm_is_old(b)) {
+		project = import_arm_from_old(b);
 	}
 	else if (!import_arm_has_version(b)) {
 		import_as_mesh = true;
@@ -379,8 +379,8 @@ function import_arm_run_mesh(raw: project_format_t) {
 function import_arm_run_material(path: string) {
 	let b: buffer_t = data_get_blob(path);
 	let project: project_format_t;
-	if (import_arm_is_legacy(b)) {
-		project = import_arm_from_legacy(b);
+	if (import_arm_is_old(b)) {
+		project = import_arm_from_old(b);
 	}
 	else {
 		project = armpack_decode(b);
