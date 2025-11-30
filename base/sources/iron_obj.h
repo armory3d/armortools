@@ -9,6 +9,7 @@ typedef struct raw_mesh {
 	struct i16_array *posa;
 	struct i16_array *nora;
 	struct i16_array *texa;
+	struct i16_array *texa1;
 	struct i16_array *cola;
 	struct u32_array *inda;
 	int               vertex_count;

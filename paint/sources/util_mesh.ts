@@ -24,12 +24,15 @@ function util_mesh_merge(paint_objects: mesh_object_t[] = null) {
 			max_scale = paint_objects[i].data.scale_pos;
 		}
 	}
-	vlen                 = math_floor(vlen / 4);
-	let va0: i16_array_t = i16_array_create(vlen * 4);
-	let va1: i16_array_t = i16_array_create(vlen * 2);
-	let va2: i16_array_t = i16_array_create(vlen * 2);
-	let va3: i16_array_t = paint_objects[0].data.vertex_arrays.length > 3 ? i16_array_create(vlen * 4) : null;
-	let ia: u32_array_t  = u32_array_create(ilen);
+	vlen                    = math_floor(vlen / 4);
+	let va0: i16_array_t    = i16_array_create(vlen * 4);
+	let va1: i16_array_t    = i16_array_create(vlen * 2);
+	let va2: i16_array_t    = i16_array_create(vlen * 2);
+	let vatex1: i16_array_t = mesh_data_get_vertex_array(paint_objects[0].data, "tex1") != null ? i16_array_create(vlen * 2) : null;
+	let vacol: i16_array_t  = mesh_data_get_vertex_array(paint_objects[0].data, "col") != null ? i16_array_create(vlen * 4) : null;
+	let tex1i: i32          = 3;
+	let coli: i32           = vatex1 != null ? 4 : 3;
+	let ia: u32_array_t     = u32_array_create(ilen);
 
 	let voff: i32 = 0;
 	let ioff: i32 = 0;
@@ -65,10 +68,16 @@ function util_mesh_merge(paint_objects: mesh_object_t[] = null) {
 		for (let j: i32 = 0; j < vas[2].values.length; ++j) {
 			va2[j + voff * 2] = vas[2].values[j];
 		}
+		// Tex1
+		if (vatex1 != null) {
+			for (let j: i32 = 0; j < vas[tex1i].values.length; ++j) {
+				vatex1[j + voff * 2] = vas[tex1i].values[j];
+			}
+		}
 		// Col
-		if (va3 != null) {
-			for (let j: i32 = 0; j < vas[3].values.length; ++j) {
-				va3[j + voff * 4] = vas[3].values[j];
+		if (vacol != null) {
+			for (let j: i32 = 0; j < vas[coli].values.length; ++j) {
+				vacol[j + voff * 4] = vas[coli].values[j];
 			}
 		}
 		// Indices
@@ -90,9 +99,13 @@ function util_mesh_merge(paint_objects: mesh_object_t[] = null) {
 		scale_pos : max_scale,
 		scale_tex : 1.0
 	};
-	if (va3 != null) {
-		let col: vertex_array_t = {values : va3, attrib : "col", data : "short4norm"};
-		array_push(raw.vertex_arrays, col);
+	if (vatex1 != null) {
+		let va: vertex_array_t = {values : vatex1, attrib : "tex1", data : "short2norm"};
+		array_push(raw.vertex_arrays, va);
+	}
+	if (vacol != null) {
+		let va: vertex_array_t = {values : vacol, attrib : "col", data : "short4norm"};
+		array_push(raw.vertex_arrays, va);
 	}
 
 	util_mesh_remove_merged();

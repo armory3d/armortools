@@ -17,6 +17,7 @@ type slot_layer_t = {
 	scale?: f32;
 	angle?: f32;
 	uv_type?: uv_type_t;
+	uv_map?: i32;
 	paint_base?: bool;
 	paint_opac?: bool;
 	paint_occ?: bool;

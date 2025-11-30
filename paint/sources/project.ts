@@ -783,6 +783,7 @@ type layer_data_t = {
 	uv_scale?: f32;
 	uv_rot?: f32;
 	uv_type?: i32;
+	uv_map?: i32;
 	decal_mat?: f32_array_t;
 	opacity_mask?: f32;
 	fill_layer?: i32;

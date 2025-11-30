@@ -73,7 +73,14 @@ function make_texcoord_run(kong: node_shader_t) {
 	else if (uv_type == uv_type_t.UVMAP) { // TexCoords - uvmap
 		node_shader_add_constant(kong, "brush_scale: float", "_brush_scale");
 		node_shader_add_out(kong, "tex_coord: float2");
-		node_shader_write_vert(kong, "output.tex_coord = input.tex * constants.brush_scale;");
+
+		if (context_raw.layer.uv_map == 1) {
+			node_shader_write_vert(kong, "output.tex_coord = input.tex1 * constants.brush_scale;");
+		}
+		else {
+			node_shader_write_vert(kong, "output.tex_coord = input.tex * constants.brush_scale;");
+		}
+
 		if (uv_angle > 0.0) {
 			node_shader_add_constant(kong, "brush_angle: float2", "_brush_angle");
 			node_shader_write_vert(

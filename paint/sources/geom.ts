@@ -133,6 +133,7 @@ declare type raw_mesh_t = {
 	posa?: i16_array_t;
 	nora?: i16_array_t;
 	texa?: i16_array_t;
+	texa1?: i16_array_t;
 	cola?: i16_array_t;
 	inda?: u32_array_t;
 	vertex_count?: i32;

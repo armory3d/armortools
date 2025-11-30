@@ -543,7 +543,7 @@ function tab_layers_draw_layer_highlight(l: slot_layer_t, mini: bool) {
 
 function tab_layers_handle_layer_icon_state(l: slot_layer_t, i: i32, state: ui_state_t, uix: f32, uiy: f32) {
 	let texpaint_preview: gpu_texture_t = l.texpaint_preview;
-	tab_layers_show_context_menu = false;
+	tab_layers_show_context_menu        = false;
 
 	// Layer preview tooltip
 	if (ui.is_hovered && texpaint_preview != null) {
@@ -848,10 +848,20 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 				layers_on_resized();
 			}
 
-			// ui_menu_align();
-			// let hh: ui_handle_t     = ui_handle(__ID__);
-			// let aruv: string[] = [ "main" ];
-			// ui_combo(hh, aruv, tr("UV Map"), true);
+			ui_menu_align();
+			let huv: ui_handle_t = ui_handle(__ID__);
+			huv.i                = l.uv_map;
+			let aruv: string[]   = [ "uv0" ];
+			if (mesh_data_get_vertex_array(context_raw.paint_object.data, "tex1") != null) {
+				array_push(aruv, "uv1");
+			}
+			ui_combo(huv, aruv, tr("UV Map"), true);
+			l.uv_map = huv.i;
+			if (huv.changed) {
+				make_material_parse_paint_material();
+				make_material_parse_mesh_material();
+				ui_menu_keep_open = true;
+			}
 
 			/// if (arm_android || arm_ios)
 			// let bits_items: string[] = ["8"];
@@ -916,7 +926,6 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 		}
 
 		if (!slot_layer_is_group(l)) {
-
 			let base_handle: ui_handle_t         = ui_nest(ui_handle(__ID__), l.id);
 			let opac_handle: ui_handle_t         = ui_nest(ui_handle(__ID__), l.id);
 			let nor_handle: ui_handle_t          = ui_nest(ui_handle(__ID__), l.id);

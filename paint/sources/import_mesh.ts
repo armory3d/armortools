@@ -3,7 +3,6 @@ let import_mesh_clear_layers: bool      = true;
 let import_mesh_meshes_to_unwrap: any[] = null;
 
 function import_mesh_run(path: string, _clear_layers: bool = true, replace_existing: bool = true) {
-
 	if (!path_is_mesh(path)) {
 		if (!context_enable_import_plugin(path)) {
 			console_error(strings_unknown_asset_format());
@@ -259,6 +258,11 @@ function import_mesh_raw_mesh(mesh: raw_mesh_t): mesh_data_t {
 		scale_pos : mesh.scale_pos,
 		scale_tex : mesh.scale_tex
 	};
+
+	if (mesh.texa1 != null) {
+		let va: vertex_array_t = {values : mesh.texa1, attrib : "tex1", data : "short2norm"};
+		array_push(raw.vertex_arrays, va);
+	}
 
 	if (mesh.cola != null) {
 		let va: vertex_array_t = {values : mesh.cola, attrib : "col", data : "short4norm"};

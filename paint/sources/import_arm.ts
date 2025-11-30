@@ -252,6 +252,7 @@ function import_arm_run_project(path: string) {
 			l.scale   = ld.uv_scale;
 			l.angle   = ld.uv_rot;
 			l.uv_type = ld.uv_type;
+			l.uv_map  = ld.uv_map;
 			if (ld.decal_mat != null) {
 				l.decal_mat = mat4_from_f32_array(ld.decal_mat);
 			}

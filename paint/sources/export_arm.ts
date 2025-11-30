@@ -77,6 +77,7 @@ function export_arm_run_project() {
 			uv_scale : l.scale,
 			uv_rot : l.angle,
 			uv_type : l.uv_type,
+			uv_map : l.uv_map,
 			decal_mat : l.uv_type == uv_type_t.PROJECT ? mat4_to_f32_array(l.decal_mat) : null,
 			opacity_mask : l.mask_opacity,
 			fill_layer : l.fill_layer != null ? array_index_of(project_materials, l.fill_layer) : -1,

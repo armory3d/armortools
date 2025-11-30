@@ -54,6 +54,10 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	};
 	let con_paint: node_shader_context_t = node_shader_context_create(data, props);
 
+	if (mesh_data_get_vertex_array(context_raw.paint_object.data, "tex1") != null) {
+		node_shader_context_add_elem(con_paint, "tex1", "short2norm");
+	}
+
 	con_paint.data.color_writes_red   = [ true, true, true, true ];
 	con_paint.data.color_writes_green = [ true, true, true, true ];
 	con_paint.data.color_writes_blue  = [ true, true, true, true ];
@@ -87,7 +91,12 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	let uv_island_fill: bool = context_raw.tool == tool_type_t.FILL && context_raw.fill_type_handle.i == fill_type_t.UV_ISLAND;
 	let decal: bool          = context_is_decal();
 
-	node_shader_write_vert(kong, "var tpos: float2 = float2(input.tex.x * 2.0 - 1.0, (1.0 - input.tex.y) * 2.0 - 1.0);");
+	if (context_raw.layer.uv_map == 1) {
+		node_shader_write_vert(kong, "var tpos: float2 = float2(input.tex1.x * 2.0 - 1.0, (1.0 - input.tex1.y) * 2.0 - 1.0);");
+	}
+	else {
+		node_shader_write_vert(kong, "var tpos: float2 = float2(input.tex.x * 2.0 - 1.0, (1.0 - input.tex.y) * 2.0 - 1.0);");
+	}
 
 	node_shader_write_vert(kong, "output.pos = float4(tpos, 0.0, 1.0);");
 

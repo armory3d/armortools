@@ -164,7 +164,6 @@ function node_shader_vstruct_to_vsin(raw: node_shader_t) {
 }
 
 function node_shader_get(raw: node_shader_t): string {
-
 	node_shader_vstruct_to_vsin(raw);
 
 	let s: string = "";
