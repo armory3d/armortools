@@ -6,7 +6,16 @@ function uv_map_node_init() {
 
 function uv_map_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
 	node_shader_context_add_elem(parser_material_kong.context, "tex", "short2norm");
-	return "float3(tex_coord.x, tex_coord.y, 0.0)";
+	let uv_map: i32 = node.buttons[0].default_value[0];
+	if (uv_map == 1 && mesh_data_get_vertex_array(context_raw.paint_object.data, "tex1") != null) {
+		node_shader_context_add_elem(parser_material_kong.context, "tex1", "short2norm");
+		node_shader_add_out(parser_material_kong, "tex_coord1: float2");
+		node_shader_write_vert(parser_material_kong, "output.tex_coord1 = input.tex1;");
+		return "float3(input.tex_coord1.x, input.tex_coord1.y, 0.0)";
+	}
+	else {
+		return "float3(tex_coord.x, tex_coord.y, 0.0)";
+	}
 }
 
 let uv_map_node_def: ui_node_t = {
@@ -29,7 +38,19 @@ let uv_map_node_def: ui_node_t = {
 		precision : 100,
 		display : 0
 	} ],
-	buttons : [],
+	buttons : [
+		{
+			name : _tr("UV Map"),
+			type : "ENUM",
+			output : -1,
+			default_value : f32_array_create_x(0),
+			data : u8_array_create_from_string("uv0" + "\n" + "uv1"),
+			min : 0.0,
+			max : 1.0,
+			precision : 100,
+			height : 0
+		}
+	],
 	width : 0,
 	flags : 0
 };
