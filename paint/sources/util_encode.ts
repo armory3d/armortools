@@ -259,7 +259,7 @@ function util_encode_project(raw: project_format_t): buffer_t {
 	if (raw.layer_datas != null) {
 		armpack_encode_array(raw.layer_datas.length);
 		for (let i: i32 = 0; i < raw.layer_datas.length; ++i) {
-			armpack_encode_map(27);
+			armpack_encode_map(28);
 			armpack_encode_string("name");
 			armpack_encode_string(raw.layer_datas[i].name);
 			armpack_encode_string("res");
@@ -314,6 +314,8 @@ function util_encode_project(raw: project_format_t): buffer_t {
 			armpack_encode_bool(raw.layer_datas[i].paint_emis);
 			armpack_encode_string("paint_subs");
 			armpack_encode_bool(raw.layer_datas[i].paint_subs);
+			armpack_encode_string("uv_map");
+			armpack_encode_i32(raw.layer_datas[i].uv_map);
 		}
 	}
 	else {
