@@ -232,9 +232,7 @@ function import_arm_is_legacy(b: buffer_t): bool {
 	let has_dot: bool     = b[23] == 46;  // '.'
 	let has_eight: bool   = b[24] == 56;  // '8'
 	let has_nine: bool    = b[24] == 57;  // '9'
-	if (has_version && has_zero && has_dot && (has_eight || has_nine)) {
-		return true;
-	}
+	return has_version && has_zero && has_dot && (has_eight || has_nine);
 }
 
 function import_arm_is_version_2(b: buffer_t): bool {
