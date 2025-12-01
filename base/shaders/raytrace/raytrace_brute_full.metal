@@ -302,7 +302,7 @@ kernel void raytracingKernel(
 					float3 specular_dir = reflect(ray.direction, n);
 					#endif
 
-					payload.ray_dir = lerp(specular_dir, diffuse_dir, texpaint2.g * texpaint2.g);
+					payload.ray_dir = mix(specular_dir, diffuse_dir, texpaint2.g * texpaint2.g);
 					float3 specular = surface_specular(texcolor, texpaint2.b);
 					payload.color.xyz *= specular;
 
@@ -322,7 +322,7 @@ kernel void raytracingKernel(
 				#endif
 
 				// float dotnv = abs(dot(n, -WorldRayDirection()));
-				// payload.ray_origin = hit_world_position() + n * lerp(0.1f, 0.0001f, dotnv);
+				// payload.ray_origin = hit_world_position() + n * mix(0.1f, 0.0001f, dotnv);
 				payload.ray_origin = hit_world_position(ray, intersection) + payload.ray_dir * 0.0001f;
 
 				#ifdef _EMISSION
