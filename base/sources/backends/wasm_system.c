@@ -100,7 +100,7 @@ __attribute__((export_name("_mousemove"))) void _mousemove(int x, int y) {
 	iron_internal_mouse_trigger_move(x, y);
 }
 
-__attribute__((export_name("_wheel"))) void _wheel(int delta) {
+__attribute__((export_name("_wheel"))) void _wheel(float delta) {
 	iron_internal_mouse_trigger_scroll(delta);
 }
 

@@ -947,10 +947,10 @@ static bool _handle_messages() {
 				break;
 			// Button4 and Button5 provide mouse wheel events because why not
 			case Button4:
-				iron_internal_mouse_trigger_scroll(-1);
+				iron_internal_mouse_trigger_scroll(-1.0);
 				break;
 			case Button5:
-				iron_internal_mouse_trigger_scroll(1);
+				iron_internal_mouse_trigger_scroll(1.0);
 				break;
 			// button 6 and 7 seem to be horizontal scrolling, which is not exposed in Iron's api at the moment
 			case Button6:

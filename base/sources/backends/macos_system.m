@@ -382,7 +382,7 @@ static int getMouseY(NSEvent *event) {
 }
 
 - (void)scrollWheel:(NSEvent *)theEvent {
-	int delta = [theEvent deltaY];
+	float delta = [theEvent deltaY];
 	iron_internal_mouse_trigger_scroll(-delta);
 }
 

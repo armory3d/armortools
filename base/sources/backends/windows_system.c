@@ -554,7 +554,7 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		iron_internal_mouse_trigger_release(HIWORD(wParam) + 2, mouseX, mouseY);
 		break;
 	case WM_MOUSEWHEEL:
-		iron_internal_mouse_trigger_scroll(GET_WHEEL_DELTA_WPARAM(wParam) / -120);
+		iron_internal_mouse_trigger_scroll(GET_WHEEL_DELTA_WPARAM(wParam) / -120.0);
 		break;
 	case WM_POINTERDOWN:
 		pointerId = GET_POINTERID_WPARAM(wParam);

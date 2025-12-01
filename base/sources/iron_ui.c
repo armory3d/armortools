@@ -2371,7 +2371,7 @@ void ui_mouse_up(ui_t *ui, int button, int x, int y) {
 	ui_deselect_text(ui);
 }
 
-void ui_mouse_wheel(ui_t *ui, int delta) {
+void ui_mouse_wheel(ui_t *ui, float delta) {
 	ui->input_wheel_delta = delta;
 }
 

@@ -212,7 +212,7 @@ static void touchInput(AInputEvent *event) {
 	case AMOTION_EVENT_ACTION_SCROLL:
 		if (id == 0) {
 			float scroll = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_VSCROLL, 0);
-			iron_internal_mouse_trigger_scroll(-(int)scroll);
+			iron_internal_mouse_trigger_scroll(-scroll);
 		}
 		break;
 	}

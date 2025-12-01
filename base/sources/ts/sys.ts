@@ -186,7 +186,7 @@ function sys_mouse_move_callback(x: i32, y: i32, mx: i32, my: i32) {
 	mouse_move_listener(x, y, mx, my);
 }
 
-function sys_mouse_wheel_callback(delta: i32) {
+function sys_mouse_wheel_callback(delta: f32) {
 	mouse_wheel_listener(delta);
 }
 

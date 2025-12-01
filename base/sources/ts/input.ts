@@ -142,7 +142,7 @@ function mouse_move_listener(x: i32, y: i32, movement_x: i32, movement_y: i32) {
 	mouse_moved  = true;
 }
 
-function mouse_wheel_listener(delta: i32) {
+function mouse_wheel_listener(delta: f32) {
 	mouse_wheel_delta = delta;
 }
 
@@ -183,8 +183,8 @@ function mouse_on_touch_move(index: i32, x: i32, y: i32) {
 		mouse_pinch_dist   = math_sqrt(dx * dx + dy * dy);
 		mouse_pinch_total += last_dist != 0 ? last_dist - mouse_pinch_dist : 0;
 		if (!mouse_pinch_started) {
-			mouse_wheel_delta = mouse_pinch_total / 10;
-			if (mouse_wheel_delta != 0) {
+			mouse_wheel_delta = mouse_pinch_total / 10.0;
+			if (mouse_wheel_delta != 0.0) {
 				mouse_pinch_total = 0.0;
 			}
 		}

@@ -220,7 +220,7 @@ void (*iron_key_up)(int);
 void (*iron_mouse_down)(int, int, int);
 void (*iron_mouse_up)(int, int, int);
 void (*iron_mouse_move)(int, int, int, int);
-void (*iron_mouse_wheel)(int);
+void (*iron_mouse_wheel)(float);
 void (*iron_touch_down)(int, int, int);
 void (*iron_touch_up)(int, int, int);
 void (*iron_touch_move)(int, int, int);
@@ -498,7 +498,7 @@ void _mouse_move(int x, int y, int mx, int my, void *data) {
 #endif
 }
 
-void _mouse_wheel(int delta, void *data) {
+void _mouse_wheel(float delta, void *data) {
 	iron_mouse_wheel(delta);
 	if (ui_get_current())
 		ui_mouse_wheel(ui_get_current(), delta);
@@ -782,7 +782,7 @@ void iron_set_mouse_move_callback(void (*callback)(int, int, int, int)) {
 	iron_mouse_set_move_callback(_mouse_move, NULL);
 }
 
-void iron_set_mouse_wheel_callback(void (*callback)(int)) {
+void iron_set_mouse_wheel_callback(void (*callback)(float)) {
 	iron_mouse_wheel = callback;
 	iron_mouse_set_scroll_callback(_mouse_wheel, NULL);
 }

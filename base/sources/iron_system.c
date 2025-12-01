@@ -349,7 +349,7 @@ static void (*mouse_release_callback)(int /*button*/, int /*x*/, int /*y*/, void
 static void *mouse_release_callback_data                                                                        = NULL;
 static void (*mouse_move_callback)(int /*x*/, int /*y*/, int /*movementX*/, int /*movementY*/, void * /*data*/) = NULL;
 static void *mouse_move_callback_data                                                                           = NULL;
-static void (*mouse_scroll_callback)(int /*delta*/, void * /*data*/)                                            = NULL;
+static void (*mouse_scroll_callback)(float /*delta*/, void * /*data*/)                                            = NULL;
 static void *mouse_scroll_callback_data                                                                         = NULL;
 
 void iron_mouse_set_press_callback(void (*value)(int /*button*/, int /*x*/, int /*y*/, void * /*data*/), void *data) {
@@ -367,7 +367,7 @@ void iron_mouse_set_move_callback(void (*value)(int /*x*/, int /*y*/, int /*move
 	mouse_move_callback_data = data;
 }
 
-void iron_mouse_set_scroll_callback(void (*value)(int /*delta*/, void * /*data*/), void *data) {
+void iron_mouse_set_scroll_callback(void (*value)(float /*delta*/, void * /*data*/), void *data) {
 	mouse_scroll_callback      = value;
 	mouse_scroll_callback_data = data;
 }
@@ -378,7 +378,7 @@ void iron_internal_mouse_trigger_release(int button, int x, int y) {
 	}
 }
 
-void iron_internal_mouse_trigger_scroll(int delta) {
+void iron_internal_mouse_trigger_scroll(float delta) {
 	if (mouse_scroll_callback != NULL) {
 		mouse_scroll_callback(delta, mouse_scroll_callback_data);
 	}

@@ -318,7 +318,7 @@ void  ui_set_hovered_tab_name(char *name);
 void  ui_mouse_down(ui_t *ui, int button, int x, int y); // Input events
 void  ui_mouse_move(ui_t *ui, int x, int y, int movement_x, int movement_y);
 void  ui_mouse_up(ui_t *ui, int button, int x, int y);
-void  ui_mouse_wheel(ui_t *ui, int delta);
+void  ui_mouse_wheel(ui_t *ui, float delta);
 void  ui_pen_down(ui_t *ui, int x, int y, float pressure);
 void  ui_pen_up(ui_t *ui, int x, int y, float pressure);
 void  ui_pen_move(ui_t *ui, int x, int y, float pressure);
