@@ -1,5 +1,6 @@
 
 #include "android_system.h"
+#include "android_file_dialog.h"
 #include <assert.h>
 #include <iron_file.h>
 #include <iron_gpu.h>
@@ -47,7 +48,7 @@ static const char     *videoFormats[]                   = {"ts", NULL};
 static __kernel_time_t start_sec                        = 0;
 static void (*resizeCallback)(int x, int y, void *data) = NULL;
 static void *resizeCallbackData                         = NULL;
-static char  ios_title[1024];
+char         android_title[1024];
 #ifdef WITH_GAMEPAD
 static float last_x         = 0.0f;
 static float last_y         = 0.0f;
@@ -1265,3 +1266,7 @@ void iron_gamepad_rumble(int gamepad, float left, float right) {}
 bool _save_and_quit_callback_internal() {
 	return false;
 }
+
+volatile int iron_exec_async_done = 1;
+
+void iron_exec_async(const char *path, char *argv[]) {}

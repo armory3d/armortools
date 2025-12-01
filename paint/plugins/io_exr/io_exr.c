@@ -1,17 +1,17 @@
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
-#include <math.h>
-#include <stdlib.h>
 #include "iron_array.h"
 #include "iron_gpu.h"
-void *gpu_create_texture_from_bytes(void *buffer, int width, int height, int format);
-void console_info(char *s);
+#include <math.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+void     *gpu_create_texture_from_bytes(void *buffer, int width, int height, int format);
+void      console_info(char *s);
 buffer_t *iron_inflate(buffer_t *bytes, bool raw);
 
 typedef struct {
 	char name[256];
-	int pixel_type;
+	int  pixel_type;
 } channel_t;
 
 void *io_exr_parse(uint8_t *buf, size_t buf_size) {
@@ -22,17 +22,17 @@ void *io_exr_parse(uint8_t *buf, size_t buf_size) {
 	pos += 4;
 	pos += 4; // version
 
-	int width = 0;
-	int height = 0;
-	int bits = 16;
-	int pixel_type = 0;
+	int       width      = 0;
+	int       height     = 0;
+	int       bits       = 16;
+	int       pixel_type = 0;
 	channel_t channels[4];
-	int num_channels = 0;
-	int compression = 0;
+	int       num_channels = 0;
+	int       compression  = 0;
 
 	while (1) {
 		char name[256];
-		int i = 0;
+		int  i = 0;
 		while (buf[pos] != 0) {
 			name[i++] = (char)buf[pos];
 			pos++;
@@ -71,11 +71,15 @@ void *io_exr_parse(uint8_t *buf, size_t buf_size) {
 					break;
 				}
 
-				int32_t chpixel_type = *(int32_t *)(buf + chpos); chpos += 4;
-				uint8_t pLinear = buf[chpos]; chpos += 1;  // 1 byte
-				chpos += 3;  // Skip reserved (3 bytes)
-				int32_t xSampling = *(int32_t *)(buf + chpos); chpos += 4;
-				int32_t ySampling = *(int32_t *)(buf + chpos); chpos += 4;
+				int32_t chpixel_type = *(int32_t *)(buf + chpos);
+				chpos += 4;
+				uint8_t pLinear = buf[chpos];
+				chpos += 1; // 1 byte
+				chpos += 3; // Skip reserved (3 bytes)
+				int32_t xSampling = *(int32_t *)(buf + chpos);
+				chpos += 4;
+				int32_t ySampling = *(int32_t *)(buf + chpos);
+				chpos += 4;
 
 				strcpy(channels[num_channels].name, chname);
 				channels[num_channels].pixel_type = chpixel_type;
@@ -88,7 +92,7 @@ void *io_exr_parse(uint8_t *buf, size_t buf_size) {
 			int32_t xMax = *(int32_t *)(buf + pos + 8);
 			int32_t yMax = *(int32_t *)(buf + pos + 12);
 			if (strcmp(name, "dataWindow") == 0) {
-				width = xMax - xMin + 1;
+				width  = xMax - xMin + 1;
 				height = yMax - yMin + 1;
 			}
 		}
@@ -103,11 +107,11 @@ void *io_exr_parse(uint8_t *buf, size_t buf_size) {
 	}
 
 	pixel_type = channels[0].pixel_type;
-	bits = (pixel_type == 1) ? 16 : 32;
+	bits       = (pixel_type == 1) ? 16 : 32;
 
 	uint32_t *line_offset_table = (uint32_t *)malloc(height * sizeof(uint32_t));
 	for (int y = 0; y < height; y++) {
-		uint32_t lo = *(uint32_t *)(buf + pos);
+		uint32_t lo          = *(uint32_t *)(buf + pos);
 		line_offset_table[y] = lo;
 		pos += 8;
 	}
@@ -117,44 +121,50 @@ void *io_exr_parse(uint8_t *buf, size_t buf_size) {
 	int b_idx = -1;
 	int a_idx = -1;
 	for (int c = 0; c < num_channels; c++) {
-		if (strcmp(channels[c].name, "R") == 0) r_idx = c;
-		else if (strcmp(channels[c].name, "G") == 0) g_idx = c;
-		else if (strcmp(channels[c].name, "B") == 0) b_idx = c;
-		else if (strcmp(channels[c].name, "A") == 0) a_idx = c;
+		if (strcmp(channels[c].name, "R") == 0)
+			r_idx = c;
+		else if (strcmp(channels[c].name, "G") == 0)
+			g_idx = c;
+		else if (strcmp(channels[c].name, "B") == 0)
+			b_idx = c;
+		else if (strcmp(channels[c].name, "A") == 0)
+			a_idx = c;
 	}
 
-	bool is_16bit = bits == 16;
-	int channel_bytes = is_16bit ? 2 : 4;
-	size_t image_size = (size_t)width * height * 4 * channel_bytes;
-	uint8_t *pixels = (uint8_t *)malloc(image_size);
-	uint8_t *reordered = NULL;
+	bool     is_16bit      = bits == 16;
+	int      channel_bytes = is_16bit ? 2 : 4;
+	size_t   image_size    = (size_t)width * height * 4 * channel_bytes;
+	uint8_t *pixels        = (uint8_t *)malloc(image_size);
+	uint8_t *reordered     = NULL;
 
 	for (int y = 0; y < height; y++) {
-		uint32_t scan_line_pos = line_offset_table[y];
-		uint32_t compressed_len = *(uint32_t *)(buf + scan_line_pos + 4);
-		uint32_t off = scan_line_pos + 8;
-		uint8_t *line_data = NULL;
+		uint32_t  scan_line_pos  = line_offset_table[y];
+		uint32_t  compressed_len = *(uint32_t *)(buf + scan_line_pos + 4);
+		uint32_t  off            = scan_line_pos + 8;
+		uint8_t  *line_data      = NULL;
 		buffer_t *decomp;
 
 		if (compression == 0) { // None
 			line_data = buf + off;
 		}
+
+#ifdef WITH_COMPRESS
 		// else if (compression == 1) {} // RLE
 		else if (compression == 2) { // ZIPS
 			buffer_t compressed;
 			compressed.buffer = buf + off;
 			compressed.length = compressed.capacity = compressed_len;
-			decomp = iron_inflate(&compressed, false);
-			line_data = decomp->buffer;
+			decomp                                  = iron_inflate(&compressed, false);
+			line_data                               = decomp->buffer;
 
-			uint8_t *t = line_data + 1;
+			uint8_t *t    = line_data + 1;
 			uint8_t *stop = line_data + decomp->length;
-			int p = line_data[0];
+			int      p    = line_data[0];
 			while (t < stop) {
-				int d = *t;
+				int d    = *t;
 				int orig = (d - 128 + p) & 0xFF;
-				p = orig;
-				*t = (uint8_t)orig;
+				p        = orig;
+				*t       = (uint8_t)orig;
 				++t;
 			}
 
@@ -171,10 +181,11 @@ void *io_exr_parse(uint8_t *buf, size_t buf_size) {
 			line_data = reordered;
 		}
 		// else if (compression == 3) {} // ZIP
+#endif
 
 		if (line_data) {
 			uint8_t *plane_starts[4];
-			size_t plane_size = (size_t)width * channel_bytes;
+			size_t   plane_size = (size_t)width * channel_bytes;
 			for (int c = 0; c < num_channels; c++) {
 				plane_starts[c] = line_data + (size_t)c * plane_size;
 			}
@@ -207,9 +218,9 @@ void *io_exr_parse(uint8_t *buf, size_t buf_size) {
 					float b = (b_idx >= 0 ? vals_f[b_idx] : r);
 					float a = (a_idx >= 0 ? vals_f[a_idx] : 1.0f);
 
-					*(float *)(pixels + outi + 0) = r;
-					*(float *)(pixels + outi + 4) = g;
-					*(float *)(pixels + outi + 8) = b;
+					*(float *)(pixels + outi + 0)  = r;
+					*(float *)(pixels + outi + 4)  = g;
+					*(float *)(pixels + outi + 8)  = b;
 					*(float *)(pixels + outi + 12) = a;
 				}
 			}
@@ -219,8 +230,8 @@ void *io_exr_parse(uint8_t *buf, size_t buf_size) {
 	free(line_offset_table);
 
 	buffer_t *b = (buffer_t *)malloc(sizeof(buffer_t));
-	b->buffer = pixels;
+	b->buffer   = pixels;
 	b->length = b->capacity = (uint32_t)image_size;
-	int format = is_16bit ? GPU_TEXTURE_FORMAT_RGBA64 : GPU_TEXTURE_FORMAT_RGBA128;
+	int format              = is_16bit ? GPU_TEXTURE_FORMAT_RGBA64 : GPU_TEXTURE_FORMAT_RGBA128;
 	return gpu_create_texture_from_bytes(b, width, height, format);
 }

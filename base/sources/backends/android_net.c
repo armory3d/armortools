@@ -4,6 +4,7 @@
 #include <iron_system.h>
 #include <jni.h>
 #include <string.h>
+#include <stdio.h>
 
 ANativeActivity *iron_android_get_activity(void);
 jclass           iron_android_find_class(JNIEnv *env, const char *name);
@@ -30,7 +31,19 @@ void iron_net_request(const char *url_base, const char *url_path, const char *da
 	jsize  num_bytes = (*env)->GetArrayLength(env, bytes_array);
 	jbyte *elements  = (*env)->GetByteArrayElements(env, bytes_array, NULL);
 	if (elements != NULL) {
-		callback((char *)elements, callbackdata);
+
+		if (dst_path != NULL) {
+			FILE *file = fopen(dst_path, "wb");
+			if (file != NULL) {
+				fwrite((char *)elements, 1, num_bytes, file);
+				fclose(file);
+			}
+			callback(NULL, callbackdata);
+		}
+		else {
+			callback((char *)elements, callbackdata);
+		}
+
 		// (*env)->ReleaseByteArrayElements(env, bytes_array, elements, JNI_ABORT);
 	}
 
