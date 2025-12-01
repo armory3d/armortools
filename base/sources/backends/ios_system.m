@@ -597,3 +597,8 @@ void iron_gamepad_rumble(int gamepad, float left, float right) {}
 bool _save_and_quit_callback_internal() {
 	return false;
 }
+
+volatile int iron_exec_async_done = 1;
+
+void iron_exec_async(const char *path, char *argv[]) {
+}
