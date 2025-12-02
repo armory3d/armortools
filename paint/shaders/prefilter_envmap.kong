@@ -35,7 +35,7 @@ fun prefilter_envmap_vert(input: vert_in): vert_out {
 
 fun rand(co: float2): float {
 	// return frac(sin(dot(co.xy, float2(12.9898, 78.233)) % 3.14) * 43758.5453);
-	var uv: float2 = frac(co * 12.34);
+	var uv: float2 = float2(frac(co.x * 12.34), frac(co.y * 12.34));
 	return sample(noise, sampler_linear, uv).r;
 }
 
