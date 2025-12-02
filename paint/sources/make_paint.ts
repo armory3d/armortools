@@ -54,6 +54,10 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 	};
 	let con_paint: node_shader_context_t = node_shader_context_create(data, props);
 
+	if (mesh_data_get_vertex_array(context_raw.paint_object.data, "col") != null) {
+		node_shader_context_add_elem(con_paint, "col", "short4norm");
+	}
+
 	if (mesh_data_get_vertex_array(context_raw.paint_object.data, "tex1") != null) {
 		node_shader_context_add_elem(con_paint, "tex1", "short2norm");
 	}

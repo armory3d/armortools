@@ -14,6 +14,10 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 	};
 	let con_mesh: node_shader_context_t = node_shader_context_create(data, props);
 
+	if (mesh_data_get_vertex_array(context_raw.paint_object.data, "col") != null) {
+		node_shader_context_add_elem(con_mesh, "col", "short4norm");
+	}
+
 	if (mesh_data_get_vertex_array(context_raw.paint_object.data, "tex1") != null) {
 		node_shader_context_add_elem(con_mesh, "tex1", "short2norm");
 	}
