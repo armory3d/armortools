@@ -9,7 +9,7 @@ function neural_node_vector(node: ui_node_t, socket: ui_node_socket_t): string {
 	}
 	let tex_name: string = parser_material_node_name(node);
 	map_set(data_cached_images, tex_name, result);
-	let tex: bind_tex_t = parser_material_make_bind_tex(tex_name, tex_name);
+	let tex: bind_tex_t  = parser_material_make_bind_tex(tex_name, tex_name);
 	let texstore: string = parser_material_texture_store(node, tex, tex_name, color_space_t.AUTO);
 	return texstore + ".rgb";
 }
@@ -21,13 +21,13 @@ function neural_node_value(node: ui_node_t, socket: ui_node_socket_t): string {
 	}
 	let tex_name: string = parser_material_node_name(node);
 	map_set(data_cached_images, tex_name, result);
-	let tex: bind_tex_t = parser_material_make_bind_tex(tex_name, tex_name);
+	let tex: bind_tex_t  = parser_material_make_bind_tex(tex_name, tex_name);
 	let texstore: string = parser_material_texture_store(node, tex, tex_name, color_space_t.AUTO);
 	return texstore + ".r";
 }
 
 function neural_from_node(inp: ui_node_socket_t, socket: i32): ui_node_t {
-	let result: ui_node_t = null;
+	let result: ui_node_t        = null;
 	let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
 	for (let i: i32 = 0; i < canvas.links.length; ++i) {
 		let l: ui_node_link_t = canvas.links[i];
@@ -40,9 +40,9 @@ function neural_from_node(inp: ui_node_socket_t, socket: i32): ui_node_t {
 }
 
 function neural_node_button(node: ui_node_t, model: string): bool {
-	let url: string = box_preferneces_model_url_from_name(model);
+	let url: string       = box_preferneces_model_url_from_name(model);
 	let file_name: string = box_preferences_file_name_from_url(url);
-	let found: bool = box_preferences_model_exists(file_name);
+	let found: bool       = box_preferences_model_exists(file_name);
 
 	if (iron_exec_async_done == 0) {
 		if (node != neural_node_current) {
@@ -67,11 +67,14 @@ function neural_node_button(node: ui_node_t, model: string): bool {
 
 function neural_node_check_result(node: ui_node_t) {
 	neural_node_current = node;
+	iron_delay_idle_sleep();
 	if (iron_exec_async_done == 1) {
 		let file: string = neural_node_dir() + path_sep + "output.png";
 		if (iron_file_exists(file)) {
 			let result: gpu_texture_t = iron_load_texture(file);
 			map_set(neural_node_results, node.id, result);
+			ui_nodes_hwnd.redraws  = 2;
+			ui_view2d_hwnd.redraws = 2;
 		}
 		sys_remove_update(neural_node_check_result);
 	}
@@ -111,13 +114,13 @@ let neural_node_downloading: i32 = 0;
 function neural_node_download(url: string) {
 	let file_name: string = substring(url, string_last_index_of(url, "/") + 1, url.length);
 	let file_path: string = neural_node_dir() + path_sep + file_name;
-	let found: bool = iron_file_exists(file_path);
+	let found: bool       = iron_file_exists(file_path);
 	if (found) {
 		return;
 	}
 
 	neural_node_downloading++;
-	file_download_to(url, file_path, function (url: string) {
+	file_download_to(url, file_path, function(url: string) {
 		neural_node_downloading--;
 		console_log(tr("Downloaded file from") + " " + url);
 
