@@ -78,7 +78,7 @@ function import_folder_run(path: string) {
 	}
 	for (let i: i32 = 0; i < canvas.nodes.length; ++i) {
 		let n: ui_node_t = canvas.nodes[i];
-		if (n.name == "RGB") {
+		if (n.name == "Color") {
 			ui_remove_node(n, canvas);
 			break;
 		}
@@ -87,7 +87,7 @@ function import_folder_run(path: string) {
 	// Place nodes
 	let pos: i32     = 0;
 	let start_y: i32 = 100;
-	let node_h: i32  = 164;
+	let node_h: i32  = 170;
 	if (mapbase != "") {
 		import_folder_place_image_node(nodes, canvas, mapbase, start_y + node_h * pos, nout.id, 0);
 		pos++;
