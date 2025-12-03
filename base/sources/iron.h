@@ -1117,6 +1117,9 @@ gpu_texture_t *gpu_create_texture_from_bytes(buffer_t *data, i32 width, i32 heig
 }
 
 gpu_texture_t *gpu_create_texture_from_encoded_bytes(buffer_t *data, string_t *format) {
+	if (data == NULL || data->length == 0) {
+		return NULL;
+	}
 	gpu_texture_t *texture = (gpu_texture_t *)malloc(sizeof(gpu_texture_t));
 	texture->buffer        = NULL;
 	unsigned char       *texture_data;

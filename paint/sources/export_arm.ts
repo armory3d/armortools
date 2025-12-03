@@ -193,8 +193,12 @@ function export_arm_run_project() {
 function export_arm_export_node(n: ui_node_t, assets: asset_t[] = null) {
 	if (n.type == "TEX_IMAGE") {
 		let index: i32    = n.buttons[0].default_value[0];
-		n.buttons[0].data = u8_array_create_from_string(base_enum_texts(n.type)[index]);
-
+		if (index > 9000) { // 9999 - Texture deleted
+			n.buttons[0].data = u8_array_create_from_string("");
+		}
+		else {
+			n.buttons[0].data = u8_array_create_from_string(base_enum_texts(n.type)[index]);
+		}
 		if (assets != null) {
 			let asset: asset_t = project_assets[index];
 			if (array_index_of(assets, asset) == -1) {

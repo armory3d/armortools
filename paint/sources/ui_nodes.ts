@@ -1150,16 +1150,18 @@ function ui_nodes_get_node_preview_image(n: ui_node_t): gpu_texture_t {
 	}
 	else if (n.type == "TEX_IMAGE" && parser_material_get_input_link(n.inputs[0]) == null) {
 		let i: i32           = n.buttons[0].default_value[0];
-		let filepath: string = parser_material_enum_data(base_enum_texts(n.type)[i]);
-		let asset_index: i32 = -1;
-		for (let i: i32 = 0; i < project_assets.length; ++i) {
-			if (project_assets[i].file == filepath) {
-				asset_index = i;
-				break;
+		if (i <= 9000) { // 9999 - Texture deleted
+			let filepath: string = parser_material_enum_data(base_enum_texts(n.type)[i]);
+			let asset_index: i32 = -1;
+			for (let i: i32 = 0; i < project_assets.length; ++i) {
+				if (project_assets[i].file == filepath) {
+					asset_index = i;
+					break;
+				}
 			}
-		}
-		if (asset_index > -1) {
-			img = project_get_image(project_assets[asset_index]);
+			if (asset_index > -1) {
+				img = project_get_image(project_assets[asset_index]);
+			}
 		}
 	}
 	else if (starts_with(n.type, "NEURAL_") && n.type != "NEURAL_IMAGE_TO_PBR") {

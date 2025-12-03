@@ -222,14 +222,14 @@ function tab_textures_draw(htab: ui_handle_t) {
 	}
 }
 
-function tab_textures_update_texture_pointers(nodes: ui_node_t[], i: i32) {
+function tab_textures_update_texture_pointers(nodes: ui_node_t[], index: i32) {
 	for (let i: i32 = 0; i < nodes.length; ++i) {
 		let n: ui_node_t = nodes[i];
 		if (n.type == "TEX_IMAGE") {
-			if (n.buttons[0].default_value[0] == i) {
+			if (n.buttons[0].default_value[0] == index) {
 				n.buttons[0].default_value[0] = 9999; // Texture deleted, use pink now
 			}
-			else if (n.buttons[0].default_value[0] > i) {
+			else if (n.buttons[0].default_value[0] > index) {
 				n.buttons[0].default_value[0]--; // Offset by deleted texture
 			}
 		}
@@ -237,13 +237,13 @@ function tab_textures_update_texture_pointers(nodes: ui_node_t[], i: i32) {
 }
 
 function tab_textures_delete_texture(asset: asset_t) {
-	let i: i32 = array_index_of(project_assets, asset);
+	let index: i32 = array_index_of(project_assets, asset);
 	if (project_assets.length > 1) {
-		context_raw.texture = project_assets[i == project_assets.length - 1 ? i - 1 : i + 1];
+		context_raw.texture = project_assets[index == project_assets.length - 1 ? index - 1 : index + 1];
 	}
 	ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 
-	if (context_raw.tool == tool_type_t.COLORID && i == context_raw.colorid_handle.i) {
+	if (context_raw.tool == tool_type_t.COLORID && index == context_raw.colorid_handle.i) {
 		ui_header_handle.redraws   = 2;
 		context_raw.ddirty         = 2;
 		context_raw.colorid_picked = false;
@@ -266,22 +266,21 @@ function tab_textures_delete_texture(asset: asset_t) {
 
 	data_delete_image(asset.file);
 	map_delete(project_asset_map, asset.id);
-	array_splice(project_assets, i, 1);
-	array_splice(project_asset_names, i, 1);
+	array_splice(project_assets, index, 1);
+	array_splice(project_asset_names, index, 1);
 	sys_notify_on_next_frame(function() {
 		make_material_parse_paint_material();
-
 		util_render_make_material_preview();
 		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
 	});
 
 	for (let i: i32 = 0; i < project_materials.length; ++i) {
 		let m: slot_material_t = project_materials[i];
-		tab_textures_update_texture_pointers(m.canvas.nodes, i);
+		tab_textures_update_texture_pointers(m.canvas.nodes, index);
 	}
 
 	for (let i: i32 = 0; i < project_brushes.length; ++i) {
 		let b: slot_brush_t = project_brushes[i];
-		tab_textures_update_texture_pointers(b.canvas.nodes, i);
+		tab_textures_update_texture_pointers(b.canvas.nodes, index);
 	}
 }

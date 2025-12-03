@@ -201,30 +201,32 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 							file_cache_cloud(handle.text + path_sep + icon_file, function(abs: string) {
 								if (abs != null) {
 									let image: gpu_texture_t = data_get_image(abs);
-									/// if arm_windows
-									abs = string_replace_all(abs, "\\", "/");
-									/// end
-									let icon_file: string            = substring(abs, string_last_index_of(abs, "/") + 1, abs.length);
-									let f: string                    = map_get(ui_files_icon_file_map, icon_file);
-									let data: draw_cloud_icon_data_t = make_draw_cloud_icon_data(f, image);
+									if (image != null) {
+										/// if arm_windows
+										abs = string_replace_all(abs, "\\", "/");
+										/// end
+										let icon_file: string            = substring(abs, string_last_index_of(abs, "/") + 1, abs.length);
+										let f: string                    = map_get(ui_files_icon_file_map, icon_file);
+										let data: draw_cloud_icon_data_t = make_draw_cloud_icon_data(f, image);
 
-									sys_notify_on_next_frame(function(data: draw_cloud_icon_data_t) {
-										let icon: gpu_texture_t = gpu_create_render_target(data.image.width, data.image.height);
-										if (ends_with(data.f, ".arm")) { // Used for material sphere alpha cutout
-											draw_begin(icon);
-											draw_image(project_materials[0].image, 0, 0);
-										}
-										else {
-											draw_begin(icon, true, 0xffffffff);
-										}
-										draw_set_pipeline(pipes_copy_rgb);
-										draw_image(data.image, 0, 0);
-										draw_set_pipeline(null);
-										draw_end();
+										sys_notify_on_next_frame(function(data: draw_cloud_icon_data_t) {
+											let icon: gpu_texture_t = gpu_create_render_target(data.image.width, data.image.height);
+											if (ends_with(data.f, ".arm")) { // Used for material sphere alpha cutout
+												draw_begin(icon);
+												draw_image(project_materials[0].image, 0, 0);
+											}
+											else {
+												draw_begin(icon, true, 0xffffffff);
+											}
+											draw_set_pipeline(pipes_copy_rgb);
+											draw_image(data.image, 0, 0);
+											draw_set_pipeline(null);
+											draw_end();
 
-										map_set(ui_files_icon_map, _ui_files_file_browser_handle.text + path_sep + data.f, icon);
-										ui_base_hwnds[tab_area_t.STATUS].redraws = 3;
-									}, data);
+											map_set(ui_files_icon_map, _ui_files_file_browser_handle.text + path_sep + data.f, icon);
+											ui_base_hwnds[tab_area_t.STATUS].redraws = 3;
+										}, data);
+									}
 								}
 								else {
 									ui_files_offline = true;
