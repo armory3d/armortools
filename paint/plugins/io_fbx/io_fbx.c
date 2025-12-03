@@ -35,14 +35,20 @@ void io_fbx_parse_mesh(raw_mesh_t *raw, ufbx_mesh *mesh, ufbx_matrix *to_world, 
 			uint32_t a = indices[v_ix];
 
 			ufbx_vec3 v  = ufbx_transform_position(to_world, ufbx_get_vertex_vec3(&mesh->vertex_position, a));
+			// posa32[pi++] = v.x;
+			// posa32[pi++] = v.y;
+			// posa32[pi++] = v.z;
 			posa32[pi++] = v.x;
+			posa32[pi++] = -v.z;
 			posa32[pi++] = v.y;
-			posa32[pi++] = v.z;
 
 			v            = ufbx_transform_direction(to_world_unscaled, ufbx_get_vertex_vec3(&mesh->vertex_normal, a));
+			// nora32[ni++] = v.x;
+			// nora32[ni++] = v.y;
+			// nora32[ni++] = v.z;
 			nora32[ni++] = v.x;
+			nora32[ni++] = -v.z;
 			nora32[ni++] = v.y;
-			nora32[ni++] = v.z;
 
 			if (has_tex) {
 				texa32[ti++] = ufbx_get_vertex_vec2(&mesh->vertex_uv, a).x;
