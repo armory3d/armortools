@@ -33,8 +33,6 @@ type context_t = {
 	format_quality?: f32;
 	layers_destination?: export_destination_t;
 	split_by?: split_type_t;
-	parse_transform?: bool;
-	parse_vcols?: bool;
 	select_time?: f32;
 	viewport_mode?: viewport_mode_t;
 	render_mode?: render_mode_t;
@@ -249,8 +247,6 @@ function context_create(): context_t {
 	c.format_quality          = 100.0;
 	c.layers_destination      = export_destination_t.DISK;
 	c.split_by                = split_type_t.OBJECT;
-	c.parse_transform         = true;
-	c.parse_vcols             = false;
 	c.select_time             = 0.0;
 	c.viewport_mode           = config_raw.viewport_mode == 0 ? viewport_mode_t.LIT : viewport_mode_t.PATH_TRACE;
 	/// if (arm_android || arm_ios)
