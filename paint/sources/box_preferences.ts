@@ -394,9 +394,9 @@ function box_preferences_usage_tab() {
 	}
 
 	/// if (arm_android || arm_ios)
-	let res_combo: string[] = [ "128", "256", "512", "1K", "2K", "4K" ];
+	let res_combo: string[] = [ "128", "256", "512", "1024", "2048", "4096" ];
 	/// else
-	let res_combo: string[] = [ "128", "256", "512", "1K", "2K", "4K", "8K", "16K" ];
+	let res_combo: string[] = [ "128", "256", "512", "1024", "2048", "4096", "8192", "16384" ];
 	/// end
 
 	ui_combo(layer_res_handle, res_combo, tr("Default Layer Resolution"), true);

@@ -57,9 +57,9 @@ function box_export_tab_export_textures(title: string, bake_material: bool = fal
 		ui_row2();
 
 		/// if (arm_android || arm_ios)
-		let base_res_combo: string[] = [ "128", "256", "512", "1K", "2K", "4K" ];
+		let base_res_combo: string[] = [ "128", "256", "512", "1024", "2048", "4096" ];
 		/// else
-		let base_res_combo: string[] = [ "128", "256", "512", "1K", "2K", "4K", "8K", "16K" ];
+		let base_res_combo: string[] = [ "128", "256", "512", "1024", "2048", "4096", "8192", "16384" ];
 		/// end
 
 		ui_combo(base_res_handle, base_res_combo, tr("Resolution"), true);
