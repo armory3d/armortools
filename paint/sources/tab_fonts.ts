@@ -85,7 +85,6 @@ function tab_fonts_draw(htab: ui_handle_t) {
 
 						sys_notify_on_next_frame(function() {
 							let i: i32 = _tab_fonts_draw_i;
-
 							context_select_font(i);
 						});
 					}
@@ -95,15 +94,15 @@ function tab_fonts_draw(htab: ui_handle_t) {
 					context_raw.select_time = sys_time();
 				}
 				if (ui.is_hovered && ui.input_released_r) {
-					context_select_font(i);
 					_tab_fonts_draw_i = i;
-
-					ui_menu_draw(function() {
-						let i: i32 = _tab_fonts_draw_i;
-
-						if (project_fonts.length > 1 && ui_menu_button(tr("Delete"), "delete") && project_fonts[i].file != "") {
-							tab_fonts_delete_font(project_fonts[i]);
-						}
+					sys_notify_on_next_frame(function() {
+						context_select_font(_tab_fonts_draw_i);
+						ui_menu_draw(function() {
+							let i: i32 = _tab_fonts_draw_i;
+							if (project_fonts.length > 1 && ui_menu_button(tr("Delete"), "delete") && project_fonts[i].file != "") {
+								tab_fonts_delete_font(project_fonts[i]);
+							}
+						});
 					});
 				}
 				if (ui.is_hovered) {
