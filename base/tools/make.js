@@ -943,8 +943,9 @@ class WasmExporter extends Exporter {
 		this.compile_commands = new CompilerCommandsExporter();
 		let compiler          = "clang --target=wasm32 -nostdlib -matomics -mbulk-memory";
 		let compilerFlags     = "";
-		this.make             = new MakeExporter(compiler, compiler, compilerFlags, compilerFlags,
-		                                         '--target=wasm32 -nostdlib -matomics -mbulk-memory "-Wl,--import-memory,--shared-memory"', '.wasm');
+		this.make =
+		    new MakeExporter(compiler, compiler, compilerFlags, compilerFlags,
+		                     '--target=wasm32 -nostdlib -matomics -mbulk-memory "-Wl,--import-memory,--shared-memory" "-Wl,--allow-undefined"', '.wasm');
 	}
 
 	export_solution(project) {
@@ -3234,6 +3235,11 @@ function compile_project(make, project) {
 		let to   = path_resolve("..", project.get_debug_dir(), executable_name + ".exe");
 		fs_copyfile(from, to);
 	}
+	else if (goptions.target === "wasm") {
+		let from = path_resolve(path_join("build", goptions.build_path), executable_name + ".wasm");
+		let to   = path_resolve(".", project.get_debug_dir(), "start.wasm");
+		fs_copyfile(from, to);
+	}
 	if (goptions.run) {
 		if (goptions.target === "macos") {
 			os_exec("build/" + (goptions.debug ? "Debug" : "Release") + "/" + project.name + ".app/Contents/MacOS/" + project.name, [], {cwd : "build"});
@@ -3349,7 +3355,10 @@ if (goptions.run) {
 }
 
 if (goptions.graphics === "default") {
-	if (os_platform() === "win32") {
+	if (goptions.target === "wasm") {
+		goptions.graphics = "webgpu";
+	}
+	else if (os_platform() === "win32") {
 		goptions.graphics = "direct3d12";
 	}
 	else if (os_platform() === "darwin") {

@@ -81,34 +81,31 @@ __attribute__((export_name("_start"))) void _start(void) {
 	kickstart(0, NULL);
 }
 
-__attribute__((export_name("_update"))) void _update(void) {
+__attribute__((export_name("wasm_update"))) void wasm_update(void) {
 	iron_internal_update_callback();
-	#ifdef IRON_A2
-	iron_a2_update();
-	#endif
 }
 
-__attribute__((export_name("_mousedown"))) void _mousedown(int button, int x, int y) {
+__attribute__((export_name("wasm_mousedown"))) void wasm_mousedown(int button, int x, int y) {
 	iron_internal_mouse_trigger_press(button, x, y);
 }
 
-__attribute__((export_name("_mouseup"))) void _mouseup(int button, int x, int y) {
+__attribute__((export_name("wasm_mouseup"))) void wasm_mouseup(int button, int x, int y) {
 	iron_internal_mouse_trigger_release(button, x, y);
 }
 
-__attribute__((export_name("_mousemove"))) void _mousemove(int x, int y) {
+__attribute__((export_name("wasm_mousemove"))) void wasm_mousemove(int x, int y) {
 	iron_internal_mouse_trigger_move(x, y);
 }
 
-__attribute__((export_name("_wheel"))) void _wheel(float delta) {
+__attribute__((export_name("wasm_wheel"))) void wasm_wheel(float delta) {
 	iron_internal_mouse_trigger_scroll(delta);
 }
 
-__attribute__((export_name("_keydown"))) void _keydown(int key) {
+__attribute__((export_name("wasm_keydown"))) void wasm_keydown(int key) {
 	iron_internal_keyboard_trigger_key_down(key);
 }
 
-__attribute__((export_name("_keyup"))) void _keyup(int key) {
+__attribute__((export_name("wasm_keyup"))) void wasm_keyup(int key) {
 	iron_internal_keyboard_trigger_key_up(key);
 }
 
@@ -162,3 +159,8 @@ void iron_window_set_close_callback(bool (*callback)(void *), void *data) {}
 iron_window_mode_t iron_window_get_mode() {
 	return iron_internal_window_mode;
 }
+
+void iron_net_update() {
+}
+
+volatile uint64_t iron_net_bytes_downloaded = 0;

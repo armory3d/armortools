@@ -6,7 +6,7 @@
 #include <string.h>
 
 void *gc_alloc(size_t size);
-void *gc_leaf(void *ptr);
+void  gc_leaf(void *ptr);
 
 char *string_alloc(int size) {
 	char *r = gc_alloc(size);
