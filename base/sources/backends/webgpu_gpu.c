@@ -7,6 +7,56 @@
 #include <stdlib.h>
 #include <string.h>
 
+__attribute__((import_module("imports"), import_name("wgpuDeviceCreateTexture"))) WGPUTexture wgpuDeviceCreateTexture(WGPUDevice device, WGPUTextureDescriptor const * descriptor);
+__attribute__((import_module("imports"), import_name("wgpuTextureCreateView"))) WGPUTextureView wgpuTextureCreateView(WGPUTexture texture, WGPU_NULLABLE WGPUTextureViewDescriptor const * descriptor);
+__attribute__((import_module("imports"), import_name("wgpuCreateInstance"))) WGPUInstance wgpuCreateInstance(WGPU_NULLABLE WGPUInstanceDescriptor const * descriptor);
+__attribute__((import_module("imports"), import_name("wgpuInstanceRequestAdapter"))) WGPUFuture wgpuInstanceRequestAdapter(WGPUInstance instance, WGPU_NULLABLE WGPURequestAdapterOptions const * options, WGPURequestAdapterCallbackInfo callbackInfo);
+__attribute__((import_module("imports"), import_name("wgpuAdapterGetInfo"))) WGPUStatus wgpuAdapterGetInfo(WGPUAdapter adapter, WGPUAdapterInfo * info);
+__attribute__((import_module("imports"), import_name("wgpuAdapterInfoFreeMembers"))) void wgpuAdapterInfoFreeMembers(WGPUAdapterInfo adapterInfo);
+__attribute__((import_module("imports"), import_name("wgpuAdapterRequestDevice"))) WGPUFuture wgpuAdapterRequestDevice(WGPUAdapter adapter, WGPU_NULLABLE WGPUDeviceDescriptor const * descriptor, WGPURequestDeviceCallbackInfo callbackInfo);
+__attribute__((import_module("imports"), import_name("wgpuDeviceGetQueue"))) WGPUQueue wgpuDeviceGetQueue(WGPUDevice device);
+__attribute__((import_module("imports"), import_name("wgpuDeviceCreateBindGroupLayout"))) WGPUBindGroupLayout wgpuDeviceCreateBindGroupLayout(WGPUDevice device, WGPUBindGroupLayoutDescriptor const * descriptor);
+__attribute__((import_module("imports"), import_name("wgpuDeviceCreateBuffer"))) WGPUBuffer wgpuDeviceCreateBuffer(WGPUDevice device, WGPUBufferDescriptor const * descriptor);
+__attribute__((import_module("imports"), import_name("wgpuBufferGetMappedRange"))) void *wgpuBufferGetMappedRange(WGPUBuffer buffer, size_t offset, size_t size);
+__attribute__((import_module("imports"), import_name("wgpuBufferUnmap"))) void wgpuBufferUnmap(WGPUBuffer buffer);
+__attribute__((import_module("imports"), import_name("wgpuDeviceCreateCommandEncoder"))) WGPUCommandEncoder wgpuDeviceCreateCommandEncoder(WGPUDevice device, WGPU_NULLABLE WGPUCommandEncoderDescriptor const * descriptor);
+__attribute__((import_module("imports"), import_name("wgpuCommandEncoderCopyBufferToTexture"))) void wgpuCommandEncoderCopyBufferToTexture(WGPUCommandEncoder commandEncoder, WGPUTexelCopyBufferInfo const * source, WGPUTexelCopyTextureInfo const * destination, WGPUExtent3D const * copySize);
+__attribute__((import_module("imports"), import_name("wgpuCommandEncoderFinish"))) WGPUCommandBuffer wgpuCommandEncoderFinish(WGPUCommandEncoder commandEncoder, WGPU_NULLABLE WGPUCommandBufferDescriptor const * descriptor);
+__attribute__((import_module("imports"), import_name("wgpuQueueSubmit"))) void wgpuQueueSubmit(WGPUQueue queue, size_t commandCount, WGPUCommandBuffer const * commands);
+__attribute__((import_module("imports"), import_name("wgpuBufferRelease"))) void wgpuBufferRelease(WGPUBuffer buffer);
+__attribute__((import_module("imports"), import_name("wgpuDeviceCreateSampler"))) WGPUSampler wgpuDeviceCreateSampler(WGPUDevice device, WGPU_NULLABLE WGPUSamplerDescriptor const * descriptor);
+__attribute__((import_module("imports"), import_name("wgpuSurfaceGetCapabilities"))) WGPUStatus wgpuSurfaceGetCapabilities(WGPUSurface surface, WGPUAdapter adapter, WGPUSurfaceCapabilities * capabilities);
+__attribute__((import_module("imports"), import_name("wgpuSurfaceCapabilitiesFreeMembers"))) void wgpuSurfaceCapabilitiesFreeMembers(WGPUSurfaceCapabilities surfaceCapabilities);
+__attribute__((import_module("imports"), import_name("wgpuBufferDestroy"))) void wgpuBufferDestroy(WGPUBuffer buffer);
+__attribute__((import_module("imports"), import_name("wgpuSurfaceGetCurrentTexture"))) void wgpuSurfaceGetCurrentTexture(WGPUSurface surface, WGPUSurfaceTexture * surfaceTexture);
+__attribute__((import_module("imports"), import_name("wgpuCommandEncoderBeginRenderPass"))) WGPURenderPassEncoder wgpuCommandEncoderBeginRenderPass(WGPUCommandEncoder commandEncoder, WGPURenderPassDescriptor const * descriptor);
+__attribute__((import_module("imports"), import_name("wgpuRenderPassEncoderSetViewport"))) void wgpuRenderPassEncoderSetViewport(WGPURenderPassEncoder renderPassEncoder, float x, float y, float width, float height, float minDepth, float maxDepth);
+__attribute__((import_module("imports"), import_name("wgpuRenderPassEncoderSetScissorRect"))) void wgpuRenderPassEncoderSetScissorRect(WGPURenderPassEncoder renderPassEncoder, uint32_t x, uint32_t y, uint32_t width, uint32_t height);
+__attribute__((import_module("imports"), import_name("wgpuRenderPassEncoderEnd"))) void wgpuRenderPassEncoderEnd(WGPURenderPassEncoder renderPassEncoder);
+__attribute__((import_module("imports"), import_name("wgpuRenderPassEncoderRelease"))) void wgpuRenderPassEncoderRelease(WGPURenderPassEncoder renderPassEncoder);
+__attribute__((import_module("imports"), import_name("wgpuCommandBufferRelease"))) void wgpuCommandBufferRelease(WGPUCommandBuffer commandBuffer);
+__attribute__((import_module("imports"), import_name("wgpuCommandEncoderRelease"))) void wgpuCommandEncoderRelease(WGPUCommandEncoder commandEncoder);
+__attribute__((import_module("imports"), import_name("wgpuSurfacePresent"))) WGPUStatus wgpuSurfacePresent(WGPUSurface surface);
+__attribute__((import_module("imports"), import_name("wgpuRenderPassEncoderDrawIndexed"))) void wgpuRenderPassEncoderDrawIndexed(WGPURenderPassEncoder renderPassEncoder, uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t baseVertex, uint32_t firstInstance);
+__attribute__((import_module("imports"), import_name("wgpuRenderPassEncoderSetPipeline"))) void wgpuRenderPassEncoderSetPipeline(WGPURenderPassEncoder renderPassEncoder, WGPURenderPipeline pipeline);
+__attribute__((import_module("imports"), import_name("wgpuRenderPassEncoderSetVertexBuffer"))) void wgpuRenderPassEncoderSetVertexBuffer(WGPURenderPassEncoder renderPassEncoder, uint32_t slot, WGPU_NULLABLE WGPUBuffer buffer, uint64_t offset, uint64_t size);
+__attribute__((import_module("imports"), import_name("wgpuRenderPassEncoderSetIndexBuffer"))) void wgpuRenderPassEncoderSetIndexBuffer(WGPURenderPassEncoder renderPassEncoder, WGPUBuffer buffer, WGPUIndexFormat format, uint64_t offset, uint64_t size);
+__attribute__((import_module("imports"), import_name("wgpuDeviceCreateBindGroup"))) WGPUBindGroup wgpuDeviceCreateBindGroup(WGPUDevice device, WGPUBindGroupDescriptor const * descriptor);
+__attribute__((import_module("imports"), import_name("wgpuRenderPassEncoderSetBindGroup"))) void wgpuRenderPassEncoderSetBindGroup(WGPURenderPassEncoder renderPassEncoder, uint32_t groupIndex, WGPU_NULLABLE WGPUBindGroup group, size_t dynamicOffsetCount, uint32_t const * dynamicOffsets);
+__attribute__((import_module("imports"), import_name("wgpuBindGroupRelease"))) void wgpuBindGroupRelease(WGPUBindGroup bindGroup);
+__attribute__((import_module("imports"), import_name("wgpuRenderPipelineRelease"))) void wgpuRenderPipelineRelease(WGPURenderPipeline renderPipeline);
+__attribute__((import_module("imports"), import_name("wgpuPipelineLayoutRelease"))) void wgpuPipelineLayoutRelease(WGPUPipelineLayout pipelineLayout);
+__attribute__((import_module("imports"), import_name("wgpuDeviceCreatePipelineLayout"))) WGPUPipelineLayout wgpuDeviceCreatePipelineLayout(WGPUDevice device, WGPUPipelineLayoutDescriptor const * descriptor);
+__attribute__((import_module("imports"), import_name("wgpuDeviceCreateShaderModule"))) WGPUShaderModule wgpuDeviceCreateShaderModule(WGPUDevice device, WGPUShaderModuleDescriptor const * descriptor);
+__attribute__((import_module("imports"), import_name("wgpuDeviceCreateRenderPipeline"))) WGPURenderPipeline wgpuDeviceCreateRenderPipeline(WGPUDevice device, WGPURenderPipelineDescriptor const * descriptor);
+__attribute__((import_module("imports"), import_name("wgpuShaderModuleRelease"))) void wgpuShaderModuleRelease(WGPUShaderModule shaderModule);
+__attribute__((import_module("imports"), import_name("wgpuQueueWriteBuffer"))) void wgpuQueueWriteBuffer(WGPUQueue queue, WGPUBuffer buffer, uint64_t bufferOffset, void const * data, size_t size);
+__attribute__((import_module("imports"), import_name("wgpuTextureDestroy"))) void wgpuTextureDestroy(WGPUTexture texture);
+__attribute__((import_module("imports"), import_name("wgpuTextureRelease"))) void wgpuTextureRelease(WGPUTexture texture);
+__attribute__((import_module("imports"), import_name("wgpuTextureViewRelease"))) void wgpuTextureViewRelease(WGPUTextureView textureView);
+__attribute__((import_module("imports"), import_name("wgpuCommandEncoderCopyBufferToBuffer"))) void wgpuCommandEncoderCopyBufferToBuffer(WGPUCommandEncoder commandEncoder, WGPUBuffer source, uint64_t sourceOffset, WGPUBuffer destination, uint64_t destinationOffset, uint64_t size);
+__attribute__((import_module("imports"), import_name("wgpuSurfaceConfigure"))) void wgpuSurfaceConfigure(WGPUSurface surface, WGPUSurfaceConfiguration const * config);
+
 bool                                        gpu_transpose_mat = true;
 extern int                                  constant_buffer_index;
 static gpu_buffer_t                        *current_vb;

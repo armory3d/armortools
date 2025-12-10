@@ -77,7 +77,7 @@ void iron_internal_shutdown(void) {}
 
 extern int kickstart(int argc, char **argv);
 
-__attribute__((export_name("_start"))) void _start(void) {
+__attribute__((export_name("wasm_start"))) void wasm_start(void) {
 	kickstart(0, NULL);
 }
 
