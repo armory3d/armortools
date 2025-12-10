@@ -42,17 +42,17 @@ function tab_meshes_draw(htab: ui_handle_t) {
 					context_raw.ddirty = 2;
 				}
 
-				if (ui_menu_button(tr("Calculate Normals"))) {
-					ui_menu_draw(function() {
-						if (ui_menu_button(tr("Smooth"))) {
-							util_mesh_calc_normals(true);
-							context_raw.ddirty = 2;
-						}
-						if (ui_menu_button(tr("Flat"))) {
-							util_mesh_calc_normals(false);
-							context_raw.ddirty = 2;
-						}
-					});
+				if (ui_menu_sub_button(ui_handle(__ID__), tr("Calculate Normals"))) {
+					ui_menu_sub_begin(2);
+					if (ui_menu_button(tr("Smooth"))) {
+						util_mesh_calc_normals(true);
+						context_raw.ddirty = 2;
+					}
+					if (ui_menu_button(tr("Flat"))) {
+						util_mesh_calc_normals(false);
+						context_raw.ddirty = 2;
+					}
+					ui_menu_sub_end();
 				}
 
 				if (ui_menu_button(tr("Geometry to Origin"))) {
@@ -62,28 +62,25 @@ function tab_meshes_draw(htab: ui_handle_t) {
 
 				if (ui_menu_button(tr("Apply Displacement"))) {
 					util_mesh_apply_displacement(project_layers[0].texpaint_pack);
-
 					util_mesh_calc_normals();
 					context_raw.ddirty = 2;
 				}
 
-				if (ui_menu_button(tr("Rotate"))) {
-					ui_menu_draw(function() {
-						if (ui_menu_button(tr("Rotate X"))) {
-							util_mesh_swap_axis(1, 2);
-							context_raw.ddirty = 2;
-						}
-
-						if (ui_menu_button(tr("Rotate Y"))) {
-							util_mesh_swap_axis(2, 0);
-							context_raw.ddirty = 2;
-						}
-
-						if (ui_menu_button(tr("Rotate Z"))) {
-							util_mesh_swap_axis(0, 1);
-							context_raw.ddirty = 2;
-						}
-					});
+				if (ui_menu_sub_button(ui_handle(__ID__), tr("Rotate"))) {
+					ui_menu_sub_begin(3);
+					if (ui_menu_button(tr("X"))) {
+						util_mesh_swap_axis(1, 2);
+						context_raw.ddirty = 2;
+					}
+					if (ui_menu_button(tr("Y"))) {
+						util_mesh_swap_axis(2, 0);
+						context_raw.ddirty = 2;
+					}
+					if (ui_menu_button(tr("Z"))) {
+						util_mesh_swap_axis(0, 1);
+						context_raw.ddirty = 2;
+					}
+					ui_menu_sub_end();
 				}
 
 				if (ui_menu_button(tr("UV Unwrap"))) {

@@ -5,9 +5,12 @@ let ui_menu_x: i32           = 0;
 let ui_menu_y: i32           = 0;
 let ui_menu_h: i32           = 0;
 let ui_menu_keep_open: bool  = false;
-let ui_menu_commands: () => void = null;
-let ui_menu_show_first: bool     = true;
-let ui_menu_hide_flag: bool      = false;
+let ui_menu_commands: () => void    = null;
+let ui_menu_show_first: bool        = true;
+let ui_menu_hide_flag: bool         = false;
+let ui_menu_sub_x: i32              = 0;
+let ui_menu_sub_y: i32              = 0;
+let ui_menu_sub_handle: ui_handle_t = null;
 
 let _ui_menu_render_msg: string;
 
@@ -35,7 +38,7 @@ function ui_menu_render() {
 	draw_begin();
 	ui_begin_region(ui, ui_menu_x, ui_menu_y, menu_w);
 	ui.input_enabled = ui.combo_selected_handle == null;
-	ui_menu_start();
+	ui_menu_begin();
 
 	if (ui_menu_commands != null) {
 		ui_menu_commands();
@@ -127,6 +130,18 @@ function ui_menu_button(text: string, label: string = ""): bool {
 	return ui_button(config_button_spacing + text, config_button_align, label);
 }
 
+function ui_menu_sub_button(handle: ui_handle_t, text: string): bool {
+	ui.is_hovered = false;
+	ui_menu_button(text, ">");
+	if (ui.is_hovered) {
+		ui_menu_sub_handle = handle;
+	}
+	else if (math_abs(ui.input_dy) > ui.input_dx && ui.input_x < ui._x + ui._w) {
+		ui_menu_sub_handle = null;
+	}
+	return ui_menu_sub_handle == handle;
+}
+
 function ui_menu_label(text: string, shortcut: string = null) {
 	let _y: i32           = ui._y;
 	let _TEXT_COL: i32    = ui.ops.theme.TEXT_COL;
@@ -147,7 +162,7 @@ function ui_menu_align() {
 	}
 }
 
-function ui_menu_start() {
+function ui_menu_begin() {
 	ui_draw_shadow(ui._x, ui._y, ui._w, ui_menu_h);
 
 	draw_set_color(ui.ops.theme.SEPARATOR_COL);
@@ -156,3 +171,20 @@ function ui_menu_start() {
 }
 
 function ui_menu_end() {}
+
+function ui_menu_sub_begin(items: i32) {
+	ui_menu_sub_x = ui._x;
+	ui_menu_sub_y = ui._y;
+	ui._x += ui._w + 2;
+	ui._y -= ui.ops.theme.ELEMENT_H;
+
+	ui_draw_shadow(ui._x, ui._y, ui._w, ui.ops.theme.ELEMENT_H * items);
+	draw_set_color(ui.ops.theme.SEPARATOR_COL);
+	ui_draw_rect(true, ui._x, ui._y, ui._w, ui.ops.theme.ELEMENT_H * items);
+	draw_set_color(0xffffffff);
+}
+
+function ui_menu_sub_end() {
+	ui._x = ui_menu_sub_x;
+	ui._y = ui_menu_sub_y;
+}

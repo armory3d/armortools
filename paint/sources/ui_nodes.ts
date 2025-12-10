@@ -1060,7 +1060,7 @@ function ui_nodes_render() {
 			ui_menu_h += project_material_groups.length * UI_ELEMENT_H();
 		}
 
-		ui_menu_start();
+		ui_menu_begin();
 
 		for (let i: i32 = 0; i < category.length; ++i) {
 			let n: ui_node_t = category[i];

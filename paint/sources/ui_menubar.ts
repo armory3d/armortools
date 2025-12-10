@@ -193,34 +193,36 @@ function ui_menubar_draw_category_items() {
 			project_save_as();
 		}
 		ui_menu_separator();
-		if (ui_menu_button(tr("Import Texture..."), map_get(config_keymap, "file_import_assets"))) {
-			project_import_asset(string_array_join(path_texture_formats, ","), false);
-		}
-		if (ui_menu_button(tr("Import Envmap..."))) {
-			ui_files_show("hdr", false, false, function(path: string) {
-				if (!ends_with(path, ".hdr")) {
-					console_error(tr("Error: .hdr file expected"));
-					return;
-				}
-				import_asset_run(path);
-			});
-		}
-
-		if (ui_menu_button(tr("Import Font..."))) {
-			project_import_asset("ttf,ttc,otf");
-		}
-		if (ui_menu_button(tr("Import Material..."))) {
-			project_import_material();
-		}
-		if (ui_menu_button(tr("Import Brush..."))) {
-			project_import_brush();
-		}
-
-		if (ui_menu_button(tr("Import Swatches..."))) {
-			project_import_swatches();
-		}
-		if (ui_menu_button(tr("Import Mesh..."))) {
-			project_import_mesh();
+		if (ui_menu_sub_button(ui_handle(__ID__), tr("Import"))) {
+			ui_menu_sub_begin(7);
+			if (ui_menu_button(tr("Texture..."), map_get(config_keymap, "file_import_assets"))) {
+				project_import_asset(string_array_join(path_texture_formats, ","), false);
+			}
+			if (ui_menu_button(tr("Envmap..."))) {
+				ui_files_show("hdr", false, false, function(path: string) {
+					if (!ends_with(path, ".hdr")) {
+						console_error(tr("Error: .hdr file expected"));
+						return;
+					}
+					import_asset_run(path);
+				});
+			}
+			if (ui_menu_button(tr("Font..."))) {
+				project_import_asset("ttf,ttc,otf");
+			}
+			if (ui_menu_button(tr("Material..."))) {
+				project_import_material();
+			}
+			if (ui_menu_button(tr("Brush..."))) {
+				project_import_brush();
+			}
+			if (ui_menu_button(tr("Swatches..."))) {
+				project_import_swatches();
+			}
+			if (ui_menu_button(tr("Mesh..."))) {
+				project_import_mesh();
+			}
+			ui_menu_sub_end();
 		}
 		if (ui_menu_button(tr("Reimport Mesh"), map_get(config_keymap, "file_reimport_mesh"))) {
 			project_reimport_mesh();
@@ -229,21 +231,24 @@ function ui_menubar_draw_category_items() {
 			project_reimport_textures();
 		}
 		ui_menu_separator();
-		if (ui_menu_button(tr("Export Textures..."), map_get(config_keymap, "file_export_textures_as"))) {
-			context_raw.layers_export = export_mode_t.VISIBLE;
-			box_export_show_textures();
-		}
-		if (ui_menu_button(tr("Export Swatches..."))) {
-			project_export_swatches();
-		}
-		if (ui_menu_button(tr("Export Mesh..."))) {
-			context_raw.export_mesh_index = 0; // All
-			box_export_show_mesh();
+		if (ui_menu_sub_button(ui_handle(__ID__), tr("Export"))) {
+			ui_menu_sub_begin(3);
+			if (ui_menu_button(tr("Textures..."), map_get(config_keymap, "file_export_textures_as"))) {
+				context_raw.layers_export = export_mode_t.VISIBLE;
+				box_export_show_textures();
+			}
+			if (ui_menu_button(tr("Swatches..."))) {
+				project_export_swatches();
+			}
+			if (ui_menu_button(tr("Mesh..."))) {
+				context_raw.export_mesh_index = 0; // All
+				box_export_show_mesh();
+			}
+			ui_menu_sub_end();
 		}
 		if (ui_menu_button(tr("Bake Material..."))) {
 			box_export_show_bake_material();
 		}
-
 		ui_menu_separator();
 		if (ui_menu_button(tr("Exit"))) {
 			iron_stop();
@@ -429,42 +434,49 @@ function ui_menubar_draw_category_items() {
 			viewport_scale_to_bounds();
 		}
 		ui_menu_separator();
-		if (ui_menu_button(tr("Front"), map_get(config_keymap, "view_front"))) {
-			viewport_set_view(0, -1, 0, math_pi() / 2, 0, 0);
+		if (ui_menu_sub_button(ui_handle(__ID__), tr("View"))) {
+			ui_menu_sub_begin(6);
+			if (ui_menu_button(tr("Front"), map_get(config_keymap, "view_front"))) {
+				viewport_set_view(0, -1, 0, math_pi() / 2, 0, 0);
+			}
+			if (ui_menu_button(tr("Back"), map_get(config_keymap, "view_back"))) {
+				viewport_set_view(0, 1, 0, math_pi() / 2, 0, math_pi());
+			}
+			if (ui_menu_button(tr("Right"), map_get(config_keymap, "view_right"))) {
+				viewport_set_view(1, 0, 0, math_pi() / 2, 0, math_pi() / 2);
+			}
+			if (ui_menu_button(tr("Left"), map_get(config_keymap, "view_left"))) {
+				viewport_set_view(-1, 0, 0, math_pi() / 2, 0, -math_pi() / 2);
+			}
+			if (ui_menu_button(tr("Top"), map_get(config_keymap, "view_top"))) {
+				viewport_set_view(0, 0, 1, 0, 0, 0);
+			}
+			if (ui_menu_button(tr("Bottom"), map_get(config_keymap, "view_bottom"))) {
+				viewport_set_view(0, 0, -1, math_pi(), 0, math_pi());
+			}
+			ui_menu_sub_end();
 		}
-		if (ui_menu_button(tr("Back"), map_get(config_keymap, "view_back"))) {
-			viewport_set_view(0, 1, 0, math_pi() / 2, 0, math_pi());
-		}
-		if (ui_menu_button(tr("Right"), map_get(config_keymap, "view_right"))) {
-			viewport_set_view(1, 0, 0, math_pi() / 2, 0, math_pi() / 2);
-		}
-		if (ui_menu_button(tr("Left"), map_get(config_keymap, "view_left"))) {
-			viewport_set_view(-1, 0, 0, math_pi() / 2, 0, -math_pi() / 2);
-		}
-		if (ui_menu_button(tr("Top"), map_get(config_keymap, "view_top"))) {
-			viewport_set_view(0, 0, 1, 0, 0, 0);
-		}
-		if (ui_menu_button(tr("Bottom"), map_get(config_keymap, "view_bottom"))) {
-			viewport_set_view(0, 0, -1, math_pi(), 0, math_pi());
-		}
-		ui_menu_separator();
 
 		ui.changed = false;
 
-		if (ui_menu_button(tr("Orbit Left"), map_get(config_keymap, "view_orbit_left"))) {
-			viewport_orbit(-math_pi() / 12, 0);
-		}
-		if (ui_menu_button(tr("Orbit Right"), map_get(config_keymap, "view_orbit_right"))) {
-			viewport_orbit(math_pi() / 12, 0);
-		}
-		if (ui_menu_button(tr("Orbit Up"), map_get(config_keymap, "view_orbit_up"))) {
-			viewport_orbit(0, -math_pi() / 12);
-		}
-		if (ui_menu_button(tr("Orbit Down"), map_get(config_keymap, "view_orbit_down"))) {
-			viewport_orbit(0, math_pi() / 12);
-		}
-		if (ui_menu_button(tr("Orbit Opposite"), map_get(config_keymap, "view_orbit_opposite"))) {
-			viewport_orbit_opposite();
+		if (ui_menu_sub_button(ui_handle(__ID__), tr("Orbit"))) {
+			ui_menu_sub_begin(5);
+			if (ui_menu_button(tr("Left"), map_get(config_keymap, "view_orbit_left"))) {
+				viewport_orbit(-math_pi() / 12, 0);
+			}
+			if (ui_menu_button(tr("Right"), map_get(config_keymap, "view_orbit_right"))) {
+				viewport_orbit(math_pi() / 12, 0);
+			}
+			if (ui_menu_button(tr("Up"), map_get(config_keymap, "view_orbit_up"))) {
+				viewport_orbit(0, -math_pi() / 12);
+			}
+			if (ui_menu_button(tr("Down"), map_get(config_keymap, "view_orbit_down"))) {
+				viewport_orbit(0, math_pi() / 12);
+			}
+			if (ui_menu_button(tr("Opposite"), map_get(config_keymap, "view_orbit_opposite"))) {
+				viewport_orbit_opposite();
+			}
+			ui_menu_sub_end();
 		}
 		if (ui_menu_button(tr("Zoom In"), map_get(config_keymap, "view_zoom_in"))) {
 			viewport_zoom(0.2);
@@ -652,7 +664,7 @@ function ui_menubar_show_menu(category: i32) {
 	let panel_x: i32 = ui_menu_panel_x();
 	let panel_y: i32 = ui_menu_panel_y();
 	ui_menu_x        = math_floor(ui._x - ui._w) + panel_x;
-	ui_menu_y        = math_floor(ui_MENUBAR_H(ui)) + panel_y;
+	ui_menu_y        = math_floor(ui_MENUBAR_H(ui)) + panel_y + 2;
 	if (config_raw.touch_ui) {
 		let menu_w: i32 = math_floor(base_default_element_w * UI_SCALE() * 2.0);
 		ui_menu_x -= math_floor((menu_w - ui._w) / 2) + math_floor(ui_header_h / 2);
