@@ -10,7 +10,6 @@
 #include <iron_video.h>
 #include <shellapi.h>
 #include <shlobj.h>
-#include <stb_sprintf.h>
 #include <stdio.h>
 
 void iron_microsoft_format(const char *format, va_list args, wchar_t *buffer) {
