@@ -1,12 +1,26 @@
 
-let memory   = null;
-let heapu8   = null;
-let heapu16  = null;
-let heapu32  = null;
-let heapi32  = null;
-let heapf32  = null;
+let memory  = null;
+let heapu8  = null;
+let heapu16 = null;
+let heapu32 = null;
+let heapi32 = null;
+let heapf32 = null;
 let module   = null;
 let instance = null;
+
+let wgpu_objects = [ null ];
+
+function ptr_to_id(ptr) {
+	if (ptr === null) {
+		return 0;
+	}
+	wgpu_objects.push(ptr);
+	return wgpu_objects.length - 1;
+}
+
+function id_to_ptr(id) {
+	return wgpu_objects[id];
+}
 
 function read_string(ptr) {
 	let str = '';
@@ -16,6 +30,10 @@ function read_string(ptr) {
 	return str;
 }
 
+function read_u32(ptr) {
+	return heapu32[ptr / 4];
+}
+
 function write_string(ptr, str) {
 	for (let i = 0; i < str.length; ++i) {
 		heapu8[ptr + i] = str.charCodeAt(i);
@@ -23,197 +41,394 @@ function write_string(ptr, str) {
 	heapu8[ptr + str.length] = 0;
 }
 
-async function init_webgpu(canvas) {
-	if (!navigator.gpu) {
-		throw new Error('WebGPU not supported');
-	}
-	const adapter = await navigator.gpu.requestAdapter();
-	if (!adapter) {
-		throw new Error('No GPU adapter found');
-	}
-	const device = await adapter.requestDevice();
+function id_to_texture_format(id) {
+	if (id === 0x00000001)
+		return "r8unorm";
+	if (id === 0x00000016)
+		return "rgba8unorm";
+}
 
-	const context = canvas.getContext('webgpu');
-	const format  = navigator.gpu.getPreferredCanvasFormat();
-
-	context.configure({device, format});
-	return {context, device};
+function id_to_vertex_format(id) {
+	return "float32x3";
 }
 
 async function init() {
 	let   wasm_bytes = null;
 	await fetch("./start.wasm").then(res => res.arrayBuffer()).then(buffer => wasm_bytes = new Uint8Array(buffer));
 
-	// Read memory size from wasm file
-	let memory_size = 0;
-	let i           = 8;
-	while (i < wasm_bytes.length) {
-		function read_leb() {
-			let result = 0;
-			let shift  = 0;
-			while (true) {
-				let byte = wasm_bytes[i++];
-				result |= (byte & 0x7f) << shift;
-				if ((byte & 0x80) == 0)
-					return result;
-				shift += 7;
-			}
-		}
-		let type   = read_leb()
-		let length = read_leb()
-		if (type == 6) {
-			read_leb(); // count
-			i++;        // gtype
-			i++;        // mutable
-			read_leb(); // opcode
-			memory_size = read_leb() / 65536 + 1;
-			break;
-		}
-		i += length;
-	}
-
-	memory  = new WebAssembly.Memory({initial : memory_size, maximum : memory_size, shared : true});
+	memory  = new WebAssembly.Memory({initial : 8295, maximum : 8295, shared : true});
 	heapu8  = new Uint8Array(memory.buffer);
 	heapu16 = new Uint16Array(memory.buffer);
 	heapu32 = new Uint32Array(memory.buffer);
 	heapi32 = new Int32Array(memory.buffer);
 	heapf32 = new Float32Array(memory.buffer);
 
-	const canvas = document.getElementById('iron');
+	if (!navigator.gpu) {
+		throw new Error('WebGPU not supported');
+	}
+	let adapter = await navigator.gpu.requestAdapter();
+	let device  = await adapter.requestDevice();
 
-	const {context, device} = await init_webgpu(canvas);
+	let canvas  = document.getElementById('iron');
+	let context = canvas.getContext('webgpu');
+	let format  = navigator.gpu.getPreferredCanvasFormat();
+	context.configure({device, format});
 
 	let file_buffer     = null;
 	let file_buffer_pos = 0;
 
-	const result = await WebAssembly.instantiate(wasm_bytes, {
+	let result = await WebAssembly.instantiate(wasm_bytes, {
 		env : {memory},
 		imports : {
 
-			wgpuDeviceCreateTexture : function(device, descriptor) {
-				return null; // WGPUTexture
+			wgpuCreateInstance : function(pdescriptor) {
+		        let inst = navigator.gpu;
+		        return ptr_to_id(inst);
 			},
-			wgpuTextureCreateView : function(texture, descriptor) {
-				return null; // WGPUTextureView
+			// wgpuInstanceRequestAdapter : function(pinstance, poptions, pcallback_info) {
+			// 	let callback_index = heapu32[(pcallback_info + 12) >> 2];
+			// 	instance.exports.__indirect_function_table.get(callback_index)(0, ptr_to_id(adapter), null, null, null);
+			// 	return 0n;
+			// },
+			wgpuInstanceRequestAdapterSync : function() {
+		        return ptr_to_id(adapter);
 			},
-			wgpuCreateInstance : function(descriptor) {
-				return null; // WGPUInstance
+			wgpuAdapterGetInfo : function(padapter, pinfo) {
+		        return 0;
 			},
-			wgpuInstanceRequestAdapter : function(instance, options, callbackInfo) {
-				return null; // WGPUFuture
+			wgpuAdapterInfoFreeMembers : function(padapter_info) {},
+			// wgpuAdapterRequestDevice : function(padapter, pdescriptor, pcallback_info) {
+			// 	return 0;
+			// },
+			wgpuAdapterRequestDeviceSync : function() {
+		        return ptr_to_id(device);
 			},
-			wgpuAdapterGetInfo : function(adapter, info) {
-				return null; // WGPUStatus
+			wgpuDeviceCreateTexture : function(pdevice, pdescriptor) {
+		        let device = id_to_ptr(pdevice);
+		        // WGPUTextureDescriptor
+		        let desc = {
+			        usage : read_u32(pdescriptor + 16),
+			        dimension : "2d",
+			        size : {width : read_u32(pdescriptor + 32), height : read_u32(pdescriptor + 36), depthOrArrayLayers : 1},
+			        format : read_u32(pdescriptor + 44),
+			        mipLevelCount : 1,
+			        sampleCount : 1
+		        };
+		        desc.format = id_to_texture_format(desc.format);
+		        let texture = device.createTexture(desc);
+		        return ptr_to_id(texture);
 			},
-			wgpuAdapterInfoFreeMembers : function(adapterInfo) {
+			wgpuTextureCreateView : function(ptexture, pdescriptor) {
+		        let texture = id_to_ptr(ptexture);
+		        let desc    = {}; // TODO
+		        let view    = texture.createView(desc);
+		        return ptr_to_id(view);
 			},
-			wgpuAdapterRequestDevice : function(adapter, descriptor, callbackInfo) {
-				return null; // WGPUFuture
+			wgpuDeviceGetQueue : function(pdevice) {
+		        let device = id_to_ptr(pdevice);
+		        return ptr_to_id(device.queue);
 			},
-			wgpuDeviceGetQueue : function(device) {
-				return null; // WGPUQueue
+			wgpuDeviceCreateBindGroupLayout : function(pdevice, pdescriptor) {
+		        let device = id_to_ptr(pdevice);
+		        // WGPUBindGroupLayoutDescriptor
+		        let desc     = {entryCount : read_u32(pdescriptor + 12), entries : []};
+		        let pentries = read_u32(pdescriptor + 16);
+
+		        // WGPUBindGroupLayoutEntry
+		        for (let i = 0; i < desc.entryCount; ++i) {
+			        let e = {
+				        binding : read_u32(i * 88 + pentries + 4),
+				        visibility : read_u32(i * 88 + pentries + 8),
+			        };
+
+			        if (read_u32(i * 88 + pentries + 28) != 0x00000000) { // WGPUBufferBindingType_BindingNotUsed
+				        e.buffer = {
+					        type : read_u32(i * 88 + pentries + 28),
+					        hasDynamicOffset : read_u32(i * 88 + pentries + 32),
+					        minBindingSize : read_u32(i * 88 + pentries + 36)
+				        };
+				        if (e.buffer.type === 0x00000002)
+					        e.buffer.type = "uniform";
+			        }
+
+			        if (read_u32(i * 88 + pentries + 52) != 0x00000000) { // WGPUSamplerBindingType_BindingNotUsed
+				        e.sampler = {type : read_u32(i * 88 + pentries + 52)};
+				        if (e.sampler.type === 0x00000002)
+					        e.sampler.type = "filtering";
+			        }
+
+			        if (read_u32(i * 88 + pentries + 60) != 0x00000000) { // WGPUTextureSampleType_BindingNotUsed
+				        e.texture = {
+					        sampleType : read_u32(i * 88 + pentries + 60),
+					        viewDimension : "2d", // read_u32(i * 88 + pentries + 64),
+					        multisampled : read_u32(i * 88 + pentries + 68)
+				        };
+				        if (e.texture.sampleType === 0x00000002)
+					        e.texture.sampleType = "float";
+			        }
+
+			        desc.entries.push(e);
+		        }
+		        let bgl = device.createBindGroupLayout(desc);
+		        return ptr_to_id(bgl);
 			},
-			wgpuDeviceCreateBindGroupLayout : function(device, descriptor) {
-				return null; // WGPUBindGroupLayout
+			wgpuDeviceCreateBuffer : function(pdevice, pdescriptor) {
+		        let device = id_to_ptr(pdevice);
+		        // WGPUBufferDescriptor
+		        let desc   = {usage : read_u32(pdescriptor + 16), size : read_u32(pdescriptor + 24), mappedAtCreation : read_u32(pdescriptor + 32)};
+		        let buffer = device.createBuffer(desc);
+		        return ptr_to_id(buffer);
 			},
-			wgpuDeviceCreateBuffer : function(device, descriptor) {
-				return null; // WGPUBuffer
+			wgpuBufferGetMappedRange : function(pbuffer, offset, size) {
+		        let buffer = id_to_ptr(pbuffer);
+		        let ptr    = instance.exports.malloc(size);
+		        let ab     = buffer.getMappedRange(offset, size);
+		        for (let i = 0; i < ab.length; ++i) {
+			        heapu8[ptr + i] = ab[i];
+		        }
+		        return ptr;
 			},
-			wgpuBufferGetMappedRange : function(buffer, offset, size) {
-				return null; // void *
+			wgpuBufferUnmap : function(pbuffer) {
+		        let buffer = id_to_ptr(pbuffer);
+		        buffer.unmap();
 			},
-			wgpuBufferUnmap : function(buffer) {
+			wgpuDeviceCreateCommandEncoder : function(pdevice, pdescriptor) {
+		        let device  = id_to_ptr(pdevice);
+		        let desc    = {}; // TODO
+		        let encoder = device.createCommandEncoder(desc);
+		        return ptr_to_id(encoder);
 			},
-			wgpuDeviceCreateCommandEncoder : function(device, descriptor) {
-				return null; // WGPUCommandEncoder
+			wgpuCommandEncoderCopyBufferToTexture : function(pcommand_encoder, psource, pdestination, pcopysize) {
+		        let encoder = id_to_ptr(pcommand_encoder);
+		        // WGPUTexelCopyBufferInfo
+		        let source = {
+			        layout : {bytesPerRow : read_u32(psource + 8), rowsPerImage : read_u32(psource + 12)},
+			        buffer : id_to_ptr(read_u32(psource + 16))
+		        };
+		        // WGPUTexelCopyTextureInfo
+		        let destination = {texture : id_to_ptr(read_u32(pdestination))};
+		        // WGPUExtent3D
+		        let copysize = {width : read_u32(pcopysize), height : read_u32(pcopysize + 4), depthOrArrayLayers : read_u32(pcopysize + 8)};
+		        encoder.copyBufferToTexture(source, destination, copysize);
 			},
-			wgpuCommandEncoderCopyBufferToTexture : function(commandEncoder, source, destination, copySize) {
+			wgpuCommandEncoderFinish : function(pcommand_encoder, pdescriptor) {
+		        let encoder        = id_to_ptr(pcommand_encoder);
+		        let desc           = {}; // TODO: read WGPUCommandBufferDescriptor
+		        let command_buffer = encoder.finish(desc);
+		        return ptr_to_id(command_buffer);
 			},
-			wgpuCommandEncoderFinish : function(commandEncoder, descriptor) {
-				return null; // WGPUCommandBuffer
+			wgpuQueueSubmit : function(pqueue, command_count, pcommands) {
+		        let queue    = id_to_ptr(pqueue);
+		        let commands = [];
+		        for (let i = 0; i < command_count; i++) {
+			        commands.push(id_to_ptr(heapu32[(pcommands >> 2) + i]));
+		        }
+		        queue.submit(commands);
 			},
-			wgpuQueueSubmit : function(queue, commandCount, commands) {
+			wgpuBufferRelease : function(pbuffer) {},
+			wgpuDeviceCreateSampler : function(pdevice, pdescriptor) {
+		        let device  = id_to_ptr(pdevice);
+		        // WGPUSamplerDescriptor
+				let desc    = {};
+		        let sampler = device.createSampler(desc);
+		        return ptr_to_id(sampler);
 			},
-			wgpuBufferRelease : function(buffer) {
+			wgpuSurfaceGetCapabilities : function(psurface, padapter, pcapabilities) {
+		        return 0;
 			},
-			wgpuDeviceCreateSampler : function(device, descriptor) {
-				return null; // WGPUSampler
+			wgpuSurfaceCapabilitiesFreeMembers : function(pcapabilities) {},
+			wgpuBufferDestroy : function(pbuffer) {
+		        let buffer = id_to_ptr(pbuffer);
+		        buffer.destroy();
 			},
-			wgpuSurfaceGetCapabilities : function(surface, adapter, capabilities) {
-				return null; // WGPUStatus
+			wgpuSurfaceGetCurrentTexture : function(psurface, psurface_texture) {
+		        let surface = id_to_ptr(psurface) || context;
+		        let texture = surface.getCurrentTexture();
+		        // WGPUSurfaceTexture
 			},
-			wgpuSurfaceCapabilitiesFreeMembers : function(surfaceCapabilities) {
+			wgpuCommandEncoderBeginRenderPass : function(pcommand_encoder, pdescriptor) {
+		        let encoder     = id_to_ptr(pcommand_encoder);
+		        // WGPURenderPassDescriptor
+				let desc        = {};
+		        let render_pass = encoder.beginRenderPass(desc);
+		        return ptr_to_id(render_pass);
 			},
-			wgpuBufferDestroy : function(buffer) {
+			wgpuRenderPassEncoderSetViewport : function(prender_pass_encoder, x, y, width, height, min_depth, max_depth) {
+		        let render_pass = id_to_ptr(prender_pass_encoder);
+		        render_pass.setViewport(x, y, width, height, min_depth, max_depth);
 			},
-			wgpuSurfaceGetCurrentTexture : function(surface, surfaceTexture) {
+			wgpuRenderPassEncoderSetScissorRect : function(prender_pass_encoder, x, y, width, height) {
+		        let render_pass = id_to_ptr(prender_pass_encoder);
+		        render_pass.setScissorRect(x, y, width, height);
 			},
-			wgpuCommandEncoderBeginRenderPass : function(commandEncoder, descriptor) {
-				return null; // WGPURenderPassEncoder
+			wgpuRenderPassEncoderEnd : function(prender_pass_encoder) {
+		        let render_pass = id_to_ptr(prender_pass_encoder);
+		        render_pass.end();
 			},
-			wgpuRenderPassEncoderSetViewport : function(renderPassEncoder, x, y, width, height, minDepth, maxDepth) {
+			wgpuRenderPassEncoderRelease : function(prender_pass_encoder) {},
+			wgpuCommandBufferRelease : function(commandBufferPtr) {},
+			wgpuCommandEncoderRelease : function(pcommand_encoder) {},
+			wgpuSurfacePresent : function(psurface) {
+		        return 0;
 			},
-			wgpuRenderPassEncoderSetScissorRect : function(renderPassEncoder, x, y, width, height) {
+			wgpuRenderPassEncoderDrawIndexed : function(prender_pass_encoder, index_count, instance_count, first_index, base_vertex, first_instance) {
+		        let render_pass = id_to_ptr(prender_pass_encoder);
+		        render_pass.drawIndexed(index_count, instance_count, first_index, base_vertex, first_instance);
 			},
-			wgpuRenderPassEncoderEnd : function(renderPassEncoder) {
+			wgpuRenderPassEncoderSetPipeline : function(prender_pass_encoder, ppipeline) {
+		        let render_pass = id_to_ptr(prender_pass_encoder);
+		        let pipeline    = id_to_ptr(ppipeline);
+		        render_pass.setPipeline(pipeline);
 			},
-			wgpuRenderPassEncoderRelease : function(renderPassEncoder) {
+			wgpuRenderPassEncoderSetVertexBuffer : function(prender_pass_encoder, slot, pbuffer, offset, size) {
+		        let render_pass = id_to_ptr(prender_pass_encoder);
+		        let buffer      = id_to_ptr(pbuffer);
+		        render_pass.setVertexBuffer(slot, buffer, offset, size);
 			},
-			wgpuCommandBufferRelease : function(commandBuffer) {
+			wgpuRenderPassEncoderSetIndexBuffer : function(prender_pass_encoder, pbuffer, format, offset, size) {
+		        let render_pass = id_to_ptr(prender_pass_encoder);
+		        let buffer      = id_to_ptr(pbuffer);
+		        render_pass.setIndexBuffer(buffer, 'uint32', offset, size);
 			},
-			wgpuCommandEncoderRelease : function(commandEncoder) {
+			wgpuDeviceCreateBindGroup : function(pdevice, pdescriptor) {
+		        let device = id_to_ptr(pdevice);
+		        // WGPUBindGroupDescriptor
+				let desc   = {};
+		        let bg     = device.createBindGroup(desc);
+		        return ptr_to_id(bg);
 			},
-			wgpuSurfacePresent : function(surface) {
-				return null; // WGPUStatus
+			wgpuRenderPassEncoderSetBindGroup : function(prender_pass_encoder, group_index, pgroup, dynamic_offset_count, pdynamic_offsets) {
+		        let render_pass     = id_to_ptr(prender_pass_encoder);
+		        let group           = id_to_ptr(pgroup);
+		        let dynamic_offsets = [];
+		        for (let i = 0; i < dynamic_offset_count; i++) {
+			        dynamic_offsets.push(heapu32[(pdynamic_offsets >> 2) + i]);
+		        }
+		        render_pass.setBindGroup(group_index, group, dynamic_offsets);
 			},
-			wgpuRenderPassEncoderDrawIndexed : function(renderPassEncoder, indexCount, instanceCount, firstIndex, baseVertex, firstInstance) {
+			wgpuBindGroupRelease : function(pbind_group) {},
+			wgpuRenderPipelineRelease : function(prender_pipeline) {},
+			wgpuPipelineLayoutRelease : function(ppipeline_layout) {},
+			wgpuDeviceCreatePipelineLayout : function(pdevice, pdescriptor) {
+		        let device = id_to_ptr(pdevice);
+		        // WGPUPipelineLayoutDescriptor
+		        let desc = {bindGroupLayoutCount : read_u32(pdescriptor + 24), bindGroupLayouts : []};
+		        let pbgl = read_u32(pdescriptor + 28);
+		        for (let i = 0; i < desc.bindGroupLayoutCount; ++i) {
+			        // WGPUBindGroupLayout
+			        let bgl = id_to_ptr(read_u32(pbgl + i * 4));
+			        desc.bindGroupLayouts.push(bgl);
+		        }
+		        let pl = device.createPipelineLayout(desc);
+		        return ptr_to_id(pl);
 			},
-			wgpuRenderPassEncoderSetPipeline : function(renderPassEncoder, pipeline) {
+			wgpuDeviceCreateShaderModule : function(pdevice, pdescriptor) {
+		        let device = id_to_ptr(pdevice);
+		        // WGPUShaderSourceWGSL
+		        let pwgsl = read_u32(pdescriptor);
+		        let wgsl  = {chain : {sType : read_u32(pwgsl + 4)}, code : {data : read_u32(pwgsl + 8), length : read_u32(pwgsl + 16)}};
+		        // WGPUShaderModuleDescriptor
+		        // let desc   = { nextInChain: wgsl };
+		        let desc = {code : wgsl.code};
+		        let sm   = device.createShaderModule(desc);
+		        return ptr_to_id(sm);
 			},
-			wgpuRenderPassEncoderSetVertexBuffer : function(renderPassEncoder, slot, buffer, offset, size) {
+			wgpuDeviceCreateRenderPipeline : function(pdevice, pdescriptor) {
+		        let device = id_to_ptr(pdevice);
+
+		        // WGPUFragmentState
+		        let pfrag    = read_u32(pdescriptor + 128);
+		        let frag     = {module : id_to_ptr(read_u32(pfrag + 4)), entryPoint : "main", targetCount : 1, targets : []};
+		        let ptragets = read_u32(pdescriptor + 48);
+		        for (let i = 0; i < frag.targetCount; ++i) {
+			        // WGPUColorTargetState
+			        let t = {format : id_to_texture_format(read_u32(ptragets + 4 + i * 24)), blend : null, writeMask : read_u32(ptragets + 12 + i * 24)};
+			        frag.targets.push(t);
+		        }
+
+		        // WGPURenderPipelineDescriptor
+		        let desc = {
+			        layout : id_to_ptr(read_u32(pdescriptor + 20)),
+			        // WGPUVertexState
+			        vertex : {module : id_to_ptr(read_u32(pdescriptor + 28)), entryPoint : "main", bufferCount : 1, buffers : []},
+			        primitive : {topology : "trianglelist", frontFace : "ccw", cullMode : "none"},
+			        depthStencil : null,
+			        multisample : {count : 1, mask : 0},
+			        fragment : frag,
+		        };
+
+		        let pbuffers = read_u32(pdescriptor + 64);
+		        for (let i = 0; i < desc.vertex.bufferCount; ++i) {
+			        // WGPUVertexBufferLayout
+			        let b           = {arrayStride : read_u32(pbuffers + 8 + i * 28), attributeCount : read_u32(pbuffers + 16 + i * 28), attributes : []};
+			        let pattributes = read_u32(pbuffers + 24 + i * 28);
+			        for (let i = 0; i < b.attributeCount; ++i) {
+				        // WGPUVertexAttribute
+				        let a = {
+					        format : id_to_vertex_format(read_u32(pattributes + 4 + i * 20)),
+					        offset : read_u32(pattributes + 8 + i * 20),
+					        shaderLocation : read_u32(pattributes + 16 + i * 20)
+				        };
+				        b.attributes.push(a);
+			        }
+			        desc.vertex.buffers.push(b);
+		        }
+
+		        let rp = device.createRenderPipeline(desc);
+		        return ptr_to_id(rp);
 			},
-			wgpuRenderPassEncoderSetIndexBuffer : function(renderPassEncoder, buffer, format, offset, size) {
+			wgpuShaderModuleRelease : function(pshader_module) {},
+			wgpuQueueWriteBuffer : function(pqueue, pbuffer, buffer_offset, pdata, size) {
+		        let queue  = id_to_ptr(pqueue) || device.queue;
+		        let buffer = id_to_ptr(pbuffer);
+		        let data   = heapu8.subarray(pdata, pdata + size);
+		        queue.writeBuffer(buffer, buffer_offset, data);
 			},
-			wgpuDeviceCreateBindGroup : function(device, descriptor) {
-				return null; // WGPUBindGroup
+			wgpuTextureDestroy : function(ptexture) {
+		        let texture = id_to_ptr(ptexture);
+		        texture.destroy();
 			},
-			wgpuRenderPassEncoderSetBindGroup : function(renderPassEncoder, groupIndex, group, dynamicOffsetCount, dynamicOffsets) {
+			wgpuTextureRelease : function(ptexture) {},
+			wgpuTextureViewRelease : function(ptexture_view) {},
+			wgpuCommandEncoderCopyBufferToBuffer : function(pcommand_encoder, psource, source_offset, pdestination, destination_offset, size) {
+		        let encoder     = id_to_ptr(pcommand_encoder);
+		        let source      = id_to_ptr(psource);
+		        let destination = id_to_ptr(pdestination);
+		        encoder.copyBufferToBuffer(source, source_offset, destination, destination_offset, size);
 			},
-			wgpuBindGroupRelease : function(bindGroup) {
-			},
-			wgpuRenderPipelineRelease : function(renderPipeline) {
-			},
-			wgpuPipelineLayoutRelease : function(pipelineLayout) {
-			},
-			wgpuDeviceCreatePipelineLayout : function(device, descriptor) {
-				return null; // WGPUPipelineLayout
-			},
-			wgpuDeviceCreateShaderModule : function(device, descriptor) {
-				return null; // WGPUShaderModule
-			},
-			wgpuDeviceCreateRenderPipeline : function(device, descriptor) {
-				return null; // WGPURenderPipeline
-			},
-			wgpuShaderModuleRelease : function(shaderModule) {
-			},
-			wgpuQueueWriteBuffer : function(queue, buffer, bufferOffset, data, size) {
-			},
-			wgpuTextureDestroy : function(texture) {
-			},
-			wgpuTextureRelease : function(texture) {
-			},
-			wgpuTextureViewRelease : function(textureView) {
-			},
-			wgpuCommandEncoderCopyBufferToBuffer : function(commandEncoder, source, sourceOffset, destination, destinationOffset, size) {
-			},
-			wgpuSurfaceConfigure : function(surface, config) {
+			wgpuSurfaceConfigure : function(psurface, pconfig) {
+		        let surface = id_to_ptr(psurface) || context;
+		        // WGPUSurfaceConfiguration
+		        let config = {
+			        device : id_to_ptr(read_u32(pconfig + 4)),
+			        format : id_to_texture_format(read_u32(pconfig + 8)),
+			        usage : read_u32(pconfig + 16),
+			        width : read_u32(pconfig + 24),
+			        height : read_u32(pconfig + 28),
+			        viewFormatCount : read_u32(pconfig + 32),
+			        viewFormats : [],
+			        alphaMode : read_u32(pconfig + 40),
+			        presentMode : read_u32(pconfig + 44)
+		        };
+		        if (config.alphaMode === 0x00000001)
+			        config.alphaMode = "opaque";
+		        if (config.presentMode === 0x00000001)
+			        config.presentMode = "fifo";
+		        if (config.presentMode === 0x00000004)
+			        config.presentMode = "mailbox";
+		        let pview_formats = read_u32(pconfig + 36);
+		        for (let i = 0; i < config.viewFormatCount; ++i) {
+			        let f = id_to_texture_format(read_u32(pview_formats + i * 4));
+			        config.viewFormats.push(f);
+		        }
+		        surface.configure(config);
 			},
 
 			js_fprintf : function(format) {
 		        console.log(read_string(format));
 			},
 			js_fopen : function(filename) {
-		        const req = new XMLHttpRequest();
+		        let req = new XMLHttpRequest();
 		        req.open("GET", read_string(filename), false);
 		        req.overrideMimeType("text/plain; charset=x-user-defined");
 		        req.send();

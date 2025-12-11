@@ -12,10 +12,19 @@
 static uint8_t *heap     = NULL;
 static size_t   heap_top = 0;
 
+#ifdef IRON_WASM
+__attribute__((import_module("imports"), import_name("js_fprintf"))) void js_fprintf(const char *format);
+#endif
+
 void *gc_alloc(size_t size) {
 #ifdef HEAP_SIZE
 	size_t old_top = heap_top;
 	heap_top += size;
+#ifdef IRON_WASM
+	if (heap_top >= HEAP_SIZE) {
+		js_fprintf("gc_alloc: out of memory");
+	}
+#endif
 	return &heap[old_top];
 #else
 	return calloc(size, 1);

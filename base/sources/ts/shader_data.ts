@@ -12,6 +12,8 @@ function shader_data_ext(): string {
 	return ".spirv";
 	/// elseif arm_metal
 	return ".metal";
+	/// elseif arm_webgpu
+	return ".wgsl";
 	/// else
 	return ".d3d11";
 	/// end

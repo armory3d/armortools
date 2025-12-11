@@ -7,55 +7,79 @@
 #include <stdlib.h>
 #include <string.h>
 
-__attribute__((import_module("imports"), import_name("wgpuDeviceCreateTexture"))) WGPUTexture wgpuDeviceCreateTexture(WGPUDevice device, WGPUTextureDescriptor const * descriptor);
-__attribute__((import_module("imports"), import_name("wgpuTextureCreateView"))) WGPUTextureView wgpuTextureCreateView(WGPUTexture texture, WGPU_NULLABLE WGPUTextureViewDescriptor const * descriptor);
-__attribute__((import_module("imports"), import_name("wgpuCreateInstance"))) WGPUInstance wgpuCreateInstance(WGPU_NULLABLE WGPUInstanceDescriptor const * descriptor);
-__attribute__((import_module("imports"), import_name("wgpuInstanceRequestAdapter"))) WGPUFuture wgpuInstanceRequestAdapter(WGPUInstance instance, WGPU_NULLABLE WGPURequestAdapterOptions const * options, WGPURequestAdapterCallbackInfo callbackInfo);
-__attribute__((import_module("imports"), import_name("wgpuAdapterGetInfo"))) WGPUStatus wgpuAdapterGetInfo(WGPUAdapter adapter, WGPUAdapterInfo * info);
-__attribute__((import_module("imports"), import_name("wgpuAdapterInfoFreeMembers"))) void wgpuAdapterInfoFreeMembers(WGPUAdapterInfo adapterInfo);
-__attribute__((import_module("imports"), import_name("wgpuAdapterRequestDevice"))) WGPUFuture wgpuAdapterRequestDevice(WGPUAdapter adapter, WGPU_NULLABLE WGPUDeviceDescriptor const * descriptor, WGPURequestDeviceCallbackInfo callbackInfo);
-__attribute__((import_module("imports"), import_name("wgpuDeviceGetQueue"))) WGPUQueue wgpuDeviceGetQueue(WGPUDevice device);
-__attribute__((import_module("imports"), import_name("wgpuDeviceCreateBindGroupLayout"))) WGPUBindGroupLayout wgpuDeviceCreateBindGroupLayout(WGPUDevice device, WGPUBindGroupLayoutDescriptor const * descriptor);
-__attribute__((import_module("imports"), import_name("wgpuDeviceCreateBuffer"))) WGPUBuffer wgpuDeviceCreateBuffer(WGPUDevice device, WGPUBufferDescriptor const * descriptor);
-__attribute__((import_module("imports"), import_name("wgpuBufferGetMappedRange"))) void *wgpuBufferGetMappedRange(WGPUBuffer buffer, size_t offset, size_t size);
-__attribute__((import_module("imports"), import_name("wgpuBufferUnmap"))) void wgpuBufferUnmap(WGPUBuffer buffer);
-__attribute__((import_module("imports"), import_name("wgpuDeviceCreateCommandEncoder"))) WGPUCommandEncoder wgpuDeviceCreateCommandEncoder(WGPUDevice device, WGPU_NULLABLE WGPUCommandEncoderDescriptor const * descriptor);
-__attribute__((import_module("imports"), import_name("wgpuCommandEncoderCopyBufferToTexture"))) void wgpuCommandEncoderCopyBufferToTexture(WGPUCommandEncoder commandEncoder, WGPUTexelCopyBufferInfo const * source, WGPUTexelCopyTextureInfo const * destination, WGPUExtent3D const * copySize);
-__attribute__((import_module("imports"), import_name("wgpuCommandEncoderFinish"))) WGPUCommandBuffer wgpuCommandEncoderFinish(WGPUCommandEncoder commandEncoder, WGPU_NULLABLE WGPUCommandBufferDescriptor const * descriptor);
-__attribute__((import_module("imports"), import_name("wgpuQueueSubmit"))) void wgpuQueueSubmit(WGPUQueue queue, size_t commandCount, WGPUCommandBuffer const * commands);
-__attribute__((import_module("imports"), import_name("wgpuBufferRelease"))) void wgpuBufferRelease(WGPUBuffer buffer);
-__attribute__((import_module("imports"), import_name("wgpuDeviceCreateSampler"))) WGPUSampler wgpuDeviceCreateSampler(WGPUDevice device, WGPU_NULLABLE WGPUSamplerDescriptor const * descriptor);
-__attribute__((import_module("imports"), import_name("wgpuSurfaceGetCapabilities"))) WGPUStatus wgpuSurfaceGetCapabilities(WGPUSurface surface, WGPUAdapter adapter, WGPUSurfaceCapabilities * capabilities);
-__attribute__((import_module("imports"), import_name("wgpuSurfaceCapabilitiesFreeMembers"))) void wgpuSurfaceCapabilitiesFreeMembers(WGPUSurfaceCapabilities surfaceCapabilities);
-__attribute__((import_module("imports"), import_name("wgpuBufferDestroy"))) void wgpuBufferDestroy(WGPUBuffer buffer);
-__attribute__((import_module("imports"), import_name("wgpuSurfaceGetCurrentTexture"))) void wgpuSurfaceGetCurrentTexture(WGPUSurface surface, WGPUSurfaceTexture * surfaceTexture);
-__attribute__((import_module("imports"), import_name("wgpuCommandEncoderBeginRenderPass"))) WGPURenderPassEncoder wgpuCommandEncoderBeginRenderPass(WGPUCommandEncoder commandEncoder, WGPURenderPassDescriptor const * descriptor);
-__attribute__((import_module("imports"), import_name("wgpuRenderPassEncoderSetViewport"))) void wgpuRenderPassEncoderSetViewport(WGPURenderPassEncoder renderPassEncoder, float x, float y, float width, float height, float minDepth, float maxDepth);
-__attribute__((import_module("imports"), import_name("wgpuRenderPassEncoderSetScissorRect"))) void wgpuRenderPassEncoderSetScissorRect(WGPURenderPassEncoder renderPassEncoder, uint32_t x, uint32_t y, uint32_t width, uint32_t height);
-__attribute__((import_module("imports"), import_name("wgpuRenderPassEncoderEnd"))) void wgpuRenderPassEncoderEnd(WGPURenderPassEncoder renderPassEncoder);
-__attribute__((import_module("imports"), import_name("wgpuRenderPassEncoderRelease"))) void wgpuRenderPassEncoderRelease(WGPURenderPassEncoder renderPassEncoder);
-__attribute__((import_module("imports"), import_name("wgpuCommandBufferRelease"))) void wgpuCommandBufferRelease(WGPUCommandBuffer commandBuffer);
-__attribute__((import_module("imports"), import_name("wgpuCommandEncoderRelease"))) void wgpuCommandEncoderRelease(WGPUCommandEncoder commandEncoder);
-__attribute__((import_module("imports"), import_name("wgpuSurfacePresent"))) WGPUStatus wgpuSurfacePresent(WGPUSurface surface);
-__attribute__((import_module("imports"), import_name("wgpuRenderPassEncoderDrawIndexed"))) void wgpuRenderPassEncoderDrawIndexed(WGPURenderPassEncoder renderPassEncoder, uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t baseVertex, uint32_t firstInstance);
-__attribute__((import_module("imports"), import_name("wgpuRenderPassEncoderSetPipeline"))) void wgpuRenderPassEncoderSetPipeline(WGPURenderPassEncoder renderPassEncoder, WGPURenderPipeline pipeline);
-__attribute__((import_module("imports"), import_name("wgpuRenderPassEncoderSetVertexBuffer"))) void wgpuRenderPassEncoderSetVertexBuffer(WGPURenderPassEncoder renderPassEncoder, uint32_t slot, WGPU_NULLABLE WGPUBuffer buffer, uint64_t offset, uint64_t size);
-__attribute__((import_module("imports"), import_name("wgpuRenderPassEncoderSetIndexBuffer"))) void wgpuRenderPassEncoderSetIndexBuffer(WGPURenderPassEncoder renderPassEncoder, WGPUBuffer buffer, WGPUIndexFormat format, uint64_t offset, uint64_t size);
-__attribute__((import_module("imports"), import_name("wgpuDeviceCreateBindGroup"))) WGPUBindGroup wgpuDeviceCreateBindGroup(WGPUDevice device, WGPUBindGroupDescriptor const * descriptor);
-__attribute__((import_module("imports"), import_name("wgpuRenderPassEncoderSetBindGroup"))) void wgpuRenderPassEncoderSetBindGroup(WGPURenderPassEncoder renderPassEncoder, uint32_t groupIndex, WGPU_NULLABLE WGPUBindGroup group, size_t dynamicOffsetCount, uint32_t const * dynamicOffsets);
-__attribute__((import_module("imports"), import_name("wgpuBindGroupRelease"))) void wgpuBindGroupRelease(WGPUBindGroup bindGroup);
-__attribute__((import_module("imports"), import_name("wgpuRenderPipelineRelease"))) void wgpuRenderPipelineRelease(WGPURenderPipeline renderPipeline);
-__attribute__((import_module("imports"), import_name("wgpuPipelineLayoutRelease"))) void wgpuPipelineLayoutRelease(WGPUPipelineLayout pipelineLayout);
-__attribute__((import_module("imports"), import_name("wgpuDeviceCreatePipelineLayout"))) WGPUPipelineLayout wgpuDeviceCreatePipelineLayout(WGPUDevice device, WGPUPipelineLayoutDescriptor const * descriptor);
-__attribute__((import_module("imports"), import_name("wgpuDeviceCreateShaderModule"))) WGPUShaderModule wgpuDeviceCreateShaderModule(WGPUDevice device, WGPUShaderModuleDescriptor const * descriptor);
-__attribute__((import_module("imports"), import_name("wgpuDeviceCreateRenderPipeline"))) WGPURenderPipeline wgpuDeviceCreateRenderPipeline(WGPUDevice device, WGPURenderPipelineDescriptor const * descriptor);
-__attribute__((import_module("imports"), import_name("wgpuShaderModuleRelease"))) void wgpuShaderModuleRelease(WGPUShaderModule shaderModule);
-__attribute__((import_module("imports"), import_name("wgpuQueueWriteBuffer"))) void wgpuQueueWriteBuffer(WGPUQueue queue, WGPUBuffer buffer, uint64_t bufferOffset, void const * data, size_t size);
-__attribute__((import_module("imports"), import_name("wgpuTextureDestroy"))) void wgpuTextureDestroy(WGPUTexture texture);
-__attribute__((import_module("imports"), import_name("wgpuTextureRelease"))) void wgpuTextureRelease(WGPUTexture texture);
-__attribute__((import_module("imports"), import_name("wgpuTextureViewRelease"))) void wgpuTextureViewRelease(WGPUTextureView textureView);
-__attribute__((import_module("imports"), import_name("wgpuCommandEncoderCopyBufferToBuffer"))) void wgpuCommandEncoderCopyBufferToBuffer(WGPUCommandEncoder commandEncoder, WGPUBuffer source, uint64_t sourceOffset, WGPUBuffer destination, uint64_t destinationOffset, uint64_t size);
-__attribute__((import_module("imports"), import_name("wgpuSurfaceConfigure"))) void wgpuSurfaceConfigure(WGPUSurface surface, WGPUSurfaceConfiguration const * config);
+#define IMPORT(str) __attribute__((import_module("imports"), import_name(str)))
+
+IMPORT("wgpuDeviceCreateTexture") WGPUTexture wgpuDeviceCreateTexture(WGPUDevice device, WGPUTextureDescriptor const *descriptor);
+IMPORT("wgpuTextureCreateView") WGPUTextureView wgpuTextureCreateView(WGPUTexture texture, WGPU_NULLABLE WGPUTextureViewDescriptor const *descriptor);
+IMPORT("wgpuCreateInstance") WGPUInstance wgpuCreateInstance(WGPU_NULLABLE WGPUInstanceDescriptor const *descriptor);
+// IMPORT("wgpuInstanceRequestAdapter") WGPUFuture wgpuInstanceRequestAdapter(WGPUInstance instance, WGPU_NULLABLE WGPURequestAdapterOptions const * options,
+// WGPURequestAdapterCallbackInfo callbackInfo);
+IMPORT("wgpuAdapterGetInfo") WGPUStatus wgpuAdapterGetInfo(WGPUAdapter adapter, WGPUAdapterInfo *info);
+IMPORT("wgpuAdapterInfoFreeMembers") void wgpuAdapterInfoFreeMembers(WGPUAdapterInfo adapterInfo);
+IMPORT("wgpuAdapterRequestDevice")
+WGPUFuture wgpuAdapterRequestDevice(WGPUAdapter adapter, WGPU_NULLABLE WGPUDeviceDescriptor const *descriptor, WGPURequestDeviceCallbackInfo callbackInfo);
+IMPORT("wgpuDeviceGetQueue") WGPUQueue wgpuDeviceGetQueue(WGPUDevice device);
+IMPORT("wgpuDeviceCreateBindGroupLayout")
+WGPUBindGroupLayout wgpuDeviceCreateBindGroupLayout(WGPUDevice device, WGPUBindGroupLayoutDescriptor const *descriptor);
+IMPORT("wgpuDeviceCreateBuffer") WGPUBuffer wgpuDeviceCreateBuffer(WGPUDevice device, WGPUBufferDescriptor const *descriptor);
+IMPORT("wgpuBufferGetMappedRange") void *wgpuBufferGetMappedRange(WGPUBuffer buffer, size_t offset, size_t size);
+IMPORT("wgpuBufferUnmap") void wgpuBufferUnmap(WGPUBuffer buffer);
+IMPORT("wgpuDeviceCreateCommandEncoder")
+WGPUCommandEncoder wgpuDeviceCreateCommandEncoder(WGPUDevice device, WGPU_NULLABLE WGPUCommandEncoderDescriptor const *descriptor);
+IMPORT("wgpuCommandEncoderCopyBufferToTexture")
+void wgpuCommandEncoderCopyBufferToTexture(WGPUCommandEncoder commandEncoder, WGPUTexelCopyBufferInfo const *source,
+                                           WGPUTexelCopyTextureInfo const *destination, WGPUExtent3D const *copySize);
+IMPORT("wgpuCommandEncoderFinish")
+WGPUCommandBuffer wgpuCommandEncoderFinish(WGPUCommandEncoder commandEncoder, WGPU_NULLABLE WGPUCommandBufferDescriptor const *descriptor);
+IMPORT("wgpuQueueSubmit") void wgpuQueueSubmit(WGPUQueue queue, size_t commandCount, WGPUCommandBuffer const *commands);
+IMPORT("wgpuBufferRelease") void wgpuBufferRelease(WGPUBuffer buffer);
+IMPORT("wgpuDeviceCreateSampler") WGPUSampler wgpuDeviceCreateSampler(WGPUDevice device, WGPU_NULLABLE WGPUSamplerDescriptor const *descriptor);
+IMPORT("wgpuSurfaceGetCapabilities") WGPUStatus wgpuSurfaceGetCapabilities(WGPUSurface surface, WGPUAdapter adapter, WGPUSurfaceCapabilities *capabilities);
+IMPORT("wgpuSurfaceCapabilitiesFreeMembers") void wgpuSurfaceCapabilitiesFreeMembers(WGPUSurfaceCapabilities surfaceCapabilities);
+IMPORT("wgpuBufferDestroy") void wgpuBufferDestroy(WGPUBuffer buffer);
+IMPORT("wgpuSurfaceGetCurrentTexture") void wgpuSurfaceGetCurrentTexture(WGPUSurface surface, WGPUSurfaceTexture *surfaceTexture);
+IMPORT("wgpuCommandEncoderBeginRenderPass")
+WGPURenderPassEncoder wgpuCommandEncoderBeginRenderPass(WGPUCommandEncoder commandEncoder, WGPURenderPassDescriptor const *descriptor);
+IMPORT("wgpuRenderPassEncoderSetViewport")
+void wgpuRenderPassEncoderSetViewport(WGPURenderPassEncoder renderPassEncoder, float x, float y, float width, float height, float minDepth, float maxDepth);
+IMPORT("wgpuRenderPassEncoderSetScissorRect")
+void wgpuRenderPassEncoderSetScissorRect(WGPURenderPassEncoder renderPassEncoder, uint32_t x, uint32_t y, uint32_t width, uint32_t height);
+IMPORT("wgpuRenderPassEncoderEnd") void wgpuRenderPassEncoderEnd(WGPURenderPassEncoder renderPassEncoder);
+IMPORT("wgpuRenderPassEncoderRelease") void wgpuRenderPassEncoderRelease(WGPURenderPassEncoder renderPassEncoder);
+IMPORT("wgpuCommandBufferRelease") void wgpuCommandBufferRelease(WGPUCommandBuffer commandBuffer);
+IMPORT("wgpuCommandEncoderRelease") void wgpuCommandEncoderRelease(WGPUCommandEncoder commandEncoder);
+IMPORT("wgpuSurfacePresent") WGPUStatus wgpuSurfacePresent(WGPUSurface surface);
+IMPORT("wgpuRenderPassEncoderDrawIndexed")
+void wgpuRenderPassEncoderDrawIndexed(WGPURenderPassEncoder renderPassEncoder, uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex,
+                                      int32_t baseVertex, uint32_t firstInstance);
+IMPORT("wgpuRenderPassEncoderSetPipeline") void wgpuRenderPassEncoderSetPipeline(WGPURenderPassEncoder renderPassEncoder, WGPURenderPipeline pipeline);
+IMPORT("wgpuRenderPassEncoderSetVertexBuffer")
+void wgpuRenderPassEncoderSetVertexBuffer(WGPURenderPassEncoder renderPassEncoder, uint32_t slot, WGPU_NULLABLE WGPUBuffer buffer, uint64_t offset,
+                                          uint64_t size);
+IMPORT("wgpuRenderPassEncoderSetIndexBuffer")
+void wgpuRenderPassEncoderSetIndexBuffer(WGPURenderPassEncoder renderPassEncoder, WGPUBuffer buffer, WGPUIndexFormat format, uint64_t offset, uint64_t size);
+IMPORT("wgpuDeviceCreateBindGroup") WGPUBindGroup wgpuDeviceCreateBindGroup(WGPUDevice device, WGPUBindGroupDescriptor const *descriptor);
+IMPORT("wgpuRenderPassEncoderSetBindGroup")
+void wgpuRenderPassEncoderSetBindGroup(WGPURenderPassEncoder renderPassEncoder, uint32_t groupIndex, WGPU_NULLABLE WGPUBindGroup group,
+                                       size_t dynamicOffsetCount, uint32_t const *dynamicOffsets);
+IMPORT("wgpuBindGroupRelease") void wgpuBindGroupRelease(WGPUBindGroup bindGroup);
+IMPORT("wgpuRenderPipelineRelease") void wgpuRenderPipelineRelease(WGPURenderPipeline renderPipeline);
+IMPORT("wgpuPipelineLayoutRelease") void wgpuPipelineLayoutRelease(WGPUPipelineLayout pipelineLayout);
+IMPORT("wgpuDeviceCreatePipelineLayout") WGPUPipelineLayout wgpuDeviceCreatePipelineLayout(WGPUDevice device, WGPUPipelineLayoutDescriptor const *descriptor);
+IMPORT("wgpuDeviceCreateShaderModule") WGPUShaderModule wgpuDeviceCreateShaderModule(WGPUDevice device, WGPUShaderModuleDescriptor const *descriptor);
+IMPORT("wgpuDeviceCreateRenderPipeline") WGPURenderPipeline wgpuDeviceCreateRenderPipeline(WGPUDevice device, WGPURenderPipelineDescriptor const *descriptor);
+IMPORT("wgpuShaderModuleRelease") void wgpuShaderModuleRelease(WGPUShaderModule shaderModule);
+IMPORT("wgpuQueueWriteBuffer") void wgpuQueueWriteBuffer(WGPUQueue queue, WGPUBuffer buffer, uint64_t bufferOffset, void const *data, size_t size);
+IMPORT("wgpuTextureDestroy") void wgpuTextureDestroy(WGPUTexture texture);
+IMPORT("wgpuTextureRelease") void wgpuTextureRelease(WGPUTexture texture);
+IMPORT("wgpuTextureViewRelease") void wgpuTextureViewRelease(WGPUTextureView textureView);
+IMPORT("wgpuCommandEncoderCopyBufferToBuffer")
+void wgpuCommandEncoderCopyBufferToBuffer(WGPUCommandEncoder commandEncoder, WGPUBuffer source, uint64_t sourceOffset, WGPUBuffer destination,
+                                          uint64_t destinationOffset, uint64_t size);
+IMPORT("wgpuSurfaceConfigure") void wgpuSurfaceConfigure(WGPUSurface surface, WGPUSurfaceConfiguration const *config);
+
+IMPORT("wgpuInstanceRequestAdapterSync") WGPUAdapter wgpuInstanceRequestAdapterSync();
+IMPORT("wgpuAdapterRequestDeviceSync") WGPUDevice wgpuAdapterRequestDeviceSync();
 
 bool                                        gpu_transpose_mat = true;
 extern int                                  constant_buffer_index;
@@ -69,8 +93,8 @@ static WGPUCommandEncoder                   command_encoder;
 static WGPURenderPassEncoder                render_pass_encoder;
 static char                                 device_name[256];
 static WGPUInstance                         instance;
-static WGPUAdapter                          gpu;
-static WGPUDevice                           device;
+static WGPUAdapter                          gpu    = NULL;
+static WGPUDevice                           device = NULL;
 static WGPUQueue                            queue;
 static int                                  window_depth_bits;
 static bool                                 window_vsync;
@@ -225,8 +249,7 @@ static void create_descriptors(void) {
 	point_sampler             = wgpuDeviceCreateSampler(device, &sampler_info);
 }
 
-void gpu_barrier(gpu_texture_t *render_target, gpu_texture_state_t state_after) {
-}
+void gpu_barrier(gpu_texture_t *render_target, gpu_texture_state_t state_after) {}
 
 void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_texture_format_t format, int framebuffer_index) {
 	target->width  = width;
@@ -303,37 +326,40 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	instance          = wgpuCreateInstance(NULL);
 	window_depth_bits = depth_buffer_bits;
 	window_vsync      = vsync;
-	WGPURequestAdapterOptions options = {.compatibleSurface = surface, .powerPreference = WGPUPowerPreference_HighPerformance};
 
-	gpu                                        = NULL;
-	WGPURequestAdapterCallbackInfo adapter_cbi = {.callback = adapter_request_callback, .userdata1 = &gpu};
-	wgpuInstanceRequestAdapter(instance, &options, adapter_cbi);
+	// WGPURequestAdapterOptions options = {.compatibleSurface = surface, .powerPreference = WGPUPowerPreference_HighPerformance};
+	// WGPURequestAdapterCallbackInfo adapter_cbi = {.callback = adapter_request_callback, .userdata1 = &gpu};
+	// wgpuInstanceRequestAdapter(instance, &options, adapter_cbi);
+	// while (gpu == NULL) {
+	// sleep(10);
+	// }
+	gpu = wgpuInstanceRequestAdapterSync();
 
-	while (gpu == NULL) {
-		// emscripten_sleep(10);
-	}
-	WGPUAdapterInfo props = {0};
-	wgpuAdapterGetInfo(gpu, &props);
+	// WGPUAdapterInfo props = {0};
+	// wgpuAdapterGetInfo(gpu, &props);
 	// if (props.device) {
 	// 	strncpy(device_name, props.device, sizeof(device_name) - 1);
 	// 	device_name[sizeof(device_name) - 1] = '\0';
 	// }
-	wgpuAdapterInfoFreeMembers(props);
-	WGPUDeviceDescriptor deviceinfo = {0};
+	// wgpuAdapterInfoFreeMembers(props);
 
-	device                                   = NULL;
-	WGPURequestDeviceCallbackInfo device_cbi = {.callback = device_request_callback, .userdata1 = &device};
-	wgpuAdapterRequestDevice(gpu, &deviceinfo, device_cbi);
+	// WGPUDeviceDescriptor          deviceinfo = {0};
+	// WGPURequestDeviceCallbackInfo device_cbi = {.callback = device_request_callback, .userdata1 = &device};
+	// wgpuAdapterRequestDevice(gpu, &deviceinfo, device_cbi);
+	// while (device == NULL) {
+	// 	sleep(10);
+	// }
+	device = wgpuAdapterRequestDeviceSync();
 
-	while (device == NULL) {
-		// emscripten_sleep(10);
-	}
 	queue = wgpuDeviceGetQueue(device);
 	create_descriptors();
-	WGPUSurfaceCapabilities caps = {0};
-	wgpuSurfaceGetCapabilities(surface, gpu, &caps);
-	surface_format = caps.formats[0];
-	wgpuSurfaceCapabilitiesFreeMembers(caps);
+
+	// WGPUSurfaceCapabilities caps = {0};
+	// wgpuSurfaceGetCapabilities(surface, gpu, &caps);
+	// surface_format = caps.formats[0];
+	// wgpuSurfaceCapabilitiesFreeMembers(caps);
+	surface_format = WGPUTextureFormat_RGBA8Unorm;
+
 	gpu_create_framebuffers(depth_buffer_bits);
 	create_swapchain();
 }
@@ -479,10 +505,10 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 
 	WGPUCommandEncoder       encoder = wgpuDeviceCreateCommandEncoder(device, NULL);
 	WGPUTexelCopyTextureInfo src     = {.texture = render_target->impl.texture};
-	WGPUTexelCopyBufferInfo  dst     = {
-	         .layout = {.bytesPerRow = render_target->width * gpu_texture_format_size(render_target->format), .rowsPerImage = render_target->height},
-	         .buffer = readback_buffer};
-	WGPUExtent3D extent = {(uint32_t)render_target->width, (uint32_t)render_target->height, 1};
+	WGPUTexelCopyBufferInfo  dst     = {.layout = {.bytesPerRow  = render_target->width * gpu_texture_format_size(render_target->format),
+	                                               .rowsPerImage = render_target->height},
+	                                    .buffer = readback_buffer};
+	WGPUExtent3D             extent  = {(uint32_t)render_target->width, (uint32_t)render_target->height, 1};
 	wgpuCommandEncoderCopyTextureToBuffer(encoder, &src, &dst, &extent);
 	WGPUCommandBuffer cmd = wgpuCommandEncoderFinish(encoder, NULL);
 	wgpuQueueSubmit(queue, 1, &cmd);
@@ -569,7 +595,7 @@ void gpu_pipeline_compile(gpu_pipeline_t *pipeline) {
 	pipeline_desc.multisample.mask             = ~0u;
 
 	if (pipeline->depth_attachment_bits > 0) {
-		pipeline_desc.depthStencil = &(WGPUDepthStencilState){
+		pipeline_desc.depthStencil = &(WGPUDepthStencilState){ ////
 		    .format            = WGPUTextureFormat_Depth32Float,
 		    .depthWriteEnabled = pipeline->depth_write,
 		    .depthCompare      = convert_compare_mode(pipeline->depth_mode),
@@ -807,7 +833,7 @@ void gpu_constant_buffer_lock(gpu_buffer_t *buffer, int start, int count) {
 	WGPUBufferDescriptor temp_desc = {
 	    .size             = count,
 	    .usage            = WGPUBufferUsage_CopySrc | WGPUBufferUsage_MapWrite,
-	    .mappedAtCreation = false,
+	    .mappedAtCreation = true,
 	};
 	buffer->impl.temp_buf = wgpuDeviceCreateBuffer(device, &temp_desc);
 	// wgpuBufferMapSync(buffer->impl.temp_buf, WGPUMapMode_Write, 0, count);

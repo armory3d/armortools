@@ -3,7 +3,7 @@
 #ifdef IRON_WASM
 __attribute__((import_module("imports"), import_name("js_fprintf"))) void js_fprintf(const char *format);
 
-#define HEAP_SIZE 1024 * 1024 * 8
+#define HEAP_SIZE 1024 * 1024 * 512
 static unsigned char heap[HEAP_SIZE];
 static size_t        heap_top = 4;
 #endif
