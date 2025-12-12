@@ -1213,6 +1213,10 @@ static char *wgsl_export_fragment2(function *main) {
 }
 
 void wgsl_export2(char **vs, char **fs) {
+
+	vertex_inputs_size = 0;
+	fragment_inputs_size = 0;
+
 	for (type_id i = 0; get_type(i) != NULL; ++i) {
 		type *t = get_type(i);
 		if (!t->built_in && has_attribute(&t->attributes, add_name("pipe"))) {

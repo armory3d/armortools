@@ -1,13 +1,12 @@
 
-let memory  = null;
-let heapu8  = null;
-let heapu16 = null;
-let heapu32 = null;
-let heapi32 = null;
-let heapf32 = null;
-let module   = null;
-let instance = null;
-
+let memory       = null;
+let heapu8       = null;
+let heapu16      = null;
+let heapu32      = null;
+let heapi32      = null;
+let heapf32      = null;
+let module       = null;
+let instance     = null;
 let wgpu_objects = [ null ];
 
 function ptr_to_id(ptr) {
@@ -30,6 +29,14 @@ function read_string(ptr) {
 	return str;
 }
 
+function read_string_n(ptr, n) {
+	let str = '';
+	for (let i = 0; i < n; ++i) {
+		str += String.fromCharCode(heapu8[ptr + i]);
+	}
+	return str;
+}
+
 function read_u32(ptr) {
 	return heapu32[ptr / 4];
 }
@@ -45,7 +52,13 @@ function id_to_texture_format(id) {
 	if (id === 0x00000001)
 		return "r8unorm";
 	if (id === 0x00000016)
-		return "rgba8unorm";
+		return "bgra8unorm";
+	// return "rgba8unorm";
+	if (id === 0x00000030)
+		return "depth32float";
+	if (id === 0x0000001B)
+		return "bgra8unorm";
+	return "bgra8unorm"; ////
 }
 
 function id_to_vertex_format(id) {
@@ -109,8 +122,8 @@ async function init() {
 		        let desc = {
 			        usage : read_u32(pdescriptor + 16),
 			        dimension : "2d",
-			        size : {width : read_u32(pdescriptor + 32), height : read_u32(pdescriptor + 36), depthOrArrayLayers : 1},
-			        format : read_u32(pdescriptor + 44),
+			        size : {width : read_u32(pdescriptor + 28), height : read_u32(pdescriptor + 32), depthOrArrayLayers : 1},
+			        format : read_u32(pdescriptor + 40),
 			        mipLevelCount : 1,
 			        sampleCount : 1
 		        };
@@ -120,8 +133,10 @@ async function init() {
 			},
 			wgpuTextureCreateView : function(ptexture, pdescriptor) {
 		        let texture = id_to_ptr(ptexture);
-		        let desc    = {}; // TODO
-		        let view    = texture.createView(desc);
+		        // WGPUTextureViewDescriptor
+		        let desc =
+		            {format : id_to_texture_format(read_u32(pdescriptor + 12)), dimension : "2d", mipLevelCount : 1, arrayLayerCount : 1, aspect : "all"};
+		        let view = texture.createView(desc);
 		        return ptr_to_id(view);
 			},
 			wgpuDeviceGetQueue : function(pdevice) {
@@ -182,9 +197,11 @@ async function init() {
 			wgpuBufferGetMappedRange : function(pbuffer, offset, size) {
 		        let buffer = id_to_ptr(pbuffer);
 		        let ptr    = instance.exports.malloc(size);
-		        let ab     = buffer.getMappedRange(offset, size);
-		        for (let i = 0; i < ab.length; ++i) {
-			        heapu8[ptr + i] = ab[i];
+		        // let ab     = buffer.getMappedRange(offset, size);
+		        let ab = buffer.getMappedRange();
+		        let u8 = new Uint8Array(ab);
+		        for (let i = 0; i < u8.length; ++i) {
+			        heapu8[ptr + i] = u8[i];
 		        }
 		        return ptr;
 			},
@@ -192,9 +209,20 @@ async function init() {
 		        let buffer = id_to_ptr(pbuffer);
 		        buffer.unmap();
 			},
+			wgpuBufferUnmap2 : function(pbuffer, pdata, data_size) {
+		        let buffer = id_to_ptr(pbuffer);
+		        // let ab     = buffer.getMappedRange(0, data_size);
+		        let ab = buffer.getMappedRange();
+		        let u8 = new Uint8Array(ab);
+		        for (let i = 0; i < u8.length; ++i) {
+			        u8[i] = heapu8[pdata + i];
+		        }
+		        buffer.unmap();
+			},
 			wgpuDeviceCreateCommandEncoder : function(pdevice, pdescriptor) {
-		        let device  = id_to_ptr(pdevice);
-		        let desc    = {}; // TODO
+		        let device = id_to_ptr(pdevice);
+		        // WGPUCommandBufferDescriptor
+		        let desc    = null;
 		        let encoder = device.createCommandEncoder(desc);
 		        return ptr_to_id(encoder);
 			},
@@ -212,24 +240,34 @@ async function init() {
 		        encoder.copyBufferToTexture(source, destination, copysize);
 			},
 			wgpuCommandEncoderFinish : function(pcommand_encoder, pdescriptor) {
-		        let encoder        = id_to_ptr(pcommand_encoder);
-		        let desc           = {}; // TODO: read WGPUCommandBufferDescriptor
+		        let encoder = id_to_ptr(pcommand_encoder);
+		        // WGPUCommandBufferDescriptor
+		        let desc           = null;
 		        let command_buffer = encoder.finish(desc);
 		        return ptr_to_id(command_buffer);
 			},
-			wgpuQueueSubmit : function(pqueue, command_count, pcommands) {
-		        let queue    = id_to_ptr(pqueue);
-		        let commands = [];
-		        for (let i = 0; i < command_count; i++) {
-			        commands.push(id_to_ptr(heapu32[(pcommands >> 2) + i]));
+			wgpuQueueSubmit : function(pqueue, command_buffer_count, pcommand_buffers) {
+		        let queue           = id_to_ptr(pqueue);
+		        let command_buffers = [];
+		        for (let i = 0; i < command_buffer_count; i++) {
+			        let c = id_to_ptr(read_u32(pcommand_buffers + i * 4));
+			        command_buffers.push(c);
 		        }
-		        queue.submit(commands);
+		        queue.submit(command_buffers);
 			},
 			wgpuBufferRelease : function(pbuffer) {},
 			wgpuDeviceCreateSampler : function(pdevice, pdescriptor) {
-		        let device  = id_to_ptr(pdevice);
+		        let device = id_to_ptr(pdevice);
 		        // WGPUSamplerDescriptor
-				let desc    = {};
+		        let desc = {
+			        addressModeU : "repeat",
+			        addressModeV : "repeat",
+			        addressModeW : "repeat",
+			        magFilter : "linear",
+			        minFilter : "linear",
+			        mipmapFilter : "linear",
+			        maxAnisotropy : 1
+		        };
 		        let sampler = device.createSampler(desc);
 		        return ptr_to_id(sampler);
 			},
@@ -245,11 +283,26 @@ async function init() {
 		        let surface = id_to_ptr(psurface) || context;
 		        let texture = surface.getCurrentTexture();
 		        // WGPUSurfaceTexture
+		        heapu32[psurface_texture / 4 + 1] = ptr_to_id(texture);
 			},
 			wgpuCommandEncoderBeginRenderPass : function(pcommand_encoder, pdescriptor) {
-		        let encoder     = id_to_ptr(pcommand_encoder);
+		        let encoder = id_to_ptr(pcommand_encoder);
+
 		        // WGPURenderPassDescriptor
-				let desc        = {};
+		        let desc = {colorAttachmentCount : read_u32(pdescriptor + 12), colorAttachments : []};
+		        let pcas = read_u32(pdescriptor + 16);
+		        for (let i = 0; i < desc.colorAttachmentCount; ++i) {
+			        // WGPURenderPassColorAttachment
+			        let ca = {view : id_to_ptr(read_u32(pcas + 4 + i * 28)), loadOp : "clear", storeOp : "store", clearValue : [ 0.0, 0.0, 0.0, 0.0 ]};
+			        desc.colorAttachments.push(ca);
+		        }
+
+		        // WGPURenderPassDepthStencilAttachment
+		        let pdsa = read_u32(pdescriptor + 20);
+		        if (pdsa !== 0) {
+			        desc.depthStencilAttachment = {view : id_to_ptr(read_u32(pdsa + 4)), depthLoadOp : "clear", depthStoreOp : "store", depthClearValue : 0.0};
+		        }
+
 		        let render_pass = encoder.beginRenderPass(desc);
 		        return ptr_to_id(render_pass);
 			},
@@ -273,7 +326,8 @@ async function init() {
 			},
 			wgpuRenderPassEncoderDrawIndexed : function(prender_pass_encoder, index_count, instance_count, first_index, base_vertex, first_instance) {
 		        let render_pass = id_to_ptr(prender_pass_encoder);
-		        render_pass.drawIndexed(index_count, instance_count, first_index, base_vertex, first_instance);
+		        // render_pass.drawIndexed(index_count, instance_count, first_index, base_vertex, first_instance);
+		        render_pass.drawIndexed(index_count);
 			},
 			wgpuRenderPassEncoderSetPipeline : function(prender_pass_encoder, ppipeline) {
 		        let render_pass = id_to_ptr(prender_pass_encoder);
@@ -283,18 +337,43 @@ async function init() {
 			wgpuRenderPassEncoderSetVertexBuffer : function(prender_pass_encoder, slot, pbuffer, offset, size) {
 		        let render_pass = id_to_ptr(prender_pass_encoder);
 		        let buffer      = id_to_ptr(pbuffer);
-		        render_pass.setVertexBuffer(slot, buffer, offset, size);
+		        // render_pass.setVertexBuffer(slot, buffer, Number(offset), Number(size));
+		        render_pass.setVertexBuffer(slot, buffer);
 			},
 			wgpuRenderPassEncoderSetIndexBuffer : function(prender_pass_encoder, pbuffer, format, offset, size) {
 		        let render_pass = id_to_ptr(prender_pass_encoder);
 		        let buffer      = id_to_ptr(pbuffer);
-		        render_pass.setIndexBuffer(buffer, 'uint32', offset, size);
+		        // render_pass.setIndexBuffer(buffer, 'uint32', Number(offset), Number(size));
+		        render_pass.setIndexBuffer(buffer, 'uint32');
 			},
 			wgpuDeviceCreateBindGroup : function(pdevice, pdescriptor) {
 		        let device = id_to_ptr(pdevice);
 		        // WGPUBindGroupDescriptor
-				let desc   = {};
-		        let bg     = device.createBindGroup(desc);
+		        let desc     = {layout : id_to_ptr(read_u32(pdescriptor + 12)), entryCount : read_u32(pdescriptor + 16), entries : []};
+		        let pentries = read_u32(pdescriptor + 20);
+		        for (let i = 0; i < desc.entryCount; i++) {
+			        // WGPUBindGroupEntry
+			        let e = {
+				        binding : read_u32(pentries + 4 + i * 40),
+			        };
+
+			        if (read_u32(pentries + 8 + i * 40) !== 0) {
+				        e.resource = {
+					        buffer : id_to_ptr(read_u32(pentries + 8 + i * 40)),
+					        offset : read_u32(pentries + 16 + i * 40),
+					        size : read_u32(pentries + 24 + i * 40)
+				        }
+			        }
+			        if (read_u32(pentries + 32 + i * 40) !== 0) {
+				        e.resource = id_to_ptr(read_u32(pentries + 32 + i * 40));
+			        }
+			        if (read_u32(pentries + 36 + i * 40) !== 0) {
+				        e.resource = id_to_ptr(read_u32(pentries + 36 + i * 40));
+			        }
+
+			        desc.entries.push(e);
+		        }
+		        let bg = device.createBindGroup(desc);
 		        return ptr_to_id(bg);
 			},
 			wgpuRenderPassEncoderSetBindGroup : function(prender_pass_encoder, group_index, pgroup, dynamic_offset_count, pdynamic_offsets) {
@@ -302,7 +381,8 @@ async function init() {
 		        let group           = id_to_ptr(pgroup);
 		        let dynamic_offsets = [];
 		        for (let i = 0; i < dynamic_offset_count; i++) {
-			        dynamic_offsets.push(heapu32[(pdynamic_offsets >> 2) + i]);
+			        let doff = read_u32(pdynamic_offsets + i * 4);
+			        dynamic_offsets.push(doff);
 		        }
 		        render_pass.setBindGroup(group_index, group, dynamic_offsets);
 			},
@@ -312,8 +392,8 @@ async function init() {
 			wgpuDeviceCreatePipelineLayout : function(pdevice, pdescriptor) {
 		        let device = id_to_ptr(pdevice);
 		        // WGPUPipelineLayoutDescriptor
-		        let desc = {bindGroupLayoutCount : read_u32(pdescriptor + 24), bindGroupLayouts : []};
-		        let pbgl = read_u32(pdescriptor + 28);
+		        let desc = {bindGroupLayoutCount : read_u32(pdescriptor + 12), bindGroupLayouts : []};
+		        let pbgl = read_u32(pdescriptor + 16);
 		        for (let i = 0; i < desc.bindGroupLayoutCount; ++i) {
 			        // WGPUBindGroupLayout
 			        let bgl = id_to_ptr(read_u32(pbgl + i * 4));
@@ -326,10 +406,10 @@ async function init() {
 		        let device = id_to_ptr(pdevice);
 		        // WGPUShaderSourceWGSL
 		        let pwgsl = read_u32(pdescriptor);
-		        let wgsl  = {chain : {sType : read_u32(pwgsl + 4)}, code : {data : read_u32(pwgsl + 8), length : read_u32(pwgsl + 16)}};
+		        let wgsl  = {chain : {sType : read_u32(pwgsl + 4)}, code : {data : read_u32(pwgsl + 8), length : read_u32(pwgsl + 12)}};
 		        // WGPUShaderModuleDescriptor
 		        // let desc   = { nextInChain: wgsl };
-		        let desc = {code : wgsl.code};
+		        let desc = {code : read_string_n(wgsl.code.data, wgsl.code.length)};
 		        let sm   = device.createShaderModule(desc);
 		        return ptr_to_id(sm);
 			},
@@ -337,31 +417,47 @@ async function init() {
 		        let device = id_to_ptr(pdevice);
 
 		        // WGPUFragmentState
-		        let pfrag    = read_u32(pdescriptor + 128);
+		        let pfrag    = read_u32(pdescriptor + 92);
 		        let frag     = {module : id_to_ptr(read_u32(pfrag + 4)), entryPoint : "main", targetCount : 1, targets : []};
-		        let ptragets = read_u32(pdescriptor + 48);
+		        let ptragets = read_u32(pfrag + 28);
 		        for (let i = 0; i < frag.targetCount; ++i) {
 			        // WGPUColorTargetState
-			        let t = {format : id_to_texture_format(read_u32(ptragets + 4 + i * 24)), blend : null, writeMask : read_u32(ptragets + 12 + i * 24)};
+			        let t = {
+				        format : id_to_texture_format(read_u32(ptragets + 4 + i * 24)),
+				        // blend : {
+				        //     color : {operation : "add", srcFactor : "one", dstFactor : "zero"},
+				        //     alpha : {operation : "add", srcFactor : "one", dstFactor : "zero"}
+				        // },
+				        // writeMask : read_u32(ptragets + 16 + i * 24)
+			        };
 			        frag.targets.push(t);
 		        }
 
+		        // WGPUDepthStencilState
+		        let pds = read_u32(pdescriptor + 72);
+		        let ds  = {format : id_to_texture_format(read_u32(pds + 4)), depthWriteEnabled : read_u32(pds + 8), depthCompare : read_u32(pds + 12)};
+		        if (ds.depthCompare === 0x00000002)
+			        ds.depthCompare = "less";
+		        if (ds.depthCompare === 0x00000008)
+			        ds.depthCompare = "always";
+
 		        // WGPURenderPipelineDescriptor
 		        let desc = {
-			        layout : id_to_ptr(read_u32(pdescriptor + 20)),
+			        layout : id_to_ptr(read_u32(pdescriptor + 12)),
+			        // layout : "auto",
 			        // WGPUVertexState
-			        vertex : {module : id_to_ptr(read_u32(pdescriptor + 28)), entryPoint : "main", bufferCount : 1, buffers : []},
-			        primitive : {topology : "trianglelist", frontFace : "ccw", cullMode : "none"},
-			        depthStencil : null,
+			        vertex : {module : id_to_ptr(read_u32(pdescriptor + 20)), entryPoint : "main", bufferCount : 1, buffers : []},
+			        primitive : {topology : "triangle-list", frontFace : "ccw", cullMode : "none"},
+			        depthStencil : ds,
 			        multisample : {count : 1, mask : 0},
 			        fragment : frag,
 		        };
 
-		        let pbuffers = read_u32(pdescriptor + 64);
+		        let pbuffers = read_u32(pdescriptor + 44);
 		        for (let i = 0; i < desc.vertex.bufferCount; ++i) {
 			        // WGPUVertexBufferLayout
-			        let b           = {arrayStride : read_u32(pbuffers + 8 + i * 28), attributeCount : read_u32(pbuffers + 16 + i * 28), attributes : []};
-			        let pattributes = read_u32(pbuffers + 24 + i * 28);
+			        let b           = {arrayStride : read_u32(pbuffers + 8 + i * 24), attributeCount : read_u32(pbuffers + 16 + i * 24), attributes : []};
+			        let pattributes = read_u32(pbuffers + 20 + i * 24);
 			        for (let i = 0; i < b.attributeCount; ++i) {
 				        // WGPUVertexAttribute
 				        let a = {
@@ -379,7 +475,7 @@ async function init() {
 			},
 			wgpuShaderModuleRelease : function(pshader_module) {},
 			wgpuQueueWriteBuffer : function(pqueue, pbuffer, buffer_offset, pdata, size) {
-		        let queue  = id_to_ptr(pqueue) || device.queue;
+		        let queue  = id_to_ptr(pqueue);
 		        let buffer = id_to_ptr(pbuffer);
 		        let data   = heapu8.subarray(pdata, pdata + size);
 		        queue.writeBuffer(buffer, buffer_offset, data);
@@ -394,7 +490,7 @@ async function init() {
 		        let encoder     = id_to_ptr(pcommand_encoder);
 		        let source      = id_to_ptr(psource);
 		        let destination = id_to_ptr(pdestination);
-		        encoder.copyBufferToBuffer(source, source_offset, destination, destination_offset, size);
+		        encoder.copyBufferToBuffer(source, Number(source_offset), destination, Number(destination_offset), Number(size));
 			},
 			wgpuSurfaceConfigure : function(psurface, pconfig) {
 		        let surface = id_to_ptr(psurface) || context;
