@@ -80,7 +80,7 @@ IMPORT("wgpuSurfaceConfigure") void wgpuSurfaceConfigure(WGPUSurface surface, WG
 
 IMPORT("wgpuInstanceRequestAdapterSync") WGPUAdapter wgpuInstanceRequestAdapterSync();
 IMPORT("wgpuAdapterRequestDeviceSync") WGPUDevice wgpuAdapterRequestDeviceSync();
-IMPORT("wgpuBufferUnmap2") void wgpuBufferUnmap2(WGPUBuffer buffer, void *data, int data_size);
+IMPORT("wgpuBufferUnmap2") void wgpuBufferUnmap2(WGPUBuffer buffer, void *data, int start, int count);
 
 bool                                        gpu_transpose_mat = true;
 extern int                                  constant_buffer_index;
@@ -130,7 +130,6 @@ static WGPUTextureFormat convert_image_format(gpu_texture_format_t format) {
 		return WGPUTextureFormat_Depth32Float;
 	default:
 		return WGPUTextureFormat_RGBA8Unorm;
-		// return WGPUTextureFormat_BGRA8Unorm;
 	}
 }
 
@@ -216,8 +215,14 @@ static void create_descriptors(void) {
 	};
 	dummy_texture = wgpuDeviceCreateTexture(device, &dummy_desc);
 
-	WGPUTextureViewDescriptor dummy_view_desc = {0};
-	dummy_view                                = wgpuTextureCreateView(dummy_texture, &dummy_view_desc);
+	WGPUTextureViewDescriptor dummy_view_desc = {
+	    .dimension       = WGPUTextureViewDimension_2D,
+	    .format          = WGPUTextureFormat_RGBA8Unorm,
+	    .mipLevelCount   = 1,
+	    .arrayLayerCount = 1,
+	    .aspect          = WGPUTextureAspect_All,
+	};
+	dummy_view = wgpuTextureCreateView(dummy_texture, &dummy_view_desc);
 
 	uint8_t              white[4]          = {255, 255, 255, 255};
 	WGPUBufferDescriptor dummy_upload_desc = {.size = 4, .usage = WGPUBufferUsage_CopySrc, .mappedAtCreation = true};
@@ -371,11 +376,11 @@ void gpu_destroy() {
 		wgpuBufferDestroy(readback_buffer);
 		wgpuBufferRelease(readback_buffer);
 	}
-	wgpuSurfaceUnconfigure(surface);
-	wgpuSurfaceRelease(surface);
-	wgpuDeviceRelease(device);
-	wgpuAdapterRelease(gpu);
-	wgpuInstanceRelease(instance);
+	// wgpuSurfaceUnconfigure(surface);
+	// wgpuSurfaceRelease(surface);
+	// wgpuDeviceRelease(device);
+	// wgpuAdapterRelease(gpu);
+	// wgpuInstanceRelease(instance);
 }
 
 void gpu_begin_internal(gpu_clear_t flags, unsigned color, float depth) {
@@ -445,7 +450,6 @@ void gpu_execute_and_wait() {
 	WGPUCommandBuffer command_buffer = wgpuCommandEncoderFinish(command_encoder, NULL);
 	wgpuQueueSubmit(queue, 1, &command_buffer);
 	wgpuCommandBufferRelease(command_buffer);
-	// wgpuDevicePoll(device, true, NULL);
 	wgpuCommandEncoderRelease(command_encoder);
 	command_encoder = wgpuDeviceCreateCommandEncoder(device, NULL);
 }
@@ -486,12 +490,12 @@ void gpu_set_pipeline_internal(gpu_pipeline_t *pipeline) {
 
 void gpu_set_vertex_buffer(gpu_buffer_t *buffer) {
 	current_vb = buffer;
-	wgpuRenderPassEncoderSetVertexBuffer(render_pass_encoder, 0, buffer->impl.buf, 0, WGPU_WHOLE_SIZE);
+	wgpuRenderPassEncoderSetVertexBuffer(render_pass_encoder, 0, buffer->impl.buf, 0, buffer->count * buffer->stride);
 }
 
 void gpu_set_index_buffer(gpu_buffer_t *buffer) {
 	current_ib = buffer;
-	wgpuRenderPassEncoderSetIndexBuffer(render_pass_encoder, buffer->impl.buf, WGPUIndexFormat_Uint32, 0, WGPU_WHOLE_SIZE);
+	wgpuRenderPassEncoderSetIndexBuffer(render_pass_encoder, buffer->impl.buf, WGPUIndexFormat_Uint32, 0, buffer->count * buffer->stride);
 }
 
 void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
@@ -517,15 +521,13 @@ void gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data) {
 	                                               .rowsPerImage = render_target->height},
 	                                    .buffer = readback_buffer};
 	WGPUExtent3D             extent  = {(uint32_t)render_target->width, (uint32_t)render_target->height, 1};
-	wgpuCommandEncoderCopyTextureToBuffer(encoder, &src, &dst, &extent);
+	// wgpuCommandEncoderCopyTextureToBuffer(encoder, &src, &dst, &extent);
 	WGPUCommandBuffer cmd = wgpuCommandEncoderFinish(encoder, NULL);
 	wgpuQueueSubmit(queue, 1, &cmd);
 	wgpuCommandBufferRelease(cmd);
 	wgpuCommandEncoderRelease(encoder);
-	// wgpuDevicePoll(device, true, NULL);
 
-	// wgpuBufferMapSync(readback_buffer, WGPUMapMode_Read, 0, buffer_size);
-	memcpy(data, wgpuBufferGetConstMappedRange(readback_buffer, 0, buffer_size), buffer_size);
+	// memcpy(data, wgpuBufferGetConstMappedRange(readback_buffer, 0, buffer_size), buffer_size);
 	wgpuBufferUnmap(readback_buffer);
 }
 
@@ -560,7 +562,8 @@ static WGPUBindGroup get_descriptor_set(WGPUBuffer buffer) {
 
 void gpu_set_constant_buffer(gpu_buffer_t *buffer, int offset, size_t size) {
 	WGPUBindGroup bind_group = get_descriptor_set(buffer->impl.buf);
-	uint32_t      offsets[1] = {(uint32_t)offset};
+	// uint32_t      offsets[1] = {(uint32_t)offset};
+	uint32_t      offsets[1] = {(uint32_t)0};
 	wgpuRenderPassEncoderSetBindGroup(render_pass_encoder, 0, bind_group, 1, offsets);
 	wgpuBindGroupRelease(bind_group);
 }
@@ -762,15 +765,6 @@ void gpu_render_target_init(gpu_texture_t *target, int width, int height, gpu_te
 	gpu_render_target_init2(target, width, height, format, -1);
 }
 
-static void _gpu_buffer_init(gpu_buffer_impl_t *buffer, int size, WGPUBufferUsage usage) {
-	if (buffer->buf != NULL) {
-		// wgpuBufferDestroy(buffer->buf); ////
-		// wgpuBufferRelease(buffer->buf); ////
-	}
-	WGPUBufferDescriptor desc = {.size = size, .usage = usage};
-	buffer->buf               = wgpuDeviceCreateBuffer(device, &desc);
-}
-
 static void _gpu_buffer_copy(WGPUBuffer dest, WGPUBuffer source, uint32_t size) {
 	WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, NULL);
 	wgpuCommandEncoderCopyBufferToBuffer(encoder, source, 0, dest, 0, size);
@@ -786,72 +780,56 @@ void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structur
 	for (int i = 0; i < structure->size; ++i) {
 		buffer->stride += gpu_vertex_data_size(structure->elements[i].data);
 	}
+
+	WGPUBufferDescriptor desc = {.size = buffer->count * buffer->stride, .usage = WGPUBufferUsage_Vertex, .mappedAtCreation = true};
+	buffer->impl.buf          = wgpuDeviceCreateBuffer(device, &desc);
+	buffer->impl.temp         = malloc(buffer->count * buffer->stride);
 }
 
 void *gpu_vertex_buffer_lock(gpu_buffer_t *buffer) {
-	WGPUBufferDescriptor desc = {.size = buffer->count * buffer->stride, .usage = WGPUBufferUsage_Vertex, .mappedAtCreation = true};
-	buffer->impl.buf          = wgpuDeviceCreateBuffer(device, &desc);
-
-	buffer->impl.temp = malloc(buffer->count * buffer->stride);
 	return buffer->impl.temp;
 }
 
 void gpu_vertex_buffer_unlock(gpu_buffer_t *buffer) {
-	wgpuBufferUnmap2(buffer->impl.buf, buffer->impl.temp, buffer->count * buffer->stride);
+	wgpuBufferUnmap2(buffer->impl.buf, buffer->impl.temp, 0, buffer->count * buffer->stride);
 }
 
 void gpu_index_buffer_init(gpu_buffer_t *buffer, int count) {
 	buffer->count  = count;
 	buffer->stride = sizeof(uint32_t);
+
+	WGPUBufferDescriptor desc = {.size = buffer->count * buffer->stride, .usage = WGPUBufferUsage_Index, .mappedAtCreation = true};
+	buffer->impl.buf          = wgpuDeviceCreateBuffer(device, &desc);
+	buffer->impl.temp         = malloc(buffer->count * buffer->stride);
 }
 
 void *gpu_index_buffer_lock(gpu_buffer_t *buffer) {
-	WGPUBufferDescriptor desc = {.size = buffer->count * buffer->stride, .usage = WGPUBufferUsage_Index, .mappedAtCreation = true};
-	buffer->impl.buf          = wgpuDeviceCreateBuffer(device, &desc);
-
-	buffer->impl.temp = malloc(buffer->count * buffer->stride);
 	return buffer->impl.temp;
 }
 
 void gpu_index_buffer_unlock(gpu_buffer_t *buffer) {
-	wgpuBufferUnmap2(buffer->impl.buf, buffer->impl.temp, buffer->count * buffer->stride);
+	wgpuBufferUnmap2(buffer->impl.buf, buffer->impl.temp, 0, buffer->count * buffer->stride);
 }
 
 void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size) {
-	buffer->count = size;
-	_gpu_buffer_init(&buffer->impl, size, WGPUBufferUsage_Uniform | WGPUBufferUsage_CopyDst);
+	buffer->count  = size;
+	buffer->stride = 1;
+
+	// WGPUBufferDescriptor desc = {.size = size, .usage = WGPUBufferUsage_Uniform, .mappedAtCreation = true};
+	WGPUBufferDescriptor desc = {.size = size, .usage = WGPUBufferUsage_Uniform, .mappedAtCreation = false};
+	buffer->impl.buf          = wgpuDeviceCreateBuffer(device, &desc);
+	buffer->impl.temp         = malloc(buffer->count * buffer->stride);
 }
 
 void gpu_constant_buffer_lock(gpu_buffer_t *buffer, int start, int count) {
-	WGPUBufferDescriptor temp_desc = {
-	    .size             = count,
-	    .usage            = WGPUBufferUsage_CopySrc | WGPUBufferUsage_MapWrite,
-	    .mappedAtCreation = true,
-	};
-	buffer->impl.temp_buf = wgpuDeviceCreateBuffer(device, &temp_desc);
-	buffer->impl.start    = start;
-	buffer->impl.count    = count;
-	// wgpuBufferMapSync(buffer->impl.temp_buf, WGPUMapMode_Write, 0, count);
-	buffer->data = wgpuBufferGetMappedRange(buffer->impl.temp_buf, 0, count);
-
-	// buffer->data = wgpuBufferGetMappedRange(buffer->impl.buf, start, count);
+	// buffer->impl.start = start;
+	buffer->impl.start = 0;
+	buffer->impl.count = count;
+	buffer->data       = &buffer->impl.temp[start];
 }
 
 void gpu_constant_buffer_unlock(gpu_buffer_t *buffer) {
-	wgpuBufferUnmap(buffer->impl.temp_buf);
-
-	// _gpu_buffer_copy(buffer->impl.buf, buffer->impl.temp_buf, buffer->count);
-	WGPUBuffer         dest    = buffer->impl.buf;
-	WGPUBuffer         source  = buffer->impl.temp_buf;
-	WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, NULL);
-	wgpuCommandEncoderCopyBufferToBuffer(encoder, source, 0, dest, buffer->impl.start, buffer->impl.count);
-	WGPUCommandBuffer cmd = wgpuCommandEncoderFinish(encoder, NULL);
-	wgpuQueueSubmit(queue, 1, &cmd);
-	wgpuCommandBufferRelease(cmd);
-	wgpuCommandEncoderRelease(encoder);
-
-	wgpuBufferDestroy(buffer->impl.temp_buf);
-	wgpuBufferRelease(buffer->impl.temp_buf);
+	// wgpuBufferUnmap2(buffer->impl.buf, buffer->data, buffer->impl.start, buffer->impl.count);
 	buffer->data = NULL;
 }
 

@@ -42,12 +42,7 @@ void iron_keyboard_hide() {}
 
 __attribute__((import_module("imports"), import_name("js_time"))) int js_time();
 
-extern int iron_internal_window_width;
-extern int iron_internal_window_height;
-
 void iron_init(iron_window_options_t *win) {
-	iron_internal_window_width  = win->width;
-	iron_internal_window_height = win->height;
 	gpu_init(win->depth_bits, true);
 }
 
@@ -109,8 +104,6 @@ __attribute__((export_name("wasm_keyup"))) void wasm_keyup(int key) {
 	iron_internal_keyboard_trigger_key_up(key);
 }
 
-int                iron_internal_window_width  = 0;
-int                iron_internal_window_height = 0;
 iron_window_mode_t iron_internal_window_mode   = IRON_WINDOW_MODE_WINDOW;
 
 int iron_window_x() {
@@ -121,12 +114,15 @@ int iron_window_y() {
 	return 0;
 }
 
+__attribute__((import_module("imports"), import_name("js_canvas_w"))) int js_canvas_w();
+__attribute__((import_module("imports"), import_name("js_canvas_h"))) int js_canvas_h();
+
 int iron_window_width() {
-	return iron_internal_window_width;
+	return js_canvas_w();
 }
 
 int iron_window_height() {
-	return iron_internal_window_height;
+	return js_canvas_h();
 }
 
 void iron_window_resize(int width, int height) {}

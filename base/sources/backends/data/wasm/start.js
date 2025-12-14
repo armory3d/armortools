@@ -58,11 +58,21 @@ function id_to_texture_format(id) {
 		return "depth32float";
 	if (id === 0x0000001B)
 		return "bgra8unorm";
-	return "bgra8unorm"; ////
 }
 
 function id_to_vertex_format(id) {
-	return "float32x3";
+	if (id === 0x0000001C)
+		return "float32";
+	if (id === 0x0000001D)
+		return "float32x2";
+	if (id === 0x0000001E)
+		return "float32x3";
+	if (id === 0x0000001F)
+		return "float32x4";
+	if (id === 0x00000017)
+		return "snorm16x2";
+	if (id === 0x00000018)
+		return "snorm16x4";
 }
 
 async function init() {
@@ -123,11 +133,10 @@ async function init() {
 			        usage : read_u32(pdescriptor + 16),
 			        dimension : "2d",
 			        size : {width : read_u32(pdescriptor + 28), height : read_u32(pdescriptor + 32), depthOrArrayLayers : 1},
-			        format : read_u32(pdescriptor + 40),
+			        format : id_to_texture_format(read_u32(pdescriptor + 40)),
 			        mipLevelCount : 1,
 			        sampleCount : 1
 		        };
-		        desc.format = id_to_texture_format(desc.format);
 		        let texture = device.createTexture(desc);
 		        return ptr_to_id(texture);
 			},
@@ -197,9 +206,8 @@ async function init() {
 			wgpuBufferGetMappedRange : function(pbuffer, offset, size) {
 		        let buffer = id_to_ptr(pbuffer);
 		        let ptr    = instance.exports.malloc(size);
-		        // let ab     = buffer.getMappedRange(offset, size);
-		        let ab = buffer.getMappedRange();
-		        let u8 = new Uint8Array(ab);
+		        let ab     = buffer.getMappedRange(offset, size);
+		        let u8     = new Uint8Array(ab);
 		        for (let i = 0; i < u8.length; ++i) {
 			        heapu8[ptr + i] = u8[i];
 		        }
@@ -209,11 +217,10 @@ async function init() {
 		        let buffer = id_to_ptr(pbuffer);
 		        buffer.unmap();
 			},
-			wgpuBufferUnmap2 : function(pbuffer, pdata, data_size) {
+			wgpuBufferUnmap2 : function(pbuffer, pdata, start, count) {
 		        let buffer = id_to_ptr(pbuffer);
-		        // let ab     = buffer.getMappedRange(0, data_size);
-		        let ab = buffer.getMappedRange();
-		        let u8 = new Uint8Array(ab);
+		        let ab     = buffer.getMappedRange(start, count);
+		        let u8     = new Uint8Array(ab);
 		        for (let i = 0; i < u8.length; ++i) {
 			        u8[i] = heapu8[pdata + i];
 		        }
@@ -300,7 +307,7 @@ async function init() {
 		        // WGPURenderPassDepthStencilAttachment
 		        let pdsa = read_u32(pdescriptor + 20);
 		        if (pdsa !== 0) {
-			        desc.depthStencilAttachment = {view : id_to_ptr(read_u32(pdsa + 4)), depthLoadOp : "clear", depthStoreOp : "store", depthClearValue : 0.0};
+			        desc.depthStencilAttachment = {view : id_to_ptr(read_u32(pdsa + 4)), depthLoadOp : "clear", depthStoreOp : "store", depthClearValue : 1.0};
 		        }
 
 		        let render_pass = encoder.beginRenderPass(desc);
@@ -326,8 +333,7 @@ async function init() {
 			},
 			wgpuRenderPassEncoderDrawIndexed : function(prender_pass_encoder, index_count, instance_count, first_index, base_vertex, first_instance) {
 		        let render_pass = id_to_ptr(prender_pass_encoder);
-		        // render_pass.drawIndexed(index_count, instance_count, first_index, base_vertex, first_instance);
-		        render_pass.drawIndexed(index_count);
+		        render_pass.drawIndexed(index_count, instance_count, first_index, base_vertex, first_instance);
 			},
 			wgpuRenderPassEncoderSetPipeline : function(prender_pass_encoder, ppipeline) {
 		        let render_pass = id_to_ptr(prender_pass_encoder);
@@ -337,14 +343,12 @@ async function init() {
 			wgpuRenderPassEncoderSetVertexBuffer : function(prender_pass_encoder, slot, pbuffer, offset, size) {
 		        let render_pass = id_to_ptr(prender_pass_encoder);
 		        let buffer      = id_to_ptr(pbuffer);
-		        // render_pass.setVertexBuffer(slot, buffer, Number(offset), Number(size));
-		        render_pass.setVertexBuffer(slot, buffer);
+		        render_pass.setVertexBuffer(slot, buffer, Number(offset), Number(size));
 			},
 			wgpuRenderPassEncoderSetIndexBuffer : function(prender_pass_encoder, pbuffer, format, offset, size) {
 		        let render_pass = id_to_ptr(prender_pass_encoder);
 		        let buffer      = id_to_ptr(pbuffer);
-		        // render_pass.setIndexBuffer(buffer, 'uint32', Number(offset), Number(size));
-		        render_pass.setIndexBuffer(buffer, 'uint32');
+		        render_pass.setIndexBuffer(buffer, 'uint32', Number(offset), Number(size));
 			},
 			wgpuDeviceCreateBindGroup : function(pdevice, pdescriptor) {
 		        let device = id_to_ptr(pdevice);
@@ -408,7 +412,6 @@ async function init() {
 		        let pwgsl = read_u32(pdescriptor);
 		        let wgsl  = {chain : {sType : read_u32(pwgsl + 4)}, code : {data : read_u32(pwgsl + 8), length : read_u32(pwgsl + 12)}};
 		        // WGPUShaderModuleDescriptor
-		        // let desc   = { nextInChain: wgsl };
 		        let desc = {code : read_string_n(wgsl.code.data, wgsl.code.length)};
 		        let sm   = device.createShaderModule(desc);
 		        return ptr_to_id(sm);
@@ -424,11 +427,11 @@ async function init() {
 			        // WGPUColorTargetState
 			        let t = {
 				        format : id_to_texture_format(read_u32(ptragets + 4 + i * 24)),
-				        // blend : {
-				        //     color : {operation : "add", srcFactor : "one", dstFactor : "zero"},
-				        //     alpha : {operation : "add", srcFactor : "one", dstFactor : "zero"}
-				        // },
-				        // writeMask : read_u32(ptragets + 16 + i * 24)
+				        blend : {
+					        color : {operation : "add", srcFactor : "one", dstFactor : "zero"},
+					        alpha : {operation : "add", srcFactor : "one", dstFactor : "zero"}
+				        },
+				        writeMask : read_u32(ptragets + 16 + i * 24)
 			        };
 			        frag.targets.push(t);
 		        }
@@ -444,12 +447,10 @@ async function init() {
 		        // WGPURenderPipelineDescriptor
 		        let desc = {
 			        layout : id_to_ptr(read_u32(pdescriptor + 12)),
-			        // layout : "auto",
 			        // WGPUVertexState
 			        vertex : {module : id_to_ptr(read_u32(pdescriptor + 20)), entryPoint : "main", bufferCount : 1, buffers : []},
 			        primitive : {topology : "triangle-list", frontFace : "ccw", cullMode : "none"},
 			        depthStencil : ds,
-			        multisample : {count : 1, mask : 0},
 			        fragment : frag,
 		        };
 
@@ -582,6 +583,12 @@ async function init() {
 			},
 			js_eval : function(str) {
 		        (1, eval)(read_string(str));
+			},
+			js_canvas_w: function() {
+				return canvas.width;
+			},
+			js_canvas_h: function() {
+				return canvas.height;
 			}
 		}
 	});
