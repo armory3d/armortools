@@ -176,11 +176,11 @@ function ui_menu_sub_begin(items: i32) {
 	ui_menu_sub_x = ui._x;
 	ui_menu_sub_y = ui._y;
 	ui._x += ui._w + 2;
-	ui._y -= ui.ops.theme.ELEMENT_H;
+	ui._y -= UI_ELEMENT_H();
 
-	ui_draw_shadow(ui._x, ui._y, ui._w, ui.ops.theme.ELEMENT_H * items);
+	ui_draw_shadow(ui._x, ui._y, ui._w, UI_ELEMENT_H() * items);
 	draw_set_color(ui.ops.theme.SEPARATOR_COL);
-	ui_draw_rect(true, ui._x, ui._y, ui._w, ui.ops.theme.ELEMENT_H * items);
+	ui_draw_rect(true, ui._x, ui._y, ui._w, UI_ELEMENT_H() * items);
 	draw_set_color(0xffffffff);
 }
 
