@@ -118,7 +118,7 @@ function config_init() {
 		config_raw                    = {};
 		config_raw.version            = manifest_version_config;
 		config_raw.sha                = config_get_sha();
-		config_raw.locale             = "system";
+		config_raw.locale             = "en"; // "system";
 		config_raw.window_mode        = 0;
 		config_raw.window_resizable   = true;
 		config_raw.window_minimizable = true;
