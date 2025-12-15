@@ -1,6 +1,7 @@
 
 let util_mesh_unwrappers: map_t<string, any> = map_create(); // JSValue * -> ((a: raw_mesh_t)=>void)
-let util_mesh_calc_normals_va0: i16_array_t;
+let util_mesh_va0: i16_array_t;
+let util_mesh_quantized: i32_array_t;
 
 function util_mesh_merge(paint_objects: mesh_object_t[] = null) {
 	if (paint_objects == null) {
@@ -203,15 +204,15 @@ function util_mesh_calc_normals(smooth: bool = false) {
 				array_push(indices, j);
 			}
 
-			util_mesh_calc_normals_va0 = va0;
+			util_mesh_va0 = va0;
 			i32_array_sort(indices, function (pa: i32_ptr, pb: i32_ptr): i32 {
 				let a: i32 = DEREFERENCE(pa);
 				let b: i32 = DEREFERENCE(pb);
-				let diff: i32 = util_mesh_calc_normals_va0[a * 4] - util_mesh_calc_normals_va0[b * 4];
+				let diff: i32 = util_mesh_va0[a * 4] - util_mesh_va0[b * 4];
 				if (diff != 0) return diff;
-				diff = util_mesh_calc_normals_va0[a * 4 + 1] - util_mesh_calc_normals_va0[b * 4 + 1];
+				diff = util_mesh_va0[a * 4 + 1] - util_mesh_va0[b * 4 + 1];
 				if (diff != 0) return diff;
-				return util_mesh_calc_normals_va0[a * 4 + 2] - util_mesh_calc_normals_va0[b * 4 + 2];
+				return util_mesh_va0[a * 4 + 2] - util_mesh_va0[b * 4 + 2];
 			});
 
 			if (indices.length > 0) {
@@ -441,28 +442,132 @@ function util_mesh_calc_normal(p0: vec4_t, p1: vec4_t, p2: vec4_t): vec4_t {
 	return cb;
 }
 
-function util_mesh_decimate() {
-	let o: mesh_object_t      = project_paint_objects[0];
-	let vas: vertex_array_t[] = o.data.vertex_arrays;
-	let posa: i16_array_t     = vas[0].values;
-	let nora: i16_array_t     = vas[1].values;
-	let texa: i16_array_t     = vas[2].values;
-	let inda: u32_array_t     = o.data.index_array;
+function util_mesh_decimate(strength: f32 = 0.5) {
+	let objects: mesh_object_t[] = project_paint_objects;
+	let o: mesh_object_t      = objects[0];
+	let g: mesh_data_t        = o.data;
+	let va0: i16_array_t      = g.vertex_arrays[0].values;
+	let va1: i16_array_t      = g.vertex_arrays[1].values;
+	let va2: i16_array_t      = g.vertex_arrays[2].values;
+	let inda: u32_array_t     = g.index_array;
+	let num_verts: i32        = math_floor(va0.length / 4);
 
-	let mesh: raw_mesh_t = {
-		posa : posa,
-		nora : nora,
-		texa : texa,
-		cola : null,
-		inda : inda,
-		vertex_count : posa.length / 4,
-		index_count : inda.length,
-		scale_pos : o.data.scale_pos,
-		scale_tex : 1.0,
-		name : "Decimated",
+	let min_x: i32 = 32767;
+	let max_x: i32 = -32767;
+	let min_y: i32 = 32767;
+	let max_y: i32 = -32767;
+	let min_z: i32 = 32767;
+	let max_z: i32 = -32767;
+	for (let i: i32 = 0; i < num_verts; ++i) {
+		let x: i32 = va0[i * 4];
+		let y: i32 = va0[i * 4 + 1];
+		let z: i32 = va0[i * 4 + 2];
+		if (x < min_x) min_x = x; if (x > max_x) max_x = x;
+		if (y < min_y) min_y = y; if (y > max_y) max_y = y;
+		if (z < min_z) min_z = z; if (z > max_z) max_z = z;
+	}
+	let box_size: i32 = math_max(max_x - min_x, math_max(max_y - min_y, max_z - min_z));
+
+	let cells: f32    = 200.0 * (1.0 - strength);
+	if (cells < 2.0) cells = 2.0;
+	let cell_size: i32 = math_floor(box_size / cells);
+	if (cell_size < 1) cell_size = 1;
+
+	util_mesh_quantized = i32_array_create(num_verts * 3);
+	let indices: i32[]         = [];
+
+	for (let i: i32 = 0; i < num_verts; ++i) {
+		util_mesh_quantized[i * 3]     = math_floor((va0[i * 4]     - min_x) / cell_size);
+		util_mesh_quantized[i * 3 + 1] = math_floor((va0[i * 4 + 1] - min_y) / cell_size);
+		util_mesh_quantized[i * 3 + 2] = math_floor((va0[i * 4 + 2] - min_z) / cell_size);
+		array_push(indices, i);
+	}
+
+	i32_array_sort(indices, function (pa: i32_ptr, pb: i32_ptr): i32 {
+		let a: i32 = DEREFERENCE(pa);
+		let b: i32 = DEREFERENCE(pb);
+		let diff: i32 = util_mesh_quantized[a * 3] - util_mesh_quantized[b * 3];
+		if (diff != 0) return diff;
+		diff = util_mesh_quantized[a * 3 + 1] - util_mesh_quantized[b * 3 + 1];
+		if (diff != 0) return diff;
+		return util_mesh_quantized[a * 3 + 2] - util_mesh_quantized[b * 3 + 2];
+	});
+
+	let remap: i32_array_t    = i32_array_create(num_verts);
+	let new_verts_count: i32  = 0;
+	let unique_indices: i32[] = [];
+
+	if (indices.length > 0) {
+		let start_of_cell: i32 = 0;
+		remap[indices[0]] = 0;
+		for (let i: i32 = 1; i <= indices.length; ++i) {
+			let is_new_cell: bool = false;
+			if (i < indices.length) {
+				let curr: i32 = indices[i];
+				let prev: i32 = indices[i - 1];
+				if (util_mesh_quantized[curr * 3]     != util_mesh_quantized[prev * 3] ||
+					util_mesh_quantized[curr * 3 + 1] != util_mesh_quantized[prev * 3 + 1] ||
+					util_mesh_quantized[curr * 3 + 2] != util_mesh_quantized[prev * 3 + 2]) {
+					is_new_cell = true;
+				}
+			}
+			else {
+				is_new_cell = true;
+			}
+			if (is_new_cell) {
+				array_push(unique_indices, indices[start_of_cell]);
+				for (let k: i32 = start_of_cell; k < i; ++k) {
+					remap[indices[k]] = new_verts_count;
+				}
+				new_verts_count++;
+				start_of_cell = i;
+			}
+		}
+	}
+
+	let new_va0: i16_array_t = i16_array_create(new_verts_count * 4);
+	let new_va1: i16_array_t = i16_array_create(new_verts_count * 2);
+	let new_va2: i16_array_t = i16_array_create(new_verts_count * 2);
+	for (let i: i32 = 0; i < new_verts_count; ++i) {
+		let old_idx: i32 = unique_indices[i];
+		new_va0[i * 4]     = va0[old_idx * 4];
+		new_va0[i * 4 + 1] = va0[old_idx * 4 + 1];
+		new_va0[i * 4 + 2] = va0[old_idx * 4 + 2];
+		new_va0[i * 4 + 3] = va0[old_idx * 4 + 3];
+		new_va1[i * 2]     = va1[old_idx * 2];
+		new_va1[i * 2 + 1] = va1[old_idx * 2 + 1];
+		new_va2[i * 2]     = va2[old_idx * 2];
+		new_va2[i * 2 + 1] = va2[old_idx * 2 + 1];
+	}
+
+	let new_inda: u32[] = [];
+	for (let i: i32 = 0; i < math_floor(inda.length / 3); ++i) {
+		let i1: i32 = remap[inda[i * 3]];
+		let i2: i32 = remap[inda[i * 3 + 1]];
+		let i3: i32 = remap[inda[i * 3 + 2]];
+		if (i1 != i2 && i1 != i3 && i2 != i3) {
+			array_push(new_inda, i1);
+			array_push(new_inda, i2);
+			array_push(new_inda, i3);
+		}
+	}
+
+	let raw: mesh_data_t = {
+		name: o.base.name + "_decimated",
+		vertex_arrays: [
+			{ values: new_va0, attrib: "pos", data: "short4norm" },
+			{ values: new_va1, attrib: "nor", data: "short2norm" },
+			{ values: new_va2, attrib: "tex", data: "short2norm" }
+		],
+		index_array: u32_array_create_from_array(new_inda),
+		scale_pos: o.data.scale_pos,
+		scale_tex: 1.0
 	};
-	// decimate_mesh(mesh);
-	import_mesh_add_mesh(mesh);
+
+	let new_data: mesh_data_t = mesh_data_create(raw);
+	o.data = new_data;
+	util_mesh_calc_normals(true);
+	plugin_uv_unwrap_button();
 }
 
 function _util_mesh_unique_data_count(): i32 {

@@ -90,6 +90,10 @@ function tab_meshes_draw(htab: ui_handle_t) {
 					}
 					plugin_uv_unwrap_button();
 				}
+
+				if (config_raw.experimental && ui_menu_button(tr("Decimate"))) {
+					util_mesh_decimate(0.5);
+				}
 			});
 		}
 

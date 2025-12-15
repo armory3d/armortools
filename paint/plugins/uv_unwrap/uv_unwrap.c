@@ -661,17 +661,17 @@ void proc_uv_unwrap(raw_mesh_t *mesh) {
 	}
 	sb_free(islands);
 
-	if (mesh->posa->buffer)
-		free(mesh->posa->buffer);
-	if (mesh->nora->buffer)
-		free(mesh->nora->buffer);
-	if (mesh->inda->buffer)
-		free(mesh->inda->buffer);
-	if (mesh->texa) {
-		if (mesh->texa->buffer)
-			free(mesh->texa->buffer);
-		free(mesh->texa);
-	}
+	// if (mesh->posa->buffer)
+	// 	free(mesh->posa->buffer);
+	// if (mesh->nora->buffer)
+	// 	free(mesh->nora->buffer);
+	// if (mesh->inda->buffer)
+	// 	free(mesh->inda->buffer);
+	// if (mesh->texa) {
+	// 	if (mesh->texa->buffer)
+	// 		free(mesh->texa->buffer);
+	// 	free(mesh->texa);
+	// }
 
 	mesh->posa->buffer   = pa_out;
 	mesh->posa->length   = out_v_count * 4;
