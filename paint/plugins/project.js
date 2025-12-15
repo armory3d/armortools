@@ -1,7 +1,7 @@
 let project = new Project("plugins");
 
 project.add_cfiles("plugins.c");
-project.add_cfiles("proc_xatlas/**");
+project.add_cfiles("uv_unwrap/**");
 project.add_cfiles("io_svg/**");
 project.add_cfiles("io_exr/**");
 project.add_cfiles("io_usd/**");

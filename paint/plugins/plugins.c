@@ -5,11 +5,11 @@
 #include "iron_ui.h"
 #include "iron_ui_nodes.h"
 
-void proc_xatlas_unwrap(void *mesh);
-FN(proc_xatlas_unwrap) {
+void proc_uv_unwrap(void *mesh);
+FN(proc_uv_unwrap) {
 	uint64_t mesh;
 	JS_ToBigUint64(ctx, &mesh, argv[0]);
-	proc_xatlas_unwrap((void *)mesh);
+	proc_uv_unwrap((void *)mesh);
 	return JS_UNDEFINED;
 }
 
@@ -262,7 +262,7 @@ FN(path_texture_importers_delete) {
 void plugin_embed() {
 	JSValue global_obj = JS_GetGlobalObject(js_ctx);
 
-	BIND(proc_xatlas_unwrap, 1);
+	BIND(proc_uv_unwrap, 1);
 	BIND(plugin_uv_unwrap_button, 0);
 	BIND(io_svg_parse, 1);
 	BIND(io_exr_parse, 1);

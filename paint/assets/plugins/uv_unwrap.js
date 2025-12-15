@@ -2,7 +2,7 @@
 let plugin = plugin_create();
 
 function unwrap_mesh(mesh) {
-	proc_xatlas_unwrap(mesh);
+	proc_uv_unwrap(mesh);
 }
 
 let h1 = ui_handle_create();
