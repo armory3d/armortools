@@ -1,5 +1,6 @@
 
 let util_mesh_unwrappers: map_t<string, any> = map_create(); // JSValue * -> ((a: raw_mesh_t)=>void)
+let util_mesh_calc_normals_va0: i16_array_t;
 
 function util_mesh_merge(paint_objects: mesh_object_t[] = null) {
 	if (paint_objects == null) {
@@ -182,6 +183,7 @@ function util_mesh_calc_normals(smooth: bool = false) {
 	let cb: vec4_t               = vec4_create();
 	let ab: vec4_t               = vec4_create();
 	let objects: mesh_object_t[] = project_paint_objects;
+
 	for (let i: i32 = 0; i < objects.length; ++i) {
 		let o: mesh_object_t  = objects[i];
 		let g: mesh_data_t    = o.data;
@@ -189,70 +191,108 @@ function util_mesh_calc_normals(smooth: bool = false) {
 		let va0: i16_array_t  = o.data.vertex_arrays[0].values;
 		let va1: i16_array_t  = o.data.vertex_arrays[1].values;
 		let num_verts: i32    = math_floor(va0.length / 4);
-		for (let i: i32 = 0; i < math_floor(inda.length / 3); ++i) {
-			let i1: i32     = inda[i * 3];
-			let i2: i32     = inda[i * 3 + 1];
-			let i3: i32     = inda[i * 3 + 2];
-			va              = vec4_create(va0[i1 * 4], va0[i1 * 4 + 1], va0[i1 * 4 + 2]);
-			vb              = vec4_create(va0[i2 * 4], va0[i2 * 4 + 1], va0[i2 * 4 + 2]);
-			vc              = vec4_create(va0[i3 * 4], va0[i3 * 4 + 1], va0[i3 * 4 + 2]);
-			cb              = vec4_sub(vc, vb);
-			ab              = vec4_sub(va, vb);
-			cb              = vec4_cross(cb, ab);
-			cb              = vec4_norm(cb);
-			let nx: i32     = math_floor(cb.x * 32767);
-			let ny: i32     = math_floor(cb.y * 32767);
-			let nz: i32     = math_floor(cb.z * 32767);
-			va1[i1 * 2]     = nx;
-			va1[i1 * 2 + 1] = ny;
-			va0[i1 * 4 + 3] = nz;
-			va1[i2 * 2]     = nx;
-			va1[i2 * 2 + 1] = ny;
-			va0[i2 * 4 + 3] = nz;
-			va1[i3 * 2]     = nx;
-			va1[i3 * 2 + 1] = ny;
-			va0[i3 * 4 + 3] = nz;
-		}
+
+		let smooth_vals: f32_array_t = null;
+		let vert_map: i32_array_t    = null;
 		if (smooth) {
-			let shared: u32_array_t = u32_array_create(1024);
-			let shared_len: i32     = 0;
-			let found: i32[]        = [];
-			for (let i: i32 = 0; i < (inda.length - 1); ++i) {
-				if (array_index_of(found, i) >= 0) {
-					continue;
-				}
-				let i1: i32          = inda[i];
-				shared_len           = 0;
-				shared[shared_len++] = i1;
-				for (let j: i32 = (i + 1); j < inda.length; ++j) {
-					let i2: i32 = inda[j];
-					if (va0[i1 * 4] == va0[i2 * 4] && va0[i1 * 4 + 1] == va0[i2 * 4 + 1] && va0[i1 * 4 + 2] == va0[i2 * 4 + 2]) {
-						// if (n1.dot(n2) > 0)
-						shared[shared_len++] = i2;
-						array_push(found, j);
-						if (shared_len >= 1024) {
-							break;
-						}
+			smooth_vals = f32_array_create(num_verts * 3);
+			vert_map    = i32_array_create(num_verts);
+
+			let indices: i32[] = [];
+			for (let j: i32 = 0; j < num_verts; ++j) {
+				array_push(indices, j);
+			}
+
+			util_mesh_calc_normals_va0 = va0;
+			i32_array_sort(indices, function (pa: i32_ptr, pb: i32_ptr): i32 {
+				let a: i32 = DEREFERENCE(pa);
+				let b: i32 = DEREFERENCE(pb);
+				let diff: i32 = util_mesh_calc_normals_va0[a * 4] - util_mesh_calc_normals_va0[b * 4];
+				if (diff != 0) return diff;
+				diff = util_mesh_calc_normals_va0[a * 4 + 1] - util_mesh_calc_normals_va0[b * 4 + 1];
+				if (diff != 0) return diff;
+				return util_mesh_calc_normals_va0[a * 4 + 2] - util_mesh_calc_normals_va0[b * 4 + 2];
+			});
+
+			if (indices.length > 0) {
+				let unique_id: i32 = indices[0];
+				vert_map[indices[0]] = unique_id;
+				for (let j: i32 = 1; j < indices.length; ++j) {
+					let curr: i32 = indices[j];
+					let prev: i32 = indices[j - 1];
+					if (va0[curr * 4]     == va0[prev * 4] &&
+						va0[curr * 4 + 1] == va0[prev * 4 + 1] &&
+						va0[curr * 4 + 2] == va0[prev * 4 + 2]) {
+						vert_map[curr] = unique_id;
+					}
+					else {
+						unique_id = curr;
+						vert_map[curr] = unique_id;
 					}
 				}
-				if (shared_len > 1) {
-					va = vec4_create(0, 0, 0);
-					for (let j: i32 = 0; j < shared_len; ++j) {
-						let i1: i32 = shared[j];
-						va          = vec4_fadd(va, va1[i1 * 2], va1[i1 * 2 + 1], va0[i1 * 4 + 3]);
-					}
-					va           = vec4_mult(va, 1 / shared_len);
-					va           = vec4_norm(va);
-					let vax: i32 = math_floor(va.x * 32767);
-					let vay: i32 = math_floor(va.y * 32767);
-					let vaz: i32 = math_floor(va.z * 32767);
-					for (let j: i32 = 0; j < shared_len; ++j) {
-						let i1: i32     = shared[j];
-						va1[i1 * 2]     = vax;
-						va1[i1 * 2 + 1] = vay;
-						va0[i1 * 4 + 3] = vaz;
-					}
+			}
+		}
+
+		for (let i: i32 = 0; i < math_floor(inda.length / 3); ++i) {
+			let i1: i32 = inda[i * 3];
+			let i2: i32 = inda[i * 3 + 1];
+			let i3: i32 = inda[i * 3 + 2];
+			va          = vec4_create(va0[i1 * 4], va0[i1 * 4 + 1], va0[i1 * 4 + 2]);
+			vb          = vec4_create(va0[i2 * 4], va0[i2 * 4 + 1], va0[i2 * 4 + 2]);
+			vc          = vec4_create(va0[i3 * 4], va0[i3 * 4 + 1], va0[i3 * 4 + 2]);
+			cb          = vec4_sub(vc, vb);
+			ab          = vec4_sub(va, vb);
+			cb          = vec4_cross(cb, ab);
+			if (smooth) {
+				let u1: i32 = vert_map[i1];
+				let u2: i32 = vert_map[i2];
+				let u3: i32 = vert_map[i3];
+				smooth_vals[u1 * 3]     += cb.x;
+				smooth_vals[u1 * 3 + 1] += cb.y;
+				smooth_vals[u1 * 3 + 2] += cb.z;
+				if (u2 != u1) {
+					smooth_vals[u2 * 3]     += cb.x;
+					smooth_vals[u2 * 3 + 1] += cb.y;
+					smooth_vals[u2 * 3 + 2] += cb.z;
 				}
+				if (u3 != u1 && u3 != u2) {
+					smooth_vals[u3 * 3]     += cb.x;
+					smooth_vals[u3 * 3 + 1] += cb.y;
+					smooth_vals[u3 * 3 + 2] += cb.z;
+				}
+			}
+			else {
+				cb = vec4_norm(cb);
+				let nx: i32     = math_floor(cb.x * 32767);
+				let ny: i32     = math_floor(cb.y * 32767);
+				let nz: i32     = math_floor(cb.z * 32767);
+				va1[i1 * 2]     = nx;
+				va1[i1 * 2 + 1] = ny;
+				va0[i1 * 4 + 3] = nz;
+				va1[i2 * 2]     = nx;
+				va1[i2 * 2 + 1] = ny;
+				va0[i2 * 4 + 3] = nz;
+				va1[i3 * 2]     = nx;
+				va1[i3 * 2 + 1] = ny;
+				va0[i3 * 4 + 3] = nz;
+			}
+		}
+
+		if (smooth) {
+			for (let j: i32 = 0; j < num_verts; ++j) {
+				let u: i32  = vert_map[j];
+				let nx: f32 = smooth_vals[u * 3];
+				let ny: f32 = smooth_vals[u * 3 + 1];
+				let nz: f32 = smooth_vals[u * 3 + 2];
+				let l: f32  = math_sqrt(nx * nx + ny * ny + nz * nz);
+				if (l > 0.0001) {
+					nx /= l;
+					ny /= l;
+					nz /= l;
+				}
+				va1[j * 2]     = math_floor(nx * 32767);
+				va1[j * 2 + 1] = math_floor(ny * 32767);
+				va0[j * 4 + 3] = math_floor(nz * 32767);
 			}
 		}
 
