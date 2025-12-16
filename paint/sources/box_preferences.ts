@@ -66,10 +66,10 @@ function box_preferences_interface_tab() {
 			for (let j: i32 = 0; j < c.nodes.length; ++j) {
 				let n: ui_node_t = c.nodes[j];
 				if (config_raw.node_previews) {
-					n.flags |= _ui_node_flag_t.PREVIEW;
+					n.flags |= ui_node_flag_t.PREVIEW;
 				}
 				else {
-					n.flags &= ~_ui_node_flag_t.PREVIEW;
+					n.flags &= ~ui_node_flag_t.PREVIEW;
 				}
 			}
 		}

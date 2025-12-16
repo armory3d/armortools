@@ -88,7 +88,7 @@ float UI_LINE_H() {
 }
 
 float UI_BUTTONS_H(ui_node_t *node) {
-	if (node->flags & NODE_FLAG_COLLAPSED)
+	if (node->flags & UI_NODE_FLAG_COLLAPSED)
 		return 0.0;
 	float h = 0.0;
 	for (int i = 0; i < node->buttons->length; ++i) {
@@ -111,7 +111,7 @@ float UI_BUTTONS_H(ui_node_t *node) {
 }
 
 float UI_OUTPUTS_H(ui_node_t *node, int length) {
-	if (node->flags & NODE_FLAG_COLLAPSED)
+	if (node->flags & UI_NODE_FLAG_COLLAPSED)
 		return 0.0;
 	float h = 0.0;
 	for (int i = 0; i < (length < 0 ? node->outputs->length : length); ++i) {
@@ -144,7 +144,7 @@ float UI_INPUTS_H(ui_node_canvas_t *canvas, ui_node_socket_t **sockets, int sock
 }
 
 float UI_NODE_H(ui_node_canvas_t *canvas, ui_node_t *node) {
-	if (node->flags & NODE_FLAG_COLLAPSED)
+	if (node->flags & UI_NODE_FLAG_COLLAPSED)
 		return UI_LINE_H() * 1.2;
 	return UI_LINE_H() * 1.2 + UI_INPUTS_H(canvas, node->inputs->buffer, node->inputs->length, -1) + UI_OUTPUTS_H(node, -1) + UI_BUTTONS_H(node);
 }
@@ -162,13 +162,13 @@ float UI_NODE_Y(ui_node_t *node) {
 }
 
 float UI_INPUT_Y(ui_node_canvas_t *canvas, ui_node_t *node, int pos) {
-	if (node->flags & NODE_FLAG_COLLAPSED)
+	if (node->flags & UI_NODE_FLAG_COLLAPSED)
 		return UI_LINE_H() * 0.5;
 	return UI_LINE_H() * 1.62 + UI_INPUTS_H(canvas, node->inputs->buffer, node->inputs->length, pos);
 }
 
 float UI_OUTPUT_Y(ui_node_t *node, int pos) {
-	if (node->flags & NODE_FLAG_COLLAPSED)
+	if (node->flags & UI_NODE_FLAG_COLLAPSED)
 		return UI_LINE_H() * 0.5;
 	return UI_LINE_H() * 1.62 + UI_OUTPUTS_H(node, pos);
 }
@@ -746,7 +746,7 @@ void ui_node_draw(ui_node_t *node, ui_node_canvas_t *canvas) {
 	}
 
 	// Node preview
-	if ((node->flags & NODE_FLAG_PREVIEW) && ui_nodes_preview_image != NULL) {
+	if ((node->flags & UI_NODE_FLAG_PREVIEW) && ui_nodes_preview_image != NULL) {
 		// ui_draw_shadow(nx, ny - w, w * 0.98, w * 0.98);
 		gpu_texture_t *image = ui_nodes_preview_image(node);
 		if (image != NULL) {
@@ -774,7 +774,7 @@ void ui_node_draw(ui_node_t *node, ui_node_canvas_t *canvas) {
 	// Collapse button
 	bool hover = current->input_x > wx + nx && current->input_x < wx + nx + ui_p(20) && current->input_y > wy + ny && current->input_y < wy + ny + ui_p(20);
 	if (hover && current->input_started) {
-		node->flags ^= NODE_FLAG_COLLAPSED;
+		node->flags ^= UI_NODE_FLAG_COLLAPSED;
 	}
 	draw_set_color(hover ? current->ops->theme->LABEL_COL : current->ops->theme->HOVER_COL);
 	int bx = nx + ui_p(4);
@@ -784,7 +784,7 @@ void ui_node_draw(ui_node_t *node, ui_node_canvas_t *canvas) {
 	// Eye button
 	hover = current->input_x > wx + nx + w - ui_p(20) && current->input_x < wx + nx + w && current->input_y > wy + ny && current->input_y < wy + ny + ui_p(20);
 	if (hover && current->input_started) {
-		node->flags ^= NODE_FLAG_PREVIEW;
+		node->flags ^= UI_NODE_FLAG_PREVIEW;
 	}
 	draw_set_color(hover ? current->ops->theme->LABEL_COL : current->ops->theme->HOVER_COL);
 	float       ex         = nx + w - ui_p(10);
@@ -809,7 +809,7 @@ void ui_node_draw(ui_node_t *node, ui_node_canvas_t *canvas) {
 	draw_string(text, nx + ui_p(20), ny + ui_p(6));
 	ny += lineh * 0.5;
 
-	if (!(node->flags & NODE_FLAG_COLLAPSED)) {
+	if (!(node->flags & UI_NODE_FLAG_COLLAPSED)) {
 		bool _changed    = current->changed;
 		current->changed = false;
 		ui_node_draw_body(node, canvas, nx, ny);
@@ -973,7 +973,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 		ui_node_t *node = canvas->nodes->buffer[i];
 
 		// Cull
-		float preview_h = (node->flags & NODE_FLAG_PREVIEW) ? UI_NODE_W(node) : 0.0;
+		float preview_h = (node->flags & UI_NODE_FLAG_PREVIEW) ? UI_NODE_W(node) : 0.0;
 		if (UI_NODE_X(node) > current->_window_w || UI_NODE_X(node) + UI_NODE_W(node) < 0 || UI_NODE_Y(node) - preview_h > current->_window_h ||
 		    UI_NODE_Y(node) + UI_NODE_H(canvas, node) < 0) {
 			if (!ui_is_selected(node)) {
@@ -1022,7 +1022,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 			}
 		}
 
-		if (current->input_started && !(node->flags & NODE_FLAG_COLLAPSED) &&
+		if (current->input_started && !(node->flags & UI_NODE_FLAG_COLLAPSED) &&
 		    ui_input_in_rect(wx + UI_NODE_X(node) - UI_LINE_H() / 2, wy + UI_NODE_Y(node) - UI_LINE_H() / 2, UI_NODE_W(node) + UI_LINE_H(),
 		                     node_h + UI_LINE_H())) {
 			// Check sockets
@@ -1353,7 +1353,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 			int        nid = current_nodes->nodes_selected_id->buffer[i--];
 			ui_node_t *n   = ui_get_node(canvas->nodes, nid);
 			if (ui_is_node_type_excluded(n->type)) {
-				n->flags ^= NODE_FLAG_COLLAPSED;
+				n->flags ^= UI_NODE_FLAG_COLLAPSED;
 				continue;
 			}
 			ui_remove_node(n, canvas);

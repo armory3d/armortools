@@ -94,7 +94,7 @@ static BOOL CALLBACK EnumerationCallback(HMONITOR monitor, HDC hdc_unused, LPREC
 
 	HDC hdc      = CreateDCA(NULL, display->name, NULL, NULL);
 	display->ppi = GetDeviceCaps(hdc, LOGPIXELSX);
-	int scale    = GetDeviceCaps(hdc, SCALINGFACTORX);
+	/* int scale =*/ GetDeviceCaps(hdc, SCALINGFACTORX);
 	DeleteDC(hdc);
 
 	if (MyGetDpiForMonitor != NULL) {
@@ -959,7 +959,7 @@ void iron_internal_shutdown() {
 void iron_copy_to_clipboard(const char *text) {
 	wchar_t wtext[4096];
 	MultiByteToWideChar(CP_UTF8, 0, text, -1, wtext, 4096);
-	OpenClipboard(iron_windows_window_handle(0));
+	OpenClipboard(iron_windows_window_handle());
 	EmptyClipboard();
 	size_t size   = (wcslen(wtext) + 1) * sizeof(wchar_t);
 	HANDLE handle = GlobalAlloc(GMEM_MOVEABLE, size);
@@ -1156,7 +1156,7 @@ static void createWindow(const wchar_t *title, int x, int y, int width, int heig
 	RegGetValueW(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", L"AppsUseLightTheme", RRF_RT_REG_DWORD, NULL, vdata,
 	             &cbdata);
 	BOOL use_dark_mode = (int)(vdata[3] << 24 | vdata[2] << 16 | vdata[1] << 8 | vdata[0]) != 1;
-	DwmSetWindowAttribute(iron_windows_window_handle(0), DWMWA_USE_IMMERSIVE_DARK_MODE, &use_dark_mode, sizeof(use_dark_mode));
+	DwmSetWindowAttribute(iron_windows_window_handle(), DWMWA_USE_IMMERSIVE_DARK_MODE, &use_dark_mode, sizeof(use_dark_mode));
 }
 
 void iron_window_resize(int width, int height) {
@@ -1246,9 +1246,7 @@ void iron_windows_hide_windows(void) {
 }
 
 void iron_windows_destroy_windows(void) {
-	for (int i = 0; i < 1; ++i) {
-		iron_window_destroy(i);
-	}
+	iron_window_destroy();
 	UnregisterClassW(windowClassName, GetModuleHandleW(NULL));
 }
 

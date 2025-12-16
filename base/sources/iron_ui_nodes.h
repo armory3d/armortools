@@ -48,9 +48,9 @@ typedef struct ui_node_button_array {
 } ui_node_button_array_t;
 
 typedef enum ui_node_flag {
-	NODE_FLAG_NONE      = 0,
-	NODE_FLAG_COLLAPSED = 1,
-	NODE_FLAG_PREVIEW   = 2,
+	UI_NODE_FLAG_NONE      = 0,
+	UI_NODE_FLAG_COLLAPSED = 1,
+	UI_NODE_FLAG_PREVIEW   = 2,
 } ui_node_flag_t;
 
 typedef struct ui_node {

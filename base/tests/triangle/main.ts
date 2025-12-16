@@ -7,7 +7,7 @@ let vb: gpu_buffer_t;
 let ib: gpu_buffer_t;
 
 function render() {
-	_gpu_begin(null, null, null, clear_flag_t.COLOR | clear_flag_t.DEPTH, 0xff000000, 1.0);
+	_gpu_begin(null, null, null, gpu_clear_t.COLOR | gpu_clear_t.DEPTH, 0xff000000, 1.0);
 	gpu_set_pipeline(pipeline);
 	gpu_set_vertex_buffer(vb);
 	gpu_set_index_buffer(ib);

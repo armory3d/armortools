@@ -190,7 +190,7 @@ function render_path_base_draw_bloom(source: string, target: string) {
 
 	for (let i: i32 = 0; i < num_mips; ++i) {
 		render_path_base_bloom_current_mip = i;
-		render_path_set_target(render_path_base_bloom_mipmaps[i].name, null, null, clear_flag_t.COLOR, 0x00000000);
+		render_path_set_target(render_path_base_bloom_mipmaps[i].name, null, null, gpu_clear_t.COLOR, 0x00000000);
 		render_path_bind_target(i == 0 ? source : render_path_base_bloom_mipmaps[i - 1].name, "tex");
 		render_path_draw_shader("Scene/bloom_pass/bloom_downsample_pass");
 	}
@@ -351,7 +351,7 @@ function render_path_base_swap_buf(bufb: string) {
 }
 
 function render_path_base_draw_gbuffer() {
-	render_path_set_target("gbuffer0", null, "main", clear_flag_t.DEPTH, 0, 1.0); // Only clear gbuffer0
+	render_path_set_target("gbuffer0", null, "main", gpu_clear_t.DEPTH, 0, 1.0); // Only clear gbuffer0
 	let additional: string[] = [ "gbuffer1", "gbuffer2" ];
 	render_path_set_target("gbuffer0", additional, "main");
 	render_path_paint_bind_layers();
@@ -363,7 +363,7 @@ function render_path_base_draw_gbuffer() {
 			let ping: string = i % 2 == 1 ? "_copy" : "";
 			let pong: string = i % 2 == 1 ? "" : "_copy";
 			if (i == make_mesh_layer_pass_count - 1) {
-				render_path_set_target("gbuffer2" + ping, null, null, clear_flag_t.COLOR, 0xff000000);
+				render_path_set_target("gbuffer2" + ping, null, null, gpu_clear_t.COLOR, 0xff000000);
 			}
 			let g1ping: string       = "gbuffer1" + ping;
 			let g2ping: string       = "gbuffer2" + ping;

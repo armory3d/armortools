@@ -62,7 +62,7 @@ function render_path_preview_init() {
 }
 
 function render_path_preview_commands_preview() {
-	render_path_set_target("mgbuffer0", null, "mmain", clear_flag_t.COLOR | clear_flag_t.DEPTH, 0xffffffff, 1.0);
+	render_path_set_target("mgbuffer0", null, "mmain", gpu_clear_t.COLOR | gpu_clear_t.DEPTH, 0xffffffff, 1.0);
 	let additional: string[] = [ "mgbuffer1" ];
 	render_path_set_target("mgbuffer0", additional, "mmain");
 	render_path_draw_meshes("mesh");
@@ -95,7 +95,7 @@ function render_path_preview_commands_preview() {
 }
 
 function render_path_preview_commands_decal() {
-	render_path_set_target("gbuffer0", null, "main", clear_flag_t.COLOR | clear_flag_t.DEPTH, 0xffffffff, 1.0);
+	render_path_set_target("gbuffer0", null, "main", gpu_clear_t.COLOR | gpu_clear_t.DEPTH, 0xffffffff, 1.0);
 	let additional: string[] = [ "gbuffer1" ];
 	render_path_set_target("gbuffer0", additional, "main");
 	render_path_draw_meshes("mesh");

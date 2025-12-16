@@ -251,7 +251,7 @@ static void *gc_allocate(size_t count, size_t size) {
 	/* Allocation logic that generalizes over malloc/calloc */
 	/* Check if we reached the high-water mark and need to clean up */
 	if (gc->allocs->size > gc->allocs->sweep_limit && !gc->paused) {
-		size_t freed_mem = _gc_run();
+		_gc_run();
 	}
 	/* With cleanup out of the way, attempt to allocate memory */
 	void  *ptr        = gc_mcalloc(count, size);

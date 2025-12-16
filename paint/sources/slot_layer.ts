@@ -233,7 +233,7 @@ function slot_layer_swap(raw: slot_layer_t, other: slot_layer_t) {
 function slot_layer_clear(raw: slot_layer_t, base_color: i32 = 0x00000000, base_image: gpu_texture_t = null, occlusion: f32 = 1.0,
                           roughness: f32 = layers_default_rough, metallic: f32 = 0.0) {
 	// Base
-	_gpu_begin(raw.texpaint, null, null, clear_flag_t.COLOR, base_color);
+	_gpu_begin(raw.texpaint, null, null, gpu_clear_t.COLOR, base_color);
 	gpu_end();
 	if (base_image != null) {
 		draw_begin(raw.texpaint);
@@ -243,10 +243,10 @@ function slot_layer_clear(raw: slot_layer_t, base_color: i32 = 0x00000000, base_
 
 	if (slot_layer_is_layer(raw)) {
 		// Nor
-		_gpu_begin(raw.texpaint_nor, null, null, clear_flag_t.COLOR, color_from_floats(0.5, 0.5, 1.0, 0.0));
+		_gpu_begin(raw.texpaint_nor, null, null, gpu_clear_t.COLOR, color_from_floats(0.5, 0.5, 1.0, 0.0));
 		gpu_end();
 		// Occ, rough, met
-		_gpu_begin(raw.texpaint_pack, null, null, clear_flag_t.COLOR, color_from_floats(occlusion, roughness, metallic, 0.0));
+		_gpu_begin(raw.texpaint_pack, null, null, gpu_clear_t.COLOR, color_from_floats(occlusion, roughness, metallic, 0.0));
 		gpu_end();
 	}
 
@@ -1537,11 +1537,11 @@ function layers_flatten(height_to_normal: bool = false, layers: slot_layer_t[] =
 	let empty: gpu_texture_t      = empty_rt._image;
 
 	// Clear export layer
-	_gpu_begin(layers_expa, null, null, clear_flag_t.COLOR, color_from_floats(0.0, 0.0, 0.0, 0.0));
+	_gpu_begin(layers_expa, null, null, gpu_clear_t.COLOR, color_from_floats(0.0, 0.0, 0.0, 0.0));
 	gpu_end();
-	_gpu_begin(layers_expb, null, null, clear_flag_t.COLOR, color_from_floats(0.5, 0.5, 1.0, 0.0));
+	_gpu_begin(layers_expb, null, null, gpu_clear_t.COLOR, color_from_floats(0.5, 0.5, 1.0, 0.0));
 	gpu_end();
-	_gpu_begin(layers_expc, null, null, clear_flag_t.COLOR, color_from_floats(1.0, 0.0, 0.0, 0.0));
+	_gpu_begin(layers_expc, null, null, gpu_clear_t.COLOR, color_from_floats(1.0, 0.0, 0.0, 0.0));
 	gpu_end();
 
 	// Flatten layers
@@ -1559,7 +1559,7 @@ function layers_flatten(height_to_normal: bool = false, layers: slot_layer_t[] =
 		if (l1masks != null) {
 			if (l1masks.length > 1) {
 				layers_make_temp_mask_img();
-				draw_begin(pipes_temp_mask_image, clear_flag_t.COLOR, 0x00000000);
+				draw_begin(pipes_temp_mask_image, gpu_clear_t.COLOR, 0x00000000);
 				draw_end();
 				let l1: slot_layer_t = {texpaint : pipes_temp_mask_image};
 				for (let i: i32 = 0; i < l1masks.length; ++i) {

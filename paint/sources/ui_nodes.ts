@@ -767,7 +767,7 @@ function ui_nodes_recompile() {
 }
 
 function ui_nodes_get_linked_nodes(linked_nodes: ui_node_t[], n: ui_node_t, c: ui_node_canvas_t) {
-	if (array_index_of(linked_nodes, n) == -1 && (n.flags & _ui_node_flag_t.PREVIEW)) {
+	if (array_index_of(linked_nodes, n) == -1 && (n.flags & ui_node_flag_t.PREVIEW)) {
 		array_push(linked_nodes, n);
 	}
 	for (let i: i32 = 0; i < c.links.length; ++i) {
@@ -1004,7 +1004,7 @@ function ui_nodes_render() {
 		if (context_raw.selected_node_preview && ui_nodes.nodes_selected_id.length > 0) {
 			let sel: ui_node_t     = ui_get_node(c.nodes, ui_nodes.nodes_selected_id[0]);
 			let img: gpu_texture_t = ui_nodes_get_node_preview_image(sel);
-			if (img != null && !(sel.flags & _ui_node_flag_t.PREVIEW)) {
+			if (img != null && !(sel.flags & ui_node_flag_t.PREVIEW)) {
 				let tw: f32 = 128 * UI_SCALE();
 				let th: f32 = tw * (img.height / img.width);
 				let tx: f32 = ui_nodes_ww - tw - 8 * UI_SCALE();
@@ -1390,7 +1390,7 @@ function ui_nodes_make_node(n: ui_node_t, nodes: ui_nodes_t, canvas: ui_node_can
 	node.outputs        = [];
 	node.buttons        = [];
 	node.width          = 0;
-	node.flags          = config_raw.node_previews ? _ui_node_flag_t.PREVIEW : _ui_node_flag_t.NONE;
+	node.flags          = config_raw.node_previews ? ui_node_flag_t.PREVIEW : ui_node_flag_t.NONE;
 
 	let count: i32 = 0;
 	for (let i: i32 = 0; i < n.inputs.length; ++i) {

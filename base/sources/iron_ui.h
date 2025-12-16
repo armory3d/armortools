@@ -11,13 +11,13 @@
 typedef enum {
 	UI_LAYOUT_VERTICAL,
 	UI_LAYOUT_HORIZONTAL
-} _ui_layout_t;
+} ui_layout_t;
 
 typedef enum {
 	UI_ALIGN_LEFT,
 	UI_ALIGN_CENTER,
 	UI_ALIGN_RIGHT
-} _ui_align_t;
+} ui_align_t;
 
 typedef enum {
 	UI_STATE_IDLE,
@@ -25,12 +25,12 @@ typedef enum {
 	UI_STATE_DOWN,
 	UI_STATE_RELEASED,
 	UI_STATE_HOVERED
-} _ui_state_t;
+} ui_state_t;
 
 typedef enum {
 	UI_LINK_STYLE_LINE,
 	UI_LINK_STYLE_CUBIC_BEZIER
-} _ui_link_style_t;
+} ui_link_style_t;
 
 typedef struct ui_theme {
 	int          WINDOW_BG_COL;

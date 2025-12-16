@@ -22,7 +22,7 @@ function main() {
 }
 
 function render_commands() {
-	render_path_set_target("", null, null, clear_flag_t.COLOR | clear_flag_t.DEPTH, 0xff6495ed, 1.0);
+	render_path_set_target("", null, null, gpu_clear_t.COLOR | gpu_clear_t.DEPTH, 0xff6495ed, 1.0);
 	render_path_draw_meshes("mesh");
 }
 

@@ -123,7 +123,7 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 
 	if (context_raw.pdirty > 0) {
 		if (context_raw.tool == tool_type_t.COLORID) {
-			render_path_set_target("texpaint_colorid", null, null, clear_flag_t.COLOR, 0xff000000);
+			render_path_set_target("texpaint_colorid", null, null, gpu_clear_t.COLOR, 0xff000000);
 			render_path_bind_target("gbuffer2", "gbuffer2");
 			render_path_paint_draw_fullscreen_triangle("paint");
 			ui_header_handle.redraws = 2;
@@ -233,7 +233,7 @@ function render_path_paint_commands_paint(dilation: bool = true) {
 			let texpaint: string = "texpaint" + tid;
 			if (context_raw.tool == tool_type_t.BAKE && context_raw.brush_time == sys_delta()) {
 				// Clear to black on bake start
-				render_path_set_target(texpaint, null, null, clear_flag_t.COLOR, 0xff000000);
+				render_path_set_target(texpaint, null, null, gpu_clear_t.COLOR, 0xff000000);
 			}
 
 			render_path_set_target("texpaint_blend1");
@@ -677,8 +677,8 @@ function render_path_paint_draw() {
 
 	if (context_raw.brush_blend_dirty) {
 		context_raw.brush_blend_dirty = false;
-		render_path_set_target("texpaint_blend0", null, null, clear_flag_t.COLOR, 0x00000000);
-		render_path_set_target("texpaint_blend1", null, null, clear_flag_t.COLOR, 0x00000000);
+		render_path_set_target("texpaint_blend0", null, null, gpu_clear_t.COLOR, 0x00000000);
+		render_path_set_target("texpaint_blend1", null, null, gpu_clear_t.COLOR, 0x00000000);
 		render_path_end();
 	}
 

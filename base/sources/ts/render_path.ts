@@ -64,7 +64,7 @@ function render_path_render_frame() {
 	_render_path_frame++;
 }
 
-function render_path_set_target(target: string, additional: string[] = null, depth_buffer: string = null, flags: clear_flag_t = clear_flag_t.NONE,
+function render_path_set_target(target: string, additional: string[] = null, depth_buffer: string = null, flags: gpu_clear_t = gpu_clear_t.NONE,
                                 color: i32 = 0, depth: f32 = 0.0) {
 	if (_render_path_current_image != null) {
 		render_path_end();

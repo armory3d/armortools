@@ -65,7 +65,7 @@ function slot_material_create(m: material_data_t = null, c: ui_node_canvas_t = n
 	if (config_raw.node_previews) {
 		for (let i: i32 = 0; i < raw.canvas.nodes.length; ++i) {
 			let n: ui_node_t = raw.canvas.nodes[i];
-			n.flags |= _ui_node_flag_t.PREVIEW;
+			n.flags |= ui_node_flag_t.PREVIEW;
 		}
 	}
 

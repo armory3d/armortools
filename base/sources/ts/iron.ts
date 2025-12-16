@@ -277,7 +277,7 @@ declare function gpu_viewport(x: i32, y: i32, width: i32, height: i32): void;
 declare function gpu_scissor(x: i32, y: i32, width: i32, height: i32): void;
 declare function gpu_disable_scissor(): void;
 declare function _gpu_begin(render_target: gpu_texture_t, additional: gpu_texture_t[] = null, depth_buffer: gpu_texture_t = null,
-                            flags: clear_flag_t = clear_flag_t.NONE, color: i32 = 0, depth: f32 = 0.0): void;
+                            flags: gpu_clear_t = gpu_clear_t.NONE, color: i32 = 0, depth: f32 = 0.0): void;
 declare function gpu_end(): void;
 declare function gpu_present(): void;
 declare function iron_file_save_bytes(path: string, bytes: buffer_t, length: i32 = 0): void;
@@ -586,7 +586,7 @@ declare type gpu_buffer_t = {
 	impl?: any;
 };
 
-enum clear_flag_t {
+declare enum gpu_clear_t {
 	NONE  = 0,
 	COLOR = 1,
 	DEPTH = 2,
@@ -882,18 +882,18 @@ declare type ui_nodes_t = {
 	link_drag_id?: i32;
 };
 
-enum ui_layout_t {
+declare enum ui_layout_t {
 	VERTICAL,
 	HORIZONTAL,
 }
 
-enum ui_align_t {
+declare enum ui_align_t {
 	LEFT,
 	CENTER,
 	RIGHT,
 }
 
-enum ui_state_t {
+declare enum ui_state_t {
 	IDLE,
 	STARTED,
 	DOWN,
@@ -901,7 +901,7 @@ enum ui_state_t {
 	HOVERED,
 }
 
-enum _ui_node_flag_t {
+declare enum ui_node_flag_t {
 	NONE      = 0,
 	COLLAPSED = 1,
 	PREVIEW   = 2,
