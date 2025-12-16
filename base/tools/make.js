@@ -688,7 +688,9 @@ class VisualStudioExporter extends Exporter {
 		this.p('<ItemDefinitionGroup Condition="\'$(Configuration)|$(Platform)\'==\'' + config + '|' + system + '\'">', indent);
 		this.p('<ClCompile>', indent + 1);
 		this.p('<AdditionalIncludeDirectories>' + includes + '</AdditionalIncludeDirectories>', indent + 2);
-		this.p('<AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>', indent + 2);
+
+		this.p('<AdditionalOptions>-Wno-deprecated-declarations -Wno-incompatible-pointer-types -Wno-incompatible-function-pointer-types -Wno-microsoft-enum-forward-reference /bigobj %(AdditionalOptions)</AdditionalOptions>', indent + 2);
+
 		this.p('<WarningLevel>Level3</WarningLevel>', indent + 2);
 		this.p('<Optimization>' + this.get_optimization(config) + '</Optimization>', indent + 2);
 		if (config === 'Release') {
