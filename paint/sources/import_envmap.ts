@@ -15,22 +15,22 @@ function import_envmap_run(path: string, image: gpu_texture_t) {
 		import_envmap_pipeline.vertex_shader   = sys_get_shader("prefilter_envmap.vert");
 		import_envmap_pipeline.fragment_shader = sys_get_shader("prefilter_envmap.frag");
 		let vs: gpu_vertex_structure_t         = {};
-		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
+		gpu_vertex_struct_add(vs, "pos", gpu_vertex_data_t.F32_2X);
 		import_envmap_pipeline.input_layout                      = vs;
 		import_envmap_pipeline.color_attachment_count            = 1;
-		ARRAY_ACCESS(import_envmap_pipeline.color_attachment, 0) = tex_format_t.RGBA128;
+		ARRAY_ACCESS(import_envmap_pipeline.color_attachment, 0) = gpu_texture_format_t.RGBA128;
 
 		gpu_pipeline_compile(import_envmap_pipeline);
 		import_envmap_params_loc   = 0;
 		import_envmap_radiance_loc = 0;
 		import_envmap_noise_loc    = 1;
 
-		import_envmap_radiance = gpu_create_render_target(1024, 512, tex_format_t.RGBA128);
+		import_envmap_radiance = gpu_create_render_target(1024, 512, gpu_texture_format_t.RGBA128);
 
 		import_envmap_mips = [];
 		let w: i32         = 512;
 		for (let i: i32 = 0; i < 5; ++i) {
-			array_push(import_envmap_mips, gpu_create_render_target(w, w > 1 ? math_floor(w / 2) : 1, tex_format_t.RGBA128));
+			array_push(import_envmap_mips, gpu_create_render_target(w, w > 1 ? math_floor(w / 2) : 1, gpu_texture_format_t.RGBA128));
 			w = math_floor(w / 2);
 		}
 	}

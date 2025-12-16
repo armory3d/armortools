@@ -102,7 +102,7 @@ function util_uv_cache_dilate_map() {
 		return;
 
 	if (util_uv_dilatemap == null) {
-		util_uv_dilatemap = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
+		util_uv_dilatemap = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), gpu_texture_format_t.R8);
 	}
 
 	if (util_uv_pipe_dilate == null) {
@@ -110,13 +110,13 @@ function util_uv_cache_dilate_map() {
 		util_uv_pipe_dilate.vertex_shader   = sys_get_shader("dilate_map.vert");
 		util_uv_pipe_dilate.fragment_shader = sys_get_shader("dilate_map.frag");
 		let vs: gpu_vertex_structure_t      = {};
-		gpu_vertex_struct_add(vs, "pos", vertex_data_t.I16_4X_NORM);
-		gpu_vertex_struct_add(vs, "nor", vertex_data_t.I16_2X_NORM);
-		gpu_vertex_struct_add(vs, "tex", vertex_data_t.I16_2X_NORM);
+		gpu_vertex_struct_add(vs, "pos", gpu_vertex_data_t.I16_4X_NORM);
+		gpu_vertex_struct_add(vs, "nor", gpu_vertex_data_t.I16_2X_NORM);
+		gpu_vertex_struct_add(vs, "tex", gpu_vertex_data_t.I16_2X_NORM);
 		util_uv_pipe_dilate.input_layout                      = vs;
 		util_uv_pipe_dilate.depth_write                       = false;
-		util_uv_pipe_dilate.depth_mode                        = compare_mode_t.ALWAYS;
-		ARRAY_ACCESS(util_uv_pipe_dilate.color_attachment, 0) = tex_format_t.R8;
+		util_uv_pipe_dilate.depth_mode                        = gpu_compare_mode_t.ALWAYS;
+		ARRAY_ACCESS(util_uv_pipe_dilate.color_attachment, 0) = gpu_texture_format_t.R8;
 		gpu_pipeline_compile(util_uv_pipe_dilate);
 		// dilate_tex_unpack = getConstantLocation(pipeDilate, "tex_unpack");
 	}
@@ -185,6 +185,6 @@ function util_uv_cache_uv_island_map() {
 	if (util_uv_uvislandmap != null) {
 		gpu_delete_texture(util_uv_uvislandmap);
 	}
-	util_uv_uvislandmap        = gpu_create_texture_from_bytes(bytes, w, h, tex_format_t.R8);
+	util_uv_uvislandmap        = gpu_create_texture_from_bytes(bytes, w, h, gpu_texture_format_t.R8);
 	util_uv_uvislandmap_cached = true;
 }

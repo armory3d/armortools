@@ -31,10 +31,10 @@ function ui_view2d_init() {
 	ui_view2d_pipe.vertex_shader   = sys_get_shader("layer_view.vert");
 	ui_view2d_pipe.fragment_shader = sys_get_shader("layer_view.frag");
 	let vs: gpu_vertex_structure_t = {};
-	gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
+	gpu_vertex_struct_add(vs, "pos", gpu_vertex_data_t.F32_2X);
 	ui_view2d_pipe.input_layout                            = vs;
-	ui_view2d_pipe.blend_source                            = blend_factor_t.BLEND_ONE;
-	ui_view2d_pipe.blend_destination                       = blend_factor_t.BLEND_ZERO;
+	ui_view2d_pipe.blend_source                            = gpu_blend_t.ONE;
+	ui_view2d_pipe.blend_destination                       = gpu_blend_t.ZERO;
 	ARRAY_ACCESS(ui_view2d_pipe.color_write_mask_alpha, 0) = false;
 	gpu_pipeline_compile(ui_view2d_pipe);
 	pipes_offset = 0;

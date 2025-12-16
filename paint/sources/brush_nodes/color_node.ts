@@ -41,7 +41,7 @@ function color_node_get_as_image(self: color_node_t, from: i32): gpu_texture_t {
 	buffer_set_f32(b, 4, self.value.y);
 	buffer_set_f32(b, 8, self.value.z);
 	buffer_set_f32(b, 12, self.value.w);
-	self.image = gpu_create_texture_from_bytes(b, 1, 1, tex_format_t.RGBA128);
+	self.image = gpu_create_texture_from_bytes(b, 1, 1, gpu_texture_format_t.RGBA128);
 	return self.image;
 }
 

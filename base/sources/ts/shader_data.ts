@@ -120,8 +120,8 @@ function shader_context_compile(raw: shader_context_t) {
 	}
 
 	if (raw.shader_from_source) {
-		raw._.pipe.vertex_shader   = gpu_create_shader_from_source(raw.vertex_shader, raw._.vertex_shader_size, shader_type_t.VERTEX);
-		raw._.pipe.fragment_shader = gpu_create_shader_from_source(raw.fragment_shader, raw._.fragment_shader_size, shader_type_t.FRAGMENT);
+		raw._.pipe.vertex_shader   = gpu_create_shader_from_source(raw.vertex_shader, raw._.vertex_shader_size, gpu_shader_type_t.VERTEX);
+		raw._.pipe.fragment_shader = gpu_create_shader_from_source(raw.fragment_shader, raw._.fragment_shader_size, gpu_shader_type_t.FRAGMENT);
 		if (raw._.pipe.vertex_shader == null || raw._.pipe.fragment_shader == null) {
 			return;
 		}
@@ -135,9 +135,9 @@ function shader_context_compile(raw: shader_context_t) {
 		/// else // Load shaders manually
 
 		let vs_buffer: buffer_t    = data_get_blob(raw.vertex_shader + shader_data_ext());
-		raw._.pipe.vertex_shader   = gpu_create_shader(vs_buffer, shader_type_t.VERTEX);
+		raw._.pipe.vertex_shader   = gpu_create_shader(vs_buffer, gpu_shader_type_t.VERTEX);
 		let fs_buffer: buffer_t    = data_get_blob(raw.fragment_shader + shader_data_ext());
-		raw._.pipe.fragment_shader = gpu_create_shader(fs_buffer, shader_type_t.FRAGMENT);
+		raw._.pipe.fragment_shader = gpu_create_shader(fs_buffer, gpu_shader_type_t.FRAGMENT);
 		/// end
 	}
 
@@ -244,26 +244,26 @@ function shader_context_finish_compile(raw: shader_context_t) {
 	}
 }
 
-function shader_context_parse_data(data: string): vertex_data_t {
+function shader_context_parse_data(data: string): gpu_vertex_data_t {
 	if (data == "float1") {
-		return vertex_data_t.F32_1X;
+		return gpu_vertex_data_t.F32_1X;
 	}
 	else if (data == "float2") {
-		return vertex_data_t.F32_2X;
+		return gpu_vertex_data_t.F32_2X;
 	}
 	else if (data == "float3") {
-		return vertex_data_t.F32_3X;
+		return gpu_vertex_data_t.F32_3X;
 	}
 	else if (data == "float4") {
-		return vertex_data_t.F32_4X;
+		return gpu_vertex_data_t.F32_4X;
 	}
 	else if (data == "short2norm") {
-		return vertex_data_t.I16_2X_NORM;
+		return gpu_vertex_data_t.I16_2X_NORM;
 	}
 	else if (data == "short4norm") {
-		return vertex_data_t.I16_4X_NORM;
+		return gpu_vertex_data_t.I16_4X_NORM;
 	}
-	return vertex_data_t.F32_1X;
+	return gpu_vertex_data_t.F32_1X;
 }
 
 function shader_context_parse_vertex_struct(raw: shader_context_t) {
@@ -286,71 +286,71 @@ function shader_context_delete(raw: shader_context_t) {
 	gpu_delete_pipeline(raw._.pipe);
 }
 
-function shader_context_get_compare_mode(s: string): compare_mode_t {
+function shader_context_get_compare_mode(s: string): gpu_compare_mode_t {
 	if (s == "always") {
-		return compare_mode_t.ALWAYS;
+		return gpu_compare_mode_t.ALWAYS;
 	}
 	if (s == "never") {
-		return compare_mode_t.NEVER;
+		return gpu_compare_mode_t.NEVER;
 	}
 	if (s == "equal") {
-		return compare_mode_t.EQUAL;
+		return gpu_compare_mode_t.EQUAL;
 	}
-	return compare_mode_t.LESS;
+	return gpu_compare_mode_t.LESS;
 }
 
-function shader_context_get_cull_mode(s: string): cull_mode_t {
+function shader_context_get_cull_mode(s: string): gpu_cull_mode_t {
 	if (s == "none") {
-		return cull_mode_t.NONE;
+		return gpu_cull_mode_t.NONE;
 	}
 	if (s == "clockwise") {
-		return cull_mode_t.CLOCKWISE;
+		return gpu_cull_mode_t.CLOCKWISE;
 	}
-	return cull_mode_t.COUNTER_CLOCKWISE;
+	return gpu_cull_mode_t.COUNTER_CLOCKWISE;
 }
 
-function shader_context_get_blend_fac(s: string): blend_factor_t {
+function shader_context_get_blend_fac(s: string): gpu_blend_t {
 	if (s == "blend_one") {
-		return blend_factor_t.BLEND_ONE;
+		return gpu_blend_t.ONE;
 	}
 	if (s == "blend_zero") {
-		return blend_factor_t.BLEND_ZERO;
+		return gpu_blend_t.ZERO;
 	}
 	if (s == "source_alpha") {
-		return blend_factor_t.SOURCE_ALPHA;
+		return gpu_blend_t.SOURCE_ALPHA;
 	}
 	if (s == "destination_alpha") {
-		return blend_factor_t.DEST_ALPHA;
+		return gpu_blend_t.DEST_ALPHA;
 	}
 	if (s == "inverse_source_alpha") {
-		return blend_factor_t.INV_SOURCE_ALPHA;
+		return gpu_blend_t.INV_SOURCE_ALPHA;
 	}
 	if (s == "inverse_destination_alpha") {
-		return blend_factor_t.INV_DEST_ALPHA;
+		return gpu_blend_t.INV_DEST_ALPHA;
 	}
-	return blend_factor_t.BLEND_ONE;
+	return gpu_blend_t.ONE;
 }
 
-function shader_context_get_tex_format(s: string): tex_format_t {
+function shader_context_get_tex_format(s: string): gpu_texture_format_t {
 	if (s == "RGBA32") {
-		return tex_format_t.RGBA32;
+		return gpu_texture_format_t.RGBA32;
 	}
 	if (s == "RGBA64") {
-		return tex_format_t.RGBA64;
+		return gpu_texture_format_t.RGBA64;
 	}
 	if (s == "RGBA128") {
-		return tex_format_t.RGBA128;
+		return gpu_texture_format_t.RGBA128;
 	}
 	if (s == "R32") {
-		return tex_format_t.R32;
+		return gpu_texture_format_t.R32;
 	}
 	if (s == "R16") {
-		return tex_format_t.R16;
+		return gpu_texture_format_t.R16;
 	}
 	if (s == "R8") {
-		return tex_format_t.R8;
+		return gpu_texture_format_t.R8;
 	}
-	return tex_format_t.RGBA32;
+	return gpu_texture_format_t.RGBA32;
 }
 
 function shader_context_add_const(raw: shader_context_t, offset: i32) {

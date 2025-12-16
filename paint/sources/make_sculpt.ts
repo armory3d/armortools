@@ -11,7 +11,7 @@ function sculpt_import_mesh_pack_to_texture(mesh: mesh_data_t, l: slot_layer_t) 
 		buffer_set_f32(b, 4 * i * 4 + 3 * 4, 1.0);
 	}
 
-	let imgmesh: gpu_texture_t = gpu_create_texture_from_bytes(b, config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.RGBA128);
+	let imgmesh: gpu_texture_t = gpu_create_texture_from_bytes(b, config_get_texture_res_x(), config_get_texture_res_y(), gpu_texture_format_t.RGBA128);
 	draw_begin(l.texpaint_sculpt);
 	draw_set_pipeline(pipes_copy128);
 	draw_scaled_image(imgmesh, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());

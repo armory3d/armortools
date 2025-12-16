@@ -288,7 +288,7 @@ function sys_get_shader(name: string): gpu_shader_t {
 	let shader: gpu_shader_t = map_get(_sys_shaders, name);
 	if (shader == null) {
 		shader =
-		    gpu_create_shader(iron_load_blob(data_path() + name + sys_shader_ext()), ends_with(name, ".frag") ? shader_type_t.FRAGMENT : shader_type_t.VERTEX);
+		    gpu_create_shader(iron_load_blob(data_path() + name + sys_shader_ext()), ends_with(name, ".frag") ? gpu_shader_type_t.FRAGMENT : gpu_shader_type_t.VERTEX);
 		map_set(_sys_shaders, name, shader);
 	}
 	return shader;

@@ -311,7 +311,7 @@ function base_resize() {
 
 function base_update() {
 	if (mouse_movement_x != 0 || mouse_movement_y != 0) {
-		iron_mouse_set_cursor(cursor_t.ARROW);
+		iron_mouse_set_cursor(iron_cursor_t.ARROW);
 	}
 
 	let has_drag: bool = base_drag_asset != null || base_drag_material != null || base_drag_layer != null || base_drag_file != null || base_drag_swatch != null;
@@ -421,7 +421,7 @@ function base_update() {
 			base_drag_layer = null;
 		}
 
-		iron_mouse_set_cursor(cursor_t.ARROW);
+		iron_mouse_set_cursor(iron_cursor_t.ARROW);
 		base_is_dragging = false;
 	}
 	if (context_raw.color_picker_callback != null && (mouse_released() || mouse_released("right"))) {
@@ -561,7 +561,7 @@ function base_render() {
 	context_raw.frame++;
 
 	if (base_is_dragging) {
-		iron_mouse_set_cursor(cursor_t.HAND);
+		iron_mouse_set_cursor(iron_cursor_t.HAND);
 		let img: gpu_texture_t = base_get_drag_image();
 		let scale_factor: f32  = UI_SCALE();
 		let size: f32          = (base_drag_size == -1 ? 50 : base_drag_size) * scale_factor;
@@ -1921,7 +1921,7 @@ function ui_base_on_border_hover(handle: ui_handle_t, side: i32) {
 		return; // UI is snapped to the right side
 	}
 
-	side == border_side_t.LEFT || side == border_side_t.RIGHT ? iron_mouse_set_cursor(cursor_t.SIZEWE) : iron_mouse_set_cursor(cursor_t.SIZENS);
+	side == border_side_t.LEFT || side == border_side_t.RIGHT ? iron_mouse_set_cursor(iron_cursor_t.SIZEWE) : iron_mouse_set_cursor(iron_cursor_t.SIZENS);
 
 	if (ui.input_started) {
 		ui_base_border_started = side;

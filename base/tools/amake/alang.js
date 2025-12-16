@@ -1099,7 +1099,7 @@ function _t_to_struct(type) {
 	// type_t * -> struct type *
 	if (type.endsWith("_t *") && type != "string_t *") {
 		let type_short = strip(type, 4);     // _t *
-		if (type_short.endsWith("_array")) { // tex_format_t_array -> i32_array
+		if (type_short.endsWith("_array")) { // gpu_texture_format_t_array -> i32_array
 			for (let e of enums) {
 				if (type_short.startsWith(e)) {
 					type_short = "i32_array";

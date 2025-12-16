@@ -44,11 +44,11 @@ function mesh_data_get_vertex_struct(vertex_arrays: vertex_array_t[]): gpu_verte
 	return structure;
 }
 
-function mesh_data_get_vertex_data(data: string): vertex_data_t {
+function mesh_data_get_vertex_data(data: string): gpu_vertex_data_t {
 	if (data == "short4norm") {
-		return vertex_data_t.I16_4X_NORM;
+		return gpu_vertex_data_t.I16_4X_NORM;
 	}
-	return vertex_data_t.I16_2X_NORM; // short2norm
+	return gpu_vertex_data_t.I16_2X_NORM; // short2norm
 }
 
 function mesh_data_get_vertex_size(vertex_data: string): i32 {

@@ -253,7 +253,7 @@ void gpu_pipeline_init(gpu_pipeline_t *pipe) {
 	pipe->input_layout            = NULL;
 	pipe->vertex_shader           = NULL;
 	pipe->fragment_shader         = NULL;
-	pipe->cull_mode               = GPU_CULL_MODE_NEVER;
+	pipe->cull_mode               = GPU_CULL_MODE_NONE;
 	pipe->depth_write             = false;
 	pipe->depth_mode              = GPU_COMPARE_MODE_ALWAYS;
 	pipe->blend_source            = GPU_BLEND_ONE;

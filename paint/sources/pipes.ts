@@ -58,7 +58,7 @@ function _pipes_make_merge(red: bool, green: bool, blue: bool, alpha: bool): gpu
 	pipe.vertex_shader             = sys_get_shader("layer_merge.vert");
 	pipe.fragment_shader           = sys_get_shader("layer_merge.frag");
 	let vs: gpu_vertex_structure_t = {};
-	gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
+	gpu_vertex_struct_add(vs, "pos", gpu_vertex_data_t.F32_2X);
 	pipe.input_layout                            = vs;
 	ARRAY_ACCESS(pipe.color_write_mask_red, 0)   = red;
 	ARRAY_ACCESS(pipe.color_write_mask_green, 0) = green;
@@ -87,7 +87,7 @@ function pipes_init() {
 		pipes_copy.vertex_shader       = sys_get_shader("layer_copy.vert");
 		pipes_copy.fragment_shader     = sys_get_shader("layer_copy.frag");
 		let vs: gpu_vertex_structure_t = {};
-		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
+		gpu_vertex_struct_add(vs, "pos", gpu_vertex_data_t.F32_2X);
 		pipes_copy.input_layout = vs;
 		gpu_pipeline_compile(pipes_copy);
 	}
@@ -97,7 +97,7 @@ function pipes_init() {
 		pipes_copy_bgra.vertex_shader   = sys_get_shader("layer_copy_bgra.vert");
 		pipes_copy_bgra.fragment_shader = sys_get_shader("layer_copy_bgra.frag");
 		let vs: gpu_vertex_structure_t  = {};
-		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
+		gpu_vertex_struct_add(vs, "pos", gpu_vertex_data_t.F32_2X);
 		pipes_copy_bgra.input_layout = vs;
 		gpu_pipeline_compile(pipes_copy_bgra);
 	}
@@ -107,10 +107,10 @@ function pipes_init() {
 		pipes_copy8.vertex_shader      = sys_get_shader("layer_copy.vert");
 		pipes_copy8.fragment_shader    = sys_get_shader("layer_copy.frag");
 		let vs: gpu_vertex_structure_t = {};
-		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
+		gpu_vertex_struct_add(vs, "pos", gpu_vertex_data_t.F32_2X);
 		pipes_copy8.input_layout                      = vs;
 		pipes_copy8.color_attachment_count            = 1;
-		ARRAY_ACCESS(pipes_copy8.color_attachment, 0) = tex_format_t.R8;
+		ARRAY_ACCESS(pipes_copy8.color_attachment, 0) = gpu_texture_format_t.R8;
 		gpu_pipeline_compile(pipes_copy8);
 	}
 
@@ -119,10 +119,10 @@ function pipes_init() {
 		pipes_copy64.vertex_shader     = sys_get_shader("layer_copy.vert");
 		pipes_copy64.fragment_shader   = sys_get_shader("layer_copy.frag");
 		let vs: gpu_vertex_structure_t = {};
-		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
+		gpu_vertex_struct_add(vs, "pos", gpu_vertex_data_t.F32_2X);
 		pipes_copy64.input_layout                      = vs;
 		pipes_copy64.color_attachment_count            = 1;
-		ARRAY_ACCESS(pipes_copy64.color_attachment, 0) = tex_format_t.RGBA64;
+		ARRAY_ACCESS(pipes_copy64.color_attachment, 0) = gpu_texture_format_t.RGBA64;
 		gpu_pipeline_compile(pipes_copy64);
 	}
 
@@ -131,10 +131,10 @@ function pipes_init() {
 		pipes_copy128.vertex_shader    = sys_get_shader("layer_copy.vert");
 		pipes_copy128.fragment_shader  = sys_get_shader("layer_copy.frag");
 		let vs: gpu_vertex_structure_t = {};
-		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
+		gpu_vertex_struct_add(vs, "pos", gpu_vertex_data_t.F32_2X);
 		pipes_copy128.input_layout                      = vs;
 		pipes_copy128.color_attachment_count            = 1;
-		ARRAY_ACCESS(pipes_copy128.color_attachment, 0) = tex_format_t.RGBA128;
+		ARRAY_ACCESS(pipes_copy128.color_attachment, 0) = gpu_texture_format_t.RGBA128;
 		gpu_pipeline_compile(pipes_copy128);
 	}
 
@@ -143,10 +143,10 @@ function pipes_init() {
 		pipes_invert8.vertex_shader    = sys_get_shader("layer_invert.vert");
 		pipes_invert8.fragment_shader  = sys_get_shader("layer_invert.frag");
 		let vs: gpu_vertex_structure_t = {};
-		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
+		gpu_vertex_struct_add(vs, "pos", gpu_vertex_data_t.F32_2X);
 		pipes_invert8.input_layout                      = vs;
 		pipes_invert8.color_attachment_count            = 1;
-		ARRAY_ACCESS(pipes_invert8.color_attachment, 0) = tex_format_t.R8;
+		ARRAY_ACCESS(pipes_invert8.color_attachment, 0) = gpu_texture_format_t.R8;
 		gpu_pipeline_compile(pipes_invert8);
 	}
 
@@ -155,7 +155,7 @@ function pipes_init() {
 		pipes_apply_mask.vertex_shader   = sys_get_shader("mask_apply.vert");
 		pipes_apply_mask.fragment_shader = sys_get_shader("mask_apply.frag");
 		let vs: gpu_vertex_structure_t   = {};
-		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
+		gpu_vertex_struct_add(vs, "pos", gpu_vertex_data_t.F32_2X);
 		pipes_apply_mask.input_layout = vs;
 		gpu_pipeline_compile(pipes_apply_mask);
 		pipes_tex0_mask = 0;
@@ -167,7 +167,7 @@ function pipes_init() {
 		pipes_merge_mask.vertex_shader   = sys_get_shader("mask_merge.vert");
 		pipes_merge_mask.fragment_shader = sys_get_shader("mask_merge.frag");
 		let vs: gpu_vertex_structure_t   = {};
-		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
+		gpu_vertex_struct_add(vs, "pos", gpu_vertex_data_t.F32_2X);
 		pipes_merge_mask.input_layout = vs;
 		gpu_pipeline_compile(pipes_merge_mask);
 		pipes_tex0_merge_mask     = 0;
@@ -182,7 +182,7 @@ function pipes_init() {
 		pipes_colorid_to_mask.vertex_shader   = sys_get_shader("mask_colorid.vert");
 		pipes_colorid_to_mask.fragment_shader = sys_get_shader("mask_colorid.frag");
 		let vs: gpu_vertex_structure_t        = {};
-		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
+		gpu_vertex_struct_add(vs, "pos", gpu_vertex_data_t.F32_2X);
 		pipes_colorid_to_mask.input_layout = vs;
 		gpu_pipeline_compile(pipes_colorid_to_mask);
 		pipes_texpaint_colorid = 0;
@@ -194,7 +194,7 @@ function pipes_init() {
 		pipes_copy_rgb.vertex_shader   = sys_get_shader("layer_copy.vert");
 		pipes_copy_rgb.fragment_shader = sys_get_shader("layer_copy.frag");
 		let vs: gpu_vertex_structure_t = {};
-		gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_2X);
+		gpu_vertex_struct_add(vs, "pos", gpu_vertex_data_t.F32_2X);
 		pipes_copy_rgb.input_layout                            = vs;
 		ARRAY_ACCESS(pipes_copy_rgb.color_write_mask_alpha, 0) = false;
 		gpu_pipeline_compile(pipes_copy_rgb);
@@ -205,14 +205,14 @@ function pipes_init() {
 		pipes_cursor.vertex_shader     = sys_get_shader("cursor.vert");
 		pipes_cursor.fragment_shader   = sys_get_shader("cursor.frag");
 		let vs: gpu_vertex_structure_t = {};
-		gpu_vertex_struct_add(vs, "pos", vertex_data_t.I16_4X_NORM);
-		gpu_vertex_struct_add(vs, "nor", vertex_data_t.I16_2X_NORM);
-		gpu_vertex_struct_add(vs, "tex", vertex_data_t.I16_2X_NORM);
+		gpu_vertex_struct_add(vs, "pos", gpu_vertex_data_t.I16_4X_NORM);
+		gpu_vertex_struct_add(vs, "nor", gpu_vertex_data_t.I16_2X_NORM);
+		gpu_vertex_struct_add(vs, "tex", gpu_vertex_data_t.I16_2X_NORM);
 		pipes_cursor.input_layout      = vs;
-		pipes_cursor.blend_source      = blend_factor_t.SOURCE_ALPHA;
-		pipes_cursor.blend_destination = blend_factor_t.INV_SOURCE_ALPHA;
+		pipes_cursor.blend_source      = gpu_blend_t.SOURCE_ALPHA;
+		pipes_cursor.blend_destination = gpu_blend_t.INV_SOURCE_ALPHA;
 		pipes_cursor.depth_write       = false;
-		pipes_cursor.depth_mode        = compare_mode_t.ALWAYS;
+		pipes_cursor.depth_mode        = gpu_compare_mode_t.ALWAYS;
 		gpu_pipeline_compile(pipes_cursor);
 		pipes_offset              = 0;
 		pipes_cursor_vp           = pipes_get_constant_location("mat4");

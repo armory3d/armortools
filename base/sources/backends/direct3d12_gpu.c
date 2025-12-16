@@ -43,7 +43,7 @@ static ID3D12Resource              *resources_to_destroy[512];
 static int                          resources_to_destroy_count = 0;
 static char                         device_name[256];
 
-static D3D12_BLEND convert_blend_factor(gpu_blending_factor_t factor) {
+static D3D12_BLEND convert_blend_factor(gpu_blend_t factor) {
 	switch (factor) {
 	case GPU_BLEND_ONE:
 		return D3D12_BLEND_ONE;
@@ -64,7 +64,7 @@ static D3D12_CULL_MODE convert_cull_mode(gpu_cull_mode_t cull_mode) {
 	switch (cull_mode) {
 	case GPU_CULL_MODE_CLOCKWISE:
 		return D3D12_CULL_MODE_FRONT;
-	case GPU_CULL_MODE_COUNTERCLOCKWISE:
+	case GPU_CULL_MODE_COUNTER_CLOCKWISE:
 		return D3D12_CULL_MODE_BACK;
 	default:
 		return D3D12_CULL_MODE_NONE;

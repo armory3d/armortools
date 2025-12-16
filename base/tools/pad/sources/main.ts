@@ -182,7 +182,7 @@ function render() {
 	storage.window_x = iron_window_x();
 	storage.window_y = iron_window_y();
 	if (ui.input_dx != 0 || ui.input_dy != 0) {
-		iron_mouse_set_cursor(cursor_t.ARROW);
+		iron_mouse_set_cursor(iron_cursor_t.ARROW);
 	}
 
 	ui_begin(ui);
@@ -362,7 +362,7 @@ function on_border_hover(handle: ui_handle_t, side: i32) {
 		return; // Right
 	}
 
-	iron_mouse_set_cursor(cursor_t.SIZEWE);
+	iron_mouse_set_cursor(iron_cursor_t.SIZEWE);
 
 	if (ui.input_started) {
 		resizing_sidebar = true;

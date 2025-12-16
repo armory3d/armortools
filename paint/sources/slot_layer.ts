@@ -106,7 +106,7 @@ function slot_layer_create(ext: string = "", type: layer_slot_type_t = layer_slo
 			raw.texpaint_pack      = render_path_create_render_target(t)._image;
 		}
 
-		raw.texpaint_preview = gpu_create_render_target(util_render_layer_preview_size, util_render_layer_preview_size, tex_format_t.RGBA32);
+		raw.texpaint_preview = gpu_create_render_target(util_render_layer_preview_size, util_render_layer_preview_size, gpu_texture_format_t.RGBA32);
 	}
 
 	else { // Mask
@@ -124,7 +124,7 @@ function slot_layer_create(ext: string = "", type: layer_slot_type_t = layer_slo
 			raw.texpaint           = render_path_create_render_target(t)._image;
 		}
 
-		raw.texpaint_preview = gpu_create_render_target(util_render_layer_preview_size, util_render_layer_preview_size, tex_format_t.RGBA32);
+		raw.texpaint_preview = gpu_create_render_target(util_render_layer_preview_size, util_render_layer_preview_size, gpu_texture_format_t.RGBA32);
 	}
 
 	return raw;
@@ -255,7 +255,7 @@ function slot_layer_clear(raw: slot_layer_t, base_color: i32 = 0x00000000, base_
 }
 
 function slot_layer_invert_mask(raw: slot_layer_t) {
-	let inverted: gpu_texture_t = gpu_create_render_target(raw.texpaint.width, raw.texpaint.height, tex_format_t.RGBA32);
+	let inverted: gpu_texture_t = gpu_create_render_target(raw.texpaint.width, raw.texpaint.height, gpu_texture_format_t.RGBA32);
 	draw_begin(inverted);
 	draw_set_pipeline(pipes_invert8);
 	draw_image(raw.texpaint, 0, 0);
@@ -363,11 +363,11 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 	let rts: map_t<string, render_target_t> = render_path_render_targets;
 
 	if (slot_layer_is_layer(raw)) {
-		let format: tex_format_t = base_bits_handle.i == texture_bits_t.BITS8    ? tex_format_t.RGBA32
-		                           : base_bits_handle.i == texture_bits_t.BITS16 ? tex_format_t.RGBA64
-		                                                                         : tex_format_t.RGBA128;
+		let format: gpu_texture_format_t = base_bits_handle.i == texture_bits_t.BITS8    ? gpu_texture_format_t.RGBA32
+		                           : base_bits_handle.i == texture_bits_t.BITS16 ? gpu_texture_format_t.RGBA64
+		                                                                         : gpu_texture_format_t.RGBA128;
 
-		let pipe: gpu_pipeline_t = format == tex_format_t.RGBA32 ? pipes_copy : format == tex_format_t.RGBA64 ? pipes_copy64 : pipes_copy128;
+		let pipe: gpu_pipeline_t = format == gpu_texture_format_t.RGBA32 ? pipes_copy : format == gpu_texture_format_t.RGBA64 ? pipes_copy64 : pipes_copy128;
 
 		let _texpaint: gpu_texture_t = raw.texpaint;
 		raw.texpaint                 = gpu_create_render_target(res_x, res_y, format);
@@ -422,7 +422,7 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 	}
 	else if (slot_layer_is_mask(raw)) {
 		let _texpaint: gpu_texture_t = raw.texpaint;
-		raw.texpaint                 = gpu_create_render_target(res_x, res_y, tex_format_t.RGBA32);
+		raw.texpaint                 = gpu_create_render_target(res_x, res_y, gpu_texture_format_t.RGBA32);
 
 		draw_begin(raw.texpaint);
 		draw_set_pipeline(pipes_copy8);
@@ -821,14 +821,14 @@ function layers_resize() {
 	gpu_delete_texture(_texpaint_blend0);
 	blend0.width  = config_get_texture_res_x();
 	blend0.height = config_get_texture_res_y();
-	blend0._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
+	blend0._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), gpu_texture_format_t.R8);
 
 	let blend1: render_target_t         = map_get(rts, "texpaint_blend1");
 	let _texpaint_blend1: gpu_texture_t = blend1._image;
 	gpu_delete_texture(_texpaint_blend1);
 	blend1.width  = config_get_texture_res_x();
 	blend1.height = config_get_texture_res_y();
-	blend1._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
+	blend1._image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), gpu_texture_format_t.R8);
 
 	context_raw.brush_blend_dirty = true;
 
@@ -891,7 +891,7 @@ function layers_make_temp_mask_img() {
 		pipes_temp_mask_image = null;
 	}
 	if (pipes_temp_mask_image == null) {
-		pipes_temp_mask_image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
+		pipes_temp_mask_image = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), gpu_texture_format_t.R8);
 	}
 }
 

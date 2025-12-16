@@ -32,11 +32,11 @@ function main() {
 
 	pipeline                       = gpu_create_pipeline();
 	let vs: gpu_vertex_structure_t = {};
-	gpu_vertex_struct_add(vs, "pos", vertex_data_t.F32_3X);
+	gpu_vertex_struct_add(vs, "pos", gpu_vertex_data_t.F32_3X);
 	let vs_buffer: buffer_t  = iron_load_blob("./data/test.vert" + sys_shader_ext());
 	let fs_buffer: buffer_t  = iron_load_blob("./data/test.frag" + sys_shader_ext());
-	let vert: gpu_shader_t   = gpu_create_shader(vs_buffer, shader_type_t.VERTEX);
-	let frag: gpu_shader_t   = gpu_create_shader(fs_buffer, shader_type_t.FRAGMENT);
+	let vert: gpu_shader_t   = gpu_create_shader(vs_buffer, gpu_shader_type_t.VERTEX);
+	let frag: gpu_shader_t   = gpu_create_shader(fs_buffer, gpu_shader_type_t.FRAGMENT);
 	pipeline.vertex_shader   = vert;
 	pipeline.fragment_shader = frag;
 	pipeline.input_layout    = vs;

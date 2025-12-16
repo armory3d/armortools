@@ -80,7 +80,7 @@ function util_render_make_material_preview() {
 
 function util_render_make_decal_preview() {
 	if (context_raw.decal_image == null) {
-		context_raw.decal_image = gpu_create_render_target(util_render_decal_preview_size, util_render_decal_preview_size, tex_format_t.RGBA64);
+		context_raw.decal_image = gpu_create_render_target(util_render_decal_preview_size, util_render_decal_preview_size, gpu_texture_format_t.RGBA64);
 	}
 	context_raw.decal_preview = true;
 
@@ -156,7 +156,7 @@ function util_render_make_text_preview() {
 		context_raw.text_tool_image = null;
 	}
 	if (context_raw.text_tool_image == null) {
-		context_raw.text_tool_image = gpu_create_render_target(tex_w, tex_w, tex_format_t.RGBA32);
+		context_raw.text_tool_image = gpu_create_render_target(tex_w, tex_w, gpu_texture_format_t.RGBA32);
 	}
 	draw_begin(context_raw.text_tool_image, true, 0xff000000);
 	draw_set_font(font, font_size);
@@ -181,7 +181,7 @@ function util_render_make_font_preview() {
 	let text_h: i32       = math_floor(draw_font_height(font, font_size)) + 8;
 	let tex_w: i32        = text_w + 32;
 	if (context_raw.font.image == null) {
-		context_raw.font.image = gpu_create_render_target(tex_w, tex_w, tex_format_t.RGBA32);
+		context_raw.font.image = gpu_create_render_target(tex_w, tex_w, gpu_texture_format_t.RGBA32);
 	}
 	draw_begin(context_raw.font.image, true, 0x00000000);
 	draw_set_font(font, font_size);
@@ -473,10 +473,10 @@ function util_render_create_screen_aligned_full_data() {
 
 	// Mandatory vertex data names and sizes
 	let structure: gpu_vertex_structure_t = {};
-	gpu_vertex_struct_add(structure, "pos", vertex_data_t.I16_4X_NORM);
-	gpu_vertex_struct_add(structure, "nor", vertex_data_t.I16_2X_NORM);
-	gpu_vertex_struct_add(structure, "tex", vertex_data_t.I16_2X_NORM);
-	gpu_vertex_struct_add(structure, "col", vertex_data_t.I16_4X_NORM);
+	gpu_vertex_struct_add(structure, "pos", gpu_vertex_data_t.I16_4X_NORM);
+	gpu_vertex_struct_add(structure, "nor", gpu_vertex_data_t.I16_2X_NORM);
+	gpu_vertex_struct_add(structure, "tex", gpu_vertex_data_t.I16_2X_NORM);
+	gpu_vertex_struct_add(structure, "col", gpu_vertex_data_t.I16_4X_NORM);
 	util_render_screen_aligned_full_vb = gpu_create_vertex_buffer(math_floor(data.length / math_floor(gpu_vertex_struct_size(structure) / 2)), structure);
 	let vertices: buffer_t             = gpu_lock_vertex_buffer(util_render_screen_aligned_full_vb);
 	for (let i: i32 = 0; i < math_floor((vertices.length) / 2); ++i) {

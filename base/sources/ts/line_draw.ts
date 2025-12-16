@@ -41,17 +41,17 @@ let line_draw_camera_look: vec4_t = vec4_create();
 function line_draw_init() {
 	if (line_draw_pipeline == null) {
 		let structure: gpu_vertex_structure_t = {};
-		gpu_vertex_struct_add(structure, "pos", vertex_data_t.F32_3X);
+		gpu_vertex_struct_add(structure, "pos", gpu_vertex_data_t.F32_3X);
 		line_draw_pipeline                                   = gpu_create_pipeline();
 		line_draw_pipeline.input_layout                      = structure;
 		line_draw_pipeline.fragment_shader                   = sys_get_shader("line.frag");
 		line_draw_pipeline.vertex_shader                     = sys_get_shader("line.vert");
 		line_draw_pipeline.depth_write                       = true;
-		line_draw_pipeline.depth_mode                        = compare_mode_t.LESS;
-		line_draw_pipeline.cull_mode                         = cull_mode_t.NONE;
+		line_draw_pipeline.depth_mode                        = gpu_compare_mode_t.LESS;
+		line_draw_pipeline.cull_mode                         = gpu_cull_mode_t.NONE;
 		line_draw_pipeline.color_attachment_count            = 2;
-		ARRAY_ACCESS(line_draw_pipeline.color_attachment, 0) = tex_format_t.RGBA64;
-		ARRAY_ACCESS(line_draw_pipeline.color_attachment, 1) = tex_format_t.RGBA64;
+		ARRAY_ACCESS(line_draw_pipeline.color_attachment, 0) = gpu_texture_format_t.RGBA64;
+		ARRAY_ACCESS(line_draw_pipeline.color_attachment, 1) = gpu_texture_format_t.RGBA64;
 		line_draw_pipeline.depth_attachment_bits             = 32;
 		gpu_pipeline_compile(line_draw_pipeline);
 		pipes_offset            = 0;
@@ -63,16 +63,16 @@ function line_draw_init() {
 	}
 	if (line_draw_overlay_pipeline == null) {
 		let structure: gpu_vertex_structure_t = {};
-		gpu_vertex_struct_add(structure, "pos", vertex_data_t.F32_3X);
+		gpu_vertex_struct_add(structure, "pos", gpu_vertex_data_t.F32_3X);
 		line_draw_overlay_pipeline                                   = gpu_create_pipeline();
 		line_draw_overlay_pipeline.input_layout                      = structure;
 		line_draw_overlay_pipeline.fragment_shader                   = sys_get_shader("line_overlay.frag");
 		line_draw_overlay_pipeline.vertex_shader                     = sys_get_shader("line_overlay.vert");
 		line_draw_overlay_pipeline.depth_write                       = false;
-		line_draw_overlay_pipeline.depth_mode                        = compare_mode_t.ALWAYS;
-		line_draw_overlay_pipeline.cull_mode                         = cull_mode_t.NONE;
+		line_draw_overlay_pipeline.depth_mode                        = gpu_compare_mode_t.ALWAYS;
+		line_draw_overlay_pipeline.cull_mode                         = gpu_cull_mode_t.NONE;
 		line_draw_overlay_pipeline.color_attachment_count            = 1;
-		ARRAY_ACCESS(line_draw_overlay_pipeline.color_attachment, 0) = tex_format_t.RGBA64;
+		ARRAY_ACCESS(line_draw_overlay_pipeline.color_attachment, 0) = gpu_texture_format_t.RGBA64;
 		gpu_pipeline_compile(line_draw_overlay_pipeline);
 	}
 }
@@ -254,7 +254,7 @@ function shape_draw_sphere(mat: mat4_t) {
 
 		let posa: i16_array_t                 = md.vertex_arrays[0].values;
 		let structure: gpu_vertex_structure_t = {};
-		gpu_vertex_struct_add(structure, "pos", vertex_data_t.F32_3X);
+		gpu_vertex_struct_add(structure, "pos", gpu_vertex_data_t.F32_3X);
 		_shape_draw_sphere_vb = gpu_create_vertex_buffer(posa.length, structure);
 		let data: buffer_t    = gpu_lock_vertex_buffer(_shape_draw_sphere_vb);
 		for (let i: i32 = 0; i < posa.length / 4; ++i) {

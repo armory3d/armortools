@@ -276,7 +276,7 @@ function make_material_bake_node_preview(node: ui_node_t, group: ui_node_canvas_
 			if (image != null) {
 				gpu_delete_texture(image);
 			}
-			image = gpu_create_render_target(res_x, res_y, tex_format_t.R8);
+			image = gpu_create_render_target(res_x, res_y, gpu_texture_format_t.R8);
 			map_set(context_raw.node_previews, id, image);
 		}
 

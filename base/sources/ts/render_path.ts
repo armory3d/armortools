@@ -269,32 +269,32 @@ function render_path_create_image(t: render_target_t): gpu_texture_t {
 	if (height < 1) {
 		height = 1;
 	}
-	return gpu_create_render_target(width, height, t.format != null ? render_path_get_tex_format(t.format) : tex_format_t.RGBA32);
+	return gpu_create_render_target(width, height, t.format != null ? render_path_get_tex_format(t.format) : gpu_texture_format_t.RGBA32);
 }
 
-function render_path_get_tex_format(s: string): tex_format_t {
+function render_path_get_tex_format(s: string): gpu_texture_format_t {
 	if (s == "RGBA32") {
-		return tex_format_t.RGBA32;
+		return gpu_texture_format_t.RGBA32;
 	}
 	if (s == "RGBA64") {
-		return tex_format_t.RGBA64;
+		return gpu_texture_format_t.RGBA64;
 	}
 	if (s == "RGBA128") {
-		return tex_format_t.RGBA128;
+		return gpu_texture_format_t.RGBA128;
 	}
 	if (s == "R32") {
-		return tex_format_t.R32;
+		return gpu_texture_format_t.R32;
 	}
 	if (s == "R16") {
-		return tex_format_t.R16;
+		return gpu_texture_format_t.R16;
 	}
 	if (s == "R8") {
-		return tex_format_t.R8;
+		return gpu_texture_format_t.R8;
 	}
 	if (s == "D32") {
-		return tex_format_t.D32;
+		return gpu_texture_format_t.D32;
 	}
-	return tex_format_t.RGBA32;
+	return gpu_texture_format_t.RGBA32;
 }
 
 function render_target_create(): render_target_t {

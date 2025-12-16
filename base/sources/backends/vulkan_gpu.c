@@ -97,7 +97,7 @@ static VkCullModeFlagBits convert_cull_mode(gpu_cull_mode_t cull_mode) {
 	switch (cull_mode) {
 	case GPU_CULL_MODE_CLOCKWISE:
 		return VK_CULL_MODE_BACK_BIT;
-	case GPU_CULL_MODE_COUNTERCLOCKWISE:
+	case GPU_CULL_MODE_COUNTER_CLOCKWISE:
 		return VK_CULL_MODE_FRONT_BIT;
 	default:
 		return VK_CULL_MODE_NONE;
@@ -118,7 +118,7 @@ static VkCompareOp convert_compare_mode(gpu_compare_mode_t compare) {
 	}
 }
 
-static VkBlendFactor convert_blend_factor(gpu_blending_factor_t factor) {
+static VkBlendFactor convert_blend_factor(gpu_blend_t factor) {
 	switch (factor) {
 	case GPU_BLEND_ONE:
 		return VK_BLEND_FACTOR_ONE;

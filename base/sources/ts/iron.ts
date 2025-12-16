@@ -220,7 +220,7 @@ declare function gpu_vertex_buffer_unlock(buffer: any): void;
 declare function gpu_set_vertex_buffer(buffer: any): void;
 declare function gpu_draw(): void;
 declare function gpu_create_shader(data: buffer_t, type: i32): gpu_shader_t;
-declare function gpu_create_shader_from_source(source: string, source_size: i32, shader_type: shader_type_t): gpu_shader_t;
+declare function gpu_create_shader_from_source(source: string, source_size: i32, shader_type: gpu_shader_type_t): gpu_shader_t;
 declare function gpu_shader_destroy(shader: gpu_shader_t): void;
 declare function gpu_create_pipeline(): any;
 declare function gpu_delete_pipeline(pipeline: any): void;
@@ -269,8 +269,8 @@ declare function iron_display_y(index: i32): i32;
 declare function iron_display_frequency(index: i32): i32;
 declare function iron_display_is_primary(index: i32): bool;
 
-declare function gpu_create_render_target(width: i32, height: i32, format: i32 = tex_format_t.RGBA32): any;
-declare function gpu_create_texture_from_bytes(data: buffer_t, width: i32, height: i32, format: i32 = tex_format_t.RGBA32): any;
+declare function gpu_create_render_target(width: i32, height: i32, format: i32 = gpu_texture_format_t.RGBA32): any;
+declare function gpu_create_texture_from_bytes(data: buffer_t, width: i32, height: i32, format: i32 = gpu_texture_format_t.RGBA32): any;
 declare function gpu_create_texture_from_encoded_bytes(data: buffer_t, format: string): any;
 declare function gpu_get_texture_pixels(texture: any): buffer_t;
 declare function gpu_viewport(x: i32, y: i32, width: i32, height: i32): void;
@@ -332,7 +332,7 @@ declare type draw_font_t = {
 };
 
 declare function iron_set_save_and_quit_callback(callback: (save: bool) => void): void;
-declare function iron_mouse_set_cursor(id: cursor_t): void;
+declare function iron_mouse_set_cursor(id: iron_cursor_t): void;
 declare function iron_delay_idle_sleep(): void;
 declare function iron_open_dialog(filter_list: string, default_path: string, open_multiple: bool): string[];
 declare function iron_save_dialog(filter_list: string, default_path: string): string;
@@ -537,7 +537,7 @@ type vec4_box_t = {
 declare function f32_nan(): f32;
 declare function f32_isnan(f: f32): bool;
 
-function gpu_vertex_struct_add(raw: gpu_vertex_structure_t, name: string, data: vertex_data_t) {
+function gpu_vertex_struct_add(raw: gpu_vertex_structure_t, name: string, data: gpu_vertex_data_t) {
 	let e: gpu_vertex_element_t = ADDRESS(ARRAY_ACCESS(raw.elements, raw.size));
 	e.name                      = name;
 	e.data                      = data;
@@ -545,19 +545,19 @@ function gpu_vertex_struct_add(raw: gpu_vertex_structure_t, name: string, data: 
 }
 
 declare function gpu_vertex_struct_size(s: gpu_vertex_structure_t): i32;
-declare function gpu_vertex_data_size(data: vertex_data_t);
+declare function gpu_vertex_data_size(data: gpu_vertex_data_t);
 
 declare type gpu_pipeline_t = {
 	input_layout?: any;
 	vertex_shader?: any;
 	fragment_shader?: any;
-	cull_mode?: cull_mode_t;
+	cull_mode?: gpu_cull_mode_t;
 	depth_write?: bool;
-	depth_mode?: compare_mode_t;
-	blend_source?: blend_factor_t;
-	blend_destination?: blend_factor_t;
-	alpha_blend_source?: blend_factor_t;
-	alpha_blend_destination?: blend_factor_t;
+	depth_mode?: gpu_compare_mode_t;
+	blend_source?: gpu_blend_t;
+	blend_destination?: gpu_blend_t;
+	alpha_blend_source?: gpu_blend_t;
+	alpha_blend_destination?: gpu_blend_t;
 	color_write_mask_red?: any;
 	color_write_mask_green?: any;
 	color_write_mask_blue?: any;
@@ -574,7 +574,7 @@ declare type gpu_shader_t = {
 
 declare type gpu_vertex_element_t = {
 	name?: string;
-	data?: vertex_data_t;
+	data?: gpu_vertex_data_t;
 };
 
 declare type gpu_vertex_structure_t = {
@@ -592,7 +592,7 @@ declare enum gpu_clear_t {
 	DEPTH = 2,
 }
 
-enum tex_format_t {
+declare enum gpu_texture_format_t {
 	RGBA32,
 	RGBA64,
 	RGBA128,
@@ -602,7 +602,7 @@ enum tex_format_t {
 	D32,
 }
 
-enum vertex_data_t {
+declare enum gpu_vertex_data_t {
 	F32_1X,
 	F32_2X,
 	F32_3X,
@@ -611,34 +611,34 @@ enum vertex_data_t {
 	I16_4X_NORM,
 }
 
-enum blend_factor_t {
-	BLEND_ONE,
-	BLEND_ZERO,
+declare enum gpu_blend_t {
+	ONE,
+	ZERO,
 	SOURCE_ALPHA,
 	DEST_ALPHA,
 	INV_SOURCE_ALPHA,
 	INV_DEST_ALPHA,
 }
 
-enum compare_mode_t {
+declare enum gpu_compare_mode_t {
 	ALWAYS,
 	NEVER,
 	LESS,
 	EQUAL,
 }
 
-enum cull_mode_t {
+declare enum gpu_cull_mode_t {
 	CLOCKWISE,
 	COUNTER_CLOCKWISE,
 	NONE,
 }
 
-enum shader_type_t {
+declare enum gpu_shader_type_t {
 	VERTEX,
 	FRAGMENT,
 }
 
-enum cursor_t {
+declare enum iron_cursor_t {
 	ARROW,
 	HAND,
 	IBEAM,

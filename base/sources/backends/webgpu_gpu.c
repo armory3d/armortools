@@ -62,7 +62,7 @@ static WGPUCullMode convert_cull_mode(gpu_cull_mode_t cull_mode) {
 	switch (cull_mode) {
 	case GPU_CULL_MODE_CLOCKWISE:
 		return WGPUCullMode_Back;
-	case GPU_CULL_MODE_COUNTERCLOCKWISE:
+	case GPU_CULL_MODE_COUNTER_CLOCKWISE:
 		return WGPUCullMode_Front;
 	default:
 		return WGPUCullMode_None;
@@ -83,7 +83,7 @@ static WGPUCompareFunction convert_compare_mode(gpu_compare_mode_t compare) {
 	}
 }
 
-static WGPUBlendFactor convert_blend_factor(gpu_blending_factor_t factor) {
+static WGPUBlendFactor convert_blend_factor(gpu_blend_t factor) {
 	switch (factor) {
 	case GPU_BLEND_ONE:
 		return WGPUBlendFactor_One;

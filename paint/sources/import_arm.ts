@@ -72,7 +72,7 @@ function import_arm_run_project(path: string) {
 	let bits_pos: texture_bits_t = l0.bpp == 8 ? texture_bits_t.BITS8 : l0.bpp == 16 ? texture_bits_t.BITS16 : texture_bits_t.BITS32;
 	base_bits_handle.i           = bits_pos;
 	let bytes_per_pixel: i32     = math_floor(l0.bpp / 8);
-	let format: tex_format_t     = l0.bpp == 8 ? tex_format_t.RGBA32 : l0.bpp == 16 ? tex_format_t.RGBA64 : tex_format_t.RGBA128;
+	let format: gpu_texture_format_t     = l0.bpp == 8 ? gpu_texture_format_t.RGBA32 : l0.bpp == 16 ? gpu_texture_format_t.RGBA64 : gpu_texture_format_t.RGBA128;
 
 	let base: string = path_base_dir(path);
 	if (project_raw.envmap != null) {
@@ -184,13 +184,13 @@ function import_arm_run_project(path: string) {
 		gpu_delete_texture(_texpaint_blend0);
 		blend0.width                        = config_get_texture_res_x();
 		blend0.height                       = config_get_texture_res_y();
-		blend0._image                       = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
+		blend0._image                       = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), gpu_texture_format_t.R8);
 		let blend1: render_target_t         = map_get(rts, "texpaint_blend1");
 		let _texpaint_blend1: gpu_texture_t = blend1._image;
 		gpu_delete_texture(_texpaint_blend1);
 		blend1.width                  = config_get_texture_res_x();
 		blend1.height                 = config_get_texture_res_y();
-		blend1._image                 = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), tex_format_t.R8);
+		blend1._image                 = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), gpu_texture_format_t.R8);
 		context_raw.brush_blend_dirty = true;
 	}
 
@@ -217,7 +217,7 @@ function import_arm_run_project(path: string) {
 			let _texpaint_pack: gpu_texture_t = null;
 
 			if (is_mask) {
-				_texpaint = gpu_create_texture_from_bytes(lz4_decode(ld.texpaint, ld.res * ld.res * 4), ld.res, ld.res, tex_format_t.RGBA32);
+				_texpaint = gpu_create_texture_from_bytes(lz4_decode(ld.texpaint, ld.res * ld.res * 4), ld.res, ld.res, gpu_texture_format_t.RGBA32);
 				draw_begin(l.texpaint);
 				// draw_set_pipeline(pipes_copy8);
 				draw_set_pipeline(project.is_bgra ? pipes_copy_bgra : pipes_copy); // Full bits for undo support, R8 is used

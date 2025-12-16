@@ -21,26 +21,26 @@
 #define GPU_FRAMEBUFFER_COUNT 3
 #endif
 
-typedef enum gpu_clear {
+typedef enum {
 	GPU_CLEAR_NONE  = 0,
 	GPU_CLEAR_COLOR = 1,
 	GPU_CLEAR_DEPTH = 2,
 } gpu_clear_t;
 
-typedef enum gpu_texture_state {
+typedef enum {
 	GPU_TEXTURE_STATE_SHADER_RESOURCE,
 	GPU_TEXTURE_STATE_RENDER_TARGET,
 	GPU_TEXTURE_STATE_RENDER_TARGET_DEPTH,
 	GPU_TEXTURE_STATE_PRESENT
 } gpu_texture_state_t;
 
-typedef enum gpu_texture_compression {
+typedef enum {
 	GPU_TEXTURE_COMPRESSION_NONE,
 	GPU_TEXTURE_COMPRESSION_DXT5,
 	GPU_TEXTURE_COMPRESSION_ASTC
 } gpu_texture_compression_t;
 
-typedef enum gpu_texture_format {
+typedef enum {
 	GPU_TEXTURE_FORMAT_RGBA32,
 	GPU_TEXTURE_FORMAT_RGBA64,
 	GPU_TEXTURE_FORMAT_RGBA128,
@@ -50,7 +50,7 @@ typedef enum gpu_texture_format {
 	GPU_TEXTURE_FORMAT_D32
 } gpu_texture_format_t;
 
-typedef enum gpu_vertex_data {
+typedef enum {
 	GPU_VERTEX_DATA_F32_1X,
 	GPU_VERTEX_DATA_F32_2X,
 	GPU_VERTEX_DATA_F32_3X,
@@ -59,7 +59,7 @@ typedef enum gpu_vertex_data {
 	GPU_VERTEX_DATA_I16_4X_NORM
 } gpu_vertex_data_t;
 
-typedef enum gpu_shader_type {
+typedef enum {
 	GPU_SHADER_TYPE_VERTEX,
 	GPU_SHADER_TYPE_FRAGMENT,
 	GPU_SHADER_TYPE_COUNT
@@ -72,15 +72,15 @@ typedef enum {
 	GPU_BLEND_DEST_ALPHA,
 	GPU_BLEND_INV_SOURCE_ALPHA,
 	GPU_BLEND_INV_DEST_ALPHA
-} gpu_blending_factor_t;
+} gpu_blend_t;
 
-typedef enum gpu_cull_mode {
+typedef enum {
 	GPU_CULL_MODE_CLOCKWISE,
-	GPU_CULL_MODE_COUNTERCLOCKWISE,
-	GPU_CULL_MODE_NEVER
+	GPU_CULL_MODE_COUNTER_CLOCKWISE,
+	GPU_CULL_MODE_NONE
 } gpu_cull_mode_t;
 
-typedef enum gpu_compare_mode {
+typedef enum {
 	GPU_COMPARE_MODE_ALWAYS,
 	GPU_COMPARE_MODE_NEVER,
 	GPU_COMPARE_MODE_LESS,
@@ -125,10 +125,10 @@ typedef struct gpu_pipeline {
 	gpu_cull_mode_t         cull_mode;
 	bool                    depth_write;
 	gpu_compare_mode_t      depth_mode;
-	gpu_blending_factor_t   blend_source;
-	gpu_blending_factor_t   blend_destination;
-	gpu_blending_factor_t   alpha_blend_source;
-	gpu_blending_factor_t   alpha_blend_destination;
+	gpu_blend_t             blend_source;
+	gpu_blend_t             blend_destination;
+	gpu_blend_t             alpha_blend_source;
+	gpu_blend_t             alpha_blend_destination;
 	bool                    color_write_mask_red[8];
 	bool                    color_write_mask_green[8];
 	bool                    color_write_mask_blue[8];

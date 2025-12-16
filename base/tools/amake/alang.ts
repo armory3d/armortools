@@ -1121,7 +1121,7 @@ function _t_to_struct(type: string): string {
 	// type_t * -> struct type *
 	if (ends_with(type, "_t *") && type != "string_t *") {
 		let type_short: string = strip(type, 4); // _t *
-		if (ends_with(type_short, "_array")) {   // tex_format_t_array -> i32_array
+		if (ends_with(type_short, "_array")) {   // gpu_texture_format_t_array -> i32_array
 			for (let i: i32 = 0; i < enums.length; ++i) {
 				let e: string = enums[i];
 				if (starts_with(type_short, e)) {

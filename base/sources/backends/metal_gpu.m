@@ -30,7 +30,7 @@ static void                       *readback_buffer;
 static int                         readback_buffer_size = 0;
 static bool                        linear_sampling      = true;
 
-static MTLBlendFactor convert_blending_factor(gpu_blending_factor_t factor) {
+static MTLBlendFactor convert_blending_factor(gpu_blend_t factor) {
 	switch (factor) {
 	case GPU_BLEND_ONE:
 		return MTLBlendFactorOne;
@@ -64,9 +64,9 @@ static MTLCullMode convert_cull_mode(gpu_cull_mode_t cull) {
 	switch (cull) {
 	case GPU_CULL_MODE_CLOCKWISE:
 		return MTLCullModeFront;
-	case GPU_CULL_MODE_COUNTERCLOCKWISE:
+	case GPU_CULL_MODE_COUNTER_CLOCKWISE:
 		return MTLCullModeBack;
-	case GPU_CULL_MODE_NEVER:
+	case GPU_CULL_MODE_NONE:
 		return MTLCullModeNone;
 	}
 }
