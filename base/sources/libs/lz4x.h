@@ -158,8 +158,8 @@ size_t LZ4_compress(const char *source, int sourceSize, char *dest, const int ma
 				while (p < pp) {
 					const U32 h           = HASH_32(p);
 					tail[p & WINDOW_MASK] = head[h];
-					size_t read_offset    = 0;
-					size_t write_offset   = 0;
+					// size_t read_offset    = 0;
+					// size_t write_offset   = 0;
 					head[h]               = p++;
 				}
 			}

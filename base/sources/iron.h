@@ -1143,7 +1143,7 @@ gpu_texture_t *gpu_create_texture_from_encoded_bytes(buffer_t *data, string_t *f
 			LZ4_decompress_safe((char *)data->buffer + 12, (char *)texture_data, compressed_size, output_size);
 			texture_format = GPU_TEXTURE_FORMAT_RGBA32;
 		}
-		else if (strcmp(fourcc, "LZ4F") == 0) {
+		else { // "LZ4F"
 			int output_size = width * height * 16;
 			texture_data    = (unsigned char *)malloc(output_size);
 			LZ4_decompress_safe((char *)data->buffer + 12, (char *)texture_data, compressed_size, output_size);
@@ -1696,7 +1696,7 @@ static H264E_persist_t *iron_mp4_enc     = NULL;
 static H264E_scratch_t *iron_mp4_scratch = NULL;
 static char             iron_mp4_path[512];
 static char             iron_mp4_path_264[512];
-static char            *iron_mp4_yuv_buf;
+static uint8_t         *iron_mp4_yuv_buf;
 
 static size_t iron_mp4_get_nal_size(uint8_t *buf, size_t size) {
 	size_t pos = 3;

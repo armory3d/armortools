@@ -31,7 +31,7 @@ void *gc_alloc(size_t size) {
 #endif
 }
 
-void gc_array(void *ptr, int *length) {}
+void gc_array(void *ptr, uint32_t *length) {}
 
 void gc_leaf(void *ptr) {}
 
@@ -84,7 +84,7 @@ void *gc_alloc(size_t size) {
 	return _gc_calloc(size, sizeof(uint8_t));
 }
 
-void gc_array(void *ptr, int *length) {
+void gc_array(void *ptr, uint32_t *length) {
 	_gc_array(ptr, length);
 }
 

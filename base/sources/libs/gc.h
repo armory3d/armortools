@@ -12,7 +12,7 @@ void   _gc_pause();
 void   _gc_resume();
 size_t _gc_run();
 void  *_gc_calloc(size_t count, size_t size);
-void   _gc_array(void *ptr, int *length);
+void   _gc_array(void *ptr, uint32_t *length);
 void   _gc_leaf(void *ptr);
 void   _gc_root(void *ptr);
 void   _gc_unroot(void *ptr);

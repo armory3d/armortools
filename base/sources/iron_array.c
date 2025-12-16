@@ -378,7 +378,7 @@ buffer_t *buffer_create(uint32_t length) {
 	return b;
 }
 
-buffer_t *buffer_create_from_raw(char *raw, uint32_t length) {
+buffer_t *buffer_create_from_raw(uint8_t *raw, uint32_t length) {
 	buffer_t *b = gc_alloc(sizeof(buffer_t));
 	b->buffer   = raw;
 	b->length   = length;

@@ -655,15 +655,15 @@ function base_get_asset_index(file_name: string): i32 {
 }
 
 function base_toggle_fullscreen() {
-	if (iron_window_get_mode() == window_mode_t.WINDOWED) {
+	if (iron_window_get_mode() == iron_window_mode_t.WINDOW) {
 		config_raw.window_w = iron_window_width();
 		config_raw.window_h = iron_window_height();
 		config_raw.window_x = iron_window_x();
 		config_raw.window_y = iron_window_y();
-		iron_window_change_mode(window_mode_t.FULLSCREEN);
+		iron_window_change_mode(iron_window_mode_t.FULLSCREEN);
 	}
 	else {
-		iron_window_change_mode(window_mode_t.WINDOWED);
+		iron_window_change_mode(iron_window_mode_t.WINDOW);
 		iron_window_resize(config_raw.window_w, config_raw.window_h);
 		iron_window_move(config_raw.window_x, config_raw.window_y);
 	}
@@ -1481,7 +1481,6 @@ function ui_base_update_ui() {
 	    context_raw.tool == tool_type_t.CLONE &&
 	    operator_shortcut(map_get(config_keymap, "set_clone_source") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
 
-	let decal: bool      = context_is_decal();
 	let decal_mask: bool = context_is_decal_mask_paint();
 
 	let down: bool = operator_shortcut(map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN) || decal_mask || set_clone_source ||

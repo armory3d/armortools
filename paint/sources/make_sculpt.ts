@@ -233,7 +233,6 @@ function sculpt_layers_create_sculpt_layer() {
 	render_path_load_shader("Scene/copy_pass/copyR32_pass");
 
 	for (let i: i32 = 0; i < history_undo_layers.length; ++i) {
-		let len: i32        = history_undo_layers.length;
 		let ext: string     = "_undo" + i;
 		let l: slot_layer_t = history_undo_layers[i];
 

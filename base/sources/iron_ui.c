@@ -19,8 +19,6 @@ static bool         ui_dynamic_glyph_load = true; // Allow text input fields to 
 static float        ui_key_repeat_time    = 0.0;
 static char         ui_text_to_paste[1024];
 static char         ui_text_to_copy[1024];
-static ui_t        *ui_copy_receiver                           = NULL;
-static int          ui_copy_frame                              = 0;
 static bool         ui_combo_first                             = true;
 static ui_handle_t *ui_combo_search_handle                     = NULL;
 static int          touch_hold_x                               = -1;
@@ -1848,7 +1846,7 @@ int ui_text(char *text, int align, int bg) {
 	bool started  = ui_get_started(h);
 	bool down     = ui_get_pushed(h);
 	bool released = ui_get_released(h);
-	bool hover    = ui_get_hover(h);
+	/*bool hover    =*/ ui_get_hover(h);
 	if (bg != 0x0000000) {
 		draw_set_color(bg);
 		draw_filled_rect(current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w - current->button_offset_y * 2,
@@ -3193,7 +3191,7 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 			}
 			else {
 				// Multi-line selection highlight
-				if (text_area_selection_start > -1 && (i >= text_area_selection_start && i < handle->i) || (i <= text_area_selection_start && i > handle->i)) {
+				if (text_area_selection_start > -1 && ((i >= text_area_selection_start && i < handle->i) || (i <= text_area_selection_start && i > handle->i))) {
 					int line_height   = UI_ELEMENT_H();
 					int cursor_height = line_height - current->button_offset_y * 3.0;
 					int linew         = draw_string_width(current->ops->font, current->font_size, line);

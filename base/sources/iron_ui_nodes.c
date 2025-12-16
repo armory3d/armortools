@@ -410,7 +410,7 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 	float wx      = current->_window_x;
 	float wy      = current->_window_y;
 	float w       = UI_NODE_W(node);
-	float h       = UI_NODE_H(canvas, node);
+	// float h       = UI_NODE_H(canvas, node);
 	float lineh   = UI_LINE_H();
 
 	// Outputs
@@ -515,7 +515,7 @@ void ui_node_draw_body(ui_node_t *node, ui_node_canvas_t *canvas, float nx, floa
 			ui_node_socket_t *soc = but->output >= 0 ? node->outputs->buffer[but->output] : NULL;
 			ui_handle_t      *h   = ui_nest(nhandle, buti);
 			if (h->init) {
-				h->text = soc != NULL ? soc->default_value->buffer : but->default_value->buffer != NULL ? but->default_value->buffer : "";
+				h->text = soc != NULL ? (char *)soc->default_value->buffer : but->default_value->buffer != NULL ? (char *)but->default_value->buffer : "";
 			}
 			but->default_value->buffer = ui_text_input(h, ui_tr(but->name), UI_ALIGN_LEFT, true, false);
 			but->default_value->length = strlen(but->default_value->buffer) + 1;
@@ -805,7 +805,7 @@ void ui_node_draw(ui_node_t *node, ui_node_canvas_t *canvas) {
 
 	// Title
 	draw_set_color(current->ops->theme->TEXT_COL);
-	float textw = draw_string_width(current->ops->font, current->font_size, text);
+	// float textw = draw_string_width(current->ops->font, current->font_size, text);
 	draw_string(text, nx + ui_p(20), ny + ui_p(6));
 	ny += lineh * 0.5;
 
@@ -1286,7 +1286,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 					ui_node_button_t *but = paste_canvas->nodes->buffer[i]->buttons->buffer[j];
 					if (but->data != NULL) {
 						char *s = string_replace_all(but->data, "\\n", "\n");
-						but->data = u8_array_create_from_raw(s, strlen(s) + 1);
+						but->data = u8_array_create_from_raw((uint8_t *)s, strlen(s) + 1);
 					}
 				}
 			}
@@ -1692,7 +1692,7 @@ char *ui_node_canvas_to_json(ui_node_canvas_t *canvas) {
 			json_encode_f32_array("default_value", canvas->nodes->buffer[i]->buttons->buffer[j]->default_value);
 			u8_array_t *data = canvas->nodes->buffer[i]->buttons->buffer[j]->data;
 			if (data != NULL) {
-				char *s = string_replace_all(data->buffer, "\n", "\\n");
+				char *s = string_replace_all((char *)data->buffer, "\n", "\\n");
 				json_encode_string("data", s);
 			}
 			else {

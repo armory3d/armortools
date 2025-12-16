@@ -277,7 +277,7 @@ static void *gc_allocate(size_t count, size_t size) {
 	return ptr;
 }
 
-void _gc_array(void *ptr, int *length) {
+void _gc_array(void *ptr, uint32_t *length) {
 	gc_allocation_t *alloc = gc_allocation_map_get(gc->allocs, ptr);
 	if (alloc) {
 		// alloc->array_length = length;

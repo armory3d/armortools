@@ -22,7 +22,7 @@ function main() {
 		height : 480,
 		x : -1,
 		y : -1,
-		mode : window_mode_t.WINDOWED,
+		mode : iron_window_mode_t.WINDOW,
 		features : window_features_t.RESIZABLE | window_features_t.MINIMIZABLE | window_features_t.MAXIMIZABLE,
 		vsync : true,
 		frequency : 60,

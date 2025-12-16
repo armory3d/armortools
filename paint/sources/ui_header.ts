@@ -342,7 +342,6 @@ function ui_header_draw_tool_properties() {
 	         context_raw.tool == tool_type_t.DECAL || context_raw.tool == tool_type_t.TEXT || context_raw.tool == tool_type_t.CLONE ||
 	         context_raw.tool == tool_type_t.BLUR || context_raw.tool == tool_type_t.SMUDGE || context_raw.tool == tool_type_t.PARTICLE) {
 
-		let decal: bool      = context_is_decal();
 		let decal_mask: bool = context_is_decal_mask();
 		if (context_raw.tool != tool_type_t.FILL) {
 			if (decal_mask) {

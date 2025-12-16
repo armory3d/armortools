@@ -26,11 +26,11 @@ static void store_u8(uint8_t u8) {
 	di += 1;
 }
 
-static void store_i16(int16_t i16) {
+/*static void store_i16(int16_t i16) {
 	di += pad(di, 2);
 	*(int16_t *)(decoded + di) = i16;
 	di += 2;
-}
+}*/
 
 static void store_u32(uint32_t u32) {
 	di += pad(di, 4);
@@ -345,7 +345,7 @@ static void read_store_array(uint32_t count) { // Store in any/i32/../_array_t f
 			array_count = count;
 
 			for (uint32_t i = 0; i < count; ++i) {
-				uint8_t flag = read_u8();
+				/*uint8_t flag =*/ read_u8();
 				read_store_array(read_i32());
 			}
 		}
@@ -366,7 +366,7 @@ static void read_store_array(uint32_t count) { // Store in any/i32/../_array_t f
 
 			for (uint32_t i = 0; i < count; ++i) {
 				di           = pad(di, PTR_SIZE) + di;
-				uint8_t flag = read_u8();
+				/*uint8_t flag =*/ read_u8();
 				read_store_map(read_i32());
 			}
 		}

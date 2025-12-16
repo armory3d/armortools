@@ -117,7 +117,7 @@ void      buffer_set_i32(buffer_t *b, uint32_t p, int32_t n);
 void      buffer_set_f32(buffer_t *b, uint32_t p, float n);
 
 buffer_t         *buffer_create(uint32_t length);
-buffer_t         *buffer_create_from_raw(char *raw, uint32_t length);
+buffer_t         *buffer_create_from_raw(uint8_t *raw, uint32_t length);
 f32_array_t      *f32_array_create(uint32_t length);
 f32_array_t      *f32_array_create_from_buffer(buffer_t *b);
 f32_array_t      *f32_array_create_from_array(f32_array_t *from);

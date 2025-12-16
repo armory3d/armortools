@@ -6055,14 +6055,14 @@ ufbxi_nodiscard static ufbxi_noinline int ufbxi_report_progress(ufbxi_context *u
 }
 
 // TODO: Remove `ufbxi_unused` when it's not needed anymore
-ufbxi_unused ufbxi_nodiscard static ufbxi_forceinline int ufbxi_progress(ufbxi_context *uc, size_t work_units)
+/*ufbxi_unused ufbxi_nodiscard static ufbxi_forceinline int ufbxi_progress(ufbxi_context *uc, size_t work_units)
 {
 	if (!uc->opts.progress_cb.fn) return 1;
 	ptrdiff_t left = uc->progress_timer - (ptrdiff_t)work_units;
 	uc->progress_timer = left;
 	if (left > 0) return 1;
 	return ufbxi_report_progress(uc);
-}
+}*/
 
 // -- IO
 

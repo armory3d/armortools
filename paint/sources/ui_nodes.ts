@@ -1037,12 +1037,7 @@ function ui_nodes_render() {
 	if (ui_nodes_show_menu) {
 		let list: node_list_t[]     = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_list : nodes_brush_list;
 		let category: ui_node_t[]   = list[ui_nodes_menu_category];
-		let num_nodes: i32          = category.length;
 		let is_group_category: bool = ui_nodes_canvas_type == canvas_type_t.MATERIAL && nodes_material_categories[ui_nodes_menu_category] == "Group";
-
-		if (is_group_category) {
-			num_nodes += project_material_groups.length;
-		}
 
 		let py: i32    = ui_nodes_popup_y;
 		let menuw: i32 = math_floor(ew * 2.3);

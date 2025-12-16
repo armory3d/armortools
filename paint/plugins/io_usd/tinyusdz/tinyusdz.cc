@@ -3354,23 +3354,23 @@ bool Parser::_BuildLiveFieldSets() {
   std::cout << "# of live fieldsets = " << _live_fieldsets.size() << "\n";
 #endif
 
-  size_t sum = 0;
-  for (const auto &item : _live_fieldsets) {
-#if TINYUSDZ_LOCAL_DEBUG_PRINT
-    std::cout << "livefieldsets[" << item.first.value
-              << "].count = " << item.second.size() << "\n";
-#endif
-    sum += item.second.size();
+  //size_t sum = 0;
+  //for (const auto &item : _live_fieldsets) {
+//#if TINYUSDZ_LOCAL_DEBUG_PRINT
+//    std::cout << "livefieldsets[" << item.first.value
+//              << "].count = " << item.second.size() << "\n";
+//#endif
+    //sum += item.second.size();
 
-#if TINYUSDZ_LOCAL_DEBUG_PRINT
-    for (size_t i = 0; i < item.second.size(); i++) {
-      std::cout << " [" << i << "] name = " << item.second[i].first << "\n";
-    }
-#endif
-  }
-#if TINYUSDZ_LOCAL_DEBUG_PRINT
-  std::cout << "Total fields used = " << sum << "\n";
-#endif
+//#if TINYUSDZ_LOCAL_DEBUG_PRINT
+//    for (size_t i = 0; i < item.second.size(); i++) {
+//      std::cout << " [" << i << "] name = " << item.second[i].first << "\n";
+//    }
+//#endif
+//  }
+//#if TINYUSDZ_LOCAL_DEBUG_PRINT
+//  std::cout << "Total fields used = " << sum << "\n";
+//#endif
 
   return true;
 }
@@ -3626,7 +3626,7 @@ bool Parser::_ReconstructGeomMesh(
     const std::unordered_map<uint32_t, uint32_t> &path_index_to_spec_index_map,
     GeomMesh *mesh) {
 
-  bool has_position{false};
+  //bool has_position{false};
 
   for (const auto &fv : fields) {
     if (fv.first == "properties") {
@@ -3637,7 +3637,7 @@ bool Parser::_ReconstructGeomMesh(
       assert(fv.second.IsArray());
       for (size_t i = 0; i < fv.second.GetStringArray().size(); i++) {
         if (fv.second.GetStringArray()[i] == "points") {
-          has_position = true;
+          //has_position = true;
         }
       }
     }
@@ -4373,12 +4373,12 @@ bool Parser::_ReconstructSceneRecursively(
       // Check if TokenArray contains known child nodes
       const auto &tokens = fv.second.GetStringArray();
 
-      bool valid = true;
+      //bool valid = true;
       for (const auto &token : tokens) {
         if (!node.GetPrimChildren().count(token)) {
           _err += "primChild '" + token + "' not found in node '" +
                   node.GetPath().full_path_name() + "'\n";
-          valid = false;
+          //valid = false;
           break;
         }
       }

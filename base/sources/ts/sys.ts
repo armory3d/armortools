@@ -30,7 +30,7 @@ declare type iron_window_options_t = {
 	width?: i32;
 	height?: i32;
 	features?: window_features_t;
-	mode?: window_mode_t;
+	mode?: iron_window_mode_t;
 	frequency?: i32;
 	vsync?: bool;
 	display_index?: i32;
@@ -325,8 +325,8 @@ enum window_features_t {
 	MAXIMIZABLE = 4,
 }
 
-enum window_mode_t {
-	WINDOWED,
+declare enum iron_window_mode_t {
+	WINDOW,
 	FULLSCREEN,
 }
 

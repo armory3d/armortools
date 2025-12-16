@@ -56,16 +56,16 @@ char *i32_to_string_hex(int32_t i) {
 }
 
 char *i64_to_string(int64_t i) {
-	int   l = snprintf(NULL, 0, "%ld", i);
+	int   l = snprintf(NULL, 0, "%lld", i);
 	char *r = string_alloc(l + 1);
-	sprintf(r, "%ld", i);
+	sprintf(r, "%lld", i);
 	return r;
 }
 
 char *u64_to_string(uint64_t i) {
-	int   l = snprintf(NULL, 0, "%lu", i);
+	int   l = snprintf(NULL, 0, "%llu", i);
 	char *r = string_alloc(l + 1);
-	sprintf(r, "%lu", i);
+	sprintf(r, "%llu", i);
 	return r;
 }
 
@@ -254,9 +254,8 @@ int string_utf8_decode(const char *str, int *i) {
 	if (is_unicode(u)) {
 		int a = (u & 0x20) ? ((u & 0x10) ? ((u & 0x08) ? ((u & 0x04) ? 6 : 5) : 4) : 3) : 2;
 		if (a < 6 || !(u & 0x02)) {
-			int b, p = 0;
 			u = ((u << (a + 1)) & 0xff) >> (a + 1);
-			for (b = 1; b < a; ++b)
+			for (int b = 1; b < a; ++b)
 				u = (u << 6) | (s[l++] & 0x3f);
 		}
 	}

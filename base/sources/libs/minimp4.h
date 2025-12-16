@@ -859,7 +859,7 @@ int MP4E_add_track(MP4E_mux_t *mux, const MP4E_track_t *track_data)
     return ntr;
 }
 
-static const unsigned char *next_dsi(const unsigned char *p, const unsigned char *end, int *bytes)
+/*static const unsigned char *next_dsi(const unsigned char *p, const unsigned char *end, int *bytes)
 {
     if (p < end + 2)
     {
@@ -867,7 +867,7 @@ static const unsigned char *next_dsi(const unsigned char *p, const unsigned char
         return p + 2;
     } else
         return NULL;
-}
+}*/
 
 static int append_mem(minimp4_vector_t *v, const void *mem, int bytes)
 {
@@ -1000,11 +1000,11 @@ static int mp4e_write_fragment_header(MP4E_mux_t *mux, int track_num, int data_b
     unsigned char **stack = stack_base;
     unsigned char *pdata_offset;
     unsigned flags;
-    enum
+    /*enum
     {
         default_sample_duration_present = 0x000008,
         default_sample_flags_present = 0x000020,
-    } e;
+    } e;*/
 
     track_t *tr = ((track_t*)mux->tracks.data) + track_num;
 

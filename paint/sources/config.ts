@@ -244,7 +244,7 @@ function config_get_date(): string {
 }
 
 function config_get_options(): iron_window_options_t {
-	let window_mode: window_mode_t  = config_raw.window_mode == 0 ? window_mode_t.WINDOWED : window_mode_t.FULLSCREEN;
+	let window_mode: iron_window_mode_t  = config_raw.window_mode == 0 ? iron_window_mode_t.WINDOW : iron_window_mode_t.FULLSCREEN;
 	let features: window_features_t = window_features_t.NONE;
 	if (config_raw.window_resizable) {
 		features |= window_features_t.RESIZABLE;

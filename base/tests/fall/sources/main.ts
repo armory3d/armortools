@@ -12,7 +12,7 @@ function main() {
 		x : -1,
 		y : -1,
 		features : window_features_t.RESIZABLE | window_features_t.MINIMIZABLE | window_features_t.MAXIMIZABLE,
-		mode : window_mode_t.WINDOWED,
+		mode : iron_window_mode_t.WINDOW,
 		frequency : 60,
 		vsync : true,
 		depth_bits : 32

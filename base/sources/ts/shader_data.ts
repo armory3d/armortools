@@ -238,7 +238,6 @@ function shader_context_finish_compile(raw: shader_context_t) {
 	}
 	if (raw.texture_units != null) {
 		for (let i: i32 = 0; i < raw.texture_units.length; ++i) {
-			let tu: tex_unit_t = raw.texture_units[i];
 			shader_context_add_tex(raw, i);
 		}
 	}

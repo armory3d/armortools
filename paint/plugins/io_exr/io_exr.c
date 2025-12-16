@@ -73,12 +73,12 @@ void *io_exr_parse(uint8_t *buf, size_t buf_size) {
 
 				int32_t chpixel_type = *(int32_t *)(buf + chpos);
 				chpos += 4;
-				uint8_t pLinear = buf[chpos];
+				// uint8_t pLinear = buf[chpos];
 				chpos += 1; // 1 byte
 				chpos += 3; // Skip reserved (3 bytes)
-				int32_t xSampling = *(int32_t *)(buf + chpos);
+				// int32_t xSampling = *(int32_t *)(buf + chpos);
 				chpos += 4;
-				int32_t ySampling = *(int32_t *)(buf + chpos);
+				// int32_t ySampling = *(int32_t *)(buf + chpos);
 				chpos += 4;
 
 				strcpy(channels[num_channels].name, chname);
