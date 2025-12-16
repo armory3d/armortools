@@ -28,6 +28,36 @@ function text_to_image_node_sd_args(dir: string, prompt: string): string[] {
 	return argv;
 }
 
+function text_to_image_node_zimage_args(dir: string, prompt: string): string[] {
+	let argv: string[] = [
+		dir + "/" + neural_node_sd_bin(),
+		"--diffusion-model",
+		dir + "/z_image_turbo-Q4_K.gguf",
+		"--vae",
+		dir + "/ae.safetensors",
+		"--llm",
+		dir + "/Qwen3-4B-Instruct-2507-Q4_K_S.gguf",
+		"--diffusion-fa",
+		"--offload-to-cpu",
+		"--cfg-scale",
+		"1.0",
+		"-W",
+		"512",
+		"-H",
+		"512",
+		"--steps",
+		"40",
+		"-s",
+		"-1",
+		"-o",
+		dir + "/output.png",
+		"-p",
+		"'" + prompt + "'",
+		null
+	];
+	return argv;
+}
+
 function text_to_image_node_qwen_args(dir: string, prompt: string): string[] {
 	let argv: string[] = [
 		dir + "/" + neural_node_sd_bin(),
@@ -99,7 +129,7 @@ function text_to_image_node_button(node_id: i32) {
 	let node_name: string = parser_material_node_name(node);
 	let h: ui_handle_t = ui_handle(node_name);
 
-	let models: string[] = [ "Stable Diffusion", "Qwen Image", "Wan" ];
+	let models: string[] = [ "Stable Diffusion", "Z-Image-Turbo", "Qwen Image", "Wan" ];
 	let model: i32       = ui_combo(ui_nest(h, 0), models, tr("Model"));
 
 	let prompt: string     = ui_text_area(ui_nest(h, 1), ui_align_t.LEFT, true, tr("prompt"), true);
@@ -117,6 +147,9 @@ function text_to_image_node_button(node_id: i32) {
 			argv = text_to_image_node_sd_args(dir, prompt);
 		}
 		else if (model == 1) {
+			argv = text_to_image_node_zimage_args(dir, prompt);
+		}
+		else if (model == 2) {
 			argv = text_to_image_node_qwen_args(dir, prompt);
 		}
 		else {

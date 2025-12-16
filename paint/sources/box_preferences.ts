@@ -715,6 +715,19 @@ function box_preferences_init_models() {
 			license : "openrail"
 		},
 		{
+			name : "Z-Image-Turbo",
+			memory : "4GB",
+			size : "6.7GB",
+			nodes : "Text to Image",
+			urls : [
+				"https://huggingface.co/armory3d/z_image_turbo/resolve/main/Qwen3-4B-Instruct-2507-Q4_K_S.gguf",
+				"https://huggingface.co/armory3d/z_image_turbo/resolve/main/ae.safetensors",
+				"https://huggingface.co/armory3d/z_image_turbo/resolve/main/z_image_turbo-Q4_K.gguf"
+			],
+			web : "https://huggingface.co/armory3d/z_image_turbo",
+			license : "apache-2.0"
+		},
+		{
 			name : "Qwen Image",
 			memory : "13GB",
 			size : "16.9GB",
@@ -1033,8 +1046,8 @@ function box_preferences_show() {
 	    720, 520,
 	    function() {
 		    config_save();
-	    }, true, tr("Preferences")
-	);
+	    },
+	    true, tr("Preferences"));
 }
 
 function box_preferences_fetch_themes() {
