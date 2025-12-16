@@ -55,17 +55,25 @@ char *i32_to_string_hex(int32_t i) {
 	return r;
 }
 
+#ifdef IRON_WINDOWS
+#define PERCENT_LD "%lld"
+#define PERCENT_LU "%llu"
+#else
+#define PERCENT_LD "%ld"
+#define PERCENT_LU "%lu"
+#endif
+
 char *i64_to_string(int64_t i) {
-	int   l = snprintf(NULL, 0, "%lld", i);
+	int   l = snprintf(NULL, 0, PERCENT_LD, i);
 	char *r = string_alloc(l + 1);
-	sprintf(r, "%lld", i);
+	sprintf(r, PERCENT_LD, i);
 	return r;
 }
 
 char *u64_to_string(uint64_t i) {
-	int   l = snprintf(NULL, 0, "%llu", i);
+	int   l = snprintf(NULL, 0, PERCENT_LU, i);
 	char *r = string_alloc(l + 1);
-	sprintf(r, "%llu", i);
+	sprintf(r, PERCENT_LU, i);
 	return r;
 }
 

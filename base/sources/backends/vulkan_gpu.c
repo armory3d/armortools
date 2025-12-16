@@ -606,7 +606,7 @@ static void create_swapchain() {
 }
 
 static void acquire_next_image() {
-	VkResult err = vkAcquireNextImageKHR(device, swapchain, UINT64_MAX, framebuffer_available_semaphore, VK_NULL_HANDLE, &framebuffer_index);
+	VkResult err = vkAcquireNextImageKHR(device, swapchain, UINT64_MAX, framebuffer_available_semaphore, VK_NULL_HANDLE, (uint32_t *)&framebuffer_index);
 	if (err == VK_ERROR_SURFACE_LOST_KHR || err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR || surface_destroyed) {
 		surface_destroyed = surface_destroyed || (err == VK_ERROR_SURFACE_LOST_KHR);
 		gpu_in_use        = false;
@@ -743,6 +743,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 				score = 2;
 				break;
 			case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
+			default:
 				score = 1;
 				break;
 			}
@@ -1191,7 +1192,7 @@ void gpu_present_internal() {
 	    .sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
 	    .swapchainCount     = 1,
 	    .pSwapchains        = &swapchain,
-	    .pImageIndices      = &framebuffer_index,
+	    .pImageIndices      = (uint32_t *)&framebuffer_index,
 	    .pWaitSemaphores    = &rendering_finished_semaphores[framebuffer_index],
 	    .waitSemaphoreCount = 1,
 	};
@@ -1995,8 +1996,7 @@ void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *ray_sha
 		    {9, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR},
 		    {10, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR},
 		    {11, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR},
-		    {12, VK_DESCRIPTOR_TYPE_SAMPLER, 1, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR, NULL, 0,
-		     &linear_sampler}};
+		    {12, VK_DESCRIPTOR_TYPE_SAMPLER, 1, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR}};
 
 		VkDescriptorSetLayoutCreateInfo layout_info = {
 		    .sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,

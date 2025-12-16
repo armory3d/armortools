@@ -1808,6 +1808,7 @@ class MakeExporter extends Exporter {
 		this.cppFlags        = cppFlags;
 		this.linkerFlags     = linkerFlags;
 		this.outputExtension = outputExtension;
+		this.cFlags += " -Wno-incompatible-pointer-types";
 		if (libsLine != null) {
 			this.libsLine = libsLine;
 		}
@@ -1870,14 +1871,14 @@ class MakeExporter extends Exporter {
 		}
 		this.p("DEF=" + defline);
 		this.p();
-		let cline = this.cFlags;
-		cline     = "-std=" + project.cStd + " ";
+		let cline  = this.cFlags;
+		cline     += " -std=" + project.cStd + " ";
 		for (let flag of project.cFlags) {
 			cline += flag + ' ';
 		}
 		this.p("CFLAGS=" + cline);
-		let cppline = this.cppFlags;
-		cppline     = "-std=" + project.cppStd + " ";
+		let cppline  = this.cppFlags;
+		cppline     += " -std=" + project.cppStd + " ";
 		for (let flag of project.cppFlags) {
 			cppline += flag + " ";
 		}
