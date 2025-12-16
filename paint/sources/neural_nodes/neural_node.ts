@@ -144,15 +144,15 @@ function neural_node_download_models(models: string[]) {
 	}
 
 	/// if arm_windows
-	neural_node_download("https://github.com/armory3d/armortools/raw/refs/heads/main/base/assets/bin/windows_x64/sd_cpu.exe");
-	neural_node_download("https://github.com/armory3d/armortools/raw/refs/heads/main/base/assets/bin/windows_x64/sd_vulkan.exe");
-	neural_node_download("https://github.com/armory3d/armortools/raw/refs/heads/main/base/assets/bin/windows_x64/sd_cuda.exe");
+	neural_node_download("https://huggingface.co/armory3d/sd_bin/resolve/main/windows_x64/sd_cpu.exe");
+	neural_node_download("https://huggingface.co/armory3d/sd_bin/resolve/main/windows_x64/sd_vulkan.exe");
+	neural_node_download("https://huggingface.co/armory3d/sd_bin/resolve/main/windows_x64/sd_cuda.exe");
 	/// elseif arm_linux
-	neural_node_download("https://github.com/armory3d/armortools/raw/refs/heads/main/base/assets/bin/linux_x64/sd_cpu");
-	neural_node_download("https://github.com/armory3d/armortools/raw/refs/heads/main/base/assets/bin/linux_x64/sd_vulkan");
+	neural_node_download("https://huggingface.co/armory3d/sd_bin/resolve/main/linux_x64/sd_cpu");
+	neural_node_download("https://huggingface.co/armory3d/sd_bin/resolve/main/linux_x64/sd_vulkan");
 	/// else
-	neural_node_download("https://github.com/armory3d/armortools/raw/refs/heads/main/base/assets/bin/macos/sd_cpu");
-	neural_node_download("https://github.com/armory3d/armortools/raw/refs/heads/main/base/assets/bin/macos/sd_vulkan");
+	neural_node_download("https://huggingface.co/armory3d/sd_bin/resolve/main/macos/sd_cpu");
+	neural_node_download("https://huggingface.co/armory3d/sd_bin/resolve/main/macos/sd_vulkan");
 	/// end
 
 	iron_net_bytes_downloaded = 0;
