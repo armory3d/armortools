@@ -390,11 +390,12 @@ function read_type() { // Cursor at ":"
 }
 
 function enum_access(s) {
-	// Turn enum_t.VALUE into enum_t_VALUE
+	// Turn enum_t.VALUE into ENUM_VALUE
 	if (s.indexOf("_t.") > -1) {
 		for (let e of enums) {
 			if (s.indexOf(e) > -1) {
-				s = s.replaceAll(".", "_");
+				s = s.replace("_t.", "_");
+				s = s.toUpperCase();
 				break;
 			}
 		}
@@ -1159,7 +1160,9 @@ function write_enums() {
 					break;
 				}
 
-				out("\t" + enum_name + "_" + token);
+				let enum_base = strip(enum_name, 2); // _t
+				enum_base = enum_base.toUpperCase();
+				out("\t" + enum_base + "_" + token);
 
 				pos++; // = or ,
 				token = get_token();

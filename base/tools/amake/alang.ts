@@ -390,12 +390,13 @@ function read_type(): string { // Cursor at ":"
 }
 
 function enum_access(s: string): string {
-	// Turn enum_t.VALUE into enum_t_VALUE
+	// Turn enum_t.VALUE into ENUM_VALUE
 	if (string_index_of(s, "_t.") > -1) {
 		for (let i: i32 = 0; i < enums.length; ++i) {
 			let e: string = enums[i];
 			if (string_index_of(s, e) > -1) {
-				s = string_replace_all(s, ".", "_");
+				s = string_replace_all(s, "_t.", "_");
+				s = to_upper_case(s);
 				break;
 			}
 		}
@@ -1181,7 +1182,9 @@ function write_enums() {
 					break;
 				}
 
-				out("\t" + enum_name + "_" + token);
+				let enum_base: string = strip(enum_name, 2); // _t
+				enum_base = to_upper_case(enum_base);
+				out("\t" + enum_base + "_" + token);
 
 				pos++; // = or ,
 				token = get_token();
