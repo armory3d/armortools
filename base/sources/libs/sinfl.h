@@ -195,11 +195,13 @@ sinfl_copy64(unsigned char **dst, unsigned char **src) {
   memcpy(*dst, &n, 8);
   *dst += 8, *src += 8;
 }
-/*static unsigned char*
+#ifdef SINFL_NO_SIMD
+static unsigned char*
 sinfl_write64(unsigned char *dst, unsigned long long w) {
   memcpy(dst, &w, 8);
   return dst + 8;
-}*/
+}
+#endif
 #ifndef SINFL_NO_SIMD
 static unsigned char*
 sinfl_write128(unsigned char *dst, sinfl_char16 w) {

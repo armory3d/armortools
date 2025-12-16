@@ -42,7 +42,7 @@ function sim_update() {
 			/// if IRON_BGRA
 			export_arm_bgra_swap(pixels);
 			/// end
-			iron_mp4_encode(pixels);
+			// iron_mp4_encode(pixels);
 		}
 	}
 }
@@ -58,7 +58,7 @@ function sim_play() {
 		}
 		let path: string        = path_base_dir(project_filepath) + "/output.mp4";
 		let rt: render_target_t = map_get(render_path_render_targets, "last");
-		iron_mp4_begin(path, rt._image.width, rt._image.height);
+		// iron_mp4_begin(path, rt._image.width, rt._image.height);
 	}
 
 	// Save transforms
@@ -74,7 +74,7 @@ function sim_stop() {
 	sim_running = false;
 
 	if (sim_record) {
-		iron_mp4_end();
+		// iron_mp4_end();
 	}
 
 	// Restore transforms

@@ -8,7 +8,7 @@ flags.with_d3dcompiler    = true;
 flags.with_nfd            = true;
 flags.with_compress       = platform != "android";
 flags.with_image_write    = true;
-flags.with_video_write    = true;
+flags.with_video_write    = os_argv().indexOf("tcc") == -1;
 flags.with_eval           = true;
 flags.with_plugins        = true;
 flags.with_kong           = true;
