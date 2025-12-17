@@ -26,6 +26,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <locale.h>
 #ifdef IRON_WINDOWS
 #include <Windows.h>
 #endif
@@ -722,6 +723,7 @@ void _iron_init(iron_window_options_t *ops) {
 	ops->visible       = enable_window;
 	ops->color_bits    = 32;
 	iron_init(ops);
+	setlocale(LC_NUMERIC, "C");
 	iron_random_init((int)(iron_time() * 1000));
 	iron_set_cut_callback(_cut, NULL);
 	iron_set_copy_callback(_copy, NULL);
