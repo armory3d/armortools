@@ -375,6 +375,12 @@ function box_preferences_usage_tab() {
 	}
 	config_raw.camera_pan_speed = ui_slider(hspeed, tr("Camera Pan Speed"), 0.1, 4.0, true);
 
+	let upside_down_handle: ui_handle_t = ui_handle(__ID__);
+	if (upside_down_handle.init) {
+		upside_down_handle.b = config_raw.camera_upside_down;
+	}
+	config_raw.camera_upside_down = ui_check(upside_down_handle, tr("Allow Upside Down Camera"));
+
 	let zoom_direction_handle: ui_handle_t = ui_handle(__ID__);
 	if (zoom_direction_handle.init) {
 		zoom_direction_handle.i = config_raw.zoom_direction;

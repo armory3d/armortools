@@ -70,7 +70,7 @@ function camera_update() {
 		transform_rotate(camera.base.transform, vec4_z_axis(), -mouse_movement_x / 100 * config_raw.camera_rotation_speed);
 		transform_rotate(camera.base.transform, camera_object_right_world(camera), -mouse_movement_y / 100 * config_raw.camera_rotation_speed);
 		let up_world: vec4_t = camera_object_up_world(camera);
-		if (up_world.z < 0) {
+		if (up_world.z < 0 && !config_raw.camera_upside_down) {
 			transform_rotate(camera.base.transform, camera_object_right_world(camera), mouse_movement_y / 100 * config_raw.camera_rotation_speed);
 		}
 		transform_move(camera.base.transform, camera_object_look_world(camera), -dist);
@@ -85,7 +85,7 @@ function camera_update() {
 		transform_rotate(t, right, (mouse_movement_y / 120) * config_raw.camera_rotation_speed);
 		transform_build_matrix(t);
 		let tup: vec4_t = transform_up(t);
-		if (tup.z < 0) {
+		if (tup.z < 0 && !config_raw.camera_upside_down) {
 			transform_rotate(t, right, -(mouse_movement_y / 120) * config_raw.camera_rotation_speed);
 		}
 	}
