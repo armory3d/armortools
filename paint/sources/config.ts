@@ -71,6 +71,7 @@ function config_save() {
 	json_encode_f32("camera_pan_speed", config_raw.camera_pan_speed);
 	json_encode_f32("camera_zoom_speed", config_raw.camera_zoom_speed);
 	json_encode_f32("camera_rotation_speed", config_raw.camera_rotation_speed);
+	json_encode_bool("camera_upside_down", config_raw.camera_upside_down);
 	json_encode_i32("zoom_direction", config_raw.zoom_direction);
 	json_encode_bool("wrap_mouse", config_raw.wrap_mouse);
 	json_encode_bool("show_asset_names", config_raw.show_asset_names);
@@ -175,6 +176,7 @@ function config_init() {
 		config_raw.camera_zoom_speed     = 1.0;
 		config_raw.camera_pan_speed      = 1.0;
 		config_raw.camera_rotation_speed = 1.0;
+		config_raw.camera_upside_down    = false;
 		config_raw.zoom_direction        = zoom_direction_t.VERTICAL;
 		config_raw.displace_strength     = 0.0;
 		config_raw.wrap_mouse            = false;
@@ -451,6 +453,7 @@ type config_t = {
 	camera_pan_speed?: f32;
 	camera_zoom_speed?: f32;
 	camera_rotation_speed?: f32;
+	camera_upside_down?: bool;
 	zoom_direction?: i32;
 	wrap_mouse?: bool;
 	show_asset_names?: bool;

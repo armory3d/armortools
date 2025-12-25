@@ -73,8 +73,8 @@ function base_init() {
 	    function() {}, // Pause
 	    function() {   // Background
 		    // Release keys after alt-tab / win-tab
-		    keyboard_up_listener(key_code_t.ALT);
-		    keyboard_up_listener(key_code_t.WIN);
+		    _key_up(key_code_t.ALT, null);
+		    _key_up(key_code_t.WIN, null);
 	    },
 	    function() { // Shutdown
 		    /// if (arm_android || arm_ios)

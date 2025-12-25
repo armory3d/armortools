@@ -9,7 +9,9 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-typedef struct {
+#define MAX_THREADS 32
+
+typedef struct async_context {
 	SSL                  *ssl;
 	int                   sock_fd;
 	FILE                 *fp;
@@ -19,7 +21,9 @@ typedef struct {
 	void                 *callbackdata;
 	char                 *url_base;
 	char                 *url_path;
+	char                 *dst_path;
 	int                   port;
+	struct async_context *next;
 } async_context_t;
 
 typedef struct request {
@@ -29,12 +33,34 @@ typedef struct request {
 	struct request       *next;
 } request_t;
 
-volatile uint64_t      iron_net_bytes_downloaded = 0;
-static SSL_CTX        *ctx                       = NULL;
-static pthread_mutex_t ctx_mutex                 = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t pending_mutex             = PTHREAD_MUTEX_INITIALIZER;
-static request_t      *pending_head              = NULL;
-static request_t      *pending_tail              = NULL;
+volatile uint64_t       iron_net_bytes_downloaded = 0;
+static SSL_CTX         *ctx                       = NULL;
+static pthread_mutex_t  ctx_mutex                 = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t  pending_mutex             = PTHREAD_MUTEX_INITIALIZER;
+static request_t       *pending_head              = NULL;
+static request_t       *pending_tail              = NULL;
+static int              active_threads            = 0;
+static async_context_t *queue_head                = NULL;
+static async_context_t *queue_tail                = NULL;
+static pthread_mutex_t  queue_mutex               = PTHREAD_MUTEX_INITIALIZER;
+
+static void *download_thread(void *arg);
+
+static void try_process_queue() {
+	pthread_mutex_lock(&queue_mutex);
+	while (active_threads < MAX_THREADS && queue_head != NULL) {
+		async_context_t *async_ctx = queue_head;
+		queue_head                 = async_ctx->next;
+		if (queue_head == NULL) {
+			queue_tail = NULL;
+		}
+		active_threads++;
+		pthread_t thread;
+		pthread_create(&thread, NULL, download_thread, async_ctx);
+		pthread_detach(thread);
+	}
+	pthread_mutex_unlock(&queue_mutex);
+}
 
 static void finish_request(async_context_t *async_ctx, char *response) {
 	if (async_ctx->fp) {
@@ -57,11 +83,16 @@ static void finish_request(async_context_t *async_ctx, char *response) {
 	if (async_ctx->url_path) {
 		free(async_ctx->url_path);
 	}
+	if (async_ctx->dst_path) {
+		free(async_ctx->dst_path);
+	}
+
 	request_t *req    = malloc(sizeof(request_t));
 	req->response     = response;
 	req->callback     = async_ctx->callback;
 	req->callbackdata = async_ctx->callbackdata;
 	req->next         = NULL;
+
 	pthread_mutex_lock(&pending_mutex);
 	if (pending_tail == NULL) {
 		pending_head = pending_tail = req;
@@ -71,7 +102,12 @@ static void finish_request(async_context_t *async_ctx, char *response) {
 		pending_tail       = req;
 	}
 	pthread_mutex_unlock(&pending_mutex);
+
 	free(async_ctx);
+	pthread_mutex_lock(&queue_mutex);
+	active_threads--;
+	pthread_mutex_unlock(&queue_mutex);
+	try_process_queue();
 }
 
 static void parse_url(const char *url, char **host, char **path, int *port) {
@@ -112,13 +148,6 @@ static int do_request(async_context_t *async_ctx) {
 		return 0;
 	}
 	freeaddrinfo(res);
-
-	pthread_mutex_lock(&ctx_mutex);
-	if (ctx == NULL) {
-		ctx = SSL_CTX_new(TLS_client_method());
-		SSL_CTX_set_mode(ctx, SSL_MODE_RELEASE_BUFFERS);
-	}
-	pthread_mutex_unlock(&ctx_mutex);
 
 	SSL *ssl = SSL_new(ctx);
 	SSL_set_fd(ssl, sock_fd);
@@ -242,6 +271,14 @@ static int do_request(async_context_t *async_ctx) {
 
 static void *download_thread(void *arg) {
 	async_context_t *async_ctx = (async_context_t *)arg;
+	if (async_ctx->dst_path) {
+		async_ctx->fp = fopen(async_ctx->dst_path, "wb");
+		if (!async_ctx->fp) {
+			finish_request(async_ctx, NULL);
+			return NULL;
+		}
+		setvbuf(async_ctx->fp, NULL, _IOFBF, 256 * 1024);
+	}
 	if (!do_request(async_ctx)) {
 		finish_request(async_ctx, NULL);
 	}
@@ -250,24 +287,34 @@ static void *download_thread(void *arg) {
 
 void iron_net_request(const char *url_base, const char *url_path, const char *data, int port, int method, iron_https_callback_t callback, void *callbackdata,
                       const char *dst_path) {
+	if (ctx == NULL) {
+		ctx = SSL_CTX_new(TLS_client_method());
+		SSL_CTX_set_mode(ctx, SSL_MODE_RELEASE_BUFFERS);
+	}
+
 	async_context_t *async_ctx = calloc(1, sizeof(async_context_t));
 	async_ctx->callback        = callback;
 	async_ctx->callbackdata    = callbackdata;
 	async_ctx->buf_len         = 1024 * 1024;
 	async_ctx->buf             = malloc(async_ctx->buf_len);
-	async_ctx->fp              = NULL;
 	async_ctx->sock_fd         = -1;
-	async_ctx->ssl             = NULL;
 	async_ctx->url_base        = strdup(url_base);
 	async_ctx->url_path        = strdup(url_path);
 	async_ctx->port            = port;
 	if (dst_path) {
-		async_ctx->fp = fopen(dst_path, "wb");
-		setvbuf(async_ctx->fp, NULL, _IOFBF, 256 * 1024);
+		async_ctx->dst_path = strdup(dst_path);
 	}
-	pthread_t thread;
-	pthread_create(&thread, NULL, download_thread, async_ctx);
-	pthread_detach(thread);
+
+	pthread_mutex_lock(&queue_mutex);
+	if (queue_tail == NULL) {
+		queue_head = queue_tail = async_ctx;
+	}
+	else {
+		queue_tail->next = async_ctx;
+		queue_tail       = async_ctx;
+	}
+	pthread_mutex_unlock(&queue_mutex);
+	try_process_queue();
 }
 
 void iron_net_update() {
