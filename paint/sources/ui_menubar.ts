@@ -487,10 +487,7 @@ function ui_menubar_draw_category_items() {
 		}
 
 		let cam: camera_object_t = scene_camera;
-		context_raw.fov_handle   = ui_handle(__ID__);
-		if (context_raw.fov_handle.init) {
-			context_raw.fov_handle.f = math_floor(cam.data.fov * 100) / 100;
-		}
+		context_raw.fov_handle.f = math_floor(cam.data.fov * 100) / 100;
 		ui_menu_align();
 		cam.data.fov = ui_slider(context_raw.fov_handle, tr("FoV"), 0.3, 1.4, true);
 		if (context_raw.fov_handle.changed) {

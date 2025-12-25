@@ -708,7 +708,7 @@ function render_path_paint_set_plane_mesh() {
 	let m: mat4_t = mat4_identity();
 	m             = mat4_translate(m, 0, 0, 0.5);
 	transform_set_matrix(cam.base.transform, m);
-	cam.data.fov = base_default_fov;
+	cam.data.fov = 0.69;
 	camera_object_build_proj(cam);
 	camera_object_build_mat(cam);
 

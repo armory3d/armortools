@@ -31,7 +31,6 @@ let base_last_window_width: i32         = 0;
 let base_last_window_height: i32        = 0;
 let base_drag_material: slot_material_t = null;
 let base_drag_layer: slot_layer_t       = null;
-let base_default_fov: f32               = 0.69;
 let _base_material_count: i32;
 
 let ui: ui_t;

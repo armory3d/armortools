@@ -346,6 +346,10 @@ function box_preferences_usage_tab() {
 		config_raw.camera_controls = camera_controls_handle.i;
 	}
 
+	let hfov: ui_handle_t = ui_handle(__ID__);
+	hfov.f = config_raw.camera_fov;
+	config_raw.camera_fov = ui_slider(hfov, tr("Default Camera FoV"), 0.3, 1.4, true);
+
 	let hspeed: ui_handle_t = ui_handle(__ID__);
 	if (hspeed.init) {
 		hspeed.f = config_raw.camera_zoom_speed;

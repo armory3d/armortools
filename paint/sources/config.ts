@@ -68,6 +68,7 @@ function config_save() {
 	json_encode_string("keymap", config_raw.keymap);
 	json_encode_string("theme", config_raw.theme);
 	json_encode_i32("undo_steps", config_raw.undo_steps);
+	json_encode_f32("camera_fov", config_raw.camera_fov);
 	json_encode_f32("camera_pan_speed", config_raw.camera_pan_speed);
 	json_encode_f32("camera_zoom_speed", config_raw.camera_zoom_speed);
 	json_encode_f32("camera_rotation_speed", config_raw.camera_rotation_speed);
@@ -173,6 +174,7 @@ function config_init() {
 		/// else
 		config_raw.pressure_sensitivity = 2.0;
 		/// end
+		config_raw.camera_fov            = 0.69;
 		config_raw.camera_zoom_speed     = 1.0;
 		config_raw.camera_pan_speed      = 1.0;
 		config_raw.camera_rotation_speed = 1.0;
@@ -450,6 +452,7 @@ type config_t = {
 	keymap?: string;            // Link to keymap file
 	theme?: string;             // Link to theme file
 	undo_steps?: i32;           // Number of undo steps to preserve
+	camera_fov?: f32;
 	camera_pan_speed?: f32;
 	camera_zoom_speed?: f32;
 	camera_rotation_speed?: f32;

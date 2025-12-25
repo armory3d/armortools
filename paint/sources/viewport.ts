@@ -25,9 +25,7 @@ function viewport_reset() {
 		if (o.type == "camera_object") {
 			cam.base.transform.local = mat4_from_f32_array(o.transform);
 			transform_decompose(cam.base.transform);
-			if (context_raw.fov_handle != null) {
-				context_raw.fov_handle.f = cam.data.fov = base_default_fov;
-			}
+			cam.data.fov = config_raw.camera_fov;
 			context_raw.cam_handle.i = 0;
 			cam.data.ortho           = null;
 			camera_object_build_proj(cam);

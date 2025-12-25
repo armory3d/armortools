@@ -279,6 +279,7 @@ function context_create(): context_t {
 	c.brush_locked            = false;
 	c.camera_type             = camera_type_t.PERSPECTIVE;
 	c.cam_handle              = ui_handle_create();
+	c.fov_handle              = ui_handle_create();
 	c.hssao                   = ui_handle_create();
 	c.hbloom                  = ui_handle_create();
 	c.hsupersample            = ui_handle_create();
