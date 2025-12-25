@@ -90,6 +90,9 @@ function nodes_material_init() {
 
 	nodes_material_neural = [];
 	edit_image_node_init();
+	/// if arm_windows
+	image_to_3d_mesh_node_init();
+	/// end
 	image_to_depth_node_init();
 	image_to_normal_map_node_init();
 	image_to_pbr_node_init();
