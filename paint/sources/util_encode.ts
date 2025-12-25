@@ -137,7 +137,7 @@ function util_encode_project(raw: project_format_t): buffer_t {
 	let encoded: buffer_t = buffer_create(size);
 
 	armpack_encode_start(encoded.buffer);
-	armpack_encode_map(22);
+	armpack_encode_map(24);
 	armpack_encode_string("version");
 	armpack_encode_string(raw.version);
 	armpack_encode_string("assets");
@@ -162,6 +162,10 @@ function util_encode_project(raw: project_format_t): buffer_t {
 	armpack_encode_string(raw.envmap);
 	armpack_encode_string("envmap_strength");
 	armpack_encode_f32(raw.envmap_strength);
+	armpack_encode_string("envmap_angle");
+	armpack_encode_f32(raw.envmap_angle);
+	armpack_encode_string("envmap_blur");
+	armpack_encode_bool(raw.envmap_blur);
 	armpack_encode_string("camera_world");
 	armpack_encode_array_f32(raw.camera_world);
 	armpack_encode_string("camera_origin");

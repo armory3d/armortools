@@ -244,8 +244,17 @@ function import_arm_is_version_2(b: buffer_t): bool {
 	return false;
 }
 
+function import_arm_is_version_3(b: buffer_t): bool {
+	let has_version: bool = b[10] == 118; // 'v'
+	let has_three: bool     = b[22] == 51;  // '3'
+	if (has_version && has_three) {
+		return true;
+	}
+	return false;
+}
+
 function import_arm_is_old(b: buffer_t): bool {
-	return import_arm_is_legacy(b) || import_arm_is_version_2(b);
+	return import_arm_is_legacy(b) || import_arm_is_version_2(b) || import_arm_is_version_3(b);
 }
 
 function import_arm_from_legacy(old: map_t<string, any>): project_format_t {
@@ -385,6 +394,21 @@ function import_arm_from_version_2(old: map_t<string, any>): project_format_t {
 	return project;
 }
 
+function import_arm_from_version_3(old: map_t<string, any>): project_format_t {
+	let project: project_format_t = import_arm_from_version_2(old);
+	let lds: any[]         = map_get(old, "layer_datas");
+	for (let i: i32 = 0; i < lds.length; ++i) {
+		let old: map_t<string, any> = lds[i];
+		let ld: layer_data_t        = project.layer_datas[i];
+		ld.uv_map = armpack_map_get_i32(old, "uv_map");
+	}
+	////
+	project.envmap_angle = 0.0;
+	project.envmap_blur = false;
+	////
+	return project;
+}
+
 function import_arm_from_old(b: buffer_t): project_format_t {
 	let old: map_t<string, any> = armpack_decode_to_map(b);
 	if (import_arm_is_legacy(b)) {
@@ -392,6 +416,9 @@ function import_arm_from_old(b: buffer_t): project_format_t {
 	}
 	if (import_arm_is_version_2(b)) {
 		return import_arm_from_version_2(old);
+	}
+	if (import_arm_is_version_3(b)) {
+		return import_arm_from_version_3(old);
 	}
 	return null;
 }

@@ -382,7 +382,8 @@ function ui_menubar_draw_category_items() {
 			context_raw.ddirty = 2;
 		}
 
-		context_raw.show_envmap_blur = ui_check(context_raw.show_envmap_blur_handle, " " + tr("Blur Envmap"));
+		context_raw.show_envmap_blur_handle.b = context_raw.show_envmap_blur;
+		context_raw.show_envmap_blur          = ui_check(context_raw.show_envmap_blur_handle, " " + tr("Blur Envmap"));
 		if (context_raw.show_envmap_blur_handle.changed) {
 			context_raw.ddirty = 2;
 		}

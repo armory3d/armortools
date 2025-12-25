@@ -67,12 +67,12 @@ function import_arm_run_project(path: string) {
 
 	project_raw = project;
 
-	let l0: layer_data_t         = project.layer_datas[0];
-	base_res_handle.i            = config_get_texture_res_pos(l0.res);
-	let bits_pos: texture_bits_t = l0.bpp == 8 ? texture_bits_t.BITS8 : l0.bpp == 16 ? texture_bits_t.BITS16 : texture_bits_t.BITS32;
-	base_bits_handle.i           = bits_pos;
-	let bytes_per_pixel: i32     = math_floor(l0.bpp / 8);
-	let format: gpu_texture_format_t     = l0.bpp == 8 ? gpu_texture_format_t.RGBA32 : l0.bpp == 16 ? gpu_texture_format_t.RGBA64 : gpu_texture_format_t.RGBA128;
+	let l0: layer_data_t             = project.layer_datas[0];
+	base_res_handle.i                = config_get_texture_res_pos(l0.res);
+	let bits_pos: texture_bits_t     = l0.bpp == 8 ? texture_bits_t.BITS8 : l0.bpp == 16 ? texture_bits_t.BITS16 : texture_bits_t.BITS32;
+	base_bits_handle.i               = bits_pos;
+	let bytes_per_pixel: i32         = math_floor(l0.bpp / 8);
+	let format: gpu_texture_format_t = l0.bpp == 8 ? gpu_texture_format_t.RGBA32 : l0.bpp == 16 ? gpu_texture_format_t.RGBA64 : gpu_texture_format_t.RGBA128;
 
 	let base: string = path_base_dir(path);
 	if (project_raw.envmap != null) {
@@ -83,7 +83,6 @@ function import_arm_run_project(path: string) {
 		project_raw.envmap = string_replace_all(project_raw.envmap, "\\", "/");
 		/// end
 	}
-	scene_world.strength = project_raw.envmap_strength;
 
 	if (project_raw.camera_world != null) {
 		scene_camera.base.transform.local = mat4_from_f32_array(project_raw.camera_world);
@@ -341,6 +340,16 @@ function import_arm_run_project(path: string) {
 			l.fill_layer = ld.fill_layer > -1 ? project_materials[ld.fill_layer] : null;
 		}
 	}
+
+	sys_notify_on_next_frame(function() {
+		// Once envmap is imported
+		scene_world.strength         = project_raw.envmap_strength;
+		context_raw.envmap_angle     = project_raw.envmap_angle;
+		context_raw.show_envmap_blur = project_raw.envmap_blur;
+		if (context_raw.show_envmap_blur) {
+			scene_world._.envmap = scene_world._.radiance_mipmaps[0];
+		}
+	});
 
 	ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
 	ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;

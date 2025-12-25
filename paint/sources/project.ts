@@ -725,6 +725,8 @@ type project_format_t = {
 	packed_assets?: packed_asset_t[];
 	envmap?: string; // Asset name
 	envmap_strength?: f32;
+	envmap_angle?: f32;
+	envmap_blur?: bool;
 	camera_world?: f32_array_t;
 	camera_origin?: f32_array_t;
 	camera_fov?: f32;

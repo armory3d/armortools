@@ -116,6 +116,8 @@ function export_arm_run_project() {
 	project_raw.swatches        = project_raw.swatches;
 	project_raw.envmap = project_raw.envmap != null ? (same_drive ? path_to_relative(project_filepath, project_raw.envmap) : project_raw.envmap) : null;
 	project_raw.envmap_strength = scene_world.strength;
+	project_raw.envmap_angle    = context_raw.envmap_angle;
+	project_raw.envmap_blur     = context_raw.show_envmap_blur;
 	project_raw.camera_world    = mat4_to_f32_array(scene_camera.base.transform.local);
 	project_raw.camera_origin   = export_arm_vec3f32(camera_origins[0].v);
 	project_raw.camera_fov      = scene_camera.data.fov;
