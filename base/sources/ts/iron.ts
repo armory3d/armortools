@@ -136,8 +136,9 @@ declare function i64_to_string(i: i64): string;
 declare function u64_to_string(i: u64): string;
 declare function f32_to_string(f: f32): string;
 declare function f32_to_string_with_zeros(f: f32): string;
-declare function json_parse(s: string): any;
+declare function f32_from_string(s: string): f32;
 
+declare function json_parse(s: string): any;
 declare function json_parse_to_map(s: string): map_t<string, string>;
 declare function json_encode_begin(): void;
 declare function json_encode_string(k: string, v: string): void;
@@ -152,6 +153,29 @@ declare function json_encode_end_array(): void;
 declare function json_encode_begin_object(): void;
 declare function json_encode_end_object(): void;
 declare function json_encode_map(m: map_t<string, string>): void;
+
+enum json_type_t {
+	UNDEFINED = 0,
+	OBJECT    = 1,
+	ARRAY     = 2,
+	STRING    = 4,
+	NUMBER    = 8,
+	BOOL      = 16,
+	NULL      = 32,
+}
+
+declare type json_object_t = {
+	type?: json_type_t;
+	index?: i32;
+	data?: any;
+};
+
+declare function json_decode(s: string): json_object_t;
+declare function json_decode_object_value(s: string, o: json_object_t, name: string): json_object_t;
+declare function json_decode_array_value(s: string, o: json_object_t, index: u32): json_object_t;
+declare function json_decode_string_value(s: string, o: json_object_t): string;
+declare function json_decode_number_value(s: string, o: json_object_t): f32;
+declare function json_decode_bool_value(s: string, o: json_object_t): bool;
 
 declare function js_eval(js: string): f32;
 declare function js_call(f: any): string;
