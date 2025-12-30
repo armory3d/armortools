@@ -5,6 +5,10 @@ let path_sep: string = "\\";
 let path_sep: string = "/";
 /// end
 
+/// if arm_linux
+let path_is_protected_linux: bool = false;
+/// end
+
 let path_mesh_formats: string[]    = [ "obj", "blend" ];
 let path_texture_formats: string[] = [ "jpg", "jpeg", "png", "tga", "bmp", "psd", "gif", "hdr", "k" ];
 
@@ -165,6 +169,8 @@ function path_is_folder(p: string): bool {
 function path_is_protected(): bool {
 	/// if arm_windows
 	return string_index_of(iron_internal_files_location(), "Program Files") >= 0;
+	/// elseif arm_linux
+	return path_is_protected_linux;
 	/// elseif arm_android
 	return true;
 	/// elseif arm_ios

@@ -693,38 +693,6 @@ function base_init_undo_layers() {
 	}
 }
 
-function base_init_layout() {
-	let raw: config_t     = config_raw;
-	let show2d: bool      = (ui_nodes_show || ui_view2d_show) && raw.layout != null;
-	let new_layout: i32[] = [];
-
-	array_push(new_layout, math_floor(ui_sidebar_default_w * raw.window_scale)); // LayoutSidebarW
-	array_push(new_layout, math_floor(iron_window_height() / 2));                // LayoutSidebarH0
-	array_push(new_layout, math_floor(iron_window_height() / 2));                // LayoutSidebarH1
-
-	/// if arm_ios
-	array_push(new_layout, show2d ? math_floor((sys_w() + raw.layout[layout_size_t.NODES_W]) * 0.473) : math_floor(sys_w() * 0.473)); // LayoutNodesW
-	/// elseif arm_android
-	array_push(new_layout, show2d ? math_floor((sys_w() + raw.layout[layout_size_t.NODES_W]) * 0.473) : math_floor(sys_w() * 0.473));
-	/// else
-	array_push(new_layout,
-	           show2d ? math_floor((sys_w() + raw.layout[layout_size_t.NODES_W]) * 0.515) : math_floor(sys_w() * 0.515)); // Align with ui header controls
-	/// end
-
-	array_push(new_layout, math_floor(sys_h() / 2));                               // LayoutNodesH
-	array_push(new_layout, math_floor(ui_statusbar_default_h * raw.window_scale)); // LayoutStatusH
-
-	/// if (arm_android || arm_ios)
-	array_push(new_layout, 0); // LayoutHeader
-	/// else
-	array_push(new_layout, 1);
-	/// end
-
-	raw.layout_tabs = [ 0, 0, 0 ];
-
-	raw.layout = new_layout;
-}
-
 function ui_base_init_hwnds(): ui_handle_t[] {
 	let hwnds: ui_handle_t[] = [ ui_handle_create(), ui_handle_create(), ui_handle_create() ];
 	return hwnds;

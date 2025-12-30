@@ -146,6 +146,7 @@ declare function json_encode_i32(k: string, v: i32): void;
 declare function json_encode_i32_array(k: string, v: i32[]): void;
 declare function json_encode_f32(k: string, v: f32): void;
 declare function json_encode_bool(k: string, v: bool): void;
+declare function json_encode_null(k: string): void;
 declare function json_encode_end(): string;
 declare function json_encode_begin_array(k: string): void;
 declare function json_encode_end_array(): void;

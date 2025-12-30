@@ -12,7 +12,7 @@ function main() {
 	context_init();
 	sys_start(config_get_options());
 	if (config_raw.layout == null) {
-		base_init_layout();
+		config_init_layout();
 	}
 	iron_set_app_name(manifest_title);
 	scene_set_active("Scene");

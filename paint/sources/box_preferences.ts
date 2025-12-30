@@ -164,7 +164,7 @@ function box_preferences_interface_tab() {
 	if (ui_button(tr("Reset Layout")) && !ui_menu_show) {
 		ui_menu_draw(function() {
 			if (ui_menu_button(tr("Confirm"))) {
-				base_init_layout();
+				config_init_layout();
 				config_save();
 			}
 		});

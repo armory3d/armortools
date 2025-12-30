@@ -15,8 +15,15 @@ function config_load() {
 	let blob: buffer_t = data_get_blob(path);
 
 	/// if arm_linux
-	if (blob == null) { // Protected directory
-		blob = data_get_blob(iron_internal_save_path() + "config.json");
+	if (blob == null) { // Detect protected path
+		config_init();
+		config_save();
+		blob = data_get_blob(path);
+		if (blob == null) {
+			path_is_protected_linux = true;
+			config_load();
+			return;
+		}
 	}
 	/// end
 
@@ -78,8 +85,18 @@ function config_save() {
 	json_encode_bool("show_asset_names", config_raw.show_asset_names);
 	json_encode_bool("touch_ui", config_raw.touch_ui);
 	json_encode_bool("splash_screen", config_raw.splash_screen);
-	json_encode_i32_array("layout", config_raw.layout);
-	json_encode_i32_array("layout_tabs", config_raw.layout_tabs);
+	if (config_raw.layout != null) {
+		json_encode_i32_array("layout", config_raw.layout);
+	}
+	else {
+		json_encode_null("layout");
+	}
+	if (config_raw.layout_tabs != null) {
+		json_encode_i32_array("layout_tabs", config_raw.layout_tabs);
+	}
+	else {
+		json_encode_null("layout_tabs");
+	}
 	json_encode_i32("camera_controls", config_raw.camera_controls);
 	json_encode_string("server", config_raw.server);
 	json_encode_i32("viewport_mode", config_raw.viewport_mode);
@@ -107,12 +124,6 @@ function config_save() {
 
 	let buffer: buffer_t = sys_string_to_buffer(config_json);
 	iron_file_save_bytes(path, buffer, 0);
-
-	/// if arm_linux // Protected directory
-	if (!iron_file_exists(path)) {
-		iron_file_save_bytes(iron_internal_save_path() + "config.json", buffer, 0);
-	}
-	/// end
 }
 
 function config_init() {
@@ -229,6 +240,38 @@ function config_init() {
 	keymap_load();
 }
 
+function config_init_layout() {
+	let raw: config_t     = config_raw;
+	let show2d: bool      = (ui_nodes_show || ui_view2d_show) && raw.layout != null;
+	let new_layout: i32[] = [];
+
+	array_push(new_layout, math_floor(ui_sidebar_default_w * raw.window_scale)); // LayoutSidebarW
+	array_push(new_layout, math_floor(iron_window_height() / 2));                // LayoutSidebarH0
+	array_push(new_layout, math_floor(iron_window_height() / 2));                // LayoutSidebarH1
+
+	/// if arm_ios
+	array_push(new_layout, show2d ? math_floor((sys_w() + raw.layout[layout_size_t.NODES_W]) * 0.473) : math_floor(sys_w() * 0.473)); // LayoutNodesW
+	/// elseif arm_android
+	array_push(new_layout, show2d ? math_floor((sys_w() + raw.layout[layout_size_t.NODES_W]) * 0.473) : math_floor(sys_w() * 0.473));
+	/// else
+	array_push(new_layout,
+	           show2d ? math_floor((sys_w() + raw.layout[layout_size_t.NODES_W]) * 0.515) : math_floor(sys_w() * 0.515)); // Align with ui header controls
+	/// end
+
+	array_push(new_layout, math_floor(sys_h() / 2));                               // LayoutNodesH
+	array_push(new_layout, math_floor(ui_statusbar_default_h * raw.window_scale)); // LayoutStatusH
+
+	/// if (arm_android || arm_ios)
+	array_push(new_layout, 0); // LayoutHeader
+	/// else
+	array_push(new_layout, 1);
+	/// end
+
+	raw.layout_tabs = [ 0, 0, 0 ];
+
+	raw.layout = new_layout;
+}
+
 function config_get_sha(): string {
 	let blob: buffer_t = data_get_blob("version.json");
 	if (blob == null) {
@@ -248,8 +291,8 @@ function config_get_date(): string {
 }
 
 function config_get_options(): iron_window_options_t {
-	let window_mode: iron_window_mode_t  = config_raw.window_mode == 0 ? iron_window_mode_t.WINDOW : iron_window_mode_t.FULLSCREEN;
-	let features: window_features_t = window_features_t.NONE;
+	let window_mode: iron_window_mode_t = config_raw.window_mode == 0 ? iron_window_mode_t.WINDOW : iron_window_mode_t.FULLSCREEN;
+	let features: window_features_t     = window_features_t.NONE;
 	if (config_raw.window_resizable) {
 		features |= window_features_t.RESIZABLE;
 	}
@@ -280,7 +323,7 @@ function config_restore() {
 	let _layout: i32[] = config_raw.layout;
 	config_init();
 	config_raw.layout = _layout;
-	base_init_layout();
+	config_init_layout();
 	translator_load_translations(config_raw.locale);
 	config_apply();
 	config_load_theme(config_raw.theme);
@@ -294,7 +337,7 @@ function config_import_from(from: config_t) {
 	config_raw.version   = _version;
 	ui_children          = map_create(); // Reset ui handles
 	keymap_load();
-	base_init_layout();
+	config_init_layout();
 	translator_load_translations(config_raw.locale);
 	config_apply();
 	config_load_theme(config_raw.theme);
