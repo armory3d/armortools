@@ -264,19 +264,36 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 					blob_path = document_directory + blob_path;
 					/// end
 
-					let buffer: buffer_t      = iron_load_blob(blob_path);
-					let raw: project_format_t = armpack_decode(buffer);
+					let buffer: buffer_t = iron_load_blob(blob_path);
+					let raw: project_format_t;
+					if (import_arm_is_old(buffer)) {
+						raw = import_arm_from_old(buffer);
+					}
+					else if (import_arm_has_version(buffer)) {
+						raw = armpack_decode(buffer);
+					}
+
 					if (raw.material_icons != null) {
-						let bytes_icon: any = raw.material_icons[0];
-						icon                = gpu_create_texture_from_bytes(lz4_decode(bytes_icon, 256 * 256 * 4), 256, 256);
+						let bytes_icon: buffer_t = raw.material_icons[0];
+						/// if IRON_BGRA
+						let buf: buffer_t = export_arm_bgra64_swap(lz4_decode(bytes_icon, 256 * 256 * 8));
+						/// else
+						let buf: buffer_t = lz4_decode(bytes_icon, 256 * 256 * 8);
+						/// end
+						icon                     = gpu_create_texture_from_bytes(buf, 256, 256, gpu_texture_format_t.RGBA64);
 					}
 					else if (raw.mesh_icons != null) {
-						let bytes_icon: any = raw.mesh_icons[0];
-						icon                = gpu_create_texture_from_bytes(lz4_decode(bytes_icon, 256 * 256 * 4), 256, 256);
+						let bytes_icon: buffer_t = raw.mesh_icons[0];
+						icon                     = gpu_create_texture_from_bytes(lz4_decode(bytes_icon, 256 * 256 * 4), 256, 256);
 					}
 					else if (raw.brush_icons != null) {
-						let bytes_icon: any = raw.brush_icons[0];
-						icon                = gpu_create_texture_from_bytes(lz4_decode(bytes_icon, 256 * 256 * 4), 256, 256);
+						let bytes_icon: buffer_t = raw.brush_icons[0];
+						icon                     = gpu_create_texture_from_bytes(lz4_decode(bytes_icon, 256 * 256 * 4), 256, 256);
+					}
+
+					if (icon == null) {
+						let rt: render_target_t = map_get(render_path_render_targets, "empty_black");
+						icon                    = rt._image;
 					}
 
 					map_set(ui_files_icon_map, key, icon);

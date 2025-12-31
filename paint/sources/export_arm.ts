@@ -194,7 +194,7 @@ function export_arm_run_project() {
 
 function export_arm_export_node(n: ui_node_t, assets: asset_t[] = null) {
 	if (n.type == "TEX_IMAGE") {
-		let index: i32    = n.buttons[0].default_value[0];
+		let index: i32 = n.buttons[0].default_value[0];
 		if (index > 9000) { // 9999 - Texture deleted
 			n.buttons[0].data = u8_array_create_from_string("");
 		}
@@ -249,7 +249,7 @@ function export_arm_run_material(path: string) {
 	let micons: buffer_t[] = null;
 	if (!is_cloud) {
 		/// if IRON_BGRA
-		let buf: buffer_t = lz4_encode(export_arm_bgra_swap(gpu_get_texture_pixels(m.image)));
+		let buf: buffer_t = lz4_encode(export_arm_bgra64_swap(gpu_get_texture_pixels(m.image)));
 		/// else
 		let buf: buffer_t = lz4_encode(gpu_get_texture_pixels(m.image));
 		/// end
@@ -285,6 +285,18 @@ function export_arm_bgra_swap(buffer: buffer_t): buffer_t {
 		let r: i32        = buffer[i * 4];
 		buffer[i * 4]     = buffer[i * 4 + 2];
 		buffer[i * 4 + 2] = r;
+	}
+	return buffer;
+}
+
+function export_arm_bgra64_swap(buffer: buffer_t): buffer_t {
+	for (let i: i32 = 0; i < math_floor((buffer.length) / 8); ++i) {
+		let r_low: i32    = buffer[i * 8 + 4];
+		let r_high: i32   = buffer[i * 8 + 5];
+		buffer[i * 8 + 4] = buffer[i * 8 + 0];
+		buffer[i * 8 + 5] = buffer[i * 8 + 1];
+		buffer[i * 8]     = r_low;
+		buffer[i * 8 + 1] = r_high;
 	}
 	return buffer;
 }
