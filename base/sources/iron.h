@@ -1332,6 +1332,7 @@ i32 iron_sys_command(string_t *cmd) {
 #else
 	int result = system(cmd);
 #endif
+	setlocale(LC_NUMERIC, "C"); // Restore locale!
 	return result;
 }
 
