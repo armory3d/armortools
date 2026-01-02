@@ -271,7 +271,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		if (context_raw.material.paint_subs) {
 			node_shader_write_frag(kong, "var subs: float = " + subs + ";");
 		}
-		if (!make_material_opac_used && parse_float(opac) != 1.0) {
+		if (!make_material_opac_used && parse_float(opac) != 1.0 && context_raw.viewport_mode == viewport_mode_t.PATH_TRACE) {
 			make_material_opac_used = true;
 			return make_paint_run(data, matcon);
 		}
@@ -466,7 +466,7 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 				                                 ", mat_opacity);");
 			}
 			else {
-				if (make_material_opac_used && context_raw.viewport_mode == viewport_mode_t.PATH_TRACE) {
+				if (make_material_opac_used) {
 					node_shader_write_frag(kong, "output[0] = float4(" +
 					                                 make_material_blend_mode(kong, context_raw.brush_blending, "sample_undo.rgb", "basecol", "str") +
 					                                 ", mat_opacity);");
