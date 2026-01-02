@@ -1494,6 +1494,7 @@ void iron_gamepad_rumble(int gamepad, float left, float right) {}
 
 #ifdef WITH_NFD // Has gtk
 #include <gtk/gtk.h>
+#include <locale.h>
 extern void (*iron_save_and_quit)(bool);
 #endif
 
@@ -1512,6 +1513,7 @@ bool _save_and_quit_callback_internal() {
 		gtk_widget_realize(dialog);
 		gint res = gtk_dialog_run(GTK_DIALOG(dialog));
 		gtk_widget_destroy(dialog);
+		setlocale(LC_NUMERIC, "C"); // Restore locale!
 		while (g_main_context_pending(NULL)) {
 			g_main_context_iteration(NULL, FALSE);
 		}
