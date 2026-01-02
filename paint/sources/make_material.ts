@@ -2,6 +2,7 @@
 let make_material_default_scon: shader_context_t   = null;
 let make_material_default_mcon: material_context_t = null;
 
+let make_material_opac_used: bool   = false;
 let make_material_height_used: bool = false;
 let make_material_emis_used: bool   = false;
 let make_material_subs_used: bool   = false;

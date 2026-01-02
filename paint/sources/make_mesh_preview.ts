@@ -67,6 +67,14 @@ function make_mesh_preview_run(data: material_t, matcon: material_context_t): no
 	node_shader_add_function(kong, str_cotangent_frame);
 	node_shader_add_function(kong, str_octahedron_wrap);
 
+	if (make_material_opac_used) {
+		kong.frag_wvpposition = true;
+		node_shader_add_function(kong, str_dither_bayer);
+		node_shader_write_frag(kong, "var fragcoord1: float2 = float2(input.wvpposition.x / input.wvpposition.w, input.wvpposition.y / input.wvpposition.w) * 0.5 + 0.5;");
+		node_shader_write_frag(kong, "var dither: float = dither_bayer(fragcoord1 * float2(256.0, 256.0));");
+		node_shader_write_frag(kong, "if (opacity < dither) { discard; }");
+	}
+
 	if (make_material_height_used) {
 		node_shader_write_frag(kong, "if (height > 0.0) {");
 		node_shader_write_frag(kong, "var height_dx: float = ddx(height * 2.0);");

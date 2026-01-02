@@ -22,8 +22,8 @@ function make_paint_color_attachments(): string[] {
 	}
 
 	let format: gpu_texture_format_t = base_bits_handle.i == texture_bits_t.BITS8    ? gpu_texture_format_t.RGBA32
-	                           : base_bits_handle.i == texture_bits_t.BITS16 ? gpu_texture_format_t.RGBA64
-	                                                                         : gpu_texture_format_t.RGBA128;
+	                                   : base_bits_handle.i == texture_bits_t.BITS16 ? gpu_texture_format_t.RGBA64
+	                                                                                 : gpu_texture_format_t.RGBA128;
 
 	if (format == gpu_texture_format_t.RGBA64) {
 		let res: string[] = [ "RGBA64", "RGBA64", "RGBA64", "R8" ];
@@ -250,7 +250,13 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		node_shader_write_frag(kong, "var nortan: float3 = " + nortan + ";");
 		node_shader_write_frag(kong, "var height: float = " + height + ";");
 		node_shader_write_frag(kong, "var mat_opacity: float = " + opac + ";");
-		node_shader_write_frag(kong, "var opacity: float = mat_opacity;");
+		if (make_material_opac_used) {
+			node_shader_write_frag(kong, "var opacity: float = 1.0;");
+		}
+		else {
+			node_shader_write_frag(kong, "var opacity: float = mat_opacity;");
+		}
+
 		if (context_raw.tool == tool_type_t.GIZMO) {
 			node_shader_write_frag(kong, "opacity = 1.0;");
 		}
@@ -265,6 +271,10 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		if (context_raw.material.paint_subs) {
 			node_shader_write_frag(kong, "var subs: float = " + subs + ";");
 		}
+		// if (!make_material_opac_used && parse_float(opac) != 1.0) {
+		// 	make_material_opac_used = true;
+		// 	return make_paint_run(data, matcon);
+		// }
 		if (!make_material_height_used && parse_float(height) != 0.0) {
 			make_material_height_used = true;
 			// Height used for the first time, also rebuild vertex shader
@@ -456,9 +466,16 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 				                                 ", mat_opacity);");
 			}
 			else {
-				node_shader_write_frag(kong, "output[0] = float4(" +
-				                                 make_material_blend_mode(kong, context_raw.brush_blending, "sample_undo.rgb", "basecol", "str") +
-				                                 ", max(str, sample_undo.a));");
+				if (make_material_opac_used) {
+					node_shader_write_frag(kong, "output[0] = float4(" +
+					                                 make_material_blend_mode(kong, context_raw.brush_blending, "sample_undo.rgb", "basecol", "str") +
+					                                 ", mat_opacity);");
+				}
+				else {
+					node_shader_write_frag(kong, "output[0] = float4(" +
+					                                 make_material_blend_mode(kong, context_raw.brush_blending, "sample_undo.rgb", "basecol", "str") +
+					                                 ", max(str, sample_undo.a));");
+				}
 			}
 			node_shader_write_frag(kong, "output[1] = float4(lerp3(sample_nor_undo.rgb, nortan, str), matid);");
 			if (context_raw.material.paint_height && make_material_height_used) {

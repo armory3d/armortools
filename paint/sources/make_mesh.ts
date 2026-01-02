@@ -220,11 +220,15 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			node_shader_add_texture(kong, "texpaint" + l.id);
 			node_shader_write_frag(kong, "texpaint_sample = sample_lod(texpaint" + l.id + ", sampler_linear, " + tex_coord + ", 0.0);");
 			node_shader_write_frag(kong, "texpaint_opac = texpaint_sample.a;");
-			// ///if (arm_direct3d12 || arm_vulkan)
-			// if (raw.viewport_mode == viewport_mode_t.LIT) {
-			// 	write_frag(kong, "if (texpaint_opac < 0.1) { discard; }");
-			// }
-			// ///end
+
+			if (context_raw.viewport_mode == viewport_mode_t.LIT && make_material_opac_used) {
+				kong.frag_wvpposition = true;
+				node_shader_add_function(kong, str_dither_bayer);
+				node_shader_add_constant(kong, "gbuffer_size: float2", "_gbuffer_size");
+				node_shader_write_frag(kong, "var fragcoord1: float2 = float2(input.wvpposition.x / input.wvpposition.w, input.wvpposition.y / input.wvpposition.w) * 0.5 + 0.5;");
+				node_shader_write_frag(kong, "var dither: float = dither_bayer(fragcoord1 * constants.gbuffer_size);");
+				node_shader_write_frag(kong, "if (texpaint_opac < dither) { discard; }");
+			}
 
 			let masks: slot_layer_t[] = slot_layer_get_masks(l);
 			if (masks != null) {
@@ -676,5 +680,58 @@ fun env_brdf_approx(specular: float3, roughness: float, dotnv: float): float3 { 
 	var a004: float = min(r.x * r.x, exp((-9.28 * dotnv) * log(2.0))) * r.x + r.y; \
 	var ab: float2 = float2(-1.04, 1.04) * a004 + r.zw; \
 	return specular * ab.x + ab.y; \
+} \
+";
+
+let str_dither_bayer: string = "\
+fun dither_bayer(uv: float2): float { \
+	var x: int = int(uv.x % 4.0); \
+	var y: int = int(uv.y % 4.0); \
+	if (y == 0) { \
+		if (x == 0) { \
+			return 0.0 / 16.0; \
+		} \
+		if (x == 1) { \
+			return 8.0 / 16.0; \
+		} \
+		if (x == 2) { \
+			return 2.0 / 16.0; \
+		} \
+		return 10.0 / 16.0; \
+	} \
+	if (y == 1) { \
+		if (x == 0) { \
+			return 12.0 / 16.0; \
+		} \
+		if (x == 1) { \
+			return 4.0 / 16.0; \
+		} \
+		if (x == 2) { \
+			return 14.0 / 16.0; \
+		} \
+		return 6.0 / 16.0; \
+	} \
+	if (y == 2) { \
+		if (x == 0) { \
+			return 3.0 / 16.0; \
+		} \
+		if (x == 1) { \
+			return 11.0 / 16.0; \
+		} \
+		if (x == 2) { \
+			return 1.0 / 16.0; \
+		} \
+		return 9.0 / 16.0; \
+	} \
+	if (x == 0) { \
+		return 15.0 / 16.0; \
+	} \
+	if (x == 1) { \
+		return 7.0 / 16.0; \
+	} \
+	if (x == 2) { \
+		return 13.0 / 16.0; \
+	} \
+	return 5.0 / 16.0; \
 } \
 ";
