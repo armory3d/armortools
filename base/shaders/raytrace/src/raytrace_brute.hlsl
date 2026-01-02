@@ -1,4 +1,3 @@
-
 #ifdef _FULL
 #define _EMISSION
 #define _SUBSURFACE
@@ -49,7 +48,7 @@ SamplerState sampler_linear : register(s0);
 
 static const int SAMPLES = 64;
 #ifdef _TRANSLUCENCY
-static const int DEPTH = 6;
+static const int DEPTH = 16;
 #else
 static const int DEPTH = 3; // Opaque hits
 #endif
@@ -212,6 +211,13 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 
 	float3 texcolor = pow(texpaint0.rgb, float3(2.2, 2.2, 2.2));
 
+	#ifdef _TRANSLUCENCY
+	if (HitKind() == HIT_KIND_TRIANGLE_BACK_FACE) {
+		float3 absorption = pow(max(texcolor, 0.001), RayTCurrent() * texpaint0.a);
+		payload.color.rgb *= absorption;
+	}
+	#endif
+
 	float3 tangent = float3(0, 0, 0);
 	float3 binormal = float3(0, 0, 0);
 	create_basis(n, tangent, binormal);
@@ -224,12 +230,19 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	seed += 1;
 
 	#ifdef _TRANSLUCENCY
-	float3 _payload_color = payload.color.xyz;
-	float3 diffuse_dir = texpaint0.a < f ?
-		WorldRayDirection() : cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
-	#else
-	float3 diffuse_dir = cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+	if (f > texpaint0.a) {
+		float roughness = texpaint2.g;
+		float3 scatter_dir = cos_weighted_hemisphere_direction(WorldRayDirection(), payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+		payload.ray_dir = normalize(lerp(WorldRayDirection(), scatter_dir, roughness * roughness * 0.5));
+		payload.ray_origin = hit_world_position() + payload.ray_dir * 0.0001f;
+		return;
+	}
+
+	f = rand(DispatchRaysIndex().x, DispatchRaysIndex().y, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+	seed += 1;
 	#endif
+
+	float3 diffuse_dir = cos_weighted_hemisphere_direction(n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
 
 	#ifdef _FRESNEL
 	float specular_chance = fresnel(n, WorldRayDirection());
@@ -238,26 +251,7 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 	#endif
 
 	if (f < specular_chance) {
-		#ifdef _TRANSLUCENCY
-		float3 specular_dir = texpaint0.a < f * 2.0 ? WorldRayDirection() : reflect(WorldRayDirection(), n);
-		#else
 		float3 specular_dir = reflect(WorldRayDirection(), n);
-		#endif
-
-		// float roughness = texpaint2.g;
-		// float exponent = max(1.0 / (roughness * roughness) - 1.0, 0.01);
-		// seed += 2;
-		// float u1 = rand(DispatchRaysIndex().x, DispatchRaysIndex().y, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
-		// seed += 1;
-		// float u2 = rand(DispatchRaysIndex().x, DispatchRaysIndex().y, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
-		// seed += 1;
-		// float cos_theta = pow(u1, 1.0 / (exponent + 1.0));
-		// float sin_theta = sqrt(1.0 - cos_theta * cos_theta);
-		// float phi = u2 * 2.0 * 3.1415926535;
-		// float3 tangent_r, binormal_r;
-		// create_basis(specular_dir, tangent_r, binormal_r);
-		// float3 dir_local = float3(cos(phi) * sin_theta, sin(phi) * sin_theta, cos_theta);
-		// payload.ray_dir = mul(dir_local, float3x3(tangent_r, binormal_r, specular_dir));
 
 		payload.ray_dir = lerp(specular_dir, diffuse_dir, texpaint2.g * texpaint2.g);
 		float3 specular = surface_specular(texcolor, texpaint2.b);
@@ -274,16 +268,11 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 		payload.color.xyz /= 1.0 - specular_chance;
 		#endif
 	}
+
 	#ifdef _FRESNEL
 	payload.color.xyz *= 0.5;
 	#endif
 
-	#ifdef _TRANSLUCENCY
-	payload.color.xyz = lerp(_payload_color, payload.color.xyz, texpaint0.a);
-	#endif
-
-	// float dotnv = abs(dot(n, -WorldRayDirection()));
-	// payload.ray_origin = hit_world_position() + n * lerp(0.1f, 0.0001f, dotnv);
 	payload.ray_origin = hit_world_position() + payload.ray_dir * 0.0001f;
 
 	#ifdef _EMISSION
@@ -295,10 +284,8 @@ void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttribut
 
 	#ifdef _SUBSURFACE
 	if (int(texpaint1.a * 255.0f) % 3 == 2) {
-		// Thickness
 		float d = min(1.0 / min(RayTCurrent() * 2.0, 1.0) / 10.0, 0.5);
 		payload.color.xyz += payload.color.xyz * d;
-		// Fake scatter
 		if (f < 0.5) {
 			payload.ray_origin += WorldRayDirection() * f * 0.001;
 		}

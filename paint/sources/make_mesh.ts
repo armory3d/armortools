@@ -221,14 +221,14 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			node_shader_write_frag(kong, "texpaint_sample = sample_lod(texpaint" + l.id + ", sampler_linear, " + tex_coord + ", 0.0);");
 			node_shader_write_frag(kong, "texpaint_opac = texpaint_sample.a;");
 
-			if (context_raw.viewport_mode == viewport_mode_t.LIT && make_material_opac_used) {
-				kong.frag_wvpposition = true;
-				node_shader_add_function(kong, str_dither_bayer);
-				node_shader_add_constant(kong, "gbuffer_size: float2", "_gbuffer_size");
-				node_shader_write_frag(kong, "var fragcoord1: float2 = float2(input.wvpposition.x / input.wvpposition.w, input.wvpposition.y / input.wvpposition.w) * 0.5 + 0.5;");
-				node_shader_write_frag(kong, "var dither: float = dither_bayer(fragcoord1 * constants.gbuffer_size);");
-				node_shader_write_frag(kong, "if (texpaint_opac < dither) { discard; }");
-			}
+			// if (context_raw.viewport_mode == viewport_mode_t.LIT && make_material_opac_used) {
+			// 	kong.frag_wvpposition = true;
+			// 	node_shader_add_function(kong, str_dither_bayer);
+			// 	node_shader_add_constant(kong, "gbuffer_size: float2", "_gbuffer_size");
+			// 	node_shader_write_frag(kong, "var fragcoord1: float2 = float2(input.wvpposition.x / input.wvpposition.w, input.wvpposition.y / input.wvpposition.w) * 0.5 + 0.5;");
+			// 	node_shader_write_frag(kong, "var dither: float = dither_bayer(fragcoord1 * constants.gbuffer_size);");
+			// 	node_shader_write_frag(kong, "if (texpaint_opac < dither) { discard; }");
+			// }
 
 			let masks: slot_layer_t[] = slot_layer_get_masks(l);
 			if (masks != null) {
