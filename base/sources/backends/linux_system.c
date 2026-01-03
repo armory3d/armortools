@@ -1494,8 +1494,15 @@ void iron_gamepad_rumble(int gamepad, float left, float right) {}
 
 #ifdef WITH_NFD // Has gtk
 #include <gtk/gtk.h>
-#include <locale.h>
 extern void (*iron_save_and_quit)(bool);
+static bool iron_gtk_setlocale_disabled = false;
+void iron_gtk_disable_setlocale() {
+	if (iron_gtk_setlocale_disabled) {
+		return;
+	}
+	gtk_disable_setlocale();
+	iron_gtk_setlocale_disabled = true;
+}
 #endif
 
 bool _save_and_quit_callback_internal() {
@@ -1507,13 +1514,13 @@ bool _save_and_quit_callback_internal() {
 	bool  dirty = strstr(title, "* - ArmorPaint") != NULL;
 	// XFree(title);
 	if (dirty) {
+		iron_gtk_disable_setlocale();
 		gtk_init(NULL, NULL);
 		GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO, "Project has been modified, save changes?");
 		gtk_window_set_title(GTK_WINDOW(dialog), "Save Changes?");
 		gtk_widget_realize(dialog);
 		gint res = gtk_dialog_run(GTK_DIALOG(dialog));
 		gtk_widget_destroy(dialog);
-		setlocale(LC_NUMERIC, "C"); // Restore locale!
 		while (g_main_context_pending(NULL)) {
 			g_main_context_iteration(NULL, FALSE);
 		}

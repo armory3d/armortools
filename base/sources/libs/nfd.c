@@ -157,6 +157,8 @@ int NFDi_IsFilterSegmentChar( char ch )
 
 const char INIT_FAIL_MSG[] = "gtk_init_check failed to initilaize GTK+";
 
+void iron_gtk_disable_setlocale();
+
 static void AddTypeToFilterName( const char *typebuf, char *filterName, size_t bufsize )
 {
 	const char SEP[] = ", ";
@@ -314,6 +316,7 @@ nfdresult_t NFD_OpenDialog( const nfdchar_t *filterList,
 	GtkWidget *dialog;
 	nfdresult_t result;
 
+	iron_gtk_disable_setlocale();
 	if ( !gtk_init_check( NULL, NULL ) )
 	{
 		NFDi_SetError(INIT_FAIL_MSG);
@@ -371,6 +374,7 @@ nfdresult_t NFD_OpenDialogMultiple( const nfdchar_t *filterList,
 	GtkWidget *dialog;
 	nfdresult_t result;
 
+	iron_gtk_disable_setlocale();
 	if ( !gtk_init_check( NULL, NULL ) )
 	{
 		NFDi_SetError(INIT_FAIL_MSG);
@@ -418,6 +422,7 @@ nfdresult_t NFD_SaveDialog( const nfdchar_t *filterList,
 	GtkWidget *dialog;
 	nfdresult_t result;
 
+	iron_gtk_disable_setlocale();
 	if ( !gtk_init_check( NULL, NULL ) )
 	{
 		NFDi_SetError(INIT_FAIL_MSG);
@@ -473,6 +478,7 @@ nfdresult_t NFD_PickFolder(const nfdchar_t *defaultPath,
 	GtkWidget *dialog;
 	nfdresult_t result;
 
+	iron_gtk_disable_setlocale();
 	if (!gtk_init_check(NULL, NULL))
 	{
 		NFDi_SetError(INIT_FAIL_MSG);
