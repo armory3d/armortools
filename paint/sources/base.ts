@@ -483,7 +483,7 @@ function base_handle_drop_paths() {
 function base_get_drag_background(): rect_t {
 	let icons: gpu_texture_t = resource_get("icons.k");
 	if (base_drag_layer != null && !slot_layer_is_group(base_drag_layer) && base_drag_layer.fill_layer == null) {
-		return resource_tile50(icons, 4, 1);
+		return resource_tile50(icons, icon_t.CHECKER);
 	}
 	return null;
 }
@@ -505,7 +505,7 @@ function base_get_drag_image(): gpu_texture_t {
 			return base_drag_file_icon;
 		}
 		let icons: gpu_texture_t = resource_get("icons.k");
-		base_drag_rect           = string_index_of(base_drag_file, ".") > 0 ? resource_tile50(icons, 3, 1) : resource_tile50(icons, 2, 1);
+		base_drag_rect           = string_index_of(base_drag_file, ".") > 0 ? resource_tile50(icons, icon_t.FILE) : resource_tile50(icons, icon_t.FOLDER_FULL);
 		base_drag_tint           = ui.ops.theme.HIGHLIGHT_COL;
 		return icons;
 	}
@@ -515,8 +515,8 @@ function base_get_drag_image(): gpu_texture_t {
 	}
 	if (base_drag_layer != null && slot_layer_is_group(base_drag_layer)) {
 		let icons: gpu_texture_t  = resource_get("icons.k");
-		let folder_closed: rect_t = resource_tile50(icons, 2, 1);
-		let folder_open: rect_t   = resource_tile50(icons, 8, 1);
+		let folder_closed: rect_t = resource_tile50(icons, icon_t.FOLDER_FULL);
+		let folder_open: rect_t   = resource_tile50(icons, icon_t.FOLDER_OPEN);
 		base_drag_rect            = base_drag_layer.show_panel ? folder_open : folder_closed;
 		base_drag_tint            = ui.ops.theme.LABEL_COL - 0x00202020;
 		return icons;
@@ -1716,7 +1716,7 @@ function ui_base_render_cursor() {
 	}
 	if (context_raw.tool == tool_type_t.PICKER && context_raw.color_picker_callback != null) {
 		let img: gpu_texture_t = resource_get("icons.k");
-		let rect: rect_t       = resource_tile50(img, tool_type_t.PICKER, 0);
+		let rect: rect_t       = resource_tile50(img, tool_type_t.PICKER);
 		draw_sub_image(img, mx + 10, my + 10, rect.x, rect.y, rect.w, rect.h);
 	}
 

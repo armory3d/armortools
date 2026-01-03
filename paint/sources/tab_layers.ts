@@ -342,7 +342,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	let row: f32[] = [ 0.08 ];
 	ui_row(row);
 	let icons: gpu_texture_t = resource_get("icons.k");
-	let r: rect_t            = resource_tile18(icons, l.visible ? 0 : 1, 0);
+	let r: rect_t            = resource_tile18(icons, l.visible ? icon18_t.EYE_ON : icon18_t.EYE_OFF);
 	ui._x                    = uix + 4;
 	ui._y                    = uiy + 3 + center;
 	let col: i32             = ui.ops.theme.ACCENT_COL;
@@ -609,7 +609,7 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 		let icon: gpu_texture_t = l.fill_layer == null ? texpaint_preview : l.fill_layer.image_icon;
 		if (l.fill_layer == null) {
 			// Checker
-			let r: rect_t = resource_tile50(icons, 4, 1);
+			let r: rect_t = resource_tile50(icons, icon_t.CHECKER);
 			let _x: f32   = ui._x;
 			let _y: f32   = ui._y;
 			let _w: f32   = ui._w;
@@ -646,8 +646,8 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 		return state;
 	}
 	else { // Group
-		let folder_closed: rect_t = resource_tile50(icons, 2, 1);
-		let folder_open: rect_t   = resource_tile50(icons, 8, 1);
+		let folder_closed: rect_t = resource_tile50(icons, icon_t.FOLDER_FULL);
+		let folder_open: rect_t   = resource_tile50(icons, icon_t.FOLDER_OPEN);
 		let folder: rect_t        = l.show_panel ? folder_open : folder_closed;
 		return ui_sub_image(icons, ui.ops.theme.LABEL_COL - 0x00202020, icon_h, folder.x, folder.y, folder.w, folder.h);
 	}

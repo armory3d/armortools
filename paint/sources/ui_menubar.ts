@@ -60,9 +60,9 @@ function ui_menubar_render_ui() {
 		if (config_raw.touch_ui) {
 			ui._w = item_w;
 
-			if (ui_menubar_icon_button(0, 2))
+			if (ui_menubar_icon_button(icon_t.MENU))
 				box_preferences_show();
-			if (ui_menubar_icon_button(0, 3)) {
+			if (ui_menubar_icon_button(icon_t.PROJECTS)) {
 				// Save project icon in lit mode
 				context_set_viewport_mode(viewport_mode_t.LIT);
 				console_toast(tr("Saving project"));
@@ -73,43 +73,43 @@ function ui_menubar_render_ui() {
 					});
 				});
 			}
-			if (ui_menubar_icon_button(4, 2)) {
+			if (ui_menubar_icon_button(icon_t.IMPORT)) {
 				project_import_asset();
 			}
-			if (ui_menubar_icon_button(5, 2)) {
+			if (ui_menubar_icon_button(icon_t.EXPORT)) {
 				box_export_show_textures();
 			}
 			let size: i32 = math_floor(ui._w / UI_SCALE());
 			if (ui_menu_show && ui_menubar_category == menubar_category_t.VIEWPORT) {
 				ui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
 			}
-			if (ui_menubar_icon_button(8, 2)) {
+			if (ui_menubar_icon_button(icon_t.VIEWPORT)) {
 				ui_menubar_show_menu(menubar_category_t.VIEWPORT);
 			}
 			if (ui_menu_show && ui_menubar_category == menubar_category_t.MODE) {
 				ui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
 			}
-			if (ui_menubar_icon_button(9, 2)) {
+			if (ui_menubar_icon_button(icon_t.MODE)) {
 				ui_menubar_show_menu(menubar_category_t.MODE);
 			}
 			if (ui_menu_show && ui_menubar_category == menubar_category_t.CAMERA) {
 				ui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
 			}
-			if (ui_menubar_icon_button(10, 2)) {
+			if (ui_menubar_icon_button(icon_t.CAMERA)) {
 				ui_menubar_show_menu(menubar_category_t.CAMERA);
 			}
 			if (ui_menu_show && ui_menubar_category == menubar_category_t.HELP) {
 				ui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
 			}
-			if (ui_menubar_icon_button(11, 2)) {
+			if (ui_menubar_icon_button(icon_t.HELP)) {
 				ui_menubar_show_menu(menubar_category_t.HELP);
 			}
 			ui.enabled = history_undos > 0;
-			if (ui_menubar_icon_button(6, 2)) {
+			if (ui_menubar_icon_button(icon_t.UNDO)) {
 				history_undo();
 			}
 			ui.enabled = history_redos > 0;
-			if (ui_menubar_icon_button(7, 2)) {
+			if (ui_menubar_icon_button(icon_t.REDO)) {
 				history_redo();
 			}
 			ui.enabled = true;
@@ -672,11 +672,11 @@ function ui_menubar_show_menu(category: i32) {
 	}
 }
 
-function ui_menubar_icon_button(i: i32, j: i32): bool {
+function ui_menubar_icon_button(i: i32): bool {
 	let col: u32           = ui.ops.theme.WINDOW_BG_COL;
 	let light: bool        = col > 0xff666666;
 	let icon_accent: i32   = light ? 0xff666666 : 0xffaaaaaa;
 	let img: gpu_texture_t = resource_get("icons.k");
-	let rect: rect_t       = resource_tile50(img, i, j);
+	let rect: rect_t       = resource_tile50(img, i);
 	return ui_sub_image(img, icon_accent, -1.0, rect.x, rect.y, rect.w, rect.h) == ui_state_t.RELEASED;
 }

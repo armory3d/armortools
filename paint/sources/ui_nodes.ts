@@ -1254,7 +1254,7 @@ function ui_nodes_draw_menubar() {
 		let _w: i32 = ui._w;
 		ui._w       = math_floor(36 * UI_SCALE());
 		ui._y       = 4 * UI_SCALE() + start_y;
-		if (ui_menubar_icon_button(2, 3)) {
+		if (ui_menubar_icon_button(icon_t.SEARCH)) {
 			ui_nodes_node_search(math_floor(ui._window_x + ui._x), math_floor(ui._window_y + ui._y));
 		}
 		ui._w = _w;

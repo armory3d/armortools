@@ -79,8 +79,8 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
                                context_menu: (s: string) => void = null): string {
 
 	let icons: gpu_texture_t = resource_get("icons.k");
-	let folder: rect_t       = resource_tile50(icons, 2, 1);
-	let file: rect_t         = resource_tile50(icons, 3, 1);
+	let folder: rect_t       = resource_tile50(icons, icon_t.FOLDER_FULL);
+	let file: rect_t         = resource_tile50(icons, icon_t.FILE);
 	let is_cloud: bool       = starts_with(handle.text, "cloud");
 
 	if (is_cloud && file_cloud == null) {

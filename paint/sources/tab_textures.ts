@@ -206,7 +206,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 		}
 		else {
 			let img: gpu_texture_t = resource_get("icons.k");
-			let r: rect_t          = resource_tile50(img, 0, 1);
+			let r: rect_t          = resource_tile50(img, icon_t.DROP);
 			ui_sub_image(img, ui.ops.theme.BUTTON_COL, r.h, r.x, r.y, r.w, r.h);
 			if (ui.is_hovered) {
 				ui_tooltip(tr("Drag and drop files here"));

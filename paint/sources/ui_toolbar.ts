@@ -46,7 +46,8 @@ function ui_toolbar_draw_tool(tool: i32, img: gpu_texture_t, icon_accent: i32) {
 	}
 	let tile_y: i32  = math_floor(tool / 12);
 	let tile_x: i32  = tile_y % 2 == 0 ? tool % 12 : (11 - (tool % 12));
-	let rect: rect_t = resource_tile50(img, tile_x, tile_y);
+	let tile_i: i32  = tile_y * 12 + tile_x;
+	let rect: rect_t = resource_tile50(img, tile_i);
 	let _y: i32      = ui._y;
 
 	let visible: bool = true;
@@ -146,7 +147,7 @@ function ui_toolbar_render_ui() {
 
 		// Properties icon
 		if (!context_is_floating_toolbar()) {
-			let rect: rect_t = resource_tile50(img, 7, 1);
+			let rect: rect_t = resource_tile50(img, icon_t.PROPERTIES);
 			if (ui_sub_image(img, light ? 0xff666666 : ui.ops.theme.BUTTON_COL, -1.0, rect.x, rect.y, rect.w, rect.h) == ui_state_t.RELEASED) {
 				config_raw.layout[layout_size_t.HEADER] = 0;
 			}
