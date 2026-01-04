@@ -16,17 +16,17 @@ function tab_scripts_draw(htab: ui_handle_t) {
 		if (ui_button(tr("Edit"))) {
 
 			ui_menu_draw(function() {
-				if (ui_menu_button(tr("Clear"))) {
+				if (ui_menu_button(tr("Clear"), "", icon_t.ERASE)) {
 					tab_scripts_hscript.text = "";
 				}
-				if (ui_menu_button(tr("Import"))) {
+				if (ui_menu_button(tr("Import"), "", icon_t.IMPORT)) {
 					ui_files_show("js", false, false, function(path: string) {
 						let b: buffer_t          = data_get_blob(path);
 						tab_scripts_hscript.text = sys_buffer_to_string(b);
 						data_delete_blob(path);
 					});
 				}
-				if (ui_menu_button(tr("Export"))) {
+				if (ui_menu_button(tr("Export"), "", icon_t.EXPORT)) {
 					ui_files_show("js", true, false, function(path: string) {
 						let str: string = tab_scripts_hscript.text;
 						let f: string   = ui_files_filename;

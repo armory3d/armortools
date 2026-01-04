@@ -84,14 +84,14 @@ function tab_layers_button_new(text: string) {
 	if (ui_button(text)) {
 		ui_menu_draw(function() {
 			let l: slot_layer_t = context_raw.layer;
-			if (ui_menu_button(tr("Paint Layer"))) {
+			if (ui_menu_button(tr("Paint Layer"), "", icon_t.PAINT)) {
 				layers_new_layer();
 				history_new_layer();
 			}
-			if (ui_menu_button(tr("Fill Layer"))) {
+			if (ui_menu_button(tr("Fill Layer"), "", icon_t.SPHERE)) {
 				layers_create_fill_layer(uv_type_t.UVMAP);
 			}
-			if (ui_menu_button(tr("Decal Layer"))) {
+			if (ui_menu_button(tr("Decal Layer"), "", icon_t.DECAL)) {
 				layers_create_fill_layer(uv_type_t.PROJECT);
 			}
 			if (config_raw.experimental) {
@@ -101,7 +101,7 @@ function tab_layers_button_new(text: string) {
 					});
 				}
 			}
-			if (ui_menu_button(tr("Black Mask"))) {
+			if (ui_menu_button(tr("Black Mask"), "", icon_t.MASK)) {
 				if (slot_layer_is_mask(l)) {
 					context_set_layer(l.parent);
 				}
@@ -117,7 +117,7 @@ function tab_layers_button_new(text: string) {
 					layers_update_fill_layers();
 				});
 			}
-			if (ui_menu_button(tr("White Mask"))) {
+			if (ui_menu_button(tr("White Mask"), "", icon_t.MASK_WHITE)) {
 				if (slot_layer_is_mask(l)) {
 					context_set_layer(l.parent);
 				}
@@ -133,7 +133,7 @@ function tab_layers_button_new(text: string) {
 					layers_update_fill_layers();
 				});
 			}
-			if (ui_menu_button(tr("Fill Mask"))) {
+			if (ui_menu_button(tr("Fill Mask"), "", icon_t.MASK_FILL)) {
 				if (slot_layer_is_mask(l)) {
 					context_set_layer(l.parent);
 				}
@@ -150,7 +150,7 @@ function tab_layers_button_new(text: string) {
 				});
 			}
 			ui.enabled = !slot_layer_is_group(context_raw.layer) && !slot_layer_is_in_group(context_raw.layer);
-			if (ui_menu_button(tr("Group"))) {
+			if (ui_menu_button(tr("Group"), "", icon_t.FOLDER)) {
 				if (slot_layer_is_group(l) || slot_layer_is_in_group(l)) {
 					return;
 				}
@@ -727,14 +727,14 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			let to_fill_string: string  = slot_layer_is_layer(l) ? tr("To Fill Layer") : tr("To Fill Mask");
 			let to_paint_string: string = slot_layer_is_layer(l) ? tr("To Paint Layer") : tr("To Paint Mask");
 
-			if (l.fill_layer == null && ui_menu_button(to_fill_string)) {
+			if (l.fill_layer == null && ui_menu_button(to_fill_string, "", icon_t.SPHERE)) {
 				sys_notify_on_next_frame(function() {
 					let l: slot_layer_t = tab_layers_l;
 					slot_layer_is_layer(l) ? history_to_fill_layer() : history_to_fill_mask();
 					slot_layer_to_fill_layer(l);
 				});
 			}
-			if (l.fill_layer != null && ui_menu_button(to_paint_string)) {
+			if (l.fill_layer != null && ui_menu_button(to_paint_string, "", icon_t.PAINT)) {
 				sys_notify_on_next_frame(function() {
 					let l: slot_layer_t = tab_layers_l;
 					slot_layer_is_layer(l) ? history_to_paint_layer() : history_to_paint_mask();
@@ -751,7 +751,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 		}
 		ui.enabled = true;
 
-		if (l.fill_layer == null && ui_menu_button(tr("Clear"))) {
+		if (l.fill_layer == null && ui_menu_button(tr("Clear"), "", icon_t.ERASE)) {
 			context_set_layer(l);
 			sys_notify_on_next_frame(function() {
 				let l: slot_layer_t = tab_layers_l;
@@ -771,7 +771,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 				}
 			});
 		}
-		if (slot_layer_is_mask(l) && l.fill_layer == null && ui_menu_button(tr("Invert"))) {
+		if (slot_layer_is_mask(l) && l.fill_layer == null && ui_menu_button(tr("Invert"), "", icon_t.INVERT)) {
 			sys_notify_on_next_frame(function() {
 				let l: slot_layer_t = tab_layers_l;
 				context_set_layer(l);
@@ -779,7 +779,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 				slot_layer_invert_mask(l);
 			});
 		}
-		if (slot_layer_is_mask(l) && ui_menu_button(tr("Apply"))) {
+		if (slot_layer_is_mask(l) && ui_menu_button(tr("Apply"), "", icon_t.CHECK)) {
 			sys_notify_on_next_frame(function() {
 				let l: slot_layer_t = tab_layers_l;
 				context_raw.layer   = l;
@@ -797,7 +797,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			});
 		}
 		ui.enabled = tab_layers_can_merge_down(l);
-		if (ui_menu_button(tr("Merge Down"))) {
+		if (ui_menu_button(tr("Merge Down"), "", icon_t.ARROW_DOWN)) {
 			sys_notify_on_next_frame(function() {
 				let l: slot_layer_t = tab_layers_l;
 				context_set_layer(l);
@@ -808,7 +808,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			});
 		}
 		ui.enabled = true;
-		if (ui_menu_button(tr("Duplicate"))) {
+		if (ui_menu_button(tr("Duplicate"), "", icon_t.DUPLICATE)) {
 			sys_notify_on_next_frame(function() {
 				let l: slot_layer_t = tab_layers_l;
 				context_set_layer(l);

@@ -99,7 +99,7 @@ function tab_fonts_draw(htab: ui_handle_t) {
 						context_select_font(_tab_fonts_draw_i);
 						ui_menu_draw(function() {
 							let i: i32 = _tab_fonts_draw_i;
-							if (project_fonts.length > 1 && ui_menu_button(tr("Delete"), "delete") && project_fonts[i].file != "") {
+							if (project_fonts.length > 1 && ui_menu_button(tr("Delete"), "delete", icon_t.DELETE) && project_fonts[i].file != "") {
 								tab_fonts_delete_font(project_fonts[i]);
 							}
 						});

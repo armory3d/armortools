@@ -128,7 +128,7 @@ function box_preferences_interface_tab() {
 	ui_row2();
 	if (ui_button(tr("Restore")) && !ui_menu_show) {
 		ui_menu_draw(function() {
-			if (ui_menu_button(tr("Confirm"))) {
+			if (ui_menu_button(tr("Confirm"), "", icon_t.CHECK)) {
 				sys_notify_on_next_frame(function() {
 					ui.ops.theme.ELEMENT_H = base_default_element_h;
 					config_restore();
@@ -146,7 +146,7 @@ function box_preferences_interface_tab() {
 					ui_base_set_viewport_col(ui.ops.theme.VIEWPORT_COL);
 				});
 			}
-			if (ui_menu_button(tr("Import..."))) {
+			if (ui_menu_button(tr("Import..."), "", icon_t.IMPORT)) {
 				ui_files_show("json", false, false, function(path: string) {
 					let b: buffer_t   = data_get_blob(path);
 					let raw: config_t = json_parse(sys_buffer_to_string(b));
@@ -163,7 +163,7 @@ function box_preferences_interface_tab() {
 	}
 	if (ui_button(tr("Reset Layout")) && !ui_menu_show) {
 		ui_menu_draw(function() {
-			if (ui_menu_button(tr("Confirm"))) {
+			if (ui_menu_button(tr("Confirm"), "", icon_t.CHECK)) {
 				config_init_layout();
 				config_save();
 			}
@@ -891,7 +891,7 @@ plugin_notify_on_ui(plugin, function() {\
 					data_delete_blob("plugins/" + _box_preferences_f);
 					console_info(tr("Script opened"));
 				}
-				if (ui_menu_button(tr("Export"))) {
+				if (ui_menu_button(tr("Export"), "", icon_t.EXPORT)) {
 					ui_files_show("js", true, false, function(dest: string) {
 						if (!ends_with(ui_files_filename, ".js")) {
 							ui_files_filename += ".js";
@@ -900,7 +900,7 @@ plugin_notify_on_ui(plugin, function() {\
 						file_copy(path, dest + path_sep + ui_files_filename);
 					});
 				}
-				if (ui_menu_button(tr("Delete"))) {
+				if (ui_menu_button(tr("Delete"), "", icon_t.DELETE)) {
 					if (array_index_of(config_raw.plugins, _box_preferences_f) >= 0) {
 						array_remove(config_raw.plugins, _box_preferences_f);
 						plugin_stop(_box_preferences_f);

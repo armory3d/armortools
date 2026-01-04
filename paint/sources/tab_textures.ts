@@ -121,7 +121,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 						_tab_textures_draw_is_packed = is_packed;
 
 						ui_menu_draw(function() {
-							if (ui_menu_button(tr("Export"))) {
+							if (ui_menu_button(tr("Export"), "", icon_t.EXPORT)) {
 								ui_files_show("png", true, false, function(path: string) {
 									_tab_textures_draw_path = path;
 
@@ -150,23 +150,23 @@ function tab_textures_draw(htab: ui_handle_t) {
 									});
 								});
 							}
-							if (ui_menu_button(tr("Reimport"))) {
+							if (ui_menu_button(tr("Reimport"), "", icon_t.SYNC)) {
 								project_reimport_texture(_tab_textures_draw_asset);
 							}
 
-							if (ui_menu_button(tr("To Mask"))) {
+							if (ui_menu_button(tr("To Mask"), "", icon_t.MASK)) {
 								sys_notify_on_next_frame(function() {
 									layers_create_image_mask(_tab_textures_draw_asset);
 								});
 							}
 
-							if (ui_menu_button(tr("Set as Envmap"))) {
+							if (ui_menu_button(tr("Set as Envmap"), "", icon_t.LANDSCAPE)) {
 								sys_notify_on_next_frame(function() {
 									import_envmap_run(_tab_textures_draw_asset.file, _tab_textures_draw_img);
 								});
 							}
 
-							if (ui_menu_button(tr("Set as Color ID Map"))) {
+							if (ui_menu_button(tr("Set as Color ID Map"), "", icon_t.COLOR_ID)) {
 								context_raw.colorid_handle.i = _tab_textures_draw_i;
 								context_raw.colorid_picked   = false;
 								ui_toolbar_handle.redraws    = 1;
@@ -176,10 +176,10 @@ function tab_textures_draw(htab: ui_handle_t) {
 								}
 							}
 
-							if (ui_menu_button(tr("Delete"), "delete")) {
+							if (ui_menu_button(tr("Delete"), "delete", icon_t.DELETE)) {
 								tab_textures_delete_texture(_tab_textures_draw_asset);
 							}
-							if (!_tab_textures_draw_is_packed && ui_menu_button(tr("Open Containing Directory..."))) {
+							if (!_tab_textures_draw_is_packed && ui_menu_button(tr("Open Containing Directory..."), "", icon_t.FOLDER_OPEN)) {
 								file_start(substring(_tab_textures_draw_asset.file, 0, string_last_index_of(_tab_textures_draw_asset.file, path_sep)));
 							}
 							if (!_tab_textures_draw_is_packed && ui_menu_button(tr("Open in Browser"))) {

@@ -94,12 +94,12 @@ function tab_brushes_draw(htab: ui_handle_t) {
 
 						// let b: slot_brush_t = brushes[i];
 
-						if (ui_menu_button(tr("Export"))) {
+						if (ui_menu_button(tr("Export"), "", icon_t.EXPORT)) {
 							context_select_brush(i);
 							box_export_show_brush();
 						}
 
-						if (ui_menu_button(tr("Duplicate"))) {
+						if (ui_menu_button(tr("Duplicate"), "", icon_t.DUPLICATE)) {
 							sys_notify_on_next_frame(function() {
 								let i: i32 = _tab_brushes_draw_i;
 
@@ -112,7 +112,7 @@ function tab_brushes_draw(htab: ui_handle_t) {
 							});
 						}
 
-						if (project_brushes.length > 1 && ui_menu_button(tr("Delete"), "delete")) {
+						if (project_brushes.length > 1 && ui_menu_button(tr("Delete"), "delete", icon_t.DELETE)) {
 							tab_brushes_delete_brush(project_brushes[i]);
 						}
 					});

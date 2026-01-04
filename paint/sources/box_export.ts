@@ -240,7 +240,7 @@ function box_export_tab_presets() {
 			if (ui.is_hovered && ui.input_released_r) {
 				_box_export_t = t;
 				ui_menu_draw(function() {
-					if (ui_menu_button(tr("Delete"))) {
+					if (ui_menu_button(tr("Delete"), "", icon_t.DELETE)) {
 						array_remove(box_export_preset.textures, _box_export_t);
 						box_export_save_preset();
 					}

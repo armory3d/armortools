@@ -184,25 +184,25 @@ function tab_swatches_draw(htab: ui_handle_t) {
 					ui_menu_draw(function() {
 						let i: i32 = _tab_swatches_draw_i;
 
-						if (ui_menu_button(tr("Duplicate"))) {
+						if (ui_menu_button(tr("Duplicate"), "", icon_t.DUPLICATE)) {
 							context_set_swatch(project_clone_swatch(context_raw.swatch));
 							array_push(project_raw.swatches, context_raw.swatch);
 						}
 						/// if (arm_windows || arm_linux || arm_macos)
-						else if (ui_menu_button(tr("Copy Hex Code"))) {
+						else if (ui_menu_button(tr("Copy Hex Code"), "", icon_t.HASH)) {
 							let color: i32 = context_raw.swatch.base;
 							color          = color_set_ab(color, context_raw.swatch.opacity * 255);
 							let val: u32   = color;
 							iron_copy_to_clipboard(i32_to_string(val));
 						}
 						/// end
-						else if (project_raw.swatches.length > 1 && ui_menu_button(tr("Delete"), "delete")) {
+						else if (project_raw.swatches.length > 1 && ui_menu_button(tr("Delete"), "delete", icon_t.DELETE)) {
 							tab_swatches_delete_swatch(project_raw.swatches[i]);
 						}
-						else if (ui_menu_button(tr("Create Material"))) {
+						else if (ui_menu_button(tr("Create Material"), "", icon_t.SPHERE)) {
 							tab_materials_accept_swatch_drop(project_raw.swatches[i]);
 						}
-						else if (ui_menu_button(tr("Create Color Layer"))) {
+						else if (ui_menu_button(tr("Create Color Layer"), "", icon_t.LAYERS)) {
 							let color: i32 = project_raw.swatches[i].base;
 							color          = color_set_ab(color, project_raw.swatches[i].opacity * 255);
 							layers_create_color_layer(color, project_raw.swatches[i].occlusion, project_raw.swatches[i].roughness,

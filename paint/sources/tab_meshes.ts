@@ -112,11 +112,11 @@ function tab_meshes_draw(htab: ui_handle_t) {
 					let i: i32           = _tab_meshes_draw_i;
 					let o: mesh_object_t = project_paint_objects[i];
 
-					if (ui_menu_button(tr("Export"))) {
+					if (ui_menu_button(tr("Export"), "", icon_t.EXPORT)) {
 						context_raw.export_mesh_index = i + 1;
 						box_export_show_mesh();
 					}
-					if (project_paint_objects.length > 1 && ui_menu_button(tr("Delete"))) {
+					if (project_paint_objects.length > 1 && ui_menu_button(tr("Delete"), "", icon_t.DELETE)) {
 						array_remove(project_paint_objects, o);
 						while (o.base.children.length > 0) {
 							let child: object_t = o.base.children[0];
@@ -135,7 +135,7 @@ function tab_meshes_draw(htab: ui_handle_t) {
 						util_mesh_merge();
 						context_raw.ddirty = 2;
 					}
-					if (ui_menu_button(tr("Duplicate"))) {
+					if (ui_menu_button(tr("Duplicate"), "", icon_t.DUPLICATE)) {
 						sim_duplicate();
 					}
 
@@ -486,10 +486,10 @@ function tab_scene_draw_list(list_handle: ui_handle_t, current_object: object_t)
 		tab_scene_select_object(current_object.ext);
 
 		ui_menu_draw(function() {
-			if (ui_menu_button(tr("Duplicate"))) {
+			if (ui_menu_button(tr("Duplicate"), "", icon_t.DUPLICATE)) {
 				sim_duplicate();
 			}
-			if (ui_menu_button(tr("Delete"))) {
+			if (ui_menu_button(tr("Delete"), "", icon_t.DELETE)) {
 				sim_delete();
 			}
 		});

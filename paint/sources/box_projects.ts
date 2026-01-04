@@ -142,8 +142,8 @@ function box_projects_tab() {
 						_box_projects_icon_path = icon_path;
 						_box_projects_i         = i;
 						ui_menu_draw(function() {
-							// if (ui_menu_button(tr("Duplicate"))) {}
-							if (ui_menu_button(tr("Delete"))) {
+							// if (ui_menu_button(tr("Duplicate"), "", icon_t.DUPLICATE)) {}
+							if (ui_menu_button(tr("Delete"), "", icon_t.DELETE)) {
 								sys_notify_on_next_frame(function() {
 									iron_delete_file(_box_projects_path);
 									iron_delete_file(_box_projects_icon_path);

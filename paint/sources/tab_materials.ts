@@ -148,22 +148,22 @@ function tab_materials_draw_slots(mini: bool) {
 					let i: i32             = _tab_materials_draw_slots;
 					let m: slot_material_t = project_materials[i];
 
-					if (ui_menu_button(tr("To Fill Layer"))) {
+					if (ui_menu_button(tr("To Fill Layer"), "", icon_t.SPHERE)) {
 						context_select_material(i);
 						layers_create_fill_layer();
 					}
 
-					if (ui_menu_button(tr("Export"))) {
+					if (ui_menu_button(tr("Export"), "", icon_t.EXPORT)) {
 						context_select_material(i);
 						box_export_show_material();
 					}
 
-					if (ui_menu_button(tr("Bake"))) {
+					if (ui_menu_button(tr("Bake"), "", icon_t.BAKE)) {
 						context_select_material(i);
 						box_export_show_bake_material();
 					}
 
-					if (ui_menu_button(tr("Duplicate"))) {
+					if (ui_menu_button(tr("Duplicate"), "", icon_t.DUPLICATE)) {
 						sys_notify_on_next_frame(function() {
 							let i: i32 = _tab_materials_draw_slots;
 
@@ -176,7 +176,7 @@ function tab_materials_draw_slots(mini: bool) {
 						});
 					}
 
-					if (project_materials.length > 1 && ui_menu_button(tr("Delete"), "delete")) {
+					if (project_materials.length > 1 && ui_menu_button(tr("Delete"), "delete", icon_t.DELETE)) {
 						tab_materials_delete_material(m);
 					}
 

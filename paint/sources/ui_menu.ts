@@ -137,7 +137,7 @@ function ui_menu_button(text: string, label: string = "", icon: icon_t = icon_t.
 		let icon_h: i32          = 25 * UI_SCALE();
 		ui._y                    = _y_top - 1;
 		ui._x -= 5 * UI_SCALE();
-		ui_sub_image(icons, ui.ops.theme.LABEL_COL, icon_h, folder.x / 2, folder.y / 2, folder.w / 2, folder.h / 2);
+		ui_sub_image(icons, ui.ops.theme.LABEL_COL - 0x00222222, icon_h, folder.x / 2, folder.y / 2, folder.w / 2, folder.h / 2);
 		ui._x += 5 * UI_SCALE();
 		ui._y = _y_bottom;
 	}

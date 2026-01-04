@@ -138,11 +138,11 @@ function tab_browser_draw(htab: ui_handle_t) {
 			ui_menu_draw(function() {
 				let file: string = _tab_browser_draw_file;
 
-				if (ui_menu_button(tr("Import"))) {
+				if (ui_menu_button(tr("Import"), "", icon_t.IMPORT)) {
 					import_asset_run(file);
 				}
 				if (path_is_texture(file)) {
-					if (ui_menu_button(tr("Set as Envmap"))) {
+					if (ui_menu_button(tr("Set as Envmap"), "", icon_t.LANDSCAPE)) {
 
 						import_asset_run(file, -1.0, -1.0, true, true, function() {
 							sys_notify_on_next_frame(function() {
@@ -162,7 +162,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 						});
 					}
 
-					if (ui_menu_button(tr("Set as Mask"))) {
+					if (ui_menu_button(tr("Set as Mask"), "", icon_t.MASK)) {
 						import_asset_run(file, -1.0, -1.0, true, true, function() {
 							sys_notify_on_next_frame(function() {
 								let file: string = _tab_browser_draw_file;
@@ -181,7 +181,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 						});
 					}
 
-					if (ui_menu_button(tr("Set as Color ID Map"))) {
+					if (ui_menu_button(tr("Set as Color ID Map"), "", icon_t.COLOR_ID)) {
 						import_asset_run(file, -1.0, -1.0, true, true, function() {
 							sys_notify_on_next_frame(function() {
 								let file: string = _tab_browser_draw_file;
@@ -243,16 +243,16 @@ function tab_browser_draw(htab: ui_handle_t) {
 			if (ui_button(tr("Disk"), ui_align_t.LEFT)) {
 				/// if arm_android
 				ui_menu_draw(function() {
-					if (ui_menu_button(tr("Download"))) {
+					if (ui_menu_button(tr("Download"), "", icon_t.FOLDER)) {
 						tab_browser_hpath.text = ui_files_default_path;
 					}
-					if (ui_menu_button(tr("Pictures"))) {
+					if (ui_menu_button(tr("Pictures"), "", icon_t.FOLDER)) {
 						tab_browser_hpath.text = "/storage/emulated/0/Pictures";
 					}
-					if (ui_menu_button(tr("Camera"))) {
+					if (ui_menu_button(tr("Camera"), "", icon_t.FOLDER)) {
 						tab_browser_hpath.text = "/storage/emulated/0/DCIM/Camera";
 					}
-					if (ui_menu_button(tr("Projects"))) {
+					if (ui_menu_button(tr("Projects"), "", icon_t.FOLDER)) {
 						tab_browser_hpath.text = iron_internal_save_path();
 					}
 				});
@@ -275,7 +275,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 				if (ui.is_hovered && ui.input_released_r) {
 					_tab_browser_draw_b = b;
 					ui_menu_draw(function() {
-						if (ui_menu_button(tr("Delete"))) {
+						if (ui_menu_button(tr("Delete"), "", icon_t.DELETE)) {
 							array_remove(config_raw.bookmarks, _tab_browser_draw_b);
 							config_save();
 						}

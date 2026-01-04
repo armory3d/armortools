@@ -156,7 +156,7 @@ function ui_viewnodes_on_socket_released(socket_id: i32) {
 					let socket: ui_node_socket_t = _ui_nodes_on_socket_released_socket;
 					let node: ui_node_t          = _ui_nodes_on_socket_released_node;
 
-					if (ui_menu_button(tr("Edit"))) {
+					if (ui_menu_button(tr("Edit"), "", icon_t.EDIT)) {
 						_ui_nodes_htype.i    = socket.type == "RGBA" ? 0 : socket.type == "VECTOR" ? 1 : 2;
 						_ui_nodes_hname.text = socket.name;
 						_ui_nodes_hmin.f     = socket.min;
@@ -222,7 +222,7 @@ function ui_viewnodes_on_socket_released(socket_id: i32) {
 							}, 400, 250, null, true, tr("Socket"));
 						});
 					}
-					if (ui_menu_button(tr("Delete"))) {
+					if (ui_menu_button(tr("Delete"), "", icon_t.DELETE)) {
 						let i: i32                   = 0;
 						let canvas: ui_node_canvas_t = ui_nodes_get_canvas(true);
 						// Remove links connected to the socket
@@ -323,7 +323,7 @@ function ui_viewnodes_on_canvas_released() {
 						});
 					});
 				}
-				if (ui_menu_button(tr("Duplicate"))) {
+				if (ui_menu_button(tr("Duplicate"), "", icon_t.DUPLICATE)) {
 					sys_notify_on_next_frame(function() {
 						ui_nodes_hwnd.redraws    = 2;
 						ui_is_copy               = true;
@@ -332,7 +332,7 @@ function ui_viewnodes_on_canvas_released() {
 					});
 				}
 				if (selected != null && selected.type == "RGB") {
-					if (ui_menu_button(tr("Add Swatch"))) {
+					if (ui_menu_button(tr("Add Swatch"), "", icon_t.PALETTE)) {
 						let color: f32_array_t         = selected.outputs[0].default_value;
 						let new_swatch: swatch_color_t = make_swatch(color_from_floats(color[0], color[1], color[2], color[3]));
 						context_set_swatch(new_swatch);
@@ -341,7 +341,7 @@ function ui_viewnodes_on_canvas_released() {
 					}
 				}
 
-				if (ui_menu_button(tr("Capture Output"))) {
+				if (ui_menu_button(tr("Capture Output"), "", icon_t.PHOTO)) {
 					sys_notify_on_next_frame(function() {
 						ui_nodes_capture_output();
 					});

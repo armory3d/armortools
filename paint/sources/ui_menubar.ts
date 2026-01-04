@@ -83,13 +83,13 @@ function ui_menubar_render_ui() {
 			if (ui_menu_show && ui_menubar_category == menubar_category_t.VIEWPORT) {
 				ui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
 			}
-			if (ui_menubar_icon_button(icon_t.VIEWPORT)) {
+			if (ui_menubar_icon_button(icon_t.IMAGE)) {
 				ui_menubar_show_menu(menubar_category_t.VIEWPORT);
 			}
 			if (ui_menu_show && ui_menubar_category == menubar_category_t.MODE) {
 				ui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
 			}
-			if (ui_menubar_icon_button(icon_t.IMAGE)) {
+			if (ui_menubar_icon_button(icon_t.SUN)) {
 				ui_menubar_show_menu(menubar_category_t.MODE);
 			}
 			if (ui_menu_show && ui_menubar_category == menubar_category_t.CAMERA) {
@@ -195,10 +195,10 @@ function ui_menubar_draw_category_items() {
 		ui_menu_separator();
 		if (ui_menu_sub_button(ui_handle(__ID__), tr("Import"))) {
 			ui_menu_sub_begin(7);
-			if (ui_menu_button(tr("Texture..."), map_get(config_keymap, "file_import_assets"))) {
+			if (ui_menu_button(tr("Texture..."), map_get(config_keymap, "file_import_assets"), icon_t.IMAGE)) {
 				project_import_asset(string_array_join(path_texture_formats, ","), false);
 			}
-			if (ui_menu_button(tr("Envmap..."))) {
+			if (ui_menu_button(tr("Envmap..."), "", icon_t.LANDSCAPE)) {
 				ui_files_show("hdr", false, false, function(path: string) {
 					if (!ends_with(path, ".hdr")) {
 						console_error(tr("Error: .hdr file expected"));
@@ -207,46 +207,46 @@ function ui_menubar_draw_category_items() {
 					import_asset_run(path);
 				});
 			}
-			if (ui_menu_button(tr("Font..."))) {
+			if (ui_menu_button(tr("Font..."), "", icon_t.FONT)) {
 				project_import_asset("ttf,ttc,otf");
 			}
-			if (ui_menu_button(tr("Material..."))) {
+			if (ui_menu_button(tr("Material..."), "", icon_t.SPHERE)) {
 				project_import_material();
 			}
-			if (ui_menu_button(tr("Brush..."))) {
+			if (ui_menu_button(tr("Brush..."), "", icon_t.PAINT)) {
 				project_import_brush();
 			}
-			if (ui_menu_button(tr("Swatches..."))) {
+			if (ui_menu_button(tr("Swatches..."), "", icon_t.PALETTE)) {
 				project_import_swatches();
 			}
-			if (ui_menu_button(tr("Mesh..."))) {
+			if (ui_menu_button(tr("Mesh..."), "", icon_t.CUBE)) {
 				project_import_mesh();
 			}
 			ui_menu_sub_end();
 		}
-		if (ui_menu_button(tr("Reimport Mesh"), map_get(config_keymap, "file_reimport_mesh"))) {
+		if (ui_menu_button(tr("Reimport Mesh"), map_get(config_keymap, "file_reimport_mesh"), icon_t.SYNC)) {
 			project_reimport_mesh();
 		}
-		if (ui_menu_button(tr("Reimport Textures"), map_get(config_keymap, "file_reimport_textures"))) {
+		if (ui_menu_button(tr("Reimport Textures"), map_get(config_keymap, "file_reimport_textures"), icon_t.SYNC)) {
 			project_reimport_textures();
 		}
 		ui_menu_separator();
 		if (ui_menu_sub_button(ui_handle(__ID__), tr("Export"))) {
 			ui_menu_sub_begin(3);
-			if (ui_menu_button(tr("Textures..."), map_get(config_keymap, "file_export_textures_as"))) {
+			if (ui_menu_button(tr("Textures..."), map_get(config_keymap, "file_export_textures_as"), icon_t.IMAGE)) {
 				context_raw.layers_export = export_mode_t.VISIBLE;
 				box_export_show_textures();
 			}
-			if (ui_menu_button(tr("Swatches..."))) {
+			if (ui_menu_button(tr("Swatches..."), "", icon_t.PALETTE)) {
 				project_export_swatches();
 			}
-			if (ui_menu_button(tr("Mesh..."))) {
+			if (ui_menu_button(tr("Mesh..."), "", icon_t.CUBE)) {
 				context_raw.export_mesh_index = 0; // All
 				box_export_show_mesh();
 			}
 			ui_menu_sub_end();
 		}
-		if (ui_menu_button(tr("Bake Material..."))) {
+		if (ui_menu_button(tr("Bake Material..."), "", icon_t.BAKE)) {
 			box_export_show_bake_material();
 		}
 		ui_menu_separator();
@@ -545,13 +545,13 @@ function ui_menubar_draw_category_items() {
 		if (ui_menu_button(tr("How To"), "", icon_t.HELP)) {
 			iron_load_url(manifest_url + "/howto");
 		}
-		if (ui_menu_button(tr("What's New"))) {
+		if (ui_menu_button(tr("What's New"), "", icon_t.LINK)) {
 			iron_load_url(manifest_url + "/notes");
 		}
-		if (ui_menu_button(tr("Issue Tracker"), "", icon_t.WEB)) {
+		if (ui_menu_button(tr("Issue Tracker"), "", icon_t.LINK)) {
 			iron_load_url("https://github.com/armory3d/armortools/issues");
 		}
-		if (ui_menu_button(tr("Report Bug"), "", icon_t.WEB)) {
+		if (ui_menu_button(tr("Report Bug"), "", icon_t.LINK)) {
 			/// if (arm_macos || arm_ios) // Limited url length
 			iron_load_url("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" +
 			              manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id());
@@ -561,7 +561,7 @@ function ui_menubar_draw_category_items() {
 			              "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A");
 			/// end
 		}
-		if (ui_menu_button(tr("Request Feature"), "", icon_t.WEB)) {
+		if (ui_menu_button(tr("Request Feature"), "", icon_t.LINK)) {
 			/// if (arm_macos || arm_ios) // Limited url length
 			iron_load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title +
 			              "%20" + manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id());
