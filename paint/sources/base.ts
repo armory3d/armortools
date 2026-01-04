@@ -758,7 +758,7 @@ function ui_base_init() {
 	scene_world._.envmap = context_raw.show_envmap ? context_raw.saved_envmap : context_raw.empty_envmap;
 	context_raw.ddirty   = 1;
 
-	let resources: string[] = [ "cursor.k", "icons.k" ];
+	let resources: string[] = [ "cursor.k", "icons.k", "icons05x.k" ];
 	resource_load(resources);
 
 	let scale: f32 = config_raw.window_scale;
@@ -1848,12 +1848,13 @@ function ui_base_toggle_browser() {
 
 function ui_base_set_icon_scale() {
 	if (UI_SCALE() > 1) {
-		let res: string[] = [ "icons2x.k" ];
+		let res: string[] = [ "icons.k", "icons05x.k", "icons2x.k" ];
 		resource_load(res);
+		map_set(resource_bundled, "icons05x.k", resource_get("icons.k"));
 		map_set(resource_bundled, "icons.k", resource_get("icons2x.k"));
 	}
 	else {
-		let res: string[] = [ "icons.k" ];
+		let res: string[] = [ "icons.k", "icons05x.k" ];
 		resource_load(res);
 	}
 }

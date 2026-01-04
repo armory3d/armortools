@@ -703,7 +703,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 			}
 		}
 
-		if (ui_menu_button(tr("Export"))) {
+		if (ui_menu_button(tr("Export"), "", icon_t.EXPORT)) {
 			if (slot_layer_is_mask(l)) {
 				ui_files_show("png", true, false, function(path: string) {
 					let l: slot_layer_t = tab_layers_l;
@@ -744,7 +744,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 		}
 
 		ui.enabled = tab_layers_can_delete(l);
-		if (ui_menu_button(tr("Delete"), "delete")) {
+		if (ui_menu_button(tr("Delete"), "delete", icon_t.DELETE)) {
 			sys_notify_on_next_frame(function() {
 				tab_layers_delete_layer(context_raw.layer);
 			});

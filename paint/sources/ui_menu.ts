@@ -123,11 +123,25 @@ function ui_menu_separator() {
 	}
 }
 
-function ui_menu_button(text: string, label: string = ""): bool {
+function ui_menu_button(text: string, label: string = "", icon: icon_t = icon_t.NONE): bool {
 	if (config_raw.touch_ui) {
 		label = "";
 	}
-	return ui_button(config_button_spacing + text, config_button_align, label);
+	let _y_top: i32  = ui._y;
+	let result: bool = ui_button(config_button_spacing + text, config_button_align, label);
+
+	if (icon != icon_t.NONE) {
+		let _y_bottom: i32 = ui._y;
+		let icons: gpu_texture_t = resource_get("icons05x.k");
+		let folder: rect_t       = resource_tile50(icons, icon);
+		let icon_h: i32          = 25 * UI_SCALE();
+		ui._y                    = _y_top - 1;
+		ui._x -= 5 * UI_SCALE();
+		ui_sub_image(icons, ui.ops.theme.LABEL_COL, icon_h, folder.x / 2, folder.y / 2, folder.w / 2, folder.h / 2);
+		ui._x += 5 * UI_SCALE();
+		ui._y = _y_bottom;
+	}
+	return result;
 }
 
 function ui_menu_sub_button(handle: ui_handle_t, text: string): bool {

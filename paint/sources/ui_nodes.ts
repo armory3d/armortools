@@ -291,7 +291,7 @@ function ui_viewnodes_on_canvas_released() {
 				let is_protected: bool = selected == null || selected.type == "OUTPUT_MATERIAL_PBR" || selected.type == "GROUP_INPUT" ||
 				                         selected.type == "GROUP_OUTPUT" || selected.type == "brush_output_node";
 				ui.enabled = !is_protected;
-				if (ui_menu_button(tr("Cut"), "ctrl+x")) {
+				if (ui_menu_button(tr("Cut"), "ctrl+x", icon_t.CUT)) {
 					sys_notify_on_next_frame(function() {
 						ui_nodes_hwnd.redraws    = 2;
 						ui_is_copy               = true;
@@ -299,14 +299,14 @@ function ui_viewnodes_on_canvas_released() {
 						ui_nodes_is_node_menu_op = true;
 					});
 				}
-				if (ui_menu_button(tr("Copy"), "ctrl+c")) {
+				if (ui_menu_button(tr("Copy"), "ctrl+c", icon_t.COPY)) {
 					sys_notify_on_next_frame(function() {
 						ui_is_copy               = true;
 						ui_nodes_is_node_menu_op = true;
 					});
 				}
 				ui.enabled = ui_clipboard != "";
-				if (ui_menu_button(tr("Paste"), "ctrl+v")) {
+				if (ui_menu_button(tr("Paste"), "ctrl+v", icon_t.PASTE)) {
 					sys_notify_on_next_frame(function() {
 						ui_nodes_hwnd.redraws    = 2;
 						ui_is_paste              = true;
@@ -314,7 +314,7 @@ function ui_viewnodes_on_canvas_released() {
 					});
 				}
 				ui.enabled = !is_protected;
-				if (ui_menu_button(tr("Delete"), "delete")) {
+				if (ui_menu_button(tr("Delete"), "delete", icon_t.DELETE)) {
 					sys_notify_on_next_frame(function() {
 						sys_notify_on_end_frame(function() {
 							ui_nodes_hwnd.redraws    = 2;

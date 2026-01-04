@@ -14,8 +14,8 @@ function resource_get(name: string): gpu_texture_t {
 }
 
 function resource_tile50(img: gpu_texture_t, i: i32): rect_t {
-	let x: i32 = i % 12;
-	let y: i32 = i / 12;
+	let x: i32    = i % 12;
+	let y: i32    = i / 12;
 	let size: i32 = config_raw.window_scale > 1 ? 100 : 50;
 	let r: rect_t = {x : x * size, y : y * size, w : size, h : size};
 	return r;
@@ -40,6 +40,8 @@ enum icon18_t {
 }
 
 enum icon_t {
+	NONE = -1,
+
 	BRUSH    = 0,
 	ERASER   = 1,
 	FILL     = 2,
@@ -62,7 +64,7 @@ enum icon_t {
 	TEXT_PREVIEW     = 18,
 	PROPERTIES       = 19,
 	FOLDER_OPEN      = 20,
-	EMPRT            = 21,
+	EMPTY            = 21,
 	GIZMO            = 22,
 	MATERIAL         = 23,
 
@@ -75,7 +77,7 @@ enum icon_t {
 	UNDO     = 30,
 	REDO     = 31,
 	VIEWPORT = 32,
-	MODE     = 33,
+	IMAGE    = 33,
 	CAMERA   = 34,
 	HELP     = 35,
 
@@ -84,7 +86,7 @@ enum icon_t {
 	SEARCH        = 38,
 	HOME          = 39,
 	CLOSE         = 40,
-	WRENCH        = 41,
+	COG           = 41,
 	HEART         = 42,
 	PLUS          = 43,
 	CHEVRON_LEFT  = 44,
@@ -120,8 +122,8 @@ enum icon_t {
 
 	STAR      = 72,
 	CUBE      = 73,
-	TWOD      = 74,
-	THREED    = 75,
+	PAINT     = 74,
+	PALETTE   = 75,
 	LAYER     = 76,
 	LAYER_NEW = 77,
 	WINDOW    = 78,
@@ -134,9 +136,9 @@ enum icon_t {
 	ARROW_UP_LEFT = 84,
 	ATTACHMENT    = 85,
 	BLOCK         = 86,
-	CAPTURE       = 87,
+	LANDSCAPE     = 87,
 	CHAT          = 88,
-	HORSE         = 89,
+	CHICK         = 89,
 	CLOUD         = 90,
 	PICKER2       = 91,
 	COPY          = 92,
@@ -148,13 +150,13 @@ enum icon_t {
 	EXIT      = 97,
 	FILTER    = 98,
 	PLUGIN    = 99,
-	EMPTY2    = 100,
+	ERASE     = 100,
 	FILE_SAVE = 101,
-	QUESTION  = 102,
+	FONT      = 102,
 	HISTORY   = 103,
-	IMAGE     = 104,
+	SPHERE    = 104,
 	INFO      = 105,
-	KEY       = 106,
+	SYNC      = 106,
 	WEB       = 107,
 
 	LAYERS  = 108,

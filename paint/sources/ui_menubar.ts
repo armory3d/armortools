@@ -89,7 +89,7 @@ function ui_menubar_render_ui() {
 			if (ui_menu_show && ui_menubar_category == menubar_category_t.MODE) {
 				ui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
 			}
-			if (ui_menubar_icon_button(icon_t.MODE)) {
+			if (ui_menubar_icon_button(icon_t.IMAGE)) {
 				ui_menubar_show_menu(menubar_category_t.MODE);
 			}
 			if (ui_menu_show && ui_menubar_category == menubar_category_t.CAMERA) {
@@ -177,19 +177,19 @@ function ui_menubar_draw_tab_header() {
 
 function ui_menubar_draw_category_items() {
 	if (ui_menubar_category == menubar_category_t.FILE) {
-		if (ui_menu_button(tr("New Project..."), map_get(config_keymap, "file_new"))) {
+		if (ui_menu_button(tr("New Project..."), map_get(config_keymap, "file_new"), icon_t.FILE_NEW)) {
 			project_new_box();
 		}
-		if (ui_menu_button(tr("Open..."), map_get(config_keymap, "file_open"))) {
+		if (ui_menu_button(tr("Open..."), map_get(config_keymap, "file_open"), icon_t.FOLDER_OPEN)) {
 			project_open();
 		}
-		if (ui_menu_button(tr("Open Recent..."), map_get(config_keymap, "file_open_recent"))) {
+		if (ui_menu_button(tr("Open Recent..."), map_get(config_keymap, "file_open_recent"), icon_t.REPLAY)) {
 			box_projects_show();
 		}
-		if (ui_menu_button(tr("Save"), map_get(config_keymap, "file_save"))) {
+		if (ui_menu_button(tr("Save"), map_get(config_keymap, "file_save"), icon_t.SAVE)) {
 			project_save();
 		}
-		if (ui_menu_button(tr("Save As..."), map_get(config_keymap, "file_save_as"))) {
+		if (ui_menu_button(tr("Save As..."), map_get(config_keymap, "file_save_as"), icon_t.SAVE_AS)) {
 			project_save_as();
 		}
 		ui_menu_separator();
@@ -250,7 +250,7 @@ function ui_menubar_draw_category_items() {
 			box_export_show_bake_material();
 		}
 		ui_menu_separator();
-		if (ui_menu_button(tr("Exit"))) {
+		if (ui_menu_button(tr("Exit"), "", icon_t.EXIT)) {
 			iron_stop();
 		}
 	}
@@ -267,19 +267,19 @@ function ui_menubar_draw_category_items() {
 		ui.enabled                           = history_undos > 0;
 		let vars_undo: map_t<string, string> = map_create();
 		map_set(vars_undo, "step", step_undo);
-		if (ui_menu_button(tr("Undo {step}", vars_undo), map_get(config_keymap, "edit_undo"))) {
+		if (ui_menu_button(tr("Undo {step}", vars_undo), map_get(config_keymap, "edit_undo"), icon_t.UNDO)) {
 			history_undo();
 		}
 
 		ui.enabled                           = history_redos > 0;
 		let vars_redo: map_t<string, string> = map_create();
 		map_set(vars_redo, "step", step_redo);
-		if (ui_menu_button(tr("Redo {step}", vars_redo), map_get(config_keymap, "edit_redo"))) {
+		if (ui_menu_button(tr("Redo {step}", vars_redo), map_get(config_keymap, "edit_redo"), icon_t.REDO)) {
 			history_redo();
 		}
 		ui.enabled = true;
 		ui_menu_separator();
-		if (ui_menu_button(tr("Preferences..."), map_get(config_keymap, "edit_prefs"))) {
+		if (ui_menu_button(tr("Preferences..."), map_get(config_keymap, "edit_prefs"), icon_t.COG)) {
 			box_preferences_show();
 		}
 	}
@@ -290,7 +290,7 @@ function ui_menubar_draw_category_items() {
 		}
 
 		/// if !(arm_android || arm_ios)
-		if (ui_menu_button(tr("Toggle Fullscreen"), "alt+enter")) {
+		if (ui_menu_button(tr("Toggle Fullscreen"), "alt+enter", icon_t.FULLSCREEN)) {
 			base_toggle_fullscreen();
 		}
 		/// end
@@ -392,7 +392,7 @@ function ui_menubar_draw_category_items() {
 			project_set_default_envmap();
 		}
 
-		if (ui_menu_button(tr("Capture Screenshot"))) {
+		if (ui_menu_button(tr("Capture Screenshot"), "", icon_t.PHOTO)) {
 			sys_notify_on_next_frame(function() {
 				viewport_capture_screenshot();
 			});
@@ -462,16 +462,16 @@ function ui_menubar_draw_category_items() {
 
 		if (ui_menu_sub_button(ui_handle(__ID__), tr("Orbit"))) {
 			ui_menu_sub_begin(5);
-			if (ui_menu_button(tr("Left"), map_get(config_keymap, "view_orbit_left"))) {
+			if (ui_menu_button(tr("Left"), map_get(config_keymap, "view_orbit_left"), icon_t.ARROW_LEFT)) {
 				viewport_orbit(-math_pi() / 12, 0);
 			}
-			if (ui_menu_button(tr("Right"), map_get(config_keymap, "view_orbit_right"))) {
+			if (ui_menu_button(tr("Right"), map_get(config_keymap, "view_orbit_right"), icon_t.ARROW_RIGHT)) {
 				viewport_orbit(math_pi() / 12, 0);
 			}
-			if (ui_menu_button(tr("Up"), map_get(config_keymap, "view_orbit_up"))) {
+			if (ui_menu_button(tr("Up"), map_get(config_keymap, "view_orbit_up"), icon_t.ARROW_UP)) {
 				viewport_orbit(0, -math_pi() / 12);
 			}
-			if (ui_menu_button(tr("Down"), map_get(config_keymap, "view_orbit_down"))) {
+			if (ui_menu_button(tr("Down"), map_get(config_keymap, "view_orbit_down"), icon_t.ARROW_DOWN)) {
 				viewport_orbit(0, math_pi() / 12);
 			}
 			if (ui_menu_button(tr("Opposite"), map_get(config_keymap, "view_orbit_opposite"))) {
@@ -479,10 +479,10 @@ function ui_menubar_draw_category_items() {
 			}
 			ui_menu_sub_end();
 		}
-		if (ui_menu_button(tr("Zoom In"), map_get(config_keymap, "view_zoom_in"))) {
+		if (ui_menu_button(tr("Zoom In"), map_get(config_keymap, "view_zoom_in"), icon_t.ZOOM_IN)) {
 			viewport_zoom(0.2);
 		}
-		if (ui_menu_button(tr("Zoom Out"), map_get(config_keymap, "view_zoom_out"))) {
+		if (ui_menu_button(tr("Zoom Out"), map_get(config_keymap, "view_zoom_out"), icon_t.ZOOM_OUT)) {
 			viewport_zoom(-0.2);
 		}
 
@@ -539,19 +539,19 @@ function ui_menubar_draw_category_items() {
 		}
 	}
 	else if (ui_menubar_category == menubar_category_t.HELP) {
-		if (ui_menu_button(tr("Manual"))) {
+		if (ui_menu_button(tr("Manual"), "", icon_t.HELP)) {
 			iron_load_url(manifest_url + "/manual");
 		}
-		if (ui_menu_button(tr("How To"))) {
+		if (ui_menu_button(tr("How To"), "", icon_t.HELP)) {
 			iron_load_url(manifest_url + "/howto");
 		}
 		if (ui_menu_button(tr("What's New"))) {
 			iron_load_url(manifest_url + "/notes");
 		}
-		if (ui_menu_button(tr("Issue Tracker"))) {
+		if (ui_menu_button(tr("Issue Tracker"), "", icon_t.WEB)) {
 			iron_load_url("https://github.com/armory3d/armortools/issues");
 		}
-		if (ui_menu_button(tr("Report Bug"))) {
+		if (ui_menu_button(tr("Report Bug"), "", icon_t.WEB)) {
 			/// if (arm_macos || arm_ios) // Limited url length
 			iron_load_url("https://github.com/armory3d/armortools/issues/new?labels=bug&template=bug_report.md&body=*" + manifest_title + "%20" +
 			              manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id());
@@ -561,7 +561,7 @@ function ui_menubar_draw_category_items() {
 			              "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A");
 			/// end
 		}
-		if (ui_menu_button(tr("Request Feature"))) {
+		if (ui_menu_button(tr("Request Feature"), "", icon_t.WEB)) {
 			/// if (arm_macos || arm_ios) // Limited url length
 			iron_load_url("https://github.com/armory3d/armortools/issues/new?labels=feature%20request&template=feature_request.md&body=*" + manifest_title +
 			              "%20" + manifest_version + "-" + config_get_sha() + ",%20" + iron_system_id());
@@ -607,7 +607,7 @@ function ui_menubar_draw_category_items() {
 			/// end
 		}
 
-		if (ui_menu_button(tr("About..."))) {
+		if (ui_menu_button(tr("About..."), "", icon_t.INFO)) {
 
 			let msg: string = manifest_title + ".org - v" + manifest_version + " (" + config_get_date() + ") - " + config_get_sha() + "\n";
 			msg += iron_system_id() + " - " + strings_graphics_api();
