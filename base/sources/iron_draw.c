@@ -75,11 +75,11 @@ static uint32_t _draw_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
 	return (a << 24) | (r << 16) | (g << 8) | b;
 }
 
-static int vw() {
+static float vw() {
 	return _draw_current != NULL ? _draw_current->width : iron_window_width();
 }
 
-static int vh() {
+static float vh() {
 	return _draw_current != NULL ? _draw_current->height : iron_window_height();
 }
 
@@ -232,7 +232,7 @@ void draw_scaled_sub_image(gpu_texture_t *tex, float sx, float sy, float sw, flo
 	}
 	gpu_set_vertex_buffer(&rect_vertex_buffer);
 	gpu_set_index_buffer(&rect_index_buffer);
-	gpu_set_float4(image_pos_loc, dx / vw(), dy / vh(), dw / vw(), dh / vh());
+	gpu_set_float4(image_pos_loc, (int)dx / vw(), (int)dy / vh(), (int)dw / vw(), (int)dh / vh());
 	gpu_set_float4(image_tex_loc, sx / tex->width, sy / tex->height, sw / tex->width, sh / tex->height);
 	gpu_set_float4(image_col_loc, _draw_color_r(draw_color) / 255.0, _draw_color_g(draw_color) / 255.0, _draw_color_b(draw_color) / 255.0,
 	               _draw_color_a(draw_color) / 255.0);
@@ -268,7 +268,7 @@ void draw_filled_rect(float x, float y, float width, float height) {
 	gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : &rect_pipeline);
 	gpu_set_vertex_buffer(&rect_vertex_buffer);
 	gpu_set_index_buffer(&rect_index_buffer);
-	gpu_set_float4(rect_pos_loc, x / vw(), y / vh(), width / vw(), height / vh());
+	gpu_set_float4(rect_pos_loc, (int)x / vw(), (int)y / vh(), (int)width / vw(), (int)height / vh());
 	gpu_set_float4(rect_col_loc, _draw_color_r(draw_color) / 255.0, _draw_color_g(draw_color) / 255.0, _draw_color_b(draw_color) / 255.0,
 	               _draw_color_a(draw_color) / 255.0);
 	gpu_draw();
@@ -527,7 +527,7 @@ void draw_string(const char *text, float x, float y) {
 
 		if (draw_font_get_baked_quad(draw_font, draw_font_size, &q, codepoint, xpos, ypos)) {
 			xpos += q.xadvance;
-			gpu_set_float4(text_pos_loc, q.x0 / vw(), q.y0 / vh(), (q.x1 - q.x0) / vw(), (q.y1 - q.y0) / vh());
+			gpu_set_float4(text_pos_loc, (int)q.x0 / vw(), (int)q.y0 / vh(), (int)(q.x1 - q.x0) / vw(), (q.y1 - q.y0) / vh());
 			gpu_set_float4(text_tex_loc, q.s0, q.t0, q.s1 - q.s0, q.t1 - q.t0);
 			gpu_set_float4(text_col_loc, _draw_color_r(draw_color) / 255.0, _draw_color_g(draw_color) / 255.0, _draw_color_b(draw_color) / 255.0,
 			               _draw_color_a(draw_color) / 255.0);
