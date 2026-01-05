@@ -20,6 +20,11 @@ typedef enum {
 } iron_log_level_t;
 
 void iron_log_args(iron_log_level_t level, const char *format, va_list args) {
+#ifdef IRON_WASM
+	printf(format);
+	return;
+#endif
+
 #ifdef IRON_ANDROID
 	va_list args_android_copy;
 	va_copy(args_android_copy, args);
@@ -82,8 +87,7 @@ double iron_time(void) {
 }
 #endif
 
-static void (*update_callback)(void *)             = NULL;
-static void *update_callback_data                  = NULL;
+static void (*update_callback)(void)               = NULL;
 static void (*foreground_callback)(void *)         = NULL;
 static void *foreground_callback_data              = NULL;
 static void (*background_callback)(void *)         = NULL;
@@ -107,9 +111,8 @@ static void *paste_callback_data                   = NULL;
 bool with_autoreleasepool(bool (*f)(void));
 #endif
 
-void iron_set_update_callback(void (*callback)(void *), void *data) {
-	update_callback      = callback;
-	update_callback_data = data;
+void iron_set_update_callback(void (*callback)(void)) {
+	update_callback = callback;
 }
 
 void iron_set_foreground_callback(void (*callback)(void *), void *data) {
@@ -159,7 +162,7 @@ void iron_set_paste_callback(void (*callback)(char *, void *), void *data) {
 
 void iron_internal_update_callback(void) {
 	if (update_callback != NULL) {
-		update_callback(update_callback_data);
+		update_callback();
 	}
 }
 
@@ -349,7 +352,7 @@ static void (*mouse_release_callback)(int /*button*/, int /*x*/, int /*y*/, void
 static void *mouse_release_callback_data                                                                        = NULL;
 static void (*mouse_move_callback)(int /*x*/, int /*y*/, int /*movementX*/, int /*movementY*/, void * /*data*/) = NULL;
 static void *mouse_move_callback_data                                                                           = NULL;
-static void (*mouse_scroll_callback)(float /*delta*/, void * /*data*/)                                            = NULL;
+static void (*mouse_scroll_callback)(float /*delta*/, void * /*data*/)                                          = NULL;
 static void *mouse_scroll_callback_data                                                                         = NULL;
 
 void iron_mouse_set_press_callback(void (*value)(int /*button*/, int /*x*/, int /*y*/, void * /*data*/), void *data) {

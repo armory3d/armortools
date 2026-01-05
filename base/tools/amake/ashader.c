@@ -106,6 +106,7 @@ void kong_compile(char *shader_lang, const char *from, const char *to) {
 	analyze();
 
 	if (strcmp(shader_lang, "wgsl") == 0) {
+		transform(TRANSFORM_FLAG_ONE_COMPONENT_SWIZZLE);
 		char *vs;
 		char *fs;
 		wgsl_export2(&vs, &fs);

@@ -6,16 +6,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-static const int PTR_SIZE = 8;
-static uint32_t  di;     // Decoded index
-static uint32_t  ei;     // Encoded index
-static uint32_t  bottom; // Decoded bottom
-static uint8_t  *decoded;
-static uint8_t  *encoded;
-static uint32_t  capacity;
-static uint32_t  array_count;
-static uint32_t  string_length;
-static void      read_store();
+#ifdef IRON_WASM
+#define PTR_SIZE 4
+#else
+#define PTR_SIZE 8
+#endif
+static uint32_t di;     // Decoded index
+static uint32_t ei;     // Encoded index
+static uint32_t bottom; // Decoded bottom
+static uint8_t *decoded;
+static uint8_t *encoded;
+static uint32_t capacity;
+static uint32_t array_count;
+static uint32_t string_length;
+static void     read_store();
 
 static inline uint64_t pad(int di, int n) {
 	return (n - (di % n)) % n;
@@ -52,13 +56,13 @@ static void store_f32(float f32) {
 
 static void store_ptr(uint32_t ptr) {
 	di += pad(di, PTR_SIZE);
-	*(uint64_t *)(decoded + di) = (uint64_t)decoded + (uint64_t)ptr;
+	*(uintptr_t *)(decoded + di) = (uintptr_t)decoded + (uintptr_t)ptr;
 	di += PTR_SIZE;
 }
 
 static void store_ptr_abs(void *ptr) {
 	di += pad(di, PTR_SIZE);
-	*(uint64_t *)(decoded + di) = (uint64_t)ptr;
+	*(uintptr_t *)(decoded + di) = (uintptr_t)ptr;
 	di += PTR_SIZE;
 }
 
@@ -181,7 +185,7 @@ static uint32_t traverse(int di, bool count_arrays) {
 				len += traverse(0, count_arrays);
 			}
 		}
-		len += 32; // buffer ptr, length, capacity + align?
+		len += PTR_SIZE + 4 + 4 + 16; // buffer ptr, length, capacity + align
 		if (!count_arrays) {
 			len = 0;
 		}
@@ -334,7 +338,7 @@ static void read_store_array(uint32_t count) { // Store in any/i32/../_array_t f
 					ei += length;
 					length += pad(length, PTR_SIZE);
 					arrays_length += length;
-					arrays_length += 8 + 8 + 4 + 4;
+					arrays_length += PTR_SIZE + 4 + 4;
 				}
 			}
 			ei = _ei;
@@ -345,7 +349,7 @@ static void read_store_array(uint32_t count) { // Store in any/i32/../_array_t f
 			array_count = count;
 
 			for (uint32_t i = 0; i < count; ++i) {
-				/*uint8_t flag =*/ read_u8();
+				/*uint8_t flag =*/read_u8();
 				read_store_array(read_i32());
 			}
 		}
@@ -365,8 +369,8 @@ static void read_store_array(uint32_t count) { // Store in any/i32/../_array_t f
 			array_count = count;
 
 			for (uint32_t i = 0; i < count; ++i) {
-				di           = pad(di, PTR_SIZE) + di;
-				/*uint8_t flag =*/ read_u8();
+				di = pad(di, PTR_SIZE) + di;
+				/*uint8_t flag =*/read_u8();
 				read_store_map(read_i32());
 			}
 		}

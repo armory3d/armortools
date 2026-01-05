@@ -96,7 +96,7 @@ void                iron_exec_async(const char *path, char *argv[]);
 extern volatile int iron_exec_async_done;
 
 void iron_copy_to_clipboard(const char *text);
-void iron_set_update_callback(void (*callback)(void *), void *data);
+void iron_set_update_callback(void (*callback)(void));
 void iron_set_foreground_callback(void (*callback)(void *), void *data);
 void iron_set_resume_callback(void (*callback)(void *), void *data);
 void iron_set_pause_callback(void (*callback)(void *), void *data);

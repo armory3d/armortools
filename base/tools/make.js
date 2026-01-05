@@ -948,7 +948,7 @@ class WasmExporter extends Exporter {
 		this.make =
 		    new MakeExporter(compiler, compiler, compilerFlags, compilerFlags,
 		                    //  '--target=wasm32 -nostdlib -matomics -mbulk-memory "-Wl,--import-memory,--shared-memory,--allow-undefined,--no-entry"', '.wasm');
-							 '--target=wasm32 -nostdlib -matomics -mbulk-memory "-Wl,--import-memory,--shared-memory,--allow-undefined,--no-entry,--stack-first,--initial-memory=543621120,--max-memory=543621120,-z,stack-size=6553600"', '.wasm');
+							 '--target=wasm32 -nostdlib -matomics -mbulk-memory "-Wl,--import-memory,--shared-memory,--allow-undefined,--no-entry,--stack-first,--initial-memory=1310720000,--max-memory=1310720000,-z,stack-size=6553600"', '.wasm');
 	}
 
 	export_solution(project) {

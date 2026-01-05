@@ -1,9 +1,9 @@
 #include "stdlib.h"
+#include "stdio.h"
+#include "string.h"
 
 #ifdef IRON_WASM
-__attribute__((import_module("imports"), import_name("js_fprintf"))) void js_fprintf(const char *format);
-
-#define HEAP_SIZE 1024 * 1024 * 512
+#define HEAP_SIZE 1024 * 1024 * 512 * 2
 static unsigned char heap[HEAP_SIZE];
 static size_t        heap_top = 4;
 #endif
@@ -21,7 +21,7 @@ malloc(size_t size) {
 	size_t old_top = heap_top;
 	heap_top += size;
 	if (heap_top >= HEAP_SIZE) {
-		js_fprintf("malloc: out of memory");
+		printf("malloc: out of memory");
 	}
 	return &heap[old_top];
 #endif
@@ -29,7 +29,13 @@ malloc(size_t size) {
 }
 
 void *calloc(size_t num, size_t size) {
+#ifdef IRON_WASM
+	void *ptr = malloc(num * size);
+	memset(ptr, 0, num * size);
+	return ptr;
+#else
 	return NULL;
+#endif
 }
 
 void *alloca(size_t size) {
@@ -37,7 +43,15 @@ void *alloca(size_t size) {
 }
 
 void *realloc(void *mem, size_t size) {
+#ifdef IRON_WASM
+	void *new_ptr = malloc(size);
+	if (mem != NULL) {
+		memcpy(new_ptr, mem, size);
+	}
+	return new_ptr;
+#else
 	return NULL;
+#endif
 }
 
 void free(void *mem) {}

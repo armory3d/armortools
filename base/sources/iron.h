@@ -244,6 +244,8 @@ int kickstart(int argc, char **argv) {
 	char *bindir = "/";
 #elif defined(IRON_IOS)
 	char *bindir = "";
+#elif defined(IRON_WASM)
+	char *bindir = "/";
 #else
 	char *bindir = argv[0];
 #endif
@@ -352,7 +354,7 @@ unsigned char *iron_deflate_raw(unsigned char *data, int data_len, int *out_len,
 #include <time.h>
 #endif
 
-void _update(void *data) {
+void _update() {
 #ifdef IRON_WINDOWS
 	if (in_background && ++paused_frames > 3) {
 		Sleep(1);
@@ -735,7 +737,7 @@ void _iron_init(iron_window_options_t *ops) {
 
 void _iron_set_update_callback(void (*callback)(void)) {
 	iron_update = callback;
-	iron_set_update_callback(_update, NULL);
+	iron_set_update_callback(_update);
 }
 
 void _iron_set_drop_files_callback(void (*callback)(char *)) {
