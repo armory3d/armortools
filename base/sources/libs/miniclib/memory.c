@@ -2,18 +2,15 @@
 #include "stdio.h"
 #include "string.h"
 
-#ifdef IRON_WASM
 #define HEAP_SIZE 1024 * 1024 * 512 * 2
 static unsigned char heap[HEAP_SIZE];
 static size_t        heap_top = 4;
-#endif
 
 #ifdef IRON_WASM
 __attribute__((export_name("malloc")))
 #endif
 void *
 malloc(size_t size) {
-#ifdef IRON_WASM
 	// Align to 4 bytes to make js typed arrays work
 	if (size % 4 != 0) {
 		size += 4 - size % 4;
@@ -24,34 +21,20 @@ malloc(size_t size) {
 		printf("malloc: out of memory");
 	}
 	return &heap[old_top];
-#endif
-	return NULL;
 }
 
 void *calloc(size_t num, size_t size) {
-#ifdef IRON_WASM
 	void *ptr = malloc(num * size);
 	memset(ptr, 0, num * size);
 	return ptr;
-#else
-	return NULL;
-#endif
-}
-
-void *alloca(size_t size) {
-	return NULL;
 }
 
 void *realloc(void *mem, size_t size) {
-#ifdef IRON_WASM
 	void *new_ptr = malloc(size);
 	if (mem != NULL) {
 		memcpy(new_ptr, mem, size);
 	}
 	return new_ptr;
-#else
-	return NULL;
-#endif
 }
 
 void free(void *mem) {}

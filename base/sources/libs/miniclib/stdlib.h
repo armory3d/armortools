@@ -7,7 +7,6 @@ typedef unsigned long size_t;
 
 void *malloc(size_t size);
 void *calloc(size_t num, size_t size);
-void *alloca(size_t size);
 void *realloc(void *mem, size_t size);
 void  free(void *mem);
 
