@@ -1,7 +1,56 @@
 
 #include "iron_gc.h"
 
-#ifdef NO_GC
+#ifdef NO_GC_USE_HEAP
+
+#include <memory.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+#define HEAP_SIZE 512 * 1024 * 1024
+static uint8_t *heap     = NULL;
+static size_t   heap_top = 0;
+
+void *gc_alloc(size_t size) {
+	size_t old_top = heap_top;
+	heap_top += size;
+	if (heap_top >= HEAP_SIZE) {
+		printf("gc_alloc: out of memory\n");
+	}
+	return &heap[old_top];
+}
+
+void gc_array(void *ptr, uint32_t *length) {}
+void gc_leaf(void *ptr) {}
+void gc_root(void *ptr) {}
+void gc_unroot(void *ptr) {}
+
+void *gc_cut(void *ptr, size_t pos, size_t size) {
+	return NULL;
+}
+
+void *gc_realloc(void *ptr, size_t size) {
+	void *new_ptr = gc_alloc(size);
+	if (ptr != NULL) {
+		memcpy(new_ptr, ptr, size);
+	}
+	return new_ptr;
+}
+
+void gc_free(void *ptr) {}
+void gc_pause() {}
+void gc_resume() {}
+void gc_run() {}
+
+void gc_start(void *bos) {
+	heap = (uint8_t *)calloc(HEAP_SIZE, 1);
+}
+
+void gc_stop() {}
+
+#elif defined(NO_GC)
 
 #include <stdint.h>
 #include <stdlib.h>

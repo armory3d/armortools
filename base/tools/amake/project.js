@@ -3,11 +3,10 @@ let project = new Project("amake");
 
 // alang
 project.add_define("NO_GC");
+project.add_define("NO_GC_USE_HEAP");
 project.add_define("NO_IRON_API");
-project.add_define("NO_IRON_START");
-project.add_tsfiles("./");     // alang.ts
 project.add_include_dir("./"); // iron.h
-project.add_cfiles("build/iron.c");
+project.add_cfiles("alang.c");
 project.add_include_dir("../../sources");
 project.add_cfiles("../../sources/iron_string.c");
 project.add_cfiles("../../sources/iron_array.c");

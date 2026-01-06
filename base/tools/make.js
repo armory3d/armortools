@@ -2750,23 +2750,10 @@ function write_ts_project(projectdir, options) {
 		source += file;
 	}
 
-	if (goptions.alangjs) {
-		globalThis.std                = std;
-		globalThis.fs_readfile        = fs_readfile;
-		globalThis.fs_writefile       = fs_writefile;
-		globalThis.flags.alang_source = source;
-		globalThis.flags.alang_output = os_cwd() + path_sep + "build" + path_sep + "iron.c";
-		let alang                     = irondir + '/tools/amake/alang.js';
-		(1, eval)(fs_readfile(alang));
-	}
-	else {
-		// let alang_input = os_cwd() + path_sep + "build" + path_sep + "iron.ts";
-		// fs_writefile(alang_input, source);
-		let alang_output = os_cwd() + path_sep + "build" + path_sep + "iron.c";
-		let start        = Date.now();
-		amake.alang(source, alang_output);
-		console.log("alang took " + (Date.now() - start) + "ms.");
-	}
+	let alang_output = os_cwd() + path_sep + "build" + path_sep + "iron.c";
+	let start        = Date.now();
+	amake.alang(source, alang_output);
+	console.log("alang took " + (Date.now() - start) + "ms.");
 }
 
 function export_project_files(name, options, exporter, defines) {
@@ -3316,7 +3303,6 @@ let goptions = {
 	ccompiler : 'clang',
 	cppcompiler : 'clang++',
 	arch : 'default',
-	alangjs : false,
 	js : false,
 	ashader : false,
 };

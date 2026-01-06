@@ -3,5 +3,5 @@
 Iron build tool.
 
 ```bash
-../../make --compile --alangjs
+../../make --compile
 ```
