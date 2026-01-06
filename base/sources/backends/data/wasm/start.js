@@ -5,6 +5,7 @@ let heapu16      = null;
 let heapu32      = null;
 let heapi32      = null;
 let heapf32      = null;
+let heapf64      = null;
 let module       = null;
 let instance     = null;
 let wgpu_objects = [ null ];
@@ -39,6 +40,10 @@ function read_string_n(ptr, n) {
 
 function read_u32(ptr) {
 	return heapu32[ptr / 4];
+}
+
+function read_f64(ptr) {
+	return heapf64[ptr / 8];
 }
 
 function write_string(ptr, str) {
@@ -85,6 +90,7 @@ async function init() {
 	heapu32 = new Uint32Array(memory.buffer);
 	heapi32 = new Int32Array(memory.buffer);
 	heapf32 = new Float32Array(memory.buffer);
+	heapf64 = new Float64Array(memory.buffer);
 
 	if (!navigator.gpu) {
 		throw new Error('WebGPU not supported');
@@ -297,7 +303,12 @@ async function init() {
 				let pcas = read_u32(pdescriptor + 16);
 				for (let i = 0; i < desc.colorAttachmentCount; ++i) {
 					// WGPURenderPassColorAttachment
-					let ca = {view : id_to_ptr(read_u32(pcas + 4 + i * 28)), loadOp : "clear", storeOp : "store", clearValue : [ 0.0, 0.0, 0.0, 0.0 ]};
+					let ca = {
+						view : id_to_ptr(read_u32(pcas + 4 + i * 56)),
+						loadOp : "clear",
+						storeOp : "store",
+						clearValue : [ read_f64(pcas + 24 + i * 56), read_f64(pcas + 32 + i * 56), read_f64(pcas + 40 + i * 56), read_f64(pcas + 48 + i * 56) ]
+					};
 					desc.colorAttachments.push(ca);
 				}
 

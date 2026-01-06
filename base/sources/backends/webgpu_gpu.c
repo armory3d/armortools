@@ -491,8 +491,7 @@ static WGPUBindGroup get_descriptor_set(WGPUBuffer buffer) {
 
 void gpu_set_constant_buffer(gpu_buffer_t *buffer, int offset, size_t size) {
 	WGPUBindGroup bind_group = get_descriptor_set(buffer->impl.buf);
-	// uint32_t      offsets[1] = {(uint32_t)offset};
-	uint32_t offsets[1] = {(uint32_t)0};
+	uint32_t      offsets[1] = {(uint32_t)offset};
 	wgpuRenderPassEncoderSetBindGroup(render_pass_encoder, 0, bind_group, 1, offsets);
 	wgpuBindGroupRelease(bind_group);
 }
@@ -744,20 +743,19 @@ void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size) {
 	buffer->count  = size;
 	buffer->stride = 1;
 
-	// WGPUBufferDescriptor desc = {.size = size, .usage = WGPUBufferUsage_Uniform, .mappedAtCreation = true};
-	WGPUBufferDescriptor desc = {.size = size, .usage = WGPUBufferUsage_Uniform, .mappedAtCreation = false};
+	WGPUBufferDescriptor desc = {.size = size, .usage = WGPUBufferUsage_Uniform | WGPUBufferUsage_CopyDst, .mappedAtCreation = false};
 	buffer->impl.buf          = wgpuDeviceCreateBuffer(device, &desc);
 	buffer->impl.mem          = malloc(buffer->count * buffer->stride);
 }
 
 void gpu_constant_buffer_lock(gpu_buffer_t *buffer, int start, int count) {
-	// buffer->start = start;
+	buffer->impl.start = start;
 	buffer->count = count;
 	buffer->data  = &buffer->impl.mem[start];
 }
 
 void gpu_constant_buffer_unlock(gpu_buffer_t *buffer) {
-	// wgpuBufferUnmap2(buffer->impl.buf, buffer->data, buffer->start, buffer->count);
+	wgpuQueueWriteBuffer(queue, buffer->impl.buf, buffer->impl.start, buffer->data, buffer->count);
 	buffer->data = NULL;
 }
 

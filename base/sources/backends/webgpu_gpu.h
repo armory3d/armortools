@@ -4,6 +4,7 @@
 typedef struct {
 	WGPUBuffer buf;
 	void      *mem;
+	int        start;
 } gpu_buffer_impl_t;
 
 typedef struct {
