@@ -102,7 +102,8 @@ enum {
     JS_TAG_UNINITIALIZED = 4,
     JS_TAG_CATCH_OFFSET = 5,
     JS_TAG_EXCEPTION   = 6,
-    JS_TAG_FLOAT64     = 7,
+    JS_TAG_SHORT_BIG_INT = 7,
+    JS_TAG_FLOAT64     = 8,
     /* any larger tag is FLOAT64 if JS_NAN_BOXING */
 };
 
@@ -136,6 +137,7 @@ typedef const struct JSValue *JSValueConst;
 #define JS_MKPTR(tag, ptr)       ((JSValue)((tag) | (intptr_t)(ptr)))
 #define JS_VALUE_GET_NORM_TAG(v) ((int)((intptr_t)(v) & 15))
 #define JS_VALUE_GET_TAG(v)      ((int)((intptr_t)(v) & 15))
+#define JS_VALUE_GET_SHORT_BIG_INT(v) JS_VALUE_GET_INT(v)
 #define JS_VALUE_GET_PTR(v)      ((void *)((intptr_t)(v) & ~15))
 #define JS_VALUE_GET_INT(v)      ((int)((intptr_t)(v) >> 4))
 #define JS_VALUE_GET_BOOL(v)     ((int)((intptr_t)(v) >> 4))
@@ -146,6 +148,12 @@ typedef const struct JSValue *JSValueConst;
 static inline JSValue __JS_NewFloat64(double d)
 {
     return JS_MKVAL(JS_TAG_FLOAT64, (int)d);
+}
+
+static inline JSValue __JS_NewShortBigInt(JSContext *ctx, int32_t d)
+{
+    (void)&ctx;
+    return JS_MKVAL(JS_TAG_SHORT_BIG_INT, d);
 }
 
 static inline bool JS_VALUE_IS_NAN(JSValue v)
@@ -161,6 +169,7 @@ typedef uint64_t JSValue;
 #define JS_VALUE_GET_TAG(v) (int)((v) >> 32)
 #define JS_VALUE_GET_INT(v) (int)(v)
 #define JS_VALUE_GET_BOOL(v) (int)(v)
+#define JS_VALUE_GET_SHORT_BIG_INT(v) (int)(v)
 #define JS_VALUE_GET_PTR(v) (void *)(intptr_t)(v)
 
 #define JS_MKVAL(tag, val) (((uint64_t)(tag) << 32) | (uint32_t)(val))
@@ -197,6 +206,12 @@ static inline JSValue __JS_NewFloat64(double d)
     return v;
 }
 
+static inline JSValue __JS_NewShortBigInt(JSContext *ctx, int32_t d)
+{
+    (void)&ctx;
+    return JS_MKVAL(JS_TAG_SHORT_BIG_INT, d);
+}
+
 #define JS_TAG_IS_FLOAT64(tag) ((unsigned)((tag) - JS_TAG_FIRST) >= (JS_TAG_FLOAT64 - JS_TAG_FIRST))
 
 /* same as JS_VALUE_GET_TAG, but return JS_TAG_FLOAT64 with NaN boxing */
@@ -223,6 +238,7 @@ typedef union JSValueUnion {
     int32_t int32;
     double float64;
     void *ptr;
+    int32_t short_big_int;
 } JSValueUnion;
 
 typedef struct JSValue {
@@ -236,6 +252,7 @@ typedef struct JSValue {
 #define JS_VALUE_GET_INT(v) ((v).u.int32)
 #define JS_VALUE_GET_BOOL(v) ((v).u.int32)
 #define JS_VALUE_GET_FLOAT64(v) ((v).u.float64)
+#define JS_VALUE_GET_SHORT_BIG_INT(v) ((v).u.short_big_int)
 #define JS_VALUE_GET_PTR(v) ((v).u.ptr)
 
 /* msvc doesn't understand designated initializers without /std:c++20 */
@@ -278,6 +295,15 @@ static inline JSValue __JS_NewFloat64(double d)
     JSValue v;
     v.tag = JS_TAG_FLOAT64;
     v.u.float64 = d;
+    return v;
+}
+
+static inline JSValue __JS_NewShortBigInt(JSContext *ctx, int64_t d)
+{
+    (void)&ctx;
+    JSValue v;
+    v.tag = JS_TAG_SHORT_BIG_INT;
+    v.u.short_big_int = d;
     return v;
 }
 
@@ -459,6 +485,7 @@ JS_EXTERN void JS_AddIntrinsicPromise(JSContext *ctx);
 JS_EXTERN void JS_AddIntrinsicBigInt(JSContext *ctx);
 JS_EXTERN void JS_AddIntrinsicWeakRef(JSContext *ctx);
 JS_EXTERN void JS_AddPerformance(JSContext *ctx);
+JS_EXTERN void JS_AddIntrinsicDOMException(JSContext *ctx);
 
 /* for equality comparisons and sameness */
 JS_EXTERN int JS_IsEqual(JSContext *ctx, JSValueConst op1, JSValueConst op2);
@@ -518,7 +545,11 @@ JS_EXTERN void JS_FreeAtom(JSContext *ctx, JSAtom v);
 JS_EXTERN void JS_FreeAtomRT(JSRuntime *rt, JSAtom v);
 JS_EXTERN JSValue JS_AtomToValue(JSContext *ctx, JSAtom atom);
 JS_EXTERN JSValue JS_AtomToString(JSContext *ctx, JSAtom atom);
-JS_EXTERN const char *JS_AtomToCString(JSContext *ctx, JSAtom atom);
+JS_EXTERN const char *JS_AtomToCStringLen(JSContext *ctx, size_t *plen, JSAtom atom);
+static inline const char *JS_AtomToCString(JSContext *ctx, JSAtom atom) 
+{
+    return JS_AtomToCStringLen(ctx, NULL, atom);
+}
 JS_EXTERN JSAtom JS_ValueToAtom(JSContext *ctx, JSValueConst val);
 
 /* object class support */
@@ -662,10 +693,10 @@ static inline bool JS_IsNumber(JSValueConst v)
     return tag == JS_TAG_INT || JS_TAG_IS_FLOAT64(tag);
 }
 
-static inline bool JS_IsBigInt(JSContext *ctx, JSValueConst v)
+static inline bool JS_IsBigInt(JSValueConst v)
 {
-    (void)&ctx;
-    return JS_VALUE_GET_TAG(v) == JS_TAG_BIG_INT;
+    int tag = JS_VALUE_GET_TAG(v);
+    return tag == JS_TAG_BIG_INT || tag == JS_TAG_SHORT_BIG_INT;
 }
 
 static inline bool JS_IsBool(JSValueConst v)
@@ -716,8 +747,8 @@ static inline bool JS_IsModule(JSValueConst v)
 JS_EXTERN JSValue JS_Throw(JSContext *ctx, JSValue obj);
 JS_EXTERN JSValue JS_GetException(JSContext *ctx);
 JS_EXTERN bool JS_HasException(JSContext *ctx);
-JS_EXTERN bool JS_IsError(JSContext *ctx, JSValueConst val);
-JS_EXTERN bool JS_IsUncatchableError(JSContext* ctx, JSValueConst val);
+JS_EXTERN bool JS_IsError(JSValueConst val);
+JS_EXTERN bool JS_IsUncatchableError(JSValueConst val);
 JS_EXTERN void JS_SetUncatchableError(JSContext *ctx, JSValueConst val);
 JS_EXTERN void JS_ClearUncatchableError(JSContext *ctx, JSValueConst val);
 // Shorthand for:
@@ -726,12 +757,19 @@ JS_EXTERN void JS_ClearUncatchableError(JSContext *ctx, JSValueConst val);
 //  JS_Throw(ctx, exc);
 JS_EXTERN void JS_ResetUncatchableError(JSContext *ctx);
 JS_EXTERN JSValue JS_NewError(JSContext *ctx);
+JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_NewInternalError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
+JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_NewPlainError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
+JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_NewRangeError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
+JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_NewReferenceError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
+JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_NewSyntaxError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
+JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_NewTypeError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
+JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowInternalError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
 JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowPlainError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
+JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowRangeError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
+JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowReferenceError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
 JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowSyntaxError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
 JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowTypeError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
-JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowReferenceError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
-JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowRangeError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
-JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowInternalError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
+JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(3, 4) JS_ThrowDOMException(JSContext *ctx, const char *name, JS_PRINTF_FORMAT const char *fmt, ...);
 JS_EXTERN JSValue JS_ThrowOutOfMemory(JSContext *ctx);
 JS_EXTERN void JS_FreeValue(JSContext *ctx, JSValue v);
 JS_EXTERN void JS_FreeValueRT(JSRuntime *rt, JSValue v);
@@ -761,6 +799,10 @@ JS_EXTERN JSValue JS_NewStringLen(JSContext *ctx, const char *str1, size_t len1)
 static inline JSValue JS_NewString(JSContext *ctx, const char *str) {
     return JS_NewStringLen(ctx, str, strlen(str));
 }
+// makes a copy of the input; does not check if the input is valid UTF-16,
+// that is the responsibility of the caller
+JS_EXTERN JSValue JS_NewTwoByteString(JSContext *ctx, const uint16_t *buf,
+                                      size_t len);
 JS_EXTERN JSValue JS_NewAtomString(JSContext *ctx, const char *str);
 JS_EXTERN JSValue JS_ToString(JSContext *ctx, JSValueConst val);
 JS_EXTERN JSValue JS_ToPropertyKey(JSContext *ctx, JSValueConst val);
@@ -777,7 +819,7 @@ JS_EXTERN void JS_FreeCString(JSContext *ctx, const char *ptr);
 
 JS_EXTERN JSValue JS_NewObjectProtoClass(JSContext *ctx, JSValueConst proto,
                                          JSClassID class_id);
-JS_EXTERN JSValue JS_NewObjectClass(JSContext *ctx, int class_id);
+JS_EXTERN JSValue JS_NewObjectClass(JSContext *ctx, JSClassID class_id);
 JS_EXTERN JSValue JS_NewObjectProto(JSContext *ctx, JSValueConst proto);
 JS_EXTERN JSValue JS_NewObject(JSContext *ctx);
 // takes ownership of the values
@@ -797,6 +839,11 @@ JS_EXTERN bool JS_SetConstructorBit(JSContext *ctx, JSValueConst func_obj, bool 
 
 JS_EXTERN bool JS_IsRegExp(JSValueConst val);
 JS_EXTERN bool JS_IsMap(JSValueConst val);
+JS_EXTERN bool JS_IsSet(JSValueConst val);
+JS_EXTERN bool JS_IsWeakRef(JSValueConst val);
+JS_EXTERN bool JS_IsWeakSet(JSValueConst val);
+JS_EXTERN bool JS_IsWeakMap(JSValueConst val);
+JS_EXTERN bool JS_IsDataView(JSValueConst val);
 
 JS_EXTERN JSValue JS_NewArray(JSContext *ctx);
 // takes ownership of the values
@@ -835,7 +882,7 @@ JS_EXTERN int JS_HasProperty(JSContext *ctx, JSValueConst this_obj, JSAtom prop)
 JS_EXTERN int JS_IsExtensible(JSContext *ctx, JSValueConst obj);
 JS_EXTERN int JS_PreventExtensions(JSContext *ctx, JSValueConst obj);
 JS_EXTERN int JS_DeleteProperty(JSContext *ctx, JSValueConst obj, JSAtom prop, int flags);
-JS_EXTERN int JS_SetPrototype(JSContext *ctx, JSValueConst obj, JSValue proto_val);
+JS_EXTERN int JS_SetPrototype(JSContext *ctx, JSValueConst obj, JSValueConst proto_val);
 JS_EXTERN JSValue JS_GetPrototype(JSContext *ctx, JSValueConst val);
 JS_EXTERN int JS_GetLength(JSContext *ctx, JSValueConst obj, int64_t *pres);
 JS_EXTERN int JS_SetLength(JSContext *ctx, JSValueConst obj, int64_t len);
@@ -872,6 +919,7 @@ JS_EXTERN JSValue JS_CallConstructor2(JSContext *ctx, JSValueConst func_obj,
  * wholly infallible: non-strict classic scripts may _parse_ okay as a module
  * but not _execute_ as one (different runtime semantics.) Use with caution.
  * |input| can be either ASCII or UTF-8 encoded source code.
+ * Returns false if QuickJS was built with -DQJS_DISABLE_PARSER.
  */
 JS_EXTERN bool JS_DetectModule(const char *input, size_t input_len);
 /* 'input' must be zero terminated i.e. input[input_len] = '\0'. */
@@ -970,6 +1018,23 @@ JS_EXTERN JSValue JS_PromiseResult(JSContext *ctx, JSValueConst promise);
 JS_EXTERN bool JS_IsPromise(JSValueConst val);
 
 JS_EXTERN JSValue JS_NewSymbol(JSContext *ctx, const char *description, bool is_global);
+
+typedef enum JSPromiseHookType {
+    JS_PROMISE_HOOK_INIT,     // emitted when a new promise is created
+    JS_PROMISE_HOOK_BEFORE,   // runs right before promise.then is invoked
+    JS_PROMISE_HOOK_AFTER,    // runs right after promise.then is invoked
+    JS_PROMISE_HOOK_RESOLVE,  // not emitted for rejected promises
+} JSPromiseHookType;
+
+// parent_promise is only passed in when type == JS_PROMISE_HOOK_INIT and
+// is then either a promise object or JS_UNDEFINED if the new promise does
+// not have a parent promise; only promises created with promise.then have
+// a parent promise
+typedef void JSPromiseHook(JSContext *ctx, JSPromiseHookType type,
+                           JSValueConst promise, JSValueConst parent_promise,
+                           void *opaque);
+JS_EXTERN void JS_SetPromiseHook(JSRuntime *rt, JSPromiseHook promise_hook,
+                                 void *opaque);
 
 /* is_handled = true means that the rejection is handled */
 typedef void JSHostPromiseRejectionTracker(JSContext *ctx, JSValueConst promise,
@@ -1090,10 +1155,14 @@ JS_EXTERN JSValue JS_NewCFunction2(JSContext *ctx, JSCFunction *func,
 JS_EXTERN JSValue JS_NewCFunction3(JSContext *ctx, JSCFunction *func,
                                    const char *name,
                                    int length, JSCFunctionEnum cproto, int magic,
-                                   JSValue proto_val);
+                                   JSValueConst proto_val);
 JS_EXTERN JSValue JS_NewCFunctionData(JSContext *ctx, JSCFunctionData *func,
                                       int length, int magic, int data_len,
                                       JSValueConst *data);
+JS_EXTERN JSValue JS_NewCFunctionData2(JSContext *ctx, JSCFunctionData *func,
+                                       const char *name,
+                                       int length, int magic, int data_len,
+                                       JSValueConst *data);
 
 static inline JSValue JS_NewCFunction(JSContext *ctx, JSCFunction *func,
                                       const char *name, int length)
@@ -1176,7 +1245,7 @@ typedef struct JSCFunctionListEntry {
 #define JS_ALIAS_DEF(name, from) { name, JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE, JS_DEF_ALIAS, 0, { .alias = { from, -1 } } }
 #define JS_ALIAS_BASE_DEF(name, from, base) { name, JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE, JS_DEF_ALIAS, 0, { .alias = { from, base } } }
 
-JS_EXTERN void JS_SetPropertyFunctionList(JSContext *ctx, JSValue obj,
+JS_EXTERN int JS_SetPropertyFunctionList(JSContext *ctx, JSValueConst obj,
                                           const JSCFunctionListEntry *tab,
                                           int len);
 
@@ -1199,7 +1268,7 @@ JS_EXTERN int JS_SetModuleExportList(JSContext *ctx, JSModuleDef *m,
 /* Version */
 
 #define QJS_VERSION_MAJOR 0
-#define QJS_VERSION_MINOR 9
+#define QJS_VERSION_MINOR 11
 #define QJS_VERSION_PATCH 0
 #define QJS_VERSION_SUFFIX ""
 

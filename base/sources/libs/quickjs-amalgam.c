@@ -100,7 +100,7 @@ extern "C" {
 #endif
 #if defined(__APPLE__)
 #include <malloc/malloc.h>
-#elif defined(__linux__) || defined(__ANDROID__) || defined(__CYGWIN__)
+#elif defined(__linux__) || defined(__ANDROID__) || defined(__CYGWIN__) || defined(__GLIBC__)
 #include <malloc.h>
 #elif defined(__FreeBSD__)
 #include <malloc_np.h>
@@ -110,6 +110,10 @@ extern "C" {
 #if !defined(_WIN32) && !defined(EMSCRIPTEN) && !defined(__wasi__)
 #include <errno.h>
 #include <pthread.h>
+#endif
+#if !defined(_WIN32)
+#include <limits.h>
+#include <unistd.h>
 #endif
 
 #if defined(_MSC_VER) && !defined(__clang__)
@@ -151,7 +155,7 @@ extern "C" {
 #define container_of(ptr, type, member) ((type *)((uint8_t *)(ptr) - offsetof(type, member)))
 #endif
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || defined(__cplusplus)
 #define minimum_length(n) n
 #else
 #define minimum_length(n) static n
@@ -175,1179 +179,13 @@ extern "C" {
 #endif
 #endif
 
-////
-
-#ifdef _WIN32
-/*
- * Dirent interface for Microsoft Visual Studio
- *
- * Copyright (C) 1998-2019 Toni Ronkko
- * This file is part of dirent.  Dirent may be freely distributed
- * under the MIT license.  For all details and documentation, see
- * https://github.com/tronkko/dirent
- */
-#ifndef DIRENT_H
-#define DIRENT_H
-
-/* Hide warnings about unreferenced local functions */
-#if defined(__clang__)
-#   pragma clang diagnostic ignored "-Wunused-function"
-#elif defined(_MSC_VER)
-#   pragma warning(disable:4505)
-#elif defined(__GNUC__)
-#   pragma GCC diagnostic ignored "-Wunused-function"
-#endif
-
-/*
- * Include windows.h without Windows Sockets 1.1 to prevent conflicts with
- * Windows Sockets 2.0.
- */
-#ifndef WIN32_LEAN_AND_MEAN
-#   define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-
-#include <stdio.h>
-#include <stdarg.h>
-#include <wchar.h>
-#include <string.h>
-#include <stdlib.h>
-#include <malloc.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <errno.h>
-
-/* Indicates that d_type field is available in dirent structure */
-#define _DIRENT_HAVE_D_TYPE
-
-/* Indicates that d_namlen field is available in dirent structure */
-#define _DIRENT_HAVE_D_NAMLEN
-
-/* Entries missing from MSVC 6.0 */
-#if !defined(FILE_ATTRIBUTE_DEVICE)
-#   define FILE_ATTRIBUTE_DEVICE 0x40
-#endif
-
-/* File type and permission flags for stat(), general mask */
-#if !defined(S_IFMT)
-#   define S_IFMT _S_IFMT
-#endif
-
-/* Directory bit */
-#if !defined(S_IFDIR)
-#   define S_IFDIR _S_IFDIR
-#endif
-
-/* Character device bit */
-#if !defined(S_IFCHR)
-#   define S_IFCHR _S_IFCHR
-#endif
-
-/* Pipe bit */
-#if !defined(S_IFFIFO)
-#   define S_IFFIFO _S_IFFIFO
-#endif
-
-/* Regular file bit */
-#if !defined(S_IFREG)
-#   define S_IFREG _S_IFREG
-#endif
-
-/* Read permission */
-#if !defined(S_IREAD)
-#   define S_IREAD _S_IREAD
-#endif
-
-/* Write permission */
-#if !defined(S_IWRITE)
-#   define S_IWRITE _S_IWRITE
-#endif
-
-/* Execute permission */
-#if !defined(S_IEXEC)
-#   define S_IEXEC _S_IEXEC
-#endif
-
-/* Pipe */
-#if !defined(S_IFIFO)
-#   define S_IFIFO _S_IFIFO
-#endif
-
-/* Block device */
-#if !defined(S_IFBLK)
-#   define S_IFBLK 0
-#endif
-
-/* Link */
-#if !defined(S_IFLNK)
-#   define S_IFLNK 0
-#endif
-
-/* Socket */
-#if !defined(S_IFSOCK)
-#   define S_IFSOCK 0
-#endif
-
-/* Read user permission */
-#if !defined(S_IRUSR)
-#   define S_IRUSR S_IREAD
-#endif
-
-/* Write user permission */
-#if !defined(S_IWUSR)
-#   define S_IWUSR S_IWRITE
-#endif
-
-/* Execute user permission */
-#if !defined(S_IXUSR)
-#   define S_IXUSR 0
-#endif
-
-/* Read group permission */
-#if !defined(S_IRGRP)
-#   define S_IRGRP 0
-#endif
-
-/* Write group permission */
-#if !defined(S_IWGRP)
-#   define S_IWGRP 0
-#endif
-
-/* Execute group permission */
-#if !defined(S_IXGRP)
-#   define S_IXGRP 0
-#endif
-
-/* Read others permission */
-#if !defined(S_IROTH)
-#   define S_IROTH 0
-#endif
-
-/* Write others permission */
-#if !defined(S_IWOTH)
-#   define S_IWOTH 0
-#endif
-
-/* Execute others permission */
-#if !defined(S_IXOTH)
-#   define S_IXOTH 0
-#endif
-
-/* Maximum length of file name */
-#if !defined(PATH_MAX)
-#   define PATH_MAX MAX_PATH
-#endif
-#if !defined(FILENAME_MAX)
-#   define FILENAME_MAX MAX_PATH
-#endif
-#if !defined(NAME_MAX)
-#   define NAME_MAX FILENAME_MAX
-#endif
-
-/* File type flags for d_type */
-#define DT_UNKNOWN 0
-#define DT_REG S_IFREG
-#define DT_DIR S_IFDIR
-#define DT_FIFO S_IFIFO
-#define DT_SOCK S_IFSOCK
-#define DT_CHR S_IFCHR
-#define DT_BLK S_IFBLK
-#define DT_LNK S_IFLNK
-
-/* Macros for converting between st_mode and d_type */
-#define IFTODT(mode) ((mode) & S_IFMT)
-#define DTTOIF(type) (type)
-
-/*
- * File type macros.  Note that block devices, sockets and links cannot be
- * distinguished on Windows and the macros S_ISBLK, S_ISSOCK and S_ISLNK are
- * only defined for compatibility.  These macros should always return false
- * on Windows.
- */
-#if !defined(S_ISFIFO)
-#   define S_ISFIFO(mode) (((mode) & S_IFMT) == S_IFIFO)
-#endif
-#if !defined(S_ISDIR)
-#   define S_ISDIR(mode) (((mode) & S_IFMT) == S_IFDIR)
-#endif
-#if !defined(S_ISREG)
-#   define S_ISREG(mode) (((mode) & S_IFMT) == S_IFREG)
-#endif
-#if !defined(S_ISLNK)
-#   define S_ISLNK(mode) (((mode) & S_IFMT) == S_IFLNK)
-#endif
-#if !defined(S_ISSOCK)
-#   define S_ISSOCK(mode) (((mode) & S_IFMT) == S_IFSOCK)
-#endif
-#if !defined(S_ISCHR)
-#   define S_ISCHR(mode) (((mode) & S_IFMT) == S_IFCHR)
-#endif
-#if !defined(S_ISBLK)
-#   define S_ISBLK(mode) (((mode) & S_IFMT) == S_IFBLK)
-#endif
-
-/* Return the exact length of the file name without zero terminator */
-#define _D_EXACT_NAMLEN(p) ((p)->d_namlen)
-
-/* Return the maximum size of a file name */
-#define _D_ALLOC_NAMLEN(p) ((PATH_MAX)+1)
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
-/* Wide-character version */
-struct _wdirent {
-    /* Always zero */
-    long d_ino;
-
-    /* File position within stream */
-    long d_off;
-
-    /* Structure size */
-    unsigned short d_reclen;
-
-    /* Length of name without \0 */
-    size_t d_namlen;
-
-    /* File type */
-    int d_type;
-
-    /* File name */
-    wchar_t d_name[PATH_MAX+1];
-};
-typedef struct _wdirent _wdirent;
-
-struct _WDIR {
-    /* Current directory entry */
-    struct _wdirent ent;
-
-    /* Private file data */
-    WIN32_FIND_DATAW data;
-
-    /* True if data is valid */
-    int cached;
-
-    /* Win32 search handle */
-    HANDLE handle;
-
-    /* Initial directory name */
-    wchar_t *patt;
-};
-typedef struct _WDIR _WDIR;
-
-/* Multi-byte character version */
-struct dirent {
-    /* Always zero */
-    long d_ino;
-
-    /* File position within stream */
-    long d_off;
-
-    /* Structure size */
-    unsigned short d_reclen;
-
-    /* Length of name without \0 */
-    size_t d_namlen;
-
-    /* File type */
-    int d_type;
-
-    /* File name */
-    char d_name[PATH_MAX+1];
-};
-typedef struct dirent dirent;
-
-struct DIR {
-    struct dirent ent;
-    struct _WDIR *wdirp;
-};
-typedef struct DIR DIR;
-
-
-/* Dirent functions */
-static DIR *opendir (const char *dirname);
-static _WDIR *_wopendir (const wchar_t *dirname);
-
-static struct dirent *readdir (DIR *dirp);
-static struct _wdirent *_wreaddir (_WDIR *dirp);
-
-static int readdir_r(
-    DIR *dirp, struct dirent *entry, struct dirent **result);
-static int _wreaddir_r(
-    _WDIR *dirp, struct _wdirent *entry, struct _wdirent **result);
-
-static int closedir (DIR *dirp);
-static int _wclosedir (_WDIR *dirp);
-
-static void rewinddir (DIR* dirp);
-static void _wrewinddir (_WDIR* dirp);
-
-static int scandir (const char *dirname, struct dirent ***namelist,
-    int (*filter)(const struct dirent*),
-    int (*compare)(const struct dirent**, const struct dirent**));
-
-static int alphasort (const struct dirent **a, const struct dirent **b);
-
-static int versionsort (const struct dirent **a, const struct dirent **b);
-
-
-/* For compatibility with Symbian */
-#define wdirent _wdirent
-#define WDIR _WDIR
-#define wopendir _wopendir
-#define wreaddir _wreaddir
-#define wclosedir _wclosedir
-#define wrewinddir _wrewinddir
-
-
-/* Internal utility functions */
-static WIN32_FIND_DATAW *dirent_first (_WDIR *dirp);
-static WIN32_FIND_DATAW *dirent_next (_WDIR *dirp);
-
-static int dirent_mbstowcs_s(
-    size_t *pReturnValue,
-    wchar_t *wcstr,
-    size_t sizeInWords,
-    const char *mbstr,
-    size_t count);
-
-static int dirent_wcstombs_s(
-    size_t *pReturnValue,
-    char *mbstr,
-    size_t sizeInBytes,
-    const wchar_t *wcstr,
-    size_t count);
-
-static void dirent_set_errno (int error);
-
-
-/*
- * Open directory stream DIRNAME for read and return a pointer to the
- * internal working area that is used to retrieve individual directory
- * entries.
- */
-static _WDIR*
-_wopendir(
-    const wchar_t *dirname)
-{
-    _WDIR *dirp;
-#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
-    /* Desktop */
-    DWORD n;
+#if defined(PATH_MAX)
+# define JS__PATH_MAX PATH_MAX
+#elif defined(_WIN32)
+# define JS__PATH_MAX 32767
 #else
-    /* WinRT */
-    size_t n;
+# define JS__PATH_MAX 8192
 #endif
-    wchar_t *p;
-
-    /* Must have directory name */
-    if (dirname == NULL  ||  dirname[0] == '\0') {
-        dirent_set_errno (ENOENT);
-        return NULL;
-    }
-
-    /* Allocate new _WDIR structure */
-    dirp = (_WDIR*) malloc (sizeof (struct _WDIR));
-    if (!dirp) {
-        return NULL;
-    }
-
-    /* Reset _WDIR structure */
-    dirp->handle = INVALID_HANDLE_VALUE;
-    dirp->patt = NULL;
-    dirp->cached = 0;
-
-    /*
-     * Compute the length of full path plus zero terminator
-     *
-     * Note that on WinRT there's no way to convert relative paths
-     * into absolute paths, so just assume it is an absolute path.
-     */
-#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
-    /* Desktop */
-    n = GetFullPathNameW (dirname, 0, NULL, NULL);
-#else
-    /* WinRT */
-    n = wcslen (dirname);
-#endif
-
-    /* Allocate room for absolute directory name and search pattern */
-    dirp->patt = (wchar_t*) malloc (sizeof (wchar_t) * n + 16);
-    if (dirp->patt == NULL) {
-        goto exit_closedir;
-    }
-
-    /*
-     * Convert relative directory name to an absolute one.  This
-     * allows rewinddir() to function correctly even when current
-     * working directory is changed between opendir() and rewinddir().
-     *
-     * Note that on WinRT there's no way to convert relative paths
-     * into absolute paths, so just assume it is an absolute path.
-     */
-#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
-    /* Desktop */
-    n = GetFullPathNameW (dirname, n, dirp->patt, NULL);
-    if (n <= 0) {
-        goto exit_closedir;
-    }
-#else
-    /* WinRT */
-    wcsncpy_s (dirp->patt, n+1, dirname, n);
-#endif
-
-    /* Append search pattern \* to the directory name */
-    p = dirp->patt + n;
-    switch (p[-1]) {
-    case '\\':
-    case '/':
-    case ':':
-        /* Directory ends in path separator, e.g. c:\temp\ */
-        /*NOP*/;
-        break;
-
-    default:
-        /* Directory name doesn't end in path separator */
-        *p++ = '\\';
-    }
-    *p++ = '*';
-    *p = '\0';
-
-    /* Open directory stream and retrieve the first entry */
-    if (!dirent_first (dirp)) {
-        goto exit_closedir;
-    }
-
-    /* Success */
-    return dirp;
-
-    /* Failure */
-exit_closedir:
-    _wclosedir (dirp);
-    return NULL;
-}
-
-/*
- * Read next directory entry.
- *
- * Returns pointer to static directory entry which may be overwritten by
- * subsequent calls to _wreaddir().
- */
-static struct _wdirent*
-_wreaddir(
-    _WDIR *dirp)
-{
-    struct _wdirent *entry;
-
-    /*
-     * Read directory entry to buffer.  We can safely ignore the return value
-     * as entry will be set to NULL in case of error.
-     */
-    (void) _wreaddir_r (dirp, &dirp->ent, &entry);
-
-    /* Return pointer to statically allocated directory entry */
-    return entry;
-}
-
-/*
- * Read next directory entry.
- *
- * Returns zero on success.  If end of directory stream is reached, then sets
- * result to NULL and returns zero.
- */
-static int
-_wreaddir_r(
-    _WDIR *dirp,
-    struct _wdirent *entry,
-    struct _wdirent **result)
-{
-    WIN32_FIND_DATAW *datap;
-
-    /* Read next directory entry */
-    datap = dirent_next (dirp);
-    if (datap) {
-        size_t n;
-        DWORD attr;
-
-        /*
-         * Copy file name as wide-character string.  If the file name is too
-         * long to fit in to the destination buffer, then truncate file name
-         * to PATH_MAX characters and zero-terminate the buffer.
-         */
-        n = 0;
-        while (n < PATH_MAX  &&  datap->cFileName[n] != 0) {
-            entry->d_name[n] = datap->cFileName[n];
-            n++;
-        }
-        entry->d_name[n] = 0;
-
-        /* Length of file name excluding zero terminator */
-        entry->d_namlen = n;
-
-        /* File type */
-        attr = datap->dwFileAttributes;
-        if ((attr & FILE_ATTRIBUTE_DEVICE) != 0) {
-            entry->d_type = DT_CHR;
-        } else if ((attr & FILE_ATTRIBUTE_DIRECTORY) != 0) {
-            entry->d_type = DT_DIR;
-        } else {
-            entry->d_type = DT_REG;
-        }
-
-        /* Reset dummy fields */
-        entry->d_ino = 0;
-        entry->d_off = 0;
-        entry->d_reclen = sizeof (struct _wdirent);
-
-        /* Set result address */
-        *result = entry;
-
-    } else {
-
-        /* Return NULL to indicate end of directory */
-        *result = NULL;
-
-    }
-
-    return /*OK*/0;
-}
-
-/*
- * Close directory stream opened by opendir() function.  This invalidates the
- * DIR structure as well as any directory entry read previously by
- * _wreaddir().
- */
-static int
-_wclosedir(
-    _WDIR *dirp)
-{
-    int ok;
-    if (dirp) {
-
-        /* Release search handle */
-        if (dirp->handle != INVALID_HANDLE_VALUE) {
-            FindClose (dirp->handle);
-        }
-
-        /* Release search pattern */
-        free (dirp->patt);
-
-        /* Release directory structure */
-        free (dirp);
-        ok = /*success*/0;
-
-    } else {
-
-        /* Invalid directory stream */
-        dirent_set_errno (EBADF);
-        ok = /*failure*/-1;
-
-    }
-    return ok;
-}
-
-/*
- * Rewind directory stream such that _wreaddir() returns the very first
- * file name again.
- */
-static void
-_wrewinddir(
-    _WDIR* dirp)
-{
-    if (dirp) {
-        /* Release existing search handle */
-        if (dirp->handle != INVALID_HANDLE_VALUE) {
-            FindClose (dirp->handle);
-        }
-
-        /* Open new search handle */
-        dirent_first (dirp);
-    }
-}
-
-/* Get first directory entry (internal) */
-static WIN32_FIND_DATAW*
-dirent_first(
-    _WDIR *dirp)
-{
-    WIN32_FIND_DATAW *datap;
-    DWORD error;
-
-    /* Open directory and retrieve the first entry */
-    dirp->handle = FindFirstFileExW(
-        dirp->patt, FindExInfoStandard, &dirp->data,
-        FindExSearchNameMatch, NULL, 0);
-    if (dirp->handle != INVALID_HANDLE_VALUE) {
-
-        /* a directory entry is now waiting in memory */
-        datap = &dirp->data;
-        dirp->cached = 1;
-
-    } else {
-
-        /* Failed to open directory: no directory entry in memory */
-        dirp->cached = 0;
-        datap = NULL;
-
-        /* Set error code */
-        error = GetLastError ();
-        switch (error) {
-        case ERROR_ACCESS_DENIED:
-            /* No read access to directory */
-            dirent_set_errno (EACCES);
-            break;
-
-        case ERROR_DIRECTORY:
-            /* Directory name is invalid */
-            dirent_set_errno (ENOTDIR);
-            break;
-
-        case ERROR_PATH_NOT_FOUND:
-        default:
-            /* Cannot find the file */
-            dirent_set_errno (ENOENT);
-        }
-
-    }
-    return datap;
-}
-
-/*
- * Get next directory entry (internal).
- *
- * Returns
- */
-static WIN32_FIND_DATAW*
-dirent_next(
-    _WDIR *dirp)
-{
-    WIN32_FIND_DATAW *p;
-
-    /* Get next directory entry */
-    if (dirp->cached != 0) {
-
-        /* A valid directory entry already in memory */
-        p = &dirp->data;
-        dirp->cached = 0;
-
-    } else if (dirp->handle != INVALID_HANDLE_VALUE) {
-
-        /* Get the next directory entry from stream */
-        if (FindNextFileW (dirp->handle, &dirp->data) != 0) {
-            /* Got a file */
-            p = &dirp->data;
-        } else {
-            /* The very last entry has been processed or an error occurred */
-            FindClose (dirp->handle);
-            dirp->handle = INVALID_HANDLE_VALUE;
-            p = NULL;
-        }
-
-    } else {
-
-        /* End of directory stream reached */
-        p = NULL;
-
-    }
-
-    return p;
-}
-
-/*
- * Open directory stream using plain old C-string.
- */
-static DIR*
-opendir(
-    const char *dirname)
-{
-    struct DIR *dirp;
-
-    /* Must have directory name */
-    if (dirname == NULL  ||  dirname[0] == '\0') {
-        dirent_set_errno (ENOENT);
-        return NULL;
-    }
-
-    /* Allocate memory for DIR structure */
-    dirp = (DIR*) malloc (sizeof (struct DIR));
-    if (!dirp) {
-        return NULL;
-    }
-    {
-        int error;
-        wchar_t wname[PATH_MAX + 1];
-        size_t n;
-
-        /* Convert directory name to wide-character string */
-        error = dirent_mbstowcs_s(
-            &n, wname, PATH_MAX + 1, dirname, PATH_MAX + 1);
-        if (error) {
-            /*
-             * Cannot convert file name to wide-character string.  This
-             * occurs if the string contains invalid multi-byte sequences or
-             * the output buffer is too small to contain the resulting
-             * string.
-             */
-            goto exit_free;
-        }
-
-
-        /* Open directory stream using wide-character name */
-        dirp->wdirp = _wopendir (wname);
-        if (!dirp->wdirp) {
-            goto exit_free;
-        }
-
-    }
-
-    /* Success */
-    return dirp;
-
-    /* Failure */
-exit_free:
-    free (dirp);
-    return NULL;
-}
-
-/*
- * Read next directory entry.
- */
-static struct dirent*
-readdir(
-    DIR *dirp)
-{
-    struct dirent *entry;
-
-    /*
-     * Read directory entry to buffer.  We can safely ignore the return value
-     * as entry will be set to NULL in case of error.
-     */
-    (void) readdir_r (dirp, &dirp->ent, &entry);
-
-    /* Return pointer to statically allocated directory entry */
-    return entry;
-}
-
-/*
- * Read next directory entry into called-allocated buffer.
- *
- * Returns zero on success.  If the end of directory stream is reached, then
- * sets result to NULL and returns zero.
- */
-static int
-readdir_r(
-    DIR *dirp,
-    struct dirent *entry,
-    struct dirent **result)
-{
-    WIN32_FIND_DATAW *datap;
-
-    /* Read next directory entry */
-    datap = dirent_next (dirp->wdirp);
-    if (datap) {
-        size_t n;
-        int error;
-
-        /* Attempt to convert file name to multi-byte string */
-        error = dirent_wcstombs_s(
-            &n, entry->d_name, PATH_MAX + 1, datap->cFileName, PATH_MAX + 1);
-
-        /*
-         * If the file name cannot be represented by a multi-byte string,
-         * then attempt to use old 8+3 file name.  This allows traditional
-         * Unix-code to access some file names despite of unicode
-         * characters, although file names may seem unfamiliar to the user.
-         *
-         * Be ware that the code below cannot come up with a short file
-         * name unless the file system provides one.  At least
-         * VirtualBox shared folders fail to do this.
-         */
-        if (error  &&  datap->cAlternateFileName[0] != '\0') {
-            error = dirent_wcstombs_s(
-                &n, entry->d_name, PATH_MAX + 1,
-                datap->cAlternateFileName, PATH_MAX + 1);
-        }
-
-        if (!error) {
-            DWORD attr;
-
-            /* Length of file name excluding zero terminator */
-            entry->d_namlen = n - 1;
-
-            /* File attributes */
-            attr = datap->dwFileAttributes;
-            if ((attr & FILE_ATTRIBUTE_DEVICE) != 0) {
-                entry->d_type = DT_CHR;
-            } else if ((attr & FILE_ATTRIBUTE_DIRECTORY) != 0) {
-                entry->d_type = DT_DIR;
-            } else {
-                entry->d_type = DT_REG;
-            }
-
-            /* Reset dummy fields */
-            entry->d_ino = 0;
-            entry->d_off = 0;
-            entry->d_reclen = sizeof (struct dirent);
-
-        } else {
-
-            /*
-             * Cannot convert file name to multi-byte string so construct
-             * an erroneous directory entry and return that.  Note that
-             * we cannot return NULL as that would stop the processing
-             * of directory entries completely.
-             */
-            entry->d_name[0] = '?';
-            entry->d_name[1] = '\0';
-            entry->d_namlen = 1;
-            entry->d_type = DT_UNKNOWN;
-            entry->d_ino = 0;
-            entry->d_off = -1;
-            entry->d_reclen = 0;
-
-        }
-
-        /* Return pointer to directory entry */
-        *result = entry;
-
-    } else {
-
-        /* No more directory entries */
-        *result = NULL;
-
-    }
-
-    return /*OK*/0;
-}
-
-/*
- * Close directory stream.
- */
-static int
-closedir(
-    DIR *dirp)
-{
-    int ok;
-    if (dirp) {
-
-        /* Close wide-character directory stream */
-        ok = _wclosedir (dirp->wdirp);
-        dirp->wdirp = NULL;
-
-        /* Release multi-byte character version */
-        free (dirp);
-
-    } else {
-
-        /* Invalid directory stream */
-        dirent_set_errno (EBADF);
-        ok = /*failure*/-1;
-
-    }
-    return ok;
-}
-
-/*
- * Rewind directory stream to beginning.
- */
-static void
-rewinddir(
-    DIR* dirp)
-{
-    /* Rewind wide-character string directory stream */
-    _wrewinddir (dirp->wdirp);
-}
-
-/*
- * Scan directory for entries.
- */
-static int
-scandir(
-    const char *dirname,
-    struct dirent ***namelist,
-    int (*filter)(const struct dirent*),
-    int (*compare)(const struct dirent**, const struct dirent**))
-{
-    struct dirent **files = NULL;
-    size_t size = 0;
-    size_t allocated = 0;
-    const size_t init_size = 1;
-    DIR *dir = NULL;
-    struct dirent *entry;
-    struct dirent *tmp = NULL;
-    size_t i;
-    int result = 0;
-
-    /* Open directory stream */
-    dir = opendir (dirname);
-    if (dir) {
-
-        /* Read directory entries to memory */
-        while (1) {
-
-            /* Enlarge pointer table to make room for another pointer */
-            if (size >= allocated) {
-                void *p;
-                size_t num_entries;
-
-                /* Compute number of entries in the enlarged pointer table */
-                if (size < init_size) {
-                    /* Allocate initial pointer table */
-                    num_entries = init_size;
-                } else {
-                    /* Double the size */
-                    num_entries = size * 2;
-                }
-
-                /* Allocate first pointer table or enlarge existing table */
-                p = realloc (files, sizeof (void*) * num_entries);
-                if (p != NULL) {
-                    /* Got the memory */
-                    files = (dirent**) p;
-                    allocated = num_entries;
-                } else {
-                    /* Out of memory */
-                    result = -1;
-                    break;
-                }
-
-            }
-
-            /* Allocate room for temporary directory entry */
-            if (tmp == NULL) {
-                tmp = (struct dirent*) malloc (sizeof (struct dirent));
-                if (tmp == NULL) {
-                    /* Cannot allocate temporary directory entry */
-                    result = -1;
-                    break;
-                }
-            }
-
-            /* Read directory entry to temporary area */
-            if (readdir_r (dir, tmp, &entry) == /*OK*/0) {
-
-                /* Did we get an entry? */
-                if (entry != NULL) {
-                    int pass;
-
-                    /* Determine whether to include the entry in result */
-                    if (filter) {
-                        /* Let the filter function decide */
-                        pass = filter (tmp);
-                    } else {
-                        /* No filter function, include everything */
-                        pass = 1;
-                    }
-
-                    if (pass) {
-                        /* Store the temporary entry to pointer table */
-                        files[size++] = tmp;
-                        tmp = NULL;
-
-                        /* Keep up with the number of files */
-                        result++;
-                    }
-
-                } else {
-
-                    /*
-                     * End of directory stream reached => sort entries and
-                     * exit.
-                     */
-                    qsort (files, size, sizeof (void*),
-                        (int (*) (const void*, const void*)) compare);
-                    break;
-
-                }
-
-            } else {
-                /* Error reading directory entry */
-                result = /*Error*/ -1;
-                break;
-            }
-
-        }
-
-    } else {
-        /* Cannot open directory */
-        result = /*Error*/ -1;
-    }
-
-    /* Release temporary directory entry */
-    free (tmp);
-
-    /* Release allocated memory on error */
-    if (result < 0) {
-        for (i = 0; i < size; i++) {
-            free (files[i]);
-        }
-        free (files);
-        files = NULL;
-    }
-
-    /* Close directory stream */
-    if (dir) {
-        closedir (dir);
-    }
-
-    /* Pass pointer table to caller */
-    if (namelist) {
-        *namelist = files;
-    }
-    return result;
-}
-
-/* Alphabetical sorting */
-static int
-alphasort(
-    const struct dirent **a, const struct dirent **b)
-{
-    return strcoll ((*a)->d_name, (*b)->d_name);
-}
-
-/* Sort versions */
-static int
-versionsort(
-    const struct dirent **a, const struct dirent **b)
-{
-    /* FIXME: implement strverscmp and use that */
-    return alphasort (a, b);
-}
-
-/* Convert multi-byte string to wide character string */
-static int
-dirent_mbstowcs_s(
-    size_t *pReturnValue,
-    wchar_t *wcstr,
-    size_t sizeInWords,
-    const char *mbstr,
-    size_t count)
-{
-    int error;
-
-#if defined(_MSC_VER)  &&  _MSC_VER >= 1400
-
-    /* Microsoft Visual Studio 2005 or later */
-    error = mbstowcs_s (pReturnValue, wcstr, sizeInWords, mbstr, count);
-
-#else
-
-    /* Older Visual Studio or non-Microsoft compiler */
-    size_t n;
-
-    /* Convert to wide-character string (or count characters) */
-    n = mbstowcs (wcstr, mbstr, sizeInWords);
-    if (!wcstr  ||  n < count) {
-
-        /* Zero-terminate output buffer */
-        if (wcstr  &&  sizeInWords) {
-            if (n >= sizeInWords) {
-                n = sizeInWords - 1;
-            }
-            wcstr[n] = 0;
-        }
-
-        /* Length of resulting multi-byte string WITH zero terminator */
-        if (pReturnValue) {
-            *pReturnValue = n + 1;
-        }
-
-        /* Success */
-        error = 0;
-
-    } else {
-
-        /* Could not convert string */
-        error = 1;
-
-    }
-
-#endif
-    return error;
-}
-
-/* Convert wide-character string to multi-byte string */
-static int
-dirent_wcstombs_s(
-    size_t *pReturnValue,
-    char *mbstr,
-    size_t sizeInBytes, /* max size of mbstr */
-    const wchar_t *wcstr,
-    size_t count)
-{
-    int error;
-
-#if defined(_MSC_VER)  &&  _MSC_VER >= 1400
-
-    /* Microsoft Visual Studio 2005 or later */
-    error = wcstombs_s (pReturnValue, mbstr, sizeInBytes, wcstr, count);
-
-#else
-
-    /* Older Visual Studio or non-Microsoft compiler */
-    size_t n;
-
-    /* Convert to multi-byte string (or count the number of bytes needed) */
-    n = wcstombs (mbstr, wcstr, sizeInBytes);
-    if (!mbstr  ||  n < count) {
-
-        /* Zero-terminate output buffer */
-        if (mbstr  &&  sizeInBytes) {
-            if (n >= sizeInBytes) {
-                n = sizeInBytes - 1;
-            }
-            mbstr[n] = '\0';
-        }
-
-        /* Length of resulting multi-bytes string WITH zero-terminator */
-        if (pReturnValue) {
-            *pReturnValue = n + 1;
-        }
-
-        /* Success */
-        error = 0;
-
-    } else {
-
-        /* Cannot convert string */
-        error = 1;
-
-    }
-
-#endif
-    return error;
-}
-
-/* Set errno variable */
-static void
-dirent_set_errno(
-    int error)
-{
-#if defined(_MSC_VER)  &&  _MSC_VER >= 1400
-
-    /* Microsoft Visual Studio 2005 and later */
-    _set_errno (error);
-
-#else
-
-    /* Non-Microsoft compiler or older Microsoft compiler */
-    errno = error;
-
-#endif
-}
-
-
-#ifdef __cplusplus
-}
-#endif
-#endif /*DIRENT_H*/
-
-#endif // _WIN32
-
-////
 
 void js__pstrcpy(char *buf, int buf_size, const char *str);
 char *js__pstrcat(char *buf, int buf_size, const char *s);
@@ -1762,19 +600,29 @@ static inline uint8_t to_upper_ascii(uint8_t c) {
     return c >= 'a' && c <= 'z' ? c - 'a' + 'A' : c;
 }
 
-extern char const digits36[36];
-size_t u32toa(char buf[minimum_length(11)], uint32_t n);
-size_t i32toa(char buf[minimum_length(12)], int32_t n);
-size_t u64toa(char buf[minimum_length(21)], uint64_t n);
-size_t i64toa(char buf[minimum_length(22)], int64_t n);
-size_t u32toa_radix(char buf[minimum_length(33)], uint32_t n, unsigned int base);
-size_t i32toa_radix(char buf[minimum_length(34)], int32_t n, unsigned base);
-size_t u64toa_radix(char buf[minimum_length(65)], uint64_t n, unsigned int base);
-size_t i64toa_radix(char buf[minimum_length(66)], int64_t n, unsigned int base);
-
 void rqsort(void *base, size_t nmemb, size_t size,
             int (*cmp)(const void *, const void *, void *),
             void *arg);
+
+static inline uint64_t float64_as_uint64(double d)
+{
+    union {
+        double d;
+        uint64_t u64;
+    } u;
+    u.d = d;
+    return u.u64;
+}
+
+static inline double uint64_as_float64(uint64_t u64)
+{
+    union {
+        double d;
+        uint64_t u64;
+    } u;
+    u.u64 = u64;
+    return u.d;
+}
 
 int64_t js__gettimeofday_us(void);
 uint64_t js__hrtime_ns(void);
@@ -1785,27 +633,37 @@ static inline size_t js__malloc_usable_size(const void *ptr)
     return malloc_size(ptr);
 #elif defined(_WIN32)
     return _msize((void *)ptr);
-#elif defined(__linux__) || defined(__ANDROID__) || defined(__CYGWIN__) || defined(__FreeBSD__)
+#elif defined(__linux__) || defined(__ANDROID__) || defined(__CYGWIN__) || defined(__FreeBSD__) || defined(__GLIBC__)
     return malloc_usable_size((void *)ptr);
 #else
     return 0;
 #endif
 }
 
+int js_exepath(char* buffer, size_t* size);
+
 /* Cross-platform threading APIs. */
 
-#if !defined(EMSCRIPTEN) && !defined(__wasi__)
+#if defined(EMSCRIPTEN) || defined(__wasi__)
+
+#define JS_HAVE_THREADS 0
+
+#else
+
+#define JS_HAVE_THREADS 1
 
 #if defined(_WIN32)
 #define JS_ONCE_INIT INIT_ONCE_STATIC_INIT
 typedef INIT_ONCE js_once_t;
 typedef CRITICAL_SECTION js_mutex_t;
 typedef CONDITION_VARIABLE js_cond_t;
+typedef HANDLE js_thread_t;
 #else
 #define JS_ONCE_INIT PTHREAD_ONCE_INIT
 typedef pthread_once_t js_once_t;
 typedef pthread_mutex_t js_mutex_t;
 typedef pthread_cond_t js_cond_t;
+typedef pthread_t js_thread_t;
 #endif
 
 void js_once(js_once_t *guard, void (*callback)(void));
@@ -1822,6 +680,15 @@ void js_cond_broadcast(js_cond_t *cond);
 void js_cond_wait(js_cond_t *cond, js_mutex_t *mutex);
 int js_cond_timedwait(js_cond_t *cond, js_mutex_t *mutex, uint64_t timeout);
 
+enum {
+    JS_THREAD_CREATE_DETACHED = 1,
+};
+
+// creates threads with 2 MB stacks (glibc default)
+int js_thread_create(js_thread_t *thrd, void (*start)(void *), void *arg,
+                     int flags);
+int js_thread_join(js_thread_t thrd);
+
 #endif /* !defined(EMSCRIPTEN) && !defined(__wasi__) */
 
 #ifdef __cplusplus
@@ -1829,6 +696,89 @@ int js_cond_timedwait(js_cond_t *cond, js_mutex_t *mutex, uint64_t timeout);
 #endif
 
 #endif  /* CUTILS_H */
+/*
+ * Tiny float64 printing and parsing library
+ *
+ * Copyright (c) 2024 Fabrice Bellard
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+//#define JS_DTOA_DUMP_STATS
+
+/* maximum number of digits for fixed and frac formats */
+#define JS_DTOA_MAX_DIGITS 101
+
+/* radix != 10 is only supported with flags = JS_DTOA_FORMAT_FREE */
+/* use as many digits as necessary */
+#define JS_DTOA_FORMAT_FREE  (0 << 0)
+/* use n_digits significant digits (1 <= n_digits <= JS_DTOA_MAX_DIGITS) */
+#define JS_DTOA_FORMAT_FIXED (1 << 0)
+/* force fractional format: [-]dd.dd with n_digits fractional digits.
+   0 <= n_digits <= JS_DTOA_MAX_DIGITS */
+#define JS_DTOA_FORMAT_FRAC  (2 << 0)
+#define JS_DTOA_FORMAT_MASK  (3 << 0)
+
+/* select exponential notation either in fixed or free format */
+#define JS_DTOA_EXP_AUTO     (0 << 2)
+#define JS_DTOA_EXP_ENABLED  (1 << 2)
+#define JS_DTOA_EXP_DISABLED (2 << 2)
+#define JS_DTOA_EXP_MASK     (3 << 2)
+
+#define JS_DTOA_MINUS_ZERO   (1 << 4) /* show the minus sign for -0 */
+
+/* only accepts integers (no dot, no exponent) */
+#define JS_ATOD_INT_ONLY       (1 << 0)
+/* accept Oo and Ob prefixes in addition to 0x prefix if radix = 0 */
+#define JS_ATOD_ACCEPT_BIN_OCT (1 << 1)
+/* accept O prefix as octal if radix == 0 and properly formed (Annex B) */
+#define JS_ATOD_ACCEPT_LEGACY_OCTAL  (1 << 2)
+/* accept _ between digits as a digit separator */
+#define JS_ATOD_ACCEPT_UNDERSCORES  (1 << 3)
+
+typedef struct {
+    uint64_t mem[37];
+} JSDTOATempMem;
+
+typedef struct {
+    uint64_t mem[27];
+} JSATODTempMem;
+
+/* return a maximum bound of the string length */
+int js_dtoa_max_len(double d, int radix, int n_digits, int flags);
+/* return the string length */
+int js_dtoa(char *buf, double d, int radix, int n_digits, int flags,
+            JSDTOATempMem *tmp_mem);
+double js_atod(const char *str, const char **pnext, int radix, int flags,
+               JSATODTempMem *tmp_mem);
+
+#ifdef JS_DTOA_DUMP_STATS
+void js_dtoa_dump_stats(void);
+#endif
+
+/* additional exported functions */
+size_t u32toa(char *buf, uint32_t n);
+size_t i32toa(char *buf, int32_t n);
+size_t u64toa(char *buf, uint64_t n);
+size_t i64toa(char *buf, int64_t n);
+size_t u64toa_radix(char *buf, uint64_t n, unsigned int radix);
+size_t i64toa_radix(char *buf, int64_t n, unsigned int radix);
 /*
  * Linux klist like system
  *
@@ -1936,551 +886,6 @@ static inline int list_empty(struct list_head *el)
 #endif
 
 #endif /* LIST_H */
-/*
- * Tiny arbitrary precision floating point library
- *
- * Copyright (c) 2017-2021 Fabrice Bellard
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
-#ifndef LIBBF_H
-#define LIBBF_H
-
-#include <stddef.h>
-#include <stdint.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#if INTPTR_MAX >= INT64_MAX && !defined(_WIN32) && !defined(__TINYC__)
-#define LIMB_LOG2_BITS 6
-#else
-#define LIMB_LOG2_BITS 5
-#endif
-
-#define LIMB_BITS (1 << LIMB_LOG2_BITS)
-
-#if LIMB_BITS == 64
-#ifndef INT128_MAX
-__extension__ typedef __int128 int128_t;
-__extension__ typedef unsigned __int128 uint128_t;
-#endif
-typedef int64_t slimb_t;
-typedef uint64_t limb_t;
-typedef uint128_t dlimb_t;
-#define BF_RAW_EXP_MIN INT64_MIN
-#define BF_RAW_EXP_MAX INT64_MAX
-
-#define LIMB_DIGITS 19
-#define BF_DEC_BASE UINT64_C(10000000000000000000)
-
-#else
-
-typedef int32_t slimb_t;
-typedef uint32_t limb_t;
-typedef uint64_t dlimb_t;
-#define BF_RAW_EXP_MIN INT32_MIN
-#define BF_RAW_EXP_MAX INT32_MAX
-
-#define LIMB_DIGITS 9
-#define BF_DEC_BASE 1000000000U
-
-#endif
-
-/* in bits */
-/* minimum number of bits for the exponent */
-#define BF_EXP_BITS_MIN 3
-/* maximum number of bits for the exponent */
-#define BF_EXP_BITS_MAX (LIMB_BITS - 3)
-/* extended range for exponent, used internally */
-#define BF_EXT_EXP_BITS_MAX (BF_EXP_BITS_MAX + 1)
-/* minimum possible precision */
-#define BF_PREC_MIN 2
-/* minimum possible precision */
-#define BF_PREC_MAX (((limb_t)1 << (LIMB_BITS - 2)) - 2)
-/* some operations support infinite precision */
-#define BF_PREC_INF (BF_PREC_MAX + 1) /* infinite precision */
-
-#if LIMB_BITS == 64
-#define BF_CHKSUM_MOD (UINT64_C(975620677) * UINT64_C(9795002197))
-#else
-#define BF_CHKSUM_MOD 975620677U
-#endif
-
-#define BF_EXP_ZERO BF_RAW_EXP_MIN
-#define BF_EXP_INF (BF_RAW_EXP_MAX - 1)
-#define BF_EXP_NAN BF_RAW_EXP_MAX
-
-/* +/-zero is represented with expn = BF_EXP_ZERO and len = 0,
-   +/-infinity is represented with expn = BF_EXP_INF and len = 0,
-   NaN is represented with expn = BF_EXP_NAN and len = 0 (sign is ignored)
- */
-typedef struct {
-    struct bf_context_t *ctx;
-    int sign;
-    slimb_t expn;
-    limb_t len;
-    limb_t *tab;
-} bf_t;
-
-typedef struct {
-    /* must be kept identical to bf_t */
-    struct bf_context_t *ctx;
-    int sign;
-    slimb_t expn;
-    limb_t len;
-    limb_t *tab;
-} bfdec_t;
-
-typedef enum {
-    BF_RNDN, /* round to nearest, ties to even */
-    BF_RNDZ, /* round to zero */
-    BF_RNDD, /* round to -inf (the code relies on (BF_RNDD xor BF_RNDU) = 1) */
-    BF_RNDU, /* round to +inf */
-    BF_RNDNA, /* round to nearest, ties away from zero */
-    BF_RNDA, /* round away from zero */
-    BF_RNDF, /* faithful rounding (nondeterministic, either RNDD or RNDU,
-                inexact flag is always set)  */
-} bf_rnd_t;
-
-/* allow subnormal numbers. Only available if the number of exponent
-   bits is <= BF_EXP_BITS_USER_MAX and prec != BF_PREC_INF. */
-#define BF_FLAG_SUBNORMAL (1 << 3)
-/* 'prec' is the precision after the radix point instead of the whole
-   mantissa. Can only be used with bf_round() and
-   bfdec_[add|sub|mul|div|sqrt|round](). */
-#define BF_FLAG_RADPNT_PREC (1 << 4)
-
-#define BF_RND_MASK 0x7
-#define BF_EXP_BITS_SHIFT 5
-#define BF_EXP_BITS_MASK 0x3f
-
-/* shortcut for bf_set_exp_bits(BF_EXT_EXP_BITS_MAX) */
-#define BF_FLAG_EXT_EXP (BF_EXP_BITS_MASK << BF_EXP_BITS_SHIFT)
-
-/* contains the rounding mode and number of exponents bits */
-typedef uint32_t bf_flags_t;
-
-typedef void *bf_realloc_func_t(void *opaque, void *ptr, size_t size);
-
-typedef struct {
-    bf_t val;
-    limb_t prec;
-} BFConstCache;
-
-typedef struct bf_context_t {
-    void *realloc_opaque;
-    bf_realloc_func_t *realloc_func;
-    BFConstCache log2_cache;
-    BFConstCache pi_cache;
-    struct BFNTTState *ntt_state;
-} bf_context_t;
-
-static inline int bf_get_exp_bits(bf_flags_t flags)
-{
-    int e;
-    e = (flags >> BF_EXP_BITS_SHIFT) & BF_EXP_BITS_MASK;
-    if (e == BF_EXP_BITS_MASK)
-        return BF_EXP_BITS_MAX + 1;
-    else
-        return BF_EXP_BITS_MAX - e;
-}
-
-static inline bf_flags_t bf_set_exp_bits(int n)
-{
-    return ((BF_EXP_BITS_MAX - n) & BF_EXP_BITS_MASK) << BF_EXP_BITS_SHIFT;
-}
-
-/* returned status */
-#define BF_ST_INVALID_OP  (1 << 0)
-#define BF_ST_DIVIDE_ZERO (1 << 1)
-#define BF_ST_OVERFLOW    (1 << 2)
-#define BF_ST_UNDERFLOW   (1 << 3)
-#define BF_ST_INEXACT     (1 << 4)
-/* indicate that a memory allocation error occured. NaN is returned */
-#define BF_ST_MEM_ERROR   (1 << 5)
-
-#define BF_RADIX_MAX 36 /* maximum radix for bf_atof() and bf_ftoa() */
-
-static inline slimb_t bf_max(slimb_t a, slimb_t b)
-{
-    if (a > b)
-        return a;
-    else
-        return b;
-}
-
-static inline slimb_t bf_min(slimb_t a, slimb_t b)
-{
-    if (a < b)
-        return a;
-    else
-        return b;
-}
-
-void bf_context_init(bf_context_t *s, bf_realloc_func_t *realloc_func,
-                     void *realloc_opaque);
-void bf_context_end(bf_context_t *s);
-/* free memory allocated for the bf cache data */
-void bf_clear_cache(bf_context_t *s);
-
-static inline void *bf_realloc(bf_context_t *s, void *ptr, size_t size)
-{
-    return s->realloc_func(s->realloc_opaque, ptr, size);
-}
-
-/* 'size' must be != 0 */
-static inline void *bf_malloc(bf_context_t *s, size_t size)
-{
-    return bf_realloc(s, NULL, size);
-}
-
-static inline void bf_free(bf_context_t *s, void *ptr)
-{
-    /* must test ptr otherwise equivalent to malloc(0) */
-    if (ptr)
-        bf_realloc(s, ptr, 0);
-}
-
-void bf_init(bf_context_t *s, bf_t *r);
-
-static inline void bf_delete(bf_t *r)
-{
-    bf_context_t *s = r->ctx;
-    /* we accept to delete a zeroed bf_t structure */
-    if (s && r->tab) {
-        bf_realloc(s, r->tab, 0);
-    }
-}
-
-static inline void bf_neg(bf_t *r)
-{
-    r->sign ^= 1;
-}
-
-static inline int bf_is_finite(const bf_t *a)
-{
-    return (a->expn < BF_EXP_INF);
-}
-
-static inline int bf_is_nan(const bf_t *a)
-{
-    return (a->expn == BF_EXP_NAN);
-}
-
-static inline int bf_is_zero(const bf_t *a)
-{
-    return (a->expn == BF_EXP_ZERO);
-}
-
-static inline void bf_memcpy(bf_t *r, const bf_t *a)
-{
-    *r = *a;
-}
-
-int bf_set_ui(bf_t *r, uint64_t a);
-int bf_set_si(bf_t *r, int64_t a);
-void bf_set_nan(bf_t *r);
-void bf_set_zero(bf_t *r, int is_neg);
-void bf_set_inf(bf_t *r, int is_neg);
-int bf_set(bf_t *r, const bf_t *a);
-void bf_move(bf_t *r, bf_t *a);
-int bf_get_float64(const bf_t *a, double *pres, bf_rnd_t rnd_mode);
-int bf_set_float64(bf_t *a, double d);
-
-int bf_cmpu(const bf_t *a, const bf_t *b);
-int bf_cmp_full(const bf_t *a, const bf_t *b);
-int bf_cmp(const bf_t *a, const bf_t *b);
-static inline int bf_cmp_eq(const bf_t *a, const bf_t *b)
-{
-    return bf_cmp(a, b) == 0;
-}
-
-static inline int bf_cmp_le(const bf_t *a, const bf_t *b)
-{
-    return bf_cmp(a, b) <= 0;
-}
-
-static inline int bf_cmp_lt(const bf_t *a, const bf_t *b)
-{
-    return bf_cmp(a, b) < 0;
-}
-
-int bf_add(bf_t *r, const bf_t *a, const bf_t *b, limb_t prec, bf_flags_t flags);
-int bf_sub(bf_t *r, const bf_t *a, const bf_t *b, limb_t prec, bf_flags_t flags);
-int bf_add_si(bf_t *r, const bf_t *a, int64_t b1, limb_t prec, bf_flags_t flags);
-int bf_mul(bf_t *r, const bf_t *a, const bf_t *b, limb_t prec, bf_flags_t flags);
-int bf_mul_ui(bf_t *r, const bf_t *a, uint64_t b1, limb_t prec, bf_flags_t flags);
-int bf_mul_si(bf_t *r, const bf_t *a, int64_t b1, limb_t prec,
-              bf_flags_t flags);
-int bf_mul_2exp(bf_t *r, slimb_t e, limb_t prec, bf_flags_t flags);
-int bf_div(bf_t *r, const bf_t *a, const bf_t *b, limb_t prec, bf_flags_t flags);
-#define BF_DIVREM_EUCLIDIAN BF_RNDF
-int bf_divrem(bf_t *q, bf_t *r, const bf_t *a, const bf_t *b,
-              limb_t prec, bf_flags_t flags, int rnd_mode);
-int bf_rem(bf_t *r, const bf_t *a, const bf_t *b, limb_t prec,
-           bf_flags_t flags, int rnd_mode);
-int bf_remquo(slimb_t *pq, bf_t *r, const bf_t *a, const bf_t *b, limb_t prec,
-              bf_flags_t flags, int rnd_mode);
-/* round to integer with infinite precision */
-int bf_rint(bf_t *r, int rnd_mode);
-int bf_round(bf_t *r, limb_t prec, bf_flags_t flags);
-int bf_sqrtrem(bf_t *r, bf_t *rem1, const bf_t *a);
-int bf_sqrt(bf_t *r, const bf_t *a, limb_t prec, bf_flags_t flags);
-slimb_t bf_get_exp_min(const bf_t *a);
-int bf_logic_or(bf_t *r, const bf_t *a, const bf_t *b);
-int bf_logic_xor(bf_t *r, const bf_t *a, const bf_t *b);
-int bf_logic_and(bf_t *r, const bf_t *a, const bf_t *b);
-
-/* additional flags for bf_atof */
-/* do not accept hex radix prefix (0x or 0X) if radix = 0 or radix = 16 */
-#define BF_ATOF_NO_HEX       (1 << 16)
-/* accept binary (0b or 0B) or octal (0o or 0O) radix prefix if radix = 0 */
-#define BF_ATOF_BIN_OCT      (1 << 17)
-/* Do not parse NaN or Inf */
-#define BF_ATOF_NO_NAN_INF   (1 << 18)
-/* return the exponent separately */
-#define BF_ATOF_EXPONENT       (1 << 19)
-
-int bf_atof(bf_t *a, const char *str, const char **pnext, int radix,
-            limb_t prec, bf_flags_t flags);
-/* this version accepts prec = BF_PREC_INF and returns the radix
-   exponent */
-int bf_atof2(bf_t *r, slimb_t *pexponent,
-             const char *str, const char **pnext, int radix,
-             limb_t prec, bf_flags_t flags);
-int bf_mul_pow_radix(bf_t *r, const bf_t *T, limb_t radix,
-                     slimb_t expn, limb_t prec, bf_flags_t flags);
-
-
-/* Conversion of floating point number to string. Return a null
-   terminated string or NULL if memory error. *plen contains its
-   length if plen != NULL.  The exponent letter is "e" for base 10,
-   "p" for bases 2, 8, 16 with a binary exponent and "@" for the other
-   bases. */
-
-#define BF_FTOA_FORMAT_MASK (3 << 16)
-
-/* fixed format: prec significant digits rounded with (flags &
-   BF_RND_MASK). Exponential notation is used if too many zeros are
-   needed.*/
-#define BF_FTOA_FORMAT_FIXED (0 << 16)
-/* fractional format: prec digits after the decimal point rounded with
-   (flags & BF_RND_MASK) */
-#define BF_FTOA_FORMAT_FRAC  (1 << 16)
-/* free format:
-
-   For binary radices with bf_ftoa() and for bfdec_ftoa(): use the minimum
-   number of digits to represent 'a'. The precision and the rounding
-   mode are ignored.
-
-   For the non binary radices with bf_ftoa(): use as many digits as
-   necessary so that bf_atof() return the same number when using
-   precision 'prec', rounding to nearest and the subnormal
-   configuration of 'flags'. The result is meaningful only if 'a' is
-   already rounded to 'prec' bits. If the subnormal flag is set, the
-   exponent in 'flags' must also be set to the desired exponent range.
-*/
-#define BF_FTOA_FORMAT_FREE  (2 << 16)
-/* same as BF_FTOA_FORMAT_FREE but uses the minimum number of digits
-   (takes more computation time). Identical to BF_FTOA_FORMAT_FREE for
-   binary radices with bf_ftoa() and for bfdec_ftoa(). */
-#define BF_FTOA_FORMAT_FREE_MIN (3 << 16)
-
-/* force exponential notation for fixed or free format */
-#define BF_FTOA_FORCE_EXP    (1 << 20)
-/* add 0x prefix for base 16, 0o prefix for base 8 or 0b prefix for
-   base 2 if non zero value */
-#define BF_FTOA_ADD_PREFIX   (1 << 21)
-/* return "Infinity" instead of "Inf" and add a "+" for positive
-   exponents */
-#define BF_FTOA_JS_QUIRKS    (1 << 22)
-
-char *bf_ftoa(size_t *plen, const bf_t *a, int radix, limb_t prec,
-              bf_flags_t flags);
-
-/* modulo 2^n instead of saturation. NaN and infinity return 0 */
-#define BF_GET_INT_MOD (1 << 0)
-int bf_get_int32(int *pres, const bf_t *a, int flags);
-int bf_get_int64(int64_t *pres, const bf_t *a, int flags);
-int bf_get_uint64(uint64_t *pres, const bf_t *a);
-
-/* the following functions are exported for testing only. */
-void mp_print_str(const char *str, const limb_t *tab, limb_t n);
-void bf_print_str(const char *str, const bf_t *a);
-int bf_resize(bf_t *r, limb_t len);
-int bf_get_fft_size(int *pdpl, int *pnb_mods, limb_t len);
-int bf_normalize_and_round(bf_t *r, limb_t prec1, bf_flags_t flags);
-int bf_can_round(const bf_t *a, slimb_t prec, bf_rnd_t rnd_mode, slimb_t k);
-slimb_t bf_mul_log2_radix(slimb_t a1, unsigned int radix, int is_inv,
-                          int is_ceil1);
-int mp_mul(bf_context_t *s, limb_t *result,
-           const limb_t *op1, limb_t op1_size,
-           const limb_t *op2, limb_t op2_size);
-limb_t mp_add(limb_t *res, const limb_t *op1, const limb_t *op2,
-              limb_t n, limb_t carry);
-limb_t mp_add_ui(limb_t *tab, limb_t b, size_t n);
-int mp_sqrtrem(bf_context_t *s, limb_t *tabs, limb_t *taba, limb_t n);
-int mp_recip(bf_context_t *s, limb_t *tabr, const limb_t *taba, limb_t n);
-limb_t bf_isqrt(limb_t a);
-
-/* transcendental functions */
-int bf_const_log2(bf_t *T, limb_t prec, bf_flags_t flags);
-int bf_const_pi(bf_t *T, limb_t prec, bf_flags_t flags);
-int bf_exp(bf_t *r, const bf_t *a, limb_t prec, bf_flags_t flags);
-int bf_log(bf_t *r, const bf_t *a, limb_t prec, bf_flags_t flags);
-#define BF_POW_JS_QUIRKS (1 << 16) /* (+/-1)^(+/-Inf) = NaN, 1^NaN = NaN */
-int bf_pow(bf_t *r, const bf_t *x, const bf_t *y, limb_t prec, bf_flags_t flags);
-int bf_cos(bf_t *r, const bf_t *a, limb_t prec, bf_flags_t flags);
-int bf_sin(bf_t *r, const bf_t *a, limb_t prec, bf_flags_t flags);
-int bf_tan(bf_t *r, const bf_t *a, limb_t prec, bf_flags_t flags);
-int bf_atan(bf_t *r, const bf_t *a, limb_t prec, bf_flags_t flags);
-int bf_atan2(bf_t *r, const bf_t *y, const bf_t *x,
-             limb_t prec, bf_flags_t flags);
-int bf_asin(bf_t *r, const bf_t *a, limb_t prec, bf_flags_t flags);
-int bf_acos(bf_t *r, const bf_t *a, limb_t prec, bf_flags_t flags);
-
-/* decimal floating point */
-
-static inline void bfdec_init(bf_context_t *s, bfdec_t *r)
-{
-    bf_init(s, (bf_t *)r);
-}
-static inline void bfdec_delete(bfdec_t *r)
-{
-    bf_delete((bf_t *)r);
-}
-
-static inline void bfdec_neg(bfdec_t *r)
-{
-    r->sign ^= 1;
-}
-
-static inline int bfdec_is_finite(const bfdec_t *a)
-{
-    return (a->expn < BF_EXP_INF);
-}
-
-static inline int bfdec_is_nan(const bfdec_t *a)
-{
-    return (a->expn == BF_EXP_NAN);
-}
-
-static inline int bfdec_is_zero(const bfdec_t *a)
-{
-    return (a->expn == BF_EXP_ZERO);
-}
-
-static inline void bfdec_memcpy(bfdec_t *r, const bfdec_t *a)
-{
-    bf_memcpy((bf_t *)r, (const bf_t *)a);
-}
-
-int bfdec_set_ui(bfdec_t *r, uint64_t a);
-int bfdec_set_si(bfdec_t *r, int64_t a);
-
-static inline void bfdec_set_nan(bfdec_t *r)
-{
-    bf_set_nan((bf_t *)r);
-}
-static inline void bfdec_set_zero(bfdec_t *r, int is_neg)
-{
-    bf_set_zero((bf_t *)r, is_neg);
-}
-static inline void bfdec_set_inf(bfdec_t *r, int is_neg)
-{
-    bf_set_inf((bf_t *)r, is_neg);
-}
-static inline int bfdec_set(bfdec_t *r, const bfdec_t *a)
-{
-    return bf_set((bf_t *)r, (bf_t *)a);
-}
-static inline void bfdec_move(bfdec_t *r, bfdec_t *a)
-{
-    bf_move((bf_t *)r, (bf_t *)a);
-}
-static inline int bfdec_cmpu(const bfdec_t *a, const bfdec_t *b)
-{
-    return bf_cmpu((const bf_t *)a, (const bf_t *)b);
-}
-static inline int bfdec_cmp_full(const bfdec_t *a, const bfdec_t *b)
-{
-    return bf_cmp_full((const bf_t *)a, (const bf_t *)b);
-}
-static inline int bfdec_cmp(const bfdec_t *a, const bfdec_t *b)
-{
-    return bf_cmp((const bf_t *)a, (const bf_t *)b);
-}
-static inline int bfdec_cmp_eq(const bfdec_t *a, const bfdec_t *b)
-{
-    return bfdec_cmp(a, b) == 0;
-}
-static inline int bfdec_cmp_le(const bfdec_t *a, const bfdec_t *b)
-{
-    return bfdec_cmp(a, b) <= 0;
-}
-static inline int bfdec_cmp_lt(const bfdec_t *a, const bfdec_t *b)
-{
-    return bfdec_cmp(a, b) < 0;
-}
-
-int bfdec_add(bfdec_t *r, const bfdec_t *a, const bfdec_t *b, limb_t prec,
-              bf_flags_t flags);
-int bfdec_sub(bfdec_t *r, const bfdec_t *a, const bfdec_t *b, limb_t prec,
-              bf_flags_t flags);
-int bfdec_add_si(bfdec_t *r, const bfdec_t *a, int64_t b1, limb_t prec,
-                 bf_flags_t flags);
-int bfdec_mul(bfdec_t *r, const bfdec_t *a, const bfdec_t *b, limb_t prec,
-              bf_flags_t flags);
-int bfdec_mul_si(bfdec_t *r, const bfdec_t *a, int64_t b1, limb_t prec,
-                 bf_flags_t flags);
-int bfdec_div(bfdec_t *r, const bfdec_t *a, const bfdec_t *b, limb_t prec,
-              bf_flags_t flags);
-int bfdec_divrem(bfdec_t *q, bfdec_t *r, const bfdec_t *a, const bfdec_t *b,
-                 limb_t prec, bf_flags_t flags, int rnd_mode);
-int bfdec_rem(bfdec_t *r, const bfdec_t *a, const bfdec_t *b, limb_t prec,
-              bf_flags_t flags, int rnd_mode);
-int bfdec_rint(bfdec_t *r, int rnd_mode);
-int bfdec_sqrt(bfdec_t *r, const bfdec_t *a, limb_t prec, bf_flags_t flags);
-int bfdec_round(bfdec_t *r, limb_t prec, bf_flags_t flags);
-int bfdec_get_int32(int *pres, const bfdec_t *a);
-int bfdec_pow_ui(bfdec_t *r, const bfdec_t *a, limb_t b);
-
-char *bfdec_ftoa(size_t *plen, const bfdec_t *a, limb_t prec, bf_flags_t flags);
-int bfdec_atof(bfdec_t *r, const char *str, const char **pnext,
-               limb_t prec, bf_flags_t flags);
-
-/* the following functions are exported for testing only. */
-extern const limb_t mp_pow_dec[LIMB_DIGITS + 1];
-void bfdec_print_str(const char *str, const bfdec_t *a);
-static inline int bfdec_resize(bfdec_t *r, limb_t len)
-{
-    return bf_resize((bf_t *)r, len);
-}
-int bfdec_normalize_and_round(bfdec_t *r, limb_t prec1, bf_flags_t flags);
-
-#ifdef __cplusplus
-} /* extern "C" { */
-#endif
-
-#endif /* LIBBF_H */
 /*
  * Unicode utilities
  *
@@ -2652,6 +1057,9 @@ extern "C" {
 #define LRE_FLAG_NAMED_GROUPS (1 << 7) /* named groups are present in the regexp */
 #define LRE_FLAG_UNICODE_SETS (1 << 8)
 
+#define LRE_RET_MEMORY_ERROR (-1)
+#define LRE_RET_TIMEOUT      (-2)
+
 uint8_t *lre_compile(int *plen, char *error_msg, int error_msg_size,
                      const char *buf, size_t buf_len, int re_flags,
                      void *opaque);
@@ -2669,6 +1077,8 @@ void lre_byte_swap(uint8_t *buf, size_t len, bool is_byte_swapped);
 
 /* must be provided by the user */
 bool lre_check_stack_overflow(void *opaque, size_t alloca_size);
+/* must be provided by the user, return non zero if time out */
+int lre_check_timeout(void *opaque);
 void *lre_realloc(void *opaque, void *ptr, size_t size);
 
 /* JS identifier test */
@@ -7461,7 +5871,8 @@ enum {
     JS_TAG_UNINITIALIZED = 4,
     JS_TAG_CATCH_OFFSET = 5,
     JS_TAG_EXCEPTION   = 6,
-    JS_TAG_FLOAT64     = 7,
+    JS_TAG_SHORT_BIG_INT = 7,
+    JS_TAG_FLOAT64     = 8,
     /* any larger tag is FLOAT64 if JS_NAN_BOXING */
 };
 
@@ -7495,6 +5906,7 @@ typedef const struct JSValue *JSValueConst;
 #define JS_MKPTR(tag, ptr)       ((JSValue)((tag) | (intptr_t)(ptr)))
 #define JS_VALUE_GET_NORM_TAG(v) ((int)((intptr_t)(v) & 15))
 #define JS_VALUE_GET_TAG(v)      ((int)((intptr_t)(v) & 15))
+#define JS_VALUE_GET_SHORT_BIG_INT(v) JS_VALUE_GET_INT(v)
 #define JS_VALUE_GET_PTR(v)      ((void *)((intptr_t)(v) & ~15))
 #define JS_VALUE_GET_INT(v)      ((int)((intptr_t)(v) >> 4))
 #define JS_VALUE_GET_BOOL(v)     ((int)((intptr_t)(v) >> 4))
@@ -7505,6 +5917,12 @@ typedef const struct JSValue *JSValueConst;
 static inline JSValue __JS_NewFloat64(double d)
 {
     return JS_MKVAL(JS_TAG_FLOAT64, (int)d);
+}
+
+static inline JSValue __JS_NewShortBigInt(JSContext *ctx, int32_t d)
+{
+    (void)&ctx;
+    return JS_MKVAL(JS_TAG_SHORT_BIG_INT, d);
 }
 
 static inline bool JS_VALUE_IS_NAN(JSValue v)
@@ -7520,6 +5938,7 @@ typedef uint64_t JSValue;
 #define JS_VALUE_GET_TAG(v) (int)((v) >> 32)
 #define JS_VALUE_GET_INT(v) (int)(v)
 #define JS_VALUE_GET_BOOL(v) (int)(v)
+#define JS_VALUE_GET_SHORT_BIG_INT(v) (int)(v)
 #define JS_VALUE_GET_PTR(v) (void *)(intptr_t)(v)
 
 #define JS_MKVAL(tag, val) (((uint64_t)(tag) << 32) | (uint32_t)(val))
@@ -7556,6 +5975,12 @@ static inline JSValue __JS_NewFloat64(double d)
     return v;
 }
 
+static inline JSValue __JS_NewShortBigInt(JSContext *ctx, int32_t d)
+{
+    (void)&ctx;
+    return JS_MKVAL(JS_TAG_SHORT_BIG_INT, d);
+}
+
 #define JS_TAG_IS_FLOAT64(tag) ((unsigned)((tag) - JS_TAG_FIRST) >= (JS_TAG_FLOAT64 - JS_TAG_FIRST))
 
 /* same as JS_VALUE_GET_TAG, but return JS_TAG_FLOAT64 with NaN boxing */
@@ -7582,6 +6007,7 @@ typedef union JSValueUnion {
     int32_t int32;
     double float64;
     void *ptr;
+    int32_t short_big_int;
 } JSValueUnion;
 
 typedef struct JSValue {
@@ -7595,6 +6021,7 @@ typedef struct JSValue {
 #define JS_VALUE_GET_INT(v) ((v).u.int32)
 #define JS_VALUE_GET_BOOL(v) ((v).u.int32)
 #define JS_VALUE_GET_FLOAT64(v) ((v).u.float64)
+#define JS_VALUE_GET_SHORT_BIG_INT(v) ((v).u.short_big_int)
 #define JS_VALUE_GET_PTR(v) ((v).u.ptr)
 
 /* msvc doesn't understand designated initializers without /std:c++20 */
@@ -7637,6 +6064,15 @@ static inline JSValue __JS_NewFloat64(double d)
     JSValue v;
     v.tag = JS_TAG_FLOAT64;
     v.u.float64 = d;
+    return v;
+}
+
+static inline JSValue __JS_NewShortBigInt(JSContext *ctx, int64_t d)
+{
+    (void)&ctx;
+    JSValue v;
+    v.tag = JS_TAG_SHORT_BIG_INT;
+    v.u.short_big_int = d;
     return v;
 }
 
@@ -7818,6 +6254,7 @@ JS_EXTERN void JS_AddIntrinsicPromise(JSContext *ctx);
 JS_EXTERN void JS_AddIntrinsicBigInt(JSContext *ctx);
 JS_EXTERN void JS_AddIntrinsicWeakRef(JSContext *ctx);
 JS_EXTERN void JS_AddPerformance(JSContext *ctx);
+JS_EXTERN void JS_AddIntrinsicDOMException(JSContext *ctx);
 
 /* for equality comparisons and sameness */
 JS_EXTERN int JS_IsEqual(JSContext *ctx, JSValueConst op1, JSValueConst op2);
@@ -7877,7 +6314,11 @@ JS_EXTERN void JS_FreeAtom(JSContext *ctx, JSAtom v);
 JS_EXTERN void JS_FreeAtomRT(JSRuntime *rt, JSAtom v);
 JS_EXTERN JSValue JS_AtomToValue(JSContext *ctx, JSAtom atom);
 JS_EXTERN JSValue JS_AtomToString(JSContext *ctx, JSAtom atom);
-JS_EXTERN const char *JS_AtomToCString(JSContext *ctx, JSAtom atom);
+JS_EXTERN const char *JS_AtomToCStringLen(JSContext *ctx, size_t *plen, JSAtom atom);
+static inline const char *JS_AtomToCString(JSContext *ctx, JSAtom atom) 
+{
+    return JS_AtomToCStringLen(ctx, NULL, atom);
+}
 JS_EXTERN JSAtom JS_ValueToAtom(JSContext *ctx, JSValueConst val);
 
 /* object class support */
@@ -8021,10 +6462,10 @@ static inline bool JS_IsNumber(JSValueConst v)
     return tag == JS_TAG_INT || JS_TAG_IS_FLOAT64(tag);
 }
 
-static inline bool JS_IsBigInt(JSContext *ctx, JSValueConst v)
+static inline bool JS_IsBigInt(JSValueConst v)
 {
-    (void)&ctx;
-    return JS_VALUE_GET_TAG(v) == JS_TAG_BIG_INT;
+    int tag = JS_VALUE_GET_TAG(v);
+    return tag == JS_TAG_BIG_INT || tag == JS_TAG_SHORT_BIG_INT;
 }
 
 static inline bool JS_IsBool(JSValueConst v)
@@ -8075,8 +6516,8 @@ static inline bool JS_IsModule(JSValueConst v)
 JS_EXTERN JSValue JS_Throw(JSContext *ctx, JSValue obj);
 JS_EXTERN JSValue JS_GetException(JSContext *ctx);
 JS_EXTERN bool JS_HasException(JSContext *ctx);
-JS_EXTERN bool JS_IsError(JSContext *ctx, JSValueConst val);
-JS_EXTERN bool JS_IsUncatchableError(JSContext* ctx, JSValueConst val);
+JS_EXTERN bool JS_IsError(JSValueConst val);
+JS_EXTERN bool JS_IsUncatchableError(JSValueConst val);
 JS_EXTERN void JS_SetUncatchableError(JSContext *ctx, JSValueConst val);
 JS_EXTERN void JS_ClearUncatchableError(JSContext *ctx, JSValueConst val);
 // Shorthand for:
@@ -8085,12 +6526,19 @@ JS_EXTERN void JS_ClearUncatchableError(JSContext *ctx, JSValueConst val);
 //  JS_Throw(ctx, exc);
 JS_EXTERN void JS_ResetUncatchableError(JSContext *ctx);
 JS_EXTERN JSValue JS_NewError(JSContext *ctx);
+JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_NewInternalError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
+JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_NewPlainError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
+JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_NewRangeError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
+JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_NewReferenceError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
+JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_NewSyntaxError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
+JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_NewTypeError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
+JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowInternalError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
 JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowPlainError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
+JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowRangeError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
+JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowReferenceError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
 JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowSyntaxError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
 JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowTypeError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
-JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowReferenceError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
-JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowRangeError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
-JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowInternalError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
+JS_EXTERN JSValue JS_PRINTF_FORMAT_ATTR(3, 4) JS_ThrowDOMException(JSContext *ctx, const char *name, JS_PRINTF_FORMAT const char *fmt, ...);
 JS_EXTERN JSValue JS_ThrowOutOfMemory(JSContext *ctx);
 JS_EXTERN void JS_FreeValue(JSContext *ctx, JSValue v);
 JS_EXTERN void JS_FreeValueRT(JSRuntime *rt, JSValue v);
@@ -8120,6 +6568,10 @@ JS_EXTERN JSValue JS_NewStringLen(JSContext *ctx, const char *str1, size_t len1)
 static inline JSValue JS_NewString(JSContext *ctx, const char *str) {
     return JS_NewStringLen(ctx, str, strlen(str));
 }
+// makes a copy of the input; does not check if the input is valid UTF-16,
+// that is the responsibility of the caller
+JS_EXTERN JSValue JS_NewTwoByteString(JSContext *ctx, const uint16_t *buf,
+                                      size_t len);
 JS_EXTERN JSValue JS_NewAtomString(JSContext *ctx, const char *str);
 JS_EXTERN JSValue JS_ToString(JSContext *ctx, JSValueConst val);
 JS_EXTERN JSValue JS_ToPropertyKey(JSContext *ctx, JSValueConst val);
@@ -8136,7 +6588,7 @@ JS_EXTERN void JS_FreeCString(JSContext *ctx, const char *ptr);
 
 JS_EXTERN JSValue JS_NewObjectProtoClass(JSContext *ctx, JSValueConst proto,
                                          JSClassID class_id);
-JS_EXTERN JSValue JS_NewObjectClass(JSContext *ctx, int class_id);
+JS_EXTERN JSValue JS_NewObjectClass(JSContext *ctx, JSClassID class_id);
 JS_EXTERN JSValue JS_NewObjectProto(JSContext *ctx, JSValueConst proto);
 JS_EXTERN JSValue JS_NewObject(JSContext *ctx);
 // takes ownership of the values
@@ -8156,6 +6608,11 @@ JS_EXTERN bool JS_SetConstructorBit(JSContext *ctx, JSValueConst func_obj, bool 
 
 JS_EXTERN bool JS_IsRegExp(JSValueConst val);
 JS_EXTERN bool JS_IsMap(JSValueConst val);
+JS_EXTERN bool JS_IsSet(JSValueConst val);
+JS_EXTERN bool JS_IsWeakRef(JSValueConst val);
+JS_EXTERN bool JS_IsWeakSet(JSValueConst val);
+JS_EXTERN bool JS_IsWeakMap(JSValueConst val);
+JS_EXTERN bool JS_IsDataView(JSValueConst val);
 
 JS_EXTERN JSValue JS_NewArray(JSContext *ctx);
 // takes ownership of the values
@@ -8194,7 +6651,7 @@ JS_EXTERN int JS_HasProperty(JSContext *ctx, JSValueConst this_obj, JSAtom prop)
 JS_EXTERN int JS_IsExtensible(JSContext *ctx, JSValueConst obj);
 JS_EXTERN int JS_PreventExtensions(JSContext *ctx, JSValueConst obj);
 JS_EXTERN int JS_DeleteProperty(JSContext *ctx, JSValueConst obj, JSAtom prop, int flags);
-JS_EXTERN int JS_SetPrototype(JSContext *ctx, JSValueConst obj, JSValue proto_val);
+JS_EXTERN int JS_SetPrototype(JSContext *ctx, JSValueConst obj, JSValueConst proto_val);
 JS_EXTERN JSValue JS_GetPrototype(JSContext *ctx, JSValueConst val);
 JS_EXTERN int JS_GetLength(JSContext *ctx, JSValueConst obj, int64_t *pres);
 JS_EXTERN int JS_SetLength(JSContext *ctx, JSValueConst obj, int64_t len);
@@ -8231,6 +6688,7 @@ JS_EXTERN JSValue JS_CallConstructor2(JSContext *ctx, JSValueConst func_obj,
  * wholly infallible: non-strict classic scripts may _parse_ okay as a module
  * but not _execute_ as one (different runtime semantics.) Use with caution.
  * |input| can be either ASCII or UTF-8 encoded source code.
+ * Returns false if QuickJS was built with -DQJS_DISABLE_PARSER.
  */
 JS_EXTERN bool JS_DetectModule(const char *input, size_t input_len);
 /* 'input' must be zero terminated i.e. input[input_len] = '\0'. */
@@ -8329,6 +6787,23 @@ JS_EXTERN JSValue JS_PromiseResult(JSContext *ctx, JSValueConst promise);
 JS_EXTERN bool JS_IsPromise(JSValueConst val);
 
 JS_EXTERN JSValue JS_NewSymbol(JSContext *ctx, const char *description, bool is_global);
+
+typedef enum JSPromiseHookType {
+    JS_PROMISE_HOOK_INIT,     // emitted when a new promise is created
+    JS_PROMISE_HOOK_BEFORE,   // runs right before promise.then is invoked
+    JS_PROMISE_HOOK_AFTER,    // runs right after promise.then is invoked
+    JS_PROMISE_HOOK_RESOLVE,  // not emitted for rejected promises
+} JSPromiseHookType;
+
+// parent_promise is only passed in when type == JS_PROMISE_HOOK_INIT and
+// is then either a promise object or JS_UNDEFINED if the new promise does
+// not have a parent promise; only promises created with promise.then have
+// a parent promise
+typedef void JSPromiseHook(JSContext *ctx, JSPromiseHookType type,
+                           JSValueConst promise, JSValueConst parent_promise,
+                           void *opaque);
+JS_EXTERN void JS_SetPromiseHook(JSRuntime *rt, JSPromiseHook promise_hook,
+                                 void *opaque);
 
 /* is_handled = true means that the rejection is handled */
 typedef void JSHostPromiseRejectionTracker(JSContext *ctx, JSValueConst promise,
@@ -8449,10 +6924,14 @@ JS_EXTERN JSValue JS_NewCFunction2(JSContext *ctx, JSCFunction *func,
 JS_EXTERN JSValue JS_NewCFunction3(JSContext *ctx, JSCFunction *func,
                                    const char *name,
                                    int length, JSCFunctionEnum cproto, int magic,
-                                   JSValue proto_val);
+                                   JSValueConst proto_val);
 JS_EXTERN JSValue JS_NewCFunctionData(JSContext *ctx, JSCFunctionData *func,
                                       int length, int magic, int data_len,
                                       JSValueConst *data);
+JS_EXTERN JSValue JS_NewCFunctionData2(JSContext *ctx, JSCFunctionData *func,
+                                       const char *name,
+                                       int length, int magic, int data_len,
+                                       JSValueConst *data);
 
 static inline JSValue JS_NewCFunction(JSContext *ctx, JSCFunction *func,
                                       const char *name, int length)
@@ -8535,7 +7014,7 @@ typedef struct JSCFunctionListEntry {
 #define JS_ALIAS_DEF(name, from) { name, JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE, JS_DEF_ALIAS, 0, { .alias = { from, -1 } } }
 #define JS_ALIAS_BASE_DEF(name, from, base) { name, JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE, JS_DEF_ALIAS, 0, { .alias = { from, base } } }
 
-JS_EXTERN void JS_SetPropertyFunctionList(JSContext *ctx, JSValue obj,
+JS_EXTERN int JS_SetPropertyFunctionList(JSContext *ctx, JSValueConst obj,
                                           const JSCFunctionListEntry *tab,
                                           int len);
 
@@ -8558,7 +7037,7 @@ JS_EXTERN int JS_SetModuleExportList(JSContext *ctx, JSModuleDef *m,
 /* Version */
 
 #define QJS_VERSION_MAJOR 0
-#define QJS_VERSION_MINOR 9
+#define QJS_VERSION_MINOR 11
 #define QJS_VERSION_PATCH 0
 #define QJS_VERSION_SUFFIX ""
 
@@ -8578,8 +7057,8 @@ JS_EXTERN uintptr_t js_std_cmd(int cmd, ...);
 /*
  * QuickJS Javascript Engine
  *
- * Copyright (c) 2017-2024 Fabrice Bellard
- * Copyright (c) 2017-2024 Charlie Gordon
+ * Copyright (c) 2017-2025 Fabrice Bellard
+ * Copyright (c) 2017-2025 Charlie Gordon
  * Copyright (c) 2023-2025 Ben Noordhuis
  * Copyright (c) 2023-2025 Saúl Ibarra Corretgé
  *
@@ -8739,6 +7218,7 @@ enum {
     JS_CLASS_WEAKMAP,           /* u.map_state */
     JS_CLASS_WEAKSET,           /* u.map_state */
     JS_CLASS_ITERATOR,
+    JS_CLASS_ITERATOR_CONCAT,   /* u.iterator_concat_data */
     JS_CLASS_ITERATOR_HELPER,   /* u.iterator_helper_data */
     JS_CLASS_ITERATOR_WRAP,     /* u.iterator_wrap_data */
     JS_CLASS_MAP_ITERATOR,      /* u.map_iterator_data */
@@ -8759,6 +7239,7 @@ enum {
     JS_CLASS_ASYNC_GENERATOR,   /* u.async_generator_data */
     JS_CLASS_WEAK_REF,
     JS_CLASS_FINALIZATION_REGISTRY,
+    JS_CLASS_DOM_EXCEPTION,
     JS_CLASS_CALL_SITE,
 
     JS_CLASS_INIT_COUNT, /* last entry for predefined classes */
@@ -8786,6 +7267,9 @@ typedef enum JSErrorEnum {
 #define JS_MAX_LOCAL_VARS 65535
 #define JS_STACK_SIZE_MAX 65534
 #define JS_STRING_LEN_MAX ((1 << 30) - 1)
+// 1,024 bytes is about the cutoff point where it starts getting
+// more profitable to ref slice than to copy
+#define JS_STRING_SLICE_LEN_MAX 1024 // in bytes
 
 #define __exception __attribute__((warn_unused_result))
 
@@ -8813,6 +7297,11 @@ typedef struct JSRuntimeFinalizerState {
     JSRuntimeFinalizer *finalizer;
     void *arg;
 } JSRuntimeFinalizerState;
+
+typedef struct JSValueLink {
+    struct JSValueLink *next;
+    JSValueConst value;
+} JSValueLink;
 
 struct JSRuntime {
     JSMallocFunctions mf;
@@ -8861,6 +7350,12 @@ struct JSRuntime {
     JSInterruptHandler *interrupt_handler;
     void *interrupt_opaque;
 
+    JSPromiseHook *promise_hook;
+    void *promise_hook_opaque;
+    // for smuggling the parent promise from js_promise_then
+    // to js_promise_constructor
+    JSValueLink *parent_promise;
+
     JSHostPromiseRejectionTracker *host_promise_rejection_tracker;
     void *host_promise_rejection_tracker_opaque;
 
@@ -8883,7 +7378,6 @@ struct JSRuntime {
     int shape_hash_size;
     int shape_hash_count; /* number of hashed shapes */
     JSShape **shape_hash;
-    bf_context_t bf_ctx;
     void *user_opaque;
     void *libc_opaque;
     JSRuntimeFinalizerState *finalizers;
@@ -8941,15 +7435,7 @@ typedef struct JSVarRef {
         struct {
             int __gc_ref_count; /* corresponds to header.ref_count */
             uint8_t __gc_mark; /* corresponds to header.mark/gc_obj_type */
-
-            /* 0 : the JSVarRef is on the stack. header.link is an element
-               of JSStackFrame.var_ref_list.
-               1 : the JSVarRef is detached. header.link has the normal meanning
-            */
-            uint8_t is_detached : 1;
-            uint8_t is_arg : 1;
-            uint16_t var_idx; /* index of the corresponding function variable on
-                                 the stack */
+            uint8_t is_detached;
         };
     };
     JSValue *pvalue; /* pointer to the value, either on the stack or
@@ -8961,18 +7447,47 @@ typedef struct JSRefCountHeader {
     int ref_count;
 } JSRefCountHeader;
 
-/* the same structure is used for big integers.
-   Big integers are never infinite or NaNs */
+/* bigint */
+typedef int32_t js_slimb_t;
+typedef uint32_t js_limb_t;
+typedef int64_t js_sdlimb_t;
+typedef uint64_t js_dlimb_t;
+
+#define JS_LIMB_DIGITS 9
+
+/* Must match the size of short_big_int in JSValueUnion */
+#define JS_LIMB_BITS 32
+#define JS_SHORT_BIG_INT_BITS JS_LIMB_BITS
+#define JS_BIGINT_MAX_SIZE ((1024 * 1024) / JS_LIMB_BITS) /* in limbs */
+#define JS_SHORT_BIG_INT_MIN INT32_MIN
+#define JS_SHORT_BIG_INT_MAX INT32_MAX
+
+
 typedef struct JSBigInt {
     JSRefCountHeader header; /* must come first, 32-bit */
-    bf_t num;
+    uint32_t len; /* number of limbs, >= 1 */
+    js_limb_t tab[]; /* two's complement representation, always
+                        normalized so that 'len' is the minimum
+                        possible length >= 1 */
 } JSBigInt;
+
+/* this bigint structure can hold a 64 bit integer */
+typedef struct {
+    js_limb_t big_int_buf[sizeof(JSBigInt) / sizeof(js_limb_t)]; /* for JSBigInt */
+    /* must come just after */
+    js_limb_t tab[(64 + JS_LIMB_BITS - 1) / JS_LIMB_BITS];
+} JSBigIntBuf;
 
 typedef enum {
     JS_AUTOINIT_ID_PROTOTYPE,
     JS_AUTOINIT_ID_MODULE_NS,
     JS_AUTOINIT_ID_PROP,
+    JS_AUTOINIT_ID_BYTECODE,
 } JSAutoInitIDEnum;
+
+enum {
+    JS_BUILTIN_ARRAY_FROMASYNC = 1,
+};
 
 /* must be large enough to have a negligible runtime cost and small
    enough to call the interrupt callback often. */
@@ -9000,6 +7515,7 @@ struct JSContext {
     JSValue error_prepare_stack;
     JSValue error_stack_trace_limit;
     JSValue iterator_ctor;
+    JSValue iterator_ctor_getset;
     JSValue iterator_proto;
     JSValue async_iterator_proto;
     JSValue array_proto_values;
@@ -9012,7 +7528,7 @@ struct JSContext {
     double time_origin;
 
     uint64_t random_state;
-    bf_context_t *bf_ctx;   /* points to rt->bf_ctx, shared by all contexts */
+
     /* when the counter reaches zero, JSRutime.interrupt_handler is called */
     int interrupt_counter;
 
@@ -9050,6 +7566,32 @@ typedef struct JSWeakRefRecord {
     } u;
 } JSWeakRefRecord;
 
+typedef struct JSMapRecord {
+    int ref_count; /* used during enumeration to avoid freeing the record */
+    bool empty; /* true if the record is deleted */
+    struct JSMapState *map;
+    struct list_head link;
+    struct list_head hash_link;
+    JSValue key;
+    JSValue value;
+} JSMapRecord;
+
+typedef struct JSMapState {
+    bool is_weak; /* true if WeakSet/WeakMap */
+    struct list_head records; /* list of JSMapRecord.link */
+    uint32_t record_count;
+    struct list_head *hash_table;
+    uint32_t hash_size; /* must be a power of two */
+    uint32_t record_count_threshold; /* count at which a hash table
+                                        resize is needed */
+} JSMapState;
+
+enum
+{
+    JS_TO_STRING_IS_PROPERTY_KEY = 1 << 0,
+    JS_TO_STRING_NO_SIDE_EFFECTS = 1 << 1,
+};
+
 enum {
     JS_ATOM_TYPE_STRING = 1,
     JS_ATOM_TYPE_GLOBAL_SYMBOL,
@@ -9068,7 +7610,12 @@ typedef enum {
     JS_ATOM_KIND_PRIVATE,
 } JSAtomKindEnum;
 
-#define JS_ATOM_HASH_MASK  ((1 << 30) - 1)
+typedef enum {
+    JS_STRING_KIND_NORMAL,
+    JS_STRING_KIND_SLICE,
+} JSStringKind;
+
+#define JS_ATOM_HASH_MASK  ((1 << 29) - 1)
 
 struct JSString {
     JSRefCountHeader header; /* must come first, 32-bit */
@@ -9077,7 +7624,8 @@ struct JSString {
     /* for JS_ATOM_TYPE_SYMBOL: hash = 0, atom_type = 3,
        for JS_ATOM_TYPE_PRIVATE: hash = 1, atom_type = 3
        XXX: could change encoding to have one more bit in hash */
-    uint32_t hash : 30;
+    uint32_t hash : 29;
+    uint8_t kind : 1;
     uint8_t atom_type : 2; /* != 0 if atom, JS_ATOM_TYPE_x */
     uint32_t hash_next; /* atom_index for JS_ATOM_TYPE_SYMBOL */
     JSWeakRefRecord *first_weak_ref;
@@ -9086,14 +7634,34 @@ struct JSString {
 #endif
 };
 
+typedef struct JSStringSlice {
+    JSString *parent;
+    uint32_t start; // in bytes, not characters
+} JSStringSlice;
+
+static inline void *strv(JSString *p)
+{
+    JSStringSlice *slice;
+
+    switch (p->kind) {
+    case JS_STRING_KIND_NORMAL:
+        return (void *)&p[1];
+    case JS_STRING_KIND_SLICE:
+        slice = (void *)&p[1];
+        return (char *)&slice->parent[1] + slice->start;
+    }
+    abort();
+    return NULL;
+}
+
 static inline uint8_t *str8(JSString *p)
 {
-    return (void *)(p + 1);
+    return strv(p);
 }
 
 static inline uint16_t *str16(JSString *p)
 {
-    return (void *)(p + 1);
+    return strv(p);
 }
 
 typedef struct JSClosureVar {
@@ -9476,6 +8044,7 @@ struct JSObject {
         struct JSArrayIteratorData *array_iterator_data; /* JS_CLASS_ARRAY_ITERATOR, JS_CLASS_STRING_ITERATOR */
         struct JSRegExpStringIteratorData *regexp_string_iterator_data; /* JS_CLASS_REGEXP_STRING_ITERATOR */
         struct JSGeneratorData *generator_data; /* JS_CLASS_GENERATOR */
+        struct JSIteratorConcatData *iterator_concat_data; /* JS_CLASS_ITERATOR_CONCAT */
         struct JSIteratorHelperData *iterator_helper_data; /* JS_CLASS_ITERATOR_HELPER */
         struct JSIteratorWrapData *iterator_wrap_data; /* JS_CLASS_ITERATOR_WRAP */
         struct JSProxyData *proxy_data; /* JS_CLASS_PROXY */
@@ -9694,6 +8263,7 @@ DEF(brand, "<brand>")
 DEF(hash_constructor, "#constructor")
 DEF(as, "as")
 DEF(from, "from")
+DEF(fromAsync, "fromAsync")
 DEF(meta, "meta")
 DEF(_default_, "*default*")
 DEF(_star_, "*")
@@ -9757,6 +8327,7 @@ DEF(Set, "Set") /* Map + 1 */
 DEF(WeakMap, "WeakMap") /* Map + 2 */
 DEF(WeakSet, "WeakSet") /* Map + 3 */
 DEF(Iterator, "Iterator")
+DEF(IteratorConcat, "Iterator Concat")
 DEF(IteratorHelper, "Iterator Helper")
 DEF(IteratorWrap, "Iterator Wrap")
 DEF(Map_Iterator, "Map Iterator")
@@ -9781,6 +8352,7 @@ DEF(SyntaxError, "SyntaxError")
 DEF(TypeError, "TypeError")
 DEF(URIError, "URIError")
 DEF(InternalError, "InternalError")
+DEF(DOMException, "DOMException")
 DEF(CallSite, "CallSite")
 /* private symbols */
 DEF(Private_brand, "<brand>")
@@ -9965,6 +8537,7 @@ DEF(brand, "<brand>")
 DEF(hash_constructor, "#constructor")
 DEF(as, "as")
 DEF(from, "from")
+DEF(fromAsync, "fromAsync")
 DEF(meta, "meta")
 DEF(_default_, "*default*")
 DEF(_star_, "*")
@@ -10028,6 +8601,7 @@ DEF(Set, "Set") /* Map + 1 */
 DEF(WeakMap, "WeakMap") /* Map + 2 */
 DEF(WeakSet, "WeakSet") /* Map + 3 */
 DEF(Iterator, "Iterator")
+DEF(IteratorConcat, "Iterator Concat")
 DEF(IteratorHelper, "Iterator Helper")
 DEF(IteratorWrap, "Iterator Wrap")
 DEF(Map_Iterator, "Map Iterator")
@@ -10052,6 +8626,7 @@ DEF(SyntaxError, "SyntaxError")
 DEF(TypeError, "TypeError")
 DEF(URIError, "URIError")
 DEF(InternalError, "InternalError")
+DEF(DOMException, "DOMException")
 DEF(CallSite, "CallSite")
 /* private symbols */
 DEF(Private_brand, "<brand>")
@@ -10344,6 +8919,7 @@ DEF(      strict_eq, 1, 2, 1, none)
 DEF(     strict_neq, 1, 2, 1, none)
 DEF(is_undefined_or_null, 1, 1, 1, none)
 DEF(     private_in, 1, 2, 1, none)
+DEF(push_bigint_i32, 5, 0, 1, i32)
 /* must be the last non short and non temporary opcode */
 DEF(            nop, 1, 0, 0, none)
 
@@ -10723,6 +9299,7 @@ DEF(      strict_eq, 1, 2, 1, none)
 DEF(     strict_neq, 1, 2, 1, none)
 DEF(is_undefined_or_null, 1, 1, 1, none)
 DEF(     private_in, 1, 2, 1, none)
+DEF(push_bigint_i32, 5, 0, 1, i32)
 /* must be the last non short and non temporary opcode */
 DEF(            nop, 1, 0, 0, none)
 
@@ -11104,6 +9681,7 @@ DEF(      strict_eq, 1, 2, 1, none)
 DEF(     strict_neq, 1, 2, 1, none)
 DEF(is_undefined_or_null, 1, 1, 1, none)
 DEF(     private_in, 1, 2, 1, none)
+DEF(push_bigint_i32, 5, 0, 1, i32)
 /* must be the last non short and non temporary opcode */
 DEF(            nop, 1, 0, 0, none)
 
@@ -11241,8 +9819,6 @@ static __exception int JS_ToArrayLengthFree(JSContext *ctx, uint32_t *plen,
                                             JSValue val, bool is_array_ctor);
 static JSValue JS_EvalObject(JSContext *ctx, JSValueConst this_obj,
                              JSValueConst val, int flags, int scope_idx);
-JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowInternalError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...);
-
 static __maybe_unused void JS_DumpString(JSRuntime *rt, JSString *p);
 static __maybe_unused void JS_DumpObjectHeader(JSRuntime *rt);
 static __maybe_unused void JS_DumpObject(JSRuntime *rt, JSObject *p);
@@ -11288,6 +9864,9 @@ static void js_map_iterator_mark(JSRuntime *rt, JSValueConst val,
 static void js_array_iterator_finalizer(JSRuntime *rt, JSValueConst val);
 static void js_array_iterator_mark(JSRuntime *rt, JSValueConst val,
                                 JS_MarkFunc *mark_func);
+static void js_iterator_concat_finalizer(JSRuntime *rt, JSValueConst val);
+static void js_iterator_concat_mark(JSRuntime *rt, JSValueConst val,
+                                    JS_MarkFunc *mark_func);
 static void js_iterator_helper_finalizer(JSRuntime *rt, JSValueConst val);
 static void js_iterator_helper_mark(JSRuntime *rt, JSValueConst val,
                                     JS_MarkFunc *mark_func);
@@ -11318,6 +9897,8 @@ static int JS_ToBoolFree(JSContext *ctx, JSValue val);
 static int JS_ToInt32Free(JSContext *ctx, int32_t *pres, JSValue val);
 static int JS_ToFloat64Free(JSContext *ctx, double *pres, JSValue val);
 static int JS_ToUint8ClampFree(JSContext *ctx, int32_t *pres, JSValue val);
+static JSValue JS_ToPropertyKeyInternal(JSContext *ctx, JSValueConst val,
+                                        int flags);
 static JSValue js_new_string8_len(JSContext *ctx, const char *buf, int len);
 static JSValue js_compile_regexp(JSContext *ctx, JSValueConst pattern,
                                  JSValueConst flags);
@@ -11328,6 +9909,12 @@ static int JS_NewClass1(JSRuntime *rt, JSClassID class_id,
                         const JSClassDef *class_def, JSAtom name);
 static JSValue js_array_push(JSContext *ctx, JSValueConst this_val,
                              int argc, JSValueConst *argv, int unshift);
+static JSValue js_array_constructor(JSContext *ctx, JSValueConst new_target,
+                                    int argc, JSValueConst *argv);
+static JSValue js_error_constructor(JSContext *ctx, JSValueConst new_target,
+                                    int argc, JSValueConst *argv, int magic);
+static JSValue js_object_defineProperty(JSContext *ctx, JSValueConst this_val,
+                                        int argc, JSValueConst *argv, int magic);
 
 typedef enum JSStrictEqModeEnum {
     JS_EQ_STRICT,
@@ -11343,19 +9930,8 @@ static bool js_same_value_zero(JSContext *ctx, JSValueConst op1, JSValueConst op
 static JSValue JS_ToObjectFree(JSContext *ctx, JSValue val);
 static JSProperty *add_property(JSContext *ctx,
                                 JSObject *p, JSAtom prop, int prop_flags);
-static JSValue JS_NewBigInt(JSContext *ctx);
-static inline bf_t *JS_GetBigInt(JSValueConst val)
-{
-    JSBigInt *p = JS_VALUE_GET_PTR(val);
-    return &p->num;
-}
-static JSValue JS_CompactBigInt1(JSContext *ctx, JSValue val);
-static JSValue JS_CompactBigInt(JSContext *ctx, JSValue val);
 static int JS_ToBigInt64Free(JSContext *ctx, int64_t *pres, JSValue val);
-static bf_t *JS_ToBigInt(JSContext *ctx, bf_t *buf, JSValueConst val);
-static bf_t *JS_ToBigInt1(JSContext *ctx, bf_t *buf, JSValueConst val);
-static void JS_FreeBigInt(JSContext *ctx, bf_t *a, bf_t *buf);
-JSValue JS_ThrowOutOfMemory(JSContext *ctx);
+static JSValue JS_ThrowStackOverflow(JSContext *ctx);
 static JSValue JS_ThrowTypeErrorRevokedProxy(JSContext *ctx);
 static JSValue js_proxy_getPrototypeOf(JSContext *ctx, JSValueConst obj);
 static int js_proxy_setPrototypeOf(JSContext *ctx, JSValueConst obj,
@@ -11392,12 +9968,12 @@ static JSValue js_typed_array_constructor_ta(JSContext *ctx,
                                              int classid, uint32_t len);
 static bool is_typed_array(JSClassID class_id);
 static bool typed_array_is_oob(JSObject *p);
-static uint32_t typed_array_get_length(JSContext *ctx, JSObject *p);
+static uint32_t typed_array_length(JSObject *p);
 static JSValue JS_ThrowTypeErrorDetachedArrayBuffer(JSContext *ctx);
 static JSValue JS_ThrowTypeErrorArrayBufferOOB(JSContext *ctx);
 static JSVarRef *get_var_ref(JSContext *ctx, JSStackFrame *sf, int var_idx,
                              bool is_arg);
-static JSValue js_generator_function_call(JSContext *ctx, JSValueConst func_obj,
+static JSValue js_call_generator_function(JSContext *ctx, JSValueConst func_obj,
                                           JSValueConst this_obj,
                                           int argc, JSValueConst *argv,
                                           int flags);
@@ -11425,6 +10001,8 @@ static JSValue js_promise_resolve(JSContext *ctx, JSValueConst this_val,
                                   int argc, JSValueConst *argv, int magic);
 static JSValue js_promise_then(JSContext *ctx, JSValueConst this_val,
                                int argc, JSValueConst *argv);
+static JSValue js_promise_resolve_thenable_job(JSContext *ctx,
+                                               int argc, JSValueConst *argv);
 static bool js_string_eq(JSString *p1, JSString *p2);
 static int js_string_compare(JSString *p1, JSString *p2);
 static int JS_SetPropertyValue(JSContext *ctx, JSValueConst this_obj,
@@ -11461,7 +10039,7 @@ static JSValue JS_CreateAsyncFromSyncIterator(JSContext *ctx,
 static void js_c_function_data_finalizer(JSRuntime *rt, JSValueConst val);
 static void js_c_function_data_mark(JSRuntime *rt, JSValueConst val,
                                     JS_MarkFunc *mark_func);
-static JSValue js_c_function_data_call(JSContext *ctx, JSValueConst func_obj,
+static JSValue js_call_c_function_data(JSContext *ctx, JSValueConst func_obj,
                                        JSValueConst this_val,
                                        int argc, JSValueConst *argv, int flags);
 static JSAtom js_symbol_to_atom(JSContext *ctx, JSValueConst val);
@@ -11539,8 +10117,6 @@ static JSValue js_int64(int64_t v)
     else
         return js_float64(v);
 }
-
-#define JS_NewInt64(ctx, val)  js_int64(val)
 
 static JSValue js_number(double d)
 {
@@ -11709,13 +10285,6 @@ size_t js_malloc_usable_size_rt(JSRuntime *rt, const void *ptr)
 void *js_mallocz_rt(JSRuntime *rt, size_t size)
 {
     return js_calloc_rt(rt, 1, size);
-}
-
-/* called by libbf */
-static void *js_bf_realloc(void *opaque, void *ptr, size_t size)
-{
-    JSRuntime *rt = opaque;
-    return js_realloc_rt(rt, ptr, size);
 }
 
 /* Throw out of memory in case of error */
@@ -11897,9 +10466,10 @@ static JSClassShortDef const js_std_class_def[] = {
     { JS_ATOM_BigInt, js_object_data_finalizer, js_object_data_mark },      /* JS_CLASS_BIG_INT */
     { JS_ATOM_Map, js_map_finalizer, js_map_mark },             /* JS_CLASS_MAP */
     { JS_ATOM_Set, js_map_finalizer, js_map_mark },             /* JS_CLASS_SET */
-    { JS_ATOM_WeakMap, js_map_finalizer, js_map_mark },         /* JS_CLASS_WEAKMAP */
-    { JS_ATOM_WeakSet, js_map_finalizer, js_map_mark },         /* JS_CLASS_WEAKSET */
+    { JS_ATOM_WeakMap, js_map_finalizer, NULL },         /* JS_CLASS_WEAKMAP */
+    { JS_ATOM_WeakSet, js_map_finalizer, NULL },         /* JS_CLASS_WEAKSET */
     { JS_ATOM_Iterator, NULL, NULL },                           /* JS_CLASS_ITERATOR */
+    { JS_ATOM_IteratorConcat, js_iterator_concat_finalizer, js_iterator_concat_mark }, /* JS_CLASS_ITERATOR_CONCAT */
     { JS_ATOM_IteratorHelper, js_iterator_helper_finalizer, js_iterator_helper_mark }, /* JS_CLASS_ITERATOR_HELPER */
     { JS_ATOM_IteratorWrap, js_iterator_wrap_finalizer, js_iterator_wrap_mark }, /* JS_CLASS_ITERATOR_WRAP */
     { JS_ATOM_Map_Iterator, js_map_iterator_finalizer, js_map_iterator_mark }, /* JS_CLASS_MAP_ITERATOR */
@@ -11976,8 +10546,6 @@ JSRuntime *JS_NewRuntime2(const JSMallocFunctions *mf, void *opaque)
     rt->malloc_state = ms;
     rt->malloc_gc_threshold = 256 * 1024;
 
-    bf_context_init(&rt->bf_ctx, js_bf_realloc, rt);
-
     init_list_head(&rt->context_list);
     init_list_head(&rt->gc_obj_list);
     init_list_head(&rt->gc_zero_ref_count_list);
@@ -12000,9 +10568,9 @@ JSRuntime *JS_NewRuntime2(const JSMallocFunctions *mf, void *opaque)
     rt->class_array[JS_CLASS_MODULE_NS].exotic = &js_module_ns_exotic_methods;
 
     rt->class_array[JS_CLASS_C_FUNCTION].call = js_call_c_function;
-    rt->class_array[JS_CLASS_C_FUNCTION_DATA].call = js_c_function_data_call;
+    rt->class_array[JS_CLASS_C_FUNCTION_DATA].call = js_call_c_function_data;
     rt->class_array[JS_CLASS_BOUND_FUNCTION].call = js_call_bound_function;
-    rt->class_array[JS_CLASS_GENERATOR_FUNCTION].call = js_generator_function_call;
+    rt->class_array[JS_CLASS_GENERATOR_FUNCTION].call = js_call_generator_function;
     if (init_shape_hash(rt))
         goto fail;
 
@@ -12215,6 +10783,7 @@ static JSString *js_alloc_string_rt(JSRuntime *rt, int max_len, int is_wide_char
     str->header.ref_count = 1;
     str->is_wide_char = is_wide_char;
     str->len = max_len;
+    str->kind = JS_STRING_KIND_NORMAL;
     str->atom_type = 0;
     str->hash = 0;          /* optional but costless */
     str->hash_next = 0;     /* optional */
@@ -12235,18 +10804,28 @@ static JSString *js_alloc_string(JSContext *ctx, int max_len, int is_wide_char)
     return p;
 }
 
+static inline void js_free_string0(JSRuntime *rt, JSString *str);
+
 /* same as JS_FreeValueRT() but faster */
 static inline void js_free_string(JSRuntime *rt, JSString *str)
 {
-    if (--str->header.ref_count <= 0) {
-        if (str->atom_type) {
-            JS_FreeAtomStruct(rt, str);
-        } else {
+    if (--str->header.ref_count <= 0)
+        js_free_string0(rt, str);
+}
+
+static inline void js_free_string0(JSRuntime *rt, JSString *str)
+{
+    if (str->atom_type) {
+        JS_FreeAtomStruct(rt, str);
+    } else {
 #ifdef ENABLE_DUMPS // JS_DUMP_LEAKS
-            list_del(&str->link);
+        list_del(&str->link);
 #endif
-            js_free_rt(rt, str);
+        if (str->kind == JS_STRING_KIND_SLICE) {
+            JSStringSlice *slice = (void *)&str[1];
+            js_free_string(rt, slice->parent); // safe, recurses only 1 level
         }
+        js_free_rt(rt, str);
     }
 }
 
@@ -12324,8 +10903,6 @@ void JS_FreeRuntime(JSRuntime *rt)
         }
     }
     js_free_rt(rt, rt->class_array);
-
-    bf_context_end(&rt->bf_ctx);
 
 #ifdef ENABLE_DUMPS // JS_DUMP_ATOM_LEAKS
     /* only the atoms defined in JS_InitAtoms() should be left */
@@ -12473,11 +11050,11 @@ JSContext *JS_NewContextRaw(JSRuntime *rt)
     }
     ctx->rt = rt;
     list_add_tail(&ctx->link, &rt->context_list);
-    ctx->bf_ctx = &rt->bf_ctx;
     for(i = 0; i < rt->class_count; i++)
         ctx->class_proto[i] = JS_NULL;
     ctx->array_ctor = JS_NULL;
     ctx->iterator_ctor = JS_NULL;
+    ctx->iterator_ctor_getset = JS_NULL;
     ctx->regexp_ctor = JS_NULL;
     ctx->promise_ctor = JS_NULL;
     ctx->error_ctor = JS_NULL;
@@ -12509,6 +11086,7 @@ JSContext *JS_NewContext(JSRuntime *rt)
     JS_AddIntrinsicPromise(ctx);
     JS_AddIntrinsicBigInt(ctx);
     JS_AddIntrinsicWeakRef(ctx);
+    JS_AddIntrinsicDOMException(ctx);
 
     JS_AddPerformance(ctx);
 
@@ -12608,6 +11186,7 @@ static void JS_MarkContext(JSRuntime *rt, JSContext *ctx,
         JS_MarkValue(rt, ctx->class_proto[i], mark_func);
     }
     JS_MarkValue(rt, ctx->iterator_ctor, mark_func);
+    JS_MarkValue(rt, ctx->iterator_ctor_getset, mark_func);
     JS_MarkValue(rt, ctx->async_iterator_proto, mark_func);
     JS_MarkValue(rt, ctx->promise_ctor, mark_func);
     JS_MarkValue(rt, ctx->array_ctor, mark_func);
@@ -12678,6 +11257,7 @@ void JS_FreeContext(JSContext *ctx)
     }
     js_free_rt(rt, ctx->class_proto);
     JS_FreeValue(ctx, ctx->iterator_ctor);
+    JS_FreeValue(ctx, ctx->iterator_ctor_getset);
     JS_FreeValue(ctx, ctx->async_iterator_proto);
     JS_FreeValue(ctx, ctx->promise_ctor);
     JS_FreeValue(ctx, ctx->array_ctor);
@@ -13127,6 +11707,7 @@ static JSAtom __JS_NewAtom(JSRuntime *rt, JSString *str, int atom_type)
             p->header.ref_count = 1;
             p->is_wide_char = str->is_wide_char;
             p->len = str->len;
+            p->kind = JS_STRING_KIND_NORMAL;
 #ifdef ENABLE_DUMPS // JS_DUMP_LEAKS
             list_add_tail(&p->link, &rt->string_list);
 #endif
@@ -13141,6 +11722,7 @@ static JSAtom __JS_NewAtom(JSRuntime *rt, JSString *str, int atom_type)
         p->header.ref_count = 1;
         p->is_wide_char = 1;    /* Hack to represent NULL as a JSString */
         p->len = 0;
+        p->kind = JS_STRING_KIND_NORMAL;
 #ifdef ENABLE_DUMPS // JS_DUMP_LEAKS
         list_add_tail(&p->link, &rt->string_list);
 #endif
@@ -13386,7 +11968,6 @@ static const char *JS_AtomGetStrRT(JSRuntime *rt, char *buf, int buf_size,
         JSAtomStruct *p = rt->atom_array[atom];
         *buf = '\0';
         if (atom_is_free(p)) {
-            assert(!atom_is_free(p));
             snprintf(buf, buf_size, "<free %x>", atom);
         } else if (p != NULL) {
             JSString *str = p;
@@ -13630,18 +12211,23 @@ static __maybe_unused void print_atom(JSContext *ctx, JSAtom atom)
 }
 
 /* free with JS_FreeCString() */
-const char *JS_AtomToCString(JSContext *ctx, JSAtom atom)
+const char *JS_AtomToCStringLen(JSContext *ctx, size_t *plen, JSAtom atom)
 {
     JSValue str;
     const char *cstr;
 
     str = JS_AtomToString(ctx, atom);
-    if (JS_IsException(str))
+    if (JS_IsException(str)) {
+        if (plen)
+            *plen = 0;
         return NULL;
-    cstr = JS_ToCString(ctx, str);
+    }
+    cstr = JS_ToCStringLen(ctx, plen, str);
     JS_FreeValue(ctx, str);
     return cstr;
 }
+
+#ifndef QJS_DISABLE_PARSER
 
 /* return a string atom containing name concatenated with str1 */
 /* `str1` may be pure ASCII or UTF-8 encoded */
@@ -13681,9 +12267,14 @@ static JSAtom js_atom_concat_str(JSContext *ctx, JSAtom name, const char *str1)
 static JSAtom js_atom_concat_num(JSContext *ctx, JSAtom name, uint32_t n)
 {
     char buf[16];
-    u32toa(buf, n);
+    size_t len;
+
+    len = u32toa(buf, n);
+    buf[len] = '\0';
     return js_atom_concat_str(ctx, name, buf);
 }
+
+#endif // QJS_DISABLE_PARSER
 
 static inline bool JS_IsEmptyString(JSValueConst v)
 {
@@ -13787,6 +12378,12 @@ int JS_NewClass(JSRuntime *rt, JSClassID class_id, const JSClassDef *class_def)
     return ret;
 }
 
+static inline JSValue js_empty_string(JSRuntime *rt)
+{
+    JSAtomStruct *p = rt->atom_array[JS_ATOM_empty_string];
+    return js_dup(JS_MKPTR(JS_TAG_STRING, p));
+}
+
 // XXX: `buf` contains raw 8-bit data, no UTF-8 decoding is performed
 // XXX: no special case for len == 0
 static JSValue js_new_string8_len(JSContext *ctx, const char *buf, int len)
@@ -13830,12 +12427,36 @@ static JSValue js_new_string_char(JSContext *ctx, uint16_t c)
 
 static JSValue js_sub_string(JSContext *ctx, JSString *p, int start, int end)
 {
-    int len = end - start;
+    JSStringSlice *slice;
+    JSString *q;
+    int len;
+
+    len = end - start;
     if (start == 0 && end == p->len) {
         return js_dup(JS_MKPTR(JS_TAG_STRING, p));
     }
     if (len <= 0) {
-        return JS_AtomToString(ctx, JS_ATOM_empty_string);
+        return js_empty_string(ctx->rt);
+    }
+    if (len > (JS_STRING_SLICE_LEN_MAX >> p->is_wide_char)) {
+        if (p->kind == JS_STRING_KIND_SLICE) {
+            slice = (void *)&p[1];
+            p = slice->parent;
+            start += slice->start >> p->is_wide_char; // bytes -> chars
+        }
+        // allocate as 16 bit wide string to avoid wastage;
+        // js_alloc_string allocates 1 byte extra for 8 bit strings;
+        q = js_alloc_string(ctx, sizeof(*slice)/2, /*is_wide_char*/true);
+        if (!q)
+            return JS_EXCEPTION;
+        q->is_wide_char = p->is_wide_char;
+        q->kind = JS_STRING_KIND_SLICE;
+        q->len = len;
+        slice = (void *)&q[1];
+        slice->parent = p;
+        slice->start = start << p->is_wide_char; // chars -> bytes
+        p->header.ref_count++;
+        return JS_MKPTR(JS_TAG_STRING, q);
     }
     if (p->is_wide_char) {
         JSString *str;
@@ -14172,7 +12793,7 @@ static JSValue string_buffer_end(StringBuffer *s)
     if (s->len == 0) {
         js_free(s->ctx, str);
         s->str = NULL;
-        return JS_AtomToString(s->ctx, JS_ATOM_empty_string);
+        return js_empty_string(s->ctx->rt);
     }
     if (s->len < s->size) {
         /* smaller size so js_realloc should not fail, but OK if it does */
@@ -14203,7 +12824,7 @@ JSValue JS_NewStringLen(JSContext *ctx, const char *buf, size_t buf_len)
     int kind;
 
     if (buf_len <= 0) {
-        return JS_AtomToString(ctx, JS_ATOM_empty_string);
+        return js_empty_string(ctx->rt);
     }
     /* Compute string kind and length: 7-bit, 8-bit, 16-bit, 16-bit UTF-16 */
     kind = utf8_scan(buf, buf_len, &len);
@@ -14235,6 +12856,19 @@ JSValue JS_NewStringLen(JSContext *ctx, const char *buf, size_t buf_len)
         utf8_decode_buf16(str16(str), len, buf, buf_len);
         break;
     }
+    return JS_MKPTR(JS_TAG_STRING, str);
+}
+
+JSValue JS_NewTwoByteString(JSContext *ctx, const uint16_t *buf, size_t len)
+{
+    JSString *str;
+
+    if (!len)
+        return js_empty_string(ctx->rt);
+    str = js_alloc_string(ctx, len, 1);
+    if (!str)
+        return JS_EXCEPTION;
+    memcpy(str16(str), buf, len * sizeof(*buf));
     return JS_MKPTR(JS_TAG_STRING, str);
 }
 
@@ -14335,7 +12969,7 @@ go:
         for (pos = 0; pos < len; pos++) {
             count += src[pos] >> 7;
         }
-        if (count == 0) {
+        if (count == 0 && str->kind == JS_STRING_KIND_NORMAL) {
             if (plen)
                 *plen = len;
             return (const char *)src;
@@ -14581,7 +13215,7 @@ static inline JSShapeProperty *get_shape_prop(JSShape *sh)
 
 static int init_shape_hash(JSRuntime *rt)
 {
-    rt->shape_hash_bits = 4;   /* 16 shapes */
+    rt->shape_hash_bits = 6;   /* 64 shapes */
     rt->shape_hash_size = 1 << rt->shape_hash_bits;
     rt->shape_hash_count = 0;
     rt->shape_hash = js_mallocz_rt(rt, sizeof(rt->shape_hash[0]) *
@@ -15199,7 +13833,7 @@ static int JS_SetObjectData(JSContext *ctx, JSValueConst obj, JSValue val)
     return -1;
 }
 
-JSValue JS_NewObjectClass(JSContext *ctx, int class_id)
+JSValue JS_NewObjectClass(JSContext *ctx, JSClassID class_id)
 {
     return JS_NewObjectProtoClass(ctx, ctx->class_proto[class_id], class_id);
 }
@@ -15298,21 +13932,26 @@ JSValue JS_NewArrayFrom(JSContext *ctx, int count, const JSValue *values)
 {
     JSObject *p;
     JSValue obj;
+    int i;
 
     obj = JS_NewArray(ctx);
     if (JS_IsException(obj))
-        return JS_EXCEPTION;
+        goto exception;
     if (count > 0) {
         p = JS_VALUE_GET_OBJ(obj);
         if (expand_fast_array(ctx, p, count)) {
             JS_FreeValue(ctx, obj);
-            return JS_EXCEPTION;
+            goto exception;
         }
         p->u.array.count = count;
         p->prop[0].u.value = js_int32(count);
         memcpy(p->u.array.u.values, values, count * sizeof(*values));
     }
     return obj;
+exception:
+    for (i = 0; i < count; i++)
+        JS_FreeValue(ctx, values[i]);
+    return JS_EXCEPTION;
 }
 
 JSValue JS_NewObject(JSContext *ctx)
@@ -15416,7 +14055,7 @@ static int js_method_set_properties(JSContext *ctx, JSValue func_obj,
 JSValue JS_NewCFunction3(JSContext *ctx, JSCFunction *func,
                          const char *name,
                          int length, JSCFunctionEnum cproto, int magic,
-                         JSValue proto_val)
+                         JSValueConst proto_val)
 {
     JSValue func_obj;
     JSObject *p;
@@ -15435,9 +14074,14 @@ JSValue JS_NewCFunction3(JSContext *ctx, JSCFunction *func,
                          cproto == JS_CFUNC_constructor_magic ||
                          cproto == JS_CFUNC_constructor_or_func ||
                          cproto == JS_CFUNC_constructor_or_func_magic);
-    if (!name)
-        name = "";
-    name_atom = JS_NewAtom(ctx, name);
+    name_atom = JS_ATOM_empty_string;
+    if (name && *name) {
+        name_atom = JS_NewAtom(ctx, name);
+        if (name_atom == JS_ATOM_NULL) {
+            JS_FreeValue(ctx, func_obj);
+            return JS_EXCEPTION;
+        }
+    }
     js_function_set_properties(ctx, func_obj, name_atom, length);
     JS_FreeAtom(ctx, name_atom);
     return func_obj;
@@ -15486,33 +14130,53 @@ static void js_c_function_data_mark(JSRuntime *rt, JSValueConst val,
     }
 }
 
-static JSValue js_c_function_data_call(JSContext *ctx, JSValueConst func_obj,
+static JSValue js_call_c_function_data(JSContext *ctx, JSValueConst func_obj,
                                        JSValueConst this_val,
                                        int argc, JSValueConst *argv, int flags)
 {
-    JSCFunctionDataRecord *s = JS_GetOpaque(func_obj, JS_CLASS_C_FUNCTION_DATA);
+    JSRuntime *rt = ctx->rt;
+    JSStackFrame sf_s, *sf = &sf_s, *prev_sf;
+    JSCFunctionDataRecord *s;
     JSValueConst *arg_buf;
+    JSValue ret;
+    size_t stack_size;
+    int arg_count;
     int i;
 
-    /* XXX: could add the function on the stack for debug */
-    if (unlikely(argc < s->length)) {
-        arg_buf = alloca(sizeof(arg_buf[0]) * s->length);
+    s = JS_GetOpaque(func_obj, JS_CLASS_C_FUNCTION_DATA);
+    if (!s)
+        return JS_EXCEPTION; // can't really happen
+    arg_buf = argv;
+    arg_count = s->length;
+    if (unlikely(argc < arg_count)) {
+        stack_size = arg_count * sizeof(arg_buf[0]);
+        if (js_check_stack_overflow(rt, stack_size))
+            return JS_ThrowStackOverflow(ctx);
+        arg_buf = alloca(stack_size);
         for(i = 0; i < argc; i++)
             arg_buf[i] = argv[i];
-        for(i = argc; i < s->length; i++)
+        for(i = argc; i < arg_count; i++)
             arg_buf[i] = JS_UNDEFINED;
-    } else {
-        arg_buf = argv;
     }
-
-    return s->func(ctx, this_val, argc, arg_buf, s->magic, vc(s->data));
+    prev_sf = rt->current_stack_frame;
+    sf->prev_frame = prev_sf;
+    rt->current_stack_frame = sf;
+    // TODO(bnoordhuis) switch realms like js_call_c_function does
+    sf->is_strict_mode = false;
+    sf->cur_func = unsafe_unconst(func_obj);
+    sf->arg_count = argc;
+    ret = s->func(ctx, this_val, argc, arg_buf, s->magic, vc(s->data));
+    rt->current_stack_frame = sf->prev_frame;
+    return ret;
 }
 
-JSValue JS_NewCFunctionData(JSContext *ctx, JSCFunctionData *func,
-                            int length, int magic, int data_len,
-                            JSValueConst *data)
+JSValue JS_NewCFunctionData2(JSContext *ctx, JSCFunctionData *func,
+                             const char *name,
+                             int length, int magic, int data_len,
+                             JSValueConst *data)
 {
     JSCFunctionDataRecord *s;
+    JSAtom name_atom;
     JSValue func_obj;
     int i;
 
@@ -15532,9 +14196,24 @@ JSValue JS_NewCFunctionData(JSContext *ctx, JSCFunctionData *func,
     for(i = 0; i < data_len; i++)
         s->data[i] = js_dup(data[i]);
     JS_SetOpaqueInternal(func_obj, s);
-    js_function_set_properties(ctx, func_obj,
-                               JS_ATOM_empty_string, length);
+    name_atom = JS_ATOM_empty_string;
+    if (name && *name) {
+        name_atom = JS_NewAtom(ctx, name);
+        if (name_atom == JS_ATOM_NULL) {
+            JS_FreeValue(ctx, func_obj);
+            return JS_EXCEPTION;
+        }
+    }
+    js_function_set_properties(ctx, func_obj, name_atom, length);
+    JS_FreeAtom(ctx, name_atom);
     return func_obj;
+}
+
+JSValue JS_NewCFunctionData(JSContext *ctx, JSCFunctionData *func,
+                            int length, int magic, int data_len,
+                            JSValueConst *data)
+{
+    return JS_NewCFunctionData2(ctx, func, NULL, length, magic, data_len, data);
 }
 
 static JSContext *js_autoinit_get_realm(JSProperty *pr)
@@ -15618,11 +14297,6 @@ static force_inline JSShapeProperty *find_own_property(JSProperty **ppr,
     }
     *ppr = NULL;
     return NULL;
-}
-
-/* indicate that the object may be part of a function prototype cycle */
-static void set_cycle_flag(JSContext *ctx, JSValueConst obj)
-{
 }
 
 static void free_var_ref(JSRuntime *rt, JSVarRef *var_ref)
@@ -15888,17 +14562,7 @@ static void js_free_value_rt(JSRuntime *rt, JSValue v)
 
     switch(tag) {
     case JS_TAG_STRING:
-        {
-            JSString *p = JS_VALUE_GET_STRING(v);
-            if (p->atom_type) {
-                JS_FreeAtomStruct(rt, p);
-            } else {
-#ifdef ENABLE_DUMPS // JS_DUMP_LEAKS
-                list_del(&p->link);
-#endif
-                js_free_rt(rt, p);
-            }
-        }
+        js_free_string0(rt, JS_VALUE_GET_STRING(v));
         break;
     case JS_TAG_OBJECT:
     case JS_TAG_FUNCTION_BYTECODE:
@@ -15918,9 +14582,8 @@ static void js_free_value_rt(JSRuntime *rt, JSValue v)
         break;
     case JS_TAG_BIG_INT:
         {
-            JSBigInt *bf = JS_VALUE_GET_PTR(v);
-            bf_delete(&bf->num);
-            js_free_rt(rt, bf);
+            JSBigInt *p = JS_VALUE_GET_PTR(v);
+            js_free_rt(rt, p);
         }
         break;
     case JS_TAG_SYMBOL:
@@ -15979,6 +14642,22 @@ void JS_MarkValue(JSRuntime *rt, JSValueConst val, JS_MarkFunc *mark_func)
     }
 }
 
+static void mark_weak_map_value(JSRuntime *rt, JSWeakRefRecord *first_weak_ref, JS_MarkFunc *mark_func) {
+    JSWeakRefRecord *wr;
+    JSMapRecord *mr;
+    JSMapState *s;
+
+    for (wr = first_weak_ref; wr != NULL; wr = wr->next_weak_ref) {
+        if (wr->kind == JS_WEAK_REF_KIND_MAP) {
+            mr = wr->u.map_record;
+            s = mr->map;
+            assert(s->is_weak);
+            assert(!mr->empty); /* no iterator on WeakMap/WeakSet */
+            JS_MarkValue(rt, mr->value, mark_func);
+        }
+    }
+}
+
 static void mark_children(JSRuntime *rt, JSGCObjectHeader *gp,
                           JS_MarkFunc *mark_func)
 {
@@ -16016,6 +14695,10 @@ static void mark_children(JSRuntime *rt, JSGCObjectHeader *gp,
                     }
                 }
                 prs++;
+            }
+
+            if (unlikely(p->first_weak_ref)) {
+                mark_weak_map_value(rt, p->first_weak_ref, mark_func);
             }
 
             if (p->class_id != JS_CLASS_OBJECT) {
@@ -16620,10 +15303,10 @@ void JS_DumpMemoryUsage(FILE *fp, const JSMemoryUsage *s, JSRuntime *rt)
             if (obj_classes[0])
                 fprintf(fp, "  %5d  %2.0d %s\n", obj_classes[0], 0, "none");
             for (class_id = 1; class_id < JS_CLASS_INIT_COUNT; class_id++) {
-                if (obj_classes[class_id]) {
+                if (obj_classes[class_id] && class_id < rt->class_count) {
                     char buf[ATOM_GET_STR_BUF_SIZE];
                     fprintf(fp, "  %5d  %2.0d %s\n", obj_classes[class_id], class_id,
-                            JS_AtomGetStrRT(rt, buf, sizeof(buf), js_std_class_def[class_id - 1].class_name));
+                            JS_AtomGetStrRT(rt, buf, sizeof(buf), rt->class_array[class_id].class_name));
                 }
             }
             if (obj_classes[JS_CLASS_INIT_COUNT])
@@ -16859,7 +15542,7 @@ static bool can_add_backtrace(JSValueConst obj)
     if (JS_VALUE_GET_TAG(obj) != JS_TAG_OBJECT)
         return false;
     p = JS_VALUE_GET_OBJ(obj);
-    if (p->class_id != JS_CLASS_ERROR)
+    if (p->class_id != JS_CLASS_ERROR && p->class_id != JS_CLASS_DOM_EXCEPTION)
         return false;
     if (find_own_property1(p, JS_ATOM_stack))
         return false;
@@ -17080,8 +15763,8 @@ JSValue JS_NewError(JSContext *ctx)
     return obj;
 }
 
-static JSValue JS_MakeError(JSContext *ctx, JSErrorEnum error_num,
-                            const char *message, bool add_backtrace)
+static JSValue JS_MakeError2(JSContext *ctx, JSErrorEnum error_num,
+                             bool add_backtrace, const char *message)
 {
     JSValue obj, msg;
 
@@ -17105,16 +15788,24 @@ static JSValue JS_MakeError(JSContext *ctx, JSErrorEnum error_num,
     return obj;
 }
 
-/* fmt and arguments may be pure ASCII or UTF-8 encoded contents */
 static JSValue JS_PRINTF_FORMAT_ATTR(4, 0)
-JS_ThrowError2(JSContext *ctx, JSErrorEnum error_num,
-               bool add_backtrace, JS_PRINTF_FORMAT const char *fmt, va_list ap)
+JS_MakeError(JSContext *ctx, JSErrorEnum error_num, bool add_backtrace,
+             JS_PRINTF_FORMAT const char *fmt, va_list ap)
 {
     char buf[256];
-    JSValue obj;
 
     vsnprintf(buf, sizeof(buf), fmt, ap);
-    obj = JS_MakeError(ctx, error_num, buf, add_backtrace);
+    return JS_MakeError2(ctx, error_num, add_backtrace, buf);
+}
+
+/* fmt and arguments may be pure ASCII or UTF-8 encoded contents */
+static JSValue JS_PRINTF_FORMAT_ATTR(4, 0)
+JS_ThrowError2(JSContext *ctx, JSErrorEnum error_num, bool add_backtrace,
+               JS_PRINTF_FORMAT const char *fmt, va_list ap)
+{
+    JSValue obj;
+
+    obj = JS_MakeError(ctx, error_num, add_backtrace, fmt, ap);
     if (unlikely(JS_IsException(obj))) {
         /* out of memory: throw JS_NULL to avoid recursing */
         obj = JS_NULL;
@@ -17137,38 +15828,45 @@ JS_ThrowError(JSContext *ctx, JSErrorEnum error_num,
     return JS_ThrowError2(ctx, error_num, add_backtrace, fmt, ap);
 }
 
-JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowPlainError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...)
-{
-    JSValue val;
-    va_list ap;
+#define JS_ERROR_MAP(X)     \
+    X(Internal, INTERNAL)   \
+    X(Plain, PLAIN)         \
+    X(Range, RANGE)         \
+    X(Reference, REFERENCE) \
+    X(Syntax, SYNTAX)       \
+    X(Type, TYPE)           \
 
-    va_start(ap, fmt);
-    val = JS_ThrowError(ctx, JS_PLAIN_ERROR, fmt, ap);
-    va_end(ap);
-    return val;
-}
+#define X(lc, uc)   \
+    JSValue JS_PRINTF_FORMAT_ATTR(2, 3)                         \
+    JS_New##lc##Error(JSContext *ctx,                           \
+                      JS_PRINTF_FORMAT const char *fmt, ...)    \
+    {                                                           \
+        JSValue val;                                            \
+        va_list ap;                                             \
+                                                                \
+        va_start(ap, fmt);                                      \
+        val = JS_MakeError(ctx, JS_##uc##_ERROR,                \
+                           /*add_backtrace*/true, fmt, ap);     \
+        va_end(ap);                                             \
+        return val;                                             \
+    }                                                           \
+    JSValue JS_PRINTF_FORMAT_ATTR(2, 3)                         \
+    JS_Throw##lc##Error(JSContext *ctx,                         \
+                        JS_PRINTF_FORMAT const char *fmt, ...)  \
+    {                                                           \
+        JSValue val;                                            \
+        va_list ap;                                             \
+                                                                \
+        va_start(ap, fmt);                                      \
+        val = JS_ThrowError(ctx, JS_##uc##_ERROR, fmt, ap);     \
+        va_end(ap);                                             \
+        return val;                                             \
+    }                                                           \
 
-JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowSyntaxError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...)
-{
-    JSValue val;
-    va_list ap;
+JS_ERROR_MAP(X)
 
-    va_start(ap, fmt);
-    val = JS_ThrowError(ctx, JS_SYNTAX_ERROR, fmt, ap);
-    va_end(ap);
-    return val;
-}
-
-JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowTypeError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...)
-{
-    JSValue val;
-    va_list ap;
-
-    va_start(ap, fmt);
-    val = JS_ThrowError(ctx, JS_TYPE_ERROR, fmt, ap);
-    va_end(ap);
-    return val;
-}
+#undef X
+#undef JS_ERROR_MAP
 
 static int JS_PRINTF_FORMAT_ATTR(3, 4) JS_ThrowTypeErrorOrFalse(JSContext *ctx, int flags, JS_PRINTF_FORMAT const char *fmt, ...)
 {
@@ -17217,39 +15915,6 @@ static int JS_ThrowTypeErrorReadOnly(JSContext *ctx, int flags, JSAtom atom)
     }
 }
 
-JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowReferenceError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...)
-{
-    JSValue val;
-    va_list ap;
-
-    va_start(ap, fmt);
-    val = JS_ThrowError(ctx, JS_REFERENCE_ERROR, fmt, ap);
-    va_end(ap);
-    return val;
-}
-
-JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowRangeError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...)
-{
-    JSValue val;
-    va_list ap;
-
-    va_start(ap, fmt);
-    val = JS_ThrowError(ctx, JS_RANGE_ERROR, fmt, ap);
-    va_end(ap);
-    return val;
-}
-
-JSValue JS_PRINTF_FORMAT_ATTR(2, 3) JS_ThrowInternalError(JSContext *ctx, JS_PRINTF_FORMAT const char *fmt, ...)
-{
-    JSValue val;
-    va_list ap;
-
-    va_start(ap, fmt);
-    val = JS_ThrowError(ctx, JS_INTERNAL_ERROR, fmt, ap);
-    va_end(ap);
-    return val;
-}
-
 JSValue JS_ThrowOutOfMemory(JSContext *ctx)
 {
     JSRuntime *rt = ctx->rt;
@@ -17264,6 +15929,25 @@ JSValue JS_ThrowOutOfMemory(JSContext *ctx)
 static JSValue JS_ThrowStackOverflow(JSContext *ctx)
 {
     return JS_ThrowRangeError(ctx, "Maximum call stack size exceeded");
+}
+
+static JSValue JS_ThrowTypeErrorNotAConstructor(JSContext *ctx,
+                                                JSValueConst func_obj)
+{
+    JSObject *p;
+    JSAtom name;
+
+    if (JS_TAG_OBJECT != JS_VALUE_GET_TAG(func_obj))
+        goto fini;
+    p = JS_VALUE_GET_OBJ(func_obj);
+    if (!js_class_has_bytecode(p->class_id))
+        goto fini;
+    name = p->u.func.function_bytecode->func_name;
+    if (name == JS_ATOM_NULL)
+        goto fini;
+    return JS_ThrowTypeErrorAtom(ctx, "%s is not a constructor", name);
+fini:
+    return JS_ThrowTypeError(ctx, "not a constructor");
 }
 
 static JSValue JS_ThrowTypeErrorNotAFunction(JSContext *ctx)
@@ -17319,15 +16003,19 @@ static JSValue JS_ThrowTypeErrorInvalidClass(JSContext *ctx, int class_id)
     return JS_ThrowTypeErrorAtom(ctx, "%s object expected", name);
 }
 
+static void JS_ThrowInterrupted(JSContext *ctx)
+{
+    JS_ThrowInternalError(ctx, "interrupted");
+    JS_SetUncatchableError(ctx, ctx->rt->current_exception);
+}
+
 static no_inline __exception int __js_poll_interrupts(JSContext *ctx)
 {
     JSRuntime *rt = ctx->rt;
     ctx->interrupt_counter = JS_INTERRUPT_COUNTER_INIT;
     if (rt->interrupt_handler) {
         if (rt->interrupt_handler(rt, rt->interrupt_opaque)) {
-            /* XXX: should set a specific flag to avoid catching */
-            JS_ThrowInternalError(ctx, "interrupted");
-            js_set_uncatchable_error(ctx, ctx->rt->current_exception, true);
+            JS_ThrowInterrupted(ctx);
             return -1;
         }
     }
@@ -17421,7 +16109,7 @@ static int JS_SetPrototypeInternal(JSContext *ctx, JSValueConst obj,
 }
 
 /* return -1 (exception) or true/false */
-int JS_SetPrototype(JSContext *ctx, JSValueConst obj, JSValue proto_val)
+int JS_SetPrototype(JSContext *ctx, JSValueConst obj, JSValueConst proto_val)
 {
     return JS_SetPrototypeInternal(ctx, obj, proto_val, true);
 }
@@ -17431,6 +16119,7 @@ static JSValueConst JS_GetPrototypePrimitive(JSContext *ctx, JSValueConst val)
 {
     JSValue ret;
     switch(JS_VALUE_GET_NORM_TAG(val)) {
+    case JS_TAG_SHORT_BIG_INT:
     case JS_TAG_BIG_INT:
         ret = ctx->class_proto[JS_CLASS_BIG_INT];
         break;
@@ -17594,13 +16283,173 @@ int JS_IsInstanceOf(JSContext *ctx, JSValueConst val, JSValueConst obj)
     return JS_OrdinaryIsInstanceOf(ctx, val, obj);
 }
 
+/* File generated automatically by the QuickJS-ng compiler. */
+
+#include <inttypes.h>
+
+const uint32_t qjsc_builtin_array_fromasync_size = 826;
+
+const uint8_t qjsc_builtin_array_fromasync[826] = {
+ 0x15, 0x0d, 0x01, 0x1a, 0x61, 0x73, 0x79, 0x6e,
+ 0x63, 0x49, 0x74, 0x65, 0x72, 0x61, 0x74, 0x6f,
+ 0x72, 0x01, 0x10, 0x69, 0x74, 0x65, 0x72, 0x61,
+ 0x74, 0x6f, 0x72, 0x01, 0x12, 0x61, 0x72, 0x72,
+ 0x61, 0x79, 0x4c, 0x69, 0x6b, 0x65, 0x01, 0x0a,
+ 0x6d, 0x61, 0x70, 0x46, 0x6e, 0x01, 0x0e, 0x74,
+ 0x68, 0x69, 0x73, 0x41, 0x72, 0x67, 0x01, 0x0c,
+ 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x01, 0x02,
+ 0x69, 0x01, 0x1a, 0x69, 0x73, 0x43, 0x6f, 0x6e,
+ 0x73, 0x74, 0x72, 0x75, 0x63, 0x74, 0x6f, 0x72,
+ 0x01, 0x08, 0x73, 0x79, 0x6e, 0x63, 0x01, 0x0c,
+ 0x6d, 0x65, 0x74, 0x68, 0x6f, 0x64, 0x01, 0x08,
+ 0x69, 0x74, 0x65, 0x72, 0x01, 0x1c, 0x6e, 0x6f,
+ 0x74, 0x20, 0x61, 0x20, 0x66, 0x75, 0x6e, 0x63,
+ 0x74, 0x69, 0x6f, 0x6e, 0x01, 0x08, 0x63, 0x61,
+ 0x6c, 0x6c, 0x0c, 0x00, 0x02, 0x00, 0xa2, 0x01,
+ 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x04, 0x01,
+ 0xa4, 0x01, 0x00, 0x00, 0x00, 0x0c, 0x43, 0x02,
+ 0x01, 0x00, 0x05, 0x00, 0x05, 0x01, 0x00, 0x01,
+ 0x03, 0x05, 0xaa, 0x02, 0x00, 0x01, 0x40, 0xa0,
+ 0x03, 0x00, 0x01, 0x40, 0xc6, 0x03, 0x00, 0x01,
+ 0x40, 0xcc, 0x01, 0x00, 0x01, 0x40, 0xc8, 0x03,
+ 0x00, 0x01, 0x40, 0x0c, 0x60, 0x02, 0x01, 0xf8,
+ 0x01, 0x03, 0x0e, 0x01, 0x06, 0x05, 0x00, 0x86,
+ 0x04, 0x11, 0xca, 0x03, 0x00, 0x01, 0x00, 0xcc,
+ 0x03, 0x00, 0x01, 0x00, 0xce, 0x03, 0x00, 0x01,
+ 0x00, 0xca, 0x03, 0x01, 0xff, 0xff, 0xff, 0xff,
+ 0x0f, 0x20, 0xcc, 0x03, 0x01, 0x01, 0x20, 0xce,
+ 0x03, 0x01, 0x02, 0x20, 0xd0, 0x03, 0x02, 0x00,
+ 0x20, 0xd2, 0x03, 0x02, 0x04, 0x20, 0xd4, 0x03,
+ 0x02, 0x05, 0x20, 0xd6, 0x03, 0x02, 0x06, 0x20,
+ 0xd8, 0x03, 0x02, 0x07, 0x20, 0x64, 0x06, 0x08,
+ 0x20, 0x82, 0x01, 0x07, 0x09, 0x20, 0xda, 0x03,
+ 0x0a, 0x08, 0x30, 0x82, 0x01, 0x0d, 0x0b, 0x20,
+ 0xd4, 0x01, 0x0d, 0x0c, 0x20, 0x10, 0x00, 0x01,
+ 0x00, 0xa0, 0x03, 0x01, 0x03, 0xc6, 0x03, 0x02,
+ 0x03, 0xc8, 0x03, 0x04, 0x03, 0xaa, 0x02, 0x00,
+ 0x03, 0xcc, 0x01, 0x03, 0x03, 0x08, 0xc4, 0x0d,
+ 0x62, 0x02, 0x00, 0x62, 0x01, 0x00, 0x62, 0x00,
+ 0x00, 0xd3, 0xcb, 0xd4, 0x11, 0xf4, 0xec, 0x08,
+ 0x0e, 0x39, 0x46, 0x00, 0x00, 0x00, 0xdc, 0xcc,
+ 0xd5, 0x11, 0xf4, 0xec, 0x08, 0x0e, 0x39, 0x46,
+ 0x00, 0x00, 0x00, 0xdd, 0xcd, 0x62, 0x07, 0x00,
+ 0x62, 0x06, 0x00, 0x62, 0x05, 0x00, 0x62, 0x04,
+ 0x00, 0x62, 0x03, 0x00, 0xd4, 0x39, 0x46, 0x00,
+ 0x00, 0x00, 0xb0, 0xec, 0x16, 0xd4, 0x98, 0x04,
+ 0x1b, 0x00, 0x00, 0x00, 0xb0, 0xec, 0x0c, 0xdf,
+ 0x11, 0x04, 0xee, 0x00, 0x00, 0x00, 0x21, 0x01,
+ 0x00, 0x30, 0x06, 0xce, 0xb6, 0xc4, 0x04, 0xc3,
+ 0x0d, 0xf7, 0xc4, 0x05, 0x09, 0xc4, 0x06, 0xd3,
+ 0xe0, 0x48, 0xc4, 0x07, 0x63, 0x07, 0x00, 0x07,
+ 0xad, 0xec, 0x0f, 0x0a, 0x11, 0x64, 0x06, 0x00,
+ 0x0e, 0xd3, 0xe1, 0x48, 0x11, 0x64, 0x07, 0x00,
+ 0x0e, 0x63, 0x07, 0x00, 0x07, 0xad, 0x6a, 0xa6,
+ 0x00, 0x00, 0x00, 0x62, 0x08, 0x00, 0x06, 0x11,
+ 0xf4, 0xed, 0x0c, 0x71, 0x43, 0x32, 0x00, 0x00,
+ 0x00, 0xc4, 0x08, 0x0e, 0xee, 0x05, 0x0e, 0xd3,
+ 0xee, 0xf2, 0x63, 0x08, 0x00, 0x8e, 0x11, 0xed,
+ 0x03, 0x0e, 0xb6, 0x11, 0x64, 0x08, 0x00, 0x0e,
+ 0x63, 0x05, 0x00, 0xec, 0x0c, 0xc3, 0x0d, 0x11,
+ 0x63, 0x08, 0x00, 0x21, 0x01, 0x00, 0xee, 0x06,
+ 0xe2, 0x63, 0x08, 0x00, 0xf1, 0x11, 0x64, 0x03,
+ 0x00, 0x0e, 0x63, 0x04, 0x00, 0x63, 0x08, 0x00,
+ 0xa7, 0x6a, 0x2a, 0x01, 0x00, 0x00, 0x62, 0x09,
+ 0x00, 0xd3, 0x63, 0x04, 0x00, 0x48, 0xc4, 0x09,
+ 0x63, 0x06, 0x00, 0xec, 0x0a, 0x63, 0x09, 0x00,
+ 0x8c, 0x11, 0x64, 0x09, 0x00, 0x0e, 0xd4, 0xec,
+ 0x17, 0xd4, 0x43, 0xef, 0x00, 0x00, 0x00, 0xd5,
+ 0x63, 0x09, 0x00, 0x63, 0x04, 0x00, 0x24, 0x03,
+ 0x00, 0x8c, 0x11, 0x64, 0x09, 0x00, 0x0e, 0x5f,
+ 0x04, 0x00, 0x63, 0x03, 0x00, 0x63, 0x04, 0x00,
+ 0x92, 0x64, 0x04, 0x00, 0x0b, 0x63, 0x09, 0x00,
+ 0x4d, 0x41, 0x00, 0x00, 0x00, 0x0a, 0x4d, 0x3e,
+ 0x00, 0x00, 0x00, 0x0a, 0x4d, 0x3f, 0x00, 0x00,
+ 0x00, 0xf3, 0x0e, 0xee, 0x9e, 0x62, 0x0a, 0x00,
+ 0x63, 0x07, 0x00, 0x43, 0xef, 0x00, 0x00, 0x00,
+ 0xd3, 0x24, 0x01, 0x00, 0xc4, 0x0a, 0x63, 0x05,
+ 0x00, 0xec, 0x09, 0xc3, 0x0d, 0x11, 0x21, 0x00,
+ 0x00, 0xee, 0x03, 0xe2, 0xf0, 0x11, 0x64, 0x03,
+ 0x00, 0x0e, 0x6d, 0x8c, 0x00, 0x00, 0x00, 0x62,
+ 0x0c, 0x00, 0x62, 0x0b, 0x00, 0x06, 0x11, 0xf4,
+ 0xed, 0x13, 0x71, 0x43, 0x41, 0x00, 0x00, 0x00,
+ 0xc4, 0x0b, 0x43, 0x6a, 0x00, 0x00, 0x00, 0xc4,
+ 0x0c, 0x0e, 0xee, 0x10, 0x0e, 0x63, 0x0a, 0x00,
+ 0x43, 0x6b, 0x00, 0x00, 0x00, 0x24, 0x00, 0x00,
+ 0x8c, 0xee, 0xe0, 0x63, 0x0c, 0x00, 0xed, 0x4e,
+ 0x63, 0x06, 0x00, 0xec, 0x0a, 0x63, 0x0b, 0x00,
+ 0x8c, 0x11, 0x64, 0x0b, 0x00, 0x0e, 0xd4, 0xec,
+ 0x17, 0xd4, 0x43, 0xef, 0x00, 0x00, 0x00, 0xd5,
+ 0x63, 0x0b, 0x00, 0x63, 0x04, 0x00, 0x24, 0x03,
+ 0x00, 0x8c, 0x11, 0x64, 0x0b, 0x00, 0x0e, 0x5f,
+ 0x04, 0x00, 0x63, 0x03, 0x00, 0x63, 0x04, 0x00,
+ 0x92, 0x64, 0x04, 0x00, 0x0b, 0x63, 0x0b, 0x00,
+ 0x4d, 0x41, 0x00, 0x00, 0x00, 0x0a, 0x4d, 0x3e,
+ 0x00, 0x00, 0x00, 0x0a, 0x4d, 0x3f, 0x00, 0x00,
+ 0x00, 0xf3, 0x0e, 0xee, 0x83, 0x0e, 0x06, 0x6e,
+ 0x0d, 0x00, 0x00, 0x00, 0x0e, 0xee, 0x1e, 0x6e,
+ 0x05, 0x00, 0x00, 0x00, 0x30, 0x63, 0x0a, 0x00,
+ 0x42, 0x06, 0x00, 0x00, 0x00, 0xec, 0x0d, 0x63,
+ 0x0a, 0x00, 0x43, 0x06, 0x00, 0x00, 0x00, 0x24,
+ 0x00, 0x00, 0x0e, 0x6f, 0x63, 0x03, 0x00, 0x63,
+ 0x04, 0x00, 0x44, 0x32, 0x00, 0x00, 0x00, 0x63,
+ 0x03, 0x00, 0x2f, 0xc1, 0x00, 0x28, 0xc1, 0x00,
+ 0xcf, 0x28,
+};
+
+
+
+static JSValue js_bytecode_autoinit(JSContext *ctx, JSObject *p, JSAtom atom,
+                                    void *opaque)
+{
+    switch ((uintptr_t)opaque) {
+    default:
+        abort();
+    case JS_BUILTIN_ARRAY_FROMASYNC:
+        {
+            JSValue obj = JS_ReadObject(ctx, qjsc_builtin_array_fromasync,
+                                        sizeof(qjsc_builtin_array_fromasync),
+                                        JS_READ_OBJ_BYTECODE);
+            if (JS_IsException(obj))
+                return JS_EXCEPTION;
+            JSValue fun = JS_EvalFunction(ctx, obj);
+            if (JS_IsException(fun))
+                return JS_EXCEPTION;
+            assert(JS_IsFunction(ctx, fun));
+            JSValue args[] = {
+                JS_NewCFunction(ctx, js_array_constructor, "Array", 0),
+                JS_NewCFunctionMagic(ctx, js_error_constructor, "TypeError", 1,
+                                     JS_CFUNC_constructor_or_func_magic,
+                                     JS_TYPE_ERROR),
+                JS_AtomToValue(ctx, JS_ATOM_Symbol_asyncIterator),
+                JS_NewCFunctionMagic(ctx, js_object_defineProperty,
+                                     "Object.defineProperty", 3,
+                                     JS_CFUNC_generic_magic, 0),
+                JS_AtomToValue(ctx, JS_ATOM_Symbol_iterator),
+            };
+            JSValue result = JS_Call(ctx, fun, JS_UNDEFINED,
+                                     countof(args), vc(args));
+            for (size_t i = 0; i < countof(args); i++)
+                JS_FreeValue(ctx, args[i]);
+            JS_FreeValue(ctx, fun);
+            if (JS_SetPrototypeInternal(ctx, result, ctx->function_proto,
+                                        /*throw_flag*/true) < 0) {
+                JS_FreeValue(ctx, result);
+                return JS_EXCEPTION;
+            }
+            return result;
+        }
+    }
+    return JS_UNDEFINED;
+}
+
 /* return the value associated to the autoinit property or an exception */
 typedef JSValue JSAutoInitFunc(JSContext *ctx, JSObject *p, JSAtom atom, void *opaque);
 
-static JSAutoInitFunc *js_autoinit_func_table[] = {
+static JSAutoInitFunc *const js_autoinit_func_table[] = {
     js_instantiate_prototype, /* JS_AUTOINIT_ID_PROTOTYPE */
     js_module_ns_autoinit, /* JS_AUTOINIT_ID_MODULE_NS */
     JS_InstantiateFunctionListItem2, /* JS_AUTOINIT_ID_PROP */
+    js_bytecode_autoinit, /* JS_AUTOINIT_ID_BYTECODE */
 };
 
 /* warning: 'prs' is reallocated after it */
@@ -17634,9 +16483,8 @@ static JSValue JS_GetPropertyInternal(JSContext *ctx, JSValueConst obj,
     JSObject *p;
     JSProperty *pr;
     JSShapeProperty *prs;
-    uint32_t tag, proto_depth;
+    uint32_t tag;
 
-    proto_depth = 0;
     tag = JS_VALUE_GET_TAG(obj);
     if (unlikely(tag != JS_TAG_OBJECT)) {
         switch(tag) {
@@ -17758,7 +16606,6 @@ static JSValue JS_GetPropertyInternal(JSContext *ctx, JSValueConst obj,
                 }
             }
         }
-        proto_depth++;
         p = p->shape->proto;
         if (!p)
             break;
@@ -18385,7 +17232,8 @@ static JSAtom js_symbol_to_atom(JSContext *ctx, JSValueConst val)
 }
 
 /* return JS_ATOM_NULL in case of exception */
-JSAtom JS_ValueToAtom(JSContext *ctx, JSValueConst val)
+static JSAtom JS_ValueToAtomInternal(JSContext *ctx, JSValueConst val,
+                                     int flags)
 {
     JSAtom atom;
     uint32_t tag;
@@ -18399,7 +17247,7 @@ JSAtom JS_ValueToAtom(JSContext *ctx, JSValueConst val)
         atom = JS_DupAtom(ctx, js_get_atom_index(ctx->rt, p));
     } else {
         JSValue str;
-        str = JS_ToPropertyKey(ctx, val);
+        str = JS_ToPropertyKeyInternal(ctx, val, flags);
         if (JS_IsException(str))
             return JS_ATOM_NULL;
         if (JS_VALUE_GET_TAG(str) == JS_TAG_SYMBOL) {
@@ -18409,6 +17257,11 @@ JSAtom JS_ValueToAtom(JSContext *ctx, JSValueConst val)
         }
     }
     return atom;
+}
+
+JSAtom JS_ValueToAtom(JSContext *ctx, JSValueConst val)
+{
+    return JS_ValueToAtomInternal(ctx, val, /*flags*/0);
 }
 
 static bool js_get_fast_array_element(JSContext *ctx, JSObject *p,
@@ -18487,15 +17340,21 @@ static JSValue JS_GetPropertyValue(JSContext *ctx, JSValueConst this_obj,
             if (js_get_fast_array_element(ctx, p, idx, &val))
                 return val;
         }
-    } else {
-        switch(tag) {
-        case JS_TAG_NULL:
-            JS_FreeValue(ctx, prop);
-            return JS_ThrowTypeError(ctx, "cannot read property of null");
-        case JS_TAG_UNDEFINED:
-            JS_FreeValue(ctx, prop);
-            return JS_ThrowTypeError(ctx, "cannot read property of undefined");
+    } else if (unlikely(tag == JS_TAG_NULL || tag == JS_TAG_UNDEFINED)) {
+        // per spec: not allowed to call ToPropertyKey before ToObject
+        // so we must ensure to not invoke JS anything that's observable
+        // from JS code
+        atom = JS_ValueToAtomInternal(ctx, prop, JS_TO_STRING_NO_SIDE_EFFECTS);
+        JS_FreeValue(ctx, prop);
+        if (unlikely(atom == JS_ATOM_NULL))
+            return JS_EXCEPTION;
+        if (tag == JS_TAG_NULL) {
+            JS_ThrowTypeErrorAtom(ctx, "cannot read property '%s' of null", atom);
+        } else {
+            JS_ThrowTypeErrorAtom(ctx, "cannot read property '%s' of undefined", atom);
         }
+        JS_FreeAtom(ctx, atom);
+        return JS_EXCEPTION;
     }
     atom = JS_ValueToAtom(ctx, prop);
     JS_FreeValue(ctx, prop);
@@ -18576,6 +17435,8 @@ JSValue JS_GetPropertyStr(JSContext *ctx, JSValueConst this_obj,
     JSAtom atom;
     JSValue ret;
     atom = JS_NewAtom(ctx, prop);
+    if (atom == JS_ATOM_NULL)
+        return JS_EXCEPTION;
     ret = JS_GetProperty(ctx, this_obj, atom);
     JS_FreeAtom(ctx, atom);
     return ret;
@@ -19088,6 +17949,8 @@ retry:
                 goto retry2;
             } else if (!(prs->flags & JS_PROP_WRITABLE)) {
                 goto read_only_prop;
+            } else {
+                break;
             }
         }
     }
@@ -19361,6 +18224,10 @@ int JS_SetPropertyStr(JSContext *ctx, JSValueConst this_obj,
     JSAtom atom;
     int ret;
     atom = JS_NewAtom(ctx, prop);
+    if (atom == JS_ATOM_NULL) {
+        JS_FreeValue(ctx, val);
+        return -1;
+    }
     ret = JS_SetPropertyInternal(ctx, this_obj, atom, val, JS_PROP_THROW);
     JS_FreeAtom(ctx, atom);
     return ret;
@@ -19814,7 +18681,7 @@ int JS_DefineProperty(JSContext *ctx, JSValueConst this_obj,
             }
             idx = __JS_AtomToUInt32(prop);
             /* if the typed array is detached, p->u.array.count = 0 */
-            if (idx >= typed_array_get_length(ctx, p)) {
+            if (idx >= p->u.array.count) {
             typed_array_oob:
                 return JS_ThrowTypeErrorOrFalse(ctx, flags, "out-of-bound index in typed array");
             }
@@ -19912,6 +18779,10 @@ int JS_DefinePropertyValueStr(JSContext *ctx, JSValueConst this_obj,
     JSAtom atom;
     int ret;
     atom = JS_NewAtom(ctx, prop);
+    if (atom == JS_ATOM_NULL) {
+        JS_FreeValue(ctx, val);
+        return -1;
+    }
     ret = JS_DefinePropertyValue(ctx, this_obj, atom, val, flags);
     JS_FreeAtom(ctx, atom);
     return ret;
@@ -20212,6 +19083,29 @@ static int JS_SetGlobalVar(JSContext *ctx, JSAtom prop, JSValue val,
     return JS_SetPropertyInternal(ctx, ctx->global_obj, prop, val, flags);
 }
 
+/* return -1, false or true */
+static int JS_DeleteGlobalVar(JSContext *ctx, JSAtom prop)
+{
+    JSObject *p;
+    JSShapeProperty *prs;
+    JSProperty *pr;
+    int ret;
+
+    /* 9.1.1.4.7 DeleteBinding ( N ) */
+    p = JS_VALUE_GET_OBJ(ctx->global_var_obj);
+    prs = find_own_property(&pr, p, prop);
+    if (prs)
+        return false; /* lexical variables cannot be deleted */
+    ret = JS_HasProperty(ctx, ctx->global_obj, prop);
+    if (ret < 0)
+        return -1;
+    if (ret) {
+        return JS_DeleteProperty(ctx, ctx->global_obj, prop, 0);
+    } else {
+        return true;
+    }
+}
+
 /* return -1, false or true. return false if not configurable or
    invalid object. return -1 in case of exception.
    flags can be 0, JS_PROP_THROW or JS_PROP_THROW_STRICT */
@@ -20304,29 +19198,46 @@ bool JS_SetConstructorBit(JSContext *ctx, JSValueConst func_obj, bool val)
 
 bool JS_IsRegExp(JSValueConst val)
 {
-    if (JS_VALUE_GET_TAG(val) != JS_TAG_OBJECT)
-        return false;
-    return JS_VALUE_GET_OBJ(val)->class_id == JS_CLASS_REGEXP;
+    return JS_CLASS_REGEXP == JS_GetClassID(val);
 }
 
 bool JS_IsMap(JSValueConst val)
 {
-    if (JS_VALUE_GET_TAG(val) != JS_TAG_OBJECT)
-        return false;
-    return JS_VALUE_GET_OBJ(val)->class_id == JS_CLASS_MAP;
+    return JS_CLASS_MAP == JS_GetClassID(val);
 }
 
-bool JS_IsError(JSContext *ctx, JSValueConst val)
+bool JS_IsSet(JSValueConst val)
 {
-    JSObject *p;
-    if (JS_VALUE_GET_TAG(val) != JS_TAG_OBJECT)
-        return false;
-    p = JS_VALUE_GET_OBJ(val);
-    return (p->class_id == JS_CLASS_ERROR);
+    return JS_CLASS_SET == JS_GetClassID(val);
+}
+
+bool JS_IsWeakRef(JSValueConst val)
+{
+    return JS_CLASS_WEAK_REF == JS_GetClassID(val);
+}
+
+bool JS_IsWeakSet(JSValueConst val)
+{
+    return JS_CLASS_WEAKSET == JS_GetClassID(val);
+}
+
+bool JS_IsWeakMap(JSValueConst val)
+{
+    return JS_CLASS_WEAKMAP == JS_GetClassID(val);
+}
+
+bool JS_IsDataView(JSValueConst val)
+{
+    return JS_CLASS_DATAVIEW == JS_GetClassID(val);
+}
+
+bool JS_IsError(JSValueConst val)
+{
+    return JS_CLASS_ERROR == JS_GetClassID(val);
 }
 
 /* used to avoid catching interrupt exceptions */
-bool JS_IsUncatchableError(JSContext *ctx, JSValueConst val)
+bool JS_IsUncatchableError(JSValueConst val)
 {
     JSObject *p;
     if (JS_VALUE_GET_TAG(val) != JS_TAG_OBJECT)
@@ -20533,11 +19444,24 @@ static int JS_ToBoolFree(JSContext *ctx, JSValue val)
             JS_FreeValue(ctx, val);
             return ret;
         }
+    case JS_TAG_SHORT_BIG_INT:
+        return JS_VALUE_GET_SHORT_BIG_INT(val) != 0;
     case JS_TAG_BIG_INT:
         {
             JSBigInt *p = JS_VALUE_GET_PTR(val);
             bool ret;
-            ret = p->num.expn != BF_EXP_ZERO && p->num.expn != BF_EXP_NAN;
+            int i;
+
+            /* fail safe: we assume it is not necessarily
+                normalized. Beginning from the MSB ensures that the
+                test is fast. */
+            ret = false;
+            for(i = p->len - 1; i >= 0; i--) {
+                if (p->tab[i] != 0) {
+                    ret = true;
+                    break;
+                }
+            }
             JS_FreeValue(ctx, val);
             return ret;
         }
@@ -20588,7 +19512,7 @@ static int skip_spaces(const char *pc)
     return p - 1 - p_start;
 }
 
-static inline int to_digit(int c)
+static inline int js_to_digit(int c)
 {
     if (c >= '0' && c <= '9')
         return c - '0';
@@ -20600,200 +19524,1544 @@ static inline int to_digit(int c)
         return 36;
 }
 
-/* XXX: remove */
-static double js_strtod(const char *str, int radix, bool is_float)
+/* bigint support */
+
+#define ADDC(res, carry_out, op1, op2, carry_in)        \
+do {                                                    \
+    js_limb_t __v, __a, __k, __k1;                      \
+    __v = (op1);                                        \
+    __a = __v + (op2);                                  \
+    __k1 = __a < __v;                                   \
+    __k = (carry_in);                                   \
+    __a = __a + __k;                                    \
+    carry_out = (__a < __k) | __k1;                     \
+    res = __a;                                          \
+} while (0)
+
+/* a != 0 */
+static inline js_limb_t js_limb_clz(js_limb_t a)
 {
-    double d;
-    int c;
+    if (!a)
+        return JS_LIMB_BITS;
+    return clz32(a);
+}
 
-    if (!is_float || radix != 10) {
-        const char *p = str;
-        uint64_t n_max, n;
-        int int_exp, is_neg;
+static js_limb_t js_mp_add(js_limb_t *res, const js_limb_t *op1, const js_limb_t *op2,
+                     js_limb_t n, js_limb_t carry)
+{
+    int i;
+    for(i = 0;i < n; i++) {
+        ADDC(res[i], carry, op1[i], op2[i], carry);
+    }
+    return carry;
+}
 
-        is_neg = 0;
-        if (*p == '-') {
-            is_neg = 1;
-            p++;
+static js_limb_t js_mp_sub(js_limb_t *res, const js_limb_t *op1, const js_limb_t *op2,
+                        int n, js_limb_t carry)
+{
+    int i;
+    js_limb_t k, a, v, k1;
+
+    k = carry;
+    for(i=0;i<n;i++) {
+        v = op1[i];
+        a = v - op2[i];
+        k1 = a > v;
+        v = a - k;
+        k = (v > a) | k1;
+        res[i] = v;
+    }
+    return k;
+}
+
+/* compute 0 - op2. carry = 0 or 1. */
+static js_limb_t js_mp_neg(js_limb_t *res, const js_limb_t *op2, int n)
+{
+    int i;
+    js_limb_t v, carry;
+
+    carry = 1;
+    for(i=0;i<n;i++) {
+        v = ~op2[i] + carry;
+        carry = v < carry;
+        res[i] = v;
+    }
+    return carry;
+}
+
+/* tabr[] = taba[] * b + l. Return the high carry */
+static js_limb_t js_mp_mul1(js_limb_t *tabr, const js_limb_t *taba, js_limb_t n,
+                      js_limb_t b, js_limb_t l)
+{
+    js_limb_t i;
+    js_dlimb_t t;
+
+    for(i = 0; i < n; i++) {
+        t = (js_dlimb_t)taba[i] * (js_dlimb_t)b + l;
+        tabr[i] = t;
+        l = t >> JS_LIMB_BITS;
+    }
+    return l;
+}
+
+static js_limb_t js_mp_div1(js_limb_t *tabr, const js_limb_t *taba, js_limb_t n,
+                      js_limb_t b, js_limb_t r)
+{
+    js_slimb_t i;
+    js_dlimb_t a1;
+    for(i = n - 1; i >= 0; i--) {
+        a1 = ((js_dlimb_t)r << JS_LIMB_BITS) | taba[i];
+        tabr[i] = a1 / b;
+        r = a1 % b;
+    }
+    return r;
+}
+
+/* tabr[] += taba[] * b, return the high word. */
+static js_limb_t js_mp_add_mul1(js_limb_t *tabr, const js_limb_t *taba, js_limb_t n,
+                          js_limb_t b)
+{
+    js_limb_t i, l;
+    js_dlimb_t t;
+
+    l = 0;
+    for(i = 0; i < n; i++) {
+        t = (js_dlimb_t)taba[i] * (js_dlimb_t)b + l + tabr[i];
+        tabr[i] = t;
+        l = t >> JS_LIMB_BITS;
+    }
+    return l;
+}
+
+/* size of the result : op1_size + op2_size. */
+static void js_mp_mul_basecase(js_limb_t *result,
+                            const js_limb_t *op1, js_limb_t op1_size,
+                            const js_limb_t *op2, js_limb_t op2_size)
+{
+    int i;
+    js_limb_t r;
+
+    result[op1_size] = js_mp_mul1(result, op1, op1_size, op2[0], 0);
+    for(i=1;i<op2_size;i++) {
+        r = js_mp_add_mul1(result + i, op1, op1_size, op2[i]);
+        result[i + op1_size] = r;
+    }
+}
+
+/* tabr[] -= taba[] * b. Return the value to substract to the high
+   word. */
+static js_limb_t js_mp_sub_mul1(js_limb_t *tabr, const js_limb_t *taba, js_limb_t n,
+                          js_limb_t b)
+{
+    js_limb_t i, l;
+    js_dlimb_t t;
+
+    l = 0;
+    for(i = 0; i < n; i++) {
+        t = tabr[i] - (js_dlimb_t)taba[i] * (js_dlimb_t)b - l;
+        tabr[i] = t;
+        l = -(t >> JS_LIMB_BITS);
+    }
+    return l;
+}
+
+/* WARNING: d must be >= 2^(JS_LIMB_BITS-1) */
+static inline js_limb_t js_udiv1norm_init(js_limb_t d)
+{
+    js_limb_t a0, a1;
+    a1 = -d - 1;
+    a0 = -1;
+    return (((js_dlimb_t)a1 << JS_LIMB_BITS) | a0) / d;
+}
+
+/* return the quotient and the remainder in '*pr'of 'a1*2^JS_LIMB_BITS+a0
+   / d' with 0 <= a1 < d. */
+static inline js_limb_t js_udiv1norm(js_limb_t *pr, js_limb_t a1, js_limb_t a0,
+                                     js_limb_t d, js_limb_t d_inv)
+{
+    js_limb_t n1m, n_adj, q, r, ah;
+    js_dlimb_t a;
+    n1m = ((js_slimb_t)a0 >> (JS_LIMB_BITS - 1));
+    n_adj = a0 + (n1m & d);
+    a = (js_dlimb_t)d_inv * (a1 - n1m) + n_adj;
+    q = (a >> JS_LIMB_BITS) + a1;
+    /* compute a - q * r and update q so that the remainder is\
+       between 0 and d - 1 */
+    a = ((js_dlimb_t)a1 << JS_LIMB_BITS) | a0;
+    a = a - (js_dlimb_t)q * d - d;
+    ah = a >> JS_LIMB_BITS;
+    q += 1 + ah;
+    r = (js_limb_t)a + (ah & d);
+    *pr = r;
+    return q;
+}
+
+#define UDIV1NORM_THRESHOLD 3
+
+/* b must be >= 1 << (JS_LIMB_BITS - 1) */
+static js_limb_t js_mp_div1norm(js_limb_t *tabr, const js_limb_t *taba, js_limb_t n,
+                          js_limb_t b, js_limb_t r)
+{
+    js_slimb_t i;
+
+    if (n >= UDIV1NORM_THRESHOLD) {
+        js_limb_t b_inv;
+        b_inv = js_udiv1norm_init(b);
+        for(i = n - 1; i >= 0; i--) {
+            tabr[i] = js_udiv1norm(&r, r, taba[i], b, b_inv);
         }
+    } else {
+        js_dlimb_t a1;
+        for(i = n - 1; i >= 0; i--) {
+            a1 = ((js_dlimb_t)r << JS_LIMB_BITS) | taba[i];
+            tabr[i] = a1 / b;
+            r = a1 % b;
+        }
+    }
+    return r;
+}
 
-        /* skip leading zeros */
-        while (*p == '0')
-            p++;
-        n = 0;
-        if (radix == 10)
-            n_max = ((uint64_t)-1 - 9) / 10; /* most common case */
-        else
-            n_max = ((uint64_t)-1 - (radix - 1)) / radix;
-        /* XXX: could be more precise */
-        int_exp = 0;
-        while ((c = to_digit(*p)) < radix) {
-            if (n <= n_max) {
-                n = n * radix + c;
-            } else {
-                if (radix == 10)
-                    goto strtod_case;
-                int_exp++;
+/* base case division: divides taba[0..na-1] by tabb[0..nb-1]. tabb[nb
+   - 1] must be >= 1 << (JS_LIMB_BITS - 1). na - nb must be >= 0. 'taba'
+   is modified and contains the remainder (nb limbs). tabq[0..na-nb]
+   contains the quotient with tabq[na - nb] <= 1. */
+static void js_mp_divnorm(js_limb_t *tabq, js_limb_t *taba, js_limb_t na,
+                       const js_limb_t *tabb, js_limb_t nb)
+{
+    js_limb_t r, a, c, q, v, b1, b1_inv, n, dummy_r;
+    int i, j;
+
+    b1 = tabb[nb - 1];
+    if (nb == 1) {
+        taba[0] = js_mp_div1norm(tabq, taba, na, b1, 0);
+        return;
+    }
+    n = na - nb;
+
+    if (n >= UDIV1NORM_THRESHOLD)
+        b1_inv = js_udiv1norm_init(b1);
+    else
+        b1_inv = 0;
+
+    /* first iteration: the quotient is only 0 or 1 */
+    q = 1;
+    for(j = nb - 1; j >= 0; j--) {
+        if (taba[n + j] != tabb[j]) {
+            if (taba[n + j] < tabb[j])
+                q = 0;
+            break;
+        }
+    }
+    tabq[n] = q;
+    if (q) {
+        js_mp_sub(taba + n, taba + n, tabb, nb, 0);
+    }
+
+    for(i = n - 1; i >= 0; i--) {
+        if (unlikely(taba[i + nb] >= b1)) {
+            q = -1;
+        } else if (b1_inv) {
+            q = js_udiv1norm(&dummy_r, taba[i + nb], taba[i + nb - 1], b1, b1_inv);
+        } else {
+            js_dlimb_t al;
+            al = ((js_dlimb_t)taba[i + nb] << JS_LIMB_BITS) | taba[i + nb - 1];
+            q = al / b1;
+            r = al % b1;
+        }
+        r = js_mp_sub_mul1(taba + i, tabb, nb, q);
+
+        v = taba[i + nb];
+        a = v - r;
+        c = (a > v);
+        taba[i + nb] = a;
+
+        if (c != 0) {
+            /* negative result */
+            for(;;) {
+                q--;
+                c = js_mp_add(taba + i, taba + i, tabb, nb, 0);
+                /* propagate carry and test if positive result */
+                if (c != 0) {
+                    if (++taba[i + nb] == 0) {
+                        break;
+                    }
+                }
             }
-            p++;
         }
-        d = n;
-        if (int_exp != 0) {
-            d *= pow(radix, int_exp);
+        tabq[i] = q;
+    }
+}
+
+/* 1 <= shift <= JS_LIMB_BITS - 1 */
+static js_limb_t js_mp_shl(js_limb_t *tabr, const js_limb_t *taba, int n,
+                        int shift)
+{
+    int i;
+    js_limb_t l, v;
+    l = 0;
+    for(i = 0; i < n; i++) {
+        v = taba[i];
+        tabr[i] = (v << shift) | l;
+        l = v >> (JS_LIMB_BITS - shift);
+    }
+    return l;
+}
+
+/* r = (a + high*B^n) >> shift. Return the remainder r (0 <= r < 2^shift).
+   1 <= shift <= LIMB_BITS - 1 */
+static js_limb_t js_mp_shr(js_limb_t *tab_r, const js_limb_t *tab, int n,
+                        int shift, js_limb_t high)
+{
+    int i;
+    js_limb_t l, a;
+
+    l = high;
+    for(i = n - 1; i >= 0; i--) {
+        a = tab[i];
+        tab_r[i] = (a >> shift) | (l << (JS_LIMB_BITS - shift));
+        l = a;
+    }
+    return l & (((js_limb_t)1 << shift) - 1);
+}
+
+static JSBigInt *js_bigint_new(JSContext *ctx, int len)
+{
+    JSBigInt *r;
+    if (len > JS_BIGINT_MAX_SIZE) {
+        JS_ThrowRangeError(ctx, "BigInt is too large to allocate");
+        return NULL;
+    }
+    r = js_malloc(ctx, sizeof(JSBigInt) + len * sizeof(js_limb_t));
+    if (!r)
+        return NULL;
+    r->header.ref_count = 1;
+    r->len = len;
+    return r;
+}
+
+static JSBigInt *js_bigint_set_si(JSBigIntBuf *buf, js_slimb_t a)
+{
+    JSBigInt *r = (JSBigInt *)buf->big_int_buf;
+    r->header.ref_count = 0; /* fail safe */
+    r->len = 1;
+    r->tab[0] = a;
+    return r;
+}
+
+static JSBigInt *js_bigint_set_si64(JSBigIntBuf *buf, int64_t a)
+{
+    JSBigInt *r = (JSBigInt *)buf->big_int_buf;
+    r->header.ref_count = 0; /* fail safe */
+    if (a >= INT32_MIN && a <= INT32_MAX) {
+        r->len = 1;
+        r->tab[0] = a;
+    } else {
+        r->len = 2;
+        r->tab[0] = a;
+        r->tab[1] = a >> JS_LIMB_BITS;
+    }
+    return r;
+}
+
+/* val must be a short big int */
+static JSBigInt *js_bigint_set_short(JSBigIntBuf *buf, JSValueConst val)
+{
+    return js_bigint_set_si(buf, JS_VALUE_GET_SHORT_BIG_INT(val));
+}
+
+static __maybe_unused void js_bigint_dump1(JSContext *ctx, const char *str,
+                                           const js_limb_t *tab, int len)
+{
+    int i;
+    printf("%s: ", str);
+    for(i = len - 1; i >= 0; i--) {
+        printf(" %08x", tab[i]);
+    }
+    printf("\n");
+}
+
+static __maybe_unused void js_bigint_dump(JSContext *ctx, const char *str,
+                                          const JSBigInt *p)
+{
+    js_bigint_dump1(ctx, str, p->tab, p->len);
+}
+
+static JSBigInt *js_bigint_new_si(JSContext *ctx, js_slimb_t a)
+{
+    JSBigInt *r;
+    r = js_bigint_new(ctx, 1);
+    if (!r)
+        return NULL;
+    r->tab[0] = a;
+    return r;
+}
+
+static JSBigInt *js_bigint_new_si64(JSContext *ctx, int64_t a)
+{
+    if (a >= INT32_MIN && a <= INT32_MAX) {
+        return js_bigint_new_si(ctx, a);
+    } else {
+        JSBigInt *r;
+        r = js_bigint_new(ctx, 2);
+        if (!r)
+            return NULL;
+        r->tab[0] = a;
+        r->tab[1] = a >> 32;
+        return r;
+    }
+}
+
+static JSBigInt *js_bigint_new_ui64(JSContext *ctx, uint64_t a)
+{
+    if (a <= INT64_MAX) {
+        return js_bigint_new_si64(ctx, a);
+    } else {
+        JSBigInt *r;
+        r = js_bigint_new(ctx, (65 + JS_LIMB_BITS - 1) / JS_LIMB_BITS);
+        if (!r)
+            return NULL;
+        r->tab[0] = a;
+        r->tab[1] = a >> 32;
+        r->tab[2] = 0;
+        return r;
+    }
+}
+
+static JSBigInt *js_bigint_new_di(JSContext *ctx, js_sdlimb_t a)
+{
+    JSBigInt *r;
+    if (a == (js_slimb_t)a) {
+        r = js_bigint_new(ctx, 1);
+        if (!r)
+            return NULL;
+        r->tab[0] = a;
+    } else {
+        r = js_bigint_new(ctx, 2);
+        if (!r)
+            return NULL;
+        r->tab[0] = a;
+        r->tab[1] = a >> JS_LIMB_BITS;
+    }
+    return r;
+}
+
+/* Remove redundant high order limbs. Warning: 'a' may be
+   reallocated. Can never fail.
+*/
+static JSBigInt *js_bigint_normalize1(JSContext *ctx, JSBigInt *a, int l)
+{
+    js_limb_t v;
+
+    assert(a->header.ref_count == 1);
+    while (l > 1) {
+        v = a->tab[l - 1];
+        if ((v != 0 && v != -1) ||
+            (v & 1) != (a->tab[l - 2] >> (JS_LIMB_BITS - 1))) {
+            break;
+        }
+        l--;
+    }
+    if (l != a->len) {
+        JSBigInt *a1;
+        /* realloc to reduce the size */
+        a->len = l;
+        a1 = js_realloc(ctx, a, sizeof(JSBigInt) + l * sizeof(js_limb_t));
+        if (a1)
+            a = a1;
+    }
+    return a;
+}
+
+static JSBigInt *js_bigint_normalize(JSContext *ctx, JSBigInt *a)
+{
+    return js_bigint_normalize1(ctx, a, a->len);
+}
+
+/* return 0 or 1 depending on the sign */
+static inline int js_bigint_sign(const JSBigInt *a)
+{
+    return a->tab[a->len - 1] >> (JS_LIMB_BITS - 1);
+}
+
+static js_slimb_t js_bigint_get_si_sat(const JSBigInt *a)
+{
+    if (a->len == 1) {
+        return a->tab[0];
+    } else {
+        if (js_bigint_sign(a))
+            return INT32_MIN;
+        else
+            return INT32_MAX;
+    }
+}
+
+/* add the op1 limb */
+static JSBigInt *js_bigint_extend(JSContext *ctx, JSBigInt *r,
+                                  js_limb_t op1)
+{
+    int n2 = r->len;
+    if ((op1 != 0 && op1 != -1) ||
+        (op1 & 1) != r->tab[n2 - 1] >> (JS_LIMB_BITS - 1)) {
+        JSBigInt *r1;
+        r1 = js_realloc(ctx, r,
+                        sizeof(JSBigInt) + (n2 + 1) * sizeof(js_limb_t));
+        if (!r1) {
+            js_free(ctx, r);
+            return NULL;
+        }
+        r = r1;
+        r->len = n2 + 1;
+        r->tab[n2] = op1;
+    } else {
+        /* otherwise still need to normalize the result */
+        r = js_bigint_normalize(ctx, r);
+    }
+    return r;
+}
+
+/* return NULL in case of error. Compute a + b (b_neg = 0) or a - b
+   (b_neg = 1) */
+/* XXX: optimize */
+static JSBigInt *js_bigint_add(JSContext *ctx, const JSBigInt *a,
+                               const JSBigInt *b, int b_neg)
+{
+    JSBigInt *r;
+    int n1, n2, i;
+    js_limb_t carry, op1, op2, a_sign, b_sign;
+
+    n2 = max_int(a->len, b->len);
+    n1 = min_int(a->len, b->len);
+    r = js_bigint_new(ctx, n2);
+    if (!r)
+        return NULL;
+    /* XXX: optimize */
+    /* common part */
+    carry = b_neg;
+    for(i = 0; i < n1; i++) {
+        op1 = a->tab[i];
+        op2 = b->tab[i] ^ (-b_neg);
+        ADDC(r->tab[i], carry, op1, op2, carry);
+    }
+    a_sign = -js_bigint_sign(a);
+    b_sign = (-js_bigint_sign(b)) ^ (-b_neg);
+    /* part with sign extension of one operand  */
+    if (a->len > b->len) {
+        for(i = n1; i < n2; i++) {
+            op1 = a->tab[i];
+            ADDC(r->tab[i], carry, op1, b_sign, carry);
+        }
+    } else if (a->len < b->len) {
+        for(i = n1; i < n2; i++) {
+            op2 = b->tab[i] ^ (-b_neg);
+            ADDC(r->tab[i], carry, a_sign, op2, carry);
+        }
+    }
+
+    /* part with sign extension for both operands. Extend the result
+       if necessary */
+    return js_bigint_extend(ctx, r, a_sign + b_sign + carry);
+}
+
+/* XXX: optimize */
+static JSBigInt *js_bigint_neg(JSContext *ctx, const JSBigInt *a)
+{
+    JSBigIntBuf buf;
+    JSBigInt *b;
+    b = js_bigint_set_si(&buf, 0);
+    return js_bigint_add(ctx, b, a, 1);
+}
+
+static JSBigInt *js_bigint_mul(JSContext *ctx, const JSBigInt *a,
+                               const JSBigInt *b)
+{
+    JSBigInt *r;
+
+    r = js_bigint_new(ctx, a->len + b->len);
+    if (!r)
+        return NULL;
+    js_mp_mul_basecase(r->tab, a->tab, a->len, b->tab, b->len);
+    /* correct the result if negative operands (no overflow is
+       possible) */
+    if (js_bigint_sign(a))
+        js_mp_sub(r->tab + a->len, r->tab + a->len, b->tab, b->len, 0);
+    if (js_bigint_sign(b))
+        js_mp_sub(r->tab + b->len, r->tab + b->len, a->tab, a->len, 0);
+    return js_bigint_normalize(ctx, r);
+}
+
+/* return the division or the remainder. 'b' must be != 0. return NULL
+   in case of exception (division by zero or memory error) */
+static JSBigInt *js_bigint_divrem(JSContext *ctx, const JSBigInt *a,
+                                  const JSBigInt *b, bool is_rem)
+{
+    JSBigInt *r, *q;
+    js_limb_t *tabb, h;
+    int na, nb, a_sign, b_sign, shift;
+
+    if (b->len == 1 && b->tab[0] == 0) {
+        JS_ThrowRangeError(ctx, "BigInt division by zero");
+        return NULL;
+    }
+
+    a_sign = js_bigint_sign(a);
+    b_sign = js_bigint_sign(b);
+    na = a->len;
+    nb = b->len;
+
+    r = js_bigint_new(ctx, na + 2);
+    if (!r)
+        return NULL;
+    if (a_sign) {
+        js_mp_neg(r->tab, a->tab, na);
+    } else {
+        memcpy(r->tab, a->tab, na * sizeof(a->tab[0]));
+    }
+    /* normalize */
+    while (na > 1 && r->tab[na - 1] == 0)
+        na--;
+
+    tabb = js_malloc(ctx, nb * sizeof(tabb[0]));
+    if (!tabb) {
+        js_free(ctx, r);
+        return NULL;
+    }
+    if (b_sign) {
+        js_mp_neg(tabb, b->tab, nb);
+    } else {
+        memcpy(tabb, b->tab, nb * sizeof(tabb[0]));
+    }
+    /* normalize */
+    while (nb > 1 && tabb[nb - 1] == 0)
+        nb--;
+
+    /* trivial case if 'a' is small */
+    if (na < nb) {
+        js_free(ctx, r);
+        js_free(ctx, tabb);
+        if (is_rem) {
+            /* r = a */
+            r = js_bigint_new(ctx, a->len);
+            if (!r)
+                return NULL;
+            memcpy(r->tab, a->tab, a->len * sizeof(a->tab[0]));
+            return r;
+        } else {
+            /* q = 0 */
+            return js_bigint_new_si(ctx, 0);
+        }
+    }
+
+    /* normalize 'b' */
+    shift = js_limb_clz(tabb[nb - 1]);
+    if (shift != 0) {
+        js_mp_shl(tabb, tabb, nb, shift);
+        h = js_mp_shl(r->tab, r->tab, na, shift);
+        if (h != 0)
+            r->tab[na++] = h;
+    }
+
+    q = js_bigint_new(ctx, na - nb + 2); /* one more limb for the sign */
+    if (!q) {
+        js_free(ctx, r);
+        js_free(ctx, tabb);
+        return NULL;
+    }
+
+    //    js_bigint_dump1(ctx, "a", r->tab, na);
+    //    js_bigint_dump1(ctx, "b", tabb, nb);
+    js_mp_divnorm(q->tab, r->tab, na, tabb, nb);
+    js_free(ctx, tabb);
+
+    if (is_rem) {
+        js_free(ctx, q);
+        if (shift != 0)
+            js_mp_shr(r->tab, r->tab, nb, shift, 0);
+        r->tab[nb++] = 0;
+        if (a_sign)
+            js_mp_neg(r->tab, r->tab, nb);
+        r = js_bigint_normalize1(ctx, r, nb);
+        return r;
+    } else {
+        js_free(ctx, r);
+        q->tab[na - nb + 1] = 0;
+        if (a_sign ^ b_sign) {
+            js_mp_neg(q->tab, q->tab, q->len);
+        }
+        q = js_bigint_normalize(ctx, q);
+        return q;
+    }
+}
+
+/* and, or, xor */
+static JSBigInt *js_bigint_logic(JSContext *ctx, const JSBigInt *a,
+                                 const JSBigInt *b, OPCodeEnum op)
+{
+    JSBigInt *r;
+    js_limb_t b_sign;
+    int a_len, b_len, i;
+
+    if (a->len < b->len) {
+        const JSBigInt *tmp;
+        tmp = a;
+        a = b;
+        b = tmp;
+    }
+    /* a_len >= b_len */
+    a_len = a->len;
+    b_len = b->len;
+    b_sign = -js_bigint_sign(b);
+
+    r = js_bigint_new(ctx, a_len);
+    if (!r)
+        return NULL;
+    switch(op) {
+    case OP_or:
+        for(i = 0; i < b_len; i++) {
+            r->tab[i] = a->tab[i] | b->tab[i];
+        }
+        for(i = b_len; i < a_len; i++) {
+            r->tab[i] = a->tab[i] | b_sign;
+        }
+        break;
+    case OP_and:
+        for(i = 0; i < b_len; i++) {
+            r->tab[i] = a->tab[i] & b->tab[i];
+        }
+        for(i = b_len; i < a_len; i++) {
+            r->tab[i] = a->tab[i] & b_sign;
+        }
+        break;
+    case OP_xor:
+        for(i = 0; i < b_len; i++) {
+            r->tab[i] = a->tab[i] ^ b->tab[i];
+        }
+        for(i = b_len; i < a_len; i++) {
+            r->tab[i] = a->tab[i] ^ b_sign;
+        }
+        break;
+    default:
+        abort();
+    }
+    return js_bigint_normalize(ctx, r);
+}
+
+static JSBigInt *js_bigint_not(JSContext *ctx, const JSBigInt *a)
+{
+    JSBigInt *r;
+    int i;
+
+    r = js_bigint_new(ctx, a->len);
+    if (!r)
+        return NULL;
+    for(i = 0; i < a->len; i++) {
+        r->tab[i] = ~a->tab[i];
+    }
+    /* no normalization is needed */
+    return r;
+}
+
+static JSBigInt *js_bigint_shl(JSContext *ctx, const JSBigInt *a,
+                               unsigned int shift1)
+{
+    int d, i, shift;
+    JSBigInt *r;
+    js_limb_t l;
+
+    if (a->len == 1 && a->tab[0] == 0)
+        return js_bigint_new_si(ctx, 0); /* zero case */
+    d = shift1 / JS_LIMB_BITS;
+    shift = shift1 % JS_LIMB_BITS;
+    r = js_bigint_new(ctx, a->len + d);
+    if (!r)
+        return NULL;
+    for(i = 0; i < d; i++)
+        r->tab[i] = 0;
+    if (shift == 0) {
+        for(i = 0; i < a->len; i++) {
+            r->tab[i + d] = a->tab[i];
+        }
+    } else {
+        l = js_mp_shl(r->tab + d, a->tab, a->len, shift);
+        if (js_bigint_sign(a))
+            l |= (js_limb_t)(-1) << shift;
+        r = js_bigint_extend(ctx, r, l);
+    }
+    return r;
+}
+
+static JSBigInt *js_bigint_shr(JSContext *ctx, const JSBigInt *a,
+                               unsigned int shift1)
+{
+    int d, i, shift, a_sign, n1;
+    JSBigInt *r;
+
+    d = shift1 / JS_LIMB_BITS;
+    shift = shift1 % JS_LIMB_BITS;
+    a_sign = js_bigint_sign(a);
+    if (d >= a->len)
+        return js_bigint_new_si(ctx, -a_sign);
+    n1 = a->len - d;
+    r = js_bigint_new(ctx, n1);
+    if (!r)
+        return NULL;
+    if (shift == 0) {
+        for(i = 0; i < n1; i++) {
+            r->tab[i] = a->tab[i + d];
+        }
+        /* no normalization is needed */
+    } else {
+        js_mp_shr(r->tab, a->tab + d, n1, shift, -a_sign);
+        r = js_bigint_normalize(ctx, r);
+    }
+    return r;
+}
+
+static JSBigInt *js_bigint_pow(JSContext *ctx, const JSBigInt *a, JSBigInt *b)
+{
+    uint32_t e;
+    int n_bits, i;
+    JSBigInt *r, *r1;
+
+    /* b must be >= 0 */
+    if (js_bigint_sign(b)) {
+        JS_ThrowRangeError(ctx, "BigInt negative exponent");
+        return NULL;
+    }
+    if (b->len == 1 && b->tab[0] == 0) {
+        /* a^0 = 1 */
+        return js_bigint_new_si(ctx, 1);
+    } else if (a->len == 1) {
+        js_limb_t v;
+        bool is_neg;
+
+        v = a->tab[0];
+        if (v <= 1)
+            return js_bigint_new_si(ctx, v);
+        else if (v == -1)
+            return js_bigint_new_si(ctx, 1 - 2 * (b->tab[0] & 1));
+        is_neg = (js_slimb_t)v < 0;
+        if (is_neg)
+            v = -v;
+        if ((v & (v - 1)) == 0) {
+            uint64_t e1;
+            int n;
+            /* v = 2^n */
+            n = JS_LIMB_BITS - 1 - js_limb_clz(v);
+            if (b->len > 1)
+                goto overflow;
+            if (b->tab[0] > INT32_MAX)
+                goto overflow;
+            e = b->tab[0];
+            e1 = (uint64_t)e * n;
+            if (e1 > JS_BIGINT_MAX_SIZE * JS_LIMB_BITS)
+                goto overflow;
+            e = e1;
+            if (is_neg)
+                is_neg = b->tab[0] & 1;
+            r = js_bigint_new(ctx,
+                              (e + JS_LIMB_BITS + 1 - is_neg) / JS_LIMB_BITS);
+            if (!r)
+                return NULL;
+            memset(r->tab, 0, sizeof(r->tab[0]) * r->len);
+            r->tab[e / JS_LIMB_BITS] =
+                (js_limb_t)(1 - 2 * is_neg) << (e % JS_LIMB_BITS);
+            return r;
+        }
+    }
+    if (b->len > 1)
+        goto overflow;
+    if (b->tab[0] > INT32_MAX)
+        goto overflow;
+    e = b->tab[0];
+    n_bits = 32 - clz32(e);
+
+    r = js_bigint_new(ctx, a->len);
+    if (!r)
+        return NULL;
+    memcpy(r->tab, a->tab, a->len * sizeof(a->tab[0]));
+    for(i = n_bits - 2; i >= 0; i--) {
+        r1 = js_bigint_mul(ctx, r, r);
+        if (!r1)
+            return NULL;
+        js_free(ctx, r);
+        r = r1;
+        if ((e >> i) & 1) {
+            r1 = js_bigint_mul(ctx, r, a);
+            if (!r1)
+                return NULL;
+            js_free(ctx, r);
+            r = r1;
+        }
+    }
+    return r;
+ overflow:
+    JS_ThrowRangeError(ctx, "BigInt is too large");
+    return NULL;
+}
+
+/* return (mant, exp) so that abs(a) ~ mant*2^(exp - (limb_bits -
+   1). a must be != 0. */
+static uint64_t js_bigint_get_mant_exp(JSContext *ctx,
+                                       int *pexp, const JSBigInt *a)
+{
+    js_limb_t t[4 - JS_LIMB_BITS / 32], carry, v, low_bits;
+    int n1, n2, sgn, shift, i, j, e;
+    uint64_t a1, a0;
+
+    n2 = 4 - JS_LIMB_BITS / 32;
+    n1 = a->len - n2;
+    sgn = js_bigint_sign(a);
+
+    /* low_bits != 0 if there are a non zero low bit in abs(a) */
+    low_bits = 0;
+    carry = sgn;
+    for(i = 0; i < n1; i++) {
+        v = (a->tab[i] ^ (-sgn)) + carry;
+        carry = v < carry;
+        low_bits |= v;
+    }
+    /* get the n2 high limbs of abs(a) */
+    for(j = 0; j < n2; j++) {
+        i = j + n1;
+        if (i < 0) {
+            v = 0;
+        } else {
+            v = (a->tab[i] ^ (-sgn)) + carry;
+            carry = v < carry;
+        }
+        t[j] = v;
+    }
+
+    a1 = ((uint64_t)t[2] << 32) | t[1];
+    a0 = (uint64_t)t[0] << 32;
+    a0 |= (low_bits != 0);
+    /* normalize */
+    {
+        shift = clz64(a1);
+        if (shift != 0) {
+            a1 = (a1 << shift) | (a0 >> (64 - shift));
+            a0 <<= shift;
+        }
+    }
+    a1 |= (a0 != 0); /* keep the bits for the final rounding */
+    /* compute the exponent */
+    e = a->len * JS_LIMB_BITS - shift - 1;
+    *pexp = e;
+    return a1;
+}
+
+/* shift left with round to nearest, ties to even. n >= 1 */
+static uint64_t shr_rndn(uint64_t a, int n)
+{
+    uint64_t addend = ((a >> n) & 1) + ((1 << (n - 1)) - 1);
+    return (a + addend) >> n;
+}
+
+/* convert to float64 with round to nearest, ties to even. Return
+   +/-infinity if too large. */
+static double js_bigint_to_float64(JSContext *ctx, const JSBigInt *a)
+{
+    int sgn, e;
+    uint64_t mant;
+
+    if (a->len == 1) {
+        /* fast case, including zero */
+        return (double)(js_slimb_t)a->tab[0];
+    }
+
+    sgn = js_bigint_sign(a);
+    mant = js_bigint_get_mant_exp(ctx, &e, a);
+    if (e > 1023) {
+        /* overflow: return infinity */
+        mant = 0;
+        e = 1024;
+    } else {
+        mant = (mant >> 1) | (mant & 1); /* avoid overflow in rounding */
+        mant = shr_rndn(mant, 10);
+        /* rounding can cause an overflow */
+        if (mant >= ((uint64_t)1 << 53)) {
+            mant >>= 1;
+            e++;
+        }
+        mant &= (((uint64_t)1 << 52) - 1);
+    }
+    return uint64_as_float64(((uint64_t)sgn << 63) |
+                             ((uint64_t)(e + 1023) << 52) |
+                             mant);
+}
+
+/* return (1, NULL) if not an integer, (2, NULL) if NaN or Infinity,
+   (0, n) if an integer, (0, NULL) in case of memory error */
+static JSBigInt *js_bigint_from_float64(JSContext *ctx, int *pres, double a1)
+{
+    uint64_t a = float64_as_uint64(a1);
+    int sgn, e, shift;
+    uint64_t mant;
+    JSBigIntBuf buf;
+    JSBigInt *r;
+
+    sgn = a >> 63;
+    e = (a >> 52) & ((1 << 11) - 1);
+    mant = a & (((uint64_t)1 << 52) - 1);
+    if (e == 2047) {
+        /* NaN, Infinity */
+        *pres = 2;
+        return NULL;
+    }
+    if (e == 0 && mant == 0) {
+        /* zero */
+        *pres = 0;
+        return js_bigint_new_si(ctx, 0);
+    }
+    e -= 1023;
+    /* 0 < a < 1 : not an integer */
+    if (e < 0)
+        goto not_an_integer;
+    mant |= (uint64_t)1 << 52;
+    if (e < 52) {
+        shift = 52 - e;
+        /* check that there is no fractional part */
+        if (mant & (((uint64_t)1 << shift) - 1)) {
+        not_an_integer:
+            *pres = 1;
+            return NULL;
+        }
+        mant >>= shift;
+        e = 0;
+    } else {
+        e -= 52;
+    }
+    if (sgn)
+        mant = -mant;
+    /* the integer is mant*2^e */
+    r = js_bigint_set_si64(&buf, (int64_t)mant);
+    *pres = 0;
+    return js_bigint_shl(ctx, r, e);
+}
+
+/* return -1, 0, 1 or (2) (unordered) */
+static int js_bigint_float64_cmp(JSContext *ctx, const JSBigInt *a,
+                                 double b)
+{
+    int b_sign, a_sign, e, f;
+    uint64_t mant, b1, a_mant;
+
+    b1 = float64_as_uint64(b);
+    b_sign = b1 >> 63;
+    e = (b1 >> 52) & ((1 << 11) - 1);
+    mant = b1 & (((uint64_t)1 << 52) - 1);
+    a_sign = js_bigint_sign(a);
+    if (e == 2047) {
+        if (mant != 0) {
+            /* NaN */
+            return 2;
+        } else {
+            /* +/- infinity */
+            return 2 * b_sign - 1;
+        }
+    } else if (e == 0 && mant == 0) {
+        /* b = +/-0 */
+        if (a->len == 1 && a->tab[0] == 0)
+            return 0;
+        else
+            return 1 - 2 * a_sign;
+    } else if (a->len == 1 && a->tab[0] == 0) {
+        /* a = 0, b != 0 */
+        return 2 * b_sign - 1;
+    } else if (a_sign != b_sign) {
+        return 1 - 2 * a_sign;
+    } else {
+        e -= 1023;
+        /* Note: handling denormals is not necessary because we
+           compare to integers hence f >= 0 */
+        /* compute f so that 2^f <= abs(a) < 2^(f+1) */
+        a_mant = js_bigint_get_mant_exp(ctx, &f, a);
+        if (f != e) {
+            if (f < e)
+                return -1;
+            else
+                return 1;
+        } else {
+            mant = (mant | ((uint64_t)1 << 52)) << 11; /* align to a_mant */
+            if (a_mant < mant)
+                return 2 * a_sign - 1;
+            else if (a_mant > mant)
+                return 1 - 2 * a_sign;
+            else
+                return 0;
+        }
+    }
+}
+
+/* return -1, 0 or 1 */
+static int js_bigint_cmp(JSContext *ctx, const JSBigInt *a,
+                         const JSBigInt *b)
+{
+    int a_sign, b_sign, res, i;
+    a_sign = js_bigint_sign(a);
+    b_sign = js_bigint_sign(b);
+    if (a_sign != b_sign) {
+        res = 1 - 2 * a_sign;
+    } else {
+        /* we assume the numbers are normalized */
+        if (a->len != b->len) {
+            if (a->len < b->len)
+                res = 2 * a_sign - 1;
+            else
+                res = 1 - 2 * a_sign;
+        } else {
+            res = 0;
+            for(i = a->len -1; i >= 0; i--) {
+                if (a->tab[i] != b->tab[i]) {
+                    if (a->tab[i] < b->tab[i])
+                        res = -1;
+                    else
+                        res = 1;
+                    break;
+                }
+            }
+        }
+    }
+    return res;
+}
+
+/* contains 10^i */
+static const js_limb_t js_pow_dec[JS_LIMB_DIGITS + 1] = {
+    1U,
+    10U,
+    100U,
+    1000U,
+    10000U,
+    100000U,
+    1000000U,
+    10000000U,
+    100000000U,
+    1000000000U,
+};
+
+/* syntax: [-]digits in base radix. Return NULL if memory error. radix
+   = 10, 2, 8 or 16. */
+static JSBigInt *js_bigint_from_string(JSContext *ctx,
+                                       const char *str, int radix)
+{
+    const char *p = str;
+    size_t n_digits1;
+    int is_neg, n_digits, n_limbs, len, log2_radix, n_bits, i;
+    JSBigInt *r;
+    js_limb_t v, c, h;
+
+    is_neg = 0;
+    if (*p == '-') {
+        is_neg = 1;
+        p++;
+    }
+    while (*p == '0')
+        p++;
+    n_digits1 = strlen(p);
+    /* the real check for overflox is done js_bigint_new(). Here
+       we just avoid integer overflow */
+    if (n_digits1 > JS_BIGINT_MAX_SIZE * JS_LIMB_BITS) {
+        JS_ThrowRangeError(ctx, "BigInt is too large to allocate");
+        return NULL;
+    }
+    n_digits = n_digits1;
+    log2_radix = 32 - clz32(radix - 1); /* ceil(log2(radix)) */
+    /* compute the maximum number of limbs */
+    if (radix == 10) {
+        n_bits = (n_digits * 27 + 7) / 8; /* >= ceil(n_digits * log2(10)) */
+    } else {
+        n_bits = n_digits * log2_radix;
+    }
+    /* we add one extra bit for the sign */
+    n_limbs = max_int(1, n_bits / JS_LIMB_BITS + 1);
+    r = js_bigint_new(ctx, n_limbs);
+    if (!r)
+        return NULL;
+    if (radix == 10) {
+        int digits_per_limb = JS_LIMB_DIGITS;
+        len = 1;
+        r->tab[0] = 0;
+        for(;;) {
+            /* XXX: slow */
+            v = 0;
+            for(i = 0; i < digits_per_limb; i++) {
+                c = js_to_digit(*p);
+                if (c >= radix)
+                    break;
+                p++;
+                v = v * 10 + c;
+            }
+            if (i == 0)
+                break;
+            if (len == 1 && r->tab[0] == 0) {
+                r->tab[0] = v;
+            } else {
+                h = js_mp_mul1(r->tab, r->tab, len, js_pow_dec[i], v);
+                if (h != 0) {
+                    r->tab[len++] = h;
+                }
+            }
+        }
+        /* add one extra limb to have the correct sign*/
+        if ((r->tab[len - 1] >> (JS_LIMB_BITS - 1)) != 0)
+            r->tab[len++] = 0;
+        r->len = len;
+    } else {
+        unsigned int bit_pos, shift, pos;
+
+        /* power of two base: no multiplication is needed */
+        r->len = n_limbs;
+        memset(r->tab, 0, sizeof(r->tab[0]) * n_limbs);
+        for(i = 0; i < n_digits; i++) {
+            c = js_to_digit(p[n_digits - 1 - i]);
+            assert(c < radix);
+            bit_pos = i * log2_radix;
+            shift = bit_pos & (JS_LIMB_BITS - 1);
+            pos = bit_pos / JS_LIMB_BITS;
+            r->tab[pos] |= c << shift;
+            /* if log2_radix does not divide JS_LIMB_BITS, needed an
+               additional op */
+            if (shift + log2_radix > JS_LIMB_BITS) {
+                r->tab[pos + 1] |= c >> (JS_LIMB_BITS - shift);
+            }
+        }
+    }
+    r = js_bigint_normalize(ctx, r);
+    /* XXX: could do it in place */
+    if (is_neg) {
+        JSBigInt *r1;
+        r1 = js_bigint_neg(ctx, r);
+        js_free(ctx, r);
+        r = r1;
+    }
+    return r;
+}
+
+/* 2 <= base <= 36 */
+static char const digits[36] = {
+    '0','1','2','3','4','5','6','7','8','9',
+    'a','b','c','d','e','f','g','h','i','j',
+    'k','l','m','n','o','p','q','r','s','t',
+    'u','v','w','x','y','z'
+};
+
+/* special version going backwards */
+/* XXX: use dtoa.c */
+static char *js_u64toa(char *q, int64_t n, unsigned int base)
+{
+    int digit;
+    if (base == 10) {
+        /* division by known base uses multiplication */
+        do {
+            digit = (uint64_t)n % 10;
+            n = (uint64_t)n / 10;
+            *--q = '0' + digit;
+        } while (n != 0);
+    } else {
+        do {
+            digit = (uint64_t)n % base;
+            n = (uint64_t)n / base;
+            *--q = digits[digit];
+        } while (n != 0);
+    }
+    return q;
+}
+
+/* len >= 1. 2 <= radix <= 36 */
+static char *js_limb_to_a(char *q, js_limb_t n, unsigned int radix, int len)
+{
+    int digit, i;
+
+    if (radix == 10) {
+        /* specific case with constant divisor */
+        /* XXX: optimize */
+        for(i = 0; i < len; i++) {
+            digit = (js_limb_t)n % 10;
+            n = (js_limb_t)n / 10;
+            *--q = digit + '0';
+        }
+    } else {
+        for(i = 0; i < len; i++) {
+            digit = (js_limb_t)n % radix;
+            n = (js_limb_t)n / radix;
+            *--q = digits[digit];
+        }
+    }
+    return q;
+}
+
+#define JS_RADIX_MAX 36
+
+static const uint8_t js_digits_per_limb_table[JS_RADIX_MAX - 1] = {
+32,20,16,13,12,11,10,10, 9, 9, 8, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+};
+
+static const js_limb_t js_radix_base_table[JS_RADIX_MAX - 1] = {
+ 0x00000000, 0xcfd41b91, 0x00000000, 0x48c27395,
+ 0x81bf1000, 0x75db9c97, 0x40000000, 0xcfd41b91,
+ 0x3b9aca00, 0x8c8b6d2b, 0x19a10000, 0x309f1021,
+ 0x57f6c100, 0x98c29b81, 0x00000000, 0x18754571,
+ 0x247dbc80, 0x3547667b, 0x4c4b4000, 0x6b5a6e1d,
+ 0x94ace180, 0xcaf18367, 0x0b640000, 0x0e8d4a51,
+ 0x1269ae40, 0x17179149, 0x1cb91000, 0x23744899,
+ 0x2b73a840, 0x34e63b41, 0x40000000, 0x4cfa3cc1,
+ 0x5c13d840, 0x6d91b519, 0x81bf1000,
+};
+
+static JSValue js_bigint_to_string1(JSContext *ctx, JSValueConst val, int radix)
+{
+    if (JS_VALUE_GET_TAG(val) == JS_TAG_SHORT_BIG_INT) {
+        char buf[66];
+        int len;
+        len = i64toa_radix(buf, JS_VALUE_GET_SHORT_BIG_INT(val), radix);
+        return js_new_string8_len(ctx, buf, len);
+    } else {
+        JSBigInt *r, *tmp = NULL;
+        char *buf, *q, *buf_end;
+        int is_neg, n_bits, log2_radix, n_digits;
+        bool is_binary_radix;
+        JSValue res;
+
+        assert(JS_VALUE_GET_TAG(val) == JS_TAG_BIG_INT);
+        r = JS_VALUE_GET_PTR(val);
+        if (r->len == 1 && r->tab[0] == 0) {
+            /* '0' case */
+            return js_new_string8_len(ctx, "0", 1);
+        }
+        is_binary_radix = ((radix & (radix - 1)) == 0);
+        is_neg = js_bigint_sign(r);
+        if (is_neg) {
+            tmp = js_bigint_neg(ctx, r);
+            if (!tmp)
+                return JS_EXCEPTION;
+            r = tmp;
+        } else if (!is_binary_radix) {
+            /* need to modify 'r' */
+            tmp = js_bigint_new(ctx, r->len);
+            if (!tmp)
+                return JS_EXCEPTION;
+            memcpy(tmp->tab, r->tab, r->len * sizeof(r->tab[0]));
+            r = tmp;
+        }
+        log2_radix = 31 - clz32(radix); /* floor(log2(radix)) */
+        n_bits = r->len * JS_LIMB_BITS - js_limb_clz(r->tab[r->len - 1]);
+        /* n_digits is exact only if radix is a power of
+           two. Otherwise it is >= the exact number of digits */
+        n_digits = (n_bits + log2_radix - 1) / log2_radix;
+        /* XXX: could directly build the JSString */
+        buf = js_malloc(ctx, n_digits + is_neg + 1);
+        if (!buf) {
+            js_free(ctx, tmp);
+            return JS_EXCEPTION;
+        }
+        q = buf + n_digits + is_neg + 1;
+        *--q = '\0';
+        buf_end = q;
+        if (!is_binary_radix) {
+            int len;
+            js_limb_t radix_base, v;
+            radix_base = js_radix_base_table[radix - 2];
+            len = r->len;
+            for(;;) {
+                /* remove leading zero limbs */
+                while (len > 1 && r->tab[len - 1] == 0)
+                    len--;
+                if (len == 1 && r->tab[0] < radix_base) {
+                    v = r->tab[0];
+                    if (v != 0) {
+                        q = js_u64toa(q, v, radix);
+                    }
+                    break;
+                } else {
+                    v = js_mp_div1(r->tab, r->tab, len, radix_base, 0);
+                    q = js_limb_to_a(q, v, radix, js_digits_per_limb_table[radix - 2]);
+                }
+            }
+        } else {
+            int i, shift;
+            unsigned int bit_pos, pos, c;
+
+            /* radix is a power of two */
+            for(i = 0; i < n_digits; i++) {
+                bit_pos = i * log2_radix;
+                pos = bit_pos / JS_LIMB_BITS;
+                shift = bit_pos % JS_LIMB_BITS;
+                c = r->tab[pos] >> shift;
+                if ((shift + log2_radix) > JS_LIMB_BITS &&
+                    (pos + 1) < r->len) {
+                    c |= r->tab[pos + 1] << (JS_LIMB_BITS - shift);
+                }
+                c &= (radix - 1);
+                *--q = digits[c];
+            }
         }
         if (is_neg)
-            d = -d;
+            *--q = '-';
+        js_free(ctx, tmp);
+        res = js_new_string8_len(ctx, q, buf_end - q);
+        js_free(ctx, buf);
+        return res;
+    }
+}
+
+/* if possible transform a BigInt to short big and free it, otherwise
+   return a normal bigint */
+static JSValue JS_CompactBigInt(JSContext *ctx, JSBigInt *p)
+{
+    JSValue res;
+    if (p->len == 1) {
+        res = __JS_NewShortBigInt(ctx, (js_slimb_t)p->tab[0]);
+        js_free(ctx, p);
+        return res;
     } else {
-    strtod_case:
-        d = strtod(str, NULL);
+        return JS_MKPTR(JS_TAG_BIG_INT, p);
     }
-    return d;
 }
 
-static JSValue js_string_to_bigint(JSContext *ctx, const char *buf, int radix)
+#define ATOD_INT_ONLY        (1 << 0)
+/* accept Oo and Ob prefixes in addition to 0x prefix if radix = 0 */
+#define ATOD_ACCEPT_BIN_OCT  (1 << 2)
+/* accept O prefix as octal if radix == 0 and properly formed (Annex B) */
+#define ATOD_ACCEPT_LEGACY_OCTAL  (1 << 4)
+/* accept _ between digits as a digit separator */
+#define ATOD_ACCEPT_UNDERSCORES  (1 << 5)
+/* allow a suffix to override the type */
+#define ATOD_ACCEPT_SUFFIX    (1 << 6)
+/* default type */
+#define ATOD_TYPE_MASK        (3 << 7)
+#define ATOD_TYPE_FLOAT64     (0 << 7)
+#define ATOD_TYPE_BIG_INT     (1 << 7)
+/* accept -0x1 */
+#define ATOD_ACCEPT_PREFIX_AFTER_SIGN (1 << 10)
+
+/* return an exception in case of memory error. Return JS_NAN if
+   invalid syntax */
+/* XXX: directly use js_atod() */
+static JSValue js_atof(JSContext *ctx, const char *str, const char **pp,
+                       int radix, int flags)
 {
-    bf_t *a;
-    int ret;
+    const char *p, *p_start;
+    int sep, is_neg;
+    bool is_float, has_legacy_octal;
+    int atod_type = flags & ATOD_TYPE_MASK;
+    char buf1[64], *buf;
+    int i, j, len;
+    bool buf_allocated = false;
     JSValue val;
-    val = JS_NewBigInt(ctx);
-    if (JS_IsException(val))
-        return val;
-    a = JS_GetBigInt(val);
-    ret = bf_atof(a, buf, NULL, radix, BF_PREC_INF, BF_RNDZ);
-    if (ret & BF_ST_MEM_ERROR) {
-        JS_FreeValue(ctx, val);
-        return JS_ThrowOutOfMemory(ctx);
-    }
-    return JS_CompactBigInt1(ctx, val);
-}
-
-/* `js_atof(ctx, p, len, pp, radix, flags)`
-   Convert the string pointed to by `p` to a number value.
-   Return an exception in case of memory error.
-   Return `JS_NAN` if invalid syntax.
-   - `p` points to a null terminated UTF-8 encoded char array,
-   - `len` the length of the array,
-   - `pp` if not null receives a pointer to the next character,
-   - `radix` must be in range 2 to 36, else return `JS_NAN`.
-   - `flags` is a combination of the flags below.
-   There is a null byte at `p[len]`, but there might be embedded null
-   bytes between `p[0]` and `p[len]` which must produce `JS_NAN` if
-   the `ATOD_NO_TRAILING_CHARS` flag is present.
- */
-
-#define ATOD_TRIM_SPACES         (1 << 0)   /* trim white space */
-#define ATOD_ACCEPT_EMPTY        (1 << 1)   /* accept an empty string, value is 0 */
-#define ATOD_ACCEPT_FLOAT        (1 << 2)   /* parse decimal floating point syntax */
-#define ATOD_ACCEPT_INFINITY     (1 << 3)   /* parse Infinity as a float point number */
-#define ATOD_ACCEPT_BIN_OCT      (1 << 4)   /* accept 0o and 0b prefixes */
-#define ATOD_ACCEPT_HEX_PREFIX   (1 << 5)   /* accept 0x prefix for radix 16 */
-#define ATOD_ACCEPT_UNDERSCORES  (1 << 6)   /* accept _ between digits as a digit separator */
-#define ATOD_ACCEPT_SUFFIX       (1 << 7)   /* allow 'n' suffix to produce BigInt */
-#define ATOD_WANT_BIG_INT        (1 << 8)   /* return type must be BigInt */
-#define ATOD_DECIMAL_AFTER_SIGN  (1 << 9)   /* only accept decimal number after sign */
-#define ATOD_NO_TRAILING_CHARS   (1 << 10)  /* do not accept trailing characters */
-
-static JSValue js_atof(JSContext *ctx, const char *p, size_t len,
-                       const char **pp, int radix, int flags)
-{
-    const char *p_start;
-    const char *end = p + len;
-    int sep;
-    bool is_float;
-    char buf1[64], *buf = buf1;
-    size_t i, j;
-    JSValue val = JS_NAN;
-    double d;
-    char sign;
-
-    if (radix < 2 || radix > 36)
-        goto done;
+    JSATODTempMem atod_mem;
 
     /* optional separator between digits */
     sep = (flags & ATOD_ACCEPT_UNDERSCORES) ? '_' : 256;
-    sign = 0;
-    if (flags & ATOD_TRIM_SPACES)
-        p += skip_spaces(p);
-    if (p == end && (flags & ATOD_ACCEPT_EMPTY)) {
-        if (pp) *pp = p;
-        if (flags & ATOD_WANT_BIG_INT)
-            return JS_NewBigInt64(ctx, 0);
-        else
-            return js_int32(0);
-    }
-    if (*p == '+' || *p == '-') {
-        sign = *p;
+    has_legacy_octal = false;
+
+    p = str;
+    p_start = p;
+    is_neg = 0;
+    if (p[0] == '+') {
         p++;
-        if (flags & ATOD_DECIMAL_AFTER_SIGN)
-            flags &= ~(ATOD_ACCEPT_HEX_PREFIX | ATOD_ACCEPT_BIN_OCT);
+        p_start++;
+        if (!(flags & ATOD_ACCEPT_PREFIX_AFTER_SIGN))
+            goto no_radix_prefix;
+    } else if (p[0] == '-') {
+        p++;
+        p_start++;
+        is_neg = 1;
+        if (!(flags & ATOD_ACCEPT_PREFIX_AFTER_SIGN))
+            goto no_radix_prefix;
     }
     if (p[0] == '0') {
         if ((p[1] == 'x' || p[1] == 'X') &&
-            ((flags & ATOD_ACCEPT_HEX_PREFIX) || radix == 16)) {
+            (radix == 0 || radix == 16)) {
             p += 2;
             radix = 16;
-        } else if (flags & ATOD_ACCEPT_BIN_OCT) {
-            if (p[1] == 'o' || p[1] == 'O') {
-                p += 2;
-                radix = 8;
-            } else if (p[1] == 'b' || p[1] == 'B') {
-                p += 2;
-                radix = 2;
-            }
+        } else if ((p[1] == 'o' || p[1] == 'O') &&
+                   radix == 0 && (flags & ATOD_ACCEPT_BIN_OCT)) {
+            p += 2;
+            radix = 8;
+        } else if ((p[1] == 'b' || p[1] == 'B') &&
+                   radix == 0 && (flags & ATOD_ACCEPT_BIN_OCT)) {
+            p += 2;
+            radix = 2;
+        } else if ((p[1] >= '0' && p[1] <= '9') &&
+                   radix == 0 && (flags & ATOD_ACCEPT_LEGACY_OCTAL)) {
+            int i;
+            has_legacy_octal = true;
+            sep = 256;
+            for (i = 1; (p[i] >= '0' && p[i] <= '7'); i++)
+                continue;
+            if (p[i] == '8' || p[i] == '9')
+                goto no_prefix;
+            p += 1;
+            radix = 8;
+        } else {
+            goto no_prefix;
         }
+        /* there must be a digit after the prefix */
+        if (js_to_digit((uint8_t)*p) >= radix)
+            goto fail;
+    no_prefix: ;
     } else {
-        if (*p == 'I' && (flags & ATOD_ACCEPT_INFINITY) && js__strstart(p, "Infinity", &p)) {
-            d = INF;
-            if (sign == '-')
+ no_radix_prefix:
+        if (!(flags & ATOD_INT_ONLY) &&
+            (atod_type == ATOD_TYPE_FLOAT64) &&
+            js__strstart(p, "Infinity", &p)) {
+            double d = INF;
+            if (is_neg)
                 d = -d;
             val = js_float64(d);
             goto done;
         }
     }
+    if (radix == 0)
+        radix = 10;
     is_float = false;
     p_start = p;
-    while (to_digit(*p) < radix) {
+    while (js_to_digit((uint8_t)*p) < radix
+           ||  (*p == sep && (radix != 10 ||
+                              p != p_start + 1 || p[-1] != '0') &&
+                js_to_digit((uint8_t)p[1]) < radix)) {
         p++;
-        if (*p == sep && to_digit(p[1]) < radix)
-            p++;
     }
-    if ((flags & ATOD_ACCEPT_FLOAT) && radix == 10) {
-        if (*p == '.' && (p > p_start || to_digit(p[1]) < radix)) {
+    if (!(flags & ATOD_INT_ONLY) && radix == 10) {
+        if (*p == '.' && (p > p_start || js_to_digit((uint8_t)p[1]) < radix)) {
             is_float = true;
             p++;
-            while (to_digit(*p) < radix) {
+            if (*p == sep)
+                goto fail;
+            while (js_to_digit((uint8_t)*p) < radix ||
+                   (*p == sep && js_to_digit((uint8_t)p[1]) < radix))
                 p++;
-                if (*p == sep && to_digit(p[1]) < radix)
-                    p++;
-            }
         }
         if (p > p_start && (*p == 'e' || *p == 'E')) {
-            i = 1;
-            if (p[1] == '+' || p[1] == '-') {
-                i++;
+            const char *p1 = p + 1;
+            is_float = true;
+            if (*p1 == '+') {
+                p1++;
+            } else if (*p1 == '-') {
+                p1++;
             }
-            if (is_digit(p[i])) {
-                is_float = true;
-                p += i + 1;
-                while (is_digit(*p) || (*p == sep && is_digit(p[1])))
+            if (is_digit((uint8_t)*p1)) {
+                p = p1 + 1;
+                while (is_digit((uint8_t)*p) || (*p == sep && is_digit((uint8_t)p[1])))
                     p++;
             }
         }
     }
     if (p == p_start)
-        goto done;
+        goto fail;
 
+    buf = buf1;
+    buf_allocated = false;
     len = p - p_start;
     if (unlikely((len + 2) > sizeof(buf1))) {
         buf = js_malloc_rt(ctx->rt, len + 2); /* no exception raised */
-        if (!buf) {
-            if (pp) *pp = p;
-            return JS_ThrowOutOfMemory(ctx);
-        }
+        if (!buf)
+            goto mem_error;
+        buf_allocated = true;
     }
-    /* remove the separators and the radix prefix */
+    /* remove the separators and the radix prefixes */
     j = 0;
-    if (sign == '-')
+    if (is_neg)
         buf[j++] = '-';
     for (i = 0; i < len; i++) {
         if (p_start[i] != '_')
@@ -20804,31 +21072,49 @@ static JSValue js_atof(JSContext *ctx, const char *p, size_t len,
     if (flags & ATOD_ACCEPT_SUFFIX) {
         if (*p == 'n') {
             p++;
-            flags |= ATOD_WANT_BIG_INT;
+            atod_type = ATOD_TYPE_BIG_INT;
         }
     }
 
-    if (flags & ATOD_WANT_BIG_INT) {
-        if (!is_float)
-            val = js_string_to_bigint(ctx, buf, radix);
-    } else {
-        d = js_strtod(buf, radix, is_float);
-        val = js_number(d);     /* return int or float64 */
+    switch(atod_type) {
+    case ATOD_TYPE_FLOAT64:
+        {
+            double d;
+            d = js_atod(buf, NULL, radix, is_float ? 0 : JS_ATOD_INT_ONLY,
+                        &atod_mem);
+            /* return int or float64 */
+            val = js_number(d);
+        }
+        break;
+    case ATOD_TYPE_BIG_INT:
+        {
+            JSBigInt *r;
+            if (has_legacy_octal || is_float)
+                goto fail;
+            r = js_bigint_from_string(ctx, buf, radix);
+            if (!r) {
+                val = JS_EXCEPTION;
+                goto done;
+            }
+            val = JS_CompactBigInt(ctx, r);
+        }
+        break;
+    default:
+        abort();
     }
 
- done:
-    if (flags & ATOD_NO_TRAILING_CHARS) {
-        if (flags & ATOD_TRIM_SPACES)
-            p += skip_spaces(p);
-        if (p != end) {
-            JS_FreeValue(ctx, val);
-            val = JS_NAN;
-        }
-    }
-    if (buf != buf1)
+done:
+    if (buf_allocated)
         js_free_rt(ctx->rt, buf);
-    if (pp) *pp = p;
+    if (pp)
+        *pp = p;
     return val;
+ fail:
+    val = JS_NAN;
+    goto done;
+ mem_error:
+    val = JS_ThrowOutOfMemory(ctx);
+    goto done;
 }
 
 typedef enum JSToNumberHintEnum {
@@ -20846,6 +21132,7 @@ static JSValue JS_ToNumberHintFree(JSContext *ctx, JSValue val,
     tag = JS_VALUE_GET_NORM_TAG(val);
     switch(tag) {
     case JS_TAG_BIG_INT:
+    case JS_TAG_SHORT_BIG_INT:
         if (flag != TON_FLAG_NUMERIC) {
             JS_FreeValue(ctx, val);
             return JS_ThrowTypeError(ctx, "cannot convert BigInt to number");
@@ -20872,18 +21159,28 @@ static JSValue JS_ToNumberHintFree(JSContext *ctx, JSValue val,
     case JS_TAG_STRING:
         {
             const char *str;
+            const char *p;
             size_t len;
-            int flags;
 
             str = JS_ToCStringLen(ctx, &len, val);
             JS_FreeValue(ctx, val);
             if (!str)
                 return JS_EXCEPTION;
-            flags = ATOD_TRIM_SPACES | ATOD_ACCEPT_EMPTY |
-                ATOD_ACCEPT_FLOAT | ATOD_ACCEPT_INFINITY |
-                ATOD_ACCEPT_HEX_PREFIX | ATOD_ACCEPT_BIN_OCT |
-                ATOD_DECIMAL_AFTER_SIGN | ATOD_NO_TRAILING_CHARS;
-            ret = js_atof(ctx, str, len, NULL, 10, flags);
+            p = str;
+            p += skip_spaces(p);
+            if ((p - str) == len) {
+                ret = JS_NewInt32(ctx, 0);
+            } else {
+                int flags = ATOD_ACCEPT_BIN_OCT;
+                ret = js_atof(ctx, p, &p, 0, flags);
+                if (!JS_IsException(ret)) {
+                    p += skip_spaces(p);
+                    if ((p - str) != len) {
+                        JS_FreeValue(ctx, ret);
+                        ret = JS_NAN;
+                    }
+                }
+            }
             JS_FreeCString(ctx, str);
         }
         break;
@@ -20920,10 +21217,8 @@ static __exception int __JS_ToFloat64Free(JSContext *ctx, double *pres,
     uint32_t tag;
 
     val = JS_ToNumberFree(ctx, val);
-    if (JS_IsException(val)) {
-        *pres = NAN;
-        return -1;
-    }
+    if (JS_IsException(val))
+        goto fail;
     tag = JS_VALUE_GET_NORM_TAG(val);
     switch(tag) {
     case JS_TAG_INT:
@@ -20932,21 +21227,14 @@ static __exception int __JS_ToFloat64Free(JSContext *ctx, double *pres,
     case JS_TAG_FLOAT64:
         d = JS_VALUE_GET_FLOAT64(val);
         break;
-    case JS_TAG_BIG_INT:
-        {
-            JSBigInt *p = JS_VALUE_GET_PTR(val);
-            /* XXX: there can be a double rounding issue with some
-               primitives (such as JS_ToUint8ClampFree()), but it is
-               not critical to fix it. */
-            bf_get_float64(&p->num, &d, BF_RNDN);
-            JS_FreeValue(ctx, val);
-        }
-        break;
     default:
         abort();
     }
     *pres = d;
     return 0;
+fail:
+    *pres = NAN;
+    return -1;
 }
 
 static inline int JS_ToFloat64Free(JSContext *ctx, double *pres, JSValue val)
@@ -21200,7 +21488,7 @@ int JS_ToInt64(JSContext *ctx, int64_t *pres, JSValueConst val)
 
 int JS_ToInt64Ext(JSContext *ctx, int64_t *pres, JSValueConst val)
 {
-    if (JS_IsBigInt(ctx, val))
+    if (JS_IsBigInt(val))
         return JS_ToBigInt64(ctx, pres, val);
     else
         return JS_ToInt64(ctx, pres, val);
@@ -21330,21 +21618,6 @@ static __exception int JS_ToArrayLengthFree(JSContext *ctx, uint32_t *plen,
             len = v;
         }
         break;
-    case JS_TAG_BIG_INT:
-        {
-            JSBigInt *p = JS_VALUE_GET_PTR(val);
-            bf_t a;
-            bool res;
-            bf_get_int32((int32_t *)&len, &p->num, BF_GET_INT_MOD);
-            bf_init(ctx->bf_ctx, &a);
-            bf_set_ui(&a, len);
-            res = bf_cmp_eq(&a, &p->num);
-            bf_delete(&a);
-            JS_FreeValue(ctx, val);
-            if (!res)
-                goto fail;
-        }
-        break;
     default:
         if (JS_TAG_IS_FLOAT64(tag)) {
             double d;
@@ -21450,40 +21723,16 @@ static bool JS_NumberIsNegativeOrMinusZero(JSContext *ctx, JSValueConst val)
             u.d = JS_VALUE_GET_FLOAT64(val);
             return (u.u64 >> 63);
         }
+    case JS_TAG_SHORT_BIG_INT:
+        return (JS_VALUE_GET_SHORT_BIG_INT(val) < 0);
     case JS_TAG_BIG_INT:
         {
             JSBigInt *p = JS_VALUE_GET_PTR(val);
-            /* Note: integer zeros are not necessarily positive */
-            return p->num.sign && !bf_is_zero(&p->num);
+            return js_bigint_sign(p);
         }
     default:
         return false;
     }
-}
-
-static JSValue js_bigint_to_string1(JSContext *ctx, JSValueConst val, int radix)
-{
-    JSValue ret;
-    bf_t a_s, *a;
-    char *str;
-    int saved_sign;
-    size_t len;
-
-    a = JS_ToBigInt(ctx, &a_s, val);
-    if (!a)
-        return JS_EXCEPTION;
-    saved_sign = a->sign;
-    if (a->expn == BF_EXP_ZERO)
-        a->sign = 0;
-    str = bf_ftoa(&len, a, radix, 0, BF_RNDZ | BF_FTOA_FORMAT_FRAC |
-                  BF_FTOA_JS_QUIRKS);
-    a->sign = saved_sign;
-    JS_FreeBigInt(ctx, a, &a_s);
-    if (!str)
-        return JS_ThrowOutOfMemory(ctx);
-    ret = js_new_string8_len(ctx, str, len);
-    bf_free(ctx->bf_ctx, str);
-    return ret;
 }
 
 static JSValue js_bigint_to_string(JSContext *ctx, JSValueConst val)
@@ -21493,429 +21742,33 @@ static JSValue js_bigint_to_string(JSContext *ctx, JSValueConst val)
 
 /*---- floating point number to string conversions ----*/
 
-/* JavaScript rounding is specified as round to nearest tie away
-   from zero (RNDNA), but in `printf` the "ties" case is not
-   specified (in most cases it is RNDN, round to nearest, tie to even),
-   so we must round manually. We generate 2 extra places and make
-   an extra call to snprintf if these are exactly '50'.
-   We set the current rounding mode to FE_DOWNWARD to check if the
-   last 2 places become '49'. If not, we must round up, which is
-   performed in place using the string digits.
-
-   Note that we cannot rely on snprintf for rounding up:
-   the code below fails on macOS for `0.5.toFixed(0)`: gives `0` expected `1`
-      fesetround(FE_UPWARD);
-      snprintf(dest, size, "%.*f", n_digits, d);
-      fesetround(FE_TONEAREST);
- */
-
-/* `js_fcvt` minimum buffer length:
-   - up to 21 digits in integral part
-   - 1 potential decimal point
-   - up to 102 decimals
-   - 1 null terminator
- */
-#define JS_FCVT_BUF_SIZE  (21+1+102+1)
-
-/* `js_ecvt` minimum buffer length:
-   - 1 leading digit
-   - 1 potential decimal point
-   - up to 102 decimals
-   - 5 exponent characters (from 'e-324' to 'e+308')
-   - 1 null terminator
- */
-#define JS_ECVT_BUF_SIZE  (1+1+102+5+1)
-
-/* `js_dtoa` minimum buffer length:
-   - 8 byte prefix
-   - either JS_FCVT_BUF_SIZE or JS_ECVT_BUF_SIZE
-   - JS_FCVT_BUF_SIZE is larger than JS_ECVT_BUF_SIZE
- */
-#define JS_DTOA_BUF_SIZE  (8+JS_FCVT_BUF_SIZE)
-
-/* `js_ecvt1`: compute the digits and decimal point spot for a double
-   - `d` is finite, positive or zero
-   - `n_digits` number of significant digits in range 1..103
-   - `buf` receives the printf result
-   - `buf` has a fixed format: n_digits with a decimal point at offset 1
-     and exponent 'e{+/-}xx[x]' at offset n_digits+1
-   Return n_digits
-   Store the position of the decimal point into `*decpt`
- */
-static int js_ecvt1(double d, int n_digits,
-                    char dest[minimum_length(JS_ECVT_BUF_SIZE)],
-                    size_t size, int *decpt)
+static JSValue js_dtoa2(JSContext *ctx,
+                        double d, int radix, int n_digits, int flags)
 {
-    /* d is positive, ensure decimal point is always present */
-    snprintf(dest, size, "%#.*e", n_digits - 1, d);
-    /* dest contents:
-       0:            first digit
-       1:            '.' decimal point (locale specific)
-       2..n_digits:  (n_digits-1) additional digits
-       n_digits+1:   'e' exponent mark
-       n_digits+2..: exponent sign, value and null terminator
-     */
-    /* extract the exponent (actually the position of the decimal point) */
-    *decpt = 1 + atoi(dest + n_digits + 2);
-    return n_digits;
-}
+    char static_buf[128], *buf, *tmp_buf;
+    int len, len_max;
+    JSValue res;
+    JSDTOATempMem dtoa_mem;
+    len_max = js_dtoa_max_len(d, radix, n_digits, flags);
 
-/* `js_ecvt`: compute the digits and decimal point spot for a double
-   with proper javascript rounding. We cannot use `ecvt` for multiple
-   resasons: portability, because of the number of digits is typically
-   limited to 17, finally because the default rounding is inadequate.
-   `d` is finite and positive or zero.
-   `n_digits` number of significant digits in range 1..101
-   or 0 for automatic (only as many digits as necessary)
-   Return the number of digits produced in `dest`.
-   Store the position of the decimal point into `*decpt`
- */
-static int js_ecvt(double d, int n_digits,
-                   char dest[minimum_length(JS_ECVT_BUF_SIZE)],
-                   size_t size, int *decpt)
-{
-    if (n_digits == 0) {
-        /* find the minimum number of digits (XXX: inefficient but simple) */
-        // TODO(chqrlie) use direct method from quickjs-printf
-        unsigned int n_digits_min = 1;
-        unsigned int n_digits_max = 17;
-        for (;;) {
-            n_digits = (n_digits_min + n_digits_max) / 2;
-            js_ecvt1(d, n_digits, dest, size, decpt);
-            if (n_digits_min == n_digits_max)
-                return n_digits;
-            /* dest contents:
-               0:            first digit
-               1:            '.' decimal point (locale specific)
-               2..n_digits:  (n_digits-1) additional digits
-               n_digits+1:   'e' exponent mark
-               n_digits+2..: exponent sign, value and null terminator
-             */
-            if (strtod(dest, NULL) == d) {
-                unsigned int n0 = n_digits;
-                /* enough digits */
-                /* strip the trailing zeros */
-                while (dest[n_digits] == '0')
-                    n_digits--;
-                if (n_digits == n_digits_min)
-                    return n_digits;
-                /* done if trailing zeros and not denormal or huge */
-                if (n_digits < n0 && d > 3e-308 && d < 8e307)
-                    return n_digits;
-                n_digits_max = n_digits;
-            } else {
-                /* need at least one more digit */
-                n_digits_min = n_digits + 1;
-            }
-        }
+    /* longer buffer may be used if radix != 10 */
+    if (len_max > sizeof(static_buf) - 1) {
+        tmp_buf = js_malloc(ctx, len_max + 1);
+        if (!tmp_buf)
+            return JS_EXCEPTION;
+        buf = tmp_buf;
     } else {
-#if defined(FE_DOWNWARD) && defined(FE_TONEAREST)
-        int i;
-        /* generate 2 extra digits: 99% chances to avoid 2 calls */
-        js_ecvt1(d, n_digits + 2, dest, size, decpt);
-        if (dest[n_digits + 1] < '5')
-            return n_digits;    /* truncate the 2 extra digits */
-        if (dest[n_digits + 1] == '5' && dest[n_digits + 2] == '0') {
-            /* close to half-way: try rounding toward 0 */
-            fesetround(FE_DOWNWARD);
-            js_ecvt1(d, n_digits + 2, dest, size, decpt);
-            fesetround(FE_TONEAREST);
-            if (dest[n_digits + 1] < '5')
-                return n_digits;    /* truncate the 2 extra digits */
-        }
-        /* round up in the string */
-        for(i = n_digits;; i--) {
-            /* ignore the locale specific decimal point */
-            if (is_digit(dest[i])) {
-                if (dest[i]++ < '9')
-                    break;
-                dest[i] = '0';
-                if (i == 0) {
-                    dest[0] = '1';
-                    (*decpt)++;
-                    break;
-                }
-            }
-        }
-        return n_digits;    /* truncate the 2 extra digits */
-#else
-        /* No disambiguation available, eg: __wasi__ targets */
-        return js_ecvt1(d, n_digits, dest, size, decpt);
-#endif
+        tmp_buf = NULL;
+        buf = static_buf;
     }
+    len = js_dtoa(buf, d, radix, n_digits, flags, &dtoa_mem);
+    res = js_new_string8_len(ctx, buf, len);
+    js_free(ctx, tmp_buf);
+    return res;
 }
 
-/* `js_fcvt`: convert a floating point value to %f format using RNDNA
-   `d` is finite and positive or zero.
-   `n_digits` number of decimal places in range 0..100
-   Return the number of characters produced in `dest`.
- */
-static size_t js_fcvt(double d, int n_digits,
-                      char dest[minimum_length(JS_FCVT_BUF_SIZE)], size_t size)
-{
-#if defined(FE_DOWNWARD) && defined(FE_TONEAREST)
-    int i, n1;
-    /* generate 2 extra digits: 99% chances to avoid 2 calls */
-    n1 = snprintf(dest, size, "%.*f", n_digits + 2, d) - 2;
-    if (dest[n1] >= '5') {
-        if (dest[n1] == '5' && dest[n1 + 1] == '0') {
-            /* close to half-way: try rounding toward 0 */
-            fesetround(FE_DOWNWARD);
-            n1 = snprintf(dest, size, "%.*f", n_digits + 2, d) - 2;
-            fesetround(FE_TONEAREST);
-        }
-        if (dest[n1] >= '5') {  /* number should be rounded up */
-            /* d is either exactly half way or greater: round the string manually */
-            for (i = n1 - 1;; i--) {
-                /* ignore the locale specific decimal point */
-                if (is_digit(dest[i])) {
-                    if (dest[i]++ < '9')
-                        break;
-                    dest[i] = '0';
-                    if (i == 0) {
-                        dest[0] = '1';
-                        dest[n1] = '0';
-                        dest[n1 - n_digits - 1] = '0';
-                        dest[n1 - n_digits] = '.';
-                        n1++;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    /* truncate the extra 2 digits and the decimal point if !n_digits */
-    n1 -= !n_digits;
-    //dest[n1] = '\0';    // optional
-    return n1;
-#else
-    /* No disambiguation available, eg: __wasi__ targets */
-    return snprintf(dest, size, "%.*f", n_digits, d);
-#endif
-}
-
-static JSValue js_dtoa_infinite(JSContext *ctx, double d)
-{
-    // TODO(chqrlie) use atoms for NaN and Infinite?
-    if (isnan(d))
-        return js_new_string8(ctx, "NaN");
-    if (d < 0)
-        return js_new_string8(ctx, "-Infinity");
-    else
-        return js_new_string8(ctx, "Infinity");
-}
-
-#define JS_DTOA_TOSTRING    0  /* use as many digits as necessary */
-#define JS_DTOA_EXPONENTIAL 1  /* use exponential notation either fixed or variable digits */
-#define JS_DTOA_FIXED       2  /* force fixed number of fractional digits */
-#define JS_DTOA_PRECISION   3  /* use n_digits significant digits (1 <= n_digits <= 101) */
-
-/* `js_dtoa`: convert a floating point number to a string
-   - `mode`: one of the 4 supported formats
-   - `n_digits`: digit number according to mode
-   -   TOSTRING:    0 only. As many digits as necessary
-   -   EXPONENTIAL: 0 as many decimals as necessary
-   -                1..101 number of significant digits
-   -   FIXED:       0..100 number of decimal places
-   -   PRECISION:   1..101 number of significant digits
- */
-// XXX: should use libbf or quickjs-printf.
-static JSValue js_dtoa(JSContext *ctx, double d, int n_digits, int mode)
-{
-    char buf[JS_DTOA_BUF_SIZE];
-    size_t len;
-    char *start;
-    int sign, decpt, exp, i, k, n, n_max;
-
-    if (!isfinite(d))
-        return js_dtoa_infinite(ctx, d);
-
-    sign = (d < 0);
-    start = buf + 8;
-    d = fabs(d);  /* also converts -0 to 0 */
-
-    if (mode != JS_DTOA_EXPONENTIAL && n_digits == 0) {
-        /* fast path for exact integers in variable format:
-           clip to MAX_SAFE_INTEGER because to ensure insignificant
-           digits are generated as 0.
-           used for JS_DTOA_TOSTRING and JS_DTOA_FIXED without decimals.
-         */
-        if (d <= (double)MAX_SAFE_INTEGER) {
-            uint64_t u64 = (uint64_t)d;
-            if (d == u64) {
-                len = u64toa(start, u64);
-                goto done;
-            }
-        }
-    }
-    if (mode == JS_DTOA_FIXED) {
-        len = js_fcvt(d, n_digits, start, sizeof(buf) - 8);
-        // TODO(chqrlie) patch the locale specific decimal point
-        goto done;
-    }
-
-    n_max = (n_digits > 0) ? n_digits : 21;
-    /* the number has k digits (1 <= k <= n_max) */
-    k = js_ecvt(d, n_digits, start, sizeof(buf) - 8, &decpt);
-    /* buffer contents:
-       0:     first digit
-       1:     '.' decimal point
-       2..k:  (k-1) additional digits
-     */
-    n = decpt; /* d=10^(n-k)*(buf1) i.e. d= < x.yyyy 10^(n-1) */
-    if (mode != JS_DTOA_EXPONENTIAL) {
-        /* mode is JS_DTOA_PRECISION or JS_DTOA_TOSTRING */
-        if (n >= 1 && n <= n_max) {
-            /* between 1 and n_max digits before the decimal point */
-            if (k <= n) {
-                /* all digits before the point, append zeros */
-                start[1] = start[0];
-                start++;
-                for(i = k; i < n; i++)
-                    start[i] = '0';
-                len = n;
-            } else {
-                /* k > n: move digits before the point */
-                for(i = 1; i < n; i++)
-                    start[i] = start[i + 1];
-                start[i] = '.';
-                len = 1 + k;
-            }
-            goto done;
-        }
-        if (n >= -5 && n <= 0) {
-            /* insert -n leading 0 decimals and a '0.' prefix */
-            n = -n;
-            start[1] = start[0];
-            start -= n + 1;
-            start[0] = '0';
-            start[1] = '.';
-            for(i = 0; i < n; i++)
-                start[2 + i] = '0';
-            len = 2 + k + n;
-            goto done;
-        }
-    }
-    /* exponential notation */
-    exp = n - 1;
-    /* count the digits and the decimal point if at least one decimal */
-    len = k + (k > 1);
-    start[1] = '.'; /* patch the locale specific decimal point */
-    start[len] = 'e';
-    start[len + 1] = '+';
-    if (exp < 0) {
-        start[len + 1] = '-';
-        exp = -exp;
-    }
-    len += 2 + 1 + (exp > 9) + (exp > 99);
-    for (i = len - 1; exp > 9;) {
-        int quo = exp / 10;
-        start[i--] = (char)('0' + exp % 10);
-        exp = quo;
-    }
-    start[i] = (char)('0' + exp);
-
- done:
-    start[-1] = '-';    /* prepend the sign if negative */
-    return js_new_string8_len(ctx, start - sign, len + sign);
-}
-
-/* `js_dtoa_radix`: convert a floating point number using a specific base
-   - `d` must be finite
-   - `radix` must be in range 2..36
- */
-static JSValue js_dtoa_radix(JSContext *ctx, double d, int radix)
-{
-    char buf[2200], *ptr, *ptr2, *ptr3;
-    int sign, digit;
-    double frac, d0;
-    int64_t n0;
-
-    if (!isfinite(d))
-        return js_dtoa_infinite(ctx, d);
-
-    sign = (d < 0);
-    d = fabs(d);
-    d0 = trunc(d);
-    n0 = 0;
-    frac = d - d0;
-    ptr2 = buf + 1100;  /* ptr2 points to the end of the string */
-    ptr = ptr2;         /* ptr points to the beginning of the string */
-    if (d0 <= MAX_SAFE_INTEGER) {
-        int64_t n = n0 = (int64_t)d0;
-        while (n >= radix) {
-            digit = n % radix;
-            n = n / radix;
-            *--ptr = digits36[digit];
-        }
-        *--ptr = digits36[(size_t)n];
-    } else {
-        /* no decimals */
-        while (d0 >= radix) {
-            digit = fmod(d0, radix);
-            d0 = trunc(d0 / radix);
-            if (d0 >= MAX_SAFE_INTEGER)
-                digit = 0;
-            *--ptr = digits36[digit];
-        }
-        *--ptr = digits36[(size_t)d0];
-        goto done;
-    }
-    if (frac != 0) {
-        double log2_radix = log2(radix);
-        double prec = 1023 + 51;  // handle subnormals
-        *ptr2++ = '.';
-        while (frac != 0 && n0 <= MAX_SAFE_INTEGER/2 && prec > 0) {
-            frac *= radix;
-            digit = trunc(frac);
-            frac -= digit;
-            *ptr2++ = digits36[digit];
-            n0 = n0 * radix + digit;
-            prec -= log2_radix;
-        }
-        if (frac * radix >= radix / 2) {
-            /* round up the string representation manually */
-            char nine = digits36[radix - 1];
-            while (ptr2[-1] == nine) {
-                /* strip trailing '9' or equivalent digits */
-                ptr2--;
-            }
-            if (ptr2[-1] == '.') {
-                /* strip the 'decimal' point */
-                ptr2--;
-                /* increment the integral part */
-                for (ptr3 = ptr2;;) {
-                    if (ptr3[-1] != nine) {
-                        ptr3[-1] = (ptr3[-1] == '9') ? 'a' : ptr3[-1] + 1;
-                        break;
-                    }
-                    *--ptr3 = '0';
-                    if (ptr3 <= ptr) {
-                        /* prepend a '1' if number was all nines */
-                        *--ptr = '1';
-                        break;
-                    }
-                }
-            } else {
-                /* increment the last fractional digit */
-                ptr2[-1] = (ptr2[-1] == '9') ? 'a' : ptr2[-1] + 1;
-            }
-        } else {
-            /* strip trailing fractional zeros */
-            while (ptr2[-1] == '0')
-                ptr2--;
-            /* strip the 'decimal' point if last */
-            ptr2 -= (ptr2[-1] == '.');
-        }
-    }
-done:
-    ptr[-1] = '-';
-    ptr -= sign;
-    return js_new_string8_len(ctx, ptr, ptr2 - ptr);
-}
-
-JSValue JS_ToStringInternal(JSContext *ctx, JSValueConst val,
-                            bool is_ToPropertyKey)
+static JSValue JS_ToStringInternal(JSContext *ctx, JSValueConst val,
+                                   int flags)
 {
     uint32_t tag;
     char buf[32];
@@ -21938,12 +21791,14 @@ JSValue JS_ToStringInternal(JSContext *ctx, JSValueConst val,
     case JS_TAG_EXCEPTION:
         return JS_EXCEPTION;
     case JS_TAG_OBJECT:
-        {
+        if (flags & JS_TO_STRING_NO_SIDE_EFFECTS) {
+            return js_new_string8(ctx, "{}");
+        } else {
             JSValue val1, ret;
             val1 = JS_ToPrimitive(ctx, val, HINT_STRING);
             if (JS_IsException(val1))
                 return val1;
-            ret = JS_ToStringInternal(ctx, val1, is_ToPropertyKey);
+            ret = JS_ToStringInternal(ctx, val1, flags);
             JS_FreeValue(ctx, val1);
             return ret;
         }
@@ -21951,13 +21806,15 @@ JSValue JS_ToStringInternal(JSContext *ctx, JSValueConst val,
     case JS_TAG_FUNCTION_BYTECODE:
         return js_new_string8(ctx, "[function bytecode]");
     case JS_TAG_SYMBOL:
-        if (is_ToPropertyKey) {
+        if (flags & JS_TO_STRING_IS_PROPERTY_KEY) {
             return js_dup(val);
         } else {
             return JS_ThrowTypeError(ctx, "cannot convert symbol to string");
         }
     case JS_TAG_FLOAT64:
-        return js_dtoa(ctx, JS_VALUE_GET_FLOAT64(val), 0, JS_DTOA_TOSTRING);
+        return js_dtoa2(ctx, JS_VALUE_GET_FLOAT64(val), 10, 0,
+                        JS_DTOA_FORMAT_FREE);
+    case JS_TAG_SHORT_BIG_INT:
     case JS_TAG_BIG_INT:
         return js_bigint_to_string(ctx, val);
     case JS_TAG_UNINITIALIZED:
@@ -21969,7 +21826,7 @@ JSValue JS_ToStringInternal(JSContext *ctx, JSValueConst val,
 
 JSValue JS_ToString(JSContext *ctx, JSValueConst val)
 {
-    return JS_ToStringInternal(ctx, val, false);
+    return JS_ToStringInternal(ctx, val, /*flags*/0);
 }
 
 static JSValue JS_ToStringFree(JSContext *ctx, JSValue val)
@@ -21987,9 +21844,15 @@ static JSValue JS_ToLocaleStringFree(JSContext *ctx, JSValue val)
     return JS_InvokeFree(ctx, val, JS_ATOM_toLocaleString, 0, NULL);
 }
 
+static JSValue JS_ToPropertyKeyInternal(JSContext *ctx, JSValueConst val,
+                                        int flags)
+{
+    return JS_ToStringInternal(ctx, val, flags | JS_TO_STRING_IS_PROPERTY_KEY);
+}
+
 JSValue JS_ToPropertyKey(JSContext *ctx, JSValueConst val)
 {
-    return JS_ToStringInternal(ctx, val, true);
+    return JS_ToPropertyKeyInternal(ctx, val, /*flags*/0);
 }
 
 static JSValue JS_ToStringCheckObject(JSContext *ctx, JSValueConst val)
@@ -22243,14 +22106,26 @@ static __maybe_unused void JS_DumpValue(JSRuntime *rt, JSValueConst val)
     case JS_TAG_FLOAT64:
         printf("%.14g", JS_VALUE_GET_FLOAT64(val));
         break;
+    case JS_TAG_SHORT_BIG_INT:
+        printf("%" PRId64 "n", (int64_t)JS_VALUE_GET_SHORT_BIG_INT(val));
+        break;
     case JS_TAG_BIG_INT:
         {
             JSBigInt *p = JS_VALUE_GET_PTR(val);
-            char *str;
-            str = bf_ftoa(NULL, &p->num, 10, 0,
-                          BF_RNDZ | BF_FTOA_FORMAT_FRAC);
-            printf("%sn", str);
-            bf_realloc(&rt->bf_ctx, str, 0);
+            int sgn, i;
+            /* In order to avoid allocations we just dump the limbs */
+            sgn = js_bigint_sign(p);
+            if (sgn)
+                printf("BigInt.asIntN(%d,", p->len * JS_LIMB_BITS);
+            printf("0x");
+            for(i = p->len - 1; i >= 0; i--) {
+                if (i != p->len - 1)
+                    printf("_");
+                printf("%08x", p->tab[i]);
+            }
+            printf("n");
+            if (sgn)
+                printf(")");
         }
         break;
     case JS_TAG_STRING:
@@ -22333,82 +22208,34 @@ static double js_math_pow(double a, double b)
 
 JSValue JS_NewBigInt64(JSContext *ctx, int64_t v)
 {
-    JSValue val;
-    bf_t *a;
-    val = JS_NewBigInt(ctx);
-    if (JS_IsException(val))
-        return val;
-    a = JS_GetBigInt(val);
-    if (bf_set_si(a, v)) {
-        JS_FreeValue(ctx, val);
-        return JS_ThrowOutOfMemory(ctx);
+    if (v >= JS_SHORT_BIG_INT_MIN && v <= JS_SHORT_BIG_INT_MAX) {
+        return __JS_NewShortBigInt(ctx, v);
+    } else {
+        JSBigInt *p;
+        p = js_bigint_new_si64(ctx, v);
+        if (!p)
+            return JS_EXCEPTION;
+        return JS_MKPTR(JS_TAG_BIG_INT, p);
     }
-    return val;
 }
 
 JSValue JS_NewBigUint64(JSContext *ctx, uint64_t v)
 {
-    JSValue val;
-    bf_t *a;
-    val = JS_NewBigInt(ctx);
-    if (JS_IsException(val))
-        return val;
-    a = JS_GetBigInt(val);
-    if (bf_set_ui(a, v)) {
-        JS_FreeValue(ctx, val);
-        return JS_ThrowOutOfMemory(ctx);
+    if (v <= JS_SHORT_BIG_INT_MAX) {
+        return __JS_NewShortBigInt(ctx, v);
+    } else {
+        JSBigInt *p;
+        p = js_bigint_new_ui64(ctx, v);
+        if (!p)
+            return JS_EXCEPTION;
+        return JS_MKPTR(JS_TAG_BIG_INT, p);
     }
-
-    return val;
-}
-
-/* if the returned bigint is allocated it is equal to
-   'buf'. Otherwise it is a pointer to the bigint in 'val'. Return
-   NULL in case of error. */
-// TODO(bnoordhuis) Merge with JS_ToBigInt()
-static bf_t *JS_ToBigInt1(JSContext *ctx, bf_t *buf, JSValueConst val)
-{
-    uint32_t tag;
-    bf_t *r;
-    JSBigInt *p;
-
-    tag = JS_VALUE_GET_NORM_TAG(val);
-    switch(tag) {
-    case JS_TAG_INT:
-    case JS_TAG_BOOL:
-    case JS_TAG_NULL:
-        r = buf;
-        bf_init(ctx->bf_ctx, r);
-        if (bf_set_si(r, JS_VALUE_GET_INT(val)))
-            goto fail;
-        break;
-    case JS_TAG_FLOAT64:
-        r = buf;
-        bf_init(ctx->bf_ctx, r);
-        if (bf_set_float64(r, JS_VALUE_GET_FLOAT64(val))) {
-        fail:
-            bf_delete(r);
-            return NULL;
-        }
-        break;
-    case JS_TAG_BIG_INT:
-        p = JS_VALUE_GET_PTR(val);
-        r = &p->num;
-        break;
-    case JS_TAG_UNDEFINED:
-    default:
-        r = buf;
-        bf_init(ctx->bf_ctx, r);
-        bf_set_nan(r);
-        break;
-    }
-    return r;
 }
 
 /* return NaN if bad bigint literal */
 static JSValue JS_StringToBigInt(JSContext *ctx, JSValue val)
 {
-    const char *str;
+    const char *str, *p;
     size_t len;
     int flags;
 
@@ -22416,11 +22243,21 @@ static JSValue JS_StringToBigInt(JSContext *ctx, JSValue val)
     JS_FreeValue(ctx, val);
     if (!str)
         return JS_EXCEPTION;
-    flags = ATOD_WANT_BIG_INT |
-        ATOD_TRIM_SPACES | ATOD_ACCEPT_EMPTY |
-        ATOD_ACCEPT_HEX_PREFIX | ATOD_ACCEPT_BIN_OCT |
-        ATOD_DECIMAL_AFTER_SIGN | ATOD_NO_TRAILING_CHARS;
-    val = js_atof(ctx, str, len, NULL, 10, flags);
+    p = str;
+    p += skip_spaces(p);
+    if ((p - str) == len) {
+        val = JS_NewBigInt64(ctx, 0);
+    } else {
+        flags = ATOD_INT_ONLY | ATOD_ACCEPT_BIN_OCT | ATOD_TYPE_BIG_INT;
+        val = js_atof(ctx, p, &p, 0, flags);
+        p += skip_spaces(p);
+        if (!JS_IsException(val)) {
+            if ((p - str) != len) {
+                JS_FreeValue(ctx, val);
+                val = JS_NAN;
+            }
+        }
+    }
     JS_FreeCString(ctx, str);
     return val;
 }
@@ -22433,106 +22270,69 @@ static JSValue JS_StringToBigIntErr(JSContext *ctx, JSValue val)
     return val;
 }
 
-/* if the returned bigint is allocated it is equal to
-   'buf'. Otherwise it is a pointer to the bigint in 'val'. */
-static bf_t *JS_ToBigIntFree(JSContext *ctx, bf_t *buf, JSValue val)
+/* JS Numbers are not allowed */
+static JSValue JS_ToBigIntFree(JSContext *ctx, JSValue val)
 {
     uint32_t tag;
-    bf_t *r;
-    JSBigInt *p;
 
  redo:
     tag = JS_VALUE_GET_NORM_TAG(val);
     switch(tag) {
+    case JS_TAG_SHORT_BIG_INT:
+    case JS_TAG_BIG_INT:
+        break;
     case JS_TAG_INT:
     case JS_TAG_NULL:
     case JS_TAG_UNDEFINED:
     case JS_TAG_FLOAT64:
         goto fail;
     case JS_TAG_BOOL:
-        r = buf;
-        bf_init(ctx->bf_ctx, r);
-        bf_set_si(r, JS_VALUE_GET_INT(val));
-        break;
-    case JS_TAG_BIG_INT:
-        p = JS_VALUE_GET_PTR(val);
-        r = &p->num;
+        val = __JS_NewShortBigInt(ctx, JS_VALUE_GET_INT(val));
         break;
     case JS_TAG_STRING:
         val = JS_StringToBigIntErr(ctx, val);
         if (JS_IsException(val))
-            return NULL;
+            return val;
         goto redo;
     case JS_TAG_OBJECT:
         val = JS_ToPrimitiveFree(ctx, val, HINT_NUMBER);
         if (JS_IsException(val))
-            return NULL;
+            return val;
         goto redo;
     default:
     fail:
         JS_FreeValue(ctx, val);
-        JS_ThrowTypeError(ctx, "cannot convert to BigInt");
-        return NULL;
+        return JS_ThrowTypeError(ctx, "cannot convert to bigint");
     }
-    return r;
+    return val;
 }
 
-static bf_t *JS_ToBigInt(JSContext *ctx, bf_t *buf, JSValueConst val)
+static JSValue JS_ToBigInt(JSContext *ctx, JSValueConst val)
 {
-    return JS_ToBigIntFree(ctx, buf, js_dup(val));
-}
-
-static __maybe_unused JSValue JS_ToBigIntValueFree(JSContext *ctx, JSValue val)
-{
-    if (JS_VALUE_GET_TAG(val) == JS_TAG_BIG_INT) {
-        return val;
-    } else {
-        bf_t a_s, *a, *r;
-        int ret;
-        JSValue res;
-
-        res = JS_NewBigInt(ctx);
-        if (JS_IsException(res))
-            return JS_EXCEPTION;
-        a = JS_ToBigIntFree(ctx, &a_s, val);
-        if (!a) {
-            JS_FreeValue(ctx, res);
-            return JS_EXCEPTION;
-        }
-        r = JS_GetBigInt(res);
-        ret = bf_set(r, a);
-        JS_FreeBigInt(ctx, a, &a_s);
-        if (ret) {
-            JS_FreeValue(ctx, res);
-            return JS_ThrowOutOfMemory(ctx);
-        }
-        return JS_CompactBigInt(ctx, res);
-    }
-}
-
-/* free the bf_t allocated by JS_ToBigInt */
-static void JS_FreeBigInt(JSContext *ctx, bf_t *a, bf_t *buf)
-{
-    if (a == buf) {
-        bf_delete(a);
-    } else {
-        JSBigInt *p = (JSBigInt *)((uint8_t *)a - offsetof(JSBigInt, num));
-        JS_FreeValue(ctx, JS_MKPTR(JS_TAG_BIG_INT, p));
-    }
+    return JS_ToBigIntFree(ctx, js_dup(val));
 }
 
 /* XXX: merge with JS_ToInt64Free with a specific flag */
 static int JS_ToBigInt64Free(JSContext *ctx, int64_t *pres, JSValue val)
 {
-    bf_t a_s, *a;
+    uint64_t res;
 
-    a = JS_ToBigIntFree(ctx, &a_s, val);
-    if (!a) {
+    val = JS_ToBigIntFree(ctx, val);
+    if (JS_IsException(val)) {
         *pres = 0;
         return -1;
     }
-    bf_get_int64(pres, a, BF_GET_INT_MOD);
-    JS_FreeBigInt(ctx, a, &a_s);
+    if (JS_VALUE_GET_TAG(val) == JS_TAG_SHORT_BIG_INT) {
+        res = JS_VALUE_GET_SHORT_BIG_INT(val);
+    } else {
+        JSBigInt *p = JS_VALUE_GET_PTR(val);
+        /* return the value mod 2^64 */
+        res = p->tab[0];
+        if (p->len >= 2)
+            res |= (uint64_t)p->tab[1] << 32;
+        JS_FreeValue(ctx, val);
+    }
+    *pres = res;
     return 0;
 }
 
@@ -22546,103 +22346,6 @@ int JS_ToBigUint64(JSContext *ctx, uint64_t *pres, JSValueConst val)
     return JS_ToBigInt64Free(ctx, (int64_t *)pres, js_dup(val));
 }
 
-static JSValue JS_NewBigInt(JSContext *ctx)
-{
-    JSBigInt *p;
-    p = js_malloc(ctx, sizeof(*p));
-    if (!p)
-        return JS_EXCEPTION;
-    p->header.ref_count = 1;
-    bf_init(ctx->bf_ctx, &p->num);
-    return JS_MKPTR(JS_TAG_BIG_INT, p);
-}
-
-static JSValue JS_CompactBigInt1(JSContext *ctx, JSValue val)
-{
-    if (JS_VALUE_GET_TAG(val) != JS_TAG_BIG_INT)
-        return val; /* fail safe */
-    bf_t *a = JS_GetBigInt(val);
-    if (a->expn == BF_EXP_ZERO && a->sign) {
-        assert(((JSBigInt*)JS_VALUE_GET_PTR(val))->header.ref_count == 1);
-        a->sign = 0;
-    }
-    return val;
-}
-
-/* Nnormalize the zero representation. Could also be used to convert the bigint
-   to a short bigint value. The reference count of the value must be
-   1. Cannot fail */
-static JSValue JS_CompactBigInt(JSContext *ctx, JSValue val)
-{
-    return JS_CompactBigInt1(ctx, val);
-}
-
-static JSValue throw_bf_exception(JSContext *ctx, int status)
-{
-    const char *str;
-    if (status & BF_ST_MEM_ERROR)
-        return JS_ThrowOutOfMemory(ctx);
-    if (status & BF_ST_DIVIDE_ZERO) {
-        str = "division by zero";
-    } else if (status & BF_ST_INVALID_OP) {
-        str = "invalid operation";
-    } else {
-        str = "integer overflow";
-    }
-    return JS_ThrowRangeError(ctx, "%s", str);
-}
-
-static int js_unary_arith_bigint(JSContext *ctx,
-                                 JSValue *pres, OPCodeEnum op, JSValue op1)
-{
-    bf_t a_s, *r, *a;
-    int ret, v;
-    JSValue res;
-
-    if (op == OP_plus) {
-        JS_ThrowTypeError(ctx, "BigInt argument with unary +");
-        JS_FreeValue(ctx, op1);
-        return -1;
-    }
-    res = JS_NewBigInt(ctx);
-    if (JS_IsException(res)) {
-        JS_FreeValue(ctx, op1);
-        return -1;
-    }
-    r = JS_GetBigInt(res);
-    a = JS_ToBigIntFree(ctx, &a_s, op1); // infallible, always a bigint
-    ret = 0;
-    switch(op) {
-    case OP_inc:
-    case OP_dec:
-        v = 2 * (op - OP_dec) - 1;
-        ret = bf_add_si(r, a, v, BF_PREC_INF, BF_RNDZ);
-        break;
-    case OP_plus:
-        ret = bf_set(r, a);
-        break;
-    case OP_neg:
-        ret = bf_set(r, a);
-        bf_neg(r);
-        break;
-    case OP_not:
-        ret = bf_add_si(r, a, 1, BF_PREC_INF, BF_RNDZ);
-        bf_neg(r);
-        break;
-    default:
-        abort();
-    }
-    JS_FreeBigInt(ctx, a, &a_s);
-    if (unlikely(ret)) {
-        JS_FreeValue(ctx, res);
-        throw_bf_exception(ctx, ret);
-        return -1;
-    }
-    res = JS_CompactBigInt(ctx, res);
-    *pres = res;
-    return 0;
-}
-
 static no_inline __exception int js_unary_arith_slow(JSContext *ctx,
                                                      JSValue *sp,
                                                      OPCodeEnum op)
@@ -22650,12 +22353,13 @@ static no_inline __exception int js_unary_arith_slow(JSContext *ctx,
     JSValue op1;
     int v;
     uint32_t tag;
+    JSBigIntBuf buf1;
+    JSBigInt *p1;
 
     op1 = sp[-1];
     /* fast path for float64 */
     if (JS_TAG_IS_FLOAT64(JS_VALUE_GET_TAG(op1)))
         goto handle_float64;
-
     op1 = JS_ToNumericFree(ctx, op1);
     if (JS_IsException(op1))
         goto exception;
@@ -22687,14 +22391,77 @@ static no_inline __exception int js_unary_arith_slow(JSContext *ctx,
             sp[-1] = js_int64(v64);
         }
         break;
+    case JS_TAG_SHORT_BIG_INT:
+        {
+            int64_t v;
+            v = JS_VALUE_GET_SHORT_BIG_INT(op1);
+            switch(op) {
+            case OP_plus:
+                JS_ThrowTypeError(ctx, "bigint argument with unary +");
+                goto exception;
+            case OP_inc:
+                if (v == JS_SHORT_BIG_INT_MAX)
+                    goto bigint_slow_case;
+                sp[-1] = __JS_NewShortBigInt(ctx, v + 1);
+                break;
+            case OP_dec:
+                if (v == JS_SHORT_BIG_INT_MIN)
+                    goto bigint_slow_case;
+                sp[-1] = __JS_NewShortBigInt(ctx, v - 1);
+                break;
+            case OP_neg:
+                v = JS_VALUE_GET_SHORT_BIG_INT(op1);
+                if (v == JS_SHORT_BIG_INT_MIN) {
+                bigint_slow_case:
+                    p1 = js_bigint_set_short(&buf1, op1);
+                    goto bigint_slow_case1;
+                }
+                sp[-1] = __JS_NewShortBigInt(ctx, -v);
+                break;
+            default:
+                abort();
+            }
+        }
+        break;
     case JS_TAG_BIG_INT:
-        if (js_unary_arith_bigint(ctx, sp - 1, op, op1))
-            goto exception;
+        {
+            JSBigInt *r;
+            p1 = JS_VALUE_GET_PTR(op1);
+        bigint_slow_case1:
+            switch(op) {
+            case OP_plus:
+                JS_ThrowTypeError(ctx, "bigint argument with unary +");
+                JS_FreeValue(ctx, op1);
+                goto exception;
+            case OP_inc:
+            case OP_dec:
+                {
+                    JSBigIntBuf buf2;
+                    JSBigInt *p2;
+                    p2 = js_bigint_set_si(&buf2, 2 * (op - OP_dec) - 1);
+                    r = js_bigint_add(ctx, p1, p2, 0);
+                }
+                break;
+            case OP_neg:
+                r = js_bigint_neg(ctx, p1);
+                break;
+            case OP_not:
+                r = js_bigint_not(ctx, p1);
+                break;
+            default:
+                abort();
+            }
+            JS_FreeValue(ctx, op1);
+            if (!r)
+                goto exception;
+            sp[-1] = JS_CompactBigInt(ctx, r);
+        }
         break;
     default:
     handle_float64:
         {
-            double d = JS_VALUE_GET_FLOAT64(op1);
+            double d;
+            d = JS_VALUE_GET_FLOAT64(op1);
             switch(op) {
             case OP_inc:
             case OP_dec:
@@ -22740,12 +22507,19 @@ static no_inline int js_not_slow(JSContext *ctx, JSValue *sp)
 {
     JSValue op1;
 
-    op1 = JS_ToNumericFree(ctx, sp[-1]);
+    op1 = sp[-1];
+    op1 = JS_ToNumericFree(ctx, op1);
     if (JS_IsException(op1))
         goto exception;
-    if (JS_VALUE_GET_TAG(op1) == JS_TAG_BIG_INT) {
-        if (js_unary_arith_bigint(ctx, sp - 1, OP_not, op1))
+    if (JS_VALUE_GET_TAG(op1) == JS_TAG_SHORT_BIG_INT) {
+        sp[-1] = __JS_NewShortBigInt(ctx, ~JS_VALUE_GET_SHORT_BIG_INT(op1));
+    } else if (JS_VALUE_GET_TAG(op1) == JS_TAG_BIG_INT) {
+        JSBigInt *r;
+        r = js_bigint_not(ctx, JS_VALUE_GET_PTR(op1));
+        JS_FreeValue(ctx, op1);
+        if (!r)
             goto exception;
+        sp[-1] = JS_CompactBigInt(ctx, r);
     } else {
         int32_t v1;
         if (unlikely(JS_ToInt32Free(ctx, &v1, op1)))
@@ -22756,107 +22530,6 @@ static no_inline int js_not_slow(JSContext *ctx, JSValue *sp)
  exception:
     sp[-1] = JS_UNDEFINED;
     return -1;
-}
-
-static int js_binary_arith_bigint(JSContext *ctx, OPCodeEnum op,
-                                  JSValue *pres, JSValue op1, JSValue op2)
-{
-    bf_t a_s, b_s, *r, *a, *b;
-    int ret;
-    JSValue res;
-
-    a = JS_ToBigIntFree(ctx, &a_s, op1);
-    if (!a) {
-        JS_FreeValue(ctx, op2);
-        return -1;
-    }
-    b = JS_ToBigIntFree(ctx, &b_s, op2);
-    if (!b) {
-        JS_FreeBigInt(ctx, a, &a_s);
-        return -1;
-    }
-    res = JS_NewBigInt(ctx);
-    if (JS_IsException(res)) {
-        JS_FreeBigInt(ctx, a, &a_s);
-        JS_FreeBigInt(ctx, b, &b_s);
-        return -1;
-    }
-    r = JS_GetBigInt(res);
-    ret = 0;
-    switch(op) {
-    case OP_add:
-        ret = bf_add(r, a, b, BF_PREC_INF, BF_RNDZ);
-        break;
-    case OP_sub:
-        ret = bf_sub(r, a, b, BF_PREC_INF, BF_RNDZ);
-        break;
-    case OP_mul:
-        ret = bf_mul(r, a, b, BF_PREC_INF, BF_RNDZ);
-        break;
-    case OP_div:
-        {
-            bf_t rem_s, *rem = &rem_s;
-            bf_init(ctx->bf_ctx, rem);
-            ret = bf_divrem(r, rem, a, b, BF_PREC_INF, BF_RNDZ, BF_RNDZ);
-            bf_delete(rem);
-        }
-        break;
-    case OP_mod:
-        ret = bf_rem(r, a, b, BF_PREC_INF, BF_RNDZ,
-                     BF_RNDZ) & BF_ST_INVALID_OP;
-        break;
-    case OP_pow:
-        if (b->sign) {
-            ret = BF_ST_INVALID_OP;
-        } else {
-            ret = bf_pow(r, a, b, BF_PREC_INF, BF_RNDZ | BF_POW_JS_QUIRKS);
-        }
-        break;
-
-        /* logical operations */
-    case OP_shl:
-    case OP_sar:
-        {
-            slimb_t v2;
-#if LIMB_BITS == 32
-            bf_get_int32(&v2, b, 0);
-            if (v2 == INT32_MIN)
-                v2 = INT32_MIN + 1;
-#else
-            bf_get_int64(&v2, b, 0);
-            if (v2 == INT64_MIN)
-                v2 = INT64_MIN + 1;
-#endif
-            if (op == OP_sar)
-                v2 = -v2;
-            ret = bf_set(r, a);
-            ret |= bf_mul_2exp(r, v2, BF_PREC_INF, BF_RNDZ);
-            if (v2 < 0) {
-                ret |= bf_rint(r, BF_RNDD) & (BF_ST_OVERFLOW | BF_ST_MEM_ERROR);
-            }
-        }
-        break;
-    case OP_and:
-        ret = bf_logic_and(r, a, b);
-        break;
-    case OP_or:
-        ret = bf_logic_or(r, a, b);
-        break;
-    case OP_xor:
-        ret = bf_logic_xor(r, a, b);
-        break;
-    default:
-        abort();
-    }
-    JS_FreeBigInt(ctx, a, &a_s);
-    JS_FreeBigInt(ctx, b, &b_s);
-    if (unlikely(ret)) {
-        JS_FreeValue(ctx, res);
-        throw_bf_exception(ctx, ret);
-        return -1;
-    }
-    *pres = JS_CompactBigInt(ctx, res);
-    return 0;
 }
 
 static no_inline __exception int js_binary_arith_slow(JSContext *ctx, JSValue *sp,
@@ -22876,7 +22549,50 @@ static no_inline __exception int js_binary_arith_slow(JSContext *ctx, JSValue *s
         d2 = JS_VALUE_GET_FLOAT64(op2);
         goto handle_float64;
     }
-
+    /* fast path for short big int operations */
+    if (tag1 == JS_TAG_SHORT_BIG_INT && tag2 == JS_TAG_SHORT_BIG_INT) {
+        js_slimb_t v1, v2;
+        js_sdlimb_t v;
+        v1 = JS_VALUE_GET_SHORT_BIG_INT(op1);
+        v2 = JS_VALUE_GET_SHORT_BIG_INT(op2);
+        switch(op) {
+        case OP_sub:
+            v = (js_sdlimb_t)v1 - (js_sdlimb_t)v2;
+            break;
+        case OP_mul:
+            v = (js_sdlimb_t)v1 * (js_sdlimb_t)v2;
+            break;
+        case OP_div:
+            if (v2 == 0 ||
+                ((js_limb_t)v1 == (js_limb_t)1 << (JS_LIMB_BITS - 1) &&
+                 v2 == -1)) {
+                goto slow_big_int;
+            }
+            sp[-2] = __JS_NewShortBigInt(ctx, v1 / v2);
+            return 0;
+        case OP_mod:
+            if (v2 == 0 ||
+                ((js_limb_t)v1 == (js_limb_t)1 << (JS_LIMB_BITS - 1) &&
+                 v2 == -1)) {
+                goto slow_big_int;
+            }
+            sp[-2] = __JS_NewShortBigInt(ctx, v1 % v2);
+            return 0;
+        case OP_pow:
+            goto slow_big_int;
+        default:
+            abort();
+        }
+        if (likely(v >= JS_SHORT_BIG_INT_MIN && v <= JS_SHORT_BIG_INT_MAX)) {
+            sp[-2] = __JS_NewShortBigInt(ctx, v);
+        } else {
+            JSBigInt *r = js_bigint_new_di(ctx, v);
+            if (!r)
+                goto exception;
+            sp[-2] = JS_MKPTR(JS_TAG_BIG_INT, r);
+        }
+        return 0;
+    }
     op1 = JS_ToNumericFree(ctx, op1);
     if (JS_IsException(op1)) {
         JS_FreeValue(ctx, op2);
@@ -22907,7 +22623,7 @@ static no_inline __exception int js_binary_arith_slow(JSContext *ctx, JSValue *s
             }
             break;
         case OP_div:
-            sp[-2] = js_float64((double)v1 / (double)v2);
+            sp[-2] = js_number((double)v1 / (double)v2);
             return 0;
         case OP_mod:
             if (v1 < 0 || v2 <= 0) {
@@ -22924,9 +22640,47 @@ static no_inline __exception int js_binary_arith_slow(JSContext *ctx, JSValue *s
             abort();
         }
         sp[-2] = js_int64(v);
-    } else if (tag1 == JS_TAG_BIG_INT || tag2 == JS_TAG_BIG_INT) {
-        if (js_binary_arith_bigint(ctx, op, sp - 2, op1, op2))
+    } else if ((tag1 == JS_TAG_SHORT_BIG_INT || tag1 == JS_TAG_BIG_INT) &&
+               (tag2 == JS_TAG_SHORT_BIG_INT || tag2 == JS_TAG_BIG_INT)) {
+        JSBigInt *p1, *p2, *r;
+        JSBigIntBuf buf1, buf2;
+    slow_big_int:
+        /* bigint result */
+        if (JS_VALUE_GET_TAG(op1) == JS_TAG_SHORT_BIG_INT)
+            p1 = js_bigint_set_short(&buf1, op1);
+        else
+            p1 = JS_VALUE_GET_PTR(op1);
+        if (JS_VALUE_GET_TAG(op2) == JS_TAG_SHORT_BIG_INT)
+            p2 = js_bigint_set_short(&buf2, op2);
+        else
+            p2 = JS_VALUE_GET_PTR(op2);
+        switch(op) {
+        case OP_add:
+            r = js_bigint_add(ctx, p1, p2, 0);
+            break;
+        case OP_sub:
+            r = js_bigint_add(ctx, p1, p2, 1);
+            break;
+        case OP_mul:
+            r = js_bigint_mul(ctx, p1, p2);
+            break;
+        case OP_div:
+            r = js_bigint_divrem(ctx, p1, p2, false);
+            break;
+        case OP_mod:
+            r = js_bigint_divrem(ctx, p1, p2, true);
+            break;
+        case OP_pow:
+            r = js_bigint_pow(ctx, p1, p2);
+            break;
+        default:
+            abort();
+        }
+        JS_FreeValue(ctx, op1);
+        JS_FreeValue(ctx, op2);
+        if (!r)
             goto exception;
+        sp[-2] = JS_CompactBigInt(ctx, r);
     } else {
         double dr;
         /* float64 result */
@@ -22983,6 +22737,23 @@ static no_inline __exception int js_add_slow(JSContext *ctx, JSValue *sp)
         sp[-2] = js_float64(d1 + d2);
         return 0;
     }
+    /* fast path for short bigint */
+    if (tag1 == JS_TAG_SHORT_BIG_INT && tag2 == JS_TAG_SHORT_BIG_INT) {
+        js_slimb_t v1, v2;
+        js_sdlimb_t v;
+        v1 = JS_VALUE_GET_SHORT_BIG_INT(op1);
+        v2 = JS_VALUE_GET_SHORT_BIG_INT(op2);
+        v = (js_sdlimb_t)v1 + (js_sdlimb_t)v2;
+        if (likely(v >= JS_SHORT_BIG_INT_MIN && v <= JS_SHORT_BIG_INT_MAX)) {
+            sp[-2] = __JS_NewShortBigInt(ctx, v);
+        } else {
+            JSBigInt *r = js_bigint_new_di(ctx, v);
+            if (!r)
+                goto exception;
+            sp[-2] = JS_MKPTR(JS_TAG_BIG_INT, r);
+        }
+        return 0;
+    }
 
     if (tag1 == JS_TAG_OBJECT || tag2 == JS_TAG_OBJECT) {
         op1 = JS_ToPrimitiveFree(ctx, op1, HINT_NONE);
@@ -23027,9 +22798,25 @@ static no_inline __exception int js_add_slow(JSContext *ctx, JSValue *sp)
         v2 = JS_VALUE_GET_INT(op2);
         v = (int64_t)v1 + (int64_t)v2;
         sp[-2] = js_int64(v);
-    } else if (tag1 == JS_TAG_BIG_INT || tag2 == JS_TAG_BIG_INT) {
-        if (js_binary_arith_bigint(ctx, OP_add, sp - 2, op1, op2))
+    } else if ((tag1 == JS_TAG_BIG_INT || tag1 == JS_TAG_SHORT_BIG_INT) &&
+               (tag2 == JS_TAG_BIG_INT || tag2 == JS_TAG_SHORT_BIG_INT)) {
+        JSBigInt *p1, *p2, *r;
+        JSBigIntBuf buf1, buf2;
+        /* bigint result */
+        if (JS_VALUE_GET_TAG(op1) == JS_TAG_SHORT_BIG_INT)
+            p1 = js_bigint_set_short(&buf1, op1);
+        else
+            p1 = JS_VALUE_GET_PTR(op1);
+        if (JS_VALUE_GET_TAG(op2) == JS_TAG_SHORT_BIG_INT)
+            p2 = js_bigint_set_short(&buf2, op2);
+        else
+            p2 = JS_VALUE_GET_PTR(op2);
+        r = js_bigint_add(ctx, p1, p2, 0);
+        JS_FreeValue(ctx, op1);
+        JS_FreeValue(ctx, op2);
+        if (!r)
             goto exception;
+        sp[-2] = JS_CompactBigInt(ctx, r);
     } else {
         double d1, d2;
         /* float64 result */
@@ -23061,6 +22848,62 @@ static no_inline __exception int js_binary_logic_slow(JSContext *ctx,
     tag1 = JS_VALUE_GET_NORM_TAG(op1);
     tag2 = JS_VALUE_GET_NORM_TAG(op2);
 
+    if (tag1 == JS_TAG_SHORT_BIG_INT && tag2 == JS_TAG_SHORT_BIG_INT) {
+        js_slimb_t v1, v2, v;
+        js_sdlimb_t vd;
+        v1 = JS_VALUE_GET_SHORT_BIG_INT(op1);
+        v2 = JS_VALUE_GET_SHORT_BIG_INT(op2);
+        /* bigint fast path */
+        switch(op) {
+        case OP_and:
+            v = v1 & v2;
+            break;
+        case OP_or:
+            v = v1 | v2;
+            break;
+        case OP_xor:
+            v = v1 ^ v2;
+            break;
+        case OP_sar:
+            if (v2 > (JS_LIMB_BITS - 1)) {
+                goto slow_big_int;
+            } else if (v2 < 0) {
+                if (v2 < -(JS_LIMB_BITS - 1))
+                    goto slow_big_int;
+                v2 = -v2;
+                goto bigint_shl;
+            }
+        bigint_sar:
+            v = v1 >> v2;
+            break;
+        case OP_shl:
+            if (v2 > (JS_LIMB_BITS - 1)) {
+                goto slow_big_int;
+            } else if (v2 < 0) {
+                if (v2 < -(JS_LIMB_BITS - 1))
+                    goto slow_big_int;
+                v2 = -v2;
+                goto bigint_sar;
+            }
+        bigint_shl:
+            vd = (js_dlimb_t)v1 << v2;
+            if (likely(vd >= JS_SHORT_BIG_INT_MIN &&
+                       vd <= JS_SHORT_BIG_INT_MAX)) {
+                v = vd;
+            } else {
+                JSBigInt *r = js_bigint_new_di(ctx, vd);
+                if (!r)
+                    goto exception;
+                sp[-2] = JS_MKPTR(JS_TAG_BIG_INT, r);
+                return 0;
+            }
+            break;
+        default:
+            abort();
+        }
+        sp[-2] = __JS_NewShortBigInt(ctx, v);
+        return 0;
+    }
     op1 = JS_ToNumericFree(ctx, op1);
     if (JS_IsException(op1)) {
         JS_FreeValue(ctx, op2);
@@ -23074,15 +22917,50 @@ static no_inline __exception int js_binary_logic_slow(JSContext *ctx,
 
     tag1 = JS_VALUE_GET_TAG(op1);
     tag2 = JS_VALUE_GET_TAG(op2);
-    if (tag1 == JS_TAG_BIG_INT || tag2 == JS_TAG_BIG_INT) {
-        if (tag1 != tag2) {
-            JS_FreeValue(ctx, op1);
-            JS_FreeValue(ctx, op2);
-            JS_ThrowTypeError(ctx, "both operands must be BigInt");
-            goto exception;
-        } else if (js_binary_arith_bigint(ctx, op, sp - 2, op1, op2)) {
-            goto exception;
+    if ((tag1 == JS_TAG_BIG_INT || tag1 == JS_TAG_SHORT_BIG_INT) &&
+        (tag2 == JS_TAG_BIG_INT || tag2 == JS_TAG_SHORT_BIG_INT)) {
+        JSBigInt *p1, *p2, *r;
+        JSBigIntBuf buf1, buf2;
+    slow_big_int:
+        if (JS_VALUE_GET_TAG(op1) == JS_TAG_SHORT_BIG_INT)
+            p1 = js_bigint_set_short(&buf1, op1);
+        else
+            p1 = JS_VALUE_GET_PTR(op1);
+        if (JS_VALUE_GET_TAG(op2) == JS_TAG_SHORT_BIG_INT)
+            p2 = js_bigint_set_short(&buf2, op2);
+        else
+            p2 = JS_VALUE_GET_PTR(op2);
+        switch(op) {
+        case OP_and:
+        case OP_or:
+        case OP_xor:
+            r = js_bigint_logic(ctx, p1, p2, op);
+            break;
+        case OP_shl:
+        case OP_sar:
+            {
+                js_slimb_t shift;
+                shift = js_bigint_get_si_sat(p2);
+                if (shift > INT32_MAX)
+                    shift = INT32_MAX;
+                else if (shift < -INT32_MAX)
+                    shift = -INT32_MAX;
+                if (op == OP_sar)
+                    shift = -shift;
+                if (shift >= 0)
+                    r = js_bigint_shl(ctx, p1, shift);
+                else
+                    r = js_bigint_shr(ctx, p1, -shift);
+            }
+            break;
+        default:
+            abort();
         }
+        JS_FreeValue(ctx, op1);
+        JS_FreeValue(ctx, op2);
+        if (!r)
+            goto exception;
+        sp[-2] = JS_CompactBigInt(ctx, r);
     } else {
         if (unlikely(JS_ToInt32Free(ctx, (int32_t *)&v1, op1))) {
             JS_FreeValue(ctx, op2);
@@ -23118,49 +22996,96 @@ static no_inline __exception int js_binary_logic_slow(JSContext *ctx,
     return -1;
 }
 
-static int js_compare_bigint(JSContext *ctx, OPCodeEnum op,
-                             JSValue op1, JSValue op2)
+/* op1 must be a bigint or int. */
+static JSBigInt *JS_ToBigIntBuf(JSContext *ctx, JSBigIntBuf *buf1,
+                                JSValue op1)
 {
-    bf_t a_s, b_s, *a, *b;
-    int res;
+    JSBigInt *p1;
 
-    a = JS_ToBigInt1(ctx, &a_s, op1);
-    if (!a) {
-        JS_FreeValue(ctx, op2);
-        return -1;
-    }
-    b = JS_ToBigInt1(ctx, &b_s, op2);
-    if (!b) {
-        if (a == &a_s)
-            bf_delete(a);
-        JS_FreeValue(ctx, op1);
-        return -1;
-    }
-    switch(op) {
-    case OP_lt:
-        res = bf_cmp_lt(a, b); /* if NaN return false */
+    switch(JS_VALUE_GET_TAG(op1)) {
+    case JS_TAG_INT:
+        p1 = js_bigint_set_si(buf1, JS_VALUE_GET_INT(op1));
         break;
-    case OP_lte:
-        res = bf_cmp_le(a, b); /* if NaN return false */
+    case JS_TAG_SHORT_BIG_INT:
+        p1 = js_bigint_set_short(buf1, op1);
         break;
-    case OP_gt:
-        res = bf_cmp_lt(b, a); /* if NaN return false */
-        break;
-    case OP_gte:
-        res = bf_cmp_le(b, a); /* if NaN return false */
-        break;
-    case OP_eq:
-        res = bf_cmp_eq(a, b); /* if NaN return false */
+    case JS_TAG_BIG_INT:
+        p1 = JS_VALUE_GET_PTR(op1);
         break;
     default:
         abort();
     }
-    if (a == &a_s)
-        bf_delete(a);
-    if (b == &b_s)
-        bf_delete(b);
-    JS_FreeValue(ctx, op1);
-    JS_FreeValue(ctx, op2);
+    return p1;
+}
+
+/* op1 and op2 must be numeric types and at least one must be a
+   bigint. No exception is generated. */
+static int js_compare_bigint(JSContext *ctx, OPCodeEnum op,
+                             JSValue op1, JSValue op2)
+{
+    int res, val, tag1, tag2;
+    JSBigIntBuf buf1, buf2;
+    JSBigInt *p1, *p2;
+
+    tag1 = JS_VALUE_GET_NORM_TAG(op1);
+    tag2 = JS_VALUE_GET_NORM_TAG(op2);
+    if ((tag1 == JS_TAG_SHORT_BIG_INT || tag1 == JS_TAG_INT) &&
+        (tag2 == JS_TAG_SHORT_BIG_INT || tag2 == JS_TAG_INT)) {
+        /* fast path */
+        js_slimb_t v1, v2;
+        if (tag1 == JS_TAG_INT)
+            v1 = JS_VALUE_GET_INT(op1);
+        else
+            v1 = JS_VALUE_GET_SHORT_BIG_INT(op1);
+        if (tag2 == JS_TAG_INT)
+            v2 = JS_VALUE_GET_INT(op2);
+        else
+            v2 = JS_VALUE_GET_SHORT_BIG_INT(op2);
+        val = (v1 > v2) - (v1 < v2);
+    } else {
+        if (tag1 == JS_TAG_FLOAT64) {
+            p2 = JS_ToBigIntBuf(ctx, &buf2, op2);
+            val = js_bigint_float64_cmp(ctx, p2, JS_VALUE_GET_FLOAT64(op1));
+            if (val == 2)
+                goto unordered;
+            val = -val;
+        } else if (tag2 == JS_TAG_FLOAT64) {
+            p1 = JS_ToBigIntBuf(ctx, &buf1, op1);
+            val = js_bigint_float64_cmp(ctx, p1, JS_VALUE_GET_FLOAT64(op2));
+            if (val == 2) {
+            unordered:
+                JS_FreeValue(ctx, op1);
+                JS_FreeValue(ctx, op2);
+                return false;
+            }
+        } else {
+            p1 = JS_ToBigIntBuf(ctx, &buf1, op1);
+            p2 = JS_ToBigIntBuf(ctx, &buf2, op2);
+            val = js_bigint_cmp(ctx, p1, p2);
+        }
+        JS_FreeValue(ctx, op1);
+        JS_FreeValue(ctx, op2);
+    }
+
+    switch(op) {
+    case OP_lt:
+        res = val < 0;
+        break;
+    case OP_lte:
+        res = val <= 0;
+        break;
+    case OP_gt:
+        res = val > 0;
+        break;
+    case OP_gte:
+        res = val >= 0;
+        break;
+    case OP_eq:
+        res = val == 0;
+        break;
+    default:
+        abort();
+    }
     return res;
 }
 
@@ -23216,16 +23141,20 @@ static no_inline int js_relational_slow(JSContext *ctx, JSValue *sp,
         /* fast path for float64/int */
         goto float64_compare;
     } else {
-        if (((tag1 == JS_TAG_BIG_INT && tag2 == JS_TAG_STRING) ||
-             (tag2 == JS_TAG_BIG_INT && tag1 == JS_TAG_STRING))) {
+        if ((((tag1 == JS_TAG_BIG_INT || tag1 == JS_TAG_SHORT_BIG_INT) &&
+              tag2 == JS_TAG_STRING) ||
+             ((tag2 == JS_TAG_BIG_INT || tag2 == JS_TAG_SHORT_BIG_INT) &&
+              tag1 == JS_TAG_STRING))) {
             if (tag1 == JS_TAG_STRING) {
                 op1 = JS_StringToBigInt(ctx, op1);
-                if (JS_VALUE_GET_TAG(op1) != JS_TAG_BIG_INT)
+                if (JS_VALUE_GET_TAG(op1) != JS_TAG_BIG_INT &&
+                    JS_VALUE_GET_TAG(op1) != JS_TAG_SHORT_BIG_INT)
                     goto invalid_bigint_string;
             }
             if (tag2 == JS_TAG_STRING) {
                 op2 = JS_StringToBigInt(ctx, op2);
-                if (JS_VALUE_GET_TAG(op2) != JS_TAG_BIG_INT) {
+                if (JS_VALUE_GET_TAG(op2) != JS_TAG_BIG_INT &&
+                    JS_VALUE_GET_TAG(op2) != JS_TAG_SHORT_BIG_INT) {
                 invalid_bigint_string:
                     JS_FreeValue(ctx, op1);
                     JS_FreeValue(ctx, op2);
@@ -23249,10 +23178,9 @@ static no_inline int js_relational_slow(JSContext *ctx, JSValue *sp,
         tag1 = JS_VALUE_GET_NORM_TAG(op1);
         tag2 = JS_VALUE_GET_NORM_TAG(op2);
 
-        if (tag1 == JS_TAG_BIG_INT || tag2 == JS_TAG_BIG_INT) {
+        if (tag1 == JS_TAG_BIG_INT || tag1 == JS_TAG_SHORT_BIG_INT ||
+            tag2 == JS_TAG_BIG_INT || tag2 == JS_TAG_SHORT_BIG_INT) {
             res = js_compare_bigint(ctx, op, op1, op2);
-            if (res < 0)
-                goto exception;
         } else {
             double d1, d2;
 
@@ -23296,8 +23224,9 @@ static no_inline int js_relational_slow(JSContext *ctx, JSValue *sp,
 
 static bool tag_is_number(uint32_t tag)
 {
-    return (tag == JS_TAG_INT || tag == JS_TAG_BIG_INT ||
-            tag == JS_TAG_FLOAT64);
+    return (tag == JS_TAG_INT ||
+            tag == JS_TAG_FLOAT64 ||
+            tag == JS_TAG_BIG_INT || tag == JS_TAG_SHORT_BIG_INT);
 }
 
 static no_inline __exception int js_eq_slow(JSContext *ctx, JSValue *sp,
@@ -23344,15 +23273,18 @@ static no_inline __exception int js_eq_slow(JSContext *ctx, JSValue *sp,
     } else if ((tag1 == JS_TAG_STRING && tag_is_number(tag2)) ||
                (tag2 == JS_TAG_STRING && tag_is_number(tag1))) {
 
-        if ((tag1 == JS_TAG_BIG_INT || tag2 == JS_TAG_BIG_INT)) {
+        if (tag1 == JS_TAG_BIG_INT || tag1 == JS_TAG_SHORT_BIG_INT ||
+            tag2 == JS_TAG_BIG_INT || tag2 == JS_TAG_SHORT_BIG_INT) {
             if (tag1 == JS_TAG_STRING) {
                 op1 = JS_StringToBigInt(ctx, op1);
-                if (JS_VALUE_GET_TAG(op1) != JS_TAG_BIG_INT)
+                if (JS_VALUE_GET_TAG(op1) != JS_TAG_BIG_INT &&
+                    JS_VALUE_GET_TAG(op1) != JS_TAG_SHORT_BIG_INT)
                     goto invalid_bigint_string;
             }
             if (tag2 == JS_TAG_STRING) {
                 op2 = JS_StringToBigInt(ctx, op2);
-                if (JS_VALUE_GET_TAG(op2) != JS_TAG_BIG_INT) {
+                if (JS_VALUE_GET_TAG(op2) != JS_TAG_BIG_INT &&
+                    JS_VALUE_GET_TAG(op2) != JS_TAG_SHORT_BIG_INT ) {
                 invalid_bigint_string:
                     JS_FreeValue(ctx, op1);
                     JS_FreeValue(ctx, op2);
@@ -23434,8 +23366,10 @@ static no_inline int js_shr_slow(JSContext *ctx, JSValue *sp)
         goto exception;
     }
 
-    if ((JS_VALUE_GET_TAG(op1) == JS_TAG_BIG_INT ||
-         JS_VALUE_GET_TAG(op2) == JS_TAG_BIG_INT)) {
+    if (JS_VALUE_GET_TAG(op1) == JS_TAG_BIG_INT ||
+        JS_VALUE_GET_TAG(op1) == JS_TAG_SHORT_BIG_INT ||
+        JS_VALUE_GET_TAG(op2) == JS_TAG_BIG_INT ||
+        JS_VALUE_GET_TAG(op2) == JS_TAG_SHORT_BIG_INT) {
         JS_ThrowTypeError(ctx, "BigInt operands are forbidden for >>>");
         JS_FreeValue(ctx, op1);
         JS_FreeValue(ctx, op2);
@@ -23544,20 +23478,27 @@ static bool js_strict_eq2(JSContext *ctx, JSValue op1, JSValue op2,
             res = (d1 == d2); /* if NaN return false and +0 == -0 */
         }
         goto done_no_free;
+    case JS_TAG_SHORT_BIG_INT:
     case JS_TAG_BIG_INT:
         {
-            bf_t a_s, *a, b_s, *b;
-            if (tag1 != tag2) {
+            JSBigIntBuf buf1, buf2;
+            JSBigInt *p1, *p2;
+
+            if (tag2 != JS_TAG_SHORT_BIG_INT &&
+                tag2 != JS_TAG_BIG_INT) {
                 res = false;
                 break;
             }
-            a = JS_ToBigInt1(ctx, &a_s, op1);
-            b = JS_ToBigInt1(ctx, &b_s, op2);
-            res = bf_cmp_eq(a, b);
-            if (a == &a_s)
-                bf_delete(a);
-            if (b == &b_s)
-                bf_delete(b);
+
+            if (JS_VALUE_GET_TAG(op1) == JS_TAG_SHORT_BIG_INT)
+                p1 = js_bigint_set_short(&buf1, op1);
+            else
+                p1 = JS_VALUE_GET_PTR(op1);
+            if (JS_VALUE_GET_TAG(op2) == JS_TAG_SHORT_BIG_INT)
+                p2 = js_bigint_set_short(&buf2, op2);
+            else
+                p2 = JS_VALUE_GET_PTR(op2);
+            res = (js_bigint_cmp(ctx, p1, p2) == 0);
         }
         break;
     default:
@@ -23651,7 +23592,7 @@ static __exception int js_operator_private_in(JSContext *ctx, JSValue *sp)
     }
     JS_FreeValue(ctx, op1);
     JS_FreeValue(ctx, op2);
-    sp[-2] = JS_NewBool(ctx, ret);
+    sp[-2] = js_bool(ret);
     return 0;
 }
 
@@ -23696,6 +23637,7 @@ static __exception int js_operator_typeof(JSContext *ctx, JSValue op1)
 
     tag = JS_VALUE_GET_NORM_TAG(op1);
     switch(tag) {
+    case JS_TAG_SHORT_BIG_INT:
     case JS_TAG_BIG_INT:
         atom = JS_ATOM_bigint;
         break;
@@ -23762,18 +23704,9 @@ static __exception int js_operator_delete(JSContext *ctx, JSValue *sp)
 static JSValue js_throw_type_error(JSContext *ctx, JSValueConst this_val,
                                    int argc, JSValueConst *argv)
 {
-    return JS_ThrowTypeError(ctx, "invalid property access");
-}
-
-/* XXX: not 100% compatible, but mozilla seems to use a similar
-   implementation to ensure that caller in non strict mode does not
-   throw (ES5 compatibility) */
-static JSValue js_function_proto_caller(JSContext *ctx, JSValueConst this_val,
-                                        int argc, JSValueConst *argv)
-{
     JSFunctionBytecode *b = JS_GetFunctionBytecode(this_val);
     if (!b || b->is_strict_mode || !b->has_prototype) {
-        return js_throw_type_error(ctx, this_val, 0, NULL);
+        return JS_ThrowTypeError(ctx, "invalid property access");
     }
     return JS_UNDEFINED;
 }
@@ -24221,9 +24154,13 @@ static JSValue JS_IteratorNext(JSContext *ctx, JSValueConst enum_obj,
     obj = JS_IteratorNext2(ctx, enum_obj, method, argc, argv, &done);
     if (JS_IsException(obj))
         goto fail;
-    if (done != 2) {
-        *pdone = done;
+    if (likely(done == 0)) {
+        *pdone = false;
         return obj;
+    } else if (done != 2) {
+        JS_FreeValue(ctx, obj);
+        *pdone = true;
+        return JS_UNDEFINED;
     } else {
         done_val = JS_GetProperty(ctx, obj, JS_ATOM_done);
         if (JS_IsException(done_val))
@@ -24596,10 +24533,16 @@ static JSVarRef *get_var_ref(JSContext *ctx, JSStackFrame *sf,
 {
     JSVarRef *var_ref;
     struct list_head *el;
+    JSValue *pvalue;
+
+    if (is_arg)
+        pvalue = &sf->arg_buf[var_idx];
+    else
+        pvalue = &sf->var_buf[var_idx];
 
     list_for_each(el, &sf->var_ref_list) {
         var_ref = list_entry(el, JSVarRef, header.link);
-        if (var_ref->var_idx == var_idx && var_ref->is_arg == is_arg) {
+        if (var_ref->pvalue == pvalue) {
             var_ref->header.ref_count++;
             return var_ref;
         }
@@ -24610,13 +24553,8 @@ static JSVarRef *get_var_ref(JSContext *ctx, JSStackFrame *sf,
         return NULL;
     var_ref->header.ref_count = 1;
     var_ref->is_detached = false;
-    var_ref->is_arg = is_arg;
-    var_ref->var_idx = var_idx;
     list_add_tail(&var_ref->header.link, &sf->var_ref_list);
-    if (is_arg)
-        var_ref->pvalue = &sf->arg_buf[var_idx];
-    else
-        var_ref->pvalue = &sf->var_buf[var_idx];
+    var_ref->pvalue = pvalue;
     var_ref->value = JS_UNDEFINED;
     return var_ref;
 }
@@ -24670,8 +24608,6 @@ static JSValue js_instantiate_prototype(JSContext *ctx, JSObject *p, JSAtom atom
     obj = JS_NewObject(ctx);
     if (JS_IsException(obj))
         return JS_EXCEPTION;
-    set_cycle_flag(ctx, obj);
-    set_cycle_flag(ctx, this_val);
     ret = JS_DefinePropertyValue(ctx, obj, JS_ATOM_constructor,
                                  js_dup(this_val),
                                  JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
@@ -24821,8 +24757,6 @@ static int js_op_define_class(JSContext *ctx, JSValue *sp,
     if (JS_DefinePropertyValue(ctx, ctor, JS_ATOM_prototype,
                                js_dup(proto), JS_PROP_THROW) < 0)
         goto fail;
-    set_cycle_flag(ctx, ctor);
-    set_cycle_flag(ctx, proto);
 
     JS_FreeValue(ctx, parent_proto);
     JS_FreeValue(ctx, parent_class);
@@ -24845,15 +24779,10 @@ static void close_var_refs(JSRuntime *rt, JSStackFrame *sf)
 {
     struct list_head *el, *el1;
     JSVarRef *var_ref;
-    int var_idx;
 
     list_for_each_safe(el, el1, &sf->var_ref_list) {
         var_ref = list_entry(el, JSVarRef, header.link);
-        var_idx = var_ref->var_idx;
-        if (var_ref->is_arg)
-            var_ref->value = js_dup(sf->arg_buf[var_idx]);
-        else
-            var_ref->value = js_dup(sf->var_buf[var_idx]);
+        var_ref->value = js_dup(*var_ref->pvalue);
         var_ref->pvalue = &var_ref->value;
         /* the reference is no longer to a local variable */
         var_ref->is_detached = true;
@@ -24863,13 +24792,15 @@ static void close_var_refs(JSRuntime *rt, JSStackFrame *sf)
 
 static void close_lexical_var(JSContext *ctx, JSStackFrame *sf, int var_idx)
 {
+    JSValue *pvalue;
     struct list_head *el, *el1;
     JSVarRef *var_ref;
 
+    pvalue = &sf->var_buf[var_idx];
     list_for_each_safe(el, el1, &sf->var_ref_list) {
         var_ref = list_entry(el, JSVarRef, header.link);
-        if (var_idx == var_ref->var_idx && !var_ref->is_arg) {
-            var_ref->value = js_dup(sf->var_buf[var_idx]);
+        if (var_ref->pvalue == pvalue) {
+            var_ref->value = js_dup(*var_ref->pvalue);
             var_ref->pvalue = &var_ref->value;
             list_del(&var_ref->header.link);
             /* the reference is no longer to a local variable */
@@ -25054,6 +24985,7 @@ typedef enum {
     OP_SPECIAL_OBJECT_HOME_OBJECT,
     OP_SPECIAL_OBJECT_VAR_OBJECT,
     OP_SPECIAL_OBJECT_IMPORT_META,
+    OP_SPECIAL_OBJECT_NULL_PROTO,
 } OPSpecialObjectEnum;
 
 #define FUNC_RET_AWAIT      0
@@ -25376,6 +25308,7 @@ DEF(      strict_eq, 1, 2, 1, none)
 DEF(     strict_neq, 1, 2, 1, none)
 DEF(is_undefined_or_null, 1, 1, 1, none)
 DEF(     private_in, 1, 2, 1, none)
+DEF(push_bigint_i32, 5, 0, 1, i32)
 /* must be the last non short and non temporary opcode */
 DEF(            nop, 1, 0, 0, none)
 
@@ -25589,6 +25522,10 @@ DEF( typeof_is_function, 1, 1, 1, none)
             *sp++ = js_int32(get_u32(pc));
             pc += 4;
             BREAK;
+        CASE(OP_push_bigint_i32):
+            *sp++ = __JS_NewShortBigInt(ctx, (int)get_u32(pc));
+            pc += 4;
+            BREAK;
         CASE(OP_push_const):
             *sp++ = js_dup(b->cpool[get_u32(pc)]);
             pc += 4;
@@ -25621,7 +25558,7 @@ DEF( typeof_is_function, 1, 1, 1, none)
                 goto exception;
             BREAK;
         CASE(OP_push_empty_string):
-            *sp++ = JS_AtomToString(ctx, JS_ATOM_empty_string);
+            *sp++ = js_empty_string(rt);
             BREAK;
         CASE(OP_get_length):
             {
@@ -25716,6 +25653,11 @@ DEF( typeof_is_function, 1, 1, 1, none)
                     break;
                 case OP_SPECIAL_OBJECT_IMPORT_META:
                     *sp++ = js_import_meta(ctx);
+                    if (unlikely(JS_IsException(sp[-1])))
+                        goto exception;
+                    break;
+                case OP_SPECIAL_OBJECT_NULL_PROTO:
+                    *sp++ = JS_NewObjectProtoClass(ctx, JS_NULL, JS_CLASS_OBJECT);
                     if (unlikely(JS_IsException(sp[-1])))
                         goto exception;
                     break;
@@ -25958,9 +25900,9 @@ DEF( typeof_is_function, 1, 1, 1, none)
                 pc += 2;
                 call_argv = sp - call_argc;
                 ret_val = JS_NewArrayFrom(ctx, call_argc, call_argv);
+                sp -= call_argc;
                 if (unlikely(JS_IsException(ret_val)))
                     goto exception;
-                sp -= call_argc;
                 *sp++ = ret_val;
             }
             BREAK;
@@ -27717,7 +27659,7 @@ DEF( typeof_is_function, 1, 1, 1, none)
                 pc += 4;
 
                 sf->cur_pc = pc;
-                ret = JS_DeleteProperty(ctx, ctx->global_obj, atom, 0);
+                ret = JS_DeleteGlobalVar(ctx, atom);
                 if (unlikely(ret < 0))
                     goto exception;
                 *sp++ = js_bool(ret);
@@ -27929,7 +27871,7 @@ DEF( typeof_is_function, 1, 1, 1, none)
         build_backtrace(ctx, rt->current_exception, JS_UNDEFINED,
                         NULL, 0, 0, 0);
     }
-    if (!JS_IsUncatchableError(ctx, rt->current_exception)) {
+    if (!JS_IsUncatchableError(rt->current_exception)) {
         while (sp > stack_buf) {
             JSValue val = *--sp;
             JS_FreeValue(ctx, val);
@@ -28082,7 +28024,7 @@ static JSValue JS_CallConstructorInternal(JSContext *ctx,
         goto not_a_function;
     p = JS_VALUE_GET_OBJ(func_obj);
     if (unlikely(!p->is_constructor))
-        return JS_ThrowTypeError(ctx, "not a constructor");
+        return JS_ThrowTypeErrorNotAConstructor(ctx, func_obj);
     if (unlikely(p->class_id != JS_CLASS_BYTECODE_FUNCTION)) {
         JSClassCall *call_func;
         call_func = ctx->rt->class_array[p->class_id].call;
@@ -28383,7 +28325,7 @@ static JSValue js_generator_next(JSContext *ctx, JSValueConst this_val,
     return ret;
 }
 
-static JSValue js_generator_function_call(JSContext *ctx, JSValueConst func_obj,
+static JSValue js_call_generator_function(JSContext *ctx, JSValueConst func_obj,
                                           JSValueConst this_obj,
                                           int argc, JSValueConst *argv,
                                           int flags)
@@ -28494,7 +28436,7 @@ static bool js_async_function_resume(JSContext *ctx, JSAsyncFunctionData *s)
     func_ret = async_func_resume(ctx, &s->func_state);
     if (JS_IsException(func_ret)) {
     fail:
-        if (unlikely(JS_IsUncatchableError(ctx, ctx->rt->current_exception))) {
+        if (unlikely(JS_IsUncatchableError(ctx->rt->current_exception))) {
             is_success = false;
         } else {
             JSValue error = JS_GetException(ctx);
@@ -28503,7 +28445,7 @@ static bool js_async_function_resume(JSContext *ctx, JSAsyncFunctionData *s)
             JS_FreeValue(ctx, error);
         resolved:
             if (unlikely(JS_IsException(ret2))) {
-                if (JS_IsUncatchableError(ctx, ctx->rt->current_exception)) {
+                if (JS_IsUncatchableError(ctx->rt->current_exception)) {
                     is_success = false;
                 } else {
                     abort(); /* BUG */
@@ -29686,6 +29628,7 @@ DEF(      strict_eq, 1, 2, 1, none)
 DEF(     strict_neq, 1, 2, 1, none)
 DEF(is_undefined_or_null, 1, 1, 1, none)
 DEF(     private_in, 1, 2, 1, none)
+DEF(push_bigint_i32, 5, 0, 1, i32)
 /* must be the last non short and non temporary opcode */
 DEF(            nop, 1, 0, 0, none)
 
@@ -29803,8 +29746,6 @@ DEF( typeof_is_function, 1, 1, 1, none)
     opcode_info[(op) >= OP_TEMP_START ? \
                 (op) + (OP_TEMP_END - OP_TEMP_START) : (op)]
 
-static __exception int next_token(JSParseState *s);
-
 static void free_token(JSParseState *s, JSToken *token)
 {
     switch(token->val) {
@@ -29911,6 +29852,10 @@ int JS_PRINTF_FORMAT_ATTR(2, 3) js_parse_error(JSParseState *s, JS_PRINTF_FORMAT
     return -1;
 }
 
+#ifndef QJS_DISABLE_PARSER
+
+static __exception int next_token(JSParseState *s);
+
 static int js_parse_expect(JSParseState *s, int tok)
 {
     char buf[ATOM_GET_STR_BUF_SIZE];
@@ -29968,6 +29913,7 @@ static __exception int js_parse_template_part(JSParseState *s,
     const uint8_t *p_next;
     uint32_t c;
     StringBuffer b_s, *b = &b_s;
+    JSValue str;
 
     /* p points to the first byte of the template part */
     if (string_buffer_init(s->ctx, b, 32))
@@ -30013,9 +29959,12 @@ static __exception int js_parse_template_part(JSParseState *s,
         if (string_buffer_putc(b, c))
             goto fail;
     }
+    str = string_buffer_end(b);
+    if (JS_IsException(str))
+        return -1;
     s->token.val = TOK_TEMPLATE;
     s->token.u.str.sep = c;
-    s->token.u.str.str = string_buffer_end(b);
+    s->token.u.str.str = str;
     s->buf_ptr = p;
     return 0;
 
@@ -30034,6 +29983,7 @@ static __exception int js_parse_string(JSParseState *s, int sep,
     int ret;
     uint32_t c;
     StringBuffer b_s, *b = &b_s;
+    JSValue str;
 
     /* string */
     if (string_buffer_init(s->ctx, b, 32))
@@ -30142,9 +30092,12 @@ static __exception int js_parse_string(JSParseState *s, int sep,
         if (string_buffer_putc(b, c))
             goto fail;
     }
+    str = string_buffer_end(b);
+    if (JS_IsException(str))
+        return -1;
     token->val = TOK_STRING;
     token->u.str.sep = c;
-    token->u.str.str = string_buffer_end(b);
+    token->u.str.str = str;
     *pp = p;
     return 0;
 
@@ -30172,6 +30125,7 @@ static __exception int js_parse_regexp(JSParseState *s)
     StringBuffer b_s, *b = &b_s;
     StringBuffer b2_s, *b2 = &b2_s;
     uint32_t c;
+    JSValue body_str, flags_str;
 
     p = s->buf_ptr;
     p++;
@@ -30244,9 +30198,17 @@ static __exception int js_parse_regexp(JSParseState *s)
         p = p_next;
     }
 
+    body_str = string_buffer_end(b);
+    flags_str = string_buffer_end(b2);
+    if (JS_IsException(body_str) ||
+        JS_IsException(flags_str)) {
+        JS_FreeValue(s->ctx, body_str);
+        JS_FreeValue(s->ctx, flags_str);
+        return -1;
+    }
     s->token.val = TOK_REGEXP;
-    s->token.u.regexp.body = string_buffer_end(b);
-    s->token.u.regexp.flags = string_buffer_end(b2);
+    s->token.u.regexp.body = body_str;
+    s->token.u.regexp.flags = flags_str;
     s->buf_ptr = p;
     return 0;
  fail:
@@ -30254,6 +30216,8 @@ static __exception int js_parse_regexp(JSParseState *s)
     string_buffer_free(b2);
     return -1;
 }
+
+#endif // QJS_DISABLE_PARSER
 
 static __exception int ident_realloc(JSContext *ctx, char **pbuf, size_t *psize,
                                      char *static_buf)
@@ -30281,6 +30245,8 @@ static __exception int ident_realloc(JSContext *ctx, char **pbuf, size_t *psize,
     *psize = new_size;
     return 0;
 }
+
+#ifndef QJS_DISABLE_PARSER
 
 /* convert a TOK_IDENT to a keyword when needed */
 static void update_token_ident(JSParseState *s)
@@ -30378,7 +30344,6 @@ static __exception int next_token(JSParseState *s)
     int c;
     bool ident_has_escape;
     JSAtom atom;
-    int flags, radix;
 
     if (js_check_stack_overflow(s->ctx->rt, 1000)) {
         JS_ThrowStackOverflow(s->ctx);
@@ -30573,56 +30538,36 @@ static __exception int next_token(JSParseState *s)
             break;
         }
         if (p[1] >= '0' && p[1] <= '9') {
-            flags = ATOD_ACCEPT_UNDERSCORES | ATOD_ACCEPT_FLOAT;
-            radix = 10;
             goto parse_number;
+        } else {
+            goto def_token;
         }
-        goto def_token;
+        break;
     case '0':
-        if (is_digit(p[1])) { /* handle legacy octal */
-            if (s->cur_func->is_strict_mode) {
-                js_parse_error(s, "Octal literals are not allowed in strict mode");
-                goto fail;
-            }
-            /* Legacy octal: no separators, no suffix, no floats,
-               base 8 unless non octal digits are detected */
-            flags = 0;
-            radix = 8;
-            while (is_digit(*p)) {
-                if (*p >= '8' && *p <= '9')
-                    radix = 10;
-                p++;
-            }
-            p = s->token.ptr;
-            goto parse_number;
-        }
-        if (p[1] == '_') {
-            js_parse_error(s, "Numeric separator can not be used after leading 0");
+        /* in strict mode, octal literals are not accepted */
+        if (is_digit(p[1]) && (s->cur_func->is_strict_mode)) {
+            js_parse_error(s, "Octal literals are not allowed in strict mode");
             goto fail;
         }
-        flags = ATOD_ACCEPT_HEX_PREFIX | ATOD_ACCEPT_BIN_OCT |
-            ATOD_ACCEPT_FLOAT | ATOD_ACCEPT_UNDERSCORES | ATOD_ACCEPT_SUFFIX;
-        radix = 10;
         goto parse_number;
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8':
     case '9':
         /* number */
+    parse_number:
         {
             JSValue ret;
-            const char *p1;
-
-            flags = ATOD_ACCEPT_FLOAT | ATOD_ACCEPT_UNDERSCORES | ATOD_ACCEPT_SUFFIX;
-            radix = 10;
-        parse_number:
-            p1 = (const char *)p;
-            ret = js_atof(s->ctx, p1, s->buf_end - p, &p1, radix, flags);
-            p = (const uint8_t *)p1;
+            const uint8_t *p1;
+            int flags;
+            flags = ATOD_ACCEPT_BIN_OCT | ATOD_ACCEPT_LEGACY_OCTAL |
+                ATOD_ACCEPT_UNDERSCORES | ATOD_ACCEPT_SUFFIX;
+            ret = js_atof(s->ctx, (const char *)p, (const char **)&p, 0,
+                          flags);
             if (JS_IsException(ret))
                 goto fail;
             /* reject `10instanceof Number` */
             if (JS_VALUE_IS_NAN(ret) ||
-                lre_js_is_ident_next(utf8_decode(p, &p_next))) {
+                lre_js_is_ident_next(utf8_decode(p, &p1))) {
                 JS_FreeValue(s->ctx, ret);
                 js_parse_error(s, "invalid number literal");
                 goto fail;
@@ -30855,6 +30800,8 @@ static __exception int next_token(JSParseState *s)
     s->token.val = TOK_ERROR;
     return -1;
 }
+
+#endif // QJS_DISABLE_PARSER
 
 static int json_parse_error(JSParseState *s, const uint8_t *curp, const char *msg)
 {
@@ -31156,6 +31103,8 @@ static __exception int json_next_token(JSParseState *s)
     return -1;
 }
 
+#ifndef QJS_DISABLE_PARSER
+
 /* only used for ':' and '=>', 'let' or 'function' look-ahead. *pp is
    only set if TOK_IMPORT is returned */
 /* XXX: handle all unicode cases */
@@ -31268,7 +31217,7 @@ static void skip_shebang(const uint8_t **pp, const uint8_t *buf_end)
 }
 
 static inline int get_prev_opcode(JSFunctionDef *fd) {
-    if (fd->last_opcode_pos < 0)
+    if (fd->last_opcode_pos < 0 || dbuf_error(&fd->byte_code))
         return OP_invalid;
     else
         return fd->byte_code.buf[fd->last_opcode_pos];
@@ -31329,7 +31278,11 @@ static void emit_op(JSParseState *s, uint8_t val)
 
 static void emit_atom(JSParseState *s, JSAtom name)
 {
-    emit_u32(s, JS_DupAtom(s->ctx, name));
+    DynBuf *bc = &s->cur_func->byte_code;
+    if (dbuf_realloc(bc, bc->size + 4))
+        return; /* not enough memory : don't duplicate the atom */
+    put_u32(bc->buf + bc->size, JS_DupAtom(s->ctx, name));
+    bc->size += 4;
 }
 
 static int update_label(JSFunctionDef *s, int label, int delta)
@@ -31343,29 +31296,33 @@ static int update_label(JSFunctionDef *s, int label, int delta)
     return ls->ref_count;
 }
 
-static int new_label_fd(JSFunctionDef *fd, int label)
+static int new_label_fd(JSFunctionDef *fd)
 {
+    int label;
     LabelSlot *ls;
 
-    if (label < 0) {
-        if (js_resize_array(fd->ctx, (void *)&fd->label_slots,
+    if (js_resize_array(fd->ctx, (void *)&fd->label_slots,
                             sizeof(fd->label_slots[0]),
                             &fd->label_size, fd->label_count + 1))
-            return -1;
-        label = fd->label_count++;
-        ls = &fd->label_slots[label];
-        ls->ref_count = 0;
-        ls->pos = -1;
-        ls->pos2 = -1;
-        ls->addr = -1;
-        ls->first_reloc = NULL;
-    }
+        return -1;
+    label = fd->label_count++;
+    ls = &fd->label_slots[label];
+    ls->ref_count = 0;
+    ls->pos = -1;
+    ls->pos2 = -1;
+    ls->addr = -1;
+    ls->first_reloc = NULL;
     return label;
 }
 
 static int new_label(JSParseState *s)
 {
-    return new_label_fd(s->cur_func, -1);
+    int label;
+    label = new_label_fd(s->cur_func);
+    if (unlikely(label < 0)) {
+        dbuf_set_error(&s->cur_func->byte_code);
+    }
+    return label;
 }
 
 /* don't update the last opcode and don't emit line number info */
@@ -31393,8 +31350,11 @@ static int emit_label(JSParseState *s, int label)
 static int emit_goto(JSParseState *s, int opcode, int label)
 {
     if (js_is_live_code(s)) {
-        if (label < 0)
+        if (label < 0) {
             label = new_label(s);
+            if (label < 0)
+                return -1;
+        }
         emit_op(s, opcode);
         emit_u32(s, label);
         s->cur_func->label_slots[label].ref_count++;
@@ -33529,6 +33489,8 @@ static __exception int get_lvalue(JSParseState *s, int *popcode, int *pscope,
         switch(opcode) {
         case OP_scope_get_var:
             label = new_label(s);
+            if (label < 0)
+                return -1;
             emit_op(s, OP_scope_make_ref);
             emit_atom(s, name);
             emit_u32(s, label);
@@ -33564,6 +33526,8 @@ static __exception int get_lvalue(JSParseState *s, int *popcode, int *pscope,
         switch(opcode) {
         case OP_scope_get_var:
             label = new_label(s);
+            if (label < 0)
+                return -1;
             emit_op(s, OP_scope_make_ref);
             emit_atom(s, name);
             emit_u32(s, label);
@@ -34307,7 +34271,17 @@ static __exception int js_parse_postfix_expr(JSParseState *s, int parse_flags)
             if (JS_VALUE_GET_TAG(val) == JS_TAG_INT) {
                 emit_op(s, OP_push_i32);
                 emit_u32(s, JS_VALUE_GET_INT(val));
+            } else if (JS_VALUE_GET_TAG(val) == JS_TAG_SHORT_BIG_INT) {
+                int64_t v;
+                v = JS_VALUE_GET_SHORT_BIG_INT(val);
+                if (v >= INT32_MIN && v <= INT32_MAX) {
+                    emit_op(s, OP_push_bigint_i32);
+                    emit_u32(s, v);
+                } else {
+                    goto large_number;
+                }
             } else {
+            large_number:
                 if (emit_push_const(s, val, 0) < 0)
                     return -1;
             }
@@ -37062,6 +37036,8 @@ fail:
     return -1;
 }
 
+#endif // QJS_DISABLE_PARSER
+
 /* 'name' is freed */
 static JSModuleDef *js_new_module_def(JSContext *ctx, JSAtom name)
 {
@@ -37147,6 +37123,8 @@ static void js_free_module_def(JSContext *ctx, JSModuleDef *m)
     js_free(ctx, m);
 }
 
+#ifndef QJS_DISABLE_PARSER
+
 static int add_req_module_entry(JSContext *ctx, JSModuleDef *m,
                                 JSAtom module_name)
 {
@@ -37170,6 +37148,8 @@ static int add_req_module_entry(JSContext *ctx, JSModuleDef *m,
     rme->module = NULL;
     return i;
 }
+
+#endif // QJS_DISABLE_PARSER
 
 static JSExportEntry *find_export_entry(JSContext *ctx, const JSModuleDef *m,
                                         JSAtom export_name)
@@ -37215,6 +37195,8 @@ static JSExportEntry *add_export_entry2(JSContext *ctx,
     return me;
 }
 
+#ifndef QJS_DISABLE_PARSER
+
 static JSExportEntry *add_export_entry(JSParseState *s, JSModuleDef *m,
                                        JSAtom local_name, JSAtom export_name,
                                        JSExportTypeEnum export_type)
@@ -37238,6 +37220,8 @@ static int add_star_export_entry(JSContext *ctx, JSModuleDef *m,
     return 0;
 }
 
+#endif // QJS_DISABLE_PARSER
+
 /* create a C module */
 /* `name_str` may be pure ASCII or UTF-8 encoded */
 JSModuleDef *JS_NewCModule(JSContext *ctx, const char *name_str,
@@ -37249,6 +37233,8 @@ JSModuleDef *JS_NewCModule(JSContext *ctx, const char *name_str,
     if (name == JS_ATOM_NULL)
         return NULL;
     m = js_new_module_def(ctx, name);
+    if (!m)
+        return NULL;
     m->init_func = func;
     return m;
 }
@@ -38886,6 +38872,8 @@ static JSValue js_evaluate_module(JSContext *ctx, JSModuleDef *m)
     return js_dup(m->promise);
 }
 
+#ifndef QJS_DISABLE_PARSER
+
 static __exception JSAtom js_parse_from_clause(JSParseState *s)
 {
     JSAtom module_name;
@@ -38907,6 +38895,23 @@ static __exception JSAtom js_parse_from_clause(JSParseState *s)
         return JS_ATOM_NULL;
     }
     return module_name;
+}
+
+static bool has_unmatched_surrogate(const uint16_t *s, size_t n)
+{
+    size_t i;
+
+    for (i = 0; i < n; i++) {
+        if (is_lo_surrogate(s[i]))
+            return true;
+        if (!is_hi_surrogate(s[i]))
+            continue;
+        if (++i == n)
+            return true;
+        if (!is_lo_surrogate(s[i]))
+            return true;
+    }
+    return false;
 }
 
 static __exception int js_parse_export(JSParseState *s)
@@ -38941,23 +38946,40 @@ static __exception int js_parse_export(JSParseState *s)
     switch(tok) {
     case '{':
         first_export = m->export_entries_count;
+        bool has_string_binding = false;
         while (s->token.val != '}') {
-            if (!token_is_ident(s->token.val)) {
-                js_parse_error(s, "identifier expected");
-                return -1;
+            if (token_is_ident(s->token.val)) {
+                local_name = JS_DupAtom(ctx, s->token.u.ident.atom);
+            } else if (s->token.val == TOK_STRING) {
+                local_name = JS_ValueToAtom(ctx, s->token.u.str.str);
+                if (local_name == JS_ATOM_NULL)
+                    return -1;
+                has_string_binding = true;
+            } else {
+                return js_parse_error(s, "identifier or string expected");
             }
-            local_name = JS_DupAtom(ctx, s->token.u.ident.atom);
             export_name = JS_ATOM_NULL;
             if (next_token(s))
                 goto fail;
             if (token_is_pseudo_keyword(s, JS_ATOM_as)) {
                 if (next_token(s))
                     goto fail;
-                if (!token_is_ident(s->token.val)) {
-                    js_parse_error(s, "identifier expected");
+                if (token_is_ident(s->token.val)) {
+                    export_name = JS_DupAtom(ctx, s->token.u.ident.atom);
+                } else if (s->token.val == TOK_STRING) {
+                    JSString *p = JS_VALUE_GET_STRING(s->token.u.str.str);
+                    if (p->is_wide_char && has_unmatched_surrogate(str16(p), p->len)) {
+                        js_parse_error(s, "illegal export name");
+                        return -1;
+                    }
+                    export_name = JS_ValueToAtom(ctx, s->token.u.str.str);
+                    if (export_name == JS_ATOM_NULL) {
+                        return -1;
+                    }
+                } else {
+                    js_parse_error(s, "identifier or string expected");
                     goto fail;
                 }
-                export_name = JS_DupAtom(ctx, s->token.u.ident.atom);
                 if (next_token(s)) {
                 fail:
                     JS_FreeAtom(ctx, local_name);
@@ -38994,6 +39016,9 @@ static __exception int js_parse_export(JSParseState *s)
                 me->export_type = JS_EXPORT_TYPE_INDIRECT;
                 me->u.req_module_idx = idx;
             }
+        } else if (has_string_binding) {
+            // Without 'from' clause, string literals cannot be used as local binding names
+            return js_parse_error(s, "string export name only allowed with 'from' clause");
         }
         break;
     case '*':
@@ -39001,11 +39026,16 @@ static __exception int js_parse_export(JSParseState *s)
             /* export ns from */
             if (next_token(s))
                 return -1;
-            if (!token_is_ident(s->token.val)) {
-                js_parse_error(s, "identifier expected");
-                return -1;
+            if (token_is_ident(s->token.val)) {
+                export_name = JS_DupAtom(ctx, s->token.u.ident.atom);
+            } else if (s->token.val == TOK_STRING) {
+                export_name = JS_ValueToAtom(ctx, s->token.u.str.str);
+                if (export_name == JS_ATOM_NULL) {
+                    return -1;
+                }
+            } else {
+                return js_parse_error(s, "identifier or string expected");
             }
-            export_name = JS_DupAtom(ctx, s->token.u.ident.atom);
             if (next_token(s))
                 goto fail1;
             module_name = js_parse_from_clause(s);
@@ -39179,11 +39209,15 @@ static __exception int js_parse_import(JSParseState *s)
                 return -1;
 
             while (s->token.val != '}') {
-                if (!token_is_ident(s->token.val)) {
-                    js_parse_error(s, "identifier expected");
-                    return -1;
+                if (token_is_ident(s->token.val)) {
+                    import_name = JS_DupAtom(ctx, s->token.u.ident.atom);
+                } else if (s->token.val == TOK_STRING) {
+                    import_name = JS_ValueToAtom(ctx, s->token.u.str.str);
+                    if (import_name == JS_ATOM_NULL)
+                        return -1;
+                } else {
+                    return js_parse_error(s, "identifier or string expected expected");
                 }
-                import_name = JS_DupAtom(ctx, s->token.u.ident.atom);
                 local_name = JS_ATOM_NULL;
                 if (next_token(s))
                     goto fail;
@@ -39325,6 +39359,8 @@ static JSFunctionDef *js_new_function_def(JSContext *ctx,
     return fd;
 }
 
+#endif // QJS_DISABLE_PARSER
+
 static void free_bytecode_atoms(JSRuntime *rt,
                                 const uint8_t *bc_buf, int bc_len,
                                 bool use_short_opcodes)
@@ -39348,6 +39384,8 @@ static void free_bytecode_atoms(JSRuntime *rt,
         case OP_FMT_atom_u16:
         case OP_FMT_atom_label_u8:
         case OP_FMT_atom_label_u16:
+            if ((pos + 1 + 4) > bc_len)
+                break; /* may happen if there is not enough memory when emiting bytecode */
             atom = get_u32(bc_buf + pos + 1);
             JS_FreeAtomRT(rt, atom);
             break;
@@ -39357,6 +39395,8 @@ static void free_bytecode_atoms(JSRuntime *rt,
         pos += len;
     }
 }
+
+#ifndef QJS_DISABLE_PARSER
 
 static void js_free_function_def(JSContext *ctx, JSFunctionDef *fd)
 {
@@ -39419,6 +39459,8 @@ static void js_free_function_def(JSContext *ctx, JSFunctionDef *fd)
     }
     js_free(ctx, fd);
 }
+
+#endif // QJS_DISABLE_PARSER
 
 #ifdef ENABLE_DUMPS // JS_DUMP_BYTECODE_*
 static const char *skip_lines(const char *p, int n) {
@@ -39876,6 +39918,8 @@ static __maybe_unused void js_dump_function_bytecode(JSContext *ctx, JSFunctionB
 }
 #endif
 
+#ifndef QJS_DISABLE_PARSER
+
 static int add_closure_var(JSContext *ctx, JSFunctionDef *s,
                            bool is_local, bool is_arg,
                            int var_idx, JSAtom var_name,
@@ -40159,7 +40203,13 @@ static void var_object_test(JSContext *ctx, JSFunctionDef *s,
 {
     dbuf_putc(bc, get_with_scope_opcode(op));
     dbuf_put_u32(bc, JS_DupAtom(ctx, var_name));
-    *plabel_done = new_label_fd(s, *plabel_done);
+    if (*plabel_done < 0) {
+        *plabel_done = new_label_fd(s);
+        if (*plabel_done < 0) {
+            dbuf_set_error(bc);
+            return;
+        }
+    }
     dbuf_put_u32(bc, *plabel_done);
     dbuf_putc(bc, is_with);
     update_label(s, *plabel_done, 1);
@@ -41203,7 +41253,11 @@ static void instantiate_hoisted_definitions(JSContext *ctx, JSFunctionDef *s, Dy
        evaluating the module so that the exported functions are
        visible if there are cyclic module references */
     if (s->module) {
-        label_next = new_label_fd(s, -1);
+        label_next = new_label_fd(s);
+        if (label_next < 0) {
+            dbuf_set_error(bc);
+            return;
+        }
 
         /* if 'this' is true, initialize the global variables and return */
         dbuf_putc(bc, OP_push_this);
@@ -42369,6 +42423,28 @@ static __exception int resolve_labels(JSContext *ctx, JSFunctionDef *s)
             push_short_int(&bc_out, val);
             break;
 
+        case OP_push_bigint_i32:
+            {
+                /* transform i32(val) neg -> i32(-val) */
+                val = get_i32(bc_buf + pos + 1);
+                if (val != INT32_MIN
+                &&  code_match(&cc, pos_next, OP_neg, -1)) {
+                    if (cc.line_num >= 0) line_num = cc.line_num;
+                    if (cc.col_num >= 0) col_num = cc.col_num;
+                    if (code_match(&cc, cc.pos, OP_drop, -1)) {
+                        if (cc.line_num >= 0) line_num = cc.line_num;
+                        if (cc.col_num >= 0) col_num = cc.col_num;
+                    } else {
+                        add_pc2line_info(s, bc_out.size, line_num, col_num);
+                        dbuf_putc(&bc_out, OP_push_bigint_i32);
+                        dbuf_put_u32(&bc_out, -val);
+                    }
+                    pos_next = cc.pos;
+                    break;
+                }
+            }
+            goto no_change;
+
         case OP_push_const:
         case OP_fclosure:
             {
@@ -42720,6 +42796,18 @@ static __exception int resolve_labels(JSContext *ctx, JSFunctionDef *s)
                         goto has_label;
                     }
                 }
+            }
+            goto no_change;
+
+        case OP_object:
+            if (code_match(&cc, pos_next, OP_null, OP_set_proto, -1)) {
+                if (cc.line_num >= 0) line_num = cc.line_num;
+                if (cc.col_num >= 0) col_num = cc.col_num;
+                add_pc2line_info(s, bc_out.size, line_num, col_num);
+                dbuf_putc(&bc_out, OP_special_object);
+                dbuf_putc(&bc_out, OP_SPECIAL_OBJECT_NULL_PROTO);
+                pos_next = cc.pos;
+                break;
             }
             goto no_change;
 
@@ -43161,8 +43249,10 @@ static JSValue js_create_function(JSContext *ctx, JSFunctionDef *fd)
        are used to compile the eval and they must be ordered by scope,
        so it is necessary to create the closure variables before any
        other variable lookup is done. */
+#ifndef QJS_DISABLE_PARSER
     if (fd->has_eval_call)
         add_eval_variables(ctx, fd);
+#endif // QJS_DISABLE_PARSER
 
     /* add the module global variables in the closure */
     if (fd->module) {
@@ -43321,11 +43411,14 @@ static JSValue js_create_function(JSContext *ctx, JSFunctionDef *fd)
     return JS_EXCEPTION;
 }
 
+#endif // QJS_DISABLE_PARSER
+
 static void free_function_bytecode(JSRuntime *rt, JSFunctionBytecode *b)
 {
     int i;
 
-    free_bytecode_atoms(rt, b->byte_code_buf, b->byte_code_len, true);
+    if (b->byte_code_buf)
+        free_bytecode_atoms(rt, b->byte_code_buf, b->byte_code_len, true);
 
     if (b->vardefs) {
         for(i = 0; i < b->arg_count + b->var_count; i++) {
@@ -43354,6 +43447,8 @@ static void free_function_bytecode(JSRuntime *rt, JSFunctionBytecode *b)
         js_free_rt(rt, b);
     }
 }
+
+#ifndef QJS_DISABLE_PARSER
 
 static __exception int js_parse_directives(JSParseState *s)
 {
@@ -44166,6 +44261,8 @@ static __exception int js_parse_program(JSParseState *s)
     return 0;
 }
 
+#endif // QJS_DISABLE_PARSER
+
 static void js_parse_init(JSContext *ctx, JSParseState *s,
                           const char *input, size_t input_len,
                           const char *filename, int line)
@@ -44220,6 +44317,8 @@ JSValue JS_EvalFunction(JSContext *ctx, JSValue fun_obj)
 {
     return JS_EvalFunctionInternal(ctx, fun_obj, ctx->global_obj, NULL, NULL);
 }
+
+#ifndef QJS_DISABLE_PARSER
 
 /* 'input' must be zero terminated i.e. input[input_len] = '\0'. */
 /* `export_name` and `input` may be pure ASCII or UTF-8 encoded */
@@ -44336,6 +44435,8 @@ static JSValue __JS_EvalInternal(JSContext *ctx, JSValueConst this_obj,
         js_free_module_def(ctx, m);
     return JS_EXCEPTION;
 }
+
+#endif // QJS_DISABLE_PARSER
 
 /* the indirection is needed to make 'eval' optional */
 static JSValue JS_EvalInternal(JSContext *ctx, JSValueConst this_obj,
@@ -44573,7 +44674,7 @@ typedef enum BCTagEnum {
     BC_TAG_SYMBOL,
 } BCTagEnum;
 
-#define BC_VERSION 19
+#define BC_VERSION 21
 
 typedef struct BCWriterState {
     JSContext *ctx;
@@ -44623,6 +44724,13 @@ static const char * const bc_tag_str[] = {
     "Set",
     "Symbol",
 };
+
+static const char *bc_tag_name(uint8_t tag)
+{
+    if (tag >= countof(bc_tag_str))
+        return "<bad tag>";
+    return bc_tag_str[tag];
+}
 #endif
 
 static void bc_put_u8(BCWriterState *s, uint8_t v)
@@ -44843,71 +44951,44 @@ static void JS_WriteString(BCWriterState *s, JSString *p)
 
 static int JS_WriteBigInt(BCWriterState *s, JSValueConst obj)
 {
-    uint32_t tag, tag1;
-    int64_t e;
-    JSBigInt *bf = JS_VALUE_GET_PTR(obj);
-    bf_t *a = &bf->num;
-    size_t len, i, n1, j;
-    limb_t v;
+    JSBigIntBuf buf;
+    JSBigInt *p;
+    uint32_t len, i;
+    js_limb_t v, b;
+    int shift;
 
-    tag = JS_VALUE_GET_TAG(obj);
-    switch(tag) {
-    case JS_TAG_BIG_INT:
-        tag1 = BC_TAG_BIG_INT;
-        break;
-    default:
-        abort();
-    }
-    bc_put_u8(s, tag1);
+    bc_put_u8(s, BC_TAG_BIG_INT);
 
-    /* sign + exponent */
-    if (a->expn == BF_EXP_ZERO)
-        e = 0;
-    else if (a->expn == BF_EXP_INF)
-        e = 1;
-    else if (a->expn == BF_EXP_NAN)
-        e = 2;
-    else if (a->expn >= 0)
-        e = a->expn + 3;
+    if (JS_VALUE_GET_TAG(obj) == JS_TAG_SHORT_BIG_INT)
+        p = js_bigint_set_short(&buf, obj);
     else
-        e = a->expn;
-    e = (e * 2) | a->sign;
-    if (e < INT32_MIN || e > INT32_MAX) {
-        JS_ThrowRangeError(s->ctx, "maximum BigInt size exceeded");
-        return -1;
+        p = JS_VALUE_GET_PTR(obj);
+    if (p->len == 1 && p->tab[0] == 0) {
+        /* zero case */
+        len = 0;
+    } else {
+        /* compute the length of the two's complement representation
+           in bytes */
+        len = p->len * (JS_LIMB_BITS / 8);
+        v = p->tab[p->len - 1];
+        shift = JS_LIMB_BITS - 8;
+        while (shift > 0) {
+            b = (v >> shift) & 0xff;
+            if (b != 0x00 && b != 0xff)
+                break;
+            if ((b & 1) != ((v >> (shift - 1)) & 1))
+                break;
+            shift -= 8;
+            len--;
+        }
     }
-    bc_put_sleb128(s, e);
-
-    /* mantissa */
-    if (a->len != 0) {
-        i = 0;
-        while (i < a->len && a->tab[i] == 0)
-            i++;
-        assert(i < a->len);
-        v = a->tab[i];
-        n1 = sizeof(limb_t);
-        while ((v & 0xff) == 0) {
-            n1--;
-            v >>= 8;
+    bc_put_leb128(s, len);
+    if (len > 0) {
+        for(i = 0; i < (len / (JS_LIMB_BITS / 8)); i++) {
+            bc_put_u32(s, p->tab[i]);
         }
-        i++;
-        len = (a->len - i) * sizeof(limb_t) + n1;
-        if (len > INT32_MAX) {
-            JS_ThrowRangeError(s->ctx, "maximum BigInt size exceeded");
-            return -1;
-        }
-        bc_put_leb128(s, len);
-        /* always saved in byte based little endian representation */
-        for(j = 0; j < n1; j++) {
-            bc_put_u8(s, v >> (j * 8));
-        }
-        for(; i < a->len; i++) {
-            limb_t v = a->tab[i];
-#if LIMB_BITS == 32
-            bc_put_u32(s, v);
-#else
-            bc_put_u64(s, v);
-#endif
+        for(i = 0; i < len % (JS_LIMB_BITS / 8); i++) {
+            bc_put_u8(s, (p->tab[p->len - 1] >> (i * 8)) & 0xff);
         }
     }
     return 0;
@@ -45330,6 +45411,7 @@ static int JS_WriteObjectRec(BCWriterState *s, JSValueConst obj)
                 goto fail;
         }
         break;
+    case JS_TAG_SHORT_BIG_INT:
     case JS_TAG_BIG_INT:
         if (JS_WriteBigInt(s, obj))
             goto fail;
@@ -45675,6 +45757,10 @@ static JSString *JS_ReadString(BCReaderState *s)
         return NULL;
     is_wide_char = len & 1;
     len >>= 1;
+    if (len > JS_STRING_LEN_MAX) {
+        JS_ThrowInternalError(s->ctx, "string too long");
+        return NULL;
+    }
     p = js_alloc_string(s->ctx, len, is_wide_char);
     if (!p) {
         s->error_state = -1;
@@ -45772,77 +45858,46 @@ static int JS_ReadFunctionBytecode(BCReaderState *s, JSFunctionBytecode *b,
 
 static JSValue JS_ReadBigInt(BCReaderState *s)
 {
-    JSValue obj;
+    JSValue obj = JS_UNDEFINED;
+    uint32_t len, i, n;
+    JSBigInt *p;
+    js_limb_t v;
     uint8_t v8;
-    int32_t e;
-    uint32_t len;
-    limb_t l, i, n;
-    limb_t v;
-    bf_t *a;
 
-    obj = JS_NewBigInt(s->ctx);
-    if (JS_IsException(obj))
+    if (bc_get_leb128(s, &len))
         goto fail;
-
-    /* sign + exponent */
-    if (bc_get_sleb128(s, &e))
-        goto fail;
-
-    a = JS_GetBigInt(obj);
-    a->sign = e & 1;
-    e >>= 1;
-    if (e == 0)
-        a->expn = BF_EXP_ZERO;
-    else if (e == 1)
-        a->expn = BF_EXP_INF;
-    else if (e == 2)
-        a->expn = BF_EXP_NAN;
-    else if (e >= 3)
-        a->expn = e - 3;
-    else
-        a->expn = e;
-
-    /* mantissa */
-    if (a->expn != BF_EXP_ZERO &&
-        a->expn != BF_EXP_INF &&
-        a->expn != BF_EXP_NAN) {
-        if (bc_get_leb128(s, &len))
-            goto fail;
-        bc_read_trace(s, "len=%" PRId64 "\n", (int64_t)len);
-        if (len == 0) {
-            JS_ThrowRangeError(s->ctx, "maximum BigInt size exceeded");
-            goto fail;
-        }
-        l = (len + sizeof(limb_t) - 1) / sizeof(limb_t);
-        if (bf_resize(a, l)) {
-            JS_ThrowOutOfMemory(s->ctx);
-            goto fail;
-        }
-        n = len & (sizeof(limb_t) - 1);
-        if (n != 0) {
-            v = 0;
-            for(i = 0; i < n; i++) {
-                if (bc_get_u8(s, &v8))
-                    goto fail;
-                v |= (limb_t)v8 << ((sizeof(limb_t) - n + i) * 8);
-            }
-            a->tab[0] = v;
-            i = 1;
-        } else {
-            i = 0;
-        }
-        for(; i < l; i++) {
-#if LIMB_BITS == 32
-            if (bc_get_u32(s, &v))
-                goto fail;
-#else
-            if (bc_get_u64(s, &v))
-                goto fail;
-#endif
-            a->tab[i] = v;
-        }
+    bc_read_trace(s, "len=%" PRId64 "\n", (int64_t)len);
+    if (len == 0) {
+        /* zero case */
+        bc_read_trace(s, "}\n");
+        return __JS_NewShortBigInt(s->ctx, 0);
     }
-    return obj;
+    p = js_bigint_new(s->ctx, (len - 1) / (JS_LIMB_BITS / 8) + 1);
+    if (!p)
+        goto fail;
+    for(i = 0; i < len / (JS_LIMB_BITS / 8); i++) {
+        if (bc_get_u32(s, &v))
+            goto fail;
+        p->tab[i] = v;
+    }
+    n = len % (JS_LIMB_BITS / 8);
+    if (n != 0) {
+        int shift;
+        v = 0;
+        for(i = 0; i < n; i++) {
+            if (bc_get_u8(s, &v8))
+                goto fail;
+            v |= (js_limb_t)v8 << (i * 8);
+        }
+        shift = JS_LIMB_BITS - n * 8;
+        /* extend the sign */
+        if (shift != 0) {
+            v = (js_slimb_t)(v << shift) >> shift;
+        }
+        p->tab[p->len - 1] = v;
+    }
+    bc_read_trace(s, "}\n");
+    return JS_CompactBigInt(s->ctx, p);
  fail:
     JS_FreeValue(s->ctx, obj);
     return JS_EXCEPTION;
@@ -46532,7 +46587,7 @@ static JSValue JS_ReadObjectRec(BCReaderState *s)
     if (bc_get_u8(s, &tag))
         return JS_EXCEPTION;
 
-    bc_read_trace(s, "%s {\n", bc_tag_str[tag]);
+    bc_read_trace(s, "%s {\n", bc_tag_name(tag));
 
     switch(tag) {
     case BC_TAG_NULL:
@@ -46842,7 +46897,7 @@ static JSValue JS_InstantiateFunctionListItem2(JSContext *ctx, JSObject *p,
     return val;
 }
 
-static int JS_InstantiateFunctionListItem(JSContext *ctx, JSValue obj,
+static int JS_InstantiateFunctionListItem(JSContext *ctx, JSValueConst obj,
                                           JSAtom atom,
                                           const JSCFunctionListEntry *e)
 {
@@ -46935,17 +46990,22 @@ static int JS_InstantiateFunctionListItem(JSContext *ctx, JSValue obj,
     return 0;
 }
 
-void JS_SetPropertyFunctionList(JSContext *ctx, JSValue obj,
+int JS_SetPropertyFunctionList(JSContext *ctx, JSValueConst obj,
                                 const JSCFunctionListEntry *tab, int len)
 {
-    int i;
+    int i, ret;
 
     for (i = 0; i < len; i++) {
         const JSCFunctionListEntry *e = &tab[i];
         JSAtom atom = find_atom(ctx, e->name);
-        JS_InstantiateFunctionListItem(ctx, obj, atom, e);
+        if (atom == JS_ATOM_NULL)
+            return -1;
+        ret = JS_InstantiateFunctionListItem(ctx, obj, atom, e);
         JS_FreeAtom(ctx, atom);
+        if (ret)
+            return -1;
     }
+    return 0;
 }
 
 int JS_AddModuleExportList(JSContext *ctx, JSModuleDef *m,
@@ -47008,8 +47068,6 @@ static void JS_SetConstructor2(JSContext *ctx,
                            js_dup(proto), proto_flags);
     JS_DefinePropertyValue(ctx, proto, JS_ATOM_constructor,
                            js_dup(func_obj), ctor_flags);
-    set_cycle_flag(ctx, func_obj);
-    set_cycle_flag(ctx, proto);
 }
 
 void JS_SetConstructor(JSContext *ctx, JSValueConst func_obj,
@@ -47109,6 +47167,7 @@ JSValue JS_ToObject(JSContext *ctx, JSValueConst val)
     case JS_TAG_OBJECT:
     case JS_TAG_EXCEPTION:
         return js_dup(val);
+    case JS_TAG_SHORT_BIG_INT:
     case JS_TAG_BIG_INT:
         obj = JS_NewObjectClass(ctx, JS_CLASS_BIG_INT);
         goto set_value;
@@ -48114,10 +48173,8 @@ static JSValue js_object_fromEntries(JSContext *ctx, JSValueConst this_val,
         item = JS_IteratorNext(ctx, iter, next_method, 0, NULL, &done);
         if (JS_IsException(item))
             goto fail;
-        if (done) {
-            JS_FreeValue(ctx, item);
+        if (done)
             break;
-        }
 
         key = JS_UNDEFINED;
         value = JS_UNDEFINED;
@@ -48184,8 +48241,9 @@ static JSValue JS_SpeciesConstructor(JSContext *ctx, JSValueConst obj,
     if (JS_IsUndefined(species) || JS_IsNull(species))
         return js_dup(defaultConstructor);
     if (!JS_IsConstructor(ctx, species)) {
+        JS_ThrowTypeErrorNotAConstructor(ctx, species);
         JS_FreeValue(ctx, species);
-        return JS_ThrowTypeError(ctx, "not a constructor");
+        return JS_EXCEPTION;
     }
     return species;
 }
@@ -48645,7 +48703,7 @@ static JSValue js_function_bind(JSContext *ctx, JSValueConst this_val,
         goto exception;
     if (!JS_IsString(name1)) {
         JS_FreeValue(ctx, name1);
-        name1 = JS_AtomToString(ctx, JS_ATOM_empty_string);
+        name1 = js_empty_string(ctx->rt);
     }
     name1 = JS_ConcatString3(ctx, "bound ", name1, "");
     if (JS_IsException(name1))
@@ -48696,7 +48754,7 @@ static JSValue js_function_toString(JSContext *ctx, JSValueConst this_val,
         suff = "() {\n    [native code]\n}";
         name = JS_GetProperty(ctx, this_val, JS_ATOM_name);
         if (JS_IsUndefined(name))
-            name = JS_AtomToString(ctx, JS_ATOM_empty_string);
+            name = js_empty_string(ctx->rt);
         return JS_ConcatString3(ctx, pref, name, suff);
     }
 }
@@ -48858,7 +48916,7 @@ static JSValue js_error_toString(JSContext *ctx, JSValueConst this_val,
 
     msg = JS_GetProperty(ctx, this_val, JS_ATOM_message);
     if (JS_IsUndefined(msg))
-        msg = JS_AtomToString(ctx, JS_ATOM_empty_string);
+        msg = js_empty_string(ctx->rt);
     else
         msg = JS_ToStringFree(ctx, msg);
     if (JS_IsException(msg)) {
@@ -48879,7 +48937,7 @@ static const JSCFunctionListEntry js_error_proto_funcs[] = {
 static JSValue js_error_isError(JSContext *ctx, JSValueConst this_val,
                                 int argc, JSValueConst *argv)
 {
-    return js_bool(JS_IsError(ctx, argv[0]));
+    return js_bool(JS_IsError(argv[0]));
 }
 
 static JSValue js_error_get_stackTraceLimit(JSContext *ctx, JSValueConst this_val)
@@ -49627,8 +49685,10 @@ done:
             goto exception;
         args[0] = ret;
         res = JS_Invoke(ctx, arr, JS_ATOM_set, 1, args);
-        if (check_exception_free(ctx, res))
+        if (check_exception_free(ctx, res)) {
+            JS_FreeValue(ctx, arr);
             goto exception;
+        }
         JS_FreeValue(ctx, ret);
         ret = arr;
     }
@@ -50808,11 +50868,10 @@ static JSValue js_array_toSorted(JSContext *ctx, JSValueConst this_val,
     JSObject *p;
     int64_t i, len;
     uint32_t count32;
-    int ok;
 
-    ok = JS_IsUndefined(argv[0]) || JS_IsFunction(ctx, argv[0]);
-    if (!ok)
-        return JS_ThrowTypeErrorNotAFunction(ctx);
+    if (!JS_IsUndefined(argv[0]))
+        if (check_function(ctx, argv[0]))
+            return JS_EXCEPTION;
 
     ret = JS_EXCEPTION;
     arr = JS_UNDEFINED;
@@ -51063,6 +51122,26 @@ static const JSCFunctionListEntry js_iterator_wrap_proto_funcs[] = {
     JS_ITERATOR_NEXT_DEF("return", 0, js_iterator_wrap_next, GEN_MAGIC_RETURN ),
 };
 
+static JSValue js_iterator_constructor_getset(JSContext *ctx,
+                                              JSValueConst this_val,
+                                              int argc, JSValueConst *argv,
+                                              int magic,
+                                              JSValueConst *func_data)
+{
+    int ret;
+
+    if (argc > 0) { // if setter
+        if (!JS_IsObject(argv[0]))
+            return JS_ThrowTypeErrorNotAnObject(ctx);
+        ret = JS_DefinePropertyValue(ctx, this_val, JS_ATOM_constructor,
+                                     js_dup(argv[0]),
+                                     JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
+        if (ret < 0)
+            return JS_EXCEPTION;
+    }
+    return js_dup(func_data[0]);
+}
+
 static JSValue js_iterator_constructor(JSContext *ctx, JSValueConst new_target,
                                        int argc, JSValueConst *argv)
 {
@@ -51075,6 +51154,216 @@ static JSValue js_iterator_constructor(JSContext *ctx, JSValueConst new_target,
         if (p->u.cfunc.c_function.generic == js_iterator_constructor)
             return JS_ThrowTypeError(ctx, "abstract class not constructable");
     return js_create_from_ctor(ctx, new_target, JS_CLASS_ITERATOR);
+}
+
+// note: deliberately doesn't use space-saving bit fields for
+// |index|, |count| and |running| because tcc miscompiles them
+typedef struct JSIteratorConcatData {
+    int index, count;             // elements (not pairs!) in values[] array
+    bool running;
+    JSValue iter, next, values[]; // array of (object, method) pairs
+} JSIteratorConcatData;
+
+static void js_iterator_concat_finalizer(JSRuntime *rt, JSValueConst val)
+{
+    JSObject *p = JS_VALUE_GET_OBJ(val);
+    JSIteratorConcatData *it = p->u.iterator_concat_data;
+    if (it) {
+        JS_FreeValueRT(rt, it->iter);
+        JS_FreeValueRT(rt, it->next);
+        for (int i = it->index; i < it->count; i++)
+            JS_FreeValueRT(rt, it->values[i]);
+        js_free_rt(rt, it);
+    }
+}
+
+static void js_iterator_concat_mark(JSRuntime *rt, JSValueConst val,
+                                    JS_MarkFunc *mark_func)
+{
+    JSObject *p = JS_VALUE_GET_OBJ(val);
+    JSIteratorConcatData *it = p->u.iterator_concat_data;
+    if (it) {
+        JS_MarkValue(rt, it->iter, mark_func);
+        JS_MarkValue(rt, it->next, mark_func);
+        for (int i = it->index; i < it->count; i++)
+            JS_MarkValue(rt, it->values[i], mark_func);
+    }
+}
+
+static JSValue js_iterator_concat_next(JSContext *ctx, JSValueConst this_val,
+                                       int argc, JSValueConst *argv)
+{
+    JSValue iter, item, next, val, *obj, *meth;
+    JSIteratorConcatData *it;
+    JSPropertyDescriptor d;
+    int done, ret;
+
+    it = JS_GetOpaque2(ctx, this_val, JS_CLASS_ITERATOR_CONCAT);
+    if (!it)
+        return JS_EXCEPTION;
+    if (it->running)
+        return JS_ThrowTypeError(ctx, "already running");
+next:
+    if (it->index >= it->count)
+        return js_create_iterator_result(ctx, JS_UNDEFINED, /*done*/true);
+    obj = &it->values[it->index + 0];
+    meth = &it->values[it->index + 1];
+    iter = it->iter;
+    if (JS_IsUndefined(iter)) {
+        iter = JS_GetIterator2(ctx, *obj, *meth);
+        if (JS_IsException(iter))
+            return JS_EXCEPTION;
+        it->iter = iter;
+    }
+    next = it->next;
+    if (JS_IsUndefined(next)) {
+        next = JS_GetProperty(ctx, iter, JS_ATOM_next);
+        if (JS_IsException(next))
+            return JS_EXCEPTION;
+        it->next = next;
+    }
+    it->running = true;
+    item = JS_IteratorNext2(ctx, iter, next, 0, NULL, &done);
+    it->running = false;
+    if (JS_IsException(item))
+        return JS_EXCEPTION;
+    if (!done)
+        return js_create_iterator_result(ctx, item, /*done*/false);
+    // done==1 means really done, done==2 means "unknown, inspect object"
+    if (done == 2) {
+        val = JS_GetProperty(ctx, item, JS_ATOM_done);
+        if (JS_IsException(val)) {
+            JS_FreeValue(ctx, item);
+            return JS_EXCEPTION;
+        }
+        done = JS_ToBoolFree(ctx, val);
+    }
+    if (done) {
+        JS_FreeValue(ctx, item);
+        JS_FreeValue(ctx, iter);
+        JS_FreeValue(ctx, next);
+        it->iter = JS_UNDEFINED;
+        it->next = JS_UNDEFINED;
+        JS_FreeValue(ctx, *meth);
+        JS_FreeValue(ctx, *obj);
+        it->index += 2;
+        goto next;
+    }
+    // not done, construct { done: false, value: xxx } object
+    // copy .value verbatim from source object, spec doesn't
+    // allow dereferencing getters here
+    d = (JSPropertyDescriptor){
+        .value = JS_UNDEFINED,
+        .getter = JS_UNDEFINED,
+        .setter = JS_UNDEFINED,
+    };
+    ret = JS_GetOwnProperty(ctx, &d, item, JS_ATOM_value);
+    JS_FreeValue(ctx, item);
+    if (ret < 0)
+        return JS_EXCEPTION;
+    if (d.flags & JS_PROP_GETSET) {
+        d.flags |= JS_PROP_HAS_GET | JS_PROP_HAS_SET;
+    } else {
+        d.flags |= JS_PROP_HAS_VALUE;
+    }
+    item = JS_NewObject(ctx);
+    if (JS_IsException(item))
+        goto fail;
+    if (JS_DefinePropertyValue(ctx, item, JS_ATOM_done, JS_FALSE,
+                               JS_PROP_C_W_E) < 0) {
+        goto fail;
+    }
+    if (JS_DefineProperty(ctx, item, JS_ATOM_value, d.value, d.getter,
+                          d.setter, d.flags | JS_PROP_C_W_E) < 0) {
+    fail:
+        JS_FreeValue(ctx, item);
+        item = JS_EXCEPTION;
+    }
+    js_free_desc(ctx, &d);
+    return item;
+}
+
+static JSValue js_iterator_concat_return(JSContext *ctx, JSValueConst this_val,
+                                         int argc, JSValueConst *argv)
+{
+    JSIteratorConcatData *it;
+    JSValue ret;
+
+    it = JS_GetOpaque2(ctx, this_val, JS_CLASS_ITERATOR_CONCAT);
+    if (!it)
+        return JS_EXCEPTION;
+    if (it->running)
+        return JS_ThrowTypeError(ctx, "already running");
+    ret = JS_UNDEFINED;
+    if (!JS_IsUndefined(it->iter)) {
+        ret = JS_GetProperty(ctx, it->iter, JS_ATOM_return);
+        if (JS_IsException(ret))
+            return JS_EXCEPTION;
+        it->running = true;
+        ret = JS_CallFree(ctx, ret, it->iter, 0, NULL);
+        it->running = false;
+    }
+    while (it->index < it->count)
+        JS_FreeValue(ctx, it->values[it->index++]);
+    JS_FreeValue(ctx, it->iter);
+    JS_FreeValue(ctx, it->next);
+    it->iter = JS_UNDEFINED;
+    it->next = JS_UNDEFINED;
+    return ret;
+}
+
+// note: |next| and |return| don't use JS_ITERATOR_NEXT_DEF because |next|
+// has to return a full { value: xxx, done: xxx } step object - it must
+// copy getters and setters from the inner iterator's step object
+// slightly inefficient because of the intermediate step object that is
+// created but that can't be helped right now
+static const JSCFunctionListEntry js_iterator_concat_proto_funcs[] = {
+    JS_CFUNC_DEF("next", 1, js_iterator_concat_next ),
+    JS_CFUNC_DEF("return", 1, js_iterator_concat_return ),
+    JS_PROP_STRING_DEF("[Symbol.toStringTag]", "Iterator Concat", JS_PROP_CONFIGURABLE ),
+};
+
+static JSValue js_iterator_concat(JSContext *ctx, JSValueConst this_val,
+                                  int argc, JSValueConst *argv)
+{
+    JSIteratorConcatData *it;
+    JSValue obj, method;
+
+    it = js_malloc(ctx, sizeof(*it) + 2*argc * sizeof(it->values[0]));
+    if (!it)
+        return JS_EXCEPTION;
+    it->running = false;
+    it->index = 0;
+    it->count = 0;
+    it->iter = JS_UNDEFINED;
+    it->next = JS_UNDEFINED;
+    for (int i = 0; i < argc; i++) {
+        JSValueConst obj = argv[i];
+        if (!JS_IsObject(obj)) {
+            JS_ThrowTypeErrorNotAnObject(ctx);
+            goto fail;
+        }
+        method = JS_GetProperty(ctx, obj, JS_ATOM_Symbol_iterator);
+        if (JS_IsException(method))
+            goto fail;
+        if (!JS_IsFunction(ctx, method)) {
+            JS_ThrowTypeErrorNotAFunction(ctx);
+            JS_FreeValue(ctx, method);
+            goto fail;
+        }
+        it->values[it->count++] = js_dup(obj);
+        it->values[it->count++] = method;
+    }
+    obj = JS_NewObjectClass(ctx, JS_CLASS_ITERATOR_CONCAT);
+    if (JS_IsException(obj))
+        goto fail;
+    JS_SetOpaqueInternal(obj, it);
+    return obj;
+fail:
+    for (int i = 0; i < it->count; i++)
+        JS_FreeValue(ctx, it->values[i]);
+    js_free(ctx, it);
+    return JS_EXCEPTION;
 }
 
 static JSValue js_iterator_from(JSContext *ctx, JSValueConst this_val,
@@ -51168,33 +51457,31 @@ static JSValue js_create_iterator_helper(JSContext *ctx, JSValueConst this_val,
             double dlimit;
             v = JS_ToNumber(ctx, argv[0]);
             if (JS_IsException(v))
-                return JS_EXCEPTION;
+                goto fail;
             // Check for Infinity.
             if (JS_ToFloat64(ctx, &dlimit, v)) {
                 JS_FreeValue(ctx, v);
-                return JS_EXCEPTION;
+                goto fail;
             }
             if (isnan(dlimit)) {
                 JS_FreeValue(ctx, v);
-                goto fail;
+                goto range_error;
             }
             if (!isfinite(dlimit)) {
                 JS_FreeValue(ctx, v);
                 if (dlimit < 0)
-                    goto fail;
+                    goto range_error;
                 else
                     count = MAX_SAFE_INTEGER;
             } else {
                 v = JS_ToIntegerFree(ctx, v);
                 if (JS_IsException(v))
-                    return JS_EXCEPTION;
+                    goto fail;
                 if (JS_ToInt64Free(ctx, &count, v))
-                    return JS_EXCEPTION;
+                    goto fail;
             }
-            if (count < 0) {
-            fail:
-                return JS_ThrowRangeError(ctx, "must be positive");
-            }
+            if (count < 0)
+                goto range_error;
         }
         break;
     case JS_ITERATOR_HELPER_KIND_FILTER:
@@ -51203,7 +51490,7 @@ static JSValue js_create_iterator_helper(JSContext *ctx, JSValueConst this_val,
         {
             func = argv[0];
             if (check_function(ctx, func))
-                return JS_EXCEPTION;
+                goto fail;
         }
         break;
     default:
@@ -51213,17 +51500,17 @@ static JSValue js_create_iterator_helper(JSContext *ctx, JSValueConst this_val,
 
     method = JS_GetProperty(ctx, this_val, JS_ATOM_next);
     if (JS_IsException(method))
-        return JS_EXCEPTION;
+        goto fail;
     obj = JS_NewObjectClass(ctx, JS_CLASS_ITERATOR_HELPER);
     if (JS_IsException(obj)) {
         JS_FreeValue(ctx, method);
-        return JS_EXCEPTION;
+        goto fail;
     }
     it = js_malloc(ctx, sizeof(*it));
     if (!it) {
         JS_FreeValue(ctx, obj);
         JS_FreeValue(ctx, method);
-        return JS_EXCEPTION;
+        goto fail;
     }
     it->kind = magic;
     it->obj = js_dup(this_val);
@@ -51235,6 +51522,11 @@ static JSValue js_create_iterator_helper(JSContext *ctx, JSValueConst this_val,
     it->done = 0;
     JS_SetOpaqueInternal(obj, it);
     return obj;
+range_error:
+    JS_ThrowRangeError(ctx, "must be positive");
+fail:
+    JS_IteratorClose(ctx, this_val, true);
+    return JS_EXCEPTION;
 }
 
 static JSValue js_iterator_proto_func(JSContext *ctx, JSValueConst this_val,
@@ -51247,8 +51539,10 @@ static JSValue js_iterator_proto_func(JSContext *ctx, JSValueConst this_val,
 
     if (check_iterator(ctx, this_val) < 0)
         return JS_EXCEPTION;
+    func = JS_UNDEFINED;
+    method = JS_UNDEFINED;
     if (check_function(ctx, argv[0]))
-        return JS_EXCEPTION;
+        goto fail;
     func = js_dup(argv[0]);
     method = JS_GetProperty(ctx, this_val, JS_ATOM_next);
     if (JS_IsException(method))
@@ -51397,9 +51691,11 @@ static JSValue js_iterator_proto_reduce(JSContext *ctx, JSValueConst this_val,
 
     if (check_iterator(ctx, this_val) < 0)
         return JS_EXCEPTION;
-    if (check_function(ctx, argv[0]))
-        return JS_EXCEPTION;
     acc = JS_UNDEFINED;
+    func = JS_UNDEFINED;
+    method = JS_UNDEFINED;
+    if (check_function(ctx, argv[0]))
+        goto exception;
     func = js_dup(argv[0]);
     method = JS_GetProperty(ctx, this_val, JS_ATOM_next);
     if (JS_IsException(method))
@@ -51796,6 +52092,7 @@ fail:
 }
 
 static const JSCFunctionListEntry js_iterator_funcs[] = {
+    JS_CFUNC_DEF("concat", 0, js_iterator_concat ),
     JS_CFUNC_DEF("from", 1, js_iterator_from ),
 };
 
@@ -51881,11 +52178,16 @@ static JSValue js_number_constructor(JSContext *ctx, JSValueConst new_target,
         if (JS_IsException(val))
             return val;
         switch(JS_VALUE_GET_TAG(val)) {
+        case JS_TAG_SHORT_BIG_INT:
+            val = js_int64(JS_VALUE_GET_SHORT_BIG_INT(val));
+            if (JS_IsException(val))
+                return val;
+            break;
         case JS_TAG_BIG_INT:
             {
                 JSBigInt *p = JS_VALUE_GET_PTR(val);
                 double d;
-                bf_get_float64(&p->num, &d, BF_RNDN);
+                d = js_bigint_to_float64(ctx, p);
                 JS_FreeValue(ctx, val);
                 val = js_float64(d);
             }
@@ -51996,44 +52298,42 @@ static int js_get_radix(JSContext *ctx, JSValueConst val)
 static JSValue js_number_toString(JSContext *ctx, JSValueConst this_val,
                                   int argc, JSValueConst *argv, int magic)
 {
-    char buf[72];
     JSValue val;
-    int base;
+    int base, flags;
     double d;
 
     val = js_thisNumberValue(ctx, this_val);
     if (JS_IsException(val))
         return val;
     if (magic || JS_IsUndefined(argv[0])) {
-        if (JS_VALUE_GET_TAG(val) == JS_TAG_INT) {
-            size_t len = i32toa(buf, JS_VALUE_GET_INT(val));
-            return js_new_string8_len(ctx, buf, len);
-        }
         base = 10;
     } else {
         base = js_get_radix(ctx, argv[0]);
-        if (base < 0) {
-            JS_FreeValue(ctx, val);
-            return JS_EXCEPTION;
-        }
+        if (base < 0)
+            goto fail;
     }
     if (JS_VALUE_GET_TAG(val) == JS_TAG_INT) {
-        size_t len = i32toa_radix(buf, JS_VALUE_GET_INT(val), base);
-        return js_new_string8_len(ctx, buf, len);
+        char buf1[70];
+        int len;
+        len = i64toa_radix(buf1, JS_VALUE_GET_INT(val), base);
+        return js_new_string8_len(ctx, buf1, len);
     }
     if (JS_ToFloat64Free(ctx, &d, val))
         return JS_EXCEPTION;
+    flags = JS_DTOA_FORMAT_FREE;
     if (base != 10)
-        return js_dtoa_radix(ctx, d, base);
-
-    return js_dtoa(ctx, d, 0, JS_DTOA_TOSTRING);
+        flags |= JS_DTOA_EXP_DISABLED;
+    return js_dtoa2(ctx, d, base, 0, flags);
+ fail:
+    JS_FreeValue(ctx, val);
+    return JS_EXCEPTION;
 }
 
 static JSValue js_number_toFixed(JSContext *ctx, JSValueConst this_val,
                                  int argc, JSValueConst *argv)
 {
     JSValue val;
-    int f;
+    int f, flags;
     double d;
 
     val = js_thisNumberValue(ctx, this_val);
@@ -52043,23 +52343,21 @@ static JSValue js_number_toFixed(JSContext *ctx, JSValueConst this_val,
         return JS_EXCEPTION;
     if (JS_ToInt32Sat(ctx, &f, argv[0]))
         return JS_EXCEPTION;
-    if (f < 0 || f > 100) {
-        return JS_ThrowRangeError(ctx, "toFixed() digits argument must be between 0 and 100");
-    }
-    if (fabs(d) >= 1e21) {
-        // use ToString(d)
-        return js_dtoa(ctx, d, 0, JS_DTOA_TOSTRING);
-    } else {
-        return js_dtoa(ctx, d, f, JS_DTOA_FIXED);
-    }
+    if (f < 0 || f > 100)
+        return JS_ThrowRangeError(ctx, "invalid number of digits");
+    if (fabs(d) >= 1e21)
+        flags = JS_DTOA_FORMAT_FREE;
+    else
+        flags = JS_DTOA_FORMAT_FRAC;
+    return js_dtoa2(ctx, d, 10, f, flags);
 }
 
 static JSValue js_number_toExponential(JSContext *ctx, JSValueConst this_val,
                                        int argc, JSValueConst *argv)
 {
     JSValue val;
+    int f, flags;
     double d;
-    int f;
 
     val = js_thisNumberValue(ctx, this_val);
     if (JS_IsException(val))
@@ -52068,15 +52366,19 @@ static JSValue js_number_toExponential(JSContext *ctx, JSValueConst this_val,
         return JS_EXCEPTION;
     if (JS_ToInt32Sat(ctx, &f, argv[0]))
         return JS_EXCEPTION;
-    if (!isfinite(d))
-        return js_dtoa_infinite(ctx, d);
-    if (!JS_IsUndefined(argv[0])) {
-        if (f < 0 || f > 100) {
-            return JS_ThrowRangeError(ctx, "toExponential() argument must be between 0 and 100");
-        }
-        f += 1;  /* number of significant digits between 1 and 101 */
+    if (!isfinite(d)) {
+        return JS_ToStringFree(ctx,  __JS_NewFloat64(d));
     }
-    return js_dtoa(ctx, d, f, JS_DTOA_EXPONENTIAL);
+    if (JS_IsUndefined(argv[0])) {
+        flags = JS_DTOA_FORMAT_FREE;
+        f = 0;
+    } else {
+        if (f < 0 || f > 100)
+            return JS_ThrowRangeError(ctx, "invalid number of digits");
+        f++;
+        flags = JS_DTOA_FORMAT_FIXED;
+    }
+    return js_dtoa2(ctx, d, 10, f, flags | JS_DTOA_EXP_ENABLED);
 }
 
 static JSValue js_number_toPrecision(JSContext *ctx, JSValueConst this_val,
@@ -52092,15 +52394,16 @@ static JSValue js_number_toPrecision(JSContext *ctx, JSValueConst this_val,
     if (JS_ToFloat64Free(ctx, &d, val))
         return JS_EXCEPTION;
     if (JS_IsUndefined(argv[0]))
-        return js_dtoa(ctx, d, 0, JS_DTOA_TOSTRING);
+        goto to_string;
     if (JS_ToInt32Sat(ctx, &p, argv[0]))
         return JS_EXCEPTION;
-    if (!isfinite(d))
-        return js_dtoa_infinite(ctx, d);
-    if (p < 1 || p > 100) {
-        return JS_ThrowRangeError(ctx, "toPrecision() argument must be between 1 and 100");
+    if (!isfinite(d)) {
+    to_string:
+        return JS_ToStringFree(ctx,  __JS_NewFloat64(d));
     }
-    return js_dtoa(ctx, d, p, JS_DTOA_PRECISION);
+    if (p < 1 || p > 100)
+        return JS_ThrowRangeError(ctx, "invalid number of digits");
+    return js_dtoa2(ctx, d, 10, p, JS_DTOA_FORMAT_FIXED);
 }
 
 static const JSCFunctionListEntry js_number_proto_funcs[] = {
@@ -52115,24 +52418,25 @@ static const JSCFunctionListEntry js_number_proto_funcs[] = {
 static JSValue js_parseInt(JSContext *ctx, JSValueConst this_val,
                            int argc, JSValueConst *argv)
 {
-    const char *str;
+    const char *str, *p;
     int radix, flags;
     JSValue ret;
-    size_t len;
 
-    str = JS_ToCStringLen(ctx, &len, argv[0]);
+    str = JS_ToCString(ctx, argv[0]);
     if (!str)
         return JS_EXCEPTION;
     if (JS_ToInt32(ctx, &radix, argv[1])) {
         JS_FreeCString(ctx, str);
         return JS_EXCEPTION;
     }
-    flags = ATOD_TRIM_SPACES;
-    if (radix == 0) {
-        flags |= ATOD_ACCEPT_HEX_PREFIX;  // Only 0x and 0X are supported
-        radix = 10;
+    if (radix != 0 && (radix < 2 || radix > 36)) {
+        ret = JS_NAN;
+    } else {
+        p = str;
+        p += skip_spaces(p);
+        flags = ATOD_INT_ONLY | ATOD_ACCEPT_PREFIX_AFTER_SIGN;
+        ret = js_atof(ctx, p, NULL, radix, flags);
     }
-    ret = js_atof(ctx, str, len, NULL, radix, flags);
     JS_FreeCString(ctx, str);
     return ret;
 }
@@ -52140,16 +52444,15 @@ static JSValue js_parseInt(JSContext *ctx, JSValueConst this_val,
 static JSValue js_parseFloat(JSContext *ctx, JSValueConst this_val,
                              int argc, JSValueConst *argv)
 {
-    const char *str;
+    const char *str, *p;
     JSValue ret;
-    int flags;
-    size_t len;
 
-    str = JS_ToCStringLen(ctx, &len, argv[0]);
+    str = JS_ToCString(ctx, argv[0]);
     if (!str)
         return JS_EXCEPTION;
-    flags = ATOD_TRIM_SPACES | ATOD_ACCEPT_FLOAT | ATOD_ACCEPT_INFINITY;
-    ret = js_atof(ctx, str, len, NULL, 10, flags);
+    p = str;
+    p += skip_spaces(p);
+    ret = js_atof(ctx, p, NULL, 10, 0);
     JS_FreeCString(ctx, str);
     return ret;
 }
@@ -52302,7 +52605,7 @@ static JSValue js_string_constructor(JSContext *ctx, JSValueConst new_target,
 {
     JSValue val, obj;
     if (argc == 0) {
-        val = JS_AtomToString(ctx, JS_ATOM_empty_string);
+        val = js_empty_string(ctx->rt);
     } else {
         if (JS_IsUndefined(new_target) && JS_IsSymbol(argv[0])) {
             JSAtomStruct *p = JS_VALUE_GET_PTR(argv[0]);
@@ -52317,7 +52620,9 @@ static JSValue js_string_constructor(JSContext *ctx, JSValueConst new_target,
         JSString *p1 = JS_VALUE_GET_STRING(val);
 
         obj = js_create_from_ctor(ctx, new_target, JS_CLASS_STRING);
-        if (!JS_IsException(obj)) {
+        if (JS_IsException(obj)) {
+            JS_FreeValue(ctx, val);
+        } else {
             JS_SetObjectData(ctx, obj, val);
             JS_DefinePropertyValue(ctx, obj, JS_ATOM_length, js_int32(p1->len), 0);
         }
@@ -52550,7 +52855,7 @@ static JSValue js_string_charAt(JSContext *ctx, JSValueConst this_val,
         return JS_EXCEPTION;
     }
     if (idx < 0 || idx >= p->len) {
-        ret = JS_AtomToString(ctx, JS_ATOM_empty_string);
+        ret = js_empty_string(ctx->rt);
     } else {
         c = string_get(p, idx);
         ret = js_new_string_char(ctx, c);
@@ -52908,7 +53213,7 @@ static JSValue js_string_match(JSContext *ctx, JSValueConst this_val,
     if (JS_IsUndefined(O) || JS_IsNull(O))
         return JS_ThrowTypeError(ctx, "cannot convert to object");
 
-    if (!JS_IsUndefined(regexp) && !JS_IsNull(regexp)) {
+    if (JS_IsObject(regexp)) {
         matcher = JS_GetProperty(ctx, regexp, atom);
         if (JS_IsException(matcher))
             return JS_EXCEPTION;
@@ -53074,7 +53379,7 @@ static JSValue js_string_replace(JSContext *ctx, JSValueConst this_val,
     replaceValue_str = JS_UNDEFINED;
     repl_str = JS_UNDEFINED;
 
-    if (!JS_IsUndefined(searchValue) && !JS_IsNull(searchValue)) {
+    if (JS_IsObject(searchValue)) {
         JSValue replacer;
         if (is_replaceAll) {
             if (check_regexp_g_flag(ctx, searchValue) < 0)
@@ -53185,7 +53490,7 @@ static JSValue js_string_split(JSContext *ctx, JSValueConst this_val,
     A = JS_UNDEFINED;
     R = JS_UNDEFINED;
 
-    if (!JS_IsUndefined(separator) && !JS_IsNull(separator)) {
+    if (JS_IsObject(separator)) {
         JSValue splitter;
         splitter = JS_GetProperty(ctx, separator, JS_ATOM_Symbol_split);
         if (JS_IsException(splitter))
@@ -53380,7 +53685,7 @@ static JSValue js_string_pad(JSContext *ctx, JSValueConst this_val,
     }
     if (n > JS_STRING_LEN_MAX) {
         JS_ThrowRangeError(ctx, "invalid string length");
-        goto fail2;
+        goto fail3;
     }
     if (string_buffer_init(ctx, b, n))
         goto fail3;
@@ -54112,62 +54417,252 @@ static JSValue js_math_clz32(JSContext *ctx, JSValueConst this_val,
     return js_int32(r);
 }
 
+/* we add one extra limb to avoid having to test for overflows during the sum */
+#define SUM_PRECISE_ACC_LEN 34
+
+typedef enum {
+    SUM_PRECISE_STATE_MINUS_ZERO,
+    SUM_PRECISE_STATE_FINITE,
+    SUM_PRECISE_STATE_INFINITY,
+    SUM_PRECISE_STATE_MINUS_INFINITY, /* must be after SUM_PRECISE_STATE_INFINITY */
+    SUM_PRECISE_STATE_NAN, /* must be after SUM_PRECISE_STATE_MINUS_INFINITY */
+} SumPreciseStateEnum;
+
+typedef struct {
+    uint64_t acc[SUM_PRECISE_ACC_LEN];
+    int n_limbs; /* acc is not necessarily normalized */
+    SumPreciseStateEnum state;
+} SumPreciseState;
+
+static void sum_precise_init(SumPreciseState *s)
+{
+    s->state = SUM_PRECISE_STATE_MINUS_ZERO;
+    s->acc[0] = 0;
+    s->n_limbs = 1;
+}
+
+#define ADDC64(res, carry_out, op1, op2, carry_in)      \
+do {                                                    \
+    uint64_t __v, __a, __k, __k1;                       \
+    __v = (op1);                                        \
+    __a = __v + (op2);                                  \
+    __k1 = __a < __v;                                   \
+    __k = (carry_in);                                   \
+    __a = __a + __k;                                    \
+    carry_out = (__a < __k) | __k1;                     \
+    res = __a;                                          \
+} while (0)
+
+static void sum_precise_add(SumPreciseState *s, double d)
+{
+    uint64_t a, m, a0, carry, acc_sign, a_sign;
+    int sgn, e, p, n, i;
+    unsigned shift;
+
+    a = float64_as_uint64(d);
+    sgn = a >> 63;
+    e = (a >> 52) & ((1 << 11) - 1);
+    m = a & (((uint64_t)1 << 52) - 1);
+    if (unlikely(e == 2047)) {
+        if (m == 0) {
+            /* +/- infinity */
+            if (s->state == SUM_PRECISE_STATE_NAN ||
+                (s->state == SUM_PRECISE_STATE_MINUS_INFINITY && !sgn) ||
+                (s->state == SUM_PRECISE_STATE_INFINITY && sgn)) {
+                s->state = SUM_PRECISE_STATE_NAN;
+            } else {
+                s->state = SUM_PRECISE_STATE_INFINITY + sgn;
+            }
+        } else {
+            /* NaN */
+            s->state = SUM_PRECISE_STATE_NAN;
+        }
+    } else if (e == 0) {
+        if (likely(m == 0)) {
+            /* zero */
+            if (s->state == SUM_PRECISE_STATE_MINUS_ZERO && !sgn)
+                s->state = SUM_PRECISE_STATE_FINITE;
+        } else {
+            /* subnormal */
+            p = 0;
+            shift = 0;
+            goto add;
+        }
+    } else {
+        m |= (uint64_t)1 << 52;
+        shift = e - 1;
+        p = shift / 64;
+        /* 'p' is the position of a0 in acc */
+        shift %= 64;
+    add:
+        if (s->state >= SUM_PRECISE_STATE_INFINITY)
+            return;
+        s->state = SUM_PRECISE_STATE_FINITE;
+        n = s->n_limbs;
+
+        acc_sign = (int64_t)s->acc[n - 1] >> 63;
+
+        /* sign extend acc */
+        for(i = n; i <= p; i++)
+            s->acc[i] = acc_sign;
+
+        carry = sgn;
+        a_sign = -sgn;
+        a0 = m << shift;
+        ADDC64(s->acc[p], carry, s->acc[p], a0 ^ a_sign, carry);
+        if (shift >= 12) {
+            p++;
+            if (p >= n)
+                s->acc[p] = acc_sign;
+            a0 = m >> (64 - shift);
+            ADDC64(s->acc[p], carry, s->acc[p], a0 ^ a_sign, carry);
+        }
+        p++;
+        if (p >= n) {
+            n = p;
+        } else {
+            /* carry */
+            for(i = p; i < n; i++) {
+                /* if 'a' positive: stop condition: carry = 0.
+                   if 'a' negative: stop condition: carry = 1. */
+                if (carry == sgn)
+                    goto done;
+                ADDC64(s->acc[i], carry, s->acc[i], a_sign, carry);
+            }
+        }
+
+        /* extend the accumulator if needed */
+        a0 = carry + acc_sign + a_sign;
+        /* -1 <= a0 <= 1 (if both acc and a are negative, carry is set) */
+        if (a0 != ((int64_t)s->acc[n - 1] >> 63)) {
+            s->acc[n++] = a0;
+        }
+    done:
+        s->n_limbs = n;
+    }
+}
+
+static double sum_precise_get_result(SumPreciseState *s)
+{
+    int n, shift, e, p, is_neg, i;
+    uint64_t m, addend, carry;
+
+    if (s->state != SUM_PRECISE_STATE_FINITE) {
+        switch(s->state) {
+        default:
+        case SUM_PRECISE_STATE_MINUS_ZERO:
+            return -0.0;
+        case SUM_PRECISE_STATE_INFINITY:
+            return INFINITY;
+        case SUM_PRECISE_STATE_MINUS_INFINITY:
+            return -INFINITY;
+        case SUM_PRECISE_STATE_NAN:
+            return NAN;
+        }
+    }
+
+    /* extract the sign and absolute value */
+    n = s->n_limbs;
+    is_neg = s->acc[n - 1] >> 63;
+    if (is_neg) {
+        /* acc = -acc */
+        carry = 1;
+        for(i = 0; i < n; i++) {
+            ADDC64(s->acc[i], carry, ~s->acc[i], 0, carry);
+        }
+    }
+    /* normalize */
+    while (n > 0 && s->acc[n - 1] == 0)
+        n--;
+    /* zero result. The spec tells it is always positive in the finite case */
+    if (n == 0)
+        return 0.0;
+    /* subnormal case */
+    if (n == 1 && s->acc[0] < ((uint64_t)1 << 52))
+        return uint64_as_float64(((uint64_t)is_neg << 63) | s->acc[0]);
+    /* normal case */
+    e = n * 64;
+    p = n - 1;
+    m = s->acc[p];
+    shift = clz64(m);
+    e = e - shift - 52;
+    if (shift != 0) {
+        m <<= shift;
+        if (p > 0) {
+            int shift1;
+            uint64_t nz;
+            p--;
+            shift1 = 64 - shift;
+            nz = s->acc[p] & (((uint64_t)1 << shift1) - 1);
+            m = m | (s->acc[p] >> shift1) | (nz != 0);
+        }
+    }
+    if ((m & ((1 << 10) - 1)) == 0) {
+        /* see if the LSB part is non zero for the final rounding  */
+        while (p > 0) {
+            p--;
+            if (s->acc[p] != 0) {
+                m |= 1;
+                break;
+            }
+        }
+    }
+    /* rounding to nearest with ties to even */
+    addend = (1 << 10) - 1 + ((m >> 11) & 1);
+    m = (m + addend) >> 11;
+    /* handle overflow in the rounding */
+    if (m == 0)
+        e++;
+    if (unlikely(e >= 2047)) {
+        /* infinity */
+        return uint64_as_float64(((uint64_t)is_neg << 63) | ((uint64_t)2047 << 52));
+    } else {
+        m &= (((uint64_t)1 << 52) - 1);
+        return uint64_as_float64(((uint64_t)is_neg << 63) | ((uint64_t)e << 52) | m);
+    }
+}
+
 static JSValue js_math_sumPrecise(JSContext *ctx, JSValueConst this_val,
                                   int argc, JSValueConst *argv)
 {
     JSValue iter, next, item, ret;
-    bf_t a, b;
+    uint32_t tag;
     int done;
     double d;
-    int r;
+    SumPreciseState s_s, *s = &s_s;
 
-    iter = JS_GetIterator(ctx, argv[0], /*async*/false);
+    iter = JS_GetIterator(ctx, argv[0], /*is_async*/false);
     if (JS_IsException(iter))
         return JS_EXCEPTION;
-    bf_init(ctx->bf_ctx, &a);
-    bf_init(ctx->bf_ctx, &b);
     ret = JS_EXCEPTION;
     next = JS_GetProperty(ctx, iter, JS_ATOM_next);
     if (JS_IsException(next))
         goto fail;
-    bf_set_zero(&a, /*is_neg*/true);
+    sum_precise_init(s);
     for (;;) {
         item = JS_IteratorNext(ctx, iter, next, 0, NULL, &done);
         if (JS_IsException(item))
             goto fail;
         if (done)
-            break; // item == JS_UNDEFINED
-        switch (JS_VALUE_GET_TAG(item)) {
-        default:
+            break;
+        tag = JS_VALUE_GET_TAG(item);
+        if (JS_TAG_IS_FLOAT64(tag)) {
+            d = JS_VALUE_GET_FLOAT64(item);
+        } else if (tag == JS_TAG_INT) {
+            d = JS_VALUE_GET_INT(item);
+        } else {
             JS_FreeValue(ctx, item);
             JS_ThrowTypeError(ctx, "not a number");
+            JS_IteratorClose(ctx, iter, /*is_exception_pending*/true);
             goto fail;
-        case JS_TAG_INT:
-            d = JS_VALUE_GET_INT(item);
-            break;
-        case JS_TAG_FLOAT64:
-            d = JS_VALUE_GET_FLOAT64(item);
-            break;
         }
-        if (bf_set_float64(&b, d))
-            goto oom;
-        // Infinity + -Infinity results in BF_ST_INVALID_OP, sets |a| to nan
-        if ((r = bf_add(&a, &a, &b, BF_PREC_INF, BF_RNDN)))
-            if (r != BF_ST_INVALID_OP)
-                goto oom;
+        sum_precise_add(s, d);
     }
-    bf_get_float64(&a, &d, BF_RNDN); // return value deliberately ignored
-    ret = js_float64(d);
+    ret = js_float64(sum_precise_get_result(s));
 fail:
-    JS_IteratorClose(ctx, iter, JS_IsException(ret));
     JS_FreeValue(ctx, iter);
     JS_FreeValue(ctx, next);
-    bf_delete(&a);
-    bf_delete(&b);
     return ret;
-oom:
-    JS_ThrowOutOfMemory(ctx);
-    goto fail;
 }
 
 /* xorshift* random number generator by Marsaglia */
@@ -54546,7 +55041,7 @@ static JSValue js_regexp_constructor(JSContext *ctx, JSValueConst new_target,
             flags = js_dup(flags1);
         }
         if (JS_IsUndefined(pattern)) {
-            pattern = JS_AtomToString(ctx, JS_ATOM_empty_string);
+            pattern = js_empty_string(ctx->rt);
         } else {
             val = pattern;
             pattern = JS_ToString(ctx, val);
@@ -54588,7 +55083,7 @@ static JSValue js_regexp_compile(JSContext *ctx, JSValueConst this_val,
     } else {
         bc = JS_UNDEFINED;
         if (JS_IsUndefined(pattern1))
-            pattern = JS_AtomToString(ctx, JS_ATOM_empty_string);
+            pattern = js_empty_string(ctx->rt);
         else
             pattern = JS_ToString(ctx, pattern1);
         if (JS_IsException(pattern))
@@ -54746,7 +55241,7 @@ static JSValue js_regexp_get_flags(JSContext *ctx, JSValueConst this_val)
     if (res)
         *p++ = 'y';
     if (p == str)
-        return JS_AtomToString(ctx, JS_ATOM_empty_string);
+        return js_empty_string(ctx->rt);
     return js_new_string8_len(ctx, str, p - str);
 
 exception:
@@ -54782,6 +55277,14 @@ bool lre_check_stack_overflow(void *opaque, size_t alloca_size)
 {
     JSContext *ctx = opaque;
     return js_check_stack_overflow(ctx->rt, alloca_size);
+}
+
+int lre_check_timeout(void *opaque)
+{
+    JSContext *ctx = opaque;
+    JSRuntime *rt = ctx->rt;
+    return (rt->interrupt_handler &&
+            rt->interrupt_handler(rt, rt->interrupt_opaque));
 }
 
 void *lre_realloc(void *opaque, void *ptr, size_t size)
@@ -54898,7 +55401,11 @@ static JSValue js_regexp_exec(JSContext *ctx, JSValueConst this_val,
                     goto fail;
             }
         } else {
-            JS_ThrowInternalError(ctx, "out of memory in regexp execution");
+            if (rc == LRE_RET_TIMEOUT) {
+                JS_ThrowInterrupted(ctx);
+            } else {
+                JS_ThrowInternalError(ctx, "out of memory in regexp execution");
+            }
             goto fail;
         }
     } else {
@@ -55093,7 +55600,11 @@ static JSValue JS_RegExpDelete(JSContext *ctx, JSValueConst this_val, JSValue ar
                         goto fail;
                 }
             } else {
-                JS_ThrowInternalError(ctx, "out of memory in regexp execution");
+                if (ret == LRE_RET_TIMEOUT) {
+                    JS_ThrowInterrupted(ctx);
+                } else {
+                    JS_ThrowInternalError(ctx, "out of memory in regexp execution");
+                }
                 goto fail;
             }
             break;
@@ -56205,7 +56716,7 @@ static JSValue js_json_check(JSContext *ctx, JSONStringifyContext *jsc,
     JSValue v;
     JSValueConst args[2];
 
-    if (JS_IsObject(val) || JS_IsBigInt(ctx, val)) {
+    if (JS_IsObject(val) || JS_IsBigInt(val)) {
 		JSValue f = JS_GetProperty(ctx, val, JS_ATOM_toJSON);
 		if (JS_IsException(f))
 			goto exception;
@@ -56239,6 +56750,7 @@ static JSValue js_json_check(JSContext *ctx, JSONStringifyContext *jsc,
     case JS_TAG_FLOAT64:
     case JS_TAG_BOOL:
     case JS_TAG_NULL:
+    case JS_TAG_SHORT_BIG_INT:
     case JS_TAG_BIG_INT:
     case JS_TAG_EXCEPTION:
         return val;
@@ -56268,6 +56780,11 @@ static int js_json_to_str(JSContext *ctx, JSONStringifyContext *jsc,
     sep1 = JS_UNDEFINED;
     tab = JS_UNDEFINED;
     prop = JS_UNDEFINED;
+
+    if (js_check_stack_overflow(ctx->rt, 0)) {
+        JS_ThrowStackOverflow(ctx);
+        goto exception;
+    }
 
     if (JS_IsObject(val)) {
         p = JS_VALUE_GET_OBJ(val);
@@ -56416,6 +56933,7 @@ static int js_json_to_str(JSContext *ctx, JSONStringifyContext *jsc,
     case JS_TAG_NULL:
     concat_value:
         return string_buffer_concat_value_free(jsc->b, val);
+    case JS_TAG_SHORT_BIG_INT:
     case JS_TAG_BIG_INT:
         JS_ThrowTypeError(ctx, "BigInt are forbidden in JSON.stringify");
         goto exception;
@@ -56448,7 +56966,7 @@ JSValue JS_JSONStringify(JSContext *ctx, JSValueConst obj,
     jsc->property_list = JS_UNDEFINED;
     jsc->gap = JS_UNDEFINED;
     jsc->b = &b_s;
-    jsc->empty = JS_AtomToString(ctx, JS_ATOM_empty_string);
+    jsc->empty = js_empty_string(ctx->rt);
     ret = JS_UNDEFINED;
     wrapper = JS_UNDEFINED;
 
@@ -56611,7 +57129,7 @@ static JSValue js_reflect_construct(JSContext *ctx, JSValueConst this_val,
     if (argc > 2) {
         new_target = argv[2];
         if (!JS_IsConstructor(ctx, new_target))
-            return JS_ThrowTypeError(ctx, "not a constructor");
+            return JS_ThrowTypeErrorNotAConstructor(ctx, new_target);
     } else {
         new_target = func;
     }
@@ -57531,7 +58049,7 @@ static JSValue js_proxy_call_constructor(JSContext *ctx, JSValueConst func_obj,
     if (!s)
         return JS_EXCEPTION;
     if (!JS_IsConstructor(ctx, s->target))
-        return JS_ThrowTypeError(ctx, "not a constructor");
+        return JS_ThrowTypeErrorNotAConstructor(ctx, s->target);
     if (JS_IsUndefined(method))
         return JS_CallConstructor2(ctx, s->target, new_target, argc, argv);
     arg_array = js_create_array(ctx, argc, argv);
@@ -57763,7 +58281,7 @@ static JSValue js_symbol_constructor(JSContext *ctx, JSValueConst new_target,
     JSString *p;
 
     if (!JS_IsUndefined(new_target))
-        return JS_ThrowTypeError(ctx, "not a constructor");
+        return JS_ThrowTypeErrorNotAConstructor(ctx, new_target);
     if (argc == 0 || JS_IsUndefined(argv[0])) {
         p = NULL;
     } else {
@@ -57867,26 +58385,6 @@ static const JSCFunctionListEntry js_symbol_funcs[] = {
 
 /* Set/Map/WeakSet/WeakMap */
 
-typedef struct JSMapRecord {
-    int ref_count; /* used during enumeration to avoid freeing the record */
-    bool empty; /* true if the record is deleted */
-    struct JSMapState *map;
-    struct list_head link;
-    struct list_head hash_link;
-    JSValue key;
-    JSValue value;
-} JSMapRecord;
-
-typedef struct JSMapState {
-    bool is_weak; /* true if WeakSet/WeakMap */
-    struct list_head records; /* list of JSMapRecord.link */
-    uint32_t record_count;
-    struct list_head *hash_table;
-    uint32_t hash_size; /* must be a power of two */
-    uint32_t record_count_threshold; /* count at which a hash table
-                                        resize is needed */
-} JSMapState;
-
 #define MAGIC_SET (1 << 0)
 #define MAGIC_WEAK (1 << 1)
 
@@ -57942,10 +58440,8 @@ static JSValue js_map_constructor(JSContext *ctx, JSValueConst new_target,
             item = JS_IteratorNext(ctx, iter, next_method, 0, NULL, &done);
             if (JS_IsException(item))
                 goto fail;
-            if (done) {
-                JS_FreeValue(ctx, item);
+            if (done)
                 break;
-            }
             if (is_set) {
                 ret = JS_Call(ctx, adder, obj, 1, vc(&item));
                 if (JS_IsException(ret)) {
@@ -58023,7 +58519,7 @@ static uint32_t map_hash_key(JSContext *ctx, JSValueConst key)
     uint32_t h;
     double d;
     JSFloat64Union u;
-    bf_t *a;
+    JSBigInt *r;
 
     switch(tag) {
     case JS_TAG_BOOL:
@@ -58039,9 +58535,12 @@ static uint32_t map_hash_key(JSContext *ctx, JSValueConst key)
     case JS_TAG_INT:
         d = JS_VALUE_GET_INT(key);
         goto hash_float64;
+    case JS_TAG_SHORT_BIG_INT:
+        d = JS_VALUE_GET_SHORT_BIG_INT(key);
+        goto hash_float64;
     case JS_TAG_BIG_INT:
-        a = JS_GetBigInt(key);
-        h = hash_string8((void *)a->tab, a->len * sizeof(*a->tab), 0);
+        r = JS_VALUE_GET_PTR(key);
+        h = hash_string8((void *)r->tab, r->len * sizeof(*r->tab), 0);
         break;
     case JS_TAG_FLOAT64:
         d = JS_VALUE_GET_FLOAT64(key);
@@ -58078,7 +58577,6 @@ static JSMapRecord *map_find_record(JSContext *ctx, JSMapState *s,
 static void map_hash_resize(JSContext *ctx, JSMapState *s)
 {
     uint32_t new_hash_size, i, h;
-    size_t slack;
     struct list_head *new_hash_table, *el;
     JSMapRecord *mr;
 
@@ -58087,11 +58585,10 @@ static void map_hash_resize(JSContext *ctx, JSMapState *s)
         new_hash_size = 4;
     else
         new_hash_size = s->hash_size * 2;
-    new_hash_table = js_realloc2(ctx, s->hash_table,
-                                 sizeof(new_hash_table[0]) * new_hash_size, &slack);
+    new_hash_table = js_realloc(ctx, s->hash_table,
+                                sizeof(new_hash_table[0]) * new_hash_size);
     if (!new_hash_table)
         return;
-    new_hash_size += slack / sizeof(*new_hash_table);
 
     for(i = 0; i < new_hash_size; i++)
         init_list_head(&new_hash_table[i]);
@@ -58262,6 +58759,45 @@ static JSValue js_map_get(JSContext *ctx, JSValueConst this_val,
         return JS_UNDEFINED;
     else
         return js_dup(mr->value);
+}
+
+static JSValue js_map_getOrInsert(JSContext *ctx, JSValueConst this_val,
+                                  int argc, JSValueConst *argv, int magic)
+{
+    bool computed = magic & 1;
+    JSClassID class_id = magic >> 1;
+    JSMapState *s = JS_GetOpaque2(ctx, this_val, class_id);
+    JSMapRecord *mr;
+    JSValueConst key;
+    JSValue value;
+
+    if (!s)
+        return JS_EXCEPTION;
+    if (computed && check_function(ctx, argv[1]))
+        return JS_EXCEPTION;
+    key = map_normalize_key_const(ctx, argv[0]);
+    if (s->is_weak && !is_valid_weakref_target(key))
+        return JS_ThrowTypeError(ctx, "invalid value used as WeakMap key");
+    mr = map_find_record(ctx, s, key);
+    if (!mr) {
+        if (computed) {
+            value = JS_Call(ctx, argv[1], JS_UNDEFINED, 1, &key);
+            if (JS_IsException(value))
+                return JS_EXCEPTION;
+            mr = map_find_record(ctx, s, key);
+            if (mr)
+                map_delete_record(ctx->rt, s, mr);
+        } else {
+            value = js_dup(argv[1]);
+        }
+        mr = map_add_record(ctx, s, key);
+        if (!mr) {
+            JS_FreeValue(ctx, value);
+            return JS_EXCEPTION;
+        }
+        mr->value = value;
+    }
+    return js_dup(mr->value);
 }
 
 static JSValue js_map_has(JSContext *ctx, JSValueConst this_val,
@@ -58491,10 +59027,10 @@ static void js_map_mark(JSRuntime *rt, JSValueConst val,
 
     s = p->u.map_state;
     if (s) {
+        assert(!s->is_weak);
         list_for_each(el, &s->records) {
             mr = list_entry(el, JSMapRecord, link);
-            if (!s->is_weak)
-                JS_MarkValue(rt, mr->key, mark_func);
+            JS_MarkValue(rt, mr->key, mark_func);
             JS_MarkValue(rt, mr->value, mark_func);
         }
     }
@@ -58716,16 +59252,19 @@ static int JS_WriteSet(BCWriterState *s, struct JSMapState *map_state)
     return js_map_write(s, map_state, MAGIC_SET);
 }
 
-static int js_setlike_get_size(JSContext *ctx, JSValueConst setlike,
-                               int64_t *pout)
+static int js_setlike_get_props(JSContext *ctx, JSValueConst setlike,
+                                uint64_t *psize, JSValue *phas, JSValue *pkeys)
 {
+    JSValue has, keys, v;
     JSMapState *s;
-    JSValue v;
+    uint64_t size;
     double d;
 
+    keys = JS_UNDEFINED;
+    has = JS_UNDEFINED;
     s = JS_GetOpaque(setlike, JS_CLASS_SET);
     if (s) {
-        *pout = s->record_count;
+        size = s->record_count;
     } else {
         v = JS_GetProperty(ctx, setlike, JS_ATOM_size);
         if (JS_IsException(v))
@@ -58736,91 +59275,73 @@ static int js_setlike_get_size(JSContext *ctx, JSValueConst setlike,
         }
         if (JS_ToFloat64Free(ctx, &d, v) < 0)
             return -1;
-        if (isnan(d)) {
-            JS_ThrowTypeError(ctx, ".size is not a number");
+        if (d < 0) {
+            JS_ThrowRangeError(ctx, ".size is not a legal size");
             return -1;
         }
-        *pout = d;
+        if (isnan(d)) {
+            JS_ThrowTypeError(ctx, ".size is not a legal size");
+            return -1;
+        }
+        if (isinf(d) || d > (double)MAX_SAFE_INTEGER) {
+            size = UINT64_MAX;
+        } else {
+            size = (uint64_t)d; // cast for expository reasons
+        }
     }
-    return 0;
-}
-
-static int js_setlike_get_has(JSContext *ctx, JSValueConst setlike,
-                              JSValue *pout)
-{
-    JSValue v;
-
-    v = JS_GetProperty(ctx, setlike, JS_ATOM_has);
-    if (JS_IsException(v))
+    has = JS_GetProperty(ctx, setlike, JS_ATOM_has);
+    if (JS_IsException(has))
         return -1;
-    if (JS_IsUndefined(v)) {
-        JS_ThrowTypeError(ctx, ".has is undefined");
-        return -1;
-    }
-    if (!JS_IsFunction(ctx, v)) {
+    if (!JS_IsFunction(ctx, has)) {
         JS_ThrowTypeError(ctx, ".has is not a function");
-        JS_FreeValue(ctx, v);
-        return -1;
+        goto fail;
     }
-    *pout = v;
-    return 0;
-}
-
-static int js_setlike_get_keys(JSContext *ctx, JSValueConst setlike,
-                               JSValue *pout)
-{
-    JSValue v;
-
-    v = JS_GetProperty(ctx, setlike, JS_ATOM_keys);
-    if (JS_IsException(v))
-        return -1;
-    if (JS_IsUndefined(v)) {
-        JS_ThrowTypeError(ctx, ".keys is undefined");
-        return -1;
-    }
-    if (!JS_IsFunction(ctx, v)) {
+    keys = JS_GetProperty(ctx, setlike, JS_ATOM_keys);
+    if (JS_IsException(keys))
+        goto fail;
+    if (!JS_IsFunction(ctx, keys)) {
         JS_ThrowTypeError(ctx, ".keys is not a function");
-        JS_FreeValue(ctx, v);
-        return -1;
+        goto fail;
     }
-    *pout = v;
+    *psize = size;
+    *phas = has;
+    *pkeys = keys;
     return 0;
+fail:
+    JS_FreeValue(ctx, has);
+    JS_FreeValue(ctx, keys);
+    return -1;
 }
 
 static JSValue js_set_isDisjointFrom(JSContext *ctx, JSValueConst this_val,
                                      int argc, JSValueConst *argv)
 {
-    JSValue item, iter, keys, has, next, rv, rval;
+    JSValue has, item, iter, keys, next, rv, rval;
+    JSValueConst setlike;
     int done;
     bool found;
     JSMapState *s;
-    int64_t size;
+    uint64_t size;
     int ok;
 
-    has = JS_UNDEFINED;
-    iter = JS_UNDEFINED;
-    keys = JS_UNDEFINED;
-    next = JS_UNDEFINED;
-    rval = JS_EXCEPTION;
     s = JS_GetOpaque2(ctx, this_val, JS_CLASS_SET);
     if (!s)
-        goto exception;
-    // order matters!
-    if (js_setlike_get_size(ctx, argv[0], &size) < 0)
-        goto exception;
-    if (js_setlike_get_has(ctx, argv[0], &has) < 0)
-        goto exception;
-    if (js_setlike_get_keys(ctx, argv[0], &keys) < 0)
-        goto exception;
+        return JS_EXCEPTION;
+    setlike = argv[0];
+    if (js_setlike_get_props(ctx, setlike, &size, &has, &keys) < 0)
+        return JS_EXCEPTION;
+    iter = JS_UNDEFINED;
+    next = JS_UNDEFINED;
+    rval = JS_EXCEPTION;
     if (s->record_count > size) {
-        iter = JS_Call(ctx, keys, argv[0], 0, NULL);
+        iter = JS_Call(ctx, keys, setlike, 0, NULL);
         if (JS_IsException(iter))
             goto exception;
         next = JS_GetProperty(ctx, iter, JS_ATOM_next);
         if (JS_IsException(next))
             goto exception;
         found = false;
-        do {
+        for (;;) {
             item = JS_IteratorNext(ctx, iter, next, 0, NULL, &done);
             if (JS_IsException(item))
                 goto exception;
@@ -58829,7 +59350,12 @@ static JSValue js_set_isDisjointFrom(JSContext *ctx, JSValueConst this_val,
             item = map_normalize_key(ctx, item);
             found = (NULL != map_find_record(ctx, s, item));
             JS_FreeValue(ctx, item);
-        } while (!found);
+            if (!found)
+                continue;
+            if (JS_IteratorClose(ctx, iter, /*is_exception_pending*/false) < 0)
+                goto exception;
+            break;
+        }
     } else {
         iter = js_create_map_iterator(ctx, this_val, 0, NULL, MAGIC_SET);
         if (JS_IsException(iter))
@@ -58841,7 +59367,7 @@ static JSValue js_set_isDisjointFrom(JSContext *ctx, JSValueConst this_val,
                 goto exception;
             if (done) // item is JS_UNDEFINED
                 break;
-            rv = JS_Call(ctx, has, argv[0], 1, vc(&item));
+            rv = JS_Call(ctx, has, setlike, 1, vc(&item));
             JS_FreeValue(ctx, item);
             ok = JS_ToBoolFree(ctx, rv); // returns -1 if rv is JS_EXCEPTION
             if (ok < 0)
@@ -58861,27 +59387,22 @@ exception:
 static JSValue js_set_isSubsetOf(JSContext *ctx, JSValueConst this_val,
                                  int argc, JSValueConst *argv)
 {
-    JSValue item, iter, keys, has, next, rv, rval;
+    JSValue has, item, iter, keys, next, rv, rval;
+    JSValueConst setlike;
     bool found;
     JSMapState *s;
-    int64_t size;
+    uint64_t size;
     int done, ok;
 
-    has = JS_UNDEFINED;
-    iter = JS_UNDEFINED;
-    keys = JS_UNDEFINED;
-    next = JS_UNDEFINED;
-    rval = JS_EXCEPTION;
     s = JS_GetOpaque2(ctx, this_val, JS_CLASS_SET);
     if (!s)
-        goto exception;
-    // order matters!
-    if (js_setlike_get_size(ctx, argv[0], &size) < 0)
-        goto exception;
-    if (js_setlike_get_has(ctx, argv[0], &has) < 0)
-        goto exception;
-    if (js_setlike_get_keys(ctx, argv[0], &keys) < 0)
-        goto exception;
+        return JS_EXCEPTION;
+    setlike = argv[0];
+    if (js_setlike_get_props(ctx, setlike, &size, &has, &keys) < 0)
+        return JS_EXCEPTION;
+    iter = JS_UNDEFINED;
+    next = JS_UNDEFINED;
+    rval = JS_EXCEPTION;
     found = false;
     if (s->record_count > size)
         goto fini;
@@ -58895,7 +59416,7 @@ static JSValue js_set_isSubsetOf(JSContext *ctx, JSValueConst this_val,
             goto exception;
         if (done) // item is JS_UNDEFINED
             break;
-        rv = JS_Call(ctx, has, argv[0], 1, vc(&item));
+        rv = JS_Call(ctx, has, setlike, 1, vc(&item));
         JS_FreeValue(ctx, item);
         ok = JS_ToBoolFree(ctx, rv); // returns -1 if rv is JS_EXCEPTION
         if (ok < 0)
@@ -58915,38 +59436,33 @@ exception:
 static JSValue js_set_isSupersetOf(JSContext *ctx, JSValueConst this_val,
                                    int argc, JSValueConst *argv)
 {
-    JSValue item, iter, keys, has, next, rval;
+    JSValue has, item, iter, keys, next, rval;
+    JSValueConst setlike;
     int done;
     bool found;
     JSMapState *s;
-    int64_t size;
+    uint64_t size;
 
-    has = JS_UNDEFINED;
-    iter = JS_UNDEFINED;
-    keys = JS_UNDEFINED;
-    next = JS_UNDEFINED;
-    rval = JS_EXCEPTION;
     s = JS_GetOpaque2(ctx, this_val, JS_CLASS_SET);
     if (!s)
-        goto exception;
-    // order matters!
-    if (js_setlike_get_size(ctx, argv[0], &size) < 0)
-        goto exception;
-    if (js_setlike_get_has(ctx, argv[0], &has) < 0)
-        goto exception;
-    if (js_setlike_get_keys(ctx, argv[0], &keys) < 0)
-        goto exception;
+        return JS_EXCEPTION;
+    setlike = argv[0];
+    if (js_setlike_get_props(ctx, setlike, &size, &has, &keys) < 0)
+        return JS_EXCEPTION;
+    iter = JS_UNDEFINED;
+    next = JS_UNDEFINED;
+    rval = JS_EXCEPTION;
     found = false;
     if (s->record_count < size)
         goto fini;
-    iter = JS_Call(ctx, keys, argv[0], 0, NULL);
+    iter = JS_Call(ctx, keys, setlike, 0, NULL);
     if (JS_IsException(iter))
         goto exception;
     next = JS_GetProperty(ctx, iter, JS_ATOM_next);
     if (JS_IsException(next))
         goto exception;
     found = true;
-    do {
+    for (;;) {
         item = JS_IteratorNext(ctx, iter, next, 0, NULL, &done);
         if (JS_IsException(item))
             goto exception;
@@ -58955,7 +59471,12 @@ static JSValue js_set_isSupersetOf(JSContext *ctx, JSValueConst this_val,
         item = map_normalize_key(ctx, item);
         found = (NULL != map_find_record(ctx, s, item));
         JS_FreeValue(ctx, item);
-    } while (found);
+        if (found)
+            continue;
+        if (JS_IteratorClose(ctx, iter, /*is_exception_pending*/false) < 0)
+            goto exception;
+        break;
+    }
 fini:
     rval = found ? JS_TRUE : JS_FALSE;
 exception:
@@ -58969,29 +59490,24 @@ exception:
 static JSValue js_set_intersection(JSContext *ctx, JSValueConst this_val,
                                    int argc, JSValueConst *argv)
 {
-    JSValue newset, item, iter, keys, has, next, rv;
+    JSValue has, item, iter, keys, newset, next, rv;
+    JSValueConst setlike;
     JSMapState *s, *t;
     JSMapRecord *mr;
-    int64_t size;
+    uint64_t size;
     int done, ok;
 
-    has = JS_UNDEFINED;
-    iter = JS_UNDEFINED;
-    keys = JS_UNDEFINED;
-    next = JS_UNDEFINED;
-    newset = JS_UNDEFINED;
     s = JS_GetOpaque2(ctx, this_val, JS_CLASS_SET);
     if (!s)
-        goto exception;
-    // order matters!
-    if (js_setlike_get_size(ctx, argv[0], &size) < 0)
-        goto exception;
-    if (js_setlike_get_has(ctx, argv[0], &has) < 0)
-        goto exception;
-    if (js_setlike_get_keys(ctx, argv[0], &keys) < 0)
-        goto exception;
+        return JS_EXCEPTION;
+    setlike = argv[0];
+    if (js_setlike_get_props(ctx, setlike, &size, &has, &keys) < 0)
+        return JS_EXCEPTION;
+    iter = JS_UNDEFINED;
+    next = JS_UNDEFINED;
+    newset = JS_UNDEFINED;
     if (s->record_count > size) {
-        iter = JS_Call(ctx, keys, argv[0], 0, NULL);
+        iter = JS_Call(ctx, keys, setlike, 0, NULL);
         if (JS_IsException(iter))
             goto exception;
         next = JS_GetProperty(ctx, iter, JS_ATOM_next);
@@ -59033,7 +59549,7 @@ static JSValue js_set_intersection(JSContext *ctx, JSValueConst this_val,
                 goto exception;
             if (done) // item is JS_UNDEFINED
                 break;
-            rv = JS_Call(ctx, has, argv[0], 1, vc(&item));
+            rv = JS_Call(ctx, has, setlike, 1, vc(&item));
             ok = JS_ToBoolFree(ctx, rv); // returns -1 if rv is JS_EXCEPTION
             if (ok > 0) {
                 item = map_normalize_key(ctx, item);
@@ -59067,30 +59583,25 @@ fini:
 static JSValue js_set_difference(JSContext *ctx, JSValueConst this_val,
                                  int argc, JSValueConst *argv)
 {
-    JSValue newset, item, iter, keys, has, next, rv;
+    JSValue has, item, iter, keys, newset, next, rv;
+    JSValueConst setlike;
     JSMapState *s, *t;
     JSMapRecord *mr;
-    int64_t size;
+    uint64_t size;
     int done;
     int ok;
 
-    has = JS_UNDEFINED;
-    iter = JS_UNDEFINED;
-    keys = JS_UNDEFINED;
-    next = JS_UNDEFINED;
-    newset = JS_UNDEFINED;
     s = JS_GetOpaque2(ctx, this_val, JS_CLASS_SET);
     if (!s)
-        goto exception;
-    // order matters!
-    if (js_setlike_get_size(ctx, argv[0], &size) < 0)
-        goto exception;
-    if (js_setlike_get_has(ctx, argv[0], &has) < 0)
-        goto exception;
-    if (js_setlike_get_keys(ctx, argv[0], &keys) < 0)
-        goto exception;
+        return JS_EXCEPTION;
+    setlike = argv[0];
+    if (js_setlike_get_props(ctx, setlike, &size, &has, &keys) < 0)
+        return JS_EXCEPTION;
+    iter = JS_UNDEFINED;
+    next = JS_UNDEFINED;
+    newset = JS_UNDEFINED;
     if (s->record_count > size) {
-        iter = JS_Call(ctx, keys, argv[0], 0, NULL);
+        iter = JS_Call(ctx, keys, setlike, 0, NULL);
         if (JS_IsException(iter))
             goto exception;
         next = JS_GetProperty(ctx, iter, JS_ATOM_next);
@@ -59126,7 +59637,7 @@ static JSValue js_set_difference(JSContext *ctx, JSValueConst this_val,
                 goto exception;
             if (done) // item is JS_UNDEFINED
                 break;
-            rv = JS_Call(ctx, has, argv[0], 1, vc(&item));
+            rv = JS_Call(ctx, has, setlike, 1, vc(&item));
             ok = JS_ToBoolFree(ctx, rv); // returns -1 if rv is JS_EXCEPTION
             if (ok == 0) {
                 item = map_normalize_key(ctx, item);
@@ -59160,29 +59671,28 @@ fini:
 static JSValue js_set_symmetricDifference(JSContext *ctx, JSValueConst this_val,
                                           int argc, JSValueConst *argv)
 {
-    JSValue newset, item, iter, next, rv;
+    JSValue has, item, iter, keys, newset, next;
+    JSValueConst setlike;
     struct list_head *el;
     JSMapState *s, *t;
     JSMapRecord *mr;
-    int64_t size;
+    uint64_t size;
     int done;
     bool present;
 
     s = JS_GetOpaque2(ctx, this_val, JS_CLASS_SET);
     if (!s)
         return JS_EXCEPTION;
-    // order matters! they're JS-observable side effects
-    if (js_setlike_get_size(ctx, argv[0], &size) < 0)
+    setlike = argv[0];
+    if (js_setlike_get_props(ctx, setlike, &size, &has, &keys) < 0)
         return JS_EXCEPTION;
-    if (js_setlike_get_has(ctx, argv[0], &rv) < 0)
-        return JS_EXCEPTION;
-    JS_FreeValue(ctx, rv);
-    newset = js_map_constructor(ctx, JS_UNDEFINED, 0, NULL, MAGIC_SET);
-    if (JS_IsException(newset))
-        return JS_EXCEPTION;
-    t = JS_GetOpaque(newset, JS_CLASS_SET);
+    JS_FreeValue(ctx, has);
     iter = JS_UNDEFINED;
     next = JS_UNDEFINED;
+    newset = js_map_constructor(ctx, JS_UNDEFINED, 0, NULL, MAGIC_SET);
+    if (JS_IsException(newset))
+        goto exception;
+    t = JS_GetOpaque(newset, JS_CLASS_SET);
     // can't clone this_val using js_map_constructor(),
     // test262 mandates we don't call the .add method
     list_for_each(el, &s->records) {
@@ -59194,10 +59704,7 @@ static JSValue js_set_symmetricDifference(JSContext *ctx, JSValueConst this_val,
             goto exception;
         mr->value = JS_UNDEFINED;
     }
-    iter = JS_GetProperty(ctx, argv[0], JS_ATOM_keys);
-    if (JS_IsException(iter))
-        goto exception;
-    iter = JS_CallFree(ctx, iter, argv[0], 0, NULL);
+    iter = JS_Call(ctx, keys, setlike, 0, NULL);
     if (JS_IsException(iter))
         goto exception;
     next = JS_GetProperty(ctx, iter, JS_ATOM_next);
@@ -59240,6 +59747,7 @@ exception:
     JS_FreeValue(ctx, newset);
     newset = JS_EXCEPTION;
 fini:
+    JS_FreeValue(ctx, keys);
     JS_FreeValue(ctx, next);
     JS_FreeValue(ctx, iter);
     return newset;
@@ -59248,28 +59756,28 @@ fini:
 static JSValue js_set_union(JSContext *ctx, JSValueConst this_val,
                             int argc, JSValueConst *argv)
 {
-    JSValue newset, item, iter, next, rv;
+    JSValue has, item, iter, keys, newset, next, rv;
+    JSValueConst setlike;
     struct list_head *el;
     JSMapState *s, *t;
     JSMapRecord *mr;
-    int64_t size;
+    uint64_t size;
     int done;
 
+    iter = JS_UNDEFINED;
     s = JS_GetOpaque2(ctx, this_val, JS_CLASS_SET);
     if (!s)
         return JS_EXCEPTION;
-    // order matters! they're JS-observable side effects
-    if (js_setlike_get_size(ctx, argv[0], &size) < 0)
+    setlike = argv[0];
+    if (js_setlike_get_props(ctx, setlike, &size, &has, &keys) < 0)
         return JS_EXCEPTION;
-    if (js_setlike_get_has(ctx, argv[0], &rv) < 0)
-        return JS_EXCEPTION;
-    JS_FreeValue(ctx, rv);
-    newset = js_map_constructor(ctx, JS_UNDEFINED, 0, NULL, MAGIC_SET);
-    if (JS_IsException(newset))
-        return JS_EXCEPTION;
-    t = JS_GetOpaque(newset, JS_CLASS_SET);
+    JS_FreeValue(ctx, has);
     iter = JS_UNDEFINED;
     next = JS_UNDEFINED;
+    newset = js_map_constructor(ctx, JS_UNDEFINED, 0, NULL, MAGIC_SET);
+    if (JS_IsException(newset))
+        goto exception;
+    t = JS_GetOpaque(newset, JS_CLASS_SET);
     list_for_each(el, &s->records) {
         mr = list_entry(el, JSMapRecord, link);
         if (mr->empty)
@@ -59279,10 +59787,7 @@ static JSValue js_set_union(JSContext *ctx, JSValueConst this_val,
             goto exception;
         mr->value = JS_UNDEFINED;
     }
-    iter = JS_GetProperty(ctx, argv[0], JS_ATOM_keys);
-    if (JS_IsException(iter))
-        goto exception;
-    iter = JS_CallFree(ctx, iter, argv[0], 0, NULL);
+    iter = JS_Call(ctx, keys, setlike, 0, NULL);
     if (JS_IsException(iter))
         goto exception;
     next = JS_GetProperty(ctx, iter, JS_ATOM_next);
@@ -59305,6 +59810,7 @@ exception:
     JS_FreeValue(ctx, newset);
     newset = JS_EXCEPTION;
 fini:
+    JS_FreeValue(ctx, keys);
     JS_FreeValue(ctx, next);
     JS_FreeValue(ctx, iter);
     return newset;
@@ -59322,6 +59828,10 @@ static const JSCFunctionListEntry js_set_funcs[] = {
 static const JSCFunctionListEntry js_map_proto_funcs[] = {
     JS_CFUNC_MAGIC_DEF("set", 2, js_map_set, 0 ),
     JS_CFUNC_MAGIC_DEF("get", 1, js_map_get, 0 ),
+    JS_CFUNC_MAGIC_DEF("getOrInsert", 2, js_map_getOrInsert,
+                       JS_CLASS_MAP<<1 | /*computed*/false ),
+    JS_CFUNC_MAGIC_DEF("getOrInsertComputed", 2, js_map_getOrInsert,
+                       JS_CLASS_MAP<<1 | /*computed*/true ),
     JS_CFUNC_MAGIC_DEF("has", 1, js_map_has, 0 ),
     JS_CFUNC_MAGIC_DEF("delete", 1, js_map_delete, 0 ),
     JS_CFUNC_MAGIC_DEF("clear", 0, js_map_clear, 0 ),
@@ -59368,6 +59878,10 @@ static const JSCFunctionListEntry js_set_iterator_proto_funcs[] = {
 static const JSCFunctionListEntry js_weak_map_proto_funcs[] = {
     JS_CFUNC_MAGIC_DEF("set", 2, js_map_set, MAGIC_WEAK ),
     JS_CFUNC_MAGIC_DEF("get", 1, js_map_get, MAGIC_WEAK ),
+    JS_CFUNC_MAGIC_DEF("getOrInsert", 2, js_map_getOrInsert,
+                       JS_CLASS_WEAKMAP<<1 | /*computed*/false ),
+    JS_CFUNC_MAGIC_DEF("getOrInsertComputed", 2, js_map_getOrInsert,
+                       JS_CLASS_WEAKMAP<<1 | /*computed*/true ),
     JS_CFUNC_MAGIC_DEF("has", 1, js_map_has, MAGIC_WEAK ),
     JS_CFUNC_MAGIC_DEF("delete", 1, js_map_delete, MAGIC_WEAK ),
     JS_PROP_STRING_DEF("[Symbol.toStringTag]", "WeakMap", JS_PROP_CONFIGURABLE ),
@@ -59540,7 +60054,7 @@ static JSValue promise_reaction_job(JSContext *ctx, int argc,
     }
     is_reject = JS_IsException(res);
     if (is_reject) {
-        if (unlikely(JS_IsUncatchableError(ctx, ctx->rt->current_exception)))
+        if (unlikely(JS_IsUncatchableError(ctx->rt->current_exception)))
             return JS_EXCEPTION;
         res = JS_GetException(ctx);
     }
@@ -59556,6 +60070,12 @@ static JSValue promise_reaction_job(JSContext *ctx, int argc,
     JS_FreeValue(ctx, res);
 
     return res2;
+}
+
+void JS_SetPromiseHook(JSRuntime *rt, JSPromiseHook promise_hook, void *opaque)
+{
+    rt->promise_hook = promise_hook;
+    rt->promise_hook_opaque = opaque;
 }
 
 void JS_SetHostPromiseRejectionTracker(JSRuntime *rt,
@@ -59581,12 +60101,19 @@ static void fulfill_or_reject_promise(JSContext *ctx, JSValueConst promise,
 
     promise_trace(ctx, "fulfill_or_reject_promise: is_reject=%d\n", is_reject);
 
+    if (s->promise_state == JS_PROMISE_FULFILLED) {
+        JSRuntime *rt = ctx->rt;
+        if (rt->promise_hook) {
+            rt->promise_hook(ctx, JS_PROMISE_HOOK_RESOLVE, promise,
+                             JS_UNDEFINED, rt->promise_hook_opaque);
+        }
+    }
+
     if (s->promise_state == JS_PROMISE_REJECTED && !s->is_handled) {
         JSRuntime *rt = ctx->rt;
-        if (rt->host_promise_rejection_tracker) {
+        if (rt->host_promise_rejection_tracker)
             rt->host_promise_rejection_tracker(ctx, promise, value, false,
                                                rt->host_promise_rejection_tracker_opaque);
-        }
     }
 
     list_for_each_safe(el, el1, &s->promise_reactions[is_reject]) {
@@ -59608,17 +60135,12 @@ static void fulfill_or_reject_promise(JSContext *ctx, JSValueConst promise,
     }
 }
 
-static void reject_promise(JSContext *ctx, JSValueConst promise,
-                           JSValueConst value)
-{
-    fulfill_or_reject_promise(ctx, promise, value, true);
-}
-
 static JSValue js_promise_resolve_thenable_job(JSContext *ctx,
                                                int argc, JSValueConst *argv)
 {
     JSValueConst promise, thenable, then;
     JSValue args[2], res;
+    JSRuntime *rt;
 
     promise_trace(ctx, "js_promise_resolve_thenable_job\n");
 
@@ -59628,7 +60150,16 @@ static JSValue js_promise_resolve_thenable_job(JSContext *ctx,
     then = argv[2];
     if (js_create_resolving_functions(ctx, args, promise) < 0)
         return JS_EXCEPTION;
+    rt = ctx->rt;
+    if (rt->promise_hook) {
+        rt->promise_hook(ctx, JS_PROMISE_HOOK_BEFORE, promise, JS_UNDEFINED,
+                         rt->promise_hook_opaque);
+    }
     res = JS_Call(ctx, then, thenable, 2, vc(args));
+    if (rt->promise_hook) {
+        rt->promise_hook(ctx, JS_PROMISE_HOOK_AFTER, promise, JS_UNDEFINED,
+                         rt->promise_hook_opaque);
+    }
     if (JS_IsException(res)) {
         JSValue error = JS_GetException(ctx);
         res = JS_Call(ctx, args[1], JS_UNDEFINED, 1, vc(&error));
@@ -59749,7 +60280,7 @@ static JSValue js_promise_resolve_function_call(JSContext *ctx,
         JSValue error;
     fail_reject:
         error = JS_GetException(ctx);
-        reject_promise(ctx, s->promise, error);
+        fulfill_or_reject_promise(ctx, s->promise, error, true);
         JS_FreeValue(ctx, error);
     } else if (!JS_IsFunction(ctx, then)) {
         JS_FreeValue(ctx, then);
@@ -59811,6 +60342,7 @@ static JSValue js_promise_constructor(JSContext *ctx, JSValueConst new_target,
     JSValueConst executor;
     JSValue obj;
     JSPromiseData *s;
+    JSRuntime *rt;
     JSValue args[2], ret;
     int i;
 
@@ -59831,6 +60363,14 @@ static JSValue js_promise_constructor(JSContext *ctx, JSValueConst new_target,
     JS_SetOpaqueInternal(obj, s);
     if (js_create_resolving_functions(ctx, args, obj))
         goto fail;
+    rt = ctx->rt;
+    if (rt->promise_hook) {
+        JSValueConst parent_promise = JS_UNDEFINED;
+        if (rt->parent_promise)
+            parent_promise = rt->parent_promise->value;
+        rt->promise_hook(ctx, JS_PROMISE_HOOK_INIT, obj, parent_promise,
+                         rt->promise_hook_opaque);
+    }
     ret = JS_Call(ctx, executor, JS_UNDEFINED, 2, vc(args));
     if (JS_IsException(ret)) {
         JSValue ret2, error;
@@ -59888,8 +60428,7 @@ static JSValue js_new_promise_capability(JSContext *ctx,
 
     executor = js_promise_executor_new(ctx);
     if (JS_IsException(executor))
-        return executor;
-
+        return JS_EXCEPTION;
     if (JS_IsUndefined(ctor)) {
         result_promise = js_promise_constructor(ctx, ctor, 1, vc(&executor));
     } else {
@@ -59960,16 +60499,29 @@ static JSValue js_promise_withResolvers(JSContext *ctx, JSValueConst this_val,
     if (JS_IsException(result_promise))
         return JS_EXCEPTION;
     obj = JS_NewObject(ctx);
-    if (JS_IsException(obj)) {
-        JS_FreeValue(ctx, resolving_funcs[0]);
-        JS_FreeValue(ctx, resolving_funcs[1]);
-        JS_FreeValue(ctx, result_promise);
-        return JS_EXCEPTION;
+    if (JS_IsException(obj))
+        goto exception;
+    if (JS_DefinePropertyValue(ctx, obj, JS_ATOM_promise, result_promise,
+                               JS_PROP_C_W_E) < 0) {
+        goto exception;
     }
-    JS_DefinePropertyValue(ctx, obj, JS_ATOM_promise, result_promise, JS_PROP_C_W_E);
-    JS_DefinePropertyValue(ctx, obj, JS_ATOM_resolve, resolving_funcs[0], JS_PROP_C_W_E);
-    JS_DefinePropertyValue(ctx, obj, JS_ATOM_reject, resolving_funcs[1], JS_PROP_C_W_E);
+    result_promise = JS_UNDEFINED;
+    if (JS_DefinePropertyValue(ctx, obj, JS_ATOM_resolve, resolving_funcs[0],
+                               JS_PROP_C_W_E) < 0) {
+        goto exception;
+    }
+    resolving_funcs[0] = JS_UNDEFINED;
+    if (JS_DefinePropertyValue(ctx, obj, JS_ATOM_reject, resolving_funcs[1],
+                               JS_PROP_C_W_E) < 0) {
+        goto exception;
+    }
     return obj;
+exception:
+    JS_FreeValue(ctx, resolving_funcs[0]);
+    JS_FreeValue(ctx, resolving_funcs[1]);
+    JS_FreeValue(ctx, result_promise);
+    JS_FreeValue(ctx, obj);
+    return JS_EXCEPTION;
 }
 
 static JSValue js_promise_try(JSContext *ctx, JSValueConst this_val,
@@ -60340,10 +60892,9 @@ static __exception int perform_promise_then(JSContext *ctx,
         JSValueConst args[5];
         if (s->promise_state == JS_PROMISE_REJECTED && !s->is_handled) {
             JSRuntime *rt = ctx->rt;
-            if (rt->host_promise_rejection_tracker) {
+            if (rt->host_promise_rejection_tracker)
                 rt->host_promise_rejection_tracker(ctx, promise, s->promise_result,
                                                    true, rt->host_promise_rejection_tracker_opaque);
-            }
         }
         i = s->promise_state - JS_PROMISE_FULFILLED;
         rd = rd_array[i];
@@ -60364,7 +60915,10 @@ static JSValue js_promise_then(JSContext *ctx, JSValueConst this_val,
                                int argc, JSValueConst *argv)
 {
     JSValue ctor, result_promise, resolving_funcs[2];
+    bool have_promise_hook;
+    JSValueLink link;
     JSPromiseData *s;
+    JSRuntime *rt;
     int i, ret;
 
     s = JS_GetOpaque2(ctx, this_val, JS_CLASS_PROMISE);
@@ -60374,7 +60928,16 @@ static JSValue js_promise_then(JSContext *ctx, JSValueConst this_val,
     ctor = JS_SpeciesConstructor(ctx, this_val, JS_UNDEFINED);
     if (JS_IsException(ctor))
         return ctor;
+    rt = ctx->rt;
+    // always restore, even if js_new_promise_capability callee removes hook
+    have_promise_hook = (rt->promise_hook != NULL);
+    if (have_promise_hook) {
+        link = (JSValueLink){rt->parent_promise, this_val};
+        rt->parent_promise = &link;
+    }
     result_promise = js_new_promise_capability(ctx, resolving_funcs, ctor);
+    if (have_promise_hook)
+        rt->parent_promise = link.next;
     JS_FreeValue(ctx, ctor);
     if (JS_IsException(result_promise))
         return result_promise;
@@ -60612,9 +61175,12 @@ static JSValue js_async_from_sync_iterator_next(JSContext *ctx, JSValueConst thi
             if (magic == GEN_MAGIC_RETURN) {
                 err = js_create_iterator_result(ctx, js_dup(argv[0]), true);
                 is_reject = 0;
+            } else if (JS_IteratorClose(ctx, s->sync_iter, false)) {
+                err = JS_GetException(ctx);
+                is_reject = 1;
             } else {
-                err = JS_MakeError(ctx, JS_TYPE_ERROR, "throw is not a method",
-                                   true);
+                err = JS_MakeError2(ctx, JS_TYPE_ERROR, /*add_backtrace*/true,
+                                    "throw is not a method");
                 is_reject = 1;
             }
             goto done_resolve;
@@ -61474,7 +62040,7 @@ static JSValue get_date_string(JSContext *ctx, JSValueConst this_val,
     }
     if (!pos) {
         // XXX: should throw exception?
-        return JS_AtomToString(ctx, JS_ATOM_empty_string);
+        return js_empty_string(ctx->rt);
     }
     return js_new_string8_len(ctx, buf, pos);
 }
@@ -61621,6 +62187,9 @@ static bool string_get_digits(const uint8_t *sp, int *pp, int *pval,
 
     p_start = p;
     while ((c = sp[p]) >= '0' && c <= '9') {
+        /* arbitrary limit to 9 digits */
+        if (v >= 100000000)
+            return false;
         v = v * 10 + c - '0';
         p++;
         if (p - p_start == max_digits)
@@ -61664,7 +62233,7 @@ static bool string_get_tzoffset(const uint8_t *sp, int *pp, int *tzp, bool stric
     sgn = sp[p++];
     if (sgn == '+' || sgn == '-') {
         int n = p;
-        if (!string_get_digits(sp, &p, &hh, 1, 9))
+        if (!string_get_digits(sp, &p, &hh, 1, 0))
             return false;
         n = p - n;
         if (strict && n != 2 && n != 4)
@@ -61858,7 +62427,7 @@ static bool js_date_parse_otherstring(const uint8_t *sp,
                 *is_local = false;
             } else {
                 p++;
-                if (string_get_digits(sp, &p, &val, 1, 9)) {
+                if (string_get_digits(sp, &p, &val, 1, 0)) {
                     if (c == '-') {
                         if (val == 0)
                             return false;
@@ -61869,7 +62438,7 @@ static bool js_date_parse_otherstring(const uint8_t *sp,
                 }
             }
         } else
-        if (string_get_digits(sp, &p, &val, 1, 9)) {
+        if (string_get_digits(sp, &p, &val, 1, 0)) {
             if (string_skip_char(sp, &p, ':')) {
                 /* time part */
                 fields[3] = val;
@@ -62028,7 +62597,7 @@ static JSValue js_Date_parse(JSContext *ctx, JSValueConst this_val,
             for(i = 0; i < 7; i++)
                 fields1[i] = fields[i];
             d = set_date_fields(fields1, is_local) - fields[8] * 60000;
-            rv = JS_NewFloat64(ctx, d);
+            rv = js_float64(d);
         }
     }
     JS_FreeValue(ctx, s);
@@ -62261,7 +62830,9 @@ void JS_AddIntrinsicDate(JSContext *ctx)
 
 void JS_AddIntrinsicEval(JSContext *ctx)
 {
+#ifndef QJS_DISABLE_PARSER
     ctx->eval_internal = __JS_EvalInternal;
+#endif // QJS_DISABLE_PARSER
 }
 
 /* BigInt */
@@ -62277,40 +62848,25 @@ static JSValue JS_ToBigIntCtorFree(JSContext *ctx, JSValue val)
     case JS_TAG_BOOL:
         val = JS_NewBigInt64(ctx, JS_VALUE_GET_INT(val));
         break;
+    case JS_TAG_SHORT_BIG_INT:
     case JS_TAG_BIG_INT:
         break;
     case JS_TAG_FLOAT64:
         {
-            bf_t *a, a_s;
-
-            a = JS_ToBigInt1(ctx, &a_s, val);
-            if (!bf_is_finite(a)) {
-                JS_FreeValue(ctx, val);
-                val = JS_ThrowRangeError(ctx, "cannot convert NaN or Infinity to BigInt");
-            } else {
-                JSValue val1 = JS_NewBigInt(ctx);
-                bf_t *r;
-                int ret;
-                if (JS_IsException(val1)) {
-                    JS_FreeValue(ctx, val);
-                    return JS_EXCEPTION;
-                }
-                r = JS_GetBigInt(val1);
-                ret = bf_set(r, a);
-                ret |= bf_rint(r, BF_RNDZ);
-                JS_FreeValue(ctx, val);
-                if (ret & BF_ST_MEM_ERROR) {
-                    JS_FreeValue(ctx, val1);
-                    val = JS_ThrowOutOfMemory(ctx);
-                } else if (ret & BF_ST_INEXACT) {
-                    JS_FreeValue(ctx, val1);
+            double d = JS_VALUE_GET_FLOAT64(val);
+            JSBigInt *r;
+            int res;
+            r = js_bigint_from_float64(ctx, &res, d);
+            if (!r) {
+                if (res == 0) {
+                    val = JS_EXCEPTION;
+                } else if (res == 1) {
                     val = JS_ThrowRangeError(ctx, "cannot convert to BigInt: not an integer");
                 } else {
-                    val = JS_CompactBigInt(ctx, val1);
-                }
+                    val = JS_ThrowRangeError(ctx, "cannot convert NaN or Infinity to BigInt");                }
+            } else {
+                val = JS_CompactBigInt(ctx, r);
             }
-            if (a == &a_s)
-                bf_delete(a);
         }
         break;
     case JS_TAG_STRING:
@@ -62335,19 +62891,19 @@ static JSValue js_bigint_constructor(JSContext *ctx,
                                      int argc, JSValueConst *argv)
 {
     if (!JS_IsUndefined(new_target))
-        return JS_ThrowTypeError(ctx, "not a constructor");
+        return JS_ThrowTypeErrorNotAConstructor(ctx, new_target);
     return JS_ToBigIntCtorFree(ctx, js_dup(argv[0]));
 }
 
 static JSValue js_thisBigIntValue(JSContext *ctx, JSValueConst this_val)
 {
-    if (JS_IsBigInt(ctx, this_val))
+    if (JS_IsBigInt(this_val))
         return js_dup(this_val);
 
     if (JS_VALUE_GET_TAG(this_val) == JS_TAG_OBJECT) {
         JSObject *p = JS_VALUE_GET_OBJ(this_val);
         if (p->class_id == JS_CLASS_BIG_INT) {
-            if (JS_IsBigInt(ctx, p->u.object_data))
+            if (JS_IsBigInt(p->u.object_data))
                 return js_dup(p->u.object_data);
         }
     }
@@ -62390,38 +62946,62 @@ static JSValue js_bigint_asUintN(JSContext *ctx,
                                   int argc, JSValueConst *argv, int asIntN)
 {
     uint64_t bits;
-    bf_t a_s, *a = &a_s, *r, mask_s, *mask = &mask_s;
-    JSValue res;
+    JSValue res, a;
 
     if (JS_ToIndex(ctx, &bits, argv[0]))
         return JS_EXCEPTION;
-    res = JS_NewBigInt(ctx);
-    if (JS_IsException(res))
+    a = JS_ToBigInt(ctx, argv[1]);
+    if (JS_IsException(a))
         return JS_EXCEPTION;
-    a = JS_ToBigInt(ctx, &a_s, argv[1]);
-    if (!a) {
-        JS_FreeValue(ctx, res);
-        return JS_EXCEPTION;
-    }
-    /* XXX: optimize */
-    r = JS_GetBigInt(res);
-    bf_init(ctx->bf_ctx, mask);
-    bf_set_ui(mask, 1);
-    bf_mul_2exp(mask, bits, BF_PREC_INF, BF_RNDZ);
-    bf_add_si(mask, mask, -1, BF_PREC_INF, BF_RNDZ);
-    bf_logic_and(r, a, mask);
-    if (asIntN && bits != 0) {
-        bf_set_ui(mask, 1);
-        bf_mul_2exp(mask, bits - 1, BF_PREC_INF, BF_RNDZ);
-        if (bf_cmpu(r, mask) >= 0) {
-            bf_set_ui(mask, 1);
-            bf_mul_2exp(mask, bits, BF_PREC_INF, BF_RNDZ);
-            bf_sub(r, r, mask, BF_PREC_INF, BF_RNDZ);
+    if (bits == 0) {
+        JS_FreeValue(ctx, a);
+        res = __JS_NewShortBigInt(ctx, 0);
+    } else if (JS_VALUE_GET_TAG(a) == JS_TAG_SHORT_BIG_INT) {
+        /* fast case */
+        if (bits >= JS_SHORT_BIG_INT_BITS) {
+            res = a;
+        } else {
+            uint64_t v;
+            int shift;
+            shift = 64 - bits;
+            v = JS_VALUE_GET_SHORT_BIG_INT(a);
+            v = v << shift;
+            if (asIntN)
+                v = (int64_t)v >> shift;
+            else
+                v = v >> shift;
+            res = __JS_NewShortBigInt(ctx, v);
+        }
+    } else {
+        JSBigInt *r, *p = JS_VALUE_GET_PTR(a);
+        if (bits >= p->len * JS_LIMB_BITS) {
+            res = a;
+        } else {
+            int len, shift, i;
+            js_limb_t v;
+            len = (bits + JS_LIMB_BITS - 1) / JS_LIMB_BITS;
+            r = js_bigint_new(ctx, len);
+            if (!r) {
+                JS_FreeValue(ctx, a);
+                return JS_EXCEPTION;
+            }
+            r->len = len;
+            for(i = 0; i < len - 1; i++)
+                r->tab[i] = p->tab[i];
+            shift = (-bits) & (JS_LIMB_BITS - 1);
+            /* 0 <= shift <= JS_LIMB_BITS - 1 */
+            v = p->tab[len - 1] << shift;
+            if (asIntN)
+                v = (js_slimb_t)v >> shift;
+            else
+                v = v >> shift;
+            r->tab[len - 1] = v;
+            r = js_bigint_normalize(ctx, r);
+            JS_FreeValue(ctx, a);
+            res = JS_CompactBigInt(ctx, r);
         }
     }
-    bf_delete(mask);
-    JS_FreeBigInt(ctx, a, &a_s);
-    return JS_CompactBigInt(ctx, res);
+    return res;
 }
 
 static const JSCFunctionListEntry js_bigint_funcs[] = {
@@ -62480,7 +63060,7 @@ static void JS_AddIntrinsicBasicObjects(JSContext *ctx)
                                JS_NewAtomString(ctx, native_error_name[i]),
                                JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
         JS_DefinePropertyValue(ctx, proto, JS_ATOM_message,
-                               JS_AtomToString(ctx, JS_ATOM_empty_string),
+                               js_empty_string(ctx->rt),
                                JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
         ctx->native_error_proto[i] = proto;
     }
@@ -62512,16 +63092,14 @@ void JS_AddIntrinsicBaseObjects(JSContext *ctx)
     ctx->throw_type_error = JS_NewCFunction(ctx, js_throw_type_error, NULL, 0);
 
     /* add caller and arguments properties to throw a TypeError */
-    obj1 = JS_NewCFunction(ctx, js_function_proto_caller, NULL, 0);
     JS_DefineProperty(ctx, ctx->function_proto, JS_ATOM_caller, JS_UNDEFINED,
-                      obj1, ctx->throw_type_error,
+                      ctx->throw_type_error, ctx->throw_type_error,
                       JS_PROP_HAS_GET | JS_PROP_HAS_SET |
                       JS_PROP_HAS_CONFIGURABLE | JS_PROP_CONFIGURABLE);
     JS_DefineProperty(ctx, ctx->function_proto, JS_ATOM_arguments, JS_UNDEFINED,
-                      obj1, ctx->throw_type_error,
+                      ctx->throw_type_error, ctx->throw_type_error,
                       JS_PROP_HAS_GET | JS_PROP_HAS_SET |
                       JS_PROP_HAS_CONFIGURABLE | JS_PROP_CONFIGURABLE);
-    JS_FreeValue(ctx, obj1);
     JS_FreeValue(ctx, js_object_seal(ctx, JS_UNDEFINED, 1, vc(&ctx->throw_type_error), 1));
 
     /* Object */
@@ -62570,10 +63148,25 @@ void JS_AddIntrinsicBaseObjects(JSContext *ctx)
                                countof(js_iterator_proto_funcs));
     obj = JS_NewGlobalCConstructor(ctx, "Iterator", js_iterator_constructor, 0,
                                    ctx->class_proto[JS_CLASS_ITERATOR]);
+    // quirk: Iterator.prototype.constructor is an accessor property
+    // TODO(bnoordhuis) mildly inefficient because JS_NewGlobalCConstructor
+    // first creates a .constructor value property that we then replace with
+    // an accessor
+    ctx->iterator_ctor_getset = JS_NewCFunctionData(ctx, js_iterator_constructor_getset,
+                                                    0, 0, 1, vc(&obj));
+    JS_DefineProperty(ctx, ctx->class_proto[JS_CLASS_ITERATOR],
+                      JS_ATOM_constructor, JS_UNDEFINED,
+                      ctx->iterator_ctor_getset, ctx->iterator_ctor_getset,
+                      JS_PROP_HAS_GET|JS_PROP_HAS_SET|JS_PROP_WRITABLE|JS_PROP_CONFIGURABLE);
     ctx->iterator_ctor = js_dup(obj);
     JS_SetPropertyFunctionList(ctx, obj,
                                js_iterator_funcs,
                                countof(js_iterator_funcs));
+
+    ctx->class_proto[JS_CLASS_ITERATOR_CONCAT] = JS_NewObjectProto(ctx, ctx->class_proto[JS_CLASS_ITERATOR]);
+    JS_SetPropertyFunctionList(ctx, ctx->class_proto[JS_CLASS_ITERATOR_CONCAT],
+                               js_iterator_concat_proto_funcs,
+                               countof(js_iterator_concat_proto_funcs));
 
     ctx->class_proto[JS_CLASS_ITERATOR_HELPER] = JS_NewObjectProto(ctx, ctx->class_proto[JS_CLASS_ITERATOR]);
     JS_SetPropertyFunctionList(ctx, ctx->class_proto[JS_CLASS_ITERATOR_HELPER],
@@ -62595,6 +63188,10 @@ void JS_AddIntrinsicBaseObjects(JSContext *ctx)
     ctx->array_ctor = js_dup(obj);
     JS_SetPropertyFunctionList(ctx, obj, js_array_funcs,
                                countof(js_array_funcs));
+    JS_DefineAutoInitProperty(ctx, obj, JS_ATOM_fromAsync,
+                              JS_AUTOINIT_ID_BYTECODE,
+                              (void *)(uintptr_t)JS_BUILTIN_ARRAY_FROMASYNC,
+                              JS_PROP_WRITABLE|JS_PROP_CONFIGURABLE);
 
     /* XXX: create auto_initializer */
     {
@@ -62663,7 +63260,7 @@ void JS_AddIntrinsicBaseObjects(JSContext *ctx)
     /* String */
     ctx->class_proto[JS_CLASS_STRING] = JS_NewObjectProtoClass(ctx, ctx->class_proto[JS_CLASS_OBJECT],
                                                                JS_CLASS_STRING);
-    JS_SetObjectData(ctx, ctx->class_proto[JS_CLASS_STRING], JS_AtomToString(ctx, JS_ATOM_empty_string));
+    JS_SetObjectData(ctx, ctx->class_proto[JS_CLASS_STRING], js_empty_string(ctx->rt));
     obj = JS_NewGlobalCConstructor(ctx, "String", js_string_constructor, 1,
                                    ctx->class_proto[JS_CLASS_STRING]);
     JS_SetPropertyFunctionList(ctx, obj, js_string_funcs,
@@ -63090,6 +63687,43 @@ static bool array_buffer_is_resizable(const JSArrayBuffer *abuf)
     return abuf->max_byte_length >= 0;
 }
 
+static void js_array_buffer_update_typed_arrays(JSArrayBuffer *abuf)
+{
+    uint32_t size_log2, size_elem;
+    struct list_head *el;
+    JSTypedArray *ta;
+    JSObject *p;
+    uint8_t *data;
+    int64_t len;
+
+    len = abuf->byte_length;
+    data = abuf->data;
+    list_for_each(el, &abuf->array_list) {
+        ta = list_entry(el, JSTypedArray, link);
+        p = ta->obj;
+        if (p->class_id == JS_CLASS_DATAVIEW) {
+            if (ta->track_rab && ta->offset < len)
+                ta->length = len - ta->offset;
+            continue;
+        }
+        p->u.array.count = 0;
+        p->u.array.u.ptr = NULL;
+        size_log2 = typed_array_size_log2(p->class_id);
+        size_elem = 1 << size_log2;
+        if (ta->track_rab) {
+            if (len >= (int64_t)ta->offset + size_elem) {
+                p->u.array.count = (len - ta->offset) >> size_log2;
+                p->u.array.u.ptr = &data[ta->offset];
+            }
+        } else {
+            if (len >= (int64_t)ta->offset + ta->length) {
+                p->u.array.count = ta->length >> size_log2;
+                p->u.array.u.ptr = &data[ta->offset];
+            }
+        }
+    }
+}
+
 // ES #sec-arraybuffer.prototype.transfer
 static JSValue js_array_buffer_transfer(JSContext *ctx, JSValueConst this_val,
                                         int argc, JSValueConst *argv, int magic)
@@ -63142,6 +63776,7 @@ static JSValue js_array_buffer_transfer(JSContext *ctx, JSValueConst this_val,
     abuf->data = NULL;
     abuf->byte_length = 0;
     abuf->detached = true;
+    js_array_buffer_update_typed_arrays(abuf);
     return js_array_buffer_constructor3(ctx, JS_UNDEFINED, new_len, pmax_len,
                                         JS_CLASS_ARRAY_BUFFER,
                                         bs, abuf->free_func,
@@ -63151,11 +63786,7 @@ static JSValue js_array_buffer_transfer(JSContext *ctx, JSValueConst this_val,
 static JSValue js_array_buffer_resize(JSContext *ctx, JSValueConst this_val,
                                       int argc, JSValueConst *argv, int class_id)
 {
-    uint32_t size_log2, size_elem;
-    struct list_head *el;
     JSArrayBuffer *abuf;
-    JSTypedArray *ta;
-    JSObject *p;
     uint8_t *data;
     int64_t len;
 
@@ -63198,29 +63829,7 @@ static JSValue js_array_buffer_resize(JSContext *ctx, JSValueConst this_val,
         abuf->byte_length = len;
         abuf->data = data;
     }
-    data = abuf->data;
-    // update lengths of all typed arrays backed by this array buffer
-    list_for_each(el, &abuf->array_list) {
-        ta = list_entry(el, JSTypedArray, link);
-        p = ta->obj;
-        if (p->class_id == JS_CLASS_DATAVIEW)
-            continue;
-        p->u.array.count = 0;
-        p->u.array.u.ptr = NULL;
-        size_log2 = typed_array_size_log2(p->class_id);
-        size_elem = 1 << size_log2;
-        if (ta->track_rab) {
-            if (len >= (int64_t)ta->offset + size_elem) {
-                p->u.array.count = (len - ta->offset) >> size_log2;
-                p->u.array.u.ptr = &data[ta->offset];
-            }
-        } else {
-            if (len >= (int64_t)ta->offset + ta->length) {
-                p->u.array.count = ta->length >> size_log2;
-                p->u.array.u.ptr = &data[ta->offset];
-            }
-        }
-    }
+    js_array_buffer_update_typed_arrays(abuf);
     return JS_UNDEFINED;
 }
 
@@ -63279,7 +63888,7 @@ static JSValue js_array_buffer_slice(JSContext *ctx,
         goto fail;
     }
     /* must test again because of side effects */
-    if (abuf->detached) {
+    if (abuf->detached || abuf->byte_length < start + new_len) {
         JS_ThrowTypeErrorDetachedArrayBuffer(ctx);
         goto fail;
     }
@@ -63351,7 +63960,7 @@ static bool typed_array_is_oob(JSObject *p)
 
 /* WARNING: 'p' must be a typed array. Works even if the array buffer
    is detached */
-static uint32_t typed_array_get_length(JSContext *ctx, JSObject *p)
+static uint32_t typed_array_length(JSObject *p)
 {
     JSTypedArray *ta = p->u.typed_array;
     int size_log2 = typed_array_size_log2(p->class_id);
@@ -64073,7 +64682,6 @@ static JSValue js_typed_array_indexOf(JSContext *ctx, JSValueConst this_val,
     double d;
     float f;
     uint16_t hf;
-    bool oob;
 
     p = get_typed_array(ctx, this_val);
     if (!p)
@@ -64085,26 +64693,15 @@ static JSValue js_typed_array_indexOf(JSContext *ctx, JSValueConst this_val,
     if (len == 0)
         goto done;
 
-    oob = false;
     if (special == special_lastIndexOf) {
         k = len - 1;
         if (argc > 1) {
-            if (JS_ToFloat64(ctx, &d, argv[1]))
+            int64_t k1;
+            if (JS_ToInt64Clamp(ctx, &k1, argv[1], -1, len - 1, len))
                 goto exception;
-            if (isnan(d)) {
-                k = 0;
-            } else {
-                if (d >= 0) {
-                    if (d < k) {
-                        k = d;
-                    }
-                } else {
-                    d += len;
-                    if (d < 0)
-                        goto done;
-                    k = d;
-                }
-            }
+            k = k1;
+            if (k < 0)
+                goto done;
         }
         stop = -1;
         inc = -1;
@@ -64119,7 +64716,6 @@ static JSValue js_typed_array_indexOf(JSContext *ctx, JSValueConst this_val,
                     k = 0;
             } else if (k > len) {
                 k = len;
-                oob = true;
             }
         }
         stop = len;
@@ -64130,8 +64726,10 @@ static JSValue js_typed_array_indexOf(JSContext *ctx, JSValueConst this_val,
        exception is raised) */
     if (typed_array_is_oob(p) || len > p->u.array.count) {
         /* "includes" scans all the properties, so "undefined" can match */
-        if (special == special_includes && JS_IsUndefined(argv[0]) && len > 0)
-            res = oob ? -1 : 0;
+        if (special == special_includes)
+            if (JS_IsUndefined(argv[0]))
+                if (k < typed_array_length(p))
+                    res = 0;
         goto done;
     }
 
@@ -64157,19 +64755,33 @@ static JSValue js_typed_array_indexOf(JSContext *ctx, JSValueConst this_val,
             v64 = d;
             is_int = (v64 == d);
         }
-    } else
-    if (tag == JS_TAG_BIG_INT) {
-        JSBigInt *p1 = JS_VALUE_GET_PTR(argv[0]);
+    } else if (tag == JS_TAG_BIG_INT || tag == JS_TAG_SHORT_BIG_INT) {
+        JSBigIntBuf buf1;
+        JSBigInt *p1;
+        int sz = (64 / JS_LIMB_BITS);
+        if (tag == JS_TAG_SHORT_BIG_INT)
+            p1 = js_bigint_set_short(&buf1, argv[0]);
+        else
+            p1 = JS_VALUE_GET_PTR(argv[0]);
 
         if (p->class_id == JS_CLASS_BIG_INT64_ARRAY) {
-            if (bf_get_int64(&v64, &p1->num, 0) != 0)
-                goto done;
+            if (p1->len > sz)
+                goto done; /* does not fit an int64 : cannot be found */
         } else if (p->class_id == JS_CLASS_BIG_UINT64_ARRAY) {
-            if (bf_get_uint64((uint64_t *)&v64, &p1->num) != 0)
+            if (js_bigint_sign(p1))
+                goto done; /* v < 0 */
+            if (p1->len <= sz) {
+                /* OK */
+            } else if (p1->len == sz + 1 && p1->tab[sz] == 0) {
+                /* 2^63 <= v <= 2^64-1 */
+            } else {
                 goto done;
+            }
         } else {
             goto done;
         }
+        if (JS_ToBigInt64(ctx, &v64, argv[0]))
+            goto exception;
         d = 0;
         is_bigint = 1;
     } else {
@@ -64557,8 +65169,8 @@ static JSValue js_typed_array_slice(JSContext *ctx, JSValueConst this_val,
 
         p1 = get_typed_array(ctx, arr);
         if (p1 != NULL && p->class_id == p1->class_id &&
-            typed_array_get_length(ctx, p1) >= count &&
-            typed_array_get_length(ctx, p) >= start + count) {
+            typed_array_length(p1) >= count &&
+            typed_array_length(p) >= start + count) {
             shift = typed_array_size_log2(p->class_id);
             memmove(p1->u.array.u.uint8_ptr,
                     p->u.array.u.uint8_ptr + (start << shift),
@@ -65076,10 +65688,8 @@ static JSValue js_array_from_iterator(JSContext *ctx, uint32_t *plen,
         val = JS_IteratorNext(ctx, iter, next_method, 0, NULL, &done);
         if (JS_IsException(val))
             goto fail;
-        if (done) {
-            JS_FreeValue(ctx, val);
+        if (done)
             break;
-        }
         if (JS_CreateDataPropertyUint32(ctx, arr, k, val, JS_PROP_THROW) < 0)
             goto fail;
         k++;
@@ -65593,8 +66203,7 @@ static JSValue js_dataview_setValue(JSContext *ctx,
     if (class_id <= JS_CLASS_UINT32_ARRAY) {
         if (JS_ToUint32(ctx, &v, val))
             return JS_EXCEPTION;
-    } else
-    if (class_id <= JS_CLASS_BIG_UINT64_ARRAY) {
+    } else if (class_id <= JS_CLASS_BIG_UINT64_ARRAY) {
         if (JS_ToBigInt64(ctx, (int64_t *)&v64, val))
             return JS_EXCEPTION;
     } else {
@@ -65973,7 +66582,7 @@ static JSValue js_atomics_store(JSContext *ctx,
         return JS_EXCEPTION;
     if (size_log2 == 3) {
         int64_t v64;
-        ret = JS_ToBigIntValueFree(ctx, js_dup(argv[2]));
+        ret = JS_ToBigIntFree(ctx, js_dup(argv[2]));
         if (JS_IsException(ret))
             return ret;
         if (JS_ToBigInt64(ctx, &v64, ret)) {
@@ -66262,6 +66871,7 @@ void JS_AddIntrinsicTypedArrays(JSContext *ctx)
                                js_typed_array_base_funcs,
                                countof(js_typed_array_base_funcs));
     JS_SetConstructor(ctx, typed_array_base_func, typed_array_base_proto);
+    JS_SetConstructorBit(ctx, typed_array_base_func, true);
 
     /* Used to squelch a -Wcast-function-type warning. */
     JSCFunctionType ft = { .generic_magic = js_typed_array_constructor };
@@ -66516,9 +67126,8 @@ static JSValue js_finrec_constructor(JSContext *ctx, JSValueConst new_target,
     if (JS_IsUndefined(new_target))
         return JS_ThrowTypeError(ctx, "constructor requires 'new'");
     JSValueConst cb = argv[0];
-    if (!JS_IsFunction(ctx, cb))
-        return JS_ThrowTypeError(ctx, "argument must be a function");
-
+    if (check_function(ctx, cb))
+        return JS_EXCEPTION;
     JSValue obj = js_create_from_ctor(ctx, new_target, JS_CLASS_FINALIZATION_REGISTRY);
     if (JS_IsException(obj))
         return JS_EXCEPTION;
@@ -66663,6 +67272,7 @@ static void reset_weak_ref(JSRuntime *rt, JSWeakRefRecord **first_weak_ref)
             assert(!mr->empty); /* no iterator on WeakMap/WeakSet */
             list_del(&mr->hash_link);
             list_del(&mr->link);
+            s->record_count--;
             break;
         case JS_WEAK_REF_KIND_WEAK_REF:
             wrd = wr->u.weak_ref_data;
@@ -66857,7 +67467,7 @@ static JSValue js_callsite_isnative(JSContext *ctx, JSValueConst this_val, int a
     JSCallSiteData *csd = JS_GetOpaque2(ctx, this_val, JS_CLASS_CALL_SITE);
     if (!csd)
         return JS_EXCEPTION;
-    return JS_NewBool(ctx, csd->native);
+    return js_bool(csd->native);
 }
 
 static JSValue js_callsite_getnumber(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic)
@@ -66866,7 +67476,7 @@ static JSValue js_callsite_getnumber(JSContext *ctx, JSValueConst this_val, int 
     if (!csd)
         return JS_EXCEPTION;
     int *field = (void *)((char *)csd + magic);
-    return JS_NewInt32(ctx, *field);
+    return js_int32(*field);
 }
 
 static const JSCFunctionListEntry js_callsite_proto_funcs[] = {
@@ -66897,8 +67507,231 @@ static void _JS_AddIntrinsicCallSite(JSContext *ctx)
                                countof(js_callsite_proto_funcs));
 }
 
+/* DOMException */
+typedef struct JSDOMExceptionData {
+    JSValue name;
+    JSValue message;
+    int code;
+} JSDOMExceptionData;
+
+typedef struct JSDOMExceptionNameDef {
+    const char * const name;
+    const char * const code_name;
+} JSDOMExceptionNameDef;
+
+static const JSDOMExceptionNameDef js_dom_exception_names_table[] = {
+    { "IndexSizeError", "INDEX_SIZE_ERR" },
+    { NULL, "DOMSTRING_SIZE_ERR" },
+    { "HierarchyRequestError", "HIERARCHY_REQUEST_ERR" },
+    { "WrongDocumentError", "WRONG_DOCUMENT_ERR" },
+    { "InvalidCharacterError", "INVALID_CHARACTER_ERR" },
+    { NULL, "NO_DATA_ALLOWED_ERR" },
+    { "NoModificationAllowedError", "NO_MODIFICATION_ALLOWED_ERR" },
+    { "NotFoundError", "NOT_FOUND_ERR" },
+    { "NotSupportedError", "NOT_SUPPORTED_ERR" },
+    { "InUseAttributeError", "INUSE_ATTRIBUTE_ERR" },
+    { "InvalidStateError", "INVALID_STATE_ERR" },
+    { "SyntaxError", "SYNTAX_ERR" },
+    { "InvalidModificationError", "INVALID_MODIFICATION_ERR" },
+    { "NamespaceError", "NAMESPACE_ERR" },
+    { "InvalidAccessError", "INVALID_ACCESS_ERR" },
+    { NULL, "VALIDATION_ERR" },
+    { "TypeMismatchError", "TYPE_MISMATCH_ERR" },
+    { "SecurityError", "SECURITY_ERR" },
+    { "NetworkError", "NETWORK_ERR" },
+    { "AbortError", "ABORT_ERR" },
+    { "URLMismatchError", "URL_MISMATCH_ERR" },
+    { "QuotaExceededError", "QUOTA_EXCEEDED_ERR" },
+    { "TimeoutError", "TIMEOUT_ERR" },
+    { "InvalidNodeTypeError", "INVALID_NODE_TYPE_ERR" },
+    { "DataCloneError", "DATA_CLONE_ERR" }
+};
+
+static void js_domexception_finalizer(JSRuntime *rt, JSValueConst val)
+{
+    JSDOMExceptionData *s = JS_GetOpaque(val, JS_CLASS_DOM_EXCEPTION);
+    if (s) {
+        JS_FreeValueRT(rt, s->name);
+        JS_FreeValueRT(rt, s->message);
+        js_free_rt(rt, s);
+    }
+}
+
+static void js_domexception_mark(JSRuntime *rt, JSValueConst val,
+                                 JS_MarkFunc *mark_func)
+{
+    JSDOMExceptionData *s = JS_GetOpaque(val, JS_CLASS_DOM_EXCEPTION);
+    if (s) {
+        JS_MarkValue(rt, s->name, mark_func);
+        JS_MarkValue(rt, s->message, mark_func);
+    }
+}
+
+static JSValue js_domexception_constructor0(JSContext *ctx, JSValueConst new_target,
+                                            int argc, JSValueConst *argv,
+                                            int backtrace_flags)
+{
+    JSDOMExceptionData *s;
+    JSValue obj, message, name;
+
+    obj = js_create_from_ctor(ctx, new_target, JS_CLASS_DOM_EXCEPTION);
+    if (JS_IsException(obj))
+        return JS_EXCEPTION;
+    if (!JS_IsUndefined(argv[0]))
+        message = JS_ToString(ctx, argv[0]);
+    else
+        message = js_empty_string(ctx->rt);
+    if (JS_IsException(message))
+        goto fail1;
+    if (!JS_IsUndefined(argv[1]))
+        name = JS_ToString(ctx, argv[1]);
+    else
+        name = JS_AtomToString(ctx, JS_ATOM_Error);
+    if (JS_IsException(name))
+        goto fail2;
+    s = js_malloc(ctx, sizeof(*s));
+    if (!s)
+        goto fail3;
+    s->name = name;
+    s->message = message;
+    s->code = -1;
+    JS_SetOpaqueInternal(obj, s);
+    build_backtrace(ctx, obj, JS_UNDEFINED, NULL, 0, 0, backtrace_flags);
+    return obj;
+fail3:
+    JS_FreeValue(ctx, name);
+fail2:
+    JS_FreeValue(ctx, message);
+fail1:
+    JS_FreeValue(ctx, obj);
+    return JS_EXCEPTION;
+}
+
+static JSValue js_domexception_constructor(JSContext *ctx, JSValueConst new_target,
+                                           int argc, JSValueConst *argv)
+{
+    if (JS_IsUndefined(new_target))
+        return JS_ThrowTypeError(ctx, "constructor requires 'new'");
+    return js_domexception_constructor0(ctx, new_target, argc, argv,
+                                        JS_BACKTRACE_FLAG_SKIP_FIRST_LEVEL);
+}
+
+static JSValue js_domexception_getfield(JSContext *ctx, JSValueConst this_val,
+                                        int magic)
+{
+    JSDOMExceptionData *s;
+    JSValue *valp;
+
+    s = JS_GetOpaque2(ctx, this_val, JS_CLASS_DOM_EXCEPTION);
+    if (!s)
+        return JS_EXCEPTION;
+    valp = (void *)((char *)s + magic);
+    return js_dup(*valp);
+}
+
+static JSValue js_domexception_get_code(JSContext *ctx, JSValueConst this_val)
+{
+    JSDOMExceptionData *s;
+    const char *name, *it;
+    int i;
+    size_t len;
+
+    s = JS_GetOpaque2(ctx, this_val, JS_CLASS_DOM_EXCEPTION);
+    if (!s)
+        return JS_EXCEPTION;
+    if (s->code == -1) {
+        name = JS_ToCStringLen(ctx, &len, s->name);
+        if (!name)
+            return JS_EXCEPTION;
+        for (i = 0; i < countof(js_dom_exception_names_table); i++) {
+            it = js_dom_exception_names_table[i].name;
+            if (it && !strcmp(it, name) && len == strlen(it)) {
+                s->code = i;
+                break;
+            }
+        }
+        s->code++;
+        JS_FreeCString(ctx, name);
+    }
+    return js_int32(s->code);
+}
+
+static const JSCFunctionListEntry js_domexception_proto_funcs[] = {
+    JS_CGETSET_MAGIC_DEF("name", js_domexception_getfield, NULL,
+        offsetof(JSDOMExceptionData, name) ),
+    JS_CGETSET_MAGIC_DEF("message", js_domexception_getfield, NULL,
+        offsetof(JSDOMExceptionData, message) ),
+    JS_CGETSET_DEF("code", js_domexception_get_code, NULL ),
+    JS_PROP_STRING_DEF("[Symbol.toStringTag]", "DOMException", JS_PROP_CONFIGURABLE ),
+};
+
+static const JSClassShortDef js_domexception_class_def[] = {
+    { JS_ATOM_DOMException, js_domexception_finalizer, js_domexception_mark }, /* JS_CLASS_DOM_EXCEPTION */
+};
+
+JSValue JS_PRINTF_FORMAT_ATTR(3, 4) JS_ThrowDOMException(JSContext *ctx, const char *name, JS_PRINTF_FORMAT const char *fmt, ...)
+{
+    JSValue obj, js_name, js_message;
+    JSValueConst argv[2];
+    va_list ap;
+    char buf[256];
+
+    assert(JS_IsRegisteredClass(ctx->rt, JS_CLASS_DOM_EXCEPTION));
+    va_start(ap, fmt);
+    vsnprintf(buf, sizeof(buf), fmt, ap);
+    va_end(ap);
+    js_name = JS_NewString(ctx, name);
+    if (JS_IsException(js_name))
+        return JS_EXCEPTION;
+    js_message = JS_NewString(ctx, buf);
+    if (JS_IsException(js_message)) {
+        JS_FreeValue(ctx, js_name);
+        return JS_EXCEPTION;
+    }
+    argv[0] = js_message;
+    argv[1] = js_name;
+    obj = js_domexception_constructor0(ctx, JS_UNDEFINED, 2, argv, 0);
+    JS_FreeValue(ctx, js_message);
+    JS_FreeValue(ctx, js_name);
+    if (JS_IsException(obj))
+        return JS_EXCEPTION;
+    return JS_Throw(ctx, obj);
+}
+
+void JS_AddIntrinsicDOMException(JSContext *ctx)
+{
+    JSRuntime *rt = ctx->rt;
+    int i;
+    JSAtom name;
+    JSValue ctor, proto;
+
+    if (!JS_IsRegisteredClass(rt, JS_CLASS_DOM_EXCEPTION)) {
+        init_class_range(rt, js_domexception_class_def, JS_CLASS_DOM_EXCEPTION,
+                         countof(js_domexception_class_def));
+    }
+    proto = JS_NewObjectClass(ctx, JS_CLASS_ERROR);
+    JS_SetPropertyFunctionList(ctx, proto,
+                               js_domexception_proto_funcs,
+                               countof(js_domexception_proto_funcs));
+    ctor = JS_NewCFunction2(ctx, js_domexception_constructor, "DOMException", 2,
+                            JS_CFUNC_constructor_or_func, 0);
+    JS_SetConstructor(ctx, ctor, proto);
+    for (i = 0; i < countof(js_dom_exception_names_table); i++) {
+        name = JS_NewAtom(ctx, js_dom_exception_names_table[i].code_name);
+        JS_DefinePropertyValue(ctx, proto, name, js_int32(i + 1),
+                               JS_PROP_ENUMERABLE);
+        JS_DefinePropertyValue(ctx, ctor, name, js_int32(i + 1),
+                               JS_PROP_ENUMERABLE);
+        JS_FreeAtom(ctx, name);
+    }
+    JS_DefinePropertyValue(ctx, ctx->global_obj, JS_ATOM_DOMException, ctor,
+                           JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
+    ctx->class_proto[JS_CLASS_DOM_EXCEPTION] = proto;
+}
+
 bool JS_DetectModule(const char *input, size_t input_len)
 {
+#ifndef QJS_DISABLE_PARSER
     JSRuntime *rt;
     JSContext *ctx;
     JSValue val;
@@ -66927,6 +67760,9 @@ bool JS_DetectModule(const char *input, size_t input_len)
     JS_FreeContext(ctx);
     JS_FreeRuntime(rt);
     return is_module;
+#else
+    return false;
+#endif // QJS_DISABLE_PARSER
 }
 
 uintptr_t js_std_cmd(int cmd, ...) {
@@ -66952,6 +67788,13 @@ uintptr_t js_std_cmd(int cmd, ...) {
         pv = va_arg(ap, JSValue *);
         *pv = ctx->error_back_trace;
         ctx->error_back_trace = JS_UNDEFINED;
+        break;
+    case 3: // GetStringKind
+        ctx = va_arg(ap, JSContext *);
+        pv = va_arg(ap, JSValue *);
+        rv = -1;
+        if (JS_IsString(*pv))
+            rv = JS_VALUE_GET_STRING(*pv)->kind;
         break;
     default:
         rv = -1;
@@ -66996,6 +67839,13 @@ uintptr_t js_std_cmd(int cmd, ...) {
 #include <time.h>
 #if !defined(_MSC_VER)
 #include <sys/time.h>
+#endif
+#if defined(_WIN32)
+#include <windows.h>
+#include <process.h> // _beginthread
+#endif
+#if defined(__APPLE__)
+#include <mach-o/dyld.h>
 #endif
 
 
@@ -67061,6 +67911,10 @@ int js__has_suffix(const char *str, const char *suffix)
 
 static void *dbuf_default_realloc(void *opaque, void *ptr, size_t size)
 {
+    if (unlikely(size == 0)) {
+        free(ptr);
+        return NULL;
+    }
     return realloc(ptr, size);
 }
 
@@ -67545,258 +68399,6 @@ overflow:
     return j;
 }
 
-/*--- integer to string conversions --*/
-
-/* All conversion functions:
-   - require a destination array `buf` of sufficient length
-   - write the string representation at the beginning of `buf`
-   - null terminate the string
-   - return the string length
- */
-
-/* 2 <= base <= 36 */
-char const digits36[36] = {
-    '0','1','2','3','4','5','6','7','8','9',
-    'a','b','c','d','e','f','g','h','i','j',
-    'k','l','m','n','o','p','q','r','s','t',
-    'u','v','w','x','y','z'
-};
-
-
-#define USE_SPECIAL_RADIX_10  1  // special case base 10 radix conversions
-#define USE_SINGLE_CASE_FAST  1  // special case single digit numbers
-
-/* using u32toa_shift variant */
-
-#define gen_digit(buf, c)  if (is_be()) \
-            buf = (buf >> 8) | ((uint64_t)(c) << ((sizeof(buf) - 1) * 8)); \
-        else \
-            buf = (buf << 8) | (c)
-
-static size_t u7toa_shift(char dest[minimum_length(8)], uint32_t n)
-{
-    size_t len = 1;
-    uint64_t buf = 0;
-    while (n >= 10) {
-        uint32_t quo = n % 10;
-        n /= 10;
-        gen_digit(buf, '0' + quo);
-        len++;
-    }
-    gen_digit(buf, '0' + n);
-    memcpy(dest, &buf, sizeof buf);
-    return len;
-}
-
-static size_t u07toa_shift(char dest[minimum_length(8)], uint32_t n, size_t len)
-{
-    size_t i;
-    dest += len;
-    dest[7] = '\0';
-    for (i = 7; i-- > 1;) {
-        uint32_t quo = n % 10;
-        n /= 10;
-        dest[i] = (char)('0' + quo);
-    }
-    dest[i] = (char)('0' + n);
-    return len + 7;
-}
-
-size_t u32toa(char buf[minimum_length(11)], uint32_t n)
-{
-#ifdef USE_SINGLE_CASE_FAST /* 10% */
-    if (n < 10) {
-        buf[0] = (char)('0' + n);
-        buf[1] = '\0';
-        return 1;
-    }
-#endif
-#define TEN_POW_7 10000000
-    if (n >= TEN_POW_7) {
-        uint32_t quo = n / TEN_POW_7;
-        n %= TEN_POW_7;
-        size_t len = u7toa_shift(buf, quo);
-        return u07toa_shift(buf, n, len);
-    }
-    return u7toa_shift(buf, n);
-}
-
-size_t u64toa(char buf[minimum_length(21)], uint64_t n)
-{
-    if (likely(n < 0x100000000))
-        return u32toa(buf, n);
-
-    size_t len;
-    if (n >= TEN_POW_7) {
-        uint64_t n1 = n / TEN_POW_7;
-        n %= TEN_POW_7;
-        if (n1 >= TEN_POW_7) {
-            uint32_t quo = n1 / TEN_POW_7;
-            n1 %= TEN_POW_7;
-            len = u7toa_shift(buf, quo);
-            len = u07toa_shift(buf, n1, len);
-        } else {
-            len = u7toa_shift(buf, n1);
-        }
-        return u07toa_shift(buf, n, len);
-    }
-    return u7toa_shift(buf, n);
-}
-
-size_t i32toa(char buf[minimum_length(12)], int32_t n)
-{
-    if (likely(n >= 0))
-        return u32toa(buf, n);
-
-    buf[0] = '-';
-    return 1 + u32toa(buf + 1, -(uint32_t)n);
-}
-
-size_t i64toa(char buf[minimum_length(22)], int64_t n)
-{
-    if (likely(n >= 0))
-        return u64toa(buf, n);
-
-    buf[0] = '-';
-    return 1 + u64toa(buf + 1, -(uint64_t)n);
-}
-
-/* using u32toa_radix_length variant */
-
-static uint8_t const radix_shift[64] = {
-    0, 0, 1, 0, 2, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0,
-    4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-};
-
-size_t u32toa_radix(char buf[minimum_length(33)], uint32_t n, unsigned base)
-{
-    int shift;
-
-#ifdef USE_SPECIAL_RADIX_10
-    if (likely(base == 10))
-        return u32toa(buf, n);
-#endif
-    if (n < base) {
-        buf[0] = digits36[n];
-        buf[1] = '\0';
-        return 1;
-    }
-    shift = radix_shift[base & 63];
-    if (shift) {
-        uint32_t mask = (1 << shift) - 1;
-        size_t len = (32 - clz32(n) + shift - 1) / shift;
-        size_t last = n & mask;
-        char *end = buf + len;
-        n >>= shift;
-        *end-- = '\0';
-        *end-- = digits36[last];
-        while (n >= base) {
-            size_t quo = n & mask;
-            n >>= shift;
-            *end-- = digits36[quo];
-        }
-        *end = digits36[n];
-        return len;
-    } else {
-        size_t len = 2;
-        size_t last = n % base;
-        n /= base;
-        uint32_t nbase = base;
-        while (n >= nbase) {
-            nbase *= base;
-            len++;
-        }
-        char *end = buf + len;
-        *end-- = '\0';
-        *end-- = digits36[last];
-        while (n >= base) {
-            size_t quo = n % base;
-            n /= base;
-            *end-- = digits36[quo];
-        }
-        *end = digits36[n];
-        return len;
-    }
-}
-
-size_t u64toa_radix(char buf[minimum_length(65)], uint64_t n, unsigned base)
-{
-    int shift;
-
-#ifdef USE_SPECIAL_RADIX_10
-    if (likely(base == 10))
-        return u64toa(buf, n);
-#endif
-    shift = radix_shift[base & 63];
-    if (shift) {
-        if (n < base) {
-            buf[0] = digits36[n];
-            buf[1] = '\0';
-            return 1;
-        }
-        uint64_t mask = (1 << shift) - 1;
-        size_t len = (64 - clz64(n) + shift - 1) / shift;
-        size_t last = n & mask;
-        char *end = buf + len;
-        n >>= shift;
-        *end-- = '\0';
-        *end-- = digits36[last];
-        while (n >= base) {
-            size_t quo = n & mask;
-            n >>= shift;
-            *end-- = digits36[quo];
-        }
-        *end = digits36[n];
-        return len;
-    } else {
-        if (likely(n < 0x100000000))
-            return u32toa_radix(buf, n, base);
-        size_t last = n % base;
-        n /= base;
-        uint64_t nbase = base;
-        size_t len = 2;
-        while (n >= nbase) {
-            nbase *= base;
-            len++;
-        }
-        char *end = buf + len;
-        *end-- = '\0';
-        *end-- = digits36[last];
-        while (n >= base) {
-            size_t quo = n % base;
-            n /= base;
-            *end-- = digits36[quo];
-        }
-        *end = digits36[n];
-        return len;
-    }
-}
-
-size_t i32toa_radix(char buf[minimum_length(34)], int32_t n, unsigned int base)
-{
-    if (likely(n >= 0))
-        return u32toa_radix(buf, n, base);
-
-    buf[0] = '-';
-    return 1 + u32toa_radix(buf + 1, -(uint32_t)n, base);
-}
-
-size_t i64toa_radix(char buf[minimum_length(66)], int64_t n, unsigned int base)
-{
-    if (likely(n >= 0))
-        return u64toa_radix(buf, n, base);
-
-    buf[0] = '-';
-    return 1 + u64toa_radix(buf + 1, -(uint64_t)n, base);
-}
-
-#undef gen_digit
-#undef TEN_POW_7
-#undef USE_SPECIAL_RADIX_10
-#undef USE_SINGLE_CASE_FAST
-
 /*---- sorting with opaque argument ----*/
 
 typedef void (*exchange_f)(void *a, void *b, size_t size);
@@ -68163,10 +68765,112 @@ int64_t js__gettimeofday_us(void) {
     return ((int64_t)tv.tv_sec * 1000000) + tv.tv_usec;
 }
 
+#if defined(_WIN32)
+int js_exepath(char *buffer, size_t *size_ptr) {
+    int utf8_len, utf16_buffer_len, utf16_len;
+    WCHAR* utf16_buffer;
+
+    if (buffer == NULL || size_ptr == NULL || *size_ptr == 0)
+      return -1;
+
+    if (*size_ptr > 32768) {
+      /* Windows paths can never be longer than this. */
+      utf16_buffer_len = 32768;
+    } else {
+      utf16_buffer_len = (int)*size_ptr;
+    }
+
+    utf16_buffer = malloc(sizeof(WCHAR) * utf16_buffer_len);
+    if (!utf16_buffer)
+        return -1;
+
+    /* Get the path as UTF-16. */
+    utf16_len = GetModuleFileNameW(NULL, utf16_buffer, utf16_buffer_len);
+    if (utf16_len <= 0)
+      goto error;
+
+    /* Convert to UTF-8 */
+    utf8_len = WideCharToMultiByte(CP_UTF8,
+                                   0,
+                                   utf16_buffer,
+                                   -1,
+                                   buffer,
+                                   (int)*size_ptr,
+                                   NULL,
+                                   NULL);
+    if (utf8_len == 0)
+      goto error;
+
+    free(utf16_buffer);
+
+    /* utf8_len *does* include the terminating null at this point, but the
+     * returned size shouldn't. */
+    *size_ptr = utf8_len - 1;
+    return 0;
+
+error:
+    free(utf16_buffer);
+    return -1;
+}
+#elif defined(__APPLE__)
+int js_exepath(char *buffer, size_t *size) {
+    /* realpath(exepath) may be > PATH_MAX so double it to be on the safe side. */
+    char abspath[PATH_MAX * 2 + 1];
+    char exepath[PATH_MAX + 1];
+    uint32_t exepath_size;
+    size_t abspath_size;
+
+    if (buffer == NULL || size == NULL || *size == 0)
+        return -1;
+
+    exepath_size = sizeof(exepath);
+    if (_NSGetExecutablePath(exepath, &exepath_size))
+        return -1;
+
+    if (realpath(exepath, abspath) != abspath)
+        return -1;
+
+    abspath_size = strlen(abspath);
+    if (abspath_size == 0)
+        return -1;
+
+    *size -= 1;
+    if (*size > abspath_size)
+        *size = abspath_size;
+
+    memcpy(buffer, abspath, *size);
+    buffer[*size] = '\0';
+
+    return 0;
+}
+#elif defined(__linux__) || defined(__GNU__)
+int js_exepath(char *buffer, size_t *size) {
+    ssize_t n;
+
+    if (buffer == NULL || size == NULL || *size == 0)
+        return -1;
+
+    n = *size - 1;
+    if (n > 0)
+        n = readlink("/proc/self/exe", buffer, n);
+
+    if (n == -1)
+        return n;
+
+    buffer[n] = '\0';
+    *size = n;
+
+    return 0;
+}
+#else
+int js_exepath(char* buffer, size_t* size_ptr) {
+    return -1;
+}
+#endif
+
 /*--- Cross-platform threading APIs. ----*/
 
-#if !defined(EMSCRIPTEN) && !defined(__wasi__)
-
+#if JS_HAVE_THREADS
 #if defined(_WIN32)
 typedef void (*js__once_cb)(void);
 
@@ -68231,6 +68935,37 @@ int js_cond_timedwait(js_cond_t *cond, js_mutex_t *mutex, uint64_t timeout) {
     if (GetLastError() != ERROR_TIMEOUT)
         abort();
     return -1;
+}
+
+int js_thread_create(js_thread_t *thrd, void (*start)(void *), void *arg,
+                     int flags)
+{
+    HANDLE h, cp;
+
+    *thrd = INVALID_HANDLE_VALUE;
+    if (flags & ~JS_THREAD_CREATE_DETACHED)
+        return -1;
+    h = (HANDLE)_beginthread(start, /*stacksize*/2<<20, arg);
+    if (!h)
+        return -1;
+    if (flags & JS_THREAD_CREATE_DETACHED)
+        return 0;
+    // _endthread() automatically closes the handle but we want to wait on
+    // it so make a copy. Race-y for very short-lived threads. Can be solved
+    // by switching to _beginthreadex(CREATE_SUSPENDED) but means changing
+    // |start| from __cdecl to __stdcall.
+    cp = GetCurrentProcess();
+    if (DuplicateHandle(cp, h, cp, thrd, 0, FALSE, DUPLICATE_SAME_ACCESS))
+        return 0;
+    return -1;
+}
+
+int js_thread_join(js_thread_t thrd)
+{
+    if (WaitForSingleObject(thrd, INFINITE))
+        return -1;
+    CloseHandle(thrd);
+    return 0;
 }
 
 #else /* !defined(_WIN32) */
@@ -68373,17 +69108,51 @@ int js_cond_timedwait(js_cond_t *cond, js_mutex_t *mutex, uint64_t timeout) {
     return -1;
 }
 
-#endif
+int js_thread_create(js_thread_t *thrd, void (*start)(void *), void *arg,
+                     int flags)
+{
+    union {
+        void (*x)(void *);
+        void *(*f)(void *);
+    } u = {start};
+    pthread_attr_t attr;
+    int ret;
 
-#endif /* !defined(EMSCRIPTEN) && !defined(__wasi__) */
+    if (flags & ~JS_THREAD_CREATE_DETACHED)
+        return -1;
+    if (pthread_attr_init(&attr))
+        return -1;
+    ret = -1;
+    if (pthread_attr_setstacksize(&attr, 2<<20))
+        goto fail;
+    if (flags & JS_THREAD_CREATE_DETACHED)
+        if (pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED))
+            goto fail;
+    if (pthread_create(thrd, &attr, u.f, arg))
+        goto fail;
+    ret = 0;
+fail:
+    pthread_attr_destroy(&attr);
+    return ret;
+}
+
+int js_thread_join(js_thread_t thrd)
+{
+    if (pthread_join(thrd, NULL))
+        return -1;
+    return 0;
+}
+
+#endif /* !defined(_WIN32) */
+#endif /* JS_HAVE_THREADS */
 
 #ifdef __GNUC__
 #pragma GCC visibility pop
 #endif
 /*
- * Tiny arbitrary precision floating point library
+ * Tiny float64 printing and parsing library
  *
- * Copyright (c) 2017-2021 Fabrice Bellard
+ * Copyright (c) 2024 Fabrice Bellard
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -68405,1039 +69174,56 @@ int js_cond_timedwait(js_cond_t *cond, js_mutex_t *mutex, uint64_t timeout) {
  */
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <inttypes.h>
-#include <math.h>
 #include <string.h>
 #include <assert.h>
-
-#ifdef __AVX2__
-#include <immintrin.h>
-#endif
-
-
+#include <ctype.h>
+// #include <sys/time.h>
+#include <math.h>
+// #include <setjmp.h>
 
 
-/* enable it to check the multiplication result */
-//#define USE_MUL_CHECK
-/* enable it to use FFT/NTT multiplication */
-#define USE_FFT_MUL
-/* enable decimal floating point support */
-#define USE_BF_DEC
 
-//#define inline __attribute__((always_inline))
 
-#ifdef __AVX2__
-#define FFT_MUL_THRESHOLD 100 /* in limbs of the smallest factor */
-#else
-#define FFT_MUL_THRESHOLD 100 /* in limbs of the smallest factor */
-#endif
+/* 
+   TODO:
+   - test n_digits=101 instead of 100
+   - simplify subnormal handling
+   - reduce max memory usage
+   - free format: could add shortcut if exact result
+   - use 64 bit limb_t when possible
+   - use another algorithm for free format dtoa in base 10 (ryu ?)
+*/
 
-/* XXX: adjust */
-#define DIVNORM_LARGE_THRESHOLD 50
-#define UDIV1NORM_THRESHOLD 3
+#define USE_POW5_TABLE
+/* use fast path to print small integers in free format */
+#define USE_FAST_INT
 
-#if LIMB_BITS == 64
-#define FMT_LIMB1 "%" PRIx64
-#define FMT_LIMB "%016" PRIx64
-#define PRId_LIMB PRId64
-#define PRIu_LIMB PRIu64
+#define LIMB_LOG2_BITS 5
 
-#else
+#define LIMB_BITS (1 << LIMB_LOG2_BITS)
 
-#define FMT_LIMB1 "%x"
-#define FMT_LIMB "%08x"
-#define PRId_LIMB "d"
-#define PRIu_LIMB "u"
+typedef int32_t slimb_t;
+typedef uint32_t limb_t;
+typedef uint64_t dlimb_t;
 
-#endif
+#define LIMB_DIGITS 9
+
+#define JS_RADIX_MAX 36
+
+#define DBIGNUM_LEN_MAX 52 /* ~ 2^(1072+53)*36^100 (dtoa) */
+#define MANT_LEN_MAX 18 /* < 36^100 */
 
 typedef intptr_t mp_size_t;
 
-typedef int bf_op2_func_t(bf_t *r, const bf_t *a, const bf_t *b, limb_t prec,
-                          bf_flags_t flags);
-
-#ifdef USE_FFT_MUL
-
-#define FFT_MUL_R_OVERLAP_A (1 << 0)
-#define FFT_MUL_R_OVERLAP_B (1 << 1)
-#define FFT_MUL_R_NORESIZE  (1 << 2)
-
-static no_inline int fft_mul(bf_context_t *s,
-                             bf_t *res, limb_t *a_tab, limb_t a_len,
-                             limb_t *b_tab, limb_t b_len, int mul_flags);
-static void fft_clear_cache(bf_context_t *s);
-#endif
-#ifdef USE_BF_DEC
-static limb_t get_digit(const limb_t *tab, limb_t len, slimb_t pos);
-#endif
-
-
-/* could leading zeros */
-static inline int clz(limb_t a)
-{
-    if (a == 0) {
-        return LIMB_BITS;
-    } else {
-#if LIMB_BITS == 64
-        return clz64(a);
-#else
-        return clz32(a);
-#endif
-    }
-}
-
-static inline int ctz(limb_t a)
-{
-    if (a == 0) {
-        return LIMB_BITS;
-    } else {
-#if LIMB_BITS == 64
-        return ctz64(a);
-#else
-        return ctz32(a);
-#endif
-    }
-}
-
-static inline int ceil_log2(limb_t a)
-{
-    if (a <= 1)
-        return 0;
-    else
-        return LIMB_BITS - clz(a - 1);
-}
-
-/* b must be >= 1 */
-static inline slimb_t ceil_div(slimb_t a, slimb_t b)
-{
-    if (a >= 0)
-        return (a + b - 1) / b;
-    else
-        return a / b;
-}
-
-/* b must be >= 1 */
-static inline slimb_t floor_div(slimb_t a, slimb_t b)
-{
-    if (a >= 0) {
-        return a / b;
-    } else {
-        return (a - b + 1) / b;
-    }
-}
-
-/* return r = a modulo b (0 <= r <= b - 1. b must be >= 1 */
-static inline limb_t smod(slimb_t a, slimb_t b)
-{
-    a = a % (slimb_t)b;
-    if (a < 0)
-        a += b;
-    return a;
-}
-
-/* signed addition with saturation */
-static inline slimb_t sat_add(slimb_t a, slimb_t b)
-{
-    slimb_t r;
-    r = a + b;
-    /* overflow ? */
-    if (((a ^ r) & (b ^ r)) < 0)
-        r = (a >> (LIMB_BITS - 1)) ^ (((limb_t)1 << (LIMB_BITS - 1)) - 1);
-    return r;
-}
-
-static inline __maybe_unused limb_t shrd(limb_t low, limb_t high, long shift)
-{
-    if (shift != 0)
-        low = (low >> shift) | (high << (LIMB_BITS - shift));
-    return low;
-}
-
-static inline __maybe_unused limb_t shld(limb_t a1, limb_t a0, long shift)
-{
-    if (shift != 0)
-        return (a1 << shift) | (a0 >> (LIMB_BITS - shift));
-    else
-        return a1;
-}
-
-#define malloc(s) malloc_is_forbidden(s)
-#define free(p) free_is_forbidden(p)
-#define realloc(p, s) realloc_is_forbidden(p, s)
-
-void bf_context_init(bf_context_t *s, bf_realloc_func_t *realloc_func,
-                     void *realloc_opaque)
-{
-    memset(s, 0, sizeof(*s));
-    s->realloc_func = realloc_func;
-    s->realloc_opaque = realloc_opaque;
-}
-
-void bf_context_end(bf_context_t *s)
-{
-    bf_clear_cache(s);
-}
-
-void bf_init(bf_context_t *s, bf_t *r)
-{
-    r->ctx = s;
-    r->sign = 0;
-    r->expn = BF_EXP_ZERO;
-    r->len = 0;
-    r->tab = NULL;
-}
-
-/* return 0 if OK, -1 if alloc error */
-int bf_resize(bf_t *r, limb_t len)
-{
-    limb_t *tab;
-
-    if (len != r->len) {
-        tab = bf_realloc(r->ctx, r->tab, len * sizeof(limb_t));
-        if (!tab && len != 0)
-            return -1;
-        r->tab = tab;
-        r->len = len;
-    }
-    return 0;
-}
-
-/* return 0 or BF_ST_MEM_ERROR */
-int bf_set_ui(bf_t *r, uint64_t a)
-{
-    r->sign = 0;
-    if (a == 0) {
-        r->expn = BF_EXP_ZERO;
-        bf_resize(r, 0); /* cannot fail */
-    }
-#if LIMB_BITS == 32
-    else if (a <= 0xffffffff)
-#else
-    else
-#endif
-    {
-        int shift;
-        if (bf_resize(r, 1))
-            goto fail;
-        shift = clz(a);
-        r->tab[0] = a << shift;
-        r->expn = LIMB_BITS - shift;
-    }
-#if LIMB_BITS == 32
-    else {
-        uint32_t a1, a0;
-        int shift;
-        if (bf_resize(r, 2))
-            goto fail;
-        a0 = a;
-        a1 = a >> 32;
-        shift = clz(a1);
-        r->tab[0] = a0 << shift;
-        r->tab[1] = shld(a1, a0, shift);
-        r->expn = 2 * LIMB_BITS - shift;
-    }
-#endif
-    return 0;
- fail:
-    bf_set_nan(r);
-    return BF_ST_MEM_ERROR;
-}
-
-/* return 0 or BF_ST_MEM_ERROR */
-int bf_set_si(bf_t *r, int64_t a)
-{
-    int ret;
-
-    if (a < 0) {
-        ret = bf_set_ui(r, -a);
-        r->sign = 1;
-    } else {
-        ret = bf_set_ui(r, a);
-    }
-    return ret;
-}
-
-void bf_set_nan(bf_t *r)
-{
-    bf_resize(r, 0); /* cannot fail */
-    r->expn = BF_EXP_NAN;
-    r->sign = 0;
-}
-
-void bf_set_zero(bf_t *r, int is_neg)
-{
-    bf_resize(r, 0); /* cannot fail */
-    r->expn = BF_EXP_ZERO;
-    r->sign = is_neg;
-}
-
-void bf_set_inf(bf_t *r, int is_neg)
-{
-    bf_resize(r, 0); /* cannot fail */
-    r->expn = BF_EXP_INF;
-    r->sign = is_neg;
-}
-
-/* return 0 or BF_ST_MEM_ERROR */
-int bf_set(bf_t *r, const bf_t *a)
-{
-    if (r == a)
-        return 0;
-    if (bf_resize(r, a->len)) {
-        bf_set_nan(r);
-        return BF_ST_MEM_ERROR;
-    }
-    r->sign = a->sign;
-    r->expn = a->expn;
-    if (a->len > 0)
-        memcpy(r->tab, a->tab, a->len * sizeof(limb_t));
-    return 0;
-}
-
-/* equivalent to bf_set(r, a); bf_delete(a) */
-void bf_move(bf_t *r, bf_t *a)
-{
-    bf_context_t *s = r->ctx;
-    if (r == a)
-        return;
-    bf_free(s, r->tab);
-    *r = *a;
-}
-
-static limb_t get_limbz(const bf_t *a, limb_t idx)
-{
-    if (idx >= a->len)
-        return 0;
-    else
-        return a->tab[idx];
-}
-
-/* get LIMB_BITS at bit position 'pos' in tab */
-static inline limb_t get_bits(const limb_t *tab, limb_t len, slimb_t pos)
-{
-    limb_t i, a0, a1;
-    int p;
-
-    i = pos >> LIMB_LOG2_BITS;
-    p = pos & (LIMB_BITS - 1);
-    if (i < len)
-        a0 = tab[i];
-    else
-        a0 = 0;
-    if (p == 0) {
-        return a0;
-    } else {
-        i++;
-        if (i < len)
-            a1 = tab[i];
-        else
-            a1 = 0;
-        return (a0 >> p) | (a1 << (LIMB_BITS - p));
-    }
-}
-
-static inline limb_t get_bit(const limb_t *tab, limb_t len, slimb_t pos)
-{
-    slimb_t i;
-    i = pos >> LIMB_LOG2_BITS;
-    if (i < 0 || i >= len)
-        return 0;
-    return (tab[i] >> (pos & (LIMB_BITS - 1))) & 1;
-}
-
-static inline limb_t limb_mask(int start, int last)
-{
-    limb_t v;
-    int n;
-    n = last - start + 1;
-    if (n == LIMB_BITS)
-        v = -1;
-    else
-        v = (((limb_t)1 << n) - 1) << start;
-    return v;
-}
-
-static limb_t mp_scan_nz(const limb_t *tab, mp_size_t n)
-{
-    mp_size_t i;
-    for(i = 0; i < n; i++) {
-        if (tab[i] != 0)
-            return 1;
-    }
-    return 0;
-}
-
-/* return != 0 if one bit between 0 and bit_pos inclusive is not zero. */
-static inline limb_t scan_bit_nz(const bf_t *r, slimb_t bit_pos)
-{
-    slimb_t pos;
-    limb_t v;
-
-    pos = bit_pos >> LIMB_LOG2_BITS;
-    if (pos < 0)
-        return 0;
-    v = r->tab[pos] & limb_mask(0, bit_pos & (LIMB_BITS - 1));
-    if (v != 0)
-        return 1;
-    pos--;
-    while (pos >= 0) {
-        if (r->tab[pos] != 0)
-            return 1;
-        pos--;
-    }
-    return 0;
-}
-
-/* return the addend for rounding. Note that prec can be <= 0 (for
-   BF_FLAG_RADPNT_PREC) */
-static int bf_get_rnd_add(int *pret, const bf_t *r, limb_t l,
-                          slimb_t prec, int rnd_mode)
-{
-    int add_one, inexact;
-    limb_t bit1, bit0;
-
-    if (rnd_mode == BF_RNDF) {
-        bit0 = 1; /* faithful rounding does not honor the INEXACT flag */
-    } else {
-        /* starting limb for bit 'prec + 1' */
-        bit0 = scan_bit_nz(r, l * LIMB_BITS - 1 - bf_max(0, prec + 1));
-    }
-
-    /* get the bit at 'prec' */
-    bit1 = get_bit(r->tab, l, l * LIMB_BITS - 1 - prec);
-    inexact = (bit1 | bit0) != 0;
-
-    add_one = 0;
-    switch(rnd_mode) {
-    case BF_RNDZ:
-        break;
-    case BF_RNDN:
-        if (bit1) {
-            if (bit0) {
-                add_one = 1;
-            } else {
-                /* round to even */
-                add_one =
-                    get_bit(r->tab, l, l * LIMB_BITS - 1 - (prec - 1));
-            }
-        }
-        break;
-    case BF_RNDD:
-    case BF_RNDU:
-        if (r->sign == (rnd_mode == BF_RNDD))
-            add_one = inexact;
-        break;
-    case BF_RNDA:
-        add_one = inexact;
-        break;
-    case BF_RNDNA:
-    case BF_RNDF:
-        add_one = bit1;
-        break;
-    default:
-        abort();
-    }
-
-    if (inexact)
-        *pret |= BF_ST_INEXACT;
-    return add_one;
-}
-
-static int bf_set_overflow(bf_t *r, int sign, limb_t prec, bf_flags_t flags)
-{
-    slimb_t i, l, e_max;
-    int rnd_mode;
-
-    rnd_mode = flags & BF_RND_MASK;
-    if (prec == BF_PREC_INF ||
-        rnd_mode == BF_RNDN ||
-        rnd_mode == BF_RNDNA ||
-        rnd_mode == BF_RNDA ||
-        (rnd_mode == BF_RNDD && sign == 1) ||
-        (rnd_mode == BF_RNDU && sign == 0)) {
-        bf_set_inf(r, sign);
-    } else {
-        /* set to maximum finite number */
-        l = (prec + LIMB_BITS - 1) / LIMB_BITS;
-        if (bf_resize(r, l)) {
-            bf_set_nan(r);
-            return BF_ST_MEM_ERROR;
-        }
-        r->tab[0] = limb_mask((-prec) & (LIMB_BITS - 1),
-                              LIMB_BITS - 1);
-        for(i = 1; i < l; i++)
-            r->tab[i] = (limb_t)-1;
-        e_max = (limb_t)1 << (bf_get_exp_bits(flags) - 1);
-        r->expn = e_max;
-        r->sign = sign;
-    }
-    return BF_ST_OVERFLOW | BF_ST_INEXACT;
-}
-
-/* round to prec1 bits assuming 'r' is non zero and finite. 'r' is
-   assumed to have length 'l' (1 <= l <= r->len). Note: 'prec1' can be
-   infinite (BF_PREC_INF). 'ret' is 0 or BF_ST_INEXACT if the result
-   is known to be inexact. Can fail with BF_ST_MEM_ERROR in case of
-   overflow not returning infinity. */
-static int __bf_round(bf_t *r, limb_t prec1, bf_flags_t flags, limb_t l,
-                      int ret)
-{
-    limb_t v, a;
-    int shift, add_one, rnd_mode;
-    slimb_t i, bit_pos, pos, e_min, e_max, e_range, prec;
-
-    /* e_min and e_max are computed to match the IEEE 754 conventions */
-    e_range = (limb_t)1 << (bf_get_exp_bits(flags) - 1);
-    e_min = -e_range + 3;
-    e_max = e_range;
-
-    if (flags & BF_FLAG_RADPNT_PREC) {
-        /* 'prec' is the precision after the radix point */
-        if (prec1 != BF_PREC_INF)
-            prec = r->expn + prec1;
-        else
-            prec = prec1;
-    } else if (unlikely(r->expn < e_min) && (flags & BF_FLAG_SUBNORMAL)) {
-        /* restrict the precision in case of potentially subnormal
-           result */
-        assert(prec1 != BF_PREC_INF);
-        prec = prec1 - (e_min - r->expn);
-    } else {
-        prec = prec1;
-    }
-
-    /* round to prec bits */
-    rnd_mode = flags & BF_RND_MASK;
-    add_one = bf_get_rnd_add(&ret, r, l, prec, rnd_mode);
-
-    if (prec <= 0) {
-        if (add_one) {
-            bf_resize(r, 1); /* cannot fail */
-            r->tab[0] = (limb_t)1 << (LIMB_BITS - 1);
-            r->expn += 1 - prec;
-            ret |= BF_ST_UNDERFLOW | BF_ST_INEXACT;
-            return ret;
-        } else {
-            goto underflow;
-        }
-    } else if (add_one) {
-        limb_t carry;
-
-        /* add one starting at digit 'prec - 1' */
-        bit_pos = l * LIMB_BITS - 1 - (prec - 1);
-        pos = bit_pos >> LIMB_LOG2_BITS;
-        carry = (limb_t)1 << (bit_pos & (LIMB_BITS - 1));
-
-        for(i = pos; i < l; i++) {
-            v = r->tab[i] + carry;
-            carry = (v < carry);
-            r->tab[i] = v;
-            if (carry == 0)
-                break;
-        }
-        if (carry) {
-            /* shift right by one digit */
-            v = 1;
-            for(i = l - 1; i >= pos; i--) {
-                a = r->tab[i];
-                r->tab[i] = (a >> 1) | (v << (LIMB_BITS - 1));
-                v = a;
-            }
-            r->expn++;
-        }
-    }
-
-    /* check underflow */
-    if (unlikely(r->expn < e_min)) {
-        if (flags & BF_FLAG_SUBNORMAL) {
-            /* if inexact, also set the underflow flag */
-            if (ret & BF_ST_INEXACT)
-                ret |= BF_ST_UNDERFLOW;
-        } else {
-        underflow:
-            ret |= BF_ST_UNDERFLOW | BF_ST_INEXACT;
-            bf_set_zero(r, r->sign);
-            return ret;
-        }
-    }
-
-    /* check overflow */
-    if (unlikely(r->expn > e_max))
-        return bf_set_overflow(r, r->sign, prec1, flags);
-
-    /* keep the bits starting at 'prec - 1' */
-    bit_pos = l * LIMB_BITS - 1 - (prec - 1);
-    i = bit_pos >> LIMB_LOG2_BITS;
-    if (i >= 0) {
-        shift = bit_pos & (LIMB_BITS - 1);
-        if (shift != 0)
-            r->tab[i] &= limb_mask(shift, LIMB_BITS - 1);
-    } else {
-        i = 0;
-    }
-    /* remove trailing zeros */
-    while (r->tab[i] == 0)
-        i++;
-    if (i > 0) {
-        l -= i;
-        memmove(r->tab, r->tab + i, l * sizeof(limb_t));
-    }
-    bf_resize(r, l); /* cannot fail */
-    return ret;
-}
-
-/* 'r' must be a finite number. */
-int bf_normalize_and_round(bf_t *r, limb_t prec1, bf_flags_t flags)
-{
-    limb_t l, v, a;
-    int shift, ret;
-    slimb_t i;
-
-    //    bf_print_str("bf_renorm", r);
-    l = r->len;
-    while (l > 0 && r->tab[l - 1] == 0)
-        l--;
-    if (l == 0) {
-        /* zero */
-        r->expn = BF_EXP_ZERO;
-        bf_resize(r, 0); /* cannot fail */
-        ret = 0;
-    } else {
-        r->expn -= (r->len - l) * LIMB_BITS;
-        /* shift to have the MSB set to '1' */
-        v = r->tab[l - 1];
-        shift = clz(v);
-        if (shift != 0) {
-            v = 0;
-            for(i = 0; i < l; i++) {
-                a = r->tab[i];
-                r->tab[i] = (a << shift) | (v >> (LIMB_BITS - shift));
-                v = a;
-            }
-            r->expn -= shift;
-        }
-        ret = __bf_round(r, prec1, flags, l, 0);
-    }
-    //    bf_print_str("r_final", r);
-    return ret;
-}
-
-/* return true if rounding can be done at precision 'prec' assuming
-   the exact result r is such that |r-a| <= 2^(EXP(a)-k). */
-/* XXX: check the case where the exponent would be incremented by the
-   rounding */
-int bf_can_round(const bf_t *a, slimb_t prec, bf_rnd_t rnd_mode, slimb_t k)
-{
-    bool is_rndn;
-    slimb_t bit_pos, n;
-    limb_t bit;
-
-    if (a->expn == BF_EXP_INF || a->expn == BF_EXP_NAN)
-        return false;
-    if (rnd_mode == BF_RNDF) {
-        return (k >= (prec + 1));
-    }
-    if (a->expn == BF_EXP_ZERO)
-        return false;
-    is_rndn = (rnd_mode == BF_RNDN || rnd_mode == BF_RNDNA);
-    if (k < (prec + 2))
-        return false;
-    bit_pos = a->len * LIMB_BITS - 1 - prec;
-    n = k - prec;
-    /* bit pattern for RNDN or RNDNA: 0111.. or 1000...
-       for other rounding modes: 000... or 111...
-    */
-    bit = get_bit(a->tab, a->len, bit_pos);
-    bit_pos--;
-    n--;
-    bit ^= is_rndn;
-    /* XXX: slow, but a few iterations on average */
-    while (n != 0) {
-        if (get_bit(a->tab, a->len, bit_pos) != bit)
-            return true;
-        bit_pos--;
-        n--;
-    }
-    return false;
-}
-
-/* Cannot fail with BF_ST_MEM_ERROR. */
-int bf_round(bf_t *r, limb_t prec, bf_flags_t flags)
-{
-    if (r->len == 0)
-        return 0;
-    return __bf_round(r, prec, flags, r->len, 0);
-}
-
-/* for debugging */
-static __maybe_unused void dump_limbs(const char *str, const limb_t *tab, limb_t n)
-{
-    limb_t i;
-    printf("%s: len=%" PRId_LIMB "\n", str, n);
-    for(i = 0; i < n; i++) {
-        printf("%" PRId_LIMB ": " FMT_LIMB "\n",
-               i, tab[i]);
-    }
-}
-
-void mp_print_str(const char *str, const limb_t *tab, limb_t n)
-{
-    slimb_t i;
-    printf("%s= 0x", str);
-    for(i = n - 1; i >= 0; i--) {
-        if (i != (n - 1))
-            printf("_");
-        printf(FMT_LIMB, tab[i]);
-    }
-    printf("\n");
-}
-
-static __maybe_unused void mp_print_str_h(const char *str,
-                                          const limb_t *tab, limb_t n,
-                                          limb_t high)
-{
-    slimb_t i;
-    printf("%s= 0x", str);
-    printf(FMT_LIMB, high);
-    for(i = n - 1; i >= 0; i--) {
-        printf("_");
-        printf(FMT_LIMB, tab[i]);
-    }
-    printf("\n");
-}
-
-/* for debugging */
-void bf_print_str(const char *str, const bf_t *a)
-{
-    slimb_t i;
-    printf("%s=", str);
-
-    if (a->expn == BF_EXP_NAN) {
-        printf("NaN");
-    } else {
-        if (a->sign)
-            putchar('-');
-        if (a->expn == BF_EXP_ZERO) {
-            putchar('0');
-        } else if (a->expn == BF_EXP_INF) {
-            printf("Inf");
-        } else {
-            printf("0x0.");
-            for(i = a->len - 1; i >= 0; i--)
-                printf(FMT_LIMB, a->tab[i]);
-            printf("p%" PRId_LIMB, a->expn);
-        }
-    }
-    printf("\n");
-}
-
-/* compare the absolute value of 'a' and 'b'. Return < 0 if a < b, 0
-   if a = b and > 0 otherwise. */
-int bf_cmpu(const bf_t *a, const bf_t *b)
-{
-    slimb_t i;
-    limb_t len, v1, v2;
-
-    if (a->expn != b->expn) {
-        if (a->expn < b->expn)
-            return -1;
-        else
-            return 1;
-    }
-    len = bf_max(a->len, b->len);
-    for(i = len - 1; i >= 0; i--) {
-        v1 = get_limbz(a, a->len - len + i);
-        v2 = get_limbz(b, b->len - len + i);
-        if (v1 != v2) {
-            if (v1 < v2)
-                return -1;
-            else
-                return 1;
-        }
-    }
-    return 0;
-}
-
-/* Full order: -0 < 0, NaN == NaN and NaN is larger than all other numbers */
-int bf_cmp_full(const bf_t *a, const bf_t *b)
-{
-    int res;
-
-    if (a->expn == BF_EXP_NAN || b->expn == BF_EXP_NAN) {
-        if (a->expn == b->expn)
-            res = 0;
-        else if (a->expn == BF_EXP_NAN)
-            res = 1;
-        else
-            res = -1;
-    } else if (a->sign != b->sign) {
-        res = 1 - 2 * a->sign;
-    } else {
-        res = bf_cmpu(a, b);
-        if (a->sign)
-            res = -res;
-    }
-    return res;
-}
-
-/* Standard floating point comparison: return 2 if one of the operands
-   is NaN (unordered) or -1, 0, 1 depending on the ordering assuming
-   -0 == +0 */
-int bf_cmp(const bf_t *a, const bf_t *b)
-{
-    int res;
-
-    if (a->expn == BF_EXP_NAN || b->expn == BF_EXP_NAN) {
-        res = 2;
-    } else if (a->sign != b->sign) {
-        if (a->expn == BF_EXP_ZERO && b->expn == BF_EXP_ZERO)
-            res = 0;
-        else
-            res = 1 - 2 * a->sign;
-    } else {
-        res = bf_cmpu(a, b);
-        if (a->sign)
-            res = -res;
-    }
-    return res;
-}
-
-/* Compute the number of bits 'n' matching the pattern:
-   a= X1000..0
-   b= X0111..1
-
-   When computing a-b, the result will have at least n leading zero
-   bits.
-
-   Precondition: a > b and a.expn - b.expn = 0 or 1
-*/
-static limb_t count_cancelled_bits(const bf_t *a, const bf_t *b)
-{
-    slimb_t bit_offset, b_offset, n;
-    int p, p1;
-    limb_t v1, v2, mask;
-
-    bit_offset = a->len * LIMB_BITS - 1;
-    b_offset = (b->len - a->len) * LIMB_BITS - (LIMB_BITS - 1) +
-        a->expn - b->expn;
-    n = 0;
-
-    /* first search the equals bits */
-    for(;;) {
-        v1 = get_limbz(a, bit_offset >> LIMB_LOG2_BITS);
-        v2 = get_bits(b->tab, b->len, bit_offset + b_offset);
-        //        printf("v1=" FMT_LIMB " v2=" FMT_LIMB "\n", v1, v2);
-        if (v1 != v2)
-            break;
-        n += LIMB_BITS;
-        bit_offset -= LIMB_BITS;
-    }
-    /* find the position of the first different bit */
-    p = clz(v1 ^ v2) + 1;
-    n += p;
-    /* then search for '0' in a and '1' in b */
-    p = LIMB_BITS - p;
-    if (p > 0) {
-        /* search in the trailing p bits of v1 and v2 */
-        mask = limb_mask(0, p - 1);
-        p1 = bf_min(clz(v1 & mask), clz((~v2) & mask)) - (LIMB_BITS - p);
-        n += p1;
-        if (p1 != p)
-            goto done;
-    }
-    bit_offset -= LIMB_BITS;
-    for(;;) {
-        v1 = get_limbz(a, bit_offset >> LIMB_LOG2_BITS);
-        v2 = get_bits(b->tab, b->len, bit_offset + b_offset);
-        //        printf("v1=" FMT_LIMB " v2=" FMT_LIMB "\n", v1, v2);
-        if (v1 != 0 || v2 != -1) {
-            /* different: count the matching bits */
-            p1 = bf_min(clz(v1), clz(~v2));
-            n += p1;
-            break;
-        }
-        n += LIMB_BITS;
-        bit_offset -= LIMB_BITS;
-    }
- done:
-    return n;
-}
-
-static int bf_add_internal(bf_t *r, const bf_t *a, const bf_t *b, limb_t prec,
-                           bf_flags_t flags, int b_neg)
-{
-    const bf_t *tmp;
-    int is_sub, ret, cmp_res, a_sign, b_sign;
-
-    a_sign = a->sign;
-    b_sign = b->sign ^ b_neg;
-    is_sub = a_sign ^ b_sign;
-    cmp_res = bf_cmpu(a, b);
-    if (cmp_res < 0) {
-        tmp = a;
-        a = b;
-        b = tmp;
-        a_sign = b_sign; /* b_sign is never used later */
-    }
-    /* abs(a) >= abs(b) */
-    if (cmp_res == 0 && is_sub && a->expn < BF_EXP_INF) {
-        /* zero result */
-        bf_set_zero(r, (flags & BF_RND_MASK) == BF_RNDD);
-        ret = 0;
-    } else if (a->len == 0 || b->len == 0) {
-        ret = 0;
-        if (a->expn >= BF_EXP_INF) {
-            if (a->expn == BF_EXP_NAN) {
-                /* at least one operand is NaN */
-                bf_set_nan(r);
-            } else if (b->expn == BF_EXP_INF && is_sub) {
-                /* infinities with different signs */
-                bf_set_nan(r);
-                ret = BF_ST_INVALID_OP;
-            } else {
-                bf_set_inf(r, a_sign);
-            }
-        } else {
-            /* at least one zero and not subtract */
-            bf_set(r, a);
-            r->sign = a_sign;
-            goto renorm;
-        }
-    } else {
-        slimb_t d, a_offset, b_bit_offset, i, cancelled_bits;
-        limb_t carry, v1, v2, u, r_len, carry1, precl, tot_len, z, sub_mask;
-
-        r->sign = a_sign;
-        r->expn = a->expn;
-        d = a->expn - b->expn;
-        /* must add more precision for the leading cancelled bits in
-           subtraction */
-        if (is_sub) {
-            if (d <= 1)
-                cancelled_bits = count_cancelled_bits(a, b);
-            else
-                cancelled_bits = 1;
-        } else {
-            cancelled_bits = 0;
-        }
-
-        /* add two extra bits for rounding */
-        precl = (cancelled_bits + prec + 2 + LIMB_BITS - 1) / LIMB_BITS;
-        tot_len = bf_max(a->len, b->len + (d + LIMB_BITS - 1) / LIMB_BITS);
-        r_len = bf_min(precl, tot_len);
-        if (bf_resize(r, r_len))
-            goto fail;
-        a_offset = a->len - r_len;
-        b_bit_offset = (b->len - r_len) * LIMB_BITS + d;
-
-        /* compute the bits before for the rounding */
-        carry = is_sub;
-        z = 0;
-        sub_mask = -is_sub;
-        i = r_len - tot_len;
-        while (i < 0) {
-            slimb_t ap, bp;
-            bool inflag;
-
-            ap = a_offset + i;
-            bp = b_bit_offset + i * LIMB_BITS;
-            inflag = false;
-            if (ap >= 0 && ap < a->len) {
-                v1 = a->tab[ap];
-                inflag = true;
-            } else {
-                v1 = 0;
-            }
-            if (bp + LIMB_BITS > 0 && bp < (slimb_t)(b->len * LIMB_BITS)) {
-                v2 = get_bits(b->tab, b->len, bp);
-                inflag = true;
-            } else {
-                v2 = 0;
-            }
-            if (!inflag) {
-                /* outside 'a' and 'b': go directly to the next value
-                   inside a or b so that the running time does not
-                   depend on the exponent difference */
-                i = 0;
-                if (ap < 0)
-                    i = bf_min(i, -a_offset);
-                /* b_bit_offset + i * LIMB_BITS + LIMB_BITS >= 1
-                   equivalent to
-                   i >= ceil(-b_bit_offset + 1 - LIMB_BITS) / LIMB_BITS)
-                */
-                if (bp + LIMB_BITS <= 0)
-                    i = bf_min(i, (-b_bit_offset) >> LIMB_LOG2_BITS);
-            } else {
-                i++;
-            }
-            v2 ^= sub_mask;
-            u = v1 + v2;
-            carry1 = u < v1;
-            u += carry;
-            carry = (u < carry) | carry1;
-            z |= u;
-        }
-        /* and the result */
-        for(i = 0; i < r_len; i++) {
-            v1 = get_limbz(a, a_offset + i);
-            v2 = get_bits(b->tab, b->len, b_bit_offset + i * LIMB_BITS);
-            v2 ^= sub_mask;
-            u = v1 + v2;
-            carry1 = u < v1;
-            u += carry;
-            carry = (u < carry) | carry1;
-            r->tab[i] = u;
-        }
-        /* set the extra bits for the rounding */
-        r->tab[0] |= (z != 0);
-
-        /* carry is only possible in add case */
-        if (!is_sub && carry) {
-            if (bf_resize(r, r_len + 1))
-                goto fail;
-            r->tab[r_len] = 1;
-            r->expn += LIMB_BITS;
-        }
-    renorm:
-        ret = bf_normalize_and_round(r, prec, flags);
-    }
-    return ret;
- fail:
-    bf_set_nan(r);
-    return BF_ST_MEM_ERROR;
-}
-
-static int __bf_add(bf_t *r, const bf_t *a, const bf_t *b, limb_t prec,
-                     bf_flags_t flags)
-{
-    return bf_add_internal(r, a, b, prec, flags, 0);
-}
-
-static int __bf_sub(bf_t *r, const bf_t *a, const bf_t *b, limb_t prec,
-                     bf_flags_t flags)
-{
-    return bf_add_internal(r, a, b, prec, flags, 1);
-}
-
-limb_t mp_add(limb_t *res, const limb_t *op1, const limb_t *op2,
-              limb_t n, limb_t carry)
-{
-    slimb_t i;
-    limb_t k, a, v, k1;
-
-    k = carry;
-    for(i=0;i<n;i++) {
-        v = op1[i];
-        a = v + op2[i];
-        k1 = a < v;
-        a = a + k;
-        k = (a < k) | k1;
-        res[i] = a;
-    }
-    return k;
-}
-
-limb_t mp_add_ui(limb_t *tab, limb_t b, size_t n)
+/* the represented number is sum(i, tab[i]*2^(LIMB_BITS * i)) */
+typedef struct {
+    int len; /* >= 1 */
+    limb_t tab[];
+} mpb_t;
+
+static limb_t mp_add_ui(limb_t *tab, limb_t b, size_t n)
 {
     size_t i;
     limb_t k, a;
@@ -69453,79 +69239,8 @@ limb_t mp_add_ui(limb_t *tab, limb_t b, size_t n)
     return k;
 }
 
-limb_t mp_sub(limb_t *res, const limb_t *op1, const limb_t *op2,
-              mp_size_t n, limb_t carry)
-{
-    int i;
-    limb_t k, a, v, k1;
-
-    k = carry;
-    for(i=0;i<n;i++) {
-        v = op1[i];
-        a = v - op2[i];
-        k1 = a > v;
-        v = a - k;
-        k = (v > a) | k1;
-        res[i] = v;
-    }
-    return k;
-}
-
-/* compute 0 - op2 */
-static limb_t mp_neg(limb_t *res, const limb_t *op2, mp_size_t n, limb_t carry)
-{
-    int i;
-    limb_t k, a, v, k1;
-
-    k = carry;
-    for(i=0;i<n;i++) {
-        v = 0;
-        a = v - op2[i];
-        k1 = a > v;
-        v = a - k;
-        k = (v > a) | k1;
-        res[i] = v;
-    }
-    return k;
-}
-
-limb_t mp_sub_ui(limb_t *tab, limb_t b, mp_size_t n)
-{
-    mp_size_t i;
-    limb_t k, a, v;
-
-    k=b;
-    for(i=0;i<n;i++) {
-        v = tab[i];
-        a = v - k;
-        k = a > v;
-        tab[i] = a;
-        if (k == 0)
-            break;
-    }
-    return k;
-}
-
-/* r = (a + high*B^n) >> shift. Return the remainder r (0 <= r < 2^shift).
-   1 <= shift <= LIMB_BITS - 1 */
-static limb_t mp_shr(limb_t *tab_r, const limb_t *tab, mp_size_t n,
-                     int shift, limb_t high)
-{
-    mp_size_t i;
-    limb_t l, a;
-
-    assert(shift >= 1 && shift < LIMB_BITS);
-    l = high;
-    for(i = n - 1; i >= 0; i--) {
-        a = tab[i];
-        tab_r[i] = (a >> shift) | (l << (LIMB_BITS - shift));
-        l = a;
-    }
-    return l & (((limb_t)1 << shift) - 1);
-}
-
 /* tabr[] = taba[] * b + l. Return the high carry */
-static limb_t mp_mul1(limb_t *tabr, const limb_t *taba, limb_t n,
+static limb_t mp_mul1(limb_t *tabr, const limb_t *taba, limb_t n, 
                       limb_t b, limb_t l)
 {
     limb_t i;
@@ -69535,75 +69250,6 @@ static limb_t mp_mul1(limb_t *tabr, const limb_t *taba, limb_t n,
         t = (dlimb_t)taba[i] * (dlimb_t)b + l;
         tabr[i] = t;
         l = t >> LIMB_BITS;
-    }
-    return l;
-}
-
-/* tabr[] += taba[] * b, return the high word. */
-static limb_t mp_add_mul1(limb_t *tabr, const limb_t *taba, limb_t n,
-                          limb_t b)
-{
-    limb_t i, l;
-    dlimb_t t;
-
-    l = 0;
-    for(i = 0; i < n; i++) {
-        t = (dlimb_t)taba[i] * (dlimb_t)b + l + tabr[i];
-        tabr[i] = t;
-        l = t >> LIMB_BITS;
-    }
-    return l;
-}
-
-/* size of the result : op1_size + op2_size. */
-static void mp_mul_basecase(limb_t *result,
-                            const limb_t *op1, limb_t op1_size,
-                            const limb_t *op2, limb_t op2_size)
-{
-    limb_t i, r;
-
-    result[op1_size] = mp_mul1(result, op1, op1_size, op2[0], 0);
-    for(i=1;i<op2_size;i++) {
-        r = mp_add_mul1(result + i, op1, op1_size, op2[i]);
-        result[i + op1_size] = r;
-    }
-}
-
-/* return 0 if OK, -1 if memory error */
-/* XXX: change API so that result can be allocated */
-int mp_mul(bf_context_t *s, limb_t *result,
-           const limb_t *op1, limb_t op1_size,
-           const limb_t *op2, limb_t op2_size)
-{
-#ifdef USE_FFT_MUL
-    if (unlikely(bf_min(op1_size, op2_size) >= FFT_MUL_THRESHOLD)) {
-        bf_t r_s, *r = &r_s;
-        r->tab = result;
-        /* XXX: optimize memory usage in API */
-        if (fft_mul(s, r, (limb_t *)op1, op1_size,
-                    (limb_t *)op2, op2_size, FFT_MUL_R_NORESIZE))
-            return -1;
-    } else
-#endif
-    {
-        mp_mul_basecase(result, op1, op1_size, op2, op2_size);
-    }
-    return 0;
-}
-
-/* tabr[] -= taba[] * b. Return the value to substract to the high
-   word. */
-static limb_t mp_sub_mul1(limb_t *tabr, const limb_t *taba, limb_t n,
-                          limb_t b)
-{
-    limb_t i, l;
-    dlimb_t t;
-
-    l = 0;
-    for(i = 0; i < n; i++) {
-        t = tabr[i] - (dlimb_t)taba[i] * (dlimb_t)b - l;
-        tabr[i] = t;
-        l = -(t >> LIMB_BITS);
     }
     return l;
 }
@@ -69628,8 +69274,8 @@ static inline limb_t udiv1norm(limb_t *pr, limb_t a1, limb_t a0,
     n_adj = a0 + (n1m & d);
     a = (dlimb_t)d_inv * (a1 - n1m) + n_adj;
     q = (a >> LIMB_BITS) + a1;
-    /* compute a - q * r and update q so that the remainder is\
-       between 0 and d - 1 */
+    /* compute a - q * r and update q so that the remainder is between
+       0 and d - 1 */
     a = ((dlimb_t)a1 << LIMB_BITS) | a0;
     a = a - (dlimb_t)q * d - d;
     ah = a >> LIMB_BITS;
@@ -69639,183 +69285,280 @@ static inline limb_t udiv1norm(limb_t *pr, limb_t a1, limb_t a0,
     return q;
 }
 
-/* b must be >= 1 << (LIMB_BITS - 1) */
-static limb_t mp_div1norm(limb_t *tabr, const limb_t *taba, limb_t n,
-                          limb_t b, limb_t r)
+static limb_t mp_div1(limb_t *tabr, const limb_t *taba, limb_t n,
+                      limb_t b, limb_t r)
 {
     slimb_t i;
-
-    if (n >= UDIV1NORM_THRESHOLD) {
-        limb_t b_inv;
-        b_inv = udiv1norm_init(b);
-        for(i = n - 1; i >= 0; i--) {
-            tabr[i] = udiv1norm(&r, r, taba[i], b, b_inv);
-        }
-    } else {
-        dlimb_t a1;
-        for(i = n - 1; i >= 0; i--) {
-            a1 = ((dlimb_t)r << LIMB_BITS) | taba[i];
-            tabr[i] = a1 / b;
-            r = a1 % b;
-        }
+    dlimb_t a1;
+    for(i = n - 1; i >= 0; i--) {
+        a1 = ((dlimb_t)r << LIMB_BITS) | taba[i];
+        tabr[i] = a1 / b;
+        r = a1 % b;
     }
     return r;
 }
 
-static int mp_divnorm_large(bf_context_t *s,
-                            limb_t *tabq, limb_t *taba, limb_t na,
-                            const limb_t *tabb, limb_t nb);
-
-/* base case division: divides taba[0..na-1] by tabb[0..nb-1]. tabb[nb
-   - 1] must be >= 1 << (LIMB_BITS - 1). na - nb must be >= 0. 'taba'
-   is modified and contains the remainder (nb limbs). tabq[0..na-nb]
-   contains the quotient with tabq[na - nb] <= 1. */
-static int mp_divnorm(bf_context_t *s, limb_t *tabq, limb_t *taba, limb_t na,
-                      const limb_t *tabb, limb_t nb)
+/* r = (a + high*B^n) >> shift. Return the remainder r (0 <= r < 2^shift). 
+   1 <= shift <= LIMB_BITS - 1 */
+static limb_t mp_shr(limb_t *tab_r, const limb_t *tab, mp_size_t n, 
+                     int shift, limb_t high)
 {
-    limb_t r, a, c, q, v, b1, b1_inv, n, dummy_r;
-    slimb_t i, j;
+    mp_size_t i;
+    limb_t l, a;
 
-    b1 = tabb[nb - 1];
-    if (nb == 1) {
-        taba[0] = mp_div1norm(tabq, taba, na, b1, 0);
-        return 0;
-    }
-    n = na - nb;
-    if (bf_min(n, nb) >= DIVNORM_LARGE_THRESHOLD) {
-        return mp_divnorm_large(s, tabq, taba, na, tabb, nb);
-    }
-
-    if (n >= UDIV1NORM_THRESHOLD)
-        b1_inv = udiv1norm_init(b1);
-    else
-        b1_inv = 0;
-
-    /* first iteration: the quotient is only 0 or 1 */
-    q = 1;
-    for(j = nb - 1; j >= 0; j--) {
-        if (taba[n + j] != tabb[j]) {
-            if (taba[n + j] < tabb[j])
-                q = 0;
-            break;
-        }
-    }
-    tabq[n] = q;
-    if (q) {
-        mp_sub(taba + n, taba + n, tabb, nb, 0);
-    }
-
+    assert(shift >= 1 && shift < LIMB_BITS);
+    l = high;
     for(i = n - 1; i >= 0; i--) {
-        if (unlikely(taba[i + nb] >= b1)) {
-            q = -1;
-        } else if (b1_inv) {
-            q = udiv1norm(&dummy_r, taba[i + nb], taba[i + nb - 1], b1, b1_inv);
-        } else {
-            dlimb_t al;
-            al = ((dlimb_t)taba[i + nb] << LIMB_BITS) | taba[i + nb - 1];
-            q = al / b1;
-            r = al % b1;
-        }
-        r = mp_sub_mul1(taba + i, tabb, nb, q);
-
-        v = taba[i + nb];
-        a = v - r;
-        c = (a > v);
-        taba[i + nb] = a;
-
-        if (c != 0) {
-            /* negative result */
-            for(;;) {
-                q--;
-                c = mp_add(taba + i, taba + i, tabb, nb, 0);
-                /* propagate carry and test if positive result */
-                if (c != 0) {
-                    if (++taba[i + nb] == 0) {
-                        break;
-                    }
-                }
-            }
-        }
-        tabq[i] = q;
+        a = tab[i];
+        tab_r[i] = (a >> shift) | (l << (LIMB_BITS - shift));
+        l = a;
     }
-    return 0;
+    return l & (((limb_t)1 << shift) - 1);
 }
 
-/* compute r=B^(2*n)/a such as a*r < B^(2*n) < a*r + 2 with n >= 1. 'a'
-   has n limbs with a[n-1] >= B/2 and 'r' has n+1 limbs with r[n] = 1.
-
-   See Modern Computer Arithmetic by Richard P. Brent and Paul
-   Zimmermann, algorithm 3.5 */
-int mp_recip(bf_context_t *s, limb_t *tabr, const limb_t *taba, limb_t n)
+/* r = (a << shift) + low. 1 <= shift <= LIMB_BITS - 1, 0 <= low <
+   2^shift. */
+static limb_t mp_shl(limb_t *tab_r, const limb_t *tab, mp_size_t n, 
+              int shift, limb_t low)
 {
-    mp_size_t l, h, k, i;
-    limb_t *tabxh, *tabt, c, *tabu;
+    mp_size_t i;
+    limb_t l, a;
 
-    if (n <= 2) {
-        /* return ceil(B^(2*n)/a) - 1 */
-        /* XXX: could avoid allocation */
-        tabu = bf_malloc(s, sizeof(limb_t) * (2 * n + 1));
-        tabt = bf_malloc(s, sizeof(limb_t) * (n + 2));
-        if (!tabt || !tabu)
-            goto fail;
-        for(i = 0; i < 2 * n; i++)
-            tabu[i] = 0;
-        tabu[2 * n] = 1;
-        if (mp_divnorm(s, tabt, tabu, 2 * n + 1, taba, n))
-            goto fail;
-        for(i = 0; i < n + 1; i++)
-            tabr[i] = tabt[i];
-        if (mp_scan_nz(tabu, n) == 0) {
-            /* only happens for a=B^n/2 */
-            mp_sub_ui(tabr, 1, n + 1);
+    assert(shift >= 1 && shift < LIMB_BITS);
+    l = low;
+    for(i = 0; i < n; i++) {
+        a = tab[i];
+        tab_r[i] = (a << shift) | l;
+        l = (a >> (LIMB_BITS - shift)); 
+    }
+    return l;
+}
+
+static no_inline limb_t mp_div1norm(limb_t *tabr, const limb_t *taba, limb_t n,
+                                    limb_t b, limb_t r, limb_t b_inv, int shift)
+{
+    slimb_t i;
+
+    if (shift != 0) {
+        r = (r << shift) | mp_shl(tabr, taba, n, shift, 0);
+    }
+    for(i = n - 1; i >= 0; i--) {
+        tabr[i] = udiv1norm(&r, r, taba[i], b, b_inv);
+    }
+    r >>= shift;
+    return r;
+}
+
+static __maybe_unused void mpb_dump(const char *str, const mpb_t *a)
+{
+    int i;
+    
+    printf("%s= 0x", str);
+    for(i = a->len - 1; i >= 0; i--) {
+        printf("%08x", a->tab[i]);
+        if (i != 0)
+            printf("_");
+    }
+    printf("\n");
+}
+
+static void mpb_renorm(mpb_t *r)
+{
+    while (r->len > 1 && r->tab[r->len - 1] == 0)
+        r->len--;
+}
+
+#ifdef USE_POW5_TABLE
+static const uint32_t pow5_table[17] = {
+    0x00000005, 0x00000019, 0x0000007d, 0x00000271, 
+    0x00000c35, 0x00003d09, 0x0001312d, 0x0005f5e1, 
+    0x001dcd65, 0x009502f9, 0x02e90edd, 0x0e8d4a51, 
+    0x48c27395, 0x6bcc41e9, 0x1afd498d, 0x86f26fc1, 
+    0xa2bc2ec5, 
+};
+
+static const uint8_t pow5h_table[4] = {
+    0x00000001, 0x00000007, 0x00000023, 0x000000b1, 
+};
+
+static const uint32_t pow5_inv_table[13] = {
+    0x99999999, 0x47ae147a, 0x0624dd2f, 0xa36e2eb1,
+    0x4f8b588e, 0x0c6f7a0b, 0xad7f29ab, 0x5798ee23,
+    0x12e0be82, 0xb7cdfd9d, 0x5fd7fe17, 0x19799812,
+    0xc25c2684,
+};
+#endif
+
+/* return a^b */
+static uint64_t pow_ui(uint32_t a, uint32_t b)
+{
+    int i, n_bits;
+    uint64_t r;
+    if (b == 0)
+        return 1;
+    if (b == 1)
+        return a;
+#ifdef USE_POW5_TABLE
+    if ((a == 5 || a == 10) && b <= 17) {
+        r = pow5_table[b - 1];
+        if (b >= 14) {
+            r |= (uint64_t)pow5h_table[b - 14] << 32;
+        }
+        if (a == 10)
+            r <<= b;
+        return r;
+    }
+#endif
+    r = a;
+    n_bits = 32 - clz32(b);
+    for(i = n_bits - 2; i >= 0; i--) {
+        r *= r;
+        if ((b >> i) & 1)
+            r *= a;
+    }
+    return r;
+}
+
+static uint32_t pow_ui_inv(uint32_t *pr_inv, int *pshift, uint32_t a, uint32_t b)
+{
+    uint32_t r_inv, r;
+    int shift;
+#ifdef USE_POW5_TABLE
+    if (a == 5 && b >= 1 && b <= 13) {
+        r = pow5_table[b - 1];
+        shift = clz32(r);
+        r <<= shift;
+        r_inv = pow5_inv_table[b - 1];
+    } else
+#endif
+    {
+        r = pow_ui(a, b);
+        shift = clz32(r);
+        r <<= shift;
+        r_inv = udiv1norm_init(r);
+    }
+    *pshift = shift;
+    *pr_inv = r_inv;
+    return r;
+}
+
+enum {
+    JS_RNDN, /* round to nearest, ties to even */
+    JS_RNDNA, /* round to nearest, ties away from zero */
+    JS_RNDZ,
+};
+
+static int mpb_get_bit(const mpb_t *r, int k)
+{
+    int l;
+    
+    l = (unsigned)k / LIMB_BITS;
+    k = k & (LIMB_BITS - 1);
+    if (l >= r->len)
+        return 0;
+    else
+        return (r->tab[l] >> k) & 1;
+}
+
+/* compute round(r / 2^shift). 'shift' can be negative */
+static void mpb_shr_round(mpb_t *r, int shift, int rnd_mode)
+{
+    int l, i;
+
+    if (shift == 0)
+        return;
+    if (shift < 0) {
+        shift = -shift;
+        l = (unsigned)shift / LIMB_BITS;
+        shift = shift & (LIMB_BITS - 1);
+        if (shift != 0) {
+            r->tab[r->len] = mp_shl(r->tab, r->tab, r->len, shift, 0);
+            r->len++;
+            mpb_renorm(r);
+        }
+        if (l > 0) {
+            for(i = r->len - 1; i >= 0; i--)
+                r->tab[i + l] = r->tab[i];
+            for(i = 0; i < l; i++)
+                r->tab[i] = 0;
+            r->len += l;
         }
     } else {
-        l = (n - 1) / 2;
-        h = n - l;
-        /* n=2p  -> l=p-1, h = p + 1, k = p + 3
-           n=2p+1-> l=p,  h = p + 1; k = p + 2
-        */
-        tabt = bf_malloc(s, sizeof(limb_t) * (n + h + 1));
-        tabu = bf_malloc(s, sizeof(limb_t) * (n + 2 * h - l + 2));
-        if (!tabt || !tabu)
-            goto fail;
-        tabxh = tabr + l;
-        if (mp_recip(s, tabxh, taba + l, h))
-            goto fail;
-        if (mp_mul(s, tabt, taba, n, tabxh, h + 1)) /* n + h + 1 limbs */
-            goto fail;
-        while (tabt[n + h] != 0) {
-            mp_sub_ui(tabxh, 1, h + 1);
-            c = mp_sub(tabt, tabt, taba, n, 0);
-            mp_sub_ui(tabt + n, c, h + 1);
+        limb_t bit1, bit2;
+        int k, add_one;
+        
+        switch(rnd_mode) {
+        default:
+        case JS_RNDZ:
+            add_one = 0;
+            break;
+        case JS_RNDN:
+        case JS_RNDNA:
+            bit1 = mpb_get_bit(r, shift - 1);
+            if (bit1) {
+                if (rnd_mode == JS_RNDNA) {
+                    bit2 = 1;
+                } else {
+                    /* bit2 = oring of all the bits after bit1 */
+                    bit2 = 0;
+                    if (shift >= 2) {
+                        k = shift - 1;
+                        l = (unsigned)k / LIMB_BITS;
+                        k = k & (LIMB_BITS - 1);
+                        for(i = 0; i < min_int(l, r->len); i++)
+                            bit2 |= r->tab[i];
+                        if (l < r->len)
+                            bit2 |= r->tab[l] & (((limb_t)1 << k) - 1);
+                    }
+                }
+                if (bit2) {
+                    add_one = 1;
+                } else {
+                    /* round to even */
+                    add_one = mpb_get_bit(r, shift);
+                }
+            } else {
+                add_one = 0;
+            }
+            break;
         }
-        /* T = B^(n+h) - T */
-        mp_neg(tabt, tabt, n + h + 1, 0);
-        tabt[n + h]++;
-        if (mp_mul(s, tabu, tabt + l, n + h + 1 - l, tabxh, h + 1))
-            goto fail;
-        /* n + 2*h - l + 2 limbs */
-        k = 2 * h - l;
-        for(i = 0; i < l; i++)
-            tabr[i] = tabu[i + k];
-        mp_add(tabr + l, tabr + l, tabu + 2 * h, h, 0);
+
+        l = (unsigned)shift / LIMB_BITS;
+        shift = shift & (LIMB_BITS - 1);
+        if (l >= r->len) {
+            r->len = 1;
+            r->tab[0] = add_one;
+        } else {
+            if (l > 0) {
+                r->len -= l;
+                for(i = 0; i < r->len; i++)
+                    r->tab[i] = r->tab[i + l];
+            }
+            if (shift != 0) {
+                mp_shr(r->tab, r->tab, r->len, shift, 0);
+                mpb_renorm(r);
+            }
+            if (add_one) {
+                limb_t a;
+                a = mp_add_ui(r->tab, 1, r->len);
+                if (a)
+                    r->tab[r->len++] = a;
+            }
+        }
     }
-    bf_free(s, tabt);
-    bf_free(s, tabu);
-    return 0;
- fail:
-    bf_free(s, tabt);
-    bf_free(s, tabu);
-    return -1;
 }
 
 /* return -1, 0 or 1 */
-static int mp_cmp(const limb_t *taba, const limb_t *tabb, mp_size_t n)
+static int mpb_cmp(const mpb_t *a, const mpb_t *b)
 {
     mp_size_t i;
-    for(i = n - 1; i >= 0; i--) {
-        if (taba[i] != tabb[i]) {
-            if (taba[i] < tabb[i])
+    if (a->len < b->len)
+        return -1;
+    else if (a->len > b->len)
+        return 1;
+    for(i = a->len - 1; i >= 0; i--) {
+        if (a->tab[i] != b->tab[i]) {
+            if (a->tab[i] < b->tab[i])
                 return -1;
             else
                 return 1;
@@ -69824,2180 +69567,131 @@ static int mp_cmp(const limb_t *taba, const limb_t *tabb, mp_size_t n)
     return 0;
 }
 
-//#define DEBUG_DIVNORM_LARGE
-//#define DEBUG_DIVNORM_LARGE2
-
-/* subquadratic divnorm */
-static int mp_divnorm_large(bf_context_t *s,
-                            limb_t *tabq, limb_t *taba, limb_t na,
-                            const limb_t *tabb, limb_t nb)
+static void mpb_set_u64(mpb_t *r, uint64_t m)
 {
-    limb_t *tabb_inv, nq, *tabt, i, n;
-    nq = na - nb;
-#ifdef DEBUG_DIVNORM_LARGE
-    printf("na=%d nb=%d nq=%d\n", (int)na, (int)nb, (int)nq);
-    mp_print_str("a", taba, na);
-    mp_print_str("b", tabb, nb);
+#if LIMB_BITS == 64
+    r->tab[0] = m;
+    r->len = 1;
+#else
+    r->tab[0] = m;
+    r->tab[1] = m >> LIMB_BITS;
+    if (r->tab[1] == 0)
+        r->len = 1;
+    else
+        r->len = 2;
 #endif
-    assert(nq >= 1);
-    n = nq;
-    if (nq < nb)
-        n++;
-    tabb_inv = bf_malloc(s, sizeof(limb_t) * (n + 1));
-    tabt = bf_malloc(s, sizeof(limb_t) * 2 * (n + 1));
-    if (!tabb_inv || !tabt)
-        goto fail;
+}
 
-    if (n >= nb) {
-        for(i = 0; i < n - nb; i++)
-            tabt[i] = 0;
-        for(i = 0; i < nb; i++)
-            tabt[i + n - nb] = tabb[i];
+static uint64_t mpb_get_u64(mpb_t *r)
+{
+#if LIMB_BITS == 64
+    return r->tab[0];
+#else
+    if (r->len == 1) {
+        return r->tab[0];
     } else {
-        /* truncate B: need to increment it so that the approximate
-           inverse is smaller that the exact inverse */
-        for(i = 0; i < n; i++)
-            tabt[i] = tabb[i + nb - n];
-        if (mp_add_ui(tabt, 1, n)) {
-            /* tabt = B^n : tabb_inv = B^n */
-            memset(tabb_inv, 0, n * sizeof(limb_t));
-            tabb_inv[n] = 1;
-            goto recip_done;
-        }
-    }
-    if (mp_recip(s, tabb_inv, tabt, n))
-        goto fail;
- recip_done:
-    /* Q=A*B^-1 */
-    if (mp_mul(s, tabt, tabb_inv, n + 1, taba + na - (n + 1), n + 1))
-        goto fail;
-
-    for(i = 0; i < nq + 1; i++)
-        tabq[i] = tabt[i + 2 * (n + 1) - (nq + 1)];
-#ifdef DEBUG_DIVNORM_LARGE
-    mp_print_str("q", tabq, nq + 1);
-#endif
-
-    bf_free(s, tabt);
-    bf_free(s, tabb_inv);
-    tabb_inv = NULL;
-
-    /* R=A-B*Q */
-    tabt = bf_malloc(s, sizeof(limb_t) * (na + 1));
-    if (!tabt)
-        goto fail;
-    if (mp_mul(s, tabt, tabq, nq + 1, tabb, nb))
-        goto fail;
-    /* we add one more limb for the result */
-    mp_sub(taba, taba, tabt, nb + 1, 0);
-    bf_free(s, tabt);
-    /* the approximated quotient is smaller than than the exact one,
-       hence we may have to increment it */
-#ifdef DEBUG_DIVNORM_LARGE2
-    int cnt = 0;
-    static int cnt_max;
-#endif
-    for(;;) {
-        if (taba[nb] == 0 && mp_cmp(taba, tabb, nb) < 0)
-            break;
-        taba[nb] -= mp_sub(taba, taba, tabb, nb, 0);
-        mp_add_ui(tabq, 1, nq + 1);
-#ifdef DEBUG_DIVNORM_LARGE2
-        cnt++;
-#endif
-    }
-#ifdef DEBUG_DIVNORM_LARGE2
-    if (cnt > cnt_max) {
-        cnt_max = cnt;
-        printf("\ncnt=%d nq=%d nb=%d\n", cnt_max, (int)nq, (int)nb);
+        return r->tab[0] | ((uint64_t)r->tab[1] << LIMB_BITS);
     }
 #endif
-    return 0;
- fail:
-    bf_free(s, tabb_inv);
-    bf_free(s, tabt);
-    return -1;
 }
 
-int bf_mul(bf_t *r, const bf_t *a, const bf_t *b, limb_t prec,
-           bf_flags_t flags)
+/* floor_log2() = position of the first non zero bit or -1 if zero. */
+static int mpb_floor_log2(mpb_t *a)
 {
-    int ret, r_sign;
-
-    if (a->len < b->len) {
-        const bf_t *tmp = a;
-        a = b;
-        b = tmp;
-    }
-    r_sign = a->sign ^ b->sign;
-    /* here b->len <= a->len */
-    if (b->len == 0) {
-        if (a->expn == BF_EXP_NAN || b->expn == BF_EXP_NAN) {
-            bf_set_nan(r);
-            ret = 0;
-        } else if (a->expn == BF_EXP_INF || b->expn == BF_EXP_INF) {
-            if ((a->expn == BF_EXP_INF && b->expn == BF_EXP_ZERO) ||
-                (a->expn == BF_EXP_ZERO && b->expn == BF_EXP_INF)) {
-                bf_set_nan(r);
-                ret = BF_ST_INVALID_OP;
-            } else {
-                bf_set_inf(r, r_sign);
-                ret = 0;
-            }
-        } else {
-            bf_set_zero(r, r_sign);
-            ret = 0;
-        }
-    } else {
-        bf_t tmp, *r1 = NULL;
-        limb_t a_len, b_len, precl;
-        limb_t *a_tab, *b_tab;
-
-        a_len = a->len;
-        b_len = b->len;
-
-        if ((flags & BF_RND_MASK) == BF_RNDF) {
-            /* faithful rounding does not require using the full inputs */
-            precl = (prec + 2 + LIMB_BITS - 1) / LIMB_BITS;
-            a_len = bf_min(a_len, precl);
-            b_len = bf_min(b_len, precl);
-        }
-        a_tab = a->tab + a->len - a_len;
-        b_tab = b->tab + b->len - b_len;
-
-#ifdef USE_FFT_MUL
-        if (b_len >= FFT_MUL_THRESHOLD) {
-            int mul_flags = 0;
-            if (r == a)
-                mul_flags |= FFT_MUL_R_OVERLAP_A;
-            if (r == b)
-                mul_flags |= FFT_MUL_R_OVERLAP_B;
-            if (fft_mul(r->ctx, r, a_tab, a_len, b_tab, b_len, mul_flags))
-                goto fail;
-        } else
-#endif
-        {
-            if (r == a || r == b) {
-                bf_init(r->ctx, &tmp);
-                r1 = r;
-                r = &tmp;
-            }
-            if (bf_resize(r, a_len + b_len)) {
-            fail:
-                bf_set_nan(r);
-                ret = BF_ST_MEM_ERROR;
-                goto done;
-            }
-            mp_mul_basecase(r->tab, a_tab, a_len, b_tab, b_len);
-        }
-        r->sign = r_sign;
-        r->expn = a->expn + b->expn;
-        ret = bf_normalize_and_round(r, prec, flags);
-    done:
-        if (r == &tmp)
-            bf_move(r1, &tmp);
-    }
-    return ret;
-}
-
-/* multiply 'r' by 2^e */
-int bf_mul_2exp(bf_t *r, slimb_t e, limb_t prec, bf_flags_t flags)
-{
-    slimb_t e_max;
-    if (r->len == 0)
-        return 0;
-    e_max = ((limb_t)1 << BF_EXT_EXP_BITS_MAX) - 1;
-    e = bf_max(e, -e_max);
-    e = bf_min(e, e_max);
-    r->expn += e;
-    return __bf_round(r, prec, flags, r->len, 0);
-}
-
-/* Return e such as a=m*2^e with m odd integer. return 0 if a is zero,
-   Infinite or Nan. */
-slimb_t bf_get_exp_min(const bf_t *a)
-{
-    slimb_t i;
     limb_t v;
-    int k;
-
-    for(i = 0; i < a->len; i++) {
-        v = a->tab[i];
-        if (v != 0) {
-            k = ctz(v);
-            return a->expn - (a->len - i) * LIMB_BITS + k;
-        }
-    }
-    return 0;
-}
-
-/* a and b must be finite numbers with a >= 0 and b > 0. 'q' is the
-   integer defined as floor(a/b) and r = a - q * b. */
-static void bf_tdivremu(bf_t *q, bf_t *r,
-                        const bf_t *a, const bf_t *b)
-{
-    if (bf_cmpu(a, b) < 0) {
-        bf_set_ui(q, 0);
-        bf_set(r, a);
-    } else {
-        bf_div(q, a, b, bf_max(a->expn - b->expn + 1, 2), BF_RNDZ);
-        bf_rint(q, BF_RNDZ);
-        bf_mul(r, q, b, BF_PREC_INF, BF_RNDZ);
-        bf_sub(r, a, r, BF_PREC_INF, BF_RNDZ);
-    }
-}
-
-static int __bf_div(bf_t *r, const bf_t *a, const bf_t *b, limb_t prec,
-                    bf_flags_t flags)
-{
-    bf_context_t *s = r->ctx;
-    int ret, r_sign;
-    limb_t n, nb, precl;
-
-    r_sign = a->sign ^ b->sign;
-    if (a->expn >= BF_EXP_INF || b->expn >= BF_EXP_INF) {
-        if (a->expn == BF_EXP_NAN || b->expn == BF_EXP_NAN) {
-            bf_set_nan(r);
-            return 0;
-        } else if (a->expn == BF_EXP_INF && b->expn == BF_EXP_INF) {
-            bf_set_nan(r);
-            return BF_ST_INVALID_OP;
-        } else if (a->expn == BF_EXP_INF) {
-            bf_set_inf(r, r_sign);
-            return 0;
-        } else {
-            bf_set_zero(r, r_sign);
-            return 0;
-        }
-    } else if (a->expn == BF_EXP_ZERO) {
-        if (b->expn == BF_EXP_ZERO) {
-            bf_set_nan(r);
-            return BF_ST_INVALID_OP;
-        } else {
-            bf_set_zero(r, r_sign);
-            return 0;
-        }
-    } else if (b->expn == BF_EXP_ZERO) {
-        bf_set_inf(r, r_sign);
-        return BF_ST_DIVIDE_ZERO;
-    }
-
-    /* number of limbs of the quotient (2 extra bits for rounding) */
-    precl = (prec + 2 + LIMB_BITS - 1) / LIMB_BITS;
-    nb = b->len;
-    n = bf_max(a->len, precl);
-
-    {
-        limb_t *taba, na;
-        slimb_t d;
-
-        na = n + nb;
-
-#if LIMB_LOG2_BITS == 6
-        if (na >= (SIZE_MAX / sizeof(limb_t)) - 1) {
-            return BF_ST_MEM_ERROR;  /* Return memory error status */
-        }
-#endif
-
-        taba = bf_malloc(s, (na + 1) * sizeof(limb_t));
-        if (!taba)
-            goto fail;
-        d = na - a->len;
-        memset(taba, 0, d * sizeof(limb_t));
-        memcpy(taba + d, a->tab, a->len * sizeof(limb_t));
-        if (bf_resize(r, n + 1))
-            goto fail1;
-        if (mp_divnorm(s, r->tab, taba, na, b->tab, nb)) {
-        fail1:
-            bf_free(s, taba);
-            goto fail;
-        }
-        /* see if non zero remainder */
-        if (mp_scan_nz(taba, nb))
-            r->tab[0] |= 1;
-        bf_free(r->ctx, taba);
-        r->expn = a->expn - b->expn + LIMB_BITS;
-        r->sign = r_sign;
-        ret = bf_normalize_and_round(r, prec, flags);
-    }
-    return ret;
- fail:
-    bf_set_nan(r);
-    return BF_ST_MEM_ERROR;
-}
-
-/* division and remainder.
-
-   rnd_mode is the rounding mode for the quotient. The additional
-   rounding mode BF_RND_EUCLIDIAN is supported.
-
-   'q' is an integer. 'r' is rounded with prec and flags (prec can be
-   BF_PREC_INF).
-*/
-int bf_divrem(bf_t *q, bf_t *r, const bf_t *a, const bf_t *b,
-              limb_t prec, bf_flags_t flags, int rnd_mode)
-{
-    bf_t a1_s, *a1 = &a1_s;
-    bf_t b1_s, *b1 = &b1_s;
-    int q_sign, ret;
-    bool is_ceil, is_rndn;
-
-    assert(q != a && q != b);
-    assert(r != a && r != b);
-    assert(q != r);
-
-    if (a->len == 0 || b->len == 0) {
-        bf_set_zero(q, 0);
-        if (a->expn == BF_EXP_NAN || b->expn == BF_EXP_NAN) {
-            bf_set_nan(r);
-            return 0;
-        } else if (a->expn == BF_EXP_INF || b->expn == BF_EXP_ZERO) {
-            bf_set_nan(r);
-            return BF_ST_INVALID_OP;
-        } else {
-            bf_set(r, a);
-            return bf_round(r, prec, flags);
-        }
-    }
-
-    q_sign = a->sign ^ b->sign;
-    is_rndn = (rnd_mode == BF_RNDN || rnd_mode == BF_RNDNA);
-    switch(rnd_mode) {
-    default:
-    case BF_RNDZ:
-    case BF_RNDN:
-    case BF_RNDNA:
-        is_ceil = false;
-        break;
-    case BF_RNDD:
-        is_ceil = q_sign;
-        break;
-    case BF_RNDU:
-        is_ceil = q_sign ^ 1;
-        break;
-    case BF_RNDA:
-        is_ceil = true;
-        break;
-    case BF_DIVREM_EUCLIDIAN:
-        is_ceil = a->sign;
-        break;
-    }
-
-    a1->expn = a->expn;
-    a1->tab = a->tab;
-    a1->len = a->len;
-    a1->sign = 0;
-
-    b1->expn = b->expn;
-    b1->tab = b->tab;
-    b1->len = b->len;
-    b1->sign = 0;
-
-    /* XXX: could improve to avoid having a large 'q' */
-    bf_tdivremu(q, r, a1, b1);
-    if (bf_is_nan(q) || bf_is_nan(r))
-        goto fail;
-
-    if (r->len != 0) {
-        if (is_rndn) {
-            int res;
-            b1->expn--;
-            res = bf_cmpu(r, b1);
-            b1->expn++;
-            if (res > 0 ||
-                (res == 0 &&
-                 (rnd_mode == BF_RNDNA ||
-                  get_bit(q->tab, q->len, q->len * LIMB_BITS - q->expn)))) {
-                goto do_sub_r;
-            }
-        } else if (is_ceil) {
-        do_sub_r:
-            ret = bf_add_si(q, q, 1, BF_PREC_INF, BF_RNDZ);
-            ret |= bf_sub(r, r, b1, BF_PREC_INF, BF_RNDZ);
-            if (ret & BF_ST_MEM_ERROR)
-                goto fail;
-        }
-    }
-
-    r->sign ^= a->sign;
-    q->sign = q_sign;
-    return bf_round(r, prec, flags);
- fail:
-    bf_set_nan(q);
-    bf_set_nan(r);
-    return BF_ST_MEM_ERROR;
-}
-
-int bf_rem(bf_t *r, const bf_t *a, const bf_t *b, limb_t prec,
-           bf_flags_t flags, int rnd_mode)
-{
-    bf_t q_s, *q = &q_s;
-    int ret;
-
-    bf_init(r->ctx, q);
-    ret = bf_divrem(q, r, a, b, prec, flags, rnd_mode);
-    bf_delete(q);
-    return ret;
-}
-
-static inline int bf_get_limb(slimb_t *pres, const bf_t *a, int flags)
-{
-#if LIMB_BITS == 32
-    return bf_get_int32(pres, a, flags);
-#else
-    return bf_get_int64(pres, a, flags);
-#endif
-}
-
-int bf_remquo(slimb_t *pq, bf_t *r, const bf_t *a, const bf_t *b, limb_t prec,
-              bf_flags_t flags, int rnd_mode)
-{
-    bf_t q_s, *q = &q_s;
-    int ret;
-
-    bf_init(r->ctx, q);
-    ret = bf_divrem(q, r, a, b, prec, flags, rnd_mode);
-    bf_get_limb(pq, q, BF_GET_INT_MOD);
-    bf_delete(q);
-    return ret;
-}
-
-static __maybe_unused inline limb_t mul_mod(limb_t a, limb_t b, limb_t m)
-{
-    dlimb_t t;
-    t = (dlimb_t)a * (dlimb_t)b;
-    return t % m;
-}
-
-#if defined(USE_MUL_CHECK)
-static limb_t mp_mod1(const limb_t *tab, limb_t n, limb_t m, limb_t r)
-{
-    slimb_t i;
-    dlimb_t t;
-
-    for(i = n - 1; i >= 0; i--) {
-        t = ((dlimb_t)r << LIMB_BITS) | tab[i];
-        r = t % m;
-    }
-    return r;
-}
-#endif
-
-static const uint16_t sqrt_table[192] = {
-128,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,144,145,146,147,148,149,150,150,151,152,153,154,155,155,156,157,158,159,160,160,161,162,163,163,164,165,166,167,167,168,169,170,170,171,172,173,173,174,175,176,176,177,178,178,179,180,181,181,182,183,183,184,185,185,186,187,187,188,189,189,190,191,192,192,193,193,194,195,195,196,197,197,198,199,199,200,201,201,202,203,203,204,204,205,206,206,207,208,208,209,209,210,211,211,212,212,213,214,214,215,215,216,217,217,218,218,219,219,220,221,221,222,222,223,224,224,225,225,226,226,227,227,228,229,229,230,230,231,231,232,232,233,234,234,235,235,236,236,237,237,238,238,239,240,240,241,241,242,242,243,243,244,244,245,245,246,246,247,247,248,248,249,249,250,250,251,251,252,252,253,253,254,254,255,
-};
-
-/* a >= 2^(LIMB_BITS - 2).  Return (s, r) with s=floor(sqrt(a)) and
-   r=a-s^2. 0 <= r <= 2 * s */
-static limb_t mp_sqrtrem1(limb_t *pr, limb_t a)
-{
-    limb_t s1, r1, s, r, q, u, num;
-
-    /* use a table for the 16 -> 8 bit sqrt */
-    s1 = sqrt_table[(a >> (LIMB_BITS - 8)) - 64];
-    r1 = (a >> (LIMB_BITS - 16)) - s1 * s1;
-    if (r1 > 2 * s1) {
-        r1 -= 2 * s1 + 1;
-        s1++;
-    }
-
-    /* one iteration to get a 32 -> 16 bit sqrt */
-    num = (r1 << 8) | ((a >> (LIMB_BITS - 32 + 8)) & 0xff);
-    q = num / (2 * s1); /* q <= 2^8 */
-    u = num % (2 * s1);
-    s = (s1 << 8) + q;
-    r = (u << 8) | ((a >> (LIMB_BITS - 32)) & 0xff);
-    r -= q * q;
-    if ((slimb_t)r < 0) {
-        s--;
-        r += 2 * s + 1;
-    }
-
-#if LIMB_BITS == 64
-    s1 = s;
-    r1 = r;
-    /* one more iteration for 64 -> 32 bit sqrt */
-    num = (r1 << 16) | ((a >> (LIMB_BITS - 64 + 16)) & 0xffff);
-    q = num / (2 * s1); /* q <= 2^16 */
-    u = num % (2 * s1);
-    s = (s1 << 16) + q;
-    r = (u << 16) | ((a >> (LIMB_BITS - 64)) & 0xffff);
-    r -= q * q;
-    if ((slimb_t)r < 0) {
-        s--;
-        r += 2 * s + 1;
-    }
-#endif
-    *pr = r;
-    return s;
-}
-
-/* return floor(sqrt(a)) */
-limb_t bf_isqrt(limb_t a)
-{
-    limb_t s, r;
-    int k;
-
-    if (a == 0)
-        return 0;
-    k = clz(a) & ~1;
-    s = mp_sqrtrem1(&r, a << k);
-    s >>= (k >> 1);
-    return s;
-}
-
-static limb_t mp_sqrtrem2(limb_t *tabs, limb_t *taba)
-{
-    limb_t s1, r1, s, q, u, a0, a1;
-    dlimb_t r, num;
-    int l;
-
-    a0 = taba[0];
-    a1 = taba[1];
-    s1 = mp_sqrtrem1(&r1, a1);
-    l = LIMB_BITS / 2;
-    num = ((dlimb_t)r1 << l) | (a0 >> l);
-    q = num / (2 * s1);
-    u = num % (2 * s1);
-    s = (s1 << l) + q;
-    r = ((dlimb_t)u << l) | (a0 & (((limb_t)1 << l) - 1));
-    if (unlikely((q >> l) != 0))
-        r -= (dlimb_t)1 << LIMB_BITS; /* special case when q=2^l */
-    else
-        r -= q * q;
-    if ((slimb_t)(r >> LIMB_BITS) < 0) {
-        s--;
-        r += 2 * (dlimb_t)s + 1;
-    }
-    tabs[0] = s;
-    taba[0] = r;
-    return r >> LIMB_BITS;
-}
-
-//#define DEBUG_SQRTREM
-
-/* tmp_buf must contain (n / 2 + 1 limbs). *prh contains the highest
-   limb of the remainder. */
-static int mp_sqrtrem_rec(bf_context_t *s, limb_t *tabs, limb_t *taba, limb_t n,
-                          limb_t *tmp_buf, limb_t *prh)
-{
-    limb_t l, h, rh, ql, qh, c, i;
-
-    if (n == 1) {
-        *prh = mp_sqrtrem2(tabs, taba);
-        return 0;
-    }
-#ifdef DEBUG_SQRTREM
-    mp_print_str("a", taba, 2 * n);
-#endif
-    l = n / 2;
-    h = n - l;
-    if (mp_sqrtrem_rec(s, tabs + l, taba + 2 * l, h, tmp_buf, &qh))
+    v = a->tab[a->len - 1];
+    if (v == 0)
         return -1;
-#ifdef DEBUG_SQRTREM
-    mp_print_str("s1", tabs + l, h);
-    mp_print_str_h("r1", taba + 2 * l, h, qh);
-    mp_print_str_h("r2", taba + l, n, qh);
-#endif
-
-    /* the remainder is in taba + 2 * l. Its high bit is in qh */
-    if (qh) {
-        mp_sub(taba + 2 * l, taba + 2 * l, tabs + l, h, 0);
-    }
-    /* instead of dividing by 2*s, divide by s (which is normalized)
-       and update q and r */
-    if (mp_divnorm(s, tmp_buf, taba + l, n, tabs + l, h))
-        return -1;
-    qh += tmp_buf[l];
-    for(i = 0; i < l; i++)
-        tabs[i] = tmp_buf[i];
-    ql = mp_shr(tabs, tabs, l, 1, qh & 1);
-    qh = qh >> 1; /* 0 or 1 */
-    if (ql)
-        rh = mp_add(taba + l, taba + l, tabs + l, h, 0);
     else
-        rh = 0;
-#ifdef DEBUG_SQRTREM
-    mp_print_str_h("q", tabs, l, qh);
-    mp_print_str_h("u", taba + l, h, rh);
-#endif
-
-    mp_add_ui(tabs + l, qh, h);
-#ifdef DEBUG_SQRTREM
-    mp_print_str_h("s2", tabs, n, sh);
-#endif
-
-    /* q = qh, tabs[l - 1 ... 0], r = taba[n - 1 ... l] */
-    /* subtract q^2. if qh = 1 then q = B^l, so we can take shortcuts */
-    if (qh) {
-        c = qh;
-    } else {
-        if (mp_mul(s, taba + n, tabs, l, tabs, l))
-            return -1;
-        c = mp_sub(taba, taba, taba + n, 2 * l, 0);
-    }
-    rh -= mp_sub_ui(taba + 2 * l, c, n - 2 * l);
-    if ((slimb_t)rh < 0) {
-        mp_sub_ui(tabs, 1, n);
-        rh += mp_add_mul1(taba, tabs, n, 2);
-        rh += mp_add_ui(taba, 1, n);
-    }
-    *prh = rh;
-    return 0;
+        return a->len * LIMB_BITS - 1 - clz32(v);
 }
 
-/* 'taba' has 2*n limbs with n >= 1 and taba[2*n-1] >= 2 ^ (LIMB_BITS
-   - 2). Return (s, r) with s=floor(sqrt(a)) and r=a-s^2. 0 <= r <= 2
-   * s. tabs has n limbs. r is returned in the lower n limbs of
-   taba. Its r[n] is the returned value of the function. */
-/* Algorithm from the article "Karatsuba Square Root" by Paul Zimmermann and
-   inspirated from its GMP implementation */
-int mp_sqrtrem(bf_context_t *s, limb_t *tabs, limb_t *taba, limb_t n)
-{
-    limb_t tmp_buf1[8];
-    limb_t *tmp_buf;
-    mp_size_t n2;
-    int ret;
-    n2 = n / 2 + 1;
-    if (n2 <= countof(tmp_buf1)) {
-        tmp_buf = tmp_buf1;
-    } else {
-        tmp_buf = bf_malloc(s, sizeof(limb_t) * n2);
-        if (!tmp_buf)
-            return -1;
-    }
-    ret = mp_sqrtrem_rec(s, tabs, taba, n, tmp_buf, taba + n);
-    if (tmp_buf != tmp_buf1)
-        bf_free(s, tmp_buf);
-    return ret;
-}
+#define MUL_LOG2_RADIX_BASE_LOG2 24
 
-/* Integer square root with remainder. 'a' must be an integer. r =
-   floor(sqrt(a)) and rem = a - r^2.  BF_ST_INEXACT is set if the result
-   is inexact. 'rem' can be NULL if the remainder is not needed. */
-int bf_sqrtrem(bf_t *r, bf_t *rem1, const bf_t *a)
-{
-    int ret;
-
-    if (a->len == 0) {
-        if (a->expn == BF_EXP_NAN) {
-            bf_set_nan(r);
-        } else if (a->expn == BF_EXP_INF && a->sign) {
-            goto invalid_op;
-        } else {
-            bf_set(r, a);
-        }
-        if (rem1)
-            bf_set_ui(rem1, 0);
-        ret = 0;
-    } else if (a->sign) {
- invalid_op:
-        bf_set_nan(r);
-        if (rem1)
-            bf_set_ui(rem1, 0);
-        ret = BF_ST_INVALID_OP;
-    } else {
-        bf_t rem_s, *rem;
-
-        bf_sqrt(r, a, (a->expn + 1) / 2, BF_RNDZ);
-        bf_rint(r, BF_RNDZ);
-        /* see if the result is exact by computing the remainder */
-        if (rem1) {
-            rem = rem1;
-        } else {
-            rem = &rem_s;
-            bf_init(r->ctx, rem);
-        }
-        /* XXX: could avoid recomputing the remainder */
-        bf_mul(rem, r, r, BF_PREC_INF, BF_RNDZ);
-        bf_neg(rem);
-        bf_add(rem, rem, a, BF_PREC_INF, BF_RNDZ);
-        if (bf_is_nan(rem)) {
-            ret = BF_ST_MEM_ERROR;
-            goto done;
-        }
-        if (rem->len != 0) {
-            ret = BF_ST_INEXACT;
-        } else {
-            ret = 0;
-        }
-    done:
-        if (!rem1)
-            bf_delete(rem);
-    }
-    return ret;
-}
-
-int bf_sqrt(bf_t *r, const bf_t *a, limb_t prec, bf_flags_t flags)
-{
-    bf_context_t *s = a->ctx;
-    int ret;
-
-    assert(r != a);
-
-    if (a->len == 0) {
-        if (a->expn == BF_EXP_NAN) {
-            bf_set_nan(r);
-        } else if (a->expn == BF_EXP_INF && a->sign) {
-            goto invalid_op;
-        } else {
-            bf_set(r, a);
-        }
-        ret = 0;
-    } else if (a->sign) {
- invalid_op:
-        bf_set_nan(r);
-        ret = BF_ST_INVALID_OP;
-    } else {
-        limb_t *a1;
-        slimb_t n, n1;
-        limb_t res;
-
-        /* convert the mantissa to an integer with at least 2 *
-           prec + 4 bits */
-        n = (2 * (prec + 2) + 2 * LIMB_BITS - 1) / (2 * LIMB_BITS);
-        if (bf_resize(r, n))
-            goto fail;
-        a1 = bf_malloc(s, sizeof(limb_t) * 2 * n);
-        if (!a1)
-            goto fail;
-        n1 = bf_min(2 * n, a->len);
-        memset(a1, 0, (2 * n - n1) * sizeof(limb_t));
-        memcpy(a1 + 2 * n - n1, a->tab + a->len - n1, n1 * sizeof(limb_t));
-        if (a->expn & 1) {
-            res = mp_shr(a1, a1, 2 * n, 1, 0);
-        } else {
-            res = 0;
-        }
-        if (mp_sqrtrem(s, r->tab, a1, n)) {
-            bf_free(s, a1);
-            goto fail;
-        }
-        if (!res) {
-            res = mp_scan_nz(a1, n + 1);
-        }
-        bf_free(s, a1);
-        if (!res) {
-            res = mp_scan_nz(a->tab, a->len - n1);
-        }
-        if (res != 0)
-            r->tab[0] |= 1;
-        r->sign = 0;
-        r->expn = (a->expn + 1) >> 1;
-        ret = bf_round(r, prec, flags);
-    }
-    return ret;
- fail:
-    bf_set_nan(r);
-    return BF_ST_MEM_ERROR;
-}
-
-static no_inline int bf_op2(bf_t *r, const bf_t *a, const bf_t *b, limb_t prec,
-                            bf_flags_t flags, bf_op2_func_t *func)
-{
-    bf_t tmp;
-    int ret;
-
-    if (r == a || r == b) {
-        bf_init(r->ctx, &tmp);
-        ret = func(&tmp, a, b, prec, flags);
-        bf_move(r, &tmp);
-    } else {
-        ret = func(r, a, b, prec, flags);
-    }
-    return ret;
-}
-
-int bf_add(bf_t *r, const bf_t *a, const bf_t *b, limb_t prec,
-            bf_flags_t flags)
-{
-    return bf_op2(r, a, b, prec, flags, __bf_add);
-}
-
-int bf_sub(bf_t *r, const bf_t *a, const bf_t *b, limb_t prec,
-            bf_flags_t flags)
-{
-    return bf_op2(r, a, b, prec, flags, __bf_sub);
-}
-
-int bf_div(bf_t *r, const bf_t *a, const bf_t *b, limb_t prec,
-           bf_flags_t flags)
-{
-    return bf_op2(r, a, b, prec, flags, __bf_div);
-}
-
-int bf_mul_ui(bf_t *r, const bf_t *a, uint64_t b1, limb_t prec,
-               bf_flags_t flags)
-{
-    bf_t b;
-    int ret;
-    bf_init(r->ctx, &b);
-    ret = bf_set_ui(&b, b1);
-    ret |= bf_mul(r, a, &b, prec, flags);
-    bf_delete(&b);
-    return ret;
-}
-
-int bf_mul_si(bf_t *r, const bf_t *a, int64_t b1, limb_t prec,
-               bf_flags_t flags)
-{
-    bf_t b;
-    int ret;
-    bf_init(r->ctx, &b);
-    ret = bf_set_si(&b, b1);
-    ret |= bf_mul(r, a, &b, prec, flags);
-    bf_delete(&b);
-    return ret;
-}
-
-int bf_add_si(bf_t *r, const bf_t *a, int64_t b1, limb_t prec,
-              bf_flags_t flags)
-{
-    bf_t b;
-    int ret;
-
-    bf_init(r->ctx, &b);
-    ret = bf_set_si(&b, b1);
-    ret |= bf_add(r, a, &b, prec, flags);
-    bf_delete(&b);
-    return ret;
-}
-
-static int bf_pow_ui(bf_t *r, const bf_t *a, limb_t b, limb_t prec,
-                     bf_flags_t flags)
-{
-    int ret, n_bits, i;
-
-    assert(r != a);
-    if (b == 0)
-        return bf_set_ui(r, 1);
-    ret = bf_set(r, a);
-    n_bits = LIMB_BITS - clz(b);
-    for(i = n_bits - 2; i >= 0; i--) {
-        ret |= bf_mul(r, r, r, prec, flags);
-        if ((b >> i) & 1)
-            ret |= bf_mul(r, r, a, prec, flags);
-    }
-    return ret;
-}
-
-static int bf_pow_ui_ui(bf_t *r, limb_t a1, limb_t b,
-                        limb_t prec, bf_flags_t flags)
-{
-    bf_t a;
-    int ret;
-
-    if (a1 == 10 && b <= LIMB_DIGITS) {
-        /* use precomputed powers. We do not round at this point
-           because we expect the caller to do it */
-        ret = bf_set_ui(r, mp_pow_dec[b]);
-    } else {
-        bf_init(r->ctx, &a);
-        ret = bf_set_ui(&a, a1);
-        ret |= bf_pow_ui(r, &a, b, prec, flags);
-        bf_delete(&a);
-    }
-    return ret;
-}
-
-/* convert to integer (infinite precision) */
-int bf_rint(bf_t *r, int rnd_mode)
-{
-    return bf_round(r, 0, rnd_mode | BF_FLAG_RADPNT_PREC);
-}
-
-/* logical operations */
-#define BF_LOGIC_OR  0
-#define BF_LOGIC_XOR 1
-#define BF_LOGIC_AND 2
-
-static inline limb_t bf_logic_op1(limb_t a, limb_t b, int op)
-{
-    switch(op) {
-    case BF_LOGIC_OR:
-        return a | b;
-    case BF_LOGIC_XOR:
-        return a ^ b;
-    default:
-    case BF_LOGIC_AND:
-        return a & b;
-    }
-}
-
-static int bf_logic_op(bf_t *r, const bf_t *a1, const bf_t *b1, int op)
-{
-    bf_t b1_s, a1_s, *a, *b;
-    limb_t a_sign, b_sign, r_sign;
-    slimb_t l, i, a_bit_offset, b_bit_offset;
-    limb_t v1, v2, v1_mask, v2_mask, r_mask;
-    int ret;
-
-    assert(r != a1 && r != b1);
-
-    if (a1->expn <= 0)
-        a_sign = 0; /* minus zero is considered as positive */
-    else
-        a_sign = a1->sign;
-
-    if (b1->expn <= 0)
-        b_sign = 0; /* minus zero is considered as positive */
-    else
-        b_sign = b1->sign;
-
-    if (a_sign) {
-        a = &a1_s;
-        bf_init(r->ctx, a);
-        if (bf_add_si(a, a1, 1, BF_PREC_INF, BF_RNDZ)) {
-            b = NULL;
-            goto fail;
-        }
-    } else {
-        a = (bf_t *)a1;
-    }
-
-    if (b_sign) {
-        b = &b1_s;
-        bf_init(r->ctx, b);
-        if (bf_add_si(b, b1, 1, BF_PREC_INF, BF_RNDZ))
-            goto fail;
-    } else {
-        b = (bf_t *)b1;
-    }
-
-    r_sign = bf_logic_op1(a_sign, b_sign, op);
-    if (op == BF_LOGIC_AND && r_sign == 0) {
-        /* no need to compute extra zeros for and */
-        if (a_sign == 0 && b_sign == 0)
-            l = bf_min(a->expn, b->expn);
-        else if (a_sign == 0)
-            l = a->expn;
-        else
-            l = b->expn;
-    } else {
-        l = bf_max(a->expn, b->expn);
-    }
-    /* Note: a or b can be zero */
-    l = (bf_max(l, 1) + LIMB_BITS - 1) / LIMB_BITS;
-    if (bf_resize(r, l))
-        goto fail;
-    a_bit_offset = a->len * LIMB_BITS - a->expn;
-    b_bit_offset = b->len * LIMB_BITS - b->expn;
-    v1_mask = -a_sign;
-    v2_mask = -b_sign;
-    r_mask = -r_sign;
-    for(i = 0; i < l; i++) {
-        v1 = get_bits(a->tab, a->len, a_bit_offset + i * LIMB_BITS) ^ v1_mask;
-        v2 = get_bits(b->tab, b->len, b_bit_offset + i * LIMB_BITS) ^ v2_mask;
-        r->tab[i] = bf_logic_op1(v1, v2, op) ^ r_mask;
-    }
-    r->expn = l * LIMB_BITS;
-    r->sign = r_sign;
-    bf_normalize_and_round(r, BF_PREC_INF, BF_RNDZ); /* cannot fail */
-    if (r_sign) {
-        if (bf_add_si(r, r, -1, BF_PREC_INF, BF_RNDZ))
-            goto fail;
-    }
-    ret = 0;
- done:
-    if (a == &a1_s)
-        bf_delete(a);
-    if (b == &b1_s)
-        bf_delete(b);
-    return ret;
- fail:
-    bf_set_nan(r);
-    ret = BF_ST_MEM_ERROR;
-    goto done;
-}
-
-/* 'a' and 'b' must be integers. Return 0 or BF_ST_MEM_ERROR. */
-int bf_logic_or(bf_t *r, const bf_t *a, const bf_t *b)
-{
-    return bf_logic_op(r, a, b, BF_LOGIC_OR);
-}
-
-/* 'a' and 'b' must be integers. Return 0 or BF_ST_MEM_ERROR. */
-int bf_logic_xor(bf_t *r, const bf_t *a, const bf_t *b)
-{
-    return bf_logic_op(r, a, b, BF_LOGIC_XOR);
-}
-
-/* 'a' and 'b' must be integers. Return 0 or BF_ST_MEM_ERROR. */
-int bf_logic_and(bf_t *r, const bf_t *a, const bf_t *b)
-{
-    return bf_logic_op(r, a, b, BF_LOGIC_AND);
-}
-
-/* conversion between fixed size types */
-
-typedef union {
-    double d;
-    uint64_t u;
-} Float64Union;
-
-int bf_get_float64(const bf_t *a, double *pres, bf_rnd_t rnd_mode)
-{
-    Float64Union u;
-    int e, ret;
-    uint64_t m;
-
-    ret = 0;
-    if (a->expn == BF_EXP_NAN) {
-        u.u = 0x7ff8000000000000; /* quiet nan */
-    } else {
-        bf_t b_s, *b = &b_s;
-
-        bf_init(a->ctx, b);
-        bf_set(b, a);
-        if (bf_is_finite(b)) {
-            ret = bf_round(b, 53, rnd_mode | BF_FLAG_SUBNORMAL | bf_set_exp_bits(11));
-        }
-        if (b->expn == BF_EXP_INF) {
-            e = (1 << 11) - 1;
-            m = 0;
-        } else if (b->expn == BF_EXP_ZERO) {
-            e = 0;
-            m = 0;
-        } else {
-            e = b->expn + 1023 - 1;
-#if LIMB_BITS == 32
-            if (b->len == 2) {
-                m = ((uint64_t)b->tab[1] << 32) | b->tab[0];
-            } else {
-                m = ((uint64_t)b->tab[0] << 32);
-            }
-#else
-            m = b->tab[0];
-#endif
-            if (e <= 0) {
-                /* subnormal */
-                m = m >> (12 - e);
-                e = 0;
-            } else {
-                m = (m << 1) >> 12;
-            }
-        }
-        u.u = m | ((uint64_t)e << 52) | ((uint64_t)b->sign << 63);
-        bf_delete(b);
-    }
-    *pres = u.d;
-    return ret;
-}
-
-int bf_set_float64(bf_t *a, double d)
-{
-    Float64Union u;
-    uint64_t m;
-    int shift, e, sgn;
-
-    u.d = d;
-    sgn = u.u >> 63;
-    e = (u.u >> 52) & ((1 << 11) - 1);
-    m = u.u & (((uint64_t)1 << 52) - 1);
-    if (e == ((1 << 11) - 1)) {
-        if (m != 0) {
-            bf_set_nan(a);
-        } else {
-            bf_set_inf(a, sgn);
-        }
-    } else if (e == 0) {
-        if (m == 0) {
-            bf_set_zero(a, sgn);
-        } else {
-            /* subnormal number */
-            m <<= 12;
-            shift = clz64(m);
-            m <<= shift;
-            e = -shift;
-            goto norm;
-        }
-    } else {
-        m = (m << 11) | ((uint64_t)1 << 63);
-    norm:
-        a->expn = e - 1023 + 1;
-#if LIMB_BITS == 32
-        if (bf_resize(a, 2))
-            goto fail;
-        a->tab[0] = m;
-        a->tab[1] = m >> 32;
-#else
-        if (bf_resize(a, 1))
-            goto fail;
-        a->tab[0] = m;
-#endif
-        a->sign = sgn;
-    }
-    return 0;
-fail:
-    bf_set_nan(a);
-    return BF_ST_MEM_ERROR;
-}
-
-/* The rounding mode is always BF_RNDZ. Return BF_ST_INVALID_OP if there
-   is an overflow and 0 otherwise. */
-int bf_get_int32(int *pres, const bf_t *a, int flags)
-{
-    uint32_t v;
-    int ret;
-    if (a->expn >= BF_EXP_INF) {
-        ret = BF_ST_INVALID_OP;
-        if (flags & BF_GET_INT_MOD) {
-            v = 0;
-        } else if (a->expn == BF_EXP_INF) {
-            v = (uint32_t)INT32_MAX + a->sign;
-        } else {
-            v = INT32_MAX;
-        }
-    } else if (a->expn <= 0) {
-        v = 0;
-        ret = 0;
-    } else if (a->expn <= 31) {
-        v = a->tab[a->len - 1] >> (LIMB_BITS - a->expn);
-        if (a->sign)
-            v = -v;
-        ret = 0;
-    } else if (!(flags & BF_GET_INT_MOD)) {
-        ret = BF_ST_INVALID_OP;
-        if (a->sign) {
-            v = (uint32_t)INT32_MAX + 1;
-            if (a->expn == 32 &&
-                (a->tab[a->len - 1] >> (LIMB_BITS - 32)) == v) {
-                ret = 0;
-            }
-        } else {
-            v = INT32_MAX;
-        }
-    } else {
-        v = get_bits(a->tab, a->len, a->len * LIMB_BITS - a->expn);
-        if (a->sign)
-            v = -v;
-        ret = 0;
-    }
-    *pres = v;
-    return ret;
-}
-
-/* The rounding mode is always BF_RNDZ. Return BF_ST_INVALID_OP if there
-   is an overflow and 0 otherwise. */
-int bf_get_int64(int64_t *pres, const bf_t *a, int flags)
-{
-    uint64_t v;
-    int ret;
-    if (a->expn >= BF_EXP_INF) {
-        ret = BF_ST_INVALID_OP;
-        if (flags & BF_GET_INT_MOD) {
-            v = 0;
-        } else if (a->expn == BF_EXP_INF) {
-            v = (uint64_t)INT64_MAX + a->sign;
-        } else {
-            v = INT64_MAX;
-        }
-    } else if (a->expn <= 0) {
-        v = 0;
-        ret = 0;
-    } else if (a->expn <= 63) {
-#if LIMB_BITS == 32
-        if (a->expn <= 32)
-            v = a->tab[a->len - 1] >> (LIMB_BITS - a->expn);
-        else
-            v = (((uint64_t)a->tab[a->len - 1] << 32) |
-                 get_limbz(a, a->len - 2)) >> (64 - a->expn);
-#else
-        v = a->tab[a->len - 1] >> (LIMB_BITS - a->expn);
-#endif
-        if (a->sign)
-            v = -v;
-        ret = 0;
-    } else if (!(flags & BF_GET_INT_MOD)) {
-        ret = BF_ST_INVALID_OP;
-        if (a->sign) {
-            uint64_t v1;
-            v = (uint64_t)INT64_MAX + 1;
-            if (a->expn == 64) {
-                v1 = a->tab[a->len - 1];
-#if LIMB_BITS == 32
-                v1 = (v1 << 32) | get_limbz(a, a->len - 2);
-#endif
-                if (v1 == v)
-                    ret = 0;
-            }
-        } else {
-            v = INT64_MAX;
-        }
-    } else {
-        slimb_t bit_pos = a->len * LIMB_BITS - a->expn;
-        v = get_bits(a->tab, a->len, bit_pos);
-#if LIMB_BITS == 32
-        v |= (uint64_t)get_bits(a->tab, a->len, bit_pos + 32) << 32;
-#endif
-        if (a->sign)
-            v = -v;
-        ret = 0;
-    }
-    *pres = v;
-    return ret;
-}
-
-/* The rounding mode is always BF_RNDZ. Return BF_ST_INVALID_OP if there
-   is an overflow and 0 otherwise. */
-int bf_get_uint64(uint64_t *pres, const bf_t *a)
-{
-    uint64_t v;
-    int ret;
-    if (a->expn == BF_EXP_NAN) {
-        goto overflow;
-    } else if (a->expn <= 0) {
-        v = 0;
-        ret = 0;
-    } else if (a->sign) {
-        v = 0;
-        ret = BF_ST_INVALID_OP;
-    } else if (a->expn <= 64) {
-#if LIMB_BITS == 32
-        if (a->expn <= 32)
-            v = a->tab[a->len - 1] >> (LIMB_BITS - a->expn);
-        else
-            v = (((uint64_t)a->tab[a->len - 1] << 32) |
-                 get_limbz(a, a->len - 2)) >> (64 - a->expn);
-#else
-        v = a->tab[a->len - 1] >> (LIMB_BITS - a->expn);
-#endif
-        ret = 0;
-    } else {
-    overflow:
-        v = UINT64_MAX;
-        ret = BF_ST_INVALID_OP;
-    }
-    *pres = v;
-    return ret;
-}
-
-/* base conversion from radix */
-
-static const uint8_t digits_per_limb_table[BF_RADIX_MAX - 1] = {
-#if LIMB_BITS == 32
-32,20,16,13,12,11,10,10, 9, 9, 8, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-#else
-64,40,32,27,24,22,21,20,19,18,17,17,16,16,16,15,15,15,14,14,14,14,13,13,13,13,13,13,13,12,12,12,12,12,12,
-#endif
+/* round((1 << MUL_LOG2_RADIX_BASE_LOG2)/log2(i + 2)) */
+static const uint32_t mul_log2_radix_table[JS_RADIX_MAX - 1] = {
+    0x000000, 0xa1849d, 0x000000, 0x6e40d2, 
+    0x6308c9, 0x5b3065, 0x000000, 0x50c24e, 
+    0x4d104d, 0x4a0027, 0x4768ce, 0x452e54, 
+    0x433d00, 0x418677, 0x000000, 0x3ea16b, 
+    0x3d645a, 0x3c43c2, 0x3b3b9a, 0x3a4899, 
+    0x39680b, 0x3897b3, 0x37d5af, 0x372069, 
+    0x367686, 0x35d6df, 0x354072, 0x34b261, 
+    0x342bea, 0x33ac62, 0x000000, 0x32bfd9, 
+    0x3251dd, 0x31e8d6, 0x318465,
 };
 
-static limb_t get_limb_radix(int radix)
+/* return floor(a / log2(radix)) for -2048 <= a <= 2047 */
+static int mul_log2_radix(int a, int radix)
 {
-    int i, k;
-    limb_t radixl;
+    int radix_bits, mult;
 
-    k = digits_per_limb_table[radix - 2];
-    radixl = radix;
-    for(i = 1; i < k; i++)
-        radixl *= radix;
-    return radixl;
-}
-
-/* return != 0 if error */
-static int bf_integer_from_radix_rec(bf_t *r, const limb_t *tab,
-                                     limb_t n, int level, limb_t n0,
-                                     limb_t radix, bf_t *pow_tab)
-{
-    int ret;
-    if (n == 1) {
-        ret = bf_set_ui(r, tab[0]);
-    } else {
-        bf_t T_s, *T = &T_s, *B;
-        limb_t n1, n2;
-
-        n2 = (((n0 * 2) >> (level + 1)) + 1) / 2;
-        n1 = n - n2;
-        //        printf("level=%d n0=%ld n1=%ld n2=%ld\n", level, n0, n1, n2);
-        B = &pow_tab[level];
-        if (B->len == 0) {
-            ret = bf_pow_ui_ui(B, radix, n2, BF_PREC_INF, BF_RNDZ);
-            if (ret)
-                return ret;
-        }
-        ret = bf_integer_from_radix_rec(r, tab + n2, n1, level + 1, n0,
-                                        radix, pow_tab);
-        if (ret)
-            return ret;
-        ret = bf_mul(r, r, B, BF_PREC_INF, BF_RNDZ);
-        if (ret)
-            return ret;
-        bf_init(r->ctx, T);
-        ret = bf_integer_from_radix_rec(T, tab, n2, level + 1, n0,
-                                        radix, pow_tab);
-        if (!ret)
-            ret = bf_add(r, r, T, BF_PREC_INF, BF_RNDZ);
-        bf_delete(T);
-    }
-    return ret;
-    //    bf_print_str("  r=", r);
-}
-
-/* return 0 if OK != 0 if memory error */
-static int bf_integer_from_radix(bf_t *r, const limb_t *tab,
-                                 limb_t n, limb_t radix)
-{
-    bf_context_t *s = r->ctx;
-    int pow_tab_len, i, ret;
-    limb_t radixl;
-    bf_t *pow_tab;
-
-    radixl = get_limb_radix(radix);
-    pow_tab_len = ceil_log2(n) + 2; /* XXX: check */
-    pow_tab = bf_malloc(s, sizeof(pow_tab[0]) * pow_tab_len);
-    if (!pow_tab)
-        return -1;
-    for(i = 0; i < pow_tab_len; i++)
-        bf_init(r->ctx, &pow_tab[i]);
-    ret = bf_integer_from_radix_rec(r, tab, n, 0, n, radixl, pow_tab);
-    for(i = 0; i < pow_tab_len; i++) {
-        bf_delete(&pow_tab[i]);
-    }
-    bf_free(s, pow_tab);
-    return ret;
-}
-
-/* compute and round T * radix^expn. */
-int bf_mul_pow_radix(bf_t *r, const bf_t *T, limb_t radix,
-                     slimb_t expn, limb_t prec, bf_flags_t flags)
-{
-    int ret, expn_sign, overflow;
-    slimb_t e, extra_bits, prec1, ziv_extra_bits;
-    bf_t B_s, *B = &B_s;
-
-    if (T->len == 0) {
-        return bf_set(r, T);
-    } else if (expn == 0) {
-        ret = bf_set(r, T);
-        ret |= bf_round(r, prec, flags);
-        return ret;
-    }
-
-    e = expn;
-    expn_sign = 0;
-    if (e < 0) {
-        e = -e;
-        expn_sign = 1;
-    }
-    bf_init(r->ctx, B);
-    if (prec == BF_PREC_INF) {
-        /* infinite precision: only used if the result is known to be exact */
-        ret = bf_pow_ui_ui(B, radix, e, BF_PREC_INF, BF_RNDN);
-        if (expn_sign) {
-            ret |= bf_div(r, T, B, T->len * LIMB_BITS, BF_RNDN);
-        } else {
-            ret |= bf_mul(r, T, B, BF_PREC_INF, BF_RNDN);
-        }
-    } else {
-        ziv_extra_bits = 16;
-        for(;;) {
-            prec1 = prec + ziv_extra_bits;
-            /* XXX: correct overflow/underflow handling */
-            /* XXX: rigorous error analysis needed */
-            extra_bits = ceil_log2(e) * 2 + 1;
-            ret = bf_pow_ui_ui(B, radix, e, prec1 + extra_bits, BF_RNDN | BF_FLAG_EXT_EXP);
-            overflow = !bf_is_finite(B);
-            /* XXX: if bf_pow_ui_ui returns an exact result, can stop
-               after the next operation */
-            if (expn_sign)
-                ret |= bf_div(r, T, B, prec1 + extra_bits, BF_RNDN | BF_FLAG_EXT_EXP);
-            else
-                ret |= bf_mul(r, T, B, prec1 + extra_bits, BF_RNDN | BF_FLAG_EXT_EXP);
-            if (ret & BF_ST_MEM_ERROR)
-                break;
-            if ((ret & BF_ST_INEXACT) &&
-                !bf_can_round(r, prec, flags & BF_RND_MASK, prec1) &&
-                !overflow) {
-                /* and more precision and retry */
-                ziv_extra_bits = ziv_extra_bits  + (ziv_extra_bits / 2);
-            } else {
-                /* XXX: need to use __bf_round() to pass the inexact
-                   flag for the subnormal case */
-                ret = bf_round(r, prec, flags) | (ret & BF_ST_INEXACT);
-                break;
-            }
-        }
-    }
-    bf_delete(B);
-    return ret;
-}
-
-static inline int bf_to_digit(int c)
-{
-    if (c >= '0' && c <= '9')
-        return c - '0';
-    else if (c >= 'A' && c <= 'Z')
-        return c - 'A' + 10;
-    else if (c >= 'a' && c <= 'z')
-        return c - 'a' + 10;
-    else
-        return 36;
-}
-
-/* add a limb at 'pos' and decrement pos. new space is created if
-   needed. Return 0 if OK, -1 if memory error */
-static int bf_add_limb(bf_t *a, slimb_t *ppos, limb_t v)
-{
-    slimb_t pos;
-    pos = *ppos;
-    if (unlikely(pos < 0)) {
-        limb_t new_size, d, *new_tab;
-        new_size = bf_max(a->len + 1, a->len * 3 / 2);
-        new_tab = bf_realloc(a->ctx, a->tab, sizeof(limb_t) * new_size);
-        if (!new_tab)
-            return -1;
-        a->tab = new_tab;
-        d = new_size - a->len;
-        memmove(a->tab + d, a->tab, a->len * sizeof(limb_t));
-        a->len = new_size;
-        pos += d;
-    }
-    a->tab[pos--] = v;
-    *ppos = pos;
-    return 0;
-}
-
-static int bf_tolower(int c)
-{
-    if (c >= 'A' && c <= 'Z')
-        c = c - 'A' + 'a';
-    return c;
-}
-
-static int strcasestart(const char *str, const char *val, const char **ptr)
-{
-    const char *p, *q;
-    p = str;
-    q = val;
-    while (*q != '\0') {
-        if (bf_tolower(*p) != *q)
-            return 0;
-        p++;
-        q++;
-    }
-    if (ptr)
-        *ptr = p;
-    return 1;
-}
-
-static int bf_atof_internal(bf_t *r, slimb_t *pexponent,
-                            const char *str, const char **pnext, int radix,
-                            limb_t prec, bf_flags_t flags, bool is_dec)
-{
-    const char *p, *p_start;
-    int is_neg, radix_bits, exp_is_neg, ret, digits_per_limb, shift;
-    limb_t cur_limb;
-    slimb_t pos, expn, int_len, digit_count;
-    bool has_decpt, is_bin_exp;
-    bf_t a_s, *a;
-
-    *pexponent = 0;
-    p = str;
-    if (!(flags & BF_ATOF_NO_NAN_INF) && radix <= 16 &&
-        strcasestart(p, "nan", &p)) {
-        bf_set_nan(r);
-        ret = 0;
-        goto done;
-    }
-    is_neg = 0;
-
-    if (p[0] == '+') {
-        p++;
-        p_start = p;
-    } else if (p[0] == '-') {
-        is_neg = 1;
-        p++;
-        p_start = p;
-    } else {
-        p_start = p;
-    }
-    if (p[0] == '0') {
-        if ((p[1] == 'x' || p[1] == 'X') &&
-            (radix == 0 || radix == 16) &&
-            !(flags & BF_ATOF_NO_HEX)) {
-            radix = 16;
-            p += 2;
-        } else if ((p[1] == 'o' || p[1] == 'O') &&
-                   radix == 0 && (flags & BF_ATOF_BIN_OCT)) {
-            p += 2;
-            radix = 8;
-        } else if ((p[1] == 'b' || p[1] == 'B') &&
-                   radix == 0 && (flags & BF_ATOF_BIN_OCT)) {
-            p += 2;
-            radix = 2;
-        } else {
-            goto no_prefix;
-        }
-        /* there must be a digit after the prefix */
-        if (bf_to_digit((uint8_t)*p) >= radix) {
-            bf_set_nan(r);
-            ret = 0;
-            goto done;
-        }
-    no_prefix: ;
-    } else {
-        if (!(flags & BF_ATOF_NO_NAN_INF) && radix <= 16 &&
-            strcasestart(p, "inf", &p)) {
-            bf_set_inf(r, is_neg);
-            ret = 0;
-            goto done;
-        }
-    }
-
-    if (radix == 0)
-        radix = 10;
-    if (is_dec) {
-        assert(radix == 10);
-        radix_bits = 0;
-        a = r;
-    } else if ((radix & (radix - 1)) != 0) {
-        radix_bits = 0; /* base is not a power of two */
-        a = &a_s;
-        bf_init(r->ctx, a);
-    } else {
-        radix_bits = ceil_log2(radix);
-        a = r;
-    }
-
-    /* skip leading zeros */
-    /* XXX: could also skip zeros after the decimal point */
-    while (*p == '0')
-        p++;
-
-    if (radix_bits) {
-        shift = digits_per_limb = LIMB_BITS;
-    } else {
-        radix_bits = 0;
-        shift = digits_per_limb = digits_per_limb_table[radix - 2];
-    }
-    cur_limb = 0;
-    bf_resize(a, 1);
-    pos = 0;
-    has_decpt = false;
-    int_len = digit_count = 0;
-    for(;;) {
-        limb_t c;
-        if (*p == '.' && (p > p_start || bf_to_digit(p[1]) < radix)) {
-            if (has_decpt)
-                break;
-            has_decpt = true;
-            int_len = digit_count;
-            p++;
-        }
-        c = bf_to_digit(*p);
-        if (c >= radix)
-            break;
-        digit_count++;
-        p++;
-        if (radix_bits) {
-            shift -= radix_bits;
-            if (shift <= 0) {
-                cur_limb |= c >> (-shift);
-                if (bf_add_limb(a, &pos, cur_limb))
-                    goto mem_error;
-                if (shift < 0)
-                    cur_limb = c << (LIMB_BITS + shift);
-                else
-                    cur_limb = 0;
-                shift += LIMB_BITS;
-            } else {
-                cur_limb |= c << shift;
-            }
-        } else {
-            cur_limb = cur_limb * radix + c;
-            shift--;
-            if (shift == 0) {
-                if (bf_add_limb(a, &pos, cur_limb))
-                    goto mem_error;
-                shift = digits_per_limb;
-                cur_limb = 0;
-            }
-        }
-    }
-    if (!has_decpt)
-        int_len = digit_count;
-
-    /* add the last limb and pad with zeros */
-    if (shift != digits_per_limb) {
-        if (radix_bits == 0) {
-            while (shift != 0) {
-                cur_limb *= radix;
-                shift--;
-            }
-        }
-        if (bf_add_limb(a, &pos, cur_limb)) {
-        mem_error:
-            ret = BF_ST_MEM_ERROR;
-            if (!radix_bits)
-                bf_delete(a);
-            bf_set_nan(r);
-            goto done;
-        }
-    }
-
-    /* reset the next limbs to zero (we prefer to reallocate in the
-       renormalization) */
-    memset(a->tab, 0, (pos + 1) * sizeof(limb_t));
-
-    if (p == p_start) {
-        ret = 0;
-        if (!radix_bits)
-            bf_delete(a);
-        bf_set_nan(r);
-        goto done;
-    }
-
-    /* parse the exponent, if any */
-    expn = 0;
-    is_bin_exp = false;
-    if (((radix == 10 && (*p == 'e' || *p == 'E')) ||
-         (radix != 10 && (*p == '@' ||
-                          (radix_bits && (*p == 'p' || *p == 'P'))))) &&
-        p > p_start) {
-        is_bin_exp = (*p == 'p' || *p == 'P');
-        p++;
-        exp_is_neg = 0;
-        if (*p == '+') {
-            p++;
-        } else if (*p == '-') {
-            exp_is_neg = 1;
-            p++;
-        }
-        for(;;) {
-            int c;
-            c = bf_to_digit(*p);
-            if (c >= 10)
-                break;
-            if (unlikely(expn > ((BF_RAW_EXP_MAX - 2 - 9) / 10))) {
-                /* exponent overflow */
-                if (exp_is_neg) {
-                    bf_set_zero(r, is_neg);
-                    ret = BF_ST_UNDERFLOW | BF_ST_INEXACT;
-                } else {
-                    bf_set_inf(r, is_neg);
-                    ret = BF_ST_OVERFLOW | BF_ST_INEXACT;
-                }
-                goto done;
-            }
-            p++;
-            expn = expn * 10 + c;
-        }
-        if (exp_is_neg)
-            expn = -expn;
-    }
-    if (is_dec) {
-        a->expn = expn + int_len;
-        a->sign = is_neg;
-        ret = bfdec_normalize_and_round((bfdec_t *)a, prec, flags);
-    } else if (radix_bits) {
-        /* XXX: may overflow */
-        if (!is_bin_exp)
-            expn *= radix_bits;
-        a->expn = expn + (int_len * radix_bits);
-        a->sign = is_neg;
-        ret = bf_normalize_and_round(a, prec, flags);
-    } else {
-        limb_t l;
-        pos++;
-        l = a->len - pos; /* number of limbs */
-        if (l == 0) {
-            bf_set_zero(r, is_neg);
-            ret = 0;
-        } else {
-            bf_t T_s, *T = &T_s;
-
-            expn -= l * digits_per_limb - int_len;
-            bf_init(r->ctx, T);
-            if (bf_integer_from_radix(T, a->tab + pos, l, radix)) {
-                bf_set_nan(r);
-                ret = BF_ST_MEM_ERROR;
-            } else {
-                T->sign = is_neg;
-                if (flags & BF_ATOF_EXPONENT) {
-                    /* return the exponent */
-                    *pexponent = expn;
-                    ret = bf_set(r, T);
-                } else {
-                    ret = bf_mul_pow_radix(r, T, radix, expn, prec, flags);
-                }
-            }
-            bf_delete(T);
-        }
-        bf_delete(a);
-    }
- done:
-    if (pnext)
-        *pnext = p;
-    return ret;
-}
-
-/*
-   Return (status, n, exp). 'status' is the floating point status. 'n'
-   is the parsed number.
-
-   If (flags & BF_ATOF_EXPONENT) and if the radix is not a power of
-   two, the parsed number is equal to r *
-   (*pexponent)^radix. Otherwise *pexponent = 0.
-*/
-int bf_atof2(bf_t *r, slimb_t *pexponent,
-             const char *str, const char **pnext, int radix,
-             limb_t prec, bf_flags_t flags)
-{
-    return bf_atof_internal(r, pexponent, str, pnext, radix, prec, flags,
-                            false);
-}
-
-int bf_atof(bf_t *r, const char *str, const char **pnext, int radix,
-            limb_t prec, bf_flags_t flags)
-{
-    slimb_t dummy_exp;
-    return bf_atof_internal(r, &dummy_exp, str, pnext, radix, prec, flags, false);
-}
-
-/* base conversion to radix */
-
-#if LIMB_BITS == 64
-#define RADIXL_10 UINT64_C(10000000000000000000)
-#else
-#define RADIXL_10 UINT64_C(1000000000)
-#endif
-
-static const uint32_t inv_log2_radix[BF_RADIX_MAX - 1][LIMB_BITS / 32 + 1] = {
-#if LIMB_BITS == 32
-{ 0x80000000, 0x00000000,},
-{ 0x50c24e60, 0xd4d4f4a7,},
-{ 0x40000000, 0x00000000,},
-{ 0x372068d2, 0x0a1ee5ca,},
-{ 0x3184648d, 0xb8153e7a,},
-{ 0x2d983275, 0x9d5369c4,},
-{ 0x2aaaaaaa, 0xaaaaaaab,},
-{ 0x28612730, 0x6a6a7a54,},
-{ 0x268826a1, 0x3ef3fde6,},
-{ 0x25001383, 0xbac8a744,},
-{ 0x23b46706, 0x82c0c709,},
-{ 0x229729f1, 0xb2c83ded,},
-{ 0x219e7ffd, 0xa5ad572b,},
-{ 0x20c33b88, 0xda7c29ab,},
-{ 0x20000000, 0x00000000,},
-{ 0x1f50b57e, 0xac5884b3,},
-{ 0x1eb22cc6, 0x8aa6e26f,},
-{ 0x1e21e118, 0x0c5daab2,},
-{ 0x1d9dcd21, 0x439834e4,},
-{ 0x1d244c78, 0x367a0d65,},
-{ 0x1cb40589, 0xac173e0c,},
-{ 0x1c4bd95b, 0xa8d72b0d,},
-{ 0x1bead768, 0x98f8ce4c,},
-{ 0x1b903469, 0x050f72e5,},
-{ 0x1b3b433f, 0x2eb06f15,},
-{ 0x1aeb6f75, 0x9c46fc38,},
-{ 0x1aa038eb, 0x0e3bfd17,},
-{ 0x1a593062, 0xb38d8c56,},
-{ 0x1a15f4c3, 0x2b95a2e6,},
-{ 0x19d630dc, 0xcc7ddef9,},
-{ 0x19999999, 0x9999999a,},
-{ 0x195fec80, 0x8a609431,},
-{ 0x1928ee7b, 0x0b4f22f9,},
-{ 0x18f46acf, 0x8c06e318,},
-{ 0x18c23246, 0xdc0a9f3d,},
-#else
-{ 0x80000000, 0x00000000, 0x00000000,},
-{ 0x50c24e60, 0xd4d4f4a7, 0x021f57bc,},
-{ 0x40000000, 0x00000000, 0x00000000,},
-{ 0x372068d2, 0x0a1ee5ca, 0x19ea911b,},
-{ 0x3184648d, 0xb8153e7a, 0x7fc2d2e1,},
-{ 0x2d983275, 0x9d5369c4, 0x4dec1661,},
-{ 0x2aaaaaaa, 0xaaaaaaaa, 0xaaaaaaab,},
-{ 0x28612730, 0x6a6a7a53, 0x810fabde,},
-{ 0x268826a1, 0x3ef3fde6, 0x23e2566b,},
-{ 0x25001383, 0xbac8a744, 0x385a3349,},
-{ 0x23b46706, 0x82c0c709, 0x3f891718,},
-{ 0x229729f1, 0xb2c83ded, 0x15fba800,},
-{ 0x219e7ffd, 0xa5ad572a, 0xe169744b,},
-{ 0x20c33b88, 0xda7c29aa, 0x9bddee52,},
-{ 0x20000000, 0x00000000, 0x00000000,},
-{ 0x1f50b57e, 0xac5884b3, 0x70e28eee,},
-{ 0x1eb22cc6, 0x8aa6e26f, 0x06d1a2a2,},
-{ 0x1e21e118, 0x0c5daab1, 0x81b4f4bf,},
-{ 0x1d9dcd21, 0x439834e3, 0x81667575,},
-{ 0x1d244c78, 0x367a0d64, 0xc8204d6d,},
-{ 0x1cb40589, 0xac173e0c, 0x3b7b16ba,},
-{ 0x1c4bd95b, 0xa8d72b0d, 0x5879f25a,},
-{ 0x1bead768, 0x98f8ce4c, 0x66cc2858,},
-{ 0x1b903469, 0x050f72e5, 0x0cf5488e,},
-{ 0x1b3b433f, 0x2eb06f14, 0x8c89719c,},
-{ 0x1aeb6f75, 0x9c46fc37, 0xab5fc7e9,},
-{ 0x1aa038eb, 0x0e3bfd17, 0x1bd62080,},
-{ 0x1a593062, 0xb38d8c56, 0x7998ab45,},
-{ 0x1a15f4c3, 0x2b95a2e6, 0x46aed6a0,},
-{ 0x19d630dc, 0xcc7ddef9, 0x5aadd61b,},
-{ 0x19999999, 0x99999999, 0x9999999a,},
-{ 0x195fec80, 0x8a609430, 0xe1106014,},
-{ 0x1928ee7b, 0x0b4f22f9, 0x5f69791d,},
-{ 0x18f46acf, 0x8c06e318, 0x4d2aeb2c,},
-{ 0x18c23246, 0xdc0a9f3d, 0x3fe16970,},
-#endif
-};
-
-static const limb_t log2_radix[BF_RADIX_MAX - 1] = {
-#if LIMB_BITS == 32
-0x20000000,
-0x32b80347,
-0x40000000,
-0x4a4d3c26,
-0x52b80347,
-0x59d5d9fd,
-0x60000000,
-0x6570068e,
-0x6a4d3c26,
-0x6eb3a9f0,
-0x72b80347,
-0x766a008e,
-0x79d5d9fd,
-0x7d053f6d,
-0x80000000,
-0x82cc7edf,
-0x8570068e,
-0x87ef05ae,
-0x8a4d3c26,
-0x8c8ddd45,
-0x8eb3a9f0,
-0x90c10501,
-0x92b80347,
-0x949a784c,
-0x966a008e,
-0x982809d6,
-0x99d5d9fd,
-0x9b74948f,
-0x9d053f6d,
-0x9e88c6b3,
-0xa0000000,
-0xa16bad37,
-0xa2cc7edf,
-0xa4231623,
-0xa570068e,
-#else
-0x2000000000000000,
-0x32b803473f7ad0f4,
-0x4000000000000000,
-0x4a4d3c25e68dc57f,
-0x52b803473f7ad0f4,
-0x59d5d9fd5010b366,
-0x6000000000000000,
-0x6570068e7ef5a1e8,
-0x6a4d3c25e68dc57f,
-0x6eb3a9f01975077f,
-0x72b803473f7ad0f4,
-0x766a008e4788cbcd,
-0x79d5d9fd5010b366,
-0x7d053f6d26089673,
-0x8000000000000000,
-0x82cc7edf592262d0,
-0x8570068e7ef5a1e8,
-0x87ef05ae409a0289,
-0x8a4d3c25e68dc57f,
-0x8c8ddd448f8b845a,
-0x8eb3a9f01975077f,
-0x90c10500d63aa659,
-0x92b803473f7ad0f4,
-0x949a784bcd1b8afe,
-0x966a008e4788cbcd,
-0x982809d5be7072dc,
-0x99d5d9fd5010b366,
-0x9b74948f5532da4b,
-0x9d053f6d26089673,
-0x9e88c6b3626a72aa,
-0xa000000000000000,
-0xa16bad3758efd873,
-0xa2cc7edf592262d0,
-0xa4231623369e78e6,
-0xa570068e7ef5a1e8,
-#endif
-};
-
-/* compute floor(a*b) or ceil(a*b) with b = log2(radix) or
-   b=1/log2(radix). For is_inv = 0, strict accuracy is not guaranteed
-   when radix is not a power of two. */
-slimb_t bf_mul_log2_radix(slimb_t a1, unsigned int radix, int is_inv,
-                          int is_ceil1)
-{
-    int is_neg;
-    limb_t a;
-    bool is_ceil;
-
-    is_ceil = is_ceil1;
-    a = a1;
-    if (a1 < 0) {
-        a = -a;
-        is_neg = 1;
-    } else {
-        is_neg = 0;
-    }
-    is_ceil ^= is_neg;
     if ((radix & (radix - 1)) == 0) {
-        int radix_bits;
-        /* radix is a power of two */
-        radix_bits = ceil_log2(radix);
-        if (is_inv) {
-            if (is_ceil)
-                a += radix_bits - 1;
-            a = a / radix_bits;
-        } else {
-            a = a * radix_bits;
-        }
+        /* if the radix is a power of two better to do it exactly */
+        radix_bits = 31 - clz32(radix);
+        if (a < 0)
+            a -= radix_bits - 1;
+        return a / radix_bits;
     } else {
-        const uint32_t *tab;
-        limb_t b0, b1;
-        dlimb_t t;
-
-        if (is_inv) {
-            tab = inv_log2_radix[radix - 2];
-#if LIMB_BITS == 32
-            b1 = tab[0];
-            b0 = tab[1];
-#else
-            b1 = ((limb_t)tab[0] << 32) | tab[1];
-            b0 = (limb_t)tab[2] << 32;
-#endif
-            t = (dlimb_t)b0 * (dlimb_t)a;
-            t = (dlimb_t)b1 * (dlimb_t)a + (t >> LIMB_BITS);
-            a = t >> (LIMB_BITS - 1);
-        } else {
-            b0 = log2_radix[radix - 2];
-            t = (dlimb_t)b0 * (dlimb_t)a;
-            a = t >> (LIMB_BITS - 3);
-        }
-        /* a = floor(result) and 'result' cannot be an integer */
-        a += is_ceil;
+        mult = mul_log2_radix_table[radix - 2];
+        return ((int64_t)a * mult) >> MUL_LOG2_RADIX_BASE_LOG2;
     }
-    if (is_neg)
-        a = -a;
-    return a;
 }
 
-/* 'n' is the number of output limbs */
-static int bf_integer_to_radix_rec(bf_t *pow_tab,
-                                   limb_t *out, const bf_t *a, limb_t n,
-                                   int level, limb_t n0, limb_t radixl,
-                                   unsigned int radixl_bits)
+#if 0
+static void build_mul_log2_radix_table(void)
 {
-    limb_t n1, n2, q_prec;
-    int ret;
+    int base, radix, mult, col, base_log2;
 
-    assert(n >= 1);
-    if (n == 1) {
-        out[0] = get_bits(a->tab, a->len, a->len * LIMB_BITS - a->expn);
-    } else if (n == 2) {
-        dlimb_t t;
-        slimb_t pos;
-        pos = a->len * LIMB_BITS - a->expn;
-        t = ((dlimb_t)get_bits(a->tab, a->len, pos + LIMB_BITS) << LIMB_BITS) |
-            get_bits(a->tab, a->len, pos);
-        if (likely(radixl == RADIXL_10)) {
-            /* use division by a constant when possible */
-            out[0] = t % RADIXL_10;
-            out[1] = t / RADIXL_10;
-        } else {
-            out[0] = t % radixl;
-            out[1] = t / radixl;
+    base_log2 = 24;
+    base = 1 << base_log2;
+    col = 0;
+    for(radix = 2; radix <= 36; radix++) {
+        if ((radix & (radix - 1)) == 0)
+            mult = 0;
+        else
+            mult = lrint((double)base / log2(radix));
+        printf("0x%06x, ", mult);
+        if (++col == 4) {
+            printf("\n");
+            col = 0;
         }
-    } else {
-        bf_t Q, R, *B, *B_inv;
-        int q_add;
-        bf_init(a->ctx, &Q);
-        bf_init(a->ctx, &R);
-        n2 = (((n0 * 2) >> (level + 1)) + 1) / 2;
-        n1 = n - n2;
-        B = &pow_tab[2 * level];
-        B_inv = &pow_tab[2 * level + 1];
-        ret = 0;
-        if (B->len == 0) {
-            /* compute BASE^n2 */
-            ret |= bf_pow_ui_ui(B, radixl, n2, BF_PREC_INF, BF_RNDZ);
-            /* we use enough bits for the maximum possible 'n1' value,
-               i.e. n2 + 1 */
-            ret |= bf_set_ui(&R, 1);
-            ret |= bf_div(B_inv, &R, B, (n2 + 1) * radixl_bits + 2, BF_RNDN);
-        }
-        //        printf("%d: n1=% " PRId64 " n2=%" PRId64 "\n", level, n1, n2);
-        q_prec = n1 * radixl_bits;
-        ret |= bf_mul(&Q, a, B_inv, q_prec, BF_RNDN);
-        ret |= bf_rint(&Q, BF_RNDZ);
-
-        ret |= bf_mul(&R, &Q, B, BF_PREC_INF, BF_RNDZ);
-        ret |= bf_sub(&R, a, &R, BF_PREC_INF, BF_RNDZ);
-
-        if (ret & BF_ST_MEM_ERROR)
-            goto fail;
-        /* adjust if necessary */
-        q_add = 0;
-        while (R.sign && R.len != 0) {
-            if (bf_add(&R, &R, B, BF_PREC_INF, BF_RNDZ))
-                goto fail;
-            q_add--;
-        }
-        while (bf_cmpu(&R, B) >= 0) {
-            if (bf_sub(&R, &R, B, BF_PREC_INF, BF_RNDZ))
-                goto fail;
-            q_add++;
-        }
-        if (q_add != 0) {
-            if (bf_add_si(&Q, &Q, q_add, BF_PREC_INF, BF_RNDZ))
-                goto fail;
-        }
-        if (bf_integer_to_radix_rec(pow_tab, out + n2, &Q, n1, level + 1, n0,
-                                    radixl, radixl_bits))
-            goto fail;
-        if (bf_integer_to_radix_rec(pow_tab, out, &R, n2, level + 1, n0,
-                                    radixl, radixl_bits)) {
-        fail:
-            bf_delete(&Q);
-            bf_delete(&R);
-            return -1;
-        }
-        bf_delete(&Q);
-        bf_delete(&R);
     }
-    return 0;
+    printf("\n");
 }
 
-/* return 0 if OK != 0 if memory error */
-static int bf_integer_to_radix(bf_t *r, const bf_t *a, limb_t radixl)
+static void mul_log2_radix_test(void)
 {
-    bf_context_t *s = r->ctx;
-    limb_t r_len;
-    bf_t *pow_tab;
-    int i, pow_tab_len, ret;
-
-    r_len = r->len;
-    pow_tab_len = (ceil_log2(r_len) + 2) * 2; /* XXX: check */
-    pow_tab = bf_malloc(s, sizeof(pow_tab[0]) * pow_tab_len);
-    if (!pow_tab)
-        return -1;
-    for(i = 0; i < pow_tab_len; i++)
-        bf_init(r->ctx, &pow_tab[i]);
-
-    ret = bf_integer_to_radix_rec(pow_tab, r->tab, a, r_len, 0, r_len, radixl,
-                                  ceil_log2(radixl));
-
-    for(i = 0; i < pow_tab_len; i++) {
-        bf_delete(&pow_tab[i]);
-    }
-    bf_free(s, pow_tab);
-    return ret;
-}
-
-/* a must be >= 0. 'P' is the wanted number of digits in radix
-   'radix'. 'r' is the mantissa represented as an integer. *pE
-   contains the exponent. Return != 0 if memory error. */
-static int bf_convert_to_radix(bf_t *r, slimb_t *pE,
-                               const bf_t *a, int radix,
-                               limb_t P, bf_rnd_t rnd_mode,
-                               bool is_fixed_exponent)
-{
-    slimb_t E, e, prec, extra_bits, ziv_extra_bits, prec0;
-    bf_t B_s, *B = &B_s;
-    int e_sign, ret, res;
-
-    if (a->len == 0) {
-        /* zero case */
-        *pE = 0;
-        return bf_set(r, a);
-    }
-
-    if (is_fixed_exponent) {
-        E = *pE;
-    } else {
-        /* compute the new exponent */
-        E = 1 + bf_mul_log2_radix(a->expn - 1, radix, true, false);
-    }
-    //    bf_print_str("a", a);
-    //    printf("E=%ld P=%ld radix=%d\n", E, P, radix);
-
-    for(;;) {
-        e = P - E;
-        e_sign = 0;
-        if (e < 0) {
-            e = -e;
-            e_sign = 1;
-        }
-        /* Note: precision for log2(radix) is not critical here */
-        prec0 = bf_mul_log2_radix(P, radix, false, true);
-        ziv_extra_bits = 16;
-        for(;;) {
-            prec = prec0 + ziv_extra_bits;
-            /* XXX: rigorous error analysis needed */
-            extra_bits = ceil_log2(e) * 2 + 1;
-            ret = bf_pow_ui_ui(r, radix, e, prec + extra_bits,
-                               BF_RNDN | BF_FLAG_EXT_EXP);
-            if (!e_sign)
-                ret |= bf_mul(r, r, a, prec + extra_bits,
-                              BF_RNDN | BF_FLAG_EXT_EXP);
-            else
-                ret |= bf_div(r, a, r, prec + extra_bits,
-                              BF_RNDN | BF_FLAG_EXT_EXP);
-            if (ret & BF_ST_MEM_ERROR)
-                return BF_ST_MEM_ERROR;
-            /* if the result is not exact, check that it can be safely
-               rounded to an integer */
-            if ((ret & BF_ST_INEXACT) &&
-                !bf_can_round(r, r->expn, rnd_mode, prec)) {
-                /* and more precision and retry */
-                ziv_extra_bits = ziv_extra_bits  + (ziv_extra_bits / 2);
-                continue;
-            } else {
-                ret = bf_rint(r, rnd_mode);
-                if (ret & BF_ST_MEM_ERROR)
-                    return BF_ST_MEM_ERROR;
-                break;
+    int radix, i, ref, r;
+    
+    for(radix = 2; radix <= 36; radix++) {
+        for(i = -2048; i <= 2047; i++) {
+            ref = (int)floor((double)i / log2(radix));
+            r = mul_log2_radix(i, radix);
+            if (ref != r) {
+                printf("ERROR: radix=%d i=%d r=%d ref=%d\n",
+                       radix, i, r, ref);
+                exit(1);
             }
         }
-        if (is_fixed_exponent)
-            break;
-        /* check that the result is < B^P */
-        /* XXX: do a fast approximate test first ? */
-        bf_init(r->ctx, B);
-        ret = bf_pow_ui_ui(B, radix, P, BF_PREC_INF, BF_RNDZ);
-        if (ret) {
-            bf_delete(B);
-            return ret;
-        }
-        res = bf_cmpu(r, B);
-        bf_delete(B);
-        if (res < 0)
-            break;
-        /* try a larger exponent */
-        E++;
     }
-    *pE = E;
-    return 0;
+    if (0)
+        build_mul_log2_radix_table();
 }
+#endif
 
-static void limb_to_a(char *buf, limb_t n, unsigned int radix, int len)
+static void u32toa_len(char *buf, uint32_t n, size_t len)
 {
     int digit, i;
-
-    if (radix == 10) {
-        /* specific case with constant divisor */
-        for(i = len - 1; i >= 0; i--) {
-            digit = (limb_t)n % 10;
-            n = (limb_t)n / 10;
-            buf[i] = digit + '0';
-        }
-    } else {
-        for(i = len - 1; i >= 0; i--) {
-            digit = (limb_t)n % radix;
-            n = (limb_t)n / radix;
-            if (digit < 10)
-                digit += '0';
-            else
-                digit += 'a' - 10;
-            buf[i] = digit;
-        }
+    for(i = len - 1; i >= 0; i--) {
+        digit = n % 10;
+        n = n / 10;
+        buf[i] = digit + '0';
     }
 }
 
-/* for power of 2 radixes */
-static void limb_to_a2(char *buf, limb_t n, unsigned int radix_bits, int len)
+/* for power of 2 radixes. len >= 1 */
+static void u64toa_bin_len(char *buf, uint64_t n, unsigned int radix_bits, int len)
 {
     int digit, i;
     unsigned int mask;
@@ -72014,4794 +69708,1067 @@ static void limb_to_a2(char *buf, limb_t n, unsigned int radix_bits, int len)
     }
 }
 
-/* 'a' must be an integer if the is_dec = false or if the radix is not
-   a power of two. A dot is added before the 'dot_pos' digit. dot_pos
-   = n_digits does not display the dot. 0 <= dot_pos <=
-   n_digits. n_digits >= 1. */
-static void output_digits(DynBuf *s, const bf_t *a1, int radix, limb_t n_digits,
-                          limb_t dot_pos, bool is_dec)
+/* len >= 1. 2 <= radix <= 36 */
+static void limb_to_a(char *buf, limb_t n, unsigned int radix, int len)
 {
-    limb_t i, v, l;
-    slimb_t pos, pos_incr;
-    int digits_per_limb, buf_pos, radix_bits, first_buf_pos;
-    char buf[65];
-    bf_t a_s, *a;
+    int digit, i;
 
-    if (is_dec) {
-        digits_per_limb = LIMB_DIGITS;
-        a = (bf_t *)a1;
-        radix_bits = 0;
-        pos = a->len;
-        pos_incr = 1;
-        first_buf_pos = 0;
-    } else if ((radix & (radix - 1)) == 0) {
-        a = (bf_t *)a1;
-        radix_bits = ceil_log2(radix);
-        digits_per_limb = LIMB_BITS / radix_bits;
-        pos_incr = digits_per_limb * radix_bits;
-        /* digits are aligned relative to the radix point */
-        pos = a->len * LIMB_BITS + smod(-a->expn, radix_bits);
-        first_buf_pos = 0;
-    } else {
-        limb_t n, radixl;
-
-        digits_per_limb = digits_per_limb_table[radix - 2];
-        radixl = get_limb_radix(radix);
-        a = &a_s;
-        bf_init(a1->ctx, a);
-        n = (n_digits + digits_per_limb - 1) / digits_per_limb;
-        if (bf_resize(a, n)) {
-            dbuf_set_error(s);
-            goto done;
-        }
-        if (bf_integer_to_radix(a, a1, radixl)) {
-            dbuf_set_error(s);
-            goto done;
-        }
-        radix_bits = 0;
-        pos = n;
-        pos_incr = 1;
-        first_buf_pos = pos * digits_per_limb - n_digits;
-    }
-    buf_pos = digits_per_limb;
-    i = 0;
-    while (i < n_digits) {
-        if (buf_pos == digits_per_limb) {
-            pos -= pos_incr;
-            if (radix_bits == 0) {
-                v = get_limbz(a, pos);
-                limb_to_a(buf, v, radix, digits_per_limb);
-            } else {
-                v = get_bits(a->tab, a->len, pos);
-                limb_to_a2(buf, v, radix_bits, digits_per_limb);
-            }
-            buf_pos = first_buf_pos;
-            first_buf_pos = 0;
-        }
-        if (i < dot_pos) {
-            l = dot_pos;
-        } else {
-            if (i == dot_pos)
-                dbuf_putc(s, '.');
-            l = n_digits;
-        }
-        l = bf_min(digits_per_limb - buf_pos, l - i);
-        dbuf_put(s, (uint8_t *)(buf + buf_pos), l);
-        buf_pos += l;
-        i += l;
-    }
- done:
-    if (a != a1)
-        bf_delete(a);
-}
-
-static void *bf_dbuf_realloc(void *opaque, void *ptr, size_t size)
-{
-    bf_context_t *s = opaque;
-    return bf_realloc(s, ptr, size);
-}
-
-/* return the length in bytes. A trailing '\0' is added */
-static char *bf_ftoa_internal(size_t *plen, const bf_t *a2, int radix,
-                              limb_t prec, bf_flags_t flags, bool is_dec)
-{
-    bf_context_t *ctx = a2->ctx;
-    DynBuf s_s, *s = &s_s;
-    int radix_bits;
-
-    //    bf_print_str("ftoa", a2);
-    //    printf("radix=%d\n", radix);
-    dbuf_init2(s, ctx, bf_dbuf_realloc);
-    if (a2->expn == BF_EXP_NAN) {
-        dbuf_putstr(s, "NaN");
-    } else {
-        if (a2->sign)
-            dbuf_putc(s, '-');
-        if (a2->expn == BF_EXP_INF) {
-            if (flags & BF_FTOA_JS_QUIRKS)
-                dbuf_putstr(s, "Infinity");
-            else
-                dbuf_putstr(s, "Inf");
-        } else {
-            int fmt, ret;
-            slimb_t n_digits, n, i, n_max, n1;
-            bf_t a1_s, *a1 = &a1_s;
-
-            if ((radix & (radix - 1)) != 0)
-                radix_bits = 0;
-            else
-                radix_bits = ceil_log2(radix);
-
-            fmt = flags & BF_FTOA_FORMAT_MASK;
-            bf_init(ctx, a1);
-            if (fmt == BF_FTOA_FORMAT_FRAC) {
-                if (is_dec || radix_bits != 0) {
-                    if (bf_set(a1, a2))
-                        goto fail1;
-#ifdef USE_BF_DEC
-                    if (is_dec) {
-                        if (bfdec_round((bfdec_t *)a1, prec, (flags & BF_RND_MASK) | BF_FLAG_RADPNT_PREC) & BF_ST_MEM_ERROR)
-                            goto fail1;
-                        n = a1->expn;
-                    } else
-#endif
-                    {
-                        if (bf_round(a1, prec * radix_bits, (flags & BF_RND_MASK) | BF_FLAG_RADPNT_PREC) & BF_ST_MEM_ERROR)
-                            goto fail1;
-                        n = ceil_div(a1->expn, radix_bits);
-                    }
-                    if (flags & BF_FTOA_ADD_PREFIX) {
-                        if (radix == 16)
-                            dbuf_putstr(s, "0x");
-                        else if (radix == 8)
-                            dbuf_putstr(s, "0o");
-                        else if (radix == 2)
-                            dbuf_putstr(s, "0b");
-                    }
-                    if (a1->expn == BF_EXP_ZERO) {
-                        dbuf_putstr(s, "0");
-                        if (prec > 0) {
-                            dbuf_putstr(s, ".");
-                            for(i = 0; i < prec; i++) {
-                                dbuf_putc(s, '0');
-                            }
-                        }
-                    } else {
-                        n_digits = prec + n;
-                        if (n <= 0) {
-                            /* 0.x */
-                            dbuf_putstr(s, "0.");
-                            for(i = 0; i < -n; i++) {
-                                dbuf_putc(s, '0');
-                            }
-                            if (n_digits > 0) {
-                                output_digits(s, a1, radix, n_digits, n_digits, is_dec);
-                            }
-                        } else {
-                            output_digits(s, a1, radix, n_digits, n, is_dec);
-                        }
-                    }
-                } else {
-                    size_t pos, start;
-                    bf_t a_s, *a = &a_s;
-
-                    /* make a positive number */
-                    a->tab = a2->tab;
-                    a->len = a2->len;
-                    a->expn = a2->expn;
-                    a->sign = 0;
-
-                    /* one more digit for the rounding */
-                    n = 1 + bf_mul_log2_radix(bf_max(a->expn, 0), radix, true, true);
-                    n_digits = n + prec;
-                    n1 = n;
-                    if (bf_convert_to_radix(a1, &n1, a, radix, n_digits,
-                                            flags & BF_RND_MASK, true))
-                        goto fail1;
-                    start = s->size;
-                    output_digits(s, a1, radix, n_digits, n, is_dec);
-                    /* remove leading zeros because we allocated one more digit */
-                    pos = start;
-                    while ((pos + 1) < s->size && s->buf[pos] == '0' &&
-                           s->buf[pos + 1] != '.')
-                        pos++;
-                    if (pos > start) {
-                        memmove(s->buf + start, s->buf + pos, s->size - pos);
-                        s->size -= (pos - start);
-                    }
-                }
-            } else {
-#ifdef USE_BF_DEC
-                if (is_dec) {
-                    if (bf_set(a1, a2))
-                        goto fail1;
-                    if (fmt == BF_FTOA_FORMAT_FIXED) {
-                        n_digits = prec;
-                        n_max = n_digits;
-                        if (bfdec_round((bfdec_t *)a1, prec, (flags & BF_RND_MASK)) & BF_ST_MEM_ERROR)
-                            goto fail1;
-                    } else {
-                        /* prec is ignored */
-                        prec = n_digits = a1->len * LIMB_DIGITS;
-                        /* remove the trailing zero digits */
-                        while (n_digits > 1 &&
-                               get_digit(a1->tab, a1->len, prec - n_digits) == 0) {
-                            n_digits--;
-                        }
-                        n_max = n_digits + 4;
-                    }
-                    n = a1->expn;
-                } else
-#endif
-                if (radix_bits != 0) {
-                    if (bf_set(a1, a2))
-                        goto fail1;
-                    if (fmt == BF_FTOA_FORMAT_FIXED) {
-                        slimb_t prec_bits;
-                        n_digits = prec;
-                        n_max = n_digits;
-                        /* align to the radix point */
-                        prec_bits = prec * radix_bits -
-                            smod(-a1->expn, radix_bits);
-                        if (bf_round(a1, prec_bits,
-                                     (flags & BF_RND_MASK)) & BF_ST_MEM_ERROR)
-                            goto fail1;
-                    } else {
-                        limb_t digit_mask;
-                        slimb_t pos;
-                        /* position of the digit before the most
-                           significant digit in bits */
-                        pos = a1->len * LIMB_BITS +
-                            smod(-a1->expn, radix_bits);
-                        n_digits = ceil_div(pos, radix_bits);
-                        /* remove the trailing zero digits */
-                        digit_mask = ((limb_t)1 << radix_bits) - 1;
-                        while (n_digits > 1 &&
-                               (get_bits(a1->tab, a1->len, pos - n_digits * radix_bits) & digit_mask) == 0) {
-                            n_digits--;
-                        }
-                        n_max = n_digits + 4;
-                    }
-                    n = ceil_div(a1->expn, radix_bits);
-                } else {
-                    bf_t a_s, *a = &a_s;
-
-                    /* make a positive number */
-                    a->tab = a2->tab;
-                    a->len = a2->len;
-                    a->expn = a2->expn;
-                    a->sign = 0;
-
-                    if (fmt == BF_FTOA_FORMAT_FIXED) {
-                        n_digits = prec;
-                        n_max = n_digits;
-                    } else {
-                        slimb_t n_digits_max, n_digits_min;
-
-                        assert(prec != BF_PREC_INF);
-                        n_digits = 1 + bf_mul_log2_radix(prec, radix, true, true);
-                        /* max number of digits for non exponential
-                           notation. The rational is to have the same rule
-                           as JS i.e. n_max = 21 for 64 bit float in base 10. */
-                        n_max = n_digits + 4;
-                        if (fmt == BF_FTOA_FORMAT_FREE_MIN) {
-                            bf_t b_s, *b = &b_s;
-
-                            /* find the minimum number of digits by
-                               dichotomy. */
-                            /* XXX: inefficient */
-                            n_digits_max = n_digits;
-                            n_digits_min = 1;
-                            bf_init(ctx, b);
-                            while (n_digits_min < n_digits_max) {
-                                n_digits = (n_digits_min + n_digits_max) / 2;
-                                if (bf_convert_to_radix(a1, &n, a, radix, n_digits,
-                                                        flags & BF_RND_MASK, false)) {
-                                    bf_delete(b);
-                                    goto fail1;
-                                }
-                                /* convert back to a number and compare */
-                                ret = bf_mul_pow_radix(b, a1, radix, n - n_digits,
-                                                       prec,
-                                                       (flags & ~BF_RND_MASK) |
-                                                       BF_RNDN);
-                                if (ret & BF_ST_MEM_ERROR) {
-                                    bf_delete(b);
-                                    goto fail1;
-                                }
-                                if (bf_cmpu(b, a) == 0) {
-                                    n_digits_max = n_digits;
-                                } else {
-                                    n_digits_min = n_digits + 1;
-                                }
-                            }
-                            bf_delete(b);
-                            n_digits = n_digits_max;
-                        }
-                    }
-                    if (bf_convert_to_radix(a1, &n, a, radix, n_digits,
-                                            flags & BF_RND_MASK, false)) {
-                    fail1:
-                        bf_delete(a1);
-                        goto fail;
-                    }
-                }
-                if (a1->expn == BF_EXP_ZERO &&
-                    fmt != BF_FTOA_FORMAT_FIXED &&
-                    !(flags & BF_FTOA_FORCE_EXP)) {
-                    /* just output zero */
-                    dbuf_putstr(s, "0");
-                } else {
-                    if (flags & BF_FTOA_ADD_PREFIX) {
-                        if (radix == 16)
-                            dbuf_putstr(s, "0x");
-                        else if (radix == 8)
-                            dbuf_putstr(s, "0o");
-                        else if (radix == 2)
-                            dbuf_putstr(s, "0b");
-                    }
-                    if (a1->expn == BF_EXP_ZERO)
-                        n = 1;
-                    if ((flags & BF_FTOA_FORCE_EXP) ||
-                        n <= -6 || n > n_max) {
-                        /* exponential notation */
-                        output_digits(s, a1, radix, n_digits, 1, is_dec);
-                        if (radix_bits != 0 && radix <= 16) {
-                            slimb_t exp_n = (n - 1) * radix_bits;
-                            if (flags & BF_FTOA_JS_QUIRKS)
-                                dbuf_printf(s, "p%+" PRId_LIMB, exp_n);
-                            else
-                                dbuf_printf(s, "p%" PRId_LIMB, exp_n);
-                        } else {
-                            const char c = radix <= 10 ? 'e' : '@';
-                            if (flags & BF_FTOA_JS_QUIRKS)
-                                dbuf_printf(s, "%c%+" PRId_LIMB, c, n - 1);
-                            else
-                                dbuf_printf(s, "%c%" PRId_LIMB, c, n - 1);
-                        }
-                    } else if (n <= 0) {
-                        /* 0.x */
-                        dbuf_putstr(s, "0.");
-                        for(i = 0; i < -n; i++) {
-                            dbuf_putc(s, '0');
-                        }
-                        output_digits(s, a1, radix, n_digits, n_digits, is_dec);
-                    } else {
-                        if (n_digits <= n) {
-                            /* no dot */
-                            output_digits(s, a1, radix, n_digits, n_digits, is_dec);
-                            for(i = 0; i < (n - n_digits); i++)
-                                dbuf_putc(s, '0');
-                        } else {
-                            output_digits(s, a1, radix, n_digits, n, is_dec);
-                        }
-                    }
-                }
-            }
-            bf_delete(a1);
-        }
-    }
-    dbuf_putc(s, '\0');
-    if (dbuf_error(s))
-        goto fail;
-    if (plen)
-        *plen = s->size - 1;
-    return (char *)s->buf;
- fail:
-    bf_free(ctx, s->buf);
-    if (plen)
-        *plen = 0;
-    return NULL;
-}
-
-char *bf_ftoa(size_t *plen, const bf_t *a, int radix, limb_t prec,
-              bf_flags_t flags)
-{
-    return bf_ftoa_internal(plen, a, radix, prec, flags, false);
-}
-
-/***************************************************************/
-/* transcendental functions */
-
-/* Note: the algorithm is from MPFR */
-static void bf_const_log2_rec(bf_t *T, bf_t *P, bf_t *Q, limb_t n1,
-                              limb_t n2, bool need_P)
-{
-    bf_context_t *s = T->ctx;
-    if ((n2 - n1) == 1) {
-        if (n1 == 0) {
-            bf_set_ui(P, 3);
-        } else {
-            bf_set_ui(P, n1);
-            P->sign = 1;
-        }
-        bf_set_ui(Q, 2 * n1 + 1);
-        Q->expn += 2;
-        bf_set(T, P);
-    } else {
-        limb_t m;
-        bf_t T1_s, *T1 = &T1_s;
-        bf_t P1_s, *P1 = &P1_s;
-        bf_t Q1_s, *Q1 = &Q1_s;
-
-        m = n1 + ((n2 - n1) >> 1);
-        bf_const_log2_rec(T, P, Q, n1, m, true);
-        bf_init(s, T1);
-        bf_init(s, P1);
-        bf_init(s, Q1);
-        bf_const_log2_rec(T1, P1, Q1, m, n2, need_P);
-        bf_mul(T, T, Q1, BF_PREC_INF, BF_RNDZ);
-        bf_mul(T1, T1, P, BF_PREC_INF, BF_RNDZ);
-        bf_add(T, T, T1, BF_PREC_INF, BF_RNDZ);
-        if (need_P)
-            bf_mul(P, P, P1, BF_PREC_INF, BF_RNDZ);
-        bf_mul(Q, Q, Q1, BF_PREC_INF, BF_RNDZ);
-        bf_delete(T1);
-        bf_delete(P1);
-        bf_delete(Q1);
-    }
-}
-
-/* compute log(2) with faithful rounding at precision 'prec' */
-static void bf_const_log2_internal(bf_t *T, limb_t prec)
-{
-    limb_t w, N;
-    bf_t P_s, *P = &P_s;
-    bf_t Q_s, *Q = &Q_s;
-
-    w = prec + 15;
-    N = w / 3 + 1;
-    bf_init(T->ctx, P);
-    bf_init(T->ctx, Q);
-    bf_const_log2_rec(T, P, Q, 0, N, false);
-    bf_div(T, T, Q, prec, BF_RNDN);
-    bf_delete(P);
-    bf_delete(Q);
-}
-
-/* PI constant */
-
-#define CHUD_A 13591409
-#define CHUD_B 545140134
-#define CHUD_C 640320
-#define CHUD_BITS_PER_TERM 47
-
-static void chud_bs(bf_t *P, bf_t *Q, bf_t *G, int64_t a, int64_t b, int need_g,
-                    limb_t prec)
-{
-    bf_context_t *s = P->ctx;
-    int64_t c;
-
-    if (a == (b - 1)) {
-        bf_t T0, T1;
-
-        bf_init(s, &T0);
-        bf_init(s, &T1);
-        bf_set_ui(G, 2 * b - 1);
-        bf_mul_ui(G, G, 6 * b - 1, prec, BF_RNDN);
-        bf_mul_ui(G, G, 6 * b - 5, prec, BF_RNDN);
-        bf_set_ui(&T0, CHUD_B);
-        bf_mul_ui(&T0, &T0, b, prec, BF_RNDN);
-        bf_set_ui(&T1, CHUD_A);
-        bf_add(&T0, &T0, &T1, prec, BF_RNDN);
-        bf_mul(P, G, &T0, prec, BF_RNDN);
-        P->sign = b & 1;
-
-        bf_set_ui(Q, b);
-        bf_mul_ui(Q, Q, b, prec, BF_RNDN);
-        bf_mul_ui(Q, Q, b, prec, BF_RNDN);
-        bf_mul_ui(Q, Q, (uint64_t)CHUD_C * CHUD_C * CHUD_C / 24, prec, BF_RNDN);
-        bf_delete(&T0);
-        bf_delete(&T1);
-    } else {
-        bf_t P2, Q2, G2;
-
-        bf_init(s, &P2);
-        bf_init(s, &Q2);
-        bf_init(s, &G2);
-
-        c = (a + b) / 2;
-        chud_bs(P, Q, G, a, c, 1, prec);
-        chud_bs(&P2, &Q2, &G2, c, b, need_g, prec);
-
-        /* Q = Q1 * Q2 */
-        /* G = G1 * G2 */
-        /* P = P1 * Q2 + P2 * G1 */
-        bf_mul(&P2, &P2, G, prec, BF_RNDN);
-        if (!need_g)
-            bf_set_ui(G, 0);
-        bf_mul(P, P, &Q2, prec, BF_RNDN);
-        bf_add(P, P, &P2, prec, BF_RNDN);
-        bf_delete(&P2);
-
-        bf_mul(Q, Q, &Q2, prec, BF_RNDN);
-        bf_delete(&Q2);
-        if (need_g)
-            bf_mul(G, G, &G2, prec, BF_RNDN);
-        bf_delete(&G2);
-    }
-}
-
-/* compute Pi with faithful rounding at precision 'prec' using the
-   Chudnovsky formula */
-static void bf_const_pi_internal(bf_t *Q, limb_t prec)
-{
-    bf_context_t *s = Q->ctx;
-    int64_t n, prec1;
-    bf_t P, G;
-
-    /* number of serie terms */
-    n = prec / CHUD_BITS_PER_TERM + 1;
-    /* XXX: precision analysis */
-    prec1 = prec + 32;
-
-    bf_init(s, &P);
-    bf_init(s, &G);
-
-    chud_bs(&P, Q, &G, 0, n, 0, BF_PREC_INF);
-
-    bf_mul_ui(&G, Q, CHUD_A, prec1, BF_RNDN);
-    bf_add(&P, &G, &P, prec1, BF_RNDN);
-    bf_div(Q, Q, &P, prec1, BF_RNDF);
-
-    bf_set_ui(&P, CHUD_C);
-    bf_sqrt(&G, &P, prec1, BF_RNDF);
-    bf_mul_ui(&G, &G, (uint64_t)CHUD_C / 12, prec1, BF_RNDF);
-    bf_mul(Q, Q, &G, prec, BF_RNDN);
-    bf_delete(&P);
-    bf_delete(&G);
-}
-
-static int bf_const_get(bf_t *T, limb_t prec, bf_flags_t flags,
-                        BFConstCache *c,
-                        void (*func)(bf_t *res, limb_t prec), int sign)
-{
-    limb_t ziv_extra_bits, prec1;
-
-    ziv_extra_bits = 32;
-    for(;;) {
-        prec1 = prec + ziv_extra_bits;
-        if (c->prec < prec1) {
-            if (c->val.len == 0)
-                bf_init(T->ctx, &c->val);
-            func(&c->val, prec1);
-            c->prec = prec1;
-        } else {
-            prec1 = c->prec;
-        }
-        bf_set(T, &c->val);
-        T->sign = sign;
-        if (!bf_can_round(T, prec, flags & BF_RND_MASK, prec1)) {
-            /* and more precision and retry */
-            ziv_extra_bits = ziv_extra_bits  + (ziv_extra_bits / 2);
-        } else {
-            break;
-        }
-    }
-    return bf_round(T, prec, flags);
-}
-
-static void bf_const_free(BFConstCache *c)
-{
-    bf_delete(&c->val);
-    memset(c, 0, sizeof(*c));
-}
-
-int bf_const_log2(bf_t *T, limb_t prec, bf_flags_t flags)
-{
-    bf_context_t *s = T->ctx;
-    return bf_const_get(T, prec, flags, &s->log2_cache, bf_const_log2_internal, 0);
-}
-
-/* return rounded pi * (1 - 2 * sign) */
-static int bf_const_pi_signed(bf_t *T, int sign, limb_t prec, bf_flags_t flags)
-{
-    bf_context_t *s = T->ctx;
-    return bf_const_get(T, prec, flags, &s->pi_cache, bf_const_pi_internal,
-                        sign);
-}
-
-int bf_const_pi(bf_t *T, limb_t prec, bf_flags_t flags)
-{
-    return bf_const_pi_signed(T, 0, prec, flags);
-}
-
-void bf_clear_cache(bf_context_t *s)
-{
-#ifdef USE_FFT_MUL
-    fft_clear_cache(s);
-#endif
-    bf_const_free(&s->log2_cache);
-    bf_const_free(&s->pi_cache);
-}
-
-/* ZivFunc should compute the result 'r' with faithful rounding at
-   precision 'prec'. For efficiency purposes, the final bf_round()
-   does not need to be done in the function. */
-typedef int ZivFunc(bf_t *r, const bf_t *a, limb_t prec, void *opaque);
-
-static int bf_ziv_rounding(bf_t *r, const bf_t *a,
-                           limb_t prec, bf_flags_t flags,
-                           ZivFunc *f, void *opaque)
-{
-    int rnd_mode, ret;
-    slimb_t prec1, ziv_extra_bits;
-
-    rnd_mode = flags & BF_RND_MASK;
-    if (rnd_mode == BF_RNDF) {
-        /* no need to iterate */
-        f(r, a, prec, opaque);
-        ret = 0;
-    } else {
-        ziv_extra_bits = 32;
-        for(;;) {
-            prec1 = prec + ziv_extra_bits;
-            ret = f(r, a, prec1, opaque);
-            if (ret & (BF_ST_OVERFLOW | BF_ST_UNDERFLOW | BF_ST_MEM_ERROR)) {
-                /* overflow or underflow should never happen because
-                   it indicates the rounding cannot be done correctly,
-                   but we do not catch all the cases */
-                return ret;
-            }
-            /* if the result is exact, we can stop */
-            if (!(ret & BF_ST_INEXACT)) {
-                ret = 0;
-                break;
-            }
-            if (bf_can_round(r, prec, rnd_mode, prec1)) {
-                ret = BF_ST_INEXACT;
-                break;
-            }
-            ziv_extra_bits = ziv_extra_bits * 2;
-            //            printf("ziv_extra_bits=%" PRId64 "\n", (int64_t)ziv_extra_bits);
-        }
-    }
-    if (r->len == 0)
-        return ret;
-    else
-        return __bf_round(r, prec, flags, r->len, ret);
-}
-
-/* add (1 - 2*e_sign) * 2^e */
-static int bf_add_epsilon(bf_t *r, const bf_t *a, slimb_t e, int e_sign,
-                          limb_t prec, int flags)
-{
-    bf_t T_s, *T = &T_s;
-    int ret;
-    /* small argument case: result = 1 + epsilon * sign(x) */
-    bf_init(a->ctx, T);
-    bf_set_ui(T, 1);
-    T->sign = e_sign;
-    T->expn += e;
-    ret = bf_add(r, r, T, prec, flags);
-    bf_delete(T);
-    return ret;
-}
-
-/* Compute the exponential using faithful rounding at precision 'prec'.
-   Note: the algorithm is from MPFR */
-static int bf_exp_internal(bf_t *r, const bf_t *a, limb_t prec, void *opaque)
-{
-    bf_context_t *s = r->ctx;
-    bf_t T_s, *T = &T_s;
-    slimb_t n, K, l, i, prec1;
-
-    assert(r != a);
-
-    /* argument reduction:
-       T = a - n*log(2) with 0 <= T < log(2) and n integer.
-    */
-    bf_init(s, T);
-    if (a->expn <= -1) {
-        /* 0 <= abs(a) <= 0.5 */
-        if (a->sign)
-            n = -1;
-        else
-            n = 0;
-    } else {
-        bf_const_log2(T, LIMB_BITS, BF_RNDZ);
-        bf_div(T, a, T, LIMB_BITS, BF_RNDD);
-        bf_get_limb(&n, T, 0);
-    }
-
-    K = bf_isqrt((prec + 1) / 2);
-    l = (prec - 1) / K + 1;
-    /* XXX: precision analysis ? */
-    prec1 = prec + (K + 2 * l + 18) + K + 8;
-    if (a->expn > 0)
-        prec1 += a->expn;
-    //    printf("n=%ld K=%ld prec1=%ld\n", n, K, prec1);
-
-    bf_const_log2(T, prec1, BF_RNDF);
-    bf_mul_si(T, T, n, prec1, BF_RNDN);
-    bf_sub(T, a, T, prec1, BF_RNDN);
-
-    /* reduce the range of T */
-    bf_mul_2exp(T, -K, BF_PREC_INF, BF_RNDZ);
-
-    /* Taylor expansion around zero :
-     1 + x + x^2/2 + ... + x^n/n!
-     = (1 + x * (1 + x/2 * (1 + ... (x/n))))
-    */
-    {
-        bf_t U_s, *U = &U_s;
-
-        bf_init(s, U);
-        bf_set_ui(r, 1);
-        for(i = l ; i >= 1; i--) {
-            bf_set_ui(U, i);
-            bf_div(U, T, U, prec1, BF_RNDN);
-            bf_mul(r, r, U, prec1, BF_RNDN);
-            bf_add_si(r, r, 1, prec1, BF_RNDN);
-        }
-        bf_delete(U);
-    }
-    bf_delete(T);
-
-    /* undo the range reduction */
-    for(i = 0; i < K; i++) {
-        bf_mul(r, r, r, prec1, BF_RNDN | BF_FLAG_EXT_EXP);
-    }
-
-    /* undo the argument reduction */
-    bf_mul_2exp(r, n, BF_PREC_INF, BF_RNDZ | BF_FLAG_EXT_EXP);
-
-    return BF_ST_INEXACT;
-}
-
-/* crude overflow and underflow tests for exp(a). a_low <= a <= a_high */
-static int check_exp_underflow_overflow(bf_context_t *s, bf_t *r,
-                                        const bf_t *a_low, const bf_t *a_high,
-                                        limb_t prec, bf_flags_t flags)
-{
-    bf_t T_s, *T = &T_s;
-    bf_t log2_s, *log2 = &log2_s;
-    slimb_t e_min, e_max;
-
-    if (a_high->expn <= 0)
-        return 0;
-
-    e_max = (limb_t)1 << (bf_get_exp_bits(flags) - 1);
-    e_min = -e_max + 3;
-    if (flags & BF_FLAG_SUBNORMAL)
-        e_min -= (prec - 1);
-
-    bf_init(s, T);
-    bf_init(s, log2);
-    bf_const_log2(log2, LIMB_BITS, BF_RNDU);
-    bf_mul_ui(T, log2, e_max, LIMB_BITS, BF_RNDU);
-    /* a_low > e_max * log(2) implies exp(a) > e_max */
-    if (bf_cmp_lt(T, a_low) > 0) {
-        /* overflow */
-        bf_delete(T);
-        bf_delete(log2);
-        return bf_set_overflow(r, 0, prec, flags);
-    }
-    /* a_high < (e_min - 2) * log(2) implies exp(a) < (e_min - 2) */
-    bf_const_log2(log2, LIMB_BITS, BF_RNDD);
-    bf_mul_si(T, log2, e_min - 2, LIMB_BITS, BF_RNDD);
-    if (bf_cmp_lt(a_high, T)) {
-        int rnd_mode = flags & BF_RND_MASK;
-
-        /* underflow */
-        bf_delete(T);
-        bf_delete(log2);
-        if (rnd_mode == BF_RNDU) {
-            /* set the smallest value */
-            bf_set_ui(r, 1);
-            r->expn = e_min;
-        } else {
-            bf_set_zero(r, 0);
-        }
-        return BF_ST_UNDERFLOW | BF_ST_INEXACT;
-    }
-    bf_delete(log2);
-    bf_delete(T);
-    return 0;
-}
-
-int bf_exp(bf_t *r, const bf_t *a, limb_t prec, bf_flags_t flags)
-{
-    bf_context_t *s = r->ctx;
-    int ret;
-    assert(r != a);
-    if (a->len == 0) {
-        if (a->expn == BF_EXP_NAN) {
-            bf_set_nan(r);
-        } else if (a->expn == BF_EXP_INF) {
-            if (a->sign)
-                bf_set_zero(r, 0);
-            else
-                bf_set_inf(r, 0);
-        } else {
-            bf_set_ui(r, 1);
-        }
-        return 0;
-    }
-
-    ret = check_exp_underflow_overflow(s, r, a, a, prec, flags);
-    if (ret)
-        return ret;
-    if (a->expn < 0 && (-a->expn) >= (prec + 2)) {
-        /* small argument case: result = 1 + epsilon * sign(x) */
-        bf_set_ui(r, 1);
-        return bf_add_epsilon(r, r, -(prec + 2), a->sign, prec, flags);
-    }
-
-    return bf_ziv_rounding(r, a, prec, flags, bf_exp_internal, NULL);
-}
-
-static int bf_log_internal(bf_t *r, const bf_t *a, limb_t prec, void *opaque)
-{
-    bf_context_t *s = r->ctx;
-    bf_t T_s, *T = &T_s;
-    bf_t U_s, *U = &U_s;
-    bf_t V_s, *V = &V_s;
-    slimb_t n, prec1, l, i, K;
-
-    assert(r != a);
-
-    bf_init(s, T);
-    /* argument reduction 1 */
-    /* T=a*2^n with 2/3 <= T <= 4/3 */
-    {
-        bf_t U_s, *U = &U_s;
-        bf_set(T, a);
-        n = T->expn;
-        T->expn = 0;
-        /* U= ~ 2/3 */
-        bf_init(s, U);
-        bf_set_ui(U, 0xaaaaaaaa);
-        U->expn = 0;
-        if (bf_cmp_lt(T, U)) {
-            T->expn++;
-            n--;
-        }
-        bf_delete(U);
-    }
-    //    printf("n=%ld\n", n);
-    //    bf_print_str("T", T);
-
-    /* XXX: precision analysis */
-    /* number of iterations for argument reduction 2 */
-    K = bf_isqrt((prec + 1) / 2);
-    /* order of Taylor expansion */
-    l = prec / (2 * K) + 1;
-    /* precision of the intermediate computations */
-    prec1 = prec + K + 2 * l + 32;
-
-    bf_init(s, U);
-    bf_init(s, V);
-
-    /* Note: cancellation occurs here, so we use more precision (XXX:
-       reduce the precision by computing the exact cancellation) */
-    bf_add_si(T, T, -1, BF_PREC_INF, BF_RNDN);
-
-    /* argument reduction 2 */
-    for(i = 0; i < K; i++) {
-        /* T = T / (1 + sqrt(1 + T)) */
-        bf_add_si(U, T, 1, prec1, BF_RNDN);
-        bf_sqrt(V, U, prec1, BF_RNDF);
-        bf_add_si(U, V, 1, prec1, BF_RNDN);
-        bf_div(T, T, U, prec1, BF_RNDN);
-    }
-
-    {
-        bf_t Y_s, *Y = &Y_s;
-        bf_t Y2_s, *Y2 = &Y2_s;
-        bf_init(s, Y);
-        bf_init(s, Y2);
-
-        /* compute ln(1+x) = ln((1+y)/(1-y)) with y=x/(2+x)
-           = y + y^3/3 + ... + y^(2*l + 1) / (2*l+1)
-           with Y=Y^2
-           = y*(1+Y/3+Y^2/5+...) = y*(1+Y*(1/3+Y*(1/5 + ...)))
-        */
-        bf_add_si(Y, T, 2, prec1, BF_RNDN);
-        bf_div(Y, T, Y, prec1, BF_RNDN);
-
-        bf_mul(Y2, Y, Y, prec1, BF_RNDN);
-        bf_set_ui(r, 0);
-        for(i = l; i >= 1; i--) {
-            bf_set_ui(U, 1);
-            bf_set_ui(V, 2 * i + 1);
-            bf_div(U, U, V, prec1, BF_RNDN);
-            bf_add(r, r, U, prec1, BF_RNDN);
-            bf_mul(r, r, Y2, prec1, BF_RNDN);
-        }
-        bf_add_si(r, r, 1, prec1, BF_RNDN);
-        bf_mul(r, r, Y, prec1, BF_RNDN);
-        bf_delete(Y);
-        bf_delete(Y2);
-    }
-    bf_delete(V);
-    bf_delete(U);
-
-    /* multiplication by 2 for the Taylor expansion and undo the
-       argument reduction 2*/
-    bf_mul_2exp(r, K + 1, BF_PREC_INF, BF_RNDZ);
-
-    /* undo the argument reduction 1 */
-    bf_const_log2(T, prec1, BF_RNDF);
-    bf_mul_si(T, T, n, prec1, BF_RNDN);
-    bf_add(r, r, T, prec1, BF_RNDN);
-
-    bf_delete(T);
-    return BF_ST_INEXACT;
-}
-
-int bf_log(bf_t *r, const bf_t *a, limb_t prec, bf_flags_t flags)
-{
-    bf_context_t *s = r->ctx;
-    bf_t T_s, *T = &T_s;
-
-    assert(r != a);
-    if (a->len == 0) {
-        if (a->expn == BF_EXP_NAN) {
-            bf_set_nan(r);
-            return 0;
-        } else if (a->expn == BF_EXP_INF) {
-            if (a->sign) {
-                bf_set_nan(r);
-                return BF_ST_INVALID_OP;
-            } else {
-                bf_set_inf(r, 0);
-                return 0;
-            }
-        } else {
-            bf_set_inf(r, 1);
-            return 0;
-        }
-    }
-    if (a->sign) {
-        bf_set_nan(r);
-        return BF_ST_INVALID_OP;
-    }
-    bf_init(s, T);
-    bf_set_ui(T, 1);
-    if (bf_cmp_eq(a, T)) {
-        bf_set_zero(r, 0);
-        bf_delete(T);
-        return 0;
-    }
-    bf_delete(T);
-
-    return bf_ziv_rounding(r, a, prec, flags, bf_log_internal, NULL);
-}
-
-/* x and y finite and x > 0 */
-static int bf_pow_generic(bf_t *r, const bf_t *x, limb_t prec, void *opaque)
-{
-    bf_context_t *s = r->ctx;
-    const bf_t *y = opaque;
-    bf_t T_s, *T = &T_s;
-    limb_t prec1;
-
-    bf_init(s, T);
-    /* XXX: proof for the added precision */
-    prec1 = prec + 32;
-    bf_log(T, x, prec1, BF_RNDF | BF_FLAG_EXT_EXP);
-    bf_mul(T, T, y, prec1, BF_RNDF | BF_FLAG_EXT_EXP);
-    if (bf_is_nan(T))
-        bf_set_nan(r);
-    else
-        bf_exp_internal(r, T, prec1, NULL); /* no overflow/underlow test needed */
-    bf_delete(T);
-    return BF_ST_INEXACT;
-}
-
-/* x and y finite, x > 0, y integer and y fits on one limb */
-static int bf_pow_int(bf_t *r, const bf_t *x, limb_t prec, void *opaque)
-{
-    bf_context_t *s = r->ctx;
-    const bf_t *y = opaque;
-    bf_t T_s, *T = &T_s;
-    limb_t prec1;
-    int ret;
-    slimb_t y1;
-
-    bf_get_limb(&y1, y, 0);
-    if (y1 < 0)
-        y1 = -y1;
-    /* XXX: proof for the added precision */
-    prec1 = prec + ceil_log2(y1) * 2 + 8;
-    ret = bf_pow_ui(r, x, y1 < 0 ? -y1 : y1, prec1, BF_RNDN | BF_FLAG_EXT_EXP);
-    if (y->sign) {
-        bf_init(s, T);
-        bf_set_ui(T, 1);
-        ret |= bf_div(r, T, r, prec1, BF_RNDN | BF_FLAG_EXT_EXP);
-        bf_delete(T);
-    }
-    return ret;
-}
-
-/* x must be a finite non zero float. Return true if there is a
-   floating point number r such as x=r^(2^n) and return this floating
-   point number 'r'. Otherwise return false and r is undefined. */
-static bool check_exact_power2n(bf_t *r, const bf_t *x, slimb_t n)
-{
-    bf_context_t *s = r->ctx;
-    bf_t T_s, *T = &T_s;
-    slimb_t e, i, er;
-    limb_t v;
-
-    /* x = m*2^e with m odd integer */
-    e = bf_get_exp_min(x);
-    /* fast check on the exponent */
-    if (n > (LIMB_BITS - 1)) {
-        if (e != 0)
-            return false;
-        er = 0;
-    } else {
-        if ((e & (((limb_t)1 << n) - 1)) != 0)
-            return false;
-        er = e >> n;
-    }
-    /* every perfect odd square = 1 modulo 8 */
-    v = get_bits(x->tab, x->len, x->len * LIMB_BITS - x->expn + e);
-    if ((v & 7) != 1)
-        return false;
-
-    bf_init(s, T);
-    bf_set(T, x);
-    T->expn -= e;
-    for(i = 0; i < n; i++) {
-        if (i != 0)
-            bf_set(T, r);
-        if (bf_sqrtrem(r, NULL, T) != 0)
-            return false;
-    }
-    r->expn += er;
-    return true;
-}
-
-/* prec = BF_PREC_INF is accepted for x and y integers and y >= 0 */
-int bf_pow(bf_t *r, const bf_t *x, const bf_t *y, limb_t prec, bf_flags_t flags)
-{
-    bf_context_t *s = r->ctx;
-    bf_t T_s, *T = &T_s;
-    bf_t ytmp_s;
-    bool y_is_int, y_is_odd;
-    int r_sign, ret, rnd_mode;
-    slimb_t y_emin;
-
-    if (x->len == 0 || y->len == 0) {
-        if (y->expn == BF_EXP_ZERO) {
-            /* pow(x, 0) = 1 */
-            bf_set_ui(r, 1);
-        } else if (x->expn == BF_EXP_NAN) {
-            bf_set_nan(r);
-        } else {
-            int cmp_x_abs_1;
-            bf_set_ui(r, 1);
-            cmp_x_abs_1 = bf_cmpu(x, r);
-            if (cmp_x_abs_1 == 0 && (flags & BF_POW_JS_QUIRKS) &&
-                (y->expn >= BF_EXP_INF)) {
-                bf_set_nan(r);
-            } else if (cmp_x_abs_1 == 0 &&
-                       (!x->sign || y->expn != BF_EXP_NAN)) {
-                /* pow(1, y) = 1 even if y = NaN */
-                /* pow(-1, +/-inf) = 1 */
-            } else if (y->expn == BF_EXP_NAN) {
-                bf_set_nan(r);
-            } else if (y->expn == BF_EXP_INF) {
-                if (y->sign == (cmp_x_abs_1 > 0)) {
-                    bf_set_zero(r, 0);
-                } else {
-                    bf_set_inf(r, 0);
-                }
-            } else {
-                y_emin = bf_get_exp_min(y);
-                y_is_odd = (y_emin == 0);
-                if (y->sign == (x->expn == BF_EXP_ZERO)) {
-                    bf_set_inf(r, y_is_odd & x->sign);
-                    if (y->sign) {
-                        /* pow(0, y) with y < 0 */
-                        return BF_ST_DIVIDE_ZERO;
-                    }
-                } else {
-                    bf_set_zero(r, y_is_odd & x->sign);
-                }
-            }
-        }
-        return 0;
-    }
-    bf_init(s, T);
-    bf_set(T, x);
-    y_emin = bf_get_exp_min(y);
-    y_is_int = (y_emin >= 0);
-    rnd_mode = flags & BF_RND_MASK;
-    if (x->sign) {
-        if (!y_is_int) {
-            bf_set_nan(r);
-            bf_delete(T);
-            return BF_ST_INVALID_OP;
-        }
-        y_is_odd = (y_emin == 0);
-        r_sign = y_is_odd;
-        /* change the directed rounding mode if the sign of the result
-           is changed */
-        if (r_sign && (rnd_mode == BF_RNDD || rnd_mode == BF_RNDU))
-            flags ^= 1;
-        bf_neg(T);
-    } else {
-        r_sign = 0;
-    }
-
-    bf_set_ui(r, 1);
-    if (bf_cmp_eq(T, r)) {
-        /* abs(x) = 1: nothing more to do */
-        ret = 0;
-    } else {
-        /* check the overflow/underflow cases */
-        {
-            bf_t al_s, *al = &al_s;
-            bf_t ah_s, *ah = &ah_s;
-            limb_t precl = LIMB_BITS;
-
-            bf_init(s, al);
-            bf_init(s, ah);
-            /* compute bounds of log(abs(x)) * y with a low precision */
-            /* XXX: compute bf_log() once */
-            /* XXX: add a fast test before this slow test */
-            bf_log(al, T, precl, BF_RNDD);
-            bf_log(ah, T, precl, BF_RNDU);
-            bf_mul(al, al, y, precl, BF_RNDD ^ y->sign);
-            bf_mul(ah, ah, y, precl, BF_RNDU ^ y->sign);
-            ret = check_exp_underflow_overflow(s, r, al, ah, prec, flags);
-            bf_delete(al);
-            bf_delete(ah);
-            if (ret)
-                goto done;
-        }
-
-        if (y_is_int) {
-            slimb_t T_bits, e;
-        int_pow:
-            T_bits = T->expn - bf_get_exp_min(T);
-            if (T_bits == 1) {
-                /* pow(2^b, y) = 2^(b*y) */
-                bf_mul_si(T, y, T->expn - 1, LIMB_BITS, BF_RNDZ);
-                bf_get_limb(&e, T, 0);
-                bf_set_ui(r, 1);
-                ret = bf_mul_2exp(r, e, prec, flags);
-            } else if (prec == BF_PREC_INF) {
-                slimb_t y1;
-                /* specific case for infinite precision (integer case) */
-                bf_get_limb(&y1, y, 0);
-                assert(!y->sign);
-                /* x must be an integer, so abs(x) >= 2 */
-                if (y1 >= ((slimb_t)1 << BF_EXP_BITS_MAX)) {
-                    bf_delete(T);
-                    return bf_set_overflow(r, 0, BF_PREC_INF, flags);
-                }
-                ret = bf_pow_ui(r, T, y1, BF_PREC_INF, BF_RNDZ);
-            } else {
-                if (y->expn <= 31) {
-                    /* small enough power: use exponentiation in all cases */
-                } else if (y->sign) {
-                    /* cannot be exact */
-                    goto general_case;
-                } else {
-                    if (rnd_mode == BF_RNDF)
-                        goto general_case; /* no need to track exact results */
-                    /* see if the result has a chance to be exact:
-                       if x=a*2^b (a odd), x^y=a^y*2^(b*y)
-                       x^y needs a precision of at least floor_log2(a)*y bits
-                    */
-                    bf_mul_si(r, y, T_bits - 1, LIMB_BITS, BF_RNDZ);
-                    bf_get_limb(&e, r, 0);
-                    if (prec < e)
-                        goto general_case;
-                }
-                ret = bf_ziv_rounding(r, T, prec, flags, bf_pow_int, (void *)y);
-            }
-        } else {
-            if (rnd_mode != BF_RNDF) {
-                bf_t *y1;
-                if (y_emin < 0 && check_exact_power2n(r, T, -y_emin)) {
-                    /* the problem is reduced to a power to an integer */
-                    bf_set(T, r);
-                    y1 = &ytmp_s;
-                    y1->tab = y->tab;
-                    y1->len = y->len;
-                    y1->sign = y->sign;
-                    y1->expn = y->expn - y_emin;
-                    y = y1;
-                    goto int_pow;
-                }
-            }
-        general_case:
-            ret = bf_ziv_rounding(r, T, prec, flags, bf_pow_generic, (void *)y);
-        }
-    }
- done:
-    bf_delete(T);
-    r->sign = r_sign;
-    return ret;
-}
-
-/* compute sqrt(-2*x-x^2) to get |sin(x)| from cos(x) - 1. */
-static void bf_sqrt_sin(bf_t *r, const bf_t *x, limb_t prec1)
-{
-    bf_context_t *s = r->ctx;
-    bf_t T_s, *T = &T_s;
-    bf_init(s, T);
-    bf_set(T, x);
-    bf_mul(r, T, T, prec1, BF_RNDN);
-    bf_mul_2exp(T, 1, BF_PREC_INF, BF_RNDZ);
-    bf_add(T, T, r, prec1, BF_RNDN);
-    bf_neg(T);
-    bf_sqrt(r, T, prec1, BF_RNDF);
-    bf_delete(T);
-}
-
-static int bf_sincos(bf_t *s, bf_t *c, const bf_t *a, limb_t prec)
-{
-    bf_context_t *s1 = a->ctx;
-    bf_t T_s, *T = &T_s;
-    bf_t U_s, *U = &U_s;
-    bf_t r_s, *r = &r_s;
-    slimb_t K, prec1, i, l, mod, prec2;
-    int is_neg;
-
-    assert(c != a && s != a);
-
-    bf_init(s1, T);
-    bf_init(s1, U);
-    bf_init(s1, r);
-
-    /* XXX: precision analysis */
-    K = bf_isqrt(prec / 2);
-    l = prec / (2 * K) + 1;
-    prec1 = prec + 2 * K + l + 8;
-
-    /* after the modulo reduction, -pi/4 <= T <= pi/4 */
-    if (a->expn <= -1) {
-        /* abs(a) <= 0.25: no modulo reduction needed */
-        bf_set(T, a);
-        mod = 0;
-    } else {
-        slimb_t cancel;
-        cancel = 0;
-        for(;;) {
-            prec2 = prec1 + a->expn + cancel;
-            bf_const_pi(U, prec2, BF_RNDF);
-            bf_mul_2exp(U, -1, BF_PREC_INF, BF_RNDZ);
-            bf_remquo(&mod, T, a, U, prec2, BF_RNDN, BF_RNDN);
-            //            printf("T.expn=%ld prec2=%ld\n", T->expn, prec2);
-            if (mod == 0 || (T->expn != BF_EXP_ZERO &&
-                             (T->expn + prec2) >= (prec1 - 1)))
-                break;
-            /* increase the number of bits until the precision is good enough */
-            cancel = bf_max(-T->expn, (cancel + 1) * 3 / 2);
-        }
-        mod &= 3;
-    }
-
-    is_neg = T->sign;
-
-    /* compute cosm1(x) = cos(x) - 1 */
-    bf_mul(T, T, T, prec1, BF_RNDN);
-    bf_mul_2exp(T, -2 * K, BF_PREC_INF, BF_RNDZ);
-
-    /* Taylor expansion:
-       -x^2/2 + x^4/4! - x^6/6! + ...
-    */
-    bf_set_ui(r, 1);
-    for(i = l ; i >= 1; i--) {
-        bf_set_ui(U, 2 * i - 1);
-        bf_mul_ui(U, U, 2 * i, BF_PREC_INF, BF_RNDZ);
-        bf_div(U, T, U, prec1, BF_RNDN);
-        bf_mul(r, r, U, prec1, BF_RNDN);
-        bf_neg(r);
-        if (i != 1)
-            bf_add_si(r, r, 1, prec1, BF_RNDN);
-    }
-    bf_delete(U);
-
-    /* undo argument reduction:
-       cosm1(2*x)= 2*(2*cosm1(x)+cosm1(x)^2)
-    */
-    for(i = 0; i < K; i++) {
-        bf_mul(T, r, r, prec1, BF_RNDN);
-        bf_mul_2exp(r, 1, BF_PREC_INF, BF_RNDZ);
-        bf_add(r, r, T, prec1, BF_RNDN);
-        bf_mul_2exp(r, 1, BF_PREC_INF, BF_RNDZ);
-    }
-    bf_delete(T);
-
-    if (c) {
-        if ((mod & 1) == 0) {
-            bf_add_si(c, r, 1, prec1, BF_RNDN);
-        } else {
-            bf_sqrt_sin(c, r, prec1);
-            c->sign = is_neg ^ 1;
-        }
-        c->sign ^= mod >> 1;
-    }
-    if (s) {
-        if ((mod & 1) == 0) {
-            bf_sqrt_sin(s, r, prec1);
-            s->sign = is_neg;
-        } else {
-            bf_add_si(s, r, 1, prec1, BF_RNDN);
-        }
-        s->sign ^= mod >> 1;
-    }
-    bf_delete(r);
-    return BF_ST_INEXACT;
-}
-
-static int bf_cos_internal(bf_t *r, const bf_t *a, limb_t prec, void *opaque)
-{
-    return bf_sincos(NULL, r, a, prec);
-}
-
-int bf_cos(bf_t *r, const bf_t *a, limb_t prec, bf_flags_t flags)
-{
-    if (a->len == 0) {
-        if (a->expn == BF_EXP_NAN) {
-            bf_set_nan(r);
-            return 0;
-        } else if (a->expn == BF_EXP_INF) {
-            bf_set_nan(r);
-            return BF_ST_INVALID_OP;
-        } else {
-            bf_set_ui(r, 1);
-            return 0;
-        }
-    }
-
-    /* small argument case: result = 1+r(x) with r(x) = -x^2/2 +
-       O(X^4). We assume r(x) < 2^(2*EXP(x) - 1). */
-    if (a->expn < 0) {
-        slimb_t e;
-        e = 2 * a->expn - 1;
-        if (e < -(prec + 2)) {
-            bf_set_ui(r, 1);
-            return bf_add_epsilon(r, r, e, 1, prec, flags);
-        }
-    }
-
-    return bf_ziv_rounding(r, a, prec, flags, bf_cos_internal, NULL);
-}
-
-static int bf_sin_internal(bf_t *r, const bf_t *a, limb_t prec, void *opaque)
-{
-    return bf_sincos(r, NULL, a, prec);
-}
-
-int bf_sin(bf_t *r, const bf_t *a, limb_t prec, bf_flags_t flags)
-{
-    if (a->len == 0) {
-        if (a->expn == BF_EXP_NAN) {
-            bf_set_nan(r);
-            return 0;
-        } else if (a->expn == BF_EXP_INF) {
-            bf_set_nan(r);
-            return BF_ST_INVALID_OP;
-        } else {
-            bf_set_zero(r, a->sign);
-            return 0;
-        }
-    }
-
-    /* small argument case: result = x+r(x) with r(x) = -x^3/6 +
-       O(X^5). We assume r(x) < 2^(3*EXP(x) - 2). */
-    if (a->expn < 0) {
-        slimb_t e;
-        e = sat_add(2 * a->expn, a->expn - 2);
-        if (e < a->expn - bf_max(prec + 2, a->len * LIMB_BITS + 2)) {
-            bf_set(r, a);
-            return bf_add_epsilon(r, r, e, 1 - a->sign, prec, flags);
-        }
-    }
-
-    return bf_ziv_rounding(r, a, prec, flags, bf_sin_internal, NULL);
-}
-
-static int bf_tan_internal(bf_t *r, const bf_t *a, limb_t prec, void *opaque)
-{
-    bf_context_t *s = r->ctx;
-    bf_t T_s, *T = &T_s;
-    limb_t prec1;
-
-    /* XXX: precision analysis */
-    prec1 = prec + 8;
-    bf_init(s, T);
-    bf_sincos(r, T, a, prec1);
-    bf_div(r, r, T, prec1, BF_RNDF);
-    bf_delete(T);
-    return BF_ST_INEXACT;
-}
-
-int bf_tan(bf_t *r, const bf_t *a, limb_t prec, bf_flags_t flags)
-{
-    assert(r != a);
-    if (a->len == 0) {
-        if (a->expn == BF_EXP_NAN) {
-            bf_set_nan(r);
-            return 0;
-        } else if (a->expn == BF_EXP_INF) {
-            bf_set_nan(r);
-            return BF_ST_INVALID_OP;
-        } else {
-            bf_set_zero(r, a->sign);
-            return 0;
-        }
-    }
-
-    /* small argument case: result = x+r(x) with r(x) = x^3/3 +
-       O(X^5). We assume r(x) < 2^(3*EXP(x) - 1). */
-    if (a->expn < 0) {
-        slimb_t e;
-        e = sat_add(2 * a->expn, a->expn - 1);
-        if (e < a->expn - bf_max(prec + 2, a->len * LIMB_BITS + 2)) {
-            bf_set(r, a);
-            return bf_add_epsilon(r, r, e, a->sign, prec, flags);
-        }
-    }
-
-    return bf_ziv_rounding(r, a, prec, flags, bf_tan_internal, NULL);
-}
-
-/* if add_pi2 is true, add pi/2 to the result (used for acos(x) to
-   avoid cancellation) */
-static int bf_atan_internal(bf_t *r, const bf_t *a, limb_t prec,
-                            void *opaque)
-{
-    bf_context_t *s = r->ctx;
-    bool add_pi2 = (bool)(intptr_t)opaque;
-    bf_t T_s, *T = &T_s;
-    bf_t U_s, *U = &U_s;
-    bf_t V_s, *V = &V_s;
-    bf_t X2_s, *X2 = &X2_s;
-    int cmp_1;
-    slimb_t prec1, i, K, l;
-
-    /* XXX: precision analysis */
-    K = bf_isqrt((prec + 1) / 2);
-    l = prec / (2 * K) + 1;
-    prec1 = prec + K + 2 * l + 32;
-    //    printf("prec=%d K=%d l=%d prec1=%d\n", (int)prec, (int)K, (int)l, (int)prec1);
-
-    bf_init(s, T);
-    cmp_1 = (a->expn >= 1); /* a >= 1 */
-    if (cmp_1) {
-        bf_set_ui(T, 1);
-        bf_div(T, T, a, prec1, BF_RNDN);
-    } else {
-        bf_set(T, a);
-    }
-
-    /* abs(T) <= 1 */
-
-    /* argument reduction */
-
-    bf_init(s, U);
-    bf_init(s, V);
-    bf_init(s, X2);
-    for(i = 0; i < K; i++) {
-        /* T = T / (1 + sqrt(1 + T^2)) */
-        bf_mul(U, T, T, prec1, BF_RNDN);
-        bf_add_si(U, U, 1, prec1, BF_RNDN);
-        bf_sqrt(V, U, prec1, BF_RNDN);
-        bf_add_si(V, V, 1, prec1, BF_RNDN);
-        bf_div(T, T, V, prec1, BF_RNDN);
-    }
-
-    /* Taylor series:
-       x - x^3/3 + ... + (-1)^ l * y^(2*l + 1) / (2*l+1)
-    */
-    bf_mul(X2, T, T, prec1, BF_RNDN);
-    bf_set_ui(r, 0);
-    for(i = l; i >= 1; i--) {
-        bf_set_si(U, 1);
-        bf_set_ui(V, 2 * i + 1);
-        bf_div(U, U, V, prec1, BF_RNDN);
-        bf_neg(r);
-        bf_add(r, r, U, prec1, BF_RNDN);
-        bf_mul(r, r, X2, prec1, BF_RNDN);
-    }
-    bf_neg(r);
-    bf_add_si(r, r, 1, prec1, BF_RNDN);
-    bf_mul(r, r, T, prec1, BF_RNDN);
-
-    /* undo the argument reduction */
-    bf_mul_2exp(r, K, BF_PREC_INF, BF_RNDZ);
-
-    bf_delete(U);
-    bf_delete(V);
-    bf_delete(X2);
-
-    i = add_pi2;
-    if (cmp_1 > 0) {
-        /* undo the inversion : r = sign(a)*PI/2 - r */
-        bf_neg(r);
-        i += 1 - 2 * a->sign;
-    }
-    /* add i*(pi/2) with -1 <= i <= 2 */
-    if (i != 0) {
-        bf_const_pi(T, prec1, BF_RNDF);
-        if (i != 2)
-            bf_mul_2exp(T, -1, BF_PREC_INF, BF_RNDZ);
-        T->sign = (i < 0);
-        bf_add(r, T, r, prec1, BF_RNDN);
-    }
-
-    bf_delete(T);
-    return BF_ST_INEXACT;
-}
-
-int bf_atan(bf_t *r, const bf_t *a, limb_t prec, bf_flags_t flags)
-{
-    bf_context_t *s = r->ctx;
-    bf_t T_s, *T = &T_s;
-    int res;
-
-    if (a->len == 0) {
-        if (a->expn == BF_EXP_NAN) {
-            bf_set_nan(r);
-            return 0;
-        } else if (a->expn == BF_EXP_INF)  {
-            /* -PI/2 or PI/2 */
-            bf_const_pi_signed(r, a->sign, prec, flags);
-            bf_mul_2exp(r, -1, BF_PREC_INF, BF_RNDZ);
-            return BF_ST_INEXACT;
-        } else {
-            bf_set_zero(r, a->sign);
-            return 0;
-        }
-    }
-
-    bf_init(s, T);
-    bf_set_ui(T, 1);
-    res = bf_cmpu(a, T);
-    bf_delete(T);
-    if (res == 0) {
-        /* short cut: abs(a) == 1 -> +/-pi/4 */
-        bf_const_pi_signed(r, a->sign, prec, flags);
-        bf_mul_2exp(r, -2, BF_PREC_INF, BF_RNDZ);
-        return BF_ST_INEXACT;
-    }
-
-    /* small argument case: result = x+r(x) with r(x) = -x^3/3 +
-       O(X^5). We assume r(x) < 2^(3*EXP(x) - 1). */
-    if (a->expn < 0) {
-        slimb_t e;
-        e = sat_add(2 * a->expn, a->expn - 1);
-        if (e < a->expn - bf_max(prec + 2, a->len * LIMB_BITS + 2)) {
-            bf_set(r, a);
-            return bf_add_epsilon(r, r, e, 1 - a->sign, prec, flags);
-        }
-    }
-
-    return bf_ziv_rounding(r, a, prec, flags, bf_atan_internal, (void *)false);
-}
-
-static int bf_atan2_internal(bf_t *r, const bf_t *y, limb_t prec, void *opaque)
-{
-    bf_context_t *s = r->ctx;
-    const bf_t *x = opaque;
-    bf_t T_s, *T = &T_s;
-    limb_t prec1;
-    int ret;
-
-    if (y->expn == BF_EXP_NAN || x->expn == BF_EXP_NAN) {
-        bf_set_nan(r);
-        return 0;
-    }
-
-    /* compute atan(y/x) assumming inf/inf = 1 and 0/0 = 0 */
-    bf_init(s, T);
-    prec1 = prec + 32;
-    if (y->expn == BF_EXP_INF && x->expn == BF_EXP_INF) {
-        bf_set_ui(T, 1);
-        T->sign = y->sign ^ x->sign;
-    } else if (y->expn == BF_EXP_ZERO && x->expn == BF_EXP_ZERO) {
-        bf_set_zero(T, y->sign ^ x->sign);
-    } else {
-        bf_div(T, y, x, prec1, BF_RNDF);
-    }
-    ret = bf_atan(r, T, prec1, BF_RNDF);
-
-    if (x->sign) {
-        /* if x < 0 (it includes -0), return sign(y)*pi + atan(y/x) */
-        bf_const_pi(T, prec1, BF_RNDF);
-        T->sign = y->sign;
-        bf_add(r, r, T, prec1, BF_RNDN);
-        ret |= BF_ST_INEXACT;
-    }
-
-    bf_delete(T);
-    return ret;
-}
-
-int bf_atan2(bf_t *r, const bf_t *y, const bf_t *x,
-             limb_t prec, bf_flags_t flags)
-{
-    return bf_ziv_rounding(r, y, prec, flags, bf_atan2_internal, (void *)x);
-}
-
-static int bf_asin_internal(bf_t *r, const bf_t *a, limb_t prec, void *opaque)
-{
-    bf_context_t *s = r->ctx;
-    bool is_acos = (bool)(intptr_t)opaque;
-    bf_t T_s, *T = &T_s;
-    limb_t prec1, prec2;
-
-    /* asin(x) = atan(x/sqrt(1-x^2))
-       acos(x) = pi/2 - asin(x) */
-    prec1 = prec + 8;
-    /* increase the precision in x^2 to compensate the cancellation in
-       (1-x^2) if x is close to 1 */
-    /* XXX: use less precision when possible */
-    if (a->expn >= 0)
-        prec2 = BF_PREC_INF;
-    else
-        prec2 = prec1;
-    bf_init(s, T);
-    bf_mul(T, a, a, prec2, BF_RNDN);
-    bf_neg(T);
-    bf_add_si(T, T, 1, prec2, BF_RNDN);
-
-    bf_sqrt(r, T, prec1, BF_RNDN);
-    bf_div(T, a, r, prec1, BF_RNDN);
-    if (is_acos)
-        bf_neg(T);
-    bf_atan_internal(r, T, prec1, (void *)(intptr_t)is_acos);
-    bf_delete(T);
-    return BF_ST_INEXACT;
-}
-
-int bf_asin(bf_t *r, const bf_t *a, limb_t prec, bf_flags_t flags)
-{
-    bf_context_t *s = r->ctx;
-    bf_t T_s, *T = &T_s;
-    int res;
-
-    if (a->len == 0) {
-        if (a->expn == BF_EXP_NAN) {
-            bf_set_nan(r);
-            return 0;
-        } else if (a->expn == BF_EXP_INF) {
-            bf_set_nan(r);
-            return BF_ST_INVALID_OP;
-        } else {
-            bf_set_zero(r, a->sign);
-            return 0;
-        }
-    }
-    bf_init(s, T);
-    bf_set_ui(T, 1);
-    res = bf_cmpu(a, T);
-    bf_delete(T);
-    if (res > 0) {
-        bf_set_nan(r);
-        return BF_ST_INVALID_OP;
-    }
-
-    /* small argument case: result = x+r(x) with r(x) = x^3/6 +
-       O(X^5). We assume r(x) < 2^(3*EXP(x) - 2). */
-    if (a->expn < 0) {
-        slimb_t e;
-        e = sat_add(2 * a->expn, a->expn - 2);
-        if (e < a->expn - bf_max(prec + 2, a->len * LIMB_BITS + 2)) {
-            bf_set(r, a);
-            return bf_add_epsilon(r, r, e, a->sign, prec, flags);
-        }
-    }
-
-    return bf_ziv_rounding(r, a, prec, flags, bf_asin_internal, (void *)false);
-}
-
-int bf_acos(bf_t *r, const bf_t *a, limb_t prec, bf_flags_t flags)
-{
-    bf_context_t *s = r->ctx;
-    bf_t T_s, *T = &T_s;
-    int res;
-
-    if (a->len == 0) {
-        if (a->expn == BF_EXP_NAN) {
-            bf_set_nan(r);
-            return 0;
-        } else if (a->expn == BF_EXP_INF) {
-            bf_set_nan(r);
-            return BF_ST_INVALID_OP;
-        } else {
-            bf_const_pi(r, prec, flags);
-            bf_mul_2exp(r, -1, BF_PREC_INF, BF_RNDZ);
-            return BF_ST_INEXACT;
-        }
-    }
-    bf_init(s, T);
-    bf_set_ui(T, 1);
-    res = bf_cmpu(a, T);
-    bf_delete(T);
-    if (res > 0) {
-        bf_set_nan(r);
-        return BF_ST_INVALID_OP;
-    } else if (res == 0 && a->sign == 0) {
-        bf_set_zero(r, 0);
-        return 0;
-    }
-
-    return bf_ziv_rounding(r, a, prec, flags, bf_asin_internal, (void *)true);
-}
-
-/***************************************************************/
-/* decimal floating point numbers */
-
-#ifdef USE_BF_DEC
-
-#define adddq(r1, r0, a1, a0)                   \
-    do {                                        \
-        limb_t __t = r0;                        \
-        r0 += (a0);                             \
-        r1 += (a1) + (r0 < __t);                \
-    } while (0)
-
-#define subdq(r1, r0, a1, a0)                   \
-    do {                                        \
-        limb_t __t = r0;                        \
-        r0 -= (a0);                             \
-        r1 -= (a1) + (r0 > __t);                \
-    } while (0)
-
-#if LIMB_BITS == 64
-
-/* Note: we assume __int128 is available */
-/* uint128_t defined in libbf.h          */
-#define muldq(r1, r0, a, b)                     \
-    do {                                        \
-        uint128_t __t;                          \
-        __t = (uint128_t)(a) * (uint128_t)(b);  \
-        r0 = __t;                               \
-        r1 = __t >> 64;                         \
-    } while (0)
-
-#define divdq(q, r, a1, a0, b)                  \
-    do {                                        \
-        uint128_t __t;                  \
-        limb_t __b = (b);                       \
-        __t = ((uint128_t)(a1) << 64) | (a0);   \
-        q = __t / __b;                                  \
-        r = __t % __b;                                  \
-    } while (0)
-
-#else
-
-#define muldq(r1, r0, a, b)                     \
-    do {                                        \
-        uint64_t __t;                          \
-        __t = (uint64_t)(a) * (uint64_t)(b);  \
-        r0 = __t;                               \
-        r1 = __t >> 32;                         \
-    } while (0)
-
-#define divdq(q, r, a1, a0, b)                  \
-    do {                                        \
-        uint64_t __t;                  \
-        limb_t __b = (b);                       \
-        __t = ((uint64_t)(a1) << 32) | (a0);   \
-        q = __t / __b;                                  \
-        r = __t % __b;                                  \
-    } while (0)
-
-#endif /* LIMB_BITS != 64 */
-
-#if LIMB_DIGITS == 19
-
-/* WARNING: hardcoded for b = 1e19. It is assumed that:
-   0 <= a1 < 2^63 */
-#define divdq_base(q, r, a1, a0)\
-do {\
-    uint64_t __a0, __a1, __t0, __t1, __b = BF_DEC_BASE; \
-    __a0 = a0;\
-    __a1 = a1;\
-    __t0 = __a1;\
-    __t0 = shld(__t0, __a0, 1);\
-    muldq(q, __t1, __t0, UINT64_C(17014118346046923173)); \
-    muldq(__t1, __t0, q, __b);\
-    subdq(__a1, __a0, __t1, __t0);\
-    subdq(__a1, __a0, 1, __b * 2);    \
-    __t0 = (slimb_t)__a1 >> 1; \
-    q += 2 + __t0;\
-    adddq(__a1, __a0, 0, __b & __t0);\
-    q += __a1;                  \
-    __a0 += __b & __a1;           \
-    r = __a0;\
-} while(0)
-
-#elif LIMB_DIGITS == 9
-
-/* WARNING: hardcoded for b = 1e9. It is assumed that:
-   0 <= a1 < 2^29 */
-#define divdq_base(q, r, a1, a0)\
-do {\
-    uint32_t __t0, __t1, __b = BF_DEC_BASE; \
-    __t0 = a1;\
-    __t1 = a0;\
-    __t0 = (__t0 << 3) | (__t1 >> (32 - 3));    \
-    muldq(q, __t1, __t0, 2305843009U);\
-    r = a0 - q * __b;\
-    __t1 = (r >= __b);\
-    q += __t1;\
-    if (__t1)\
-        r -= __b;\
-} while(0)
-
-#endif
-
-/* fast integer division by a fixed constant */
-
-typedef struct FastDivData {
-    limb_t m1; /* multiplier */
-    int8_t shift1;
-    int8_t shift2;
-} FastDivData;
-
-/* From "Division by Invariant Integers using Multiplication" by
-   Torborn Granlund and Peter L. Montgomery */
-/* d must be != 0 */
-static inline __maybe_unused void fast_udiv_init(FastDivData *s, limb_t d)
-{
-    int l;
-    limb_t q, r, m1;
-    if (d == 1)
-        l = 0;
-    else
-        l = 64 - clz64(d - 1);
-    divdq(q, r, ((limb_t)1 << l) - d, 0, d);
-    (void)r;
-    m1 = q + 1;
-    //    printf("d=%lu l=%d m1=0x%016lx\n", d, l, m1);
-    s->m1 = m1;
-    s->shift1 = l;
-    if (s->shift1 > 1)
-        s->shift1 = 1;
-    s->shift2 = l - 1;
-    if (s->shift2 < 0)
-        s->shift2 = 0;
-}
-
-static inline limb_t fast_udiv(limb_t a, const FastDivData *s)
-{
-    limb_t t0, t1;
-    muldq(t1, t0, s->m1, a);
-    t0 = (a - t1) >> s->shift1;
-    return (t1 + t0) >> s->shift2;
-}
-
-/* contains 10^i */
-const limb_t mp_pow_dec[LIMB_DIGITS + 1] = {
-    1U,
-    10U,
-    100U,
-    1000U,
-    10000U,
-    100000U,
-    1000000U,
-    10000000U,
-    100000000U,
-    1000000000U,
-#if LIMB_BITS == 64
-    10000000000U,
-    100000000000U,
-    1000000000000U,
-    10000000000000U,
-    100000000000000U,
-    1000000000000000U,
-    10000000000000000U,
-    100000000000000000U,
-    1000000000000000000U,
-    10000000000000000000U,
-#endif
-};
-
-/* precomputed from fast_udiv_init(10^i) */
-static const FastDivData mp_pow_div[LIMB_DIGITS + 1] = {
+    if (radix == 10) {
+        /* specific case with constant divisor */
 #if LIMB_BITS == 32
-    { 0x00000001, 0, 0 },
-    { 0x9999999a, 1, 3 },
-    { 0x47ae147b, 1, 6 },
-    { 0x0624dd30, 1, 9 },
-    { 0xa36e2eb2, 1, 13 },
-    { 0x4f8b588f, 1, 16 },
-    { 0x0c6f7a0c, 1, 19 },
-    { 0xad7f29ac, 1, 23 },
-    { 0x5798ee24, 1, 26 },
-    { 0x12e0be83, 1, 29 },
+        u32toa_len(buf, n, len);
 #else
-    { 0x0000000000000001, 0, 0 },
-    { 0x999999999999999a, 1, 3 },
-    { 0x47ae147ae147ae15, 1, 6 },
-    { 0x0624dd2f1a9fbe77, 1, 9 },
-    { 0xa36e2eb1c432ca58, 1, 13 },
-    { 0x4f8b588e368f0847, 1, 16 },
-    { 0x0c6f7a0b5ed8d36c, 1, 19 },
-    { 0xad7f29abcaf48579, 1, 23 },
-    { 0x5798ee2308c39dfa, 1, 26 },
-    { 0x12e0be826d694b2f, 1, 29 },
-    { 0xb7cdfd9d7bdbab7e, 1, 33 },
-    { 0x5fd7fe17964955fe, 1, 36 },
-    { 0x19799812dea11198, 1, 39 },
-    { 0xc25c268497681c27, 1, 43 },
-    { 0x6849b86a12b9b01f, 1, 46 },
-    { 0x203af9ee756159b3, 1, 49 },
-    { 0xcd2b297d889bc2b7, 1, 53 },
-    { 0x70ef54646d496893, 1, 56 },
-    { 0x2725dd1d243aba0f, 1, 59 },
-    { 0xd83c94fb6d2ac34d, 1, 63 },
+        /* XXX: optimize */
+        for(i = len - 1; i >= 0; i--) {
+            digit = (limb_t)n % 10;
+            n = (limb_t)n / 10;
+            buf[i] = digit + '0';
+        }
 #endif
-};
-
-/* divide by 10^shift with 0 <= shift <= LIMB_DIGITS */
-static inline limb_t fast_shr_dec(limb_t a, int shift)
-{
-    return fast_udiv(a, &mp_pow_div[shift]);
-}
-
-/* division and remainder by 10^shift */
-#define fast_shr_rem_dec(q, r, a, shift) q = fast_shr_dec(a, shift), r = a - q * mp_pow_dec[shift]
-
-limb_t mp_add_dec(limb_t *res, const limb_t *op1, const limb_t *op2,
-                  mp_size_t n, limb_t carry)
-{
-    limb_t base = BF_DEC_BASE;
-    mp_size_t i;
-    limb_t k, a, v;
-
-    k=carry;
-    for(i=0;i<n;i++) {
-        /* XXX: reuse the trick in add_mod */
-        v = op1[i];
-        a = v + op2[i] + k - base;
-        k = a <= v;
-        if (!k)
-            a += base;
-        res[i]=a;
-    }
-    return k;
-}
-
-limb_t mp_add_ui_dec(limb_t *tab, limb_t b, mp_size_t n)
-{
-    limb_t base = BF_DEC_BASE;
-    mp_size_t i;
-    limb_t k, a, v;
-
-    k=b;
-    for(i=0;i<n;i++) {
-        v = tab[i];
-        a = v + k - base;
-        k = a <= v;
-        if (!k)
-            a += base;
-        tab[i] = a;
-        if (k == 0)
-            break;
-    }
-    return k;
-}
-
-limb_t mp_sub_dec(limb_t *res, const limb_t *op1, const limb_t *op2,
-                  mp_size_t n, limb_t carry)
-{
-    limb_t base = BF_DEC_BASE;
-    mp_size_t i;
-    limb_t k, v, a;
-
-    k=carry;
-    for(i=0;i<n;i++) {
-        v = op1[i];
-        a = v - op2[i] - k;
-        k = a > v;
-        if (k)
-            a += base;
-        res[i] = a;
-    }
-    return k;
-}
-
-limb_t mp_sub_ui_dec(limb_t *tab, limb_t b, mp_size_t n)
-{
-    limb_t base = BF_DEC_BASE;
-    mp_size_t i;
-    limb_t k, v, a;
-
-    k=b;
-    for(i=0;i<n;i++) {
-        v = tab[i];
-        a = v - k;
-        k = a > v;
-        if (k)
-            a += base;
-        tab[i]=a;
-        if (k == 0)
-            break;
-    }
-    return k;
-}
-
-/* taba[] = taba[] * b + l. 0 <= b, l <= base - 1. Return the high carry */
-limb_t mp_mul1_dec(limb_t *tabr, const limb_t *taba, mp_size_t n,
-                   limb_t b, limb_t l)
-{
-    mp_size_t i;
-    limb_t t0, t1, r;
-
-    for(i = 0; i < n; i++) {
-        muldq(t1, t0, taba[i], b);
-        adddq(t1, t0, 0, l);
-        divdq_base(l, r, t1, t0);
-        tabr[i] = r;
-    }
-    return l;
-}
-
-/* tabr[] += taba[] * b. 0 <= b <= base - 1. Return the value to add
-   to the high word */
-limb_t mp_add_mul1_dec(limb_t *tabr, const limb_t *taba, mp_size_t n,
-                       limb_t b)
-{
-    mp_size_t i;
-    limb_t l, t0, t1, r;
-
-    l = 0;
-    for(i = 0; i < n; i++) {
-        muldq(t1, t0, taba[i], b);
-        adddq(t1, t0, 0, l);
-        adddq(t1, t0, 0, tabr[i]);
-        divdq_base(l, r, t1, t0);
-        tabr[i] = r;
-    }
-    return l;
-}
-
-/* tabr[] -= taba[] * b. 0 <= b <= base - 1. Return the value to
-   substract to the high word. */
-limb_t mp_sub_mul1_dec(limb_t *tabr, const limb_t *taba, mp_size_t n,
-                       limb_t b)
-{
-    limb_t base = BF_DEC_BASE;
-    mp_size_t i;
-    limb_t l, t0, t1, r, a, v, c;
-
-    /* XXX: optimize */
-    l = 0;
-    for(i = 0; i < n; i++) {
-        muldq(t1, t0, taba[i], b);
-        adddq(t1, t0, 0, l);
-        divdq_base(l, r, t1, t0);
-        v = tabr[i];
-        a = v - r;
-        c = a > v;
-        if (c)
-            a += base;
-        /* never bigger than base because r = 0 when l = base - 1 */
-        l += c;
-        tabr[i] = a;
-    }
-    return l;
-}
-
-/* size of the result : op1_size + op2_size. */
-void mp_mul_basecase_dec(limb_t *result,
-                         const limb_t *op1, mp_size_t op1_size,
-                         const limb_t *op2, mp_size_t op2_size)
-{
-    mp_size_t i;
-    limb_t r;
-
-    result[op1_size] = mp_mul1_dec(result, op1, op1_size, op2[0], 0);
-
-    for(i=1;i<op2_size;i++) {
-        r = mp_add_mul1_dec(result + i, op1, op1_size, op2[i]);
-        result[i + op1_size] = r;
-    }
-}
-
-/* taba[] = (taba[] + r*base^na) / b. 0 <= b < base. 0 <= r <
-   b. Return the remainder. */
-limb_t mp_div1_dec(limb_t *tabr, const limb_t *taba, mp_size_t na,
-                   limb_t b, limb_t r)
-{
-    limb_t base = BF_DEC_BASE;
-    mp_size_t i;
-    limb_t t0, t1, q;
-    int shift;
-
-#if (BF_DEC_BASE % 2) == 0
-    if (b == 2) {
-        limb_t base_div2;
-        /* Note: only works if base is even */
-        base_div2 = base >> 1;
-        if (r)
-            r = base_div2;
-        for(i = na - 1; i >= 0; i--) {
-            t0 = taba[i];
-            tabr[i] = (t0 >> 1) + r;
-            r = 0;
-            if (t0 & 1)
-                r = base_div2;
+    } else {
+        for(i = len - 1; i >= 0; i--) {
+            digit = (limb_t)n % radix;
+            n = (limb_t)n / radix;
+            if (digit < 10)
+                digit += '0';
+            else
+                digit += 'a' - 10;
+            buf[i] = digit;
         }
-        if (r)
-            r = 1;
-    } else
-#endif
-    if (na >= UDIV1NORM_THRESHOLD) {
-        shift = clz(b);
-        if (shift == 0) {
-            /* normalized case: b >= 2^(LIMB_BITS-1) */
-            limb_t b_inv;
-            b_inv = udiv1norm_init(b);
-            for(i = na - 1; i >= 0; i--) {
-                muldq(t1, t0, r, base);
-                adddq(t1, t0, 0, taba[i]);
-                q = udiv1norm(&r, t1, t0, b, b_inv);
-                tabr[i] = q;
+    }
+}
+
+size_t u32toa(char *buf, uint32_t n)
+{
+    char buf1[10], *q;
+    size_t len;
+    
+    q = buf1 + sizeof(buf1);
+    do {
+        *--q = n % 10 + '0';
+        n /= 10;
+    } while (n != 0);
+    len = buf1 + sizeof(buf1) - q;
+    memcpy(buf, q, len);
+    return len;
+}
+
+size_t i32toa(char *buf, int32_t n)
+{
+    if (n >= 0) {
+        return u32toa(buf, n);
+    } else {
+        buf[0] = '-';
+        return u32toa(buf + 1, -(uint32_t)n) + 1;
+    }
+}
+
+#ifdef USE_FAST_INT
+size_t u64toa(char *buf, uint64_t n)
+{
+    if (n < 0x100000000) {
+        return u32toa(buf, n);
+    } else {
+        uint64_t n1;
+        char *q = buf;
+        uint32_t n2;
+        
+        n1 = n / 1000000000;
+        n %= 1000000000;
+        if (n1 >= 0x100000000) {
+            n2 = n1 / 1000000000;
+            n1 = n1 % 1000000000;
+            /* at most two digits */
+            if (n2 >= 10) {
+                *q++ = n2 / 10 + '0';
+                n2 %= 10;
             }
+            *q++ = n2 + '0';
+            u32toa_len(q, n1, 9);
+            q += 9;
         } else {
-            limb_t b_inv;
-            b <<= shift;
-            b_inv = udiv1norm_init(b);
-            for(i = na - 1; i >= 0; i--) {
-                muldq(t1, t0, r, base);
-                adddq(t1, t0, 0, taba[i]);
-                t1 = (t1 << shift) | (t0 >> (LIMB_BITS - shift));
-                t0 <<= shift;
-                q = udiv1norm(&r, t1, t0, b, b_inv);
-                r >>= shift;
-                tabr[i] = q;
-            }
+            q += u32toa(q, n1);
         }
+        u32toa_len(q, n, 9);
+        q += 9;
+        return q - buf;
+    }
+}
+
+size_t i64toa(char *buf, int64_t n)
+{
+    if (n >= 0) {
+        return u64toa(buf, n);
     } else {
-        for(i = na - 1; i >= 0; i--) {
-            muldq(t1, t0, r, base);
-            adddq(t1, t0, 0, taba[i]);
-            divdq(q, r, t1, t0, b);
-            tabr[i] = q;
-        }
-    }
-    return r;
-}
-
-static __maybe_unused void mp_print_str_dec(const char *str,
-                                       const limb_t *tab, slimb_t n)
-{
-    slimb_t i;
-    printf("%s=", str);
-    for(i = n - 1; i >= 0; i--) {
-        if (i != n - 1)
-            printf("_");
-        printf("%0*" PRIu_LIMB, LIMB_DIGITS, tab[i]);
-    }
-    printf("\n");
-}
-
-static __maybe_unused void mp_print_str_h_dec(const char *str,
-                                              const limb_t *tab, slimb_t n,
-                                              limb_t high)
-{
-    slimb_t i;
-    printf("%s=", str);
-    printf("%0*" PRIu_LIMB, LIMB_DIGITS, high);
-    for(i = n - 1; i >= 0; i--) {
-        printf("_");
-        printf("%0*" PRIu_LIMB, LIMB_DIGITS, tab[i]);
-    }
-    printf("\n");
-}
-
-//#define DEBUG_DIV_SLOW
-
-#define DIV_STATIC_ALLOC_LEN 16
-
-/* return q = a / b and r = a % b.
-
-   taba[na] must be allocated if tabb1[nb - 1] < B / 2.  tabb1[nb - 1]
-   must be != zero. na must be >= nb. 's' can be NULL if tabb1[nb - 1]
-   >= B / 2.
-
-   The remainder is is returned in taba and contains nb libms. tabq
-   contains na - nb + 1 limbs. No overlap is permitted.
-
-   Running time of the standard method: (na - nb + 1) * nb
-   Return 0 if OK, -1 if memory alloc error
-*/
-/* XXX: optimize */
-static int mp_div_dec(bf_context_t *s, limb_t *tabq,
-                      limb_t *taba, mp_size_t na,
-                      const limb_t *tabb1, mp_size_t nb)
-{
-    limb_t base = BF_DEC_BASE;
-    limb_t r, mult, t0, t1, a, c, q, v, *tabb;
-    mp_size_t i, j;
-    limb_t static_tabb[DIV_STATIC_ALLOC_LEN];
-
-#ifdef DEBUG_DIV_SLOW
-    mp_print_str_dec("a", taba, na);
-    mp_print_str_dec("b", tabb1, nb);
-#endif
-
-    /* normalize tabb */
-    r = tabb1[nb - 1];
-    assert(r != 0);
-    i = na - nb;
-    if (r >= BF_DEC_BASE / 2) {
-        mult = 1;
-        tabb = (limb_t *)tabb1;
-        q = 1;
-        for(j = nb - 1; j >= 0; j--) {
-            if (taba[i + j] != tabb[j]) {
-                if (taba[i + j] < tabb[j])
-                    q = 0;
-                break;
-            }
-        }
-        tabq[i] = q;
-        if (q) {
-            mp_sub_dec(taba + i, taba + i, tabb, nb, 0);
-        }
-        i--;
-    } else {
-        mult = base / (r + 1);
-        if (likely(nb <= DIV_STATIC_ALLOC_LEN)) {
-            tabb = static_tabb;
-        } else {
-            tabb = bf_malloc(s, sizeof(limb_t) * nb);
-            if (!tabb)
-                return -1;
-        }
-        mp_mul1_dec(tabb, tabb1, nb, mult, 0);
-        taba[na] = mp_mul1_dec(taba, taba, na, mult, 0);
-    }
-
-#ifdef DEBUG_DIV_SLOW
-    printf("mult=" FMT_LIMB "\n", mult);
-    mp_print_str_dec("a_norm", taba, na + 1);
-    mp_print_str_dec("b_norm", tabb, nb);
-#endif
-
-    for(; i >= 0; i--) {
-        if (unlikely(taba[i + nb] >= tabb[nb - 1])) {
-            /* XXX: check if it is really possible */
-            q = base - 1;
-        } else {
-            muldq(t1, t0, taba[i + nb], base);
-            adddq(t1, t0, 0, taba[i + nb - 1]);
-            divdq(q, r, t1, t0, tabb[nb - 1]);
-        }
-        //        printf("i=%d q1=%ld\n", i, q);
-
-        r = mp_sub_mul1_dec(taba + i, tabb, nb, q);
-        //        mp_dump("r1", taba + i, nb, bd);
-        //        printf("r2=%ld\n", r);
-
-        v = taba[i + nb];
-        a = v - r;
-        c = a > v;
-        if (c)
-            a += base;
-        taba[i + nb] = a;
-
-        if (c != 0) {
-            /* negative result */
-            for(;;) {
-                q--;
-                c = mp_add_dec(taba + i, taba + i, tabb, nb, 0);
-                /* propagate carry and test if positive result */
-                if (c != 0) {
-                    if (++taba[i + nb] == base) {
-                        break;
-                    }
-                }
-            }
-        }
-        tabq[i] = q;
-    }
-
-#ifdef DEBUG_DIV_SLOW
-    mp_print_str_dec("q", tabq, na - nb + 1);
-    mp_print_str_dec("r", taba, nb);
-#endif
-
-    /* remove the normalization */
-    if (mult != 1) {
-        mp_div1_dec(taba, taba, nb, mult, 0);
-        if (unlikely(tabb != static_tabb))
-            bf_free(s, tabb);
-    }
-    return 0;
-}
-
-/* divide by 10^shift */
-static limb_t mp_shr_dec(limb_t *tab_r, const limb_t *tab, mp_size_t n,
-                         limb_t shift, limb_t high)
-{
-    mp_size_t i;
-    limb_t l, a, q, r;
-
-    assert(shift >= 1 && shift < LIMB_DIGITS);
-    l = high;
-    for(i = n - 1; i >= 0; i--) {
-        a = tab[i];
-        fast_shr_rem_dec(q, r, a, shift);
-        tab_r[i] = q + l * mp_pow_dec[LIMB_DIGITS - shift];
-        l = r;
-    }
-    return l;
-}
-
-/* multiply by 10^shift */
-static limb_t mp_shl_dec(limb_t *tab_r, const limb_t *tab, mp_size_t n,
-                         limb_t shift, limb_t low)
-{
-    mp_size_t i;
-    limb_t l, a, q, r;
-
-    assert(shift >= 1 && shift < LIMB_DIGITS);
-    l = low;
-    for(i = 0; i < n; i++) {
-        a = tab[i];
-        fast_shr_rem_dec(q, r, a, LIMB_DIGITS - shift);
-        tab_r[i] = r * mp_pow_dec[shift] + l;
-        l = q;
-    }
-    return l;
-}
-
-static limb_t mp_sqrtrem2_dec(limb_t *tabs, limb_t *taba)
-{
-    int k;
-    dlimb_t a, b, r;
-    limb_t taba1[2], s, r0, r1;
-
-    /* convert to binary and normalize */
-    a = (dlimb_t)taba[1] * BF_DEC_BASE + taba[0];
-    k = clz(a >> LIMB_BITS) & ~1;
-    b = a << k;
-    taba1[0] = b;
-    taba1[1] = b >> LIMB_BITS;
-    mp_sqrtrem2(&s, taba1);
-    s >>= (k >> 1);
-    /* convert the remainder back to decimal */
-    r = a - (dlimb_t)s * (dlimb_t)s;
-    divdq_base(r1, r0, r >> LIMB_BITS, r);
-    taba[0] = r0;
-    tabs[0] = s;
-    return r1;
-}
-
-//#define DEBUG_SQRTREM_DEC
-
-/* tmp_buf must contain (n / 2 + 1 limbs) */
-static limb_t mp_sqrtrem_rec_dec(limb_t *tabs, limb_t *taba, limb_t n,
-                                 limb_t *tmp_buf)
-{
-    limb_t l, h, rh, ql, qh, c, i;
-
-    if (n == 1)
-        return mp_sqrtrem2_dec(tabs, taba);
-#ifdef DEBUG_SQRTREM_DEC
-    mp_print_str_dec("a", taba, 2 * n);
-#endif
-    l = n / 2;
-    h = n - l;
-    qh = mp_sqrtrem_rec_dec(tabs + l, taba + 2 * l, h, tmp_buf);
-#ifdef DEBUG_SQRTREM_DEC
-    mp_print_str_dec("s1", tabs + l, h);
-    mp_print_str_h_dec("r1", taba + 2 * l, h, qh);
-    mp_print_str_h_dec("r2", taba + l, n, qh);
-#endif
-
-    /* the remainder is in taba + 2 * l. Its high bit is in qh */
-    if (qh) {
-        mp_sub_dec(taba + 2 * l, taba + 2 * l, tabs + l, h, 0);
-    }
-    /* instead of dividing by 2*s, divide by s (which is normalized)
-       and update q and r */
-    mp_div_dec(NULL, tmp_buf, taba + l, n, tabs + l, h);
-    qh += tmp_buf[l];
-    for(i = 0; i < l; i++)
-        tabs[i] = tmp_buf[i];
-    ql = mp_div1_dec(tabs, tabs, l, 2, qh & 1);
-    qh = qh >> 1; /* 0 or 1 */
-    if (ql)
-        rh = mp_add_dec(taba + l, taba + l, tabs + l, h, 0);
-    else
-        rh = 0;
-#ifdef DEBUG_SQRTREM_DEC
-    mp_print_str_h_dec("q", tabs, l, qh);
-    mp_print_str_h_dec("u", taba + l, h, rh);
-#endif
-
-    mp_add_ui_dec(tabs + l, qh, h);
-#ifdef DEBUG_SQRTREM_DEC
-    mp_print_str_dec("s2", tabs, n);
-#endif
-
-    /* q = qh, tabs[l - 1 ... 0], r = taba[n - 1 ... l] */
-    /* subtract q^2. if qh = 1 then q = B^l, so we can take shortcuts */
-    if (qh) {
-        c = qh;
-    } else {
-        mp_mul_basecase_dec(taba + n, tabs, l, tabs, l);
-        c = mp_sub_dec(taba, taba, taba + n, 2 * l, 0);
-    }
-    rh -= mp_sub_ui_dec(taba + 2 * l, c, n - 2 * l);
-    if ((slimb_t)rh < 0) {
-        mp_sub_ui_dec(tabs, 1, n);
-        rh += mp_add_mul1_dec(taba, tabs, n, 2);
-        rh += mp_add_ui_dec(taba, 1, n);
-    }
-    return rh;
-}
-
-/* 'taba' has 2*n limbs with n >= 1 and taba[2*n-1] >= B/4. Return (s,
-   r) with s=floor(sqrt(a)) and r=a-s^2. 0 <= r <= 2 * s. tabs has n
-   limbs. r is returned in the lower n limbs of taba. Its r[n] is the
-   returned value of the function. */
-int mp_sqrtrem_dec(bf_context_t *s, limb_t *tabs, limb_t *taba, limb_t n)
-{
-    limb_t tmp_buf1[8];
-    limb_t *tmp_buf;
-    mp_size_t n2;
-    n2 = n / 2 + 1;
-    if (n2 <= countof(tmp_buf1)) {
-        tmp_buf = tmp_buf1;
-    } else {
-        tmp_buf = bf_malloc(s, sizeof(limb_t) * n2);
-        if (!tmp_buf)
-            return -1;
-    }
-    taba[n] = mp_sqrtrem_rec_dec(tabs, taba, n, tmp_buf);
-    if (tmp_buf != tmp_buf1)
-        bf_free(s, tmp_buf);
-    return 0;
-}
-
-/* return the number of leading zero digits, from 0 to LIMB_DIGITS */
-static int clz_dec(limb_t a)
-{
-    if (a == 0)
-        return LIMB_DIGITS;
-    switch(LIMB_BITS - 1 - clz(a)) {
-    case 0: /* 1-1 */
-        return LIMB_DIGITS - 1;
-    case 1: /* 2-3 */
-        return LIMB_DIGITS - 1;
-    case 2: /* 4-7 */
-        return LIMB_DIGITS - 1;
-    case 3: /* 8-15 */
-        if (a < 10)
-            return LIMB_DIGITS - 1;
-        else
-            return LIMB_DIGITS - 2;
-    case 4: /* 16-31 */
-        return LIMB_DIGITS - 2;
-    case 5: /* 32-63 */
-        return LIMB_DIGITS - 2;
-    case 6: /* 64-127 */
-        if (a < 100)
-            return LIMB_DIGITS - 2;
-        else
-            return LIMB_DIGITS - 3;
-    case 7: /* 128-255 */
-        return LIMB_DIGITS - 3;
-    case 8: /* 256-511 */
-        return LIMB_DIGITS - 3;
-    case 9: /* 512-1023 */
-        if (a < 1000)
-            return LIMB_DIGITS - 3;
-        else
-            return LIMB_DIGITS - 4;
-    case 10: /* 1024-2047 */
-        return LIMB_DIGITS - 4;
-    case 11: /* 2048-4095 */
-        return LIMB_DIGITS - 4;
-    case 12: /* 4096-8191 */
-        return LIMB_DIGITS - 4;
-    case 13: /* 8192-16383 */
-        if (a < 10000)
-            return LIMB_DIGITS - 4;
-        else
-            return LIMB_DIGITS - 5;
-    case 14: /* 16384-32767 */
-        return LIMB_DIGITS - 5;
-    case 15: /* 32768-65535 */
-        return LIMB_DIGITS - 5;
-    case 16: /* 65536-131071 */
-        if (a < 100000)
-            return LIMB_DIGITS - 5;
-        else
-            return LIMB_DIGITS - 6;
-    case 17: /* 131072-262143 */
-        return LIMB_DIGITS - 6;
-    case 18: /* 262144-524287 */
-        return LIMB_DIGITS - 6;
-    case 19: /* 524288-1048575 */
-        if (a < 1000000)
-            return LIMB_DIGITS - 6;
-        else
-            return LIMB_DIGITS - 7;
-    case 20: /* 1048576-2097151 */
-        return LIMB_DIGITS - 7;
-    case 21: /* 2097152-4194303 */
-        return LIMB_DIGITS - 7;
-    case 22: /* 4194304-8388607 */
-        return LIMB_DIGITS - 7;
-    case 23: /* 8388608-16777215 */
-        if (a < 10000000)
-            return LIMB_DIGITS - 7;
-        else
-            return LIMB_DIGITS - 8;
-    case 24: /* 16777216-33554431 */
-        return LIMB_DIGITS - 8;
-    case 25: /* 33554432-67108863 */
-        return LIMB_DIGITS - 8;
-    case 26: /* 67108864-134217727 */
-        if (a < 100000000)
-            return LIMB_DIGITS - 8;
-        else
-            return LIMB_DIGITS - 9;
-#if LIMB_BITS == 64
-    case 27: /* 134217728-268435455 */
-        return LIMB_DIGITS - 9;
-    case 28: /* 268435456-536870911 */
-        return LIMB_DIGITS - 9;
-    case 29: /* 536870912-1073741823 */
-        if (a < 1000000000)
-            return LIMB_DIGITS - 9;
-        else
-            return LIMB_DIGITS - 10;
-    case 30: /* 1073741824-2147483647 */
-        return LIMB_DIGITS - 10;
-    case 31: /* 2147483648-4294967295 */
-        return LIMB_DIGITS - 10;
-    case 32: /* 4294967296-8589934591 */
-        return LIMB_DIGITS - 10;
-    case 33: /* 8589934592-17179869183 */
-        if (a < 10000000000)
-            return LIMB_DIGITS - 10;
-        else
-            return LIMB_DIGITS - 11;
-    case 34: /* 17179869184-34359738367 */
-        return LIMB_DIGITS - 11;
-    case 35: /* 34359738368-68719476735 */
-        return LIMB_DIGITS - 11;
-    case 36: /* 68719476736-137438953471 */
-        if (a < 100000000000)
-            return LIMB_DIGITS - 11;
-        else
-            return LIMB_DIGITS - 12;
-    case 37: /* 137438953472-274877906943 */
-        return LIMB_DIGITS - 12;
-    case 38: /* 274877906944-549755813887 */
-        return LIMB_DIGITS - 12;
-    case 39: /* 549755813888-1099511627775 */
-        if (a < 1000000000000)
-            return LIMB_DIGITS - 12;
-        else
-            return LIMB_DIGITS - 13;
-    case 40: /* 1099511627776-2199023255551 */
-        return LIMB_DIGITS - 13;
-    case 41: /* 2199023255552-4398046511103 */
-        return LIMB_DIGITS - 13;
-    case 42: /* 4398046511104-8796093022207 */
-        return LIMB_DIGITS - 13;
-    case 43: /* 8796093022208-17592186044415 */
-        if (a < 10000000000000)
-            return LIMB_DIGITS - 13;
-        else
-            return LIMB_DIGITS - 14;
-    case 44: /* 17592186044416-35184372088831 */
-        return LIMB_DIGITS - 14;
-    case 45: /* 35184372088832-70368744177663 */
-        return LIMB_DIGITS - 14;
-    case 46: /* 70368744177664-140737488355327 */
-        if (a < 100000000000000)
-            return LIMB_DIGITS - 14;
-        else
-            return LIMB_DIGITS - 15;
-    case 47: /* 140737488355328-281474976710655 */
-        return LIMB_DIGITS - 15;
-    case 48: /* 281474976710656-562949953421311 */
-        return LIMB_DIGITS - 15;
-    case 49: /* 562949953421312-1125899906842623 */
-        if (a < 1000000000000000)
-            return LIMB_DIGITS - 15;
-        else
-            return LIMB_DIGITS - 16;
-    case 50: /* 1125899906842624-2251799813685247 */
-        return LIMB_DIGITS - 16;
-    case 51: /* 2251799813685248-4503599627370495 */
-        return LIMB_DIGITS - 16;
-    case 52: /* 4503599627370496-9007199254740991 */
-        return LIMB_DIGITS - 16;
-    case 53: /* 9007199254740992-18014398509481983 */
-        if (a < 10000000000000000)
-            return LIMB_DIGITS - 16;
-        else
-            return LIMB_DIGITS - 17;
-    case 54: /* 18014398509481984-36028797018963967 */
-        return LIMB_DIGITS - 17;
-    case 55: /* 36028797018963968-72057594037927935 */
-        return LIMB_DIGITS - 17;
-    case 56: /* 72057594037927936-144115188075855871 */
-        if (a < 100000000000000000)
-            return LIMB_DIGITS - 17;
-        else
-            return LIMB_DIGITS - 18;
-    case 57: /* 144115188075855872-288230376151711743 */
-        return LIMB_DIGITS - 18;
-    case 58: /* 288230376151711744-576460752303423487 */
-        return LIMB_DIGITS - 18;
-    case 59: /* 576460752303423488-1152921504606846975 */
-        if (a < 1000000000000000000)
-            return LIMB_DIGITS - 18;
-        else
-            return LIMB_DIGITS - 19;
-#endif
-    default:
-        return 0;
+        buf[0] = '-';
+        return u64toa(buf + 1, -(uint64_t)n) + 1;
     }
 }
 
-/* for debugging */
-void bfdec_print_str(const char *str, const bfdec_t *a)
+/* XXX: only tested for 1 <= n < 2^53 */
+size_t u64toa_radix(char *buf, uint64_t n, unsigned int radix)
 {
-    slimb_t i;
-    printf("%s=", str);
-
-    if (a->expn == BF_EXP_NAN) {
-        printf("NaN");
-    } else {
-        if (a->sign)
-            putchar('-');
-        if (a->expn == BF_EXP_ZERO) {
-            putchar('0');
-        } else if (a->expn == BF_EXP_INF) {
-            printf("Inf");
-        } else {
-            printf("0.");
-            for(i = a->len - 1; i >= 0; i--)
-                printf("%0*" PRIu_LIMB, LIMB_DIGITS, a->tab[i]);
-            printf("e%" PRId_LIMB, a->expn);
-        }
-    }
-    printf("\n");
-}
-
-/* return != 0 if one digit between 0 and bit_pos inclusive is not zero. */
-static inline limb_t scan_digit_nz(const bfdec_t *r, slimb_t bit_pos)
-{
-    slimb_t pos;
-    limb_t v, q;
-    int shift;
-
-    if (bit_pos < 0)
-        return 0;
-    pos = (limb_t)bit_pos / LIMB_DIGITS;
-    shift = (limb_t)bit_pos % LIMB_DIGITS;
-    fast_shr_rem_dec(q, v, r->tab[pos], shift + 1);
-    (void)q;
-    if (v != 0)
-        return 1;
-    pos--;
-    while (pos >= 0) {
-        if (r->tab[pos] != 0)
-            return 1;
-        pos--;
-    }
-    return 0;
-}
-
-static limb_t get_digit(const limb_t *tab, limb_t len, slimb_t pos)
-{
-    slimb_t i;
-    int shift;
-    i = floor_div(pos, LIMB_DIGITS);
-    if (i < 0 || i >= len)
-        return 0;
-    shift = pos - i * LIMB_DIGITS;
-    return fast_shr_dec(tab[i], shift) % 10;
-}
-
-/* return the addend for rounding. Note that prec can be <= 0 for bf_rint() */
-static int bfdec_get_rnd_add(int *pret, const bfdec_t *r, limb_t l,
-                             slimb_t prec, int rnd_mode)
-{
-    int add_one, inexact;
-    limb_t digit1, digit0;
-
-    //    bfdec_print_str("get_rnd_add", r);
-    if (rnd_mode == BF_RNDF) {
-        digit0 = 1; /* faithful rounding does not honor the INEXACT flag */
-    } else {
-        /* starting limb for bit 'prec + 1' */
-        digit0 = scan_digit_nz(r, l * LIMB_DIGITS - 1 - bf_max(0, prec + 1));
-    }
-
-    /* get the digit at 'prec' */
-    digit1 = get_digit(r->tab, l, l * LIMB_DIGITS - 1 - prec);
-    inexact = (digit1 | digit0) != 0;
-
-    add_one = 0;
-    switch(rnd_mode) {
-    case BF_RNDZ:
-        break;
-    case BF_RNDN:
-        if (digit1 == 5) {
-            if (digit0) {
-                add_one = 1;
-            } else {
-                /* round to even */
-                add_one =
-                    get_digit(r->tab, l, l * LIMB_DIGITS - 1 - (prec - 1)) & 1;
-            }
-        } else if (digit1 > 5) {
-            add_one = 1;
-        }
-        break;
-    case BF_RNDD:
-    case BF_RNDU:
-        if (r->sign == (rnd_mode == BF_RNDD))
-            add_one = inexact;
-        break;
-    case BF_RNDNA:
-    case BF_RNDF:
-        add_one = (digit1 >= 5);
-        break;
-    case BF_RNDA:
-        add_one = inexact;
-        break;
-    default:
-        abort();
-    }
-
-    if (inexact)
-        *pret |= BF_ST_INEXACT;
-    return add_one;
-}
-
-/* round to prec1 bits assuming 'r' is non zero and finite. 'r' is
-   assumed to have length 'l' (1 <= l <= r->len). prec1 can be
-   BF_PREC_INF. BF_FLAG_SUBNORMAL is not supported. Cannot fail with
-   BF_ST_MEM_ERROR.
- */
-static int __bfdec_round(bfdec_t *r, limb_t prec1, bf_flags_t flags, limb_t l)
-{
-    int shift, add_one, rnd_mode, ret;
-    slimb_t i, bit_pos, pos, e_min, e_max, e_range, prec;
-
-    /* XXX: align to IEEE 754 2008 for decimal numbers ? */
-    e_range = (limb_t)1 << (bf_get_exp_bits(flags) - 1);
-    e_min = -e_range + 3;
-    e_max = e_range;
-
-    if (flags & BF_FLAG_RADPNT_PREC) {
-        /* 'prec' is the precision after the decimal point */
-        if (prec1 != BF_PREC_INF)
-            prec = r->expn + prec1;
-        else
-            prec = prec1;
-    } else if (unlikely(r->expn < e_min) && (flags & BF_FLAG_SUBNORMAL)) {
-        /* restrict the precision in case of potentially subnormal
-           result */
-        assert(prec1 != BF_PREC_INF);
-        prec = prec1 - (e_min - r->expn);
-    } else {
-        prec = prec1;
-    }
-
-    /* round to prec bits */
-    rnd_mode = flags & BF_RND_MASK;
-    ret = 0;
-    add_one = bfdec_get_rnd_add(&ret, r, l, prec, rnd_mode);
-
-    if (prec <= 0) {
-        if (add_one) {
-            bfdec_resize(r, 1); /* cannot fail because r is non zero */
-            r->tab[0] = BF_DEC_BASE / 10;
-            r->expn += 1 - prec;
-            ret |= BF_ST_UNDERFLOW | BF_ST_INEXACT;
-            return ret;
-        } else {
-            goto underflow;
-        }
-    } else if (add_one) {
-        limb_t carry;
-
-        /* add one starting at digit 'prec - 1' */
-        bit_pos = l * LIMB_DIGITS - 1 - (prec - 1);
-        pos = bit_pos / LIMB_DIGITS;
-        carry = mp_pow_dec[bit_pos % LIMB_DIGITS];
-        carry = mp_add_ui_dec(r->tab + pos, carry, l - pos);
-        if (carry) {
-            /* shift right by one digit */
-            mp_shr_dec(r->tab + pos, r->tab + pos, l - pos, 1, 1);
-            r->expn++;
-        }
-    }
-
-    /* check underflow */
-    if (unlikely(r->expn < e_min)) {
-        if (flags & BF_FLAG_SUBNORMAL) {
-            /* if inexact, also set the underflow flag */
-            if (ret & BF_ST_INEXACT)
-                ret |= BF_ST_UNDERFLOW;
-        } else {
-        underflow:
-            bfdec_set_zero(r, r->sign);
-            ret |= BF_ST_UNDERFLOW | BF_ST_INEXACT;
-            return ret;
-        }
-    }
-
-    /* check overflow */
-    if (unlikely(r->expn > e_max)) {
-        bfdec_set_inf(r, r->sign);
-        ret |= BF_ST_OVERFLOW | BF_ST_INEXACT;
-        return ret;
-    }
-
-    /* keep the bits starting at 'prec - 1' */
-    bit_pos = l * LIMB_DIGITS - 1 - (prec - 1);
-    i = floor_div(bit_pos, LIMB_DIGITS);
-    if (i >= 0) {
-        shift = smod(bit_pos, LIMB_DIGITS);
-        if (shift != 0) {
-            r->tab[i] = fast_shr_dec(r->tab[i], shift) *
-                mp_pow_dec[shift];
-        }
-    } else {
-        i = 0;
-    }
-    /* remove trailing zeros */
-    while (r->tab[i] == 0)
-        i++;
-    if (i > 0) {
-        l -= i;
-        memmove(r->tab, r->tab + i, l * sizeof(limb_t));
-    }
-    bfdec_resize(r, l); /* cannot fail */
-    return ret;
-}
-
-/* Cannot fail with BF_ST_MEM_ERROR. */
-int bfdec_round(bfdec_t *r, limb_t prec, bf_flags_t flags)
-{
-    if (r->len == 0)
-        return 0;
-    return __bfdec_round(r, prec, flags, r->len);
-}
-
-/* 'r' must be a finite number. Cannot fail with BF_ST_MEM_ERROR.  */
-int bfdec_normalize_and_round(bfdec_t *r, limb_t prec1, bf_flags_t flags)
-{
-    limb_t l, v;
-    int shift, ret;
-
-    //    bfdec_print_str("bf_renorm", r);
-    l = r->len;
-    while (l > 0 && r->tab[l - 1] == 0)
-        l--;
-    if (l == 0) {
-        /* zero */
-        r->expn = BF_EXP_ZERO;
-        bfdec_resize(r, 0); /* cannot fail */
-        ret = 0;
-    } else {
-        r->expn -= (r->len - l) * LIMB_DIGITS;
-        /* shift to have the MSB set to '1' */
-        v = r->tab[l - 1];
-        shift = clz_dec(v);
-        if (shift != 0) {
-            mp_shl_dec(r->tab, r->tab, l, shift, 0);
-            r->expn -= shift;
-        }
-        ret = __bfdec_round(r, prec1, flags, l);
-    }
-    //    bf_print_str("r_final", r);
-    return ret;
-}
-
-int bfdec_set_ui(bfdec_t *r, uint64_t v)
-{
-#if LIMB_BITS == 32
-    if (v >= BF_DEC_BASE * BF_DEC_BASE) {
-        if (bfdec_resize(r, 3))
-            goto fail;
-        r->tab[0] = v % BF_DEC_BASE;
-        v /= BF_DEC_BASE;
-        r->tab[1] = v % BF_DEC_BASE;
-        r->tab[2] = v / BF_DEC_BASE;
-        r->expn = 3 * LIMB_DIGITS;
-    } else
-#endif
-    if (v >= BF_DEC_BASE) {
-        if (bfdec_resize(r, 2))
-            goto fail;
-        r->tab[0] = v % BF_DEC_BASE;
-        r->tab[1] = v / BF_DEC_BASE;
-        r->expn = 2 * LIMB_DIGITS;
-    } else {
-        if (bfdec_resize(r, 1))
-            goto fail;
-        r->tab[0] = v;
-        r->expn = LIMB_DIGITS;
-    }
-    r->sign = 0;
-    return bfdec_normalize_and_round(r, BF_PREC_INF, 0);
- fail:
-    bfdec_set_nan(r);
-    return BF_ST_MEM_ERROR;
-}
-
-int bfdec_set_si(bfdec_t *r, int64_t v)
-{
-    int ret;
-    if (v < 0) {
-        ret = bfdec_set_ui(r, -v);
-        r->sign = 1;
-    } else {
-        ret = bfdec_set_ui(r, v);
-    }
-    return ret;
-}
-
-static int bfdec_add_internal(bfdec_t *r, const bfdec_t *a, const bfdec_t *b, limb_t prec, bf_flags_t flags, int b_neg)
-{
-    bf_context_t *s = r->ctx;
-    int is_sub, cmp_res, a_sign, b_sign, ret;
-
-    a_sign = a->sign;
-    b_sign = b->sign ^ b_neg;
-    is_sub = a_sign ^ b_sign;
-    cmp_res = bfdec_cmpu(a, b);
-    if (cmp_res < 0) {
-        const bfdec_t *tmp;
-        tmp = a;
-        a = b;
-        b = tmp;
-        a_sign = b_sign; /* b_sign is never used later */
-    }
-    /* abs(a) >= abs(b) */
-    if (cmp_res == 0 && is_sub && a->expn < BF_EXP_INF) {
-        /* zero result */
-        bfdec_set_zero(r, (flags & BF_RND_MASK) == BF_RNDD);
-        ret = 0;
-    } else if (a->len == 0 || b->len == 0) {
-        ret = 0;
-        if (a->expn >= BF_EXP_INF) {
-            if (a->expn == BF_EXP_NAN) {
-                /* at least one operand is NaN */
-                bfdec_set_nan(r);
-                ret = 0;
-            } else if (b->expn == BF_EXP_INF && is_sub) {
-                /* infinities with different signs */
-                bfdec_set_nan(r);
-                ret = BF_ST_INVALID_OP;
-            } else {
-                bfdec_set_inf(r, a_sign);
-            }
-        } else {
-            /* at least one zero and not subtract */
-            if (bfdec_set(r, a))
-                return BF_ST_MEM_ERROR;
-            r->sign = a_sign;
-            goto renorm;
-        }
-    } else {
-        slimb_t d, a_offset, b_offset, i, r_len;
-        limb_t carry;
-        limb_t *b1_tab;
-        int b_shift;
-        mp_size_t b1_len;
-
-        d = a->expn - b->expn;
-
-        /* XXX: not efficient in time and memory if the precision is
-           not infinite */
-        r_len = bf_max(a->len, b->len + (d + LIMB_DIGITS - 1) / LIMB_DIGITS);
-        if (bfdec_resize(r, r_len))
-            goto fail;
-        r->sign = a_sign;
-        r->expn = a->expn;
-
-        a_offset = r_len - a->len;
-        for(i = 0; i < a_offset; i++)
-            r->tab[i] = 0;
-        for(i = 0; i < a->len; i++)
-            r->tab[a_offset + i] = a->tab[i];
-
-        b_shift = d % LIMB_DIGITS;
-        if (b_shift == 0) {
-            b1_len = b->len;
-            b1_tab = (limb_t *)b->tab;
-        } else {
-            b1_len = b->len + 1;
-            b1_tab = bf_malloc(s, sizeof(limb_t) * b1_len);
-            if (!b1_tab)
-                goto fail;
-            b1_tab[0] = mp_shr_dec(b1_tab + 1, b->tab, b->len, b_shift, 0) *
-                mp_pow_dec[LIMB_DIGITS - b_shift];
-        }
-        b_offset = r_len - (b->len + (d + LIMB_DIGITS - 1) / LIMB_DIGITS);
-
-        if (is_sub) {
-            carry = mp_sub_dec(r->tab + b_offset, r->tab + b_offset,
-                               b1_tab, b1_len, 0);
-            if (carry != 0) {
-                carry = mp_sub_ui_dec(r->tab + b_offset + b1_len, carry,
-                                      r_len - (b_offset + b1_len));
-                assert(carry == 0);
-            }
-        } else {
-            carry = mp_add_dec(r->tab + b_offset, r->tab + b_offset,
-                               b1_tab, b1_len, 0);
-            if (carry != 0) {
-                carry = mp_add_ui_dec(r->tab + b_offset + b1_len, carry,
-                                      r_len - (b_offset + b1_len));
-            }
-            if (carry != 0) {
-                if (bfdec_resize(r, r_len + 1)) {
-                    if (b_shift != 0)
-                        bf_free(s, b1_tab);
-                    goto fail;
-                }
-                r->tab[r_len] = 1;
-                r->expn += LIMB_DIGITS;
-            }
-        }
-        if (b_shift != 0)
-            bf_free(s, b1_tab);
-    renorm:
-        ret = bfdec_normalize_and_round(r, prec, flags);
-    }
-    return ret;
- fail:
-    bfdec_set_nan(r);
-    return BF_ST_MEM_ERROR;
-}
-
-static int __bfdec_add(bfdec_t *r, const bfdec_t *a, const bfdec_t *b, limb_t prec,
-                     bf_flags_t flags)
-{
-    return bfdec_add_internal(r, a, b, prec, flags, 0);
-}
-
-static int __bfdec_sub(bfdec_t *r, const bfdec_t *a, const bfdec_t *b, limb_t prec,
-                     bf_flags_t flags)
-{
-    return bfdec_add_internal(r, a, b, prec, flags, 1);
-}
-
-int bfdec_add(bfdec_t *r, const bfdec_t *a, const bfdec_t *b, limb_t prec,
-              bf_flags_t flags)
-{
-    return bf_op2((bf_t *)r, (bf_t *)a, (bf_t *)b, prec, flags,
-                  (bf_op2_func_t *)__bfdec_add);
-}
-
-int bfdec_sub(bfdec_t *r, const bfdec_t *a, const bfdec_t *b, limb_t prec,
-              bf_flags_t flags)
-{
-    return bf_op2((bf_t *)r, (bf_t *)a, (bf_t *)b, prec, flags,
-                  (bf_op2_func_t *)__bfdec_sub);
-}
-
-int bfdec_mul(bfdec_t *r, const bfdec_t *a, const bfdec_t *b, limb_t prec,
-              bf_flags_t flags)
-{
-    int ret, r_sign;
-
-    if (a->len < b->len) {
-        const bfdec_t *tmp = a;
-        a = b;
-        b = tmp;
-    }
-    r_sign = a->sign ^ b->sign;
-    /* here b->len <= a->len */
-    if (b->len == 0) {
-        if (a->expn == BF_EXP_NAN || b->expn == BF_EXP_NAN) {
-            bfdec_set_nan(r);
-            ret = 0;
-        } else if (a->expn == BF_EXP_INF || b->expn == BF_EXP_INF) {
-            if ((a->expn == BF_EXP_INF && b->expn == BF_EXP_ZERO) ||
-                (a->expn == BF_EXP_ZERO && b->expn == BF_EXP_INF)) {
-                bfdec_set_nan(r);
-                ret = BF_ST_INVALID_OP;
-            } else {
-                bfdec_set_inf(r, r_sign);
-                ret = 0;
-            }
-        } else {
-            bfdec_set_zero(r, r_sign);
-            ret = 0;
-        }
-    } else {
-        bfdec_t tmp, *r1 = NULL;
-        limb_t a_len, b_len;
-        limb_t *a_tab, *b_tab;
-
-        a_len = a->len;
-        b_len = b->len;
-        a_tab = a->tab;
-        b_tab = b->tab;
-
-        if (r == a || r == b) {
-            bfdec_init(r->ctx, &tmp);
-            r1 = r;
-            r = &tmp;
-        }
-        if (bfdec_resize(r, a_len + b_len)) {
-            bfdec_set_nan(r);
-            ret = BF_ST_MEM_ERROR;
-            goto done;
-        }
-        mp_mul_basecase_dec(r->tab, a_tab, a_len, b_tab, b_len);
-        r->sign = r_sign;
-        r->expn = a->expn + b->expn;
-        ret = bfdec_normalize_and_round(r, prec, flags);
-    done:
-        if (r == &tmp)
-            bfdec_move(r1, &tmp);
-    }
-    return ret;
-}
-
-int bfdec_mul_si(bfdec_t *r, const bfdec_t *a, int64_t b1, limb_t prec,
-                 bf_flags_t flags)
-{
-    bfdec_t b;
-    int ret;
-    bfdec_init(r->ctx, &b);
-    ret = bfdec_set_si(&b, b1);
-    ret |= bfdec_mul(r, a, &b, prec, flags);
-    bfdec_delete(&b);
-    return ret;
-}
-
-int bfdec_add_si(bfdec_t *r, const bfdec_t *a, int64_t b1, limb_t prec,
-                 bf_flags_t flags)
-{
-    bfdec_t b;
-    int ret;
-
-    bfdec_init(r->ctx, &b);
-    ret = bfdec_set_si(&b, b1);
-    ret |= bfdec_add(r, a, &b, prec, flags);
-    bfdec_delete(&b);
-    return ret;
-}
-
-static int __bfdec_div(bfdec_t *r, const bfdec_t *a, const bfdec_t *b,
-                       limb_t prec, bf_flags_t flags)
-{
-    int ret, r_sign;
-    limb_t n, nb, precl;
-
-    r_sign = a->sign ^ b->sign;
-    if (a->expn >= BF_EXP_INF || b->expn >= BF_EXP_INF) {
-        if (a->expn == BF_EXP_NAN || b->expn == BF_EXP_NAN) {
-            bfdec_set_nan(r);
-            return 0;
-        } else if (a->expn == BF_EXP_INF && b->expn == BF_EXP_INF) {
-            bfdec_set_nan(r);
-            return BF_ST_INVALID_OP;
-        } else if (a->expn == BF_EXP_INF) {
-            bfdec_set_inf(r, r_sign);
-            return 0;
-        } else {
-            bfdec_set_zero(r, r_sign);
-            return 0;
-        }
-    } else if (a->expn == BF_EXP_ZERO) {
-        if (b->expn == BF_EXP_ZERO) {
-            bfdec_set_nan(r);
-            return BF_ST_INVALID_OP;
-        } else {
-            bfdec_set_zero(r, r_sign);
-            return 0;
-        }
-    } else if (b->expn == BF_EXP_ZERO) {
-        bfdec_set_inf(r, r_sign);
-        return BF_ST_DIVIDE_ZERO;
-    }
-
-    nb = b->len;
-    if (prec == BF_PREC_INF) {
-        /* infinite precision: return BF_ST_INVALID_OP if not an exact
-           result */
-        /* XXX: check */
-        precl = nb + 1;
-    } else if (flags & BF_FLAG_RADPNT_PREC) {
-        /* number of digits after the decimal point */
-        /* XXX: check (2 extra digits for rounding + 2 digits) */
-        precl = (bf_max(a->expn - b->expn, 0) + 2 +
-                 prec + 2 + LIMB_DIGITS - 1) / LIMB_DIGITS;
-    } else {
-        /* number of limbs of the quotient (2 extra digits for rounding) */
-        precl = (prec + 2 + LIMB_DIGITS - 1) / LIMB_DIGITS;
-    }
-    n = bf_max(a->len, precl);
-
-    {
-        limb_t *taba, na, i;
-        slimb_t d;
-
-        na = n + nb;
-        taba = bf_malloc(r->ctx, (na + 1) * sizeof(limb_t));
-        if (!taba)
-            goto fail;
-        d = na - a->len;
-        memset(taba, 0, d * sizeof(limb_t));
-        memcpy(taba + d, a->tab, a->len * sizeof(limb_t));
-        if (bfdec_resize(r, n + 1))
-            goto fail1;
-        if (mp_div_dec(r->ctx, r->tab, taba, na, b->tab, nb)) {
-        fail1:
-            bf_free(r->ctx, taba);
-            goto fail;
-        }
-        /* see if non zero remainder */
-        for(i = 0; i < nb; i++) {
-            if (taba[i] != 0)
-                break;
-        }
-        bf_free(r->ctx, taba);
-        if (i != nb) {
-            if (prec == BF_PREC_INF) {
-                bfdec_set_nan(r);
-                return BF_ST_INVALID_OP;
-            } else {
-                r->tab[0] |= 1;
-            }
-        }
-        r->expn = a->expn - b->expn + LIMB_DIGITS;
-        r->sign = r_sign;
-        ret = bfdec_normalize_and_round(r, prec, flags);
-    }
-    return ret;
- fail:
-    bfdec_set_nan(r);
-    return BF_ST_MEM_ERROR;
-}
-
-int bfdec_div(bfdec_t *r, const bfdec_t *a, const bfdec_t *b, limb_t prec,
-              bf_flags_t flags)
-{
-    return bf_op2((bf_t *)r, (bf_t *)a, (bf_t *)b, prec, flags,
-                  (bf_op2_func_t *)__bfdec_div);
-}
-
-/* a and b must be finite numbers with a >= 0 and b > 0. 'q' is the
-   integer defined as floor(a/b) and r = a - q * b. */
-static void bfdec_tdivremu(bf_context_t *s, bfdec_t *q, bfdec_t *r,
-                           const bfdec_t *a, const bfdec_t *b)
-{
-    if (bfdec_cmpu(a, b) < 0) {
-        bfdec_set_ui(q, 0);
-        bfdec_set(r, a);
-    } else {
-        bfdec_div(q, a, b, 0, BF_RNDZ | BF_FLAG_RADPNT_PREC);
-        bfdec_mul(r, q, b, BF_PREC_INF, BF_RNDZ);
-        bfdec_sub(r, a, r, BF_PREC_INF, BF_RNDZ);
-    }
-}
-
-/* division and remainder.
-
-   rnd_mode is the rounding mode for the quotient. The additional
-   rounding mode BF_RND_EUCLIDIAN is supported.
-
-   'q' is an integer. 'r' is rounded with prec and flags (prec can be
-   BF_PREC_INF).
-*/
-int bfdec_divrem(bfdec_t *q, bfdec_t *r, const bfdec_t *a, const bfdec_t *b,
-                 limb_t prec, bf_flags_t flags, int rnd_mode)
-{
-    bf_context_t *s = q->ctx;
-    bfdec_t a1_s, *a1 = &a1_s;
-    bfdec_t b1_s, *b1 = &b1_s;
-    bfdec_t r1_s, *r1 = &r1_s;
-    int q_sign, res;
-    bool is_ceil, is_rndn;
-
-    assert(q != a && q != b);
-    assert(r != a && r != b);
-    assert(q != r);
-
-    if (a->len == 0 || b->len == 0) {
-        bfdec_set_zero(q, 0);
-        if (a->expn == BF_EXP_NAN || b->expn == BF_EXP_NAN) {
-            bfdec_set_nan(r);
-            return 0;
-        } else if (a->expn == BF_EXP_INF || b->expn == BF_EXP_ZERO) {
-            bfdec_set_nan(r);
-            return BF_ST_INVALID_OP;
-        } else {
-            bfdec_set(r, a);
-            return bfdec_round(r, prec, flags);
-        }
-    }
-
-    q_sign = a->sign ^ b->sign;
-    is_rndn = (rnd_mode == BF_RNDN || rnd_mode == BF_RNDNA);
-    switch(rnd_mode) {
-    default:
-    case BF_RNDZ:
-    case BF_RNDN:
-    case BF_RNDNA:
-        is_ceil = false;
-        break;
-    case BF_RNDD:
-        is_ceil = q_sign;
-        break;
-    case BF_RNDU:
-        is_ceil = q_sign ^ 1;
-        break;
-    case BF_RNDA:
-        is_ceil = true;
-        break;
-    case BF_DIVREM_EUCLIDIAN:
-        is_ceil = a->sign;
-        break;
-    }
-
-    a1->expn = a->expn;
-    a1->tab = a->tab;
-    a1->len = a->len;
-    a1->sign = 0;
-
-    b1->expn = b->expn;
-    b1->tab = b->tab;
-    b1->len = b->len;
-    b1->sign = 0;
-
-    //    bfdec_print_str("a1", a1);
-    //    bfdec_print_str("b1", b1);
-    /* XXX: could improve to avoid having a large 'q' */
-    bfdec_tdivremu(s, q, r, a1, b1);
-    if (bfdec_is_nan(q) || bfdec_is_nan(r))
-        goto fail;
-    //    bfdec_print_str("q", q);
-    //    bfdec_print_str("r", r);
-
-    if (r->len != 0) {
-        if (is_rndn) {
-            bfdec_init(s, r1);
-            if (bfdec_set(r1, r))
-                goto fail;
-            if (bfdec_mul_si(r1, r1, 2, BF_PREC_INF, BF_RNDZ)) {
-                bfdec_delete(r1);
-                goto fail;
-            }
-            res = bfdec_cmpu(r1, b);
-            bfdec_delete(r1);
-            if (res > 0 ||
-                (res == 0 &&
-                 (rnd_mode == BF_RNDNA ||
-                  (get_digit(q->tab, q->len, q->len * LIMB_DIGITS - q->expn) & 1) != 0))) {
-                goto do_sub_r;
-            }
-        } else if (is_ceil) {
-        do_sub_r:
-            res = bfdec_add_si(q, q, 1, BF_PREC_INF, BF_RNDZ);
-            res |= bfdec_sub(r, r, b1, BF_PREC_INF, BF_RNDZ);
-            if (res & BF_ST_MEM_ERROR)
-                goto fail;
-        }
-    }
-
-    r->sign ^= a->sign;
-    q->sign = q_sign;
-    return bfdec_round(r, prec, flags);
- fail:
-    bfdec_set_nan(q);
-    bfdec_set_nan(r);
-    return BF_ST_MEM_ERROR;
-}
-
-int bfdec_rem(bfdec_t *r, const bfdec_t *a, const bfdec_t *b, limb_t prec,
-              bf_flags_t flags, int rnd_mode)
-{
-    bfdec_t q_s, *q = &q_s;
-    int ret;
-
-    bfdec_init(r->ctx, q);
-    ret = bfdec_divrem(q, r, a, b, prec, flags, rnd_mode);
-    bfdec_delete(q);
-    return ret;
-}
-
-/* convert to integer (infinite precision) */
-int bfdec_rint(bfdec_t *r, int rnd_mode)
-{
-    return bfdec_round(r, 0, rnd_mode | BF_FLAG_RADPNT_PREC);
-}
-
-int bfdec_sqrt(bfdec_t *r, const bfdec_t *a, limb_t prec, bf_flags_t flags)
-{
-    bf_context_t *s = a->ctx;
-    int ret, k;
-    limb_t *a1, v;
-    slimb_t n, n1, prec1;
-    limb_t res;
-
-    assert(r != a);
-
-    if (a->len == 0) {
-        if (a->expn == BF_EXP_NAN) {
-            bfdec_set_nan(r);
-        } else if (a->expn == BF_EXP_INF && a->sign) {
-            goto invalid_op;
-        } else {
-            bfdec_set(r, a);
-        }
-        ret = 0;
-    } else if (a->sign || prec == BF_PREC_INF) {
- invalid_op:
-        bfdec_set_nan(r);
-        ret = BF_ST_INVALID_OP;
-    } else {
-        if (flags & BF_FLAG_RADPNT_PREC) {
-            prec1 = bf_max(floor_div(a->expn + 1, 2) + prec, 1);
-        } else {
-            prec1 = prec;
-        }
-        /* convert the mantissa to an integer with at least 2 *
-           prec + 4 digits */
-        n = (2 * (prec1 + 2) + 2 * LIMB_DIGITS - 1) / (2 * LIMB_DIGITS);
-        if (bfdec_resize(r, n))
-            goto fail;
-        a1 = bf_malloc(s, sizeof(limb_t) * 2 * n);
-        if (!a1)
-            goto fail;
-        n1 = bf_min(2 * n, a->len);
-        memset(a1, 0, (2 * n - n1) * sizeof(limb_t));
-        memcpy(a1 + 2 * n - n1, a->tab + a->len - n1, n1 * sizeof(limb_t));
-        if (a->expn & 1) {
-            res = mp_shr_dec(a1, a1, 2 * n, 1, 0);
-        } else {
-            res = 0;
-        }
-        /* normalize so that a1 >= B^(2*n)/4. Not need for n = 1
-           because mp_sqrtrem2_dec already does it */
-        k = 0;
-        if (n > 1) {
-            v = a1[2 * n - 1];
-            while (v < BF_DEC_BASE / 4) {
-                k++;
-                v *= 4;
-            }
-            if (k != 0)
-                mp_mul1_dec(a1, a1, 2 * n, 1 << (2 * k), 0);
-        }
-        if (mp_sqrtrem_dec(s, r->tab, a1, n)) {
-            bf_free(s, a1);
-            goto fail;
-        }
-        if (k != 0)
-            mp_div1_dec(r->tab, r->tab, n, 1 << k, 0);
-        if (!res) {
-            res = mp_scan_nz(a1, n + 1);
-        }
-        bf_free(s, a1);
-        if (!res) {
-            res = mp_scan_nz(a->tab, a->len - n1);
-        }
-        if (res != 0)
-            r->tab[0] |= 1;
-        r->sign = 0;
-        r->expn = (a->expn + 1) >> 1;
-        ret = bfdec_round(r, prec, flags);
-    }
-    return ret;
- fail:
-    bfdec_set_nan(r);
-    return BF_ST_MEM_ERROR;
-}
-
-/* The rounding mode is always BF_RNDZ. Return BF_ST_OVERFLOW if there
-   is an overflow and 0 otherwise. No memory error is possible. */
-int bfdec_get_int32(int *pres, const bfdec_t *a)
-{
-    uint32_t v;
-    int ret;
-    if (a->expn >= BF_EXP_INF) {
-        ret = 0;
-        if (a->expn == BF_EXP_INF) {
-            v = (uint32_t)INT32_MAX + a->sign;
-             /* XXX: return overflow ? */
-        } else {
-            v = INT32_MAX;
-        }
-    } else if (a->expn <= 0) {
-        v = 0;
-        ret = 0;
-    } else if (a->expn <= 9) {
-        v = fast_shr_dec(a->tab[a->len - 1], LIMB_DIGITS - a->expn);
-        if (a->sign)
-            v = -v;
-        ret = 0;
-    } else if (a->expn == 10) {
-        uint64_t v1;
-        uint32_t v_max;
-#if LIMB_BITS == 64
-        v1 = fast_shr_dec(a->tab[a->len - 1], LIMB_DIGITS - a->expn);
-#else
-        v1 = (uint64_t)a->tab[a->len - 1] * 10 +
-            get_digit(a->tab, a->len, (a->len - 1) * LIMB_DIGITS - 1);
-#endif
-        v_max = (uint32_t)INT32_MAX + a->sign;
-        if (v1 > v_max) {
-            v = v_max;
-            ret = BF_ST_OVERFLOW;
-        } else {
-            v = v1;
-            if (a->sign)
-                v = -v;
-            ret = 0;
-        }
-    } else {
-        v = (uint32_t)INT32_MAX + a->sign;
-        ret = BF_ST_OVERFLOW;
-    }
-    *pres = v;
-    return ret;
-}
-
-/* power to an integer with infinite precision */
-int bfdec_pow_ui(bfdec_t *r, const bfdec_t *a, limb_t b)
-{
-    int ret, n_bits, i;
-
-    assert(r != a);
-    if (b == 0)
-        return bfdec_set_ui(r, 1);
-    ret = bfdec_set(r, a);
-    n_bits = LIMB_BITS - clz(b);
-    for(i = n_bits - 2; i >= 0; i--) {
-        ret |= bfdec_mul(r, r, r, BF_PREC_INF, BF_RNDZ);
-        if ((b >> i) & 1)
-            ret |= bfdec_mul(r, r, a, BF_PREC_INF, BF_RNDZ);
-    }
-    return ret;
-}
-
-char *bfdec_ftoa(size_t *plen, const bfdec_t *a, limb_t prec, bf_flags_t flags)
-{
-    return bf_ftoa_internal(plen, (const bf_t *)a, 10, prec, flags, true);
-}
-
-int bfdec_atof(bfdec_t *r, const char *str, const char **pnext,
-               limb_t prec, bf_flags_t flags)
-{
-    slimb_t dummy_exp;
-    return bf_atof_internal((bf_t *)r, &dummy_exp, str, pnext, 10, prec,
-                            flags, true);
-}
-
-#endif /* USE_BF_DEC */
-
-#ifdef USE_FFT_MUL
-/***************************************************************/
-/* Integer multiplication with FFT */
-
-/* or LIMB_BITS at bit position 'pos' in tab */
-static inline void put_bits(limb_t *tab, limb_t len, slimb_t pos, limb_t val)
-{
-    limb_t i;
-    int p;
-
-    i = pos >> LIMB_LOG2_BITS;
-    p = pos & (LIMB_BITS - 1);
-    if (i < len)
-        tab[i] |= val << p;
-    if (p != 0) {
-        i++;
-        if (i < len) {
-            tab[i] |= val >> (LIMB_BITS - p);
-        }
-    }
-}
-
-#if defined(__AVX2__)
-
-typedef double NTTLimb;
-
-/* we must have: modulo >= 1 << NTT_MOD_LOG2_MIN */
-#define NTT_MOD_LOG2_MIN 50
-#define NTT_MOD_LOG2_MAX 51
-#define NB_MODS 5
-#define NTT_PROOT_2EXP 39
-static const int ntt_int_bits[NB_MODS] = { 254, 203, 152, 101, 50, };
-
-static const limb_t ntt_mods[NB_MODS] = { 0x00073a8000000001, 0x0007858000000001, 0x0007a38000000001, 0x0007a68000000001, 0x0007fd8000000001,
-};
-
-static const limb_t ntt_proot[2][NB_MODS] = {
-    { 0x00056198d44332c8, 0x0002eb5d640aad39, 0x00047e31eaa35fd0, 0x0005271ac118a150, 0x00075e0ce8442bd5, },
-    { 0x000461169761bcc5, 0x0002dac3cb2da688, 0x0004abc97751e3bf, 0x000656778fc8c485, 0x0000dc6469c269fa, },
-};
-
-static const limb_t ntt_mods_cr[NB_MODS * (NB_MODS - 1) / 2] = {
- 0x00020e4da740da8e, 0x0004c3dc09c09c1d, 0x000063bd097b4271, 0x000799d8f18f18fd,
- 0x0005384222222264, 0x000572b07c1f07fe, 0x00035cd08888889a,
- 0x00066015555557e3, 0x000725960b60b623,
- 0x0002fc1fa1d6ce12,
-};
-
-#else
-
-typedef limb_t NTTLimb;
-
-#if LIMB_BITS == 64
-
-#define NTT_MOD_LOG2_MIN 61
-#define NTT_MOD_LOG2_MAX 62
-#define NB_MODS 5
-#define NTT_PROOT_2EXP 51
-static const int ntt_int_bits[NB_MODS] = { 307, 246, 185, 123, 61, };
-
-static const limb_t ntt_mods[NB_MODS] = { 0x28d8000000000001, 0x2a88000000000001, 0x2ed8000000000001, 0x3508000000000001, 0x3aa8000000000001,
-};
-
-static const limb_t ntt_proot[2][NB_MODS] = {
-    { 0x1b8ea61034a2bea7, 0x21a9762de58206fb, 0x02ca782f0756a8ea, 0x278384537a3e50a1, 0x106e13fee74ce0ab, },
-    { 0x233513af133e13b8, 0x1d13140d1c6f75f1, 0x12cde57f97e3eeda, 0x0d6149e23cbe654f, 0x36cd204f522a1379, },
-};
-
-static const limb_t ntt_mods_cr[NB_MODS * (NB_MODS - 1) / 2] = {
- 0x08a9ed097b425eea, 0x18a44aaaaaaaaab3, 0x2493f57f57f57f5d, 0x126b8d0649a7f8d4,
- 0x09d80ed7303b5ccc, 0x25b8bcf3cf3cf3d5, 0x2ce6ce63398ce638,
- 0x0e31fad40a57eb59, 0x02a3529fd4a7f52f,
- 0x3a5493e93e93e94a,
-};
-
-#elif LIMB_BITS == 32
-
-/* we must have: modulo >= 1 << NTT_MOD_LOG2_MIN */
-#define NTT_MOD_LOG2_MIN 29
-#define NTT_MOD_LOG2_MAX 30
-#define NB_MODS 5
-#define NTT_PROOT_2EXP 20
-static const int ntt_int_bits[NB_MODS] = { 148, 119, 89, 59, 29, };
-
-static const limb_t ntt_mods[NB_MODS] = { 0x0000000032b00001, 0x0000000033700001, 0x0000000036d00001, 0x0000000037300001, 0x000000003e500001,
-};
-
-static const limb_t ntt_proot[2][NB_MODS] = {
-    { 0x0000000032525f31, 0x0000000005eb3b37, 0x00000000246eda9f, 0x0000000035f25901, 0x00000000022f5768, },
-    { 0x00000000051eba1a, 0x00000000107be10e, 0x000000001cd574e0, 0x00000000053806e6, 0x000000002cd6bf98, },
-};
-
-static const limb_t ntt_mods_cr[NB_MODS * (NB_MODS - 1) / 2] = {
- 0x000000000449559a, 0x000000001eba6ca9, 0x000000002ec18e46, 0x000000000860160b,
- 0x000000000d321307, 0x000000000bf51120, 0x000000000f662938,
- 0x000000000932ab3e, 0x000000002f40eef8,
- 0x000000002e760905,
-};
-
-#endif /* LIMB_BITS */
-
-#endif /* !AVX2 */
-
-#if defined(__AVX2__)
-#define NTT_TRIG_K_MAX 18
-#else
-#define NTT_TRIG_K_MAX 19
-#endif
-
-typedef struct BFNTTState {
-    bf_context_t *ctx;
-
-    /* used for mul_mod_fast() */
-    limb_t ntt_mods_div[NB_MODS];
-
-    limb_t ntt_proot_pow[NB_MODS][2][NTT_PROOT_2EXP + 1];
-    limb_t ntt_proot_pow_inv[NB_MODS][2][NTT_PROOT_2EXP + 1];
-    NTTLimb *ntt_trig[NB_MODS][2][NTT_TRIG_K_MAX + 1];
-    /* 1/2^n mod m */
-    limb_t ntt_len_inv[NB_MODS][NTT_PROOT_2EXP + 1][2];
-#if defined(__AVX2__)
-    __m256d ntt_mods_cr_vec[NB_MODS * (NB_MODS - 1) / 2];
-    __m256d ntt_mods_vec[NB_MODS];
-    __m256d ntt_mods_inv_vec[NB_MODS];
-#else
-    limb_t ntt_mods_cr_inv[NB_MODS * (NB_MODS - 1) / 2];
-#endif
-} BFNTTState;
-
-static NTTLimb *get_trig(BFNTTState *s, int k, int inverse, int m_idx);
-
-/* add modulo with up to (LIMB_BITS-1) bit modulo */
-static inline limb_t add_mod(limb_t a, limb_t b, limb_t m)
-{
-    limb_t r;
-    r = a + b;
-    if (r >= m)
-        r -= m;
-    return r;
-}
-
-/* sub modulo with up to LIMB_BITS bit modulo */
-static inline limb_t sub_mod(limb_t a, limb_t b, limb_t m)
-{
-    limb_t r;
-    r = a - b;
-    if (r > a)
-        r += m;
-    return r;
-}
-
-/* return (r0+r1*B) mod m
-   precondition: 0 <= r0+r1*B < 2^(64+NTT_MOD_LOG2_MIN)
-*/
-static inline limb_t mod_fast(dlimb_t r,
-                                limb_t m, limb_t m_inv)
-{
-    limb_t a1, q, t0, r1, r0;
-
-    a1 = r >> NTT_MOD_LOG2_MIN;
-
-    q = ((dlimb_t)a1 * m_inv) >> LIMB_BITS;
-    r = r - (dlimb_t)q * m - m * 2;
-    r1 = r >> LIMB_BITS;
-    t0 = (slimb_t)r1 >> 1;
-    r += m & t0;
-    r0 = r;
-    r1 = r >> LIMB_BITS;
-    r0 += m & r1;
-    return r0;
-}
-
-/* faster version using precomputed modulo inverse.
-   precondition: 0 <= a * b < 2^(64+NTT_MOD_LOG2_MIN) */
-static inline limb_t mul_mod_fast(limb_t a, limb_t b,
-                                    limb_t m, limb_t m_inv)
-{
-    dlimb_t r;
-    r = (dlimb_t)a * (dlimb_t)b;
-    return mod_fast(r, m, m_inv);
-}
-
-static inline limb_t init_mul_mod_fast(limb_t m)
-{
-    dlimb_t t;
-    assert(m < (limb_t)1 << NTT_MOD_LOG2_MAX);
-    assert(m >= (limb_t)1 << NTT_MOD_LOG2_MIN);
-    t = (dlimb_t)1 << (LIMB_BITS + NTT_MOD_LOG2_MIN);
-    return t / m;
-}
-
-/* Faster version used when the multiplier is constant. 0 <= a < 2^64,
-   0 <= b < m. */
-static inline limb_t mul_mod_fast2(limb_t a, limb_t b,
-                                     limb_t m, limb_t b_inv)
-{
-    limb_t r, q;
-
-    q = ((dlimb_t)a * (dlimb_t)b_inv) >> LIMB_BITS;
-    r = a * b - q * m;
-    if (r >= m)
-        r -= m;
-    return r;
-}
-
-/* Faster version used when the multiplier is constant. 0 <= a < 2^64,
-   0 <= b < m. Let r = a * b mod m. The return value is 'r' or 'r +
-   m'. */
-static inline limb_t mul_mod_fast3(limb_t a, limb_t b,
-                                     limb_t m, limb_t b_inv)
-{
-    limb_t r, q;
-
-    q = ((dlimb_t)a * (dlimb_t)b_inv) >> LIMB_BITS;
-    r = a * b - q * m;
-    return r;
-}
-
-static inline limb_t init_mul_mod_fast2(limb_t b, limb_t m)
-{
-    return ((dlimb_t)b << LIMB_BITS) / m;
-}
-
-#ifdef __AVX2__
-
-static inline limb_t ntt_limb_to_int(NTTLimb a, limb_t m)
-{
-    slimb_t v;
-    v = a;
-    if (v < 0)
-        v += m;
-    if (v >= m)
-        v -= m;
-    return v;
-}
-
-static inline NTTLimb int_to_ntt_limb(limb_t a, limb_t m)
-{
-    return (slimb_t)a;
-}
-
-static inline NTTLimb int_to_ntt_limb2(limb_t a, limb_t m)
-{
-    if (a >= (m / 2))
-        a -= m;
-    return (slimb_t)a;
-}
-
-/* return r + m if r < 0 otherwise r. */
-static inline __m256d ntt_mod1(__m256d r, __m256d m)
-{
-    return _mm256_blendv_pd(r, r + m, r);
-}
-
-/* input: abs(r) < 2 * m. Output: abs(r) < m */
-static inline __m256d ntt_mod(__m256d r, __m256d mf, __m256d m2f)
-{
-    return _mm256_blendv_pd(r, r + m2f, r) - mf;
-}
-
-/* input: abs(a*b) < 2 * m^2, output: abs(r) < m */
-static inline __m256d ntt_mul_mod(__m256d a, __m256d b, __m256d mf,
-                                  __m256d m_inv)
-{
-    __m256d r, q, ab1, ab0, qm0, qm1;
-    ab1 = a * b;
-    q = _mm256_round_pd(ab1 * m_inv, 0); /* round to nearest */
-    qm1 = q * mf;
-    qm0 = _mm256_fmsub_pd(q, mf, qm1); /* low part */
-    ab0 = _mm256_fmsub_pd(a, b, ab1); /* low part */
-    r = (ab1 - qm1) + (ab0 - qm0);
-    return r;
-}
-
-static void *bf_aligned_malloc(bf_context_t *s, size_t size, size_t align)
-{
-    void *ptr;
-    void **ptr1;
-    ptr = bf_malloc(s, size + sizeof(void *) + align - 1);
-    if (!ptr)
-        return NULL;
-    ptr1 = (void **)(((uintptr_t)ptr + sizeof(void *) + align - 1) &
-                     ~(align - 1));
-    ptr1[-1] = ptr;
-    return ptr1;
-}
-
-static void bf_aligned_free(bf_context_t *s, void *ptr)
-{
-    if (!ptr)
-        return;
-    bf_free(s, ((void **)ptr)[-1]);
-}
-
-static void *ntt_malloc(BFNTTState *s, size_t size)
-{
-    return bf_aligned_malloc(s->ctx, size, 64);
-}
-
-static void ntt_free(BFNTTState *s, void *ptr)
-{
-    bf_aligned_free(s->ctx, ptr);
-}
-
-static no_inline int ntt_fft(BFNTTState *s,
-                             NTTLimb *out_buf, NTTLimb *in_buf,
-                             NTTLimb *tmp_buf, int fft_len_log2,
-                             int inverse, int m_idx)
-{
-    limb_t nb_blocks, fft_per_block, p, k, n, stride_in, i, j;
-    NTTLimb *tab_in, *tab_out, *tmp, *trig;
-    __m256d m_inv, mf, m2f, c, a0, a1, b0, b1;
-    limb_t m;
-    int l;
-
-    m = ntt_mods[m_idx];
-
-    m_inv = _mm256_set1_pd(1.0 / (double)m);
-    mf = _mm256_set1_pd(m);
-    m2f = _mm256_set1_pd(m * 2);
-
-    n = (limb_t)1 << fft_len_log2;
-    assert(n >= 8);
-    stride_in = n / 2;
-
-    tab_in = in_buf;
-    tab_out = tmp_buf;
-    trig = get_trig(s, fft_len_log2, inverse, m_idx);
-    if (!trig)
-        return -1;
-    p = 0;
-    for(k = 0; k < stride_in; k += 4) {
-        a0 = _mm256_load_pd(&tab_in[k]);
-        a1 = _mm256_load_pd(&tab_in[k + stride_in]);
-        c = _mm256_load_pd(trig);
-        trig += 4;
-        b0 = ntt_mod(a0 + a1, mf, m2f);
-        b1 = ntt_mul_mod(a0 - a1, c, mf, m_inv);
-        a0 = _mm256_permute2f128_pd(b0, b1, 0x20);
-        a1 = _mm256_permute2f128_pd(b0, b1, 0x31);
-        a0 = _mm256_permute4x64_pd(a0, 0xd8);
-        a1 = _mm256_permute4x64_pd(a1, 0xd8);
-        _mm256_store_pd(&tab_out[p], a0);
-        _mm256_store_pd(&tab_out[p + 4], a1);
-        p += 2 * 4;
-    }
-    tmp = tab_in;
-    tab_in = tab_out;
-    tab_out = tmp;
-
-    trig = get_trig(s, fft_len_log2 - 1, inverse, m_idx);
-    if (!trig)
-        return -1;
-    p = 0;
-    for(k = 0; k < stride_in; k += 4) {
-        a0 = _mm256_load_pd(&tab_in[k]);
-        a1 = _mm256_load_pd(&tab_in[k + stride_in]);
-        c = _mm256_setr_pd(trig[0], trig[0], trig[1], trig[1]);
-        trig += 2;
-        b0 = ntt_mod(a0 + a1, mf, m2f);
-        b1 = ntt_mul_mod(a0 - a1, c, mf, m_inv);
-        a0 = _mm256_permute2f128_pd(b0, b1, 0x20);
-        a1 = _mm256_permute2f128_pd(b0, b1, 0x31);
-        _mm256_store_pd(&tab_out[p], a0);
-        _mm256_store_pd(&tab_out[p + 4], a1);
-        p += 2 * 4;
-    }
-    tmp = tab_in;
-    tab_in = tab_out;
-    tab_out = tmp;
-
-    nb_blocks = n / 4;
-    fft_per_block = 4;
-
-    l = fft_len_log2 - 2;
-    while (nb_blocks != 2) {
-        nb_blocks >>= 1;
-        p = 0;
-        k = 0;
-        trig = get_trig(s, l, inverse, m_idx);
-        if (!trig)
-            return -1;
-        for(i = 0; i < nb_blocks; i++) {
-            c = _mm256_set1_pd(trig[0]);
-            trig++;
-            for(j = 0; j < fft_per_block; j += 4) {
-                a0 = _mm256_load_pd(&tab_in[k + j]);
-                a1 = _mm256_load_pd(&tab_in[k + j + stride_in]);
-                b0 = ntt_mod(a0 + a1, mf, m2f);
-                b1 = ntt_mul_mod(a0 - a1, c, mf, m_inv);
-                _mm256_store_pd(&tab_out[p + j], b0);
-                _mm256_store_pd(&tab_out[p + j + fft_per_block], b1);
-            }
-            k += fft_per_block;
-            p += 2 * fft_per_block;
-        }
-        fft_per_block <<= 1;
-        l--;
-        tmp = tab_in;
-        tab_in = tab_out;
-        tab_out = tmp;
-    }
-
-    tab_out = out_buf;
-    for(k = 0; k < stride_in; k += 4) {
-        a0 = _mm256_load_pd(&tab_in[k]);
-        a1 = _mm256_load_pd(&tab_in[k + stride_in]);
-        b0 = ntt_mod(a0 + a1, mf, m2f);
-        b1 = ntt_mod(a0 - a1, mf, m2f);
-        _mm256_store_pd(&tab_out[k], b0);
-        _mm256_store_pd(&tab_out[k + stride_in], b1);
-    }
-    return 0;
-}
-
-static void ntt_vec_mul(BFNTTState *s,
-                        NTTLimb *tab1, NTTLimb *tab2, limb_t fft_len_log2,
-                        int k_tot, int m_idx)
-{
-    limb_t i, c_inv, n, m;
-    __m256d m_inv, mf, a, b, c;
-
-    m = ntt_mods[m_idx];
-    c_inv = s->ntt_len_inv[m_idx][k_tot][0];
-    m_inv = _mm256_set1_pd(1.0 / (double)m);
-    mf = _mm256_set1_pd(m);
-    c = _mm256_set1_pd(int_to_ntt_limb(c_inv, m));
-    n = (limb_t)1 << fft_len_log2;
-    for(i = 0; i < n; i += 4) {
-        a = _mm256_load_pd(&tab1[i]);
-        b = _mm256_load_pd(&tab2[i]);
-        a = ntt_mul_mod(a, b, mf, m_inv);
-        a = ntt_mul_mod(a, c, mf, m_inv);
-        _mm256_store_pd(&tab1[i], a);
-    }
-}
-
-static no_inline void mul_trig(NTTLimb *buf,
-                               limb_t n, limb_t c1, limb_t m, limb_t m_inv1)
-{
-    limb_t i, c2, c3, c4;
-    __m256d c, c_mul, a0, mf, m_inv;
-    assert(n >= 2);
-
-    mf = _mm256_set1_pd(m);
-    m_inv = _mm256_set1_pd(1.0 / (double)m);
-
-    c2 = mul_mod_fast(c1, c1, m, m_inv1);
-    c3 = mul_mod_fast(c2, c1, m, m_inv1);
-    c4 = mul_mod_fast(c2, c2, m, m_inv1);
-    c = _mm256_setr_pd(1, int_to_ntt_limb(c1, m),
-                       int_to_ntt_limb(c2, m), int_to_ntt_limb(c3, m));
-    c_mul = _mm256_set1_pd(int_to_ntt_limb(c4, m));
-    for(i = 0; i < n; i += 4) {
-        a0 = _mm256_load_pd(&buf[i]);
-        a0 = ntt_mul_mod(a0, c, mf, m_inv);
-        _mm256_store_pd(&buf[i], a0);
-        c = ntt_mul_mod(c, c_mul, mf, m_inv);
-    }
-}
-
-#else
-
-static void *ntt_malloc(BFNTTState *s, size_t size)
-{
-    return bf_malloc(s->ctx, size);
-}
-
-static void ntt_free(BFNTTState *s, void *ptr)
-{
-    bf_free(s->ctx, ptr);
-}
-
-static inline limb_t ntt_limb_to_int(NTTLimb a, limb_t m)
-{
-    if (a >= m)
-        a -= m;
-    return a;
-}
-
-static inline NTTLimb int_to_ntt_limb(slimb_t a, limb_t m)
-{
-    return a;
-}
-
-static no_inline int ntt_fft(BFNTTState *s, NTTLimb *out_buf, NTTLimb *in_buf,
-                             NTTLimb *tmp_buf, int fft_len_log2,
-                             int inverse, int m_idx)
-{
-    limb_t nb_blocks, fft_per_block, p, k, n, stride_in, i, j, m, m2;
-    NTTLimb *tab_in, *tab_out, *tmp, a0, a1, b0, b1, c, *trig, c_inv;
-    int l;
-
-    m = ntt_mods[m_idx];
-    m2 = 2 * m;
-    n = (limb_t)1 << fft_len_log2;
-    nb_blocks = n;
-    fft_per_block = 1;
-    stride_in = n / 2;
-    tab_in = in_buf;
-    tab_out = tmp_buf;
-    l = fft_len_log2;
-    while (nb_blocks != 2) {
-        nb_blocks >>= 1;
-        p = 0;
-        k = 0;
-        trig = get_trig(s, l, inverse, m_idx);
-        if (!trig)
-            return -1;
-        for(i = 0; i < nb_blocks; i++) {
-            c = trig[0];
-            c_inv = trig[1];
-            trig += 2;
-            for(j = 0; j < fft_per_block; j++) {
-                a0 = tab_in[k + j];
-                a1 = tab_in[k + j + stride_in];
-                b0 = add_mod(a0, a1, m2);
-                b1 = a0 - a1 + m2;
-                b1 = mul_mod_fast3(b1, c, m, c_inv);
-                tab_out[p + j] = b0;
-                tab_out[p + j + fft_per_block] = b1;
-            }
-            k += fft_per_block;
-            p += 2 * fft_per_block;
-        }
-        fft_per_block <<= 1;
-        l--;
-        tmp = tab_in;
-        tab_in = tab_out;
-        tab_out = tmp;
-    }
-    /* no twiddle in last step */
-    tab_out = out_buf;
-    for(k = 0; k < stride_in; k++) {
-        a0 = tab_in[k];
-        a1 = tab_in[k + stride_in];
-        b0 = add_mod(a0, a1, m2);
-        b1 = sub_mod(a0, a1, m2);
-        tab_out[k] = b0;
-        tab_out[k + stride_in] = b1;
-    }
-    return 0;
-}
-
-static void ntt_vec_mul(BFNTTState *s,
-                        NTTLimb *tab1, NTTLimb *tab2, int fft_len_log2,
-                        int k_tot, int m_idx)
-{
-    limb_t i, norm, norm_inv, a, n, m, m_inv;
-
-    m = ntt_mods[m_idx];
-    m_inv = s->ntt_mods_div[m_idx];
-    norm = s->ntt_len_inv[m_idx][k_tot][0];
-    norm_inv = s->ntt_len_inv[m_idx][k_tot][1];
-    n = (limb_t)1 << fft_len_log2;
-    for(i = 0; i < n; i++) {
-        a = tab1[i];
-        /* need to reduce the range so that the product is <
-           2^(LIMB_BITS+NTT_MOD_LOG2_MIN) */
-        if (a >= m)
-            a -= m;
-        a = mul_mod_fast(a, tab2[i], m, m_inv);
-        a = mul_mod_fast3(a, norm, m, norm_inv);
-        tab1[i] = a;
-    }
-}
-
-static no_inline void mul_trig(NTTLimb *buf,
-                               limb_t n, limb_t c_mul, limb_t m, limb_t m_inv)
-{
-    limb_t i, c0, c_mul_inv;
-
-    c0 = 1;
-    c_mul_inv = init_mul_mod_fast2(c_mul, m);
-    for(i = 0; i < n; i++) {
-        buf[i] = mul_mod_fast(buf[i], c0, m, m_inv);
-        c0 = mul_mod_fast2(c0, c_mul, m, c_mul_inv);
-    }
-}
-
-#endif /* !AVX2 */
-
-static no_inline NTTLimb *get_trig(BFNTTState *s,
-                                   int k, int inverse, int m_idx)
-{
-    NTTLimb *tab;
-    limb_t i, n2, c, c_mul, m, c_mul_inv;
-
-    if (k > NTT_TRIG_K_MAX)
-        return NULL;
-
-    tab = s->ntt_trig[m_idx][inverse][k];
-    if (tab)
-        return tab;
-    n2 = (limb_t)1 << (k - 1);
-    m = ntt_mods[m_idx];
-#ifdef __AVX2__
-    tab = ntt_malloc(s, sizeof(NTTLimb) * n2);
-#else
-    tab = ntt_malloc(s, sizeof(NTTLimb) * n2 * 2);
-#endif
-    if (!tab)
-        return NULL;
-    c = 1;
-    c_mul = s->ntt_proot_pow[m_idx][inverse][k];
-    c_mul_inv = s->ntt_proot_pow_inv[m_idx][inverse][k];
-    for(i = 0; i < n2; i++) {
-#ifdef __AVX2__
-        tab[i] = int_to_ntt_limb2(c, m);
-#else
-        tab[2 * i] = int_to_ntt_limb(c, m);
-        tab[2 * i + 1] = init_mul_mod_fast2(c, m);
-#endif
-        c = mul_mod_fast2(c, c_mul, m, c_mul_inv);
-    }
-    s->ntt_trig[m_idx][inverse][k] = tab;
-    return tab;
-}
-
-void fft_clear_cache(bf_context_t *s1)
-{
-    int m_idx, inverse, k;
-    BFNTTState *s = s1->ntt_state;
-    if (s) {
-        for(m_idx = 0; m_idx < NB_MODS; m_idx++) {
-            for(inverse = 0; inverse < 2; inverse++) {
-                for(k = 0; k < NTT_TRIG_K_MAX + 1; k++) {
-                    if (s->ntt_trig[m_idx][inverse][k]) {
-                        ntt_free(s, s->ntt_trig[m_idx][inverse][k]);
-                        s->ntt_trig[m_idx][inverse][k] = NULL;
-                    }
-                }
-            }
-        }
-#if defined(__AVX2__)
-        bf_aligned_free(s1, s);
-#else
-        bf_free(s1, s);
-#endif
-        s1->ntt_state = NULL;
-    }
-}
-
-#define STRIP_LEN 16
-
-/* dst = buf1, src = buf2 */
-static int ntt_fft_partial(BFNTTState *s, NTTLimb *buf1,
-                           int k1, int k2, limb_t n1, limb_t n2, int inverse,
-                           limb_t m_idx)
-{
-    limb_t i, j, c_mul, c0, m, m_inv, strip_len, l;
-    NTTLimb *buf2, *buf3;
-
-    buf2 = NULL;
-    buf3 = ntt_malloc(s, sizeof(NTTLimb) * n1);
-    if (!buf3)
-        goto fail;
-    if (k2 == 0) {
-        if (ntt_fft(s, buf1, buf1, buf3, k1, inverse, m_idx))
-            goto fail;
-    } else {
-        strip_len = STRIP_LEN;
-        buf2 = ntt_malloc(s, sizeof(NTTLimb) * n1 * strip_len);
-        if (!buf2)
-            goto fail;
-        m = ntt_mods[m_idx];
-        m_inv = s->ntt_mods_div[m_idx];
-        c0 = s->ntt_proot_pow[m_idx][inverse][k1 + k2];
-        c_mul = 1;
-        assert((n2 % strip_len) == 0);
-        for(j = 0; j < n2; j += strip_len) {
-            for(i = 0; i < n1; i++) {
-                for(l = 0; l < strip_len; l++) {
-                    buf2[i + l * n1] = buf1[i * n2 + (j + l)];
-                }
-            }
-            for(l = 0; l < strip_len; l++) {
-                if (inverse)
-                    mul_trig(buf2 + l * n1, n1, c_mul, m, m_inv);
-                if (ntt_fft(s, buf2 + l * n1, buf2 + l * n1, buf3, k1, inverse, m_idx))
-                    goto fail;
-                if (!inverse)
-                    mul_trig(buf2 + l * n1, n1, c_mul, m, m_inv);
-                c_mul = mul_mod_fast(c_mul, c0, m, m_inv);
-            }
-
-            for(i = 0; i < n1; i++) {
-                for(l = 0; l < strip_len; l++) {
-                    buf1[i * n2 + (j + l)] = buf2[i + l *n1];
-                }
-            }
-        }
-        ntt_free(s, buf2);
-    }
-    ntt_free(s, buf3);
-    return 0;
- fail:
-    ntt_free(s, buf2);
-    ntt_free(s, buf3);
-    return -1;
-}
-
-
-/* dst = buf1, src = buf2, tmp = buf3 */
-static int ntt_conv(BFNTTState *s, NTTLimb *buf1, NTTLimb *buf2,
-                    int k, int k_tot, limb_t m_idx)
-{
-    limb_t n1, n2, i;
-    int k1, k2;
-
-    if (k <= NTT_TRIG_K_MAX) {
-        k1 = k;
-    } else {
-        /* recursive split of the FFT */
-        k1 = bf_min(k / 2, NTT_TRIG_K_MAX);
-    }
-    k2 = k - k1;
-    n1 = (limb_t)1 << k1;
-    n2 = (limb_t)1 << k2;
-
-    if (ntt_fft_partial(s, buf1, k1, k2, n1, n2, 0, m_idx))
-        return -1;
-    if (ntt_fft_partial(s, buf2, k1, k2, n1, n2, 0, m_idx))
-        return -1;
-    if (k2 == 0) {
-        ntt_vec_mul(s, buf1, buf2, k, k_tot, m_idx);
-    } else {
-        for(i = 0; i < n1; i++) {
-            ntt_conv(s, buf1 + i * n2, buf2 + i * n2, k2, k_tot, m_idx);
-        }
-    }
-    if (ntt_fft_partial(s, buf1, k1, k2, n1, n2, 1, m_idx))
-        return -1;
-    return 0;
-}
-
-
-static no_inline void limb_to_ntt(BFNTTState *s,
-                                  NTTLimb *tabr, limb_t fft_len,
-                                  const limb_t *taba, limb_t a_len, int dpl,
-                                  int first_m_idx, int nb_mods)
-{
-    slimb_t i, n;
-    dlimb_t a, b;
-    int j, shift;
-    limb_t base_mask1, a0, a1, a2, r, m, m_inv;
-
-    memset(tabr, 0, sizeof(NTTLimb) * fft_len * nb_mods);
-    shift = dpl & (LIMB_BITS - 1);
-    if (shift == 0)
-        base_mask1 = -1;
-    else
-        base_mask1 = ((limb_t)1 << shift) - 1;
-    n = bf_min(fft_len, (a_len * LIMB_BITS + dpl - 1) / dpl);
-    for(i = 0; i < n; i++) {
-        a0 = get_bits(taba, a_len, i * dpl);
-        if (dpl <= LIMB_BITS) {
-            a0 &= base_mask1;
-            a = a0;
-        } else {
-            a1 = get_bits(taba, a_len, i * dpl + LIMB_BITS);
-            if (dpl <= (LIMB_BITS + NTT_MOD_LOG2_MIN)) {
-                a = a0 | ((dlimb_t)(a1 & base_mask1) << LIMB_BITS);
-            } else {
-                if (dpl > 2 * LIMB_BITS) {
-                    a2 = get_bits(taba, a_len, i * dpl + LIMB_BITS * 2) &
-                        base_mask1;
-                } else {
-                    a1 &= base_mask1;
-                    a2 = 0;
-                }
-                //            printf("a=0x%016lx%016lx%016lx\n", a2, a1, a0);
-                a = (a0 >> (LIMB_BITS - NTT_MOD_LOG2_MAX + NTT_MOD_LOG2_MIN)) |
-                    ((dlimb_t)a1 << (NTT_MOD_LOG2_MAX - NTT_MOD_LOG2_MIN)) |
-                    ((dlimb_t)a2 << (LIMB_BITS + NTT_MOD_LOG2_MAX - NTT_MOD_LOG2_MIN));
-                a0 &= ((limb_t)1 << (LIMB_BITS - NTT_MOD_LOG2_MAX + NTT_MOD_LOG2_MIN)) - 1;
-            }
-        }
-        for(j = 0; j < nb_mods; j++) {
-            m = ntt_mods[first_m_idx + j];
-            m_inv = s->ntt_mods_div[first_m_idx + j];
-            r = mod_fast(a, m, m_inv);
-            if (dpl > (LIMB_BITS + NTT_MOD_LOG2_MIN)) {
-                b = ((dlimb_t)r << (LIMB_BITS - NTT_MOD_LOG2_MAX + NTT_MOD_LOG2_MIN)) | a0;
-                r = mod_fast(b, m, m_inv);
-            }
-            tabr[i + j * fft_len] = int_to_ntt_limb(r, m);
-        }
-    }
-}
-
-#if defined(__AVX2__)
-
-#define VEC_LEN 4
-
-typedef union {
-    __m256d v;
-    double d[4];
-} VecUnion;
-
-static no_inline void ntt_to_limb(BFNTTState *s, limb_t *tabr, limb_t r_len,
-                                  const NTTLimb *buf, int fft_len_log2, int dpl,
-                                  int nb_mods)
-{
-    const limb_t *mods = ntt_mods + NB_MODS - nb_mods;
-    const __m256d *mods_cr_vec, *mf, *m_inv;
-    VecUnion y[NB_MODS];
-    limb_t u[NB_MODS], carry[NB_MODS], fft_len, base_mask1, r;
-    slimb_t i, len, pos;
-    int j, k, l, shift, n_limb1, p;
-    dlimb_t t;
-
-    j = NB_MODS * (NB_MODS - 1) / 2 - nb_mods * (nb_mods - 1) / 2;
-    mods_cr_vec = s->ntt_mods_cr_vec + j;
-    mf = s->ntt_mods_vec + NB_MODS - nb_mods;
-    m_inv = s->ntt_mods_inv_vec + NB_MODS - nb_mods;
-
-    shift = dpl & (LIMB_BITS - 1);
-    if (shift == 0)
-        base_mask1 = -1;
-    else
-        base_mask1 = ((limb_t)1 << shift) - 1;
-    n_limb1 = ((unsigned)dpl - 1) / LIMB_BITS;
-    for(j = 0; j < NB_MODS; j++)
-        carry[j] = 0;
-    for(j = 0; j < NB_MODS; j++)
-        u[j] = 0; /* avoid warnings */
-    memset(tabr, 0, sizeof(limb_t) * r_len);
-    fft_len = (limb_t)1 << fft_len_log2;
-    len = bf_min(fft_len, (r_len * LIMB_BITS + dpl - 1) / dpl);
-    len = (len + VEC_LEN - 1) & ~(VEC_LEN - 1);
-    i = 0;
-    while (i < len) {
-        for(j = 0; j < nb_mods; j++)
-            y[j].v = *(__m256d *)&buf[i + fft_len * j];
-
-        /* Chinese remainder to get mixed radix representation */
-        l = 0;
-        for(j = 0; j < nb_mods - 1; j++) {
-            y[j].v = ntt_mod1(y[j].v, mf[j]);
-            for(k = j + 1; k < nb_mods; k++) {
-                y[k].v = ntt_mul_mod(y[k].v - y[j].v,
-                                     mods_cr_vec[l], mf[k], m_inv[k]);
-                l++;
-            }
-        }
-        y[j].v = ntt_mod1(y[j].v, mf[j]);
-
-        for(p = 0; p < VEC_LEN; p++) {
-            /* back to normal representation */
-            u[0] = (int64_t)y[nb_mods - 1].d[p];
+    int radix_bits, l;
+    if (likely(radix == 10))
+        return u64toa(buf, n);
+    if ((radix & (radix - 1)) == 0) {
+        radix_bits = 31 - clz32(radix);
+        if (n == 0)
             l = 1;
-            for(j = nb_mods - 2; j >= 1; j--) {
-                r = (int64_t)y[j].d[p];
-                for(k = 0; k < l; k++) {
-                    t = (dlimb_t)u[k] * mods[j] + r;
-                    r = t >> LIMB_BITS;
-                    u[k] = t;
-                }
-                u[l] = r;
-                l++;
-            }
-            /* XXX: for nb_mods = 5, l should be 4 */
-
-            /* last step adds the carry */
-            r = (int64_t)y[0].d[p];
-            for(k = 0; k < l; k++) {
-                t = (dlimb_t)u[k] * mods[j] + r + carry[k];
-                r = t >> LIMB_BITS;
-                u[k] = t;
-            }
-            u[l] = r + carry[l];
-
-            /* write the digits */
-            pos = i * dpl;
-            for(j = 0; j < n_limb1; j++) {
-                put_bits(tabr, r_len, pos, u[j]);
-                pos += LIMB_BITS;
-            }
-            put_bits(tabr, r_len, pos, u[n_limb1] & base_mask1);
-            /* shift by dpl digits and set the carry */
-            if (shift == 0) {
-                for(j = n_limb1 + 1; j < nb_mods; j++)
-                    carry[j - (n_limb1 + 1)] = u[j];
-            } else {
-                for(j = n_limb1; j < nb_mods - 1; j++) {
-                    carry[j - n_limb1] = (u[j] >> shift) |
-                        (u[j + 1] << (LIMB_BITS - shift));
-                }
-                carry[nb_mods - 1 - n_limb1] = u[nb_mods - 1] >> shift;
-            }
-            i++;
-        }
-    }
-}
-#else
-static no_inline void ntt_to_limb(BFNTTState *s, limb_t *tabr, limb_t r_len,
-                                  const NTTLimb *buf, int fft_len_log2, int dpl,
-                                  int nb_mods)
-{
-    const limb_t *mods = ntt_mods + NB_MODS - nb_mods;
-    const limb_t *mods_cr, *mods_cr_inv;
-    limb_t y[NB_MODS], u[NB_MODS], carry[NB_MODS], fft_len, base_mask1, r;
-    slimb_t i, len, pos;
-    int j, k, l, shift, n_limb1;
-    dlimb_t t;
-
-    j = NB_MODS * (NB_MODS - 1) / 2 - nb_mods * (nb_mods - 1) / 2;
-    mods_cr = ntt_mods_cr + j;
-    mods_cr_inv = s->ntt_mods_cr_inv + j;
-
-    shift = dpl & (LIMB_BITS - 1);
-    if (shift == 0)
-        base_mask1 = -1;
-    else
-        base_mask1 = ((limb_t)1 << shift) - 1;
-    n_limb1 = ((unsigned)dpl - 1) / LIMB_BITS;
-    for(j = 0; j < NB_MODS; j++)
-        carry[j] = 0;
-    for(j = 0; j < NB_MODS; j++)
-        u[j] = 0; /* avoid warnings */
-    memset(tabr, 0, sizeof(limb_t) * r_len);
-    fft_len = (limb_t)1 << fft_len_log2;
-    len = bf_min(fft_len, (r_len * LIMB_BITS + dpl - 1) / dpl);
-    for(i = 0; i < len; i++) {
-        for(j = 0; j < nb_mods; j++)  {
-            y[j] = ntt_limb_to_int(buf[i + fft_len * j], mods[j]);
-        }
-
-        /* Chinese remainder to get mixed radix representation */
-        l = 0;
-        for(j = 0; j < nb_mods - 1; j++) {
-            for(k = j + 1; k < nb_mods; k++) {
-                limb_t m;
-                m = mods[k];
-                /* Note: there is no overflow in the sub_mod() because
-                   the modulos are sorted by increasing order */
-                y[k] = mul_mod_fast2(y[k] - y[j] + m,
-                                     mods_cr[l], m, mods_cr_inv[l]);
-                l++;
-            }
-        }
-
-        /* back to normal representation */
-        u[0] = y[nb_mods - 1];
-        l = 1;
-        for(j = nb_mods - 2; j >= 1; j--) {
-            r = y[j];
-            for(k = 0; k < l; k++) {
-                t = (dlimb_t)u[k] * mods[j] + r;
-                r = t >> LIMB_BITS;
-                u[k] = t;
-            }
-            u[l] = r;
-            l++;
-        }
-
-        /* last step adds the carry */
-        r = y[0];
-        for(k = 0; k < l; k++) {
-            t = (dlimb_t)u[k] * mods[j] + r + carry[k];
-            r = t >> LIMB_BITS;
-            u[k] = t;
-        }
-        u[l] = r + carry[l];
-
-        /* write the digits */
-        pos = i * dpl;
-        for(j = 0; j < n_limb1; j++) {
-            put_bits(tabr, r_len, pos, u[j]);
-            pos += LIMB_BITS;
-        }
-        put_bits(tabr, r_len, pos, u[n_limb1] & base_mask1);
-        /* shift by dpl digits and set the carry */
-        if (shift == 0) {
-            for(j = n_limb1 + 1; j < nb_mods; j++)
-                carry[j - (n_limb1 + 1)] = u[j];
-        } else {
-            for(j = n_limb1; j < nb_mods - 1; j++) {
-                carry[j - n_limb1] = (u[j] >> shift) |
-                    (u[j + 1] << (LIMB_BITS - shift));
-            }
-            carry[nb_mods - 1 - n_limb1] = u[nb_mods - 1] >> shift;
-        }
-    }
-}
-#endif
-
-static int ntt_static_init(bf_context_t *s1)
-{
-    BFNTTState *s;
-    int inverse, i, j, k, l;
-    limb_t c, c_inv, c_inv2, m, m_inv;
-
-    if (s1->ntt_state)
-        return 0;
-#if defined(__AVX2__)
-    s = bf_aligned_malloc(s1, sizeof(*s), 64);
-#else
-    s = bf_malloc(s1, sizeof(*s));
-#endif
-    if (!s)
-        return -1;
-    memset(s, 0, sizeof(*s));
-    s1->ntt_state = s;
-    s->ctx = s1;
-
-    for(j = 0; j < NB_MODS; j++) {
-        m = ntt_mods[j];
-        m_inv = init_mul_mod_fast(m);
-        s->ntt_mods_div[j] = m_inv;
-#if defined(__AVX2__)
-        s->ntt_mods_vec[j] = _mm256_set1_pd(m);
-        s->ntt_mods_inv_vec[j] = _mm256_set1_pd(1.0 / (double)m);
-#endif
-        c_inv2 = (m + 1) / 2; /* 1/2 */
-        c_inv = 1;
-        for(i = 0; i <= NTT_PROOT_2EXP; i++) {
-            s->ntt_len_inv[j][i][0] = c_inv;
-            s->ntt_len_inv[j][i][1] = init_mul_mod_fast2(c_inv, m);
-            c_inv = mul_mod_fast(c_inv, c_inv2, m, m_inv);
-        }
-
-        for(inverse = 0; inverse < 2; inverse++) {
-            c = ntt_proot[inverse][j];
-            for(i = 0; i < NTT_PROOT_2EXP; i++) {
-                s->ntt_proot_pow[j][inverse][NTT_PROOT_2EXP - i] = c;
-                s->ntt_proot_pow_inv[j][inverse][NTT_PROOT_2EXP - i] =
-                    init_mul_mod_fast2(c, m);
-                c = mul_mod_fast(c, c, m, m_inv);
-            }
-        }
-    }
-
-    l = 0;
-    for(j = 0; j < NB_MODS - 1; j++) {
-        for(k = j + 1; k < NB_MODS; k++) {
-#if defined(__AVX2__)
-            s->ntt_mods_cr_vec[l] = _mm256_set1_pd(int_to_ntt_limb2(ntt_mods_cr[l],
-                                                                    ntt_mods[k]));
-#else
-            s->ntt_mods_cr_inv[l] = init_mul_mod_fast2(ntt_mods_cr[l],
-                                                       ntt_mods[k]);
-#endif
-            l++;
-        }
-    }
-    return 0;
-}
-
-int bf_get_fft_size(int *pdpl, int *pnb_mods, limb_t len)
-{
-    int dpl, fft_len_log2, n_bits, nb_mods, dpl_found, fft_len_log2_found;
-    int int_bits, nb_mods_found;
-    limb_t cost, min_cost;
-
-    min_cost = -1;
-    dpl_found = 0;
-    nb_mods_found = 4;
-    fft_len_log2_found = 0;
-    for(nb_mods = 3; nb_mods <= NB_MODS; nb_mods++) {
-        int_bits = ntt_int_bits[NB_MODS - nb_mods];
-        dpl = bf_min((int_bits - 4) / 2,
-                     2 * LIMB_BITS + 2 * NTT_MOD_LOG2_MIN - NTT_MOD_LOG2_MAX);
-        for(;;) {
-            fft_len_log2 = ceil_log2((len * LIMB_BITS + dpl - 1) / dpl);
-            if (fft_len_log2 > NTT_PROOT_2EXP)
-                goto next;
-            n_bits = fft_len_log2 + 2 * dpl;
-            if (n_bits <= int_bits) {
-                cost = ((limb_t)(fft_len_log2 + 1) << fft_len_log2) * nb_mods;
-                //                printf("n=%d dpl=%d: cost=%" PRId64 "\n", nb_mods, dpl, (int64_t)cost);
-                if (cost < min_cost) {
-                    min_cost = cost;
-                    dpl_found = dpl;
-                    nb_mods_found = nb_mods;
-                    fft_len_log2_found = fft_len_log2;
-                }
-                break;
-            }
-            dpl--;
-            if (dpl == 0)
-                break;
-        }
-    next: ;
-    }
-    if (!dpl_found)
-        abort();
-    /* limit dpl if possible to reduce fixed cost of limb/NTT conversion */
-    if (dpl_found > (LIMB_BITS + NTT_MOD_LOG2_MIN) &&
-        ((limb_t)(LIMB_BITS + NTT_MOD_LOG2_MIN) << fft_len_log2_found) >=
-        len * LIMB_BITS) {
-        dpl_found = LIMB_BITS + NTT_MOD_LOG2_MIN;
-    }
-    *pnb_mods = nb_mods_found;
-    *pdpl = dpl_found;
-    return fft_len_log2_found;
-}
-
-/* return 0 if OK, -1 if memory error */
-static no_inline int fft_mul(bf_context_t *s1,
-                             bf_t *res, limb_t *a_tab, limb_t a_len,
-                             limb_t *b_tab, limb_t b_len, int mul_flags)
-{
-    BFNTTState *s;
-    int dpl, fft_len_log2, j, nb_mods, reduced_mem;
-    slimb_t len, fft_len;
-    NTTLimb *buf1, *buf2, *ptr;
-#if defined(USE_MUL_CHECK)
-    limb_t ha, hb, hr, h_ref;
-#endif
-
-    if (ntt_static_init(s1))
-        return -1;
-    s = s1->ntt_state;
-
-    /* find the optimal number of digits per limb (dpl) */
-    len = a_len + b_len;
-    fft_len_log2 = bf_get_fft_size(&dpl, &nb_mods, len);
-    fft_len = (uint64_t)1 << fft_len_log2;
-    //    printf("len=%" PRId64 " fft_len_log2=%d dpl=%d\n", len, fft_len_log2, dpl);
-#if defined(USE_MUL_CHECK)
-    ha = mp_mod1(a_tab, a_len, BF_CHKSUM_MOD, 0);
-    hb = mp_mod1(b_tab, b_len, BF_CHKSUM_MOD, 0);
-#endif
-    if ((mul_flags & (FFT_MUL_R_OVERLAP_A | FFT_MUL_R_OVERLAP_B)) == 0) {
-        if (!(mul_flags & FFT_MUL_R_NORESIZE))
-            bf_resize(res, 0);
-    } else if (mul_flags & FFT_MUL_R_OVERLAP_B) {
-        limb_t *tmp_tab, tmp_len;
-        /* it is better to free 'b' first */
-        tmp_tab = a_tab;
-        a_tab = b_tab;
-        b_tab = tmp_tab;
-        tmp_len = a_len;
-        a_len = b_len;
-        b_len = tmp_len;
-    }
-    buf1 = ntt_malloc(s, sizeof(NTTLimb) * fft_len * nb_mods);
-    if (!buf1)
-        return -1;
-    limb_to_ntt(s, buf1, fft_len, a_tab, a_len, dpl,
-                NB_MODS - nb_mods, nb_mods);
-    if ((mul_flags & (FFT_MUL_R_OVERLAP_A | FFT_MUL_R_OVERLAP_B)) ==
-        FFT_MUL_R_OVERLAP_A) {
-        if (!(mul_flags & FFT_MUL_R_NORESIZE))
-            bf_resize(res, 0);
-    }
-    reduced_mem = (fft_len_log2 >= 14);
-    if (!reduced_mem) {
-        buf2 = ntt_malloc(s, sizeof(NTTLimb) * fft_len * nb_mods);
-        if (!buf2)
-            goto fail;
-        limb_to_ntt(s, buf2, fft_len, b_tab, b_len, dpl,
-                    NB_MODS - nb_mods, nb_mods);
-        if (!(mul_flags & FFT_MUL_R_NORESIZE))
-            bf_resize(res, 0); /* in case res == b */
+        else
+            l = (64 - clz64(n) + radix_bits - 1) / radix_bits;
+        u64toa_bin_len(buf, n, radix_bits, l);
+        return l;
     } else {
-        buf2 = ntt_malloc(s, sizeof(NTTLimb) * fft_len);
-        if (!buf2)
-            goto fail;
+        char buf1[41], *q; /* maximum length for radix = 3 */
+        size_t len;
+        int digit;
+        q = buf1 + sizeof(buf1);
+        do {
+            digit = n % radix;
+            n /= radix;
+            if (digit < 10)
+                digit += '0';
+            else
+                digit += 'a' - 10;
+            *--q = digit;
+        } while (n != 0);
+        len = buf1 + sizeof(buf1) - q;
+        memcpy(buf, q, len);
+        return len;
     }
-    for(j = 0; j < nb_mods; j++) {
-        if (reduced_mem) {
-            limb_to_ntt(s, buf2, fft_len, b_tab, b_len, dpl,
-                        NB_MODS - nb_mods + j, 1);
-            ptr = buf2;
-        } else {
-            ptr = buf2 + fft_len * j;
+}
+
+size_t i64toa_radix(char *buf, int64_t n, unsigned int radix)
+{
+    if (n >= 0) {
+        return u64toa_radix(buf, n, radix);
+    } else {
+        buf[0] = '-';
+        return u64toa_radix(buf + 1, -(uint64_t)n, radix) + 1;
+    }
+}
+#endif /* USE_FAST_INT */
+
+static const uint8_t digits_per_limb_table[JS_RADIX_MAX - 1] = {
+#if LIMB_BITS == 32
+32,20,16,13,12,11,10,10, 9, 9, 8, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+#else
+64,40,32,27,24,22,21,20,19,18,17,17,16,16,16,15,15,15,14,14,14,14,13,13,13,13,13,13,13,12,12,12,12,12,12,
+#endif
+};
+
+static const uint32_t radix_base_table[JS_RADIX_MAX - 1] = {
+ 0x00000000, 0xcfd41b91, 0x00000000, 0x48c27395,
+ 0x81bf1000, 0x75db9c97, 0x40000000, 0xcfd41b91,
+ 0x3b9aca00, 0x8c8b6d2b, 0x19a10000, 0x309f1021,
+ 0x57f6c100, 0x98c29b81, 0x00000000, 0x18754571,
+ 0x247dbc80, 0x3547667b, 0x4c4b4000, 0x6b5a6e1d,
+ 0x94ace180, 0xcaf18367, 0x0b640000, 0x0e8d4a51,
+ 0x1269ae40, 0x17179149, 0x1cb91000, 0x23744899,
+ 0x2b73a840, 0x34e63b41, 0x40000000, 0x4cfa3cc1,
+ 0x5c13d840, 0x6d91b519, 0x81bf1000,
+};
+
+/* XXX: remove the table ? */
+static uint8_t dtoa_max_digits_table[JS_RADIX_MAX - 1] = {
+    54, 35, 28, 24, 22, 20, 19, 18, 17, 17, 16, 16, 15, 15, 15, 14, 14, 14, 14, 14, 13, 13, 13, 13, 13, 13, 13, 12, 12, 12, 12, 12, 12, 12, 12,
+};
+
+/* we limit the maximum number of significant digits for atod to about
+   128 bits of precision for non power of two bases. The only
+   requirement for Javascript is at least 20 digits in base 10. For
+   power of two bases, we do an exact rounding in all the cases. */
+static uint8_t atod_max_digits_table[JS_RADIX_MAX - 1] = {
+     64, 80, 32, 55, 49, 45, 21, 40, 38, 37, 35, 34, 33, 32, 16, 31, 30, 30, 29, 29, 28, 28, 27, 27, 27, 26, 26, 26, 26, 25, 12, 25, 25, 24, 24,
+};
+
+/* if abs(d) >= B^max_exponent, it is an overflow */
+static const int16_t max_exponent[JS_RADIX_MAX - 1] = {
+ 1024,   647,   512,   442,   397,   365,   342,   324, 
+  309,   297,   286,   277,   269,   263,   256,   251, 
+  246,   242,   237,   234,   230,   227,   224,   221, 
+  218,   216,   214,   211,   209,   207,   205,   203, 
+  202,   200,   199, 
+};
+
+/* if abs(d) <= B^min_exponent, it is an underflow */
+static const int16_t min_exponent[JS_RADIX_MAX - 1] = {
+-1075,  -679,  -538,  -463,  -416,  -383,  -359,  -340, 
+ -324,  -311,  -300,  -291,  -283,  -276,  -269,  -263, 
+ -258,  -254,  -249,  -245,  -242,  -238,  -235,  -232, 
+ -229,  -227,  -224,  -222,  -220,  -217,  -215,  -214, 
+ -212,  -210,  -208, 
+};
+
+#if 0
+void build_tables(void)
+{
+    int r, j, radix, n, col, i;
+    
+    /* radix_base_table */
+    for(radix = 2; radix <= 36; radix++) {
+        r = 1;
+        for(j = 0; j < digits_per_limb_table[radix - 2]; j++) {
+            r *= radix;
         }
-        if (ntt_conv(s, buf1 + fft_len * j, ptr,
-                     fft_len_log2, fft_len_log2, j + NB_MODS - nb_mods))
-            goto fail;
+        printf(" 0x%08x,", r);
+        if ((radix % 4) == 1)
+            printf("\n");
     }
-    if (!(mul_flags & FFT_MUL_R_NORESIZE))
-        bf_resize(res, 0); /* in case res == b and reduced mem */
-    ntt_free(s, buf2);
-    buf2 = NULL;
-    if (!(mul_flags & FFT_MUL_R_NORESIZE)) {
-        if (bf_resize(res, len))
-            goto fail;
+    printf("\n");
+
+    /* dtoa_max_digits_table */
+    for(radix = 2; radix <= 36; radix++) {
+        /* Note: over estimated when the radix is a power of two */
+        printf(" %d,", 1 + (int)ceil(53.0 / log2(radix)));
     }
-    ntt_to_limb(s, res->tab, len, buf1, fft_len_log2, dpl, nb_mods);
-    ntt_free(s, buf1);
-#if defined(USE_MUL_CHECK)
-    hr = mp_mod1(res->tab, len, BF_CHKSUM_MOD, 0);
-    h_ref = mul_mod(ha, hb, BF_CHKSUM_MOD);
-    if (hr != h_ref) {
-        printf("ntt_mul_error: len=%" PRId_LIMB " fft_len_log2=%d dpl=%d nb_mods=%d\n",
-               len, fft_len_log2, dpl, nb_mods);
-        //        printf("ha=0x" FMT_LIMB" hb=0x" FMT_LIMB " hr=0x" FMT_LIMB " expected=0x" FMT_LIMB "\n", ha, hb, hr, h_ref);
-        exit(1);
+    printf("\n");
+
+    /* atod_max_digits_table */
+    for(radix = 2; radix <= 36; radix++) {
+        if ((radix & (radix - 1)) == 0) {
+            /* 64 bits is more than enough */
+            n = (int)floor(64.0 / log2(radix));
+        } else {
+            n = (int)floor(128.0 / log2(radix));
+        }
+        printf(" %d,", n);
+    }
+    printf("\n");
+
+    printf("static const int16_t max_exponent[JS_RADIX_MAX - 1] = {\n");
+    col = 0;
+    for(radix = 2; radix <= 36; radix++) {
+        printf("%5d, ", (int)ceil(1024 / log2(radix)));
+        if (++col == 8) {
+            col = 0;
+            printf("\n");
+        }
+    }
+    printf("\n};\n\n");
+
+    printf("static const int16_t min_exponent[JS_RADIX_MAX - 1] = {\n");
+    col = 0; 
+    for(radix = 2; radix <= 36; radix++) {
+        printf("%5d, ", (int)floor(-1075 / log2(radix)));
+        if (++col == 8) {
+            col = 0;
+            printf("\n");
+        }
+    }
+    printf("\n};\n\n");
+
+    printf("static const uint32_t pow5_table[16] = {\n");
+    col = 0; 
+    for(i = 2; i <= 17; i++) {
+        r = 1;
+        for(j = 0; j < i; j++) {
+            r *= 5;
+        }
+        printf("0x%08x, ", r);
+        if (++col == 4) {
+            col = 0;
+            printf("\n");
+        }
+    }
+    printf("\n};\n\n");
+
+    /* high part */
+    printf("static const uint8_t pow5h_table[4] = {\n");
+    col = 0; 
+    for(i = 14; i <= 17; i++) {
+        uint64_t r1;
+        r1 = 1;
+        for(j = 0; j < i; j++) {
+            r1 *= 5;
+        }
+        printf("0x%08x, ", (uint32_t)(r1 >> 32));
+        if (++col == 4) {
+            col = 0;
+            printf("\n");
+        }
+    }
+    printf("\n};\n\n");
+}
+#endif
+
+/* n_digits >= 1. 0 <= dot_pos <= n_digits. If dot_pos == n_digits,
+   the dot is not displayed. 'a' is modified. */
+static int output_digits(char *buf,
+                         mpb_t *a, int radix, int n_digits1,
+                         int dot_pos)
+{
+    int n_digits, digits_per_limb, radix_bits, n, len;
+
+    n_digits = n_digits1;
+    if ((radix & (radix - 1)) == 0) {
+        /* radix = 2^radix_bits */
+        radix_bits = 31 - clz32(radix);
+    } else {
+        radix_bits = 0;
+    }
+    digits_per_limb = digits_per_limb_table[radix - 2];
+    if (radix_bits != 0) {
+        for(;;) {
+            n = min_int(n_digits, digits_per_limb);
+            n_digits -= n;
+            u64toa_bin_len(buf + n_digits, a->tab[0], radix_bits, n);
+            if (n_digits == 0)
+                break;
+            mpb_shr_round(a, digits_per_limb * radix_bits, JS_RNDZ);
+        }
+    } else {
+        limb_t r;
+        while (n_digits != 0) {
+            n = min_int(n_digits, digits_per_limb);
+            n_digits -= n;
+            r = mp_div1(a->tab, a->tab, a->len, radix_base_table[radix - 2], 0);
+            mpb_renorm(a);
+            limb_to_a(buf + n_digits, r, radix, n);
+        }
+    }
+
+    /* add the dot */
+    len = n_digits1;
+    if (dot_pos != n_digits1) {
+        memmove(buf + dot_pos + 1, buf + dot_pos, n_digits1 - dot_pos);
+        buf[dot_pos] = '.';
+        len++;
+    }
+    return len;
+}
+
+/* return (a, e_offset) such that a = a * (radix1*2^radix_shift)^f *
+   2^-e_offset. 'f' can be negative. */
+static int mul_pow(mpb_t *a, int radix1, int radix_shift, int f, bool is_int, int e)
+{
+    int e_offset, d, n, n0;
+
+    e_offset = -f * radix_shift;
+    if (radix1 != 1) {
+        d = digits_per_limb_table[radix1 - 2];
+        if (f >= 0) {
+            limb_t h, b;
+            
+            b = 0;
+            n0 = 0;
+            while (f != 0) {
+                n = min_int(f, d);
+                if (n != n0) {
+                    b = pow_ui(radix1, n);
+                    n0 = n;
+                }
+                h = mp_mul1(a->tab, a->tab, a->len, b, 0);
+                if (h != 0) {
+                    a->tab[a->len++] = h;
+                }
+                f -= n;
+            }
+        } else {
+            int extra_bits, l, shift;
+            limb_t r, rem, b, b_inv;
+            
+            f = -f;
+            l = (f + d - 1) / d; /* high bound for the number of limbs (XXX: make it better) */
+            e_offset += l * LIMB_BITS;
+            if (!is_int) {
+                /* at least 'e' bits are needed in the final result for rounding */
+                extra_bits = max_int(e - mpb_floor_log2(a), 0);
+            } else {
+                /* at least two extra bits are needed in the final result
+                   for rounding */
+                extra_bits = max_int(2 + e - e_offset, 0);
+            }
+            e_offset += extra_bits;
+            mpb_shr_round(a, -(l * LIMB_BITS + extra_bits), JS_RNDZ);
+            
+            b = 0;
+            b_inv = 0;
+            shift = 0;
+            n0 = 0;
+            rem = 0;
+            while (f != 0) {
+                n = min_int(f, d);
+                if (n != n0) {
+                    b = pow_ui_inv(&b_inv, &shift, radix1, n);
+                    n0 = n;
+                }
+                r = mp_div1norm(a->tab, a->tab, a->len, b, 0, b_inv, shift);
+                rem |= r;
+                mpb_renorm(a);
+                f -= n;
+            }
+            /* if the remainder is non zero, use it for rounding */
+            a->tab[0] |= (rem != 0);
+        }
+    }
+    return e_offset;
+}
+
+/* tmp1 = round(m*2^e*radix^f). 'tmp0' is a temporary storage */
+static void mul_pow_round(mpb_t *tmp1, uint64_t m, int e, int radix1, int radix_shift, int f,
+                          int rnd_mode)
+{
+    int e_offset;
+
+    mpb_set_u64(tmp1, m);
+    e_offset = mul_pow(tmp1, radix1, radix_shift, f, true, e);
+    mpb_shr_round(tmp1, -e + e_offset, rnd_mode);
+}
+
+/* return round(a*2^e_offset) rounded as a float64. 'a' is modified */
+static uint64_t round_to_d(int *pe, mpb_t *a, int e_offset, int rnd_mode)
+{
+    int e;
+    uint64_t m;
+
+    if (a->tab[0] == 0 && a->len == 1) {
+        /* zero result */
+        m = 0;
+        e = 0; /* don't care */
+    } else {
+        int prec, prec1, e_min;
+        e = mpb_floor_log2(a) + 1 - e_offset;
+        prec1 = 53;
+        e_min = -1021;
+        if (e < e_min) {
+            /* subnormal result or zero */
+            prec = prec1 - (e_min - e);
+        } else {
+            prec = prec1;
+        }
+        mpb_shr_round(a, e + e_offset - prec, rnd_mode);
+        m = mpb_get_u64(a);
+        m <<= (53 - prec);
+        /* mantissa overflow due to rounding */
+        if (m >= (uint64_t)1 << 53) {
+            m >>= 1;
+            e++;
+        }
+    }
+    *pe = e;
+    return m;
+}
+
+/* return (m, e) such that m*2^(e-53) = round(a * radix^f) with 2^52
+   <= m < 2^53 or m = 0.
+   'a' is modified. */
+static uint64_t mul_pow_round_to_d(int *pe, mpb_t *a,
+                                   int radix1, int radix_shift, int f, int rnd_mode)
+{
+    int e_offset;
+
+    e_offset = mul_pow(a, radix1, radix_shift, f, false, 55);
+    return round_to_d(pe, a, e_offset, rnd_mode);
+}
+
+#ifdef JS_DTOA_DUMP_STATS
+static int out_len_count[17];
+
+void js_dtoa_dump_stats(void)
+{
+    int i, sum;
+    sum = 0;
+    for(i = 0; i < 17; i++)
+        sum += out_len_count[i];
+    for(i = 0; i < 17; i++) {
+        printf("%2d %8d %5.2f%%\n",
+               i + 1, out_len_count[i], (double)out_len_count[i] / sum * 100);
+    }
+}
+#endif
+
+/* return a maximum bound of the string length. The bound depends on
+   'd' only if format = JS_DTOA_FORMAT_FRAC or if JS_DTOA_EXP_DISABLED
+   is enabled. */
+int js_dtoa_max_len(double d, int radix, int n_digits, int flags)
+{
+    int fmt = flags & JS_DTOA_FORMAT_MASK;
+    int n, e;
+    uint64_t a;
+
+    if (fmt != JS_DTOA_FORMAT_FRAC) {
+        if (fmt == JS_DTOA_FORMAT_FREE) {
+            n = dtoa_max_digits_table[radix - 2];
+        } else {
+            n = n_digits;
+        }
+        if ((flags & JS_DTOA_EXP_MASK) == JS_DTOA_EXP_DISABLED) {
+            /* no exponential */
+            a = float64_as_uint64(d);
+            e = (a >> 52) & 0x7ff;
+            if (e == 0x7ff) {
+                /* NaN, Infinity */
+                n = 0;
+            } else {
+                e -= 1023;
+                /* XXX: adjust */
+                n += 10 + abs(mul_log2_radix(e - 1, radix));
+            }
+        } else {
+            /* extra: sign, 1 dot and exponent "e-1000" */
+            n += 1 + 1 + 6;
+        }
+    } else {
+        a = float64_as_uint64(d);
+        e = (a >> 52) & 0x7ff;
+        if (e == 0x7ff) {
+            /* NaN, Infinity */
+            n = 0;
+        } else {
+            /* high bound for the integer part */
+            e -= 1023;
+            /* x < 2^(e + 1) */
+            if (e < 0) {
+                n = 1;
+            } else {
+                n = 2 + mul_log2_radix(e - 1, radix);
+            }
+            /* sign, extra digit, 1 dot */
+            n += 1 + 1 + 1 + n_digits;
+        }
+    }
+    return max_int(n, 9); /* also include NaN and [-]Infinity */
+}
+
+#if defined(__SANITIZE_ADDRESS__) && 0
+static void *dtoa_malloc(uint64_t **pptr, size_t size)
+{
+    return malloc(size);
+}
+static void dtoa_free(void *ptr)
+{
+    free(ptr);
+}
+#else
+static void *dtoa_malloc(uint64_t **pptr, size_t size)
+{
+    void *ret;
+    ret = *pptr;
+    *pptr += (size + 7) / 8;
+    return ret;
+}
+
+static void dtoa_free(void *ptr)
+{
+}
+#endif
+
+/* return the length */
+int js_dtoa(char *buf, double d, int radix, int n_digits, int flags,
+            JSDTOATempMem *tmp_mem)
+{
+    uint64_t a, m, *mptr = tmp_mem->mem;
+    int e, sgn, l, E, P, i, E_max, radix1, radix_shift;
+    char *q;
+    mpb_t *tmp1, *mant_max;
+    int fmt = flags & JS_DTOA_FORMAT_MASK;
+
+    tmp1 = dtoa_malloc(&mptr, sizeof(mpb_t) + sizeof(limb_t) * DBIGNUM_LEN_MAX);
+    mant_max = dtoa_malloc(&mptr, sizeof(mpb_t) + sizeof(limb_t) * MANT_LEN_MAX);
+    assert((mptr - tmp_mem->mem) <= sizeof(JSDTOATempMem) / sizeof(mptr[0]));
+
+    radix_shift = ctz32(radix);
+    radix1 = radix >> radix_shift;
+    a = float64_as_uint64(d);
+    sgn = a >> 63;
+    e = (a >> 52) & 0x7ff;
+    m = a & (((uint64_t)1 << 52) - 1);
+    q = buf;
+    if (e == 0x7ff) {
+        if (m == 0) {
+            if (sgn)
+                *q++ = '-';
+            memcpy(q, "Infinity", 8);
+            q += 8;
+        } else {
+            memcpy(q, "NaN", 3);
+            q += 3;
+        }
+        goto done;
+    } else if (e == 0) {
+        if (m == 0) {
+            tmp1->len = 1;
+            tmp1->tab[0] = 0;
+            E = 1;
+            if (fmt == JS_DTOA_FORMAT_FREE)
+                P = 1;
+            else if (fmt == JS_DTOA_FORMAT_FRAC)
+                P = n_digits + 1;
+            else
+                P = n_digits;
+            /* "-0" is displayed as "0" if JS_DTOA_MINUS_ZERO is not present */
+            if (sgn && (flags & JS_DTOA_MINUS_ZERO))
+                *q++ = '-';
+            goto output;
+        }
+        /* denormal number: convert to a normal number */
+        l = clz64(m) - 11;
+        e -= l - 1;
+        m <<= l;
+    } else {
+        m |= (uint64_t)1 << 52;
+    }
+    if (sgn)
+        *q++ = '-';
+    /* remove the bias */
+    e -= 1022;
+    /* d = 2^(e-53)*m */
+    //    printf("m=0x%016" PRIx64 " e=%d\n", m, e);
+#ifdef USE_FAST_INT
+    if (fmt == JS_DTOA_FORMAT_FREE &&
+        e >= 1 && e <= 53 &&
+        (m & (((uint64_t)1 << (53 - e)) - 1)) == 0 &&
+        (flags & JS_DTOA_EXP_MASK) != JS_DTOA_EXP_ENABLED) {
+        m >>= 53 - e;
+        /* 'm' is never zero */
+        q += u64toa_radix(q, m, radix);
+        goto done;
     }
 #endif
-    return 0;
- fail:
-    ntt_free(s, buf1);
-    ntt_free(s, buf2);
-    return -1;
+    
+    /* this choice of E implies F=round(x*B^(P-E) is such as: 
+       B^(P-1) <= F < 2.B^P. */
+    E = 1 + mul_log2_radix(e - 1, radix);
+    
+    if (fmt == JS_DTOA_FORMAT_FREE) {
+        int P_max, E0, e1, E_found, P_found;
+        uint64_t m1, mant_found, mant, mant_max1;
+        /* P_max is guarranteed to work by construction */
+        P_max = dtoa_max_digits_table[radix - 2];
+        E0 = E;
+        E_found = 0;
+        P_found = 0;
+        mant_found = 0;
+        /* find the minimum number of digits by successive tries */
+        P = P_max; /* P_max is guarateed to work */
+        for(;;) {
+            /* mant_max always fits on 64 bits */
+            mant_max1 = pow_ui(radix, P);
+            /* compute the mantissa in base B */
+            E = E0;
+            for(;;) {
+                /* XXX: add inexact flag */
+                mul_pow_round(tmp1, m, e - 53, radix1, radix_shift, P - E, JS_RNDN);
+                mant = mpb_get_u64(tmp1);
+                if (mant < mant_max1)
+                    break;
+                E++; /* at most one iteration is possible */
+            }
+            /* remove useless trailing zero digits */
+            while ((mant % radix) == 0) {
+                mant /= radix;
+                P--;
+            }
+            /* garanteed to work for P = P_max */
+            if (P_found == 0)
+                goto prec_found;
+            /* convert back to base 2 */
+            mpb_set_u64(tmp1, mant);
+            m1 = mul_pow_round_to_d(&e1, tmp1, radix1, radix_shift, E - P, JS_RNDN);
+            //            printf("P=%2d: m=0x%016" PRIx64 " e=%d m1=0x%016" PRIx64 " e1=%d\n", P, m, e, m1, e1);
+            /* Note: (m, e) is never zero here, so the exponent for m1
+               = 0 does not matter */
+            if (m1 == m && e1 == e) {
+            prec_found:
+                P_found = P;
+                E_found = E;
+                mant_found = mant;
+                if (P == 1)
+                    break;
+                P--; /* try lower exponent */
+            } else {
+                break;
+            }
+        }
+        P = P_found;
+        E = E_found;
+        mpb_set_u64(tmp1, mant_found);
+#ifdef JS_DTOA_DUMP_STATS
+        if (radix == 10) {
+            out_len_count[P - 1]++;
+        }
+#endif        
+    } else if (fmt == JS_DTOA_FORMAT_FRAC) {
+        int len;
+
+        assert(n_digits >= 0 && n_digits <= JS_DTOA_MAX_DIGITS);
+        /* P = max_int(E, 1) + n_digits; */
+        /* frac is rounded using RNDNA */
+        mul_pow_round(tmp1, m, e - 53, radix1, radix_shift, n_digits, JS_RNDNA);
+
+        /* we add one extra digit on the left and remove it if needed
+           to avoid testing if the result is < radix^P */
+        len = output_digits(q, tmp1, radix, max_int(E + 1, 1) + n_digits,
+                            max_int(E + 1, 1));
+        if (q[0] == '0' && len >= 2 && q[1] != '.') {
+            len--;
+            memmove(q, q + 1, len);
+        }
+        q += len;
+        goto done;
+    } else {
+        int pow_shift;
+        assert(n_digits >= 1 && n_digits <= JS_DTOA_MAX_DIGITS);
+        P = n_digits;
+        /* mant_max = radix^P */
+        mant_max->len = 1;
+        mant_max->tab[0] = 1;
+        pow_shift = mul_pow(mant_max, radix1, radix_shift, P, false, 0);
+        mpb_shr_round(mant_max, pow_shift, JS_RNDZ);
+        
+        for(;;) {
+            /* fixed and frac are rounded using RNDNA */
+            mul_pow_round(tmp1, m, e - 53, radix1, radix_shift, P - E, JS_RNDNA);
+            if (mpb_cmp(tmp1, mant_max) < 0)
+                break;
+            E++; /* at most one iteration is possible */
+        }
+    }
+ output:
+    if (fmt == JS_DTOA_FORMAT_FIXED)
+        E_max = n_digits;
+    else
+        E_max = dtoa_max_digits_table[radix - 2] + 4;
+    if ((flags & JS_DTOA_EXP_MASK) == JS_DTOA_EXP_ENABLED ||
+        ((flags & JS_DTOA_EXP_MASK) == JS_DTOA_EXP_AUTO && (E <= -6 || E > E_max))) {
+        q += output_digits(q, tmp1, radix, P, 1);
+        E--;
+        if (radix == 10) {
+            *q++ = 'e';
+        } else if (radix1 == 1 && radix_shift <= 4) {
+            E *= radix_shift;
+            *q++ = 'p';
+        } else {
+            *q++ = '@';
+        }
+        if (E < 0) {
+            *q++ = '-';
+            E = -E;
+        } else {
+            *q++ = '+';
+        }
+        q += u32toa(q, E);
+    } else if (E <= 0) {
+        *q++ = '0';
+        *q++ = '.';
+        for(i = 0; i < -E; i++)
+            *q++ = '0';
+        q += output_digits(q, tmp1, radix, P, P);
+    } else {
+        q += output_digits(q, tmp1, radix, P, min_int(P, E));
+        for(i = 0; i < E - P; i++)
+            *q++ = '0';
+    }
+ done:
+    *q = '\0';
+    dtoa_free(mant_max);
+    dtoa_free(tmp1);
+    return q - buf;
 }
 
-#else /* USE_FFT_MUL */
-
-int bf_get_fft_size(int *pdpl, int *pnb_mods, limb_t len)
+static inline int to_digit(int c)
 {
-    return 0;
+    if (c >= '0' && c <= '9')
+        return c - '0';
+    else if (c >= 'A' && c <= 'Z')
+        return c - 'A' + 10;
+    else if (c >= 'a' && c <= 'z')
+        return c - 'a' + 10;
+    else
+        return 36;
 }
 
-#endif /* !USE_FFT_MUL */
+/* r = r * radix_base + a. radix_base = 0 means radix_base = 2^32 */
+static void mpb_mul1_base(mpb_t *r, limb_t radix_base, limb_t a)
+{
+    int i;
+    if (r->tab[0] == 0 && r->len == 1) {
+        r->tab[0] = a;
+    } else {
+        if (radix_base == 0) {
+            for(i = r->len; i >= 0; i--) {
+                r->tab[i + 1] = r->tab[i];
+            }
+            r->tab[0] = a;
+        } else {
+            r->tab[r->len] = mp_mul1(r->tab, r->tab, r->len,
+                                     radix_base, a);
+        }
+        r->len++;
+        mpb_renorm(r);
+    }
+}
 
-#undef malloc
-#undef free
-#undef realloc
+/* XXX: add fast path for small integers */
+double js_atod(const char *str, const char **pnext, int radix, int flags,
+               JSATODTempMem *tmp_mem)
+{
+    uint64_t *mptr = tmp_mem->mem;
+    const char *p, *p_start;
+    limb_t cur_limb, radix_base, extra_digits;
+    int is_neg, digit_count, limb_digit_count, digits_per_limb, sep, radix1, radix_shift;
+    int radix_bits, expn, e, max_digits, expn_offset, dot_pos, sig_pos, pos;
+    mpb_t *tmp0;
+    double dval;
+    bool is_bin_exp, is_zero, expn_overflow;
+    uint64_t m, a;
+
+    tmp0 = dtoa_malloc(&mptr, sizeof(mpb_t) + sizeof(limb_t) * DBIGNUM_LEN_MAX);
+    assert((mptr - tmp_mem->mem) <= sizeof(JSATODTempMem) / sizeof(mptr[0]));
+    /* optional separator between digits */
+    sep = (flags & JS_ATOD_ACCEPT_UNDERSCORES) ? '_' : 256;
+
+    p = str;
+    is_neg = 0;
+    if (p[0] == '+') {
+        p++;
+        p_start = p;
+    } else if (p[0] == '-') {
+        is_neg = 1;
+        p++;
+        p_start = p;
+    } else {
+        p_start = p;
+    }
+    
+    if (p[0] == '0') {
+        if ((p[1] == 'x' || p[1] == 'X') &&
+            (radix == 0 || radix == 16)) {
+            p += 2;
+            radix = 16;
+        } else if ((p[1] == 'o' || p[1] == 'O') &&
+                   radix == 0 && (flags & JS_ATOD_ACCEPT_BIN_OCT)) {
+            p += 2;
+            radix = 8;
+        } else if ((p[1] == 'b' || p[1] == 'B') &&
+                   radix == 0 && (flags & JS_ATOD_ACCEPT_BIN_OCT)) {
+            p += 2;
+            radix = 2;
+        } else if ((p[1] >= '0' && p[1] <= '9') &&
+                   radix == 0 && (flags & JS_ATOD_ACCEPT_LEGACY_OCTAL)) {
+            int i;
+            sep = 256;
+            for (i = 1; (p[i] >= '0' && p[i] <= '7'); i++)
+                continue;
+            if (p[i] == '8' || p[i] == '9')
+                goto no_prefix;
+            p += 1;
+            radix = 8;
+        } else {
+            goto no_prefix;
+        }
+        /* there must be a digit after the prefix */
+        if (to_digit((uint8_t)*p) >= radix)
+            goto fail;
+    no_prefix: ;
+    } else {
+        if (!(flags & JS_ATOD_INT_ONLY) && js__strstart(p, "Infinity", &p))
+            goto overflow;
+    }
+    if (radix == 0)
+        radix = 10;
+
+    cur_limb = 0;
+    expn_offset = 0;
+    digit_count = 0;
+    limb_digit_count = 0;
+    max_digits = atod_max_digits_table[radix - 2];
+    digits_per_limb = digits_per_limb_table[radix - 2];
+    radix_base = radix_base_table[radix - 2];
+    radix_shift = ctz32(radix);
+    radix1 = radix >> radix_shift;
+    if (radix1 == 1) {
+        /* radix = 2^radix_bits */
+        radix_bits = radix_shift;
+    } else {
+        radix_bits = 0;
+    }
+    tmp0->len = 1;
+    tmp0->tab[0] = 0;
+    extra_digits = 0;
+    pos = 0;
+    dot_pos = -1;
+    /* skip leading zeros */
+    for(;;) {
+        if (*p == '.' && (p > p_start || to_digit(p[1]) < radix) &&
+            !(flags & JS_ATOD_INT_ONLY)) {
+            if (*p == sep)
+                goto fail;
+            if (dot_pos >= 0)
+                break;
+            dot_pos = pos;
+            p++;
+        }
+        if (*p == sep && p > p_start && p[1] == '0')
+            p++;
+        if (*p != '0')
+            break;
+        p++;
+        pos++;
+    }
+    
+    sig_pos = pos;
+    for(;;) {
+        limb_t c;
+        if (*p == '.' && (p > p_start || to_digit(p[1]) < radix) &&
+            !(flags & JS_ATOD_INT_ONLY)) {
+            if (*p == sep)
+                goto fail;
+            if (dot_pos >= 0)
+                break;
+            dot_pos = pos;
+            p++;
+        }
+        if (*p == sep && p > p_start && to_digit(p[1]) < radix)
+            p++;
+        c = to_digit(*p);
+        if (c >= radix)
+            break;
+        p++;
+        pos++;
+        if (digit_count < max_digits) {
+            /* XXX: could be faster when radix_bits != 0 */
+            cur_limb = cur_limb * radix + c;
+            limb_digit_count++;
+            if (limb_digit_count == digits_per_limb) {
+                mpb_mul1_base(tmp0, radix_base, cur_limb);
+                cur_limb = 0;
+                limb_digit_count = 0;
+            }
+            digit_count++;
+        } else {
+            extra_digits |= c;
+        }
+    }
+    if (limb_digit_count != 0) {
+        mpb_mul1_base(tmp0, pow_ui(radix, limb_digit_count), cur_limb);
+    }
+    if (digit_count == 0) {
+        is_zero = true;
+        expn_offset = 0;
+    } else {
+        is_zero = false;
+        if (dot_pos < 0)
+            dot_pos = pos;
+        expn_offset = sig_pos + digit_count - dot_pos;
+    }
+    
+    /* Use the extra digits for rounding if the base is a power of
+       two. Otherwise they are just truncated. */
+    if (radix_bits != 0 && extra_digits != 0) {
+        tmp0->tab[0] |= 1;
+    }
+    
+    /* parse the exponent, if any */
+    expn = 0;
+    expn_overflow = false;
+    is_bin_exp = false;
+    if (!(flags & JS_ATOD_INT_ONLY) &&
+        ((radix == 10 && (*p == 'e' || *p == 'E')) ||
+         (radix != 10 && (*p == '@' ||
+                          (radix_bits >= 1 && radix_bits <= 4 && (*p == 'p' || *p == 'P'))))) &&
+        p > p_start) {
+        bool exp_is_neg;
+        int c;
+        is_bin_exp = (*p == 'p' || *p == 'P');
+        p++;
+        exp_is_neg = false;
+        if (*p == '+') {
+            p++;
+        } else if (*p == '-') {
+            exp_is_neg = true;
+            p++;
+        }
+        c = to_digit(*p);
+        if (c >= 10)
+            goto fail; /* XXX: could stop before the exponent part */
+        expn = c;
+        p++;
+        for(;;) {
+            if (*p == sep && to_digit(p[1]) < 10)
+                p++;
+            c = to_digit(*p);
+            if (c >= 10)
+                break;
+            if (!expn_overflow) {
+                if (unlikely(expn > ((INT32_MAX - 2 - 9) / 10))) {
+                    expn_overflow = true;
+                } else {
+                    expn = expn * 10 + c;
+                }
+            }
+            p++;
+        }
+        if (exp_is_neg)
+            expn = -expn;
+        /* if zero result, the exponent can be arbitrarily large */
+        if (!is_zero && expn_overflow) {
+            if (exp_is_neg)
+                a = 0;
+            else
+                a = (uint64_t)0x7ff << 52; /* infinity */
+            goto done;
+        }
+    }
+
+    if (p == p_start)
+        goto fail;
+
+    if (is_zero) {
+        a = 0;
+    } else {
+        int expn1;
+        if (radix_bits != 0) {
+            if (!is_bin_exp)
+                expn *= radix_bits;
+            expn -= expn_offset * radix_bits;
+            expn1 = expn + digit_count * radix_bits;
+            if (expn1 >= 1024 + radix_bits)
+                goto overflow;
+            else if (expn1 <= -1075)
+                goto underflow;
+            m = round_to_d(&e, tmp0, -expn, JS_RNDN);
+        } else {
+            expn -= expn_offset;
+            expn1 = expn + digit_count;
+            if (expn1 >= max_exponent[radix - 2] + 1)
+                goto overflow;
+            else if (expn1 <= min_exponent[radix - 2])
+                goto underflow;
+            m = mul_pow_round_to_d(&e, tmp0, radix1, radix_shift, expn, JS_RNDN);
+        }
+        if (m == 0) {
+        underflow:
+            a = 0;
+        } else if (e > 1024) {
+        overflow:
+            /* overflow */
+            a = (uint64_t)0x7ff << 52;
+        } else if (e < -1073) {
+            /* underflow */
+            /* XXX: check rounding */
+            a = 0;
+        } else if (e < -1021) {
+            /* subnormal */
+            a = m >> (-e - 1021);
+        } else {
+            a = ((uint64_t)(e + 1022) << 52) | (m & (((uint64_t)1 << 52) - 1));
+        }
+    }
+ done:
+    a |= (uint64_t)is_neg << 63;
+    dval = uint64_as_float64(a);
+ done1:
+    if (pnext)
+        *pnext = p;
+    dtoa_free(tmp0);
+    return dval;
+ fail:
+    dval = NAN;
+    goto done1;
+}
 /*
  * Regular Expression Engine
  *
@@ -76915,6 +70882,9 @@ DEF(simple_greedy_quant, 17)
 
 #define CAPTURE_COUNT_MAX 255
 #define STACK_SIZE_MAX 255
+/* must be large enough to have a negligible runtime cost and small
+   enough to call the interrupt callback often. */
+#define INTERRUPT_COUNTER_INIT 10000
 
 /* unicode code points */
 #define CP_LS   0x2028
@@ -78912,6 +72882,7 @@ typedef struct {
     bool multi_line;
     bool ignore_case;
     bool is_unicode;
+    int interrupt_counter;
     void *opaque; /* used for stack overflow check */
 
     size_t state_size;
@@ -78958,7 +72929,17 @@ static int push_state(REExecContext *s,
     return 0;
 }
 
-/* return 1 if match, 0 if not match or -1 if error. */
+static int lre_poll_timeout(REExecContext *s)
+{
+    if (unlikely(--s->interrupt_counter <= 0)) {
+        s->interrupt_counter = INTERRUPT_COUNTER_INIT;
+        if (lre_check_timeout(s->opaque))
+            return LRE_RET_TIMEOUT;
+    }
+    return 0;
+}
+
+/* return 1 if match, 0 if not match or < 0 if error. */
 static intptr_t lre_exec_backtrack(REExecContext *s, uint8_t **capture,
                                    StackInt *stack, int stack_len,
                                    const uint8_t *pc, const uint8_t *cptr,
@@ -78989,6 +72970,8 @@ static intptr_t lre_exec_backtrack(REExecContext *s, uint8_t **capture,
                 ret = 0;
             recurse:
                 for(;;) {
+                    if (lre_poll_timeout(s))
+                        return LRE_RET_TIMEOUT;
                     if (s->state_stack_len == 0)
                         return ret;
                     rs = (REExecState *)(s->state_stack +
@@ -79082,7 +73065,7 @@ static intptr_t lre_exec_backtrack(REExecContext *s, uint8_t **capture,
                 ret = push_state(s, capture, stack, stack_len,
                                  pc1, cptr, RE_EXEC_STATE_SPLIT, 0);
                 if (ret < 0)
-                    return -1;
+                    return LRE_RET_MEMORY_ERROR;
                 break;
             }
         case REOP_lookahead:
@@ -79094,12 +73077,14 @@ static intptr_t lre_exec_backtrack(REExecContext *s, uint8_t **capture,
                              RE_EXEC_STATE_LOOKAHEAD + opcode - REOP_lookahead,
                              0);
             if (ret < 0)
-                return -1;
+                return LRE_RET_MEMORY_ERROR;
             break;
 
         case REOP_goto:
             val = get_u32(pc);
             pc += 4 + (int)val;
+            if (lre_poll_timeout(s))
+                return LRE_RET_TIMEOUT;
             break;
         case REOP_line_start:
             if (cptr == s->cbuf)
@@ -79164,6 +73149,8 @@ static intptr_t lre_exec_backtrack(REExecContext *s, uint8_t **capture,
             pc += 4;
             if (--stack[stack_len - 1] != 0) {
                 pc += (int)val;
+                if (lre_poll_timeout(s))
+                    return LRE_RET_TIMEOUT;
             }
             break;
         case REOP_push_char_pos:
@@ -79338,9 +73325,12 @@ static intptr_t lre_exec_backtrack(REExecContext *s, uint8_t **capture,
 
                 q = 0;
                 for(;;) {
+                    if (lre_poll_timeout(s))
+                        return LRE_RET_TIMEOUT;
                     res = lre_exec_backtrack(s, capture, stack, stack_len,
                                              pc1, cptr, true);
-                    if (res == -1)
+                    if (res == LRE_RET_MEMORY_ERROR ||
+                        res == LRE_RET_TIMEOUT)
                         return res;
                     if (!res)
                         break;
@@ -79358,7 +73348,7 @@ static intptr_t lre_exec_backtrack(REExecContext *s, uint8_t **capture,
                                      RE_EXEC_STATE_GREEDY_QUANT,
                                      q - quant_min);
                     if (ret < 0)
-                        return -1;
+                        return LRE_RET_MEMORY_ERROR;
                 }
             }
             break;
@@ -79368,7 +73358,7 @@ static intptr_t lre_exec_backtrack(REExecContext *s, uint8_t **capture,
     }
 }
 
-/* Return 1 if match, 0 if not match or -1 if error. cindex is the
+/* Return 1 if match, 0 if not match or < 0 if error (see LRE_RET_x). cindex is the
    starting position of the match and must be such as 0 <= cindex <=
    clen. */
 int lre_exec(uint8_t **capture,
@@ -79390,6 +73380,7 @@ int lre_exec(uint8_t **capture,
     s->cbuf_type = cbuf_type;
     if (s->cbuf_type == 1 && s->is_unicode)
         s->cbuf_type = 2;
+    s->interrupt_counter = INTERRUPT_COUNTER_INIT;
     s->opaque = opaque;
 
     s->state_size = sizeof(REExecState) +
@@ -81341,26 +75332,40 @@ int unicode_prop(CharRange *cr, const char *prop_name)
 extern "C" {
 #endif
 
-JSModuleDef *js_init_module_std(JSContext *ctx, const char *module_name);
-JSModuleDef *js_init_module_os(JSContext *ctx, const char *module_name);
-JSModuleDef *js_init_module_bjson(JSContext *ctx, const char *module_name);
-void js_std_add_helpers(JSContext *ctx, int argc, char **argv);
-int js_std_loop(JSContext *ctx);
-JSValue js_std_await(JSContext *ctx, JSValue obj);
-void js_std_init_handlers(JSRuntime *rt);
-void js_std_free_handlers(JSRuntime *rt);
-void js_std_dump_error(JSContext *ctx);
-uint8_t *js_load_file(JSContext *ctx, size_t *pbuf_len, const char *filename);
-int js_module_set_import_meta(JSContext *ctx, JSValueConst func_val,
-                              bool use_realpath, bool is_main);
-JSModuleDef *js_module_loader(JSContext *ctx,
-                              const char *module_name, void *opaque);
-void js_std_eval_binary(JSContext *ctx, const uint8_t *buf, size_t buf_len,
-                        int flags);
-void js_std_promise_rejection_tracker(JSContext *ctx, JSValueConst promise,
-                                      JSValueConst reason,
-                                      bool is_handled, void *opaque);
-void js_std_set_worker_new_context_func(JSContext *(*func)(JSRuntime *rt));
+#if defined(__GNUC__) || defined(__clang__)
+#define JS_EXTERN __attribute__((visibility("default")))
+#else
+#define JS_EXTERN /* nothing */
+#endif
+
+JS_EXTERN JSModuleDef *js_init_module_std(JSContext *ctx,
+                                          const char *module_name);
+JS_EXTERN JSModuleDef *js_init_module_os(JSContext *ctx,
+                                         const char *module_name);
+JS_EXTERN JSModuleDef *js_init_module_bjson(JSContext *ctx,
+                                            const char *module_name);
+JS_EXTERN void js_std_add_helpers(JSContext *ctx, int argc, char **argv);
+JS_EXTERN int js_std_loop(JSContext *ctx);
+JS_EXTERN JSValue js_std_await(JSContext *ctx, JSValue obj);
+JS_EXTERN void js_std_init_handlers(JSRuntime *rt);
+JS_EXTERN void js_std_free_handlers(JSRuntime *rt);
+JS_EXTERN void js_std_dump_error(JSContext *ctx);
+JS_EXTERN uint8_t *js_load_file(JSContext *ctx, size_t *pbuf_len,
+                                const char *filename);
+JS_EXTERN int js_module_set_import_meta(JSContext *ctx, JSValueConst func_val,
+                                        bool use_realpath, bool is_main);
+JS_EXTERN JSModuleDef *js_module_loader(JSContext *ctx,
+                                        const char *module_name, void *opaque);
+JS_EXTERN void js_std_eval_binary(JSContext *ctx, const uint8_t *buf,
+                                  size_t buf_len, int flags);
+JS_EXTERN void js_std_promise_rejection_tracker(JSContext *ctx,
+                                                JSValueConst promise,
+                                                JSValueConst reason,
+                                                bool is_handled,
+                                                void *opaque);
+JS_EXTERN void js_std_set_worker_new_context_func(JSContext *(*func)(JSRuntime *rt));
+
+#undef JS_EXTERN
 
 #ifdef __cplusplus
 } /* extern "C" { */
@@ -81391,27 +75396,24 @@ void js_std_set_worker_new_context_func(JSContext *(*func)(JSRuntime *rt));
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <inttypes.h>
 #include <string.h>
 #include <assert.h>
-#if !defined(_MSC_VER)
-#include <unistd.h>
-#endif
 #include <errno.h>
 #include <fcntl.h>
 #if !defined(_MSC_VER)
 #include <sys/time.h>
+#include <unistd.h>
 #endif
 #include <time.h>
 #include <signal.h>
 #include <limits.h>
 #include <sys/stat.h>
-#if defined(_MSC_VER)
-
-#else
+#if !defined(_MSC_VER)
 #include <dirent.h>
 #endif
 #if defined(_WIN32)
@@ -81429,11 +75431,13 @@ void js_std_set_worker_new_context_func(JSContext *(*func)(JSRuntime *rt));
 #define chdir _chdir
 #else
 #include <sys/ioctl.h>
+#include <poll.h>
 #if !defined(__wasi__)
 #include <dlfcn.h>
 #include <termios.h>
 #include <sys/resource.h>
 #include <sys/wait.h>
+#include <grp.h>
 #endif
 
 #if defined(__APPLE__)
@@ -81449,19 +75453,22 @@ extern char **environ;
 
 #endif /* _WIN32 */
 
-#if !defined(_WIN32) && !defined(__wasi__)
-/* enable the os.Worker API. IT relies on POSIX threads */
-#define USE_WORKER
+
+
+
+
+#if JS_HAVE_THREADS
+
+#define USE_WORKER // enable os.Worker
 #endif
 
-#ifdef USE_WORKER
-#include <pthread.h>
-
+#ifndef S_IFBLK
+#define S_IFBLK 0
 #endif
 
-
-
-
+#ifndef S_IFIFO
+#define S_IFIFO 0
+#endif
 
 #ifndef MAX_SAFE_INTEGER // already defined in amalgamation builds
 #define MAX_SAFE_INTEGER (((int64_t) 1 << 53) - 1)
@@ -81502,6 +75509,14 @@ typedef struct {
 
 typedef struct {
     struct list_head link;
+    JSValue promise;
+    JSValue reason;
+} JSRejectedPromiseEntry;
+
+#ifdef USE_WORKER
+
+typedef struct {
+    struct list_head link;
     uint8_t *data;
     size_t data_len;
     /* list of SharedArrayBuffers, necessary to free the message */
@@ -81509,14 +75524,20 @@ typedef struct {
     size_t sab_tab_len;
 } JSWorkerMessage;
 
-typedef struct {
-    int ref_count;
-#ifdef USE_WORKER
-    pthread_mutex_t mutex;
-#endif
-    struct list_head msg_queue; /* list of JSWorkerMessage.link */
+typedef struct JSWaker {
+#ifdef _WIN32
+    HANDLE handle;
+#else
     int read_fd;
     int write_fd;
+#endif
+} JSWaker;
+
+typedef struct {
+    int ref_count;
+    js_mutex_t mutex;
+    struct list_head msg_queue; /* list of JSWorkerMessage.link */
+    JSWaker waker;
 } JSWorkerMessagePipe;
 
 typedef struct {
@@ -81525,16 +75546,23 @@ typedef struct {
     JSValue on_message_func;
 } JSWorkerMessageHandler;
 
+#endif // USE_WORKER
+
 typedef struct JSThreadState {
     struct list_head os_rw_handlers; /* list of JSOSRWHandler.link */
     struct list_head os_signal_handlers; /* list JSOSSignalHandler.link */
     struct list_head os_timers; /* list of JSOSTimer.link */
     struct list_head port_list; /* list of JSWorkerMessageHandler.link */
+    struct list_head rejected_promise_list; /* list of JSRejectedPromiseEntry.link */
     int eval_script_recurse; /* only used in the main thread */
     int64_t next_timer_id; /* for setTimeout / setInterval */
     bool can_js_os_poll;
     /* not used in the main thread */
+#ifdef USE_WORKER
     JSWorkerMessagePipe *recv_pipe, *send_pipe;
+#else
+    void *recv_pipe;
+#endif // USE_WORKER
     JSClassID std_file_class_id;
     JSClassID worker_class_id;
 } JSThreadState;
@@ -82079,7 +76107,7 @@ int js_module_set_import_meta(JSContext *ctx, JSValueConst func_val,
                               bool use_realpath, bool is_main)
 {
     JSModuleDef *m;
-    char buf[PATH_MAX + 16];
+    char buf[JS__PATH_MAX + 16];
     JSValue meta_obj;
     JSAtom module_name_atom;
     const char *module_name;
@@ -82500,7 +76528,7 @@ static JSValue js_std_popen(JSContext *ctx, JSValueConst this_val,
     mode = JS_ToCString(ctx, argv[1]);
     if (!mode)
         goto fail;
-    if (mode[strspn(mode, "rw")] != '\0') {
+    if (strcmp(mode, "r") && strcmp(mode, "w")) {
         JS_ThrowTypeError(ctx, "invalid file mode");
         goto fail;
     }
@@ -82672,7 +76700,7 @@ static JSValue js_std_file_tell(JSContext *ctx, JSValueConst this_val,
     int64_t pos;
     if (!f)
         return JS_EXCEPTION;
-#if defined(__linux__)
+#if defined(__linux__) || defined(__GLIBC__)
     pos = ftello(f);
 #else
     pos = ftell(f);
@@ -82695,7 +76723,7 @@ static JSValue js_std_file_seek(JSContext *ctx, JSValueConst this_val,
         return JS_EXCEPTION;
     if (JS_ToInt32(ctx, &whence, argv[1]))
         return JS_EXCEPTION;
-#if defined(__linux__)
+#if defined(__linux__) || defined(__GLIBC__)
     ret = fseeko(f, pos, whence);
 #else
     ret = fseek(f, pos, whence);
@@ -83235,7 +77263,7 @@ static JSValue js_os_seek(JSContext *ctx, JSValueConst this_val,
 
     if (JS_ToInt32(ctx, &fd, argv[0]))
         return JS_EXCEPTION;
-    is_bigint = JS_IsBigInt(ctx, argv[1]);
+    is_bigint = JS_IsBigInt(argv[1]);
     if (JS_ToInt64Ext(ctx, &pos, argv[1]))
         return JS_EXCEPTION;
     if (JS_ToInt32(ctx, &whence, argv[2]))
@@ -83402,7 +77430,7 @@ static JSValue js_os_remove(JSContext *ctx, JSValueConst this_val,
 #if defined(_WIN32)
     {
         struct stat st;
-        if (stat(filename, &st) == 0 && S_ISDIR(st.st_mode)) {
+        if (stat(filename, &st) == 0 && (st.st_mode & _S_IFDIR)) {
             ret = rmdir(filename);
         } else {
             ret = unlink(filename);
@@ -83597,6 +77625,16 @@ static JSValue js_os_cputime(JSContext *ctx, JSValueConst this_val,
 }
 #endif
 
+static JSValue js_os_exepath(JSContext *ctx, JSValueConst this_val,
+                             int argc, JSValueConst *argv)
+{
+    char buf[JS__PATH_MAX];
+    size_t len = sizeof(buf);
+    if (js_exepath(buf, &len))
+        return JS_UNDEFINED;
+    return JS_NewStringLen(ctx, buf, len);
+}
+
 static JSValue js_os_now(JSContext *ctx, JSValueConst this_val,
                          int argc, JSValueConst *argv)
 {
@@ -83762,61 +77800,81 @@ static int js_os_run_timers(JSRuntime *rt, JSContext *ctx, JSThreadState *ts, in
     return 0;
 }
 
-#if defined(_WIN32)
+#ifdef USE_WORKER
 
-static int js_os_poll(JSContext *ctx)
+#ifdef _WIN32
+
+static int js_waker_init(JSWaker *w)
 {
-    JSRuntime *rt = JS_GetRuntime(ctx);
-    JSThreadState *ts = js_get_thread_state(rt);
-    int min_delay, console_fd;
-    JSOSRWHandler *rh;
-    struct list_head *el;
+    w->handle = CreateEvent(NULL, TRUE, FALSE, NULL);
+    return w->handle ? 0 : -1;
+}
 
-    /* XXX: handle signals if useful */
+static void js_waker_signal(JSWaker *w)
+{
+    SetEvent(w->handle);
+}
 
-    if (js_os_run_timers(rt, ctx, ts, &min_delay))
+static void js_waker_clear(JSWaker *w)
+{
+    ResetEvent(w->handle);
+}
+
+static void js_waker_close(JSWaker *w)
+{
+    CloseHandle(w->handle);
+    w->handle = INVALID_HANDLE_VALUE;
+}
+
+#else // !_WIN32
+
+static int js_waker_init(JSWaker *w)
+{
+    int fds[2];
+
+    if (pipe(fds) < 0)
         return -1;
-    if (min_delay == 0)
-        return 0; // expired timer
-    if (min_delay < 0)
-        if (list_empty(&ts->os_rw_handlers))
-            return -1; /* no more events */
-
-    console_fd = -1;
-    list_for_each(el, &ts->os_rw_handlers) {
-        rh = list_entry(el, JSOSRWHandler, link);
-        if (rh->fd == 0 && !JS_IsNull(rh->rw_func[0])) {
-            console_fd = rh->fd;
-            break;
-        }
-    }
-
-    if (console_fd >= 0) {
-        DWORD ti, ret;
-        HANDLE handle;
-        if (min_delay == -1)
-            ti = INFINITE;
-        else
-            ti = min_delay;
-        handle = (HANDLE)_get_osfhandle(console_fd);
-        ret = WaitForSingleObject(handle, ti);
-        if (ret == WAIT_OBJECT_0) {
-            list_for_each(el, &ts->os_rw_handlers) {
-                rh = list_entry(el, JSOSRWHandler, link);
-                if (rh->fd == console_fd && !JS_IsNull(rh->rw_func[0])) {
-                    return call_handler(ctx, rh->rw_func[0]);
-                    /* must stop because the list may have been modified */
-                }
-            }
-        }
-    } else {
-        Sleep(min_delay);
-    }
+    w->read_fd = fds[0];
+    w->write_fd = fds[1];
     return 0;
 }
-#else
 
-#ifdef USE_WORKER
+static void js_waker_signal(JSWaker *w)
+{
+    int ret;
+
+    for(;;) {
+        ret = write(w->write_fd, "", 1);
+        if (ret == 1)
+            break;
+        if (ret < 0 && (errno != EAGAIN || errno != EINTR))
+            break;
+    }
+}
+
+static void js_waker_clear(JSWaker *w)
+{
+    uint8_t buf[16];
+    int ret;
+
+    for(;;) {
+        ret = read(w->read_fd, buf, sizeof(buf));
+        if (ret >= 0)
+            break;
+        if (errno != EAGAIN && errno != EINTR)
+            break;
+    }
+}
+
+static void js_waker_close(JSWaker *w)
+{
+    close(w->read_fd);
+    close(w->write_fd);
+    w->read_fd = -1;
+    w->write_fd = -1;
+}
+
+#endif // _WIN32
 
 static void js_free_message(JSWorkerMessage *msg);
 
@@ -83830,7 +77888,7 @@ static int handle_posted_message(JSRuntime *rt, JSContext *ctx,
     JSWorkerMessage *msg;
     JSValue obj, data_obj, func, retval;
 
-    pthread_mutex_lock(&ps->mutex);
+    js_mutex_lock(&ps->mutex);
     if (!list_empty(&ps->msg_queue)) {
         el = ps->msg_queue.next;
         msg = list_entry(el, JSWorkerMessage, link);
@@ -83838,19 +77896,11 @@ static int handle_posted_message(JSRuntime *rt, JSContext *ctx,
         /* remove the message from the queue */
         list_del(&msg->link);
 
-        if (list_empty(&ps->msg_queue)) {
-            uint8_t buf[16];
-            int ret;
-            for(;;) {
-                ret = read(ps->read_fd, buf, sizeof(buf));
-                if (ret >= 0)
-                    break;
-                if (errno != EAGAIN && errno != EINTR)
-                    break;
-            }
-        }
+        // drain read end of pipe
+        if (list_empty(&ps->msg_queue))
+            js_waker_clear(&ps->waker);
 
-        pthread_mutex_unlock(&ps->mutex);
+        js_mutex_unlock(&ps->mutex);
 
         data_obj = JS_ReadObject(ctx, msg->data, msg->data_len,
                                  JS_READ_OBJ_SAB | JS_READ_OBJ_REFERENCE);
@@ -83880,28 +77930,92 @@ static int handle_posted_message(JSRuntime *rt, JSContext *ctx,
         }
         ret = 1;
     } else {
-        pthread_mutex_unlock(&ps->mutex);
+        js_mutex_unlock(&ps->mutex);
         ret = 0;
     }
     return ret;
 }
-#else
-static int handle_posted_message(JSRuntime *rt, JSContext *ctx,
-                                 JSWorkerMessageHandler *port)
-{
-    return 0;
-}
-#endif
 
+#endif // USE_WORKER
+
+#if defined(_WIN32)
 static int js_os_poll(JSContext *ctx)
 {
     JSRuntime *rt = JS_GetRuntime(ctx);
     JSThreadState *ts = js_get_thread_state(rt);
-    int ret, fd_max, min_delay;
-    fd_set rfds, wfds;
+    int min_delay, count;
     JSOSRWHandler *rh;
     struct list_head *el;
-    struct timeval tv, *tvp;
+    HANDLE handles[MAXIMUM_WAIT_OBJECTS]; // 64
+
+    /* XXX: handle signals if useful */
+
+    if (js_os_run_timers(rt, ctx, ts, &min_delay))
+        return -1;
+    if (min_delay == 0)
+        return 0; // expired timer
+    if (min_delay < 0)
+        if (list_empty(&ts->os_rw_handlers) && list_empty(&ts->port_list))
+            return -1; /* no more events */
+
+    count = 0;
+    list_for_each(el, &ts->os_rw_handlers) {
+        rh = list_entry(el, JSOSRWHandler, link);
+        if (rh->fd == 0 && !JS_IsNull(rh->rw_func[0]))
+            handles[count++] = (HANDLE)_get_osfhandle(rh->fd); // stdin
+        if (count == (int)countof(handles))
+            break;
+    }
+
+    list_for_each(el, &ts->port_list) {
+        JSWorkerMessageHandler *port = list_entry(el, JSWorkerMessageHandler, link);
+        if (JS_IsNull(port->on_message_func))
+            continue;
+        handles[count++] = port->recv_pipe->waker.handle;
+        if (count == (int)countof(handles))
+            break;
+    }
+
+    if (count > 0) {
+        DWORD ret, timeout = INFINITE;
+        if (min_delay != -1)
+            timeout = min_delay;
+        ret = WaitForMultipleObjects(count, handles, FALSE, timeout);
+        if (ret < count) {
+            list_for_each(el, &ts->os_rw_handlers) {
+                rh = list_entry(el, JSOSRWHandler, link);
+                if (rh->fd == 0 && !JS_IsNull(rh->rw_func[0])) {
+                    return call_handler(ctx, rh->rw_func[0]);
+                    /* must stop because the list may have been modified */
+                }
+            }
+
+            list_for_each(el, &ts->port_list) {
+                JSWorkerMessageHandler *port = list_entry(el, JSWorkerMessageHandler, link);
+                if (!JS_IsNull(port->on_message_func)) {
+                    JSWorkerMessagePipe *ps = port->recv_pipe;
+                    if (ps->waker.handle == handles[ret]) {
+                        if (handle_posted_message(rt, ctx, port))
+                            goto done;
+                    }
+                }
+            }
+        }
+    } else {
+        Sleep(min_delay);
+    }
+done:
+    return 0;
+}
+#else // !defined(_WIN32)
+static int js_os_poll(JSContext *ctx)
+{
+    JSRuntime *rt = JS_GetRuntime(ctx);
+    JSThreadState *ts = js_get_thread_state(rt);
+    int r, w, ret, nfds, min_delay;
+    JSOSRWHandler *rh;
+    struct list_head *el;
+    struct pollfd *pfd, *pfds, pfds_local[64];
 
     /* only check signals in the main thread */
     if (!ts->recv_pipe &&
@@ -83927,65 +78041,86 @@ static int js_os_poll(JSContext *ctx)
         if (list_empty(&ts->os_rw_handlers) && list_empty(&ts->port_list))
             return -1; /* no more events */
 
-    tvp = NULL;
-    if (min_delay >= 0) {
-        tv.tv_sec = min_delay / 1000;
-        tv.tv_usec = (min_delay % 1000) * 1000;
-        tvp = &tv;
-    }
-
-    FD_ZERO(&rfds);
-    FD_ZERO(&wfds);
-    fd_max = -1;
+    nfds = 0;
     list_for_each(el, &ts->os_rw_handlers) {
         rh = list_entry(el, JSOSRWHandler, link);
-        fd_max = max_int(fd_max, rh->fd);
-        if (!JS_IsNull(rh->rw_func[0]))
-            FD_SET(rh->fd, &rfds);
-        if (!JS_IsNull(rh->rw_func[1]))
-            FD_SET(rh->fd, &wfds);
+        nfds += (!JS_IsNull(rh->rw_func[0]) || !JS_IsNull(rh->rw_func[1]));
     }
 
+#ifdef USE_WORKER
+    list_for_each(el, &ts->port_list) {
+        JSWorkerMessageHandler *port = list_entry(el, JSWorkerMessageHandler, link);
+        nfds += !JS_IsNull(port->on_message_func);
+    }
+#endif // USE_WORKER
+
+    pfd = pfds = pfds_local;
+    if (nfds > (int)countof(pfds_local)) {
+        pfd = pfds = js_malloc(ctx, nfds * sizeof(*pfd));
+        if (!pfd)
+            return -1;
+    }
+
+    list_for_each(el, &ts->os_rw_handlers) {
+        rh = list_entry(el, JSOSRWHandler, link);
+        r = POLLIN * !JS_IsNull(rh->rw_func[0]);
+        w = POLLOUT * !JS_IsNull(rh->rw_func[1]);
+        if (r || w)
+            *pfd++ = (struct pollfd){rh->fd, r|w, 0};
+    }
+
+#ifdef USE_WORKER
     list_for_each(el, &ts->port_list) {
         JSWorkerMessageHandler *port = list_entry(el, JSWorkerMessageHandler, link);
         if (!JS_IsNull(port->on_message_func)) {
             JSWorkerMessagePipe *ps = port->recv_pipe;
-            fd_max = max_int(fd_max, ps->read_fd);
-            FD_SET(ps->read_fd, &rfds);
+            *pfd++ = (struct pollfd){ps->waker.read_fd, POLLIN, 0};
         }
     }
+#endif // USE_WORKER
 
-    ret = select(fd_max + 1, &rfds, &wfds, NULL, tvp);
-    if (ret > 0) {
-        list_for_each(el, &ts->os_rw_handlers) {
-            rh = list_entry(el, JSOSRWHandler, link);
-            if (!JS_IsNull(rh->rw_func[0]) &&
-                FD_ISSET(rh->fd, &rfds)) {
-                return call_handler(ctx, rh->rw_func[0]);
+    // FIXME(bnoordhuis) the loop below is quadratic in theory but
+    // linear-ish in practice because we bail out on the first hit,
+    // i.e., it's probably good enough for now
+    ret = 0;
+    nfds = poll(pfds, nfds, min_delay);
+    for (pfd = pfds; nfds-- > 0; pfd++) {
+        rh = find_rh(ts, pfd->fd);
+        if (rh) {
+            r = (POLLERR|POLLHUP|POLLNVAL|POLLIN) * !JS_IsNull(rh->rw_func[0]);
+            w = (POLLERR|POLLHUP|POLLNVAL|POLLOUT) * !JS_IsNull(rh->rw_func[1]);
+            if (r & pfd->revents) {
+                ret = call_handler(ctx, rh->rw_func[0]);
+                goto done;
                 /* must stop because the list may have been modified */
             }
-            if (!JS_IsNull(rh->rw_func[1]) &&
-                FD_ISSET(rh->fd, &wfds)) {
-                return call_handler(ctx, rh->rw_func[1]);
+            if (w & pfd->revents) {
+                ret = call_handler(ctx, rh->rw_func[1]);
+                goto done;
                 /* must stop because the list may have been modified */
             }
-        }
-
-        list_for_each(el, &ts->port_list) {
-            JSWorkerMessageHandler *port = list_entry(el, JSWorkerMessageHandler, link);
-            if (!JS_IsNull(port->on_message_func)) {
-                JSWorkerMessagePipe *ps = port->recv_pipe;
-                if (FD_ISSET(ps->read_fd, &rfds)) {
-                    if (handle_posted_message(rt, ctx, port))
-                        goto done;
+        } else {
+#ifdef USE_WORKER
+            list_for_each(el, &ts->port_list) {
+                JSWorkerMessageHandler *port = list_entry(el, JSWorkerMessageHandler, link);
+                if (!JS_IsNull(port->on_message_func)) {
+                    JSWorkerMessagePipe *ps = port->recv_pipe;
+                    if (pfd->fd == ps->waker.read_fd) {
+                        if (handle_posted_message(rt, ctx, port))
+                            goto done;
+                    }
                 }
             }
+#endif // USE_WORKER
         }
     }
-    done:
-    return 0;
+done:
+    if (pfds != pfds_local)
+        js_free(ctx, pfds);
+    return ret;
 }
-#endif /* !_WIN32 */
+#endif // defined(_WIN32)
+
 
 static JSValue make_obj_error(JSContext *ctx,
                               JSValue obj,
@@ -84015,7 +78150,7 @@ static JSValue make_string_error(JSContext *ctx,
 static JSValue js_os_getcwd(JSContext *ctx, JSValueConst this_val,
                             int argc, JSValueConst *argv)
 {
-    char buf[PATH_MAX];
+    char buf[JS__PATH_MAX];
     int err;
 
     if (!getcwd(buf, sizeof(buf))) {
@@ -84070,6 +78205,42 @@ static JSValue js_os_mkdir(JSContext *ctx, JSValueConst this_val,
 static JSValue js_os_readdir(JSContext *ctx, JSValueConst this_val,
                              int argc, JSValueConst *argv)
 {
+#ifdef _WIN32
+    const char *path;
+    JSValue obj;
+    int err;
+    uint32_t len;
+    HANDLE h;
+    WIN32_FIND_DATAA d;
+    char s[1024];
+
+    path = JS_ToCString(ctx, argv[0]);
+    if (!path)
+        return JS_EXCEPTION;
+    obj = JS_NewArray(ctx);
+    if (JS_IsException(obj)) {
+        JS_FreeCString(ctx, path);
+        return JS_EXCEPTION;
+    }
+    snprintf(s, sizeof(s), "%s/*", path);
+    JS_FreeCString(ctx, path);
+    err = 0;
+    h = FindFirstFileA(s, &d);
+    if (h == INVALID_HANDLE_VALUE)
+        err = GetLastError();
+    if (err)
+        goto done;
+    JS_DefinePropertyValueUint32(ctx, obj, 0, JS_NewString(ctx, "."),
+                                 JS_PROP_C_W_E);
+    for (len = 1; FindNextFileA(h, &d); len++) {
+        JS_DefinePropertyValueUint32(ctx, obj, len,
+                                     JS_NewString(ctx, d.cFileName),
+                                     JS_PROP_C_W_E);
+    }
+    FindClose(h);
+done:
+    return make_obj_error(ctx, obj, err);
+#else
     const char *path;
     DIR *f;
     struct dirent *d;
@@ -84108,6 +78279,7 @@ static JSValue js_os_readdir(JSContext *ctx, JSValueConst this_val,
     closedir(f);
  done:
     return make_obj_error(ctx, obj, err);
+#endif
 }
 
 #if !defined(_WIN32)
@@ -84283,7 +78455,7 @@ static JSValue js_os_sleep(JSContext *ctx, JSValueConst this_val,
 #if defined(_WIN32)
 static char *realpath(const char *path, char *buf)
 {
-    if (!_fullpath(buf, path, PATH_MAX)) {
+    if (!_fullpath(buf, path, JS__PATH_MAX)) {
         errno = ENOENT;
         return NULL;
     } else {
@@ -84298,7 +78470,7 @@ static JSValue js_os_realpath(JSContext *ctx, JSValueConst this_val,
                               int argc, JSValueConst *argv)
 {
     const char *path;
-    char buf[PATH_MAX], *res;
+    char buf[JS__PATH_MAX], *res;
     int err;
 
     path = JS_ToCString(ctx, argv[0]);
@@ -84342,7 +78514,7 @@ static JSValue js_os_readlink(JSContext *ctx, JSValueConst this_val,
                               int argc, JSValueConst *argv)
 {
     const char *path;
-    char buf[PATH_MAX];
+    char buf[JS__PATH_MAX];
     int err;
     ssize_t res;
 
@@ -84424,7 +78596,7 @@ static char **build_envp(JSContext *ctx, JSValue obj)
 static int my_execvpe(const char *filename, char **argv, char **envp)
 {
     char *path, *p, *p_next, *p1;
-    char buf[PATH_MAX];
+    char buf[JS__PATH_MAX];
     size_t filename_len, path_len;
     bool eacces_error;
 
@@ -84451,7 +78623,7 @@ static int my_execvpe(const char *filename, char **argv, char **envp)
             path_len = p1 - p;
         }
         /* path too long */
-        if ((path_len + 1 + filename_len + 1) > PATH_MAX)
+        if ((path_len + 1 + filename_len + 1) > JS__PATH_MAX)
             continue;
         memcpy(buf, p, path_len);
         buf[path_len] = '/';
@@ -84484,7 +78656,7 @@ static js_once_t js_os_exec_once = JS_ONCE_INIT;
 
 static void js_os_exec_once_init(void)
 {
-    js_os_exec_closefrom = dlsym(RTLD_DEFAULT, "closefrom");
+     *(void **) (&js_os_exec_closefrom) = dlsym(RTLD_DEFAULT, "closefrom");
 }
 
 #endif
@@ -84503,6 +78675,8 @@ static JSValue js_os_exec(JSContext *ctx, JSValueConst this_val,
     static const char *std_name[3] = { "stdin", "stdout", "stderr" };
     int std_fds[3];
     uint32_t uid = -1, gid = -1;
+    int ngroups = -1;
+    gid_t groups[64];
 
     val = JS_GetPropertyStr(ctx, args, "length");
     if (JS_IsException(val))
@@ -84606,6 +78780,40 @@ static JSValue js_os_exec(JSContext *ctx, JSValueConst this_val,
             if (ret)
                 goto exception;
         }
+
+        val = JS_GetPropertyStr(ctx, options, "groups");
+        if (JS_IsException(val))
+            goto exception;
+        if (!JS_IsUndefined(val)) {
+            int64_t idx, len;
+            JSValue prop;
+            uint32_t id;
+            ngroups = 0;
+            if (JS_GetLength(ctx, val, &len)) {
+                JS_FreeValue(ctx, val);
+                goto exception;
+            }
+            for (idx = 0; idx < len; idx++) {
+                prop = JS_GetPropertyInt64(ctx, val, idx);
+                if (JS_IsException(prop))
+                    break;
+                if (JS_IsUndefined(prop))
+                    continue;
+                ret = JS_ToUint32(ctx, &id, prop);
+                JS_FreeValue(ctx, prop);
+                if (ret)
+                    break;
+                if (ngroups == countof(groups)) {
+                    JS_ThrowRangeError(ctx, "too many groups");
+                    break;
+                }
+                groups[ngroups++] = id;
+            }
+            JS_FreeValue(ctx, val);
+            if (idx < len)
+                goto exception;
+        }
+
     }
 
 #if !defined(EMSCRIPTEN) && !defined(__wasi__)
@@ -84639,6 +78847,10 @@ static JSValue js_os_exec(JSContext *ctx, JSValueConst this_val,
 
         if (cwd) {
             if (chdir(cwd) < 0)
+                _exit(127);
+        }
+        if (ngroups != -1) {
+            if (setgroups(ngroups, groups) < 0)
                 _exit(127);
         }
         if (uid != -1) {
@@ -84855,22 +79067,17 @@ static void js_sab_dup(void *opaque, void *ptr)
 static JSWorkerMessagePipe *js_new_message_pipe(void)
 {
     JSWorkerMessagePipe *ps;
-    int pipe_fds[2];
-
-    if (pipe(pipe_fds) < 0)
-        return NULL;
 
     ps = malloc(sizeof(*ps));
-    if (!ps) {
-        close(pipe_fds[0]);
-        close(pipe_fds[1]);
+    if (!ps)
+        return NULL;
+    if (js_waker_init(&ps->waker)) {
+        free(ps);
         return NULL;
     }
     ps->ref_count = 1;
     init_list_head(&ps->msg_queue);
-    pthread_mutex_init(&ps->mutex, NULL);
-    ps->read_fd = pipe_fds[0];
-    ps->write_fd = pipe_fds[1];
+    js_mutex_init(&ps->mutex);
     return ps;
 }
 
@@ -84908,9 +79115,8 @@ static void js_free_message_pipe(JSWorkerMessagePipe *ps)
             msg = list_entry(el, JSWorkerMessage, link);
             js_free_message(msg);
         }
-        pthread_mutex_destroy(&ps->mutex);
-        close(ps->read_fd);
-        close(ps->write_fd);
+        js_mutex_destroy(&ps->mutex);
+        js_waker_close(&ps->waker);
         free(ps);
     }
 }
@@ -84942,7 +79148,7 @@ static JSClassDef js_worker_class = {
     .finalizer = js_worker_finalizer,
 };
 
-static void *worker_func(void *opaque)
+static void worker_func(void *opaque)
 {
     WorkerFuncArgs *args = opaque;
     JSRuntime *rt;
@@ -84989,7 +79195,6 @@ static void *worker_func(void *opaque)
     js_std_free_handlers(rt);
     JS_FreeContext(ctx);
     JS_FreeRuntime(rt);
-    return NULL;
 }
 
 static JSValue js_worker_ctor_internal(JSContext *ctx, JSValueConst new_target,
@@ -85031,8 +79236,7 @@ static JSValue js_worker_ctor(JSContext *ctx, JSValueConst new_target,
 {
     JSRuntime *rt = JS_GetRuntime(ctx);
     WorkerFuncArgs *args = NULL;
-    pthread_t tid;
-    pthread_attr_t attr;
+    js_thread_t thr;
     JSValue obj = JS_UNDEFINED;
     int ret;
     const char *filename = NULL, *basename;
@@ -85079,14 +79283,7 @@ static JSValue js_worker_ctor(JSContext *ctx, JSValueConst new_target,
     if (JS_IsException(obj))
         goto fail;
 
-    pthread_attr_init(&attr);
-    /* no join at the end */
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-    // musl libc gives threads 80 kb stacks, much smaller than
-    // JS_DEFAULT_STACK_SIZE (1 MB)
-    pthread_attr_setstacksize(&attr, 2 << 20); // 2 MB, glibc default
-    ret = pthread_create(&tid, &attr, worker_func, args);
-    pthread_attr_destroy(&attr);
+    ret = js_thread_create(&thr, worker_func, args, JS_THREAD_CREATE_DETACHED);
     if (ret != 0) {
         JS_ThrowTypeError(ctx, "could not create worker");
         goto fail;
@@ -85161,21 +79358,12 @@ static JSValue js_worker_postMessage(JSContext *ctx, JSValueConst this_val,
     }
 
     ps = worker->send_pipe;
-    pthread_mutex_lock(&ps->mutex);
+    js_mutex_lock(&ps->mutex);
     /* indicate that data is present */
-    if (list_empty(&ps->msg_queue)) {
-        uint8_t ch = '\0';
-        int ret;
-        for(;;) {
-            ret = write(ps->write_fd, &ch, 1);
-            if (ret == 1)
-                break;
-            if (ret < 0 && (errno != EAGAIN || errno != EINTR))
-                break;
-        }
-    }
+    if (list_empty(&ps->msg_queue))
+        js_waker_signal(&ps->waker);
     list_add_tail(&msg->link, &ps->msg_queue);
-    pthread_mutex_unlock(&ps->mutex);
+    js_mutex_unlock(&ps->mutex);
     return JS_UNDEFINED;
  fail:
     if (msg) {
@@ -85272,6 +79460,8 @@ void js_std_set_worker_new_context_func(JSContext *(*func)(JSRuntime *rt))
 #define OS_PLATFORM "freebsd"
 #elif defined(__wasi__)
 #define OS_PLATFORM "wasi"
+#elif defined(__GNU__)
+#define OS_PLATFORM "hurd"
 #else
 #define OS_PLATFORM "unknown"
 #endif
@@ -85325,6 +79515,7 @@ static const JSCFunctionListEntry js_os_funcs[] = {
     OS_FLAG(SIGTTOU),
     JS_CFUNC_DEF("cputime", 0, js_os_cputime ),
 #endif
+    JS_CFUNC_DEF("exePath", 0, js_os_exepath ),
     JS_CFUNC_DEF("now", 0, js_os_now ),
     JS_CFUNC_MAGIC_DEF("setTimeout", 2, js_os_setTimeout, 0 ),
     JS_CFUNC_MAGIC_DEF("setInterval", 2, js_os_setTimeout, 1 ),
@@ -85529,6 +79720,7 @@ void js_std_init_handlers(JSRuntime *rt)
     init_list_head(&ts->os_signal_handlers);
     init_list_head(&ts->os_timers);
     init_list_head(&ts->port_list);
+    init_list_head(&ts->rejected_promise_list);
 
     ts->next_timer_id = 1;
 
@@ -85546,6 +79738,14 @@ void js_std_init_handlers(JSRuntime *rt)
         JS_SetSharedArrayBufferFunctions(rt, &sf);
     }
 #endif
+}
+
+static void free_rp(JSRuntime *rt, JSRejectedPromiseEntry *rp)
+{
+    list_del(&rp->link);
+    JS_FreeValueRT(rt, rp->promise);
+    JS_FreeValueRT(rt, rp->reason);
+    js_free_rt(rt, rp);
 }
 
 void js_std_free_handlers(JSRuntime *rt)
@@ -85566,6 +79766,11 @@ void js_std_free_handlers(JSRuntime *rt)
     list_for_each_safe(el, el1, &ts->os_timers) {
         JSOSTimer *th = list_entry(el, JSOSTimer, link);
         free_timer(rt, th);
+    }
+
+    list_for_each_safe(el, el1, &ts->rejected_promise_list) {
+        JSRejectedPromiseEntry *rp = list_entry(el, JSRejectedPromiseEntry, link);
+        free_rp(rt, rp);
     }
 
 #ifdef USE_WORKER
@@ -85593,7 +79798,7 @@ static void js_std_dump_error1(JSContext *ctx, JSValueConst exception_val)
     JSValue val;
     bool is_error;
 
-    is_error = JS_IsError(ctx, exception_val);
+    is_error = JS_IsError(exception_val);
     js_dump_obj(ctx, stderr, exception_val);
     if (is_error) {
         val = JS_GetPropertyStr(ctx, exception_val, "stack");
@@ -85615,14 +79820,62 @@ void js_std_dump_error(JSContext *ctx)
     JS_FreeValue(ctx, exception_val);
 }
 
+static JSRejectedPromiseEntry *find_rejected_promise(JSContext *ctx, JSThreadState *ts,
+                                                     JSValueConst promise)
+{
+    struct list_head *el;
+
+    list_for_each(el, &ts->rejected_promise_list) {
+        JSRejectedPromiseEntry *rp = list_entry(el, JSRejectedPromiseEntry, link);
+        if (JS_IsSameValue(ctx, rp->promise, promise))
+            return rp;
+    }
+    return NULL;
+}
+
 void js_std_promise_rejection_tracker(JSContext *ctx, JSValueConst promise,
                                       JSValueConst reason,
                                       bool is_handled, void *opaque)
 {
-    if (!is_handled) {
-        fprintf(stderr, "Possibly unhandled promise rejection: ");
-        js_std_dump_error1(ctx, reason);
-        fflush(stderr);
+
+    JSRuntime *rt = JS_GetRuntime(ctx);
+    JSThreadState *ts = js_get_thread_state(rt);
+    JSRejectedPromiseEntry *rp = find_rejected_promise(ctx, ts, promise);
+
+    if (is_handled) {
+        /* the rejection is handled, so the entry can be removed if present */
+        if (rp)
+            free_rp(rt, rp);
+    } else {
+        /* add a new entry if needed */
+        if (!rp) {
+            rp = js_malloc_rt(rt, sizeof(*rp));
+            if (rp) {
+                rp->promise = JS_DupValue(ctx, promise);
+                rp->reason = JS_DupValue(ctx, reason);
+                list_add_tail(&rp->link, &ts->rejected_promise_list);
+            }
+        }
+    }
+}
+
+/* check if there are pending promise rejections. It must be done
+   asynchrously in case a rejected promise is handled later. Currently
+   we do it once the application is about to sleep. It could be done
+   more often if needed. */
+static void js_std_promise_rejection_check(JSContext *ctx)
+{
+    JSRuntime *rt = JS_GetRuntime(ctx);
+    JSThreadState *ts = js_get_thread_state(rt);
+    struct list_head *el;
+
+    if (unlikely(!list_empty(&ts->rejected_promise_list))) {
+        list_for_each(el, &ts->rejected_promise_list) {
+            JSRejectedPromiseEntry *rp = list_entry(el, JSRejectedPromiseEntry, link);
+            fprintf(stderr, "Possibly unhandled promise rejection: ");
+            js_std_dump_error1(ctx, rp->reason);
+            fflush(stderr);
+        }
         exit(1);
     }
 }
@@ -85645,6 +79898,8 @@ int js_std_loop(JSContext *ctx)
                 break;
             }
         }
+
+        js_std_promise_rejection_check(ctx);
 
         if (!ts->can_js_os_poll || js_os_poll(ctx))
             break;
@@ -85680,6 +79935,8 @@ JSValue js_std_await(JSContext *ctx, JSValue obj)
             if (err < 0) {
                 js_std_dump_error(ctx1);
             }
+            if (err == 0)
+                js_std_promise_rejection_check(ctx);
             if (ts->can_js_os_poll)
                 js_os_poll(ctx);
         } else {
@@ -85703,6 +79960,7 @@ void js_std_eval_binary(JSContext *ctx, const uint8_t *buf, size_t buf_len,
             if (js_module_set_import_meta(ctx, obj, false, false) < 0)
                 goto exception;
         }
+        JS_FreeValue(ctx, obj);
     } else {
         if (JS_VALUE_GET_TAG(obj) == JS_TAG_MODULE) {
             if (JS_ResolveModule(ctx, obj) < 0) {
