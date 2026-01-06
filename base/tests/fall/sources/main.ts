@@ -79,7 +79,7 @@ function scene_ready() {
 	asim_body_create(0, 1, 1, 1, 1, 0, 0, 0, mesh.data.vertex_arrays[0].values, mesh.data.index_array, mesh.data.scale_pos);
 }
 
-function scene_update() {
+function scene_update(_: any) {
 	asim_world_update(sys_delta());
 	camera_update();
 
@@ -93,6 +93,21 @@ function scene_update() {
 	transform_build_matrix(t);
 }
 
+////
+type config_t = {
+	server: string;
+};
+let      config_raw: config_t;
+function strings_check_internet_connection(): string {
+	return "";
+}
+function console_error(s: string) {}
+function console_info(s: string) {}
+function plugin_embed() {}
 function tr(id: string, vars: map_t<string, string> = null): string {
 	return id;
+}
+let      pipes_offset: i32;
+function pipes_get_constant_location(s: string): i32 {
+	return 0;
 }
