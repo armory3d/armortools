@@ -516,7 +516,7 @@ static void write_functions(char *code, size_t *offset, shader_stage stage, func
 						                   type_string(f->parameter_types[parameter_index].type));
 					}
 				}
-				*offset += sprintf(&code[*offset], ") -> %s {\n", type_string(f->return_type.type));
+				*offset += sprintf(&code[*offset], ", @builtin(vertex_index) _kong_vertex_id: u32) -> %s {\n", type_string(f->return_type.type));
 			}
 			else if (stage == SHADER_STAGE_FRAGMENT) {
 				if (get_type(f->return_type.type)->array_size > 0) {
@@ -926,6 +926,10 @@ static void write_functions(char *code, size_t *offset, shader_stage stage, func
 					*offset +=
 					    sprintf(&code[*offset], "var _%" PRIu64 ": %s = _kong_group_index;\n", o->op_call.var.index, type_string(o->op_call.var.type.type));
 				}
+				else if (o->op_call.func == add_name("vertex_id")) {
+					check(o->op_call.parameters_size == 0, context, "vertex_id can not have a parameter");
+					*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = i32(_kong_vertex_id);\n", o->op_call.var.index, type_string(o->op_call.var.type.type));
+				}
 				else {
 					name_id     func_name_id = o->op_call.func;
 					const char *func_name    = get_name(o->op_call.func);
@@ -976,6 +980,17 @@ static void write_functions(char *code, size_t *offset, shader_stage stage, func
 					}
 					*offset += sprintf(&code[*offset], ");\n");
 				}
+				break;
+			}
+			case OPCODE_NEGATE: {
+				indent(code, offset, indentation);
+				*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = -_%" PRIu64 ";\n", o->op_negate.to.index, type_string(o->op_negate.to.type.type),
+								o->op_negate.from.index);
+				break;
+			}
+			case OPCODE_NOT: {
+				indent(code, offset, indentation);
+				*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = !_%" PRIu64 ";\n", o->op_not.to.index, type_string(o->op_not.to.type.type), o->op_not.from.index);
 				break;
 			}
 			default:
