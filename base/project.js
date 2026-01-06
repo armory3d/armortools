@@ -144,10 +144,10 @@ else if (platform == "wasm") {
 	add_sys_backend("wasm");
 	add_thread_backend("wasm");
 	add_gpu_backend("webgpu");
-	project.add_cfiles("sources/libs/miniclib/**");
 	project.add_define("IRON_WASM");
 	project.add_define("IRON_WEBGPU");
 	project.add_define("NO_GC");
+	project.add_cfiles("sources/libs/miniclib/**");
 	project.add_include_dir("sources/libs/miniclib");
 	project.add_assets("sources/backends/data/wasm/*");
 }
