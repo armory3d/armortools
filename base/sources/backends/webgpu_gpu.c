@@ -294,7 +294,7 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 	// wgpuSurfaceGetCapabilities(surface, gpu, &caps);
 	// surface_format = caps.formats[0];
 	// wgpuSurfaceCapabilitiesFreeMembers(caps);
-	surface_format = WGPUTextureFormat_BGRA8Unorm;
+	surface_format = WGPUTextureFormat_RGBA8Unorm;
 
 	gpu_create_framebuffers(depth_buffer_bits);
 	create_swapchain();
@@ -325,7 +325,7 @@ void gpu_begin_internal(gpu_clear_t flags, unsigned color, float depth) {
 	framebuffers[0].impl.texture        = surface_texture.texture;
 	WGPUTextureViewDescriptor view_info = {
 	    .dimension       = WGPUTextureViewDimension_2D,
-	    .format          = WGPUTextureFormat_BGRA8Unorm,
+	    .format          = WGPUTextureFormat_RGBA8Unorm,
 	    .mipLevelCount   = 1,
 	    .arrayLayerCount = 1,
 	};
@@ -633,10 +633,21 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	texture->format = format;
 	texture->state  = GPU_TEXTURE_STATE_SHADER_RESOURCE;
 
-	WGPUTextureFormat wgpu_format            = convert_image_format(format);
-	int               bpp                    = gpu_texture_format_size(format);
-	size_t            _upload_size           = (size_t)width * height * bpp;
-	int               new_upload_buffer_size = _upload_size > (1024 * 1024 * 4) ? _upload_size : (1024 * 1024 * 4);
+	WGPUTextureFormat wgpu_format = convert_image_format(format);
+	int               bpp         = gpu_texture_format_size(format);
+	int               aligned_bpr = bytes_per_row_align(width * bpp);
+	size_t            upload_size = width * height * bpp;
+	void             *upload_data = data;
+
+	if (aligned_bpr != width * bpp) {
+		upload_size = (size_t)aligned_bpr * height;
+		upload_data = malloc(upload_size);
+		for (int row = 0; row < height; ++row) {
+			memcpy((uint8_t *)upload_data + row * aligned_bpr, (uint8_t *)data + row * width * bpp, width * bpp);
+		}
+	}
+
+	int new_upload_buffer_size = upload_size > (1024 * 1024 * 4) ? upload_size : (1024 * 1024 * 4);
 
 	if (upload_buffer_size < new_upload_buffer_size) {
 		if (upload_buffer_size > 0) {
@@ -652,7 +663,11 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 		upload_buffer = wgpuDeviceCreateBuffer(device, &upload_desc);
 	}
 
-	wgpuQueueWriteBuffer(queue, upload_buffer, 0, data, _upload_size);
+	wgpuQueueWriteBuffer(queue, upload_buffer, 0, upload_data, upload_size);
+
+	if (upload_data != data) {
+		free(upload_data);
+	}
 
 	WGPUTextureDescriptor image_info = {
 	    .size          = {(uint32_t)width, (uint32_t)height, 1},
@@ -665,7 +680,7 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	texture->impl.texture = wgpuDeviceCreateTexture(device, &image_info);
 
 	WGPUCommandEncoder       encoder = wgpuDeviceCreateCommandEncoder(device, NULL);
-	WGPUTexelCopyBufferInfo  src     = {.layout = {.bytesPerRow = bytes_per_row_align(width * bpp), .rowsPerImage = height}, .buffer = upload_buffer};
+	WGPUTexelCopyBufferInfo  src     = {.layout = {.bytesPerRow = aligned_bpr, .rowsPerImage = height}, .buffer = upload_buffer};
 	WGPUTexelCopyTextureInfo dst     = {.texture = texture->impl.texture};
 	WGPUExtent3D             extent  = {(uint32_t)width, (uint32_t)height, 1};
 	wgpuCommandEncoderCopyBufferToTexture(encoder, &src, &dst, &extent);
@@ -750,8 +765,8 @@ void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size) {
 
 void gpu_constant_buffer_lock(gpu_buffer_t *buffer, int start, int count) {
 	buffer->impl.start = start;
-	buffer->count = count;
-	buffer->data  = &buffer->impl.mem[start];
+	buffer->count      = count;
+	buffer->data       = &buffer->impl.mem[start];
 }
 
 void gpu_constant_buffer_unlock(gpu_buffer_t *buffer) {

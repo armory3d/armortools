@@ -2,7 +2,7 @@
 #include "stdio.h"
 #include "string.h"
 
-#define HEAP_SIZE 1024 * 1024 * 512 * 2
+#define HEAP_SIZE 1024 * 1024 * 256
 static unsigned char heap[HEAP_SIZE];
 static size_t        heap_top = 4;
 

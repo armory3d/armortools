@@ -57,8 +57,7 @@ function id_to_texture_format(id) {
 	if (id === 0x00000001)
 		return "r8unorm";
 	if (id === 0x00000016)
-		return "bgra8unorm";
-	// return "rgba8unorm";
+		return "rgba8unorm";
 	if (id === 0x00000030)
 		return "depth32float";
 	if (id === 0x0000001B)
@@ -84,7 +83,7 @@ async function init() {
 	let   wasm_bytes = null;
 	await fetch("./start.wasm").then(res => res.arrayBuffer()).then(buffer => wasm_bytes = new Uint8Array(buffer));
 
-	memory  = new WebAssembly.Memory({initial : 20000, maximum : 20000, shared : true}); // * 65536
+	memory  = new WebAssembly.Memory({initial : 4356, maximum : 4356, shared : true}); // * 65536 = 285474816 (make.js --initial-memory)
 	heapu8  = new Uint8Array(memory.buffer);
 	heapu16 = new Uint16Array(memory.buffer);
 	heapu32 = new Uint32Array(memory.buffer);
