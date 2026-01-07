@@ -115,12 +115,7 @@ function ui_menu_fit_to_screen() {
 
 function ui_menu_separator() {
 	ui._y++;
-	if (config_raw.touch_ui) {
-		ui_fill(0, 0, ui._w / UI_SCALE(), 1, ui.ops.theme.BUTTON_COL);
-	}
-	else {
-		ui_fill(26, 0, ui._w / UI_SCALE() - 26, 1, ui.ops.theme.BUTTON_COL);
-	}
+	ui_fill(26, 0, ui._w / UI_SCALE() - 26, 1, ui.ops.theme.BUTTON_COL);
 }
 
 function ui_menu_button(text: string, label: string = "", icon: icon_t = icon_t.NONE): bool {

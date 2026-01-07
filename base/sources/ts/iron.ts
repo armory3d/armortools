@@ -721,7 +721,7 @@ declare function _ui_menu_button(s: string): bool;
 declare function ui_begin_region(ui: ui_t, x: i32, y: i32, w: i32): void;
 declare function ui_inline_radio(handle: ui_handle_t, texts: string[], align: i32): i32;
 declare function ui_end_input(): void;
-declare function ui_panel(handle: ui_handle_t, text: string, is_tree: bool = false, filled: bool = true): bool;
+declare function ui_panel(handle: ui_handle_t, text: string, is_tree: bool = false, filled: bool = true, align_right: bool = false): bool;
 declare function ui_nodes_rgba_popup(nhandle: ui_handle_t, val: f32_ptr, x: i32, y: i32): void;
 declare function ui_get_link(links: ui_node_link_t[], id: i32): ui_node_link_t;
 declare function ui_get_node(nodes: ui_node_t[], id: i32): ui_node_t;

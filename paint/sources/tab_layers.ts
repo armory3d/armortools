@@ -444,7 +444,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 
 		let layer_panel: ui_handle_t = ui_nest(ui_handle(__ID__), l.id);
 		layer_panel.b                = l.show_panel;
-		l.show_panel                 = ui_panel(layer_panel, "", true, false);
+		l.show_panel                 = ui_panel(layer_panel, "", false, false, true);
 	}
 
 	ui._x = uix;

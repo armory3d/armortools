@@ -1405,15 +1405,20 @@ void ui_draw_tabs() {
 	current->_w = !current->current_window->scroll_enabled ? current->_window_w : current->_window_w - UI_SCROLL_W();
 }
 
-void ui_draw_arrow(bool selected) {
+void ui_draw_arrow(bool selected, bool align_right) {
 	float x = current->_x + current->arrow_offset_x;
 	float y = current->_y + current->arrow_offset_y;
-	draw_set_color(theme->TEXT_COL);
+	draw_set_color(theme->LABEL_COL);
 	if (selected) {
-		draw_filled_triangle(x, y, x + UI_ARROW_SIZE(), y, x + UI_ARROW_SIZE() / 2.0, y + UI_ARROW_SIZE());
+		draw_filled_triangle(x, y, x + UI_ARROW_SIZE() + 0.1, y, x + UI_ARROW_SIZE() / 2.0, y + UI_ARROW_SIZE());
 	}
 	else {
-		draw_filled_triangle(x, y, x, y + UI_ARROW_SIZE(), x + UI_ARROW_SIZE(), y + UI_ARROW_SIZE() / 2.0);
+		if (align_right) {
+			draw_filled_triangle(x + UI_ARROW_SIZE(), y - 1, x + UI_ARROW_SIZE(), y + UI_ARROW_SIZE() + 1, x, y + UI_ARROW_SIZE() / 2.0);
+		}
+		else {
+			draw_filled_triangle(x + UI_ARROW_SIZE(), y - 0.1, x, y + UI_ARROW_SIZE() + 0.1, x + UI_ARROW_SIZE(), y + UI_ARROW_SIZE() / 2.0);
+		}
 	}
 }
 
@@ -1423,11 +1428,11 @@ void ui_draw_tree(bool selected) {
 	float y      = current->_y + current->arrow_offset_y + 1;
 	draw_set_color(theme->TEXT_COL);
 	if (selected) {
-		draw_filled_rect(x, y + SIGN_W / 2.0 - 1, SIGN_W, SIGN_W / 8.0);
+		draw_filled_rect(x, y + SIGN_W / 2.0 - 1, SIGN_W, SIGN_W / 7.0);
 	}
 	else {
-		draw_filled_rect(x, y + SIGN_W / 2.0 - 1, SIGN_W, SIGN_W / 8.0);
-		draw_filled_rect(x + SIGN_W / 2.0 - 1, y, SIGN_W / 8.0, SIGN_W);
+		draw_filled_rect(x, y + SIGN_W / 2.0 - 1, SIGN_W, SIGN_W / 7.0);
+		draw_filled_rect(x + SIGN_W / 2.0 - 1, y, SIGN_W / 7.0, SIGN_W);
 	}
 }
 
@@ -1892,7 +1897,7 @@ bool ui_tab(ui_handle_t *handle, char *text, bool vertical, uint32_t color, bool
 	return handle->i == current->tab_count - 1;
 }
 
-bool ui_panel(ui_handle_t *handle, char *text, bool is_tree, bool filled) {
+bool ui_panel(ui_handle_t *handle, char *text, bool is_tree, bool filled, bool align_right) {
 	if (!ui_is_visible(UI_ELEMENT_H())) {
 		ui_end_element();
 		return handle->b;
@@ -1912,7 +1917,7 @@ bool ui_panel(ui_handle_t *handle, char *text, bool is_tree, bool filled) {
 		ui_draw_tree(handle->b);
 	}
 	else {
-		ui_draw_arrow(handle->b);
+		ui_draw_arrow(handle->b, align_right);
 	}
 
 	draw_set_color(theme->LABEL_COL); // Title

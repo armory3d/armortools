@@ -444,7 +444,7 @@ FN(ui_panel) {
 	uint64_t p;
 	JS_ToBigUint64(ctx, &p, argv[0]);
 	char *s      = (char *)JS_ToCString(ctx, argv[1]);
-	bool  result = ui_panel((void *)p, s, false, false);
+	bool  result = ui_panel((void *)p, s, false, false, false);
 	return JS_NewBool(ctx, result);
 }
 

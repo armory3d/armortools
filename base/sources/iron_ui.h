@@ -293,7 +293,7 @@ bool  ui_window(ui_handle_t *handle, int x, int y, int w, int h, bool drag); // 
 bool  ui_button(char *text, int align, char *label);
 int   ui_text(char *text, int align, int bg);
 bool  ui_tab(ui_handle_t *handle, char *text, bool vertical, uint32_t color, bool align_right);
-bool  ui_panel(ui_handle_t *handle, char *text, bool is_tree, bool filled);
+bool  ui_panel(ui_handle_t *handle, char *text, bool is_tree, bool filled, bool align_right);
 int   ui_sub_image(gpu_texture_t *image, uint32_t tint, int h, int sx, int sy, int sw, int sh);
 int   ui_image(gpu_texture_t *image, uint32_t tint, int h);
 char *ui_text_input(ui_handle_t *handle, char *label, int align, bool editable, bool live_update);

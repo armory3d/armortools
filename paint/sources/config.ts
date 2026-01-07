@@ -3,8 +3,7 @@ let config_raw: config_t = null;
 let config_keymap: map_t<string, string>;
 let config_loaded: bool                   = false;
 let config_button_align: ui_align_t       = ui_align_t.LEFT;
-let config_default_button_spacing: string = "       ";
-let config_button_spacing: string         = config_default_button_spacing;
+let config_button_spacing: string         = "       ";
 
 function config_load() {
 	let path: string = "";
@@ -439,13 +438,9 @@ function config_load_theme(theme: string, tag_redraw: bool = true) {
 		base_theme.ARROW_SIZE        = 5 + 2;
 		base_theme.CHECK_SIZE        = 15 + 4;
 		base_theme.CHECK_SELECT_SIZE = 8 + 2;
-		config_button_align          = ui_align_t.LEFT;
-		config_button_spacing        = "";
 	}
 	else {
 		base_theme.FULL_TABS  = false;
-		config_button_align   = ui_align_t.LEFT;
-		config_button_spacing = config_default_button_spacing;
 	}
 }
 

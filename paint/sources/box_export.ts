@@ -31,7 +31,7 @@ function box_export_show_textures() {
 		/// if (arm_android || arm_ios)
 		box_export_tab_export_mesh(box_export_htab);
 		/// end
-	}, 540, 340, null, true, tr("Export"));
+	}, 600, 400, null, true, tr("Export"));
 }
 
 function box_export_show_bake_material() {
@@ -47,7 +47,7 @@ function box_export_show_bake_material() {
 
 		box_export_tab_export_textures(tr("Bake to Textures"), true);
 		box_export_tab_presets();
-	}, 540, 340, null, true, tr("Export"));
+	}, 600, 400, null, true, tr("Export"));
 }
 
 function box_export_tab_export_textures(title: string, bake_material: bool = false) {
