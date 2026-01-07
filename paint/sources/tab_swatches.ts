@@ -26,7 +26,7 @@ function tab_swatches_draw(htab: ui_handle_t) {
 		let row: f32[] = [ -100, -100, -100, -100, -100 ];
 		ui_row(row);
 
-		if (ui_button(tr("New"))) {
+		if (ui_icon_button(tr("New"), icon_t.PLUS)) {
 			context_set_swatch(make_swatch());
 			array_push(project_raw.swatches, context_raw.swatch);
 		}
@@ -34,7 +34,7 @@ function tab_swatches_draw(htab: ui_handle_t) {
 			ui_tooltip(tr("Add new swatch"));
 		}
 
-		if (ui_button(tr("Import"))) {
+		if (ui_icon_button(tr("Import"), icon_t.IMPORT)) {
 			ui_menu_draw(function() {
 				if (ui_menu_button(tr("Replace Existing"))) {
 					project_import_swatches(true);
@@ -49,19 +49,19 @@ function tab_swatches_draw(htab: ui_handle_t) {
 			ui_tooltip(tr("Import swatches"));
 		}
 
-		if (ui_button(tr("Export"))) {
+		if (ui_icon_button(tr("Export"), icon_t.EXPORT)) {
 			project_export_swatches();
 		}
 		if (ui.is_hovered) {
 			ui_tooltip(tr("Export swatches"));
 		}
 
-		if (ui_button(tr("Clear"))) {
+		if (ui_icon_button(tr("Clear"), icon_t.ERASE)) {
 			context_set_swatch(make_swatch());
 			project_raw.swatches = [ context_raw.swatch ];
 		}
 
-		if (ui_button(tr("Restore"))) {
+		if (ui_icon_button(tr("Restore"), icon_t.REPLAY)) {
 			project_set_default_swatches();
 			context_set_swatch(project_raw.swatches[0]);
 		}

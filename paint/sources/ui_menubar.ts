@@ -117,7 +117,7 @@ function ui_menubar_render_ui() {
 		else {
 			let categories: string[] = [ tr("File"), tr("Edit"), tr("Viewport"), tr("Mode"), tr("Camera"), tr("Help") ];
 			for (let i: i32 = 0; i < categories.length; ++i) {
-				if (_ui_menu_button(categories[i]) || (ui_menu_show && ui_menu_commands == ui_menubar_draw_category_items && ui.is_hovered)) {
+				if (ui_menubar_button(categories[i]) || (ui_menu_show && ui_menu_commands == ui_menubar_draw_category_items && ui.is_hovered)) {
 					ui_menubar_show_menu(i);
 				}
 			}

@@ -6,13 +6,13 @@ function tab_brushes_draw(htab: ui_handle_t) {
 		ui_begin_sticky();
 		let row: f32[] = [ -70, -70, -70 ];
 		ui_row(row);
-		if (ui_button(tr("New"))) {
+		if (ui_icon_button(tr("New"), icon_t.PLUS)) {
 			context_raw.brush = slot_brush_create();
 			array_push(project_brushes, context_raw.brush);
 			make_material_parse_brush();
 			ui_nodes_hwnd.redraws = 2;
 		}
-		if (ui_button(tr("Import"))) {
+		if (ui_icon_button(tr("Import"), icon_t.IMPORT)) {
 			project_import_brush();
 		}
 		if (ui_button(tr("Nodes"))) {

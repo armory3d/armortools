@@ -1234,7 +1234,7 @@ function ui_nodes_draw_menubar() {
 	let cats: string[] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_categories : nodes_brush_categories;
 
 	for (let i: i32 = 0; i < cats.length; ++i) {
-		if ((_ui_menu_button(tr(cats[i]))) || (ui.is_hovered && ui_nodes_show_menu)) {
+		if ((ui_menubar_button(tr(cats[i]))) || (ui.is_hovered && ui_nodes_show_menu)) {
 			ui_nodes_show_menu     = true;
 			ui_nodes_menu_category = i;
 			ui_nodes_popup_x       = ui_nodes_wx + ui._x;
@@ -1260,7 +1260,7 @@ function ui_nodes_draw_menubar() {
 		ui._w = _w;
 	}
 	else {
-		if (_ui_menu_button(tr("Search"))) {
+		if (ui_menubar_button(tr("Search"))) {
 			ui_nodes_node_search_x = ui._window_x + ui._x;
 			ui_nodes_node_search_y = ui._window_y + ui._y;
 			// Allow for node menu to be closed first
@@ -1278,7 +1278,7 @@ function ui_nodes_draw_menubar() {
 	ui.ops.theme.BUTTON_COL = _BUTTON_COL;
 
 	// Close node group
-	if (ui_nodes_group_stack.length > 0 && _ui_menu_button(tr("Close"))) {
+	if (ui_nodes_group_stack.length > 0 && ui_menubar_button(tr("Close"))) {
 		array_pop(ui_nodes_group_stack);
 	}
 }

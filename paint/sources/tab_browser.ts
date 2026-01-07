@@ -45,7 +45,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 			}
 
 			// Bookmark
-			if (ui_button("+")) {
+			if (ui_icon_button(tr("Bookmark"), icon_t.PLUS, ui_align_t.LEFT)) {
 				let bookmark: string = tab_browser_hpath.text;
 				/// if arm_windows
 				bookmark = string_replace_all(bookmark, "\\", "/");
@@ -53,14 +53,11 @@ function tab_browser_draw(htab: ui_handle_t) {
 				array_push(config_raw.bookmarks, bookmark);
 				config_save();
 			}
-			if (ui.is_hovered) {
-				ui_tooltip(tr("Add bookmark"));
-			}
 
 			// Refresh
 			let in_focus: bool =
 			    ui.input_x > ui._window_x && ui.input_x < ui._window_x + ui._window_w && ui.input_y > ui._window_y && ui.input_y < ui._window_y + ui._window_h;
-			if (ui_button(tr("Refresh")) || (in_focus && ui.is_key_pressed && ui.key_code == key_code_t.F5)) {
+			if (ui_icon_button(tr("Refresh"), icon_t.REFRESH) || (in_focus && ui.is_key_pressed && ui.key_code == key_code_t.F5)) {
 				tab_browser_refresh = true;
 			}
 		}
@@ -80,7 +77,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 		/// end
 
 		ui.enabled = nested;
-		if (ui_button("<")) {
+		if (ui_icon_button("", icon_t.CHEVRON_LEFT)) {
 			ui_files_go_up(tab_browser_hpath);
 		}
 		ui.enabled = true;
@@ -236,11 +233,11 @@ function tab_browser_draw(htab: ui_handle_t) {
 			ui._y             = _y;
 			ui._w             = bookmarks_w;
 
-			if (ui_button(tr("Cloud"), ui_align_t.LEFT)) {
+			if (ui_icon_button(tr("Cloud"), icon_t.CLOUD, ui_align_t.LEFT)) {
 				tab_browser_hpath.text = "cloud";
 			}
 
-			if (ui_button(tr("Disk"), ui_align_t.LEFT)) {
+			if (ui_icon_button(tr("Disk"), icon_t.STORAGE, ui_align_t.LEFT)) {
 				/// if arm_android
 				ui_menu_draw(function() {
 					if (ui_menu_button(tr("Download"), "", icon_t.FOLDER)) {
@@ -265,7 +262,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 				let b: string      = config_raw.bookmarks[i];
 				let folder: string = substring(b, string_last_index_of(b, "/") + 1, b.length);
 
-				if (ui_button(folder, ui_align_t.LEFT)) {
+				if (ui_icon_button(folder, icon_t.FOLDER)) {
 					tab_browser_hpath.text = b;
 					/// if arm_windows
 					tab_browser_hpath.text = string_replace_all(tab_browser_hpath.text, "/", "\\");

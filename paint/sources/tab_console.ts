@@ -13,10 +13,10 @@ function tab_console_draw(htab: ui_handle_t) {
 		/// end
 		ui_row(row);
 
-		if (ui_button(tr("Clear"))) {
+		if (ui_icon_button(tr("Clear"), icon_t.ERASE)) {
 			console_last_traces = [];
 		}
-		if (ui_button(tr("Export"))) {
+		if (ui_icon_button(tr("Export"), icon_t.EXPORT)) {
 			ui_files_show("txt", true, false, function(path: string) {
 				let str: string = string_array_join(console_last_traces, "\n");
 				let f: string   = ui_files_filename;
@@ -31,7 +31,7 @@ function tab_console_draw(htab: ui_handle_t) {
 			});
 		}
 		/// if (arm_windows || arm_linux || arm_macos)
-		if (ui_button(tr("Copy"))) {
+		if (ui_icon_button(tr("Copy"), icon_t.COPY)) {
 			let str: string = string_array_join(console_last_traces, "\n");
 			iron_copy_to_clipboard(str);
 		}

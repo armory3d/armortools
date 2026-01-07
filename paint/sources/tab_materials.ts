@@ -13,7 +13,7 @@ function tab_materials_draw_mini(htab: ui_handle_t) {
 	ui_separator(5);
 
 	tab_materials_button_nodes();
-	tab_materials_button_new("+");
+	tab_materials_button_new("");
 
 	ui_end_sticky();
 	ui_separator(3, false);
@@ -27,7 +27,7 @@ function tab_materials_draw_full(htab: ui_handle_t) {
 		ui_row(row);
 
 		tab_materials_button_new(tr("New"));
-		if (ui_button(tr("Import"))) {
+		if (ui_icon_button(tr("Import"), icon_t.IMPORT)) {
 			project_import_material();
 		}
 		tab_materials_button_nodes();
@@ -292,7 +292,7 @@ function tab_materials_draw_slots(mini: bool) {
 }
 
 function tab_materials_button_new(text: string) {
-	if (ui_button(text)) {
+	if (ui_icon_button(text, icon_t.PLUS)) {
 		sys_notify_on_next_frame(function() {
 			context_raw.material = slot_material_create(project_materials[0].data);
 			array_push(project_materials, context_raw.material);

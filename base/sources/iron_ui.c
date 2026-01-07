@@ -3272,7 +3272,7 @@ void ui_end_menu() {
 	current->ops->theme->BUTTON_COL     = _BUTTON_COL;
 }
 
-bool _ui_menu_button(char *text) {
+bool ui_menubar_button(char *text) {
 	ui_t *current = ui_get_current();
 	current->_w   = draw_string_width(current->ops->font, current->font_size, text) + 25.0 * UI_SCALE();
 	return ui_button(text, UI_ALIGN_CENTER, "");

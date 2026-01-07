@@ -8,14 +8,14 @@ function tab_fonts_draw(htab: ui_handle_t) {
 		let row: f32[] = [ -100, -100 ];
 		ui_row(row);
 
-		if (ui_button(tr("Import"))) {
+		if (ui_icon_button(tr("Import"), icon_t.IMPORT)) {
 			project_import_asset("ttf,ttc,otf");
 		}
 		if (ui.is_hovered) {
 			ui_tooltip(tr("Import font file"));
 		}
 
-		if (ui_button(tr("2D View"))) {
+		if (ui_icon_button(tr("2D View"), icon_t.WINDOW)) {
 			ui_base_show_2d_view(view_2d_type_t.FONT);
 		}
 		ui_end_sticky();

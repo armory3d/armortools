@@ -4,10 +4,10 @@ function tab_plugins_draw(htab: ui_handle_t) {
 
 		ui_begin_sticky();
 
-		let row: f32[] = [ -70 ];
+		let row: f32[] = [ -100 ];
 		ui_row(row);
 
-		if (ui_button(tr("Manager"))) {
+		if (ui_icon_button(tr("Preferences"), icon_t.COG)) {
 			box_preferences_htab.i = preference_tab_t.PLUGINS;
 			box_preferences_show();
 		}

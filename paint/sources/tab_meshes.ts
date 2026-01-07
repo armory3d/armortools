@@ -8,7 +8,7 @@ function tab_meshes_draw(htab: ui_handle_t) {
 		let row: f32[] = [ -100, -100 ];
 		ui_row(row);
 
-		if (ui_button(tr("Import"))) {
+		if (ui_icon_button(tr("Import"), icon_t.IMPORT)) {
 			ui_menu_draw(function() {
 				if (ui_menu_button(tr("Replace Existing"), map_get(config_keymap, "file_import_assets"))) {
 					project_import_mesh(true);
@@ -34,7 +34,7 @@ function tab_meshes_draw(htab: ui_handle_t) {
 		if (ui.is_hovered)
 			ui_tooltip(tr("Import mesh file"));
 
-		if (ui_button(tr("Edit"))) {
+		if (ui_icon_button(tr("Edit"), icon_t.EDIT)) {
 
 			ui_menu_draw(function() {
 				if (ui_menu_button(tr("Flip Normals"))) {

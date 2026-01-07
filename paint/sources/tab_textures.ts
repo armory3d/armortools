@@ -14,7 +14,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 		let row: f32[] = [ -100, -100 ];
 		ui_row(row);
 
-		if (ui_button(tr("Import"))) {
+		if (ui_icon_button(tr("Import"), icon_t.IMPORT)) {
 			ui_files_show(string_array_join(path_texture_formats, ","), false, true, function(path: string) {
 				import_asset_run(path, -1.0, -1.0, true, false);
 				ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
@@ -24,7 +24,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 			ui_tooltip(tr("Import texture file") + " (" + map_get(config_keymap, "file_import_assets") + ")");
 		}
 
-		if (ui_button(tr("2D View"))) {
+		if (ui_icon_button(tr("2D View"), icon_t.WINDOW)) {
 			ui_base_show_2d_view(view_2d_type_t.ASSET);
 		}
 

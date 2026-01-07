@@ -396,7 +396,7 @@ int   ui_color_wheel(ui_handle_t *handle, bool alpha, float w, float h, bool col
 char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, bool word_wrap);
 void  ui_begin_menu();
 void  ui_end_menu();
-bool  _ui_menu_button(char *text);
+bool  ui_menubar_button(char *text);
 void  ui_hsv_to_rgb(float cr, float cg, float cb, float *out);
 void  ui_rgb_to_hsv(float cr, float cg, float cb, float *out);
 

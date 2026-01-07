@@ -81,6 +81,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 	let icons: gpu_texture_t = resource_get("icons.k");
 	let folder: rect_t       = resource_tile50(icons, icon_t.FOLDER_FULL);
 	let file: rect_t         = resource_tile50(icons, icon_t.FILE);
+	let downloading: rect_t  = resource_tile50(icons, icon_t.DOWNLOADING);
 	let is_cloud: bool       = starts_with(handle.text, "cloud");
 
 	if (is_cloud && file_cloud == null) {
@@ -164,6 +165,9 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 			let _x: f32   = ui._x;
 
 			let rect: rect_t = string_index_of(f, ".") > 0 ? file : folder;
+			if (rect == file && is_cloud) {
+				rect = downloading;
+			}
 			let col: i32     = rect == file ? ui.ops.theme.LABEL_COL : ui.ops.theme.LABEL_COL - 0x00202020;
 			if (ui_files_selected == i)
 				col = ui.ops.theme.HIGHLIGHT_COL;
@@ -191,9 +195,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 						let files_all: string[] = file_read_directory(handle.text);
 						let icon_file: string   = substring(f, 0, dot) + "_icon.jpg";
 						if (array_index_of(files_all, icon_file) >= 0) {
-							let rt: render_target_t  = map_get(render_path_render_targets, "empty_black");
-							let empty: gpu_texture_t = rt._image;
-							map_set(ui_files_icon_map, handle.text + path_sep + f, empty);
+							map_set(ui_files_icon_map, handle.text + path_sep + f, icons);
 
 							_ui_files_file_browser_handle = handle;
 							map_set(ui_files_icon_file_map, icon_file, f);
@@ -235,7 +237,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 						}
 					}
 				}
-				if (icon != null) {
+				if (icon != null && icon != icons) {
 					let w: i32 = 50;
 					if (i == ui_files_selected) {
 						ui_fill(-2, -2, w + 4, 2, ui.ops.theme.HIGHLIGHT_COL);
@@ -251,13 +253,14 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 					generic = false;
 				}
 			}
+
 			if (ends_with(f, ".arm") && !is_cloud) {
 				if (ui_files_icon_map == null) {
 					ui_files_icon_map = map_create();
 				}
 				let key: string = handle.text + path_sep + f;
 				icon            = map_get(ui_files_icon_map, key);
-				if (map_get(ui_files_icon_map, key) == null) {
+				if (icon == null) {
 					let blob_path: string = key;
 
 					/// if arm_ios
@@ -280,7 +283,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 						/// else
 						let buf: buffer_t = lz4_decode(bytes_icon, 256 * 256 * 8);
 						/// end
-						icon                     = gpu_create_texture_from_bytes(buf, 256, 256, gpu_texture_format_t.RGBA64);
+						icon = gpu_create_texture_from_bytes(buf, 256, 256, gpu_texture_format_t.RGBA64);
 					}
 					else if (raw.mesh_icons != null) {
 						let bytes_icon: buffer_t = raw.mesh_icons[0];

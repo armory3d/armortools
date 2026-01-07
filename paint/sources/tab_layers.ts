@@ -21,7 +21,7 @@ function tab_layers_draw_mini(htab: ui_handle_t) {
 
 	tab_layers_combo_filter();
 	tab_layers_button_2d_view();
-	tab_layers_button_new("+");
+	tab_layers_button_new("");
 
 	ui_end_sticky();
 	ui._y += 2;
@@ -81,7 +81,7 @@ function tab_layers_highlight_odd_lines() {
 }
 
 function tab_layers_button_new(text: string) {
-	if (ui_button(text)) {
+	if (ui_icon_button(text, icon_t.PLUS)) {
 		ui_menu_draw(function() {
 			let l: slot_layer_t = context_raw.layer;
 			if (ui_menu_button(tr("Paint Layer"), "", icon_t.PAINT)) {

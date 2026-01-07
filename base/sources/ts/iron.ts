@@ -717,7 +717,7 @@ declare function ui_draw_rect(filled: bool, x: i32, y: i32, w: i32, h: i32): voi
 declare function ui_draw_round_bottom(x: i32, y: i32, w: i32): void;
 declare function ui_begin_menu(): void;
 declare function ui_end_menu(): void;
-declare function _ui_menu_button(s: string): bool;
+declare function ui_menubar_button(s: string): bool;
 declare function ui_begin_region(ui: ui_t, x: i32, y: i32, w: i32): void;
 declare function ui_inline_radio(handle: ui_handle_t, texts: string[], align: i32): i32;
 declare function ui_end_input(): void;

@@ -9,11 +9,11 @@ function tab_scripts_draw(htab: ui_handle_t) {
 		let row: f32[] = [ -70, -70, -140 ];
 		ui_row(row);
 
-		if (ui_button(tr("Run"))) {
+		if (ui_icon_button(tr("Run"), icon_t.PLAY)) {
 			js_eval(tab_scripts_hscript.text);
 		}
 
-		if (ui_button(tr("Edit"))) {
+		if (ui_icon_button(tr("Edit"), icon_t.EDIT)) {
 
 			ui_menu_draw(function() {
 				if (ui_menu_button(tr("Clear"), "", icon_t.ERASE)) {
