@@ -631,17 +631,17 @@ function ui_menubar_draw_category_items() {
 				ui_row3();
 
 				/// if (arm_windows || arm_linux || arm_macos)
-				if (ui_button(tr("Copy"))) {
+				if (ui_icon_button(tr("Copy"), icon_t.COPY)) {
 					iron_copy_to_clipboard(_ui_menu_render_msg);
 				}
 				/// else
 				ui_end_element();
 				/// end
 
-				if (ui_button(tr("Contributors"))) {
+				if (ui_icon_button(tr("Contributors"), icon_t.LINK)) {
 					iron_load_url("https://github.com/armory3d/armortools/graphs/contributors");
 				}
-				if (ui_button(tr("OK"))) {
+				if (ui_icon_button(tr("OK"), icon_t.CHECK)) {
 					ui_box_hide();
 				}
 			}, 400, 320, null, true, tr("About"));

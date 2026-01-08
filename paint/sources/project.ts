@@ -124,10 +124,10 @@ function project_new_box() {
 
 		ui_end_element();
 		ui_row2();
-		if (ui_button(tr("Cancel"))) {
+		if (ui_icon_button(tr("Cancel"), icon_t.CLOSE)) {
 			ui_box_hide();
 		}
-		if (ui_button(tr("OK")) || ui.is_return_down) {
+		if (ui_icon_button(tr("OK"), icon_t.CHECK) || ui.is_return_down) {
 			project_new();
 			ui_box_hide();
 		}
@@ -404,10 +404,10 @@ function project_import_mesh_box(path: string, replace_existing: bool = true, cl
 
 		let row: f32[] = [ 0.45, 0.45, 0.1 ];
 		ui_row(row);
-		if (ui_button(tr("Cancel"))) {
+		if (ui_icon_button(tr("Cancel"), icon_t.CLOSE)) {
 			ui_box_hide();
 		}
-		if (ui_button(tr("Import")) || ui.is_return_down) {
+		if (ui_icon_button(tr("Import"), icon_t.CHECK) || ui.is_return_down) {
 			ui_box_hide();
 
 			/// if (arm_android || arm_ios)

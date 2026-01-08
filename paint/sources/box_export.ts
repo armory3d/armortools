@@ -128,10 +128,10 @@ function box_export_tab_export_textures(title: string, bake_material: bool = fal
 		ui_end_element();
 
 		ui_row2();
-		if (ui_button(tr("Cancel"))) {
+		if (ui_icon_button(tr("Cancel"), icon_t.CLOSE)) {
 			ui_box_hide();
 		}
-		if (ui_button(tr("Export"))) {
+		if (ui_icon_button(tr("Export"), icon_t.CHECK)) {
 			ui_box_hide();
 			if (context_raw.layers_destination == export_destination_t.PACK_INTO_PROJECT) {
 				_box_export_bake_material       = bake_material;
@@ -174,7 +174,7 @@ function box_export_tab_presets() {
 			box_export_preset = null;
 		}
 
-		if (ui_button(tr("New"))) {
+		if (ui_icon_button(tr("New"), icon_t.PLUS)) {
 			ui_box_show_custom(function() {
 				let tab_vertical: bool = config_raw.touch_ui;
 				if (ui_tab(ui_handle(__ID__), tr("New Preset"), tab_vertical)) {
@@ -184,7 +184,7 @@ function box_export_tab_presets() {
 						h_preset.text = "new_preset";
 					}
 					let preset_name: string = ui_text_input(h_preset, tr("Name"));
-					if (ui_button(tr("OK")) || ui.is_return_down) {
+					if (ui_icon_button(tr("OK"), icon_t.CHECK) || ui.is_return_down) {
 						box_export_new_preset(preset_name);
 						box_export_fetch_presets();
 						box_export_preset    = null;
@@ -197,7 +197,7 @@ function box_export_tab_presets() {
 			});
 		}
 
-		if (ui_button(tr("Import"))) {
+		if (ui_icon_button(tr("Import"), icon_t.IMPORT)) {
 			ui_files_show("json", false, false, function(path: string) {
 				path = to_lower_case(path);
 				if (ends_with(path, ".json")) {
@@ -287,7 +287,7 @@ function box_export_tab_presets() {
 
 		row = [ 1 / 6 ];
 		ui_row(row);
-		if (ui_button(tr("Add"))) {
+		if (ui_icon_button(tr("Add"), icon_t.PLUS)) {
 			let tex: export_preset_texture_t = {name : "base", channels : [ "base_r", "base_g", "base_b", "1.0" ], color_space : "linear"};
 			array_push(box_export_preset.textures, tex);
 			box_export_hpreset.children = null;
@@ -371,10 +371,10 @@ function box_export_tab_export_mesh(htab: ui_handle_t) {
 		ui_text(tris + " " + tr("triangles"));
 
 		ui_row2();
-		if (ui_button(tr("Cancel"))) {
+		if (ui_icon_button(tr("Cancel"), icon_t.CLOSE)) {
 			ui_box_hide();
 		}
-		if (ui_button(tr("Export"))) {
+		if (ui_icon_button(tr("Export"), icon_t.CHECK)) {
 			ui_box_hide();
 			_box_export_apply_displacement = apply_displacement;
 			_box_export_merge_vertices     = merge_vertices;

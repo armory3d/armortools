@@ -223,17 +223,17 @@ function box_projects_recent_tab() {
 		}
 
 		ui.enabled = config_raw.recent_projects.length > 0;
-		if (ui_button(tr("Clear"), ui_align_t.LEFT)) {
+		if (ui_icon_button(tr("Clear"), icon_t.ERASE, ui_align_t.LEFT)) {
 			config_raw.recent_projects = [];
 			config_save();
 		}
 		ui.enabled = true;
 
 		ui_end_element();
-		if (ui_button(tr("New Project..."), ui_align_t.LEFT)) {
+		if (ui_icon_button(tr("New Project..."), icon_t.FILE_NEW, ui_align_t.LEFT)) {
 			project_new_box();
 		}
-		if (ui_button(tr("Open..."), ui_align_t.LEFT)) {
+		if (ui_icon_button(tr("Open..."), icon_t.FOLDER_OPEN, ui_align_t.LEFT)) {
 			project_open();
 		}
 	}

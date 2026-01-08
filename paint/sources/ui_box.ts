@@ -98,11 +98,11 @@ function ui_box_render() {
 			ui_end_element();
 
 			/// if (arm_windows || arm_linux || arm_macos)
-			if (ui_box_copyable && ui_button(tr("Copy"))) {
+			if (ui_box_copyable && ui_icon_button(tr("Copy"), icon_t.COPY)) {
 				iron_copy_to_clipboard(ui_box_text);
 			}
 			/// end
-			if (ui_button(tr("OK"))) {
+			if (ui_icon_button(tr("OK"), icon_t.CHECK)) {
 				ui_box_hide();
 			}
 			ui_box_window_border();
