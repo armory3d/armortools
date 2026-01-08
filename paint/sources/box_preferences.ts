@@ -126,7 +126,7 @@ function box_preferences_interface_tab() {
 	ui_end_element();
 
 	ui_row2();
-	if (ui_button(tr("Restore")) && !ui_menu_show) {
+	if (ui_icon_button(tr("Restore"), icon_t.REPLAY) && !ui_menu_show) {
 		ui_menu_draw(function() {
 			if (ui_menu_button(tr("Confirm"), "", icon_t.CHECK)) {
 				sys_notify_on_next_frame(function() {
@@ -189,7 +189,7 @@ function box_preferences_theme_tab() {
 		config_load_theme(config_raw.theme);
 	}
 
-	if (ui_button(tr("New"))) {
+	if (ui_icon_button(tr("New"), icon_t.PLUS)) {
 		ui_box_show_custom(function() {
 			ui_row2();
 			let h: ui_handle_t = ui_handle(__ID__);
@@ -197,7 +197,7 @@ function box_preferences_theme_tab() {
 				h.text = "new_theme";
 			}
 			let theme_name: string = ui_text_input(h, tr("Name"));
-			if (ui_button(tr("OK")) || ui.is_return_down) {
+			if (ui_icon_button(tr("OK"), icon_t.CHECK) || ui.is_return_down) {
 				let template: string = box_preferences_theme_to_json(base_theme);
 				if (!ends_with(theme_name, ".json")) {
 					theme_name += ".json";
@@ -214,13 +214,13 @@ function box_preferences_theme_tab() {
 		}, 400, 200, null, true, tr("New Theme"));
 	}
 
-	if (ui_button(tr("Import"))) {
+	if (ui_icon_button(tr("Import"), icon_t.IMPORT)) {
 		ui_files_show("json", false, false, function(path: string) {
 			import_theme_run(path);
 		});
 	}
 
-	if (ui_button(tr("Export"))) {
+	if (ui_icon_button(tr("Export"), icon_t.EXPORT)) {
 		ui_files_show("json", true, false, function(path: string) {
 			path += path_sep;
 			path += ui_files_filename;
@@ -518,7 +518,7 @@ function box_preferences_pen_tab() {
 	ui_end_element();
 	let row: f32[] = [ 1 / 4 ];
 	ui_row(row);
-	if (ui_button(tr("Help"))) {
+	if (ui_icon_button(tr("Help"), icon_t.LINK)) {
 		let url: string  = "https://github.com/armory3d/";
 		let name: string = to_lower_case(manifest_title);
 		url += name;
@@ -641,7 +641,7 @@ function box_preferences_keymap_tab() {
 		keymap_load();
 	}
 
-	if (ui_button(tr("New"))) {
+	if (ui_icon_button(tr("New"), icon_t.PLUS)) {
 		ui_box_show_custom(function() {
 			ui_row2();
 			let h: ui_handle_t = ui_handle(__ID__);
@@ -649,7 +649,7 @@ function box_preferences_keymap_tab() {
 				h.text = "new_keymap";
 			}
 			let keymap_name: string = ui_text_input(h, tr("Name"));
-			if (ui_button(tr("OK")) || ui.is_return_down) {
+			if (ui_icon_button(tr("OK"), icon_t.CHECK) || ui.is_return_down) {
 				let template: string = keymap_to_json(keymap_get_default());
 				if (!ends_with(keymap_name, ".json")) {
 					keymap_name += ".json";
@@ -666,12 +666,12 @@ function box_preferences_keymap_tab() {
 		}, 400, 200, null, true, tr("New Keymap"));
 	}
 
-	if (ui_button(tr("Import"))) {
+	if (ui_icon_button(tr("Import"), icon_t.IMPORT)) {
 		ui_files_show("json", false, false, function(path: string) {
 			import_keymap_run(path);
 		});
 	}
-	if (ui_button(tr("Export"))) {
+	if (ui_icon_button(tr("Export"), icon_t.EXPORT)) {
 		ui_files_show("json", true, false, function(dest: string) {
 			if (!ends_with(ui_files_filename, ".json")) {
 				ui_files_filename += ".json";
@@ -734,7 +734,7 @@ function box_preferences_neural_tab() {
 
 	let row: f32[] = [ 1 / 4 ];
 	ui_row(row);
-	if (ui_button(tr("Models Directory..."))) {
+	if (ui_icon_button(tr("Models Directory..."), icon_t.FOLDER)) {
 		if (file_read_directory(neural_node_dir())[0] == "") {
 			file_create_directory(neural_node_dir());
 		}
@@ -797,11 +797,11 @@ function box_preferences_model_panel(m: neural_node_model_t) {
 
 			ui.enabled = true;
 		}
-		else if (!found && ui_button(tr("Download") + " (" + m.size + ")")) {
+		else if (!found && ui_icon_button(tr("Download") + " (" + m.size + ")", icon_t.ARROW_DOWN)) {
 			neural_node_download_models(m.urls);
 			console_info(tr("Downloading"));
 		}
-		else if (found && ui_button(tr("Remove") + " (" + m.size + ")")) {
+		else if (found && ui_icon_button(tr("Remove") + " (" + m.size + ")", icon_t.DELETE)) {
 			for (let i: i32 = 0; i < m.urls.length; ++i) {
 				let url: string       = m.urls[i];
 				let file_name: string = box_preferences_file_name_from_url(url);
@@ -815,7 +815,7 @@ function box_preferences_plugins_tab() {
 	ui_begin_sticky();
 	let row: f32[] = [ 1 / 4, 1 / 4 ];
 	ui_row(row);
-	if (ui_button(tr("New"))) {
+	if (ui_icon_button(tr("New"), icon_t.PLUS)) {
 		ui_box_show_custom(function() {
 			ui_row2();
 			let h: ui_handle_t = ui_handle(__ID__);
@@ -823,7 +823,7 @@ function box_preferences_plugins_tab() {
 				h.text = "new_plugin";
 			}
 			let plugin_name: string = ui_text_input(h, tr("Name"));
-			if (ui_button(tr("OK")) || ui.is_return_down) {
+			if (ui_icon_button(tr("OK"), icon_t.CHECK) || ui.is_return_down) {
 				let template: string = "let plugin = plugin_create();\
 let h1 = ui_handle_create();\
 plugin_notify_on_ui(plugin, function() {\
@@ -846,7 +846,7 @@ plugin_notify_on_ui(plugin, function() {\
 			}
 		}, 400, 200, null, true, tr("New Plugin"));
 	}
-	if (ui_button(tr("Import"))) {
+	if (ui_icon_button(tr("Import"), icon_t.IMPORT)) {
 		ui_files_show("js,zip", false, false, function(path: string) {
 			import_plugin_run(path);
 		});

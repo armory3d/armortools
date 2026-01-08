@@ -208,7 +208,7 @@ function ui_viewnodes_on_socket_released(socket_id: i32) {
 									let f: f32    = ui_float_input(_ui_nodes_hval0, tr("default_value"));
 									default_value = f32_array_create_x(f);
 								}
-								if (ui_button(tr("OK"))) { // || ui.isReturnDown
+								if (ui_icon_button(tr("OK"), icon_t.CHECK)) { // || ui.isReturnDown
 									socket.name          = name;
 									socket.type          = type == 0 ? "RGBA" : type == 1 ? "VECTOR" : "VALUE";
 									socket.color         = nodes_material_get_socket_color(socket.type);
