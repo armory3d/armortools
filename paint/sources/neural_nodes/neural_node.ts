@@ -135,6 +135,14 @@ function neural_node_download(url: string) {
 			iron_sys_command("chmod +x \"" + bin + "\"");
 		}
 		/// end
+
+		if (ends_with(url, "Hunyuan3D_win64.tar")) {
+			console_toast(tr("Unpacking Hunyuan3D_win64.tar"));
+			sys_notify_on_next_frame(function() {
+				let tar: string = neural_node_dir() + "/Hunyuan3D_win64.tar";
+				untar_here(tar);
+			});
+		}
 	});
 }
 

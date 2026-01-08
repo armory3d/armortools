@@ -284,6 +284,7 @@ if (flags.with_nfd && (platform == "windows" || platform == "linux" || platform 
 
 if (flags.with_compress) {
 	project.add_define("WITH_COMPRESS");
+	project.add_cfiles("sources/libs/untar.c");
 }
 
 if (flags.with_image_write) {

@@ -335,6 +335,7 @@ string_t *iron_get_arg(i32 index) {
 #ifdef WITH_COMPRESS
 unsigned char *iron_deflate_raw(unsigned char *data, int data_len, int *out_len, int quality);
 #define STBIW_ZLIB_COMPRESS iron_deflate_raw
+void untar_here(const char *path);
 #endif
 #define STBI_WINDOWS_UTF8
 #define STB_IMAGE_WRITE_IMPLEMENTATION
