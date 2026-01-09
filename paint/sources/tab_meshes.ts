@@ -100,6 +100,14 @@ function tab_meshes_draw(htab: ui_handle_t) {
 		ui_end_sticky();
 
 		for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
+
+			let row: f32[] = [ -30, 1.0 ];
+			ui_row(row);
+			let icons: gpu_texture_t = resource_get("icons05x.k");
+			let rect: rect_t         = resource_tile50(icons, icon_t.CUBE);
+			let icon_h: i32          = 25 * UI_SCALE();
+			ui_sub_image(icons, ui.ops.theme.LABEL_COL - 0x00333333, icon_h, rect.x / 2, rect.y / 2, rect.w / 2, rect.h / 2);
+
 			let o: mesh_object_t = project_paint_objects[i];
 			let h: ui_handle_t   = ui_handle(__ID__);
 			h.b                  = o.base.visible;
