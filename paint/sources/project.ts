@@ -470,10 +470,10 @@ function project_unwrap_mesh_box(mesh: raw_mesh_t, done: (a: raw_mesh_t) => void
 		_project_unwrap_by           = ui_combo(ui_handle(__ID__), unwrap_plugins, tr("Plugin"), true);
 
 		ui_row2();
-		if (ui_button(tr("Cancel"))) {
+		if (ui_icon_button(tr("Cancel"), icon_t.CLOSE)) {
 			ui_box_hide();
 		}
-		if (ui_button(tr("Unwrap")) || ui.is_return_down) {
+		if (ui_icon_button(tr("Unwrap"), icon_t.CHECK) || ui.is_return_down) {
 			ui_box_hide();
 
 			/// if (arm_android || arm_ios)

@@ -418,10 +418,10 @@ function box_export_show_material() {
 			context_raw.pack_assets_on_export = ui_check(h1, tr("Pack Assets"));
 			context_raw.write_icon_on_export  = ui_check(h2, tr("Export Icon"));
 			ui_row2();
-			if (ui_button(tr("Cancel"))) {
+			if (ui_icon_button(tr("Cancel"), icon_t.CLOSE)) {
 				ui_box_hide();
 			}
-			if (ui_button(tr("Export"))) {
+			if (ui_icon_button(tr("Export"), icon_t.CHECK)) {
 				ui_box_hide();
 				ui_files_show("arm", true, false, function(path: string) {
 					let f: string = ui_files_filename;
@@ -449,10 +449,10 @@ function box_export_show_brush() {
 			context_raw.pack_assets_on_export = ui_check(h1, tr("Pack Assets"));
 			context_raw.write_icon_on_export  = ui_check(h2, tr("Export Icon"));
 			ui_row2();
-			if (ui_button(tr("Cancel"))) {
+			if (ui_icon_button(tr("Cancel"), icon_t.CLOSE)) {
 				ui_box_hide();
 			}
-			if (ui_button(tr("Export"))) {
+			if (ui_icon_button(tr("Export"), icon_t.CHECK)) {
 				ui_box_hide();
 				ui_files_show("arm", true, false, function(path: string) {
 					let f: string = ui_files_filename;

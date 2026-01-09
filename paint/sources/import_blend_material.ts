@@ -10,10 +10,10 @@ function import_blend_material_run(path: string) {
 			import_blend_mesh_ui();
 
 			ui_row2();
-			if (ui_button(tr("Cancel"))) {
+			if (ui_icon_button(tr("Cancel"), icon_t.CLOSE)) {
 				ui_box_hide();
 			}
-			if (ui_button(tr("Import")) || ui.is_return_down) {
+			if (ui_icon_button(tr("Import"), icon_t.CHECK) || ui.is_return_down) {
 
 				ui_box_hide();
 

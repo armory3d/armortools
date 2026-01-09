@@ -13,7 +13,7 @@ function import_blend_mesh_ui() {
 	h.text             = config_raw.blender;
 	config_raw.blender = ui_text_input(h);
 
-	if (ui_button("...")) {
+	if (ui_icon_button("", icon_t.FOLDER_OPEN)) {
 		ui_files_show("", false, false, function(path: string) {
 			/// if arm_windows
 			path = string_replace_all(path, "\\", "/");
