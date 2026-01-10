@@ -262,7 +262,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 				let b: string      = config_raw.bookmarks[i];
 				let folder: string = substring(b, string_last_index_of(b, "/") + 1, b.length);
 
-				if (ui_icon_button(folder, icon_t.FOLDER)) {
+				if (ui_icon_button(folder, icon_t.FOLDER, ui_align_t.LEFT)) {
 					tab_browser_hpath.text = b;
 					/// if arm_windows
 					tab_browser_hpath.text = string_replace_all(tab_browser_hpath.text, "/", "\\");
