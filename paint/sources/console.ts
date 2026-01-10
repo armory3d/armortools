@@ -22,11 +22,12 @@ function console_draw_toast(s: string) {
 function console_toast(s: string) {
 	// Show a popup message
 	let current: gpu_texture_t = _draw_current;
-	if (current != null)
+	let in_use: bool           = gpu_in_use;
+	if (in_use)
 		draw_end();
 	console_trace(s);
 	console_draw_toast(s);
-	if (current != null)
+	if (in_use)
 		draw_begin(current);
 }
 

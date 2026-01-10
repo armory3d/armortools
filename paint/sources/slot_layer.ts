@@ -364,8 +364,8 @@ function slot_layer_resize_and_set_bits(raw: slot_layer_t) {
 
 	if (slot_layer_is_layer(raw)) {
 		let format: gpu_texture_format_t = base_bits_handle.i == texture_bits_t.BITS8    ? gpu_texture_format_t.RGBA32
-		                           : base_bits_handle.i == texture_bits_t.BITS16 ? gpu_texture_format_t.RGBA64
-		                                                                         : gpu_texture_format_t.RGBA128;
+		                                   : base_bits_handle.i == texture_bits_t.BITS16 ? gpu_texture_format_t.RGBA64
+		                                                                                 : gpu_texture_format_t.RGBA128;
 
 		let pipe: gpu_pipeline_t = format == gpu_texture_format_t.RGBA32 ? pipes_copy : format == gpu_texture_format_t.RGBA64 ? pipes_copy64 : pipes_copy128;
 
@@ -1015,8 +1015,9 @@ function layers_update_fill_layers() {
 			render_path_paint_live_layer = slot_layer_create("_live");
 		}
 
-		current = _draw_current;
-		if (current != null)
+		current          = _draw_current;
+		let in_use: bool = gpu_in_use;
+		if (in_use)
 			draw_end();
 
 		context_raw.tool               = tool_type_t.FILL;
@@ -1036,7 +1037,7 @@ function layers_update_fill_layers() {
 		make_material_parse_paint_material();
 		ui_view2d_hwnd.redraws = 2;
 
-		if (current != null)
+		if (in_use)
 			draw_begin(current);
 		return;
 	}
@@ -1058,9 +1059,9 @@ function layers_update_fill_layers() {
 
 	if (has_fill_layer || has_fill_mask) {
 		current = _draw_current;
-		if (current != null) {
+		let in_use: bool = gpu_in_use;
+		if (in_use)
 			draw_end();
-		}
 		context_raw.pdirty             = 1;
 		context_raw.tool               = tool_type_t.FILL;
 		context_raw.fill_type_handle.i = fill_type_t.OBJECT;
@@ -1104,7 +1105,7 @@ function layers_update_fill_layers() {
 		context_raw.ddirty               = 2;
 		context_raw.rdirty               = 2;
 		context_raw.layers_preview_dirty = true; // Repaint all layer previews as multiple layers might have changed.
-		if (current != null)
+		if (in_use)
 			draw_begin(current);
 		context_raw.layer = _layer;
 		layers_set_object_mask();
