@@ -389,6 +389,7 @@ function render_path_base_draw_gbuffer() {
 		let additional: string[] = [ "gbuffer1" ];
 		render_path_set_target("gbuffer0", additional, "main");
 		line_draw_render(context_raw.layer.decal_mat);
+		render_path_end();
 	}
 }
 
