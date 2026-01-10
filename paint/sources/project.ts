@@ -608,7 +608,12 @@ function project_is_atlas_object(p: mesh_object_t): bool {
 }
 
 function project_get_atlas_objects(object_mask: i32): mesh_object_t[] {
-	let atlas_name: string        = project_get_used_atlases()[object_mask - project_paint_objects.length - 1];
+	let atlases: string[] = project_get_used_atlases();
+	let i: i32            = object_mask - project_paint_objects.length - 1;
+	if (atlases == null || i >= atlases.length) {
+		return project_paint_objects;
+	}
+	let atlas_name: string        = atlases[i];
 	let atlas_i: i32              = array_index_of(project_atlas_names, atlas_name);
 	let visibles: mesh_object_t[] = [];
 	for (let i: i32 = 0; i < project_paint_objects.length; ++i) {
