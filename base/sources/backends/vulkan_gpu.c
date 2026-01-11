@@ -1171,6 +1171,14 @@ void gpu_execute_and_wait() {
 	}
 }
 
+static void gpu_cleanup_internal() {
+	while (buffers_to_destroy_count > 0) {
+		buffers_to_destroy_count--;
+		vkFreeMemory(device, buffer_memories_to_destroy[buffers_to_destroy_count], NULL);
+		vkDestroyBuffer(device, buffers_to_destroy[buffers_to_destroy_count], NULL);
+	}
+}
+
 void gpu_present_internal() {
 	vkEndCommandBuffer(command_buffer);
 	vkResetFences(device, 1, &fence);
@@ -1208,11 +1216,7 @@ void gpu_present_internal() {
 	framebuffer_acquired = false;
 	framebuffer_index    = (framebuffer_index + 1) % GPU_FRAMEBUFFER_COUNT;
 
-	while (buffers_to_destroy_count > 0) {
-		buffers_to_destroy_count--;
-		vkFreeMemory(device, buffer_memories_to_destroy[buffers_to_destroy_count], NULL);
-		vkDestroyBuffer(device, buffers_to_destroy[buffers_to_destroy_count], NULL);
-	}
+	gpu_cleanup_internal();
 }
 
 void gpu_draw_internal() {
@@ -1692,7 +1696,16 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	    .allocationSize = mem_reqs.size,
 	};
 	mem_alloc.memoryTypeIndex = memory_type_from_properties(mem_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-	vkAllocateMemory(device, &mem_alloc, NULL, &texture->impl.mem);
+	VkResult result = vkAllocateMemory(device, &mem_alloc, NULL, &texture->impl.mem);
+
+	if (result != VK_SUCCESS && gpu_cleanup_pending()) {
+		gpu_execute_and_wait();
+		gpu_cleanup_internal();
+		gpu_cleanup();
+		gpu_texture_init_from_bytes(texture, data, width, height, format);
+		return;
+	}
+
 	vkBindImageMemory(device, texture->impl.image, texture->impl.mem, 0);
 
 	if (gpu_in_use) {

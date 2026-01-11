@@ -115,6 +115,10 @@ void gpu_cleanup() {
 	}
 }
 
+bool gpu_cleanup_pending() {
+	return textures_to_destroy_count > 0 || buffers_to_destroy_count > 0 || pipelines_to_destroy_count > 0;
+}
+
 void gpu_present() {
 	gpu_present_internal();
 	draw_calls_last = draw_calls;

@@ -154,6 +154,8 @@ void gpu_begin_internal(gpu_clear_t flags, unsigned color, float depth);
 void gpu_end(void);
 void gpu_end_internal(void);
 void gpu_execute_and_wait(void);
+void gpu_cleanup(void);
+bool gpu_cleanup_pending(void);
 void gpu_present(void);
 void gpu_present_internal(void);
 void gpu_barrier(gpu_texture_t *render_target, gpu_texture_state_t state_after);
