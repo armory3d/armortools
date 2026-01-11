@@ -28,6 +28,7 @@ static gpu_vertex_structure_t draw_structure;
 
 static gpu_pipeline_t image_pipeline;
 static gpu_pipeline_t image_transform_pipeline;
+static gpu_pipeline_t image_r8_pipeline;
 static int            image_tex_unit;
 static int            image_pos_loc;
 static int            image_tex_loc;
@@ -157,6 +158,10 @@ void draw_init(buffer_t *image_vert, buffer_t *image_frag, buffer_t *image_trans
 		image_tex_loc  = 16;
 		image_col_loc  = 32;
 
+		draw_pipeline_init(&image_r8_pipeline, &vert_shader, &frag_shader);
+		image_r8_pipeline.color_attachment[0] = GPU_TEXTURE_FORMAT_R8;
+		gpu_pipeline_compile(&image_r8_pipeline);
+
 		gpu_shader_init(&vert_shader, image_transform_vert->buffer, image_transform_vert->length, GPU_SHADER_TYPE_VERTEX);
 		gpu_shader_init(&frag_shader, image_transform_frag->buffer, image_transform_frag->length, GPU_SHADER_TYPE_FRAGMENT);
 		draw_pipeline_init(&image_transform_pipeline, &vert_shader, &frag_shader);
@@ -224,7 +229,7 @@ void draw_end(void) {
 
 void draw_scaled_sub_image(gpu_texture_t *tex, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh) {
 	if (mat3_isnan(draw_transform)) {
-		gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : &image_pipeline);
+		gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : (_draw_current != NULL && _draw_current->format == GPU_TEXTURE_FORMAT_R8) ? &image_r8_pipeline : &image_pipeline);
 	}
 	else {
 		gpu_set_pipeline(draw_custom_pipeline != NULL ? draw_custom_pipeline : &image_transform_pipeline);
