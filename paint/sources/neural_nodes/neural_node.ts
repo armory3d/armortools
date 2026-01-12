@@ -136,6 +136,7 @@ function neural_node_download(url: string) {
 		}
 		/// end
 
+		/// if WITH_COMPRESS
 		if (ends_with(url, "Hunyuan3D_win64.tar")) {
 			console_toast(tr("Unpacking Hunyuan3D_win64.tar"));
 			sys_notify_on_next_frame(function() {
@@ -143,6 +144,7 @@ function neural_node_download(url: string) {
 				untar_here(tar);
 			});
 		}
+		/// end
 	});
 }
 
