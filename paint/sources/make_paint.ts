@@ -271,7 +271,8 @@ function make_paint_run(data: material_t, matcon: material_context_t): node_shad
 		if (context_raw.material.paint_subs) {
 			node_shader_write_frag(kong, "var subs: float = " + subs + ";");
 		}
-		if (!make_material_opac_used && parse_float(opac) != 1.0 && context_raw.viewport_mode == viewport_mode_t.PATH_TRACE && config_raw.pathtrace_mode == pathtrace_mode_t.QUALITY) {
+		if (!make_material_opac_used && parse_float(opac) != 1.0 && context_raw.viewport_mode == viewport_mode_t.PATH_TRACE &&
+		    config_raw.pathtrace_mode == pathtrace_mode_t.QUALITY) {
 			make_material_opac_used = true;
 			return make_paint_run(data, matcon);
 		}

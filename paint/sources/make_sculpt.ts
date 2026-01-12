@@ -81,10 +81,10 @@ function sculpt_make_sculpt_run(data: material_t, matcon: material_context_t): n
 		    kong, "var wposition: float3 = (constants.W * texpaint_sculpt_undo[uint2(uint(tex_coord.x * 2048.0), uint(tex_coord.y * 2048.0))]).xyz;");
 	}
 
-	parser_material_parse_height = true;
+	parser_material_parse_height            = true;
 	parser_material_parse_height_as_channel = true;
-	let sout: shader_out_t       = parser_material_parse(context_raw.material.canvas, con_paint, kong, matcon);
-	let height: string           = sout.out_height;
+	let sout: shader_out_t                  = parser_material_parse(context_raw.material.canvas, con_paint, kong, matcon);
+	let height: string                      = sout.out_height;
 	node_shader_write_frag(kong, "var height: float = " + height + ";");
 
 	if (kong.frag_bposition) {
