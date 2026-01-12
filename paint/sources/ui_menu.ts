@@ -122,6 +122,7 @@ function ui_menu_button(text: string, label: string = "", icon: icon_t = icon_t.
 	if (config_raw.touch_ui) {
 		label = "";
 	}
+	let _x_left: i32 = ui._x;
 	let _y_top: i32  = ui._y;
 	let result: bool = ui_button(config_button_spacing + text, config_button_align, label);
 
@@ -130,10 +131,14 @@ function ui_menu_button(text: string, label: string = "", icon: icon_t = icon_t.
 		let icons: gpu_texture_t = resource_get("icons05x.k");
 		let rect: rect_t         = resource_tile50(icons, icon);
 		let icon_h: i32          = 25 * UI_SCALE();
+		ui._x                    = _x_left - 5 * UI_SCALE();
 		ui._y                    = _y_top - 1;
-		ui._x -= 5 * UI_SCALE();
+		if (config_raw.touch_ui) {
+			ui._x = _x_left - 2 * UI_SCALE();
+			ui._y = _y_top + 2 * UI_SCALE();
+		}
 		ui_sub_image(icons, ui.ops.theme.LABEL_COL - 0x00222222, icon_h, rect.x / 2, rect.y / 2, rect.w / 2, rect.h / 2);
-		ui._x += 5 * UI_SCALE();
+		ui._x = _x_left;
 		ui._y = _y_bottom;
 	}
 	return result;
@@ -149,7 +154,8 @@ function ui_icon_button(text: string, icon: icon_t = icon_t.NONE, align: ui_alig
 
 	let tooltip: string = "";
 	let textw: i32      = draw_string_width(ui.ops.font, ui.font_size, text);
-	if (textw > _w * 0.8) {
+	let wmax: f32       = config_raw.touch_ui ? 0.9 : 0.8;
+	if (textw > _w * wmax) {
 		tooltip = text;
 		text    = "";
 		textw   = 0;
@@ -170,6 +176,10 @@ function ui_icon_button(text: string, icon: icon_t = icon_t.NONE, align: ui_alig
 
 		ui._x = align == ui_align_t.LEFT ? _x_left : _x_left + _w / 2 - textw / 2 - icon_h / 2;
 		ui._y = _y_top - 1;
+		if (config_raw.touch_ui) {
+			ui._x += 2 * UI_SCALE();
+			ui._y = _y_top + 2 * UI_SCALE();
+		}
 		if (ui.current_ratio > -1) {
 			ui.current_ratio--;
 		}
