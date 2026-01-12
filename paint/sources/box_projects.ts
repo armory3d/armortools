@@ -43,7 +43,7 @@ function box_projects_tab() {
 
 		box_projects_draw_badge();
 
-		if (ui_button(tr("New"))) {
+		if (ui_icon_button(tr("New"), icon_t.PLUS)) {
 			project_new();
 			ui_box_hide();
 			// Pick unique name
@@ -247,13 +247,13 @@ function box_projects_draw_badge() {
 
 function box_projects_get_started_tab() {
 	if (ui_tab(box_projects_htab, tr("Get Started"), true)) {
-		if (ui_button(tr("Manual"))) {
+		if (ui_icon_button(tr("Manual"), icon_t.HELP)) {
 			iron_load_url(manifest_url + "/manual");
 		}
-		if (ui_button(tr("How To"))) {
+		if (ui_icon_button(tr("How To"), icon_t.HELP)) {
 			iron_load_url(manifest_url + "/howto");
 		}
-		if (ui_button(tr("What's New"))) {
+		if (ui_icon_button(tr("What's New"), icon_t.LINK)) {
 			iron_load_url(manifest_url + "/notes");
 		}
 	}
