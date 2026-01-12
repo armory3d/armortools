@@ -31,9 +31,9 @@ static void store_u8(uint8_t u8) {
 }
 
 /*static void store_i16(int16_t i16) {
-	di += pad(di, 2);
-	*(int16_t *)(decoded + di) = i16;
-	di += 2;
+    di += pad(di, 2);
+    *(int16_t *)(decoded + di) = i16;
+    di += 2;
 }*/
 
 static void store_u32(uint32_t u32) {
@@ -155,29 +155,35 @@ static uint32_t traverse(int di, bool count_arrays) {
 			break;
 		case 0xca: // Typed f32
 			ei += 4 * count;
-			len += 4 * count;
+			if (4 * count <= 4096)
+				len += 4 * count;
 			break;
 		case 0xd2: // Typed i32
 			ei += 4 * count;
-			len += 4 * count;
+			if (4 * count <= 4096)
+				len += 4 * count;
 			break;
 		case 0xd1: // Typed i16
 			ei += 2 * count;
-			len += 2 * count;
+			if (2 * count <= 4096)
+				len += 2 * count;
 			break;
 		case 0xc4: // Typed u8
 			ei += count;
-			len += count;
+			if (count <= 4096)
+				len += count;
 			break;
-		case 0xc2: // Bool array
+		case 0xc2: // Deprecated: Bool array
 			ei -= 1;
 			ei += count;
-			len += count;
+			if (count <= 4096)
+				len += count;
 			break;
-		case 0xc3: // Bool array
+		case 0xc3: // Deprecated: Bool array
 			ei -= 1;
 			ei += count;
-			len += count;
+			if (count <= 4096)
+				len += count;
 			break;
 		default:     // Dynamic (type (array / map / string) - value)
 			ei -= 1; // Undo flag2 read
@@ -254,12 +260,18 @@ static uint8_t flag_to_byte_size(uint8_t flag) {
 
 static void store_typed_array(uint8_t flag, uint32_t count) {
 	uint32_t size = flag_to_byte_size(flag) * count;
-	memcpy(decoded + di, encoded + ei, size);
 	if (size > 4096) {
-		gc_cut(decoded, di, size);
+		void *data = gc_alloc(size);
+		memcpy(data, encoded + ei, size);
+		gc_leaf(data);
+		*(uintptr_t *)(decoded + di - 4 - 4 - PTR_SIZE) = (uintptr_t)data; // Set buffer ptr
+		*(uint32_t *)(decoded + di - 4)                 = count;           // Set capacity
+	}
+	else {
+		memcpy(decoded + di, encoded + ei, size);
+		di += size;
 	}
 	ei += size;
-	di += size;
 }
 
 static void read_store_array(uint32_t count) { // Store in any/i32/../_array_t format
@@ -350,7 +362,7 @@ static void read_store_array(uint32_t count) { // Store in any/i32/../_array_t f
 
 			for (uint32_t i = 0; i < count; ++i) {
 				/*uint8_t flag =*/read_u8();
-				read_store_array(read_i32());
+				read_store_array(read_u32());
 			}
 		}
 		// Structs
@@ -371,7 +383,7 @@ static void read_store_array(uint32_t count) { // Store in any/i32/../_array_t f
 			for (uint32_t i = 0; i < count; ++i) {
 				di = pad(di, PTR_SIZE) + di;
 				/*uint8_t flag =*/read_u8();
-				read_store_map(read_i32());
+				read_store_map(read_u32());
 			}
 		}
 	}

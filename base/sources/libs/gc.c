@@ -35,20 +35,17 @@
 #define GC_TAG_LEAF 0x1
 #define GC_TAG_MARK 0x2
 #define GC_TAG_ROOT 0x4
-#define GC_TAG_CUT  0x8
 
 #if defined(_MSC_VER) && !defined(__clang__)
 #define __builtin_frame_address(x) ((void)(x), _AddressOfReturnAddress())
 #endif
 
 typedef struct gc_allocation {
-	void                 *ptr;          // mem pointer
-	size_t                size;         // allocated size in bytes
-	int                  *array_length; // if this alloc is an array
-	char                  tag;          // the tag for mark-and-sweep
-	char                  roots;        // number of root users
-	struct gc_allocation *next;         // separate chaining
-	struct gc_allocation *cut;
+	void                 *ptr;   // mem pointer
+	size_t                size;  // allocated size in bytes
+	char                  tag;   // the tag for mark-and-sweep
+	char                  roots; // number of root users
+	struct gc_allocation *next;  // separate chaining
 } gc_allocation_t;
 
 typedef struct gc_allocation_map {
@@ -76,11 +73,9 @@ static gc_allocation_t *gc_allocation_new(void *ptr, size_t size) {
 	gc_allocation_t *a = (gc_allocation_t *)malloc(sizeof(gc_allocation_t));
 	a->ptr             = ptr;
 	a->size            = size;
-	a->array_length    = NULL;
 	a->tag             = GC_TAG_NONE;
 	a->roots           = 0;
 	a->next            = NULL;
-	a->cut             = NULL;
 	return a;
 }
 
@@ -277,13 +272,6 @@ static void *gc_allocate(size_t count, size_t size) {
 	return ptr;
 }
 
-void _gc_array(void *ptr, uint32_t *length) {
-	gc_allocation_t *alloc = gc_allocation_map_get(gc->allocs, ptr);
-	if (alloc) {
-		// alloc->array_length = length;
-	}
-}
-
 void _gc_leaf(void *ptr) {
 	gc_allocation_t *alloc = gc_allocation_map_get(gc->allocs, ptr);
 	if (alloc) {
@@ -313,35 +301,6 @@ static inline uint64_t pad(int di, int n) {
 	return (n - (di % n)) % n;
 }
 
-// Cut out a leaf out of an existing allocation
-void *_gc_cut(void *ptr, size_t pos, size_t size) {
-	size += pad(size, 8);
-
-	// Start
-	gc_allocation_t *start = gc_allocation_map_get(gc->allocs, ptr);
-	while (start->cut) {
-		start = start->cut;
-	}
-	size_t start_size = start->size;
-	pos -= (char *)start->ptr - (char *)ptr;
-	start->size = pos;
-
-	// Middle
-	gc_allocation_t *middle = gc_allocation_new((char *)start->ptr + pos, size);
-	middle->tag |= GC_TAG_CUT;
-	middle->tag |= GC_TAG_LEAF;
-	start->cut = middle;
-	gc_allocation_map_put(gc->allocs, middle);
-
-	// End
-	gc_allocation_t *end = gc_allocation_new((char *)start->ptr + pos + size, start_size - size - pos);
-	end->tag |= GC_TAG_CUT;
-	middle->cut = end;
-	gc_allocation_map_put(gc->allocs, end);
-
-	return middle->ptr;
-}
-
 static void gc_mark_alloc(void *ptr) {
 	gc_allocation_t *alloc = gc_allocation_map_get(gc->allocs, ptr);
 	/* Mark if alloc exists and is not tagged already, otherwise skip */
@@ -349,10 +308,8 @@ static void gc_mark_alloc(void *ptr) {
 		alloc->tag |= GC_TAG_MARK;
 		if (!(alloc->tag & GC_TAG_LEAF)) { // Skip contents
 			/* Iterate over allocation contents and mark them as well */
-			int size = alloc->array_length ? (*alloc->array_length) * PTRSIZE : alloc->size;
-
-			for (char *p = (char *)alloc->ptr; p <= (char *)alloc->ptr + size - PTRSIZE; ++p) {
-				gc_mark_alloc(*(void **)p);
+			for (void **p = (void **)alloc->ptr; (char *)p <= (char *)alloc->ptr + alloc->size - PTRSIZE; ++p) {
+				gc_mark_alloc(*p);
 			}
 		}
 	}
@@ -363,8 +320,8 @@ static void gc_mark_stack() {
 	void *bos = gc->bos;
 	/* The stack grows towards smaller memory addresses, hence we scan tos->bos.
 	 * Stop scanning once the distance between tos & bos is too small to hold a valid pointer */
-	for (char *p = (char *)tos; p <= (char *)bos - PTRSIZE; ++p) {
-		gc_mark_alloc(*(void **)p);
+	for (void **p = (void **)tos; (char *)p <= (char *)bos - PTRSIZE; ++p) {
+		gc_mark_alloc(*p);
 	}
 }
 
@@ -404,22 +361,13 @@ static size_t gc_sweep() {
 				chunk->tag &= ~GC_TAG_MARK;
 				chunk = chunk->next;
 			}
-			else if (chunk->tag & GC_TAG_CUT) {
-				chunk = chunk->next;
-			}
 			else {
 				/* no reference to this chunk, hence delete it */
 				total += chunk->size;
 				free(chunk->ptr);
 				/* and remove it from the bookkeeping */
-				next                 = chunk->next;
-				gc_allocation_t *cut = chunk->cut;
+				next = chunk->next;
 				gc_allocation_map_remove(gc->allocs, chunk->ptr, false);
-				while (cut) {
-					gc_allocation_t *next = cut->cut;
-					gc_allocation_map_remove(gc->allocs, cut->ptr, false);
-					cut = next;
-				}
 				chunk = next;
 			}
 		}

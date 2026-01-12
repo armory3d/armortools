@@ -35,9 +35,6 @@ static void array_alloc(void *a, uint8_t element_size) {
 		if (element_size < 8) {
 			gc_leaf(tmp->buffer);
 		}
-		else {
-			gc_array(tmp->buffer, &tmp->length);
-		}
 	}
 }
 
@@ -131,13 +128,11 @@ void f32_array_resize(f32_array_t *a, uint32_t size) {
 void any_array_resize(any_array_t *a, uint32_t size) {
 	a->capacity = size;
 	a->buffer   = gc_realloc(a->buffer, a->capacity * sizeof(void *));
-	gc_array(a->buffer, &a->length);
 }
 
 void char_ptr_array_resize(char_ptr_array_t *a, uint32_t size) {
 	a->capacity = size;
 	a->buffer   = gc_realloc(a->buffer, a->capacity * sizeof(void *));
-	gc_array(a->buffer, &a->length);
 }
 
 void buffer_resize(buffer_t *b, uint32_t size) {
