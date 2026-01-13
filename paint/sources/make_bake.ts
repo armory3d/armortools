@@ -83,7 +83,7 @@ function make_bake_run(con: node_shader_context_t, kong: node_shader_t) {
 	else if (context_raw.bake_type == bake_type_t.VERTEX_COLOR) {
 		if (con.allow_vcols) {
 			node_shader_context_add_elem(con, "col", "short4norm");
-			node_shader_write_frag(kong, "output[0] = float4(vcolor.r, vcolor.g, vcolor.b, 1.0);");
+			node_shader_write_frag(kong, "output[0] = float4(input.vcolor.r, input.vcolor.g, input.vcolor.b, 1.0);");
 		}
 		else {
 			node_shader_write_frag(kong, "output[0] = float4(1.0, 1.0, 1.0, 1.0);");
