@@ -94,10 +94,16 @@ function viewport_update_camera_type(camera_type: i32) {
 function viewport_capture_screenshot() {
 	let rt: render_target_t       = map_get(render_path_render_targets, "last");
 	let tex: gpu_texture_t        = rt._image;
-	let screenshot: gpu_texture_t = gpu_create_render_target(512, 512);
-	let r: f32                    = sys_w() / sys_h();
+
+	// let screenshot: gpu_texture_t = gpu_create_render_target(512, 512);
+	// let r: f32                    = sys_w() / sys_h();
+	// draw_begin(screenshot);
+	// draw_scaled_image(tex, -(512 * r - 512) / 2, 0, 512 * r, 512);
+	// draw_end();
+
+	let screenshot: gpu_texture_t = gpu_create_render_target(tex.width, tex.height);
 	draw_begin(screenshot);
-	draw_scaled_image(tex, -(512 * r - 512) / 2, 0, 512 * r, 512);
+	draw_image(tex, 0, 0);
 	draw_end();
 
 	if (project_raw.packed_assets == null) {
