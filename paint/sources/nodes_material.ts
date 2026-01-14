@@ -49,14 +49,15 @@ function nodes_material_init() {
 	camera_texture_node_init();
 	checker_texture_node_init();
 	curvature_bake_node_init();
+	gabor_texture_node_init();
 	gradient_texture_node_init();
 	image_texture_node_init();
-	text_texture_node_init();
 	magic_texture_node_init();
 	noise_texture_node_init();
+	text_texture_node_init();
 	voronoi_texture_node_init();
 	wave_texture_node_init();
-	gabor_texture_node_init();
+
 
 	nodes_material_color = [];
 	blur_node_init();
@@ -71,19 +72,19 @@ function nodes_material_init() {
 
 	nodes_material_utilities = [];
 	bump_node_init();
+	clamp_node_init();
+	color_mask_node_init();
+	color_ramp_node_init();
+	combine_xyz_node_init();
+	map_range_node_init();
 	mapping_node_init();
+	math2_node_init();
 	mix_normal_map_node_init();
 	normal_node_init();
 	normal_map_node_init();
-	vector_curves_node_init();
-	clamp_node_init();
-	color_ramp_node_init();
-	color_mask_node_init();
-	combine_xyz_node_init();
-	map_range_node_init();
-	math2_node_init();
 	rgb_to_bw_node_init();
 	separate_xyz_node_init();
+	vector_curves_node_init();
 	vector_math2_node_init();
 
 	/// if (arm_windows || arm_linux || arm_macos)
