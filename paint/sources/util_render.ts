@@ -101,6 +101,7 @@ function util_render_make_decal_preview() {
 	let saved_fov: f32    = scene_camera.data.fov;
 	scene_camera.data.fov = 0.92;
 	viewport_update_camera_type(camera_type_t.PERSPECTIVE);
+	let _envmap: gpu_texture_t = scene_world._.envmap;
 	scene_world._.envmap = context_raw.preview_envmap;
 
 	// No resize
@@ -130,7 +131,7 @@ function util_render_make_decal_preview() {
 	camera_object_build_proj(scene_camera);
 	camera_object_build_mat(scene_camera);
 
-	scene_world._.envmap = context_raw.show_envmap ? context_raw.saved_envmap : context_raw.empty_envmap;
+	scene_world._.envmap = _envmap;
 
 	make_material_parse_mesh_material();
 	context_raw.ddirty = 1; // Refresh depth for decal paint
