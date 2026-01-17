@@ -1794,11 +1794,9 @@ function ui_base_show_material_nodes() {
 	ui_nodes_show        = !ui_nodes_show || ui_nodes_canvas_type != canvas_type_t.MATERIAL;
 	ui_nodes_canvas_type = canvas_type_t.MATERIAL;
 
-	/// if (arm_ios || arm_android)
-	if (ui_view2d_show) {
+	if (config_raw.touch_ui && ui_view2d_show && base_view3d_show) {
 		ui_view2d_show = false;
 	}
-	/// end
 
 	base_resize();
 }
@@ -1809,11 +1807,9 @@ function ui_base_show_brush_nodes() {
 	ui_nodes_show        = !ui_nodes_show || ui_nodes_canvas_type != canvas_type_t.BRUSH;
 	ui_nodes_canvas_type = canvas_type_t.BRUSH;
 
-	/// if (arm_ios || arm_android)
-	if (ui_view2d_show) {
+	if (config_raw.touch_ui && ui_view2d_show && base_view3d_show) {
 		ui_view2d_show = false;
 	}
-	/// end
 
 	base_resize();
 }
@@ -1830,11 +1826,9 @@ function ui_base_show_2d_view(type: view_2d_type_t) {
 	ui_view2d_type         = type;
 	ui_view2d_hwnd.redraws = 2;
 
-	/// if (arm_ios || arm_android)
-	if (ui_nodes_show) {
+	if (config_raw.touch_ui && ui_nodes_show && base_view3d_show) {
 		ui_nodes_show = false;
 	}
-	/// end
 
 	base_resize();
 }

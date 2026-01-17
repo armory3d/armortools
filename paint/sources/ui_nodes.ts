@@ -885,25 +885,27 @@ function ui_nodes_render() {
 
 	if (ui_window(ui_nodes_hwnd, ui_nodes_wx, ui_nodes_wy, ui_nodes_ww, ui_nodes_wh)) {
 
-		let expand: bool = !base_view3d_show && config_raw.layout[layout_size_t.SIDEBAR_W] == 0;
-		ui_tab(ui_nodes_htab, expand ? tr("Nodes") + "          " : tr("Nodes"), false, -1, !base_view3d_show);
+		if (!config_raw.touch_ui) {
+			let expand: bool = !base_view3d_show && config_raw.layout[layout_size_t.SIDEBAR_W] == 0;
+			ui_tab(ui_nodes_htab, expand ? tr("Nodes") + "          " : tr("Nodes"), false, -1, !base_view3d_show);
 
-		// Additional tabs
-		if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) {
-			if (ui_nodes_tabs == null) {
-				ui_nodes_tabs = [];
-			}
-
-			for (let i: i32 = 0; i < ui_nodes_tabs.length; ++i) {
-				ui_tab(ui_nodes_htab, ui_nodes_tabs[i].canvas.name);
-				if (ui_tab(ui_nodes_htab, tr("x"))) {
-					array_splice(ui_nodes_tabs, i, 1);
-					ui_nodes_htab.i = 0;
+			// Additional tabs
+			if (ui_nodes_canvas_type == canvas_type_t.MATERIAL) {
+				if (ui_nodes_tabs == null) {
+					ui_nodes_tabs = [];
 				}
-			}
 
-			if (ui_tab(ui_nodes_htab, tr("+"))) {
-				array_push(ui_nodes_tabs, context_raw.material);
+				for (let i: i32 = 0; i < ui_nodes_tabs.length; ++i) {
+					ui_tab(ui_nodes_htab, ui_nodes_tabs[i].canvas.name);
+					if (ui_tab(ui_nodes_htab, tr("x"))) {
+						array_splice(ui_nodes_tabs, i, 1);
+						ui_nodes_htab.i = 0;
+					}
+				}
+
+				if (ui_tab(ui_nodes_htab, tr("+"))) {
+					array_push(ui_nodes_tabs, context_raw.material);
+				}
 			}
 		}
 
@@ -1144,7 +1146,7 @@ function ui_nodes_get_node_preview_image(n: ui_node_t): gpu_texture_t {
 		img = context_raw.brush.image;
 	}
 	else if (n.type == "TEX_IMAGE" && parser_material_get_input_link(n.inputs[0]) == null) {
-		let i: i32           = n.buttons[0].default_value[0];
+		let i: i32 = n.buttons[0].default_value[0];
 		if (i <= 9000) { // 9999 - Texture deleted
 			let filepath: string = parser_material_enum_data(base_enum_texts(n.type)[i]);
 			let asset_index: i32 = -1;
@@ -1171,12 +1173,13 @@ function ui_nodes_get_node_preview_image(n: ui_node_t): gpu_texture_t {
 function ui_nodes_draw_menubar() {
 	let c: ui_node_canvas_t = ui_nodes_get_canvas(true);
 	let ew: i32             = math_floor(UI_ELEMENT_W() * 0.7);
+	let top_y: i32          = config_raw.touch_ui ? 0 : UI_ELEMENT_H();
 
 	draw_set_color(ui.ops.theme.WINDOW_BG_COL);
-	draw_filled_rect(0, UI_ELEMENT_H(), ui_nodes_ww, UI_ELEMENT_H() + UI_ELEMENT_OFFSET() * 2);
+	draw_filled_rect(0, top_y, ui_nodes_ww, UI_ELEMENT_H() + UI_ELEMENT_OFFSET() * 2);
 	draw_set_color(0xffffffff);
 
-	let start_y: i32 = UI_ELEMENT_H() + UI_ELEMENT_OFFSET();
+	let start_y: i32 = top_y + UI_ELEMENT_OFFSET();
 	ui._x            = 0;
 	ui._y            = 2 + start_y;
 	ui._w            = ew;

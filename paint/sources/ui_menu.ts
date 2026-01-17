@@ -119,12 +119,15 @@ function ui_menu_separator() {
 }
 
 function ui_menu_button(text: string, label: string = "", icon: icon_t = icon_t.NONE): bool {
-	if (config_raw.touch_ui) {
+	if (config_raw.touch_ui && label != ">") {
 		label = "";
 	}
 	let _x_left: i32 = ui._x;
 	let _y_top: i32  = ui._y;
 	let result: bool = ui_button(config_button_spacing + text, config_button_align, label);
+	if (label == ">" && result) {
+		ui_menu_keep_open = true;
+	}
 
 	if (icon != icon_t.NONE) {
 		let _y_bottom: i32       = ui._y;
@@ -177,7 +180,10 @@ function ui_icon_button(text: string, icon: icon_t = icon_t.NONE, align: ui_alig
 		ui._x = align == ui_align_t.LEFT ? _x_left : _x_left + _w / 2 - textw / 2 - icon_h / 2;
 		ui._y = _y_top - 1;
 		if (config_raw.touch_ui) {
-			ui._x += 2 * UI_SCALE();
+			ui._x += 1 * UI_SCALE();
+			if (text != "") {
+				ui._x += 5 * UI_SCALE();
+			}
 			ui._y = _y_top + 2 * UI_SCALE();
 		}
 		if (ui.current_ratio > -1) {

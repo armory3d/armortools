@@ -45,6 +45,11 @@ function ui_menu_panel_y(): i32 {
 }
 
 function ui_menubar_render_ui() {
+
+	if (config_raw.touch_ui && !base_view3d_show) {
+		return;
+	}
+
 	let item_w: i32  = ui_toolbar_w();
 	let panel_x: i32 = ui_menu_panel_x();
 	let panel_y: i32 = ui_menu_panel_y();

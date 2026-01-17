@@ -25,6 +25,7 @@ let _ui_view2d_render_th: f32;
 let ui_view2d_grid: gpu_texture_t = null;
 let ui_view2d_grid_redraw: bool   = true;
 let ui_view2d_htab: ui_handle_t   = ui_handle_create();
+let ui_view2d_layer_touched: bool = false;
 
 function ui_view2d_init() {
 	ui_view2d_pipe                 = gpu_create_pipeline();
@@ -115,11 +116,12 @@ function ui_view2d_render() {
 
 	if (ui_window(ui_view2d_hwnd, ui_view2d_wx, ui_view2d_wy, ui_view2d_ww, ui_view2d_wh)) {
 
-		let expand: bool = !base_view3d_show && !ui_nodes_show && config_raw.layout[layout_size_t.SIDEBAR_W] == 0;
-		ui_tab(ui_view2d_htab, expand ? tr("2D View") + "          " : tr("2D View"), false, -1, !base_view3d_show);
-
-		if (ui_tab(ui_view2d_htab, tr("+"))) {
-			ui_view2d_htab.i = 0;
+		if (!config_raw.touch_ui) {
+			let expand: bool = !base_view3d_show && !ui_nodes_show && config_raw.layout[layout_size_t.SIDEBAR_W] == 0;
+			ui_tab(ui_view2d_htab, expand ? tr("2D View") + "          " : tr("2D View"), false, -1, !base_view3d_show);
+			if (ui_tab(ui_view2d_htab, tr("+"))) {
+				ui_view2d_htab.i = 0;
+			}
 		}
 
 		// Grid
@@ -273,12 +275,13 @@ function ui_view2d_render() {
 		}
 
 		// Menu
-		let ew: i32 = math_floor(UI_ELEMENT_W());
+		let top_y: i32 = config_raw.touch_ui ? 0 : UI_ELEMENT_H();
+		let ew: i32    = math_floor(UI_ELEMENT_W());
 		draw_set_color(ui.ops.theme.WINDOW_BG_COL);
-		draw_filled_rect(0, UI_ELEMENT_H(), ui_view2d_ww, UI_ELEMENT_H() + UI_ELEMENT_OFFSET() * 2);
+		draw_filled_rect(0, top_y, ui_view2d_ww, UI_ELEMENT_H() + UI_ELEMENT_OFFSET() * 2);
 		draw_set_color(0xffffffff);
 
-		let start_y: f32 = UI_ELEMENT_H() + UI_ELEMENT_OFFSET();
+		let start_y: f32 = top_y + UI_ELEMENT_OFFSET();
 		ui._x            = 2;
 		ui._y            = 2 + start_y;
 		ui._w            = ew;
@@ -453,15 +456,16 @@ function ui_view2d_update() {
 	    operator_shortcut(map_get(config_keymap, "set_clone_source") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN);
 	let bake: bool = context_raw.tool == tool_type_t.BAKE;
 
+	if (!ui.input_down) {
+		ui_view2d_layer_touched = false;
+	}
+
 	if (ui_view2d_type == view_2d_type_t.LAYER && !ui_view2d_text_input_hover && !bake &&
 	    (operator_shortcut(map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN) ||
 	     operator_shortcut(map_get(config_keymap, "brush_ruler") + "+" + map_get(config_keymap, "action_paint"), shortcut_type_t.DOWN) || decal_mask ||
 	     set_clone_source || config_raw.brush_live)) {
 
-		// Same mapping for paint and rotate (predefined in touch keymap)
-		let paint_key: string  = map_get(config_keymap, "action_paint");
-		let rotate_key: string = map_get(config_keymap, "action_rotate");
-		if (paint_key == rotate_key) {
+		if (config_raw.touch_ui) {
 			// Paint only when clicking on the layer rect
 			let layer: slot_layer_t = context_raw.layer;
 			let tex: gpu_texture_t  = layer.texpaint;
@@ -475,6 +479,9 @@ function ui_view2d_update() {
 			let mx: f32             = mouse_x - ui_view2d_wx;
 			let my: f32             = mouse_y - ui_view2d_wy;
 			if (mx > tx && mx < tx + tw && my > ty && my < ty + th) {
+				ui_view2d_layer_touched = true;
+			}
+			if (ui_view2d_layer_touched) {
 				context_raw.paint2d = true;
 			}
 		}
@@ -498,6 +505,11 @@ function ui_view2d_update() {
 	}
 	else if (keyboard_started("down")) {
 		ui_view2d_pan_y += 5;
+	}
+
+	if (!context_raw.paint2d && config_raw.touch_ui && ui.input_down) {
+		ui_view2d_pan_x += ui.input_dx;
+		ui_view2d_pan_y += ui.input_dy;
 	}
 
 	// Limit panning to keep texture in viewport

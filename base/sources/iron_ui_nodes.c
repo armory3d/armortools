@@ -16,6 +16,7 @@
 static ui_nodes_t   *current_nodes           = NULL;
 static bool          ui_nodes_elements_baked = false;
 static gpu_texture_t ui_socket_image;
+static bool          ui_touch_drag   = false;
 static bool          ui_box_select   = false;
 static int           ui_box_select_x = 0;
 static int           ui_box_select_y = 0;
@@ -1165,11 +1166,23 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 		if (current->input_enabled && current->input_started && !current->is_alt_down && current_nodes->link_drag_id == -1 && !current_nodes->nodes_drag &&
 		    !current->changed && ui_input_in_rect(current->_window_x, current->_window_y, current->_window_w, current->_window_h)) {
 
-			ui_box_select   = true;
-			ui_box_select_x = current->input_x - current->_window_x;
-			ui_box_select_y = current->input_y - current->_window_y;
+			if (ui_touch_scroll) {
+				ui_touch_drag = true;
+			}
+			else {
+				ui_box_select   = true;
+				ui_box_select_x = current->input_x - current->_window_x;
+				ui_box_select_y = current->input_y - current->_window_y;
+			}
 		}
-		else if (ui_box_select && !current->input_down) {
+		if (ui_touch_drag) {
+			if (!current->input_down) {
+				ui_touch_drag = false;
+			}
+			current_nodes->pan_x += current->input_dx / UI_NODES_SCALE();
+			current_nodes->pan_y += current->input_dy / UI_NODES_SCALE();
+		}
+		if (ui_box_select && !current->input_down) {
 			ui_box_select = false;
 			int left      = ui_box_select_x;
 			int top       = ui_box_select_y;

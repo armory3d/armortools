@@ -87,7 +87,6 @@ function box_preferences_interface_tab() {
 		base_redraw_ui();
 	}
 
-	/// if !(arm_android || arm_ios)
 	ui.changed                  = false;
 	let h_touch_ui: ui_handle_t = ui_handle(__ID__);
 	if (h_touch_ui.init) {
@@ -102,7 +101,6 @@ function box_preferences_interface_tab() {
 		box_preferences_set_scale();
 		base_redraw_ui();
 	}
-	/// end
 
 	let h_splash_screen: ui_handle_t = ui_handle(__ID__);
 	if (h_splash_screen.init) {

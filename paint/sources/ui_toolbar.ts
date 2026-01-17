@@ -112,6 +112,46 @@ function ui_toolbar_x(): i32 {
 	return 5 * UI_SCALE();
 }
 
+function ui_toolbar_draw_show_3d_view() {
+	if (context_is_floating_toolbar()) {
+		let toolbar_w: i32 = ui_toolbar_default_w * UI_SCALE() + 14 * UI_SCALE();
+		let _WINDOW_BG_COL: i32 = ui.ops.theme.WINDOW_BG_COL;
+		// ui.ops.theme.WINDOW_BG_COL = ui.ops.theme.SEPARATOR_COL;
+		let y: i32 = ui_header_h + 8 * UI_SCALE();
+
+		if ((ui_view2d_show || ui_nodes_show) && !config_raw.touch_ui) {
+			y += toolbar_w;
+		}
+
+		if (ui_window(ui_toolbar_handle, ui_toolbar_x(), y, toolbar_w, toolbar_w)) {
+			let _ELEMENT_H: i32     = ui.ops.theme.ELEMENT_H;
+			let _BUTTON_H: i32      = ui.ops.theme.BUTTON_H;
+			let _BUTTON_COL: i32    = ui.ops.theme.BUTTON_COL;
+			let _fontOffsetY: i32   = ui.font_offset_y;
+			ui.ops.theme.ELEMENT_H  = math_floor(ui.ops.theme.ELEMENT_H * 1.5);
+			ui.ops.theme.BUTTON_H   = ui.ops.theme.ELEMENT_H;
+			ui.ops.theme.BUTTON_COL = ui.ops.theme.WINDOW_BG_COL;
+			let font_height: i32    = draw_font_height(ui.ops.font, ui.font_size);
+			ui.font_offset_y        = (UI_ELEMENT_H() - font_height) / 2;
+			let _w: i32             = ui._w;
+			ui._w                   = toolbar_w;
+			if (ui_icon_button("", icon_t.CUBE)) {
+				if (config_raw.touch_ui && ui_nodes_show && ui_view2d_show) {
+					ui_view2d_show = false;
+				}
+				base_view3d_show = true;
+				base_resize();
+			}
+			ui._w                   = _w;
+			ui.ops.theme.ELEMENT_H  = _ELEMENT_H;
+			ui.ops.theme.BUTTON_H   = _BUTTON_H;
+			ui.ops.theme.BUTTON_COL = _BUTTON_COL;
+			ui.font_offset_y        = _fontOffsetY;
+		}
+		ui.ops.theme.WINDOW_BG_COL = _WINDOW_BG_COL;
+	}
+}
+
 function ui_toolbar_render_ui() {
 	let x: i32              = 0;
 	let y: i32              = ui_header_h;
@@ -119,10 +159,12 @@ function ui_toolbar_render_ui() {
 	let _WINDOW_BG_COL: i32 = ui.ops.theme.WINDOW_BG_COL;
 
 	if (!base_view3d_show && !ui_view2d_show) {
+		ui_toolbar_draw_show_3d_view();
 		return;
 	}
 
 	if (!base_view3d_show && ui_view2d_show && ui_view2d_type != view_2d_type_t.LAYER) {
+		ui_toolbar_draw_show_3d_view();
 		return;
 	}
 
@@ -132,7 +174,7 @@ function ui_toolbar_render_ui() {
 		h                          = (ui_toolbar_tool_names.length + 1) * (ui_toolbar_w() + 2);
 		ui.ops.theme.WINDOW_BG_COL = ui.ops.theme.SEPARATOR_COL;
 
-		if (!base_view3d_show && ui_view2d_show) {
+		if (!base_view3d_show && ui_view2d_show && !config_raw.touch_ui) {
 			y += ui_toolbar_w();
 		}
 	}
@@ -216,6 +258,15 @@ function ui_toolbar_tool_properties_menu() {
 		if (base_view3d_show && ui_button(tr("Pin to Header"), ui_align_t.LEFT)) {
 			config_raw.layout[layout_size_t.HEADER] = 1;
 		}
+
+		if (ui_button(base_view3d_show ? tr("Hide 3D View") : tr("Show 3D View"), ui_align_t.LEFT)) {
+			base_view3d_show = !base_view3d_show;
+			if (base_view3d_show && ui_nodes_show && ui_view2d_show) {
+				ui_view2d_show = false;
+			}
+			base_resize();
+		}
+
 	}, ui._x + ui._w + 6 * UI_SCALE(), y);
 }
 
