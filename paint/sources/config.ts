@@ -176,7 +176,7 @@ function config_init() {
 		config_raw.keymap = "default.json";
 		/// end
 		config_raw.theme           = "default.json";
-		config_raw.server          = "https://armorpaint.fra1.digitaloceanspaces.com";
+		config_raw.server          = "https://cloud.armory3d.com";
 		config_raw.undo_steps      = 4;
 		config_raw.pressure_radius = true;
 		/// if (arm_ios || arm_linux)

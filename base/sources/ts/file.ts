@@ -133,7 +133,7 @@ function file_cache_cloud(path: string, done: (s: string) => void) {
 
 function file_init_cloud_bytes(done: () => void, append: string = "") {
 	_file_init_cloud_bytes_done = done;
-	iron_file_download(config_raw.server + "/?list-type=2" + append, function(url: string, buffer: buffer_t) {
+	iron_file_download(config_raw.server + "/index.txt" + append, function(url: string, buffer: buffer_t) {
 		if (buffer == null) {
 			let empty: string[] = [];
 			map_set(file_cloud, "cloud", empty);
@@ -142,26 +142,24 @@ function file_init_cloud_bytes(done: () => void, append: string = "") {
 		}
 		let files: string[] = [];
 		let sizes: i32[]    = [];
-
-		let str: string    = sys_buffer_to_string(buffer);
-		let pos_start: i32 = 0;
-		let pos_end: i32   = 0;
+		let str: string     = sys_buffer_to_string(buffer);
+		let str_len: i32    = str.length;
+		let pos_start: i32  = 0;
+		let pos_end: i32    = 0;
 
 		while (true) {
-			pos_start = string_index_of_pos(str, "<Key>", pos_start);
-			if (pos_start == -1) {
+			if (pos_start >= str_len) {
 				break;
 			}
-			pos_start += 5; // <Key>
-			pos_end = string_index_of_pos(str, "</Key>", pos_start);
-
+			pos_end = string_index_of_pos(str, " ", pos_start);
 			array_push(files, substring(str, pos_start, pos_end));
-
-			pos_start = string_index_of_pos(str, "<Size>", pos_end);
-			pos_start += 6; //<Size>
-			pos_end = string_index_of_pos(str, "</Size>", pos_start);
-
+			pos_start = pos_end + 1;
+			pos_end = string_index_of_pos(str, "\n", pos_start);
+			if (pos_end == -1) {
+				pos_end = str_len - 1;
+			}
 			array_push(sizes, parse_int(substring(str, pos_start, pos_end)));
+			pos_start = pos_end + 1;
 		}
 
 		for (let i: i32 = 0; i < files.length; ++i) {
@@ -185,17 +183,7 @@ function file_init_cloud_bytes(done: () => void, append: string = "") {
 			}
 		}
 
-		let is_truncated: bool = string_index_of(str, "<IsTruncated>true") > -1;
-		if (is_truncated) {
-			let pos_start: i32 = string_index_of(str, "<NextContinuationToken>");
-			pos_start += 23;
-			let pos_end: i32 = string_index_of_pos(str, "</NextContinuationToken>", pos_start);
-			file_init_cloud_bytes(_file_init_cloud_bytes_done, "&start-after=" + substring(str, pos_start, pos_end));
-			_file_init_cloud_bytes_done();
-		}
-		else {
-			_file_init_cloud_bytes_done();
-		}
+		_file_init_cloud_bytes_done();
 	});
 }
 
