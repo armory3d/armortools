@@ -15,6 +15,7 @@ char *i64_to_string(int64_t i);
 char *u64_to_string(uint64_t i);
 char *f32_to_string(float f);
 char *f32_to_string_with_zeros(float f);
+float f32_from_string(const char *const s);
 
 void         string_strip_trailing_zeros(char *str);
 int32_t      string_index_of(char *s, char *search);
