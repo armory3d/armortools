@@ -584,7 +584,7 @@ function ui_menubar_draw_category_items() {
 			iron_load_url(manifest_url_ios);
 			/// else
 			// Retrieve latest version number
-			iron_file_download("https://server.armorpaint.org/" + to_lower_case(manifest_title) + ".html", function(url: string, buffer: buffer_t) {
+			iron_file_download("https://check-for-updates.armory3d.workers.dev", function(url: string, buffer: buffer_t) {
 				if (buffer != null) {
 					// Compare versions
 					let update: update_info_t = json_parse(sys_buffer_to_string(buffer));

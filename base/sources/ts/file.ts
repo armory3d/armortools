@@ -185,6 +185,7 @@ function file_init_cloud_bytes(done: () => void, append: string = "") {
 
 		_file_init_cloud_bytes_done();
 	});
+	iron_file_download("https://cloud-index.armory3d.workers.dev/", function(url: string, buffer: buffer_t) {});
 }
 
 function file_init_cloud(done: () => void) {
