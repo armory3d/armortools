@@ -1798,6 +1798,15 @@ function ui_base_show_material_nodes() {
 		ui_view2d_show = false;
 	}
 
+	if (config_raw.touch_ui && ui_nodes_show && iron_window_width() < iron_window_height()) {
+		ui_view2d_show = false;
+		base_view3d_show = false;
+	}
+
+	if (config_raw.touch_ui && !ui_nodes_show && iron_window_width() < iron_window_height()) {
+		base_view3d_show = true;
+	}
+
 	base_resize();
 }
 
@@ -1809,6 +1818,15 @@ function ui_base_show_brush_nodes() {
 
 	if (config_raw.touch_ui && ui_view2d_show && base_view3d_show) {
 		ui_view2d_show = false;
+	}
+
+	if (config_raw.touch_ui && ui_nodes_show && iron_window_width() < iron_window_height()) {
+		ui_view2d_show = false;
+		base_view3d_show = false;
+	}
+
+	if (config_raw.touch_ui && !ui_nodes_show && iron_window_width() < iron_window_height()) {
+		base_view3d_show = true;
 	}
 
 	base_resize();
@@ -1830,6 +1848,30 @@ function ui_base_show_2d_view(type: view_2d_type_t) {
 		ui_nodes_show = false;
 	}
 
+	if (config_raw.touch_ui && ui_view2d_show && iron_window_width() < iron_window_height()) {
+		ui_nodes_show = false;
+		base_view3d_show = false;
+	}
+
+	if (config_raw.touch_ui && !ui_view2d_show && iron_window_width() < iron_window_height()) {
+		base_view3d_show = true;
+	}
+
+	base_resize();
+}
+
+function ui_base_show_3d_view() {
+	if (!base_view3d_show) {
+		if (config_raw.touch_ui && ui_nodes_show && ui_view2d_show) {
+			ui_view2d_show = false;
+		}
+		if (config_raw.touch_ui && (ui_nodes_show || ui_view2d_show) && iron_window_width() < iron_window_height()) {
+			ui_nodes_show = false;
+			ui_view2d_show = false;
+		}
+	}
+
+	base_view3d_show = !base_view3d_show;
 	base_resize();
 }
 

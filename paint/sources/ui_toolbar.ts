@@ -136,11 +136,7 @@ function ui_toolbar_draw_show_3d_view() {
 			let _w: i32             = ui._w;
 			ui._w                   = toolbar_w;
 			if (ui_icon_button("", icon_t.CUBE)) {
-				if (config_raw.touch_ui && ui_nodes_show && ui_view2d_show) {
-					ui_view2d_show = false;
-				}
-				base_view3d_show = true;
-				base_resize();
+				ui_base_show_3d_view();
 			}
 			ui._w                   = _w;
 			ui.ops.theme.ELEMENT_H  = _ELEMENT_H;
@@ -260,11 +256,7 @@ function ui_toolbar_tool_properties_menu() {
 		}
 
 		if (ui_button(base_view3d_show ? tr("Hide 3D View") : tr("Show 3D View"), ui_align_t.LEFT)) {
-			base_view3d_show = !base_view3d_show;
-			if (base_view3d_show && ui_nodes_show && ui_view2d_show) {
-				ui_view2d_show = false;
-			}
-			base_resize();
+			ui_base_show_3d_view();
 		}
 
 	}, ui._x + ui._w + 6 * UI_SCALE(), y);
