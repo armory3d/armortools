@@ -62,9 +62,20 @@ function tab_browser_draw(htab: ui_handle_t) {
 			}
 		}
 		else {
-			// Up, Refresh
-			let row: f32[] = [ 1 / 4, 3 / 4 ];
+			// Menu, Up, Refresh
+			let row: f32[] = [ 0.5 / 4, 0.5 / 4, 3 / 4 ];
 			ui_row(row);
+
+			if (ui_icon_button("", icon_t.MENU)) {
+				ui_menu_draw(function() {
+					if (ui_menu_button(tr("Cloud"), "", icon_t.CLOUD)) {
+						tab_browser_go_to_cloud();
+					}
+					if (ui_menu_button(tr("Disk"), "", icon_t.STORAGE)) {
+						tab_browser_go_to_disk();
+					}
+				});
+			}
 		}
 
 		// Previous folder
@@ -234,28 +245,11 @@ function tab_browser_draw(htab: ui_handle_t) {
 			ui._w             = bookmarks_w;
 
 			if (ui_icon_button(tr("Cloud"), icon_t.CLOUD, ui_align_t.LEFT)) {
-				tab_browser_hpath.text = "cloud";
+				tab_browser_go_to_cloud();
 			}
 
 			if (ui_icon_button(tr("Disk"), icon_t.STORAGE, ui_align_t.LEFT)) {
-				/// if arm_android
-				ui_menu_draw(function() {
-					if (ui_menu_button(tr("Download"), "", icon_t.FOLDER)) {
-						tab_browser_hpath.text = ui_files_default_path;
-					}
-					if (ui_menu_button(tr("Pictures"), "", icon_t.FOLDER)) {
-						tab_browser_hpath.text = "/storage/emulated/0/Pictures";
-					}
-					if (ui_menu_button(tr("Camera"), "", icon_t.FOLDER)) {
-						tab_browser_hpath.text = "/storage/emulated/0/DCIM/Camera";
-					}
-					if (ui_menu_button(tr("Projects"), "", icon_t.FOLDER)) {
-						tab_browser_hpath.text = iron_internal_save_path();
-					}
-				});
-				/// else
-				tab_browser_hpath.text = ui_files_default_path;
-				/// end
+				tab_browser_go_to_disk();
 			}
 
 			for (let i: i32 = 0; i < config_raw.bookmarks.length; ++i) {
@@ -285,4 +279,29 @@ function tab_browser_draw(htab: ui_handle_t) {
 			}
 		}
 	}
+}
+
+function tab_browser_go_to_cloud() {
+	tab_browser_hpath.text = "cloud";
+}
+
+function tab_browser_go_to_disk() {
+	/// if arm_android
+	ui_menu_draw(function() {
+		if (ui_menu_button(tr("Download"), "", icon_t.FOLDER)) {
+			tab_browser_hpath.text = ui_files_default_path;
+		}
+		if (ui_menu_button(tr("Pictures"), "", icon_t.FOLDER)) {
+			tab_browser_hpath.text = "/storage/emulated/0/Pictures";
+		}
+		if (ui_menu_button(tr("Camera"), "", icon_t.FOLDER)) {
+			tab_browser_hpath.text = "/storage/emulated/0/DCIM/Camera";
+		}
+		if (ui_menu_button(tr("Projects"), "", icon_t.FOLDER)) {
+			tab_browser_hpath.text = iron_internal_save_path();
+		}
+	});
+	/// else
+	tab_browser_hpath.text = ui_files_default_path;
+	/// end
 }
