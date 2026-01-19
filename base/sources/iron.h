@@ -1223,8 +1223,8 @@ buffer_t *iron_load_blob(string_t *file) {
 	return buffer;
 }
 
-i32 iron_screen_dpi() {
-	return iron_display_current_mode(iron_primary_display()).pixels_per_inch;
+i32 iron_display_ppi(i32 index) {
+	return iron_display_current_mode(index).pixels_per_inch;
 }
 
 i32 iron_display_width(i32 index) {

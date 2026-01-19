@@ -150,6 +150,11 @@ function config_init() {
 		/// if (arm_android || arm_ios || arm_macos)
 		config_raw.window_scale = 2.0;
 		/// end
+		/// if (arm_android || arm_ios)
+		if (sys_display_ppi() > 330) {
+			config_raw.window_scale = 2.5;
+		}
+		/// end
 		config_raw.window_vsync     = true;
 		config_raw.window_frequency = sys_display_frequency();
 		config_raw.rp_bloom         = false;

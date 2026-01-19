@@ -83,11 +83,13 @@ id get_metal_queue(void) {
 void iron_display_init(void) {}
 
 iron_display_mode_t iron_display_current_mode(int display) {
+	UIScreen           *screen = [UIScreen mainScreen];
 	iron_display_mode_t dm;
-	dm.width          = iron_window_width();
-	dm.height         = iron_window_height();
-	dm.frequency      = (int)[[UIScreen mainScreen] maximumFramesPerSecond];
-	dm.bits_per_pixel = 32;
+	dm.width           = iron_window_width();
+	dm.height          = iron_window_height();
+	dm.frequency       = (int)screen.maximumFramesPerSecond;
+	dm.bits_per_pixel  = 32;
+	dm.pixels_per_inch = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 326.0f : 460.0f; // Approx
 	return dm;
 }
 
@@ -600,5 +602,4 @@ bool _save_and_quit_callback_internal() {
 
 volatile int iron_exec_async_done = 1;
 
-void iron_exec_async(const char *path, char *argv[]) {
-}
+void iron_exec_async(const char *path, char *argv[]) {}

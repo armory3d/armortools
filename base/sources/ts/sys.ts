@@ -260,6 +260,10 @@ function sys_display_frequency(): i32 {
 	return iron_display_frequency(sys_display_primary_id());
 }
 
+function sys_display_ppi(): i32 {
+	return iron_display_ppi(sys_display_primary_id());
+}
+
 function sys_buffer_to_string(b: buffer_t): string {
 	let str: string = string_alloc(b.length + 1);
 	memcpy(str, b.buffer, b.length);
