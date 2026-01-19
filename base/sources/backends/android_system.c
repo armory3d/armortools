@@ -1042,6 +1042,7 @@ bool iron_internal_handle_messages(void) {
 		int32_t height      = iron_android_height();
 		gpu_resize(width, height);
 		iron_internal_call_resize_callback(width, height);
+		iron_vulkan_surface_destroyed();
 	}
 
 	return true;
