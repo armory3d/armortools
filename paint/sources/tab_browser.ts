@@ -15,7 +15,15 @@ function tab_browser_show_directory(directory: string) {
 }
 
 function tab_browser_draw(htab: ui_handle_t) {
-	if (ui_tab(htab, tr("Browser")) && ui._window_h > ui_statusbar_default_h * UI_SCALE()) {
+	let title: string = tr("Browser");
+
+	/// if arm_ios
+	if (config_is_iphone()) {
+		title = "  " + title;
+	}
+	/// end
+
+	if (ui_tab(htab, title) && ui._window_h > ui_statusbar_default_h * UI_SCALE()) {
 
 		if (config_raw.bookmarks == null) {
 			config_raw.bookmarks = [];

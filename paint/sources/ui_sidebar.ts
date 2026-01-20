@@ -53,10 +53,10 @@ function ui_sidebar_render_ui() {
 
 	/// if arm_ios
 	if (config_is_iphone()) {
-		sidebar_y += UI_ELEMENT_H();
+		sidebar_y += UI_ELEMENT_H() + UI_ELEMENT_OFFSET();
 		ui_end();
 		draw_begin(null);
-		draw_set_color(ui.ops.theme.SEPARATOR_COL);
+		draw_set_color(ui.ops.theme.PRESSED_COL);
 		draw_filled_rect(ui_sidebar_tabx, 0, config_raw.layout[layout_size_t.SIDEBAR_W], sidebar_y);
 		draw_end();
 		ui_begin(ui);

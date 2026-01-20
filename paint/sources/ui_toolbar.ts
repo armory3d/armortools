@@ -159,6 +159,14 @@ function ui_toolbar_render_ui() {
 		return;
 	}
 
+	if (!base_view3d_show && ui_view2d_show && ui_view2d_type != view_2d_type_t.LAYER) {
+		return;
+	}
+
+	if (!base_view3d_show && ui_nodes_show && !ui_view2d_show) {
+		return;
+	}
+
 	if (context_is_floating_toolbar()) {
 		x += ui_toolbar_x();
 		y += ui_toolbar_x() + 3 * UI_SCALE();

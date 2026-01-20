@@ -37,7 +37,7 @@ function ui_menu_panel_x(): i32 {
 function ui_menu_top_y(): i32 {
 	/// if arm_ios
 	if (config_is_iphone()) {
-		return UI_ELEMENT_H();
+		return UI_ELEMENT_H() + UI_ELEMENT_OFFSET();
 	}
 	/// end
 
