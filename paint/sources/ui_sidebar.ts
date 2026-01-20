@@ -49,8 +49,22 @@ function ui_sidebar_render_ui() {
 		ui.ops.theme.SCROLL_W = ui.ops.theme.SCROLL_MINI_W;
 	}
 
-	if (ui_window(ui_base_hwnds[tab_area_t.SIDEBAR0], ui_sidebar_tabx, 0, config_raw.layout[layout_size_t.SIDEBAR_W],
-	              config_raw.layout[layout_size_t.SIDEBAR_H0])) {
+	let sidebar_y: i32 = 0;
+
+	/// if arm_ios
+	if (config_is_iphone()) {
+		sidebar_y += UI_ELEMENT_H();
+		ui_end();
+		draw_begin(null);
+		draw_set_color(ui.ops.theme.SEPARATOR_COL);
+		draw_filled_rect(ui_sidebar_tabx, 0, config_raw.layout[layout_size_t.SIDEBAR_W], sidebar_y);
+		draw_end();
+		ui_begin(ui);
+	}
+	/// end
+
+	if (ui_window(ui_base_hwnds[tab_area_t.SIDEBAR0], ui_sidebar_tabx, sidebar_y, config_raw.layout[layout_size_t.SIDEBAR_W],
+	              config_raw.layout[layout_size_t.SIDEBAR_H0] - sidebar_y)) {
 		let tabs: tab_draw_t[] = ui_base_hwnd_tabs[tab_area_t.SIDEBAR0];
 		for (let i: i32 = 0; i < (mini ? 1 : tabs.length); ++i) {
 			tabs[i].f(ui_base_htabs[tab_area_t.SIDEBAR0]);

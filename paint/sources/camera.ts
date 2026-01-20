@@ -219,6 +219,16 @@ function camera_reset(view_index: i32 = -1) {
 		camera_origins[view_index].v = vec4_create(0, 0, 0);
 		camera_views[view_index].v   = mat4_clone(camera.base.transform.local);
 	}
+
+	/// if arm_ios
+	if (config_is_iphone()) {
+		viewport_zoom(-2.4);
+		let right: vec4_t                = vec4_mult(transform_right(camera.base.transform), -0.135);
+		camera.base.transform.loc        = vec4_add(camera.base.transform.loc, right);
+		camera_origins[camera_index()].v = vec4_add(camera_origins[camera_index()].v, right);
+		camera_object_build_mat(camera);
+	}
+	/// end
 }
 
 function camera_pan_action(modif: bool, default_keymap: bool) {

@@ -48,7 +48,7 @@ function tab_materials_button_nodes() {
 }
 
 function tab_materials_draw_slots(mini: bool) {
-	let slotw: i32 = math_floor((51 + math_floor(config_raw.window_scale * 2)) * UI_SCALE());
+	let slotw: i32 = math_floor(51 * UI_SCALE() + config_raw.window_scale * 2);
 	let num: i32   = math_floor(ui._window_w / slotw);
 	if (num == 0) {
 		return;

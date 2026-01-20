@@ -154,12 +154,7 @@ function ui_toolbar_render_ui() {
 	let h: i32              = iron_window_height() - ui_header_h - config_raw.layout[layout_size_t.STATUS_H];
 	let _WINDOW_BG_COL: i32 = ui.ops.theme.WINDOW_BG_COL;
 
-	if (!base_view3d_show && !ui_view2d_show) {
-		ui_toolbar_draw_show_3d_view();
-		return;
-	}
-
-	if (!base_view3d_show && ui_view2d_show && ui_view2d_type != view_2d_type_t.LAYER) {
+	if (!base_view3d_show && !ui_view2d_show && !ui_nodes_show) {
 		ui_toolbar_draw_show_3d_view();
 		return;
 	}
@@ -173,6 +168,12 @@ function ui_toolbar_render_ui() {
 		if (!base_view3d_show && ui_view2d_show && !config_raw.touch_ui) {
 			y += ui_toolbar_w();
 		}
+
+		/// if arm_ios
+		if (config_is_iphone()) {
+			y += ui_toolbar_w();
+		}
+		/// end
 	}
 
 	if (ui_window(ui_toolbar_handle, x, y, ui_toolbar_w(), h)) {
@@ -245,6 +246,12 @@ function ui_toolbar_tool_properties_menu() {
 		y += ui_toolbar_w();
 	}
 
+	/// if arm_ios
+	if (config_is_iphone() && base_view3d_show) {
+		y += ui_toolbar_w();
+	}
+	/// end
+
 	ui_menu_draw(function() {
 		ui.changed = false;
 		ui_header_draw_tool_properties();
@@ -254,8 +261,7 @@ function ui_toolbar_tool_properties_menu() {
 		if (base_view3d_show && ui_button(tr("Pin to Header"), ui_align_t.LEFT)) {
 			config_raw.layout[layout_size_t.HEADER] = 1;
 		}
-
-		if (ui_button(base_view3d_show ? tr("Hide 3D View") : tr("Show 3D View"), ui_align_t.LEFT)) {
+		if (base_view3d_show && ui_button(tr("Hide 3D View"), ui_align_t.LEFT)) {
 			ui_base_show_3d_view();
 		}
 

@@ -21,7 +21,23 @@ function compass_render() {
 	cam.p                        = mat4_ortho(-8 * ratio, 8 * ratio, -8, 8, -2, 2);
 	compass.base.visible         = true;
 	compass.base.parent          = cam.base;
-	compass.base.transform.loc   = vec4_create(7.4 * ratio, 7.0, -1);
+
+	let compass_x: f32 = 7.4;
+	let compass_y: f32 = 7.0;
+	let compass_down: bool = false;
+
+	/// if arm_ios
+	if (config_is_iphone()) {
+		compass_down = true;
+	}
+	/// end
+
+	if (compass_down) {
+		compass_x = 6.0;
+		compass_y = -compass_y;
+	}
+
+	compass.base.transform.loc   = vec4_create(compass_x * ratio, compass_y, -1);
 	compass.base.transform.rot   = quat_create(-crot.x, -crot.y, -crot.z, crot.w);
 	compass.base.transform.scale = vec4_create(0.4, 0.4, 0.4);
 	transform_build_matrix(compass.base.transform);

@@ -1173,7 +1173,7 @@ function ui_nodes_get_node_preview_image(n: ui_node_t): gpu_texture_t {
 function ui_nodes_draw_menubar() {
 	let c: ui_node_canvas_t = ui_nodes_get_canvas(true);
 	let ew: i32             = math_floor(UI_ELEMENT_W() * 0.7);
-	let top_y: i32          = config_raw.touch_ui ? 0 : UI_ELEMENT_H();
+	let top_y: i32          = ui_menu_top_y();
 
 	draw_set_color(ui.ops.theme.WINDOW_BG_COL);
 	draw_filled_rect(0, top_y, ui_nodes_ww, UI_ELEMENT_H() + UI_ELEMENT_OFFSET() * 2);

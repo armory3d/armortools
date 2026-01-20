@@ -34,18 +34,35 @@ function ui_menu_panel_x(): i32 {
 	return panel_x;
 }
 
-function ui_menu_panel_y(): i32 {
-	let panel_y: i32 = 0;
-	if (config_raw.layout[layout_size_t.HEADER] == 1) {
+function ui_menu_top_y(): i32 {
+	/// if arm_ios
+	if (config_is_iphone()) {
+		return UI_ELEMENT_H();
 	}
-	else {
+	/// end
+
+	if (config_raw.touch_ui) {
+		return 0;
+	}
+
+	return UI_ELEMENT_H();
+}
+
+function ui_menu_panel_y(): i32 {
+	/// if arm_ios
+	if (config_is_iphone()) {
+		return ui_header_h;
+	}
+	/// end
+
+	let panel_y: i32 = 0;
+	if (config_raw.layout[layout_size_t.HEADER] == 0) { // Floating
 		panel_y += 5 * UI_SCALE();
 	}
 	return panel_y;
 }
 
 function ui_menubar_render_ui() {
-
 	if (config_raw.touch_ui && !base_view3d_show) {
 		return;
 	}
@@ -65,8 +82,9 @@ function ui_menubar_render_ui() {
 		if (config_raw.touch_ui) {
 			ui._w = item_w;
 
-			if (ui_menubar_icon_button(icon_t.MENU))
+			if (ui_menubar_icon_button(icon_t.MENU)) {
 				box_preferences_show();
+			}
 			if (ui_menubar_icon_button(icon_t.PROJECTS)) {
 				// Save project icon in lit mode
 				context_set_viewport_mode(viewport_mode_t.LIT);
@@ -106,15 +124,24 @@ function ui_menubar_render_ui() {
 			if (ui_menu_show && ui_menubar_category == menubar_category_t.HELP) {
 				ui_fill(0, -6, size, size - 4, ui.ops.theme.HIGHLIGHT_COL);
 			}
-			if (ui_menubar_icon_button(icon_t.HELP)) {
+
+			let full: bool = true;
+			/// if arm_ios
+			if (config_is_iphone()) {
+				full = false;
+			}
+			/// end
+
+			if (full && ui_menubar_icon_button(icon_t.HELP)) {
 				ui_menubar_show_menu(menubar_category_t.HELP);
 			}
+
 			ui.enabled = history_undos > 0;
 			if (ui_menubar_icon_button(icon_t.UNDO)) {
 				history_undo();
 			}
 			ui.enabled = history_redos > 0;
-			if (ui_menubar_icon_button(icon_t.REDO)) {
+			if (full && ui_menubar_icon_button(icon_t.REDO)) {
 				history_redo();
 			}
 			ui.enabled = true;
@@ -440,50 +467,63 @@ function ui_menubar_draw_category_items() {
 			viewport_scale_to_bounds();
 		}
 		ui_menu_separator();
-		if (ui_menu_sub_button(ui_handle(__ID__), tr("View"))) {
-			ui_menu_sub_begin(6);
-			if (ui_menu_button(tr("Front"), map_get(config_keymap, "view_front"))) {
-				viewport_set_view(0, -1, 0, math_pi() / 2, 0, 0);
+
+		let full: bool = true;
+
+		/// if arm_ios
+		if (config_is_iphone()) {
+			full = false;
+		}
+		/// end
+
+		if (full) {
+
+			if (ui_menu_sub_button(ui_handle(__ID__), tr("View"))) {
+				ui_menu_sub_begin(6);
+				if (ui_menu_button(tr("Front"), map_get(config_keymap, "view_front"))) {
+					viewport_set_view(0, -1, 0, math_pi() / 2, 0, 0);
+				}
+				if (ui_menu_button(tr("Back"), map_get(config_keymap, "view_back"))) {
+					viewport_set_view(0, 1, 0, math_pi() / 2, 0, math_pi());
+				}
+				if (ui_menu_button(tr("Right"), map_get(config_keymap, "view_right"))) {
+					viewport_set_view(1, 0, 0, math_pi() / 2, 0, math_pi() / 2);
+				}
+				if (ui_menu_button(tr("Left"), map_get(config_keymap, "view_left"))) {
+					viewport_set_view(-1, 0, 0, math_pi() / 2, 0, -math_pi() / 2);
+				}
+				if (ui_menu_button(tr("Top"), map_get(config_keymap, "view_top"))) {
+					viewport_set_view(0, 0, 1, 0, 0, 0);
+				}
+				if (ui_menu_button(tr("Bottom"), map_get(config_keymap, "view_bottom"))) {
+					viewport_set_view(0, 0, -1, math_pi(), 0, math_pi());
+				}
+				ui_menu_sub_end();
 			}
-			if (ui_menu_button(tr("Back"), map_get(config_keymap, "view_back"))) {
-				viewport_set_view(0, 1, 0, math_pi() / 2, 0, math_pi());
+
+			ui.changed = false;
+
+			if (ui_menu_sub_button(ui_handle(__ID__), tr("Orbit"))) {
+				ui_menu_sub_begin(5);
+				if (ui_menu_button(tr("Left"), map_get(config_keymap, "view_orbit_left"), icon_t.ARROW_LEFT)) {
+					viewport_orbit(-math_pi() / 12, 0);
+				}
+				if (ui_menu_button(tr("Right"), map_get(config_keymap, "view_orbit_right"), icon_t.ARROW_RIGHT)) {
+					viewport_orbit(math_pi() / 12, 0);
+				}
+				if (ui_menu_button(tr("Up"), map_get(config_keymap, "view_orbit_up"), icon_t.ARROW_UP)) {
+					viewport_orbit(0, -math_pi() / 12);
+				}
+				if (ui_menu_button(tr("Down"), map_get(config_keymap, "view_orbit_down"), icon_t.ARROW_DOWN)) {
+					viewport_orbit(0, math_pi() / 12);
+				}
+				if (ui_menu_button(tr("Opposite"), map_get(config_keymap, "view_orbit_opposite"))) {
+					viewport_orbit_opposite();
+				}
+				ui_menu_sub_end();
 			}
-			if (ui_menu_button(tr("Right"), map_get(config_keymap, "view_right"))) {
-				viewport_set_view(1, 0, 0, math_pi() / 2, 0, math_pi() / 2);
-			}
-			if (ui_menu_button(tr("Left"), map_get(config_keymap, "view_left"))) {
-				viewport_set_view(-1, 0, 0, math_pi() / 2, 0, -math_pi() / 2);
-			}
-			if (ui_menu_button(tr("Top"), map_get(config_keymap, "view_top"))) {
-				viewport_set_view(0, 0, 1, 0, 0, 0);
-			}
-			if (ui_menu_button(tr("Bottom"), map_get(config_keymap, "view_bottom"))) {
-				viewport_set_view(0, 0, -1, math_pi(), 0, math_pi());
-			}
-			ui_menu_sub_end();
 		}
 
-		ui.changed = false;
-
-		if (ui_menu_sub_button(ui_handle(__ID__), tr("Orbit"))) {
-			ui_menu_sub_begin(5);
-			if (ui_menu_button(tr("Left"), map_get(config_keymap, "view_orbit_left"), icon_t.ARROW_LEFT)) {
-				viewport_orbit(-math_pi() / 12, 0);
-			}
-			if (ui_menu_button(tr("Right"), map_get(config_keymap, "view_orbit_right"), icon_t.ARROW_RIGHT)) {
-				viewport_orbit(math_pi() / 12, 0);
-			}
-			if (ui_menu_button(tr("Up"), map_get(config_keymap, "view_orbit_up"), icon_t.ARROW_UP)) {
-				viewport_orbit(0, -math_pi() / 12);
-			}
-			if (ui_menu_button(tr("Down"), map_get(config_keymap, "view_orbit_down"), icon_t.ARROW_DOWN)) {
-				viewport_orbit(0, math_pi() / 12);
-			}
-			if (ui_menu_button(tr("Opposite"), map_get(config_keymap, "view_orbit_opposite"))) {
-				viewport_orbit_opposite();
-			}
-			ui_menu_sub_end();
-		}
 		if (ui_menu_button(tr("Zoom In"), map_get(config_keymap, "view_zoom_in"), icon_t.ZOOM_IN)) {
 			viewport_zoom(0.2);
 		}

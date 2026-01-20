@@ -720,6 +720,12 @@ function ui_base_init_hwnd_tabs(): tab_draw_array_t[] {
 		_draw_callback_create(ui_statusbar_draw_version_tab)
 	];
 
+	/// if arm_ios
+	if (config_is_iphone()) {
+		array_splice(a2, 4, 1); // Swatches
+	}
+	/// end
+
 	let r: tab_draw_array_t[] = [];
 	array_push(r, a0);
 	array_push(r, a1);

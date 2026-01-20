@@ -275,7 +275,7 @@ function ui_view2d_render() {
 		}
 
 		// Menu
-		let top_y: i32 = config_raw.touch_ui ? 0 : UI_ELEMENT_H();
+		let top_y: i32 = ui_menu_top_y();
 		let ew: i32    = math_floor(UI_ELEMENT_W());
 		draw_set_color(ui.ops.theme.WINDOW_BG_COL);
 		draw_filled_rect(0, top_y, ui_view2d_ww, UI_ELEMENT_H() + UI_ELEMENT_OFFSET() * 2);
@@ -370,35 +370,45 @@ function ui_view2d_render() {
 		ui._x += ew * 0.6 + 3;
 		ui._y = 2 + start_y;
 
-		if (tex != null) {
-			ui._w                  = math_floor(ew * 0.5 + 3);
-			let scale_percent: i32 = math_round((tw / tex.width) * 100);
-			if (ui_text(scale_percent + "%") == ui_state_t.STARTED) {
-				ui_view2d_pan_scale = tex.width / (ui_view2d_ww * 0.95);
+		let full: bool = true;
+
+		/// if arm_ios
+		if (config_is_iphone()) {
+			full = false;
+		}
+		/// end
+
+		if (full) {
+			if (tex != null) {
+				ui._w                  = math_floor(ew * 0.5 + 3);
+				let scale_percent: i32 = math_round((tw / tex.width) * 100);
+				if (ui_text(scale_percent + "%") == ui_state_t.STARTED) {
+					ui_view2d_pan_scale = tex.width / (ui_view2d_ww * 0.95);
+				}
+				ui._x += ew * 0.5 + 3;
+				ui._y = 2 + start_y;
 			}
+
+			ui.enabled = false;
+
+			if ((ui_view2d_type == view_2d_type_t.ASSET || ui_view2d_type == view_2d_type_t.NODE) && tex != null) { // Texture resolution
+				ui._w = math_floor(ew * 0.7 + 3);
+				ui_text(tex.width + "x" + tex.height);
+				ui._x += ew * 0.7 + 3;
+				ui._y = 2 + start_y;
+			}
+
+			let view_type: string = ui_view2d_type == view_2d_type_t.ASSET  ? "Asset"
+									: ui_view2d_type == view_2d_type_t.NODE ? "Node"
+									: ui_view2d_type == view_2d_type_t.FONT ? "Font"
+																			: "Layer";
+			ui._w                 = math_floor(ew * 0.5 + 3);
+			ui_text(view_type);
 			ui._x += ew * 0.5 + 3;
 			ui._y = 2 + start_y;
+
+			ui.enabled = true;
 		}
-
-		ui.enabled = false;
-
-		if ((ui_view2d_type == view_2d_type_t.ASSET || ui_view2d_type == view_2d_type_t.NODE) && tex != null) { // Texture resolution
-			ui._w = math_floor(ew * 0.7 + 3);
-			ui_text(tex.width + "x" + tex.height);
-			ui._x += ew * 0.7 + 3;
-			ui._y = 2 + start_y;
-		}
-
-		let view_type: string = ui_view2d_type == view_2d_type_t.ASSET  ? "Asset"
-		                        : ui_view2d_type == view_2d_type_t.NODE ? "Node"
-		                        : ui_view2d_type == view_2d_type_t.FONT ? "Font"
-		                                                                : "Layer";
-		ui._w                 = math_floor(ew * 0.5 + 3);
-		ui_text(view_type);
-		ui._x += ew * 0.5 + 3;
-		ui._y = 2 + start_y;
-
-		ui.enabled = true;
 
 		// Picked position
 		if (context_raw.tool == tool_type_t.PICKER && (ui_view2d_type == view_2d_type_t.LAYER || ui_view2d_type == view_2d_type_t.ASSET)) {

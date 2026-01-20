@@ -154,6 +154,9 @@ function config_init() {
 		if (sys_display_ppi() > 330) {
 			config_raw.window_scale = 2.5;
 		}
+		if (sys_display_ppi() > 400) {
+			config_raw.window_scale = 3.0;
+		}
 		/// end
 		config_raw.window_vsync     = true;
 		config_raw.window_frequency = sys_display_frequency();
@@ -458,6 +461,12 @@ function config_disable_plugin(f: string) {
 	array_remove(config_raw.plugins, f);
 	plugin_stop(f);
 }
+
+/// if arm_ios
+function config_is_iphone(): bool {
+	return sys_display_ppi() > 330;
+}
+/// end
 
 type version_t = {
 	sha: string; date : string;
