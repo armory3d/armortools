@@ -63,9 +63,12 @@ void io_gltf_parse_mesh(raw_mesh_t *raw, cgltf_mesh *mesh, float *to_world, floa
 
 	float *m = to_world;
 	for (int i = 0; i < vertex_count; ++i) {
+		// float x           = posa32[i * 3 + 0];
+		// float y           = posa32[i * 3 + 1];
+		// float z           = posa32[i * 3 + 2];
 		float x           = posa32[i * 3 + 0];
-		float y           = posa32[i * 3 + 1];
-		float z           = posa32[i * 3 + 2];
+		float y           = -posa32[i * 3 + 2];
+		float z           = posa32[i * 3 + 1];
 		posa32[i * 3 + 0] = m[0] * x + m[4] * y + m[8] * z + m[12];
 		posa32[i * 3 + 1] = m[1] * x + m[5] * y + m[9] * z + m[13];
 		posa32[i * 3 + 2] = m[2] * x + m[6] * y + m[10] * z + m[14];
@@ -73,9 +76,12 @@ void io_gltf_parse_mesh(raw_mesh_t *raw, cgltf_mesh *mesh, float *to_world, floa
 
 	if (nora32 != NULL) {
 		for (int i = 0; i < vertex_count; ++i) {
+			// float x   = nora32[i * 3 + 0] / scale[0];
+			// float y   = nora32[i * 3 + 1] / scale[1];
+			// float z   = nora32[i * 3 + 2] / scale[2];
 			float x   = nora32[i * 3 + 0] / scale[0];
-			float y   = nora32[i * 3 + 1] / scale[1];
-			float z   = nora32[i * 3 + 2] / scale[2];
+			float y   = -nora32[i * 3 + 2] / scale[2];
+			float z   = nora32[i * 3 + 1] / scale[1];
 			float tx  = m[0] * x + m[4] * y + m[8] * z;
 			float ty  = m[1] * x + m[5] * y + m[9] * z;
 			float tz  = m[2] * x + m[6] * y + m[10] * z;
