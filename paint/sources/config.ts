@@ -240,9 +240,13 @@ function config_init() {
 		}
 	}
 
-	ui_touch_scroll   = config_raw.touch_ui;
-	ui_touch_hold     = config_raw.touch_ui;
-	ui_touch_tooltip  = config_raw.touch_ui;
+	ui_touch_control = config_raw.touch_ui;
+	ui_touch_speed   = 1.0;
+	/// if (arm_android || arm_ios)
+	if (sys_display_ppi() > 400) {
+		ui_touch_speed = 0.5;
+	}
+	/// end
 	base_res_handle.i = config_raw.layer_res;
 	keymap_load();
 }

@@ -874,7 +874,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 		current_nodes->zoom = round(current_nodes->zoom * 100.0) / 100.0;
 		current_nodes->uiw  = current->_w;
 		current_nodes->uih  = current->_h;
-		if (ui_touch_scroll) {
+		if (ui_touch_control) {
 			// Zoom to finger location
 			current_nodes->pan_x -= (current->input_x - current->_window_x - current->_window_w / 2.0) * controls->zoom * 5.0 * (1.0 - current_nodes->zoom);
 			current_nodes->pan_y -= (current->input_y - current->_window_y - current->_window_h / 2.0) * controls->zoom * 5.0 * (1.0 - current_nodes->zoom);
@@ -1166,7 +1166,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 		if (current->input_enabled && current->input_started && !current->is_alt_down && current_nodes->link_drag_id == -1 && !current_nodes->nodes_drag &&
 		    !current->changed && ui_input_in_rect(current->_window_x, current->_window_y, current->_window_w, current->_window_h)) {
 
-			if (ui_touch_scroll) {
+			if (ui_touch_control) {
 				ui_touch_drag = true;
 			}
 			else {

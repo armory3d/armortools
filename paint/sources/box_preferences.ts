@@ -94,9 +94,7 @@ function box_preferences_interface_tab() {
 	}
 	config_raw.touch_ui = ui_check(h_touch_ui, tr("Touch UI"));
 	if (ui.changed) {
-		ui_touch_scroll  = config_raw.touch_ui;
-		ui_touch_hold    = config_raw.touch_ui;
-		ui_touch_tooltip = config_raw.touch_ui;
+		ui_touch_control = config_raw.touch_ui;
 		config_load_theme(config_raw.theme);
 		box_preferences_set_scale();
 		base_redraw_ui();

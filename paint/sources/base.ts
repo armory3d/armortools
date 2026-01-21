@@ -340,7 +340,7 @@ function base_update() {
 			base_drag_layer     = null;
 		}
 		// Disable touch scrolling while dragging is active
-		ui_touch_scroll = !base_is_dragging;
+		ui_touch_control = !base_is_dragging;
 	}
 
 	if (has_drag && (mouse_movement_x != 0 || mouse_movement_y != 0)) {

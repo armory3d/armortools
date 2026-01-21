@@ -606,7 +606,17 @@ function tab_layers_draw_layer_icon(l: slot_layer_t, i: i32, uix: f32, uiy: f32,
 	if (!slot_layer_is_group(l)) {
 		let texpaint_preview: gpu_texture_t = l.texpaint_preview;
 
-		let icon: gpu_texture_t = l.fill_layer == null ? texpaint_preview : l.fill_layer.image_icon;
+		let icon: gpu_texture_t;
+		if (l.fill_layer == null) {
+			icon = texpaint_preview;
+		}
+		else if (config_raw.window_scale > 1) {
+			icon = l.fill_layer.image;
+		}
+		else {
+			icon = l.fill_layer.image_icon;
+		}
+
 		if (l.fill_layer == null) {
 			// Checker
 			let r: rect_t = resource_tile50(icons, icon_t.CHECKER);

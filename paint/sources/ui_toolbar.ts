@@ -54,7 +54,7 @@ function ui_toolbar_draw_tool(tool: i32, img: gpu_texture_t, icon_accent: i32) {
 	if (context_is_floating_toolbar()) {
 		let statush: i32 = config_raw.layout[layout_size_t.STATUS_H];
 		let statusy: i32 = iron_window_height() - statush;
-		visible          = ui._y + ui._w * 2 < statusy;
+		visible          = ui.input_y < statusy;
 	}
 
 	let image_state: ui_state_t = ui_sub_image(img, icon_accent, -1.0, rect.x, rect.y, rect.w, rect.h);

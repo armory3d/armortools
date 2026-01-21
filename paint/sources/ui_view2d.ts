@@ -452,7 +452,7 @@ function ui_view2d_update() {
 		ui_view2d_pan_x = _pan_x * ui_view2d_pan_scale;
 		ui_view2d_pan_y = _pan_y * ui_view2d_pan_scale;
 
-		if (ui_touch_scroll) {
+		if (ui_touch_control) {
 			// Zoom to finger location
 			ui_view2d_pan_x -= (ui.input_x - ui._window_x - ui._window_w / 2) * control.zoom;
 			ui_view2d_pan_y -= (ui.input_y - ui._window_y - ui._window_h / 2) * control.zoom;

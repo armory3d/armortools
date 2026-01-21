@@ -649,9 +649,8 @@ declare enum iron_cursor_t {
 
 declare let ui_nodes_enum_texts: (s: string)       => string[];
 declare let ui_nodes_preview_image: (n: ui_node_t) => gpu_texture_t;
-declare let ui_touch_scroll: bool;
-declare let ui_touch_hold: bool;
-declare let ui_touch_tooltip: bool;
+declare let ui_touch_control: bool;
+declare let ui_touch_speed: f32;
 declare let ui_on_border_hover: any;
 declare let ui_on_tab_drop: any;
 declare let ui_nodes_on_link_drag: any;

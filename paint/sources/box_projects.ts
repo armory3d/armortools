@@ -41,6 +41,8 @@ function box_projects_tab() {
 	if (ui_tab(box_projects_htab, tr("Projects"), true)) {
 		ui_begin_sticky();
 
+		ui_separator(UI_ELEMENT_H(), false);
+
 		box_projects_draw_badge();
 
 		if (ui_icon_button(tr("New"), icon_t.PLUS)) {
@@ -82,7 +84,7 @@ function box_projects_tab() {
 			ui_row(ar);
 
 			ui._x += 2;
-			let off: f32 = show_asset_names ? UI_ELEMENT_OFFSET() * 16.0 : 6;
+			let off: f32 = show_asset_names ? 96 * UI_SCALE() : 16 * UI_SCALE();
 			if (row > 0) {
 				ui._y += off;
 			}
@@ -247,6 +249,9 @@ function box_projects_draw_badge() {
 
 function box_projects_get_started_tab() {
 	if (ui_tab(box_projects_htab, tr("Get Started"), true)) {
+
+		ui_separator(UI_ELEMENT_H(), false);
+
 		if (ui_icon_button(tr("Manual"), icon_t.HELP)) {
 			iron_load_url(manifest_url + "/manual");
 		}

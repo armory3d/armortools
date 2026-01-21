@@ -23,9 +23,11 @@ static bool         ui_combo_first                             = true;
 static ui_handle_t *ui_combo_search_handle                     = NULL;
 static int          touch_hold_x                               = -1;
 static int          touch_hold_y                               = -1;
-bool                ui_touch_scroll                            = false; // Pan with finger to scroll
-bool                ui_touch_hold                              = false; // Touch and hold finger for right click
-bool                ui_touch_tooltip                           = false; // Show extra tooltips above finger / on-screen keyboard
+// Pan with finger to scroll
+// Touch and hold finger for right click
+// Show extra tooltips above finger / on-screen keyboard
+bool                ui_touch_control                           = false;
+float               ui_touch_speed                             = 1.0;
 bool                ui_is_cut                                  = false;
 bool                ui_is_copy                                 = false;
 bool                ui_is_paste                                = false;
@@ -568,7 +570,7 @@ void ui_end_input() {
 		touch_hold_y              = -1;
 		current->input_released_r = true;
 	}
-	if (ui_touch_hold && current->input_down && current->input_x == current->input_started_x && current->input_y == current->input_started_y &&
+	if (ui_touch_control && current->input_down && current->input_x == current->input_started_x && current->input_y == current->input_started_y &&
 	    current->input_started_time > 0 && iron_time() - current->input_started_time > 0.5) {
 		current->touch_hold_activated = true;
 		current->input_released       = true;
@@ -698,7 +700,7 @@ void ui_draw_tooltip() {
 		draw_string(text, x - x_off, current->slider_tooltip_y - y_off);
 		draw_end();
 	}
-	if (ui_touch_tooltip && current->text_selected_handle != NULL) {
+	if (ui_touch_control && current->text_selected_handle != NULL) {
 		draw_begin(NULL, false, 0);
 		draw_set_font(current->ops->font, current->font_size * 2.0);
 		float x_off = draw_string_width(current->ops->font, current->font_size * 2.0, current->text_selected) / 2.0;
@@ -1642,10 +1644,10 @@ void ui_end_window() {
 			}
 
 			float scroll_delta = current->input_wheel_delta;
-			if (handle->scroll_enabled && ui_touch_scroll && current->input_down && current->input_dy != 0 &&
+			if (handle->scroll_enabled && ui_touch_control && current->input_down && current->input_dy != 0 &&
 			    current->input_x > current->_window_x + current->window_header_w && current->input_y > current->_window_y + current->window_header_h) {
 				current->is_scrolling = true;
-				scroll_delta          = -current->input_dy / 20.0;
+				scroll_delta          = -(current->input_dy / 20.0) * ui_touch_speed;
 			}
 			if (handle == current->scroll_handle) { // Scroll
 				ui_scroll(current->input_dy * e);
@@ -2188,7 +2190,7 @@ float ui_slider(ui_handle_t *handle, char *text, float from, float to, bool fill
 		current->scroll_handle = handle;
 		current->is_scrolling  = true;
 		current->changed = handle->changed = true;
-		if (ui_touch_tooltip) {
+		if (ui_touch_control) {
 			current->slider_tooltip   = true;
 			current->slider_tooltip_x = current->_x + current->_window_x;
 			current->slider_tooltip_y = current->_y + current->_window_y;
@@ -2563,7 +2565,7 @@ void ui_touch_move(ui_t *ui, int index, int x, int y) {
 		ui_pinch_distance   = sqrtf(dx * dx + dy * dy);
 		ui_pinch_total += last_distance != 0 ? last_distance - ui_pinch_distance : 0;
 		if (!ui_pinch_started) {
-			ui->input_wheel_delta = ui_pinch_total / 50;
+			ui->input_wheel_delta = (ui_pinch_total / 50) * ui_touch_speed;
 			if (ui->input_wheel_delta != 0) {
 				ui_pinch_total = 0.0;
 			}
