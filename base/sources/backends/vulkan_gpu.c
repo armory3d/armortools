@@ -374,6 +374,14 @@ VkSwapchainKHR cleanup_swapchain() {
 	return chain;
 }
 
+static void gpu_cleanup_internal() {
+	while (buffers_to_destroy_count > 0) {
+		buffers_to_destroy_count--;
+		vkFreeMemory(device, buffer_memories_to_destroy[buffers_to_destroy_count], NULL);
+		vkDestroyBuffer(device, buffers_to_destroy[buffers_to_destroy_count], NULL);
+	}
+}
+
 void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_texture_format_t format, int framebuffer_index) {
 	target->width                = width;
 	target->height               = height;
@@ -429,7 +437,16 @@ void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_t
 	    .allocationSize = memory_reqs.size,
 	};
 	allocation_nfo.memoryTypeIndex = memory_type_from_properties(memory_reqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-	vkAllocateMemory(device, &allocation_nfo, NULL, &target->impl.mem);
+	VkResult result = vkAllocateMemory(device, &allocation_nfo, NULL, &target->impl.mem);
+
+	if (result != VK_SUCCESS && gpu_cleanup_pending()) {
+		gpu_execute_and_wait();
+		gpu_cleanup_internal();
+		gpu_cleanup();
+		gpu_render_target_init2(target, width, height, format, framebuffer_index);
+		return;
+	}
+
 	vkBindImageMemory(device, target->impl.image, target->impl.mem, 0);
 	set_image_layout(target->impl.image, format == GPU_TEXTURE_FORMAT_D32 ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED,
 	                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
@@ -1171,14 +1188,6 @@ void gpu_execute_and_wait() {
 	}
 }
 
-static void gpu_cleanup_internal() {
-	while (buffers_to_destroy_count > 0) {
-		buffers_to_destroy_count--;
-		vkFreeMemory(device, buffer_memories_to_destroy[buffers_to_destroy_count], NULL);
-		vkDestroyBuffer(device, buffers_to_destroy[buffers_to_destroy_count], NULL);
-	}
-}
-
 void gpu_present_internal() {
 	vkEndCommandBuffer(command_buffer);
 	vkResetFences(device, 1, &fence);
@@ -1821,7 +1830,16 @@ void _gpu_buffer_init(gpu_buffer_impl_t *buffer, int size, int usage, int memory
 		memory_allocate_flags_info.flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR;
 		mem_alloc.pNext                  = &memory_allocate_flags_info;
 	}
-	vkAllocateMemory(device, &mem_alloc, NULL, &buffer->mem);
+	VkResult result = vkAllocateMemory(device, &mem_alloc, NULL, &buffer->mem);
+
+	if (result != VK_SUCCESS && gpu_cleanup_pending()) {
+		gpu_execute_and_wait();
+		gpu_cleanup_internal();
+		gpu_cleanup();
+		_gpu_buffer_init(buffer, size, usage, memory_requirements);
+		return;
+	}
+
 	vkBindBufferMemory(device, buffer->buf, buffer->mem, 0);
 }
 
