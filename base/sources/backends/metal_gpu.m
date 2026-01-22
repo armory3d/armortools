@@ -110,6 +110,10 @@ void gpu_render_target_init2(gpu_texture_t *target, int width, int height, gpu_t
 		descriptor.usage                 = MTLTextureUsageRenderTarget | MTLTextureUsageShaderRead | MTLTextureUsageShaderWrite;
 		descriptor.resourceOptions       = MTLResourceStorageModePrivate;
 		target->impl._tex                = (__bridge_retained void *)[device newTextureWithDescriptor:descriptor];
+		if (target->impl._tex == nil) {
+			gpu_cleanup();
+			target->impl._tex = (__bridge_retained void *)[device newTextureWithDescriptor:descriptor];
+		}
 	}
 }
 
@@ -555,6 +559,10 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 
 	id<MTLDevice>  device = get_metal_device();
 	id<MTLTexture> tex    = [device newTextureWithDescriptor:descriptor];
+	if (tex == nil) {
+		gpu_cleanup();
+		tex = [device newTextureWithDescriptor:descriptor];
+	}
 	texture->impl._tex    = (__bridge_retained void *)tex;
 	[tex replaceRegion:MTLRegionMake2D(0, 0, width, height)
 	       mipmapLevel:0
@@ -585,7 +593,11 @@ void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structur
 	MTLResourceOptions options = MTLResourceCPUCacheModeWriteCombined;
 	options |= MTLResourceStorageModeShared;
 
-	id<MTLBuffer> buf         = [device newBufferWithLength:count * buffer->stride options:options];
+	id<MTLBuffer> buf = [device newBufferWithLength:count * buffer->stride options:options];
+	if (buf == nil) {
+		gpu_cleanup();
+		buf = [device newBufferWithLength:count * buffer->stride options:options];
+	}
 	buffer->impl.metal_buffer = (__bridge_retained void *)buf;
 }
 
@@ -595,6 +607,28 @@ void *gpu_vertex_buffer_lock(gpu_buffer_t *buf) {
 }
 
 void gpu_vertex_buffer_unlock(gpu_buffer_t *buf) {}
+
+void gpu_index_buffer_init(gpu_buffer_t *buffer, int indexCount) {
+	buffer->count = indexCount;
+
+	id<MTLDevice>      device  = get_metal_device();
+	MTLResourceOptions options = MTLResourceCPUCacheModeWriteCombined;
+	options |= MTLResourceStorageModeShared;
+
+	buffer->impl.metal_buffer = (__bridge_retained void *)[device newBufferWithLength:sizeof(uint32_t) * indexCount options:options];
+	if (buffer->impl.metal_buffer == nil) {
+		gpu_cleanup();
+		buffer->impl.metal_buffer = (__bridge_retained void *)[device newBufferWithLength:sizeof(uint32_t) * indexCount options:options];
+	}
+}
+
+void *gpu_index_buffer_lock(gpu_buffer_t *buffer) {
+	id<MTLBuffer> metal_buffer = (__bridge id<MTLBuffer>)buffer->impl.metal_buffer;
+	uint8_t      *data         = (uint8_t *)[metal_buffer contents];
+	return data;
+}
+
+void gpu_index_buffer_unlock(gpu_buffer_t *buffer) {}
 
 void gpu_constant_buffer_init(gpu_buffer_t *buffer, int size) {
 	buffer->count             = size;
@@ -610,29 +644,11 @@ void gpu_constant_buffer_lock(gpu_buffer_t *buffer, int start, int count) {
 
 void gpu_constant_buffer_unlock(gpu_buffer_t *buffer) {}
 
-void gpu_index_buffer_init(gpu_buffer_t *buffer, int indexCount) {
-	buffer->count = indexCount;
-
-	id<MTLDevice>      device  = get_metal_device();
-	MTLResourceOptions options = MTLResourceCPUCacheModeWriteCombined;
-	options |= MTLResourceStorageModeShared;
-
-	buffer->impl.metal_buffer = (__bridge_retained void *)[device newBufferWithLength:sizeof(uint32_t) * indexCount options:options];
-}
-
 void gpu_buffer_destroy_internal(gpu_buffer_t *buffer) {
 	id<MTLBuffer> buf         = (__bridge_transfer id<MTLBuffer>)buffer->impl.metal_buffer;
 	buf                       = nil;
 	buffer->impl.metal_buffer = NULL;
 }
-
-void *gpu_index_buffer_lock(gpu_buffer_t *buffer) {
-	id<MTLBuffer> metal_buffer = (__bridge id<MTLBuffer>)buffer->impl.metal_buffer;
-	uint8_t      *data         = (uint8_t *)[metal_buffer contents];
-	return data;
-}
-
-void gpu_index_buffer_unlock(gpu_buffer_t *buffer) {}
 
 char *gpu_device_name() {
 	id<MTLDevice> device = get_metal_device();
