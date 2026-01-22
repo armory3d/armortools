@@ -161,16 +161,31 @@ static void write_k(int width, int height, const char *format, char *data, int s
 	fclose(file);
 }
 
+static uint16_t float_to_half_fast(float value) {
+	union { float f; uint32_t u; } v = {value};
+	uint32_t sign = (v.u >> 16) & 0x8000;
+	v.u &= 0x7FFFFFFF;
+	if (v.u >= 0x47800000) return sign | 0x7C00;
+	if (v.u < 0x38800000) return sign;
+	return sign | ((v.u - 0x38000000) >> 13);
+}
+
 void export_k(const char *from, const char *to) {
 	gpu_texture_t img;
 	if (ends_with(from, ".hdr")) {
 		img = read_hdr(from);
+		// F32 to F16
+		float    *f32_data = (float *)img.data;
+		uint16_t *f16_data = (uint16_t *)img.data;
+		for (int i = 0; i < img.width * img.height * 4; ++i) {
+			f16_data[i] = float_to_half_fast(f32_data[i]);
+		}
 	}
 	else {
 		img = read_png_jpg(from);
 	}
 
-	int   pixel_size      = img.is_hdr ? 16 : 4;
+	int   pixel_size      = img.is_hdr ? 8 : 4;
 	int   max             = LZ4_compress_bound(img.width * img.height * pixel_size);
 	char *compressed      = malloc(max);
 	int   compressed_size = LZ4_compress_default((char *)img.data, compressed, img.width * img.height * pixel_size, max);

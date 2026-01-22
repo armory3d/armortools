@@ -18,26 +18,26 @@ function import_envmap_run(path: string, image: gpu_texture_t) {
 		gpu_vertex_struct_add(vs, "pos", gpu_vertex_data_t.F32_2X);
 		import_envmap_pipeline.input_layout                      = vs;
 		import_envmap_pipeline.color_attachment_count            = 1;
-		ARRAY_ACCESS(import_envmap_pipeline.color_attachment, 0) = gpu_texture_format_t.RGBA128;
+		ARRAY_ACCESS(import_envmap_pipeline.color_attachment, 0) = gpu_texture_format_t.RGBA64;
 
 		gpu_pipeline_compile(import_envmap_pipeline);
 		import_envmap_params_loc   = 0;
 		import_envmap_radiance_loc = 0;
 		import_envmap_noise_loc    = 1;
 
-		import_envmap_radiance = gpu_create_render_target(1024, 512, gpu_texture_format_t.RGBA128);
+		import_envmap_radiance = gpu_create_render_target(1024, 512, gpu_texture_format_t.RGBA64);
 
 		import_envmap_mips = [];
 		let w: i32         = 512;
 		for (let i: i32 = 0; i < 5; ++i) {
-			array_push(import_envmap_mips, gpu_create_render_target(w, w > 1 ? math_floor(w / 2) : 1, gpu_texture_format_t.RGBA128));
+			array_push(import_envmap_mips, gpu_create_render_target(w, w > 1 ? math_floor(w / 2) : 1, gpu_texture_format_t.RGBA64));
 			w = math_floor(w / 2);
 		}
 	}
 
 	// Down-scale to 1024x512
 	draw_begin(import_envmap_radiance);
-	draw_set_pipeline(pipes_copy128);
+	draw_set_pipeline(pipes_copy64);
 	draw_scaled_image(image, 0, 0, 1024, 512);
 	draw_set_pipeline(null);
 	draw_end();
@@ -111,7 +111,7 @@ function import_envmap_get_spherical_harmonics(source: buffer_t, source_width: i
 			import_envmap_n = import_envmap_reverse_equirect(x / source_width, y / source_height);
 
 			for (let i: i32 = 0; i < 3; ++i) {
-				let value: f32 = buffer_get_f32(source, ((x + y * source_width) * 16 + i * 4));
+				let value: f32 = buffer_get_f16(source, ((x + y * source_width) * 8 + i * 2));
 				value          = math_pow(value, 1.0 / 2.2);
 
 				sh[0 + i] += value * weight1;

@@ -1147,16 +1147,22 @@ gpu_texture_t *gpu_create_texture_from_encoded_bytes(buffer_t *data, string_t *f
 			texture_format = GPU_TEXTURE_FORMAT_RGBA32;
 		}
 		else { // "LZ4F"
-			int output_size = width * height * 16;
+			int output_size = width * height * 8;
 			texture_data    = (unsigned char *)malloc(output_size);
 			LZ4_decompress_safe((char *)data->buffer + 12, (char *)texture_data, compressed_size, output_size);
-			texture_format = GPU_TEXTURE_FORMAT_RGBA128;
+			texture_format = GPU_TEXTURE_FORMAT_RGBA64;
 		}
 	}
 	else if (ends_with(format, "hdr")) {
 		int comp;
 		texture_data   = (unsigned char *)stbi_loadf_from_memory(data->buffer, data->length, &width, &height, &comp, 4);
-		texture_format = GPU_TEXTURE_FORMAT_RGBA128;
+		texture_format = GPU_TEXTURE_FORMAT_RGBA64;
+		// F32 to F16
+		float    *f32_data = (float *)texture_data;
+		uint16_t *f16_data = (uint16_t *)texture_data;
+		for (int i = 0; i < width * height * 4; ++i) {
+			f16_data[i] = float_to_half_fast(f32_data[i]);
+		}
 	}
 	else { // jpg, png, ..
 		int comp;
