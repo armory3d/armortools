@@ -158,10 +158,11 @@ kernel void raytracingKernel(
 	texture2d<float, access::read> mytexture0 [[texture(1)]],
 	texture2d<float, access::read> mytexture1 [[texture(2)]],
 	texture2d<float, access::read> mytexture2 [[texture(3)]],
-	texture2d<float, access::read> mytexture_env [[texture(4)]],
+	texture2d<float, access::sample> mytexture_env [[texture(4)]],
 	texture2d<float, access::read> mytexture_sobol [[texture(5)]],
 	texture2d<float, access::read> mytexture_scramble [[texture(6)]],
 	texture2d<float, access::read> mytexture_rank [[texture(7)]],
+	sampler linear_sampler [[sampler(0)]],
 	instance_acceleration_structure scene [[buffer(1)]],
 	device void *indices [[buffer(2)]],
 	device void *vertices [[buffer(3)]]
@@ -224,9 +225,7 @@ kernel void raytracingKernel(
 				#endif
 
 				float2 tex_coord = fract(equirect(ray.direction, constant_buffer.params.y));
-				uint2 size = uint2(mytexture_env.get_width(), mytexture_env.get_height());
-				float3 texenv = mytexture_env.read(uint2(tex_coord * float2(size)), 0).rgb * abs(constant_buffer.params.x);
-				// .sample()
+				float3 texenv = mytexture_env.sample(linear_sampler, tex_coord).rgb * abs(constant_buffer.params.x);
 				payload.color = float4(payload.color.rgb * texenv.rgb, -1);
 			}
 			else {

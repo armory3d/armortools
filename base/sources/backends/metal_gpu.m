@@ -897,6 +897,7 @@ void gpu_raytrace_dispatch_rays() {
 	[compute_encoder setTexture:(__bridge id<MTLTexture>)_texsobol->impl._tex atIndex:5];
 	[compute_encoder setTexture:(__bridge id<MTLTexture>)_texscramble->impl._tex atIndex:6];
 	[compute_encoder setTexture:(__bridge id<MTLTexture>)_texrank->impl._tex atIndex:7];
+	[compute_encoder setSamplerState:linear_sampler atIndex:0];
 
 	for (id<MTLAccelerationStructure> primitive_accel in _primitive_accels) {
 		[compute_encoder useResource:primitive_accel usage:MTLResourceUsageRead];
