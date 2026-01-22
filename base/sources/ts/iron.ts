@@ -115,6 +115,7 @@ declare function buffer_get_u8(b: buffer_t, p: u32): u8;
 declare function buffer_get_i8(b: buffer_t, p: u32): i8;
 declare function buffer_get_u16(b: buffer_t, p: u32): u16;
 declare function buffer_get_i16(b: buffer_t, p: u32): i16;
+declare function buffer_get_f16(b: buffer_t, p: u32): f32;
 declare function buffer_get_u32(b: buffer_t, p: u32): u32;
 declare function buffer_get_i32(b: buffer_t, p: u32): i32;
 declare function buffer_get_f32(b: buffer_t, p: u32): f32;
