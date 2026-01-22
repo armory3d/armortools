@@ -1502,8 +1502,8 @@ void ui_set_scale(float factor) {
 	float font_height              = draw_font_height(current->ops->font, current->font_size);
 	current->font_offset_y         = (UI_ELEMENT_H() - font_height) / 2.0; // Precalculate offsets
 	current->arrow_offset_y        = (UI_ELEMENT_H() - UI_ARROW_SIZE()) / 2.0;
-	current->arrow_offset_x        = current->arrow_offset_y;
-	current->title_offset_x        = (current->arrow_offset_x * 2.0 + UI_ARROW_SIZE()) / UI_SCALE();
+	current->arrow_offset_x        = UI_ARROW_SIZE() * 1.5;
+	current->title_offset_x        = (current->arrow_offset_y * 2.0 + UI_ARROW_SIZE()) / UI_SCALE();
 	current->button_offset_y       = (UI_ELEMENT_H() - UI_BUTTON_H()) / 2.0;
 	current->check_offset_y        = (UI_ELEMENT_H() - UI_CHECK_SIZE()) / 2.0;
 	current->check_offset_x        = current->check_offset_y;
