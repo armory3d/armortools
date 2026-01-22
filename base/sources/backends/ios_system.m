@@ -481,19 +481,25 @@ int iron_window_display() {
 }
 
 void importFile(NSURL *url) {
-	NSArray  *paths      = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-	NSString *folderName = [NSString stringWithUTF8String:ios_title];
-	NSString *filePath   = [[paths objectAtIndex:0] stringByAppendingPathComponent:folderName];
-	if (![[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
-		[[NSFileManager defaultManager] createDirectoryAtPath:filePath withIntermediateDirectories:NO attributes:nil error:nil];
+	NSArray  *paths       = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *folder_name = [NSString stringWithUTF8String:ios_title];
+	NSString *file_path   = [[paths objectAtIndex:0] stringByAppendingPathComponent:folder_name];
+	if (![[NSFileManager defaultManager] fileExistsAtPath:file_path]) {
+		[[NSFileManager defaultManager] createDirectoryAtPath:file_path withIntermediateDirectories:YES attributes:nil error:nil];
 	}
-	NSString *suggestedName = url.path.lastPathComponent;
-	filePath                = [filePath stringByAppendingPathComponent:suggestedName];
-	CFURLRef cfurl          = (__bridge CFURLRef)url;
-	CFURLStartAccessingSecurityScopedResource(cfurl);
-	[[NSFileManager defaultManager] copyItemAtPath:url.path toPath:filePath error:nil];
-	CFURLStopAccessingSecurityScopedResource(cfurl);
-	const char *cpath = [filePath cStringUsingEncoding:NSUTF8StringEncoding];
+	NSString *suggestedName = url.lastPathComponent;
+	file_path               = [file_path stringByAppendingPathComponent:suggestedName];
+	[url startAccessingSecurityScopedResource];
+	NSFileCoordinator *coordinator = [[NSFileCoordinator alloc] initWithFilePresenter:nil];
+	[coordinator coordinateReadingItemAtURL:url options:NSFileCoordinatorReadingWithoutChanges error:nil byAccessor:^(NSURL *new_url) {
+		if ([[NSFileManager defaultManager] fileExistsAtPath:file_path]) {
+			[[NSFileManager defaultManager] removeItemAtPath:file_path error:nil];
+		}
+		[[NSFileManager defaultManager] copyItemAtURL:new_url toURL:[NSURL fileURLWithPath:file_path] error:nil];
+	}];
+
+	[url stopAccessingSecurityScopedResource];
+	const char *cpath = [file_path cStringUsingEncoding:NSUTF8StringEncoding];
 	iron_internal_drop_files_callback(cpath);
 }
 
