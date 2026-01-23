@@ -1,7 +1,7 @@
 
 #[set(everything)]
 const constants: {
-	params: float4; // level, constants.params.y
+	params: float4; // level, samples, alpha, pass
 };
 
 #[set(everything)]
@@ -65,13 +65,13 @@ fun cos_weighted_hemisphere_direction(n: float3, co: float2, seed: float): float
 }
 
 fun prefilter_envmap_frag(input: vert_out): float4 {
-	var color: float4 = float4(0.0, 0.0, 0.0, 1.0);
+	var color: float4 = float4(0.0, 0.0, 0.0, constants.params.z);
 	var n: float3 = reverse_equirect(input.tex);
 
 	//for (var i: int = 0; i < int(constants.params.y); i += 1) {
 	var i: int = 0;
 	while (i < int(constants.params.y)) {
-		var dir: float3 = normalize(lerp3(n, cos_weighted_hemisphere_direction(n, input.tex, float(i)), constants.params.x));
+		var dir: float3 = normalize(lerp3(n, cos_weighted_hemisphere_direction(n, input.tex, float(i + constants.params.w * constants.params.y)), constants.params.x));
 		var sampled: float3 = sample(radiance, sampler_linear, equirect(dir)).rgb;
 		sampled = min3(sampled, float3(10.0, 10.0, 10.0));
 		color.rgb = color.rgb + sampled;

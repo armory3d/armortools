@@ -11,9 +11,11 @@ let import_envmap_mips: gpu_texture_t[]   = null;
 function import_envmap_run(path: string, image: gpu_texture_t) {
 	// Init
 	if (import_envmap_pipeline == null) {
-		import_envmap_pipeline                 = gpu_create_pipeline();
-		import_envmap_pipeline.vertex_shader   = sys_get_shader("prefilter_envmap.vert");
-		import_envmap_pipeline.fragment_shader = sys_get_shader("prefilter_envmap.frag");
+		import_envmap_pipeline                   = gpu_create_pipeline();
+		import_envmap_pipeline.vertex_shader     = sys_get_shader("prefilter_envmap.vert");
+		import_envmap_pipeline.fragment_shader   = sys_get_shader("prefilter_envmap.frag");
+		import_envmap_pipeline.blend_source      = gpu_blend_t.SOURCE_ALPHA;
+		import_envmap_pipeline.blend_destination = gpu_blend_t.ONE;
 		let vs: gpu_vertex_structure_t         = {};
 		gpu_vertex_struct_add(vs, "pos", gpu_vertex_data_t.F32_2X);
 		import_envmap_pipeline.input_layout                      = vs;
@@ -68,22 +70,29 @@ function import_envmap_run(path: string, image: gpu_texture_t) {
 }
 
 function import_envmap_get_radiance_mip(mip: gpu_texture_t, level: i32, radiance: gpu_texture_t) {
-	_gpu_begin(mip);
-	gpu_set_vertex_buffer(const_data_screen_aligned_vb);
-	gpu_set_index_buffer(const_data_screen_aligned_ib);
-	gpu_set_pipeline(import_envmap_pipeline);
-	import_envmap_params.x = (level + 1) / 10;
-	/// if (arm_macos || arm_ios)
-	import_envmap_params.y = 1024 * 2; // Prevent gpu hang
+	/// if arm_metal
+	let pass_count: i32 = 8; // 32;
+	import_envmap_params.y = 512;
 	/// else
+	let pass_count: i32 = 1;
 	import_envmap_params.y = 1024 * 16;
 	/// end
-	gpu_set_float4(import_envmap_params_loc, import_envmap_params.x, import_envmap_params.y, import_envmap_params.z, import_envmap_params.w);
-	gpu_set_texture(import_envmap_radiance_loc, radiance);
-	let noise: gpu_texture_t = data_get_image("bnoise256.k");
-	gpu_set_texture(import_envmap_noise_loc, noise);
-	gpu_draw();
-	gpu_end();
+	import_envmap_params.z = 1.0 / pass_count;
+	import_envmap_params.x = (level + 1) / 10;
+
+	for (let i: i32 = 0; i < pass_count; ++i) {
+		_gpu_begin(mip, null, null, i == 0 ? gpu_clear_t.COLOR : gpu_clear_t.NONE, 0x00000000);
+		gpu_set_vertex_buffer(const_data_screen_aligned_vb);
+		gpu_set_index_buffer(const_data_screen_aligned_ib);
+		gpu_set_pipeline(import_envmap_pipeline);
+		import_envmap_params.w = i;
+		gpu_set_float4(import_envmap_params_loc, import_envmap_params.x, import_envmap_params.y, import_envmap_params.z, import_envmap_params.w);
+		gpu_set_texture(import_envmap_radiance_loc, radiance);
+		let noise: gpu_texture_t = data_get_image("bnoise256.k");
+		gpu_set_texture(import_envmap_noise_loc, noise);
+		gpu_draw();
+		gpu_end();
+	}
 }
 
 function import_envmap_reverse_equirect(x: f32, y: f32): vec4_t {
