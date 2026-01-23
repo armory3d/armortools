@@ -272,13 +272,13 @@ function import_arm_run_project(path: string) {
 			l.paint_subs         = ld.paint_subs;
 
 			gpu_delete_texture(_texpaint);
-
 			if (_texpaint_nor != null) {
 				gpu_delete_texture(_texpaint_nor);
 			}
 			if (_texpaint_pack != null) {
 				gpu_delete_texture(_texpaint_pack);
 			}
+			gc_run();
 		}
 	}
 
