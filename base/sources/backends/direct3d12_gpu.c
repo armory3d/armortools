@@ -221,8 +221,14 @@ void gpu_render_target_init2(gpu_texture_t *render_target, int width, int height
 		window_swapchain->lpVtbl->GetBuffer(window_swapchain, framebuffer_index, &IID_ID3D12Resource, &render_target->impl.image);
 	}
 	else {
-		device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-		                                        &clear_value, &IID_ID3D12Resource, &render_target->impl.image);
+		HRESULT result = device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		                                                         &clear_value, &IID_ID3D12Resource, &render_target->impl.image);
+		if (result != S_OK && gpu_cleanup_pending()) {
+			gpu_execute_and_wait();
+			gpu_cleanup();
+			device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		                                            &clear_value, &IID_ID3D12Resource, &render_target->impl.image);
+		}
 	}
 
 	D3D12_RENDER_TARGET_VIEW_DESC view_desc = {
@@ -845,8 +851,15 @@ void gpu_texture_init_from_bytes(gpu_texture_t *texture, void *data, int width, 
 	    .Flags              = D3D12_RESOURCE_FLAG_NONE,
 	};
 
-	device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, NULL,
-	                                        &IID_ID3D12Resource, &texture->impl.image);
+	HRESULT result = device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, NULL,
+	                                                         &IID_ID3D12Resource, &texture->impl.image);
+
+	if (result != S_OK && gpu_cleanup_pending()) {
+		gpu_execute_and_wait();
+		gpu_cleanup();
+		device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, NULL,
+	                                            &IID_ID3D12Resource, &texture->impl.image);
+	}
 
 	D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint;
 	UINT64                             upload_size;
@@ -991,9 +1004,17 @@ void _gpu_buffer_init(ID3D12Resource **buffer, int size, D3D12_HEAP_TYPE heap_ty
 	    .Flags              = D3D12_RESOURCE_FLAG_NONE,
 	};
 
-	device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc,
-	                                        heap_type == D3D12_HEAP_TYPE_UPLOAD ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COMMON, NULL,
-	                                        &IID_ID3D12Resource, buffer);
+	HRESULT result = device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc,
+	                                                         heap_type == D3D12_HEAP_TYPE_UPLOAD ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COMMON, NULL,
+	                                                         &IID_ID3D12Resource, buffer);
+
+	if (result != S_OK && gpu_cleanup_pending()) {
+		gpu_execute_and_wait();
+		gpu_cleanup();
+		device->lpVtbl->CreateCommittedResource(device, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc,
+	                                            heap_type == D3D12_HEAP_TYPE_UPLOAD ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COMMON, NULL,
+	                                            &IID_ID3D12Resource, buffer);
+	}
 }
 
 void gpu_vertex_buffer_init(gpu_buffer_t *buffer, int count, gpu_vertex_structure_t *structure) {
