@@ -1503,11 +1503,13 @@ class XCodeExporter extends Exporter {
 		this.p('CLANG_WARN_UNREACHABLE_CODE = YES;', 4);
 		this.p('CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;', 4);
 		this.p('CODE_SIGN_IDENTITY = "-";', 4);
-		if (platform === 'ios') {
-			this.p('"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";', 4);
-		}
-		else {
-			this.p('"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";', 4);
+		if (target_options.developmentTeam) {
+			if (platform === 'ios') {
+				this.p('"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";', 4);
+			}
+			else {
+				this.p('"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";', 4);
+			}
 		}
 		this.p('COPY_PHASE_STRIP = NO;', 4);
 		this.p('ENABLE_STRICT_OBJC_MSGSEND = YES;', 4);
@@ -1580,11 +1582,13 @@ class XCodeExporter extends Exporter {
 		this.p('CLANG_WARN_UNREACHABLE_CODE = YES;', 4);
 		this.p('CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;', 4);
 		this.p('CODE_SIGN_IDENTITY = "-";', 4);
-		if (platform === 'ios') {
-			this.p('"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";', 4);
-		}
-		else {
-			this.p('"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";', 4);
+		if (target_options.developmentTeam) {
+			if (platform === 'ios') {
+				this.p('"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";', 4);
+			}
+			else {
+				this.p('"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";', 4);
+			}
 		}
 		this.p('COPY_PHASE_STRIP = YES;', 4);
 		if (platform === 'macos') {
@@ -1695,11 +1699,13 @@ class XCodeExporter extends Exporter {
 		this.p('BUNDLE_VERSION = "' + target_options.version + '";', 4);
 		this.p('BUILD_VERSION = "' + target_options.build + '";', 4);
 		this.p('CODE_SIGN_IDENTITY = "-";', 4);
-		if (platform === 'ios') {
-			this.p('"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";', 4);
-		}
-		else {
-			this.p('"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";', 4);
+		if (target_options.developmentTeam) {
+			if (platform === 'ios') {
+				this.p('"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";', 4);
+			}
+			else {
+				this.p('"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";', 4);
+			}
 		}
 		this.p('PRODUCT_NAME = "$(TARGET_NAME)";', 4);
 		this.p('};', 3);
@@ -1771,11 +1777,13 @@ class XCodeExporter extends Exporter {
 		this.p('BUNDLE_VERSION = "' + target_options.version + '";', 4);
 		this.p('BUILD_VERSION = "' + target_options.build + '";', 4);
 		this.p('CODE_SIGN_IDENTITY = "-";', 4);
-		if (platform === 'ios') {
-			this.p('"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";', 4);
-		}
-		else {
-			this.p('"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";', 4);
+		if (target_options.developmentTeam) {
+			if (platform === 'ios') {
+				this.p('"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";', 4);
+			}
+			else {
+				this.p('"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";', 4);
+			}
 		}
 		this.p('PRODUCT_NAME = "$(TARGET_NAME)";', 4);
 		this.p('};', 3);
