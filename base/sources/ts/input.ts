@@ -147,11 +147,14 @@ function mouse_wheel_listener(delta: f32) {
 }
 
 /// if (arm_android || arm_ios)
+let mouse_pinch_dist: f32     = 0.0;
+let mouse_pinch_total: f32    = 0.0;
+let mouse_pinch_smooth: f32   = 0.0;
+
 function mouse_on_touch_down(index: i32, x: i32, y: i32) {
 	if (index == 1) { // Two fingers down - right mouse button
 		_mouse_buttons_down[0] = false;
 		mouse_down_listener(1, math_floor(mouse_x), math_floor(mouse_y));
-		mouse_pinch_started = true;
 		mouse_pinch_total   = 0.0;
 		mouse_pinch_dist    = 0.0;
 	}
@@ -164,31 +167,35 @@ function mouse_on_touch_down(index: i32, x: i32, y: i32) {
 function mouse_on_touch_up(index: i32, x: i32, y: i32) {
 	if (index == 1) {
 		mouse_up_listener(1, math_floor(mouse_x), math_floor(mouse_y));
+		mouse_pinch_dist     = 0.0;
+		mouse_pinch_total    = 0.0;
+		mouse_pinch_smooth   = 0.0;
 	}
 	else if (index == 2) {
 		mouse_up_listener(2, math_floor(mouse_x), math_floor(mouse_y));
 	}
 }
 
-let mouse_pinch_dist: f32     = 0.0;
-let mouse_pinch_total: f32    = 0.0;
-let mouse_pinch_started: bool = false;
-
 function mouse_on_touch_move(index: i32, x: i32, y: i32) {
 	// Pinch to zoom - mouse wheel
 	if (index == 1) {
-		let last_dist: f32 = mouse_pinch_dist;
-		let dx: f32        = mouse_x - x;
-		let dy: f32        = mouse_y - y;
-		mouse_pinch_dist   = math_sqrt(dx * dx + dy * dy);
-		mouse_pinch_total += last_dist != 0 ? last_dist - mouse_pinch_dist : 0;
-		if (!mouse_pinch_started) {
-			mouse_wheel_delta = mouse_pinch_total / 10.0;
-			if (mouse_wheel_delta != 0.0) {
-				mouse_pinch_total = 0.0;
-			}
+		let dx: f32 = mouse_x - x;
+		let dy: f32 = mouse_y - y;
+		let new_distance: f32 = math_sqrt(dx * dx + dy * dy);
+		if (mouse_pinch_dist == 0.0) {
+			mouse_pinch_dist = new_distance;
+			return;
 		}
-		mouse_pinch_started = false;
+		let delta: f32 = mouse_pinch_dist - new_distance;
+		mouse_pinch_dist = new_distance;
+		let smoothing_factor: f32 = 0.3;
+		mouse_pinch_smooth = mouse_pinch_smooth * smoothing_factor + delta * (1.0 - smoothing_factor);
+		mouse_pinch_total += mouse_pinch_smooth;
+		let deadzone: f32 = 2.0;
+		if (fabs(mouse_pinch_total) > deadzone) {
+			mouse_wheel_delta = (mouse_pinch_total / 40.0);
+			mouse_pinch_total = 0.0;
+		}
 	}
 }
 /// end

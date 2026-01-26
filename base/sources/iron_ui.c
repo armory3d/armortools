@@ -2521,7 +2521,7 @@ void ui_key_press(ui_t *ui, unsigned key_char) {
 #if defined(IRON_ANDROID) || defined(IRON_IOS)
 static float ui_pinch_distance = 0.0;
 static float ui_pinch_total    = 0.0;
-static bool  ui_pinch_started  = false;
+static float ui_pinch_smooth   = 0.0;
 
 void ui_touch_down(ui_t *ui, int index, int x, int y) {
 	// Reset movement delta on touch start
@@ -2535,7 +2535,6 @@ void ui_touch_down(ui_t *ui, int index, int x, int y) {
 	else if (index == 1) {
 		ui->input_down = false;
 		ui_mouse_down(ui, 1, ui->input_x, ui->input_y);
-		ui_pinch_started  = true;
 		ui_pinch_total    = 0.0;
 		ui_pinch_distance = 0.0;
 	}
@@ -2549,6 +2548,9 @@ void ui_touch_down(ui_t *ui, int index, int x, int y) {
 void ui_touch_up(ui_t *ui, int index, int x, int y) {
 	if (index == 1) {
 		ui_mouse_up(ui, 1, ui->input_x, ui->input_y);
+		ui_pinch_distance = 0.0;
+		ui_pinch_total    = 0.0;
+		ui_pinch_smooth   = 0.0;
 	}
 }
 
@@ -2559,18 +2561,23 @@ void ui_touch_move(ui_t *ui, int index, int x, int y) {
 
 	// Pinch to zoom - mouse wheel
 	if (index == 1) {
-		float last_distance = ui_pinch_distance;
-		float dx            = ui->input_x - x;
-		float dy            = ui->input_y - y;
-		ui_pinch_distance   = sqrtf(dx * dx + dy * dy);
-		ui_pinch_total += last_distance != 0 ? last_distance - ui_pinch_distance : 0;
-		if (!ui_pinch_started) {
-			ui->input_wheel_delta = (ui_pinch_total / 50) * ui_touch_speed;
-			if (ui->input_wheel_delta != 0) {
-				ui_pinch_total = 0.0;
-			}
+		float dx = ui->input_x - x;
+		float dy = ui->input_y - y;
+		float new_distance = sqrtf(dx * dx + dy * dy);
+		if (ui_pinch_distance == 0.0) {
+			ui_pinch_distance = new_distance;
+			return;
 		}
-		ui_pinch_started = false;
+		float delta = ui_pinch_distance - new_distance;
+		ui_pinch_distance = new_distance;
+		float smoothing_factor = 0.3;
+		ui_pinch_smooth = ui_pinch_smooth * smoothing_factor + delta * (1.0 - smoothing_factor);
+		ui_pinch_total += ui_pinch_smooth;
+		float deadzone = 2.0;
+		if (fabs(ui_pinch_total) > deadzone) {
+			ui->input_wheel_delta = (ui_pinch_total / 50.0) * ui_touch_speed;
+			ui_pinch_total = 0.0;
+		}
 	}
 }
 #endif
