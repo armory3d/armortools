@@ -1173,8 +1173,9 @@ class XCodeExporter extends Exporter {
 		for (let lib of project.getLibs()) {
 			frameworks.push(new Framework(lib));
 		}
+
 		let target_options =
-		    {bundle : 'org.armory3d.' + project.getName().toLowerCase(), version : "1.0", build : "1", organizationName : "Armory3D", developmentTeam : "AUW6AHHL4Q"};
+		    {bundle : 'org.armory3d.' + project.getName().toLowerCase(), version : "1.0", build : "1", organizationName : "Armory3D", developmentTeam : from.startsWith("/Users/lubos/") ? "AUW6AHHL4Q" : ""};
 		if (project.target_options && project.target_options.ios) {
 			let userOptions = project.target_options.ios;
 			if (userOptions.version)
@@ -1634,7 +1635,9 @@ class XCodeExporter extends Exporter {
 		this.p('ARCHS = arm64;', 4);
 		this.p('ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;', 4);
 		this.p('CODE_SIGN_STYLE = Automatic;', 4);
-		this.p('DEVELOPMENT_TEAM = ' + target_options.developmentTeam + ';', 4);
+		if (target_options.developmentTeam) {
+			this.p('DEVELOPMENT_TEAM = ' + target_options.developmentTeam + ';', 4);
+		}
 		if (platform === 'macos') {
 			this.p('COMBINE_HIDPI_IMAGES = YES;', 4);
 		}
@@ -1708,7 +1711,9 @@ class XCodeExporter extends Exporter {
 		this.p('ARCHS = arm64;', 4);
 		this.p('ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;', 4);
 		this.p('CODE_SIGN_STYLE = Automatic;', 4);
-		this.p('DEVELOPMENT_TEAM = ' + target_options.developmentTeam + ';', 4);
+		if (target_options.developmentTeam) {
+			this.p('DEVELOPMENT_TEAM = ' + target_options.developmentTeam + ';', 4);
+		}
 		if (platform === 'macos') {
 			this.p('COMBINE_HIDPI_IMAGES = YES;', 4);
 		}
