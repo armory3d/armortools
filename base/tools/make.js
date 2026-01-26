@@ -1174,7 +1174,7 @@ class XCodeExporter extends Exporter {
 			frameworks.push(new Framework(lib));
 		}
 		let target_options =
-		    {bundle : 'org.armory3d.' + project.getName().toLowerCase(), version : "1.0", build : "1", organizationName : "Armory3D", developmentTeam : ""};
+		    {bundle : 'org.armory3d.' + project.getName().toLowerCase(), version : "1.0", build : "1", organizationName : "Armory3D", developmentTeam : "AUW6AHHL4Q"};
 		if (project.target_options && project.target_options.ios) {
 			let userOptions = project.target_options.ios;
 			if (userOptions.version)
@@ -1423,6 +1423,7 @@ class XCodeExporter extends Exporter {
 		this.p('CreatedOnToolsVersion = 6.1.1;', 6);
 		if (target_options.developmentTeam) {
 			this.p('DevelopmentTeam = ' + target_options.developmentTeam + ';', 6);
+			this.p('ProvisioningStyle = Automatic;', 6);
 		}
 		this.p('};', 5);
 		this.p('};', 4);
@@ -1500,12 +1501,12 @@ class XCodeExporter extends Exporter {
 		this.p('CLANG_WARN_SUSPICIOUS_MOVE = YES;', 4);
 		this.p('CLANG_WARN_UNREACHABLE_CODE = YES;', 4);
 		this.p('CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;', 4);
+		this.p('CODE_SIGN_IDENTITY = "-";', 4);
 		if (platform === 'ios') {
-			this.p('"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";', 4);
+			this.p('"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";', 4);
 		}
 		else {
-			this.p('CODE_SIGN_IDENTITY = "-";', 4);
-			// this.p('"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";', 4);
+			this.p('"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";', 4);
 		}
 		this.p('COPY_PHASE_STRIP = NO;', 4);
 		this.p('ENABLE_STRICT_OBJC_MSGSEND = YES;', 4);
@@ -1577,12 +1578,12 @@ class XCodeExporter extends Exporter {
 		this.p('CLANG_WARN_SUSPICIOUS_MOVE = YES;', 4);
 		this.p('CLANG_WARN_UNREACHABLE_CODE = YES;', 4);
 		this.p('CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;', 4);
+		this.p('CODE_SIGN_IDENTITY = "-";', 4);
 		if (platform === 'ios') {
-			this.p('"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";', 4);
+			this.p('"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";', 4);
 		}
 		else {
-			this.p('CODE_SIGN_IDENTITY = "-";', 4);
-			// this.p('"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";', 4);
+			this.p('"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";', 4);
 		}
 		this.p('COPY_PHASE_STRIP = YES;', 4);
 		if (platform === 'macos') {
@@ -1633,6 +1634,7 @@ class XCodeExporter extends Exporter {
 		this.p('ARCHS = arm64;', 4);
 		this.p('ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;', 4);
 		this.p('CODE_SIGN_STYLE = Automatic;', 4);
+		this.p('DEVELOPMENT_TEAM = ' + target_options.developmentTeam + ';', 4);
 		if (platform === 'macos') {
 			this.p('COMBINE_HIDPI_IMAGES = YES;', 4);
 		}
@@ -1660,6 +1662,7 @@ class XCodeExporter extends Exporter {
 		this.p(');', 4);
 		this.p('INFOPLIST_EXPAND_BUILD_SETTINGS = "YES";', 4);
 		this.p('INFOPLIST_FILE = "' + path_resolve(from, plistname) + '";', 4);
+		this.p('INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.graphics-design";');
 		this.p('LD_RUNPATH_SEARCH_PATHS = (', 4);
 		this.p('"$(inherited)",', 5);
 		if (platform === 'ios') {
@@ -1689,6 +1692,12 @@ class XCodeExporter extends Exporter {
 		this.p('BUNDLE_VERSION = "' + target_options.version + '";', 4);
 		this.p('BUILD_VERSION = "' + target_options.build + '";', 4);
 		this.p('CODE_SIGN_IDENTITY = "-";', 4);
+		if (platform === 'ios') {
+			this.p('"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";', 4);
+		}
+		else {
+			this.p('"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";', 4);
+		}
 		this.p('PRODUCT_NAME = "$(TARGET_NAME)";', 4);
 		this.p('};', 3);
 		this.p('name = Debug;', 3);
@@ -1699,6 +1708,7 @@ class XCodeExporter extends Exporter {
 		this.p('ARCHS = arm64;', 4);
 		this.p('ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;', 4);
 		this.p('CODE_SIGN_STYLE = Automatic;', 4);
+		this.p('DEVELOPMENT_TEAM = ' + target_options.developmentTeam + ';', 4);
 		if (platform === 'macos') {
 			this.p('COMBINE_HIDPI_IMAGES = YES;', 4);
 		}
@@ -1726,6 +1736,7 @@ class XCodeExporter extends Exporter {
 		this.p(');', 4);
 		this.p('INFOPLIST_EXPAND_BUILD_SETTINGS = "YES";', 4);
 		this.p('INFOPLIST_FILE = "' + path_resolve(from, plistname) + '";', 4);
+		this.p('INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.graphics-design";');
 		this.p('LD_RUNPATH_SEARCH_PATHS = (', 4);
 		this.p('"$(inherited)",', 5);
 		if (platform === 'ios') {
@@ -1755,6 +1766,12 @@ class XCodeExporter extends Exporter {
 		this.p('BUNDLE_VERSION = "' + target_options.version + '";', 4);
 		this.p('BUILD_VERSION = "' + target_options.build + '";', 4);
 		this.p('CODE_SIGN_IDENTITY = "-";', 4);
+		if (platform === 'ios') {
+			this.p('"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";', 4);
+		}
+		else {
+			this.p('"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";', 4);
+		}
 		this.p('PRODUCT_NAME = "$(TARGET_NAME)";', 4);
 		this.p('};', 3);
 		this.p('name = Release;', 3);
