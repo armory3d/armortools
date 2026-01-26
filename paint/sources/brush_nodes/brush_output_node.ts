@@ -98,6 +98,12 @@ function brush_output_node_run(self: brush_output_node_t, from: i32) {
 		let w: i32 = ui_toolbar_x() + ui_toolbar_w();
 		left += w / sys_w();
 		top += w / sys_h();
+
+		/// if arm_ios
+		if (config_is_iphone()) {
+			top += w / sys_h();
+		}
+		/// end
 	}
 
 	// First time init

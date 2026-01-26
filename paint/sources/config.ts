@@ -193,9 +193,15 @@ function config_init() {
 		config_raw.pressure_sensitivity = 2.0;
 		/// end
 		config_raw.camera_fov            = 0.69;
+		/// if (arm_android || arm_ios)
+		config_raw.camera_zoom_speed     = 0.5;
+		config_raw.camera_pan_speed      = 0.5;
+		config_raw.camera_rotation_speed = 0.5;
+		/// else
 		config_raw.camera_zoom_speed     = 1.0;
 		config_raw.camera_pan_speed      = 1.0;
 		config_raw.camera_rotation_speed = 1.0;
+		/// end
 		config_raw.camera_upside_down    = false;
 		config_raw.zoom_direction        = zoom_direction_t.VERTICAL;
 		config_raw.displace_strength     = 0.0;
