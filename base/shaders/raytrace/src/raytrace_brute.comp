@@ -1,0 +1,461 @@
+#version 460
+#extension GL_EXT_ray_query : require
+#extension GL_EXT_ray_tracing : require
+#extension GL_EXT_shader_explicit_arithmetic_types : require
+
+#ifdef _FULL
+#define _EMISSION
+#define _SUBSURFACE
+#define _TRANSLUCENCY
+#define _TRANSPARENCY
+#define _ROULETTE
+// #define _FRESNEL
+#endif
+// #define _RENDER
+
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+layout(binding = 10, set = 0, rgba16f) uniform image2D render_target;
+layout(binding = 0, set = 0) uniform accelerationStructureEXT scene;
+layout(binding = 1, set = 0) readonly buffer IndicesBuffer { uint indices[]; };
+layout(binding = 2, set = 0) readonly buffer VerticesBuffer {
+    uint vertex_data[];
+};
+
+layout(binding = 11, set = 0) uniform RayGenConstantBuffer {
+    vec4 eye; // xyz, frame
+    mat4 inv_vp;
+    vec4 params; // envstr, envangle, uvscale, empty
+} constant_buffer;
+
+layout(binding = 3, set = 0) uniform texture2D mytexture0;
+layout(binding = 4, set = 0) uniform texture2D mytexture1;
+layout(binding = 5, set = 0) uniform texture2D mytexture2;
+layout(binding = 6, set = 0) uniform texture2D mytexture_env;
+layout(binding = 7, set = 0) uniform texture2D mytexture_sobol;
+layout(binding = 8, set = 0) uniform texture2D mytexture_scramble;
+layout(binding = 9, set = 0) uniform texture2D mytexture_rank;
+layout(binding = 12, set = 0) uniform sampler sampler_linear;
+
+const int SAMPLES = 64;
+#ifdef _TRANSLUCENCY
+const int DEPTH = 16;
+#else
+const int DEPTH = 3;
+#endif
+
+const float PI = 3.1415926535;
+const float PI2 = 6.283185307;
+
+uint thread_seed = 0;
+
+#ifdef _TRANSPARENCY
+const int DEPTH_TRANSPARENT = 16;
+#endif
+
+#ifdef _ROULETTE
+const int rr_start = 2;
+const float rr_probability = 0.5;
+#endif
+
+struct Vertex {
+    uint posxy;
+    uint poszw;
+    uint nor;
+    uint tex;
+};
+
+struct RayPayload {
+    vec4 color; // rgb, frame
+    vec3 ray_origin;
+    vec3 ray_dir;
+};
+
+////
+float rand(int pixel_i, int pixel_j, int sample_index, int sample_dimension, int frame) {
+    pixel_i += frame * 9;
+    pixel_j += frame * 11;
+    pixel_i = pixel_i & 127;
+    pixel_j = pixel_j & 127;
+    sample_index = sample_index & 255;
+    sample_dimension = sample_dimension & 255;
+    int i = sample_dimension + (pixel_i + pixel_j * 128) * 8;
+    int ranked_sample_index = sample_index ^ int(texelFetch(sampler2D(mytexture_rank, sampler_linear),
+        ivec2(i % 128, i / 128), 0).r * 255.0);
+    i = sample_dimension + ranked_sample_index * 256;
+    int value = int(texelFetch(sampler2D(mytexture_sobol, sampler_linear),
+        ivec2(i % 256, i / 256), 0).r * 255.0);
+    i = (sample_dimension % 8) + (pixel_i + pixel_j * 128) * 8;
+    value = value ^ int(texelFetch(sampler2D(mytexture_scramble, sampler_linear),
+        ivec2(i % 128, i / 128), 0).r * 255.0);
+    float v = (0.5 + float(value)) / 256.0;
+    return v;
+}
+
+vec2 s16_to_f32(uint val) {
+    int a = int(val << 16) >> 16;
+    int b = int(val & 0xffff0000u) >> 16;
+    return vec2(float(a), float(b)) / 32767.0;
+}
+
+vec3 unpack_normal(uint nor_xy, uint posz_norz) {
+    vec2 nor_xy_unpacked = s16_to_f32(nor_xy);
+    float nor_z = s16_to_f32(posz_norz).y;
+    return vec3(nor_xy_unpacked.x, nor_xy_unpacked.y, nor_z);
+}
+
+void create_basis(vec3 normal, out vec3 tangent, out vec3 binormal) {
+    vec3 v = cross(normal, vec3(0.0, 0.0, 1.0));
+    if (dot(v, v) > 0.0001) {
+        tangent = normalize(v);
+    }
+    else {
+        v = cross(normal, vec3(0.0, 1.0, 0.0));
+        tangent = normalize(v);
+    }
+    binormal = cross(tangent, normal);
+}
+
+void generate_camera_ray(vec2 screen_pos, out vec3 ray_origin, out vec3 ray_dir, vec3 eye, mat4 inv_vp) {
+    screen_pos.y = -screen_pos.y;
+    vec4 world = inv_vp * vec4(screen_pos, 0.0, 1.0);
+    world.xyz /= world.w;
+    ray_origin = eye;
+    ray_dir = normalize(world.xyz - ray_origin);
+}
+
+vec2 equirect(vec3 normal, float angle) {
+    float phi = acos(normal.z);
+    float theta = atan(-normal.y, normal.x) + PI + angle;
+    return vec2(theta / PI2, phi / PI);
+}
+
+vec3 cos_weighted_hemisphere_direction(vec3 n, uint sample_idx, uint seed_val, int frame) {
+    float f0 = rand(int(gl_GlobalInvocationID.x), int(gl_GlobalInvocationID.y),
+                    int(sample_idx), int(seed_val), frame);
+    float f1 = rand(int(gl_GlobalInvocationID.x), int(gl_GlobalInvocationID.y),
+                    int(sample_idx), int(seed_val + 1u), frame);
+    float z = f0 * 2.0 - 1.0;
+    float a = f1 * PI2;
+    float r = sqrt(1.0 - z * z);
+    float x = r * cos(a);
+    float y = r * sin(a);
+    return normalize(n + vec3(x, y, z));
+}
+
+vec3 surface_albedo(vec3 base_color, float metalness) {
+    return mix(base_color, vec3(0.0), metalness);
+}
+
+vec3 surface_specular(vec3 base_color, float metalness) {
+    return mix(vec3(0.04), base_color, metalness);
+}
+
+float fresnel(vec3 normal, vec3 incident) {
+    return mix(0.5, 1.0, pow(1.0 + dot(normal, incident), 5.0));
+}
+
+Vertex get_vertex(uint index) {
+    uint base = index * 4u;
+    Vertex v;
+    v.posxy = vertex_data[base + 0u];
+    v.poszw = vertex_data[base + 1u];
+    v.nor = vertex_data[base + 2u];
+    v.tex = vertex_data[base + 3u];
+    return v;
+}
+////
+
+bool process_hit(rayQueryEXT query, inout RayPayload payload, uvec2 pixel_coord, int sample_index) {
+    uint triangle_index = rayQueryGetIntersectionPrimitiveIndexEXT(query, true);
+    uint instance_id = rayQueryGetIntersectionInstanceIdEXT(query, true);
+
+    uint base_index = triangle_index * 3u;
+
+    #ifdef _FORGE
+    base_index += instance_id;
+    #endif
+
+    uvec3 indices_sample = uvec3(
+        indices[base_index + 0u],
+        indices[base_index + 1u],
+        indices[base_index + 2u]
+    );
+
+    vec2 bary = rayQueryGetIntersectionBarycentricsEXT(query, true);
+    vec3 barycentrics = vec3(1.0 - bary.x - bary.y, bary.x, bary.y);
+
+    Vertex v0 = get_vertex(indices_sample[0]);
+    Vertex v1 = get_vertex(indices_sample[1]);
+    Vertex v2 = get_vertex(indices_sample[2]);
+
+    vec2 vertex_uvs[3];
+    vertex_uvs[0] = s16_to_f32(v0.tex);
+    vertex_uvs[1] = s16_to_f32(v1.tex);
+    vertex_uvs[2] = s16_to_f32(v2.tex);
+
+    vec2 tex_coord = (vertex_uvs[0] * barycentrics.x +
+                      vertex_uvs[1] * barycentrics.y +
+                      vertex_uvs[2] * barycentrics.z) * constant_buffer.params.z;
+
+    ivec2 size = textureSize(sampler2D(mytexture0, sampler_linear), 0);
+    ivec2 utex_coord = ivec2(fract(tex_coord) * vec2(size));
+    vec4 texpaint0 = texelFetch(sampler2D(mytexture0, sampler_linear), utex_coord, 0);
+
+    #ifdef _TRANSPARENCY
+    if (texpaint0.a <= 0.01) {
+        payload.color.a = -2.0;
+        return false;
+    }
+    #endif
+
+    vec3 vertex_normals[3];
+    vertex_normals[0] = unpack_normal(v0.nor, v0.poszw);
+    vertex_normals[1] = unpack_normal(v1.nor, v1.poszw);
+    vertex_normals[2] = unpack_normal(v2.nor, v2.poszw);
+
+    vec3 n = normalize(vertex_normals[0] * barycentrics.x +
+                       vertex_normals[1] * barycentrics.y +
+                       vertex_normals[2] * barycentrics.z);
+
+    #ifdef _FORGE
+    mat4x3 obj_to_world = rayQueryGetIntersectionObjectToWorldEXT(query, true);
+    n = normalize(mat3(obj_to_world) * n);
+    #endif
+
+    size = textureSize(sampler2D(mytexture1, sampler_linear), 0);
+    utex_coord = ivec2(fract(tex_coord) * vec2(size));
+    vec4 texpaint1 = texelFetch(sampler2D(mytexture1, sampler_linear), utex_coord, 0);
+
+    size = textureSize(sampler2D(mytexture2, sampler_linear), 0);
+    utex_coord = ivec2(fract(tex_coord) * vec2(size));
+    vec4 texpaint2 = texelFetch(sampler2D(mytexture2, sampler_linear), utex_coord, 0);
+
+    vec3 texcolor = pow(texpaint0.rgb, vec3(2.2));
+
+    vec3 ray_dir = rayQueryGetWorldRayDirectionEXT(query);
+    float ray_t = rayQueryGetIntersectionTEXT(query, true);
+
+    #ifdef _TRANSLUCENCY
+    bool front_face = rayQueryGetIntersectionFrontFaceEXT(query, true);
+    if (!front_face) {
+        vec3 absorption = pow(max(texcolor, vec3(0.001)), vec3(ray_t * texpaint0.a));
+        payload.color.rgb *= absorption;
+    }
+    #endif
+
+    vec3 tangent, binormal;
+    create_basis(n, tangent, binormal);
+
+    texpaint1.rgb = normalize(texpaint1.rgb * 2.0 - 1.0);
+    texpaint1.g = -texpaint1.g;
+    n = mat3(tangent, binormal, n) * texpaint1.rgb;
+
+    uint bounce_seed = 0;
+
+    float f = rand(int(pixel_coord.x), int(pixel_coord.y), int(payload.color.a),
+                   int(bounce_seed), int(constant_buffer.eye.w));
+    bounce_seed += 1u;
+
+    #ifdef _TRANSLUCENCY
+    if (f > texpaint0.a) {
+        float roughness = texpaint2.g;
+        vec3 scatter_dir = cos_weighted_hemisphere_direction(ray_dir, uint(payload.color.a),
+                                                            bounce_seed, int(constant_buffer.eye.w));
+        payload.ray_dir = normalize(mix(ray_dir, scatter_dir, roughness * roughness * 0.5));
+        payload.ray_origin = rayQueryGetWorldRayOriginEXT(query) + ray_dir * ray_t +
+                            payload.ray_dir * 0.0001;
+        return true;
+    }
+
+    f = rand(int(pixel_coord.x), int(pixel_coord.y), int(payload.color.a),
+             int(bounce_seed), int(constant_buffer.eye.w));
+    bounce_seed += 1u;
+    #endif
+
+    vec3 diffuse_dir = cos_weighted_hemisphere_direction(n, uint(payload.color.a),
+                                                         bounce_seed, int(constant_buffer.eye.w));
+
+    #ifdef _FRESNEL
+    float specular_chance = fresnel(n, ray_dir);
+    #else
+    const float specular_chance = 0.5;
+    #endif
+
+    if (f < specular_chance) {
+        vec3 specular_dir = reflect(ray_dir, n);
+        payload.ray_dir = mix(specular_dir, diffuse_dir, texpaint2.g * texpaint2.g);
+        vec3 specular = surface_specular(texcolor, texpaint2.b);
+        payload.color.xyz *= specular;
+
+        #ifdef _FRESNEL
+        payload.color.xyz /= specular_chance;
+        #endif
+    }
+    else {
+        payload.ray_dir = diffuse_dir;
+        payload.color.xyz *= surface_albedo(texcolor, texpaint2.b);
+        #ifdef _FRESNEL
+        payload.color.xyz /= 1.0 - specular_chance;
+        #endif
+    }
+
+    #ifdef _FRESNEL
+    payload.color.xyz *= 0.5;
+    #endif
+
+    payload.ray_origin = rayQueryGetWorldRayOriginEXT(query) + ray_dir * ray_t +
+                        payload.ray_dir * 0.0001;
+
+    #ifdef _EMISSION
+    if (int(texpaint1.a * 255.0) % 3 == 1) {
+        payload.color.xyz *= 100.0;
+        payload.color.a = -3.0;
+    }
+    #endif
+
+    #ifdef _SUBSURFACE
+    if (int(texpaint1.a * 255.0) % 3 == 2) {
+        float d = min(1.0 / min(ray_t * 2.0, 1.0) / 10.0, 0.5);
+        payload.color.xyz += payload.color.xyz * d;
+        if (f < 0.5) {
+            payload.ray_origin += ray_dir * f * 0.001;
+        }
+    }
+    #endif
+
+    return true;
+}
+
+void main() {
+    uvec2 pixel_coord = gl_GlobalInvocationID.xy;
+
+    ivec2 dimensions = imageSize(render_target);
+
+    if (pixel_coord.x >= uint(dimensions.x) || pixel_coord.y >= uint(dimensions.y)) {
+        return;
+    }
+
+    thread_seed = 0;
+
+    vec3 accum = vec3(0.0);
+
+    for (int j = 0; j < SAMPLES; ++j) {
+        // AA
+        vec2 xy = vec2(pixel_coord) + 0.5;
+        xy.x += rand(int(pixel_coord.x), int(pixel_coord.y), j, int(thread_seed),
+                    int(constant_buffer.eye.w));
+        thread_seed += 1u;
+        xy.y += rand(int(pixel_coord.x), int(pixel_coord.y), j, int(thread_seed),
+                    int(constant_buffer.eye.w));
+
+        vec2 screen_pos = xy / vec2(dimensions) * 2.0 - 1.0;
+
+        vec3 ray_origin;
+        vec3 ray_dir;
+        generate_camera_ray(screen_pos, ray_origin, ray_dir,
+                          constant_buffer.eye.xyz, constant_buffer.inv_vp);
+
+        RayPayload payload;
+        payload.color = vec4(1.0, 1.0, 1.0, float(j));
+
+        #ifdef _TRANSPARENCY
+        int transparent_hits = 0;
+        #endif
+
+        for (int i = 0; i < DEPTH; ++i) {
+            #ifdef _ROULETTE
+            float rr_factor = 1.0;
+            if (i >= rr_start) {
+                float f = rand(int(pixel_coord.x), int(pixel_coord.y), j, int(thread_seed),
+                              int(constant_buffer.eye.w));
+                if (f <= rr_probability) {
+                    break;
+                }
+                rr_factor = 1.0 / (1.0 - rr_probability);
+            }
+            #endif
+
+            rayQueryEXT query;
+            rayQueryInitializeEXT(query, scene,
+                gl_RayFlagsOpaqueEXT,
+                0xFF,
+                ray_origin,
+                0.0001,
+                ray_dir,
+                100.0);
+
+            while(rayQueryProceedEXT(query)) {}
+
+            if (rayQueryGetIntersectionTypeEXT(query, true) == gl_RayQueryCommittedIntersectionTriangleEXT) {
+                payload.ray_origin = ray_origin;
+                payload.ray_dir = ray_dir;
+
+                if (process_hit(query, payload, pixel_coord, j)) {
+                    #ifdef _EMISSION
+                    if (payload.color.a == -3.0) {
+                        accum += payload.color.rgb;
+                        break;
+                    }
+                    #endif
+
+                    #ifdef _TRANSPARENCY
+                    if (payload.color.a == -2.0 && transparent_hits < DEPTH_TRANSPARENT) {
+                        payload.color.a = float(j);
+                        transparent_hits++;
+                        i--;
+                        ray_origin = payload.ray_origin;
+                        ray_dir = payload.ray_dir;
+                        continue;
+                    }
+                    #endif
+
+                    ray_origin = payload.ray_origin;
+                    ray_dir = payload.ray_dir;
+
+                    #ifdef _ROULETTE
+                    payload.color.rgb *= rr_factor;
+                    #endif
+                }
+            }
+            else {
+                // Miss
+                #ifdef _EMISSION
+                if (payload.color.a == -3.0) {
+                    accum += payload.color.rgb;
+                    break;
+                }
+                #endif
+
+                if (i == 0 && constant_buffer.params.x < 0.0) {
+                    payload.color.rgb = vec3(0.032);
+                }
+                else {
+                    vec2 tex_coord = equirect(ray_dir, constant_buffer.params.y);
+                    vec3 texenv = texture(sampler2D(mytexture_env, sampler_linear),
+                                        tex_coord).rgb;
+                    texenv *= abs(constant_buffer.params.x);
+                    payload.color.rgb *= texenv.rgb;
+                }
+
+                accum += clamp(payload.color.rgb, 0.0, 8.0);
+                break;
+            }
+        }
+    }
+
+    vec3 color = imageLoad(render_target, ivec2(pixel_coord)).xyz;
+    accum = accum / float(SAMPLES);
+
+    #ifdef _RENDER
+    float a = 1.0 / (constant_buffer.eye.w + 1.0);
+    float b = 1.0 - a;
+    color = color * b + accum * a;
+    imageStore(render_target, ivec2(pixel_coord), vec4(color, 1.0));
+    #else
+    if (constant_buffer.eye.w == 0.0) {
+        color = accum;
+    }
+    imageStore(render_target, ivec2(pixel_coord), vec4(mix(color, accum, 1.0 / 4.0), 1.0));
+    #endif
+}
