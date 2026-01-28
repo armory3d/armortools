@@ -71,7 +71,7 @@ fun prefilter_envmap_frag(input: vert_out): float4 {
 	//for (var i: int = 0; i < int(constants.params.y); i += 1) {
 	var i: int = 0;
 	while (i < int(constants.params.y)) {
-		var dir: float3 = normalize(lerp3(n, cos_weighted_hemisphere_direction(n, input.tex, float(i + constants.params.w * constants.params.y)), constants.params.x));
+		var dir: float3 = normalize(lerp3(n, cos_weighted_hemisphere_direction(n, input.tex, float(i) + constants.params.w * constants.params.y), constants.params.x));
 		var sampled: float3 = sample(radiance, sampler_linear, equirect(dir)).rgb;
 		sampled = min3(sampled, float3(10.0, 10.0, 10.0));
 		color.rgb = color.rgb + sampled;

@@ -263,7 +263,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 
 			if (slot_layer_get_opacity(l) < 1) {
 				let opac: f32 = slot_layer_get_opacity(l);
-				node_shader_write_frag(kong, "texpaint_opac *= " + opac + ";");
+				node_shader_write_frag(kong, "texpaint_opac *= float(" + opac + ");");
 			}
 
 			if (l.paint_base) {
