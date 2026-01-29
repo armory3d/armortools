@@ -170,10 +170,21 @@ char *string_array_join(any_array_t *a, char *separator) {
 }
 
 char *string_replace_all(char *s, char *search, char *replace) {
-	char  *buffer      = string_alloc(1024);
-	char  *buffer_pos  = buffer;
 	size_t search_len  = strlen(search);
 	size_t replace_len = strlen(replace);
+	size_t buffer_size = strlen(s) + 1;
+	if (replace_len > search_len) {
+		char  *tmp   = s;
+		size_t count = 0;
+		while ((tmp = strstr(tmp, search)) != NULL) {
+			count++;
+			tmp += search_len;
+		}
+		buffer_size += count * (replace_len - search_len);
+	}
+
+	char *buffer     = string_alloc(buffer_size);
+	char *buffer_pos = buffer;
 	while (1) {
 		char *p = strstr(s, search);
 		if (p == NULL) {
