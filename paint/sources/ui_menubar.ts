@@ -148,6 +148,11 @@ function ui_menubar_render_ui() {
 		}
 		else {
 			let categories: string[] = [ tr("File"), tr("Edit"), tr("Viewport"), tr("Mode"), tr("Camera"), tr("Help") ];
+
+			if (config_raw.experimental) {
+				array_push(categories, tr("Workspace"));
+			}
+
 			for (let i: i32 = 0; i < categories.length; ++i) {
 				if (ui_menubar_button(categories[i]) || (ui_menu_show && ui_menu_commands == ui_menubar_draw_category_items && ui.is_hovered)) {
 					ui_menubar_show_menu(i);
@@ -690,6 +695,21 @@ function ui_menubar_draw_category_items() {
 					ui_box_hide();
 				}
 			}, 400, 320, null, true, tr("About"));
+		}
+	}
+	else if (ui_menubar_category == menubar_category_t.WORKSPACE) {
+		let workspace_handle: ui_handle_t = ui_handle(__ID__);
+		workspace_handle.i                = context_raw.workspace;
+		let modes: string[]          = [
+            tr("Paint 3D"), tr("Paint 2D"), tr("Sculpt")
+		];
+
+		for (let i: i32 = 0; i < modes.length; ++i) {
+			ui_radio(workspace_handle, i, modes[i]);
+		}
+
+		if (workspace_handle.changed) {
+			context_raw.workspace = workspace_handle.i;
 		}
 	}
 }

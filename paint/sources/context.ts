@@ -35,6 +35,7 @@ type context_t = {
 	split_by?: split_type_t;
 	select_time?: f32;
 	viewport_mode?: viewport_mode_t;
+	workspace?: workspace_t;
 	render_mode?: render_mode_t;
 	viewport_shader?: any; // JSValue * -> (ns: node_shader_t)=>void;
 	hscale_was_changed?: bool;

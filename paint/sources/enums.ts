@@ -60,6 +60,12 @@ enum viewport_mode_t {
 	PATH_TRACE    = 15,
 }
 
+enum workspace_t {
+	PAINT_3D = 0,
+	PAINT_2D = 1,
+	SCULPT   = 2,
+}
+
 enum channel_type_t {
 	BASE_COLOR = 0,
 	OCCLUSION  = 1,
@@ -163,12 +169,13 @@ enum mesh_format_t {
 }
 
 enum menubar_category_t {
-	FILE     = 0,
-	EDIT     = 1,
-	VIEWPORT = 2,
-	MODE     = 3,
-	CAMERA   = 4,
-	HELP     = 5,
+	FILE      = 0,
+	EDIT      = 1,
+	VIEWPORT  = 2,
+	MODE      = 3,
+	CAMERA    = 4,
+	HELP      = 5,
+	WORKSPACE = 6,
 }
 
 enum canvas_type_t {

@@ -84,22 +84,24 @@ function tab_layers_button_new(text: string) {
 	if (ui_icon_button(text, icon_t.PLUS)) {
 		ui_menu_draw(function() {
 			let l: slot_layer_t = context_raw.layer;
-			if (ui_menu_button(tr("Paint Layer"), "", icon_t.PAINT)) {
-				layers_new_layer();
-				history_new_layer();
+			if (context_raw.workspace == workspace_t.SCULPT) {
+				if (ui_menu_button(tr("Sculpt Layer"), "", icon_t.PAINT)) {
+					sys_notify_on_next_frame(function() {
+						sculpt_layers_create_sculpt_layer();
+					});
+				}
+			}
+			else {
+				if (ui_menu_button(tr("Paint Layer"), "", icon_t.PAINT)) {
+					layers_new_layer();
+					history_new_layer();
+				}
 			}
 			if (ui_menu_button(tr("Fill Layer"), "", icon_t.SPHERE)) {
 				layers_create_fill_layer(uv_type_t.UVMAP);
 			}
 			if (ui_menu_button(tr("Decal Layer"), "", icon_t.DECAL)) {
 				layers_create_fill_layer(uv_type_t.PROJECT);
-			}
-			if (config_raw.experimental) {
-				if (ui_menu_button(tr("Sculpt Layer"))) {
-					sys_notify_on_next_frame(function() {
-						sculpt_layers_create_sculpt_layer();
-					});
-				}
 			}
 			if (ui_menu_button(tr("Black Mask"), "", icon_t.MASK)) {
 				if (slot_layer_is_mask(l)) {
