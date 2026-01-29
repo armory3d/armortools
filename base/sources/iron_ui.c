@@ -599,12 +599,14 @@ int ui_line_count(char *str) {
 	return count;
 }
 
-char *ui_extract_line(char *str, int line) {
+char *ui_extract_line_off(char *str, int line, int *off) {
+	str += *off;
 	static char temp[1024];
 	int         pos    = 0;
 	int         len    = strlen(str);
 	int         line_i = 0;
-	for (int i = 0; i < len; ++i) {
+	int         i      = 0;
+	for (i = 0; i < len; ++i) {
 		if (str[i] == '\n') {
 			line_i++;
 			continue;
@@ -618,7 +620,13 @@ char *ui_extract_line(char *str, int line) {
 		temp[pos++] = str[i];
 	}
 	temp[pos] = 0;
+	*off += i;
 	return temp;
+}
+
+char *ui_extract_line(char *str, int line) {
+	int off = 0;
+	return ui_extract_line_off(str, line, &off);
 }
 
 char *ui_lower_case(char *dest, char *src) {
@@ -3072,103 +3080,120 @@ static int ui_line_pos(char *str, int line) {
 	return i;
 }
 
+static char *lines_buffer = NULL;
+static int   lines_size   = 0;
+
+void ui_text_area_word_wrap(char *lines, ui_handle_t *handle, bool selected) {
+	bool cursor_set = false;
+	int  cursor_pos = current->cursor_x;
+	for (int i = 0; i < handle->i; ++i) {
+		cursor_pos += strlen(ui_extract_line(lines, i)) + 1; // + '\n'
+	}
+	bool anchor_set = false;
+	int  anchor_pos = current->highlight_anchor;
+	for (int i = 0; i < handle->i; ++i) {
+		anchor_pos += strlen(ui_extract_line(lines, i)) + 1;
+	}
+	int  word_count = ui_word_count(lines);
+	char line[1024];
+	line[0] = '\0';
+	char new_lines[4096];
+	new_lines[0] = '\0';
+
+	for (int i = 0; i < word_count; ++i) {
+		char *w      = ui_extract_word(lines, i);
+		float spacew = draw_string_width(current->ops->font, current->font_size, " ");
+		float wordw  = spacew + draw_string_width(current->ops->font, current->font_size, w);
+		float linew  = wordw + draw_string_width(current->ops->font, current->font_size, line);
+		if (linew > current->_w - 10 && linew > wordw) {
+			if (new_lines[0] != '\0') {
+				strcat(new_lines, "\n");
+			}
+			strcat(new_lines, line);
+			line[0] = '\0';
+		}
+
+		if (line[0] == '\0') {
+			strcpy(line, w);
+		}
+		else {
+			strcat(line, " ");
+			strcat(line, w);
+		}
+
+		int new_line_count = new_lines[0] == '\0' ? 0 : ui_line_count(new_lines);
+		int lines_len      = new_line_count;
+		for (int i = 0; i < new_line_count; ++i) {
+			lines_len += strlen(ui_extract_line(new_lines, i));
+		}
+
+		if (selected && !cursor_set && cursor_pos <= lines_len + strlen(line)) {
+			cursor_set        = true;
+			handle->i         = new_line_count;
+			current->cursor_x = cursor_pos - lines_len;
+		}
+		if (selected && !anchor_set && anchor_pos <= lines_len + strlen(line)) {
+			anchor_set                = true;
+			current->highlight_anchor = anchor_pos - lines_len;
+		}
+	}
+	if (new_lines[0] != '\0') {
+		strcat(new_lines, "\n");
+	}
+	strcat(new_lines, line);
+	if (selected) {
+		strcpy(handle->text, ui_extract_line(new_lines, handle->i));
+		strcpy(current->text_selected, handle->text);
+	}
+	strcpy(lines, new_lines);
+}
+
+void ui_text_area_draw_line_numbers(int line_count) {
+	float _y                      = current->_y;
+	int   _TEXT_COL               = current->ops->theme->TEXT_COL;
+	current->ops->theme->TEXT_COL = current->ops->theme->HOVER_COL;
+	int  max_length               = ceil(log(line_count + 0.5) / log(10)); // Express log_10 with natural log
+	char s[64];
+	for (int i = 0; i < line_count; ++i) {
+		ui_text(right_align_number(&s[0], i + 1, max_length), UI_ALIGN_LEFT, 0x00000000);
+		current->_y -= UI_ELEMENT_OFFSET();
+	}
+	current->ops->theme->TEXT_COL = _TEXT_COL;
+	current->_y                   = _y;
+
+	sprintf(s, "%d", line_count);
+	float numbers_w = (strlen(s) * 16 + 4) * UI_SCALE();
+	current->_x += numbers_w;
+	current->_w -= numbers_w - UI_SCROLL_W();
+}
+
 char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, bool word_wrap) {
 	ui_t *current = ui_get_current();
 	handle->text  = string_replace_all(handle->text, "\t", "    ");
 	bool selected = current->text_selected_handle == handle; // Text being edited
 
-	char lines[4096];
+	int text_size = strlen(handle->text) + 1;
+	if (lines_size < text_size) {
+		if (lines_buffer != NULL) {
+			free(lines_buffer);
+		}
+		lines_buffer = malloc(text_size);
+	}
+
+	char *lines = lines_buffer;
 	strcpy(lines, handle->text);
 	int  line_count              = ui_line_count(lines);
 	bool show_label              = (line_count == 1 && lines[0] == '\0');
 	bool key_pressed             = selected && current->is_key_pressed;
 	current->highlight_on_select = false;
 	current->tab_switch_enabled  = false;
-
 	if (word_wrap && handle->text[0] != '\0') {
-		bool cursor_set = false;
-		int  cursor_pos = current->cursor_x;
-		for (int i = 0; i < handle->i; ++i) {
-			cursor_pos += strlen(ui_extract_line(lines, i)) + 1; // + '\n'
-		}
-		bool anchor_set = false;
-		int  anchor_pos = current->highlight_anchor;
-		for (int i = 0; i < handle->i; ++i) {
-			anchor_pos += strlen(ui_extract_line(lines, i)) + 1;
-		}
-		int  word_count = ui_word_count(lines);
-		char line[1024];
-		line[0] = '\0';
-		char new_lines[4096];
-		new_lines[0] = '\0';
-
-		for (int i = 0; i < word_count; ++i) {
-			char *w      = ui_extract_word(lines, i);
-			float spacew = draw_string_width(current->ops->font, current->font_size, " ");
-			float wordw  = spacew + draw_string_width(current->ops->font, current->font_size, w);
-			float linew  = wordw + draw_string_width(current->ops->font, current->font_size, line);
-			if (linew > current->_w - 10 && linew > wordw) {
-				if (new_lines[0] != '\0') {
-					strcat(new_lines, "\n");
-				}
-				strcat(new_lines, line);
-				line[0] = '\0';
-			}
-
-			if (line[0] == '\0') {
-				strcpy(line, w);
-			}
-			else {
-				strcat(line, " ");
-				strcat(line, w);
-			}
-
-			int new_line_count = new_lines[0] == '\0' ? 0 : ui_line_count(new_lines);
-			int lines_len      = new_line_count;
-			for (int i = 0; i < new_line_count; ++i) {
-				lines_len += strlen(ui_extract_line(new_lines, i));
-			}
-
-			if (selected && !cursor_set && cursor_pos <= lines_len + strlen(line)) {
-				cursor_set        = true;
-				handle->i         = new_line_count;
-				current->cursor_x = cursor_pos - lines_len;
-			}
-			if (selected && !anchor_set && anchor_pos <= lines_len + strlen(line)) {
-				anchor_set                = true;
-				current->highlight_anchor = anchor_pos - lines_len;
-			}
-		}
-		if (new_lines[0] != '\0') {
-			strcat(new_lines, "\n");
-		}
-		strcat(new_lines, line);
-		if (selected) {
-			strcpy(handle->text, ui_extract_line(new_lines, handle->i));
-			strcpy(current->text_selected, handle->text);
-		}
-		strcpy(lines, new_lines);
+		ui_text_area_word_wrap(lines, handle, selected);
+	}
+	if (ui_text_area_line_numbers) {
+		ui_text_area_draw_line_numbers(line_count);
 	}
 	int cursor_start_x = current->cursor_x;
-
-	if (ui_text_area_line_numbers) {
-		float _y                      = current->_y;
-		int   _TEXT_COL               = current->ops->theme->TEXT_COL;
-		current->ops->theme->TEXT_COL = current->ops->theme->HOVER_COL;
-		int  max_length               = ceil(log(line_count + 0.5) / log(10)); // Express log_10 with natural log
-		char s[64];
-		for (int i = 0; i < line_count; ++i) {
-			ui_text(right_align_number(&s[0], i + 1, max_length), UI_ALIGN_LEFT, 0x00000000);
-			current->_y -= UI_ELEMENT_OFFSET();
-		}
-		current->ops->theme->TEXT_COL = _TEXT_COL;
-		current->_y                   = _y;
-
-		sprintf(s, "%d", line_count);
-		float numbers_w = (strlen(s) * 16 + 4) * UI_SCALE();
-		current->_x += numbers_w;
-		current->_w -= numbers_w - UI_SCROLL_W();
-	}
 
 	draw_set_color(current->ops->theme->SEPARATOR_COL); // Background
 	ui_draw_rect(true, current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w - current->button_offset_y * 2,
@@ -3181,8 +3206,9 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 		text_area_selection_start = -1;
 	}
 
+	int lines_off = 0;
 	for (int i = 0; i < line_count; ++i) { // Draw lines
-		char *line = ui_extract_line(lines, i);
+		char *line = ui_extract_line_off(lines, 0, &lines_off);
 		// Text input
 		if ((!selected && ui_get_hover(UI_ELEMENT_H())) || (selected && i == handle->i)) {
 			handle->i = i; // Set active line
