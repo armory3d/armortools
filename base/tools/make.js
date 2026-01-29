@@ -2843,7 +2843,10 @@ function export_iron_project(project, options) {
 			}
 			embed_header += "char *embed_keys[] = {\n"
 			for (let file of embed_files) {
-				embed_header += "\"./data/" + path_basename(file) + "\",\n";
+				let f = file.replaceAll("\\", "/");
+				let i = f.lastIndexOf("/temp/data/");
+				f = i > -1 ? f.substring(i + 11) : path_basename(file);
+				embed_header += "\"./data/" + f + "\",\n";
 			}
 			embed_header += "};\n"
 			embed_header += "const unsigned char *embed_values[] = {\n"

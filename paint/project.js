@@ -30,7 +30,7 @@ project.add_assets("assets/keymap_presets/*", {destination : "data/keymap_preset
 project.add_assets("assets/licenses/**", {destination : "data/licenses/{name}"});
 project.add_assets("assets/plugins/*", {destination : "data/plugins/{name}"});
 project.add_assets("assets/meshes/*", {destination : "data/meshes/{name}", noembed : true});
-project.add_assets("assets/meshes/box_bevel.arm", {destination : "data/meshes/box_bevel.arm", noembed : false}); // embed default mesh
+project.add_assets("assets/meshes/default/*", {destination : "data/meshes/{name}"}); // embed default mesh
 project.add_assets("assets/locale/*", {destination : "data/locale/{name}"});
 project.add_assets("assets/readme/readme.txt", {destination : "{name}"});
 project.flatten();
