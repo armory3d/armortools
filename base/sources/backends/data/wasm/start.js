@@ -83,7 +83,7 @@ async function init() {
 	let   wasm_bytes = null;
 	await fetch("./start.wasm").then(res => res.arrayBuffer()).then(buffer => wasm_bytes = new Uint8Array(buffer));
 
-	memory  = new WebAssembly.Memory({initial : 4356, maximum : 4356, shared : true}); // * 65536 = 285474816 (make.js --initial-memory)
+	memory  = new WebAssembly.Memory({initial : 8192, maximum : 8192, shared : true}); // * 65536 = 536870912 (make.js --initial-memory)
 	heapu8  = new Uint8Array(memory.buffer);
 	heapu16 = new Uint16Array(memory.buffer);
 	heapu32 = new Uint32Array(memory.buffer);

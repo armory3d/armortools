@@ -782,3 +782,17 @@ void gpu_buffer_destroy_internal(gpu_buffer_t *buffer) {
 char *gpu_device_name() {
 	return device_name;
 }
+
+bool gpu_raytrace_supported(void) { return false; }
+void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *ray_shader, int ray_shader_size, gpu_buffer_t *constant_buffer) {}
+void gpu_raytrace_pipeline_destroy(gpu_raytrace_pipeline_t *pipeline) {}
+void gpu_raytrace_acceleration_structure_init(gpu_raytrace_acceleration_structure_t *accel) {}
+void gpu_raytrace_acceleration_structure_add(gpu_raytrace_acceleration_structure_t *accel, gpu_buffer_t *vb, gpu_buffer_t *ib, iron_matrix4x4_t transform) {}
+void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structure_t *accel, gpu_buffer_t *_vb_full, gpu_buffer_t *_ib_full) {}
+void gpu_raytrace_acceleration_structure_destroy(gpu_raytrace_acceleration_structure_t *accel) {}
+void gpu_raytrace_set_textures(gpu_texture_t *texpaint0, gpu_texture_t *texpaint1, gpu_texture_t *texpaint2, gpu_texture_t *texenv, gpu_texture_t *texsobol,
+                               gpu_texture_t *texscramble, gpu_texture_t *texrank) {}
+void gpu_raytrace_set_acceleration_structure(gpu_raytrace_acceleration_structure_t *accel) {}
+void gpu_raytrace_set_pipeline(gpu_raytrace_pipeline_t *pipeline) {}
+void gpu_raytrace_set_target(gpu_texture_t *output) {}
+void gpu_raytrace_dispatch_rays() {}

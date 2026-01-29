@@ -39,6 +39,10 @@ void *realloc(void *mem, size_t size) {
 
 void free(void *mem) {}
 
+void *aligned_alloc(size_t align, size_t size) {
+	return NULL;
+}
+
 void *memset(void *ptr, int value, size_t num) {
 	unsigned char *data = (unsigned char *)ptr;
 	for (size_t i = 0; i < num; ++i) {
@@ -65,4 +69,8 @@ int memcmp(const void *ptr1, const void *ptr2, size_t num) {
 		}
 	}
 	return 0;
+}
+
+void *memmove(void *destination, const void *source, size_t num) {
+	return NULL;
 }

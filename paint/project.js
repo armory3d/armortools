@@ -17,6 +17,16 @@ flags.idle_sleep          = true;
 flags.export_version_info = true;
 flags.export_data_list    = platform == "android"; // .apk contents
 
+if (platform == "wasm") {
+    flags.with_nfd = false;
+    flags.with_compress = false;
+    flags.with_video_write = false;
+    flags.with_eval = false;
+    flags.with_plugins = false;
+    flags.with_raytrace = false;
+    flags.idle_sleep = false;
+}
+
 let project = new Project(flags.name);
 project.add_project("../base");
 project.add_tsfiles("sources");

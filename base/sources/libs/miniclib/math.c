@@ -193,6 +193,22 @@ float expf(float x) {
 	return 0.0;
 }
 
+double exp2(double x) {
+	return 0.0;
+}
+
+float exp2f(float x) {
+	return 0.0f;
+}
+
+double frexp(double x, int *exp) {
+	return 0.0;
+}
+
+float frexpf(float x, int *exp) {
+	return 0.0;
+}
+
 double sqrt(double x) {
 #ifdef IRON_WASM
 	return js_sqrt(x);
@@ -209,6 +225,10 @@ float sqrtf(float x) {
 
 double fmod(double x, double y) {
 	return 0.0;
+}
+
+float fmodf(float x, float y) {
+	return 0.0f;
 }
 
 int isnan(float x) {

@@ -32,9 +32,14 @@ float  logf(float x);
 float  log2f(float x);
 double exp(double x);
 float  expf(float x);
+double exp2(double x);
+float  exp2f(float x);
+double frexp(double x, int *exp);
+float  frexpf(float x, int *exp);
 double sqrt(double x);
 float  sqrtf(float x);
 double fmod(double x, double y);
+float  fmodf(float x, float y);
 
 int isnan(float x);
 #define NAN (0.0F / 0.0F)

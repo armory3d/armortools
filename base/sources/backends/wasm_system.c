@@ -2,6 +2,7 @@
 #include <iron_audio.h>
 #include <iron_gpu.h>
 #include <iron_system.h>
+#include <iron_net.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -160,3 +161,22 @@ void iron_net_update() {
 }
 
 volatile uint64_t iron_net_bytes_downloaded = 0;
+
+void iron_net_request(const char *url_base, const char *url_path, const char *data, int port, int method, iron_https_callback_t callback, void *callbackdata,
+                      const char *dst_path) {
+}
+
+bool _save_and_quit_callback_internal() {
+	return false;
+}
+
+const char *iron_language() {
+	return "en";
+}
+
+void iron_load_url(const char *url) {
+}
+
+const char *iron_system_id() {
+	return "wasm";
+}

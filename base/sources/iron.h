@@ -1473,6 +1473,17 @@ char *iron_save_dialog(char *filter_list, char *default_path) {
 	wcstombs(temp_string, out_path, sizeof(temp_string));
 	return temp_string;
 }
+
+#elif defined(IRON_WASM)
+
+char_ptr_array_t *iron_open_dialog(char *filter_list, char *default_path, bool open_multiple) {
+	return NULL;
+}
+
+char *iron_save_dialog(char *filter_list, char *default_path) {
+	return NULL;
+}
+
 #endif
 
 char *iron_read_directory(char *path) {

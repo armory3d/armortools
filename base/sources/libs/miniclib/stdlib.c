@@ -16,6 +16,10 @@ float strtof(const char *str, char **endptr) {
 	return 0.0f;
 }
 
+double strtod(const char *str, char **endptr) {
+	return 0.0;
+}
+
 double atof (const char* str) {
 	return 0.0;
 }
