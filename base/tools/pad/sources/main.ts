@@ -24,6 +24,7 @@ let minimap_h: i32              = 0;
 let minimap_box_h: i32          = 0;
 let minimap_scrolling: bool     = false;
 let minimap: gpu_texture_t      = null;
+let redraw_minimap: bool        = true;
 let window_header_h: i32        = 0;
 
 function drop_files(path: string) {
@@ -155,6 +156,7 @@ function list_folder(path: string) {
 				storage.text          = string_replace_all(storage.text, "\r", "");
 				text_handle.text      = storage.text;
 				editor_handle.redraws = 1;
+				redraw_minimap        = true;
 				iron_window_set_title(abs);
 			}
 			// Expand folder
@@ -199,10 +201,7 @@ function render() {
 		ui_fill(storage.sidebar_w, 0, 1, iron_window_height(), theme.SEPARATOR_COL);
 	}
 
-	let editor_updated: bool = false;
-
 	if (ui_window(editor_handle, storage.sidebar_w + 1, 0, iron_window_width() - storage.sidebar_w - minimap_w, iron_window_height(), false)) {
-		editor_updated           = true;
 		let htab: ui_handle_t    = ui_handle(__ID__);
 		let file_name: string    = substring(storage.file, string_last_index_of(storage.file, "/") + 1, storage.file.length);
 		let file_names: string[] = [ file_name ];
@@ -259,6 +258,10 @@ function render() {
 
 	ui_end();
 
+	if (ui.is_key_pressed && ui.key_code == key_code_t.F11) {
+		toggle_fullscreen();
+	}
+
 	if (redraw) {
 		editor_handle.redraws = 2;
 	}
@@ -269,7 +272,8 @@ function render() {
 		draw_end();
 	}
 
-	if (editor_updated) {
+	if (redraw_minimap) {
+		redraw_minimap = false;
 		draw_minimap();
 	}
 }
@@ -366,6 +370,21 @@ function on_border_hover(handle: ui_handle_t, side: i32) {
 
 	if (ui.input_started) {
 		resizing_sidebar = true;
+	}
+}
+
+let _window_w: i32;
+let _window_h: i32;
+
+function toggle_fullscreen() {
+	if (iron_window_get_mode() == iron_window_mode_t.WINDOW) {
+		_window_w = iron_window_width();
+		_window_h = iron_window_height();
+		iron_window_change_mode(iron_window_mode_t.FULLSCREEN);
+	}
+	else {
+		iron_window_change_mode(iron_window_mode_t.WINDOW);
+		iron_window_resize(_window_w, _window_h);
 	}
 }
 
