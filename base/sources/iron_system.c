@@ -20,11 +20,6 @@ typedef enum {
 } iron_log_level_t;
 
 void iron_log_args(iron_log_level_t level, const char *format, va_list args) {
-#ifdef IRON_WASM
-	printf(format);
-	return;
-#endif
-
 #ifdef IRON_ANDROID
 	va_list args_android_copy;
 	va_copy(args_android_copy, args);
@@ -50,7 +45,11 @@ void iron_log_args(iron_log_level_t level, const char *format, va_list args) {
 	char buffer[4096];
 	vsnprintf(buffer, 4090, format, args);
 	strcat(buffer, "\n");
+	#ifdef IRON_WASM
+	printf("%s", buffer); ////
+	#else
 	fprintf(level == IRON_LOG_LEVEL_INFO ? stdout : stderr, "%s", buffer);
+	#endif
 #endif
 }
 
