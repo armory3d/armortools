@@ -56,9 +56,9 @@ static void resize(any_map_t *m, int elem_size) {
 	int        cap        = m->keys->capacity == 0 ? 16 : m->keys->capacity * 2;
 	any_map_t *tmp        = any_map_create();
 	tmp->keys->capacity   = cap;
-	tmp->keys->buffer     = gc_realloc(tmp->keys->buffer, cap * sizeof(void *));
+	tmp->keys->buffer     = gc_alloc(cap * sizeof(void *));
 	tmp->values->capacity = cap;
-	tmp->values->buffer   = gc_realloc(tmp->values->buffer, cap * elem_size);
+	tmp->values->buffer   = gc_alloc(cap * elem_size);
 	if (elem_size < 8) {
 		gc_leaf(tmp->values->buffer);
 	}
