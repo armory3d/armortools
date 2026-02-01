@@ -22,3 +22,4 @@ long int ftell(FILE *stream);
 int      fseek(FILE *stream, long int offset, int origin);
 size_t   fread(void *ptr, size_t size, size_t count, FILE *stream);
 int      fputs(const char *str, FILE *stream);
+int      puts(char *str);

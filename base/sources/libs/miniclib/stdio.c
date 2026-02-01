@@ -1,4 +1,6 @@
 #include "stdio.h"
+#define STB_SPRINTF_IMPLEMENTATION
+#include "../stb_sprintf.h"
 
 #ifdef IRON_WASM
 __attribute__((import_module("imports"), import_name("js_printf"))) void    js_printf(const char *format);
@@ -11,29 +13,47 @@ __attribute__((import_module("imports"), import_name("js_fread"))) size_t   js_f
 FILE *stdout = NULL, *stderr = NULL;
 
 int printf(const char *format, ...) {
+	char    buf[1024];
+	va_list args;
+	va_start(args, format);
+	int ret = stbsp_vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
 #ifdef IRON_WASM
-	js_printf(format);
+	js_printf(buf);
 #endif
-	return 0;
+	return ret;
 }
 
 int fprintf(FILE *stream, const char *format, ...) {
+	char    buf[1024];
+	va_list args;
+	va_start(args, format);
+	int ret = stbsp_vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
 #ifdef IRON_WASM
-	js_printf(format);
+	js_printf(buf);
 #endif
-	return 0;
+	return ret;
 }
 
 int sprintf(char *s, const char *format, ...) {
-	return 0;
+	va_list args;
+	va_start(args, format);
+	int ret = stbsp_vsprintf(s, format, args);
+	va_end(args);
+	return ret;
 }
 
 int snprintf(char *s, size_t n, const char *format, ...) {
-	return 0;
+	va_list args;
+	va_start(args, format);
+	int ret = stbsp_vsnprintf(s, (int)n, format, args);
+	va_end(args);
+	return ret;
 }
 
 int vsnprintf(char *s, size_t n, const char *format, va_list arg) {
-	return 0;
+	return stbsp_vsnprintf(s, (int)n, format, arg);
 }
 
 size_t fwrite(const void *ptr, size_t size, size_t count, FILE *stream) {
@@ -73,5 +93,9 @@ size_t fread(void *ptr, size_t size, size_t count, FILE *stream) {
 }
 
 int fputs(const char *str, FILE *stream) {
+	return 0;
+}
+
+int puts(char *str) {
 	return 0;
 }

@@ -171,3 +171,12 @@ int wcsncmp(const wchar_t *str1, const wchar_t *str2, size_t num) {
 	}
 	return 0;
 }
+
+char *stpcpy(char *destination, const char *source) {
+	for (size_t i = 0;; ++i) {
+		destination[i] = source[i];
+		if (source[i] == 0) {
+			return &destination[i];
+		}
+	}
+}
