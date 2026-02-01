@@ -949,6 +949,7 @@ int  _expression_index;
 int  _statement_index;
 void hlsl_export2(char **vs, char **fs, api_kind d3d, bool debug);
 void spirv_export2(char **vs, char **fs, int *vs_size, int *fs_size, bool debug);
+void wgsl_export2(char **vs, char **fs);
 void console_info(char *s);
 
 static struct {
@@ -1017,6 +1018,7 @@ void gpu_create_shaders_from_kong(char *kong, char **vs, char **fs, int *vs_size
 	tokens tokens = tokenize(from, kong);
 	parse(from, &tokens);
 	resolve_types();
+
 	if (kong_error) {
 		console_info("Warning: Shader compilation failed");
 		free(tokens.t);
@@ -1045,6 +1047,11 @@ void gpu_create_shaders_from_kong(char *kong, char **vs, char **fs, int *vs_size
 	*vs = &vs_temp[0];
 	*fs = "//>kong_frag\n";
 	free(metal);
+
+#elif defined(IRON_WASM)
+
+	transform(TRANSFORM_FLAG_ONE_COMPONENT_SWIZZLE);
+	wgsl_export2(vs, fs);
 
 #else
 
@@ -1088,6 +1095,11 @@ gpu_shader_t *gpu_create_shader_from_source(string_t *source, int source_size, g
 #elif defined(IRON_VULKAN)
 
 	gpu_shader_init(shader, source, source_size, shader_type);
+
+#elif defined(IRON_WASM)
+
+	strcpy(temp_string_s, source);
+	gpu_shader_init(shader, temp_string_s, strlen(temp_string_s), shader_type);
 
 #endif
 
