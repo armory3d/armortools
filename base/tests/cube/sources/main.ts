@@ -46,7 +46,8 @@ function ready() {
 				depth_write : true,
 				vertex_elements : [ {name : "pos", data : "short4norm"}, {name : "tex", data : "short2norm"} ],
 				constants : [ {name : "WVP", type : "mat4", link : "_world_view_proj_matrix"} ],
-				texture_units : [ {name : "my_texture"} ]
+				texture_units : [ {name : "my_texture"} ],
+				depth_attachment: "D32"
 			} ]
 		} ]
 	};
