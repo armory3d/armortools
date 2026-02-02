@@ -60,7 +60,7 @@ function ui_toolbar_draw_tool(tool: i32, img: gpu_texture_t, icon_accent: i32) {
 	let image_state: ui_state_t = ui_sub_image(img, icon_accent, -1.0, rect.x, rect.y, rect.w, rect.h);
 	if (image_state == ui_state_t.STARTED && visible) {
 		_ui_toolbar_i = tool;
-		sys_notify_on_next_frame(function() {
+		sys_notify_on_next_frame(function(_: any) {
 			context_select_tool(_ui_toolbar_i);
 		});
 	}

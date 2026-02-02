@@ -83,7 +83,7 @@ function tab_fonts_draw(htab: ui_handle_t) {
 					if (context_raw.font != project_fonts[i]) {
 						_tab_fonts_draw_i = i;
 
-						sys_notify_on_next_frame(function() {
+						sys_notify_on_next_frame(function(_: any) {
 							let i: i32 = _tab_fonts_draw_i;
 							context_select_font(i);
 						});
@@ -95,7 +95,7 @@ function tab_fonts_draw(htab: ui_handle_t) {
 				}
 				if (ui.is_hovered && ui.input_released_r) {
 					_tab_fonts_draw_i = i;
-					sys_notify_on_next_frame(function() {
+					sys_notify_on_next_frame(function(_: any) {
 						context_select_font(_tab_fonts_draw_i);
 						ui_menu_draw(function() {
 							let i: i32 = _tab_fonts_draw_i;
@@ -109,7 +109,7 @@ function tab_fonts_draw(htab: ui_handle_t) {
 					if (img == null) {
 						_tab_fonts_draw_i = i;
 
-						sys_notify_on_next_frame(function() {
+						sys_notify_on_next_frame(function(_: any) {
 							let i: i32 = _tab_fonts_draw_i;
 
 							let _font: slot_font_t = context_raw.font;

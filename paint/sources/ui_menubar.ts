@@ -89,8 +89,8 @@ function ui_menubar_render_ui() {
 				// Save project icon in lit mode
 				context_set_viewport_mode(viewport_mode_t.LIT);
 				console_toast(tr("Saving project"));
-				sys_notify_on_next_frame(function() {
-					sys_notify_on_end_frame(function() {
+				sys_notify_on_next_frame(function(_: any) {
+					sys_notify_on_end_frame(function(_: any) {
 						project_save();
 						box_projects_show();
 					});
@@ -430,7 +430,7 @@ function ui_menubar_draw_category_items() {
 		}
 
 		if (ui_menu_button(tr("Capture Screenshot"), "", icon_t.PHOTO)) {
-			sys_notify_on_next_frame(function() {
+			sys_notify_on_next_frame(function(_: any) {
 				viewport_capture_screenshot();
 			});
 			ui.changed = false; // Close menu

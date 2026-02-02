@@ -85,7 +85,8 @@ double round(double x) {
 }
 
 float roundf(float x) {
-	return (float)round(x);
+	// return (float)round(x); // __builtin_roundf
+	return x >= 0.0 ? floor(x + 0.5) : ceil(x - 0.5);
 }
 
 double sin(double x) {

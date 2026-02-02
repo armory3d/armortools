@@ -124,7 +124,7 @@ function tab_materials_draw_slots(mini: bool) {
 				if (context_raw.material != project_materials[i]) {
 					context_select_material(i);
 					if (context_raw.tool == tool_type_t.MATERIAL) {
-						sys_notify_on_next_frame(layers_update_fill_layers);
+						sys_notify_on_next_frame(function(_: any) { layers_update_fill_layers(); });
 					}
 				}
 				base_drag_off_x    = -(mouse_x - uix - ui._window_x - 3);
@@ -164,7 +164,7 @@ function tab_materials_draw_slots(mini: bool) {
 					}
 
 					if (ui_menu_button(tr("Duplicate"), "", icon_t.DUPLICATE)) {
-						sys_notify_on_next_frame(function() {
+						sys_notify_on_next_frame(function(_: any) {
 							let i: i32 = _tab_materials_draw_slots;
 
 							context_raw.material = slot_material_create(project_materials[0].data);
@@ -293,7 +293,7 @@ function tab_materials_draw_slots(mini: bool) {
 
 function tab_materials_button_new(text: string) {
 	if (ui_icon_button(text, icon_t.PLUS)) {
-		sys_notify_on_next_frame(function() {
+		sys_notify_on_next_frame(function(_: any) {
 			context_raw.material = slot_material_create(project_materials[0].data);
 			array_push(project_materials, context_raw.material);
 			tab_materials_update_material();

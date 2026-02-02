@@ -574,7 +574,7 @@ function _render_path_paint_deriv() {
 	if (render_path_paint_push_undo_last) {
 		history_paint();
 	}
-	sys_notify_on_next_frame(_render_path_paint_final);
+	sys_notify_on_next_frame(function(_: any) { _render_path_paint_final(); });
 }
 
 function render_path_paint_is_rt_bake(): bool {
@@ -632,10 +632,10 @@ function render_path_paint_draw() {
 					context_select_paint_object(_paint_object);
 
 					if (context_raw.bake_type == bake_type_t.DERIVATIVE) {
-						sys_notify_on_next_frame(_render_path_paint_deriv);
+						sys_notify_on_next_frame(function(_: any) { _render_path_paint_deriv(); });
 					}
 					else {
-						sys_notify_on_next_frame(_render_path_paint_final);
+						sys_notify_on_next_frame(function(_: any) { _render_path_paint_final(); });
 					}
 				}
 			}

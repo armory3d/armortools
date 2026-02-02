@@ -114,7 +114,7 @@ function image_to_pbr_node_button(node_id: i32) {
 						// image_to_pbr_node_run_sd("marigold-iid-lighting-v1-1.q8_0.gguf", "_diffuse_shading", function(tex: gpu_texture_t) {
 							image_to_pbr_node_result_roughness = tex;
 
-							sys_notify_on_next_frame(function() {
+							sys_notify_on_next_frame(function(_: any) {
 								let occmap: render_target_t;
 								{
 									let t: render_target_t = render_target_create();

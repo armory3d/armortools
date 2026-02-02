@@ -62,7 +62,7 @@ function render_path_raytrace_bake_commands(parse_paint_material: (b?: bool) => 
 		render_path_set_target("baketex0", additional);
 		render_path_draw_meshes("paint");
 		context_raw.bake_type = _bake_type;
-		sys_notify_on_next_frame(parse_paint_material);
+		sys_notify_on_next_frame(function(parse_paint_material: (b?: bool) => void) { parse_paint_material(true); }, parse_paint_material);
 
 		render_path_raytrace_init_shader = true;
 		render_path_raytrace_raytrace_init(render_path_raytrace_bake_get_bake_shader_name(), rebuild);

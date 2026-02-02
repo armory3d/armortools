@@ -31,7 +31,7 @@ function import_blend_material_run(path: string) {
 function _import_blend_material() {
 	console_toast(tr("Baking material"));
 
-	sys_notify_on_next_frame(function() {
+	sys_notify_on_next_frame(function(_: any) {
 		let save: string;
 		if (path_is_protected()) {
 			save = iron_internal_save_path();

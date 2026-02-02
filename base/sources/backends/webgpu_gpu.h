@@ -14,7 +14,9 @@ typedef struct {
 
 typedef struct {
 	WGPURenderPipeline pipeline;
+	WGPURenderPipeline pipeline_depth;
 	WGPUPipelineLayout pipeline_layout;
+	WGPUPipelineLayout pipeline_layout_depth;
 } gpu_pipeline_impl_t;
 
 typedef struct {

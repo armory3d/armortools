@@ -31,7 +31,7 @@ function console_toast(s: string) {
 		draw_begin(current);
 }
 
-function console_draw_progress() {
+function console_draw_progress(_: any) {
 	console_draw_toast(console_progress_text);
 }
 

@@ -32,7 +32,7 @@ let _render_path_paused: bool                    = false;
 let _render_path_last_w: i32                     = 0;
 let _render_path_last_h: i32                     = 0;
 let _render_path_bind_params: string[];
-let _render_path_meshes_sorted: bool;
+// let _render_path_meshes_sorted: bool;
 let _render_path_last_frame_time: f32                                           = 0.0;
 let _render_path_loading: i32                                                   = 0;
 let _render_path_cached_shader_contexts: map_t<string, cached_shader_context_t> = map_create();
@@ -57,7 +57,7 @@ function render_path_render_frame() {
 
 	render_path_current_w      = sys_w();
 	render_path_current_h      = sys_h();
-	_render_path_meshes_sorted = false;
+	// _render_path_meshes_sorted = false;
 
 	render_path_commands();
 
@@ -134,22 +134,22 @@ function render_path_submit_draw(context: string) {
 	let meshes: mesh_object_t[] = scene_meshes;
 	_mesh_object_last_pipeline  = null;
 
-	if (!_render_path_meshes_sorted && camera != null) { // Order max once per frame for now
-		let cam_x: f32 = transform_world_x(camera.base.transform);
-		let cam_y: f32 = transform_world_y(camera.base.transform);
-		let cam_z: f32 = transform_world_z(camera.base.transform);
-		for (let i: i32 = 0; i < meshes.length; ++i) {
-			let mesh: mesh_object_t = meshes[i];
-			mesh_object_compute_camera_dist(mesh, cam_x, cam_y, cam_z);
-		}
-		if (_render_path_draw_order == draw_order_t.SHADER) {
-			render_path_sort_meshes_shader(meshes);
-		}
-		else {
-			render_path_sort_meshes_dist(meshes);
-		}
-		_render_path_meshes_sorted = true;
-	}
+	// if (!_render_path_meshes_sorted && camera != null) { // Order max once per frame for now
+	// 	let cam_x: f32 = transform_world_x(camera.base.transform);
+	// 	let cam_y: f32 = transform_world_y(camera.base.transform);
+	// 	let cam_z: f32 = transform_world_z(camera.base.transform);
+	// 	for (let i: i32 = 0; i < meshes.length; ++i) {
+	// 		let mesh: mesh_object_t = meshes[i];
+	// 		mesh_object_compute_camera_dist(mesh, cam_x, cam_y, cam_z);
+	// 	}
+	// 	if (_render_path_draw_order == draw_order_t.SHADER) {
+	// 		render_path_sort_meshes_shader(meshes);
+	// 	}
+	// 	else {
+	// 		render_path_sort_meshes_dist(meshes);
+	// 	}
+	// 	_render_path_meshes_sorted = true;
+	// }
 
 	for (let i: i32 = 0; i < meshes.length; ++i) {
 		let mesh: mesh_object_t = meshes[i];

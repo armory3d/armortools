@@ -54,7 +54,7 @@ function neural_node_button(node: ui_node_t, model: string): bool {
 		}
 	}
 	else if (!found && ui_button(tr("Setup"))) {
-		sys_notify_on_next_frame(function() {
+		sys_notify_on_next_frame(function(_: any) {
 			box_preferences_htab.i = preference_tab_t.NEURAL;
 			box_preferences_show();
 		});
@@ -139,7 +139,7 @@ function neural_node_download(url: string) {
 		/// if WITH_COMPRESS
 		if (ends_with(url, "Hunyuan3D_win64.tar")) {
 			console_toast(tr("Unpacking Hunyuan3D_win64.tar"));
-			sys_notify_on_next_frame(function() {
+			sys_notify_on_next_frame(function(_: any) {
 				let tar: string = neural_node_dir() + "/Hunyuan3D_win64.tar";
 				untar_here(tar);
 			});

@@ -139,16 +139,16 @@ function _import_mesh_make_mesh(mesh: raw_mesh_t) {
 			slot_layer_unload(l);
 		}
 		layers_new_layer(false);
-		sys_notify_on_next_frame(layers_init);
+		sys_notify_on_next_frame(function(_: any) { layers_init(); });
 		history_reset();
 	}
 
 	// Wait for add_mesh calls to finish
 	if (import_mesh_meshes_to_unwrap != null) {
-		sys_notify_on_next_frame(import_mesh_finish_import);
+		sys_notify_on_next_frame( function(_: any) { import_mesh_finish_import(); });
 	}
 	else {
-		sys_notify_on_next_frame(import_mesh_finish_import);
+		sys_notify_on_next_frame( function(_: any) { import_mesh_finish_import(); });
 	}
 }
 

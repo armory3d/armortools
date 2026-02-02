@@ -308,7 +308,7 @@ function base_resize() {
 	base_redraw_ui();
 }
 
-function base_update() {
+function base_update(_: any) {
 	if (mouse_movement_x != 0 || mouse_movement_y != 0) {
 		iron_mouse_set_cursor(iron_cursor_t.ARROW);
 	}
@@ -532,7 +532,7 @@ function base_get_drag_image(): gpu_texture_t {
 	return null;
 }
 
-function base_render() {
+function base_render(_: any) {
 	if (context_raw.frame == 2) {
 		util_render_make_material_preview();
 		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;
@@ -791,7 +791,7 @@ function ui_base_init() {
 	project_new(false);
 
 	if (project_filepath == "") {
-		sys_notify_on_next_frame(layers_init);
+		sys_notify_on_next_frame(function(_: any) { layers_init(); });
 	}
 
 	context_raw.project_objects = [];
@@ -803,7 +803,7 @@ function ui_base_init() {
 	operator_register("view_top", ui_base_view_top);
 }
 
-function ui_base_update() {
+function ui_base_update(_: any) {
 	ui_base_update_ui();
 	operator_update();
 
@@ -859,7 +859,7 @@ function ui_base_update() {
 			box_export_show_textures();
 		}
 		else {
-			sys_notify_on_next_frame(function() {
+			sys_notify_on_next_frame(function(_: any) {
 				export_texture_run(context_raw.texture_export_path);
 			});
 		}
@@ -1531,7 +1531,7 @@ function ui_base_update_ui() {
 
 		// New color id picked, update fill layer
 		if (context_raw.tool == tool_type_t.COLORID && context_raw.layer.fill_layer != null) {
-			sys_notify_on_next_frame(function() {
+			sys_notify_on_next_frame(function(_: any) {
 				layers_update_fill_layer();
 				make_material_parse_paint_material(false);
 			});
@@ -1615,7 +1615,7 @@ function ui_base_update_ui() {
 	gizmo_update();
 }
 
-function ui_base_render() {
+function ui_base_render(_: any) {
 	if (!ui_base_show && config_raw.touch_ui) {
 		ui.input_enabled = true;
 		ui_begin(ui);
@@ -1666,7 +1666,7 @@ function ui_base_render() {
 	ui.input_enabled = true;
 }
 
-function ui_base_render_cursor() {
+function ui_base_render_cursor(_: any) {
 	if (!base_ui_enabled) {
 		return;
 	}

@@ -32,7 +32,7 @@ function tween_reset() {
 	_tween_anims = [];
 }
 
-function tween_update() {
+function tween_update(_: any) {
 	let d: f32 = sys_delta();
 	let i: i32 = _tween_anims.length;
 	while (i-- > 0 && _tween_anims.length > 0) {

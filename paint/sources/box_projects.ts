@@ -146,7 +146,7 @@ function box_projects_tab() {
 						ui_menu_draw(function() {
 							// if (ui_menu_button(tr("Duplicate"), "", icon_t.DUPLICATE)) {}
 							if (ui_menu_button(tr("Delete"), "", icon_t.DELETE)) {
-								sys_notify_on_next_frame(function() {
+								sys_notify_on_next_frame(function(_: any) {
 									iron_delete_file(_box_projects_path);
 									iron_delete_file(_box_projects_icon_path);
 									let data_path: string = substring(_box_projects_path, 0, _box_projects_path.length - 4);

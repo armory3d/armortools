@@ -62,6 +62,15 @@ function id_to_texture_format(id) {
 		return "depth32float";
 	if (id === 0x0000001B)
 		return "bgra8unorm";
+	if (id === 0x00000028)
+		return "rgba16float";
+	if (id === 0x00000029)
+		return "rgba16float";
+		// return "rgba32float"; // Total color attachment bytes per sample (48) exceeds maximum (32)
+	if (id === 0x00000009)
+		return "r16float";
+	if (id === 0x0000000E)
+		return "r32float";
 }
 
 function id_to_vertex_format(id) {
@@ -79,11 +88,33 @@ function id_to_vertex_format(id) {
 		return "snorm16x4";
 }
 
+function id_to_blend_factor(id) {
+	if (id === 0x00000001)
+		return "zero";
+	if (id === 0x00000002)
+		return "one";
+	if (id === 0x00000005)
+		return "src-alpha";
+	if (id === 0x00000009)
+		return "dst-alpha";
+	if (id === 0x00000006)
+		return "one-minus-src-alpha";
+	if (id === 0x0000000A)
+		return "one-minus-dst-alpha";
+}
+
+function id_to_filter_mode(id) {
+	if (id === 0x00000001)
+		return "nearest";
+	if (id === 0x00000002)
+		return "linear";
+}
+
 async function init() {
 	let   wasm_bytes = null;
 	await fetch("./start.wasm").then(res => res.arrayBuffer()).then(buffer => wasm_bytes = new Uint8Array(buffer));
 
-	memory  = new WebAssembly.Memory({initial : 8192, maximum : 8192, shared : true}); // * 65536 = 536870912 (make.js --initial-memory)
+	memory  = new WebAssembly.Memory({initial : 10240, maximum : 10240, shared : true}); // * 65536 = 671088640 (make.js --initial-memory)
 	heapu8  = new Uint8Array(memory.buffer);
 	heapu16 = new Uint16Array(memory.buffer);
 	heapu32 = new Uint32Array(memory.buffer);
@@ -184,6 +215,8 @@ async function init() {
 						e.sampler = {type : read_u32(i * 88 + pentries + 52)};
 						if (e.sampler.type === 0x00000002)
 							e.sampler.type = "filtering";
+						else if (e.sampler.type === 0x00000003)
+							e.sampler.type = "non-filtering";
 					}
 
 					if (read_u32(i * 88 + pentries + 60) != 0x00000000) { // WGPUTextureSampleType_BindingNotUsed
@@ -194,6 +227,10 @@ async function init() {
 						};
 						if (e.texture.sampleType === 0x00000002)
 							e.texture.sampleType = "float";
+						else if (e.texture.sampleType === 0x00000003)
+							e.texture.sampleType = "unfilterable-float";
+						else if (e.texture.sampleType === 0x00000004)
+							e.texture.sampleType = "depth";
 					}
 
 					desc.entries.push(e);
@@ -272,9 +309,9 @@ async function init() {
 					addressModeU : "repeat",
 					addressModeV : "repeat",
 					addressModeW : "repeat",
-					magFilter : "linear",
-					minFilter : "linear",
-					mipmapFilter : "linear",
+					magFilter :  id_to_filter_mode(read_u32(pdescriptor + 24)),
+					minFilter : id_to_filter_mode(read_u32(pdescriptor + 28)),
+					mipmapFilter : id_to_filter_mode(read_u32(pdescriptor + 32)),
 					maxAnisotropy : 1
 				};
 				let sampler = device.createSampler(desc);
@@ -304,7 +341,7 @@ async function init() {
 					// WGPURenderPassColorAttachment
 					let ca = {
 						view : id_to_ptr(read_u32(pcas + 4 + i * 56)),
-						loadOp : "clear",
+						loadOp : read_u32(pcas + 16 + i * 56) == 0x00000001 ? "load" : "clear",
 						storeOp : "store",
 						clearValue : [ read_f64(pcas + 24 + i * 56), read_f64(pcas + 32 + i * 56), read_f64(pcas + 40 + i * 56), read_f64(pcas + 48 + i * 56) ]
 					};
@@ -314,7 +351,7 @@ async function init() {
 				// WGPURenderPassDepthStencilAttachment
 				let pdsa = read_u32(pdescriptor + 20);
 				if (pdsa !== 0) {
-					desc.depthStencilAttachment = {view : id_to_ptr(read_u32(pdsa + 4)), depthLoadOp : "clear", depthStoreOp : "store", depthClearValue : 1.0};
+					desc.depthStencilAttachment = {view : id_to_ptr(read_u32(pdsa + 4)), depthLoadOp : read_u32(pdsa + 8) == 0x00000001 ? "load" : "clear", depthStoreOp : "store", depthClearValue : 1.0};
 				}
 
 				let render_pass = encoder.beginRenderPass(desc);
@@ -428,28 +465,23 @@ async function init() {
 
 				// WGPUFragmentState
 				let pfrag    = read_u32(pdescriptor + 92);
-				let frag     = {module : id_to_ptr(read_u32(pfrag + 4)), entryPoint : "main", targetCount : 1, targets : []};
+				let frag     = {module : id_to_ptr(read_u32(pfrag + 4)), entryPoint : "main", targetCount : read_u32(pfrag + 24), targets : []};
 				let ptragets = read_u32(pfrag + 28);
 				for (let i = 0; i < frag.targetCount; ++i) {
 					// WGPUColorTargetState
 					let t = {
 						format : id_to_texture_format(read_u32(ptragets + 4 + i * 24)),
-						blend : {
-							color : {operation : "add", srcFactor : "one", dstFactor : "zero"},
-							alpha : {operation : "add", srcFactor : "one", dstFactor : "zero"}
-						},
 						writeMask : read_u32(ptragets + 16 + i * 24)
 					};
+					let pbs = read_u32(ptragets + 8 + i * 24); // WGPUBlendState
+					if (pbs != 0) {
+						t.blend = {
+							color : {operation : "add", srcFactor : id_to_blend_factor(read_u32(pbs + 4)), dstFactor : id_to_blend_factor(read_u32(pbs + 8))},
+							alpha : {operation : "add", srcFactor : id_to_blend_factor(read_u32(pbs + 16)), dstFactor : id_to_blend_factor(read_u32(pbs + 20))}
+						};
+					}
 					frag.targets.push(t);
 				}
-
-				// WGPUDepthStencilState
-				let pds = read_u32(pdescriptor + 72);
-				let ds  = {format : id_to_texture_format(read_u32(pds + 4)), depthWriteEnabled : read_u32(pds + 8), depthCompare : read_u32(pds + 12)};
-				if (ds.depthCompare === 0x00000002)
-					ds.depthCompare = "less";
-				if (ds.depthCompare === 0x00000008)
-					ds.depthCompare = "always";
 
 				// WGPURenderPipelineDescriptor
 				let desc = {
@@ -457,9 +489,19 @@ async function init() {
 					// WGPUVertexState
 					vertex : {module : id_to_ptr(read_u32(pdescriptor + 20)), entryPoint : "main", bufferCount : 1, buffers : []},
 					primitive : {topology : "triangle-list", frontFace : "ccw", cullMode : "none"},
-					depthStencil : ds,
 					fragment : frag,
 				};
+
+				// WGPUDepthStencilState
+				let pds = read_u32(pdescriptor + 72);
+				if (pds != 0) {
+					let ds  = {format : id_to_texture_format(read_u32(pds + 4)), depthWriteEnabled : read_u32(pds + 8), depthCompare : read_u32(pds + 12)};
+					if (ds.depthCompare === 0x00000002)
+						ds.depthCompare = "less";
+					if (ds.depthCompare === 0x00000008)
+						ds.depthCompare = "always";
+					desc.depthStencil = ds;
+				}
 
 				let pbuffers = read_u32(pdescriptor + 44);
 				for (let i = 0; i < desc.vertex.bufferCount; ++i) {
@@ -567,9 +609,6 @@ async function init() {
 			js_pow : function(x) {
 				return Math.pow(x);
 			},
-			js_floor : function(x) {
-				return Math.floor(x);
-			},
 			js_sin : function(x) {
 				return Math.sin(x);
 			},
@@ -588,6 +627,19 @@ async function init() {
 			js_sqrt : function(x) {
 				return Math.sqrt(x);
 			},
+			js_acos : function(x) {
+				return Math.acos(x);
+			},
+			js_asin : function(x) {
+				return Math.asin(x);
+			},
+			js_atan : function(x) {
+				return Math.atan(x);
+			},
+			js_atan2 : function(x, y) {
+				return Math.atan2(x, y);
+			},
+
 			js_eval : function(str) {
 				(1, eval)(read_string(str));
 			},

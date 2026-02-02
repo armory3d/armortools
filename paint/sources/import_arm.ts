@@ -341,7 +341,7 @@ function import_arm_run_project(path: string) {
 		}
 	}
 
-	sys_notify_on_next_frame(function() {
+	sys_notify_on_next_frame(function(_: any) {
 		// Once envmap is imported
 		scene_world.strength         = project_raw.envmap_strength;
 		context_raw.envmap_angle     = project_raw.envmap_angle;
@@ -381,7 +381,7 @@ function import_arm_run_mesh(raw: project_format_t) {
 		util_mesh_merge();
 		viewport_scale_to_bounds();
 	}
-	sys_notify_on_next_frame(layers_init);
+	sys_notify_on_next_frame(function(_: any) { layers_init(); });
 	history_reset();
 }
 

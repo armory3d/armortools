@@ -441,7 +441,7 @@ function slot_layer_to_fill_layer(raw: slot_layer_t) {
 	context_set_layer(raw);
 	raw.fill_layer = context_raw.material;
 	layers_update_fill_layer();
-	sys_notify_on_next_frame(function() {
+	sys_notify_on_next_frame(function(_: any) {
 		make_material_parse_paint_material();
 		context_raw.layer_preview_dirty            = true;
 		ui_base_hwnds[tab_area_t.SIDEBAR0].redraws = 2;
@@ -1252,7 +1252,7 @@ function layers_create_fill_layer(uv_type: uv_type_t = uv_type_t.UVMAP, decal_ma
 	_layers_uv_type   = uv_type;
 	_layers_decal_mat = decal_mat;
 	_layers_position  = position;
-	sys_notify_on_next_frame(function() {
+	sys_notify_on_next_frame(function(_: any) {
 		let l: slot_layer_t = layers_new_layer(false, _layers_position);
 		history_new_layer();
 		l.uv_type = _layers_uv_type;
@@ -1284,7 +1284,7 @@ function layers_create_color_layer(base_color: i32, occlusion: f32 = 1.0, roughn
 	_layers_metallic   = metallic;
 	_layers_position   = position;
 
-	sys_notify_on_next_frame(function() {
+	sys_notify_on_next_frame(function(_: any) {
 		let l: slot_layer_t = layers_new_layer(false, _layers_position);
 		history_new_layer();
 		l.uv_type     = uv_type_t.UVMAP;
@@ -1682,7 +1682,7 @@ function layers_flatten(height_to_normal: bool = false, layers: slot_layer_t[] =
 }
 
 function layers_on_resized() {
-	sys_notify_on_next_frame(function() {
+	sys_notify_on_next_frame(function(_: any) {
 		layers_resize();
 		let _layer: slot_layer_t       = context_raw.layer;
 		let _material: slot_material_t = context_raw.material;

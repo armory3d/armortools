@@ -70,7 +70,7 @@ function project_save(save_and_quit: bool = false) {
 
 	_project_save_and_quit = save_and_quit;
 
-	sys_notify_on_next_frame(function() {
+	sys_notify_on_next_frame(function(_: any) {
 		export_arm_run_project();
 		if (_project_save_and_quit) {
 			iron_stop();
@@ -276,9 +276,9 @@ function project_new(reset_layers: bool = true) {
 		array_push(project_layers, layer);
 		context_set_layer(layer);
 		if (aspect_ratio_changed) {
-			sys_notify_on_next_frame(layers_resize);
+			sys_notify_on_next_frame(function(_: any) { layers_resize(); });
 		}
-		sys_notify_on_next_frame(layers_init);
+		sys_notify_on_next_frame(function(_: any) { layers_init(); });
 	}
 
 	if (in_use)
@@ -290,7 +290,7 @@ function project_new(reset_layers: bool = true) {
 	viewport_scale_to_bounds(1.8);
 	render_path_raytrace_ready = false;
 
-	sys_notify_on_next_frame(function() {
+	sys_notify_on_next_frame(function(_: any) {
 		// Once layers and meshes are populated on project open
 		util_render_make_material_preview();
 		context_raw.ddirty = 4;
@@ -354,7 +354,7 @@ function project_import_brush() {
 			// Parse brush
 			make_material_parse_brush();
 			ui_nodes_hwnd.redraws = 2;
-			sys_notify_on_next_frame(util_render_make_brush_preview);
+			sys_notify_on_next_frame(function(_: any) { util_render_make_brush_preview(); });
 		}
 		// Import from project file
 		else {
@@ -552,7 +552,7 @@ function project_reimport_texture_load(path: string, asset: asset_t) {
 		context_raw.texture = project_assets[i];
 	}
 
-	sys_notify_on_next_frame(function() {
+	sys_notify_on_next_frame(function(_: any) {
 		make_material_parse_paint_material();
 
 		util_render_make_material_preview();

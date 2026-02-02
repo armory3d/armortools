@@ -125,7 +125,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 								ui_files_show("png", true, false, function(path: string) {
 									_tab_textures_draw_path = path;
 
-									sys_notify_on_next_frame(function() {
+									sys_notify_on_next_frame(function(_: any) {
 										let img: gpu_texture_t    = _tab_textures_draw_img;
 										let target: gpu_texture_t = gpu_create_render_target(img.width, img.height);
 										draw_begin(target);
@@ -155,13 +155,13 @@ function tab_textures_draw(htab: ui_handle_t) {
 							}
 
 							if (ui_menu_button(tr("To Mask"), "", icon_t.MASK)) {
-								sys_notify_on_next_frame(function() {
+								sys_notify_on_next_frame(function(_: any) {
 									layers_create_image_mask(_tab_textures_draw_asset);
 								});
 							}
 
 							if (ui_menu_button(tr("Set as Envmap"), "", icon_t.LANDSCAPE)) {
-								sys_notify_on_next_frame(function() {
+								sys_notify_on_next_frame(function(_: any) {
 									import_envmap_run(_tab_textures_draw_asset.file, _tab_textures_draw_img);
 								});
 							}
@@ -268,7 +268,7 @@ function tab_textures_delete_texture(asset: asset_t) {
 	map_delete(project_asset_map, asset.id);
 	array_splice(project_assets, index, 1);
 	array_splice(project_asset_names, index, 1);
-	sys_notify_on_next_frame(function() {
+	sys_notify_on_next_frame(function(_: any) {
 		make_material_parse_paint_material();
 		util_render_make_material_preview();
 		ui_base_hwnds[tab_area_t.SIDEBAR1].redraws = 2;

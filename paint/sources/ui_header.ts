@@ -207,7 +207,7 @@ function ui_header_draw_tool_properties() {
 		if (!baking && ui_button(tr("Bake"))) {
 			context_raw.pdirty = rt_bake ? context_raw.bake_samples : 1;
 			context_raw.rdirty = 3;
-			sys_notify_on_next_frame(function() {
+			sys_notify_on_next_frame(function(_: any) {
 				context_raw.layer_preview_dirty = true;
 			});
 			ui_base_hwnds[0].redraws                 = 2;

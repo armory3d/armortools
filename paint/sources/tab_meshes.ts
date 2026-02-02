@@ -432,7 +432,7 @@ function tab_scene_import_mesh_done() {
 		tab_scene_select_object(mo);
 	}
 
-	sys_notify_on_next_frame(function() {
+	sys_notify_on_next_frame(function(_: any) {
 		util_mesh_merge();
 		tab_scene_select_object(context_raw.selected_object.ext);
 		tab_scene_sort();

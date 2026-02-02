@@ -151,7 +151,7 @@ function ui_viewnodes_on_socket_released(socket_id: i32) {
 			_ui_nodes_on_socket_released_socket = socket;
 			_ui_nodes_on_socket_released_node   = node;
 
-			sys_notify_on_next_frame(function() {
+			sys_notify_on_next_frame(function(_: any) {
 				ui_menu_draw(function() {
 					let socket: ui_node_socket_t = _ui_nodes_on_socket_released_socket;
 					let node: ui_node_t          = _ui_nodes_on_socket_released_node;
@@ -173,7 +173,7 @@ function ui_viewnodes_on_socket_released(socket_id: i32) {
 							_ui_nodes_hval0.f = socket.default_value[0];
 						}
 
-						sys_notify_on_next_frame(function() {
+						sys_notify_on_next_frame(function(_: any) {
 							ui_end_input();
 
 							ui_box_show_custom(function() {
@@ -292,7 +292,7 @@ function ui_viewnodes_on_canvas_released() {
 				                         selected.type == "GROUP_OUTPUT" || selected.type == "brush_output_node";
 				ui.enabled = !is_protected;
 				if (ui_menu_button(tr("Cut"), "ctrl+x", icon_t.CUT)) {
-					sys_notify_on_next_frame(function() {
+					sys_notify_on_next_frame(function(_: any) {
 						ui_nodes_hwnd.redraws    = 2;
 						ui_is_copy               = true;
 						ui_is_cut                = true;
@@ -300,14 +300,14 @@ function ui_viewnodes_on_canvas_released() {
 					});
 				}
 				if (ui_menu_button(tr("Copy"), "ctrl+c", icon_t.COPY)) {
-					sys_notify_on_next_frame(function() {
+					sys_notify_on_next_frame(function(_: any) {
 						ui_is_copy               = true;
 						ui_nodes_is_node_menu_op = true;
 					});
 				}
 				ui.enabled = ui_clipboard != "";
 				if (ui_menu_button(tr("Paste"), "ctrl+v", icon_t.PASTE)) {
-					sys_notify_on_next_frame(function() {
+					sys_notify_on_next_frame(function(_: any) {
 						ui_nodes_hwnd.redraws    = 2;
 						ui_is_paste              = true;
 						ui_nodes_is_node_menu_op = true;
@@ -315,8 +315,8 @@ function ui_viewnodes_on_canvas_released() {
 				}
 				ui.enabled = !is_protected;
 				if (ui_menu_button(tr("Delete"), "delete", icon_t.DELETE)) {
-					sys_notify_on_next_frame(function() {
-						sys_notify_on_end_frame(function() {
+					sys_notify_on_next_frame(function(_: any) {
+						sys_notify_on_end_frame(function(_: any) {
 							ui_nodes_hwnd.redraws    = 2;
 							ui.is_delete_down        = true;
 							ui_nodes_is_node_menu_op = true;
@@ -324,7 +324,7 @@ function ui_viewnodes_on_canvas_released() {
 					});
 				}
 				if (ui_menu_button(tr("Duplicate"), "", icon_t.DUPLICATE)) {
-					sys_notify_on_next_frame(function() {
+					sys_notify_on_next_frame(function(_: any) {
 						ui_nodes_hwnd.redraws    = 2;
 						ui_is_copy               = true;
 						ui_is_paste              = true;
@@ -342,7 +342,7 @@ function ui_viewnodes_on_canvas_released() {
 				}
 
 				if (ui_menu_button(tr("Capture Output"), "", icon_t.PHOTO)) {
-					sys_notify_on_next_frame(function() {
+					sys_notify_on_next_frame(function(_: any) {
 						ui_nodes_capture_output();
 					});
 				}
@@ -485,7 +485,7 @@ function ui_nodes_get_nodes(): ui_nodes_t {
 	}
 }
 
-function ui_nodes_update() {
+function ui_nodes_update(_: any) {
 	if (!ui_nodes_show || !base_ui_enabled) {
 		return;
 	}
@@ -779,7 +779,7 @@ function ui_nodes_get_linked_nodes(linked_nodes: ui_node_t[], n: ui_node_t, c: u
 	}
 }
 
-function ui_nodes_render() {
+function ui_nodes_render(_: any) {
 	ui_nodes_recompile();
 
 	let ui_nodes: ui_nodes_t = ui_nodes_get_nodes();
@@ -1267,7 +1267,7 @@ function ui_nodes_draw_menubar() {
 			ui_nodes_node_search_x = ui._window_x + ui._x;
 			ui_nodes_node_search_y = ui._window_y + ui._y;
 			// Allow for node menu to be closed first
-			sys_notify_on_next_frame(function() {
+			sys_notify_on_next_frame(function(_: any) {
 				ui_nodes_node_search(math_floor(ui_nodes_node_search_x), math_floor(ui_nodes_node_search_y));
 			});
 		}

@@ -125,7 +125,7 @@ function box_preferences_interface_tab() {
 	if (ui_icon_button(tr("Restore"), icon_t.REPLAY) && !ui_menu_show) {
 		ui_menu_draw(function() {
 			if (ui_menu_button(tr("Confirm"), "", icon_t.CHECK)) {
-				sys_notify_on_next_frame(function() {
+				sys_notify_on_next_frame(function(_: any) {
 					ui.ops.theme.ELEMENT_H = base_default_element_h;
 					config_restore();
 					box_preferences_set_scale();

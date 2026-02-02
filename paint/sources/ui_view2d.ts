@@ -52,7 +52,7 @@ function ui_view2d_draw_image(image: gpu_texture_t, dx: f32, dy: f32, dw: f32, d
 	draw_scaled_image(image, dx, dy, dw, dh);
 }
 
-function ui_view2d_render() {
+function ui_view2d_render(_: any) {
 	ui_view2d_ww = config_raw.layout[layout_size_t.NODES_W];
 	ui_view2d_wx = math_floor(sys_w()) + ui_toolbar_w(true);
 	ui_view2d_wy = 0;
@@ -240,7 +240,7 @@ function ui_view2d_render() {
 				_ui_view2d_render_tw = tw;
 				_ui_view2d_render_th = th;
 
-				sys_notify_on_next_frame(function() {
+				sys_notify_on_next_frame(function(_: any) {
 					let rt: render_target_t            = map_get(render_path_render_targets, "texpaint_picker");
 					let texpaint_picker: gpu_texture_t = rt._image;
 					draw_begin(texpaint_picker);
@@ -421,7 +421,7 @@ function ui_view2d_render() {
 	ui_end();
 }
 
-function ui_view2d_update() {
+function ui_view2d_update(_: any) {
 	let headerh: f32 = UI_ELEMENT_H() * 1.4;
 
 	context_raw.paint2d = false;

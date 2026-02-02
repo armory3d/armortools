@@ -75,7 +75,7 @@ function box_export_tab_export_textures(title: string, bake_material: bool = fal
 
 		ui_combo(base_bits_handle, base_bits_combo, tr("Color"), true);
 		if (base_bits_handle.changed) {
-			sys_notify_on_next_frame(layers_set_bits);
+			sys_notify_on_next_frame(function(_: any) { layers_set_bits(); });
 		}
 
 		ui_row2();
@@ -136,7 +136,7 @@ function box_export_tab_export_textures(title: string, bake_material: bool = fal
 			if (context_raw.layers_destination == export_destination_t.PACK_INTO_PROJECT) {
 				_box_export_bake_material       = bake_material;
 				context_raw.texture_export_path = "/";
-				sys_notify_on_next_frame(function() {
+				sys_notify_on_next_frame(function(_: any) {
 					export_texture_run(context_raw.texture_export_path, _box_export_bake_material);
 				});
 			}
@@ -148,7 +148,7 @@ function box_export_tab_export_textures(title: string, bake_material: bool = fal
 					/// if (arm_android || arm_ios)
 					console_toast(tr("Exporting textures"));
 					/// end
-					sys_notify_on_next_frame(function() {
+					sys_notify_on_next_frame(function(_: any) {
 						export_texture_run(context_raw.texture_export_path, _box_export_bake_material);
 					});
 				});

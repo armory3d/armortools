@@ -92,7 +92,7 @@ void qsort(void *base, size_t num, size_t size, int (*compar)(const void *, cons
 		while (compar(b + i * size, tmp) < 0) {
 			i++;
 		}
-		while (compar(b + j * size, tmp) > 0) {
+		while (j > 0 && compar(b + j * size, tmp) > 0) {
 			j--;
 		}
 		if (i <= j) {
@@ -103,6 +103,9 @@ void qsort(void *base, size_t num, size_t size, int (*compar)(const void *, cons
 				memcpy(b + j * size, t, size);
 			}
 			i++;
+			if (j == 0) {
+				break;
+			}
 			j--;
 		}
 	}

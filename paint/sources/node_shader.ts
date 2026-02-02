@@ -99,6 +99,15 @@ function node_shader_add_texture(raw: node_shader_t, name: string, link: string 
 		array_push(raw.textures, name);
 		node_shader_context_add_texture_unit(raw.context, name, link);
 	}
+
+/// if IRON_WASM
+	if (name == "gbufferD") { // webgpu - depth texture first
+		let t: string = array_pop(raw.textures);
+		array_insert(raw.textures, 0, t);
+		let c: tex_unit_t = array_pop(raw.context.data.texture_units);
+		array_insert(raw.context.data.texture_units, 0, c);
+	}
+/// end
 }
 
 function node_shader_add_function(raw: node_shader_t, s: string) {

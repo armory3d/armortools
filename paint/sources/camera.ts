@@ -10,7 +10,7 @@ function camera_init() {
 	camera_reset();
 }
 
-function camera_update() {
+function camera_update(_: any) {
 	let camera: camera_object_t = scene_camera;
 
 	if (mouse_view_x() < 0 || mouse_view_x() > sys_w() || mouse_view_y() < 0 || mouse_view_y() > sys_h()) {

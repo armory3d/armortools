@@ -161,7 +161,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 					if (ui_menu_button(tr("Set as Envmap"), "", icon_t.LANDSCAPE)) {
 
 						import_asset_run(file, -1.0, -1.0, true, true, function() {
-							sys_notify_on_next_frame(function() {
+							sys_notify_on_next_frame(function(_: any) {
 								let file: string = _tab_browser_draw_file;
 
 								let asset_index: i32 = -1;
@@ -180,7 +180,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 
 					if (ui_menu_button(tr("Set as Mask"), "", icon_t.MASK)) {
 						import_asset_run(file, -1.0, -1.0, true, true, function() {
-							sys_notify_on_next_frame(function() {
+							sys_notify_on_next_frame(function(_: any) {
 								let file: string = _tab_browser_draw_file;
 
 								let asset_index: i32 = -1;
@@ -199,7 +199,7 @@ function tab_browser_draw(htab: ui_handle_t) {
 
 					if (ui_menu_button(tr("Set as Color ID Map"), "", icon_t.COLOR_ID)) {
 						import_asset_run(file, -1.0, -1.0, true, true, function() {
-							sys_notify_on_next_frame(function() {
+							sys_notify_on_next_frame(function(_: any) {
 								let file: string = _tab_browser_draw_file;
 
 								let asset_index: i32 = -1;
