@@ -281,7 +281,7 @@ void cstyle_write_opcode(char *code, size_t *offset, opcode *o, type_string_func
 	}
 	case OPCODE_WHILE_CONDITION: {
 		indent(code, offset, *indentation);
-		*offset += sprintf(&code[*offset], "if (!_%" PRIu64 ") break;\n", o->op_while.condition.index);
+		*offset += sprintf(&code[*offset], "if (!_%" PRIu64 ") { break; }\n", o->op_while.condition.index); // wgsl requires {} for if statements
 		break;
 	}
 	case OPCODE_WHILE_END: {

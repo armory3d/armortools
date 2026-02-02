@@ -32,6 +32,10 @@ void kong_log_args(log_level_t level, const char *format, va_list args) {
 		char buffer[4096];
 		vsnprintf(buffer, 4090, format, args);
 		strcat(buffer, "\n");
+#ifdef IRON_WASM
+		printf("%s", buffer); ////
+#else
 		fprintf(level == LOG_LEVEL_INFO ? stdout : stderr, "%s", buffer);
+#endif
 	}
 }

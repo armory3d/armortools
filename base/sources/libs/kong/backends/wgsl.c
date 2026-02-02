@@ -296,7 +296,20 @@ static void write_globals(char *wgsl, size_t *offset, function *main, bool *fram
 
 	find_referenced_globals(main, &referenced_globals);
 
+	for (size_t i = 0; i < referenced_globals.size; ++i) {
+		global *g         = get_global(referenced_globals.globals[i]);
+		type   *t         = get_type(g->type);
+		type_id base_type = t->array_size > 0 ? t->base : g->type;
+		if (base_type == float_id) {
+			*offset += sprintf(&wgsl[*offset], "const _%" PRIu64 ": f32 = %f;\n\n", g->var_index, g->value.value.floats[0]);
+		}
+	}
+
 	descriptor_set_group *group = find_descriptor_set_group_for_function(main);
+
+	if (group == NULL) {
+		return;
+	}
 
 	for (size_t set_index = 0; set_index < group->size; ++set_index) {
 		uint32_t binding = 0;
@@ -451,16 +464,24 @@ typedef struct small_string {
 	char str[64];
 } small_string;
 
-static small_string get_var(variable var, function *f) {
+static small_string get_var(variable var, function *f, function *main) {
 	// TODO: Create the list of globals only once per function
-	descriptor_set_group *group = get_descriptor_set_group(f->descriptor_set_group_index);
-	for (size_t set_index = 0; set_index < group->size; ++set_index) {
-		descriptor_set *set = group->values[set_index];
-		for (size_t global_index = 0; global_index < set->globals.size; ++global_index) {
-			if (var.index == get_global(set->globals.globals[global_index])->var_index) {
-				small_string name;
-				sprintf(name.str, "_set%zu_%" PRIu64, set_index, var.index);
-				return name;
+	descriptor_set_group *group = NULL;
+	if (main->descriptor_set_group_index != UINT32_MAX) {
+		group = get_descriptor_set_group(main->descriptor_set_group_index);
+	}
+	if (group != NULL) {
+		for (size_t set_index = 0; set_index < group->size; ++set_index) {
+			descriptor_set *set = group->values[set_index];
+			if (set == NULL) continue;
+
+			for (size_t global_index = 0; global_index < set->globals.size; ++global_index) {
+				global *g = get_global(set->globals.globals[global_index]);
+				if (g != NULL && var.index == g->var_index) {
+					small_string name;
+					sprintf(name.str, "_set%zu_%" PRIu64, set_index, var.index);
+					return name;
+				}
 			}
 		}
 	}
@@ -574,10 +595,10 @@ static void write_functions(char *code, size_t *offset, shader_stage stage, func
 			*offset += sprintf(&code[*offset], "fn %s(", get_name(f->name));
 			for (uint8_t parameter_index = 0; parameter_index < f->parameters_size; ++parameter_index) {
 				if (parameter_index == 0) {
-					*offset += sprintf(&code[*offset], "%s _%" PRIu64, type_string(f->parameter_types[parameter_index].type), parameter_ids[parameter_index]);
+					*offset += sprintf(&code[*offset], "_%" PRIu64 ": %s", parameter_ids[parameter_index], type_string(f->parameter_types[parameter_index].type));
 				}
 				else {
-					*offset += sprintf(&code[*offset], "%s _%" PRIu64, type_string(f->parameter_types[parameter_index].type), parameter_ids[parameter_index]);
+					*offset += sprintf(&code[*offset], ", _%" PRIu64 ": %s", parameter_ids[parameter_index], type_string(f->parameter_types[parameter_index].type));
 				}
 			}
 			*offset += sprintf(&code[*offset], ") -> %s {\n", type_string(f->return_type.type));
@@ -611,15 +632,15 @@ static void write_functions(char *code, size_t *offset, shader_stage stage, func
 					assert(o->op_load_access_list.access_list[0].kind == ACCESS_ELEMENT);
 
 					*offset +=
-					    sprintf(&code[*offset], "var %s: %s = ", get_var(o->op_load_access_list.to, f).str, type_string(o->op_load_access_list.to.type.type));
+					    sprintf(&code[*offset], "var %s: %s = ", get_var(o->op_load_access_list.to, f, main).str, type_string(o->op_load_access_list.to.type.type));
 
-					*offset += sprintf(&code[*offset], "textureLoad(%s, vec2<u32>(u32(%s.x), u32(%s.y)), 0);\n", get_var(o->op_load_access_list.from, f).str,
-					                   get_var(o->op_load_access_list.access_list[0].access_element.index, f).str,
-					                   get_var(o->op_load_access_list.access_list[0].access_element.index, f).str);
+					*offset += sprintf(&code[*offset], "textureLoad(%s, vec2<u32>(u32(%s.x), u32(%s.y)), 0);\n", get_var(o->op_load_access_list.from, f, main).str,
+					                   get_var(o->op_load_access_list.access_list[0].access_element.index, f, main).str,
+					                   get_var(o->op_load_access_list.access_list[0].access_element.index, f, main).str);
 				}
 				else {
-					*offset += sprintf(&code[*offset], "var %s: %s = %s", get_var(o->op_load_access_list.to, f).str,
-					                   type_string(o->op_load_access_list.to.type.type), get_var(o->op_load_access_list.from, f).str);
+					*offset += sprintf(&code[*offset], "var %s: %s = %s", get_var(o->op_load_access_list.to, f, main).str,
+					                   type_string(o->op_load_access_list.to.type.type), get_var(o->op_load_access_list.from, f, main).str);
 
 					type *s = get_type(o->op_load_access_list.from.type.type);
 
@@ -632,7 +653,7 @@ static void write_functions(char *code, size_t *offset, shader_stage stage, func
 							*offset += sprintf(&code[*offset], ".%s", get_name(o->op_load_access_list.access_list[i].access_member.name));
 							break;
 						case ACCESS_SWIZZLE: {
-							char swizzle[4];
+							char swizzle[5];
 
 							for (uint32_t swizzle_index = 0; swizzle_index < o->op_load_access_list.access_list[i].access_swizzle.swizzle.size;
 							     ++swizzle_index) {
@@ -668,11 +689,11 @@ static void write_functions(char *code, size_t *offset, shader_stage stage, func
 					assert(o->op_store_access_list.access_list[0].kind == ACCESS_ELEMENT);
 
 					*offset += sprintf(&code[*offset], "textureStore(%s, vec2<u32>(u32(_%" PRIu64 ".x), u32(_%" PRIu64 ".y)), _%" PRIu64 ");\n",
-					                   get_var(o->op_store_access_list.to, f).str, o->op_store_access_list.access_list[0].access_element.index.index,
+					                   get_var(o->op_store_access_list.to, f, main).str, o->op_store_access_list.access_list[0].access_element.index.index,
 					                   o->op_store_access_list.access_list[0].access_element.index.index, o->op_store_access_list.from.index);
 				}
 				else {
-					*offset += sprintf(&code[*offset], "%s", get_var(o->op_store_access_list.to, f).str);
+					*offset += sprintf(&code[*offset], "%s", get_var(o->op_store_access_list.to, f, main).str);
 
 					type *s = get_type(to_type);
 
@@ -685,7 +706,7 @@ static void write_functions(char *code, size_t *offset, shader_stage stage, func
 							*offset += sprintf(&code[*offset], ".%s", get_name(o->op_store_access_list.access_list[i].access_member.name));
 							break;
 						case ACCESS_SWIZZLE: {
-							char swizzle[4];
+							char swizzle[5];
 
 							for (uint32_t swizzle_index = 0; swizzle_index < o->op_store_access_list.access_list[i].access_swizzle.swizzle.size;
 							     ++swizzle_index) {
@@ -704,19 +725,19 @@ static void write_functions(char *code, size_t *offset, shader_stage stage, func
 
 					switch (o->type) {
 					case OPCODE_STORE_ACCESS_LIST:
-						*offset += sprintf(&code[*offset], " = %s;\n", get_var(o->op_store_access_list.from, f).str);
+						*offset += sprintf(&code[*offset], " = %s;\n", get_var(o->op_store_access_list.from, f, main).str);
 						break;
 					case OPCODE_SUB_AND_STORE_ACCESS_LIST:
-						*offset += sprintf(&code[*offset], " -= %s;\n", get_var(o->op_store_access_list.from, f).str);
+						*offset += sprintf(&code[*offset], " -= %s;\n", get_var(o->op_store_access_list.from, f, main).str);
 						break;
 					case OPCODE_ADD_AND_STORE_ACCESS_LIST:
-						*offset += sprintf(&code[*offset], " += %s;\n", get_var(o->op_store_access_list.from, f).str);
+						*offset += sprintf(&code[*offset], " += %s;\n", get_var(o->op_store_access_list.from, f, main).str);
 						break;
 					case OPCODE_DIVIDE_AND_STORE_ACCESS_LIST:
-						*offset += sprintf(&code[*offset], " /= %s;\n", get_var(o->op_store_access_list.from, f).str);
+						*offset += sprintf(&code[*offset], " /= %s;\n", get_var(o->op_store_access_list.from, f, main).str);
 						break;
 					case OPCODE_MULTIPLY_AND_STORE_ACCESS_LIST:
-						*offset += sprintf(&code[*offset], " *= %s;\n", get_var(o->op_store_access_list.from, f).str);
+						*offset += sprintf(&code[*offset], " *= %s;\n", get_var(o->op_store_access_list.from, f, main).str);
 						break;
 					default:
 						assert(false);
@@ -750,6 +771,11 @@ static void write_functions(char *code, size_t *offset, shader_stage stage, func
 					indent(code, offset, indentation);
 					*offset += sprintf(&code[*offset], "return;\n");
 				}
+				break;
+			}
+			case OPCODE_DISCARD: {
+				indent(code, offset, indentation);
+				*offset += sprintf(&code[*offset], "discard;\n");
 				break;
 			}
 			case OPCODE_MULTIPLY: {
@@ -886,22 +912,22 @@ static void write_functions(char *code, size_t *offset, shader_stage stage, func
 					variable coord   = o->op_call.parameters[2];
 
 					if (get_type(tex.type.type)->tex_kind == TEXTURE_KIND_2D_ARRAY) {
-						*offset += sprintf(&code[*offset], "var %s: %s = textureSample(%s, %s, %s.xy, u32(%s.z));\n", get_var(o->op_call.var, f).str,
-						                   type_string(o->op_call.var.type.type), get_var(tex, f).str, get_var(sampler, f).str, get_var(coord, f).str,
-						                   get_var(coord, f).str);
+						*offset += sprintf(&code[*offset], "var %s: %s = textureSample(%s, %s, %s.xy, u32(%s.z));\n", get_var(o->op_call.var, f, main).str,
+						                   type_string(o->op_call.var.type.type), get_var(tex, f, main).str, get_var(sampler, f, main).str, get_var(coord, f, main).str,
+						                   get_var(coord, f, main).str);
 					}
 					else {
-						*offset += sprintf(&code[*offset], "var %s: %s = textureSample(%s, %s, %s);\n", get_var(o->op_call.var, f).str,
-						                   type_string(o->op_call.var.type.type), get_var(tex, f).str, get_var(sampler, f).str, get_var(coord, f).str);
+						*offset += sprintf(&code[*offset], "var %s: %s = textureSample(%s, %s, %s);\n", get_var(o->op_call.var, f, main).str,
+						                   type_string(o->op_call.var.type.type), get_var(tex, f, main).str, get_var(sampler, f, main).str, get_var(coord, f, main).str);
 					}
 				}
 				else if (o->op_call.func == add_name("sample_lod")) {
 					check(o->op_call.parameters_size == 4, context, "sample_lod requires four arguments");
 					indent(code, offset, indentation);
 					*offset +=
-					    sprintf(&code[*offset], "var %s: %s = textureSampleLevel(%s, %s, %s, %s);\n", get_var(o->op_call.var, f).str,
-					            type_string(o->op_call.var.type.type), get_var(o->op_call.parameters[0], f).str, get_var(o->op_call.parameters[1], f).str,
-					            get_var(o->op_call.parameters[2], f).str, get_var(o->op_call.parameters[3], f).str);
+					    sprintf(&code[*offset], "var %s: %s = textureSampleLevel(%s, %s, %s, %s);\n", get_var(o->op_call.var, f, main).str,
+					            type_string(o->op_call.var.type.type), get_var(o->op_call.parameters[0], f, main).str, get_var(o->op_call.parameters[1], f, main).str,
+					            get_var(o->op_call.parameters[2], f, main).str, get_var(o->op_call.parameters[3], f, main).str);
 				}
 				else if (o->op_call.func == add_name("group_id")) {
 					check(o->op_call.parameters_size == 0, context, "group_id can not have a parameter");
@@ -930,6 +956,96 @@ static void write_functions(char *code, size_t *offset, shader_stage stage, func
 					check(o->op_call.parameters_size == 0, context, "vertex_id can not have a parameter");
 					*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = i32(_kong_vertex_id);\n", o->op_call.var.index, type_string(o->op_call.var.type.type));
 				}
+				else if (o->op_call.func == add_name("lerp")) {
+					*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = mix(_%" PRIu64 ", _%" PRIu64 ", _%" PRIu64 ");\n", o->op_call.var.index, type_string(o->op_call.var.type.type),
+					                   o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index);
+				}
+				else if (o->op_call.func == add_name("ddx")) {
+					*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = dpdx(_%" PRIu64 ");\n", o->op_call.var.index, type_string(o->op_call.var.type.type),
+					                   o->op_call.parameters[0].index);
+				}
+				else if (o->op_call.func == add_name("ddy")) {
+					*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = dpdy(_%" PRIu64 ");\n", o->op_call.var.index, type_string(o->op_call.var.type.type),
+					                   o->op_call.parameters[0].index);
+				}
+				else if (o->op_call.func == add_name("rsqrt")) {
+					*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = inverseSqrt(_%" PRIu64 ");\n", o->op_call.var.index, type_string(o->op_call.var.type.type),
+					                   o->op_call.parameters[0].index);
+				}
+				else if (o->op_call.func == add_name("float3x3")) {
+					*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = mat3x3<f32>(_%" PRIu64 ", _%" PRIu64 ", _%" PRIu64 ");\n", o->op_call.var.index, type_string(o->op_call.var.type.type),
+					                   o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index);
+				}
+
+				////
+
+				else if (o->op_call.func == add_name("lerp3")) {
+					*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = mix(_%" PRIu64 ", _%" PRIu64 ", _%" PRIu64 ");\n", o->op_call.var.index, type_string(o->op_call.var.type.type),
+					                   o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index);
+				}
+				else if (o->op_call.func == add_name("lerp4")) {
+					*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = mix(_%" PRIu64 ", _%" PRIu64 ", _%" PRIu64 ");\n", o->op_call.var.index, type_string(o->op_call.var.type.type),
+					                   o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index);
+				}
+				else if (o->op_call.func == add_name("frac3")) {
+					*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = frac(_%" PRIu64 ");\n", o->op_call.var.index, type_string(o->op_call.var.type.type),
+					                   o->op_call.parameters[0].index);
+				}
+				else if (o->op_call.func == add_name("abs3")) {
+					*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = abs(_%" PRIu64 ");\n", o->op_call.var.index, type_string(o->op_call.var.type.type),
+					                   o->op_call.parameters[0].index);
+				}
+				else if (o->op_call.func == add_name("clamp3")) {
+					*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = clamp(_%" PRIu64 ", _%" PRIu64 ", _%" PRIu64 ");\n", o->op_call.var.index, type_string(o->op_call.var.type.type),
+					                   o->op_call.parameters[0].index, o->op_call.parameters[1].index, o->op_call.parameters[2].index);
+				}
+				else if (o->op_call.func == add_name("min3")) {
+					*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = min(_%" PRIu64 ", _%" PRIu64 ");\n", o->op_call.var.index, type_string(o->op_call.var.type.type),
+					                   o->op_call.parameters[0].index, o->op_call.parameters[1].index);
+				}
+				else if (o->op_call.func == add_name("max3")) {
+					*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = max(_%" PRIu64 ", _%" PRIu64 ");\n", o->op_call.var.index, type_string(o->op_call.var.type.type),
+					                   o->op_call.parameters[0].index, o->op_call.parameters[1].index);
+				}
+				else if (o->op_call.func == add_name("max4")) {
+					*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = max(_%" PRIu64 ", _%" PRIu64 ");\n", o->op_call.var.index, type_string(o->op_call.var.type.type),
+					                   o->op_call.parameters[0].index, o->op_call.parameters[1].index);
+				}
+				else if (o->op_call.func == add_name("step3")) {
+					*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = step(_%" PRIu64 ", _%" PRIu64 ");\n", o->op_call.var.index, type_string(o->op_call.var.type.type),
+					                   o->op_call.parameters[0].index, o->op_call.parameters[1].index);
+				}
+				else if (o->op_call.func == add_name("pow3")) {
+					*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = pow(_%" PRIu64 ", _%" PRIu64 ");\n", o->op_call.var.index, type_string(o->op_call.var.type.type),
+					                   o->op_call.parameters[0].index, o->op_call.parameters[1].index);
+				}
+				else if (o->op_call.func == add_name("floor3")) {
+					*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = floor(_%" PRIu64 ");\n", o->op_call.var.index, type_string(o->op_call.var.type.type),
+					                   o->op_call.parameters[0].index);
+				}
+				else if (o->op_call.func == add_name("ceil3")) {
+					*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = ceil(_%" PRIu64 ");\n", o->op_call.var.index, type_string(o->op_call.var.type.type),
+					                   o->op_call.parameters[0].index);
+				}
+				else if (o->op_call.func == add_name("ddx2")) {
+					*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = dpdx(_%" PRIu64 ");\n", o->op_call.var.index, type_string(o->op_call.var.type.type),
+					                   o->op_call.parameters[0].index);
+				}
+				else if (o->op_call.func == add_name("ddy2")) {
+					*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = dpdy(_%" PRIu64 ");\n", o->op_call.var.index, type_string(o->op_call.var.type.type),
+					                   o->op_call.parameters[0].index);
+				}
+				else if (o->op_call.func == add_name("ddx3")) {
+					*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = dpdx(_%" PRIu64 ");\n", o->op_call.var.index, type_string(o->op_call.var.type.type),
+					                   o->op_call.parameters[0].index);
+				}
+				else if (o->op_call.func == add_name("ddy3")) {
+					*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = dpdy(_%" PRIu64 ");\n", o->op_call.var.index, type_string(o->op_call.var.type.type),
+					                   o->op_call.parameters[0].index);
+				}
+
+				////
+
 				else {
 					name_id     func_name_id = o->op_call.func;
 					const char *func_name    = get_name(o->op_call.func);
@@ -1231,6 +1347,8 @@ void wgsl_export2(char **vs, char **fs) {
 
 	vertex_inputs_size = 0;
 	fragment_inputs_size = 0;
+	vertex_functions_size = 0;
+	fragment_functions_size = 0;
 
 	for (type_id i = 0; get_type(i) != NULL; ++i) {
 		type *t = get_type(i);
