@@ -178,7 +178,7 @@ function list_folder(path: string) {
 	}
 }
 
-function render() {
+function render(_: any) {
 	storage.window_w = iron_window_width();
 	storage.window_h = iron_window_height();
 	storage.window_x = iron_window_x();
