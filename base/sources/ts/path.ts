@@ -17,7 +17,7 @@ let path_texture_importers: map_t<string, any> = map_create(); // JSValue -> (s:
 
 let path_base_color_ext: string[]   = [ "albedo", "alb", "basecol", "basecolor", "diffuse", "diff", "base", "bc", "d", "color", "col" ];
 let path_opacity_ext: string[]      = [ "opac", "opacity", "alpha" ];
-let path_normal_map_ext: string[]   = [ "normal", "nor", "n", "nrm", "normalgl" ];
+let path_normal_map_ext: string[]   = [ "normal", "normals", "nor", "n", "nrm", "normalgl" ];
 let path_occlusion_ext: string[]    = [ "ao", "occlusion", "ambientOcclusion", "o", "occ" ];
 let path_roughness_ext: string[]    = [ "roughness", "rough", "r", "rgh" ];
 let path_metallic_ext: string[]     = [ "metallic", "metal", "metalness", "m", "met" ];
