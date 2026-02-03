@@ -1101,12 +1101,13 @@ static void write_functions(char *code, size_t *offset, shader_stage stage, func
 			case OPCODE_NEGATE: {
 				indent(code, offset, indentation);
 				*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = -_%" PRIu64 ";\n", o->op_negate.to.index, type_string(o->op_negate.to.type.type),
-								o->op_negate.from.index);
+				                   o->op_negate.from.index);
 				break;
 			}
 			case OPCODE_NOT: {
 				indent(code, offset, indentation);
-				*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = !_%" PRIu64 ";\n", o->op_not.to.index, type_string(o->op_not.to.type.type), o->op_not.from.index);
+				*offset += sprintf(&code[*offset], "var _%" PRIu64 ": %s = !_%" PRIu64 ";\n", o->op_not.to.index, type_string(o->op_not.to.type.type),
+				                   o->op_not.from.index);
 				break;
 			}
 			default:
