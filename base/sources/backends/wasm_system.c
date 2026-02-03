@@ -1,8 +1,8 @@
 
 #include <iron_audio.h>
 #include <iron_gpu.h>
-#include <iron_system.h>
 #include <iron_net.h>
+#include <iron_system.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -94,7 +94,7 @@ __attribute__((export_name("wasm_mousemove"))) void wasm_mousemove(int x, int y)
 }
 
 __attribute__((export_name("wasm_wheel"))) void wasm_wheel(float delta) {
-	iron_internal_mouse_trigger_scroll(delta);
+	iron_internal_mouse_trigger_scroll(delta / 200.0);
 }
 
 __attribute__((export_name("wasm_keydown"))) void wasm_keydown(int key) {
@@ -105,7 +105,7 @@ __attribute__((export_name("wasm_keyup"))) void wasm_keyup(int key) {
 	iron_internal_keyboard_trigger_key_up(key);
 }
 
-iron_window_mode_t iron_internal_window_mode   = IRON_WINDOW_MODE_WINDOW;
+iron_window_mode_t iron_internal_window_mode = IRON_WINDOW_MODE_WINDOW;
 
 int iron_window_x() {
 	return 0;
@@ -157,14 +157,12 @@ iron_window_mode_t iron_window_get_mode() {
 	return iron_internal_window_mode;
 }
 
-void iron_net_update() {
-}
+void iron_net_update() {}
 
 volatile uint64_t iron_net_bytes_downloaded = 0;
 
 void iron_net_request(const char *url_base, const char *url_path, const char *data, int port, int method, iron_https_callback_t callback, void *callbackdata,
-                      const char *dst_path) {
-}
+                      const char *dst_path) {}
 
 bool _save_and_quit_callback_internal() {
 	return false;
@@ -174,8 +172,7 @@ const char *iron_language() {
 	return "en";
 }
 
-void iron_load_url(const char *url) {
-}
+void iron_load_url(const char *url) {}
 
 const char *iron_system_id() {
 	return "wasm";

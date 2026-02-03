@@ -1,18 +1,24 @@
 
-let memory       = null;
-let heapu8       = null;
-let heapu16      = null;
-let heapu32      = null;
-let heapi32      = null;
-let heapf32      = null;
-let heapf64      = null;
-let module       = null;
-let instance     = null;
-let wgpu_objects = [ null ];
+let memory        = null;
+let heapu8        = null;
+let heapu16       = null;
+let heapu32       = null;
+let heapi32       = null;
+let heapf32       = null;
+let heapf64       = null;
+let module        = null;
+let instance      = null;
+let wgpu_objects  = [ null ];
+let wgpu_free_ids = [];
 
 function ptr_to_id(ptr) {
 	if (ptr === null) {
 		return 0;
+	}
+	if (wgpu_free_ids.length > 0) {
+		let id           = wgpu_free_ids.pop();
+		wgpu_objects[id] = ptr;
+		return id;
 	}
 	wgpu_objects.push(ptr);
 	return wgpu_objects.length - 1;
@@ -20,6 +26,11 @@ function ptr_to_id(ptr) {
 
 function id_to_ptr(id) {
 	return wgpu_objects[id];
+}
+
+function release_id(id) {
+	wgpu_objects[id] = null;
+	wgpu_free_ids.push(id);
 }
 
 function read_string(ptr) {
@@ -66,7 +77,7 @@ function id_to_texture_format(id) {
 		return "rgba16float";
 	if (id === 0x00000029)
 		return "rgba16float";
-		// return "rgba32float"; // Total color attachment bytes per sample (48) exceeds maximum (32)
+	// return "rgba32float"; // Total color attachment bytes per sample (48) exceeds maximum (32)
 	if (id === 0x00000009)
 		return "r16float";
 	if (id === 0x0000000E)
@@ -129,6 +140,15 @@ async function init() {
 	let device  = await adapter.requestDevice();
 
 	let canvas  = document.getElementById('iron');
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
+
+	window.addEventListener('resize', () => {
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
+		// ...
+	});
+
 	let context = canvas.getContext('webgpu');
 	let format  = navigator.gpu.getPreferredCanvasFormat();
 	context.configure({device, format});
@@ -229,8 +249,6 @@ async function init() {
 							e.texture.sampleType = "float";
 						else if (e.texture.sampleType === 0x00000003)
 							e.texture.sampleType = "unfilterable-float";
-						else if (e.texture.sampleType === 0x00000004)
-							e.texture.sampleType = "depth";
 					}
 
 					desc.entries.push(e);
@@ -301,7 +319,9 @@ async function init() {
 				}
 				queue.submit(command_buffers);
 			},
-			wgpuBufferRelease : function(pbuffer) {},
+			wgpuBufferRelease : function(pbuffer) {
+				release_id(pbuffer);
+			},
 			wgpuDeviceCreateSampler : function(pdevice, pdescriptor) {
 				let device = id_to_ptr(pdevice);
 				// WGPUSamplerDescriptor
@@ -309,7 +329,7 @@ async function init() {
 					addressModeU : "repeat",
 					addressModeV : "repeat",
 					addressModeW : "repeat",
-					magFilter :  id_to_filter_mode(read_u32(pdescriptor + 24)),
+					magFilter : id_to_filter_mode(read_u32(pdescriptor + 24)),
 					minFilter : id_to_filter_mode(read_u32(pdescriptor + 28)),
 					mipmapFilter : id_to_filter_mode(read_u32(pdescriptor + 32)),
 					maxAnisotropy : 1
@@ -351,7 +371,12 @@ async function init() {
 				// WGPURenderPassDepthStencilAttachment
 				let pdsa = read_u32(pdescriptor + 20);
 				if (pdsa !== 0) {
-					desc.depthStencilAttachment = {view : id_to_ptr(read_u32(pdsa + 4)), depthLoadOp : read_u32(pdsa + 8) == 0x00000001 ? "load" : "clear", depthStoreOp : "store", depthClearValue : 1.0};
+					desc.depthStencilAttachment = {
+						view : id_to_ptr(read_u32(pdsa + 4)),
+						depthLoadOp : read_u32(pdsa + 8) == 0x00000001 ? "load" : "clear",
+						depthStoreOp : "store",
+						depthClearValue : 1.0
+					};
 				}
 
 				let render_pass = encoder.beginRenderPass(desc);
@@ -369,9 +394,15 @@ async function init() {
 				let render_pass = id_to_ptr(prender_pass_encoder);
 				render_pass.end();
 			},
-			wgpuRenderPassEncoderRelease : function(prender_pass_encoder) {},
-			wgpuCommandBufferRelease : function(commandBufferPtr) {},
-			wgpuCommandEncoderRelease : function(pcommand_encoder) {},
+			wgpuRenderPassEncoderRelease : function(prender_pass_encoder) {
+				release_id(prender_pass_encoder);
+			},
+			wgpuCommandBufferRelease : function(pcommand_buffer) {
+				release_id(pcommand_buffer);
+			},
+			wgpuCommandEncoderRelease : function(pcommand_encoder) {
+				release_id(pcommand_encoder);
+			},
 			wgpuSurfacePresent : function(psurface) {
 				return 0;
 			},
@@ -434,9 +465,15 @@ async function init() {
 				}
 				render_pass.setBindGroup(group_index, group, dynamic_offsets);
 			},
-			wgpuBindGroupRelease : function(pbind_group) {},
-			wgpuRenderPipelineRelease : function(prender_pipeline) {},
-			wgpuPipelineLayoutRelease : function(ppipeline_layout) {},
+			wgpuBindGroupRelease : function(pbind_group) {
+				release_id(pbind_group);
+			},
+			wgpuRenderPipelineRelease : function(prender_pipeline) {
+				release_id(prender_pipeline);
+			},
+			wgpuPipelineLayoutRelease : function(ppipeline_layout) {
+				release_id(ppipeline_layout);
+			},
 			wgpuDeviceCreatePipelineLayout : function(pdevice, pdescriptor) {
 				let device = id_to_ptr(pdevice);
 				// WGPUPipelineLayoutDescriptor
@@ -469,10 +506,7 @@ async function init() {
 				let ptragets = read_u32(pfrag + 28);
 				for (let i = 0; i < frag.targetCount; ++i) {
 					// WGPUColorTargetState
-					let t = {
-						format : id_to_texture_format(read_u32(ptragets + 4 + i * 24)),
-						writeMask : read_u32(ptragets + 16 + i * 24)
-					};
+					let t   = {format : id_to_texture_format(read_u32(ptragets + 4 + i * 24)), writeMask : read_u32(ptragets + 16 + i * 24)};
 					let pbs = read_u32(ptragets + 8 + i * 24); // WGPUBlendState
 					if (pbs != 0) {
 						t.blend = {
@@ -488,17 +522,24 @@ async function init() {
 					layout : id_to_ptr(read_u32(pdescriptor + 12)),
 					// WGPUVertexState
 					vertex : {module : id_to_ptr(read_u32(pdescriptor + 20)), entryPoint : "main", bufferCount : 1, buffers : []},
-					primitive : {topology : "triangle-list", frontFace : "ccw", cullMode : "none"},
+					primitive : {topology : "triangle-list", frontFace : "ccw", cullMode : read_u32(pdescriptor + 64)},
 					fragment : frag,
 				};
+
+				if (desc.primitive.cullMode === 0x00000001)
+					desc.primitive.cullMode = "none";
+				else if (desc.primitive.cullMode === 0x00000002)
+					desc.primitive.cullMode = "front";
+				else if (desc.primitive.cullMode === 0x00000003)
+					desc.primitive.cullMode = "back";
 
 				// WGPUDepthStencilState
 				let pds = read_u32(pdescriptor + 72);
 				if (pds != 0) {
-					let ds  = {format : id_to_texture_format(read_u32(pds + 4)), depthWriteEnabled : read_u32(pds + 8), depthCompare : read_u32(pds + 12)};
+					let ds = {format : id_to_texture_format(read_u32(pds + 4)), depthWriteEnabled : read_u32(pds + 8), depthCompare : read_u32(pds + 12)};
 					if (ds.depthCompare === 0x00000002)
 						ds.depthCompare = "less";
-					if (ds.depthCompare === 0x00000008)
+					else if (ds.depthCompare === 0x00000008)
 						ds.depthCompare = "always";
 					desc.depthStencil = ds;
 				}
@@ -523,7 +564,9 @@ async function init() {
 				let rp = device.createRenderPipeline(desc);
 				return ptr_to_id(rp);
 			},
-			wgpuShaderModuleRelease : function(pshader_module) {},
+			wgpuShaderModuleRelease : function(pshader_module) {
+				release_id(pshader_module);
+			},
 			wgpuQueueWriteBuffer : function(pqueue, pbuffer, buffer_offset, pdata, size) {
 				let queue  = id_to_ptr(pqueue);
 				let buffer = id_to_ptr(pbuffer);
@@ -534,8 +577,12 @@ async function init() {
 				let texture = id_to_ptr(ptexture);
 				texture.destroy();
 			},
-			wgpuTextureRelease : function(ptexture) {},
-			wgpuTextureViewRelease : function(ptexture_view) {},
+			wgpuTextureRelease : function(ptexture) {
+				release_id(ptexture);
+			},
+			wgpuTextureViewRelease : function(ptexture_view) {
+				release_id(ptexture_view);
+			},
 			wgpuCommandEncoderCopyBufferToBuffer : function(pcommand_encoder, psource, source_offset, pdestination, destination_offset, size) {
 				let encoder     = id_to_ptr(pcommand_encoder);
 				let source      = id_to_ptr(psource);
@@ -662,11 +709,21 @@ async function init() {
 	}
 	window.requestAnimationFrame(update);
 
-	canvas.addEventListener('contextmenu', (event) => { event.preventDefault(); });
-	canvas.addEventListener('mousedown', (event) => { instance.exports.wasm_mousedown(event.button, event.clientX, event.clientY); });
-	canvas.addEventListener('mouseup', (event) => { instance.exports.wasm_mouseup(event.button, event.clientX, event.clientY); });
-	canvas.addEventListener('mousemove', (event) => { instance.exports.wasm_mousemove(event.clientX, event.clientY); });
-	canvas.addEventListener('wheel', (event) => { instance.exports.wasm_wheel(event.deltaY); });
+	canvas.addEventListener('contextmenu', (event) => {
+		event.preventDefault();
+	});
+	canvas.addEventListener('mousedown', (event) => {
+		instance.exports.wasm_mousedown(button_to_iron_button(event.button), event.clientX, event.clientY);
+	});
+	canvas.addEventListener('mouseup', (event) => {
+		instance.exports.wasm_mouseup(button_to_iron_button(event.button), event.clientX, event.clientY);
+	});
+	canvas.addEventListener('mousemove', (event) => {
+		instance.exports.wasm_mousemove(event.clientX, event.clientY);
+	});
+	canvas.addEventListener('wheel', (event) => {
+		instance.exports.wasm_wheel(event.deltaY);
+	});
 	canvas.addEventListener('keydown', (event) => {
 		if (event.repeat) {
 			event.preventDefault();
@@ -681,6 +738,14 @@ async function init() {
 		}
 		instance.exports.wasm_keyup(event.keyCode);
 	});
+}
+
+function button_to_iron_button(button) {
+	if (button === 1)
+		return 2;
+	if (button === 2)
+		return 1;
+	return button;
 }
 
 init();

@@ -28,7 +28,9 @@ function strings_graphics_api(): string {
 	return "Direct3D12";
 	/// elseif arm_metal
 	return "Metal";
-	/// else
+	/// elseif arm_vulkan
 	return "Vulkan";
+	/// else
+	return "WebGPU";
 	/// end
 }

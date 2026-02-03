@@ -50,14 +50,16 @@ double strtod(const char *str, char **endptr) {
 	while (isspace(*str)) {
 		str++;
 	}
-	int   sign = (*str == '-') ? (str++, -1) : (*str == '+') ? (str++, 1) : 1;
-	float val  = 0;
+	int    sign = (*str == '-') ? (str++, -1) : (*str == '+') ? (str++, 1) : 1;
+	double val  = 0;
 	while (isdigit(*str)) {
-		val = val * 10 + (*str++ - '0');
+		val = val * 10.0 + (*str++ - '0');
 	}
 	if (*str == '.') {
+		double divisor = 10.0;
 		for (str++; isdigit(*str); str++) {
-			val += (*str - '0') / (float)(str - (str - 1));
+			val += (*str - '0') / divisor;
+			divisor *= 10.0;
 		}
 	}
 	if (endptr) {
