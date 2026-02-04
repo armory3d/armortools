@@ -49,6 +49,7 @@ void close_dir(directory *dir) {
 
 directory open_dir(const char *dirname) {
 	directory dir;
+	dir.handle = NULL;
 	return dir;
 }
 

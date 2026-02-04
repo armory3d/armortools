@@ -21,7 +21,7 @@ let file_cloud_sizes: map_t<string, i32> = null;
 
 let _file_init_cloud_bytes_done: () => void;
 
-/// if arm_android
+/// if (arm_android || arm_wasm)
 let file_internal: map_t<string, string[]> = null; // .apk contents
 /// end
 
@@ -37,7 +37,13 @@ function file_read_directory(path: string): string[] {
 		}
 	}
 
-	/// if arm_android
+	/// if arm_wasm
+	if (starts_with(path, "/./")) {
+		path = substring(path, 2, path.length);
+	}
+	/// end
+
+	/// if (arm_android || arm_wasm)
 	path = string_replace_all(path, "//", "/");
 	if (file_internal == null) {
 		let s: string = sys_buffer_to_string(data_get_blob("data_list.json"));
@@ -49,6 +55,10 @@ function file_read_directory(path: string): string[] {
 	/// end
 
 	let files: string[] = string_split(iron_read_directory(path), "\n");
+	if (files.length == 1 && files[0] == ""){
+		array_pop(files);
+		return files;
+	}
 	array_sort(files, null);
 
 	// Folders first

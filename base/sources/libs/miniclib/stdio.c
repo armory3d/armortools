@@ -8,6 +8,7 @@ __attribute__((import_module("imports"), import_name("js_fopen"))) FILE    *js_f
 __attribute__((import_module("imports"), import_name("js_ftell"))) long int js_ftell(FILE *stream);
 __attribute__((import_module("imports"), import_name("js_fseek"))) int      js_fseek(FILE *stream, long int offset, int origin);
 __attribute__((import_module("imports"), import_name("js_fread"))) size_t   js_fread(void *ptr, size_t size, size_t count, FILE *stream);
+__attribute__((import_module("imports"), import_name("js_fwrite"))) size_t  js_fwrite(void *ptr, size_t size, size_t count, FILE *stream);
 #endif
 
 FILE *stdout = NULL, *stderr = NULL;
@@ -57,6 +58,9 @@ int vsnprintf(char *s, size_t n, const char *format, va_list arg) {
 }
 
 size_t fwrite(const void *ptr, size_t size, size_t count, FILE *stream) {
+#ifdef IRON_WASM
+	js_fwrite(ptr, size, count, stream);
+#endif
 	return 0;
 }
 

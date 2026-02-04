@@ -7,6 +7,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+__attribute__((import_module("imports"), import_name("js_time"))) int              js_time();
+__attribute__((import_module("imports"), import_name("js_canvas_w"))) int          js_canvas_w();
+__attribute__((import_module("imports"), import_name("js_canvas_h"))) int          js_canvas_h();
+__attribute__((import_module("imports"), import_name("js_mouse_set_cursor"))) void js_mouse_set_cursor(int i);
+__attribute__((import_module("imports"), import_name("js_mouse_show"))) void       js_mouse_show();
+__attribute__((import_module("imports"), import_name("js_mouse_hide"))) void       js_mouse_hide();
+__attribute__((import_module("imports"), import_name("js_window_set_title"))) void js_window_set_title(const char *title);
+__attribute__((import_module("imports"), import_name("js_load_url"))) void         js_load_url(const char *url);
+
+static bool mouse_hidden = false;
+
 void iron_display_init(void) {}
 
 int iron_primary_display(void) {
@@ -33,15 +44,24 @@ bool iron_mouse_can_lock(void) {
 	return false;
 }
 
-void iron_mouse_show() {}
-void iron_mouse_hide() {}
-void iron_mouse_set_cursor(iron_cursor_t cursor_index) {}
+void iron_mouse_show() {
+	js_mouse_show();
+}
+void iron_mouse_hide() {
+	js_mouse_hide();
+}
+
+void iron_mouse_set_cursor(iron_cursor_t cursor_index) {
+	if (mouse_hidden) {
+		return;
+	}
+	js_mouse_set_cursor(cursor_index);
+}
+
 void iron_mouse_set_position(int x, int y) {}
 void iron_mouse_get_position(int *x, int *y) {}
 void iron_keyboard_show() {}
 void iron_keyboard_hide() {}
-
-__attribute__((import_module("imports"), import_name("js_time"))) int js_time();
 
 void iron_init(iron_window_options_t *win) {
 	gpu_init(win->depth_bits, true);
@@ -66,7 +86,7 @@ double iron_time(void) {
 }
 
 int iron_hardware_threads(void) {
-	return 4;
+	return 1;
 }
 
 void iron_internal_shutdown(void) {}
@@ -105,6 +125,10 @@ __attribute__((export_name("wasm_keyup"))) void wasm_keyup(int key) {
 	iron_internal_keyboard_trigger_key_up(key);
 }
 
+__attribute__((export_name("wasm_keypress"))) void wasm_keypress(int key) {
+	iron_internal_keyboard_trigger_key_press(key);
+}
+
 iron_window_mode_t iron_internal_window_mode = IRON_WINDOW_MODE_WINDOW;
 
 int iron_window_x() {
@@ -114,9 +138,6 @@ int iron_window_x() {
 int iron_window_y() {
 	return 0;
 }
-
-__attribute__((import_module("imports"), import_name("js_canvas_w"))) int js_canvas_w();
-__attribute__((import_module("imports"), import_name("js_canvas_h"))) int js_canvas_h();
 
 int iron_window_width() {
 	return js_canvas_w();
@@ -148,7 +169,11 @@ void iron_window_change_mode(iron_window_mode_t mode) {
 void iron_window_destroy() {}
 void iron_window_show() {}
 void iron_window_hide() {}
-void iron_window_set_title(const char *title) {}
+
+void iron_window_set_title(const char *title) {
+	js_window_set_title(title);
+}
+
 void iron_window_create(iron_window_options_t *win) {}
 void iron_window_set_resize_callback(void (*callback)(int x, int y, void *data), void *data) {}
 void iron_window_set_close_callback(bool (*callback)(void *), void *data) {}
@@ -172,8 +197,15 @@ const char *iron_language() {
 	return "en";
 }
 
-void iron_load_url(const char *url) {}
+void iron_load_url(const char *url) {
+	js_load_url(url);
+}
 
 const char *iron_system_id() {
 	return "wasm";
 }
+
+// void        iron_internal_drop_files_callback(char *);
+// char       *iron_internal_cut_callback(void);
+// char       *iron_internal_copy_callback(void);
+// void        iron_internal_paste_callback(char *);

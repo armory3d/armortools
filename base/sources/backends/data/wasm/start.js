@@ -1,15 +1,18 @@
 
-let memory        = null;
-let heapu8        = null;
-let heapu16       = null;
-let heapu32       = null;
-let heapi32       = null;
-let heapf32       = null;
-let heapf64       = null;
-let module        = null;
-let instance      = null;
-let wgpu_objects  = [ null ];
-let wgpu_free_ids = [];
+let memory          = null;
+let heapu8          = null;
+let heapu16         = null;
+let heapu32         = null;
+let heapi32         = null;
+let heapf32         = null;
+let heapf64         = null;
+let module          = null;
+let instance        = null;
+let wgpu_objects    = [ null ];
+let wgpu_free_ids   = [];
+let file_buffer     = null;
+let file_buffer_pos = 0;
+let config_json     = "";
 
 function ptr_to_id(ptr) {
 	if (ptr === null) {
@@ -139,22 +142,18 @@ async function init() {
 	let adapter = await navigator.gpu.requestAdapter();
 	let device  = await adapter.requestDevice();
 
-	let canvas  = document.getElementById('iron');
-	canvas.width = window.innerWidth;
+	let canvas    = document.getElementById('iron');
+	canvas.width  = window.innerWidth;
 	canvas.height = window.innerHeight;
 
 	window.addEventListener('resize', () => {
-		canvas.width = window.innerWidth;
+		canvas.width  = window.innerWidth;
 		canvas.height = window.innerHeight;
-		// ...
 	});
 
 	let context = canvas.getContext('webgpu');
 	let format  = navigator.gpu.getPreferredCanvasFormat();
 	context.configure({device, format});
-
-	let file_buffer     = null;
-	let file_buffer_pos = 0;
 
 	let result = await WebAssembly.instantiate(wasm_bytes, {
 		env : {memory},
@@ -621,11 +620,18 @@ async function init() {
 				console.log(read_string(format));
 			},
 			js_fopen : function(filename) {
-				let req = new XMLHttpRequest();
-				req.open("GET", read_string(filename), false);
-				req.overrideMimeType("text/plain; charset=x-user-defined");
-				req.send();
-				let str         = req.response;
+				let str;
+				if (read_string(filename) === "/./data/config.json" ||
+					read_string(filename) === "/./data//config.json") { ////
+					str = config_json;
+				}
+				else {
+					let req = new XMLHttpRequest();
+					req.open("GET", read_string(filename), false);
+					req.overrideMimeType("text/plain; charset=x-user-defined");
+					req.send();
+					str = req.response;
+				}
 				file_buffer_pos = 0;
 				file_buffer     = new ArrayBuffer(str.length);
 				let buf_view    = new Uint8Array(file_buffer);
@@ -649,6 +655,9 @@ async function init() {
 					heapu8[ptr + i] = buf_view[file_buffer_pos++];
 				}
 				return count;
+			},
+			js_fwrite : function(ptr, size, count, stream) {
+				config_json = read_string_n(ptr, count); ////
 			},
 			js_time : function() {
 				return window.performance.now();
@@ -695,6 +704,30 @@ async function init() {
 			},
 			js_canvas_h : function() {
 				return canvas.height;
+			},
+			js_mouse_set_cursor : function(i) {
+				if (i == 0) // arrow
+					canvas.style.cursor = 'default';
+				else if (i == 1) // hand
+					canvas.style.cursor = 'pointer';
+				else if (i == 2) // ibeam
+					canvas.style.cursor = 'text';
+				else if (i == 3) // sizewe
+					canvas.style.cursor = 'ew-resize';
+				else if (i == 4) // sizens
+					canvas.style.cursor = 'ns-resize';
+			},
+			js_mouse_show : function() {
+				canvas.style.cursor = 'default';
+			},
+			js_mouse_hide : function() {
+				canvas.style.cursor = 'none';
+			},
+			js_window_set_title : function(str) {
+				document.title = read_string(str);
+			},
+			js_load_url : function(str) {
+				window.open(read_string(str), "_blank");
 			}
 		}
 	});
@@ -709,35 +742,166 @@ async function init() {
 	}
 	window.requestAnimationFrame(update);
 
-	canvas.addEventListener('contextmenu', (event) => {
-		event.preventDefault();
-	});
-	canvas.addEventListener('mousedown', (event) => {
-		instance.exports.wasm_mousedown(button_to_iron_button(event.button), event.clientX, event.clientY);
-	});
-	canvas.addEventListener('mouseup', (event) => {
-		instance.exports.wasm_mouseup(button_to_iron_button(event.button), event.clientX, event.clientY);
-	});
-	canvas.addEventListener('mousemove', (event) => {
-		instance.exports.wasm_mousemove(event.clientX, event.clientY);
-	});
-	canvas.addEventListener('wheel', (event) => {
-		instance.exports.wasm_wheel(event.deltaY);
-	});
+	canvas.addEventListener('contextmenu', (event) => { event.preventDefault(); });
+	canvas.addEventListener('mousedown', (event) => { instance.exports.wasm_mousedown(button_to_iron_button(event.button), event.clientX, event.clientY); });
+	canvas.addEventListener('mouseup', (event) => { instance.exports.wasm_mouseup(button_to_iron_button(event.button), event.clientX, event.clientY); });
+	canvas.addEventListener('mousemove', (event) => { instance.exports.wasm_mousemove(event.clientX, event.clientY); });
+	canvas.addEventListener('wheel', (event) => { instance.exports.wasm_wheel(event.deltaY); });
 	canvas.addEventListener('keydown', (event) => {
 		if (event.repeat) {
 			event.preventDefault();
 			return;
 		}
-		instance.exports.wasm_keydown(event.keyCode);
+		instance.exports.wasm_keydown(key_to_iron_key(event.key));
+		instance.exports.wasm_keypress(key_to_iron_key(event.key, true));
 	});
 	canvas.addEventListener('keyup', (event) => {
 		if (event.repeat) {
 			event.preventDefault();
 			return;
 		}
-		instance.exports.wasm_keyup(event.keyCode);
+		instance.exports.wasm_keyup(key_to_iron_key(event.key));
 	});
+}
+
+function key_to_iron_key(key, is_press = false) {
+	if (key === ":")
+		return 58;
+	if (key === ";")
+		return 59;
+	if (key === "<")
+		return 60;
+	if (key === "=")
+		return 61;
+	if (key === ">")
+		return 62;
+	if (key === "?")
+		return 63;
+	if (key === "@")
+		return 64;
+	if (key === "^")
+		return 160;
+	if (key === "!")
+		return 161;
+	if (key === '"')
+		return 162;
+	if (key === "#")
+		return 163;
+	if (key === "$")
+		return 164;
+	if (key === "%")
+		return 165;
+	if (key === "&")
+		return 166;
+	if (key === "_")
+		return 167;
+	if (key === "(")
+		return 168;
+	if (key === ")")
+		return 169;
+	if (key === "*")
+		return 170;
+	if (key === "+")
+		return 171;
+	if (key === "|")
+		return 172;
+	if (key === "-")
+		return 173;
+	if (key === "{")
+		return 174;
+	if (key === "}")
+		return 175;
+	if (key === "~")
+		return 176;
+	if (key === ",")
+		return 188;
+	if (key === ".")
+		return 190;
+	if (key === "/")
+		return 191;
+	if (key === "`")
+		return 192;
+	if (key === "[")
+		return 219;
+	if (key === "\\")
+		return 220;
+	if (key === "]")
+		return 221;
+	if (key === "'")
+		return 222;
+	if (key === " ")
+		return 32;
+	if (key.length === 1 && is_press)
+		return key.charCodeAt(0);
+	if (key.length === 1)
+		return key.toUpperCase().charCodeAt(0);
+	if (key === "Backspace")
+		return 8;
+	if (key === "Tab")
+		return 9;
+	if (key === "Enter")
+		return 13;
+	if (key === "Shift")
+		return 16;
+	if (key === "Control")
+		return 17;
+	if (key === "Alt")
+		return 18;
+	if (key === "CapsLock")
+		return 20;
+	if (key === "Escape")
+		return 27;
+	if (key === "PageUp")
+		return 33;
+	if (key === "PageDown")
+		return 34;
+	if (key === "End")
+		return 35;
+	if (key === "Home")
+		return 36;
+	if (key === "ArrowLeft")
+		return 37;
+	if (key === "ArrowUp")
+		return 38;
+	if (key === "ArrowRight")
+		return 39;
+	if (key === "ArrowDown")
+		return 40;
+	if (key === "PrintScreen")
+		return 44;
+	if (key === "Insert")
+		return 45;
+	if (key === "Delete")
+		return 46;
+	if (key === "Meta")
+		return 224;
+	if (key === "AltGraph")
+		return 225;
+	if (key === "F1")
+		return 112;
+	if (key === "F2")
+		return 113;
+	if (key === "F3")
+		return 114;
+	if (key === "F4")
+		return 115;
+	if (key === "F5")
+		return 116;
+	if (key === "F6")
+		return 117;
+	if (key === "F7")
+		return 118;
+	if (key === "F8")
+		return 119;
+	if (key === "F9")
+		return 120;
+	if (key === "F10")
+		return 121;
+	if (key === "F11")
+		return 122;
+	if (key === "F12")
+		return 123;
+	return -1;
 }
 
 function button_to_iron_button(button) {

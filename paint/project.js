@@ -25,6 +25,7 @@ if (platform == "wasm") {
     flags.with_plugins = false;
     flags.with_raytrace = false;
     flags.idle_sleep = false;
+    flags.export_data_list = true;
 }
 
 let project = new Project(flags.name);
