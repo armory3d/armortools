@@ -12,6 +12,7 @@ let wgpu_objects    = [ null ];
 let wgpu_free_ids   = [];
 let file_buffer     = null;
 let file_buffer_pos = 0;
+let file_dropped    = null;
 let config_json     = "";
 
 function ptr_to_id(ptr) {
@@ -264,7 +265,7 @@ async function init() {
 			},
 			wgpuBufferGetMappedRange : function(pbuffer, offset, size) {
 				let buffer = id_to_ptr(pbuffer);
-				let ptr    = instance.exports.malloc(size);
+				let ptr    = instance.exports.wasm_malloc(size);
 				let ab     = buffer.getMappedRange(offset, size);
 				let u8     = new Uint8Array(ab);
 				for (let i = 0; i < u8.length; ++i) {
@@ -621,8 +622,7 @@ async function init() {
 			},
 			js_fopen : function(filename) {
 				let str;
-				if (read_string(filename) === "/./data/config.json" ||
-					read_string(filename) === "/./data//config.json") { ////
+				if (read_string(filename) === "/./data/config.json" || read_string(filename) === "/./data//config.json") { ////
 					str = config_json;
 				}
 				else {
@@ -633,10 +633,16 @@ async function init() {
 					str = req.response;
 				}
 				file_buffer_pos = 0;
-				file_buffer     = new ArrayBuffer(str.length);
-				let buf_view    = new Uint8Array(file_buffer);
-				for (let i = 0; i < str.length; ++i) {
-					buf_view[i] = str.charCodeAt(i);
+				if (file_dropped != null) {
+					file_buffer  = file_dropped;
+					file_dropped = null;
+				}
+				else {
+					file_buffer  = new ArrayBuffer(str.length);
+					let buf_view = new Uint8Array(file_buffer);
+					for (let i = 0; i < str.length; ++i) {
+						buf_view[i] = str.charCodeAt(i);
+					}
 				}
 				return 1;
 			},
@@ -726,9 +732,46 @@ async function init() {
 			js_window_set_title : function(str) {
 				document.title = read_string(str);
 			},
+			js_window_change_mode : function(i) {
+				i == 0 ? document.exitFullscreen() : canvas.requestFullscreen();
+			},
 			js_load_url : function(str) {
 				window.open(read_string(str), "_blank");
-			}
+			},
+			js_open_dialog : async function() {
+				let [handle]             = await window.showOpenFilePicker({multiple : false});
+				let file                 = await     handle.getFile();
+				file_dropped             = await file.arrayBuffer();
+				let                  ptr = instance.exports.wasm_malloc(file.name.length + 1);
+				write_string(ptr, file.name)
+				instance.exports.wasm_drop_files(ptr);
+			},
+			js_save_dialog : function() {
+				alert("Not implemented yet.")
+			},
+			js_net_request : function(purl_base, purl_path, pdata, port, method, callback_id, callbackdata, pdst_path) {
+				let url_base    = read_string(purl_base);
+				let url_path    = read_string(purl_path);
+				let dst_path    = pdst_path !== 0 ? read_string(pdst_path) : null;
+				let url         = `https://${url_base}:${port}/${url_path}`;
+				let options     = {method : 'GET', headers : {}};
+				fetch(url, options)
+					.then(response => {
+						if (dst_path) {
+						}
+						else {
+							return response.text();
+						}
+					})
+					.then(text => {
+						let buffer_ptr = 0;
+						if (text !== null) {
+							buffer_ptr = instance.exports.wasm_malloc(text.length + 1);
+							write_string(buffer_ptr, text);
+						}
+						instance.exports.wasm_net_callback(callback_id, buffer_ptr);
+					});
+			},
 		}
 	});
 
@@ -761,6 +804,22 @@ async function init() {
 			return;
 		}
 		instance.exports.wasm_keyup(key_to_iron_key(event.key));
+	});
+
+	canvas.addEventListener('dragover', (event) => {
+		event.preventDefault();
+		event.dataTransfer.dropEffect = 'copy';
+	});
+	canvas.addEventListener('drop', async (event) => {
+		event.preventDefault();
+		const files = event.dataTransfer.files;
+		if (files.length > 0) {
+			let                  file = files[0];
+			file_dropped              = await file.arrayBuffer();
+			let                  ptr  = instance.exports.wasm_malloc(file.name.length + 1);
+			write_string(ptr, file.name)
+			instance.exports.wasm_drop_files(ptr);
+		}
 	});
 }
 

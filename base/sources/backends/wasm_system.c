@@ -7,16 +7,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-__attribute__((import_module("imports"), import_name("js_time"))) int              js_time();
-__attribute__((import_module("imports"), import_name("js_canvas_w"))) int          js_canvas_w();
-__attribute__((import_module("imports"), import_name("js_canvas_h"))) int          js_canvas_h();
-__attribute__((import_module("imports"), import_name("js_mouse_set_cursor"))) void js_mouse_set_cursor(int i);
-__attribute__((import_module("imports"), import_name("js_mouse_show"))) void       js_mouse_show();
-__attribute__((import_module("imports"), import_name("js_mouse_hide"))) void       js_mouse_hide();
-__attribute__((import_module("imports"), import_name("js_window_set_title"))) void js_window_set_title(const char *title);
-__attribute__((import_module("imports"), import_name("js_load_url"))) void         js_load_url(const char *url);
+__attribute__((import_module("imports"), import_name("js_time"))) int                js_time();
+__attribute__((import_module("imports"), import_name("js_canvas_w"))) int            js_canvas_w();
+__attribute__((import_module("imports"), import_name("js_canvas_h"))) int            js_canvas_h();
+__attribute__((import_module("imports"), import_name("js_mouse_set_cursor"))) void   js_mouse_set_cursor(int i);
+__attribute__((import_module("imports"), import_name("js_mouse_show"))) void         js_mouse_show();
+__attribute__((import_module("imports"), import_name("js_mouse_hide"))) void         js_mouse_hide();
+__attribute__((import_module("imports"), import_name("js_window_set_title"))) void   js_window_set_title(const char *title);
+__attribute__((import_module("imports"), import_name("js_window_change_mode"))) void js_window_change_mode(int mode);
+__attribute__((import_module("imports"), import_name("js_load_url"))) void           js_load_url(const char *url);
+__attribute__((import_module("imports"), import_name("js_net_request"))) void
+js_net_request(const char *url_base, const char *url_path, const char *data, int port, int method, int callback_id, void *callbackdata, const char *dst_path);
 
-static bool mouse_hidden = false;
+static iron_window_mode_t iron_internal_window_mode = IRON_WINDOW_MODE_WINDOW;
+static bool               mouse_hidden              = false;
 
 void iron_display_init(void) {}
 
@@ -129,7 +133,9 @@ __attribute__((export_name("wasm_keypress"))) void wasm_keypress(int key) {
 	iron_internal_keyboard_trigger_key_press(key);
 }
 
-iron_window_mode_t iron_internal_window_mode = IRON_WINDOW_MODE_WINDOW;
+__attribute__((export_name("wasm_drop_files"))) void wasm_drop_files(char *str) {
+	iron_internal_drop_files_callback(str);
+}
 
 int iron_window_x() {
 	return 0;
@@ -151,19 +157,8 @@ void iron_window_resize(int width, int height) {}
 void iron_window_move(int x, int y) {}
 
 void iron_window_change_mode(iron_window_mode_t mode) {
-	if (mode == IRON_WINDOW_MODE_FULLSCREEN) {
-		if (iron_internal_window_mode == IRON_WINDOW_MODE_FULLSCREEN) {
-			iron_internal_window_mode = mode;
-			return;
-		}
-		iron_internal_window_mode = mode;
-	}
-	else {
-		if (mode == iron_internal_window_mode) {
-			return;
-		}
-		iron_internal_window_mode = mode;
-	}
+	iron_internal_window_mode = mode;
+	js_window_change_mode(mode);
 }
 
 void iron_window_destroy() {}
@@ -182,12 +177,44 @@ iron_window_mode_t iron_window_get_mode() {
 	return iron_internal_window_mode;
 }
 
-void iron_net_update() {}
-
 volatile uint64_t iron_net_bytes_downloaded = 0;
 
+#define MAX_CALLBACKS 32
+
+static struct {
+	iron_https_callback_t callback;
+	void                 *data;
+	bool                  in_use;
+} callbacks[MAX_CALLBACKS];
+
+static int register_callback(iron_https_callback_t callback, void *callbackdata) {
+	for (int i = 0; i < MAX_CALLBACKS; i++) {
+		if (!callbacks[i].in_use) {
+			callbacks[i].callback = callback;
+			callbacks[i].data     = callbackdata;
+			callbacks[i].in_use   = true;
+			return i;
+		}
+	}
+	return -1;
+}
+
+__attribute__((export_name("wasm_net_callback"))) void wasm_net_callback(int callback_id, char *buffer) {
+	callbacks[callback_id].callback(buffer, callbacks[callback_id].data);
+	callbacks[callback_id].in_use = false;
+}
+
 void iron_net_request(const char *url_base, const char *url_path, const char *data, int port, int method, iron_https_callback_t callback, void *callbackdata,
-                      const char *dst_path) {}
+                      const char *dst_path) {
+	int callback_id = register_callback(callback, callbackdata);
+	if (callback_id < 0) {
+		callback(NULL, callbackdata);
+		return;
+	}
+	js_net_request(url_base, url_path, data, port, method, callback_id, callbackdata, dst_path);
+}
+
+void iron_net_update() {}
 
 bool _save_and_quit_callback_internal() {
 	return false;
@@ -202,10 +229,9 @@ void iron_load_url(const char *url) {
 }
 
 const char *iron_system_id() {
-	return "wasm";
+	return "Wasm";
 }
 
-// void        iron_internal_drop_files_callback(char *);
 // char       *iron_internal_cut_callback(void);
 // char       *iron_internal_copy_callback(void);
 // void        iron_internal_paste_callback(char *);

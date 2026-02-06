@@ -377,7 +377,7 @@ void _update() {
 	if (++paused_frames > start_sleep && !input_down) {
 #ifdef IRON_WINDOWS
 		Sleep(1);
-#else
+#elif !defined(IRON_WASM)
 		struct timespec t;
 		t.tv_sec  = 0;
 		t.tv_nsec = 1000000;
@@ -1488,12 +1488,16 @@ char *iron_save_dialog(char *filter_list, char *default_path) {
 
 #elif defined(IRON_WASM)
 
+__attribute__((import_module("imports"), import_name("js_open_dialog"))) void js_open_dialog();
+__attribute__((import_module("imports"), import_name("js_save_dialog"))) char *js_save_dialog();
+
 char_ptr_array_t *iron_open_dialog(char *filter_list, char *default_path, bool open_multiple) {
+	js_open_dialog();
 	return NULL;
 }
 
 char *iron_save_dialog(char *filter_list, char *default_path) {
-	return NULL;
+	return js_save_dialog();
 }
 
 #endif

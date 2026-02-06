@@ -18,9 +18,17 @@
 			height: 100vh;
 		}
 	</style>
+	<link rel="manifest" href="/manifest.json">
 </head>
 <body>
 	<canvas id="iron" tabindex="0"></canvas>
 	<script src="start.js"></script>
+	<script>
+	if ("serviceWorker" in navigator) {
+		window.addEventListener("load", () => {
+			navigator.serviceWorker.register("/sw.js");
+		});
+	}
+	</script>
 </body>
 </html>

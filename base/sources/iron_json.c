@@ -8,7 +8,12 @@
 
 void *gc_alloc(size_t size);
 
-static const int  PTR_SIZE = 8;
+#ifdef IRON_WASM
+#define PTR_SIZE 4
+#else
+#define PTR_SIZE 8
+#endif
+
 static char      *source;
 static jsmntok_t *tokens;
 static int        num_tokens;
@@ -50,13 +55,13 @@ static void store_f32(float f32) {
 
 static void store_ptr(uint32_t ptr) {
 	wi += pad(wi, PTR_SIZE);
-	*(uint64_t *)(decoded + wi) = (uint64_t)decoded + (uint64_t)ptr;
+	*(uintptr_t *)(decoded + wi) = (uintptr_t)decoded + (uintptr_t)ptr;
 	wi += PTR_SIZE;
 }
 
 static void store_ptr_abs(void *ptr) {
 	wi += pad(wi, PTR_SIZE);
-	*(uint64_t *)(decoded + wi) = (uint64_t)ptr;
+	*(uintptr_t *)(decoded + wi) = (uintptr_t)ptr;
 	wi += PTR_SIZE;
 }
 

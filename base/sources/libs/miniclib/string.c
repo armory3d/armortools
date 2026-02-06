@@ -1,6 +1,62 @@
 #include "string.h"
 
+#include <stdlib.h>
 #include <stdbool.h>
+
+void *memset(void *ptr, int value, size_t num) {
+	unsigned char *data = (unsigned char *)ptr;
+	for (size_t i = 0; i < num; ++i) {
+		data[i] = (unsigned char)value;
+	}
+	return ptr;
+}
+
+void *memcpy(void *destination, const void *source, size_t num) {
+	unsigned char *s = (unsigned char *)source;
+	unsigned char *d = (unsigned char *)destination;
+	for (size_t i = 0; i < num; ++i) {
+		d[i] = s[i];
+	}
+	return destination;
+}
+
+int memcmp(const void *ptr1, const void *ptr2, size_t num) {
+	unsigned char *p1 = (unsigned char *)ptr1;
+	unsigned char *p2 = (unsigned char *)ptr2;
+	for (size_t i = 0; i < num; ++i) {
+		if (p1[i] != p2[i]) {
+			return (int)p1[i] - (int)p2[i];
+		}
+	}
+	return 0;
+}
+
+void *memmove(void *destination, const void *source, size_t num) {
+	unsigned char *d = (unsigned char *)destination;
+	unsigned char *s = (unsigned char *)source;
+	if (d < s || d == s) {
+		for (size_t i = 0; i < num; ++i) {
+			d[i] = s[i];
+		}
+	}
+	else {
+		for (size_t i = num; i > 0; --i) {
+			d[i - 1] = s[i - 1];
+		}
+	}
+	return destination;
+}
+
+void *memchr(const void *str, int c, size_t num) {
+	unsigned char *ptr    = (unsigned char *)str;
+	unsigned char  target = (unsigned char)c;
+	for (size_t i = 0; i < num; i++) {
+		if (ptr[i] == target) {
+			return (void *)(ptr + i);
+		}
+	}
+	return NULL;
+}
 
 size_t strlen(const char *str) {
 	size_t size = 0;
@@ -46,6 +102,15 @@ char *strcat(char *destination, const char *source) {
 		++di;
 	}
 	return destination;
+}
+
+char *strdup(const char *str) {
+	if (str == NULL) {
+        return NULL;
+    }
+    size_t len = strlen(str) + 1;
+    char *copy = (char *)malloc(len);
+    return strcpy(copy, str);
 }
 
 char *strstr(const char *str1, const char *str2) {

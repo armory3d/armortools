@@ -20,11 +20,9 @@ flags.export_data_list    = platform == "android"; // .apk contents
 if (platform == "wasm") {
     flags.with_nfd = false;
     flags.with_compress = false;
-    flags.with_video_write = false;
     flags.with_eval = false;
     flags.with_plugins = false;
     flags.with_raytrace = false;
-    flags.idle_sleep = false;
     flags.export_data_list = true;
 }
 

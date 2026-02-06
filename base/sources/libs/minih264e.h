@@ -364,7 +364,7 @@ void H264E_set_vbv_state(
 
 #define H264E_CONFIGS_COUNT ((H264E_ENABLE_SSE2) + (H264E_ENABLE_PLAIN_C) + (H264E_ENABLE_NEON))
 
-#if defined(__ARMCC_VERSION) || defined(_WIN32) || defined(__EMSCRIPTEN__)
+#if defined(__ARMCC_VERSION) || defined(_WIN32) || defined(__EMSCRIPTEN__) || defined(IRON_WASM)
 #define __BYTE_ORDER 0
 #define __BIG_ENDIAN 1
 #elif defined(__linux__) || defined(__CYGWIN__)
