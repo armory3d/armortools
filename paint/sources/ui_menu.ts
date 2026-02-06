@@ -147,6 +147,10 @@ function ui_menu_button(text: string, label: string = "", icon: icon_t = icon_t.
 	return result;
 }
 
+function ui_menu_color_sub(c: u32, s: u32): u32 {
+	return c - (s + 0xff000000) > c ? 0xff000000 : c - s;
+}
+
 function ui_icon_button(text: string, icon: icon_t = icon_t.NONE, align: ui_align_t = ui_align_t.CENTER): bool {
 	let _x_left: i32 = ui._x;
 	let _y_top: i32  = ui._y;
@@ -191,7 +195,7 @@ function ui_icon_button(text: string, icon: icon_t = icon_t.NONE, align: ui_alig
 		}
 
 		ui.image_scroll_align = false;
-		ui_sub_image(icons, ui.enabled ? ui.ops.theme.LABEL_COL - 0x00333333 : 0xffffffff, icon_h, rect.x / 2, rect.y / 2, rect.w / 2, rect.h / 2);
+		ui_sub_image(icons, ui.enabled ? ui_menu_color_sub(ui.ops.theme.LABEL_COL, 0x00333333) : 0xffffffff, icon_h, rect.x / 2, rect.y / 2, rect.w / 2, rect.h / 2);
 		ui.image_scroll_align = true;
 
 		ui._x = _x_right;

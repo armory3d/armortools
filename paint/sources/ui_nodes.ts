@@ -1232,7 +1232,9 @@ function ui_nodes_draw_menubar() {
 	}
 
 	let _BUTTON_COL: i32    = ui.ops.theme.BUTTON_COL;
+	let _SHADOWS: bool      = ui.ops.theme.SHADOWS;
 	ui.ops.theme.BUTTON_COL = ui.ops.theme.WINDOW_BG_COL;
+	ui.ops.theme.SHADOWS    = false;
 
 	let cats: string[] = ui_nodes_canvas_type == canvas_type_t.MATERIAL ? nodes_material_categories : nodes_brush_categories;
 
@@ -1279,6 +1281,7 @@ function ui_nodes_draw_menubar() {
 	ui._y = 2 + start_y;
 
 	ui.ops.theme.BUTTON_COL = _BUTTON_COL;
+	ui.ops.theme.SHADOWS    = _SHADOWS;
 
 	// Close node group
 	if (ui_nodes_group_stack.length > 0 && ui_menubar_button(tr("Close"))) {
