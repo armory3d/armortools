@@ -182,7 +182,7 @@ function ui_icon_button(text: string, icon: icon_t = icon_t.NONE, align: ui_alig
 		let icon_h: i32          = 25 * UI_SCALE();
 
 		ui._x = align == ui_align_t.LEFT ? _x_left : _x_left + _w / 2 - textw / 2 - icon_h / 2;
-		ui._y = _y_top - 1;
+		ui._y = _y_top;
 		if (config_raw.touch_ui) {
 			ui._x += 1 * UI_SCALE();
 			if (text != "") {

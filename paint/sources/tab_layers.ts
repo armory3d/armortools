@@ -347,7 +347,7 @@ function tab_layers_draw_layer_slot_full(l: slot_layer_t, i: i32) {
 	let r: rect_t            = resource_tile18(icons, l.visible ? icon18_t.EYE_ON : icon18_t.EYE_OFF);
 	ui._x                    = uix + 4;
 	ui._y                    = uiy + 3 + center;
-	let col: i32             = ui.ops.theme.ACCENT_COL;
+	let col: i32             = ui.ops.theme.HOVER_COL + 0x00282828;
 	let parent_hidden: bool  = l.parent != null && (!l.parent.visible || (l.parent.parent != null && !l.parent.parent.visible));
 	if (parent_hidden) {
 		col -= 0x99000000;

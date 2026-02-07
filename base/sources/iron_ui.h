@@ -35,7 +35,6 @@ typedef enum {
 typedef struct ui_theme {
 	int          WINDOW_BG_COL;
 	int          HOVER_COL;
-	int          ACCENT_COL;
 	int          BUTTON_COL;
 	int          PRESSED_COL;
 	int          TEXT_COL;

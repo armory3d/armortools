@@ -170,19 +170,18 @@ void ui_rect(float x, float y, float w, float h, uint32_t color, float strength)
 void ui_draw_shadow(float x, float y, float w, float h) {
 	if (theme->SHADOWS) {
 		theme->SHADOWS   = false;
-		float max_offset = 4.0 * UI_SCALE();
-		for (int i = 0; i < 4; i++) {
-			float offset = (max_offset / 4) * (i + 1);
-			float a      = 0.05 - (0.05 / 4) * i;
+		float max_offset = 16.0 * UI_SCALE();
+		for (int i = 0; i < 6; i++) {
+			float offset = (max_offset / 6) * (i + 1);
+			float a      = 0.04 - (0.04 / 6) * i;
 			draw_set_color(((uint8_t)(a * 255) << 24) | (0 << 16) | (0 << 8) | 0);
-			ui_draw_rect(true, x + offset, y + offset, w + (max_offset - offset) * 2, h + (max_offset - offset) * 2);
+			ui_draw_rect(true, x - offset, y, w + offset * 2, h + offset);
 		}
 		theme->SHADOWS = true;
 	}
 }
 
 void ui_draw_rect(bool fill, float x, float y, float w, float h) {
-	float strength = 1.0;
 	if (!current->enabled) {
 		ui_fade_color(0.25);
 	}
@@ -194,23 +193,21 @@ void ui_draw_rect(bool fill, float x, float y, float w, float h) {
 	if (fill) {
 		int r = current->filled_round_corner_image.width;
 		if (theme->ROUND_CORNERS && current->enabled && r > 0 && w >= r * 2.0) {
-			y -= 1; // Make it pixel perfect with non-round draw
-			h += 1;
-			if (theme->SHADOWS) {
-				uint32_t color = draw_get_color();
-				draw_set_color(0x22000000);
-				draw_scaled_image(&current->filled_round_corner_image, x + w + 1, y + h + 1, -r, -r);
-				draw_scaled_image(&current->filled_round_corner_image, x + 1, y + h + 1, r, -r);
-				draw_filled_rect(x + r + 1, y + 1, w - r * 2.0, h);
-				draw_filled_rect(x + 1, y + r + 1, w, h - r * 2.0);
-				draw_set_color(color);
-			}
 			draw_scaled_image(&current->filled_round_corner_image, x, y, r, r);
 			draw_scaled_image(&current->filled_round_corner_image, x, y + h, r, -r);
 			draw_scaled_image(&current->filled_round_corner_image, x + w, y, -r, r);
 			draw_scaled_image(&current->filled_round_corner_image, x + w, y + h, -r, -r);
 			draw_filled_rect(x + r, y, w - r * 2.0, h);
 			draw_filled_rect(x, y + r, w, h - r * 2.0);
+			if (theme->SHADOWS) {
+				uint32_t color = draw_get_color();
+				draw_set_color(color + 0x00030303);
+				draw_filled_rect(x + r, y + h - 1.0, w - r * 2.0, 1.0);
+				draw_filled_rect(x, y + r, 1.0, h - r * 2.0);
+				draw_filled_rect(x + w - 1.0, y + r, 1.0, h - r * 2.0);
+				draw_set_color(color + 0x00080808);
+				draw_filled_rect(x + r, y, w - r * 2.0, 1.0);
+			}
 		}
 		else {
 			draw_filled_rect(x, y - 1, w, h + 1);
@@ -218,27 +215,16 @@ void ui_draw_rect(bool fill, float x, float y, float w, float h) {
 	}
 	else {
 		int r = current->round_corner_image.width;
+		float strength = 1.0;
 		if (theme->ROUND_CORNERS && current->enabled && r > 0) {
-			x -= 1;
-			w += 1;
-			y -= 1;
-			h += 1;
-			if (theme->SHADOWS) {
-				uint32_t color = draw_get_color();
-				draw_set_color(0x22000000);
-				draw_scaled_image(&current->round_corner_image, x + w + 1, y + h + 1, -r, -r);
-				draw_filled_rect(x + r + 1, y + h - 1 + 1, w - r * 2.0, strength);
-				draw_filled_rect(x + w - 1 + 1, y + r + 1, strength, h - r * 2.0);
-				draw_set_color(color);
-			}
 			draw_scaled_image(&current->round_corner_image, x, y, r, r);
 			draw_scaled_image(&current->round_corner_image, x, y + h, r, -r);
 			draw_scaled_image(&current->round_corner_image, x + w, y, -r, r);
 			draw_scaled_image(&current->round_corner_image, x + w, y + h, -r, -r);
 			draw_filled_rect(x + r, y, w - r * 2.0, strength);
-			draw_filled_rect(x + r, y + h - 1, w - r * 2.0, strength);
+			draw_filled_rect(x + r, y + h - 1.0, w - r * 2.0, strength);
 			draw_filled_rect(x, y + r, strength, h - r * 2.0);
-			draw_filled_rect(x + w - 1, y + r, strength, h - r * 2.0);
+			draw_filled_rect(x + w - 1.0, y + r, strength, h - r * 2.0);
 		}
 		else {
 			draw_rect(x, y, w, h, strength);
@@ -250,8 +236,6 @@ void ui_draw_round_bottom(float x, float y, float w) {
 	if (theme->ROUND_CORNERS) {
 		int r = current->filled_round_corner_image.width;
 		int h = 4;
-		y -= 1; // Make it pixel perfect with non-round draw
-		h += 1;
 		draw_set_color(theme->SEPARATOR_COL);
 		draw_scaled_image(&current->filled_round_corner_image, x, y + h, r, -r);
 		draw_scaled_image(&current->filled_round_corner_image, x + w, y + h, -r, -r);
@@ -923,11 +907,11 @@ void ui_draw_combo() {
 			draw_set_color(theme->LABEL_COL);
 			ui_draw_string(current->combo_selected_label, theme->TEXT_OFFSET, 0, UI_ALIGN_RIGHT, true);
 			current->_y += UI_ELEMENT_H();
-			ui_fill(0, 0, current->_w / UI_SCALE(), 1.0 * UI_SCALE(), theme->ACCENT_COL); // Separator
+			ui_fill(0, 0, current->_w / UI_SCALE(), 1.0 * UI_SCALE(), theme->HOVER_COL); // Separator
 		}
 		else {
 			ui_fill(0, 0, current->_w / UI_SCALE(), UI_ELEMENT_H() / UI_SCALE(), theme->SEPARATOR_COL);
-			ui_fill(0, 0, current->_w / UI_SCALE(), 1.0 * UI_SCALE(), theme->ACCENT_COL); // Separator
+			ui_fill(0, 0, current->_w / UI_SCALE(), 1.0 * UI_SCALE(), theme->HOVER_COL); // Separator
 			draw_set_color(theme->LABEL_COL);
 			ui_draw_string(current->combo_selected_label, theme->TEXT_OFFSET, 0, UI_ALIGN_RIGHT, true);
 			current->_y += UI_ELEMENT_H();
@@ -1263,7 +1247,7 @@ void ui_update_text_edit(int align, bool editable, bool live_update) {
 		if (align == UI_ALIGN_RIGHT) {
 			hl_start -= draw_sub_string_width(current->ops->font, current->font_size, text, iend, strlen(text));
 		}
-		draw_set_color(theme->ACCENT_COL);
+		draw_set_color(theme->HOVER_COL + 0x00202020);
 		draw_filled_rect(hl_start, current->_y + current->button_offset_y * 1.5, hlstrw, cursor_height);
 	}
 
@@ -1386,7 +1370,30 @@ void ui_draw_tabs() {
 		else {
 			tab_x += current->_w + 1;
 		}
-		draw_filled_rect(current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w, tab_h);
+
+		if (theme->ROUND_CORNERS && !current->tab_vertical) {
+			int x = current->_x + current->button_offset_y;
+			int y = current->_y + current->button_offset_y;
+			int w = current->_w;
+			int h = tab_h;
+			int r = current->filled_round_corner_image.width;
+			draw_scaled_image(&current->filled_round_corner_image, x, y, r, r);
+			draw_scaled_image(&current->filled_round_corner_image, x + w, y, -r, r);
+			draw_filled_rect(x + r, y, w - r * 2.0, h);
+			draw_filled_rect(x, y + r, w, h - r);
+			if (selected && theme->SHADOWS) {
+				uint32_t color = draw_get_color();
+				draw_set_color(color + 0x00030303);
+				draw_filled_rect(x, y + r, 1, h - r * 2.0);
+				draw_filled_rect(x + w - 1, y + r, 1, h - r * 2.0);
+				draw_set_color(color + 0x00080808);
+				draw_filled_rect(x + r, y, w - r * 2.0, 1);
+			}
+		}
+		else {
+			draw_filled_rect(current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w, tab_h);
+		}
+
 		draw_set_color(theme->TEXT_COL);
 		if (current->tab_colors[i] == -2) { // Faded
 			ui_fade_color(0.25);
@@ -1397,7 +1404,7 @@ void ui_draw_tabs() {
 		ui_draw_string(current->tab_names[i], theme->TEXT_OFFSET, (tab_h - tab_h_min) / 2.0,
 		               (theme->FULL_TABS || !current->tab_vertical) ? UI_ALIGN_CENTER : UI_ALIGN_LEFT, true);
 
-		if (selected) { // Hide underline for active tab
+		if (selected) {
 			if (current->tab_vertical) {
 				// Highlight
 				draw_set_color(theme->HIGHLIGHT_COL);
@@ -1407,24 +1414,6 @@ void ui_draw_tabs() {
 				// Hide underline
 				draw_set_color(theme->WINDOW_BG_COL);
 				draw_filled_rect(current->_x + current->button_offset_y, current->_y + current->button_offset_y + tab_h, current->_w, 1);
-				// Highlight
-				draw_set_color(theme->HIGHLIGHT_COL);
-				draw_filled_rect(current->_x + current->button_offset_y, current->_y + current->button_offset_y, current->_w, 2);
-			}
-		}
-
-		// Tab separator
-		if (i < current->tab_count - 1) {
-			int sep_col = theme->SEPARATOR_COL - 0x00050505;
-			if (sep_col < 0xff000000) {
-				sep_col = theme->SEPARATOR_COL + 0x00050505;
-			}
-			draw_set_color(sep_col);
-			if (current->tab_vertical) {
-				draw_filled_rect(current->_x, current->_y + tab_h, current->_w, 1);
-			}
-			else {
-				draw_filled_rect(current->_x + current->button_offset_y + current->_w, current->_y, 1, tab_h);
 			}
 		}
 	}
@@ -2629,21 +2618,20 @@ void ui_paste(char *s) {
 }
 
 void ui_theme_default(ui_theme_t *t) {
-	t->WINDOW_BG_COL     = 0xff292929;
-	t->HOVER_COL         = 0xff434343;
-	t->ACCENT_COL        = 0xff606060;
-	t->BUTTON_COL        = 0xff383838;
-	t->PRESSED_COL       = 0xff222222;
-	t->TEXT_COL          = 0xffe8e8e8;
-	t->LABEL_COL         = 0xffc8c8c8;
+	t->WINDOW_BG_COL     = 0xff262626;
+	t->HOVER_COL         = 0xff383838;
+	t->BUTTON_COL        = 0xff323232;
+	t->PRESSED_COL       = 0xff212121;
+	t->TEXT_COL          = 0xfff7f7f7;
+	t->LABEL_COL         = 0xffcfcfcf;
 	t->SEPARATOR_COL     = 0xff202020;
 	t->HIGHLIGHT_COL     = 0xff205d9c;
 	t->FONT_SIZE         = 13;
 	t->ELEMENT_W         = 100;
-	t->ELEMENT_H         = 24;
+	t->ELEMENT_H         = 26;
 	t->ELEMENT_OFFSET    = 4;
 	t->ARROW_SIZE        = 5;
-	t->BUTTON_H          = 22;
+	t->BUTTON_H          = 24;
 	t->CHECK_SIZE        = 16;
 	t->CHECK_SELECT_SIZE = 12;
 	t->SCROLL_W          = 9;
@@ -2656,7 +2644,7 @@ void ui_theme_default(ui_theme_t *t) {
 	t->FULL_TABS         = false;
 	t->ROUND_CORNERS     = true;
 	t->SHADOWS           = true;
-	t->VIEWPORT_COL      = 0xff080808;
+	t->VIEWPORT_COL      = 0xff070707;
 }
 
 #define MATH_PI 3.14159265358979323846
@@ -3260,7 +3248,7 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 					int line_height   = UI_ELEMENT_H();
 					int cursor_height = line_height - current->button_offset_y * 3.0;
 					int linew         = draw_string_width(current->ops->font, current->font_size, line);
-					draw_set_color(theme->ACCENT_COL);
+					draw_set_color(theme->HOVER_COL + 0x00202020);
 					draw_filled_rect(current->_x + UI_ELEMENT_OFFSET() * 2.0, current->_y + current->button_offset_y * 1.5, linew, cursor_height);
 				}
 				ui_text(line, align, 0x00000000);
@@ -3341,9 +3329,9 @@ bool ui_menubar_button(char *text) {
 	return ui_button(text, UI_ALIGN_CENTER, "");
 }
 
-const char *ui_theme_keys[] = {"WINDOW_BG_COL",  "HOVER_COL",      "ACCENT_COL",        "BUTTON_COL", "PRESSED_COL",   "TEXT_COL",       "LABEL_COL",
-                               "SEPARATOR_COL",  "HIGHLIGHT_COL",  "FONT_SIZE",         "ELEMENT_W",  "ELEMENT_H",     "ELEMENT_OFFSET", "ARROW_SIZE",
-                               "BUTTON_H",       "CHECK_SIZE",     "CHECK_SELECT_SIZE", "SCROLL_W",   "SCROLL_MINI_W", "TEXT_OFFSET",    "TAB_W",
-                               "FILL_WINDOW_BG", "FILL_BUTTON_BG", "LINK_STYLE",        "FULL_TABS",  "ROUND_CORNERS", "SHADOWS",        "VIEWPORT_COL"};
+const char *ui_theme_keys[] = {"WINDOW_BG_COL",  "HOVER_COL",      "BUTTON_COL",        "PRESSED_COL", "TEXT_COL",      "LABEL_COL",
+                               "SEPARATOR_COL",  "HIGHLIGHT_COL",  "FONT_SIZE",         "ELEMENT_W",   "ELEMENT_H",     "ELEMENT_OFFSET", "ARROW_SIZE",
+                               "BUTTON_H",       "CHECK_SIZE",     "CHECK_SELECT_SIZE", "SCROLL_W",    "SCROLL_MINI_W", "TEXT_OFFSET",    "TAB_W",
+                               "FILL_WINDOW_BG", "FILL_BUTTON_BG", "LINK_STYLE",        "FULL_TABS",   "ROUND_CORNERS", "SHADOWS",        "VIEWPORT_COL"};
 
 int ui_theme_keys_count = sizeof(ui_theme_keys) / sizeof(ui_theme_keys[0]);

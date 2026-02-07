@@ -279,7 +279,7 @@ ui_canvas_control_t *ui_on_default_canvas_control() {
 void ui_draw_link(float x1, float y1, float x2, float y2, bool highlight) {
 	ui_t *current = ui_get_current();
 	int   c1      = current->ops->theme->LABEL_COL;
-	int   c2      = current->ops->theme->ACCENT_COL;
+	int   c2      = current->ops->theme->HOVER_COL + 0X00222222;
 	int   c       = highlight ? c1 : c2;
 	draw_set_color(ui_color(ui_color_r(c), ui_color_g(c), ui_color_b(c), 210));
 	if (current->ops->theme->LINK_STYLE == UI_LINK_STYLE_LINE) {

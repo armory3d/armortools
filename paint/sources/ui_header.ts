@@ -1,5 +1,5 @@
 
-let ui_header_default_h: i32      = 28;
+let ui_header_default_h: i32      = 30;
 let ui_header_h: i32              = ui_header_default_h;
 let ui_header_handle: ui_handle_t = ui_handle_create();
 
@@ -9,7 +9,7 @@ function ui_header_init() {
 
 function ui_header_render_ui() {
 	if (config_raw.touch_ui) {
-		ui_header_h = ui_header_default_h + 6;
+		ui_header_h = ui_header_default_h + 4;
 	}
 	else {
 		ui_header_h = ui_header_default_h;
