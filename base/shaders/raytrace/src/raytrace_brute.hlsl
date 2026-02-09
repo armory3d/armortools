@@ -121,7 +121,7 @@ void raygeneration() {
 			// Miss
 			if (payload.color.a < 0) {
 				if (i == 0 && constant_buffer.params.x < 0) { // No envmap
-					payload.color.rgb = float3(0.032, 0.032, 0.032);
+					payload.color.rgb = float3(0.0275, 0.0275, 0.0275);
 				}
 
 				accum += clamp(payload.color.rgb, 0.0, 8.0);

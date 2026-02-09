@@ -428,7 +428,7 @@ void main() {
                 #endif
 
                 if (i == 0 && constant_buffer.params.x < 0.0) {
-                    payload.color.rgb = vec3(0.032);
+                    payload.color.rgb = vec3(0.0275);
                 }
                 else {
                     vec2 tex_coord = equirect(ray_dir, constant_buffer.params.y);

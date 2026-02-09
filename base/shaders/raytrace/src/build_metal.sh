@@ -1,0 +1,6 @@
+cp raytrace_brute_core.metal ../raytrace_brute_core.metal
+cp raytrace_brute_full.metal ../raytrace_brute_full.metal
+cp raytrace_bake_ao.metal ../raytrace_bake_ao.metal
+cp raytrace_bake_light.metal ../raytrace_bake_light.metal
+cp raytrace_bake_bent.metal ../raytrace_bake_bent.metal
+cp raytrace_bake_thick.metal ../raytrace_bake_thick.metal
