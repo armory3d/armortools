@@ -135,18 +135,7 @@ void        iron_internal_paste_callback(char *);
 #define IRON_KEY_ALT                 18
 #define IRON_KEY_PAUSE               19
 #define IRON_KEY_CAPS_LOCK           20
-#define IRON_KEY_KANA                21
-#define IRON_KEY_HANGUL              21
-#define IRON_KEY_EISU                22
-#define IRON_KEY_JUNJA               23
-#define IRON_KEY_FINAL               24
-#define IRON_KEY_HANJA               25
-#define IRON_KEY_KANJI               25
 #define IRON_KEY_ESCAPE              27
-#define IRON_KEY_CONVERT             28
-#define IRON_KEY_NON_CONVERT         29
-#define IRON_KEY_ACCEPT              30
-#define IRON_KEY_MODE_CHANGE         31
 #define IRON_KEY_SPACE               32
 #define IRON_KEY_PAGE_UP             33
 #define IRON_KEY_PAGE_DOWN           34
@@ -250,11 +239,6 @@ void        iron_internal_paste_callback(char *);
 #define IRON_KEY_F24                 135
 #define IRON_KEY_NUM_LOCK            144
 #define IRON_KEY_SCROLL_LOCK         145
-#define IRON_KEY_WIN_OEM_FJ_JISHO    146
-#define IRON_KEY_WIN_OEM_FJ_MASSHOU  147
-#define IRON_KEY_WIN_OEM_FJ_TOUROKU  148
-#define IRON_KEY_WIN_OEM_FJ_LOYA     149
-#define IRON_KEY_WIN_OEM_FJ_ROYA     150
 #define IRON_KEY_CIRCUMFLEX          160
 #define IRON_KEY_EXCLAMATION         161
 #define IRON_KEY_DOUBLE_QUOTE        162
@@ -285,30 +269,6 @@ void        iron_internal_paste_callback(char *);
 #define IRON_KEY_QUOTE               222
 #define IRON_KEY_META                224
 #define IRON_KEY_ALT_GR              225
-#define IRON_KEY_WIN_ICO_HELP        227
-#define IRON_KEY_WIN_ICO_00          228
-#define IRON_KEY_WIN_ICO_CLEAR       230
-#define IRON_KEY_WIN_OEM_RESET       233
-#define IRON_KEY_WIN_OEM_JUMP        234
-#define IRON_KEY_WIN_OEM_PA1         235
-#define IRON_KEY_WIN_OEM_PA2         236
-#define IRON_KEY_WIN_OEM_PA3         237
-#define IRON_KEY_WIN_OEM_WSCTRL      238
-#define IRON_KEY_WIN_OEM_CUSEL       239
-#define IRON_KEY_WIN_OEM_ATTN        240
-#define IRON_KEY_WIN_OEM_FINISH      241
-#define IRON_KEY_WIN_OEM_COPY        242
-#define IRON_KEY_WIN_OEM_AUTO        243
-#define IRON_KEY_WIN_OEM_ENLW        244
-#define IRON_KEY_WIN_OEM_BACK_TAB    245
-#define IRON_KEY_ATTN                246
-#define IRON_KEY_CRSEL               247
-#define IRON_KEY_EXSEL               248
-#define IRON_KEY_EREOF               249
-#define IRON_KEY_PLAY                250
-#define IRON_KEY_ZOOM                251
-#define IRON_KEY_PA1                 253
-#define IRON_KEY_WIN_OEM_CLEAR       254
 
 void iron_keyboard_show(void);
 void iron_keyboard_hide(void);
