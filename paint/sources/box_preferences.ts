@@ -352,7 +352,7 @@ function box_preferences_usage_tab() {
 
 	let h_scene_atlas_res: ui_handle_t = ui_handle(__ID__);
 	h_scene_atlas_res.i                = config_raw.scene_atlas_res;
-	config_raw.scene_atlas_res = ui_combo(h_scene_atlas_res, res_combo, tr("Scene Atlas Resolution"), true);
+	config_raw.scene_atlas_res         = ui_combo(h_scene_atlas_res, res_combo, tr("Scene Atlas Resolution"), true);
 
 	let h_server: ui_handle_t = ui_handle(__ID__);
 	h_server.text             = config_raw.server;
@@ -464,9 +464,9 @@ function box_preferences_viewport_tab() {
 	}
 
 	let h_render_mode: ui_handle_t  = ui_handle(__ID__);
-	h_render_mode.i                 = context_raw.render_mode;
+	h_render_mode.i                 = config_raw.render_mode;
 	let render_mode_combo: string[] = [ tr("Desktop"), tr("Mobile") ];
-	context_raw.render_mode         = ui_combo(h_render_mode, render_mode_combo, tr("Renderer"), true);
+	config_raw.render_mode          = ui_combo(h_render_mode, render_mode_combo, tr("Renderer"), true);
 	if (h_render_mode.changed) {
 		context_set_render_path();
 	}
@@ -480,7 +480,7 @@ function box_preferences_viewport_tab() {
 		config_apply();
 	}
 
-	if (context_raw.render_mode == render_mode_t.DEFERRED) {
+	if (config_raw.render_mode == render_mode_t.DEFERRED) {
 		let h_ssao: ui_handle_t = ui_handle(__ID__);
 		h_ssao.b                = config_raw.rp_ssao;
 		config_raw.rp_ssao      = ui_check(h_ssao, tr("SSAO"));

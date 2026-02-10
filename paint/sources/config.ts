@@ -119,6 +119,7 @@ function config_save() {
 	json_encode_bool("grid_snap", config_raw.grid_snap);
 	json_encode_bool("experimental", config_raw.experimental);
 	json_encode_i32("neural_backend", config_raw.neural_backend);
+	json_encode_i32("render_mode", config_raw.render_mode);
 	let config_json: string = json_encode_end();
 
 	let buffer: buffer_t = sys_string_to_buffer(config_json);
@@ -192,7 +193,7 @@ function config_init() {
 		/// else
 		config_raw.pressure_sensitivity = 2.0;
 		/// end
-		config_raw.camera_fov            = 0.69;
+		config_raw.camera_fov = 0.69;
 		/// if (arm_android || arm_ios)
 		config_raw.camera_zoom_speed     = 0.5;
 		config_raw.camera_pan_speed      = 0.5;
@@ -202,12 +203,12 @@ function config_init() {
 		config_raw.camera_pan_speed      = 1.0;
 		config_raw.camera_rotation_speed = 1.0;
 		/// end
-		config_raw.camera_upside_down    = false;
-		config_raw.zoom_direction        = zoom_direction_t.VERTICAL;
-		config_raw.displace_strength     = 0.0;
-		config_raw.wrap_mouse            = false;
-		config_raw.camera_controls       = camera_controls_t.ORBIT;
-		config_raw.layer_res             = texture_res_t.RES2048;
+		config_raw.camera_upside_down = false;
+		config_raw.zoom_direction     = zoom_direction_t.VERTICAL;
+		config_raw.displace_strength  = 0.0;
+		config_raw.wrap_mouse         = false;
+		config_raw.camera_controls    = camera_controls_t.ORBIT;
+		config_raw.layer_res          = texture_res_t.RES2048;
 		/// if (arm_android || arm_ios)
 		config_raw.touch_ui      = true;
 		config_raw.splash_screen = true;
@@ -236,6 +237,11 @@ function config_init() {
 		config_raw.grid_snap           = false;
 		config_raw.experimental        = false;
 		config_raw.neural_backend      = neural_backend_t.VULKAN;
+		/// if (arm_android || arm_ios)
+		config_raw.render_mode = render_mode_t.FORWARD;
+		/// else
+		config_raw.render_mode = render_mode_t.DEFERRED;
+		/// end
 	}
 	else {
 		// Discard old config
@@ -362,7 +368,7 @@ function config_import_from(from: config_t) {
 
 function config_apply() {
 	config_save();
-	context_raw.ddirty = 2;
+	context_raw.ddirty         = 2;
 	let current: gpu_texture_t = _draw_current;
 	let in_use: bool           = gpu_in_use;
 	if (in_use)
@@ -543,4 +549,5 @@ type config_t = {
 	grid_snap?: bool;
 	experimental?: bool;
 	neural_backend?: i32;
+	render_mode?: render_mode_t;
 };

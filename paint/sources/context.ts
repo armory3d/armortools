@@ -36,7 +36,6 @@ type context_t = {
 	select_time?: f32;
 	viewport_mode?: viewport_mode_t;
 	workspace?: workspace_t;
-	render_mode?: render_mode_t;
 	viewport_shader?: any; // JSValue * -> (ns: node_shader_t)=>void;
 	hscale_was_changed?: bool;
 	export_mesh_format?: mesh_format_t;
@@ -246,11 +245,6 @@ function context_create(): context_t {
 	c.split_by                = split_type_t.OBJECT;
 	c.select_time             = 0.0;
 	c.viewport_mode           = config_raw.viewport_mode == 0 ? viewport_mode_t.LIT : viewport_mode_t.PATH_TRACE;
-	/// if (arm_android || arm_ios)
-	c.render_mode = render_mode_t.FORWARD;
-	/// else
-	c.render_mode = render_mode_t.DEFERRED;
-	/// end
 	c.hscale_was_changed      = false;
 	c.export_mesh_format      = mesh_format_t.OBJ;
 	c.export_mesh_index       = 0;
@@ -401,7 +395,7 @@ function context_init() {
 }
 
 function context_use_deferred(): bool {
-	return context_raw.render_mode != render_mode_t.FORWARD &&
+	return config_raw.render_mode != render_mode_t.FORWARD &&
 	       (context_raw.viewport_mode == viewport_mode_t.LIT || context_raw.viewport_mode == viewport_mode_t.PATH_TRACE) &&
 	       context_raw.tool != tool_type_t.COLORID;
 }
@@ -426,7 +420,9 @@ function context_set_material(m: slot_material_t) {
 
 	let decal: bool = context_is_decal();
 	if (decal) {
-		sys_notify_on_next_frame(function(_: any) { util_render_make_decal_preview(); });
+		sys_notify_on_next_frame(function(_: any) {
+			util_render_make_decal_preview();
+		});
 	}
 }
 
@@ -708,13 +704,15 @@ function context_set_viewport_shader(viewport_shader: any) { // JSValue * -> (ns
 }
 
 function context_set_render_path() {
-	if (context_raw.render_mode == render_mode_t.FORWARD || context_raw.viewport_shader != null) {
+	if (config_raw.render_mode == render_mode_t.FORWARD || context_raw.viewport_shader != null) {
 		render_path_commands = render_path_forward_commands;
 	}
 	else {
 		render_path_commands = render_path_deferred_commands;
 	}
-	sys_notify_on_next_frame(function(_: any) { make_material_parse_mesh_material(); });
+	sys_notify_on_next_frame(function(_: any) {
+		make_material_parse_mesh_material();
+	});
 }
 
 function context_enable_import_plugin(file: string): bool {

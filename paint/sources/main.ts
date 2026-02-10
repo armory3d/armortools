@@ -19,7 +19,7 @@ function main() {
 	uniforms_ext_init();
 	render_path_base_init();
 	render_path_deferred_init(); // Allocate gbuffer
-	if (context_raw.render_mode == render_mode_t.FORWARD) {
+	if (config_raw.render_mode == render_mode_t.FORWARD) {
 		render_path_forward_init();
 		render_path_commands = render_path_forward_commands;
 	}

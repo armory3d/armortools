@@ -153,7 +153,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 			}
 		}
 
-		if (context_raw.viewport_mode == viewport_mode_t.LIT && context_raw.render_mode == render_mode_t.FORWARD) {
+		if (context_raw.viewport_mode == viewport_mode_t.LIT && config_raw.render_mode == render_mode_t.FORWARD) {
 			texture_count += 6;
 			node_shader_add_texture(kong, "senvmap_radiance", "_envmap_radiance");
 			node_shader_add_texture(kong, "senvmap_radiance0", "_envmap_radiance0");
@@ -404,7 +404,7 @@ function make_mesh_run(data: material_t, layer_pass: i32 = 0): node_shader_conte
 				js_call_ptr(context_raw.viewport_shader, kong);
 				node_shader_write_frag(kong, "output[1] = float4(output_color, 1.0);");
 			}
-			else if (context_raw.render_mode == render_mode_t.FORWARD && context_raw.viewport_mode != viewport_mode_t.PATH_TRACE) {
+			else if (config_raw.render_mode == render_mode_t.FORWARD && context_raw.viewport_mode != viewport_mode_t.PATH_TRACE) {
 				node_shader_write_frag(kong, "var albedo: float3 = lerp3(basecol, float3(0.0, 0.0, 0.0), metallic);");
 				node_shader_write_frag(kong, "var f0: float3 = lerp3(float3(0.04, 0.04, 0.04), basecol, metallic);");
 				kong.frag_vvec = true;
