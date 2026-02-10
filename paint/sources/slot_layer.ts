@@ -792,13 +792,9 @@ function layers_init() {
 }
 
 function layers_resize() {
-	let conf: config_t = config_raw;
 	if (base_res_handle.i >= math_floor(texture_res_t.RES16384)) { // Save memory for >=16k
-		conf.undo_steps = 1;
-		if (context_raw.undo_handle != null) {
-			context_raw.undo_handle.f = conf.undo_steps;
-		}
-		while (history_undo_layers.length > conf.undo_steps) {
+		config_raw.undo_steps = 1;
+		while (history_undo_layers.length > config_raw.undo_steps) {
 			let l: slot_layer_t = array_pop(history_undo_layers);
 			sys_notify_on_next_frame(function(l: slot_layer_t) {
 				slot_layer_unload(l);

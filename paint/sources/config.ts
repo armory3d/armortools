@@ -361,12 +361,8 @@ function config_import_from(from: config_t) {
 }
 
 function config_apply() {
-	config_raw.rp_ssao        = context_raw.hssao.b;
-	config_raw.rp_bloom       = context_raw.hbloom.b;
-	config_raw.rp_supersample = config_get_super_sample_size(context_raw.hsupersample.i);
 	config_save();
 	context_raw.ddirty = 2;
-
 	let current: gpu_texture_t = _draw_current;
 	let in_use: bool           = gpu_in_use;
 	if (in_use)
