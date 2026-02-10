@@ -287,12 +287,6 @@ static void initKeyTranslation() {
 	keyTranslated[VK_MENU]       = IRON_KEY_ALT;
 	keyTranslated[VK_PAUSE]      = IRON_KEY_PAUSE;
 	keyTranslated[VK_CAPITAL]    = IRON_KEY_CAPS_LOCK;
-	keyTranslated[VK_KANA]       = IRON_KEY_KANA;
-	keyTranslated[VK_HANGUL]     = IRON_KEY_HANGUL;
-	keyTranslated[VK_JUNJA]      = IRON_KEY_JUNJA;
-	keyTranslated[VK_FINAL]      = IRON_KEY_FINAL;
-	keyTranslated[VK_HANJA]      = IRON_KEY_HANJA;
-	keyTranslated[VK_KANJI]      = IRON_KEY_KANJI;
 	keyTranslated[VK_ESCAPE]     = IRON_KEY_ESCAPE;
 	keyTranslated[VK_SPACE]      = IRON_KEY_SPACE;
 	keyTranslated[VK_PRIOR]      = IRON_KEY_PAGE_UP;
