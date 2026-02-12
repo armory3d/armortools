@@ -141,12 +141,12 @@ typedef struct gpu_pipeline {
 
 typedef struct gpu_raytrace_pipeline {
 	gpu_buffer_t                *constant_buffer;
-	gpu_raytrace_pipeline_impl_t impl;
+	gpu_pipeline_impl_t impl;
 } gpu_raytrace_pipeline_t;
 
-typedef struct gpu_raytrace_acceleration_structure {
-	gpu_raytrace_acceleration_structure_impl_t impl;
-} gpu_raytrace_acceleration_structure_t;
+typedef struct gpu_acceleration_structure {
+	gpu_acceleration_structure_impl_t impl;
+} gpu_acceleration_structure_t;
 
 int  gpu_max_bound_textures(void);
 void gpu_begin(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, gpu_clear_t flags, unsigned color, float depth);
@@ -220,15 +220,15 @@ void  gpu_use_linear_sampling(bool b);
 char *gpu_device_name();
 
 bool gpu_raytrace_supported(void);
-void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *ray_shader, int ray_shader_size, gpu_buffer_t *constant_buffer);
+void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *shader, int shader_size, gpu_buffer_t *constant_buffer);
 void gpu_raytrace_pipeline_destroy(gpu_raytrace_pipeline_t *pipeline);
-void gpu_raytrace_acceleration_structure_init(gpu_raytrace_acceleration_structure_t *accel);
-void gpu_raytrace_acceleration_structure_add(gpu_raytrace_acceleration_structure_t *accel, gpu_buffer_t *vb, gpu_buffer_t *ib, iron_matrix4x4_t transform);
-void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structure_t *accel, gpu_buffer_t *_vb_full, gpu_buffer_t *_ib_full);
-void gpu_raytrace_acceleration_structure_destroy(gpu_raytrace_acceleration_structure_t *accel);
+void gpu_raytrace_acceleration_structure_init(gpu_acceleration_structure_t *accel);
+void gpu_raytrace_acceleration_structure_add(gpu_acceleration_structure_t *accel, gpu_buffer_t *vb, gpu_buffer_t *ib, iron_matrix4x4_t transform);
+void gpu_raytrace_acceleration_structure_build(gpu_acceleration_structure_t *accel, gpu_buffer_t *_vb_full, gpu_buffer_t *_ib_full);
+void gpu_raytrace_acceleration_structure_destroy(gpu_acceleration_structure_t *accel);
 void gpu_raytrace_set_textures(gpu_texture_t *texpaint0, gpu_texture_t *texpaint1, gpu_texture_t *texpaint2, gpu_texture_t *texenv, gpu_texture_t *texsobol,
                                gpu_texture_t *texscramble, gpu_texture_t *texrank);
-void gpu_raytrace_set_acceleration_structure(gpu_raytrace_acceleration_structure_t *accel);
+void gpu_raytrace_set_acceleration_structure(gpu_acceleration_structure_t *accel);
 void gpu_raytrace_set_pipeline(gpu_raytrace_pipeline_t *pipeline);
 void gpu_raytrace_set_target(gpu_texture_t *output);
 void gpu_raytrace_dispatch_rays();

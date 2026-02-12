@@ -4,7 +4,9 @@
 
 #include "rand.hlsl"
 
-void create_basis(float3 normal, out float3 tangent, out float3 binormal) {
+float3x3 create_basis(float3 normal) {
+	float3 tangent = float3(0, 0, 0);
+	float3 binormal = float3(0, 0, 0);
 	float3 v = cross(normal, float3(0.0, 0.0, 1.0));
 	if (dot(v, v) > 0.0001) {
 		tangent = normalize(v);
@@ -14,6 +16,7 @@ void create_basis(float3 normal, out float3 tangent, out float3 binormal) {
 		tangent = normalize(v);
 	}
 	binormal = cross(tangent, normal);
+	return float3x3(tangent, binormal, normal);
 }
 
 void generate_camera_ray(float2 screen_pos, out float3 ray_origin, out float3 ray_dir, float3 eye, float4x4 inv_vp) {
@@ -32,11 +35,11 @@ float2 equirect(float3 normal, float angle) {
 	return float2(theta / PI2, phi / PI);
 }
 
-float3 cos_weighted_hemisphere_direction(float3 n, uint sample, uint seed, int frame, Texture2D<float4> sobol, Texture2D<float4> scramble, Texture2D<float4> rank) {
+float3 cos_weighted_hemisphere_direction(uint3 id, float3 n, uint sample, uint seed, int frame, Texture2D<float4> sobol, Texture2D<float4> scramble, Texture2D<float4> rank) {
 	const float PI = 3.1415926535;
 	const float PI2 = PI * 2.0;
-	float f0 = rand(DispatchRaysIndex().x, DispatchRaysIndex().y, sample, seed, frame, sobol, scramble, rank);
-	float f1 = rand(DispatchRaysIndex().x, DispatchRaysIndex().y, sample, seed + 1, frame, sobol, scramble, rank);
+	float f0 = rand(id.x, id.y, sample, seed, frame, sobol, scramble, rank);
+	float f1 = rand(id.x, id.y, sample, seed + 1, frame, sobol, scramble, rank);
 	float z = f0 * 2.0f - 1.0f;
 	float a = f1 * PI2;
 	float r = sqrt(1.0f - z * z);
@@ -44,8 +47,8 @@ float3 cos_weighted_hemisphere_direction(float3 n, uint sample, uint seed, int f
 	float y = r * sin(a);
 	return normalize(n + float3(x, y, z));
 
-	// float xi1 = rand(DispatchRaysIndex().x, DispatchRaysIndex().y, sample, seed, frame, sobol, scramble, rank);
-	// float xi2 = rand(DispatchRaysIndex().x, DispatchRaysIndex().y, sample, seed + 1, frame, sobol, scramble, rank);
+	// float xi1 = rand(id.x, id.y, sample, seed, frame, sobol, scramble, rank);
+	// float xi2 = rand(id.x, id.y, sample, seed + 1, frame, sobol, scramble, rank);
 	// float3 tangent, binormal;
 	// create_basis(n, tangent, binormal);
 	// float sin_theta = sqrt(xi1);

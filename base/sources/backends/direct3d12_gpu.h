@@ -65,13 +65,6 @@ typedef struct {
 } gpu_buffer_impl_t;
 
 typedef struct {
-	struct ID3D12StateObject *state;
-	struct ID3D12Resource    *raygen_shader_table;
-	struct ID3D12Resource    *miss_shader_table;
-	struct ID3D12Resource    *hitgroup_shader_table;
-} gpu_raytrace_pipeline_impl_t;
-
-typedef struct {
 	struct ID3D12Resource *bottom_level_accel[16];
 	struct ID3D12Resource *top_level_accel;
-} gpu_raytrace_acceleration_structure_impl_t;
+} gpu_acceleration_structure_impl_t;

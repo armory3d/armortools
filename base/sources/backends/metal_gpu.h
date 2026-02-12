@@ -22,9 +22,5 @@ typedef struct {
 } gpu_buffer_impl_t;
 
 typedef struct {
-	void *_raytracingPipeline;
-} gpu_raytrace_pipeline_impl_t;
-
-typedef struct {
 	void *_accelerationStructure;
-} gpu_raytrace_acceleration_structure_impl_t;
+} gpu_acceleration_structure_impl_t;

@@ -8,9 +8,9 @@ float2 s16_to_f32(uint val) {
 	return float2(a, b) / 32767.0f;
 }
 
-float3 hit_world_position() {
-	return WorldRayOrigin() + RayTCurrent() * WorldRayDirection();
-}
+// float3 hit_world_position() {
+// 	return WorldRayOrigin() + RayTCurrent() * WorldRayDirection();
+// }
 
 float3 hit_attribute(float3 vertex_attribute[3], BuiltInTriangleIntersectionAttributes attr) {
 	return vertex_attribute[0] +

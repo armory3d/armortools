@@ -1,4 +1,3 @@
-
 #include "std/rand.hlsl"
 #include "std/math.hlsl"
 
@@ -15,12 +14,6 @@ struct RayGenConstantBuffer {
 	float4 v2;
 	float4 v3;
 	float4 v4;
-};
-
-struct RayPayload {
-	float4 color;
-	float3 ray_origin;
-	float3 ray_dir;
 };
 
 RWTexture2D<half4> render_target : register(u0);
@@ -40,53 +33,55 @@ Texture2D<float4> mytexture_rank : register(t9);
 static const int SAMPLES = 64;
 static uint seed = 0;
 
-[shader("raygeneration")]
-void raygeneration() {
-	float2 xy = DispatchRaysIndex().xy + 0.5f;
+[numthreads(16, 16, 1)]
+void main(uint3 id : SV_DispatchThreadID) {
+	uint2 dim;
+	render_target.GetDimensions(dim.x, dim.y);
+	if (id.x >= dim.x || id.y >= dim.y) return;
+
+	float2 xy = id.xy + 0.5f;
 	float4 tex0 = mytexture0.Load(uint3(xy, 0));
 	if (tex0.a == 0.0) {
-		render_target[DispatchRaysIndex().xy] = half4(0.0f, 0.0f, 0.0f, 0.0f);
+		render_target[id.xy] = half4(0.0f, 0.0f, 0.0f, 0.0f);
 		return;
 	}
+
 	float3 pos = tex0.rgb;
 	float3 nor = mytexture1.Load(uint3(xy, 0)).rgb;
-
-	RayPayload payload;
 
 	RayDesc ray;
 	ray.TMin = constant_buffer.v0.w * 0.01;
 	ray.TMax = constant_buffer.v0.z * 10.0;
 	ray.Origin = pos;
 
-	float3 accum = float3(0, 0, 0);
+	float3 accum = 0;
 
 	for (int i = 0; i < SAMPLES; ++i) {
-		ray.Direction = cos_weighted_hemisphere_direction(nor, i, seed, constant_buffer.v0.x, mytexture_sobol, mytexture_scramble, mytexture_rank);
+		ray.Direction = cos_weighted_hemisphere_direction(id, nor, i, seed, constant_buffer.v0.x, mytexture_sobol, mytexture_scramble, mytexture_rank);
 		seed += 1;
-		TraceRay(scene, RAY_FLAG_FORCE_OPAQUE, ~0, 0, 1, 0, ray, payload);
-		accum += payload.color.rgb;
+
+		RayQuery<RAY_FLAG_FORCE_OPAQUE> q;
+		q.TraceRayInline(scene, RAY_FLAG_NONE, ~0, ray);
+		q.Proceed();
+
+		if (q.CommittedStatus() == COMMITTED_TRIANGLE_HIT) {
+			accum += 0;
+		}
+		else {
+			accum += 1;
+		}
 	}
 
 	accum /= SAMPLES;
 
-	float3 color = float3(render_target[DispatchRaysIndex().xy].xyz);
+	float3 color = render_target[id.xy].xyz;
 	if (constant_buffer.v0.x == 0) {
-		color = accum.xyz;
+		color = accum;
 	}
 	else {
 		float a = 1.0 / constant_buffer.v0.x;
-		float b = 1.0 - a;
-		color = color * b + accum.xyz * a;
+		color = lerp(color, accum, a);
 	}
-	render_target[DispatchRaysIndex().xy] = half4(color.xyz, 1.0f);
-}
 
-[shader("closesthit")]
-void closesthit(inout RayPayload payload, in BuiltInTriangleIntersectionAttributes attr) {
-	payload.color = float4(0, 0, 0, 1);
-}
-
-[shader("miss")]
-void miss(inout RayPayload payload) {
-	payload.color = float4(1, 1, 1, 1);
+	render_target[id.xy] = half4(color, 1.0f);
 }

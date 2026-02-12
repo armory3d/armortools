@@ -660,7 +660,7 @@ typedef struct inst {
 	int              i;
 } inst_t;
 
-static gpu_raytrace_acceleration_structure_t *accel;
+static gpu_acceleration_structure_t          *accel;
 static gpu_raytrace_pipeline_t               *pipeline;
 static gpu_texture_t                         *output = NULL;
 static gpu_buffer_t                          *constant_buf;
@@ -683,14 +683,14 @@ static int                                    vb_count_last = 0;
 static inst_t                                 instances[1024];
 static int                                    instances_count = 0;
 
-void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *ray_shader, int ray_shader_size, gpu_buffer_t *constant_buffer) {
+void gpu_raytrace_pipeline_init(gpu_raytrace_pipeline_t *pipeline, void *shader, int ray_shader_size, gpu_buffer_t *constant_buffer) {
 	id<MTLDevice> device = get_metal_device();
 	if (!device.supportsRaytracing)
 		return;
 	constant_buf = constant_buffer;
 
 	NSError       *error   = nil;
-	id<MTLLibrary> library = [device newLibraryWithSource:[[NSString alloc] initWithBytes:ray_shader length:ray_shader_size encoding:NSUTF8StringEncoding]
+	id<MTLLibrary> library = [device newLibraryWithSource:[[NSString alloc] initWithBytes:shader length:ray_shader_size encoding:NSUTF8StringEncoding]
 	                                              options:nil
 	                                                error:&error];
 	if (library == nil) {
@@ -742,12 +742,12 @@ id<MTLAccelerationStructure> create_acceleration_sctructure(MTLAccelerationStruc
 	return compacted_acceleration_structure;
 }
 
-void gpu_raytrace_acceleration_structure_init(gpu_raytrace_acceleration_structure_t *accel) {
+void gpu_raytrace_acceleration_structure_init(gpu_acceleration_structure_t *accel) {
 	vb_count        = 0;
 	instances_count = 0;
 }
 
-void gpu_raytrace_acceleration_structure_add(gpu_raytrace_acceleration_structure_t *accel, gpu_buffer_t *_vb, gpu_buffer_t *_ib, iron_matrix4x4_t _transform) {
+void gpu_raytrace_acceleration_structure_add(gpu_acceleration_structure_t *accel, gpu_buffer_t *_vb, gpu_buffer_t *_ib, iron_matrix4x4_t _transform) {
 
 	int vb_i = -1;
 	for (int i = 0; i < vb_count; ++i) {
@@ -768,17 +768,17 @@ void gpu_raytrace_acceleration_structure_add(gpu_raytrace_acceleration_structure
 	instances_count++;
 }
 
-void _gpu_raytrace_acceleration_structure_destroy_bottom(gpu_raytrace_acceleration_structure_t *accel) {
+void _gpu_raytrace_acceleration_structure_destroy_bottom(gpu_acceleration_structure_t *accel) {
 	//	for (int i = 0; i < vb_count_last; ++i) {
 	//	}
 	_primitive_accels = nil;
 }
 
-void _gpu_raytrace_acceleration_structure_destroy_top(gpu_raytrace_acceleration_structure_t *accel) {
+void _gpu_raytrace_acceleration_structure_destroy_top(gpu_acceleration_structure_t *accel) {
 	_instance_accel = nil;
 }
 
-void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structure_t *accel, gpu_buffer_t *_vb_full, gpu_buffer_t *_ib_full) {
+void gpu_raytrace_acceleration_structure_build(gpu_acceleration_structure_t *accel, gpu_buffer_t *_vb_full, gpu_buffer_t *_ib_full) {
 
 	bool build_bottom = false;
 	for (int i = 0; i < 16; ++i) {
@@ -840,7 +840,7 @@ void gpu_raytrace_acceleration_structure_build(gpu_raytrace_acceleration_structu
 	_instance_accel                                                   = create_acceleration_sctructure(inst_accel_descriptor);
 }
 
-void gpu_raytrace_acceleration_structure_destroy(gpu_raytrace_acceleration_structure_t *accel) {}
+void gpu_raytrace_acceleration_structure_destroy(gpu_acceleration_structure_t *accel) {}
 
 void gpu_raytrace_set_textures(gpu_texture_t *texpaint0, gpu_texture_t *texpaint1, gpu_texture_t *texpaint2, gpu_texture_t *texenv, gpu_texture_t *texsobol,
                                gpu_texture_t *texscramble, gpu_texture_t *texrank) {
@@ -853,7 +853,7 @@ void gpu_raytrace_set_textures(gpu_texture_t *texpaint0, gpu_texture_t *texpaint
 	_texrank     = texrank;
 }
 
-void gpu_raytrace_set_acceleration_structure(gpu_raytrace_acceleration_structure_t *_accel) {
+void gpu_raytrace_set_acceleration_structure(gpu_acceleration_structure_t *_accel) {
 	accel = _accel;
 }
 

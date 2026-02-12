@@ -368,7 +368,7 @@ int gpu_texture_format_size(gpu_texture_format_t format) {
 
 static gpu_buffer_t                          rt_constant_buffer;
 static gpu_raytrace_pipeline_t               rt_pipeline;
-static gpu_raytrace_acceleration_structure_t rt_accel;
+static gpu_acceleration_structure_t          rt_accel;
 static bool                                  rt_created              = false;
 static bool                                  rt_accel_created        = false;
 static const int                             rt_constant_buffer_size = 24;

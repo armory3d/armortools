@@ -26,8 +26,4 @@ typedef struct {
 
 typedef struct {
 	int empty;
-} gpu_raytrace_pipeline_impl_t;
-
-typedef struct {
-	int empty;
-} gpu_raytrace_acceleration_structure_impl_t;
+} gpu_acceleration_structure_impl_t;
