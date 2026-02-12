@@ -266,9 +266,13 @@ function export_arm_run_material(path: string) {
 	};
 
 	if (context_raw.write_icon_on_export) { // Separate icon files
-		iron_write_png(substring(path, 0, path.length - 4) + "_icon.png", gpu_get_texture_pixels(m.image), m.image.width, m.image.height, 0);
+		let buf: buffer_t = export_arm_rgba64_to_rgba32(gpu_get_texture_pixels(m.image));
+		/// if IRON_BGRA
+		buf = export_arm_bgra_swap(buf);
+		/// end
+		iron_write_png(substring(path, 0, path.length - 4) + "_icon.png", buf, m.image.width, m.image.height, 0);
 		if (is_cloud) {
-			iron_write_jpg(substring(path, 0, path.length - 4) + "_icon.jpg", gpu_get_texture_pixels(m.image), m.image.width, m.image.height, 0, 50);
+			iron_write_jpg(substring(path, 0, path.length - 4) + "_icon.jpg", buf, m.image.width, m.image.height, 0, 50);
 		}
 	}
 
@@ -339,7 +343,11 @@ function export_arm_run_brush(path: string) {
 	    {version : manifest_version_project, brush_nodes : bnodes, brush_icons : bicons, assets : texture_files, packed_assets : packed_assets};
 
 	if (context_raw.write_icon_on_export) { // Separate icon file
-		iron_write_png(substring(path, 0, path.length - 4) + "_icon.png", gpu_get_texture_pixels(b.image), b.image.width, b.image.height, 0);
+		let buf: buffer_t = export_arm_rgba64_to_rgba32(gpu_get_texture_pixels(b.image));
+		/// if IRON_BGRA
+		buf = export_arm_bgra_swap(buf);
+		/// end
+		iron_write_png(substring(path, 0, path.length - 4) + "_icon.png", buf, b.image.width, b.image.height, 0);
 	}
 
 	if (context_raw.pack_assets_on_export) { // Pack textures
@@ -480,4 +488,11 @@ function export_arm_vec3f32(v: vec4_t): f32_array_t {
 	res[1]               = v.y;
 	res[2]               = v.z;
 	return res;
+}
+
+function export_arm_rgba64_to_rgba32(buffer: buffer_t): buffer_t {
+	for (let i: i32 = 0; i < buffer.length / 2; ++i) {
+		buffer[i] = half_to_u8_fast(buffer_get_u16(buffer, i * 2));
+	}
+	return buffer;
 }
