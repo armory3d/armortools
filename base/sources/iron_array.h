@@ -150,3 +150,4 @@ any_array_t      *any_array_create(uint32_t length);
 any_array_t      *any_array_create_from_raw(void **raw, uint32_t length);
 char_ptr_array_t *char_ptr_array_create(uint32_t length);
 uint16_t          float_to_half_fast(float value);
+uint8_t           half_to_u8_fast(uint16_t h);

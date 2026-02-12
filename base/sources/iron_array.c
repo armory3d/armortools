@@ -2,9 +2,9 @@
 
 #include "iron_gc.h"
 #include "iron_string.h"
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
 void array_free(void *a) {
 	u8_array_t *tmp = (u8_array_t *)a;
@@ -321,12 +321,17 @@ int16_t buffer_get_i16(buffer_t *b, uint32_t p) {
 }
 
 float buffer_get_f16(buffer_t *b, uint32_t p) {
-	uint16_t half = *(uint16_t *)(b->buffer + p);
-	uint32_t sign = (half & 0x8000) << 16;
+	uint16_t half     = *(uint16_t *)(b->buffer + p);
+	uint32_t sign     = (half & 0x8000) << 16;
 	uint32_t exp_frac = half & 0x7FFF;
-	if (exp_frac == 0) return 0.0;
-	if ((half & 0x7C00) == 0x7C00) return NAN;
-	union { float f; uint32_t u; } result;
+	if (exp_frac == 0)
+		return 0.0;
+	if ((half & 0x7C00) == 0x7C00)
+		return NAN;
+	union {
+		float    f;
+		uint32_t u;
+	} result;
 	result.u = sign | ((exp_frac << 13) + 0x38000000);
 	return result.f;
 }
@@ -641,10 +646,28 @@ char_ptr_array_t *char_ptr_array_create(uint32_t length) {
 }
 
 uint16_t float_to_half_fast(float value) {
-	union { float f; uint32_t u; } v = {value};
+	union {
+		float    f;
+		uint32_t u;
+	} v           = {value};
 	uint32_t sign = (v.u >> 16) & 0x8000;
 	v.u &= 0x7FFFFFFF;
-	if (v.u >= 0x47800000) return sign | 0x7C00;
-	if (v.u < 0x38800000) return sign;
+	if (v.u >= 0x47800000)
+		return sign | 0x7C00;
+	if (v.u < 0x38800000)
+		return sign;
 	return sign | ((v.u - 0x38000000) >> 13);
+}
+
+uint8_t half_to_u8_fast(uint16_t h) {
+	uint32_t exp      = (h >> 10) & 0x1F;
+	uint32_t mantissa = h & 0x03FF;
+	if (exp == 0)
+		return 0;
+	if (exp >= 15)
+		return 255;
+	uint32_t val   = mantissa | 0x0400;
+	int      shift = 25 - exp;
+	uint32_t res   = (val * 255) >> shift;
+	return (uint8_t)res;
 }
