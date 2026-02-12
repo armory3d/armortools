@@ -371,6 +371,12 @@ function project_import_mesh(replace_existing: bool = true, done: () => void = n
 		// Show .fbx in the file picker even when fbx plugin is not yet enabled
 		formats += ",fbx";
 	}
+	if (string_index_of(formats, "gltf") == -1) {
+		formats += ",gltf";
+	}
+	if (string_index_of(formats, "glb") == -1) {
+		formats += ",glb";
+	}
 	ui_files_show(formats, false, false, function(path: string) {
 		project_import_mesh_box(path, _project_import_mesh_replace_existing, true, _project_import_mesh_done);
 	});

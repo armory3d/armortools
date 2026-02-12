@@ -123,9 +123,14 @@ function path_is_gimp_color_palette(path: string): bool {
 	return ends_with(p, ".gpl");
 }
 
+function path_is_ext_format(path: string): bool {
+	let p: string = to_lower_case(path);
+	return ends_with(p, ".fbx") || ends_with(p, ".gltf") || ends_with(p, ".glb") || ends_with(p, ".stl") || ends_with(p, ".svg");
+}
+
 function path_is_known(path: string): bool {
 	return path_is_mesh(path) || path_is_texture(path) || path_is_font(path) || path_is_project(path) || path_is_plugin(path) || path_is_text(path) ||
-	       path_is_gimp_color_palette(path);
+	       path_is_gimp_color_palette(path) || path_is_ext_format(path);
 }
 
 function path_check_ext(p: string, exts: string[]): bool {
