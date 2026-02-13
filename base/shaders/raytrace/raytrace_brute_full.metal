@@ -167,15 +167,15 @@ kernel void raytracingKernel(
 	device void *indices [[buffer(2)]],
 	device void *vertices [[buffer(3)]]
 ) {
-	uint seed = 0;
+	uint thread_seed = 0;
 	float3 accum = float3(0, 0, 0);
 
 	for (int j = 0; j < SAMPLES; ++j) {
 		// AA
 		float2 xy = float2(tid) + float2(0.5f, 0.5f);
-		xy.x += rand(tid.x, tid.y, j, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
-		seed += 1;
-		xy.y += rand(tid.x, tid.y, j, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+		xy.x += rand(tid.x, tid.y, j, thread_seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+		thread_seed += 1;
+		xy.y += rand(tid.x, tid.y, j, thread_seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
 
 		float2 screen_pos = xy / float2(render_target.get_width(), render_target.get_height()) * 2.0 - 1.0;
 		ray ray;
@@ -195,7 +195,7 @@ kernel void raytracingKernel(
 			#ifdef _ROULETTE
 			float rr_factor = 1.0;
 			if (i >= rr_start) {
-				float f = rand(tid.x, tid.y, j, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+				float f = rand(tid.x, tid.y, j, thread_seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
 				if (f <= rr_probability) {
 					break;
 				}
@@ -277,15 +277,16 @@ kernel void raytracingKernel(
 				texpaint1.g = -texpaint1.g;
 				n = float3x3(tangent, binormal, n) * texpaint1.rgb;
 
-				float f = rand(tid.x, tid.y, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
-				seed += 1;
+				uint bounce_seed = 0;
+				float f = rand(tid.x, tid.y, payload.color.a, bounce_seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+				bounce_seed += 1;
 
 				#ifdef _TRANSLUCENCY
 				float3 diffuse_dir = texpaint0.a < f ?
-					cos_weighted_hemisphere_direction(tid, ray.direction, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank) :
-					cos_weighted_hemisphere_direction(tid, n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+					cos_weighted_hemisphere_direction(tid, ray.direction, payload.color.a, bounce_seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank) :
+					cos_weighted_hemisphere_direction(tid, n, payload.color.a, bounce_seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
 				#else
-				float3 diffuse_dir = cos_weighted_hemisphere_direction(tid, n, payload.color.a, seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+				float3 diffuse_dir = cos_weighted_hemisphere_direction(tid, n, payload.color.a, bounce_seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
 				#endif
 
 				#ifdef _FRESNEL
@@ -356,7 +357,7 @@ kernel void raytracingKernel(
 				#endif
 
 				if (i == 0 && constant_buffer.params.x < 0) { // No envmap
-					payload.color.rgb = float3(0.032, 0.032, 0.032);
+					payload.color.rgb = float3(0.0275, 0.0275, 0.0275);
 				}
 
 				accum += clamp(payload.color.rgb, 0.0, 8.0);
