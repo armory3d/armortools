@@ -8,7 +8,7 @@
 #include <X11/extensions/Xrandr.h>
 #include <iron_system.h>
 
-#define MAXIMUM_DISPLAYS 8
+#define MAXIMUM_DISPLAYS 32
 
 struct iron_x11_window {
 	int                display_index;

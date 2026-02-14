@@ -151,15 +151,15 @@ void iron_display_init() {
 	RROutput            primary_output   = XRRGetOutputPrimary(x11_ctx.display, root_window);
 
 	for (int i = 0; i < screen_resources->noutput; i++) {
-		if (i >= MAXIMUM_DISPLAYS) {
-			iron_error("Too many screens (maximum %i)", MAXIMUM_DISPLAYS);
-			break;
-		}
-
 		XRROutputInfo *output_info = XRRGetOutputInfo(x11_ctx.display, screen_resources, screen_resources->outputs[i]);
 		if (output_info->connection != RR_Connected || output_info->crtc == None) {
 			XRRFreeOutputInfo(output_info);
 			continue;
+		}
+		if (x11_ctx.num_displays >= MAXIMUM_DISPLAYS) {
+			iron_error("Too many screens (maximum %i)", MAXIMUM_DISPLAYS);
+			XRRFreeOutputInfo(output_info);
+			break;
 		}
 
 		XRRCrtcInfo *crtc_info = XRRGetCrtcInfo(x11_ctx.display, screen_resources, output_info->crtc);
