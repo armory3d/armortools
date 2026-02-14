@@ -217,6 +217,7 @@ void  gpu_set_constant_buffer(gpu_buffer_t *buffer, int offset, size_t size);
 void  gpu_get_render_target_pixels(gpu_texture_t *render_target, uint8_t *data);
 void  gpu_set_texture(int unit, gpu_texture_t *texture);
 void  gpu_use_linear_sampling(bool b);
+int   gpu_uniform_buffer_align(void);
 char *gpu_device_name();
 
 bool gpu_raytrace_supported(void);

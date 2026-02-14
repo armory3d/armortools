@@ -3,6 +3,7 @@
 #include <string.h>
 
 static gpu_buffer_t   constant_buffer;
+static int            constant_buffer_stride          = GPU_CONSTANT_BUFFER_SIZE;
 static bool           gpu_thrown = false;
 static gpu_texture_t  textures_to_destroy[128];
 static gpu_buffer_t   buffers_to_destroy[128];
@@ -26,8 +27,13 @@ int             framebuffer_index = 0;
 
 void gpu_init(int depth_buffer_bits, bool vsync) {
 	gpu_init_internal(depth_buffer_bits, vsync);
-	gpu_constant_buffer_init(&constant_buffer, GPU_CONSTANT_BUFFER_SIZE * GPU_CONSTANT_BUFFER_MULTIPLE);
-	gpu_constant_buffer_lock(&constant_buffer, 0, GPU_CONSTANT_BUFFER_SIZE);
+	int align = gpu_uniform_buffer_align();
+	if (align < 1) {
+		align = 1;
+	}
+	constant_buffer_stride = ((GPU_CONSTANT_BUFFER_SIZE + align - 1) / align) * align;
+	gpu_constant_buffer_init(&constant_buffer, constant_buffer_stride * GPU_CONSTANT_BUFFER_MULTIPLE);
+	gpu_constant_buffer_lock(&constant_buffer, 0, constant_buffer_stride);
 }
 
 void gpu_begin(gpu_texture_t **targets, int count, gpu_texture_t *depth_buffer, gpu_clear_t flags, unsigned color, float depth) {
@@ -74,7 +80,7 @@ void gpu_draw() {
 		return;
 	}
 	gpu_constant_buffer_unlock(&constant_buffer);
-	gpu_set_constant_buffer(&constant_buffer, constant_buffer_index * GPU_CONSTANT_BUFFER_SIZE, GPU_CONSTANT_BUFFER_SIZE);
+	gpu_set_constant_buffer(&constant_buffer, constant_buffer_index * constant_buffer_stride, GPU_CONSTANT_BUFFER_SIZE);
 	gpu_draw_internal();
 
 	constant_buffer_index++;
@@ -88,7 +94,7 @@ void gpu_draw() {
 		gpu_execute_and_wait();
 	}
 
-	gpu_constant_buffer_lock(&constant_buffer, constant_buffer_index * GPU_CONSTANT_BUFFER_SIZE, GPU_CONSTANT_BUFFER_SIZE);
+	gpu_constant_buffer_lock(&constant_buffer, constant_buffer_index * constant_buffer_stride, constant_buffer_stride);
 }
 
 void gpu_end() {
