@@ -277,16 +277,15 @@ kernel void raytracingKernel(
 				texpaint1.g = -texpaint1.g;
 				n = float3x3(tangent, binormal, n) * texpaint1.rgb;
 
-				uint bounce_seed = 0;
-				float f = rand(tid.x, tid.y, payload.color.a, bounce_seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
-				bounce_seed += 1;
+				float f = rand(tid.x, tid.y, payload.color.a, thread_seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+				thread_seed += 1;
 
 				#ifdef _TRANSLUCENCY
 				float3 diffuse_dir = texpaint0.a < f ?
-					cos_weighted_hemisphere_direction(tid, ray.direction, payload.color.a, bounce_seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank) :
-					cos_weighted_hemisphere_direction(tid, n, payload.color.a, bounce_seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+					cos_weighted_hemisphere_direction(tid, ray.direction, payload.color.a, thread_seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank) :
+					cos_weighted_hemisphere_direction(tid, n, payload.color.a, thread_seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
 				#else
-				float3 diffuse_dir = cos_weighted_hemisphere_direction(tid, n, payload.color.a, bounce_seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
+				float3 diffuse_dir = cos_weighted_hemisphere_direction(tid, n, payload.color.a, thread_seed, constant_buffer.eye.w, mytexture_sobol, mytexture_scramble, mytexture_rank);
 				#endif
 
 				#ifdef _FRESNEL
