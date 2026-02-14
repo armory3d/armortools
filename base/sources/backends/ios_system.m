@@ -322,6 +322,12 @@ int iron_window_display() {
 				iron_internal_mouse_trigger_move(x, y);
 			}
 			iron_internal_surface_trigger_move(index, x, y);
+			if (touch.type == UITouchTypePencil) {
+				if (!(touch.estimatedProperties & UITouchPropertyForce)) {
+					// usb-c pencil with no pressure
+					iron_internal_pen_trigger_move(x, y, touch.force);
+				}
+			}
 		}
 	}
 }
@@ -332,6 +338,7 @@ int iron_window_display() {
 			CGPoint point = [touch locationInView:self];
 			float   x     = point.x * self.contentScaleFactor;
 			float   y     = point.y * self.contentScaleFactor;
+			// pencil with pressure
 			iron_internal_pen_trigger_move(x, y, touch.force);
 		}
 	}
