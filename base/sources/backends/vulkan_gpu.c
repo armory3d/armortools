@@ -65,6 +65,7 @@ static VkBuffer           upload_buffer;
 static int                upload_buffer_size = 0;
 static VkDeviceMemory     upload_mem;
 static bool               is_amd = false;
+static uint32_t           uniform_buffer_align = GPU_CONSTANT_BUFFER_SIZE;
 
 void     iron_vulkan_get_instance_extensions(const char **extensions, int *index);
 VkBool32 iron_vulkan_get_physical_device_presentation_support(VkPhysicalDevice physical_device, uint32_t queue_family_index);
@@ -775,12 +776,16 @@ void gpu_init_internal(int depth_buffer_bits, bool vsync) {
 			iron_error("No Vulkan device that supports presentation found");
 		}
 
-		VkPhysicalDeviceProperties properties;
-		vkGetPhysicalDeviceProperties(gpu, &properties);
-		iron_log("Chosen Vulkan device: %s", properties.deviceName);
-		strcpy(device_name, properties.deviceName);
-		is_amd = properties.vendorID == 0x1002;
-		free(physical_devices);
+			VkPhysicalDeviceProperties properties;
+			vkGetPhysicalDeviceProperties(gpu, &properties);
+			iron_log("Chosen Vulkan device: %s", properties.deviceName);
+			strcpy(device_name, properties.deviceName);
+			is_amd = properties.vendorID == 0x1002;
+			uniform_buffer_align = properties.limits.minUniformBufferOffsetAlignment;
+			if (uniform_buffer_align < 1) {
+				uniform_buffer_align = 1;
+			}
+			free(physical_devices);
 	}
 	else {
 		iron_error("No Vulkan device found");
@@ -1409,7 +1414,14 @@ static VkDescriptorSet get_descriptor_set(VkBuffer buffer) {
 }
 
 void gpu_set_constant_buffer(gpu_buffer_t *buffer, int offset, size_t size) {
+	if (buffer == NULL || buffer->impl.buf == VK_NULL_HANDLE || current_pipeline == NULL || current_pipeline->impl.pipeline_layout == VK_NULL_HANDLE ||
+	    command_buffer == VK_NULL_HANDLE) {
+		return;
+	}
 	VkDescriptorSet descriptor_set = get_descriptor_set(buffer->impl.buf);
+	if (descriptor_set == VK_NULL_HANDLE) {
+		return;
+	}
 	uint32_t        offsets[1]     = {offset};
 	vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, current_pipeline->impl.pipeline_layout, 0, 1, &descriptor_set, 1, offsets);
 }
@@ -1923,6 +1935,10 @@ void gpu_buffer_destroy_internal(gpu_buffer_t *buffer) {
 
 char *gpu_device_name() {
 	return device_name;
+}
+
+int gpu_uniform_buffer_align(void) {
+	return (int)uniform_buffer_align;
 }
 
 typedef struct inst {

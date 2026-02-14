@@ -28,6 +28,8 @@
 #include <string.h>
 #ifdef IRON_WINDOWS
 #include <Windows.h>
+#else
+#include <sys/stat.h>
 #endif
 #ifdef WITH_AUDIO
 #include "iron_audio.h"
@@ -1561,6 +1563,16 @@ bool iron_file_exists(char *path) {
 		return true;
 	}
 	return false;
+}
+
+bool iron_is_directory(char *path) {
+#ifdef IRON_WINDOWS
+	DWORD attrs = GetFileAttributesA(path);
+	return attrs != INVALID_FILE_ATTRIBUTES && (attrs & FILE_ATTRIBUTE_DIRECTORY);
+#else
+	struct stat st;
+	return stat(path, &st) == 0 && S_ISDIR(st.st_mode);
+#endif
 }
 
 void iron_delete_file(char *path) {

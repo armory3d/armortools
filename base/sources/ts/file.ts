@@ -66,6 +66,15 @@ function file_read_directory(path: string): string[] {
 	for (let i: i32 = 0; i < num; ++i) {
 		let f: string = files[i];
 		if (string_index_of(f, ".") > -1) {
+			let full_path: string = path;
+			if (char_at(full_path, full_path.length - 1) != path_sep) {
+				full_path += path_sep;
+			}
+			full_path += f;
+			let is_dir: bool = iron_is_directory(full_path);
+			if (is_dir) {
+				continue;
+			}
 			array_splice(files, i, 1);
 			array_push(files, f);
 			i--;
