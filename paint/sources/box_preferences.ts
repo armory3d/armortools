@@ -26,7 +26,9 @@ function box_preferences_interface_tab() {
 	}
 
 	let h_scale: ui_handle_t = ui_handle(__ID__);
-	h_scale.f                = config_raw.window_scale;
+	if (h_scale.init) {
+		h_scale.f = config_raw.window_scale;
+	}
 	ui_slider(h_scale, tr("UI Scale"), 1.0, 4.0, true, 10);
 	if (context_raw.hscale_was_changed && !ui.input_down) {
 		context_raw.hscale_was_changed = false;
