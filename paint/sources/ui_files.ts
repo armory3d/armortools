@@ -22,6 +22,7 @@ let ui_files_last_search: string                    = "";
 let ui_files_files: string[]                        = null;
 let ui_files_icon_map: map_t<string, gpu_texture_t> = null;
 let ui_files_icon_file_map: map_t<string, string>   = null;
+let ui_files_is_folder_map: map_t<string, i32>       = null;
 let ui_files_selected: i32                          = -1;
 let ui_files_show_extensions: bool                  = false;
 let ui_files_offline: bool                          = false;
@@ -90,8 +91,11 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 			tab_browser_refresh                      = true;
 		});
 	}
-	if (is_cloud && file_read_directory("cloud").length == 0) {
-		return handle.text;
+	if (is_cloud) {
+		let cloud_files: string[] = file_read_directory("cloud");
+		if (cloud_files.length == 0) {
+			return handle.text;
+		}
 	}
 
 	/// if arm_ios
@@ -105,6 +109,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 
 	if (handle.text != ui_files_last_path || search != ui_files_last_search || refresh) {
 		ui_files_files = [];
+		ui_files_is_folder_map = map_create();
 
 		let dir_path: string = handle.text;
 		/// if arm_ios
@@ -119,7 +124,18 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 			if (f == "" || char_at(f, 0) == ".") {
 				continue; // Skip hidden
 			}
-			if (string_index_of(f, ".") > 0 && !path_is_known(f)) {
+
+			let is_folder: bool = path_is_folder(f);
+			if (!is_cloud && !is_folder && string_index_of(f, ".") > 0 && !path_is_known(f)) {
+				let full_path: string = dir_path;
+				if (char_at(full_path, full_path.length - 1) != path_sep) {
+					full_path += path_sep;
+				}
+				full_path += f;
+				is_folder = iron_is_directory(full_path);
+			}
+
+			if (!is_folder && string_index_of(f, ".") > 0 && !path_is_known(f)) {
 				continue; // Skip unknown extensions
 			}
 			if (is_cloud && string_index_of(f, "_icon.") >= 0) {
@@ -128,6 +144,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 			if (string_index_of(to_lower_case(f), to_lower_case(search)) < 0) {
 				continue; // Search filter
 			}
+			map_set(ui_files_is_folder_map, f, is_folder ? 1 : 0);
 			array_push(ui_files_files, f);
 		}
 	}
@@ -164,7 +181,8 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 			let f: string = ui_files_files[i];
 			let _x: f32   = ui._x;
 
-			let rect: rect_t = string_index_of(f, ".") > 0 ? file : folder;
+			let is_folder: bool = ui_files_is_folder_map != null && map_get(ui_files_is_folder_map, f) == 1;
+			let rect: rect_t = is_folder ? folder : file;
 			if (rect == file && is_cloud) {
 				rect = downloading;
 			}
@@ -254,7 +272,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 				}
 			}
 
-			if (ends_with(f, ".arm") && !is_cloud) {
+			if (!is_folder && ends_with(f, ".arm") && !is_cloud) {
 				if (ui_files_icon_map == null) {
 					ui_files_icon_map = map_create();
 				}
@@ -318,7 +336,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 				}
 			}
 
-			if (path_is_texture(f) && !is_cloud) {
+			if (!is_folder && path_is_texture(f) && !is_cloud) {
 				let w: i32 = 50;
 				if (ui_files_icon_map == null) {
 					ui_files_icon_map = map_create();
@@ -333,7 +351,6 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 					let empty: gpu_texture_t = rt._image;
 					map_set(ui_files_icon_map, shandle, empty);
 					let image: gpu_texture_t = data_get_image(shandle);
-
 					let args: ui_files_make_icon_t = {image : image, shandle : shandle, w : w};
 					sys_notify_on_next_frame(ui_files_make_icon, args);
 				}
@@ -384,6 +401,9 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 						handle.text += path_sep;
 					}
 					handle.text += f;
+					if (!is_cloud && is_folder && char_at(handle.text, handle.text.length - 1) != path_sep) {
+						handle.text += path_sep;
+					}
 					ui_files_selected = -1;
 				}
 				context_raw.select_time = sys_time();
@@ -392,7 +412,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 			// Label
 			ui._x = _x;
 			ui._y += slotw * 0.75;
-			let label0: string = (ui_files_show_extensions || string_index_of(f, ".") <= 0) ? f : substring(f, 0, string_last_index_of(f, "."));
+			let label0: string = is_folder || ui_files_show_extensions || string_index_of(f, ".") <= 0 ? f : substring(f, 0, string_last_index_of(f, "."));
 			let label1: string = "";
 			while (label0.length > 0 && draw_string_width(ui.ops.font, ui.font_size, label0) > ui._w - 6) { // 2 line split
 				label1 = char_at(label0, label0.length - 1) + label1;
