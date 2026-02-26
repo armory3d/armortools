@@ -295,7 +295,7 @@ declare function draw_init(image_vert: buffer_t, image_frag: buffer_t, image_tra
 declare function draw_begin(render_target: gpu_texture_t = null, clear: bool = false, color: u32 = 0): void;
 declare function draw_end(): void;
 declare function draw_scaled_sub_image(image: gpu_texture_t, sx: f32, sy: f32, sw: f32, sh: f32, dx: f32, dy: f32, dw: f32, dh: f32): void;
-declare function draw_sub_image(image: gpu_texture_t, x: f32, y: f32, sx: f32, sy: f32, sw: f32, sh: f32): void;
+declare function draw_sub_image(image: gpu_texture_t, sx: f32, sy: f32, sw: f32, sh: f32, x: f32, y: f32): void;
 declare function draw_scaled_image(image: gpu_texture_t, dx: f32, dy: f32, dw: f32, dh: f32): void;
 declare function draw_image(image: gpu_texture_t, x: f32, y: f32): void;
 declare function draw_filled_triangle(x0: f32, y0: f32, x1: f32, y1: f32, x2: f32, y2: f32): void;
