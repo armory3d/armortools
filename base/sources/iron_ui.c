@@ -3183,12 +3183,13 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 	handle->text  = string_replace_all(handle->text, "\t", "    ");
 	bool selected = current->text_selected_handle == handle; // Text being edited
 
-	int text_size = strlen(handle->text) + 1;
+	int text_size = strlen(handle->text) + 1 + 1024;
 	if (lines_size < text_size) {
 		if (lines_buffer != NULL) {
 			free(lines_buffer);
 		}
 		lines_buffer = malloc(text_size);
+		lines_size   = text_size;
 	}
 
 	char *lines = lines_buffer;
