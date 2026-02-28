@@ -139,9 +139,9 @@ function ui_view2d_render(_: any) {
 		let l: slot_layer_t    = context_raw.layer;
 		let channel: i32       = 0;
 
-		let tw: f32 = ui_view2d_ww * 0.95 * ui_view2d_pan_scale;
-		let tx: f32 = ui_view2d_ww / 2 - tw / 2 + ui_view2d_pan_x;
-		let ty: f32 = apph / 2 - tw / 2 + ui_view2d_pan_y;
+		let tw: i32 = ui_view2d_ww * 0.95 * ui_view2d_pan_scale;
+		let tx: i32 = ui_view2d_ww / 2 - tw / 2 + ui_view2d_pan_x;
+		let ty: i32 = apph / 2 - tw / 2 + ui_view2d_pan_y;
 
 		if (ui_view2d_type == view_2d_type_t.ASSET) {
 			tex = project_get_image(context_raw.texture);
@@ -206,7 +206,7 @@ function ui_view2d_render(_: any) {
 			tex = context_raw.font.image;
 		}
 
-		let th: f32 = tw;
+		let th: i32 = tw;
 		if (tex != null) {
 			th = tw * (tex.height / tex.width);
 			ty = apph / 2 - th / 2 + ui_view2d_pan_y;
