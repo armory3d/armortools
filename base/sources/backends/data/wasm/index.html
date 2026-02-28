@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>ArmorPaint</title>
+	<title>ArmorPaint.app</title>
 	<style>
 		body, html {
 			margin: 0;
@@ -11,24 +11,99 @@
 			height: 100%;
 			overflow: hidden;
 			background-color: #222;
+			font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 		}
 		#iron {
 			display: block;
 			width: 100vw;
 			height: 100vh;
 		}
+		.modal {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(0, 0, 0, 0.7);
+			display: none;
+			align-items: center;
+			justify-content: center;
+			z-index: 9999;
+		}
+		.modal .modal-content {
+			background: #2a2a2a;
+			padding: 32px 40px;
+			border-radius: 12px;
+			max-width: 420px;
+			text-align: center;
+			color: #fff;
+			box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+			border: 1px solid #444;
+		}
+		.modal button {
+			margin-top: 24px;
+			padding: 10px 24px;
+			background: #444;
+			color: #fff;
+			border: none;
+			border-radius: 6px;
+			font-size: 15px;
+			cursor: pointer;
+			transition: background 0.2s;
+		}
+		.modal button:hover {
+			background: #555;
+		}
 	</style>
 	<link rel="manifest" href="/manifest.json">
 </head>
 <body>
 	<canvas id="iron" tabindex="0"></canvas>
+
+	<div id="webgpu-modal" class="modal">
+		<div class="modal-content">
+			<h2>ArmorPaint.app</h2>
+			<p>This browser does not support WebGPU or it is disabled.</p>
+		</div>
+	</div>
+
+	<div id="hello-modal" class="modal">
+		<div class="modal-content">
+			<h2>ArmorPaint.app</h2>
+			<p>Experimental! Texture export, cloud and ray-tracing is not implemented yet.</p>
+			<button onclick="document.getElementById('hello-modal').style.display='none'">OK</button>
+		</div>
+	</div>
+
 	<script src="start.js"></script>
 	<script>
-	if ("serviceWorker" in navigator) {
-		window.addEventListener("load", () => {
-			navigator.serviceWorker.register("/sw.js");
+		if ("serviceWorker" in navigator) {
+			window.addEventListener("load", () => {
+				navigator.serviceWorker.register("/sw.js");
+			});
+		}
+
+		async function check_webgpu() {
+			const modal = document.getElementById('webgpu-modal');
+			if (!navigator.gpu) {
+				modal.style.display = 'flex';
+				return;
+			}
+			const adapter = await navigator.gpu.requestAdapter();
+			if (!adapter) {
+				modal.style.display = 'flex';
+				return;
+			}
+			const device = await adapter.requestDevice();
+			if (!device) {
+				modal.style.display = 'flex';
+			} else {
+				document.getElementById('hello-modal').style.display = 'flex';
+			}
+		}
+		window.addEventListener('DOMContentLoaded', () => {
+			check_webgpu();
 		});
-	}
 	</script>
 </body>
 </html>
