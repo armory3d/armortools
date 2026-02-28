@@ -33,16 +33,21 @@ cd armortools/paint
 # Build and run
 ```
 
-**Android (arm64)** *wip*
+**Android (arm64)**
 ```bash
 ../base/make --target android
 # Open generated Android Studio project at `build/ArmorPaint`
 # Build for device
 ```
 
-**iOS (arm64)** *wip*
+**iOS (arm64)**
 ```bash
 ../base/make --target ios
 # Open generated Xcode project `build/ArmorPaint.xcodeproj`
 # Build for device
+```
+
+**WASM**
+```bash
+../base/make --target wasm --compile
 ```
