@@ -19,7 +19,13 @@ function image_to_normal_map_node_button(node_id: i32) {
 		let input: gpu_texture_t = ui_nodes_get_node_preview_image(from_node);
 		if (input != null) {
 			let dir: string = neural_node_dir();
-			iron_write_png(dir + path_sep + "input.png", gpu_get_texture_pixels(input), input.width, input.height, 0);
+
+			/// if IRON_BGRA
+			let input_buf: buffer_t = export_arm_bgra_swap(gpu_get_texture_pixels(input)); // Vulkan non-rt textures need a flip
+			/// else
+			let input_buf: buffer_t = gpu_get_texture_pixels(input);
+			/// end
+			iron_write_png(dir + path_sep + "input.png", input_buf, input.width, input.height, 0);
 
 			let argv: string[] = [
 				dir + "/" + neural_node_sd_bin(),

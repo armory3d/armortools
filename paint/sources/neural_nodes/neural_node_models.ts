@@ -40,11 +40,11 @@ function neural_node_models_init() {
 			size : "16.9GB",
 			nodes : "Text to Image",
 			urls : [
-				"https://huggingface.co/QuantStack/Qwen-Image-GGUF/resolve/main/Qwen_Image-Q4_K_S.gguf",
+				"https://huggingface.co/unsloth/Qwen-Image-2512-GGUF/resolve/main/qwen-image-2512-Q4_K_S.gguf",
 				"https://huggingface.co/QuantStack/Qwen-Image-GGUF/resolve/main/VAE/Qwen_Image-VAE.safetensors",
 				"https://huggingface.co/unsloth/Qwen2.5-VL-7B-Instruct-GGUF/resolve/main/Qwen2.5-VL-7B-Instruct-Q4_K_S.gguf"
 			],
-			web : "https://huggingface.co/QuantStack/Qwen-Image-GGUF",
+			web : "https://huggingface.co/unsloth/Qwen-Image-2512-GGUF",
 			license : "apache-2.0"
 		},
 		{
@@ -53,12 +53,12 @@ function neural_node_models_init() {
 			size : "18.3GB",
 			nodes : "Edit Image, Inpaint Image, Outpaint Image, Tile Image, Vary Image",
 			urls : [
-				"https://huggingface.co/QuantStack/Qwen-Image-Edit-2509-GGUF/resolve/main/Qwen-Image-Edit-2509-Q4_K_S.gguf",
+				"https://huggingface.co/unsloth/Qwen-Image-Edit-2511-GGUF/resolve/main/qwen-image-edit-2511-Q4_K_S.gguf",
 				"https://huggingface.co/QuantStack/Qwen-Image-GGUF/resolve/main/VAE/Qwen_Image-VAE.safetensors",
 				"https://huggingface.co/unsloth/Qwen2.5-VL-7B-Instruct-GGUF/resolve/main/Qwen2.5-VL-7B-Instruct-Q4_K_S.gguf",
 				"https://huggingface.co/unsloth/Qwen2.5-VL-7B-Instruct-GGUF/resolve/main/mmproj-F16.gguf"
 			],
-			web : "https://huggingface.co/QuantStack/Qwen-Image-Edit-2509-GGUF",
+			web : "https://huggingface.co/unsloth/Qwen-Image-Edit-2511-GGUF",
 			license : "apache-2.0"
 		},
 		{

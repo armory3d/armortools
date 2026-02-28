@@ -62,11 +62,13 @@ function text_to_image_node_qwen_args(dir: string, prompt: string): string[] {
 	let argv: string[] = [
 		dir + "/" + neural_node_sd_bin(),
 		"--diffusion-model",
-		dir + "/Qwen_Image-Q4_K_S.gguf",
+		dir + "/qwen-image-2512-Q4_K_S.gguf",
 		"--vae",
 		dir + "/Qwen_Image-VAE.safetensors",
-		"--qwen2vl",
+		"--llm",
 		dir + "/Qwen2.5-VL-7B-Instruct-Q4_K_S.gguf",
+		"--llm_vision",
+		dir + "/mmproj-F16.gguf",
 		"--sampling-method",
 		"euler",
 		"--offload-to-cpu",
@@ -155,6 +157,11 @@ function text_to_image_node_button(node_id: i32) {
 		else {
 			argv = text_to_image_node_wan_args(dir, prompt);
 		}
+
+		if (node.buttons[1].default_value[0] > 0.0) {
+			array_insert(argv, argv.length - 1, "--circular");
+		}
+
 		iron_exec_async(argv[0], argv.buffer);
 		sys_notify_on_update(neural_node_check_result, node);
 	}
@@ -190,6 +197,17 @@ let text_to_image_node_def: ui_node_t = {
 		max : 1.0,
 		precision : 100,
 		height : 1
+	},
+	{
+		name : _tr("Tiled"),
+		type : "BOOL",
+		output : 0,
+		default_value : f32_array_create_x(0),
+		data : null,
+		min : 0.0,
+		max : 1.0,
+		precision : 100,
+		height : 0
 	} ],
 	width : 0,
 	flags : 0

@@ -28,7 +28,12 @@ function image_to_3d_mesh_node_button(node_id: i32) {
 		let input: gpu_texture_t = ui_nodes_get_node_preview_image(from_node);
 		if (input != null) {
 			let dir: string = neural_node_dir();
+
+			/// if IRON_BGRA
+			let input_buf: buffer_t = image_to_3d_mesh_node_remove_background(export_arm_bgra_swap(gpu_get_texture_pixels(input)));
+			/// else
 			let input_buf: buffer_t = image_to_3d_mesh_node_remove_background(gpu_get_texture_pixels(input));
+			/// end
 			iron_write_png(dir + path_sep + "input.png", input_buf, input.width, input.height, 0);
 
 			dir = string_replace_all(dir, "\\", "/");
