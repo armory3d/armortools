@@ -184,3 +184,12 @@ function path_is_protected(): bool {
 	return false;
 	/// end
 }
+
+function path_join(a: string, b: string): string {
+	let path: string = a;
+	if (!ends_with(path, path_sep)) {
+		path += path_sep;
+	}
+	path += b;
+	return path;
+}
