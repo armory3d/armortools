@@ -28,6 +28,8 @@
 #include <string.h>
 #ifdef IRON_WINDOWS
 #include <Windows.h>
+#else
+#include <sys/stat.h>
 #endif
 #ifdef WITH_AUDIO
 #include "iron_audio.h"
@@ -1551,6 +1553,16 @@ void iron_create_directory(char *path) {
 	strcat(cmd, path);
 	strcat(cmd, "\"");
 	iron_sys_command(cmd);
+#endif
+}
+
+bool iron_is_directory(char *path) {
+#ifdef IRON_WINDOWS
+	DWORD attribs = GetFileAttributesA(path);
+	return attribs != INVALID_FILE_ATTRIBUTES && (attribs & FILE_ATTRIBUTE_DIRECTORY);
+#else
+	struct stat st;
+	return stat(path, &st) == 0 && S_ISDIR(st.st_mode);
 #endif
 }
 
