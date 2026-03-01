@@ -81,6 +81,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 	let icons: gpu_texture_t = resource_get("icons.k");
 	let folder: rect_t       = resource_tile50(icons, icon_t.FOLDER_FULL);
 	let file: rect_t         = resource_tile50(icons, icon_t.FILE);
+	let cube: rect_t         = resource_tile50(icons, icon_t.CUBE);
 	let downloading: rect_t  = resource_tile50(icons, icon_t.DOWNLOADING);
 	let is_cloud: bool       = starts_with(handle.text, "cloud");
 
@@ -116,13 +117,15 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 
 		for (let i: i32 = 0; i < files_all.length; ++i) {
 			let f: string = files_all[i];
+			let is_dir: bool = iron_is_directory(path_join(dir_path, f));
 			if (f == "" || char_at(f, 0) == ".") {
 				continue; // Skip hidden
 			}
-			if (!is_cloud && string_index_of(f, ".") > 0) {
-				if (!iron_is_directory(path_join(dir_path, f)) && !path_is_known(f)) {
-					continue; // Skip unknown extensions
-				}
+			if (!is_cloud && string_index_of(f, ".") > 0 && !is_dir && !path_is_known(f)) {
+				continue; // Skip unknown extensions
+			}
+			if (!is_cloud && !is_dir && string_index_of(f, ".") == -1) {
+				continue; // Skip files with no extension
 			}
 			if (is_cloud && string_index_of(f, "_icon.") >= 0) {
 				continue; // Skip thumbnails
@@ -165,11 +168,22 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 
 			let f: string = ui_files_files[i];
 			let _x: f32   = ui._x;
-			let is_folder: bool = iron_is_directory(path_join(handle.text, f));
+			let is_folder: bool;
+			if (is_cloud) {
+				is_folder = string_index_of(f, ".") == -1;
+			}
+			else {
+				is_folder = iron_is_directory(path_join(handle.text, f));
+			}
+
 			let rect: rect_t = is_folder ? folder : file;
 			if (rect == file && is_cloud) {
 				rect = downloading;
 			}
+			else if (!is_folder && path_is_mesh(f)) {
+				rect = cube;
+			}
+
 			let col: i32 = rect == file ? ui.ops.theme.LABEL_COL : ui.ops.theme.LABEL_COL - 0x00202020;
 			if (ui_files_selected == i)
 				col = ui.ops.theme.HIGHLIGHT_COL;
