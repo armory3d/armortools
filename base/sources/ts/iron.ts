@@ -1025,3 +1025,6 @@ declare function path_is_displacement_tex(p: string): bool;
 declare function path_is_folder(p: string): bool;
 declare function path_is_protected(): bool;
 declare function path_join(a: string, b: string): string;
+
+declare function lz4_encode(b: buffer_t): buffer_t;
+declare function lz4_decode(b: buffer_t, olen: u32): buffer_t;

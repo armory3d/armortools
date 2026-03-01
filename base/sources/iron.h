@@ -18,6 +18,7 @@
 #include "iron_string.h"
 #include "iron_system.h"
 #include "iron_thread.h"
+#include "iron_lz4.h"
 #include "iron_ui.h"
 #include "iron_ui_nodes.h"
 #include "iron_vec2.h"
