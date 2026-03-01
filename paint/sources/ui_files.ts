@@ -119,8 +119,10 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 			if (f == "" || char_at(f, 0) == ".") {
 				continue; // Skip hidden
 			}
-			if (string_index_of(f, ".") > 0 && !path_is_known(f)) {
-				continue; // Skip unknown extensions
+			if (!is_cloud && string_index_of(f, ".") > 0) {
+				if (!iron_is_directory(path_join(dir_path, f)) && !path_is_known(f)) {
+					continue; // Skip unknown extensions
+				}
 			}
 			if (is_cloud && string_index_of(f, "_icon.") >= 0) {
 				continue; // Skip thumbnails
@@ -163,12 +165,12 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 
 			let f: string = ui_files_files[i];
 			let _x: f32   = ui._x;
-
-			let rect: rect_t = string_index_of(f, ".") > 0 ? file : folder;
+			let is_folder: bool = iron_is_directory(path_join(handle.text, f));
+			let rect: rect_t = is_folder ? folder : file;
 			if (rect == file && is_cloud) {
 				rect = downloading;
 			}
-			let col: i32     = rect == file ? ui.ops.theme.LABEL_COL : ui.ops.theme.LABEL_COL - 0x00202020;
+			let col: i32 = rect == file ? ui.ops.theme.LABEL_COL : ui.ops.theme.LABEL_COL - 0x00202020;
 			if (ui_files_selected == i)
 				col = ui.ops.theme.HIGHLIGHT_COL;
 
@@ -254,7 +256,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 				}
 			}
 
-			if (ends_with(f, ".arm") && !is_cloud) {
+			if (!is_folder && ends_with(f, ".arm") && !is_cloud) {
 				if (ui_files_icon_map == null) {
 					ui_files_icon_map = map_create();
 				}
@@ -318,7 +320,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 				}
 			}
 
-			if (path_is_texture(f) && !is_cloud) {
+			if (!is_folder && path_is_texture(f) && !is_cloud) {
 				let w: i32 = 50;
 				if (ui_files_icon_map == null) {
 					ui_files_icon_map = map_create();
@@ -392,7 +394,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 			// Label
 			ui._x = _x;
 			ui._y += slotw * 0.75;
-			let label0: string = (ui_files_show_extensions || string_index_of(f, ".") <= 0) ? f : substring(f, 0, string_last_index_of(f, "."));
+			let label0: string = (is_folder || ui_files_show_extensions || string_index_of(f, ".") <= 0) ? f : substring(f, 0, string_last_index_of(f, "."));
 			let label1: string = "";
 			while (label0.length > 0 && draw_string_width(ui.ops.font, ui.font_size, label0) > ui._w - 6) { // 2 line split
 				label1 = char_at(label0, label0.length - 1) + label1;

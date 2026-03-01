@@ -245,6 +245,9 @@ function tab_browser_draw(htab: ui_handle_t) {
 			tab_browser_known = false;
 		}
 		/// end
+		if (tab_browser_known && iron_is_directory(tab_browser_hpath.text)) {
+			tab_browser_known = false;
+		}
 
 		if (show_full) {
 			let bottom_y: i32 = ui._y;
