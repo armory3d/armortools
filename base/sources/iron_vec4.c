@@ -1,7 +1,7 @@
 #include "iron_vec4.h"
 #include "iron_quat.h"
 
-#include <iron_math.h>
+#include "iron_math.h"
 #include <math.h>
 
 vec4_t vec4_create(float x, float y, float z, float w) {

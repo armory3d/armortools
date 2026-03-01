@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iron_global.h>
+#include "iron_global.h"
 #include <string.h>
 
 /*! \file float32x4.h
@@ -74,7 +74,7 @@ typedef uint32x4_t  iron_float32x4_mask_t;
 
 #elif defined(IRON_NOSIMD)
 
-#include <iron_math.h>
+#include "iron_math.h"
 
 typedef struct iron_float32x4 {
 	float values[4];

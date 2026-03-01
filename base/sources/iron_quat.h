@@ -2,7 +2,7 @@
 
 #include "iron_mat4.h"
 #include "iron_vec4.h"
-#include <iron_math.h>
+#include "iron_math.h"
 
 quat_t quat_create(float x, float y, float z, float w);
 quat_t quat_from_axis_angle(vec4_t axis, float angle);

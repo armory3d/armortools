@@ -8,7 +8,7 @@
 #define vec2_t iron_vector2_t
 
 #include "iron_mat4.h"
-#include <iron_math.h>
+#include "iron_math.h"
 
 vec4_t vec4_create(float x, float y, float z, float w);
 vec4_t vec4_cross(vec4_t a, vec4_t b);

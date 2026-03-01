@@ -2,7 +2,7 @@
 
 #ifdef IRON_A1
 
-#include <iron_global.h>
+#include "iron_global.h"
 #include <stdbool.h>
 
 /*! \file audio.h
@@ -82,7 +82,7 @@ void                    iron_a1_sound_stream_set_volume(iron_a1_sound_stream_t *
 
 #ifdef IRON_A2
 
-#include <iron_global.h>
+#include "iron_global.h"
 
 #include <stdint.h>
 
@@ -117,7 +117,7 @@ void iron_a2_internal_sample_rate_callback(void);
 
 #ifdef IRON_IMPLEMENTATION
 
-#include <iron_thread.h>
+#include "iron_thread.h"
 #include <memory.h>
 #include <stddef.h>
 
