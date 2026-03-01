@@ -51,8 +51,8 @@ function outpaint_image_node_button(node_id: i32) {
 				// /// end
 
 				let dir: string = neural_node_dir();
-				iron_write_png(dir + path_sep + "input.png", gpu_get_texture_pixels(input_scaled), input_scaled.width, input_scaled.height, 0);
-				iron_write_png(dir + path_sep + "mask.png", gpu_get_texture_pixels(mask), mask.width, mask.height, 0);
+				iron_write_png(dir + PATH_SEP + "input.png", gpu_get_texture_pixels(input_scaled), input_scaled.width, input_scaled.height, 0);
+				iron_write_png(dir + PATH_SEP + "mask.png", gpu_get_texture_pixels(mask), mask.width, mask.height, 0);
 
 				let argv: string[];
 				if (model == 0) {

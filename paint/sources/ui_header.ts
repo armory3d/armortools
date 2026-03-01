@@ -62,7 +62,7 @@ function ui_header_draw_tool_properties() {
 			}
 		}
 		if (ui_button(tr("Import"))) {
-			ui_files_show(string_array_join(path_texture_formats, ","), false, true, function(path: string) {
+			ui_files_show(string_array_join(path_texture_formats(), ","), false, true, function(path: string) {
 				import_asset_run(path, -1.0, -1.0, true, false);
 
 				context_raw.colorid_handle.i = project_asset_names.length - 1;

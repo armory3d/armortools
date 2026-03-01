@@ -726,7 +726,7 @@ function tab_layers_draw_layer_context_menu(l: slot_layer_t, mini: bool) {
 					if (!ends_with(f, ".png")) {
 						f += ".png";
 					}
-					iron_write_png(path + path_sep + f, gpu_get_texture_pixels(l.texpaint), l.texpaint.width, l.texpaint.height, 3); // RRR1
+					iron_write_png(path + PATH_SEP + f, gpu_get_texture_pixels(l.texpaint), l.texpaint.width, l.texpaint.height, 3); // RRR1
 				});
 			}
 			else {

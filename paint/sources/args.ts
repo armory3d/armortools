@@ -103,7 +103,7 @@ function args_run() {
 				context_raw.layers_export = export_mode_t.VISIBLE;
 
 				// Get export preset and apply the correct one from args
-				box_export_files = file_read_directory(path_data() + path_sep + "export_presets");
+				box_export_files = file_read_directory(path_data() + PATH_SEP + "export_presets");
 				for (let i: i32 = 0; i < box_export_files.length; ++i) {
 					let s: string       = box_export_files[i];
 					box_export_files[i] = substring(s, 0, s.length - 5); // Strip .json
@@ -135,7 +135,7 @@ function args_run() {
 				if (f == "") {
 					f = tr("untitled");
 				}
-				export_mesh_run(args_export_mesh_path + path_sep + f, null, false);
+				export_mesh_run(args_export_mesh_path + PATH_SEP + f, null, false);
 			}
 			else if (args_export_material) {
 				context_raw.write_icon_on_export = true;

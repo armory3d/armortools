@@ -38,7 +38,7 @@ function import_arm_run_project(path: string) {
 
 	project_new(import_as_mesh);
 	project_filepath  = path;
-	ui_files_filename = substring(path, string_last_index_of(path, path_sep) + 1, string_last_index_of(path, "."));
+	ui_files_filename = substring(path, string_last_index_of(path, PATH_SEP) + 1, string_last_index_of(path, "."));
 	/// if (arm_android || arm_ios)
 	sys_title_set(ui_files_filename);
 	/// else

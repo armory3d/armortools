@@ -994,3 +994,34 @@ function ui_set_font(ui: ui_t, font: draw_font_t) {
 	draw_font_init(font); // Make sure font is ready
 	ui.ops.font = font;
 }
+
+declare let PATH_SEP: string;
+declare function path_mesh_formats(): string[];
+declare function path_texture_formats(): string[];
+declare function path_displacement_ext(): string[];
+declare function path_data(): string;
+declare function path_to_relative(from: string, to: string): string;
+declare function path_normalize(path: string): string;
+declare function path_base_dir(path: string): string;
+declare function path_base_name(path: string): string;
+declare function path_is_mesh(path: string): bool;
+declare function path_is_texture(path: string): bool;
+declare function path_is_font(path: string): bool;
+declare function path_is_project(path: string): bool;
+declare function path_is_plugin(path: string): bool;
+declare function path_is_json(path: string): bool;
+declare function path_is_text(path: string): bool;
+declare function path_is_gimp_color_palette(path: string): bool;
+declare function path_is_ext_format(path: string): bool;
+declare function path_is_known(path: string): bool;
+declare function path_check_ext(p: string, exts: string[]): bool;
+declare function path_is_base_color_tex(p: string): bool;
+declare function path_is_opacity_tex(p: string): bool;
+declare function path_is_normal_map_tex(p: string): bool;
+declare function path_is_occlusion_tex(p: string): bool;
+declare function path_is_roughness_tex(p: string): bool;
+declare function path_is_metallic_tex(p: string): bool;
+declare function path_is_displacement_tex(p: string): bool;
+declare function path_is_folder(p: string): bool;
+declare function path_is_protected(): bool;
+declare function path_join(a: string, b: string): string;

@@ -43,8 +43,8 @@ function inpaint_image_node_button(node_id: i32) {
 					/// else
 					let input_buf: buffer_t = gpu_get_texture_pixels(input);
 					/// end
-					iron_write_png(dir + path_sep + "input.png", input_buf, input.width, input.height, 0);
-					iron_write_png(dir + path_sep + "mask.png", gpu_get_texture_pixels(mask), mask.width, mask.height, 0);
+					iron_write_png(dir + PATH_SEP + "input.png", input_buf, input.width, input.height, 0);
+					iron_write_png(dir + PATH_SEP + "mask.png", gpu_get_texture_pixels(mask), mask.width, mask.height, 0);
 				}
 				else {
 					let masked: gpu_texture_t = gpu_create_render_target(512, 512);
@@ -55,7 +55,7 @@ function inpaint_image_node_button(node_id: i32) {
 					draw_scaled_image(mask, 0, 0, 512, 512);
 					draw_set_pipeline(null);
 					draw_end();
-					iron_write_png(dir + path_sep + "input.png", gpu_get_texture_pixels(masked), masked.width, masked.height, 0);
+					iron_write_png(dir + PATH_SEP + "input.png", gpu_get_texture_pixels(masked), masked.width, masked.height, 0);
 				}
 
 				let argv: string[];

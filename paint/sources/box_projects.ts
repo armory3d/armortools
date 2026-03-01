@@ -54,7 +54,7 @@ function box_projects_tab() {
 			let title: string = "" + tr("untitled") + i;
 			while (j < config_raw.recent_projects.length) {
 				let base: string = config_raw.recent_projects[j];
-				base             = substring(base, string_last_index_of(base, path_sep) + 1, string_last_index_of(base, "."));
+				base             = substring(base, string_last_index_of(base, PATH_SEP) + 1, string_last_index_of(base, "."));
 				j++;
 				if (title == base) {
 					i++;
@@ -138,7 +138,7 @@ function box_projects_tab() {
 						}, path);
 					}
 
-					let name: string = substring(path, string_last_index_of(path, path_sep) + 1, string_last_index_of(path, "."));
+					let name: string = substring(path, string_last_index_of(path, PATH_SEP) + 1, string_last_index_of(path, "."));
 					if (ui.is_hovered && ui.input_released_r) {
 						_box_projects_path      = path;
 						_box_projects_icon_path = icon_path;
@@ -201,7 +201,7 @@ function box_projects_recent_tab() {
 			/// else
 			path = string_replace_all(path, "\\", "/");
 			/// end
-			let file: string = substring(path, string_last_index_of(path, path_sep) + 1, path.length);
+			let file: string = substring(path, string_last_index_of(path, PATH_SEP) + 1, path.length);
 
 			if (string_index_of(to_lower_case(file), to_lower_case(box_projects_hsearch.text)) < 0) {
 				continue; // Search filter

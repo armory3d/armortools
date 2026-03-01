@@ -88,11 +88,11 @@ function tab_browser_draw(htab: ui_handle_t) {
 
 		// Previous folder
 		let text: string = tab_browser_hpath.text;
-		let i1: i32      = string_index_of(text, path_sep);
+		let i1: i32      = string_index_of(text, PATH_SEP);
 		let nested: bool = i1 > -1 && text.length - 1 > i1;
 		/// if arm_windows
 		// Server addresses like \\server are not nested
-		nested = nested && !(text.length >= 2 && char_at(text, 0) == path_sep && char_at(text, 1) == path_sep && string_last_index_of(text, path_sep) == 1);
+		nested = nested && !(text.length >= 2 && char_at(text, 0) == PATH_SEP && char_at(text, 1) == PATH_SEP && string_last_index_of(text, PATH_SEP) == 1);
 		/// end
 
 		ui.enabled = nested;
@@ -235,11 +235,11 @@ function tab_browser_draw(htab: ui_handle_t) {
 			sys_notify_on_next_frame(function(path: string) {
 				import_asset_run(path);
 			}, path);
-			tab_browser_hpath.text = substring(tab_browser_hpath.text, 0, string_last_index_of(tab_browser_hpath.text, path_sep));
+			tab_browser_hpath.text = substring(tab_browser_hpath.text, 0, string_last_index_of(tab_browser_hpath.text, PATH_SEP));
 		}
 		let hpath_text: string = tab_browser_hpath.text;
 		tab_browser_known =
-		    string_index_of(substring(tab_browser_hpath.text, string_last_index_of(tab_browser_hpath.text, path_sep), hpath_text.length), ".") > 0;
+		    string_index_of(substring(tab_browser_hpath.text, string_last_index_of(tab_browser_hpath.text, PATH_SEP), hpath_text.length), ".") > 0;
 		/// if arm_android
 		if (ends_with(tab_browser_hpath.text, "." + to_lower_case(manifest_title))) {
 			tab_browser_known = false;

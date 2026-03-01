@@ -54,8 +54,8 @@ function tile_image_node_button(node_id: i32) {
 				let mask: gpu_texture_t = gpu_create_texture_from_bytes(u8a, 512, 512, gpu_texture_format_t.R8);
 
 				let dir: string = neural_node_dir();
-				iron_write_png(dir + path_sep + "input.png", gpu_get_texture_pixels(tile), tile.width, tile.height, 0);
-				iron_write_png(dir + path_sep + "mask.png", gpu_get_texture_pixels(mask), mask.width, mask.height, 1);
+				iron_write_png(dir + PATH_SEP + "input.png", gpu_get_texture_pixels(tile), tile.width, tile.height, 0);
+				iron_write_png(dir + PATH_SEP + "mask.png", gpu_get_texture_pixels(mask), mask.width, mask.height, 1);
 
 				if (prompt == "") {
 					prompt = ".";

@@ -14,7 +14,7 @@ function import_font_run(path: string) {
 	let font_slots: slot_font_t[] = [];
 
 	for (let i: i32 = 0; i < count; ++i) {
-		let ar: string[]   = string_split(path, path_sep);
+		let ar: string[]   = string_split(path, PATH_SEP);
 		let name: string   = ar[ar.length - 1];
 		let f: draw_font_t = {buf : font.buf, index : font.index};
 		draw_font_init(f);

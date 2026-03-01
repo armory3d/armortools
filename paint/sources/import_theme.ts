@@ -5,8 +5,8 @@ function import_theme_run(path: string) {
 		return;
 	}
 
-	let filename: string = substring(path, string_last_index_of(path, path_sep) + 1, path.length);
-	let dst_path: string = path_data() + path_sep + "themes" + path_sep + filename;
+	let filename: string = substring(path, string_last_index_of(path, PATH_SEP) + 1, path.length);
+	let dst_path: string = path_data() + PATH_SEP + "themes" + PATH_SEP + filename;
 	file_copy(path, dst_path);      // Copy to preset folder
 	box_preferences_fetch_themes(); // Refresh file list
 	config_raw.theme          = filename;

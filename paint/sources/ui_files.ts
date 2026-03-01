@@ -32,13 +32,13 @@ function ui_files_show(filters: string, is_save: bool, open_multiple: bool, file
 	if (is_save) {
 		ui_files_path = iron_save_dialog(filters, "");
 		if (ui_files_path != null) {
-			let sep2: string = path_sep + path_sep;
+			let sep2: string = PATH_SEP + PATH_SEP;
 			while (string_index_of(ui_files_path, sep2) >= 0) {
-				ui_files_path = string_replace_all(ui_files_path, sep2, path_sep);
+				ui_files_path = string_replace_all(ui_files_path, sep2, PATH_SEP);
 			}
 			ui_files_path     = string_replace_all(ui_files_path, "\r", "");
-			ui_files_filename = substring(ui_files_path, string_last_index_of(ui_files_path, path_sep) + 1, ui_files_path.length);
-			ui_files_path     = substring(ui_files_path, 0, string_last_index_of(ui_files_path, path_sep));
+			ui_files_filename = substring(ui_files_path, string_last_index_of(ui_files_path, PATH_SEP) + 1, ui_files_path.length);
+			ui_files_path     = substring(ui_files_path, 0, string_last_index_of(ui_files_path, PATH_SEP));
 			files_done(ui_files_path);
 		}
 	}
@@ -47,12 +47,12 @@ function ui_files_show(filters: string, is_save: bool, open_multiple: bool, file
 		if (paths != null) {
 			for (let i: i32 = 0; i < paths.length; ++i) {
 				let path: string = paths[i];
-				let sep2: string = path_sep + path_sep;
+				let sep2: string = PATH_SEP + PATH_SEP;
 				while (string_index_of(path, sep2) >= 0) {
-					path = string_replace_all(path, sep2, path_sep);
+					path = string_replace_all(path, sep2, PATH_SEP);
 				}
 				path              = string_replace_all(path, "\r", "");
-				ui_files_filename = substring(path, string_last_index_of(path, path_sep) + 1, path.length);
+				ui_files_filename = substring(path, string_last_index_of(path, PATH_SEP) + 1, path.length);
 				files_done(path);
 			}
 		}
@@ -204,19 +204,19 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 				if (ui_files_icon_file_map == null) {
 					ui_files_icon_file_map = map_create();
 				}
-				icon = map_get(ui_files_icon_map, handle.text + path_sep + f);
+				icon = map_get(ui_files_icon_map, handle.text + PATH_SEP + f);
 				if (icon == null) {
 					let dot: i32 = string_last_index_of(f, ".");
 					if (dot > -1) {
 						let files_all: string[] = file_read_directory(handle.text);
 						let icon_file: string   = substring(f, 0, dot) + "_icon.jpg";
 						if (array_index_of(files_all, icon_file) >= 0) {
-							map_set(ui_files_icon_map, handle.text + path_sep + f, icons);
+							map_set(ui_files_icon_map, handle.text + PATH_SEP + f, icons);
 
 							_ui_files_file_browser_handle = handle;
 							map_set(ui_files_icon_file_map, icon_file, f);
 
-							file_cache_cloud(handle.text + path_sep + icon_file, function(abs: string) {
+							file_cache_cloud(handle.text + PATH_SEP + icon_file, function(abs: string) {
 								if (abs != null) {
 									let image: gpu_texture_t = data_get_image(abs);
 									if (image != null) {
@@ -241,7 +241,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 											draw_set_pipeline(null);
 											draw_end();
 
-											map_set(ui_files_icon_map, _ui_files_file_browser_handle.text + path_sep + data.f, icon);
+											map_set(ui_files_icon_map, _ui_files_file_browser_handle.text + PATH_SEP + data.f, icon);
 											ui_base_hwnds[tab_area_t.STATUS].redraws = 3;
 										}, data);
 									}
@@ -274,7 +274,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 				if (ui_files_icon_map == null) {
 					ui_files_icon_map = map_create();
 				}
-				let key: string = handle.text + path_sep + f;
+				let key: string = handle.text + PATH_SEP + f;
 				icon            = map_get(ui_files_icon_map, key);
 				if (icon == null) {
 					let blob_path: string = key;
@@ -339,7 +339,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 				if (ui_files_icon_map == null) {
 					ui_files_icon_map = map_create();
 				}
-				let shandle: string = handle.text + path_sep + f;
+				let shandle: string = handle.text + PATH_SEP + f;
 				/// if arm_ios
 				shandle = document_directory + shandle;
 				/// end
@@ -370,7 +370,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 			}
 
 			if (ui.is_hovered && ui.input_released_r && context_menu != null) {
-				context_menu(handle.text + path_sep + f);
+				context_menu(handle.text + PATH_SEP + f);
 			}
 
 			if (state == ui_state_t.STARTED) {
@@ -383,8 +383,8 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 						base_drag_file = document_directory + base_drag_file;
 					}
 					/// end
-					if (char_at(base_drag_file, base_drag_file.length - 1) != path_sep) {
-						base_drag_file += path_sep;
+					if (char_at(base_drag_file, base_drag_file.length - 1) != PATH_SEP) {
+						base_drag_file += PATH_SEP;
 					}
 					base_drag_file += f;
 					base_drag_file_icon = icon;
@@ -396,8 +396,8 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 					base_drag_file_icon = null;
 					base_is_dragging    = false;
 					handle.changed = ui.changed = true;
-					if (char_at(handle.text, handle.text.length - 1) != path_sep) {
-						handle.text += path_sep;
+					if (char_at(handle.text, handle.text.length - 1) != PATH_SEP) {
+						handle.text += PATH_SEP;
 					}
 					handle.text += f;
 					ui_files_selected = -1;
@@ -476,10 +476,10 @@ function ui_files_make_icon(args: ui_files_make_icon_t) {
 }
 
 function ui_files_go_up(handle: ui_handle_t) {
-	handle.text = substring(handle.text, 0, string_last_index_of(handle.text, path_sep));
+	handle.text = substring(handle.text, 0, string_last_index_of(handle.text, PATH_SEP));
 	// Drive root
 	if (handle.text.length == 2 && char_at(handle.text, 1) == ":") {
-		handle.text += path_sep;
+		handle.text += PATH_SEP;
 	}
 }
 

@@ -44,7 +44,7 @@ function config_save() {
 	}
 	else {
 		path += path_data();
-		path += path_sep;
+		path += PATH_SEP;
 	}
 	path += "config.json";
 

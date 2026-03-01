@@ -23,7 +23,7 @@ function tab_console_draw(htab: ui_handle_t) {
 				if (f == "") {
 					f = tr("untitled");
 				}
-				path = path + path_sep + f;
+				path = path + PATH_SEP + f;
 				if (!ends_with(path, ".txt")) {
 					path += ".txt";
 				}

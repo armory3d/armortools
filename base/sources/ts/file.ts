@@ -109,7 +109,7 @@ function file_cache_cloud(path: string, done: (s: string) => void) {
 		dest = iron_internal_save_path();
 	}
 	else {
-		dest = iron_internal_files_location() + path_sep;
+		dest = iron_internal_files_location() + PATH_SEP;
 	}
 	dest += path;
 
@@ -118,7 +118,7 @@ function file_cache_cloud(path: string, done: (s: string) => void) {
 		return;
 	}
 
-	let file_dir: string = substring(dest, 0, string_last_index_of(dest, path_sep));
+	let file_dir: string = substring(dest, 0, string_last_index_of(dest, PATH_SEP));
 	if (file_read_directory(file_dir)[0] == "") {
 		file_create_directory(file_dir);
 	}

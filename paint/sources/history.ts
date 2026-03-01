@@ -579,7 +579,7 @@ function history_push(name: string): history_step_t {
 	/// if (arm_windows || arm_linux || arm_macos)
 	let filename: string = project_filepath == ""
 	                           ? ui_files_filename
-	                           : substring(project_filepath, string_last_index_of(project_filepath, path_sep) + 1, project_filepath.length - 4);
+	                           : substring(project_filepath, string_last_index_of(project_filepath, PATH_SEP) + 1, project_filepath.length - 4);
 	sys_title_set(filename + "* - " + manifest_title);
 	/// end
 

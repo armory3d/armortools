@@ -25,7 +25,7 @@ function upscale_image_node_button(node_id: i32) {
 			/// end
 
 			let dir: string = neural_node_dir();
-			iron_write_png(dir + path_sep + "input.png", input_buf, input.width, input.height, 0);
+			iron_write_png(dir + PATH_SEP + "input.png", input_buf, input.width, input.height, 0);
 
 			let argv: string[] = [
 				dir + "/" + neural_node_sd_bin(), "-M", "upscale", "--upscale-model", dir + "/RealESRGAN_x4plus.pth", "-i", dir + "/input.png", "-o",

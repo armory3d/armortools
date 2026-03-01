@@ -229,7 +229,7 @@ function ui_menubar_draw_category_items() {
 		if (ui_menu_sub_button(ui_handle(__ID__), tr("Import"))) {
 			ui_menu_sub_begin(7);
 			if (ui_menu_button(tr("Texture..."), map_get(config_keymap, "file_import_assets"), icon_t.IMAGE)) {
-				project_import_asset(string_array_join(path_texture_formats, ","), false);
+				project_import_asset(string_array_join(path_texture_formats(), ","), false);
 			}
 			if (ui_menu_button(tr("Envmap..."), "", icon_t.LANDSCAPE)) {
 				ui_files_show("hdr", false, false, function(path: string) {

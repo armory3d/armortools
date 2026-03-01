@@ -64,7 +64,7 @@ function project_save(save_and_quit: bool = false) {
 	}
 
 	/// if (arm_windows || arm_linux || arm_macos)
-	let filename: string = substring(project_filepath, string_last_index_of(project_filepath, path_sep) + 1, project_filepath.length - 4);
+	let filename: string = substring(project_filepath, string_last_index_of(project_filepath, PATH_SEP) + 1, project_filepath.length - 4);
 	sys_title_set(filename + " - " + manifest_title);
 	/// end
 
@@ -85,7 +85,7 @@ function project_save_as(save_and_quit: bool = false) {
 		if (f == "") {
 			f = tr("untitled");
 		}
-		project_filepath = path + path_sep + f;
+		project_filepath = path + PATH_SEP + f;
 		if (!ends_with(project_filepath, ".arm")) {
 			project_filepath += ".arm";
 		}
@@ -95,7 +95,7 @@ function project_save_as(save_and_quit: bool = false) {
 
 function project_fetch_default_meshes() {
 	if (project_mesh_list == null) {
-		project_mesh_list = file_read_directory(path_data() + path_sep + "meshes");
+		project_mesh_list = file_read_directory(path_data() + PATH_SEP + "meshes");
 		for (let i: i32 = 0; i < project_mesh_list.length; ++i) {
 			let s: string        = project_mesh_list[i];
 			project_mesh_list[i] = substring(project_mesh_list[i], 0, s.length - 4); // Trim .arm
@@ -324,7 +324,7 @@ function project_create_node_link(links: ui_node_link_t[], from_id: i32, from_so
 }
 
 function project_import_brush() {
-	let formats: string = string_array_join(path_texture_formats, ",");
+	let formats: string = string_array_join(path_texture_formats(), ",");
 	ui_files_show("arm," + formats, false, true, function(path: string) {
 		// Create brush from texture
 		if (path_is_texture(path)) {
@@ -366,7 +366,7 @@ function project_import_brush() {
 function project_import_mesh(replace_existing: bool = true, done: () => void = null) {
 	_project_import_mesh_replace_existing = replace_existing;
 	_project_import_mesh_done             = done;
-	let formats: string                   = string_array_join(path_mesh_formats, ",");
+	let formats: string                   = string_array_join(path_mesh_formats(), ",");
 	if (string_index_of(formats, "fbx") == -1) {
 		// Show .fbx in the file picker even when fbx plugin is not yet enabled
 		formats += ",fbx";
@@ -513,7 +513,7 @@ function project_unwrap_mesh(mesh: raw_mesh_t, done: (a: raw_mesh_t) => void) {
 
 function project_import_asset(filters: string = null, hdr_as_envmap: bool = true) {
 	if (filters == null) {
-		filters = string_array_join(path_texture_formats, ",") + "," + string_array_join(path_mesh_formats, ",");
+		filters = string_array_join(path_texture_formats(), ",") + "," + string_array_join(path_mesh_formats(), ",");
 	}
 
 	_project_import_asset_hdr_as_envmap = hdr_as_envmap;
@@ -568,7 +568,7 @@ function project_reimport_texture_load(path: string, asset: asset_t) {
 
 function project_reimport_texture(asset: asset_t) {
 	if (!iron_file_exists(asset.file)) {
-		let filters: string             = string_array_join(path_texture_formats, ",");
+		let filters: string             = string_array_join(path_texture_formats(), ",");
 		_project_reimport_texture_asset = asset;
 		ui_files_show(filters, false, false, function(path: string) {
 			project_reimport_texture_load(path, _project_reimport_texture_asset);
@@ -649,10 +649,10 @@ function project_export_swatches() {
 			f = tr("untitled");
 		}
 		if (path_is_gimp_color_palette(f)) {
-			// export_gpl_run(path + path_sep + f, substring(f, 0, string_last_index_of(f, ".")), project_raw.swatches);
+			// export_gpl_run(path + PATH_SEP + f, substring(f, 0, string_last_index_of(f, ".")), project_raw.swatches);
 		}
 		else {
-			export_arm_run_swatches(path + path_sep + f);
+			export_arm_run_swatches(path + PATH_SEP + f);
 		}
 	});
 }

@@ -108,7 +108,7 @@ function image_to_pbr_node_button(node_id: i32) {
 			/// else
 			let input_buf: buffer_t = gpu_get_texture_pixels(input);
 			/// end
-			iron_write_png(dir + path_sep + "input.png", input_buf, input.width, input.height, 0);
+			iron_write_png(dir + PATH_SEP + "input.png", input_buf, input.width, input.height, 0);
 
 			image_to_pbr_node_run_sd("marigold-normals-v1-1.q8_0.gguf", "_normals", function(tex: gpu_texture_t) {
 				image_to_pbr_node_result_normal = tex;
@@ -170,7 +170,7 @@ function image_to_pbr_node_check_result(done: (tex: gpu_texture_t) => void) {
 	iron_delay_idle_sleep();
 	if (iron_exec_async_done == 1) {
 		let dir: string = neural_node_dir();
-		let file: string = dir + path_sep + "output.png";
+		let file: string = dir + PATH_SEP + "output.png";
 		if (iron_file_exists(file)) {
 			let tex: gpu_texture_t = iron_load_texture(file);
 			done(tex);

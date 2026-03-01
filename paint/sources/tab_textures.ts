@@ -15,7 +15,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 		ui_row(row);
 
 		if (ui_icon_button(tr("Import"), icon_t.IMPORT)) {
-			ui_files_show(string_array_join(path_texture_formats, ","), false, true, function(path: string) {
+			ui_files_show(string_array_join(path_texture_formats(), ","), false, true, function(path: string) {
 				import_asset_run(path, -1.0, -1.0, true, false);
 				ui_base_hwnds[tab_area_t.STATUS].redraws = 2;
 			});
@@ -144,7 +144,7 @@ function tab_textures_draw(htab: ui_handle_t) {
 											}
 
 											let buf: buffer_t = gpu_get_texture_pixels(target);
-											iron_write_png(path + path_sep + f, buf, target.width, target.height, 0);
+											iron_write_png(path + PATH_SEP + f, buf, target.width, target.height, 0);
 											gpu_delete_texture(target);
 										}, target);
 									});
@@ -180,11 +180,11 @@ function tab_textures_draw(htab: ui_handle_t) {
 								tab_textures_delete_texture(_tab_textures_draw_asset);
 							}
 							if (!_tab_textures_draw_is_packed && ui_menu_button(tr("Open Containing Directory..."), "", icon_t.FOLDER_OPEN)) {
-								file_start(substring(_tab_textures_draw_asset.file, 0, string_last_index_of(_tab_textures_draw_asset.file, path_sep)));
+								file_start(substring(_tab_textures_draw_asset.file, 0, string_last_index_of(_tab_textures_draw_asset.file, PATH_SEP)));
 							}
 							if (!_tab_textures_draw_is_packed && ui_menu_button(tr("Open in Browser"))) {
 								tab_browser_show_directory(
-								    substring(_tab_textures_draw_asset.file, 0, string_last_index_of(_tab_textures_draw_asset.file, path_sep)));
+								    substring(_tab_textures_draw_asset.file, 0, string_last_index_of(_tab_textures_draw_asset.file, PATH_SEP)));
 							}
 						});
 					}

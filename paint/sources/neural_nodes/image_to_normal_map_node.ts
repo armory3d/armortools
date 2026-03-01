@@ -25,7 +25,7 @@ function image_to_normal_map_node_button(node_id: i32) {
 			/// else
 			let input_buf: buffer_t = gpu_get_texture_pixels(input);
 			/// end
-			iron_write_png(dir + path_sep + "input.png", input_buf, input.width, input.height, 0);
+			iron_write_png(dir + PATH_SEP + "input.png", input_buf, input.width, input.height, 0);
 
 			let argv: string[] = [
 				dir + "/" + neural_node_sd_bin(),

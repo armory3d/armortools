@@ -3,6 +3,8 @@ type import_texture_data_t = {
 	path: string; image : gpu_texture_t;
 };
 
+let import_texture_importers: map_t<string, any> = map_create(); // JSValue -> (s: string)=>gpu_texture_t
+
 function import_texture_run(path: string, hdr_as_envmap: bool = true) {
 	if (!path_is_texture(path)) {
 		if (!context_enable_import_plugin(path)) {
@@ -29,7 +31,7 @@ function import_texture_run(path: string, hdr_as_envmap: bool = true) {
 	}
 
 	let ext: string   = substring(path, string_last_index_of(path, ".") + 1, path.length);
-	let importer: any = map_get(path_texture_importers, ext);      // JSValue -> (s: string)=>gpu_texture_t
+	let importer: any = map_get(import_texture_importers, ext);      // JSValue -> (s: string)=>gpu_texture_t
 	let cached: bool  = map_get(data_cached_images, path) != null; // Already loaded or pink texture for missing file
 	let image: gpu_texture_t;
 	if (importer == null || cached) {
@@ -44,7 +46,7 @@ function import_texture_run(path: string, hdr_as_envmap: bool = true) {
 	}
 
 	map_set(data_cached_images, path, image);
-	let ar: string[]   = string_split(path, path_sep);
+	let ar: string[]   = string_split(path, PATH_SEP);
 	let name: string   = ar[ar.length - 1];
 	let asset: asset_t = {name : name, file : path, id : project_asset_id++};
 	array_push(project_assets, asset);

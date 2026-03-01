@@ -330,28 +330,28 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 		let tex_name: string           = t.name != "" ? "_" + t.name : "";
 		let single_channel: bool       = c[0] == c[1] && c[1] == c[2] && c[3] == "1.0";
 		if (c[0] == "base_r" && c[1] == "base_g" && c[2] == "base_b" && c[3] == "1.0" && t.color_space == "linear") {
-			export_texture_write_texture(path + path_sep + f + tex_name + ext, pixpaint, 1);
+			export_texture_write_texture(path + PATH_SEP + f + tex_name + ext, pixpaint, 1);
 		}
 		else if (c[0] == "nor_r" && c[1] == "nor_g" && c[2] == "nor_b" && c[3] == "1.0" && t.color_space == "linear") {
-			export_texture_write_texture(path + path_sep + f + tex_name + ext, pixpaint_nor, 1);
+			export_texture_write_texture(path + PATH_SEP + f + tex_name + ext, pixpaint_nor, 1);
 		}
 		else if (c[0] == "occ" && c[1] == "rough" && c[2] == "metal" && c[3] == "1.0" && t.color_space == "linear") {
-			export_texture_write_texture(path + path_sep + f + tex_name + ext, pixpaint_pack, 1);
+			export_texture_write_texture(path + PATH_SEP + f + tex_name + ext, pixpaint_pack, 1);
 		}
 		else if (single_channel && c[0] == "occ" && t.color_space == "linear") {
-			export_texture_write_texture(path + path_sep + f + tex_name + ext, pixpaint_pack, 2, 0);
+			export_texture_write_texture(path + PATH_SEP + f + tex_name + ext, pixpaint_pack, 2, 0);
 		}
 		else if (single_channel && c[0] == "rough" && t.color_space == "linear") {
-			export_texture_write_texture(path + path_sep + f + tex_name + ext, pixpaint_pack, 2, 1);
+			export_texture_write_texture(path + PATH_SEP + f + tex_name + ext, pixpaint_pack, 2, 1);
 		}
 		else if (single_channel && c[0] == "metal" && t.color_space == "linear") {
-			export_texture_write_texture(path + path_sep + f + tex_name + ext, pixpaint_pack, 2, 2);
+			export_texture_write_texture(path + PATH_SEP + f + tex_name + ext, pixpaint_pack, 2, 2);
 		}
 		else if (single_channel && c[0] == "height" && t.color_space == "linear") {
-			export_texture_write_texture(path + path_sep + f + tex_name + ext, pixpaint_pack, 2, 3);
+			export_texture_write_texture(path + PATH_SEP + f + tex_name + ext, pixpaint_pack, 2, 3);
 		}
 		else if (single_channel && c[0] == "opac" && t.color_space == "linear") {
-			export_texture_write_texture(path + path_sep + f + tex_name + ext, pixpaint, 2, 3);
+			export_texture_write_texture(path + PATH_SEP + f + tex_name + ext, pixpaint, 2, 3);
 		}
 		else {
 			if (pix == null) {
@@ -411,7 +411,7 @@ function export_texture_run_layers(path: string, layers: slot_layer_t[], object_
 					export_texture_set_channel(255, pix, i);
 				}
 			}
-			export_texture_write_texture(path + path_sep + f + tex_name + ext, pix, 3);
+			export_texture_write_texture(path + PATH_SEP + f + tex_name + ext, pix, 3);
 		}
 	}
 
@@ -451,7 +451,7 @@ function export_texture_write_texture(file: string, pixels: buffer_t, type: i32 
 		/// end
 		let image: gpu_texture_t = gpu_create_texture_from_bytes(pixels, res_x, res_y);
 		map_set(data_cached_images, file, image);
-		let ar: string[]   = string_split(file, path_sep);
+		let ar: string[]   = string_split(file, PATH_SEP);
 		let name: string   = ar[ar.length - 1];
 		let asset: asset_t = {name : name, file : file, id : project_asset_id++};
 		array_push(project_assets, asset);

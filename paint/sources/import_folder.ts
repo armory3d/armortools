@@ -51,7 +51,7 @@ function import_folder_run(path: string) {
 		}
 
 		if (valid) {
-			import_texture_run(path + path_sep + f, false);
+			import_texture_run(path + PATH_SEP + f, false);
 			found_texture = true;
 		}
 	}
@@ -66,7 +66,7 @@ function import_folder_run(path: string) {
 	array_push(project_materials, context_raw.material);
 	let nodes: ui_nodes_t        = context_raw.material.nodes;
 	let canvas: ui_node_canvas_t = context_raw.material.canvas;
-	let dirs: string[]           = string_split(path, path_sep);
+	let dirs: string[]           = string_split(path, PATH_SEP);
 	canvas.name                  = dirs[dirs.length - 1];
 	let nout: ui_node_t          = null;
 	for (let i: i32 = 0; i < canvas.nodes.length; ++i) {

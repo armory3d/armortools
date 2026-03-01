@@ -2,6 +2,8 @@
 let import_mesh_clear_layers: bool      = true;
 let import_mesh_meshes_to_unwrap: any[] = null;
 
+let import_mesh_importers: map_t<string, any> = map_create(); // JSValue -> (s: string)=>raw_mesh_t
+
 function import_mesh_run(path: string, _clear_layers: bool = true, replace_existing: bool = true) {
 	if (!path_is_mesh(path)) {
 		if (!context_enable_import_plugin(path)) {
@@ -24,7 +26,7 @@ function import_mesh_run(path: string, _clear_layers: bool = true, replace_exist
 	}
 	else {
 		let ext: string      = substring(path, string_last_index_of(path, ".") + 1, path.length);
-		let importer: any    = map_get(path_mesh_importers, ext); // JSValue -> (s: string)=>raw_mesh_t
+		let importer: any    = map_get(import_mesh_importers, ext); // JSValue -> (s: string)=>raw_mesh_t
 		let mesh: raw_mesh_t = js_pcall_str(importer, path);
 		if (mesh.name == "") {
 			mesh.name = path_base_name(path);
@@ -46,7 +48,7 @@ function import_mesh_run(path: string, _clear_layers: bool = true, replace_exist
 	project_mesh_assets = [ path ];
 
 	/// if (arm_android || arm_ios)
-	sys_title_set(substring(path, string_last_index_of(path, path_sep) + 1, string_last_index_of(path, ".")));
+	sys_title_set(substring(path, string_last_index_of(path, PATH_SEP) + 1, string_last_index_of(path, ".")));
 	/// end
 }
 

@@ -34,7 +34,7 @@ function image_to_3d_mesh_node_button(node_id: i32) {
 			/// else
 			let input_buf: buffer_t = image_to_3d_mesh_node_remove_background(gpu_get_texture_pixels(input));
 			/// end
-			iron_write_png(dir + path_sep + "input.png", input_buf, input.width, input.height, 0);
+			iron_write_png(dir + PATH_SEP + "input.png", input_buf, input.width, input.height, 0);
 
 			dir = string_replace_all(dir, "\\", "/");
 			let argv: string[] = [
@@ -56,7 +56,7 @@ function image_to_3d_mesh_node_check_result(node: ui_node_t) {
 	neural_node_current = node;
 	iron_delay_idle_sleep();
 	if (iron_exec_async_done == 1) {
-		let file: string = neural_node_dir() + path_sep + "output.obj";
+		let file: string = neural_node_dir() + PATH_SEP + "output.obj";
 		if (iron_file_exists(file)) {
 			// let result: gpu_texture_t = ;
 			// map_set(neural_node_results, node.id, result);

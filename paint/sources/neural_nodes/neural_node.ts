@@ -69,7 +69,7 @@ function neural_node_check_result(node: ui_node_t) {
 	neural_node_current = node;
 	iron_delay_idle_sleep();
 	if (iron_exec_async_done == 1) {
-		let file: string = neural_node_dir() + path_sep + "output.png";
+		let file: string = neural_node_dir() + PATH_SEP + "output.png";
 		if (iron_file_exists(file)) {
 			let result: gpu_texture_t = iron_load_texture(file);
 			map_set(neural_node_results, node.id, result);
@@ -104,7 +104,7 @@ function neural_node_dir(): string {
 		dir = iron_internal_save_path() + "models";
 	}
 	else {
-		dir = iron_internal_files_location() + path_sep + "models";
+		dir = iron_internal_files_location() + PATH_SEP + "models";
 	}
 	return dir;
 }
@@ -113,7 +113,7 @@ let neural_node_downloading: i32 = 0;
 
 function neural_node_download(url: string) {
 	let file_name: string = substring(url, string_last_index_of(url, "/") + 1, url.length);
-	let file_path: string = neural_node_dir() + path_sep + file_name;
+	let file_path: string = neural_node_dir() + PATH_SEP + file_name;
 	let found: bool       = iron_file_exists(file_path);
 	if (found) {
 		return;

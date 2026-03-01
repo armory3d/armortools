@@ -113,7 +113,7 @@ function translator_load_translations(new_locale: string) {
 		}
 		else {
 			_translator_load_translations_cjk_font_path      = "";
-			_translator_load_translations_cjk_font_disk_path = path_data() + path_sep;
+			_translator_load_translations_cjk_font_disk_path = path_data() + PATH_SEP;
 		}
 		_translator_load_translations_cjk_font_path += "font_cjk.ttc";
 		_translator_load_translations_cjk_font_disk_path += "font_cjk.ttc";
@@ -186,7 +186,7 @@ function translator_extended_glyphs() {
 // Returns a list of supported locales (plus English and the automatically detected system locale)
 function translator_get_supported_locales(): string[] {
 	let locales: string[] = [ "system", "en" ];
-	let files: string[]   = file_read_directory(path_data() + path_sep + "locale");
+	let files: string[]   = file_read_directory(path_data() + PATH_SEP + "locale");
 	for (let i: i32 = 0; i < files.length; ++i) {
 		let locale_filename: string = files[i];
 		// Trim the ".json" file extension from file names

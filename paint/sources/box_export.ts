@@ -201,8 +201,8 @@ function box_export_tab_presets() {
 			ui_files_show("json", false, false, function(path: string) {
 				path = to_lower_case(path);
 				if (ends_with(path, ".json")) {
-					let filename: string = substring(path, string_last_index_of(path, path_sep) + 1, path.length);
-					let dst_path: string = path_data() + path_sep + "export_presets" + path_sep + filename;
+					let filename: string = substring(path, string_last_index_of(path, PATH_SEP) + 1, path.length);
+					let dst_path: string = path_data() + PATH_SEP + "export_presets" + PATH_SEP + filename;
 					file_copy(path, dst_path); // Copy to presets folder
 					box_export_fetch_presets();
 					box_export_preset    = null;
@@ -400,7 +400,7 @@ function box_export_tab_export_mesh(htab: ui_handle_t) {
 					paint_objects         = [ po ];
 				}
 
-				export_mesh_run(path + path_sep + f, paint_objects, _box_export_apply_displacement, _box_export_merge_vertices);
+				export_mesh_run(path + PATH_SEP + f, paint_objects, _box_export_apply_displacement, _box_export_merge_vertices);
 			});
 		}
 	}
@@ -430,7 +430,7 @@ function box_export_show_material() {
 					}
 					sys_notify_on_next_frame(function(path: string) {
 						export_arm_run_material(path);
-					}, path + path_sep + f);
+					}, path + PATH_SEP + f);
 				});
 			}
 		}
@@ -460,7 +460,7 @@ function box_export_show_brush() {
 						f = tr("untitled");
 					sys_notify_on_next_frame(function(path: string) {
 						export_arm_run_brush(path);
-					}, path + path_sep + f);
+					}, path + PATH_SEP + f);
 				});
 			}
 		}
@@ -468,7 +468,7 @@ function box_export_show_brush() {
 }
 
 function box_export_fetch_presets() {
-	box_export_files = file_read_directory(path_data() + path_sep + "export_presets");
+	box_export_files = file_read_directory(path_data() + PATH_SEP + "export_presets");
 	for (let i: i32 = 0; i < box_export_files.length; ++i) {
 		let s: string       = box_export_files[i];
 		box_export_files[i] = substring(s, 0, s.length - 5); // Strip .json
@@ -492,7 +492,7 @@ function box_export_new_preset(name: string) {
 	if (!ends_with(name, ".json")) {
 		name += ".json";
 	}
-	let path: string = path_data() + path_sep + "export_presets" + path_sep + name;
+	let path: string = path_data() + PATH_SEP + "export_presets" + PATH_SEP + name;
 	iron_file_save_bytes(path, sys_string_to_buffer(template), 0);
 }
 
@@ -501,7 +501,7 @@ function box_export_save_preset() {
 	if (name == "generic") {
 		return; // generic is const
 	}
-	let path: string = path_data() + path_sep + "export_presets" + path_sep + name + ".json";
+	let path: string = path_data() + PATH_SEP + "export_presets" + PATH_SEP + name + ".json";
 	iron_file_save_bytes(path, sys_string_to_buffer(box_export_preset_to_json(box_export_preset)), 0);
 }
 

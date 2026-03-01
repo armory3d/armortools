@@ -181,7 +181,7 @@ function box_preferences_theme_tab() {
 				if (!ends_with(theme_name, ".json")) {
 					theme_name += ".json";
 				}
-				let path: string = path_data() + path_sep + "themes" + path_sep + theme_name;
+				let path: string = path_data() + PATH_SEP + "themes" + PATH_SEP + theme_name;
 				iron_file_save_bytes(path, sys_string_to_buffer(template), 0);
 				box_preferences_fetch_themes(); // Refresh file list
 				config_raw.theme          = theme_name;
@@ -201,7 +201,7 @@ function box_preferences_theme_tab() {
 
 	if (ui_icon_button(tr("Export"), icon_t.EXPORT)) {
 		ui_files_show("json", true, false, function(path: string) {
-			path += path_sep;
+			path += PATH_SEP;
 			path += ui_files_filename;
 			if (!ends_with(path, ".json")) {
 				path += ".json";
@@ -564,7 +564,7 @@ function box_preferences_keymap_tab() {
 				if (!ends_with(keymap_name, ".json")) {
 					keymap_name += ".json";
 				}
-				let path: string = path_data() + path_sep + "keymap_presets" + path_sep + keymap_name;
+				let path: string = path_data() + PATH_SEP + "keymap_presets" + PATH_SEP + keymap_name;
 				iron_file_save_bytes(path, sys_string_to_buffer(template), 0);
 				box_preferences_fetch_keymaps(); // Refresh file list
 				config_raw.keymap          = keymap_name;
@@ -586,8 +586,8 @@ function box_preferences_keymap_tab() {
 			if (!ends_with(ui_files_filename, ".json")) {
 				ui_files_filename += ".json";
 			}
-			let path: string = path_data() + path_sep + "keymap_presets" + path_sep + config_raw.keymap;
-			file_copy(path, dest + path_sep + ui_files_filename);
+			let path: string = path_data() + PATH_SEP + "keymap_presets" + PATH_SEP + config_raw.keymap;
+			file_copy(path, dest + PATH_SEP + ui_files_filename);
 		});
 	}
 
@@ -648,7 +648,7 @@ function box_preferences_neural_tab() {
 }
 
 function box_preferences_model_exists(file_name: string): bool {
-	return iron_file_exists(neural_node_dir() + path_sep + file_name);
+	return iron_file_exists(neural_node_dir() + PATH_SEP + file_name);
 }
 
 function box_preferences_file_name_from_url(url: string): string {
@@ -710,7 +710,7 @@ function box_preferences_model_panel(m: neural_node_model_t) {
 			for (let i: i32 = 0; i < m.urls.length; ++i) {
 				let url: string       = m.urls[i];
 				let file_name: string = box_preferences_file_name_from_url(url);
-				iron_delete_file(neural_node_dir() + path_sep + file_name);
+				iron_delete_file(neural_node_dir() + PATH_SEP + file_name);
 			}
 		}
 	}
@@ -742,7 +742,7 @@ plugin_notify_on_ui(plugin, function() {\
 				if (!ends_with(plugin_name, ".js")) {
 					plugin_name += ".js";
 				}
-				let path: string = path_data() + path_sep + "plugins" + path_sep + plugin_name;
+				let path: string = path_data() + PATH_SEP + "plugins" + PATH_SEP + plugin_name;
 				iron_file_save_bytes(path, sys_string_to_buffer(template), 0);
 				box_preferences_files_plugin = null; // Refresh file list
 				ui_box_hide();
@@ -786,7 +786,7 @@ plugin_notify_on_ui(plugin, function() {\
 		if (ui.is_hovered && ui.input_released_r) {
 			_box_preferences_f = f;
 			ui_menu_draw(function() {
-				let path: string = path_data() + path_sep + "plugins" + path_sep + _box_preferences_f;
+				let path: string = path_data() + PATH_SEP + "plugins" + PATH_SEP + _box_preferences_f;
 				if (ui_menu_button(tr("Edit in Text Editor"))) {
 					file_start(path);
 				}
@@ -801,8 +801,8 @@ plugin_notify_on_ui(plugin, function() {\
 						if (!ends_with(ui_files_filename, ".js")) {
 							ui_files_filename += ".js";
 						}
-						let path: string = path_data() + path_sep + "plugins" + path_sep + _box_preferences_f;
-						file_copy(path, dest + path_sep + ui_files_filename);
+						let path: string = path_data() + PATH_SEP + "plugins" + PATH_SEP + _box_preferences_f;
+						file_copy(path, dest + PATH_SEP + ui_files_filename);
 					});
 				}
 				if (ui_menu_button(tr("Delete"), "", icon_t.DELETE)) {
@@ -863,7 +863,7 @@ function box_preferences_show() {
 }
 
 function box_preferences_fetch_themes() {
-	box_preferences_themes = file_read_directory(path_data() + path_sep + "themes");
+	box_preferences_themes = file_read_directory(path_data() + PATH_SEP + "themes");
 	for (let i: i32 = 0; i < box_preferences_themes.length; ++i) {
 		let s: string             = box_preferences_themes[i];
 		box_preferences_themes[i] = substring(box_preferences_themes[i], 0, s.length - 5); // Strip .json
@@ -872,7 +872,7 @@ function box_preferences_fetch_themes() {
 }
 
 function box_preferences_fetch_keymaps() {
-	box_preferences_files_keymap = file_read_directory(path_data() + path_sep + "keymap_presets");
+	box_preferences_files_keymap = file_read_directory(path_data() + PATH_SEP + "keymap_presets");
 	for (let i: i32 = 0; i < box_preferences_files_keymap.length; ++i) {
 		let s: string                   = box_preferences_files_keymap[i];
 		box_preferences_files_keymap[i] = substring(box_preferences_files_keymap[i], 0, s.length - 5); // Strip .json
@@ -881,7 +881,7 @@ function box_preferences_fetch_keymaps() {
 }
 
 function box_preferences_fetch_plugins() {
-	box_preferences_files_plugin = file_read_directory(path_data() + path_sep + "plugins");
+	box_preferences_files_plugin = file_read_directory(path_data() + PATH_SEP + "plugins");
 }
 
 function box_preferences_get_theme_index(): i32 {

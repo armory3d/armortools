@@ -6,6 +6,7 @@
 #include "iron_array.h"
 #include "iron_draw.h"
 #include "iron_file.h"
+#include "iron_path.h"
 #include "iron_gc.h"
 #include "iron_gpu.h"
 #include "iron_json.h"
