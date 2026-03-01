@@ -1,12 +1,15 @@
 
 #pragma once
 
-extern const int   _const_data_skydome_indices[];
-extern const int   _const_data_skydome_indices_count;
-extern const float _const_data_skydome_pos[];
-extern const int   _const_data_skydome_pos_count;
-extern const float _const_data_skydome_nor[];
-extern const int   _const_data_skydome_nor_count;
+#include "iron_gpu.h"
+
+extern gpu_buffer_t *const_data_screen_aligned_vb;
+extern gpu_buffer_t *const_data_screen_aligned_ib;
+extern gpu_buffer_t *const_data_skydome_vb;
+extern gpu_buffer_t *const_data_skydome_ib;
+
+void const_data_create_screen_aligned_data(void);
+void const_data_create_skydome_data(void);
 
 extern const char          iron_font_13_x0[];
 extern const char          iron_font_13_y0[];

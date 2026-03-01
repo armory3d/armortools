@@ -1,4 +1,12 @@
 
+#include "const_data.h"
+#include <stdlib.h>
+
+gpu_buffer_t *const_data_screen_aligned_vb;
+gpu_buffer_t *const_data_screen_aligned_ib;
+gpu_buffer_t *const_data_skydome_vb;
+gpu_buffer_t *const_data_skydome_ib;
+
 // Generated in Blender with armory_tools/export_skydome_geometry.py, using
 // a UV sphere with 24 segments and 12 rings.
 
@@ -730,3 +738,60 @@ const unsigned char iron_font_13_pixels[] = {
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0};
+
+void const_data_create_screen_aligned_data(void) {
+	// Over-sized triangle
+	float data[]    = {-1.0f, -1.0f, 3.0f, -1.0f, -1.0f, 3.0f};
+	int   indices[] = {0, 1, 2};
+
+	gpu_vertex_structure_t structure;
+	structure.size = 0;
+	gpu_vertex_structure_add(&structure, "pos", GPU_VERTEX_DATA_F32_2X);
+
+	int vertex_count             = sizeof(data) / sizeof(data[0]) / (gpu_vertex_struct_size(&structure) / 4);
+	const_data_screen_aligned_vb = malloc(sizeof(gpu_buffer_t));
+	gpu_vertex_buffer_init(const_data_screen_aligned_vb, vertex_count, &structure);
+	float *vertices = gpu_vertex_buffer_lock(const_data_screen_aligned_vb);
+	for (int i = 0; i < (int)(sizeof(data) / sizeof(data[0])); ++i) {
+		vertices[i] = data[i];
+	}
+	gpu_vertex_buffer_unlock(const_data_screen_aligned_vb);
+
+	const_data_screen_aligned_ib = malloc(sizeof(gpu_buffer_t));
+	gpu_index_buffer_init(const_data_screen_aligned_ib, sizeof(indices) / sizeof(indices[0]));
+	int *id = gpu_index_buffer_lock(const_data_screen_aligned_ib);
+	for (int i = 0; i < (int)(sizeof(indices) / sizeof(indices[0])); ++i) {
+		id[i] = indices[i];
+	}
+	gpu_index_buffer_unlock(const_data_screen_aligned_ib);
+}
+
+void const_data_create_skydome_data(void) {
+	gpu_vertex_structure_t structure;
+	structure.size = 0;
+	gpu_vertex_structure_add(&structure, "pos", GPU_VERTEX_DATA_F32_3X);
+	gpu_vertex_structure_add(&structure, "nor", GPU_VERTEX_DATA_F32_3X);
+
+	int struct_length     = gpu_vertex_struct_size(&structure) / 4;
+	int vertex_count      = _const_data_skydome_pos_count / 3;
+	const_data_skydome_vb = malloc(sizeof(gpu_buffer_t));
+	gpu_vertex_buffer_init(const_data_skydome_vb, vertex_count, &structure);
+	float *vertices = gpu_vertex_buffer_lock(const_data_skydome_vb);
+	for (int i = 0; i < vertex_count; ++i) {
+		vertices[i * struct_length]     = _const_data_skydome_pos[i * 3];
+		vertices[i * struct_length + 1] = _const_data_skydome_pos[i * 3 + 1];
+		vertices[i * struct_length + 2] = _const_data_skydome_pos[i * 3 + 2];
+		vertices[i * struct_length + 3] = _const_data_skydome_nor[i * 3];
+		vertices[i * struct_length + 4] = _const_data_skydome_nor[i * 3 + 1];
+		vertices[i * struct_length + 5] = _const_data_skydome_nor[i * 3 + 2];
+	}
+	gpu_vertex_buffer_unlock(const_data_skydome_vb);
+
+	const_data_skydome_ib = malloc(sizeof(gpu_buffer_t));
+	gpu_index_buffer_init(const_data_skydome_ib, _const_data_skydome_indices_count);
+	int *id = gpu_index_buffer_lock(const_data_skydome_ib);
+	for (int i = 0; i < _const_data_skydome_indices_count; ++i) {
+		id[i] = _const_data_skydome_indices[i];
+	}
+	gpu_index_buffer_unlock(const_data_skydome_ib);
+}

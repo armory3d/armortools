@@ -1028,3 +1028,10 @@ declare function path_join(a: string, b: string): string;
 
 declare function lz4_encode(b: buffer_t): buffer_t;
 declare function lz4_decode(b: buffer_t, olen: u32): buffer_t;
+
+declare let const_data_screen_aligned_vb: gpu_buffer_t;
+declare let const_data_screen_aligned_ib: gpu_buffer_t;
+declare let const_data_skydome_vb: gpu_buffer_t;
+declare let const_data_skydome_ib: gpu_buffer_t;
+declare function const_data_create_screen_aligned_data();
+declare function const_data_create_skydome_data();
