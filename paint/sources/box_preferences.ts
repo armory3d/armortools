@@ -88,6 +88,7 @@ function box_preferences_interface_tab() {
 		config_load_theme(config_raw.theme);
 		box_preferences_set_scale();
 		base_redraw_ui();
+		context_raw.hscale_was_changed = true;
 	}
 
 	let h_splash_screen: ui_handle_t = ui_handle(__ID__);

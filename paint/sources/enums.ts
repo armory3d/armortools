@@ -174,8 +174,8 @@ enum menubar_category_t {
 	VIEWPORT  = 2,
 	MODE      = 3,
 	CAMERA    = 4,
-	HELP      = 5,
-	WORKSPACE = 6,
+	WORKSPACE = 5,
+	HELP      = 6,
 }
 
 enum canvas_type_t {

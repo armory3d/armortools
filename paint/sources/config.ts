@@ -120,6 +120,7 @@ function config_save() {
 	json_encode_bool("experimental", config_raw.experimental);
 	json_encode_i32("neural_backend", config_raw.neural_backend);
 	json_encode_i32("render_mode", config_raw.render_mode);
+	json_encode_i32("workspace", config_raw.workspace);
 	let config_json: string = json_encode_end();
 
 	let buffer: buffer_t = sys_string_to_buffer(config_json);
@@ -242,6 +243,7 @@ function config_init() {
 		/// else
 		config_raw.render_mode = render_mode_t.DEFERRED;
 		/// end
+		config_raw.workspace = workspace_t.PAINT_3D;
 	}
 	else {
 		// Discard old config
@@ -550,4 +552,5 @@ type config_t = {
 	experimental?: bool;
 	neural_backend?: i32;
 	render_mode?: render_mode_t;
+	workspace?: workspace_t;
 };

@@ -84,7 +84,7 @@ function tab_layers_button_new(text: string) {
 	if (ui_icon_button(text, icon_t.PLUS)) {
 		ui_menu_draw(function() {
 			let l: slot_layer_t = context_raw.layer;
-			if (context_raw.workspace == workspace_t.SCULPT) {
+			if (config_raw.workspace == workspace_t.SCULPT) {
 				if (ui_menu_button(tr("Sculpt Layer"), "", icon_t.PAINT)) {
 					sys_notify_on_next_frame(function(_: any) {
 						sculpt_layers_create_sculpt_layer();

@@ -1,5 +1,5 @@
 
-let ui_menubar_default_w: i32           = 330;
+let ui_menubar_default_w: i32           = 406;
 let ui_menubar_hwnd: ui_handle_t        = ui_handle_create();
 let ui_menubar_menu_handle: ui_handle_t = ui_handle_create();
 let ui_menubar_tab: ui_handle_t         = ui_handle_create();
@@ -147,11 +147,7 @@ function ui_menubar_render_ui() {
 			ui.enabled = true;
 		}
 		else {
-			let categories: string[] = [ tr("File"), tr("Edit"), tr("Viewport"), tr("Mode"), tr("Camera"), tr("Help") ];
-
-			if (config_raw.experimental) {
-				array_push(categories, tr("Workspace"));
-			}
+			let categories: string[] = [ tr("File"), tr("Edit"), tr("Viewport"), tr("Mode"), tr("Camera"), tr("Workspace"), tr("Help") ];
 
 			for (let i: i32 = 0; i < categories.length; ++i) {
 				if (ui_menubar_button(categories[i]) || (ui_menu_show && ui_menu_commands == ui_menubar_draw_category_items && ui.is_hovered)) {
@@ -699,17 +695,22 @@ function ui_menubar_draw_category_items() {
 	}
 	else if (ui_menubar_category == menubar_category_t.WORKSPACE) {
 		let workspace_handle: ui_handle_t = ui_handle(__ID__);
-		workspace_handle.i                = context_raw.workspace;
+		workspace_handle.i                = config_raw.workspace;
 		let modes: string[]          = [
-            tr("Paint 3D"), tr("Paint 2D"), tr("Sculpt")
+			tr("Paint 3D"), tr("Paint 2D")
 		];
+
+		if (config_raw.experimental) {
+			array_push(modes, tr("Sculpt"));
+		}
 
 		for (let i: i32 = 0; i < modes.length; ++i) {
 			ui_radio(workspace_handle, i, modes[i]);
 		}
 
 		if (workspace_handle.changed) {
-			context_raw.workspace = workspace_handle.i;
+			config_raw.workspace = workspace_handle.i;
+			config_save();
 		}
 	}
 }
