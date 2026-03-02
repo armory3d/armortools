@@ -1042,3 +1042,28 @@ declare let const_data_skydome_vb: gpu_buffer_t;
 declare let const_data_skydome_ib: gpu_buffer_t;
 declare function const_data_create_screen_aligned_data();
 declare function const_data_create_skydome_data();
+
+declare enum ease_t {
+	LINEAR,
+	EXPO_IN,
+	EXPO_OUT,
+}
+
+declare type tween_anim_t = {
+	target?:    f32_ptr;
+	to?:        f32;
+	duration?:  f32;
+	delay?:     f32;
+	ease?:      ease_t;
+	done?:      (data?: any) => void;
+	tick?:      () => void;
+	done_data?: any;
+	_from?:     f32;
+	_time?:     f32;
+};
+
+declare function tween_to(anim: tween_anim_t): tween_anim_t;
+declare function tween_timer(delay: f32, done: (data?: any) => void, data?: any): tween_anim_t;
+declare function tween_stop(anim: tween_anim_t): void;
+declare function tween_reset(): void;
+declare function tween_update(unused: any): void;

@@ -206,6 +206,7 @@ string_t *iron_get_arg(i32 index) {
 
 #include "iron_math.h"
 #include "iron_net.h"
+#include "iron_tween.h"
 #include "kong/dir.h"
 #include <lz4x.h>
 #include <stdio.h>
