@@ -39,11 +39,14 @@ typedef CONST void *LPCVOID;
 #define CREATE_ALWAYS 2
 #define OPEN_EXISTING 3
 
-#define FILE_ATTRIBUTE_NORMAL 0x00000080
-#define INVALID_HANDLE_VALUE  ((HANDLE)(LONG_PTR) - 1)
-#define FILE_BEGIN            0
-#define FILE_CURRENT          1
-#define MAX_PATH              260
+#define FILE_ATTRIBUTE_HIDDEN    0x00000002
+#define FILE_ATTRIBUTE_DIRECTORY 0x00000010
+#define FILE_ATTRIBUTE_NORMAL    0x00000080
+#define INVALID_FILE_ATTRIBUTES  ((DWORD) - 1)
+#define INVALID_HANDLE_VALUE     ((HANDLE)(LONG_PTR) - 1)
+#define FILE_BEGIN               0
+#define FILE_CURRENT             1
+#define MAX_PATH                 260
 
 typedef struct _SECURITY_ATTRIBUTES {
 	DWORD  nLength;

@@ -20,6 +20,9 @@
 
 i32 iron_sys_command(char *cmd);
 extern char temp_string[1024 * 128];
+#ifdef IRON_WINDOWS
+extern wchar_t temp_wstring[1024 * 32];
+#endif
 
 static char *fileslocation = NULL;
 #ifdef IRON_WINDOWS
