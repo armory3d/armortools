@@ -1019,30 +1019,21 @@ static void RegisterWindowClass(HINSTANCE hInstance, const wchar_t *className) {
 }
 
 static DWORD getStyle(int features) {
-	DWORD style = WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP;
-	if ((features & IRON_WINDOW_FEATURE_RESIZEABLE) && ((features & IRON_WINDOW_FEATURE_BORDERLESS) == 0)) {
+	DWORD style = WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP | WS_CAPTION | WS_SYSMENU;
+	if (features & IRON_WINDOW_FEATURES_RESIZABLE) {
 		style |= WS_SIZEBOX;
 	}
-	if (features & IRON_WINDOW_FEATURE_MAXIMIZABLE) {
+	if (features & IRON_WINDOW_FEATURES_MAXIMIZABLE) {
 		style |= WS_MAXIMIZEBOX;
 	}
-	if (features & IRON_WINDOW_FEATURE_MINIMIZABLE) {
+	if (features & IRON_WINDOW_FEATURES_MINIMIZABLE) {
 		style |= WS_MINIMIZEBOX;
-	}
-	if ((features & IRON_WINDOW_FEATURE_BORDERLESS) == 0) {
-		style |= WS_CAPTION | WS_SYSMENU;
 	}
 	return style;
 }
 
 static DWORD getExStyle(int features) {
-	DWORD exStyle = WS_EX_APPWINDOW;
-	if ((features & IRON_WINDOW_FEATURE_BORDERLESS) == 0) {
-		exStyle |= WS_EX_WINDOWEDGE;
-	}
-	if (features & IRON_WINDOW_FEATURE_ON_TOP) {
-		exStyle |= WS_EX_TOPMOST;
-	}
+	DWORD exStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
 	return exStyle;
 }
 
@@ -1200,8 +1191,7 @@ void iron_window_change_mode(iron_window_mode_t mode) {
 		iron_windows_restore_display(display_index);
 		SetWindowLongW(win->handle, GWL_STYLE, getStyle(win->features));
 		SetWindowLongW(win->handle, GWL_EXSTYLE, getExStyle(win->features));
-		HWND on_top = (win->features & IRON_WINDOW_FEATURE_ON_TOP) ? HWND_TOPMOST : HWND_NOTOPMOST;
-		SetWindowPos(win->handle, on_top, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED);
+		SetWindowPos(win->handle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED);
 		iron_window_show();
 		break;
 	}

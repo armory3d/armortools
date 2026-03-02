@@ -23,7 +23,7 @@ function main() {
 		x : -1,
 		y : -1,
 		mode : iron_window_mode_t.WINDOW,
-		features : window_features_t.RESIZABLE | window_features_t.MINIMIZABLE | window_features_t.MAXIMIZABLE,
+		features : iron_window_features_t.RESIZABLE | iron_window_features_t.MINIMIZABLE | iron_window_features_t.MAXIMIZABLE,
 		vsync : true,
 		frequency : 60,
 		depth_bits : 32

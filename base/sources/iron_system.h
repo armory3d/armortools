@@ -38,11 +38,12 @@ typedef enum {
 	IRON_WINDOW_MODE_FULLSCREEN
 } iron_window_mode_t;
 
-#define IRON_WINDOW_FEATURE_RESIZEABLE  1
-#define IRON_WINDOW_FEATURE_MINIMIZABLE 2
-#define IRON_WINDOW_FEATURE_MAXIMIZABLE 4
-#define IRON_WINDOW_FEATURE_BORDERLESS  8
-#define IRON_WINDOW_FEATURE_ON_TOP      16
+typedef enum {
+	IRON_WINDOW_FEATURES_NONE = 0,
+	IRON_WINDOW_FEATURES_RESIZABLE   = 1,
+	IRON_WINDOW_FEATURES_MINIMIZABLE = 2,
+	IRON_WINDOW_FEATURES_MAXIMIZABLE = 4,
+} iron_window_features_t;
 
 typedef struct iron_window_options {
 	const char        *title;

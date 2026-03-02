@@ -646,10 +646,10 @@ static void createWindow(iron_window_options_t *options) {
 	int width     = options->width / [[NSScreen mainScreen] backingScaleFactor];
 	int height    = options->height / [[NSScreen mainScreen] backingScaleFactor];
 	int styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable;
-	if ((options->features & IRON_WINDOW_FEATURE_RESIZEABLE) || (options->features & IRON_WINDOW_FEATURE_MAXIMIZABLE)) {
+	if ((options->features & IRON_WINDOW_FEATURES_RESIZABLE) || (options->features & IRON_WINDOW_FEATURES_MAXIMIZABLE)) {
 		styleMask |= NSWindowStyleMaskResizable;
 	}
-	if (options->features & IRON_WINDOW_FEATURE_MINIMIZABLE) {
+	if (options->features & IRON_WINDOW_FEATURES_MINIMIZABLE) {
 		styleMask |= NSWindowStyleMaskMiniaturizable;
 	}
 

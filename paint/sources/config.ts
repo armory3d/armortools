@@ -317,15 +317,15 @@ function config_get_date(): string {
 
 function config_get_options(): iron_window_options_t {
 	let window_mode: iron_window_mode_t = config_raw.window_mode == 0 ? iron_window_mode_t.WINDOW : iron_window_mode_t.FULLSCREEN;
-	let features: window_features_t     = window_features_t.NONE;
+	let features: iron_window_features_t     = iron_window_features_t.NONE;
 	if (config_raw.window_resizable) {
-		features |= window_features_t.RESIZABLE;
+		features |= iron_window_features_t.RESIZABLE;
 	}
 	if (config_raw.window_maximizable) {
-		features |= window_features_t.MAXIMIZABLE;
+		features |= iron_window_features_t.MAXIMIZABLE;
 	}
 	if (config_raw.window_minimizable) {
-		features |= window_features_t.MINIMIZABLE;
+		features |= iron_window_features_t.MINIMIZABLE;
 	}
 	let title: string              = "untitled - " + manifest_title;
 	let ops: iron_window_options_t = {

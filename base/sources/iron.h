@@ -209,6 +209,7 @@ string_t *iron_get_arg(i32 index) {
 #include "iron_tween.h"
 #include "iron_input.h"
 #include "iron_tilesheet.h"
+#include "iron_sys.h"
 #include "kong/dir.h"
 #include <lz4x.h>
 #include <stdio.h>

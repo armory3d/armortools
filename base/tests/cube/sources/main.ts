@@ -7,7 +7,7 @@ function main() {
 		height : 720,
 		x : -1,
 		y : -1,
-		features : window_features_t.RESIZABLE | window_features_t.MINIMIZABLE | window_features_t.MAXIMIZABLE,
+		features : iron_window_features_t.RESIZABLE | iron_window_features_t.MINIMIZABLE | iron_window_features_t.MAXIMIZABLE,
 		mode : iron_window_mode_t.WINDOW,
 		frequency : 60,
 		vsync : true,

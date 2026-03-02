@@ -1314,3 +1314,37 @@ declare type tilesheet_t = {
 	time?: f32;
 	on_action_complete?: () => void;
 };
+
+declare type color_t = i32;
+
+declare type video_t = {
+	video_?: any;
+};
+
+declare type sound_t = {
+	sound_?: any;
+};
+
+declare enum iron_window_features_t {
+	NONE        = 0,
+	RESIZABLE   = 1,
+	MINIMIZABLE = 2,
+	MAXIMIZABLE = 4,
+}
+
+declare enum iron_window_mode_t {
+	WINDOW,
+	FULLSCREEN,
+}
+
+declare function sys_w(): i32;
+declare function sys_h(): i32;
+declare function sys_x(): i32;
+declare function sys_y(): i32;
+
+declare function sys_notify_on_update(f: (data?: any) => void, data: any = null);
+declare function sys_notify_on_render(f: (data?: any) => void, data: any = null);
+declare function sys_notify_on_next_frame(f: (data?: any) => void, data: any = null);
+declare function sys_notify_on_end_frame(f: (data?: any) => void, data: any = null);
+declare function sys_buffer_to_string(b: buffer_t): string;
+declare function sys_string_to_buffer(str: string): buffer_t;

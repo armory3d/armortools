@@ -83,7 +83,7 @@ function main() {
 		y : storage.window_y,
 		width : storage.window_w,
 		height : storage.window_h,
-		features : window_features_t.RESIZABLE | window_features_t.MAXIMIZABLE | window_features_t.MINIMIZABLE,
+		features : iron_window_features_t.RESIZABLE | iron_window_features_t.MAXIMIZABLE | iron_window_features_t.MINIMIZABLE,
 		mode : iron_window_mode_t.WINDOW,
 		frequency : 60,
 		vsync : true,
