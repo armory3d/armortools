@@ -12,19 +12,6 @@ type transform_t = {
 	object?: object_t;
 	dim?: vec4_t;
 	radius?: f32;
-	/// if arm_anim
-	// Wrong order returned from get_euler(), store last state for animation
-	_euler_x?: f32;
-	_euler_y?: f32;
-	_euler_z?: f32;
-	// Animated delta transform
-	dloc?: vec4_t;
-	drot?: quat_t;
-	dscale?: vec4_t;
-	_deuler_x?: f32;
-	_deuler_y?: f32;
-	_deuler_z?: f32;
-	/// end
 };
 
 function transform_create(object: object_t): transform_t {
@@ -53,17 +40,6 @@ function transform_update(raw: transform_t) {
 		transform_build_matrix(raw);
 	}
 }
-
-/// if arm_anim
-function transform_compose_delta(raw: transform_t) {
-	// Delta transform
-	raw.dloc   = vec4_add(raw.loc, raw.dloc);
-	raw.dscale = vec4_add(raw.dscale, raw.scale);
-	raw.drot   = quat_from_euler(raw._deuler_x, raw._deuler_y, raw._deuler_z);
-	raw.drot   = quat_mult(raw.rot, raw.drot);
-	raw.local  = mat4_compose(raw.dloc, raw.drot, raw.dscale);
-}
-/// end
 
 function transform_build_matrix(raw: transform_t) {
 	// if (vec4_isnan(raw.dloc)) {
@@ -146,11 +122,6 @@ function transform_move(raw: transform_t, axis: vec4_t, f: f32 = 1.0) {
 
 function transform_set_rot(raw: transform_t, x: f32, y: f32, z: f32) {
 	raw.rot = quat_from_euler(x, y, z);
-	/// if arm_anim
-	raw._euler_x = x;
-	raw._euler_y = y;
-	raw._euler_z = z;
-	/// end
 	raw.dirty = true;
 }
 

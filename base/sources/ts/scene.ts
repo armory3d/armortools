@@ -7,9 +7,6 @@ let scene_cameras: camera_object_t[];
 let scene_speakers: speaker_object_t[];
 /// end
 let scene_empties: object_t[];
-/// if arm_anim
-let scene_animations: anim_raw_t[];
-/// end
 let scene_embedded: map_t<string, gpu_texture_t>;
 
 let _scene_uid_counter: i32 = 0;
@@ -28,9 +25,6 @@ function scene_create(format: scene_t): object_t {
 	scene_speakers = [];
 	/// end
 	scene_empties = [];
-	/// if arm_anim
-	scene_animations = [];
-	/// end
 	scene_embedded   = map_create();
 	_scene_root      = object_create();
 	_scene_root.name = "Root";
@@ -86,12 +80,6 @@ function scene_render_frame() {
 		return;
 	}
 
-	/// if arm_anim
-	for (let i: i32 = 0; i < scene_animations.length; ++i) {
-		let anim: anim_raw_t = scene_animations[i];
-		anim_update(anim, sys_delta());
-	}
-	/// end
 	for (let i: i32 = 0; i < scene_empties.length; ++i) {
 		let e: object_t = scene_empties[i];
 		if (e != null && e.parent != null) {
@@ -318,30 +306,7 @@ function scene_return_mesh_object(object_file: string, data_ref: string, materia
 }
 
 function scene_return_object(object: object_t, o: obj_t): object_t {
-	// Load object actions
-	/// if arm_anim
-	if (object != null && o.anim != null && o.anim.object_actions != null) {
-		let oactions: scene_t[] = [];
-		while (oactions.length < o.anim.object_actions.length) {
-			array_push(oactions, null);
-		}
-
-		for (let i: i32 = 0; i < o.anim.object_actions.length; ++i) {
-			let ref: string = o.anim.object_actions[i];
-			if (ref == "null") { // No startup action set
-				continue;
-			}
-			let action: scene_t = data_get_scene_raw(ref);
-			oactions[i]         = action;
-		}
-		return scene_return_object_loaded(object, o, oactions);
-	}
-	else {
-		/// end
-		return scene_return_object_loaded(object, o, null);
-		/// if arm_anim
-	}
-	/// end
+	return scene_return_object_loaded(object, o, null);
 }
 
 function scene_return_object_loaded(object: object_t, o: obj_t, oactions: scene_t[]): object_t {
@@ -350,9 +315,6 @@ function scene_return_object_loaded(object: object_t, o: obj_t, oactions: scene_
 		object.name    = o.name;
 		object.visible = o.visible;
 		scene_gen_transform(o, object.transform);
-		/// if arm_anim
-		object_setup_animation(object, oactions);
-		/// end
 	}
 	return object;
 }
@@ -557,7 +519,7 @@ type obj_t = {
 	dimensions?: f32_array_t; // Geometry objects
 	visible?: bool;
 	spawn?: bool;  // Auto add object when creating scene
-	anim?: anim_t; // Object animation
+	anim?: any; // TODO: deprecated
 	material_ref?: string;
 	children?: obj_t[];
 	_?: obj_runtime_t;
@@ -565,20 +527,4 @@ type obj_t = {
 
 type obj_runtime_t = {
 	_gc?: scene_t; // Link to armpack_decode result
-};
-
-type anim_t = {
-	object_actions?: string[];
-	tracks?: track_t[];
-	begin?: i32; // Frames, for non-sampled
-	end?: i32;
-	has_delta?: bool; // Delta transform
-	marker_frames?: u32_array_t;
-	marker_names?: string[];
-};
-
-type track_t = {
-	target?: string;
-	frames?: u32_array_t;
-	values?: f32_array_t; // sampled - full matrix transforms, non-sampled - values
 };

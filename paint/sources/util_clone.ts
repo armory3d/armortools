@@ -285,36 +285,6 @@ function util_clone_material_data(m: material_data_t): material_data_t {
 	return r;
 }
 
-function util_clone_tracks(tracks: track_t[]): track_t[] {
-	if (tracks == null) {
-		return null;
-	}
-	let r: track_t[] = [];
-	for (let i: i32 = 0; i < tracks.length; ++i) {
-		let t: track_t = {};
-		t.target       = tracks[i].target;
-		t.frames       = util_clone_u32_array(tracks[i].frames);
-		t.values       = util_clone_f32_array(tracks[i].values);
-		array_push(r, t);
-	}
-	return r;
-}
-
-function util_clone_anim(a: anim_t): anim_t {
-	if (a == null) {
-		return null;
-	}
-	let r: anim_t    = {};
-	r.object_actions = util_clone_string_array(a.object_actions);
-	r.tracks         = util_clone_tracks(a.tracks);
-	r.begin          = a.begin;
-	r.end            = a.end;
-	r.has_delta      = a.has_delta;
-	r.marker_frames  = util_clone_u32_array(a.marker_frames);
-	r.marker_names   = util_clone_string_array(a.marker_names);
-	return r;
-}
-
 function util_clone_obj(o: obj_t): obj_t {
 	if (o == null) {
 		return null;
@@ -327,7 +297,6 @@ function util_clone_obj(o: obj_t): obj_t {
 	r.dimensions   = util_clone_f32_array(o.dimensions);
 	r.visible      = o.visible;
 	r.spawn        = o.spawn;
-	r.anim         = util_clone_anim(o.anim);
 	r.material_ref = o.material_ref;
 	if (o.children != null) {
 		r.children = [];

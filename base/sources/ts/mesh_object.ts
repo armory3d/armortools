@@ -35,12 +35,6 @@ function mesh_object_remove(raw: mesh_object_t) {
 	object_remove_super(raw.base);
 }
 
-function mesh_object_setup_animation(raw: mesh_object_t, oactions: scene_t[] = null) {
-	/// if arm_anim
-	object_setup_animation_super(raw.base, oactions);
-	/// end
-}
-
 function mesh_object_cull_material(raw: mesh_object_t, context: string): bool {
 	// Skip render if material does not contain current context
 	if (!mesh_object_valid_context(raw, raw.material, context)) {
