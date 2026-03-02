@@ -560,8 +560,8 @@ void ui_end_input() {
 	current->input_wheel_delta = 0;
 	current->pen_in_use        = false;
 	if (ui_key_repeat && current->is_key_down && iron_time() - ui_key_repeat_time > 0.05) {
-		if (current->key_code == IRON_KEY_BACKSPACE || current->key_code == IRON_KEY_DELETE || current->key_code == IRON_KEY_LEFT ||
-		    current->key_code == IRON_KEY_RIGHT || current->key_code == IRON_KEY_UP || current->key_code == IRON_KEY_DOWN) {
+		if (current->key_code == KEY_CODE_BACKSPACE || current->key_code == KEY_CODE_DELETE || current->key_code == KEY_CODE_LEFT ||
+		    current->key_code == KEY_CODE_RIGHT || current->key_code == KEY_CODE_UP || current->key_code == KEY_CODE_DOWN) {
 			ui_key_repeat_time      = iron_time();
 			current->is_key_pressed = true;
 		}
@@ -774,8 +774,8 @@ void ui_draw_combo() {
 	}
 
 	if (current->is_key_pressed || current->input_wheel_delta != 0) {
-		int arrow_up   = current->is_key_pressed && current->key_code == (unroll_up ? IRON_KEY_DOWN : IRON_KEY_UP);
-		int arrow_down = current->is_key_pressed && current->key_code == (unroll_up ? IRON_KEY_UP : IRON_KEY_DOWN);
+		int arrow_up   = current->is_key_pressed && current->key_code == (unroll_up ? KEY_CODE_DOWN : KEY_CODE_UP);
+		int arrow_down = current->is_key_pressed && current->key_code == (unroll_up ? KEY_CODE_UP : KEY_CODE_DOWN);
 		int wheel_up   = (unroll_up && current->input_wheel_delta > 0) || (!unroll_up && current->input_wheel_delta < 0);
 		int wheel_down = (unroll_up && current->input_wheel_delta < 0) || (!unroll_up && current->input_wheel_delta > 0);
 		if ((arrow_up || wheel_up) && current->combo_to_submit > 0) {
@@ -1080,7 +1080,7 @@ void ui_deselect_text(ui_t *ui) {
 	iron_keyboard_hide();
 	ui->highlight_anchor = ui->cursor_x;
 #ifdef IRON_IOS
-	keyboard_up_listener(IRON_KEY_SHIFT);
+	keyboard_up_listener(KEY_CODE_SHIFT);
 #endif
 }
 
@@ -1116,17 +1116,17 @@ void ui_update_text_edit(int align, bool editable, bool live_update) {
 	char text[1024];
 	strcpy(text, current->text_selected);
 	if (current->is_key_pressed) {                // Process input
-		if (current->key_code == IRON_KEY_LEFT) { // Move cursor
+		if (current->key_code == KEY_CODE_LEFT) { // Move cursor
 			if (current->cursor_x > 0) {
 				current->cursor_x--;
 			}
 		}
-		else if (current->key_code == IRON_KEY_RIGHT) {
+		else if (current->key_code == KEY_CODE_RIGHT) {
 			if (current->cursor_x < strlen(text)) {
 				current->cursor_x++;
 			}
 		}
-		else if (editable && current->key_code == IRON_KEY_BACKSPACE) { // Remove char
+		else if (editable && current->key_code == KEY_CODE_BACKSPACE) { // Remove char
 			if (current->cursor_x > 0 && current->highlight_anchor == current->cursor_x) {
 				ui_remove_char_at(text, current->cursor_x - 1);
 				current->cursor_x--;
@@ -1141,7 +1141,7 @@ void ui_update_text_edit(int align, bool editable, bool live_update) {
 				ui_remove_chars_at(text, current->cursor_x, count);
 			}
 		}
-		else if (editable && current->key_code == IRON_KEY_DELETE) {
+		else if (editable && current->key_code == KEY_CODE_DELETE) {
 			if (current->highlight_anchor == current->cursor_x) {
 				ui_remove_char_at(text, current->cursor_x);
 			}
@@ -1155,22 +1155,22 @@ void ui_update_text_edit(int align, bool editable, bool live_update) {
 				ui_remove_chars_at(text, current->cursor_x, count);
 			}
 		}
-		else if (current->key_code == IRON_KEY_RETURN) { // Deselect
+		else if (current->key_code == KEY_CODE_RETURN) { // Deselect
 			ui_deselect_text(current);
 		}
-		else if (current->key_code == IRON_KEY_ESCAPE) { // Cancel
+		else if (current->key_code == KEY_CODE_ESCAPE) { // Cancel
 			strcpy(current->text_selected, current->text_selected_handle->text);
 			ui_deselect_text(current);
 		}
-		else if (current->key_code == IRON_KEY_TAB && current->tab_switch_enabled && !current->is_ctrl_down) { // Next field
+		else if (current->key_code == KEY_CODE_TAB && current->tab_switch_enabled && !current->is_ctrl_down) { // Next field
 			current->tab_pressed = true;
 			ui_deselect_text(current);
 			current->key_code = 0;
 		}
-		else if (current->key_code == IRON_KEY_HOME) {
+		else if (current->key_code == KEY_CODE_HOME) {
 			current->cursor_x = 0;
 		}
-		else if (current->key_code == IRON_KEY_END) {
+		else if (current->key_code == KEY_CODE_END) {
 			current->cursor_x = strlen(text);
 		}
 		else if (current->is_ctrl_down && current->is_a_down) { // Select all
@@ -1178,16 +1178,16 @@ void ui_update_text_edit(int align, bool editable, bool live_update) {
 			current->highlight_anchor = 0;
 		}
 		else if (editable && // Write
-		         current->key_code != IRON_KEY_SHIFT && current->key_code != IRON_KEY_CAPS_LOCK && current->key_code != IRON_KEY_CONTROL &&
-		         current->key_code != IRON_KEY_META && current->key_code != IRON_KEY_ALT && current->key_code != IRON_KEY_UP &&
-		         current->key_code != IRON_KEY_DOWN && current->key_char >= 32) {
+		         current->key_code != KEY_CODE_SHIFT && current->key_code != KEY_CODE_CAPS_LOCK && current->key_code != KEY_CODE_CONTROL &&
+		         current->key_code != KEY_CODE_META && current->key_code != KEY_CODE_ALT && current->key_code != KEY_CODE_UP &&
+		         current->key_code != KEY_CODE_DOWN && current->key_char >= 32) {
 			ui_remove_chars_at(text, current->highlight_anchor, current->cursor_x - current->highlight_anchor);
 			ui_insert_char_at(text, current->highlight_anchor, current->key_char);
 
 			current->cursor_x = current->cursor_x + 1 > strlen(text) ? strlen(text) : current->cursor_x + 1;
 		}
 		bool selecting =
-		    current->is_shift_down && (current->key_code == IRON_KEY_LEFT || current->key_code == IRON_KEY_RIGHT || current->key_code == IRON_KEY_SHIFT);
+		    current->is_shift_down && (current->key_code == KEY_CODE_LEFT || current->key_code == KEY_CODE_RIGHT || current->key_code == KEY_CODE_SHIFT);
 		// isCtrlDown && isAltDown is the condition for AltGr was pressed
 		// AltGr is part of the German keyboard layout and part of key combinations like AltGr + e -> €
 		if (!selecting && (!current->is_ctrl_down || (current->is_ctrl_down && current->is_alt_down))) {
@@ -2445,43 +2445,43 @@ void ui_key_down(ui_t *ui, int key_code) {
 	ui->is_key_down    = true;
 	ui_key_repeat_time = iron_time() + 0.4;
 	switch (key_code) {
-	case IRON_KEY_SHIFT:
+	case KEY_CODE_SHIFT:
 		ui->is_shift_down = true;
 		break;
-	case IRON_KEY_CONTROL:
+	case KEY_CODE_CONTROL:
 		ui->is_ctrl_down = true;
 		break;
 #ifdef IRON_DARWIN
-	case IRON_KEY_META:
+	case KEY_CODE_META:
 		ui->is_ctrl_down = true;
 		break;
 #endif
-	case IRON_KEY_ALT:
+	case KEY_CODE_ALT:
 		ui->is_alt_down = true;
 		break;
-	case IRON_KEY_BACKSPACE:
+	case KEY_CODE_BACKSPACE:
 		ui->is_backspace_down = true;
 		break;
-	case IRON_KEY_DELETE:
+	case KEY_CODE_DELETE:
 		ui->is_delete_down = true;
 		break;
-	case IRON_KEY_ESCAPE:
+	case KEY_CODE_ESCAPE:
 		ui->is_escape_down = true;
 		break;
-	case IRON_KEY_RETURN:
+	case KEY_CODE_RETURN:
 		ui->is_return_down = true;
 		break;
-	case IRON_KEY_TAB:
+	case KEY_CODE_TAB:
 		ui->is_tab_down = true;
 		break;
-	case IRON_KEY_A:
+	case KEY_CODE_A:
 		ui->is_a_down = true;
 		break;
-	case IRON_KEY_SPACE:
+	case KEY_CODE_SPACE:
 		ui->key_char = ' ';
 		break;
 #ifdef UI_ANDROID_RMB // Detect right mouse button on Android..
-	case IRON_KEY_BACK:
+	case KEY_CODE_BACK:
 		if (!ui->input_down_r)
 			ui_mouse_down(ui, 1, ui->input_x, ui->input_y);
 		break;
@@ -2492,40 +2492,40 @@ void ui_key_down(ui_t *ui, int key_code) {
 void ui_key_up(ui_t *ui, int key_code) {
 	ui->is_key_down = false;
 	switch (key_code) {
-	case IRON_KEY_SHIFT:
+	case KEY_CODE_SHIFT:
 		ui->is_shift_down = false;
 		break;
-	case IRON_KEY_CONTROL:
+	case KEY_CODE_CONTROL:
 		ui->is_ctrl_down = false;
 		break;
 #ifdef IRON_DARWIN
-	case IRON_KEY_META:
+	case KEY_CODE_META:
 		ui->is_ctrl_down = false;
 		break;
 #endif
-	case IRON_KEY_ALT:
+	case KEY_CODE_ALT:
 		ui->is_alt_down = false;
 		break;
-	case IRON_KEY_BACKSPACE:
+	case KEY_CODE_BACKSPACE:
 		ui->is_backspace_down = false;
 		break;
-	case IRON_KEY_DELETE:
+	case KEY_CODE_DELETE:
 		ui->is_delete_down = false;
 		break;
-	case IRON_KEY_ESCAPE:
+	case KEY_CODE_ESCAPE:
 		ui->is_escape_down = false;
 		break;
-	case IRON_KEY_RETURN:
+	case KEY_CODE_RETURN:
 		ui->is_return_down = false;
 		break;
-	case IRON_KEY_TAB:
+	case KEY_CODE_TAB:
 		ui->is_tab_down = false;
 		break;
-	case IRON_KEY_A:
+	case KEY_CODE_A:
 		ui->is_a_down = false;
 		break;
 #ifdef UI_ANDROID_RMB
-	case IRON_KEY_BACK:
+	case KEY_CODE_BACK:
 		ui_mouse_down(ui, 1, ui->input_x, ui->input_y);
 		break;
 #endif
@@ -3227,7 +3227,7 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 			strcpy(handle->text, line);
 			current->submit_text_handle = NULL;
 			ui_text_input(handle, show_label ? label : "", align, editable, false);
-			if (selected && current->key_code != IRON_KEY_RETURN && current->key_code != IRON_KEY_ESCAPE &&
+			if (selected && current->key_code != KEY_CODE_RETURN && current->key_code != KEY_CODE_ESCAPE &&
 			    strcmp(line, current->text_selected) != 0) { // Edit text
 				int line_pos = ui_line_pos(lines, i);
 				ui_remove_chars_at(lines, line_pos, strlen(line));
@@ -3266,18 +3266,18 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 
 	if (key_pressed) {
 		// Move cursor vertically
-		if (current->key_code == IRON_KEY_DOWN && handle->i < line_count - 1) {
+		if (current->key_code == KEY_CODE_DOWN && handle->i < line_count - 1) {
 			handle_line_select(current, handle);
 			handle->i++;
 			scroll_align(current, handle);
 		}
-		if (current->key_code == IRON_KEY_UP && handle->i > 0) {
+		if (current->key_code == KEY_CODE_UP && handle->i > 0) {
 			handle_line_select(current, handle);
 			handle->i--;
 			scroll_align(current, handle);
 		}
 		// New line
-		if (editable && current->key_code == IRON_KEY_RETURN && !word_wrap) {
+		if (editable && current->key_code == KEY_CODE_RETURN && !word_wrap) {
 			handle->i++;
 			ui_insert_char_at(lines, ui_line_pos(lines, handle->i - 1) + current->cursor_x, '\n');
 			ui_start_text_edit(handle, UI_ALIGN_LEFT);
@@ -3285,7 +3285,7 @@ char *ui_text_area(ui_handle_t *handle, int align, bool editable, char *label, b
 			scroll_align(current, handle);
 		}
 		// Delete line
-		if (editable && current->key_code == IRON_KEY_BACKSPACE && cursor_start_x == 0 && handle->i > 0) {
+		if (editable && current->key_code == KEY_CODE_BACKSPACE && cursor_start_x == 0 && handle->i > 0) {
 			handle->i--;
 			current->cursor_x = current->highlight_anchor = strlen(ui_extract_line(lines, handle->i));
 			ui_remove_chars_at(lines, ui_line_pos(lines, handle->i + 1) - 1, 1); // Remove '\n' of the previous line

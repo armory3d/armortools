@@ -1063,7 +1063,215 @@ declare type tween_anim_t = {
 };
 
 declare function tween_to(anim: tween_anim_t): tween_anim_t;
-declare function tween_timer(delay: f32, done: (data?: any) => void, data?: any): tween_anim_t;
+declare function tween_timer(delay: f32, done: (data?: any) => void, data?: any = null): tween_anim_t;
 declare function tween_stop(anim: tween_anim_t): void;
 declare function tween_reset(): void;
 declare function tween_update(unused: any): void;
+
+declare function input_reset(): void;
+declare function input_end_frame(): void;
+declare function input_on_foreground(): void;
+declare function input_register(): void;
+
+declare function mouse_end_frame(): void;
+declare function mouse_reset(): void;
+declare function mouse_button_index(button: string): i32;
+declare function mouse_down(button: string = "left"): bool;
+declare function mouse_down_any(): bool;
+declare function mouse_started(button: string = "left"): bool;
+declare function mouse_started_any(): bool;
+declare function mouse_released(button: string = "left"): bool;
+declare function mouse_down_listener(index: i32, x: i32, y: i32): void;
+declare function mouse_up_listener(index: i32, x: i32, y: i32): void;
+declare function mouse_move_listener(x: i32, y: i32, movement_x: i32, movement_y: i32): void;
+declare function mouse_wheel_listener(delta: f32): void;
+declare function mouse_view_x(): f32;
+declare function mouse_view_y(): f32;
+declare let      mouse_x: f32;
+declare let      mouse_y: f32;
+declare let      mouse_moved: bool;
+declare let      mouse_movement_x: f32;
+declare let      mouse_movement_y: f32;
+declare let      mouse_wheel_delta: f32;
+declare let      mouse_last_x: f32;
+declare let      mouse_last_y: f32;
+
+declare function pen_end_frame(): void;
+declare function pen_reset(): void;
+declare function pen_button_index(unused: string): i32;
+declare function pen_down(button: string = "tip"): bool;
+declare function pen_started(button: string = "tip"): bool;
+declare function pen_released(button: string = "tip"): bool;
+declare function pen_down_listener(x: i32, y: i32, pressure: f32): void;
+declare function pen_up_listener(x: i32, y: i32, pressure: f32): void;
+declare function pen_move_listener(x: i32, y: i32, pressure: f32): void;
+declare function pen_view_x(): f32;
+declare function pen_view_y(): f32;
+declare let      pen_x: f32;
+declare let      pen_y: f32;
+declare let      pen_moved: bool;
+declare let      pen_movement_x: f32;
+declare let      pen_movement_y: f32;
+declare let      pen_pressure: f32;
+declare let      pen_connected: bool;
+declare let      pen_in_use: bool;
+declare let      pen_last_x: f32;
+declare let      pen_last_y: f32;
+
+declare function keyboard_end_frame(): void;
+declare function keyboard_reset(): void;
+declare function keyboard_down(key: string): bool;
+declare function keyboard_started(key: string): bool;
+declare function keyboard_started_any(): bool;
+declare function keyboard_released(key: string): bool;
+declare function keyboard_repeat(key: string): bool;
+declare function keyboard_key_code(key: i32): string;
+declare function keyboard_down_listener(code: i32): void;
+declare function keyboard_up_listener(code: i32): void;
+declare let      keyboard_repeat_key: bool;
+declare let      keyboard_repeat_time: f32;
+
+declare enum key_code_t {
+	UNKNOWN             = 0,
+	BACK                = 1, // Android
+	CANCEL              = 3,
+	HELP                = 6,
+	BACKSPACE           = 8,
+	TAB                 = 9,
+	RETURN              = 13,
+	SHIFT               = 16,
+	CONTROL             = 17,
+	ALT                 = 18,
+	PAUSE               = 19,
+	CAPS_LOCK           = 20,
+	ESCAPE              = 27,
+	SPACE               = 32,
+	PAGE_UP             = 33,
+	PAGE_DOWN           = 34,
+	END                 = 35,
+	HOME                = 36,
+	LEFT                = 37,
+	UP                  = 38,
+	RIGHT               = 39,
+	DOWN                = 40,
+	PRINT_SCREEN        = 44,
+	INSERT              = 45,
+	DELETE              = 46,
+	ZERO                = 48,
+	ONE                 = 49,
+	TWO                 = 50,
+	THREE               = 51,
+	FOUR                = 52,
+	FIVE                = 53,
+	SIX                 = 54,
+	SEVEN               = 55,
+	EIGHT               = 56,
+	NINE                = 57,
+	COLON               = 58,
+	SEMICOLON           = 59,
+	LESS_THAN           = 60,
+	EQUALS              = 61,
+	GREATER_THAN        = 62,
+	QUESTION_MARK       = 63,
+	AT                  = 64,
+	A                   = 65,
+	B                   = 66,
+	C                   = 67,
+	D                   = 68,
+	E                   = 69,
+	F                   = 70,
+	G                   = 71,
+	H                   = 72,
+	I                   = 73,
+	J                   = 74,
+	K                   = 75,
+	L                   = 76,
+	M                   = 77,
+	N                   = 78,
+	O                   = 79,
+	P                   = 80,
+	Q                   = 81,
+	R                   = 82,
+	S                   = 83,
+	T                   = 84,
+	U                   = 85,
+	V                   = 86,
+	W                   = 87,
+	X                   = 88,
+	Y                   = 89,
+	Z                   = 90,
+	WIN                 = 91,
+	CONTEXT_MENU        = 93,
+	SLEEP               = 95,
+	NUMPAD0             = 96,
+	NUMPAD1             = 97,
+	NUMPAD2             = 98,
+	NUMPAD3             = 99,
+	NUMPAD4             = 100,
+	NUMPAD5             = 101,
+	NUMPAD6             = 102,
+	NUMPAD7             = 103,
+	NUMPAD8             = 104,
+	NUMPAD9             = 105,
+	MULTIPLY            = 106,
+	ADD                 = 107,
+	SEPARATOR           = 108,
+	SUBTRACT            = 109,
+	DECIMAL             = 110,
+	DIVIDE              = 111,
+	F1                  = 112,
+	F2                  = 113,
+	F3                  = 114,
+	F4                  = 115,
+	F5                  = 116,
+	F6                  = 117,
+	F7                  = 118,
+	F8                  = 119,
+	F9                  = 120,
+	F10                 = 121,
+	F11                 = 122,
+	F12                 = 123,
+	F13                 = 124,
+	F14                 = 125,
+	F15                 = 126,
+	F16                 = 127,
+	F17                 = 128,
+	F18                 = 129,
+	F19                 = 130,
+	F20                 = 131,
+	F21                 = 132,
+	F22                 = 133,
+	F23                 = 134,
+	F24                 = 135,
+	NUM_LOCK            = 144,
+	SCROLL_LOCK         = 145,
+	EXCLAMATION         = 161,
+	DOUBLE_QUOTE        = 162,
+	HASH                = 163,
+	DOLLAR              = 164,
+	PERCENT             = 165,
+	AMPERSAND           = 166,
+	UNDERSCORE          = 167,
+	OPEN_PAREN          = 168,
+	CLOSE_PAREN         = 169,
+	ASTERISK            = 170,
+	PLUS                = 171,
+	PIPE                = 172,
+	HYPHEN_MINUS        = 173,
+	OPEN_CURLY_BRACKET  = 174,
+	CLOSE_CURLY_BRACKET = 175,
+	TILDE               = 176,
+	VOLUME_MUTE         = 181,
+	VOLUME_DOWN         = 182,
+	VOLUME_UP           = 183,
+	COMMA               = 188,
+	PERIOD              = 190,
+	SLASH               = 191,
+	BACK_QUOTE          = 192,
+	OPEN_BRACKET        = 219,
+	BACK_SLASH          = 220,
+	CLOSE_BRACKET       = 221,
+	QUOTE               = 222,
+	META                = 224,
+	ALTGR               = 225,
+}

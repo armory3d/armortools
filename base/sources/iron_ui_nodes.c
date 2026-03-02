@@ -1351,7 +1351,7 @@ void ui_node_canvas(ui_nodes_t *nodes, ui_node_canvas_t *canvas) {
 	}
 
 	// Select all nodes
-	if (current->is_ctrl_down && current->key_code == IRON_KEY_A && !current->is_typing) {
+	if (current->is_ctrl_down && current->key_code == KEY_CODE_A && !current->is_typing) {
 		current_nodes->nodes_selected_id->length = 0;
 		for (int i = 0; i < canvas->nodes->length; ++i) {
 			add_to_selection(canvas->nodes->buffer[i]);

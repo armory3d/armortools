@@ -123,153 +123,150 @@ char       *iron_internal_cut_callback(void);
 char       *iron_internal_copy_callback(void);
 void        iron_internal_paste_callback(char *);
 
-#define IRON_KEY_UNKNOWN             0
-#define IRON_KEY_BACK                1 // Android
-#define IRON_KEY_CANCEL              3
-#define IRON_KEY_HELP                6
-#define IRON_KEY_BACKSPACE           8
-#define IRON_KEY_TAB                 9
-#define IRON_KEY_CLEAR               12
-#define IRON_KEY_RETURN              13
-#define IRON_KEY_SHIFT               16
-#define IRON_KEY_CONTROL             17
-#define IRON_KEY_ALT                 18
-#define IRON_KEY_PAUSE               19
-#define IRON_KEY_CAPS_LOCK           20
-#define IRON_KEY_ESCAPE              27
-#define IRON_KEY_SPACE               32
-#define IRON_KEY_PAGE_UP             33
-#define IRON_KEY_PAGE_DOWN           34
-#define IRON_KEY_END                 35
-#define IRON_KEY_HOME                36
-#define IRON_KEY_LEFT                37
-#define IRON_KEY_UP                  38
-#define IRON_KEY_RIGHT               39
-#define IRON_KEY_DOWN                40
-#define IRON_KEY_SELECT              41
-#define IRON_KEY_PRINT               42
-#define IRON_KEY_EXECUTE             43
-#define IRON_KEY_PRINT_SCREEN        44
-#define IRON_KEY_INSERT              45
-#define IRON_KEY_DELETE              46
-#define IRON_KEY_0                   48
-#define IRON_KEY_1                   49
-#define IRON_KEY_2                   50
-#define IRON_KEY_3                   51
-#define IRON_KEY_4                   52
-#define IRON_KEY_5                   53
-#define IRON_KEY_6                   54
-#define IRON_KEY_7                   55
-#define IRON_KEY_8                   56
-#define IRON_KEY_9                   57
-#define IRON_KEY_COLON               58
-#define IRON_KEY_SEMICOLON           59
-#define IRON_KEY_LESS_THAN           60
-#define IRON_KEY_EQUALS              61
-#define IRON_KEY_GREATER_THAN        62
-#define IRON_KEY_QUESTIONMARK        63
-#define IRON_KEY_AT                  64
-#define IRON_KEY_A                   65
-#define IRON_KEY_B                   66
-#define IRON_KEY_C                   67
-#define IRON_KEY_D                   68
-#define IRON_KEY_E                   69
-#define IRON_KEY_F                   70
-#define IRON_KEY_G                   71
-#define IRON_KEY_H                   72
-#define IRON_KEY_I                   73
-#define IRON_KEY_J                   74
-#define IRON_KEY_K                   75
-#define IRON_KEY_L                   76
-#define IRON_KEY_M                   77
-#define IRON_KEY_N                   78
-#define IRON_KEY_O                   79
-#define IRON_KEY_P                   80
-#define IRON_KEY_Q                   81
-#define IRON_KEY_R                   82
-#define IRON_KEY_S                   83
-#define IRON_KEY_T                   84
-#define IRON_KEY_U                   85
-#define IRON_KEY_V                   86
-#define IRON_KEY_W                   87
-#define IRON_KEY_X                   88
-#define IRON_KEY_Y                   89
-#define IRON_KEY_Z                   90
-#define IRON_KEY_WIN                 91
-#define IRON_KEY_CONTEXT_MENU        93
-#define IRON_KEY_SLEEP               95
-#define IRON_KEY_NUMPAD_0            96
-#define IRON_KEY_NUMPAD_1            97
-#define IRON_KEY_NUMPAD_2            98
-#define IRON_KEY_NUMPAD_3            99
-#define IRON_KEY_NUMPAD_4            100
-#define IRON_KEY_NUMPAD_5            101
-#define IRON_KEY_NUMPAD_6            102
-#define IRON_KEY_NUMPAD_7            103
-#define IRON_KEY_NUMPAD_8            104
-#define IRON_KEY_NUMPAD_9            105
-#define IRON_KEY_MULTIPLY            106
-#define IRON_KEY_ADD                 107
-#define IRON_KEY_SEPARATOR           108
-#define IRON_KEY_SUBTRACT            109
-#define IRON_KEY_DECIMAL             110
-#define IRON_KEY_DIVIDE              111
-#define IRON_KEY_F1                  112
-#define IRON_KEY_F2                  113
-#define IRON_KEY_F3                  114
-#define IRON_KEY_F4                  115
-#define IRON_KEY_F5                  116
-#define IRON_KEY_F6                  117
-#define IRON_KEY_F7                  118
-#define IRON_KEY_F8                  119
-#define IRON_KEY_F9                  120
-#define IRON_KEY_F10                 121
-#define IRON_KEY_F11                 122
-#define IRON_KEY_F12                 123
-#define IRON_KEY_F13                 124
-#define IRON_KEY_F14                 125
-#define IRON_KEY_F15                 126
-#define IRON_KEY_F16                 127
-#define IRON_KEY_F17                 128
-#define IRON_KEY_F18                 129
-#define IRON_KEY_F19                 130
-#define IRON_KEY_F20                 131
-#define IRON_KEY_F21                 132
-#define IRON_KEY_F22                 133
-#define IRON_KEY_F23                 134
-#define IRON_KEY_F24                 135
-#define IRON_KEY_NUM_LOCK            144
-#define IRON_KEY_SCROLL_LOCK         145
-#define IRON_KEY_CIRCUMFLEX          160
-#define IRON_KEY_EXCLAMATION         161
-#define IRON_KEY_DOUBLE_QUOTE        162
-#define IRON_KEY_HASH                163
-#define IRON_KEY_DOLLAR              164
-#define IRON_KEY_PERCENT             165
-#define IRON_KEY_AMPERSAND           166
-#define IRON_KEY_UNDERSCORE          167
-#define IRON_KEY_OPEN_PAREN          168
-#define IRON_KEY_CLOSE_PAREN         169
-#define IRON_KEY_ASTERISK            170
-#define IRON_KEY_PLUS                171
-#define IRON_KEY_PIPE                172
-#define IRON_KEY_HYPHEN_MINUS        173
-#define IRON_KEY_OPEN_CURLY_BRACKET  174
-#define IRON_KEY_CLOSE_CURLY_BRACKET 175
-#define IRON_KEY_TILDE               176
-#define IRON_KEY_VOLUME_MUTE         181
-#define IRON_KEY_VOLUME_DOWN         182
-#define IRON_KEY_VOLUME_UP           183
-#define IRON_KEY_COMMA               188
-#define IRON_KEY_PERIOD              190
-#define IRON_KEY_SLASH               191
-#define IRON_KEY_BACK_QUOTE          192
-#define IRON_KEY_OPEN_BRACKET        219
-#define IRON_KEY_BACK_SLASH          220
-#define IRON_KEY_CLOSE_BRACKET       221
-#define IRON_KEY_QUOTE               222
-#define IRON_KEY_META                224
-#define IRON_KEY_ALT_GR              225
+typedef enum {
+	KEY_CODE_UNKNOWN             = 0,
+	KEY_CODE_BACK                = 1,
+	KEY_CODE_CANCEL              = 3,
+	KEY_CODE_HELP                = 6,
+	KEY_CODE_BACKSPACE           = 8,
+	KEY_CODE_TAB                 = 9,
+	KEY_CODE_RETURN              = 13,
+	KEY_CODE_SHIFT               = 16,
+	KEY_CODE_CONTROL             = 17,
+	KEY_CODE_ALT                 = 18,
+	KEY_CODE_PAUSE               = 19,
+	KEY_CODE_CAPS_LOCK           = 20,
+	KEY_CODE_ESCAPE              = 27,
+	KEY_CODE_SPACE               = 32,
+	KEY_CODE_PAGE_UP             = 33,
+	KEY_CODE_PAGE_DOWN           = 34,
+	KEY_CODE_END                 = 35,
+	KEY_CODE_HOME                = 36,
+	KEY_CODE_LEFT                = 37,
+	KEY_CODE_UP                  = 38,
+	KEY_CODE_RIGHT               = 39,
+	KEY_CODE_DOWN                = 40,
+	KEY_CODE_PRINT_SCREEN        = 44,
+	KEY_CODE_INSERT              = 45,
+	KEY_CODE_DELETE              = 46,
+	KEY_CODE_0                   = 48,
+	KEY_CODE_1                   = 49,
+	KEY_CODE_2                   = 50,
+	KEY_CODE_3                   = 51,
+	KEY_CODE_4                   = 52,
+	KEY_CODE_5                   = 53,
+	KEY_CODE_6                   = 54,
+	KEY_CODE_7                   = 55,
+	KEY_CODE_8                   = 56,
+	KEY_CODE_9                   = 57,
+	KEY_CODE_COLON               = 58,
+	KEY_CODE_SEMICOLON           = 59,
+	KEY_CODE_LESS_THAN           = 60,
+	KEY_CODE_EQUALS              = 61,
+	KEY_CODE_GREATER_THAN        = 62,
+	KEY_CODE_QUESTIONMARK        = 63,
+	KEY_CODE_AT                  = 64,
+	KEY_CODE_A                   = 65,
+	KEY_CODE_B                   = 66,
+	KEY_CODE_C                   = 67,
+	KEY_CODE_D                   = 68,
+	KEY_CODE_E                   = 69,
+	KEY_CODE_F                   = 70,
+	KEY_CODE_G                   = 71,
+	KEY_CODE_H                   = 72,
+	KEY_CODE_I                   = 73,
+	KEY_CODE_J                   = 74,
+	KEY_CODE_K                   = 75,
+	KEY_CODE_L                   = 76,
+	KEY_CODE_M                   = 77,
+	KEY_CODE_N                   = 78,
+	KEY_CODE_O                   = 79,
+	KEY_CODE_P                   = 80,
+	KEY_CODE_Q                   = 81,
+	KEY_CODE_R                   = 82,
+	KEY_CODE_S                   = 83,
+	KEY_CODE_T                   = 84,
+	KEY_CODE_U                   = 85,
+	KEY_CODE_V                   = 86,
+	KEY_CODE_W                   = 87,
+	KEY_CODE_X                   = 88,
+	KEY_CODE_Y                   = 89,
+	KEY_CODE_Z                   = 90,
+	KEY_CODE_WIN                 = 91,
+	KEY_CODE_CONTEXT_MENU        = 93,
+	KEY_CODE_SLEEP               = 95,
+	KEY_CODE_NUMPAD_0            = 96,
+	KEY_CODE_NUMPAD_1            = 97,
+	KEY_CODE_NUMPAD_2            = 98,
+	KEY_CODE_NUMPAD_3            = 99,
+	KEY_CODE_NUMPAD_4            = 100,
+	KEY_CODE_NUMPAD_5            = 101,
+	KEY_CODE_NUMPAD_6            = 102,
+	KEY_CODE_NUMPAD_7            = 103,
+	KEY_CODE_NUMPAD_8            = 104,
+	KEY_CODE_NUMPAD_9            = 105,
+	KEY_CODE_MULTIPLY            = 106,
+	KEY_CODE_ADD                 = 107,
+	KEY_CODE_SEPARATOR           = 108,
+	KEY_CODE_SUBTRACT            = 109,
+	KEY_CODE_DECIMAL             = 110,
+	KEY_CODE_DIVIDE              = 111,
+	KEY_CODE_F1                  = 112,
+	KEY_CODE_F2                  = 113,
+	KEY_CODE_F3                  = 114,
+	KEY_CODE_F4                  = 115,
+	KEY_CODE_F5                  = 116,
+	KEY_CODE_F6                  = 117,
+	KEY_CODE_F7                  = 118,
+	KEY_CODE_F8                  = 119,
+	KEY_CODE_F9                  = 120,
+	KEY_CODE_F10                 = 121,
+	KEY_CODE_F11                 = 122,
+	KEY_CODE_F12                 = 123,
+	KEY_CODE_F13                 = 124,
+	KEY_CODE_F14                 = 125,
+	KEY_CODE_F15                 = 126,
+	KEY_CODE_F16                 = 127,
+	KEY_CODE_F17                 = 128,
+	KEY_CODE_F18                 = 129,
+	KEY_CODE_F19                 = 130,
+	KEY_CODE_F20                 = 131,
+	KEY_CODE_F21                 = 132,
+	KEY_CODE_F22                 = 133,
+	KEY_CODE_F23                 = 134,
+	KEY_CODE_F24                 = 135,
+	KEY_CODE_NUM_LOCK            = 144,
+	KEY_CODE_SCROLL_LOCK         = 145,
+	KEY_CODE_EXCLAMATION         = 161,
+	KEY_CODE_DOUBLE_QUOTE        = 162,
+	KEY_CODE_HASH                = 163,
+	KEY_CODE_DOLLAR              = 164,
+	KEY_CODE_PERCENT             = 165,
+	KEY_CODE_AMPERSAND           = 166,
+	KEY_CODE_UNDERSCORE          = 167,
+	KEY_CODE_OPEN_PAREN          = 168,
+	KEY_CODE_CLOSE_PAREN         = 169,
+	KEY_CODE_ASTERISK            = 170,
+	KEY_CODE_PLUS                = 171,
+	KEY_CODE_PIPE                = 172,
+	KEY_CODE_HYPHEN_MINUS        = 173,
+	KEY_CODE_OPEN_CURLY_BRACKET  = 174,
+	KEY_CODE_CLOSE_CURLY_BRACKET = 175,
+	KEY_CODE_TILDE               = 176,
+	KEY_CODE_VOLUME_MUTE         = 181,
+	KEY_CODE_VOLUME_DOWN         = 182,
+	KEY_CODE_VOLUME_UP           = 183,
+	KEY_CODE_COMMA               = 188,
+	KEY_CODE_PERIOD              = 190,
+	KEY_CODE_SLASH               = 191,
+	KEY_CODE_BACK_QUOTE          = 192,
+	KEY_CODE_OPEN_BRACKET        = 219,
+	KEY_CODE_BACK_SLASH          = 220,
+	KEY_CODE_CLOSE_BRACKET       = 221,
+	KEY_CODE_QUOTE               = 222,
+	KEY_CODE_META                = 224,
+	KEY_CODE_ALT_GR              = 225,
+} key_code_t;
 
 void iron_keyboard_show(void);
 void iron_keyboard_hide(void);

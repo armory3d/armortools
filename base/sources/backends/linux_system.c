@@ -483,268 +483,266 @@ VkResult iron_vulkan_create_surface(VkInstance instance, VkSurfaceKHR *surface) 
 
 static int xk_to_iron(KeySym symbol) {
 	if (symbol == XK_Right)
-		return IRON_KEY_RIGHT;
+		return KEY_CODE_RIGHT;
 	if (symbol == XK_Left)
-		return IRON_KEY_LEFT;
+		return KEY_CODE_LEFT;
 	if (symbol == XK_Up)
-		return IRON_KEY_UP;
+		return KEY_CODE_UP;
 	if (symbol == XK_Down)
-		return IRON_KEY_DOWN;
+		return KEY_CODE_DOWN;
 	if (symbol == XK_space)
-		return IRON_KEY_SPACE;
+		return KEY_CODE_SPACE;
 	if (symbol == XK_BackSpace)
-		return IRON_KEY_BACKSPACE;
+		return KEY_CODE_BACKSPACE;
 	if (symbol == XK_Tab)
-		return IRON_KEY_TAB;
+		return KEY_CODE_TAB;
 	if (symbol == XK_Return)
-		return IRON_KEY_RETURN;
+		return KEY_CODE_RETURN;
 	if (symbol == XK_Shift_L)
-		return IRON_KEY_SHIFT;
+		return KEY_CODE_SHIFT;
 	if (symbol == XK_Shift_R)
-		return IRON_KEY_SHIFT;
+		return KEY_CODE_SHIFT;
 	if (symbol == XK_Control_L)
-		return IRON_KEY_CONTROL;
+		return KEY_CODE_CONTROL;
 	if (symbol == XK_Control_R)
-		return IRON_KEY_CONTROL;
+		return KEY_CODE_CONTROL;
 	if (symbol == XK_Alt_L)
-		return IRON_KEY_ALT;
+		return KEY_CODE_ALT;
 	if (symbol == XK_Alt_R)
-		return IRON_KEY_ALT;
+		return KEY_CODE_ALT;
 	if (symbol == XK_ISO_Prev_Group)
-		return IRON_KEY_ALT; // XK_ISO_Prev_Group received instead of XK_Alt_L?
+		return KEY_CODE_ALT; // XK_ISO_Prev_Group received instead of XK_Alt_L?
 	if (symbol == XK_Delete)
-		return IRON_KEY_DELETE;
+		return KEY_CODE_DELETE;
 	if (symbol == XK_comma)
-		return IRON_KEY_COMMA;
+		return KEY_CODE_COMMA;
 	if (symbol == XK_period)
-		return IRON_KEY_PERIOD;
+		return KEY_CODE_PERIOD;
 	if (symbol == XK_bracketleft)
-		return IRON_KEY_OPEN_BRACKET;
+		return KEY_CODE_OPEN_BRACKET;
 	if (symbol == XK_bracketright)
-		return IRON_KEY_CLOSE_BRACKET;
+		return KEY_CODE_CLOSE_BRACKET;
 	if (symbol == XK_braceleft)
-		return IRON_KEY_OPEN_CURLY_BRACKET;
+		return KEY_CODE_OPEN_CURLY_BRACKET;
 	if (symbol == XK_braceright)
-		return IRON_KEY_CLOSE_CURLY_BRACKET;
+		return KEY_CODE_CLOSE_CURLY_BRACKET;
 	if (symbol == XK_parenleft)
-		return IRON_KEY_OPEN_PAREN;
+		return KEY_CODE_OPEN_PAREN;
 	if (symbol == XK_parenright)
-		return IRON_KEY_CLOSE_PAREN;
+		return KEY_CODE_CLOSE_PAREN;
 	if (symbol == XK_backslash)
-		return IRON_KEY_BACK_SLASH;
+		return KEY_CODE_BACK_SLASH;
 	if (symbol == XK_apostrophe)
-		return IRON_KEY_QUOTE;
+		return KEY_CODE_QUOTE;
 	if (symbol == XK_colon)
-		return IRON_KEY_COLON;
+		return KEY_CODE_COLON;
 	if (symbol == XK_semicolon)
-		return IRON_KEY_SEMICOLON;
+		return KEY_CODE_SEMICOLON;
 	if (symbol == XK_minus)
-		return IRON_KEY_HYPHEN_MINUS;
+		return KEY_CODE_HYPHEN_MINUS;
 	if (symbol == XK_underscore)
-		return IRON_KEY_UNDERSCORE;
+		return KEY_CODE_UNDERSCORE;
 	if (symbol == XK_slash)
-		return IRON_KEY_SLASH;
+		return KEY_CODE_SLASH;
 	if (symbol == XK_bar)
-		return IRON_KEY_PIPE;
+		return KEY_CODE_PIPE;
 	if (symbol == XK_question)
-		return IRON_KEY_QUESTIONMARK;
+		return KEY_CODE_QUESTIONMARK;
 	if (symbol == XK_less)
-		return IRON_KEY_LESS_THAN;
+		return KEY_CODE_LESS_THAN;
 	if (symbol == XK_greater)
-		return IRON_KEY_GREATER_THAN;
+		return KEY_CODE_GREATER_THAN;
 	if (symbol == XK_asterisk)
-		return IRON_KEY_ASTERISK;
+		return KEY_CODE_ASTERISK;
 	if (symbol == XK_ampersand)
-		return IRON_KEY_AMPERSAND;
-	if (symbol == XK_asciicircum)
-		return IRON_KEY_CIRCUMFLEX;
+		return KEY_CODE_AMPERSAND;
 	if (symbol == XK_percent)
-		return IRON_KEY_PERCENT;
+		return KEY_CODE_PERCENT;
 	if (symbol == XK_dollar)
-		return IRON_KEY_DOLLAR;
+		return KEY_CODE_DOLLAR;
 	if (symbol == XK_numbersign)
-		return IRON_KEY_HASH;
+		return KEY_CODE_HASH;
 	if (symbol == XK_at)
-		return IRON_KEY_AT;
+		return KEY_CODE_AT;
 	if (symbol == XK_exclam)
-		return IRON_KEY_EXCLAMATION;
+		return KEY_CODE_EXCLAMATION;
 	if (symbol == XK_equal)
-		return IRON_KEY_EQUALS;
+		return KEY_CODE_EQUALS;
 	if (symbol == XK_plus)
-		return IRON_KEY_ADD;
+		return KEY_CODE_ADD;
 	if (symbol == XK_quoteleft)
-		return IRON_KEY_BACK_QUOTE;
+		return KEY_CODE_BACK_QUOTE;
 	if (symbol == XK_quotedbl)
-		return IRON_KEY_DOUBLE_QUOTE;
+		return KEY_CODE_DOUBLE_QUOTE;
 	if (symbol == XK_asciitilde)
-		return IRON_KEY_TILDE;
+		return KEY_CODE_TILDE;
 	if (symbol == XK_Pause)
-		return IRON_KEY_PAUSE;
+		return KEY_CODE_PAUSE;
 	if (symbol == XK_Scroll_Lock)
-		return IRON_KEY_SCROLL_LOCK;
+		return KEY_CODE_SCROLL_LOCK;
 	if (symbol == XK_Home)
-		return IRON_KEY_HOME;
+		return KEY_CODE_HOME;
 	if (symbol == XK_Page_Up)
-		return IRON_KEY_PAGE_UP;
+		return KEY_CODE_PAGE_UP;
 	if (symbol == XK_Page_Down)
-		return IRON_KEY_PAGE_DOWN;
+		return KEY_CODE_PAGE_DOWN;
 	if (symbol == XK_End)
-		return IRON_KEY_END;
+		return KEY_CODE_END;
 	if (symbol == XK_Insert)
-		return IRON_KEY_INSERT;
+		return KEY_CODE_INSERT;
 	if (symbol == XK_KP_Enter)
-		return IRON_KEY_RETURN;
+		return KEY_CODE_RETURN;
 	if (symbol == XK_KP_Multiply)
-		return IRON_KEY_MULTIPLY;
+		return KEY_CODE_MULTIPLY;
 	if (symbol == XK_KP_Add)
-		return IRON_KEY_ADD;
+		return KEY_CODE_ADD;
 	if (symbol == XK_KP_Subtract)
-		return IRON_KEY_SUBTRACT;
+		return KEY_CODE_SUBTRACT;
 	if (symbol == XK_KP_Decimal)
-		return IRON_KEY_DECIMAL;
+		return KEY_CODE_DECIMAL;
 	if (symbol == XK_KP_Divide)
-		return IRON_KEY_DIVIDE;
+		return KEY_CODE_DIVIDE;
 	if (symbol == XK_KP_0)
-		return IRON_KEY_NUMPAD_0;
+		return KEY_CODE_NUMPAD_0;
 	if (symbol == XK_KP_1)
-		return IRON_KEY_NUMPAD_1;
+		return KEY_CODE_NUMPAD_1;
 	if (symbol == XK_KP_2)
-		return IRON_KEY_NUMPAD_2;
+		return KEY_CODE_NUMPAD_2;
 	if (symbol == XK_KP_3)
-		return IRON_KEY_NUMPAD_3;
+		return KEY_CODE_NUMPAD_3;
 	if (symbol == XK_KP_4)
-		return IRON_KEY_NUMPAD_4;
+		return KEY_CODE_NUMPAD_4;
 	if (symbol == XK_KP_5)
-		return IRON_KEY_NUMPAD_5;
+		return KEY_CODE_NUMPAD_5;
 	if (symbol == XK_KP_6)
-		return IRON_KEY_NUMPAD_6;
+		return KEY_CODE_NUMPAD_6;
 	if (symbol == XK_KP_7)
-		return IRON_KEY_NUMPAD_7;
+		return KEY_CODE_NUMPAD_7;
 	if (symbol == XK_KP_8)
-		return IRON_KEY_NUMPAD_8;
+		return KEY_CODE_NUMPAD_8;
 	if (symbol == XK_KP_9)
-		return IRON_KEY_NUMPAD_9;
+		return KEY_CODE_NUMPAD_9;
 	if (symbol == XK_KP_Insert)
-		return IRON_KEY_INSERT;
+		return KEY_CODE_INSERT;
 	if (symbol == XK_KP_Delete)
-		return IRON_KEY_DELETE;
+		return KEY_CODE_DELETE;
 	if (symbol == XK_KP_End)
-		return IRON_KEY_END;
+		return KEY_CODE_END;
 	if (symbol == XK_KP_Home)
-		return IRON_KEY_HOME;
+		return KEY_CODE_HOME;
 	if (symbol == XK_KP_Left)
-		return IRON_KEY_LEFT;
+		return KEY_CODE_LEFT;
 	if (symbol == XK_KP_Up)
-		return IRON_KEY_UP;
+		return KEY_CODE_UP;
 	if (symbol == XK_KP_Right)
-		return IRON_KEY_RIGHT;
+		return KEY_CODE_RIGHT;
 	if (symbol == XK_KP_Down)
-		return IRON_KEY_DOWN;
+		return KEY_CODE_DOWN;
 	if (symbol == XK_KP_Page_Up)
-		return IRON_KEY_PAGE_UP;
+		return KEY_CODE_PAGE_UP;
 	if (symbol == XK_KP_Page_Down)
-		return IRON_KEY_PAGE_DOWN;
+		return KEY_CODE_PAGE_DOWN;
 	if (symbol == XK_Menu)
-		return IRON_KEY_CONTEXT_MENU;
+		return KEY_CODE_CONTEXT_MENU;
 	if (symbol == XK_a)
-		return IRON_KEY_A;
+		return KEY_CODE_A;
 	if (symbol == XK_b)
-		return IRON_KEY_B;
+		return KEY_CODE_B;
 	if (symbol == XK_c)
-		return IRON_KEY_C;
+		return KEY_CODE_C;
 	if (symbol == XK_d)
-		return IRON_KEY_D;
+		return KEY_CODE_D;
 	if (symbol == XK_e)
-		return IRON_KEY_E;
+		return KEY_CODE_E;
 	if (symbol == XK_f)
-		return IRON_KEY_F;
+		return KEY_CODE_F;
 	if (symbol == XK_g)
-		return IRON_KEY_G;
+		return KEY_CODE_G;
 	if (symbol == XK_h)
-		return IRON_KEY_H;
+		return KEY_CODE_H;
 	if (symbol == XK_i)
-		return IRON_KEY_I;
+		return KEY_CODE_I;
 	if (symbol == XK_j)
-		return IRON_KEY_J;
+		return KEY_CODE_J;
 	if (symbol == XK_k)
-		return IRON_KEY_K;
+		return KEY_CODE_K;
 	if (symbol == XK_l)
-		return IRON_KEY_L;
+		return KEY_CODE_L;
 	if (symbol == XK_m)
-		return IRON_KEY_M;
+		return KEY_CODE_M;
 	if (symbol == XK_n)
-		return IRON_KEY_N;
+		return KEY_CODE_N;
 	if (symbol == XK_o)
-		return IRON_KEY_O;
+		return KEY_CODE_O;
 	if (symbol == XK_p)
-		return IRON_KEY_P;
+		return KEY_CODE_P;
 	if (symbol == XK_q)
-		return IRON_KEY_Q;
+		return KEY_CODE_Q;
 	if (symbol == XK_r)
-		return IRON_KEY_R;
+		return KEY_CODE_R;
 	if (symbol == XK_s)
-		return IRON_KEY_S;
+		return KEY_CODE_S;
 	if (symbol == XK_t)
-		return IRON_KEY_T;
+		return KEY_CODE_T;
 	if (symbol == XK_u)
-		return IRON_KEY_U;
+		return KEY_CODE_U;
 	if (symbol == XK_v)
-		return IRON_KEY_V;
+		return KEY_CODE_V;
 	if (symbol == XK_w)
-		return IRON_KEY_W;
+		return KEY_CODE_W;
 	if (symbol == XK_x)
-		return IRON_KEY_X;
+		return KEY_CODE_X;
 	if (symbol == XK_y)
-		return IRON_KEY_Y;
+		return KEY_CODE_Y;
 	if (symbol == XK_z)
-		return IRON_KEY_Z;
+		return KEY_CODE_Z;
 	if (symbol == XK_1)
-		return IRON_KEY_1;
+		return KEY_CODE_1;
 	if (symbol == XK_2)
-		return IRON_KEY_2;
+		return KEY_CODE_2;
 	if (symbol == XK_3)
-		return IRON_KEY_3;
+		return KEY_CODE_3;
 	if (symbol == XK_4)
-		return IRON_KEY_4;
+		return KEY_CODE_4;
 	if (symbol == XK_5)
-		return IRON_KEY_5;
+		return KEY_CODE_5;
 	if (symbol == XK_6)
-		return IRON_KEY_6;
+		return KEY_CODE_6;
 	if (symbol == XK_7)
-		return IRON_KEY_7;
+		return KEY_CODE_7;
 	if (symbol == XK_8)
-		return IRON_KEY_8;
+		return KEY_CODE_8;
 	if (symbol == XK_9)
-		return IRON_KEY_9;
+		return KEY_CODE_9;
 	if (symbol == XK_0)
-		return IRON_KEY_0;
+		return KEY_CODE_0;
 	if (symbol == XK_Escape)
-		return IRON_KEY_ESCAPE;
+		return KEY_CODE_ESCAPE;
 	if (symbol == XK_F1)
-		return IRON_KEY_F1;
+		return KEY_CODE_F1;
 	if (symbol == XK_F2)
-		return IRON_KEY_F2;
+		return KEY_CODE_F2;
 	if (symbol == XK_F3)
-		return IRON_KEY_F3;
+		return KEY_CODE_F3;
 	if (symbol == XK_F4)
-		return IRON_KEY_F4;
+		return KEY_CODE_F4;
 	if (symbol == XK_F5)
-		return IRON_KEY_F5;
+		return KEY_CODE_F5;
 	if (symbol == XK_F6)
-		return IRON_KEY_F6;
+		return KEY_CODE_F6;
 	if (symbol == XK_F7)
-		return IRON_KEY_F7;
+		return KEY_CODE_F7;
 	if (symbol == XK_F8)
-		return IRON_KEY_F8;
+		return KEY_CODE_F8;
 	if (symbol == XK_F9)
-		return IRON_KEY_F9;
+		return KEY_CODE_F9;
 	if (symbol == XK_F10)
-		return IRON_KEY_F10;
+		return KEY_CODE_F10;
 	if (symbol == XK_F11)
-		return IRON_KEY_F11;
+		return KEY_CODE_F11;
 	if (symbol == XK_F12)
-		return IRON_KEY_F12;
-	return IRON_KEY_UNKNOWN;
+		return KEY_CODE_F12;
+	return KEY_CODE_UNKNOWN;
 }
 
 void *gc_alloc(size_t size);
@@ -861,7 +859,7 @@ static bool _handle_messages() {
 			}
 
 			int key_code = xk_to_iron(ksKey);
-			if (key_code != IRON_KEY_UNKNOWN) {
+			if (key_code != KEY_CODE_UNKNOWN) {
 				iron_internal_keyboard_trigger_key_down(key_code);
 			}
 
@@ -897,7 +895,7 @@ static bool _handle_messages() {
 			}
 
 			int key_code = xk_to_iron(ksKey);
-			if (key_code != IRON_KEY_UNKNOWN) {
+			if (key_code != KEY_CODE_UNKNOWN) {
 				iron_internal_keyboard_trigger_key_up(key_code);
 			}
 

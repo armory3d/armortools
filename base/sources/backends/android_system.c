@@ -302,71 +302,67 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 			if (shift) {
 				switch (code) {
 				case AKEYCODE_1:
-					iron_internal_keyboard_trigger_key_down(IRON_KEY_EXCLAMATION);
+					iron_internal_keyboard_trigger_key_down(KEY_CODE_EXCLAMATION);
 					iron_internal_keyboard_trigger_key_press('!');
 					return 1;
 				case AKEYCODE_4:
-					iron_internal_keyboard_trigger_key_down(IRON_KEY_DOLLAR);
+					iron_internal_keyboard_trigger_key_down(KEY_CODE_DOLLAR);
 					iron_internal_keyboard_trigger_key_press('$');
 					return 1;
 				case AKEYCODE_5:
-					iron_internal_keyboard_trigger_key_down(IRON_KEY_PERCENT);
+					iron_internal_keyboard_trigger_key_down(KEY_CODE_PERCENT);
 					iron_internal_keyboard_trigger_key_press('%');
 					return 1;
-				case AKEYCODE_6:
-					iron_internal_keyboard_trigger_key_down(IRON_KEY_CIRCUMFLEX);
-					iron_internal_keyboard_trigger_key_press('^');
-					return 1;
 				case AKEYCODE_7:
-					iron_internal_keyboard_trigger_key_down(IRON_KEY_AMPERSAND);
+					iron_internal_keyboard_trigger_key_down(KEY_CODE_AMPERSAND);
 					iron_internal_keyboard_trigger_key_press('&');
 					return 1;
 				case AKEYCODE_9:
-					iron_internal_keyboard_trigger_key_down(IRON_KEY_OPEN_PAREN);
+					iron_internal_keyboard_trigger_key_down(KEY_CODE_OPEN_PAREN);
 					iron_internal_keyboard_trigger_key_press('(');
 					return 1;
 				case AKEYCODE_0:
-					iron_internal_keyboard_trigger_key_down(IRON_KEY_CLOSE_PAREN);
+					iron_internal_keyboard_trigger_key_down(KEY_CODE_CLOSE_PAREN);
 					iron_internal_keyboard_trigger_key_press(')');
 					return 1;
 				case AKEYCODE_COMMA:
-					iron_internal_keyboard_trigger_key_down(IRON_KEY_LESS_THAN);
+					iron_internal_keyboard_trigger_key_down(KEY_CODE_LESS_THAN);
 					iron_internal_keyboard_trigger_key_press('<');
 					return 1;
 				case AKEYCODE_PERIOD:
-					iron_internal_keyboard_trigger_key_down(IRON_KEY_GREATER_THAN);
+					iron_internal_keyboard_trigger_key_down(KEY_CODE_GREATER_THAN);
 					iron_internal_keyboard_trigger_key_press('>');
 					return 1;
 				case AKEYCODE_MINUS:
-					iron_internal_keyboard_trigger_key_down(IRON_KEY_UNDERSCORE);
+					iron_internal_keyboard_trigger_key_down(KEY_CODE_UNDERSCORE);
 					iron_internal_keyboard_trigger_key_press('_');
 					return 1;
 				case AKEYCODE_SLASH:
-					iron_internal_keyboard_trigger_key_down(IRON_KEY_QUESTIONMARK);
+					iron_internal_keyboard_trigger_key_down(KEY_CODE_QUESTIONMARK);
 					iron_internal_keyboard_trigger_key_press('?');
 					return 1;
 				case AKEYCODE_BACKSLASH:
-					iron_internal_keyboard_trigger_key_down(IRON_KEY_PIPE);
+					iron_internal_keyboard_trigger_key_down(KEY_CODE_PIPE);
 					iron_internal_keyboard_trigger_key_press('|');
 					return 1;
 				case AKEYCODE_LEFT_BRACKET:
-					iron_internal_keyboard_trigger_key_down(IRON_KEY_OPEN_CURLY_BRACKET);
+					iron_internal_keyboard_trigger_key_down(KEY_CODE_OPEN_CURLY_BRACKET);
 					iron_internal_keyboard_trigger_key_press('{');
 					return 1;
 				case AKEYCODE_RIGHT_BRACKET:
-					iron_internal_keyboard_trigger_key_down(IRON_KEY_CLOSE_CURLY_BRACKET);
+					iron_internal_keyboard_trigger_key_down(KEY_CODE_CLOSE_CURLY_BRACKET);
 					iron_internal_keyboard_trigger_key_press('}');
 					return 1;
 				case AKEYCODE_SEMICOLON:
-					iron_internal_keyboard_trigger_key_down(IRON_KEY_COLON);
+					iron_internal_keyboard_trigger_key_down(KEY_CODE_COLON);
 					iron_internal_keyboard_trigger_key_press(':');
 					return 1;
 				case AKEYCODE_APOSTROPHE:
-					iron_internal_keyboard_trigger_key_down(IRON_KEY_DOUBLE_QUOTE);
+					iron_internal_keyboard_trigger_key_down(KEY_CODE_DOUBLE_QUOTE);
 					iron_internal_keyboard_trigger_key_press('"');
 					return 1;
 				case AKEYCODE_GRAVE:
-					iron_internal_keyboard_trigger_key_down(IRON_KEY_TILDE);
+					iron_internal_keyboard_trigger_key_down(KEY_CODE_TILDE);
 					iron_internal_keyboard_trigger_key_press('~');
 					return 1;
 				}
@@ -374,17 +370,17 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 			switch (code) {
 			case AKEYCODE_SHIFT_LEFT:
 			case AKEYCODE_SHIFT_RIGHT:
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_SHIFT);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_SHIFT);
 				return 1;
 			case AKEYCODE_DEL:
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_BACKSPACE);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_BACKSPACE);
 				return 1;
 			case AKEYCODE_ENTER:
 			case AKEYCODE_NUMPAD_ENTER:
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_RETURN);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_RETURN);
 				return 1;
 			case AKEYCODE_BACK:
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_BACK);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_BACK);
 				return 1;
 
 #ifdef WITH_GAMEPAD
@@ -437,7 +433,7 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 					return 1;
 				}
 #endif
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_UP);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_UP);
 				return 1;
 			}
 			case AKEYCODE_DPAD_DOWN: {
@@ -447,7 +443,7 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 					return 1;
 				}
 #endif
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_DOWN);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_DOWN);
 				return 1;
 			}
 			case AKEYCODE_DPAD_LEFT: {
@@ -457,7 +453,7 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 					return 1;
 				}
 #endif
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_LEFT);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_LEFT);
 				return 1;
 			}
 			case AKEYCODE_DPAD_RIGHT: {
@@ -467,95 +463,95 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 					return 1;
 				}
 #endif
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_RIGHT);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_RIGHT);
 				return 1;
 			}
 			case AKEYCODE_STAR:
 			case AKEYCODE_NUMPAD_MULTIPLY:
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_MULTIPLY);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_MULTIPLY);
 				iron_internal_keyboard_trigger_key_press('*');
 				return 1;
 			case AKEYCODE_POUND:
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_HASH);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_HASH);
 				iron_internal_keyboard_trigger_key_press('#');
 				return 1;
 			case AKEYCODE_COMMA:
 			case AKEYCODE_NUMPAD_COMMA:
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_COMMA);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_COMMA);
 				iron_internal_keyboard_trigger_key_press(',');
 				return 1;
 			case AKEYCODE_PERIOD:
 			case AKEYCODE_NUMPAD_DOT:
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_PERIOD);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_PERIOD);
 				iron_internal_keyboard_trigger_key_press('.');
 				return 1;
 			case AKEYCODE_SPACE:
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_SPACE);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_SPACE);
 				iron_internal_keyboard_trigger_key_press(' ');
 				return 1;
 			case AKEYCODE_MINUS:
 			case AKEYCODE_NUMPAD_SUBTRACT:
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_HYPHEN_MINUS);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_HYPHEN_MINUS);
 				iron_internal_keyboard_trigger_key_press('-');
 				return 1;
 			case AKEYCODE_EQUALS:
 			case AKEYCODE_NUMPAD_EQUALS:
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_EQUALS);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_EQUALS);
 				iron_internal_keyboard_trigger_key_press('=');
 				return 1;
 			case AKEYCODE_LEFT_BRACKET:
 			case AKEYCODE_NUMPAD_LEFT_PAREN:
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_OPEN_BRACKET);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_OPEN_BRACKET);
 				iron_internal_keyboard_trigger_key_press('[');
 				return 1;
 			case AKEYCODE_RIGHT_BRACKET:
 			case AKEYCODE_NUMPAD_RIGHT_PAREN:
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_CLOSE_BRACKET);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_CLOSE_BRACKET);
 				iron_internal_keyboard_trigger_key_press(']');
 				return 1;
 			case AKEYCODE_BACKSLASH:
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_BACK_SLASH);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_BACK_SLASH);
 				iron_internal_keyboard_trigger_key_press('\\');
 				return 1;
 			case AKEYCODE_SEMICOLON:
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_SEMICOLON);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_SEMICOLON);
 				iron_internal_keyboard_trigger_key_press(';');
 				return 1;
 			case AKEYCODE_APOSTROPHE:
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_QUOTE);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_QUOTE);
 				iron_internal_keyboard_trigger_key_press('\'');
 				return 1;
 			case AKEYCODE_GRAVE:
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_BACK_QUOTE);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_BACK_QUOTE);
 				iron_internal_keyboard_trigger_key_press('`');
 				return 1;
 			case AKEYCODE_SLASH:
 			case AKEYCODE_NUMPAD_DIVIDE:
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_SLASH);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_SLASH);
 				iron_internal_keyboard_trigger_key_press('/');
 				return 1;
 			case AKEYCODE_AT:
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_AT);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_AT);
 				iron_internal_keyboard_trigger_key_press('@');
 				return 1;
 			case AKEYCODE_PLUS:
 			case AKEYCODE_NUMPAD_ADD:
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_PLUS);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_PLUS);
 				iron_internal_keyboard_trigger_key_press('+');
 				return 1;
 			default:
 				if (code >= AKEYCODE_NUMPAD_0 && code <= AKEYCODE_NUMPAD_9) {
-					iron_internal_keyboard_trigger_key_down(code + IRON_KEY_NUMPAD_0 - AKEYCODE_NUMPAD_0);
-					iron_internal_keyboard_trigger_key_press(code + IRON_KEY_NUMPAD_0 - AKEYCODE_NUMPAD_0);
+					iron_internal_keyboard_trigger_key_down(code + KEY_CODE_NUMPAD_0 - AKEYCODE_NUMPAD_0);
+					iron_internal_keyboard_trigger_key_press(code + KEY_CODE_NUMPAD_0 - AKEYCODE_NUMPAD_0);
 					return 1;
 				}
 				else if (code >= AKEYCODE_0 && code <= AKEYCODE_9) {
-					iron_internal_keyboard_trigger_key_down(code + IRON_KEY_0 - AKEYCODE_0);
-					iron_internal_keyboard_trigger_key_press(code + IRON_KEY_0 - AKEYCODE_0);
+					iron_internal_keyboard_trigger_key_down(code + KEY_CODE_0 - AKEYCODE_0);
+					iron_internal_keyboard_trigger_key_press(code + KEY_CODE_0 - AKEYCODE_0);
 					return 1;
 				}
 				else if (code >= AKEYCODE_A && code <= AKEYCODE_Z) {
-					iron_internal_keyboard_trigger_key_down(code + IRON_KEY_A - AKEYCODE_A);
+					iron_internal_keyboard_trigger_key_down(code + KEY_CODE_A - AKEYCODE_A);
 					iron_internal_keyboard_trigger_key_press(code + (shift ? 'A' : 'a') - AKEYCODE_A);
 					return 1;
 				}
@@ -566,55 +562,52 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 			if (shift) {
 				switch (code) {
 				case AKEYCODE_1:
-					iron_internal_keyboard_trigger_key_up(IRON_KEY_EXCLAMATION);
+					iron_internal_keyboard_trigger_key_up(KEY_CODE_EXCLAMATION);
 					return 1;
 				case AKEYCODE_4:
-					iron_internal_keyboard_trigger_key_up(IRON_KEY_DOLLAR);
+					iron_internal_keyboard_trigger_key_up(KEY_CODE_DOLLAR);
 					return 1;
 				case AKEYCODE_5:
-					iron_internal_keyboard_trigger_key_up(IRON_KEY_PERCENT);
-					return 1;
-				case AKEYCODE_6:
-					iron_internal_keyboard_trigger_key_up(IRON_KEY_CIRCUMFLEX);
+					iron_internal_keyboard_trigger_key_up(KEY_CODE_PERCENT);
 					return 1;
 				case AKEYCODE_7:
-					iron_internal_keyboard_trigger_key_up(IRON_KEY_AMPERSAND);
+					iron_internal_keyboard_trigger_key_up(KEY_CODE_AMPERSAND);
 					return 1;
 				case AKEYCODE_9:
-					iron_internal_keyboard_trigger_key_up(IRON_KEY_OPEN_PAREN);
+					iron_internal_keyboard_trigger_key_up(KEY_CODE_OPEN_PAREN);
 					return 1;
 				case AKEYCODE_0:
-					iron_internal_keyboard_trigger_key_up(IRON_KEY_CLOSE_PAREN);
+					iron_internal_keyboard_trigger_key_up(KEY_CODE_CLOSE_PAREN);
 					return 1;
 				case AKEYCODE_COMMA:
-					iron_internal_keyboard_trigger_key_up(IRON_KEY_LESS_THAN);
+					iron_internal_keyboard_trigger_key_up(KEY_CODE_LESS_THAN);
 					return 1;
 				case AKEYCODE_PERIOD:
-					iron_internal_keyboard_trigger_key_up(IRON_KEY_GREATER_THAN);
+					iron_internal_keyboard_trigger_key_up(KEY_CODE_GREATER_THAN);
 					return 1;
 				case AKEYCODE_MINUS:
-					iron_internal_keyboard_trigger_key_up(IRON_KEY_UNDERSCORE);
+					iron_internal_keyboard_trigger_key_up(KEY_CODE_UNDERSCORE);
 					return 1;
 				case AKEYCODE_SLASH:
-					iron_internal_keyboard_trigger_key_up(IRON_KEY_QUESTIONMARK);
+					iron_internal_keyboard_trigger_key_up(KEY_CODE_QUESTIONMARK);
 					return 1;
 				case AKEYCODE_BACKSLASH:
-					iron_internal_keyboard_trigger_key_up(IRON_KEY_PIPE);
+					iron_internal_keyboard_trigger_key_up(KEY_CODE_PIPE);
 					return 1;
 				case AKEYCODE_LEFT_BRACKET:
-					iron_internal_keyboard_trigger_key_up(IRON_KEY_OPEN_CURLY_BRACKET);
+					iron_internal_keyboard_trigger_key_up(KEY_CODE_OPEN_CURLY_BRACKET);
 					return 1;
 				case AKEYCODE_RIGHT_BRACKET:
-					iron_internal_keyboard_trigger_key_up(IRON_KEY_CLOSE_CURLY_BRACKET);
+					iron_internal_keyboard_trigger_key_up(KEY_CODE_CLOSE_CURLY_BRACKET);
 					return 1;
 				case AKEYCODE_SEMICOLON:
-					iron_internal_keyboard_trigger_key_up(IRON_KEY_COLON);
+					iron_internal_keyboard_trigger_key_up(KEY_CODE_COLON);
 					return 1;
 				case AKEYCODE_APOSTROPHE:
-					iron_internal_keyboard_trigger_key_up(IRON_KEY_DOUBLE_QUOTE);
+					iron_internal_keyboard_trigger_key_up(KEY_CODE_DOUBLE_QUOTE);
 					return 1;
 				case AKEYCODE_GRAVE:
-					iron_internal_keyboard_trigger_key_up(IRON_KEY_TILDE);
+					iron_internal_keyboard_trigger_key_up(KEY_CODE_TILDE);
 					return 1;
 				}
 			}
@@ -622,16 +615,16 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 			switch (code) {
 			case AKEYCODE_SHIFT_LEFT:
 			case AKEYCODE_SHIFT_RIGHT:
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_SHIFT);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_SHIFT);
 				return 1;
 			case AKEYCODE_DEL:
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_BACKSPACE);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_BACKSPACE);
 				return 1;
 			case AKEYCODE_ENTER:
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_RETURN);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_RETURN);
 				return 1;
 			case AKEYCODE_BACK:
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_BACK);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_BACK);
 				return 1;
 
 #ifdef WITH_GAMEPAD
@@ -684,7 +677,7 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 					return 1;
 				}
 #endif
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_UP);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_UP);
 				return 1;
 			}
 			case AKEYCODE_DPAD_DOWN: {
@@ -694,7 +687,7 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 					return 1;
 				}
 #endif
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_DOWN);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_DOWN);
 				return 1;
 			}
 			case AKEYCODE_DPAD_LEFT: {
@@ -704,7 +697,7 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 					return 1;
 				}
 #endif
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_LEFT);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_LEFT);
 				return 1;
 			}
 			case AKEYCODE_DPAD_RIGHT: {
@@ -714,77 +707,77 @@ static int32_t input(struct android_app *app, AInputEvent *event) {
 					return 1;
 				}
 #endif
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_RIGHT);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_RIGHT);
 				return 1;
 			}
 			case AKEYCODE_STAR:
 			case AKEYCODE_NUMPAD_MULTIPLY:
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_MULTIPLY);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_MULTIPLY);
 				return 1;
 			case AKEYCODE_POUND:
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_HASH);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_HASH);
 				return 1;
 			case AKEYCODE_COMMA:
 			case AKEYCODE_NUMPAD_COMMA:
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_COMMA);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_COMMA);
 				return 1;
 			case AKEYCODE_PERIOD:
 			case AKEYCODE_NUMPAD_DOT:
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_PERIOD);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_PERIOD);
 				return 1;
 			case AKEYCODE_SPACE:
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_SPACE);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_SPACE);
 				return 1;
 			case AKEYCODE_MINUS:
 			case AKEYCODE_NUMPAD_SUBTRACT:
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_HYPHEN_MINUS);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_HYPHEN_MINUS);
 				return 1;
 			case AKEYCODE_EQUALS:
 			case AKEYCODE_NUMPAD_EQUALS:
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_EQUALS);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_EQUALS);
 				return 1;
 			case AKEYCODE_LEFT_BRACKET:
 			case AKEYCODE_NUMPAD_LEFT_PAREN:
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_OPEN_BRACKET);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_OPEN_BRACKET);
 				return 1;
 			case AKEYCODE_RIGHT_BRACKET:
 			case AKEYCODE_NUMPAD_RIGHT_PAREN:
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_CLOSE_BRACKET);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_CLOSE_BRACKET);
 				return 1;
 			case AKEYCODE_BACKSLASH:
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_BACK_SLASH);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_BACK_SLASH);
 				return 1;
 			case AKEYCODE_SEMICOLON:
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_SEMICOLON);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_SEMICOLON);
 				return 1;
 			case AKEYCODE_APOSTROPHE:
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_QUOTE);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_QUOTE);
 				return 1;
 			case AKEYCODE_GRAVE:
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_BACK_QUOTE);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_BACK_QUOTE);
 				return 1;
 			case AKEYCODE_SLASH:
 			case AKEYCODE_NUMPAD_DIVIDE:
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_SLASH);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_SLASH);
 				return 1;
 			case AKEYCODE_AT:
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_AT);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_AT);
 				return 1;
 			case AKEYCODE_PLUS:
 			case AKEYCODE_NUMPAD_ADD:
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_PLUS);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_PLUS);
 				return 1;
 			default: {
 				if (code >= AKEYCODE_NUMPAD_0 && code <= AKEYCODE_NUMPAD_9) {
-					iron_internal_keyboard_trigger_key_up(code + IRON_KEY_NUMPAD_0 - AKEYCODE_NUMPAD_0);
+					iron_internal_keyboard_trigger_key_up(code + KEY_CODE_NUMPAD_0 - AKEYCODE_NUMPAD_0);
 					return 1;
 				}
 				else if (code >= AKEYCODE_0 && code <= AKEYCODE_9) {
-					iron_internal_keyboard_trigger_key_up(code + IRON_KEY_0 - AKEYCODE_0);
+					iron_internal_keyboard_trigger_key_up(code + KEY_CODE_0 - AKEYCODE_0);
 					return 1;
 				}
 				else if (code >= AKEYCODE_A && code <= AKEYCODE_Z) {
-					iron_internal_keyboard_trigger_key_up(code + IRON_KEY_A - AKEYCODE_A);
+					iron_internal_keyboard_trigger_key_up(code + KEY_CODE_A - AKEYCODE_A);
 					return 1;
 				}
 			}

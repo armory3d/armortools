@@ -399,57 +399,57 @@ int iron_window_display() {
 			ch = '_';
 		}
 		if (ch == L'\n') {
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_RETURN);
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_RETURN);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_RETURN);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_RETURN);
 			return;
 		}
 		if (ch == L'.') {
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_PERIOD);
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_PERIOD);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_PERIOD);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_PERIOD);
 		}
 		else if (ch == L'%') {
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_PERCENT);
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_PERCENT);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_PERCENT);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_PERCENT);
 		}
 		else if (ch == L'(') {
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_OPEN_PAREN);
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_OPEN_PAREN);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_OPEN_PAREN);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_OPEN_PAREN);
 		}
 		else if (ch == L'&') {
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_AMPERSAND);
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_AMPERSAND);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_AMPERSAND);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_AMPERSAND);
 		}
 		else if (ch == L'$') {
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_DOLLAR);
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_DOLLAR);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_DOLLAR);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_DOLLAR);
 		}
 		else if (ch == L'#') {
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_HASH);
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_HASH);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_HASH);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_HASH);
 		}
 		else if (ch >= L'a' && ch <= L'z') {
 			if (shift_down) {
-				iron_internal_keyboard_trigger_key_up(IRON_KEY_SHIFT);
+				iron_internal_keyboard_trigger_key_up(KEY_CODE_SHIFT);
 				shift_down = false;
 			}
-			iron_internal_keyboard_trigger_key_down(ch + IRON_KEY_A - L'a');
-			iron_internal_keyboard_trigger_key_up(ch + IRON_KEY_A - L'a');
+			iron_internal_keyboard_trigger_key_down(ch + KEY_CODE_A - L'a');
+			iron_internal_keyboard_trigger_key_up(ch + KEY_CODE_A - L'a');
 		}
 		else {
 			if (!shift_down) {
-				iron_internal_keyboard_trigger_key_down(IRON_KEY_SHIFT);
+				iron_internal_keyboard_trigger_key_down(KEY_CODE_SHIFT);
 				shift_down = true;
 			}
-			iron_internal_keyboard_trigger_key_down(ch + IRON_KEY_A - L'A');
-			iron_internal_keyboard_trigger_key_up(ch + IRON_KEY_A - L'A');
+			iron_internal_keyboard_trigger_key_down(ch + KEY_CODE_A - L'A');
+			iron_internal_keyboard_trigger_key_up(ch + KEY_CODE_A - L'A');
 		}
 		iron_internal_keyboard_trigger_key_press(ch);
 	}
 }
 
 - (void)deleteBackward {
-	iron_internal_keyboard_trigger_key_down(IRON_KEY_BACKSPACE);
-	iron_internal_keyboard_trigger_key_up(IRON_KEY_BACKSPACE);
+	iron_internal_keyboard_trigger_key_down(KEY_CODE_BACKSPACE);
+	iron_internal_keyboard_trigger_key_up(KEY_CODE_BACKSPACE);
 }
 
 - (BOOL)canBecomeFirstResponder {

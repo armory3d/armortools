@@ -276,126 +276,126 @@ static void ReleaseTouchIndex(int dwID) {
 
 static void initKeyTranslation() {
 	for (int i = 0; i < 256; ++i) {
-		keyTranslated[i] = IRON_KEY_UNKNOWN;
+		keyTranslated[i] = KEY_CODE_UNKNOWN;
 	}
-	keyTranslated[VK_BACK]       = IRON_KEY_BACKSPACE;
-	keyTranslated[VK_TAB]        = IRON_KEY_TAB;
-	keyTranslated[VK_CLEAR]      = IRON_KEY_CLEAR;
-	keyTranslated[VK_RETURN]     = IRON_KEY_RETURN;
-	keyTranslated[VK_SHIFT]      = IRON_KEY_SHIFT;
-	keyTranslated[VK_CONTROL]    = IRON_KEY_CONTROL;
-	keyTranslated[VK_MENU]       = IRON_KEY_ALT;
-	keyTranslated[VK_PAUSE]      = IRON_KEY_PAUSE;
-	keyTranslated[VK_CAPITAL]    = IRON_KEY_CAPS_LOCK;
-	keyTranslated[VK_ESCAPE]     = IRON_KEY_ESCAPE;
-	keyTranslated[VK_SPACE]      = IRON_KEY_SPACE;
-	keyTranslated[VK_PRIOR]      = IRON_KEY_PAGE_UP;
-	keyTranslated[VK_NEXT]       = IRON_KEY_PAGE_DOWN;
-	keyTranslated[VK_END]        = IRON_KEY_END;
-	keyTranslated[VK_HOME]       = IRON_KEY_HOME;
-	keyTranslated[VK_LEFT]       = IRON_KEY_LEFT;
-	keyTranslated[VK_UP]         = IRON_KEY_UP;
-	keyTranslated[VK_RIGHT]      = IRON_KEY_RIGHT;
-	keyTranslated[VK_DOWN]       = IRON_KEY_DOWN;
-	keyTranslated[VK_PRINT]      = IRON_KEY_PRINT;
-	keyTranslated[VK_INSERT]     = IRON_KEY_INSERT;
-	keyTranslated[VK_DELETE]     = IRON_KEY_DELETE;
-	keyTranslated[VK_HELP]       = IRON_KEY_HELP;
-	keyTranslated[0x30]          = IRON_KEY_0;
-	keyTranslated[0x31]          = IRON_KEY_1;
-	keyTranslated[0x32]          = IRON_KEY_2;
-	keyTranslated[0x33]          = IRON_KEY_3;
-	keyTranslated[0x34]          = IRON_KEY_4;
-	keyTranslated[0x35]          = IRON_KEY_5;
-	keyTranslated[0x36]          = IRON_KEY_6;
-	keyTranslated[0x37]          = IRON_KEY_7;
-	keyTranslated[0x38]          = IRON_KEY_8;
-	keyTranslated[0x39]          = IRON_KEY_9;
-	keyTranslated[0x41]          = IRON_KEY_A;
-	keyTranslated[0x42]          = IRON_KEY_B;
-	keyTranslated[0x43]          = IRON_KEY_C;
-	keyTranslated[0x44]          = IRON_KEY_D;
-	keyTranslated[0x45]          = IRON_KEY_E;
-	keyTranslated[0x46]          = IRON_KEY_F;
-	keyTranslated[0x47]          = IRON_KEY_G;
-	keyTranslated[0x48]          = IRON_KEY_H;
-	keyTranslated[0x49]          = IRON_KEY_I;
-	keyTranslated[0x4A]          = IRON_KEY_J;
-	keyTranslated[0x4B]          = IRON_KEY_K;
-	keyTranslated[0x4C]          = IRON_KEY_L;
-	keyTranslated[0x4D]          = IRON_KEY_M;
-	keyTranslated[0x4E]          = IRON_KEY_N;
-	keyTranslated[0x4F]          = IRON_KEY_O;
-	keyTranslated[0x50]          = IRON_KEY_P;
-	keyTranslated[0x51]          = IRON_KEY_Q;
-	keyTranslated[0x52]          = IRON_KEY_R;
-	keyTranslated[0x53]          = IRON_KEY_S;
-	keyTranslated[0x54]          = IRON_KEY_T;
-	keyTranslated[0x55]          = IRON_KEY_U;
-	keyTranslated[0x56]          = IRON_KEY_V;
-	keyTranslated[0x57]          = IRON_KEY_W;
-	keyTranslated[0x58]          = IRON_KEY_X;
-	keyTranslated[0x59]          = IRON_KEY_Y;
-	keyTranslated[0x5A]          = IRON_KEY_Z;
-	keyTranslated[VK_LWIN]       = IRON_KEY_WIN;
-	keyTranslated[VK_RWIN]       = IRON_KEY_WIN;
-	keyTranslated[VK_APPS]       = IRON_KEY_CONTEXT_MENU;
-	keyTranslated[VK_NUMPAD0]    = IRON_KEY_NUMPAD_0;
-	keyTranslated[VK_NUMPAD1]    = IRON_KEY_NUMPAD_1;
-	keyTranslated[VK_NUMPAD2]    = IRON_KEY_NUMPAD_2;
-	keyTranslated[VK_NUMPAD3]    = IRON_KEY_NUMPAD_3;
-	keyTranslated[VK_NUMPAD4]    = IRON_KEY_NUMPAD_4;
-	keyTranslated[VK_NUMPAD5]    = IRON_KEY_NUMPAD_5;
-	keyTranslated[VK_NUMPAD6]    = IRON_KEY_NUMPAD_6;
-	keyTranslated[VK_NUMPAD7]    = IRON_KEY_NUMPAD_7;
-	keyTranslated[VK_NUMPAD8]    = IRON_KEY_NUMPAD_8;
-	keyTranslated[VK_NUMPAD9]    = IRON_KEY_NUMPAD_9;
-	keyTranslated[VK_MULTIPLY]   = IRON_KEY_MULTIPLY;
-	keyTranslated[VK_ADD]        = IRON_KEY_ADD;
-	keyTranslated[VK_SUBTRACT]   = IRON_KEY_SUBTRACT;
-	keyTranslated[VK_DECIMAL]    = IRON_KEY_DECIMAL;
-	keyTranslated[VK_DIVIDE]     = IRON_KEY_DIVIDE;
-	keyTranslated[VK_F1]         = IRON_KEY_F1;
-	keyTranslated[VK_F2]         = IRON_KEY_F2;
-	keyTranslated[VK_F3]         = IRON_KEY_F3;
-	keyTranslated[VK_F4]         = IRON_KEY_F4;
-	keyTranslated[VK_F5]         = IRON_KEY_F5;
-	keyTranslated[VK_F6]         = IRON_KEY_F6;
-	keyTranslated[VK_F7]         = IRON_KEY_F7;
-	keyTranslated[VK_F8]         = IRON_KEY_F8;
-	keyTranslated[VK_F9]         = IRON_KEY_F9;
-	keyTranslated[VK_F10]        = IRON_KEY_F10;
-	keyTranslated[VK_F11]        = IRON_KEY_F11;
-	keyTranslated[VK_F12]        = IRON_KEY_F12;
-	keyTranslated[VK_F13]        = IRON_KEY_F13;
-	keyTranslated[VK_F14]        = IRON_KEY_F14;
-	keyTranslated[VK_F15]        = IRON_KEY_F15;
-	keyTranslated[VK_F16]        = IRON_KEY_F16;
-	keyTranslated[VK_F17]        = IRON_KEY_F17;
-	keyTranslated[VK_F18]        = IRON_KEY_F18;
-	keyTranslated[VK_F19]        = IRON_KEY_F19;
-	keyTranslated[VK_F20]        = IRON_KEY_F20;
-	keyTranslated[VK_F21]        = IRON_KEY_F21;
-	keyTranslated[VK_F22]        = IRON_KEY_F22;
-	keyTranslated[VK_F23]        = IRON_KEY_F23;
-	keyTranslated[VK_F24]        = IRON_KEY_F24;
-	keyTranslated[VK_NUMLOCK]    = IRON_KEY_NUM_LOCK;
-	keyTranslated[VK_SCROLL]     = IRON_KEY_SCROLL_LOCK;
-	keyTranslated[VK_LSHIFT]     = IRON_KEY_SHIFT;
-	keyTranslated[VK_RSHIFT]     = IRON_KEY_SHIFT;
-	keyTranslated[VK_LCONTROL]   = IRON_KEY_CONTROL;
-	keyTranslated[VK_RCONTROL]   = IRON_KEY_CONTROL;
-	keyTranslated[VK_OEM_1]      = IRON_KEY_SEMICOLON;
-	keyTranslated[VK_OEM_PLUS]   = IRON_KEY_PLUS;
-	keyTranslated[VK_OEM_COMMA]  = IRON_KEY_COMMA;
-	keyTranslated[VK_OEM_MINUS]  = IRON_KEY_HYPHEN_MINUS;
-	keyTranslated[VK_OEM_PERIOD] = IRON_KEY_PERIOD;
-	keyTranslated[VK_OEM_2]      = IRON_KEY_SLASH;
-	keyTranslated[VK_OEM_3]      = IRON_KEY_BACK_QUOTE;
-	keyTranslated[VK_OEM_4]      = IRON_KEY_OPEN_BRACKET;
-	keyTranslated[VK_OEM_5]      = IRON_KEY_BACK_SLASH;
-	keyTranslated[VK_OEM_6]      = IRON_KEY_CLOSE_BRACKET;
-	keyTranslated[VK_OEM_7]      = IRON_KEY_QUOTE;
+	keyTranslated[VK_BACK]       = KEY_CODE_BACKSPACE;
+	keyTranslated[VK_TAB]        = KEY_CODE_TAB;
+	keyTranslated[VK_CLEAR]      = KEY_CODE_CLEAR;
+	keyTranslated[VK_RETURN]     = KEY_CODE_RETURN;
+	keyTranslated[VK_SHIFT]      = KEY_CODE_SHIFT;
+	keyTranslated[VK_CONTROL]    = KEY_CODE_CONTROL;
+	keyTranslated[VK_MENU]       = KEY_CODE_ALT;
+	keyTranslated[VK_PAUSE]      = KEY_CODE_PAUSE;
+	keyTranslated[VK_CAPITAL]    = KEY_CODE_CAPS_LOCK;
+	keyTranslated[VK_ESCAPE]     = KEY_CODE_ESCAPE;
+	keyTranslated[VK_SPACE]      = KEY_CODE_SPACE;
+	keyTranslated[VK_PRIOR]      = KEY_CODE_PAGE_UP;
+	keyTranslated[VK_NEXT]       = KEY_CODE_PAGE_DOWN;
+	keyTranslated[VK_END]        = KEY_CODE_END;
+	keyTranslated[VK_HOME]       = KEY_CODE_HOME;
+	keyTranslated[VK_LEFT]       = KEY_CODE_LEFT;
+	keyTranslated[VK_UP]         = KEY_CODE_UP;
+	keyTranslated[VK_RIGHT]      = KEY_CODE_RIGHT;
+	keyTranslated[VK_DOWN]       = KEY_CODE_DOWN;
+	keyTranslated[VK_PRINT]      = KEY_CODE_PRINT;
+	keyTranslated[VK_INSERT]     = KEY_CODE_INSERT;
+	keyTranslated[VK_DELETE]     = KEY_CODE_DELETE;
+	keyTranslated[VK_HELP]       = KEY_CODE_HELP;
+	keyTranslated[0x30]          = KEY_CODE_0;
+	keyTranslated[0x31]          = KEY_CODE_1;
+	keyTranslated[0x32]          = KEY_CODE_2;
+	keyTranslated[0x33]          = KEY_CODE_3;
+	keyTranslated[0x34]          = KEY_CODE_4;
+	keyTranslated[0x35]          = KEY_CODE_5;
+	keyTranslated[0x36]          = KEY_CODE_6;
+	keyTranslated[0x37]          = KEY_CODE_7;
+	keyTranslated[0x38]          = KEY_CODE_8;
+	keyTranslated[0x39]          = KEY_CODE_9;
+	keyTranslated[0x41]          = KEY_CODE_A;
+	keyTranslated[0x42]          = KEY_CODE_B;
+	keyTranslated[0x43]          = KEY_CODE_C;
+	keyTranslated[0x44]          = KEY_CODE_D;
+	keyTranslated[0x45]          = KEY_CODE_E;
+	keyTranslated[0x46]          = KEY_CODE_F;
+	keyTranslated[0x47]          = KEY_CODE_G;
+	keyTranslated[0x48]          = KEY_CODE_H;
+	keyTranslated[0x49]          = KEY_CODE_I;
+	keyTranslated[0x4A]          = KEY_CODE_J;
+	keyTranslated[0x4B]          = KEY_CODE_K;
+	keyTranslated[0x4C]          = KEY_CODE_L;
+	keyTranslated[0x4D]          = KEY_CODE_M;
+	keyTranslated[0x4E]          = KEY_CODE_N;
+	keyTranslated[0x4F]          = KEY_CODE_O;
+	keyTranslated[0x50]          = KEY_CODE_P;
+	keyTranslated[0x51]          = KEY_CODE_Q;
+	keyTranslated[0x52]          = KEY_CODE_R;
+	keyTranslated[0x53]          = KEY_CODE_S;
+	keyTranslated[0x54]          = KEY_CODE_T;
+	keyTranslated[0x55]          = KEY_CODE_U;
+	keyTranslated[0x56]          = KEY_CODE_V;
+	keyTranslated[0x57]          = KEY_CODE_W;
+	keyTranslated[0x58]          = KEY_CODE_X;
+	keyTranslated[0x59]          = KEY_CODE_Y;
+	keyTranslated[0x5A]          = KEY_CODE_Z;
+	keyTranslated[VK_LWIN]       = KEY_CODE_WIN;
+	keyTranslated[VK_RWIN]       = KEY_CODE_WIN;
+	keyTranslated[VK_APPS]       = KEY_CODE_CONTEXT_MENU;
+	keyTranslated[VK_NUMPAD0]    = KEY_CODE_NUMPAD_0;
+	keyTranslated[VK_NUMPAD1]    = KEY_CODE_NUMPAD_1;
+	keyTranslated[VK_NUMPAD2]    = KEY_CODE_NUMPAD_2;
+	keyTranslated[VK_NUMPAD3]    = KEY_CODE_NUMPAD_3;
+	keyTranslated[VK_NUMPAD4]    = KEY_CODE_NUMPAD_4;
+	keyTranslated[VK_NUMPAD5]    = KEY_CODE_NUMPAD_5;
+	keyTranslated[VK_NUMPAD6]    = KEY_CODE_NUMPAD_6;
+	keyTranslated[VK_NUMPAD7]    = KEY_CODE_NUMPAD_7;
+	keyTranslated[VK_NUMPAD8]    = KEY_CODE_NUMPAD_8;
+	keyTranslated[VK_NUMPAD9]    = KEY_CODE_NUMPAD_9;
+	keyTranslated[VK_MULTIPLY]   = KEY_CODE_MULTIPLY;
+	keyTranslated[VK_ADD]        = KEY_CODE_ADD;
+	keyTranslated[VK_SUBTRACT]   = KEY_CODE_SUBTRACT;
+	keyTranslated[VK_DECIMAL]    = KEY_CODE_DECIMAL;
+	keyTranslated[VK_DIVIDE]     = KEY_CODE_DIVIDE;
+	keyTranslated[VK_F1]         = KEY_CODE_F1;
+	keyTranslated[VK_F2]         = KEY_CODE_F2;
+	keyTranslated[VK_F3]         = KEY_CODE_F3;
+	keyTranslated[VK_F4]         = KEY_CODE_F4;
+	keyTranslated[VK_F5]         = KEY_CODE_F5;
+	keyTranslated[VK_F6]         = KEY_CODE_F6;
+	keyTranslated[VK_F7]         = KEY_CODE_F7;
+	keyTranslated[VK_F8]         = KEY_CODE_F8;
+	keyTranslated[VK_F9]         = KEY_CODE_F9;
+	keyTranslated[VK_F10]        = KEY_CODE_F10;
+	keyTranslated[VK_F11]        = KEY_CODE_F11;
+	keyTranslated[VK_F12]        = KEY_CODE_F12;
+	keyTranslated[VK_F13]        = KEY_CODE_F13;
+	keyTranslated[VK_F14]        = KEY_CODE_F14;
+	keyTranslated[VK_F15]        = KEY_CODE_F15;
+	keyTranslated[VK_F16]        = KEY_CODE_F16;
+	keyTranslated[VK_F17]        = KEY_CODE_F17;
+	keyTranslated[VK_F18]        = KEY_CODE_F18;
+	keyTranslated[VK_F19]        = KEY_CODE_F19;
+	keyTranslated[VK_F20]        = KEY_CODE_F20;
+	keyTranslated[VK_F21]        = KEY_CODE_F21;
+	keyTranslated[VK_F22]        = KEY_CODE_F22;
+	keyTranslated[VK_F23]        = KEY_CODE_F23;
+	keyTranslated[VK_F24]        = KEY_CODE_F24;
+	keyTranslated[VK_NUMLOCK]    = KEY_CODE_NUM_LOCK;
+	keyTranslated[VK_SCROLL]     = KEY_CODE_SCROLL_LOCK;
+	keyTranslated[VK_LSHIFT]     = KEY_CODE_SHIFT;
+	keyTranslated[VK_RSHIFT]     = KEY_CODE_SHIFT;
+	keyTranslated[VK_LCONTROL]   = KEY_CODE_CONTROL;
+	keyTranslated[VK_RCONTROL]   = KEY_CODE_CONTROL;
+	keyTranslated[VK_OEM_1]      = KEY_CODE_SEMICOLON;
+	keyTranslated[VK_OEM_PLUS]   = KEY_CODE_PLUS;
+	keyTranslated[VK_OEM_COMMA]  = KEY_CODE_COMMA;
+	keyTranslated[VK_OEM_MINUS]  = KEY_CODE_HYPHEN_MINUS;
+	keyTranslated[VK_OEM_PERIOD] = KEY_CODE_PERIOD;
+	keyTranslated[VK_OEM_2]      = KEY_CODE_SLASH;
+	keyTranslated[VK_OEM_3]      = KEY_CODE_BACK_QUOTE;
+	keyTranslated[VK_OEM_4]      = KEY_CODE_OPEN_BRACKET;
+	keyTranslated[VK_OEM_5]      = KEY_CODE_BACK_SLASH;
+	keyTranslated[VK_OEM_6]      = KEY_CODE_CLOSE_BRACKET;
+	keyTranslated[VK_OEM_7]      = KEY_CODE_QUOTE;
 }
 
 #ifdef WITH_GAMEPAD
@@ -634,16 +634,16 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 		if (!keyPressed[wParam]) {
 			keyPressed[wParam] = true;
 
-			if (keyTranslated[wParam] == IRON_KEY_CONTROL) {
+			if (keyTranslated[wParam] == KEY_CODE_CONTROL) {
 				controlDown = true;
 			}
 #ifdef HANDLE_ALT_ENTER
-			else if (keyTranslated[wParam] == IRON_KEY_ALT) {
+			else if (keyTranslated[wParam] == KEY_CODE_ALT) {
 				altDown = true;
 			}
 #endif
 			else {
-				if (controlDown && keyTranslated[wParam] == IRON_KEY_X) {
+				if (controlDown && keyTranslated[wParam] == KEY_CODE_X) {
 					char *text = iron_internal_cut_callback();
 					if (text != NULL) {
 						wchar_t wtext[4096];
@@ -660,14 +660,14 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 					}
 				}
 
-				if (controlDown && keyTranslated[wParam] == IRON_KEY_C) {
+				if (controlDown && keyTranslated[wParam] == KEY_CODE_C) {
 					char *text = iron_internal_copy_callback();
 					if (text != NULL) {
 						iron_copy_to_clipboard(text);
 					}
 				}
 
-				if (controlDown && keyTranslated[wParam] == IRON_KEY_V) {
+				if (controlDown && keyTranslated[wParam] == KEY_CODE_V) {
 					if (IsClipboardFormatAvailable(CF_UNICODETEXT)) {
 						OpenClipboard(hWnd);
 						HANDLE handle = GetClipboardData(CF_UNICODETEXT);
@@ -685,7 +685,7 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 				}
 
 #ifdef HANDLE_ALT_ENTER
-				if (altDown && keyTranslated[wParam] == IRON_KEY_RETURN) {
+				if (altDown && keyTranslated[wParam] == KEY_CODE_RETURN) {
 					if (iron_window_get_mode() == IRON_WINDOW_MODE_WINDOW) {
 						last_window_width  = iron_window_width();
 						last_window_height = iron_window_height();
@@ -715,11 +715,11 @@ LRESULT WINAPI IronWindowsMessageProcedure(HWND hWnd, UINT msg, WPARAM wParam, L
 	case WM_SYSKEYUP:
 		keyPressed[wParam] = false;
 
-		if (keyTranslated[wParam] == IRON_KEY_CONTROL) {
+		if (keyTranslated[wParam] == KEY_CODE_CONTROL) {
 			controlDown = false;
 		}
 #ifdef HANDLE_ALT_ENTER
-		if (keyTranslated[wParam] == IRON_KEY_ALT) {
+		if (keyTranslated[wParam] == KEY_CODE_ALT) {
 			altDown = false;
 		}
 #endif

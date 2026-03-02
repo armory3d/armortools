@@ -38,36 +38,36 @@ static bool cmd   = false;
 
 - (void)flagsChanged:(NSEvent *)theEvent {
 	if (shift) {
-		iron_internal_keyboard_trigger_key_up(IRON_KEY_SHIFT);
+		iron_internal_keyboard_trigger_key_up(KEY_CODE_SHIFT);
 		shift = false;
 	}
 	if (ctrl) {
-		iron_internal_keyboard_trigger_key_up(IRON_KEY_CONTROL);
+		iron_internal_keyboard_trigger_key_up(KEY_CODE_CONTROL);
 		ctrl = false;
 	}
 	if (alt) {
-		iron_internal_keyboard_trigger_key_up(IRON_KEY_ALT);
+		iron_internal_keyboard_trigger_key_up(KEY_CODE_ALT);
 		alt = false;
 	}
 	if (cmd) {
-		iron_internal_keyboard_trigger_key_up(IRON_KEY_META);
+		iron_internal_keyboard_trigger_key_up(KEY_CODE_META);
 		cmd = false;
 	}
 
 	if ([theEvent modifierFlags] & NSShiftKeyMask) {
-		iron_internal_keyboard_trigger_key_down(IRON_KEY_SHIFT);
+		iron_internal_keyboard_trigger_key_down(KEY_CODE_SHIFT);
 		shift = true;
 	}
 	if ([theEvent modifierFlags] & NSControlKeyMask) {
-		iron_internal_keyboard_trigger_key_down(IRON_KEY_CONTROL);
+		iron_internal_keyboard_trigger_key_down(KEY_CODE_CONTROL);
 		ctrl = true;
 	}
 	if ([theEvent modifierFlags] & NSAlternateKeyMask) {
-		iron_internal_keyboard_trigger_key_down(IRON_KEY_ALT);
+		iron_internal_keyboard_trigger_key_down(KEY_CODE_ALT);
 		alt = true;
 	}
 	if ([theEvent modifierFlags] & NSCommandKeyMask) {
-		iron_internal_keyboard_trigger_key_down(IRON_KEY_META);
+		iron_internal_keyboard_trigger_key_down(KEY_CODE_META);
 		cmd = true;
 	}
 }
@@ -80,89 +80,89 @@ static bool cmd   = false;
 		unichar ch = [characters characterAtIndex:0];
 		switch (ch) { // keys that exist in keydown and keypress events
 		case 59:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_SEMICOLON);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_SEMICOLON);
 			break;
 		case 91:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_OPEN_BRACKET);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_OPEN_BRACKET);
 			break;
 		case 93:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_CLOSE_BRACKET);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_CLOSE_BRACKET);
 			break;
 		case 39:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_QUOTE);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_QUOTE);
 			break;
 		case 92:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_BACK_SLASH);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_BACK_SLASH);
 			break;
 		case 44:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_COMMA);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_COMMA);
 			break;
 		case 46:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_PERIOD);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_PERIOD);
 			break;
 		case 47:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_SLASH);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_SLASH);
 			break;
 		case 96:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_BACK_QUOTE);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_BACK_QUOTE);
 			break;
 		case 32:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_SPACE);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_SPACE);
 			break;
 		case 34:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_DOUBLE_QUOTE);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_DOUBLE_QUOTE);
 			break;
 		case 40:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_OPEN_PAREN);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_OPEN_PAREN);
 			break;
 		case 41:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_CLOSE_PAREN);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_CLOSE_PAREN);
 			break;
 		case 42:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_ASTERISK);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_ASTERISK);
 			break;
 		case 43:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_PLUS);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_PLUS);
 			break;
 		case 45:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_HYPHEN_MINUS);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_HYPHEN_MINUS);
 			break;
 		case 61:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_EQUALS);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_EQUALS);
 			break;
 		case 95:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_UNDERSCORE);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_UNDERSCORE);
 			break;
 		}
 
 		switch (ch) {
 		case NSRightArrowFunctionKey:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_RIGHT);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_RIGHT);
 			break;
 		case NSLeftArrowFunctionKey:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_LEFT);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_LEFT);
 			break;
 		case NSUpArrowFunctionKey:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_UP);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_UP);
 			break;
 		case NSDownArrowFunctionKey:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_DOWN);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_DOWN);
 			break;
 		case 27:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_ESCAPE);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_ESCAPE);
 			break;
 		case NSEnterCharacter:
 		case NSNewlineCharacter:
 		case NSCarriageReturnCharacter:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_RETURN);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_RETURN);
 			iron_internal_keyboard_trigger_key_press('\n');
 			break;
 		case 0x7f:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_BACKSPACE);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_BACKSPACE);
 			iron_internal_keyboard_trigger_key_press('\x08');
 			break;
 		case 9:
-			iron_internal_keyboard_trigger_key_down(IRON_KEY_TAB);
+			iron_internal_keyboard_trigger_key_down(KEY_CODE_TAB);
 			iron_internal_keyboard_trigger_key_press('\t');
 			break;
 		default:
@@ -190,13 +190,13 @@ static bool cmd   = false;
 				}
 			}
 			if (ch >= L'a' && ch <= L'z') {
-				iron_internal_keyboard_trigger_key_down(ch - L'a' + IRON_KEY_A);
+				iron_internal_keyboard_trigger_key_down(ch - L'a' + KEY_CODE_A);
 			}
 			else if (ch >= L'A' && ch <= L'Z') {
-				iron_internal_keyboard_trigger_key_down(ch - L'A' + IRON_KEY_A);
+				iron_internal_keyboard_trigger_key_down(ch - L'A' + KEY_CODE_A);
 			}
 			else if (ch >= L'0' && ch <= L'9') {
-				iron_internal_keyboard_trigger_key_down(ch - L'0' + IRON_KEY_0);
+				iron_internal_keyboard_trigger_key_down(ch - L'0' + KEY_CODE_0);
 			}
 			iron_internal_keyboard_trigger_key_press(ch);
 			break;
@@ -210,94 +210,94 @@ static bool cmd   = false;
 		unichar ch = [characters characterAtIndex:0];
 		switch (ch) {
 		case 59:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_SEMICOLON);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_SEMICOLON);
 			break;
 		case 91:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_OPEN_BRACKET);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_OPEN_BRACKET);
 			break;
 		case 93:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_CLOSE_BRACKET);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_CLOSE_BRACKET);
 			break;
 		case 39:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_QUOTE);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_QUOTE);
 			break;
 		case 92:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_BACK_SLASH);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_BACK_SLASH);
 			break;
 		case 44:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_COMMA);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_COMMA);
 			break;
 		case 46:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_PERIOD);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_PERIOD);
 			break;
 		case 47:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_SLASH);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_SLASH);
 			break;
 		case 96:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_BACK_QUOTE);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_BACK_QUOTE);
 			break;
 		case 45:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_HYPHEN_MINUS);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_HYPHEN_MINUS);
 			break;
 		case 61:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_EQUALS);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_EQUALS);
 			break;
 		case NSRightArrowFunctionKey:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_RIGHT);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_RIGHT);
 			break;
 		case NSLeftArrowFunctionKey:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_LEFT);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_LEFT);
 			break;
 		case NSUpArrowFunctionKey:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_UP);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_UP);
 			break;
 		case NSDownArrowFunctionKey:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_DOWN);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_DOWN);
 			break;
 		case 27:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_ESCAPE);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_ESCAPE);
 			break;
 		case NSEnterCharacter:
 		case NSNewlineCharacter:
 		case NSCarriageReturnCharacter:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_RETURN);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_RETURN);
 			break;
 		case 0x7f:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_BACKSPACE);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_BACKSPACE);
 			break;
 		case 9:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_TAB);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_TAB);
 			break;
 		case 32:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_SPACE);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_SPACE);
 			break;
 		case 34:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_DOUBLE_QUOTE);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_DOUBLE_QUOTE);
 			break;
 		case 40:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_OPEN_PAREN);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_OPEN_PAREN);
 			break;
 		case 41:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_CLOSE_PAREN);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_CLOSE_PAREN);
 			break;
 		case 42:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_ASTERISK);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_ASTERISK);
 			break;
 		case 43:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_PLUS);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_PLUS);
 			break;
 		case 95:
-			iron_internal_keyboard_trigger_key_up(IRON_KEY_UNDERSCORE);
+			iron_internal_keyboard_trigger_key_up(KEY_CODE_UNDERSCORE);
 			break;
 		default:
 			if (ch >= L'a' && ch <= L'z') {
-				iron_internal_keyboard_trigger_key_up(ch - L'a' + IRON_KEY_A);
+				iron_internal_keyboard_trigger_key_up(ch - L'a' + KEY_CODE_A);
 			}
 			else if (ch >= L'A' && ch <= L'Z') {
-				iron_internal_keyboard_trigger_key_up(ch - L'A' + IRON_KEY_A);
+				iron_internal_keyboard_trigger_key_up(ch - L'A' + KEY_CODE_A);
 			}
 			else if (ch >= L'0' && ch <= L'9') {
-				iron_internal_keyboard_trigger_key_up(ch - L'0' + IRON_KEY_0);
+				iron_internal_keyboard_trigger_key_up(ch - L'0' + KEY_CODE_0);
 			}
 			break;
 		}
