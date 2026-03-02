@@ -3,9 +3,6 @@ let scene_camera: camera_object_t;
 let scene_world: world_data_t;
 let scene_meshes: mesh_object_t[];
 let scene_cameras: camera_object_t[];
-/// if arm_audio
-let scene_speakers: speaker_object_t[];
-/// end
 let scene_empties: object_t[];
 let scene_embedded: map_t<string, gpu_texture_t>;
 
@@ -21,9 +18,6 @@ function scene_create(format: scene_t): object_t {
 	_scene_uid    = _scene_uid_counter++;
 	scene_meshes  = [];
 	scene_cameras = [];
-	/// if arm_audio
-	scene_speakers = [];
-	/// end
 	scene_empties = [];
 	scene_embedded   = map_create();
 	_scene_root      = object_create();
@@ -52,12 +46,6 @@ function scene_remove() {
 		let o: camera_object_t = scene_cameras[i];
 		camera_object_remove(o);
 	}
-	/// if arm_audio
-	for (let i: i32 = 0; i < scene_speakers.length; ++i) {
-		let o: speaker_object_t = scene_speakers[i];
-		speaker_object_remove(o);
-	}
-	/// end
 	for (let i: i32 = 0; i < scene_empties.length; ++i) {
 		let o: object_t = scene_empties[i];
 		object_remove(o);
@@ -122,18 +110,6 @@ function scene_get_camera(name: string): camera_object_t {
 	return null;
 }
 
-/// if arm_audio
-function scene_get_speaker(name: string): speaker_object_t {
-	for (let i: i32 = 0; i < scene_speakers.length; ++i) {
-		let s: speaker_object_t = scene_speakers[i];
-		if (s.base.name == name) {
-			return s;
-		}
-	}
-	return null;
-}
-/// end
-
 function scene_get_empty(name: string): object_t {
 	for (let i: i32 = 0; i < scene_empties.length; ++i) {
 		let e: object_t = scene_empties[i];
@@ -155,14 +131,6 @@ function scene_add_camera_object(data: camera_data_t, parent: object_t = null): 
 	parent != null ? object_set_parent(object.base, parent) : object_set_parent(object.base, _scene_root);
 	return object;
 }
-
-/// if arm_audio
-function scene_add_speaker_object(data: speaker_data_t, parent: object_t = null): speaker_object_t {
-	let object: speaker_object_t = speaker_object_create(data);
-	parent != null ? object_set_parent(object.base, parent) : object_set_parent(object.base, _scene_root);
-	return object;
-}
-/// end
 
 function scene_traverse_objects(format: scene_t, parent: object_t, objects: obj_t[]) {
 	if (objects == null) {
@@ -266,12 +234,6 @@ function scene_create_object(o: obj_t, format: scene_t, parent: object_t): objec
 			return scene_create_mesh_object(o, format, parent, mat);
 		}
 	}
-	/// if arm_audio
-	else if (o.type == "speaker_object") {
-		let object: speaker_object_t = scene_add_speaker_object(speaker_data_get_raw_by_name(format.speaker_datas, o.data_ref), parent);
-		return scene_return_object(object.base, o);
-	}
-	/// end
 	else if (o.type == "object") {
 		let object: object_t = scene_add_object(parent);
 		return scene_return_object(object, o);
@@ -355,7 +317,7 @@ type scene_t = {
 	shader_datas?: shader_data_t[];
 	world_datas?: world_data_t[];
 	world_ref?: string;
-	speaker_datas?: speaker_data_t[];
+	speaker_datas?: any; // TODO: deprecated
 	embedded_datas?: string[]; // Preload for this scene, images only for now
 };
 
@@ -478,17 +440,6 @@ type tex_unit_t = {
 	link?: string;
 };
 
-type speaker_data_t = {
-	name?: string;
-	sound?: string;
-	muted?: bool;
-	loop?: bool;
-	stream?: bool;
-	volume?: f32;
-	attenuation?: f32;
-	play_on_start?: bool;
-};
-
 type world_data_t = {
 	name?: string;
 	color?: i32;
@@ -513,7 +464,7 @@ type irradiance_t = {
 
 type obj_t = {
 	name?: string;
-	type?: string; // object, mesh_object, camera_object, speaker_object
+	type?: string; // object, mesh_object, camera_object
 	data_ref?: string;
 	transform?: f32_array_t;
 	dimensions?: f32_array_t; // Geometry objects
