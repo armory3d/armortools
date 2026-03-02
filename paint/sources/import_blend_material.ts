@@ -40,7 +40,7 @@ function _import_blend_material() {
 			save = path_data();
 		}
 		save += "blender";
-		file_create_directory(save);
+		iron_create_directory(save);
 
 		let py: string = "\
 import bpy;\n\

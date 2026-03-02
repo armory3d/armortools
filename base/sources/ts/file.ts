@@ -76,10 +76,6 @@ function file_read_directory(path: string): string[] {
 	return files;
 }
 
-function file_create_directory(path: string) {
-	iron_create_directory(path);
-}
-
 function file_copy(src_path: string, dst_path: string) {
 	iron_sys_command(file_cmd_copy + " \"" + src_path + "\" \"" + dst_path + "\"");
 }
@@ -120,7 +116,7 @@ function file_cache_cloud(path: string, done: (s: string) => void) {
 
 	let file_dir: string = substring(dest, 0, string_last_index_of(dest, PATH_SEP));
 	if (file_read_directory(file_dir)[0] == "") {
-		file_create_directory(file_dir);
+		iron_create_directory(file_dir);
 	}
 	/// if arm_windows
 	path = string_replace_all(path, "\\", "/");

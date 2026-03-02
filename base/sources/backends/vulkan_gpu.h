@@ -3,7 +3,6 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
 
 typedef struct gpu_pipeline_impl {

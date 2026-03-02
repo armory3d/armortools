@@ -641,7 +641,7 @@ function box_preferences_neural_tab() {
 	ui_row(row);
 	if (ui_icon_button(tr("Models Directory..."), icon_t.FOLDER)) {
 		if (file_read_directory(neural_node_dir())[0] == "") {
-			file_create_directory(neural_node_dir());
+			iron_create_directory(neural_node_dir());
 		}
 		file_start(neural_node_dir());
 	}

@@ -159,16 +159,6 @@ buffer_t *embed_get(char *key) {
 }
 #endif
 
-#define f64                double
-#define i64                int64_t
-#define u64                uint64_t
-#define f32                float
-#define i32                int32_t
-#define u32                uint32_t
-#define i16                int16_t
-#define u16                uint16_t
-#define i8                 int8_t
-#define u8                 uint8_t
 #define string_t           char
 #define any                void *
 #define any_ptr            void **
@@ -1306,25 +1296,6 @@ void _gpu_begin(gpu_texture_t *render_target, any_array_t *additional, gpu_textu
 	}
 }
 
-void iron_file_save_bytes(string_t *path, buffer_t *bytes, u64 length) {
-	u64 byte_length = length > 0 ? length : (u64)bytes->length;
-	if (byte_length > (u64)bytes->length) {
-		byte_length = (u64)bytes->length;
-	}
-
-#ifdef IRON_WINDOWS
-	MultiByteToWideChar(CP_UTF8, 0, path, -1, temp_wstring, 1024);
-	FILE *file = _wfopen(temp_wstring, L"wb");
-#else
-	FILE *file = fopen(path, "wb");
-#endif
-	if (file == NULL) {
-		return;
-	}
-	fwrite(bytes->buffer, 1, byte_length, file);
-	fclose(file);
-}
-
 i32 iron_sys_command(string_t *cmd) {
 #ifdef IRON_WINDOWS
 
@@ -1357,56 +1328,6 @@ i32 iron_sys_command(string_t *cmd) {
 	int result = system(cmd);
 #endif
 	return result;
-}
-
-typedef struct _callback_data {
-	int32_t size;
-	char    url[512];
-	void (*func)(char *, buffer_t *);
-} _callback_data_t;
-
-void _https_callback(const char *body, void *callback_data) {
-	_callback_data_t *cbd    = (_callback_data_t *)callback_data;
-	buffer_t         *buffer = NULL;
-	if (body != NULL) {
-		buffer         = malloc(sizeof(buffer_t));
-		buffer->length = cbd->size > 0 ? cbd->size : strlen(body);
-		buffer->buffer = malloc(buffer->length);
-		memcpy(buffer->buffer, body, buffer->length);
-	}
-	cbd->func(cbd->url, buffer);
-	free(cbd);
-}
-
-void iron_file_download(string_t *url, void (*callback)(char *, buffer_t *), i32 size, string_t *dst_path) {
-	_callback_data_t *cbd = malloc(sizeof(_callback_data_t));
-	cbd->size             = size;
-	strcpy(cbd->url, url);
-	cbd->func = callback;
-
-	char url_base[512];
-	char url_path[512];
-	int  i = 0;
-	for (; i < strlen(url) - 8; ++i) {
-		if (url[i + 8] == '/') {
-			break;
-		}
-		url_base[i] = url[i + 8]; // Strip https://
-	}
-	url_base[i] = 0;
-	int j       = 0;
-	if (strlen(url_base) < strlen(url) - 8) {
-		++i; // Skip /
-	}
-	for (; j < strlen(url) - 8 - i; ++j) {
-		if (url[i + 8 + j] == 0) {
-			break;
-		}
-		url_path[j] = url[i + 8 + j];
-	}
-	url_path[j] = 0;
-
-	iron_net_request(url_base, url_path, NULL, 443, IRON_HTTPS_GET, &_https_callback, cbd, dst_path);
 }
 
 bool _save_and_quit_callback_internal();
@@ -1506,95 +1427,6 @@ char *iron_save_dialog(char *filter_list, char *default_path) {
 }
 
 #endif
-
-char *iron_read_directory(char *path) {
-	char *files = temp_string;
-	files[0]    = 0;
-
-	directory dir = open_dir(path);
-	if (dir.handle == NULL) {
-		return files;
-	}
-
-	while (true) {
-		file f = read_next_file(&dir);
-		if (!f.valid) {
-			break;
-		}
-
-#ifdef IRON_WINDOWS
-		char file_path[512];
-		strcpy(file_path, path);
-		strcat(file_path, "\\");
-		strcat(file_path, f.name);
-		if (FILE_ATTRIBUTE_HIDDEN & GetFileAttributesA(file_path)) {
-			continue; // Skip hidden files
-		}
-#endif
-
-		if (files[0] != '\0') {
-			strcat(files, "\n");
-		}
-		strcat(files, f.name);
-	}
-	close_dir(&dir);
-	return files;
-}
-
-void iron_create_directory(char *path) {
-#ifdef IRON_IOS
-	IOSCreateDirectory(path);
-#elif defined(IRON_WINDOWS)
-	char cmd[1024];
-	strcpy(cmd, "mkdir \"");
-	strcat(cmd, path);
-	strcat(cmd, "\"");
-	iron_sys_command(cmd);
-#else
-	char cmd[1024];
-	strcpy(cmd, "mkdir -p \"");
-	strcat(cmd, path);
-	strcat(cmd, "\"");
-	iron_sys_command(cmd);
-#endif
-}
-
-bool iron_is_directory(char *path) {
-#ifdef IRON_WINDOWS
-	DWORD attribs = GetFileAttributesA(path);
-	return attribs != INVALID_FILE_ATTRIBUTES && (attribs & FILE_ATTRIBUTE_DIRECTORY);
-#else
-	struct stat st;
-	return stat(path, &st) == 0 && S_ISDIR(st.st_mode);
-#endif
-}
-
-bool iron_file_exists(char *path) {
-	iron_file_reader_t reader;
-	if (iron_file_reader_open(&reader, path, IRON_FILE_TYPE_ASSET)) {
-		iron_file_reader_close(&reader);
-		return true;
-	}
-	return false;
-}
-
-void iron_delete_file(char *path) {
-#ifdef IRON_IOS
-	IOSDeleteFile(path);
-#elif defined(IRON_WINDOWS)
-	char cmd[1024];
-	strcpy(cmd, "del /f \"");
-	strcat(cmd, path);
-	strcat(cmd, "\"");
-	iron_sys_command(cmd);
-#else
-	char cmd[1024];
-	strcpy(cmd, "rm \"");
-	strcat(cmd, path);
-	strcat(cmd, "\"");
-	iron_sys_command(cmd);
-#endif
-}
 
 #ifdef WITH_COMPRESS
 buffer_t *iron_inflate(buffer_t *bytes, bool raw) {

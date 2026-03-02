@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iron_global.h"
+#include "iron_array.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -61,3 +62,11 @@ typedef struct iron_file_writer {
 bool iron_file_writer_open(iron_file_writer_t *writer, const char *filepath);
 void iron_file_writer_write(iron_file_writer_t *writer, void *data, int size);
 void iron_file_writer_close(iron_file_writer_t *writer);
+
+char *iron_read_directory(char *path);
+void iron_create_directory(char *path);
+bool iron_is_directory(char *path);
+bool iron_file_exists(char *path);
+void iron_delete_file(char *path);
+void iron_file_save_bytes(char *path, buffer_t *bytes, u64 length);
+void iron_file_download(char *url, void (*callback)(char *, buffer_t *), i32 size, char *dst_path);

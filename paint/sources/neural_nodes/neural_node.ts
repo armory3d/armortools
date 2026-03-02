@@ -150,7 +150,7 @@ function neural_node_download(url: string) {
 
 function neural_node_download_models(models: string[]) {
 	if (file_read_directory(neural_node_dir())[0] == "") {
-		file_create_directory(neural_node_dir());
+		iron_create_directory(neural_node_dir());
 	}
 
 	/// if arm_windows
