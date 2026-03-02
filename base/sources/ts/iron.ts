@@ -1275,3 +1275,42 @@ declare enum key_code_t {
 	META                = 224,
 	ALTGR               = 225,
 }
+
+
+declare let tilesheet_datas: tilesheet_data_t[];
+
+declare function tilesheet_create(scene_name: string, tilesheet_ref: string, tilesheet_action_ref: string): tilesheet_t;
+declare function tilesheet_play(self: tilesheet_t, action_ref: string, on_action_complete: () => void = null);
+declare function tilesheet_pause(self: tilesheet_t);
+declare function tilesheet_resume(self: tilesheet_t);
+declare function tilesheet_set_frame_offset(self: tilesheet_t, frame: i32);
+declare function tilesheet_get_frame_offset(self: tilesheet_t): i32;
+declare function tilesheet_update(self: tilesheet_t);
+declare function tilesheet_set_frame(self: tilesheet_t, f: i32);
+
+declare type tilesheet_data_t = {
+	name?: string;
+	tiles_x?: i32;
+	tiles_y?: i32;
+	framerate?: i32;
+	actions?: tilesheet_action_t[];
+};
+
+declare type tilesheet_action_t = {
+	name?: string;
+	start?: i32;
+	end?: i32;
+	loop?: bool;
+};
+
+declare type tilesheet_t = {
+	tile_x?: f32; // Tile offset on tilesheet texture 0-1
+	tile_y?: f32;
+	raw?: tilesheet_data_t;
+	action?: tilesheet_action_t;
+	ready?: bool;
+	paused?: bool;
+	frame?: i32;
+	time?: f32;
+	on_action_complete?: () => void;
+};
