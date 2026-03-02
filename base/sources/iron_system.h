@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iron_global.h"
+#include "iron_array.h"
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -334,3 +335,5 @@ void        iron_internal_gamepad_trigger_button(int gamepad, int button, float 
 #endif
 
 i32 iron_sys_command(char *cmd);
+char_ptr_array_t *iron_open_dialog(char *filter_list, char *default_path, bool open_multiple);
+char *iron_save_dialog(char *filter_list, char *default_path);

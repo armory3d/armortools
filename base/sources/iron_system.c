@@ -652,3 +652,94 @@ i32 iron_sys_command(char *cmd) {
 #endif
 	return result;
 }
+
+#ifdef WITH_NFD
+
+#include <nfd.h>
+
+char_ptr_array_t *iron_open_dialog(char *filter_list, char *default_path, bool open_multiple) {
+	nfdpathset_t out_paths;
+	nfdchar_t   *out_path;
+	nfdresult_t  result = open_multiple ? NFD_OpenDialogMultiple(filter_list, default_path, &out_paths) : NFD_OpenDialog(filter_list, default_path, &out_path);
+
+	if (result == NFD_OKAY) {
+		int               path_count = open_multiple ? (int)NFD_PathSet_GetCount(&out_paths) : 1;
+		char_ptr_array_t *result     = any_array_create(path_count);
+
+		if (open_multiple) {
+			for (int i = 0; i < path_count; ++i) {
+				nfdchar_t *out_path = NFD_PathSet_GetPath(&out_paths, i);
+				result->buffer[i]   = out_path;
+			}
+			// NFD_PathSet_Free(&out_paths);
+		}
+		else {
+			result->buffer[0] = out_path;
+			// free(out_path);
+		}
+		return result;
+	}
+	return NULL;
+}
+
+static char iron_save_dialog_path[512];
+
+char *iron_save_dialog(char *filter_list, char *default_path) {
+	nfdchar_t  *out_path = NULL;
+	nfdresult_t result   = NFD_SaveDialog(filter_list, default_path, &out_path);
+	if (result == NFD_OKAY) {
+		strcpy(iron_save_dialog_path, out_path);
+		free(out_path);
+		return iron_save_dialog_path;
+	}
+	return NULL;
+}
+
+#elif defined(IRON_ANDROID)
+
+#include "backends/android_file_dialog.h"
+
+char_ptr_array_t *iron_open_dialog(char *filter_list, char *default_path, bool open_multiple) {
+	AndroidFileDialogOpen();
+	return NULL;
+}
+
+char *iron_save_dialog(char *filter_list, char *default_path) {
+	wchar_t *out_path = AndroidFileDialogSave();
+	wcstombs(temp_string, out_path, sizeof(temp_string));
+	return temp_string;
+}
+
+#elif defined(IRON_IOS)
+
+#include "backends/ios_file_dialog.h"
+#include <wchar.h>
+
+char_ptr_array_t *iron_open_dialog(char *filter_list, char *default_path, bool open_multiple) {
+	// Once finished drop_files callback is called
+	IOSFileDialogOpen();
+	return NULL;
+}
+
+char *iron_save_dialog(char *filter_list, char *default_path) {
+	// Path to app document directory
+	wchar_t *out_path = IOSFileDialogSave();
+	wcstombs(temp_string, out_path, sizeof(temp_string));
+	return temp_string;
+}
+
+#elif defined(IRON_WASM)
+
+__attribute__((import_module("imports"), import_name("js_open_dialog"))) void js_open_dialog();
+__attribute__((import_module("imports"), import_name("js_save_dialog"))) char *js_save_dialog();
+
+char_ptr_array_t *iron_open_dialog(char *filter_list, char *default_path, bool open_multiple) {
+	js_open_dialog();
+	return NULL;
+}
+
+char *iron_save_dialog(char *filter_list, char *default_path) {
+	return js_save_dialog();
+}
+
+#endif
