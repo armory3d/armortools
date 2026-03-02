@@ -1199,39 +1199,7 @@ void _gpu_begin(gpu_texture_t *render_target, any_array_t *additional, gpu_textu
 	}
 }
 
-i32 iron_sys_command(string_t *cmd) {
-#ifdef IRON_WINDOWS
 
-	int      wlen = MultiByteToWideChar(CP_UTF8, 0, cmd, -1, NULL, 0);
-	wchar_t *wstr = malloc(sizeof(wchar_t) * wlen);
-	MultiByteToWideChar(CP_UTF8, 0, cmd, -1, wstr, wlen);
-	wchar_t comspec[MAX_PATH];
-	GetEnvironmentVariableW(L"ComSpec", comspec, MAX_PATH);
-	wchar_t cmdline[2048];
-	swprintf(cmdline, 2048, L"\"%s\" /c \"%s\"", comspec, wstr);
-	STARTUPINFO si;
-	memset(&si, 0, sizeof(si));
-	si.cb          = sizeof(si);
-	si.dwFlags     = STARTF_USESHOWWINDOW;
-	si.wShowWindow = SW_HIDE;
-	PROCESS_INFORMATION pi;
-	memset(&pi, 0, sizeof(pi));
-	CreateProcessW(NULL, cmdline, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
-	free(wstr);
-	WaitForSingleObject(pi.hProcess, INFINITE);
-	DWORD exit_code = 0;
-	GetExitCodeProcess(pi.hProcess, &exit_code);
-	CloseHandle(pi.hProcess);
-	CloseHandle(pi.hThread);
-	int result = (int)exit_code;
-
-#elif defined(IRON_IOS)
-	int result = 0;
-#else
-	int result = system(cmd);
-#endif
-	return result;
-}
 
 bool _save_and_quit_callback_internal();
 

@@ -332,3 +332,5 @@ void        iron_internal_gamepad_trigger_disconnect(int gamepad);
 void        iron_internal_gamepad_trigger_axis(int gamepad, int axis, float value);
 void        iron_internal_gamepad_trigger_button(int gamepad, int button, float value);
 #endif
+
+i32 iron_sys_command(char *cmd);
