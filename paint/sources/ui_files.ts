@@ -89,7 +89,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 		file_init_cloud(function() {
 			ui_base_hwnds[tab_area_t.STATUS].redraws = 3;
 			tab_browser_refresh                      = true;
-		});
+		}, config_raw.server);
 	}
 	if (is_cloud && file_read_directory("cloud").length == 0) {
 		return handle.text;
@@ -249,7 +249,7 @@ function ui_files_file_browser(handle: ui_handle_t, drag_files: bool = false, se
 								else {
 									ui_files_offline = true;
 								}
-							});
+							}, config_raw.server);
 						}
 					}
 				}

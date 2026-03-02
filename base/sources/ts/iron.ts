@@ -1026,6 +1026,13 @@ declare function path_is_folder(p: string): bool;
 declare function path_is_protected(): bool;
 declare function path_join(a: string, b: string): string;
 
+declare function file_read_directory(path: string): string[];
+declare function file_copy(src_path: string, dst_path: string);
+declare function file_start(path: string);
+declare function file_download_to(url: string, dst_path: string, done: (url: string) => void, size: i32 = 0);
+declare function file_cache_cloud(path: string, done: (s: string) => void);
+declare function file_init_cloud(done: () => void);
+
 declare function lz4_encode(b: buffer_t): buffer_t;
 declare function lz4_decode(b: buffer_t, olen: u32): buffer_t;
 

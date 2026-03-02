@@ -1,3 +1,5 @@
+Based on: https://github.com/Kode/Kore/tree/main/miniclib
+
 Copyright (c) 2024 the Kore Development Team
 
 This software is provided 'as-is', without any express or implied

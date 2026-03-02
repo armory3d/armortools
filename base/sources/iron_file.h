@@ -1,7 +1,8 @@
 #pragma once
 
-#include "iron_global.h"
 #include "iron_array.h"
+#include "iron_global.h"
+#include "iron_map.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -64,9 +65,29 @@ void iron_file_writer_write(iron_file_writer_t *writer, void *data, int size);
 void iron_file_writer_close(iron_file_writer_t *writer);
 
 char *iron_read_directory(char *path);
-void iron_create_directory(char *path);
-bool iron_is_directory(char *path);
-bool iron_file_exists(char *path);
-void iron_delete_file(char *path);
-void iron_file_save_bytes(char *path, buffer_t *bytes, u64 length);
-void iron_file_download(char *url, void (*callback)(char *, buffer_t *), i32 size, char *dst_path);
+void  iron_create_directory(char *path);
+bool  iron_is_directory(char *path);
+bool  iron_file_exists(char *path);
+void  iron_delete_file(char *path);
+void  iron_file_save_bytes(char *path, buffer_t *bytes, u64 length);
+void  iron_file_download(char *url, void (*callback)(char *, buffer_t *), i32 size, char *dst_path);
+
+typedef struct file_download_data {
+	void (*done)(char *url);
+} file_download_data_t;
+
+typedef struct file_cache_cloud_data {
+	char dest[512];
+	char path[512];
+	void (*done)(char *dest);
+} file_cache_cloud_data_t;
+
+extern any_map_t *file_cloud;
+extern i32_map_t *file_cloud_sizes;
+
+any_array_t *file_read_directory(char *path);
+void         file_copy(char *src_path, char *dst_path);
+void         file_start(char *path);
+void         file_download_to(char *url, char *dst_path, void (*done)(char *url), i32 size);
+void         file_cache_cloud(char *path, void (*done)(char *dest), char *server);
+void         file_init_cloud(void (*done)(void), char *server);

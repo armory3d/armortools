@@ -25,7 +25,7 @@ function import_asset_run(path: string, drop_x: f32 = -1.0, drop_y: f32 = -1.0, 
 				return;
 			}
 			import_asset_run(abs, _import_asset_drop_x, _import_asset_drop_y, _import_asset_show_box, _import_asset_hdr_as_envmap, _import_asset_done);
-		});
+		}, config_raw.server);
 
 		return;
 	}

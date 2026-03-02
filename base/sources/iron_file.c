@@ -1,8 +1,12 @@
 
 #include "iron_file.h"
-#include "iron_system.h"
-#include "iron_string.h"
+#include "iron_gc.h"
+#include "iron_json.h"
+#include "iron_map.h"
 #include "iron_net.h"
+#include "iron_path.h"
+#include "iron_string.h"
+#include "iron_system.h"
 #include "libs/kong/dir.h"
 #ifdef IRON_ANDROID
 #include <backends/android_system.h>
@@ -11,14 +15,14 @@
 #include <stdlib.h>
 #include <string.h>
 #ifdef IRON_WINDOWS
+#include <backends/windows_mini.h>
 #include <malloc.h>
 #include <memory.h>
-#include <backends/windows_mini.h>
 #else
 #include <sys/stat.h>
 #endif
 
-i32 iron_sys_command(char *cmd);
+i32         iron_sys_command(char *cmd);
 extern char temp_string[1024 * 128];
 #ifdef IRON_WINDOWS
 extern wchar_t temp_wstring[1024 * 32];
@@ -458,4 +462,250 @@ void iron_file_download(char *url, void (*callback)(char *, buffer_t *), i32 siz
 	url_path[j] = 0;
 
 	iron_net_request(url_base, url_path, NULL, 443, IRON_HTTPS_GET, &_https_callback, cbd, dst_path);
+}
+
+char     *strings_check_internet_connection(void);
+char     *sys_buffer_to_string(buffer_t *b);
+buffer_t *data_get_blob(char *file);
+void      console_error(char *s);
+i32       parse_int(const char *s);
+
+#ifdef IRON_WINDOWS
+static char *file_cmd_copy = "copy";
+#else
+static char *file_cmd_copy = "cp";
+#endif
+
+any_map_t *file_cloud       = NULL;
+i32_map_t *file_cloud_sizes = NULL;
+
+static void (*_file_init_cloud_bytes_done)(void) = NULL;
+
+static any_map_t *_file_download_map    = NULL;
+static any_map_t *_file_cache_cloud_map = NULL;
+
+#if defined(IRON_ANDROID) || defined(IRON_WASM)
+static any_map_t *file_internal = NULL;
+#endif
+
+any_array_t *file_read_directory(char *path) {
+	if (starts_with(path, "cloud")) {
+		any_array_t *files = file_cloud != NULL ? any_map_get(file_cloud, string_replace_all(path, "\\", "/")) : NULL;
+		if (files != NULL) {
+			return files;
+		}
+		else {
+			return gc_alloc(sizeof(any_array_t));
+		}
+	}
+
+#ifdef IRON_WASM
+	if (starts_with(path, "/./")) {
+		path = substring(path, 2, string_length(path));
+	}
+#endif
+
+#if defined(IRON_ANDROID) || defined(IRON_WASM)
+	path = string_replace_all(path, "//", "/");
+	if (file_internal == NULL) {
+		buffer_t *blob = data_get_blob("data_list.json");
+		char     *s    = sys_buffer_to_string(blob);
+		file_internal  = json_parse_to_map(s);
+	}
+	if (any_map_get(file_internal, path) != NULL) {
+		return string_split(any_map_get(file_internal, path), ",");
+	}
+#endif
+
+	any_array_t *files = string_split(iron_read_directory(path), "\n");
+	if (files->length == 1 && string_equals(files->buffer[0], "")) {
+		array_pop(files);
+		return files;
+	}
+	array_sort(files, NULL);
+
+	// Folders first
+	i32 num = files->length;
+	for (i32 i = 0; i < num; ++i) {
+		char *f = files->buffer[i];
+		if (!iron_is_directory(path_join(path, f))) {
+			array_splice(files, i, 1);
+			any_array_push(files, f);
+			i--;
+			num--;
+		}
+	}
+
+	return files;
+}
+
+void file_copy(char *src_path, char *dst_path) {
+	char cmd[1024];
+	strcpy(cmd, file_cmd_copy);
+	strcat(cmd, " \"");
+	strcat(cmd, src_path);
+	strcat(cmd, "\" \"");
+	strcat(cmd, dst_path);
+	strcat(cmd, "\"");
+	iron_sys_command(cmd);
+}
+
+void file_start(char *path) {
+#ifdef IRON_WINDOWS
+	char cmd[1024];
+	strcpy(cmd, "start \"\" \"");
+	strcat(cmd, path);
+	strcat(cmd, "\"");
+	iron_sys_command(cmd);
+#elif defined(IRON_LINUX)
+	char cmd[1024];
+	strcpy(cmd, "xdg-open \"");
+	strcat(cmd, path);
+	strcat(cmd, "\"");
+	iron_sys_command(cmd);
+#else
+	char cmd[1024];
+	strcpy(cmd, "open \"");
+	strcat(cmd, path);
+	strcat(cmd, "\"");
+	iron_sys_command(cmd);
+#endif
+}
+
+static void _file_download_to_callback(char *url, buffer_t *ab) {
+	file_download_data_t *fdd = any_map_get(_file_download_map, url);
+	fdd->done(url);
+}
+
+void file_download_to(char *url, char *dst_path, void (*done)(char *url), i32 size) {
+	if (_file_download_map == NULL) {
+		_file_download_map = any_map_create();
+		gc_root(_file_download_map);
+	}
+	file_download_data_t *fdd = malloc(sizeof(file_download_data_t));
+	fdd->done                 = done;
+	any_map_set(_file_download_map, url, fdd);
+	iron_file_download(url, _file_download_to_callback, size, dst_path);
+}
+
+static void _file_cache_cloud_callback(char *url) {
+	file_cache_cloud_data_t *fccd = any_map_get(_file_cache_cloud_map, url);
+	if (!iron_file_exists(fccd->dest)) {
+		console_error(strings_check_internet_connection());
+		fccd->done(NULL);
+		return;
+	}
+	fccd->done(fccd->dest);
+}
+
+void file_cache_cloud(char *path, void (*done)(char *dest), char *server) {
+	if (_file_cache_cloud_map == NULL) {
+		_file_cache_cloud_map = any_map_create();
+		gc_root(_file_cache_cloud_map);
+	}
+
+	char dest[512];
+	if (path_is_protected()) {
+		strcpy(dest, iron_internal_save_path());
+	}
+	else {
+		strcpy(dest, iron_internal_files_location());
+		strcat(dest, PATH_SEP);
+	}
+	strcat(dest, path);
+
+	if (iron_file_exists(dest)) {
+		done(dest);
+		return;
+	}
+
+	char        *file_dir  = substring(dest, 0, string_last_index_of(dest, PATH_SEP));
+	any_array_t *dir_files = file_read_directory(file_dir);
+	if (dir_files->length == 0 || string_equals(dir_files->buffer[0], "")) {
+		iron_create_directory(file_dir);
+	}
+
+#ifdef IRON_WINDOWS
+	path = string_replace_all(path, "\\", "/");
+#endif
+	char *url = string_join(string_join(server, "/"), path);
+
+	file_cache_cloud_data_t *fccd = malloc(sizeof(file_cache_cloud_data_t));
+	strcpy(fccd->dest, dest);
+	strcpy(fccd->path, path);
+	fccd->done = done;
+	any_map_set(_file_cache_cloud_map, url, fccd);
+
+	file_download_to(url, dest, _file_cache_cloud_callback, i32_map_get(file_cloud_sizes, path));
+}
+
+static void _file_init_cloud_bytes_callback(char *url, buffer_t *buffer) {
+	if (buffer == NULL) {
+		any_array_t *empty = gc_alloc(sizeof(any_array_t));
+		any_map_set(file_cloud, "cloud", empty);
+		console_error(strings_check_internet_connection());
+		return;
+	}
+
+	any_array_t *files     = gc_alloc(sizeof(any_array_t));
+	i32_array_t *sizes     = gc_alloc(sizeof(i32_array_t));
+	char        *str       = sys_buffer_to_string(buffer);
+	i32          str_len   = string_length(str);
+	i32          pos_start = 0;
+	i32          pos_end   = 0;
+
+	while (true) {
+		if (pos_start >= str_len) {
+			break;
+		}
+		pos_end = string_index_of_pos(str, " ", pos_start);
+		any_array_push(files, substring(str, pos_start, pos_end));
+		pos_start = pos_end + 1;
+		pos_end   = string_index_of_pos(str, "\n", pos_start);
+		if (pos_end == -1) {
+			pos_end = str_len - 1;
+		}
+		i32_array_push(sizes, parse_int(substring(str, pos_start, pos_end)));
+		pos_start = pos_end + 1;
+	}
+
+	for (i32 i = 0; i < (i32)files->length; ++i) {
+		char *file = files->buffer[i];
+		if (path_is_folder(file)) {
+			any_array_t *empty = gc_alloc(sizeof(any_array_t));
+			any_map_set(file_cloud, substring(file, 0, string_length(file) - 1), empty);
+		}
+	}
+	for (i32 i = 0; i < (i32)files->length; ++i) {
+		char *file   = files->buffer[i];
+		bool  nested = string_index_of(file, "/") != string_last_index_of(file, "/");
+		if (nested) {
+			i32   delim  = path_is_folder(file) ? string_last_index_of(substring(file, 0, string_length(file) - 1), "/") : string_last_index_of(file, "/");
+			char *parent = substring(file, 0, delim);
+			char *child  = path_is_folder(file) ? substring(file, delim + 1, string_length(file) - 1) : substring(file, delim + 1, string_length(file));
+			any_array_push(any_map_get(file_cloud, parent), child);
+			if (!path_is_folder(file)) {
+				i32_map_set(file_cloud_sizes, file, sizes->buffer[i]);
+			}
+		}
+	}
+
+	_file_init_cloud_bytes_done();
+}
+
+static void _file_init_cloud_index_callback(char *url, buffer_t *buffer) {}
+
+void file_init_cloud_bytes(void (*done)(void), char *append, char *server) {
+	_file_init_cloud_bytes_done = done;
+	char *index_url             = string_join(string_join(server, "/index.txt"), append != NULL ? append : "");
+	iron_file_download(index_url, _file_init_cloud_bytes_callback, 0, NULL);
+	iron_file_download("https://cloud-index.armory3d.workers.dev/", _file_init_cloud_index_callback, 0, NULL);
+}
+
+void file_init_cloud(void (*done)(void), char *server) {
+	file_cloud       = any_map_create();
+	gc_root(file_cloud);
+	file_cloud_sizes = i32_map_create();
+	gc_root(file_cloud_sizes);
+	file_init_cloud_bytes(done, NULL, server);
 }
