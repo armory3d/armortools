@@ -28,11 +28,7 @@ function scene_create(format: scene_t): object_t {
 
 	// Startup scene
 	let scene_object: object_t = scene_add_scene(format.name, null);
-	if (scene_cameras.length == 0) {
-		iron_log("No camera found for scene '" + format.name + "'");
-	}
-
-	scene_camera        = scene_get_camera(format.camera_ref);
+	scene_camera        = scene_cameras[0]; // format.camera_ref
 	_scene_scene_parent = scene_object;
 	return scene_object;
 }
@@ -67,16 +63,13 @@ function scene_render_frame() {
 	if (render_path_commands == null) {
 		return;
 	}
-
 	for (let i: i32 = 0; i < scene_empties.length; ++i) {
 		let e: object_t = scene_empties[i];
 		if (e != null && e.parent != null) {
 			transform_update(e.transform);
 		}
 	}
-
-	// Render active camera
-	scene_camera != null ? camera_object_render_frame(scene_camera) : render_path_render_frame();
+	camera_object_render_frame(scene_camera);
 }
 
 // Objects
@@ -88,36 +81,6 @@ function scene_add_object(parent: object_t = null): object_t {
 
 function scene_get_child(name: string): object_t {
 	return object_get_child(_scene_root, name);
-}
-
-function scene_get_mesh(name: string): mesh_object_t {
-	for (let i: i32 = 0; i < scene_meshes.length; ++i) {
-		let m: mesh_object_t = scene_meshes[i];
-		if (m.base.name == name) {
-			return m;
-		}
-	}
-	return null;
-}
-
-function scene_get_camera(name: string): camera_object_t {
-	for (let i: i32 = 0; i < scene_cameras.length; ++i) {
-		let c: camera_object_t = scene_cameras[i];
-		if (c.base.name == name) {
-			return c;
-		}
-	}
-	return null;
-}
-
-function scene_get_empty(name: string): object_t {
-	for (let i: i32 = 0; i < scene_empties.length; ++i) {
-		let e: object_t = scene_empties[i];
-		if (e.name == name) {
-			return e;
-		}
-	}
-	return null;
 }
 
 function scene_add_mesh_object(data: mesh_data_t, material: material_data_t, parent: object_t = null): mesh_object_t {
@@ -238,9 +201,7 @@ function scene_create_object(o: obj_t, format: scene_t, parent: object_t): objec
 		let object: object_t = scene_add_object(parent);
 		return scene_return_object(object, o);
 	}
-	else {
-		return null;
-	}
+	return null;
 }
 
 function scene_create_mesh_object(o: obj_t, format: scene_t, parent: object_t, material: material_data_t): object_t {
@@ -268,10 +229,6 @@ function scene_return_mesh_object(object_file: string, data_ref: string, materia
 }
 
 function scene_return_object(object: object_t, o: obj_t): object_t {
-	return scene_return_object_loaded(object, o, null);
-}
-
-function scene_return_object_loaded(object: object_t, o: obj_t, oactions: scene_t[]): object_t {
 	if (object != null) {
 		object.raw     = o;
 		object.name    = o.name;

@@ -14,11 +14,6 @@ type cached_shader_context_t = {
 	context?: shader_context_t;
 };
 
-enum draw_order_t {
-	DIST,   // Early-z
-	SHADER, // Less state changes
-}
-
 let render_path_commands: () => void                           = null;
 let render_path_render_targets: map_t<string, render_target_t> = map_create();
 let render_path_current_w: i32;
@@ -27,12 +22,10 @@ let _render_path_frame_time: f32                 = 0.0;
 let _render_path_frame: i32                      = 0;
 let _render_path_current_target: render_target_t = null;
 let _render_path_current_image: gpu_texture_t    = null;
-let _render_path_draw_order: draw_order_t        = draw_order_t.DIST;
 let _render_path_paused: bool                    = false;
 let _render_path_last_w: i32                     = 0;
 let _render_path_last_h: i32                     = 0;
 let _render_path_bind_params: string[];
-// let _render_path_meshes_sorted: bool;
 let _render_path_last_frame_time: f32                                           = 0.0;
 let _render_path_loading: i32                                                   = 0;
 let _render_path_cached_shader_contexts: map_t<string, cached_shader_context_t> = map_create();
@@ -45,27 +38,21 @@ function render_path_render_frame() {
 	if (!render_path_ready() || _render_path_paused) {
 		return;
 	}
-
 	if (_render_path_last_w > 0 && (_render_path_last_w != sys_w() || _render_path_last_h != sys_h())) {
 		render_path_resize();
 	}
-	_render_path_last_w = sys_w();
-	_render_path_last_h = sys_h();
-
+	_render_path_last_w          = sys_w();
+	_render_path_last_h          = sys_h();
 	_render_path_frame_time      = sys_time() - _render_path_last_frame_time;
 	_render_path_last_frame_time = sys_time();
-
-	render_path_current_w      = sys_w();
-	render_path_current_h      = sys_h();
-	// _render_path_meshes_sorted = false;
-
+	render_path_current_w        = sys_w();
+	render_path_current_h        = sys_h();
 	render_path_commands();
-
 	_render_path_frame++;
 }
 
-function render_path_set_target(target: string, additional: string[] = null, depth_buffer: string = null, flags: gpu_clear_t = gpu_clear_t.NONE,
-                                color: i32 = 0, depth: f32 = 0.0) {
+function render_path_set_target(target: string, additional: string[] = null, depth_buffer: string = null, flags: gpu_clear_t = gpu_clear_t.NONE, color: i32 = 0,
+                                depth: f32 = 0.0) {
 	if (_render_path_current_image != null) {
 		render_path_end();
 	}
@@ -104,53 +91,14 @@ function render_path_end() {
 	_render_path_bind_params   = null;
 }
 
-function _render_path_sort_dist(a: any_ptr, b: any_ptr): i32 {
-	let ma: mesh_object_t = DEREFERENCE(a);
-	let mb: mesh_object_t = DEREFERENCE(b);
-	return ma.camera_dist >= mb.camera_dist ? 1 : -1;
-}
-
-function render_path_sort_meshes_dist(meshes: mesh_object_t[]) {
-	array_sort(meshes, _render_path_sort_dist);
-}
-
-function _render_path_sort_shader(a: any_ptr, b: any_ptr): i32 {
-	let ma: mesh_object_t = DEREFERENCE(a);
-	let mb: mesh_object_t = DEREFERENCE(b);
-	return strcmp(ma.material.name, mb.material.name);
-}
-
-function render_path_sort_meshes_shader(meshes: mesh_object_t[]) {
-	array_sort(meshes, _render_path_sort_shader);
-}
-
 function render_path_draw_meshes(context: string) {
 	render_path_submit_draw(context);
 	render_path_end();
 }
 
 function render_path_submit_draw(context: string) {
-	let camera: camera_object_t = scene_camera;
 	let meshes: mesh_object_t[] = scene_meshes;
 	_mesh_object_last_pipeline  = null;
-
-	// if (!_render_path_meshes_sorted && camera != null) { // Order max once per frame for now
-	// 	let cam_x: f32 = transform_world_x(camera.base.transform);
-	// 	let cam_y: f32 = transform_world_y(camera.base.transform);
-	// 	let cam_z: f32 = transform_world_z(camera.base.transform);
-	// 	for (let i: i32 = 0; i < meshes.length; ++i) {
-	// 		let mesh: mesh_object_t = meshes[i];
-	// 		mesh_object_compute_camera_dist(mesh, cam_x, cam_y, cam_z);
-	// 	}
-	// 	if (_render_path_draw_order == draw_order_t.SHADER) {
-	// 		render_path_sort_meshes_shader(meshes);
-	// 	}
-	// 	else {
-	// 		render_path_sort_meshes_dist(meshes);
-	// 	}
-	// 	_render_path_meshes_sorted = true;
-	// }
-
 	for (let i: i32 = 0; i < meshes.length; ++i) {
 		let mesh: mesh_object_t = meshes[i];
 		mesh_object_render(mesh, context, _render_path_bind_params);
@@ -162,12 +110,9 @@ function render_path_draw_skydome(handle: string) {
 		const_data_create_skydome_data();
 	}
 	let cc: cached_shader_context_t = map_get(_render_path_cached_shader_contexts, handle);
-	if (cc.context == null) {
-		return; // World data not specified
-	}
 	gpu_set_pipeline(cc.context._.pipe);
 	uniforms_set_context_consts(cc.context, _render_path_bind_params);
-	uniforms_set_obj_consts(cc.context, null); // External hosek
+	uniforms_set_obj_consts(cc.context, null);
 	gpu_set_vertex_buffer(const_data_skydome_vb);
 	gpu_set_index_buffer(const_data_skydome_ib);
 	gpu_draw();
@@ -184,8 +129,8 @@ function render_path_bind_target(target: string, uniform: string) {
 	}
 }
 
-// Full-screen triangle
 function render_path_draw_shader(handle: string) {
+	// Full-screen triangle
 	// file/data_name/context
 	let cc: cached_shader_context_t = map_get(_render_path_cached_shader_contexts, handle);
 	if (const_data_screen_aligned_vb == null) {
@@ -197,7 +142,6 @@ function render_path_draw_shader(handle: string) {
 	gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 	gpu_set_index_buffer(const_data_screen_aligned_ib);
 	gpu_draw();
-
 	render_path_end();
 }
 
@@ -220,28 +164,10 @@ function render_path_load_shader(handle: string) {
 	_render_path_loading--;
 }
 
-function render_path_unload_shader(handle: string) {
-	map_delete(_render_path_cached_shader_contexts, handle);
-
-	// file/data_name/context
-	let shader_path: string[] = string_split(handle, "/");
-	// Todo: Handle context overrides (see data_get_shader())
-	map_delete(data_cached_shaders, shader_path[1]);
-}
-
-function render_path_unload() {
-	let render_targets_keys: string[] = map_keys(render_path_render_targets);
-	for (let i: i32 = 0; i < render_targets_keys.length; ++i) {
-		let rt: render_target_t = map_get(render_path_render_targets, render_targets_keys[i]);
-		render_target_unload(rt);
-	}
-}
-
 function render_path_resize() {
 	if (iron_window_width() == 0 || iron_window_height() == 0) {
 		return;
 	}
-
 	let render_targets_keys: string[] = map_keys(render_path_render_targets);
 	for (let i: i32 = 0; i < render_targets_keys.length; ++i) {
 		let rt: render_target_t = map_get(render_path_render_targets, render_targets_keys[i]);
@@ -301,10 +227,4 @@ function render_target_create(): render_target_t {
 	let raw: render_target_t = {};
 	raw.scale                = 1.0;
 	return raw;
-}
-
-function render_target_unload(raw: render_target_t) {
-	if (raw._image != null) {
-		gpu_delete_texture(raw._image);
-	}
 }

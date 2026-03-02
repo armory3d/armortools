@@ -222,72 +222,11 @@ function data_delete_sound(handle: string) {
 }
 /// end
 
-function data_delete_all() {
-	let cached_meshes_keys: string[] = map_keys(data_cached_meshes);
-	for (let i: i32 = 0; i < cached_meshes_keys.length; ++i) {
-		let c: mesh_data_t = map_get(data_cached_meshes, cached_meshes_keys[i]);
-		mesh_data_delete(c);
-	}
-	data_cached_meshes = map_create();
-
-	let cached_shaders_keys: string[] = map_keys(data_cached_shaders);
-	for (let i: i32 = 0; i < cached_shaders_keys.length; ++i) {
-		let c: shader_data_t = map_get(data_cached_shaders, cached_shaders_keys[i]);
-		shader_data_delete(c);
-	}
-	data_cached_shaders = map_create();
-
-	data_cached_scene_raws = map_create();
-	data_cached_cameras    = map_create();
-	data_cached_materials  = map_create();
-	data_cached_worlds     = map_create();
-	render_path_unload();
-	data_cached_blobs = map_create();
-
-	let cached_images_keys: string[] = map_keys(data_cached_images);
-	for (let i: i32 = 0; i < cached_images_keys.length; ++i) {
-		let c: gpu_texture_t = map_get(data_cached_images, cached_images_keys[i]);
-		gpu_delete_texture(c);
-	}
-	data_cached_images = map_create();
-
-	/// if arm_audio
-	let cached_sounds_keys: string[] = map_keys(data_cached_sounds);
-	for (let i: i32 = 0; i < cached_sounds_keys.length; ++i) {
-		let c: sound_t = map_get(data_cached_sounds, cached_sounds_keys[i]);
-		sound_unload(c);
-	}
-	data_cached_sounds = map_create();
-	/// end
-
-	let cached_videos_keys: string[] = map_keys(data_cached_videos);
-	for (let i: i32 = 0; i < cached_videos_keys.length; ++i) {
-		let c: video_t = map_get(data_cached_videos, cached_videos_keys[i]);
-		video_unload(c);
-	}
-	data_cached_videos = map_create();
-
-	let cached_fonts_keys: string[] = map_keys(data_cached_fonts);
-	for (let i: i32 = 0; i < cached_fonts_keys.length; ++i) {
-		let c: draw_font_t = map_get(data_cached_fonts, cached_fonts_keys[i]);
-		draw_font_destroy(c);
-	}
-	data_cached_fonts = map_create();
-}
-
-function data_sep(): string {
-	/// if arm_windows
-	return "\\";
-	/// else
-	return "/";
-	/// end
-}
-
 function data_path(): string {
 	/// if arm_android
-	return "data" + data_sep();
+	return "data" + PATH_SEP;
 	/// else
-	return "." + data_sep() + "data" + data_sep();
+	return "." + PATH_SEP + "data" + PATH_SEP;
 	/// end
 }
 
@@ -297,11 +236,6 @@ function data_is_abs(file: string): bool {
 
 function data_is_up(file: string): bool {
 	return char_at(file, 0) == "." && char_at(file, 1) == ".";
-}
-
-function data_base_name(path: string): string {
-	let slash: i32 = string_last_index_of(path, data_sep());
-	return slash >= 0 ? substring(path, slash + 1, path.length) : path;
 }
 
 function data_resolve_path(file: string): string {

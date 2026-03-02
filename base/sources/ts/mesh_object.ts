@@ -107,9 +107,3 @@ function mesh_object_render(raw: mesh_object_t, context: string, bind_params: st
 function mesh_object_valid_context(raw: mesh_object_t, mat: material_data_t, context: string): bool {
 	return material_data_get_context(mat, context) != null;
 }
-
-function mesh_object_compute_camera_dist(raw: mesh_object_t, cam_x: f32, cam_y: f32, cam_z: f32) {
-	// Render path mesh sorting
-	raw.camera_dist =
-	    vec4_fdist(cam_x, cam_y, cam_z, transform_world_x(raw.base.transform), transform_world_y(raw.base.transform), transform_world_z(raw.base.transform));
-}

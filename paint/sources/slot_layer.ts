@@ -862,7 +862,7 @@ function layers_make_temp_img() {
 	if (layers_temp_image != null &&
 	    (layers_temp_image.width != l.texpaint.width || layers_temp_image.height != l.texpaint.height || layers_temp_image.format != l.texpaint.format)) {
 		let _temptex0: render_target_t = map_get(render_path_render_targets, "temptex0");
-		render_target_unload(_temptex0);
+		gpu_delete_texture(_temptex0._image);
 		map_delete(render_path_render_targets, "temptex0");
 		layers_temp_image = null;
 	}

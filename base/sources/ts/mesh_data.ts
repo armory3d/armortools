@@ -76,9 +76,6 @@ function mesh_data_build_vertices(vertex_buffer: gpu_buffer_t, vertex_arrays: ve
 
 function mesh_data_build_indices(index_buffer: gpu_buffer_t, index_array: u32_array_t) {
 	let ia: u32_array_t = gpu_lock_index_buffer(index_buffer);
-	// for (let i: i32 = 0; i < ia.length; ++i) {
-	// 	ia[i] = index_array[i];
-	// }
 	memcpy(ia.buffer, index_array.buffer, ia.length * 4);
 	gpu_index_buffer_unlock(index_buffer);
 }

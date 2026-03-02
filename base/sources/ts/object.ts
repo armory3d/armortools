@@ -31,16 +31,13 @@ function object_create(is_empty: bool = true): object_t {
 	return raw;
 }
 
-function object_set_parent(raw: object_t, parent_object: object_t, parent_inv: bool = false, keep_transform: bool = false) {
+function object_set_parent(raw: object_t, parent_object: object_t) {
 	if (parent_object == raw || parent_object == raw.parent) {
 		return;
 	}
 
 	if (raw.parent != null) {
 		array_remove(raw.parent.children, raw);
-		if (keep_transform) {
-			transform_apply_parent(raw.transform);
-		}
 		raw.parent = null; // rebuild matrix without a parent
 		transform_build_matrix(raw.transform);
 	}
@@ -50,9 +47,6 @@ function object_set_parent(raw: object_t, parent_object: object_t, parent_inv: b
 	}
 	raw.parent = parent_object;
 	array_push(raw.parent.children, raw);
-	if (parent_inv) {
-		transform_apply_parent_inv(raw.transform);
-	}
 }
 
 function object_remove_super(raw: object_t) {
@@ -94,17 +88,4 @@ function object_get_child(raw: object_t, name: string): object_t {
 		}
 	}
 	return null;
-}
-
-function object_get_children(raw: object_t, recursive: bool = false): object_t[] {
-	if (!recursive) {
-		return raw.children;
-	}
-
-	let ret_children: object_t[] = array_slice(raw.children, 0, raw.children.length);
-	for (let i: i32 = 0; i < raw.children.length; ++i) {
-		let c: object_t = raw.children[i];
-		ret_children    = array_concat(ret_children, object_get_children(c, recursive));
-	}
-	return ret_children;
 }

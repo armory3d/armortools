@@ -10,7 +10,6 @@ type camera_object_t = {
 	frustum_planes?: frustum_plane_t[];
 };
 
-let _camera_object_v: vec4_t             = vec4_create();
 let _camera_object_sphere_center: vec4_t = vec4_create();
 let camera_object_taa_frames: i32        = 1;
 
@@ -107,14 +106,6 @@ function camera_object_proj_jitter(raw: camera_object_t) {
 
 function camera_object_build_mat(raw: camera_object_t) {
 	transform_build_matrix(raw.base.transform);
-
-	// Prevent camera matrix scaling
-	// TODO: discards position affected by scaled camera parent
-	let sc: vec4_t = mat4_get_scale(raw.base.transform.world);
-	if (sc.x != 1.0 || sc.y != 1.0 || sc.z != 1.0) {
-		_camera_object_v         = vec4_create(1.0 / sc.x, 1.0 / sc.y, 1.0 / sc.z);
-		raw.base.transform.world = mat4_scale(raw.base.transform.world, _camera_object_v);
-	}
 
 	raw.v  = mat4_inv(raw.base.transform.world);
 	raw.vp = mat4_mult_mat(raw.v, raw.p);

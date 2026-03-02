@@ -1,7 +1,6 @@
 
 type transform_t = {
 	world?: mat4_t;
-	local_only?: bool;
 	local?: mat4_t;
 	loc?: vec4_t;
 	rot?: quat_t;
@@ -16,7 +15,6 @@ type transform_t = {
 
 function transform_create(object: object_t): transform_t {
 	let raw: transform_t = {};
-	raw.local_only       = false;
 	raw.scale_world      = 1.0;
 	raw.object           = object;
 	transform_reset(raw);
@@ -42,14 +40,9 @@ function transform_update(raw: transform_t) {
 }
 
 function transform_build_matrix(raw: transform_t) {
-	// if (vec4_isnan(raw.dloc)) {
 	raw.local = mat4_compose(raw.loc, raw.rot, raw.scale);
-	// }
-	// else {
-	// transform_compose_delta(raw);
-	// }
 
-	if (raw.object.parent != null && !raw.local_only) {
+	if (raw.object.parent != null) {
 		raw.world = mat4_mult_mat3x4(raw.local, raw.object.parent.transform.world);
 	}
 	else {
@@ -83,21 +76,8 @@ function transform_build_matrix(raw: transform_t) {
 	raw.dirty = false;
 }
 
-function transform_translate(raw: transform_t, x: f32, y: f32, z: f32) {
-	raw.loc.x += x;
-	raw.loc.y += y;
-	raw.loc.z += z;
-	transform_build_matrix(raw);
-}
-
 function transform_set_matrix(raw: transform_t, mat: mat4_t) {
 	raw.local = mat4_clone(mat);
-	transform_decompose(raw);
-	transform_build_matrix(raw);
-}
-
-function transform_mult_matrix(raw: transform_t, mat: mat4_t) {
-	raw.local = mat4_mult_mat(raw.local, mat);
 	transform_decompose(raw);
 	transform_build_matrix(raw);
 }
@@ -118,11 +98,6 @@ function transform_rotate(raw: transform_t, axis: vec4_t, f: f32) {
 function transform_move(raw: transform_t, axis: vec4_t, f: f32 = 1.0) {
 	raw.loc = vec4_fadd(raw.loc, axis.x * f, axis.y * f, axis.z * f);
 	transform_build_matrix(raw);
-}
-
-function transform_set_rot(raw: transform_t, x: f32, y: f32, z: f32) {
-	raw.rot = quat_from_euler(x, y, z);
-	raw.dirty = true;
 }
 
 function transform_compute_radius(raw: transform_t) {
@@ -146,23 +121,6 @@ function transform_compute_dim(raw: transform_t) {
 		raw.dim            = vec4_create(d[0] * raw.scale.x, d[1] * raw.scale.y, d[2] * raw.scale.z);
 	}
 	transform_compute_radius(raw);
-}
-
-function transform_apply_parent_inv(raw: transform_t) {
-	let pt: transform_t = raw.object.parent.transform;
-	transform_build_matrix(pt);
-	let pinv: mat4_t = mat4_inv(pt.world);
-	raw.local        = mat4_mult_mat(raw.local, pinv);
-	transform_decompose(raw);
-	transform_build_matrix(raw);
-}
-
-function transform_apply_parent(raw: transform_t) {
-	let pt: transform_t = raw.object.parent.transform;
-	transform_build_matrix(pt);
-	raw.local = mat4_mult_mat(raw.local, pt.world);
-	transform_decompose(raw);
-	transform_build_matrix(raw);
 }
 
 function transform_look(raw: transform_t): vec4_t {
