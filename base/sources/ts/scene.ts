@@ -278,7 +278,7 @@ type scene_t = {
 	embedded_datas?: string[]; // Preload for this scene, images only for now
 };
 
-type mesh_data_t = {
+declare type mesh_data_t = {
 	name?: string;
 	scale_pos?: f32; // Unpack pos from (-1,1) coords
 	scale_tex?: f32; // Unpack tex from (-1,1) coords
@@ -287,20 +287,20 @@ type mesh_data_t = {
 	_?: mesh_data_runtime_t;
 };
 
-type mesh_data_runtime_t = {
+declare type mesh_data_runtime_t = {
 	handle?: string; // Handle used to retrieve this object in Data
 	vertex_buffer?: gpu_buffer_t;
 	index_buffer?: gpu_buffer_t;
 	structure?: gpu_vertex_structure_t;
 };
 
-type vertex_array_t = {
+declare type vertex_array_t = {
 	attrib?: string;
 	data?: string; // short4norm, short2norm
 	values?: i16_array_t;
 };
 
-type camera_data_t = {
+declare type camera_data_t = {
 	name?: string;
 	near_plane?: f32;
 	far_plane?: f32;
@@ -310,45 +310,45 @@ type camera_data_t = {
 	ortho?: f32_array_t; // Indicates ortho camera, left, right, bottom, top
 };
 
-type material_data_t = {
+declare type material_data_t = {
 	name?: string;
 	shader?: string;
 	contexts?: material_context_t[];
 	_?: material_data_runtime_t;
 };
 
-type material_data_runtime_t = {
+declare type material_data_runtime_t = {
 	uid?: f32;
 	shader?: shader_data_t;
 };
 
-type material_context_t = {
+declare type material_context_t = {
 	name?: string;
 	bind_constants?: bind_const_t[];
 	bind_textures?: bind_tex_t[];
 	_?: material_context_runtime_t;
 };
 
-type material_context_runtime_t = {
+declare type material_context_runtime_t = {
 	textures?: gpu_texture_t[];
 };
 
-type bind_const_t = {
+declare type bind_const_t = {
 	name?: string;
 	vec?: f32_array_t; // bool (vec[0] > 0) | i32 | f32 | vec2 | vec3 | vec4
 };
 
-type bind_tex_t = {
+declare type bind_tex_t = {
 	name?: string;
 	file?: string;
 };
 
-type shader_data_t = {
+declare type shader_data_t = {
 	name?: string;
 	contexts?: shader_context_t[];
 };
 
-type shader_context_t = {
+declare type shader_context_t = {
 	name?: string;
 	depth_write?: bool;
 	compare_mode?: string;
@@ -372,7 +372,7 @@ type shader_context_t = {
 	_?: shader_context_runtime_t;
 };
 
-type shader_context_runtime_t = {
+declare type shader_context_runtime_t = {
 	pipe?: gpu_pipeline_t;
 	constants?: i32[];
 	tex_units?: i32[];
@@ -381,23 +381,23 @@ type shader_context_runtime_t = {
 	fragment_shader_size?: i32;
 };
 
-type vertex_element_t = {
+declare type vertex_element_t = {
 	name?: string;
 	data?: string; // "short4norm", "short2norm"
 };
 
-type shader_const_t = {
+declare type shader_const_t = {
 	name?: string;
 	type?: string;
 	link?: string;
 };
 
-type tex_unit_t = {
+declare type tex_unit_t = {
 	name?: string;
 	link?: string;
 };
 
-type world_data_t = {
+declare type world_data_t = {
 	name?: string;
 	color?: i32;
 	strength?: f32;
@@ -408,18 +408,18 @@ type world_data_t = {
 	_?: world_data_runtime_t;
 };
 
-type world_data_runtime_t = {
+declare type world_data_runtime_t = {
 	envmap?: gpu_texture_t;
 	radiance?: gpu_texture_t;
 	radiance_mipmaps?: gpu_texture_t[];
 	irradiance?: f32_array_t;
 };
 
-type irradiance_t = {
+declare type irradiance_t = {
 	irradiance?: f32_array_t; // Blob with spherical harmonics, bands 0,1,2
 };
 
-type obj_t = {
+declare type obj_t = {
 	name?: string;
 	type?: string; // object, mesh_object, camera_object
 	data_ref?: string;
@@ -433,6 +433,6 @@ type obj_t = {
 	_?: obj_runtime_t;
 };
 
-type obj_runtime_t = {
+declare type obj_runtime_t = {
 	_gc?: scene_t; // Link to armpack_decode result
 };

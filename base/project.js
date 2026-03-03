@@ -33,6 +33,7 @@ let dir     = flags.name.substr(5).toLowerCase(); // ArmorPaint -> paint
 let project = new Project("Base");
 project.add_include_dir("sources");
 project.add_include_dir("sources/libs");
+project.add_tsfiles("sources");
 project.add_tsfiles("sources/ts");
 project.add_shaders("shaders/*.kong");
 project.add_assets("assets/*", {destination : "data/{name}"});
