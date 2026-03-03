@@ -1,13 +1,32 @@
 #include "engine.h"
+#include <limits.h>
 
 i32                 _object_uid_counter = 0;
 extern any_array_t *scene_empties;
 extern any_array_t *scene_meshes;
 extern object_t    *_scene_scene_parent;
 
-void      mesh_object_remove(void *raw);
-void      camera_object_remove(void *raw);
-_scene_t *data_get_scene_raw(char *name);
+scene_t *data_get_scene_raw(char *name);
+i32      sys_w(void);
+i32      sys_h(void);
+void     render_path_render_frame(void);
+
+extern any_array_t      *scene_cameras;
+extern camera_object_t  *scene_camera;
+extern world_data_t     *scene_world;
+extern any_map_t        *scene_embedded;
+extern i32               render_path_current_w;
+extern i32               render_path_current_h;
+extern any_map_t        *render_path_render_targets;
+extern char_ptr_array_t *_render_path_bind_params;
+
+f32  sys_time(void);
+f32  f32_nan(void);
+bool f32_isnan(f32 f);
+
+gpu_pipeline_t *_mesh_object_last_pipeline   = NULL;
+vec4_t          _camera_object_sphere_center = {0};
+i32             camera_object_taa_frames     = 1;
 
 gpu_buffer_t   *gpu_create_vertex_buffer(i32 count, gpu_vertex_structure_t *structure);
 gpu_buffer_t   *gpu_create_index_buffer(i32 count);
@@ -252,7 +271,7 @@ float transform_world_z(transform_t *raw) {
 //  ╚═════╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
 
 camera_data_t *camera_data_parse(char *name, char *id) {
-	_scene_t      *format = data_get_scene_raw(name);
+	scene_t       *format = data_get_scene_raw(name);
 	camera_data_t *raw    = camera_data_get_raw_by_name(format->camera_datas, id);
 	if (raw == NULL) {
 		iron_log("Camera data '%s' not found!", id);
@@ -283,7 +302,7 @@ camera_data_t *camera_data_get_raw_by_name(any_array_t *datas, char *name) {
 f32_array_t *_world_data_empty_irr = NULL;
 
 world_data_t *world_data_parse(char *name, char *id) {
-	_scene_t     *format = data_get_scene_raw(name);
+	scene_t      *format = data_get_scene_raw(name);
 	world_data_t *raw    = world_data_get_raw_by_name(format->world_datas, id);
 	if (raw == NULL) {
 		iron_log("World data '%s' not found!", id);
@@ -390,7 +409,7 @@ material_data_t *material_data_create(material_data_t *raw, char *file) {
 }
 
 material_data_t *material_data_parse(char *file, char *name) {
-	_scene_t        *format = data_get_scene_raw(file);
+	scene_t         *format = data_get_scene_raw(file);
 	material_data_t *raw    = material_data_get_raw_by_name(format->material_datas, name);
 	if (raw == NULL) {
 		iron_log("Material data '%s' not found!", name);
@@ -465,7 +484,7 @@ char *shader_data_ext() {
 }
 
 shader_data_t *shader_data_parse(char *file, char *name) {
-	_scene_t      *format = data_get_scene_raw(file);
+	scene_t       *format = data_get_scene_raw(file);
 	shader_data_t *raw    = shader_data_get_raw_by_name(format->shader_datas, name);
 	if (raw == NULL) {
 		iron_log("Shader data '%s' not found!", name);
@@ -779,7 +798,7 @@ void shader_context_add_tex(shader_context_t *raw, i32 i) {
 // ╚═╝     ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
 
 mesh_data_t *mesh_data_parse(char *name, char *id) {
-	_scene_t    *format = data_get_scene_raw(name);
+	scene_t     *format = data_get_scene_raw(name);
 	mesh_data_t *raw    = mesh_data_get_raw_by_name(format->mesh_datas, id);
 	if (raw == NULL) {
 		iron_log("Mesh data '%s' not found!", id);
@@ -916,4 +935,924 @@ vec4_t mesh_data_calculate_aabb(mesh_data_t *raw) {
 void mesh_data_delete(mesh_data_t *raw) {
 	gpu_delete_buffer(raw->_->vertex_buffer);
 	gpu_delete_buffer(raw->_->index_buffer);
+}
+
+// ███╗   ███╗███████╗███████╗██╗  ██╗     ██████╗ ██████╗      ██╗███████╗ ██████╗████████╗
+// ████╗ ████║██╔════╝██╔════╝██║  ██║    ██╔═══██╗██╔══██╗     ██║██╔════╝██╔════╝╚══██╔══╝
+// ██╔████╔██║█████╗  ███████╗███████║    ██║   ██║██████╔╝     ██║█████╗  ██║        ██║
+// ██║╚██╔╝██║██╔══╝  ╚════██║██╔══██║    ██║   ██║██╔══██╗██   ██║██╔══╝  ██║        ██║
+// ██║ ╚═╝ ██║███████╗███████║██║  ██║    ╚██████╔╝██████╔╝╚█████╔╝███████╗╚██████╗   ██║
+// ╚═╝     ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝     ╚═════╝ ╚═════╝  ╚════╝ ╚══════╝ ╚═════╝   ╚═╝
+
+mesh_object_t *mesh_object_create(mesh_data_t *data, material_data_t *material) {
+	mesh_object_t *raw   = gc_alloc(sizeof(mesh_object_t));
+	raw->frustum_culling = true;
+	raw->base            = object_create(false);
+	raw->base->ext       = raw;
+	raw->base->ext_type  = "mesh_object_t";
+	raw->material        = material;
+	mesh_object_set_data(raw, data);
+	any_array_push(scene_meshes, raw);
+	return raw;
+}
+
+void mesh_object_set_data(mesh_object_t *raw, mesh_data_t *data) {
+	raw->data = data;
+	// Scale-up packed (-1,1) mesh coords
+	raw->base->transform->scale_world = data->scale_pos;
+}
+
+void mesh_object_remove(mesh_object_t *raw) {
+	array_remove(scene_meshes, raw);
+	object_remove_super(raw->base);
+}
+
+bool mesh_object_cull_material(mesh_object_t *raw, char *context) {
+	// Skip render if material does not contain current context
+	if (!mesh_object_valid_context(raw, raw->material, context)) {
+		raw->base->culled = true;
+		return true;
+	}
+	if (raw->skip_context != NULL && string_equals(raw->skip_context, context)) {
+		raw->base->culled = true;
+		return true;
+	}
+	if (raw->force_context != NULL && !string_equals(raw->force_context, context)) {
+		raw->base->culled = true;
+		return true;
+	}
+	raw->base->culled = false;
+	return false;
+}
+
+bool mesh_object_cull_mesh(mesh_object_t *raw, char *context, camera_object_t *camera) {
+	if (camera->data->frustum_culling && raw->frustum_culling) {
+		f32 radius_scale = 1.0;
+		if (!camera_object_sphere_in_frustum(&camera->frustum_planes, raw->base->transform, radius_scale, 0.0, 0.0, 0.0)) {
+			raw->base->culled = true;
+			return true;
+		}
+	}
+	raw->base->culled = false;
+	return false;
+}
+
+void mesh_object_render(mesh_object_t *raw, char *context, char_ptr_array_t *bind_params) {
+	if (!raw->base->visible) {
+		return; // Skip render if object is hidden
+	}
+	if (mesh_object_cull_mesh(raw, context, scene_camera)) {
+		return;
+	}
+	if (mesh_object_cull_material(raw, context)) {
+		return;
+	}
+
+	uniforms_pos_unpack = raw->data->scale_pos;
+	uniforms_tex_unpack = raw->data->scale_tex;
+	transform_update(raw->base->transform);
+
+	shader_context_t   *scontext = NULL;
+	material_context_t *mcontext = NULL;
+	material_data_t    *mat      = raw->material;
+	for (i32 j = 0; j < (i32)mat->contexts->length; ++j) {
+		material_context_t *c = (material_context_t *)mat->contexts->buffer[j];
+		if (string_equals(c->name, context)) {
+			scontext = shader_data_get_context(mat->_->shader, context);
+			mcontext = c;
+			break;
+		}
+	}
+
+	if (scontext->_->pipe != _mesh_object_last_pipeline) {
+		gpu_set_pipeline(scontext->_->pipe);
+		gc_unroot(_mesh_object_last_pipeline);
+		_mesh_object_last_pipeline = scontext->_->pipe;
+		gc_root(_mesh_object_last_pipeline);
+	}
+	uniforms_set_context_consts(scontext, bind_params);
+	uniforms_set_obj_consts(scontext, raw->base);
+	uniforms_set_material_consts(scontext, mcontext);
+	gpu_set_vertex_buffer(raw->data->_->vertex_buffer);
+	gpu_set_index_buffer(raw->data->_->index_buffer);
+	gpu_draw();
+}
+
+bool mesh_object_valid_context(mesh_object_t *raw, material_data_t *mat, char *context) {
+	return material_data_get_context(mat, context) != NULL;
+}
+
+// ██████╗ ██████╗ ██╗   ██╗███████╗████████╗██╗   ██╗███╗   ███╗    ██████╗ ██╗      █████╗ ███╗   ██╗███████╗
+// ██╔════╝██╔══██╗██║   ██║██╔════╝╚══██╔══╝██║   ██║████╗ ████║    ██╔══██╗██║     ██╔══██╗████╗  ██║██╔════╝
+// ██║     ██████╔╝██║   ██║███████╗   ██║   ██║   ██║██╔████╔██║    ██████╔╝██║     ███████║██╔██╗ ██║█████╗
+// ██║     ██╔══██╗██║   ██║╚════██║   ██║   ██║   ██║██║╚██╔╝██║    ██╔═══╝ ██║     ██╔══██║██║╚██╗██║██╔══╝
+// ╚██████╗██║  ██║╚██████╔╝███████║   ██║   ╚██████╔╝██║ ╚═╝ ██║    ██║     ███████╗██║  ██║██║ ╚████║███████╗
+//  ╚═════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝    ╚═════╝ ╚═╝     ╚═╝    ╚═╝     ╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝
+
+camera_object_t *camera_object_create(camera_data_t *data) {
+	camera_object_t *raw = gc_alloc(sizeof(camera_object_t));
+	raw->no_jitter_p     = mat4_identity();
+	raw->frame           = 0;
+	raw->base            = object_create(false);
+	raw->base->ext       = raw;
+	raw->base->ext_type  = "camera_object_t";
+	raw->data            = data;
+
+	camera_object_build_proj(raw, -1.0);
+
+	raw->v  = mat4_identity();
+	raw->vp = mat4_identity();
+
+	if (data->frustum_culling) {
+		raw->frustum_planes = any_array_create(0);
+		for (i32 i = 0; i < 6; ++i) {
+			any_array_push(raw->frustum_planes, frustum_plane_create());
+		}
+	}
+
+	any_array_push(scene_cameras, raw);
+	return raw;
+}
+
+void camera_object_build_proj(camera_object_t *raw, f32 screen_aspect) {
+	if (raw->data->ortho != NULL) {
+		raw->p = mat4_ortho(raw->data->ortho->buffer[0], raw->data->ortho->buffer[1], raw->data->ortho->buffer[2], raw->data->ortho->buffer[3],
+		                    -raw->data->far_plane, raw->data->far_plane);
+	}
+	else {
+		if (screen_aspect < 0) {
+			screen_aspect = (f32)sys_w() / (f32)sys_h();
+		}
+		f32 aspect = raw->data->aspect != 0.0 ? raw->data->aspect : screen_aspect;
+		raw->p     = mat4_persp(raw->data->fov, aspect, raw->data->near_plane, raw->data->far_plane);
+	}
+	raw->no_jitter_p = mat4_clone(raw->p);
+}
+
+void camera_object_remove(camera_object_t *raw) {
+	array_remove(scene_cameras, raw);
+	object_remove_super(raw->base);
+}
+
+void camera_object_render_frame(camera_object_t *raw) {
+	camera_object_proj_jitter(raw);
+	camera_object_build_mat(raw);
+	render_path_render_frame();
+}
+
+void camera_object_proj_jitter(camera_object_t *raw) {
+	i32 w  = render_path_current_w;
+	i32 h  = render_path_current_h;
+	raw->p = mat4_clone(raw->no_jitter_p);
+
+	i32 i = raw->frame % camera_object_taa_frames;
+	f32 x = 0.0;
+	f32 y = 0.0;
+
+	if (i == 0) {
+		x = 0.5;
+		y = 0.333;
+	}
+	else if (i == 1) {
+		x = -0.5;
+		y = -0.333;
+	}
+	else if (i == 2) {
+		x = 0.25;
+		y = 0.111;
+	}
+	else if (i == 3) {
+		x = -0.25;
+		y = -0.111;
+	}
+	else if (i == 4) {
+		x = 0.375;
+		y = 0.444;
+	}
+	else {
+		x = -0.375;
+		y = -0.444;
+	}
+	x *= 2;
+	y *= 2;
+
+	raw->p.m20 += x / w;
+	raw->p.m21 += y / h;
+	raw->frame++;
+}
+
+void camera_object_build_mat(camera_object_t *raw) {
+	transform_build_matrix(raw->base->transform);
+
+	raw->v  = mat4_inv(raw->base->transform->world);
+	raw->vp = mat4_mult_mat(raw->v, raw->p);
+
+	if (raw->data->frustum_culling) {
+		camera_object_build_view_frustum(raw->vp, raw->frustum_planes);
+	}
+}
+
+vec4_t camera_object_right(camera_object_t *raw) {
+	return vec4_norm(vec4_create(raw->base->transform->local.m00, raw->base->transform->local.m01, raw->base->transform->local.m02, 0.0));
+}
+
+vec4_t camera_object_up(camera_object_t *raw) {
+	return vec4_norm(vec4_create(raw->base->transform->local.m10, raw->base->transform->local.m11, raw->base->transform->local.m12, 0.0));
+}
+
+vec4_t camera_object_look(camera_object_t *raw) {
+	return vec4_norm(vec4_create(-raw->base->transform->local.m20, -raw->base->transform->local.m21, -raw->base->transform->local.m22, 0.0));
+}
+
+vec4_t camera_object_right_world(camera_object_t *raw) {
+	return vec4_norm(vec4_create(raw->base->transform->world.m00, raw->base->transform->world.m01, raw->base->transform->world.m02, 0.0));
+}
+
+vec4_t camera_object_up_world(camera_object_t *raw) {
+	return vec4_norm(vec4_create(raw->base->transform->world.m10, raw->base->transform->world.m11, raw->base->transform->world.m12, 0.0));
+}
+
+vec4_t camera_object_look_world(camera_object_t *raw) {
+	return vec4_norm(vec4_create(-raw->base->transform->world.m20, -raw->base->transform->world.m21, -raw->base->transform->world.m22, 0.0));
+}
+
+void camera_object_build_view_frustum(mat4_t vp, frustum_plane_array_t *frustum_planes) {
+	// Left plane
+	frustum_plane_set_components(frustum_planes->buffer[0], vp.m03 + vp.m00, vp.m13 + vp.m10, vp.m23 + vp.m20, vp.m33 + vp.m30);
+	// Right plane
+	frustum_plane_set_components(frustum_planes->buffer[1], vp.m03 - vp.m00, vp.m13 - vp.m10, vp.m23 - vp.m20, vp.m33 - vp.m30);
+	// Top plane
+	frustum_plane_set_components(frustum_planes->buffer[2], vp.m03 - vp.m01, vp.m13 - vp.m11, vp.m23 - vp.m21, vp.m33 - vp.m31);
+	// Bottom plane
+	frustum_plane_set_components(frustum_planes->buffer[3], vp.m03 + vp.m01, vp.m13 + vp.m11, vp.m23 + vp.m21, vp.m33 + vp.m31);
+	// Near plane
+	frustum_plane_set_components(frustum_planes->buffer[4], vp.m02, vp.m12, vp.m22, vp.m32);
+	// Far plane
+	frustum_plane_set_components(frustum_planes->buffer[5], vp.m03 - vp.m02, vp.m13 - vp.m12, vp.m23 - vp.m22, vp.m33 - vp.m32);
+	// Normalize planes
+	for (i32 i = 0; i < frustum_planes->length; ++i) {
+		frustum_plane_normalize(frustum_planes->buffer[i]);
+	}
+}
+
+bool camera_object_sphere_in_frustum(frustum_plane_array_t *frustum_planes, transform_t *t, f32 radius_scale, f32 offset_x, f32 offset_y, f32 offset_z) {
+	// Use scale when radius is changing
+	f32 radius = t->radius * radius_scale;
+	for (i32 i = 0; i < frustum_planes->length; ++i) {
+		frustum_plane_t *plane       = frustum_planes->buffer[i];
+		_camera_object_sphere_center = vec4_create(transform_world_x(t) + offset_x, transform_world_y(t) + offset_y, transform_world_z(t) + offset_z, 0.0);
+		// Outside the frustum
+		if (frustum_plane_dist_to_sphere(plane, _camera_object_sphere_center, radius) + radius * 2 < 0) {
+			return false;
+		}
+	}
+	return true;
+}
+
+// ███████╗██████╗ ██╗   ██╗███████╗████████╗██╗   ██╗███╗   ███╗    ██████╗ ██╗      █████╗ ███╗   ██╗███████╗
+// ██╔════╝██╔══██╗██║   ██║██╔════╝╚══██╔══╝██║   ██║████╗ ████║    ██╔══██╗██║     ██╔══██╗████╗  ██║██╔════╝
+// █████╗  ██████╔╝██║   ██║███████╗   ██║   ██║   ██║██╔████╔██║    ██████╔╝██║     ███████║██╔██╗ ██║█████╗
+// ██╔══╝  ██╔══██╗██║   ██║╚════██║   ██║   ██║   ██║██║╚██╔╝██║    ██╔═══╝ ██║     ██╔══██║██║╚██╗██║██╔══╝
+// ██║     ██║  ██║╚██████╔╝███████║   ██║   ╚██████╔╝██║ ╚═╝ ██║    ██║     ███████╗██║  ██║██║ ╚████║███████╗
+// ╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝    ╚═════╝ ╚═╝     ╚═╝    ╚═╝     ╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝
+
+frustum_plane_t *frustum_plane_create() {
+	frustum_plane_t *raw = gc_alloc(sizeof(frustum_plane_t));
+	raw->normal          = vec4_create(1.0, 0.0, 0.0, 0.0);
+	raw->constant        = 0.0;
+	return raw;
+}
+
+void frustum_plane_normalize(frustum_plane_t *raw) {
+	f32 inv_normal_length = 1.0 / vec4_len(raw->normal);
+	raw->normal           = vec4_mult(raw->normal, inv_normal_length);
+	raw->constant *= inv_normal_length;
+}
+
+f32 frustum_plane_dist_to_sphere(frustum_plane_t *raw, vec4_t sphere_center, f32 sphere_radius) {
+	return (vec4_dot(raw->normal, sphere_center) + raw->constant) - sphere_radius;
+}
+
+void frustum_plane_set_components(frustum_plane_t *raw, f32 x, f32 y, f32 z, f32 w) {
+	raw->normal   = vec4_create(x, y, z, 0.0);
+	raw->constant = w;
+}
+
+// ██╗   ██╗███╗   ██╗██╗███████╗ ██████╗ ██████╗ ███╗   ███╗███████╗
+// ██║   ██║████╗  ██║██║██╔════╝██╔═══██╗██╔══██╗████╗ ████║██╔════╝
+// ██║   ██║██╔██╗ ██║██║█████╗  ██║   ██║██████╔╝██╔████╔██║███████╗
+// ██║   ██║██║╚██╗██║██║██╔══╝  ██║   ██║██╔══██╗██║╚██╔╝██║╚════██║
+// ╚██████╔╝██║ ╚████║██║██║     ╚██████╔╝██║  ██║██║ ╚═╝ ██║███████║
+//  ╚═════╝ ╚═╝  ╚═══╝╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
+
+mat4_t _uniforms_mat  = {0};
+mat4_t _uniforms_mat2 = {0};
+mat3_t _uniforms_mat3 = {0};
+vec4_t _uniforms_vec  = {0};
+vec4_t _uniforms_vec2 = {0};
+quat_t _uniforms_quat = {0.0, 0.0, 0.0, 1.0};
+
+f32 uniforms_pos_unpack = 1.0;
+f32 uniforms_tex_unpack = 1.0;
+
+gpu_texture_t *(*uniforms_tex_links)(object_t *o, material_data_t *md, char *s)     = NULL;
+mat4_t (*uniforms_mat4_links)(object_t *o, material_data_t *md, char *s)            = NULL;
+vec4_t (*uniforms_vec4_links)(object_t *o, material_data_t *md, char *s)            = NULL;
+vec4_t (*uniforms_vec3_links)(object_t *o, material_data_t *md, char *s)            = NULL;
+vec2_t (*uniforms_vec2_links)(object_t *o, material_data_t *md, char *s)            = NULL;
+f32 (*uniforms_f32_links)(object_t *o, material_data_t *md, char *s)                = NULL;
+f32_array_t *(*uniforms_f32_array_links)(object_t *o, material_data_t *md, char *s) = NULL;
+i32 (*uniforms_i32_links)(object_t *o, material_data_t *md, char *s)                = NULL;
+
+void uniforms_set_context_consts(shader_context_t *context, char_ptr_array_t *bind_params) {
+	// On shader compile error, _.constants.length will be 0
+	if (context->constants != NULL && context->constants->length == context->_->constants->length) {
+		for (i32 i = 0; i < context->constants->length; ++i) {
+			shader_const_t *c = context->constants->buffer[i];
+			uniforms_set_context_const(context->_->constants->buffer[i], c);
+		}
+	}
+
+	// Texture context constants
+	if (bind_params != NULL) { // Bind targets
+		for (i32 i = 0; i < (i32)math_floor(bind_params->length / 2); ++i) {
+			i32              pos        = i * 2; // bind params = [texture, sampler_id]
+			char            *rt_id      = bind_params->buffer[pos];
+			char            *sampler_id = bind_params->buffer[pos + 1];
+			render_target_t *rt         = any_map_get(render_path_render_targets, rt_id);
+			uniforms_bind_render_target(rt, context, sampler_id);
+		}
+	}
+
+	// Texture links
+	if (context->texture_units != NULL && context->texture_units->length == context->_->tex_units->length) {
+		for (i32 j = 0; j < context->texture_units->length; ++j) {
+			char *tulink = context->texture_units->buffer[j]->link;
+			if (tulink == NULL) {
+				continue;
+			}
+
+			if (tulink[0] == '$') { // Link to embedded data
+				gpu_set_texture(context->_->tex_units->buffer[j], any_map_get(scene_embedded, substring(tulink, 1, string_length(tulink))));
+			}
+			else if (string_equals(tulink, "_envmap_radiance")) {
+				world_data_t *w = scene_world;
+				if (w != NULL) {
+					gpu_set_texture(context->_->tex_units->buffer[j], w->_->radiance);
+				}
+			}
+			else if (string_equals(tulink, "_envmap_radiance0")) {
+				world_data_t *w = scene_world;
+				if (w != NULL) {
+					gpu_set_texture(context->_->tex_units->buffer[j], w->_->radiance_mipmaps->buffer[0]);
+				}
+			}
+			else if (string_equals(tulink, "_envmap_radiance1")) {
+				world_data_t *w = scene_world;
+				if (w != NULL) {
+					gpu_set_texture(context->_->tex_units->buffer[j], w->_->radiance_mipmaps->buffer[1]);
+				}
+			}
+			else if (string_equals(tulink, "_envmap_radiance2")) {
+				world_data_t *w = scene_world;
+				if (w != NULL) {
+					gpu_set_texture(context->_->tex_units->buffer[j], w->_->radiance_mipmaps->buffer[2]);
+				}
+			}
+			else if (string_equals(tulink, "_envmap_radiance3")) {
+				world_data_t *w = scene_world;
+				if (w != NULL) {
+					gpu_set_texture(context->_->tex_units->buffer[j], w->_->radiance_mipmaps->buffer[3]);
+				}
+			}
+			else if (string_equals(tulink, "_envmap_radiance4")) {
+				world_data_t *w = scene_world;
+				if (w != NULL) {
+					gpu_set_texture(context->_->tex_units->buffer[j], w->_->radiance_mipmaps->buffer[4]);
+				}
+			}
+			else if (string_equals(tulink, "_envmap")) {
+				world_data_t *w = scene_world;
+				if (w != NULL) {
+					gpu_set_texture(context->_->tex_units->buffer[j], w->_->envmap);
+				}
+			}
+		}
+	}
+}
+
+void uniforms_set_obj_consts(shader_context_t *context, object_t *object) {
+	if (context->constants != NULL && context->constants->length == context->_->constants->length) {
+		for (i32 i = 0; i < context->constants->length; ++i) {
+			shader_const_t *c = context->constants->buffer[i];
+			uniforms_set_obj_const(object, context->_->constants->buffer[i], c);
+		}
+	}
+
+	// Texture object constants
+	// External
+	if (uniforms_tex_links != NULL && context->texture_units != NULL && context->texture_units->length == context->_->tex_units->length) {
+		for (i32 j = 0; j < context->texture_units->length; ++j) {
+			tex_unit_t *tu = context->texture_units->buffer[j];
+			if (tu->link == NULL) {
+				continue;
+			}
+
+			gpu_texture_t *image = uniforms_tex_links(object, current_material(object), tu->link);
+			if (image != NULL) {
+				gpu_set_texture(context->_->tex_units->buffer[j], image);
+			}
+		}
+	}
+}
+
+void uniforms_bind_render_target(render_target_t *rt, shader_context_t *context, char *sampler_id) {
+	if (rt == NULL) {
+		return;
+	}
+
+	if (context->texture_units != NULL && context->texture_units->length == context->_->tex_units->length) {
+		for (i32 j = 0; j < context->texture_units->length; ++j) { // Set texture
+			if (string_equals(sampler_id, context->texture_units->buffer[j]->name)) {
+				gpu_set_texture(context->_->tex_units->buffer[j], rt->_image);
+			}
+		}
+	}
+}
+
+bool uniforms_set_context_const(i32 location, shader_const_t *c) {
+	if (c->link == NULL) {
+		return true;
+	}
+
+	camera_object_t *camera = scene_camera;
+
+	if (string_equals(c->type, "mat4")) {
+		mat4_t m = mat4_nan();
+		if (string_equals(c->link, "_view_matrix")) {
+			m = camera->v;
+		}
+		else if (string_equals(c->link, "_proj_matrix")) {
+			m = camera->p;
+		}
+		else if (string_equals(c->link, "_inv_proj_matrix")) {
+			m = mat4_inv(camera->p);
+		}
+		else if (string_equals(c->link, "_view_proj_matrix")) {
+			m = camera->vp;
+		}
+		else if (string_equals(c->link, "_inv_view_proj_matrix")) {
+			m = mat4_mult_mat(camera->v, camera->p);
+			m = mat4_inv(m);
+		}
+		else if (string_equals(c->link, "_skydome_matrix")) {
+			transform_t *tr     = camera->base->transform;
+			vec4_t       v      = vec4_create(transform_world_x(tr), transform_world_y(tr), transform_world_z(tr), 0.0);
+			f32          bounds = camera->data->far_plane * 0.9f;
+			vec4_t       v2     = vec4_create(bounds, bounds, bounds, 0.0);
+			m                   = mat4_compose(v, _uniforms_quat, v2);
+			m                   = mat4_mult_mat(m, camera->v);
+			m                   = mat4_mult_mat(m, camera->p);
+		}
+		else { // Unknown uniform
+			return false;
+		}
+
+		gpu_set_matrix4(location, m);
+		return true;
+	}
+	else if (string_equals(c->type, "vec4")) {
+		vec4_t v = vec4_nan();
+		if (string_equals(c->link, "_envmap_irradiance0")) {
+			f32_array_t *fa = scene_world == NULL ? world_data_get_empty_irradiance() : scene_world->_->irradiance;
+			v.x             = fa->buffer[0];
+			v.y             = fa->buffer[1];
+			v.z             = fa->buffer[2];
+			v.w             = fa->buffer[3];
+		}
+		else if (string_equals(c->link, "_envmap_irradiance1")) {
+			f32_array_t *fa = scene_world == NULL ? world_data_get_empty_irradiance() : scene_world->_->irradiance;
+			v.x             = fa->buffer[4];
+			v.y             = fa->buffer[5];
+			v.z             = fa->buffer[6];
+			v.w             = fa->buffer[7];
+		}
+		else if (string_equals(c->link, "_envmap_irradiance2")) {
+			f32_array_t *fa = scene_world == NULL ? world_data_get_empty_irradiance() : scene_world->_->irradiance;
+			v.x             = fa->buffer[8];
+			v.y             = fa->buffer[9];
+			v.z             = fa->buffer[10];
+			v.w             = fa->buffer[11];
+		}
+		else if (string_equals(c->link, "_envmap_irradiance3")) {
+			f32_array_t *fa = scene_world == NULL ? world_data_get_empty_irradiance() : scene_world->_->irradiance;
+			v.x             = fa->buffer[12];
+			v.y             = fa->buffer[13];
+			v.z             = fa->buffer[14];
+			v.w             = fa->buffer[15];
+		}
+		else if (string_equals(c->link, "_envmap_irradiance4")) {
+			f32_array_t *fa = scene_world == NULL ? world_data_get_empty_irradiance() : scene_world->_->irradiance;
+			v.x             = fa->buffer[16];
+			v.y             = fa->buffer[17];
+			v.z             = fa->buffer[18];
+			v.w             = fa->buffer[19];
+		}
+		else if (string_equals(c->link, "_envmap_irradiance5")) {
+			f32_array_t *fa = scene_world == NULL ? world_data_get_empty_irradiance() : scene_world->_->irradiance;
+			v.x             = fa->buffer[20];
+			v.y             = fa->buffer[21];
+			v.z             = fa->buffer[22];
+			v.w             = fa->buffer[23];
+		}
+		else if (string_equals(c->link, "_envmap_irradiance6")) {
+			f32_array_t *fa = scene_world == NULL ? world_data_get_empty_irradiance() : scene_world->_->irradiance;
+			v.x             = fa->buffer[24];
+			v.y             = fa->buffer[25];
+			v.z             = fa->buffer[26];
+			v.w             = fa->buffer[27];
+		}
+		else {
+			return false;
+		}
+
+		if (!vec4_isnan(v)) {
+			gpu_set_float4(location, v.x, v.y, v.z, v.w);
+		}
+		else {
+			gpu_set_float4(location, 0, 0, 0, 0);
+		}
+		return true;
+	}
+	else if (string_equals(c->type, "vec3")) {
+		vec4_t v = vec4_nan();
+
+		if (string_equals(c->link, "_camera_pos")) {
+			v = vec4_create(transform_world_x(camera->base->transform), transform_world_y(camera->base->transform), transform_world_z(camera->base->transform),
+			                0.0);
+		}
+		else if (string_equals(c->link, "_camera_look")) {
+			v = vec4_norm(camera_object_look_world(camera));
+		}
+		else {
+			return false;
+		}
+
+		if (!vec4_isnan(v)) {
+			gpu_set_float3(location, v.x, v.y, v.z);
+		}
+		else {
+			gpu_set_float3(location, 0.0, 0.0, 0.0);
+		}
+		return true;
+	}
+	else if (string_equals(c->type, "vec2")) {
+		vec4_t v = vec4_nan();
+
+		if (string_equals(c->link, "_vec2x")) {
+			v.x = 1.0;
+			v.y = 0.0;
+		}
+		else if (string_equals(c->link, "_vec2x_inv")) {
+			v.x = 1.0f / render_path_current_w;
+			v.y = 0.0;
+		}
+		else if (string_equals(c->link, "_vec2x2")) {
+			v.x = 2.0;
+			v.y = 0.0;
+		}
+		else if (string_equals(c->link, "_vec2x2_inv")) {
+			v.x = 2.0f / render_path_current_w;
+			v.y = 0.0;
+		}
+		else if (string_equals(c->link, "_vec2y")) {
+			v.x = 0.0;
+			v.y = 1.0;
+		}
+		else if (string_equals(c->link, "_vec2y_inv")) {
+			v.x = 0.0;
+			v.y = 1.0f / render_path_current_h;
+		}
+		else if (string_equals(c->link, "_vec2y2")) {
+			v.x = 0.0;
+			v.y = 2.0;
+		}
+		else if (string_equals(c->link, "_vec2y2_inv")) {
+			v.x = 0.0;
+			v.y = 2.0f / render_path_current_h;
+		}
+		else if (string_equals(c->link, "_vec2y3")) {
+			v.x = 0.0;
+			v.y = 3.0;
+		}
+		else if (string_equals(c->link, "_vec2y3_inv")) {
+			v.x = 0.0;
+			v.y = 3.0f / render_path_current_h;
+		}
+		else if (string_equals(c->link, "_screen_size")) {
+			v.x = (f32)render_path_current_w;
+			v.y = (f32)render_path_current_h;
+		}
+		else if (string_equals(c->link, "_screen_size_inv")) {
+			v.x = 1.0f / render_path_current_w;
+			v.y = 1.0f / render_path_current_h;
+		}
+		else if (string_equals(c->link, "_camera_plane_proj")) {
+			f32 znear = camera->data->near_plane;
+			f32 zfar  = camera->data->far_plane;
+			v.x       = zfar / (zfar - znear);
+			v.y       = (-zfar * znear) / (zfar - znear);
+		}
+		else if (starts_with(c->link, "_size(")) {
+			char          *tex   = substring(c->link, 6, string_length(c->link) - 1);
+			gpu_texture_t *image = uniforms_tex_links != NULL ? uniforms_tex_links(NULL, NULL, tex) : NULL;
+			if (image != NULL) {
+				v.x = (f32)image->width;
+				v.y = (f32)image->height;
+			}
+			else if (_render_path_bind_params != NULL) {
+				for (i32 i = 0; i < (i32)math_floor(_render_path_bind_params->length / 2); ++i) {
+					i32   pos        = i * 2; // bind params = [texture, sampler_id]
+					char *sampler_id = _render_path_bind_params->buffer[pos + 1];
+					if (string_equals(sampler_id, tex)) {
+						char            *rt_id = _render_path_bind_params->buffer[pos];
+						render_target_t *rt    = any_map_get(render_path_render_targets, rt_id);
+						v.x                    = (f32)rt->width;
+						v.y                    = (f32)rt->height;
+					}
+				}
+			}
+		}
+		else {
+			return false;
+		}
+
+		if (!vec4_isnan(v)) {
+			gpu_set_float2(location, v.x, v.y);
+		}
+		else {
+			gpu_set_float2(location, 0.0, 0.0);
+		}
+		return true;
+	}
+	else if (string_equals(c->type, "float")) {
+		f32 f = 0.0;
+
+		if (string_equals(c->link, "_time")) {
+			f = sys_time();
+		}
+		else if (string_equals(c->link, "_aspect_ratio_window")) {
+			f = (f32)sys_w() / (f32)sys_h();
+		}
+		else {
+			return false;
+		}
+
+		gpu_set_float(location, f);
+		return true;
+	}
+	else if (string_equals(c->type, "floats")) {
+		f32_array_t *fa = NULL;
+
+		if (string_equals(c->link, "_envmap_irradiance")) {
+			fa = scene_world == NULL ? world_data_get_empty_irradiance() : scene_world->_->irradiance;
+		}
+
+		if (fa != NULL) {
+			gpu_set_floats(location, fa);
+			return true;
+		}
+	}
+	else if (string_equals(c->type, "int")) {
+		i32 i = 0;
+
+		if (string_equals(c->link, "_envmap_num_mipmaps")) {
+			world_data_t *w = scene_world;
+			i               = w != NULL ? w->radiance_mipmaps + 1 - 2 : 1; // Include basecolor and exclude 2 scaled mips
+		}
+		else {
+			return false;
+		}
+
+		gpu_set_int(location, i);
+		return true;
+	}
+	return false;
+}
+
+void uniforms_set_obj_const(object_t *obj, i32 loc, shader_const_t *c) {
+	if (c->link == NULL) {
+		return;
+	}
+
+	camera_object_t *camera = scene_camera;
+	if (string_equals(c->type, "mat4")) {
+		mat4_t m = mat4_nan();
+
+		if (string_equals(c->link, "_world_matrix")) {
+			m = obj->transform->world_unpack;
+		}
+		else if (string_equals(c->link, "_inv_world_matrix")) {
+			m = mat4_inv(obj->transform->world_unpack);
+		}
+		else if (string_equals(c->link, "_world_view_proj_matrix")) {
+			m = mat4_mult_mat(obj->transform->world_unpack, camera->v);
+			m = mat4_mult_mat(m, camera->p);
+		}
+		else if (string_equals(c->link, "_world_wiew_matrix")) {
+			m = mat4_mult_mat(obj->transform->world_unpack, camera->v);
+		}
+		else if (uniforms_mat4_links != NULL) {
+			m = uniforms_mat4_links(obj, current_material(obj), c->link);
+		}
+
+		if (mat4_isnan(m)) {
+			return;
+		}
+		gpu_set_matrix4(loc, m);
+	}
+	else if (string_equals(c->type, "mat3")) {
+		mat3_t m = mat3_nan();
+
+		if (string_equals(c->link, "_normal_matrix")) {
+			mat4_t m4 = mat4_inv(obj->transform->world);
+			m4        = mat4_transpose3x3(m4);
+			m         = mat3_set_from4(m4);
+		}
+		else if (string_equals(c->link, "_view_matrix3")) {
+			m = mat3_set_from4(camera->v);
+		}
+
+		if (mat3_isnan(m)) {
+			return;
+		}
+		gpu_set_matrix3(loc, m);
+	}
+	else if (string_equals(c->type, "vec4")) {
+		vec4_t v = vec4_nan();
+
+		if (uniforms_vec4_links != NULL) {
+			v = uniforms_vec4_links(obj, current_material(obj), c->link);
+		}
+
+		if (vec4_isnan(v)) {
+			return;
+		}
+		gpu_set_float4(loc, v.x, v.y, v.z, v.w);
+	}
+	else if (string_equals(c->type, "vec3")) {
+		vec4_t v = vec4_nan();
+
+		if (string_equals(c->link, "_dim")) { // Model space
+			vec4_t d = obj->transform->dim;
+			vec4_t s = obj->transform->scale;
+			v        = vec4_create((d.x / s.x), (d.y / s.y), (d.z / s.z), 0.0);
+		}
+		else if (string_equals(c->link, "_half_dim")) { // Model space
+			vec4_t d = obj->transform->dim;
+			vec4_t s = obj->transform->scale;
+			v        = vec4_create((d.x / s.x) / 2, (d.y / s.y) / 2, (d.z / s.z) / 2, 0.0);
+		}
+		else if (uniforms_vec3_links != NULL) {
+			v = uniforms_vec3_links(obj, current_material(obj), c->link);
+		}
+
+		if (vec4_isnan(v)) {
+			return;
+		}
+		gpu_set_float3(loc, v.x, v.y, v.z);
+	}
+	else if (string_equals(c->type, "vec2")) {
+		vec2_t v = vec2_nan();
+
+		if (uniforms_vec2_links != NULL) {
+			v = uniforms_vec2_links(obj, current_material(obj), c->link);
+		}
+
+		if (vec2_isnan(v)) {
+			return;
+		}
+		gpu_set_float2(loc, v.x, v.y);
+	}
+	else if (string_equals(c->type, "float")) {
+		f32 f = f32_nan();
+
+		if (string_equals(c->link, "_object_info_index")) {
+			f = (f32)obj->uid;
+		}
+		else if (string_equals(c->link, "_object_info_material_index")) {
+			f = current_material(obj)->_->uid;
+		}
+		else if (string_equals(c->link, "_object_info_random")) {
+			f = obj->urandom;
+		}
+		else if (string_equals(c->link, "_pos_unpack")) {
+			f = uniforms_pos_unpack;
+		}
+		else if (string_equals(c->link, "_tex_unpack")) {
+			f = uniforms_tex_unpack;
+		}
+		else if (uniforms_f32_links != NULL) {
+			f = uniforms_f32_links(obj, current_material(obj), c->link);
+		}
+
+		if (f32_isnan(f)) {
+			return;
+		}
+		gpu_set_float(loc, f);
+	}
+	else if (string_equals(c->type, "floats")) {
+		f32_array_t *fa = NULL;
+
+		if (uniforms_f32_array_links != NULL) {
+			fa = uniforms_f32_array_links(obj, current_material(obj), c->link);
+		}
+
+		if (fa == NULL) {
+			return;
+		}
+		gpu_set_floats(loc, fa);
+	}
+	else if (string_equals(c->type, "int")) {
+		i32 i = INT_MAX;
+
+		if (string_equals(c->link, "_uid")) {
+			i = obj->uid;
+		}
+		else if (uniforms_i32_links != NULL) {
+			i = uniforms_i32_links(obj, current_material(obj), c->link);
+		}
+
+		if (i == INT_MAX) {
+			return;
+		}
+
+		gpu_set_int(loc, i);
+	}
+}
+
+void uniforms_set_material_consts(shader_context_t *context, material_context_t *material_context) {
+	if (material_context->bind_constants != NULL) {
+		for (i32 i = 0; i < material_context->bind_constants->length; ++i) {
+			bind_const_t *matc = material_context->bind_constants->buffer[i];
+			i32           pos  = -1;
+			for (i32 j = 0; j < context->constants->length; ++j) {
+				char *name = context->constants->buffer[j]->name;
+				if (string_equals(name, matc->name)) {
+					pos = j;
+					break;
+				}
+			}
+			if (pos == -1) {
+				continue;
+			}
+			shader_const_t *c = context->constants->buffer[pos];
+
+			uniforms_set_material_const(context->_->constants->buffer[pos], c, matc);
+		}
+	}
+
+	if (material_context->_->textures != NULL) {
+		for (i32 i = 0; i < material_context->_->textures->length; ++i) {
+			char *mname = material_context->bind_textures->buffer[i]->name;
+
+			for (i32 j = 0; j < context->_->tex_units->length; ++j) {
+				char *sname = context->texture_units->buffer[j]->name;
+				if (string_equals(mname, sname)) {
+					gpu_set_texture(context->_->tex_units->buffer[j], material_context->_->textures->buffer[i]);
+					break;
+				}
+			}
+		}
+	}
+}
+
+material_data_t *current_material(object_t *object) {
+	if (object != NULL && object->ext != NULL) {
+		mesh_object_t *mo = object->ext;
+		return mo->material;
+	}
+	return NULL;
+}
+
+void uniforms_set_material_const(i32 location, shader_const_t *shader_const, bind_const_t *material_const) {
+	if (string_equals(shader_const->type, "vec4")) {
+		gpu_set_float4(location, material_const->vec->buffer[0], material_const->vec->buffer[1], material_const->vec->buffer[2],
+		               material_const->vec->buffer[3]);
+	}
+	else if (string_equals(shader_const->type, "vec3")) {
+		gpu_set_float3(location, material_const->vec->buffer[0], material_const->vec->buffer[1], material_const->vec->buffer[2]);
+	}
+	else if (string_equals(shader_const->type, "vec2")) {
+		gpu_set_float2(location, material_const->vec->buffer[0], material_const->vec->buffer[1]);
+	}
+	else if (string_equals(shader_const->type, "float")) {
+		gpu_set_float(location, material_const->vec->buffer[0]);
+	}
+	else if (string_equals(shader_const->type, "bool")) {
+		gpu_set_bool(location, material_const->vec->buffer[0] > 0.0f);
+	}
+	else if (string_equals(shader_const->type, "int")) {
+		gpu_set_int(location, (i32)math_floor(material_const->vec->buffer[0]));
+	}
 }

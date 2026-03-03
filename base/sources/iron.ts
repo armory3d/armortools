@@ -1348,3 +1348,77 @@ declare function sys_notify_on_next_frame(f: (data?: any) => void, data: any = n
 declare function sys_notify_on_end_frame(f: (data?: any) => void, data: any = null);
 declare function sys_buffer_to_string(b: buffer_t): string;
 declare function sys_string_to_buffer(str: string): buffer_t;
+
+declare type ray_t = {
+	origin?: vec4_t;
+	dir?: vec4_t;
+};
+
+declare type plane_t = {
+	normal?: vec4_t;
+	constant?: f32;
+};
+
+declare let _raycast_vp_inv: mat4_t;
+declare let _raycast_p_inv: mat4_t;
+declare let _raycast_v_inv: mat4_t;
+
+declare function raycast_get_ray(input_x: f32, input_y: f32, camera: camera_object_t): ray_t;
+declare function raycast_box_intersect(transform: transform_t, input_x: f32, input_y: f32, camera: camera_object_t): vec4_t;
+declare function raycast_closest_box_intersect(transforms: transform_t[], input_x: f32, input_y: f32, camera: camera_object_t): transform_t;
+declare function plane_create(): plane_t;
+declare function raycast_plane_intersect(normal: vec4_t, a: vec4_t, input_x: f32, input_y: f32, camera: camera_object_t): vec4_t;
+declare function ray_create(origin: vec4_t, dir: vec4_t): ray_t;
+declare function ray_at(raw: ray_t, t: f32): vec4_t;
+declare function ray_dist_to_point(raw: ray_t, point: vec4_t): f32;
+declare function ray_intersects_sphere(raw: ray_t, sphere_center: vec4_t, sphere_radius: f32): bool;
+declare function ray_intersects_plane(raw: ray_t, plane: plane_t): bool;
+declare function ray_dist_to_plane(raw: ray_t, plane: plane_t): f32;
+declare function ray_intersect_plane(raw: ray_t, plane: plane_t): vec4_t;
+declare function ray_intersect_box(raw: ray_t, center: vec4_t, dim: vec4_t): vec4_t;
+declare function ray_intersect_triangle(raw: ray_t, a: vec4_t, b: vec4_t, c: vec4_t, cull_backface: bool): vec4_t;
+declare function plane_dist_to_point(raw: plane_t, point: vec4_t): f32;
+declare function plane_set(raw: plane_t, normal: vec4_t, point: vec4_t): plane_t;
+
+// let line_draw_color: color_t = 0xffff0000;
+// let line_draw_strength: f32  = 0.002;
+// let line_draw_mat: mat4_t    = mat4_nan();
+// let line_draw_dim: vec4_t    = vec4_nan();
+// let line_draw_vertex_buffer: gpu_buffer_t;
+// let line_draw_index_buffer: gpu_buffer_t;
+// let line_draw_pipeline: gpu_pipeline_t         = null;
+// let line_draw_overlay_pipeline: gpu_pipeline_t = null;
+// let line_draw_vp: mat4_t;
+// let line_draw_vp_loc: i32;
+// let line_draw_color_loc: i32;
+// let line_draw_vb_data: buffer_t;
+// let line_draw_ib_data: u32_array_t;
+// let line_draw_max_lines: i32    = 300;
+// let line_draw_max_vertices: i32 = line_draw_max_lines * 4;
+// let line_draw_max_indices: i32  = line_draw_max_lines * 6;
+// let line_draw_lines: i32        = 0;
+// let line_draw_wpos: vec4_t;
+// let line_draw_vx: vec4_t = vec4_create();
+// let line_draw_vy: vec4_t = vec4_create();
+// let line_draw_vz: vec4_t = vec4_create();
+// let line_draw_v1: vec4_t = vec4_create();
+// let line_draw_v2: vec4_t = vec4_create();
+// let line_draw_t: vec4_t  = vec4_create();
+// let line_draw_mid_point: vec4_t   = vec4_create();
+// let line_draw_mid_line: vec4_t    = vec4_create();
+// let line_draw_corner1: vec4_t     = vec4_create();
+// let line_draw_corner2: vec4_t     = vec4_create();
+// let line_draw_corner3: vec4_t     = vec4_create();
+// let line_draw_corner4: vec4_t     = vec4_create();
+// let line_draw_camera_look: vec4_t = vec4_create();
+
+declare function line_draw_init();
+declare function line_draw_render(matrix: mat4_t);
+declare function line_draw_bounds(mat: mat4_t, dim: vec4_t);
+declare function line_draw_lineb(a: i32, b: i32, c: i32, d: i32, e: i32, f: i32);
+declare function line_draw_line(x1: f32, y1: f32, z1: f32, x2: f32, y2: f32, z2: f32);
+declare function line_draw_begin();
+declare function line_draw_end();
+// let _shape_draw_sphere_vb: gpu_buffer_t = null;
+// let _shape_draw_sphere_ib: gpu_buffer_t = null;
+declare function shape_draw_sphere(mat: mat4_t);

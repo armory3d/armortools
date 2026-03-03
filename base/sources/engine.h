@@ -4,10 +4,12 @@
 #include "iron_array.h"
 #include "iron_gc.h"
 #include "iron_gpu.h"
+#include "iron_mat3.h"
 #include "iron_mat4.h"
 #include "iron_quat.h"
 #include "iron_string.h"
 #include "iron_system.h"
+#include "iron_vec2.h"
 #include "iron_vec4.h"
 #include <math.h>
 #include <string.h>
@@ -46,18 +48,18 @@ typedef struct _vertex_element_t_array {
 } _vertex_element_t_array_t;
 typedef struct _bind_const_t_array {
 	struct bind_const **buffer;
-	int                     length;
-	int                     capacity;
+	int                 length;
+	int                 capacity;
 } _bind_const_t_array_t;
 typedef struct _bind_tex_t_array {
 	struct bind_tex **buffer;
-	int                     length;
-	int                     capacity;
+	int               length;
+	int               capacity;
 } _bind_tex_t_array_t;
 typedef struct _material_context_t_array {
 	struct material_context **buffer;
-	int                     length;
-	int                     capacity;
+	int                       length;
+	int                       capacity;
 } _material_context_t_array_t;
 
 typedef struct obj_runtime {
@@ -110,6 +112,28 @@ typedef struct camera_data {
 	f32_array_t *ortho; // Indicates ortho camera, left, right, bottom, top
 } camera_data_t;
 
+typedef struct frustum_plane {
+	vec4_t normal;
+	f32    constant;
+} frustum_plane_t;
+
+typedef struct frustum_plane_array {
+	frustum_plane_t **buffer;
+	int               length;
+	int               capacity;
+} frustum_plane_array_t;
+
+typedef struct camera_object {
+	object_t              *base;
+	camera_data_t         *data;
+	mat4_t                 p;
+	mat4_t                 no_jitter_p;
+	i32                    frame;
+	mat4_t                 v;
+	mat4_t                 vp;
+	frustum_plane_array_t *frustum_planes;
+} camera_object_t;
+
 typedef struct world_data_runtime {
 	gpu_texture_t *envmap;
 	gpu_texture_t *radiance;
@@ -132,19 +156,19 @@ typedef struct irradiance {
 	f32_array_t *irradiance; // Spherical harmonics, bands 0,1,2
 } irradiance_t;
 
-typedef struct _scene {
+typedef struct scene {
 	char             *name;
-	any_array_t      *objects;
-	any_array_t      *mesh_datas;
-	any_array_t      *camera_datas;
+	any_array_t      *objects;      // obj_t[]
+	any_array_t      *mesh_datas;   // mesh_data_t[]
+	any_array_t      *camera_datas; // camera_data_t[]
 	char             *camera_ref;
-	any_array_t      *material_datas;
-	any_array_t      *shader_datas;
-	any_array_t      *world_datas;
+	any_array_t      *material_datas; // material_data_t[]
+	any_array_t      *shader_datas;   // shader_data_t[]
+	any_array_t      *world_datas;    // world_data_t[]
 	char             *world_ref;
 	any_array_t      *speaker_datas;  // TODO: deprecated
 	char_ptr_array_t *embedded_datas; // Preload for this scene, images only for now
-} _scene_t;
+} scene_t;
 
 typedef struct shader_context_runtime {
 	gpu_pipeline_t        *pipe;
@@ -216,8 +240,8 @@ typedef struct material_context_runtime {
 
 typedef struct material_context {
 	char                       *name;
-	_bind_const_t_array_t                *bind_constants; // bind_const_t[]
-	_bind_tex_t_array_t                *bind_textures;  // bind_tex_t[]
+	_bind_const_t_array_t      *bind_constants; // bind_const_t[]
+	_bind_tex_t_array_t        *bind_textures;  // bind_tex_t[]
 	material_context_runtime_t *_;
 } material_context_t;
 
@@ -227,11 +251,32 @@ typedef struct material_data_runtime {
 } material_data_runtime_t;
 
 typedef struct material_data {
-	char                    *name;
-	char                    *shader;
-	_material_context_t_array_t             *contexts; // material_context_t[]
-	material_data_runtime_t *_;
+	char                        *name;
+	char                        *shader;
+	_material_context_t_array_t *contexts; // material_context_t[]
+	material_data_runtime_t     *_;
 } material_data_t;
+
+typedef struct render_target {
+	char *name;
+	i32   width;
+	i32   height;
+	// Optional
+	char *format;
+	f32   scale;
+	// Runtime
+	gpu_texture_t *_image;
+} render_target_t;
+
+typedef struct mesh_object {
+	object_t        *base;
+	mesh_data_t     *data;
+	material_data_t *material;
+	f32              camera_dist;
+	bool             frustum_culling;
+	char            *skip_context;  // Do not draw this context
+	char            *force_context; // Draw only this context
+} mesh_object_t;
 
 typedef struct transform {
 	mat4_t    world;
@@ -290,6 +335,28 @@ float        transform_world_z(transform_t *raw);
 camera_data_t *camera_data_parse(char *name, char *id);
 camera_data_t *camera_data_get_raw_by_name(any_array_t *datas, char *name);
 
+extern vec4_t    _camera_object_sphere_center;
+extern i32       camera_object_taa_frames;
+camera_object_t *camera_object_create(camera_data_t *data);
+void             camera_object_build_proj(camera_object_t *raw, f32 screen_aspect);
+void             camera_object_remove(camera_object_t *raw);
+void             camera_object_render_frame(camera_object_t *raw);
+void             camera_object_proj_jitter(camera_object_t *raw);
+void             camera_object_build_mat(camera_object_t *raw);
+vec4_t           camera_object_right(camera_object_t *raw);
+vec4_t           camera_object_up(camera_object_t *raw);
+vec4_t           camera_object_look(camera_object_t *raw);
+vec4_t           camera_object_right_world(camera_object_t *raw);
+vec4_t           camera_object_up_world(camera_object_t *raw);
+vec4_t           camera_object_look_world(camera_object_t *raw);
+void             camera_object_build_view_frustum(mat4_t vp, frustum_plane_array_t *frustum_planes);
+bool camera_object_sphere_in_frustum(frustum_plane_array_t *frustum_planes, transform_t *t, f32 radius_scale, f32 offset_x, f32 offset_y, f32 offset_z);
+
+frustum_plane_t *frustum_plane_create();
+void             frustum_plane_normalize(frustum_plane_t *raw);
+f32              frustum_plane_dist_to_sphere(frustum_plane_t *raw, vec4_t sphere_center, f32 sphere_radius);
+void             frustum_plane_set_components(frustum_plane_t *raw, f32 x, f32 y, f32 z, f32 w);
+
 extern f32_array_t *_world_data_empty_irr;
 world_data_t       *world_data_parse(char *name, char *id);
 world_data_t       *world_data_get_raw_by_name(any_array_t *datas, char *name);
@@ -341,3 +408,38 @@ vertex_array_t        *mesh_data_get_vertex_array(mesh_data_t *raw, char *name);
 void                   mesh_data_build(mesh_data_t *raw);
 vec4_t                 mesh_data_calculate_aabb(mesh_data_t *raw);
 void                   mesh_data_delete(mesh_data_t *raw);
+
+extern gpu_pipeline_t *_mesh_object_last_pipeline;
+mesh_object_t         *mesh_object_create(mesh_data_t *data, material_data_t *material);
+void                   mesh_object_set_data(mesh_object_t *raw, mesh_data_t *data);
+void                   mesh_object_remove(mesh_object_t *raw);
+bool                   mesh_object_cull_material(mesh_object_t *raw, char *context);
+bool                   mesh_object_cull_mesh(mesh_object_t *raw, char *context, camera_object_t *camera);
+void                   mesh_object_render(mesh_object_t *raw, char *context, char_ptr_array_t *bind_params);
+bool                   mesh_object_valid_context(mesh_object_t *raw, material_data_t *mat, char *context);
+
+extern mat4_t _uniforms_mat;
+extern mat4_t _uniforms_mat2;
+extern mat3_t _uniforms_mat3;
+extern vec4_t _uniforms_vec;
+extern vec4_t _uniforms_vec2;
+extern quat_t _uniforms_quat;
+extern f32    uniforms_pos_unpack;
+extern f32    uniforms_tex_unpack;
+extern gpu_texture_t *(*uniforms_tex_links)(object_t *o, material_data_t *md, char *s);
+extern mat4_t (*uniforms_mat4_links)(object_t *o, material_data_t *md, char *s);
+extern vec4_t (*uniforms_vec4_links)(object_t *o, material_data_t *md, char *s);
+extern vec4_t (*uniforms_vec3_links)(object_t *o, material_data_t *md, char *s);
+extern vec2_t (*uniforms_vec2_links)(object_t *o, material_data_t *md, char *s);
+extern f32 (*uniforms_f32_links)(object_t *o, material_data_t *md, char *s);
+extern f32_array_t *(*uniforms_f32_array_links)(object_t *o, material_data_t *md, char *s);
+extern i32 (*uniforms_i32_links)(object_t *o, material_data_t *md, char *s);
+
+void             uniforms_set_context_consts(shader_context_t *context, char_ptr_array_t *bind_params);
+void             uniforms_set_obj_consts(shader_context_t *context, object_t *object);
+void             uniforms_bind_render_target(render_target_t *rt, shader_context_t *context, char *sampler_id);
+bool             uniforms_set_context_const(i32 location, shader_const_t *c);
+void             uniforms_set_obj_const(object_t *obj, i32 loc, shader_const_t *c);
+void             uniforms_set_material_consts(shader_context_t *context, material_context_t *material_context);
+material_data_t *current_material(object_t *object);
+void             uniforms_set_material_const(i32 location, shader_const_t *shader_const, bind_const_t *material_const);

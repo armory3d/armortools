@@ -1,5 +1,5 @@
 
-type render_target_t = {
+declare type render_target_t = {
 	name?: string;
 	width?: i32;
 	height?: i32;
