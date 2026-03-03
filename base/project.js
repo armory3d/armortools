@@ -34,7 +34,6 @@ let project = new Project("Base");
 project.add_include_dir("sources");
 project.add_include_dir("sources/libs");
 project.add_tsfiles("sources");
-project.add_tsfiles("sources/ts");
 project.add_shaders("shaders/*.kong");
 project.add_assets("assets/*", {destination : "data/{name}"});
 project.add_assets("assets/licenses/**", {destination : "data/licenses/{name}"});

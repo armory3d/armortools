@@ -2,12 +2,17 @@
 
 #include "iron_armpack.h"
 #include "iron_array.h"
+#include "iron_audio.h"
+#include "iron_draw.h"
 #include "iron_gc.h"
 #include "iron_gpu.h"
+#include "iron_map.h"
 #include "iron_mat3.h"
 #include "iron_mat4.h"
+#include "iron_path.h"
 #include "iron_quat.h"
 #include "iron_string.h"
+#include "iron_sys.h"
 #include "iron_system.h"
 #include "iron_vec2.h"
 #include "iron_vec4.h"
@@ -268,6 +273,10 @@ typedef struct render_target {
 	gpu_texture_t *_image;
 } render_target_t;
 
+typedef struct cached_shader_context {
+	shader_context_t *context;
+} cached_shader_context_t;
+
 typedef struct mesh_object {
 	object_t        *base;
 	mesh_data_t     *data;
@@ -307,6 +316,13 @@ typedef struct object {
 	char        *ext_type;
 } object_t;
 
+//  ██████╗ ██████╗      ██╗███████╗ ██████╗████████╗
+// ██╔═══██╗██╔══██╗     ██║██╔════╝██╔════╝╚══██╔══╝
+// ██║   ██║██████╔╝     ██║█████╗  ██║        ██║
+// ██║   ██║██╔══██╗██   ██║██╔══╝  ██║        ██║
+// ╚██████╔╝██████╔╝╚█████╔╝███████╗╚██████╗   ██║
+//  ╚═════╝ ╚═════╝  ╚════╝ ╚══════╝ ╚═════╝   ╚═╝
+
 extern i32 _object_uid_counter;
 
 object_t *object_create(bool is_empty);
@@ -314,6 +330,13 @@ void      object_set_parent(object_t *raw, object_t *parent_object);
 void      object_remove_super(object_t *raw);
 void      object_remove(object_t *raw);
 object_t *object_get_child(object_t *raw, char *name);
+
+// ████████╗██████╗  █████╗ ███╗   ██╗███████╗███████╗ ██████╗ ██████╗ ███╗   ███╗
+// ╚══██╔══╝██╔══██╗██╔══██╗████╗  ██║██╔════╝██╔════╝██╔═══██╗██╔══██╗████╗ ████║
+//    ██║   ██████╔╝███████║██╔██╗ ██║███████╗█████╗  ██║   ██║██████╔╝██╔████╔██║
+//    ██║   ██╔══██╗██╔══██║██║╚██╗██║╚════██║██╔══╝  ██║   ██║██╔══██╗██║╚██╔╝██║
+//    ██║   ██║  ██║██║  ██║██║ ╚████║███████║██║     ╚██████╔╝██║  ██║██║ ╚═╝ ██║
+//    ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝
 
 transform_t *transform_create(object_t *object);
 void         transform_reset(transform_t *raw);
@@ -332,8 +355,22 @@ float        transform_world_x(transform_t *raw);
 float        transform_world_y(transform_t *raw);
 float        transform_world_z(transform_t *raw);
 
+//  ██████╗ █████╗ ███╗   ███╗███████╗██████╗  █████╗     ██████╗  █████╗ ████████╗ █████╗
+// ██╔════╝██╔══██╗████╗ ████║██╔════╝██╔══██╗██╔══██╗    ██╔══██╗██╔══██╗╚══██╔══╝██╔══██╗
+// ██║     ███████║██╔████╔██║█████╗  ██████╔╝███████║    ██║  ██║███████║   ██║   ███████║
+// ██║     ██╔══██║██║╚██╔╝██║██╔══╝  ██╔══██╗██╔══██║    ██║  ██║██╔══██║   ██║   ██╔══██║
+// ╚██████╗██║  ██║██║ ╚═╝ ██║███████╗██║  ██║██║  ██║    ██████╔╝██║  ██║   ██║   ██║  ██║
+//  ╚═════╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
+
 camera_data_t *camera_data_parse(char *name, char *id);
 camera_data_t *camera_data_get_raw_by_name(any_array_t *datas, char *name);
+
+//  ██████╗ █████╗ ███╗   ███╗███████╗██████╗  █████╗      ██████╗ ██████╗      ██╗███████╗ ██████╗████████╗
+// ██╔════╝██╔══██╗████╗ ████║██╔════╝██╔══██╗██╔══██╗    ██╔═══██╗██╔══██╗     ██║██╔════╝██╔════╝╚══██╔══╝
+// ██║     ███████║██╔████╔██║█████╗  ██████╔╝███████║    ██║   ██║██████╔╝     ██║█████╗  ██║        ██║
+// ██║     ██╔══██║██║╚██╔╝██║██╔══╝  ██╔══██╗██╔══██║    ██║   ██║██╔══██╗██   ██║██╔══╝  ██║        ██║
+// ╚██████╗██║  ██║██║ ╚═╝ ██║███████╗██║  ██║██║  ██║    ╚██████╔╝██████╔╝╚█████╔╝███████╗╚██████╗   ██║
+//  ╚═════╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝     ╚═════╝ ╚═════╝  ╚════╝ ╚══════╝ ╚═════╝   ╚═╝
 
 extern vec4_t    _camera_object_sphere_center;
 extern i32       camera_object_taa_frames;
@@ -352,10 +389,24 @@ vec4_t           camera_object_look_world(camera_object_t *raw);
 void             camera_object_build_view_frustum(mat4_t vp, frustum_plane_array_t *frustum_planes);
 bool camera_object_sphere_in_frustum(frustum_plane_array_t *frustum_planes, transform_t *t, f32 radius_scale, f32 offset_x, f32 offset_y, f32 offset_z);
 
+// ███████╗██████╗ ██╗   ██╗███████╗████████╗██╗   ██╗███╗   ███╗    ██████╗ ██╗      █████╗ ███╗   ██╗███████╗
+// ██╔════╝██╔══██╗██║   ██║██╔════╝╚══██╔══╝██║   ██║████╗ ████║    ██╔══██╗██║     ██╔══██╗████╗  ██║██╔════╝
+// █████╗  ██████╔╝██║   ██║███████╗   ██║   ██║   ██║██╔████╔██║    ██████╔╝██║     ███████║██╔██╗ ██║█████╗
+// ██╔══╝  ██╔══██╗██║   ██║╚════██║   ██║   ██║   ██║██║╚██╔╝██║    ██╔═══╝ ██║     ██╔══██║██║╚██╗██║██╔══╝
+// ██║     ██║  ██║╚██████╔╝███████║   ██║   ╚██████╔╝██║ ╚═╝ ██║    ██║     ███████╗██║  ██║██║ ╚████║███████╗
+// ╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝    ╚═════╝ ╚═╝     ╚═╝    ╚═╝     ╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝
+
 frustum_plane_t *frustum_plane_create();
 void             frustum_plane_normalize(frustum_plane_t *raw);
 f32              frustum_plane_dist_to_sphere(frustum_plane_t *raw, vec4_t sphere_center, f32 sphere_radius);
 void             frustum_plane_set_components(frustum_plane_t *raw, f32 x, f32 y, f32 z, f32 w);
+
+// ██╗    ██╗ ██████╗ ██████╗ ██╗      ██████╗     ██████╗  █████╗ ████████╗ █████╗
+// ██║    ██║██╔═══██╗██╔══██╗██║      ██╔══██╗    ██╔══██╗██╔══██╗╚══██╔══╝██╔══██╗
+// ██║ █╗ ██║██║   ██║██████╔╝██║      ██║  ██║    ██║  ██║███████║   ██║   ███████║
+// ██║███╗██║██║   ██║██╔══██╗██║      ██║  ██║    ██║  ██║██╔══██║   ██║   ██╔══██║
+// ╚███╔███╔╝╚██████╔╝██║  ██║███████╗ ██████╔╝    ██████╔╝██║  ██║   ██║   ██║  ██║
+//  ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═╝╚══════╝ ╚═════╝     ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
 
 extern f32_array_t *_world_data_empty_irr;
 world_data_t       *world_data_parse(char *name, char *id);
@@ -364,8 +415,12 @@ f32_array_t        *world_data_get_empty_irradiance();
 f32_array_t        *world_data_set_irradiance(world_data_t *raw);
 void                world_data_load_envmap(world_data_t *raw);
 
-gpu_texture_t *data_get_image(char *file);
-buffer_t      *data_get_blob(char *file);
+// ███╗   ███╗ █████╗ ████████╗███████╗██████╗ ██╗ █████╗ ██╗         ██████╗  █████╗ ████████╗ █████╗
+// ████╗ ████║██╔══██╗╚══██╔══╝██╔════╝██╔══██╗██║██╔══██╗██║        ██╔══██╗██╔══██╗╚══██╔══╝██╔══██╗
+// ██╔████╔██║███████║   ██║   █████╗  ██████╔╝██║███████║██║        ██║  ██║███████║   ██║   ███████║
+// ██║╚██╔╝██║██╔══██║   ██║   ██╔══╝  ██╔══██╗██║██╔══██║██║        ██║  ██║██╔══██║   ██║   ██╔══██║
+// ██║ ╚═╝ ██║██║  ██║   ██║   ███████╗██║  ██║██║██║  ██║███████╗   ██████╔╝██║  ██║   ██║   ██║  ██║
+// ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚══════╝   ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
 
 extern i32          _material_data_uid_counter;
 material_data_t    *material_data_create(material_data_t *raw, char *file);
@@ -373,7 +428,13 @@ material_data_t    *material_data_parse(char *file, char *name);
 material_data_t    *material_data_get_raw_by_name(any_array_t *datas, char *name);
 material_context_t *material_data_get_context(material_data_t *raw, char *name);
 void                material_context_load(material_context_t *raw);
-shader_data_t      *data_get_shader(char *file, char *name);
+
+// ███████╗██╗  ██╗ █████╗ ██████╗ ███████╗██████╗     ██████╗  █████╗ ████████╗ █████╗
+// ██╔════╝██║  ██║██╔══██╗██╔══██╗██╔════╝██╔══██╗    ██╔══██╗██╔══██╗╚══██╔══╝██╔══██╗
+// ███████╗███████║███████║██║  ██║█████╗  ██████╔╝    ██║  ██║███████║   ██║   ███████║
+// ╚════██║██╔══██║██╔══██║██║  ██║██╔══╝  ██╔══██╗    ██║  ██║██╔══██║   ██║   ██╔══██║
+// ███████║██║  ██║██║  ██║██████╔╝███████╗██║  ██║    ██████╔╝██║  ██║   ██║   ██║  ██║
+// ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝  ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
 
 shader_data_t       *shader_data_create(shader_data_t *raw);
 char                *shader_data_ext();
@@ -396,6 +457,13 @@ gpu_texture_format_t shader_context_get_tex_format(char *s);
 void                 shader_context_add_const(shader_context_t *raw, i32 offset);
 void                 shader_context_add_tex(shader_context_t *raw, i32 i);
 
+// ███╗   ███╗███████╗███████╗██╗  ██╗    ██████╗  █████╗ ████████╗ █████╗
+// ████╗ ████║██╔════╝██╔════╝██║  ██║    ██╔══██╗██╔══██╗╚══██╔══╝██╔══██╗
+// ██╔████╔██║█████╗  ███████╗███████║    ██║  ██║███████║   ██║   ███████║
+// ██║╚██╔╝██║██╔══╝  ╚════██║██╔══██║    ██║  ██║██╔══██║   ██║   ██╔══██║
+// ██║ ╚═╝ ██║███████╗███████║██║  ██║    ██████╔╝██║  ██║   ██║   ██║  ██║
+// ╚═╝     ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
+
 mesh_data_t           *mesh_data_parse(char *name, char *id);
 mesh_data_t           *mesh_data_get_raw_by_name(any_array_t *datas, char *name);
 mesh_data_t           *mesh_data_create(mesh_data_t *raw);
@@ -408,6 +476,13 @@ vertex_array_t        *mesh_data_get_vertex_array(mesh_data_t *raw, char *name);
 void                   mesh_data_build(mesh_data_t *raw);
 vec4_t                 mesh_data_calculate_aabb(mesh_data_t *raw);
 void                   mesh_data_delete(mesh_data_t *raw);
+
+// ███╗   ███╗███████╗███████╗██╗  ██╗     ██████╗ ██████╗      ██╗███████╗ ██████╗████████╗
+// ████╗ ████║██╔════╝██╔════╝██║  ██║    ██╔═══██╗██╔══██╗     ██║██╔════╝██╔════╝╚══██╔══╝
+// ██╔████╔██║█████╗  ███████╗███████║    ██║   ██║██████╔╝     ██║█████╗  ██║        ██║
+// ██║╚██╔╝██║██╔══╝  ╚════██║██╔══██║    ██║   ██║██╔══██╗██   ██║██╔══╝  ██║        ██║
+// ██║ ╚═╝ ██║███████╗███████║██║  ██║    ╚██████╔╝██████╔╝╚█████╔╝███████╗╚██████╗   ██║
+// ╚═╝     ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝     ╚═════╝ ╚═════╝  ╚════╝ ╚══════╝ ╚═════╝   ╚═╝
 
 extern gpu_pipeline_t *_mesh_object_last_pipeline;
 mesh_object_t         *mesh_object_create(mesh_data_t *data, material_data_t *material);
@@ -435,6 +510,13 @@ extern f32 (*uniforms_f32_links)(object_t *o, material_data_t *md, char *s);
 extern f32_array_t *(*uniforms_f32_array_links)(object_t *o, material_data_t *md, char *s);
 extern i32 (*uniforms_i32_links)(object_t *o, material_data_t *md, char *s);
 
+// ██╗   ██╗███╗   ██╗██╗███████╗ ██████╗ ██████╗ ███╗   ███╗███████╗
+// ██║   ██║████╗  ██║██║██╔════╝██╔═══██╗██╔══██╗████╗ ████║██╔════╝
+// ██║   ██║██╔██╗ ██║██║█████╗  ██║   ██║██████╔╝██╔████╔██║███████╗
+// ██║   ██║██║╚██╗██║██║██╔══╝  ██║   ██║██╔══██╗██║╚██╔╝██║╚════██║
+// ╚██████╔╝██║ ╚████║██║██║     ╚██████╔╝██║  ██║██║ ╚═╝ ██║███████║
+//  ╚═════╝ ╚═╝  ╚═══╝╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
+
 void             uniforms_set_context_consts(shader_context_t *context, char_ptr_array_t *bind_params);
 void             uniforms_set_obj_consts(shader_context_t *context, object_t *object);
 void             uniforms_bind_render_target(render_target_t *rt, shader_context_t *context, char *sampler_id);
@@ -443,3 +525,138 @@ void             uniforms_set_obj_const(object_t *obj, i32 loc, shader_const_t *
 void             uniforms_set_material_consts(shader_context_t *context, material_context_t *material_context);
 material_data_t *current_material(object_t *object);
 void             uniforms_set_material_const(i32 location, shader_const_t *shader_const, bind_const_t *material_const);
+
+// ██████╗  █████╗ ████████╗ █████╗
+// ██╔══██╗██╔══██╗╚══██╔══╝██╔══██╗
+// ██║  ██║███████║   ██║   ███████║
+// ██║  ██║██╔══██║   ██║   ██╔══██║
+// ██████╔╝██║  ██║   ██║   ██║  ██║
+// ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
+
+typedef struct sound {
+	void *sound_;
+} sound_t;
+
+extern any_map_t *data_cached_scene_raws;
+extern any_map_t *data_cached_meshes;
+extern any_map_t *data_cached_cameras;
+extern any_map_t *data_cached_materials;
+extern any_map_t *data_cached_worlds;
+extern any_map_t *data_cached_shaders;
+extern any_map_t *data_cached_blobs;
+extern any_map_t *data_cached_images;
+extern any_map_t *data_cached_videos;
+extern any_map_t *data_cached_fonts;
+#ifdef arm_audio
+extern any_map_t *data_cached_sounds;
+#endif
+extern i32 data_assets_loaded;
+
+mesh_data_t     *data_get_mesh(char *file, char *name);
+camera_data_t   *data_get_camera(char *file, char *name);
+material_data_t *data_get_material(char *file, char *name);
+world_data_t    *data_get_world(char *file, char *name);
+shader_data_t   *data_get_shader(char *file, char *name);
+scene_t         *data_get_scene_raw(char *file);
+gpu_texture_t   *data_get_image(char *file);
+buffer_t        *data_get_blob(char *file);
+video_t         *data_get_video(char *file);
+draw_font_t     *data_get_font(char *file);
+#ifdef arm_audio
+sound_t *data_get_sound(char *file);
+#endif
+void data_delete_mesh(char *handle);
+void data_delete_blob(char *handle);
+void data_delete_image(char *handle);
+void data_delete_video(char *handle);
+void data_delete_font(char *handle);
+#ifdef arm_audio
+void data_delete_sound(char *handle);
+#endif
+bool  data_is_abs(char *file);
+bool  data_is_up(char *file);
+char *data_resolve_path(char *file);
+char *data_path(void);
+
+// ███████╗ ██████╗███████╗███╗   ██╗███████╗
+// ██╔════╝██╔════╝██╔════╝████╗  ██║██╔════╝
+// ███████╗██║     █████╗  ██╔██╗ ██║█████╗
+// ╚════██║██║     ██╔══╝  ██║╚██╗██║██╔══╝
+// ███████║╚██████╗███████╗██║ ╚████║███████╗
+// ╚══════╝ ╚═════╝╚══════╝╚═╝  ╚═══╝╚══════╝
+
+extern camera_object_t *scene_camera;
+extern world_data_t    *scene_world;
+extern any_array_t     *scene_meshes;
+extern any_array_t     *scene_cameras;
+extern any_array_t     *scene_empties;
+extern any_map_t       *scene_embedded;
+extern i32              _scene_uid_counter;
+extern i32              _scene_uid;
+extern scene_t         *_scene_raw;
+extern object_t        *_scene_root;
+extern object_t        *_scene_scene_parent;
+extern i32              _scene_objects_traversed;
+extern i32              _scene_objects_count;
+
+object_t        *scene_create(scene_t *format);
+void             scene_remove(void);
+object_t        *scene_set_active(char *scene_name);
+void             scene_render_frame(void);
+object_t        *scene_add_object(object_t *parent);
+object_t        *scene_get_child(char *name);
+mesh_object_t   *scene_add_mesh_object(mesh_data_t *data, material_data_t *material, object_t *parent);
+camera_object_t *scene_add_camera_object(camera_data_t *data, object_t *parent);
+void             scene_traverse_objects(scene_t *format, object_t *parent, any_array_t *objects);
+object_t        *scene_add_scene(char *scene_name, object_t *parent);
+i32              scene_get_objects_count(any_array_t *objects);
+object_t        *_scene_spawn_object_tree(obj_t *obj, object_t *parent, bool spawn_children);
+object_t        *scene_spawn_object(char *name, object_t *parent, bool spawn_children);
+obj_t           *scene_get_raw_object_by_name(scene_t *format, char *name);
+obj_t           *scene_traverse_objs(any_array_t *children, char *name);
+object_t        *scene_create_object(obj_t *o, scene_t *format, object_t *parent);
+object_t        *scene_create_mesh_object(obj_t *o, scene_t *format, object_t *parent, material_data_t *material);
+object_t        *scene_return_mesh_object(char *object_file, char *data_ref, material_data_t *material, object_t *parent, obj_t *o);
+object_t        *scene_return_object(object_t *object, obj_t *o);
+void             scene_gen_transform(obj_t *object, transform_t *transform);
+void             scene_load_embedded_data(char_ptr_array_t *datas);
+void             scene_embed_data(char *file);
+
+// ██████╗ ███████╗███╗   ██╗██████╗ ███████╗██████╗     ██████╗  █████╗ ████████╗██╗  ██╗
+// ██╔══██╗██╔════╝████╗  ██║██╔══██╗██╔════╝██╔══██╗    ██╔══██╗██╔══██╗╚══██╔══╝██║  ██║
+// ██████╔╝█████╗  ██╔██╗ ██║██║  ██║█████╗  ██████╔╝    ██████╔╝███████║   ██║   ███████║
+// ██╔══██╗██╔══╝  ██║╚██╗██║██║  ██║██╔══╝  ██╔══██╗    ██╔═══╝ ██╔══██║   ██║   ██╔══██║
+// ██║  ██║███████╗██║ ╚████║██████╔╝███████╗██║  ██║    ██║     ██║  ██║   ██║   ██║  ██║
+// ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝    ╚═╝     ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
+
+extern void (*render_path_commands)(void);
+extern any_map_t        *render_path_render_targets;
+extern i32               render_path_current_w;
+extern i32               render_path_current_h;
+extern f32               _render_path_frame_time;
+extern i32               _render_path_frame;
+extern render_target_t  *_render_path_current_target;
+extern gpu_texture_t    *_render_path_current_image;
+extern bool              _render_path_paused;
+extern i32               _render_path_last_w;
+extern i32               _render_path_last_h;
+extern char_ptr_array_t *_render_path_bind_params;
+extern f32               _render_path_last_frame_time;
+extern i32               _render_path_loading;
+extern any_map_t        *_render_path_cached_shader_contexts;
+
+bool                 render_path_ready(void);
+void                 render_path_render_frame(void);
+void                 render_path_set_target(char *target, char_ptr_array_t *additional, char *depth_buffer, gpu_clear_t flags, i32 color, f32 depth);
+void                 render_path_end(void);
+void                 render_path_draw_meshes(char *context);
+void                 render_path_submit_draw(char *context);
+void                 render_path_draw_skydome(char *handle);
+void                 render_path_bind_target(char *target, char *uniform);
+void                 render_path_draw_shader(char *handle);
+void                 render_path_load_shader(char *handle);
+void                 render_path_resize(void);
+render_target_t     *render_path_create_render_target(render_target_t *t);
+gpu_texture_t       *render_path_create_image(render_target_t *t);
+gpu_texture_format_t render_path_get_tex_format(char *s);
+render_target_t     *render_target_create(void);

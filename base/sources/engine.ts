@@ -355,3 +355,126 @@ declare type scene_t = {
 	speaker_datas?: any; // TODO: deprecated
 	embedded_datas?: string[]; // Preload for this scene, images only for now
 };
+
+declare let data_cached_scene_raws: map_t<string, scene_t>;
+declare let data_cached_meshes: map_t<string, mesh_data_t>;
+declare let data_cached_cameras: map_t<string, camera_data_t>;
+declare let data_cached_materials: map_t<string, material_data_t>;
+declare let data_cached_worlds: map_t<string, world_data_t>;
+declare let data_cached_shaders: map_t<string, shader_data_t>;
+declare let data_cached_blobs: map_t<string, buffer_t>;
+declare let data_cached_images: map_t<string, gpu_texture_t>;
+declare let data_cached_videos: map_t<string, video_t>;
+declare let data_cached_fonts: map_t<string, draw_font_t>;
+/// if arm_audio
+declare let data_cached_sounds: map_t<string, sound_t>;
+/// end
+declare let data_assets_loaded: i32;
+
+declare function data_get_mesh(file: string, name: string): mesh_data_t;
+declare function data_get_camera(file: string, name: string): camera_data_t;
+declare function data_get_material(file: string, name: string): material_data_t;
+declare function data_get_world(file: string, name: string): world_data_t;
+declare function data_get_shader(file: string, name: string): shader_data_t;
+declare function data_get_scene_raw(file: string): scene_t;
+declare function data_get_blob(file: string): buffer_t;
+declare function data_get_image(file: string): gpu_texture_t;
+declare function data_get_video(file: string): video_t;
+declare function data_get_font(file: string): draw_font_t;
+declare function data_get_sound(file: string): sound_t;
+declare function data_delete_mesh(handle: string);
+declare function data_delete_blob(handle: string);
+declare function data_delete_image(handle: string);
+declare function data_delete_video(handle: string);
+declare function data_delete_font(handle: string);
+declare function data_delete_sound(handle: string);
+declare function data_path(): string;
+declare function data_is_abs(file: string): bool;
+declare function data_is_up(file: string): bool;
+declare function data_resolve_path(file: string): string;
+
+
+declare let scene_camera: camera_object_t;
+declare let scene_world: world_data_t;
+declare let scene_meshes: mesh_object_t[];
+declare let scene_cameras: camera_object_t[];
+declare let scene_empties: object_t[];
+declare let scene_embedded: map_t<string, gpu_texture_t>;
+declare let _scene_uid_counter: i32;
+declare let _scene_uid: i32;
+declare let _scene_raw: scene_t;
+declare let _scene_root: object_t;
+declare let _scene_scene_parent: object_t;
+declare let _scene_objects_traversed: i32;
+declare let _scene_objects_count: i32;
+
+declare function scene_create(format: scene_t): object_t;
+declare function scene_remove();
+declare function scene_set_active(scene_name: string): object_t;
+declare function scene_render_frame();
+declare function scene_add_object(parent: object_t = null): object_t;
+declare function scene_get_child(name: string): object_t;
+declare function scene_add_mesh_object(data: mesh_data_t, material: material_data_t, parent: object_t = null): mesh_object_t;
+declare function scene_add_camera_object(data: camera_data_t, parent: object_t = null): camera_object_t;
+declare function scene_traverse_objects(format: scene_t, parent: object_t, objects: obj_t[]);
+declare function scene_add_scene(scene_name: string, parent: object_t): object_t;
+declare function scene_get_objects_count(objects: obj_t[]): i32;
+declare function _scene_spawn_object_tree(obj: obj_t, parent: object_t, spawn_children: bool): object_t;
+declare function scene_spawn_object(name: string, parent: object_t = null, spawn_children: bool = true): object_t;
+declare function scene_get_raw_object_by_name(format: scene_t, name: string): obj_t;
+declare function scene_traverse_objs(children: obj_t[], name: string): obj_t;
+declare function scene_create_object(o: obj_t, format: scene_t, parent: object_t): object_t;
+declare function scene_create_mesh_object(o: obj_t, format: scene_t, parent: object_t, material: material_data_t): object_t;
+declare function scene_return_mesh_object(object_file: string, data_ref: string, material: material_data_t, parent: object_t, o: obj_t): object_t;
+declare function scene_return_object(object: object_t, o: obj_t): object_t;
+declare function scene_gen_transform(object: obj_t, transform: transform_t);
+declare function scene_load_embedded_data(datas: string[]);
+declare function scene_embed_data(file: string);
+
+
+declare type render_target_t = {
+	name?: string;
+	width?: i32;
+	height?: i32;
+	// Opt
+	format?: string;
+	scale?: f32;
+	// Runtime
+	_image?: gpu_texture_t;
+};
+
+declare type cached_shader_context_t = {
+	context?: shader_context_t;
+};
+
+declare let render_path_commands: () => void;
+declare let render_path_render_targets: map_t<string, render_target_t>;
+declare let render_path_current_w: i32;
+declare let render_path_current_h: i32;
+declare let _render_path_frame_time: f32;
+declare let _render_path_frame: i32;
+declare let _render_path_current_target: render_target_t;
+declare let _render_path_current_image: gpu_texture_t;
+declare let _render_path_paused: bool;
+declare let _render_path_last_w: i32;
+declare let _render_path_last_h: i32;
+declare let _render_path_bind_params: string[];
+declare let _render_path_last_frame_time: f32                                           = 0.0;
+declare let _render_path_loading: i32                                                   = 0;
+declare let _render_path_cached_shader_contexts: map_t<string, cached_shader_context_t> = map_create();
+
+declare function render_path_ready(): bool;
+declare function render_path_render_frame();
+declare function render_path_set_target(target: string, additional: string[] = null, depth_buffer: string = null, flags: gpu_clear_t = gpu_clear_t.NONE, color: i32 = 0, depth: f32 = 0.0);
+declare function render_path_end();
+declare function render_path_draw_meshes(context: string);
+declare function render_path_submit_draw(context: string);
+declare function render_path_draw_skydome(handle: string);
+declare function render_path_bind_target(target: string, uniform: string);
+declare function render_path_draw_shader(handle: string);
+declare function render_path_load_shader(handle: string);
+declare function render_path_resize();
+declare function render_path_create_render_target(t: render_target_t): render_target_t;
+declare function render_path_create_image(t: render_target_t): gpu_texture_t;
+declare function render_path_get_tex_format(s: string): gpu_texture_format_t;
+declare function render_target_create(): render_target_t;
