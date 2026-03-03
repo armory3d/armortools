@@ -280,7 +280,6 @@ static void initKeyTranslation() {
 	}
 	keyTranslated[VK_BACK]       = KEY_CODE_BACKSPACE;
 	keyTranslated[VK_TAB]        = KEY_CODE_TAB;
-	keyTranslated[VK_CLEAR]      = KEY_CODE_CLEAR;
 	keyTranslated[VK_RETURN]     = KEY_CODE_RETURN;
 	keyTranslated[VK_SHIFT]      = KEY_CODE_SHIFT;
 	keyTranslated[VK_CONTROL]    = KEY_CODE_CONTROL;
@@ -297,7 +296,6 @@ static void initKeyTranslation() {
 	keyTranslated[VK_UP]         = KEY_CODE_UP;
 	keyTranslated[VK_RIGHT]      = KEY_CODE_RIGHT;
 	keyTranslated[VK_DOWN]       = KEY_CODE_DOWN;
-	keyTranslated[VK_PRINT]      = KEY_CODE_PRINT;
 	keyTranslated[VK_INSERT]     = KEY_CODE_INSERT;
 	keyTranslated[VK_DELETE]     = KEY_CODE_DELETE;
 	keyTranslated[VK_HELP]       = KEY_CODE_HELP;

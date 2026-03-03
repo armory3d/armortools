@@ -636,7 +636,7 @@ i32 iron_sys_command(char *cmd) {
 	si.wShowWindow = SW_HIDE;
 	PROCESS_INFORMATION pi;
 	memset(&pi, 0, sizeof(pi));
-	CreateProcessW(NULL, cmdline, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
+	CreateProcessW(NULL, cmdline, NULL, NULL, false, CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
 	free(wstr);
 	WaitForSingleObject(pi.hProcess, INFINITE);
 	DWORD exit_code = 0;
