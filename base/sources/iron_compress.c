@@ -2,6 +2,7 @@
 #ifdef WITH_COMPRESS
 
 #include "iron_compress.h"
+#include <stdlib.h>
 
 #define SDEFL_IMPLEMENTATION
 #include "sdefl.h"
