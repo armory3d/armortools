@@ -1,0 +1,90 @@
+void import_asset_run(string_t *path, f32 drop_x, f32 drop_y, bool show_box, bool hdr_as_envmap, void (*done)(void)) {
+	if (starts_with(path, "cloud")) {
+		#ifdef IRON_ANDROID
+		console_toast(tr("Downloading", null));
+		#else
+		console_info(tr("Downloading", null));
+		#endif
+
+		_import_asset_drop_x        = drop_x;
+		_import_asset_drop_y        = drop_y;
+		_import_asset_show_box      = show_box;
+		_import_asset_hdr_as_envmap = hdr_as_envmap;
+		gc_unroot(_import_asset_done);
+		_import_asset_done = done;
+		gc_root(_import_asset_done);
+		file_cache_cloud(path, &import_asset_run_70884, config_raw->server);
+
+		return;
+	}
+
+	if (path_is_mesh(path)) {
+		if (context_raw->tool == TOOL_TYPE_GIZMO) {
+			// project_import_mesh_box(path, false, false, tab_meshes_import_mesh_done);
+			project_import_mesh_box(path, false, false, tab_scene_import_mesh_done);
+		}
+		else {
+			show_box ? project_import_mesh_box(path, true, true, null) : import_mesh_run(path, true, true);
+		}
+		if (drop_x > 0) {
+			ui_box_click_to_hide = false; // Prevent closing when going back to window after drag and drop
+		}
+	}
+	else if (path_is_texture(path)) {
+		import_texture_run(path, hdr_as_envmap);
+		// Place image node
+		i32 x0 = ui_nodes_wx;
+		i32 x1 = ui_nodes_wx + ui_nodes_ww;
+		if (ui_nodes_show && drop_x > x0 && drop_x < x1) {
+			i32 asset_index = 0;
+			for (i32 i = 0; i < project_assets->length; ++i) {
+				if (string_equals(project_assets->buffer[i]->file, path)) {
+					asset_index = i;
+					break;
+				}
+			}
+			ui_nodes_accept_asset_drop(asset_index);
+			ui_nodes_get_nodes()->nodes_drag = false;
+			ui_nodes_hwnd->redraws           = 2;
+		}
+
+		if (context_raw->tool == TOOL_TYPE_COLORID && project_asset_names->length == 1) {
+			ui_header_handle->redraws = 2;
+			context_raw->ddirty       = 2;
+		}
+	}
+	else if (path_is_project(path)) {
+		import_arm_run_project(path);
+	}
+	else if (path_is_plugin(path)) {
+		import_plugin_run(path);
+	}
+	else if (path_is_gimp_color_palette(path)) {
+		// import_gpl_run(path, false);
+	}
+	else if (path_is_font(path)) {
+		import_font_run(path);
+	}
+	else if (path_is_folder(path)) {
+		import_folder_run(path);
+	}
+	else {
+		if (context_enable_import_plugin(path)) {
+			import_asset_run(path, drop_x, drop_y, show_box, true, null);
+		}
+		else {
+			console_error(strings_unknown_asset_format());
+		}
+	}
+
+	if (done != null) {
+		done();
+	}
+}
+
+void import_asset_run_70884(string_t *abs) {
+	if (abs == null) {
+		return;
+	}
+	import_asset_run(abs, _import_asset_drop_x, _import_asset_drop_y, _import_asset_show_box, _import_asset_hdr_as_envmap, _import_asset_done);
+}

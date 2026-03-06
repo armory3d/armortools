@@ -1,0 +1,296 @@
+void import_mesh_run(string_t *path, bool _clear_layers, bool replace_existing) {
+	if (!path_is_mesh(path)) {
+		if (!context_enable_import_plugin(path)) {
+			console_error(strings_unknown_asset_format());
+			return;
+		}
+	}
+
+	import_mesh_clear_layers  = _clear_layers;
+	context_raw->layer_filter = 0;
+
+	gc_unroot(import_mesh_meshes_to_unwrap);
+	import_mesh_meshes_to_unwrap = null;
+
+	string_t *p                  = to_lower_case(path);
+	if (ends_with(p, ".obj")) {
+		import_obj_run(path, replace_existing);
+	}
+	else if (ends_with(p, ".blend")) {
+		import_blend_mesh_run(path, replace_existing);
+	}
+	else {
+		string_t   *ext      = substring(path, string_last_index_of(path, ".") + 1, string_length(path));
+		any         importer = any_map_get(import_mesh_importers, ext); // JSValue -> (s: string)=>raw_mesh_t
+		raw_mesh_t *mesh     = js_pcall_str(importer, path);
+		if (string_equals(mesh->name, "")) {
+			mesh->name = string_copy(path_base_name(path));
+		}
+
+		replace_existing ? import_mesh_make_mesh(mesh) : import_mesh_add_mesh(mesh);
+
+		bool has_next = mesh->has_next;
+		while (has_next) {
+			raw_mesh_t *mesh = js_pcall_str(importer, path);
+			if (string_equals(mesh->name, "")) {
+				mesh->name = string_copy(path_base_name(path));
+			}
+			has_next = mesh->has_next;
+			import_mesh_add_mesh(mesh);
+		}
+	}
+
+	gc_unroot(project_mesh_assets);
+	project_mesh_assets = any_array_create_from_raw(
+	    (any[]){
+	        path,
+	    },
+	    1);
+	gc_root(project_mesh_assets);
+
+	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+	sys_title_set(substring(path, string_last_index_of(path, PATH_SEP) + 1, string_last_index_of(path, ".")));
+	#endif
+}
+
+void import_mesh_finish_import() {
+	if (context_raw->merged_object != null) {
+		mesh_data_delete(context_raw->merged_object->data);
+		mesh_object_remove(context_raw->merged_object);
+		context_raw->merged_object = null;
+	}
+
+	context_select_paint_object(context_main_object());
+
+	// No mask by default
+	for (i32 i = 0; i < project_paint_objects->length; ++i) {
+		mesh_object_t *p = project_paint_objects->buffer[i];
+		p->base->visible = true;
+	}
+
+	if (project_paint_objects->length > 1) {
+		// Sort by name
+		array_sort(project_paint_objects, &import_mesh_finish_import_85673);
+
+		if (context_raw->merged_object == null) {
+			util_mesh_merge(null);
+		}
+		context_raw->paint_object->skip_context   = "paint";
+		context_raw->merged_object->base->visible = true;
+	}
+
+	viewport_scale_to_bounds(2.0);
+
+	if (string_equals(context_raw->paint_object->base->name, "")) {
+		context_raw->paint_object->base->name = "Object";
+	}
+	make_material_parse_paint_material(true);
+	make_material_parse_mesh_material();
+	ui_view2d_hwnd->redraws    = 2;
+	render_path_raytrace_ready = false;
+	context_raw->paint_body    = null;
+}
+
+i32 import_mesh_finish_import_85673(any_ptr pa, any_ptr pb) {
+	mesh_object_t *a = DEREFERENCE(pa);
+	mesh_object_t *b = DEREFERENCE(pb);
+	return strcmp(a->base->name, b->base->name);
+}
+
+void _import_mesh_make_mesh(raw_mesh_t *mesh) {
+	mesh_data_t *raw          = import_mesh_raw_mesh(mesh);
+
+	mesh_data_t *md           = mesh_data_create(raw);
+	context_raw->paint_object = context_main_object();
+
+	context_select_paint_object(context_main_object());
+	viewport_reset();
+
+	for (i32 i = 0; i < project_paint_objects->length; ++i) {
+		mesh_object_t *p = project_paint_objects->buffer[i];
+		if (p == context_raw->paint_object) {
+			continue;
+		}
+		data_delete_mesh(p->data->_->handle);
+		mesh_object_remove(p);
+	}
+
+	string_t *handle = context_raw->paint_object->data->_->handle;
+	if (!string_equals(handle, "SceneSphere") && !string_equals(handle, "ScenePlane")) {
+		sys_notify_on_next_frame(&_import_mesh_make_mesh_85887, context_raw->paint_object->data);
+	}
+
+	mesh_object_set_data(context_raw->paint_object, md);
+	context_raw->paint_object->base->name = mesh->name;
+	gc_unroot(project_paint_objects);
+	project_paint_objects = any_array_create_from_raw(
+	    (any[]){
+	        context_raw->paint_object,
+	    },
+	    1);
+	gc_root(project_paint_objects);
+
+	md->_->handle = string_copy(raw->name);
+	any_map_set(data_cached_meshes, md->_->handle, md);
+
+	context_raw->ddirty                               = 4;
+
+	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
+	util_uv_uvmap_cached                              = false;
+	util_uv_trianglemap_cached                        = false;
+	util_uv_dilatemap_cached                          = false;
+
+	if (import_mesh_clear_layers) {
+		while (project_layers->length > 0) {
+			slot_layer_t *l = array_pop(project_layers);
+			slot_layer_unload(l);
+		}
+		layers_new_layer(false, -1);
+		sys_notify_on_next_frame(&_import_mesh_make_mesh_86005, null);
+		history_reset();
+	}
+
+	// Wait for add_mesh calls to finish
+	if (import_mesh_meshes_to_unwrap != null) {
+		sys_notify_on_next_frame(&_import_mesh_make_mesh_86033, null);
+	}
+	else {
+		sys_notify_on_next_frame(&_import_mesh_make_mesh_86052, null);
+	}
+}
+
+void _import_mesh_make_mesh_86052(any _) {
+	import_mesh_finish_import();
+}
+
+void _import_mesh_make_mesh_86033(any _) {
+	import_mesh_finish_import();
+}
+
+void _import_mesh_make_mesh_86005(any _) {
+	layers_init();
+}
+
+void _import_mesh_make_mesh_85887(mesh_data_t *md) {
+	mesh_data_delete(md);
+}
+
+void import_mesh_first_unwrap_done(raw_mesh_t *mesh) {
+	_import_mesh_make_mesh(mesh);
+	for (i32 i = 0; i < import_mesh_meshes_to_unwrap->length; ++i) {
+		raw_mesh_t *mesh = import_mesh_meshes_to_unwrap->buffer[i];
+		project_unwrap_mesh_box(mesh, _import_mesh_add_mesh, true);
+	}
+}
+
+void import_mesh_make_mesh(raw_mesh_t *mesh) {
+	if (mesh == null || mesh->posa == null || mesh->nora == null || mesh->inda == null || mesh->posa->length == 0) {
+		console_error(strings_failed_to_read_mesh_data());
+		return;
+	}
+
+	if (mesh->texa == null) {
+		if (import_mesh_meshes_to_unwrap == null) {
+			gc_unroot(import_mesh_meshes_to_unwrap);
+			import_mesh_meshes_to_unwrap = any_array_create_from_raw((any[]){}, 0);
+			gc_root(import_mesh_meshes_to_unwrap);
+		}
+		project_unwrap_mesh_box(mesh, import_mesh_first_unwrap_done, false);
+	}
+	else {
+		_import_mesh_make_mesh(mesh);
+	}
+}
+
+bool _import_mesh_is_unique_name(string_t *s) {
+	for (i32 i = 0; i < project_paint_objects->length; ++i) {
+		mesh_object_t *p = project_paint_objects->buffer[i];
+		if (string_equals(p->base->name, s)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+string_t *_import_mesh_number_ext(i32 i) {
+	if (i < 10) {
+		return string_join(".00", i32_to_string(i));
+	}
+	if (i < 100) {
+		return string_join(".0", i32_to_string(i));
+	}
+	return string_join(".", i32_to_string(i));
+}
+
+void _import_mesh_add_mesh(raw_mesh_t *mesh) {
+	mesh_data_t *raw = import_mesh_raw_mesh(mesh);
+
+	if (context_raw->tool == TOOL_TYPE_GIZMO) {
+		util_mesh_pack_uvs(mesh->texa);
+	}
+
+	mesh_data_t   *md     = mesh_data_create(raw);
+
+	mesh_object_t *object = scene_add_mesh_object(md, context_raw->paint_object->material, context_raw->paint_object->base);
+	object->base->name    = mesh->name;
+	object->skip_context  = "paint";
+
+	// Ensure unique names
+	string_t *oname       = object->base->name;
+	string_t *ext         = "";
+	i32       i           = 0;
+	while (!_import_mesh_is_unique_name(string_join(oname, ext))) {
+		ext = string_copy(_import_mesh_number_ext(++i));
+	}
+	object->base->name = string_join(object->base->name, ext);
+	raw->name          = string_join(raw->name, ext);
+
+	any_array_push(project_paint_objects, object);
+	md->_->handle = string_copy(raw->name);
+	any_map_set(data_cached_meshes, md->_->handle, md);
+
+	context_raw->ddirty                               = 4;
+
+	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+	util_uv_uvmap_cached                              = false;
+	util_uv_trianglemap_cached                        = false;
+	util_uv_dilatemap_cached                          = false;
+}
+
+void import_mesh_add_mesh(raw_mesh_t *mesh) {
+	if (mesh->texa == null) {
+		if (import_mesh_meshes_to_unwrap != null) {
+			any_array_push(import_mesh_meshes_to_unwrap, mesh);
+		}
+		else {
+			project_unwrap_mesh_box(mesh, _import_mesh_add_mesh, false);
+		}
+	}
+	else {
+		_import_mesh_add_mesh(mesh);
+	}
+}
+
+mesh_data_t *import_mesh_raw_mesh(raw_mesh_t *mesh) {
+	mesh_data_t *raw = GC_ALLOC_INIT(mesh_data_t, {.name          = mesh->name,
+	                                               .vertex_arrays = any_array_create_from_raw(
+	                                                   (any[]){
+	                                                       GC_ALLOC_INIT(vertex_array_t, {.values = mesh->posa, .attrib = "pos", .data = "short4norm"}),
+	                                                       GC_ALLOC_INIT(vertex_array_t, {.values = mesh->nora, .attrib = "nor", .data = "short2norm"}),
+	                                                       GC_ALLOC_INIT(vertex_array_t, {.values = mesh->texa, .attrib = "tex", .data = "short2norm"}),
+	                                                   },
+	                                                   3),
+	                                               .index_array = mesh->inda,
+	                                               .scale_pos   = mesh->scale_pos,
+	                                               .scale_tex   = mesh->scale_tex});
+	if (mesh->texa1 != null) {
+		vertex_array_t *va = GC_ALLOC_INIT(vertex_array_t, {.values = mesh->texa1, .attrib = "tex1", .data = "short2norm"});
+		any_array_push(raw->vertex_arrays, va);
+	}
+	if (mesh->cola != null) {
+		vertex_array_t *va = GC_ALLOC_INIT(vertex_array_t, {.values = mesh->cola, .attrib = "col", .data = "short4norm"});
+		any_array_push(raw->vertex_arrays, va);
+	}
+	return raw;
+}

@@ -1,0 +1,449 @@
+void render_path_base_init() {
+	pipes_init();
+	const_data_create_screen_aligned_data();
+	render_path_base_super_sample = config_raw->rp_supersample;
+}
+
+void render_path_base_apply_config() {
+	if (render_path_base_super_sample != config_raw->rp_supersample) {
+		render_path_base_super_sample = config_raw->rp_supersample;
+		string_t_array_t *keys        = map_keys(render_path_render_targets);
+		for (i32 i = 0; i < keys->length; ++i) {
+			render_target_t *rt = any_map_get(render_path_render_targets, keys->buffer[i]);
+			if (rt->width == 0) {
+				rt->scale = render_path_base_super_sample;
+			}
+		}
+		render_path_resize();
+	}
+}
+
+f32 render_path_base_get_super_sampling() {
+	return render_path_base_super_sample;
+}
+
+void render_path_base_draw_compass() {
+	compass_render();
+}
+
+void render_path_base_begin() {
+	// Begin split
+	if (context_raw->split_view && !context_raw->paint2d_view) {
+		if (context_raw->view_index_last == -1 && context_raw->view_index == -1) {
+			// Begin split, draw right viewport first
+			context_raw->view_index = 1;
+		}
+		else {
+			// Set current viewport
+			context_raw->view_index = mouse_view_x() > base_w() / (float)2 ? 1 : 0;
+		}
+
+		camera_object_t *cam = scene_camera;
+		if (context_raw->view_index_last > -1) {
+			// Save current viewport camera
+			camera_views->buffer[context_raw->view_index_last]->v = mat4_clone(cam->base->transform->local);
+		}
+
+		bool decal = context_is_decal();
+
+		if (context_raw->view_index_last != context_raw->view_index || decal) {
+			// Redraw on current viewport change
+			context_raw->ddirty = 1;
+		}
+
+		transform_set_matrix(cam->base->transform, camera_views->buffer[context_raw->view_index]->v);
+		camera_object_build_mat(cam);
+		camera_object_build_proj(cam, -1.0);
+	}
+
+	// Match projection matrix jitter
+	bool skip_taa =
+	    context_raw->split_view || context_raw->viewport_mode == VIEWPORT_MODE_PATH_TRACE || context_raw->camera_type == CAMERA_TYPE_ORTHOGRAPHIC ||
+	    ((context_raw->tool == TOOL_TYPE_CLONE || context_raw->tool == TOOL_TYPE_BLUR || context_raw->tool == TOOL_TYPE_SMUDGE) && context_raw->pdirty > 0);
+	scene_camera->frame = skip_taa ? 0 : render_path_base_taa_frame;
+	camera_object_proj_jitter(scene_camera);
+	camera_object_build_mat(scene_camera);
+}
+
+void render_path_base_end() {
+	// End split
+	context_raw->view_index_last = context_raw->view_index;
+	context_raw->view_index      = -1;
+
+	if (context_raw->foreground_event && !mouse_down("left")) {
+		context_raw->foreground_event = false;
+		context_raw->pdirty           = 0;
+	}
+
+	render_path_base_taa_frame++;
+}
+
+bool render_path_base_ssaa4() {
+	return config_raw->rp_supersample == 4;
+}
+
+bool render_path_base_is_cached() {
+	if (iron_window_width() == 0 || iron_window_height() == 0) {
+		return true;
+	}
+
+	f32 mx                  = render_path_base_last_x;
+	f32 my                  = render_path_base_last_y;
+	render_path_base_last_x = mouse_view_x();
+	render_path_base_last_y = mouse_view_y();
+
+	if (context_raw->ddirty <= 0 && context_raw->rdirty <= 0 && context_raw->pdirty <= 0) {
+		if (mx != render_path_base_last_x || my != render_path_base_last_y || iron_mouse_is_locked()) {
+			context_raw->ddirty = 0;
+		}
+
+		if (context_raw->ddirty > -6) {
+			// Accumulate taa frames
+			context_raw->ddirty--;
+			return false;
+		}
+
+		if (context_raw->ddirty > -12) {
+			render_path_set_target("", null, null, GPU_CLEAR_NONE, 0, 0.0);
+			render_path_bind_target("last", "tex");
+			if (render_path_base_ssaa4()) {
+				render_path_draw_shader("Scene/supersample_resolve/supersample_resolveRGBA64");
+			}
+			else {
+				render_path_draw_shader("Scene/copy_pass/copy_pass");
+			}
+			render_path_paint_commands_cursor();
+			context_raw->ddirty--;
+		}
+
+		render_path_base_end();
+		return true;
+	}
+	return false;
+}
+
+void render_path_base_commands(void (*draw_commands)(void)) {
+	if (render_path_base_is_cached()) {
+		return;
+	}
+	render_path_base_begin();
+
+	render_path_paint_begin();
+	render_path_base_draw_split(draw_commands);
+	render_path_base_draw_gbuffer();
+	render_path_paint_draw();
+
+	if (context_raw->viewport_mode == VIEWPORT_MODE_PATH_TRACE) {
+		bool use_live_layer = context_raw->tool == TOOL_TYPE_MATERIAL;
+		render_path_raytrace_draw(use_live_layer);
+		context_raw->foreground_event = false;
+		render_path_base_end();
+		return;
+	}
+
+	draw_commands();
+	render_path_paint_commands_cursor();
+	render_path_paint_end();
+	render_path_base_end();
+}
+
+void render_path_base_draw_bloom(string_t *source, string_t *target) {
+	if (config_raw->rp_bloom == false) {
+		return;
+	}
+
+	if (render_path_base_bloom_mipmaps == null) {
+		gc_unroot(render_path_base_bloom_mipmaps);
+		render_path_base_bloom_mipmaps = any_array_create_from_raw((any[]){}, 0);
+		gc_root(render_path_base_bloom_mipmaps);
+
+		f32 prev_scale = 1.0;
+		for (i32 i = 0; i < 10; ++i) {
+			render_target_t *t = render_target_create();
+			t->name            = string_join("bloom_mip_", i32_to_string(i));
+			t->width           = 0;
+			t->height          = 0;
+			prev_scale *= 0.5;
+			t->scale  = prev_scale;
+			t->format = "RGBA64";
+			any_array_push(render_path_base_bloom_mipmaps, render_path_create_render_target(t));
+		}
+
+		render_path_load_shader("Scene/bloom_pass/bloom_downsample_pass");
+		render_path_load_shader("Scene/bloom_pass/bloom_upsample_pass");
+	}
+
+	f32 bloom_radius                    = 6.5;
+	f32 min_dim                         = math_min(render_path_current_w, render_path_current_h);
+	f32 log_min_dim                     = math_max(1.0, math_log2(min_dim) + (bloom_radius - 8.0));
+	i32 num_mips                        = math_floor(log_min_dim);
+	render_path_base_bloom_sample_scale = 0.5 + log_min_dim - num_mips;
+
+	for (i32 i = 0; i < num_mips; ++i) {
+		render_path_base_bloom_current_mip = i;
+		render_path_set_target(render_path_base_bloom_mipmaps->buffer[i]->name, null, null, GPU_CLEAR_COLOR, 0x00000000, 0.0);
+		render_path_bind_target(i == 0 ? source : render_path_base_bloom_mipmaps->buffer[i - 1]->name, "tex");
+		render_path_draw_shader("Scene/bloom_pass/bloom_downsample_pass");
+	}
+
+	for (i32 i = 0; i < num_mips; ++i) {
+		i32 mip_level                      = num_mips - 1 - i;
+		render_path_base_bloom_current_mip = mip_level;
+		render_path_set_target(mip_level == 0 ? target : render_path_base_bloom_mipmaps->buffer[mip_level - 1]->name, null, null, GPU_CLEAR_NONE, 0, 0.0);
+		render_path_bind_target(render_path_base_bloom_mipmaps->buffer[mip_level]->name, "tex");
+		render_path_draw_shader("Scene/bloom_pass/bloom_upsample_pass");
+	}
+}
+
+void render_path_base_draw_split(void (*draw_commands)(void)) {
+	if (context_raw->split_view && !context_raw->paint2d_view) {
+		context_raw->ddirty     = 2;
+		camera_object_t *cam    = scene_camera;
+
+		context_raw->view_index = context_raw->view_index == 0 ? 1 : 0;
+		transform_set_matrix(cam->base->transform, camera_views->buffer[context_raw->view_index]->v);
+		camera_object_build_mat(cam);
+		camera_object_build_proj(cam, -1.0);
+
+		render_path_base_draw_gbuffer();
+
+		bool use_live_layer = context_raw->tool == TOOL_TYPE_MATERIAL;
+		context_raw->viewport_mode == VIEWPORT_MODE_PATH_TRACE ? render_path_raytrace_draw(use_live_layer) : draw_commands();
+
+		context_raw->view_index = context_raw->view_index == 0 ? 1 : 0;
+		transform_set_matrix(cam->base->transform, camera_views->buffer[context_raw->view_index]->v);
+		camera_object_build_mat(cam);
+		camera_object_build_proj(cam, -1.0);
+	}
+}
+
+void render_path_base_init_ssao() {
+	#if defined(IRON_MACOS) || defined(IRON_IOS) || defined(IRON_ANDROID)
+	f32 scale = 0.5;
+	#else
+	f32 scale = 1.0;
+	#endif
+
+	{
+		render_target_t *t = render_target_create();
+		t->name            = "singlea";
+		t->width           = 0;
+		t->height          = 0;
+		t->format          = "R8";
+		t->scale           = scale * render_path_base_get_super_sampling();
+		render_path_create_render_target(t);
+	}
+
+	{
+		render_target_t *t = render_target_create();
+		t->name            = "singleb";
+		t->width           = 0;
+		t->height          = 0;
+		t->format          = "R8";
+		t->scale           = scale * render_path_base_get_super_sampling();
+		render_path_create_render_target(t);
+	}
+
+	render_path_load_shader("Scene/ssao_pass/ssao_pass");
+	render_path_load_shader("Scene/ssao_blur_pass/ssao_blur_pass_x");
+	render_path_load_shader("Scene/ssao_blur_pass/ssao_blur_pass_y");
+}
+
+void render_path_base_draw_ssao() {
+	bool ssao = config_raw->rp_ssao != false && context_raw->camera_type == CAMERA_TYPE_PERSPECTIVE;
+	if (ssao && context_raw->ddirty > 0 && _render_path_frame > 0) {
+		if (any_map_get(render_path_render_targets, "singlea") == null) {
+			render_path_base_init_ssao();
+		}
+
+		render_path_set_target("singlea", null, null, GPU_CLEAR_NONE, 0, 0.0);
+		render_path_bind_target("main", "gbufferD");
+		render_path_bind_target("gbuffer0", "gbuffer0");
+		render_path_draw_shader("Scene/ssao_pass/ssao_pass");
+
+		render_path_set_target("singleb", null, null, GPU_CLEAR_NONE, 0, 0.0);
+		render_path_bind_target("singlea", "tex");
+		render_path_bind_target("gbuffer0", "gbuffer0");
+		render_path_draw_shader("Scene/ssao_blur_pass/ssao_blur_pass_x");
+
+		render_path_set_target("singlea", null, null, GPU_CLEAR_NONE, 0, 0.0);
+		render_path_bind_target("singleb", "tex");
+		render_path_bind_target("gbuffer0", "gbuffer0");
+		render_path_draw_shader("Scene/ssao_blur_pass/ssao_blur_pass_y");
+	}
+}
+
+void render_path_base_draw_deferred_light() {
+	render_path_set_target("buf", null, null, GPU_CLEAR_NONE, 0, 0.0);
+	render_path_bind_target("main", "gbufferD");
+	render_path_bind_target("gbuffer0", "gbuffer0");
+	render_path_bind_target("gbuffer1", "gbuffer1");
+	bool ssao = config_raw->rp_ssao != false && context_raw->camera_type == CAMERA_TYPE_PERSPECTIVE;
+	if (ssao && _render_path_frame > 0) {
+		render_path_bind_target("singlea", "ssaotex");
+	}
+	else {
+		render_path_bind_target("empty_white", "ssaotex");
+	}
+
+	render_path_draw_shader("Scene/deferred_light/deferred_light");
+
+	render_path_set_target("buf", null, "main", GPU_CLEAR_NONE, 0, 0.0);
+	render_path_draw_skydome("Scene/world_pass/world_pass");
+}
+
+// function render_path_base_draw_histogram() {
+// 	{
+// 		let t: render_target_t = RenderTarget.create();
+// 		t.name = "histogram";
+// 		t.width = 1;
+// 		t.height = 1;
+// 		t.format = "RGBA64";
+// 		render_path_create_render_target(t);
+// 		render_path_load_shader("Scene/histogram_pass/histogram_pass");
+// 	}
+// 	render_path_set_target("histogram");
+// 	render_path_bind_target("last", "tex");
+// 	render_path_draw_shader("Scene/histogram_pass/histogram_pass");
+// }
+
+void render_path_base_draw_taa(string_t *bufa, string_t *bufb) {
+	render_path_set_target(bufb, null, null, GPU_CLEAR_NONE, 0, 0.0);
+	render_path_bind_target(bufa, "tex");
+
+	bool skip_taa = context_raw->split_view;
+	if (skip_taa) {
+		render_path_draw_shader("Scene/copy_pass/copyRGBA64_pass");
+	}
+	else {
+		render_path_bind_target("last", "tex2");
+		render_path_draw_shader("Scene/taa_pass/taa_pass");
+	}
+
+	render_path_set_target("", null, null, GPU_CLEAR_NONE, 0, 0.0);
+	render_path_bind_target(bufb, "tex");
+	if (render_path_base_ssaa4()) {
+		render_path_draw_shader("Scene/supersample_resolve/supersample_resolveRGBA64");
+	}
+	else {
+		render_path_draw_shader("Scene/copy_pass/copy_pass");
+	}
+
+	render_path_base_swap_buf(bufb);
+}
+
+void render_path_base_swap_buf(string_t *bufb) {
+	// Swap buf and last targets
+	render_target_t *last_target = any_map_get(render_path_render_targets, "last");
+	last_target->name            = string_copy(bufb);
+	render_target_t *buf_target  = any_map_get(render_path_render_targets, bufb);
+	buf_target->name             = "last";
+	any_map_set(render_path_render_targets, bufb, last_target);
+	any_map_set(render_path_render_targets, "last", buf_target);
+	render_path_base_buf_swapped = !render_path_base_buf_swapped;
+}
+
+void render_path_base_draw_gbuffer() {
+	render_path_set_target("gbuffer0", null, "main", GPU_CLEAR_DEPTH, 0, 1.0); // Only clear gbuffer0
+	string_t_array_t *additional = any_array_create_from_raw(
+	    (any[]){
+	        "gbuffer1",
+	        "gbuffer2",
+	    },
+	    2);
+	render_path_set_target("gbuffer0", additional, "main", GPU_CLEAR_NONE, 0, 0.0);
+	render_path_paint_bind_layers();
+	render_path_draw_meshes("mesh");
+	render_path_paint_unbind_layers();
+	if (make_mesh_layer_pass_count > 1) {
+		render_path_base_make_gbuffer_copy_textures();
+		for (i32 i = 1; i < make_mesh_layer_pass_count; ++i) {
+			string_t *ping = i % 2 == 1 ? "_copy" : "";
+			string_t *pong = i % 2 == 1 ? "" : "_copy";
+			if (i == make_mesh_layer_pass_count - 1) {
+				render_path_set_target(string_join("gbuffer2", ping), null, null, GPU_CLEAR_COLOR, 0xff000000, 0.0);
+			}
+			string_t         *g1ping     = string_join("gbuffer1", ping);
+			string_t         *g2ping     = string_join("gbuffer2", ping);
+			string_t_array_t *additional = any_array_create_from_raw(
+			    (any[]){
+			        g1ping,
+			        g2ping,
+			    },
+			    2);
+			render_path_set_target(string_join("gbuffer0", ping), additional, "main", GPU_CLEAR_NONE, 0, 0.0);
+			render_path_bind_target(string_join("gbuffer0", pong), "gbuffer0");
+			render_path_bind_target(string_join("gbuffer1", pong), "gbuffer1");
+			render_path_bind_target(string_join("gbuffer2", pong), "gbuffer2");
+			render_path_paint_bind_layers();
+			render_path_draw_meshes(string_join("mesh", i32_to_string(i)));
+			render_path_paint_unbind_layers();
+		}
+		if (make_mesh_layer_pass_count % 2 == 0) {
+			render_path_base_copy_to_gbuffer();
+		}
+	}
+
+	bool hide     = operator_shortcut(any_map_get(config_keymap, "stencil_hide"), SHORTCUT_TYPE_DOWN) || keyboard_down("control");
+	bool is_decal = base_is_decal_layer();
+	if (is_decal && !hide) {
+		line_draw_color              = 0xff000000;
+		line_draw_strength           = 0.002;
+		string_t_array_t *additional = any_array_create_from_raw(
+		    (any[]){
+		        "gbuffer1",
+		    },
+		    1);
+		render_path_set_target("gbuffer0", additional, "main", GPU_CLEAR_NONE, 0, 0.0);
+		line_draw_render(context_raw->layer->decal_mat);
+		render_path_end();
+	}
+}
+
+void render_path_base_make_gbuffer_copy_textures() {
+	render_target_t *copy = any_map_get(render_path_render_targets, "gbuffer0_copy");
+	render_target_t *g0   = any_map_get(render_path_render_targets, "gbuffer0");
+	if (copy == null || copy->_image->width != g0->_image->width || copy->_image->height != g0->_image->height) {
+		{
+			render_target_t *t = render_target_create();
+			t->name            = "gbuffer0_copy";
+			t->width           = 0;
+			t->height          = 0;
+			t->format          = "RGBA64";
+			t->scale           = render_path_base_get_super_sampling();
+			render_path_create_render_target(t);
+		}
+		{
+			render_target_t *t = render_target_create();
+			t->name            = "gbuffer1_copy";
+			t->width           = 0;
+			t->height          = 0;
+			t->format          = "RGBA64";
+			t->scale           = render_path_base_get_super_sampling();
+			render_path_create_render_target(t);
+		}
+		{
+			render_target_t *t = render_target_create();
+			t->name            = "gbuffer2_copy";
+			t->width           = 0;
+			t->height          = 0;
+			t->format          = "RGBA64";
+			t->scale           = render_path_base_get_super_sampling();
+			render_path_create_render_target(t);
+		}
+	}
+}
+
+void render_path_base_copy_to_gbuffer() {
+	string_t_array_t *additional = any_array_create_from_raw(
+	    (any[]){
+	        "gbuffer1",
+	        "gbuffer2",
+	    },
+	    2);
+	render_path_set_target("gbuffer0", additional, null, GPU_CLEAR_NONE, 0, 0.0);
+	render_path_bind_target("gbuffer0_copy", "tex0");
+	render_path_bind_target("gbuffer1_copy", "tex1");
+	render_path_bind_target("gbuffer2_copy", "tex2");
+	render_path_draw_shader("Scene/copy_mrt3_pass/copy_mrt3RGBA64_pass");
+}

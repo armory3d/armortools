@@ -123,6 +123,10 @@ void spirv_export2(char **vs, char **fs, int *vs_size, int *fs_size, bool debug)
 void wgsl_export2(char **vs, char **fs);
 void console_info(char *s);
 
+#ifdef AMAKE
+void console_info(char *s) {}
+#endif
+
 static struct {
 	char   *key;
 	name_id value;

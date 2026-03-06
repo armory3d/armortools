@@ -49,7 +49,7 @@ void *ui_popup_data2;
 int   ui_popup_handle_node_id        = -1;
 int   ui_popup_handle_node_socket_id = -1;
 
-char *tr(char *id, void *map); // translator.ts
+char *tr(char *id, void *map); // translator.c
 
 char *ui_tr(char *id) {
 	return tr(id, NULL);

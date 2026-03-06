@@ -1,0 +1,180 @@
+void text_to_image_node_init() {
+	any_array_push(nodes_material_neural, text_to_image_node_def);
+	any_map_set(parser_material_node_vectors, "NEURAL_TEXT_TO_IMAGE", neural_node_vector);
+	any_map_set(ui_nodes_custom_buttons, "text_to_image_node_button", text_to_image_node_button);
+}
+
+string_t_array_t *text_to_image_node_sd_args(string_t *dir, string_t *prompt) {
+	string_t_array_t *argv = any_array_create_from_raw(
+	    (any[]){
+	        string_join(string_join(dir, "/"), neural_node_sd_bin()),
+	        "-m",
+	        string_join(dir, "/v1-5-pruned-emaonly.safetensors"),
+	        "--offload-to-cpu",
+	        "-W",
+	        "512",
+	        "-H",
+	        "512",
+	        "--steps",
+	        "40",
+	        "-s",
+	        "-1",
+	        "-o",
+	        string_join(dir, "/output.png"),
+	        "-p",
+	        string_join(string_join("'", prompt), "'"),
+	        null,
+	    },
+	    17);
+	return argv;
+}
+
+string_t_array_t *text_to_image_node_zimage_args(string_t *dir, string_t *prompt) {
+	string_t_array_t *argv = any_array_create_from_raw(
+	    (any[]){
+	        string_join(string_join(dir, "/"), neural_node_sd_bin()),
+	        "--diffusion-model",
+	        string_join(dir, "/z_image_turbo-Q4_K.gguf"),
+	        "--vae",
+	        string_join(dir, "/ae.safetensors"),
+	        "--llm",
+	        string_join(dir, "/Qwen3-4B-Instruct-2507-Q4_K_S.gguf"),
+	        "--diffusion-fa",
+	        "--offload-to-cpu",
+	        "--cfg-scale",
+	        "1.0",
+	        "-W",
+	        "512",
+	        "-H",
+	        "512",
+	        "--steps",
+	        "40",
+	        "-s",
+	        "-1",
+	        "-o",
+	        string_join(dir, "/output.png"),
+	        "-p",
+	        string_join(string_join("'", prompt), "'"),
+	        null,
+	    },
+	    24);
+	return argv;
+}
+
+string_t_array_t *text_to_image_node_qwen_args(string_t *dir, string_t *prompt) {
+	string_t_array_t *argv = any_array_create_from_raw(
+	    (any[]){
+	        string_join(string_join(dir, "/"), neural_node_sd_bin()),
+	        "--diffusion-model",
+	        string_join(dir, "/qwen-image-2512-Q4_K_S.gguf"),
+	        "--vae",
+	        string_join(dir, "/Qwen_Image-VAE.safetensors"),
+	        "--llm",
+	        string_join(dir, "/Qwen2.5-VL-7B-Instruct-Q4_K_S.gguf"),
+	        "--llm_vision",
+	        string_join(dir, "/mmproj-F16.gguf"),
+	        "--sampling-method",
+	        "euler",
+	        "--offload-to-cpu",
+	        "-W",
+	        "512",
+	        "-H",
+	        "512",
+	        "--steps",
+	        "20",
+	        "-s",
+	        "-1",
+	        "-o",
+	        string_join(dir, "/output.png"),
+	        "-p",
+	        string_join(string_join("'", prompt), "'"),
+	        null,
+	    },
+	    25);
+	return argv;
+}
+
+string_t_array_t *text_to_image_node_wan_args(string_t *dir, string_t *prompt) {
+	string_t_array_t *argv = any_array_create_from_raw(
+	    (any[]){
+	        string_join(string_join(dir, "/"), neural_node_sd_bin()),
+	        "-M",
+	        "vid_gen",
+	        "--diffusion-model",
+	        string_join(dir, "/Wan2.2-T2V-A14B-LowNoise-Q4_K_S.gguf"),
+	        "--high-noise-diffusion-model",
+	        string_join(dir, "/Wan2.2-T2V-A14B-HighNoise-Q4_K_S.gguf"),
+	        "--vae",
+	        string_join(dir, "/Wan2.1_VAE.safetensors"),
+	        "--t5xxl",
+	        string_join(dir, "/umt5-xxl-encoder-Q4_K_S.gguf"),
+	        "--sampling-method",
+	        "euler",
+	        "--steps",
+	        "20",
+	        "--high-noise-sampling-method",
+	        "euler",
+	        "--high-noise-steps",
+	        "10",
+	        "-W",
+	        "512",
+	        "-H",
+	        "512",
+	        "--offload-to-cpu",
+	        "-s",
+	        "-1",
+	        "-o",
+	        string_join(dir, "/output.png"),
+	        "-p",
+	        prompt,
+	        null,
+	    },
+	    31);
+	return argv;
+}
+
+void text_to_image_node_button(i32 node_id) {
+	ui_node_t        *node      = ui_get_node(ui_nodes_get_canvas(true)->nodes, node_id);
+	string_t         *node_name = parser_material_node_name(node, null);
+	ui_handle_t      *h         = ui_handle(node_name);
+	string_t_array_t *models    = any_array_create_from_raw(
+        (any[]){
+            "Stable Diffusion",
+            "Z-Image-Turbo",
+            "Qwen Image",
+            "Wan",
+        },
+        4);
+	i32       model                  = ui_combo(ui_nest(h, 0), models, tr("Model", null), false, UI_ALIGN_LEFT, true);
+	string_t *prompt                 = ui_text_area(ui_nest(h, 1), UI_ALIGN_LEFT, true, tr("prompt", null), true);
+	node->buttons->buffer[0]->height = string_split(prompt, "\n")->length + 2;
+
+	if (neural_node_button(node, models->buffer[model])) {
+		string_t *dir = neural_node_dir();
+
+		if (string_equals(prompt, "")) {
+			prompt = ".";
+		}
+
+		string_t_array_t *argv;
+		if (model == 0) {
+			argv = text_to_image_node_sd_args(dir, prompt);
+		}
+		else if (model == 1) {
+			argv = text_to_image_node_zimage_args(dir, prompt);
+		}
+		else if (model == 2) {
+			argv = text_to_image_node_qwen_args(dir, prompt);
+		}
+		else {
+			argv = text_to_image_node_wan_args(dir, prompt);
+		}
+
+		if (node->buttons->buffer[1]->default_value->buffer[0] > 0.0) {
+			array_insert(argv, argv->length - 1, "--circular");
+		}
+
+		iron_exec_async(argv->buffer[0], argv->buffer);
+		sys_notify_on_update(neural_node_check_result, node);
+	}
+}

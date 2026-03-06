@@ -1,0 +1,41 @@
+void import_font_run(string_t *path) {
+	for (i32 i = 0; i < project_fonts->length; ++i) {
+		slot_font_t *f = project_fonts->buffer[i];
+		if (string_equals(f->file, path)) {
+			console_info(strings_asset_already_imported());
+			return;
+		}
+	}
+
+	draw_font_t *font = data_get_font(path);
+	draw_font_init(font); // Make sure font_ is ready
+	i32                  count      = draw_font_count(font);
+	slot_font_t_array_t *font_slots = any_array_create_from_raw((any[]){}, 0);
+
+	for (i32 i = 0; i < count; ++i) {
+		string_t_array_t *ar   = string_split(path, PATH_SEP);
+		string_t         *name = ar->buffer[ar->length - 1];
+		draw_font_t      *f    = GC_ALLOC_INIT(draw_font_t, {.buf = font->buf, .index = font->index});
+		draw_font_init(f);
+		if (!draw_set_font(f, util_render_font_preview_size)) {
+			console_error(tr("Error: Failed to read font data", null));
+			continue;
+		}
+
+		slot_font_t *font_slot = slot_font_create(name, f, path);
+		any_array_push(font_slots, font_slot);
+	}
+
+	sys_notify_on_next_frame(&import_font_run_158599, font_slots);
+
+	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
+}
+
+void import_font_run_158599(slot_font_t_array_t *font_slots) {
+	for (i32 i = 0; i < font_slots->length; ++i) {
+		slot_font_t *f    = font_slots->buffer[i];
+		context_raw->font = f;
+		any_array_push(project_fonts, f);
+		util_render_make_font_preview();
+	}
+}

@@ -1,19 +1,14 @@
 
 let project = new Project("amake");
+project.add_define('AMAKE');
 
-// alang
-project.add_define("NO_GC");
-project.add_define("NO_GC_USE_HEAP");
-project.add_define("NO_IRON_API");
-project.add_include_dir("./"); // iron.h
-project.add_cfiles("alang.c");
 project.add_include_dir("../../sources");
 project.add_cfiles("../../sources/iron_string.c");
 project.add_cfiles("../../sources/iron_array.c");
-project.add_cfiles("../../sources/iron_map.c");
-project.add_cfiles("../../sources/iron_armpack.c");
-project.add_cfiles("../../sources/iron_json.c");
 project.add_cfiles("../../sources/iron_gc.c");
+project.add_define("NO_GC");
+project.add_define("NO_GC_USE_HEAP");
+project.add_define("NO_IRON_API");
 
 project.add_include_dir("../../sources/libs");
 project.add_cfiles("../../sources/libs/quickjs-amalgam.c");

@@ -28,7 +28,7 @@ for (let path of source_paths) {
 
 	let files = fs_readdir(path);
 	for (let file of files) {
-		if (!file.endsWith(".ts")) {
+		if (!file.endsWith(".c")) {
 			continue;
 		}
 

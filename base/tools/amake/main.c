@@ -88,14 +88,6 @@ static JSValue js_os_exec_win(JSContext *ctx, JSValue this_val, int argc, JSValu
 
 #endif
 
-void           alang(char *source, char *output);
-static JSValue js_alang(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) {
-	const char *source = JS_ToCString(ctx, argv[0]);
-	const char *output = JS_ToCString(ctx, argv[1]);
-	alang(source, output);
-	return JS_UNDEFINED;
-}
-
 int            ashader(char *shader_lang, char *from, char *to);
 static JSValue js_ashader(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) {
 	const char *shader_lang = JS_ToCString(ctx, argv[0]);
@@ -159,7 +151,6 @@ int main(int argc, char **argv) {
 #ifdef _WIN32
 	JS_SetPropertyStr(ctx, amake, "os_exec_win", JS_NewCFunction(ctx, js_os_exec_win, "os_exec_win", 1));
 #endif
-	JS_SetPropertyStr(ctx, amake, "alang", JS_NewCFunction(ctx, js_alang, "alang", 2));
 	JS_SetPropertyStr(ctx, amake, "ashader", JS_NewCFunction(ctx, js_ashader, "ashader", 3));
 
 	JS_SetPropertyStr(ctx, global_obj, "amake", amake);

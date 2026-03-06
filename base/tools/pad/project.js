@@ -5,6 +5,6 @@ flags.package = "org.armorpad";
 
 let project = new Project("ArmorPad");
 project.add_project("../..");
-project.add_tsfiles("sources");
+project.add_cfiles("sources");
 project.flatten();
 return project;

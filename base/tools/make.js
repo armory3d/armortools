@@ -2632,12 +2632,6 @@ class IronExporter {
 		this.sources = [];
 	}
 
-	ts_options(defines) {
-		defines.push("arm_" + this.options.graphics);
-		defines.push("arm_" + goptions.target);
-		return {from : ".", sources : this.sources, defines : defines};
-	}
-
 	export() {
 		fs_ensuredir(path_join("build", "out"));
 	}
@@ -2667,128 +2661,7 @@ class IronExporter {
 	}
 }
 
-function ts_contains_define(define) {
-	let b = false;
-	for (let s of globalThis.options.defines) {
-		if (define.includes(s)) {
-			b = true;
-			break;
-		};
-	}
-	if (define.includes("!")) {
-		b = !b;
-	}
-	return b;
-}
-
-function ts_preprocessor(file, file_path) {
-	let stack = [];
-	let found = [];
-	let lines = file.split("\n");
-	for (let i = 0; i < lines.length; ++i) {
-		let line = lines[i].trimStart();
-		if (line.startsWith("/// if")) {
-			let define = line.substr(6);
-			stack.push(ts_contains_define(define));
-			found.push(stack[stack.length - 1]);
-		}
-		else if (line.startsWith("/// elseif")) {
-			let define = line.substr(10);
-			if (!found[found.length - 1] && ts_contains_define(define)) {
-				stack[stack.length - 1] = true;
-				found[found.length - 1] = true;
-			}
-			else {
-				stack[stack.length - 1] = false;
-			}
-		}
-		else if (line.startsWith("/// else")) {
-			stack[stack.length - 1] = !found[found.length - 1];
-		}
-		else if (line.startsWith("/// end")) {
-			stack.pop();
-			found.pop();
-		}
-		else if (stack.length > 0) {
-			let comment = false;
-			for (let b of stack) {
-				if (!b) {
-					comment = true;
-					break;
-				}
-			}
-			if (comment) {
-				lines[i] = "///" + lines[i];
-			}
-		}
-		if (lines[i].indexOf("__ID__") > -1 && !lines[i].startsWith("declare")) {
-			// #define ID__(x, y) x ":" #y
-			// #define ID_(x, y) ID__(x, y)
-			// #define ID ID_(__FILE__, __LINE__)
-			lines[i] = lines[i].replace("__ID__", "\"" + path_basename(file_path) + ":" + i + "\"");
-		}
-	}
-	return lines.join("\n");
-}
-
-function write_ts_project(projectdir, options) {
-	let tsdata = {include : []};
-
-	let main_ts = null;
-
-	for (let i = 0; i < options.sources.length; ++i) {
-		let src   = options.sources[i];
-		let files = fs_readdir(src);
-		if (src.endsWith(".ts")) {
-			// Add file instead of dir
-			files = [ src.substring(src.lastIndexOf(path_sep) + 1, src.length) ];
-			src   = src.substring(0, src.lastIndexOf(path_sep));
-		}
-		for (let file of files) {
-			if (file.endsWith(".ts")) {
-				// Prevent duplicates, keep the newly added file
-				for (let included of tsdata.include) {
-					if (path_basename(included) == file) {
-						tsdata.include.splice(tsdata.include.indexOf(included), 1);
-						break;
-					}
-				}
-				tsdata.include.push(src + path_sep + file);
-				if (file == "main.ts") {
-					main_ts = src + path_sep + file;
-				}
-			}
-		}
-	}
-
-	// Include main.ts last
-	if (main_ts != null) {
-		tsdata.include.splice(tsdata.include.indexOf(main_ts), 1);
-		tsdata.include.push(main_ts);
-	}
-
-	fs_ensuredir(projectdir);
-	fs_writefile(path_join(projectdir, 'tsconfig.json'), JSON.stringify(tsdata, null, 4));
-
-	// alang compiler
-	globalThis.options = options;
-	let source         = '';
-	let file_paths     = tsdata.include;
-	for (let file_path of file_paths) {
-		let file = fs_readfile(file_path);
-		file     = ts_preprocessor(file, file_path);
-		source += file;
-	}
-
-	let alang_output = os_cwd() + path_sep + "build" + path_sep + "iron.c";
-	let start        = Date.now();
-	amake.alang(source, alang_output);
-	console.log("alang took " + (Date.now() - start) + "ms.");
-}
-
 function export_project_files(name, options, exporter, defines) {
-	let ts_options = exporter.ts_options(defines);
-	write_ts_project("build", ts_options);
 	exporter.export();
 	return name;
 }
@@ -3133,10 +3006,6 @@ class Project {
 			match = base + match.replace(/\\/g, '/');
 		}
 		this.asset_matchers.push({match : match, options : options});
-	}
-
-	add_tsfiles(source) {
-		this.sources.push(path_resolve(path_join(this.basedir, source)));
 	}
 
 	add_shaders(match, options) {

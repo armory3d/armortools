@@ -42,6 +42,11 @@
 #include EMBED_H_PATH
 #endif
 
+#define ID__(x, y) x ":" #y
+#define ID_(x, y) ID__(x, y)
+// #define ID ID_(__FILE__, __LINE__)
+#define __ID__ ID_(__FILE__, __LINE__)
+
 int    _argc;
 char **_argv;
 

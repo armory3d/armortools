@@ -33,7 +33,6 @@ let dir     = flags.name.substr(5).toLowerCase(); // ArmorPaint -> paint
 let project = new Project("Base");
 project.add_include_dir("sources");
 project.add_include_dir("sources/libs");
-project.add_tsfiles("sources");
 project.add_shaders("shaders/*.kong");
 project.add_assets("assets/*", {destination : "data/{name}"});
 project.add_assets("assets/licenses/**", {destination : "data/licenses/{name}"});
@@ -45,8 +44,6 @@ if (platform != "wasm") {
 }
 
 project.add_cfiles("sources/libs/kong/dir.c");
-project.add_define("IRON_C_PATH=\"" + os_cwd() + "/build/iron.c" +
-                   "\"");
 project.add_define("EMBED_H_PATH=\"" + os_cwd() + "/build/embed.h" +
                    "\"");
 
