@@ -67,7 +67,6 @@ buffer_t *embed_get(char *key) {
 }
 #endif
 
-#define string_t           char
 #define any                void *
 #define any_ptr            void **
 #define f64_ptr            f64 *
@@ -196,7 +195,7 @@ i32 iron_get_arg_count() {
 	return _argc;
 }
 
-string_t *iron_get_arg(i32 index) {
+char *iron_get_arg(i32 index) {
 	return _argv[index];
 }
 
@@ -786,7 +785,7 @@ gpu_shader_t *gpu_create_shader(buffer_t *data, i32 shader_type) {
 void gpu_create_shaders_from_kong(char *kong, char **vs, char **fs, int *vs_size, int *fs_size);
 #endif
 
-gpu_shader_t *gpu_create_shader_from_source(string_t *source, int source_size, gpu_shader_type_t shader_type) {
+gpu_shader_t *gpu_create_shader_from_source(char *source, int source_size, gpu_shader_type_t shader_type) {
 	gpu_shader_t *shader        = (gpu_shader_t *)malloc(sizeof(gpu_shader_t));
 	char         *temp_string_s = shader_type == GPU_SHADER_TYPE_VERTEX ? temp_string_vs : temp_string_fs;
 
@@ -852,7 +851,7 @@ gpu_texture_t *gpu_create_texture_from_bytes(buffer_t *data, i32 width, i32 heig
 	return texture;
 }
 
-gpu_texture_t *gpu_create_texture_from_encoded_bytes(buffer_t *data, string_t *format) {
+gpu_texture_t *gpu_create_texture_from_encoded_bytes(buffer_t *data, char *format) {
 	if (data == NULL || data->length == 0) {
 		return NULL;
 	}
@@ -914,7 +913,7 @@ void gpu_delete_texture(gpu_texture_t *texture) {
 	free(texture);
 }
 
-gpu_texture_t *iron_load_texture(string_t *file) {
+gpu_texture_t *iron_load_texture(char *file) {
 #ifdef WITH_EMBED
 	buffer_t *b = embed_get(file);
 	if (b != NULL) {
@@ -937,13 +936,13 @@ gpu_texture_t *iron_load_texture(string_t *file) {
 }
 
 #ifdef WITH_AUDIO
-any iron_load_sound(string_t *file) {
+any iron_load_sound(char *file) {
 	iron_a1_sound_t *sound = iron_a1_sound_create(file);
 	return sound;
 }
 #endif
 
-buffer_t *iron_load_blob(string_t *file) {
+buffer_t *iron_load_blob(char *file) {
 #ifdef WITH_EMBED
 	buffer_t *b = embed_get(file);
 	if (b != NULL) {

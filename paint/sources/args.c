@@ -5,7 +5,7 @@ void args_parse() {
 		i32 i    = 0;
 		while (i < iron_get_arg_count()) {
 			// Process each arg
-			string_t *current_arg = iron_get_arg(i);
+			char *current_arg = iron_get_arg(i);
 
 			if (path_is_project(current_arg)) {
 				gc_unroot(project_filepath);
@@ -65,7 +65,7 @@ void args_parse() {
 void args_run() {
 
 	if (args_use) {
-		sys_notify_on_next_frame(&args_run_115314, null);
+		sys_notify_on_next_frame(&args_run_115314, NULL);
 	}
 }
 
@@ -78,7 +78,7 @@ void args_run_115314(any _) {
 		import_arm_run_project(project_filepath);
 	}
 	else if (!string_equals(args_asset_path, "")) {
-		import_asset_run(args_asset_path, -1, -1, false, true, null);
+		import_asset_run(args_asset_path, -1, -1, false, true, NULL);
 		if (path_is_texture(args_asset_path)) {
 			ui_base_show_2d_view(VIEW_2D_TYPE_ASSET);
 		}
@@ -89,7 +89,7 @@ void args_run_115314(any _) {
 
 	if (args_export_textures) {
 		if (!path_is_folder(args_export_textures_path)) {
-			iron_log(tr("Invalid export directory", null));
+			iron_log(tr("Invalid export directory", NULL));
 		}
 
 		if (string_equals(args_export_textures_type, "png")) {
@@ -107,7 +107,7 @@ void args_run_115314(any _) {
 			base_bits_handle->i = TEXTURE_BITS_BITS32;
 		}
 		else {
-			iron_log(tr("Invalid texture type", null));
+			iron_log(tr("Invalid texture type", NULL));
 		}
 
 		context_raw->layers_export = EXPORT_MODE_VISIBLE;
@@ -117,13 +117,13 @@ void args_run_115314(any _) {
 		box_export_files = file_read_directory(string_join(string_join(path_data(), PATH_SEP), "export_presets"));
 		gc_root(box_export_files);
 		for (i32 i = 0; i < box_export_files->length; ++i) {
-			string_t *s                 = box_export_files->buffer[i];
+			char *s                 = box_export_files->buffer[i];
 			box_export_files->buffer[i] = substring(s, 0, string_length(s) - 5); // Strip .json
 		}
 
-		string_t *file = string_join(string_join("export_presets/", box_export_files->buffer[0]), ".json");
+		char *file = string_join(string_join("export_presets/", box_export_files->buffer[0]), ".json");
 		for (i32 i = 0; i < box_export_files->length; ++i) {
-			string_t *f = box_export_files->buffer[i];
+			char *f = box_export_files->buffer[i];
 			if (string_equals(f, args_export_textures_preset)) {
 				file = string_join(string_join("export_presets/", box_export_files->buffer[array_index_of(box_export_files, f)]), ".json");
 			}
@@ -136,18 +136,18 @@ void args_run_115314(any _) {
 		data_delete_blob(string_join("export_presets/", file));
 
 		// Export queue
-		sys_notify_on_next_frame(&args_run_115626, null);
+		sys_notify_on_next_frame(&args_run_115626, NULL);
 	}
 	else if (args_export_mesh) {
 		if (!path_is_folder(args_export_mesh_path)) {
-			iron_log(tr("Invalid export directory", null));
+			iron_log(tr("Invalid export directory", NULL));
 		}
 
-		string_t *f = ui_files_filename;
+		char *f = ui_files_filename;
 		if (string_equals(f, "")) {
-			f = string_copy(tr("untitled", null));
+			f = string_copy(tr("untitled", NULL));
 		}
-		export_mesh_run(string_join(string_join(args_export_mesh_path, PATH_SEP), f), null, false, true);
+		export_mesh_run(string_join(string_join(args_export_mesh_path, PATH_SEP), f), NULL, false, true);
 	}
 	else if (args_export_material) {
 		context_raw->write_icon_on_export = true;

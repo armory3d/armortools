@@ -1,5 +1,5 @@
 void make_discard_color_id(node_shader_t *kong) {
-	node_shader_add_texture(kong, "texpaint_colorid", null); // 1x1 picker
+	node_shader_add_texture(kong, "texpaint_colorid", NULL); // 1x1 picker
 	node_shader_add_texture(kong, "texcolorid", "_texcolorid"); // color map
 	// node_shader_write_frag(kong, "var colorid_c1: float3 = texpaint_colorid[uint2(0, 0)].rgb;");
 	node_shader_write_frag(kong, "var colorid_c14: float4 = texpaint_colorid[uint2(uint(0), uint(0))];");
@@ -10,7 +10,7 @@ void make_discard_color_id(node_shader_t *kong) {
 }
 
 void make_discard_face(node_shader_t *kong) {
-	node_shader_add_texture(kong, "gbuffer2", null);
+	node_shader_add_texture(kong, "gbuffer2", NULL);
 	node_shader_add_texture(kong, "textrianglemap", "_textrianglemap");
 	node_shader_add_constant(kong, "textrianglemap_size: float2", "_texpaint_size");
 	node_shader_add_constant(kong, "gbuffer_size: float2", "_gbuffer_size");

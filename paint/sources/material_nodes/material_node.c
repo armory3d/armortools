@@ -4,8 +4,8 @@ void material_node_init() {
 	any_map_set(parser_material_node_values, "MATERIAL", material_node_value);
 }
 
-string_t *material_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
-	string_t *result = "float3(0.0, 0.0, 0.0)";
+char *material_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
+	char *result = "float3(0.0, 0.0, 0.0)";
 	i32       mi     = node->buttons->buffer[0]->default_value->buffer[0];
 	if (mi >= project_materials->length) {
 		return result;
@@ -37,8 +37,8 @@ string_t *material_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	return result;
 }
 
-string_t *material_node_value(ui_node_t *node, ui_node_socket_t *socket) {
-	string_t *result = "0.0";
+char *material_node_value(ui_node_t *node, ui_node_socket_t *socket) {
+	char *result = "0.0";
 	i32       mi     = node->buttons->buffer[0]->default_value->buffer[0];
 	if (mi >= project_materials->length)
 		return result;

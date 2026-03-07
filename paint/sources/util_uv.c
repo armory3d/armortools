@@ -1,8 +1,8 @@
 void util_uv_cache_uv_map() {
-	if (util_uv_uvmap != null && (util_uv_uvmap->width != config_get_texture_res_x() || util_uv_uvmap->height != config_get_texture_res_y())) {
+	if (util_uv_uvmap != NULL && (util_uv_uvmap->width != config_get_texture_res_x() || util_uv_uvmap->height != config_get_texture_res_y())) {
 		gpu_delete_texture(util_uv_uvmap);
 		gc_unroot(util_uv_uvmap);
-		util_uv_uvmap        = null;
+		util_uv_uvmap        = NULL;
 		util_uv_uvmap_cached = false;
 	}
 
@@ -12,7 +12,7 @@ void util_uv_cache_uv_map() {
 
 	i32 res_x = config_get_texture_res_x();
 	i32 res_y = config_get_texture_res_y();
-	if (util_uv_uvmap == null) {
+	if (util_uv_uvmap == NULL) {
 		gc_unroot(util_uv_uvmap);
 		util_uv_uvmap = gpu_create_render_target(res_x, res_y, GPU_TEXTURE_FORMAT_RGBA32);
 		gc_root(util_uv_uvmap);
@@ -21,7 +21,7 @@ void util_uv_cache_uv_map() {
 	util_uv_uvmap_cached  = true;
 	i32            mask   = slot_layer_get_object_mask(context_raw->layer);
 	mesh_object_t *merged = mask > 0 ? project_paint_objects->buffer[mask - 1] : context_raw->merged_object;
-	mesh_data_t   *mesh   = (context_raw->layer_filter == 0 && merged != null) ? merged->data : context_raw->paint_object->data;
+	mesh_data_t   *mesh   = (context_raw->layer_filter == 0 && merged != NULL) ? merged->data : context_raw->paint_object->data;
 
 	i16_array_t   *texa   = mesh->vertex_arrays->buffer[2]->values;
 	u32_array_t   *inda   = mesh->index_array;
@@ -44,11 +44,11 @@ void util_uv_cache_uv_map() {
 }
 
 void util_uv_cache_triangle_map() {
-	if (util_uv_trianglemap != null &&
+	if (util_uv_trianglemap != NULL &&
 	    (util_uv_trianglemap->width != config_get_texture_res_x() || util_uv_trianglemap->height != config_get_texture_res_y())) {
 		gpu_delete_texture(util_uv_trianglemap);
 		gc_unroot(util_uv_trianglemap);
-		util_uv_trianglemap        = null;
+		util_uv_trianglemap        = NULL;
 		util_uv_trianglemap_cached = false;
 	}
 
@@ -56,14 +56,14 @@ void util_uv_cache_triangle_map() {
 		return;
 	}
 
-	if (util_uv_trianglemap == null) {
+	if (util_uv_trianglemap == NULL) {
 		gc_unroot(util_uv_trianglemap);
 		util_uv_trianglemap = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), GPU_TEXTURE_FORMAT_RGBA32);
 		gc_root(util_uv_trianglemap);
 	}
 
 	util_uv_trianglemap_cached = true;
-	mesh_data_t *merged        = context_raw->merged_object != null ? context_raw->merged_object->data : context_raw->paint_object->data;
+	mesh_data_t *merged        = context_raw->merged_object != NULL ? context_raw->merged_object->data : context_raw->paint_object->data;
 	mesh_data_t *mesh          = merged;
 	i16_array_t *texa          = mesh->vertex_arrays->buffer[2]->values;
 	u32_array_t *inda          = mesh->index_array;
@@ -87,23 +87,23 @@ void util_uv_cache_triangle_map() {
 }
 
 void util_uv_cache_dilate_map() {
-	if (util_uv_dilatemap != null && (util_uv_dilatemap->width != config_get_texture_res_x() || util_uv_dilatemap->height != config_get_texture_res_y())) {
+	if (util_uv_dilatemap != NULL && (util_uv_dilatemap->width != config_get_texture_res_x() || util_uv_dilatemap->height != config_get_texture_res_y())) {
 		gpu_delete_texture(util_uv_dilatemap);
 		gc_unroot(util_uv_dilatemap);
-		util_uv_dilatemap        = null;
+		util_uv_dilatemap        = NULL;
 		util_uv_dilatemap_cached = false;
 	}
 
 	if (util_uv_dilatemap_cached)
 		return;
 
-	if (util_uv_dilatemap == null) {
+	if (util_uv_dilatemap == NULL) {
 		gc_unroot(util_uv_dilatemap);
 		util_uv_dilatemap = gpu_create_render_target(config_get_texture_res_x(), config_get_texture_res_y(), GPU_TEXTURE_FORMAT_R8);
 		gc_root(util_uv_dilatemap);
 	}
 
-	if (util_uv_pipe_dilate == null) {
+	if (util_uv_pipe_dilate == NULL) {
 		gc_unroot(util_uv_pipe_dilate);
 		util_uv_pipe_dilate = gpu_create_pipeline();
 		gc_root(util_uv_pipe_dilate);
@@ -125,8 +125,8 @@ void util_uv_cache_dilate_map() {
 	if (context_layer_filter_used()) {
 		mask = context_raw->layer_filter;
 	}
-	mesh_data_t *geom = mask == 0 && context_raw->merged_object != null ? context_raw->merged_object->data : context_raw->paint_object->data;
-	_gpu_begin(util_uv_dilatemap, null, null, GPU_CLEAR_COLOR, 0x00000000, 0.0);
+	mesh_data_t *geom = mask == 0 && context_raw->merged_object != NULL ? context_raw->merged_object->data : context_raw->paint_object->data;
+	_gpu_begin(util_uv_dilatemap, NULL, NULL, GPU_CLEAR_COLOR, 0x00000000, 0.0);
 	gpu_set_pipeline(util_uv_pipe_dilate);
 	gpu_set_vertex_buffer(geom->_->vertex_buffer);
 	gpu_set_index_buffer(geom->_->index_buffer);
@@ -134,7 +134,7 @@ void util_uv_cache_dilate_map() {
 	gpu_end();
 	util_uv_dilatemap_cached = true;
 	gc_unroot(util_uv_dilate_bytes);
-	util_uv_dilate_bytes = null;
+	util_uv_dilate_bytes = NULL;
 }
 
 void _util_uv_check(i32 cx, i32 cy, i32 w, i32 h, i32 r, buffer_t *view, i32_array_t *coords_x, i32_array_t *coords_y) {
@@ -164,7 +164,7 @@ void _util_uv_check(i32 cx, i32 cy, i32 w, i32 h, i32 r, buffer_t *view, i32_arr
 
 void util_uv_cache_uv_island_map() {
 	util_uv_cache_dilate_map();
-	if (util_uv_dilate_bytes == null) {
+	if (util_uv_dilate_bytes == NULL) {
 		gc_unroot(util_uv_dilate_bytes);
 		util_uv_dilate_bytes = gpu_get_texture_pixels(util_uv_dilatemap);
 		gc_root(util_uv_dilate_bytes);
@@ -193,7 +193,7 @@ void util_uv_cache_uv_island_map() {
 		_util_uv_check(cx, cy, w, h, r, bytes, coords_x, coords_y);
 	}
 
-	if (util_uv_uvislandmap != null) {
+	if (util_uv_uvislandmap != NULL) {
 		gpu_delete_texture(util_uv_uvislandmap);
 	}
 	gc_unroot(util_uv_uvislandmap);

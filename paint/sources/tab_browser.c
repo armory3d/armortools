@@ -1,4 +1,4 @@
-void tab_browser_show_directory(string_t *directory) {
+void tab_browser_show_directory(char *directory) {
 	tab_browser_hpath->text                          = string_copy(directory);
 	tab_browser_hsearch->text                        = "";
 	ui_base_htabs->buffer[TAB_AREA_STATUS]->i        = 0;
@@ -6,7 +6,7 @@ void tab_browser_show_directory(string_t *directory) {
 }
 
 void tab_browser_draw(ui_handle_t *htab) {
-	string_t *title = tr("Browser", null);
+	char *title = tr("Browser", NULL);
 
 	#ifdef IRON_IOS
 	if (config_is_iphone()) {
@@ -15,7 +15,7 @@ void tab_browser_draw(ui_handle_t *htab) {
 	#endif
 
 	if (ui_tab(htab, title, false, -1, false) && ui->_window_h > ui_statusbar_default_h * UI_SCALE()) {
-		if (config_raw->bookmarks == null) {
+		if (config_raw->bookmarks == NULL) {
 			config_raw->bookmarks = any_array_create_from_raw((any[]){}, 0);
 		}
 
@@ -60,8 +60,8 @@ void tab_browser_draw(ui_handle_t *htab) {
 			}
 
 			// Bookmark
-			if (ui_icon_button(tr("Bookmark", null), ICON_PLUS, UI_ALIGN_LEFT)) {
-				string_t *bookmark = tab_browser_hpath->text;
+			if (ui_icon_button(tr("Bookmark", NULL), ICON_PLUS, UI_ALIGN_LEFT)) {
+				char *bookmark = tab_browser_hpath->text;
 				#ifdef IRON_WINDOWS
 				bookmark = string_copy(string_replace_all(bookmark, "\\", "/"));
 				#endif
@@ -72,7 +72,7 @@ void tab_browser_draw(ui_handle_t *htab) {
 			// Refresh
 			bool in_focus = ui->input_x > ui->_window_x && ui->input_x < ui->_window_x + ui->_window_w && ui->input_y > ui->_window_y &&
 			                ui->input_y < ui->_window_y + ui->_window_h;
-			if (ui_icon_button(tr("Refresh", null), ICON_REFRESH, UI_ALIGN_CENTER) || (in_focus && ui->is_key_pressed && ui->key_code == KEY_CODE_F5)) {
+			if (ui_icon_button(tr("Refresh", NULL), ICON_REFRESH, UI_ALIGN_CENTER) || (in_focus && ui->is_key_pressed && ui->key_code == KEY_CODE_F5)) {
 				tab_browser_refresh = true;
 			}
 		}
@@ -92,7 +92,7 @@ void tab_browser_draw(ui_handle_t *htab) {
 		}
 
 		// Previous folder
-		string_t *text   = tab_browser_hpath->text;
+		char *text   = tab_browser_hpath->text;
 		i32       i1     = string_index_of(text, PATH_SEP);
 		bool      nested = i1 > -1 && string_length(text) - 1 > i1;
 		#ifdef IRON_WINDOWS
@@ -106,19 +106,19 @@ void tab_browser_draw(ui_handle_t *htab) {
 		}
 		ui->enabled = true;
 		if (ui->is_hovered) {
-			ui_tooltip(tr("Previous folder", null));
+			ui_tooltip(tr("Previous folder", NULL));
 		}
 
 		#ifdef IRON_ANDROID
 		bool      stripped = false;
-		string_t *strip    = "/storage/emulated/0/";
+		char *strip    = "/storage/emulated/0/";
 		if (starts_with(tab_browser_hpath->text, strip)) {
 			tab_browser_hpath->text = string_copy(substring(tab_browser_hpath->text, string_length(strip) - 1, string_length(tab_browser_hpath->text)));
 			stripped                = true;
 		}
 		#endif
 
-		tab_browser_hpath->text = string_copy(ui_text_input(tab_browser_hpath, tr("Path", null), UI_ALIGN_LEFT, true, false));
+		tab_browser_hpath->text = string_copy(ui_text_input(tab_browser_hpath, tr("Path", NULL), UI_ALIGN_LEFT, true, false));
 
 		#ifdef IRON_ANDROID
 		if (stripped) {
@@ -127,14 +127,14 @@ void tab_browser_draw(ui_handle_t *htab) {
 		#endif
 
 		if (show_full) {
-			tab_browser_hsearch->text = string_copy(ui_text_input(tab_browser_hsearch, tr("Search", null), UI_ALIGN_LEFT, true, true));
+			tab_browser_hsearch->text = string_copy(ui_text_input(tab_browser_hsearch, tr("Search", NULL), UI_ALIGN_LEFT, true, true));
 			if (ui->is_hovered) {
-				ui_tooltip(string_join(string_join(tr("ctrl+f to search", null), "\n"), tr("esc to cancel", null)));
+				ui_tooltip(string_join(string_join(tr("ctrl+f to search", NULL), "\n"), tr("esc to cancel", NULL)));
 			}
 			if (ui->is_ctrl_down && ui->is_key_pressed && ui->key_code == KEY_CODE_F) { // Start searching via ctrl+f
 				ui_start_text_edit(tab_browser_hsearch, UI_ALIGN_LEFT);
 			}
-			if (!string_equals(tab_browser_hsearch->text, "") && (ui_button(tr("X", null), UI_ALIGN_CENTER, "") || ui->is_escape_down)) {
+			if (!string_equals(tab_browser_hsearch->text, "") && (ui_button(tr("X", NULL), UI_ALIGN_CENTER, "") || ui->is_escape_down)) {
 				tab_browser_hsearch->text = "";
 			}
 		}
@@ -159,11 +159,11 @@ void tab_browser_draw(ui_handle_t *htab) {
 		tab_browser_refresh = false;
 
 		if (tab_browser_known) {
-			string_t *path = tab_browser_hpath->text;
+			char *path = tab_browser_hpath->text;
 			sys_notify_on_next_frame(&tab_browser_draw_121898, path);
 			tab_browser_hpath->text = string_copy(substring(tab_browser_hpath->text, 0, string_last_index_of(tab_browser_hpath->text, PATH_SEP)));
 		}
-		string_t *hpath_text = tab_browser_hpath->text;
+		char *hpath_text = tab_browser_hpath->text;
 		tab_browser_known =
 		    string_index_of(substring(tab_browser_hpath->text, string_last_index_of(tab_browser_hpath->text, PATH_SEP), string_length(hpath_text)), ".") > 0;
 		#ifdef IRON_ANDROID
@@ -181,17 +181,17 @@ void tab_browser_draw(ui_handle_t *htab) {
 			ui->_y       = _y;
 			ui->_w       = bookmarks_w;
 
-			if (ui_icon_button(tr("Cloud", null), ICON_CLOUD, UI_ALIGN_LEFT)) {
+			if (ui_icon_button(tr("Cloud", NULL), ICON_CLOUD, UI_ALIGN_LEFT)) {
 				tab_browser_go_to_cloud();
 			}
 
-			if (ui_icon_button(tr("Disk", null), ICON_STORAGE, UI_ALIGN_LEFT)) {
+			if (ui_icon_button(tr("Disk", NULL), ICON_STORAGE, UI_ALIGN_LEFT)) {
 				tab_browser_go_to_disk();
 			}
 
 			for (i32 i = 0; i < config_raw->bookmarks->length; ++i) {
-				string_t *b      = config_raw->bookmarks->buffer[i];
-				string_t *folder = substring(b, string_last_index_of(b, "/") + 1, string_length(b));
+				char *b      = config_raw->bookmarks->buffer[i];
+				char *folder = substring(b, string_last_index_of(b, "/") + 1, string_length(b));
 
 				if (ui_icon_button(folder, ICON_FOLDER, UI_ALIGN_LEFT)) {
 					tab_browser_hpath->text = string_copy(b);
@@ -215,18 +215,18 @@ void tab_browser_draw(ui_handle_t *htab) {
 }
 
 void tab_browser_draw_122149() {
-	if (ui_menu_button(tr("Delete", null), "", ICON_DELETE)) {
+	if (ui_menu_button(tr("Delete", NULL), "", ICON_DELETE)) {
 		char_ptr_array_remove(config_raw->bookmarks, _tab_browser_draw_b);
 		config_save();
 	}
 }
 
-void tab_browser_draw_121898(string_t *path) {
-	import_asset_run(path, -1.0, -1.0, true, true, null);
+void tab_browser_draw_121898(char *path) {
+	import_asset_run(path, -1.0, -1.0, true, true, NULL);
 }
 
 void tab_browser_draw_121757(any _) {
-	string_t *file        = _tab_browser_draw_file;
+	char *file        = _tab_browser_draw_file;
 	i32       asset_index = -1;
 	for (i32 i = 0; i < project_assets->length; ++i) {
 		if (string_equals(project_assets->buffer[i]->file, file)) {
@@ -247,11 +247,11 @@ void tab_browser_draw_121757(any _) {
 }
 
 void tab_browser_draw_121751() {
-	sys_notify_on_next_frame(&tab_browser_draw_121757, null);
+	sys_notify_on_next_frame(&tab_browser_draw_121757, NULL);
 }
 
 void tab_browser_draw_121645(any _) {
-	string_t *file        = _tab_browser_draw_file;
+	char *file        = _tab_browser_draw_file;
 	i32       asset_index = -1;
 	for (i32 i = 0; i < project_assets->length; ++i) {
 		if (string_equals(project_assets->buffer[i]->file, file)) {
@@ -265,11 +265,11 @@ void tab_browser_draw_121645(any _) {
 }
 
 void tab_browser_draw_121639() {
-	sys_notify_on_next_frame(&tab_browser_draw_121645, null);
+	sys_notify_on_next_frame(&tab_browser_draw_121645, NULL);
 }
 
 void tab_browser_draw_121528(any _) {
-	string_t *file        = _tab_browser_draw_file;
+	char *file        = _tab_browser_draw_file;
 	i32       asset_index = -1;
 	for (i32 i = 0; i < project_assets->length; ++i) {
 		if (string_equals(project_assets->buffer[i]->file, file)) {
@@ -284,31 +284,31 @@ void tab_browser_draw_121528(any _) {
 }
 
 void tab_browser_draw_121522() {
-	sys_notify_on_next_frame(&tab_browser_draw_121528, null);
+	sys_notify_on_next_frame(&tab_browser_draw_121528, NULL);
 }
 
 void tab_browser_draw_121455() {
-	string_t *file = _tab_browser_draw_file;
-	if (ui_menu_button(tr("Import", null), "", ICON_IMPORT)) {
-		import_asset_run(file, -1.0, -1.0, true, true, null);
+	char *file = _tab_browser_draw_file;
+	if (ui_menu_button(tr("Import", NULL), "", ICON_IMPORT)) {
+		import_asset_run(file, -1.0, -1.0, true, true, NULL);
 	}
 	if (path_is_texture(file)) {
-		if (ui_menu_button(tr("Set as Envmap", null), "", ICON_LANDSCAPE)) {
+		if (ui_menu_button(tr("Set as Envmap", NULL), "", ICON_LANDSCAPE)) {
 			import_asset_run(file, -1.0, -1.0, true, true, &tab_browser_draw_121522);
 		}
-		if (ui_menu_button(tr("Set as Mask", null), "", ICON_MASK)) {
+		if (ui_menu_button(tr("Set as Mask", NULL), "", ICON_MASK)) {
 			import_asset_run(file, -1.0, -1.0, true, true, &tab_browser_draw_121639);
 		}
-		if (ui_menu_button(tr("Set as Color ID Map", null), "", ICON_COLOR_ID)) {
+		if (ui_menu_button(tr("Set as Color ID Map", NULL), "", ICON_COLOR_ID)) {
 			import_asset_run(file, -1.0, -1.0, true, true, &tab_browser_draw_121751);
 		}
 	}
-	if (ui_menu_button(tr("Open Externally", null), "", ICON_NONE)) {
+	if (ui_menu_button(tr("Open Externally", NULL), "", ICON_NONE)) {
 		file_start(file);
 	}
 }
 
-void tab_browser_draw_121442(string_t *file) {
+void tab_browser_draw_121442(char *file) {
 	gc_unroot(_tab_browser_draw_file);
 	_tab_browser_draw_file = string_copy(file);
 	gc_root(_tab_browser_draw_file);
@@ -318,10 +318,10 @@ void tab_browser_draw_121442(string_t *file) {
 }
 
 void tab_browser_draw_121079() {
-	if (ui_menu_button(tr("Cloud", null), "", ICON_CLOUD)) {
+	if (ui_menu_button(tr("Cloud", NULL), "", ICON_CLOUD)) {
 		tab_browser_go_to_cloud();
 	}
-	if (ui_menu_button(tr("Disk", null), "", ICON_STORAGE)) {
+	if (ui_menu_button(tr("Disk", NULL), "", ICON_STORAGE)) {
 		tab_browser_go_to_disk();
 	}
 }
@@ -339,16 +339,16 @@ void tab_browser_go_to_disk() {
 }
 
 void tab_browser_go_to_disk_122217() {
-	if (ui_menu_button(tr("Download", null), "", ICON_FOLDER)) {
+	if (ui_menu_button(tr("Download", NULL), "", ICON_FOLDER)) {
 		tab_browser_hpath->text = string_copy(ui_files_default_path);
 	}
-	if (ui_menu_button(tr("Pictures", null), "", ICON_FOLDER)) {
+	if (ui_menu_button(tr("Pictures", NULL), "", ICON_FOLDER)) {
 		tab_browser_hpath->text = "/storage/emulated/0/Pictures";
 	}
-	if (ui_menu_button(tr("Camera", null), "", ICON_FOLDER)) {
+	if (ui_menu_button(tr("Camera", NULL), "", ICON_FOLDER)) {
 		tab_browser_hpath->text = "/storage/emulated/0/DCIM/Camera";
 	}
-	if (ui_menu_button(tr("Projects", null), "", ICON_FOLDER)) {
+	if (ui_menu_button(tr("Projects", NULL), "", ICON_FOLDER)) {
 		tab_browser_hpath->text = string_copy(iron_internal_save_path());
 	}
 }

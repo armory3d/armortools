@@ -15,28 +15,28 @@ void logic_node_add_outputs(logic_node_t *self, logic_node_t_array_t *nodes) {
 }
 
 any logic_node_get(logic_node_t *self, i32 from) {
-	if (self->get != null) {
+	if (self->get != NULL) {
 		return self->get(self->ext, from);
 	}
-	return null;
+	return NULL;
 }
 
 gpu_texture_t *logic_node_get_as_image(logic_node_t *self, i32 from) {
-	if (self->get_as_image != null) {
+	if (self->get_as_image != NULL) {
 		return self->get_as_image(self->ext, from);
 	}
-	return null;
+	return NULL;
 }
 
 gpu_texture_t *logic_node_get_cached_image(logic_node_t *self) {
-	if (self->get_cached_image != null) {
+	if (self->get_cached_image != NULL) {
 		return self->get_cached_image(self->ext);
 	}
-	return null;
+	return NULL;
 }
 
 void logic_node_set(logic_node_t *self, any value) {
-	if (self->set != null) {
+	if (self->set != NULL) {
 		self->set(self->ext, value);
 	}
 }

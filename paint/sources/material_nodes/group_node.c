@@ -7,11 +7,11 @@ void group_node_init() {
 	any_map_set(ui_nodes_custom_buttons, "nodes_material_group_output_button", nodes_material_group_output_button);
 }
 
-string_t *group_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
+char *group_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	return parser_material_parse_group(node, socket);
 }
 
-string_t *group_node_value(ui_node_t *node, ui_node_socket_t *socket) {
+char *group_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 	return parser_material_parse_group(node, socket);
 }
 
@@ -19,11 +19,11 @@ void nodes_material_new_group_button(i32 node_id) {
 	ui_node_t *node = ui_get_node(ui_nodes_get_canvas(true)->nodes, node_id);
 	if (string_equals(node->name, "New Group")) {
 		for (i32 i = 1; i < 999; ++i) {
-			node->name = string_join(string_join(tr("Group", null), " "), i32_to_string(i));
+			node->name = string_join(string_join(tr("Group", NULL), " "), i32_to_string(i));
 			bool found = false;
 			for (i32 i = 0; i < project_material_groups->length; ++i) {
 				node_group_t *g     = project_material_groups->buffer[i];
-				string_t     *cname = g->canvas->name;
+				char     *cname = g->canvas->name;
 				if (string_equals(cname, node->name)) {
 					found = true;
 					break;
@@ -76,16 +76,16 @@ void nodes_material_new_group_button(i32 node_id) {
 		node_group_t *ng = GC_ALLOC_INIT(node_group_t, {.canvas = canvas, .nodes = ui_nodes_create()});
 		any_array_push(project_material_groups, ng);
 	}
-	node_group_t *group = null;
+	node_group_t *group = NULL;
 	for (i32 i = 0; i < project_material_groups->length; ++i) {
 		node_group_t *g     = project_material_groups->buffer[i];
-		string_t     *cname = g->canvas->name;
+		char     *cname = g->canvas->name;
 		if (string_equals(cname, node->name)) {
 			group = g;
 			break;
 		}
 	}
-	if (ui_button(tr("Nodes", null), UI_ALIGN_CENTER, "")) {
+	if (ui_button(tr("Nodes", NULL), UI_ALIGN_CENTER, "")) {
 		any_array_push(ui_nodes_group_stack, group);
 	}
 }
@@ -103,7 +103,7 @@ void nodes_material_group_output_button(i32 node_id) {
 }
 
 void nodes_material_add_socket_button(ui_nodes_t *nodes, ui_node_t *node, ui_node_socket_t_array_t *sockets) {
-	if (ui_button(tr("Add", null), UI_ALIGN_CENTER, "")) {
+	if (ui_button(tr("Add", NULL), UI_ALIGN_CENTER, "")) {
 		gc_unroot(_nodes_material_nodes);
 		_nodes_material_nodes = nodes;
 		gc_root(_nodes_material_nodes);
@@ -123,16 +123,16 @@ void nodes_material_add_socket_button_229488() {
 	ui_node_socket_t_array_t *sockets     = _nodes_material_sockets;
 	node_group_t_array_t     *group_stack = ui_nodes_group_stack;
 	ui_node_canvas_t         *c           = group_stack->buffer[group_stack->length - 1]->canvas;
-	if (ui_menu_button(tr("RGBA", null), "", ICON_NONE)) {
-		any_array_push(sockets, nodes_material_create_socket(nodes, node, null, "RGBA", c, 0.0, 1.0, null));
+	if (ui_menu_button(tr("RGBA", NULL), "", ICON_NONE)) {
+		any_array_push(sockets, nodes_material_create_socket(nodes, node, NULL, "RGBA", c, 0.0, 1.0, NULL));
 		nodes_material_sync_sockets(node);
 	}
-	if (ui_menu_button(tr("Vector", null), "", ICON_NONE)) {
-		any_array_push(sockets, nodes_material_create_socket(nodes, node, null, "VECTOR", c, 0.0, 1.0, null));
+	if (ui_menu_button(tr("Vector", NULL), "", ICON_NONE)) {
+		any_array_push(sockets, nodes_material_create_socket(nodes, node, NULL, "VECTOR", c, 0.0, 1.0, NULL));
 		nodes_material_sync_sockets(node);
 	}
-	if (ui_menu_button(tr("Value", null), "", ICON_NONE)) {
-		any_array_push(sockets, nodes_material_create_socket(nodes, node, null, "VALUE", c, 0.0, 1.0, null));
+	if (ui_menu_button(tr("Value", NULL), "", ICON_NONE)) {
+		any_array_push(sockets, nodes_material_create_socket(nodes, node, NULL, "VALUE", c, 0.0, 1.0, NULL));
 		nodes_material_sync_sockets(node);
 	}
 }
@@ -150,7 +150,7 @@ void nodes_material_sync_sockets(ui_node_t *node) {
 	}
 }
 
-void nodes_material_sync_group_sockets(ui_node_canvas_t *canvas, string_t *group_name, ui_node_t *node) {
+void nodes_material_sync_group_sockets(ui_node_canvas_t *canvas, char *group_name, ui_node_t *node) {
 	for (i32 i = 0; i < canvas->nodes->length; ++i) {
 		ui_node_t *n = canvas->nodes->buffer[i];
 		if (string_equals(n->type, "GROUP") && string_equals(n->name, group_name)) {
@@ -177,29 +177,29 @@ void nodes_material_sync_group_sockets(ui_node_canvas_t *canvas, string_t *group
 	}
 }
 
-i32 nodes_material_get_socket_color(string_t *type) {
+i32 nodes_material_get_socket_color(char *type) {
 	return string_equals(type, "RGBA") ? 0xffc7c729 : string_equals(type, "VECTOR") ? 0xff6363c7 : 0xffa1a1a1;
 }
 
-f32_array_t *nodes_material_get_socket_default_value(string_t *type) {
+f32_array_t *nodes_material_get_socket_default_value(char *type) {
 	return string_equals(type, "RGBA")     ? f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0)
 	       : string_equals(type, "VECTOR") ? f32_array_create_xyz(0.0, 0.0, 0.0)
 	                                       : f32_array_create_x(0.0);
 }
 
-string_t *nodes_material_get_socket_name(string_t *type) {
+char *nodes_material_get_socket_name(char *type) {
 	return string_equals(type, "RGBA") ? _tr("Color") : string_equals(type, "VECTOR") ? _tr("Vector") : _tr("Value");
 }
 
-ui_node_socket_t *nodes_material_create_socket(ui_nodes_t *nodes, ui_node_t *node, string_t *name, string_t *type, ui_node_canvas_t *canvas, f32 min, f32 max,
+ui_node_socket_t *nodes_material_create_socket(ui_nodes_t *nodes, ui_node_t *node, char *name, char *type, ui_node_canvas_t *canvas, f32 min, f32 max,
                                                any default_value) {
 	ui_node_socket_t *soc =
 	    GC_ALLOC_INIT(ui_node_socket_t, {.id            = ui_get_socket_id(canvas->nodes),
 	                                     .node_id       = node->id,
-	                                     .name          = name == null ? nodes_material_get_socket_name(type) : name,
+	                                     .name          = name == NULL ? nodes_material_get_socket_name(type) : name,
 	                                     .type          = type,
 	                                     .color         = nodes_material_get_socket_color(type),
-	                                     .default_value = default_value == null ? nodes_material_get_socket_default_value(type) : default_value,
+	                                     .default_value = default_value == NULL ? nodes_material_get_socket_default_value(type) : default_value,
 	                                     .min           = min,
 	                                     .max           = max,
 	                                     .precision     = 100});

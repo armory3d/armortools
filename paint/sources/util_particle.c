@@ -1,5 +1,5 @@
 void util_particle_init() {
-	if (context_raw->particle_material != null) {
+	if (context_raw->particle_material != NULL) {
 		return;
 	}
 
@@ -40,14 +40,14 @@ void util_particle_init() {
 		}
 	}
 
-	object_t      *o  = scene_spawn_object(".Sphere", null, true);
+	object_t      *o  = scene_spawn_object(".Sphere", NULL, true);
 	mesh_object_t *mo = o->ext;
 	mo->base->name    = ".ParticleEmitter";
 	mo->base->raw     = util_clone_obj(mo->base->raw);
 }
 
 void util_particle_init_physics() {
-	if (physics_world_active != null) {
+	if (physics_world_active != NULL) {
 		util_particle_init_mesh();
 		return;
 	}
@@ -57,12 +57,12 @@ void util_particle_init_physics() {
 }
 
 void util_particle_init_mesh() {
-	if (context_raw->paint_body != null) {
+	if (context_raw->paint_body != NULL) {
 		return;
 	}
 
-	if (context_raw->merged_object == null) {
-		util_mesh_merge(null);
+	if (context_raw->merged_object == NULL) {
+		util_mesh_merge(NULL);
 	}
 
 	mesh_object_t *po              = context_raw->merged_object;

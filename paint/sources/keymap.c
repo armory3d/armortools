@@ -7,7 +7,7 @@ void keymap_load() {
 		any_map_t        *new_keymap = json_parse_to_map(sys_buffer_to_string(blob));
 		string_t_array_t *keys       = map_keys(new_keymap);
 		for (i32 i = 0; i < keys->length; ++i) {
-			string_t *key = keys->buffer[i];
+			char *key = keys->buffer[i];
 			any_map_set(config_keymap, key, any_map_get(new_keymap, key));
 		}
 	}
@@ -17,12 +17,12 @@ void keymap_save() {
 	if (string_equals(config_raw->keymap, "default.json")) {
 		return;
 	}
-	string_t *path   = string_join(string_join(data_path(), "keymap_presets/"), config_raw->keymap);
+	char *path   = string_join(string_join(data_path(), "keymap_presets/"), config_raw->keymap);
 	buffer_t *buffer = sys_string_to_buffer(keymap_to_json(config_keymap));
 	iron_file_save_bytes(path, buffer, 0);
 }
 
-string_t *keymap_to_json(any_map_t *keymap) {
+char *keymap_to_json(any_map_t *keymap) {
 	json_encode_begin();
 	json_encode_map(keymap);
 	return json_encode_end();

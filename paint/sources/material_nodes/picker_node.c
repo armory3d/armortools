@@ -4,7 +4,7 @@ void picker_node_init() {
 	any_map_set(parser_material_node_values, "PICKER", picker_node_value);
 }
 
-string_t *picker_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
+char *picker_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	if (socket == node->outputs->buffer[0]) { // Base
 		node_shader_add_constant(parser_material_kong, "picker_base: float3", "_picker_base");
 		return "constants.picker_base";
@@ -15,7 +15,7 @@ string_t *picker_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	}
 }
 
-string_t *picker_node_value(ui_node_t *node, ui_node_socket_t *socket) {
+char *picker_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 	if (socket == node->outputs->buffer[1]) {
 		node_shader_add_constant(parser_material_kong, "picker_opacity: float", "_picker_opacity");
 		return "constants.picker_opacity";

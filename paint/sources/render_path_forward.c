@@ -6,14 +6,14 @@ void render_path_forward_commands() {
 }
 
 void render_path_forward_draw_forward() {
-	render_path_set_target("gbuffer1", null, "main", GPU_CLEAR_NONE, 0, 0.0);
+	render_path_set_target("gbuffer1", NULL, "main", GPU_CLEAR_NONE, 0, 0.0);
 	render_path_draw_skydome("Scene/world_pass/world_pass");
 
-	render_path_set_target("buf", null, null, GPU_CLEAR_NONE, 0, 0.0);
+	render_path_set_target("buf", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_bind_target("gbuffer1", "tex");
 	render_path_draw_shader("Scene/compositor_pass/compositor_pass");
 
-	render_path_set_target("buf", null, null, GPU_CLEAR_NONE, 0, 0.0);
+	render_path_set_target("buf", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_base_draw_compass();
 	render_path_draw_meshes("overlay");
 

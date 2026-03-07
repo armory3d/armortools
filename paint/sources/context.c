@@ -203,7 +203,7 @@ void context_set_material(slot_material_t *m) {
 
 	bool decal = context_is_decal();
 	if (decal) {
-		sys_notify_on_next_frame(&context_set_material_62876, null);
+		sys_notify_on_next_frame(&context_set_material_62876, NULL);
 	}
 }
 
@@ -309,7 +309,7 @@ void context_init_tool() {
 	}
 	else if (context_raw->tool == TOOL_TYPE_MATERIAL) {
 		layers_update_fill_layers();
-		context_main_object()->skip_context = null;
+		context_main_object()->skip_context = NULL;
 	}
 }
 
@@ -331,7 +331,7 @@ void context_select_paint_object(mesh_object_t *o) {
 		mask = context_raw->layer_filter;
 	}
 
-	if (context_raw->merged_object == null || mask > 0) {
+	if (context_raw->merged_object == NULL || mask > 0) {
 		context_raw->paint_object->skip_context = "";
 	}
 	util_uv_uvmap_cached       = false;
@@ -366,13 +366,13 @@ bool context_in_paint_area() {
 }
 
 bool context_in_layers() {
-	string_t *tab = ui_hovered_tab_name();
-	return string_equals(tab, tr("Layers", null));
+	char *tab = ui_hovered_tab_name();
+	return string_equals(tab, tr("Layers", NULL));
 }
 
 bool context_in_materials() {
-	string_t *tab = ui_hovered_tab_name();
-	return string_equals(tab, tr("Materials", null));
+	char *tab = ui_hovered_tab_name();
+	return string_equals(tab, tr("Materials", NULL));
 }
 
 bool context_in_2d_view(view_2d_type_t type) {
@@ -385,13 +385,13 @@ bool context_in_nodes() {
 }
 
 bool context_in_swatches() {
-	string_t *tab = ui_hovered_tab_name();
-	return string_equals(tab, tr("Swatches", null));
+	char *tab = ui_hovered_tab_name();
+	return string_equals(tab, tr("Swatches", NULL));
 }
 
 bool context_in_browser() {
-	string_t *tab = ui_hovered_tab_name();
-	return string_equals(tab, tr("Browser", null));
+	char *tab = ui_hovered_tab_name();
+	return string_equals(tab, tr("Browser", NULL));
 }
 
 bool context_is_picker() {
@@ -476,7 +476,7 @@ void context_load_envmap() {
 		map_delete(data_cached_images, "World_radiance.k");
 	}
 	world_data_load_envmap(scene_world);
-	if (context_raw->saved_envmap == null) {
+	if (context_raw->saved_envmap == NULL) {
 		context_raw->saved_envmap = scene_world->_->envmap;
 	}
 }
@@ -496,7 +496,7 @@ void context_set_viewport_shader(any viewport_shader) { // JSValue * -> (ns: nod
 }
 
 void context_set_render_path() {
-	if (config_raw->render_mode == RENDER_MODE_FORWARD || context_raw->viewport_shader != null) {
+	if (config_raw->render_mode == RENDER_MODE_FORWARD || context_raw->viewport_shader != NULL) {
 		gc_unroot(render_path_commands);
 		render_path_commands = render_path_forward_commands;
 		gc_root(render_path_commands);
@@ -506,24 +506,24 @@ void context_set_render_path() {
 		render_path_commands = render_path_deferred_commands;
 		gc_root(render_path_commands);
 	}
-	sys_notify_on_next_frame(&context_set_render_path_64096, null);
+	sys_notify_on_next_frame(&context_set_render_path_64096, NULL);
 }
 
 void context_set_render_path_64096(any _) {
 	make_material_parse_mesh_material();
 }
 
-bool context_enable_import_plugin(string_t *file) {
+bool context_enable_import_plugin(char *file) {
 	// Return plugin name suitable for importing the specified file
-	if (box_preferences_files_plugin == null) {
+	if (box_preferences_files_plugin == NULL) {
 		box_preferences_fetch_plugins();
 	}
-	string_t *ext = substring(file, string_last_index_of(file, ".") + 1, string_length(file));
+	char *ext = substring(file, string_last_index_of(file, ".") + 1, string_length(file));
 	for (i32 i = 0; i < box_preferences_files_plugin->length; ++i) {
-		string_t *f = box_preferences_files_plugin->buffer[i];
+		char *f = box_preferences_files_plugin->buffer[i];
 		if (starts_with(f, "import_") && string_index_of(f, ext) >= 0) {
 			config_enable_plugin(f);
-			console_info(string_join(string_join(f, " "), tr("plugin enabled", null)));
+			console_info(string_join(string_join(f, " "), tr("plugin enabled", NULL)));
 			return true;
 		}
 	}

@@ -4,7 +4,7 @@ integer_node_t *integer_node_create(ui_node_t *raw, f32_array_t *args) {
 	n->base         = logic_node_create(n);
 	n->base->get    = integer_node_get;
 	n->base->set    = integer_node_set;
-	n->value        = args == null ? 0 : args->buffer[0];
+	n->value        = args == NULL ? 0 : args->buffer[0];
 	return n;
 }
 

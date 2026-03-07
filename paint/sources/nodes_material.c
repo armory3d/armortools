@@ -1,5 +1,5 @@
 void nodes_material_init() {
-	if (nodes_material_list != null) {
+	if (nodes_material_list != NULL) {
 		return;
 	}
 
@@ -131,7 +131,7 @@ void nodes_material_init() {
 	#endif
 }
 
-ui_node_t *nodes_material_get_node_t(string_t *node_type) {
+ui_node_t *nodes_material_get_node_t(char *node_type) {
 	for (i32 i = 0; i < nodes_material_list->length; ++i) {
 		ui_node_t_array_t *c = nodes_material_list->buffer[i];
 		for (i32 i = 0; i < c->length; ++i) {
@@ -141,16 +141,16 @@ ui_node_t *nodes_material_get_node_t(string_t *node_type) {
 			}
 		}
 	}
-	return null;
+	return NULL;
 }
 
-ui_node_t *nodes_material_create_node(string_t *node_type, node_group_t *group) {
+ui_node_t *nodes_material_create_node(char *node_type, node_group_t *group) {
 	ui_node_t *n = nodes_material_get_node_t(node_type);
-	if (n == null) {
-		return null;
+	if (n == NULL) {
+		return NULL;
 	}
-	ui_node_canvas_t *canvas = group != null ? group->canvas : ui_nodes_get_canvas(false);
-	ui_nodes_t       *nodes  = group != null ? group->nodes : context_raw->material->nodes;
+	ui_node_canvas_t *canvas = group != NULL ? group->canvas : ui_nodes_get_canvas(false);
+	ui_nodes_t       *nodes  = group != NULL ? group->nodes : context_raw->material->nodes;
 	ui_node_t        *node   = ui_nodes_make_node(n, nodes, canvas);
 	any_array_push(canvas->nodes, node);
 	return node;

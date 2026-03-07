@@ -1,5 +1,5 @@
 void config_load() {
-	string_t *path = "";
+	char *path = "";
 	if (path_is_protected()) {
 		path = string_join(path, iron_internal_save_path());
 	}
@@ -7,11 +7,11 @@ void config_load() {
 	buffer_t *blob = data_get_blob(path);
 
 	#ifdef IRON_LINUX
-	if (blob == null) { // Detect protected path
+	if (blob == NULL) { // Detect protected path
 		config_init();
 		config_save();
 		blob = data_get_blob(path);
-		if (blob == null) {
+		if (blob == NULL) {
 			path_is_protected_linux = true;
 			config_load();
 			return;
@@ -19,8 +19,8 @@ void config_load() {
 	}
 	#endif
 
-	if (blob != null) {
-		string_t *config_string = sys_buffer_to_string(blob);
+	if (blob != NULL) {
+		char *config_string = sys_buffer_to_string(blob);
 		if (starts_with(config_string, "{\"version\":")) { // Ensure valid config
 			config_loaded = true;
 			gc_unroot(config_raw);
@@ -33,7 +33,7 @@ void config_load() {
 void config_save() {
 	// Use system application data folder
 	// when running from protected path like "Program Files"
-	string_t *path = "";
+	char *path = "";
 	if (path_is_protected()) {
 		path = string_join(path, iron_internal_save_path());
 	}
@@ -79,13 +79,13 @@ void config_save() {
 	json_encode_bool("show_asset_names", config_raw->show_asset_names);
 	json_encode_bool("touch_ui", config_raw->touch_ui);
 	json_encode_bool("splash_screen", config_raw->splash_screen);
-	if (config_raw->layout != null) {
+	if (config_raw->layout != NULL) {
 		json_encode_i32_array("layout", config_raw->layout);
 	}
 	else {
 		json_encode_null("layout");
 	}
-	if (config_raw->layout_tabs != null) {
+	if (config_raw->layout_tabs != NULL) {
 		json_encode_i32_array("layout_tabs", config_raw->layout_tabs);
 	}
 	else {
@@ -116,14 +116,14 @@ void config_save() {
 	json_encode_i32("neural_backend", config_raw->neural_backend);
 	json_encode_i32("render_mode", config_raw->render_mode);
 	json_encode_i32("workspace", config_raw->workspace);
-	string_t *config_json = json_encode_end();
+	char *config_json = json_encode_end();
 
 	buffer_t *buffer = sys_string_to_buffer(config_json);
 	iron_file_save_bytes(path, buffer, 0);
 }
 
 void config_init() {
-	if (!config_loaded || config_raw == null) {
+	if (!config_loaded || config_raw == NULL) {
 		gc_unroot(config_raw);
 		config_raw = GC_ALLOC_INIT(config_t, {0});
 		gc_root(config_raw);
@@ -264,7 +264,7 @@ void config_init() {
 
 void config_init_layout() {
 	config_t    *raw        = config_raw;
-	bool         show2d     = (ui_nodes_show || ui_view2d_show) && raw->layout != null;
+	bool         show2d     = (ui_nodes_show || ui_view2d_show) && raw->layout != NULL;
 	i32_array_t *new_layout = i32_array_create_from_raw((i32[]){}, 0);
 
 	i32_array_push(new_layout, math_floor(ui_sidebar_default_w * raw->window_scale)); // LayoutSidebarW
@@ -301,18 +301,18 @@ void config_init_layout() {
 	raw->layout = new_layout;
 }
 
-string_t *config_get_sha() {
+char *config_get_sha() {
 	buffer_t *blob = data_get_blob("version.json");
-	if (blob == null) {
+	if (blob == NULL) {
 		return "undefined";
 	}
 	version_t *v = json_parse(sys_buffer_to_string(blob));
 	return v->sha;
 }
 
-string_t *config_get_date() {
+char *config_get_date() {
 	buffer_t *blob = data_get_blob("version.json");
-	if (blob == null) {
+	if (blob == NULL) {
 		return "undefined";
 	}
 	version_t *v = json_parse(sys_buffer_to_string(blob));
@@ -331,7 +331,7 @@ iron_window_options_t *config_get_options() {
 	if (config_raw->window_minimizable) {
 		features |= IRON_WINDOW_FEATURES_MINIMIZABLE;
 	}
-	string_t              *title = string_join("untitled - ", manifest_title);
+	char              *title = string_join("untitled - ", manifest_title);
 	iron_window_options_t *ops   = GC_ALLOC_INIT(iron_window_options_t, {.title     = title,
 	                                                                     .width     = config_raw->window_w,
 	                                                                     .height    = config_raw->window_h,
@@ -359,8 +359,8 @@ void config_restore() {
 }
 
 void config_import_from(config_t *from) {
-	string_t *_sha     = config_raw->sha;
-	string_t *_version = config_raw->version;
+	char *_sha     = config_raw->sha;
+	char *_version = config_raw->version;
 	gc_unroot(config_raw);
 	config_raw = from;
 	gc_root(config_raw);
@@ -443,7 +443,7 @@ i32 config_get_texture_res_pos(i32 i) {
 	                    : 0;
 }
 
-void config_load_theme(string_t *theme, bool tag_redraw) {
+void config_load_theme(char *theme, bool tag_redraw) {
 	gc_unroot(base_theme);
 	base_theme = ui_theme_create();
 	gc_root(base_theme);
@@ -478,12 +478,12 @@ void config_load_theme(string_t *theme, bool tag_redraw) {
 	}
 }
 
-void config_enable_plugin(string_t *f) {
+void config_enable_plugin(char *f) {
 	any_array_push(config_raw->plugins, f);
 	plugin_start(f);
 }
 
-void config_disable_plugin(string_t *f) {
+void config_disable_plugin(char *f) {
 	char_ptr_array_remove(config_raw->plugins, f);
 	plugin_stop(f);
 }

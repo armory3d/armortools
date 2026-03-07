@@ -5,7 +5,7 @@ float_node_t *float_node_create(ui_node_t *raw, f32_array_t *args) {
 	n->base->get          = float_node_get;
 	n->base->get_as_image = float_node_get_as_image;
 	n->base->set          = float_node_set;
-	n->value              = args == null ? 0.5 : args->buffer[0];
+	n->value              = args == NULL ? 0.5 : args->buffer[0];
 	return n;
 }
 
@@ -23,7 +23,7 @@ gpu_texture_t *float_node_get_as_image(float_node_t *self, i32 from) {
 	if (self->base->inputs->length > 0) {
 		return logic_node_input_get_as_image(self->base->inputs->buffer[0]);
 	}
-	if (self->image != null) {
+	if (self->image != NULL) {
 		gpu_delete_texture(self->image);
 	}
 	buffer_t *b = buffer_create(16);

@@ -3,13 +3,13 @@ void mix_normal_map_node_init() {
 	any_map_set(parser_material_node_vectors, "MIX_NORMAL_MAP", mix_normal_map_node_vector);
 }
 
-string_t *mix_normal_map_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
-	string_t         *nm1   = parser_material_parse_vector_input(node->inputs->buffer[0]);
-	string_t         *nm2   = parser_material_parse_vector_input(node->inputs->buffer[1]);
+char *mix_normal_map_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
+	char         *nm1   = parser_material_parse_vector_input(node->inputs->buffer[0]);
+	char         *nm2   = parser_material_parse_vector_input(node->inputs->buffer[1]);
 	ui_node_button_t *but   = node->buttons->buffer[0];
-	string_t         *blend = to_upper_case(u8_array_string_at(but->data, but->default_value->buffer[0])); // blend_type
+	char         *blend = to_upper_case(u8_array_string_at(but->data, but->default_value->buffer[0])); // blend_type
 	blend                   = string_copy(string_replace_all(blend, " ", "_"));
-	string_t *store         = parser_material_store_var_name(node);
+	char *store         = parser_material_store_var_name(node);
 
 	// The blending algorithms are based on the paper "Blending in Detail" by Colin Barré-Brisebois and Stephen Hill 2012
 	// https://blog.selfshadow.com/publications/blending-in-detail/

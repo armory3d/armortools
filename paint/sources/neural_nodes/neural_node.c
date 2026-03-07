@@ -1,29 +1,29 @@
-string_t *neural_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
+char *neural_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	gpu_texture_t *result = any_imap_get(neural_node_results, node->id);
-	if (result == null) {
+	if (result == NULL) {
 		return "float3(0.0, 0.0, 0.0)";
 	}
-	string_t *tex_name = parser_material_node_name(node, null);
+	char *tex_name = parser_material_node_name(node, NULL);
 	any_map_set(data_cached_images, tex_name, result);
 	bind_tex_t *tex      = parser_material_make_bind_tex(tex_name, tex_name);
-	string_t   *texstore = parser_material_texture_store(node, tex, tex_name, COLOR_SPACE_AUTO);
+	char   *texstore = parser_material_texture_store(node, tex, tex_name, COLOR_SPACE_AUTO);
 	return string_join(texstore, ".rgb");
 }
 
-string_t *neural_node_value(ui_node_t *node, ui_node_socket_t *socket) {
+char *neural_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 	gpu_texture_t *result = any_imap_get(neural_node_results, node->id);
-	if (result == null) {
+	if (result == NULL) {
 		return "0.0";
 	}
-	string_t *tex_name = parser_material_node_name(node, null);
+	char *tex_name = parser_material_node_name(node, NULL);
 	any_map_set(data_cached_images, tex_name, result);
 	bind_tex_t *tex      = parser_material_make_bind_tex(tex_name, tex_name);
-	string_t   *texstore = parser_material_texture_store(node, tex, tex_name, COLOR_SPACE_AUTO);
+	char   *texstore = parser_material_texture_store(node, tex, tex_name, COLOR_SPACE_AUTO);
 	return string_join(texstore, ".r");
 }
 
 ui_node_t *neural_from_node(ui_node_socket_t *inp, i32 socket) {
-	ui_node_t        *result = null;
+	ui_node_t        *result = NULL;
 	ui_node_canvas_t *canvas = ui_nodes_get_canvas(true);
 	for (i32 i = 0; i < canvas->links->length; ++i) {
 		ui_node_link_t *l = canvas->links->buffer[i];
@@ -35,23 +35,23 @@ ui_node_t *neural_from_node(ui_node_socket_t *inp, i32 socket) {
 	return result;
 }
 
-bool neural_node_button(ui_node_t *node, string_t *model) {
-	string_t *url       = box_preferneces_model_url_from_name(model);
-	string_t *file_name = box_preferences_file_name_from_url(url);
+bool neural_node_button(ui_node_t *node, char *model) {
+	char *url       = box_preferneces_model_url_from_name(model);
+	char *file_name = box_preferences_file_name_from_url(url);
 	bool      found     = box_preferences_model_exists(file_name);
 	if (iron_exec_async_done == 0) {
 		if (node != neural_node_current) {
 			ui->enabled = false;
 		}
-		ui_button(tr("Processing...", null), UI_ALIGN_CENTER, "");
+		ui_button(tr("Processing...", NULL), UI_ALIGN_CENTER, "");
 		if (node != neural_node_current) {
 			ui->enabled = true;
 		}
 	}
-	else if (!found && ui_button(tr("Setup", null), UI_ALIGN_CENTER, "")) {
-		sys_notify_on_next_frame(&neural_node_button_236824, null);
+	else if (!found && ui_button(tr("Setup", NULL), UI_ALIGN_CENTER, "")) {
+		sys_notify_on_next_frame(&neural_node_button_236824, NULL);
 	}
-	else if (found && ui_button(tr("Run", null), UI_ALIGN_CENTER, "")) {
+	else if (found && ui_button(tr("Run", NULL), UI_ALIGN_CENTER, "")) {
 		return true;
 	}
 	return false;
@@ -68,7 +68,7 @@ void neural_node_check_result(ui_node_t *node) {
 	gc_root(neural_node_current);
 	iron_delay_idle_sleep();
 	if (iron_exec_async_done == 1) {
-		string_t *file = string_join(string_join(neural_node_dir(), PATH_SEP), "output.png");
+		char *file = string_join(string_join(neural_node_dir(), PATH_SEP), "output.png");
 		if (iron_file_exists(file)) {
 			gpu_texture_t *result = iron_load_texture(file);
 			any_imap_set(neural_node_results, node->id, result);
@@ -79,7 +79,7 @@ void neural_node_check_result(ui_node_t *node) {
 	}
 }
 
-string_t *neural_node_sd_bin_ext() {
+char *neural_node_sd_bin_ext() {
 	#ifdef IRON_WINDOWS
 	return ".exe";
 	#else
@@ -87,7 +87,7 @@ string_t *neural_node_sd_bin_ext() {
 	#endif
 }
 
-string_t *neural_node_sd_bin() {
+char *neural_node_sd_bin() {
 	if (config_raw->neural_backend == NEURAL_BACKEND_VULKAN) {
 		return string_join("sd_vulkan", neural_node_sd_bin_ext());
 	}
@@ -97,8 +97,8 @@ string_t *neural_node_sd_bin() {
 	return string_join("sd_cpu", neural_node_sd_bin_ext());
 }
 
-string_t *neural_node_dir() {
-	string_t *dir;
+char *neural_node_dir() {
+	char *dir;
 	if (path_is_protected()) {
 		dir = string_join(iron_internal_save_path(), "models");
 	}
@@ -108,9 +108,9 @@ string_t *neural_node_dir() {
 	return dir;
 }
 
-void neural_node_download(string_t *url) {
-	string_t *file_name = substring(url, string_last_index_of(url, "/") + 1, string_length(url));
-	string_t *file_path = string_join(string_join(neural_node_dir(), PATH_SEP), file_name);
+void neural_node_download(char *url) {
+	char *file_name = substring(url, string_last_index_of(url, "/") + 1, string_length(url));
+	char *file_path = string_join(string_join(neural_node_dir(), PATH_SEP), file_name);
 	bool      found     = iron_file_exists(file_path);
 	if (found) {
 		return;
@@ -121,30 +121,30 @@ void neural_node_download(string_t *url) {
 }
 
 void neural_node_download_237227(any _) {
-	string_t *tar = string_join(neural_node_dir(), "/Hunyuan3D_win64.tar");
+	char *tar = string_join(neural_node_dir(), "/Hunyuan3D_win64.tar");
 	untar_here(tar);
 }
 
-void neural_node_download_237123(string_t *url) {
+void neural_node_download_237123(char *url) {
 	neural_node_downloading--;
-	console_log(string_join(string_join(tr("Downloaded file from", null), " "), url));
+	console_log(string_join(string_join(tr("Downloaded file from", NULL), " "), url));
 
 	#ifdef IRON_LINUX
 	// todo
 	if (ends_with(url, "sd_vulkan")) {
-		string_t *bin = string_join(neural_node_dir(), "/sd_vulkan");
+		char *bin = string_join(neural_node_dir(), "/sd_vulkan");
 		iron_sys_command(string_join(string_join("chmod +x \"", bin), "\""));
 	}
 	else if (ends_with(url, "sd_cpu")) {
-		string_t *bin = string_join(neural_node_dir(), "/sd_cpu");
+		char *bin = string_join(neural_node_dir(), "/sd_cpu");
 		iron_sys_command(string_join(string_join("chmod +x \"", bin), "\""));
 	}
 	#endif
 
 	#ifdef WITH_COMPRESS
 	if (ends_with(url, "Hunyuan3D_win64.tar")) {
-		console_toast(tr("Unpacking Hunyuan3D_win64.tar", null));
-		sys_notify_on_next_frame(&neural_node_download_237227, null);
+		console_toast(tr("Unpacking Hunyuan3D_win64.tar", NULL));
+		sys_notify_on_next_frame(&neural_node_download_237227, NULL);
 	}
 	#endif
 }

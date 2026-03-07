@@ -1,5 +1,5 @@
 void tab_brushes_draw(ui_handle_t *htab) {
-	if (ui_tab(htab, tr("Brushes", null), false, -1, false)) {
+	if (ui_tab(htab, tr("Brushes", NULL), false, -1, false)) {
 		ui_begin_sticky();
 		f32_array_t *row = f32_array_create_from_raw(
 		    (f32[]){
@@ -9,16 +9,16 @@ void tab_brushes_draw(ui_handle_t *htab) {
 		    },
 		    3);
 		ui_row(row);
-		if (ui_icon_button(tr("New", null), ICON_PLUS, UI_ALIGN_CENTER)) {
-			context_raw->brush = slot_brush_create(null);
+		if (ui_icon_button(tr("New", NULL), ICON_PLUS, UI_ALIGN_CENTER)) {
+			context_raw->brush = slot_brush_create(NULL);
 			any_array_push(project_brushes, context_raw->brush);
 			make_material_parse_brush();
 			ui_nodes_hwnd->redraws = 2;
 		}
-		if (ui_icon_button(tr("Import", null), ICON_IMPORT, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Import", NULL), ICON_IMPORT, UI_ALIGN_CENTER)) {
 			project_import_brush();
 		}
-		if (ui_button(tr("Nodes", null), UI_ALIGN_CENTER, "")) {
+		if (ui_button(tr("Nodes", NULL), UI_ALIGN_CENTER, "")) {
 			ui_base_show_brush_nodes();
 		}
 		ui_end_sticky();
@@ -96,9 +96,9 @@ void tab_brushes_draw(ui_handle_t *htab) {
 				}
 
 				if (ui->is_hovered) {
-					if (img_full == null) {
+					if (img_full == NULL) {
 						_tab_brushes_draw_i = i;
-						sys_notify_on_next_frame(&tab_brushes_draw_41872, null);
+						sys_notify_on_next_frame(&tab_brushes_draw_41872, NULL);
 					}
 					else {
 						ui_tooltip_image(img_full, 0);
@@ -143,7 +143,7 @@ void tab_brushes_draw_41872(any _) {
 
 void tab_brushes_draw_41764(any _) {
 	i32 i              = _tab_brushes_draw_i;
-	context_raw->brush = slot_brush_create(null);
+	context_raw->brush = slot_brush_create(NULL);
 	any_array_push(project_brushes, context_raw->brush);
 	any cloned                 = util_clone_canvas(project_brushes->buffer[i]->canvas);
 	context_raw->brush->canvas = cloned;
@@ -155,16 +155,16 @@ void tab_brushes_draw_41711() {
 	i32 i = _tab_brushes_draw_i;
 	// let b: slot_brush_t = brushes[i];
 
-	if (ui_menu_button(tr("Export", null), "", ICON_EXPORT)) {
+	if (ui_menu_button(tr("Export", NULL), "", ICON_EXPORT)) {
 		context_select_brush(i);
 		box_export_show_brush();
 	}
 
-	if (ui_menu_button(tr("Duplicate", null), "", ICON_DUPLICATE)) {
-		sys_notify_on_next_frame(&tab_brushes_draw_41764, null);
+	if (ui_menu_button(tr("Duplicate", NULL), "", ICON_DUPLICATE)) {
+		sys_notify_on_next_frame(&tab_brushes_draw_41764, NULL);
 	}
 
-	if (project_brushes->length > 1 && ui_menu_button(tr("Delete", null), "delete", ICON_DELETE)) {
+	if (project_brushes->length > 1 && ui_menu_button(tr("Delete", NULL), "delete", ICON_DELETE)) {
 		tab_brushes_delete_brush(project_brushes->buffer[i]);
 	}
 }

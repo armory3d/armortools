@@ -2,7 +2,7 @@ void make_colorid_picker_run(node_shader_t *kong) {
 	// Mangle vertices to form full screen triangle
 	node_shader_write_vert(kong, "output.pos = float4(-1.0 + float((vertex_id() & 1) << 2), -1.0 + float((vertex_id() & 2) << 1), 0.0, 1.0);");
 
-	node_shader_add_texture(kong, "gbuffer2", null);
+	node_shader_add_texture(kong, "gbuffer2", NULL);
 	node_shader_add_constant(kong, "gbuffer_size: float2", "_gbuffer_size");
 	node_shader_add_constant(kong, "inp: float4", "_input_brush");
 
@@ -22,7 +22,7 @@ void make_colorid_picker_run(node_shader_t *kong) {
 	else if (context_raw->tool == TOOL_TYPE_PICKER || context_raw->tool == TOOL_TYPE_MATERIAL) {
 		if (context_raw->pick_pos_nor_tex) {
 			kong->frag_out = "float4[2]";
-			node_shader_add_texture(kong, "gbufferD", null);
+			node_shader_add_texture(kong, "gbufferD", NULL);
 			node_shader_add_constant(kong, "invVP: float4x4", "_inv_view_proj_matrix");
 			node_shader_add_function(kong, str_get_pos_nor_from_depth);
 			node_shader_write_frag(kong,
@@ -34,9 +34,9 @@ void make_colorid_picker_run(node_shader_t *kong) {
 		}
 		else {
 			kong->frag_out = "float4[4]";
-			node_shader_add_texture(kong, "texpaint", null);
-			node_shader_add_texture(kong, "texpaint_nor", null);
-			node_shader_add_texture(kong, "texpaint_pack", null);
+			node_shader_add_texture(kong, "texpaint", NULL);
+			node_shader_add_texture(kong, "texpaint_nor", NULL);
+			node_shader_add_texture(kong, "texpaint_pack", NULL);
 			node_shader_write_frag(kong, "output[0] = sample_lod(texpaint, sampler_linear, tex_coord_inp, 0.0);");
 			node_shader_write_frag(kong, "output[1] = sample_lod(texpaint_nor, sampler_linear, tex_coord_inp, 0.0);");
 			node_shader_write_frag(kong, "output[2] = sample_lod(texpaint_pack, sampler_linear, tex_coord_inp, 0.0);");

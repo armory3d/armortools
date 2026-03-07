@@ -1,9 +1,9 @@
-void import_asset_run(string_t *path, f32 drop_x, f32 drop_y, bool show_box, bool hdr_as_envmap, void (*done)(void)) {
+void import_asset_run(char *path, f32 drop_x, f32 drop_y, bool show_box, bool hdr_as_envmap, void (*done)(void)) {
 	if (starts_with(path, "cloud")) {
 		#ifdef IRON_ANDROID
-		console_toast(tr("Downloading", null));
+		console_toast(tr("Downloading", NULL));
 		#else
-		console_info(tr("Downloading", null));
+		console_info(tr("Downloading", NULL));
 		#endif
 
 		_import_asset_drop_x        = drop_x;
@@ -24,7 +24,7 @@ void import_asset_run(string_t *path, f32 drop_x, f32 drop_y, bool show_box, boo
 			project_import_mesh_box(path, false, false, tab_scene_import_mesh_done);
 		}
 		else {
-			show_box ? project_import_mesh_box(path, true, true, null) : import_mesh_run(path, true, true);
+			show_box ? project_import_mesh_box(path, true, true, NULL) : import_mesh_run(path, true, true);
 		}
 		if (drop_x > 0) {
 			ui_box_click_to_hide = false; // Prevent closing when going back to window after drag and drop
@@ -70,20 +70,20 @@ void import_asset_run(string_t *path, f32 drop_x, f32 drop_y, bool show_box, boo
 	}
 	else {
 		if (context_enable_import_plugin(path)) {
-			import_asset_run(path, drop_x, drop_y, show_box, true, null);
+			import_asset_run(path, drop_x, drop_y, show_box, true, NULL);
 		}
 		else {
 			console_error(strings_unknown_asset_format());
 		}
 	}
 
-	if (done != null) {
+	if (done != NULL) {
 		done();
 	}
 }
 
-void import_asset_run_70884(string_t *abs) {
-	if (abs == null) {
+void import_asset_run_70884(char *abs) {
+	if (abs == NULL) {
 		return;
 	}
 	import_asset_run(abs, _import_asset_drop_x, _import_asset_drop_y, _import_asset_show_box, _import_asset_hdr_as_envmap, _import_asset_done);

@@ -1,5 +1,5 @@
 void util_mesh_merge(mesh_object_t_array_t *paint_objects) {
-	if (paint_objects == null) {
+	if (paint_objects == NULL) {
 		if (context_raw->tool == TOOL_TYPE_GIZMO) {
 			paint_objects = util_mesh_get_unique();
 		}
@@ -25,10 +25,10 @@ void util_mesh_merge(mesh_object_t_array_t *paint_objects) {
 	i16_array_t *va0    = i16_array_create(vlen * 4);
 	i16_array_t *va1    = i16_array_create(vlen * 2);
 	i16_array_t *va2    = i16_array_create(vlen * 2);
-	i16_array_t *vatex1 = mesh_data_get_vertex_array(paint_objects->buffer[0]->data, "tex1") != null ? i16_array_create(vlen * 2) : null;
-	i16_array_t *vacol  = mesh_data_get_vertex_array(paint_objects->buffer[0]->data, "col") != null ? i16_array_create(vlen * 4) : null;
+	i16_array_t *vatex1 = mesh_data_get_vertex_array(paint_objects->buffer[0]->data, "tex1") != NULL ? i16_array_create(vlen * 2) : NULL;
+	i16_array_t *vacol  = mesh_data_get_vertex_array(paint_objects->buffer[0]->data, "col") != NULL ? i16_array_create(vlen * 4) : NULL;
 	i32          tex1i  = 3;
-	i32          coli   = vatex1 != null ? 4 : 3;
+	i32          coli   = vatex1 != NULL ? 4 : 3;
 	u32_array_t *ia     = u32_array_create(ilen);
 
 	i32 voff = 0;
@@ -66,13 +66,13 @@ void util_mesh_merge(mesh_object_t_array_t *paint_objects) {
 			va2->buffer[j + voff * 2] = vas->buffer[2]->values->buffer[j];
 		}
 		// Tex1
-		if (vatex1 != null) {
+		if (vatex1 != NULL) {
 			for (i32 j = 0; j < vas->buffer[tex1i]->values->length; ++j) {
 				vatex1->buffer[j + voff * 2] = vas->buffer[tex1i]->values->buffer[j];
 			}
 		}
 		// Col
-		if (vacol != null) {
+		if (vacol != NULL) {
 			for (i32 j = 0; j < vas->buffer[coli]->values->length; ++j) {
 				vacol->buffer[j + voff * 4] = vas->buffer[coli]->values->buffer[j];
 			}
@@ -96,11 +96,11 @@ void util_mesh_merge(mesh_object_t_array_t *paint_objects) {
 	                                               .index_array = ia,
 	                                               .scale_pos   = max_scale,
 	                                               .scale_tex   = 1.0});
-	if (vatex1 != null) {
+	if (vatex1 != NULL) {
 		vertex_array_t *va = GC_ALLOC_INIT(vertex_array_t, {.values = vatex1, .attrib = "tex1", .data = "short2norm"});
 		any_array_push(raw->vertex_arrays, va);
 	}
-	if (vacol != null) {
+	if (vacol != NULL) {
 		vertex_array_t *va = GC_ALLOC_INIT(vertex_array_t, {.values = vacol, .attrib = "col", .data = "short4norm"});
 		any_array_push(raw->vertex_arrays, va);
 	}
@@ -114,10 +114,10 @@ void util_mesh_merge(mesh_object_t_array_t *paint_objects) {
 }
 
 void util_mesh_remove_merged() {
-	if (context_raw->merged_object != null) {
+	if (context_raw->merged_object != NULL) {
 		mesh_data_delete(context_raw->merged_object->data);
 		mesh_object_remove(context_raw->merged_object);
-		context_raw->merged_object = null;
+		context_raw->merged_object = NULL;
 	}
 }
 
@@ -147,7 +147,7 @@ void util_mesh_swap_axis(i32 a, i32 b) {
 		mesh_data_build_vertices(g->_->vertex_buffer, vas);
 	}
 	util_mesh_remove_merged();
-	util_mesh_merge(null);
+	util_mesh_merge(NULL);
 }
 
 void util_mesh_flip_normals() {
@@ -182,8 +182,8 @@ void util_mesh_calc_normals(bool smooth) {
 		i16_array_t   *va0         = o->data->vertex_arrays->buffer[0]->values;
 		i16_array_t   *va1         = o->data->vertex_arrays->buffer[1]->values;
 		i32            num_verts   = math_floor(va0->length / (float)4);
-		f32_array_t   *smooth_vals = null;
-		i32_array_t   *vert_map    = null;
+		f32_array_t   *smooth_vals = NULL;
+		i32_array_t   *vert_map    = NULL;
 		if (smooth) {
 			smooth_vals          = f32_array_create(num_verts * 3);
 			vert_map             = i32_array_create(num_verts);
@@ -279,7 +279,7 @@ void util_mesh_calc_normals(bool smooth) {
 		mesh_data_build_vertices(g->_->vertex_buffer, o->data->vertex_arrays);
 	}
 
-	util_mesh_merge(null);
+	util_mesh_merge(NULL);
 	render_path_raytrace_ready = false;
 }
 
@@ -367,7 +367,7 @@ void util_mesh_to_origin() {
 		mesh_data_build_vertices(g->_->vertex_buffer, o->data->vertex_arrays);
 	}
 
-	util_mesh_merge(null);
+	util_mesh_merge(NULL);
 }
 
 void util_mesh_apply_displacement(gpu_texture_t *texpaint_pack, f32 strength, f32 uv_scale) {

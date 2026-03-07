@@ -7,7 +7,7 @@ void tile_image_node_init() {
 void tile_image_node_button(i32 node_id) {
 	ui_node_canvas_t *canvas    = ui_nodes_get_canvas(true);
 	ui_node_t        *node      = ui_get_node(canvas->nodes, node_id);
-	string_t         *node_name = parser_material_node_name(node, null);
+	char         *node_name = parser_material_node_name(node, NULL);
 	ui_handle_t      *h         = ui_handle(node_name);
 	string_t_array_t *models    = any_array_create_from_raw(
         (any[]){
@@ -15,8 +15,8 @@ void tile_image_node_button(i32 node_id) {
             "Qwen Image Edit",
         },
         2);
-	i32       model                  = ui_combo(ui_nest(h, 0), models, tr("Model", null), false, UI_ALIGN_LEFT, true);
-	string_t *prompt                 = ui_text_area(ui_nest(h, 1), UI_ALIGN_LEFT, true, tr("prompt", null), true);
+	i32       model                  = ui_combo(ui_nest(h, 0), models, tr("Model", NULL), false, UI_ALIGN_LEFT, true);
+	char *prompt                 = ui_text_area(ui_nest(h, 1), UI_ALIGN_LEFT, true, tr("prompt", NULL), true);
 	node->buttons->buffer[0]->height = string_split(prompt, "\n")->length + 2;
 
 	if (neural_node_button(node, models->buffer[model])) {
@@ -27,11 +27,11 @@ void tile_image_node_button(i32 node_id) {
 void tile_image_node_button_238443(ui_node_t *node) {
 	ui_node_t     *from_node = neural_from_node(node->inputs->buffer[0], 0);
 	gpu_texture_t *input     = ui_nodes_get_node_preview_image(from_node);
-	if (input != null) {
-		string_t      *node_name = parser_material_node_name(node, null);
+	if (input != NULL) {
+		char      *node_name = parser_material_node_name(node, NULL);
 		ui_handle_t   *h         = ui_handle(node_name);
 		i32            model     = ui_nest(h, 0)->i;
-		string_t      *prompt    = ui_nest(h, 1)->text;
+		char      *prompt    = ui_nest(h, 1)->text;
 		gpu_texture_t *tile      = gpu_create_render_target(512, 512, GPU_TEXTURE_FORMAT_RGBA32);
 		draw_begin(tile, false, 0);
 		draw_scaled_image(input, -256, -256, 512, 512);
@@ -55,7 +55,7 @@ void tile_image_node_button_238443(ui_node_t *node) {
 			// u8a[i]     = (x > 256 - l && x < 256 + l) ? 128 : 0;
 		}
 		gpu_texture_t *mask = gpu_create_texture_from_bytes(u8a, 512, 512, GPU_TEXTURE_FORMAT_R8);
-		string_t      *dir  = neural_node_dir();
+		char      *dir  = neural_node_dir();
 		iron_write_png(string_join(string_join(dir, PATH_SEP), "input.png"), gpu_get_texture_pixels(tile), tile->width, tile->height, 0);
 		iron_write_png(string_join(string_join(dir, PATH_SEP), "mask.png"), gpu_get_texture_pixels(mask), mask->width, mask->height, 1);
 
@@ -87,7 +87,7 @@ void tile_image_node_button_238443(ui_node_t *node) {
 			        string_join(dir, "/mask.png"),
 			        "-o",
 			        string_join(dir, "/output.png"),
-			        null,
+			        NULL,
 			    },
 			    21);
 		}
@@ -120,7 +120,7 @@ void tile_image_node_button_238443(ui_node_t *node) {
 			        string_join(dir, "/input.png"),
 			        "-o",
 			        string_join(dir, "/output.png"),
-			        null,
+			        NULL,
 			    },
 			    27);
 		}

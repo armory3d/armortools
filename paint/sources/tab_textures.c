@@ -1,7 +1,7 @@
 
 void tab_textures_draw(ui_handle_t *htab) {
 
-	if (ui_tab(htab, tr("Textures", null), false, -1, false) && ui->_window_h > ui_statusbar_default_h * UI_SCALE()) {
+	if (ui_tab(htab, tr("Textures", NULL), false, -1, false) && ui->_window_h > ui_statusbar_default_h * UI_SCALE()) {
 
 		ui_begin_sticky();
 
@@ -13,13 +13,13 @@ void tab_textures_draw(ui_handle_t *htab) {
 		    2);
 		ui_row(row);
 
-		if (ui_icon_button(tr("Import", null), ICON_IMPORT, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Import", NULL), ICON_IMPORT, UI_ALIGN_CENTER)) {
 			ui_files_show(string_array_join(path_texture_formats(), ","), false, true, &tab_textures_draw_37950);
 		}
 		if (ui->is_hovered) {
-			ui_tooltip(string_join(string_join(string_join(tr("Import texture file", null), " ("), any_map_get(config_keymap, "file_import_assets")), ")"));
+			ui_tooltip(string_join(string_join(string_join(tr("Import texture file", NULL), " ("), any_map_get(config_keymap, "file_import_assets")), ")"));
 		}
-		if (ui_icon_button(tr("2D View", null), ICON_WINDOW, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("2D View", NULL), ICON_WINDOW, UI_ALIGN_CENTER)) {
 			ui_base_show_2d_view(VIEW_2D_TYPE_ASSET);
 		}
 
@@ -60,7 +60,7 @@ void tab_textures_draw(ui_handle_t *htab) {
 
 					asset_t       *asset = project_assets->buffer[i];
 					gpu_texture_t *img   = project_get_image(asset);
-					if (img == null) {
+					if (img == NULL) {
 						render_target_t *empty_rt = any_map_get(render_path_render_targets, "empty_black");
 						img                       = empty_rt->_image;
 					}
@@ -96,12 +96,12 @@ void tab_textures_draw(ui_handle_t *htab) {
 						ui->_y = _uiy;
 					}
 
-					bool is_packed = project_raw->packed_assets != null && project_packed_asset_exists(project_raw->packed_assets, asset->file);
+					bool is_packed = project_raw->packed_assets != NULL && project_packed_asset_exists(project_raw->packed_assets, asset->file);
 
 					if (ui->is_hovered) {
 						ui_tooltip_image(img, 256);
 						if (is_packed) {
-							ui_tooltip(string_join(string_join(asset->name, " "), tr("(packed)", null)));
+							ui_tooltip(string_join(string_join(asset->name, " "), tr("(packed)", NULL)));
 						}
 						else {
 							ui_tooltip(asset->name);
@@ -142,7 +142,7 @@ void tab_textures_draw(ui_handle_t *htab) {
 			rect_t        *r   = resource_tile50(img, ICON_DROP);
 			ui_sub_image(img, ui->ops->theme->BUTTON_COL, r->h, r->x, r->y, r->w, r->h);
 			if (ui->is_hovered) {
-				ui_tooltip(tr("Drag and drop files here", null));
+				ui_tooltip(tr("Drag and drop files here", NULL));
 			}
 		}
 
@@ -164,10 +164,10 @@ void tab_textures_draw_38855(any _) {
 }
 
 void tab_textures_draw_38721(gpu_texture_t *target) {
-	string_t *path = _tab_textures_draw_path;
-	string_t *f    = ui_files_filename;
+	char *path = _tab_textures_draw_path;
+	char *f    = ui_files_filename;
 	if (string_equals(f, "")) {
-		f = string_copy(tr("untitled", null));
+		f = string_copy(tr("untitled", NULL));
 	}
 	if (!ends_with(f, ".png")) {
 		f = string_join(f, ".png");
@@ -183,32 +183,32 @@ void tab_textures_draw_38661(any _) {
 	draw_begin(target, false, 0);
 	draw_set_pipeline(pipes_copy);
 	draw_scaled_image(img, 0, 0, target->width, target->height);
-	draw_set_pipeline(null);
+	draw_set_pipeline(NULL);
 	draw_end();
 	sys_notify_on_next_frame(&tab_textures_draw_38721, target);
 }
 
-void tab_textures_draw_38648(string_t *path) {
+void tab_textures_draw_38648(char *path) {
 	gc_unroot(_tab_textures_draw_path);
 	_tab_textures_draw_path = string_copy(path);
 	gc_root(_tab_textures_draw_path);
-	sys_notify_on_next_frame(&tab_textures_draw_38661, null);
+	sys_notify_on_next_frame(&tab_textures_draw_38661, NULL);
 }
 
 void tab_textures_draw_38621() {
-	if (ui_menu_button(tr("Export", null), "", ICON_EXPORT)) {
+	if (ui_menu_button(tr("Export", NULL), "", ICON_EXPORT)) {
 		ui_files_show("png", true, false, &tab_textures_draw_38648);
 	}
-	if (ui_menu_button(tr("Reimport", null), "", ICON_SYNC)) {
+	if (ui_menu_button(tr("Reimport", NULL), "", ICON_SYNC)) {
 		project_reimport_texture(_tab_textures_draw_asset);
 	}
-	if (ui_menu_button(tr("To Mask", null), "", ICON_MASK)) {
-		sys_notify_on_next_frame(&tab_textures_draw_38855, null);
+	if (ui_menu_button(tr("To Mask", NULL), "", ICON_MASK)) {
+		sys_notify_on_next_frame(&tab_textures_draw_38855, NULL);
 	}
-	if (ui_menu_button(tr("Set as Envmap", null), "", ICON_LANDSCAPE)) {
-		sys_notify_on_next_frame(&tab_textures_draw_38888, null);
+	if (ui_menu_button(tr("Set as Envmap", NULL), "", ICON_LANDSCAPE)) {
+		sys_notify_on_next_frame(&tab_textures_draw_38888, NULL);
 	}
-	if (ui_menu_button(tr("Set as Color ID Map", null), "", ICON_COLOR_ID)) {
+	if (ui_menu_button(tr("Set as Color ID Map", NULL), "", ICON_COLOR_ID)) {
 		context_raw->colorid_handle->i = _tab_textures_draw_i;
 		context_raw->colorid_picked    = false;
 		ui_toolbar_handle->redraws     = 1;
@@ -217,19 +217,19 @@ void tab_textures_draw_38621() {
 			context_raw->ddirty       = 2;
 		}
 	}
-	if (ui_menu_button(tr("Delete", null), "delete", ICON_DELETE)) {
+	if (ui_menu_button(tr("Delete", NULL), "delete", ICON_DELETE)) {
 		tab_textures_delete_texture(_tab_textures_draw_asset);
 	}
-	if (!_tab_textures_draw_is_packed && ui_menu_button(tr("Open Containing Directory...", null), "", ICON_FOLDER_OPEN)) {
+	if (!_tab_textures_draw_is_packed && ui_menu_button(tr("Open Containing Directory...", NULL), "", ICON_FOLDER_OPEN)) {
 		file_start(substring(_tab_textures_draw_asset->file, 0, string_last_index_of(_tab_textures_draw_asset->file, PATH_SEP)));
 	}
-	if (!_tab_textures_draw_is_packed && ui_menu_button(tr("Open in Browser", null), "", ICON_NONE)) {
+	if (!_tab_textures_draw_is_packed && ui_menu_button(tr("Open in Browser", NULL), "", ICON_NONE)) {
 		tab_browser_show_directory(substring(_tab_textures_draw_asset->file, 0, string_last_index_of(_tab_textures_draw_asset->file, PATH_SEP)));
 	}
 }
 
-void tab_textures_draw_37950(string_t *path) {
-	import_asset_run(path, -1.0, -1.0, true, false, null);
+void tab_textures_draw_37950(char *path) {
+	import_asset_run(path, -1.0, -1.0, true, false, NULL);
 	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
 }
 
@@ -265,7 +265,7 @@ void tab_textures_delete_texture(asset_t *asset) {
 		project_set_default_envmap();
 	}
 
-	if (project_raw->packed_assets != null) {
+	if (project_raw->packed_assets != NULL) {
 		for (i32 i = 0; i < project_raw->packed_assets->length; ++i) {
 			packed_asset_t *pa = project_raw->packed_assets->buffer[i];
 			if (string_equals(pa->name, asset->file)) {
@@ -279,7 +279,7 @@ void tab_textures_delete_texture(asset_t *asset) {
 	imap_delete(project_asset_map, asset->id);
 	array_splice(project_assets, index, 1);
 	array_splice(project_asset_names, index, 1);
-	sys_notify_on_next_frame(&tab_textures_delete_texture_39524, null);
+	sys_notify_on_next_frame(&tab_textures_delete_texture_39524, NULL);
 
 	for (i32 i = 0; i < project_materials->length; ++i) {
 		slot_material_t *m = project_materials->buffer[i];

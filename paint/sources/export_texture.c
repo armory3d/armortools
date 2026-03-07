@@ -1,4 +1,4 @@
-void export_texture_run(string_t *path, bool bake_material) {
+void export_texture_run(char *path, bool bake_material) {
 
 	if (bake_material) {
 		export_texture_run_bake_material(path);
@@ -8,7 +8,7 @@ void export_texture_run(string_t *path, bool bake_material) {
 		for (i32 i = 0; i < project_layers->length; ++i) {
 			slot_layer_t *l = project_layers->buffer[i];
 			if (slot_layer_get_object_mask(l) > 0) {
-				string_t *name = project_paint_objects->buffer[slot_layer_get_object_mask(l) - 1]->base->name;
+				char *name = project_paint_objects->buffer[slot_layer_get_object_mask(l) - 1]->base->name;
 				if (string_equals(substring(name, string_length(name) - 5, 2), ".1")) { // tile.1001
 					any_array_push(udim_tiles, substring(name, string_length(name) - 5, string_length(name)));
 				}
@@ -16,7 +16,7 @@ void export_texture_run(string_t *path, bool bake_material) {
 		}
 		if (udim_tiles->length > 0) {
 			for (i32 i = 0; i < udim_tiles->length; ++i) {
-				string_t *udim_tile = udim_tiles->buffer[i];
+				char *udim_tile = udim_tiles->buffer[i];
 				export_texture_run_layers(path, project_layers, udim_tile, false);
 			}
 		}
@@ -29,7 +29,7 @@ void export_texture_run(string_t *path, bool bake_material) {
 		for (i32 i = 0; i < project_layers->length; ++i) {
 			slot_layer_t *l = project_layers->buffer[i];
 			if (slot_layer_get_object_mask(l) > 0) {
-				string_t *name = project_paint_objects->buffer[slot_layer_get_object_mask(l) - 1]->base->name;
+				char *name = project_paint_objects->buffer[slot_layer_get_object_mask(l) - 1]->base->name;
 				if (char_ptr_array_index_of(object_names, name) == -1) {
 					any_array_push(object_names, name);
 				}
@@ -37,7 +37,7 @@ void export_texture_run(string_t *path, bool bake_material) {
 		}
 		if (object_names->length > 0) {
 			for (i32 i = 0; i < object_names->length; ++i) {
-				string_t *name = object_names->buffer[i];
+				char *name = object_names->buffer[i];
 				export_texture_run_layers(path, project_layers, name, false);
 			}
 		}
@@ -47,7 +47,7 @@ void export_texture_run(string_t *path, bool bake_material) {
 	}
 	else { // Visible or selected
 		bool atlas_export = false;
-		if (project_atlas_objects != null) {
+		if (project_atlas_objects != NULL) {
 			for (i32 i = 1; i < project_atlas_objects->length; ++i) {
 				if (project_atlas_objects->buffer[i - 1] != project_atlas_objects->buffer[i]) {
 					atlas_export = true;
@@ -97,25 +97,25 @@ void export_texture_run(string_t *path, bool bake_material) {
 
 	#ifdef IRON_IOS
 	if (config_is_iphone()) {
-		console_info(string_join(string_join(string_join(tr("Textures exported", null), " (\"Files/On My iPhone/"), manifest_title), "\")"));
+		console_info(string_join(string_join(string_join(tr("Textures exported", NULL), " (\"Files/On My iPhone/"), manifest_title), "\")"));
 	}
 	else {
-		console_info(string_join(string_join(string_join(tr("Textures exported", null), " (\"Files/On My iPad/"), manifest_title), "\")"));
+		console_info(string_join(string_join(string_join(tr("Textures exported", NULL), " (\"Files/On My iPad/"), manifest_title), "\")"));
 	}
 	#elif defined(IRON_ANDROID)
-	console_info(string_join(string_join(string_join(tr("Textures exported", null), " (\"Files/Internal storage/Pictures/"), manifest_title), "\")"));
+	console_info(string_join(string_join(string_join(tr("Textures exported", NULL), " (\"Files/Internal storage/Pictures/"), manifest_title), "\")"));
 	#else
-	console_info(tr("Textures exported", null));
+	console_info(tr("Textures exported", NULL));
 	#endif
 	gc_unroot(ui_files_last_path);
 	ui_files_last_path = "";
 	gc_root(ui_files_last_path);
 }
 
-void export_texture_run_bake_material(string_t *path) {
-	if (render_path_paint_live_layer == null) {
+void export_texture_run_bake_material(char *path) {
+	if (render_path_paint_live_layer == NULL) {
 		gc_unroot(render_path_paint_live_layer);
-		render_path_paint_live_layer = slot_layer_create("_live", LAYER_SLOT_TYPE_LAYER, null);
+		render_path_paint_live_layer = slot_layer_create("_live", LAYER_SLOT_TYPE_LAYER, NULL);
 		gc_root(render_path_paint_live_layer);
 	}
 
@@ -157,21 +157,21 @@ void export_texture_run_bake_material(string_t *path) {
 	export_texture_run_layers(path, layers, "", true);
 }
 
-void export_texture_run_layers(string_t *path, slot_layer_t_array_t *layers, string_t *object_name, bool bake_material) {
+void export_texture_run_layers(char *path, slot_layer_t_array_t *layers, char *object_name, bool bake_material) {
 
 	i32 texture_size_x = config_get_texture_res_x();
 	i32 texture_size_y = config_get_texture_res_y();
 	#if defined(IRON_ANDROID) || defined(IRON_IOS)
-	string_t *f = sys_title();
+	char *f = sys_title();
 	#else
-	string_t *f = ui_files_filename;
+	char *f = ui_files_filename;
 	#endif
 	if (string_equals(f, "")) {
-		f = string_copy(tr("untitled", null));
+		f = string_copy(tr("untitled", NULL));
 	}
 	texture_ldr_format_t format_type = context_raw->format_type;
 	i32                  bits        = base_bits_handle->i == TEXTURE_BITS_BITS8 ? 8 : 16;
-	string_t            *ext         = bits == 16 ? ".exr" : format_type == TEXTURE_LDR_FORMAT_PNG ? ".png" : ".jpg";
+	char            *ext         = bits == 16 ? ".exr" : format_type == TEXTURE_LDR_FORMAT_PNG ? ".png" : ".jpg";
 	if (ends_with(f, ext)) {
 		f = string_copy(substring(f, 0, string_length(f) - 4));
 	}
@@ -196,11 +196,11 @@ void export_texture_run_layers(string_t *path, slot_layer_t_array_t *layers, str
 	}
 
 	// Clear export layer
-	_gpu_begin(layers_expa, null, null, GPU_CLEAR_COLOR, color_from_floats(0.0, 0.0, 0.0, 0.0), 0.0);
+	_gpu_begin(layers_expa, NULL, NULL, GPU_CLEAR_COLOR, color_from_floats(0.0, 0.0, 0.0, 0.0), 0.0);
 	gpu_end();
-	_gpu_begin(layers_expb, null, null, GPU_CLEAR_COLOR, color_from_floats(0.5, 0.5, 1.0, 0.0), 0.0);
+	_gpu_begin(layers_expb, NULL, NULL, GPU_CLEAR_COLOR, color_from_floats(0.5, 0.5, 1.0, 0.0), 0.0);
 	gpu_end();
-	_gpu_begin(layers_expc, null, null, GPU_CLEAR_COLOR, color_from_floats(1.0, 0.0, 0.0, 0.0), 0.0);
+	_gpu_begin(layers_expc, NULL, NULL, GPU_CLEAR_COLOR, color_from_floats(1.0, 0.0, 0.0, 0.0), 0.0);
 	gpu_end();
 
 	// Flatten layers
@@ -225,7 +225,7 @@ void export_texture_run_layers(string_t *path, slot_layer_t_array_t *layers, str
 
 		gpu_texture_t        *mask    = empty;
 		slot_layer_t_array_t *l1masks = slot_layer_get_masks(l1, true);
-		if (l1masks != null && !bake_material) {
+		if (l1masks != NULL && !bake_material) {
 			if (l1masks->length > 1) {
 				layers_make_temp_mask_img();
 				draw_begin(pipes_temp_mask_image, true, 0x00000000);
@@ -245,10 +245,10 @@ void export_texture_run_layers(string_t *path, slot_layer_t_array_t *layers, str
 			draw_begin(layers_temp_image, false, 0); // Copy to temp
 			draw_set_pipeline(pipes_copy);
 			draw_image(layers_expa, 0, 0);
-			draw_set_pipeline(null);
+			draw_set_pipeline(NULL);
 			draw_end();
 
-			_gpu_begin(layers_expa, null, null, GPU_CLEAR_NONE, 0, 0.0);
+			_gpu_begin(layers_expa, NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 			gpu_set_pipeline(pipes_merge);
 			gpu_set_texture(pipes_tex0, l1->texpaint);
 			gpu_set_texture(pipes_tex1, empty);
@@ -267,10 +267,10 @@ void export_texture_run_layers(string_t *path, slot_layer_t_array_t *layers, str
 			draw_begin(layers_temp_image, false, 0);
 			draw_set_pipeline(pipes_copy);
 			draw_image(layers_expb, 0, 0);
-			draw_set_pipeline(null);
+			draw_set_pipeline(NULL);
 			draw_end();
 
-			_gpu_begin(layers_expb, null, null, GPU_CLEAR_NONE, 0, 0.0);
+			_gpu_begin(layers_expb, NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 			gpu_set_pipeline(pipes_merge);
 			gpu_set_texture(pipes_tex0, l1->texpaint);
 			gpu_set_texture(pipes_tex1, l1->texpaint_nor);
@@ -289,7 +289,7 @@ void export_texture_run_layers(string_t *path, slot_layer_t_array_t *layers, str
 			draw_begin(layers_temp_image, false, 0);
 			draw_set_pipeline(pipes_copy);
 			draw_image(layers_expc, 0, 0);
-			draw_set_pipeline(null);
+			draw_set_pipeline(NULL);
 			draw_end();
 
 			if (l1->paint_occ && l1->paint_rough && l1->paint_met && l1->paint_height) {
@@ -311,27 +311,27 @@ void export_texture_run_layers(string_t *path, slot_layer_t_array_t *layers, str
 	gpu_texture_t *texpaint_nor  = layers_expb;
 	gpu_texture_t *texpaint_pack = layers_expc;
 
-	buffer_t        *pixpaint      = null;
-	buffer_t        *pixpaint_nor  = null;
-	buffer_t        *pixpaint_pack = null;
+	buffer_t        *pixpaint      = NULL;
+	buffer_t        *pixpaint_nor  = NULL;
+	buffer_t        *pixpaint_pack = NULL;
 	export_preset_t *preset        = box_export_preset;
-	buffer_t        *pix           = null;
+	buffer_t        *pix           = NULL;
 
 	for (i32 i = 0; i < preset->textures->length; ++i) {
 		export_preset_texture_t *t = preset->textures->buffer[i];
 		for (i32 i = 0; i < t->channels->length; ++i) {
-			string_t *c = t->channels->buffer[i];
-			if ((string_equals(c, "base_r") || string_equals(c, "base_g") || string_equals(c, "base_b") || string_equals(c, "opac")) && pixpaint == null) {
+			char *c = t->channels->buffer[i];
+			if ((string_equals(c, "base_r") || string_equals(c, "base_g") || string_equals(c, "base_b") || string_equals(c, "opac")) && pixpaint == NULL) {
 				pixpaint = gpu_get_texture_pixels(texpaint);
 			}
 			else if ((string_equals(c, "nor_r") || string_equals(c, "nor_g") || string_equals(c, "nor_g_directx") || string_equals(c, "nor_b") ||
 			          string_equals(c, "emis") || string_equals(c, "subs")) &&
-			         pixpaint_nor == null) {
+			         pixpaint_nor == NULL) {
 				pixpaint_nor = gpu_get_texture_pixels(texpaint_nor);
 			}
 			else if ((string_equals(c, "occ") || string_equals(c, "rough") || string_equals(c, "metal") || string_equals(c, "height") ||
 			          string_equals(c, "smooth")) &&
-			         pixpaint_pack == null) {
+			         pixpaint_pack == NULL) {
 				pixpaint_pack = gpu_get_texture_pixels(texpaint_pack);
 			}
 		}
@@ -340,7 +340,7 @@ void export_texture_run_layers(string_t *path, slot_layer_t_array_t *layers, str
 	for (i32 i = 0; i < preset->textures->length; ++i) {
 		export_preset_texture_t *t              = preset->textures->buffer[i];
 		string_t_array_t        *c              = t->channels;
-		string_t                *tex_name       = !string_equals(t->name, "") ? string_join("_", t->name) : "";
+		char                *tex_name       = !string_equals(t->name, "") ? string_join("_", t->name) : "";
 		bool                     single_channel = c->buffer[0] == c->buffer[1] && c->buffer[1] == c->buffer[2] && string_equals(c->buffer[3], "1.0");
 		if (string_equals(c->buffer[0], "base_r") && string_equals(c->buffer[1], "base_g") && string_equals(c->buffer[2], "base_b") &&
 		    string_equals(c->buffer[3], "1.0") && string_equals(t->color_space, "linear")) {
@@ -370,11 +370,11 @@ void export_texture_run_layers(string_t *path, slot_layer_t_array_t *layers, str
 			export_texture_write_texture(string_join(string_join(string_join(string_join(path, PATH_SEP), f), tex_name), ext), pixpaint, 2, 3);
 		}
 		else {
-			if (pix == null) {
+			if (pix == NULL) {
 				pix = buffer_create(texture_size_x * texture_size_y * 4 * math_floor(bits / (float)8));
 			}
 			for (i32 i = 0; i < 4; ++i) {
-				string_t *c = t->channels->buffer[i];
+				char *c = t->channels->buffer[i];
 				if (string_equals(c, "base_r")) {
 					export_texture_copy_channel(pixpaint, 0, pix, i, string_equals(t->color_space, "linear"));
 				}
@@ -432,12 +432,12 @@ void export_texture_run_layers(string_t *path, slot_layer_t_array_t *layers, str
 	}
 
 	// Release staging memory allocated in gpu_get_texture_pixels()
-	// texpaint->pixels = null;
-	// texpaint_nor->pixels = null;
-	// texpaint_pack->pixels = null;
+	// texpaint->pixels = NULL;
+	// texpaint_nor->pixels = NULL;
+	// texpaint_pack->pixels = NULL;
 }
 
-void export_texture_write_texture(string_t *file, buffer_t *pixels, i32 type, i32 off) {
+void export_texture_write_texture(char *file, buffer_t *pixels, i32 type, i32 off) {
 	i32 res_x       = config_get_texture_res_x();
 	i32 res_y       = config_get_texture_res_y();
 	i32 bits_handle = base_bits_handle->i;
@@ -468,10 +468,10 @@ void export_texture_write_texture(string_t *file, buffer_t *pixels, i32 type, i3
 		gpu_texture_t *image = gpu_create_texture_from_bytes(pixels, res_x, res_y, GPU_TEXTURE_FORMAT_RGBA32);
 		any_map_set(data_cached_images, file, image);
 		string_t_array_t *ar    = string_split(file, PATH_SEP);
-		string_t         *name  = ar->buffer[ar->length - 1];
+		char         *name  = ar->buffer[ar->length - 1];
 		asset_t          *asset = GC_ALLOC_INIT(asset_t, {.name = name, .file = file, .id = project_asset_id++});
 		any_array_push(project_assets, asset);
-		if (project_raw->assets == null) {
+		if (project_raw->assets == NULL) {
 			project_raw->assets = any_array_create_from_raw((any[]){}, 0);
 		}
 		any_array_push(project_raw->assets, asset->file);

@@ -1,5 +1,5 @@
 node_shader_context_t *make_mesh_preview_run(material_t *data, material_context_t *matcon) {
-	string_t              *context_id = "mesh";
+	char              *context_id = "mesh";
 	shader_context_t      *props      = GC_ALLOC_INIT(shader_context_t, {.name            = context_id,
 	                                                                     .depth_write     = true,
 	                                                                     .compare_mode    = "less",
@@ -22,12 +22,12 @@ node_shader_context_t *make_mesh_preview_run(material_t *data, material_context_
 
 	node_shader_t         *kong       = node_shader_context_make_kong(con_mesh);
 
-	string_t              *pos        = "input.pos";
+	char              *pos        = "input.pos";
 
 	node_shader_add_constant(kong, "WVP: float4x4", "_world_view_proj_matrix");
 	node_shader_write_attrib_vert(kong, string_join(string_join("output.pos = constants.WVP * float4(", pos), ".xyz, 1.0);"));
 	f32       sc          = context_raw->brush_scale * context_raw->brush_nodes_scale;
-	string_t *brush_scale = string_join(f32_to_string(sc), "");
+	char *brush_scale = string_join(f32_to_string(sc), "");
 	node_shader_add_out(kong, "tex_coord: float2");
 	node_shader_write_attrib_vert(kong, string_join(string_join("output.tex_coord = input.tex * float(", brush_scale), ");"));
 	node_shader_write_attrib_frag(kong, "var tex_coord: float2 = input.tex_coord;");
@@ -43,13 +43,13 @@ node_shader_context_t *make_mesh_preview_run(material_t *data, material_context_
 	parser_material_parse_height            = false;
 	parser_material_parse_height_as_channel = false;
 	parser_material_sample_keep_aspect      = false;
-	string_t *base                          = sout->out_basecol;
-	string_t *rough                         = sout->out_roughness;
-	string_t *met                           = sout->out_metallic;
-	string_t *occ                           = sout->out_occlusion;
-	string_t *opac                          = sout->out_opacity;
-	string_t *height                        = sout->out_height;
-	string_t *nortan                        = parser_material_out_normaltan;
+	char *base                          = sout->out_basecol;
+	char *rough                         = sout->out_roughness;
+	char *met                           = sout->out_metallic;
+	char *occ                           = sout->out_occlusion;
+	char *opac                          = sout->out_opacity;
+	char *height                        = sout->out_height;
+	char *nortan                        = parser_material_out_normaltan;
 	node_shader_write_frag(kong, string_join(string_join("var basecol: float3 = pow3(", base), ", float3(2.2, 2.2, 2.2));"));
 	node_shader_write_frag(kong, string_join(string_join("var roughness: float = ", rough), ";"));
 	node_shader_write_frag(kong, string_join(string_join("var metallic: float = ", met), ";"));

@@ -5,7 +5,7 @@ void tab_swatches_empty_set(gpu_texture_t *image) {
 }
 
 gpu_texture_t *tab_swatches_empty_get() {
-	if (_tab_swatches_empty == null) {
+	if (_tab_swatches_empty == NULL) {
 		u8_array_t *b = u8_array_create(4);
 		b->buffer[0]  = 255;
 		b->buffer[1]  = 255;
@@ -19,7 +19,7 @@ gpu_texture_t *tab_swatches_empty_get() {
 }
 
 void tab_swatches_draw(ui_handle_t *htab) {
-	if (ui_tab(htab, tr("Swatches", null), false, -1, false) && ui->_window_h > ui_statusbar_default_h * UI_SCALE()) {
+	if (ui_tab(htab, tr("Swatches", NULL), false, -1, false) && ui->_window_h > ui_statusbar_default_h * UI_SCALE()) {
 
 		ui_begin_sticky();
 		f32_array_t *row = f32_array_create_from_raw(
@@ -33,29 +33,29 @@ void tab_swatches_draw(ui_handle_t *htab) {
 		    5);
 		ui_row(row);
 
-		if (ui_icon_button(tr("New", null), ICON_PLUS, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("New", NULL), ICON_PLUS, UI_ALIGN_CENTER)) {
 			context_set_swatch(make_swatch(0xffffffff));
 			any_array_push(project_raw->swatches, context_raw->swatch);
 		}
 		if (ui->is_hovered) {
-			ui_tooltip(tr("Add new swatch", null));
+			ui_tooltip(tr("Add new swatch", NULL));
 		}
 
-		if (ui_icon_button(tr("Import", null), ICON_IMPORT, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Import", NULL), ICON_IMPORT, UI_ALIGN_CENTER)) {
 			ui_menu_draw(&tab_swatches_draw_15862, -1, -1);
 		}
 		if (ui->is_hovered) {
-			ui_tooltip(tr("Import swatches", null));
+			ui_tooltip(tr("Import swatches", NULL));
 		}
 
-		if (ui_icon_button(tr("Export", null), ICON_EXPORT, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Export", NULL), ICON_EXPORT, UI_ALIGN_CENTER)) {
 			project_export_swatches();
 		}
 		if (ui->is_hovered) {
-			ui_tooltip(tr("Export swatches", null));
+			ui_tooltip(tr("Export swatches", NULL));
 		}
 
-		if (ui_icon_button(tr("Clear", null), ICON_ERASE, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Clear", NULL), ICON_ERASE, UI_ALIGN_CENTER)) {
 			context_set_swatch(make_swatch(0xffffffff));
 			project_raw->swatches = any_array_create_from_raw(
 			    (any[]){
@@ -64,12 +64,12 @@ void tab_swatches_draw(ui_handle_t *htab) {
 			    1);
 		}
 
-		if (ui_icon_button(tr("Restore", null), ICON_REPLAY, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Restore", NULL), ICON_REPLAY, UI_ALIGN_CENTER)) {
 			project_set_default_swatches();
 			context_set_swatch(project_raw->swatches->buffer[0]);
 		}
 		if (ui->is_hovered) {
-			ui_tooltip(tr("Restore default swatches", null));
+			ui_tooltip(tr("Restore default swatches", NULL));
 		}
 
 		ui_end_sticky();
@@ -112,7 +112,7 @@ void tab_swatches_draw(ui_handle_t *htab) {
 				uiy = ui->_y;
 
 				// Draw the drag position indicator
-				if (base_drag_swatch != null && tab_swatches_drag_pos == i) {
+				if (base_drag_swatch != NULL && tab_swatches_drag_pos == i) {
 					ui_fill(-1, -2, 2, 32, ui->ops->theme->HIGHLIGHT_COL);
 				}
 
@@ -161,7 +161,7 @@ void tab_swatches_draw(ui_handle_t *htab) {
 		}
 
 		// Draw the rightmost line next to the last swatch
-		if (base_drag_swatch != null && tab_swatches_drag_pos == project_raw->swatches->length) {
+		if (base_drag_swatch != NULL && tab_swatches_drag_pos == project_raw->swatches->length) {
 			ui->_x = uix; // Reset the position because otherwise it would start in the row below
 			ui->_y = uiy;
 			ui_fill(28, -2, 2, 32, ui->ops->theme->HIGHLIGHT_COL);
@@ -184,25 +184,25 @@ void tab_swatches_draw(ui_handle_t *htab) {
 void tab_swatches_draw_16719() {
 	i32 i = _tab_swatches_draw_i;
 
-	if (ui_menu_button(tr("Duplicate", null), "", ICON_DUPLICATE)) {
+	if (ui_menu_button(tr("Duplicate", NULL), "", ICON_DUPLICATE)) {
 		context_set_swatch(project_clone_swatch(context_raw->swatch));
 		any_array_push(project_raw->swatches, context_raw->swatch);
 	}
 	#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
-	else if (ui_menu_button(tr("Copy Hex Code", null), "", ICON_HASH)) {
+	else if (ui_menu_button(tr("Copy Hex Code", NULL), "", ICON_HASH)) {
 		i32 color = context_raw->swatch->base;
 		color     = color_set_ab(color, context_raw->swatch->opacity * 255);
 		u32 val   = color;
 		iron_copy_to_clipboard(i32_to_string(val));
 	}
 	#endif
-	else if (project_raw->swatches->length > 1 && ui_menu_button(tr("Delete", null), "delete", ICON_DELETE)) {
+	else if (project_raw->swatches->length > 1 && ui_menu_button(tr("Delete", NULL), "delete", ICON_DELETE)) {
 		tab_swatches_delete_swatch(project_raw->swatches->buffer[i]);
 	}
-	else if (ui_menu_button(tr("Create Material", null), "", ICON_SPHERE)) {
+	else if (ui_menu_button(tr("Create Material", NULL), "", ICON_SPHERE)) {
 		tab_materials_accept_swatch_drop(project_raw->swatches->buffer[i]);
 	}
-	else if (ui_menu_button(tr("Create Color Layer", null), "", ICON_LAYERS)) {
+	else if (ui_menu_button(tr("Create Color Layer", NULL), "", ICON_LAYERS)) {
 		i32 color = project_raw->swatches->buffer[i]->base;
 		color     = color_set_ab(color, project_raw->swatches->buffer[i]->opacity * 255);
 		layers_create_color_layer(color, project_raw->swatches->buffer[i]->occlusion, project_raw->swatches->buffer[i]->roughness,
@@ -227,7 +227,7 @@ void tab_swatches_draw_16422() {
 	ui_handle_t *h = ui_handle(__ID__);
 	h->color       = context_raw->swatch->base;
 
-	context_raw->swatch->base = ui_color_wheel(h, false, -1, 11 * ui->ops->theme->ELEMENT_H * UI_SCALE(), true, &tab_swatches_draw_16464, null);
+	context_raw->swatch->base = ui_color_wheel(h, false, -1, 11 * ui->ops->theme->ELEMENT_H * UI_SCALE(), true, &tab_swatches_draw_16464, NULL);
 
 	ui_handle_t *hopacity          = ui_handle(__ID__);
 	hopacity->f                    = context_raw->swatch->opacity;
@@ -256,11 +256,11 @@ void tab_swatches_draw_16422() {
 }
 
 void tab_swatches_draw_15862() {
-	if (ui_menu_button(tr("Replace Existing", null), "", ICON_NONE)) {
+	if (ui_menu_button(tr("Replace Existing", NULL), "", ICON_NONE)) {
 		project_import_swatches(true);
 		context_set_swatch(project_raw->swatches->buffer[0]);
 	}
-	if (ui_menu_button(tr("Append", null), "", ICON_NONE)) {
+	if (ui_menu_button(tr("Append", NULL), "", ICON_NONE)) {
 		project_import_swatches(false);
 	}
 }

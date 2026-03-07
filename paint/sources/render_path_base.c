@@ -104,7 +104,7 @@ bool render_path_base_is_cached() {
 		}
 
 		if (context_raw->ddirty > -12) {
-			render_path_set_target("", null, null, GPU_CLEAR_NONE, 0, 0.0);
+			render_path_set_target("", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 			render_path_bind_target("last", "tex");
 			if (render_path_base_ssaa4()) {
 				render_path_draw_shader("Scene/supersample_resolve/supersample_resolveRGBA64");
@@ -147,12 +147,12 @@ void render_path_base_commands(void (*draw_commands)(void)) {
 	render_path_base_end();
 }
 
-void render_path_base_draw_bloom(string_t *source, string_t *target) {
+void render_path_base_draw_bloom(char *source, char *target) {
 	if (config_raw->rp_bloom == false) {
 		return;
 	}
 
-	if (render_path_base_bloom_mipmaps == null) {
+	if (render_path_base_bloom_mipmaps == NULL) {
 		gc_unroot(render_path_base_bloom_mipmaps);
 		render_path_base_bloom_mipmaps = any_array_create_from_raw((any[]){}, 0);
 		gc_root(render_path_base_bloom_mipmaps);
@@ -181,7 +181,7 @@ void render_path_base_draw_bloom(string_t *source, string_t *target) {
 
 	for (i32 i = 0; i < num_mips; ++i) {
 		render_path_base_bloom_current_mip = i;
-		render_path_set_target(render_path_base_bloom_mipmaps->buffer[i]->name, null, null, GPU_CLEAR_COLOR, 0x00000000, 0.0);
+		render_path_set_target(render_path_base_bloom_mipmaps->buffer[i]->name, NULL, NULL, GPU_CLEAR_COLOR, 0x00000000, 0.0);
 		render_path_bind_target(i == 0 ? source : render_path_base_bloom_mipmaps->buffer[i - 1]->name, "tex");
 		render_path_draw_shader("Scene/bloom_pass/bloom_downsample_pass");
 	}
@@ -189,7 +189,7 @@ void render_path_base_draw_bloom(string_t *source, string_t *target) {
 	for (i32 i = 0; i < num_mips; ++i) {
 		i32 mip_level                      = num_mips - 1 - i;
 		render_path_base_bloom_current_mip = mip_level;
-		render_path_set_target(mip_level == 0 ? target : render_path_base_bloom_mipmaps->buffer[mip_level - 1]->name, null, null, GPU_CLEAR_NONE, 0, 0.0);
+		render_path_set_target(mip_level == 0 ? target : render_path_base_bloom_mipmaps->buffer[mip_level - 1]->name, NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 		render_path_bind_target(render_path_base_bloom_mipmaps->buffer[mip_level]->name, "tex");
 		render_path_draw_shader("Scene/bloom_pass/bloom_upsample_pass");
 	}
@@ -252,21 +252,21 @@ void render_path_base_init_ssao() {
 void render_path_base_draw_ssao() {
 	bool ssao = config_raw->rp_ssao != false && context_raw->camera_type == CAMERA_TYPE_PERSPECTIVE;
 	if (ssao && context_raw->ddirty > 0 && _render_path_frame > 0) {
-		if (any_map_get(render_path_render_targets, "singlea") == null) {
+		if (any_map_get(render_path_render_targets, "singlea") == NULL) {
 			render_path_base_init_ssao();
 		}
 
-		render_path_set_target("singlea", null, null, GPU_CLEAR_NONE, 0, 0.0);
+		render_path_set_target("singlea", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 		render_path_bind_target("main", "gbufferD");
 		render_path_bind_target("gbuffer0", "gbuffer0");
 		render_path_draw_shader("Scene/ssao_pass/ssao_pass");
 
-		render_path_set_target("singleb", null, null, GPU_CLEAR_NONE, 0, 0.0);
+		render_path_set_target("singleb", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 		render_path_bind_target("singlea", "tex");
 		render_path_bind_target("gbuffer0", "gbuffer0");
 		render_path_draw_shader("Scene/ssao_blur_pass/ssao_blur_pass_x");
 
-		render_path_set_target("singlea", null, null, GPU_CLEAR_NONE, 0, 0.0);
+		render_path_set_target("singlea", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 		render_path_bind_target("singleb", "tex");
 		render_path_bind_target("gbuffer0", "gbuffer0");
 		render_path_draw_shader("Scene/ssao_blur_pass/ssao_blur_pass_y");
@@ -274,7 +274,7 @@ void render_path_base_draw_ssao() {
 }
 
 void render_path_base_draw_deferred_light() {
-	render_path_set_target("buf", null, null, GPU_CLEAR_NONE, 0, 0.0);
+	render_path_set_target("buf", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_bind_target("main", "gbufferD");
 	render_path_bind_target("gbuffer0", "gbuffer0");
 	render_path_bind_target("gbuffer1", "gbuffer1");
@@ -288,7 +288,7 @@ void render_path_base_draw_deferred_light() {
 
 	render_path_draw_shader("Scene/deferred_light/deferred_light");
 
-	render_path_set_target("buf", null, "main", GPU_CLEAR_NONE, 0, 0.0);
+	render_path_set_target("buf", NULL, "main", GPU_CLEAR_NONE, 0, 0.0);
 	render_path_draw_skydome("Scene/world_pass/world_pass");
 }
 
@@ -307,8 +307,8 @@ void render_path_base_draw_deferred_light() {
 // 	render_path_draw_shader("Scene/histogram_pass/histogram_pass");
 // }
 
-void render_path_base_draw_taa(string_t *bufa, string_t *bufb) {
-	render_path_set_target(bufb, null, null, GPU_CLEAR_NONE, 0, 0.0);
+void render_path_base_draw_taa(char *bufa, char *bufb) {
+	render_path_set_target(bufb, NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_bind_target(bufa, "tex");
 
 	bool skip_taa = context_raw->split_view;
@@ -320,7 +320,7 @@ void render_path_base_draw_taa(string_t *bufa, string_t *bufb) {
 		render_path_draw_shader("Scene/taa_pass/taa_pass");
 	}
 
-	render_path_set_target("", null, null, GPU_CLEAR_NONE, 0, 0.0);
+	render_path_set_target("", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_bind_target(bufb, "tex");
 	if (render_path_base_ssaa4()) {
 		render_path_draw_shader("Scene/supersample_resolve/supersample_resolveRGBA64");
@@ -332,7 +332,7 @@ void render_path_base_draw_taa(string_t *bufa, string_t *bufb) {
 	render_path_base_swap_buf(bufb);
 }
 
-void render_path_base_swap_buf(string_t *bufb) {
+void render_path_base_swap_buf(char *bufb) {
 	// Swap buf and last targets
 	render_target_t *last_target = any_map_get(render_path_render_targets, "last");
 	last_target->name            = string_copy(bufb);
@@ -344,7 +344,7 @@ void render_path_base_swap_buf(string_t *bufb) {
 }
 
 void render_path_base_draw_gbuffer() {
-	render_path_set_target("gbuffer0", null, "main", GPU_CLEAR_DEPTH, 0, 1.0); // Only clear gbuffer0
+	render_path_set_target("gbuffer0", NULL, "main", GPU_CLEAR_DEPTH, 0, 1.0); // Only clear gbuffer0
 	string_t_array_t *additional = any_array_create_from_raw(
 	    (any[]){
 	        "gbuffer1",
@@ -358,13 +358,13 @@ void render_path_base_draw_gbuffer() {
 	if (make_mesh_layer_pass_count > 1) {
 		render_path_base_make_gbuffer_copy_textures();
 		for (i32 i = 1; i < make_mesh_layer_pass_count; ++i) {
-			string_t *ping = i % 2 == 1 ? "_copy" : "";
-			string_t *pong = i % 2 == 1 ? "" : "_copy";
+			char *ping = i % 2 == 1 ? "_copy" : "";
+			char *pong = i % 2 == 1 ? "" : "_copy";
 			if (i == make_mesh_layer_pass_count - 1) {
-				render_path_set_target(string_join("gbuffer2", ping), null, null, GPU_CLEAR_COLOR, 0xff000000, 0.0);
+				render_path_set_target(string_join("gbuffer2", ping), NULL, NULL, GPU_CLEAR_COLOR, 0xff000000, 0.0);
 			}
-			string_t         *g1ping     = string_join("gbuffer1", ping);
-			string_t         *g2ping     = string_join("gbuffer2", ping);
+			char         *g1ping     = string_join("gbuffer1", ping);
+			char         *g2ping     = string_join("gbuffer2", ping);
 			string_t_array_t *additional = any_array_create_from_raw(
 			    (any[]){
 			        g1ping,
@@ -403,7 +403,7 @@ void render_path_base_draw_gbuffer() {
 void render_path_base_make_gbuffer_copy_textures() {
 	render_target_t *copy = any_map_get(render_path_render_targets, "gbuffer0_copy");
 	render_target_t *g0   = any_map_get(render_path_render_targets, "gbuffer0");
-	if (copy == null || copy->_image->width != g0->_image->width || copy->_image->height != g0->_image->height) {
+	if (copy == NULL || copy->_image->width != g0->_image->width || copy->_image->height != g0->_image->height) {
 		{
 			render_target_t *t = render_target_create();
 			t->name            = "gbuffer0_copy";
@@ -441,7 +441,7 @@ void render_path_base_copy_to_gbuffer() {
 	        "gbuffer2",
 	    },
 	    2);
-	render_path_set_target("gbuffer0", additional, null, GPU_CLEAR_NONE, 0, 0.0);
+	render_path_set_target("gbuffer0", additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_bind_target("gbuffer0_copy", "tex0");
 	render_path_bind_target("gbuffer1_copy", "tex1");
 	render_path_bind_target("gbuffer2_copy", "tex2");

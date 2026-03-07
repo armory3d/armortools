@@ -1,6 +1,6 @@
 
 void _kickstart() {
-	_world_data_empty_irr        = null;
+	_world_data_empty_irr        = NULL;
 	_render_path_last_frame_time = 0.0;
 	_render_path_loading         = 0;
 	gc_unroot(_render_path_cached_shader_contexts);
@@ -13,24 +13,24 @@ void _kickstart() {
 	ui_nodes_custom_buttons = any_map_create();
 	gc_root(ui_nodes_custom_buttons);
 	tab_swatches_drag_pos     = -1;
-	slot_brush_default_canvas = null;
-	layers_temp_image         = null;
-	layers_expa               = null;
-	layers_expb               = null;
-	layers_expc               = null;
+	slot_brush_default_canvas = NULL;
+	layers_temp_image         = NULL;
+	layers_expa               = NULL;
+	layers_expb               = NULL;
+	layers_expc               = NULL;
 	layers_default_base       = 0.5;
 	layers_default_rough      = 0.4;
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
-	layers_max_layers         = 18;
-	#else
-	layers_max_layers         = 255;
-	#endif
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
+	layers_max_layers = 18;
+#else
+	layers_max_layers = 255;
+#endif
 	gc_unroot(operator_ops);
 	operator_ops = any_map_create();
 	gc_root(operator_ops);
-	_compass_hovered      = null;
-	_compass_hovered_last = null;
-	config_raw            = null;
+	_compass_hovered      = NULL;
+	_compass_hovered_last = NULL;
+	config_raw            = NULL;
 	config_loaded         = false;
 	config_button_align   = UI_ALIGN_LEFT;
 	config_button_spacing = "       ";
@@ -40,14 +40,14 @@ void _kickstart() {
 	gc_unroot(box_export_htab);
 	box_export_htab = ui_handle_create();
 	gc_root(box_export_htab);
-	box_export_files = null;
+	box_export_files = NULL;
 	gc_unroot(box_export_mesh_handle);
 	box_export_mesh_handle = ui_handle_create();
 	gc_root(box_export_mesh_handle);
 	gc_unroot(box_export_hpreset);
 	box_export_hpreset = ui_handle_create();
 	gc_root(box_export_hpreset);
-	box_export_preset = null;
+	box_export_preset = NULL;
 	gc_unroot(box_export_channels);
 	box_export_channels = any_array_create_from_raw(
 	    (any[]){
@@ -79,36 +79,36 @@ void _kickstart() {
 	    },
 	    2);
 	gc_root(box_export_color_spaces);
-	slot_material_default_canvas = null;
-	pipes_copy_rgb               = null;
-	pipes_merge                  = null;
-	pipes_merge_r                = null;
-	pipes_merge_g                = null;
-	pipes_merge_b                = null;
-	pipes_temp_mask_image        = null;
+	slot_material_default_canvas = NULL;
+	pipes_copy_rgb               = NULL;
+	pipes_merge                  = NULL;
+	pipes_merge_r                = NULL;
+	pipes_merge_g                = NULL;
+	pipes_merge_b                = NULL;
+	pipes_temp_mask_image        = NULL;
 	gc_unroot(import_texture_importers);
 	import_texture_importers = any_map_create();
 	gc_root(import_texture_importers);
 	ui_files_default_path =
-	#ifdef IRON_WINDOWS
-		"C:\\Users"
-	#elif defined(IRON_ANDROID)
+#ifdef IRON_WINDOWS
+	    "C:\\Users"
+#elif defined(IRON_ANDROID)
 	    "/storage/emulated/0/Download"
-	#elif defined(IRON_MACOS)
+#elif defined(IRON_MACOS)
 	    "/Users"
-	#else
+#else
 	    "/"
-	#endif
-	;
+#endif
+	    ;
 
 	gc_unroot(ui_files_path);
 	ui_files_path = ui_files_default_path;
 	gc_root(ui_files_path);
 	ui_files_last_path       = "";
 	ui_files_last_search     = "";
-	ui_files_files           = null;
-	ui_files_icon_map        = null;
-	ui_files_icon_file_map   = null;
+	ui_files_files           = NULL;
+	ui_files_icon_map        = NULL;
+	ui_files_icon_file_map   = NULL;
 	ui_files_selected        = -1;
 	ui_files_show_extensions = false;
 	ui_files_offline         = false;
@@ -116,19 +116,19 @@ void _kickstart() {
 	base_view3d_show         = true;
 	base_is_dragging         = false;
 	base_is_resizing         = false;
-	base_drag_asset          = null;
-	base_drag_swatch         = null;
-	base_drag_file           = null;
-	base_drag_file_icon      = null;
+	base_drag_asset          = NULL;
+	base_drag_swatch         = NULL;
+	base_drag_file           = NULL;
+	base_drag_file_icon      = NULL;
 	base_drag_tint           = 0xffffffff;
 	base_drag_size           = -1;
-	base_drag_rect           = null;
+	base_drag_rect           = NULL;
 	base_drag_off_x          = 0.0;
 	base_drag_off_y          = 0.0;
 	base_drag_start          = 0.0;
 	base_drop_x              = 0.0;
 	base_drop_y              = 0.0;
-	base_font                = null;
+	base_font                = NULL;
 	base_default_element_w   = 100;
 	base_default_element_h   = 28;
 	base_default_font_size   = 13;
@@ -145,11 +145,11 @@ void _kickstart() {
 	base_appy                      = 0;
 	base_last_window_width         = 0;
 	base_last_window_height        = 0;
-	base_drag_material             = null;
-	base_drag_layer                = null;
+	base_drag_material             = NULL;
+	base_drag_layer                = NULL;
 	ui_base_show                   = true;
 	ui_base_border_started         = 0;
-	ui_base_border_handle          = null;
+	ui_base_border_handle          = NULL;
 	ui_base_action_paint_remap     = "";
 	ui_base_operator_search_offset = 0;
 	ui_base_undo_tap_time          = 0.0;
@@ -219,18 +219,18 @@ void _kickstart() {
 	gc_unroot(box_projects_hsearch);
 	box_projects_hsearch = ui_handle_create();
 	gc_root(box_projects_hsearch);
-	box_projects_icon_map = null;
+	box_projects_icon_map = NULL;
 	history_undo_i        = 0;
 	history_undos         = 0;
 	history_redos         = 0;
 	history_push_undo     = false;
-	history_undo_layers   = null;
+	history_undo_layers   = NULL;
 	gc_unroot(tab_scripts_hscript);
 	tab_scripts_hscript = ui_handle_create();
 	gc_root(tab_scripts_hscript);
-	tab_scripts_text_coloring    = null;
+	tab_scripts_text_coloring    = NULL;
 	import_mesh_clear_layers     = true;
-	import_mesh_meshes_to_unwrap = null;
+	import_mesh_meshes_to_unwrap = NULL;
 	gc_unroot(import_mesh_importers);
 	import_mesh_importers = any_map_create();
 	gc_root(import_mesh_importers);
@@ -247,11 +247,11 @@ void _kickstart() {
 	ui_menubar_w             = ui_menubar_default_w;
 	ui_menubar_category      = 0;
 	_ui_menubar_saved_camera = mat4_nan();
-	_ui_menubar_plane        = null;
+	_ui_menubar_plane        = NULL;
 	gc_unroot(translator_translations);
 	translator_translations = any_map_create();
 	gc_root(translator_translations);
-	translator_cjk_font_indices        = null;
+	translator_cjk_font_indices        = NULL;
 	translator_last_locale             = "en";
 	ui_menu_show                       = false;
 	ui_menu_nested                     = false;
@@ -259,12 +259,12 @@ void _kickstart() {
 	ui_menu_y                          = 0;
 	ui_menu_h                          = 0;
 	ui_menu_keep_open                  = false;
-	ui_menu_commands                   = null;
+	ui_menu_commands                   = NULL;
 	ui_menu_show_first                 = true;
 	ui_menu_hide_flag                  = false;
 	ui_menu_sub_x                      = 0;
 	ui_menu_sub_y                      = 0;
-	ui_menu_sub_handle                 = null;
+	ui_menu_sub_handle                 = NULL;
 	render_path_base_taa_frame         = 0;
 	render_path_base_super_sample      = 1.0;
 	render_path_base_last_x            = -1.0;
@@ -288,11 +288,11 @@ void _kickstart() {
 	gc_unroot(project_material_groups);
 	project_material_groups = any_array_create_from_raw((any[]){}, 0);
 	gc_root(project_material_groups);
-	project_paint_objects = null;
+	project_paint_objects = NULL;
 	gc_unroot(project_asset_map);
 	project_asset_map = any_imap_create();
 	gc_root(project_asset_map);
-	project_mesh_list = null;
+	project_mesh_list = NULL;
 	gc_unroot(project_materials);
 	project_materials = any_array_create_from_raw((any[]){}, 0);
 	gc_root(project_materials);
@@ -305,8 +305,8 @@ void _kickstart() {
 	gc_unroot(project_fonts);
 	project_fonts = any_array_create_from_raw((any[]){}, 0);
 	gc_root(project_fonts);
-	project_atlas_objects      = null;
-	project_atlas_names        = null;
+	project_atlas_objects      = NULL;
+	project_atlas_names        = NULL;
 	_project_unwrap_by         = 0;
 	ui_view2d_text_input_hover = false;
 	ui_view2d_uvmap_show       = false;
@@ -322,7 +322,7 @@ void _kickstart() {
 	ui_view2d_pan_scale     = 1.0;
 	ui_view2d_tiled_show    = false;
 	ui_view2d_controls_down = false;
-	ui_view2d_grid          = null;
+	ui_view2d_grid          = NULL;
 	ui_view2d_grid_redraw   = true;
 	gc_unroot(ui_view2d_htab);
 	ui_view2d_htab = ui_handle_create();
@@ -372,11 +372,11 @@ fun get_nor_from_depth(p0: float3, uv: float2, invVP: float4x4, tex_step: float2
 	parser_material_blur_passthrough        = false;
 	parser_material_warp_passthrough        = false;
 	parser_material_bake_passthrough        = false;
-	parser_material_start_group             = null;
-	parser_material_start_parents           = null;
-	parser_material_start_node              = null;
+	parser_material_start_group             = NULL;
+	parser_material_start_parents           = NULL;
+	parser_material_start_node              = NULL;
 	parser_material_arm_export_tangents     = true;
-	parser_material_script_links            = null;
+	parser_material_script_links            = NULL;
 	gc_unroot(parser_material_parsed_map);
 	parser_material_parsed_map = any_map_create();
 	gc_root(parser_material_parsed_map);
@@ -401,8 +401,8 @@ fun get_nor_from_depth(p0: float3, uv: float2, invVP: float4x4, tex_step: float2
 	util_render_decal_preview_size     = 512;
 	util_render_layer_preview_size     = 200;
 	util_render_font_preview_size      = 200;
-	util_render_screen_aligned_full_vb = null;
-	util_render_screen_aligned_full_ib = null;
+	util_render_screen_aligned_full_vb = NULL;
+	util_render_screen_aligned_full_ib = NULL;
 	gc_unroot(tab_browser_hpath);
 	tab_browser_hpath = ui_handle_create();
 	gc_root(tab_browser_hpath);
@@ -426,7 +426,7 @@ fun get_nor_from_depth(p0: float3, uv: float2, invVP: float4x4, tex_step: float2
 	gc_unroot(parser_logic_custom_nodes);
 	parser_logic_custom_nodes = any_map_create();
 	gc_root(parser_logic_custom_nodes);
-	parser_logic_parsed_nodes = null;
+	parser_logic_parsed_nodes = NULL;
 	gc_unroot(resource_bundled);
 	resource_bundled = any_map_create();
 	gc_root(resource_bundled);
@@ -435,11 +435,11 @@ fun get_nor_from_depth(p0: float3, uv: float2, invVP: float4x4, tex_step: float2
 	render_path_raytrace_bake_current_sample  = 0;
 	render_path_raytrace_bake_rays_timer      = 0.0;
 	render_path_raytrace_bake_rays_counter    = 0;
-	render_path_raytrace_bake_last_layer      = null;
+	render_path_raytrace_bake_last_layer      = NULL;
 	render_path_raytrace_bake_last_bake_type  = 0;
 	render_path_raytrace_bake_last_bake_type2 = 0;
-	make_material_default_scon                = null;
-	make_material_default_mcon                = null;
+	make_material_default_scon                = NULL;
+	make_material_default_mcon                = NULL;
 	make_material_opac_used                   = false;
 	make_material_height_used                 = false;
 	make_material_emis_used                   = false;
@@ -455,13 +455,13 @@ fun get_nor_from_depth(p0: float3, uv: float2, invVP: float4x4, tex_step: float2
 	ui_nodes_uichanged_last                   = false;
 	ui_nodes_recompile_mat                    = false;
 	ui_nodes_recompile_mat_final              = false;
-	ui_nodes_node_search_spawn                = null;
+	ui_nodes_node_search_spawn                = NULL;
 	ui_nodes_node_search_offset               = 0;
-	ui_nodes_last_canvas                      = null;
+	ui_nodes_last_canvas                      = NULL;
 	ui_nodes_last_node_selected_id            = -1;
 	ui_nodes_release_link                     = false;
 	ui_nodes_is_node_menu_op                  = false;
-	ui_nodes_grid                             = null;
+	ui_nodes_grid                             = NULL;
 	ui_nodes_grid_redraw                      = true;
 	ui_nodes_grid_cell_w                      = 200;
 	ui_nodes_grid_small_cell_w                = 40;
@@ -472,7 +472,7 @@ fun get_nor_from_depth(p0: float3, uv: float2, invVP: float4x4, tex_step: float2
 	ui_nodes_group_stack = any_array_create_from_raw((any[]){}, 0);
 	gc_root(ui_nodes_group_stack);
 	ui_nodes_controls_down = false;
-	ui_nodes_tabs          = null;
+	ui_nodes_tabs          = NULL;
 	gc_unroot(ui_nodes_htab);
 	ui_nodes_htab = ui_handle_create();
 	gc_root(ui_nodes_htab);
@@ -501,7 +501,7 @@ fun get_nor_from_depth(p0: float3, uv: float2, invVP: float4x4, tex_step: float2
 	gc_unroot(_ui_nodes_hval3);
 	_ui_nodes_hval3 = ui_handle_create();
 	gc_root(_ui_nodes_hval3);
-	ui_nodes_node_changed = null;
+	ui_nodes_node_changed = NULL;
 	gc_unroot(nodes_brush_categories);
 	nodes_brush_categories = any_array_create_from_raw(
 	    (any[]){
@@ -548,7 +548,7 @@ fun get_blur_tool_weight(i: int): float { \
 	manifest_url_ios           = "https://apps.apple.com/app/armorpaint/id1533967534";
 
 	gc_unroot(nodes_material_categories);
-	#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
+#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
 	nodes_material_categories = any_array_create_from_raw(
 	    (any[]){
 	        _tr("Input"),
@@ -559,7 +559,7 @@ fun get_blur_tool_weight(i: int): float { \
 	        _tr("Group"),
 	    },
 	    6);
-	#else
+#else
 	nodes_material_categories = any_array_create_from_raw(
 	    (any[]){
 	        _tr("Input"),
@@ -569,10 +569,10 @@ fun get_blur_tool_weight(i: int): float { \
 	        _tr("Group"),
 	    },
 	    5);
-	#endif
+#endif
 	gc_root(nodes_material_categories);
 
-	nodes_material_list        = null;
+	nodes_material_list        = NULL;
 	make_mesh_layer_pass_count = 1;
 	str_cotangent_frame        = "\
 fun cotangent_frame(n: float3, p: float3, tex_coord: float2): float3x3 { \
@@ -667,7 +667,7 @@ fun envmap_sample(lod: float, coord: float2): float3 { \
 ";
 
 	// https://www.unrealengine.com/en-US/blog/physically-based-shading-on-mobile
-	str_env_brdf_approx        = "\
+	str_env_brdf_approx = "\
 fun env_brdf_approx(specular: float3, roughness: float, dotnv: float): float3 { \
 	var c0: float4 = float4(-1.0, -0.0275, -0.572, 0.022); \
 	var c1: float4 = float4(1.0, 0.0425, 1.04, -0.04); \
@@ -677,7 +677,7 @@ fun env_brdf_approx(specular: float3, roughness: float, dotnv: float): float3 { 
 	return specular * ab.x + ab.y; \
 } \
 ";
-	str_dither_bayer           = "\
+	str_dither_bayer    = "\
 fun dither_bayer(uv: float2): float { \
 	var x: int = int(uv.x % 4.0); \
 	var y: int = int(uv.y % 4.0); \
@@ -747,14 +747,14 @@ fun dither_bayer(uv: float2): float { \
 	// } \
 	// ";
 
-	ui_sidebar_default_w_mini  = 56;
-	ui_sidebar_default_w_full  = 280;
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
-	ui_sidebar_default_w       = ui_sidebar_default_w_mini;
-	#else
-	ui_sidebar_default_w       = ui_sidebar_default_w_full;
-	#endif
-	ui_sidebar_tabx            = 0;
+	ui_sidebar_default_w_mini = 56;
+	ui_sidebar_default_w_full = 280;
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
+	ui_sidebar_default_w = ui_sidebar_default_w_mini;
+#else
+	ui_sidebar_default_w = ui_sidebar_default_w_full;
+#endif
+	ui_sidebar_tabx = 0;
 	gc_unroot(ui_sidebar_hminimized);
 	ui_sidebar_hminimized = ui_handle_create();
 	gc_root(ui_sidebar_hminimized);
@@ -770,7 +770,7 @@ fun dither_bayer(uv: float2): float { \
 	    },
 	    1);
 	gc_root(console_last_traces);
-	console_progress_text = null;
+	console_progress_text = NULL;
 	camera_redraws        = 0;
 	camera_dir            = vec4_create(0.0, 0.0, 0.0, 1.0);
 	camera_ease           = 1.0;
@@ -778,17 +778,17 @@ fun dither_bayer(uv: float2): float { \
 	gc_unroot(box_preferences_htab);
 	box_preferences_htab = ui_handle_create();
 	gc_root(box_preferences_htab);
-	box_preferences_files_plugin            = null;
-	box_preferences_files_keymap            = null;
-	box_preferences_locales                 = null;
-	box_preferences_themes                  = null;
-	render_path_paint_live_layer            = null;
+	box_preferences_files_plugin            = NULL;
+	box_preferences_files_keymap            = NULL;
+	box_preferences_locales                 = NULL;
+	box_preferences_themes                  = NULL;
+	render_path_paint_live_layer            = NULL;
 	render_path_paint_live_layer_drawn      = 0;
 	render_path_paint_live_layer_locked     = false;
 	render_path_paint_dilated               = true;
-	render_path_paint_painto                = null;
-	render_path_paint_planeo                = null;
-	render_path_paint_visibles              = null;
+	render_path_paint_painto                = NULL;
+	render_path_paint_planeo                = NULL;
+	render_path_paint_visibles              = NULL;
 	render_path_paint_merged_object_visible = false;
 	render_path_paint_saved_fov             = 0.0;
 	render_path_paint_baking                = false;
@@ -802,11 +802,11 @@ fun dither_bayer(uv: float2): float { \
 	gc_root(ui_box_hwnd);
 	ui_box_title                   = "";
 	ui_box_text                    = "";
-	ui_box_commands                = null;
+	ui_box_commands                = NULL;
 	ui_box_click_to_hide           = true;
 	ui_box_modalw                  = 400;
 	ui_box_modalh                  = 170;
-	ui_box_modal_on_hide           = null;
+	ui_box_modal_on_hide           = NULL;
 	ui_box_draws                   = 0;
 	ui_box_copyable                = false;
 	ui_box_tween_alpha             = 0.0;
@@ -817,16 +817,16 @@ fun dither_bayer(uv: float2): float { \
 	tab_layers_layer_name_handle = ui_handle_create();
 	gc_root(tab_layers_layer_name_handle);
 	tab_layers_show_context_menu     = false;
-	util_uv_uvmap                    = null;
+	util_uv_uvmap                    = NULL;
 	util_uv_uvmap_cached             = false;
-	util_uv_trianglemap              = null;
+	util_uv_trianglemap              = NULL;
 	util_uv_trianglemap_cached       = false;
-	util_uv_dilatemap                = null;
+	util_uv_dilatemap                = NULL;
 	util_uv_dilatemap_cached         = false;
-	util_uv_uvislandmap              = null;
+	util_uv_uvislandmap              = NULL;
 	util_uv_uvislandmap_cached       = false;
-	util_uv_dilate_bytes             = null;
-	util_uv_pipe_dilate              = null;
+	util_uv_dilate_bytes             = NULL;
+	util_uv_pipe_dilate              = NULL;
 	render_path_raytrace_frame       = 0;
 	render_path_raytrace_ready       = false;
 	render_path_raytrace_dirty       = 0;
@@ -835,99 +835,102 @@ fun dither_bayer(uv: float2): float { \
 	gc_unroot(render_path_raytrace_f32a);
 	render_path_raytrace_f32a = f32_array_create(24);
 	gc_root(render_path_raytrace_f32a);
-	render_path_raytrace_help_mat      = mat4_identity();
-	render_path_raytrace_last_envmap   = null;
-	render_path_raytrace_is_bake       = false;
-	#ifdef IRON_DIRECT3D12
-	render_path_raytrace_ext           = ".cso";
-	#elif defined(IRON_METAL)
-	render_path_raytrace_ext           = ".metal";
-	#else
-	render_path_raytrace_ext           = ".spirv";
-	#endif
-	render_path_raytrace_last_texpaint = null;
+	render_path_raytrace_help_mat    = mat4_identity();
+	render_path_raytrace_last_envmap = NULL;
+	render_path_raytrace_is_bake     = false;
+#ifdef IRON_DIRECT3D12
+	render_path_raytrace_ext = ".cso";
+#elif defined(IRON_METAL)
+	render_path_raytrace_ext = ".metal";
+#else
+	render_path_raytrace_ext = ".spirv";
+#endif
+	render_path_raytrace_last_texpaint = NULL;
 	sculpt_push_undo                   = false;
 	ui_statusbar_default_h             = 33;
 	ui_statusbar_last_tab              = 0;
-	import_envmap_pipeline             = null;
+	import_envmap_pipeline             = NULL;
 	import_envmap_params               = vec4_create(0.0, 0.0, 0.0, 1.0);
 	import_envmap_n                    = vec4_create(0.0, 0.0, 0.0, 1.0);
-	import_envmap_radiance             = null;
-	import_envmap_mips                 = null;
+	import_envmap_radiance             = NULL;
+	import_envmap_mips                 = NULL;
 	gc_unroot(image_texture_node_def);
-	image_texture_node_def = GC_ALLOC_INIT(
-	    ui_node_t,
-	    {.id     = 0,
-	     .name   = _tr("Image Texture"),
-	     .type   = "TEX_IMAGE",
-	     .x      = 0,
-	     .y      = 0,
-	     .color  = 0xff4982a0,
-	     .inputs = any_array_create_from_raw(
-	         (any[]){
-	             GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                              .node_id       = 0,
-	                                              .name          = _tr("Vector"),
-	                                              .type          = "VECTOR",
-	                                              .color         = 0xff6363c7,
-	                                              .default_value = f32_array_create_xyz(0.0, 0.0, 0.0),
-	                                              .min           = 0.0,
-	                                              .max           = 1.0,
-	                                              .precision     = 100,
-	                                              .display       = 0}),
-	         },
-	         1),
-	     .outputs = any_array_create_from_raw(
-	         (any[]){
-	             GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                              .node_id       = 0,
-	                                              .name          = _tr("Color"),
-	                                              .type          = "RGBA",
-	                                              .color         = 0xffc7c729,
-	                                              .default_value = f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
-	                                              .min           = 0.0,
-	                                              .max           = 1.0,
-	                                              .precision     = 100,
-	                                              .display       = 0}),
-	             GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                              .node_id       = 0,
-	                                              .name          = _tr("Alpha"),
-	                                              .type          = "VALUE",
-	                                              .color         = 0xffa1a1a1,
-	                                              .default_value = f32_array_create_x(1.0),
-	                                              .min           = 0.0,
-	                                              .max           = 1.0,
-	                                              .precision     = 100,
-	                                              .display       = 0}),
-	         },
-	         2),
-	     .buttons = any_array_create_from_raw(
-	         (any[]){
-	             GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("File"),
-	                                              .type          = "ENUM",
-	                                              .output        = -1,
-	                                              .default_value = f32_array_create_x(0),
-	                                              .data          = u8_array_create_from_string(""),
-	                                              .min           = 0.0,
-	                                              .max           = 1.0,
-	                                              .precision     = 100,
-	                                              .height        = 0}),
-	             GC_ALLOC_INIT(ui_node_button_t,
-	                           {.name          = _tr("Color Space"),
-	                            .type          = "ENUM",
-	                            .output        = -1,
-	                            .default_value = f32_array_create_x(0),
-	                            .data          = u8_array_create_from_string(string_join(
-                                    string_join(string_join(string_join(string_join(string_join(_tr("Auto"), "\n"), _tr("Linear")), "\n"), _tr("sRGB")), "\n"),
-                                    _tr("DirectX Normal Map"))),
-	                            .min           = 0.0,
-	                            .max           = 1.0,
-	                            .precision     = 100,
-	                            .height        = 0}),
-	         },
-	         2),
-	     .width = 0,
-	     .flags = 0});
+	char *image_texture_color_space_data = _tr("Auto");
+	image_texture_color_space_data       = string_join(image_texture_color_space_data, "\n");
+	image_texture_color_space_data       = string_join(image_texture_color_space_data, _tr("Linear"));
+	image_texture_color_space_data       = string_join(image_texture_color_space_data, "\n");
+	image_texture_color_space_data       = string_join(image_texture_color_space_data, _tr("sRGB"));
+	image_texture_color_space_data       = string_join(image_texture_color_space_data, "\n");
+	image_texture_color_space_data       = string_join(image_texture_color_space_data, _tr("DirectX Normal Map"));
+	image_texture_node_def =
+	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
+	                              .name   = _tr("Image Texture"),
+	                              .type   = "TEX_IMAGE",
+	                              .x      = 0,
+	                              .y      = 0,
+	                              .color  = 0xff4982a0,
+	                              .inputs = any_array_create_from_raw(
+	                                  (any[]){
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Vector"),
+	                                                                       .type          = "VECTOR",
+	                                                                       .color         = 0xff6363c7,
+	                                                                       .default_value = f32_array_create_xyz(0.0, 0.0, 0.0),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 0}),
+	                                  },
+	                                  1),
+	                              .outputs = any_array_create_from_raw(
+	                                  (any[]){
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Color"),
+	                                                                       .type          = "RGBA",
+	                                                                       .color         = 0xffc7c729,
+	                                                                       .default_value = f32_array_create_xyzw(0.0, 0.0, 0.0, 1.0),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 0}),
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Alpha"),
+	                                                                       .type          = "VALUE",
+	                                                                       .color         = 0xffa1a1a1,
+	                                                                       .default_value = f32_array_create_x(1.0),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 0}),
+	                                  },
+	                                  2),
+	                              .buttons = any_array_create_from_raw(
+	                                  (any[]){
+	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("File"),
+	                                                                       .type          = "ENUM",
+	                                                                       .output        = -1,
+	                                                                       .default_value = f32_array_create_x(0),
+	                                                                       .data          = u8_array_create_from_string(""),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .height        = 0}),
+	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Color Space"),
+	                                                                       .type          = "ENUM",
+	                                                                       .output        = -1,
+	                                                                       .default_value = f32_array_create_x(0),
+	                                                                       .data          = u8_array_create_from_string(image_texture_color_space_data),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .height        = 0}),
+	                                  },
+	                                  2),
+	                              .width = 0,
+	                              .flags = 0});
 	gc_root(image_texture_node_def);
 	gc_unroot(material_node_def);
 	material_node_def = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
@@ -1048,43 +1051,45 @@ fun dither_bayer(uv: float2): float { \
 	                                              .flags = 0});
 	gc_root(material_node_def);
 	gc_unroot(uv_map_node_def);
-	uv_map_node_def =
-	    GC_ALLOC_INIT(ui_node_t, {.id      = 0,
-	                              .name    = _tr("UV Map"),
-	                              .type    = "UVMAP",
-	                              .x       = 0,
-	                              .y       = 0,
-	                              .color   = 0xffb34f5a,
-	                              .inputs  = any_array_create_from_raw((any[]){}, 0),
-	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
-	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                                       .node_id       = 0,
-	                                                                       .name          = _tr("UV"),
-	                                                                       .type          = "VECTOR",
-	                                                                       .color         = 0xff6363c7,
-	                                                                       .default_value = f32_array_create_xyz(0.0, 0.0, 0.0),
-	                                                                       .min           = 0.0,
-	                                                                       .max           = 1.0,
-	                                                                       .precision     = 100,
-	                                                                       .display       = 0}),
-	                                  },
-	                                  1),
-	                              .buttons = any_array_create_from_raw(
-	                                  (any[]){
-	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("UV Map"),
-	                                                                       .type          = "ENUM",
-	                                                                       .output        = -1,
-	                                                                       .default_value = f32_array_create_x(0),
-	                                                                       .data = u8_array_create_from_string(string_join(string_join("uv0", "\n"), "uv1")),
-	                                                                       .min  = 0.0,
-	                                                                       .max  = 1.0,
-	                                                                       .precision = 100,
-	                                                                       .height    = 0}),
-	                                  },
-	                                  1),
-	                              .width = 0,
-	                              .flags = 0});
+	char *uv_map_data = "uv0";
+	uv_map_data       = string_join(uv_map_data, "\n");
+	uv_map_data       = string_join(uv_map_data, "uv1");
+	uv_map_node_def   = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
+	                                              .name    = _tr("UV Map"),
+	                                              .type    = "UVMAP",
+	                                              .x       = 0,
+	                                              .y       = 0,
+	                                              .color   = 0xffb34f5a,
+	                                              .inputs  = any_array_create_from_raw((any[]){}, 0),
+	                                              .outputs = any_array_create_from_raw(
+                                                    (any[]){
+                                                        GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                                       .node_id       = 0,
+	                                                                                       .name          = _tr("UV"),
+	                                                                                       .type          = "VECTOR",
+	                                                                                       .color         = 0xff6363c7,
+	                                                                                       .default_value = f32_array_create_xyz(0.0, 0.0, 0.0),
+	                                                                                       .min           = 0.0,
+	                                                                                       .max           = 1.0,
+	                                                                                       .precision     = 100,
+	                                                                                       .display       = 0}),
+                                                    },
+                                                    1),
+	                                              .buttons = any_array_create_from_raw(
+                                                    (any[]){
+                                                        GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("UV Map"),
+	                                                                                       .type          = "ENUM",
+	                                                                                       .output        = -1,
+	                                                                                       .default_value = f32_array_create_x(0),
+	                                                                                       .data          = u8_array_create_from_string(uv_map_data),
+	                                                                                       .min           = 0.0,
+	                                                                                       .max           = 1.0,
+	                                                                                       .precision     = 100,
+	                                                                                       .height        = 0}),
+                                                    },
+                                                    1),
+	                                              .width = 0,
+	                                              .flags = 0});
 	gc_root(uv_map_node_def);
 	str_tex_wave = "\
 fun tex_wave_f(p: float3): float { \
@@ -1152,76 +1157,78 @@ fun tex_wave_f(p: float3): float { \
 	                              .flags   = 0});
 	gc_root(wave_texture_node_def);
 	gc_unroot(clamp_node_def);
-	clamp_node_def = GC_ALLOC_INIT(
-	    ui_node_t, {.id     = 0,
-	                .name   = _tr("Clamp"),
-	                .type   = "CLAMP",
-	                .x      = 0,
-	                .y      = 0,
-	                .color  = 0xff62676d,
-	                .inputs = any_array_create_from_raw(
-	                    (any[]){
-	                        GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                         .node_id       = 0,
-	                                                         .name          = _tr("Value"),
-	                                                         .type          = "VALUE",
-	                                                         .color         = 0xffa1a1a1,
-	                                                         .default_value = f32_array_create_x(0.5),
-	                                                         .min           = 0.0,
-	                                                         .max           = 1.0,
-	                                                         .precision     = 100,
-	                                                         .display       = 0}),
-	                        GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                         .node_id       = 0,
-	                                                         .name          = _tr("Min"),
-	                                                         .type          = "VALUE",
-	                                                         .color         = 0xffa1a1a1,
-	                                                         .default_value = f32_array_create_x(0.0),
-	                                                         .min           = 0.0,
-	                                                         .max           = 1.0,
-	                                                         .precision     = 100,
-	                                                         .display       = 0}),
-	                        GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                         .node_id       = 0,
-	                                                         .name          = _tr("Max"),
-	                                                         .type          = "VALUE",
-	                                                         .color         = 0xffa1a1a1,
-	                                                         .default_value = f32_array_create_x(1.0),
-	                                                         .min           = 0.0,
-	                                                         .max           = 1.0,
-	                                                         .precision     = 100,
-	                                                         .display       = 0}),
-	                    },
-	                    3),
-	                .outputs = any_array_create_from_raw(
-	                    (any[]){
-	                        GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                         .node_id       = 0,
-	                                                         .name          = _tr("Value"),
-	                                                         .type          = "VALUE",
-	                                                         .color         = 0xffa1a1a1,
-	                                                         .default_value = f32_array_create_x(0.0),
-	                                                         .min           = 0.0,
-	                                                         .max           = 1.0,
-	                                                         .precision     = 100,
-	                                                         .display       = 0}),
-	                    },
-	                    1),
-	                .buttons = any_array_create_from_raw(
-	                    (any[]){
-	                        GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("operation"),
-	                                                         .type          = "ENUM",
-	                                                         .output        = 0,
-	                                                         .default_value = f32_array_create_x(0),
-	                                                         .data = u8_array_create_from_string(string_join(string_join(_tr("Min Max"), "\n"), _tr("Range"))),
-	                                                         .min  = 0.0,
-	                                                         .max  = 1.0,
-	                                                         .precision = 100,
-	                                                         .height    = 0}),
-	                    },
-	                    1),
-	                .width = 0,
-	                .flags = 0});
+	char *clamp_operation_data = _tr("Min Max");
+	clamp_operation_data       = string_join(clamp_operation_data, "\n");
+	clamp_operation_data       = string_join(clamp_operation_data, _tr("Range"));
+	clamp_node_def             = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
+	                                                       .name   = _tr("Clamp"),
+	                                                       .type   = "CLAMP",
+	                                                       .x      = 0,
+	                                                       .y      = 0,
+	                                                       .color  = 0xff62676d,
+	                                                       .inputs = any_array_create_from_raw(
+                                                   (any[]){
+                                                       GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                                                .node_id       = 0,
+	                                                                                                .name          = _tr("Value"),
+	                                                                                                .type          = "VALUE",
+	                                                                                                .color         = 0xffa1a1a1,
+	                                                                                                .default_value = f32_array_create_x(0.5),
+	                                                                                                .min           = 0.0,
+	                                                                                                .max           = 1.0,
+	                                                                                                .precision     = 100,
+	                                                                                                .display       = 0}),
+                                                       GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                                                .node_id       = 0,
+	                                                                                                .name          = _tr("Min"),
+	                                                                                                .type          = "VALUE",
+	                                                                                                .color         = 0xffa1a1a1,
+	                                                                                                .default_value = f32_array_create_x(0.0),
+	                                                                                                .min           = 0.0,
+	                                                                                                .max           = 1.0,
+	                                                                                                .precision     = 100,
+	                                                                                                .display       = 0}),
+                                                       GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                                                .node_id       = 0,
+	                                                                                                .name          = _tr("Max"),
+	                                                                                                .type          = "VALUE",
+	                                                                                                .color         = 0xffa1a1a1,
+	                                                                                                .default_value = f32_array_create_x(1.0),
+	                                                                                                .min           = 0.0,
+	                                                                                                .max           = 1.0,
+	                                                                                                .precision     = 100,
+	                                                                                                .display       = 0}),
+                                                   },
+                                                   3),
+	                                                       .outputs = any_array_create_from_raw(
+                                                   (any[]){
+                                                       GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                                                .node_id       = 0,
+	                                                                                                .name          = _tr("Value"),
+	                                                                                                .type          = "VALUE",
+	                                                                                                .color         = 0xffa1a1a1,
+	                                                                                                .default_value = f32_array_create_x(0.0),
+	                                                                                                .min           = 0.0,
+	                                                                                                .max           = 1.0,
+	                                                                                                .precision     = 100,
+	                                                                                                .display       = 0}),
+                                                   },
+                                                   1),
+	                                                       .buttons = any_array_create_from_raw(
+                                                   (any[]){
+                                                       GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("operation"),
+	                                                                                                .type          = "ENUM",
+	                                                                                                .output        = 0,
+	                                                                                                .default_value = f32_array_create_x(0),
+	                                                                                                .data          = u8_array_create_from_string(clamp_operation_data),
+	                                                                                                .min           = 0.0,
+	                                                                                                .max           = 1.0,
+	                                                                                                .precision     = 100,
+	                                                                                                .height        = 0}),
+                                                   },
+                                                   1),
+	                                                       .width = 0,
+	                                                       .flags = 0});
 	gc_root(clamp_node_def);
 	gc_unroot(tangent_node_def);
 	tangent_node_def = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
@@ -1413,7 +1420,7 @@ fun tex_wave_f(p: float3): float { \
 	                                                                       .type          = "STRING",
 	                                                                       .output        = -1,
 	                                                                       .default_value = f32_array_create_x(0), // "",
-	                                                                       .data          = null,
+	                                                                       .data          = NULL,
 	                                                                       .min           = 0.0,
 	                                                                       .max           = 1.0,
 	                                                                       .precision     = 100,
@@ -1424,71 +1431,72 @@ fun tex_wave_f(p: float3): float { \
 	                              .flags = 0});
 	gc_root(text_texture_node_def);
 	gc_unroot(gradient_texture_node_def);
-	gradient_texture_node_def = GC_ALLOC_INIT(
-	    ui_node_t,
-	    {.id     = 0,
-	     .name   = _tr("Gradient Texture"),
-	     .type   = "TEX_GRADIENT",
-	     .x      = 0,
-	     .y      = 0,
-	     .color  = 0xff4982a0,
-	     .inputs = any_array_create_from_raw(
-	         (any[]){
-	             GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                              .node_id       = 0,
-	                                              .name          = _tr("Vector"),
-	                                              .type          = "VECTOR",
-	                                              .color         = 0xff6363c7,
-	                                              .default_value = f32_array_create_xyz(0.0, 0.0, 0.0),
-	                                              .min           = 0.0,
-	                                              .max           = 1.0,
-	                                              .precision     = 100,
-	                                              .display       = 0}),
-	         },
-	         1),
-	     .outputs = any_array_create_from_raw(
-	         (any[]){
-	             GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                              .node_id       = 0,
-	                                              .name          = _tr("Color"),
-	                                              .type          = "RGBA",
-	                                              .color         = 0xffc7c729,
-	                                              .default_value = f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-	                                              .min           = 0.0,
-	                                              .max           = 1.0,
-	                                              .precision     = 100,
-	                                              .display       = 0}),
-	             GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                              .node_id       = 0,
-	                                              .name          = _tr("Factor"),
-	                                              .type          = "VALUE",
-	                                              .color         = 0xffa1a1a1,
-	                                              .default_value = f32_array_create_x(1.0),
-	                                              .min           = 0.0,
-	                                              .max           = 1.0,
-	                                              .precision     = 100,
-	                                              .display       = 0}),
-	         },
-	         2),
-	     .buttons = any_array_create_from_raw(
-	         (any[]){
-	             GC_ALLOC_INIT(ui_node_button_t,
-	                           {.name          = _tr("gradient_type"),
-	                            .type          = "ENUM",
-	                            .output        = 0,
-	                            .default_value = f32_array_create_x(0),
-	                            .data          = u8_array_create_from_string(string_join(
-                                    string_join(string_join(string_join(string_join(string_join(_tr("Linear"), "\n"), _tr("Diagonal")), "\n"), _tr("Radial")),
-	                                                     "\n"),
-                                    _tr("Spherical"))),
-	                            .min           = 0.0,
-	                            .max           = 1.0,
-	                            .precision     = 100,
-	                            .height        = 0}),
-	         },
-	         1),
-	     .width = 0,
-	     .flags = 0});
+	char *gradient_type_data  = _tr("Linear");
+	gradient_type_data        = string_join(gradient_type_data, "\n");
+	gradient_type_data        = string_join(gradient_type_data, _tr("Diagonal"));
+	gradient_type_data        = string_join(gradient_type_data, "\n");
+	gradient_type_data        = string_join(gradient_type_data, _tr("Radial"));
+	gradient_type_data        = string_join(gradient_type_data, "\n");
+	gradient_type_data        = string_join(gradient_type_data, _tr("Spherical"));
+	gradient_texture_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
+	                                                      .name   = _tr("Gradient Texture"),
+	                                                      .type   = "TEX_GRADIENT",
+	                                                      .x      = 0,
+	                                                      .y      = 0,
+	                                                      .color  = 0xff4982a0,
+	                                                      .inputs = any_array_create_from_raw(
+	                                                          (any[]){
+	                                                              GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                                               .node_id       = 0,
+	                                                                                               .name          = _tr("Vector"),
+	                                                                                               .type          = "VECTOR",
+	                                                                                               .color         = 0xff6363c7,
+	                                                                                               .default_value = f32_array_create_xyz(0.0, 0.0, 0.0),
+	                                                                                               .min           = 0.0,
+	                                                                                               .max           = 1.0,
+	                                                                                               .precision     = 100,
+	                                                                                               .display       = 0}),
+	                                                          },
+	                                                          1),
+	                                                      .outputs = any_array_create_from_raw(
+	                                                          (any[]){
+	                                                              GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                                               .node_id       = 0,
+	                                                                                               .name          = _tr("Color"),
+	                                                                                               .type          = "RGBA",
+	                                                                                               .color         = 0xffc7c729,
+	                                                                                               .default_value = f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+	                                                                                               .min           = 0.0,
+	                                                                                               .max           = 1.0,
+	                                                                                               .precision     = 100,
+	                                                                                               .display       = 0}),
+	                                                              GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                                               .node_id       = 0,
+	                                                                                               .name          = _tr("Factor"),
+	                                                                                               .type          = "VALUE",
+	                                                                                               .color         = 0xffa1a1a1,
+	                                                                                               .default_value = f32_array_create_x(1.0),
+	                                                                                               .min           = 0.0,
+	                                                                                               .max           = 1.0,
+	                                                                                               .precision     = 100,
+	                                                                                               .display       = 0}),
+	                                                          },
+	                                                          2),
+	                                                      .buttons = any_array_create_from_raw(
+	                                                          (any[]){
+	                                                              GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("gradient_type"),
+	                                                                                               .type          = "ENUM",
+	                                                                                               .output        = 0,
+	                                                                                               .default_value = f32_array_create_x(0),
+	                                                                                               .data      = u8_array_create_from_string(gradient_type_data),
+	                                                                                               .min       = 0.0,
+	                                                                                               .max       = 1.0,
+	                                                                                               .precision = 100,
+	                                                                                               .height    = 0}),
+	                                                          },
+	                                                          1),
+	                                                      .width = 0,
+	                                                      .flags = 0});
 	gc_root(gradient_texture_node_def);
 	gc_unroot(object_info_node_def);
 	object_info_node_def =
@@ -1809,7 +1817,7 @@ fun tex_magic_f(p: float3): float { \
 	                                                                                     .type          = "VECTOR",
 	                                                                                     .output        = 0,
 	                                                                                     .default_value = f32_array_create_xyz(0.0, 0.0, 0.0),
-	                                                                                     .data          = null,
+	                                                                                     .data          = NULL,
 	                                                                                     .min           = 0.0,
 	                                                                                     .max           = 1.0,
 	                                                                                     .precision     = 100,
@@ -2029,7 +2037,7 @@ fun tex_magic_f(p: float3): float { \
 	                                                                                        .type          = "BOOL",
 	                                                                                        .output        = 0,
 	                                                                                        .default_value = f32_array_create_x(0),
-	                                                                                        .data          = null,
+	                                                                                        .data          = NULL,
 	                                                                                        .min           = 0.0,
 	                                                                                        .max           = 1.0,
 	                                                                                        .precision     = 100,
@@ -2088,7 +2096,124 @@ fun tex_magic_f(p: float3): float { \
 	                                           .width   = 0,
 	                                           .flags   = 0});
 	gc_root(gamma_node_def);
-	gc_unroot(vector_math2_node_def);vector_math2_node_def=GC_ALLOC_INIT(ui_node_t, {.id=0,.name=_tr("Vector Math"),.type="VECT_MATH",.x=0,.y=0,.color=0xff62676d,.inputs=any_array_create_from_raw((any[]){GC_ALLOC_INIT(ui_node_socket_t, {.id=0,.node_id=0,.name=_tr("Vector"),.type="VECTOR",.color=0xff6363c7,.default_value=f32_array_create_xyz(0.0,0.0,0.0),.min=0.0,.max=1.0,.precision=100,.display=1}),GC_ALLOC_INIT(ui_node_socket_t, {.id=0,.node_id=0,.name=_tr("Vector"),.type="VECTOR",.color=0xff6363c7,.default_value=f32_array_create_xyz(0.0,0.0,0.0),.min=0.0,.max=1.0,.precision=100,.display=1}),},2),.outputs=any_array_create_from_raw((any[]){GC_ALLOC_INIT(ui_node_socket_t, {.id=0,.node_id=0,.name=_tr("Vector"),.type="VECTOR",.color=0xff6363c7,.default_value=f32_array_create_xyz(0.0,0.0,0.0),.min=0.0,.max=1.0,.precision=100,.display=0}),GC_ALLOC_INIT(ui_node_socket_t, {.id=0,.node_id=0,.name=_tr("Value"),.type="VALUE",.color=0xffa1a1a1,.default_value=f32_array_create_x(0.0),.min=0.0,.max=1.0,.precision=100,.display=0}),},2),.buttons=any_array_create_from_raw((any[]){GC_ALLOC_INIT(ui_node_button_t, {.name=_tr("operation"),.type="ENUM",.output=0,.default_value=f32_array_create_x(0),.data=u8_array_create_from_string(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(_tr("Add"),"\n"),_tr("Subtract")),"\n"),_tr("Multiply")),"\n"),_tr("Divide")),"\n"),_tr("Average")),"\n"),_tr("Cross Product")),"\n"),_tr("Project")),"\n"),_tr("Reflect")),"\n"),_tr("Dot Product")),"\n"),_tr("Distance")),"\n"),_tr("Length")),"\n"),_tr("Scale")),"\n"),_tr("Normalize")),"\n"),_tr("Absolute")),"\n"),_tr("Minimum")),"\n"),_tr("Maximum")),"\n"),_tr("Floor")),"\n"),_tr("Ceil")),"\n"),_tr("Fraction")),"\n"),_tr("Modulo")),"\n"),_tr("Snap")),"\n"),_tr("Sine")),"\n"),_tr("Cosine")),"\n"),_tr("Tangent"))),.min=0.0,.max=1.0,.precision=100,.height=0}),},1),.width=0,.flags=0});
+	gc_unroot(vector_math2_node_def);
+	char *vector_math_operation_data = _tr("Add");
+	vector_math_operation_data       = string_join(vector_math_operation_data, "\n");
+	vector_math_operation_data       = string_join(vector_math_operation_data, _tr("Subtract"));
+	vector_math_operation_data       = string_join(vector_math_operation_data, "\n");
+	vector_math_operation_data       = string_join(vector_math_operation_data, _tr("Multiply"));
+	vector_math_operation_data       = string_join(vector_math_operation_data, "\n");
+	vector_math_operation_data       = string_join(vector_math_operation_data, _tr("Divide"));
+	vector_math_operation_data       = string_join(vector_math_operation_data, "\n");
+	vector_math_operation_data       = string_join(vector_math_operation_data, _tr("Average"));
+	vector_math_operation_data       = string_join(vector_math_operation_data, "\n");
+	vector_math_operation_data       = string_join(vector_math_operation_data, _tr("Cross Product"));
+	vector_math_operation_data       = string_join(vector_math_operation_data, "\n");
+	vector_math_operation_data       = string_join(vector_math_operation_data, _tr("Project"));
+	vector_math_operation_data       = string_join(vector_math_operation_data, "\n");
+	vector_math_operation_data       = string_join(vector_math_operation_data, _tr("Reflect"));
+	vector_math_operation_data       = string_join(vector_math_operation_data, "\n");
+	vector_math_operation_data       = string_join(vector_math_operation_data, _tr("Dot Product"));
+	vector_math_operation_data       = string_join(vector_math_operation_data, "\n");
+	vector_math_operation_data       = string_join(vector_math_operation_data, _tr("Distance"));
+	vector_math_operation_data       = string_join(vector_math_operation_data, "\n");
+	vector_math_operation_data       = string_join(vector_math_operation_data, _tr("Length"));
+	vector_math_operation_data       = string_join(vector_math_operation_data, "\n");
+	vector_math_operation_data       = string_join(vector_math_operation_data, _tr("Scale"));
+	vector_math_operation_data       = string_join(vector_math_operation_data, "\n");
+	vector_math_operation_data       = string_join(vector_math_operation_data, _tr("Normalize"));
+	vector_math_operation_data       = string_join(vector_math_operation_data, "\n");
+	vector_math_operation_data       = string_join(vector_math_operation_data, _tr("Absolute"));
+	vector_math_operation_data       = string_join(vector_math_operation_data, "\n");
+	vector_math_operation_data       = string_join(vector_math_operation_data, _tr("Minimum"));
+	vector_math_operation_data       = string_join(vector_math_operation_data, "\n");
+	vector_math_operation_data       = string_join(vector_math_operation_data, _tr("Maximum"));
+	vector_math_operation_data       = string_join(vector_math_operation_data, "\n");
+	vector_math_operation_data       = string_join(vector_math_operation_data, _tr("Floor"));
+	vector_math_operation_data       = string_join(vector_math_operation_data, "\n");
+	vector_math_operation_data       = string_join(vector_math_operation_data, _tr("Ceil"));
+	vector_math_operation_data       = string_join(vector_math_operation_data, "\n");
+	vector_math_operation_data       = string_join(vector_math_operation_data, _tr("Fraction"));
+	vector_math_operation_data       = string_join(vector_math_operation_data, "\n");
+	vector_math_operation_data       = string_join(vector_math_operation_data, _tr("Modulo"));
+	vector_math_operation_data       = string_join(vector_math_operation_data, "\n");
+	vector_math_operation_data       = string_join(vector_math_operation_data, _tr("Snap"));
+	vector_math_operation_data       = string_join(vector_math_operation_data, "\n");
+	vector_math_operation_data       = string_join(vector_math_operation_data, _tr("Sine"));
+	vector_math_operation_data       = string_join(vector_math_operation_data, "\n");
+	vector_math_operation_data       = string_join(vector_math_operation_data, _tr("Cosine"));
+	vector_math_operation_data       = string_join(vector_math_operation_data, "\n");
+	vector_math_operation_data       = string_join(vector_math_operation_data, _tr("Tangent"));
+	vector_math2_node_def =
+	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
+	                              .name   = _tr("Vector Math"),
+	                              .type   = "VECT_MATH",
+	                              .x      = 0,
+	                              .y      = 0,
+	                              .color  = 0xff62676d,
+	                              .inputs = any_array_create_from_raw(
+	                                  (any[]){
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Vector"),
+	                                                                       .type          = "VECTOR",
+	                                                                       .color         = 0xff6363c7,
+	                                                                       .default_value = f32_array_create_xyz(0.0, 0.0, 0.0),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 1}),
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Vector"),
+	                                                                       .type          = "VECTOR",
+	                                                                       .color         = 0xff6363c7,
+	                                                                       .default_value = f32_array_create_xyz(0.0, 0.0, 0.0),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 1}),
+	                                  },
+	                                  2),
+	                              .outputs = any_array_create_from_raw(
+	                                  (any[]){
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Vector"),
+	                                                                       .type          = "VECTOR",
+	                                                                       .color         = 0xff6363c7,
+	                                                                       .default_value = f32_array_create_xyz(0.0, 0.0, 0.0),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 0}),
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Value"),
+	                                                                       .type          = "VALUE",
+	                                                                       .color         = 0xffa1a1a1,
+	                                                                       .default_value = f32_array_create_x(0.0),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 0}),
+	                                  },
+	                                  2),
+	                              .buttons = any_array_create_from_raw(
+	                                  (any[]){
+	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("operation"),
+	                                                                       .type          = "ENUM",
+	                                                                       .output        = 0,
+	                                                                       .default_value = f32_array_create_x(0),
+	                                                                       .data          = u8_array_create_from_string(vector_math_operation_data),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .height        = 0}),
+	                                  },
+	                                  1),
+	                              .width = 0,
+	                              .flags = 0});
 	gc_root(vector_math2_node_def);
 	str_tex_checker = "\
 fun tex_checker(co: float3, col1: float3, col2: float3, scale: float): float3 { \
@@ -2360,7 +2485,144 @@ fun hue_sat(col: float3, shift: float4): float3 { \
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(separate_xyz_node_def);
-	gc_unroot(math2_node_def);math2_node_def=GC_ALLOC_INIT(ui_node_t, {.id=0,.name=_tr("Math"),.type="MATH",.x=0,.y=0,.color=0xff62676d,.inputs=any_array_create_from_raw((any[]){GC_ALLOC_INIT(ui_node_socket_t, {.id=0,.node_id=0,.name=_tr("Value"),.type="VALUE",.color=0xffa1a1a1,.default_value=f32_array_create_x(0.5),.min=0.0,.max=1.0,.precision=100,.display=0}),GC_ALLOC_INIT(ui_node_socket_t, {.id=0,.node_id=0,.name=_tr("Value"),.type="VALUE",.color=0xffa1a1a1,.default_value=f32_array_create_x(0.5),.min=0.0,.max=1.0,.precision=100,.display=0}),},2),.outputs=any_array_create_from_raw((any[]){GC_ALLOC_INIT(ui_node_socket_t, {.id=0,.node_id=0,.name=_tr("Value"),.type="VALUE",.color=0xffa1a1a1,.default_value=f32_array_create_x(0.0),.min=0.0,.max=1.0,.precision=100,.display=0}),},1),.buttons=any_array_create_from_raw((any[]){GC_ALLOC_INIT(ui_node_button_t, {.name=_tr("operation"),.type="ENUM",.output=0,.default_value=f32_array_create_x(0),.data=u8_array_create_from_string(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(_tr("Add"),"\n"),_tr("Subtract")),"\n"),_tr("Multiply")),"\n"),_tr("Divide")),"\n"),_tr("Power")),"\n"),_tr("Logarithm")),"\n"),_tr("Square Root")),"\n"),_tr("Inverse Square Root")),"\n"),_tr("Absolute")),"\n"),_tr("Exponent")),"\n"),_tr("Minimum")),"\n"),_tr("Maximum")),"\n"),_tr("Less Than")),"\n"),_tr("Greater Than")),"\n"),_tr("Sign")),"\n"),_tr("Round")),"\n"),_tr("Floor")),"\n"),_tr("Ceil")),"\n"),_tr("Truncate")),"\n"),_tr("Fraction")),"\n"),_tr("Modulo")),"\n"),_tr("Snap")),"\n"),_tr("Ping-Pong")),"\n"),_tr("Sine")),"\n"),_tr("Cosine")),"\n"),_tr("Tangent")),"\n"),_tr("Arcsine")),"\n"),_tr("Arccosine")),"\n"),_tr("Arctangent")),"\n"),_tr("Arctan2")),"\n"),_tr("Hyperbolic Sine")),"\n"),_tr("Hyperbolic Cosine")),"\n"),_tr("Hyperbolic Tangent")),"\n"),_tr("To Radians")),"\n"),_tr("To Degrees"))),.min=0.0,.max=1.0,.precision=100,.height=0}),GC_ALLOC_INIT(ui_node_button_t, {.name=_tr("Clamp"),.type="BOOL",.output=0,.default_value=f32_array_create_x(0),.data=null,.min=0.0,.max=1.0,.precision=100,.height=0}),},2),.width=0,.flags=0});
+	gc_unroot(math2_node_def);
+	char *math_operation_data = _tr("Add");
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Subtract"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Multiply"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Divide"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Power"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Logarithm"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Square Root"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Inverse Square Root"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Absolute"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Exponent"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Minimum"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Maximum"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Less Than"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Greater Than"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Sign"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Round"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Floor"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Ceil"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Truncate"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Fraction"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Modulo"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Snap"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Ping-Pong"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Sine"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Cosine"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Tangent"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Arcsine"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Arccosine"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Arctangent"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Arctan2"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Hyperbolic Sine"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Hyperbolic Cosine"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("Hyperbolic Tangent"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("To Radians"));
+	math_operation_data       = string_join(math_operation_data, "\n");
+	math_operation_data       = string_join(math_operation_data, _tr("To Degrees"));
+	math2_node_def            = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
+	                                                      .name   = _tr("Math"),
+	                                                      .type   = "MATH",
+	                                                      .x      = 0,
+	                                                      .y      = 0,
+	                                                      .color  = 0xff62676d,
+	                                                      .inputs = any_array_create_from_raw(
+                                                   (any[]){
+                                                       GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                                               .node_id       = 0,
+	                                                                                               .name          = _tr("Value"),
+	                                                                                               .type          = "VALUE",
+	                                                                                               .color         = 0xffa1a1a1,
+	                                                                                               .default_value = f32_array_create_x(0.5),
+	                                                                                               .min           = 0.0,
+	                                                                                               .max           = 1.0,
+	                                                                                               .precision     = 100,
+	                                                                                               .display       = 0}),
+                                                       GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                                               .node_id       = 0,
+	                                                                                               .name          = _tr("Value"),
+	                                                                                               .type          = "VALUE",
+	                                                                                               .color         = 0xffa1a1a1,
+	                                                                                               .default_value = f32_array_create_x(0.5),
+	                                                                                               .min           = 0.0,
+	                                                                                               .max           = 1.0,
+	                                                                                               .precision     = 100,
+	                                                                                               .display       = 0}),
+                                                   },
+                                                   2),
+	                                                      .outputs = any_array_create_from_raw(
+                                                   (any[]){
+                                                       GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                                               .node_id       = 0,
+	                                                                                               .name          = _tr("Value"),
+	                                                                                               .type          = "VALUE",
+	                                                                                               .color         = 0xffa1a1a1,
+	                                                                                               .default_value = f32_array_create_x(0.0),
+	                                                                                               .min           = 0.0,
+	                                                                                               .max           = 1.0,
+	                                                                                               .precision     = 100,
+	                                                                                               .display       = 0}),
+                                                   },
+                                                   1),
+	                                                      .buttons = any_array_create_from_raw(
+                                                   (any[]){
+                                                       GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("operation"),
+	                                                                                               .type          = "ENUM",
+	                                                                                               .output        = 0,
+	                                                                                               .default_value = f32_array_create_x(0),
+	                                                                                               .data          = u8_array_create_from_string(math_operation_data),
+	                                                                                               .min           = 0.0,
+	                                                                                               .max           = 1.0,
+	                                                                                               .precision     = 100,
+	                                                                                               .height        = 0}),
+                                                       GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Clamp"),
+	                                                                                               .type          = "BOOL",
+	                                                                                               .output        = 0,
+	                                                                                               .default_value = f32_array_create_x(0),
+	                                                                                               .data          = NULL,
+	                                                                                               .min           = 0.0,
+	                                                                                               .max           = 1.0,
+	                                                                                               .precision     = 100,
+	                                                                                               .height        = 0}),
+                                                   },
+                                                   2),
+	                                                      .width = 0,
+	                                                      .flags = 0});
 	gc_root(math2_node_def);
 	gc_unroot(geometry_node_def);
 	geometry_node_def = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
@@ -2469,157 +2731,119 @@ fun hue_sat(col: float3, shift: float4): float3 { \
 	                                              .flags   = 0});
 	gc_root(geometry_node_def);
 	gc_unroot(mix_color_node_def);
-	mix_color_node_def = GC_ALLOC_INIT(
-	    ui_node_t,
-	    {.id     = 0,
-	     .name   = _tr("Mix Color"),
-	     .type   = "MIX_RGB",
-	     .x      = 0,
-	     .y      = 0,
-	     .color  = 0xff448c6d,
-	     .inputs = any_array_create_from_raw(
-	         (any[]){
-	             GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                              .node_id       = 0,
-	                                              .name          = _tr("Factor"),
-	                                              .type          = "VALUE",
-	                                              .color         = 0xffa1a1a1,
-	                                              .default_value = f32_array_create_x(0.5),
-	                                              .min           = 0.0,
-	                                              .max           = 1.0,
-	                                              .precision     = 100,
-	                                              .display       = 0}),
-	             GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                              .node_id       = 0,
-	                                              .name          = _tr("Color 1"),
-	                                              .type          = "RGBA",
-	                                              .color         = 0xffc7c729,
-	                                              .default_value = f32_array_create_xyzw(0.5, 0.5, 0.5, 1.0),
-	                                              .min           = 0.0,
-	                                              .max           = 1.0,
-	                                              .precision     = 100,
-	                                              .display       = 0}),
-	             GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                              .node_id       = 0,
-	                                              .name          = _tr("Color 2"),
-	                                              .type          = "RGBA",
-	                                              .color         = 0xffc7c729,
-	                                              .default_value = f32_array_create_xyzw(0.5, 0.5, 0.5, 1.0),
-	                                              .min           = 0.0,
-	                                              .max           = 1.0,
-	                                              .precision     = 100,
-	                                              .display       = 0}),
-	         },
-	         3),
-	     .outputs = any_array_create_from_raw(
-	         (any[]){
-	             GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                              .node_id       = 0,
-	                                              .name          = _tr("Color"),
-	                                              .type          = "RGBA",
-	                                              .color         = 0xffc7c729,
-	                                              .default_value = f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
-	                                              .min           = 0.0,
-	                                              .max           = 1.0,
-	                                              .precision     = 100,
-	                                              .display       = 0}),
-	         },
-	         1),
-	     .buttons = any_array_create_from_raw(
-	         (any[]){
-	             GC_ALLOC_INIT(
-	                 ui_node_button_t,
-	                 {.name          = _tr("blend_type"),
-	                  .type          = "ENUM",
-	                  .output        = 0,
-	                  .default_value = f32_array_create_x(0),
-	                  .data          = u8_array_create_from_string(string_join(
-                          string_join(
-                              string_join(
-                                  string_join(
-                                      string_join(
-                                          string_join(
-                                              string_join(
-                                                  string_join(
-                                                      string_join(
-                                                          string_join(
-                                                              string_join(
-                                                                  string_join(
-                                                                      string_join(
-                                                                          string_join(
-                                                                              string_join(
-                                                                                  string_join(
-                                                                                      string_join(
-                                                                                          string_join(
-                                                                                              string_join(
-                                                                                                  string_join(
-                                                                                                      string_join(
-                                                                                                          string_join(
-                                                                                                              string_join(
-                                                                                                                  string_join(
-                                                                                                                      string_join(
-                                                                                                                          string_join(
-                                                                                                                              string_join(
-                                                                                                                                  string_join(
-                                                                                                                                      string_join(
-                                                                                                                                          string_join(
-                                                                                                                                              string_join(
-                                                                                                                                                  string_join(
-                                                                                                                                                      string_join(
-                                                                                                                                                          string_join(
-                                                                                                                                                              _tr("Mix"),
-                                                                                                                                                              "\n"),
-                                                                                                                                                          _tr("Darken")),
-                                                                                                                                                      "\n"),
-                                                                                                                                                  _tr("Multipl"
-	                                                                                                                                                                    "y")),
-                                                                                                                                              "\n"),
-                                                                                                                                          _tr("Burn")),
-                                                                                                                                      "\n"),
-                                                                                                                                  _tr("Lighten")),
-                                                                                                                              "\n"),
-                                                                                                                          _tr("Screen")),
-                                                                                                                      "\n"),
-                                                                                                                  _tr("Dodge")),
-                                                                                                              "\n"),
-                                                                                                          _tr("Add")),
-                                                                                                      "\n"),
-                                                                                                  _tr("Overlay")),
-                                                                                              "\n"),
-                                                                                          _tr("Soft Light")),
-                                                                                      "\n"),
-                                                                                  _tr("Linear Light")),
-                                                                              "\n"),
-                                                                          _tr("Difference")),
-                                                                      "\n"),
-                                                                  _tr("Subtract")),
-                                                              "\n"),
-                                                          _tr("Divide")),
-                                                      "\n"),
-                                                  _tr("Hue")),
-                                              "\n"),
-                                          _tr("Saturation")),
-                                      "\n"),
-                                  _tr("Color")),
-                              "\n"),
-                          _tr("Value"))),
-	                  .min           = 0.0,
-	                  .max           = 1.0,
-	                  .precision     = 100,
-	                  .height        = 0}),
-	             GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Clamp"),
-	                                              .type          = "BOOL",
-	                                              .output        = 0,
-	                                              .default_value = f32_array_create_x(0),
-	                                              .data          = null,
-	                                              .min           = 0.0,
-	                                              .max           = 1.0,
-	                                              .precision     = 100,
-	                                              .height        = 0}),
-	         },
-	         2),
-	     .width = 0,
-	     .flags = 0});
+	char *mix_color_blend_type_data = _tr("Mix");
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, "\n");
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, _tr("Darken"));
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, "\n");
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, _tr("Multiply"));
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, "\n");
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, _tr("Burn"));
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, "\n");
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, _tr("Lighten"));
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, "\n");
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, _tr("Screen"));
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, "\n");
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, _tr("Dodge"));
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, "\n");
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, _tr("Add"));
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, "\n");
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, _tr("Overlay"));
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, "\n");
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, _tr("Soft Light"));
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, "\n");
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, _tr("Linear Light"));
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, "\n");
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, _tr("Difference"));
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, "\n");
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, _tr("Subtract"));
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, "\n");
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, _tr("Divide"));
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, "\n");
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, _tr("Hue"));
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, "\n");
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, _tr("Saturation"));
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, "\n");
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, _tr("Color"));
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, "\n");
+	mix_color_blend_type_data       = string_join(mix_color_blend_type_data, _tr("Value"));
+	mix_color_node_def              = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
+	                                                            .name   = _tr("Mix Color"),
+	                                                            .type   = "MIX_RGB",
+	                                                            .x      = 0,
+	                                                            .y      = 0,
+	                                                            .color  = 0xff448c6d,
+	                                                            .inputs = any_array_create_from_raw(
+                                                       (any[]){
+                                                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                                                     .node_id       = 0,
+	                                                                                                     .name          = _tr("Factor"),
+	                                                                                                     .type          = "VALUE",
+	                                                                                                     .color         = 0xffa1a1a1,
+	                                                                                                     .default_value = f32_array_create_x(0.5),
+	                                                                                                     .min           = 0.0,
+	                                                                                                     .max           = 1.0,
+	                                                                                                     .precision     = 100,
+	                                                                                                     .display       = 0}),
+                                                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                                                     .node_id       = 0,
+	                                                                                                     .name          = _tr("Color 1"),
+	                                                                                                     .type          = "RGBA",
+	                                                                                                     .color         = 0xffc7c729,
+	                                                                                                     .default_value = f32_array_create_xyzw(0.5, 0.5, 0.5, 1.0),
+	                                                                                                     .min           = 0.0,
+	                                                                                                     .max           = 1.0,
+	                                                                                                     .precision     = 100,
+	                                                                                                     .display       = 0}),
+                                                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                                                     .node_id       = 0,
+	                                                                                                     .name          = _tr("Color 2"),
+	                                                                                                     .type          = "RGBA",
+	                                                                                                     .color         = 0xffc7c729,
+	                                                                                                     .default_value = f32_array_create_xyzw(0.5, 0.5, 0.5, 1.0),
+	                                                                                                     .min           = 0.0,
+	                                                                                                     .max           = 1.0,
+	                                                                                                     .precision     = 100,
+	                                                                                                     .display       = 0}),
+                                                       },
+                                                       3),
+	                                                            .outputs = any_array_create_from_raw(
+                                                       (any[]){
+                                                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                                                     .node_id       = 0,
+	                                                                                                     .name          = _tr("Color"),
+	                                                                                                     .type          = "RGBA",
+	                                                                                                     .color         = 0xffc7c729,
+	                                                                                                     .default_value = f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0),
+	                                                                                                     .min           = 0.0,
+	                                                                                                     .max           = 1.0,
+	                                                                                                     .precision     = 100,
+	                                                                                                     .display       = 0}),
+                                                       },
+                                                       1),
+	                                                            .buttons = any_array_create_from_raw(
+                                                       (any[]){
+                                                           GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("blend_type"),
+	                                                                                                     .type          = "ENUM",
+	                                                                                                     .output        = 0,
+	                                                                                                     .default_value = f32_array_create_x(0),
+	                                                                                                     .data      = u8_array_create_from_string(mix_color_blend_type_data),
+	                                                                                                     .min       = 0.0,
+	                                                                                                     .max       = 1.0,
+	                                                                                                     .precision = 100,
+	                                                                                                     .height    = 0}),
+                                                           GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Clamp"),
+	                                                                                                     .type          = "BOOL",
+	                                                                                                     .output        = 0,
+	                                                                                                     .default_value = f32_array_create_x(0),
+	                                                                                                     .data          = NULL,
+	                                                                                                     .min           = 0.0,
+	                                                                                                     .max           = 1.0,
+	                                                                                                     .precision     = 100,
+	                                                                                                     .height        = 0}),
+                                                       },
+                                                       2),
+	                                                            .width = 0,
+	                                                            .flags = 0});
 	gc_root(mix_color_node_def);
 	gc_unroot(quantize_node_def);
 	quantize_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
@@ -2869,7 +3093,7 @@ fun hue_sat(col: float3, shift: float4): float3 { \
 	                                                                                        .type          = "BOOL",
 	                                                                                        .output        = 0,
 	                                                                                        .default_value = f32_array_create_x(0),
-	                                                                                        .data          = null,
+	                                                                                        .data          = NULL,
 	                                                                                        .min           = 0.0,
 	                                                                                        .max           = 1.0,
 	                                                                                        .precision     = 100,
@@ -2907,6 +3131,9 @@ fun tex_voronoi(x: float3): float4 { \
 } \
 ";
 	gc_unroot(voronoi_texture_node_def);
+	char *voronoi_coloring_data = _tr("Intensity");
+	voronoi_coloring_data       = string_join(voronoi_coloring_data, "\n");
+	voronoi_coloring_data       = string_join(voronoi_coloring_data, _tr("Cells"));
 	voronoi_texture_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                              .name   = _tr("Voronoi Texture"),
@@ -2964,16 +3191,15 @@ fun tex_voronoi(x: float3): float4 { \
 	                                  2),
 	                              .buttons = any_array_create_from_raw(
 	                                  (any[]){
-	                                      GC_ALLOC_INIT(ui_node_button_t,
-	                                                    {.name          = _tr("coloring"),
-	                                                     .type          = "ENUM",
-	                                                     .output        = 0,
-	                                                     .default_value = f32_array_create_x(0),
-	                                                     .data = u8_array_create_from_string(string_join(string_join(_tr("Intensity"), "\n"), _tr("Cells"))),
-	                                                     .min  = 0.0,
-	                                                     .max  = 1.0,
-	                                                     .precision = 100,
-	                                                     .height    = 0}),
+	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("coloring"),
+	                                                                       .type          = "ENUM",
+	                                                                       .output        = 0,
+	                                                                       .default_value = f32_array_create_x(0),
+	                                                                       .data          = u8_array_create_from_string(voronoi_coloring_data),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .height        = 0}),
 	                                  },
 	                                  1),
 	                              .width = 0,
@@ -3403,182 +3629,186 @@ fun tex_gabor(co: float3, scale: float, frequency: float, anisotropy: float, ori
 } \
 ";
 	gc_unroot(gabor_texture_node_def);
+	char *gabor_dimensions_data = _tr("2D");
+	gabor_dimensions_data       = string_join(gabor_dimensions_data, "\n");
+	gabor_dimensions_data       = string_join(gabor_dimensions_data, _tr("3D"));
 	gabor_texture_node_def =
-	    GC_ALLOC_INIT(ui_node_t,
-	                  {.id     = 0,
-	                   .name   = _tr("Gabor Texture"),
-	                   .type   = "TEX_GABOR",
-	                   .x      = 0,
-	                   .y      = 0,
-	                   .color  = 0xff4982a0,
-	                   .inputs = any_array_create_from_raw(
-	                       (any[]){
-	                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                            .node_id       = 0,
-	                                                            .name          = _tr("Vector"),
-	                                                            .type          = "VECTOR",
-	                                                            .color         = 0xff6363c7,
-	                                                            .default_value = f32_array_create_xyz(0.0, 0.0, 0.0),
-	                                                            .min           = 0.0,
-	                                                            .max           = 1.0,
-	                                                            .precision     = 100,
-	                                                            .display       = 0}),
-	                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                            .node_id       = 0,
-	                                                            .name          = _tr("Scale"),
-	                                                            .type          = "VALUE",
-	                                                            .color         = 0xffa1a1a1,
-	                                                            .default_value = f32_array_create_x(5.0),
-	                                                            .min           = 0.0,
-	                                                            .max           = 10.0,
-	                                                            .precision     = 100,
-	                                                            .display       = 0}),
-	                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                            .node_id       = 0,
-	                                                            .name          = _tr("Frequency"),
-	                                                            .type          = "VALUE",
-	                                                            .color         = 0xffa1a1a1,
-	                                                            .default_value = f32_array_create_x(1.0),
-	                                                            .min           = 0.0,
-	                                                            .max           = 10.0,
-	                                                            .precision     = 100,
-	                                                            .display       = 0}),
-	                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                            .node_id       = 0,
-	                                                            .name          = _tr("Anisotropy"),
-	                                                            .type          = "VALUE",
-	                                                            .color         = 0xffa1a1a1,
-	                                                            .default_value = f32_array_create_x(0.0),
-	                                                            .min           = 0.0,
-	                                                            .max           = 1.0,
-	                                                            .precision     = 100,
-	                                                            .display       = 0}),
-	                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                            .node_id       = 0,
-	                                                            .name          = _tr("Orientation"),
-	                                                            .type          = "VECTOR",
-	                                                            .color         = 0xff6363c7,
-	                                                            .default_value = f32_array_create_xyz(1.0, 0.0, 0.0),
-	                                                            .min           = 0.0,
-	                                                            .max           = 1.0,
-	                                                            .precision     = 100,
-	                                                            .display       = 0}),
-	                       },
-	                       5),
-	                   .outputs = any_array_create_from_raw(
-	                       (any[]){
-	                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                            .node_id       = 0,
-	                                                            .name          = _tr("Value"),
-	                                                            .type          = "VALUE",
-	                                                            .color         = 0xffa1a1a1,
-	                                                            .default_value = f32_array_create_x(0.5),
-	                                                            .min           = 0.0,
-	                                                            .max           = 1.0,
-	                                                            .precision     = 100,
-	                                                            .display       = 0}),
-	                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                            .node_id       = 0,
-	                                                            .name          = _tr("Phase"),
-	                                                            .type          = "VALUE",
-	                                                            .color         = 0xffa1a1a1,
-	                                                            .default_value = f32_array_create_x(0.5),
-	                                                            .min           = 0.0,
-	                                                            .max           = 1.0,
-	                                                            .precision     = 100,
-	                                                            .display       = 0}),
-	                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                            .node_id       = 0,
-	                                                            .name          = _tr("Intensity"),
-	                                                            .type          = "VALUE",
-	                                                            .color         = 0xffa1a1a1,
-	                                                            .default_value = f32_array_create_x(0.5),
-	                                                            .min           = 0.0,
-	                                                            .max           = 1.0,
-	                                                            .precision     = 100,
-	                                                            .display       = 0}),
-	                       },
-	                       3),
-	                   .buttons = any_array_create_from_raw(
-	                       (any[]){
-	                           GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Dimensions"),
-	                                                            .type          = "ENUM",
-	                                                            .output        = -1,
-	                                                            .default_value = f32_array_create_x(1),
-	                                                            .data      = u8_array_create_from_string(string_join(string_join(_tr("2D"), "\n"), _tr("3D"))),
-	                                                            .min       = 0.0,
-	                                                            .max       = 1.0,
-	                                                            .precision = 100,
-	                                                            .height    = 0}),
-	                       },
-	                       1),
-	                   .width = 0,
-	                   .flags = 0});
+	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
+	                              .name   = _tr("Gabor Texture"),
+	                              .type   = "TEX_GABOR",
+	                              .x      = 0,
+	                              .y      = 0,
+	                              .color  = 0xff4982a0,
+	                              .inputs = any_array_create_from_raw(
+	                                  (any[]){
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Vector"),
+	                                                                       .type          = "VECTOR",
+	                                                                       .color         = 0xff6363c7,
+	                                                                       .default_value = f32_array_create_xyz(0.0, 0.0, 0.0),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 0}),
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Scale"),
+	                                                                       .type          = "VALUE",
+	                                                                       .color         = 0xffa1a1a1,
+	                                                                       .default_value = f32_array_create_x(5.0),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 10.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 0}),
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Frequency"),
+	                                                                       .type          = "VALUE",
+	                                                                       .color         = 0xffa1a1a1,
+	                                                                       .default_value = f32_array_create_x(1.0),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 10.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 0}),
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Anisotropy"),
+	                                                                       .type          = "VALUE",
+	                                                                       .color         = 0xffa1a1a1,
+	                                                                       .default_value = f32_array_create_x(0.0),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 0}),
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Orientation"),
+	                                                                       .type          = "VECTOR",
+	                                                                       .color         = 0xff6363c7,
+	                                                                       .default_value = f32_array_create_xyz(1.0, 0.0, 0.0),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 0}),
+	                                  },
+	                                  5),
+	                              .outputs = any_array_create_from_raw(
+	                                  (any[]){
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Value"),
+	                                                                       .type          = "VALUE",
+	                                                                       .color         = 0xffa1a1a1,
+	                                                                       .default_value = f32_array_create_x(0.5),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 0}),
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Phase"),
+	                                                                       .type          = "VALUE",
+	                                                                       .color         = 0xffa1a1a1,
+	                                                                       .default_value = f32_array_create_x(0.5),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 0}),
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Intensity"),
+	                                                                       .type          = "VALUE",
+	                                                                       .color         = 0xffa1a1a1,
+	                                                                       .default_value = f32_array_create_x(0.5),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 0}),
+	                                  },
+	                                  3),
+	                              .buttons = any_array_create_from_raw(
+	                                  (any[]){
+	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Dimensions"),
+	                                                                       .type          = "ENUM",
+	                                                                       .output        = -1,
+	                                                                       .default_value = f32_array_create_x(1),
+	                                                                       .data          = u8_array_create_from_string(gabor_dimensions_data),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .height        = 0}),
+	                                  },
+	                                  1),
+	                              .width = 0,
+	                              .flags = 0});
 	gc_root(gabor_texture_node_def);
 	gc_unroot(mix_normal_map_node_def);
-	mix_normal_map_node_def = GC_ALLOC_INIT(
-	    ui_node_t,
-	    {.id     = 0,
-	     .name   = _tr("Mix Normal Map"),
-	     .type   = "MIX_NORMAL_MAP", // extension
-	     .x      = 0,
-	     .y      = 0,
-	     .color  = 0xff522c99,
-	     .inputs = any_array_create_from_raw(
-	         (any[]){
-	             GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                              .node_id       = 0,
-	                                              .name          = _tr("Normal Map 1"),
-	                                              .type          = "VECTOR",
-	                                              .color         = -10238109,
-	                                              .default_value = f32_array_create_xyz(0.5, 0.5, 1.0),
-	                                              .min           = 0.0,
-	                                              .max           = 1.0,
-	                                              .precision     = 100,
-	                                              .display       = 0}),
-	             GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                              .node_id       = 0,
-	                                              .name          = _tr("Normal Map 2"),
-	                                              .type          = "VECTOR",
-	                                              .color         = -10238109,
-	                                              .default_value = f32_array_create_xyz(0.5, 0.5, 1.0),
-	                                              .min           = 0.0,
-	                                              .max           = 1.0,
-	                                              .precision     = 100,
-	                                              .display       = 0}),
-	         },
-	         2),
-	     .outputs = any_array_create_from_raw(
-	         (any[]){
-	             GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                              .node_id       = 0,
-	                                              .name          = _tr("Normal Map"),
-	                                              .type          = "VECTOR",
-	                                              .color         = -10238109,
-	                                              .default_value = f32_array_create_xyz(0.5, 0.5, 1.0),
-	                                              .min           = 0.0,
-	                                              .max           = 1.0,
-	                                              .precision     = 100,
-	                                              .display       = 0}),
-	         },
-	         1),
-	     .buttons = any_array_create_from_raw(
-	         (any[]){
-	             GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("blend_type"),
-	                                              .type          = "ENUM",
-	                                              .output        = 0,
-	                                              .default_value = f32_array_create_x(0),
-	                                              .data          = u8_array_create_from_string(
-                                                      string_join(string_join(string_join(string_join(_tr("Partial Derivative"), "\n"), _tr("Whiteout")), "\n"),
-	                                                                       _tr("Reoriented"))),
-	                                              .min       = 0.0,
-	                                              .max       = 1.0,
-	                                              .precision = 100,
-	                                              .height    = 0}),
-	         },
-	         1),
-	     .width = 0,
-	     .flags = 0});
+	char *mix_normal_map_blend_type_data = _tr("Partial Derivative");
+	mix_normal_map_blend_type_data       = string_join(mix_normal_map_blend_type_data, "\n");
+	mix_normal_map_blend_type_data       = string_join(mix_normal_map_blend_type_data, _tr("Whiteout"));
+	mix_normal_map_blend_type_data       = string_join(mix_normal_map_blend_type_data, "\n");
+	mix_normal_map_blend_type_data       = string_join(mix_normal_map_blend_type_data, _tr("Reoriented"));
+	mix_normal_map_node_def =
+	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
+	                              .name   = _tr("Mix Normal Map"),
+	                              .type   = "MIX_NORMAL_MAP", // extension
+	                              .x      = 0,
+	                              .y      = 0,
+	                              .color  = 0xff522c99,
+	                              .inputs = any_array_create_from_raw(
+	                                  (any[]){
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Normal Map 1"),
+	                                                                       .type          = "VECTOR",
+	                                                                       .color         = -10238109,
+	                                                                       .default_value = f32_array_create_xyz(0.5, 0.5, 1.0),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 0}),
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Normal Map 2"),
+	                                                                       .type          = "VECTOR",
+	                                                                       .color         = -10238109,
+	                                                                       .default_value = f32_array_create_xyz(0.5, 0.5, 1.0),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 0}),
+	                                  },
+	                                  2),
+	                              .outputs = any_array_create_from_raw(
+	                                  (any[]){
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Normal Map"),
+	                                                                       .type          = "VECTOR",
+	                                                                       .color         = -10238109,
+	                                                                       .default_value = f32_array_create_xyz(0.5, 0.5, 1.0),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 0}),
+	                                  },
+	                                  1),
+	                              .buttons = any_array_create_from_raw(
+	                                  (any[]){
+	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("blend_type"),
+	                                                                       .type          = "ENUM",
+	                                                                       .output        = 0,
+	                                                                       .default_value = f32_array_create_x(0),
+	                                                                       .data          = u8_array_create_from_string(mix_normal_map_blend_type_data),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .height        = 0}),
+	                                  },
+	                                  1),
+	                              .width = 0,
+	                              .flags = 0});
 	gc_root(mix_normal_map_node_def);
 	gc_unroot(camera_data_node_def);
 	camera_data_node_def =
@@ -3655,7 +3885,7 @@ fun tex_gabor(co: float3, scale: float, frequency: float, anisotropy: float, ori
 	                                                                                     .type          = "STRING",
 	                                                                                     .output        = -1,
 	                                                                                     .default_value = f32_array_create_x(0), // "",
-	                                                                                     .data          = null,
+	                                                                                     .data          = NULL,
 	                                                                                     .min           = 0.0,
 	                                                                                     .max           = 1.0,
 	                                                                                     .precision     = 100,
@@ -3944,65 +4174,67 @@ fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
 	                              .flags   = 0});
 	gc_root(color_mask_node_def);
 	gc_unroot(vector_curves_node_def);
-	vector_curves_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
-	                                                   .name   = _tr("Vector Curves"),
-	                                                   .type   = "CURVE_VEC",
-	                                                   .x      = 0,
-	                                                   .y      = 0,
-	                                                   .color  = 0xff522c99,
-	                                                   .inputs = any_array_create_from_raw(
-	                                                       (any[]){
-	                                                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                                                            .node_id       = 0,
-	                                                                                            .name          = _tr("Factor"),
-	                                                                                            .type          = "VALUE",
-	                                                                                            .color         = 0xffa1a1a1,
-	                                                                                            .default_value = f32_array_create_x(1.0),
-	                                                                                            .min           = 0.0,
-	                                                                                            .max           = 1.0,
-	                                                                                            .precision     = 100,
-	                                                                                            .display       = 0}),
-	                                                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                                                            .node_id       = 0,
-	                                                                                            .name          = _tr("Vector"),
-	                                                                                            .type          = "VECTOR",
-	                                                                                            .color         = 0xff6363c7,
-	                                                                                            .default_value = f32_array_create_xyz(0.0, 0.0, 0.0),
-	                                                                                            .min           = 0.0,
-	                                                                                            .max           = 1.0,
-	                                                                                            .precision     = 100,
-	                                                                                            .display       = 0}),
-	                                                       },
-	                                                       2),
-	                                                   .outputs = any_array_create_from_raw(
-	                                                       (any[]){
-	                                                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                                                            .node_id       = 0,
-	                                                                                            .name          = _tr("Vector"),
-	                                                                                            .type          = "VECTOR",
-	                                                                                            .color         = 0xff6363c7,
-	                                                                                            .default_value = f32_array_create_xyz(0.0, 0.0, 0.0),
-	                                                                                            .min           = 0.0,
-	                                                                                            .max           = 1.0,
-	                                                                                            .precision     = 100,
-	                                                                                            .display       = 0}),
-	                                                       },
-	                                                       1),
-	                                                   .buttons = any_array_create_from_raw(
-	                                                       (any[]){
-	                                                           GC_ALLOC_INIT(ui_node_button_t, {.name          = "nodes_material_vector_curves_button",
-	                                                                                            .type          = "CUSTOM",
-	                                                                                            .output        = 0,
-	                                                                                            .default_value = f32_array_create(96 + 3), // x - [0, 32], y - [33, 64], z - [65, 96], x_len, y_len, z_len
-	                                                                                            .data          = null,
-	                                                                                            .min           = 0.0,
-	                                                                                            .max           = 1.0,
-	                                                                                            .precision     = 100,
-	                                                                                            .height        = 8.5}),
-	                                                       },
-	                                                       1),
-	                                                   .width = 0,
-	                                                   .flags = 0});
+	vector_curves_node_def = GC_ALLOC_INIT(
+	    ui_node_t,
+	    {.id     = 0,
+	     .name   = _tr("Vector Curves"),
+	     .type   = "CURVE_VEC",
+	     .x      = 0,
+	     .y      = 0,
+	     .color  = 0xff522c99,
+	     .inputs = any_array_create_from_raw(
+	         (any[]){
+	             GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                              .node_id       = 0,
+	                                              .name          = _tr("Factor"),
+	                                              .type          = "VALUE",
+	                                              .color         = 0xffa1a1a1,
+	                                              .default_value = f32_array_create_x(1.0),
+	                                              .min           = 0.0,
+	                                              .max           = 1.0,
+	                                              .precision     = 100,
+	                                              .display       = 0}),
+	             GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                              .node_id       = 0,
+	                                              .name          = _tr("Vector"),
+	                                              .type          = "VECTOR",
+	                                              .color         = 0xff6363c7,
+	                                              .default_value = f32_array_create_xyz(0.0, 0.0, 0.0),
+	                                              .min           = 0.0,
+	                                              .max           = 1.0,
+	                                              .precision     = 100,
+	                                              .display       = 0}),
+	         },
+	         2),
+	     .outputs = any_array_create_from_raw(
+	         (any[]){
+	             GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                              .node_id       = 0,
+	                                              .name          = _tr("Vector"),
+	                                              .type          = "VECTOR",
+	                                              .color         = 0xff6363c7,
+	                                              .default_value = f32_array_create_xyz(0.0, 0.0, 0.0),
+	                                              .min           = 0.0,
+	                                              .max           = 1.0,
+	                                              .precision     = 100,
+	                                              .display       = 0}),
+	         },
+	         1),
+	     .buttons = any_array_create_from_raw(
+	         (any[]){
+	             GC_ALLOC_INIT(ui_node_button_t, {.name          = "nodes_material_vector_curves_button",
+	                                              .type          = "CUSTOM",
+	                                              .output        = 0,
+	                                              .default_value = f32_array_create(96 + 3), // x - [0, 32], y - [33, 64], z - [65, 96], x_len, y_len, z_len
+	                                              .data          = NULL,
+	                                              .min           = 0.0,
+	                                              .max           = 1.0,
+	                                              .precision     = 100,
+	                                              .height        = 8.5}),
+	         },
+	         1),
+	     .width = 0,
+	     .flags = 0});
 	gc_root(vector_curves_node_def);
 	gc_unroot(layer_mask_node_def);
 	layer_mask_node_def = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
@@ -4096,7 +4328,7 @@ fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
 	                                                                                    .type          = "VALUE",
 	                                                                                    .output        = 0,
 	                                                                                    .default_value = f32_array_create_x(0),
-	                                                                                    .data          = null,
+	                                                                                    .data          = NULL,
 	                                                                                    .min           = 0.0,
 	                                                                                    .max           = 10.0,
 	                                                                                    .precision     = 100,
@@ -4206,7 +4438,7 @@ fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
 	                                                                                    .type          = "CUSTOM",
 	                                                                                    .output        = -1,
 	                                                                                    .default_value = f32_array_create_x(0),
-	                                                                                    .data          = null,
+	                                                                                    .data          = NULL,
 	                                                                                    .min           = 0.0,
 	                                                                                    .max           = 1.0,
 	                                                                                    .precision     = 100,
@@ -4363,7 +4595,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                                                  .type          = "RGBA",
 	                                                                                  .output        = 0,
 	                                                                                  .default_value = f32_array_create_x(0),
-	                                                                                  .data          = null,
+	                                                                                  .data          = NULL,
 	                                                                                  .min           = 0.0,
 	                                                                                  .max           = 1.0,
 	                                                                                  .precision     = 100,
@@ -4470,7 +4702,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                                                        .type          = "STRING",
 	                                                                                        .output        = -1,
 	                                                                                        .default_value = f32_array_create_x(0),
-	                                                                                        .data          = null,
+	                                                                                        .data          = NULL,
 	                                                                                        .min           = 0.0,
 	                                                                                        .max           = 1.0,
 	                                                                                        .precision     = 100,
@@ -4508,7 +4740,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                                                     .type          = "STRING",
 	                                                                                     .output        = -1,
 	                                                                                     .default_value = f32_array_create_x(0), // "",
-	                                                                                     .data          = null,
+	                                                                                     .data          = NULL,
 	                                                                                     .min           = 0.0,
 	                                                                                     .max           = 1.0,
 	                                                                                     .precision     = 100,
@@ -4559,7 +4791,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                                                            .type          = "CUSTOM",
 	                                                                                            .output        = -1,
 	                                                                                            .default_value = f32_array_create_x(0),
-	                                                                                            .data          = null,
+	                                                                                            .data          = NULL,
 	                                                                                            .min           = 0.0,
 	                                                                                            .max           = 1.0,
 	                                                                                            .precision     = 100,
@@ -4569,12 +4801,12 @@ fun tex_brick_f(p: float3): float { \
 	                                                   .width = 0,
 	                                                   .flags = 0});
 	gc_root(upscale_image_node_def);
-	image_to_pbr_node_result_base      = null;
-	image_to_pbr_node_result_normal    = null;
-	image_to_pbr_node_result_occlusion = null;
-	image_to_pbr_node_result_height    = null;
-	image_to_pbr_node_result_roughness = null;
-	image_to_pbr_node_result_metallic  = null;
+	image_to_pbr_node_result_base      = NULL;
+	image_to_pbr_node_result_normal    = NULL;
+	image_to_pbr_node_result_occlusion = NULL;
+	image_to_pbr_node_result_height    = NULL;
+	image_to_pbr_node_result_roughness = NULL;
+	image_to_pbr_node_result_metallic  = NULL;
 	gc_unroot(image_to_pbr_node_def);
 	image_to_pbr_node_def =
 	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
@@ -4667,7 +4899,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                                       .type          = "CUSTOM",
 	                                                                       .output        = -1,
 	                                                                       .default_value = f32_array_create_x(0),
-	                                                                       .data          = null,
+	                                                                       .data          = NULL,
 	                                                                       .min           = 0.0,
 	                                                                       .max           = 1.0,
 	                                                                       .precision     = 100,
@@ -4728,7 +4960,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                                                            .type          = "CUSTOM",
 	                                                                                            .output        = -1,
 	                                                                                            .default_value = f32_array_create_x(0),
-	                                                                                            .data          = null,
+	                                                                                            .data          = NULL,
 	                                                                                            .min           = 0.0,
 	                                                                                            .max           = 1.0,
 	                                                                                            .precision     = 100,
@@ -4766,7 +4998,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                                                            .type          = "CUSTOM",
 	                                                                                            .output        = -1,
 	                                                                                            .default_value = f32_array_create_x(0),
-	                                                                                            .data          = null,
+	                                                                                            .data          = NULL,
 	                                                                                            .min           = 0.0,
 	                                                                                            .max           = 1.0,
 	                                                                                            .precision     = 100,
@@ -4775,7 +5007,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                                                            .type          = "BOOL",
 	                                                                                            .output        = 0,
 	                                                                                            .default_value = f32_array_create_x(0),
-	                                                                                            .data          = null,
+	                                                                                            .data          = NULL,
 	                                                                                            .min           = 0.0,
 	                                                                                            .max           = 1.0,
 	                                                                                            .precision     = 100,
@@ -4827,7 +5059,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                                       .type          = "CUSTOM",
 	                                                                       .output        = -1,
 	                                                                       .default_value = f32_array_create_x(0),
-	                                                                       .data          = null,
+	                                                                       .data          = NULL,
 	                                                                       .min           = 0.0,
 	                                                                       .max           = 1.0,
 	                                                                       .precision     = 100,
@@ -4841,7 +5073,7 @@ fun tex_brick_f(p: float3): float { \
 	neural_node_results = any_imap_create();
 	gc_root(neural_node_results);
 	neural_node_downloading = 0;
-	neural_node_models      = null;
+	neural_node_models      = NULL;
 	gc_unroot(edit_image_node_def);
 	edit_image_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
 	                                                .name   = _tr("Edit Image"),
@@ -4883,7 +5115,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                                                         .type          = "CUSTOM",
 	                                                                                         .output        = -1,
 	                                                                                         .default_value = f32_array_create_x(0),
-	                                                                                         .data          = null,
+	                                                                                         .data          = NULL,
 	                                                                                         .min           = 0.0,
 	                                                                                         .max           = 1.0,
 	                                                                                         .precision     = 100,
@@ -4934,7 +5166,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                                                         .type          = "CUSTOM",
 	                                                                                         .output        = -1,
 	                                                                                         .default_value = f32_array_create_x(0),
-	                                                                                         .data          = null,
+	                                                                                         .data          = NULL,
 	                                                                                         .min           = 0.0,
 	                                                                                         .max           = 1.0,
 	                                                                                         .precision     = 100,
@@ -4986,7 +5218,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                                       .type          = "CUSTOM",
 	                                                                       .output        = -1,
 	                                                                       .default_value = f32_array_create_x(0),
-	                                                                       .data          = null,
+	                                                                       .data          = NULL,
 	                                                                       .min           = 0.0,
 	                                                                       .max           = 1.0,
 	                                                                       .precision     = 100,
@@ -5037,7 +5269,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                                                         .type          = "CUSTOM",
 	                                                                                         .output        = -1,
 	                                                                                         .default_value = f32_array_create_x(0),
-	                                                                                         .data          = null,
+	                                                                                         .data          = NULL,
 	                                                                                         .min           = 0.0,
 	                                                                                         .max           = 1.0,
 	                                                                                         .precision     = 100,
@@ -5089,7 +5321,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                                       .type          = "CUSTOM",
 	                                                                       .output        = -1,
 	                                                                       .default_value = f32_array_create_x(0),
-	                                                                       .data          = null,
+	                                                                       .data          = NULL,
 	                                                                       .min           = 0.0,
 	                                                                       .max           = 1.0,
 	                                                                       .precision     = 100,
@@ -5141,7 +5373,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                                       .type          = "CUSTOM",
 	                                                                       .output        = -1,
 	                                                                       .default_value = f32_array_create_x(0),
-	                                                                       .data          = null,
+	                                                                       .data          = NULL,
 	                                                                       .min           = 0.0,
 	                                                                       .max           = 1.0,
 	                                                                       .precision     = 100,
@@ -5152,9 +5384,9 @@ fun tex_brick_f(p: float3): float { \
 	                              .flags = 0});
 	gc_root(image_to_depth_node_def);
 	gc_unroot(tex_image_node_def);
-	tex_image_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
-	                                               .name   = _tr("Image Texture"),
-												   // type: "tex_image_node",
+	tex_image_node_def = GC_ALLOC_INIT(ui_node_t, {.id   = 0,
+	                                               .name = _tr("Image Texture"),
+	                                               // type: "tex_image_node",
 	                                               .type   = "TEX_IMAGE",
 	                                               .x      = 0,
 	                                               .y      = 0,
@@ -5332,80 +5564,79 @@ fun tex_brick_f(p: float3): float { \
 	gc_root(input_node_def);
 	gc_unroot(math_node_def);
 	math_node_def =
-	    GC_ALLOC_INIT(ui_node_t,
-	                  {.id     = 0,
-	                   .name   = _tr("Math"),
-	                   .type   = "math_node",
-	                   .x      = 0,
-	                   .y      = 0,
-	                   .color  = 0xff4982a0,
-	                   .inputs = any_array_create_from_raw(
-	                       (any[]){
-	                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                            .node_id       = 0,
-	                                                            .name          = _tr("Value"),
-	                                                            .type          = "VALUE",
-	                                                            .color         = 0xffa1a1a1,
-	                                                            .default_value = f32_array_create_x(0.5),
-	                                                            .min           = 0.0,
-	                                                            .max           = 1.0,
-	                                                            .precision     = 100,
-	                                                            .display       = 0}),
-	                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                            .node_id       = 0,
-	                                                            .name          = _tr("Value"),
-	                                                            .type          = "VALUE",
-	                                                            .color         = 0xffa1a1a1,
-	                                                            .default_value = f32_array_create_x(0.5),
-	                                                            .min           = 0.0,
-	                                                            .max           = 1.0,
-	                                                            .precision     = 100,
-	                                                            .display       = 0}),
-	                       },
-	                       2),
-	                   .outputs = any_array_create_from_raw(
-	                       (any[]){
-	                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
-	                                                            .node_id       = 0,
-	                                                            .name          = _tr("Value"),
-	                                                            .type          = "VALUE",
-	                                                            .color         = 0xffa1a1a1,
-	                                                            .default_value = f32_array_create_x(0.0),
-	                                                            .min           = 0.0,
-	                                                            .max           = 1.0,
-	                                                            .precision     = 100,
-	                                                            .display       = 0}),
-	                       },
-	                       1),
-	                   .buttons = any_array_create_from_raw(
-	                       (any[]){
-	                           GC_ALLOC_INIT(ui_node_button_t,
-	                                         {.name          = _tr("operation"),
-	                                          .type          = "ENUM",
-	                                          .output        = 0,
-	                                          .default_value = f32_array_create_x(0),
-	                                          .data = u8_array_create_from_string("Add\nSubtract\nMultiply\nDivide\nPower\nLogarithm\nSquare Root\nInverse "
-	                                                                              "Square Root\nAbsolute\nExponent\nMinimum\nMaximum\nLess Than\nGreater "
-	                                                                              "Than\nSign\nRound\nFloor\nCeil\nTruncate\nFraction\nModulo\nSnap\nPing-"
-	                                                                              "Pong\nSine\nCosine\nTangent\nArcsine\nArccosine\nArctangent\nArctan2\nHyperb"
-	                                                                              "olic Sine\nHyperbolic Cosine\nHyperbolic Tangent\nTo Radians\nTo Degrees"),
-	                                          .min  = 0.0,
-	                                          .max  = 1.0,
-	                                          .precision = 100,
-	                                          .height    = 0}),
-	                           GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Clamp"),
-	                                                            .type          = "BOOL",
-	                                                            .output        = 0,
-	                                                            .default_value = f32_array_create_x(0),
-	                                                            .data          = null,
-	                                                            .min           = 0.0,
-	                                                            .max           = 1.0,
-	                                                            .precision     = 100,
-	                                                            .height        = 0}),
-	                       },
-	                       2),
-	                   .width = 0,
-	                   .flags = 0});
+	    GC_ALLOC_INIT(ui_node_t, {.id     = 0,
+	                              .name   = _tr("Math"),
+	                              .type   = "math_node",
+	                              .x      = 0,
+	                              .y      = 0,
+	                              .color  = 0xff4982a0,
+	                              .inputs = any_array_create_from_raw(
+	                                  (any[]){
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Value"),
+	                                                                       .type          = "VALUE",
+	                                                                       .color         = 0xffa1a1a1,
+	                                                                       .default_value = f32_array_create_x(0.5),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 0}),
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Value"),
+	                                                                       .type          = "VALUE",
+	                                                                       .color         = 0xffa1a1a1,
+	                                                                       .default_value = f32_array_create_x(0.5),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 0}),
+	                                  },
+	                                  2),
+	                              .outputs = any_array_create_from_raw(
+	                                  (any[]){
+	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
+	                                                                       .node_id       = 0,
+	                                                                       .name          = _tr("Value"),
+	                                                                       .type          = "VALUE",
+	                                                                       .color         = 0xffa1a1a1,
+	                                                                       .default_value = f32_array_create_x(0.0),
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .display       = 0}),
+	                                  },
+	                                  1),
+	                              .buttons = any_array_create_from_raw(
+	                                  (any[]){
+	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("operation"),
+	                                                                       .type          = "ENUM",
+	                                                                       .output        = 0,
+	                                                                       .default_value = f32_array_create_x(0),
+	                                                                       .data          = u8_array_create_from_string(
+                                                                               "Add\nSubtract\nMultiply\nDivide\nPower\nLogarithm\nSquare Root\nInverse "
+	                                                                                    "Square Root\nAbsolute\nExponent\nMinimum\nMaximum\nLess Than\nGreater "
+	                                                                                    "Than\nSign\nRound\nFloor\nCeil\nTruncate\nFraction\nModulo\nSnap\nPing-"
+	                                                                                    "Pong\nSine\nCosine\nTangent\nArcsine\nArccosine\nArctangent\nArctan2\nHyperb"
+	                                                                                    "olic Sine\nHyperbolic Cosine\nHyperbolic Tangent\nTo Radians\nTo Degrees"),
+	                                                                       .min       = 0.0,
+	                                                                       .max       = 1.0,
+	                                                                       .precision = 100,
+	                                                                       .height    = 0}),
+	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Clamp"),
+	                                                                       .type          = "BOOL",
+	                                                                       .output        = 0,
+	                                                                       .default_value = f32_array_create_x(0),
+	                                                                       .data          = NULL,
+	                                                                       .min           = 0.0,
+	                                                                       .max           = 1.0,
+	                                                                       .precision     = 100,
+	                                                                       .height        = 0}),
+	                                  },
+	                                  2),
+	                              .width = 0,
+	                              .flags = 0});
 	gc_root(math_node_def);
 	gc_unroot(vector_node_def);
 	vector_node_def =
@@ -5687,8 +5918,39 @@ fun tex_brick_f(p: float3): float { \
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(separate_vector_node_def);
-	_main();
-#ifndef NO_IRON_START
+
+	sys_on_resize = base_on_resize;
+	sys_on_w      = base_w;
+	sys_on_h      = base_h;
+	sys_on_x      = base_x;
+	sys_on_y      = base_y;
+
+	iron_set_app_name(manifest_title); // Used to locate external application data folder
+	config_load();
+	config_init();
+	context_init();
+	sys_start(config_get_options());
+	if (config_raw->layout == NULL) {
+		config_init_layout();
+	}
+	iron_set_app_name(manifest_title);
+	scene_set_active("Scene");
+	uniforms_ext_init();
+	render_path_base_init();
+	render_path_deferred_init(); // Allocate gbuffer
+	if (config_raw->render_mode == RENDER_MODE_FORWARD) {
+		render_path_forward_init();
+		gc_unroot(render_path_commands);
+		render_path_commands = render_path_forward_commands;
+		gc_root(render_path_commands);
+	}
+	else {
+		gc_unroot(render_path_commands);
+		render_path_commands = render_path_deferred_commands;
+		gc_root(render_path_commands);
+	}
+
+	base_init();
+
 	iron_start();
-#endif
 }

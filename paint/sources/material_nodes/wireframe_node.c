@@ -3,7 +3,7 @@ void wireframe_node_init() {
 	any_map_set(parser_material_node_values, "WIREFRAME", wireframe_node_value);
 }
 
-string_t *wireframe_node_value(ui_node_t *node, ui_node_socket_t *socket) {
+char *wireframe_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 	node_shader_add_texture(parser_material_kong, "texuvmap", "_texuvmap");
 	// let use_pixel_size: bool = node.buttons[0].default_value[0] > 0.0;
 	// let pixel_size: f32 = parse_value_input(node.inputs[0]);

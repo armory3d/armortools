@@ -35,9 +35,9 @@ void compass_render() {
 	compass->base->transform->scale = vec4_create(0.4, 0.4, 0.4, 1.0);
 	transform_build_matrix(compass->base->transform);
 	compass->frustum_culling = false;
-	mesh_object_render(compass, "overlay", null);
+	mesh_object_render(compass, "overlay", NULL);
 
-	if (_compass_hovered != null) {
+	if (_compass_hovered != NULL) {
 		line_draw_color    = _compass_hovered == _compass_hitbox_x ? 0xffff0000 : _compass_hovered == _compass_hitbox_y ? 0xff00ff00 : 0xff0000ff;
 		line_draw_strength = 0.1;
 		shape_draw_sphere(_compass_hovered->transform->world);
@@ -49,7 +49,7 @@ void compass_render() {
 }
 
 void compass_init_hitbox() {
-	if (_compass_hitbox_x != null) {
+	if (_compass_hitbox_x != NULL) {
 		return;
 	}
 
@@ -93,7 +93,7 @@ void compass_update() {
 		context_raw->ddirty = 2;
 	}
 	gc_unroot(_compass_hovered);
-	_compass_hovered = null;
+	_compass_hovered = NULL;
 
 	f32  x           = mouse_view_x() / (float)sys_w();
 	f32  y           = mouse_view_y() / (float)sys_h();
@@ -119,7 +119,7 @@ void compass_update() {
 		    3);
 
 		transform_t *t = raycast_closest_box_intersect(ts, mouse_view_x(), mouse_view_y(), scene_camera);
-		if (t != null) {
+		if (t != NULL) {
 			quat_t cq = scene_camera->base->transform->rot;
 
 			if (t == _compass_hitbox_x->transform) {

@@ -12,12 +12,12 @@ void sculpt_import_mesh_pack_to_texture(mesh_data_t *mesh, slot_layer_t *l) {
 	draw_begin(l->texpaint_sculpt, false, 0);
 	draw_set_pipeline(pipes_copy128);
 	draw_scaled_image(imgmesh, 0, 0, config_get_texture_res_x(), config_get_texture_res_y());
-	draw_set_pipeline(null);
+	draw_set_pipeline(NULL);
 	draw_end();
 }
 
 node_shader_context_t *sculpt_make_sculpt_run(material_t *data, material_context_t *matcon) {
-	string_t              *context_id = "paint";
+	char              *context_id = "paint";
 	shader_context_t      *props      = GC_ALLOC_INIT(shader_context_t, {.name            = context_id,
 	                                                                     .depth_write     = false,
 	                                                                     .compare_mode    = "always",
@@ -77,7 +77,7 @@ node_shader_context_t *sculpt_make_sculpt_run(material_t *data, material_context
 	node_shader_write_attrib_frag(kong, "var tex_coord: float2 = input.tex_coord;");
 	node_shader_add_constant(kong, "inp: float4", "_input_brush");
 	node_shader_add_constant(kong, "inplast: float4", "_input_brush_last");
-	node_shader_add_texture(kong, "gbufferD", null);
+	node_shader_add_texture(kong, "gbufferD", NULL);
 	kong->frag_out = "float4[2]";
 	node_shader_add_constant(kong, "brush_radius: float", "_brush_radius");
 	node_shader_add_constant(kong, "brush_opacity: float", "_brush_opacity");
@@ -116,7 +116,7 @@ node_shader_context_t *sculpt_make_sculpt_run(material_t *data, material_context
 	parser_material_parse_height            = true;
 	parser_material_parse_height_as_channel = true;
 	shader_out_t *sout                      = parser_material_parse(context_raw->material->canvas, con_paint, kong, matcon);
-	string_t     *height                    = sout->out_height;
+	char     *height                    = sout->out_height;
 	node_shader_write_frag(kong, string_join(string_join("var height: float = ", height), ";"));
 
 	if (kong->frag_bposition) {
@@ -132,7 +132,7 @@ node_shader_context_t *sculpt_make_sculpt_run(material_t *data, material_context
 	node_shader_write_frag(kong, "var sample_undo: float4 = sample_lod(texpaint_sculpt_undo, sampler_linear, tex_coord, 0.0);");
 	node_shader_write_frag(kong, "if (sample_undo.r == 0.0 && sample_undo.g == 0.0 && sample_undo.b == 0.0) { discard; }");
 	node_shader_add_function(kong, str_octahedron_wrap);
-	node_shader_add_texture(kong, "gbuffer0_undo", null);
+	node_shader_add_texture(kong, "gbuffer0_undo", NULL);
 	node_shader_write_frag(kong, "var g0_undo: float2 = sample_lod(gbuffer0_undo, sampler_linear, constants.inp.xy, 0.0).rg;");
 	node_shader_write_frag(kong, "var wn: float3;");
 	node_shader_write_frag(kong, "wn.z = 1.0 - abs(g0_undo.x) - abs(g0_undo.y);");
@@ -260,7 +260,7 @@ void sculpt_layers_create_sculpt_layer() {
 	render_path_load_shader("Scene/copy_pass/copyR32_pass");
 
 	for (i32 i = 0; i < history_undo_layers->length; ++i) {
-		string_t     *ext = string_join("_undo", i32_to_string(i));
+		char     *ext = string_join("_undo", i32_to_string(i));
 		slot_layer_t *l   = history_undo_layers->buffer[i];
 
 		{
@@ -280,8 +280,8 @@ void render_path_sculpt_commands() {
 	}
 
 	i32       tid             = context_raw->layer->id;
-	string_t *texpaint_sculpt = string_join("texpaint_sculpt", i32_to_string(tid));
-	render_path_set_target("texpaint_blend1", null, null, GPU_CLEAR_NONE, 0, 0.0);
+	char *texpaint_sculpt = string_join("texpaint_sculpt", i32_to_string(tid));
+	render_path_set_target("texpaint_blend1", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_bind_target("texpaint_blend0", "tex");
 	render_path_draw_shader("Scene/copy_pass/copyR8_pass");
 	string_t_array_t *additional = any_array_create_from_raw(
@@ -289,7 +289,7 @@ void render_path_sculpt_commands() {
 	        "texpaint_blend0",
 	    },
 	    1);
-	render_path_set_target(texpaint_sculpt, additional, null, GPU_CLEAR_NONE, 0, 0.0);
+	render_path_set_target(texpaint_sculpt, additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_bind_target("gbufferD_undo", "gbufferD");
 	if (context_raw->xray || config_raw->brush_angle_reject) {
 		render_path_bind_target("gbuffer0", "gbuffer0");
@@ -297,8 +297,8 @@ void render_path_sculpt_commands() {
 	render_path_bind_target("texpaint_blend1", "paintmask");
 	render_path_bind_target("gbuffer0_undo", "gbuffer0_undo");
 
-	material_context_t *material_context = null;
-	shader_context_t   *shader_context   = null;
+	material_context_t *material_context = NULL;
+	shader_context_t   *shader_context   = NULL;
 	material_data_t    *mat              = project_paint_objects->buffer[0]->material;
 	for (i32 j = 0; j < mat->contexts->length; ++j) {
 		if (string_equals(mat->contexts->buffer[j]->name, "paint")) {
@@ -323,16 +323,16 @@ void render_path_sculpt_begin() {
 		return;
 	}
 	render_path_paint_push_undo_last = history_push_undo;
-	if (history_push_undo && history_undo_layers != null) {
+	if (history_push_undo && history_undo_layers != NULL) {
 		history_paint();
-		render_path_set_target("gbuffer0_undo", null, null, GPU_CLEAR_NONE, 0, 0.0);
+		render_path_set_target("gbuffer0_undo", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 		render_path_bind_target("gbuffer0", "tex");
 		render_path_draw_shader("Scene/copy_pass/copyRGBA64_pass");
-		render_path_set_target("gbufferD_undo", null, null, GPU_CLEAR_NONE, 0, 0.0);
+		render_path_set_target("gbufferD_undo", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 		render_path_bind_target("main", "tex");
 		render_path_draw_shader("Scene/copy_pass/copyR32_pass");
 	}
-	if (sculpt_push_undo && history_undo_layers != null) {
+	if (sculpt_push_undo && history_undo_layers != NULL) {
 		history_paint();
 	}
 }

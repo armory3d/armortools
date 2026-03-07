@@ -1739,3 +1739,58 @@ char *ui_node_canvas_to_json(ui_node_canvas_t *canvas) {
 
 	return json_encode_end();
 }
+
+////
+
+f32 ui_nodes_INPUT_Y(ui_node_canvas_t *canvas, ui_node_t *node, i32 pos) {
+	return UI_INPUT_Y(canvas, node, pos);
+}
+
+extern any_map_t                *ui_nodes_custom_buttons;
+
+void nodes_on_custom_button(i32 node_id, char *button_name) {
+	void (*f)(i32) = any_map_get(ui_nodes_custom_buttons, button_name);
+	f(node_id);
+}
+
+ui_nodes_t *ui_nodes_create() {
+	ui_nodes_t *raw = GC_ALLOC_INIT(ui_nodes_t, {0});
+	ui_nodes_init(raw);
+	gc_unroot(ui_nodes_exclude_remove);
+	ui_nodes_exclude_remove = any_array_create_from_raw(
+	    (void *[]){
+	        "OUTPUT_MATERIAL_PBR",
+	        "GROUP_OUTPUT",
+	        "GROUP_INPUT",
+	        "BrushOutputNode",
+	    },
+	    4);
+	gc_root(ui_nodes_exclude_remove);
+	ui_nodes_on_custom_button = nodes_on_custom_button;
+	return raw;
+}
+
+typedef struct ui_node_t_array {
+	ui_node_t **buffer;
+	int         length;
+	int         capacity;
+} ui_node_t_array_t;
+
+ui_node_socket_t *ui_get_socket(ui_node_t_array_t *nodes, i32 id) {
+	for (i32 i = 0; i < nodes->length; ++i) {
+		ui_node_t *n = nodes->buffer[i];
+		for (i32 j = 0; j < n->inputs->length; ++j) {
+			ui_node_socket_t *s = n->inputs->buffer[j];
+			if (s->id == id) {
+				return s;
+			}
+		}
+		for (i32 j = 0; j < n->outputs->length; ++j) {
+			ui_node_socket_t *s = n->outputs->buffer[j];
+			if (s->id == id) {
+				return s;
+			}
+		}
+	}
+	return NULL;
+}

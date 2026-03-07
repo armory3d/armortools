@@ -12,7 +12,7 @@ void gizmo_update() {
 
 	object_t *paint_object = context_raw->paint_object->base;
 
-	if (context_raw->tool == TOOL_TYPE_GIZMO && context_raw->selected_object != null) {
+	if (context_raw->tool == TOOL_TYPE_GIZMO && context_raw->selected_object != NULL) {
 		paint_object = context_raw->selected_object;
 	}
 
@@ -77,7 +77,7 @@ void gizmo_update() {
 			transform_build_matrix(paint_object->transform);
 
 			physics_body_t *pb = any_imap_get(physics_body_object_map, paint_object->uid);
-			if (pb != null) {
+			if (pb != NULL) {
 				physics_body_sync_transform(pb);
 			}
 		}
@@ -169,7 +169,7 @@ void gizmo_update() {
 		    },
 		    6);
 		transform_t *hit = raycast_closest_box_intersect(trs, mouse_view_x(), mouse_view_y(), scene_camera);
-		if (hit != null) {
+		if (hit != NULL) {
 			if (hit->object == context_raw->gizmo_translate_x) {
 				context_raw->translate_x = true;
 			}
@@ -204,7 +204,7 @@ void gizmo_update() {
 			    },
 			    3);
 			transform_t *hit = raycast_closest_box_intersect(trs, mouse_view_x(), mouse_view_y(), scene_camera);
-			if (hit != null) {
+			if (hit != NULL) {
 				if (hit->object == context_raw->gizmo_rotate_x) {
 					context_raw->rotate_x = true;
 				}

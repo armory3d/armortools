@@ -1,10 +1,10 @@
-void export_obj_write_string(u8_array_t *out, string_t *str) {
+void export_obj_write_string(u8_array_t *out, char *str) {
 	for (i32 i = 0; i < string_length(str); ++i) {
 		u8_array_push(out, char_code_at(str, i));
 	}
 }
 
-void export_obj_run(string_t *path, mesh_object_t_array_t *paint_objects, bool apply_disp) {
+void export_obj_run(char *path, mesh_object_t_array_t *paint_objects, bool apply_disp) {
 	u8_array_t *o = u8_array_create_from_raw((u8[]){}, 0);
 	export_obj_write_string(o, "# armorpaint.org\n");
 
@@ -173,7 +173,7 @@ void export_obj_run(string_t *path, mesh_object_t_array_t *paint_objects, bool a
 	iron_file_save_bytes(path, o, 0);
 }
 
-void export_obj_run_fast(string_t *path, mesh_object_t_array_t *paint_objects) {
+void export_obj_run_fast(char *path, mesh_object_t_array_t *paint_objects) {
 	// Skips merging shared vertices
 
 	u8_array_t *o = u8_array_create_from_raw((u8[]){}, 0);

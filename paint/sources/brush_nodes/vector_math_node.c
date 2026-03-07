@@ -12,7 +12,7 @@ logic_node_value_t *vector_math_node_get(vector_math_node_t *self, i32 from) {
 	vec4_t v2    = logic_node_input_get(self->base->inputs->buffer[1])->_vec4;
 	self->v      = vec4_clone(v1);
 	f32       f  = 0.0;
-	string_t *op = self->operation;
+	char *op = self->operation;
 	if (string_equals(op, "Add")) {
 		self->v = vec4_add(self->v, v2);
 	}

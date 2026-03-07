@@ -11,8 +11,8 @@ slot_brush_t *slot_brush_create(ui_node_canvas_t *c) {
 		}
 	}
 
-	if (c == null) {
-		if (slot_brush_default_canvas == null) { // Synchronous
+	if (c == NULL) {
+		if (slot_brush_default_canvas == NULL) { // Synchronous
 			buffer_t *b = data_get_blob("default_brush.arm");
 			gc_unroot(slot_brush_default_canvas);
 			slot_brush_default_canvas = b;

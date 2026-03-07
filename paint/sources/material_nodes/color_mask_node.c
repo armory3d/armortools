@@ -3,11 +3,11 @@ void color_mask_node_init() {
 	any_map_set(parser_material_node_values, "COLMASK", color_mask_node_value);
 }
 
-string_t *color_mask_node_value(ui_node_t *node, ui_node_socket_t *socket) {
-	string_t *input_color = parser_material_parse_vector_input(node->inputs->buffer[0]);
-	string_t *mask_color  = parser_material_parse_vector_input(node->inputs->buffer[1]);
-	string_t *radius      = parser_material_parse_value_input(node->inputs->buffer[2], false);
-	string_t *fuzziness   = parser_material_parse_value_input(node->inputs->buffer[3], false);
+char *color_mask_node_value(ui_node_t *node, ui_node_socket_t *socket) {
+	char *input_color = parser_material_parse_vector_input(node->inputs->buffer[0]);
+	char *mask_color  = parser_material_parse_vector_input(node->inputs->buffer[1]);
+	char *radius      = parser_material_parse_value_input(node->inputs->buffer[2], false);
+	char *fuzziness   = parser_material_parse_value_input(node->inputs->buffer[3], false);
 	return string_join(
 	    string_join(
 	        string_join(

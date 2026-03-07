@@ -7,10 +7,10 @@ vector_node_t *vector_node_create(ui_node_t *raw, f32_array_t *args) {
 	n->base->set          = vector_node_set;
 	n->value              = vec4_create(0.0, 0.0, 0.0, 1.0);
 
-	if (args != null) {
-		logic_node_add_input(n->base, float_node_create(null, f32_array_create_x(args->buffer[0])), 0);
-		logic_node_add_input(n->base, float_node_create(null, f32_array_create_x(args->buffer[1])), 0);
-		logic_node_add_input(n->base, float_node_create(null, f32_array_create_x(args->buffer[2])), 0);
+	if (args != NULL) {
+		logic_node_add_input(n->base, float_node_create(NULL, f32_array_create_x(args->buffer[0])), 0);
+		logic_node_add_input(n->base, float_node_create(NULL, f32_array_create_x(args->buffer[1])), 0);
+		logic_node_add_input(n->base, float_node_create(NULL, f32_array_create_x(args->buffer[2])), 0);
 	}
 
 	return n;
@@ -31,7 +31,7 @@ gpu_texture_t *vector_node_get_as_image(vector_node_t *self, i32 from) {
 	// let x: f32 = logic_node_input_get(self.base.inputs[0]);
 	// let y: f32 = logic_node_input_get(self.base.inputs[1]);
 	// let z: f32 = logic_node_input_get(self.base.inputs[2]);
-	if (self->image != null) {
+	if (self->image != NULL) {
 		gpu_delete_texture(self->image);
 	}
 	buffer_t     *b  = buffer_create(16);

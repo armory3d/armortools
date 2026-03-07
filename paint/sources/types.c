@@ -17,8 +17,8 @@ typedef struct slot_brush {
 
 typedef struct slot_layer {
 	i32                   id;
-	string_t             *name;
-	string_t             *ext;
+	char             *name;
+	char             *ext;
 	bool                  visible;
 	struct slot_layer    *parent; // Group (for layers) or layer (for masks)
 	struct gpu_texture   *texpaint; // Base or mask
@@ -54,22 +54,22 @@ typedef struct slot_font {
 	bool                preview_ready;
 	i32                 id;
 	struct draw_font   *font;
-	string_t           *name;
-	string_t           *file;
+	char           *name;
+	char           *file;
 } slot_font_t;
 
 typedef struct version {
-	string_t *sha;
-	string_t *date;
+	char *sha;
+	char *date;
 } version_t;
 
 typedef struct config {
-	string_t              *version;
-	string_t              *sha; // Commit id
+	char              *version;
+	char              *sha; // Commit id
 	// The locale should be specified in ISO 639-1 format:
 	// https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
 	// "system" is a special case that will use the system locale
-	string_t              *locale;
+	char              *locale;
 	// Window
 	i32                    window_mode; // window, fullscreen
 	i32                    window_w;
@@ -92,8 +92,8 @@ typedef struct config {
 	struct string_t_array *recent_projects; // Recently opened projects
 	struct string_t_array *bookmarks; // Bookmarked folders in browser
 	struct string_t_array *plugins; // List of enabled plugins
-	string_t              *keymap; // Link to keymap file
-	string_t              *theme; // Link to theme file
+	char              *keymap; // Link to keymap file
+	char              *theme; // Link to theme file
 	i32                    undo_steps; // Number of undo steps to preserve
 	f32                    camera_fov;
 	f32                    camera_pan_speed;
@@ -108,7 +108,7 @@ typedef struct config {
 	struct i32_array      *layout; // Sizes
 	struct i32_array      *layout_tabs; // Active tabs
 	i32                    camera_controls; // Orbit, rotate
-	string_t              *server;
+	char              *server;
 	i32                    viewport_mode;
 	i32                    pathtrace_mode;
 	bool                   pressure_radius; // Pen pressure controls
@@ -125,7 +125,7 @@ typedef struct config {
 	bool                   brush_angle_reject;
 	f32                    brush_alpha_discard;
 	i32                    dilate_radius;
-	string_t              *blender;
+	char              *blender;
 	i32                    scene_atlas_res;
 	bool                   grid_snap;
 	bool                   experimental;
@@ -164,18 +164,18 @@ typedef struct slot_material {
 } slot_material_t;
 
 typedef struct import_texture_data {
-	string_t           *path;
+	char           *path;
 	struct gpu_texture *image;
 } import_texture_data_t;
 
 typedef struct draw_cloud_icon_data {
-	string_t           *f;
+	char           *f;
 	struct gpu_texture *image;
 } draw_cloud_icon_data_t;
 
 typedef struct ui_files_make_icon {
 	struct gpu_texture *image;
-	string_t           *shandle;
+	char           *shandle;
 	i32                 w;
 } ui_files_make_icon_t;
 
@@ -250,7 +250,7 @@ typedef struct context {
 	camera_type_t               camera_type;
 	struct ui_handle           *cam_handle;
 	struct ui_handle           *fov_handle;
-	string_t                   *texture_export_path;
+	char                   *texture_export_path;
 	i32                         last_status_position;
 	camera_controls_t           camera_controls;
 	bool                        pen_painting_only;
@@ -263,7 +263,7 @@ typedef struct context {
 	bool                        layers_preview_dirty;
 	struct i32_imap            *node_preview_socket_map;
 	struct any_imap            *node_preview_map;
-	string_t                   *node_preview_name;
+	char                   *node_preview_name;
 	struct any_map             *node_previews;
 	struct string_t_array      *node_previews_used;
 	bool                        selected_node_preview;
@@ -298,7 +298,7 @@ typedef struct context {
 	// cache_draws?: bool;
 	bool                        write_icon_on_export;
 	struct gpu_texture         *text_tool_image;
-	string_t                   *text_tool_text;
+	char                   *text_tool_text;
 	struct material_data       *particle_material;
 	i32                         layer_filter;
 	struct brush_output_node   *brush_output_node_inst;
@@ -406,21 +406,21 @@ typedef struct node_shader {
 	struct node_shader_context *context;
 	struct string_t_array      *ins;
 	struct string_t_array      *outs;
-	string_t                   *frag_out;
+	char                   *frag_out;
 	struct string_t_array      *consts;
 	struct string_t_array      *textures;
 	struct any_map             *functions;
 
-	string_t                   *vert;
-	string_t                   *vert_end;
-	string_t                   *vert_normal;
-	string_t                   *vert_attribs;
+	char                   *vert;
+	char                   *vert_end;
+	char                   *vert_normal;
+	char                   *vert_attribs;
 	i32                         vert_write_normal;
 
-	string_t                   *frag;
-	string_t                   *frag_end;
-	string_t                   *frag_normal;
-	string_t                   *frag_attribs;
+	char                   *frag;
+	char                   *frag_end;
+	char                   *frag_normal;
+	char                   *frag_attribs;
 	i32                         frag_write_normal;
 
 	// References
@@ -440,7 +440,7 @@ typedef struct node_shader {
 } node_shader_t;
 
 typedef struct material {
-	string_t              *name;
+	char              *name;
 	struct ui_node_canvas *canvas;
 } material_t;
 
@@ -452,7 +452,7 @@ typedef struct node_shader_context {
 } node_shader_context_t;
 
 typedef struct history_step {
-	string_t              *name;
+	char              *name;
 	struct ui_node_canvas *canvas; // Node history
 	i32                    canvas_group;
 	i32                    layer;
@@ -470,7 +470,7 @@ typedef struct history_step {
 
 typedef struct update_info {
 	i32       version;
-	string_t *version_name;
+	char *version_name;
 } update_info_t;
 
 typedef struct logic_node {
@@ -490,7 +490,7 @@ typedef struct logic_node_ext {
 typedef struct logic_node_value {
 	f32       _f32;
 	vec4_t    _vec4;
-	string_t *_str;
+	char *_str;
 } logic_node_value_t;
 
 typedef struct logic_node_input {
@@ -508,11 +508,11 @@ typedef struct node_group {
 } node_group_t;
 
 typedef struct project_format {
-	string_t                      *version;
+	char                      *version;
 	struct string_t_array         *assets; // texture_assets
 	bool                           is_bgra; // Swapped red and blue channels for layer textures
 	struct packed_asset_t_array   *packed_assets;
-	string_t                      *envmap; // Asset name
+	char                      *envmap; // Asset name
 	f32                            envmap_strength;
 	f32                            envmap_angle;
 	bool                           envmap_blur;
@@ -536,12 +536,12 @@ typedef struct project_format {
 
 typedef struct asset {
 	i32       id;
-	string_t *name;
-	string_t *file;
+	char *name;
+	char *file;
 } asset_t;
 
 typedef struct packed_asset {
-	string_t      *name;
+	char      *name;
 	struct buffer *bytes;
 } packed_asset_t;
 
@@ -558,7 +558,7 @@ typedef struct swatch_color {
 } swatch_color_t;
 
 typedef struct layer_data {
-	string_t         *name;
+	char         *name;
 	i32               res; // Width pixels
 	i32               bpp; // Bits per pixel
 	struct buffer    *texpaint;
@@ -589,14 +589,14 @@ typedef struct layer_data {
 } layer_data_t;
 
 typedef struct shader_out {
-	string_t *out_basecol;
-	string_t *out_roughness;
-	string_t *out_metallic;
-	string_t *out_occlusion;
-	string_t *out_opacity;
-	string_t *out_height;
-	string_t *out_emission;
-	string_t *out_subsurface;
+	char *out_basecol;
+	char *out_roughness;
+	char *out_metallic;
+	char *out_occlusion;
+	char *out_opacity;
+	char *out_height;
+	char *out_emission;
+	char *out_subsurface;
 } shader_out_t;
 
 typedef struct plugin {
@@ -604,8 +604,8 @@ typedef struct plugin {
 	any       on_draw; // JSValue *
 	any       on_update; // JSValue *
 	any       on_delete; // JSValue *
-	string_t *version;
-	string_t *name;
+	char *version;
+	char *name;
 } plugin_t;
 
 typedef struct rect {
@@ -627,19 +627,19 @@ typedef struct export_preset {
 } export_preset_t;
 
 typedef struct export_preset_texture {
-	string_t              *name;
+	char              *name;
 	struct string_t_array *channels;
-	string_t              *color_space;
+	char              *color_space;
 } export_preset_texture_t;
 
 typedef struct neural_node_model {
-	string_t              *name;
-	string_t              *memory;
-	string_t              *size;
-	string_t              *nodes;
+	char              *name;
+	char              *memory;
+	char              *size;
+	char              *nodes;
 	struct string_t_array *urls;
-	string_t              *web;
-	string_t              *license;
+	char              *web;
+	char              *license;
 } neural_node_model_t;
 
 typedef struct tex_image_node {
@@ -662,7 +662,7 @@ typedef struct input_node {
 
 typedef struct math_node {
 	struct logic_node *base;
-	string_t          *operation;
+	char          *operation;
 	bool               use_clamp;
 } math_node_t;
 
@@ -680,7 +680,7 @@ typedef struct color_node {
 
 typedef struct string_node {
 	struct logic_node *base;
-	string_t          *value;
+	char          *value;
 } string_node_t;
 
 typedef struct null_node {
@@ -693,7 +693,7 @@ typedef struct time_node {
 
 typedef struct vector_math_node {
 	struct logic_node *base;
-	string_t          *operation;
+	char          *operation;
 	vec4_t             v;
 } vector_math_node_t;
 
@@ -803,7 +803,7 @@ typedef struct slot_font_t_array {
 	int           capacity;
 } slot_font_t_array_t;
 typedef struct string_t_array {
-	string_t **buffer;
+	char **buffer;
 	int        length;
 	int        capacity;
 } string_t_array_t;
@@ -837,11 +837,19 @@ typedef struct gpu_texture_t_array {
 	int             length;
 	int             capacity;
 } gpu_texture_t_array_t;
+
+#ifdef arm_physics
+
+#include "../libs/asim.h"
+
 typedef struct physics_pair_t_array {
 	physics_pair_t **buffer;
 	int              length;
 	int              capacity;
 } physics_pair_t_array_t;
+
+#endif
+
 typedef struct ui_node_socket_t_array {
 	ui_node_socket_t **buffer;
 	int                length;

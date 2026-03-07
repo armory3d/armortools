@@ -4,17 +4,17 @@ void color_ramp_node_init() {
 	any_map_set(ui_nodes_custom_buttons, "nodes_material_color_ramp_button", nodes_material_color_ramp_button);
 }
 
-string_t *color_ramp_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
-	string_t    *fac    = parser_material_parse_value_input(node->inputs->buffer[0], false);
+char *color_ramp_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
+	char    *fac    = parser_material_parse_value_input(node->inputs->buffer[0], false);
 	i32          data0  = node->buttons->buffer[0]->data->buffer[0];
-	string_t    *interp = data0 == 0 ? "LINEAR" : "CONSTANT";
+	char    *interp = data0 == 0 ? "LINEAR" : "CONSTANT";
 	f32_array_t *elems  = node->buttons->buffer[0]->default_value;
 	i32          len    = elems->length / (float)5;
 	if (len == 1) {
 		return parser_material_vec3(elems);
 	}
 	// Write cols array
-	string_t *cols_var = string_join(parser_material_node_name(node, null), "_cols");
+	char *cols_var = string_join(parser_material_node_name(node, NULL), "_cols");
 	parser_material_write(parser_material_kong,
 	                      string_join(string_join(string_join(string_join("var ", cols_var), ": float3["), i32_to_string(len)), "];")); // TODO: Make const
 	for (i32 i = 0; i < len; ++i) {
@@ -27,22 +27,22 @@ string_t *color_ramp_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 		                                                        ";"));
 	}
 	// Get index
-	string_t *fac_var = string_join(parser_material_node_name(node, null), "_fac");
+	char *fac_var = string_join(parser_material_node_name(node, NULL), "_fac");
 	parser_material_write(parser_material_kong, string_join(string_join(string_join(string_join("var ", fac_var), ": float = "), fac), ";"));
-	string_t *index = "0";
+	char *index = "0";
 	for (i32 i = 1; i < len; ++i) {
 		f32 e = elems->buffer[i * 5 + 4];
 		index = string_join(index, string_join(string_join(string_join(string_join(" + (", fac_var), " > "), f32_to_string(e)), " ? 1 : 0)"));
 	}
 	// Write index
-	string_t *index_var = string_join(parser_material_node_name(node, null), "_i");
+	char *index_var = string_join(parser_material_node_name(node, NULL), "_i");
 	parser_material_write(parser_material_kong, string_join(string_join(string_join(string_join("var ", index_var), ": int = "), index), ";"));
 	if (string_equals(interp, "CONSTANT")) {
 		return string_join(string_join(string_join(cols_var, "["), index_var), "]");
 	}
 	else { // Linear
 		// Write facs array
-		string_t *facs_var = string_join(parser_material_node_name(node, null), "_facs");
+		char *facs_var = string_join(parser_material_node_name(node, NULL), "_facs");
 		parser_material_write(parser_material_kong,
 		                      string_join(string_join(string_join(string_join("var ", facs_var), ": float["), i32_to_string(len)), "];")); // TODO: Make const
 		for (i32 i = 0; i < len; ++i) {
@@ -145,11 +145,11 @@ void nodes_material_color_ramp_button(i32 node_id) {
 	}
 	string_t_array_t *interpolate_combo = any_array_create_from_raw(
 	    (any[]){
-	        tr("Linear", null),
-	        tr("Constant", null),
+	        tr("Linear", NULL),
+	        tr("Constant", NULL),
 	    },
 	    2);
-	but->data->buffer[0] = ui_combo(h, interpolate_combo, tr("Interpolate", null), false, UI_ALIGN_LEFT, true);
+	but->data->buffer[0] = ui_combo(h, interpolate_combo, tr("Interpolate", NULL), false, UI_ALIGN_LEFT, true);
 	ui_row2();
 	i32 i = math_floor(ui_slider(ihandle, "Index", 0, (vals->length / (float)5) - 1, false, 1, true, UI_ALIGN_LEFT, true));
 	if (i >= (vals->length * 5) || i < 0) {

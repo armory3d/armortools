@@ -4,7 +4,7 @@ void object_info_node_init() {
 	any_map_set(parser_material_node_values, "OBJECT_INFO", object_info_node_value);
 }
 
-string_t *object_info_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
+char *object_info_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	if (socket == node->outputs->buffer[0]) { // Location
 		parser_material_kong->frag_wposition = true;
 		return "input.wposition";
@@ -14,7 +14,7 @@ string_t *object_info_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	}
 }
 
-string_t *object_info_node_value(ui_node_t *node, ui_node_socket_t *socket) {
+char *object_info_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 	if (socket == node->outputs->buffer[2]) { // Alpha
 		return "0.0";
 	}

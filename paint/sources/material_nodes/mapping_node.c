@@ -3,17 +3,17 @@ void mapping_node_init() {
 	any_map_set(parser_material_node_vectors, "MAPPING", mapping_node_vector);
 }
 
-string_t *mapping_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
-	string_t *out              = parser_material_parse_vector_input(node->inputs->buffer[0]);
-	string_t *node_translation = parser_material_parse_vector_input(node->inputs->buffer[1]);
-	string_t *node_rotation    = parser_material_parse_vector_input(node->inputs->buffer[2]);
-	string_t *node_scale       = parser_material_parse_vector_input(node->inputs->buffer[3]);
+char *mapping_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
+	char *out              = parser_material_parse_vector_input(node->inputs->buffer[0]);
+	char *node_translation = parser_material_parse_vector_input(node->inputs->buffer[1]);
+	char *node_rotation    = parser_material_parse_vector_input(node->inputs->buffer[2]);
+	char *node_scale       = parser_material_parse_vector_input(node->inputs->buffer[3]);
 	if (!string_equals(node_scale, "float3(1, 1, 1)")) {
 		out = string_join(string_join(string_join(string_join("(", out), " * "), node_scale), ")");
 	}
 	if (!string_equals(node_rotation, "float3(0, 0, 0)")) {
 		// ZYX rotation, Z axis for now..
-		string_t *a = string_join(node_rotation, ".z * (3.1415926535 / 180)");
+		char *a = string_join(node_rotation, ".z * (3.1415926535 / 180)");
 		// x * cos(theta) - y * sin(theta)
 		// x * sin(theta) + y * cos(theta)
 		out = string_join(

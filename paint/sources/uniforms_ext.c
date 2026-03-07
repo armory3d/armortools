@@ -22,14 +22,14 @@ void uniforms_ext_init() {
 	gc_root(uniforms_tex_links);
 }
 
-i32 uniforms_ext_i32_link(object_t *object, material_data_t *mat, string_t *link) {
+i32 uniforms_ext_i32_link(object_t *object, material_data_t *mat, char *link) {
 	if (string_equals(link, "_bloom_current_mip")) {
 		return render_path_base_bloom_current_mip;
 	}
 	return INT_MAX;
 }
 
-f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, string_t *link) {
+f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, char *link) {
 	if (string_equals(link, "_brush_radius")) {
 		bool decal = context_is_decal();
 		bool decal_mask =
@@ -101,7 +101,7 @@ f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, string_t *link
 			i32 atlas_stride = atlas_w / (float)item_w;
 			return atlas_stride;
 		}
-		bool fill = context_raw->layer->fill_layer != null;
+		bool fill = context_raw->layer->fill_layer != NULL;
 		f32  val  = (fill ? context_raw->layer->scale : context_raw->brush_scale) * context_raw->brush_nodes_scale;
 		return val;
 	}
@@ -109,7 +109,7 @@ f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, string_t *link
 		return array_index_of(project_paint_objects, object->ext);
 	}
 	else if (string_equals(link, "_dilate_radius")) {
-		return util_uv_dilatemap != null ? config_raw->dilate_radius : 0.0;
+		return util_uv_dilatemap != NULL ? config_raw->dilate_radius : 0.0;
 	}
 	else if (string_equals(link, "_decal_layer_dim")) {
 		vec4_t sc = mat4_get_scale(context_raw->layer->decal_mat);
@@ -141,11 +141,11 @@ f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, string_t *link
 		camera_object_taa_frames = 6;
 		return 0.833;
 	}
-	if (parser_material_script_links != null) {
+	if (parser_material_script_links != NULL) {
 		string_t_array_t *keys = map_keys(parser_material_script_links);
 		for (i32 i = 0; i < keys->length; ++i) {
-			string_t *key    = keys->buffer[i];
-			string_t *script = any_map_get(parser_material_script_links, key);
+			char *key    = keys->buffer[i];
+			char *script = any_map_get(parser_material_script_links, key);
 			f32       result = f32_nan();
 			if (!string_equals(script, "")) {
 				result = js_eval(script);
@@ -156,7 +156,7 @@ f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, string_t *link
 	return f32_nan();
 }
 
-vec2_t uniforms_ext_vec2_link(object_t *object, material_data_t *mat, string_t *link) {
+vec2_t uniforms_ext_vec2_link(object_t *object, material_data_t *mat, char *link) {
 	if (string_equals(link, "_gbuffer_size")) {
 		render_target_t *gbuffer2 = any_map_get(render_path_render_targets, "gbuffer2");
 		return vec2_create(gbuffer2->_image->width, gbuffer2->_image->height);
@@ -169,7 +169,7 @@ vec2_t uniforms_ext_vec2_link(object_t *object, material_data_t *mat, string_t *
 	}
 	else if (string_equals(link, "_brush_angle")) {
 		f32 brush_angle = context_raw->brush_angle + context_raw->brush_nodes_angle;
-		f32 angle       = context_raw->layer->fill_layer != null ? context_raw->layer->angle : brush_angle;
+		f32 angle       = context_raw->layer->fill_layer != NULL ? context_raw->layer->angle : brush_angle;
 		angle *= (math_pi() / (float)180);
 		if (config_raw->pressure_angle && pen_down("tip")) {
 			angle *= pen_pressure * config_raw->pressure_sensitivity;
@@ -179,7 +179,7 @@ vec2_t uniforms_ext_vec2_link(object_t *object, material_data_t *mat, string_t *
 	return vec2_nan();
 }
 
-vec4_t uniforms_ext_vec3_link(object_t *object, material_data_t *mat, string_t *link) {
+vec4_t uniforms_ext_vec3_link(object_t *object, material_data_t *mat, char *link) {
 	vec4_t v = vec4_nan();
 	if (string_equals(link, "_brush_direction")) {
 		v                = _uniforms_vec;
@@ -244,7 +244,7 @@ f32 vec2d(f32 x) {
 	return res;
 }
 
-vec4_t uniforms_ext_vec4_link(object_t *object, material_data_t *mat, string_t *link) {
+vec4_t uniforms_ext_vec4_link(object_t *object, material_data_t *mat, char *link) {
 	if (string_equals(link, "_input_brush")) {
 		bool   down = mouse_down("left") || pen_down("tip");
 		vec4_t v    = vec4_create(context_raw->paint_vec.x, context_raw->paint_vec.y, down ? 1.0 : 0.0, context_raw->paint2d ? 1.0 : 0.0);
@@ -294,7 +294,7 @@ vec4_t uniforms_ext_vec4_link(object_t *object, material_data_t *mat, string_t *
 	return vec4_nan();
 }
 
-mat4_t uniforms_ext_mat4_link(object_t *object, material_data_t *mat, string_t *link) {
+mat4_t uniforms_ext_mat4_link(object_t *object, material_data_t *mat, char *link) {
 	if (string_equals(link, "_decal_layer_matrix")) { // Decal layer
 		mat4_t m = mat4_inv(context_raw->layer->decal_mat);
 		f32    f = object->parent->transform->scale.x * object->transform->scale_world;
@@ -306,7 +306,7 @@ mat4_t uniforms_ext_mat4_link(object_t *object, material_data_t *mat, string_t *
 	return mat4_nan();
 }
 
-gpu_texture_t *uniforms_ext_tex_link(object_t *object, material_data_t *mat, string_t *link) {
+gpu_texture_t *uniforms_ext_tex_link(object_t *object, material_data_t *mat, char *link) {
 	if (string_equals(link, "_texpaint_undo")) {
 		i32              i  = history_undo_i - 1 < 0 ? config_raw->undo_steps - 1 : history_undo_i - 1;
 		render_target_t *rt = any_map_get(render_path_render_targets, string_join("texpaint_undo", i32_to_string(i)));
@@ -351,18 +351,18 @@ gpu_texture_t *uniforms_ext_tex_link(object_t *object, material_data_t *mat, str
 	}
 	else if (string_equals(link, "_texuvmap")) {
 		if (!util_uv_uvmap_cached) {
-			sys_notify_on_next_frame(&uniforms_ext_tex_link_73441, null);
+			sys_notify_on_next_frame(&uniforms_ext_tex_link_73441, NULL);
 		}
 		return util_uv_uvmap;
 	}
 	else if (string_equals(link, "_textrianglemap")) {
 		if (!util_uv_trianglemap_cached) {
-			sys_notify_on_next_frame(&uniforms_ext_tex_link_73476, null);
+			sys_notify_on_next_frame(&uniforms_ext_tex_link_73476, NULL);
 		}
 		return util_uv_trianglemap;
 	}
 	else if (string_equals(link, "_texuvislandmap")) {
-		sys_notify_on_next_frame(&uniforms_ext_tex_link_73505, null);
+		sys_notify_on_next_frame(&uniforms_ext_tex_link_73505, NULL);
 		if (util_uv_uvislandmap_cached) {
 			return util_uv_uvislandmap;
 		}
@@ -375,33 +375,33 @@ gpu_texture_t *uniforms_ext_tex_link(object_t *object, material_data_t *mat, str
 		return util_uv_dilatemap;
 	}
 	if (starts_with(link, "_texpaint_pack_vert")) {
-		string_t        *tid = substring(link, string_length(link) - 1, string_length(link));
+		char        *tid = substring(link, string_length(link) - 1, string_length(link));
 		render_target_t *rt  = any_map_get(render_path_render_targets, string_join("texpaint_pack", tid));
 		return rt->_image;
 	}
 	if (starts_with(link, "_texpaint_vert")) {
 		i32 tid = parse_int(substring(link, string_length(link) - 1, string_length(link)));
-		return tid < project_layers->length ? project_layers->buffer[tid]->texpaint : null;
+		return tid < project_layers->length ? project_layers->buffer[tid]->texpaint : NULL;
 	}
 	if (starts_with(link, "_texpaint_nor")) {
 		i32 tid = parse_int(substring(link, string_length(link) - 1, string_length(link)));
-		return tid < project_layers->length ? project_layers->buffer[tid]->texpaint_nor : null;
+		return tid < project_layers->length ? project_layers->buffer[tid]->texpaint_nor : NULL;
 	}
 	if (starts_with(link, "_texpaint_pack")) {
 		i32 tid = parse_int(substring(link, string_length(link) - 1, string_length(link)));
-		return tid < project_layers->length ? project_layers->buffer[tid]->texpaint_pack : null;
+		return tid < project_layers->length ? project_layers->buffer[tid]->texpaint_pack : NULL;
 	}
 	if (starts_with(link, "_texpaint_sculpt")) {
 		i32 tid = parse_int(substring(link, string_length(link) - 1, string_length(link)));
-		return tid < project_layers->length ? project_layers->buffer[tid]->texpaint_sculpt : null;
+		return tid < project_layers->length ? project_layers->buffer[tid]->texpaint_sculpt : NULL;
 	}
 	if (starts_with(link, "_texpaint")) {
 		i32 tid = parse_int(substring(link, string_length(link) - 1, string_length(link)));
-		return tid < project_layers->length ? project_layers->buffer[tid]->texpaint : null;
+		return tid < project_layers->length ? project_layers->buffer[tid]->texpaint : NULL;
 	}
 	if (starts_with(link, "_texblur_")) {
-		string_t *id = substring(link, 9, string_length(link));
-		if (context_raw->node_previews != null) {
+		char *id = substring(link, 9, string_length(link));
+		if (context_raw->node_previews != NULL) {
 			return any_map_get(context_raw->node_previews, id);
 		}
 		else {
@@ -410,8 +410,8 @@ gpu_texture_t *uniforms_ext_tex_link(object_t *object, material_data_t *mat, str
 		}
 	}
 	if (starts_with(link, "_texwarp_")) {
-		string_t *id = substring(link, 9, string_length(link));
-		if (context_raw->node_previews != null) {
+		char *id = substring(link, 9, string_length(link));
+		if (context_raw->node_previews != NULL) {
 			return any_map_get(context_raw->node_previews, id);
 		}
 		else {
@@ -420,8 +420,8 @@ gpu_texture_t *uniforms_ext_tex_link(object_t *object, material_data_t *mat, str
 		}
 	}
 	if (starts_with(link, "_texbake_")) {
-		string_t *id = substring(link, 9, string_length(link));
-		if (context_raw->node_previews != null) {
+		char *id = substring(link, 9, string_length(link));
+		if (context_raw->node_previews != NULL) {
 			return any_map_get(context_raw->node_previews, id);
 		}
 		else {
@@ -433,7 +433,7 @@ gpu_texture_t *uniforms_ext_tex_link(object_t *object, material_data_t *mat, str
 		render_target_t *rt = any_map_get(render_path_render_targets, "last");
 		return rt->_image;
 	}
-	return null;
+	return NULL;
 }
 
 void uniforms_ext_tex_link_73505(any _) {

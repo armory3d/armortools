@@ -3336,3 +3336,40 @@ const char *ui_theme_keys[] = {"WINDOW_BG_COL",  "HOVER_COL",      "BUTTON_COL",
                                "FILL_WINDOW_BG", "FILL_BUTTON_BG", "LINK_STYLE",        "FULL_TABS",   "ROUND_CORNERS", "SHADOWS",        "VIEWPORT_COL"};
 
 int ui_theme_keys_count = sizeof(ui_theme_keys) / sizeof(ui_theme_keys[0]);
+
+////
+
+f32 ui_MENUBAR_H(ui_t *ui) {
+	f32 button_offset_y = (ui->ops->theme->ELEMENT_H * UI_SCALE() - ui->ops->theme->BUTTON_H * UI_SCALE()) / (float)2;
+	return ui->ops->theme->BUTTON_H * UI_SCALE() * 1.1 + 2 + button_offset_y;
+}
+
+extern any_map_t                *ui_children;
+
+ui_handle_t *ui_handle(char *s) {
+	ui_handle_t *h = any_map_get(ui_children, s);
+	if (h == NULL) {
+		h = ui_handle_create();
+		any_map_set(ui_children, s, h);
+		return h;
+	}
+	h->init = false;
+	return h;
+}
+
+ui_t *ui_create(ui_options_t *ops) {
+	ui_t *raw = GC_ALLOC_INIT(ui_t, {0});
+	ui_init(raw, ops);
+	return raw;
+}
+
+ui_theme_t *ui_theme_create() {
+	ui_theme_t *raw = GC_ALLOC_INIT(ui_theme_t, {0});
+	ui_theme_default(raw);
+	return raw;
+}
+
+void ui_set_font(ui_t *ui, draw_font_t *font) {
+	draw_font_init(font);
+	ui->ops->font = font;
+}

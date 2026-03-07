@@ -3,24 +3,24 @@ void history_undo() {
 		i32             active = history_steps->length - 1 - history_redos;
 		history_step_t *step   = history_steps->buffer[active];
 
-		if (string_equals(step->name, tr("Edit Nodes", null))) {
+		if (string_equals(step->name, tr("Edit Nodes", NULL))) {
 			history_swap_canvas(step);
 		}
-		else if (string_equals(step->name, tr("New Layer", null)) || string_equals(step->name, tr("New Black Mask", null)) ||
-		         string_equals(step->name, tr("New White Mask", null)) || string_equals(step->name, tr("New Fill Mask", null))) {
+		else if (string_equals(step->name, tr("New Layer", NULL)) || string_equals(step->name, tr("New Black Mask", NULL)) ||
+		         string_equals(step->name, tr("New White Mask", NULL)) || string_equals(step->name, tr("New Fill Mask", NULL))) {
 			context_raw->layer = project_layers->buffer[step->layer];
 			slot_layer_delete(context_raw->layer);
 			context_raw->layer = project_layers->buffer[step->layer > 0 ? step->layer - 1 : 0];
 		}
-		else if (string_equals(step->name, tr("New Group", null))) {
+		else if (string_equals(step->name, tr("New Group", NULL))) {
 			context_raw->layer = project_layers->buffer[step->layer];
 			// The layer below is the only layer in the group. Its layer masks are automatically unparented, too.
-			project_layers->buffer[step->layer - 1]->parent = null;
+			project_layers->buffer[step->layer - 1]->parent = NULL;
 			slot_layer_delete(context_raw->layer);
 			context_raw->layer = project_layers->buffer[step->layer > 0 ? step->layer - 1 : 0];
 		}
-		else if (string_equals(step->name, tr("Delete Layer", null))) {
-			slot_layer_t *parent = step->layer_parent > 0 ? project_layers->buffer[step->layer_parent - 1] : null;
+		else if (string_equals(step->name, tr("Delete Layer", NULL))) {
+			slot_layer_t *parent = step->layer_parent > 0 ? project_layers->buffer[step->layer_parent - 1] : NULL;
 			slot_layer_t *l      = slot_layer_create("", step->layer_type, parent);
 			array_insert(project_layers, step->layer, l);
 			context_set_layer(l);
@@ -34,35 +34,35 @@ void history_undo() {
 
 			// Undo at least second time in order to avoid empty groups
 			if (step->layer_type == LAYER_SLOT_TYPE_GROUP) {
-				sys_notify_on_next_frame(&history_undo_76821, null);
+				sys_notify_on_next_frame(&history_undo_76821, NULL);
 			}
 		}
-		else if (string_equals(step->name, tr("Clear Layer", null))) {
+		else if (string_equals(step->name, tr("Clear Layer", NULL))) {
 			history_undo_i    = history_undo_i - 1 < 0 ? config_raw->undo_steps - 1 : history_undo_i - 1;
 			slot_layer_t *lay = history_undo_layers->buffer[history_undo_i];
 			slot_layer_swap(context_raw->layer, lay);
 			context_raw->layer_preview_dirty = true;
 		}
-		else if (string_equals(step->name, tr("Duplicate Layer", null))) {
+		else if (string_equals(step->name, tr("Duplicate Layer", NULL))) {
 			slot_layer_t_array_t *children = slot_layer_get_recursive_children(project_layers->buffer[step->layer]);
 			i32                   position = step->layer + 1;
-			if (children != null) {
+			if (children != NULL) {
 				position += children->length;
 			}
 
 			context_raw->layer = project_layers->buffer[position];
 			slot_layer_delete(context_raw->layer);
 		}
-		else if (string_equals(step->name, tr("Order Layers", null))) {
+		else if (string_equals(step->name, tr("Order Layers", NULL))) {
 			slot_layer_t *target                     = project_layers->buffer[step->prev_order];
 			project_layers->buffer[step->prev_order] = project_layers->buffer[step->layer];
 			project_layers->buffer[step->layer]      = target;
 		}
-		else if (string_equals(step->name, tr("Merge Layers", null))) {
+		else if (string_equals(step->name, tr("Merge Layers", NULL))) {
 			context_raw->layer = project_layers->buffer[step->layer];
 			slot_layer_delete(context_raw->layer);
 
-			slot_layer_t *parent = step->layer_parent > 0 ? project_layers->buffer[step->layer_parent - 2] : null;
+			slot_layer_t *parent = step->layer_parent > 0 ? project_layers->buffer[step->layer_parent - 2] : NULL;
 			slot_layer_t *l      = slot_layer_create("", step->layer_type, parent);
 			array_insert(project_layers, step->layer, l);
 			context_set_layer(l);
@@ -85,10 +85,10 @@ void history_undo() {
 			context_raw->layers_preview_dirty = true;
 			make_material_parse_mesh_material();
 		}
-		else if (string_equals(step->name, tr("Apply Mask", null))) {
+		else if (string_equals(step->name, tr("Apply Mask", NULL))) {
 			// First restore the layer(s)
 			i32           mask_pos      = step->layer;
-			slot_layer_t *current_layer = null;
+			slot_layer_t *current_layer = NULL;
 			// The layer at the old mask position is a mask, i.e. the layer had multiple masks before.
 			if (slot_layer_is_mask(project_layers->buffer[mask_pos])) {
 				current_layer = project_layers->buffer[mask_pos]->parent;
@@ -127,7 +127,7 @@ void history_undo() {
 			context_raw->layers_preview_dirty = true;
 			context_set_layer(context_raw->layer);
 		}
-		else if (string_equals(step->name, tr("Invert Mask", null))) {
+		else if (string_equals(step->name, tr("Invert Mask", NULL))) {
 			sys_notify_on_next_frame(&history_undo_77442, step);
 		}
 		else if (string_equals(step->name, "Apply Filter")) {
@@ -139,50 +139,50 @@ void history_undo() {
 			slot_layer_swap(context_raw->layer, lay);
 			context_raw->layer_preview_dirty = true;
 		}
-		else if (string_equals(step->name, tr("To Fill Layer", null)) || string_equals(step->name, tr("To Fill Mask", null))) {
+		else if (string_equals(step->name, tr("To Fill Layer", NULL)) || string_equals(step->name, tr("To Fill Mask", NULL))) {
 			slot_layer_to_paint_layer(context_raw->layer);
 			history_undo_i    = history_undo_i - 1 < 0 ? config_raw->undo_steps - 1 : history_undo_i - 1;
 			slot_layer_t *lay = history_undo_layers->buffer[history_undo_i];
 			slot_layer_swap(context_raw->layer, lay);
 		}
-		else if (string_equals(step->name, tr("To Paint Layer", null)) || string_equals(step->name, tr("To Paint Mask", null))) {
+		else if (string_equals(step->name, tr("To Paint Layer", NULL)) || string_equals(step->name, tr("To Paint Mask", NULL))) {
 			history_undo_i    = history_undo_i - 1 < 0 ? config_raw->undo_steps - 1 : history_undo_i - 1;
 			slot_layer_t *lay = history_undo_layers->buffer[history_undo_i];
 			slot_layer_swap(context_raw->layer, lay);
 			context_raw->layer->fill_layer = project_materials->buffer[step->material];
 		}
-		else if (string_equals(step->name, tr("Layer Opacity", null))) {
+		else if (string_equals(step->name, tr("Layer Opacity", NULL))) {
 			context_set_layer(project_layers->buffer[step->layer]);
 			f32 t                            = context_raw->layer->mask_opacity;
 			context_raw->layer->mask_opacity = step->layer_opacity;
 			step->layer_opacity              = t;
 			make_material_parse_mesh_material();
 		}
-		else if (string_equals(step->name, tr("Layer Blending", null))) {
+		else if (string_equals(step->name, tr("Layer Blending", NULL))) {
 			context_set_layer(project_layers->buffer[step->layer]);
 			blend_type_t t               = context_raw->layer->blending;
 			context_raw->layer->blending = step->layer_blending;
 			step->layer_blending         = t;
 			make_material_parse_mesh_material();
 		}
-		else if (string_equals(step->name, tr("Delete Node Group", null))) {
-			node_group_t *ng = GC_ALLOC_INIT(node_group_t, {.canvas = null, .nodes = ui_nodes_create()});
+		else if (string_equals(step->name, tr("Delete Node Group", NULL))) {
+			node_group_t *ng = GC_ALLOC_INIT(node_group_t, {.canvas = NULL, .nodes = ui_nodes_create()});
 			array_insert(project_material_groups, step->canvas_group, ng);
 			history_swap_canvas(step);
 		}
-		else if (string_equals(step->name, tr("New Material", null))) {
+		else if (string_equals(step->name, tr("New Material", NULL))) {
 			context_raw->material = project_materials->buffer[step->material];
 			step->canvas          = context_raw->material->canvas;
 			slot_material_delete(context_raw->material);
 		}
-		else if (string_equals(step->name, tr("Delete Material", null))) {
-			context_raw->material = slot_material_create(project_materials->buffer[0]->data, null);
+		else if (string_equals(step->name, tr("Delete Material", NULL))) {
+			context_raw->material = slot_material_create(project_materials->buffer[0]->data, NULL);
 			array_insert(project_materials, step->material, context_raw->material);
 			context_raw->material->canvas = step->canvas;
 			ui_nodes_canvas_changed();
 			ui_nodes_hwnd->redraws = 2;
 		}
-		else if (string_equals(step->name, tr("Duplicate Material", null))) {
+		else if (string_equals(step->name, tr("Duplicate Material", NULL))) {
 			context_raw->material = project_materials->buffer[step->material];
 			step->canvas          = context_raw->material->canvas;
 			slot_material_delete(context_raw->material);
@@ -235,28 +235,28 @@ void history_redo() {
 		i32             active = history_steps->length - history_redos;
 		history_step_t *step   = history_steps->buffer[active];
 
-		if (string_equals(step->name, tr("Edit Nodes", null))) {
+		if (string_equals(step->name, tr("Edit Nodes", NULL))) {
 			history_swap_canvas(step);
 		}
-		else if (string_equals(step->name, tr("New Layer", null)) || string_equals(step->name, tr("New Black Mask", null)) ||
-		         string_equals(step->name, tr("New White Mask", null)) || string_equals(step->name, tr("New Fill Mask", null))) {
-			slot_layer_t *parent = step->layer_parent > 0 ? project_layers->buffer[step->layer_parent - 1] : null;
+		else if (string_equals(step->name, tr("New Layer", NULL)) || string_equals(step->name, tr("New Black Mask", NULL)) ||
+		         string_equals(step->name, tr("New White Mask", NULL)) || string_equals(step->name, tr("New Fill Mask", NULL))) {
+			slot_layer_t *parent = step->layer_parent > 0 ? project_layers->buffer[step->layer_parent - 1] : NULL;
 			slot_layer_t *l      = slot_layer_create("", step->layer_type, parent);
 			array_insert(project_layers, step->layer, l);
-			if (string_equals(step->name, tr("New Black Mask", null))) {
+			if (string_equals(step->name, tr("New Black Mask", NULL))) {
 				sys_notify_on_next_frame(&history_redo_78106, l);
 			}
-			else if (string_equals(step->name, tr("New White Mask", null))) {
+			else if (string_equals(step->name, tr("New White Mask", NULL))) {
 				sys_notify_on_next_frame(&history_redo_78139, l);
 			}
-			else if (string_equals(step->name, tr("New Fill Mask", null))) {
+			else if (string_equals(step->name, tr("New Fill Mask", NULL))) {
 				context_raw->material = project_materials->buffer[step->material];
 				sys_notify_on_next_frame(&history_redo_78179, l);
 			}
 			context_raw->layer_preview_dirty = true;
 			context_set_layer(l);
 		}
-		else if (string_equals(step->name, tr("New Group", null))) {
+		else if (string_equals(step->name, tr("New Group", NULL))) {
 			slot_layer_t *l     = project_layers->buffer[step->layer - 1];
 			slot_layer_t *group = layers_new_group();
 			array_remove(project_layers, group);
@@ -264,7 +264,7 @@ void history_redo() {
 			l->parent = group;
 			context_set_layer(group);
 		}
-		else if (string_equals(step->name, tr("Delete Layer", null))) {
+		else if (string_equals(step->name, tr("Delete Layer", NULL))) {
 			context_raw->layer = project_layers->buffer[step->layer];
 			history_swap_active();
 			slot_layer_delete(context_raw->layer);
@@ -274,30 +274,30 @@ void history_redo() {
 			if (step->layer_type == LAYER_SLOT_TYPE_LAYER && history_steps->length >= active + 2 &&
 			    (history_steps->buffer[active + 1]->layer_type == LAYER_SLOT_TYPE_GROUP ||
 			     history_steps->buffer[active + 1]->layer_type == LAYER_SLOT_TYPE_MASK)) {
-				sys_notify_on_next_frame(&history_redo_78330, null);
+				sys_notify_on_next_frame(&history_redo_78330, NULL);
 			}
 		}
-		else if (string_equals(step->name, tr("Clear Layer", null))) {
+		else if (string_equals(step->name, tr("Clear Layer", NULL))) {
 			context_raw->layer = project_layers->buffer[step->layer];
 			history_swap_active();
-			slot_layer_clear(context_raw->layer, 0x00000000, null, 1.0, layers_default_rough, 0.0);
+			slot_layer_clear(context_raw->layer, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
 			context_raw->layer_preview_dirty = true;
 		}
-		else if (string_equals(step->name, tr("Duplicate Layer", null))) {
+		else if (string_equals(step->name, tr("Duplicate Layer", NULL))) {
 			context_raw->layer = project_layers->buffer[step->layer];
-			sys_notify_on_next_frame(&history_redo_78447, null);
+			sys_notify_on_next_frame(&history_redo_78447, NULL);
 		}
-		else if (string_equals(step->name, tr("Order Layers", null))) {
+		else if (string_equals(step->name, tr("Order Layers", NULL))) {
 			slot_layer_t *target                     = project_layers->buffer[step->prev_order];
 			project_layers->buffer[step->prev_order] = project_layers->buffer[step->layer];
 			project_layers->buffer[step->layer]      = target;
 		}
-		else if (string_equals(step->name, tr("Merge Layers", null))) {
+		else if (string_equals(step->name, tr("Merge Layers", NULL))) {
 			context_raw->layer = project_layers->buffer[step->layer + 1];
-			sys_notify_on_next_frame(&history_redo_78524, null);
-			sys_notify_on_next_frame(&history_redo_78540, null);
+			sys_notify_on_next_frame(&history_redo_78524, NULL);
+			sys_notify_on_next_frame(&history_redo_78540, NULL);
 		}
-		else if (string_equals(step->name, tr("Apply Mask", null))) {
+		else if (string_equals(step->name, tr("Apply Mask", NULL))) {
 			context_raw->layer = project_layers->buffer[step->layer];
 			if (slot_layer_is_group_mask(context_raw->layer)) {
 				slot_layer_t         *group  = context_raw->layer->parent;
@@ -315,12 +315,12 @@ void history_redo() {
 				history_copy_merging_layers2(layers);
 			}
 
-			sys_notify_on_next_frame(&history_redo_78638, null);
+			sys_notify_on_next_frame(&history_redo_78638, NULL);
 		}
-		else if (string_equals(step->name, tr("Invert Mask", null))) {
+		else if (string_equals(step->name, tr("Invert Mask", NULL))) {
 			sys_notify_on_next_frame(&history_redo_78676, step);
 		}
-		else if (string_equals(step->name, tr("Apply Filter", null))) {
+		else if (string_equals(step->name, tr("Apply Filter", NULL))) {
 			slot_layer_t *lay = history_undo_layers->buffer[history_undo_i];
 			context_set_layer(project_layers->buffer[step->layer]);
 			slot_layer_swap(context_raw->layer, lay);
@@ -329,50 +329,50 @@ void history_redo() {
 			context_raw->layer_preview_dirty = true;
 			history_undo_i                   = (history_undo_i + 1) % config_raw->undo_steps;
 		}
-		else if (string_equals(step->name, tr("To Fill Layer", null)) || string_equals(step->name, tr("To Fill Mask", null))) {
+		else if (string_equals(step->name, tr("To Fill Layer", NULL)) || string_equals(step->name, tr("To Fill Mask", NULL))) {
 			slot_layer_t *lay = history_undo_layers->buffer[history_undo_i];
 			slot_layer_swap(context_raw->layer, lay);
 			context_raw->layer->fill_layer = project_materials->buffer[step->material];
 			history_undo_i                 = (history_undo_i + 1) % config_raw->undo_steps;
 		}
-		else if (string_equals(step->name, tr("To Paint Layer", null)) || string_equals(step->name, tr("To Paint Mask", null))) {
+		else if (string_equals(step->name, tr("To Paint Layer", NULL)) || string_equals(step->name, tr("To Paint Mask", NULL))) {
 			slot_layer_to_paint_layer(context_raw->layer);
 			slot_layer_t *lay = history_undo_layers->buffer[history_undo_i];
 			slot_layer_swap(context_raw->layer, lay);
 			history_undo_i = (history_undo_i + 1) % config_raw->undo_steps;
 		}
-		else if (string_equals(step->name, tr("Layer Opacity", null))) {
+		else if (string_equals(step->name, tr("Layer Opacity", NULL))) {
 			context_set_layer(project_layers->buffer[step->layer]);
 			f32 t                            = context_raw->layer->mask_opacity;
 			context_raw->layer->mask_opacity = step->layer_opacity;
 			step->layer_opacity              = t;
 			make_material_parse_mesh_material();
 		}
-		else if (string_equals(step->name, tr("Layer Blending", null))) {
+		else if (string_equals(step->name, tr("Layer Blending", NULL))) {
 			context_set_layer(project_layers->buffer[step->layer]);
 			blend_type_t t               = context_raw->layer->blending;
 			context_raw->layer->blending = step->layer_blending;
 			step->layer_blending         = t;
 			make_material_parse_mesh_material();
 		}
-		else if (string_equals(step->name, tr("Delete Node Group", null))) {
+		else if (string_equals(step->name, tr("Delete Node Group", NULL))) {
 			history_swap_canvas(step);
 			array_remove(project_material_groups, project_material_groups->buffer[step->canvas_group]);
 		}
-		else if (string_equals(step->name, tr("New Material", null))) {
-			context_raw->material = slot_material_create(project_materials->buffer[0]->data, null);
+		else if (string_equals(step->name, tr("New Material", NULL))) {
+			context_raw->material = slot_material_create(project_materials->buffer[0]->data, NULL);
 			array_insert(project_materials, step->material, context_raw->material);
 			context_raw->material->canvas = step->canvas;
 			ui_nodes_canvas_changed();
 			ui_nodes_hwnd->redraws = 2;
 		}
-		else if (string_equals(step->name, tr("Delete Material", null))) {
+		else if (string_equals(step->name, tr("Delete Material", NULL))) {
 			context_raw->material = project_materials->buffer[step->material];
 			step->canvas          = context_raw->material->canvas;
 			slot_material_delete(context_raw->material);
 		}
-		else if (string_equals(step->name, tr("Duplicate Material", null))) {
-			context_raw->material = slot_material_create(project_materials->buffer[0]->data, null);
+		else if (string_equals(step->name, tr("Duplicate Material", NULL))) {
+			context_raw->material = slot_material_create(project_materials->buffer[0]->data, NULL);
 			array_insert(project_materials, step->material, context_raw->material);
 			context_raw->material->canvas = step->canvas;
 			ui_nodes_canvas_changed();
@@ -443,11 +443,11 @@ void history_redo_78179(slot_layer_t *l) {
 }
 
 void history_redo_78139(slot_layer_t *l) {
-	slot_layer_clear(l, 0xffffffff, null, 1.0, layers_default_rough, 0.0);
+	slot_layer_clear(l, 0xffffffff, NULL, 1.0, layers_default_rough, 0.0);
 }
 
 void history_redo_78106(slot_layer_t *l) {
-	slot_layer_clear(l, 0x00000000, null, 1.0, layers_default_rough, 0.0);
+	slot_layer_clear(l, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
 }
 
 void history_reset() {
@@ -456,7 +456,7 @@ void history_reset() {
 	    (any[]){
 	        GC_ALLOC_INIT(
 	            history_step_t,
-	            {.name = tr("New", null), .layer = 0, .layer_type = LAYER_SLOT_TYPE_LAYER, .layer_parent = -1, .object = 0, .material = 0, .brush = 0}),
+	            {.name = tr("New", NULL), .layer = 0, .layer_type = LAYER_SLOT_TYPE_LAYER, .layer_parent = -1, .object = 0, .material = 0, .brush = 0}),
 	    },
 	    1);
 	gc_root(history_steps);
@@ -466,7 +466,7 @@ void history_reset() {
 }
 
 void history_edit_nodes(ui_node_canvas_t *canvas, i32 canvas_type, i32 canvas_group) {
-	history_step_t *step = history_push(tr("Edit Nodes", null));
+	history_step_t *step = history_push(tr("Edit Nodes", NULL));
 	step->canvas_group   = canvas_group;
 	step->canvas_type    = canvas_type;
 	step->canvas         = util_clone_canvas(canvas);
@@ -477,52 +477,52 @@ void history_paint() {
 	history_copy_to_undo(context_raw->layer->id, history_undo_i, is_mask);
 
 	history_push_undo = false;
-	history_push(tr(ui_toolbar_tool_names->buffer[context_raw->tool], null));
+	history_push(tr(ui_toolbar_tool_names->buffer[context_raw->tool], NULL));
 }
 
 void history_new_layer() {
-	history_push(tr("New Layer", null));
+	history_push(tr("New Layer", NULL));
 }
 
 void history_new_black_mask() {
-	history_push(tr("New Black Mask", null));
+	history_push(tr("New Black Mask", NULL));
 }
 
 void history_new_white_mask() {
-	history_push(tr("New White Mask", null));
+	history_push(tr("New White Mask", NULL));
 }
 
 void history_new_fill_mask() {
-	history_push(tr("New Fill Mask", null));
+	history_push(tr("New Fill Mask", NULL));
 }
 
 void history_new_group() {
-	history_push(tr("New Group", null));
+	history_push(tr("New Group", NULL));
 }
 
 void history_duplicate_layer() {
-	history_push(tr("Duplicate Layer", null));
+	history_push(tr("Duplicate Layer", NULL));
 }
 
 void history_delete_layer() {
 	history_swap_active();
-	history_push(tr("Delete Layer", null));
+	history_push(tr("Delete Layer", NULL));
 }
 
 void history_clear_layer() {
 	history_swap_active();
-	history_push(tr("Clear Layer", null));
+	history_push(tr("Clear Layer", NULL));
 }
 
 void history_order_layers(i32 prev_order) {
-	history_step_t *step = history_push(tr("Order Layers", null));
+	history_step_t *step = history_push(tr("Order Layers", NULL));
 	step->prev_order     = prev_order;
 }
 
 void history_merge_layers() {
 	history_copy_merging_layers();
 
-	history_step_t *step = history_push(tr("Merge Layers", null));
+	history_step_t *step = history_push(tr("Merge Layers", NULL));
 	step->layer -= 1; // Merge down
 	if (slot_layer_has_masks(context_raw->layer, true)) {
 		step->layer -= slot_layer_get_masks(context_raw->layer, true)->length;
@@ -548,40 +548,40 @@ void history_apply_mask() {
 		    2);
 		history_copy_merging_layers2(layers);
 	}
-	history_push(tr("Apply Mask", null));
+	history_push(tr("Apply Mask", NULL));
 }
 
 void history_invert_mask() {
-	history_push(tr("Invert Mask", null));
+	history_push(tr("Invert Mask", NULL));
 }
 
 void history_apply_filter() {
 	history_copy_to_undo(context_raw->layer->id, history_undo_i, true);
-	history_push(tr("Apply Filter", null));
+	history_push(tr("Apply Filter", NULL));
 }
 
 void history_to_fill_layer() {
 	history_copy_to_undo(context_raw->layer->id, history_undo_i, false);
-	history_push(tr("To Fill Layer", null));
+	history_push(tr("To Fill Layer", NULL));
 }
 
 void history_to_fill_mask() {
 	history_copy_to_undo(context_raw->layer->id, history_undo_i, true);
-	history_push(tr("To Fill Mask", null));
+	history_push(tr("To Fill Mask", NULL));
 }
 
 void history_to_paint_layer() {
 	history_copy_to_undo(context_raw->layer->id, history_undo_i, false);
-	history_push(tr("To Paint Layer", null));
+	history_push(tr("To Paint Layer", NULL));
 }
 
 void history_to_paint_mask() {
 	history_copy_to_undo(context_raw->layer->id, history_undo_i, true);
-	history_push(tr("To Paint Mask", null));
+	history_push(tr("To Paint Mask", NULL));
 }
 
 void history_layer_opacity() {
-	history_push(tr("Layer Opacity", null));
+	history_push(tr("Layer Opacity", NULL));
 }
 
 // void history_layer_object() {
@@ -589,37 +589,37 @@ void history_layer_opacity() {
 // }
 
 void history_layer_blending() {
-	history_push(tr("Layer Blending", null));
+	history_push(tr("Layer Blending", NULL));
 }
 
 void history_new_material() {
-	history_step_t *step = history_push(tr("New Material", null));
+	history_step_t *step = history_push(tr("New Material", NULL));
 	step->canvas_type    = 0;
 	step->canvas         = util_clone_canvas(context_raw->material->canvas);
 }
 
 void history_delete_material() {
-	history_step_t *step = history_push(tr("Delete Material", null));
+	history_step_t *step = history_push(tr("Delete Material", NULL));
 	step->canvas_type    = 0;
 	step->canvas         = util_clone_canvas(context_raw->material->canvas);
 }
 
 void history_duplicate_material() {
-	history_step_t *step = history_push(tr("Duplicate Material", null));
+	history_step_t *step = history_push(tr("Duplicate Material", NULL));
 	step->canvas_type    = 0;
 	step->canvas         = util_clone_canvas(context_raw->material->canvas);
 }
 
 void history_delete_material_group(node_group_t *group) {
-	history_step_t *step = history_push(tr("Delete Node Group", null));
+	history_step_t *step = history_push(tr("Delete Node Group", NULL));
 	step->canvas_type    = CANVAS_TYPE_MATERIAL;
 	step->canvas_group   = array_index_of(project_material_groups, group);
 	step->canvas         = util_clone_canvas(group->canvas);
 }
 
-history_step_t *history_push(string_t *name) {
+history_step_t *history_push(char *name) {
 	#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
-	string_t *filename = string_equals(project_filepath, "")
+	char *filename = string_equals(project_filepath, "")
 	                         ? ui_files_filename
 	                         : substring(project_filepath, string_last_index_of(project_filepath, PATH_SEP) + 1, string_length(project_filepath) - 4);
 	sys_title_set(string_join(string_join(filename, "* - "), manifest_title));
@@ -651,7 +651,7 @@ history_step_t *history_push(string_t *name) {
 	                                   .layer_type     = slot_layer_is_mask(context_raw->layer)    ? LAYER_SLOT_TYPE_MASK
 	                                                     : slot_layer_is_group(context_raw->layer) ? LAYER_SLOT_TYPE_GROUP
 	                                                                                               : LAYER_SLOT_TYPE_LAYER,
-	                                   .layer_parent   = context_raw->layer->parent == null ? -1 : array_index_of(project_layers, context_raw->layer->parent),
+	                                   .layer_parent   = context_raw->layer->parent == NULL ? -1 : array_index_of(project_layers, context_raw->layer->parent),
 	                                   .object         = opos,
 	                                   .material       = mpos,
 	                                   .brush          = bpos,
@@ -695,13 +695,13 @@ void history_swap_active() {
 
 void history_copy_to_undo(i32 from_id, i32 to_id, bool is_mask) {
 	if (is_mask) {
-		render_path_set_target(string_join("texpaint_undo", i32_to_string(to_id)), null, null, GPU_CLEAR_NONE, 0, 0.0);
+		render_path_set_target(string_join("texpaint_undo", i32_to_string(to_id)), NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 		render_path_bind_target(string_join("texpaint", i32_to_string(from_id)), "tex");
 		// render_path_draw_shader("Scene/copy_pass/copyR8_pass");
 		render_path_draw_shader("Scene/copy_pass/copy_pass");
 	}
-	else if (context_raw->layer->texpaint_sculpt != null) {
-		render_path_set_target(string_join("texpaint_sculpt_undo", i32_to_string(to_id)), null, null, GPU_CLEAR_NONE, 0, 0.0);
+	else if (context_raw->layer->texpaint_sculpt != NULL) {
+		render_path_set_target(string_join("texpaint_sculpt_undo", i32_to_string(to_id)), NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 		render_path_bind_target(string_join("texpaint_sculpt", i32_to_string(from_id)), "tex");
 		render_path_draw_shader("Scene/copy_pass/copyRGBA128_pass");
 	}
@@ -712,7 +712,7 @@ void history_copy_to_undo(i32 from_id, i32 to_id, bool is_mask) {
 		        string_join("texpaint_pack_undo", i32_to_string(to_id)),
 		    },
 		    2);
-		render_path_set_target(string_join("texpaint_undo", i32_to_string(to_id)), additional, null, GPU_CLEAR_NONE, 0, 0.0);
+		render_path_set_target(string_join("texpaint_undo", i32_to_string(to_id)), additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
 		render_path_bind_target(string_join("texpaint", i32_to_string(from_id)), "tex0");
 		render_path_bind_target(string_join("texpaint_nor", i32_to_string(from_id)), "tex1");
 		render_path_bind_target(string_join("texpaint_pack", i32_to_string(from_id)), "tex2");
@@ -721,7 +721,7 @@ void history_copy_to_undo(i32 from_id, i32 to_id, bool is_mask) {
 		                              : base_bits_handle->i == TEXTURE_BITS_BITS16 ? GPU_TEXTURE_FORMAT_RGBA64
 		                                                                           : GPU_TEXTURE_FORMAT_RGBA128;
 
-		string_t *pipe = format == GPU_TEXTURE_FORMAT_RGBA32   ? "copy_mrt3_pass"
+		char *pipe = format == GPU_TEXTURE_FORMAT_RGBA32   ? "copy_mrt3_pass"
 		                 : format == GPU_TEXTURE_FORMAT_RGBA64 ? "copy_mrt3RGBA64_pass"
 		                                                       : "copy_mrt3RGBA128_pass";
 		render_path_draw_shader(string_join("Scene/copy_mrt3_pass/", pipe));

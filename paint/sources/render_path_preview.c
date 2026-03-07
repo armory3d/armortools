@@ -61,7 +61,7 @@ void render_path_preview_init() {
 }
 
 void render_path_preview_commands_preview() {
-	render_path_set_target("mgbuffer0", null, "mmain", GPU_CLEAR_COLOR | GPU_CLEAR_DEPTH, 0xffffffff, 1.0);
+	render_path_set_target("mgbuffer0", NULL, "mmain", GPU_CLEAR_COLOR | GPU_CLEAR_DEPTH, 0xffffffff, 1.0);
 	string_t_array_t *additional = any_array_create_from_raw(
 	    (any[]){
 	        "mgbuffer1",
@@ -71,34 +71,34 @@ void render_path_preview_commands_preview() {
 	render_path_draw_meshes("mesh");
 
 	// Deferred light
-	render_path_set_target("mtex", null, null, GPU_CLEAR_NONE, 0, 0.0);
+	render_path_set_target("mtex", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_bind_target("mmain", "gbufferD");
 	render_path_bind_target("mgbuffer0", "gbuffer0");
 	render_path_bind_target("mgbuffer1", "gbuffer1");
 	render_path_bind_target("empty_white", "ssaotex");
 	render_path_draw_shader("Scene/deferred_light/deferred_light");
 
-	render_path_set_target("mtex", null, "mmain", GPU_CLEAR_NONE, 0, 0.0);
+	render_path_set_target("mtex", NULL, "mmain", GPU_CLEAR_NONE, 0, 0.0);
 	render_path_draw_skydome("Scene/world_pass/world_pass");
 
-	string_t        *framebuffer     = "texpreview";
+	char        *framebuffer     = "texpreview";
 	slot_material_t *selected_mat    = context_raw->material;
 	render_target_t *texpreview      = any_map_get(render_path_render_targets, "texpreview");
 	render_target_t *texpreview_icon = any_map_get(render_path_render_targets, "texpreview_icon");
 	texpreview->_image               = selected_mat->image;
 	texpreview_icon->_image          = selected_mat->image_icon;
 
-	render_path_set_target(framebuffer, null, null, GPU_CLEAR_NONE, 0, 0.0);
+	render_path_set_target(framebuffer, NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_bind_target("mtex", "tex");
 	render_path_draw_shader("Scene/compositor_pass/compositor_pass");
 
-	render_path_set_target("texpreview_icon", null, null, GPU_CLEAR_NONE, 0, 0.0);
+	render_path_set_target("texpreview_icon", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_bind_target("texpreview", "tex");
 	render_path_draw_shader("Scene/supersample_resolve/supersample_resolveRGBA64");
 }
 
 void render_path_preview_commands_decal() {
-	render_path_set_target("gbuffer0", null, "main", GPU_CLEAR_COLOR | GPU_CLEAR_DEPTH, 0xffffffff, 1.0);
+	render_path_set_target("gbuffer0", NULL, "main", GPU_CLEAR_COLOR | GPU_CLEAR_DEPTH, 0xffffffff, 1.0);
 	string_t_array_t *additional = any_array_create_from_raw(
 	    (any[]){
 	        "gbuffer1",
@@ -108,22 +108,22 @@ void render_path_preview_commands_decal() {
 	render_path_draw_meshes("mesh");
 
 	// Deferred light
-	string_t *output = "gbuffer2";
-	render_path_set_target(output, null, null, GPU_CLEAR_NONE, 0, 0.0);
+	char *output = "gbuffer2";
+	render_path_set_target(output, NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_bind_target("main", "gbufferD");
 	render_path_bind_target("gbuffer0", "gbuffer0");
 	render_path_bind_target("gbuffer1", "gbuffer1");
 	render_path_bind_target("empty_white", "ssaotex");
 	render_path_draw_shader("Scene/deferred_light/deferred_light");
 
-	render_path_set_target(output, null, "main", GPU_CLEAR_NONE, 0, 0.0);
+	render_path_set_target(output, NULL, "main", GPU_CLEAR_NONE, 0, 0.0);
 	render_path_draw_skydome("Scene/world_pass/world_pass");
 
-	string_t        *framebuffer = "texpreview";
+	char        *framebuffer = "texpreview";
 	render_target_t *texpreview  = any_map_get(render_path_render_targets, "texpreview");
 	texpreview->_image           = context_raw->decal_image;
 
-	render_path_set_target(framebuffer, null, null, GPU_CLEAR_NONE, 0, 0.0);
+	render_path_set_target(framebuffer, NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 
 	render_path_bind_target(output, "tex");
 	render_path_draw_shader("Scene/compositor_pass/compositor_pass");

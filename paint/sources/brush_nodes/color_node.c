@@ -1,9 +1,9 @@
 
 color_node_t *color_node_create(ui_node_t *raw, f32_array_t *args) {
-	f32           r       = args == null ? 0.8 : args->buffer[0];
-	f32           g       = args == null ? 0.8 : args->buffer[1];
-	f32           b       = args == null ? 0.8 : args->buffer[2];
-	f32           a       = args == null ? 1.0 : args->buffer[3];
+	f32           r       = args == NULL ? 0.8 : args->buffer[0];
+	f32           g       = args == NULL ? 0.8 : args->buffer[1];
+	f32           b       = args == NULL ? 0.8 : args->buffer[2];
+	f32           a       = args == NULL ? 1.0 : args->buffer[3];
 	color_node_t *n       = GC_ALLOC_INIT(color_node_t, {0});
 	n->base               = logic_node_create(n);
 	n->base->get          = color_node_get;
@@ -27,7 +27,7 @@ gpu_texture_t *color_node_get_as_image(color_node_t *self, i32 from) {
 	if (self->base->inputs->length > 0) {
 		return logic_node_input_get_as_image(self->base->inputs->buffer[0]);
 	}
-	if (self->image != null) {
+	if (self->image != NULL) {
 		gpu_delete_texture(self->image);
 	}
 	buffer_t *b = buffer_create(16);

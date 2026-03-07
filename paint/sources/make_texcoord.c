@@ -1,6 +1,6 @@
 void make_texcoord_run(node_shader_t *kong) {
 
-	bool      fill_layer = context_raw->layer->fill_layer != null;
+	bool      fill_layer = context_raw->layer->fill_layer != NULL;
 	uv_type_t uv_type    = fill_layer ? context_raw->layer->uv_type : context_raw->brush_paint;
 	bool      decal      = context_is_decal();
 	f32       angle      = context_raw->brush_angle + context_raw->brush_nodes_angle;

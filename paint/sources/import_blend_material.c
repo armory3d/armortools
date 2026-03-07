@@ -1,25 +1,25 @@
-void import_blend_material_run(string_t *path) {
+void import_blend_material_run(char *path) {
 	gc_unroot(_import_blend_material_path);
 	_import_blend_material_path = string_copy(path);
 	gc_root(_import_blend_material_path);
 
-	ui_box_show_custom(&import_blend_material_run_43663, 400, 200, null, true, "");
+	ui_box_show_custom(&import_blend_material_run_43663, 400, 200, NULL, true, "");
 }
 
 void import_blend_material_run_43663() {
-	if (ui_tab(ui_handle(__ID__), tr("Import Material", null), false, -1, false)) {
+	if (ui_tab(ui_handle(__ID__), tr("Import Material", NULL), false, -1, false)) {
 		import_blend_mesh_ui();
 
 		ui_row2();
-		if (ui_icon_button(tr("Cancel", null), ICON_CLOSE, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Cancel", NULL), ICON_CLOSE, UI_ALIGN_CENTER)) {
 			ui_box_hide();
 		}
-		if (ui_icon_button(tr("Import", null), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
+		if (ui_icon_button(tr("Import", NULL), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
 
 			ui_box_hide();
 
-			if (config_raw->blender == null || string_equals(config_raw->blender, "")) {
-				console_error(tr("Blender executable path not set", null));
+			if (config_raw->blender == NULL || string_equals(config_raw->blender, "")) {
+				console_error(tr("Blender executable path not set", NULL));
 				return;
 			}
 			_import_blend_material();
@@ -28,13 +28,13 @@ void import_blend_material_run_43663() {
 }
 
 void _import_blend_material() {
-	console_toast(tr("Baking material", null));
+	console_toast(tr("Baking material", NULL));
 
-	sys_notify_on_next_frame(&_import_blend_material_43775, null);
+	sys_notify_on_next_frame(&_import_blend_material_43775, NULL);
 }
 
 void _import_blend_material_43775(any _) {
-	string_t *save;
+	char *save;
 	if (path_is_protected()) {
 		save = string_copy(iron_internal_save_path());
 	}
@@ -44,7 +44,7 @@ void _import_blend_material_43775(any _) {
 	save = string_join(save, "blender");
 	iron_create_directory(save);
 
-	string_t *py = string_join(string_join(string_join(string_join(string_join(string_join("\
+	char *py = string_join(string_join(string_join(string_join(string_join(string_join("\
 import bpy;\n\
 bpy.context.scene.render.engine = 'CYCLES'\n\
 bpy.context.scene.cycles.samples = 4\n\

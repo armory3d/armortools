@@ -1,9 +1,9 @@
 void make_bake_run(node_shader_context_t *con, node_shader_t *kong) {
 	if (context_raw->bake_type == BAKE_TYPE_CURVATURE) {
 		bool      pass     = parser_material_bake_passthrough;
-		string_t *strength = pass ? parser_material_bake_passthrough_strength : string_join(f32_to_string(context_raw->bake_curv_strength), "");
-		string_t *radius   = pass ? parser_material_bake_passthrough_radius : string_join(f32_to_string(context_raw->bake_curv_radius), "");
-		string_t *offset   = pass ? parser_material_bake_passthrough_offset : string_join(f32_to_string(context_raw->bake_curv_offset), "");
+		char *strength = pass ? parser_material_bake_passthrough_strength : string_join(f32_to_string(context_raw->bake_curv_strength), "");
+		char *radius   = pass ? parser_material_bake_passthrough_radius : string_join(f32_to_string(context_raw->bake_curv_radius), "");
+		char *offset   = pass ? parser_material_bake_passthrough_offset : string_join(f32_to_string(context_raw->bake_curv_offset), "");
 		strength           = string_join(string_join("float(", strength), ")");
 		radius             = string_join(string_join("float(", radius), ")");
 		offset             = string_join(string_join("float(", offset), ")");
@@ -18,7 +18,7 @@ void make_bake_run(node_shader_context_t *con, node_shader_t *kong) {
 		                                  offset),
 		                      " / 10.0, 0.0, 1.0);"));
 		if (context_raw->bake_axis != BAKE_AXIS_XYZ) {
-			string_t *axis = make_bake_axis_string(context_raw->bake_axis);
+			char *axis = make_bake_axis_string(context_raw->bake_axis);
 			node_shader_write_frag(kong, string_join(string_join("curvature *= dot(n, ", axis), ");"));
 		}
 		node_shader_write_frag(kong, "output[0] = float4(curvature, curvature, curvature, 1.0);");
@@ -119,7 +119,7 @@ void make_bake_set_color_writes(node_shader_context_t *con_paint) {
 	con_paint->data->color_writes_alpha->buffer[2] = false;
 }
 
-string_t *make_bake_axis_string(i32 i) {
+char *make_bake_axis_string(i32 i) {
 	return i == BAKE_AXIS_X    ? "float3(1,0,0)"
 	       : i == BAKE_AXIS_Y  ? "float3(0,1,0)"
 	       : i == BAKE_AXIS_Z  ? "float3(0,0,1)"

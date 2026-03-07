@@ -1,98 +1,9 @@
 
-
 #include <iron.h>
-#include "../libs/asim.h"
-#include "../libs/asim.h"
 #include "enums.c"
 #include "types.c"
 #include "globals.c"
 #include "functions.c"
-
-void gpu_vertex_struct_add(gpu_vertex_structure_t *raw, string_t *name, gpu_vertex_data_t data) {
-	gpu_vertex_element_t *e = ADDRESS(ARRAY_ACCESS(raw->elements, raw->size));
-	e->name                 = string_copy(name);
-	e->data                 = data;
-	raw->size++;
-}
-
-f32 ui_MENUBAR_H(ui_t *ui) {
-	f32 button_offset_y = (ui->ops->theme->ELEMENT_H * UI_SCALE() - ui->ops->theme->BUTTON_H * UI_SCALE()) / (float)2;
-	return ui->ops->theme->BUTTON_H * UI_SCALE() * 1.1 + 2 + button_offset_y;
-}
-
-f32 ui_nodes_INPUT_Y(ui_node_canvas_t *canvas, ui_node_t *node, i32 pos) {
-	return UI_INPUT_Y(canvas, node, pos);
-}
-
-ui_handle_t *ui_handle(string_t *s) {
-	ui_handle_t *h = any_map_get(ui_children, s);
-	if (h == null) {
-		h = ui_handle_create();
-		any_map_set(ui_children, s, h);
-		return h;
-	}
-	h->init = false;
-	return h;
-}
-
-ui_t *ui_create(ui_options_t *ops) {
-	ui_t *raw = GC_ALLOC_INIT(ui_t, {0});
-	ui_init(raw, ops);
-	return raw;
-}
-
-ui_theme_t *ui_theme_create() {
-	ui_theme_t *raw = GC_ALLOC_INIT(ui_theme_t, {0});
-	ui_theme_default(raw);
-	return raw;
-}
-
-void nodes_on_custom_button(i32 node_id, string_t *button_name) {
-	void (*f)(i32) = any_map_get(ui_nodes_custom_buttons, button_name);
-	f(node_id);
-}
-
-ui_nodes_t *ui_nodes_create() {
-	ui_nodes_t *raw = GC_ALLOC_INIT(ui_nodes_t, {0});
-	ui_nodes_init(raw);
-	gc_unroot(ui_nodes_exclude_remove);
-	ui_nodes_exclude_remove = any_array_create_from_raw(
-	    (any[]){
-	        "OUTPUT_MATERIAL_PBR",
-	        "GROUP_OUTPUT",
-	        "GROUP_INPUT",
-	        "BrushOutputNode",
-	    },
-	    4);
-	gc_root(ui_nodes_exclude_remove);
-	ui_nodes_on_custom_button = nodes_on_custom_button;
-	return raw;
-}
-
-ui_node_socket_t *ui_get_socket(ui_node_t_array_t *nodes, i32 id) {
-	for (i32 i = 0; i < nodes->length; ++i) {
-		ui_node_t *n = nodes->buffer[i];
-		for (i32 j = 0; j < n->inputs->length; ++j) {
-			ui_node_socket_t *s = n->inputs->buffer[j];
-			if (s->id == id) {
-				return s;
-			}
-		}
-		for (i32 j = 0; j < n->outputs->length; ++j) {
-			ui_node_socket_t *s = n->outputs->buffer[j];
-			if (s->id == id) {
-				return s;
-			}
-		}
-	}
-	return null;
-}
-
-void ui_set_font(ui_t *ui, draw_font_t *font) {
-	draw_font_init(font);
-	ui->ops->font = font;
-}
-
 
 #include "brush_nodes/boolean_node.c"
 #include "brush_nodes/brush_output_node.c"
@@ -217,7 +128,6 @@ void ui_set_font(ui_t *ui, draw_font_t *font) {
 #include "import_texture.c"
 #include "import_theme.c"
 #include "keymap.c"
-#include "kickstart.c"
 #include "logic_node.c"
 #include "make_bake.c"
 #include "make_blur.c"
@@ -291,37 +201,4 @@ void ui_set_font(ui_t *ui, draw_font_t *font) {
 #include "util_uv.c"
 #include "viewport.c"
 
-void _main() {
-	sys_on_resize = base_on_resize;
-	sys_on_w      = base_w;
-	sys_on_h      = base_h;
-	sys_on_x      = base_x;
-	sys_on_y      = base_y;
-
-	iron_set_app_name(manifest_title); // Used to locate external application data folder
-	config_load();
-	config_init();
-	context_init();
-	sys_start(config_get_options());
-	if (config_raw->layout == null) {
-		config_init_layout();
-	}
-	iron_set_app_name(manifest_title);
-	scene_set_active("Scene");
-	uniforms_ext_init();
-	render_path_base_init();
-	render_path_deferred_init(); // Allocate gbuffer
-	if (config_raw->render_mode == RENDER_MODE_FORWARD) {
-		render_path_forward_init();
-		gc_unroot(render_path_commands);
-		render_path_commands = render_path_forward_commands;
-		gc_root(render_path_commands);
-	}
-	else {
-		gc_unroot(render_path_commands);
-		render_path_commands = render_path_deferred_commands;
-		gc_root(render_path_commands);
-	}
-
-	base_init();
-}
+#include "kickstart.c"

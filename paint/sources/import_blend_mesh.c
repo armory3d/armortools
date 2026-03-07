@@ -1,9 +1,9 @@
 void import_blend_mesh_ui() {
-	if (config_raw->blender == null) {
+	if (config_raw->blender == NULL) {
 		config_raw->blender = "";
 	}
 
-	ui_text(tr("Blender Executable", null), UI_ALIGN_LEFT, 0x00000000);
+	ui_text(tr("Blender Executable", NULL), UI_ALIGN_LEFT, 0x00000000);
 
 	f32_array_t *ar = f32_array_create_from_raw(
 	    (f32[]){
@@ -21,7 +21,7 @@ void import_blend_mesh_ui() {
 	}
 }
 
-void import_blend_mesh_ui_37327(string_t *path) {
+void import_blend_mesh_ui_37327(char *path) {
 	#ifdef IRON_WINDOWS
 	path                = string_copy(string_replace_all(path, "\\", "/"));
 	#endif
@@ -29,30 +29,30 @@ void import_blend_mesh_ui_37327(string_t *path) {
 	config_save();
 }
 
-void import_blend_mesh_run(string_t *path, bool replace_existing) {
-	if (config_raw->blender == null || string_equals(config_raw->blender, "")) {
-		console_error(tr("Blender executable path not set", null));
+void import_blend_mesh_run(char *path, bool replace_existing) {
+	if (config_raw->blender == NULL || string_equals(config_raw->blender, "")) {
+		console_error(tr("Blender executable path not set", NULL));
 		return;
 	}
 
-	string_t *save       = "tmp.obj";
-	string_t *bpy_folder = "data/";
+	char *save       = "tmp.obj";
+	char *bpy_folder = "data/";
 	if (path_is_protected()) {
 		save       = string_join(iron_internal_save_path(), save);
 		bpy_folder = "";
 	}
 
 	// Have to use ; instead of \n on windows
-	string_t *py = string_join(string_join(string_join("\
+	char *py = string_join(string_join(string_join("\
 import bpy;\
 bpy.ops.wm.obj_export(filepath='",
 	                                                   bpy_folder),
 	                                       string_replace_all(save, "\\", "/")),
 	                           "',export_triangulated_mesh=True,export_materials=False,check_existing=False)");
 	#ifdef IRON_WINDOWS
-	string_t *bl = string_join(string_join("\"", string_replace_all(config_raw->blender, "/", "\\")), "\"");
+	char *bl = string_join(string_join("\"", string_replace_all(config_raw->blender, "/", "\\")), "\"");
 	#else
-	string_t *bl = string_replace_all(config_raw->blender, " ", "\\ ");
+	char *bl = string_replace_all(config_raw->blender, " ", "\\ ");
 	#endif
 	iron_sys_command(string_join(string_join(string_join(string_join(string_join(bl, " \""), path), "\" -b --python-expr \""), py), "\""));
 	import_obj_run(save, replace_existing);

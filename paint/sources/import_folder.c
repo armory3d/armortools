@@ -1,24 +1,24 @@
-void import_folder_run(string_t *path) {
+void import_folder_run(char *path) {
 	string_t_array_t *files         = file_read_directory(path);
-	string_t         *mapbase       = "";
-	string_t         *mapopac       = "";
-	string_t         *mapnor        = "";
-	string_t         *mapocc        = "";
-	string_t         *maprough      = "";
-	string_t         *mapmet        = "";
-	string_t         *mapheight     = "";
+	char         *mapbase       = "";
+	char         *mapopac       = "";
+	char         *mapnor        = "";
+	char         *mapocc        = "";
+	char         *maprough      = "";
+	char         *mapmet        = "";
+	char         *mapheight     = "";
 
 	bool              found_texture = false;
 	// Import maps
 	for (i32 i = 0; i < files->length; ++i) {
-		string_t *f = files->buffer[i];
+		char *f = files->buffer[i];
 		if (!path_is_texture(f)) {
 			continue;
 		}
 
 		// TODO: handle -albedo
 
-		string_t *base  = to_lower_case(substring(f, 0, string_last_index_of(f, ".")));
+		char *base  = to_lower_case(substring(f, 0, string_last_index_of(f, ".")));
 		bool      valid = false;
 		if (string_equals(mapbase, "") && path_is_base_color_tex(base)) {
 			mapbase = string_copy(f);
@@ -56,18 +56,18 @@ void import_folder_run(string_t *path) {
 	}
 
 	if (!found_texture) {
-		console_info(tr("Folder does not contain textures", null));
+		console_info(tr("Folder does not contain textures", NULL));
 		return;
 	}
 
 	// Create material
-	context_raw->material = slot_material_create(project_materials->buffer[0]->data, null);
+	context_raw->material = slot_material_create(project_materials->buffer[0]->data, NULL);
 	any_array_push(project_materials, context_raw->material);
 	ui_nodes_t       *nodes  = context_raw->material->nodes;
 	ui_node_canvas_t *canvas = context_raw->material->canvas;
 	string_t_array_t *dirs   = string_split(path, PATH_SEP);
 	canvas->name             = string_copy(dirs->buffer[dirs->length - 1]);
-	ui_node_t *nout          = null;
+	ui_node_t *nout          = NULL;
 	for (i32 i = 0; i < canvas->nodes->length; ++i) {
 		ui_node_t *n = canvas->nodes->buffer[i];
 		if (string_equals(n->type, "OUTPUT_MATERIAL_PBR")) {
@@ -122,8 +122,8 @@ void import_folder_run(string_t *path) {
 	history_new_material();
 }
 
-void import_folder_place_image_node(ui_nodes_t *nodes, ui_node_canvas_t *canvas, string_t *asset, i32 ny, i32 to_id, i32 to_socket) {
-	ui_node_t *n                         = nodes_material_create_node("TEX_IMAGE", null);
+void import_folder_place_image_node(ui_nodes_t *nodes, ui_node_canvas_t *canvas, char *asset, i32 ny, i32 to_id, i32 to_socket) {
+	ui_node_t *n                         = nodes_material_create_node("TEX_IMAGE", NULL);
 	n->buttons->buffer[0]->default_value = f32_array_create_x(base_get_asset_index(asset));
 	n->x                                 = 72;
 	n->y                                 = ny;

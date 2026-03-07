@@ -4,18 +4,18 @@ void image_texture_node_init() {
 	any_map_set(parser_material_node_values, "TEX_IMAGE", image_texture_node_value);
 }
 
-string_t *parser_material_texture_store(ui_node_t *node, bind_tex_t *tex, string_t *tex_name, i32 color_space) {
+char *parser_material_texture_store(ui_node_t *node, bind_tex_t *tex, char *tex_name, i32 color_space) {
 	any_array_push(parser_material_matcon->bind_textures, tex);
 	node_shader_context_add_elem(parser_material_kong->context, "tex", "short2norm");
-	node_shader_add_texture(parser_material_kong, string_join("", tex_name), null);
-	string_t *uv_name = "";
-	if (string_equals(node->type, "TEX_IMAGE") && parser_material_get_input_link(node->inputs->buffer[0]) != null) {
+	node_shader_add_texture(parser_material_kong, string_join("", tex_name), NULL);
+	char *uv_name = "";
+	if (string_equals(node->type, "TEX_IMAGE") && parser_material_get_input_link(node->inputs->buffer[0]) != NULL) {
 		uv_name = string_copy(parser_material_parse_vector_input(node->inputs->buffer[0]));
 	}
 	else {
 		uv_name = string_copy(parser_material_tex_coord);
 	}
-	string_t *tex_store = parser_material_store_var_name(node);
+	char *tex_store = parser_material_store_var_name(node);
 	if (parser_material_sample_keep_aspect) {
 		node_shader_add_constant(parser_material_kong, string_join(tex_name, "_size: float2"), string_join(string_join("_size(", tex_name), ")"));
 		parser_material_write(parser_material_kong,
@@ -118,49 +118,49 @@ string_t *parser_material_texture_store(ui_node_t *node, bind_tex_t *tex, string
 	return tex_store;
 }
 
-bind_tex_t *parser_material_make_texture(ui_node_t *image_node, string_t *tex_name) {
+bind_tex_t *parser_material_make_texture(ui_node_t *image_node, char *tex_name) {
 	i32 i = image_node->buttons->buffer[0]->default_value->buffer[0];
 	if (i > 9000) { // 9999 - Texture deleted, use pink now
-		return null;
+		return NULL;
 	}
-	string_t *filepath = parser_material_enum_data(base_enum_texts(image_node->type)->buffer[i]);
+	char *filepath = parser_material_enum_data(base_enum_texts(image_node->type)->buffer[i]);
 	if (string_equals(filepath, "") || string_index_of(filepath, ".") == -1) {
-		return null;
+		return NULL;
 	}
 	return parser_material_make_bind_tex(tex_name, filepath);
 }
 
-string_t *image_texture_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
+char *image_texture_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	// Already fetched
 	if (char_ptr_array_index_of(parser_material_parsed, parser_material_res_var_name(node, node->outputs->buffer[1])) >= 0) { // TODO: node.outputs[0]
-		string_t *varname = parser_material_store_var_name(node);
+		char *varname = parser_material_store_var_name(node);
 		return string_join(varname, ".rgb");
 	}
-	string_t   *tex_name = parser_material_node_name(node, null);
+	char   *tex_name = parser_material_node_name(node, NULL);
 	bind_tex_t *tex      = parser_material_make_texture(node, tex_name);
-	if (tex != null) {
+	if (tex != NULL) {
 		i32       color_space = node->buttons->buffer[1]->default_value->buffer[0];
-		string_t *texstore    = parser_material_texture_store(node, tex, tex_name, color_space);
+		char *texstore    = parser_material_texture_store(node, tex, tex_name, color_space);
 		return string_join(texstore, ".rgb");
 	}
 	else {
-		string_t *tex_store = parser_material_store_var_name(node); // Pink color for missing texture
+		char *tex_store = parser_material_store_var_name(node); // Pink color for missing texture
 		parser_material_write(parser_material_kong, string_join(string_join("var ", tex_store), ": float4 = float4(1.0, 0.0, 1.0, 1.0);"));
 		return string_join(tex_store, ".rgb");
 	}
 }
 
-string_t *image_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
+char *image_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 	// Already fetched
 	if (char_ptr_array_index_of(parser_material_parsed, parser_material_res_var_name(node, node->outputs->buffer[0])) >= 0) { // TODO: node.outputs[1]
-		string_t *varname = parser_material_store_var_name(node);
+		char *varname = parser_material_store_var_name(node);
 		return string_join(varname, ".a");
 	}
-	string_t   *tex_name = parser_material_node_name(node, null);
+	char   *tex_name = parser_material_node_name(node, NULL);
 	bind_tex_t *tex      = parser_material_make_texture(node, tex_name);
-	if (tex != null) {
+	if (tex != NULL) {
 		i32       color_space = node->buttons->buffer[1]->default_value->buffer[0];
-		string_t *texstore    = parser_material_texture_store(node, tex, tex_name, color_space);
+		char *texstore    = parser_material_texture_store(node, tex, tex_name, color_space);
 		return string_join(texstore, ".a");
 	}
 	return "0.0";

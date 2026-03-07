@@ -9,7 +9,7 @@ void ui_box_init() {
 
 void ui_box_render() {
 	if (!ui_menu_show) {
-		bool in_use    = ui->combo_selected_handle != null;
+		bool in_use    = ui->combo_selected_handle != NULL;
 		bool is_escape = ui->is_escape_down;
 		if (ui_box_draws > 2 && (ui->input_released || is_escape) && !in_use && !ui->is_typing) {
 			i32 appw   = iron_window_width();
@@ -29,7 +29,7 @@ void ui_box_render() {
 	}
 
 	if (config_raw->touch_ui) { // Darken bg
-		draw_begin(null, false, 0);
+		draw_begin(NULL, false, 0);
 		#if defined(IRON_ANDROID) || defined(IRON_IOS)
 		draw_set_color(color_from_floats(0, 0, 0, ui_box_tween_alpha));
 		#else
@@ -53,7 +53,7 @@ void ui_box_render() {
 	i32 top           = math_floor(apph / (float)2 - mh / (float)2);
 	ui_box_hwnd->text = string_copy(ui_box_title);
 
-	if (ui_box_commands == null) {
+	if (ui_box_commands == NULL) {
 		ui_begin(ui);
 		if (ui_window(ui_box_hwnd, left, top, mw, mh, ui_box_draggable)) {
 			ui->_y += 10;
@@ -93,11 +93,11 @@ void ui_box_render() {
 			ui_end_element();
 
 			#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
-			if (ui_box_copyable && ui_icon_button(tr("Copy", null), ICON_COPY, UI_ALIGN_CENTER)) {
+			if (ui_box_copyable && ui_icon_button(tr("Copy", NULL), ICON_COPY, UI_ALIGN_CENTER)) {
 				iron_copy_to_clipboard(ui_box_text);
 			}
 			#endif
-			if (ui_icon_button(tr("OK", null), ICON_CHECK, UI_ALIGN_CENTER)) {
+			if (ui_icon_button(tr("OK", NULL), ICON_CHECK, UI_ALIGN_CENTER)) {
 				ui_box_hide();
 			}
 			ui_box_window_border();
@@ -106,7 +106,7 @@ void ui_box_render() {
 	}
 	else {
 		ui_begin(ui);
-		ui->input_enabled = !ui_menu_show && ui->combo_selected_handle == null;
+		ui->input_enabled = !ui_menu_show && ui->combo_selected_handle == NULL;
 		if (ui_window(ui_box_hwnd, left, top, mw, mh, ui_box_draggable)) {
 			ui->_y += 10;
 			ui_box_commands();
@@ -119,7 +119,7 @@ void ui_box_render() {
 	ui_box_draws++;
 }
 
-void ui_box_show_message(string_t *title, string_t *text, bool copyable) {
+void ui_box_show_message(char *title, char *text, bool copyable) {
 	ui_box_init();
 	ui_box_modalw = 400;
 	ui_box_modalh = 180;
@@ -130,7 +130,7 @@ void ui_box_show_message(string_t *title, string_t *text, bool copyable) {
 	ui_box_text = string_copy(text);
 	gc_root(ui_box_text);
 	gc_unroot(ui_box_commands);
-	ui_box_commands  = null;
+	ui_box_commands  = NULL;
 	ui_box_copyable  = copyable;
 	ui_box_draggable = true;
 	#if defined(IRON_ANDROID) || defined(IRON_IOS)
@@ -138,7 +138,7 @@ void ui_box_show_message(string_t *title, string_t *text, bool copyable) {
 	#endif
 }
 
-void ui_box_show_custom(void (*commands)(void), i32 mw, i32 mh, void (*on_hide)(void), bool draggable, string_t *title) {
+void ui_box_show_custom(void (*commands)(void), i32 mw, i32 mh, void (*on_hide)(void), bool draggable, char *title) {
 	ui_box_init();
 	ui_box_modalw = mw;
 	ui_box_modalh = mh;
@@ -166,7 +166,7 @@ void ui_box_hide() {
 }
 
 void ui_box_hide_internal() {
-	if (ui_box_modal_on_hide != null) {
+	if (ui_box_modal_on_hide != NULL) {
 		ui_box_modal_on_hide();
 	}
 	ui_box_show = false;

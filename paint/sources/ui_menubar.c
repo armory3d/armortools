@@ -73,11 +73,11 @@ void ui_menubar_render_ui() {
 			if (ui_menubar_icon_button(ICON_PROJECTS)) {
 				// Save project icon in lit mode
 				context_set_viewport_mode(VIEWPORT_MODE_LIT);
-				console_toast(tr("Saving project", null));
-				sys_notify_on_next_frame(&ui_menubar_render_ui_87020, null);
+				console_toast(tr("Saving project", NULL));
+				sys_notify_on_next_frame(&ui_menubar_render_ui_87020, NULL);
 			}
 			if (ui_menubar_icon_button(ICON_IMPORT)) {
-				project_import_asset(null, true);
+				project_import_asset(NULL, true);
 			}
 			if (ui_menubar_icon_button(ICON_EXPORT)) {
 				box_export_show_textures();
@@ -129,13 +129,13 @@ void ui_menubar_render_ui() {
 		else {
 			string_t_array_t *categories = any_array_create_from_raw(
 			    (any[]){
-			        tr("File", null),
-			        tr("Edit", null),
-			        tr("Viewport", null),
-			        tr("Mode", null),
-			        tr("Camera", null),
-			        tr("Workspace", null),
-			        tr("Help", null),
+			        tr("File", NULL),
+			        tr("Edit", NULL),
+			        tr("Viewport", NULL),
+			        tr("Mode", NULL),
+			        tr("Camera", NULL),
+			        tr("Workspace", NULL),
+			        tr("Help", NULL),
 			    },
 			    7);
 
@@ -173,7 +173,7 @@ void ui_menubar_render_ui_87029(any _) {
 }
 
 void ui_menubar_render_ui_87020(any _) {
-	sys_notify_on_end_frame(&ui_menubar_render_ui_87029, null);
+	sys_notify_on_end_frame(&ui_menubar_render_ui_87029, NULL);
 }
 
 void ui_menubar_draw_tab_header() {
@@ -196,7 +196,7 @@ void ui_menubar_draw_tab_header() {
 			ui_fill(0, 0, ui->_window_w, ui->_window_h + 4, ui->ops->theme->SEPARATOR_COL);
 		}
 		else {
-			bool a = ui_tab(ui_menubar_tab, tr("3D View", null), false, -1, false);
+			bool a = ui_tab(ui_menubar_tab, tr("3D View", NULL), false, -1, false);
 			bool b = ui_tab(ui_menubar_tab, base_view3d_show ? ">" : "<", false, -2, false);
 			if ((a && !base_view3d_show) || b) {
 				base_view3d_show  = !base_view3d_show;
@@ -209,80 +209,80 @@ void ui_menubar_draw_tab_header() {
 
 void ui_menubar_draw_category_items() {
 	if (ui_menubar_category == MENUBAR_CATEGORY_FILE) {
-		if (ui_menu_button(tr("New Project...", null), any_map_get(config_keymap, "file_new"), ICON_FILE_NEW)) {
+		if (ui_menu_button(tr("New Project...", NULL), any_map_get(config_keymap, "file_new"), ICON_FILE_NEW)) {
 			project_new_box();
 		}
-		if (ui_menu_button(tr("Open...", null), any_map_get(config_keymap, "file_open"), ICON_FOLDER_OPEN)) {
+		if (ui_menu_button(tr("Open...", NULL), any_map_get(config_keymap, "file_open"), ICON_FOLDER_OPEN)) {
 			project_open();
 		}
-		if (ui_menu_button(tr("Open Recent...", null), any_map_get(config_keymap, "file_open_recent"), ICON_REPLAY)) {
+		if (ui_menu_button(tr("Open Recent...", NULL), any_map_get(config_keymap, "file_open_recent"), ICON_REPLAY)) {
 			box_projects_show();
 		}
-		if (ui_menu_button(tr("Save", null), any_map_get(config_keymap, "file_save"), ICON_SAVE)) {
+		if (ui_menu_button(tr("Save", NULL), any_map_get(config_keymap, "file_save"), ICON_SAVE)) {
 			project_save(false);
 		}
-		if (ui_menu_button(tr("Save As...", null), any_map_get(config_keymap, "file_save_as"), ICON_SAVE_AS)) {
+		if (ui_menu_button(tr("Save As...", NULL), any_map_get(config_keymap, "file_save_as"), ICON_SAVE_AS)) {
 			project_save_as(false);
 		}
 		ui_menu_separator();
-		if (ui_menu_sub_button(ui_handle(__ID__), tr("Import", null))) {
+		if (ui_menu_sub_button(ui_handle(__ID__), tr("Import", NULL))) {
 			ui_menu_sub_begin(7);
-			if (ui_menu_button(tr("Texture...", null), any_map_get(config_keymap, "file_import_assets"), ICON_IMAGE)) {
+			if (ui_menu_button(tr("Texture...", NULL), any_map_get(config_keymap, "file_import_assets"), ICON_IMAGE)) {
 				project_import_asset(string_array_join(path_texture_formats(), ","), false);
 			}
-			if (ui_menu_button(tr("Envmap...", null), "", ICON_LANDSCAPE)) {
+			if (ui_menu_button(tr("Envmap...", NULL), "", ICON_LANDSCAPE)) {
 				ui_files_show("hdr", false, false, &ui_menubar_draw_category_items_87924);
 			}
-			if (ui_menu_button(tr("Font...", null), "", ICON_FONT)) {
+			if (ui_menu_button(tr("Font...", NULL), "", ICON_FONT)) {
 				project_import_asset("ttf,ttc,otf", true);
 			}
-			if (ui_menu_button(tr("Material...", null), "", ICON_SPHERE)) {
+			if (ui_menu_button(tr("Material...", NULL), "", ICON_SPHERE)) {
 				project_import_material();
 			}
-			if (ui_menu_button(tr("Brush...", null), "", ICON_PAINT)) {
+			if (ui_menu_button(tr("Brush...", NULL), "", ICON_PAINT)) {
 				project_import_brush();
 			}
-			if (ui_menu_button(tr("Swatches...", null), "", ICON_PALETTE)) {
+			if (ui_menu_button(tr("Swatches...", NULL), "", ICON_PALETTE)) {
 				project_import_swatches(false);
 			}
-			if (ui_menu_button(tr("Mesh...", null), "", ICON_CUBE)) {
-				project_import_mesh(true, null);
+			if (ui_menu_button(tr("Mesh...", NULL), "", ICON_CUBE)) {
+				project_import_mesh(true, NULL);
 			}
 			ui_menu_sub_end();
 		}
-		if (ui_menu_button(tr("Reimport Mesh", null), any_map_get(config_keymap, "file_reimport_mesh"), ICON_SYNC)) {
+		if (ui_menu_button(tr("Reimport Mesh", NULL), any_map_get(config_keymap, "file_reimport_mesh"), ICON_SYNC)) {
 			project_reimport_mesh();
 		}
-		if (ui_menu_button(tr("Reimport Textures", null), any_map_get(config_keymap, "file_reimport_textures"), ICON_SYNC)) {
+		if (ui_menu_button(tr("Reimport Textures", NULL), any_map_get(config_keymap, "file_reimport_textures"), ICON_SYNC)) {
 			project_reimport_textures();
 		}
 		ui_menu_separator();
-		if (ui_menu_sub_button(ui_handle(__ID__), tr("Export", null))) {
+		if (ui_menu_sub_button(ui_handle(__ID__), tr("Export", NULL))) {
 			ui_menu_sub_begin(3);
-			if (ui_menu_button(tr("Textures...", null), any_map_get(config_keymap, "file_export_textures_as"), ICON_IMAGE)) {
+			if (ui_menu_button(tr("Textures...", NULL), any_map_get(config_keymap, "file_export_textures_as"), ICON_IMAGE)) {
 				context_raw->layers_export = EXPORT_MODE_VISIBLE;
 				box_export_show_textures();
 			}
-			if (ui_menu_button(tr("Swatches...", null), "", ICON_PALETTE)) {
+			if (ui_menu_button(tr("Swatches...", NULL), "", ICON_PALETTE)) {
 				project_export_swatches();
 			}
-			if (ui_menu_button(tr("Mesh...", null), "", ICON_CUBE)) {
+			if (ui_menu_button(tr("Mesh...", NULL), "", ICON_CUBE)) {
 				context_raw->export_mesh_index = 0; // All
 				box_export_show_mesh();
 			}
 			ui_menu_sub_end();
 		}
-		if (ui_menu_button(tr("Bake Material...", null), "", ICON_BAKE)) {
+		if (ui_menu_button(tr("Bake Material...", NULL), "", ICON_BAKE)) {
 			box_export_show_bake_material();
 		}
 		ui_menu_separator();
-		if (ui_menu_button(tr("Exit", null), "", ICON_EXIT)) {
+		if (ui_menu_button(tr("Exit", NULL), "", ICON_EXIT)) {
 			iron_stop();
 		}
 	}
 	else if (ui_menubar_category == MENUBAR_CATEGORY_EDIT) {
-		string_t *step_undo = "";
-		string_t *step_redo = "";
+		char *step_undo = "";
+		char *step_redo = "";
 		if (history_undos > 0) {
 			step_undo = string_copy(history_steps->buffer[history_steps->length - 1 - history_redos]->name);
 		}
@@ -305,18 +305,18 @@ void ui_menubar_draw_category_items() {
 		}
 		ui->enabled = true;
 		ui_menu_separator();
-		if (ui_menu_button(tr("Preferences...", null), any_map_get(config_keymap, "edit_prefs"), ICON_COG)) {
+		if (ui_menu_button(tr("Preferences...", NULL), any_map_get(config_keymap, "edit_prefs"), ICON_COG)) {
 			box_preferences_show();
 		}
 	}
 	else if (ui_menubar_category == MENUBAR_CATEGORY_VIEWPORT) {
-		if (ui_menu_button(tr("Distract Free", null), any_map_get(config_keymap, "view_distract_free"), ICON_NONE)) {
+		if (ui_menu_button(tr("Distract Free", NULL), any_map_get(config_keymap, "view_distract_free"), ICON_NONE)) {
 			ui_base_toggle_distract_free();
 			ui->is_hovered = false;
 		}
 
 		#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS) || defined(IRON_WASM)
-		if (ui_menu_button(tr("Toggle Fullscreen", null), "alt+enter", ICON_FULLSCREEN)) {
+		if (ui_menu_button(tr("Toggle Fullscreen", NULL), "alt+enter", ICON_FULLSCREEN)) {
 			base_toggle_fullscreen();
 		}
 		#endif
@@ -327,7 +327,7 @@ void ui_menubar_draw_category_items() {
 		ui_handle_t  *env_handle = ui_handle(__ID__);
 		env_handle->f            = p->strength;
 		ui_menu_align();
-		p->strength = ui_slider(env_handle, tr("Environment", null), 0.0, 6.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
+		p->strength = ui_slider(env_handle, tr("Environment", NULL), 0.0, 6.0, true, 100.0, true, UI_ALIGN_RIGHT, true);
 		if (env_handle->changed) {
 			context_raw->ddirty = 2;
 		}
@@ -342,7 +342,7 @@ void ui_menubar_draw_category_items() {
 		}
 		ui_menu_align();
 		context_raw->envmap_angle =
-		    ui_slider(enva_handle, tr("Environment Angle", null), 0.0, 360.0, true, 1, true, UI_ALIGN_RIGHT, true) / (float)180.0 * math_pi();
+		    ui_slider(enva_handle, tr("Environment Angle", NULL), 0.0, 360.0, true, 1, true, UI_ALIGN_RIGHT, true) / (float)180.0 * math_pi();
 		if (ui->is_hovered) {
 			any_map_t *vars = any_map_create();
 			any_map_set(vars, "shortcut", any_map_get(config_keymap, "rotate_envmap"));
@@ -356,7 +356,7 @@ void ui_menubar_draw_category_items() {
 		if (split_view_handle->init) {
 			split_view_handle->b = context_raw->split_view;
 		}
-		context_raw->split_view = ui_check(split_view_handle, string_join(" ", tr("Split View", null)), "");
+		context_raw->split_view = ui_check(split_view_handle, string_join(" ", tr("Split View", NULL)), "");
 		if (split_view_handle->changed) {
 			base_resize();
 		}
@@ -365,7 +365,7 @@ void ui_menubar_draw_category_items() {
 		if (cull_handle->init) {
 			cull_handle->b = context_raw->cull_backfaces;
 		}
-		context_raw->cull_backfaces = ui_check(cull_handle, string_join(" ", tr("Cull Backfaces", null)), "");
+		context_raw->cull_backfaces = ui_check(cull_handle, string_join(" ", tr("Cull Backfaces", NULL)), "");
 		if (cull_handle->changed) {
 			make_material_parse_mesh_material();
 		}
@@ -374,12 +374,12 @@ void ui_menubar_draw_category_items() {
 		if (filter_handle->init) {
 			filter_handle->b = context_raw->texture_filter;
 		}
-		context_raw->texture_filter = ui_check(filter_handle, string_join(" ", tr("Filter Textures", null)), "");
+		context_raw->texture_filter = ui_check(filter_handle, string_join(" ", tr("Filter Textures", NULL)), "");
 		if (filter_handle->changed) {
 			gpu_use_linear_sampling(context_raw->texture_filter);
 		}
 
-		context_raw->draw_wireframe = ui_check(context_raw->wireframe_handle, string_join(" ", tr("Wireframe", null)), "");
+		context_raw->draw_wireframe = ui_check(context_raw->wireframe_handle, string_join(" ", tr("Wireframe", NULL)), "");
 		if (context_raw->wireframe_handle->changed) {
 			gpu_texture_t *current = _draw_current;
 			draw_end();
@@ -388,7 +388,7 @@ void ui_menubar_draw_category_items() {
 			make_material_parse_mesh_material();
 		}
 
-		context_raw->draw_texels = ui_check(context_raw->texels_handle, string_join(" ", tr("Texels", null)), "");
+		context_raw->draw_texels = ui_check(context_raw->texels_handle, string_join(" ", tr("Texels", NULL)), "");
 		if (context_raw->texels_handle->changed) {
 			make_material_parse_mesh_material();
 		}
@@ -397,30 +397,30 @@ void ui_menubar_draw_category_items() {
 		if (compass_handle->init) {
 			compass_handle->b = context_raw->show_compass;
 		}
-		context_raw->show_compass = ui_check(compass_handle, string_join(" ", tr("Compass", null)), "");
+		context_raw->show_compass = ui_check(compass_handle, string_join(" ", tr("Compass", NULL)), "");
 		if (compass_handle->changed) {
 			context_raw->ddirty = 2;
 		}
 
 		context_raw->show_envmap_handle->b = context_raw->show_envmap;
-		context_raw->show_envmap           = ui_check(context_raw->show_envmap_handle, string_join(" ", tr("Envmap", null)), "");
+		context_raw->show_envmap           = ui_check(context_raw->show_envmap_handle, string_join(" ", tr("Envmap", NULL)), "");
 		if (context_raw->show_envmap_handle->changed) {
 			context_load_envmap();
 			context_raw->ddirty = 2;
 		}
 
 		context_raw->show_envmap_blur_handle->b = context_raw->show_envmap_blur;
-		context_raw->show_envmap_blur           = ui_check(context_raw->show_envmap_blur_handle, string_join(" ", tr("Blur Envmap", null)), "");
+		context_raw->show_envmap_blur           = ui_check(context_raw->show_envmap_blur_handle, string_join(" ", tr("Blur Envmap", NULL)), "");
 		if (context_raw->show_envmap_blur_handle->changed) {
 			context_raw->ddirty = 2;
 		}
 
-		if (ui_menu_button(tr("Reset Envmap", null), "", ICON_NONE)) {
+		if (ui_menu_button(tr("Reset Envmap", NULL), "", ICON_NONE)) {
 			project_set_default_envmap();
 		}
 
-		if (ui_menu_button(tr("Capture Screenshot", null), "", ICON_PHOTO)) {
-			sys_notify_on_next_frame(&ui_menubar_draw_category_items_89069, null);
+		if (ui_menu_button(tr("Capture Screenshot", NULL), "", ICON_PHOTO)) {
+			sys_notify_on_next_frame(&ui_menubar_draw_category_items_89069, NULL);
 			ui->changed = false; // Close menu
 		}
 
@@ -435,21 +435,21 @@ void ui_menubar_draw_category_items() {
 		mode_handle->i           = context_raw->viewport_mode;
 		string_t_array_t *modes  = any_array_create_from_raw(
             (any[]){
-                tr("Lit", null),
-                tr("Base Color", null),
-                tr("Normal", null),
-                tr("Occlusion", null),
-                tr("Roughness", null),
-                tr("Metallic", null),
-                tr("Opacity", null),
-                tr("Height", null),
-                tr("Emission", null),
-                tr("Subsurface", null),
-                tr("TexCoord", null),
-                tr("Object Normal", null),
-                tr("Material ID", null),
-                tr("Object ID", null),
-                tr("Mask", null),
+                tr("Lit", NULL),
+                tr("Base Color", NULL),
+                tr("Normal", NULL),
+                tr("Occlusion", NULL),
+                tr("Roughness", NULL),
+                tr("Metallic", NULL),
+                tr("Opacity", NULL),
+                tr("Height", NULL),
+                tr("Emission", NULL),
+                tr("Subsurface", NULL),
+                tr("TexCoord", NULL),
+                tr("Object Normal", NULL),
+                tr("Material ID", NULL),
+                tr("Object ID", NULL),
+                tr("Mask", NULL),
             },
             15);
 		string_t_array_t *shortcuts = any_array_create_from_raw(
@@ -473,12 +473,12 @@ void ui_menubar_draw_category_items() {
 		    15);
 
 		if (gpu_raytrace_supported()) {
-			any_array_push(modes, tr("Path Traced", null));
+			any_array_push(modes, tr("Path Traced", NULL));
 			any_array_push(shortcuts, "p");
 		}
 
 		for (i32 i = 0; i < modes->length; ++i) {
-			string_t *shortcut = config_raw->touch_ui ? "" : string_join(string_join(any_map_get(config_keymap, "viewport_mode"), ", "), shortcuts->buffer[i]);
+			char *shortcut = config_raw->touch_ui ? "" : string_join(string_join(any_map_get(config_keymap, "viewport_mode"), ", "), shortcuts->buffer[i]);
 			ui_radio(mode_handle, i, modes->buffer[i], shortcut);
 		}
 
@@ -488,7 +488,7 @@ void ui_menubar_draw_category_items() {
 		}
 	}
 	else if (ui_menubar_category == MENUBAR_CATEGORY_CAMERA) {
-		if (ui_menu_button(tr("Reset", null), any_map_get(config_keymap, "view_reset"), ICON_NONE)) {
+		if (ui_menu_button(tr("Reset", NULL), any_map_get(config_keymap, "view_reset"), ICON_NONE)) {
 			viewport_reset();
 			viewport_scale_to_bounds(2.0);
 		}
@@ -504,24 +504,24 @@ void ui_menubar_draw_category_items() {
 
 		if (full) {
 
-			if (ui_menu_sub_button(ui_handle(__ID__), tr("View", null))) {
+			if (ui_menu_sub_button(ui_handle(__ID__), tr("View", NULL))) {
 				ui_menu_sub_begin(6);
-				if (ui_menu_button(tr("Front", null), any_map_get(config_keymap, "view_front"), ICON_NONE)) {
+				if (ui_menu_button(tr("Front", NULL), any_map_get(config_keymap, "view_front"), ICON_NONE)) {
 					viewport_set_view(0, -1, 0, math_pi() / (float)2, 0, 0);
 				}
-				if (ui_menu_button(tr("Back", null), any_map_get(config_keymap, "view_back"), ICON_NONE)) {
+				if (ui_menu_button(tr("Back", NULL), any_map_get(config_keymap, "view_back"), ICON_NONE)) {
 					viewport_set_view(0, 1, 0, math_pi() / (float)2, 0, math_pi());
 				}
-				if (ui_menu_button(tr("Right", null), any_map_get(config_keymap, "view_right"), ICON_NONE)) {
+				if (ui_menu_button(tr("Right", NULL), any_map_get(config_keymap, "view_right"), ICON_NONE)) {
 					viewport_set_view(1, 0, 0, math_pi() / (float)2, 0, math_pi() / (float)2);
 				}
-				if (ui_menu_button(tr("Left", null), any_map_get(config_keymap, "view_left"), ICON_NONE)) {
+				if (ui_menu_button(tr("Left", NULL), any_map_get(config_keymap, "view_left"), ICON_NONE)) {
 					viewport_set_view(-1, 0, 0, math_pi() / (float)2, 0, -math_pi() / (float)2);
 				}
-				if (ui_menu_button(tr("Top", null), any_map_get(config_keymap, "view_top"), ICON_NONE)) {
+				if (ui_menu_button(tr("Top", NULL), any_map_get(config_keymap, "view_top"), ICON_NONE)) {
 					viewport_set_view(0, 0, 1, 0, 0, 0);
 				}
-				if (ui_menu_button(tr("Bottom", null), any_map_get(config_keymap, "view_bottom"), ICON_NONE)) {
+				if (ui_menu_button(tr("Bottom", NULL), any_map_get(config_keymap, "view_bottom"), ICON_NONE)) {
 					viewport_set_view(0, 0, -1, math_pi(), 0, math_pi());
 				}
 				ui_menu_sub_end();
@@ -529,65 +529,65 @@ void ui_menubar_draw_category_items() {
 
 			ui->changed = false;
 
-			if (ui_menu_sub_button(ui_handle(__ID__), tr("Orbit", null))) {
+			if (ui_menu_sub_button(ui_handle(__ID__), tr("Orbit", NULL))) {
 				ui_menu_sub_begin(5);
-				if (ui_menu_button(tr("Left", null), any_map_get(config_keymap, "view_orbit_left"), ICON_ARROW_LEFT)) {
+				if (ui_menu_button(tr("Left", NULL), any_map_get(config_keymap, "view_orbit_left"), ICON_ARROW_LEFT)) {
 					viewport_orbit(-math_pi() / (float)12, 0);
 				}
-				if (ui_menu_button(tr("Right", null), any_map_get(config_keymap, "view_orbit_right"), ICON_ARROW_RIGHT)) {
+				if (ui_menu_button(tr("Right", NULL), any_map_get(config_keymap, "view_orbit_right"), ICON_ARROW_RIGHT)) {
 					viewport_orbit(math_pi() / (float)12, 0);
 				}
-				if (ui_menu_button(tr("Up", null), any_map_get(config_keymap, "view_orbit_up"), ICON_ARROW_UP)) {
+				if (ui_menu_button(tr("Up", NULL), any_map_get(config_keymap, "view_orbit_up"), ICON_ARROW_UP)) {
 					viewport_orbit(0, -math_pi() / (float)12);
 				}
-				if (ui_menu_button(tr("Down", null), any_map_get(config_keymap, "view_orbit_down"), ICON_ARROW_DOWN)) {
+				if (ui_menu_button(tr("Down", NULL), any_map_get(config_keymap, "view_orbit_down"), ICON_ARROW_DOWN)) {
 					viewport_orbit(0, math_pi() / (float)12);
 				}
-				if (ui_menu_button(tr("Opposite", null), any_map_get(config_keymap, "view_orbit_opposite"), ICON_NONE)) {
+				if (ui_menu_button(tr("Opposite", NULL), any_map_get(config_keymap, "view_orbit_opposite"), ICON_NONE)) {
 					viewport_orbit_opposite();
 				}
 				ui_menu_sub_end();
 			}
 		}
 
-		if (ui_menu_button(tr("Zoom In", null), any_map_get(config_keymap, "view_zoom_in"), ICON_ZOOM_IN)) {
+		if (ui_menu_button(tr("Zoom In", NULL), any_map_get(config_keymap, "view_zoom_in"), ICON_ZOOM_IN)) {
 			viewport_zoom(0.2);
 		}
-		if (ui_menu_button(tr("Zoom Out", null), any_map_get(config_keymap, "view_zoom_out"), ICON_ZOOM_OUT)) {
+		if (ui_menu_button(tr("Zoom Out", NULL), any_map_get(config_keymap, "view_zoom_out"), ICON_ZOOM_OUT)) {
 			viewport_zoom(-0.2);
 		}
 
 		camera_object_t *cam       = scene_camera;
 		context_raw->fov_handle->f = math_floor(cam->data->fov * 100) / (float)100;
 		ui_menu_align();
-		cam->data->fov = ui_slider(context_raw->fov_handle, tr("FoV", null), 0.3, 1.4, true, 100.0, true, UI_ALIGN_RIGHT, true);
+		cam->data->fov = ui_slider(context_raw->fov_handle, tr("FoV", NULL), 0.3, 1.4, true, 100.0, true, UI_ALIGN_RIGHT, true);
 		if (context_raw->fov_handle->changed) {
 			viewport_update_camera_type(context_raw->camera_type);
 		}
 
 		ui_menu_separator();
 		ui_menu_align();
-		ui_menu_label(tr("Pivot", null), any_map_get(config_keymap, "view_pivot_center"));
+		ui_menu_label(tr("Pivot", NULL), any_map_get(config_keymap, "view_pivot_center"));
 		ui_menu_align();
 		ui_handle_t      *h                  = ui_handle(__ID__);
 		string_t_array_t *pivot_center_items = any_array_create_from_raw(
 		    (any[]){
-		        tr("Camera Center", null), // tr("Paint Stroke")
+		        tr("Camera Center", NULL), // tr("Paint Stroke")
 		    },
 		    1);
 		ui_inline_radio(h, pivot_center_items, UI_ALIGN_LEFT);
 
 		ui_menu_separator();
 		ui_menu_align();
-		ui_menu_label(tr("Mode", null), null);
+		ui_menu_label(tr("Mode", NULL), NULL);
 		ui_menu_align();
 		ui_handle_t *camera_controls_handle     = ui_handle(__ID__);
 		camera_controls_handle->i               = context_raw->camera_controls;
 		string_t_array_t *camera_controls_items = any_array_create_from_raw(
 		    (any[]){
-		        tr("Orbit", null),
-		        tr("Rotate", null),
-		        tr("Fly", null),
+		        tr("Orbit", NULL),
+		        tr("Rotate", NULL),
+		        tr("Fly", NULL),
 		    },
 		    3);
 		context_raw->camera_controls = ui_inline_radio(camera_controls_handle, camera_controls_items, UI_ALIGN_LEFT);
@@ -596,25 +596,25 @@ void ui_menubar_draw_category_items() {
 		any_map_set(vars, "rotate_shortcut", any_map_get(config_keymap, "action_rotate"));
 		any_map_set(vars, "zoom_shortcut", any_map_get(config_keymap, "action_zoom"));
 		any_map_set(vars, "pan_shortcut", any_map_get(config_keymap, "action_pan"));
-		string_t *orbit_and_rotate_tooltip = tr("Orbit and Rotate mode:\n{rotate_shortcut} or move right mouse button to rotate.\n{zoom_shortcut} or scroll to "
+		char *orbit_and_rotate_tooltip = tr("Orbit and Rotate mode:\n{rotate_shortcut} or move right mouse button to rotate.\n{zoom_shortcut} or scroll to "
 		                                        "zoom.\n{pan_shortcut} or move middle mouse to pan.",
 		                                        vars);
-		string_t *fly_tooltip = tr("Fly mode:\nHold the right mouse button and one of the following commands:\nmove mouse to rotate.\nw, up or scroll up to "
+		char *fly_tooltip = tr("Fly mode:\nHold the right mouse button and one of the following commands:\nmove mouse to rotate.\nw, up or scroll up to "
 		                           "move forward.\ns, down or scroll down to move backward.\na or left to move left.\nd or right to move right.\ne to move "
 		                           "up.\nq to move down.\nHold shift to move faster or alt to move slower.",
-		                           null);
+		                           NULL);
 		if (ui->is_hovered) {
 			ui_tooltip(string_join(string_join(orbit_and_rotate_tooltip, "\n\n"), fly_tooltip));
 		}
 
 		ui_menu_separator();
 		ui_menu_align();
-		ui_menu_label(tr("Type", null), any_map_get(config_keymap, "view_camera_type"));
+		ui_menu_label(tr("Type", NULL), any_map_get(config_keymap, "view_camera_type"));
 		ui_menu_align();
 		string_t_array_t *camera_type_items = any_array_create_from_raw(
 		    (any[]){
-		        tr("Perspective", null),
-		        tr("Orthographic", null),
+		        tr("Perspective", NULL),
+		        tr("Orthographic", NULL),
 		    },
 		    2);
 		context_raw->camera_type = ui_inline_radio(context_raw->cam_handle, camera_type_items, UI_ALIGN_LEFT);
@@ -627,19 +627,19 @@ void ui_menubar_draw_category_items() {
 		}
 	}
 	else if (ui_menubar_category == MENUBAR_CATEGORY_HELP) {
-		if (ui_menu_button(tr("Manual", null), "", ICON_HELP)) {
+		if (ui_menu_button(tr("Manual", NULL), "", ICON_HELP)) {
 			iron_load_url(string_join(manifest_url, "/manual"));
 		}
-		if (ui_menu_button(tr("How To", null), "", ICON_HELP)) {
+		if (ui_menu_button(tr("How To", NULL), "", ICON_HELP)) {
 			iron_load_url(string_join(manifest_url, "/howto"));
 		}
-		if (ui_menu_button(tr("What's New", null), "", ICON_LINK)) {
+		if (ui_menu_button(tr("What's New", NULL), "", ICON_LINK)) {
 			iron_load_url(string_join(manifest_url, "/notes"));
 		}
-		if (ui_menu_button(tr("Issue Tracker", null), "", ICON_LINK)) {
+		if (ui_menu_button(tr("Issue Tracker", NULL), "", ICON_LINK)) {
 			iron_load_url("https://github.com/armory3d/armortools/issues");
 		}
-		if (ui_menu_button(tr("Report Bug", null), "", ICON_LINK)) {
+		if (ui_menu_button(tr("Report Bug", NULL), "", ICON_LINK)) {
 			#if defined(IRON_MACOS) || defined(IRON_IOS) // Limited url length
 			iron_load_url(string_join(
 			    string_join(
@@ -667,7 +667,7 @@ void ui_menubar_draw_category_items() {
 			                "*%0A%0A**Issue description:**%0A%0A**Steps to reproduce:**%0A%0A"));
 			#endif
 		}
-		if (ui_menu_button(tr("Request Feature", null), "", ICON_LINK)) {
+		if (ui_menu_button(tr("Request Feature", NULL), "", ICON_LINK)) {
 			#if defined(IRON_MACOS) || defined(IRON_IOS) // Limited url length
 			iron_load_url(string_join(
 			    string_join(string_join(string_join(string_join(string_join(string_join("https://github.com/armory3d/armortools/issues/"
@@ -696,20 +696,20 @@ void ui_menubar_draw_category_items() {
 		}
 		ui_menu_separator();
 
-		if (ui_menu_button(tr("Check for Updates...", null), "", ICON_NONE)) {
+		if (ui_menu_button(tr("Check for Updates...", NULL), "", ICON_NONE)) {
 			#ifdef IRON_ANDROID
 			iron_load_url(manifest_url_android);
 			#elif defined(IRON_IOS)
 			iron_load_url(manifest_url_ios);
 			#else
 			// Retrieve latest version number
-			iron_file_download("https://check-for-updates.armory3d.workers.dev", &ui_menubar_draw_category_items_90507, 0, null);
+			iron_file_download("https://check-for-updates.armory3d.workers.dev", &ui_menubar_draw_category_items_90507, 0, NULL);
 			#endif
 		}
 
-		if (ui_menu_button(tr("About...", null), "", ICON_INFO)) {
+		if (ui_menu_button(tr("About...", NULL), "", ICON_INFO)) {
 
-			string_t *msg =
+			char *msg =
 			    string_join(string_join(string_join(string_join(string_join(string_join(string_join(manifest_title, ".org - v"), manifest_version), " ("),
 			                                                    config_get_date()),
 			                                        ") - "),
@@ -717,13 +717,13 @@ void ui_menubar_draw_category_items() {
 			                "\n");
 			msg = string_join(msg, string_join(string_join(iron_system_id(), " - "), strings_graphics_api()));
 
-			string_t *gpu = gpu_device_name();
+			char *gpu = gpu_device_name();
 			msg           = string_join(msg, string_join("\n", gpu));
 
 			gc_unroot(_ui_menu_render_msg);
 			_ui_menu_render_msg = string_copy(msg);
 			gc_root(_ui_menu_render_msg);
-			ui_box_show_custom(&ui_menubar_draw_category_items_90774, 400, 320, null, true, tr("About", null));
+			ui_box_show_custom(&ui_menubar_draw_category_items_90774, 400, 320, NULL, true, tr("About", NULL));
 		}
 	}
 	else if (ui_menubar_category == MENUBAR_CATEGORY_WORKSPACE) {
@@ -731,13 +731,13 @@ void ui_menubar_draw_category_items() {
 		workspace_handle->i           = config_raw->workspace;
 		string_t_array_t *modes       = any_array_create_from_raw(
             (any[]){
-                tr("Paint 3D", null),
-                tr("Paint 2D", null),
+                tr("Paint 3D", NULL),
+                tr("Paint 2D", NULL),
             },
             2);
 
 		if (config_raw->experimental) {
-			any_array_push(modes, tr("Sculpt", null));
+			any_array_push(modes, tr("Sculpt", NULL));
 		}
 
 		for (i32 i = 0; i < modes->length; ++i) {
@@ -765,44 +765,44 @@ void ui_menubar_draw_category_items_90774() {
 	ui_row3();
 
 	#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
-	if (ui_icon_button(tr("Copy", null), ICON_COPY, UI_ALIGN_CENTER)) {
+	if (ui_icon_button(tr("Copy", NULL), ICON_COPY, UI_ALIGN_CENTER)) {
 		iron_copy_to_clipboard(_ui_menu_render_msg);
 	}
 	#else
 	ui_end_element();
 	#endif
 
-	if (ui_icon_button(tr("Contributors", null), ICON_LINK, UI_ALIGN_CENTER)) {
+	if (ui_icon_button(tr("Contributors", NULL), ICON_LINK, UI_ALIGN_CENTER)) {
 		iron_load_url("https://github.com/armory3d/armortools/graphs/contributors");
 	}
-	if (ui_icon_button(tr("OK", null), ICON_CHECK, UI_ALIGN_CENTER)) {
+	if (ui_icon_button(tr("OK", NULL), ICON_CHECK, UI_ALIGN_CENTER)) {
 		ui_box_hide();
 	}
 }
 
-void ui_menubar_draw_category_items_90507(string_t *url, buffer_t *buffer) {
-	if (buffer != null) {
+void ui_menubar_draw_category_items_90507(char *url, buffer_t *buffer) {
+	if (buffer != NULL) {
 		// Compare versions
 		update_info_t *update         = json_parse(sys_buffer_to_string(buffer));
 		i32            update_version = math_floor(update->version);
 		if (update_version > 0) {
-			string_t *date = config_get_date(); // 2019 -> 19
+			char *date = config_get_date(); // 2019 -> 19
 			date           = string_copy(substring(date, 2, string_length(date)));
 			i32 date_int   = parse_int(string_replace_all(date, "-", ""));
 			if (update_version > date_int) {
 				any_map_t *vars = any_map_create();
 				any_map_set(vars, "url", manifest_url);
-				ui_box_show_message(tr("Update", null), tr("Update is available!\nPlease visit {url}.", vars), false);
+				ui_box_show_message(tr("Update", NULL), tr("Update is available!\nPlease visit {url}.", vars), false);
 			}
 			else {
-				ui_box_show_message(tr("Update", null), tr("You are up to date!", null), false);
+				ui_box_show_message(tr("Update", NULL), tr("You are up to date!", NULL), false);
 			}
 		}
 	}
 	else {
 		any_map_t *vars = any_map_create();
 		any_map_set(vars, "url", manifest_url);
-		ui_box_show_message(tr("Update", null), tr("Unable to check for updates.\nPlease visit {url}.", vars), false);
+		ui_box_show_message(tr("Update", NULL), tr("Unable to check for updates.\nPlease visit {url}.", vars), false);
 	}
 }
 
@@ -810,12 +810,12 @@ void ui_menubar_draw_category_items_89069(any _) {
 	viewport_capture_screenshot();
 }
 
-void ui_menubar_draw_category_items_87924(string_t *path) {
+void ui_menubar_draw_category_items_87924(char *path) {
 	if (!ends_with(path, ".hdr")) {
-		console_error(tr("Error: .hdr file expected", null));
+		console_error(tr("Error: .hdr file expected", NULL));
 		return;
 	}
-	import_asset_run(path, -1.0, -1.0, true, true, null);
+	import_asset_run(path, -1.0, -1.0, true, true, NULL);
 }
 
 void ui_menubar_show_menu(i32 category) {

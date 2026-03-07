@@ -23,13 +23,11 @@
 #define u16         uint16_t
 #define i8          int8_t
 #define u8          uint8_t
-#define string_t    char
 #define any         void *
 #define any_ptr     void **
 #define u8_ptr      u8 *
 #define u32_ptr     u32 *
 #define f32_ptr     f32 *
-#define null        NULL
 #define DEREFERENCE *
 #define ADDRESS     &
 

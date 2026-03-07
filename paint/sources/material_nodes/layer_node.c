@@ -4,7 +4,7 @@ void layer_node_init() {
 	any_map_set(parser_material_node_values, "LAYER", layer_node_value);
 }
 
-string_t *layer_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
+char *layer_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	i32 l = node->buttons->buffer[0]->default_value->buffer[0];
 	if (socket == node->outputs->buffer[0]) { // Base
 		node_shader_add_texture(parser_material_kong, string_join("texpaint", i32_to_string(l)), string_join("_texpaint", i32_to_string(l)));
@@ -16,7 +16,7 @@ string_t *layer_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	}
 }
 
-string_t *layer_node_value(ui_node_t *node, ui_node_socket_t *socket) {
+char *layer_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 	i32 l = node->buttons->buffer[0]->default_value->buffer[0];
 	if (socket == node->outputs->buffer[1]) { // Opac
 		node_shader_add_texture(parser_material_kong, string_join("texpaint", i32_to_string(l)), string_join("_texpaint", i32_to_string(l)));

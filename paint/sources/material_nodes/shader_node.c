@@ -3,8 +3,8 @@ void shader_node_init() {
 	any_map_set(parser_material_node_values, "SHADER_GPU", shader_node_value);
 }
 
-string_t *shader_node_value(ui_node_t *node, ui_node_socket_t *socket) {
+char *shader_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 	buffer_t *shader = node->buttons->buffer[0]->default_value;
-	string_t *str    = sys_buffer_to_string(shader);
+	char *str    = sys_buffer_to_string(shader);
 	return string_equals(str, "") ? "0.0" : str;
 }

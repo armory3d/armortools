@@ -1,5 +1,5 @@
 void viewport_scale_to_bounds(f32 bounds) {
-	mesh_object_t *po          = context_raw->merged_object == null ? context_main_object() : context_raw->merged_object;
+	mesh_object_t *po          = context_raw->merged_object == NULL ? context_main_object() : context_raw->merged_object;
 	mesh_data_t   *md          = po->data;
 	vec4_t         aabb        = mesh_data_calculate_aabb(md);
 	f32            r           = math_sqrt(aabb.x * aabb.x + aabb.y * aabb.y + aabb.z * aabb.z);
@@ -26,7 +26,7 @@ void viewport_reset() {
 			transform_decompose(cam->base->transform);
 			cam->data->fov             = config_raw->camera_fov;
 			context_raw->cam_handle->i = 0;
-			cam->data->ortho           = null;
+			cam->data->ortho           = NULL;
 			camera_object_build_proj(cam, -1.0);
 			context_raw->ddirty = 2;
 			camera_reset(-1);
@@ -75,7 +75,7 @@ void viewport_zoom(f32 f) {
 void viewport_update_camera_type(i32 camera_type) {
 	camera_object_t *cam = scene_cameras->buffer[0];
 	if (camera_type == CAMERA_TYPE_PERSPECTIVE) {
-		cam->data->ortho = null;
+		cam->data->ortho = NULL;
 	}
 	else {
 		f32_array_t *f32a = f32_array_create(4);
@@ -104,12 +104,12 @@ void viewport_capture_screenshot() {
 	draw_begin(screenshot, false, 0);
 	draw_image(tex, 0, 0);
 	draw_end();
-	if (project_raw->packed_assets == null) {
+	if (project_raw->packed_assets == NULL) {
 		project_raw->packed_assets = any_array_create_from_raw((any[]){}, 0);
 	}
 
 	i32       num = 0;
-	string_t *abs = "/packed/screenshot0.png";
+	char *abs = "/packed/screenshot0.png";
 	for (i32 i = 0; i < project_raw->packed_assets->length; ++i) {
 		packed_asset_t *pa = project_raw->packed_assets->buffer[i];
 		if (string_equals(pa->name, abs)) {

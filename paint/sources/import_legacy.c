@@ -1,4 +1,4 @@
-ui_node_socket_t_array_t *_import_arm_get_legacy_node_socket_array(any_map_t *old, string_t *key) {
+ui_node_socket_t_array_t *_import_arm_get_legacy_node_socket_array(any_map_t *old, char *key) {
 	ui_node_socket_t_array_t *sockets = any_array_create_from_raw((any[]){}, 0);
 	any_array_t              *ias     = any_map_get(old, key);
 	for (i32 i = 0; i < ias->length; ++i) {
@@ -41,10 +41,10 @@ ui_node_socket_t_array_t *_import_arm_get_legacy_node_socket_array(any_map_t *ol
 	return sockets;
 }
 
-ui_node_canvas_t_array_t *_import_arm_get_legacy_node_canvas_array(any_map_t *map, string_t *key) {
+ui_node_canvas_t_array_t *_import_arm_get_legacy_node_canvas_array(any_map_t *map, char *key) {
 	any_array_t *cas = any_map_get(map, key);
-	if (cas == null) {
-		return null;
+	if (cas == NULL) {
+		return NULL;
 	}
 	ui_node_canvas_t_array_t *ar = any_array_create_from_raw((any[]){}, 0);
 	for (i32 i = 0; i < cas->length; ++i) {
@@ -81,12 +81,12 @@ ui_node_canvas_t_array_t *_import_arm_get_legacy_node_canvas_array(any_map_t *ma
 					b->default_value = f32_array_create_x(x);
 
 					if (string_equals(b->name, "File")) {
-						string_t *data_string = any_map_get(old, "data");
+						char *data_string = any_map_get(old, "data");
 						b->data               = sys_string_to_buffer(data_string);
 					}
 					else {
 						string_t_array_t *data_strings = any_map_get(old, "data");
-						string_t         *joined       = string_array_join(data_strings, "\n");
+						char         *joined       = string_array_join(data_strings, "\n");
 						b->data                        = sys_string_to_buffer(joined);
 					}
 				}
@@ -143,7 +143,7 @@ ui_node_canvas_t_array_t *_import_arm_get_legacy_node_canvas_array(any_map_t *ma
 	return ar;
 }
 
-ui_node_socket_t_array_t *import_arm_get_node_socket_array(any_map_t *old, string_t *key) {
+ui_node_socket_t_array_t *import_arm_get_node_socket_array(any_map_t *old, char *key) {
 	ui_node_socket_t_array_t *sockets = any_array_create_from_raw((any[]){}, 0);
 	any_array_t              *ias     = any_map_get(old, key);
 	for (i32 i = 0; i < ias->length; ++i) {
@@ -164,10 +164,10 @@ ui_node_socket_t_array_t *import_arm_get_node_socket_array(any_map_t *old, strin
 	return sockets;
 }
 
-ui_node_canvas_t_array_t *import_arm_get_node_canvas_array(any_map_t *map, string_t *key) {
+ui_node_canvas_t_array_t *import_arm_get_node_canvas_array(any_map_t *map, char *key) {
 	any_array_t *cas = any_map_get(map, key);
-	if (cas == null) {
-		return null;
+	if (cas == NULL) {
+		return NULL;
 	}
 	ui_node_canvas_t_array_t *ar = any_array_create_from_raw((any[]){}, 0);
 	for (i32 i = 0; i < cas->length; ++i) {
@@ -260,12 +260,12 @@ project_format_t *import_arm_from_legacy(any_map_t *old) {
 	project_format_t *project = GC_ALLOC_INIT(project_format_t, {0});
 	project->version          = string_copy(manifest_version_project);
 	project->assets           = any_map_get(old, "assets");
-	if (project->assets == null) {
+	if (project->assets == NULL) {
 		project->assets = any_array_create_from_raw((any[]){}, 0);
 	}
 	project->is_bgra = armpack_map_get_i32(old, "is_bgra") > 0;
 	any_array_t *pas = any_map_get(old, "packed_assets");
-	if (pas != null) {
+	if (pas != NULL) {
 		project->packed_assets = any_array_create_from_raw((any[]){}, 0);
 		for (i32 i = 0; i < pas->length; ++i) {
 			any_map_t      *old = pas->buffer[i];
@@ -289,7 +289,7 @@ project_format_t *import_arm_from_version_2(any_map_t *old) {
 	project->assets           = any_map_get(old, "assets");
 	project->is_bgra          = armpack_map_get_i32(old, "is_bgra") > 0;
 	any_array_t *pas          = any_map_get(old, "packed_assets");
-	if (pas != null) {
+	if (pas != NULL) {
 		project->packed_assets = any_array_create_from_raw((any[]){}, 0);
 		for (i32 i = 0; i < pas->length; ++i) {
 			any_map_t      *old = pas->buffer[i];
@@ -323,7 +323,7 @@ project_format_t *import_arm_from_version_2(any_map_t *old) {
 	project->brush_nodes    = import_arm_get_node_canvas_array(old, "brush_nodes");
 	project->brush_icons    = any_map_get(old, "brush_icons");
 	project->material_nodes = import_arm_get_node_canvas_array(old, "material_nodes");
-	if (any_map_get(old, "material_groups") != null) {
+	if (any_map_get(old, "material_groups") != NULL) {
 		project->material_groups = import_arm_get_node_canvas_array(old, "material_groups");
 	}
 	project->material_icons = any_map_get(old, "material_icons");
@@ -419,5 +419,5 @@ project_format_t *import_arm_from_old(buffer_t *b) {
 	if (import_arm_is_version_3(b)) {
 		return import_arm_from_version_3(old);
 	}
-	return null;
+	return NULL;
 }

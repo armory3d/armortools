@@ -2,7 +2,7 @@
 // https://github.com/aras-p/miniexr
 // https://www.openexr.com/documentation/openexrfilelayout.pdf
 
-void export_exr_write_string(u8_array_t *out, string_t *str) {
+void export_exr_write_string(u8_array_t *out, char *str) {
 	for (i32 i = 0; i < string_length(str); ++i) {
 		u8_array_push(out, char_code_at(str, i));
 	}

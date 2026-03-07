@@ -33,10 +33,10 @@ void brush_output_node_parse_inputs(brush_output_node_t *self) {
 	context_raw->brush_nodes_angle  = input3->_f32;
 
 	logic_node_value_t *opac = input4; // Float or texture name
-	if (opac == null) {
+	if (opac == NULL) {
 		opac = GC_ALLOC_INIT(logic_node_value_t, {._f32 = 1.0});
 	}
-	if (opac->_str != null) { // string
+	if (opac->_str != NULL) { // string
 		context_raw->brush_mask_image_is_alpha = ends_with(opac->_str, ".a");
 		opac->_str                             = string_copy(substring(opac->_str, 0, string_last_index_of(opac->_str, ".")));
 		context_raw->brush_nodes_opacity       = 1.0;
@@ -48,16 +48,16 @@ void brush_output_node_parse_inputs(brush_output_node_t *self) {
 	}
 	else {
 		context_raw->brush_nodes_opacity = opac->_f32;
-		context_raw->brush_mask_image    = null;
+		context_raw->brush_mask_image    = NULL;
 	}
 
 	context_raw->brush_nodes_hardness = input5->_f32;
 
 	logic_node_value_t *stencil = input6; // Float or texture name
-	if (stencil == null) {
+	if (stencil == NULL) {
 		stencil = GC_ALLOC_INIT(logic_node_value_t, {._f32 = 1.0});
 	}
-	if (stencil->_str != null) { // string
+	if (stencil->_str != NULL) { // string
 		context_raw->brush_stencil_image_is_alpha = ends_with(stencil->_str, ".a");
 		stencil->_str                             = string_copy(substring(stencil->_str, 0, string_last_index_of(stencil->_str, ".")));
 		i32 index                                 = char_ptr_array_index_of(project_asset_names, stencil->_str);
@@ -67,7 +67,7 @@ void brush_output_node_parse_inputs(brush_output_node_t *self) {
 		}
 	}
 	else {
-		context_raw->brush_stencil_image = null;
+		context_raw->brush_stencil_image = NULL;
 	}
 
 	if (last_mask != context_raw->brush_mask_image || last_stencil != context_raw->brush_stencil_image) {
@@ -113,7 +113,7 @@ void brush_output_node_run(brush_output_node_t *self, i32 from) {
 	}
 
 	// Do not paint over fill layer
-	bool fill_layer = context_raw->layer->fill_layer != null && context_raw->tool != TOOL_TYPE_PICKER && context_raw->tool != TOOL_TYPE_MATERIAL &&
+	bool fill_layer = context_raw->layer->fill_layer != NULL && context_raw->tool != TOOL_TYPE_PICKER && context_raw->tool != TOOL_TYPE_MATERIAL &&
 	                  context_raw->tool != TOOL_TYPE_COLORID;
 	if (fill_layer) {
 		return;
@@ -132,7 +132,7 @@ void brush_output_node_run(brush_output_node_t *self, i32 from) {
 		return;
 	}
 
-	if (ui->is_hovered || base_is_dragging || base_is_resizing || ui->is_scrolling || ui->combo_selected_handle != null) {
+	if (ui->is_hovered || base_is_dragging || base_is_resizing || ui->is_scrolling || ui->combo_selected_handle != NULL) {
 		return;
 	}
 
@@ -275,7 +275,7 @@ void brush_output_paint(brush_output_node_t *self) {
 // 			type: "BOOL",
 // 			output: 0,
 // 			default_value: f32_array_create_x(0),
-//			data: null,
+//			data: NULL,
 //			min: 0.0,
 //			max: 1.0,
 //			precision: 100,

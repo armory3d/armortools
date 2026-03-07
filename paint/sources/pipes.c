@@ -201,7 +201,7 @@ void pipes_init() {
 	}
 }
 
-i32 pipes_get_constant_location(string_t *type) {
+i32 pipes_get_constant_location(char *type) {
 	i32 size = shader_context_type_size(type);
 	pipes_offset += shader_context_type_pad(pipes_offset, size);
 	i32 loc = pipes_offset;

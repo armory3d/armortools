@@ -7,14 +7,14 @@ void render_path_raytrace_commands(bool use_live_layer) {
 			render_path_raytrace_is_bake     = false;
 			render_path_raytrace_init_shader = true;
 		}
-		string_t *ext = "";
+		char *ext = "";
 		if (context_raw->tool == TOOL_TYPE_GIZMO) {
 			ext = "forge_";
 		}
-		string_t *mode = config_raw->pathtrace_mode == PATHTRACE_MODE_FAST ? "core" : "full";
+		char *mode = config_raw->pathtrace_mode == PATHTRACE_MODE_FAST ? "core" : "full";
 		render_path_raytrace_raytrace_init(string_join(string_join(string_join("raytrace_brute_", ext), mode), render_path_raytrace_ext), true);
 		gc_unroot(render_path_raytrace_last_envmap);
-		render_path_raytrace_last_envmap = null;
+		render_path_raytrace_last_envmap = NULL;
 	}
 
 	if (!context_raw->envmap_loaded) {
@@ -35,13 +35,13 @@ void render_path_raytrace_commands(bool use_live_layer) {
 		gpu_texture_t *bnoise_scramble = any_map_get(scene_embedded, "bnoise_scramble.k");
 		gpu_texture_t *bnoise_rank     = any_map_get(scene_embedded, "bnoise_rank.k");
 
-		slot_layer_t  *l               = layers_flatten(true, null);
+		slot_layer_t  *l               = layers_flatten(true, NULL);
 		gpu_raytrace_set_textures(l->texpaint, l->texpaint_nor, l->texpaint_pack, saved_envmap, bnoise_sobol, bnoise_scramble, bnoise_rank);
 	}
 	////
 
 	if (context_raw->pdirty > 0 || render_path_raytrace_dirty > 0) {
-		layers_flatten(true, null);
+		layers_flatten(true, NULL);
 	}
 
 	camera_object_t *cam                 = scene_camera;
@@ -108,7 +108,7 @@ void render_path_raytrace_commands(bool use_live_layer) {
 	}
 }
 
-void render_path_raytrace_raytrace_init(string_t *shader_name, bool build) {
+void render_path_raytrace_raytrace_init(char *shader_name, bool build) {
 	if (render_path_raytrace_init_shader) {
 		render_path_raytrace_init_shader = false;
 		scene_embed_data("bnoise_sobol.k");
@@ -147,8 +147,8 @@ void render_path_raytrace_raytrace_init(string_t *shader_name, bool build) {
 }
 
 void render_path_raytrace_build_data() {
-	if (context_raw->merged_object == null) {
-		util_mesh_merge(null);
+	if (context_raw->merged_object == NULL) {
+		util_mesh_merge(NULL);
 	}
 
 	mesh_object_t *mo = !context_layer_filter_used() ? context_raw->merged_object : context_raw->paint_object;
@@ -161,7 +161,7 @@ void render_path_raytrace_build_data() {
 	}
 
 	f32 sc = mo->base->transform->scale.x * mo->data->scale_pos;
-	if (mo->base->parent != null) {
+	if (mo->base->parent != NULL) {
 		sc *= mo->base->parent->transform->scale.x;
 	}
 	render_path_raytrace_transform = mat4_scale(render_path_raytrace_transform, vec4_create(sc, sc, sc, 1.0));
@@ -189,15 +189,15 @@ void render_path_raytrace_draw(bool use_live_layer) {
 	#endif
 
 	render_path_raytrace_commands(use_live_layer);
-	render_path_set_target("buf", null, null, GPU_CLEAR_NONE, 0, 0.0);
+	render_path_set_target("buf", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_draw_meshes("overlay");
-	render_path_set_target("buf", null, null, GPU_CLEAR_NONE, 0, 0.0);
+	render_path_set_target("buf", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_base_draw_compass();
-	render_path_set_target("last", null, null, GPU_CLEAR_NONE, 0, 0.0);
+	render_path_set_target("last", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_bind_target("buf", "tex");
 	render_path_draw_shader("Scene/compositor_pass/compositor_pass");
 	render_path_base_draw_bloom("buf", "last");
-	render_path_set_target("", null, null, GPU_CLEAR_NONE, 0, 0.0);
+	render_path_set_target("", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_bind_target("last", "tex");
 	render_path_draw_shader("Scene/copy_pass/copy_pass");
 	render_path_paint_commands_cursor();

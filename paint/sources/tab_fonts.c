@@ -1,5 +1,5 @@
 void tab_fonts_draw(ui_handle_t *htab) {
-	if (ui_tab(htab, tr("Fonts", null), false, -1, false) && ui->_window_h > ui_statusbar_default_h * UI_SCALE()) {
+	if (ui_tab(htab, tr("Fonts", NULL), false, -1, false) && ui->_window_h > ui_statusbar_default_h * UI_SCALE()) {
 
 		ui_begin_sticky();
 		f32_array_t *row = f32_array_create_from_raw(
@@ -10,14 +10,14 @@ void tab_fonts_draw(ui_handle_t *htab) {
 		    2);
 		ui_row(row);
 
-		if (ui_icon_button(tr("Import", null), ICON_IMPORT, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Import", NULL), ICON_IMPORT, UI_ALIGN_CENTER)) {
 			project_import_asset("ttf,ttc,otf", true);
 		}
 		if (ui->is_hovered) {
-			ui_tooltip(tr("Import font file", null));
+			ui_tooltip(tr("Import font file", NULL));
 		}
 
-		if (ui_icon_button(tr("2D View", null), ICON_WINDOW, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("2D View", NULL), ICON_WINDOW, UI_ALIGN_CENTER)) {
 			ui_base_show_2d_view(VIEW_2D_TYPE_FONT);
 		}
 		ui_end_sticky();
@@ -75,7 +75,7 @@ void tab_fonts_draw(ui_handle_t *htab) {
 					// draw_set_pipeline(pipe); // L8
 					// gpu_set_int(channel_location, 1);
 					state = ui_image(img, 0xffffffff, -1.0);
-					// draw_set_pipeline(null);
+					// draw_set_pipeline(NULL);
 				}
 				else {
 					state = ui_sub_image(resource_get("icons.k"), -1, -1.0, tile * 6, tile, tile, tile);
@@ -85,7 +85,7 @@ void tab_fonts_draw(ui_handle_t *htab) {
 					if (context_raw->font != project_fonts->buffer[i]) {
 						_tab_fonts_draw_i = i;
 
-						sys_notify_on_next_frame(&tab_fonts_draw_97837, null);
+						sys_notify_on_next_frame(&tab_fonts_draw_97837, NULL);
 					}
 					if (sys_time() - context_raw->select_time < 0.2) {
 						ui_base_show_2d_view(VIEW_2D_TYPE_FONT);
@@ -94,12 +94,12 @@ void tab_fonts_draw(ui_handle_t *htab) {
 				}
 				if (ui->is_hovered && ui->input_released_r) {
 					_tab_fonts_draw_i = i;
-					sys_notify_on_next_frame(&tab_fonts_draw_97897, null);
+					sys_notify_on_next_frame(&tab_fonts_draw_97897, NULL);
 				}
 				if (ui->is_hovered) {
-					if (img == null) {
+					if (img == NULL) {
 						_tab_fonts_draw_i = i;
-						sys_notify_on_next_frame(&tab_fonts_draw_97983, null);
+						sys_notify_on_next_frame(&tab_fonts_draw_97983, NULL);
 					}
 					else {
 						ui_tooltip_image(img, 0);
@@ -143,7 +143,7 @@ void tab_fonts_draw_97983(any _) {
 
 void tab_fonts_draw_97911() {
 	i32 i = _tab_fonts_draw_i;
-	if (project_fonts->length > 1 && ui_menu_button(tr("Delete", null), "delete", ICON_DELETE) && !string_equals(project_fonts->buffer[i]->file, "")) {
+	if (project_fonts->length > 1 && ui_menu_button(tr("Delete", NULL), "delete", ICON_DELETE) && !string_equals(project_fonts->buffer[i]->file, "")) {
 		tab_fonts_delete_font(project_fonts->buffer[i]);
 	}
 }

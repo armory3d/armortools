@@ -23,20 +23,20 @@ node_shader_t *node_shader_create(node_shader_context_t *context) {
 	return raw;
 }
 
-void node_shader_add_in(node_shader_t *raw, string_t *s) {
+void node_shader_add_in(node_shader_t *raw, char *s) {
 	any_array_push(raw->ins, s);
 }
 
-void node_shader_add_out(node_shader_t *raw, string_t *s) {
+void node_shader_add_out(node_shader_t *raw, char *s) {
 	any_array_push(raw->outs, s);
 }
 
-void node_shader_add_constant(node_shader_t *raw, string_t *s, string_t *link) {
+void node_shader_add_constant(node_shader_t *raw, char *s, char *link) {
 	// inp: float4
 	if (char_ptr_array_index_of(raw->consts, s) == -1) {
 		string_t_array_t *ar    = string_split(s, ": ");
-		string_t         *uname = ar->buffer[0];
-		string_t         *utype = ar->buffer[1];
+		char         *uname = ar->buffer[0];
+		char         *utype = ar->buffer[1];
 
 		////
 		if (string_equals(utype, "float2"))
@@ -56,22 +56,22 @@ void node_shader_add_constant(node_shader_t *raw, string_t *s, string_t *link) {
 	}
 }
 
-void node_shader_add_texture(node_shader_t *raw, string_t *name, string_t *link) {
+void node_shader_add_texture(node_shader_t *raw, char *name, char *link) {
 	if (char_ptr_array_index_of(raw->textures, name) == -1) {
 		any_array_push(raw->textures, name);
 		node_shader_context_add_texture_unit(raw->context, name, link);
 	}
 }
 
-void node_shader_add_function(node_shader_t *raw, string_t *s) {
-	string_t *fname = string_split(s, "(")->buffer[0];
-	if (any_map_get(raw->functions, fname) != null) {
+void node_shader_add_function(node_shader_t *raw, char *s) {
+	char *fname = string_split(s, "(")->buffer[0];
+	if (any_map_get(raw->functions, fname) != NULL) {
 		return;
 	}
 	any_map_set(raw->functions, fname, s);
 }
 
-void node_shader_write_vert(node_shader_t *raw, string_t *s) {
+void node_shader_write_vert(node_shader_t *raw, char *s) {
 	if (raw->vert_write_normal > 0) {
 		raw->vert_normal = string_join(raw->vert_normal, string_join(s, "\n"));
 	}
@@ -80,15 +80,15 @@ void node_shader_write_vert(node_shader_t *raw, string_t *s) {
 	}
 }
 
-void node_shader_write_end_vert(node_shader_t *raw, string_t *s) {
+void node_shader_write_end_vert(node_shader_t *raw, char *s) {
 	raw->vert_end = string_join(raw->vert_end, string_join(s, "\n"));
 }
 
-void node_shader_write_attrib_vert(node_shader_t *raw, string_t *s) {
+void node_shader_write_attrib_vert(node_shader_t *raw, char *s) {
 	raw->vert_attribs = string_join(raw->vert_attribs, string_join(s, "\n"));
 }
 
-void node_shader_write_frag(node_shader_t *raw, string_t *s) {
+void node_shader_write_frag(node_shader_t *raw, char *s) {
 	if (raw->frag_write_normal > 0) {
 		raw->frag_normal = string_join(raw->frag_normal, string_join(s, "\n"));
 	}
@@ -97,11 +97,11 @@ void node_shader_write_frag(node_shader_t *raw, string_t *s) {
 	}
 }
 
-void node_shader_write_attrib_frag(node_shader_t *raw, string_t *s) {
+void node_shader_write_attrib_frag(node_shader_t *raw, char *s) {
 	raw->frag_attribs = string_join(raw->frag_attribs, string_join(s, "\n"));
 }
 
-string_t *node_shader_data_size(node_shader_t *raw, string_t *data) {
+char *node_shader_data_size(node_shader_t *raw, char *data) {
 	if (string_equals(data, "float1")) {
 		return "1";
 	}
@@ -124,14 +124,14 @@ void node_shader_vstruct_to_vsin(node_shader_t *raw) {
 	}
 }
 
-string_t *node_shader_get(node_shader_t *raw) {
+char *node_shader_get(node_shader_t *raw) {
 	node_shader_vstruct_to_vsin(raw);
 
-	string_t *s = "";
+	char *s = "";
 
 	s           = string_join(s, "struct vert_in {\n");
 	for (i32 i = 0; i < raw->ins->length; ++i) {
-		string_t *a = raw->ins->buffer[i];
+		char *a = raw->ins->buffer[i];
 		s           = string_join(s, string_join(string_join("\t", a), ";\n"));
 	}
 	s = string_join(s, "}\n\n");
@@ -139,7 +139,7 @@ string_t *node_shader_get(node_shader_t *raw) {
 	s = string_join(s, "struct vert_out {\n");
 	s = string_join(s, "\tpos: float4;\n");
 	for (i32 i = 0; i < raw->outs->length; ++i) {
-		string_t *a = raw->outs->buffer[i];
+		char *a = raw->outs->buffer[i];
 		s           = string_join(s, string_join(string_join("\t", a), ";\n"));
 	}
 	if (raw->consts->length == 0) {
@@ -150,7 +150,7 @@ string_t *node_shader_get(node_shader_t *raw) {
 	s = string_join(s, "#[set(everything)]\n");
 	s = string_join(s, "const constants: {\n");
 	for (i32 i = 0; i < raw->consts->length; ++i) {
-		string_t *a = raw->consts->buffer[i];
+		char *a = raw->consts->buffer[i];
 		s           = string_join(s, string_join(string_join("\t", a), ";\n"));
 	}
 	if (raw->consts->length == 0) {
@@ -164,14 +164,14 @@ string_t *node_shader_get(node_shader_t *raw) {
 	}
 
 	for (i32 i = 0; i < raw->textures->length; ++i) {
-		string_t *a = raw->textures->buffer[i];
+		char *a = raw->textures->buffer[i];
 		s           = string_join(s, "#[set(everything)]\n");
 		s           = string_join(s, string_join(string_join("const ", a), ": tex2d;\n"));
 	}
 
 	string_t_array_t *keys = map_keys(raw->functions);
 	for (i32 i = 0; i < keys->length; ++i) {
-		string_t *f = any_map_get(raw->functions, keys->buffer[i]);
+		char *f = any_map_get(raw->functions, keys->buffer[i]);
 		s           = string_join(s, string_join(f, "\n"));
 	}
 	s = string_join(s, "\n");
@@ -227,23 +227,23 @@ node_shader_context_t *node_shader_context_create(material_t *material, shader_c
 	                                                        .alpha_blend_destination = props->alpha_blend_destination,
 	                                                        .fragment_shader         = "",
 	                                                        .vertex_shader           = "",
-	                                                        .vertex_elements         = props->vertex_elements != null ? props->vertex_elements : vertex_elements_default,
+	                                                        .vertex_elements         = props->vertex_elements != NULL ? props->vertex_elements : vertex_elements_default,
 	                                                        .color_attachments       = props->color_attachments,
 	                                                        .depth_attachment        = props->depth_attachment});
 
 	shader_context_t *rw = raw->data;
 	rw->_                = GC_ALLOC_INIT(shader_context_runtime_t, {0});
 
-	if (props->color_writes_red != null) {
+	if (props->color_writes_red != NULL) {
 		raw->data->color_writes_red = props->color_writes_red;
 	}
-	if (props->color_writes_green != null) {
+	if (props->color_writes_green != NULL) {
 		raw->data->color_writes_green = props->color_writes_green;
 	}
-	if (props->color_writes_blue != null) {
+	if (props->color_writes_blue != NULL) {
 		raw->data->color_writes_blue = props->color_writes_blue;
 	}
-	if (props->color_writes_alpha != null) {
+	if (props->color_writes_alpha != NULL) {
 		raw->data->color_writes_alpha = props->color_writes_alpha;
 	}
 
@@ -252,7 +252,7 @@ node_shader_context_t *node_shader_context_create(material_t *material, shader_c
 	return raw;
 }
 
-void node_shader_context_add_elem(node_shader_context_t *raw, string_t *name, string_t *data_type) {
+void node_shader_context_add_elem(node_shader_context_t *raw, char *name, char *data_type) {
 	for (i32 i = 0; i < raw->data->vertex_elements->length; ++i) {
 		vertex_element_t *e = raw->data->vertex_elements->buffer[i];
 		if (string_equals(e->name, name)) {
@@ -263,7 +263,7 @@ void node_shader_context_add_elem(node_shader_context_t *raw, string_t *name, st
 	any_array_push(raw->data->vertex_elements, elem);
 }
 
-bool node_shader_context_is_elem(node_shader_context_t *raw, string_t *name) {
+bool node_shader_context_is_elem(node_shader_context_t *raw, char *name) {
 	for (i32 i = 0; i < raw->data->vertex_elements->length; ++i) {
 		vertex_element_t *elem = raw->data->vertex_elements->buffer[i];
 		if (string_equals(elem->name, name)) {
@@ -273,17 +273,17 @@ bool node_shader_context_is_elem(node_shader_context_t *raw, string_t *name) {
 	return false;
 }
 
-vertex_element_t *node_shader_context_get_elem(node_shader_context_t *raw, string_t *name) {
+vertex_element_t *node_shader_context_get_elem(node_shader_context_t *raw, char *name) {
 	for (i32 i = 0; i < raw->data->vertex_elements->length; ++i) {
 		vertex_element_t *elem = raw->data->vertex_elements->buffer[i];
 		if (string_equals(elem->name, name)) {
 			return elem;
 		}
 	}
-	return null;
+	return NULL;
 }
 
-void node_shader_context_add_constant(node_shader_context_t *raw, string_t *ctype, string_t *name, string_t *link) {
+void node_shader_context_add_constant(node_shader_context_t *raw, char *ctype, char *name, char *link) {
 	for (i32 i = 0; i < raw->data->constants->length; ++i) {
 		shader_const_t *c = raw->data->constants->buffer[i];
 		if (string_equals(c->name, name)) {
@@ -292,14 +292,14 @@ void node_shader_context_add_constant(node_shader_context_t *raw, string_t *ctyp
 	}
 
 	shader_const_t *c = GC_ALLOC_INIT(shader_const_t, {.name = name, .type = ctype});
-	if (link != null) {
+	if (link != NULL) {
 		c->link = string_copy(link);
 	}
 	shader_const_t_array_t *consts = raw->data->constants;
 	any_array_push(consts, c);
 }
 
-void node_shader_context_add_texture_unit(node_shader_context_t *raw, string_t *name, string_t *link) {
+void node_shader_context_add_texture_unit(node_shader_context_t *raw, char *name, char *link) {
 	for (i32 i = 0; i < raw->data->texture_units->length; ++i) {
 		tex_unit_t *c = raw->data->texture_units->buffer[i];
 		if (string_equals(c->name, name)) {

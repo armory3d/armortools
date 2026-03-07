@@ -1,5 +1,5 @@
-void console_draw_toast(string_t *s) {
-	draw_begin(null, false, 0);
+void console_draw_toast(char *s) {
+	draw_begin(NULL, false, 0);
 	draw_set_color(0x55000000);
 	draw_filled_rect(0, 0, iron_window_width(), iron_window_height());
 	f32 scale = UI_SCALE();
@@ -12,7 +12,7 @@ void console_draw_toast(string_t *s) {
 	draw_end();
 }
 
-void console_toast(string_t *s) {
+void console_toast(char *s) {
 	// Show a popup message
 	gpu_texture_t *current = _draw_current;
 	bool           in_use  = gpu_in_use;
@@ -28,15 +28,15 @@ void console_draw_progress(any _) {
 	console_draw_toast(console_progress_text);
 }
 
-void console_progress(string_t *s) {
-	// Keep popup message displayed until s == null
-	if (s == null) {
+void console_progress(char *s) {
+	// Keep popup message displayed until s == NULL
+	if (s == NULL) {
 		sys_remove_render(console_draw_progress);
 	}
-	else if (console_progress_text == null) {
-		sys_notify_on_render(console_draw_progress, null);
+	else if (console_progress_text == NULL) {
+		sys_notify_on_render(console_draw_progress, NULL);
 	}
-	if (s != null) {
+	if (s != NULL) {
 		console_trace(s);
 	}
 	gc_unroot(console_progress_text);
@@ -46,12 +46,12 @@ void console_progress(string_t *s) {
 	// Pass one frame to immediately show the message
 	draw_end();
 	sys_render();
-	draw_begin(null, false, 0);
+	draw_begin(NULL, false, 0);
 	gpu_present();
 	ui_end_input();
 }
 
-void console_info(string_t *s) {
+void console_info(char *s) {
 	console_message_timer = 5.0;
 	gc_unroot(console_message);
 	console_message = string_copy(s);
@@ -61,7 +61,7 @@ void console_info(string_t *s) {
 	console_trace(s);
 }
 
-void console_error(string_t *s) {
+void console_error(char *s) {
 	console_message_timer = 8.0;
 	gc_unroot(console_message);
 	console_message = string_copy(s);
@@ -71,11 +71,11 @@ void console_error(string_t *s) {
 	console_trace(s);
 }
 
-void console_log(string_t *s) {
+void console_log(char *s) {
 	console_trace(s);
 }
 
-void console_trace(string_t *s) {
+void console_trace(char *s) {
 	iron_log(s);
 	base_redraw_console();
 	array_insert(console_last_traces, 0, s);

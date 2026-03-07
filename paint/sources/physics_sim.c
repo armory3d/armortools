@@ -18,8 +18,8 @@ void sim_update() {
 		object_t_array_t *objects = map_keys(sim_object_script_map);
 		for (i32 i = 0; i < objects->length; ++i) {
 			object_t *o    = objects->buffer[i];
-			string_t *s    = any_map_get(sim_object_script_map, o);
-			string_t *addr = i64_to_string((i64)(o->transform));
+			char *s    = any_map_get(sim_object_script_map, o);
+			char *addr = i64_to_string((i64)(o->transform));
 			s              = string_join(string_join(string_join(string_join("{let transform=", addr), ";"), s), "}");
 			js_eval(s);
 		}
@@ -45,11 +45,11 @@ void sim_play() {
 
 	if (sim_record) {
 		if (string_equals(project_filepath, "")) {
-			console_error(tr("Save project first", null));
+			console_error(tr("Save project first", NULL));
 			sim_record = false;
 			return;
 		}
-		string_t        *path = string_join(path_base_dir(project_filepath), "/output.mp4");
+		char        *path = string_join(path_base_dir(project_filepath), "/output.mp4");
 		render_target_t *rt   = any_map_get(render_path_render_targets, "last");
 		// iron_mp4_begin(path, rt._image.width, rt._image.height);
 	}
@@ -77,7 +77,7 @@ void sim_stop() {
 	for (i32 i = 0; i < pos->length; ++i) {
 		transform_set_matrix(pos->buffer[i]->base->transform, sim_transforms->buffer[i]->v);
 		physics_body_t *pb = any_imap_get(physics_body_object_map, pos->buffer[i]->base->uid);
-		if (pb != null) {
+		if (pb != NULL) {
 			physics_body_sync_transform(pb);
 		}
 	}
@@ -104,7 +104,7 @@ void sim_duplicate() {
 
 	// Physics
 	physics_body_t *pb = any_imap_get(physics_body_object_map, so->base->uid);
-	if (pb != null) {
+	if (pb != NULL) {
 		physics_body_t *pbdup = physics_body_create();
 		pbdup->shape          = pb->shape;
 		pbdup->mass           = pb->mass;

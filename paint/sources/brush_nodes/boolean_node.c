@@ -4,7 +4,7 @@ boolean_node_t *boolean_node_create(ui_node_t *raw, f32_array_t *args) {
 	n->base           = logic_node_create(n);
 	n->base->get      = boolean_node_get;
 	n->base->set      = boolean_node_set;
-	n->value          = args == null ? false : args->buffer[0] > 0.0;
+	n->value          = args == NULL ? false : args->buffer[0] > 0.0;
 	return n;
 }
 

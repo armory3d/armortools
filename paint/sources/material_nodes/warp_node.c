@@ -3,15 +3,15 @@ void warp_node_init() {
 	any_map_set(parser_material_node_vectors, "DIRECT_WARP", warp_node_vector);
 }
 
-string_t *warp_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
+char *warp_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	if (parser_material_warp_passthrough) {
 		return parser_material_parse_vector_input(node->inputs->buffer[0]);
 	}
-	string_t *angle    = parser_material_parse_value_input(node->inputs->buffer[1], true);
-	string_t *mask     = parser_material_parse_value_input(node->inputs->buffer[2], true);
-	string_t *tex_name = string_join("texwarp_", parser_material_node_name(node, null));
+	char *angle    = parser_material_parse_value_input(node->inputs->buffer[1], true);
+	char *mask     = parser_material_parse_value_input(node->inputs->buffer[2], true);
+	char *tex_name = string_join("texwarp_", parser_material_node_name(node, NULL));
 	node_shader_add_texture(parser_material_kong, string_join("", tex_name), string_join("_", tex_name));
-	string_t *store = parser_material_store_var_name(node);
+	char *store = parser_material_store_var_name(node);
 	f32       pi    = math_pi();
 	parser_material_write(parser_material_kong,
 	                      string_join(string_join(string_join(string_join(string_join(string_join("var ", store), "_rad: float = "), angle), " * ("),

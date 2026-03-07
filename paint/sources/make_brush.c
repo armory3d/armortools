@@ -6,7 +6,7 @@ void make_brush_run(node_shader_t *kong) {
 		return;
 	}
 
-	bool fill_layer = context_raw->layer->fill_layer != null;
+	bool fill_layer = context_raw->layer->fill_layer != NULL;
 	bool decal      = context_is_decal();
 	if (decal && !fill_layer) {
 		node_shader_write_frag(kong, "if (constants.decal_mask.z > 0.0) {");
@@ -22,7 +22,7 @@ void make_brush_run(node_shader_t *kong) {
 
 	if (config_raw->brush_angle_reject || context_raw->xray) {
 		node_shader_add_function(kong, str_octahedron_wrap);
-		node_shader_add_texture(kong, "gbuffer0", null);
+		node_shader_add_texture(kong, "gbuffer0", NULL);
 		node_shader_write_frag(kong, "var g0: float2 = sample_lod(gbuffer0, sampler_linear, constants.inp.xy, 0.0).rg;");
 		node_shader_write_frag(kong, "var wn: float3;");
 		node_shader_write_frag(kong, "wn.z = 1.0 - abs(g0.x) - abs(g0.y);");

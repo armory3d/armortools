@@ -4,11 +4,11 @@ void noise_texture_node_init() {
 	any_map_set(parser_material_node_values, "TEX_NOISE", noise_texture_node_value);
 }
 
-string_t *noise_texture_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
+char *noise_texture_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	node_shader_add_function(parser_material_kong, str_tex_noise);
-	string_t *co    = parser_material_get_coord(node);
-	string_t *scale = parser_material_parse_value_input(node->inputs->buffer[1], false);
-	string_t *res   = string_join(
+	char *co    = parser_material_get_coord(node);
+	char *scale = parser_material_parse_value_input(node->inputs->buffer[1], false);
+	char *res   = string_join(
         string_join(
             string_join(
                 string_join(
@@ -25,10 +25,10 @@ string_t *noise_texture_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	return res;
 }
 
-string_t *noise_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
+char *noise_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 	node_shader_add_function(parser_material_kong, str_tex_noise);
-	string_t *co    = parser_material_get_coord(node);
-	string_t *scale = parser_material_parse_value_input(node->inputs->buffer[1], false);
-	string_t *res   = string_join(string_join(string_join(string_join("tex_noise(", co), " * "), scale), ")");
+	char *co    = parser_material_get_coord(node);
+	char *scale = parser_material_parse_value_input(node->inputs->buffer[1], false);
+	char *res   = string_join(string_join(string_join(string_join("tex_noise(", co), " * "), scale), ")");
 	return res;
 }

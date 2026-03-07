@@ -1,6 +1,8 @@
 
 #ifdef arm_physics
 
+#include "../libs/asim.h"
+
 physics_body_t *physics_body_create() {
 	physics_body_t *body = GC_ALLOC_INIT(physics_body_t, {0});
 	return body;
@@ -16,8 +18,8 @@ void physics_body_init(physics_body_t *body, object_t *obj) {
 	body->dimz             = obj->transform->dim.z;
 
 	f32          scale_pos = 1.0;
-	i16_array_t *posa      = null;
-	u32_array_t *inda      = null;
+	i16_array_t *posa      = NULL;
+	u32_array_t *inda      = NULL;
 
 	if (body->shape == PHYSICS_SHAPE_MESH || body->shape == PHYSICS_SHAPE_HULL || body->shape == PHYSICS_SHAPE_TERRAIN) {
 		mesh_object_t *mo        = obj->ext;
@@ -52,7 +54,7 @@ void physics_body_init(physics_body_t *body, object_t *obj) {
 
 void physics_body_remove(i32 uid) {
 	physics_body_t *body = any_imap_get(physics_body_object_map, uid);
-	if (body == null) {
+	if (body == NULL) {
 		return;
 	}
 	imap_delete(physics_body_object_map, uid);

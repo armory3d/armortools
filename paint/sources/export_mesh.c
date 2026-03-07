@@ -1,5 +1,5 @@
-void export_mesh_run(string_t *path, mesh_object_t_array_t *paint_objects, bool apply_disp, bool merge_vertices) {
-	if (paint_objects == null) {
+void export_mesh_run(char *path, mesh_object_t_array_t *paint_objects, bool apply_disp, bool merge_vertices) {
+	if (paint_objects == NULL) {
 		paint_objects = project_paint_objects;
 	}
 	if (context_raw->export_mesh_format == MESH_FORMAT_OBJ) {

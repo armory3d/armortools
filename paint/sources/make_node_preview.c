@@ -1,6 +1,6 @@
 node_shader_context_t *make_node_preview_run(material_t *data, material_context_t *matcon, ui_node_t *node, ui_node_canvas_t *group,
                                              ui_node_t_array_t *parents) {
-	string_t              *context_id = "mesh";
+	char              *context_id = "mesh";
 	shader_context_t      *props      = GC_ALLOC_INIT(shader_context_t, {.name            = context_id,
 	                                                                     .depth_write     = false,
 	                                                                     .compare_mode    = "always",
@@ -45,7 +45,7 @@ node_shader_context_t *make_node_preview_run(material_t *data, material_context_
 	gc_unroot(parser_material_links);
 	parser_material_links = context_raw->material->canvas->links;
 	gc_root(parser_material_links);
-	if (group != null) {
+	if (group != NULL) {
 		parser_material_push_group(group);
 		gc_unroot(parser_material_parents);
 		parser_material_parents = parents;
@@ -69,9 +69,9 @@ node_shader_context_t *make_node_preview_run(material_t *data, material_context_
 	gc_root(parser_material_matcon);
 
 	parser_material_transform_color_space = false;
-	string_t *res                         = parser_material_write_result(link);
+	char *res                         = parser_material_write_result(link);
 	parser_material_transform_color_space = true;
-	string_t *st                          = node->outputs->buffer[link->from_socket]->type;
+	char *st                          = node->outputs->buffer[link->from_socket]->type;
 	if (!string_equals(st, "RGB") && !string_equals(st, "RGBA") && !string_equals(st, "VECTOR")) {
 		res = string_copy(parser_material_to_vec3(res));
 	}

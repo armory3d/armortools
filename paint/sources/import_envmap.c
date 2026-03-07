@@ -1,6 +1,6 @@
-void import_envmap_run(string_t *path, gpu_texture_t *image) {
+void import_envmap_run(char *path, gpu_texture_t *image) {
 	// Init
-	if (import_envmap_pipeline == null) {
+	if (import_envmap_pipeline == NULL) {
 		gc_unroot(import_envmap_pipeline);
 		import_envmap_pipeline = gpu_create_pipeline();
 		gc_root(import_envmap_pipeline);
@@ -37,7 +37,7 @@ void import_envmap_run(string_t *path, gpu_texture_t *image) {
 	draw_begin(import_envmap_radiance, false, 0);
 	draw_set_pipeline(pipes_copy64);
 	draw_scaled_image(image, 0, 0, 1024, 512);
-	draw_set_pipeline(null);
+	draw_set_pipeline(NULL);
 	draw_end();
 
 	// Radiance
@@ -77,7 +77,7 @@ void import_envmap_get_radiance_mip(gpu_texture_t *mip, i32 level, gpu_texture_t
 	import_envmap_params.x = (level + 1) / (float)10;
 
 	for (i32 i = 0; i < pass_count; ++i) {
-		_gpu_begin(mip, null, null, i == 0 ? GPU_CLEAR_COLOR : GPU_CLEAR_NONE, 0x00000000, 0.0);
+		_gpu_begin(mip, NULL, NULL, i == 0 ? GPU_CLEAR_COLOR : GPU_CLEAR_NONE, 0x00000000, 0.0);
 		gpu_set_vertex_buffer(const_data_screen_aligned_vb);
 		gpu_set_index_buffer(const_data_screen_aligned_ib);
 		gpu_set_pipeline(import_envmap_pipeline);

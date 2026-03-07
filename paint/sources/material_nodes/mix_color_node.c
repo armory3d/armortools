@@ -3,17 +3,17 @@ void mix_color_node_init() {
 	any_map_set(parser_material_node_vectors, "MIX_RGB", mix_color_node_vector);
 }
 
-string_t *mix_color_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
-	string_t *fac     = parser_material_parse_value_input(node->inputs->buffer[0], false);
-	string_t *fac_var = string_join(parser_material_node_name(node, null), "_fac");
+char *mix_color_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
+	char *fac     = parser_material_parse_value_input(node->inputs->buffer[0], false);
+	char *fac_var = string_join(parser_material_node_name(node, NULL), "_fac");
 	parser_material_write(parser_material_kong, string_join(string_join(string_join(string_join("var ", fac_var), ": float = "), fac), ";"));
-	string_t         *col1  = parser_material_parse_vector_input(node->inputs->buffer[1]);
-	string_t         *col2  = parser_material_parse_vector_input(node->inputs->buffer[2]);
+	char         *col1  = parser_material_parse_vector_input(node->inputs->buffer[1]);
+	char         *col2  = parser_material_parse_vector_input(node->inputs->buffer[2]);
 	ui_node_button_t *but   = node->buttons->buffer[0]; // blend_type
-	string_t         *blend = to_upper_case(u8_array_string_at(but->data, but->default_value->buffer[0]));
+	char         *blend = to_upper_case(u8_array_string_at(but->data, but->default_value->buffer[0]));
 	blend                   = string_copy(string_replace_all(blend, " ", "_"));
 	bool      use_clamp     = node->buttons->buffer[1]->default_value->buffer[0] > 0;
-	string_t *out_col       = "";
+	char *out_col       = "";
 	if (string_equals(blend, "MIX")) {
 		out_col = string_join(string_join(string_join(string_join(string_join(string_join("lerp3(", col1), ", "), col2), ", "), fac_var), ")");
 	}
@@ -40,7 +40,7 @@ string_t *mix_color_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 		out_col = string_join(string_join(string_join(string_join(string_join(string_join("max3(", col1), ", "), col2), " * "), fac_var), ")");
 	}
 	else if (string_equals(blend, "SCREEN")) {
-		string_t *v3 = parser_material_to_vec3(string_join("1.0 - ", fac_var));
+		char *v3 = parser_material_to_vec3(string_join("1.0 - ", fac_var));
 		out_col =
 		    string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join("(float3(1.0, 1.0, 1.0) - (", v3), " + "), fac_var),
 		                                                                " * (float3(1.0, 1.0, 1.0) - "),
@@ -69,9 +69,9 @@ string_t *mix_color_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 		// 	" + col1 + ".g < 0.5 ? 2.0 * " + col1 + ".g * " + col2 + ".g : 1.0 - 2.0 * (1.0 - " + col1 + ".g) * (1.0 - " + col2 + ".g), \
 		// 	" + col1 + ".b < 0.5 ? 2.0 * " + col1 + ".b * " + col2 + ".b : 1.0 - 2.0 * (1.0 - " + col1 + ".b) * (1.0 - " + col2 + ".b) \
 		// ), " + fac_var + ")";
-		string_t *res_r = string_join(parser_material_node_name(node, null), "_res_r");
-		string_t *res_g = string_join(parser_material_node_name(node, null), "_res_g");
-		string_t *res_b = string_join(parser_material_node_name(node, null), "_res_b");
+		char *res_r = string_join(parser_material_node_name(node, NULL), "_res_r");
+		char *res_g = string_join(parser_material_node_name(node, NULL), "_res_g");
+		char *res_b = string_join(parser_material_node_name(node, NULL), "_res_b");
 		parser_material_write(parser_material_kong, string_join(string_join("var ", res_r), ": float;"));
 		parser_material_write(parser_material_kong, string_join(string_join("var ", res_g), ": float;"));
 		parser_material_write(parser_material_kong, string_join(string_join("var ", res_b), ": float;"));
@@ -204,7 +204,7 @@ string_t *mix_color_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 		                               ", "),
 		                   f32_to_string(eps)),
             "))");
-		string_t *v3 = string_join(
+		char *v3 = string_join(
 		    string_join(
 		        string_join(
 		            string_join(

@@ -18,7 +18,7 @@ void nodes_brush_init() {
 }
 
 void nodes_brush_list_init() {
-	if (nodes_brush_list != null) {
+	if (nodes_brush_list != NULL) {
 		return;
 	}
 
@@ -47,7 +47,7 @@ void nodes_brush_list_init() {
 	gc_root(nodes_brush_list);
 }
 
-ui_node_t *nodes_brush_create_node(string_t *node_type) {
+ui_node_t *nodes_brush_create_node(char *node_type) {
 	for (i32 i = 0; i < nodes_brush_list->length; ++i) {
 		ui_node_t_array_t *c = nodes_brush_list->buffer[i];
 		for (i32 i = 0; i < c->length; ++i) {
@@ -61,5 +61,5 @@ ui_node_t *nodes_brush_create_node(string_t *node_type) {
 			}
 		}
 	}
-	return null;
+	return NULL;
 }

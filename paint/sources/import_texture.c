@@ -1,4 +1,4 @@
-void import_texture_run(string_t *path, bool hdr_as_envmap) {
+void import_texture_run(char *path, bool hdr_as_envmap) {
 	if (!path_is_texture(path)) {
 		if (!context_enable_import_plugin(path)) {
 			console_error(strings_unknown_asset_format());
@@ -21,33 +21,33 @@ void import_texture_run(string_t *path, bool hdr_as_envmap) {
 		}
 	}
 
-	string_t      *ext      = substring(path, string_last_index_of(path, ".") + 1, string_length(path));
+	char      *ext      = substring(path, string_last_index_of(path, ".") + 1, string_length(path));
 	any            importer = any_map_get(import_texture_importers, ext);      // JSValue -> (s: string)=>gpu_texture_t
-	bool           cached   = any_map_get(data_cached_images, path) != null; // Already loaded or pink texture for missing file
+	bool           cached   = any_map_get(data_cached_images, path) != NULL; // Already loaded or pink texture for missing file
 	gpu_texture_t *image;
-	if (importer == null || cached) {
+	if (importer == NULL || cached) {
 		image = import_texture_default_importer(path);
 	}
 	else {
 		image = js_pcall_str(importer, path);
 	}
 
-	if (image == null) {
+	if (image == NULL) {
 		return;
 	}
 
 	any_map_set(data_cached_images, path, image);
 	string_t_array_t *ar    = string_split(path, PATH_SEP);
-	string_t         *name  = ar->buffer[ar->length - 1];
+	char         *name  = ar->buffer[ar->length - 1];
 	asset_t          *asset = GC_ALLOC_INIT(asset_t, {.name = name, .file = path, .id = project_asset_id++});
 	any_array_push(project_assets, asset);
-	if (context_raw->texture == null) {
+	if (context_raw->texture == NULL) {
 		context_raw->texture = asset;
 	}
 	any_array_push(project_asset_names, name);
 	any_imap_set(project_asset_map, asset->id, image);
 	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
-	console_info(string_join(string_join(tr("Texture imported:", null), " "), name));
+	console_info(string_join(string_join(tr("Texture imported:", NULL), " "), name));
 
 	// Set as envmap
 	if (hdr_as_envmap && ends_with(to_lower_case(path), ".hdr")) {
@@ -64,6 +64,6 @@ void import_texture_run_44011(import_texture_data_t *itd) {
 	import_envmap_run(itd->path, itd->image);
 }
 
-gpu_texture_t *import_texture_default_importer(string_t *path) {
+gpu_texture_t *import_texture_default_importer(char *path) {
 	return data_get_image(path);
 }

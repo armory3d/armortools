@@ -4,11 +4,11 @@ void vector_math2_node_init() {
 	any_map_set(parser_material_node_values, "VECT_MATH", vector_math2_node_value);
 }
 
-string_t *vector_math2_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
-	string_t         *vec1 = parser_material_parse_vector_input(node->inputs->buffer[0]);
-	string_t         *vec2 = parser_material_parse_vector_input(node->inputs->buffer[1]);
+char *vector_math2_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
+	char         *vec1 = parser_material_parse_vector_input(node->inputs->buffer[0]);
+	char         *vec2 = parser_material_parse_vector_input(node->inputs->buffer[1]);
 	ui_node_button_t *but  = node->buttons->buffer[0]; // operation;
-	string_t         *op   = to_upper_case(u8_array_string_at(but->data, but->default_value->buffer[0]));
+	char         *op   = to_upper_case(u8_array_string_at(but->data, but->default_value->buffer[0]));
 	op                     = string_copy(string_replace_all(op, " ", "_"));
 	if (string_equals(op, "ADD")) {
 		return string_join(string_join(string_join(string_join("(", vec1), " + "), vec2), ")");
@@ -38,7 +38,7 @@ string_t *vector_math2_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 		return string_join(string_join(string_join(string_join("(", vec1), " * "), vec2), ")");
 	}
 	else if (string_equals(op, "DIVIDE")) {
-		string_t *store = string_join(parser_material_store_var_name(node), "_vec2");
+		char *store = string_join(parser_material_store_var_name(node), "_vec2");
 		parser_material_write(parser_material_kong, string_join(string_join(string_join(string_join("var ", store), ": float3 = "), vec2), ";"));
 		parser_material_write(parser_material_kong,
 		                      string_join(string_join(string_join(string_join("if (", store), ".x == 0.0) { "), store), ".x = 0.000001; }"));
@@ -99,11 +99,11 @@ string_t *vector_math2_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	}
 }
 
-string_t *vector_math2_node_value(ui_node_t *node, ui_node_socket_t *socket) {
-	string_t         *vec1 = parser_material_parse_vector_input(node->inputs->buffer[0]);
-	string_t         *vec2 = parser_material_parse_vector_input(node->inputs->buffer[1]);
+char *vector_math2_node_value(ui_node_t *node, ui_node_socket_t *socket) {
+	char         *vec1 = parser_material_parse_vector_input(node->inputs->buffer[0]);
+	char         *vec2 = parser_material_parse_vector_input(node->inputs->buffer[1]);
 	ui_node_button_t *but  = node->buttons->buffer[0]; // operation;
-	string_t         *op   = to_upper_case(u8_array_string_at(but->data, but->default_value->buffer[0]));
+	char         *op   = to_upper_case(u8_array_string_at(but->data, but->default_value->buffer[0]));
 	op                     = string_copy(string_replace_all(op, " ", "_"));
 	if (string_equals(op, "DOT_PRODUCT")) {
 		return string_join(string_join(string_join(string_join("dot(", vec1), ", "), vec2), ")");

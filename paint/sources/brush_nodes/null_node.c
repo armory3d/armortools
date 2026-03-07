@@ -7,5 +7,5 @@ null_node_t *null_node_create(ui_node_t *raw, f32_array_t *args) {
 }
 
 logic_node_value_t *null_node_get(null_node_t *self, i32 from) {
-	return null;
+	return NULL;
 }

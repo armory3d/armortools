@@ -1,5 +1,5 @@
 void tab_meshes_draw(ui_handle_t *htab) {
-	if (ui_tab(htab, tr("Meshes", null), false, -1, false) && ui->_window_h > ui_statusbar_default_h * UI_SCALE()) {
+	if (ui_tab(htab, tr("Meshes", NULL), false, -1, false) && ui->_window_h > ui_statusbar_default_h * UI_SCALE()) {
 
 		ui_begin_sticky();
 		f32_array_t *row = f32_array_create_from_raw(
@@ -10,13 +10,13 @@ void tab_meshes_draw(ui_handle_t *htab) {
 		    2);
 		ui_row(row);
 
-		if (ui_icon_button(tr("Import", null), ICON_IMPORT, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Import", NULL), ICON_IMPORT, UI_ALIGN_CENTER)) {
 			ui_menu_draw(&tab_meshes_draw_185838, -1, -1);
 		}
 		if (ui->is_hovered)
-			ui_tooltip(tr("Import mesh file", null));
+			ui_tooltip(tr("Import mesh file", NULL));
 
-		if (ui_icon_button(tr("Edit", null), ICON_EDIT, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Edit", NULL), ICON_EDIT, UI_ALIGN_CENTER)) {
 			ui_menu_draw(&tab_meshes_draw_185981, -1, -1);
 		}
 
@@ -65,15 +65,15 @@ void tab_meshes_draw_186425() {
 	i32            i = _tab_meshes_draw_i;
 	mesh_object_t *o = project_paint_objects->buffer[i];
 
-	if (ui_menu_button(tr("Export", null), "", ICON_EXPORT)) {
+	if (ui_menu_button(tr("Export", NULL), "", ICON_EXPORT)) {
 		context_raw->export_mesh_index = i + 1;
 		box_export_show_mesh();
 	}
-	if (project_paint_objects->length > 1 && ui_menu_button(tr("Delete", null), "", ICON_DELETE)) {
+	if (project_paint_objects->length > 1 && ui_menu_button(tr("Delete", NULL), "", ICON_DELETE)) {
 		array_remove(project_paint_objects, o);
 		while (o->base->children->length > 0) {
 			object_t *child = o->base->children->buffer[0];
-			object_set_parent(child, null);
+			object_set_parent(child, NULL);
 			if (project_paint_objects->buffer[0]->base != child) {
 				object_set_parent(child, project_paint_objects->buffer[0]->base);
 			}
@@ -85,10 +85,10 @@ void tab_meshes_draw_186425() {
 		data_delete_mesh(o->data->_->handle);
 		mesh_object_remove(o);
 		context_raw->paint_object = context_main_object();
-		util_mesh_merge(null);
+		util_mesh_merge(NULL);
 		context_raw->ddirty = 2;
 	}
-	if (ui_menu_button(tr("Duplicate", null), "", ICON_DUPLICATE)) {
+	if (ui_menu_button(tr("Duplicate", NULL), "", ICON_DUPLICATE)) {
 		sim_duplicate();
 	}
 
@@ -98,61 +98,61 @@ void tab_meshes_draw_186425() {
 }
 
 void tab_meshes_draw_185981() {
-	if (ui_menu_button(tr("Flip Normals", null), "", ICON_NONE)) {
+	if (ui_menu_button(tr("Flip Normals", NULL), "", ICON_NONE)) {
 		util_mesh_flip_normals();
 		context_raw->ddirty = 2;
 	}
 
-	if (ui_menu_sub_button(ui_handle(__ID__), tr("Calculate Normals", null))) {
+	if (ui_menu_sub_button(ui_handle(__ID__), tr("Calculate Normals", NULL))) {
 		ui_menu_sub_begin(2);
-		if (ui_menu_button(tr("Smooth", null), "", ICON_NONE)) {
+		if (ui_menu_button(tr("Smooth", NULL), "", ICON_NONE)) {
 			util_mesh_calc_normals(true);
 			context_raw->ddirty = 2;
 		}
-		if (ui_menu_button(tr("Flat", null), "", ICON_NONE)) {
+		if (ui_menu_button(tr("Flat", NULL), "", ICON_NONE)) {
 			util_mesh_calc_normals(false);
 			context_raw->ddirty = 2;
 		}
 		ui_menu_sub_end();
 	}
 
-	if (ui_menu_button(tr("Geometry to Origin", null), "", ICON_NONE)) {
+	if (ui_menu_button(tr("Geometry to Origin", NULL), "", ICON_NONE)) {
 		util_mesh_to_origin();
 		context_raw->ddirty = 2;
 	}
 
-	if (ui_menu_button(tr("Apply Displacement", null), "", ICON_NONE)) {
+	if (ui_menu_button(tr("Apply Displacement", NULL), "", ICON_NONE)) {
 		util_mesh_apply_displacement(project_layers->buffer[0]->texpaint_pack, 0.1, 1.0);
 		util_mesh_calc_normals(false);
 		context_raw->ddirty = 2;
 	}
 
-	if (ui_menu_sub_button(ui_handle(__ID__), tr("Rotate", null))) {
+	if (ui_menu_sub_button(ui_handle(__ID__), tr("Rotate", NULL))) {
 		ui_menu_sub_begin(3);
-		if (ui_menu_button(tr("X", null), "", ICON_NONE)) {
+		if (ui_menu_button(tr("X", NULL), "", ICON_NONE)) {
 			util_mesh_swap_axis(1, 2);
 			context_raw->ddirty = 2;
 		}
-		if (ui_menu_button(tr("Y", null), "", ICON_NONE)) {
+		if (ui_menu_button(tr("Y", NULL), "", ICON_NONE)) {
 			util_mesh_swap_axis(2, 0);
 			context_raw->ddirty = 2;
 		}
-		if (ui_menu_button(tr("Z", null), "", ICON_NONE)) {
+		if (ui_menu_button(tr("Z", NULL), "", ICON_NONE)) {
 			util_mesh_swap_axis(0, 1);
 			context_raw->ddirty = 2;
 		}
 		ui_menu_sub_end();
 	}
 
-	if (ui_menu_button(tr("UV Unwrap", null), "", ICON_NONE)) {
-		string_t *f = "uv_unwrap.js";
+	if (ui_menu_button(tr("UV Unwrap", NULL), "", ICON_NONE)) {
+		char *f = "uv_unwrap.js";
 		if (char_ptr_array_index_of(config_raw->plugins, f) == -1) {
 			config_enable_plugin(f);
 		}
 		plugin_uv_unwrap_button();
 	}
 
-	if (config_raw->experimental && ui_menu_button(tr("Decimate", null), "", ICON_NONE)) {
+	if (config_raw->experimental && ui_menu_button(tr("Decimate", NULL), "", ICON_NONE)) {
 		util_mesh_decimate(0.5);
 	}
 }
@@ -166,16 +166,16 @@ void tab_meshes_draw_185904() {
 }
 
 void tab_meshes_draw_185838() {
-	if (ui_menu_button(tr("Replace Existing", null), any_map_get(config_keymap, "file_import_assets"), ICON_NONE)) {
-		project_import_mesh(true, null);
+	if (ui_menu_button(tr("Replace Existing", NULL), any_map_get(config_keymap, "file_import_assets"), ICON_NONE)) {
+		project_import_mesh(true, NULL);
 	}
-	if (ui_menu_button(tr("Append File", null), "", ICON_NONE)) {
+	if (ui_menu_button(tr("Append File", NULL), "", ICON_NONE)) {
 		project_append_mesh();
 	}
 
 	if (config_raw->experimental) {
 		project_fetch_default_meshes();
-		if (ui_menu_button(tr("Append Shape", null), "", ICON_NONE)) {
+		if (ui_menu_button(tr("Append Shape", NULL), "", ICON_NONE)) {
 			ui_menu_draw(&tab_meshes_draw_185904, -1, -1);
 		}
 	}
@@ -188,7 +188,7 @@ void tab_meshes_draw_properties(mesh_object_t *o) {
 	// context_raw->selected_object->visible = ui_check(h, "Visible", "");
 	// if (h->changed) {
 	// Rebuild full vb for path-tracing
-	// util_mesh_merge(null);
+	// util_mesh_merge(NULL);
 	// }
 
 	transform_t *t   = context_raw->selected_object->transform;
@@ -312,7 +312,7 @@ void tab_meshes_draw_properties(mesh_object_t *o) {
 		transform_compute_dim(context_raw->selected_object->transform);
 
 		physics_body_t *pb = any_imap_get(physics_body_object_map, context_raw->selected_object->uid);
-		if (pb != null) {
+		if (pb != NULL) {
 			physics_body_sync_transform(pb);
 		}
 	}
@@ -321,19 +321,19 @@ void tab_meshes_draw_properties(mesh_object_t *o) {
 	ui_handle_t      *hshape      = ui_handle(__ID__);
 	string_t_array_t *shape_combo = any_array_create_from_raw(
 	    (any[]){
-	        tr("None", null),
-	        tr("Box", null),
-	        tr("Sphere", null),
-	        tr("Convex Hull", null),
-	        tr("Terrain", null),
-	        tr("Mesh", null),
+	        tr("None", NULL),
+	        tr("Box", NULL),
+	        tr("Sphere", NULL),
+	        tr("Convex Hull", NULL),
+	        tr("Terrain", NULL),
+	        tr("Mesh", NULL),
 	    },
 	    6);
-	hshape->i = pb != null ? pb->shape + 1 : 0;
-	ui_combo(hshape, shape_combo, tr("Shape", null), true, UI_ALIGN_LEFT, true);
+	hshape->i = pb != NULL ? pb->shape + 1 : 0;
+	ui_combo(hshape, shape_combo, tr("Shape", NULL), true, UI_ALIGN_LEFT, true);
 
 	ui_handle_t *hdynamic = ui_handle(__ID__);
-	hdynamic->b           = pb != null ? pb->mass > 0 : false;
+	hdynamic->b           = pb != NULL ? pb->mass > 0 : false;
 	ui_check(hdynamic, "Dynamic", "");
 
 	if (hshape->changed || hdynamic->changed) {
@@ -345,8 +345,8 @@ void tab_meshes_draw_properties(mesh_object_t *o) {
 
 	ui_text("Script", UI_ALIGN_LEFT, ui->ops->theme->SEPARATOR_COL);
 
-	string_t *script = any_map_get(sim_object_script_map, context_raw->selected_object);
-	if (script == null) {
+	char *script = any_map_get(sim_object_script_map, context_raw->selected_object);
+	if (script == NULL) {
 		script = "";
 	}
 
@@ -363,7 +363,7 @@ void tab_meshes_draw_properties(mesh_object_t *o) {
 	gc_root(ui_text_area_coloring);
 	ui_text_area(hscript, UI_ALIGN_LEFT, true, "", false);
 	gc_unroot(ui_text_area_coloring);
-	ui_text_area_coloring = null;
+	ui_text_area_coloring = NULL;
 	ui_set_font(ui, _font);
 	ui->font_size = _font_size;
 
@@ -375,9 +375,9 @@ void tab_meshes_draw_properties(mesh_object_t *o) {
 	}
 }
 
-void tab_meshes_append_shape(string_t *mesh_name) {
-	scene_t     *scene_raw = null;
-	mesh_data_t *raw       = null;
+void tab_meshes_append_shape(char *mesh_name) {
+	scene_t     *scene_raw = NULL;
+	mesh_data_t *raw       = NULL;
 	if (string_equals(mesh_name, "sphere")) {
 		raw_mesh_t *mesh = geom_make_uv_sphere(1, 128, 64, true, 1.0);
 		raw              = import_mesh_raw_mesh(mesh);
@@ -395,7 +395,7 @@ void tab_meshes_append_shape(string_t *mesh_name) {
 	util_mesh_pack_uvs(raw->vertex_arrays->buffer[2]->values);
 	mesh_data_t *md   = mesh_data_create(raw);
 	md->_->handle     = md->name;
-	mesh_object_t *mo = scene_add_mesh_object(md, project_paint_objects->buffer[0]->material, null);
+	mesh_object_t *mo = scene_add_mesh_object(md, project_paint_objects->buffer[0]->material, NULL);
 	mo->base->name    = md->name;
 	obj_t *o          = GC_ALLOC_INIT(obj_t, {0});
 	o->_              = GC_ALLOC_INIT(obj_runtime_t, {._gc = scene_raw});
@@ -412,7 +412,7 @@ void tab_meshes_append_shape(string_t *mesh_name) {
 ////
 
 void tab_scene_select_object(mesh_object_t *mo) {
-	if (mo == null) {
+	if (mo == NULL) {
 		return;
 	}
 
@@ -423,7 +423,7 @@ void tab_scene_select_object(mesh_object_t *mo) {
 	}
 
 	context_raw->paint_object = mo;
-	if (context_raw->merged_object != null) {
+	if (context_raw->merged_object != NULL) {
 		context_raw->merged_object->base->visible = false;
 	}
 	context_select_paint_object(mo);
@@ -446,15 +446,15 @@ void tab_scene_import_mesh_done() {
 
 	for (i32 i = 0; i < count; ++i) {
 		mesh_object_t *mo = project_paint_objects->buffer[project_paint_objects->length - 1 - i];
-		object_set_parent(mo->base, null);
+		object_set_parent(mo->base, NULL);
 		tab_scene_select_object(mo);
 	}
 
-	sys_notify_on_next_frame(&tab_scene_import_mesh_done_188032, null);
+	sys_notify_on_next_frame(&tab_scene_import_mesh_done_188032, NULL);
 }
 
 void tab_scene_import_mesh_done_188032(any _) {
-	util_mesh_merge(null);
+	util_mesh_merge(NULL);
 	tab_scene_select_object(context_raw->selected_object->ext);
 	tab_scene_sort();
 }
@@ -538,16 +538,16 @@ void tab_scene_draw_list(ui_handle_t *list_handle, object_t *current_object) {
 }
 
 void tab_scene_draw_list_188308() {
-	if (ui_menu_button(tr("Duplicate", null), "", ICON_DUPLICATE)) {
+	if (ui_menu_button(tr("Duplicate", NULL), "", ICON_DUPLICATE)) {
 		sim_duplicate();
 	}
-	if (ui_menu_button(tr("Delete", null), "", ICON_DELETE)) {
+	if (ui_menu_button(tr("Delete", NULL), "", ICON_DELETE)) {
 		sim_delete();
 	}
 }
 
 void tab_scene_draw(ui_handle_t *htab) {
-	if (ui_tab(htab, tr("Scene", null), false, -1, false)) {
+	if (ui_tab(htab, tr("Scene", NULL), false, -1, false)) {
 
 		tab_scene_line_counter = 0;
 

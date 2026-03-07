@@ -4,7 +4,7 @@ void geometry_node_init() {
 	any_map_set(parser_material_node_values, "NEW_GEOMETRY", geometry_node_value);
 }
 
-string_t *geometry_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
+char *geometry_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	if (socket == node->outputs->buffer[0]) { // Position
 		parser_material_kong->frag_wposition = true;
 		return "input.wposition";
@@ -31,7 +31,7 @@ string_t *geometry_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	}
 }
 
-string_t *geometry_node_value(ui_node_t *node, ui_node_socket_t *socket) {
+char *geometry_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 	if (socket == node->outputs->buffer[6]) { // Backfacing
 		return "0.0";                         // SV_IsFrontFace
 		                                      // return "(1.0 - float(gl_FrontFacing))";
@@ -40,7 +40,7 @@ string_t *geometry_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 		f32       strength           = 1.0;
 		f32       radius             = 1.0;
 		f32       offset             = 0.0;
-		string_t *store              = parser_material_store_var_name(node);
+		char *store              = parser_material_store_var_name(node);
 		parser_material_kong->frag_n = true;
 		parser_material_write(parser_material_kong, string_join(string_join("var ", store), "_dx: float3 = ddx3(n);"));
 		parser_material_write(parser_material_kong, string_join(string_join("var ", store), "_dy: float3 = ddy3(n);"));

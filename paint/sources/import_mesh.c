@@ -1,4 +1,4 @@
-void import_mesh_run(string_t *path, bool _clear_layers, bool replace_existing) {
+void import_mesh_run(char *path, bool _clear_layers, bool replace_existing) {
 	if (!path_is_mesh(path)) {
 		if (!context_enable_import_plugin(path)) {
 			console_error(strings_unknown_asset_format());
@@ -10,9 +10,9 @@ void import_mesh_run(string_t *path, bool _clear_layers, bool replace_existing) 
 	context_raw->layer_filter = 0;
 
 	gc_unroot(import_mesh_meshes_to_unwrap);
-	import_mesh_meshes_to_unwrap = null;
+	import_mesh_meshes_to_unwrap = NULL;
 
-	string_t *p                  = to_lower_case(path);
+	char *p                  = to_lower_case(path);
 	if (ends_with(p, ".obj")) {
 		import_obj_run(path, replace_existing);
 	}
@@ -20,7 +20,7 @@ void import_mesh_run(string_t *path, bool _clear_layers, bool replace_existing) 
 		import_blend_mesh_run(path, replace_existing);
 	}
 	else {
-		string_t   *ext      = substring(path, string_last_index_of(path, ".") + 1, string_length(path));
+		char   *ext      = substring(path, string_last_index_of(path, ".") + 1, string_length(path));
 		any         importer = any_map_get(import_mesh_importers, ext); // JSValue -> (s: string)=>raw_mesh_t
 		raw_mesh_t *mesh     = js_pcall_str(importer, path);
 		if (string_equals(mesh->name, "")) {
@@ -54,10 +54,10 @@ void import_mesh_run(string_t *path, bool _clear_layers, bool replace_existing) 
 }
 
 void import_mesh_finish_import() {
-	if (context_raw->merged_object != null) {
+	if (context_raw->merged_object != NULL) {
 		mesh_data_delete(context_raw->merged_object->data);
 		mesh_object_remove(context_raw->merged_object);
-		context_raw->merged_object = null;
+		context_raw->merged_object = NULL;
 	}
 
 	context_select_paint_object(context_main_object());
@@ -72,8 +72,8 @@ void import_mesh_finish_import() {
 		// Sort by name
 		array_sort(project_paint_objects, &import_mesh_finish_import_85673);
 
-		if (context_raw->merged_object == null) {
-			util_mesh_merge(null);
+		if (context_raw->merged_object == NULL) {
+			util_mesh_merge(NULL);
 		}
 		context_raw->paint_object->skip_context   = "paint";
 		context_raw->merged_object->base->visible = true;
@@ -88,7 +88,7 @@ void import_mesh_finish_import() {
 	make_material_parse_mesh_material();
 	ui_view2d_hwnd->redraws    = 2;
 	render_path_raytrace_ready = false;
-	context_raw->paint_body    = null;
+	context_raw->paint_body    = NULL;
 }
 
 i32 import_mesh_finish_import_85673(any_ptr pa, any_ptr pb) {
@@ -115,7 +115,7 @@ void _import_mesh_make_mesh(raw_mesh_t *mesh) {
 		mesh_object_remove(p);
 	}
 
-	string_t *handle = context_raw->paint_object->data->_->handle;
+	char *handle = context_raw->paint_object->data->_->handle;
 	if (!string_equals(handle, "SceneSphere") && !string_equals(handle, "ScenePlane")) {
 		sys_notify_on_next_frame(&_import_mesh_make_mesh_85887, context_raw->paint_object->data);
 	}
@@ -147,16 +147,16 @@ void _import_mesh_make_mesh(raw_mesh_t *mesh) {
 			slot_layer_unload(l);
 		}
 		layers_new_layer(false, -1);
-		sys_notify_on_next_frame(&_import_mesh_make_mesh_86005, null);
+		sys_notify_on_next_frame(&_import_mesh_make_mesh_86005, NULL);
 		history_reset();
 	}
 
 	// Wait for add_mesh calls to finish
-	if (import_mesh_meshes_to_unwrap != null) {
-		sys_notify_on_next_frame(&_import_mesh_make_mesh_86033, null);
+	if (import_mesh_meshes_to_unwrap != NULL) {
+		sys_notify_on_next_frame(&_import_mesh_make_mesh_86033, NULL);
 	}
 	else {
-		sys_notify_on_next_frame(&_import_mesh_make_mesh_86052, null);
+		sys_notify_on_next_frame(&_import_mesh_make_mesh_86052, NULL);
 	}
 }
 
@@ -185,13 +185,13 @@ void import_mesh_first_unwrap_done(raw_mesh_t *mesh) {
 }
 
 void import_mesh_make_mesh(raw_mesh_t *mesh) {
-	if (mesh == null || mesh->posa == null || mesh->nora == null || mesh->inda == null || mesh->posa->length == 0) {
+	if (mesh == NULL || mesh->posa == NULL || mesh->nora == NULL || mesh->inda == NULL || mesh->posa->length == 0) {
 		console_error(strings_failed_to_read_mesh_data());
 		return;
 	}
 
-	if (mesh->texa == null) {
-		if (import_mesh_meshes_to_unwrap == null) {
+	if (mesh->texa == NULL) {
+		if (import_mesh_meshes_to_unwrap == NULL) {
 			gc_unroot(import_mesh_meshes_to_unwrap);
 			import_mesh_meshes_to_unwrap = any_array_create_from_raw((any[]){}, 0);
 			gc_root(import_mesh_meshes_to_unwrap);
@@ -203,7 +203,7 @@ void import_mesh_make_mesh(raw_mesh_t *mesh) {
 	}
 }
 
-bool _import_mesh_is_unique_name(string_t *s) {
+bool _import_mesh_is_unique_name(char *s) {
 	for (i32 i = 0; i < project_paint_objects->length; ++i) {
 		mesh_object_t *p = project_paint_objects->buffer[i];
 		if (string_equals(p->base->name, s)) {
@@ -213,7 +213,7 @@ bool _import_mesh_is_unique_name(string_t *s) {
 	return true;
 }
 
-string_t *_import_mesh_number_ext(i32 i) {
+char *_import_mesh_number_ext(i32 i) {
 	if (i < 10) {
 		return string_join(".00", i32_to_string(i));
 	}
@@ -237,8 +237,8 @@ void _import_mesh_add_mesh(raw_mesh_t *mesh) {
 	object->skip_context  = "paint";
 
 	// Ensure unique names
-	string_t *oname       = object->base->name;
-	string_t *ext         = "";
+	char *oname       = object->base->name;
+	char *ext         = "";
 	i32       i           = 0;
 	while (!_import_mesh_is_unique_name(string_join(oname, ext))) {
 		ext = string_copy(_import_mesh_number_ext(++i));
@@ -259,8 +259,8 @@ void _import_mesh_add_mesh(raw_mesh_t *mesh) {
 }
 
 void import_mesh_add_mesh(raw_mesh_t *mesh) {
-	if (mesh->texa == null) {
-		if (import_mesh_meshes_to_unwrap != null) {
+	if (mesh->texa == NULL) {
+		if (import_mesh_meshes_to_unwrap != NULL) {
 			any_array_push(import_mesh_meshes_to_unwrap, mesh);
 		}
 		else {
@@ -284,11 +284,11 @@ mesh_data_t *import_mesh_raw_mesh(raw_mesh_t *mesh) {
 	                                               .index_array = mesh->inda,
 	                                               .scale_pos   = mesh->scale_pos,
 	                                               .scale_tex   = mesh->scale_tex});
-	if (mesh->texa1 != null) {
+	if (mesh->texa1 != NULL) {
 		vertex_array_t *va = GC_ALLOC_INIT(vertex_array_t, {.values = mesh->texa1, .attrib = "tex1", .data = "short2norm"});
 		any_array_push(raw->vertex_arrays, va);
 	}
-	if (mesh->cola != null) {
+	if (mesh->cola != NULL) {
 		vertex_array_t *va = GC_ALLOC_INIT(vertex_array_t, {.values = mesh->cola, .attrib = "col", .data = "short4norm"});
 		any_array_push(raw->vertex_arrays, va);
 	}

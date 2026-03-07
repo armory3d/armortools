@@ -5,7 +5,7 @@ plugin_t *plugin_create() {
 	return p;
 }
 
-void plugin_start(string_t *plugin) {
+void plugin_start(char *plugin) {
 	buffer_t *blob = data_get_blob(string_join("plugins/", plugin));
 	gc_unroot(_plugin_name);
 	_plugin_name = string_copy(plugin);
@@ -14,9 +14,9 @@ void plugin_start(string_t *plugin) {
 	data_delete_blob(string_join("plugins/", plugin));
 }
 
-void plugin_stop(string_t *plugin) {
+void plugin_stop(char *plugin) {
 	plugin_t *p = any_map_get(plugin_map, plugin);
-	if (p->on_delete != null) {
+	if (p->on_delete != NULL) {
 		js_call(p->on_delete);
 	}
 	map_delete(plugin_map, plugin);

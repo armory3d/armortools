@@ -7,11 +7,11 @@ bool render_path_raytrace_bake_commands(void (*parse_paint_material)(bool)) {
 		render_path_raytrace_ready               = true;
 		render_path_raytrace_is_bake             = true;
 		gc_unroot(render_path_raytrace_last_envmap);
-		render_path_raytrace_last_envmap = null;
+		render_path_raytrace_last_envmap = NULL;
 		gc_unroot(render_path_raytrace_bake_last_layer);
-		render_path_raytrace_bake_last_layer = null;
+		render_path_raytrace_bake_last_layer = NULL;
 
-		if (any_map_get(render_path_render_targets, "baketex0") != null) {
+		if (any_map_get(render_path_render_targets, "baketex0") != NULL) {
 			render_target_t *baketex0 = any_map_get(render_path_render_targets, "baketex0");
 			render_target_t *baketex1 = any_map_get(render_path_render_targets, "baketex1");
 			render_target_t *baketex2 = any_map_get(render_path_render_targets, "baketex2");
@@ -48,14 +48,14 @@ bool render_path_raytrace_bake_commands(void (*parse_paint_material)(bool)) {
 		bake_type_t _bake_type = context_raw->bake_type;
 		context_raw->bake_type = BAKE_TYPE_INIT;
 		parse_paint_material(true);
-		render_path_set_target("baketex0", null, null, GPU_CLEAR_COLOR, 0x00000000, 0.0);
+		render_path_set_target("baketex0", NULL, NULL, GPU_CLEAR_COLOR, 0x00000000, 0.0);
 		// Pixels with alpha of 0.0 are skipped during raytracing
 		string_t_array_t *additional = any_array_create_from_raw(
 		    (any[]){
 		        "baketex1",
 		    },
 		    1);
-		render_path_set_target("baketex0", additional, null, GPU_CLEAR_NONE, 0, 0.0);
+		render_path_set_target("baketex0", additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
 		render_path_draw_meshes("paint");
 		context_raw->bake_type = _bake_type;
 		sys_notify_on_next_frame(&render_path_raytrace_bake_commands_134003, parse_paint_material);
@@ -92,9 +92,9 @@ bool render_path_raytrace_bake_commands(void (*parse_paint_material)(bool)) {
 		render_target_t *baketex0                 = any_map_get(render_path_render_targets, "baketex0");
 		render_target_t *baketex1                 = any_map_get(render_path_render_targets, "baketex1");
 
-		gpu_texture_t   *tex2                     = null;
+		gpu_texture_t   *tex2                     = NULL;
 		if (context_raw->bake_type == BAKE_TYPE_LIGHTMAP) {
-			slot_layer_t *flat = layers_flatten(true, null);
+			slot_layer_t *flat = layers_flatten(true, NULL);
 			tex2               = flat->texpaint;
 		}
 		else {
@@ -124,8 +124,8 @@ bool render_path_raytrace_bake_commands(void (*parse_paint_material)(bool)) {
 		_gpu_raytrace_dispatch_rays(framebuffer->_image, f32a);
 
 		i32       id          = context_raw->layer->id;
-		string_t *texpaint_id = string_join("texpaint", i32_to_string(id));
-		render_path_set_target(texpaint_id, null, null, GPU_CLEAR_NONE, 0, 0.0);
+		char *texpaint_id = string_join("texpaint", i32_to_string(id));
+		render_path_set_target(texpaint_id, NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 		render_path_bind_target("baketex2", "tex");
 		render_path_draw_shader("Scene/copy_pass/copy_pass");
 
@@ -160,7 +160,7 @@ void render_path_raytrace_bake_commands_134003(void (*parse_paint_material)(bool
 	parse_paint_material(true);
 }
 
-string_t *render_path_raytrace_bake_get_bake_shader_name() {
+char *render_path_raytrace_bake_get_bake_shader_name() {
 	return context_raw->bake_type == BAKE_TYPE_AO            ? string_join("raytrace_bake_ao", render_path_raytrace_ext)
 	       : context_raw->bake_type == BAKE_TYPE_LIGHTMAP    ? string_join("raytrace_bake_light", render_path_raytrace_ext)
 	       : context_raw->bake_type == BAKE_TYPE_BENT_NORMAL ? string_join("raytrace_bake_bent", render_path_raytrace_ext)

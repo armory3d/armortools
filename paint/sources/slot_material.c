@@ -26,8 +26,8 @@ slot_material_t *slot_material_create(material_data_t *m, ui_node_canvas_t *c) {
 	raw->image      = gpu_create_render_target(w, w, GPU_TEXTURE_FORMAT_RGBA64);
 	raw->image_icon = gpu_create_render_target(w_icon, w_icon, GPU_TEXTURE_FORMAT_RGBA64);
 
-	if (c == null) {
-		if (slot_material_default_canvas == null) { // Synchronous
+	if (c == NULL) {
+		if (slot_material_default_canvas == NULL) { // Synchronous
 			buffer_t *b = data_get_blob("default_material.arm");
 			gc_unroot(slot_material_default_canvas);
 			slot_material_default_canvas = b;

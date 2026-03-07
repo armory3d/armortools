@@ -4,7 +4,7 @@ void tab_materials_draw(ui_handle_t *htab) {
 }
 
 void tab_materials_draw_mini(ui_handle_t *htab) {
-	ui_set_hovered_tab_name(tr("Materials", null));
+	ui_set_hovered_tab_name(tr("Materials", NULL));
 
 	ui_begin_sticky();
 	ui_separator(5, true);
@@ -18,7 +18,7 @@ void tab_materials_draw_mini(ui_handle_t *htab) {
 }
 
 void tab_materials_draw_full(ui_handle_t *htab) {
-	if (ui_tab(htab, tr("Materials", null), false, -1, false)) {
+	if (ui_tab(htab, tr("Materials", NULL), false, -1, false)) {
 		ui_begin_sticky();
 		f32_array_t *row = f32_array_create_from_raw(
 		    (f32[]){
@@ -29,8 +29,8 @@ void tab_materials_draw_full(ui_handle_t *htab) {
 		    3);
 		ui_row(row);
 
-		tab_materials_button_new(tr("New", null));
-		if (ui_icon_button(tr("Import", null), ICON_IMPORT, UI_ALIGN_CENTER)) {
+		tab_materials_button_new(tr("New", NULL));
+		if (ui_icon_button(tr("Import", NULL), ICON_IMPORT, UI_ALIGN_CENTER)) {
 			project_import_material();
 		}
 		tab_materials_button_nodes();
@@ -42,11 +42,11 @@ void tab_materials_draw_full(ui_handle_t *htab) {
 }
 
 void tab_materials_button_nodes() {
-	if (ui_button(tr("Nodes", null), UI_ALIGN_CENTER, "")) {
+	if (ui_button(tr("Nodes", NULL), UI_ALIGN_CENTER, "")) {
 		ui_base_show_material_nodes();
 	}
 	else if (ui->is_hovered) {
-		ui_tooltip(string_join(string_join(string_join(tr("Show Node Editor", null), " ("), any_map_get(config_keymap, "toggle_node_editor")), ")"));
+		ui_tooltip(string_join(string_join(string_join(tr("Show Node Editor", NULL), " ("), any_map_get(config_keymap, "toggle_node_editor")), ")"));
 	}
 }
 
@@ -112,7 +112,7 @@ void tab_materials_draw_slots(bool mini) {
 			bool       is_typing = ui->is_typing;
 			if (!is_typing) {
 				if (i < 9 && operator_shortcut(any_map_get(config_keymap, "select_material"), SHORTCUT_TYPE_DOWN)) {
-					string_t *number = i32_to_string(i + 1);
+					char *number = i32_to_string(i + 1);
 					i32       width  = draw_string_width(ui->ops->font, ui->font_size, number) + 10;
 					i32       height = draw_font_height(ui->ops->font, ui->font_size);
 					draw_set_color(ui->ops->theme->TEXT_COL);
@@ -127,7 +127,7 @@ void tab_materials_draw_slots(bool mini) {
 				if (context_raw->material != project_materials->buffer[i]) {
 					context_select_material(i);
 					if (context_raw->tool == TOOL_TYPE_MATERIAL) {
-						sys_notify_on_next_frame(&tab_materials_draw_slots_119149, null);
+						sys_notify_on_next_frame(&tab_materials_draw_slots_119149, NULL);
 					}
 				}
 				base_drag_off_x = -(mouse_x - uix - ui->_window_x - 3);
@@ -139,7 +139,7 @@ void tab_materials_draw_slots(bool mini) {
 				if (sys_time() - context_raw->select_time < 0.2) {
 					ui_base_show_material_nodes();
 					gc_unroot(base_drag_material);
-					base_drag_material = null;
+					base_drag_material = NULL;
 					base_is_dragging   = false;
 				}
 				context_raw->select_time = sys_time();
@@ -202,7 +202,7 @@ void tab_materials_draw_slots(bool mini) {
 
 void tab_materials_draw_slots_119357(any _) {
 	i32 i                 = _tab_materials_draw_slots;
-	context_raw->material = slot_material_create(project_materials->buffer[0]->data, null);
+	context_raw->material = slot_material_create(project_materials->buffer[0]->data, NULL);
 	any_array_push(project_materials, context_raw->material);
 	ui_node_canvas_t *cloned      = util_clone_canvas(project_materials->buffer[i]->canvas);
 	context_raw->material->canvas = cloned;
@@ -214,26 +214,26 @@ void tab_materials_draw_slots_119244() {
 	i32              i = _tab_materials_draw_slots;
 	slot_material_t *m = project_materials->buffer[i];
 
-	if (ui_menu_button(tr("To Fill Layer", null), "", ICON_SPHERE)) {
+	if (ui_menu_button(tr("To Fill Layer", NULL), "", ICON_SPHERE)) {
 		context_select_material(i);
 		layers_create_fill_layer(UV_TYPE_UVMAP, mat4nan, -1);
 	}
 
-	if (ui_menu_button(tr("Export", null), "", ICON_EXPORT)) {
+	if (ui_menu_button(tr("Export", NULL), "", ICON_EXPORT)) {
 		context_select_material(i);
 		box_export_show_material();
 	}
 
-	if (ui_menu_button(tr("Bake", null), "", ICON_BAKE)) {
+	if (ui_menu_button(tr("Bake", NULL), "", ICON_BAKE)) {
 		context_select_material(i);
 		box_export_show_bake_material();
 	}
 
-	if (ui_menu_button(tr("Duplicate", null), "", ICON_DUPLICATE)) {
-		sys_notify_on_next_frame(&tab_materials_draw_slots_119357, null);
+	if (ui_menu_button(tr("Duplicate", NULL), "", ICON_DUPLICATE)) {
+		sys_notify_on_next_frame(&tab_materials_draw_slots_119357, NULL);
 	}
 
-	if (project_materials->length > 1 && ui_menu_button(tr("Delete", null), "delete", ICON_DELETE)) {
+	if (project_materials->length > 1 && ui_menu_button(tr("Delete", NULL), "delete", ICON_DELETE)) {
 		tab_materials_delete_material(m);
 	}
 
@@ -284,21 +284,21 @@ void tab_materials_draw_slots_119244() {
 
 	ui_menu_separator();
 	ui_menu_align();
-	ui_menu_label(tr("Channels", null), null);
+	ui_menu_label(tr("Channels", NULL), NULL);
 	ui_menu_align();
 	ui_row2();
-	m->paint_base = ui_check(base_handle, tr("Base Color", null), "");
-	m->paint_opac = ui_check(opac_handle, tr("Opacity", null), "");
+	m->paint_base = ui_check(base_handle, tr("Base Color", NULL), "");
+	m->paint_opac = ui_check(opac_handle, tr("Opacity", NULL), "");
 	ui_row2();
-	m->paint_nor    = ui_check(nor_handle, tr("Normal", null), "");
-	m->paint_height = ui_check(height_handle, tr("Height", null), "");
+	m->paint_nor    = ui_check(nor_handle, tr("Normal", NULL), "");
+	m->paint_height = ui_check(height_handle, tr("Height", NULL), "");
 	ui_row2();
-	m->paint_rough = ui_check(rough_handle, tr("Roughness", null), "");
-	m->paint_met   = ui_check(met_handle, tr("Metallic", null), "");
+	m->paint_rough = ui_check(rough_handle, tr("Roughness", NULL), "");
+	m->paint_met   = ui_check(met_handle, tr("Metallic", NULL), "");
 	ui_row2();
-	m->paint_emis = ui_check(emis_handle, tr("Emission", null), "");
-	m->paint_subs = ui_check(subs_handle, tr("Subsurface", null), "");
-	m->paint_occ  = ui_check(occ_handle, tr("Occlusion", null), "");
+	m->paint_emis = ui_check(emis_handle, tr("Emission", NULL), "");
+	m->paint_subs = ui_check(subs_handle, tr("Subsurface", NULL), "");
+	m->paint_occ  = ui_check(occ_handle, tr("Occlusion", NULL), "");
 	if (base_handle->changed || opac_handle->changed || nor_handle->changed || occ_handle->changed || rough_handle->changed || met_handle->changed ||
 	    height_handle->changed || emis_handle->changed || subs_handle->changed) {
 		make_material_parse_paint_material(true);
@@ -310,14 +310,14 @@ void tab_materials_draw_slots_119149(any _) {
 	layers_update_fill_layers();
 }
 
-void tab_materials_button_new(string_t *text) {
+void tab_materials_button_new(char *text) {
 	if (ui_icon_button(text, ICON_PLUS, UI_ALIGN_CENTER)) {
-		sys_notify_on_next_frame(&tab_materials_button_new_120110, null);
+		sys_notify_on_next_frame(&tab_materials_button_new_120110, NULL);
 	}
 }
 
 void tab_materials_button_new_120110(any _) {
-	context_raw->material = slot_material_create(project_materials->buffer[0]->data, null);
+	context_raw->material = slot_material_create(project_materials->buffer[0]->data, NULL);
 	any_array_push(project_materials, context_raw->material);
 	tab_materials_update_material();
 	history_new_material();
@@ -352,7 +352,7 @@ void tab_materials_update_material_pointers(ui_node_t_array_t *nodes, i32 i) {
 }
 
 void tab_materials_accept_swatch_drop(swatch_color_t *swatch) {
-	context_raw->material = slot_material_create(project_materials->buffer[0]->data, null);
+	context_raw->material = slot_material_create(project_materials->buffer[0]->data, NULL);
 	for (i32 i = 0; i < context_raw->material->canvas->nodes->length; ++i) {
 		ui_node_t *node = context_raw->material->canvas->nodes->buffer[i];
 		if (string_equals(node->type, "RGB")) {
@@ -377,7 +377,7 @@ void tab_materials_delete_material(slot_material_t *m) {
 	for (i32 i = 0; i < project_layers->length; ++i) {
 		slot_layer_t *l = project_layers->buffer[i];
 		if (l->fill_layer == m) {
-			l->fill_layer = null;
+			l->fill_layer = NULL;
 		}
 	}
 	history_delete_material();

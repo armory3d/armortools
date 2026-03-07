@@ -48,7 +48,7 @@ void ui_view2d_render(any _) {
 
 	// Cache grid
 	if (ui_view2d_grid_redraw) {
-		if (ui_view2d_grid != null) {
+		if (ui_view2d_grid != NULL) {
 			gpu_delete_texture(ui_view2d_grid);
 		}
 		gc_unroot(ui_view2d_grid);
@@ -63,7 +63,7 @@ void ui_view2d_render(any _) {
 	}
 
 	// Ensure font image is drawn
-	if (context_raw->font->image == null) {
+	if (context_raw->font->image == NULL) {
 		util_render_make_font_preview();
 	}
 
@@ -93,8 +93,8 @@ void ui_view2d_render(any _) {
 
 		if (!config_raw->touch_ui) {
 			bool expand = !base_view3d_show && !ui_nodes_show && config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] == 0;
-			ui_tab(ui_view2d_htab, expand ? string_join(tr("2D View", null), "          ") : tr("2D View", null), false, -1, !base_view3d_show);
-			if (ui_tab(ui_view2d_htab, tr("+", null), false, -1, false)) {
+			ui_tab(ui_view2d_htab, expand ? string_join(tr("2D View", NULL), "          ") : tr("2D View", NULL), false, -1, !base_view3d_show);
+			if (ui_tab(ui_view2d_htab, tr("+", NULL), false, -1, false)) {
 				ui_view2d_htab->i = 0;
 			}
 		}
@@ -110,7 +110,7 @@ void ui_view2d_render(any _) {
 		draw_set_color(0xffffffff);
 
 		// Texture
-		gpu_texture_t *tex     = null;
+		gpu_texture_t *tex     = NULL;
 		slot_layer_t  *l       = context_raw->layer;
 		i32            channel = 0;
 
@@ -127,7 +127,7 @@ void ui_view2d_render(any _) {
 			if (nodes->nodes_selected_id->length > 0) {
 				ui_node_t     *sel = ui_get_node(c->nodes, nodes->nodes_selected_id->buffer[0]);
 				gpu_texture_t *img = ui_nodes_get_node_preview_image(sel);
-				if (img != null) {
+				if (img != NULL) {
 					tex = ui_nodes_get_node_preview_image(sel);
 				}
 			}
@@ -146,7 +146,7 @@ void ui_view2d_render(any _) {
 				bool           in_use  = gpu_in_use;
 				if (in_use)
 					draw_end();
-				layer = layers_flatten(false, null);
+				layer = layers_flatten(false, NULL);
 				if (in_use)
 					draw_begin(current, false, 0);
 			}
@@ -180,7 +180,7 @@ void ui_view2d_render(any _) {
 		}
 
 		i32 th = tw;
-		if (tex != null) {
+		if (tex != NULL) {
 			th = tw * (tex->height / (float)tex->width);
 			ty = apph / (float)2 - th / (float)2 + ui_view2d_pan_y;
 			if (ui_view2d_type == VIEW_2D_TYPE_LAYER) {
@@ -200,7 +200,7 @@ void ui_view2d_render(any _) {
 			}
 
 			if (ui_view2d_type == VIEW_2D_TYPE_LAYER) {
-				draw_set_pipeline(null);
+				draw_set_pipeline(NULL);
 			}
 
 			// Texture and node preview color picking
@@ -213,7 +213,7 @@ void ui_view2d_render(any _) {
 				_ui_view2d_render_y  = ui->input_y - ty - ui_view2d_wy;
 				_ui_view2d_render_tw = tw;
 				_ui_view2d_render_th = th;
-				sys_notify_on_next_frame(&ui_view2d_render_109006, null);
+				sys_notify_on_next_frame(&ui_view2d_render_109006, NULL);
 			}
 		}
 
@@ -236,13 +236,13 @@ void ui_view2d_render(any _) {
 
 		// Editable layer name
 		ui_handle_t *h    = ui_handle(__ID__);
-		string_t    *text = ui_view2d_type == VIEW_2D_TYPE_NODE ? context_raw->node_preview_name : h->text;
+		char    *text = ui_view2d_type == VIEW_2D_TYPE_NODE ? context_raw->node_preview_name : h->text;
 
 		ui->_w = math_floor(math_min(draw_string_width(ui->ops->font, ui->font_size, text) + 15 * UI_SCALE(), 100 * UI_SCALE()));
 
 		if (ui_view2d_type == VIEW_2D_TYPE_ASSET) {
 			asset_t *asset = context_raw->texture;
-			if (asset != null) {
+			if (asset != NULL) {
 				string_t_array_t *asset_names = project_asset_names;
 				i32               i           = char_ptr_array_index_of(asset_names, asset->name);
 				h->text                       = string_copy(asset->name);
@@ -277,11 +277,11 @@ void ui_view2d_render(any _) {
 			}
 			string_t_array_t *layer_mode_combo = any_array_create_from_raw(
 			    (any[]){
-			        tr("Visible", null),
-			        tr("Selected", null),
+			        tr("Visible", NULL),
+			        tr("Selected", NULL),
 			    },
 			    2);
-			ui_view2d_layer_mode = ui_combo(h_layer_mode, layer_mode_combo, tr("Layers", null), false, UI_ALIGN_LEFT, true);
+			ui_view2d_layer_mode = ui_combo(h_layer_mode, layer_mode_combo, tr("Layers", NULL), false, UI_ALIGN_LEFT, true);
 			ui->_x += ew + 3;
 			ui->_y = 2 + start_y;
 
@@ -292,16 +292,16 @@ void ui_view2d_render(any _) {
 				}
 				string_t_array_t *tex_type_combo = any_array_create_from_raw(
 				    (any[]){
-				        tr("Base Color", null),
-				        tr("Normal Map", null),
-				        tr("Occlusion", null),
-				        tr("Roughness", null),
-				        tr("Metallic", null),
-				        tr("Opacity", null),
-				        tr("Height", null),
+				        tr("Base Color", NULL),
+				        tr("Normal Map", NULL),
+				        tr("Occlusion", NULL),
+				        tr("Roughness", NULL),
+				        tr("Metallic", NULL),
+				        tr("Opacity", NULL),
+				        tr("Height", NULL),
 				    },
 				    7);
-				ui_view2d_tex_type = ui_combo(h_tex_type, tex_type_combo, tr("Texture", null), false, UI_ALIGN_LEFT, true);
+				ui_view2d_tex_type = ui_combo(h_tex_type, tex_type_combo, tr("Texture", NULL), false, UI_ALIGN_LEFT, true);
 				ui->_x += ew + 3;
 				ui->_y = 2 + start_y;
 			}
@@ -311,7 +311,7 @@ void ui_view2d_render(any _) {
 			if (h_uvmap_show->init) {
 				h_uvmap_show->b = ui_view2d_uvmap_show;
 			}
-			ui_view2d_uvmap_show = ui_check(h_uvmap_show, tr("UV Map", null), "");
+			ui_view2d_uvmap_show = ui_check(h_uvmap_show, tr("UV Map", NULL), "");
 			ui->_x += ew * 0.7 + 3;
 			ui->_y = 2 + start_y;
 		}
@@ -321,7 +321,7 @@ void ui_view2d_render(any _) {
 		if (h_tiled_show->init) {
 			h_tiled_show->b = ui_view2d_tiled_show;
 		}
-		ui_view2d_tiled_show = ui_check(h_tiled_show, tr("Tiled", null), "");
+		ui_view2d_tiled_show = ui_check(h_tiled_show, tr("Tiled", NULL), "");
 		ui->_x += ew * 0.6 + 3;
 		ui->_y = 2 + start_y;
 
@@ -334,7 +334,7 @@ void ui_view2d_render(any _) {
 		#endif
 
 		if (full) {
-			if (tex != null) {
+			if (tex != NULL) {
 				ui->_w            = math_floor(ew * 0.5 + 3);
 				i32 scale_percent = math_round((tw / (float)tex->width) * 100);
 				if (ui_text(string_join(i32_to_string(scale_percent), "%"), UI_ALIGN_LEFT, 0x00000000) == UI_STATE_STARTED) {
@@ -346,14 +346,14 @@ void ui_view2d_render(any _) {
 
 			ui->enabled = false;
 
-			if ((ui_view2d_type == VIEW_2D_TYPE_ASSET || ui_view2d_type == VIEW_2D_TYPE_NODE) && tex != null) { // Texture resolution
+			if ((ui_view2d_type == VIEW_2D_TYPE_ASSET || ui_view2d_type == VIEW_2D_TYPE_NODE) && tex != NULL) { // Texture resolution
 				ui->_w = math_floor(ew * 0.7 + 3);
 				ui_text(string_join(string_join(i32_to_string(tex->width), "x"), i32_to_string(tex->height)), UI_ALIGN_LEFT, 0x00000000);
 				ui->_x += ew * 0.7 + 3;
 				ui->_y = 2 + start_y;
 			}
 
-			string_t *view_type = ui_view2d_type == VIEW_2D_TYPE_ASSET  ? "Asset"
+			char *view_type = ui_view2d_type == VIEW_2D_TYPE_ASSET  ? "Asset"
 			                      : ui_view2d_type == VIEW_2D_TYPE_NODE ? "Node"
 			                      : ui_view2d_type == VIEW_2D_TYPE_FONT ? "Font"
 			                                                            : "Layer";
@@ -398,7 +398,7 @@ void ui_view2d_render_109006(any _) {
 	context_raw->picked_color->base = color_set_bb(context_raw->picked_color->base, buffer_get_u8(a, i2));
 	ui_header_handle->redraws       = 2;
 
-	if (context_raw->color_picker_callback != null) {
+	if (context_raw->color_picker_callback != NULL) {
 		context_raw->color_picker_callback(context_raw->picked_color);
 	}
 }

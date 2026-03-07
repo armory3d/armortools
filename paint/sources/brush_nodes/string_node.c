@@ -4,7 +4,7 @@ string_node_t *string_node_create(ui_node_t *raw, f32_array_t *args) {
 	n->base          = logic_node_create(n);
 	n->base->get     = string_node_get;
 	n->base->set     = string_node_set;
-	n->value         = args == null ? "" : sys_buffer_to_string(args->buffer);
+	n->value         = args == NULL ? "" : sys_buffer_to_string(args->buffer);
 	return n;
 }
 

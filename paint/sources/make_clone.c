@@ -7,13 +7,13 @@ void make_clone_run(node_shader_t *kong) {
 	node_shader_write_frag(kong, "var tex_coord_inp: float2 = tex_coord_inp4.ba;");
 
 	node_shader_write_frag(kong, "var texpaint_pack_sample: float3 = sample_lod(texpaint_pack_undo, sampler_linear, tex_coord_inp, 0.0).rgb;");
-	string_t *base   = "sample_lod(texpaint_undo, sampler_linear, tex_coord_inp, 0.0).rgb";
-	string_t *rough  = "texpaint_pack_sample.g";
-	string_t *met    = "texpaint_pack_sample.b";
-	string_t *occ    = "texpaint_pack_sample.r";
-	string_t *nortan = "sample_lod(texpaint_nor_undo, sampler_linear, tex_coord_inp, 0.0).rgb";
-	string_t *height = "0.0";
-	string_t *opac   = "1.0";
+	char *base   = "sample_lod(texpaint_undo, sampler_linear, tex_coord_inp, 0.0).rgb";
+	char *rough  = "texpaint_pack_sample.g";
+	char *met    = "texpaint_pack_sample.b";
+	char *occ    = "texpaint_pack_sample.r";
+	char *nortan = "sample_lod(texpaint_nor_undo, sampler_linear, tex_coord_inp, 0.0).rgb";
+	char *height = "0.0";
+	char *opac   = "1.0";
 	node_shader_write_frag(kong, string_join(string_join("var basecol: float3 = ", base), ";"));
 	node_shader_write_frag(kong, string_join(string_join("var roughness: float = ", rough), ";"));
 	node_shader_write_frag(kong, string_join(string_join("var metallic: float = ", met), ";"));

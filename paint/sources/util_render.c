@@ -44,7 +44,7 @@ void util_render_make_material_preview() {
 	camera_object_build_proj(scene_camera, -1.0);
 	camera_object_build_mat(scene_camera);
 
-	make_material_parse_mesh_preview_material(null);
+	make_material_parse_mesh_preview_material(NULL);
 	void (*_commands)(void) = render_path_commands;
 	gc_unroot(render_path_commands);
 	render_path_commands = render_path_preview_commands_preview;
@@ -82,7 +82,7 @@ void util_render_make_material_preview() {
 }
 
 void util_render_make_decal_preview() {
-	if (context_raw->decal_image == null) {
+	if (context_raw->decal_image == NULL) {
 		context_raw->decal_image = gpu_create_render_target(util_render_decal_preview_size, util_render_decal_preview_size, GPU_TEXTURE_FORMAT_RGBA64);
 	}
 	context_raw->decal_preview    = true;
@@ -119,7 +119,7 @@ void util_render_make_decal_preview() {
 	camera_object_build_proj(scene_camera, -1.0);
 	camera_object_build_mat(scene_camera);
 
-	make_material_parse_mesh_preview_material(null);
+	make_material_parse_mesh_preview_material(NULL);
 	void (*_commands)(void) = render_path_commands;
 	gc_unroot(render_path_commands);
 	render_path_commands = render_path_preview_commands_decal;
@@ -158,7 +158,7 @@ void util_render_make_text_preview() {
 	if (in_use)
 		draw_end();
 
-	string_t    *text      = context_raw->text_tool_text;
+	char    *text      = context_raw->text_tool_text;
 	draw_font_t *font      = context_raw->font->font;
 	i32          font_size = util_render_font_preview_size;
 	i32          text_w    = math_floor(draw_string_width(font, font_size, text));
@@ -167,11 +167,11 @@ void util_render_make_text_preview() {
 	if (tex_w < 512) {
 		tex_w = 512;
 	}
-	if (context_raw->text_tool_image != null && context_raw->text_tool_image->width < tex_w) {
+	if (context_raw->text_tool_image != NULL && context_raw->text_tool_image->width < tex_w) {
 		gpu_delete_texture(context_raw->text_tool_image);
-		context_raw->text_tool_image = null;
+		context_raw->text_tool_image = NULL;
 	}
-	if (context_raw->text_tool_image == null) {
+	if (context_raw->text_tool_image == NULL) {
 		context_raw->text_tool_image = gpu_create_render_target(tex_w, tex_w, GPU_TEXTURE_FORMAT_RGBA32);
 	}
 	draw_begin(context_raw->text_tool_image, true, 0xff000000);
@@ -190,13 +190,13 @@ void util_render_make_font_preview() {
 	if (in_use)
 		draw_end();
 
-	string_t    *text      = "Abg";
+	char    *text      = "Abg";
 	draw_font_t *font      = context_raw->font->font;
 	i32          font_size = util_render_font_preview_size;
 	i32          text_w    = math_floor(draw_string_width(font, font_size, text)) + 8;
 	i32          text_h    = math_floor(draw_font_height(font, font_size)) + 8;
 	i32          tex_w     = text_w + 32;
-	if (context_raw->font->image == null) {
+	if (context_raw->font->image == NULL) {
 		context_raw->font->image = gpu_create_render_target(tex_w, tex_w, GPU_TEXTURE_FORMAT_RGBA32);
 	}
 	draw_begin(context_raw->font->image, true, 0x00000000);
@@ -223,22 +223,22 @@ void util_render_make_brush_preview() {
 	context_raw->material_preview = true;
 
 	// Prepare layers
-	if (render_path_paint_live_layer == null) {
+	if (render_path_paint_live_layer == NULL) {
 		gc_unroot(render_path_paint_live_layer);
-		render_path_paint_live_layer = slot_layer_create("_live", LAYER_SLOT_TYPE_LAYER, null);
+		render_path_paint_live_layer = slot_layer_create("_live", LAYER_SLOT_TYPE_LAYER, NULL);
 		gc_root(render_path_paint_live_layer);
 	}
 
 	slot_layer_t *l = render_path_paint_live_layer;
-	slot_layer_clear(l, 0x00000000, null, 1.0, layers_default_rough, 0.0);
+	slot_layer_clear(l, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
 
-	if (context_raw->brush->image == null) {
+	if (context_raw->brush->image == NULL) {
 		context_raw->brush->image = gpu_create_render_target(util_render_material_preview_size, util_render_material_preview_size, GPU_TEXTURE_FORMAT_RGBA32);
 		context_raw->brush->image_icon = gpu_create_render_target(50, 50, GPU_TEXTURE_FORMAT_RGBA32);
 	}
 
 	slot_material_t *_material          = context_raw->material;
-	context_raw->material               = slot_material_create(null, null);
+	context_raw->material               = slot_material_create(NULL, NULL);
 
 	// Prevent grid jump
 	context_raw->material->nodes->pan_x = context_raw->brush->nodes->pan_x;
@@ -254,7 +254,7 @@ void util_render_make_brush_preview() {
 	}
 
 	slot_material_t *_fill_layer   = context_raw->layer->fill_layer;
-	context_raw->layer->fill_layer = null;
+	context_raw->layer->fill_layer = NULL;
 
 	render_path_paint_use_live_layer(true);
 	make_material_parse_paint_material(false);
@@ -271,7 +271,7 @@ void util_render_make_brush_preview() {
 		p->base->visible = false;
 	}
 	bool merged_object_visible = false;
-	if (context_raw->merged_object != null) {
+	if (context_raw->merged_object != NULL) {
 		merged_object_visible                     = context_raw->merged_object->base->visible;
 		context_raw->merged_object->base->visible = false;
 	}
@@ -368,7 +368,7 @@ void util_render_make_brush_preview() {
 	context_raw->layer             = _layer;
 	context_raw->material          = _material;
 	context_raw->tool              = _tool;
-	sys_notify_on_next_frame(&util_render_make_brush_preview_117467, null);
+	sys_notify_on_next_frame(&util_render_make_brush_preview_117467, NULL);
 
 	// Restore paint mesh
 	context_raw->material_preview = false;
@@ -376,7 +376,7 @@ void util_render_make_brush_preview() {
 	for (i32 i = 0; i < project_paint_objects->length; ++i) {
 		project_paint_objects->buffer[i]->base->visible = visibles->buffer[i];
 	}
-	if (context_raw->merged_object != null) {
+	if (context_raw->merged_object != NULL) {
 		context_raw->merged_object->base->visible = merged_object_visible;
 	}
 	context_raw->paint_object = painto;
@@ -392,7 +392,7 @@ void util_render_make_brush_preview() {
 	draw_begin(target, true, 0x00000000);
 	draw_set_pipeline(pipes_copy);
 	draw_scaled_image(l->texpaint, 0, 0, target->width, target->height);
-	draw_set_pipeline(null);
+	draw_set_pipeline(NULL);
 	draw_end();
 
 	// Scale image preview down to icon
@@ -400,7 +400,7 @@ void util_render_make_brush_preview() {
 	texpreview->_image               = context_raw->brush->image;
 	render_target_t *texpreview_icon = any_map_get(render_path_render_targets, "texpreview_icon");
 	texpreview_icon->_image          = context_raw->brush->image_icon;
-	render_path_set_target("texpreview_icon", null, null, GPU_CLEAR_NONE, 0, 0.0);
+	render_path_set_target("texpreview_icon", NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	render_path_bind_target("texpreview", "tex");
 	render_path_draw_shader("Scene/supersample_resolve/supersample_resolve");
 
@@ -417,11 +417,11 @@ void util_render_make_brush_preview_117467(any _) {
 
 void util_render_make_node_preview(ui_node_canvas_t *canvas, ui_node_t *node, gpu_texture_t *image, ui_node_canvas_t *group, ui_node_t_array_t *parents) {
 	parse_node_preview_result_t *res = make_material_parse_node_preview_material(node, group, parents);
-	if (res == null || res->scon == null) {
+	if (res == NULL || res->scon == NULL) {
 		return;
 	}
 
-	if (util_render_screen_aligned_full_vb == null) {
+	if (util_render_screen_aligned_full_vb == NULL) {
 		util_render_create_screen_aligned_full_data();
 	}
 
@@ -429,7 +429,7 @@ void util_render_make_node_preview(ui_node_canvas_t *canvas, ui_node_t *node, gp
 	context_raw->paint_object->base->transform->scale_world = 3.0;
 	transform_build_matrix(context_raw->paint_object->base->transform);
 
-	_gpu_begin(image, null, null, GPU_CLEAR_NONE, 0, 0.0);
+	_gpu_begin(image, NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	gpu_set_pipeline(res->scon->_->pipe);
 	string_t_array_t *empty = any_array_create_from_raw(
 	    (any[]){

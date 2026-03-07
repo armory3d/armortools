@@ -1,6 +1,8 @@
 
 #ifdef arm_physics
 
+#include "../libs/asim.h"
+
 physics_world_t *physics_world_create() {
 	asim_world_create();
 	physics_world_t *world = GC_ALLOC_INIT(physics_world_t, {0});
@@ -28,7 +30,7 @@ physics_pair_t_array_t *physics_world_get_contact_pairs(physics_world_t *world, 
 }
 
 void physics_world_destroy() {
-	if (physics_world_active != null) {
+	if (physics_world_active != NULL) {
 		asim_world_destroy();
 	}
 }

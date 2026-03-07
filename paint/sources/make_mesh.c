@@ -1,5 +1,5 @@
 node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
-	string_t              *context_id = layer_pass == 0 ? "mesh" : string_join("mesh", i32_to_string(layer_pass));
+	char              *context_id = layer_pass == 0 ? "mesh" : string_join("mesh", i32_to_string(layer_pass));
 	shader_context_t      *props      = GC_ALLOC_INIT(shader_context_t, {.name            = context_id,
 	                                                                     .depth_write     = layer_pass == 0 ? true : false,
 	                                                                     .compare_mode    = layer_pass == 0 ? "less" : "equal",
@@ -21,11 +21,11 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 	                                                                     .depth_attachment = "D32"});
 	node_shader_context_t *con_mesh   = node_shader_context_create(data, props);
 
-	if (mesh_data_get_vertex_array(context_raw->paint_object->data, "col") != null) {
+	if (mesh_data_get_vertex_array(context_raw->paint_object->data, "col") != NULL) {
 		node_shader_context_add_elem(con_mesh, "col", "short4norm");
 	}
 
-	if (mesh_data_get_vertex_array(context_raw->paint_object->data, "tex1") != null) {
+	if (mesh_data_get_vertex_array(context_raw->paint_object->data, "tex1") != NULL) {
 		node_shader_context_add_elem(con_mesh, "tex1", "short2norm");
 	}
 
@@ -56,7 +56,7 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 			node_shader_write_vert(kong, string_join(string_join("height += sample_lod(texpaint_pack_vert", i32_to_string(l->id)),
 			                                         ", sampler_linear, input.tex, 0.0).a;"));
 			slot_layer_t_array_t *masks = slot_layer_get_masks(l, true);
-			if (masks != null) {
+			if (masks != NULL) {
 				for (i32 i = 0; i < masks->length; ++i) {
 					slot_layer_t *m = masks->buffer[i];
 					if (!slot_layer_is_visible(m)) {
@@ -84,7 +84,7 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 	node_shader_write_vert(kong, "output.tex_coord = input.tex;");
 	node_shader_write_attrib_frag(kong, "var tex_coord: float2 = input.tex_coord;");
 
-	if (mesh_data_get_vertex_array(context_raw->paint_object->data, "tex1") != null) {
+	if (mesh_data_get_vertex_array(context_raw->paint_object->data, "tex1") != NULL) {
 		node_shader_add_out(kong, "tex_coord1: float2");
 		node_shader_write_vert(kong, "output.tex_coord1 = input.tex1;");
 		node_shader_write_attrib_frag(kong, "var tex_coord1: float2 = input.tex_coord1;");
@@ -96,7 +96,7 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 
 	for (i32 i = 0; i < project_layers->length; ++i) {
 		slot_layer_t *l = project_layers->buffer[i];
-		if (l->texpaint_sculpt != null) {
+		if (l->texpaint_sculpt != NULL) {
 			sculpt_make_mesh_run(kong, l);
 		}
 	}
@@ -111,9 +111,9 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 		node_shader_add_function(kong, str_octahedron_wrap);
 		node_shader_add_function(kong, str_cotangent_frame);
 		if (layer_pass > 0) {
-			node_shader_add_texture(kong, "gbuffer0", null);
-			node_shader_add_texture(kong, "gbuffer1", null);
-			node_shader_add_texture(kong, "gbuffer2", null);
+			node_shader_add_texture(kong, "gbuffer0", NULL);
+			node_shader_add_texture(kong, "gbuffer1", NULL);
+			node_shader_add_texture(kong, "gbuffer2", NULL);
 			node_shader_write_frag(
 			    kong, "var fragcoord: float2 = float2(input.wvpposition.x / input.wvpposition.w, input.wvpposition.y / input.wvpposition.w) * 0.5 + 0.5;");
 			node_shader_write_frag(kong, "fragcoord.y = 1.0 - fragcoord.y;");
@@ -156,7 +156,7 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 			node_shader_add_texture(kong, "texuvmap", "_texuvmap");
 		}
 
-		if (context_raw->viewport_mode == VIEWPORT_MODE_MASK && slot_layer_get_masks(context_raw->layer, true) != null) {
+		if (context_raw->viewport_mode == VIEWPORT_MODE_MASK && slot_layer_get_masks(context_raw->layer, true) != NULL) {
 			for (i32 i = 0; i < slot_layer_get_masks(context_raw->layer, true)->length; ++i) {
 				slot_layer_t *m = slot_layer_get_masks(context_raw->layer, true)->buffer[i];
 				if (!slot_layer_is_visible(m)) {
@@ -194,7 +194,7 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 
 			i32                   count = 3;
 			slot_layer_t_array_t *masks = slot_layer_get_masks(l, true);
-			if (masks != null) {
+			if (masks != NULL) {
 				count += masks->length;
 			}
 			texture_count += count;
@@ -231,8 +231,8 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 				}
 			}
 
-			string_t *tex_coord = l->uv_map == 1 ? "tex_coord1" : "tex_coord";
-			node_shader_add_texture(kong, string_join("texpaint", i32_to_string(l->id)), null);
+			char *tex_coord = l->uv_map == 1 ? "tex_coord1" : "tex_coord";
+			node_shader_add_texture(kong, string_join("texpaint", i32_to_string(l->id)), NULL);
 			node_shader_write_frag(kong, string_join(string_join(string_join(string_join("texpaint_sample = sample_lod(texpaint", i32_to_string(l->id)),
 			                                                                 ", sampler_linear, "),
 			                                                     tex_coord),
@@ -249,7 +249,7 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 			// }
 
 			slot_layer_t_array_t *masks = slot_layer_get_masks(l, true);
-			if (masks != null) {
+			if (masks != NULL) {
 				bool has_visible = false;
 				for (i32 i = 0; i < masks->length; ++i) {
 					slot_layer_t *m = masks->buffer[i];
@@ -259,14 +259,14 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 					}
 				}
 				if (has_visible) {
-					string_t *texpaint_mask = string_join("texpaint_mask", i32_to_string(l->id));
+					char *texpaint_mask = string_join("texpaint_mask", i32_to_string(l->id));
 					node_shader_write_frag(kong, string_join(string_join("var ", texpaint_mask), ": float = 0.0;"));
 					for (i32 i = 0; i < masks->length; ++i) {
 						slot_layer_t *m = masks->buffer[i];
 						if (!slot_layer_is_visible(m)) {
 							continue;
 						}
-						node_shader_add_texture(kong, string_join("texpaint", i32_to_string(m->id)), null);
+						node_shader_add_texture(kong, string_join("texpaint", i32_to_string(m->id)), NULL);
 						node_shader_write_frag(kong, "{"); // Group mask is sampled across multiple layers
 						node_shader_write_frag(
 						    kong, string_join(string_join(string_join(string_join(string_join(string_join("var texpaint_mask_sample", i32_to_string(m->id)),
@@ -277,7 +277,7 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 						                      ", 0.0).r;"));
 
 											  f32       opac = slot_layer_get_opacity(m);
-						string_t *mask =
+						char *mask =
 						    make_material_blend_mode_mask(kong, m->blending, texpaint_mask, string_join("texpaint_mask_sample", i32_to_string(m->id)),
 						                                  string_join(string_join("float(", f32_to_string(opac)), ")"));
 						node_shader_write_frag(kong, string_join(string_join(string_join(texpaint_mask, " = "), mask), ";"));
@@ -304,7 +304,7 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 			}
 
 			if (l->paint_nor || make_material_emis_used) {
-				node_shader_add_texture(kong, string_join("texpaint_nor", i32_to_string(l->id)), null);
+				node_shader_add_texture(kong, string_join("texpaint_nor", i32_to_string(l->id)), NULL);
 				node_shader_write_frag(kong,
 				                       string_join(string_join(string_join(string_join("texpaint_nor_sample = sample_lod(texpaint_nor", i32_to_string(l->id)),
 				                                                           ", sampler_linear, "),
@@ -343,7 +343,7 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 			}
 
 			if (l->paint_occ || l->paint_rough || l->paint_met || (l->paint_height && make_material_height_used)) {
-				node_shader_add_texture(kong, string_join("texpaint_pack", i32_to_string(l->id)), null);
+				node_shader_add_texture(kong, string_join("texpaint_pack", i32_to_string(l->id)), NULL);
 				node_shader_write_frag(kong,
 				                       string_join(string_join(string_join(string_join("texpaint_pack_sample = sample_lod(texpaint_pack", i32_to_string(l->id)),
 				                                                           ", sampler_linear, "),
@@ -360,7 +360,7 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 					node_shader_write_frag(kong, "metallic = lerp(metallic, texpaint_pack_sample.b, texpaint_opac);");
 				}
 				if (l->paint_height && make_material_height_used) {
-					string_t *assign = l->paint_height_blend ? "+=" : "=";
+					char *assign = l->paint_height_blend ? "+=" : "=";
 					node_shader_write_frag(kong, string_join(string_join("height ", assign), " texpaint_pack_sample.a * texpaint_opac;"));
 					node_shader_write_frag(kong, "{");
 					node_shader_add_constant(kong, "texpaint_size: float2", "_texpaint_size");
@@ -466,7 +466,7 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 			node_shader_write_frag(kong, "basecol = pow3(basecol, float3(2.2, 2.2, 2.2));");
 			node_shader_write_frag(kong, "basecol = max3(basecol, float3(0.0, 0.0, 0.0));");
 
-			if (context_raw->viewport_shader != null) {
+			if (context_raw->viewport_shader != NULL) {
 				node_shader_write_frag(kong, "var output_color: float3;");
 				js_call_ptr(context_raw->viewport_shader, kong);
 				node_shader_write_frag(kong, "output[1] = float4(output_color, 1.0);");
@@ -557,7 +557,7 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 		}
 		else if (context_raw->viewport_mode == VIEWPORT_MODE_MATERIAL_ID) {
 			i32 id = context_raw->layer->id;
-			node_shader_add_texture(kong, string_join("texpaint_nor", i32_to_string(id)), null);
+			node_shader_add_texture(kong, string_join("texpaint_nor", i32_to_string(id)), NULL);
 			node_shader_add_constant(kong, "texpaint_size: float2", "_texpaint_size");
 			node_shader_write_frag(kong, "var sample_matid_coord: float2 = tex_coord * constants.texpaint_size;");
 			node_shader_write_frag(kong, string_join(string_join("var sample_matid4: float4 = texpaint_nor", i32_to_string(id)),
@@ -580,7 +580,7 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 			node_shader_write_frag(kong, "output[1] = float4(id_r, id_g, id_b, 1.0);");
 		}
 		else if (context_raw->viewport_mode == VIEWPORT_MODE_MASK &&
-		         (slot_layer_get_masks(context_raw->layer, true) != null || slot_layer_is_mask(context_raw->layer))) {
+		         (slot_layer_get_masks(context_raw->layer, true) != NULL || slot_layer_is_mask(context_raw->layer))) {
 			if (slot_layer_is_mask(context_raw->layer)) {
 				i32 id = context_raw->layer->id;
 				node_shader_write_frag(kong, string_join(string_join("var mask_view: float = sample_lod(texpaint", i32_to_string(id)),
@@ -598,7 +598,7 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 					                                                     i32_to_string(m->id)),
 					                                         ", sampler_linear, tex_coord, 0.0).r;"));
 					f32       opac = slot_layer_get_opacity(m);
-					string_t *mask = make_material_blend_mode_mask(kong, m->blending, "mask_view", string_join("mask_sample", i32_to_string(m->id)),
+					char *mask = make_material_blend_mode_mask(kong, m->blending, "mask_view", string_join("mask_sample", i32_to_string(m->id)),
 					                                               string_join(string_join("float(", f32_to_string(opac)), ")"));
 					node_shader_write_frag(kong, string_join(string_join("mask_view = ", mask), ";"));
 				}

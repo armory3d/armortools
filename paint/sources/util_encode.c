@@ -34,7 +34,7 @@ void util_encode_node_canvas(ui_node_canvas_t *c) {
 }
 
 i32 util_encode_mesh_data_size(mesh_data_t_array_t *datas) {
-	if (datas == null) {
+	if (datas == NULL) {
 		return 0;
 	}
 	i32 size = 0;
@@ -48,7 +48,7 @@ i32 util_encode_mesh_data_size(mesh_data_t_array_t *datas) {
 }
 
 i32 util_encode_packed_assets_size(packed_asset_t_array_t *assets) {
-	if (assets == null) {
+	if (assets == NULL) {
 		return 0;
 	}
 	i32 size = 0;
@@ -61,7 +61,7 @@ i32 util_encode_packed_assets_size(packed_asset_t_array_t *assets) {
 }
 
 i32 util_encode_buffers_size(buffer_t_array_t *buffers) {
-	if (buffers == null) {
+	if (buffers == NULL) {
 		return 0;
 	}
 	i32 size = 0;
@@ -72,23 +72,23 @@ i32 util_encode_buffers_size(buffer_t_array_t *buffers) {
 }
 
 i32 util_encode_layer_data_size(layer_data_t_array_t *datas) {
-	if (datas == null) {
+	if (datas == NULL) {
 		return 0;
 	}
 	i32 size = 0;
 	for (i32 i = 0; i < datas->length; ++i) {
 		buffer_t *tp = datas->buffer[i]->texpaint;
-		if (tp != null) {
+		if (tp != NULL) {
 			size += tp->length;
 		}
 
 		buffer_t *tp_nor = datas->buffer[i]->texpaint_nor;
-		if (tp_nor != null) {
+		if (tp_nor != NULL) {
 			size += tp_nor->length;
 		}
 
 		buffer_t *tp_pack = datas->buffer[i]->texpaint_pack;
-		if (tp_pack != null) {
+		if (tp_pack != NULL) {
 			size += tp_pack->length;
 		}
 	}
@@ -97,7 +97,7 @@ i32 util_encode_layer_data_size(layer_data_t_array_t *datas) {
 
 void util_encode_mesh_datas(mesh_data_t_array_t *datas) {
 	armpack_encode_string("mesh_datas");
-	if (datas == null) {
+	if (datas == NULL) {
 		armpack_encode_null();
 		return;
 	}
@@ -142,7 +142,7 @@ buffer_t *util_encode_project(project_format_t *raw) {
 	armpack_encode_string("is_bgra");
 	armpack_encode_bool(raw->is_bgra);
 	armpack_encode_string("packed_assets");
-	if (raw->packed_assets != null) {
+	if (raw->packed_assets != NULL) {
 		armpack_encode_array(raw->packed_assets->length);
 		for (i32 i = 0; i < raw->packed_assets->length; ++i) {
 			armpack_encode_map(2);
@@ -170,7 +170,7 @@ buffer_t *util_encode_project(project_format_t *raw) {
 	armpack_encode_string("camera_fov");
 	armpack_encode_f32(raw->camera_fov);
 	armpack_encode_string("swatches");
-	if (raw->swatches != null) {
+	if (raw->swatches != NULL) {
 		armpack_encode_array(raw->swatches->length);
 		for (i32 i = 0; i < raw->swatches->length; ++i) {
 			armpack_encode_map(9);
@@ -199,7 +199,7 @@ buffer_t *util_encode_project(project_format_t *raw) {
 	}
 
 	armpack_encode_string("brush_nodes");
-	if (raw->brush_nodes != null) {
+	if (raw->brush_nodes != NULL) {
 		armpack_encode_array(raw->brush_nodes->length);
 		for (i32 i = 0; i < raw->brush_nodes->length; ++i) {
 			util_encode_node_canvas(raw->brush_nodes->buffer[i]);
@@ -210,7 +210,7 @@ buffer_t *util_encode_project(project_format_t *raw) {
 	}
 
 	armpack_encode_string("brush_icons");
-	if (raw->brush_icons != null) {
+	if (raw->brush_icons != NULL) {
 		armpack_encode_array(raw->brush_icons->length);
 		for (i32 i = 0; i < raw->brush_icons->length; ++i) {
 			armpack_encode_array_u8(raw->brush_icons->buffer[i]);
@@ -221,7 +221,7 @@ buffer_t *util_encode_project(project_format_t *raw) {
 	}
 
 	armpack_encode_string("material_nodes");
-	if (raw->material_nodes != null) {
+	if (raw->material_nodes != NULL) {
 		armpack_encode_array(raw->material_nodes->length);
 		for (i32 i = 0; i < raw->material_nodes->length; ++i) {
 			util_encode_node_canvas(raw->material_nodes->buffer[i]);
@@ -232,7 +232,7 @@ buffer_t *util_encode_project(project_format_t *raw) {
 	}
 
 	armpack_encode_string("material_groups");
-	if (raw->material_groups != null) {
+	if (raw->material_groups != NULL) {
 		armpack_encode_array(raw->material_groups->length);
 		for (i32 i = 0; i < raw->material_groups->length; ++i) {
 			util_encode_node_canvas(raw->material_groups->buffer[i]);
@@ -243,7 +243,7 @@ buffer_t *util_encode_project(project_format_t *raw) {
 	}
 
 	armpack_encode_string("material_icons");
-	if (raw->material_icons != null) {
+	if (raw->material_icons != NULL) {
 		armpack_encode_array(raw->material_icons->length);
 		for (i32 i = 0; i < raw->material_icons->length; ++i) {
 			armpack_encode_array_u8(raw->material_icons->buffer[i]);
@@ -257,7 +257,7 @@ buffer_t *util_encode_project(project_format_t *raw) {
 	armpack_encode_array_string(raw->font_assets);
 
 	armpack_encode_string("layer_datas");
-	if (raw->layer_datas != null) {
+	if (raw->layer_datas != NULL) {
 		armpack_encode_array(raw->layer_datas->length);
 		for (i32 i = 0; i < raw->layer_datas->length; ++i) {
 			armpack_encode_map(28);
@@ -329,7 +329,7 @@ buffer_t *util_encode_project(project_format_t *raw) {
 	armpack_encode_array_string(raw->mesh_assets);
 
 	armpack_encode_string("mesh_icons");
-	if (raw->mesh_icons != null) {
+	if (raw->mesh_icons != NULL) {
 		armpack_encode_array(raw->mesh_icons->length);
 		for (i32 i = 0; i < raw->mesh_icons->length; ++i) {
 			armpack_encode_array_u8(raw->mesh_icons->buffer[i]);

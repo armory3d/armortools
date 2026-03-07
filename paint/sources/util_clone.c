@@ -1,39 +1,39 @@
 f32_array_t *util_clone_f32_array(f32_array_t *f32a) {
-	if (f32a == null) {
-		return null;
+	if (f32a == NULL) {
+		return NULL;
 	}
 	return f32_array_create_from_array(f32a);
 }
 
 u32_array_t *util_clone_u32_array(u32_array_t *u32a) {
-	if (u32a == null) {
-		return null;
+	if (u32a == NULL) {
+		return NULL;
 	}
 	return u32_array_create_from_array(u32a);
 }
 
 u8_array_t *util_clone_u8_array(u8_array_t *u8a) {
-	if (u8a == null) {
-		return null;
+	if (u8a == NULL) {
+		return NULL;
 	}
 	return u8_array_create_from_array(u8a);
 }
 
 string_t_array_t *util_clone_string_array(string_t_array_t *a) {
-	if (a == null) {
-		return null;
+	if (a == NULL) {
+		return NULL;
 	}
 	string_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
 	for (i32 i = 0; i < a->length; ++i) {
-		string_t *s = a->buffer[i];
+		char *s = a->buffer[i];
 		any_array_push(r, s);
 	}
 	return r;
 }
 
 u8_array_t *util_clone_bool_array(u8_array_t *a) {
-	if (a == null) {
-		return null;
+	if (a == NULL) {
+		return NULL;
 	}
 	u8_array_t *r = u8_array_create_from_raw((u8[]){}, 0);
 	for (i32 i = 0; i < a->length; ++i) {
@@ -44,8 +44,8 @@ u8_array_t *util_clone_bool_array(u8_array_t *a) {
 }
 
 ui_node_socket_t_array_t *util_clone_canvas_sockets(ui_node_socket_t_array_t *sockets) {
-	if (sockets == null) {
-		return null;
+	if (sockets == NULL) {
+		return NULL;
 	}
 	ui_node_socket_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
 	for (i32 i = 0; i < sockets->length; ++i) {
@@ -66,8 +66,8 @@ ui_node_socket_t_array_t *util_clone_canvas_sockets(ui_node_socket_t_array_t *so
 }
 
 ui_node_button_t_array_t *util_clone_canvas_buttons(ui_node_button_t_array_t *buttons) {
-	if (buttons == null) {
-		return null;
+	if (buttons == NULL) {
+		return NULL;
 	}
 	ui_node_button_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
 	for (i32 i = 0; i < buttons->length; ++i) {
@@ -87,8 +87,8 @@ ui_node_button_t_array_t *util_clone_canvas_buttons(ui_node_button_t_array_t *bu
 }
 
 ui_node_t *util_clone_canvas_node(ui_node_t *n) {
-	if (n == null) {
-		return null;
+	if (n == NULL) {
+		return NULL;
 	}
 	ui_node_t *r = GC_ALLOC_INIT(ui_node_t, {0});
 	r->id        = n->id;
@@ -106,8 +106,8 @@ ui_node_t *util_clone_canvas_node(ui_node_t *n) {
 }
 
 ui_node_t_array_t *util_clone_canvas_nodes(ui_node_t_array_t *nodes) {
-	if (nodes == null) {
-		return null;
+	if (nodes == NULL) {
+		return NULL;
 	}
 	ui_node_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
 	for (i32 i = 0; i < nodes->length; ++i) {
@@ -118,8 +118,8 @@ ui_node_t_array_t *util_clone_canvas_nodes(ui_node_t_array_t *nodes) {
 }
 
 ui_node_link_t_array_t *util_clone_canvas_links(ui_node_link_t_array_t *links) {
-	if (links == null) {
-		return null;
+	if (links == NULL) {
+		return NULL;
 	}
 	ui_node_link_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
 	for (i32 i = 0; i < links->length; ++i) {
@@ -135,8 +135,8 @@ ui_node_link_t_array_t *util_clone_canvas_links(ui_node_link_t_array_t *links) {
 }
 
 ui_node_canvas_t *util_clone_canvas(ui_node_canvas_t *c) {
-	if (c == null) {
-		return null;
+	if (c == NULL) {
+		return NULL;
 	}
 	ui_node_canvas_t *r = GC_ALLOC_INIT(ui_node_canvas_t, {0});
 	r->name             = string_copy(c->name);
@@ -146,8 +146,8 @@ ui_node_canvas_t *util_clone_canvas(ui_node_canvas_t *c) {
 }
 
 vertex_element_t_array_t *util_clone_vertex_elements(vertex_element_t_array_t *elems) {
-	if (elems == null) {
-		return null;
+	if (elems == NULL) {
+		return NULL;
 	}
 	vertex_element_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
 	for (i32 i = 0; i < elems->length; ++i) {
@@ -160,8 +160,8 @@ vertex_element_t_array_t *util_clone_vertex_elements(vertex_element_t_array_t *e
 }
 
 shader_const_t_array_t *util_clone_shader_consts(shader_const_t_array_t *consts) {
-	if (consts == null) {
-		return null;
+	if (consts == NULL) {
+		return NULL;
 	}
 	shader_const_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
 	for (i32 i = 0; i < consts->length; ++i) {
@@ -175,8 +175,8 @@ shader_const_t_array_t *util_clone_shader_consts(shader_const_t_array_t *consts)
 }
 
 tex_unit_t_array_t *util_clone_tex_units(tex_unit_t_array_t *units) {
-	if (units == null) {
-		return null;
+	if (units == NULL) {
+		return NULL;
 	}
 	tex_unit_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
 	for (i32 i = 0; i < units->length; ++i) {
@@ -189,8 +189,8 @@ tex_unit_t_array_t *util_clone_tex_units(tex_unit_t_array_t *units) {
 }
 
 shader_context_t_array_t *util_clone_shader_contexts(shader_context_t_array_t *contexts) {
-	if (contexts == null) {
-		return null;
+	if (contexts == NULL) {
+		return NULL;
 	}
 	shader_context_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
 	for (i32 i = 0; i < contexts->length; ++i) {
@@ -221,8 +221,8 @@ shader_context_t_array_t *util_clone_shader_contexts(shader_context_t_array_t *c
 }
 
 shader_data_t *util_clone_shader_data(shader_data_t *s) {
-	if (s == null) {
-		return null;
+	if (s == NULL) {
+		return NULL;
 	}
 	shader_data_t *r = GC_ALLOC_INIT(shader_data_t, {0});
 	r->name          = string_copy(s->name);
@@ -231,8 +231,8 @@ shader_data_t *util_clone_shader_data(shader_data_t *s) {
 }
 
 bind_const_t_array_t *util_clone_bind_constants(bind_const_t_array_t *consts) {
-	if (consts == null) {
-		return null;
+	if (consts == NULL) {
+		return NULL;
 	}
 	bind_const_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
 	for (i32 i = 0; i < consts->length; ++i) {
@@ -245,8 +245,8 @@ bind_const_t_array_t *util_clone_bind_constants(bind_const_t_array_t *consts) {
 }
 
 bind_tex_t_array_t *util_clone_bind_textures(bind_tex_t_array_t *texs) {
-	if (texs == null) {
-		return null;
+	if (texs == NULL) {
+		return NULL;
 	}
 	bind_tex_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
 	for (i32 i = 0; i < texs->length; ++i) {
@@ -259,8 +259,8 @@ bind_tex_t_array_t *util_clone_bind_textures(bind_tex_t_array_t *texs) {
 }
 
 material_context_t_array_t *util_clone_material_contexts(material_context_t_array_t *contexts) {
-	if (contexts == null) {
-		return null;
+	if (contexts == NULL) {
+		return NULL;
 	}
 	material_context_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
 	for (i32 i = 0; i < contexts->length; ++i) {
@@ -274,8 +274,8 @@ material_context_t_array_t *util_clone_material_contexts(material_context_t_arra
 }
 
 material_data_t *util_clone_material_data(material_data_t *m) {
-	if (m == null) {
-		return null;
+	if (m == NULL) {
+		return NULL;
 	}
 	material_data_t *r = GC_ALLOC_INIT(material_data_t, {0});
 	r->name            = string_copy(m->name);
@@ -285,8 +285,8 @@ material_data_t *util_clone_material_data(material_data_t *m) {
 }
 
 obj_t *util_clone_obj(obj_t *o) {
-	if (o == null) {
-		return null;
+	if (o == NULL) {
+		return NULL;
 	}
 	obj_t *r        = GC_ALLOC_INIT(obj_t, {0});
 	r->name         = string_copy(o->name);
@@ -297,7 +297,7 @@ obj_t *util_clone_obj(obj_t *o) {
 	r->visible      = o->visible;
 	r->spawn        = o->spawn;
 	r->material_ref = string_copy(o->material_ref);
-	if (o->children != null) {
+	if (o->children != NULL) {
 		r->children = any_array_create_from_raw((any[]){}, 0);
 		for (i32 i = 0; i < o->children->length; ++i) {
 			obj_t *c = util_clone_obj(o->children->buffer[i]);

@@ -1,5 +1,5 @@
 void ui_menu_render() {
-	i32 menu_w                     = ui_menu_commands != null ? math_floor(base_default_element_w * UI_SCALE() * 2.3) : math_floor(UI_ELEMENT_W() * 2.3);
+	i32 menu_w                     = ui_menu_commands != NULL ? math_floor(base_default_element_w * UI_SCALE() * 2.3) : math_floor(UI_ELEMENT_W() * 2.3);
 
 	i32 _FILL_BUTTON_BG            = ui->ops->theme->FILL_BUTTON_BG;
 	ui->ops->theme->FILL_BUTTON_BG = false;
@@ -19,16 +19,16 @@ void ui_menu_render() {
 		ui_menu_y -= iron_window_height() * 2;
 	}
 
-	draw_begin(null, false, 0);
+	draw_begin(NULL, false, 0);
 	ui_begin_region(ui, ui_menu_x, ui_menu_y, menu_w);
-	ui->input_enabled = ui->combo_selected_handle == null;
+	ui->input_enabled = ui->combo_selected_handle == NULL;
 	ui_menu_begin();
 
-	if (ui_menu_commands != null) {
+	if (ui_menu_commands != NULL) {
 		ui_menu_commands();
 	}
 
-	ui_menu_hide_flag = ui->combo_selected_handle == null && !ui_menu_keep_open && !ui_menu_show_first &&
+	ui_menu_hide_flag = ui->combo_selected_handle == NULL && !ui_menu_keep_open && !ui_menu_show_first &&
 	                    (ui->changed || ui->input_released || ui->input_released_r || ui->is_escape_down);
 	ui_menu_keep_open              = false;
 
@@ -54,7 +54,7 @@ void ui_menu_render() {
 		ui_menu_hide();
 		ui_menu_show_first = true;
 		gc_unroot(ui_menu_commands);
-		ui_menu_commands = null;
+		ui_menu_commands = NULL;
 	}
 }
 
@@ -105,7 +105,7 @@ void ui_menu_separator() {
 	ui_fill(26, 0, ui->_w / (float)UI_SCALE() - 26, 1, ui->ops->theme->BUTTON_COL);
 }
 
-bool ui_menu_button(string_t *text, string_t *label, icon_t icon) {
+bool ui_menu_button(char *text, char *label, icon_t icon) {
 	if (config_raw->touch_ui && !string_equals(label, ">")) {
 		label = "";
 	}
@@ -139,7 +139,7 @@ u32 ui_menu_color_sub(u32 c, u32 s) {
 	return c - (s + 0xff000000) > c ? 0xff000000 : c - s;
 }
 
-bool ui_icon_button(string_t *text, icon_t icon, ui_align_t align) {
+bool ui_icon_button(char *text, icon_t icon, ui_align_t align) {
 	i32 _x_left = ui->_x;
 	i32 _y_top  = ui->_y;
 	i32 _w      = ui->_w;
@@ -147,7 +147,7 @@ bool ui_icon_button(string_t *text, icon_t icon, ui_align_t align) {
 		text = align == UI_ALIGN_LEFT ? string_join("        ", text) : string_join("      ", text);
 	}
 
-	string_t *tooltip = "";
+	char *tooltip = "";
 	i32       textw   = draw_string_width(ui->ops->font, ui->font_size, text);
 	f32       wmax    = config_raw->touch_ui ? 0.9 : 0.8;
 	if (textw > _w * wmax) {
@@ -193,7 +193,7 @@ bool ui_icon_button(string_t *text, icon_t icon, ui_align_t align) {
 	return result;
 }
 
-bool ui_menu_sub_button(ui_handle_t *handle, string_t *text) {
+bool ui_menu_sub_button(ui_handle_t *handle, char *text) {
 	ui->is_hovered = false;
 	ui_menu_button(text, ">", ICON_NONE);
 	if (ui->is_hovered) {
@@ -203,17 +203,17 @@ bool ui_menu_sub_button(ui_handle_t *handle, string_t *text) {
 	}
 	else if (math_abs(ui->input_dy) > ui->input_dx && ui->input_x < ui->_x + ui->_w) {
 		gc_unroot(ui_menu_sub_handle);
-		ui_menu_sub_handle = null;
+		ui_menu_sub_handle = NULL;
 	}
 	return ui_menu_sub_handle == handle;
 }
 
-void ui_menu_label(string_t *text, string_t *shortcut) {
+void ui_menu_label(char *text, char *shortcut) {
 	i32 _y                   = ui->_y;
 	i32 _TEXT_COL            = ui->ops->theme->TEXT_COL;
 	ui->ops->theme->TEXT_COL = ui->ops->theme->LABEL_COL;
 	ui_text(text, UI_ALIGN_LEFT, 0x00000000);
-	if (shortcut != null) {
+	if (shortcut != NULL) {
 		ui->_y = _y;
 		ui_text(shortcut, UI_ALIGN_RIGHT, 0x00000000);
 	}

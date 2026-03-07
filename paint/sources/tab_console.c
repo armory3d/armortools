@@ -1,5 +1,5 @@
 void tab_console_draw(ui_handle_t *htab) {
-	string_t *title = console_message_timer > 0 ? string_join(console_message, "        ") : tr("Console", null);
+	char *title = console_message_timer > 0 ? string_join(console_message, "        ") : tr("Console", NULL);
 	i32       color = console_message_timer > 0 ? console_message_color : -1;
 
 	if (ui_tab(htab, title, false, color, false) && ui->_window_h > ui_statusbar_default_h * UI_SCALE()) {
@@ -23,17 +23,17 @@ void tab_console_draw(ui_handle_t *htab) {
 		#endif
 		ui_row(row);
 
-		if (ui_icon_button(tr("Clear", null), ICON_ERASE, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Clear", NULL), ICON_ERASE, UI_ALIGN_CENTER)) {
 			gc_unroot(console_last_traces);
 			console_last_traces = any_array_create_from_raw((any[]){}, 0);
 			gc_root(console_last_traces);
 		}
-		if (ui_icon_button(tr("Export", null), ICON_EXPORT, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Export", NULL), ICON_EXPORT, UI_ALIGN_CENTER)) {
 			ui_files_show("txt", true, false, &tab_console_draw_37642);
 		}
 		#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
-		if (ui_icon_button(tr("Copy", null), ICON_COPY, UI_ALIGN_CENTER)) {
-			string_t *str = string_array_join(console_last_traces, "\n");
+		if (ui_icon_button(tr("Copy", NULL), ICON_COPY, UI_ALIGN_CENTER)) {
+			char *str = string_array_join(console_last_traces, "\n");
 			iron_copy_to_clipboard(str);
 		}
 		#endif
@@ -46,7 +46,7 @@ void tab_console_draw(ui_handle_t *htab) {
 		ui_set_font(ui, f);
 		ui->font_size = math_floor(15 * UI_SCALE());
 		for (i32 i = 0; i < console_last_traces->length; ++i) {
-			string_t *t = console_last_traces->buffer[i];
+			char *t = console_last_traces->buffer[i];
 			ui_text(t, UI_ALIGN_LEFT, 0x00000000);
 		}
 		ui_set_font(ui, _font);
@@ -54,11 +54,11 @@ void tab_console_draw(ui_handle_t *htab) {
 	}
 }
 
-void tab_console_draw_37642(string_t *path) {
-	string_t *str = string_array_join(console_last_traces, "\n");
-	string_t *f   = ui_files_filename;
+void tab_console_draw_37642(char *path) {
+	char *str = string_array_join(console_last_traces, "\n");
+	char *f   = ui_files_filename;
 	if (string_equals(f, "")) {
-		f = string_copy(tr("untitled", null));
+		f = string_copy(tr("untitled", NULL));
 	}
 	path = string_join(string_join(path, PATH_SEP), f);
 	if (!ends_with(path, ".txt")) {

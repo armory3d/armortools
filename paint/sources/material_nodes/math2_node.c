@@ -3,14 +3,14 @@ void math2_node_init() {
 	any_map_set(parser_material_node_values, "MATH", math2_node_value);
 }
 
-string_t *math2_node_value(ui_node_t *node, ui_node_socket_t *socket) {
-	string_t         *val1 = parser_material_parse_value_input(node->inputs->buffer[0], false);
-	string_t         *val2 = parser_material_parse_value_input(node->inputs->buffer[1], false);
+char *math2_node_value(ui_node_t *node, ui_node_socket_t *socket) {
+	char         *val1 = parser_material_parse_value_input(node->inputs->buffer[0], false);
+	char         *val2 = parser_material_parse_value_input(node->inputs->buffer[1], false);
 	ui_node_button_t *but  = node->buttons->buffer[0]; // operation
-	string_t         *op   = to_upper_case(u8_array_string_at(but->data, but->default_value->buffer[0]));
+	char         *op   = to_upper_case(u8_array_string_at(but->data, but->default_value->buffer[0]));
 	op                     = string_copy(string_replace_all(op, " ", "_"));
 	bool      use_clamp    = node->buttons->buffer[1]->default_value->buffer[0] > 0;
-	string_t *out_val      = "";
+	char *out_val      = "";
 	if (string_equals(op, "ADD")) {
 		out_val = string_join(string_join(string_join(string_join("(", val1), " + "), val2), ")");
 	}
@@ -21,7 +21,7 @@ string_t *math2_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 		out_val = string_join(string_join(string_join(string_join("(", val1), " * "), val2), ")");
 	}
 	else if (string_equals(op, "DIVIDE")) {
-		string_t *store = string_join(parser_material_store_var_name(node), "_divide");
+		char *store = string_join(parser_material_store_var_name(node), "_divide");
 		parser_material_write(parser_material_kong, string_join(string_join(string_join(string_join("var ", store), ": float = "), val2), ";"));
 		parser_material_write(parser_material_kong,
 		                      string_join(string_join(string_join(string_join(string_join(string_join("if (", store), " == 0.0) { "), store), " = "),
@@ -55,7 +55,7 @@ string_t *math2_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 	}
 	else if (string_equals(op, "LESS_THAN")) {
 		// out_val = "float(" + val1 + " < " + val2 + ")";
-		string_t *store = string_join(parser_material_store_var_name(node), "_lessthan");
+		char *store = string_join(parser_material_store_var_name(node), "_lessthan");
 		parser_material_write(parser_material_kong, string_join(string_join("var ", store), ": float = 0.0;"));
 		parser_material_write(parser_material_kong,
 		                      string_join(string_join(string_join(string_join(string_join(string_join("if (", val1), " < "), val2), ") { "), store),
@@ -64,7 +64,7 @@ string_t *math2_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 	}
 	else if (string_equals(op, "GREATER_THAN")) {
 		// out_val = "float(" + val1 + " > " + val2 + ")";
-		string_t *store = string_join(parser_material_store_var_name(node), "_greaterthan");
+		char *store = string_join(parser_material_store_var_name(node), "_greaterthan");
 		parser_material_write(parser_material_kong, string_join(string_join("var ", store), ": float = 0.0;"));
 		parser_material_write(parser_material_kong,
 		                      string_join(string_join(string_join(string_join(string_join(string_join("if (", val1), " > "), val2), ") { "), store),
@@ -96,7 +96,7 @@ string_t *math2_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 		out_val = string_join(string_join(string_join(string_join("(", val1), " % "), val2), ")");
 	}
 	else if (string_equals(op, "PING-PONG")) {
-		string_t *store = string_join(parser_material_store_var_name(node), "_pingpong");
+		char *store = string_join(parser_material_store_var_name(node), "_pingpong");
 		parser_material_write(parser_material_kong, string_join(string_join("var ", store), ": float = 0.0;"));
 		parser_material_write(
 		    parser_material_kong,

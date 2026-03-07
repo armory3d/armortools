@@ -1,5 +1,5 @@
 void tab_scripts_draw(ui_handle_t *htab) {
-	if (ui_tab(htab, tr("Scripts", null), false, -1, false)) {
+	if (ui_tab(htab, tr("Scripts", NULL), false, -1, false)) {
 
 		ui_begin_sticky();
 		f32_array_t *row = f32_array_create_from_raw(
@@ -11,11 +11,11 @@ void tab_scripts_draw(ui_handle_t *htab) {
 		    3);
 		ui_row(row);
 
-		if (ui_icon_button(tr("Run", null), ICON_PLAY, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Run", NULL), ICON_PLAY, UI_ALIGN_CENTER)) {
 			js_eval(tab_scripts_hscript->text);
 		}
 
-		if (ui_icon_button(tr("Edit", null), ICON_EDIT, UI_ALIGN_CENTER)) {
+		if (ui_icon_button(tr("Edit", NULL), ICON_EDIT, UI_ALIGN_CENTER)) {
 			ui_menu_draw(&tab_scripts_draw_80816, -1, -1);
 		}
 
@@ -25,7 +25,7 @@ void tab_scripts_draw(ui_handle_t *htab) {
 		    },
 		    1);
 		ui_handle_t *file_handle = ui_handle(__ID__);
-		ui_combo(file_handle, ar, tr("File", null), false, UI_ALIGN_LEFT, true);
+		ui_combo(file_handle, ar, tr("File", NULL), false, UI_ALIGN_LEFT, true);
 
 		ui_end_sticky();
 
@@ -43,17 +43,17 @@ void tab_scripts_draw(ui_handle_t *htab) {
 		ui_text_area_line_numbers    = false;
 		ui_text_area_scroll_past_end = false;
 		gc_unroot(ui_text_area_coloring);
-		ui_text_area_coloring = null;
+		ui_text_area_coloring = NULL;
 		ui_set_font(ui, _font);
 		ui->font_size = _font_size;
 	}
 }
 
-void tab_scripts_draw_80919(string_t *path) {
-	string_t *str = tab_scripts_hscript->text;
-	string_t *f   = ui_files_filename;
+void tab_scripts_draw_80919(char *path) {
+	char *str = tab_scripts_hscript->text;
+	char *f   = ui_files_filename;
 	if (string_equals(f, "")) {
-		f = string_copy(tr("untitled", null));
+		f = string_copy(tr("untitled", NULL));
 	}
 	path = string_join(string_join(path, PATH_SEP), f);
 	if (!ends_with(path, ".js")) {
@@ -62,26 +62,26 @@ void tab_scripts_draw_80919(string_t *path) {
 	iron_file_save_bytes(path, sys_string_to_buffer(str), 0);
 }
 
-void tab_scripts_draw_80863(string_t *path) {
+void tab_scripts_draw_80863(char *path) {
 	buffer_t *b               = data_get_blob(path);
 	tab_scripts_hscript->text = string_copy(sys_buffer_to_string(b));
 	data_delete_blob(path);
 }
 
 void tab_scripts_draw_80816() {
-	if (ui_menu_button(tr("Clear", null), "", ICON_ERASE)) {
+	if (ui_menu_button(tr("Clear", NULL), "", ICON_ERASE)) {
 		tab_scripts_hscript->text = "";
 	}
-	if (ui_menu_button(tr("Import", null), "", ICON_IMPORT)) {
+	if (ui_menu_button(tr("Import", NULL), "", ICON_IMPORT)) {
 		ui_files_show("js", false, false, &tab_scripts_draw_80863);
 	}
-	if (ui_menu_button(tr("Export", null), "", ICON_EXPORT)) {
+	if (ui_menu_button(tr("Export", NULL), "", ICON_EXPORT)) {
 		ui_files_show("js", true, false, &tab_scripts_draw_80919);
 	}
 }
 
 ui_text_coloring_t *tab_scripts_get_text_coloring() {
-	if (tab_scripts_text_coloring == null) {
+	if (tab_scripts_text_coloring == NULL) {
 		buffer_t *blob = data_get_blob("text_coloring.json");
 		gc_unroot(tab_scripts_text_coloring);
 		tab_scripts_text_coloring = json_parse(sys_buffer_to_string(blob));
