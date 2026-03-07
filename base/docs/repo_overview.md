@@ -1,0 +1,28 @@
+This repository contains everything needed to build armorpaint except the C compiler itself.
+
+## `/base`
+
+Contains a general-purpose 3D engine.
+
+#### `/sources`
+
+A collection of C source files for the complete 3D engine, hardware abstraction, OS and graphics api specifics (`/backends`) and some helper libraries (`/libs`). Only a minimal single file / header libraries are used, with the exception of `quickjs`. `quickjs` is used to provide js scripting capabilities for the engine at runtime.
+
+#### `/tests`
+
+Small stand-alone projects for testing.
+
+#### `/tools`
+
+- `/amake`: armorpain build tool
+- `/bin`: amake binary for each supported platform
+- `/make.js`: a part of amake, handles processing of `project.js` files
+- `/tcc`: actually a C compiler
+
+#### `/project.js`
+
+This file adds C source files, include directories, libraries and defines to the project, depending on the selected platform, graphics api and build flags.
+
+## `/armorpaint`
+
+Contains armorpaint specific code & assets only. The `project.js` file adds this specific code to the final project.
