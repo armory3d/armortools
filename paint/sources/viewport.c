@@ -105,7 +105,7 @@ void viewport_capture_screenshot() {
 	draw_image(tex, 0, 0);
 	draw_end();
 	if (project_raw->packed_assets == NULL) {
-		project_raw->packed_assets = any_array_create_from_raw((any[]){}, 0);
+		project_raw->packed_assets = any_array_create_from_raw((void *[]){}, 0);
 	}
 
 	i32       num = 0;

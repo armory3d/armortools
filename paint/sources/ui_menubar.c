@@ -128,7 +128,7 @@ void ui_menubar_render_ui() {
 		}
 		else {
 			string_t_array_t *categories = any_array_create_from_raw(
-			    (any[]){
+			    (void *[]){
 			        tr("File", NULL),
 			        tr("Edit", NULL),
 			        tr("Viewport", NULL),
@@ -167,12 +167,12 @@ void ui_menubar_render_ui() {
 	}
 }
 
-void ui_menubar_render_ui_87029(any _) {
+void ui_menubar_render_ui_87029(void * _) {
 	project_save(false);
 	box_projects_show();
 }
 
-void ui_menubar_render_ui_87020(any _) {
+void ui_menubar_render_ui_87020(void * _) {
 	sys_notify_on_end_frame(&ui_menubar_render_ui_87029, NULL);
 }
 
@@ -434,7 +434,7 @@ void ui_menubar_draw_category_items() {
 		ui_handle_t *mode_handle = ui_handle(__ID__);
 		mode_handle->i           = context_raw->viewport_mode;
 		string_t_array_t *modes  = any_array_create_from_raw(
-            (any[]){
+            (void *[]){
                 tr("Lit", NULL),
                 tr("Base Color", NULL),
                 tr("Normal", NULL),
@@ -453,7 +453,7 @@ void ui_menubar_draw_category_items() {
             },
             15);
 		string_t_array_t *shortcuts = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        "l",
 		        "b",
 		        "n",
@@ -571,7 +571,7 @@ void ui_menubar_draw_category_items() {
 		ui_menu_align();
 		ui_handle_t      *h                  = ui_handle(__ID__);
 		string_t_array_t *pivot_center_items = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        tr("Camera Center", NULL), // tr("Paint Stroke")
 		    },
 		    1);
@@ -584,7 +584,7 @@ void ui_menubar_draw_category_items() {
 		ui_handle_t *camera_controls_handle     = ui_handle(__ID__);
 		camera_controls_handle->i               = context_raw->camera_controls;
 		string_t_array_t *camera_controls_items = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        tr("Orbit", NULL),
 		        tr("Rotate", NULL),
 		        tr("Fly", NULL),
@@ -612,7 +612,7 @@ void ui_menubar_draw_category_items() {
 		ui_menu_label(tr("Type", NULL), any_map_get(config_keymap, "view_camera_type"));
 		ui_menu_align();
 		string_t_array_t *camera_type_items = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        tr("Perspective", NULL),
 		        tr("Orthographic", NULL),
 		    },
@@ -730,7 +730,7 @@ void ui_menubar_draw_category_items() {
 		ui_handle_t *workspace_handle = ui_handle(__ID__);
 		workspace_handle->i           = config_raw->workspace;
 		string_t_array_t *modes       = any_array_create_from_raw(
-            (any[]){
+            (void *[]){
                 tr("Paint 3D", NULL),
                 tr("Paint 2D", NULL),
             },
@@ -806,7 +806,7 @@ void ui_menubar_draw_category_items_90507(char *url, buffer_t *buffer) {
 	}
 }
 
-void ui_menubar_draw_category_items_89069(any _) {
+void ui_menubar_draw_category_items_89069(void * _) {
 	viewport_capture_screenshot();
 }
 

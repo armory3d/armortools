@@ -33,7 +33,7 @@ void _import_blend_material() {
 	sys_notify_on_next_frame(&_import_blend_material_43775, NULL);
 }
 
-void _import_blend_material_43775(any _) {
+void _import_blend_material_43775(void * _) {
 	char *save;
 	if (path_is_protected()) {
 		save = string_copy(iron_internal_save_path());

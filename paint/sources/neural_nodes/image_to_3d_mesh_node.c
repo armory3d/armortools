@@ -19,7 +19,7 @@ void image_to_3d_mesh_node_button(i32 node_id) {
 	char         *node_name = parser_material_node_name(node, NULL);
 	ui_handle_t      *h         = ui_handle(node_name);
 	string_t_array_t *models    = any_array_create_from_raw(
-        (any[]){
+        (void *[]){
             "Hunyuan3D",
         },
         1);
@@ -39,7 +39,7 @@ void image_to_3d_mesh_node_button(i32 node_id) {
 
 			dir                    = string_copy(string_replace_all(dir, "\\", "/"));
 			string_t_array_t *argv = any_array_create_from_raw(
-			    (any[]){
+			    (void *[]){
 			        string_join(dir, "/Hunyuan3D_win64/python/python.exe"),
 			        "-s",
 			        "-B",

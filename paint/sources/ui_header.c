@@ -141,7 +141,7 @@ void ui_header_draw_tool_properties() {
 		context_raw->picker_select_material = ui_check(h_select_mat, tr("Select Material", NULL), "");
 
 		string_t_array_t *picker_mask_combo = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        tr("None", NULL),
 		        tr("Material", NULL),
 		    },
@@ -175,7 +175,7 @@ void ui_header_draw_tool_properties() {
 			bake_handle->i = context_raw->bake_type;
 		}
 		string_t_array_t *bakes = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        tr("Curvature", NULL),
 		        tr("Normal", NULL),
 		        tr("Object Normal", NULL),
@@ -216,7 +216,7 @@ void ui_header_draw_tool_properties() {
 				bake_up_axis_handle->i = context_raw->bake_up_axis;
 			}
 			string_t_array_t *bake_up_axis_combo = any_array_create_from_raw(
-			    (any[]){
+			    (void *[]){
 			        tr("Z", NULL),
 			        tr("Y", NULL),
 			    },
@@ -230,7 +230,7 @@ void ui_header_draw_tool_properties() {
 				bake_axis_handle->i = context_raw->bake_axis;
 			}
 			string_t_array_t *bake_axis_combo = any_array_create_from_raw(
-			    (any[]){
+			    (void *[]){
 			        tr("XYZ", NULL),
 			        tr("X", NULL),
 			        tr("Y", NULL),
@@ -300,7 +300,7 @@ void ui_header_draw_tool_properties() {
 		}
 
 		if (context_raw->bake_type == BAKE_TYPE_NORMAL || context_raw->bake_type == BAKE_TYPE_HEIGHT || context_raw->bake_type == BAKE_TYPE_DERIVATIVE) {
-			string_t_array_t *ar = any_array_create_from_raw((any[]){}, 0);
+			string_t_array_t *ar = any_array_create_from_raw((void *[]){}, 0);
 			for (i32 i = 0; i < project_paint_objects->length; ++i) {
 				mesh_object_t *p = project_paint_objects->buffer[i];
 				any_array_push(ar, p->base->name);
@@ -405,7 +405,7 @@ void ui_header_draw_tool_properties() {
 				brush_blending_handle->f = context_raw->brush_blending;
 			}
 			string_t_array_t *brush_blending_combo = any_array_create_from_raw(
-			    (any[]){
+			    (void *[]){
 			        tr("Mix", NULL),
 			        tr("Darken", NULL),
 			        tr("Multiply", NULL),
@@ -435,7 +435,7 @@ void ui_header_draw_tool_properties() {
 		if (context_raw->tool == TOOL_TYPE_BRUSH || context_raw->tool == TOOL_TYPE_FILL) {
 			ui_handle_t      *paint_handle   = ui_handle(__ID__);
 			string_t_array_t *texcoord_combo = any_array_create_from_raw(
-			    (any[]){
+			    (void *[]){
 			        tr("UV Map", NULL),
 			        tr("Triplanar", NULL),
 			        tr("Project", NULL),
@@ -467,7 +467,7 @@ void ui_header_draw_tool_properties() {
 
 		if (context_raw->tool == TOOL_TYPE_FILL) {
 			string_t_array_t *fill_mode_combo = any_array_create_from_raw(
-			    (any[]){
+			    (void *[]){
 			        tr("Object", NULL),
 			        tr("Face", NULL),
 			        tr("Angle", NULL),
@@ -572,7 +572,7 @@ void ui_header_draw_tool_properties() {
 	}
 }
 
-void ui_header_draw_tool_properties_128937(any _) {
+void ui_header_draw_tool_properties_128937(void * _) {
 	context_raw->layer_preview_dirty = true;
 }
 

@@ -24,7 +24,7 @@ void console_toast(char *s) {
 		draw_begin(current, false, 0);
 }
 
-void console_draw_progress(any _) {
+void console_draw_progress(void * _) {
 	console_draw_toast(console_progress_text);
 }
 

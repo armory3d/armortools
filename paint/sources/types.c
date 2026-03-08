@@ -135,7 +135,7 @@ typedef struct config {
 } config_t;
 
 typedef struct physics_body {
-	any             _body;
+	void *             _body;
 	physics_shape_t shape;
 	f32             mass;
 	f32             dimx;
@@ -221,7 +221,7 @@ typedef struct context {
 	split_type_t                split_by;
 	f32                         select_time;
 	viewport_mode_t             viewport_mode;
-	any                         viewport_shader; // JSValue * -> (ns: node_shader_t)=>void;
+	void *                         viewport_shader; // JSValue * -> (ns: node_shader_t)=>void;
 	bool                        hscale_was_changed;
 	mesh_format_t               export_mesh_format;
 	i32                         export_mesh_index;
@@ -302,8 +302,8 @@ typedef struct context {
 	struct material_data       *particle_material;
 	i32                         layer_filter;
 	struct brush_output_node   *brush_output_node_inst;
-	void (*run_brush)(any, i32);
-	void (*parse_brush_inputs)(any);
+	void (*run_brush)(void *, i32);
+	void (*parse_brush_inputs)(void *);
 	struct object       *gizmo;
 	struct object       *gizmo_translate_x;
 	struct object       *gizmo_translate_y;
@@ -476,10 +476,10 @@ typedef struct update_info {
 typedef struct logic_node {
 	struct logic_node_input_t_array *inputs;
 	struct logic_node_t_array       *outputs;
-	struct logic_node_value *(*get)(any, i32);
-	struct gpu_texture *(*get_as_image)(any, i32);
-	struct gpu_texture *(*get_cached_image)(any);
-	void (*set)(any, struct f32_array *);
+	struct logic_node_value *(*get)(void *, i32);
+	struct gpu_texture *(*get_as_image)(void *, i32);
+	struct gpu_texture *(*get_cached_image)(void *);
+	void (*set)(void *, struct f32_array *);
 	struct logic_node_ext *ext;
 } logic_node_t;
 
@@ -600,10 +600,10 @@ typedef struct shader_out {
 } shader_out_t;
 
 typedef struct plugin {
-	any       on_ui; // JSValue *
-	any       on_draw; // JSValue *
-	any       on_update; // JSValue *
-	any       on_delete; // JSValue *
+	void *       on_ui; // JSValue *
+	void *       on_draw; // JSValue *
+	void *       on_update; // JSValue *
+	void *       on_delete; // JSValue *
 	char *version;
 	char *name;
 } plugin_t;

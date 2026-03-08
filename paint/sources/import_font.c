@@ -10,7 +10,7 @@ void import_font_run(char *path) {
 	draw_font_t *font = data_get_font(path);
 	draw_font_init(font); // Make sure font_ is ready
 	i32                  count      = draw_font_count(font);
-	slot_font_t_array_t *font_slots = any_array_create_from_raw((any[]){}, 0);
+	slot_font_t_array_t *font_slots = any_array_create_from_raw((void *[]){}, 0);
 
 	for (i32 i = 0; i < count; ++i) {
 		string_t_array_t *ar   = string_split(path, PATH_SEP);

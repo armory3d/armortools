@@ -58,7 +58,7 @@ void tab_swatches_draw(ui_handle_t *htab) {
 		if (ui_icon_button(tr("Clear", NULL), ICON_ERASE, UI_ALIGN_CENTER)) {
 			context_set_swatch(make_swatch(0xffffffff));
 			project_raw->swatches = any_array_create_from_raw(
-			    (any[]){
+			    (void *[]){
 			        context_raw->swatch,
 			    },
 			    1);

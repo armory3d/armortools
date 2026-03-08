@@ -9,7 +9,7 @@ void ui_view2d_init() {
 	ui_view2d_pipe->input_layout                            = vs;
 	ui_view2d_pipe->blend_source                            = GPU_BLEND_ONE;
 	ui_view2d_pipe->blend_destination                       = GPU_BLEND_ZERO;
-	ARRAY_ACCESS(ui_view2d_pipe->color_write_mask_alpha, 0) = false;
+	ui_view2d_pipe->color_write_mask_alpha[0] = false;
 	gpu_pipeline_compile(ui_view2d_pipe);
 	pipes_offset = 0;
 	pipes_get_constant_location("float4");
@@ -25,7 +25,7 @@ void ui_view2d_draw_image(gpu_texture_t *image, f32 dx, f32 dy, f32 dw, f32 dh, 
 	draw_scaled_image(image, dx, dy, dw, dh);
 }
 
-void ui_view2d_render(any _) {
+void ui_view2d_render(void * _) {
 	ui_view2d_ww = config_raw->layout->buffer[LAYOUT_SIZE_NODES_W];
 	ui_view2d_wx = math_floor(sys_w()) + ui_toolbar_w(true);
 	ui_view2d_wy = 0;
@@ -276,7 +276,7 @@ void ui_view2d_render(any _) {
 				h_layer_mode->i = ui_view2d_layer_mode;
 			}
 			string_t_array_t *layer_mode_combo = any_array_create_from_raw(
-			    (any[]){
+			    (void *[]){
 			        tr("Visible", NULL),
 			        tr("Selected", NULL),
 			    },
@@ -291,7 +291,7 @@ void ui_view2d_render(any _) {
 					h_tex_type->i = ui_view2d_tex_type;
 				}
 				string_t_array_t *tex_type_combo = any_array_create_from_raw(
-				    (any[]){
+				    (void *[]){
 				        tr("Base Color", NULL),
 				        tr("Normal Map", NULL),
 				        tr("Occlusion", NULL),
@@ -376,7 +376,7 @@ void ui_view2d_render(any _) {
 	ui_end();
 }
 
-void ui_view2d_render_109006(any _) {
+void ui_view2d_render_109006(void * _) {
 	render_target_t *rt              = any_map_get(render_path_render_targets, "texpaint_picker");
 	gpu_texture_t   *texpaint_picker = rt->_image;
 	draw_begin(texpaint_picker, false, 0);
@@ -403,7 +403,7 @@ void ui_view2d_render_109006(any _) {
 	}
 }
 
-void ui_view2d_update(any _) {
+void ui_view2d_update(void * _) {
 	f32 headerh = UI_ELEMENT_H() * 1.4;
 
 	context_raw->paint2d = false;

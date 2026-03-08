@@ -87,7 +87,7 @@ void util_mesh_merge(mesh_object_t_array_t *paint_objects) {
 	}
 	mesh_data_t *raw = GC_ALLOC_INIT(mesh_data_t, {.name          = context_raw->paint_object->base->name,
 	                                               .vertex_arrays = any_array_create_from_raw(
-	                                                   (any[]){
+	                                                   (void *[]){
 	                                                       GC_ALLOC_INIT(vertex_array_t, {.values = va0, .attrib = "pos", .data = "short4norm"}),
 	                                                       GC_ALLOC_INIT(vertex_array_t, {.values = va1, .attrib = "nor", .data = "short2norm"}),
 	                                                       GC_ALLOC_INIT(vertex_array_t, {.values = va2, .attrib = "tex", .data = "short2norm"}),
@@ -283,9 +283,9 @@ void util_mesh_calc_normals(bool smooth) {
 	render_path_raytrace_ready = false;
 }
 
-i32 util_mesh_calc_normals_123905(i32_ptr pa, i32_ptr pb) {
-	i32 a    = DEREFERENCE(pa);
-	i32 b    = DEREFERENCE(pb);
+i32 util_mesh_calc_normals_123905(i32 *pa, i32 *pb) {
+	i32 a    = *(pa);
+	i32 b    = *(pb);
 	i32 diff = util_mesh_va0->buffer[a * 4] - util_mesh_va0->buffer[b * 4];
 	if (diff != 0)
 		return diff;
@@ -549,7 +549,7 @@ void util_mesh_decimate(f32 strength) {
 
 	mesh_data_t *raw      = GC_ALLOC_INIT(mesh_data_t, {.name          = string_join(o->base->name, "_decimated"),
 	                                                    .vertex_arrays = any_array_create_from_raw(
-                                                       (any[]){
+                                                       (void *[]){
                                                            GC_ALLOC_INIT(vertex_array_t, {.values = new_va0, .attrib = "pos", .data = "short4norm"}),
                                                            GC_ALLOC_INIT(vertex_array_t, {.values = new_va1, .attrib = "nor", .data = "short2norm"}),
                                                            GC_ALLOC_INIT(vertex_array_t, {.values = new_va2, .attrib = "tex", .data = "short2norm"}),
@@ -565,9 +565,9 @@ void util_mesh_decimate(f32 strength) {
 	plugin_uv_unwrap_button();
 }
 
-i32 util_mesh_decimate_126650(i32_ptr pa, i32_ptr pb) {
-	i32 a    = DEREFERENCE(pa);
-	i32 b    = DEREFERENCE(pb);
+i32 util_mesh_decimate_126650(i32 *pa, i32 *pb) {
+	i32 a    = *(pa);
+	i32 b    = *(pb);
 	i32 diff = util_mesh_quantized->buffer[a * 3] - util_mesh_quantized->buffer[b * 3];
 	if (diff != 0)
 		return diff;
@@ -597,7 +597,7 @@ void util_mesh_pack_uvs(i16_array_t *texa) {
 }
 
 mesh_object_t_array_t *util_mesh_get_unique() {
-	mesh_object_t_array_t *ar = any_array_create_from_raw((any[]){}, 0);
+	mesh_object_t_array_t *ar = any_array_create_from_raw((void *[]){}, 0);
 
 	for (i32 i = 0; i < project_paint_objects->length; ++i) {
 		if (!project_paint_objects->buffer[i]->base->visible) {

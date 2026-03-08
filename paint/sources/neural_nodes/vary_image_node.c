@@ -10,7 +10,7 @@ void vary_image_node_button(i32 node_id) {
 	char         *node_name = parser_material_node_name(node, NULL);
 	ui_handle_t      *h         = ui_handle(node_name);
 	string_t_array_t *models    = any_array_create_from_raw(
-        (any[]){
+        (void *[]){
             "Stable Diffusion",
             "Qwen Image Edit",
         },
@@ -55,7 +55,7 @@ void vary_image_node_button_240006(ui_node_t *node) {
 		string_t_array_t *argv;
 		if (model == 0) {
 			argv = any_array_create_from_raw(
-			    (any[]){
+			    (void *[]){
 			        string_join(string_join(dir, "/"), neural_node_sd_bin()),
 			        "-m",
 			        string_join(dir, "/v1-5-pruned-emaonly.safetensors"),
@@ -86,7 +86,7 @@ void vary_image_node_button_240006(ui_node_t *node) {
 		}
 		else {
 			argv = any_array_create_from_raw(
-			    (any[]){
+			    (void *[]){
 			        string_join(string_join(dir, "/"), neural_node_sd_bin()),
 			        "--diffusion-model",
 			        string_join(dir, "/qwen-image-edit-2511-Q4_K_S.gguf"),

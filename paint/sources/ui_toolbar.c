@@ -51,7 +51,7 @@ void ui_toolbar_draw_tool(i32 tool, gpu_texture_t *img, i32 icon_accent) {
 	ui->_y += 2;
 }
 
-void ui_toolbar_draw_tool_66386(any _) {
+void ui_toolbar_draw_tool_66386(void * _) {
 	context_select_tool(_ui_toolbar_i);
 }
 

@@ -174,9 +174,9 @@ void config_init() {
 			config_raw->rp_supersample = 0.5;
 		}
 		#endif
-		config_raw->recent_projects = any_array_create_from_raw((any[]){}, 0);
-		config_raw->bookmarks       = any_array_create_from_raw((any[]){}, 0);
-		config_raw->plugins         = any_array_create_from_raw((any[]){}, 0);
+		config_raw->recent_projects = any_array_create_from_raw((void *[]){}, 0);
+		config_raw->bookmarks       = any_array_create_from_raw((void *[]){}, 0);
+		config_raw->plugins         = any_array_create_from_raw((void *[]){}, 0);
 		#if defined(IRON_ANDROID) || defined(IRON_IOS)
 		config_raw->keymap = "touch.json";
 		#else

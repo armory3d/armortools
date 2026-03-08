@@ -6,7 +6,7 @@ void util_render_make_material_preview() {
 	mesh_object_t_array_t *meshes = scene_meshes;
 	gc_unroot(scene_meshes);
 	scene_meshes = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        sphere,
 	    },
 	    1);
@@ -95,7 +95,7 @@ void util_render_make_decal_preview() {
 	mesh_object_t_array_t *meshes = scene_meshes;
 	gc_unroot(scene_meshes);
 	scene_meshes = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        plane,
 	    },
 	    1);
@@ -411,7 +411,7 @@ void util_render_make_brush_preview() {
 		draw_begin(current, false, 0);
 }
 
-void util_render_make_brush_preview_117467(any _) {
+void util_render_make_brush_preview_117467(void * _) {
 	make_material_parse_paint_material(false);
 }
 
@@ -432,7 +432,7 @@ void util_render_make_node_preview(ui_node_canvas_t *canvas, ui_node_t *node, gp
 	_gpu_begin(image, NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
 	gpu_set_pipeline(res->scon->_->pipe);
 	string_t_array_t *empty = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        "",
 	    },
 	    1);

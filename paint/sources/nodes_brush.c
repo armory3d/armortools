@@ -24,7 +24,7 @@ void nodes_brush_list_init() {
 
 	gc_unroot(nodes_brush_category0);
 	nodes_brush_category0 = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        tex_image_node_def,
 	        input_node_def,
 	        math_node_def,
@@ -40,7 +40,7 @@ void nodes_brush_list_init() {
 
 	gc_unroot(nodes_brush_list);
 	nodes_brush_list = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        nodes_brush_category0,
 	    },
 	    1);

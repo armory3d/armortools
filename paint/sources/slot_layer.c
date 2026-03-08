@@ -406,7 +406,7 @@ void slot_layer_to_fill_layer(slot_layer_t *raw) {
 	sys_notify_on_next_frame(&slot_layer_to_fill_layer_19750, NULL);
 }
 
-void slot_layer_to_fill_layer_19750(any _) {
+void slot_layer_to_fill_layer_19750(void * _) {
 	make_material_parse_paint_material(true);
 	context_raw->layer_preview_dirty                  = true;
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
@@ -430,7 +430,7 @@ slot_layer_t_array_t *slot_layer_get_children(slot_layer_t *raw) {
 		slot_layer_t *l = project_layers->buffer[i];
 		if (l->parent == raw && slot_layer_is_layer(l)) {
 			if (children == NULL) {
-				children = any_array_create_from_raw((any[]){}, 0);
+				children = any_array_create_from_raw((void *[]){}, 0);
 			}
 			any_array_push(children, l);
 		}
@@ -444,13 +444,13 @@ slot_layer_t_array_t *slot_layer_get_recursive_children(slot_layer_t *raw) {
 		slot_layer_t *l = project_layers->buffer[i];
 		if (l->parent == raw) { // Child layers and group masks
 			if (children == NULL) {
-				children = any_array_create_from_raw((any[]){}, 0);
+				children = any_array_create_from_raw((void *[]){}, 0);
 			}
 			any_array_push(children, l);
 		}
 		if (l->parent != NULL && l->parent->parent == raw) { // Layer masks
 			if (children == NULL) {
-				children = any_array_create_from_raw((any[]){}, 0);
+				children = any_array_create_from_raw((void *[]){}, 0);
 			}
 			any_array_push(children, l);
 		}
@@ -469,7 +469,7 @@ slot_layer_t_array_t *slot_layer_get_masks(slot_layer_t *raw, bool include_group
 		slot_layer_t *l = project_layers->buffer[i];
 		if (l->parent == raw && slot_layer_is_mask(l)) {
 			if (children == NULL) {
-				children = any_array_create_from_raw((any[]){}, 0);
+				children = any_array_create_from_raw((void *[]){}, 0);
 			}
 			any_array_push(children, l);
 		}
@@ -481,7 +481,7 @@ slot_layer_t_array_t *slot_layer_get_masks(slot_layer_t *raw, bool include_group
 				slot_layer_t *l = project_layers->buffer[i];
 				if (l->parent == raw->parent && slot_layer_is_mask(l)) {
 					if (children == NULL) {
-						children = any_array_create_from_raw((any[]){}, 0);
+						children = any_array_create_from_raw((void *[]){}, 0);
 					}
 					any_array_push(children, l);
 				}
@@ -1101,7 +1101,7 @@ void layers_update_fill_layer(bool parse_paint) {
 
 void layers_set_object_mask() {
 	string_t_array_t *ar = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        tr("None", NULL),
 	    },
 	    1);
@@ -1222,7 +1222,7 @@ void layers_create_fill_layer(uv_type_t uv_type, mat4_t decal_mat, i32 position)
 	sys_notify_on_next_frame(&layers_create_fill_layer_24041, NULL);
 }
 
-void layers_create_fill_layer_24041(any _) {
+void layers_create_fill_layer_24041(void * _) {
 	slot_layer_t *l = layers_new_layer(false, _layers_position);
 	history_new_layer();
 	l->uv_type = _layers_uv_type;
@@ -1256,7 +1256,7 @@ void layers_create_color_layer(i32 base_color, f32 occlusion, f32 roughness, f32
 	sys_notify_on_next_frame(&layers_create_color_layer_24217, NULL);
 }
 
-void layers_create_color_layer_24217(any _) {
+void layers_create_color_layer_24217(void * _) {
 	slot_layer_t *l = layers_new_layer(false, _layers_position);
 	history_new_layer();
 	l->uv_type     = UV_TYPE_UVMAP;
@@ -1663,7 +1663,7 @@ void layers_on_resized() {
 	render_path_raytrace_ready = false;
 }
 
-void layers_on_resized_26530(any _) {
+void layers_on_resized_26530(void * _) {
 	layers_resize();
 	slot_layer_t    *_layer    = context_raw->layer;
 	slot_material_t *_material = context_raw->material;

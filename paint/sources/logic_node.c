@@ -1,7 +1,7 @@
 logic_node_t *logic_node_create(logic_node_ext_t *ext) {
 	logic_node_t *n = GC_ALLOC_INIT(logic_node_t, {0});
-	n->inputs       = any_array_create_from_raw((any[]){}, 0);
-	n->outputs      = any_array_create_from_raw((any[]){}, 0);
+	n->inputs       = any_array_create_from_raw((void *[]){}, 0);
+	n->outputs      = any_array_create_from_raw((void *[]){}, 0);
 	n->ext          = ext;
 	return n;
 }
@@ -14,7 +14,7 @@ void logic_node_add_outputs(logic_node_t *self, logic_node_t_array_t *nodes) {
 	any_array_push(self->outputs, nodes);
 }
 
-any logic_node_get(logic_node_t *self, i32 from) {
+void * logic_node_get(logic_node_t *self, i32 from) {
 	if (self->get != NULL) {
 		return self->get(self->ext, from);
 	}
@@ -35,7 +35,7 @@ gpu_texture_t *logic_node_get_cached_image(logic_node_t *self) {
 	return NULL;
 }
 
-void logic_node_set(logic_node_t *self, any value) {
+void logic_node_set(logic_node_t *self, void * value) {
 	if (self->set != NULL) {
 		self->set(self->ext, value);
 	}

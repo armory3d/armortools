@@ -48,7 +48,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 
 		#if defined(IRON_ANDROID) || defined(IRON_IOS)
 		string_t_array_t *base_res_combo = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        "128",
 		        "256",
 		        "512",
@@ -59,7 +59,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 		    6);
 		#else
 		string_t_array_t *base_res_combo = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        "128",
 		        "256",
 		        "512",
@@ -79,13 +79,13 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 
 		#if defined(IRON_ANDROID) || defined(IRON_IOS)
 		string_t_array_t *base_bits_combo = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        "8bit",
 		    },
 		    1);
 		#else
 		string_t_array_t *base_bits_combo = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        "8bit",
 		        "16bit",
 		        "32bit",
@@ -105,7 +105,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 				h->i = context_raw->format_type;
 			}
 			string_t_array_t *format_combo = any_array_create_from_raw(
-			    (any[]){
+			    (void *[]){
 			        "png",
 			        "jpg",
 			    },
@@ -118,7 +118,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 				h->i = context_raw->format_type;
 			}
 			string_t_array_t *format_combo = any_array_create_from_raw(
-			    (any[]){
+			    (void *[]){
 			        "exr",
 			    },
 			    1);
@@ -140,7 +140,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 		ui_handle_t *layers_export_handle     = ui_handle(__ID__);
 		layers_export_handle->i               = context_raw->layers_export;
 		string_t_array_t *layers_export_combo = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        tr("Visible", NULL),
 		        tr("Selected", NULL),
 		        tr("Per Object", NULL),
@@ -160,7 +160,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 		layers_destination_handle->i               = context_raw->layers_destination;
 
 		string_t_array_t *layers_destination_combo = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        tr("Disk", NULL),
 		        tr("Pack into Project", NULL),
 		    },
@@ -194,7 +194,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 	}
 }
 
-void box_export_tab_export_textures_34904(any _) {
+void box_export_tab_export_textures_34904(void * _) {
 	export_texture_run(context_raw->texture_export_path, _box_export_bake_material);
 }
 
@@ -206,11 +206,11 @@ void box_export_tab_export_textures_34883(char *path) {
 	sys_notify_on_next_frame(&box_export_tab_export_textures_34904, NULL);
 }
 
-void box_export_tab_export_textures_34832(any _) {
+void box_export_tab_export_textures_34832(void * _) {
 	export_texture_run(context_raw->texture_export_path, _box_export_bake_material);
 }
 
-void box_export_tab_export_textures_34447(any _) {
+void box_export_tab_export_textures_34447(void * _) {
 	layers_set_bits();
 }
 
@@ -317,7 +317,7 @@ void box_export_tab_presets() {
 		if (ui_icon_button(tr("Add", NULL), ICON_PLUS, UI_ALIGN_CENTER)) {
 			export_preset_texture_t *tex = GC_ALLOC_INIT(export_preset_texture_t, {.name     = "base",
 			                                                                       .channels = any_array_create_from_raw(
-			                                                                           (any[]){
+			                                                                           (void *[]){
 			                                                                               "base_r",
 			                                                                               "base_g",
 			                                                                               "base_b",
@@ -386,7 +386,7 @@ void box_export_tab_atlases() {
 			project_atlas_objects = i32_array_create_from_raw((i32[]){}, 0);
 			gc_root(project_atlas_objects);
 			gc_unroot(project_atlas_names);
-			project_atlas_names = any_array_create_from_raw((any[]){}, 0);
+			project_atlas_names = any_array_create_from_raw((void *[]){}, 0);
 			gc_root(project_atlas_names);
 			for (i32 i = 0; i < project_paint_objects->length; ++i) {
 				i32_array_push(project_atlas_objects, 0);
@@ -425,7 +425,7 @@ void box_export_tab_export_mesh(ui_handle_t *htab) {
 			h_export_mesh_format->i = context_raw->export_mesh_format;
 		}
 		string_t_array_t *export_mesh_format_combo = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        "obj",
 		        "arm",
 		    },
@@ -433,7 +433,7 @@ void box_export_tab_export_mesh(ui_handle_t *htab) {
 		context_raw->export_mesh_format = ui_combo(h_export_mesh_format, export_mesh_format_combo, tr("Format", NULL), true, UI_ALIGN_LEFT, true);
 
 		string_t_array_t *ar            = any_array_create_from_raw(
-            (any[]){
+            (void *[]){
                 tr("All", NULL),
             },
             1);
@@ -460,7 +460,7 @@ void box_export_tab_export_mesh(ui_handle_t *htab) {
 		else {
 			mesh_object_t *po = project_paint_objects->buffer[pos - 1];
 			paint_objects     = any_array_create_from_raw(
-                (any[]){
+                (void *[]){
                     po,
                 },
                 1);
@@ -504,7 +504,7 @@ void box_export_tab_export_mesh_36414(char *path) {
 	else {
 		mesh_object_t *po = project_paint_objects->buffer[box_export_mesh_handle->i - 1];
 		paint_objects     = any_array_create_from_raw(
-            (any[]){
+            (void *[]){
                 po,
             },
             1);

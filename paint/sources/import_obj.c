@@ -32,7 +32,7 @@ void import_obj_run(char *path, bool replace_existing) {
 		}
 	}
 	else {
-		raw_mesh_t_array_t *parts = any_array_create_from_raw((any[]){}, 0);
+		raw_mesh_t_array_t *parts = any_array_create_from_raw((void *[]){}, 0);
 		raw_mesh_t         *part  = obj_parse(b, split_code, 0, false);
 		any_array_push(parts, part);
 		while (part->has_next) {

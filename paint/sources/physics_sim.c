@@ -56,7 +56,7 @@ void sim_play() {
 
 	// Save transforms
 	gc_unroot(sim_transforms);
-	sim_transforms = any_array_create_from_raw((any[]){}, 0);
+	sim_transforms = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(sim_transforms);
 	mesh_object_t_array_t *pos = project_paint_objects;
 	for (i32 i = 0; i < pos->length; ++i) {

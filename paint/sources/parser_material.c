@@ -26,11 +26,11 @@ ui_node_link_t *parser_material_get_input_link(ui_node_socket_t *inp) {
 
 void parser_material_init() {
 	gc_unroot(parser_material_parsed);
-	parser_material_parsed = any_array_create_from_raw((any[]){}, 0);
+	parser_material_parsed = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(parser_material_parsed);
 
 	gc_unroot(parser_material_parents);
-	parser_material_parents = any_array_create_from_raw((any[]){}, 0);
+	parser_material_parents = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(parser_material_parents);
 
 	parser_material_cotangent_frame_written = false;
@@ -48,7 +48,7 @@ shader_out_t *parser_material_parse(ui_node_canvas_t *canvas, node_shader_contex
 	parser_material_init();
 	gc_unroot(parser_material_canvases);
 	parser_material_canvases = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        canvas,
 	    },
 	    1);
@@ -389,7 +389,7 @@ char *parser_material_parse_vector(ui_node_t *node, ui_node_socket_t *socket) {
 		return parser_material_parse_group_input(node, socket);
 	}
 	else if (any_map_get(parser_material_custom_nodes, node->type) != NULL) {
-		any cb = any_map_get(parser_material_custom_nodes, node->type); // JSValue -> (n: ui_node_t, s: string)=>string
+		void * cb = any_map_get(parser_material_custom_nodes, node->type); // JSValue -> (n: ui_node_t, s: string)=>string
 		return js_call_ptr_str(cb, node, socket->name);
 	}
 	return "float3(0.0, 0.0, 0.0)";
@@ -449,7 +449,7 @@ char *parser_material_parse_value(ui_node_t *node, ui_node_socket_t *socket) {
 		return parser_material_parse_group_input(node, socket);
 	}
 	else if (any_map_get(parser_material_custom_nodes, node->type) != NULL) {
-		any cb = any_map_get(parser_material_custom_nodes, node->type);
+		void * cb = any_map_get(parser_material_custom_nodes, node->type);
 		return js_call_ptr_str(cb, node, socket->name);
 	}
 	return "0.0";

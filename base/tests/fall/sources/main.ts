@@ -89,7 +89,7 @@ function scene_update(_: any) {
 
 	let sphere: object_t = scene_get_child("Sphere");
 	let t: transform_t   = sphere.transform;
-	asim_body_get_pos(body, ADDRESS(t.loc));
+	asim_body_get_pos(body, &t.loc);
 	transform_build_matrix(t);
 }
 

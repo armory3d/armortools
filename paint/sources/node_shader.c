@@ -1,11 +1,11 @@
 node_shader_t *node_shader_create(node_shader_context_t *context) {
 	node_shader_t *raw     = GC_ALLOC_INIT(node_shader_t, {0});
 	raw->context           = context;
-	raw->ins               = any_array_create_from_raw((any[]){}, 0);
-	raw->outs              = any_array_create_from_raw((any[]){}, 0);
+	raw->ins               = any_array_create_from_raw((void *[]){}, 0);
+	raw->outs              = any_array_create_from_raw((void *[]){}, 0);
 	raw->frag_out          = "float4";
-	raw->consts            = any_array_create_from_raw((any[]){}, 0);
-	raw->textures          = any_array_create_from_raw((any[]){}, 0);
+	raw->consts            = any_array_create_from_raw((void *[]){}, 0);
+	raw->textures          = any_array_create_from_raw((void *[]){}, 0);
 	raw->functions         = any_map_create();
 
 	raw->vert              = "";
@@ -211,7 +211,7 @@ node_shader_context_t *node_shader_context_create(material_t *material, shader_c
 	raw->material                                     = material;
 
 	vertex_element_t_array_t *vertex_elements_default = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        GC_ALLOC_INIT(vertex_element_t, {.name = "pos", .data = "short4norm"}),
 	        GC_ALLOC_INIT(vertex_element_t, {.name = "nor", .data = "short2norm"}),
 	    },
@@ -247,7 +247,7 @@ node_shader_context_t *node_shader_context_create(material_t *material, shader_c
 		raw->data->color_writes_alpha = props->color_writes_alpha;
 	}
 
-	raw->data->texture_units = any_array_create_from_raw((any[]){}, 0);
+	raw->data->texture_units = any_array_create_from_raw((void *[]){}, 0);
 	raw->data->constants     = i32_array_create_from_raw((i32[]){}, 0);
 	return raw;
 }

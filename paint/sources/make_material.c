@@ -63,7 +63,7 @@ void make_material_parse_mesh_material() {
 		shader_context_load(con->data);
 		any_array_push(m->_->shader->contexts, con->data);
 		material_context_t *mcon =
-		    GC_ALLOC_INIT(material_context_t, {.name = string_join("mesh", i32_to_string(i)), .bind_textures = any_array_create_from_raw((any[]){}, 0)});
+		    GC_ALLOC_INIT(material_context_t, {.name = string_join("mesh", i32_to_string(i)), .bind_textures = any_array_create_from_raw((void *[]){}, 0)});
 		material_context_load(mcon);
 		any_array_push(m->contexts, mcon);
 	}
@@ -90,7 +90,7 @@ void make_material_parse_mesh_preview_material(material_data_t *md) {
 
 	array_remove(m->_->shader->contexts, scon);
 
-	material_context_t    *mcon = GC_ALLOC_INIT(material_context_t, {.name = "mesh", .bind_textures = any_array_create_from_raw((any[]){}, 0)});
+	material_context_t    *mcon = GC_ALLOC_INIT(material_context_t, {.name = "mesh", .bind_textures = any_array_create_from_raw((void *[]){}, 0)});
 	material_t            *sd   = GC_ALLOC_INIT(material_t, {.name = "Material", .canvas = NULL});
 	node_shader_context_t *con  = make_mesh_preview_run(sd, mcon);
 
@@ -154,7 +154,7 @@ void make_material_parse_paint_material(bool bake_previews) {
 	}
 
 	material_t            *sdata         = GC_ALLOC_INIT(material_t, {.name = "Material", .canvas = context_raw->material->canvas});
-	material_context_t    *tmcon         = GC_ALLOC_INIT(material_context_t, {.name = "paint", .bind_textures = any_array_create_from_raw((any[]){}, 0)});
+	material_context_t    *tmcon         = GC_ALLOC_INIT(material_context_t, {.name = "paint", .bind_textures = any_array_create_from_raw((void *[]){}, 0)});
 	node_shader_context_t *con           = make_paint_run(sdata, tmcon);
 
 	bool                   compile_error = false;
@@ -186,11 +186,11 @@ void make_material_parse_paint_material(bool bake_previews) {
 }
 
 void make_material_bake_node_previews() {
-	context_raw->node_previews_used = any_array_create_from_raw((any[]){}, 0);
+	context_raw->node_previews_used = any_array_create_from_raw((void *[]){}, 0);
 	if (context_raw->node_previews == NULL) {
 		context_raw->node_previews = any_map_create();
 	}
-	ui_node_t_array_t *empty = any_array_create_from_raw((any[]){}, 0);
+	ui_node_t_array_t *empty = any_array_create_from_raw((void *[]){}, 0);
 	make_material_traverse_nodes(context_raw->material->canvas->nodes, NULL, empty);
 
 	string_t_array_t *keys = map_keys(context_raw->node_previews);
@@ -328,7 +328,7 @@ parse_node_preview_result_t *make_material_parse_node_preview_material(ui_node_t
 	}
 
 	material_t            *sdata         = GC_ALLOC_INIT(material_t, {.name = "Material", .canvas = context_raw->material->canvas});
-	material_context_t    *mcon_raw      = GC_ALLOC_INIT(material_context_t, {.name = "mesh", .bind_textures = any_array_create_from_raw((any[]){}, 0)});
+	material_context_t    *mcon_raw      = GC_ALLOC_INIT(material_context_t, {.name = "mesh", .bind_textures = any_array_create_from_raw((void *[]){}, 0)});
 	node_shader_context_t *con           = make_node_preview_run(sdata, mcon_raw, node, group, parents);
 	bool                   compile_error = false;
 	shader_context_t      *scon;

@@ -154,7 +154,7 @@ void render_path_base_draw_bloom(char *source, char *target) {
 
 	if (render_path_base_bloom_mipmaps == NULL) {
 		gc_unroot(render_path_base_bloom_mipmaps);
-		render_path_base_bloom_mipmaps = any_array_create_from_raw((any[]){}, 0);
+		render_path_base_bloom_mipmaps = any_array_create_from_raw((void *[]){}, 0);
 		gc_root(render_path_base_bloom_mipmaps);
 
 		f32 prev_scale = 1.0;
@@ -346,7 +346,7 @@ void render_path_base_swap_buf(char *bufb) {
 void render_path_base_draw_gbuffer() {
 	render_path_set_target("gbuffer0", NULL, "main", GPU_CLEAR_DEPTH, 0, 1.0); // Only clear gbuffer0
 	string_t_array_t *additional = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        "gbuffer1",
 	        "gbuffer2",
 	    },
@@ -366,7 +366,7 @@ void render_path_base_draw_gbuffer() {
 			char         *g1ping     = string_join("gbuffer1", ping);
 			char         *g2ping     = string_join("gbuffer2", ping);
 			string_t_array_t *additional = any_array_create_from_raw(
-			    (any[]){
+			    (void *[]){
 			        g1ping,
 			        g2ping,
 			    },
@@ -390,7 +390,7 @@ void render_path_base_draw_gbuffer() {
 		line_draw_color              = 0xff000000;
 		line_draw_strength           = 0.002;
 		string_t_array_t *additional = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        "gbuffer1",
 		    },
 		    1);
@@ -436,7 +436,7 @@ void render_path_base_make_gbuffer_copy_textures() {
 
 void render_path_base_copy_to_gbuffer() {
 	string_t_array_t *additional = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        "gbuffer1",
 	        "gbuffer2",
 	    },

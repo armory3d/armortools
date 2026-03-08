@@ -141,7 +141,7 @@ void import_arm_run_project(char *path) {
 	context_raw->paint_object->base->name = md->name;
 	gc_unroot(project_paint_objects);
 	project_paint_objects = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        context_raw->paint_object,
 	    },
 	    1);
@@ -161,7 +161,7 @@ void import_arm_run_project(char *path) {
 		char *abs  = data_is_abs(file) ? file : string_join(base, file);
 		gc_unroot(project_mesh_assets);
 		project_mesh_assets = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        abs,
 		    },
 		    1);
@@ -219,7 +219,7 @@ void import_arm_run_project(char *path) {
 		slot_layer_unload(l);
 	}
 	gc_unroot(project_layers);
-	project_layers = any_array_create_from_raw((any[]){}, 0);
+	project_layers = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_layers);
 	for (i32 i = 0; i < project->layer_datas->length; ++i) {
 		layer_data_t *ld       = project->layer_datas->buffer[i];
@@ -317,7 +317,7 @@ void import_arm_run_project(char *path) {
 	// Materials
 	material_data_t *m0 = data_get_material("Scene", "Material");
 	gc_unroot(project_materials);
-	project_materials = any_array_create_from_raw((any[]){}, 0);
+	project_materials = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_materials);
 	for (i32 i = 0; i < project->material_nodes->length; ++i) {
 		ui_node_canvas_t *n = project->material_nodes->buffer[i];
@@ -328,10 +328,10 @@ void import_arm_run_project(char *path) {
 
 	ui_nodes_hwnd->redraws = 2;
 	gc_unroot(ui_nodes_group_stack);
-	ui_nodes_group_stack = any_array_create_from_raw((any[]){}, 0);
+	ui_nodes_group_stack = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(ui_nodes_group_stack);
 	gc_unroot(project_material_groups);
-	project_material_groups = any_array_create_from_raw((any[]){}, 0);
+	project_material_groups = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_material_groups);
 	if (project->material_groups != NULL) {
 		for (i32 i = 0; i < project->material_groups->length; ++i) {
@@ -349,7 +349,7 @@ void import_arm_run_project(char *path) {
 	}
 
 	gc_unroot(project_brushes);
-	project_brushes = any_array_create_from_raw((any[]){}, 0);
+	project_brushes = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_brushes);
 	for (i32 i = 0; i < project->brush_nodes->length; ++i) {
 		ui_node_canvas_t *n = project->brush_nodes->buffer[i];
@@ -378,7 +378,7 @@ void import_arm_run_project(char *path) {
 	data_delete_blob(path);
 }
 
-void import_arm_run_project_94619(any _) {
+void import_arm_run_project_94619(void * _) {
 	// Once envmap is imported
 	scene_world->strength         = project_raw->envmap_strength;
 	context_raw->envmap_angle     = project_raw->envmap_angle;
@@ -390,7 +390,7 @@ void import_arm_run_project_94619(any _) {
 
 void import_arm_run_mesh(project_format_t *raw) {
 	gc_unroot(project_paint_objects);
-	project_paint_objects = any_array_create_from_raw((any[]){}, 0);
+	project_paint_objects = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_paint_objects);
 	for (i32 i = 0; i < raw->mesh_datas->length; ++i) {
 		mesh_data_t   *md     = mesh_data_create(raw->mesh_datas->buffer[i]);
@@ -417,7 +417,7 @@ void import_arm_run_mesh(project_format_t *raw) {
 	history_reset();
 }
 
-void import_arm_run_mesh_94821(any _) {
+void import_arm_run_mesh_94821(void * _) {
 	layers_init();
 }
 
@@ -461,7 +461,7 @@ void import_arm_run_material_from_project(project_format_t *project, char *path)
 
 	material_data_t *m0 = data_get_material("Scene", "Material");
 
-	slot_material_t_array_t *imported = any_array_create_from_raw((any[]){}, 0);
+	slot_material_t_array_t *imported = any_array_create_from_raw((void *[]){}, 0);
 
 	for (i32 i = 0; i < project->material_nodes->length; ++i) {
 		ui_node_canvas_t *c = util_clone_canvas(project->material_nodes->buffer[i]); // project will get GCed
@@ -489,7 +489,7 @@ void import_arm_run_material_from_project(project_format_t *project, char *path)
 
 	sys_notify_on_next_frame(&import_arm_run_material_from_project_95252, imported);
 	gc_unroot(ui_nodes_group_stack);
-	ui_nodes_group_stack = any_array_create_from_raw((any[]){}, 0);
+	ui_nodes_group_stack = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(ui_nodes_group_stack);
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
 	data_delete_blob(path);
@@ -570,7 +570,7 @@ void import_arm_run_brush_from_project(project_format_t *project, char *path) {
 		import_texture_run(abs, true);
 	}
 
-	slot_brush_t_array_t *imported = any_array_create_from_raw((any[]){}, 0);
+	slot_brush_t_array_t *imported = any_array_create_from_raw((void *[]){}, 0);
 
 	for (i32 i = 0; i < project->brush_nodes->length; ++i) {
 		ui_node_canvas_t *c = util_clone_canvas(project->brush_nodes->buffer[i]);
@@ -606,7 +606,7 @@ void import_arm_run_swatches(char *path, bool replace_existing) {
 
 void import_arm_run_swatches_from_project(project_format_t *project, char *path, bool replace_existing) {
 	if (replace_existing) {
-		project_raw->swatches = any_array_create_from_raw((any[]){}, 0);
+		project_raw->swatches = any_array_create_from_raw((void *[]){}, 0);
 
 		if (project->swatches == NULL) { // No swatches contained
 			any_array_push(project_raw->swatches, make_swatch(0xffffffff));
@@ -646,7 +646,7 @@ void import_arm_init_nodes(ui_node_t_array_t *nodes) {
 
 void import_arm_unpack_asset(project_format_t *project, char *abs, char *file, bool gc_copy) {
 	if (project_raw->packed_assets == NULL) {
-		project_raw->packed_assets = any_array_create_from_raw((any[]){}, 0);
+		project_raw->packed_assets = any_array_create_from_raw((void *[]){}, 0);
 	}
 	for (i32 i = 0; i < project->packed_assets->length; ++i) {
 		packed_asset_t *pa = project->packed_assets->buffer[i];

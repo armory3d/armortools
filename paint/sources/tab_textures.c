@@ -155,11 +155,11 @@ void tab_textures_draw(ui_handle_t *htab) {
 	}
 }
 
-void tab_textures_draw_38888(any _) {
+void tab_textures_draw_38888(void * _) {
 	import_envmap_run(_tab_textures_draw_asset->file, _tab_textures_draw_img);
 }
 
-void tab_textures_draw_38855(any _) {
+void tab_textures_draw_38855(void * _) {
 	layers_create_image_mask(_tab_textures_draw_asset);
 }
 
@@ -177,7 +177,7 @@ void tab_textures_draw_38721(gpu_texture_t *target) {
 	gpu_delete_texture(target);
 }
 
-void tab_textures_draw_38661(any _) {
+void tab_textures_draw_38661(void * _) {
 	gpu_texture_t *img    = _tab_textures_draw_img;
 	gpu_texture_t *target = gpu_create_render_target(img->width, img->height, GPU_TEXTURE_FORMAT_RGBA32);
 	draw_begin(target, false, 0);
@@ -292,7 +292,7 @@ void tab_textures_delete_texture(asset_t *asset) {
 	}
 }
 
-void tab_textures_delete_texture_39524(any _) {
+void tab_textures_delete_texture_39524(void * _) {
 	make_material_parse_paint_material(true);
 	util_render_make_material_preview();
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;

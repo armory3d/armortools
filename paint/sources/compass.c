@@ -111,7 +111,7 @@ void compass_update() {
 		transform_build_matrix(_compass_hitbox_z->transform);
 
 		transform_t_array_t *ts = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        _compass_hitbox_x->transform,
 		        _compass_hitbox_y->transform,
 		        _compass_hitbox_z->transform,

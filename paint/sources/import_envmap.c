@@ -12,7 +12,7 @@ void import_envmap_run(char *path, gpu_texture_t *image) {
 		gpu_vertex_struct_add(vs, "pos", GPU_VERTEX_DATA_F32_2X);
 		import_envmap_pipeline->input_layout                      = vs;
 		import_envmap_pipeline->color_attachment_count            = 1;
-		ARRAY_ACCESS(import_envmap_pipeline->color_attachment, 0) = GPU_TEXTURE_FORMAT_RGBA64;
+		import_envmap_pipeline->color_attachment[0] = GPU_TEXTURE_FORMAT_RGBA64;
 
 		gpu_pipeline_compile(import_envmap_pipeline);
 		import_envmap_params_loc   = 0;
@@ -24,7 +24,7 @@ void import_envmap_run(char *path, gpu_texture_t *image) {
 		gc_root(import_envmap_radiance);
 
 		gc_unroot(import_envmap_mips);
-		import_envmap_mips = any_array_create_from_raw((any[]){}, 0);
+		import_envmap_mips = any_array_create_from_raw((void *[]){}, 0);
 		gc_root(import_envmap_mips);
 		i32 w = 512;
 		for (i32 i = 0; i < 5; ++i) {

@@ -85,7 +85,7 @@ void tab_layers_button_new(char *text) {
 	}
 }
 
-void tab_layers_button_new_189759(any _) {
+void tab_layers_button_new_189759(void * _) {
 	layers_update_fill_layers();
 }
 
@@ -93,7 +93,7 @@ void tab_layers_button_new_189732(slot_layer_t *m) {
 	slot_layer_to_fill_layer(m);
 }
 
-void tab_layers_button_new_189670(any _) {
+void tab_layers_button_new_189670(void * _) {
 	layers_update_fill_layers();
 }
 
@@ -101,7 +101,7 @@ void tab_layers_button_new_189641(slot_layer_t *m) {
 	slot_layer_clear(m, 0xffffffff, NULL, 1.0, layers_default_rough, 0.0);
 }
 
-void tab_layers_button_new_189579(any _) {
+void tab_layers_button_new_189579(void * _) {
 	layers_update_fill_layers();
 }
 
@@ -109,7 +109,7 @@ void tab_layers_button_new_189550(slot_layer_t *m) {
 	slot_layer_clear(m, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
 }
 
-void tab_layers_button_new_189418(any _) {
+void tab_layers_button_new_189418(void * _) {
 	sculpt_layers_create_sculpt_layer();
 }
 
@@ -196,7 +196,7 @@ void tab_layers_button_new_189383() {
 
 void tab_layers_combo_filter() {
 	string_t_array_t *ar = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        tr("All", NULL),
 	    },
 	    1);
@@ -224,7 +224,7 @@ void tab_layers_combo_filter() {
 			util_mesh_merge(NULL);
 		}
 		else if (context_raw->layer_filter > project_paint_objects->length) { // Atlas
-			mesh_object_t_array_t *visibles = any_array_create_from_raw((any[]){}, 0);
+			mesh_object_t_array_t *visibles = any_array_create_from_raw((void *[]){}, 0);
 			for (i32 i = 0; i < project_paint_objects->length; ++i) {
 				mesh_object_t *p = project_paint_objects->buffer[i];
 				if (p->base->visible) {
@@ -475,13 +475,13 @@ void tab_layers_draw_layer_slot_full(slot_layer_t *l, i32 i) {
 	ui->_w = uiw;
 }
 
-void tab_layers_draw_layer_slot_full_191697(any _) {
+void tab_layers_draw_layer_slot_full_191697(void * _) {
 	tab_layers_delete_layer(context_raw->layer);
 }
 
 ui_handle_t *tab_layers_combo_object(slot_layer_t *l, bool label) {
 	string_t_array_t *ar = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        tr("Shared", NULL),
 	    },
 	    1);
@@ -522,7 +522,7 @@ ui_handle_t *tab_layers_combo_blending(slot_layer_t *l, bool label) {
 	ui_handle_t *blending_handle     = ui_nest(ui_handle(__ID__), l->id);
 	blending_handle->i               = l->blending;
 	string_t_array_t *blending_combo = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        tr("Mix", NULL),
 	        tr("Darken", NULL),
 	        tr("Multiply", NULL),
@@ -730,30 +730,30 @@ void tab_layers_draw_layer_context_menu(slot_layer_t *l, bool mini) {
 	ui_menu_draw(&tab_layers_draw_layer_context_menu_193275, -1, -1);
 }
 
-void tab_layers_draw_layer_context_menu_194707(any _) {
+void tab_layers_draw_layer_context_menu_194707(void * _) {
 	layers_update_fill_layers();
 }
 
-void tab_layers_draw_layer_context_menu_194609(any _) {
+void tab_layers_draw_layer_context_menu_194609(void * _) {
 	layers_update_fill_layers();
 }
 
-void tab_layers_draw_layer_context_menu_194526(any _) {
+void tab_layers_draw_layer_context_menu_194526(void * _) {
 	layers_update_fill_layers();
 }
 
-void tab_layers_draw_layer_context_menu_194437(any _) {
+void tab_layers_draw_layer_context_menu_194437(void * _) {
 	layers_set_bits();
 }
 
-void tab_layers_draw_layer_context_menu_194083(any _) {
+void tab_layers_draw_layer_context_menu_194083(void * _) {
 	slot_layer_t *l = tab_layers_l;
 	context_set_layer(l);
 	history_duplicate_layer();
 	layers_duplicate_layer(l);
 }
 
-void tab_layers_draw_layer_context_menu_194020(any _) {
+void tab_layers_draw_layer_context_menu_194020(void * _) {
 	slot_layer_t *l = tab_layers_l;
 	context_set_layer(l);
 	history_merge_layers();
@@ -762,12 +762,12 @@ void tab_layers_draw_layer_context_menu_194020(any _) {
 		slot_layer_to_paint_layer(context_raw->layer);
 }
 
-void tab_layers_draw_layer_context_menu_193973(any _) {
+void tab_layers_draw_layer_context_menu_193973(void * _) {
 	slot_layer_t *l = tab_layers_l;
 	layers_merge_group(l);
 }
 
-void tab_layers_draw_layer_context_menu_193911(any _) {
+void tab_layers_draw_layer_context_menu_193911(void * _) {
 	slot_layer_t *l    = tab_layers_l;
 	context_raw->layer = l;
 	history_apply_mask();
@@ -777,14 +777,14 @@ void tab_layers_draw_layer_context_menu_193911(any _) {
 	context_raw->layers_preview_dirty = true;
 }
 
-void tab_layers_draw_layer_context_menu_193857(any _) {
+void tab_layers_draw_layer_context_menu_193857(void * _) {
 	slot_layer_t *l = tab_layers_l;
 	context_set_layer(l);
 	history_invert_mask();
 	slot_layer_invert_mask(l);
 }
 
-void tab_layers_draw_layer_context_menu_193736(any _) {
+void tab_layers_draw_layer_context_menu_193736(void * _) {
 	slot_layer_t *l = tab_layers_l;
 	if (!slot_layer_is_group(l)) {
 		history_clear_layer();
@@ -802,17 +802,17 @@ void tab_layers_draw_layer_context_menu_193736(any _) {
 	}
 }
 
-void tab_layers_draw_layer_context_menu_193690(any _) {
+void tab_layers_draw_layer_context_menu_193690(void * _) {
 	tab_layers_delete_layer(context_raw->layer);
 }
 
-void tab_layers_draw_layer_context_menu_193629(any _) {
+void tab_layers_draw_layer_context_menu_193629(void * _) {
 	slot_layer_t *l = tab_layers_l;
 	slot_layer_is_layer(l) ? history_to_paint_layer() : history_to_paint_mask();
 	slot_layer_to_paint_layer(l);
 }
 
-void tab_layers_draw_layer_context_menu_193575(any _) {
+void tab_layers_draw_layer_context_menu_193575(void * _) {
 	slot_layer_t *l = tab_layers_l;
 	slot_layer_is_layer(l) ? history_to_fill_layer() : history_to_fill_mask();
 	slot_layer_to_fill_layer(l);
@@ -924,7 +924,7 @@ void tab_layers_draw_layer_context_menu_193275() {
 		ui_menu_align();
 		#if defined(IRON_ANDROID) || defined(IRON_IOS)
 		string_t_array_t *ar = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        "128",
 		        "256",
 		        "512",
@@ -935,7 +935,7 @@ void tab_layers_draw_layer_context_menu_193275() {
 		    6);
 		#else
 		string_t_array_t *ar = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        "128",
 		        "256",
 		        "512",
@@ -962,7 +962,7 @@ void tab_layers_draw_layer_context_menu_193275() {
 		ui_handle_t *huv       = ui_handle(__ID__);
 		huv->i                 = l->uv_map;
 		string_t_array_t *aruv = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        "uv0",
 		    },
 		    1);
@@ -986,7 +986,7 @@ void tab_layers_draw_layer_context_menu_193275() {
 		ui_menu_label(tr("Bits", NULL), NULL);
 		ui_menu_align();
 		string_t_array_t *bits_items = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        "8",
 		        "16",
 		        "32",
@@ -1028,7 +1028,7 @@ void tab_layers_draw_layer_context_menu_193275() {
 		ui_handle_t *uv_type_handle     = ui_nest(ui_handle(__ID__), l->id);
 		uv_type_handle->i               = l->uv_type;
 		string_t_array_t *uv_type_items = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        tr("UV Map", NULL),
 		        tr("Triplanar", NULL),
 		        tr("Project", NULL),
@@ -1110,7 +1110,7 @@ void tab_layers_make_mask_preview_rgba32(slot_layer_t *l) {
 	}
 }
 
-void tab_layers_make_mask_preview_rgba32_195198(any _) {
+void tab_layers_make_mask_preview_rgba32_195198(void * _) {
 	slot_layer_t *l = tab_layers_l;
 	draw_begin(context_raw->mask_preview_rgba32, false, 0);
 	draw_set_pipeline(ui_view2d_pipe);

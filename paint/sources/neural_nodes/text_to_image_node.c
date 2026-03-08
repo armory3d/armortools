@@ -6,7 +6,7 @@ void text_to_image_node_init() {
 
 string_t_array_t *text_to_image_node_sd_args(char *dir, char *prompt) {
 	string_t_array_t *argv = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        string_join(string_join(dir, "/"), neural_node_sd_bin()),
 	        "-m",
 	        string_join(dir, "/v1-5-pruned-emaonly.safetensors"),
@@ -31,7 +31,7 @@ string_t_array_t *text_to_image_node_sd_args(char *dir, char *prompt) {
 
 string_t_array_t *text_to_image_node_zimage_args(char *dir, char *prompt) {
 	string_t_array_t *argv = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        string_join(string_join(dir, "/"), neural_node_sd_bin()),
 	        "--diffusion-model",
 	        string_join(dir, "/z_image_turbo-Q4_K.gguf"),
@@ -63,7 +63,7 @@ string_t_array_t *text_to_image_node_zimage_args(char *dir, char *prompt) {
 
 string_t_array_t *text_to_image_node_qwen_args(char *dir, char *prompt) {
 	string_t_array_t *argv = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        string_join(string_join(dir, "/"), neural_node_sd_bin()),
 	        "--diffusion-model",
 	        string_join(dir, "/qwen-image-2512-Q4_K_S.gguf"),
@@ -96,7 +96,7 @@ string_t_array_t *text_to_image_node_qwen_args(char *dir, char *prompt) {
 
 string_t_array_t *text_to_image_node_wan_args(char *dir, char *prompt) {
 	string_t_array_t *argv = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        string_join(string_join(dir, "/"), neural_node_sd_bin()),
 	        "-M",
 	        "vid_gen",
@@ -138,7 +138,7 @@ void text_to_image_node_button(i32 node_id) {
 	char         *node_name = parser_material_node_name(node, NULL);
 	ui_handle_t      *h         = ui_handle(node_name);
 	string_t_array_t *models    = any_array_create_from_raw(
-        (any[]){
+        (void *[]){
             "Stable Diffusion",
             "Z-Image-Turbo",
             "Qwen Image",

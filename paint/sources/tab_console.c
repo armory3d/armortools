@@ -25,7 +25,7 @@ void tab_console_draw(ui_handle_t *htab) {
 
 		if (ui_icon_button(tr("Clear", NULL), ICON_ERASE, UI_ALIGN_CENTER)) {
 			gc_unroot(console_last_traces);
-			console_last_traces = any_array_create_from_raw((any[]){}, 0);
+			console_last_traces = any_array_create_from_raw((void *[]){}, 0);
 			gc_root(console_last_traces);
 		}
 		if (ui_icon_button(tr("Export", NULL), ICON_EXPORT, UI_ALIGN_CENTER)) {

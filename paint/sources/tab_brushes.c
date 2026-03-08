@@ -132,7 +132,7 @@ void tab_brushes_draw(ui_handle_t *htab) {
 	}
 }
 
-void tab_brushes_draw_41872(any _) {
+void tab_brushes_draw_41872(void * _) {
 	i32           i      = _tab_brushes_draw_i;
 	slot_brush_t *_brush = context_raw->brush;
 	context_raw->brush   = project_brushes->buffer[i];
@@ -141,11 +141,11 @@ void tab_brushes_draw_41872(any _) {
 	context_raw->brush = _brush;
 }
 
-void tab_brushes_draw_41764(any _) {
+void tab_brushes_draw_41764(void * _) {
 	i32 i              = _tab_brushes_draw_i;
 	context_raw->brush = slot_brush_create(NULL);
 	any_array_push(project_brushes, context_raw->brush);
-	any cloned                 = util_clone_canvas(project_brushes->buffer[i]->canvas);
+	void * cloned                 = util_clone_canvas(project_brushes->buffer[i]->canvas);
 	context_raw->brush->canvas = cloned;
 	context_set_brush(context_raw->brush);
 	util_render_make_brush_preview();

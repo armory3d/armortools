@@ -51,7 +51,7 @@ bool render_path_raytrace_bake_commands(void (*parse_paint_material)(bool)) {
 		render_path_set_target("baketex0", NULL, NULL, GPU_CLEAR_COLOR, 0x00000000, 0.0);
 		// Pixels with alpha of 0.0 are skipped during raytracing
 		string_t_array_t *additional = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        "baketex1",
 		    },
 		    1);

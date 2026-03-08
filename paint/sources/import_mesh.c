@@ -21,7 +21,7 @@ void import_mesh_run(char *path, bool _clear_layers, bool replace_existing) {
 	}
 	else {
 		char   *ext      = substring(path, string_last_index_of(path, ".") + 1, string_length(path));
-		any         importer = any_map_get(import_mesh_importers, ext); // JSValue -> (s: string)=>raw_mesh_t
+		void *         importer = any_map_get(import_mesh_importers, ext); // JSValue -> (s: string)=>raw_mesh_t
 		raw_mesh_t *mesh     = js_pcall_str(importer, path);
 		if (string_equals(mesh->name, "")) {
 			mesh->name = string_copy(path_base_name(path));
@@ -42,7 +42,7 @@ void import_mesh_run(char *path, bool _clear_layers, bool replace_existing) {
 
 	gc_unroot(project_mesh_assets);
 	project_mesh_assets = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        path,
 	    },
 	    1);
@@ -91,9 +91,9 @@ void import_mesh_finish_import() {
 	context_raw->paint_body    = NULL;
 }
 
-i32 import_mesh_finish_import_85673(any_ptr pa, any_ptr pb) {
-	mesh_object_t *a = DEREFERENCE(pa);
-	mesh_object_t *b = DEREFERENCE(pb);
+i32 import_mesh_finish_import_85673(void **pa, void **pb) {
+	mesh_object_t *a = *(pa);
+	mesh_object_t *b = *(pb);
 	return strcmp(a->base->name, b->base->name);
 }
 
@@ -124,7 +124,7 @@ void _import_mesh_make_mesh(raw_mesh_t *mesh) {
 	context_raw->paint_object->base->name = mesh->name;
 	gc_unroot(project_paint_objects);
 	project_paint_objects = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        context_raw->paint_object,
 	    },
 	    1);
@@ -160,15 +160,15 @@ void _import_mesh_make_mesh(raw_mesh_t *mesh) {
 	}
 }
 
-void _import_mesh_make_mesh_86052(any _) {
+void _import_mesh_make_mesh_86052(void * _) {
 	import_mesh_finish_import();
 }
 
-void _import_mesh_make_mesh_86033(any _) {
+void _import_mesh_make_mesh_86033(void * _) {
 	import_mesh_finish_import();
 }
 
-void _import_mesh_make_mesh_86005(any _) {
+void _import_mesh_make_mesh_86005(void * _) {
 	layers_init();
 }
 
@@ -193,7 +193,7 @@ void import_mesh_make_mesh(raw_mesh_t *mesh) {
 	if (mesh->texa == NULL) {
 		if (import_mesh_meshes_to_unwrap == NULL) {
 			gc_unroot(import_mesh_meshes_to_unwrap);
-			import_mesh_meshes_to_unwrap = any_array_create_from_raw((any[]){}, 0);
+			import_mesh_meshes_to_unwrap = any_array_create_from_raw((void *[]){}, 0);
 			gc_root(import_mesh_meshes_to_unwrap);
 		}
 		project_unwrap_mesh_box(mesh, import_mesh_first_unwrap_done, false);
@@ -275,7 +275,7 @@ void import_mesh_add_mesh(raw_mesh_t *mesh) {
 mesh_data_t *import_mesh_raw_mesh(raw_mesh_t *mesh) {
 	mesh_data_t *raw = GC_ALLOC_INIT(mesh_data_t, {.name          = mesh->name,
 	                                               .vertex_arrays = any_array_create_from_raw(
-	                                                   (any[]){
+	                                                   (void *[]){
 	                                                       GC_ALLOC_INIT(vertex_array_t, {.values = mesh->posa, .attrib = "pos", .data = "short4norm"}),
 	                                                       GC_ALLOC_INIT(vertex_array_t, {.values = mesh->nora, .attrib = "nor", .data = "short2norm"}),
 	                                                       GC_ALLOC_INIT(vertex_array_t, {.values = mesh->texa, .attrib = "tex", .data = "short2norm"}),

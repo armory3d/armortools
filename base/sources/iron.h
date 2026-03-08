@@ -44,7 +44,6 @@
 
 #define ID__(x, y) x ":" #y
 #define ID_(x, y) ID__(x, y)
-// #define ID ID_(__FILE__, __LINE__)
 #define __ID__ ID_(__FILE__, __LINE__)
 
 int    _argc;
@@ -66,31 +65,6 @@ buffer_t *embed_get(char *key) {
 	return NULL;
 }
 #endif
-
-#define any                void *
-#define any_ptr            void **
-#define f64_ptr            f64 *
-#define i64_ptr            i64 *
-#define u64_ptr            u64 *
-#define f32_ptr            f32 *
-#define i32_ptr            i32 *
-#define u32_ptr            u32 *
-#define i16_ptr            i16 *
-#define u16_ptr            u16 *
-#define i8_ptr             i8 *
-#define u8_ptr             u8 *
-#define null               NULL
-#define DEREFERENCE        *
-#define ADDRESS            &
-#define ARRAY_ACCESS(a, i) a[i]
-
-f32 f32_nan() {
-	return NAN;
-}
-
-bool f32_isnan(f32 f) {
-	return isnan(f);
-}
 
 void _kickstart();
 bool enable_window = true;
@@ -749,7 +723,7 @@ void gpu_delete_buffer(gpu_buffer_t *buffer) {
 	free(buffer);
 }
 
-any gpu_create_index_buffer(i32 count) {
+void *gpu_create_index_buffer(i32 count) {
 	gpu_buffer_t *buffer = (gpu_buffer_t *)malloc(sizeof(gpu_buffer_t));
 	gpu_index_buffer_init(buffer, count);
 	return buffer;
@@ -762,7 +736,7 @@ u32_array_t *gpu_lock_index_buffer(gpu_buffer_t *buffer) {
 	return ar;
 }
 
-any gpu_create_vertex_buffer(i32 count, gpu_vertex_structure_t *structure) {
+void *gpu_create_vertex_buffer(i32 count, gpu_vertex_structure_t *structure) {
 	gpu_buffer_t *buffer = (gpu_buffer_t *)malloc(sizeof(gpu_buffer_t));
 	gpu_vertex_buffer_init(buffer, count, structure);
 	return buffer;
@@ -936,7 +910,7 @@ gpu_texture_t *iron_load_texture(char *file) {
 }
 
 #ifdef WITH_AUDIO
-any iron_load_sound(char *file) {
+void *iron_load_sound(char *file) {
 	iron_a1_sound_t *sound = iron_a1_sound_create(file);
 	return sound;
 }

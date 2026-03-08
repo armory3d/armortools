@@ -133,7 +133,7 @@ void tab_fonts_draw(ui_handle_t *htab) {
 	}
 }
 
-void tab_fonts_draw_97983(any _) {
+void tab_fonts_draw_97983(void * _) {
 	i32          i     = _tab_fonts_draw_i;
 	slot_font_t *_font = context_raw->font;
 	context_raw->font  = project_fonts->buffer[i];
@@ -148,12 +148,12 @@ void tab_fonts_draw_97911() {
 	}
 }
 
-void tab_fonts_draw_97897(any _) {
+void tab_fonts_draw_97897(void * _) {
 	context_select_font(_tab_fonts_draw_i);
 	ui_menu_draw(&tab_fonts_draw_97911, -1, -1);
 }
 
-void tab_fonts_draw_97837(any _) {
+void tab_fonts_draw_97837(void * _) {
 	i32 i = _tab_fonts_draw_i;
 	context_select_font(i);
 }

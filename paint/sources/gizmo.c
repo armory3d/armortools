@@ -159,7 +159,7 @@ void gizmo_update() {
 	if (mouse_started("left") && !string_equals(paint_object->name, "Scene")) {
 		// Translate, scale
 		transform_t_array_t *trs = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        context_raw->gizmo_translate_x->transform,
 		        context_raw->gizmo_translate_y->transform,
 		        context_raw->gizmo_translate_z->transform,
@@ -197,7 +197,7 @@ void gizmo_update() {
 		else {
 			// Rotate
 			transform_t_array_t *trs = any_array_create_from_raw(
-			    (any[]){
+			    (void *[]){
 			        context_raw->gizmo_rotate_x->transform,
 			        context_raw->gizmo_rotate_y->transform,
 			        context_raw->gizmo_rotate_z->transform,

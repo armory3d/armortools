@@ -4,7 +4,7 @@ void export_texture_run(char *path, bool bake_material) {
 		export_texture_run_bake_material(path);
 	}
 	else if (context_raw->layers_export == EXPORT_MODE_PER_UDIM_TILE) {
-		string_t_array_t *udim_tiles = any_array_create_from_raw((any[]){}, 0);
+		string_t_array_t *udim_tiles = any_array_create_from_raw((void *[]){}, 0);
 		for (i32 i = 0; i < project_layers->length; ++i) {
 			slot_layer_t *l = project_layers->buffer[i];
 			if (slot_layer_get_object_mask(l) > 0) {
@@ -25,7 +25,7 @@ void export_texture_run(char *path, bool bake_material) {
 		}
 	}
 	else if (context_raw->layers_export == EXPORT_MODE_PER_OBJECT) {
-		string_t_array_t *object_names = any_array_create_from_raw((any[]){}, 0);
+		string_t_array_t *object_names = any_array_create_from_raw((void *[]){}, 0);
 		for (i32 i = 0; i < project_layers->length; ++i) {
 			slot_layer_t *l = project_layers->buffer[i];
 			if (slot_layer_get_object_mask(l) > 0) {
@@ -57,7 +57,7 @@ void export_texture_run(char *path, bool bake_material) {
 		}
 		if (atlas_export) {
 			for (i32 atlas_index = 0; atlas_index < project_atlas_objects->length; ++atlas_index) {
-				slot_layer_t_array_t *layers = any_array_create_from_raw((any[]){}, 0);
+				slot_layer_t_array_t *layers = any_array_create_from_raw((void *[]){}, 0);
 				for (i32 object_index = 0; object_index < project_atlas_objects->length; ++object_index) {
 					if (project_atlas_objects->buffer[object_index] == atlas_index) {
 						for (i32 i = 0; i < project_layers->length; ++i) {
@@ -82,7 +82,7 @@ void export_texture_run(char *path, bool bake_material) {
 				}
 				else {
 					layers = any_array_create_from_raw(
-					    (any[]){
+					    (void *[]){
 					        context_raw->layer,
 					    },
 					    1);
@@ -150,7 +150,7 @@ void export_texture_run_bake_material(char *path) {
 	}
 
 	slot_layer_t_array_t *layers = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        render_path_paint_live_layer,
 	    },
 	    1);
@@ -472,13 +472,13 @@ void export_texture_write_texture(char *file, buffer_t *pixels, i32 type, i32 of
 		asset_t          *asset = GC_ALLOC_INIT(asset_t, {.name = name, .file = file, .id = project_asset_id++});
 		any_array_push(project_assets, asset);
 		if (project_raw->assets == NULL) {
-			project_raw->assets = any_array_create_from_raw((any[]){}, 0);
+			project_raw->assets = any_array_create_from_raw((void *[]){}, 0);
 		}
 		any_array_push(project_raw->assets, asset->file);
 		any_array_push(project_asset_names, asset->name);
 		any_imap_set(project_asset_map, asset->id, image);
 		asset_t_array_t *assets = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        asset,
 		    },
 		    1);

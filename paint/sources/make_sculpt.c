@@ -23,12 +23,12 @@ node_shader_context_t *sculpt_make_sculpt_run(material_t *data, material_context
 	                                                                     .compare_mode    = "always",
 	                                                                     .cull_mode       = "none",
 	                                                                     .vertex_elements = any_array_create_from_raw(
-                                                                   (any[]){
+                                                                   (void *[]){
                                                                        GC_ALLOC_INIT(vertex_element_t, {.name = "pos", .data = "float2"}),
                                                                    },
                                                                    1),
 	                                                                     .color_attachments = any_array_create_from_raw(
-                                                                   (any[]){
+                                                                   (void *[]){
                                                                        "RGBA128",
                                                                        "R8",
                                                                    },
@@ -144,8 +144,8 @@ node_shader_context_t *sculpt_make_sculpt_run(material_t *data, material_context
 	node_shader_write_frag(kong, "output[1] = float4(str, 0.0, 0.0, 1.0);");
 	parser_material_finalize(con_paint);
 	con_paint->data->shader_from_source = true;
-	gpu_create_shaders_from_kong(node_shader_get(kong), ADDRESS(con_paint->data->vertex_shader), ADDRESS(con_paint->data->fragment_shader),
-	                             ADDRESS(con_paint->data->_->vertex_shader_size), ADDRESS(con_paint->data->_->fragment_shader_size));
+	gpu_create_shaders_from_kong(node_shader_get(kong), &con_paint->data->vertex_shader, &con_paint->data->fragment_shader,
+	                             &con_paint->data->_->vertex_shader_size, &con_paint->data->_->fragment_shader_size);
 	return con_paint;
 }
 
@@ -224,7 +224,7 @@ void sculpt_layers_create_sculpt_layer() {
 	}
 	mesh_data_t *raw = GC_ALLOC_INIT(mesh_data_t, {.name          = md->name,
 	                                               .vertex_arrays = any_array_create_from_raw(
-	                                                   (any[]){
+	                                                   (void *[]){
 	                                                       GC_ALLOC_INIT(vertex_array_t, {.values = posa, .attrib = "pos", .data = "short4norm"}),
 	                                                       GC_ALLOC_INIT(vertex_array_t, {.values = nora, .attrib = "nor", .data = "short2norm"}),
 	                                                       GC_ALLOC_INIT(vertex_array_t, {.values = texa, .attrib = "tex", .data = "short2norm"}),
@@ -285,7 +285,7 @@ void render_path_sculpt_commands() {
 	render_path_bind_target("texpaint_blend0", "tex");
 	render_path_draw_shader("Scene/copy_pass/copyR8_pass");
 	string_t_array_t *additional = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        "texpaint_blend0",
 	    },
 	    1);

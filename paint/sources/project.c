@@ -46,7 +46,7 @@ void project_save(bool save_and_quit) {
 	sys_notify_on_next_frame(&project_save_102708, NULL);
 }
 
-void project_save_102708(any _) {
+void project_save_102708(void * _) {
 	export_arm_run_project();
 	if (_project_save_and_quit) {
 		iron_stop();
@@ -105,7 +105,7 @@ void project_new_box_102911() {
 		h_project_aspect_ratio->i = context_raw->project_aspect_ratio;
 	}
 	string_t_array_t *project_aspect_ratio_combo = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        "1:1",
 	        "2:1",
 	        "1:2",
@@ -180,7 +180,7 @@ void project_new(bool reset_layers) {
 	context_raw->layer_filter        = 0;
 	context_raw->texture             = NULL;
 	gc_unroot(project_mesh_assets);
-	project_mesh_assets = any_array_create_from_raw((any[]){}, 0);
+	project_mesh_assets = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_mesh_assets);
 
 	mesh_data_t *raw       = NULL;
@@ -224,7 +224,7 @@ void project_new(bool reset_layers) {
 
 	gc_unroot(project_paint_objects);
 	project_paint_objects = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        context_raw->paint_object,
 	    },
 	    1);
@@ -245,14 +245,14 @@ void project_new(bool reset_layers) {
 	context_raw->material              = project_materials->buffer[0];
 	ui_nodes_hwnd->redraws             = 2;
 	gc_unroot(ui_nodes_group_stack);
-	ui_nodes_group_stack = any_array_create_from_raw((any[]){}, 0);
+	ui_nodes_group_stack = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(ui_nodes_group_stack);
 	gc_unroot(project_material_groups);
-	project_material_groups = any_array_create_from_raw((any[]){}, 0);
+	project_material_groups = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_material_groups);
 	gc_unroot(project_brushes);
 	project_brushes = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        slot_brush_create(NULL),
 	    },
 	    1);
@@ -260,7 +260,7 @@ void project_new(bool reset_layers) {
 	context_raw->brush = project_brushes->buffer[0];
 	gc_unroot(project_fonts);
 	project_fonts = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        slot_font_create("default.ttf", base_font, ""),
 	    },
 	    1);
@@ -276,16 +276,16 @@ void project_new(bool reset_layers) {
 	make_material_parse_brush();
 
 	gc_unroot(project_assets);
-	project_assets = any_array_create_from_raw((any[]){}, 0);
+	project_assets = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_assets);
 	gc_unroot(project_asset_names);
-	project_asset_names = any_array_create_from_raw((any[]){}, 0);
+	project_asset_names = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_asset_names);
 	gc_unroot(project_asset_map);
 	project_asset_map = any_imap_create();
 	gc_root(project_asset_map);
 	project_asset_id                                  = 0;
-	project_raw->packed_assets                        = any_array_create_from_raw((any[]){}, 0);
+	project_raw->packed_assets                        = any_array_create_from_raw((void *[]){}, 0);
 	context_raw->ddirty                               = 4;
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
@@ -317,17 +317,17 @@ void project_new(bool reset_layers) {
 	sys_notify_on_next_frame(&project_new_103903, NULL);
 }
 
-void project_new_103903(any _) {
+void project_new_103903(void * _) {
 	// Once layers and meshes are populated on project open
 	util_render_make_material_preview();
 	context_raw->ddirty = 4;
 }
 
-void project_new_103856(any _) {
+void project_new_103856(void * _) {
 	layers_init();
 }
 
-void project_new_103839(any _) {
+void project_new_103839(void * _) {
 	layers_resize();
 }
 
@@ -365,7 +365,7 @@ void project_import_brush() {
 	ui_files_show(string_join("arm,", formats), false, true, &project_import_brush_104110);
 }
 
-void project_import_brush_104258(any _) {
+void project_import_brush_104258(void * _) {
 	util_render_make_brush_preview();
 }
 
@@ -454,7 +454,7 @@ void project_import_mesh_box_104467() {
 
 	if (ends_with(to_lower_case(path), ".obj")) {
 		string_t_array_t *split_by_combo = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        tr("Object", NULL),
 		        tr("Group", NULL),
 		        tr("Material", NULL),
@@ -510,7 +510,7 @@ void project_reimport_mesh() {
 }
 
 string_t_array_t *project_get_unwrap_plugins() {
-	string_t_array_t *unwrap_plugins = any_array_create_from_raw((any[]){}, 0);
+	string_t_array_t *unwrap_plugins = any_array_create_from_raw((void *[]){}, 0);
 	if (box_preferences_files_plugin == NULL) {
 		box_preferences_fetch_plugins();
 	}
@@ -574,7 +574,7 @@ void project_unwrap_mesh(raw_mesh_t *mesh, void (*done)(raw_mesh_t *)) {
 			config_enable_plugin(f);
 			console_info(string_join(string_join(f, " "), tr("plugin enabled", NULL)));
 		}
-		any cb = any_map_get(util_mesh_unwrappers, f); // JSValue * -> (a: raw_mesh_t)=>void
+		void * cb = any_map_get(util_mesh_unwrappers, f); // JSValue * -> (a: raw_mesh_t)=>void
 		js_call_ptr(cb, mesh);
 	}
 	done(mesh);
@@ -634,7 +634,7 @@ void project_reimport_texture_load(char *path, asset_t *asset) {
 	sys_notify_on_next_frame(&project_reimport_texture_load_105445, NULL);
 }
 
-void project_reimport_texture_load_105445(any _) {
+void project_reimport_texture_load_105445(void * _) {
 	make_material_parse_paint_material(true);
 	util_render_make_material_preview();
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
@@ -673,7 +673,7 @@ string_t_array_t *project_get_used_atlases() {
 		}
 	}
 	if (used->length > 1) {
-		string_t_array_t *res = any_array_create_from_raw((any[]){}, 0);
+		string_t_array_t *res = any_array_create_from_raw((void *[]){}, 0);
 		for (i32 i = 0; i < used->length; ++i) {
 			i32 u = used->buffer[i];
 			any_array_push(res, project_atlas_names->buffer[u]);
@@ -701,7 +701,7 @@ mesh_object_t_array_t *project_get_atlas_objects(i32 object_mask) {
 	}
 	char              *atlas_name = atlases->buffer[i];
 	i32                    atlas_i    = char_ptr_array_index_of(project_atlas_names, atlas_name);
-	mesh_object_t_array_t *visibles   = any_array_create_from_raw((any[]){}, 0);
+	mesh_object_t_array_t *visibles   = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < project_paint_objects->length; ++i) {
 		if (project_atlas_objects->buffer[i] == atlas_i) {
 			any_array_push(visibles, project_paint_objects->buffer[i]);
@@ -766,7 +766,7 @@ swatch_color_t *project_clone_swatch(swatch_color_t *swatch) {
 void project_set_default_swatches() {
 	// 32-Color Palette by Andrew Kensler
 	// http://eastfarthing.com/blog/2016-05-06-palette/
-	project_raw->swatches = any_array_create_from_raw((any[]){}, 0);
+	project_raw->swatches = any_array_create_from_raw((void *[]){}, 0);
 	i32_array_t *colors   = i32_array_create_from_raw(
         (i32[]){
             0xffffffff, 0xff000000, 0xffd6a090, 0xffa12c32, 0xfffa2f7a, 0xfffb9fda, 0xffe61cf7, 0xff992f7c, 0xff47011f, 0xff051155, 0xff4f02ec,
@@ -791,7 +791,7 @@ node_group_t *project_get_material_group_by_name(char *group_name) {
 }
 
 bool project_is_material_group_in_use(node_group_t *group) {
-	ui_node_canvas_t_array_t *canvases = any_array_create_from_raw((any[]){}, 0);
+	ui_node_canvas_t_array_t *canvases = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < project_materials->length; ++i) {
 		slot_material_t *m = project_materials->buffer[i];
 		any_array_push(canvases, m->canvas);

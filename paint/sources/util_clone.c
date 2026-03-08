@@ -23,7 +23,7 @@ string_t_array_t *util_clone_string_array(string_t_array_t *a) {
 	if (a == NULL) {
 		return NULL;
 	}
-	string_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
+	string_t_array_t *r = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < a->length; ++i) {
 		char *s = a->buffer[i];
 		any_array_push(r, s);
@@ -47,7 +47,7 @@ ui_node_socket_t_array_t *util_clone_canvas_sockets(ui_node_socket_t_array_t *so
 	if (sockets == NULL) {
 		return NULL;
 	}
-	ui_node_socket_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
+	ui_node_socket_t_array_t *r = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < sockets->length; ++i) {
 		ui_node_socket_t *s = GC_ALLOC_INIT(ui_node_socket_t, {0});
 		s->id               = sockets->buffer[i]->id;
@@ -69,7 +69,7 @@ ui_node_button_t_array_t *util_clone_canvas_buttons(ui_node_button_t_array_t *bu
 	if (buttons == NULL) {
 		return NULL;
 	}
-	ui_node_button_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
+	ui_node_button_t_array_t *r = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < buttons->length; ++i) {
 		ui_node_button_t *b = GC_ALLOC_INIT(ui_node_button_t, {0});
 		b->name             = string_copy(buttons->buffer[i]->name);
@@ -109,7 +109,7 @@ ui_node_t_array_t *util_clone_canvas_nodes(ui_node_t_array_t *nodes) {
 	if (nodes == NULL) {
 		return NULL;
 	}
-	ui_node_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
+	ui_node_t_array_t *r = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < nodes->length; ++i) {
 		ui_node_t *n = util_clone_canvas_node(nodes->buffer[i]);
 		any_array_push(r, n);
@@ -121,7 +121,7 @@ ui_node_link_t_array_t *util_clone_canvas_links(ui_node_link_t_array_t *links) {
 	if (links == NULL) {
 		return NULL;
 	}
-	ui_node_link_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
+	ui_node_link_t_array_t *r = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < links->length; ++i) {
 		ui_node_link_t *l = GC_ALLOC_INIT(ui_node_link_t, {0});
 		l->id             = links->buffer[i]->id;
@@ -149,7 +149,7 @@ vertex_element_t_array_t *util_clone_vertex_elements(vertex_element_t_array_t *e
 	if (elems == NULL) {
 		return NULL;
 	}
-	vertex_element_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
+	vertex_element_t_array_t *r = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < elems->length; ++i) {
 		vertex_element_t *e = GC_ALLOC_INIT(vertex_element_t, {0});
 		e->name             = string_copy(elems->buffer[i]->name);
@@ -163,7 +163,7 @@ shader_const_t_array_t *util_clone_shader_consts(shader_const_t_array_t *consts)
 	if (consts == NULL) {
 		return NULL;
 	}
-	shader_const_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
+	shader_const_t_array_t *r = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < consts->length; ++i) {
 		shader_const_t *s = GC_ALLOC_INIT(shader_const_t, {0});
 		s->name           = string_copy(consts->buffer[i]->name);
@@ -178,7 +178,7 @@ tex_unit_t_array_t *util_clone_tex_units(tex_unit_t_array_t *units) {
 	if (units == NULL) {
 		return NULL;
 	}
-	tex_unit_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
+	tex_unit_t_array_t *r = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < units->length; ++i) {
 		tex_unit_t *u = GC_ALLOC_INIT(tex_unit_t, {0});
 		u->name       = string_copy(units->buffer[i]->name);
@@ -192,7 +192,7 @@ shader_context_t_array_t *util_clone_shader_contexts(shader_context_t_array_t *c
 	if (contexts == NULL) {
 		return NULL;
 	}
-	shader_context_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
+	shader_context_t_array_t *r = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < contexts->length; ++i) {
 		shader_context_t *c        = GC_ALLOC_INIT(shader_context_t, {0});
 		c->name                    = string_copy(contexts->buffer[i]->name);
@@ -234,7 +234,7 @@ bind_const_t_array_t *util_clone_bind_constants(bind_const_t_array_t *consts) {
 	if (consts == NULL) {
 		return NULL;
 	}
-	bind_const_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
+	bind_const_t_array_t *r = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < consts->length; ++i) {
 		bind_const_t *c = GC_ALLOC_INIT(bind_const_t, {0});
 		c->name         = string_copy(consts->buffer[i]->name);
@@ -248,7 +248,7 @@ bind_tex_t_array_t *util_clone_bind_textures(bind_tex_t_array_t *texs) {
 	if (texs == NULL) {
 		return NULL;
 	}
-	bind_tex_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
+	bind_tex_t_array_t *r = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < texs->length; ++i) {
 		bind_tex_t *t = GC_ALLOC_INIT(bind_tex_t, {0});
 		t->name       = string_copy(texs->buffer[i]->name);
@@ -262,7 +262,7 @@ material_context_t_array_t *util_clone_material_contexts(material_context_t_arra
 	if (contexts == NULL) {
 		return NULL;
 	}
-	material_context_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
+	material_context_t_array_t *r = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < contexts->length; ++i) {
 		material_context_t *c = GC_ALLOC_INIT(material_context_t, {0});
 		c->name               = string_copy(contexts->buffer[i]->name);
@@ -298,7 +298,7 @@ obj_t *util_clone_obj(obj_t *o) {
 	r->spawn        = o->spawn;
 	r->material_ref = string_copy(o->material_ref);
 	if (o->children != NULL) {
-		r->children = any_array_create_from_raw((any[]){}, 0);
+		r->children = any_array_create_from_raw((void *[]){}, 0);
 		for (i32 i = 0; i < o->children->length; ++i) {
 			obj_t *c = util_clone_obj(o->children->buffer[i]);
 			any_array_push(r->children, c);

@@ -111,7 +111,7 @@ void render_path_paint_commands_paint(bool dilation) {
 			if (context_raw->pick_pos_nor_tex) {
 				if (context_raw->paint2d) {
 					string_t_array_t *additional = any_array_create_from_raw(
-					    (any[]){
+					    (void *[]){
 					        "gbuffer1",
 					        "gbuffer2",
 					    },
@@ -120,7 +120,7 @@ void render_path_paint_commands_paint(bool dilation) {
 					render_path_draw_meshes("mesh");
 				}
 				string_t_array_t *additional = any_array_create_from_raw(
-				    (any[]){
+				    (void *[]){
 				        "texpaint_posnortex_picker1",
 				    },
 				    1);
@@ -145,7 +145,7 @@ void render_path_paint_commands_paint(bool dilation) {
 			}
 			else {
 				string_t_array_t *additional = any_array_create_from_raw(
-				    (any[]){
+				    (void *[]){
 				        "texpaint_nor_picker",
 				        "texpaint_pack_picker",
 				        "texpaint_uv_picker",
@@ -243,7 +243,7 @@ void render_path_paint_commands_paint(bool dilation) {
 					}
 				}
 				string_t_array_t *additional = any_array_create_from_raw(
-				    (any[]){
+				    (void *[]){
 				        string_join("texpaint_nor", i32_to_string(ptid)),
 				        string_join("texpaint_pack", i32_to_string(ptid)),
 				        "texpaint_blend0",
@@ -253,7 +253,7 @@ void render_path_paint_commands_paint(bool dilation) {
 			}
 			else {
 				string_t_array_t *additional = any_array_create_from_raw(
-				    (any[]){
+				    (void *[]){
 				        string_join("texpaint_nor", i32_to_string(tid)),
 				        string_join("texpaint_pack", i32_to_string(tid)),
 				        "texpaint_blend0",
@@ -380,7 +380,7 @@ void render_path_paint_commands_live_brush() {
 	}
 	else {
 		string_t_array_t *additional = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        "texpaint_nor_live",
 		        "texpaint_pack_live",
 		    },
@@ -604,7 +604,7 @@ void _render_path_paint_deriv() {
 	sys_notify_on_next_frame(&_render_path_paint_deriv_178293, NULL);
 }
 
-void _render_path_paint_deriv_178293(any _) {
+void _render_path_paint_deriv_178293(void * _) {
 	_render_path_paint_final();
 }
 
@@ -716,11 +716,11 @@ void render_path_paint_draw() {
 	}
 }
 
-void render_path_paint_draw_178565(any _) {
+void render_path_paint_draw_178565(void * _) {
 	_render_path_paint_final();
 }
 
-void render_path_paint_draw_178546(any _) {
+void render_path_paint_draw_178546(void * _) {
 	_render_path_paint_deriv();
 }
 
@@ -806,7 +806,7 @@ void render_path_paint_set_plane_mesh() {
 		    GC_ALLOC_INIT(mesh_data_t,
 		                  {.name          = ".PlaneTiled",
 		                   .vertex_arrays = any_array_create_from_raw(
-		                       (any[]){
+		                       (void *[]){
 		                           GC_ALLOC_INIT(vertex_array_t, {.attrib = "pos", .values = i16_array_create_from_array(posa), .data = "short4norm"}),
 		                           GC_ALLOC_INIT(vertex_array_t, {.attrib = "nor", .values = i16_array_create_from_array(nora), .data = "short2norm"}),
 		                           GC_ALLOC_INIT(vertex_array_t, {.attrib = "tex", .values = i16_array_create_from_array(texa), .data = "short2norm"}),

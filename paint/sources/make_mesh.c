@@ -5,14 +5,14 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 	                                                                     .compare_mode    = layer_pass == 0 ? "less" : "equal",
 	                                                                     .cull_mode       = (context_raw->cull_backfaces || layer_pass > 0) ? "clockwise" : "none",
 	                                                                     .vertex_elements = any_array_create_from_raw(
-                                                                   (any[]){
+                                                                   (void *[]){
                                                                        GC_ALLOC_INIT(vertex_element_t, {.name = "pos", .data = "short4norm"}),
                                                                        GC_ALLOC_INIT(vertex_element_t, {.name = "nor", .data = "short2norm"}),
                                                                        GC_ALLOC_INIT(vertex_element_t, {.name = "tex", .data = "short2norm"}),
                                                                    },
                                                                    3),
 	                                                                     .color_attachments = any_array_create_from_raw(
-                                                                   (any[]){
+                                                                   (void *[]){
                                                                        "RGBA64",
                                                                        "RGBA64",
                                                                        "RGBA64",
@@ -180,7 +180,7 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 
 		// Get layers for this pass
 		make_mesh_layer_pass_count             = 1;
-		slot_layer_t_array_t *layers           = any_array_create_from_raw((any[]){}, 0);
+		slot_layer_t_array_t *layers           = any_array_create_from_raw((void *[]){}, 0);
 		i32                   start_count      = texture_count;
 		bool                  is_material_tool = context_raw->tool == TOOL_TYPE_MATERIAL;
 		for (i32 i = 0; i < project_layers->length; ++i) {
@@ -452,8 +452,8 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 			node_shader_write_frag(kong, "output[2] = float4(occlusion, roughness, metallic, height);");
 			parser_material_finalize(con_mesh);
 			con_mesh->data->shader_from_source = true;
-			gpu_create_shaders_from_kong(node_shader_get(kong), ADDRESS(con_mesh->data->vertex_shader), ADDRESS(con_mesh->data->fragment_shader),
-			                             ADDRESS(con_mesh->data->_->vertex_shader_size), ADDRESS(con_mesh->data->_->fragment_shader_size));
+			gpu_create_shaders_from_kong(node_shader_get(kong), &con_mesh->data->vertex_shader, &con_mesh->data->fragment_shader,
+			                             &con_mesh->data->_->vertex_shader_size, &con_mesh->data->_->fragment_shader_size);
 			return con_mesh;
 		}
 		kong->frag_vvec = true;
@@ -619,7 +619,7 @@ node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 	parser_material_finalize(con_mesh);
 
 	con_mesh->data->shader_from_source = true;
-	gpu_create_shaders_from_kong(node_shader_get(kong), ADDRESS(con_mesh->data->vertex_shader), ADDRESS(con_mesh->data->fragment_shader),
-	                             ADDRESS(con_mesh->data->_->vertex_shader_size), ADDRESS(con_mesh->data->_->fragment_shader_size));
+	gpu_create_shaders_from_kong(node_shader_get(kong), &con_mesh->data->vertex_shader, &con_mesh->data->fragment_shader,
+	                             &con_mesh->data->_->vertex_shader_size, &con_mesh->data->_->fragment_shader_size);
 	return con_mesh;
 }

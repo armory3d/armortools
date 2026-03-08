@@ -146,14 +146,14 @@ f32 uniforms_ext_f32_link(object_t *object, material_data_t *mat, char *link) {
 		for (i32 i = 0; i < keys->length; ++i) {
 			char *key    = keys->buffer[i];
 			char *script = any_map_get(parser_material_script_links, key);
-			f32       result = f32_nan();
+			f32       result = NAN;
 			if (!string_equals(script, "")) {
 				result = js_eval(script);
 			}
 			return result;
 		}
 	}
-	return f32_nan();
+	return NAN;
 }
 
 vec2_t uniforms_ext_vec2_link(object_t *object, material_data_t *mat, char *link) {
@@ -436,14 +436,14 @@ gpu_texture_t *uniforms_ext_tex_link(object_t *object, material_data_t *mat, cha
 	return NULL;
 }
 
-void uniforms_ext_tex_link_73505(any _) {
+void uniforms_ext_tex_link_73505(void * _) {
 	util_uv_cache_uv_island_map();
 }
 
-void uniforms_ext_tex_link_73476(any _) {
+void uniforms_ext_tex_link_73476(void * _) {
 	util_uv_cache_triangle_map();
 }
 
-void uniforms_ext_tex_link_73441(any _) {
+void uniforms_ext_tex_link_73441(void * _) {
 	util_uv_cache_uv_map();
 }

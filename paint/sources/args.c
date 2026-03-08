@@ -69,11 +69,11 @@ void args_run() {
 	}
 }
 
-void args_run_115626(any _) {
+void args_run_115626(void *_) {
 	export_texture_run(args_export_textures_path, false);
 }
 
-void args_run_115314(any _) {
+void args_run_115314(void *_) {
 	if (!string_equals(project_filepath, "")) {
 		import_arm_run_project(project_filepath);
 	}

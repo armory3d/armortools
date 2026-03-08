@@ -22,7 +22,7 @@ void import_texture_run(char *path, bool hdr_as_envmap) {
 	}
 
 	char      *ext      = substring(path, string_last_index_of(path, ".") + 1, string_length(path));
-	any            importer = any_map_get(import_texture_importers, ext);      // JSValue -> (s: string)=>gpu_texture_t
+	void *            importer = any_map_get(import_texture_importers, ext);      // JSValue -> (s: string)=>gpu_texture_t
 	bool           cached   = any_map_get(data_cached_images, path) != NULL; // Already loaded or pink texture for missing file
 	gpu_texture_t *image;
 	if (importer == NULL || cached) {

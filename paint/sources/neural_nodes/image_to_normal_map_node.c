@@ -10,7 +10,7 @@ void image_to_normal_map_node_button(i32 node_id) {
 	char         *node_name = parser_material_node_name(node, NULL);
 	ui_handle_t      *h         = ui_handle(node_name);
 	string_t_array_t *models    = any_array_create_from_raw(
-        (any[]){
+        (void *[]){
             "Marigold",
         },
         1);
@@ -29,7 +29,7 @@ void image_to_normal_map_node_button(i32 node_id) {
 			iron_write_png(string_join(string_join(dir, PATH_SEP), "input.png"), input_buf, input->width, input->height, 0);
 
 			string_t_array_t *argv = any_array_create_from_raw(
-			    (any[]){
+			    (void *[]){
 			        string_join(string_join(dir, "/"), neural_node_sd_bin()),
 			        "-m",
 			        string_join(dir, "/marigold-normals-v1-1.q8_0.gguf"),

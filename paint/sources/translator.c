@@ -93,7 +93,7 @@ void translator_load_translations(char *new_locale) {
 
 		for (i32 i = 0; char_code_at(s, i) != 0;) {
 			i32 l         = 0;
-			i32 codepoint = string_utf8_decode((s) + i, ADDRESS(l));
+			i32 codepoint = string_utf8_decode((s) + i, &l);
 			i += l;
 
 			// Assume cjk in the > 1119 range
@@ -167,7 +167,7 @@ void translator_init_font(bool cjk, char *font_path, f32 font_scale) {
 	sys_notify_on_next_frame(&translator_init_font_91962, NULL);
 }
 
-void translator_init_font_91962(any _) {
+void translator_init_font_91962(void * _) {
 	bool         cjk        = _translator_init_font_cjk;
 	char    *font_path  = _translator_init_font_font_path;
 	f32          font_scale = _translator_init_font_font_scale;
@@ -207,7 +207,7 @@ void translator_extended_glyphs() {
 // Returns a list of supported locales (plus English and the automatically detected system locale)
 string_t_array_t *translator_get_supported_locales() {
 	string_t_array_t *locales = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        "system",
 	        "en",
 	    },

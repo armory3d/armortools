@@ -11,7 +11,7 @@ void edit_image_node_button(i32 node_id) {
 	ui_handle_t      *h         = ui_handle(node_name);
 
 	string_t_array_t *models = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        "Qwen Image Edit",
 	    },
 	    1);
@@ -37,7 +37,7 @@ void edit_image_node_button(i32 node_id) {
 			}
 
 			string_t_array_t *argv = any_array_create_from_raw(
-			    (any[]){
+			    (void *[]){
 			        string_join(string_join(dir, "/"), neural_node_sd_bin()),
 			        "--diffusion-model",
 			        string_join(dir, "/qwen-image-edit-2511-Q4_K_S.gguf"),

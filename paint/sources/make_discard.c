@@ -5,7 +5,7 @@ void make_discard_color_id(node_shader_t *kong) {
 	node_shader_write_frag(kong, "var colorid_c14: float4 = texpaint_colorid[uint2(uint(0), uint(0))];");
 	node_shader_write_frag(kong, "var colorid_c1: float3 = colorid_c14.rgb;");
 	node_shader_write_frag(kong, "var colorid_c2: float3 = sample_lod(texcolorid, sampler_linear, input.tex_coord_pick, 0.0).rgb;");
-	// node_shader_write_frag(kong, "if (any(colorid_c1 != colorid_c2)) { discard };");
+	// node_shader_write_frag(kong, "if (void *(colorid_c1 != colorid_c2)) { discard };");
 	node_shader_write_frag(kong, "if (colorid_c1.r != colorid_c2.r || colorid_c1.g != colorid_c2.g || colorid_c1.b != colorid_c2.b) { discard; }");
 }
 
@@ -23,7 +23,7 @@ void make_discard_face(node_shader_t *kong) {
 	node_shader_write_frag(kong, "var face_c1: float4 = textrianglemap[uint2(uint(tex_coord_inp.x * constants.textrianglemap_size.x), uint(tex_coord_inp.y * "
 	                             "constants.textrianglemap_size.y))];");
 	node_shader_write_frag(kong, "var face_c2: float4 = sample_lod(textrianglemap, sampler_linear, input.tex_coord_pick, 0.0);");
-	// node_shader_write_frag(kong, "if (any(face_c1 != face_c2)) { discard; }");
+	// node_shader_write_frag(kong, "if (void *(face_c1 != face_c2)) { discard; }");
 	node_shader_write_frag(kong, "if (face_c1.x != face_c2.x || face_c1.y != face_c2.y || face_c1.z != face_c2.z || face_c1.w != face_c2.w) { discard; }");
 }
 

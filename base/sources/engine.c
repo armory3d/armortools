@@ -9,9 +9,6 @@ i32 sys_x(void);
 i32 sys_y(void);
 f32 sys_time(void);
 
-f32  f32_nan(void);
-bool f32_isnan(f32 f);
-
 gpu_pipeline_t *_mesh_object_last_pipeline   = NULL;
 vec4_t          _camera_object_sphere_center = {0};
 i32             camera_object_taa_frames     = 1;
@@ -1723,7 +1720,7 @@ void uniforms_set_obj_const(object_t *obj, i32 loc, shader_const_t *c) {
 		gpu_set_float2(loc, v.x, v.y);
 	}
 	else if (string_equals(c->type, "float")) {
-		f32 f = f32_nan();
+		f32 f = NAN;
 
 		if (string_equals(c->link, "_object_info_index")) {
 			f = (f32)obj->uid;
@@ -1744,7 +1741,7 @@ void uniforms_set_obj_const(object_t *obj, i32 loc, shader_const_t *c) {
 			f = uniforms_f32_links(obj, current_material(obj), c->link);
 		}
 
-		if (f32_isnan(f)) {
+		if (isnan(f)) {
 			return;
 		}
 		gpu_set_float(loc, f);

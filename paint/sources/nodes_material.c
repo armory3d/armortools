@@ -4,7 +4,7 @@ void nodes_material_init() {
 	}
 
 	gc_unroot(nodes_material_input);
-	nodes_material_input = any_array_create_from_raw((any[]){}, 0);
+	nodes_material_input = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(nodes_material_input);
 	attribute_node_init();
 	camera_data_node_init();
@@ -26,7 +26,7 @@ void nodes_material_init() {
 	wireframe_node_init();
 
 	gc_unroot(nodes_material_texture);
-	nodes_material_texture = any_array_create_from_raw((any[]){}, 0);
+	nodes_material_texture = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(nodes_material_texture);
 	brick_texture_node_init();
 	camera_texture_node_init();
@@ -42,7 +42,7 @@ void nodes_material_init() {
 	wave_texture_node_init();
 
 	gc_unroot(nodes_material_color);
-	nodes_material_color = any_array_create_from_raw((any[]){}, 0);
+	nodes_material_color = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(nodes_material_color);
 	blur_node_init();
 	brightness_contrast_node_init();
@@ -55,7 +55,7 @@ void nodes_material_init() {
 	warp_node_init();
 
 	gc_unroot(nodes_material_utilities);
-	nodes_material_utilities = any_array_create_from_raw((any[]){}, 0);
+	nodes_material_utilities = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(nodes_material_utilities);
 	bump_node_init();
 	clamp_node_init();
@@ -76,7 +76,7 @@ void nodes_material_init() {
 	#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
 
 	gc_unroot(nodes_material_neural);
-	nodes_material_neural = any_array_create_from_raw((any[]){}, 0);
+	nodes_material_neural = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(nodes_material_neural);
 	edit_image_node_init();
 	#ifdef IRON_WINDOWS
@@ -95,7 +95,7 @@ void nodes_material_init() {
 	#endif
 
 	gc_unroot(nodes_material_group);
-	nodes_material_group = any_array_create_from_raw((any[]){}, 0);
+	nodes_material_group = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(nodes_material_group);
 	group_node_init();
 
@@ -103,7 +103,7 @@ void nodes_material_init() {
 
 	gc_unroot(nodes_material_list);
 	nodes_material_list = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        nodes_material_input,
 	        nodes_material_texture,
 	        nodes_material_color,
@@ -118,7 +118,7 @@ void nodes_material_init() {
 
 	gc_unroot(nodes_material_list);
 	nodes_material_list = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        nodes_material_input,
 	        nodes_material_texture,
 	        nodes_material_color,

@@ -57,7 +57,7 @@ bool neural_node_button(ui_node_t *node, char *model) {
 	return false;
 }
 
-void neural_node_button_236824(any _) {
+void neural_node_button_236824(void * _) {
 	box_preferences_htab->i = PREFERENCE_TAB_NEURAL;
 	box_preferences_show();
 }
@@ -120,7 +120,7 @@ void neural_node_download(char *url) {
 	file_download_to(url, file_path, &neural_node_download_237123, 0);
 }
 
-void neural_node_download_237227(any _) {
+void neural_node_download_237227(void * _) {
 	char *tar = string_join(neural_node_dir(), "/Hunyuan3D_win64.tar");
 	untar_here(tar);
 }

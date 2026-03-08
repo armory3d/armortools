@@ -266,7 +266,7 @@ void base_resize() {
 	base_redraw_ui();
 }
 
-void base_update(any _) {
+void base_update(void *_) {
 	if (mouse_movement_x != 0 || mouse_movement_y != 0) {
 		iron_mouse_set_cursor(IRON_CURSOR_ARROW);
 	}
@@ -510,7 +510,7 @@ gpu_texture_t *base_get_drag_image() {
 	return NULL;
 }
 
-void base_render(any _) {
+void base_render(void *_) {
 	if (context_raw->frame == 2) {
 		util_render_make_material_preview();
 		ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
@@ -591,7 +591,7 @@ string_t_array_t *base_enum_texts(char *node_type) {
 		}
 		else {
 			string_t_array_t *empty = any_array_create_from_raw(
-			    (any[]){
+			    (void *[]){
 			        "",
 			    },
 			    1);
@@ -600,7 +600,7 @@ string_t_array_t *base_enum_texts(char *node_type) {
 	}
 
 	if (string_equals(node_type, "LAYER") || string_equals(node_type, "LAYER_MASK")) {
-		string_t_array_t *layer_names = any_array_create_from_raw((any[]){}, 0);
+		string_t_array_t *layer_names = any_array_create_from_raw((void *[]){}, 0);
 		for (i32 i = 0; i < project_layers->length; ++i) {
 			slot_layer_t *l = project_layers->buffer[i];
 			any_array_push(layer_names, l->name);
@@ -609,7 +609,7 @@ string_t_array_t *base_enum_texts(char *node_type) {
 	}
 
 	if (string_equals(node_type, "MATERIAL")) {
-		string_t_array_t *material_names = any_array_create_from_raw((any[]){}, 0);
+		string_t_array_t *material_names = any_array_create_from_raw((void *[]){}, 0);
 		for (i32 i = 0; i < project_materials->length; ++i) {
 			slot_material_t *m = project_materials->buffer[i];
 			any_array_push(material_names, m->canvas->name);
@@ -623,7 +623,7 @@ string_t_array_t *base_enum_texts(char *node_type) {
 		}
 		else {
 			string_t_array_t *empty = any_array_create_from_raw(
-			    (any[]){
+			    (void *[]){
 			        "",
 			    },
 			    1);
@@ -670,7 +670,7 @@ void base_redraw_console() {
 void base_init_undo_layers() {
 	if (history_undo_layers == NULL) {
 		gc_unroot(history_undo_layers);
-		history_undo_layers = any_array_create_from_raw((any[]){}, 0);
+		history_undo_layers = any_array_create_from_raw((void *[]){}, 0);
 		gc_root(history_undo_layers);
 		for (i32 i = 0; i < config_raw->undo_steps; ++i) {
 			i32           len = history_undo_layers->length;
@@ -683,7 +683,7 @@ void base_init_undo_layers() {
 
 ui_handle_t_array_t *ui_base_init_hwnds() {
 	ui_handle_t_array_t *hwnds = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        ui_handle_create(),
 	        ui_handle_create(),
 	        ui_handle_create(),
@@ -694,7 +694,7 @@ ui_handle_t_array_t *ui_base_init_hwnds() {
 
 ui_handle_t_array_t *ui_base_init_htabs() {
 	ui_handle_t_array_t *htabs = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        ui_handle_create(),
 	        ui_handle_create(),
 	        ui_handle_create(),
@@ -710,21 +710,21 @@ tab_draw_t *_draw_callback_create(void (*f)(ui_handle_t *)) {
 
 tab_draw_array_t_array_t *ui_base_init_hwnd_tabs() {
 	tab_draw_array_t *a0 = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        _draw_callback_create(tab_layers_draw),
 	        _draw_callback_create(tab_history_draw),
 	        _draw_callback_create(tab_plugins_draw),
 	    },
 	    3);
 	tab_draw_array_t *a1 = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        _draw_callback_create(tab_materials_draw),
 	        _draw_callback_create(tab_brushes_draw),
 	        _draw_callback_create(tab_scripts_draw),
 	    },
 	    3);
 	tab_draw_array_t *a2 = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        _draw_callback_create(tab_browser_draw),
 	        _draw_callback_create(tab_meshes_draw),
 	        _draw_callback_create(tab_textures_draw),
@@ -741,7 +741,7 @@ tab_draw_array_t_array_t *ui_base_init_hwnd_tabs() {
 	}
 	#endif
 
-	tab_draw_array_t_array_t *r = any_array_create_from_raw((any[]){}, 0);
+	tab_draw_array_t_array_t *r = any_array_create_from_raw((void *[]){}, 0);
 	any_array_push(r, a0);
 	any_array_push(r, a1);
 	any_array_push(r, a2);
@@ -780,7 +780,7 @@ void ui_base_init() {
 	context_raw->ddirty    = 1;
 
 	string_t_array_t *resources = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        "cursor.k",
 	        "icons.k",
 	        "icons05x.k",
@@ -822,7 +822,7 @@ void ui_base_init() {
 		sys_notify_on_next_frame(&ui_base_init_51221, NULL);
 	}
 
-	context_raw->project_objects = any_array_create_from_raw((any[]){}, 0);
+	context_raw->project_objects = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < scene_meshes->length; ++i) {
 		mesh_object_t *m = scene_meshes->buffer[i];
 		any_array_push(context_raw->project_objects, m);
@@ -831,11 +831,11 @@ void ui_base_init() {
 	operator_register("view_top", ui_base_view_top);
 }
 
-void ui_base_init_51221(any _) {
+void ui_base_init_51221(void * _) {
 	layers_init();
 }
 
-void ui_base_update(any _) {
+void ui_base_update(void * _) {
 	ui_base_update_ui();
 	operator_update();
 
@@ -1282,7 +1282,7 @@ void ui_base_update_53274() {
 	ui_text(tr("Viewport Mode", NULL), UI_ALIGN_RIGHT, 0x00000000);
 
 	string_t_array_t *modes = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        tr("Lit", NULL),
 	        tr("Base Color", NULL),
 	        tr("Normal", NULL),
@@ -1301,7 +1301,7 @@ void ui_base_update_53274() {
 	    },
 	    15);
 	string_t_array_t *shortcuts = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        "l",
 	        "b",
 	        "n",
@@ -1339,7 +1339,7 @@ void ui_base_update_53274() {
 	}
 }
 
-void ui_base_update_51603(any _) {
+void ui_base_update_51603(void * _) {
 	export_texture_run(context_raw->texture_export_path, false);
 }
 
@@ -1696,12 +1696,12 @@ void ui_base_update_ui() {
 	gizmo_update();
 }
 
-void ui_base_update_ui_56026(any _) {
+void ui_base_update_ui_56026(void * _) {
 	layers_update_fill_layer(true);
 	make_material_parse_paint_material(false);
 }
 
-void ui_base_render(any _) {
+void ui_base_render(void * _) {
 	if (!ui_base_show && config_raw->touch_ui) {
 		ui->input_enabled = true;
 		ui_begin(ui);
@@ -1750,7 +1750,7 @@ void ui_base_render(any _) {
 	ui->input_enabled = true;
 }
 
-void ui_base_render_cursor(any _) {
+void ui_base_render_cursor(void * _) {
 	if (!base_ui_enabled) {
 		return;
 	}
@@ -1976,7 +1976,7 @@ void ui_base_toggle_browser() {
 void ui_base_set_icon_scale() {
 	if (UI_SCALE() > 1) {
 		string_t_array_t *res = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        "icons.k",
 		        "icons05x.k",
 		        "icons2x.k",
@@ -1988,7 +1988,7 @@ void ui_base_set_icon_scale() {
 	}
 	else {
 		string_t_array_t *res = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        "icons.k",
 		        "icons05x.k",
 		    },

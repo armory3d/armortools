@@ -144,7 +144,7 @@ void nodes_material_color_ramp_button(i32 node_id) {
 		h->i = but->data->buffer[0];
 	}
 	string_t_array_t *interpolate_combo = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        tr("Linear", NULL),
 	        tr("Constant", NULL),
 	    },

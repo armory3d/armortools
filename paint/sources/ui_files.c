@@ -84,7 +84,7 @@ char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, 
 
 	if (!string_equals(handle->text, ui_files_last_path) || !string_equals(search, ui_files_last_search) || refresh) {
 		gc_unroot(ui_files_files);
-		ui_files_files = any_array_create_from_raw((any[]){}, 0);
+		ui_files_files = any_array_create_from_raw((void *[]){}, 0);
 		gc_root(ui_files_files);
 
 		char *dir_path = handle->text;

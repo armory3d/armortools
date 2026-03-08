@@ -22,14 +22,14 @@ void plugin_stop(char *plugin) {
 	map_delete(plugin_map, plugin);
 }
 
-void plugin_notify_on_ui(plugin_t *plugin, any f) {
+void plugin_notify_on_ui(plugin_t *plugin, void * f) {
 	plugin->on_ui = f;
 }
 
-void plugin_notify_on_update(plugin_t *plugin, any f) {
+void plugin_notify_on_update(plugin_t *plugin, void * f) {
 	plugin->on_update = f;
 }
 
-void plugin_notify_on_delete(plugin_t *plugin, any f) {
+void plugin_notify_on_delete(plugin_t *plugin, void * f) {
 	plugin->on_delete = f;
 }

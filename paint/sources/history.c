@@ -103,7 +103,7 @@ void history_undo() {
 			}
 			else {
 				layers_to_restore = any_array_create_from_raw(
-				    (any[]){
+				    (void *[]){
 				        current_layer,
 				    },
 				    1);
@@ -218,7 +218,7 @@ void history_undo_77442(history_step_t *step) {
 	slot_layer_invert_mask(context_raw->layer);
 }
 
-void history_undo_76821(any _) {
+void history_undo_76821(void * _) {
 	i32 active = history_steps->length - 1 - history_redos;
 	// 1. Undo deleting group masks
 	i32 n = 1;
@@ -307,7 +307,7 @@ void history_redo() {
 			}
 			else {
 				slot_layer_t_array_t *layers = any_array_create_from_raw(
-				    (any[]){
+				    (void *[]){
 				        context_raw->layer,
 				        context_raw->layer->parent,
 				    },
@@ -409,25 +409,25 @@ void history_redo_78676(history_step_t *step) {
 	slot_layer_invert_mask(context_raw->layer);
 }
 
-void history_redo_78638(any _) {
+void history_redo_78638(void * _) {
 	slot_layer_apply_mask(context_raw->layer);
 	context_set_layer(context_raw->layer);
 	context_raw->layers_preview_dirty = true;
 }
 
-void history_redo_78540(any _) {
+void history_redo_78540(void * _) {
 	layers_merge_down();
 }
 
-void history_redo_78524(any _) {
+void history_redo_78524(void * _) {
 	history_redo_merge_layers();
 }
 
-void history_redo_78447(any _) {
+void history_redo_78447(void * _) {
 	layers_duplicate_layer(context_raw->layer);
 }
 
-void history_redo_78330(any _) {
+void history_redo_78330(void * _) {
 	i32 active = history_steps->length - history_redos;
 	i32 n      = 1;
 	while (history_steps->buffer[active + n]->layer_type == LAYER_SLOT_TYPE_MASK) {
@@ -453,7 +453,7 @@ void history_redo_78106(slot_layer_t *l) {
 void history_reset() {
 	gc_unroot(history_steps);
 	history_steps = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        GC_ALLOC_INIT(
 	            history_step_t,
 	            {.name = tr("New", NULL), .layer = 0, .layer_type = LAYER_SLOT_TYPE_LAYER, .layer_parent = -1, .object = 0, .material = 0, .brush = 0}),
@@ -541,7 +541,7 @@ void history_apply_mask() {
 	}
 	else {
 		slot_layer_t_array_t *layers = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        context_raw->layer,
 		        context_raw->layer->parent,
 		    },
@@ -707,7 +707,7 @@ void history_copy_to_undo(i32 from_id, i32 to_id, bool is_mask) {
 	}
 	else {
 		string_t_array_t *additional = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        string_join("texpaint_nor_undo", i32_to_string(to_id)),
 		        string_join("texpaint_pack_undo", i32_to_string(to_id)),
 		    },

@@ -2,7 +2,7 @@ void camera_init() {
 	camera_reset(-1);
 }
 
-void camera_update(any _) {
+void camera_update(void * _) {
 	camera_object_t *camera = scene_camera;
 
 	if (mouse_view_x() < 0 || mouse_view_x() > sys_w() || mouse_view_y() < 0 || mouse_view_y() > sys_h()) {
@@ -203,7 +203,7 @@ void camera_reset(i32 view_index) {
 		vec4_box_t *v1 = GC_ALLOC_INIT(vec4_box_t, {.v = vec4_create(0, 0, 0, 1)});
 		gc_unroot(camera_origins);
 		camera_origins = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        v0,
 		        v1,
 		    },
@@ -213,7 +213,7 @@ void camera_reset(i32 view_index) {
 		mat4_box_t *m1 = GC_ALLOC_INIT(mat4_box_t, {.v = mat4_clone(camera->base->transform->local)});
 		gc_unroot(camera_views);
 		camera_views = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        m0,
 		        m1,
 		    },

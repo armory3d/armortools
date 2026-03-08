@@ -198,7 +198,7 @@ void context_set_material(slot_material_t *m) {
 	ui_header_handle->redraws                         = 2;
 	ui_nodes_hwnd->redraws                            = 2;
 	gc_unroot(ui_nodes_group_stack);
-	ui_nodes_group_stack = any_array_create_from_raw((any[]){}, 0);
+	ui_nodes_group_stack = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(ui_nodes_group_stack);
 
 	bool decal = context_is_decal();
@@ -207,7 +207,7 @@ void context_set_material(slot_material_t *m) {
 	}
 }
 
-void context_set_material_62876(any _) {
+void context_set_material_62876(void * _) {
 	util_render_make_decal_preview();
 }
 
@@ -490,7 +490,7 @@ void context_update_envmap() {
 	}
 }
 
-void context_set_viewport_shader(any viewport_shader) { // JSValue * -> (ns: node_shader_t)=>void
+void context_set_viewport_shader(void * viewport_shader) { // JSValue * -> (ns: node_shader_t)=>void
 	context_raw->viewport_shader = viewport_shader;
 	context_set_render_path();
 }
@@ -509,7 +509,7 @@ void context_set_render_path() {
 	sys_notify_on_next_frame(&context_set_render_path_64096, NULL);
 }
 
-void context_set_render_path_64096(any _) {
+void context_set_render_path_64096(void * _) {
 	make_material_parse_mesh_material();
 }
 

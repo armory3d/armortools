@@ -76,8 +76,8 @@ void physics_body_update(physics_body_t *body) {
 	}
 
 	transform_t *transform = body->obj->transform;
-	asim_body_get_pos(body->_body, ADDRESS(transform->loc));
-	asim_body_get_rot(body->_body, ADDRESS(transform->rot));
+	asim_body_get_pos(body->_body, &transform->loc);
+	asim_body_get_rot(body->_body, &transform->rot);
 	transform_build_matrix(transform);
 }
 

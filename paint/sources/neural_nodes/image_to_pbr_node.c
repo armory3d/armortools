@@ -53,7 +53,7 @@ char *image_to_pbr_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 void image_to_pbr_node_run_sd(char *model, char *prompt, void (*done)(gpu_texture_t *)) {
 	char         *dir  = neural_node_dir();
 	string_t_array_t *argv = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        string_join(string_join(dir, "/"), neural_node_sd_bin()),
 	        "-m",
 	        string_join(string_join(dir, "/"), model),
@@ -87,7 +87,7 @@ void image_to_pbr_node_button(i32 node_id) {
 	char         *node_name = parser_material_node_name(node, NULL);
 	ui_handle_t      *h         = ui_handle(node_name);
 	string_t_array_t *models    = any_array_create_from_raw(
-        (any[]){
+        (void *[]){
             "Marigold",
         },
         1);
@@ -110,7 +110,7 @@ void image_to_pbr_node_button(i32 node_id) {
 	}
 }
 
-void image_to_pbr_node_button_233151(any _) {
+void image_to_pbr_node_button_233151(void * _) {
 	render_target_t *occmap;
 	{
 		render_target_t *t = render_target_create();

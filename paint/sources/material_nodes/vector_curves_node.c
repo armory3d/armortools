@@ -4,12 +4,12 @@ void vector_curves_node_init() {
 	any_map_set(ui_nodes_custom_buttons, "nodes_material_vector_curves_button", nodes_material_vector_curves_button);
 }
 
-char *parser_material_vector_curve(char *name, char *fac, f32_ptr points, i32 num) {
+char *parser_material_vector_curve(char *name, char *fac, f32 *points, i32 num) {
 	// Write Ys array
 	char *ys_var = string_join(name, "_ys");
 	parser_material_write(parser_material_kong, string_join(string_join(string_join(string_join("var ", ys_var), ": float["), i32_to_string(num)), "];")); // TODO: Make const
 	for (i32 i = 0; i < num; ++i) {
-		f32 p = ARRAY_ACCESS(points, i * 2 + 1);
+		f32 p = points[i * 2 + 1];
 		parser_material_write(parser_material_kong,
 		                      string_join(string_join(string_join(string_join(string_join(ys_var, "["), i32_to_string(i)), "] = "), f32_to_string(p)), ";"));
 	}
@@ -18,7 +18,7 @@ char *parser_material_vector_curve(char *name, char *fac, f32_ptr points, i32 nu
 	parser_material_write(parser_material_kong, string_join(string_join(string_join(string_join("var ", fac_var), ": float = "), fac), ";"));
 	char *index = "0";
 	for (i32 i = 1; i < num; ++i) {
-		f32 p = ARRAY_ACCESS(points, i * 2 + 0);
+		f32 p = points[i * 2 + 0];
 		index = string_join(index, string_join(string_join(string_join(string_join(" + (", fac_var), " > "), f32_to_string(p)), " ? 1 : 0)"));
 	}
 	// Write index
@@ -29,7 +29,7 @@ char *parser_material_vector_curve(char *name, char *fac, f32_ptr points, i32 nu
 	char *facs_var = string_join(name, "_xs");
 	parser_material_write(parser_material_kong, string_join(string_join(string_join(string_join("var ", facs_var), ": float["), i32_to_string(num)), "];")); // TODO: Make const
 	for (i32 i = 0; i < num; ++i) {
-		f32 p = ARRAY_ACCESS(points, i * 2 + 0);
+		f32 p = points[i * 2 + 0];
 		parser_material_write(
 		    parser_material_kong,
 		    string_join(string_join(string_join(string_join(string_join(string_join("", facs_var), "["), i32_to_string(i)), "] = "), f32_to_string(p)), ";"));

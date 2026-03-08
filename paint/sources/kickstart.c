@@ -50,7 +50,7 @@ void _kickstart() {
 	box_export_preset = NULL;
 	gc_unroot(box_export_channels);
 	box_export_channels = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        "base_r",
 	        "base_g",
 	        "base_b",
@@ -73,7 +73,7 @@ void _kickstart() {
 	gc_root(box_export_channels);
 	gc_unroot(box_export_color_spaces);
 	box_export_color_spaces = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        "linear",
 	        "srgb",
 	    },
@@ -139,7 +139,7 @@ void _kickstart() {
 	base_bits_handle = ui_handle_create();
 	gc_root(base_bits_handle);
 	gc_unroot(base_drop_paths);
-	base_drop_paths = any_array_create_from_raw((any[]){}, 0);
+	base_drop_paths = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(base_drop_paths);
 	base_appx                      = 0;
 	base_appy                      = 0;
@@ -174,7 +174,7 @@ void _kickstart() {
 	ui_toolbar_last_tool = 0;
 	gc_unroot(ui_toolbar_tool_names);
 	ui_toolbar_tool_names = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        _tr("Brush"),
 	        _tr("Eraser"),
 	        _tr("Fill"),
@@ -194,7 +194,7 @@ void _kickstart() {
 	gc_root(ui_toolbar_tool_names);
 	gc_unroot(ui_toolbar_tooltip_extras);
 	ui_toolbar_tooltip_extras = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        _tr("Hold {action_paint} to paint\nHold {brush_ruler} and press {action_paint} to paint a straight line (ruler mode)"),
 	        _tr("Hold {action_paint} to erase\nHold {brush_ruler} and press {action_paint} to erase a straight line (ruler mode)"),
 	        "",
@@ -276,17 +276,17 @@ void _kickstart() {
 	gc_root(project_raw);
 	project_filepath = "";
 	gc_unroot(project_assets);
-	project_assets = any_array_create_from_raw((any[]){}, 0);
+	project_assets = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_assets);
 	gc_unroot(project_asset_names);
-	project_asset_names = any_array_create_from_raw((any[]){}, 0);
+	project_asset_names = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_asset_names);
 	project_asset_id = 0;
 	gc_unroot(project_mesh_assets);
-	project_mesh_assets = any_array_create_from_raw((any[]){}, 0);
+	project_mesh_assets = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_mesh_assets);
 	gc_unroot(project_material_groups);
-	project_material_groups = any_array_create_from_raw((any[]){}, 0);
+	project_material_groups = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_material_groups);
 	project_paint_objects = NULL;
 	gc_unroot(project_asset_map);
@@ -294,16 +294,16 @@ void _kickstart() {
 	gc_root(project_asset_map);
 	project_mesh_list = NULL;
 	gc_unroot(project_materials);
-	project_materials = any_array_create_from_raw((any[]){}, 0);
+	project_materials = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_materials);
 	gc_unroot(project_brushes);
-	project_brushes = any_array_create_from_raw((any[]){}, 0);
+	project_brushes = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_brushes);
 	gc_unroot(project_layers);
-	project_layers = any_array_create_from_raw((any[]){}, 0);
+	project_layers = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_layers);
 	gc_unroot(project_fonts);
-	project_fonts = any_array_create_from_raw((any[]){}, 0);
+	project_fonts = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(project_fonts);
 	project_atlas_objects      = NULL;
 	project_atlas_names        = NULL;
@@ -469,7 +469,7 @@ fun get_nor_from_depth(p0: float3, uv: float2, invVP: float4x4, tex_step: float2
 	ui_nodes_hwnd = ui_handle_create();
 	gc_root(ui_nodes_hwnd);
 	gc_unroot(ui_nodes_group_stack);
-	ui_nodes_group_stack = any_array_create_from_raw((any[]){}, 0);
+	ui_nodes_group_stack = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(ui_nodes_group_stack);
 	ui_nodes_controls_down = false;
 	ui_nodes_tabs          = NULL;
@@ -504,7 +504,7 @@ fun get_nor_from_depth(p0: float3, uv: float2, invVP: float4x4, tex_step: float2
 	ui_nodes_node_changed = NULL;
 	gc_unroot(nodes_brush_categories);
 	nodes_brush_categories = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        _tr("Nodes"),
 	    },
 	    1);
@@ -550,7 +550,7 @@ fun get_blur_tool_weight(i: int): float { \
 	gc_unroot(nodes_material_categories);
 #if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
 	nodes_material_categories = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        _tr("Input"),
 	        _tr("Texture"),
 	        _tr("Color"),
@@ -561,7 +561,7 @@ fun get_blur_tool_weight(i: int): float { \
 	    6);
 #else
 	nodes_material_categories = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        _tr("Input"),
 	        _tr("Texture"),
 	        _tr("Color"),
@@ -765,7 +765,7 @@ fun dither_bayer(uv: float2): float { \
 	console_message_color = 0x00000000;
 	gc_unroot(console_last_traces);
 	console_last_traces = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        "",
 	    },
 	    1);
@@ -870,7 +870,7 @@ fun dither_bayer(uv: float2): float { \
 	                              .y      = 0,
 	                              .color  = 0xff4982a0,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Vector"),
@@ -884,7 +884,7 @@ fun dither_bayer(uv: float2): float { \
 	                                  },
 	                                  1),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Color"),
@@ -908,7 +908,7 @@ fun dither_bayer(uv: float2): float { \
 	                                  },
 	                                  2),
 	                              .buttons = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("File"),
 	                                                                       .type          = "ENUM",
 	                                                                       .output        = -1,
@@ -939,9 +939,9 @@ fun dither_bayer(uv: float2): float { \
 	                                              .x       = 0,
 	                                              .y       = 0,
 	                                              .color   = 0xff4982a0,
-	                                              .inputs  = any_array_create_from_raw((any[]){}, 0),
+	                                              .inputs  = any_array_create_from_raw((void *[]){}, 0),
 	                                              .outputs = any_array_create_from_raw(
-	                                                  (any[]){
+	                                                  (void *[]){
 	                                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                       .node_id       = 0,
 	                                                                                       .name          = _tr("Base Color"),
@@ -1035,7 +1035,7 @@ fun dither_bayer(uv: float2): float { \
 	                                                  },
 	                                                  9),
 	                                              .buttons = any_array_create_from_raw(
-	                                                  (any[]){
+	                                                  (void *[]){
 	                                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Material"),
 	                                                                                       .type          = "ENUM",
 	                                                                                       .output        = -1,
@@ -1060,9 +1060,9 @@ fun dither_bayer(uv: float2): float { \
 	                                              .x       = 0,
 	                                              .y       = 0,
 	                                              .color   = 0xffb34f5a,
-	                                              .inputs  = any_array_create_from_raw((any[]){}, 0),
+	                                              .inputs  = any_array_create_from_raw((void *[]){}, 0),
 	                                              .outputs = any_array_create_from_raw(
-                                                    (any[]){
+                                                    (void *[]){
                                                         GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                       .node_id       = 0,
 	                                                                                       .name          = _tr("UV"),
@@ -1076,7 +1076,7 @@ fun dither_bayer(uv: float2): float { \
                                                     },
                                                     1),
 	                                              .buttons = any_array_create_from_raw(
-                                                    (any[]){
+                                                    (void *[]){
                                                         GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("UV Map"),
 	                                                                                       .type          = "ENUM",
 	                                                                                       .output        = -1,
@@ -1105,7 +1105,7 @@ fun tex_wave_f(p: float3): float { \
 	                              .y      = 0,
 	                              .color  = 0xff4982a0,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Vector"),
@@ -1129,7 +1129,7 @@ fun tex_wave_f(p: float3): float { \
 	                                  },
 	                                  2),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Color"),
@@ -1152,7 +1152,7 @@ fun tex_wave_f(p: float3): float { \
 	                                                                       .display       = 0}),
 	                                  },
 	                                  2),
-	                              .buttons = any_array_create_from_raw((any[]){}, 0),
+	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(wave_texture_node_def);
@@ -1167,7 +1167,7 @@ fun tex_wave_f(p: float3): float { \
 	                                                       .y      = 0,
 	                                                       .color  = 0xff62676d,
 	                                                       .inputs = any_array_create_from_raw(
-                                                   (any[]){
+                                                   (void *[]){
                                                        GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                                .node_id       = 0,
 	                                                                                                .name          = _tr("Value"),
@@ -1201,7 +1201,7 @@ fun tex_wave_f(p: float3): float { \
                                                    },
                                                    3),
 	                                                       .outputs = any_array_create_from_raw(
-                                                   (any[]){
+                                                   (void *[]){
                                                        GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                                .node_id       = 0,
 	                                                                                                .name          = _tr("Value"),
@@ -1215,7 +1215,7 @@ fun tex_wave_f(p: float3): float { \
                                                    },
                                                    1),
 	                                                       .buttons = any_array_create_from_raw(
-                                                   (any[]){
+                                                   (void *[]){
                                                        GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("operation"),
 	                                                                                                .type          = "ENUM",
 	                                                                                                .output        = 0,
@@ -1237,9 +1237,9 @@ fun tex_wave_f(p: float3): float { \
 	                                             .x       = 0,
 	                                             .y       = 0,
 	                                             .color   = 0xffb34f5a,
-	                                             .inputs  = any_array_create_from_raw((any[]){}, 0),
+	                                             .inputs  = any_array_create_from_raw((void *[]){}, 0),
 	                                             .outputs = any_array_create_from_raw(
-	                                                 (any[]){
+	                                                 (void *[]){
 	                                                     GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                      .node_id       = 0,
 	                                                                                      .name          = _tr("Tangent"),
@@ -1252,7 +1252,7 @@ fun tex_wave_f(p: float3): float { \
 	                                                                                      .display       = 0}),
 	                                                 },
 	                                                 1),
-	                                             .buttons = any_array_create_from_raw((any[]){}, 0),
+	                                             .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                                             .width   = 0,
 	                                             .flags   = 0});
 	gc_root(tangent_node_def);
@@ -1268,7 +1268,7 @@ fun tex_wave_f(p: float3): float { \
 	                              .y      = 0,
 	                              .color  = 0xff4982a0,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Strength"),
@@ -1302,7 +1302,7 @@ fun tex_wave_f(p: float3): float { \
 	                                  },
 	                                  3),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Value"),
@@ -1315,7 +1315,7 @@ fun tex_wave_f(p: float3): float { \
 	                                                                       .display       = 0}),
 	                                  },
 	                                  1),
-	                              .buttons = any_array_create_from_raw((any[]){}, 0),
+	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(curvature_bake_node_def);
@@ -1327,7 +1327,7 @@ fun tex_wave_f(p: float3): float { \
 	                                          .y      = 0,
 	                                          .color  = 0xff448c6d,
 	                                          .inputs = any_array_create_from_raw(
-	                                              (any[]){
+	                                              (void *[]){
 	                                                  GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                   .node_id       = 0,
 	                                                                                   .name          = _tr("Color"),
@@ -1351,7 +1351,7 @@ fun tex_wave_f(p: float3): float { \
 	                                              },
 	                                              2),
 	                                          .outputs = any_array_create_from_raw(
-	                                              (any[]){
+	                                              (void *[]){
 	                                                  GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                   .node_id       = 0,
 	                                                                                   .name          = _tr("Color"),
@@ -1364,7 +1364,7 @@ fun tex_wave_f(p: float3): float { \
 	                                                                                   .display       = 0}),
 	                                              },
 	                                              1),
-	                                          .buttons = any_array_create_from_raw((any[]){}, 0),
+	                                          .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                                          .width   = 0,
 	                                          .flags   = 0});
 	gc_root(blur_node_def);
@@ -1377,7 +1377,7 @@ fun tex_wave_f(p: float3): float { \
 	                              .y      = 0,
 	                              .color  = 0xff4982a0,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Vector"),
@@ -1391,7 +1391,7 @@ fun tex_wave_f(p: float3): float { \
 	                                  },
 	                                  1),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Color"),
@@ -1415,7 +1415,7 @@ fun tex_wave_f(p: float3): float { \
 	                                  },
 	                                  2),
 	                              .buttons = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = "text",
 	                                                                       .type          = "STRING",
 	                                                                       .output        = -1,
@@ -1445,7 +1445,7 @@ fun tex_wave_f(p: float3): float { \
 	                                                      .y      = 0,
 	                                                      .color  = 0xff4982a0,
 	                                                      .inputs = any_array_create_from_raw(
-	                                                          (any[]){
+	                                                          (void *[]){
 	                                                              GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                               .node_id       = 0,
 	                                                                                               .name          = _tr("Vector"),
@@ -1459,7 +1459,7 @@ fun tex_wave_f(p: float3): float { \
 	                                                          },
 	                                                          1),
 	                                                      .outputs = any_array_create_from_raw(
-	                                                          (any[]){
+	                                                          (void *[]){
 	                                                              GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                               .node_id       = 0,
 	                                                                                               .name          = _tr("Color"),
@@ -1483,7 +1483,7 @@ fun tex_wave_f(p: float3): float { \
 	                                                          },
 	                                                          2),
 	                                                      .buttons = any_array_create_from_raw(
-	                                                          (any[]){
+	                                                          (void *[]){
 	                                                              GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("gradient_type"),
 	                                                                                               .type          = "ENUM",
 	                                                                                               .output        = 0,
@@ -1506,9 +1506,9 @@ fun tex_wave_f(p: float3): float { \
 	                              .x       = 0,
 	                              .y       = 0,
 	                              .color   = 0xffb34f5a,
-	                              .inputs  = any_array_create_from_raw((any[]){}, 0),
+	                              .inputs  = any_array_create_from_raw((void *[]){}, 0),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Location"),
@@ -1571,7 +1571,7 @@ fun tex_wave_f(p: float3): float { \
 	                                                                       .display       = 0}),
 	                                  },
 	                                  6),
-	                              .buttons = any_array_create_from_raw((any[]){}, 0),
+	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(object_info_node_def);
@@ -1596,7 +1596,7 @@ fun tex_magic_f(p: float3): float { \
 	                              .y      = 0,
 	                              .color  = 0xff4982a0,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Vector"),
@@ -1630,7 +1630,7 @@ fun tex_magic_f(p: float3): float { \
 	                                  },
 	                                  3),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Color"),
@@ -1653,7 +1653,7 @@ fun tex_magic_f(p: float3): float { \
 	                                                                       .display       = 0}),
 	                                  },
 	                                  2),
-	                              .buttons = any_array_create_from_raw((any[]){}, 0),
+	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(magic_texture_node_def);
@@ -1666,7 +1666,7 @@ fun tex_magic_f(p: float3): float { \
 	                              .y      = 0,
 	                              .color  = 0xffb34f5a,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("IOR"),
@@ -1690,7 +1690,7 @@ fun tex_magic_f(p: float3): float { \
 	                                  },
 	                                  2),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Factor"),
@@ -1703,7 +1703,7 @@ fun tex_magic_f(p: float3): float { \
 	                                                                       .display       = 0}),
 	                                  },
 	                                  1),
-	                              .buttons = any_array_create_from_raw((any[]){}, 0),
+	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(fresnel_node_def);
@@ -1715,7 +1715,7 @@ fun tex_magic_f(p: float3): float { \
 	                                          .y      = 0,
 	                                          .color  = 0xff448c6d,
 	                                          .inputs = any_array_create_from_raw(
-	                                              (any[]){
+	                                              (void *[]){
 	                                                  GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                   .node_id       = 0,
 	                                                                                   .name          = _tr("Color"),
@@ -1749,7 +1749,7 @@ fun tex_magic_f(p: float3): float { \
 	                                              },
 	                                              3),
 	                                          .outputs = any_array_create_from_raw(
-	                                              (any[]){
+	                                              (void *[]){
 	                                                  GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                   .node_id       = 0,
 	                                                                                   .name          = _tr("Color"),
@@ -1762,7 +1762,7 @@ fun tex_magic_f(p: float3): float { \
 	                                                                                   .display       = 0}),
 	                                              },
 	                                              1),
-	                                          .buttons = any_array_create_from_raw((any[]){}, 0),
+	                                          .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                                          .width   = 0,
 	                                          .flags   = 0});
 	gc_root(warp_node_def);
@@ -1774,7 +1774,7 @@ fun tex_magic_f(p: float3): float { \
 	                                            .y      = 0,
 	                                            .color  = 0xff522c99,
 	                                            .inputs = any_array_create_from_raw(
-	                                                (any[]){
+	                                                (void *[]){
 	                                                    GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                     .node_id       = 0,
 	                                                                                     .name          = _tr("Normal"),
@@ -1788,7 +1788,7 @@ fun tex_magic_f(p: float3): float { \
 	                                                },
 	                                                1),
 	                                            .outputs = any_array_create_from_raw(
-	                                                (any[]){
+	                                                (void *[]){
 	                                                    GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                     .node_id       = 0,
 	                                                                                     .name          = _tr("Normal"),
@@ -1812,7 +1812,7 @@ fun tex_magic_f(p: float3): float { \
 	                                                },
 	                                                2),
 	                                            .buttons = any_array_create_from_raw(
-	                                                (any[]){
+	                                                (void *[]){
 	                                                    GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Vector"),
 	                                                                                     .type          = "VECTOR",
 	                                                                                     .output        = 0,
@@ -1836,7 +1836,7 @@ fun tex_magic_f(p: float3): float { \
 	                              .y      = 0,
 	                              .color  = 0xff522c99,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Vector"),
@@ -1880,7 +1880,7 @@ fun tex_magic_f(p: float3): float { \
 	                                  },
 	                                  4),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Vector"),
@@ -1893,7 +1893,7 @@ fun tex_magic_f(p: float3): float { \
 	                                                                       .display       = 0}),
 	                                  },
 	                                  1),
-	                              .buttons = any_array_create_from_raw((any[]){}, 0),
+	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(mapping_node_def);
@@ -1905,7 +1905,7 @@ fun tex_magic_f(p: float3): float { \
 	                                                .y      = 0,
 	                                                .color  = 0xff522c99,
 	                                                .inputs = any_array_create_from_raw(
-	                                                    (any[]){
+	                                                    (void *[]){
 	                                                        GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                         .node_id       = 0,
 	                                                                                         .name          = _tr("Strength"),
@@ -1929,7 +1929,7 @@ fun tex_magic_f(p: float3): float { \
 	                                                    },
 	                                                    2),
 	                                                .outputs = any_array_create_from_raw(
-	                                                    (any[]){
+	                                                    (void *[]){
 	                                                        GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                         .node_id       = 0,
 	                                                                                         .name          = _tr("Normal Map"),
@@ -1942,7 +1942,7 @@ fun tex_magic_f(p: float3): float { \
 	                                                                                         .display       = 0}),
 	                                                    },
 	                                                    1),
-	                                                .buttons = any_array_create_from_raw((any[]){}, 0),
+	                                                .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                                                .width   = 0,
 	                                                .flags   = 0});
 	gc_root(normal_map_node_def);
@@ -1955,7 +1955,7 @@ fun tex_magic_f(p: float3): float { \
 	                              .y      = 0,
 	                              .color  = 0xff448c6d,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Factor"),
@@ -1979,7 +1979,7 @@ fun tex_magic_f(p: float3): float { \
 	                                  },
 	                                  2),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Color"),
@@ -1992,7 +1992,7 @@ fun tex_magic_f(p: float3): float { \
 	                                                                       .display       = 0}),
 	                                  },
 	                                  1),
-	                              .buttons = any_array_create_from_raw((any[]){}, 0),
+	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(invert_color_node_def);
@@ -2004,7 +2004,7 @@ fun tex_magic_f(p: float3): float { \
 	                                               .y      = 0,
 	                                               .color  = 0xffb34f5a,
 	                                               .inputs = any_array_create_from_raw(
-	                                                   (any[]){
+	                                                   (void *[]){
 	                                                       GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                        .node_id       = 0,
 	                                                                                        .name          = _tr("Size"),
@@ -2018,7 +2018,7 @@ fun tex_magic_f(p: float3): float { \
 	                                                   },
 	                                                   1),
 	                                               .outputs = any_array_create_from_raw(
-	                                                   (any[]){
+	                                                   (void *[]){
 	                                                       GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                        .node_id       = 0,
 	                                                                                        .name          = _tr("Factor"),
@@ -2032,7 +2032,7 @@ fun tex_magic_f(p: float3): float { \
 	                                                   },
 	                                                   1),
 	                                               .buttons = any_array_create_from_raw(
-	                                                   (any[]){
+	                                                   (void *[]){
 	                                                       GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Pixel Size"),
 	                                                                                        .type          = "BOOL",
 	                                                                                        .output        = 0,
@@ -2055,7 +2055,7 @@ fun tex_magic_f(p: float3): float { \
 	                                           .y      = 0,
 	                                           .color  = 0xff448c6d,
 	                                           .inputs = any_array_create_from_raw(
-	                                               (any[]){
+	                                               (void *[]){
 	                                                   GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                    .node_id       = 0,
 	                                                                                    .name          = _tr("Color"),
@@ -2079,7 +2079,7 @@ fun tex_magic_f(p: float3): float { \
 	                                               },
 	                                               2),
 	                                           .outputs = any_array_create_from_raw(
-	                                               (any[]){
+	                                               (void *[]){
 	                                                   GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                    .node_id       = 0,
 	                                                                                    .name          = _tr("Color"),
@@ -2092,7 +2092,7 @@ fun tex_magic_f(p: float3): float { \
 	                                                                                    .display       = 0}),
 	                                               },
 	                                               1),
-	                                           .buttons = any_array_create_from_raw((any[]){}, 0),
+	                                           .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                                           .width   = 0,
 	                                           .flags   = 0});
 	gc_root(gamma_node_def);
@@ -2152,7 +2152,7 @@ fun tex_magic_f(p: float3): float { \
 	                              .y      = 0,
 	                              .color  = 0xff62676d,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Vector"),
@@ -2176,7 +2176,7 @@ fun tex_magic_f(p: float3): float { \
 	                                  },
 	                                  2),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Vector"),
@@ -2200,7 +2200,7 @@ fun tex_magic_f(p: float3): float { \
 	                                  },
 	                                  2),
 	                              .buttons = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("operation"),
 	                                                                       .type          = "ENUM",
 	                                                                       .output        = 0,
@@ -2252,7 +2252,7 @@ fun tex_checker_f(co: float3, scale: float): float { \
 	                              .y      = 0,
 	                              .color  = 0xff4982a0,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Vector"),
@@ -2296,7 +2296,7 @@ fun tex_checker_f(co: float3, scale: float): float { \
 	                                  },
 	                                  4),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Color"),
@@ -2319,7 +2319,7 @@ fun tex_checker_f(co: float3, scale: float): float { \
 	                                                                       .display       = 0}),
 	                                  },
 	                                  2),
-	                              .buttons = any_array_create_from_raw((any[]){}, 0),
+	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(checker_texture_node_def);
@@ -2354,7 +2354,7 @@ fun hue_sat(col: float3, shift: float4): float3 { \
 	                              .y      = 0,
 	                              .color  = 0xff448c6d,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Hue"),
@@ -2408,7 +2408,7 @@ fun hue_sat(col: float3, shift: float4): float3 { \
 	                                  },
 	                                  5),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Color"),
@@ -2421,7 +2421,7 @@ fun hue_sat(col: float3, shift: float4): float3 { \
 	                                                                       .display       = 0}),
 	                                  },
 	                                  1),
-	                              .buttons = any_array_create_from_raw((any[]){}, 0),
+	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(hue_saturation_value_node_def);
@@ -2434,7 +2434,7 @@ fun hue_sat(col: float3, shift: float4): float3 { \
 	                              .y      = 0,
 	                              .color  = 0xff62676d,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Vector"),
@@ -2448,7 +2448,7 @@ fun hue_sat(col: float3, shift: float4): float3 { \
 	                                  },
 	                                  1),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("X"),
@@ -2481,7 +2481,7 @@ fun hue_sat(col: float3, shift: float4): float3 { \
 	                                                                       .display       = 0}),
 	                                  },
 	                                  3),
-	                              .buttons = any_array_create_from_raw((any[]){}, 0),
+	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(separate_xyz_node_def);
@@ -2562,7 +2562,7 @@ fun hue_sat(col: float3, shift: float4): float3 { \
 	                                                      .y      = 0,
 	                                                      .color  = 0xff62676d,
 	                                                      .inputs = any_array_create_from_raw(
-                                                   (any[]){
+                                                   (void *[]){
                                                        GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                               .node_id       = 0,
 	                                                                                               .name          = _tr("Value"),
@@ -2586,7 +2586,7 @@ fun hue_sat(col: float3, shift: float4): float3 { \
                                                    },
                                                    2),
 	                                                      .outputs = any_array_create_from_raw(
-                                                   (any[]){
+                                                   (void *[]){
                                                        GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                               .node_id       = 0,
 	                                                                                               .name          = _tr("Value"),
@@ -2600,7 +2600,7 @@ fun hue_sat(col: float3, shift: float4): float3 { \
                                                    },
                                                    1),
 	                                                      .buttons = any_array_create_from_raw(
-                                                   (any[]){
+                                                   (void *[]){
                                                        GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("operation"),
 	                                                                                               .type          = "ENUM",
 	                                                                                               .output        = 0,
@@ -2631,9 +2631,9 @@ fun hue_sat(col: float3, shift: float4): float3 { \
 	                                              .x       = 0,
 	                                              .y       = 0,
 	                                              .color   = 0xffb34f5a,
-	                                              .inputs  = any_array_create_from_raw((any[]){}, 0),
+	                                              .inputs  = any_array_create_from_raw((void *[]){}, 0),
 	                                              .outputs = any_array_create_from_raw(
-	                                                  (any[]){
+	                                                  (void *[]){
 	                                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                       .node_id       = 0,
 	                                                                                       .name          = _tr("Position"),
@@ -2726,7 +2726,7 @@ fun hue_sat(col: float3, shift: float4): float3 { \
 	                                                                                       .display       = 0}),
 	                                                  },
 	                                                  9),
-	                                              .buttons = any_array_create_from_raw((any[]){}, 0),
+	                                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                                              .width   = 0,
 	                                              .flags   = 0});
 	gc_root(geometry_node_def);
@@ -2773,7 +2773,7 @@ fun hue_sat(col: float3, shift: float4): float3 { \
 	                                                            .y      = 0,
 	                                                            .color  = 0xff448c6d,
 	                                                            .inputs = any_array_create_from_raw(
-                                                       (any[]){
+                                                       (void *[]){
                                                            GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                                     .node_id       = 0,
 	                                                                                                     .name          = _tr("Factor"),
@@ -2807,7 +2807,7 @@ fun hue_sat(col: float3, shift: float4): float3 { \
                                                        },
                                                        3),
 	                                                            .outputs = any_array_create_from_raw(
-                                                       (any[]){
+                                                       (void *[]){
                                                            GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                                     .node_id       = 0,
 	                                                                                                     .name          = _tr("Color"),
@@ -2821,7 +2821,7 @@ fun hue_sat(col: float3, shift: float4): float3 { \
                                                        },
                                                        1),
 	                                                            .buttons = any_array_create_from_raw(
-                                                       (any[]){
+                                                       (void *[]){
                                                            GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("blend_type"),
 	                                                                                                     .type          = "ENUM",
 	                                                                                                     .output        = 0,
@@ -2853,7 +2853,7 @@ fun hue_sat(col: float3, shift: float4): float3 { \
 	                                              .y      = 0,
 	                                              .color  = 0xff448c6d,
 	                                              .inputs = any_array_create_from_raw(
-	                                                  (any[]){
+	                                                  (void *[]){
 	                                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                       .node_id       = 0,
 	                                                                                       .name          = _tr("Strength"),
@@ -2877,7 +2877,7 @@ fun hue_sat(col: float3, shift: float4): float3 { \
 	                                                  },
 	                                                  2),
 	                                              .outputs = any_array_create_from_raw(
-	                                                  (any[]){
+	                                                  (void *[]){
 	                                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                       .node_id       = 0,
 	                                                                                       .name          = _tr("Color"),
@@ -2890,7 +2890,7 @@ fun hue_sat(col: float3, shift: float4): float3 { \
 	                                                                                       .display       = 0}),
 	                                                  },
 	                                                  1),
-	                                              .buttons = any_array_create_from_raw((any[]){}, 0),
+	                                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                                              .width   = 0,
 	                                              .flags   = 0});
 	gc_root(quantize_node_def);
@@ -2901,9 +2901,9 @@ fun hue_sat(col: float3, shift: float4): float3 { \
 	                                           .x       = 0,
 	                                           .y       = 0,
 	                                           .color   = 0xff4982a0,
-	                                           .inputs  = any_array_create_from_raw((any[]){}, 0),
+	                                           .inputs  = any_array_create_from_raw((void *[]){}, 0),
 	                                           .outputs = any_array_create_from_raw(
-	                                               (any[]){
+	                                               (void *[]){
 	                                                   GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                    .node_id       = 0,
 	                                                                                    .name          = _tr("Base Color"),
@@ -2997,7 +2997,7 @@ fun hue_sat(col: float3, shift: float4): float3 { \
 	                                               },
 	                                               9),
 	                                           .buttons = any_array_create_from_raw(
-	                                               (any[]){
+	                                               (void *[]){
 	                                                   GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Layer"),
 	                                                                                    .type          = "ENUM",
 	                                                                                    .output        = -1,
@@ -3020,7 +3020,7 @@ fun hue_sat(col: float3, shift: float4): float3 { \
 	                                               .y      = 0,
 	                                               .color  = 0xff62676d,
 	                                               .inputs = any_array_create_from_raw(
-	                                                   (any[]){
+	                                                   (void *[]){
 	                                                       GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                        .node_id       = 0,
 	                                                                                        .name          = _tr("Value"),
@@ -3074,7 +3074,7 @@ fun hue_sat(col: float3, shift: float4): float3 { \
 	                                                   },
 	                                                   5),
 	                                               .outputs = any_array_create_from_raw(
-	                                                   (any[]){
+	                                                   (void *[]){
 	                                                       GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                        .node_id       = 0,
 	                                                                                        .name          = _tr("Value"),
@@ -3088,7 +3088,7 @@ fun hue_sat(col: float3, shift: float4): float3 { \
 	                                                   },
 	                                                   1),
 	                                               .buttons = any_array_create_from_raw(
-	                                                   (any[]){
+	                                                   (void *[]){
 	                                                       GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Clamp"),
 	                                                                                        .type          = "BOOL",
 	                                                                                        .output        = 0,
@@ -3142,7 +3142,7 @@ fun tex_voronoi(x: float3): float4 { \
 	                              .y      = 0,
 	                              .color  = 0xff4982a0,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Vector"),
@@ -3166,7 +3166,7 @@ fun tex_voronoi(x: float3): float4 { \
 	                                  },
 	                                  2),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Color"),
@@ -3190,7 +3190,7 @@ fun tex_voronoi(x: float3): float4 { \
 	                                  },
 	                                  2),
 	                              .buttons = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("coloring"),
 	                                                                       .type          = "ENUM",
 	                                                                       .output        = 0,
@@ -3213,7 +3213,7 @@ fun tex_voronoi(x: float3): float4 { \
 	                                                .y      = 0,
 	                                                .color  = 0xff62676d,
 	                                                .inputs = any_array_create_from_raw(
-	                                                    (any[]){
+	                                                    (void *[]){
 	                                                        GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                         .node_id       = 0,
 	                                                                                         .name          = _tr("Factor"),
@@ -3227,7 +3227,7 @@ fun tex_voronoi(x: float3): float4 { \
 	                                                    },
 	                                                    1),
 	                                                .outputs = any_array_create_from_raw(
-	                                                    (any[]){
+	                                                    (void *[]){
 	                                                        GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                         .node_id       = 0,
 	                                                                                         .name          = _tr("Color"),
@@ -3251,7 +3251,7 @@ fun tex_voronoi(x: float3): float4 { \
 	                                                    },
 	                                                    2),
 	                                                .buttons = any_array_create_from_raw(
-	                                                    (any[]){
+	                                                    (void *[]){
 	                                                        GC_ALLOC_INIT(ui_node_button_t, {.name          = "nodes_material_color_ramp_button",
 	                                                                                         .type          = "CUSTOM",
 	                                                                                         .output        = 0,
@@ -3273,9 +3273,9 @@ fun tex_voronoi(x: float3): float4 { \
 	                                            .x       = 0,
 	                                            .y       = 0,
 	                                            .color   = 0xff4982a0,
-	                                            .inputs  = any_array_create_from_raw((any[]){}, 0),
+	                                            .inputs  = any_array_create_from_raw((void *[]){}, 0),
 	                                            .outputs = any_array_create_from_raw(
-	                                                (any[]){
+	                                                (void *[]){
 	                                                    GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                     .node_id       = 0,
 	                                                                                     .name          = _tr("Base Color"),
@@ -3368,7 +3368,7 @@ fun tex_voronoi(x: float3): float4 { \
 	                                                                                     .display       = 0}),
 	                                                },
 	                                                9),
-	                                            .buttons = any_array_create_from_raw((any[]){}, 0),
+	                                            .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                                            .width   = 0,
 	                                            .flags   = 0});
 	gc_root(picker_node_def);
@@ -3381,7 +3381,7 @@ fun tex_voronoi(x: float3): float4 { \
 	                              .y      = 0,
 	                              .color  = 0xffb34f5a,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Blend"),
@@ -3405,7 +3405,7 @@ fun tex_voronoi(x: float3): float4 { \
 	                                  },
 	                                  2),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Fresnel"),
@@ -3428,7 +3428,7 @@ fun tex_voronoi(x: float3): float4 { \
 	                                                                       .display       = 0}),
 	                                  },
 	                                  2),
-	                              .buttons = any_array_create_from_raw((any[]){}, 0),
+	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(layer_weight_node_def);
@@ -3441,7 +3441,7 @@ fun tex_voronoi(x: float3): float4 { \
 	                              .y      = 0,
 	                              .color  = 0xff448c6d,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Color"),
@@ -3483,7 +3483,7 @@ fun tex_voronoi(x: float3): float4 { \
 	                                  },
 	                                  5),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Color"),
@@ -3492,7 +3492,7 @@ fun tex_voronoi(x: float3): float4 { \
 	                                                                       .default_value = f32_array_create_xyzw(0.8, 0.8, 0.8, 1.0)}),
 	                                  },
 	                                  1),
-	                              .buttons = any_array_create_from_raw((any[]){}, 0)});
+	                              .buttons = any_array_create_from_raw((void *[]){}, 0)});
 	gc_root(replace_color_node_def);
 	gc_unroot(bump_node_def);
 	bump_node_def = GC_ALLOC_INIT(ui_node_t, {.id     = 0,
@@ -3502,7 +3502,7 @@ fun tex_voronoi(x: float3): float4 { \
 	                                          .y      = 0,
 	                                          .color  = 0xff522c99,
 	                                          .inputs = any_array_create_from_raw(
-	                                              (any[]){
+	                                              (void *[]){
 	                                                  GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                   .node_id       = 0,
 	                                                                                   .name          = _tr("Strength"),
@@ -3546,7 +3546,7 @@ fun tex_voronoi(x: float3): float4 { \
 	                                              },
 	                                              4),
 	                                          .outputs = any_array_create_from_raw(
-	                                              (any[]){
+	                                              (void *[]){
 	                                                  GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                   .node_id       = 0,
 	                                                                                   .name          = _tr("Normal Map"),
@@ -3559,7 +3559,7 @@ fun tex_voronoi(x: float3): float4 { \
 	                                                                                   .display       = 0}),
 	                                              },
 	                                              1),
-	                                          .buttons = any_array_create_from_raw((any[]){}, 0),
+	                                          .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                                          .width   = 0,
 	                                          .flags   = 0});
 	gc_root(bump_node_def);
@@ -3640,7 +3640,7 @@ fun tex_gabor(co: float3, scale: float, frequency: float, anisotropy: float, ori
 	                              .y      = 0,
 	                              .color  = 0xff4982a0,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Vector"),
@@ -3694,7 +3694,7 @@ fun tex_gabor(co: float3, scale: float, frequency: float, anisotropy: float, ori
 	                                  },
 	                                  5),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Value"),
@@ -3728,7 +3728,7 @@ fun tex_gabor(co: float3, scale: float, frequency: float, anisotropy: float, ori
 	                                  },
 	                                  3),
 	                              .buttons = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Dimensions"),
 	                                                                       .type          = "ENUM",
 	                                                                       .output        = -1,
@@ -3757,7 +3757,7 @@ fun tex_gabor(co: float3, scale: float, frequency: float, anisotropy: float, ori
 	                              .y      = 0,
 	                              .color  = 0xff522c99,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Normal Map 1"),
@@ -3781,7 +3781,7 @@ fun tex_gabor(co: float3, scale: float, frequency: float, anisotropy: float, ori
 	                                  },
 	                                  2),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Normal Map"),
@@ -3795,7 +3795,7 @@ fun tex_gabor(co: float3, scale: float, frequency: float, anisotropy: float, ori
 	                                  },
 	                                  1),
 	                              .buttons = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("blend_type"),
 	                                                                       .type          = "ENUM",
 	                                                                       .output        = 0,
@@ -3818,9 +3818,9 @@ fun tex_gabor(co: float3, scale: float, frequency: float, anisotropy: float, ori
 	                              .x       = 0,
 	                              .y       = 0,
 	                              .color   = 0xffb34f5a,
-	                              .inputs  = any_array_create_from_raw((any[]){}, 0),
+	                              .inputs  = any_array_create_from_raw((void *[]){}, 0),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("View Vector"),
@@ -3853,7 +3853,7 @@ fun tex_gabor(co: float3, scale: float, frequency: float, anisotropy: float, ori
 	                                                                       .display       = 0}),
 	                                  },
 	                                  3),
-	                              .buttons = any_array_create_from_raw((any[]){}, 0),
+	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(camera_data_node_def);
@@ -3864,9 +3864,9 @@ fun tex_gabor(co: float3, scale: float, frequency: float, anisotropy: float, ori
 	                                            .x       = 0,
 	                                            .y       = 0,
 	                                            .color   = 0xffb34f5a,
-	                                            .inputs  = any_array_create_from_raw((any[]){}, 0),
+	                                            .inputs  = any_array_create_from_raw((void *[]){}, 0),
 	                                            .outputs = any_array_create_from_raw(
-	                                                (any[]){
+	                                                (void *[]){
 	                                                    GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                     .node_id       = 0,
 	                                                                                     .name          = _tr("Value"),
@@ -3880,7 +3880,7 @@ fun tex_gabor(co: float3, scale: float, frequency: float, anisotropy: float, ori
 	                                                },
 	                                                1),
 	                                            .buttons = any_array_create_from_raw(
-	                                                (any[]){
+	                                                (void *[]){
 	                                                    GC_ALLOC_INIT(ui_node_button_t, {.name          = " ",
 	                                                                                     .type          = "STRING",
 	                                                                                     .output        = -1,
@@ -3904,7 +3904,7 @@ fun tex_gabor(co: float3, scale: float, frequency: float, anisotropy: float, ori
 	                              .y      = 0,
 	                              .color  = 0xff62676d,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("X"),
@@ -3938,7 +3938,7 @@ fun tex_gabor(co: float3, scale: float, frequency: float, anisotropy: float, ori
 	                                  },
 	                                  3),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Vector"),
@@ -3951,7 +3951,7 @@ fun tex_gabor(co: float3, scale: float, frequency: float, anisotropy: float, ori
 	                                                                       .display       = 0}),
 	                                  },
 	                                  1),
-	                              .buttons = any_array_create_from_raw((any[]){}, 0),
+	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(combine_xyz_node_def);
@@ -3985,7 +3985,7 @@ fun tex_noise(p: float3): float { \
 	                                                   .y      = 0,
 	                                                   .color  = 0xff4982a0,
 	                                                   .inputs = any_array_create_from_raw(
-	                                                       (any[]){
+	                                                       (void *[]){
 	                                                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                            .node_id       = 0,
 	                                                                                            .name          = _tr("Vector"),
@@ -4009,7 +4009,7 @@ fun tex_noise(p: float3): float { \
 	                                                       },
 	                                                       2),
 	                                                   .outputs = any_array_create_from_raw(
-	                                                       (any[]){
+	                                                       (void *[]){
 	                                                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                            .node_id       = 0,
 	                                                                                            .name          = _tr("Color"),
@@ -4032,7 +4032,7 @@ fun tex_noise(p: float3): float { \
 	                                                                                            .display       = 0}),
 	                                                       },
 	                                                       2),
-	                                                   .buttons = any_array_create_from_raw((any[]){}, 0),
+	                                                   .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                                                   .width   = 0,
 	                                                   .flags   = 0});
 	gc_root(noise_texture_node_def);
@@ -4052,7 +4052,7 @@ fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
 	                              .y      = 0,
 	                              .color  = 0xff448c6d,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Color"),
@@ -4086,7 +4086,7 @@ fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
 	                                  },
 	                                  3),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Color"),
@@ -4099,7 +4099,7 @@ fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
 	                                                                       .display       = 0}),
 	                                  },
 	                                  1),
-	                              .buttons = any_array_create_from_raw((any[]){}, 0),
+	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(brightness_contrast_node_def);
@@ -4112,7 +4112,7 @@ fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
 	                              .y      = 0,
 	                              .color  = 0xff62676d,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Color"),
@@ -4156,7 +4156,7 @@ fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
 	                                  },
 	                                  4),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Mask"),
@@ -4169,7 +4169,7 @@ fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
 	                                                                       .display       = 0}),
 	                                  },
 	                                  1),
-	                              .buttons = any_array_create_from_raw((any[]){}, 0),
+	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(color_mask_node_def);
@@ -4183,7 +4183,7 @@ fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
 	     .y      = 0,
 	     .color  = 0xff522c99,
 	     .inputs = any_array_create_from_raw(
-	         (any[]){
+	         (void *[]){
 	             GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                              .node_id       = 0,
 	                                              .name          = _tr("Factor"),
@@ -4207,7 +4207,7 @@ fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
 	         },
 	         2),
 	     .outputs = any_array_create_from_raw(
-	         (any[]){
+	         (void *[]){
 	             GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                              .node_id       = 0,
 	                                              .name          = _tr("Vector"),
@@ -4221,7 +4221,7 @@ fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
 	         },
 	         1),
 	     .buttons = any_array_create_from_raw(
-	         (any[]){
+	         (void *[]){
 	             GC_ALLOC_INIT(ui_node_button_t, {.name          = "nodes_material_vector_curves_button",
 	                                              .type          = "CUSTOM",
 	                                              .output        = 0,
@@ -4243,9 +4243,9 @@ fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
 	                                                .x       = 0,
 	                                                .y       = 0,
 	                                                .color   = 0xff4982a0,
-	                                                .inputs  = any_array_create_from_raw((any[]){}, 0),
+	                                                .inputs  = any_array_create_from_raw((void *[]){}, 0),
 	                                                .outputs = any_array_create_from_raw(
-	                                                    (any[]){
+	                                                    (void *[]){
 	                                                        GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                         .node_id       = 0,
 	                                                                                         .name          = _tr("Value"),
@@ -4259,7 +4259,7 @@ fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
 	                                                    },
 	                                                    1),
 	                                                .buttons = any_array_create_from_raw(
-	                                                    (any[]){
+	                                                    (void *[]){
 	                                                        GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Layer"),
 	                                                                                         .type          = "ENUM",
 	                                                                                         .output        = -1,
@@ -4281,9 +4281,9 @@ fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
 	                                                    .x       = 0,
 	                                                    .y       = 0,
 	                                                    .color   = 0xff4982a0,
-	                                                    .inputs  = any_array_create_from_raw((any[]){}, 0),
+	                                                    .inputs  = any_array_create_from_raw((void *[]){}, 0),
 	                                                    .outputs = any_array_create_from_raw(
-	                                                        (any[]){
+	                                                        (void *[]){
 	                                                            GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                             .node_id       = 0,
 	                                                                                             .name          = _tr("Color"),
@@ -4296,7 +4296,7 @@ fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
 	                                                                                             .display       = 0}),
 	                                                        },
 	                                                        1),
-	                                                    .buttons = any_array_create_from_raw((any[]){}, 0),
+	                                                    .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                                                    .width   = 0,
 	                                                    .flags   = 0});
 	gc_root(camera_texture_node_def);
@@ -4307,9 +4307,9 @@ fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
 	                                           .x       = 0,
 	                                           .y       = 0,
 	                                           .color   = 0xffb34f5a,
-	                                           .inputs  = any_array_create_from_raw((any[]){}, 0),
+	                                           .inputs  = any_array_create_from_raw((void *[]){}, 0),
 	                                           .outputs = any_array_create_from_raw(
-	                                               (any[]){
+	                                               (void *[]){
 	                                                   GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                    .node_id       = 0,
 	                                                                                    .name          = _tr("Value"),
@@ -4323,7 +4323,7 @@ fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
 	                                               },
 	                                               1),
 	                                           .buttons = any_array_create_from_raw(
-	                                               (any[]){
+	                                               (void *[]){
 	                                                   GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("default_value"),
 	                                                                                    .type          = "VALUE",
 	                                                                                    .output        = 0,
@@ -4346,9 +4346,9 @@ fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
 	                              .x       = 0,
 	                              .y       = 0,
 	                              .color   = 0xffb34f5a,
-	                              .inputs  = any_array_create_from_raw((any[]){}, 0),
+	                              .inputs  = any_array_create_from_raw((void *[]){}, 0),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Generated"),
@@ -4421,7 +4421,7 @@ fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
 	                                                                       .display       = 0}),
 	                                  },
 	                                  7),
-	                              .buttons = any_array_create_from_raw((any[]){}, 0)});
+	                              .buttons = any_array_create_from_raw((void *[]){}, 0)});
 	gc_root(texture_coordinate_node_def);
 	gc_unroot(group_node_def);
 	group_node_def = GC_ALLOC_INIT(ui_node_t, {.id      = 0,
@@ -4430,10 +4430,10 @@ fun brightcontrast(col: float3, bright: float, contr: float): float3 { \
 	                                           .x       = 0,
 	                                           .y       = 0,
 	                                           .color   = 0xffb34f5a,
-	                                           .inputs  = any_array_create_from_raw((any[]){}, 0),
-	                                           .outputs = any_array_create_from_raw((any[]){}, 0),
+	                                           .inputs  = any_array_create_from_raw((void *[]){}, 0),
+	                                           .outputs = any_array_create_from_raw((void *[]){}, 0),
 	                                           .buttons = any_array_create_from_raw(
-	                                               (any[]){
+	                                               (void *[]){
 	                                                   GC_ALLOC_INIT(ui_node_button_t, {.name          = "nodes_material_new_group_button",
 	                                                                                    .type          = "CUSTOM",
 	                                                                                    .output        = -1,
@@ -4486,7 +4486,7 @@ fun tex_brick_f(p: float3): float { \
 	                              .y      = 0,
 	                              .color  = 0xff4982a0,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Vector"),
@@ -4540,7 +4540,7 @@ fun tex_brick_f(p: float3): float { \
 	                                  },
 	                                  5),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Color"),
@@ -4563,7 +4563,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                                       .display       = 0}),
 	                                  },
 	                                  2),
-	                              .buttons = any_array_create_from_raw((any[]){}, 0),
+	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(brick_texture_node_def);
@@ -4574,9 +4574,9 @@ fun tex_brick_f(p: float3): float { \
 	                                         .x       = 0,
 	                                         .y       = 0,
 	                                         .color   = 0xffb34f5a,
-	                                         .inputs  = any_array_create_from_raw((any[]){}, 0),
+	                                         .inputs  = any_array_create_from_raw((void *[]){}, 0),
 	                                         .outputs = any_array_create_from_raw(
-	                                             (any[]){
+	                                             (void *[]){
 	                                                 GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                  .node_id       = 0,
 	                                                                                  .name          = _tr("Color"),
@@ -4590,7 +4590,7 @@ fun tex_brick_f(p: float3): float { \
 	                                             },
 	                                             1),
 	                                         .buttons = any_array_create_from_raw(
-	                                             (any[]){
+	                                             (void *[]){
 	                                                 GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("default_value"),
 	                                                                                  .type          = "RGBA",
 	                                                                                  .output        = 0,
@@ -4613,7 +4613,7 @@ fun tex_brick_f(p: float3): float { \
 	                                               .y      = 0,
 	                                               .color  = 0xff62676d,
 	                                               .inputs = any_array_create_from_raw(
-	                                                   (any[]){
+	                                                   (void *[]){
 	                                                       GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                        .node_id       = 0,
 	                                                                                        .name          = _tr("Color"),
@@ -4627,7 +4627,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                   },
 	                                                   1),
 	                                               .outputs = any_array_create_from_raw(
-	                                                   (any[]){
+	                                                   (void *[]){
 	                                                       GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                        .node_id       = 0,
 	                                                                                        .name          = _tr("Val"),
@@ -4640,7 +4640,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                                                        .display       = 0}),
 	                                                   },
 	                                                   1),
-	                                               .buttons = any_array_create_from_raw((any[]){}, 0),
+	                                               .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                                               .width   = 0,
 	                                               .flags   = 0});
 	gc_root(rgb_to_bw_node_def);
@@ -4651,9 +4651,9 @@ fun tex_brick_f(p: float3): float { \
 	                                               .x       = 0,
 	                                               .y       = 0,
 	                                               .color   = 0xffb34f5a,
-	                                               .inputs  = any_array_create_from_raw((any[]){}, 0),
+	                                               .inputs  = any_array_create_from_raw((void *[]){}, 0),
 	                                               .outputs = any_array_create_from_raw(
-	                                                   (any[]){
+	                                                   (void *[]){
 	                                                       GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                        .node_id       = 0,
 	                                                                                        .name          = _tr("Color"),
@@ -4697,7 +4697,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                   },
 	                                                   4),
 	                                               .buttons = any_array_create_from_raw(
-	                                                   (any[]){
+	                                                   (void *[]){
 	                                                       GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("Name"),
 	                                                                                        .type          = "STRING",
 	                                                                                        .output        = -1,
@@ -4719,9 +4719,9 @@ fun tex_brick_f(p: float3): float { \
 	                                            .x       = 0,
 	                                            .y       = 0,
 	                                            .color   = 0xffb34f5a,
-	                                            .inputs  = any_array_create_from_raw((any[]){}, 0),
+	                                            .inputs  = any_array_create_from_raw((void *[]){}, 0),
 	                                            .outputs = any_array_create_from_raw(
-	                                                (any[]){
+	                                                (void *[]){
 	                                                    GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                     .node_id       = 0,
 	                                                                                     .name          = _tr("Value"),
@@ -4735,7 +4735,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                },
 	                                                1),
 	                                            .buttons = any_array_create_from_raw(
-	                                                (any[]){
+	                                                (void *[]){
 	                                                    GC_ALLOC_INIT(ui_node_button_t, {.name          = " ",
 	                                                                                     .type          = "STRING",
 	                                                                                     .output        = -1,
@@ -4758,7 +4758,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                   .y      = 0,
 	                                                   .color  = 0xff4982a0,
 	                                                   .inputs = any_array_create_from_raw(
-	                                                       (any[]){
+	                                                       (void *[]){
 	                                                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                            .node_id       = 0,
 	                                                                                            .name          = _tr("Color"),
@@ -4772,7 +4772,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                       },
 	                                                       1),
 	                                                   .outputs = any_array_create_from_raw(
-	                                                       (any[]){
+	                                                       (void *[]){
 	                                                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                            .node_id       = 0,
 	                                                                                            .name          = _tr("Color"),
@@ -4786,7 +4786,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                       },
 	                                                       1),
 	                                                   .buttons = any_array_create_from_raw(
-	                                                       (any[]){
+	                                                       (void *[]){
 	                                                           GC_ALLOC_INIT(ui_node_button_t, {.name          = "upscale_image_node_button",
 	                                                                                            .type          = "CUSTOM",
 	                                                                                            .output        = -1,
@@ -4816,7 +4816,7 @@ fun tex_brick_f(p: float3): float { \
 	                              .y      = 0,
 	                              .color  = 0xff4982a0,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Color"),
@@ -4830,7 +4830,7 @@ fun tex_brick_f(p: float3): float { \
 	                                  },
 	                                  1),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Base Color"),
@@ -4894,7 +4894,7 @@ fun tex_brick_f(p: float3): float { \
 	                                  },
 	                                  6),
 	                              .buttons = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = "image_to_pbr_node_button",
 	                                                                       .type          = "CUSTOM",
 	                                                                       .output        = -1,
@@ -4917,7 +4917,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                   .y      = 0,
 	                                                   .color  = 0xff4982a0,
 	                                                   .inputs = any_array_create_from_raw(
-	                                                       (any[]){
+	                                                       (void *[]){
 	                                                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                            .node_id       = 0,
 	                                                                                            .name          = _tr("Color"),
@@ -4941,7 +4941,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                       },
 	                                                       2),
 	                                                   .outputs = any_array_create_from_raw(
-	                                                       (any[]){
+	                                                       (void *[]){
 	                                                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                            .node_id       = 0,
 	                                                                                            .name          = _tr("Color"),
@@ -4955,7 +4955,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                       },
 	                                                       1),
 	                                                   .buttons = any_array_create_from_raw(
-	                                                       (any[]){
+	                                                       (void *[]){
 	                                                           GC_ALLOC_INIT(ui_node_button_t, {.name          = "inpaint_image_node_button",
 	                                                                                            .type          = "CUSTOM",
 	                                                                                            .output        = -1,
@@ -4977,9 +4977,9 @@ fun tex_brick_f(p: float3): float { \
 	                                                   .x       = 0,
 	                                                   .y       = 0,
 	                                                   .color   = 0xff4982a0,
-	                                                   .inputs  = any_array_create_from_raw((any[]){}, 0),
+	                                                   .inputs  = any_array_create_from_raw((void *[]){}, 0),
 	                                                   .outputs = any_array_create_from_raw(
-	                                                       (any[]){
+	                                                       (void *[]){
 	                                                           GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                            .node_id       = 0,
 	                                                                                            .name          = _tr("Color"),
@@ -4993,7 +4993,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                       },
 	                                                       1),
 	                                                   .buttons = any_array_create_from_raw(
-	                                                       (any[]){
+	                                                       (void *[]){
 	                                                           GC_ALLOC_INIT(ui_node_button_t, {.name          = "text_to_image_node_button",
 	                                                                                            .type          = "CUSTOM",
 	                                                                                            .output        = -1,
@@ -5026,7 +5026,7 @@ fun tex_brick_f(p: float3): float { \
 	                              .y      = 0,
 	                              .color  = 0xff4982a0,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Color"),
@@ -5040,7 +5040,7 @@ fun tex_brick_f(p: float3): float { \
 	                                  },
 	                                  1),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Color"),
@@ -5054,7 +5054,7 @@ fun tex_brick_f(p: float3): float { \
 	                                  },
 	                                  1),
 	                              .buttons = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = "outpaint_image_node_button",
 	                                                                       .type          = "CUSTOM",
 	                                                                       .output        = -1,
@@ -5082,7 +5082,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                .y      = 0,
 	                                                .color  = 0xff4982a0,
 	                                                .inputs = any_array_create_from_raw(
-	                                                    (any[]){
+	                                                    (void *[]){
 	                                                        GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                         .node_id       = 0,
 	                                                                                         .name          = _tr("Color"),
@@ -5096,7 +5096,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                    },
 	                                                    1),
 	                                                .outputs = any_array_create_from_raw(
-	                                                    (any[]){
+	                                                    (void *[]){
 	                                                        GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                         .node_id       = 0,
 	                                                                                         .name          = _tr("Color"),
@@ -5110,7 +5110,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                    },
 	                                                    1),
 	                                                .buttons = any_array_create_from_raw(
-	                                                    (any[]){
+	                                                    (void *[]){
 	                                                        GC_ALLOC_INIT(ui_node_button_t, {.name          = "edit_image_node_button",
 	                                                                                         .type          = "CUSTOM",
 	                                                                                         .output        = -1,
@@ -5133,7 +5133,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                .y      = 0,
 	                                                .color  = 0xff4982a0,
 	                                                .inputs = any_array_create_from_raw(
-	                                                    (any[]){
+	                                                    (void *[]){
 	                                                        GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                         .node_id       = 0,
 	                                                                                         .name          = _tr("Color"),
@@ -5147,7 +5147,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                    },
 	                                                    1),
 	                                                .outputs = any_array_create_from_raw(
-	                                                    (any[]){
+	                                                    (void *[]){
 	                                                        GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                         .node_id       = 0,
 	                                                                                         .name          = _tr("Color"),
@@ -5161,7 +5161,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                    },
 	                                                    1),
 	                                                .buttons = any_array_create_from_raw(
-	                                                    (any[]){
+	                                                    (void *[]){
 	                                                        GC_ALLOC_INIT(ui_node_button_t, {.name          = "tile_image_node_button",
 	                                                                                         .type          = "CUSTOM",
 	                                                                                         .output        = -1,
@@ -5185,7 +5185,7 @@ fun tex_brick_f(p: float3): float { \
 	                              .y      = 0,
 	                              .color  = 0xff4982a0,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Color"),
@@ -5199,7 +5199,7 @@ fun tex_brick_f(p: float3): float { \
 	                                  },
 	                                  1),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Mesh"),
@@ -5213,7 +5213,7 @@ fun tex_brick_f(p: float3): float { \
 	                                  },
 	                                  1),
 	                              .buttons = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = "image_to_3d_mesh_node_button",
 	                                                                       .type          = "CUSTOM",
 	                                                                       .output        = -1,
@@ -5236,7 +5236,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                .y      = 0,
 	                                                .color  = 0xff4982a0,
 	                                                .inputs = any_array_create_from_raw(
-	                                                    (any[]){
+	                                                    (void *[]){
 	                                                        GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                         .node_id       = 0,
 	                                                                                         .name          = _tr("Color"),
@@ -5250,7 +5250,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                    },
 	                                                    1),
 	                                                .outputs = any_array_create_from_raw(
-	                                                    (any[]){
+	                                                    (void *[]){
 	                                                        GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                         .node_id       = 0,
 	                                                                                         .name          = _tr("Color"),
@@ -5264,7 +5264,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                    },
 	                                                    1),
 	                                                .buttons = any_array_create_from_raw(
-	                                                    (any[]){
+	                                                    (void *[]){
 	                                                        GC_ALLOC_INIT(ui_node_button_t, {.name          = "vary_image_node_button",
 	                                                                                         .type          = "CUSTOM",
 	                                                                                         .output        = -1,
@@ -5288,7 +5288,7 @@ fun tex_brick_f(p: float3): float { \
 	                              .y      = 0,
 	                              .color  = 0xff4982a0,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Color"),
@@ -5302,7 +5302,7 @@ fun tex_brick_f(p: float3): float { \
 	                                  },
 	                                  1),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Normal Map"),
@@ -5316,7 +5316,7 @@ fun tex_brick_f(p: float3): float { \
 	                                  },
 	                                  1),
 	                              .buttons = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = "image_to_normal_map_node_button",
 	                                                                       .type          = "CUSTOM",
 	                                                                       .output        = -1,
@@ -5340,7 +5340,7 @@ fun tex_brick_f(p: float3): float { \
 	                              .y      = 0,
 	                              .color  = 0xff4982a0,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Color"),
@@ -5354,7 +5354,7 @@ fun tex_brick_f(p: float3): float { \
 	                                  },
 	                                  1),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Depth"),
@@ -5368,7 +5368,7 @@ fun tex_brick_f(p: float3): float { \
 	                                  },
 	                                  1),
 	                              .buttons = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = "image_to_depth_node_button",
 	                                                                       .type          = "CUSTOM",
 	                                                                       .output        = -1,
@@ -5392,7 +5392,7 @@ fun tex_brick_f(p: float3): float { \
 	                                               .y      = 0,
 	                                               .color  = 0xff4982a0,
 	                                               .inputs = any_array_create_from_raw(
-	                                                   (any[]){
+	                                                   (void *[]){
 	                                                       GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                        .node_id       = 0,
 	                                                                                        .name          = _tr("Vector"),
@@ -5406,7 +5406,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                   },
 	                                                   1),
 	                                               .outputs = any_array_create_from_raw(
-	                                                   (any[]){
+	                                                   (void *[]){
 	                                                       GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                        .node_id       = 0,
 	                                                                                        .name          = _tr("Color"),
@@ -5430,7 +5430,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                   },
 	                                                   2),
 	                                               .buttons = any_array_create_from_raw(
-	                                                   (any[]){
+	                                                   (void *[]){
 	                                                       GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("file"),
 	                                                                                        .type          = "ENUM",
 	                                                                                        .output        = -1,
@@ -5463,7 +5463,7 @@ fun tex_brick_f(p: float3): float { \
 	                                            .y      = 0,
 	                                            .color  = 0xffb34f5a,
 	                                            .inputs = any_array_create_from_raw(
-	                                                (any[]){
+	                                                (void *[]){
 	                                                    GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                     .node_id       = 0,
 	                                                                                     .name          = _tr("Min"),
@@ -5487,7 +5487,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                },
 	                                                2),
 	                                            .outputs = any_array_create_from_raw(
-	                                                (any[]){
+	                                                (void *[]){
 	                                                    GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                     .node_id       = 0,
 	                                                                                     .name          = _tr("Value"),
@@ -5500,7 +5500,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                                                     .display       = 0}),
 	                                                },
 	                                                1),
-	                                            .buttons = any_array_create_from_raw((any[]){}, 0),
+	                                            .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                                            .width   = 0,
 	                                            .flags   = 0});
 	gc_root(random_node_def);
@@ -5521,7 +5521,7 @@ fun tex_brick_f(p: float3): float { \
 	                                           .y      = 0,
 	                                           .color  = 0xff4982a0,
 	                                           .inputs = any_array_create_from_raw(
-	                                               (any[]){
+	                                               (void *[]){
 	                                                   GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                    .node_id       = 0,
 	                                                                                    .name          = _tr("Lazy Radius"),
@@ -5545,7 +5545,7 @@ fun tex_brick_f(p: float3): float { \
 	                                               },
 	                                               2),
 	                                           .outputs = any_array_create_from_raw(
-	                                               (any[]){
+	                                               (void *[]){
 	                                                   GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                    .node_id       = 0,
 	                                                                                    .name          = _tr("Position"),
@@ -5558,7 +5558,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                                                    .display       = 0}),
 	                                               },
 	                                               1),
-	                                           .buttons = any_array_create_from_raw((any[]){}, 0),
+	                                           .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                                           .width   = 0,
 	                                           .flags   = 0});
 	gc_root(input_node_def);
@@ -5571,7 +5571,7 @@ fun tex_brick_f(p: float3): float { \
 	                              .y      = 0,
 	                              .color  = 0xff4982a0,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Value"),
@@ -5595,7 +5595,7 @@ fun tex_brick_f(p: float3): float { \
 	                                  },
 	                                  2),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Value"),
@@ -5609,7 +5609,7 @@ fun tex_brick_f(p: float3): float { \
 	                                  },
 	                                  1),
 	                              .buttons = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("operation"),
 	                                                                       .type          = "ENUM",
 	                                                                       .output        = 0,
@@ -5647,7 +5647,7 @@ fun tex_brick_f(p: float3): float { \
 	                              .y      = 0,
 	                              .color  = 0xff4982a0,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("X"),
@@ -5681,7 +5681,7 @@ fun tex_brick_f(p: float3): float { \
 	                                  },
 	                                  3),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Vector"),
@@ -5694,7 +5694,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                                       .display       = 0}),
 	                                  },
 	                                  1),
-	                              .buttons = any_array_create_from_raw((any[]){}, 0),
+	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(vector_node_def);
@@ -5705,9 +5705,9 @@ fun tex_brick_f(p: float3): float { \
 	                                          .x       = 0,
 	                                          .y       = 0,
 	                                          .color   = 0xff4982a0,
-	                                          .inputs  = any_array_create_from_raw((any[]){}, 0),
+	                                          .inputs  = any_array_create_from_raw((void *[]){}, 0),
 	                                          .outputs = any_array_create_from_raw(
-	                                              (any[]){
+	                                              (void *[]){
 	                                                  GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                   .node_id       = 0,
 	                                                                                   .name          = _tr("Time"),
@@ -5740,7 +5740,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                                                   .display       = 0}),
 	                                              },
 	                                              3),
-	                                          .buttons = any_array_create_from_raw((any[]){}, 0),
+	                                          .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                                          .width   = 0,
 	                                          .flags   = 0});
 	gc_root(time_node_def);
@@ -5753,7 +5753,7 @@ fun tex_brick_f(p: float3): float { \
 	                              .y      = 0,
 	                              .color  = 0xff4982a0,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Vector"),
@@ -5777,7 +5777,7 @@ fun tex_brick_f(p: float3): float { \
 	                                  },
 	                                  2),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Vector"),
@@ -5801,7 +5801,7 @@ fun tex_brick_f(p: float3): float { \
 	                                  },
 	                                  2),
 	                              .buttons = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_button_t, {.name          = _tr("operation"),
 	                                                                       .type          = "ENUM",
 	                                                                       .output        = 0,
@@ -5827,7 +5827,7 @@ fun tex_brick_f(p: float3): float { \
 	                                           .y      = 0,
 	                                           .color  = 0xffb34f5a,
 	                                           .inputs = any_array_create_from_raw(
-	                                               (any[]){
+	                                               (void *[]){
 	                                                   GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                    .node_id       = 0,
 	                                                                                    .name          = _tr("Value"),
@@ -5841,7 +5841,7 @@ fun tex_brick_f(p: float3): float { \
 	                                               },
 	                                               1),
 	                                           .outputs = any_array_create_from_raw(
-	                                               (any[]){
+	                                               (void *[]){
 	                                                   GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                                    .node_id       = 0,
 	                                                                                    .name          = _tr("Value"),
@@ -5854,7 +5854,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                                                    .display       = 0}),
 	                                               },
 	                                               1),
-	                                           .buttons = any_array_create_from_raw((any[]){}, 0),
+	                                           .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                                           .width   = 0,
 	                                           .flags   = 0});
 	gc_root(float_node_def);
@@ -5867,7 +5867,7 @@ fun tex_brick_f(p: float3): float { \
 	                              .y      = 0,
 	                              .color  = 0xff4982a0,
 	                              .inputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("Vector"),
@@ -5881,7 +5881,7 @@ fun tex_brick_f(p: float3): float { \
 	                                  },
 	                                  1),
 	                              .outputs = any_array_create_from_raw(
-	                                  (any[]){
+	                                  (void *[]){
 	                                      GC_ALLOC_INIT(ui_node_socket_t, {.id            = 0,
 	                                                                       .node_id       = 0,
 	                                                                       .name          = _tr("X"),
@@ -5914,7 +5914,7 @@ fun tex_brick_f(p: float3): float { \
 	                                                                       .display       = 0}),
 	                                  },
 	                                  3),
-	                              .buttons = any_array_create_from_raw((any[]){}, 0),
+	                              .buttons = any_array_create_from_raw((void *[]){}, 0),
 	                              .width   = 0,
 	                              .flags   = 0});
 	gc_root(separate_vector_node_def);

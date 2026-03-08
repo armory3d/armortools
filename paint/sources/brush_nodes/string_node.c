@@ -18,7 +18,7 @@ logic_node_value_t *string_node_get(string_node_t *self, i32 from) {
 	}
 }
 
-void string_node_set(string_node_t *self, any value) {
+void string_node_set(string_node_t *self, void * value) {
 	if (self->base->inputs->length > 0) {
 		logic_node_input_set(self->base->inputs->buffer[0], value);
 	}

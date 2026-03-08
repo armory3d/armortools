@@ -200,7 +200,7 @@ void tab_materials_draw_slots(bool mini) {
 	}
 }
 
-void tab_materials_draw_slots_119357(any _) {
+void tab_materials_draw_slots_119357(void * _) {
 	i32 i                 = _tab_materials_draw_slots;
 	context_raw->material = slot_material_create(project_materials->buffer[0]->data, NULL);
 	any_array_push(project_materials, context_raw->material);
@@ -306,7 +306,7 @@ void tab_materials_draw_slots_119244() {
 	}
 }
 
-void tab_materials_draw_slots_119149(any _) {
+void tab_materials_draw_slots_119149(void * _) {
 	layers_update_fill_layers();
 }
 
@@ -316,7 +316,7 @@ void tab_materials_button_new(char *text) {
 	}
 }
 
-void tab_materials_button_new_120110(any _) {
+void tab_materials_button_new_120110(void * _) {
 	context_raw->material = slot_material_create(project_materials->buffer[0]->data, NULL);
 	any_array_push(project_materials, context_raw->material);
 	tab_materials_update_material();
@@ -327,7 +327,7 @@ void tab_materials_update_material() {
 	ui_header_handle->redraws = 2;
 	ui_nodes_hwnd->redraws    = 2;
 	gc_unroot(ui_nodes_group_stack);
-	ui_nodes_group_stack = any_array_create_from_raw((any[]){}, 0);
+	ui_nodes_group_stack = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(ui_nodes_group_stack);
 	make_material_parse_paint_material(true);
 	util_render_make_material_preview();

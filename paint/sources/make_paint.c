@@ -5,7 +5,7 @@ bool make_paint_is_raytraced_bake() {
 string_t_array_t *make_paint_color_attachments() {
 	if (context_raw->tool == TOOL_TYPE_COLORID) {
 		string_t_array_t *res = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        "RGBA32",
 		    },
 		    1);
@@ -13,7 +13,7 @@ string_t_array_t *make_paint_color_attachments() {
 	}
 	if (context_raw->tool == TOOL_TYPE_PICKER && context_raw->pick_pos_nor_tex) {
 		string_t_array_t *res = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        "RGBA128",
 		        "RGBA128",
 		    },
@@ -22,7 +22,7 @@ string_t_array_t *make_paint_color_attachments() {
 	}
 	if (context_raw->tool == TOOL_TYPE_PICKER || context_raw->tool == TOOL_TYPE_MATERIAL) {
 		string_t_array_t *res = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        "RGBA32",
 		        "RGBA32",
 		        "RGBA32",
@@ -33,7 +33,7 @@ string_t_array_t *make_paint_color_attachments() {
 	}
 	if (context_raw->tool == TOOL_TYPE_BAKE && make_paint_is_raytraced_bake()) {
 		string_t_array_t *res = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        "RGBA64",
 		        "RGBA64",
 		    },
@@ -47,7 +47,7 @@ string_t_array_t *make_paint_color_attachments() {
 
 	if (format == GPU_TEXTURE_FORMAT_RGBA64) {
 		string_t_array_t *res = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        "RGBA64",
 		        "RGBA64",
 		        "RGBA64",
@@ -58,7 +58,7 @@ string_t_array_t *make_paint_color_attachments() {
 	}
 	if (format == GPU_TEXTURE_FORMAT_RGBA128) {
 		string_t_array_t *res = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        "RGBA128",
 		        "RGBA128",
 		        "RGBA128",
@@ -69,7 +69,7 @@ string_t_array_t *make_paint_color_attachments() {
 	}
 
 	string_t_array_t *res = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        "RGBA32",
 	        "RGBA32",
 	        "RGBA32",
@@ -90,7 +90,7 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 	                                                                     .compare_mode    = "always",
 	                                                                     .cull_mode       = "none",
 	                                                                     .vertex_elements = any_array_create_from_raw(
-                                                                   (any[]){
+                                                                   (void *[]){
                                                                        GC_ALLOC_INIT(vertex_element_t, {.name = "pos", .data = "short4norm"}),
                                                                        GC_ALLOC_INIT(vertex_element_t, {.name = "nor", .data = "short2norm"}),
                                                                        GC_ALLOC_INIT(vertex_element_t, {.name = "tex", .data = "short2norm"}),
@@ -147,8 +147,8 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 		// Init raytraced bake
 		make_bake_position_normal(kong);
 		con_paint->data->shader_from_source = true;
-		gpu_create_shaders_from_kong(node_shader_get(kong), ADDRESS(con_paint->data->vertex_shader), ADDRESS(con_paint->data->fragment_shader),
-		                             ADDRESS(con_paint->data->_->vertex_shader_size), ADDRESS(con_paint->data->_->fragment_shader_size));
+		gpu_create_shaders_from_kong(node_shader_get(kong), &con_paint->data->vertex_shader, &con_paint->data->fragment_shader,
+		                             &con_paint->data->_->vertex_shader_size, &con_paint->data->_->fragment_shader_size);
 		return con_paint;
 	}
 
@@ -159,8 +159,8 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 	if (context_raw->tool == TOOL_TYPE_COLORID || context_raw->tool == TOOL_TYPE_PICKER || context_raw->tool == TOOL_TYPE_MATERIAL) {
 		make_colorid_picker_run(kong);
 		con_paint->data->shader_from_source = true;
-		gpu_create_shaders_from_kong(node_shader_get(kong), ADDRESS(con_paint->data->vertex_shader), ADDRESS(con_paint->data->fragment_shader),
-		                             ADDRESS(con_paint->data->_->vertex_shader_size), ADDRESS(con_paint->data->_->fragment_shader_size));
+		gpu_create_shaders_from_kong(node_shader_get(kong), &con_paint->data->vertex_shader, &con_paint->data->fragment_shader,
+		                             &con_paint->data->_->vertex_shader_size, &con_paint->data->_->fragment_shader_size);
 		return con_paint;
 	}
 
@@ -614,8 +614,8 @@ node_shader_context_t *make_paint_run(material_t *data, material_context_t *matc
 	parser_material_triplanar           = false;
 	parser_material_sample_keep_aspect  = false;
 	con_paint->data->shader_from_source = true;
-	gpu_create_shaders_from_kong(node_shader_get(kong), ADDRESS(con_paint->data->vertex_shader), ADDRESS(con_paint->data->fragment_shader),
-	                             ADDRESS(con_paint->data->_->vertex_shader_size), ADDRESS(con_paint->data->_->fragment_shader_size));
+	gpu_create_shaders_from_kong(node_shader_get(kong), &con_paint->data->vertex_shader, &con_paint->data->fragment_shader,
+	                             &con_paint->data->_->vertex_shader_size, &con_paint->data->_->fragment_shader_size);
 
 	return con_paint;
 }

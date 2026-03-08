@@ -20,7 +20,7 @@ void tab_scripts_draw(ui_handle_t *htab) {
 		}
 
 		string_t_array_t *ar = any_array_create_from_raw(
-		    (any[]){
+		    (void *[]){
 		        "script.js",
 		    },
 		    1);

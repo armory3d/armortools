@@ -5,14 +5,14 @@ node_shader_context_t *make_mesh_preview_run(material_t *data, material_context_
 	                                                                     .compare_mode    = "less",
 	                                                                     .cull_mode       = "clockwise",
 	                                                                     .vertex_elements = any_array_create_from_raw(
-                                                                   (any[]){
+                                                                   (void *[]){
                                                                        GC_ALLOC_INIT(vertex_element_t, {.name = "pos", .data = "short4norm"}),
                                                                        GC_ALLOC_INIT(vertex_element_t, {.name = "nor", .data = "short2norm"}),
                                                                        GC_ALLOC_INIT(vertex_element_t, {.name = "tex", .data = "short2norm"}),
                                                                    },
                                                                    3),
 	                                                                     .color_attachments = any_array_create_from_raw(
-                                                                   (any[]){
+                                                                   (void *[]){
                                                                        "RGBA64",
                                                                        "RGBA64",
                                                                    },
@@ -125,7 +125,7 @@ node_shader_context_t *make_mesh_preview_run(material_t *data, material_context_
 	parser_material_finalize(con_mesh);
 
 	con_mesh->data->shader_from_source = true;
-	gpu_create_shaders_from_kong(node_shader_get(kong), ADDRESS(con_mesh->data->vertex_shader), ADDRESS(con_mesh->data->fragment_shader),
-	                             ADDRESS(con_mesh->data->_->vertex_shader_size), ADDRESS(con_mesh->data->_->fragment_shader_size));
+	gpu_create_shaders_from_kong(node_shader_get(kong), &con_mesh->data->vertex_shader, &con_mesh->data->fragment_shader,
+	                             &con_mesh->data->_->vertex_shader_size, &con_mesh->data->_->fragment_shader_size);
 	return con_mesh;
 }

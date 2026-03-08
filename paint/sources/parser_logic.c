@@ -39,7 +39,7 @@ ui_node_link_t *parser_logic_get_input_link(ui_node_socket_t *inp) {
 }
 
 ui_node_link_t_array_t *parser_logic_get_output_links(ui_node_socket_t *out) {
-	ui_node_link_t_array_t *res = any_array_create_from_raw((any[]){}, 0);
+	ui_node_link_t_array_t *res = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < parser_logic_links->length; ++i) {
 		ui_node_link_t *l = parser_logic_links->buffer[i];
 		if (l->from_id == out->node_id) {
@@ -76,7 +76,7 @@ void parser_logic_parse(ui_node_canvas_t *canvas) {
 	gc_root(parser_logic_links);
 
 	gc_unroot(parser_logic_parsed_nodes);
-	parser_logic_parsed_nodes = any_array_create_from_raw((any[]){}, 0);
+	parser_logic_parsed_nodes = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(parser_logic_parsed_nodes);
 
 	gc_unroot(parser_logic_node_map);
@@ -130,7 +130,7 @@ char *parser_logic_build_node(ui_node_t *node) {
 	// Create outputss
 	for (i32 i = 0; i < node->outputs->length; ++i) {
 		ui_node_socket_t       *out       = node->outputs->buffer[i];
-		logic_node_t_array_t   *out_nodes = any_array_create_from_raw((any[]){}, 0);
+		logic_node_t_array_t   *out_nodes = any_array_create_from_raw((void *[]){}, 0);
 		ui_node_link_t_array_t *ls        = parser_logic_get_output_links(out);
 		if (ls != NULL && ls->length > 0) {
 			for (i32 i = 0; i < ls->length; ++i) {
@@ -152,7 +152,7 @@ char *parser_logic_build_node(ui_node_t *node) {
 }
 
 ui_node_t_array_t *parser_logic_get_root_nodes(ui_node_canvas_t *node_group) {
-	ui_node_t_array_t *roots = any_array_create_from_raw((any[]){}, 0);
+	ui_node_t_array_t *roots = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < node_group->nodes->length; ++i) {
 		ui_node_t *node   = node_group->nodes->buffer[i];
 		bool       linked = false;

@@ -16,7 +16,7 @@ void tab_browser_draw(ui_handle_t *htab) {
 
 	if (ui_tab(htab, title, false, -1, false) && ui->_window_h > ui_statusbar_default_h * UI_SCALE()) {
 		if (config_raw->bookmarks == NULL) {
-			config_raw->bookmarks = any_array_create_from_raw((any[]){}, 0);
+			config_raw->bookmarks = any_array_create_from_raw((void *[]){}, 0);
 		}
 
 		i32  bookmarks_w = math_floor(100 * UI_SCALE());
@@ -225,7 +225,7 @@ void tab_browser_draw_121898(char *path) {
 	import_asset_run(path, -1.0, -1.0, true, true, NULL);
 }
 
-void tab_browser_draw_121757(any _) {
+void tab_browser_draw_121757(void * _) {
 	char *file        = _tab_browser_draw_file;
 	i32       asset_index = -1;
 	for (i32 i = 0; i < project_assets->length; ++i) {
@@ -250,7 +250,7 @@ void tab_browser_draw_121751() {
 	sys_notify_on_next_frame(&tab_browser_draw_121757, NULL);
 }
 
-void tab_browser_draw_121645(any _) {
+void tab_browser_draw_121645(void * _) {
 	char *file        = _tab_browser_draw_file;
 	i32       asset_index = -1;
 	for (i32 i = 0; i < project_assets->length; ++i) {
@@ -268,7 +268,7 @@ void tab_browser_draw_121639() {
 	sys_notify_on_next_frame(&tab_browser_draw_121645, NULL);
 }
 
-void tab_browser_draw_121528(any _) {
+void tab_browser_draw_121528(void * _) {
 	char *file        = _tab_browser_draw_file;
 	i32       asset_index = -1;
 	for (i32 i = 0; i < project_assets->length; ++i) {

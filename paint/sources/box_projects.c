@@ -171,7 +171,7 @@ void box_projects_tab() {
 	}
 }
 
-void box_projects_tab_75419(any _) {
+void box_projects_tab_75419(void * _) {
 	iron_delete_file(_box_projects_path);
 	iron_delete_file(_box_projects_icon_path);
 	char *data_path = substring(_box_projects_path, 0, string_length(_box_projects_path) - 4);
@@ -231,7 +231,7 @@ void box_projects_recent_tab() {
 
 		ui->enabled = config_raw->recent_projects->length > 0;
 		if (ui_icon_button(tr("Clear", NULL), ICON_ERASE, UI_ALIGN_LEFT)) {
-			config_raw->recent_projects = any_array_create_from_raw((any[]){}, 0);
+			config_raw->recent_projects = any_array_create_from_raw((void *[]){}, 0);
 			config_save();
 		}
 		ui->enabled = true;

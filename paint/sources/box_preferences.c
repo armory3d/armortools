@@ -126,7 +126,7 @@ void box_preferences_interface_tab_170178(char *path) {
 	sys_notify_on_next_frame(&box_preferences_interface_tab_170210, raw);
 }
 
-void box_preferences_interface_tab_170071(any _) {
+void box_preferences_interface_tab_170071(void * _) {
 	ui->ops->theme->ELEMENT_H = base_default_element_h;
 	config_restore();
 	box_preferences_set_scale();
@@ -188,12 +188,12 @@ void box_preferences_theme_tab() {
 
 	// Theme fields
 	ui_handle_t *h_list    = ui_handle(__ID__);
-	u32_ptr      u32_theme = base_theme;
+	u32      *u32_theme = base_theme;
 	ui->input_enabled      = !ui_menu_show;
 	for (i32 i = 0; i < ui_theme_keys_count; ++i) {
-		char    *key    = ARRAY_ACCESS(ui_theme_keys, i);
+		char    *key    = ui_theme_keys[i];
 		ui_handle_t *h      = ui_nest(h_list, i);
-		u32          val    = DEREFERENCE(u32_theme + i);
+		u32          val    = *(u32_theme + i);
 		bool         is_hex = ends_with(key, "_COL");
 
 		if (is_hex) {
@@ -225,27 +225,27 @@ void box_preferences_theme_tab() {
 		    string_equals(key, "ROUND_CORNERS") || string_equals(key, "SHADOWS")) {
 			h->b                       = val > 0;
 			bool b                     = ui_check(h, key, "");
-			DEREFERENCE(u32_theme + i) = b;
+			*(u32_theme + i) = b;
 		}
 		else if (string_equals(key, "LINK_STYLE")) {
 			string_t_array_t *styles = any_array_create_from_raw(
-			    (any[]){
+			    (void *[]){
 			        tr("Straight", NULL),
 			        tr("Curved", NULL),
 			    },
 			    2);
 			h->i                       = val;
 			i32 pos                    = ui_combo(h, styles, key, true, UI_ALIGN_LEFT, true);
-			DEREFERENCE(u32_theme + i) = pos;
+			*(u32_theme + i) = pos;
 		}
 		else {
 			h->text = is_hex ? i32_to_string_hex(val) : i32_to_string(val);
 			ui_text_input(h, key, UI_ALIGN_LEFT, true, false);
 			if (is_hex) {
-				DEREFERENCE(u32_theme + i) = parse_int_hex(h->text);
+				*(u32_theme + i) = parse_int_hex(h->text);
 			}
 			else {
-				DEREFERENCE(u32_theme + i) = parse_int(h->text);
+				*(u32_theme + i) = parse_int(h->text);
 			}
 		}
 		if (ui->changed) {
@@ -258,8 +258,8 @@ void box_preferences_theme_tab() {
 void box_preferences_theme_tab_170797() {
 	ui->changed                                 = false;
 	i32     color                               = ui_color_wheel(_box_preferences_h, false, -1, 11 * ui->ops->theme->ELEMENT_H * UI_SCALE(), true, NULL, NULL);
-	u32_ptr u32_theme                           = base_theme;
-	DEREFERENCE(u32_theme + _box_preferences_i) = color;
+	u32 *u32_theme                           = base_theme;
+	*(u32_theme + _box_preferences_i) = color;
 	if (ui->changed) {
 		ui_menu_keep_open = true;
 	}
@@ -338,7 +338,7 @@ void box_preferences_usage_tab() {
 	ui_handle_t *h_camera_controls          = ui_handle(__ID__);
 	h_camera_controls->i                    = config_raw->camera_controls;
 	string_t_array_t *camera_controls_combo = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        tr("Orbit", NULL),
 	        tr("Rotate", NULL),
 	        tr("Fly", NULL),
@@ -369,7 +369,7 @@ void box_preferences_usage_tab() {
 	ui_handle_t *h_zoom_direction          = ui_handle(__ID__);
 	h_zoom_direction->i                    = config_raw->zoom_direction;
 	string_t_array_t *zoom_direction_combo = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        tr("Vertical", NULL),
 	        tr("Vertical Inverted", NULL),
 	        tr("Horizontal", NULL),
@@ -384,7 +384,7 @@ void box_preferences_usage_tab() {
 	h_layer_res->i              = config_raw->layer_res;
 	#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	string_t_array_t *res_combo = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        "128",
 	        "256",
 	        "512",
@@ -395,7 +395,7 @@ void box_preferences_usage_tab() {
 	    6);
 	#else
 	string_t_array_t *res_combo = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        "128",
 	        "256",
 	        "512",
@@ -513,7 +513,7 @@ void box_preferences_viewport_tab() {
 	ui_handle_t *h_mode          = ui_handle(__ID__);
 	h_mode->i                    = config_raw->viewport_mode;
 	string_t_array_t *mode_combo = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        tr("Lit", NULL),
 	        tr("Path Traced", NULL),
 	    },
@@ -526,7 +526,7 @@ void box_preferences_viewport_tab() {
 	ui_handle_t *h_pathtrace_mode          = ui_handle(__ID__);
 	h_pathtrace_mode->i                    = config_raw->pathtrace_mode;
 	string_t_array_t *pathtrace_mode_combo = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        tr("Fast", NULL),
 	        tr("Quality", NULL),
 	    },
@@ -541,7 +541,7 @@ void box_preferences_viewport_tab() {
 	ui_handle_t *h_render_mode          = ui_handle(__ID__);
 	h_render_mode->i                    = config_raw->render_mode;
 	string_t_array_t *render_mode_combo = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        tr("Desktop", NULL),
 	        tr("Mobile", NULL),
 	    },
@@ -554,7 +554,7 @@ void box_preferences_viewport_tab() {
 	ui_handle_t *h_supersample          = ui_handle(__ID__);
 	h_supersample->i                    = config_get_super_sample_quality(config_raw->rp_supersample);
 	string_t_array_t *supersample_combo = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        "0.25x",
 	        "0.5x",
 	        "1.0x",
@@ -715,7 +715,7 @@ void box_preferences_neural_tab() {
 	h_inference->i                    = config_raw->neural_backend;
 	#ifdef IRON_WINDOWS
 	string_t_array_t *inference_combo = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        "CPU",
 	        "Vulkan",
 	        "CUDA",
@@ -723,7 +723,7 @@ void box_preferences_neural_tab() {
 	    3);
 	#else
 	string_t_array_t *inference_combo = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        "CPU",
 	        "Vulkan",
 	    },
@@ -850,7 +850,7 @@ void box_preferences_plugins_tab() {
 	}
 
 	if (config_raw->plugins == NULL) {
-		config_raw->plugins = any_array_create_from_raw((any[]){}, 0);
+		config_raw->plugins = any_array_create_from_raw((void *[]){}, 0);
 	}
 	ui_handle_t *h = ui_handle(__ID__);
 	if (h->init) {
@@ -1041,10 +1041,10 @@ void box_preferences_set_scale() {
 
 char *box_preferences_theme_to_json(ui_theme_t *theme) {
 	json_encode_begin();
-	u32_ptr u32_theme = theme;
+	u32 *u32_theme = theme;
 	for (i32 i = 0; i < ui_theme_keys_count; ++i) {
-		char *key = ARRAY_ACCESS(ui_theme_keys, i);
-		u32       val = DEREFERENCE(u32_theme + i);
+		char *key = ui_theme_keys[i];
+		u32       val = *(u32_theme + i);
 		json_encode_i32(key, val);
 	}
 	return json_encode_end();

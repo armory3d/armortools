@@ -23,7 +23,7 @@ void physics_world_update(physics_world_t *world) {
 }
 
 physics_pair_t_array_t *physics_world_get_contact_pairs(physics_world_t *world, physics_body_t *body) {
-	physics_pair_t_array_t *pairs = any_array_create_from_raw((any[]){}, 0);
+	physics_pair_t_array_t *pairs = any_array_create_from_raw((void *[]){}, 0);
 	physics_pair_t         *p     = asim_world_get_contact();
 	any_array_push(pairs, p);
 	return pairs;

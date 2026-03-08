@@ -47,7 +47,7 @@ void tab_meshes_draw(ui_handle_t *htab) {
 				ui_menu_draw(&tab_meshes_draw_186425, -1, -1);
 			}
 			if (h->changed) {
-				mesh_object_t_array_t *visibles = any_array_create_from_raw((any[]){}, 0);
+				mesh_object_t_array_t *visibles = any_array_create_from_raw((void *[]){}, 0);
 				for (i32 i = 0; i < project_paint_objects->length; ++i) {
 					mesh_object_t *p = project_paint_objects->buffer[i];
 					if (p->base->visible) {
@@ -320,7 +320,7 @@ void tab_meshes_draw_properties(mesh_object_t *o) {
 	physics_body_t   *pb          = any_imap_get(physics_body_object_map, context_raw->selected_object->uid);
 	ui_handle_t      *hshape      = ui_handle(__ID__);
 	string_t_array_t *shape_combo = any_array_create_from_raw(
-	    (any[]){
+	    (void *[]){
 	        tr("None", NULL),
 	        tr("Box", NULL),
 	        tr("Sphere", NULL),
@@ -434,9 +434,9 @@ void tab_scene_sort() {
 	array_sort(scene->children, &tab_scene_sort_187924);
 }
 
-i32 tab_scene_sort_187924(any_ptr pa, any_ptr pb) {
-	object_t *a = DEREFERENCE(pa);
-	object_t *b = DEREFERENCE(pb);
+i32 tab_scene_sort_187924(void **pa, void **pb) {
+	object_t *a = *(pa);
+	object_t *b = *(pb);
 	return strcmp(a->name, b->name);
 }
 
@@ -453,7 +453,7 @@ void tab_scene_import_mesh_done() {
 	sys_notify_on_next_frame(&tab_scene_import_mesh_done_188032, NULL);
 }
 
-void tab_scene_import_mesh_done_188032(any _) {
+void tab_scene_import_mesh_done_188032(void * _) {
 	util_mesh_merge(NULL);
 	tab_scene_select_object(context_raw->selected_object->ext);
 	tab_scene_sort();

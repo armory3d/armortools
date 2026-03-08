@@ -5,10 +5,10 @@ gpu_pipeline_t *_pipes_make_merge(bool red, bool green, bool blue, bool alpha) {
 	gpu_vertex_structure_t *vs = GC_ALLOC_INIT(gpu_vertex_structure_t, {0});
 	gpu_vertex_struct_add(vs, "pos", GPU_VERTEX_DATA_F32_2X);
 	pipe->input_layout                            = vs;
-	ARRAY_ACCESS(pipe->color_write_mask_red, 0)   = red;
-	ARRAY_ACCESS(pipe->color_write_mask_green, 0) = green;
-	ARRAY_ACCESS(pipe->color_write_mask_blue, 0)  = blue;
-	ARRAY_ACCESS(pipe->color_write_mask_alpha, 0) = alpha;
+	pipe->color_write_mask_red[0]   = red;
+	pipe->color_write_mask_green[0] = green;
+	pipe->color_write_mask_blue[0]  = blue;
+	pipe->color_write_mask_alpha[0] = alpha;
 	gpu_pipeline_compile(pipe);
 	return pipe;
 }
@@ -69,7 +69,7 @@ void pipes_init() {
 		gpu_vertex_struct_add(vs, "pos", GPU_VERTEX_DATA_F32_2X);
 		pipes_copy8->input_layout                      = vs;
 		pipes_copy8->color_attachment_count            = 1;
-		ARRAY_ACCESS(pipes_copy8->color_attachment, 0) = GPU_TEXTURE_FORMAT_R8;
+		pipes_copy8->color_attachment[0] = GPU_TEXTURE_FORMAT_R8;
 		gpu_pipeline_compile(pipes_copy8);
 	}
 
@@ -83,7 +83,7 @@ void pipes_init() {
 		gpu_vertex_struct_add(vs, "pos", GPU_VERTEX_DATA_F32_2X);
 		pipes_copy64->input_layout                      = vs;
 		pipes_copy64->color_attachment_count            = 1;
-		ARRAY_ACCESS(pipes_copy64->color_attachment, 0) = GPU_TEXTURE_FORMAT_RGBA64;
+		pipes_copy64->color_attachment[0] = GPU_TEXTURE_FORMAT_RGBA64;
 		gpu_pipeline_compile(pipes_copy64);
 	}
 
@@ -97,7 +97,7 @@ void pipes_init() {
 		gpu_vertex_struct_add(vs, "pos", GPU_VERTEX_DATA_F32_2X);
 		pipes_copy128->input_layout                      = vs;
 		pipes_copy128->color_attachment_count            = 1;
-		ARRAY_ACCESS(pipes_copy128->color_attachment, 0) = GPU_TEXTURE_FORMAT_RGBA128;
+		pipes_copy128->color_attachment[0] = GPU_TEXTURE_FORMAT_RGBA128;
 		gpu_pipeline_compile(pipes_copy128);
 	}
 
@@ -111,7 +111,7 @@ void pipes_init() {
 		gpu_vertex_struct_add(vs, "pos", GPU_VERTEX_DATA_F32_2X);
 		pipes_invert8->input_layout                      = vs;
 		pipes_invert8->color_attachment_count            = 1;
-		ARRAY_ACCESS(pipes_invert8->color_attachment, 0) = GPU_TEXTURE_FORMAT_R8;
+		pipes_invert8->color_attachment[0] = GPU_TEXTURE_FORMAT_R8;
 		gpu_pipeline_compile(pipes_invert8);
 	}
 
@@ -169,7 +169,7 @@ void pipes_init() {
 		gpu_vertex_structure_t *vs      = GC_ALLOC_INIT(gpu_vertex_structure_t, {0});
 		gpu_vertex_struct_add(vs, "pos", GPU_VERTEX_DATA_F32_2X);
 		pipes_copy_rgb->input_layout                            = vs;
-		ARRAY_ACCESS(pipes_copy_rgb->color_write_mask_alpha, 0) = false;
+		pipes_copy_rgb->color_write_mask_alpha[0] = false;
 		gpu_pipeline_compile(pipes_copy_rgb);
 	}
 
