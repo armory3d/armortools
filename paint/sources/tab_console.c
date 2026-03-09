@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void tab_console_draw(ui_handle_t *htab) {
 	char *title = console_message_timer > 0 ? string_join(console_message, "        ") : tr("Console", NULL);
 	i32       color = console_message_timer > 0 ? console_message_color : -1;

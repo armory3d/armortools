@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void hue_saturation_value_node_init() {
 	any_array_push(nodes_material_color, hue_saturation_value_node_def);
 	any_map_set(parser_material_node_vectors, "HUE_SAT", hue_saturation_value_node_vector);

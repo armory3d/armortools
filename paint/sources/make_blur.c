@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void make_blur_run(node_shader_t *kong) {
 	// node_shader_write_frag(kong, "var tex_coord_inp: float2 = gbuffer2[uint2(sp.x * constants.gbuffer_size.x, sp.y * constants.gbuffer_size.y)].ba;");
 	node_shader_write_frag(kong, "var tex_coord_inp4: float4 = gbuffer2[uint2(uint(sp.x * constants.gbuffer_size.x), uint(sp.y * constants.gbuffer_size.y))];");

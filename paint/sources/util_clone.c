@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 f32_array_t *util_clone_f32_array(f32_array_t *f32a) {
 	if (f32a == NULL) {
 		return NULL;

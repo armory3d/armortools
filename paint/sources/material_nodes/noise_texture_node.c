@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void noise_texture_node_init() {
 	any_array_push(nodes_material_texture, noise_texture_node_def);
 	any_map_set(parser_material_node_vectors, "TEX_NOISE", noise_texture_node_vector);

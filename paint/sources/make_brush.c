@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void make_brush_run(node_shader_t *kong) {
 
 	node_shader_write_frag(kong, "var dist: float = 0.0;");

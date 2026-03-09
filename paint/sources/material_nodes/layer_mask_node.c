@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void layer_mask_node_init() {
 	any_array_push(nodes_material_input, layer_mask_node_def);
 	any_map_set(parser_material_node_values, "LAYER_MASK", layer_mask_node_value);

@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void warp_node_init() {
 	any_array_push(nodes_material_color, warp_node_def);
 	any_map_set(parser_material_node_vectors, "DIRECT_WARP", warp_node_vector);

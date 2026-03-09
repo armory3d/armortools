@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 char *neural_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	gpu_texture_t *result = any_imap_get(neural_node_results, node->id);
 	if (result == NULL) {

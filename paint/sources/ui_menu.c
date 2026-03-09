@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void ui_menu_render() {
 	i32 menu_w                     = ui_menu_commands != NULL ? math_floor(base_default_element_w * UI_SCALE() * 2.3) : math_floor(UI_ELEMENT_W() * 2.3);
 

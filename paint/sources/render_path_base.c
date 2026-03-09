@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void render_path_base_init() {
 	pipes_init();
 	const_data_create_screen_aligned_data();

@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void upscale_image_node_init() {
 	any_array_push(nodes_material_neural, upscale_image_node_def);
 	any_map_set(parser_material_node_vectors, "NEURAL_UPSCALE_IMAGE", neural_node_vector);

@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void util_render_make_material_preview() {
 	context_raw->material_preview = true;
 

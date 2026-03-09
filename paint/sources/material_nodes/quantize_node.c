@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void quantize_node_init() {
 	any_array_push(nodes_material_color, quantize_node_def);
 	any_map_set(parser_material_node_vectors, "QUANTIZE", quantize_node_vector);

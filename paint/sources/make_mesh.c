@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 node_shader_context_t *make_mesh_run(material_t *data, i32 layer_pass) {
 	char              *context_id = layer_pass == 0 ? "mesh" : string_join("mesh", i32_to_string(layer_pass));
 	shader_context_t      *props      = GC_ALLOC_INIT(shader_context_t, {.name            = context_id,

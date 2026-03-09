@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void sim_init() {
 	if (sim_initialized) {
 		return;

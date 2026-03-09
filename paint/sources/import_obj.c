@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void import_obj_run(char *path, bool replace_existing) {
 	split_type_t i          = context_raw->split_by;
 	bool         is_udim    = i == SPLIT_TYPE_UDIM;

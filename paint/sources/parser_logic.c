@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 logic_node_ext_t *parser_logic_get_logic_node(ui_node_t *node) {
 	return any_map_get(parser_logic_node_map, parser_logic_node_name(node));
 }

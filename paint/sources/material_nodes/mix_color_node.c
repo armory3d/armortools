@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void mix_color_node_init() {
 	any_array_push(nodes_material_color, mix_color_node_def);
 	any_map_set(parser_material_node_vectors, "MIX_RGB", mix_color_node_vector);

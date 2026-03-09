@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void import_mesh_run(char *path, bool _clear_layers, bool replace_existing) {
 	if (!path_is_mesh(path)) {
 		if (!context_enable_import_plugin(path)) {

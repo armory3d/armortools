@@ -1,9 +1,5 @@
 
-#include <iron.h>
-#include "enums.c"
-#include "types.c"
-#include "globals.c"
-#include "functions.c"
+#include "global.h"
 
 #include "brush_nodes/boolean_node.c"
 #include "brush_nodes/brush_output_node.c"

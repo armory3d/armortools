@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void util_uv_cache_uv_map() {
 	if (util_uv_uvmap != NULL && (util_uv_uvmap->width != config_get_texture_res_x() || util_uv_uvmap->height != config_get_texture_res_y())) {
 		gpu_delete_texture(util_uv_uvmap);

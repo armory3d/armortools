@@ -1,4 +1,6 @@
 
+#include "../global.h"
+
 string_node_t *string_node_create(ui_node_t *raw, f32_array_t *args) {
 	string_node_t *n = GC_ALLOC_INIT(string_node_t, {0});
 	n->base          = logic_node_create(n);

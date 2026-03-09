@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void ui_menubar_init() {
 	ui_menubar_hwnd->layout        = UI_LAYOUT_HORIZONTAL;
 	ui_menubar_menu_handle->layout = UI_LAYOUT_HORIZONTAL;

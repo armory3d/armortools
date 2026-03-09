@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void camera_data_node_init() {
 	any_array_push(nodes_material_input, camera_data_node_def);
 	any_map_set(parser_material_node_vectors, "CAMERA", camera_data_node_vector);

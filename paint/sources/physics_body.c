@@ -1,6 +1,7 @@
 
 #ifdef arm_physics
 
+#include "global.h"
 #include "../libs/asim.h"
 
 physics_body_t *physics_body_create() {

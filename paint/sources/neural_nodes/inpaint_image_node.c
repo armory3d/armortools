@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void inpaint_image_node_init() {
 	any_array_push(nodes_material_neural, inpaint_image_node_def);
 	any_map_set(parser_material_node_vectors, "NEURAL_INPAINT_IMAGE", neural_node_vector);

@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void checker_texture_node_init() {
 	any_array_push(nodes_material_texture, checker_texture_node_def);
 	any_map_set(parser_material_node_vectors, "TEX_CHECKER", checker_texture_node_vector);

@@ -1,4 +1,6 @@
 
+#include "global.h"
+
 raw_mesh_t *geom_make_plane(f32 size_x, f32 size_y, i32 verts_x, i32 verts_y, f32 uv_scale) {
 
 	raw_mesh_t *mesh = GC_ALLOC_INIT(raw_mesh_t, {0});

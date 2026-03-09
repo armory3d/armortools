@@ -1,4 +1,6 @@
 
+#include "../global.h"
+
 vector_node_t *vector_node_create(ui_node_t *raw, f32_array_t *args) {
 	vector_node_t *n      = GC_ALLOC_INIT(vector_node_t, {0});
 	n->base               = logic_node_create(n);

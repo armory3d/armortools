@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void project_open() {
 	ui_files_show("arm", false, false, &project_open_102526);
 }

@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void make_particle_mask(node_shader_t *kong) {
 	node_shader_add_out(kong, "wpos: float4");
 	node_shader_add_constant(kong, "W: float4x4", "_world_matrix");

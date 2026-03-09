@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void import_arm_run_project(char *path) {
 	buffer_t         *b = data_get_blob(path);
 	project_format_t *project;

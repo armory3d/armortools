@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void import_folder_run(char *path) {
 	string_t_array_t *files         = file_read_directory(path);
 	char         *mapbase       = "";

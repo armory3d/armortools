@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void import_blend_material_run(char *path) {
 	gc_unroot(_import_blend_material_path);
 	_import_blend_material_path = string_copy(path);

@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void text_to_image_node_init() {
 	any_array_push(nodes_material_neural, text_to_image_node_def);
 	any_map_set(parser_material_node_vectors, "NEURAL_TEXT_TO_IMAGE", neural_node_vector);

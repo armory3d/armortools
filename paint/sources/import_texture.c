@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void import_texture_run(char *path, bool hdr_as_envmap) {
 	if (!path_is_texture(path)) {
 		if (!context_enable_import_plugin(path)) {

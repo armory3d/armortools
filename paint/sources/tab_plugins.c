@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void tab_plugins_draw(ui_handle_t *htab) {
 	if (ui_tab(htab, tr("Plugins", NULL), false, -1, false)) {
 

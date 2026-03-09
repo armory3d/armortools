@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 node_shader_context_t *make_mesh_preview_run(material_t *data, material_context_t *matcon) {
 	char              *context_id = "mesh";
 	shader_context_t      *props      = GC_ALLOC_INIT(shader_context_t, {.name            = context_id,

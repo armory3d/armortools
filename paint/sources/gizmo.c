@@ -1,4 +1,6 @@
 
+#include "global.h"
+
 void gizmo_update() {
 	bool      is_object = context_raw->tool == TOOL_TYPE_GIZMO;
 	bool      is_decal  = base_is_decal_layer();

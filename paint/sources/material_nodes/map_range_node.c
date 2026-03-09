@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void map_range_node_init() {
 	any_array_push(nodes_material_utilities, map_range_node_def);
 	any_map_set(parser_material_node_values, "MAPRANGE", map_range_node_value);

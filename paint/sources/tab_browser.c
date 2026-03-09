@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void tab_browser_show_directory(char *directory) {
 	tab_browser_hpath->text                          = string_copy(directory);
 	tab_browser_hsearch->text                        = "";

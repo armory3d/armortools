@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void fresnel_node_init() {
 	any_array_push(nodes_material_input, fresnel_node_def);
 	any_map_set(parser_material_node_values, "FRESNEL", fresnel_node_value);

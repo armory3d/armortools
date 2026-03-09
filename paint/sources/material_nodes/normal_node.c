@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void normal_node_init() {
 	any_array_push(nodes_material_utilities, normal_node_def);
 	any_map_set(parser_material_node_vectors, "NORMAL", normal_node_vector);

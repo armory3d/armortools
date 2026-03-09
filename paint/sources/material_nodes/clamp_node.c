@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void clamp_node_init() {
 	any_array_push(nodes_material_utilities, clamp_node_def);
 	any_map_set(parser_material_node_values, "CLAMP", clamp_node_value);

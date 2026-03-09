@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void ui_view2d_init() {
 	gc_unroot(ui_view2d_pipe);
 	ui_view2d_pipe = gpu_create_pipeline();

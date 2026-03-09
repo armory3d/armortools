@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void make_clone_run(node_shader_t *kong) {
 	node_shader_add_constant(kong, "clone_delta: float2", "_clone_delta");
 	// node_shader_write_frag(kong, "var tex_coord_inp: float2 = gbuffer2[uint2((sp.xy + constants.clone_delta) * constants.gbuffer_size)].ba;");

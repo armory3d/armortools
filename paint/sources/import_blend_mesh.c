@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void import_blend_mesh_ui() {
 	if (config_raw->blender == NULL) {
 		config_raw->blender = "";

@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void config_load() {
 	char *path = "";
 	if (path_is_protected()) {

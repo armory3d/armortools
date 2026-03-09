@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void bump_node_init() {
 	any_array_push(nodes_material_utilities, bump_node_def);
 	any_map_set(parser_material_node_vectors, "BUMP", bump_node_vector);

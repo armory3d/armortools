@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void ui_header_init() {
 	ui_header_handle->layout = UI_LAYOUT_HORIZONTAL;
 }

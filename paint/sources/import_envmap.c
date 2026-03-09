@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void import_envmap_run(char *path, gpu_texture_t *image) {
 	// Init
 	if (import_envmap_pipeline == NULL) {

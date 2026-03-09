@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void camera_init() {
 	camera_reset(-1);
 }

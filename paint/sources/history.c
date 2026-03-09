@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void history_undo() {
 	if (history_undos > 0) {
 		i32             active = history_steps->length - 1 - history_redos;

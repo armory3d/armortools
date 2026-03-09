@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void util_particle_init() {
 	if (context_raw->particle_material != NULL) {
 		return;

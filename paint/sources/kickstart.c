@@ -1,4 +1,7 @@
 
+
+#include "global.h"
+
 void _kickstart() {
 	_world_data_empty_irr        = NULL;
 	_render_path_last_frame_time = 0.0;

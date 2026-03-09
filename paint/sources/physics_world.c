@@ -1,6 +1,7 @@
 
 #ifdef arm_physics
 
+#include "global.h"
 #include "../libs/asim.h"
 
 physics_world_t *physics_world_create() {

@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void neural_node_models_init() {
 	gc_unroot(neural_node_models);
 	neural_node_models = any_array_create_from_raw(

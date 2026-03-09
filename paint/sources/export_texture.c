@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void export_texture_run(char *path, bool bake_material) {
 
 	if (bake_material) {

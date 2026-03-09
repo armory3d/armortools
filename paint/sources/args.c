@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void args_parse() {
 	if (iron_get_arg_count() > 1) {
 		args_use = true;
@@ -63,7 +66,6 @@ void args_parse() {
 }
 
 void args_run() {
-
 	if (args_use) {
 		sys_notify_on_next_frame(&args_run_115314, NULL);
 	}

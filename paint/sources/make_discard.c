@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void make_discard_color_id(node_shader_t *kong) {
 	node_shader_add_texture(kong, "texpaint_colorid", NULL); // 1x1 picker
 	node_shader_add_texture(kong, "texcolorid", "_texcolorid"); // color map

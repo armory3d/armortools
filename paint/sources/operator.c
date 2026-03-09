@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void operator_register(char *name, void (*call)(void)) {
 	any_map_set(operator_ops, name, call);
 }

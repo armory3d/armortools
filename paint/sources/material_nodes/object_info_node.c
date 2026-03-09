@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void object_info_node_init() {
 	any_array_push(nodes_material_input, object_info_node_def);
 	any_map_set(parser_material_node_vectors, "OBJECT_INFO", object_info_node_vector);

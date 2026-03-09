@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void vector_curves_node_init() {
 	any_array_push(nodes_material_utilities, vector_curves_node_def);
 	any_map_set(parser_material_node_vectors, "CURVE_VEC", vector_curves_node_vector);

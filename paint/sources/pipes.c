@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 gpu_pipeline_t *_pipes_make_merge(bool red, bool green, bool blue, bool alpha) {
 	gpu_pipeline_t *pipe       = gpu_create_pipeline();
 	pipe->vertex_shader        = sys_get_shader("layer_merge.vert");

@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void box_preferences_interface_tab() {
 	if (box_preferences_locales == NULL) {
 		gc_unroot(box_preferences_locales);

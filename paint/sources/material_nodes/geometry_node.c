@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void geometry_node_init() {
 	any_array_push(nodes_material_input, geometry_node_def);
 	any_map_set(parser_material_node_vectors, "NEW_GEOMETRY", geometry_node_vector);

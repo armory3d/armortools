@@ -180,8 +180,6 @@ char *iron_get_arg(i32 index) {
 // ██║██║  ██║╚██████╔╝██║ ╚████║    ██║  ██║██║     ██║
 // ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝    ╚═╝  ╚═╝╚═╝     ╚═╝
 
-#ifndef NO_IRON_API
-
 #include "iron_math.h"
 #include "iron_net.h"
 #include "iron_tween.h"
@@ -545,6 +543,7 @@ i32 parse_int_hex(const char *s) {
 	return strtol(s, NULL, 16);
 }
 #endif
+
 f32 parse_float(const char *s) {
 	return strtof(s, NULL);
 }
@@ -1009,5 +1008,3 @@ void iron_set_save_and_quit_callback(void (*callback)(bool)) {
 void iron_delay_idle_sleep() {
 	paused_frames = 0;
 }
-
-#endif // NO_IRON_API

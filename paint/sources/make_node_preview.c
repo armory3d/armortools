@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 node_shader_context_t *make_node_preview_run(material_t *data, material_context_t *matcon, ui_node_t *node, ui_node_canvas_t *group,
                                              ui_node_t_array_t *parents) {
 	char              *context_id = "mesh";

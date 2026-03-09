@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void base_init() {
 	base_last_window_width  = iron_window_width();
 	base_last_window_height = iron_window_height();

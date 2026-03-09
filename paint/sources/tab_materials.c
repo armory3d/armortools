@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void tab_materials_draw(ui_handle_t *htab) {
 	bool mini = ui->_window_w <= ui_sidebar_w_mini;
 	mini ? tab_materials_draw_mini(htab) : tab_materials_draw_full(htab);

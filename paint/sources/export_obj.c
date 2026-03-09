@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void export_obj_write_string(u8_array_t *out, char *str) {
 	for (i32 i = 0; i < string_length(str); ++i) {
 		u8_array_push(out, char_code_at(str, i));

@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void import_theme_run(char *path) {
 	if (!path_is_json(path)) {
 		console_error(strings_unknown_asset_format());

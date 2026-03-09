@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void picker_node_init() {
 	any_array_push(nodes_material_input, picker_node_def);
 	any_map_set(parser_material_node_vectors, "PICKER", picker_node_vector);

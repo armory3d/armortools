@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void separate_xyz_node_init() {
 	any_array_push(nodes_material_utilities, separate_xyz_node_def);
 	any_map_set(parser_material_node_values, "SEPXYZ", separate_xyz_node_value);

@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void import_font_run(char *path) {
 	for (i32 i = 0; i < project_fonts->length; ++i) {
 		slot_font_t *f = project_fonts->buffer[i];

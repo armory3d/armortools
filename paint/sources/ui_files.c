@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void ui_files_show(char *filters, bool is_save, bool open_multiple, void (*files_done)(char *)) {
 	if (is_save) {
 		gc_unroot(ui_files_path);

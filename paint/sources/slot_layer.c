@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 slot_layer_t *slot_layer_create(char *ext, layer_slot_type_t type, slot_layer_t *parent) {
 	slot_layer_t *raw       = GC_ALLOC_INIT(slot_layer_t, {0});
 	raw->id                 = 0;

@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void ui_sidebar_render_ui() {
 
 	// Expand button

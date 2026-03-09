@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 logic_node_t *logic_node_create(logic_node_ext_t *ext) {
 	logic_node_t *n = GC_ALLOC_INIT(logic_node_t, {0});
 	n->inputs       = any_array_create_from_raw((void *[]){}, 0);

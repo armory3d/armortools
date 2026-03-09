@@ -1,4 +1,6 @@
 
+#include "global.h"
+
 void box_export_show_textures() {
 	ui_box_show_custom(&box_export_show_textures_34135, 600, 400, NULL, true, tr("Export", NULL));
 }

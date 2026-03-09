@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 bool make_paint_is_raytraced_bake() {
 	return context_raw->bake_type == BAKE_TYPE_INIT;
 }

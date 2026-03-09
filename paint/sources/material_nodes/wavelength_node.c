@@ -1,4 +1,6 @@
 
+#include "../global.h"
+
 // let str_wavelength_to_rgb: string = "\
 // fun wavelength_to_rgb(t: float): float3 { \
 // 	var r: float3 = t * 2.1 - float3(1.8, 1.14, 0.3); \

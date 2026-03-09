@@ -1,4 +1,6 @@
 
+#include "../global.h"
+
 time_node_t *time_node_create(ui_node_t *raw, f32_array_t *args) {
 	time_node_t *n = GC_ALLOC_INIT(time_node_t, {0});
 	n->base        = logic_node_create(n);

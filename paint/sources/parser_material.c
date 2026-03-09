@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 ui_node_t *parser_material_get_node(i32 id) {
 	for (i32 i = 0; i < parser_material_nodes->length; ++i) {
 		ui_node_t *n = parser_material_nodes->buffer[i];

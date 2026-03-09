@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void texture_coordinate_node_init() {
 	any_array_push(nodes_material_input, texture_coordinate_node_def);
 	any_map_set(parser_material_node_vectors, "TEX_COORD", texture_coordinate_node_vector);

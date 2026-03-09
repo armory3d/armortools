@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void resource_load(string_t_array_t *names) {
 	for (i32 i = 0; i < names->length; ++i) {
 		char      *s     = names->buffer[i];

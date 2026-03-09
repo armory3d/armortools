@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void image_to_3d_mesh_node_init() {
 	any_array_push(nodes_material_neural, image_to_3d_mesh_node_def);
 	any_map_set(parser_material_node_values, "NEURAL_IMAGE_TO_3D_MESH", neural_node_value);

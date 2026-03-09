@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void material_node_init() {
 	any_array_push(nodes_material_input, material_node_def);
 	any_map_set(parser_material_node_vectors, "MATERIAL", material_node_vector);

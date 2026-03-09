@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void uniforms_ext_init() {
 	gc_unroot(uniforms_i32_links);
 	uniforms_i32_links = uniforms_ext_i32_link;

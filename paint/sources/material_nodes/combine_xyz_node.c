@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void combine_xyz_node_init() {
 	any_array_push(nodes_material_utilities, combine_xyz_node_def);
 	any_map_set(parser_material_node_vectors, "COMBXYZ", combine_xyz_node_vector);

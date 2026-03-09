@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void camera_texture_node_init() {
 	any_array_push(nodes_material_texture, camera_texture_node_def);
 	any_map_set(parser_material_node_vectors, "TEX_CAMERA", camera_texture_node_vector);

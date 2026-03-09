@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void compass_render() {
 	if (!context_raw->show_compass) {
 		return;

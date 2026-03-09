@@ -1,4 +1,6 @@
 
+#include "../global.h"
+
 brush_output_node_t *brush_output_node_create(ui_node_t *raw, f32_array_t *args) {
 	context_raw->run_brush          = brush_output_node_run;
 	context_raw->parse_brush_inputs = brush_output_node_parse_inputs;
@@ -6,16 +8,11 @@ brush_output_node_t *brush_output_node_create(ui_node_t *raw, f32_array_t *args)
 	brush_output_node_t *n = GC_ALLOC_INIT(brush_output_node_t, {0});
 	n->base                = logic_node_create(n);
 	n->raw                 = raw;
-	brush_output_node_create_ext(n);
+	context_raw->brush_output_node_inst = n;
 	return n;
 }
 
-void brush_output_node_create_ext(brush_output_node_t *n) {
-	context_raw->brush_output_node_inst = n;
-}
-
 void brush_output_node_parse_inputs(brush_output_node_t *self) {
-
 	gpu_texture_t *last_mask    = context_raw->brush_mask_image;
 	gpu_texture_t *last_stencil = context_raw->brush_stencil_image;
 

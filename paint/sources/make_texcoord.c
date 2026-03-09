@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void make_texcoord_run(node_shader_t *kong) {
 
 	bool      fill_layer = context_raw->layer->fill_layer != NULL;

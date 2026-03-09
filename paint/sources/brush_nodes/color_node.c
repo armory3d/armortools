@@ -1,4 +1,6 @@
 
+#include "../global.h"
+
 color_node_t *color_node_create(ui_node_t *raw, f32_array_t *args) {
 	f32           r       = args == NULL ? 0.8 : args->buffer[0];
 	f32           g       = args == NULL ? 0.8 : args->buffer[1];

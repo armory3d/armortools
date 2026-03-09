@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void gamma_node_init() {
 	any_array_push(nodes_material_color, gamma_node_def);
 	any_map_set(parser_material_node_vectors, "GAMMA", gamma_node_vector);

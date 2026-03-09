@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void tab_swatches_empty_set(gpu_texture_t *image) {
 	gc_unroot(_tab_swatches_empty);
 	_tab_swatches_empty = image;

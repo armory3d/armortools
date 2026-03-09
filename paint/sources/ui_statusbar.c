@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void ui_statusbar_init() {}
 
 i32 ui_statusbar_width() {

@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 // Based on miniexr.cpp - public domain - 2013 Aras Pranckevicius / Unity Technologies
 // https://github.com/aras-p/miniexr
 // https://www.openexr.com/documentation/openexrfilelayout.pdf

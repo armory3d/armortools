@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 node_shader_t *node_shader_create(node_shader_context_t *context) {
 	node_shader_t *raw     = GC_ALLOC_INIT(node_shader_t, {0});
 	raw->context           = context;

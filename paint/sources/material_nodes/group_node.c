@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void group_node_init() {
 	any_array_push(nodes_material_group, group_node_def);
 	any_map_set(parser_material_node_vectors, "GROUP", group_node_vector);
@@ -102,22 +105,7 @@ void nodes_material_group_output_button(i32 node_id) {
 	nodes_material_add_socket_button(nodes, node, node->inputs);
 }
 
-void nodes_material_add_socket_button(ui_nodes_t *nodes, ui_node_t *node, ui_node_socket_t_array_t *sockets) {
-	if (ui_button(tr("Add", NULL), UI_ALIGN_CENTER, "")) {
-		gc_unroot(_nodes_material_nodes);
-		_nodes_material_nodes = nodes;
-		gc_root(_nodes_material_nodes);
-		gc_unroot(_nodes_material_node);
-		_nodes_material_node = node;
-		gc_root(_nodes_material_node);
-		gc_unroot(_nodes_material_sockets);
-		_nodes_material_sockets = sockets;
-		gc_root(_nodes_material_sockets);
-		ui_menu_draw(&nodes_material_add_socket_button_229488, -1, -1);
-	}
-}
-
-void nodes_material_add_socket_button_229488() {
+void nodes_material_add_socket_menu() {
 	ui_nodes_t               *nodes       = _nodes_material_nodes;
 	ui_node_t                *node        = _nodes_material_node;
 	ui_node_socket_t_array_t *sockets     = _nodes_material_sockets;
@@ -134,6 +122,21 @@ void nodes_material_add_socket_button_229488() {
 	if (ui_menu_button(tr("Value", NULL), "", ICON_NONE)) {
 		any_array_push(sockets, nodes_material_create_socket(nodes, node, NULL, "VALUE", c, 0.0, 1.0, NULL));
 		nodes_material_sync_sockets(node);
+	}
+}
+
+void nodes_material_add_socket_button(ui_nodes_t *nodes, ui_node_t *node, ui_node_socket_t_array_t *sockets) {
+	if (ui_button(tr("Add", NULL), UI_ALIGN_CENTER, "")) {
+		gc_unroot(_nodes_material_nodes);
+		_nodes_material_nodes = nodes;
+		gc_root(_nodes_material_nodes);
+		gc_unroot(_nodes_material_node);
+		_nodes_material_node = node;
+		gc_root(_nodes_material_node);
+		gc_unroot(_nodes_material_sockets);
+		_nodes_material_sockets = sockets;
+		gc_root(_nodes_material_sockets);
+		ui_menu_draw(&nodes_material_add_socket_menu, -1, -1);
 	}
 }
 

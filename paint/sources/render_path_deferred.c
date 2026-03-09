@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void render_path_deferred_init() {
 
 	{

@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void viewport_scale_to_bounds(f32 bounds) {
 	mesh_object_t *po          = context_raw->merged_object == NULL ? context_main_object() : context_raw->merged_object;
 	mesh_data_t   *md          = po->data;

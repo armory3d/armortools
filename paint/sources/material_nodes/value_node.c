@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void value_node_init() {
 	any_array_push(nodes_material_input, value_node_def);
 	any_map_set(parser_material_node_values, "VALUE", value_node_value);

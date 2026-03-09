@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void wireframe_node_init() {
 	any_array_push(nodes_material_input, wireframe_node_def);
 	any_map_set(parser_material_node_values, "WIREFRAME", wireframe_node_value);

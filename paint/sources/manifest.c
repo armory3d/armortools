@@ -1,4 +1,5 @@
 
+#include "global.h"
 
 // let manifest_title: string           = "ArmorPaint";
 // let manifest_version: string         = "1.0 alpha";

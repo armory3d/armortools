@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void tab_scripts_draw(ui_handle_t *htab) {
 	if (ui_tab(htab, tr("Scripts", NULL), false, -1, false)) {
 

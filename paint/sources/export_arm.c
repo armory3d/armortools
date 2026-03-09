@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void export_arm_run_mesh(char *path, mesh_object_t_array_t *paint_objects) {
 	mesh_data_t_array_t *mesh_datas = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < paint_objects->length; ++i) {

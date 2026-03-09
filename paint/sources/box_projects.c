@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void box_projects_show() {
 	if (box_projects_icon_map != NULL) {
 		string_t_array_t *keys = map_keys(box_projects_icon_map);

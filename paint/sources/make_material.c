@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 bool make_material_get_mout() {
 	for (i32 i = 0; i < context_raw->material->canvas->nodes->length; ++i) {
 		ui_node_t *n = context_raw->material->canvas->nodes->buffer[i];

@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void vary_image_node_init() {
 	any_array_push(nodes_material_neural, vary_image_node_def);
 	any_map_set(parser_material_node_vectors, "NEURAL_VARY_IMAGE", neural_node_vector);

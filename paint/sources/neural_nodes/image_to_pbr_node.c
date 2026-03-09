@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void image_to_pbr_node_init() {
 	any_array_push(nodes_material_neural, image_to_pbr_node_def);
 	any_map_set(parser_material_node_vectors, "NEURAL_IMAGE_TO_PBR", image_to_pbr_node_vector);

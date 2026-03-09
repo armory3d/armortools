@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void sculpt_import_mesh_pack_to_texture(mesh_data_t *mesh, slot_layer_t *l) {
 	buffer_t *b = buffer_create(config_get_texture_res_x() * config_get_texture_res_y() * 4 * 4);
 	for (i32 i = 0; i < math_floor(mesh->index_array->length); ++i) {

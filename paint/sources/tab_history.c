@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void tab_history_draw(ui_handle_t *htab) {
 	if (ui_tab(htab, tr("History", NULL), false, -1, false)) {
 		for (i32 i = 0; i < history_steps->length; ++i) {

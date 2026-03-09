@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 ui_node_socket_t_array_t *_import_arm_get_legacy_node_socket_array(any_map_t *old, char *key) {
 	ui_node_socket_t_array_t *sockets = any_array_create_from_raw((void *[]){}, 0);
 	any_array_t              *ias     = any_map_get(old, key);

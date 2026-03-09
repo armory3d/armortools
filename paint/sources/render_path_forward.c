@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void render_path_forward_init() {}
 
 void render_path_forward_commands() {

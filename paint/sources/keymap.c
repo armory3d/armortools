@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void keymap_load() {
 	gc_unroot(config_keymap);
 	config_keymap = keymap_get_default();

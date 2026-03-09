@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void import_asset_run(char *path, f32 drop_x, f32 drop_y, bool show_box, bool hdr_as_envmap, void (*done)(void)) {
 	if (starts_with(path, "cloud")) {
 		#ifdef IRON_ANDROID

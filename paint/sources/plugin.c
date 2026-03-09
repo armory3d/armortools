@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 plugin_t *plugin_create() {
 	plugin_t *p = GC_ALLOC_INIT(plugin_t, {0});
 	p->name     = string_copy(_plugin_name);

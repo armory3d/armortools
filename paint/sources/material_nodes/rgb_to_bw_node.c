@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void rgb_to_bw_node_init() {
 	any_array_push(nodes_material_utilities, rgb_to_bw_node_def);
 	any_map_set(parser_material_node_values, "RGBTOBW", rgb_to_bw_node_value);

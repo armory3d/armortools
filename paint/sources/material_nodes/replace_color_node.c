@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void replace_color_node_init() {
 	any_array_push(nodes_material_color, replace_color_node_def);
 	any_map_set(parser_material_node_vectors, "REPLACECOL", replace_color_node_vector);

@@ -1,4 +1,6 @@
 
+#include "../global.h"
+
 // else if (node.type == "CURVE_RGB") { // RGB Curves
 // 	let fac: string = parser_material_parse_value_input(node.inputs[0]);
 // 	let vec: string = parser_material_parse_vector_input(node.inputs[1]);

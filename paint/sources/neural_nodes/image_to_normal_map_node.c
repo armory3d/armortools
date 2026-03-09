@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void image_to_normal_map_node_init() {
 	any_array_push(nodes_material_neural, image_to_normal_map_node_def);
 	any_map_set(parser_material_node_vectors, "NEURAL_IMAGE_TO_NORMAL_MAP", neural_node_vector);

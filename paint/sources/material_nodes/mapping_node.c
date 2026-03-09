@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void mapping_node_init() {
 	any_array_push(nodes_material_utilities, mapping_node_def);
 	any_map_set(parser_material_node_vectors, "MAPPING", mapping_node_vector);

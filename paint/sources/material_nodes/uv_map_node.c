@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void uv_map_node_init() {
 	any_array_push(nodes_material_input, uv_map_node_def);
 	any_map_set(parser_material_node_vectors, "UVMAP", uv_map_node_vector);

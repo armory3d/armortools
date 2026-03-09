@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void ui_toolbar_init() {}
 
 void ui_toolbar_draw_tool(i32 tool, gpu_texture_t *img, i32 icon_accent) {

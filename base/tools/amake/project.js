@@ -7,8 +7,6 @@ project.add_cfiles("../../sources/iron_string.c");
 project.add_cfiles("../../sources/iron_array.c");
 project.add_cfiles("../../sources/iron_gc.c");
 project.add_define("NO_GC");
-project.add_define("NO_GC_USE_HEAP");
-project.add_define("NO_IRON_API");
 
 project.add_include_dir("../../sources/libs");
 project.add_cfiles("../../sources/libs/quickjs-amalgam.c");
@@ -21,14 +19,10 @@ project.add_cfiles("ashader.c");
 project.add_cfiles('../../sources/libs/kong/libs/*.c');
 project.add_cfiles('../../sources/libs/kong/*.c');
 project.add_cfiles('../../sources/libs/kong/backends/*.c');
-// project.add_cfiles('../../sources/libs/kong/backends/*.cpp'); // d3d12.cpp
 
 if (platform === "windows") {
 	project.add_define('_CRT_SECURE_NO_WARNINGS');
 	project.add_lib('d3dcompiler');
-	// project.add_include_dir('../../sources/libs/kong/libs/dxc/inc');
-	// project.add_lib('../../sources/libs/kong/libs/dxc/lib/x64/dxcompiler');
-	// hlslbin
 	project.add_lib("dxguid");
 }
 else if (platform === "macos") {

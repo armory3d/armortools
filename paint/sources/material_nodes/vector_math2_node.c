@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void vector_math2_node_init() {
 	any_array_push(nodes_material_utilities, vector_math2_node_def);
 	any_map_set(parser_material_node_vectors, "VECT_MATH", vector_math2_node_vector);

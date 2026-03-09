@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 buffer_t *util_encode_scene(scene_t *raw) {
 	i32       size    = 8 * 1024 * 1024 + util_encode_mesh_data_size(raw->mesh_datas);
 	buffer_t *encoded = buffer_create(size);

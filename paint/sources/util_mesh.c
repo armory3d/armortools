@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void util_mesh_merge(mesh_object_t_array_t *paint_objects) {
 	if (paint_objects == NULL) {
 		if (context_raw->tool == TOOL_TYPE_GIZMO) {

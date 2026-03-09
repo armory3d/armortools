@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void color_ramp_node_init() {
 	any_array_push(nodes_material_utilities, color_ramp_node_def);
 	any_map_set(parser_material_node_vectors, "VALTORGB", color_ramp_node_vector);

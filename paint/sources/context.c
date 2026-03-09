@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 context_t *context_create() {
 	context_t *c                         = GC_ALLOC_INIT(context_t, {0});
 	c->merged_object_is_atlas            = false; // Only objects referenced by atlas are merged

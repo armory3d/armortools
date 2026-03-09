@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void nodes_material_init() {
 	if (nodes_material_list != NULL) {
 		return;

@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void import_plugin_run(char *path) {
 	if (!path_is_plugin(path)) {
 		console_error(strings_unknown_asset_format());

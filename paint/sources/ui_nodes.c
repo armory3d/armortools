@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void ui_viewnodes_init() {
 	gc_unroot(ui_nodes_preview_image);
 	ui_nodes_preview_image = ui_nodes_get_node_preview_image;

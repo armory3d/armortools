@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void invert_color_node_init() {
 	any_array_push(nodes_material_color, invert_color_node_def);
 	any_map_set(parser_material_node_vectors, "INVERT_COLOR", invert_color_node_vector);

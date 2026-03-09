@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void render_path_raytrace_init() {}
 
 void render_path_raytrace_commands(bool use_live_layer) {

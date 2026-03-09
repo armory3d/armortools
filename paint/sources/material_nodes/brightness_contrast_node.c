@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void brightness_contrast_node_init() {
 	any_array_push(nodes_material_color, brightness_contrast_node_def);
 	any_map_set(parser_material_node_vectors, "BRIGHTCONTRAST", brightness_contrast_node_vector);

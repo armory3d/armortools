@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void tab_layers_draw(ui_handle_t *htab) {
 	bool mini = config_raw->layout->buffer[LAYOUT_SIZE_SIDEBAR_W] <= ui_sidebar_w_mini;
 	mini ? tab_layers_draw_mini(htab) : tab_layers_draw_full(htab);

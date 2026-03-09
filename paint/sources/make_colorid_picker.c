@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void make_colorid_picker_run(node_shader_t *kong) {
 	// Mangle vertices to form full screen triangle
 	node_shader_write_vert(kong, "output.pos = float4(-1.0 + float((vertex_id() & 1) << 2), -1.0 + float((vertex_id() & 2) << 1), 0.0, 1.0);");

@@ -1,3 +1,6 @@
+
+#include "../global.h"
+
 void gabor_texture_node_init() {
 	any_array_push(nodes_material_texture, gabor_texture_node_def);
 	any_map_set(parser_material_node_values, "TEX_GABOR", gabor_texture_node_value);

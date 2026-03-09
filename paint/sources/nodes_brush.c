@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void nodes_brush_init() {
 	gc_unroot(nodes_brush_creates);
 	nodes_brush_creates = any_map_create();

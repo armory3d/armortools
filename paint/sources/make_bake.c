@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void make_bake_run(node_shader_context_t *con, node_shader_t *kong) {
 	if (context_raw->bake_type == BAKE_TYPE_CURVATURE) {
 		bool      pass     = parser_material_bake_passthrough;

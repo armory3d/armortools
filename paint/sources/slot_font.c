@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 slot_font_t *slot_font_create(char *name, draw_font_t *font, char *file) {
 	slot_font_t *raw   = GC_ALLOC_INIT(slot_font_t, {0});
 	raw->preview_ready = false;

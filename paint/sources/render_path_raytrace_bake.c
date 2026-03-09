@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 bool render_path_raytrace_bake_commands(void (*parse_paint_material)(bool)) {
 
 	if (!render_path_raytrace_ready || !render_path_raytrace_is_bake || render_path_raytrace_bake_last_bake_type != context_raw->bake_type) {

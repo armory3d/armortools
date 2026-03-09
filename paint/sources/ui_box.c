@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void ui_box_init() {
 	ui_box_hwnd->redraws = 2;
 	ui_box_hwnd->drag_x  = 0;

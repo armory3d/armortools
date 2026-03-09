@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 void tab_brushes_draw(ui_handle_t *htab) {
 	if (ui_tab(htab, tr("Brushes", NULL), false, -1, false)) {
 		ui_begin_sticky();

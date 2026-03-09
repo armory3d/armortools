@@ -1,3 +1,6 @@
+
+#include "global.h"
+
 char *strings_arm_file_expected() {
 	return tr("Error: .arm file expected", NULL);
 }

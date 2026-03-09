@@ -1,4 +1,6 @@
 
+#include "../global.h"
+
 // let material_output_node_def: ui_node_t = {
 //     id: 0,
 //     name: _tr("Material Output"),
