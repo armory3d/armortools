@@ -1,6 +1,19 @@
 
 #include "global.h"
 
+void tab_console_draw_export_on_file_picked(char *path) {
+	char *str = string_array_join(console_last_traces, "\n");
+	char *f   = ui_files_filename;
+	if (string_equals(f, "")) {
+		f = string_copy(tr("untitled", NULL));
+	}
+	path = string_join(string_join(path, PATH_SEP), f);
+	if (!ends_with(path, ".txt")) {
+		path = string_join(path, ".txt");
+	}
+	iron_file_save_bytes(path, sys_string_to_buffer(str), 0);
+}
+
 void tab_console_draw(ui_handle_t *htab) {
 	char *title = console_message_timer > 0 ? string_join(console_message, "        ") : tr("Console", NULL);
 	i32       color = console_message_timer > 0 ? console_message_color : -1;
@@ -32,7 +45,7 @@ void tab_console_draw(ui_handle_t *htab) {
 			gc_root(console_last_traces);
 		}
 		if (ui_icon_button(tr("Export", NULL), ICON_EXPORT, UI_ALIGN_CENTER)) {
-			ui_files_show("txt", true, false, &tab_console_draw_37642);
+			ui_files_show("txt", true, false, &tab_console_draw_export_on_file_picked);
 		}
 		#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
 		if (ui_icon_button(tr("Copy", NULL), ICON_COPY, UI_ALIGN_CENTER)) {
@@ -55,17 +68,4 @@ void tab_console_draw(ui_handle_t *htab) {
 		ui_set_font(ui, _font);
 		ui->font_size = _font_size;
 	}
-}
-
-void tab_console_draw_37642(char *path) {
-	char *str = string_array_join(console_last_traces, "\n");
-	char *f   = ui_files_filename;
-	if (string_equals(f, "")) {
-		f = string_copy(tr("untitled", NULL));
-	}
-	path = string_join(string_join(path, PATH_SEP), f);
-	if (!ends_with(path, ".txt")) {
-		path = string_join(path, ".txt");
-	}
-	iron_file_save_bytes(path, sys_string_to_buffer(str), 0);
 }

@@ -1,6 +1,23 @@
 
 #include "global.h"
 
+void history_undo_invert_mask(history_step_t *step) {
+	context_raw->layer = project_layers->buffer[step->layer];
+	slot_layer_invert_mask(context_raw->layer);
+}
+
+void history_undo_delete_layer_group(void *_) {
+	i32 active = history_steps->length - 1 - history_redos;
+	// 1. Undo deleting group masks
+	i32 n = 1;
+	while (history_steps->buffer[active - n]->layer_type == LAYER_SLOT_TYPE_MASK) {
+		history_undo();
+		++n;
+	}
+	// 2. Undo a mask to have a non empty group
+	history_undo();
+}
+
 void history_undo() {
 	if (history_undos > 0) {
 		i32             active = history_steps->length - 1 - history_redos;
@@ -37,7 +54,7 @@ void history_undo() {
 
 			// Undo at least second time in order to avoid empty groups
 			if (step->layer_type == LAYER_SLOT_TYPE_GROUP) {
-				sys_notify_on_next_frame(&history_undo_76821, NULL);
+				sys_notify_on_next_frame(&history_undo_delete_layer_group, NULL);
 			}
 		}
 		else if (string_equals(step->name, tr("Clear Layer", NULL))) {
@@ -131,7 +148,7 @@ void history_undo() {
 			context_set_layer(context_raw->layer);
 		}
 		else if (string_equals(step->name, tr("Invert Mask", NULL))) {
-			sys_notify_on_next_frame(&history_undo_77442, step);
+			sys_notify_on_next_frame(&history_undo_invert_mask, step);
 		}
 		else if (string_equals(step->name, "Apply Filter")) {
 			history_undo_i    = history_undo_i - 1 < 0 ? config_raw->undo_steps - 1 : history_undo_i - 1;
@@ -216,21 +233,50 @@ void history_undo() {
 	}
 }
 
-void history_undo_77442(history_step_t *step) {
+void history_redo_invert_mask(history_step_t *step) {
 	context_raw->layer = project_layers->buffer[step->layer];
 	slot_layer_invert_mask(context_raw->layer);
 }
 
-void history_undo_76821(void * _) {
-	i32 active = history_steps->length - 1 - history_redos;
-	// 1. Undo deleting group masks
-	i32 n = 1;
-	while (history_steps->buffer[active - n]->layer_type == LAYER_SLOT_TYPE_MASK) {
-		history_undo();
+void history_redo_apply_mask(void *_) {
+	slot_layer_apply_mask(context_raw->layer);
+	context_set_layer(context_raw->layer);
+	context_raw->layers_preview_dirty = true;
+}
+
+void history_redo_merge_layers2(void *_) {
+	layers_merge_down();
+}
+
+void history_redo_merge_layers(void *_) {
+	history_copy_merging_layers();
+}
+
+void history_redo_duplicate_layer(void *_) {
+	layers_duplicate_layer(context_raw->layer);
+}
+
+void history_redo_delete_layer(void *_) {
+	i32 active = history_steps->length - history_redos;
+	i32 n      = 1;
+	while (history_steps->buffer[active + n]->layer_type == LAYER_SLOT_TYPE_MASK) {
 		++n;
 	}
-	// 2. Undo a mask to have a non empty group
-	history_undo();
+	for (i32 i = 0; i < n; ++i) {
+		history_redo();
+	}
+}
+
+void history_redo_new_fill_mask(slot_layer_t *l) {
+	slot_layer_to_fill_layer(l);
+}
+
+void history_redo_new_white_mask(slot_layer_t *l) {
+	slot_layer_clear(l, 0xffffffff, NULL, 1.0, layers_default_rough, 0.0);
+}
+
+void history_redo_new_black_mask(slot_layer_t *l) {
+	slot_layer_clear(l, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
 }
 
 void history_redo() {
@@ -247,14 +293,14 @@ void history_redo() {
 			slot_layer_t *l      = slot_layer_create("", step->layer_type, parent);
 			array_insert(project_layers, step->layer, l);
 			if (string_equals(step->name, tr("New Black Mask", NULL))) {
-				sys_notify_on_next_frame(&history_redo_78106, l);
+				sys_notify_on_next_frame(&history_redo_new_black_mask, l);
 			}
 			else if (string_equals(step->name, tr("New White Mask", NULL))) {
-				sys_notify_on_next_frame(&history_redo_78139, l);
+				sys_notify_on_next_frame(&history_redo_new_white_mask, l);
 			}
 			else if (string_equals(step->name, tr("New Fill Mask", NULL))) {
 				context_raw->material = project_materials->buffer[step->material];
-				sys_notify_on_next_frame(&history_redo_78179, l);
+				sys_notify_on_next_frame(&history_redo_new_fill_mask, l);
 			}
 			context_raw->layer_preview_dirty = true;
 			context_set_layer(l);
@@ -277,7 +323,7 @@ void history_redo() {
 			if (step->layer_type == LAYER_SLOT_TYPE_LAYER && history_steps->length >= active + 2 &&
 			    (history_steps->buffer[active + 1]->layer_type == LAYER_SLOT_TYPE_GROUP ||
 			     history_steps->buffer[active + 1]->layer_type == LAYER_SLOT_TYPE_MASK)) {
-				sys_notify_on_next_frame(&history_redo_78330, NULL);
+				sys_notify_on_next_frame(&history_redo_delete_layer, NULL);
 			}
 		}
 		else if (string_equals(step->name, tr("Clear Layer", NULL))) {
@@ -288,7 +334,7 @@ void history_redo() {
 		}
 		else if (string_equals(step->name, tr("Duplicate Layer", NULL))) {
 			context_raw->layer = project_layers->buffer[step->layer];
-			sys_notify_on_next_frame(&history_redo_78447, NULL);
+			sys_notify_on_next_frame(&history_redo_duplicate_layer, NULL);
 		}
 		else if (string_equals(step->name, tr("Order Layers", NULL))) {
 			slot_layer_t *target                     = project_layers->buffer[step->prev_order];
@@ -297,8 +343,8 @@ void history_redo() {
 		}
 		else if (string_equals(step->name, tr("Merge Layers", NULL))) {
 			context_raw->layer = project_layers->buffer[step->layer + 1];
-			sys_notify_on_next_frame(&history_redo_78524, NULL);
-			sys_notify_on_next_frame(&history_redo_78540, NULL);
+			sys_notify_on_next_frame(&history_redo_merge_layers, NULL);
+			sys_notify_on_next_frame(&history_redo_merge_layers2, NULL);
 		}
 		else if (string_equals(step->name, tr("Apply Mask", NULL))) {
 			context_raw->layer = project_layers->buffer[step->layer];
@@ -318,10 +364,10 @@ void history_redo() {
 				history_copy_merging_layers2(layers);
 			}
 
-			sys_notify_on_next_frame(&history_redo_78638, NULL);
+			sys_notify_on_next_frame(&history_redo_apply_mask, NULL);
 		}
 		else if (string_equals(step->name, tr("Invert Mask", NULL))) {
-			sys_notify_on_next_frame(&history_redo_78676, step);
+			sys_notify_on_next_frame(&history_redo_invert_mask, step);
 		}
 		else if (string_equals(step->name, tr("Apply Filter", NULL))) {
 			slot_layer_t *lay = history_undo_layers->buffer[history_undo_i];
@@ -405,52 +451,6 @@ void history_redo() {
 			ui_menubar_menu_handle->redraws = 2;
 		}
 	}
-}
-
-void history_redo_78676(history_step_t *step) {
-	context_raw->layer = project_layers->buffer[step->layer];
-	slot_layer_invert_mask(context_raw->layer);
-}
-
-void history_redo_78638(void * _) {
-	slot_layer_apply_mask(context_raw->layer);
-	context_set_layer(context_raw->layer);
-	context_raw->layers_preview_dirty = true;
-}
-
-void history_redo_78540(void * _) {
-	layers_merge_down();
-}
-
-void history_redo_78524(void * _) {
-	history_redo_merge_layers();
-}
-
-void history_redo_78447(void * _) {
-	layers_duplicate_layer(context_raw->layer);
-}
-
-void history_redo_78330(void * _) {
-	i32 active = history_steps->length - history_redos;
-	i32 n      = 1;
-	while (history_steps->buffer[active + n]->layer_type == LAYER_SLOT_TYPE_MASK) {
-		++n;
-	}
-	for (i32 i = 0; i < n; ++i) {
-		history_redo();
-	}
-}
-
-void history_redo_78179(slot_layer_t *l) {
-	slot_layer_to_fill_layer(l);
-}
-
-void history_redo_78139(slot_layer_t *l) {
-	slot_layer_clear(l, 0xffffffff, NULL, 1.0, layers_default_rough, 0.0);
-}
-
-void history_redo_78106(slot_layer_t *l) {
-	slot_layer_clear(l, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
 }
 
 void history_reset() {
@@ -621,12 +621,12 @@ void history_delete_material_group(node_group_t *group) {
 }
 
 history_step_t *history_push(char *name) {
-	#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
+#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
 	char *filename = string_equals(project_filepath, "")
-	                         ? ui_files_filename
-	                         : substring(project_filepath, string_last_index_of(project_filepath, PATH_SEP) + 1, string_length(project_filepath) - 4);
+	                     ? ui_files_filename
+	                     : substring(project_filepath, string_last_index_of(project_filepath, PATH_SEP) + 1, string_length(project_filepath) - 4);
 	sys_title_set(string_join(string_join(filename, "* - "), manifest_title));
-	#endif
+#endif
 
 	if (config_raw->touch_ui) {
 		// Refresh undo & redo buttons
@@ -668,10 +668,6 @@ history_step_t *history_push(char *name) {
 		array_shift(history_steps);
 	}
 	return history_steps->buffer[history_steps->length - 1];
-}
-
-void history_redo_merge_layers() {
-	history_copy_merging_layers();
 }
 
 void history_copy_merging_layers() {
@@ -725,8 +721,8 @@ void history_copy_to_undo(i32 from_id, i32 to_id, bool is_mask) {
 		                                                                           : GPU_TEXTURE_FORMAT_RGBA128;
 
 		char *pipe = format == GPU_TEXTURE_FORMAT_RGBA32   ? "copy_mrt3_pass"
-		                 : format == GPU_TEXTURE_FORMAT_RGBA64 ? "copy_mrt3RGBA64_pass"
-		                                                       : "copy_mrt3RGBA128_pass";
+		             : format == GPU_TEXTURE_FORMAT_RGBA64 ? "copy_mrt3RGBA64_pass"
+		                                                   : "copy_mrt3RGBA128_pass";
 		render_path_draw_shader(string_join("Scene/copy_mrt3_pass/", pipe));
 	}
 	history_undo_i = (history_undo_i + 1) % config_raw->undo_steps;

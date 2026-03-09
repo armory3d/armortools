@@ -60,6 +60,46 @@ draw_cloud_icon_data_t *make_draw_cloud_icon_data(char *f, gpu_texture_t *image)
 	return data;
 }
 
+void ui_files_file_browser_on_cache_cloud_done_on_next_frame(draw_cloud_icon_data_t *data) {
+	gpu_texture_t *icon = gpu_create_render_target(data->image->width, data->image->height, GPU_TEXTURE_FORMAT_RGBA32);
+	if (ends_with(data->f, ".arm")) { // Used for material sphere alpha cutout
+		draw_begin(icon, false, 0);
+		draw_image(project_materials->buffer[0]->image, 0, 0);
+	}
+	else {
+		draw_begin(icon, true, 0xffffffff);
+	}
+	draw_set_pipeline(pipes_copy_rgb);
+	draw_image(data->image, 0, 0);
+	draw_set_pipeline(NULL);
+	draw_end();
+	any_map_set(ui_files_icon_map, string_join(string_join(_ui_files_file_browser_handle->text, PATH_SEP), data->f), icon);
+	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 3;
+}
+
+void ui_files_file_browser_on_cache_cloud_done(char *abs) {
+	if (abs != NULL) {
+		gpu_texture_t *image = data_get_image(abs);
+		if (image != NULL) {
+			#ifdef IRON_WINDOWS
+			abs                               = string_copy(string_replace_all(abs, "\\", "/"));
+			#endif
+			char               *icon_file = substring(abs, string_last_index_of(abs, "/") + 1, string_length(abs));
+			char               *f         = any_map_get(ui_files_icon_file_map, icon_file);
+			draw_cloud_icon_data_t *data      = make_draw_cloud_icon_data(f, image);
+			sys_notify_on_next_frame(&ui_files_file_browser_on_cache_cloud_done_on_next_frame, data);
+		}
+	}
+	else {
+		ui_files_offline = true;
+	}
+}
+
+void ui_files_file_browser_on_init_cloud_done() {
+	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 3;
+	tab_browser_refresh                             = true;
+}
+
 char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, bool refresh, void (*context_menu)(char *)) {
 
 	gpu_texture_t *icons       = resource_get("icons.k");
@@ -70,7 +110,7 @@ char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, 
 	bool           is_cloud    = starts_with(handle->text, "cloud");
 
 	if (is_cloud && file_cloud == NULL) {
-		file_init_cloud(&ui_files_file_browser_44862, config_raw->server);
+		file_init_cloud(&ui_files_file_browser_on_init_cloud_done, config_raw->server);
 	}
 	if (is_cloud && file_read_directory("cloud")->length == 0) {
 		return handle->text;
@@ -210,7 +250,7 @@ char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, 
 							gc_root(_ui_files_file_browser_handle);
 							any_map_set(ui_files_icon_file_map, icon_file, f);
 
-							file_cache_cloud(string_join(string_join(handle->text, PATH_SEP), icon_file), &ui_files_file_browser_45653, config_raw->server);
+							file_cache_cloud(string_join(string_join(handle->text, PATH_SEP), icon_file), &ui_files_file_browser_on_cache_cloud_done, config_raw->server);
 						}
 					}
 				}
@@ -419,46 +459,6 @@ char *ui_files_file_browser(ui_handle_t *handle, bool drag_files, char *search, 
 	}
 	ui->_y += slotw * 0.8;
 	return handle->text;
-}
-
-void ui_files_file_browser_45742(draw_cloud_icon_data_t *data) {
-	gpu_texture_t *icon = gpu_create_render_target(data->image->width, data->image->height, GPU_TEXTURE_FORMAT_RGBA32);
-	if (ends_with(data->f, ".arm")) { // Used for material sphere alpha cutout
-		draw_begin(icon, false, 0);
-		draw_image(project_materials->buffer[0]->image, 0, 0);
-	}
-	else {
-		draw_begin(icon, true, 0xffffffff);
-	}
-	draw_set_pipeline(pipes_copy_rgb);
-	draw_image(data->image, 0, 0);
-	draw_set_pipeline(NULL);
-	draw_end();
-	any_map_set(ui_files_icon_map, string_join(string_join(_ui_files_file_browser_handle->text, PATH_SEP), data->f), icon);
-	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 3;
-}
-
-void ui_files_file_browser_45653(char *abs) {
-	if (abs != NULL) {
-		gpu_texture_t *image = data_get_image(abs);
-		if (image != NULL) {
-			#ifdef IRON_WINDOWS
-			abs                               = string_copy(string_replace_all(abs, "\\", "/"));
-			#endif
-			char               *icon_file = substring(abs, string_last_index_of(abs, "/") + 1, string_length(abs));
-			char               *f         = any_map_get(ui_files_icon_file_map, icon_file);
-			draw_cloud_icon_data_t *data      = make_draw_cloud_icon_data(f, image);
-			sys_notify_on_next_frame(&ui_files_file_browser_45742, data);
-		}
-	}
-	else {
-		ui_files_offline = true;
-	}
-}
-
-void ui_files_file_browser_44862() {
-	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 3;
-	tab_browser_refresh                             = true;
 }
 
 void ui_files_make_icon(ui_files_make_icon_t *args) {

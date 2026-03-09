@@ -194,8 +194,8 @@ vec4_t uniforms_ext_vec3_link(object_t *object, material_data_t *mat, char *link
 		f32 lastx = context_raw->prev_paint_vec_x;
 		f32 lasty = context_raw->prev_paint_vec_y;
 		if (context_raw->paint2d) {
-			x     = vec2d(x);
-			lastx = vec2d(lastx);
+			x     = uniforms_ext_vec2d(x);
+			lastx = uniforms_ext_vec2d(lastx);
 		}
 		f32 angle                     = math_atan2(-y + lasty, x - lastx) - math_pi() / (float)2;
 		v                             = vec4_create(math_cos(angle), math_sin(angle), allow_paint ? 1 : 0, 1.0);
@@ -239,7 +239,7 @@ vec4_t uniforms_ext_vec3_link(object_t *object, material_data_t *mat, char *link
 	return v;
 }
 
-f32 vec2d(f32 x) {
+f32 uniforms_ext_vec2d(f32 x) {
 	// Transform from 3d viewport coord to 2d view coord
 	context_raw->paint2d_view = false;
 	f32 res                   = (x * base_w() - base_w()) / (float)ui_view2d_ww;
@@ -252,7 +252,7 @@ vec4_t uniforms_ext_vec4_link(object_t *object, material_data_t *mat, char *link
 		bool   down = mouse_down("left") || pen_down("tip");
 		vec4_t v    = vec4_create(context_raw->paint_vec.x, context_raw->paint_vec.y, down ? 1.0 : 0.0, context_raw->paint2d ? 1.0 : 0.0);
 		if (context_raw->paint2d) {
-			v.x = vec2d(v.x);
+			v.x = uniforms_ext_vec2d(v.x);
 		}
 
 		return v;
@@ -261,7 +261,7 @@ vec4_t uniforms_ext_vec4_link(object_t *object, material_data_t *mat, char *link
 		bool   down = mouse_down("left") || pen_down("tip");
 		vec4_t v    = vec4_create(context_raw->last_paint_vec_x, context_raw->last_paint_vec_y, down ? 1.0 : 0.0, context_raw->paint2d ? 1.0 : 0.0);
 		if (context_raw->paint2d) {
-			v.x = vec2d(v.x);
+			v.x = uniforms_ext_vec2d(v.x);
 		}
 
 		return v;
@@ -276,7 +276,7 @@ vec4_t uniforms_ext_vec4_link(object_t *object, material_data_t *mat, char *link
 	else if (string_equals(link, "_stencil_transform")) {
 		vec4_t v = vec4_create(context_raw->brush_stencil_x, context_raw->brush_stencil_y, context_raw->brush_stencil_scale, context_raw->brush_stencil_angle);
 		if (context_raw->paint2d) {
-			v.x = vec2d(v.x);
+			v.x = uniforms_ext_vec2d(v.x);
 		}
 
 		return v;
@@ -288,7 +288,7 @@ vec4_t uniforms_ext_vec4_link(object_t *object, material_data_t *mat, char *link
 		val *= scale2d; // Projection ratio
 		vec4_t v = vec4_create(context_raw->decal_x, context_raw->decal_y, decal_mask ? 1 : 0, val);
 		if (context_raw->paint2d) {
-			v.x = vec2d(v.x);
+			v.x = uniforms_ext_vec2d(v.x);
 		}
 
 		return v;
@@ -307,6 +307,18 @@ mat4_t uniforms_ext_mat4_link(object_t *object, material_data_t *mat, char *link
 	}
 
 	return mat4_nan();
+}
+
+void uniforms_ext_cache_uv_island_map(void * _) {
+	util_uv_cache_uv_island_map();
+}
+
+void uniforms_ext_cache_triangle_map(void * _) {
+	util_uv_cache_triangle_map();
+}
+
+void uniforms_ext_cache_uv_map(void * _) {
+	util_uv_cache_uv_map();
 }
 
 gpu_texture_t *uniforms_ext_tex_link(object_t *object, material_data_t *mat, char *link) {
@@ -354,18 +366,18 @@ gpu_texture_t *uniforms_ext_tex_link(object_t *object, material_data_t *mat, cha
 	}
 	else if (string_equals(link, "_texuvmap")) {
 		if (!util_uv_uvmap_cached) {
-			sys_notify_on_next_frame(&uniforms_ext_tex_link_73441, NULL);
+			sys_notify_on_next_frame(&uniforms_ext_cache_uv_map, NULL);
 		}
 		return util_uv_uvmap;
 	}
 	else if (string_equals(link, "_textrianglemap")) {
 		if (!util_uv_trianglemap_cached) {
-			sys_notify_on_next_frame(&uniforms_ext_tex_link_73476, NULL);
+			sys_notify_on_next_frame(&uniforms_ext_cache_triangle_map, NULL);
 		}
 		return util_uv_trianglemap;
 	}
 	else if (string_equals(link, "_texuvislandmap")) {
-		sys_notify_on_next_frame(&uniforms_ext_tex_link_73505, NULL);
+		sys_notify_on_next_frame(&uniforms_ext_cache_uv_island_map, NULL);
 		if (util_uv_uvislandmap_cached) {
 			return util_uv_uvislandmap;
 		}
@@ -437,16 +449,4 @@ gpu_texture_t *uniforms_ext_tex_link(object_t *object, material_data_t *mat, cha
 		return rt->_image;
 	}
 	return NULL;
-}
-
-void uniforms_ext_tex_link_73505(void * _) {
-	util_uv_cache_uv_island_map();
-}
-
-void uniforms_ext_tex_link_73476(void * _) {
-	util_uv_cache_triangle_map();
-}
-
-void uniforms_ext_tex_link_73441(void * _) {
-	util_uv_cache_uv_map();
 }

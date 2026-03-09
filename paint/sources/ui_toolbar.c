@@ -3,6 +3,10 @@
 
 void ui_toolbar_init() {}
 
+void ui_toolbar_draw_tool_select_tool(void * _) {
+	context_select_tool(_ui_toolbar_i);
+}
+
 void ui_toolbar_draw_tool(i32 tool, gpu_texture_t *img, i32 icon_accent) {
 	ui->_x += 2;
 	if (context_raw->tool == tool) {
@@ -24,7 +28,7 @@ void ui_toolbar_draw_tool(i32 tool, gpu_texture_t *img, i32 icon_accent) {
 	ui_state_t image_state = ui_sub_image(img, icon_accent, -1.0, rect->x, rect->y, rect->w, rect->h);
 	if (image_state == UI_STATE_STARTED && visible) {
 		_ui_toolbar_i = tool;
-		sys_notify_on_next_frame(&ui_toolbar_draw_tool_66386, NULL);
+		sys_notify_on_next_frame(&ui_toolbar_draw_tool_select_tool, NULL);
 	}
 	else if (image_state == UI_STATE_RELEASED && context_is_floating_toolbar() && visible) {
 		if (ui_toolbar_last_tool == tool) {
@@ -52,10 +56,6 @@ void ui_toolbar_draw_tool(i32 tool, gpu_texture_t *img, i32 icon_accent) {
 	}
 	ui->_x -= 2;
 	ui->_y += 2;
-}
-
-void ui_toolbar_draw_tool_66386(void * _) {
-	context_select_tool(_ui_toolbar_i);
 }
 
 i32 ui_toolbar_w(bool screen_size_request) {
@@ -213,6 +213,20 @@ void ui_toolbar_render_ui() {
 	}
 }
 
+void ui_toolbar_tool_properties_menu_draw() {
+	ui->changed = false;
+	ui_header_draw_tool_properties();
+	if (ui->changed || ui->is_typing) {
+		ui_menu_keep_open = true;
+	}
+	if (base_view3d_show && ui_button(tr("Pin to Header", NULL), UI_ALIGN_LEFT, "")) {
+		config_raw->layout->buffer[LAYOUT_SIZE_HEADER] = 1;
+	}
+	if (base_view3d_show && ui_button(tr("Hide 3D View", NULL), UI_ALIGN_LEFT, "")) {
+		ui_base_show_3d_view();
+	}
+}
+
 void ui_toolbar_tool_properties_menu() {
 	i32 y = ui->_y - 2 * UI_SCALE();
 	if (!base_view3d_show) {
@@ -225,21 +239,7 @@ void ui_toolbar_tool_properties_menu() {
 	}
 	#endif
 
-	ui_menu_draw(&ui_toolbar_tool_properties_menu_67427, ui->_x + ui->_w + 6 * UI_SCALE(), y);
-}
-
-void ui_toolbar_tool_properties_menu_67427() {
-	ui->changed = false;
-	ui_header_draw_tool_properties();
-	if (ui->changed || ui->is_typing) {
-		ui_menu_keep_open = true;
-	}
-	if (base_view3d_show && ui_button(tr("Pin to Header", NULL), UI_ALIGN_LEFT, "")) {
-		config_raw->layout->buffer[LAYOUT_SIZE_HEADER] = 1;
-	}
-	if (base_view3d_show && ui_button(tr("Hide 3D View", NULL), UI_ALIGN_LEFT, "")) {
-		ui_base_show_3d_view();
-	}
+	ui_menu_draw(&ui_toolbar_tool_properties_menu_draw, ui->_x + ui->_w + 6 * UI_SCALE(), y);
 }
 
 void ui_toolbar_draw_highlight() {

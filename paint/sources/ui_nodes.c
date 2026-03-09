@@ -41,6 +41,39 @@ void ui_viewnodes_on_node_changed(ui_node_t *n) {
 	gc_root(ui_nodes_node_changed);
 }
 
+void ui_viewnodes_on_link_drag_on_node_search_done() {
+	ui_nodes_t *ui_nodes = ui_nodes_get_nodes();
+
+	i32 node_selected_id = _ui_nodes_on_link_drag_node->id;
+	if (ui_nodes->nodes_selected_id->length > 0) {
+		node_selected_id = ui_nodes->nodes_selected_id->buffer[0];
+	}
+
+	ui_node_link_t    *link_drag = _ui_nodes_on_link_drag_link_drag;
+	ui_node_t_array_t *nodes     = ui_nodes_get_canvas(true)->nodes;
+	ui_node_t         *n         = ui_get_node(nodes, node_selected_id);
+	if (link_drag->to_id == -1 && n->inputs->length > 0) {
+		link_drag->to_id = n->id;
+		char *from_type  = _ui_nodes_on_link_drag_node->outputs->buffer[link_drag->from_socket]->type;
+		// Connect to the first socket
+		link_drag->to_socket = 0;
+		// Try to find the first type-matching socket and use it if present
+		for (i32 i = 0; i < n->inputs->length; ++i) {
+			ui_node_socket_t *socket = n->inputs->buffer[i];
+			if (string_equals(socket->type, from_type)) {
+				link_drag->to_socket = array_index_of(n->inputs, socket);
+				break;
+			}
+		}
+		any_array_push(ui_nodes_get_canvas(true)->links, link_drag);
+	}
+	else if (link_drag->from_id == -1 && n->outputs->length > 0) {
+		link_drag->from_id     = n->id;
+		link_drag->from_socket = 0;
+		any_array_push(ui_nodes_get_canvas(true)->links, link_drag);
+	}
+}
+
 void ui_viewnodes_on_link_drag(i32 link_drag_id, bool is_new_link) {
 	if (!is_new_link) {
 		return;
@@ -68,7 +101,7 @@ void ui_viewnodes_on_link_drag(i32 link_drag_id, bool is_new_link) {
 		gc_unroot(_ui_nodes_on_link_drag_node);
 		_ui_nodes_on_link_drag_node = node;
 		gc_root(_ui_nodes_on_link_drag_node);
-		ui_nodes_node_search(-1, -1, &ui_viewnodes_on_link_drag_138508);
+		ui_nodes_node_search(-1, -1, &ui_viewnodes_on_link_drag_on_node_search_done);
 	}
 	// Selecting which node socket to preview
 	else if (link_drag->from_id > -1) {
@@ -79,69 +112,7 @@ void ui_viewnodes_on_link_drag(i32 link_drag_id, bool is_new_link) {
 	}
 }
 
-void ui_viewnodes_on_link_drag_138508() {
-	ui_nodes_t *ui_nodes = ui_nodes_get_nodes();
-
-	i32 node_selected_id = _ui_nodes_on_link_drag_node->id;
-	if (ui_nodes->nodes_selected_id->length > 0) {
-		node_selected_id = ui_nodes->nodes_selected_id->buffer[0];
-	}
-
-	ui_node_link_t    *link_drag = _ui_nodes_on_link_drag_link_drag;
-	ui_node_t_array_t *nodes     = ui_nodes_get_canvas(true)->nodes;
-	ui_node_t         *n         = ui_get_node(nodes, node_selected_id);
-	if (link_drag->to_id == -1 && n->inputs->length > 0) {
-		link_drag->to_id    = n->id;
-		char *from_type = _ui_nodes_on_link_drag_node->outputs->buffer[link_drag->from_socket]->type;
-		// Connect to the first socket
-		link_drag->to_socket = 0;
-		// Try to find the first type-matching socket and use it if present
-		for (i32 i = 0; i < n->inputs->length; ++i) {
-			ui_node_socket_t *socket = n->inputs->buffer[i];
-			if (string_equals(socket->type, from_type)) {
-				link_drag->to_socket = array_index_of(n->inputs, socket);
-				break;
-			}
-		}
-		any_array_push(ui_nodes_get_canvas(true)->links, link_drag);
-	}
-	else if (link_drag->from_id == -1 && n->outputs->length > 0) {
-		link_drag->from_id     = n->id;
-		link_drag->from_socket = 0;
-		any_array_push(ui_nodes_get_canvas(true)->links, link_drag);
-	}
-}
-
-void ui_viewnodes_on_socket_released(i32 socket_id) {
-	ui_node_canvas_t *canvas = ui_nodes_get_canvas(true);
-	ui_node_socket_t *socket = ui_get_socket(canvas->nodes, socket_id);
-	ui_node_t        *node   = ui_get_node(canvas->nodes, socket->node_id);
-	if (ui->input_released_r) {
-		if (string_equals(node->type, "GROUP_INPUT") || string_equals(node->type, "GROUP_OUTPUT")) {
-
-			gc_unroot(_ui_nodes_on_socket_released_socket);
-			_ui_nodes_on_socket_released_socket = socket;
-			gc_root(_ui_nodes_on_socket_released_socket);
-			gc_unroot(_ui_nodes_on_socket_released_node);
-			_ui_nodes_on_socket_released_node = node;
-			gc_root(_ui_nodes_on_socket_released_node);
-			sys_notify_on_next_frame(&ui_viewnodes_on_socket_released_138790, NULL);
-		}
-		else {
-			ui_viewnodes_on_canvas_released();
-		}
-	}
-	// Selecting which node socket to preview
-	// else {
-	// 	let i: i32 = array_index_of(node.outputs, socket);
-	// 	if (i > -1) {
-	// 		i32_imap_set(context_raw.node_preview_socket_map, node.id, i);
-	// 		ui_nodes_node_changed = node;
-	// 	}
-	// }
-}
-
-void ui_viewnodes_on_socket_released_138933() {
+void ui_viewnodes_on_socket_released_group_edit_box() {
 	ui_node_socket_t *socket     = _ui_nodes_on_socket_released_socket;
 	ui_node_t        *node       = _ui_nodes_on_socket_released_node;
 	string_t_array_t *type_combo = any_array_create_from_raw(
@@ -155,7 +126,7 @@ void ui_viewnodes_on_socket_released_138933() {
 	if (_ui_nodes_htype->changed) {
 		_ui_nodes_hname->text = type == 0 ? tr("Color", NULL) : type == 1 ? tr("Vector", NULL) : tr("Value", NULL);
 	}
-	char    *name          = ui_text_input(_ui_nodes_hname, tr("Name", NULL), UI_ALIGN_LEFT, true, false);
+	char        *name          = ui_text_input(_ui_nodes_hname, tr("Name", NULL), UI_ALIGN_LEFT, true, false);
 	f32          min           = ui_float_input(_ui_nodes_hmin, tr("Min", NULL), UI_ALIGN_LEFT, 1000.0);
 	f32          max           = ui_float_input(_ui_nodes_hmax, tr("Max", NULL), UI_ALIGN_LEFT, 1000.0);
 	f32_array_t *default_value = NULL;
@@ -191,12 +162,12 @@ void ui_viewnodes_on_socket_released_138933() {
 	}
 }
 
-void ui_viewnodes_on_socket_released_138920(void * _) {
+void ui_viewnodes_on_socket_released_group_edit(void *_) {
 	ui_end_input();
-	ui_box_show_custom(&ui_viewnodes_on_socket_released_138933, 400, 250, NULL, true, tr("Socket", NULL));
+	ui_box_show_custom(&ui_viewnodes_on_socket_released_group_edit_box, 400, 250, NULL, true, tr("Socket", NULL));
 }
 
-void ui_viewnodes_on_socket_released_138799() {
+void ui_viewnodes_on_socket_released_group_menu_draw() {
 	ui_node_socket_t *socket = _ui_nodes_on_socket_released_socket;
 	ui_node_t        *node   = _ui_nodes_on_socket_released_node;
 	if (ui_menu_button(tr("Edit", NULL), "", ICON_EDIT)) {
@@ -215,7 +186,7 @@ void ui_viewnodes_on_socket_released_138799() {
 		else {
 			_ui_nodes_hval0->f = socket->default_value->buffer[0];
 		}
-		sys_notify_on_next_frame(&ui_viewnodes_on_socket_released_138920, NULL);
+		sys_notify_on_next_frame(&ui_viewnodes_on_socket_released_group_edit, NULL);
 	}
 	if (ui_menu_button(tr("Delete", NULL), "", ICON_DELETE)) {
 		i32               i      = 0;
@@ -238,8 +209,120 @@ void ui_viewnodes_on_socket_released_138799() {
 	}
 }
 
-void ui_viewnodes_on_socket_released_138790(void * _) {
-	ui_menu_draw(&ui_viewnodes_on_socket_released_138799, -1, -1);
+void ui_viewnodes_on_socket_released_group_menu(void *_) {
+	ui_menu_draw(&ui_viewnodes_on_socket_released_group_menu_draw, -1, -1);
+}
+
+void ui_viewnodes_on_socket_released(i32 socket_id) {
+	ui_node_canvas_t *canvas = ui_nodes_get_canvas(true);
+	ui_node_socket_t *socket = ui_get_socket(canvas->nodes, socket_id);
+	ui_node_t        *node   = ui_get_node(canvas->nodes, socket->node_id);
+	if (ui->input_released_r) {
+		if (string_equals(node->type, "GROUP_INPUT") || string_equals(node->type, "GROUP_OUTPUT")) {
+
+			gc_unroot(_ui_nodes_on_socket_released_socket);
+			_ui_nodes_on_socket_released_socket = socket;
+			gc_root(_ui_nodes_on_socket_released_socket);
+			gc_unroot(_ui_nodes_on_socket_released_node);
+			_ui_nodes_on_socket_released_node = node;
+			gc_root(_ui_nodes_on_socket_released_node);
+			sys_notify_on_next_frame(&ui_viewnodes_on_socket_released_group_menu, NULL);
+		}
+		else {
+			ui_viewnodes_on_canvas_released();
+		}
+	}
+	// Selecting which node socket to preview
+	// else {
+	// 	let i: i32 = array_index_of(node.outputs, socket);
+	// 	if (i > -1) {
+	// 		i32_imap_set(context_raw.node_preview_socket_map, node.id, i);
+	// 		ui_nodes_node_changed = node;
+	// 	}
+	// }
+}
+
+void ui_viewnodes_on_canvas_capture_output(void *_) {
+	ui_nodes_capture_output();
+}
+
+void ui_viewnodes_on_canvas_released_duplicate(void *_) {
+	ui_nodes_hwnd->redraws   = 2;
+	ui_is_copy               = true;
+	ui_is_paste              = true;
+	ui_nodes_is_node_menu_op = true;
+}
+
+void ui_viewnodes_on_canvas_delete_on_next_frame(void *_) {
+	ui_nodes_hwnd->redraws   = 2;
+	ui->is_delete_down       = true;
+	ui_nodes_is_node_menu_op = true;
+}
+
+void ui_viewnodes_on_canvas_delete(void *_) {
+	sys_notify_on_end_frame(&ui_viewnodes_on_canvas_delete_on_next_frame, NULL);
+}
+
+void ui_viewnodes_on_canvas_paste(void *_) {
+	ui_nodes_hwnd->redraws   = 2;
+	ui_is_paste              = true;
+	ui_nodes_is_node_menu_op = true;
+}
+
+void ui_viewnodes_on_canvas_copy(void *_) {
+	ui_is_copy               = true;
+	ui_nodes_is_node_menu_op = true;
+}
+
+void ui_viewnodes_on_canvas_cut(void *_) {
+	ui_nodes_hwnd->redraws   = 2;
+	ui_is_copy               = true;
+	ui_is_cut                = true;
+	ui_nodes_is_node_menu_op = true;
+}
+
+void ui_viewnodes_on_canvas_context_menu() {
+	ui_node_t *selected = _ui_nodes_on_canvas_released_selected;
+	ui->_y += 1;
+	bool is_protected = selected == NULL || string_equals(selected->type, "OUTPUT_MATERIAL_PBR") || string_equals(selected->type, "GROUP_INPUT") ||
+	                    string_equals(selected->type, "GROUP_OUTPUT") || string_equals(selected->type, "brush_output_node");
+	ui->enabled = !is_protected;
+	if (ui_menu_button(tr("Cut", NULL), "ctrl+x", ICON_CUT)) {
+		sys_notify_on_next_frame(&ui_viewnodes_on_canvas_cut, NULL);
+	}
+	if (ui_menu_button(tr("Copy", NULL), "ctrl+c", ICON_COPY)) {
+		sys_notify_on_next_frame(&ui_viewnodes_on_canvas_copy, NULL);
+	}
+	ui->enabled = !string_equals(ui_clipboard, "");
+	if (ui_menu_button(tr("Paste", NULL), "ctrl+v", ICON_PASTE)) {
+		sys_notify_on_next_frame(&ui_viewnodes_on_canvas_paste, NULL);
+	}
+	ui->enabled = !is_protected;
+	if (ui_menu_button(tr("Delete", NULL), "delete", ICON_DELETE)) {
+		sys_notify_on_next_frame(&ui_viewnodes_on_canvas_delete, NULL);
+	}
+	if (ui_menu_button(tr("Duplicate", NULL), "", ICON_DUPLICATE)) {
+		sys_notify_on_next_frame(&ui_viewnodes_on_canvas_released_duplicate, NULL);
+	}
+	if (selected != NULL && string_equals(selected->type, "RGB")) {
+		if (ui_menu_button(tr("Add Swatch", NULL), "", ICON_PALETTE)) {
+			f32_array_t    *color      = selected->outputs->buffer[0]->default_value;
+			swatch_color_t *new_swatch = project_make_swatch(color_from_floats(color->buffer[0], color->buffer[1], color->buffer[2], color->buffer[3]));
+			context_set_swatch(new_swatch);
+			any_array_push(project_raw->swatches, new_swatch);
+			ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 1;
+		}
+	}
+	if (ui_menu_button(tr("Capture Output", NULL), "", ICON_PHOTO)) {
+		sys_notify_on_next_frame(&ui_viewnodes_on_canvas_capture_output, NULL);
+	}
+	if (ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL) {
+		ui_menu_separator();
+		if (ui_menu_button(tr("2D View", NULL), "", ICON_NONE)) {
+			ui_base_show_2d_view(VIEW_2D_TYPE_NODE);
+		}
+	}
+	ui->enabled = true;
 }
 
 void ui_viewnodes_on_canvas_released() {
@@ -273,7 +356,7 @@ void ui_viewnodes_on_canvas_released() {
 			gc_unroot(_ui_nodes_on_canvas_released_selected);
 			_ui_nodes_on_canvas_released_selected = selected;
 			gc_root(_ui_nodes_on_canvas_released_selected);
-			ui_menu_draw(&ui_viewnodes_on_canvas_released_139616, -1, -1);
+			ui_menu_draw(&ui_viewnodes_on_canvas_context_menu, -1, -1);
 		}
 	}
 
@@ -293,89 +376,6 @@ void ui_viewnodes_on_canvas_released() {
 			}
 		}
 	}
-}
-
-void ui_viewnodes_on_canvas_released_139995(void * _) {
-	ui_nodes_capture_output();
-}
-
-void ui_viewnodes_on_canvas_released_139861(void * _) {
-	ui_nodes_hwnd->redraws   = 2;
-	ui_is_copy               = true;
-	ui_is_paste              = true;
-	ui_nodes_is_node_menu_op = true;
-}
-
-void ui_viewnodes_on_canvas_released_139818(void * _) {
-	ui_nodes_hwnd->redraws   = 2;
-	ui->is_delete_down       = true;
-	ui_nodes_is_node_menu_op = true;
-}
-
-void ui_viewnodes_on_canvas_released_139809(void * _) {
-	sys_notify_on_end_frame(&ui_viewnodes_on_canvas_released_139818, NULL);
-}
-
-void ui_viewnodes_on_canvas_released_139764(void * _) {
-	ui_nodes_hwnd->redraws   = 2;
-	ui_is_paste              = true;
-	ui_nodes_is_node_menu_op = true;
-}
-
-void ui_viewnodes_on_canvas_released_139722(void * _) {
-	ui_is_copy               = true;
-	ui_nodes_is_node_menu_op = true;
-}
-
-void ui_viewnodes_on_canvas_released_139678(void * _) {
-	ui_nodes_hwnd->redraws   = 2;
-	ui_is_copy               = true;
-	ui_is_cut                = true;
-	ui_nodes_is_node_menu_op = true;
-}
-
-void ui_viewnodes_on_canvas_released_139616() {
-	ui_node_t *selected = _ui_nodes_on_canvas_released_selected;
-	ui->_y += 1;
-	bool is_protected = selected == NULL || string_equals(selected->type, "OUTPUT_MATERIAL_PBR") || string_equals(selected->type, "GROUP_INPUT") ||
-	                    string_equals(selected->type, "GROUP_OUTPUT") || string_equals(selected->type, "brush_output_node");
-	ui->enabled = !is_protected;
-	if (ui_menu_button(tr("Cut", NULL), "ctrl+x", ICON_CUT)) {
-		sys_notify_on_next_frame(&ui_viewnodes_on_canvas_released_139678, NULL);
-	}
-	if (ui_menu_button(tr("Copy", NULL), "ctrl+c", ICON_COPY)) {
-		sys_notify_on_next_frame(&ui_viewnodes_on_canvas_released_139722, NULL);
-	}
-	ui->enabled = !string_equals(ui_clipboard, "");
-	if (ui_menu_button(tr("Paste", NULL), "ctrl+v", ICON_PASTE)) {
-		sys_notify_on_next_frame(&ui_viewnodes_on_canvas_released_139764, NULL);
-	}
-	ui->enabled = !is_protected;
-	if (ui_menu_button(tr("Delete", NULL), "delete", ICON_DELETE)) {
-		sys_notify_on_next_frame(&ui_viewnodes_on_canvas_released_139809, NULL);
-	}
-	if (ui_menu_button(tr("Duplicate", NULL), "", ICON_DUPLICATE)) {
-		sys_notify_on_next_frame(&ui_viewnodes_on_canvas_released_139861, NULL);
-	}
-	if (selected != NULL && string_equals(selected->type, "RGB")) {
-		if (ui_menu_button(tr("Add Swatch", NULL), "", ICON_PALETTE)) {
-			f32_array_t    *color      = selected->outputs->buffer[0]->default_value;
-			swatch_color_t *new_swatch = make_swatch(color_from_floats(color->buffer[0], color->buffer[1], color->buffer[2], color->buffer[3]));
-			context_set_swatch(new_swatch);
-			any_array_push(project_raw->swatches, new_swatch);
-			ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 1;
-		}
-	}
-	if (ui_menu_button(tr("Capture Output", NULL), "", ICON_PHOTO)) {
-		sys_notify_on_next_frame(&ui_viewnodes_on_canvas_released_139995, NULL);
-	}
-	if (ui_nodes_canvas_type == CANVAS_TYPE_MATERIAL) {
-		ui_menu_separator();
-		if (ui_menu_button(tr("2D View", NULL), "", ICON_NONE)) {
-			ui_base_show_2d_view(VIEW_2D_TYPE_NODE);
-		}
-	}
-	ui->enabled = true;
 }
 
 ui_canvas_control_t *ui_viewnodes_on_canvas_control() {
@@ -442,7 +442,7 @@ f32 ui_nodes_get_zoom_delta() {
 
 bool ui_nodes_is_tab_selected() {
 	return ui_nodes_htab->i > 0 && ui_nodes_htab->i % 2 == 1 && // [tab0, tab1, x, tab2, x, +]
-		ui_nodes_tabs->length >= ui_nodes_htab->i / (float)2;
+	       ui_nodes_tabs->length >= ui_nodes_htab->i / (float)2;
 }
 
 i32 ui_nodes_tab_index() {
@@ -483,7 +483,7 @@ ui_nodes_t *ui_nodes_get_nodes() {
 	}
 }
 
-void ui_nodes_update(void * _) {
+void ui_nodes_update(void *_) {
 	if (!ui_nodes_show || !base_ui_enabled) {
 		return;
 	}
@@ -575,18 +575,10 @@ void ui_nodes_canvas_changed() {
 	ui_nodes_recompile_mat_final = true;
 }
 
-void ui_nodes_node_search(i32 x, i32 y, void (*done)(void)) {
-	_ui_nodes_node_search_first = true;
-	gc_unroot(_ui_nodes_node_search_done);
-	_ui_nodes_node_search_done = done;
-	gc_root(_ui_nodes_node_search_done);
-	ui_menu_draw(&ui_nodes_node_search_141325, x, y);
-}
-
-void ui_nodes_node_search_141325() {
+void ui_nodes_node_search_menu() {
 	ui_menu_h                  = UI_ELEMENT_H() * 8;
 	ui_handle_t *search_handle = ui_handle(__ID__);
-	char    *search        = to_lower_case(ui_text_input(search_handle, "", UI_ALIGN_LEFT, true, true));
+	char        *search        = to_lower_case(ui_text_input(search_handle, "", UI_ALIGN_LEFT, true, true));
 	ui->changed                = false;
 	if (_ui_nodes_node_search_first) {
 		_ui_nodes_node_search_first = false;
@@ -659,6 +651,14 @@ void ui_nodes_node_search_141325() {
 	}
 	ui->ops->theme->BUTTON_COL     = BUTTON_COL;
 	ui->ops->theme->FILL_BUTTON_BG = FILL_BUTTON_BG;
+}
+
+void ui_nodes_node_search(i32 x, i32 y, void (*done)(void)) {
+	_ui_nodes_node_search_first = true;
+	gc_unroot(_ui_nodes_node_search_done);
+	_ui_nodes_node_search_done = done;
+	gc_root(_ui_nodes_node_search_done);
+	ui_menu_draw(&ui_nodes_node_search_menu, x, y);
 }
 
 i32 ui_nodes_get_node_x() {
@@ -780,7 +780,16 @@ void ui_nodes_get_linked_nodes(ui_node_t_array_t *linked_nodes, ui_node_t *n, ui
 	}
 }
 
-void ui_nodes_render(void * _) {
+void ui_nodes_render_color_picker_callback(swatch_color_t *color) {
+	_ui_nodes_render_tmp(color->base);
+	ui_nodes_hwnd->redraws = 2;
+	bool material_live     = config_raw->material_live;
+	if (material_live) {
+		ui_nodes_canvas_changed();
+	}
+}
+
+void ui_nodes_render(void *_) {
 	ui_nodes_recompile();
 
 	ui_nodes_t *ui_nodes = ui_nodes_get_nodes();
@@ -947,7 +956,7 @@ void ui_nodes_render(void * _) {
 			gc_unroot(_ui_nodes_render_tmp);
 			_ui_nodes_render_tmp = ui_nodes->color_picker_callback;
 			gc_root(_ui_nodes_render_tmp);
-			context_raw->color_picker_callback = &ui_nodes_render_143289;
+			context_raw->color_picker_callback = &ui_nodes_render_color_picker_callback;
 			;
 			ui_nodes->color_picker_callback = NULL;
 		}
@@ -1130,15 +1139,6 @@ void ui_nodes_render(void * _) {
 	ui->input_enabled = true;
 }
 
-void ui_nodes_render_143289(swatch_color_t *color) {
-	_ui_nodes_render_tmp(color->base);
-	ui_nodes_hwnd->redraws = 2;
-	bool material_live     = config_raw->material_live;
-	if (material_live) {
-		ui_nodes_canvas_changed();
-	}
-}
-
 gpu_texture_t *ui_nodes_get_node_preview_image(ui_node_t *n) {
 	if (n == NULL) {
 		return NULL;
@@ -1166,7 +1166,7 @@ gpu_texture_t *ui_nodes_get_node_preview_image(ui_node_t *n) {
 		i32 i = n->buttons->buffer[0]->default_value->buffer[0];
 		if (i <= 9000) { // 9999 - Texture deleted
 			char *filepath    = parser_material_enum_data(base_enum_texts(n->type)->buffer[i]);
-			i32       asset_index = -1;
+			i32   asset_index = -1;
 			for (i32 i = 0; i < project_assets->length; ++i) {
 				if (string_equals(project_assets->buffer[i]->file, filepath)) {
 					asset_index = i;
@@ -1187,6 +1187,10 @@ gpu_texture_t *ui_nodes_get_node_preview_image(ui_node_t *n) {
 	return img;
 }
 
+void ui_nodes_draw_menubar_search(void *_) {
+	ui_nodes_node_search(math_floor(ui_nodes_node_search_x), math_floor(ui_nodes_node_search_y), NULL);
+}
+
 void ui_nodes_draw_menubar() {
 	ui_node_canvas_t *c     = ui_nodes_get_canvas(true);
 	i32               ew    = math_floor(UI_ELEMENT_W() * 0.7);
@@ -1201,9 +1205,9 @@ void ui_nodes_draw_menubar() {
 	ui->_w      = ew;
 
 	// Editable canvas name
-	ui_handle_t *h     = ui_handle(__ID__);
-	h->text            = string_copy(c->name);
-	ui->_w             = math_floor(math_min(draw_string_width(ui->ops->font, ui->font_size, h->text) + 15 * UI_SCALE(), 100 * UI_SCALE()));
+	ui_handle_t *h = ui_handle(__ID__);
+	h->text        = string_copy(c->name);
+	ui->_w         = math_floor(math_min(draw_string_width(ui->ops->font, ui->font_size, h->text) + 15 * UI_SCALE(), 100 * UI_SCALE()));
 	char *new_name = ui_text_input(h, "", UI_ALIGN_LEFT, true, false);
 	ui->_x += ui->_w + 3;
 	ui->_y = 2 + start_y;
@@ -1218,7 +1222,7 @@ void ui_nodes_draw_menubar() {
 				}
 			}
 			if (can_rename) {
-				char *old_name                 = c->name;
+				char *old_name                     = c->name;
 				c->name                            = string_copy(new_name);
 				ui_node_canvas_t_array_t *canvases = any_array_create_from_raw((void *[]){}, 0);
 				for (i32 i = 0; i < project_materials->length; ++i) {
@@ -1279,7 +1283,7 @@ void ui_nodes_draw_menubar() {
 			ui_nodes_node_search_x = ui->_window_x + ui->_x;
 			ui_nodes_node_search_y = ui->_window_y + ui->_y;
 			// Allow for node menu to be closed first
-			sys_notify_on_next_frame(&ui_nodes_draw_menubar_145222, NULL);
+			sys_notify_on_next_frame(&ui_nodes_draw_menubar_search, NULL);
 		}
 	}
 	if (ui->is_hovered) {
@@ -1293,10 +1297,6 @@ void ui_nodes_draw_menubar() {
 	if (ui_nodes_group_stack->length > 0 && ui_menubar_button(tr("Close", NULL))) {
 		array_pop(ui_nodes_group_stack);
 	}
-}
-
-void ui_nodes_draw_menubar_145222(void * _) {
-	ui_nodes_node_search(math_floor(ui_nodes_node_search_x), math_floor(ui_nodes_node_search_y), NULL);
 }
 
 bool ui_nodes_contains_node_group_recursive(node_group_t *group, char *group_name) {
@@ -1480,7 +1480,7 @@ ui_node_t *ui_nodes_make_group_node(ui_node_canvas_t *group_canvas, ui_nodes_t *
 	ui_node_t *group_output     = NULL;
 	for (i32 i = 0; i < project_material_groups->length; ++i) {
 		node_group_t *g     = project_material_groups->buffer[i];
-		char     *cname = g->canvas->name;
+		char         *cname = g->canvas->name;
 		if (string_equals(cname, node->name)) {
 			for (i32 i = 0; i < g->canvas->nodes->length; ++i) {
 				ui_node_t *n = g->canvas->nodes->buffer[i];
@@ -1585,7 +1585,7 @@ void ui_nodes_capture_output() {
 		project_raw->packed_assets = any_array_create_from_raw((void *[]){}, 0);
 	}
 
-	i32       num = 0;
+	i32   num = 0;
 	char *abs = "/packed/node_preview0.png";
 	for (i32 i = 0; i < project_raw->packed_assets->length; ++i) {
 		packed_asset_t *pa = project_raw->packed_assets->buffer[i];

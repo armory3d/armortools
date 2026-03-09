@@ -37,6 +37,21 @@ char *tr(char *id, any_map_t *vars) {
 	return translation;
 }
 
+void translator_load_translations_on_cjk_downloaded(char *url) {
+	if (!iron_file_exists(_translator_load_translations_cjk_font_disk_path)) {
+		// Fall back to English
+		config_raw->locale = "en";
+		translator_extended_glyphs();
+		gc_unroot(translator_translations);
+		translator_translations = any_map_create();
+		gc_root(translator_translations);
+		translator_init_font(false, "font.ttf", 1.0);
+	}
+	else {
+		translator_init_font(true, _translator_load_translations_cjk_font_path, 1.4);
+	}
+}
+
 // (Re)loads translations for the specified locale
 void translator_load_translations(char *new_locale) {
 
@@ -132,7 +147,7 @@ void translator_load_translations(char *new_locale) {
 
 		if (!iron_file_exists(_translator_load_translations_cjk_font_disk_path)) {
 			file_download_to("https://github.com/armory3d/armorbase/raw/main/Assets/common/extra/font_cjk.ttc",
-			                 _translator_load_translations_cjk_font_disk_path, &translator_load_translations_91848, 20332392);
+			                 _translator_load_translations_cjk_font_disk_path, &translator_load_translations_on_cjk_downloaded, 20332392);
 		}
 		else {
 			translator_init_font(true, _translator_load_translations_cjk_font_path, 1.4);
@@ -143,33 +158,7 @@ void translator_load_translations(char *new_locale) {
 	}
 }
 
-void translator_load_translations_91848(char *url) {
-	if (!iron_file_exists(_translator_load_translations_cjk_font_disk_path)) {
-		// Fall back to English
-		config_raw->locale = "en";
-		translator_extended_glyphs();
-		gc_unroot(translator_translations);
-		translator_translations = any_map_create();
-		gc_root(translator_translations);
-		translator_init_font(false, "font.ttf", 1.0);
-	}
-	else {
-		translator_init_font(true, _translator_load_translations_cjk_font_path, 1.4);
-	}
-}
-
-void translator_init_font(bool cjk, char *font_path, f32 font_scale) {
-	_translator_init_font_cjk = cjk;
-	gc_unroot(_translator_init_font_font_path);
-	_translator_init_font_font_path = string_copy(font_path);
-	gc_root(_translator_init_font_font_path);
-	_translator_init_font_font_scale = font_scale;
-
-	// Load and assign font with cjk characters
-	sys_notify_on_next_frame(&translator_init_font_91962, NULL);
-}
-
-void translator_init_font_91962(void * _) {
+void translator_init_font_on_next_frame(void * _) {
 	bool         cjk        = _translator_init_font_cjk;
 	char    *font_path  = _translator_init_font_font_path;
 	f32          font_scale = _translator_init_font_font_scale;
@@ -191,6 +180,17 @@ void translator_init_font_91962(void * _) {
 
 	ui_set_font(ui, f);
 	ui_set_scale(UI_SCALE());
+}
+
+void translator_init_font(bool cjk, char *font_path, f32 font_scale) {
+	_translator_init_font_cjk = cjk;
+	gc_unroot(_translator_init_font_font_path);
+	_translator_init_font_font_path = string_copy(font_path);
+	gc_root(_translator_init_font_font_path);
+	_translator_init_font_font_scale = font_scale;
+
+	// Load and assign font with cjk characters
+	sys_notify_on_next_frame(&translator_init_font_on_next_frame, NULL);
 }
 
 void translator_extended_glyphs() {

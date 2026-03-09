@@ -8,6 +8,118 @@ void tab_browser_show_directory(char *directory) {
 	config_raw->layout_tabs->buffer[TAB_AREA_STATUS] = 0;
 }
 
+void tab_browser_draw_bookmark_menu() {
+	if (ui_menu_button(tr("Delete", NULL), "", ICON_DELETE)) {
+		char_ptr_array_remove(config_raw->bookmarks, _tab_browser_draw_b);
+		config_save();
+	}
+}
+
+void tab_browser_draw_import_asset(char *path) {
+	import_asset_run(path, -1.0, -1.0, true, true, NULL);
+}
+
+void tab_browser_draw_set_as_color_id_map_on_next_frame(void * _) {
+	char *file        = _tab_browser_draw_file;
+	i32       asset_index = -1;
+	for (i32 i = 0; i < project_assets->length; ++i) {
+		if (string_equals(project_assets->buffer[i]->file, file)) {
+			asset_index = i;
+			break;
+		}
+	}
+
+	if (asset_index != -1) {
+		context_raw->colorid_handle->i = asset_index;
+		context_raw->colorid_picked    = false;
+		ui_toolbar_handle->redraws     = 1;
+		if (context_raw->tool == TOOL_TYPE_COLORID) {
+			ui_header_handle->redraws = 2;
+			context_raw->ddirty       = 2;
+		}
+	}
+}
+
+void tab_browser_draw_set_as_color_id_map() {
+	sys_notify_on_next_frame(&tab_browser_draw_set_as_color_id_map_on_next_frame, NULL);
+}
+
+void tab_browser_draw_set_as_mask_on_next_frame(void * _) {
+	char *file        = _tab_browser_draw_file;
+	i32       asset_index = -1;
+	for (i32 i = 0; i < project_assets->length; ++i) {
+		if (string_equals(project_assets->buffer[i]->file, file)) {
+			asset_index = i;
+			break;
+		}
+	}
+	if (asset_index != -1) {
+		layers_create_image_mask(project_assets->buffer[asset_index]);
+	}
+}
+
+void tab_browser_draw_set_as_mask() {
+	sys_notify_on_next_frame(&tab_browser_draw_set_as_mask_on_next_frame, NULL);
+}
+
+void tab_browser_draw_set_as_envmap_on_next_frame(void * _) {
+	char *file        = _tab_browser_draw_file;
+	i32       asset_index = -1;
+	for (i32 i = 0; i < project_assets->length; ++i) {
+		if (string_equals(project_assets->buffer[i]->file, file)) {
+			asset_index = i;
+			break;
+		}
+	}
+
+	if (asset_index != -1) {
+		import_envmap_run(file, project_get_image(project_assets->buffer[asset_index]));
+	}
+}
+
+void tab_browser_draw_set_as_envmap() {
+	sys_notify_on_next_frame(&tab_browser_draw_set_as_envmap_on_next_frame, NULL);
+}
+
+void tab_browser_draw_context_menu_draw() {
+	char *file = _tab_browser_draw_file;
+	if (ui_menu_button(tr("Import", NULL), "", ICON_IMPORT)) {
+		import_asset_run(file, -1.0, -1.0, true, true, NULL);
+	}
+	if (path_is_texture(file)) {
+		if (ui_menu_button(tr("Set as Envmap", NULL), "", ICON_LANDSCAPE)) {
+			import_asset_run(file, -1.0, -1.0, true, true, &tab_browser_draw_set_as_envmap);
+		}
+		if (ui_menu_button(tr("Set as Mask", NULL), "", ICON_MASK)) {
+			import_asset_run(file, -1.0, -1.0, true, true, &tab_browser_draw_set_as_mask);
+		}
+		if (ui_menu_button(tr("Set as Color ID Map", NULL), "", ICON_COLOR_ID)) {
+			import_asset_run(file, -1.0, -1.0, true, true, &tab_browser_draw_set_as_color_id_map);
+		}
+	}
+	if (ui_menu_button(tr("Open Externally", NULL), "", ICON_NONE)) {
+		file_start(file);
+	}
+}
+
+void tab_browser_draw_context_menu(char *file) {
+	gc_unroot(_tab_browser_draw_file);
+	_tab_browser_draw_file = string_copy(file);
+	gc_root(_tab_browser_draw_file);
+
+	// Context menu
+	ui_menu_draw(&tab_browser_draw_context_menu_draw, -1, -1);
+}
+
+void tab_browser_draw_side_menu() {
+	if (ui_menu_button(tr("Cloud", NULL), "", ICON_CLOUD)) {
+		tab_browser_go_to_cloud();
+	}
+	if (ui_menu_button(tr("Disk", NULL), "", ICON_STORAGE)) {
+		tab_browser_go_to_disk();
+	}
+}
+
 void tab_browser_draw(ui_handle_t *htab) {
 	char *title = tr("Browser", NULL);
 
@@ -90,7 +202,7 @@ void tab_browser_draw(ui_handle_t *htab) {
 			    3);
 			ui_row(row);
 			if (ui_icon_button("", ICON_MENU, UI_ALIGN_CENTER)) {
-				ui_menu_draw(&tab_browser_draw_121079, -1, -1);
+				ui_menu_draw(&tab_browser_draw_side_menu, -1, -1);
 			}
 		}
 
@@ -157,13 +269,13 @@ void tab_browser_draw(ui_handle_t *htab) {
 			ui->_w -= bookmarks_w;
 		}
 
-		ui_files_file_browser(tab_browser_hpath, true, tab_browser_hsearch->text, tab_browser_refresh, &tab_browser_draw_121442);
+		ui_files_file_browser(tab_browser_hpath, true, tab_browser_hsearch->text, tab_browser_refresh, &tab_browser_draw_context_menu);
 
 		tab_browser_refresh = false;
 
 		if (tab_browser_known) {
 			char *path = tab_browser_hpath->text;
-			sys_notify_on_next_frame(&tab_browser_draw_121898, path);
+			sys_notify_on_next_frame(&tab_browser_draw_import_asset, path);
 			tab_browser_hpath->text = string_copy(substring(tab_browser_hpath->text, 0, string_last_index_of(tab_browser_hpath->text, PATH_SEP)));
 		}
 		char *hpath_text = tab_browser_hpath->text;
@@ -207,7 +319,7 @@ void tab_browser_draw(ui_handle_t *htab) {
 					gc_unroot(_tab_browser_draw_b);
 					_tab_browser_draw_b = string_copy(b);
 					gc_root(_tab_browser_draw_b);
-					ui_menu_draw(&tab_browser_draw_122149, -1, -1);
+					ui_menu_draw(&tab_browser_draw_bookmark_menu, -1, -1);
 				}
 			}
 			if (ui->_y < bottom_y) {
@@ -217,131 +329,13 @@ void tab_browser_draw(ui_handle_t *htab) {
 	}
 }
 
-void tab_browser_draw_122149() {
-	if (ui_menu_button(tr("Delete", NULL), "", ICON_DELETE)) {
-		char_ptr_array_remove(config_raw->bookmarks, _tab_browser_draw_b);
-		config_save();
-	}
-}
-
-void tab_browser_draw_121898(char *path) {
-	import_asset_run(path, -1.0, -1.0, true, true, NULL);
-}
-
-void tab_browser_draw_121757(void * _) {
-	char *file        = _tab_browser_draw_file;
-	i32       asset_index = -1;
-	for (i32 i = 0; i < project_assets->length; ++i) {
-		if (string_equals(project_assets->buffer[i]->file, file)) {
-			asset_index = i;
-			break;
-		}
-	}
-
-	if (asset_index != -1) {
-		context_raw->colorid_handle->i = asset_index;
-		context_raw->colorid_picked    = false;
-		ui_toolbar_handle->redraws     = 1;
-		if (context_raw->tool == TOOL_TYPE_COLORID) {
-			ui_header_handle->redraws = 2;
-			context_raw->ddirty       = 2;
-		}
-	}
-}
-
-void tab_browser_draw_121751() {
-	sys_notify_on_next_frame(&tab_browser_draw_121757, NULL);
-}
-
-void tab_browser_draw_121645(void * _) {
-	char *file        = _tab_browser_draw_file;
-	i32       asset_index = -1;
-	for (i32 i = 0; i < project_assets->length; ++i) {
-		if (string_equals(project_assets->buffer[i]->file, file)) {
-			asset_index = i;
-			break;
-		}
-	}
-	if (asset_index != -1) {
-		layers_create_image_mask(project_assets->buffer[asset_index]);
-	}
-}
-
-void tab_browser_draw_121639() {
-	sys_notify_on_next_frame(&tab_browser_draw_121645, NULL);
-}
-
-void tab_browser_draw_121528(void * _) {
-	char *file        = _tab_browser_draw_file;
-	i32       asset_index = -1;
-	for (i32 i = 0; i < project_assets->length; ++i) {
-		if (string_equals(project_assets->buffer[i]->file, file)) {
-			asset_index = i;
-			break;
-		}
-	}
-
-	if (asset_index != -1) {
-		import_envmap_run(file, project_get_image(project_assets->buffer[asset_index]));
-	}
-}
-
-void tab_browser_draw_121522() {
-	sys_notify_on_next_frame(&tab_browser_draw_121528, NULL);
-}
-
-void tab_browser_draw_121455() {
-	char *file = _tab_browser_draw_file;
-	if (ui_menu_button(tr("Import", NULL), "", ICON_IMPORT)) {
-		import_asset_run(file, -1.0, -1.0, true, true, NULL);
-	}
-	if (path_is_texture(file)) {
-		if (ui_menu_button(tr("Set as Envmap", NULL), "", ICON_LANDSCAPE)) {
-			import_asset_run(file, -1.0, -1.0, true, true, &tab_browser_draw_121522);
-		}
-		if (ui_menu_button(tr("Set as Mask", NULL), "", ICON_MASK)) {
-			import_asset_run(file, -1.0, -1.0, true, true, &tab_browser_draw_121639);
-		}
-		if (ui_menu_button(tr("Set as Color ID Map", NULL), "", ICON_COLOR_ID)) {
-			import_asset_run(file, -1.0, -1.0, true, true, &tab_browser_draw_121751);
-		}
-	}
-	if (ui_menu_button(tr("Open Externally", NULL), "", ICON_NONE)) {
-		file_start(file);
-	}
-}
-
-void tab_browser_draw_121442(char *file) {
-	gc_unroot(_tab_browser_draw_file);
-	_tab_browser_draw_file = string_copy(file);
-	gc_root(_tab_browser_draw_file);
-
-	// Context menu
-	ui_menu_draw(&tab_browser_draw_121455, -1, -1);
-}
-
-void tab_browser_draw_121079() {
-	if (ui_menu_button(tr("Cloud", NULL), "", ICON_CLOUD)) {
-		tab_browser_go_to_cloud();
-	}
-	if (ui_menu_button(tr("Disk", NULL), "", ICON_STORAGE)) {
-		tab_browser_go_to_disk();
-	}
-}
-
 void tab_browser_go_to_cloud() {
 	tab_browser_hpath->text = "cloud";
 }
 
-void tab_browser_go_to_disk() {
-	#ifdef IRON_ANDROID
-	ui_menu_draw(&tab_browser_go_to_disk_122217, -1, -1);
-	#else
-	tab_browser_hpath->text = string_copy(ui_files_default_path);
-	#endif
-}
+#ifdef IRON_ANDROID
 
-void tab_browser_go_to_disk_122217() {
+void tab_browser_go_to_disk_android_menu() {
 	if (ui_menu_button(tr("Download", NULL), "", ICON_FOLDER)) {
 		tab_browser_hpath->text = string_copy(ui_files_default_path);
 	}
@@ -354,4 +348,14 @@ void tab_browser_go_to_disk_122217() {
 	if (ui_menu_button(tr("Projects", NULL), "", ICON_FOLDER)) {
 		tab_browser_hpath->text = string_copy(iron_internal_save_path());
 	}
+}
+
+#endif
+
+void tab_browser_go_to_disk() {
+	#ifdef IRON_ANDROID
+	ui_menu_draw(&tab_browser_go_to_disk_android_menu, -1, -1);
+	#else
+	tab_browser_hpath->text = string_copy(ui_files_default_path);
+	#endif
 }

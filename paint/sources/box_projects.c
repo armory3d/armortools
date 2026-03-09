@@ -1,6 +1,19 @@
 
 #include "global.h"
 
+void box_projects_show_box() {
+	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+	box_projects_align_to_fullscreen();
+	#endif
+
+	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+	box_projects_tab();
+	box_projects_get_started_tab();
+	#else
+	box_projects_recent_tab();
+	#endif
+}
+
 void box_projects_show() {
 	if (box_projects_icon_map != NULL) {
 		string_t_array_t *keys = map_keys(box_projects_icon_map);
@@ -19,20 +32,28 @@ void box_projects_show() {
 	draggable = true;
 	#endif
 
-	ui_box_show_custom(&box_projects_show_74688, 600, 400, NULL, draggable, "");
+	ui_box_show_custom(&box_projects_show_box, 600, 400, NULL, draggable, "");
 }
 
-void box_projects_show_74688() {
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
-	box_projects_align_to_fullscreen();
-	#endif
+void box_projects_tab_menu_on_next_frame(void * _) {
+	iron_delete_file(_box_projects_path);
+	iron_delete_file(_box_projects_icon_path);
+	char *data_path = substring(_box_projects_path, 0, string_length(_box_projects_path) - 4);
+	iron_delete_file(data_path);
+	string_t_array_t *recent_projects = config_raw->recent_projects;
+	array_splice(recent_projects, _box_projects_i, 1);
+}
 
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
-	box_projects_tab();
-	box_projects_get_started_tab();
-	#else
-	box_projects_recent_tab();
-	#endif
+void box_projects_tab_menu() {
+	// if (ui_menu_button(tr("Duplicate"), "", icon_t.DUPLICATE)) {}
+	if (ui_menu_button(tr("Delete", NULL), "", ICON_DELETE)) {
+		sys_notify_on_next_frame(&box_projects_tab_menu_on_next_frame, NULL);
+	}
+}
+
+void box_projects_tab_on_next_frame(char *path) {
+	ui_box_hide();
+	import_arm_run_project(path);
 }
 
 void box_projects_tab() {
@@ -132,7 +153,7 @@ void box_projects_tab() {
 						#if defined(IRON_ANDROID) || defined(IRON_IOS)
 						console_toast(tr("Opening project", NULL));
 						#endif
-						sys_notify_on_next_frame(&box_projects_tab_75329, path);
+						sys_notify_on_next_frame(&box_projects_tab_on_next_frame, path);
 					}
 
 					char *name = substring(path, string_last_index_of(path, PATH_SEP) + 1, string_last_index_of(path, "."));
@@ -144,7 +165,7 @@ void box_projects_tab() {
 						_box_projects_icon_path = string_copy(icon_path);
 						gc_root(_box_projects_icon_path);
 						_box_projects_i = i;
-						ui_menu_draw(&box_projects_tab_75398, -1, -1);
+						ui_menu_draw(&box_projects_tab_menu, -1, -1);
 					}
 
 					if (show_asset_names) {
@@ -172,27 +193,6 @@ void box_projects_tab() {
 			ui->_y += 150;
 		}
 	}
-}
-
-void box_projects_tab_75419(void * _) {
-	iron_delete_file(_box_projects_path);
-	iron_delete_file(_box_projects_icon_path);
-	char *data_path = substring(_box_projects_path, 0, string_length(_box_projects_path) - 4);
-	iron_delete_file(data_path);
-	string_t_array_t *recent_projects = config_raw->recent_projects;
-	array_splice(recent_projects, _box_projects_i, 1);
-}
-
-void box_projects_tab_75398() {
-	// if (ui_menu_button(tr("Duplicate"), "", icon_t.DUPLICATE)) {}
-	if (ui_menu_button(tr("Delete", NULL), "", ICON_DELETE)) {
-		sys_notify_on_next_frame(&box_projects_tab_75419, NULL);
-	}
-}
-
-void box_projects_tab_75329(char *path) {
-	ui_box_hide();
-	import_arm_run_project(path);
 }
 
 void box_projects_recent_tab() {

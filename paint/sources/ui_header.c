@@ -31,6 +31,65 @@ void ui_header_render_ui() {
 	}
 }
 
+void ui_header_draw_tool_properties_layer_preview_dirty(void * _) {
+	context_raw->layer_preview_dirty = true;
+}
+
+void ui_header_draw_tool_properties_color_picker_normal() {
+	ui_fill(0, 0, ui->_w / (float)UI_SCALE(), ui->ops->theme->ELEMENT_H * 9, ui->ops->theme->SEPARATOR_COL);
+	ui->changed = false;
+	ui_color_wheel(_ui_header_draw_tool_properties_h, false, -1, 10 * ui->ops->theme->ELEMENT_H * UI_SCALE(), false, NULL, NULL);
+	if (ui->changed) {
+		context_raw->picked_color->normal = _ui_header_draw_tool_properties_h->color;
+		ui_header_handle->redraws         = 2;
+		ui_menu_keep_open                 = true;
+	}
+}
+
+void ui_header_draw_tool_properties_color_picker_base() {
+	ui_fill(0, 0, ui->_w / (float)UI_SCALE(), ui->ops->theme->ELEMENT_H * 9, ui->ops->theme->SEPARATOR_COL);
+	ui->changed = false;
+	ui_color_wheel(_ui_header_draw_tool_properties_h, false, -1, 10 * ui->ops->theme->ELEMENT_H * UI_SCALE(), false, NULL, NULL);
+	if (ui->changed) {
+		context_raw->picked_color->base = _ui_header_draw_tool_properties_h->color;
+		ui_header_handle->redraws       = 2;
+		ui_menu_keep_open               = true;
+	}
+}
+
+void ui_header_draw_tool_properties_to_mask(slot_layer_t *m) {
+	_gpu_begin(m->texpaint, NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
+	gpu_set_pipeline(pipes_colorid_to_mask);
+	render_target_t *rt = any_map_get(render_path_render_targets, "texpaint_colorid");
+	gpu_set_texture(pipes_texpaint_colorid, rt->_image);
+	gpu_set_texture(pipes_tex_colorid, project_get_image(project_assets->buffer[context_raw->colorid_handle->i]));
+	gpu_set_vertex_buffer(const_data_screen_aligned_vb);
+	gpu_set_index_buffer(const_data_screen_aligned_ib);
+	gpu_draw();
+	gpu_end();
+	context_raw->colorid_picked      = false;
+	ui_toolbar_handle->redraws       = 1;
+	ui_header_handle->redraws        = 1;
+	context_raw->layer_preview_dirty = true;
+	layers_update_fill_layers();
+}
+
+void ui_header_draw_tool_properties_import(char *path) {
+	import_asset_run(path, -1.0, -1.0, true, false, NULL);
+	context_raw->colorid_handle->i = project_asset_names->length - 1;
+	for (i32 i = 0; i < project_assets->length; ++i) {
+		asset_t *a = project_assets->buffer[i];
+		// Already imported
+		if (string_equals(a->file, path)) {
+			context_raw->colorid_handle->i = array_index_of(project_assets, a);
+		}
+	}
+	context_raw->ddirty               = 2;
+	context_raw->colorid_picked       = false;
+	ui_toolbar_handle->redraws        = 1;
+	ui_base_hwnds->buffer[2]->redraws = 2;
+}
+
 void ui_header_draw_tool_properties() {
 	if (context_raw->tool == TOOL_TYPE_COLORID) {
 		ui_text(tr("Picked Color", NULL), UI_ALIGN_LEFT, 0x00000000);
@@ -58,7 +117,7 @@ void ui_header_draw_tool_properties() {
 			}
 		}
 		if (ui_button(tr("Import", NULL), UI_ALIGN_CENTER, "")) {
-			ui_files_show(string_array_join(path_texture_formats(), ","), false, true, &ui_header_draw_tool_properties_128014);
+			ui_files_show(string_array_join(path_texture_formats(), ","), false, true, &ui_header_draw_tool_properties_import);
 		}
 		ui->enabled = context_raw->colorid_picked;
 		if (ui_button(tr("To Mask", NULL), UI_ALIGN_CENTER, "")) {
@@ -66,7 +125,7 @@ void ui_header_draw_tool_properties() {
 				context_set_layer(context_raw->layer->parent);
 			}
 			slot_layer_t *m = layers_new_mask(false, context_raw->layer, -1);
-			sys_notify_on_next_frame(&ui_header_draw_tool_properties_128151, m);
+			sys_notify_on_next_frame(&ui_header_draw_tool_properties_to_mask, m);
 			history_new_white_mask();
 		}
 		ui->enabled = true;
@@ -91,7 +150,7 @@ void ui_header_draw_tool_properties() {
 			gc_unroot(_ui_header_draw_tool_properties_h);
 			_ui_header_draw_tool_properties_h = h_color;
 			gc_root(_ui_header_draw_tool_properties_h);
-			ui_menu_draw(&ui_header_draw_tool_properties_128370, -1, -1);
+			ui_menu_draw(&ui_header_draw_tool_properties_color_picker_base, -1, -1);
 		}
 		if (ui_button(tr("Add Swatch", NULL), UI_ALIGN_CENTER, "")) {
 			swatch_color_t *new_swatch = project_clone_swatch(context_raw->picked_color);
@@ -112,7 +171,7 @@ void ui_header_draw_tool_properties() {
 			gc_unroot(_ui_header_draw_tool_properties_h);
 			_ui_header_draw_tool_properties_h = h_normal;
 			gc_root(_ui_header_draw_tool_properties_h);
-			ui_menu_draw(&ui_header_draw_tool_properties_128541, -1, -1);
+			ui_menu_draw(&ui_header_draw_tool_properties_color_picker_normal, -1, -1);
 		}
 		ui_text(tr("Normal", NULL), UI_ALIGN_LEFT, 0x00000000);
 		ui->_w                               = _w;
@@ -167,7 +226,7 @@ void ui_header_draw_tool_properties() {
 		if (!baking && ui_button(tr("Bake", NULL), UI_ALIGN_CENTER, "")) {
 			context_raw->pdirty = rt_bake ? context_raw->bake_samples : 1;
 			context_raw->rdirty = 3;
-			sys_notify_on_next_frame(&ui_header_draw_tool_properties_128937, NULL);
+			sys_notify_on_next_frame(&ui_header_draw_tool_properties_layer_preview_dirty, NULL);
 			ui_base_hwnds->buffer[0]->redraws        = 2;
 			history_push_undo                        = true;
 			render_path_raytrace_bake_current_sample = 0;
@@ -573,63 +632,4 @@ void ui_header_draw_tool_properties() {
 		// let h_record: ui_handle_t = ui_handle(__ID__);
 		// sim_record = ui_check(h_record, tr("Record"));
 	}
-}
-
-void ui_header_draw_tool_properties_128937(void * _) {
-	context_raw->layer_preview_dirty = true;
-}
-
-void ui_header_draw_tool_properties_128541() {
-	ui_fill(0, 0, ui->_w / (float)UI_SCALE(), ui->ops->theme->ELEMENT_H * 9, ui->ops->theme->SEPARATOR_COL);
-	ui->changed = false;
-	ui_color_wheel(_ui_header_draw_tool_properties_h, false, -1, 10 * ui->ops->theme->ELEMENT_H * UI_SCALE(), false, NULL, NULL);
-	if (ui->changed) {
-		context_raw->picked_color->normal = _ui_header_draw_tool_properties_h->color;
-		ui_header_handle->redraws         = 2;
-		ui_menu_keep_open                 = true;
-	}
-}
-
-void ui_header_draw_tool_properties_128370() {
-	ui_fill(0, 0, ui->_w / (float)UI_SCALE(), ui->ops->theme->ELEMENT_H * 9, ui->ops->theme->SEPARATOR_COL);
-	ui->changed = false;
-	ui_color_wheel(_ui_header_draw_tool_properties_h, false, -1, 10 * ui->ops->theme->ELEMENT_H * UI_SCALE(), false, NULL, NULL);
-	if (ui->changed) {
-		context_raw->picked_color->base = _ui_header_draw_tool_properties_h->color;
-		ui_header_handle->redraws       = 2;
-		ui_menu_keep_open               = true;
-	}
-}
-
-void ui_header_draw_tool_properties_128151(slot_layer_t *m) {
-	_gpu_begin(m->texpaint, NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
-	gpu_set_pipeline(pipes_colorid_to_mask);
-	render_target_t *rt = any_map_get(render_path_render_targets, "texpaint_colorid");
-	gpu_set_texture(pipes_texpaint_colorid, rt->_image);
-	gpu_set_texture(pipes_tex_colorid, project_get_image(project_assets->buffer[context_raw->colorid_handle->i]));
-	gpu_set_vertex_buffer(const_data_screen_aligned_vb);
-	gpu_set_index_buffer(const_data_screen_aligned_ib);
-	gpu_draw();
-	gpu_end();
-	context_raw->colorid_picked      = false;
-	ui_toolbar_handle->redraws       = 1;
-	ui_header_handle->redraws        = 1;
-	context_raw->layer_preview_dirty = true;
-	layers_update_fill_layers();
-}
-
-void ui_header_draw_tool_properties_128014(char *path) {
-	import_asset_run(path, -1.0, -1.0, true, false, NULL);
-	context_raw->colorid_handle->i = project_asset_names->length - 1;
-	for (i32 i = 0; i < project_assets->length; ++i) {
-		asset_t *a = project_assets->buffer[i];
-		// Already imported
-		if (string_equals(a->file, path)) {
-			context_raw->colorid_handle->i = array_index_of(project_assets, a);
-		}
-	}
-	context_raw->ddirty               = 2;
-	context_raw->colorid_picked       = false;
-	ui_toolbar_handle->redraws        = 1;
-	ui_base_hwnds->buffer[2]->redraws = 2;
 }

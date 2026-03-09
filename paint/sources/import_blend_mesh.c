@@ -1,6 +1,14 @@
 
 #include "global.h"
 
+void import_blend_mesh_ui_blender_folder_picked(char *path) {
+	#ifdef IRON_WINDOWS
+	path                = string_copy(string_replace_all(path, "\\", "/"));
+	#endif
+	config_raw->blender = string_copy(path);
+	config_save();
+}
+
 void import_blend_mesh_ui() {
 	if (config_raw->blender == NULL) {
 		config_raw->blender = "";
@@ -20,16 +28,8 @@ void import_blend_mesh_ui() {
 	h->text             = string_copy(config_raw->blender);
 	config_raw->blender = string_copy(ui_text_input(h, "", UI_ALIGN_LEFT, true, false));
 	if (ui_icon_button("", ICON_FOLDER_OPEN, UI_ALIGN_CENTER)) {
-		ui_files_show("", false, false, &import_blend_mesh_ui_37327);
+		ui_files_show("", false, false, &import_blend_mesh_ui_blender_folder_picked);
 	}
-}
-
-void import_blend_mesh_ui_37327(char *path) {
-	#ifdef IRON_WINDOWS
-	path                = string_copy(string_replace_all(path, "\\", "/"));
-	#endif
-	config_raw->blender = string_copy(path);
-	config_save();
 }
 
 void import_blend_mesh_run(char *path, bool replace_existing) {

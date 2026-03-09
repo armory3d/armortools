@@ -1,70 +1,7 @@
 
 #include "global.h"
 
-void tab_meshes_draw(ui_handle_t *htab) {
-	if (ui_tab(htab, tr("Meshes", NULL), false, -1, false) && ui->_window_h > ui_statusbar_default_h * UI_SCALE()) {
-
-		ui_begin_sticky();
-		f32_array_t *row = f32_array_create_from_raw(
-		    (f32[]){
-		        -100,
-		        -100,
-		    },
-		    2);
-		ui_row(row);
-
-		if (ui_icon_button(tr("Import", NULL), ICON_IMPORT, UI_ALIGN_CENTER)) {
-			ui_menu_draw(&tab_meshes_draw_185838, -1, -1);
-		}
-		if (ui->is_hovered)
-			ui_tooltip(tr("Import mesh file", NULL));
-
-		if (ui_icon_button(tr("Edit", NULL), ICON_EDIT, UI_ALIGN_CENTER)) {
-			ui_menu_draw(&tab_meshes_draw_185981, -1, -1);
-		}
-
-		ui_end_sticky();
-
-		for (i32 i = 0; i < project_paint_objects->length; ++i) {
-
-			f32_array_t *row = f32_array_create_from_raw(
-			    (f32[]){
-			        -30,
-			        1.0,
-			    },
-			    2);
-			ui_row(row);
-			gpu_texture_t *icons  = resource_get("icons05x.k");
-			rect_t        *rect   = resource_tile50(icons, ICON_CUBE);
-			i32            icon_h = 25 * UI_SCALE();
-			ui_sub_image(icons, ui->ops->theme->LABEL_COL - 0x00333333, icon_h, rect->x / (float)2, rect->y / (float)2, rect->w / (float)2, rect->h / (float)2);
-
-			mesh_object_t *o = project_paint_objects->buffer[i];
-			ui_handle_t   *h = ui_handle(__ID__);
-			h->b             = o->base->visible;
-			o->base->visible = ui_check(h, o->base->name, "");
-
-			if (ui->is_hovered && ui->input_released_r) {
-				_tab_meshes_draw_i = i;
-
-				ui_menu_draw(&tab_meshes_draw_186425, -1, -1);
-			}
-			if (h->changed) {
-				mesh_object_t_array_t *visibles = any_array_create_from_raw((void *[]){}, 0);
-				for (i32 i = 0; i < project_paint_objects->length; ++i) {
-					mesh_object_t *p = project_paint_objects->buffer[i];
-					if (p->base->visible) {
-						any_array_push(visibles, p);
-					}
-				}
-				util_mesh_merge(visibles);
-				context_raw->ddirty = 2;
-			}
-		}
-	}
-}
-
-void tab_meshes_draw_186425() {
+void tab_meshes_draw_context_menu() {
 	i32            i = _tab_meshes_draw_i;
 	mesh_object_t *o = project_paint_objects->buffer[i];
 
@@ -100,7 +37,7 @@ void tab_meshes_draw_186425() {
 	}
 }
 
-void tab_meshes_draw_185981() {
+void tab_meshes_draw_edit() {
 	if (ui_menu_button(tr("Flip Normals", NULL), "", ICON_NONE)) {
 		util_mesh_flip_normals();
 		context_raw->ddirty = 2;
@@ -160,7 +97,7 @@ void tab_meshes_draw_185981() {
 	}
 }
 
-void tab_meshes_draw_185904() {
+void tab_meshes_draw_append_shape() {
 	for (i32 i = 0; i < project_mesh_list->length; ++i) {
 		if (ui_menu_button(project_mesh_list->buffer[i], "", ICON_NONE)) {
 			tab_meshes_append_shape(project_mesh_list->buffer[i]);
@@ -168,7 +105,7 @@ void tab_meshes_draw_185904() {
 	}
 }
 
-void tab_meshes_draw_185838() {
+void tab_meshes_draw_import() {
 	if (ui_menu_button(tr("Replace Existing", NULL), any_map_get(config_keymap, "file_import_assets"), ICON_NONE)) {
 		project_import_mesh(true, NULL);
 	}
@@ -179,7 +116,70 @@ void tab_meshes_draw_185838() {
 	if (config_raw->experimental) {
 		project_fetch_default_meshes();
 		if (ui_menu_button(tr("Append Shape", NULL), "", ICON_NONE)) {
-			ui_menu_draw(&tab_meshes_draw_185904, -1, -1);
+			ui_menu_draw(&tab_meshes_draw_append_shape, -1, -1);
+		}
+	}
+}
+
+void tab_meshes_draw(ui_handle_t *htab) {
+	if (ui_tab(htab, tr("Meshes", NULL), false, -1, false) && ui->_window_h > ui_statusbar_default_h * UI_SCALE()) {
+
+		ui_begin_sticky();
+		f32_array_t *row = f32_array_create_from_raw(
+		    (f32[]){
+		        -100,
+		        -100,
+		    },
+		    2);
+		ui_row(row);
+
+		if (ui_icon_button(tr("Import", NULL), ICON_IMPORT, UI_ALIGN_CENTER)) {
+			ui_menu_draw(&tab_meshes_draw_import, -1, -1);
+		}
+		if (ui->is_hovered)
+			ui_tooltip(tr("Import mesh file", NULL));
+
+		if (ui_icon_button(tr("Edit", NULL), ICON_EDIT, UI_ALIGN_CENTER)) {
+			ui_menu_draw(&tab_meshes_draw_edit, -1, -1);
+		}
+
+		ui_end_sticky();
+
+		for (i32 i = 0; i < project_paint_objects->length; ++i) {
+
+			f32_array_t *row = f32_array_create_from_raw(
+			    (f32[]){
+			        -30,
+			        1.0,
+			    },
+			    2);
+			ui_row(row);
+			gpu_texture_t *icons  = resource_get("icons05x.k");
+			rect_t        *rect   = resource_tile50(icons, ICON_CUBE);
+			i32            icon_h = 25 * UI_SCALE();
+			ui_sub_image(icons, ui->ops->theme->LABEL_COL - 0x00333333, icon_h, rect->x / (float)2, rect->y / (float)2, rect->w / (float)2, rect->h / (float)2);
+
+			mesh_object_t *o = project_paint_objects->buffer[i];
+			ui_handle_t   *h = ui_handle(__ID__);
+			h->b             = o->base->visible;
+			o->base->visible = ui_check(h, o->base->name, "");
+
+			if (ui->is_hovered && ui->input_released_r) {
+				_tab_meshes_draw_i = i;
+
+				ui_menu_draw(&tab_meshes_draw_context_menu, -1, -1);
+			}
+			if (h->changed) {
+				mesh_object_t_array_t *visibles = any_array_create_from_raw((void *[]){}, 0);
+				for (i32 i = 0; i < project_paint_objects->length; ++i) {
+					mesh_object_t *p = project_paint_objects->buffer[i];
+					if (p->base->visible) {
+						any_array_push(visibles, p);
+					}
+				}
+				util_mesh_merge(visibles);
+				context_raw->ddirty = 2;
+			}
 		}
 	}
 }
@@ -432,15 +432,21 @@ void tab_scene_select_object(mesh_object_t *mo) {
 	context_select_paint_object(mo);
 }
 
-void tab_scene_sort() {
-	object_t *scene = _scene_root->children->buffer[0];
-	array_sort(scene->children, &tab_scene_sort_187924);
-}
-
-i32 tab_scene_sort_187924(void **pa, void **pb) {
+i32 tab_scene_sort_compare(void **pa, void **pb) {
 	object_t *a = *(pa);
 	object_t *b = *(pb);
 	return strcmp(a->name, b->name);
+}
+
+void tab_scene_sort() {
+	object_t *scene = _scene_root->children->buffer[0];
+	array_sort(scene->children, &tab_scene_sort_compare);
+}
+
+void tab_scene_import_mesh_done_on_next_frame(void * _) {
+	util_mesh_merge(NULL);
+	tab_scene_select_object(context_raw->selected_object->ext);
+	tab_scene_sort();
 }
 
 void tab_scene_import_mesh_done() {
@@ -453,13 +459,16 @@ void tab_scene_import_mesh_done() {
 		tab_scene_select_object(mo);
 	}
 
-	sys_notify_on_next_frame(&tab_scene_import_mesh_done_188032, NULL);
+	sys_notify_on_next_frame(&tab_scene_import_mesh_done_on_next_frame, NULL);
 }
 
-void tab_scene_import_mesh_done_188032(void * _) {
-	util_mesh_merge(NULL);
-	tab_scene_select_object(context_raw->selected_object->ext);
-	tab_scene_sort();
+void tab_scene_draw_list_context_menu() {
+	if (ui_menu_button(tr("Duplicate", NULL), "", ICON_DUPLICATE)) {
+		sim_duplicate();
+	}
+	if (ui_menu_button(tr("Delete", NULL), "", ICON_DELETE)) {
+		sim_delete();
+	}
 }
 
 void tab_scene_draw_list(ui_handle_t *list_handle, object_t *current_object) {
@@ -521,7 +530,7 @@ void tab_scene_draw_list(ui_handle_t *list_handle, object_t *current_object) {
 	if (ui->is_hovered && ui->input_released_r) {
 		tab_scene_select_object(current_object->ext);
 
-		ui_menu_draw(&tab_scene_draw_list_188308, -1, -1);
+		ui_menu_draw(&tab_scene_draw_list_context_menu, -1, -1);
 	}
 
 	if (b) {
@@ -537,15 +546,6 @@ void tab_scene_draw_list(ui_handle_t *list_handle, object_t *current_object) {
 		draw_set_color(ui->ops->theme->BUTTON_COL);
 		draw_line(ui->_x + 14, current_y, ui->_x + 14, ui->_y - UI_ELEMENT_H() / (float)2, 1.0);
 		draw_set_color(0xffffffff);
-	}
-}
-
-void tab_scene_draw_list_188308() {
-	if (ui_menu_button(tr("Duplicate", NULL), "", ICON_DUPLICATE)) {
-		sim_duplicate();
-	}
-	if (ui_menu_button(tr("Delete", NULL), "", ICON_DELETE)) {
-		sim_delete();
 	}
 }
 

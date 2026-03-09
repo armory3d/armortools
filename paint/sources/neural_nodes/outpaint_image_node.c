@@ -7,27 +7,7 @@ void outpaint_image_node_init() {
 	any_map_set(ui_nodes_custom_buttons, "outpaint_image_node_button", outpaint_image_node_button);
 }
 
-void outpaint_image_node_button(i32 node_id) {
-	ui_node_canvas_t *canvas    = ui_nodes_get_canvas(true);
-	ui_node_t        *node      = ui_get_node(canvas->nodes, node_id);
-	char         *node_name = parser_material_node_name(node, NULL);
-	ui_handle_t      *h         = ui_handle(node_name);
-	string_t_array_t *models    = any_array_create_from_raw(
-        (void *[]){
-            "Stable Diffusion",
-            "Qwen Image Edit",
-        },
-        2);
-	i32       model                  = ui_combo(ui_nest(h, 0), models, tr("Model", NULL), false, UI_ALIGN_LEFT, true);
-	char *prompt                 = ui_text_area(ui_nest(h, 1), UI_ALIGN_LEFT, true, tr("prompt", NULL), true);
-	node->buttons->buffer[0]->height = string_split(prompt, "\n")->length + 2;
-
-	if (neural_node_button(node, models->buffer[model])) {
-		sys_notify_on_next_frame(&outpaint_image_node_button_235809, node);
-	}
-}
-
-void outpaint_image_node_button_235809(ui_node_t *node) {
+void outpaint_image_node_button_on_next_frame(ui_node_t *node) {
 	ui_node_t     *from_node = neural_from_node(node->inputs->buffer[0], 0);
 	gpu_texture_t *input     = ui_nodes_get_node_preview_image(from_node);
 	if (input != NULL) {
@@ -131,5 +111,25 @@ void outpaint_image_node_button_235809(ui_node_t *node) {
 
 		iron_exec_async(argv->buffer[0], argv->buffer);
 		sys_notify_on_update(neural_node_check_result, node);
+	}
+}
+
+void outpaint_image_node_button(i32 node_id) {
+	ui_node_canvas_t *canvas    = ui_nodes_get_canvas(true);
+	ui_node_t        *node      = ui_get_node(canvas->nodes, node_id);
+	char         *node_name = parser_material_node_name(node, NULL);
+	ui_handle_t      *h         = ui_handle(node_name);
+	string_t_array_t *models    = any_array_create_from_raw(
+        (void *[]){
+            "Stable Diffusion",
+            "Qwen Image Edit",
+        },
+        2);
+	i32       model                  = ui_combo(ui_nest(h, 0), models, tr("Model", NULL), false, UI_ALIGN_LEFT, true);
+	char *prompt                 = ui_text_area(ui_nest(h, 1), UI_ALIGN_LEFT, true, tr("prompt", NULL), true);
+	node->buttons->buffer[0]->height = string_split(prompt, "\n")->length + 2;
+
+	if (neural_node_button(node, models->buffer[model])) {
+		sys_notify_on_next_frame(&outpaint_image_node_button_on_next_frame, node);
 	}
 }

@@ -1,6 +1,16 @@
 
 #include "global.h"
 
+void import_arm_run_project_on_next_frame(void *_) {
+	// Once envmap is imported
+	scene_world->strength         = project_raw->envmap_strength;
+	context_raw->envmap_angle     = project_raw->envmap_angle;
+	context_raw->show_envmap_blur = project_raw->envmap_blur;
+	if (context_raw->show_envmap_blur) {
+		scene_world->_->envmap = scene_world->_->radiance_mipmaps->buffer[0];
+	}
+}
+
 void import_arm_run_project(char *path) {
 	buffer_t         *b = data_get_blob(path);
 	project_format_t *project;
@@ -45,11 +55,11 @@ void import_arm_run_project(char *path) {
 	gc_unroot(ui_files_filename);
 	ui_files_filename = string_copy(substring(path, string_last_index_of(path, PATH_SEP) + 1, string_last_index_of(path, ".")));
 	gc_root(ui_files_filename);
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	sys_title_set(ui_files_filename);
-	#else
+#else
 	sys_title_set(string_join(string_join(ui_files_filename, " - "), manifest_title));
-	#endif
+#endif
 
 	// Import as mesh instead
 	if (import_as_mesh) {
@@ -57,15 +67,15 @@ void import_arm_run_project(char *path) {
 		return;
 	}
 
-	// Save to recent
-	#ifdef IRON_IOS
+// Save to recent
+#ifdef IRON_IOS
 	char *recent_path = substring(path, string_last_index_of(path, "/") + 1, string_length(path));
-	#else
+#else
 	char *recent_path = path;
-	#endif
-	#ifdef IRON_WINDOWS
+#endif
+#ifdef IRON_WINDOWS
 	recent_path = string_copy(string_replace_all(recent_path, "\\", "/"));
-	#endif
+#endif
 	string_t_array_t *recent = config_raw->recent_projects;
 	char_ptr_array_remove(recent, recent_path);
 	array_insert(recent, 0, recent_path);
@@ -84,11 +94,11 @@ void import_arm_run_project(char *path) {
 	char *base = path_base_dir(path);
 	if (project_raw->envmap != NULL) {
 		project_raw->envmap = data_is_abs(project_raw->envmap) ? project_raw->envmap : string_join(base, project_raw->envmap);
-		#ifdef IRON_WINDOWS
+#ifdef IRON_WINDOWS
 		project_raw->envmap = string_copy(string_replace_all(project_raw->envmap, "/", "\\"));
-		#else
+#else
 		project_raw->envmap = string_copy(string_replace_all(project_raw->envmap, "\\", "/"));
-		#endif
+#endif
 	}
 
 	if (project_raw->camera_world != NULL) {
@@ -102,11 +112,11 @@ void import_arm_run_project(char *path) {
 
 	for (i32 i = 0; i < project->assets->length; ++i) {
 		char *file = project->assets->buffer[i];
-		#ifdef IRON_WINDOWS
+#ifdef IRON_WINDOWS
 		file = string_copy(string_replace_all(file, "/", "\\"));
-		#else
+#else
 		file = string_copy(string_replace_all(file, "\\", "/"));
-		#endif
+#endif
 		// Convert image path from relative to absolute
 		char *abs = data_is_abs(file) ? file : string_join(base, file);
 		if (project->packed_assets != NULL) {
@@ -123,11 +133,11 @@ void import_arm_run_project(char *path) {
 	if (project->font_assets != NULL) {
 		for (i32 i = 0; i < project->font_assets->length; ++i) {
 			char *file = project->font_assets->buffer[i];
-			#ifdef IRON_WINDOWS
+#ifdef IRON_WINDOWS
 			file = string_copy(string_replace_all(file, "/", "\\"));
-			#else
+#else
 			file = string_copy(string_replace_all(file, "\\", "/"));
-			#endif
+#endif
 			// Convert font path from relative to absolute
 			char *abs = data_is_abs(file) ? file : string_join(base, file);
 			if (iron_file_exists(abs)) {
@@ -373,7 +383,7 @@ void import_arm_run_project(char *path) {
 		}
 	}
 
-	sys_notify_on_next_frame(&import_arm_run_project_94619, NULL);
+	sys_notify_on_next_frame(&import_arm_run_project_on_next_frame, NULL);
 
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
@@ -381,14 +391,8 @@ void import_arm_run_project(char *path) {
 	data_delete_blob(path);
 }
 
-void import_arm_run_project_94619(void * _) {
-	// Once envmap is imported
-	scene_world->strength         = project_raw->envmap_strength;
-	context_raw->envmap_angle     = project_raw->envmap_angle;
-	context_raw->show_envmap_blur = project_raw->envmap_blur;
-	if (context_raw->show_envmap_blur) {
-		scene_world->_->envmap = scene_world->_->radiance_mipmaps->buffer[0];
-	}
+void import_arm_run_mesh_on_next_frame(void *_) {
+	layers_init();
 }
 
 void import_arm_run_mesh(project_format_t *raw) {
@@ -416,12 +420,8 @@ void import_arm_run_mesh(project_format_t *raw) {
 		util_mesh_merge(NULL);
 		viewport_scale_to_bounds(2.0);
 	}
-	sys_notify_on_next_frame(&import_arm_run_mesh_94821, NULL);
+	sys_notify_on_next_frame(&import_arm_run_mesh_on_next_frame, NULL);
 	history_reset();
-}
-
-void import_arm_run_mesh_94821(void * _) {
-	layers_init();
 }
 
 void import_arm_run_material(char *path) {
@@ -441,15 +441,24 @@ void import_arm_run_material(char *path) {
 	import_arm_run_material_from_project(project, path);
 }
 
+void import_arm_run_material_from_project_on_next_frame(slot_material_t_array_t *imported) {
+	for (i32 i = 0; i < imported->length; ++i) {
+		slot_material_t *m = imported->buffer[i];
+		context_set_material(m);
+		make_material_parse_paint_material(true);
+		util_render_make_material_preview();
+	}
+}
+
 void import_arm_run_material_from_project(project_format_t *project, char *path) {
 	char *base = path_base_dir(path);
 	for (i32 i = 0; i < project->assets->length; ++i) {
 		char *file = project->assets->buffer[i];
-		#ifdef IRON_WINDOWS
+#ifdef IRON_WINDOWS
 		file = string_copy(string_replace_all(file, "/", "\\"));
-		#else
+#else
 		file = string_copy(string_replace_all(file, "\\", "/"));
-		#endif
+#endif
 		// Convert image path from relative to absolute
 		char *abs = data_is_abs(file) ? file : string_join(base, file);
 		if (project->packed_assets != NULL) {
@@ -490,7 +499,7 @@ void import_arm_run_material_from_project(project_format_t *project, char *path)
 		}
 	}
 
-	sys_notify_on_next_frame(&import_arm_run_material_from_project_95252, imported);
+	sys_notify_on_next_frame(&import_arm_run_material_from_project_on_next_frame, imported);
 	gc_unroot(ui_nodes_group_stack);
 	ui_nodes_group_stack = any_array_create_from_raw((void *[]){}, 0);
 	gc_root(ui_nodes_group_stack);
@@ -498,19 +507,10 @@ void import_arm_run_material_from_project(project_format_t *project, char *path)
 	data_delete_blob(path);
 }
 
-void import_arm_run_material_from_project_95252(slot_material_t_array_t *imported) {
-	for (i32 i = 0; i < imported->length; ++i) {
-		slot_material_t *m = imported->buffer[i];
-		context_set_material(m);
-		make_material_parse_paint_material(true);
-		util_render_make_material_preview();
-	}
-}
-
 bool import_arm_group_exists(ui_node_canvas_t *c) {
 	for (i32 i = 0; i < project_material_groups->length; ++i) {
 		node_group_t *g     = project_material_groups->buffer[i];
-		char     *cname = g->canvas->name;
+		char         *cname = g->canvas->name;
 		if (string_equals(cname, c->name)) {
 			return true;
 		}
@@ -552,15 +552,24 @@ void import_arm_run_brush(char *path) {
 	import_arm_run_brush_from_project(project, path);
 }
 
+void import_arm_run_brush_from_project_on_next_frame(slot_brush_t_array_t *imported) {
+	for (i32 i = 0; i < imported->length; ++i) {
+		slot_brush_t *b = imported->buffer[i];
+		context_set_brush(b);
+		make_material_parse_brush();
+		util_render_make_brush_preview();
+	}
+}
+
 void import_arm_run_brush_from_project(project_format_t *project, char *path) {
 	char *base = path_base_dir(path);
 	for (i32 i = 0; i < project->assets->length; ++i) {
 		char *file = project->assets->buffer[i];
-		#ifdef IRON_WINDOWS
+#ifdef IRON_WINDOWS
 		file = string_copy(string_replace_all(file, "/", "\\"));
-		#else
+#else
 		file = string_copy(string_replace_all(file, "\\", "/"));
-		#endif
+#endif
 		// Convert image path from relative to absolute
 		char *abs = data_is_abs(file) ? file : string_join(base, file);
 		if (project->packed_assets != NULL) {
@@ -583,18 +592,9 @@ void import_arm_run_brush_from_project(project_format_t *project, char *path) {
 		any_array_push(imported, context_raw->brush);
 	}
 
-	sys_notify_on_next_frame(&import_arm_run_brush_from_project_95818, imported);
+	sys_notify_on_next_frame(&import_arm_run_brush_from_project_on_next_frame, imported);
 	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
 	data_delete_blob(path);
-}
-
-void import_arm_run_brush_from_project_95818(slot_brush_t_array_t *imported) {
-	for (i32 i = 0; i < imported->length; ++i) {
-		slot_brush_t *b = imported->buffer[i];
-		context_set_brush(b);
-		make_material_parse_brush();
-		util_render_make_brush_preview();
-	}
 }
 
 void import_arm_run_swatches(char *path, bool replace_existing) {
@@ -612,7 +612,7 @@ void import_arm_run_swatches_from_project(project_format_t *project, char *path,
 		project_raw->swatches = any_array_create_from_raw((void *[]){}, 0);
 
 		if (project->swatches == NULL) { // No swatches contained
-			any_array_push(project_raw->swatches, make_swatch(0xffffffff));
+			any_array_push(project_raw->swatches, project_make_swatch(0xffffffff));
 		}
 	}
 
@@ -653,11 +653,11 @@ void import_arm_unpack_asset(project_format_t *project, char *abs, char *file, b
 	}
 	for (i32 i = 0; i < project->packed_assets->length; ++i) {
 		packed_asset_t *pa = project->packed_assets->buffer[i];
-		#ifdef IRON_WINDOWS
+#ifdef IRON_WINDOWS
 		pa->name = string_copy(string_replace_all(pa->name, "/", "\\"));
-		#else
+#else
 		pa->name = string_copy(string_replace_all(pa->name, "\\", "/"));
-		#endif
+#endif
 		pa->name = string_copy(path_normalize(pa->name));
 		if (string_equals(pa->name, file)) {
 			pa->name = string_copy(abs); // From relative to absolute

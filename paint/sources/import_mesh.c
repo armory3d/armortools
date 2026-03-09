@@ -56,6 +56,12 @@ void import_mesh_run(char *path, bool _clear_layers, bool replace_existing) {
 	#endif
 }
 
+i32 import_mesh_finish_import_sort(void **pa, void **pb) {
+	mesh_object_t *a = *(pa);
+	mesh_object_t *b = *(pb);
+	return strcmp(a->base->name, b->base->name);
+}
+
 void import_mesh_finish_import() {
 	if (context_raw->merged_object != NULL) {
 		mesh_data_delete(context_raw->merged_object->data);
@@ -73,7 +79,7 @@ void import_mesh_finish_import() {
 
 	if (project_paint_objects->length > 1) {
 		// Sort by name
-		array_sort(project_paint_objects, &import_mesh_finish_import_85673);
+		array_sort(project_paint_objects, &import_mesh_finish_import_sort);
 
 		if (context_raw->merged_object == NULL) {
 			util_mesh_merge(NULL);
@@ -94,10 +100,12 @@ void import_mesh_finish_import() {
 	context_raw->paint_body    = NULL;
 }
 
-i32 import_mesh_finish_import_85673(void **pa, void **pb) {
-	mesh_object_t *a = *(pa);
-	mesh_object_t *b = *(pb);
-	return strcmp(a->base->name, b->base->name);
+void _import_mesh_make_mesh_finish_import(void * _) {
+	import_mesh_finish_import();
+}
+
+void _import_mesh_make_mesh_clear_layers(void * _) {
+	layers_init();
 }
 
 void _import_mesh_make_mesh(raw_mesh_t *mesh) {
@@ -120,7 +128,7 @@ void _import_mesh_make_mesh(raw_mesh_t *mesh) {
 
 	char *handle = context_raw->paint_object->data->_->handle;
 	if (!string_equals(handle, "SceneSphere") && !string_equals(handle, "ScenePlane")) {
-		sys_notify_on_next_frame(&_import_mesh_make_mesh_85887, context_raw->paint_object->data);
+		sys_notify_on_next_frame(&mesh_data_delete, context_raw->paint_object->data);
 	}
 
 	mesh_object_set_data(context_raw->paint_object, md);
@@ -150,33 +158,12 @@ void _import_mesh_make_mesh(raw_mesh_t *mesh) {
 			slot_layer_unload(l);
 		}
 		layers_new_layer(false, -1);
-		sys_notify_on_next_frame(&_import_mesh_make_mesh_86005, NULL);
+		sys_notify_on_next_frame(&_import_mesh_make_mesh_clear_layers, NULL);
 		history_reset();
 	}
 
 	// Wait for add_mesh calls to finish
-	if (import_mesh_meshes_to_unwrap != NULL) {
-		sys_notify_on_next_frame(&_import_mesh_make_mesh_86033, NULL);
-	}
-	else {
-		sys_notify_on_next_frame(&_import_mesh_make_mesh_86052, NULL);
-	}
-}
-
-void _import_mesh_make_mesh_86052(void * _) {
-	import_mesh_finish_import();
-}
-
-void _import_mesh_make_mesh_86033(void * _) {
-	import_mesh_finish_import();
-}
-
-void _import_mesh_make_mesh_86005(void * _) {
-	layers_init();
-}
-
-void _import_mesh_make_mesh_85887(mesh_data_t *md) {
-	mesh_data_delete(md);
+	sys_notify_on_next_frame(&_import_mesh_make_mesh_finish_import, NULL);
 }
 
 void import_mesh_first_unwrap_done(raw_mesh_t *mesh) {

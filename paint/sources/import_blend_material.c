@@ -1,15 +1,7 @@
 
 #include "global.h"
 
-void import_blend_material_run(char *path) {
-	gc_unroot(_import_blend_material_path);
-	_import_blend_material_path = string_copy(path);
-	gc_root(_import_blend_material_path);
-
-	ui_box_show_custom(&import_blend_material_run_43663, 400, 200, NULL, true, "");
-}
-
-void import_blend_material_run_43663() {
+void import_blend_material_run_box() {
 	if (ui_tab(ui_handle(__ID__), tr("Import Material", NULL), false, -1, false)) {
 		import_blend_mesh_ui();
 
@@ -30,13 +22,15 @@ void import_blend_material_run_43663() {
 	}
 }
 
-void _import_blend_material() {
-	console_toast(tr("Baking material", NULL));
+void import_blend_material_run(char *path) {
+	gc_unroot(_import_blend_material_path);
+	_import_blend_material_path = string_copy(path);
+	gc_root(_import_blend_material_path);
 
-	sys_notify_on_next_frame(&_import_blend_material_43775, NULL);
+	ui_box_show_custom(&import_blend_material_run_box, 400, 200, NULL, true, "");
 }
 
-void _import_blend_material_43775(void * _) {
+void _import_blend_material_on_next_frame(void * _) {
 	char *save;
 	if (path_is_protected()) {
 		save = string_copy(iron_internal_save_path());
@@ -85,4 +79,9 @@ for mat in bpy.data.materials:\n\
 	                                         py),
 	                             "\""));
 	import_folder_run(save);
+}
+
+void _import_blend_material() {
+	console_toast(tr("Baking material", NULL));
+	sys_notify_on_next_frame(&_import_blend_material_on_next_frame, NULL);
 }

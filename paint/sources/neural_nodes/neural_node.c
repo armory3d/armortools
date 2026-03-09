@@ -38,6 +38,11 @@ ui_node_t *neural_from_node(ui_node_socket_t *inp, i32 socket) {
 	return result;
 }
 
+void neural_node_button_on_next_frame(void * _) {
+	box_preferences_htab->i = PREFERENCE_TAB_NEURAL;
+	box_preferences_show();
+}
+
 bool neural_node_button(ui_node_t *node, char *model) {
 	char *url       = box_preferneces_model_url_from_name(model);
 	char *file_name = box_preferences_file_name_from_url(url);
@@ -52,17 +57,12 @@ bool neural_node_button(ui_node_t *node, char *model) {
 		}
 	}
 	else if (!found && ui_button(tr("Setup", NULL), UI_ALIGN_CENTER, "")) {
-		sys_notify_on_next_frame(&neural_node_button_236824, NULL);
+		sys_notify_on_next_frame(&neural_node_button_on_next_frame, NULL);
 	}
 	else if (found && ui_button(tr("Run", NULL), UI_ALIGN_CENTER, "")) {
 		return true;
 	}
 	return false;
-}
-
-void neural_node_button_236824(void * _) {
-	box_preferences_htab->i = PREFERENCE_TAB_NEURAL;
-	box_preferences_show();
 }
 
 void neural_node_check_result(ui_node_t *node) {
@@ -111,24 +111,16 @@ char *neural_node_dir() {
 	return dir;
 }
 
-void neural_node_download(char *url) {
-	char *file_name = substring(url, string_last_index_of(url, "/") + 1, string_length(url));
-	char *file_path = string_join(string_join(neural_node_dir(), PATH_SEP), file_name);
-	bool      found     = iron_file_exists(file_path);
-	if (found) {
-		return;
-	}
+#ifdef WITH_COMPRESS
 
-	neural_node_downloading++;
-	file_download_to(url, file_path, &neural_node_download_237123, 0);
-}
-
-void neural_node_download_237227(void * _) {
+void neural_node_download_done_untar(void * _) {
 	char *tar = string_join(neural_node_dir(), "/Hunyuan3D_win64.tar");
 	untar_here(tar);
 }
 
-void neural_node_download_237123(char *url) {
+#endif
+
+void neural_node_download_done(char *url) {
 	neural_node_downloading--;
 	console_log(string_join(string_join(tr("Downloaded file from", NULL), " "), url));
 
@@ -147,9 +139,21 @@ void neural_node_download_237123(char *url) {
 	#ifdef WITH_COMPRESS
 	if (ends_with(url, "Hunyuan3D_win64.tar")) {
 		console_toast(tr("Unpacking Hunyuan3D_win64.tar", NULL));
-		sys_notify_on_next_frame(&neural_node_download_237227, NULL);
+		sys_notify_on_next_frame(&neural_node_download_done_untar, NULL);
 	}
 	#endif
+}
+
+void neural_node_download(char *url) {
+	char *file_name = substring(url, string_last_index_of(url, "/") + 1, string_length(url));
+	char *file_path = string_join(string_join(neural_node_dir(), PATH_SEP), file_name);
+	bool      found     = iron_file_exists(file_path);
+	if (found) {
+		return;
+	}
+
+	neural_node_downloading++;
+	file_download_to(url, file_path, &neural_node_download_done, 0);
 }
 
 void neural_node_download_models(string_t_array_t *models) {

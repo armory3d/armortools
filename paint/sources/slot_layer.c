@@ -402,17 +402,17 @@ void slot_layer_resize_and_set_bits(slot_layer_t *raw) {
 	}
 }
 
+void slot_layer_to_fill_layer_on_next_frame(void * _) {
+	make_material_parse_paint_material(true);
+	context_raw->layer_preview_dirty                  = true;
+	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+}
+
 void slot_layer_to_fill_layer(slot_layer_t *raw) {
 	context_set_layer(raw);
 	raw->fill_layer = context_raw->material;
 	layers_update_fill_layer(true);
-	sys_notify_on_next_frame(&slot_layer_to_fill_layer_19750, NULL);
-}
-
-void slot_layer_to_fill_layer_19750(void * _) {
-	make_material_parse_paint_material(true);
-	context_raw->layer_preview_dirty                  = true;
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
+	sys_notify_on_next_frame(&slot_layer_to_fill_layer_on_next_frame, NULL);
 }
 
 void slot_layer_to_paint_layer(slot_layer_t *raw) {
@@ -744,7 +744,7 @@ void layers_resize() {
 		config_raw->undo_steps = 1;
 		while (history_undo_layers->length > config_raw->undo_steps) {
 			slot_layer_t *l = array_pop(history_undo_layers);
-			sys_notify_on_next_frame(&layers_resize_21670, l);
+			sys_notify_on_next_frame(&slot_layer_unload, l);
 		}
 	}
 	for (i32 i = 0; i < project_layers->length; ++i) {
@@ -789,10 +789,6 @@ void layers_resize() {
 	}
 	render_path_raytrace_ready = false; // Rebuild baketex
 	context_raw->ddirty        = 2;
-}
-
-void layers_resize_21670(slot_layer_t *l) {
-	slot_layer_unload(l);
 }
 
 void layers_set_bits() {
@@ -1145,6 +1141,10 @@ void layers_set_object_mask() {
 	util_uv_dilatemap_cached = false;
 }
 
+void layers_new_layer_clear(slot_layer_t *l) {
+	slot_layer_clear(l, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
+}
+
 slot_layer_t *layers_new_layer(bool clear, i32 position) {
 	if (project_layers->length > layers_max_layers) {
 		return NULL;
@@ -1171,13 +1171,13 @@ slot_layer_t *layers_new_layer(bool clear, i32 position) {
 		}
 	}
 	if (clear) {
-		sys_notify_on_next_frame(&layers_new_layer_23812, l);
+		sys_notify_on_next_frame(&layers_new_layer_clear, l);
 	}
 	context_raw->layer_preview_dirty = true;
 	return l;
 }
 
-void layers_new_layer_23812(slot_layer_t *l) {
+void layers_new_mask_clear(slot_layer_t *l) {
 	slot_layer_clear(l, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
 }
 
@@ -1193,14 +1193,10 @@ slot_layer_t *layers_new_mask(bool clear, slot_layer_t *parent, i32 position) {
 	array_insert(project_layers, position, l);
 	context_set_layer(l);
 	if (clear) {
-		sys_notify_on_next_frame(&layers_new_mask_23923, l);
+		sys_notify_on_next_frame(&layers_new_mask_clear, l);
 	}
 	context_raw->layer_preview_dirty = true;
 	return l;
-}
-
-void layers_new_mask_23923(slot_layer_t *l) {
-	slot_layer_clear(l, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
 }
 
 slot_layer_t *layers_new_group() {
@@ -1214,18 +1210,7 @@ slot_layer_t *layers_new_group() {
 	return l;
 }
 
-void layers_create_fill_layer(uv_type_t uv_type, mat4_t decal_mat, i32 position) {
-	if (context_raw->tool == TOOL_TYPE_GIZMO) {
-		return;
-	}
-
-	_layers_uv_type   = uv_type;
-	_layers_decal_mat = decal_mat;
-	_layers_position  = position;
-	sys_notify_on_next_frame(&layers_create_fill_layer_24041, NULL);
-}
-
-void layers_create_fill_layer_24041(void * _) {
+void layers_create_fill_layer_on_next_frame(void * _) {
 	slot_layer_t *l = layers_new_layer(false, _layers_position);
 	history_new_layer();
 	l->uv_type = _layers_uv_type;
@@ -1235,6 +1220,17 @@ void layers_create_fill_layer_24041(void * _) {
 	l->object_mask = context_raw->layer_filter;
 	history_to_fill_layer();
 	slot_layer_to_fill_layer(l);
+}
+
+void layers_create_fill_layer(uv_type_t uv_type, mat4_t decal_mat, i32 position) {
+	if (context_raw->tool == TOOL_TYPE_GIZMO) {
+		return;
+	}
+
+	_layers_uv_type   = uv_type;
+	_layers_decal_mat = decal_mat;
+	_layers_position  = position;
+	sys_notify_on_next_frame(&layers_create_fill_layer_on_next_frame, NULL);
 }
 
 void layers_create_image_mask(asset_t *asset) {
@@ -1249,6 +1245,14 @@ void layers_create_image_mask(asset_t *asset) {
 	context_raw->layer_preview_dirty = true;
 }
 
+void layers_create_color_layer_on_next_frame(void * _) {
+	slot_layer_t *l = layers_new_layer(false, _layers_position);
+	history_new_layer();
+	l->uv_type     = UV_TYPE_UVMAP;
+	l->object_mask = context_raw->layer_filter;
+	slot_layer_clear(l, _layers_base_color, NULL, _layers_occlusion, _layers_roughness, _layers_metallic);
+}
+
 void layers_create_color_layer(i32 base_color, f32 occlusion, f32 roughness, f32 metallic, i32 position) {
 	_layers_base_color = base_color;
 	_layers_occlusion  = occlusion;
@@ -1256,15 +1260,7 @@ void layers_create_color_layer(i32 base_color, f32 occlusion, f32 roughness, f32
 	_layers_metallic   = metallic;
 	_layers_position   = position;
 
-	sys_notify_on_next_frame(&layers_create_color_layer_24217, NULL);
-}
-
-void layers_create_color_layer_24217(void * _) {
-	slot_layer_t *l = layers_new_layer(false, _layers_position);
-	history_new_layer();
-	l->uv_type     = UV_TYPE_UVMAP;
-	l->object_mask = context_raw->layer_filter;
-	slot_layer_clear(l, _layers_base_color, NULL, _layers_occlusion, _layers_roughness, _layers_metallic);
+	sys_notify_on_next_frame(&layers_create_color_layer_on_next_frame, NULL);
 }
 
 void layers_duplicate_layer(slot_layer_t *l) {
@@ -1654,19 +1650,7 @@ slot_layer_t *layers_flatten(bool height_to_normal, slot_layer_t_array_t *layers
 	return l0;
 }
 
-void layers_on_resized() {
-	sys_notify_on_next_frame(&layers_on_resized_26530, NULL);
-	gc_unroot(util_uv_uvmap);
-	util_uv_uvmap        = NULL;
-	util_uv_uvmap_cached = false;
-	gc_unroot(util_uv_trianglemap);
-	util_uv_trianglemap        = NULL;
-	util_uv_trianglemap_cached = false;
-	util_uv_dilatemap_cached   = false;
-	render_path_raytrace_ready = false;
-}
-
-void layers_on_resized_26530(void * _) {
+void layers_on_resized_on_next_frame(void * _) {
 	layers_resize();
 	slot_layer_t    *_layer    = context_raw->layer;
 	slot_material_t *_material = context_raw->material;
@@ -1681,4 +1665,16 @@ void layers_on_resized_26530(void * _) {
 	context_raw->layer    = _layer;
 	context_raw->material = _material;
 	make_material_parse_paint_material(true);
+}
+
+void layers_on_resized() {
+	sys_notify_on_next_frame(&layers_on_resized_on_next_frame, NULL);
+	gc_unroot(util_uv_uvmap);
+	util_uv_uvmap        = NULL;
+	util_uv_uvmap_cached = false;
+	gc_unroot(util_uv_trianglemap);
+	util_uv_trianglemap        = NULL;
+	util_uv_trianglemap_cached = false;
+	util_uv_dilatemap_cached   = false;
+	render_path_raytrace_ready = false;
 }

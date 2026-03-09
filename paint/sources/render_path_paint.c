@@ -595,6 +595,10 @@ void _render_path_paint_final() {
 	render_path_paint_update_bake_layer(TEXTURE_BITS_BITS8);
 }
 
+void _render_path_paint_deriv_on_next_frame(void * _) {
+	_render_path_paint_final();
+}
+
 void _render_path_paint_deriv() {
 	context_raw->bake_type = BAKE_TYPE_HEIGHT;
 	make_material_parse_paint_material(true);
@@ -604,11 +608,7 @@ void _render_path_paint_deriv() {
 	if (render_path_paint_push_undo_last) {
 		history_paint();
 	}
-	sys_notify_on_next_frame(&_render_path_paint_deriv_178293, NULL);
-}
-
-void _render_path_paint_deriv_178293(void * _) {
-	_render_path_paint_final();
+	sys_notify_on_next_frame(&_render_path_paint_deriv_on_next_frame, NULL);
 }
 
 bool render_path_paint_is_rt_bake() {
@@ -621,6 +621,14 @@ void render_path_paint_update_bake_layer(texture_bits_t bits) {
 		base_bits_handle->i = bits;
 		layers_set_bits();
 	}
+}
+
+void render_path_paint_draw_bake(void * _) {
+	_render_path_paint_final();
+}
+
+void render_path_paint_draw_bake_derivative(void * _) {
+	_render_path_paint_deriv();
 }
 
 void render_path_paint_draw() {
@@ -664,10 +672,10 @@ void render_path_paint_draw() {
 					context_select_paint_object(_paint_object);
 
 					if (context_raw->bake_type == BAKE_TYPE_DERIVATIVE) {
-						sys_notify_on_next_frame(&render_path_paint_draw_178546, NULL);
+						sys_notify_on_next_frame(&render_path_paint_draw_bake_derivative, NULL);
 					}
 					else {
-						sys_notify_on_next_frame(&render_path_paint_draw_178565, NULL);
+						sys_notify_on_next_frame(&render_path_paint_draw_bake, NULL);
 					}
 				}
 			}
@@ -717,14 +725,6 @@ void render_path_paint_draw() {
 	if (context_raw->paint2d) {
 		render_path_paint_restore_plane_mesh();
 	}
-}
-
-void render_path_paint_draw_178565(void * _) {
-	_render_path_paint_final();
-}
-
-void render_path_paint_draw_178546(void * _) {
-	_render_path_paint_deriv();
 }
 
 void render_path_paint_set_plane_mesh() {

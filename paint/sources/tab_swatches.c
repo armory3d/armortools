@@ -21,6 +21,89 @@ gpu_texture_t *tab_swatches_empty_get() {
 	return _tab_swatches_empty;
 }
 
+void tab_swatches_draw_16719() {
+	i32 i = _tab_swatches_draw_i;
+
+	if (ui_menu_button(tr("Duplicate", NULL), "", ICON_DUPLICATE)) {
+		context_set_swatch(project_clone_swatch(context_raw->swatch));
+		any_array_push(project_raw->swatches, context_raw->swatch);
+	}
+	#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
+	else if (ui_menu_button(tr("Copy Hex Code", NULL), "", ICON_HASH)) {
+		i32 color = context_raw->swatch->base;
+		color     = color_set_ab(color, context_raw->swatch->opacity * 255);
+		u32 val   = color;
+		iron_copy_to_clipboard(i32_to_string(val));
+	}
+	#endif
+	else if (project_raw->swatches->length > 1 && ui_menu_button(tr("Delete", NULL), "delete", ICON_DELETE)) {
+		tab_swatches_delete_swatch(project_raw->swatches->buffer[i]);
+	}
+	else if (ui_menu_button(tr("Create Material", NULL), "", ICON_SPHERE)) {
+		tab_materials_accept_swatch_drop(project_raw->swatches->buffer[i]);
+	}
+	else if (ui_menu_button(tr("Create Color Layer", NULL), "", ICON_LAYERS)) {
+		i32 color = project_raw->swatches->buffer[i]->base;
+		color     = color_set_ab(color, project_raw->swatches->buffer[i]->opacity * 255);
+		layers_create_color_layer(color, project_raw->swatches->buffer[i]->occlusion, project_raw->swatches->buffer[i]->roughness,
+		                          project_raw->swatches->buffer[i]->metallic, -1);
+	}
+}
+
+void tab_swatches_draw_color_picker_callback(swatch_color_t *color) {
+	i32 i                            = _tab_swatches_draw_i;
+	project_raw->swatches->buffer[i] = project_clone_swatch(color);
+}
+
+void tab_swatches_draw_color_picker() {
+	context_raw->color_picker_previous_tool = context_raw->tool;
+	context_select_tool(TOOL_TYPE_PICKER);
+	context_raw->color_picker_callback = &tab_swatches_draw_color_picker_callback;
+}
+
+void tab_swatches_draw_edit_menu() {
+	ui->changed    = false;
+	ui_handle_t *h = ui_handle(__ID__);
+	h->color       = context_raw->swatch->base;
+
+	context_raw->swatch->base = ui_color_wheel(h, false, -1, 11 * ui->ops->theme->ELEMENT_H * UI_SCALE(), true, &tab_swatches_draw_color_picker, NULL);
+
+	ui_handle_t *hopacity          = ui_handle(__ID__);
+	hopacity->f                    = context_raw->swatch->opacity;
+	context_raw->swatch->opacity   = ui_slider(hopacity, "Opacity", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	ui_handle_t *hocclusion        = ui_handle(__ID__);
+	hocclusion->f                  = context_raw->swatch->occlusion;
+	context_raw->swatch->occlusion = ui_slider(hocclusion, "Occlusion", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	ui_handle_t *hroughness        = ui_handle(__ID__);
+	hroughness->f                  = context_raw->swatch->roughness;
+	context_raw->swatch->roughness = ui_slider(hroughness, "Roughness", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	ui_handle_t *hmetallic         = ui_handle(__ID__);
+	hmetallic->f                   = context_raw->swatch->metallic;
+	context_raw->swatch->metallic  = ui_slider(hmetallic, "Metallic", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
+	ui_handle_t *hheight           = ui_handle(__ID__);
+	hheight->f                     = context_raw->swatch->height;
+	context_raw->swatch->height    = ui_slider(hheight, "Height", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
+
+	if (ui->changed || ui->is_typing) {
+		ui_menu_keep_open = true;
+	}
+	if (ui->input_released) {
+		context_set_swatch(context_raw->swatch); // Trigger material preview update
+		context_raw->picked_color = util_clone_swatch_color(context_raw->swatch);
+		ui_header_handle->redraws = 2;
+	}
+}
+
+void tab_swatches_draw_import() {
+	if (ui_menu_button(tr("Replace Existing", NULL), "", ICON_NONE)) {
+		project_import_swatches(true);
+		context_set_swatch(project_raw->swatches->buffer[0]);
+	}
+	if (ui_menu_button(tr("Append", NULL), "", ICON_NONE)) {
+		project_import_swatches(false);
+	}
+}
+
 void tab_swatches_draw(ui_handle_t *htab) {
 	if (ui_tab(htab, tr("Swatches", NULL), false, -1, false) && ui->_window_h > ui_statusbar_default_h * UI_SCALE()) {
 
@@ -37,7 +120,7 @@ void tab_swatches_draw(ui_handle_t *htab) {
 		ui_row(row);
 
 		if (ui_icon_button(tr("New", NULL), ICON_PLUS, UI_ALIGN_CENTER)) {
-			context_set_swatch(make_swatch(0xffffffff));
+			context_set_swatch(project_make_swatch(0xffffffff));
 			any_array_push(project_raw->swatches, context_raw->swatch);
 		}
 		if (ui->is_hovered) {
@@ -45,7 +128,7 @@ void tab_swatches_draw(ui_handle_t *htab) {
 		}
 
 		if (ui_icon_button(tr("Import", NULL), ICON_IMPORT, UI_ALIGN_CENTER)) {
-			ui_menu_draw(&tab_swatches_draw_15862, -1, -1);
+			ui_menu_draw(&tab_swatches_draw_import, -1, -1);
 		}
 		if (ui->is_hovered) {
 			ui_tooltip(tr("Import swatches", NULL));
@@ -59,7 +142,7 @@ void tab_swatches_draw(ui_handle_t *htab) {
 		}
 
 		if (ui_icon_button(tr("Clear", NULL), ICON_ERASE, UI_ALIGN_CENTER)) {
-			context_set_swatch(make_swatch(0xffffffff));
+			context_set_swatch(project_make_swatch(0xffffffff));
 			project_raw->swatches = any_array_create_from_raw(
 			    (void *[]){
 			        context_raw->swatch,
@@ -139,10 +222,8 @@ void tab_swatches_draw(ui_handle_t *htab) {
 				}
 				else if (state == UI_STATE_RELEASED) {
 					if (sys_time() - context_raw->select_time < 0.2) {
-
 						_tab_swatches_draw_i = i;
-
-						ui_menu_draw(&tab_swatches_draw_16422, -1, -1);
+						ui_menu_draw(&tab_swatches_draw_edit_menu, -1, -1);
 					}
 
 					context_raw->select_time = sys_time();
@@ -181,90 +262,6 @@ void tab_swatches_draw(ui_handle_t *htab) {
 			ui->is_delete_down = false;
 			tab_swatches_delete_swatch(context_raw->swatch);
 		}
-	}
-}
-
-void tab_swatches_draw_16719() {
-	i32 i = _tab_swatches_draw_i;
-
-	if (ui_menu_button(tr("Duplicate", NULL), "", ICON_DUPLICATE)) {
-		context_set_swatch(project_clone_swatch(context_raw->swatch));
-		any_array_push(project_raw->swatches, context_raw->swatch);
-	}
-	#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
-	else if (ui_menu_button(tr("Copy Hex Code", NULL), "", ICON_HASH)) {
-		i32 color = context_raw->swatch->base;
-		color     = color_set_ab(color, context_raw->swatch->opacity * 255);
-		u32 val   = color;
-		iron_copy_to_clipboard(i32_to_string(val));
-	}
-	#endif
-	else if (project_raw->swatches->length > 1 && ui_menu_button(tr("Delete", NULL), "delete", ICON_DELETE)) {
-		tab_swatches_delete_swatch(project_raw->swatches->buffer[i]);
-	}
-	else if (ui_menu_button(tr("Create Material", NULL), "", ICON_SPHERE)) {
-		tab_materials_accept_swatch_drop(project_raw->swatches->buffer[i]);
-	}
-	else if (ui_menu_button(tr("Create Color Layer", NULL), "", ICON_LAYERS)) {
-		i32 color = project_raw->swatches->buffer[i]->base;
-		color     = color_set_ab(color, project_raw->swatches->buffer[i]->opacity * 255);
-		layers_create_color_layer(color, project_raw->swatches->buffer[i]->occlusion, project_raw->swatches->buffer[i]->roughness,
-		                          project_raw->swatches->buffer[i]->metallic, -1);
-	}
-}
-
-void tab_swatches_draw_16479(swatch_color_t *color) {
-	i32 i                            = _tab_swatches_draw_i;
-	project_raw->swatches->buffer[i] = project_clone_swatch(color);
-}
-
-void tab_swatches_draw_16464() {
-	context_raw->color_picker_previous_tool = context_raw->tool;
-	context_select_tool(TOOL_TYPE_PICKER);
-	context_raw->color_picker_callback = &tab_swatches_draw_16479;
-	;
-}
-
-void tab_swatches_draw_16422() {
-	ui->changed    = false;
-	ui_handle_t *h = ui_handle(__ID__);
-	h->color       = context_raw->swatch->base;
-
-	context_raw->swatch->base = ui_color_wheel(h, false, -1, 11 * ui->ops->theme->ELEMENT_H * UI_SCALE(), true, &tab_swatches_draw_16464, NULL);
-
-	ui_handle_t *hopacity          = ui_handle(__ID__);
-	hopacity->f                    = context_raw->swatch->opacity;
-	context_raw->swatch->opacity   = ui_slider(hopacity, "Opacity", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
-	ui_handle_t *hocclusion        = ui_handle(__ID__);
-	hocclusion->f                  = context_raw->swatch->occlusion;
-	context_raw->swatch->occlusion = ui_slider(hocclusion, "Occlusion", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
-	ui_handle_t *hroughness        = ui_handle(__ID__);
-	hroughness->f                  = context_raw->swatch->roughness;
-	context_raw->swatch->roughness = ui_slider(hroughness, "Roughness", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
-	ui_handle_t *hmetallic         = ui_handle(__ID__);
-	hmetallic->f                   = context_raw->swatch->metallic;
-	context_raw->swatch->metallic  = ui_slider(hmetallic, "Metallic", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
-	ui_handle_t *hheight           = ui_handle(__ID__);
-	hheight->f                     = context_raw->swatch->height;
-	context_raw->swatch->height    = ui_slider(hheight, "Height", 0, 1, true, 100.0, true, UI_ALIGN_RIGHT, true);
-
-	if (ui->changed || ui->is_typing) {
-		ui_menu_keep_open = true;
-	}
-	if (ui->input_released) {
-		context_set_swatch(context_raw->swatch); // Trigger material preview update
-		context_raw->picked_color = util_clone_swatch_color(context_raw->swatch);
-		ui_header_handle->redraws = 2;
-	}
-}
-
-void tab_swatches_draw_15862() {
-	if (ui_menu_button(tr("Replace Existing", NULL), "", ICON_NONE)) {
-		project_import_swatches(true);
-		context_set_swatch(project_raw->swatches->buffer[0]);
-	}
-	if (ui_menu_button(tr("Append", NULL), "", ICON_NONE)) {
-		project_import_swatches(false);
 	}
 }
 

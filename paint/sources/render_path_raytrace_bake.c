@@ -1,6 +1,10 @@
 
 #include "global.h"
 
+void render_path_raytrace_bake_commands_parse_paint_material(void (*parse_paint_material)(bool)) {
+	parse_paint_material(true);
+}
+
 bool render_path_raytrace_bake_commands(void (*parse_paint_material)(bool)) {
 
 	if (!render_path_raytrace_ready || !render_path_raytrace_is_bake || render_path_raytrace_bake_last_bake_type != context_raw->bake_type) {
@@ -61,7 +65,7 @@ bool render_path_raytrace_bake_commands(void (*parse_paint_material)(bool)) {
 		render_path_set_target("baketex0", additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
 		render_path_draw_meshes("paint");
 		context_raw->bake_type = _bake_type;
-		sys_notify_on_next_frame(&render_path_raytrace_bake_commands_134003, parse_paint_material);
+		sys_notify_on_next_frame(&render_path_raytrace_bake_commands_parse_paint_material, parse_paint_material);
 
 		render_path_raytrace_init_shader = true;
 		render_path_raytrace_raytrace_init(render_path_raytrace_bake_get_bake_shader_name(), rebuild);
@@ -157,10 +161,6 @@ bool render_path_raytrace_bake_commands(void (*parse_paint_material)(bool)) {
 		render_path_raytrace_bake_current_sample = 0;
 		return false;
 	}
-}
-
-void render_path_raytrace_bake_commands_134003(void (*parse_paint_material)(bool)) {
-	parse_paint_material(true);
 }
 
 char *render_path_raytrace_bake_get_bake_shader_name() {

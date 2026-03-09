@@ -171,6 +171,18 @@ void util_mesh_flip_normals() {
 	render_path_raytrace_ready = false;
 }
 
+i32 util_mesh_calc_normals_sort(i32 *pa, i32 *pb) {
+	i32 a    = *(pa);
+	i32 b    = *(pb);
+	i32 diff = util_mesh_va0->buffer[a * 4] - util_mesh_va0->buffer[b * 4];
+	if (diff != 0)
+		return diff;
+	diff = util_mesh_va0->buffer[a * 4 + 1] - util_mesh_va0->buffer[b * 4 + 1];
+	if (diff != 0)
+		return diff;
+	return util_mesh_va0->buffer[a * 4 + 2] - util_mesh_va0->buffer[b * 4 + 2];
+}
+
 void util_mesh_calc_normals(bool smooth) {
 	vec4_t                 va      = vec4_create(0.0, 0.0, 0.0, 1.0);
 	vec4_t                 vb      = vec4_create(0.0, 0.0, 0.0, 1.0);
@@ -197,7 +209,7 @@ void util_mesh_calc_normals(bool smooth) {
 			gc_unroot(util_mesh_va0);
 			util_mesh_va0 = va0;
 			gc_root(util_mesh_va0);
-			i32_array_sort(indices, &util_mesh_calc_normals_123905);
+			i32_array_sort(indices, &util_mesh_calc_normals_sort);
 			if (indices->length > 0) {
 				i32 unique_id                        = indices->buffer[0];
 				vert_map->buffer[indices->buffer[0]] = unique_id;
@@ -284,18 +296,6 @@ void util_mesh_calc_normals(bool smooth) {
 
 	util_mesh_merge(NULL);
 	render_path_raytrace_ready = false;
-}
-
-i32 util_mesh_calc_normals_123905(i32 *pa, i32 *pb) {
-	i32 a    = *(pa);
-	i32 b    = *(pb);
-	i32 diff = util_mesh_va0->buffer[a * 4] - util_mesh_va0->buffer[b * 4];
-	if (diff != 0)
-		return diff;
-	diff = util_mesh_va0->buffer[a * 4 + 1] - util_mesh_va0->buffer[b * 4 + 1];
-	if (diff != 0)
-		return diff;
-	return util_mesh_va0->buffer[a * 4 + 2] - util_mesh_va0->buffer[b * 4 + 2];
 }
 
 void util_mesh_to_origin() {
@@ -437,6 +437,18 @@ vec4_t util_mesh_calc_normal(vec4_t p0, vec4_t p1, vec4_t p2) {
 	return cb;
 }
 
+i32 util_mesh_decimate_sort(i32 *pa, i32 *pb) {
+	i32 a    = *(pa);
+	i32 b    = *(pb);
+	i32 diff = util_mesh_quantized->buffer[a * 3] - util_mesh_quantized->buffer[b * 3];
+	if (diff != 0)
+		return diff;
+	diff = util_mesh_quantized->buffer[a * 3 + 1] - util_mesh_quantized->buffer[b * 3 + 1];
+	if (diff != 0)
+		return diff;
+	return util_mesh_quantized->buffer[a * 3 + 2] - util_mesh_quantized->buffer[b * 3 + 2];
+}
+
 void util_mesh_decimate(f32 strength) {
 	mesh_object_t_array_t *objects   = project_paint_objects;
 	mesh_object_t         *o         = objects->buffer[0];
@@ -490,7 +502,7 @@ void util_mesh_decimate(f32 strength) {
 		i32_array_push(indices, i);
 	}
 
-	i32_array_sort(indices, &util_mesh_decimate_126650);
+	i32_array_sort(indices, &util_mesh_decimate_sort);
 	i32_array_t *remap           = i32_array_create(num_verts);
 	i32          new_verts_count = 0;
 	i32_array_t *unique_indices  = i32_array_create_from_raw((i32[]){}, 0);
@@ -566,18 +578,6 @@ void util_mesh_decimate(f32 strength) {
 	o->data               = new_data;
 	util_mesh_calc_normals(true);
 	plugin_uv_unwrap_button();
-}
-
-i32 util_mesh_decimate_126650(i32 *pa, i32 *pb) {
-	i32 a    = *(pa);
-	i32 b    = *(pb);
-	i32 diff = util_mesh_quantized->buffer[a * 3] - util_mesh_quantized->buffer[b * 3];
-	if (diff != 0)
-		return diff;
-	diff = util_mesh_quantized->buffer[a * 3 + 1] - util_mesh_quantized->buffer[b * 3 + 1];
-	if (diff != 0)
-		return diff;
-	return util_mesh_quantized->buffer[a * 3 + 2] - util_mesh_quantized->buffer[b * 3 + 2];
 }
 
 i32 _util_mesh_unique_data_count() {

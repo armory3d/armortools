@@ -105,7 +105,7 @@ void nodes_material_group_output_button(i32 node_id) {
 	nodes_material_add_socket_button(nodes, node, node->inputs);
 }
 
-void nodes_material_add_socket_menu() {
+void nodes_material_add_socket_menu_draw() {
 	ui_nodes_t               *nodes       = _nodes_material_nodes;
 	ui_node_t                *node        = _nodes_material_node;
 	ui_node_socket_t_array_t *sockets     = _nodes_material_sockets;
@@ -136,7 +136,7 @@ void nodes_material_add_socket_button(ui_nodes_t *nodes, ui_node_t *node, ui_nod
 		gc_unroot(_nodes_material_sockets);
 		_nodes_material_sockets = sockets;
 		gc_root(_nodes_material_sockets);
-		ui_menu_draw(&nodes_material_add_socket_menu, -1, -1);
+		ui_menu_draw(&nodes_material_add_socket_menu_draw, -1, -1);
 	}
 }
 

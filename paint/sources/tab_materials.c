@@ -53,6 +53,116 @@ void tab_materials_button_nodes() {
 	}
 }
 
+void tab_materials_draw_slots_duplicate(void * _) {
+	i32 i                 = _tab_materials_draw_slots;
+	context_raw->material = slot_material_create(project_materials->buffer[0]->data, NULL);
+	any_array_push(project_materials, context_raw->material);
+	ui_node_canvas_t *cloned      = util_clone_canvas(project_materials->buffer[i]->canvas);
+	context_raw->material->canvas = cloned;
+	tab_materials_update_material();
+	history_duplicate_material();
+}
+
+void tab_materials_draw_slots_menu() {
+	i32              i = _tab_materials_draw_slots;
+	slot_material_t *m = project_materials->buffer[i];
+
+	if (ui_menu_button(tr("To Fill Layer", NULL), "", ICON_SPHERE)) {
+		context_select_material(i);
+		layers_create_fill_layer(UV_TYPE_UVMAP, mat4nan, -1);
+	}
+
+	if (ui_menu_button(tr("Export", NULL), "", ICON_EXPORT)) {
+		context_select_material(i);
+		box_export_show_material();
+	}
+
+	if (ui_menu_button(tr("Bake", NULL), "", ICON_BAKE)) {
+		context_select_material(i);
+		box_export_show_bake_material();
+	}
+
+	if (ui_menu_button(tr("Duplicate", NULL), "", ICON_DUPLICATE)) {
+		sys_notify_on_next_frame(&tab_materials_draw_slots_duplicate, NULL);
+	}
+
+	if (project_materials->length > 1 && ui_menu_button(tr("Delete", NULL), "delete", ICON_DELETE)) {
+		tab_materials_delete_material(m);
+	}
+
+	ui_handle_t *base_handle = ui_nest(ui_handle(__ID__), m->id);
+	if (base_handle->init) {
+		base_handle->b = m->paint_base;
+	}
+
+	ui_handle_t *opac_handle = ui_nest(ui_handle(__ID__), m->id);
+	if (opac_handle->init) {
+		opac_handle->b = m->paint_opac;
+	}
+
+	ui_handle_t *nor_handle = ui_nest(ui_handle(__ID__), m->id);
+	if (nor_handle->init) {
+		nor_handle->b = m->paint_nor;
+	}
+
+	ui_handle_t *occ_handle = ui_nest(ui_handle(__ID__), m->id);
+	if (occ_handle->init) {
+		occ_handle->b = m->paint_occ;
+	}
+
+	ui_handle_t *rough_handle = ui_nest(ui_handle(__ID__), m->id);
+	if (rough_handle->init) {
+		rough_handle->b = m->paint_rough;
+	}
+
+	ui_handle_t *met_handle = ui_nest(ui_handle(__ID__), m->id);
+	if (met_handle->init) {
+		met_handle->b = m->paint_met;
+	}
+
+	ui_handle_t *height_handle = ui_nest(ui_handle(__ID__), m->id);
+	if (height_handle->init) {
+		height_handle->b = m->paint_height;
+	}
+
+	ui_handle_t *emis_handle = ui_nest(ui_handle(__ID__), m->id);
+	if (emis_handle->init) {
+		emis_handle->b = m->paint_emis;
+	}
+
+	ui_handle_t *subs_handle = ui_nest(ui_handle(__ID__), m->id);
+	if (subs_handle->init) {
+		subs_handle->b = m->paint_subs;
+	}
+
+	ui_menu_separator();
+	ui_menu_align();
+	ui_menu_label(tr("Channels", NULL), NULL);
+	ui_menu_align();
+	ui_row2();
+	m->paint_base = ui_check(base_handle, tr("Base Color", NULL), "");
+	m->paint_opac = ui_check(opac_handle, tr("Opacity", NULL), "");
+	ui_row2();
+	m->paint_nor    = ui_check(nor_handle, tr("Normal", NULL), "");
+	m->paint_height = ui_check(height_handle, tr("Height", NULL), "");
+	ui_row2();
+	m->paint_rough = ui_check(rough_handle, tr("Roughness", NULL), "");
+	m->paint_met   = ui_check(met_handle, tr("Metallic", NULL), "");
+	ui_row2();
+	m->paint_emis = ui_check(emis_handle, tr("Emission", NULL), "");
+	m->paint_subs = ui_check(subs_handle, tr("Subsurface", NULL), "");
+	m->paint_occ  = ui_check(occ_handle, tr("Occlusion", NULL), "");
+	if (base_handle->changed || opac_handle->changed || nor_handle->changed || occ_handle->changed || rough_handle->changed || met_handle->changed ||
+	    height_handle->changed || emis_handle->changed || subs_handle->changed) {
+		make_material_parse_paint_material(true);
+		ui_menu_keep_open = true;
+	}
+}
+
+void tab_materials_draw_slots_update_fill_layers(void * _) {
+	layers_update_fill_layers();
+}
+
 void tab_materials_draw_slots(bool mini) {
 	i32 slotw = math_floor(51 * UI_SCALE() + config_raw->window_scale * 2);
 	i32 num   = math_floor(ui->_window_w / (float)slotw);
@@ -130,7 +240,7 @@ void tab_materials_draw_slots(bool mini) {
 				if (context_raw->material != project_materials->buffer[i]) {
 					context_select_material(i);
 					if (context_raw->tool == TOOL_TYPE_MATERIAL) {
-						sys_notify_on_next_frame(&tab_materials_draw_slots_119149, NULL);
+						sys_notify_on_next_frame(&tab_materials_draw_slots_update_fill_layers, NULL);
 					}
 				}
 				base_drag_off_x = -(mouse_x - uix - ui->_window_x - 3);
@@ -152,7 +262,7 @@ void tab_materials_draw_slots(bool mini) {
 			if (ui->is_hovered && ui->input_released_r) {
 				context_select_material(i);
 				_tab_materials_draw_slots = i;
-				ui_menu_draw(&tab_materials_draw_slots_119244, -1, -1);
+				ui_menu_draw(&tab_materials_draw_slots_menu, -1, -1);
 			}
 			if (ui->is_hovered) {
 				ui_tooltip_image(img_full, 0);
@@ -203,127 +313,17 @@ void tab_materials_draw_slots(bool mini) {
 	}
 }
 
-void tab_materials_draw_slots_119357(void * _) {
-	i32 i                 = _tab_materials_draw_slots;
-	context_raw->material = slot_material_create(project_materials->buffer[0]->data, NULL);
-	any_array_push(project_materials, context_raw->material);
-	ui_node_canvas_t *cloned      = util_clone_canvas(project_materials->buffer[i]->canvas);
-	context_raw->material->canvas = cloned;
-	tab_materials_update_material();
-	history_duplicate_material();
-}
-
-void tab_materials_draw_slots_119244() {
-	i32              i = _tab_materials_draw_slots;
-	slot_material_t *m = project_materials->buffer[i];
-
-	if (ui_menu_button(tr("To Fill Layer", NULL), "", ICON_SPHERE)) {
-		context_select_material(i);
-		layers_create_fill_layer(UV_TYPE_UVMAP, mat4nan, -1);
-	}
-
-	if (ui_menu_button(tr("Export", NULL), "", ICON_EXPORT)) {
-		context_select_material(i);
-		box_export_show_material();
-	}
-
-	if (ui_menu_button(tr("Bake", NULL), "", ICON_BAKE)) {
-		context_select_material(i);
-		box_export_show_bake_material();
-	}
-
-	if (ui_menu_button(tr("Duplicate", NULL), "", ICON_DUPLICATE)) {
-		sys_notify_on_next_frame(&tab_materials_draw_slots_119357, NULL);
-	}
-
-	if (project_materials->length > 1 && ui_menu_button(tr("Delete", NULL), "delete", ICON_DELETE)) {
-		tab_materials_delete_material(m);
-	}
-
-	ui_handle_t *base_handle = ui_nest(ui_handle(__ID__), m->id);
-	if (base_handle->init) {
-		base_handle->b = m->paint_base;
-	}
-
-	ui_handle_t *opac_handle = ui_nest(ui_handle(__ID__), m->id);
-	if (opac_handle->init) {
-		opac_handle->b = m->paint_opac;
-	}
-
-	ui_handle_t *nor_handle = ui_nest(ui_handle(__ID__), m->id);
-	if (nor_handle->init) {
-		nor_handle->b = m->paint_nor;
-	}
-
-	ui_handle_t *occ_handle = ui_nest(ui_handle(__ID__), m->id);
-	if (occ_handle->init) {
-		occ_handle->b = m->paint_occ;
-	}
-
-	ui_handle_t *rough_handle = ui_nest(ui_handle(__ID__), m->id);
-	if (rough_handle->init) {
-		rough_handle->b = m->paint_rough;
-	}
-
-	ui_handle_t *met_handle = ui_nest(ui_handle(__ID__), m->id);
-	if (met_handle->init) {
-		met_handle->b = m->paint_met;
-	}
-
-	ui_handle_t *height_handle = ui_nest(ui_handle(__ID__), m->id);
-	if (height_handle->init) {
-		height_handle->b = m->paint_height;
-	}
-
-	ui_handle_t *emis_handle = ui_nest(ui_handle(__ID__), m->id);
-	if (emis_handle->init) {
-		emis_handle->b = m->paint_emis;
-	}
-
-	ui_handle_t *subs_handle = ui_nest(ui_handle(__ID__), m->id);
-	if (subs_handle->init) {
-		subs_handle->b = m->paint_subs;
-	}
-
-	ui_menu_separator();
-	ui_menu_align();
-	ui_menu_label(tr("Channels", NULL), NULL);
-	ui_menu_align();
-	ui_row2();
-	m->paint_base = ui_check(base_handle, tr("Base Color", NULL), "");
-	m->paint_opac = ui_check(opac_handle, tr("Opacity", NULL), "");
-	ui_row2();
-	m->paint_nor    = ui_check(nor_handle, tr("Normal", NULL), "");
-	m->paint_height = ui_check(height_handle, tr("Height", NULL), "");
-	ui_row2();
-	m->paint_rough = ui_check(rough_handle, tr("Roughness", NULL), "");
-	m->paint_met   = ui_check(met_handle, tr("Metallic", NULL), "");
-	ui_row2();
-	m->paint_emis = ui_check(emis_handle, tr("Emission", NULL), "");
-	m->paint_subs = ui_check(subs_handle, tr("Subsurface", NULL), "");
-	m->paint_occ  = ui_check(occ_handle, tr("Occlusion", NULL), "");
-	if (base_handle->changed || opac_handle->changed || nor_handle->changed || occ_handle->changed || rough_handle->changed || met_handle->changed ||
-	    height_handle->changed || emis_handle->changed || subs_handle->changed) {
-		make_material_parse_paint_material(true);
-		ui_menu_keep_open = true;
-	}
-}
-
-void tab_materials_draw_slots_119149(void * _) {
-	layers_update_fill_layers();
-}
-
-void tab_materials_button_new(char *text) {
-	if (ui_icon_button(text, ICON_PLUS, UI_ALIGN_CENTER)) {
-		sys_notify_on_next_frame(&tab_materials_button_new_120110, NULL);
-	}
-}
-
-void tab_materials_button_new_120110(void * _) {
+void tab_materials_button_new_on_next_frame(void * _) {
 	context_raw->material = slot_material_create(project_materials->buffer[0]->data, NULL);
 	any_array_push(project_materials, context_raw->material);
 	tab_materials_update_material();
 	history_new_material();
+}
+
+void tab_materials_button_new(char *text) {
+	if (ui_icon_button(text, ICON_PLUS, UI_ALIGN_CENTER)) {
+		sys_notify_on_next_frame(&tab_materials_button_new_on_next_frame, NULL);
+	}
 }
 
 void tab_materials_update_material() {

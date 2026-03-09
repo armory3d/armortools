@@ -11,7 +11,7 @@ context_t *context_create() {
 	c->split_view                        = false;
 	c->view_index                        = -1;
 	c->view_index_last                   = -1;
-	c->picked_color                      = make_swatch(0xffffffff);
+	c->picked_color                      = project_make_swatch(0xffffffff);
 	c->envmap_loaded                     = false;
 	c->show_envmap                       = false;
 	c->show_envmap_handle                = ui_handle_create();
@@ -191,6 +191,10 @@ void context_select_material(i32 i) {
 	context_set_material(project_materials->buffer[i]);
 }
 
+void context_set_material_on_next_frame(void * _) {
+	util_render_make_decal_preview();
+}
+
 void context_set_material(slot_material_t *m) {
 	if (array_index_of(project_materials, m) == -1) {
 		return;
@@ -206,12 +210,8 @@ void context_set_material(slot_material_t *m) {
 
 	bool decal = context_is_decal();
 	if (decal) {
-		sys_notify_on_next_frame(&context_set_material_62876, NULL);
+		sys_notify_on_next_frame(&context_set_material_on_next_frame, NULL);
 	}
-}
-
-void context_set_material_62876(void * _) {
-	util_render_make_decal_preview();
 }
 
 void context_select_brush(i32 i) {
@@ -498,6 +498,10 @@ void context_set_viewport_shader(void * viewport_shader) { // JSValue * -> (ns: 
 	context_set_render_path();
 }
 
+void context_set_render_path_on_next_frame(void * _) {
+	make_material_parse_mesh_material();
+}
+
 void context_set_render_path() {
 	if (config_raw->render_mode == RENDER_MODE_FORWARD || context_raw->viewport_shader != NULL) {
 		gc_unroot(render_path_commands);
@@ -509,11 +513,7 @@ void context_set_render_path() {
 		render_path_commands = render_path_deferred_commands;
 		gc_root(render_path_commands);
 	}
-	sys_notify_on_next_frame(&context_set_render_path_64096, NULL);
-}
-
-void context_set_render_path_64096(void * _) {
-	make_material_parse_mesh_material();
+	sys_notify_on_next_frame(&context_set_render_path_on_next_frame, NULL);
 }
 
 bool context_enable_import_plugin(char *file) {

@@ -54,7 +54,7 @@ void make_material_parse_mesh_material() {
 		}
 	}
 
-	material_t            *mm  = GC_ALLOC_INIT(material_t, {.name = "Material", .canvas = NULL});
+	material_t *mm = GC_ALLOC_INIT(material_t, {.name = "Material", .canvas = NULL});
 
 	node_shader_context_t *con = make_mesh_run(mm, 0);
 	shader_context_load(con->data);
@@ -71,7 +71,7 @@ void make_material_parse_mesh_material() {
 		any_array_push(m->contexts, mcon);
 	}
 
-	context_raw->ddirty        = 2;
+	context_raw->ddirty = 2;
 
 	render_path_raytrace_dirty = 1;
 }
@@ -156,12 +156,12 @@ void make_material_parse_paint_material(bool bake_previews) {
 		}
 	}
 
-	material_t            *sdata         = GC_ALLOC_INIT(material_t, {.name = "Material", .canvas = context_raw->material->canvas});
-	material_context_t    *tmcon         = GC_ALLOC_INIT(material_context_t, {.name = "paint", .bind_textures = any_array_create_from_raw((void *[]){}, 0)});
-	node_shader_context_t *con           = make_paint_run(sdata, tmcon);
+	material_t            *sdata = GC_ALLOC_INIT(material_t, {.name = "Material", .canvas = context_raw->material->canvas});
+	material_context_t    *tmcon = GC_ALLOC_INIT(material_context_t, {.name = "paint", .bind_textures = any_array_create_from_raw((void *[]){}, 0)});
+	node_shader_context_t *con   = make_paint_run(sdata, tmcon);
 
-	bool                   compile_error = false;
-	shader_context_t      *scon;
+	bool              compile_error = false;
+	shader_context_t *scon;
 	shader_context_load(con->data);
 	if (con->data == NULL) {
 		compile_error = true;
@@ -214,7 +214,7 @@ void make_material_traverse_nodes(ui_node_t_array_t *nodes, ui_node_canvas_t *gr
 		if (string_equals(node->type, "GROUP")) {
 			for (i32 j = 0; j < project_material_groups->length; ++j) {
 				node_group_t *g     = project_material_groups->buffer[j];
-				char     *cname = g->canvas->name;
+				char         *cname = g->canvas->name;
 				if (string_equals(cname, node->name)) {
 					any_array_push(parents, node);
 					make_material_traverse_nodes(g->canvas->nodes, g->canvas, parents);
@@ -228,7 +228,7 @@ void make_material_traverse_nodes(ui_node_t_array_t *nodes, ui_node_canvas_t *gr
 
 void make_material_bake_node_preview(ui_node_t *node, ui_node_canvas_t *group, ui_node_t_array_t *parents) {
 	if (string_equals(node->type, "BLUR")) {
-		char      *id    = parser_material_node_name(node, parents);
+		char          *id    = parser_material_node_name(node, parents);
 		gpu_texture_t *image = any_map_get(context_raw->node_previews, id);
 		any_array_push(context_raw->node_previews_used, id);
 		i32 res_x = math_floor(config_get_texture_res_x() / (float)4);
@@ -246,7 +246,7 @@ void make_material_bake_node_preview(ui_node_t *node, ui_node_canvas_t *group, u
 		parser_material_blur_passthrough = false;
 	}
 	else if (string_equals(node->type, "DIRECT_WARP")) {
-		char      *id    = parser_material_node_name(node, parents);
+		char          *id    = parser_material_node_name(node, parents);
 		gpu_texture_t *image = any_map_get(context_raw->node_previews, id);
 		any_array_push(context_raw->node_previews_used, id);
 		i32 res_x = math_floor(config_get_texture_res_x());
@@ -264,7 +264,7 @@ void make_material_bake_node_preview(ui_node_t *node, ui_node_canvas_t *group, u
 		parser_material_warp_passthrough = false;
 	}
 	else if (string_equals(node->type, "BAKE_CURVATURE")) {
-		char      *id    = parser_material_node_name(node, parents);
+		char          *id    = parser_material_node_name(node, parents);
 		gpu_texture_t *image = any_map_get(context_raw->node_previews, id);
 		any_array_push(context_raw->node_previews_used, id);
 		i32 res_x = math_floor(config_get_texture_res_x());
@@ -766,10 +766,11 @@ f32 make_material_get_displace_strength() {
 	return config_raw->displace_strength * 0.02 * sc.x;
 }
 
-void make_material_delete_context(shader_context_t *c) {
-	sys_notify_on_next_frame(&make_material_delete_context_137861, c); // Ensure pipeline is no longer in use
+void make_material_delete_context_on_next_frame(shader_context_t *c) {
+	shader_context_delete(c);
 }
 
-void make_material_delete_context_137861(shader_context_t *c) {
-	shader_context_delete(c);
+void make_material_delete_context(shader_context_t *c) {
+	// Ensure pipeline is no longer in use
+	sys_notify_on_next_frame(&make_material_delete_context_on_next_frame, c);
 }

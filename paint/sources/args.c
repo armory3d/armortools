@@ -65,17 +65,11 @@ void args_parse() {
 	}
 }
 
-void args_run() {
-	if (args_use) {
-		sys_notify_on_next_frame(&args_run_115314, NULL);
-	}
-}
-
-void args_run_115626(void *_) {
+void args_run_export_queue(void *_) {
 	export_texture_run(args_export_textures_path, false);
 }
 
-void args_run_115314(void *_) {
+void args_run_on_next_frame(void *_) {
 	if (!string_equals(project_filepath, "")) {
 		import_arm_run_project(project_filepath);
 	}
@@ -138,7 +132,7 @@ void args_run_115314(void *_) {
 		data_delete_blob(string_join("export_presets/", file));
 
 		// Export queue
-		sys_notify_on_next_frame(&args_run_115626, NULL);
+		sys_notify_on_next_frame(&args_run_export_queue, NULL);
 	}
 	else if (args_export_mesh) {
 		if (!path_is_folder(args_export_mesh_path)) {
@@ -158,5 +152,11 @@ void args_run_115314(void *_) {
 
 	if (args_background) {
 		iron_stop();
+	}
+}
+
+void args_run() {
+	if (args_use) {
+		sys_notify_on_next_frame(&args_run_on_next_frame, NULL);
 	}
 }

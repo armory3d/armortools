@@ -84,36 +84,7 @@ void image_to_pbr_node_run_sd(char *model, char *prompt, void (*done)(gpu_textur
 	sys_notify_on_update(image_to_pbr_node_check_result, done);
 }
 
-void image_to_pbr_node_button(i32 node_id) {
-	ui_node_canvas_t *canvas    = ui_nodes_get_canvas(true);
-	ui_node_t        *node      = ui_get_node(canvas->nodes, node_id);
-	char         *node_name = parser_material_node_name(node, NULL);
-	ui_handle_t      *h         = ui_handle(node_name);
-	string_t_array_t *models    = any_array_create_from_raw(
-        (void *[]){
-            "Marigold",
-        },
-        1);
-	i32 model = ui_combo(ui_nest(h, 0), models, tr("Model", NULL), false, UI_ALIGN_LEFT, true);
-	if (neural_node_button(node, models->buffer[model])) {
-		ui_node_t     *from_node = neural_from_node(node->inputs->buffer[0], 0);
-		gpu_texture_t *input     = ui_nodes_get_node_preview_image(from_node);
-		if (input != NULL) {
-			char *dir = neural_node_dir();
-
-			#ifdef IRON_BGRA
-			buffer_t *input_buf = export_arm_bgra_swap(gpu_get_texture_pixels(input)); // Vulkan non-rt textures need a flip
-			#else
-			buffer_t *input_buf = gpu_get_texture_pixels(input);
-			#endif
-			iron_write_png(string_join(string_join(dir, PATH_SEP), "input.png"), input_buf, input->width, input->height, 0);
-
-			image_to_pbr_node_run_sd("marigold-normals-v1-1.q8_0.gguf", "_normals", &image_to_pbr_node_button_233087);
-		}
-	}
-}
-
-void image_to_pbr_node_button_233151(void * _) {
+void image_to_pbr_node_all_done(void * _) {
 	render_target_t *occmap;
 	{
 		render_target_t *t = render_target_create();
@@ -154,33 +125,62 @@ void image_to_pbr_node_button_233151(void * _) {
 	// blur
 }
 
-void image_to_pbr_node_button_233138(gpu_texture_t *tex) {
+void image_to_pbr_node_roughness_done(gpu_texture_t *tex) {
 	gc_unroot(image_to_pbr_node_result_roughness);
 	image_to_pbr_node_result_roughness = tex;
 	gc_root(image_to_pbr_node_result_roughness);
 	// image_to_pbr_node_run_sd("marigold-iid-lighting-v1-1.q8_0.gguf", "_diffuse_shading", function(tex: gpu_texture_t) {
-	sys_notify_on_next_frame(&image_to_pbr_node_button_233151, NULL);
+	sys_notify_on_next_frame(&image_to_pbr_node_all_done, NULL);
 }
 
-void image_to_pbr_node_button_233121(gpu_texture_t *tex) {
+void image_to_pbr_node_base_done(gpu_texture_t *tex) {
 	gc_unroot(image_to_pbr_node_result_base);
 	image_to_pbr_node_result_base = tex;
 	gc_root(image_to_pbr_node_result_base);
-	image_to_pbr_node_run_sd("marigold-iid-appearance-v1-1.q8_0.gguf", "_roughness", &image_to_pbr_node_button_233138);
+	image_to_pbr_node_run_sd("marigold-iid-appearance-v1-1.q8_0.gguf", "_roughness", &image_to_pbr_node_roughness_done);
 }
 
-void image_to_pbr_node_button_233104(gpu_texture_t *tex) {
+void image_to_pbr_node_height_done(gpu_texture_t *tex) {
 	gc_unroot(image_to_pbr_node_result_height);
 	image_to_pbr_node_result_height = tex;
 	gc_root(image_to_pbr_node_result_height);
-	image_to_pbr_node_run_sd("marigold-iid-lighting-v1-1.q8_0.gguf", "_base", &image_to_pbr_node_button_233121);
+	image_to_pbr_node_run_sd("marigold-iid-lighting-v1-1.q8_0.gguf", "_base", &image_to_pbr_node_base_done);
 }
 
-void image_to_pbr_node_button_233087(gpu_texture_t *tex) {
+void image_to_pbr_node_normals_done(gpu_texture_t *tex) {
 	gc_unroot(image_to_pbr_node_result_normal);
 	image_to_pbr_node_result_normal = tex;
 	gc_root(image_to_pbr_node_result_normal);
-	image_to_pbr_node_run_sd("marigold-depth-v1-1.q8_0.gguf", "_height", &image_to_pbr_node_button_233104);
+	image_to_pbr_node_run_sd("marigold-depth-v1-1.q8_0.gguf", "_height", &image_to_pbr_node_height_done);
+}
+
+void image_to_pbr_node_button(i32 node_id) {
+	ui_node_canvas_t *canvas    = ui_nodes_get_canvas(true);
+	ui_node_t        *node      = ui_get_node(canvas->nodes, node_id);
+	char         *node_name = parser_material_node_name(node, NULL);
+	ui_handle_t      *h         = ui_handle(node_name);
+	string_t_array_t *models    = any_array_create_from_raw(
+        (void *[]){
+            "Marigold",
+        },
+        1);
+	i32 model = ui_combo(ui_nest(h, 0), models, tr("Model", NULL), false, UI_ALIGN_LEFT, true);
+	if (neural_node_button(node, models->buffer[model])) {
+		ui_node_t     *from_node = neural_from_node(node->inputs->buffer[0], 0);
+		gpu_texture_t *input     = ui_nodes_get_node_preview_image(from_node);
+		if (input != NULL) {
+			char *dir = neural_node_dir();
+
+			#ifdef IRON_BGRA
+			buffer_t *input_buf = export_arm_bgra_swap(gpu_get_texture_pixels(input)); // Vulkan non-rt textures need a flip
+			#else
+			buffer_t *input_buf = gpu_get_texture_pixels(input);
+			#endif
+			iron_write_png(string_join(string_join(dir, PATH_SEP), "input.png"), input_buf, input->width, input->height, 0);
+
+			image_to_pbr_node_run_sd("marigold-normals-v1-1.q8_0.gguf", "_normals", &image_to_pbr_node_normals_done);
+		}
+	}
 }
 
 void image_to_pbr_node_check_result(void (*done)(gpu_texture_t *)) {

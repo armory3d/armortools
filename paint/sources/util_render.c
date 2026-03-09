@@ -213,6 +213,10 @@ void util_render_make_font_preview() {
 		draw_begin(current, false, 0);
 }
 
+void util_render_make_brush_preview_parse_paint_material(void * _) {
+	make_material_parse_paint_material(false);
+}
+
 void util_render_make_brush_preview() {
 	if (render_path_paint_live_layer_locked) {
 		return;
@@ -371,7 +375,7 @@ void util_render_make_brush_preview() {
 	context_raw->layer             = _layer;
 	context_raw->material          = _material;
 	context_raw->tool              = _tool;
-	sys_notify_on_next_frame(&util_render_make_brush_preview_117467, NULL);
+	sys_notify_on_next_frame(&util_render_make_brush_preview_parse_paint_material, NULL);
 
 	// Restore paint mesh
 	context_raw->material_preview = false;
@@ -412,10 +416,6 @@ void util_render_make_brush_preview() {
 
 	if (in_use)
 		draw_begin(current, false, 0);
-}
-
-void util_render_make_brush_preview_117467(void * _) {
-	make_material_parse_paint_material(false);
 }
 
 void util_render_make_node_preview(ui_node_canvas_t *canvas, ui_node_t *node, gpu_texture_t *image, ui_node_canvas_t *group, ui_node_t_array_t *parents) {

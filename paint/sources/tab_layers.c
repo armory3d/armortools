@@ -82,45 +82,31 @@ void tab_layers_highlight_odd_lines() {
 	}
 }
 
-void tab_layers_button_new(char *text) {
-	if (ui_icon_button(text, ICON_PLUS, UI_ALIGN_CENTER)) {
-		ui_menu_draw(&tab_layers_button_new_189383, -1, -1);
-	}
-}
-
-void tab_layers_button_new_189759(void * _) {
-	layers_update_fill_layers();
-}
-
-void tab_layers_button_new_189732(slot_layer_t *m) {
+void tab_layers_button_new_to_fill_layer(slot_layer_t *m) {
 	slot_layer_to_fill_layer(m);
 }
 
-void tab_layers_button_new_189670(void * _) {
-	layers_update_fill_layers();
-}
-
-void tab_layers_button_new_189641(slot_layer_t *m) {
+void tab_layers_button_new_layer_clear(slot_layer_t *m) {
 	slot_layer_clear(m, 0xffffffff, NULL, 1.0, layers_default_rough, 0.0);
 }
 
-void tab_layers_button_new_189579(void * _) {
+void tab_layers_button_new_update_fill_layers(void * _) {
 	layers_update_fill_layers();
 }
 
-void tab_layers_button_new_189550(slot_layer_t *m) {
+void tab_layers_button_new_black_mask(slot_layer_t *m) {
 	slot_layer_clear(m, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
 }
 
-void tab_layers_button_new_189418(void * _) {
+void tab_layers_button_new_sculpt_layer(void * _) {
 	sculpt_layers_create_sculpt_layer();
 }
 
-void tab_layers_button_new_189383() {
+void tab_layers_button_new_menu() {
 	slot_layer_t *l = context_raw->layer;
 	if (config_raw->workspace == WORKSPACE_SCULPT) {
 		if (ui_menu_button(tr("Sculpt Layer", NULL), "", ICON_PAINT)) {
-			sys_notify_on_next_frame(&tab_layers_button_new_189418, NULL);
+			sys_notify_on_next_frame(&tab_layers_button_new_sculpt_layer, NULL);
 		}
 	}
 	else {
@@ -142,10 +128,10 @@ void tab_layers_button_new_189383() {
 		l               = context_raw->layer;
 
 		slot_layer_t *m = layers_new_mask(false, l, -1);
-		sys_notify_on_next_frame(&tab_layers_button_new_189550, m);
+		sys_notify_on_next_frame(&tab_layers_button_new_black_mask, m);
 		context_raw->layer_preview_dirty = true;
 		history_new_black_mask();
-		sys_notify_on_next_frame(&tab_layers_button_new_189579, NULL);
+		sys_notify_on_next_frame(&tab_layers_button_new_update_fill_layers, NULL);
 	}
 	if (ui_menu_button(tr("White Mask", NULL), "", ICON_MASK_WHITE)) {
 		if (slot_layer_is_mask(l)) {
@@ -154,10 +140,10 @@ void tab_layers_button_new_189383() {
 		l               = context_raw->layer;
 
 		slot_layer_t *m = layers_new_mask(false, l, -1);
-		sys_notify_on_next_frame(&tab_layers_button_new_189641, m);
+		sys_notify_on_next_frame(&tab_layers_button_new_layer_clear, m);
 		context_raw->layer_preview_dirty = true;
 		history_new_white_mask();
-		sys_notify_on_next_frame(&tab_layers_button_new_189670, NULL);
+		sys_notify_on_next_frame(&tab_layers_button_new_update_fill_layers, NULL);
 	}
 	if (ui_menu_button(tr("Fill Mask", NULL), "", ICON_MASK_FILL)) {
 		if (slot_layer_is_mask(l)) {
@@ -166,10 +152,10 @@ void tab_layers_button_new_189383() {
 		l               = context_raw->layer;
 
 		slot_layer_t *m = layers_new_mask(false, l, -1);
-		sys_notify_on_next_frame(&tab_layers_button_new_189732, m);
+		sys_notify_on_next_frame(&tab_layers_button_new_to_fill_layer, m);
 		context_raw->layer_preview_dirty = true;
 		history_new_fill_mask();
-		sys_notify_on_next_frame(&tab_layers_button_new_189759, NULL);
+		sys_notify_on_next_frame(&tab_layers_button_new_to_fill_layer, NULL);
 	}
 	ui->enabled = !slot_layer_is_group(context_raw->layer) && !slot_layer_is_in_group(context_raw->layer);
 	if (ui_menu_button(tr("Group", NULL), "", ICON_FOLDER)) {
@@ -195,6 +181,12 @@ void tab_layers_button_new_189383() {
 		history_new_group();
 	}
 	ui->enabled = true;
+}
+
+void tab_layers_button_new(char *text) {
+	if (ui_icon_button(text, ICON_PLUS, UI_ALIGN_CENTER)) {
+		ui_menu_draw(&tab_layers_button_new_menu, -1, -1);
+	}
 }
 
 void tab_layers_combo_filter() {
@@ -353,6 +345,10 @@ void tab_layers_draw_layer_slot_mini(slot_layer_t *l, i32 i) {
 	ui->_y = uiy + ui->ops->theme->ELEMENT_H * 2 * UI_SCALE();
 }
 
+void tab_layers_draw_layer_slot_full_delete_layer(void * _) {
+	tab_layers_delete_layer(context_raw->layer);
+}
+
 void tab_layers_draw_layer_slot_full(slot_layer_t *l, i32 i) {
 	i32          step         = ui->ops->theme->ELEMENT_H;
 	f32          center       = (step / (float)2) * UI_SCALE();
@@ -440,7 +436,7 @@ void tab_layers_draw_layer_slot_full(slot_layer_t *l, i32 i) {
 		                ui->input_y < ui->_window_y + ui->_window_h;
 		if (in_focus && ui->is_delete_down && tab_layers_can_delete(context_raw->layer)) {
 			ui->is_delete_down = false;
-			sys_notify_on_next_frame(&tab_layers_draw_layer_slot_full_191697, NULL);
+			sys_notify_on_next_frame(&tab_layers_draw_layer_slot_full_delete_layer, NULL);
 		}
 	}
 
@@ -478,8 +474,10 @@ void tab_layers_draw_layer_slot_full(slot_layer_t *l, i32 i) {
 	ui->_w = uiw;
 }
 
-void tab_layers_draw_layer_slot_full_191697(void * _) {
-	tab_layers_delete_layer(context_raw->layer);
+void tab_layers_combo_object_layer_clear(slot_layer_t *l) {
+	context_raw->material = l->fill_layer;
+	slot_layer_clear(l, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
+	layers_update_fill_layers();
 }
 
 ui_handle_t *tab_layers_combo_object(slot_layer_t *l, bool label) {
@@ -506,19 +504,13 @@ ui_handle_t *tab_layers_combo_object(slot_layer_t *l, bool label) {
 		context_set_layer(l);
 		make_material_parse_mesh_material();
 		if (l->fill_layer != NULL) { // Fill layer
-			sys_notify_on_next_frame(&tab_layers_combo_object_192061, l);
+			sys_notify_on_next_frame(&tab_layers_combo_object_layer_clear, l);
 		}
 		else {
 			layers_set_object_mask();
 		}
 	}
 	return object_handle;
-}
-
-void tab_layers_combo_object_192061(slot_layer_t *l) {
-	context_raw->material = l->fill_layer;
-	slot_layer_clear(l, 0x00000000, NULL, 1.0, layers_default_rough, 0.0);
-	layers_update_fill_layers();
 }
 
 ui_handle_t *tab_layers_combo_blending(slot_layer_t *l, bool label) {
@@ -724,39 +716,22 @@ bool tab_layers_can_merge_down(slot_layer_t *l) {
 	return true;
 }
 
-void tab_layers_draw_layer_context_menu(slot_layer_t *l, bool mini) {
-	gc_unroot(tab_layers_l);
-	tab_layers_l = l;
-	gc_root(tab_layers_l);
-	tab_layers_mini = mini;
-
-	ui_menu_draw(&tab_layers_draw_layer_context_menu_193275, -1, -1);
-}
-
-void tab_layers_draw_layer_context_menu_194707(void * _) {
+void tab_layers_draw_layer_context_menu_update_fill_layers(void * _) {
 	layers_update_fill_layers();
 }
 
-void tab_layers_draw_layer_context_menu_194609(void * _) {
-	layers_update_fill_layers();
-}
-
-void tab_layers_draw_layer_context_menu_194526(void * _) {
-	layers_update_fill_layers();
-}
-
-void tab_layers_draw_layer_context_menu_194437(void * _) {
+void tab_layers_draw_layer_context_menu_set_bits(void * _) {
 	layers_set_bits();
 }
 
-void tab_layers_draw_layer_context_menu_194083(void * _) {
+void tab_layers_draw_layer_context_menu_duplicate(void * _) {
 	slot_layer_t *l = tab_layers_l;
 	context_set_layer(l);
 	history_duplicate_layer();
 	layers_duplicate_layer(l);
 }
 
-void tab_layers_draw_layer_context_menu_194020(void * _) {
+void tab_layers_draw_layer_context_menu_merge_down(void * _) {
 	slot_layer_t *l = tab_layers_l;
 	context_set_layer(l);
 	history_merge_layers();
@@ -765,12 +740,12 @@ void tab_layers_draw_layer_context_menu_194020(void * _) {
 		slot_layer_to_paint_layer(context_raw->layer);
 }
 
-void tab_layers_draw_layer_context_menu_193973(void * _) {
+void tab_layers_draw_layer_context_menu_merge_group(void * _) {
 	slot_layer_t *l = tab_layers_l;
 	layers_merge_group(l);
 }
 
-void tab_layers_draw_layer_context_menu_193911(void * _) {
+void tab_layers_draw_layer_context_menu_apply(void * _) {
 	slot_layer_t *l    = tab_layers_l;
 	context_raw->layer = l;
 	history_apply_mask();
@@ -780,14 +755,14 @@ void tab_layers_draw_layer_context_menu_193911(void * _) {
 	context_raw->layers_preview_dirty = true;
 }
 
-void tab_layers_draw_layer_context_menu_193857(void * _) {
+void tab_layers_draw_layer_context_menu_invert(void * _) {
 	slot_layer_t *l = tab_layers_l;
 	context_set_layer(l);
 	history_invert_mask();
 	slot_layer_invert_mask(l);
 }
 
-void tab_layers_draw_layer_context_menu_193736(void * _) {
+void tab_layers_draw_layer_context_menu_clear(void * _) {
 	slot_layer_t *l = tab_layers_l;
 	if (!slot_layer_is_group(l)) {
 		history_clear_layer();
@@ -805,23 +780,23 @@ void tab_layers_draw_layer_context_menu_193736(void * _) {
 	}
 }
 
-void tab_layers_draw_layer_context_menu_193690(void * _) {
+void tab_layers_draw_layer_context_menu_delete(void * _) {
 	tab_layers_delete_layer(context_raw->layer);
 }
 
-void tab_layers_draw_layer_context_menu_193629(void * _) {
+void tab_layers_draw_layer_context_menu_to_paint_layer(void * _) {
 	slot_layer_t *l = tab_layers_l;
 	slot_layer_is_layer(l) ? history_to_paint_layer() : history_to_paint_mask();
 	slot_layer_to_paint_layer(l);
 }
 
-void tab_layers_draw_layer_context_menu_193575(void * _) {
+void tab_layers_draw_layer_context_menu_to_fill_layer(void * _) {
 	slot_layer_t *l = tab_layers_l;
 	slot_layer_is_layer(l) ? history_to_fill_layer() : history_to_fill_mask();
 	slot_layer_to_fill_layer(l);
 }
 
-void tab_layers_draw_layer_context_menu_193420(char *path) {
+void tab_layers_draw_layer_context_menu_export_on_file_picked(char *path) {
 	slot_layer_t *l = tab_layers_l;
 	char     *f = ui_files_filename;
 	if (string_equals(f, "")) {
@@ -833,7 +808,7 @@ void tab_layers_draw_layer_context_menu_193420(char *path) {
 	iron_write_png(string_join(string_join(path, PATH_SEP), f), gpu_get_texture_pixels(l->texpaint), l->texpaint->width, l->texpaint->height, 3); // RRR1
 }
 
-void tab_layers_draw_layer_context_menu_193275() {
+void tab_layers_draw_layer_context_menu_draw() {
 	slot_layer_t *l    = tab_layers_l;
 	bool          mini = tab_layers_mini;
 
@@ -860,7 +835,7 @@ void tab_layers_draw_layer_context_menu_193275() {
 
 	if (ui_menu_button(tr("Export", NULL), "", ICON_EXPORT)) {
 		if (slot_layer_is_mask(l)) {
-			ui_files_show("png", true, false, &tab_layers_draw_layer_context_menu_193420);
+			ui_files_show("png", true, false, &tab_layers_draw_layer_context_menu_export_on_file_picked);
 		}
 		else {
 			context_raw->layers_export = EXPORT_MODE_SELECTED;
@@ -873,41 +848,41 @@ void tab_layers_draw_layer_context_menu_193275() {
 		char *to_paint_string = slot_layer_is_layer(l) ? tr("To Paint Layer", NULL) : tr("To Paint Mask", NULL);
 
 		if (l->fill_layer == NULL && ui_menu_button(to_fill_string, "", ICON_SPHERE)) {
-			sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_193575, NULL);
+			sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_to_fill_layer, NULL);
 		}
 		if (l->fill_layer != NULL && ui_menu_button(to_paint_string, "", ICON_PAINT)) {
-			sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_193629, NULL);
+			sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_to_paint_layer, NULL);
 		}
 	}
 
 	ui->enabled = tab_layers_can_delete(l);
 	if (ui_menu_button(tr("Delete", NULL), "delete", ICON_DELETE)) {
-		sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_193690, NULL);
+		sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_delete, NULL);
 	}
 	ui->enabled = true;
 
 	if (l->fill_layer == NULL && ui_menu_button(tr("Clear", NULL), "", ICON_ERASE)) {
 		context_set_layer(l);
-		sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_193736, NULL);
+		sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_clear, NULL);
 	}
 	if (slot_layer_is_mask(l) && l->fill_layer == NULL && ui_menu_button(tr("Invert", NULL), "", ICON_INVERT)) {
-		sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_193857, NULL);
+		sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_invert, NULL);
 	}
 	if (slot_layer_is_mask(l) && ui_menu_button(tr("Apply", NULL), "", ICON_CHECK)) {
-		sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_193911, NULL);
+		sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_apply, NULL);
 	}
 	if (slot_layer_is_group(l) && ui_menu_button(tr("Merge Group", NULL), "", ICON_NONE)) {
-		sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_193973, NULL);
+		sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_merge_group, NULL);
 	}
 
 	ui->enabled = tab_layers_can_merge_down(l);
 	if (ui_menu_button(tr("Merge Down", NULL), "", ICON_ARROW_DOWN)) {
-		sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_194020, NULL);
+		sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_merge_down, NULL);
 	}
 	ui->enabled = true;
 
 	if (ui_menu_button(tr("Duplicate", NULL), "", ICON_DUPLICATE)) {
-		sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_194083, NULL);
+		sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_duplicate, NULL);
 	}
 
 	ui_menu_align();
@@ -998,7 +973,7 @@ void tab_layers_draw_layer_context_menu_193275() {
 		ui_inline_radio(base_bits_handle, bits_items, UI_ALIGN_LEFT);
 		#endif
 		if (base_bits_handle->changed) {
-			sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_194437, NULL);
+			sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_set_bits, NULL);
 			make_material_parse_paint_material(true);
 			ui_menu_keep_open = true;
 		}
@@ -1011,7 +986,7 @@ void tab_layers_draw_layer_context_menu_193275() {
 		if (scale_handle->changed) {
 			context_set_material(l->fill_layer);
 			context_set_layer(l);
-			sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_194526, NULL);
+			sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_update_fill_layers, NULL);
 			ui_menu_keep_open = true;
 		}
 
@@ -1023,7 +998,7 @@ void tab_layers_draw_layer_context_menu_193275() {
 			context_set_material(l->fill_layer);
 			context_set_layer(l);
 			make_material_parse_paint_material(true);
-			sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_194609, NULL);
+			sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_update_fill_layers, NULL);
 			ui_menu_keep_open = true;
 		}
 
@@ -1042,7 +1017,7 @@ void tab_layers_draw_layer_context_menu_193275() {
 			context_set_material(l->fill_layer);
 			context_set_layer(l);
 			make_material_parse_paint_material(true);
-			sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_194707, NULL);
+			sys_notify_on_next_frame(&tab_layers_draw_layer_context_menu_update_fill_layers, NULL);
 			ui_menu_keep_open = true;
 		}
 	}
@@ -1099,6 +1074,25 @@ void tab_layers_draw_layer_context_menu_193275() {
 	}
 }
 
+void tab_layers_draw_layer_context_menu(slot_layer_t *l, bool mini) {
+	gc_unroot(tab_layers_l);
+	tab_layers_l = l;
+	gc_root(tab_layers_l);
+	tab_layers_mini = mini;
+
+	ui_menu_draw(&tab_layers_draw_layer_context_menu_draw, -1, -1);
+}
+
+void tab_layers_make_mask_preview_rgba32_on_next_frame(void * _) {
+	slot_layer_t *l = tab_layers_l;
+	draw_begin(context_raw->mask_preview_rgba32, false, 0);
+	draw_set_pipeline(ui_view2d_pipe);
+	gpu_set_int(ui_view2d_channel_loc, 1);
+	draw_image(l->texpaint_preview, 0, 0);
+	draw_end();
+	draw_set_pipeline(NULL);
+}
+
 void tab_layers_make_mask_preview_rgba32(slot_layer_t *l) {
 	if (context_raw->mask_preview_rgba32 == NULL) {
 		context_raw->mask_preview_rgba32 = gpu_create_render_target(util_render_layer_preview_size, util_render_layer_preview_size, GPU_TEXTURE_FORMAT_RGBA32);
@@ -1109,18 +1103,8 @@ void tab_layers_make_mask_preview_rgba32(slot_layer_t *l) {
 		gc_unroot(tab_layers_l);
 		tab_layers_l = l;
 		gc_root(tab_layers_l);
-		sys_notify_on_next_frame(&tab_layers_make_mask_preview_rgba32_195198, NULL);
+		sys_notify_on_next_frame(&tab_layers_make_mask_preview_rgba32_on_next_frame, NULL);
 	}
-}
-
-void tab_layers_make_mask_preview_rgba32_195198(void * _) {
-	slot_layer_t *l = tab_layers_l;
-	draw_begin(context_raw->mask_preview_rgba32, false, 0);
-	draw_set_pipeline(ui_view2d_pipe);
-	gpu_set_int(ui_view2d_channel_loc, 1);
-	draw_image(l->texpaint_preview, 0, 0);
-	draw_end();
-	draw_set_pipeline(NULL);
 }
 
 void tab_layers_delete_layer(slot_layer_t *l) {

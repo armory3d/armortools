@@ -1,11 +1,7 @@
 
 #include "global.h"
 
-void project_open() {
-	ui_files_show("arm", false, false, &project_open_102526);
-}
-
-void project_open_102526(char *path) {
+void project_open_on_file_picked(char *path) {
 	if (!ends_with(path, ".arm")) {
 		console_error(strings_arm_file_expected());
 		return;
@@ -21,47 +17,46 @@ void project_open_102526(char *path) {
 		draw_begin(current, false, 0);
 }
 
-void project_save(bool save_and_quit) {
-	if (string_equals(project_filepath, "")) {
-		#ifdef IRON_IOS
-		char *document_directory = iron_save_dialog("", "");
-		document_directory           = string_copy(substring(document_directory, 0, string_length(document_directory) - 8)); // Strip /"untitled"
-		gc_unroot(project_filepath);
-		project_filepath = string_join(string_join(string_join(document_directory, "/"), sys_title()), ".arm");
-		gc_root(project_filepath);
-		#elif defined(IRON_ANDROID)
-		gc_unroot(project_filepath);
-		project_filepath = string_join(string_join(string_join(iron_internal_save_path(), "/"), sys_title()), ".arm");
-		gc_root(project_filepath);
-		#else
-		project_save_as(save_and_quit);
-		return;
-		#endif
-	}
-
-	#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
-	char *filename = substring(project_filepath, string_last_index_of(project_filepath, PATH_SEP) + 1, string_length(project_filepath) - 4);
-	sys_title_set(string_join(string_join(filename, " - "), manifest_title));
-	#endif
-
-	_project_save_and_quit = save_and_quit;
-
-	sys_notify_on_next_frame(&project_save_102708, NULL);
+void project_open() {
+	ui_files_show("arm", false, false, &project_open_on_file_picked);
 }
 
-void project_save_102708(void * _) {
+void project_save_on_next_frame(void *_) {
 	export_arm_run_project();
 	if (_project_save_and_quit) {
 		iron_stop();
 	}
 }
 
-void project_save_as(bool save_and_quit) {
+void project_save(bool save_and_quit) {
+	if (string_equals(project_filepath, "")) {
+#ifdef IRON_IOS
+		char *document_directory = iron_save_dialog("", "");
+		document_directory       = string_copy(substring(document_directory, 0, string_length(document_directory) - 8)); // Strip /"untitled"
+		gc_unroot(project_filepath);
+		project_filepath = string_join(string_join(string_join(document_directory, "/"), sys_title()), ".arm");
+		gc_root(project_filepath);
+#elif defined(IRON_ANDROID)
+		gc_unroot(project_filepath);
+		project_filepath = string_join(string_join(string_join(iron_internal_save_path(), "/"), sys_title()), ".arm");
+		gc_root(project_filepath);
+#else
+		project_save_as(save_and_quit);
+		return;
+#endif
+	}
+
+#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
+	char *filename = substring(project_filepath, string_last_index_of(project_filepath, PATH_SEP) + 1, string_length(project_filepath) - 4);
+	sys_title_set(string_join(string_join(filename, " - "), manifest_title));
+#endif
+
 	_project_save_and_quit = save_and_quit;
-	ui_files_show("arm", true, false, &project_save_as_102755);
+
+	sys_notify_on_next_frame(&project_save_on_next_frame, NULL);
 }
 
-void project_save_as_102755(char *path) {
+void project_save_as_on_file_picked(char *path) {
 	char *f = ui_files_filename;
 	if (string_equals(f, "")) {
 		f = string_copy(tr("untitled", NULL));
@@ -77,13 +72,18 @@ void project_save_as_102755(char *path) {
 	project_save(_project_save_and_quit);
 }
 
+void project_save_as(bool save_and_quit) {
+	_project_save_and_quit = save_and_quit;
+	ui_files_show("arm", true, false, &project_save_as_on_file_picked);
+}
+
 void project_fetch_default_meshes() {
 	if (project_mesh_list == NULL) {
 		gc_unroot(project_mesh_list);
 		project_mesh_list = file_read_directory(string_join(string_join(path_data(), PATH_SEP), "meshes"));
 		gc_root(project_mesh_list);
 		for (i32 i = 0; i < project_mesh_list->length; ++i) {
-			char *s                  = project_mesh_list->buffer[i];
+			char *s                      = project_mesh_list->buffer[i];
 			project_mesh_list->buffer[i] = substring(project_mesh_list->buffer[i], 0, string_length(s) - 4); // Trim .arm
 		}
 		any_array_push(project_mesh_list, "plane");
@@ -91,11 +91,7 @@ void project_fetch_default_meshes() {
 	}
 }
 
-void project_new_box() {
-	ui_box_show_custom(&project_new_box_102911, 400, 200, NULL, true, tr("New Project", NULL));
-}
-
-void project_new_box_102911() {
+void project_new_box_draw() {
 	project_fetch_default_meshes();
 	ui_row2();
 	ui_handle_t *h_project_type = ui_handle(__ID__);
@@ -124,6 +120,10 @@ void project_new_box_102911() {
 		project_new(true);
 		ui_box_hide();
 	}
+}
+
+void project_new_box() {
+	ui_box_show_custom(&project_new_box_draw, 400, 200, NULL, true, tr("New Project", NULL));
 }
 
 void project_cleanup() {
@@ -166,6 +166,20 @@ void project_cleanup() {
 	}
 }
 
+void project_new_on_next_frame(void *_) {
+	// Once layers and meshes are populated on project open
+	util_render_make_material_preview();
+	context_raw->ddirty = 4;
+}
+
+void project_new_reset_layers(void *_) {
+	layers_init();
+}
+
+void project_new_resize_layers(void *_) {
+	layers_resize();
+}
+
 void project_new(bool reset_layers) {
 	if (context_raw->paint_object != NULL) {
 		project_cleanup();
@@ -187,7 +201,7 @@ void project_new(bool reset_layers) {
 	gc_root(project_mesh_assets);
 
 	mesh_data_t *raw       = NULL;
-	char    *mesh_name = project_mesh_list == NULL ? "box_bevel" : project_mesh_list->buffer[context_raw->project_type];
+	char        *mesh_name = project_mesh_list == NULL ? "box_bevel" : project_mesh_list->buffer[context_raw->project_type];
 
 	if (string_equals(mesh_name, "sphere")) {
 		raw_mesh_t *mesh = geom_make_uv_sphere(1, 512, 256, true, 1.0);
@@ -271,7 +285,7 @@ void project_new(bool reset_layers) {
 	context_raw->font = project_fonts->buffer[0];
 	project_set_default_swatches();
 	context_raw->swatch                = project_raw->swatches->buffer[0];
-	context_raw->picked_color          = make_swatch(0xffffffff);
+	context_raw->picked_color          = project_make_swatch(0xffffffff);
 	context_raw->color_picker_callback = NULL;
 	history_reset();
 
@@ -303,9 +317,9 @@ void project_new(bool reset_layers) {
 		any_array_push(project_layers, layer);
 		context_set_layer(layer);
 		if (aspect_ratio_changed) {
-			sys_notify_on_next_frame(&project_new_103839, NULL);
+			sys_notify_on_next_frame(&project_new_resize_layers, NULL);
 		}
-		sys_notify_on_next_frame(&project_new_103856, NULL);
+		sys_notify_on_next_frame(&project_new_reset_layers, NULL);
 	}
 
 	if (in_use)
@@ -317,21 +331,7 @@ void project_new(bool reset_layers) {
 	viewport_scale_to_bounds(1.8);
 	render_path_raytrace_ready = false;
 
-	sys_notify_on_next_frame(&project_new_103903, NULL);
-}
-
-void project_new_103903(void * _) {
-	// Once layers and meshes are populated on project open
-	util_render_make_material_preview();
-	context_raw->ddirty = 4;
-}
-
-void project_new_103856(void * _) {
-	layers_init();
-}
-
-void project_new_103839(void * _) {
-	layers_resize();
+	sys_notify_on_next_frame(&project_new_on_next_frame, NULL);
 }
 
 void project_set_default_envmap() {
@@ -349,12 +349,12 @@ void project_set_default_envmap() {
 	project_raw->envmap                                           = NULL;
 }
 
-void project_import_material() {
-	ui_files_show("arm,blend", false, true, &project_import_material_103991);
+void project_import_material_on_file_picked(char *path) {
+	ends_with(path, ".blend") ? import_blend_material_run(path) : import_arm_run_material(path);
 }
 
-void project_import_material_103991(char *path) {
-	ends_with(path, ".blend") ? import_blend_material_run(path) : import_arm_run_material(path);
+void project_import_material() {
+	ui_files_show("arm,blend", false, true, &project_import_material_on_file_picked);
 }
 
 ui_node_link_t *project_create_node_link(ui_node_link_t_array_t *links, i32 from_id, i32 from_socket, i32 to_id, i32 to_socket) {
@@ -363,16 +363,11 @@ ui_node_link_t *project_create_node_link(ui_node_link_t_array_t *links, i32 from
 	return link;
 }
 
-void project_import_brush() {
-	char *formats = string_array_join(path_texture_formats(), ",");
-	ui_files_show(string_join("arm,", formats), false, true, &project_import_brush_104110);
-}
-
-void project_import_brush_104258(void * _) {
+void project_import_brush_make_brush_preview(void *_) {
 	util_render_make_brush_preview();
 }
 
-void project_import_brush_104110(char *path) {
+void project_import_brush_on_file_picked(char *path) {
 	// Create brush from texture
 	if (path_is_texture(path)) {
 		// Import texture
@@ -401,12 +396,21 @@ void project_import_brush_104110(char *path) {
 		// Parse brush
 		make_material_parse_brush();
 		ui_nodes_hwnd->redraws = 2;
-		sys_notify_on_next_frame(&project_import_brush_104258, NULL);
+		sys_notify_on_next_frame(&project_import_brush_make_brush_preview, NULL);
 	}
 	// Import from project file
 	else {
 		import_arm_run_brush(path);
 	}
+}
+
+void project_import_brush() {
+	char *formats = string_array_join(path_texture_formats(), ",");
+	ui_files_show(string_join("arm,", formats), false, true, &project_import_brush_on_file_picked);
+}
+
+void project_import_mesh_on_file_picked(char *path) {
+	project_import_mesh_box(path, _project_import_mesh_replace_existing, true, _project_import_mesh_done);
 }
 
 void project_import_mesh(bool replace_existing, void (*done)(void)) {
@@ -425,35 +429,18 @@ void project_import_mesh(bool replace_existing, void (*done)(void)) {
 	if (string_index_of(formats, "glb") == -1) {
 		formats = string_join(formats, ",glb");
 	}
-	ui_files_show(formats, false, false, &project_import_mesh_104385);
-}
-
-void project_import_mesh_104385(char *path) {
-	project_import_mesh_box(path, _project_import_mesh_replace_existing, true, _project_import_mesh_done);
+	ui_files_show(formats, false, false, &project_import_mesh_on_file_picked);
 }
 
 void project_append_mesh() {
 	project_import_mesh(false, import_mesh_finish_import);
 }
 
-void project_import_mesh_box(char *path, bool replace_existing, bool clear_layers, void (*done)(void)) {
-	gc_unroot(_project_import_mesh_box_path);
-	_project_import_mesh_box_path = string_copy(path);
-	gc_root(_project_import_mesh_box_path);
-	_project_import_mesh_box_replace_existing = replace_existing;
-	_project_import_mesh_box_clear_layers     = clear_layers;
-	gc_unroot(_project_import_mesh_box_done);
-	_project_import_mesh_box_done = done;
-	gc_root(_project_import_mesh_box_done);
-	ui_box_show_custom(&project_import_mesh_box_104467, 400, 200, NULL, true, tr("Import Mesh", NULL));
-	ui_box_click_to_hide = false; // Prevent closing when going back to window from file browser
-}
-
-void project_import_mesh_box_104467() {
+void project_import_mesh_box_draw() {
 	char *path             = _project_import_mesh_box_path;
-	bool      replace_existing = _project_import_mesh_box_replace_existing;
-	bool      clear_layers     = _project_import_mesh_box_clear_layers;
-	void (*done)(void)         = _project_import_mesh_box_done;
+	bool  replace_existing = _project_import_mesh_box_replace_existing;
+	bool  clear_layers     = _project_import_mesh_box_clear_layers;
+	void (*done)(void)     = _project_import_mesh_box_done;
 
 	if (ends_with(to_lower_case(path), ".obj")) {
 		string_t_array_t *split_by_combo = any_array_create_from_raw(
@@ -489,9 +476,9 @@ void project_import_mesh_box_104467() {
 	if (ui_icon_button(tr("Import", NULL), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
 		ui_box_hide();
 
-		#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 		console_toast(tr("Importing mesh", NULL));
-		#endif
+#endif
 
 		import_mesh_run(path, clear_layers, replace_existing);
 		if (done != NULL) {
@@ -501,6 +488,19 @@ void project_import_mesh_box_104467() {
 	if (ui_button(tr("?", NULL), UI_ALIGN_CENTER, "")) {
 		iron_load_url("https://github.com/armory3d/armorpaint_web/blob/main/manual.md#faq");
 	}
+}
+
+void project_import_mesh_box(char *path, bool replace_existing, bool clear_layers, void (*done)(void)) {
+	gc_unroot(_project_import_mesh_box_path);
+	_project_import_mesh_box_path = string_copy(path);
+	gc_root(_project_import_mesh_box_path);
+	_project_import_mesh_box_replace_existing = replace_existing;
+	_project_import_mesh_box_clear_layers     = clear_layers;
+	gc_unroot(_project_import_mesh_box_done);
+	_project_import_mesh_box_done = done;
+	gc_root(_project_import_mesh_box_done);
+	ui_box_show_custom(&project_import_mesh_box_draw, 400, 200, NULL, true, tr("Import Mesh", NULL));
+	ui_box_click_to_hide = false; // Prevent closing when going back to window from file browser
 }
 
 void project_reimport_mesh() {
@@ -527,6 +527,28 @@ string_t_array_t *project_get_unwrap_plugins() {
 	return unwrap_plugins;
 }
 
+void project_unwrap_mesh_box_draw() {
+	raw_mesh_t *mesh           = _project_unwrap_mesh_box_mesh;
+	void (*done)(raw_mesh_t *) = _project_unwrap_mesh_box_done;
+
+	string_t_array_t *unwrap_plugins = project_get_unwrap_plugins();
+	_project_unwrap_by               = ui_combo(ui_handle(__ID__), unwrap_plugins, tr("Plugin", NULL), true, UI_ALIGN_LEFT, true);
+
+	ui_row2();
+	if (ui_icon_button(tr("Cancel", NULL), ICON_CLOSE, UI_ALIGN_CENTER)) {
+		ui_box_hide();
+	}
+	if (ui_icon_button(tr("Unwrap", NULL), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
+		ui_box_hide();
+
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
+		console_toast(tr("Unwrapping mesh", NULL));
+#endif
+
+		project_unwrap_mesh(mesh, done);
+	}
+}
+
 void project_unwrap_mesh_box(raw_mesh_t *mesh, void (*done)(raw_mesh_t *), bool skip_ui) {
 	gc_unroot(_project_unwrap_mesh_box_mesh);
 	_project_unwrap_mesh_box_mesh = mesh;
@@ -540,29 +562,7 @@ void project_unwrap_mesh_box(raw_mesh_t *mesh, void (*done)(raw_mesh_t *), bool 
 		return;
 	}
 
-	ui_box_show_custom(&project_unwrap_mesh_box_104919, 400, 200, NULL, true, tr("Unwrap Mesh", NULL));
-}
-
-void project_unwrap_mesh_box_104919() {
-	raw_mesh_t *mesh                 = _project_unwrap_mesh_box_mesh;
-	void (*done)(raw_mesh_t *)       = _project_unwrap_mesh_box_done;
-
-	string_t_array_t *unwrap_plugins = project_get_unwrap_plugins();
-	_project_unwrap_by               = ui_combo(ui_handle(__ID__), unwrap_plugins, tr("Plugin", NULL), true, UI_ALIGN_LEFT, true);
-
-	ui_row2();
-	if (ui_icon_button(tr("Cancel", NULL), ICON_CLOSE, UI_ALIGN_CENTER)) {
-		ui_box_hide();
-	}
-	if (ui_icon_button(tr("Unwrap", NULL), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
-		ui_box_hide();
-
-		#if defined(IRON_ANDROID) || defined(IRON_IOS)
-		console_toast(tr("Unwrapping mesh", NULL));
-		#endif
-
-		project_unwrap_mesh(mesh, done);
-	}
+	ui_box_show_custom(&project_unwrap_mesh_box_draw, 400, 200, NULL, true, tr("Unwrap Mesh", NULL));
 }
 
 void project_unwrap_mesh(raw_mesh_t *mesh, void (*done)(raw_mesh_t *)) {
@@ -577,10 +577,14 @@ void project_unwrap_mesh(raw_mesh_t *mesh, void (*done)(raw_mesh_t *)) {
 			config_enable_plugin(f);
 			console_info(string_join(string_join(f, " "), tr("plugin enabled", NULL)));
 		}
-		void * cb = any_map_get(util_mesh_unwrappers, f); // JSValue * -> (a: raw_mesh_t)=>void
+		void *cb = any_map_get(util_mesh_unwrappers, f); // JSValue * -> (a: raw_mesh_t)=>void
 		js_call_ptr(cb, mesh);
 	}
 	done(mesh);
+}
+
+void project_import_asset_on_file_picked(char *path) {
+	import_asset_run(path, -1.0, -1.0, true, _project_import_asset_hdr_as_envmap, NULL);
 }
 
 void project_import_asset(char *filters, bool hdr_as_envmap) {
@@ -590,19 +594,10 @@ void project_import_asset(char *filters, bool hdr_as_envmap) {
 
 	_project_import_asset_hdr_as_envmap = hdr_as_envmap;
 
-	ui_files_show(filters, false, true, &project_import_asset_105217);
+	ui_files_show(filters, false, true, &project_import_asset_on_file_picked);
 }
 
-void project_import_asset_105217(char *path) {
-	import_asset_run(path, -1.0, -1.0, true, _project_import_asset_hdr_as_envmap, NULL);
-}
-
-void project_import_swatches(bool replace_existing) {
-	_project_import_swatches_replace_existing = replace_existing;
-	ui_files_show("arm,gpl", false, false, &project_import_swatches_105263);
-}
-
-void project_import_swatches_105263(char *path) {
+void project_import_swatches_on_file_picked(char *path) {
 	if (path_is_gimp_color_palette(path)) {
 		// import_gpl_run(path, _project_import_swatches_replace_existing);
 	}
@@ -611,11 +606,22 @@ void project_import_swatches_105263(char *path) {
 	}
 }
 
+void project_import_swatches(bool replace_existing) {
+	_project_import_swatches_replace_existing = replace_existing;
+	ui_files_show("arm,gpl", false, false, &project_import_swatches_on_file_picked);
+}
+
 void project_reimport_textures() {
 	for (i32 i = 0; i < project_assets->length; ++i) {
 		asset_t *asset = project_assets->buffer[i];
 		project_reimport_texture(asset);
 	}
+}
+
+void project_reimport_texture_load_on_next_frame(void *_) {
+	make_material_parse_paint_material(true);
+	util_render_make_material_preview();
+	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
 }
 
 void project_reimport_texture_load(char *path, asset_t *asset) {
@@ -634,13 +640,11 @@ void project_reimport_texture_load(char *path, asset_t *asset) {
 		context_raw->texture = project_assets->buffer[i];
 	}
 
-	sys_notify_on_next_frame(&project_reimport_texture_load_105445, NULL);
+	sys_notify_on_next_frame(&project_reimport_texture_load_on_next_frame, NULL);
 }
 
-void project_reimport_texture_load_105445(void * _) {
-	make_material_parse_paint_material(true);
-	util_render_make_material_preview();
-	ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
+void project_reimport_texture_on_file_picked(char *path) {
+	project_reimport_texture_load(path, _project_reimport_texture_asset);
 }
 
 void project_reimport_texture(asset_t *asset) {
@@ -649,15 +653,11 @@ void project_reimport_texture(asset_t *asset) {
 		gc_unroot(_project_reimport_texture_asset);
 		_project_reimport_texture_asset = asset;
 		gc_root(_project_reimport_texture_asset);
-		ui_files_show(filters, false, false, &project_reimport_texture_105515);
+		ui_files_show(filters, false, false, &project_reimport_texture_on_file_picked);
 	}
 	else {
 		project_reimport_texture_load(asset->file, asset);
 	}
-}
-
-void project_reimport_texture_105515(char *path) {
-	project_reimport_texture_load(path, _project_reimport_texture_asset);
 }
 
 gpu_texture_t *project_get_image(asset_t *asset) {
@@ -692,7 +692,7 @@ bool project_is_atlas_object(mesh_object_t *p) {
 		return false;
 	}
 	char *atlas_name = project_get_used_atlases()->buffer[context_raw->layer_filter - project_paint_objects->length - 1];
-	i32       atlas_i    = char_ptr_array_index_of(project_atlas_names, atlas_name);
+	i32   atlas_i    = char_ptr_array_index_of(project_atlas_names, atlas_name);
 	return atlas_i == project_atlas_objects->buffer[array_index_of(project_paint_objects, p)];
 }
 
@@ -702,7 +702,7 @@ mesh_object_t_array_t *project_get_atlas_objects(i32 object_mask) {
 	if (atlases == NULL || i >= atlases->length) {
 		return project_paint_objects;
 	}
-	char              *atlas_name = atlases->buffer[i];
+	char                  *atlas_name = atlases->buffer[i];
 	i32                    atlas_i    = char_ptr_array_index_of(project_atlas_names, atlas_name);
 	mesh_object_t_array_t *visibles   = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < project_paint_objects->length; ++i) {
@@ -723,11 +723,7 @@ bool project_packed_asset_exists(packed_asset_t_array_t *packed_assets, char *na
 	return false;
 }
 
-void project_export_swatches() {
-	ui_files_show("arm,gpl", true, false, &project_export_swatches_105968);
-}
-
-void project_export_swatches_105968(char *path) {
+void project_export_swatches_on_file_picked(char *path) {
 	char *f = ui_files_filename;
 	if (string_equals(f, "")) {
 		f = string_copy(tr("untitled", NULL));
@@ -740,7 +736,11 @@ void project_export_swatches_105968(char *path) {
 	}
 }
 
-swatch_color_t *make_swatch(i32 base) {
+void project_export_swatches() {
+	ui_files_show("arm,gpl", true, false, &project_export_swatches_on_file_picked);
+}
+
+swatch_color_t *project_make_swatch(i32 base) {
 	swatch_color_t *s = GC_ALLOC_INIT(swatch_color_t, {.base       = base,
 	                                                   .opacity    = 1.0,
 	                                                   .occlusion  = 1.0,
@@ -779,7 +779,7 @@ void project_set_default_swatches() {
         31);
 	for (i32 i = 0; i < colors->length; ++i) {
 		i32 c = colors->buffer[i];
-		any_array_push(project_raw->swatches, make_swatch(c));
+		any_array_push(project_raw->swatches, project_make_swatch(c));
 	}
 }
 
@@ -807,7 +807,7 @@ bool project_is_material_group_in_use(node_group_t *group) {
 		ui_node_canvas_t *canvas = canvases->buffer[i];
 		for (i32 i = 0; i < canvas->nodes->length; ++i) {
 			ui_node_t *n     = canvas->nodes->buffer[i];
-			char  *cname = group->canvas->name;
+			char      *cname = group->canvas->name;
 			if (string_equals(n->type, "GROUP") && string_equals(n->name, cname)) {
 				return true;
 			}

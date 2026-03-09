@@ -7,13 +7,7 @@ void text_texture_node_init() {
 	any_map_set(parser_material_node_values, "TEX_TEXT", text_texture_node_value);
 }
 
-void _parser_material_cache_tex_text_node(char *file, char *text) {
-	if (any_map_get(data_cached_images, file) == NULL) {
-		sys_notify_on_next_frame(&_parser_material_cache_tex_text_node_205902, text);
-	}
-}
-
-void _parser_material_cache_tex_text_node_205902(char *text) {
+void _parser_material_cache_tex_text_node_on_next_frame(char *text) {
 	char      *_text_tool_text  = context_raw->text_tool_text;
 	gpu_texture_t *_text_tool_image = context_raw->text_tool_image;
 	context_raw->text_tool_text     = string_copy(text);
@@ -24,6 +18,12 @@ void _parser_material_cache_tex_text_node_205902(char *text) {
 	any_map_set(data_cached_images, file, context_raw->text_tool_image);
 	context_raw->text_tool_text  = string_copy(_text_tool_text);
 	context_raw->text_tool_image = _text_tool_image;
+}
+
+void _parser_material_cache_tex_text_node(char *file, char *text) {
+	if (any_map_get(data_cached_images, file) == NULL) {
+		sys_notify_on_next_frame(&_parser_material_cache_tex_text_node_on_next_frame, text);
+	}
 }
 
 char *text_texture_node_vector(ui_node_t *node, ui_node_socket_t *socket) {

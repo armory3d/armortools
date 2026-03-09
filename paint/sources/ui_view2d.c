@@ -28,6 +28,33 @@ void ui_view2d_draw_image(gpu_texture_t *image, f32 dx, f32 dy, f32 dw, f32 dh, 
 	draw_scaled_image(image, dx, dy, dw, dh);
 }
 
+void ui_view2d_render_color_pick(void * _) {
+	render_target_t *rt              = any_map_get(render_path_render_targets, "texpaint_picker");
+	gpu_texture_t   *texpaint_picker = rt->_image;
+	draw_begin(texpaint_picker, false, 0);
+	draw_scaled_image(_ui_view2d_render_tex, -_ui_view2d_render_x, -_ui_view2d_render_y, _ui_view2d_render_tw, _ui_view2d_render_th);
+	draw_end();
+	buffer_t *a = gpu_get_texture_pixels(texpaint_picker);
+	#ifdef IRON_BGRA
+	i32 i0 = 2;
+	i32 i1 = 1;
+	i32 i2 = 0;
+	#else
+	i32 i0 = 0;
+	i32 i1 = 1;
+	i32 i2 = 2;
+	#endif
+
+	context_raw->picked_color->base = color_set_rb(context_raw->picked_color->base, buffer_get_u8(a, i0));
+	context_raw->picked_color->base = color_set_gb(context_raw->picked_color->base, buffer_get_u8(a, i1));
+	context_raw->picked_color->base = color_set_bb(context_raw->picked_color->base, buffer_get_u8(a, i2));
+	ui_header_handle->redraws       = 2;
+
+	if (context_raw->color_picker_callback != NULL) {
+		context_raw->color_picker_callback(context_raw->picked_color);
+	}
+}
+
 void ui_view2d_render(void * _) {
 	ui_view2d_ww = config_raw->layout->buffer[LAYOUT_SIZE_NODES_W];
 	ui_view2d_wx = math_floor(sys_w()) + ui_toolbar_w(true);
@@ -216,7 +243,7 @@ void ui_view2d_render(void * _) {
 				_ui_view2d_render_y  = ui->input_y - ty - ui_view2d_wy;
 				_ui_view2d_render_tw = tw;
 				_ui_view2d_render_th = th;
-				sys_notify_on_next_frame(&ui_view2d_render_109006, NULL);
+				sys_notify_on_next_frame(&ui_view2d_render_color_pick, NULL);
 			}
 		}
 
@@ -377,33 +404,6 @@ void ui_view2d_render(void * _) {
 		}
 	}
 	ui_end();
-}
-
-void ui_view2d_render_109006(void * _) {
-	render_target_t *rt              = any_map_get(render_path_render_targets, "texpaint_picker");
-	gpu_texture_t   *texpaint_picker = rt->_image;
-	draw_begin(texpaint_picker, false, 0);
-	draw_scaled_image(_ui_view2d_render_tex, -_ui_view2d_render_x, -_ui_view2d_render_y, _ui_view2d_render_tw, _ui_view2d_render_th);
-	draw_end();
-	buffer_t *a = gpu_get_texture_pixels(texpaint_picker);
-	#ifdef IRON_BGRA
-	i32 i0 = 2;
-	i32 i1 = 1;
-	i32 i2 = 0;
-	#else
-	i32 i0 = 0;
-	i32 i1 = 1;
-	i32 i2 = 2;
-	#endif
-
-	context_raw->picked_color->base = color_set_rb(context_raw->picked_color->base, buffer_get_u8(a, i0));
-	context_raw->picked_color->base = color_set_gb(context_raw->picked_color->base, buffer_get_u8(a, i1));
-	context_raw->picked_color->base = color_set_bb(context_raw->picked_color->base, buffer_get_u8(a, i2));
-	ui_header_handle->redraws       = 2;
-
-	if (context_raw->color_picker_callback != NULL) {
-		context_raw->color_picker_callback(context_raw->picked_color);
-	}
 }
 
 void ui_view2d_update(void * _) {

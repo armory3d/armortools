@@ -1,6 +1,10 @@
 
 #include "global.h"
 
+void import_texture_run_on_next_frame(import_texture_data_t *itd) {
+	import_envmap_run(itd->path, itd->image);
+}
+
 void import_texture_run(char *path, bool hdr_as_envmap) {
 	if (!path_is_texture(path)) {
 		if (!context_enable_import_plugin(path)) {
@@ -17,7 +21,7 @@ void import_texture_run(char *path, bool hdr_as_envmap) {
 			if (hdr_as_envmap && ends_with(to_lower_case(path), ".hdr")) {
 				gpu_texture_t         *image = data_get_image(path);
 				import_texture_data_t *itd   = GC_ALLOC_INIT(import_texture_data_t, {.path = path, .image = image});
-				sys_notify_on_next_frame(&import_texture_run_44011, itd); // Make sure file browser process did finish
+				sys_notify_on_next_frame(&import_texture_run_on_next_frame, itd); // Make sure file browser process did finish
 			}
 			console_info(strings_asset_already_imported());
 			return;
@@ -55,16 +59,8 @@ void import_texture_run(char *path, bool hdr_as_envmap) {
 	// Set as envmap
 	if (hdr_as_envmap && ends_with(to_lower_case(path), ".hdr")) {
 		import_texture_data_t *itd = GC_ALLOC_INIT(import_texture_data_t, {.path = path, .image = image});
-		sys_notify_on_next_frame(&import_texture_run_44274, itd); // Make sure file browser process did finish
+		sys_notify_on_next_frame(&import_texture_run_on_next_frame, itd); // Make sure file browser process did finish
 	}
-}
-
-void import_texture_run_44274(import_texture_data_t *itd) {
-	import_envmap_run(itd->path, itd->image);
-}
-
-void import_texture_run_44011(import_texture_data_t *itd) {
-	import_envmap_run(itd->path, itd->image);
 }
 
 gpu_texture_t *import_texture_default_importer(char *path) {

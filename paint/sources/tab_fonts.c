@@ -1,6 +1,31 @@
 
 #include "global.h"
 
+void tab_fonts_draw_make_font_preview(void * _) {
+	i32          i     = _tab_fonts_draw_i;
+	slot_font_t *_font = context_raw->font;
+	context_raw->font  = project_fonts->buffer[i];
+	util_render_make_font_preview();
+	context_raw->font = _font;
+}
+
+void tab_fonts_draw_context_menu_draw() {
+	i32 i = _tab_fonts_draw_i;
+	if (project_fonts->length > 1 && ui_menu_button(tr("Delete", NULL), "delete", ICON_DELETE) && !string_equals(project_fonts->buffer[i]->file, "")) {
+		tab_fonts_delete_font(project_fonts->buffer[i]);
+	}
+}
+
+void tab_fonts_draw_context_menu(void * _) {
+	context_select_font(_tab_fonts_draw_i);
+	ui_menu_draw(&tab_fonts_draw_context_menu_draw, -1, -1);
+}
+
+void tab_fonts_draw_select_font(void * _) {
+	i32 i = _tab_fonts_draw_i;
+	context_select_font(i);
+}
+
 void tab_fonts_draw(ui_handle_t *htab) {
 	if (ui_tab(htab, tr("Fonts", NULL), false, -1, false) && ui->_window_h > ui_statusbar_default_h * UI_SCALE()) {
 
@@ -88,7 +113,7 @@ void tab_fonts_draw(ui_handle_t *htab) {
 					if (context_raw->font != project_fonts->buffer[i]) {
 						_tab_fonts_draw_i = i;
 
-						sys_notify_on_next_frame(&tab_fonts_draw_97837, NULL);
+						sys_notify_on_next_frame(&tab_fonts_draw_select_font, NULL);
 					}
 					if (sys_time() - context_raw->select_time < 0.2) {
 						ui_base_show_2d_view(VIEW_2D_TYPE_FONT);
@@ -97,12 +122,12 @@ void tab_fonts_draw(ui_handle_t *htab) {
 				}
 				if (ui->is_hovered && ui->input_released_r) {
 					_tab_fonts_draw_i = i;
-					sys_notify_on_next_frame(&tab_fonts_draw_97897, NULL);
+					sys_notify_on_next_frame(&tab_fonts_draw_context_menu, NULL);
 				}
 				if (ui->is_hovered) {
 					if (img == NULL) {
 						_tab_fonts_draw_i = i;
-						sys_notify_on_next_frame(&tab_fonts_draw_97983, NULL);
+						sys_notify_on_next_frame(&tab_fonts_draw_make_font_preview, NULL);
 					}
 					else {
 						ui_tooltip_image(img, 0);
@@ -136,40 +161,14 @@ void tab_fonts_draw(ui_handle_t *htab) {
 	}
 }
 
-void tab_fonts_draw_97983(void * _) {
-	i32          i     = _tab_fonts_draw_i;
-	slot_font_t *_font = context_raw->font;
-	context_raw->font  = project_fonts->buffer[i];
-	util_render_make_font_preview();
-	context_raw->font = _font;
-}
-
-void tab_fonts_draw_97911() {
-	i32 i = _tab_fonts_draw_i;
-	if (project_fonts->length > 1 && ui_menu_button(tr("Delete", NULL), "delete", ICON_DELETE) && !string_equals(project_fonts->buffer[i]->file, "")) {
-		tab_fonts_delete_font(project_fonts->buffer[i]);
-	}
-}
-
-void tab_fonts_draw_97897(void * _) {
-	context_select_font(_tab_fonts_draw_i);
-	ui_menu_draw(&tab_fonts_draw_97911, -1, -1);
-}
-
-void tab_fonts_draw_97837(void * _) {
-	i32 i = _tab_fonts_draw_i;
-	context_select_font(i);
-}
-
-void tab_fonts_delete_font(slot_font_t *font) {
-	sys_notify_on_next_frame(&tab_fonts_delete_font_98187, font);
-
-	ui_base_hwnds->buffer[2]->redraws = 2;
-}
-
-void tab_fonts_delete_font_98187(slot_font_t *font) {
+void tab_fonts_delete_font_on_next_frame(slot_font_t *font) {
 	i32 i = array_index_of(project_fonts, font);
 	context_select_font(i == project_fonts->length - 1 ? i - 1 : i + 1);
 	data_delete_font(project_fonts->buffer[i]->file);
 	array_splice(project_fonts, i, 1);
+}
+
+void tab_fonts_delete_font(slot_font_t *font) {
+	sys_notify_on_next_frame(&tab_fonts_delete_font_on_next_frame, font);
+	ui_base_hwnds->buffer[2]->redraws = 2;
 }

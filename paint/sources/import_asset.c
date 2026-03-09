@@ -1,6 +1,13 @@
 
 #include "global.h"
 
+void import_asset_run_cache_cloud_done(char *abs) {
+	if (abs == NULL) {
+		return;
+	}
+	import_asset_run(abs, _import_asset_drop_x, _import_asset_drop_y, _import_asset_show_box, _import_asset_hdr_as_envmap, _import_asset_done);
+}
+
 void import_asset_run(char *path, f32 drop_x, f32 drop_y, bool show_box, bool hdr_as_envmap, void (*done)(void)) {
 	if (starts_with(path, "cloud")) {
 		#ifdef IRON_ANDROID
@@ -16,7 +23,7 @@ void import_asset_run(char *path, f32 drop_x, f32 drop_y, bool show_box, bool hd
 		gc_unroot(_import_asset_done);
 		_import_asset_done = done;
 		gc_root(_import_asset_done);
-		file_cache_cloud(path, &import_asset_run_70884, config_raw->server);
+		file_cache_cloud(path, &import_asset_run_cache_cloud_done, config_raw->server);
 
 		return;
 	}
@@ -83,11 +90,4 @@ void import_asset_run(char *path, f32 drop_x, f32 drop_y, bool show_box, bool hd
 	if (done != NULL) {
 		done();
 	}
-}
-
-void import_asset_run_70884(char *abs) {
-	if (abs == NULL) {
-		return;
-	}
-	import_asset_run(abs, _import_asset_drop_x, _import_asset_drop_y, _import_asset_show_box, _import_asset_hdr_as_envmap, _import_asset_done);
 }

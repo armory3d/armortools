@@ -50,6 +50,15 @@ i32 ui_menu_panel_y() {
 	return panel_y;
 }
 
+void ui_menubar_render_ui_save_project_on_next_frame(void * _) {
+	project_save(false);
+	box_projects_show();
+}
+
+void ui_menubar_render_ui_save_project(void * _) {
+	sys_notify_on_end_frame(&ui_menubar_render_ui_save_project_on_next_frame, NULL);
+}
+
 void ui_menubar_render_ui() {
 	if (config_raw->touch_ui && !base_view3d_show) {
 		return;
@@ -77,7 +86,7 @@ void ui_menubar_render_ui() {
 				// Save project icon in lit mode
 				context_set_viewport_mode(VIEWPORT_MODE_LIT);
 				console_toast(tr("Saving project", NULL));
-				sys_notify_on_next_frame(&ui_menubar_render_ui_87020, NULL);
+				sys_notify_on_next_frame(&ui_menubar_render_ui_save_project, NULL);
 			}
 			if (ui_menubar_icon_button(ICON_IMPORT)) {
 				project_import_asset(NULL, true);
@@ -170,15 +179,6 @@ void ui_menubar_render_ui() {
 	}
 }
 
-void ui_menubar_render_ui_87029(void * _) {
-	project_save(false);
-	box_projects_show();
-}
-
-void ui_menubar_render_ui_87020(void * _) {
-	sys_notify_on_end_frame(&ui_menubar_render_ui_87029, NULL);
-}
-
 void ui_menubar_draw_tab_header() {
 	i32 item_w  = ui_toolbar_w(false);
 	i32 nodesw  = (ui_nodes_show || ui_view2d_show) ? config_raw->layout->buffer[LAYOUT_SIZE_NODES_W] : 0;
@@ -210,6 +210,73 @@ void ui_menubar_draw_tab_header() {
 	}
 }
 
+void ui_menubar_draw_category_items_about_box() {
+	gpu_texture_t *img = data_get_image("badge.k");
+	ui_image(img, 0xffffffff, -1.0);
+	ui_end_element();
+
+	ui_handle_t *h = ui_handle(__ID__);
+	if (h->init) {
+		h->text = string_copy(_ui_menu_render_msg);
+	}
+	ui_text_area(h, UI_ALIGN_LEFT, false, "", false);
+
+	ui_row3();
+
+	#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
+	if (ui_icon_button(tr("Copy", NULL), ICON_COPY, UI_ALIGN_CENTER)) {
+		iron_copy_to_clipboard(_ui_menu_render_msg);
+	}
+	#else
+	ui_end_element();
+	#endif
+
+	if (ui_icon_button(tr("Contributors", NULL), ICON_LINK, UI_ALIGN_CENTER)) {
+		iron_load_url("https://github.com/armory3d/armortools/graphs/contributors");
+	}
+	if (ui_icon_button(tr("OK", NULL), ICON_CHECK, UI_ALIGN_CENTER)) {
+		ui_box_hide();
+	}
+}
+
+void ui_menubar_draw_category_items_on_check_for_updates_downloaded(char *url, buffer_t *buffer) {
+	if (buffer != NULL) {
+		// Compare versions
+		update_info_t *update         = json_parse(sys_buffer_to_string(buffer));
+		i32            update_version = math_floor(update->version);
+		if (update_version > 0) {
+			char *date = config_get_date(); // 2019 -> 19
+			date           = string_copy(substring(date, 2, string_length(date)));
+			i32 date_int   = parse_int(string_replace_all(date, "-", ""));
+			if (update_version > date_int) {
+				any_map_t *vars = any_map_create();
+				any_map_set(vars, "url", manifest_url);
+				ui_box_show_message(tr("Update", NULL), tr("Update is available!\nPlease visit {url}.", vars), false);
+			}
+			else {
+				ui_box_show_message(tr("Update", NULL), tr("You are up to date!", NULL), false);
+			}
+		}
+	}
+	else {
+		any_map_t *vars = any_map_create();
+		any_map_set(vars, "url", manifest_url);
+		ui_box_show_message(tr("Update", NULL), tr("Unable to check for updates.\nPlease visit {url}.", vars), false);
+	}
+}
+
+void ui_menubar_draw_category_items_capture_screenshot(void * _) {
+	viewport_capture_screenshot();
+}
+
+void ui_menubar_draw_category_items_import_envmap(char *path) {
+	if (!ends_with(path, ".hdr")) {
+		console_error(tr("Error: .hdr file expected", NULL));
+		return;
+	}
+	import_asset_run(path, -1.0, -1.0, true, true, NULL);
+}
+
 void ui_menubar_draw_category_items() {
 	if (ui_menubar_category == MENUBAR_CATEGORY_FILE) {
 		if (ui_menu_button(tr("New Project...", NULL), any_map_get(config_keymap, "file_new"), ICON_FILE_NEW)) {
@@ -234,7 +301,7 @@ void ui_menubar_draw_category_items() {
 				project_import_asset(string_array_join(path_texture_formats(), ","), false);
 			}
 			if (ui_menu_button(tr("Envmap...", NULL), "", ICON_LANDSCAPE)) {
-				ui_files_show("hdr", false, false, &ui_menubar_draw_category_items_87924);
+				ui_files_show("hdr", false, false, &ui_menubar_draw_category_items_import_envmap);
 			}
 			if (ui_menu_button(tr("Font...", NULL), "", ICON_FONT)) {
 				project_import_asset("ttf,ttc,otf", true);
@@ -423,7 +490,7 @@ void ui_menubar_draw_category_items() {
 		}
 
 		if (ui_menu_button(tr("Capture Screenshot", NULL), "", ICON_PHOTO)) {
-			sys_notify_on_next_frame(&ui_menubar_draw_category_items_89069, NULL);
+			sys_notify_on_next_frame(&ui_menubar_draw_category_items_capture_screenshot, NULL);
 			ui->changed = false; // Close menu
 		}
 
@@ -706,7 +773,7 @@ void ui_menubar_draw_category_items() {
 			iron_load_url(manifest_url_ios);
 			#else
 			// Retrieve latest version number
-			iron_file_download("https://check-for-updates.armory3d.workers.dev", &ui_menubar_draw_category_items_90507, 0, NULL);
+			iron_file_download("https://check-for-updates.armory3d.workers.dev", &ui_menubar_draw_category_items_on_check_for_updates_downloaded, 0, NULL);
 			#endif
 		}
 
@@ -726,7 +793,7 @@ void ui_menubar_draw_category_items() {
 			gc_unroot(_ui_menu_render_msg);
 			_ui_menu_render_msg = string_copy(msg);
 			gc_root(_ui_menu_render_msg);
-			ui_box_show_custom(&ui_menubar_draw_category_items_90774, 400, 320, NULL, true, tr("About", NULL));
+			ui_box_show_custom(&ui_menubar_draw_category_items_about_box, 400, 320, NULL, true, tr("About", NULL));
 		}
 	}
 	else if (ui_menubar_category == MENUBAR_CATEGORY_WORKSPACE) {
@@ -752,73 +819,6 @@ void ui_menubar_draw_category_items() {
 			config_save();
 		}
 	}
-}
-
-void ui_menubar_draw_category_items_90774() {
-	gpu_texture_t *img = data_get_image("badge.k");
-	ui_image(img, 0xffffffff, -1.0);
-	ui_end_element();
-
-	ui_handle_t *h = ui_handle(__ID__);
-	if (h->init) {
-		h->text = string_copy(_ui_menu_render_msg);
-	}
-	ui_text_area(h, UI_ALIGN_LEFT, false, "", false);
-
-	ui_row3();
-
-	#if defined(IRON_WINDOWS) || defined(IRON_LINUX) || defined(IRON_MACOS)
-	if (ui_icon_button(tr("Copy", NULL), ICON_COPY, UI_ALIGN_CENTER)) {
-		iron_copy_to_clipboard(_ui_menu_render_msg);
-	}
-	#else
-	ui_end_element();
-	#endif
-
-	if (ui_icon_button(tr("Contributors", NULL), ICON_LINK, UI_ALIGN_CENTER)) {
-		iron_load_url("https://github.com/armory3d/armortools/graphs/contributors");
-	}
-	if (ui_icon_button(tr("OK", NULL), ICON_CHECK, UI_ALIGN_CENTER)) {
-		ui_box_hide();
-	}
-}
-
-void ui_menubar_draw_category_items_90507(char *url, buffer_t *buffer) {
-	if (buffer != NULL) {
-		// Compare versions
-		update_info_t *update         = json_parse(sys_buffer_to_string(buffer));
-		i32            update_version = math_floor(update->version);
-		if (update_version > 0) {
-			char *date = config_get_date(); // 2019 -> 19
-			date           = string_copy(substring(date, 2, string_length(date)));
-			i32 date_int   = parse_int(string_replace_all(date, "-", ""));
-			if (update_version > date_int) {
-				any_map_t *vars = any_map_create();
-				any_map_set(vars, "url", manifest_url);
-				ui_box_show_message(tr("Update", NULL), tr("Update is available!\nPlease visit {url}.", vars), false);
-			}
-			else {
-				ui_box_show_message(tr("Update", NULL), tr("You are up to date!", NULL), false);
-			}
-		}
-	}
-	else {
-		any_map_t *vars = any_map_create();
-		any_map_set(vars, "url", manifest_url);
-		ui_box_show_message(tr("Update", NULL), tr("Unable to check for updates.\nPlease visit {url}.", vars), false);
-	}
-}
-
-void ui_menubar_draw_category_items_89069(void * _) {
-	viewport_capture_screenshot();
-}
-
-void ui_menubar_draw_category_items_87924(char *path) {
-	if (!ends_with(path, ".hdr")) {
-		console_error(tr("Error: .hdr file expected", NULL));
-		return;
-	}
-	import_asset_run(path, -1.0, -1.0, true, true, NULL);
 }
 
 void ui_menubar_show_menu(i32 category) {

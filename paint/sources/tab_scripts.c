@@ -1,6 +1,37 @@
 
 #include "global.h"
 
+void tab_scripts_draw_export(char *path) {
+	char *str = tab_scripts_hscript->text;
+	char *f   = ui_files_filename;
+	if (string_equals(f, "")) {
+		f = string_copy(tr("untitled", NULL));
+	}
+	path = string_join(string_join(path, PATH_SEP), f);
+	if (!ends_with(path, ".js")) {
+		path = string_join(path, ".js");
+	}
+	iron_file_save_bytes(path, sys_string_to_buffer(str), 0);
+}
+
+void tab_scripts_draw_import(char *path) {
+	buffer_t *b               = data_get_blob(path);
+	tab_scripts_hscript->text = string_copy(sys_buffer_to_string(b));
+	data_delete_blob(path);
+}
+
+void tab_scripts_draw_edit() {
+	if (ui_menu_button(tr("Clear", NULL), "", ICON_ERASE)) {
+		tab_scripts_hscript->text = "";
+	}
+	if (ui_menu_button(tr("Import", NULL), "", ICON_IMPORT)) {
+		ui_files_show("js", false, false, &tab_scripts_draw_import);
+	}
+	if (ui_menu_button(tr("Export", NULL), "", ICON_EXPORT)) {
+		ui_files_show("js", true, false, &tab_scripts_draw_export);
+	}
+}
+
 void tab_scripts_draw(ui_handle_t *htab) {
 	if (ui_tab(htab, tr("Scripts", NULL), false, -1, false)) {
 
@@ -19,7 +50,7 @@ void tab_scripts_draw(ui_handle_t *htab) {
 		}
 
 		if (ui_icon_button(tr("Edit", NULL), ICON_EDIT, UI_ALIGN_CENTER)) {
-			ui_menu_draw(&tab_scripts_draw_80816, -1, -1);
+			ui_menu_draw(&tab_scripts_draw_edit, -1, -1);
 		}
 
 		string_t_array_t *ar = any_array_create_from_raw(
@@ -49,37 +80,6 @@ void tab_scripts_draw(ui_handle_t *htab) {
 		ui_text_area_coloring = NULL;
 		ui_set_font(ui, _font);
 		ui->font_size = _font_size;
-	}
-}
-
-void tab_scripts_draw_80919(char *path) {
-	char *str = tab_scripts_hscript->text;
-	char *f   = ui_files_filename;
-	if (string_equals(f, "")) {
-		f = string_copy(tr("untitled", NULL));
-	}
-	path = string_join(string_join(path, PATH_SEP), f);
-	if (!ends_with(path, ".js")) {
-		path = string_join(path, ".js");
-	}
-	iron_file_save_bytes(path, sys_string_to_buffer(str), 0);
-}
-
-void tab_scripts_draw_80863(char *path) {
-	buffer_t *b               = data_get_blob(path);
-	tab_scripts_hscript->text = string_copy(sys_buffer_to_string(b));
-	data_delete_blob(path);
-}
-
-void tab_scripts_draw_80816() {
-	if (ui_menu_button(tr("Clear", NULL), "", ICON_ERASE)) {
-		tab_scripts_hscript->text = "";
-	}
-	if (ui_menu_button(tr("Import", NULL), "", ICON_IMPORT)) {
-		ui_files_show("js", false, false, &tab_scripts_draw_80863);
-	}
-	if (ui_menu_button(tr("Export", NULL), "", ICON_EXPORT)) {
-		ui_files_show("js", true, false, &tab_scripts_draw_80919);
 	}
 }
 

@@ -1,6 +1,15 @@
 
 #include "global.h"
 
+void import_font_run_on_next_frame(slot_font_t_array_t *font_slots) {
+	for (i32 i = 0; i < font_slots->length; ++i) {
+		slot_font_t *f    = font_slots->buffer[i];
+		context_raw->font = f;
+		any_array_push(project_fonts, f);
+		util_render_make_font_preview();
+	}
+}
+
 void import_font_run(char *path) {
 	for (i32 i = 0; i < project_fonts->length; ++i) {
 		slot_font_t *f = project_fonts->buffer[i];
@@ -29,16 +38,7 @@ void import_font_run(char *path) {
 		any_array_push(font_slots, font_slot);
 	}
 
-	sys_notify_on_next_frame(&import_font_run_158599, font_slots);
+	sys_notify_on_next_frame(&import_font_run_on_next_frame, font_slots);
 
 	ui_base_hwnds->buffer[TAB_AREA_STATUS]->redraws = 2;
-}
-
-void import_font_run_158599(slot_font_t_array_t *font_slots) {
-	for (i32 i = 0; i < font_slots->length; ++i) {
-		slot_font_t *f    = font_slots->buffer[i];
-		context_raw->font = f;
-		any_array_push(project_fonts, f);
-		util_render_make_font_preview();
-	}
 }
