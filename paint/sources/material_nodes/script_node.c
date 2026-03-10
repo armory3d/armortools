@@ -13,9 +13,9 @@ char *script_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 		gc_root(parser_material_script_links);
 	}
 	buffer_t *script = node->buttons->buffer[0]->default_value;
-	char *str    = sys_buffer_to_string(script);
-	char *link   = parser_material_node_name(node, NULL);
+	char     *str    = sys_buffer_to_string(script);
+	char     *link   = parser_material_node_name(node, NULL);
 	any_map_set(parser_material_script_links, link, str);
-	node_shader_add_constant(parser_material_kong, string_join(string_join("", link), ": float"), string_join("_", link));
-	return string_join("constants.", link);
+	node_shader_add_constant(parser_material_kong, string("%s: float", link), string("_%s", link));
+	return string("constants.%s", link);
 }

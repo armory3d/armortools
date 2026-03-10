@@ -7,161 +7,135 @@ void math2_node_init() {
 }
 
 char *math2_node_value(ui_node_t *node, ui_node_socket_t *socket) {
-	char         *val1 = parser_material_parse_value_input(node->inputs->buffer[0], false);
-	char         *val2 = parser_material_parse_value_input(node->inputs->buffer[1], false);
+	char             *val1 = parser_material_parse_value_input(node->inputs->buffer[0], false);
+	char             *val2 = parser_material_parse_value_input(node->inputs->buffer[1], false);
 	ui_node_button_t *but  = node->buttons->buffer[0]; // operation
-	char         *op   = to_upper_case(u8_array_string_at(but->data, but->default_value->buffer[0]));
+	char             *op   = to_upper_case(u8_array_string_at(but->data, but->default_value->buffer[0]));
 	op                     = string_copy(string_replace_all(op, " ", "_"));
-	bool      use_clamp    = node->buttons->buffer[1]->default_value->buffer[0] > 0;
-	char *out_val      = "";
+	bool  use_clamp        = node->buttons->buffer[1]->default_value->buffer[0] > 0;
+	char *out_val          = "";
 	if (string_equals(op, "ADD")) {
-		out_val = string_join(string_join(string_join(string_join("(", val1), " + "), val2), ")");
+		out_val = string("(%s + %s)", val1, val2);
 	}
 	else if (string_equals(op, "SUBTRACT")) {
-		out_val = string_join(string_join(string_join(string_join("(", val1), " - "), val2), ")");
+		out_val = string("(%s - %s)", val1, val2);
 	}
 	else if (string_equals(op, "MULTIPLY")) {
-		out_val = string_join(string_join(string_join(string_join("(", val1), " * "), val2), ")");
+		out_val = string("(%s * %s)", val1, val2);
 	}
 	else if (string_equals(op, "DIVIDE")) {
-		char *store = string_join(parser_material_store_var_name(node), "_divide");
-		parser_material_write(parser_material_kong, string_join(string_join(string_join(string_join("var ", store), ": float = "), val2), ";"));
-		parser_material_write(parser_material_kong,
-		                      string_join(string_join(string_join(string_join(string_join(string_join("if (", store), " == 0.0) { "), store), " = "),
-		                                              f32_to_string(parser_material_eps)),
-		                                  "; }"));
-		out_val = string_join(string_join(string_join(string_join("(", val1), " / "), store), ")");
+		char *store = string("%s_divide", parser_material_store_var_name(node));
+		parser_material_write(parser_material_kong, string("var %s: float = %s;", store, val2));
+		parser_material_write(parser_material_kong, string("if (%s == 0.0) { %s = %s; }", store, store, f32_to_string(parser_material_eps)));
+		out_val = string("(%s / %s)", val1, store);
 	}
 	else if (string_equals(op, "POWER")) {
-		out_val = string_join(string_join(string_join(string_join("pow(", val1), ", "), val2), ")");
+		out_val = string("pow(%s, %s)", val1, val2);
 	}
 	else if (string_equals(op, "LOGARITHM")) {
-		out_val = string_join(string_join("log(", val1), ")");
+		out_val = string("log(%s)", val1);
 	}
 	else if (string_equals(op, "SQUARE_ROOT")) {
-		out_val = string_join(string_join("sqrt(", val1), ")");
+		out_val = string("sqrt(%s)", val1);
 	}
 	else if (string_equals(op, "INVERSE_SQUARE_ROOT")) {
-		out_val = string_join(string_join("rsqrt(", val1), ")");
+		out_val = string("rsqrt(%s)", val1);
 	}
 	else if (string_equals(op, "EXPONENT")) {
-		out_val = string_join(string_join("exp(", val1), ")");
+		out_val = string("exp(%s)", val1);
 	}
 	else if (string_equals(op, "ABSOLUTE")) {
-		out_val = string_join(string_join("abs(", val1), ")");
+		out_val = string("abs(%s)", val1);
 	}
 	else if (string_equals(op, "MINIMUM")) {
-		out_val = string_join(string_join(string_join(string_join("min(", val1), ", "), val2), ")");
+		out_val = string("min(%s, %s)", val1, val2);
 	}
 	else if (string_equals(op, "MAXIMUM")) {
-		out_val = string_join(string_join(string_join(string_join("max(", val1), ", "), val2), ")");
+		out_val = string("max(%s, %s)", val1, val2);
 	}
 	else if (string_equals(op, "LESS_THAN")) {
 		// out_val = "float(" + val1 + " < " + val2 + ")";
-		char *store = string_join(parser_material_store_var_name(node), "_lessthan");
-		parser_material_write(parser_material_kong, string_join(string_join("var ", store), ": float = 0.0;"));
-		parser_material_write(parser_material_kong,
-		                      string_join(string_join(string_join(string_join(string_join(string_join("if (", val1), " < "), val2), ") { "), store),
-		                                  " = 1.0; }"));
+		char *store = string("%s_lessthan", parser_material_store_var_name(node));
+		parser_material_write(parser_material_kong, string("var %s: float = 0.0;", store));
+		parser_material_write(parser_material_kong, string("if (%s < %s) { %s = 1.0; }", val1, val2, store));
 		out_val = string_copy(store);
 	}
 	else if (string_equals(op, "GREATER_THAN")) {
 		// out_val = "float(" + val1 + " > " + val2 + ")";
-		char *store = string_join(parser_material_store_var_name(node), "_greaterthan");
-		parser_material_write(parser_material_kong, string_join(string_join("var ", store), ": float = 0.0;"));
-		parser_material_write(parser_material_kong,
-		                      string_join(string_join(string_join(string_join(string_join(string_join("if (", val1), " > "), val2), ") { "), store),
-		                                  " = 1.0; }"));
+		char *store = string("%s_greaterthan", parser_material_store_var_name(node));
+		parser_material_write(parser_material_kong, string("var %s: float = 0.0;", store));
+		parser_material_write(parser_material_kong, string("if (%s > %s) { %s = 1.0; }", val1, val2, store));
 		out_val = string_copy(store);
 	}
 	else if (string_equals(op, "SIGN")) {
-		out_val = string_join(string_join("sign(", val1), ")");
+		out_val = string("sign(%s)", val1);
 	}
 	else if (string_equals(op, "ROUND")) {
-		out_val = string_join(string_join("floor(", val1), " + 0.5)");
+		out_val = string("floor(%s + 0.5)", val1);
 	}
 	else if (string_equals(op, "FLOOR")) {
-		out_val = string_join(string_join("floor(", val1), ")");
+		out_val = string("floor(%s)", val1);
 	}
 	else if (string_equals(op, "CEIL")) {
-		out_val = string_join(string_join("ceil(", val1), ")");
+		out_val = string("ceil(%s)", val1);
 	}
 	else if (string_equals(op, "SNAP")) {
-		out_val = string_join(string_join(string_join(string_join(string_join(string_join("(floor(", val1), " / "), val2), ") * "), val2), ")");
+		out_val = string("(floor(%s / %s) * %s)", val1, val2, val2);
 	}
 	else if (string_equals(op, "TRUNCATE")) {
-		out_val = string_join(string_join("trunc(", val1), ")");
+		out_val = string("trunc(%s)", val1);
 	}
 	else if (string_equals(op, "FRACTION")) {
-		out_val = string_join(string_join("frac(", val1), ")");
+		out_val = string("frac(%s)", val1);
 	}
 	else if (string_equals(op, "MODULO")) {
-		out_val = string_join(string_join(string_join(string_join("(", val1), " % "), val2), ")");
+		out_val = string("(%s %% %s)", val1, val2);
 	}
 	else if (string_equals(op, "PING-PONG")) {
-		char *store = string_join(parser_material_store_var_name(node), "_pingpong");
-		parser_material_write(parser_material_kong, string_join(string_join("var ", store), ": float = 0.0;"));
-		parser_material_write(
-		    parser_material_kong,
-		    string_join(
-		        string_join(
-		            string_join(
-		                string_join(
-		                    string_join(
-		                        string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join("if (", val2),
-		                                                                                                                        " != 0.0) { "),
-		                                                                                                            store),
-		                                                                                                " = abs(frac(("),
-		                                                                                    val1),
-		                                                                        " - "),
-		                                                            val2),
-		                                                ") / ("),
-		                                    val2),
-		                        " * 2.0)) * "),
-		                    val2),
-		                " * 2.0 - "),
-		            val2),
-		        "); }"));
+		char *store = string("%s_pingpong", parser_material_store_var_name(node));
+		parser_material_write(parser_material_kong, string("var %s: float = 0.0;", store));
+		parser_material_write(parser_material_kong,
+		                      string("if (%s != 0.0) { %s = abs(frac((%s - %s) / (%s * 2.0)) * %s * 2.0 - %s); }", val2, store, val1, val2, val2, val2, val2));
 		out_val = string_copy(store);
 	}
 	else if (string_equals(op, "SINE")) {
-		out_val = string_join(string_join("sin(", val1), ")");
+		out_val = string("sin(%s)", val1);
 	}
 	else if (string_equals(op, "COSINE")) {
-		out_val = string_join(string_join("cos(", val1), ")");
+		out_val = string("cos(%s)", val1);
 	}
 	else if (string_equals(op, "TANGENT")) {
-		out_val = string_join(string_join("tan(", val1), ")");
+		out_val = string("tan(%s)", val1);
 	}
 	else if (string_equals(op, "ARCSINE")) {
-		out_val = string_join(string_join("asin(", val1), ")");
+		out_val = string("asin(%s)", val1);
 	}
 	else if (string_equals(op, "ARCCOSINE")) {
-		out_val = string_join(string_join("acos(", val1), ")");
+		out_val = string("acos(%s)", val1);
 	}
 	else if (string_equals(op, "ARCTANGENT")) {
-		out_val = string_join(string_join("atan(", val1), ")");
+		out_val = string("atan(%s)", val1);
 	}
 	else if (string_equals(op, "ARCTAN2")) {
-		out_val = string_join(string_join(string_join(string_join("atan2(", val1), ", "), val2), ")");
+		out_val = string("atan2(%s, %s)", val1, val2);
 	}
 	else if (string_equals(op, "HYPERBOLIC_SINE")) {
-		out_val = string_join(string_join("sinh(", val1), ")");
+		out_val = string("sinh(%s)", val1);
 	}
 	else if (string_equals(op, "HYPERBOLIC_COSINE")) {
-		out_val = string_join(string_join("cosh(", val1), ")");
+		out_val = string("cosh(%s)", val1);
 	}
 	else if (string_equals(op, "HYPERBOLIC_TANGENT")) {
-		out_val = string_join(string_join("tanh(", val1), ")");
+		out_val = string("tanh(%s)", val1);
 	}
 	else if (string_equals(op, "TO_RADIANS")) {
-		out_val = string_join(string_join("radians(", val1), ")");
+		out_val = string("radians(%s)", val1);
 	}
 	else if (string_equals(op, "TO_DEGREES")) {
-		out_val = string_join(string_join("degrees(", val1), ")");
+		out_val = string("degrees(%s)", val1);
 	}
 	if (use_clamp) {
-		return string_join(string_join("clamp(", out_val), ", 0.0, 1.0)");
+		return string("clamp(%s, 0.0, 1.0)", out_val);
 	}
 	else {
 		return out_val;

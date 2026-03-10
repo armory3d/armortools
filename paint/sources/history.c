@@ -625,7 +625,7 @@ history_step_t *history_push(char *name) {
 	char *filename = string_equals(project_filepath, "")
 	                     ? ui_files_filename
 	                     : substring(project_filepath, string_last_index_of(project_filepath, PATH_SEP) + 1, string_length(project_filepath) - 4);
-	sys_title_set(string_join(string_join(filename, "* - "), manifest_title));
+	sys_title_set(string("%s* - %s", filename, manifest_title));
 #endif
 
 	if (config_raw->touch_ui) {
@@ -693,28 +693,30 @@ void history_swap_active() {
 }
 
 void history_copy_to_undo(i32 from_id, i32 to_id, bool is_mask) {
+	char *to_id_s   = i32_to_string(to_id);
+	char *from_id_s = i32_to_string(from_id);
 	if (is_mask) {
-		render_path_set_target(string_join("texpaint_undo", i32_to_string(to_id)), NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
-		render_path_bind_target(string_join("texpaint", i32_to_string(from_id)), "tex");
+		render_path_set_target(string("texpaint_undo%s", to_id_s), NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
+		render_path_bind_target(string("texpaint%s", from_id_s), "tex");
 		// render_path_draw_shader("Scene/copy_pass/copyR8_pass");
 		render_path_draw_shader("Scene/copy_pass/copy_pass");
 	}
 	else if (context_raw->layer->texpaint_sculpt != NULL) {
-		render_path_set_target(string_join("texpaint_sculpt_undo", i32_to_string(to_id)), NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
-		render_path_bind_target(string_join("texpaint_sculpt", i32_to_string(from_id)), "tex");
+		render_path_set_target(string("texpaint_sculpt_undo%s", to_id_s), NULL, NULL, GPU_CLEAR_NONE, 0, 0.0);
+		render_path_bind_target(string("texpaint_sculpt%s", from_id_s), "tex");
 		render_path_draw_shader("Scene/copy_pass/copyRGBA128_pass");
 	}
 	else {
 		string_t_array_t *additional = any_array_create_from_raw(
 		    (void *[]){
-		        string_join("texpaint_nor_undo", i32_to_string(to_id)),
-		        string_join("texpaint_pack_undo", i32_to_string(to_id)),
+		        string("texpaint_nor_undo%s", to_id_s),
+		        string("texpaint_pack_undo%s", to_id_s),
 		    },
 		    2);
-		render_path_set_target(string_join("texpaint_undo", i32_to_string(to_id)), additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
-		render_path_bind_target(string_join("texpaint", i32_to_string(from_id)), "tex0");
-		render_path_bind_target(string_join("texpaint_nor", i32_to_string(from_id)), "tex1");
-		render_path_bind_target(string_join("texpaint_pack", i32_to_string(from_id)), "tex2");
+		render_path_set_target(string("texpaint_undo%s", to_id_s), additional, NULL, GPU_CLEAR_NONE, 0, 0.0);
+		render_path_bind_target(string("texpaint%s", from_id_s), "tex0");
+		render_path_bind_target(string("texpaint_nor%s", from_id_s), "tex1");
+		render_path_bind_target(string("texpaint_pack%s", from_id_s), "tex2");
 
 		gpu_texture_format_t format = base_bits_handle->i == TEXTURE_BITS_BITS8    ? GPU_TEXTURE_FORMAT_RGBA32
 		                              : base_bits_handle->i == TEXTURE_BITS_BITS16 ? GPU_TEXTURE_FORMAT_RGBA64
@@ -723,7 +725,7 @@ void history_copy_to_undo(i32 from_id, i32 to_id, bool is_mask) {
 		char *pipe = format == GPU_TEXTURE_FORMAT_RGBA32   ? "copy_mrt3_pass"
 		             : format == GPU_TEXTURE_FORMAT_RGBA64 ? "copy_mrt3RGBA64_pass"
 		                                                   : "copy_mrt3RGBA128_pass";
-		render_path_draw_shader(string_join("Scene/copy_mrt3_pass/", pipe));
+		render_path_draw_shader(string("Scene/copy_mrt3_pass/%s", pipe));
 	}
 	history_undo_i = (history_undo_i + 1) % config_raw->undo_steps;
 }

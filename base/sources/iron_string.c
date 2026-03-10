@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 void *gc_alloc(size_t size);
 void  gc_leaf(void *ptr);
@@ -12,6 +13,21 @@ char *string_alloc(int size) {
 	char *r = gc_alloc(size);
 	gc_leaf(r);
 	return r;
+}
+
+char *string(char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+
+    va_list args_copy;
+    va_copy(args_copy, args);
+    int len = vsnprintf(NULL, 0, fmt, args_copy);
+    va_end(args_copy);
+
+    char *str = string_alloc(len + 1);
+    vsnprintf(str, len + 1, fmt, args);
+    va_end(args);
+    return str;
 }
 
 char *string_join(char *a, char *b) {

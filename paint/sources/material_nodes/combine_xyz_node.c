@@ -10,5 +10,5 @@ char *combine_xyz_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	char *x = parser_material_parse_value_input(node->inputs->buffer[0], false);
 	char *y = parser_material_parse_value_input(node->inputs->buffer[1], false);
 	char *z = parser_material_parse_value_input(node->inputs->buffer[2], false);
-	return string_join(string_join(string_join(string_join(string_join(string_join("float3(", x), ", "), y), ", "), z), ")");
+	return string("float3(%s, %s, %s)", x, y, z);
 }

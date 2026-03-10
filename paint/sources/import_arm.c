@@ -58,7 +58,7 @@ void import_arm_run_project(char *path) {
 #if defined(IRON_ANDROID) || defined(IRON_IOS)
 	sys_title_set(ui_files_filename);
 #else
-	sys_title_set(string_join(string_join(ui_files_filename, " - "), manifest_title));
+	sys_title_set(string("%s - %s", ui_files_filename, manifest_title));
 #endif
 
 	// Import as mesh instead

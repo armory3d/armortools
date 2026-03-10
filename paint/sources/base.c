@@ -2,9 +2,9 @@
 #include "global.h"
 
 void base_on_shutdown() {
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	project_save(false);
-	#endif
+#endif
 	config_save();
 }
 
@@ -54,9 +54,9 @@ void base_init() {
 	gc_unroot(ui_files_filename);
 	ui_files_filename = string_copy(tr("untitled", NULL));
 	gc_root(ui_files_filename);
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	sys_title_set(tr("untitled", NULL));
-	#endif
+#endif
 
 	// Baked font for fast startup
 	if (string_equals(config_raw->locale, "en")) {
@@ -182,9 +182,9 @@ i32 base_h() {
 	i32 res = iron_window_height();
 	if (config_raw->layout == NULL) {
 		res -= ui_header_default_h * 2 + ui_statusbar_default_h;
-		#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 		res += ui_header_h;
-		#endif
+#endif
 	}
 	else if (ui_base_show && res > 0) {
 		i32 statush = config_raw->layout->buffer[LAYOUT_SIZE_STATUS_H];
@@ -445,12 +445,12 @@ void base_material_dropped() {
 void base_handle_drop_paths() {
 	if (base_drop_paths->length > 0) {
 		bool wait = false;
-		#if defined(IRON_LINUX) || defined(IRON_MACOS)
+#if defined(IRON_LINUX) || defined(IRON_MACOS)
 		wait = !mouse_moved; // Mouse coords not updated during drag
-		#endif
+#endif
 		if (!wait) {
-			base_drop_x         = mouse_x;
-			base_drop_y         = mouse_y;
+			base_drop_x     = mouse_x;
+			base_drop_y     = mouse_y;
 			char *drop_path = array_shift(base_drop_paths);
 			import_asset_run(drop_path, base_drop_x, base_drop_y, true, true, NULL);
 		}
@@ -578,13 +578,13 @@ void base_render(void *_) {
 	context_raw->last_paint_vec_x = context_raw->paint_vec.x;
 	context_raw->last_paint_vec_y = context_raw->paint_vec.y;
 
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	// No mouse move events for touch, re-init last paint position on touch start
 	if (!mouse_down("left")) {
 		context_raw->last_paint_x = -1;
 		context_raw->last_paint_y = -1;
 	}
-	#endif
+#endif
 }
 
 string_t_array_t *base_enum_texts(char *node_type) {
@@ -677,7 +677,7 @@ void base_init_undo_layers() {
 		gc_root(history_undo_layers);
 		for (i32 i = 0; i < config_raw->undo_steps; ++i) {
 			i32           len = history_undo_layers->length;
-			char     *ext = string_join("_undo", i32_to_string(len));
+			char         *ext = string("_undo%s", i32_to_string(len));
 			slot_layer_t *l   = slot_layer_create(ext, LAYER_SLOT_TYPE_LAYER, NULL);
 			any_array_push(history_undo_layers, l);
 		}
@@ -738,11 +738,11 @@ tab_draw_array_t_array_t *ui_base_init_hwnd_tabs() {
 	    },
 	    7);
 
-	#ifdef IRON_IOS
+#ifdef IRON_IOS
 	if (config_is_iphone()) {
 		array_splice(a2, 4, 1); // Swatches
 	}
-	#endif
+#endif
 
 	tab_draw_array_t_array_t *r = any_array_create_from_raw((void *[]){}, 0);
 	any_array_push(r, a0);
@@ -751,7 +751,7 @@ tab_draw_array_t_array_t *ui_base_init_hwnd_tabs() {
 	return r;
 }
 
-void ui_base_init_on_next_frame(void * _) {
+void ui_base_init_on_next_frame(void *_) {
 	layers_init();
 }
 
@@ -901,11 +901,11 @@ void ui_base_menu_draw_viewport_mode() {
 	}
 }
 
-void ui_base_update_51603(void * _) {
+void ui_base_update_51603(void *_) {
 	export_texture_run(context_raw->texture_export_path, false);
 }
 
-void ui_base_update(void * _) {
+void ui_base_update(void *_) {
 	ui_base_update_ui();
 	operator_update();
 
@@ -977,11 +977,11 @@ void ui_base_update(void * _) {
 		ui_base_toggle_distract_free();
 	}
 
-	#ifdef IRON_LINUX
+#ifdef IRON_LINUX
 	if (operator_shortcut("alt+enter", SHORTCUT_TYPE_STARTED)) {
 		base_toggle_fullscreen();
 	}
-	#endif
+#endif
 
 	bool decal_mask = context_is_decal_mask();
 
@@ -990,8 +990,7 @@ void ui_base_update(void * _) {
 		    operator_shortcut(any_map_get(config_keymap, "brush_opacity"), SHORTCUT_TYPE_DOWN) ||
 		    operator_shortcut(any_map_get(config_keymap, "brush_angle"), SHORTCUT_TYPE_DOWN) ||
 		    (decal_mask &&
-		     operator_shortcut(string_join(string_join(any_map_get(config_keymap, "decal_mask"), "+"), any_map_get(config_keymap, "brush_radius")),
-		                       SHORTCUT_TYPE_DOWN))) {
+		     operator_shortcut(string("%s+%s", any_map_get(config_keymap, "decal_mask"), any_map_get(config_keymap, "brush_radius")), SHORTCUT_TYPE_DOWN))) {
 			if (context_raw->brush_locked) {
 				if (operator_shortcut(any_map_get(config_keymap, "brush_opacity"), SHORTCUT_TYPE_DOWN)) {
 					context_raw->brush_opacity += mouse_movement_x / (float)500;
@@ -1008,9 +1007,8 @@ void ui_base_update(void * _) {
 					context_raw->brush_angle_handle->f = context_raw->brush_angle;
 					make_material_parse_paint_material(true);
 				}
-				else if (decal_mask &&
-				         operator_shortcut(string_join(string_join(any_map_get(config_keymap, "decal_mask"), "+"), any_map_get(config_keymap, "brush_radius")),
-				                           SHORTCUT_TYPE_DOWN)) {
+				else if (decal_mask && operator_shortcut(string("%s+%s", any_map_get(config_keymap, "decal_mask"), any_map_get(config_keymap, "brush_radius")),
+				                                         SHORTCUT_TYPE_DOWN)) {
 					context_raw->brush_decal_mask_radius += mouse_movement_x / (float)150;
 					context_raw->brush_decal_mask_radius           = math_max(0.01, math_min(4.0, context_raw->brush_decal_mask_radius));
 					context_raw->brush_decal_mask_radius           = math_round(context_raw->brush_decal_mask_radius * 100) / (float)100;
@@ -1032,7 +1030,7 @@ void ui_base_update(void * _) {
 		if (operator_shortcut(any_map_get(config_keymap, "select_material"), SHORTCUT_TYPE_DOWN)) {
 			ui_base_hwnds->buffer[TAB_AREA_SIDEBAR1]->redraws = 2;
 			for (i32 i = 1; i < 10; ++i) {
-				if (keyboard_started(string_join(i32_to_string(i), ""))) {
+				if (keyboard_started(i32_to_string(i))) {
 					context_select_material(i - 1);
 				}
 			}
@@ -1040,7 +1038,7 @@ void ui_base_update(void * _) {
 		else if (operator_shortcut(any_map_get(config_keymap, "select_layer"), SHORTCUT_TYPE_DOWN)) {
 			ui_base_hwnds->buffer[TAB_AREA_SIDEBAR0]->redraws = 2;
 			for (i32 i = 1; i < 10; ++i) {
-				if (keyboard_started(string_join(i32_to_string(i), ""))) {
+				if (keyboard_started(i32_to_string(i))) {
 					context_select_layer(i - 1);
 				}
 			}
@@ -1105,9 +1103,8 @@ void ui_base_update(void * _) {
 			if (operator_shortcut(any_map_get(config_keymap, "brush_radius"), SHORTCUT_TYPE_STARTED) ||
 			    operator_shortcut(any_map_get(config_keymap, "brush_opacity"), SHORTCUT_TYPE_STARTED) ||
 			    operator_shortcut(any_map_get(config_keymap, "brush_angle"), SHORTCUT_TYPE_STARTED) ||
-			    (decal_mask &&
-			     operator_shortcut(string_join(string_join(any_map_get(config_keymap, "decal_mask"), "+"), any_map_get(config_keymap, "brush_radius")),
-			                       SHORTCUT_TYPE_STARTED))) {
+			    (decal_mask && operator_shortcut(string("%s+%s", any_map_get(config_keymap, "decal_mask"), any_map_get(config_keymap, "brush_radius")),
+			                                     SHORTCUT_TYPE_STARTED))) {
 				context_raw->brush_locked = true;
 				if (!pen_connected) {
 					iron_mouse_lock();
@@ -1126,16 +1123,14 @@ void ui_base_update(void * _) {
 				ui_header_handle->redraws           = 2;
 			}
 			else if (decal_mask) {
-				if (operator_shortcut(string_join(string_join(any_map_get(config_keymap, "decal_mask"), "+"),
-				                                  any_map_get(config_keymap, "brush_radius_decrease")),
+				if (operator_shortcut(string("%s+%s", any_map_get(config_keymap, "decal_mask"), any_map_get(config_keymap, "brush_radius_decrease")),
 				                      SHORTCUT_TYPE_REPEAT)) {
 					context_raw->brush_decal_mask_radius -= ui_base_get_radius_increment();
 					context_raw->brush_decal_mask_radius           = math_max(math_round(context_raw->brush_decal_mask_radius * 100) / (float)100, 0.01);
 					context_raw->brush_decal_mask_radius_handle->f = context_raw->brush_decal_mask_radius;
 					ui_header_handle->redraws                      = 2;
 				}
-				else if (operator_shortcut(string_join(string_join(any_map_get(config_keymap, "decal_mask"), "+"),
-				                                       any_map_get(config_keymap, "brush_radius_increase")),
+				else if (operator_shortcut(string("%s+%s", any_map_get(config_keymap, "decal_mask"), any_map_get(config_keymap, "brush_radius_increase")),
 				                           SHORTCUT_TYPE_REPEAT)) {
 					context_raw->brush_decal_mask_radius += ui_base_get_radius_increment();
 					context_raw->brush_decal_mask_radius           = math_round(context_raw->brush_decal_mask_radius * 100) / (float)100;
@@ -1210,9 +1205,8 @@ void ui_base_update(void * _) {
 		bool b = context_raw->brush_locked && !operator_shortcut(any_map_get(config_keymap, "brush_radius"), SHORTCUT_TYPE_DOWN) &&
 		         !operator_shortcut(any_map_get(config_keymap, "brush_opacity"), SHORTCUT_TYPE_DOWN) &&
 		         !operator_shortcut(any_map_get(config_keymap, "brush_angle"), SHORTCUT_TYPE_DOWN) &&
-		         !(decal_mask &&
-		           operator_shortcut(string_join(string_join(any_map_get(config_keymap, "decal_mask"), "+"), any_map_get(config_keymap, "brush_radius")),
-		                             SHORTCUT_TYPE_DOWN));
+		         !(decal_mask && operator_shortcut(string("%s+%s", any_map_get(config_keymap, "decal_mask"), any_map_get(config_keymap, "brush_radius")),
+		                                           SHORTCUT_TYPE_DOWN));
 		if (b) {
 			iron_mouse_unlock();
 			context_raw->last_paint_x = -1;
@@ -1325,7 +1319,7 @@ void ui_base_update(void * _) {
 			context_raw->particle_timer = tween_timer(5, &mesh_object_remove, mo);
 		}
 
-		#ifdef arm_physics
+#ifdef arm_physics
 
 		physics_pair_t_array_t *pairs = physics_world_get_contact_pairs(world, context_raw->paint_body);
 		if (pairs != NULL) {
@@ -1342,7 +1336,7 @@ void ui_base_update(void * _) {
 			}
 		}
 
-		#endif
+#endif
 	}
 }
 
@@ -1359,7 +1353,7 @@ void ui_base_view_top() {
 void ui_base_operator_search_menu_draw() {
 	ui_menu_h                  = UI_ELEMENT_H() * 8;
 	ui_handle_t *search_handle = ui_handle(__ID__);
-	char    *search        = ui_text_input(search_handle, "", UI_ALIGN_LEFT, true, true);
+	char        *search        = ui_text_input(search_handle, "", UI_ALIGN_LEFT, true, true);
 	ui->changed                = false;
 	if (_ui_base_operator_search_first) {
 		_ui_base_operator_search_first = false;
@@ -1379,11 +1373,11 @@ void ui_base_operator_search_menu_draw() {
 			ui_base_operator_search_offset--;
 		}
 	}
-	bool              enter      = keyboard_down("enter");
-	i32               count      = 0;
-	i32               BUTTON_COL = ui->ops->theme->BUTTON_COL;
+	bool enter      = keyboard_down("enter");
+	i32  count      = 0;
+	i32  BUTTON_COL = ui->ops->theme->BUTTON_COL;
 
-	string_t_array_t *keys       = map_keys(config_keymap);
+	string_t_array_t *keys = map_keys(config_keymap);
 	for (i32 i = 0; i < keys->length; ++i) {
 		char *n = keys->buffer[i];
 		if (string_index_of(n, search) >= 0) {
@@ -1436,7 +1430,7 @@ rect_t *ui_base_get_brush_stencil_rect() {
 	return r;
 }
 
-void ui_base_update_ui_on_next_frame(void * _) {
+void ui_base_update_ui_on_next_frame(void *_) {
 	layers_update_fill_layer(true);
 	make_material_parse_paint_material(false);
 }
@@ -1464,14 +1458,14 @@ void ui_base_update_ui() {
 			ui_base_action_paint_remap = string_copy(paint_key);
 			gc_root(ui_base_action_paint_remap);
 			util_render_pick_pos_nor_tex();
-			bool is_mesh  = math_abs(context_raw->posx_picked) < 50 && math_abs(context_raw->posy_picked) < 50 && math_abs(context_raw->posz_picked) < 50;
-			#ifdef IRON_ANDROID
+			bool is_mesh = math_abs(context_raw->posx_picked) < 50 && math_abs(context_raw->posy_picked) < 50 && math_abs(context_raw->posz_picked) < 50;
+#ifdef IRON_ANDROID
 			// Allow rotating with both pen and touch, because hovering a pen prevents touch input on android
 			bool pen_only = false;
-			#else
+#else
 			bool pen_only = context_raw->pen_painting_only;
-			#endif
-			bool is_pen   = pen_only && pen_down("tip");
+#endif
+			bool is_pen = pen_only && pen_down("tip");
 			// Mesh picked - disable rotate
 			// Pen painting only - rotate with touch, paint with pen
 			if ((is_mesh && !pen_only) || is_pen) {
@@ -1543,14 +1537,12 @@ void ui_base_update_ui() {
 	}
 	bool set_clone_source =
 	    context_raw->tool == TOOL_TYPE_CLONE &&
-	    operator_shortcut(string_join(string_join(any_map_get(config_keymap, "set_clone_source"), "+"), any_map_get(config_keymap, "action_paint")),
-	                      SHORTCUT_TYPE_DOWN);
+	    operator_shortcut(string("%s+%s", any_map_get(config_keymap, "set_clone_source"), any_map_get(config_keymap, "action_paint")), SHORTCUT_TYPE_DOWN);
 
 	bool decal_mask = context_is_decal_mask_paint();
 
-	bool down       = operator_shortcut(any_map_get(config_keymap, "action_paint"), SHORTCUT_TYPE_DOWN) || decal_mask || set_clone_source ||
-	            operator_shortcut(string_join(string_join(any_map_get(config_keymap, "brush_ruler"), "+"), any_map_get(config_keymap, "action_paint")),
-	                              SHORTCUT_TYPE_DOWN) ||
+	bool down = operator_shortcut(any_map_get(config_keymap, "action_paint"), SHORTCUT_TYPE_DOWN) || decal_mask || set_clone_source ||
+	            operator_shortcut(string("%s+%s", any_map_get(config_keymap, "brush_ruler"), any_map_get(config_keymap, "action_paint")), SHORTCUT_TYPE_DOWN) ||
 	            (pen_down("tip") && !keyboard_down("alt"));
 
 	if (config_raw->touch_ui) {
@@ -1586,7 +1578,7 @@ void ui_base_update_ui() {
 				if (context_raw->brush_time == 0 && !base_is_dragging && !base_is_resizing && ui->combo_selected_handle == NULL) { // Paint started
 
 					// Draw line
-					if (operator_shortcut(string_join(string_join(any_map_get(config_keymap, "brush_ruler"), "+"), any_map_get(config_keymap, "action_paint")),
+					if (operator_shortcut(string("%s+%s", any_map_get(config_keymap, "brush_ruler"), any_map_get(config_keymap, "action_paint")),
 					                      SHORTCUT_TYPE_DOWN)) {
 						context_raw->last_paint_vec_x = context_raw->last_paint_x;
 						context_raw->last_paint_vec_y = context_raw->last_paint_y;
@@ -1613,11 +1605,11 @@ void ui_base_update_ui() {
 		}
 	}
 	else if (context_raw->brush_time > 0) { // Brush released
-		context_raw->brush_time          = 0;
-		context_raw->prev_paint_vec_x    = -1;
-		context_raw->prev_paint_vec_y    = -1;
+		context_raw->brush_time       = 0;
+		context_raw->prev_paint_vec_x = -1;
+		context_raw->prev_paint_vec_y = -1;
 		// context_raw->ddirty              = 3; // Keep accumulated samples for D3D12
-		context_raw->brush_blend_dirty   = true; // Update brush mask
+		context_raw->brush_blend_dirty = true; // Update brush mask
 
 		context_raw->layer_preview_dirty = true; // Update layer preview
 
@@ -1657,9 +1649,9 @@ void ui_base_update_ui() {
 		context_raw->layer_preview_dirty = false;
 		context_raw->mask_preview_last   = NULL;
 		// Update layer preview
-		slot_layer_t  *l                 = context_raw->layer;
+		slot_layer_t *l = context_raw->layer;
 
-		gpu_texture_t *target            = l->texpaint_preview;
+		gpu_texture_t *target = l->texpaint_preview;
 		if (target != NULL) {
 
 			gpu_texture_t *source = l->texpaint;
@@ -1704,7 +1696,7 @@ void ui_base_update_ui() {
 	gizmo_update();
 }
 
-void ui_base_render(void * _) {
+void ui_base_render(void *_) {
 	if (!ui_base_show && config_raw->touch_ui) {
 		ui->input_enabled = true;
 		ui_begin(ui);
@@ -1753,7 +1745,7 @@ void ui_base_render(void * _) {
 	ui->input_enabled = true;
 }
 
-void ui_base_render_cursor(void * _) {
+void ui_base_render_cursor(void *_) {
 	if (!base_ui_enabled) {
 		return;
 	}

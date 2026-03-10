@@ -11,14 +11,12 @@ char *magic_texture_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	node_shader_add_function(parser_material_kong, str_tex_magic);
 	char *co    = parser_material_get_coord(node);
 	char *scale = parser_material_parse_value_input(node->inputs->buffer[1], false);
-	char *res   = string_join(string_join(string_join(string_join("tex_magic(", co), " * "), scale), " * 4.0)");
-	return res;
+	return string("tex_magic(%s * %s * 4.0)", co, scale);
 }
 
 char *magic_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 	node_shader_add_function(parser_material_kong, str_tex_magic);
 	char *co    = parser_material_get_coord(node);
 	char *scale = parser_material_parse_value_input(node->inputs->buffer[1], false);
-	char *res   = string_join(string_join(string_join(string_join("tex_magic_f(", co), " * "), scale), " * 4.0)");
-	return res;
+	return string("tex_magic_f(%s * %s * 4.0)", co, scale);
 }

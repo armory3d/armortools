@@ -11,5 +11,5 @@ char *brightness_contrast_node_vector(ui_node_t *node, ui_node_socket_t *socket)
 	char *bright  = parser_material_parse_value_input(node->inputs->buffer[1], false);
 	char *contr   = parser_material_parse_value_input(node->inputs->buffer[2], false);
 	node_shader_add_function(parser_material_kong, str_brightcontrast);
-	return string_join(string_join(string_join(string_join(string_join(string_join("brightcontrast(", out_col), ", "), bright), ", "), contr), ")");
+	return string("brightcontrast(%s, %s, %s)", out_col, bright, contr);
 }

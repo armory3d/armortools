@@ -13,13 +13,5 @@ char *hue_saturation_value_node_vector(ui_node_t *node, ui_node_socket_t *socket
 	char *val = parser_material_parse_value_input(node->inputs->buffer[2], false);
 	char *fac = parser_material_parse_value_input(node->inputs->buffer[3], false);
 	char *col = parser_material_parse_vector_input(node->inputs->buffer[4]);
-	return string_join(
-	    string_join(
-	        string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join("hue_sat(", col), ", float4("), hue), " - 0.5, "),
-	                                                        sat),
-	                                            ", "),
-	                                val),
-	                    ", 1.0 - "),
-	        fac),
-	    "))");
+	return string("hue_sat(%s, float4(%s - 0.5, %s, %s, 1.0 - %s))", col, hue, sat, val, fac);
 }

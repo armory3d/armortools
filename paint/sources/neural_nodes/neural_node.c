@@ -9,8 +9,8 @@ char *neural_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	char *tex_name = parser_material_node_name(node, NULL);
 	any_map_set(data_cached_images, tex_name, result);
 	bind_tex_t *tex      = parser_material_make_bind_tex(tex_name, tex_name);
-	char   *texstore = parser_material_texture_store(node, tex, tex_name, COLOR_SPACE_AUTO);
-	return string_join(texstore, ".rgb");
+	char       *texstore = parser_material_texture_store(node, tex, tex_name, COLOR_SPACE_AUTO);
+	return string("%s.rgb", texstore);
 }
 
 char *neural_node_value(ui_node_t *node, ui_node_socket_t *socket) {
@@ -21,8 +21,8 @@ char *neural_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 	char *tex_name = parser_material_node_name(node, NULL);
 	any_map_set(data_cached_images, tex_name, result);
 	bind_tex_t *tex      = parser_material_make_bind_tex(tex_name, tex_name);
-	char   *texstore = parser_material_texture_store(node, tex, tex_name, COLOR_SPACE_AUTO);
-	return string_join(texstore, ".r");
+	char       *texstore = parser_material_texture_store(node, tex, tex_name, COLOR_SPACE_AUTO);
+	return string("%s.r", texstore);
 }
 
 ui_node_t *neural_from_node(ui_node_socket_t *inp, i32 socket) {
@@ -38,7 +38,7 @@ ui_node_t *neural_from_node(ui_node_socket_t *inp, i32 socket) {
 	return result;
 }
 
-void neural_node_button_on_next_frame(void * _) {
+void neural_node_button_on_next_frame(void *_) {
 	box_preferences_htab->i = PREFERENCE_TAB_NEURAL;
 	box_preferences_show();
 }
@@ -46,7 +46,7 @@ void neural_node_button_on_next_frame(void * _) {
 bool neural_node_button(ui_node_t *node, char *model) {
 	char *url       = box_preferneces_model_url_from_name(model);
 	char *file_name = box_preferences_file_name_from_url(url);
-	bool      found     = box_preferences_model_exists(file_name);
+	bool  found     = box_preferences_model_exists(file_name);
 	if (iron_exec_async_done == 0) {
 		if (node != neural_node_current) {
 			ui->enabled = false;
@@ -71,7 +71,7 @@ void neural_node_check_result(ui_node_t *node) {
 	gc_root(neural_node_current);
 	iron_delay_idle_sleep();
 	if (iron_exec_async_done == 1) {
-		char *file = string_join(string_join(neural_node_dir(), PATH_SEP), "output.png");
+		char *file = string("%s%soutput.png", neural_node_dir(), PATH_SEP);
 		if (iron_file_exists(file)) {
 			gpu_texture_t *result = iron_load_texture(file);
 			any_imap_set(neural_node_results, node->id, result);
@@ -83,38 +83,38 @@ void neural_node_check_result(ui_node_t *node) {
 }
 
 char *neural_node_sd_bin_ext() {
-	#ifdef IRON_WINDOWS
+#ifdef IRON_WINDOWS
 	return ".exe";
-	#else
+#else
 	return "";
-	#endif
+#endif
 }
 
 char *neural_node_sd_bin() {
 	if (config_raw->neural_backend == NEURAL_BACKEND_VULKAN) {
-		return string_join("sd_vulkan", neural_node_sd_bin_ext());
+		return string("sd_vulkan%s", neural_node_sd_bin_ext());
 	}
 	if (config_raw->neural_backend == NEURAL_BACKEND_CUDA) {
-		return string_join("sd_cuda", neural_node_sd_bin_ext());
+		return string("sd_cuda%s", neural_node_sd_bin_ext());
 	}
-	return string_join("sd_cpu", neural_node_sd_bin_ext());
+	return string("sd_cpu%s", neural_node_sd_bin_ext());
 }
 
 char *neural_node_dir() {
 	char *dir;
 	if (path_is_protected()) {
-		dir = string_join(iron_internal_save_path(), "models");
+		dir = string("%smodels", iron_internal_save_path());
 	}
 	else {
-		dir = string_join(string_join(iron_internal_files_location(), PATH_SEP), "models");
+		dir = string("%s%smodels", iron_internal_files_location(), PATH_SEP);
 	}
 	return dir;
 }
 
 #ifdef WITH_COMPRESS
 
-void neural_node_download_done_untar(void * _) {
-	char *tar = string_join(neural_node_dir(), "/Hunyuan3D_win64.tar");
+void neural_node_download_done_untar(void *_) {
+	char *tar = string("%s/Hunyuan3D_win64.tar", neural_node_dir());
 	untar_here(tar);
 }
 
@@ -122,32 +122,32 @@ void neural_node_download_done_untar(void * _) {
 
 void neural_node_download_done(char *url) {
 	neural_node_downloading--;
-	console_log(string_join(string_join(tr("Downloaded file from", NULL), " "), url));
+	console_log(string("%s %s", tr("Downloaded file from", NULL), url));
 
-	#ifdef IRON_LINUX
+#ifdef IRON_LINUX
 	// todo
 	if (ends_with(url, "sd_vulkan")) {
-		char *bin = string_join(neural_node_dir(), "/sd_vulkan");
-		iron_sys_command(string_join(string_join("chmod +x \"", bin), "\""));
+		char *bin = string("%s/sd_vulkan", neural_node_dir());
+		iron_sys_command(string("chmod +x \"%s\"", bin));
 	}
 	else if (ends_with(url, "sd_cpu")) {
-		char *bin = string_join(neural_node_dir(), "/sd_cpu");
-		iron_sys_command(string_join(string_join("chmod +x \"", bin), "\""));
+		char *bin = string("%s/sd_cpu", neural_node_dir());
+		iron_sys_command(string("chmod +x \"%s\"", bin));
 	}
-	#endif
+#endif
 
-	#ifdef WITH_COMPRESS
+#ifdef WITH_COMPRESS
 	if (ends_with(url, "Hunyuan3D_win64.tar")) {
 		console_toast(tr("Unpacking Hunyuan3D_win64.tar", NULL));
 		sys_notify_on_next_frame(&neural_node_download_done_untar, NULL);
 	}
-	#endif
+#endif
 }
 
 void neural_node_download(char *url) {
 	char *file_name = substring(url, string_last_index_of(url, "/") + 1, string_length(url));
-	char *file_path = string_join(string_join(neural_node_dir(), PATH_SEP), file_name);
-	bool      found     = iron_file_exists(file_path);
+	char *file_path = string("%s%s%s", neural_node_dir(), PATH_SEP, file_name);
+	bool  found     = iron_file_exists(file_path);
 	if (found) {
 		return;
 	}
@@ -161,17 +161,17 @@ void neural_node_download_models(string_t_array_t *models) {
 		iron_create_directory(neural_node_dir());
 	}
 
-	#ifdef IRON_WINDOWS
+#ifdef IRON_WINDOWS
 	neural_node_download("https://huggingface.co/armory3d/sd_bin/resolve/main/windows_x64/sd_cpu.exe");
 	neural_node_download("https://huggingface.co/armory3d/sd_bin/resolve/main/windows_x64/sd_vulkan.exe");
 	neural_node_download("https://huggingface.co/armory3d/sd_bin/resolve/main/windows_x64/sd_cuda.exe");
-	#elif defined(IRON_LINUX)
+#elif defined(IRON_LINUX)
 	neural_node_download("https://huggingface.co/armory3d/sd_bin/resolve/main/linux_x64/sd_cpu");
 	neural_node_download("https://huggingface.co/armory3d/sd_bin/resolve/main/linux_x64/sd_vulkan");
-	#else
+#else
 	neural_node_download("https://huggingface.co/armory3d/sd_bin/resolve/main/macos/sd_cpu");
 	neural_node_download("https://huggingface.co/armory3d/sd_bin/resolve/main/macos/sd_vulkan");
-	#endif
+#endif
 
 	iron_net_bytes_downloaded = 0;
 

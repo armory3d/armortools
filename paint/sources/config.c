@@ -4,12 +4,12 @@
 void config_load() {
 	char *path = "";
 	if (path_is_protected()) {
-		path = string_join(path, iron_internal_save_path());
+		path = iron_internal_save_path();
 	}
-	path           = string_join(path, "config.json");
+	path           = string("%sconfig.json", path);
 	buffer_t *blob = data_get_blob(path);
 
-	#ifdef IRON_LINUX
+#ifdef IRON_LINUX
 	if (blob == NULL) { // Detect protected path
 		config_init();
 		config_save();
@@ -20,7 +20,7 @@ void config_load() {
 			return;
 		}
 	}
-	#endif
+#endif
 
 	if (blob != NULL) {
 		char *config_string = sys_buffer_to_string(blob);
@@ -36,15 +36,13 @@ void config_load() {
 void config_save() {
 	// Use system application data folder
 	// when running from protected path like "Program Files"
-	char *path = "";
+	char *path;
 	if (path_is_protected()) {
-		path = string_join(path, iron_internal_save_path());
+		path = string("%sconfig.json", iron_internal_save_path());
 	}
 	else {
-		path = string_join(path, path_data());
-		path = string_join(path, PATH_SEP);
+		path = string("%s%sconfig.json", path_data(), PATH_SEP);
 	}
-	path = string_join(path, "config.json");
 
 	json_encode_begin();
 	json_encode_string("version", config_raw->version);
@@ -139,93 +137,93 @@ void config_init() {
 		config_raw->window_maximizable = true;
 		config_raw->window_w           = 1720;
 		config_raw->window_h           = 960;
-		#ifdef IRON_MACOS
+#ifdef IRON_MACOS
 		config_raw->window_w *= 2;
 		config_raw->window_h *= 2;
-		#endif
+#endif
 		config_raw->window_x     = -1;
 		config_raw->window_y     = -1;
 		config_raw->window_scale = 1.0;
 		if (sys_display_width() >= 2560 && sys_display_height() >= 1600) {
 			config_raw->window_scale = 2.0;
 		}
-		#if defined(IRON_ANDROID) || defined(IRON_IOS) || defined(IRON_MACOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS) || defined(IRON_MACOS)
 		config_raw->window_scale = 2.0;
-		#endif
-		#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#endif
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 		if (sys_display_ppi() > 330) {
 			config_raw->window_scale = 2.5;
 		}
 		if (sys_display_ppi() > 400) {
 			config_raw->window_scale = 3.0;
 		}
-		#endif
+#endif
 		config_raw->window_vsync     = true;
 		config_raw->window_frequency = sys_display_frequency();
 		config_raw->rp_bloom         = false;
 		config_raw->rp_vignette      = 0.2;
 		config_raw->rp_grain         = 0.09;
-		#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 		config_raw->rp_ssao = false;
-		#else
+#else
 		config_raw->rp_ssao = true;
-		#endif
+#endif
 		config_raw->rp_supersample = 1.0;
-		#ifdef IRON_ANDROID
+#ifdef IRON_ANDROID
 		if (sys_display_width() >= 3200 && sys_display_height() >= 2136) {
 			config_raw->window_scale   = 2.5;
 			config_raw->rp_supersample = 0.5;
 		}
-		#endif
+#endif
 		config_raw->recent_projects = any_array_create_from_raw((void *[]){}, 0);
 		config_raw->bookmarks       = any_array_create_from_raw((void *[]){}, 0);
 		config_raw->plugins         = any_array_create_from_raw((void *[]){}, 0);
-		#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 		config_raw->keymap = "touch.json";
-		#else
+#else
 		config_raw->keymap = "default.json";
-		#endif
+#endif
 		config_raw->theme           = "default.json";
 		config_raw->server          = "https://cloud.armory3d.com";
 		config_raw->undo_steps      = 4;
 		config_raw->pressure_radius = true;
-		#if defined(IRON_IOS) || defined(IRON_LINUX)
+#if defined(IRON_IOS) || defined(IRON_LINUX)
 		config_raw->pressure_sensitivity = 1.0;
-		#else
+#else
 		config_raw->pressure_sensitivity = 2.0;
-		#endif
+#endif
 		config_raw->camera_fov = 0.69;
-		#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 		config_raw->camera_zoom_speed     = 0.5;
 		config_raw->camera_pan_speed      = 0.5;
 		config_raw->camera_rotation_speed = 0.5;
-		#else
+#else
 		config_raw->camera_zoom_speed     = 1.0;
 		config_raw->camera_pan_speed      = 1.0;
 		config_raw->camera_rotation_speed = 1.0;
-		#endif
+#endif
 		config_raw->camera_upside_down = false;
 		config_raw->zoom_direction     = ZOOM_DIRECTION_VERTICAL;
 		config_raw->displace_strength  = 0.0;
 		config_raw->wrap_mouse         = false;
 		config_raw->camera_controls    = CAMERA_CONTROLS_ORBIT;
 		config_raw->layer_res          = TEXTURE_RES_RES2048;
-		#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 		config_raw->touch_ui      = true;
 		config_raw->splash_screen = true;
-		#else
+#else
 		config_raw->touch_ui      = false;
 		config_raw->splash_screen = false;
-		#endif
+#endif
 		config_raw->node_previews     = false;
 		config_raw->pressure_hardness = true;
 		config_raw->pressure_angle    = false;
 		config_raw->pressure_opacity  = false;
-		#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 		config_raw->material_live = false;
-		#else
+#else
 		config_raw->material_live = true;
-		#endif
+#endif
 		config_raw->brush_depth_reject  = true;
 		config_raw->brush_angle_reject  = true;
 		config_raw->brush_alpha_discard = 0.1;
@@ -238,11 +236,11 @@ void config_init() {
 		config_raw->grid_snap           = false;
 		config_raw->experimental        = false;
 		config_raw->neural_backend      = NEURAL_BACKEND_VULKAN;
-		#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 		config_raw->render_mode = RENDER_MODE_FORWARD;
-		#else
+#else
 		config_raw->render_mode = RENDER_MODE_DEFERRED;
-		#endif
+#endif
 		config_raw->workspace = WORKSPACE_PAINT_3D;
 	}
 	else {
@@ -256,11 +254,11 @@ void config_init() {
 
 	ui_touch_control = config_raw->touch_ui;
 	ui_touch_speed   = 1.0;
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	if (sys_display_ppi() > 400) {
 		ui_touch_speed = 0.5;
 	}
-	#endif
+#endif
 	base_res_handle->i = config_raw->layer_res;
 	keymap_load();
 }
@@ -274,24 +272,24 @@ void config_init_layout() {
 	i32_array_push(new_layout, math_floor(iron_window_height() / (float)2));          // LayoutSidebarH0
 	i32_array_push(new_layout, math_floor(iron_window_height() / (float)2));          // LayoutSidebarH1
 
-	#ifdef IRON_IOS
+#ifdef IRON_IOS
 	i32_array_push(new_layout, show2d ? math_floor((sys_w() + raw->layout->buffer[LAYOUT_SIZE_NODES_W]) * 0.473) : math_floor(sys_w() * 0.473)); // LayoutNodesW
-	#elif defined(IRON_ANDROID)
+#elif defined(IRON_ANDROID)
 	i32_array_push(new_layout, show2d ? math_floor((sys_w() + raw->layout->buffer[LAYOUT_SIZE_NODES_W]) * 0.473) : math_floor(sys_w() * 0.473));
-	#else
+#else
 	i32_array_push(new_layout,
 	               show2d ? math_floor((sys_w() + raw->layout->buffer[LAYOUT_SIZE_NODES_W]) * 0.515)
 	                      : math_floor(sys_w() * 0.515)); // Align with ui header controls
-	#endif
+#endif
 
 	i32_array_push(new_layout, math_floor(sys_h() / (float)2));                         // LayoutNodesH
 	i32_array_push(new_layout, math_floor(ui_statusbar_default_h * raw->window_scale)); // LayoutStatusH
 
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	i32_array_push(new_layout, 0); // LayoutHeader
-	#else
+#else
 	i32_array_push(new_layout, 1);
-	#endif
+#endif
 
 	raw->layout_tabs = i32_array_create_from_raw(
 	    (i32[]){
@@ -334,7 +332,7 @@ iron_window_options_t *config_get_options() {
 	if (config_raw->window_minimizable) {
 		features |= IRON_WINDOW_FEATURES_MINIMIZABLE;
 	}
-	char              *title = string_join("untitled - ", manifest_title);
+	char                  *title = string("untitled - %s", manifest_title);
 	iron_window_options_t *ops   = GC_ALLOC_INIT(iron_window_options_t, {.title     = title,
 	                                                                     .width     = config_raw->window_w,
 	                                                                     .height    = config_raw->window_h,
@@ -452,7 +450,7 @@ void config_load_theme(char *theme, bool tag_redraw) {
 	gc_root(base_theme);
 
 	if (!string_equals(theme, "default.json")) {
-		buffer_t   *b      = data_get_blob(string_join("themes/", theme));
+		buffer_t   *b      = data_get_blob(string("themes/%s", theme));
 		ui_theme_t *parsed = json_parse(sys_buffer_to_string(b));
 		gc_unroot(base_theme);
 		base_theme = parsed;

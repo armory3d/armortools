@@ -98,18 +98,18 @@ void export_texture_run(char *path, bool bake_material) {
 		}
 	}
 
-	#ifdef IRON_IOS
+#ifdef IRON_IOS
 	if (config_is_iphone()) {
-		console_info(string_join(string_join(string_join(tr("Textures exported", NULL), " (\"Files/On My iPhone/"), manifest_title), "\")"));
+		console_info(string("%s (\"Files/On My iPhone/%s\")", tr("Textures exported", NULL), manifest_title));
 	}
 	else {
-		console_info(string_join(string_join(string_join(tr("Textures exported", NULL), " (\"Files/On My iPad/"), manifest_title), "\")"));
+		console_info(string("%s (\"Files/On My iPad/%s\")", tr("Textures exported", NULL), manifest_title));
 	}
-	#elif defined(IRON_ANDROID)
-	console_info(string_join(string_join(string_join(tr("Textures exported", NULL), " (\"Files/Internal storage/Pictures/"), manifest_title), "\")"));
-	#else
+#elif defined(IRON_ANDROID)
+	console_info(string("%s (\"Files/Internal storage/Pictures/%s\")", tr("Textures exported", NULL), manifest_title));
+#else
 	console_info(tr("Textures exported", NULL));
-	#endif
+#endif
 	gc_unroot(ui_files_last_path);
 	ui_files_last_path = "";
 	gc_root(ui_files_last_path);
@@ -164,24 +164,24 @@ void export_texture_run_layers(char *path, slot_layer_t_array_t *layers, char *o
 
 	i32 texture_size_x = config_get_texture_res_x();
 	i32 texture_size_y = config_get_texture_res_y();
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	char *f = sys_title();
-	#else
+#else
 	char *f = ui_files_filename;
-	#endif
+#endif
 	if (string_equals(f, "")) {
 		f = string_copy(tr("untitled", NULL));
 	}
 	texture_ldr_format_t format_type = context_raw->format_type;
 	i32                  bits        = base_bits_handle->i == TEXTURE_BITS_BITS8 ? 8 : 16;
-	char            *ext         = bits == 16 ? ".exr" : format_type == TEXTURE_LDR_FORMAT_PNG ? ".png" : ".jpg";
+	char                *ext         = bits == 16 ? ".exr" : format_type == TEXTURE_LDR_FORMAT_PNG ? ".png" : ".jpg";
 	if (ends_with(f, ext)) {
 		f = string_copy(substring(f, 0, string_length(f) - 4));
 	}
 
 	bool is_udim = context_raw->layers_export == EXPORT_MODE_PER_UDIM_TILE;
 	if (is_udim) {
-		ext = string_join(object_name, ext);
+		ext = string("%s%s", object_name, ext);
 	}
 
 	layers_make_temp_img();
@@ -192,10 +192,10 @@ void export_texture_run_layers(char *path, slot_layer_t_array_t *layers, char *o
 	// Append object mask name
 	bool export_selected = context_raw->layers_export == EXPORT_MODE_SELECTED;
 	if (export_selected && slot_layer_get_object_mask(layers->buffer[0]) > 0) {
-		f = string_join(f, string_join("_", project_paint_objects->buffer[slot_layer_get_object_mask(layers->buffer[0]) - 1]->base->name));
+		f = string("%s_%s", f, project_paint_objects->buffer[slot_layer_get_object_mask(layers->buffer[0]) - 1]->base->name);
 	}
 	if (!is_udim && !export_selected && !string_equals(object_name, "")) {
-		f = string_join(f, string_join("_", object_name));
+		f = string("%s_%s", f, object_name);
 	}
 
 	// Clear export layer
@@ -343,34 +343,35 @@ void export_texture_run_layers(char *path, slot_layer_t_array_t *layers, char *o
 	for (i32 i = 0; i < preset->textures->length; ++i) {
 		export_preset_texture_t *t              = preset->textures->buffer[i];
 		string_t_array_t        *c              = t->channels;
-		char                *tex_name       = !string_equals(t->name, "") ? string_join("_", t->name) : "";
+		char                    *tex_name       = !string_equals(t->name, "") ? string("_%s", t->name) : "";
 		bool                     single_channel = c->buffer[0] == c->buffer[1] && c->buffer[1] == c->buffer[2] && string_equals(c->buffer[3], "1.0");
+		char                    *out_path       = string("%s%s%s%s%s", path, PATH_SEP, f, tex_name, ext);
 		if (string_equals(c->buffer[0], "base_r") && string_equals(c->buffer[1], "base_g") && string_equals(c->buffer[2], "base_b") &&
 		    string_equals(c->buffer[3], "1.0") && string_equals(t->color_space, "linear")) {
-			export_texture_write_texture(string_join(string_join(string_join(string_join(path, PATH_SEP), f), tex_name), ext), pixpaint, 1, 0);
+			export_texture_write_texture(out_path, pixpaint, 1, 0);
 		}
 		else if (string_equals(c->buffer[0], "nor_r") && string_equals(c->buffer[1], "nor_g") && string_equals(c->buffer[2], "nor_b") &&
 		         string_equals(c->buffer[3], "1.0") && string_equals(t->color_space, "linear")) {
-			export_texture_write_texture(string_join(string_join(string_join(string_join(path, PATH_SEP), f), tex_name), ext), pixpaint_nor, 1, 0);
+			export_texture_write_texture(out_path, pixpaint_nor, 1, 0);
 		}
 		else if (string_equals(c->buffer[0], "occ") && string_equals(c->buffer[1], "rough") && string_equals(c->buffer[2], "metal") &&
 		         string_equals(c->buffer[3], "1.0") && string_equals(t->color_space, "linear")) {
-			export_texture_write_texture(string_join(string_join(string_join(string_join(path, PATH_SEP), f), tex_name), ext), pixpaint_pack, 1, 0);
+			export_texture_write_texture(out_path, pixpaint_pack, 1, 0);
 		}
 		else if (single_channel && string_equals(c->buffer[0], "occ") && string_equals(t->color_space, "linear")) {
-			export_texture_write_texture(string_join(string_join(string_join(string_join(path, PATH_SEP), f), tex_name), ext), pixpaint_pack, 2, 0);
+			export_texture_write_texture(out_path, pixpaint_pack, 2, 0);
 		}
 		else if (single_channel && string_equals(c->buffer[0], "rough") && string_equals(t->color_space, "linear")) {
-			export_texture_write_texture(string_join(string_join(string_join(string_join(path, PATH_SEP), f), tex_name), ext), pixpaint_pack, 2, 1);
+			export_texture_write_texture(out_path, pixpaint_pack, 2, 1);
 		}
 		else if (single_channel && string_equals(c->buffer[0], "metal") && string_equals(t->color_space, "linear")) {
-			export_texture_write_texture(string_join(string_join(string_join(string_join(path, PATH_SEP), f), tex_name), ext), pixpaint_pack, 2, 2);
+			export_texture_write_texture(out_path, pixpaint_pack, 2, 2);
 		}
 		else if (single_channel && string_equals(c->buffer[0], "height") && string_equals(t->color_space, "linear")) {
-			export_texture_write_texture(string_join(string_join(string_join(string_join(path, PATH_SEP), f), tex_name), ext), pixpaint_pack, 2, 3);
+			export_texture_write_texture(out_path, pixpaint_pack, 2, 3);
 		}
 		else if (single_channel && string_equals(c->buffer[0], "opac") && string_equals(t->color_space, "linear")) {
-			export_texture_write_texture(string_join(string_join(string_join(string_join(path, PATH_SEP), f), tex_name), ext), pixpaint, 2, 3);
+			export_texture_write_texture(out_path, pixpaint, 2, 3);
 		}
 		else {
 			if (pix == NULL) {
@@ -430,7 +431,7 @@ void export_texture_run_layers(char *path, slot_layer_t_array_t *layers, char *o
 					export_texture_set_channel(255, pix, i, true);
 				}
 			}
-			export_texture_write_texture(string_join(string_join(string_join(string_join(path, PATH_SEP), f), tex_name), ext), pix, 3, 0);
+			export_texture_write_texture(out_path, pix, 3, 0);
 		}
 	}
 
@@ -463,15 +464,15 @@ void export_texture_write_texture(char *file, buffer_t *pixels, i32 type, i32 of
 	}
 
 	if (context_raw->layers_destination == EXPORT_DESTINATION_PACK_INTO_PROJECT) {
-		#ifdef IRON_BGRA
+#ifdef IRON_BGRA
 		if (format == 2) { // RGB1
 			export_arm_bgra_swap(pixels);
 		}
-		#endif
+#endif
 		gpu_texture_t *image = gpu_create_texture_from_bytes(pixels, res_x, res_y, GPU_TEXTURE_FORMAT_RGBA32);
 		any_map_set(data_cached_images, file, image);
 		string_t_array_t *ar    = string_split(file, PATH_SEP);
-		char         *name  = ar->buffer[ar->length - 1];
+		char             *name  = ar->buffer[ar->length - 1];
 		asset_t          *asset = GC_ALLOC_INIT(asset_t, {.name = name, .file = file, .id = project_asset_id++});
 		any_array_push(project_assets, asset);
 		if (project_raw->assets == NULL) {
@@ -508,9 +509,9 @@ i32 _export_texture_channel_bgra_swap(i32 c) {
 #endif
 
 void export_texture_copy_channel(buffer_t *from, i32 from_channel, buffer_t *to, i32 to_channel, bool linear) {
-	#ifdef IRON_BGRA
+#ifdef IRON_BGRA
 	from_channel = _export_texture_channel_bgra_swap(from_channel);
-	#endif
+#endif
 	for (i32 i = 0; i < math_floor((to->length) / (float)4); ++i) {
 		buffer_set_u8(to, i * 4 + to_channel, buffer_get_u8(from, i * 4 + from_channel));
 	}
@@ -520,9 +521,9 @@ void export_texture_copy_channel(buffer_t *from, i32 from_channel, buffer_t *to,
 }
 
 void export_texture_copy_channel_inv(buffer_t *from, i32 from_channel, buffer_t *to, i32 to_channel, bool linear) {
-	#ifdef IRON_BGRA
+#ifdef IRON_BGRA
 	from_channel = _export_texture_channel_bgra_swap(from_channel);
-	#endif
+#endif
 	for (i32 i = 0; i < math_floor((to->length) / (float)4); ++i) {
 		buffer_set_u8(to, i * 4 + to_channel, 255 - buffer_get_u8(from, i * 4 + from_channel));
 	}
@@ -532,9 +533,9 @@ void export_texture_copy_channel_inv(buffer_t *from, i32 from_channel, buffer_t 
 }
 
 void export_texture_extract_channel(buffer_t *from, i32 from_channel, buffer_t *to, i32 to_channel, i32 step, i32 mask, bool linear) {
-	#ifdef IRON_BGRA
+#ifdef IRON_BGRA
 	from_channel = _export_texture_channel_bgra_swap(from_channel);
-	#endif
+#endif
 	for (i32 i = 0; i < math_floor((to->length) / (float)4); ++i) {
 		buffer_set_u8(to, i * 4 + to_channel, buffer_get_u8(from, i * 4 + from_channel) % step == mask ? 255 : 0);
 	}

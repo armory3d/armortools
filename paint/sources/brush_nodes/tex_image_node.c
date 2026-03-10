@@ -15,11 +15,11 @@ logic_node_value_t *tex_image_node_get(tex_image_node_t *self, i32 from) {
 	char         *file = ar->buffer[i];
 
 	if (from == 0) {
-		logic_node_value_t *v = GC_ALLOC_INIT(logic_node_value_t, {._str = string_join(file, ".rgb")});
+		logic_node_value_t *v = GC_ALLOC_INIT(logic_node_value_t, {._str = string("%s.rgb", file)});
 		return v;
 	}
 	else {
-		logic_node_value_t *v = GC_ALLOC_INIT(logic_node_value_t, {._str = string_join(file, ".a")});
+		logic_node_value_t *v = GC_ALLOC_INIT(logic_node_value_t, {._str = string("%s.a", file)});
 		return v;
 	}
 }

@@ -12,7 +12,7 @@ void export_arm_run_mesh(char *path, mesh_object_t_array_t *paint_objects) {
 	buffer_t *b   = util_encode_scene(raw);
 
 	if (!ends_with(path, ".arm")) {
-		path = string_join(path, ".arm");
+		path = string("%s.arm", path);
 	}
 	iron_file_save_bytes(path, b, b->length + 1);
 }
@@ -60,15 +60,15 @@ void export_arm_run_project() {
 		any_array_push(md, p->data);
 	}
 
-	string_t_array_t     *texture_files = export_arm_assets_to_files(project_filepath, project_assets);
+	string_t_array_t *texture_files = export_arm_assets_to_files(project_filepath, project_assets);
 
-	string_t_array_t     *font_files    = export_arm_fonts_to_files(project_filepath, project_fonts);
-	string_t_array_t     *mesh_files    = export_arm_meshes_to_files(project_filepath);
+	string_t_array_t *font_files = export_arm_fonts_to_files(project_filepath, project_fonts);
+	string_t_array_t *mesh_files = export_arm_meshes_to_files(project_filepath);
 
-	i32                   bits_pos      = base_bits_handle->i;
-	i32                   bpp           = bits_pos == TEXTURE_BITS_BITS8 ? 8 : bits_pos == TEXTURE_BITS_BITS16 ? 16 : 32;
+	i32 bits_pos = base_bits_handle->i;
+	i32 bpp      = bits_pos == TEXTURE_BITS_BITS8 ? 8 : bits_pos == TEXTURE_BITS_BITS16 ? 16 : 32;
 
-	layer_data_t_array_t *ld            = any_array_create_from_raw((void *[]){}, 0);
+	layer_data_t_array_t *ld = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < project_layers->length; ++i) {
 		slot_layer_t *l = project_layers->buffer[i];
 		layer_data_t *d = GC_ALLOC_INIT(layer_data_t, {.name          = l->name,
@@ -103,17 +103,17 @@ void export_arm_run_project() {
 	}
 
 	packed_asset_t_array_t *packed_assets = (project_raw->packed_assets == NULL || project_raw->packed_assets->length == 0) ? NULL : project_raw->packed_assets;
-	#ifdef IRON_IOS
-	bool                    same_drive    = false;
-	#else
-	bool                    same_drive    = project_raw->envmap != NULL ? char_at(project_filepath, 0) == char_at(project_raw->envmap, 0) : true;
-	#endif
+#ifdef IRON_IOS
+	bool same_drive = false;
+#else
+	bool same_drive = project_raw->envmap != NULL ? char_at(project_filepath, 0) == char_at(project_raw->envmap, 0) : true;
+#endif
 
-	project_raw->version                  = string_copy(manifest_version_project);
-	project_raw->material_groups          = mgroups;
-	project_raw->assets                   = texture_files;
-	project_raw->packed_assets            = packed_assets;
-	project_raw->swatches                 = project_raw->swatches;
+	project_raw->version         = string_copy(manifest_version_project);
+	project_raw->material_groups = mgroups;
+	project_raw->assets          = texture_files;
+	project_raw->packed_assets   = packed_assets;
+	project_raw->swatches        = project_raw->swatches;
 	project_raw->envmap = project_raw->envmap != NULL ? (same_drive ? path_to_relative(project_filepath, project_raw->envmap) : project_raw->envmap) : NULL;
 	project_raw->envmap_strength = scene_world->strength;
 	project_raw->envmap_angle    = context_raw->envmap_angle;
@@ -141,17 +141,17 @@ void export_arm_run_project() {
 	project_raw->atlas_objects  = project_atlas_objects;
 	project_raw->atlas_names    = project_atlas_names;
 
-	#ifdef IRON_BGRA
-	project_raw->is_bgra        = true;
-	#else
-	project_raw->is_bgra        = false;
-	#endif
+#ifdef IRON_BGRA
+	project_raw->is_bgra = true;
+#else
+	project_raw->is_bgra = false;
+#endif
 
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
-	render_target_t *rt         = any_map_get(render_path_render_targets, "buf");
-	gpu_texture_t   *tex        = rt->_image;
-	gpu_texture_t   *mesh_icon  = gpu_create_render_target(256, 256, GPU_TEXTURE_FORMAT_RGBA32);
-	f32              r          = sys_w() / (float)sys_h();
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
+	render_target_t *rt        = any_map_get(render_path_render_targets, "buf");
+	gpu_texture_t   *tex       = rt->_image;
+	gpu_texture_t   *mesh_icon = gpu_create_render_target(256, 256, GPU_TEXTURE_FORMAT_RGBA32);
+	f32              r         = sys_w() / (float)sys_h();
 	draw_begin(mesh_icon, false, 0);
 	draw_scaled_image(tex, -(256 * r - 256) / (float)2, 0, 256 * r, 256);
 	draw_end();
@@ -161,9 +161,9 @@ void export_arm_run_project() {
 	for (i32 i = 0; i < 256 * 256 * 4; ++i) {
 		u8a->buffer[i] = math_floor(math_pow(u8a->buffer[i] / (float)255, 1.0 / (float)2.2) * 255);
 	}
-	iron_write_png(string_join(substring(project_filepath, 0, string_length(project_filepath) - 4), "_icon.png"), mesh_icon_pixels, 256, 256, 0);
+	iron_write_png(string("%s_icon.png", substring(project_filepath, 0, string_length(project_filepath) - 4)), mesh_icon_pixels, 256, 256, 0);
 	gpu_delete_texture(mesh_icon);
-	#endif
+#endif
 
 	bool is_packed = ends_with(project_filepath, "_packed_.arm");
 	if (is_packed) { // Pack textures
@@ -173,16 +173,16 @@ void export_arm_run_project() {
 	buffer_t *buffer = util_encode_project(project_raw);
 	iron_file_save_bytes(project_filepath, buffer, buffer->length + 1);
 
-	// Save to recent
-	#ifdef IRON_IOS
-	char *recent_path    = substring(project_filepath, string_last_index_of(project_filepath, "/") + 1, string_length(project_filepath));
-	#else
-	char *recent_path    = project_filepath;
-	#endif
+// Save to recent
+#ifdef IRON_IOS
+	char *recent_path = substring(project_filepath, string_last_index_of(project_filepath, "/") + 1, string_length(project_filepath));
+#else
+	char *recent_path = project_filepath;
+#endif
 
-	#ifdef IRON_WINDOWS
-	recent_path              = string_copy(string_replace_all(recent_path, "\\", "/"));
-	#endif
+#ifdef IRON_WINDOWS
+	recent_path = string_copy(string_replace_all(recent_path, "\\", "/"));
+#endif
 	string_t_array_t *recent = config_raw->recent_projects;
 	char_ptr_array_remove(recent, recent_path);
 	array_insert(recent, 0, recent_path);
@@ -211,7 +211,7 @@ void export_arm_export_node(ui_node_t *n, asset_t_array_t *assets) {
 
 void export_arm_run_material(char *path) {
 	if (!ends_with(path, ".arm")) {
-		path = string_join(path, ".arm");
+		path = string("%s.arm", path);
 	}
 	ui_node_canvas_t_array_t *mnodes  = any_array_create_from_raw((void *[]){}, 0);
 	ui_node_canvas_t_array_t *mgroups = NULL;
@@ -247,16 +247,16 @@ void export_arm_run_material(char *path) {
 
 	buffer_t_array_t *micons = NULL;
 	if (!is_cloud) {
-		#ifdef IRON_BGRA
+#ifdef IRON_BGRA
 		buffer_t *buf = lz4_encode(export_arm_bgra64_swap(gpu_get_texture_pixels(m->image)));
-		#else
+#else
 		buffer_t *buf = lz4_encode(gpu_get_texture_pixels(m->image));
-		#endif
-		micons        = any_array_create_from_raw(
-            (void *[]){
-                buf,
-            },
-            1);
+#endif
+		micons = any_array_create_from_raw(
+		    (void *[]){
+		        buf,
+		    },
+		    1);
 	}
 	project_format_t *raw = GC_ALLOC_INIT(project_format_t, {.version         = manifest_version_project,
 	                                                         .material_nodes  = mnodes,
@@ -266,12 +266,12 @@ void export_arm_run_material(char *path) {
 	                                                         .packed_assets   = packed_assets});
 	if (context_raw->write_icon_on_export) { // Separate icon files
 		buffer_t *buf = export_arm_rgba64_to_rgba32(gpu_get_texture_pixels(m->image));
-		#ifdef IRON_BGRA
-		buf           = export_arm_bgra_swap(buf);
-		#endif
-		iron_write_png(string_join(substring(path, 0, string_length(path) - 4), "_icon.png"), buf, m->image->width, m->image->height, 0);
+#ifdef IRON_BGRA
+		buf = export_arm_bgra_swap(buf);
+#endif
+		iron_write_png(string("%s_icon.png", substring(path, 0, string_length(path) - 4)), buf, m->image->width, m->image->height, 0);
 		if (is_cloud) {
-			iron_write_jpg(string_join(substring(path, 0, string_length(path) - 4), "_icon.jpg"), buf, m->image->width, m->image->height, 0, 50);
+			iron_write_jpg(string("%s_icon.jpg", substring(path, 0, string_length(path) - 4)), buf, m->image->width, m->image->height, 0, 50);
 		}
 	}
 
@@ -306,7 +306,7 @@ buffer_t *export_arm_bgra64_swap(buffer_t *buffer) {
 
 void export_arm_run_brush(char *path) {
 	if (!ends_with(path, ".arm")) {
-		path = string_join(path, ".arm");
+		path = string("%s.arm", path);
 	}
 	ui_node_canvas_t_array_t *bnodes = any_array_create_from_raw((void *[]){}, 0);
 	slot_brush_t             *b      = context_raw->brush;
@@ -330,16 +330,16 @@ void export_arm_run_brush(char *path) {
 
 	buffer_t_array_t *bicons = NULL;
 	if (!is_cloud) {
-		#ifdef IRON_BGRA
+#ifdef IRON_BGRA
 		buffer_t *buf = lz4_encode(export_arm_bgra_swap(gpu_get_texture_pixels(b->image)));
-		#else
+#else
 		buffer_t *buf = lz4_encode(gpu_get_texture_pixels(b->image));
-		#endif
-		bicons        = any_array_create_from_raw(
-            (void *[]){
-                buf,
-            },
-            1);
+#endif
+		bicons = any_array_create_from_raw(
+		    (void *[]){
+		        buf,
+		    },
+		    1);
 	}
 
 	project_format_t *raw = GC_ALLOC_INIT(
@@ -348,10 +348,10 @@ void export_arm_run_brush(char *path) {
 
 	if (context_raw->write_icon_on_export) { // Separate icon file
 		buffer_t *buf = export_arm_rgba64_to_rgba32(gpu_get_texture_pixels(b->image));
-		#ifdef IRON_BGRA
-		buf           = export_arm_bgra_swap(buf);
-		#endif
-		iron_write_png(string_join(substring(path, 0, string_length(path) - 4), "_icon.png"), buf, b->image->width, b->image->height, 0);
+#ifdef IRON_BGRA
+		buf = export_arm_bgra_swap(buf);
+#endif
+		iron_write_png(string("%s_icon.png", substring(path, 0, string_length(path) - 4)), buf, b->image->width, b->image->height, 0);
 	}
 
 	if (context_raw->pack_assets_on_export) { // Pack textures
@@ -365,12 +365,12 @@ void export_arm_run_brush(char *path) {
 string_t_array_t *export_arm_assets_to_files(char *project_path, asset_t_array_t *assets) {
 	string_t_array_t *texture_files = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < assets->length; ++i) {
-		asset_t *a          = assets->buffer[i];
-		#ifdef IRON_IOS
-		bool     same_drive = false;
-		#else
-		bool     same_drive = char_at(project_path, 0) == char_at(a->file, 0);
-		#endif
+		asset_t *a = assets->buffer[i];
+#ifdef IRON_IOS
+		bool same_drive = false;
+#else
+		bool same_drive = char_at(project_path, 0) == char_at(a->file, 0);
+#endif
 		// Convert image path from absolute to relative
 		if (same_drive) {
 			any_array_push(texture_files, path_to_relative(project_path, a->file));
@@ -385,12 +385,12 @@ string_t_array_t *export_arm_assets_to_files(char *project_path, asset_t_array_t
 string_t_array_t *export_arm_meshes_to_files(char *project_path) {
 	string_t_array_t *mesh_files = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 0; i < project_mesh_assets->length; ++i) {
-		char *file       = project_mesh_assets->buffer[i];
-		#ifdef IRON_IOS
-		bool      same_drive = false;
-		#else
-		bool      same_drive = char_at(project_path, 0) == char_at(file, 0);
-		#endif
+		char *file = project_mesh_assets->buffer[i];
+#ifdef IRON_IOS
+		bool same_drive = false;
+#else
+		bool same_drive = char_at(project_path, 0) == char_at(file, 0);
+#endif
 		// Convert mesh path from absolute to relative
 		if (same_drive) {
 			any_array_push(mesh_files, path_to_relative(project_path, file));
@@ -405,12 +405,12 @@ string_t_array_t *export_arm_meshes_to_files(char *project_path) {
 string_t_array_t *export_arm_fonts_to_files(char *project_path, slot_font_t_array_t *fonts) {
 	string_t_array_t *font_files = any_array_create_from_raw((void *[]){}, 0);
 	for (i32 i = 1; i < fonts->length; ++i) {
-		slot_font_t *f          = fonts->buffer[i];
-		#ifdef IRON_IOS
-		bool         same_drive = false;
-		#else
-		bool         same_drive = char_at(project_path, 0) == char_at(f->file, 0);
-		#endif
+		slot_font_t *f = fonts->buffer[i];
+#ifdef IRON_IOS
+		bool same_drive = false;
+#else
+		bool same_drive = char_at(project_path, 0) == char_at(f->file, 0);
+#endif
 		// Convert font path from absolute to relative
 		if (same_drive) {
 			any_array_push(font_files, path_to_relative(project_path, f->file));
@@ -426,14 +426,14 @@ packed_asset_t_array_t *export_arm_get_packed_assets(char *project_path, string_
 	packed_asset_t_array_t *packed_assets = NULL;
 	if (project_raw->packed_assets != NULL) {
 		for (i32 i = 0; i < project_raw->packed_assets->length; ++i) {
-			packed_asset_t *pa         = project_raw->packed_assets->buffer[i];
-			#ifdef IRON_IOS
-			bool            same_drive = false;
-			#else
-			bool            same_drive = char_at(project_path, 0) == char_at(pa->name, 0);
-			#endif
+			packed_asset_t *pa = project_raw->packed_assets->buffer[i];
+#ifdef IRON_IOS
+			bool same_drive = false;
+#else
+			bool same_drive = char_at(project_path, 0) == char_at(pa->name, 0);
+#endif
 			// Convert path from absolute to relative
-			pa->name                   = same_drive ? path_to_relative(project_path, pa->name) : pa->name;
+			pa->name = same_drive ? path_to_relative(project_path, pa->name) : pa->name;
 			for (i32 i = 0; i < texture_files->length; ++i) {
 				char *tf = texture_files->buffer[i];
 				if (string_equals(pa->name, tf)) {
@@ -478,7 +478,7 @@ void export_arm_pack_assets(project_format_t *raw, asset_t_array_t *assets) {
 
 void export_arm_run_swatches(char *path) {
 	if (!ends_with(path, ".arm")) {
-		path = string_join(path, ".arm");
+		path = string("%s.arm", path);
 	}
 	project_format_t *raw    = GC_ALLOC_INIT(project_format_t, {.version = manifest_version_project, .swatches = project_raw->swatches});
 	buffer_t         *buffer = util_encode_project(raw);

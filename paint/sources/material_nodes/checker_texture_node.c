@@ -13,17 +13,12 @@ char *checker_texture_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	char *col1  = parser_material_parse_vector_input(node->inputs->buffer[1]);
 	char *col2  = parser_material_parse_vector_input(node->inputs->buffer[2]);
 	char *scale = parser_material_parse_value_input(node->inputs->buffer[3], false);
-	char *res =
-	    string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join("tex_checker(", co), ", "), col1), ", "), col2), ", "),
-	                            scale),
-	                ")");
-	return res;
+	return string("tex_checker(%s, %s, %s, %s)", co, col1, col2, scale);
 }
 
 char *checker_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 	node_shader_add_function(parser_material_kong, str_tex_checker);
 	char *co    = parser_material_get_coord(node);
 	char *scale = parser_material_parse_value_input(node->inputs->buffer[3], false);
-	char *res   = string_join(string_join(string_join(string_join("tex_checker_f(", co), ", "), scale), ")");
-	return res;
+	return string("tex_checker_f(%s, %s)", co, scale);
 }

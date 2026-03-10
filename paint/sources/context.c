@@ -2,91 +2,91 @@
 #include "global.h"
 
 context_t *context_create() {
-	context_t *c                         = GC_ALLOC_INIT(context_t, {0});
-	c->merged_object_is_atlas            = false; // Only objects referenced by atlas are merged
-	c->ddirty                            = 0; // depth
-	c->pdirty                            = 0; // paint
-	c->rdirty                            = 0; // render
-	c->brush_blend_dirty                 = true;
-	c->split_view                        = false;
-	c->view_index                        = -1;
-	c->view_index_last                   = -1;
-	c->picked_color                      = project_make_swatch(0xffffffff);
-	c->envmap_loaded                     = false;
-	c->show_envmap                       = false;
-	c->show_envmap_handle                = ui_handle_create();
-	c->show_envmap_blur                  = false;
-	c->show_envmap_blur_handle           = ui_handle_create();
-	c->envmap_angle                      = 0.0;
-	c->light_angle                       = 0.0;
-	c->cull_backfaces                    = true;
-	c->texture_filter                    = true;
-	c->format_type                       = TEXTURE_LDR_FORMAT_PNG;
-	c->format_quality                    = 100.0;
-	c->layers_destination                = EXPORT_DESTINATION_DISK;
-	c->split_by                          = SPLIT_TYPE_OBJECT;
-	c->select_time                       = 0.0;
-	c->viewport_mode                     = config_raw->viewport_mode == 0 ? VIEWPORT_MODE_LIT : VIEWPORT_MODE_PATH_TRACE;
-	c->hscale_was_changed                = false;
-	c->export_mesh_format                = MESH_FORMAT_OBJ;
-	c->export_mesh_index                 = 0;
-	c->pack_assets_on_export             = true;
-	c->paint_vec                         = vec4_create(0.0, 0.0, 0.0, 1.0);
-	c->last_paint_x                      = -1.0;
-	c->last_paint_y                      = -1.0;
-	c->foreground_event                  = false;
-	c->painted                           = 0;
-	c->brush_time                        = 0.0;
-	c->clone_start_x                     = -1.0;
-	c->clone_start_y                     = -1.0;
-	c->clone_delta_x                     = 0.0;
-	c->clone_delta_y                     = 0.0;
-	c->show_compass                      = true;
-	c->project_aspect_ratio              = 0; // 1:1, 2:1, 1:2
-	c->last_paint_vec_x                  = -1.0;
-	c->last_paint_vec_y                  = -1.0;
-	c->prev_paint_vec_x                  = -1.0;
-	c->prev_paint_vec_y                  = -1.0;
-	c->frame                             = 0;
-	c->paint2d_view                      = false;
-	c->brush_locked                      = false;
-	c->camera_type                       = CAMERA_TYPE_PERSPECTIVE;
-	c->cam_handle                        = ui_handle_create();
-	c->fov_handle                        = ui_handle_create();
-	c->texture_export_path               = "";
-	c->last_status_position              = 0;
-	c->camera_controls                   = CAMERA_CONTROLS_ORBIT;
-	c->pen_painting_only                 = false; // Reject painting with finger when using pen
-	c->layer_preview_dirty               = true;
-	c->layers_preview_dirty              = false;
-	c->node_preview_name                 = "";
-	c->node_preview_socket_map           = any_map_create();
-	c->node_preview_map                  = any_map_create();
-	c->selected_node_preview             = true;
-	c->colorid_picked                    = false;
-	c->material_preview                  = false; // Drawing material previews
-	c->saved_camera                      = mat4_identity();
-	c->materialid_picked                 = 0;
-	c->uvx_picked                        = 0.0;
-	c->uvy_picked                        = 0.0;
-	c->picker_select_material            = false;
-	c->picker_mask_handle                = ui_handle_create();
-	c->pick_pos_nor_tex                  = false;
-	c->posx_picked                       = 0.0;
-	c->posy_picked                       = 0.0;
-	c->posz_picked                       = 0.0;
-	c->norx_picked                       = 0.0;
-	c->nory_picked                       = 0.0;
-	c->norz_picked                       = 0.0;
-	c->draw_wireframe                    = false;
-	c->wireframe_handle                  = ui_handle_create();
-	c->draw_texels                       = false;
-	c->texels_handle                     = ui_handle_create();
-	c->colorid_handle                    = ui_handle_create();
-	c->layers_export                     = EXPORT_MODE_VISIBLE;
-	c->decal_preview                     = false;
-	c->decal_x                           = 0.0;
-	c->decal_y                           = 0.0;
+	context_t *c               = GC_ALLOC_INIT(context_t, {0});
+	c->merged_object_is_atlas  = false; // Only objects referenced by atlas are merged
+	c->ddirty                  = 0;     // depth
+	c->pdirty                  = 0;     // paint
+	c->rdirty                  = 0;     // render
+	c->brush_blend_dirty       = true;
+	c->split_view              = false;
+	c->view_index              = -1;
+	c->view_index_last         = -1;
+	c->picked_color            = project_make_swatch(0xffffffff);
+	c->envmap_loaded           = false;
+	c->show_envmap             = false;
+	c->show_envmap_handle      = ui_handle_create();
+	c->show_envmap_blur        = false;
+	c->show_envmap_blur_handle = ui_handle_create();
+	c->envmap_angle            = 0.0;
+	c->light_angle             = 0.0;
+	c->cull_backfaces          = true;
+	c->texture_filter          = true;
+	c->format_type             = TEXTURE_LDR_FORMAT_PNG;
+	c->format_quality          = 100.0;
+	c->layers_destination      = EXPORT_DESTINATION_DISK;
+	c->split_by                = SPLIT_TYPE_OBJECT;
+	c->select_time             = 0.0;
+	c->viewport_mode           = config_raw->viewport_mode == 0 ? VIEWPORT_MODE_LIT : VIEWPORT_MODE_PATH_TRACE;
+	c->hscale_was_changed      = false;
+	c->export_mesh_format      = MESH_FORMAT_OBJ;
+	c->export_mesh_index       = 0;
+	c->pack_assets_on_export   = true;
+	c->paint_vec               = vec4_create(0.0, 0.0, 0.0, 1.0);
+	c->last_paint_x            = -1.0;
+	c->last_paint_y            = -1.0;
+	c->foreground_event        = false;
+	c->painted                 = 0;
+	c->brush_time              = 0.0;
+	c->clone_start_x           = -1.0;
+	c->clone_start_y           = -1.0;
+	c->clone_delta_x           = 0.0;
+	c->clone_delta_y           = 0.0;
+	c->show_compass            = true;
+	c->project_aspect_ratio    = 0; // 1:1, 2:1, 1:2
+	c->last_paint_vec_x        = -1.0;
+	c->last_paint_vec_y        = -1.0;
+	c->prev_paint_vec_x        = -1.0;
+	c->prev_paint_vec_y        = -1.0;
+	c->frame                   = 0;
+	c->paint2d_view            = false;
+	c->brush_locked            = false;
+	c->camera_type             = CAMERA_TYPE_PERSPECTIVE;
+	c->cam_handle              = ui_handle_create();
+	c->fov_handle              = ui_handle_create();
+	c->texture_export_path     = "";
+	c->last_status_position    = 0;
+	c->camera_controls         = CAMERA_CONTROLS_ORBIT;
+	c->pen_painting_only       = false; // Reject painting with finger when using pen
+	c->layer_preview_dirty     = true;
+	c->layers_preview_dirty    = false;
+	c->node_preview_name       = "";
+	c->node_preview_socket_map = any_map_create();
+	c->node_preview_map        = any_map_create();
+	c->selected_node_preview   = true;
+	c->colorid_picked          = false;
+	c->material_preview        = false; // Drawing material previews
+	c->saved_camera            = mat4_identity();
+	c->materialid_picked       = 0;
+	c->uvx_picked              = 0.0;
+	c->uvy_picked              = 0.0;
+	c->picker_select_material  = false;
+	c->picker_mask_handle      = ui_handle_create();
+	c->pick_pos_nor_tex        = false;
+	c->posx_picked             = 0.0;
+	c->posy_picked             = 0.0;
+	c->posz_picked             = 0.0;
+	c->norx_picked             = 0.0;
+	c->nory_picked             = 0.0;
+	c->norz_picked             = 0.0;
+	c->draw_wireframe          = false;
+	c->wireframe_handle        = ui_handle_create();
+	c->draw_texels             = false;
+	c->texels_handle           = ui_handle_create();
+	c->colorid_handle          = ui_handle_create();
+	c->layers_export           = EXPORT_MODE_VISIBLE;
+	c->decal_preview           = false;
+	c->decal_x                 = 0.0;
+	c->decal_y                 = 0.0;
 	// c.cache_draws = false;
 	c->write_icon_on_export              = false;
 	c->particle_hit_x                    = 0.0;
@@ -191,7 +191,7 @@ void context_select_material(i32 i) {
 	context_set_material(project_materials->buffer[i]);
 }
 
-void context_set_material_on_next_frame(void * _) {
+void context_set_material_on_next_frame(void *_) {
 	util_render_make_decal_preview();
 }
 
@@ -263,8 +263,8 @@ void context_set_layer(slot_layer_t *l) {
 	context_raw->layer        = l;
 	ui_header_handle->redraws = 2;
 
-	gpu_texture_t *current    = _draw_current;
-	bool           in_use     = gpu_in_use;
+	gpu_texture_t *current = _draw_current;
+	bool           in_use  = gpu_in_use;
 	if (in_use)
 		draw_end();
 
@@ -327,9 +327,9 @@ void context_select_paint_object(mesh_object_t *o) {
 	// context_raw->paint_object->skip_context = "";
 	// #endif
 
-	context_raw->paint_object               = o;
+	context_raw->paint_object = o;
 
-	i32 mask                                = slot_layer_get_object_mask(context_raw->layer);
+	i32 mask = slot_layer_get_object_mask(context_raw->layer);
 	if (context_layer_filter_used()) {
 		mask = context_raw->layer_filter;
 	}
@@ -411,8 +411,7 @@ bool context_is_decal_mask() {
 
 bool context_is_decal_mask_paint() {
 	return context_is_decal() &&
-	       operator_shortcut(string_join(string_join(any_map_get(config_keymap, "decal_mask"), "+"), any_map_get(config_keymap, "action_paint")),
-	                         SHORTCUT_TYPE_DOWN);
+	       operator_shortcut(string("%s+%s", any_map_get(config_keymap, "decal_mask"), any_map_get(config_keymap, "action_paint")), SHORTCUT_TYPE_DOWN);
 }
 
 bool context_is_floating_toolbar() {
@@ -493,12 +492,12 @@ void context_update_envmap() {
 	}
 }
 
-void context_set_viewport_shader(void * viewport_shader) { // JSValue * -> (ns: node_shader_t)=>void
+void context_set_viewport_shader(void *viewport_shader) { // JSValue * -> (ns: node_shader_t)=>void
 	context_raw->viewport_shader = viewport_shader;
 	context_set_render_path();
 }
 
-void context_set_render_path_on_next_frame(void * _) {
+void context_set_render_path_on_next_frame(void *_) {
 	make_material_parse_mesh_material();
 }
 
@@ -526,7 +525,7 @@ bool context_enable_import_plugin(char *file) {
 		char *f = box_preferences_files_plugin->buffer[i];
 		if (starts_with(f, "import_") && string_index_of(f, ext) >= 0) {
 			config_enable_plugin(f);
-			console_info(string_join(string_join(f, " "), tr("plugin enabled", NULL)));
+			console_info(string("%s %s", f, tr("plugin enabled", NULL)));
 			return true;
 		}
 	}

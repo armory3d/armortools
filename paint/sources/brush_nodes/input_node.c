@@ -20,12 +20,9 @@ void input_node_update(float_node_t *self) {
 	}
 
 	bool decal_mask = context_is_decal_mask_paint();
-
-	bool lazy_paint = context_raw->brush_lazy_radius > 0 &&
-	                  (operator_shortcut(any_map_get(config_keymap, "action_paint"), SHORTCUT_TYPE_DOWN) ||
-	                   operator_shortcut(string_join(string_join(any_map_get(config_keymap, "brush_ruler"), "+"), any_map_get(config_keymap, "action_paint")),
-	                                     SHORTCUT_TYPE_DOWN) ||
-	                   decal_mask);
+	char *ruler_paint = string("%s+%s", any_map_get(config_keymap, "brush_ruler"), any_map_get(config_keymap, "action_paint"));
+	bool lazy_paint = context_raw->brush_lazy_radius > 0 && (operator_shortcut(any_map_get(config_keymap, "action_paint"), SHORTCUT_TYPE_DOWN) ||
+	                                                         operator_shortcut(ruler_paint, SHORTCUT_TYPE_DOWN) || decal_mask);
 
 	f32 paint_x = mouse_view_x() / (float)sys_w();
 	f32 paint_y = mouse_view_y() / (float)sys_h();
@@ -44,8 +41,7 @@ void input_node_update(float_node_t *self) {
 		input_node_start_y = pen_view_y() / (float)sys_h();
 	}
 
-	if (operator_shortcut(string_join(string_join(any_map_get(config_keymap, "brush_ruler"), "+"), any_map_get(config_keymap, "action_paint")),
-	                      SHORTCUT_TYPE_DOWN)) {
+	if (operator_shortcut(ruler_paint, SHORTCUT_TYPE_DOWN)) {
 		if (input_node_lock_x) {
 			paint_x = input_node_start_x;
 		}

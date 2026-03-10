@@ -13,21 +13,14 @@ char *gabor_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 	char *frequency   = parser_material_parse_value_input(node->inputs->buffer[2], false);
 	char *anisotropy  = parser_material_parse_value_input(node->inputs->buffer[3], false);
 	char *orientation = parser_material_parse_vector_input(node->inputs->buffer[4]);
-	char *res         = string_join(
-        string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join("tex_gabor(", co), ", "), scale), ", "),
-	                                                                        frequency),
-	                                                            ", "),
-	                                                anisotropy),
-	                                    ", "),
-	                        orientation),
-        ")");
+	char *res         = string("tex_gabor(%s, %s, %s, %s, %s)", co, scale, frequency, anisotropy, orientation);
 	if (socket == node->outputs->buffer[0]) { // Value
-		return string_join(res, ".x");
+		return string("%s.x", res);
 	}
 	else if (socket == node->outputs->buffer[1]) { // Phase
-		return string_join(res, ".y");
+		return string("%s.y", res);
 	}
 	else { // Intensity
-		return string_join(res, ".z");
+		return string("%s.z", res);
 	}
 }

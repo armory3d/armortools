@@ -7,23 +7,16 @@ void clamp_node_init() {
 }
 
 char *clamp_node_value(ui_node_t *node, ui_node_socket_t *socket) {
-	char         *val = parser_material_parse_value_input(node->inputs->buffer[0], false);
-	char         *min = parser_material_parse_value_input(node->inputs->buffer[1], false);
-	char         *max = parser_material_parse_value_input(node->inputs->buffer[2], false);
+	char             *val = parser_material_parse_value_input(node->inputs->buffer[0], false);
+	char             *min = parser_material_parse_value_input(node->inputs->buffer[1], false);
+	char             *max = parser_material_parse_value_input(node->inputs->buffer[2], false);
 	ui_node_button_t *but = node->buttons->buffer[0]; // operation;
-	char         *op  = to_upper_case(u8_array_string_at(but->data, but->default_value->buffer[0]));
+	char             *op  = to_upper_case(u8_array_string_at(but->data, but->default_value->buffer[0]));
 	op                    = string_copy(string_replace_all(op, " ", "_"));
 	if (string_equals(op, "MIN_MAX")) {
-		return string_join(string_join(string_join(string_join(string_join(string_join("(clamp(", val), ", "), min), ", "), max), "))");
+		return string("(clamp(%s, %s, %s))", val, min, max);
 	}
 	else { // RANGE
-		return string_join(
-		    string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join("(clamp(", val), ", min("), min), ", "),
-		                                                                max),
-		                                                    "), max("),
-		                                        min),
-		                            ", "),
-		                max),
-		    ")))");
+		return string("(clamp(%s, min(%s, %s), max(%s, %s)))", val, min, max, min, max);
 	}
 }

@@ -168,10 +168,9 @@ void box_preferences_theme_tab_theme_field_menu() {
 }
 
 void box_preferences_theme_tab_export(char *path) {
-	path = string_join(path, PATH_SEP);
-	path = string_join(path, ui_files_filename);
+	path = string("%s%s%s", path, PATH_SEP, ui_files_filename);
 	if (!ends_with(path, ".json")) {
-		path = string_join(path, ".json");
+		path = string("%s.json", path);
 	}
 	iron_file_save_bytes(path, sys_string_to_buffer(box_preferences_theme_to_json(base_theme)), 0);
 }
@@ -190,9 +189,9 @@ void box_preferences_theme_tab_new_box() {
 	if (ui_icon_button(tr("OK", NULL), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
 		char *template = box_preferences_theme_to_json(base_theme);
 		if (!ends_with(theme_name, ".json")) {
-			theme_name = string_join(theme_name, ".json");
+			theme_name = string("%s.json", theme_name);
 		}
-		char *path = string_join(string_join(string_join(string_join(path_data(), PATH_SEP), "themes"), PATH_SEP), theme_name);
+		char *path = string("%s%sthemes%s%s", path_data(), PATH_SEP, PATH_SEP, theme_name);
 		iron_file_save_bytes(path, sys_string_to_buffer(template), 0);
 		box_preferences_fetch_themes(); // Refresh file list
 		config_raw->theme          = string_copy(theme_name);
@@ -217,7 +216,7 @@ void box_preferences_theme_tab() {
 	box_preferences_h_theme->i = box_preferences_get_theme_index();
 	ui_combo(box_preferences_h_theme, box_preferences_themes, tr("Theme", NULL), false, UI_ALIGN_LEFT, true);
 	if (box_preferences_h_theme->changed) {
-		config_raw->theme = string_join(box_preferences_themes->buffer[box_preferences_h_theme->i], ".json");
+		config_raw->theme = string("%s.json", box_preferences_themes->buffer[box_preferences_h_theme->i]);
 		config_load_theme(config_raw->theme, true);
 	}
 
@@ -318,7 +317,7 @@ void box_preferences_usage_tab() {
 		if (history_undo_layers != NULL) {
 			while (history_undo_layers->length < config_raw->undo_steps) {
 				i32           len = history_undo_layers->length;
-				slot_layer_t *l   = slot_layer_create(string_join("_undo", i32_to_string(len)), LAYER_SLOT_TYPE_LAYER, NULL);
+				slot_layer_t *l   = slot_layer_create(string("_undo%s", i32_to_string(len)), LAYER_SLOT_TYPE_LAYER, NULL);
 				any_array_push(history_undo_layers, l);
 			}
 			while (history_undo_layers->length > config_raw->undo_steps) {
@@ -506,8 +505,7 @@ void box_preferences_pen_tab() {
 	if (ui_icon_button(tr("Help", NULL), ICON_LINK, UI_ALIGN_CENTER)) {
 		char *url  = "https://github.com/armory3d/";
 		char *name = to_lower_case(manifest_title);
-		url        = string_join(url, name);
-		url        = string_join(url, "_docs#pen");
+		url        = string("%s%s_docs#pen", url, name);
 		iron_load_url(url);
 	}
 }
@@ -626,11 +624,11 @@ void box_preferences_viewport_tab() {
 void box_preferences_keymap_tab_export(char *dest) {
 	if (!ends_with(ui_files_filename, ".json")) {
 		gc_unroot(ui_files_filename);
-		ui_files_filename = string_join(ui_files_filename, ".json");
+		ui_files_filename = string("%s.json", ui_files_filename);
 		gc_root(ui_files_filename);
 	}
-	char *path = string_join(string_join(string_join(string_join(path_data(), PATH_SEP), "keymap_presets"), PATH_SEP), config_raw->keymap);
-	file_copy(path, string_join(string_join(dest, PATH_SEP), ui_files_filename));
+	char *path = string("%s%skeymap_presets%s%s", path_data(), PATH_SEP, PATH_SEP, config_raw->keymap);
+	file_copy(path, string("%s%s%s", dest, PATH_SEP, ui_files_filename));
 }
 
 void box_preferences_keymap_tab_import(char *path) {
@@ -647,9 +645,9 @@ void box_preferences_keymap_tab_new_box() {
 	if (ui_icon_button(tr("OK", NULL), ICON_CHECK, UI_ALIGN_CENTER) || ui->is_return_down) {
 		char *template = keymap_to_json(keymap_get_default());
 		if (!ends_with(keymap_name, ".json")) {
-			keymap_name = string_join(keymap_name, ".json");
+			keymap_name = string("%s.json", keymap_name);
 		}
-		char *path = string_join(string_join(string_join(string_join(path_data(), PATH_SEP), "keymap_presets"), PATH_SEP), keymap_name);
+		char *path = string("%s%skeymap_presets%s%s", path_data(), PATH_SEP, PATH_SEP, keymap_name);
 		iron_file_save_bytes(path, sys_string_to_buffer(template), 0);
 		box_preferences_fetch_keymaps(); // Refresh file list
 		config_raw->keymap          = string_copy(keymap_name);
@@ -674,7 +672,7 @@ void box_preferences_keymap_tab() {
 	box_preferences_h_preset->i = box_preferences_get_preset_index();
 	ui_combo(box_preferences_h_preset, box_preferences_files_keymap, tr("Preset", NULL), false, UI_ALIGN_LEFT, true);
 	if (box_preferences_h_preset->changed) {
-		config_raw->keymap = string_join(box_preferences_files_keymap->buffer[box_preferences_h_preset->i], ".json");
+		config_raw->keymap = string("%s.json", box_preferences_files_keymap->buffer[box_preferences_h_preset->i]);
 		config_apply();
 		keymap_load();
 	}
@@ -762,7 +760,7 @@ void box_preferences_neural_tab() {
 }
 
 bool box_preferences_model_exists(char *file_name) {
-	return iron_file_exists(string_join(string_join(neural_node_dir(), PATH_SEP), file_name));
+	return iron_file_exists(string("%s%s%s", neural_node_dir(), PATH_SEP, file_name));
 }
 
 char *box_preferences_file_name_from_url(char *url) {
@@ -784,12 +782,11 @@ char *box_preferneces_model_url_from_name(char *name) {
 
 void box_preferences_model_panel(neural_node_model_t *m) {
 	if (ui_panel(ui_handle(m->name), m->name, false, true, false)) {
-		if (ui_text(string_join(string_join(string_join(string_join(string_join(tr("source", NULL), ": "), m->web), " ("), m->license), ")"), UI_ALIGN_LEFT,
-		            0x00000000) == UI_STATE_RELEASED) {
+		if (ui_text(string("%s: %s (%s)", tr("source", NULL), m->web, m->license), UI_ALIGN_LEFT, 0x00000000) == UI_STATE_RELEASED) {
 			iron_load_url(m->web);
 		}
-		ui_text(string_join(string_join(tr("gpu memory", NULL), ": "), m->memory), UI_ALIGN_LEFT, 0x00000000);
-		ui_text(string_join(string_join(tr("nodes", NULL), ": "), m->nodes), UI_ALIGN_LEFT, 0x00000000);
+		ui_text(string("%s: %s", tr("gpu memory", NULL), m->memory), UI_ALIGN_LEFT, 0x00000000);
+		ui_text(string("%s: %s", tr("nodes", NULL), m->nodes), UI_ALIGN_LEFT, 0x00000000);
 
 		char *url       = m->urls->buffer[0];
 		char *file_name = box_preferences_file_name_from_url(url);
@@ -801,7 +798,7 @@ void box_preferences_model_panel(neural_node_model_t *m) {
 			u64   u                       = iron_net_bytes_downloaded;
 			i32   i                       = (u / (float)1000000000) * 100;
 			f32   f                       = i / (float)100;
-			char *downloaded              = string_join(f32_to_string(f), "GB");
+			char *downloaded              = string("%sGB", f32_to_string(f));
 			ui_box_hwnd->redraws          = 2;
 			box_preferences_htab->redraws = 2;
 			iron_delay_idle_sleep();
@@ -811,21 +808,21 @@ void box_preferences_model_panel(neural_node_model_t *m) {
 
 			ui_handle_t *h = ui_handle(__ID__);
 			h->f           = f / (float)parse_float(m->size);
-			ui_slider(h, string_join(string_join(downloaded, " / "), m->size), 0.0, 1.0, true, 100, false, UI_ALIGN_CENTER, true);
+			ui_slider(h, string("%s / %s", downloaded, m->size), 0.0, 1.0, true, 100, false, UI_ALIGN_CENTER, true);
 
 			ui->ops->theme->BUTTON_COL = _BUTTON_COL;
 
 			ui->enabled = true;
 		}
-		else if (!found && ui_icon_button(string_join(string_join(string_join(tr("Download", NULL), " ("), m->size), ")"), ICON_ARROW_DOWN, UI_ALIGN_CENTER)) {
+		else if (!found && ui_icon_button(string("%s (%s)", tr("Download", NULL), m->size), ICON_ARROW_DOWN, UI_ALIGN_CENTER)) {
 			neural_node_download_models(m->urls);
 			console_info(tr("Downloading", NULL));
 		}
-		else if (found && ui_icon_button(string_join(string_join(string_join(tr("Remove", NULL), " ("), m->size), ")"), ICON_DELETE, UI_ALIGN_CENTER)) {
+		else if (found && ui_icon_button(string("%s (%s)", tr("Remove", NULL), m->size), ICON_DELETE, UI_ALIGN_CENTER)) {
 			for (i32 i = 0; i < m->urls->length; ++i) {
 				char *url       = m->urls->buffer[i];
 				char *file_name = box_preferences_file_name_from_url(url);
-				iron_delete_file(string_join(string_join(neural_node_dir(), PATH_SEP), file_name));
+				iron_delete_file(string("%s%s%s", neural_node_dir(), PATH_SEP, file_name));
 			}
 		}
 	}
@@ -834,22 +831,22 @@ void box_preferences_model_panel(neural_node_model_t *m) {
 void box_preferences_plugins_tab_plugin_menu_export(char *dest) {
 	if (!ends_with(ui_files_filename, ".js")) {
 		gc_unroot(ui_files_filename);
-		ui_files_filename = string_join(ui_files_filename, ".js");
+		ui_files_filename = string("%s.js", ui_files_filename);
 		gc_root(ui_files_filename);
 	}
-	char *path = string_join(string_join(string_join(string_join(path_data(), PATH_SEP), "plugins"), PATH_SEP), _box_preferences_f);
-	file_copy(path, string_join(string_join(dest, PATH_SEP), ui_files_filename));
+	char *path = string("%s%splugins%s%s", path_data(), PATH_SEP, PATH_SEP, _box_preferences_f);
+	file_copy(path, string("%s%s%s", dest, PATH_SEP, ui_files_filename));
 }
 
 void box_preferences_plugins_tab_plugin_menu() {
-	char *path = string_join(string_join(string_join(string_join(path_data(), PATH_SEP), "plugins"), PATH_SEP), _box_preferences_f);
+	char *path = string("%s%splugins%s%s", path_data(), PATH_SEP, PATH_SEP, _box_preferences_f);
 	if (ui_menu_button(tr("Edit in Text Editor", NULL), "", ICON_NONE)) {
 		file_start(path);
 	}
 	if (ui_menu_button(tr("Edit in Script Tab", NULL), "", ICON_NONE)) {
-		buffer_t *blob            = data_get_blob(string_join("plugins/", _box_preferences_f));
+		buffer_t *blob            = data_get_blob(string("plugins/%s", _box_preferences_f));
 		tab_scripts_hscript->text = string_copy(sys_buffer_to_string(blob));
-		data_delete_blob(string_join("plugins/", _box_preferences_f));
+		data_delete_blob(string("plugins/%s", _box_preferences_f));
 		console_info(tr("Script opened", NULL));
 	}
 	if (ui_menu_button(tr("Export", NULL), "", ICON_EXPORT)) {
@@ -888,9 +885,9 @@ plugin_notify_on_ui(plugin, function() {\
 });\
 ";
 		if (!ends_with(plugin_name, ".js")) {
-			plugin_name = string_join(plugin_name, ".js");
+			plugin_name = string("%s.js", plugin_name);
 		}
-		char *path = string_join(string_join(string_join(string_join(path_data(), PATH_SEP), "plugins"), PATH_SEP), plugin_name);
+		char *path = string("%s%splugins%s%s", path_data(), PATH_SEP, PATH_SEP, plugin_name);
 		iron_file_save_bytes(path, sys_string_to_buffer(template), 0);
 		gc_unroot(box_preferences_files_plugin);
 		box_preferences_files_plugin = NULL; // Refresh file list
@@ -997,7 +994,7 @@ void box_preferences_show() {
 
 void box_preferences_fetch_themes() {
 	gc_unroot(box_preferences_themes);
-	box_preferences_themes = file_read_directory(string_join(string_join(path_data(), PATH_SEP), "themes"));
+	box_preferences_themes = file_read_directory(string("%s%sthemes", path_data(), PATH_SEP));
 	gc_root(box_preferences_themes);
 	for (i32 i = 0; i < box_preferences_themes->length; ++i) {
 		char *s                           = box_preferences_themes->buffer[i];
@@ -1008,7 +1005,7 @@ void box_preferences_fetch_themes() {
 
 void box_preferences_fetch_keymaps() {
 	gc_unroot(box_preferences_files_keymap);
-	box_preferences_files_keymap = file_read_directory(string_join(string_join(path_data(), PATH_SEP), "keymap_presets"));
+	box_preferences_files_keymap = file_read_directory(string("%s%skeymap_presets", path_data(), PATH_SEP));
 	gc_root(box_preferences_files_keymap);
 	for (i32 i = 0; i < box_preferences_files_keymap->length; ++i) {
 		char *s                                 = box_preferences_files_keymap->buffer[i];
@@ -1019,7 +1016,7 @@ void box_preferences_fetch_keymaps() {
 
 void box_preferences_fetch_plugins() {
 	gc_unroot(box_preferences_files_plugin);
-	box_preferences_files_plugin = file_read_directory(string_join(string_join(path_data(), PATH_SEP), "plugins"));
+	box_preferences_files_plugin = file_read_directory(string("%s%splugins", path_data(), PATH_SEP));
 	gc_root(box_preferences_files_plugin);
 }
 

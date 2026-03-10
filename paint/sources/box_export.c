@@ -15,9 +15,9 @@ void box_export_show_textures_box() {
 	box_export_tab_presets();
 
 	box_export_tab_atlases();
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	box_export_tab_export_mesh(box_export_htab);
-	#endif
+#endif
 }
 
 void box_export_show_textures() {
@@ -42,19 +42,19 @@ void box_export_show_bake_material() {
 	ui_box_show_custom(&box_export_show_bake_material_box, 600, 400, NULL, true, tr("Export", NULL));
 }
 
-void box_export_tab_export_textures_run(void * _) {
+void box_export_tab_export_textures_run(void *_) {
 	export_texture_run(context_raw->texture_export_path, _box_export_bake_material);
 }
 
 void box_export_tab_export_textures_path_picked(char *path) {
 	context_raw->texture_export_path = string_copy(path);
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	console_toast(tr("Exporting textures", NULL));
-	#endif
+#endif
 	sys_notify_on_next_frame(&box_export_tab_export_textures_run, NULL);
 }
 
-void box_export_tab_export_textures_on_next_frame(void * _) {
+void box_export_tab_export_textures_on_next_frame(void *_) {
 	layers_set_bits();
 }
 
@@ -64,7 +64,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 
 		ui_row2();
 
-		#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 		string_t_array_t *base_res_combo = any_array_create_from_raw(
 		    (void *[]){
 		        "128",
@@ -75,7 +75,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 		        "4096",
 		    },
 		    6);
-		#else
+#else
 		string_t_array_t *base_res_combo = any_array_create_from_raw(
 		    (void *[]){
 		        "128",
@@ -88,20 +88,20 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 		        "16384",
 		    },
 		    8);
-		#endif
+#endif
 
 		ui_combo(base_res_handle, base_res_combo, tr("Resolution", NULL), true, UI_ALIGN_LEFT, true);
 		if (base_res_handle->changed) {
 			layers_on_resized();
 		}
 
-		#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 		string_t_array_t *base_bits_combo = any_array_create_from_raw(
 		    (void *[]){
 		        "8bit",
 		    },
 		    1);
-		#else
+#else
 		string_t_array_t *base_bits_combo = any_array_create_from_raw(
 		    (void *[]){
 		        "8bit",
@@ -109,7 +109,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 		        "32bit",
 		    },
 		    3);
-		#endif
+#endif
 
 		ui_combo(base_bits_handle, base_bits_combo, tr("Color", NULL), true, UI_ALIGN_LEFT, true);
 		if (base_bits_handle->changed) {
@@ -143,7 +143,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 			context_raw->format_type = ui_combo(h, format_combo, tr("Format", NULL), true, UI_ALIGN_LEFT, true);
 		}
 
-		ui->enabled            = context_raw->format_type == TEXTURE_LDR_FORMAT_JPG && base_bits_handle->i == TEXTURE_BITS_BITS8;
+		ui->enabled = context_raw->format_type == TEXTURE_LDR_FORMAT_JPG && base_bits_handle->i == TEXTURE_BITS_BITS8;
 
 		ui_handle_t *h_quality = ui_handle(__ID__);
 		if (h_quality->init) {
@@ -151,7 +151,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 		}
 		context_raw->format_quality = ui_slider(h_quality, tr("Quality", NULL), 0.0, 100.0, true, 1, true, UI_ALIGN_RIGHT, true);
 
-		ui->enabled                 = true;
+		ui->enabled = true;
 
 		ui_row2();
 		ui->enabled                           = !bake_material;
@@ -174,8 +174,8 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 			box_export_preset = NULL;
 		}
 
-		ui_handle_t *layers_destination_handle     = ui_handle(__ID__);
-		layers_destination_handle->i               = context_raw->layers_destination;
+		ui_handle_t *layers_destination_handle = ui_handle(__ID__);
+		layers_destination_handle->i           = context_raw->layers_destination;
 
 		string_t_array_t *layers_destination_combo = any_array_create_from_raw(
 		    (void *[]){
@@ -206,7 +206,7 @@ void box_export_tab_export_textures(char *title, bool bake_material) {
 		}
 		if (ui->is_hovered) {
 			char *key = any_map_get(config_keymap, "file_export_textures");
-			char *tip = string_join(string_join(string_join(tr("Export texture files", NULL), " ("), key), ")");
+			char *tip = string("%s (%s)", tr("Export texture files", NULL), key);
 			ui_tooltip(tip);
 		}
 	}
@@ -223,13 +223,13 @@ void box_export_tab_presets_import(char *path) {
 	path = string_copy(to_lower_case(path));
 	if (ends_with(path, ".json")) {
 		char *filename = substring(path, string_last_index_of(path, PATH_SEP) + 1, string_length(path));
-		char *dst_path = string_join(string_join(string_join(string_join(path_data(), PATH_SEP), "export_presets"), PATH_SEP), filename);
+		char *dst_path = string("%s%sexport_presets%s%s", path_data(), PATH_SEP, PATH_SEP, filename);
 		file_copy(path, dst_path); // Copy to presets folder
 		box_export_fetch_presets();
 		gc_unroot(box_export_preset);
 		box_export_preset     = NULL;
 		box_export_hpreset->i = char_ptr_array_index_of(box_export_files, substring(filename, 0, string_length(filename) - 5)); // Strip .json
-		console_info(string_join(string_join(tr("Preset imported:", NULL), " "), filename));
+		console_info(string("%s %s", tr("Preset imported:", NULL), filename));
 	}
 	else {
 		console_error(strings_unknown_asset_format());
@@ -389,7 +389,7 @@ void box_export_tab_atlases() {
 			for (i32 i = 0; i < project_paint_objects->length; ++i) {
 				i32_array_push(project_atlas_objects, 0);
 				i32 i1 = i + 1;
-				any_array_push(project_atlas_names, string_join(string_join(tr("Atlas", NULL), " "), i32_to_string(i1)));
+				any_array_push(project_atlas_names, string("%s %s", tr("Atlas", NULL), i32_to_string(i1)));
 			}
 		}
 		for (i32 i = 0; i < project_paint_objects->length; ++i) {
@@ -413,17 +413,17 @@ void box_export_show_mesh() {
 }
 
 void box_export_tab_export_mesh_path_picked(char *path) {
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	char *f = sys_title();
-	#else
+#else
 	char *f = ui_files_filename;
-	#endif
+#endif
 	if (string_equals(f, "")) {
 		f = string_copy(tr("untitled", NULL));
 	}
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	console_toast(tr("Exporting mesh", NULL));
-	#endif
+#endif
 
 	mesh_object_t_array_t *paint_objects;
 	if (box_export_mesh_handle->i == 0) {
@@ -437,7 +437,7 @@ void box_export_tab_export_mesh_path_picked(char *path) {
             },
             1);
 	}
-	export_mesh_run(string_join(string_join(path, PATH_SEP), f), paint_objects, _box_export_apply_displacement, _box_export_merge_vertices);
+	export_mesh_run(string("%s%s%s", path, PATH_SEP, f), paint_objects, _box_export_apply_displacement, _box_export_merge_vertices);
 }
 
 void box_export_tab_export_mesh(ui_handle_t *htab) {
@@ -458,27 +458,27 @@ void box_export_tab_export_mesh(ui_handle_t *htab) {
 		    2);
 		context_raw->export_mesh_format = ui_combo(h_export_mesh_format, export_mesh_format_combo, tr("Format", NULL), true, UI_ALIGN_LEFT, true);
 
-		string_t_array_t *ar            = any_array_create_from_raw(
-            (void *[]){
-                tr("All", NULL),
-            },
-            1);
+		string_t_array_t *ar = any_array_create_from_raw(
+		    (void *[]){
+		        tr("All", NULL),
+		    },
+		    1);
 		for (i32 i = 0; i < project_paint_objects->length; ++i) {
 			mesh_object_t *p = project_paint_objects->buffer[i];
 			any_array_push(ar, p->base->name);
 		}
 		ui_combo(box_export_mesh_handle, ar, tr("Meshes", NULL), true, UI_ALIGN_LEFT, true);
 
-		bool         apply_displacement = ui_check(ui_handle(__ID__), tr("Apply Displacement", NULL), "");
+		bool apply_displacement = ui_check(ui_handle(__ID__), tr("Apply Displacement", NULL), "");
 
-		ui_handle_t *hmerge             = ui_handle(__ID__);
+		ui_handle_t *hmerge = ui_handle(__ID__);
 		if (hmerge->init) {
 			hmerge->b = true;
 		}
-		bool                   merge_vertices = ui_check(hmerge, tr("Merge Shared Vertices", NULL), "");
+		bool merge_vertices = ui_check(hmerge, tr("Merge Shared Vertices", NULL), "");
 
-		i32                    tris           = 0;
-		i32                    pos            = box_export_mesh_handle->i;
+		i32                    tris = 0;
+		i32                    pos  = box_export_mesh_handle->i;
 		mesh_object_t_array_t *paint_objects;
 		if (pos == 0) {
 			paint_objects = project_paint_objects;
@@ -495,7 +495,7 @@ void box_export_tab_export_mesh(ui_handle_t *htab) {
 			mesh_object_t *po = paint_objects->buffer[i];
 			tris += math_floor(po->data->index_array->length / (float)3);
 		}
-		ui_text(string_join(string_join(i32_to_string(tris), " "), tr("triangles", NULL)), UI_ALIGN_LEFT, 0x00000000);
+		ui_text(string("%s %s", i32_to_string(tris), tr("triangles", NULL)), UI_ALIGN_LEFT, 0x00000000);
 
 		ui_row2();
 		if (ui_icon_button(tr("Cancel", NULL), ICON_CLOSE, UI_ALIGN_CENTER)) {
@@ -519,7 +519,7 @@ void box_export_show_material_export(char *path) {
 	if (string_equals(f, "")) {
 		f = string_copy(tr("untitled", NULL));
 	}
-	sys_notify_on_next_frame(&box_export_show_material_export_on_next_frame, string_join(string_join(path, PATH_SEP), f));
+	sys_notify_on_next_frame(&box_export_show_material_export_on_next_frame, string("%s%s%s", path, PATH_SEP, f));
 }
 
 void box_export_show_material_box() {
@@ -555,7 +555,7 @@ void box_export_show_brush_export(char *path) {
 	char *f = ui_files_filename;
 	if (string_equals(f, ""))
 		f = string_copy(tr("untitled", NULL));
-	sys_notify_on_next_frame(&box_export_show_brush_export_on_next_frame, string_join(string_join(path, PATH_SEP), f));
+	sys_notify_on_next_frame(&box_export_show_brush_export_on_next_frame, string("%s%s%s", path, PATH_SEP, f));
 }
 
 void box_export_show_brush_box() {
@@ -585,16 +585,16 @@ void box_export_show_brush() {
 
 void box_export_fetch_presets() {
 	gc_unroot(box_export_files);
-	box_export_files = file_read_directory(string_join(string_join(path_data(), PATH_SEP), "export_presets"));
+	box_export_files = file_read_directory(string("%s%sexport_presets", path_data(), PATH_SEP));
 	gc_root(box_export_files);
 	for (i32 i = 0; i < box_export_files->length; ++i) {
-		char *s                 = box_export_files->buffer[i];
+		char *s                     = box_export_files->buffer[i];
 		box_export_files->buffer[i] = substring(s, 0, string_length(s) - 5); // Strip .json
 	}
 }
 
 void box_export_parse_preset() {
-	char *file = string_join(string_join("export_presets/", box_export_files->buffer[box_export_hpreset->i]), ".json");
+	char     *file = string("export_presets/%s.json", box_export_files->buffer[box_export_hpreset->i]);
 	buffer_t *blob = data_get_blob(file);
 	gc_unroot(box_export_preset);
 	box_export_preset = json_parse(sys_buffer_to_string(blob));
@@ -610,9 +610,9 @@ void box_export_new_preset(char *name) {
 }\
 ";
 	if (!ends_with(name, ".json")) {
-		name = string_join(name, ".json");
+		name = string("%s.json", name);
 	}
-	char *path = string_join(string_join(string_join(string_join(path_data(), PATH_SEP), "export_presets"), PATH_SEP), name);
+	char *path = string("%s%sexport_presets%s%s", path_data(), PATH_SEP, PATH_SEP, name);
 	iron_file_save_bytes(path, sys_string_to_buffer(template), 0);
 }
 
@@ -621,7 +621,7 @@ void box_export_save_preset() {
 	if (string_equals(name, "generic")) {
 		return; // generic is const
 	}
-	char *path = string_join(string_join(string_join(string_join(string_join(path_data(), PATH_SEP), "export_presets"), PATH_SEP), name), ".json");
+	char *path = string("%s%sexport_presets%s%s.json", path_data(), PATH_SEP, PATH_SEP, name);
 	iron_file_save_bytes(path, sys_string_to_buffer(box_export_preset_to_json(box_export_preset)), 0);
 }
 

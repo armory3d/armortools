@@ -20,11 +20,11 @@ char *image_to_pbr_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	if (result == NULL) {
 		return "float3(0.0, 0.0, 0.0)";
 	}
-	char *tex_name = string_join(parser_material_node_name(node, NULL), i32_to_string(socket->id));
+	char *tex_name = string("%s%s", parser_material_node_name(node, NULL), i32_to_string(socket->id));
 	any_map_set(data_cached_images, tex_name, result);
 	bind_tex_t *tex      = parser_material_make_bind_tex(tex_name, tex_name);
-	char   *texstore = parser_material_texture_store(node, tex, tex_name, COLOR_SPACE_AUTO);
-	return string_join(texstore, ".rgb");
+	char       *texstore = parser_material_texture_store(node, tex, tex_name, COLOR_SPACE_AUTO);
+	return string("%s.rgb", texstore);
 }
 
 char *image_to_pbr_node_value(ui_node_t *node, ui_node_socket_t *socket) {
@@ -46,20 +46,20 @@ char *image_to_pbr_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 		return "0.0";
 	}
 
-	char *tex_name = string_join(parser_material_node_name(node, NULL), i32_to_string(socket->id));
+	char *tex_name = string("%s%s", parser_material_node_name(node, NULL), i32_to_string(socket->id));
 	any_map_set(data_cached_images, tex_name, result);
 	bind_tex_t *tex      = parser_material_make_bind_tex(tex_name, tex_name);
-	char   *texstore = parser_material_texture_store(node, tex, tex_name, COLOR_SPACE_AUTO);
-	return string_join(texstore, ".r");
+	char       *texstore = parser_material_texture_store(node, tex, tex_name, COLOR_SPACE_AUTO);
+	return string("%s.r", texstore);
 }
 
 void image_to_pbr_node_run_sd(char *model, char *prompt, void (*done)(gpu_texture_t *)) {
-	char         *dir  = neural_node_dir();
+	char             *dir  = neural_node_dir();
 	string_t_array_t *argv = any_array_create_from_raw(
 	    (void *[]){
-	        string_join(string_join(dir, "/"), neural_node_sd_bin()),
+	        string("%s/%s", dir, neural_node_sd_bin()),
 	        "-m",
-	        string_join(string_join(dir, "/"), model),
+	        string("%s/%s", dir, model),
 	        "--sampling-method",
 	        "ddim_trailing",
 	        "--steps",
@@ -73,9 +73,9 @@ void image_to_pbr_node_run_sd(char *model, char *prompt, void (*done)(gpu_textur
 	        "-p",
 	        prompt,
 	        "-i",
-	        string_join(dir, "/input.png"),
+	        string("%s/input.png", dir),
 	        "-o",
-	        string_join(dir, "/output.png"),
+	        string("%s/output.png", dir),
 	        NULL,
 	    },
 	    20);
@@ -84,7 +84,7 @@ void image_to_pbr_node_run_sd(char *model, char *prompt, void (*done)(gpu_textur
 	sys_notify_on_update(image_to_pbr_node_check_result, done);
 }
 
-void image_to_pbr_node_all_done(void * _) {
+void image_to_pbr_node_all_done(void *_) {
 	render_target_t *occmap;
 	{
 		render_target_t *t = render_target_create();
@@ -157,7 +157,7 @@ void image_to_pbr_node_normals_done(gpu_texture_t *tex) {
 void image_to_pbr_node_button(i32 node_id) {
 	ui_node_canvas_t *canvas    = ui_nodes_get_canvas(true);
 	ui_node_t        *node      = ui_get_node(canvas->nodes, node_id);
-	char         *node_name = parser_material_node_name(node, NULL);
+	char             *node_name = parser_material_node_name(node, NULL);
 	ui_handle_t      *h         = ui_handle(node_name);
 	string_t_array_t *models    = any_array_create_from_raw(
         (void *[]){
@@ -171,12 +171,12 @@ void image_to_pbr_node_button(i32 node_id) {
 		if (input != NULL) {
 			char *dir = neural_node_dir();
 
-			#ifdef IRON_BGRA
+#ifdef IRON_BGRA
 			buffer_t *input_buf = export_arm_bgra_swap(gpu_get_texture_pixels(input)); // Vulkan non-rt textures need a flip
-			#else
+#else
 			buffer_t *input_buf = gpu_get_texture_pixels(input);
-			#endif
-			iron_write_png(string_join(string_join(dir, PATH_SEP), "input.png"), input_buf, input->width, input->height, 0);
+#endif
+			iron_write_png(string("%s%sinput.png", dir, PATH_SEP), input_buf, input->width, input->height, 0);
 
 			image_to_pbr_node_run_sd("marigold-normals-v1-1.q8_0.gguf", "_normals", &image_to_pbr_node_normals_done);
 		}
@@ -187,7 +187,7 @@ void image_to_pbr_node_check_result(void (*done)(gpu_texture_t *)) {
 	iron_delay_idle_sleep();
 	if (iron_exec_async_done == 1) {
 		char *dir  = neural_node_dir();
-		char *file = string_join(string_join(dir, PATH_SEP), "output.png");
+		char *file = string("%s%soutput.png", dir, PATH_SEP);
 		if (iron_file_exists(file)) {
 			gpu_texture_t *tex = iron_load_texture(file);
 			done(tex);

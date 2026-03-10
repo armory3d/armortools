@@ -19,10 +19,9 @@ char *curvature_bake_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 		gc_root(parser_material_bake_passthrough_offset);
 		return "0.0";
 	}
-	char *tex_name = string_join("texbake_", parser_material_node_name(node, NULL));
-	node_shader_add_texture(parser_material_kong, string_join("", tex_name), string_join("_", tex_name));
+	char *tex_name = string("texbake_%s", parser_material_node_name(node, NULL));
+	node_shader_add_texture(parser_material_kong, tex_name, string("_%s", tex_name));
 	char *store = parser_material_store_var_name(node);
-	parser_material_write(parser_material_kong, string_join(string_join(string_join(string_join("var ", store), "_res: float = sample("), tex_name),
-	                                                        ", sampler_linear, tex_coord).r;"));
-	return string_join(store, "_res");
+	parser_material_write(parser_material_kong, string("var %s_res: float = sample(%s, sampler_linear, tex_coord).r;", store, tex_name));
+	return string("%s_res", store);
 }

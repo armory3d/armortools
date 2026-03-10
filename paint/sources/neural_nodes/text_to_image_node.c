@@ -10,9 +10,9 @@ void text_to_image_node_init() {
 string_t_array_t *text_to_image_node_sd_args(char *dir, char *prompt) {
 	string_t_array_t *argv = any_array_create_from_raw(
 	    (void *[]){
-	        string_join(string_join(dir, "/"), neural_node_sd_bin()),
+	        string("%s/%s", dir, neural_node_sd_bin()),
 	        "-m",
-	        string_join(dir, "/v1-5-pruned-emaonly.safetensors"),
+	        string("%s/v1-5-pruned-emaonly.safetensors", dir),
 	        "--offload-to-cpu",
 	        "-W",
 	        "512",
@@ -23,9 +23,9 @@ string_t_array_t *text_to_image_node_sd_args(char *dir, char *prompt) {
 	        "-s",
 	        "-1",
 	        "-o",
-	        string_join(dir, "/output.png"),
+	        string("%s/output.png", dir),
 	        "-p",
-	        string_join(string_join("'", prompt), "'"),
+	        string("'%s'", prompt),
 	        NULL,
 	    },
 	    17);
@@ -35,13 +35,13 @@ string_t_array_t *text_to_image_node_sd_args(char *dir, char *prompt) {
 string_t_array_t *text_to_image_node_zimage_args(char *dir, char *prompt) {
 	string_t_array_t *argv = any_array_create_from_raw(
 	    (void *[]){
-	        string_join(string_join(dir, "/"), neural_node_sd_bin()),
+	        string("%s/%s", dir, neural_node_sd_bin()),
 	        "--diffusion-model",
-	        string_join(dir, "/z_image_turbo-Q4_K.gguf"),
+	        string("%s/z_image_turbo-Q4_K.gguf", dir),
 	        "--vae",
-	        string_join(dir, "/ae.safetensors"),
+	        string("%s/ae.safetensors", dir),
 	        "--llm",
-	        string_join(dir, "/Qwen3-4B-Instruct-2507-Q4_K_S.gguf"),
+	        string("%s/Qwen3-4B-Instruct-2507-Q4_K_S.gguf", dir),
 	        "--diffusion-fa",
 	        "--offload-to-cpu",
 	        "--cfg-scale",
@@ -55,9 +55,9 @@ string_t_array_t *text_to_image_node_zimage_args(char *dir, char *prompt) {
 	        "-s",
 	        "-1",
 	        "-o",
-	        string_join(dir, "/output.png"),
+	        string("%s/output.png", dir),
 	        "-p",
-	        string_join(string_join("'", prompt), "'"),
+	        string("'%s'", prompt),
 	        NULL,
 	    },
 	    24);
@@ -67,15 +67,15 @@ string_t_array_t *text_to_image_node_zimage_args(char *dir, char *prompt) {
 string_t_array_t *text_to_image_node_qwen_args(char *dir, char *prompt) {
 	string_t_array_t *argv = any_array_create_from_raw(
 	    (void *[]){
-	        string_join(string_join(dir, "/"), neural_node_sd_bin()),
+	        string("%s/%s", dir, neural_node_sd_bin()),
 	        "--diffusion-model",
-	        string_join(dir, "/qwen-image-2512-Q4_K_S.gguf"),
+	        string("%s/qwen-image-2512-Q4_K_S.gguf", dir),
 	        "--vae",
-	        string_join(dir, "/Qwen_Image-VAE.safetensors"),
+	        string("%s/Qwen_Image-VAE.safetensors", dir),
 	        "--llm",
-	        string_join(dir, "/Qwen2.5-VL-7B-Instruct-Q4_K_S.gguf"),
+	        string("%s/Qwen2.5-VL-7B-Instruct-Q4_K_S.gguf", dir),
 	        "--llm_vision",
-	        string_join(dir, "/mmproj-F16.gguf"),
+	        string("%s/mmproj-F16.gguf", dir),
 	        "--sampling-method",
 	        "euler",
 	        "--offload-to-cpu",
@@ -88,9 +88,9 @@ string_t_array_t *text_to_image_node_qwen_args(char *dir, char *prompt) {
 	        "-s",
 	        "-1",
 	        "-o",
-	        string_join(dir, "/output.png"),
+	        string("%s/output.png", dir),
 	        "-p",
-	        string_join(string_join("'", prompt), "'"),
+	        string("'%s'", prompt),
 	        NULL,
 	    },
 	    25);
@@ -100,17 +100,17 @@ string_t_array_t *text_to_image_node_qwen_args(char *dir, char *prompt) {
 string_t_array_t *text_to_image_node_wan_args(char *dir, char *prompt) {
 	string_t_array_t *argv = any_array_create_from_raw(
 	    (void *[]){
-	        string_join(string_join(dir, "/"), neural_node_sd_bin()),
+	        string("%s/%s", dir, neural_node_sd_bin()),
 	        "-M",
 	        "vid_gen",
 	        "--diffusion-model",
-	        string_join(dir, "/Wan2.2-T2V-A14B-LowNoise-Q4_K_S.gguf"),
+	        string("%s/Wan2.2-T2V-A14B-LowNoise-Q4_K_S.gguf", dir),
 	        "--high-noise-diffusion-model",
-	        string_join(dir, "/Wan2.2-T2V-A14B-HighNoise-Q4_K_S.gguf"),
+	        string("%s/Wan2.2-T2V-A14B-HighNoise-Q4_K_S.gguf", dir),
 	        "--vae",
-	        string_join(dir, "/Wan2.1_VAE.safetensors"),
+	        string("%s/Wan2.1_VAE.safetensors", dir),
 	        "--t5xxl",
-	        string_join(dir, "/umt5-xxl-encoder-Q4_K_S.gguf"),
+	        string("%s/umt5-xxl-encoder-Q4_K_S.gguf", dir),
 	        "--sampling-method",
 	        "euler",
 	        "--steps",
@@ -127,7 +127,7 @@ string_t_array_t *text_to_image_node_wan_args(char *dir, char *prompt) {
 	        "-s",
 	        "-1",
 	        "-o",
-	        string_join(dir, "/output.png"),
+	        string("%s/output.png", dir),
 	        "-p",
 	        prompt,
 	        NULL,
@@ -138,7 +138,7 @@ string_t_array_t *text_to_image_node_wan_args(char *dir, char *prompt) {
 
 void text_to_image_node_button(i32 node_id) {
 	ui_node_t        *node      = ui_get_node(ui_nodes_get_canvas(true)->nodes, node_id);
-	char         *node_name = parser_material_node_name(node, NULL);
+	char             *node_name = parser_material_node_name(node, NULL);
 	ui_handle_t      *h         = ui_handle(node_name);
 	string_t_array_t *models    = any_array_create_from_raw(
         (void *[]){
@@ -148,8 +148,8 @@ void text_to_image_node_button(i32 node_id) {
             "Wan",
         },
         4);
-	i32       model                  = ui_combo(ui_nest(h, 0), models, tr("Model", NULL), false, UI_ALIGN_LEFT, true);
-	char *prompt                 = ui_text_area(ui_nest(h, 1), UI_ALIGN_LEFT, true, tr("prompt", NULL), true);
+	i32   model                      = ui_combo(ui_nest(h, 0), models, tr("Model", NULL), false, UI_ALIGN_LEFT, true);
+	char *prompt                     = ui_text_area(ui_nest(h, 1), UI_ALIGN_LEFT, true, tr("prompt", NULL), true);
 	node->buttons->buffer[0]->height = string_split(prompt, "\n")->length + 2;
 
 	if (neural_node_button(node, models->buffer[model])) {

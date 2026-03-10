@@ -11,27 +11,12 @@ char *noise_texture_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	node_shader_add_function(parser_material_kong, str_tex_noise);
 	char *co    = parser_material_get_coord(node);
 	char *scale = parser_material_parse_value_input(node->inputs->buffer[1], false);
-	char *res   = string_join(
-        string_join(
-            string_join(
-                string_join(
-                    string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join("float3(tex_noise(", co), " * "), scale),
-	                                                                              "), tex_noise("),
-	                                                                  co),
-	                                                      " * "),
-	                                          scale),
-	                              " + 0.33), tex_noise("),
-                    co),
-                " * "),
-            scale),
-        " + 0.66))");
-	return res;
+	return string("float3(tex_noise(%s * %s), tex_noise(%s * %s + 0.33), tex_noise(%s * %s + 0.66))", co, scale, co, scale, co, scale);
 }
 
 char *noise_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 	node_shader_add_function(parser_material_kong, str_tex_noise);
 	char *co    = parser_material_get_coord(node);
 	char *scale = parser_material_parse_value_input(node->inputs->buffer[1], false);
-	char *res   = string_join(string_join(string_join(string_join("tex_noise(", co), " * "), scale), ")");
-	return res;
+	return string("tex_noise(%s * %s)", co, scale);
 }

@@ -7,7 +7,15 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include BACKEND_GPU_H
+#if defined(IRON_WINDOWS)
+#include "backends/direct3d12_gpu.h"
+#elif defined(IRON_MACOS) || defined(IRON_IOS)
+#include "backends/metal_gpu.h"
+#elif defined(IRON_WASM)
+#include "backends/webgpu_gpu.h"
+#else
+#include "backends/vulkan_gpu.h"
+#endif
 
 #define GPU_MAX_VERTEX_ELEMENTS      16
 #define GPU_MAX_TEXTURES             16

@@ -1,24 +1,4 @@
 
-function add_gpu_backend(name) {
-	project.add_cfiles("sources/backends/" + name + "_gpu.*");
-	project.add_define("BACKEND_GPU_H=\"backends/" + name + "_gpu.h\"");
-}
-
-function add_sys_backend(name) {
-	project.add_cfiles("sources/backends/" + name + "_system.*");
-	project.add_define("BACKEND_SYS_H=\"backends/" + name + "_system.h\"");
-}
-
-function add_net_backend(name) {
-	project.add_cfiles("sources/backends/" + name + "_net.*");
-	project.add_define("BACKEND_NET_H=\"backends/" + name + "_net.h\"");
-}
-
-function add_thread_backend(name) {
-	project.add_cfiles("sources/backends/" + name + "_thread.*");
-	project.add_define("BACKEND_THREAD_H=\"backends/" + name + "_thread.h\"");
-}
-
 function get_version_code() {
 	const now   = new Date();
 	const year  = now.getFullYear().toString().slice(-2);
@@ -38,7 +18,6 @@ project.add_assets("assets/*", {destination : "data/{name}"});
 project.add_assets("assets/licenses/**", {destination : "data/licenses/{name}"});
 project.add_assets("assets/themes/*.json", {destination : "data/themes/{name}"});
 project.add_cfiles("sources/*.c");
-// project.add_cfiles("sources/iron.c");
 if (platform != "wasm") {
 	project.add_cfiles("sources/libs/gc.c");
 }
@@ -48,10 +27,10 @@ project.add_define("EMBED_H_PATH=\"" + os_cwd() + "/build/embed.h" +
                    "\"");
 
 if (platform == "windows") {
-	add_sys_backend("windows");
-	add_net_backend("windows");
-	add_thread_backend("windows");
-	add_gpu_backend("direct3d12");
+	project.add_cfiles("sources/backends/windows_system.*");
+	project.add_cfiles("sources/backends/windows_net.*");
+	project.add_cfiles("sources/backends/windows_thread.*");
+	project.add_cfiles("sources/backends/direct3d12_gpu.*");
 	project.add_define("_CRT_SECURE_NO_WARNINGS");
 	project.add_define("_WINSOCK_DEPRECATED_NO_WARNINGS");
 	project.add_define("IRON_DIRECT3D12");
@@ -73,10 +52,10 @@ if (platform == "windows") {
 	}
 }
 else if (platform == "linux") {
-	add_sys_backend("linux");
-	add_net_backend("posix");
-	add_thread_backend("posix");
-	add_gpu_backend("vulkan");
+	project.add_cfiles("sources/backends/linux_system.*");
+	project.add_cfiles("sources/backends/posix_net.*");
+	project.add_cfiles("sources/backends/posix_thread.*");
+	project.add_cfiles("sources/backends/vulkan_gpu.*");
 	project.add_define("IRON_VULKAN");
 	project.add_define("_POSIX_C_SOURCE=200809L");
 	project.add_lib("X11");
@@ -94,18 +73,18 @@ else if (platform == "linux") {
 	}
 }
 else if (platform == "macos") {
-	add_sys_backend("macos");
-	add_net_backend("apple");
-	add_thread_backend("apple");
-	add_gpu_backend("metal");
+	project.add_cfiles("sources/backends/macos_system.*");
+	project.add_cfiles("sources/backends/apple_net.*");
+	project.add_cfiles("sources/backends/apple_thread.*");
+	project.add_cfiles("sources/backends/metal_gpu.*");
 	project.add_cfiles("sources/backends/data/mac.plist");
 	project.add_define("IRON_METAL");
 }
 else if (platform == "ios") {
-	add_sys_backend("ios");
-	add_net_backend("apple");
-	add_thread_backend("apple");
-	add_gpu_backend("metal");
+	project.add_cfiles("sources/backends/ios_system.*");
+	project.add_cfiles("sources/backends/apple_net.*");
+	project.add_cfiles("sources/backends/apple_thread.*");
+	project.add_cfiles("sources/backends/metal_gpu.*");
 	project.add_cfiles("sources/backends/data/ios.plist");
 	project.add_cfiles("sources/backends/ios_file_dialog.m");
 	project.add_define("IRON_METAL");
@@ -113,9 +92,9 @@ else if (platform == "ios") {
 	project.target_options.ios.version = get_version_code() + "";
 }
 else if (platform == "android") {
-	add_sys_backend("android");
-	add_thread_backend("posix");
-	add_gpu_backend("vulkan");
+	project.add_cfiles("sources/backends/android_system.*");
+	project.add_cfiles("sources/backends/posix_thread.*");
+	project.add_cfiles("sources/backends/vulkan_gpu.*");
 	project.add_cfiles("sources/backends/android_file_dialog.c");
 	project.add_cfiles("sources/backends/android_net.c");
 	project.add_cfiles("sources/backends/android_native_app_glue.c");
@@ -137,9 +116,9 @@ else if (platform == "android") {
 	project.target_options.android.versionName       = "1.0 alpha";
 }
 else if (platform == "wasm") {
-	add_sys_backend("wasm");
-	add_thread_backend("wasm");
-	add_gpu_backend("webgpu");
+	project.add_cfiles("sources/backends/wasm_system.*");
+	project.add_cfiles("sources/backends/wasm_thread.*");
+	project.add_cfiles("sources/backends/webgpu_gpu.*");
 	project.add_define("IRON_WASM");
 	project.add_define("IRON_WEBGPU");
 	project.add_define("NO_GC");

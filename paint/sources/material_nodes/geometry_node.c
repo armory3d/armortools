@@ -40,37 +40,18 @@ char *geometry_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 		                                      // return "(1.0 - float(gl_FrontFacing))";
 	}
 	else if (socket == node->outputs->buffer[7]) { // Pointiness
-		f32       strength           = 1.0;
-		f32       radius             = 1.0;
-		f32       offset             = 0.0;
-		char *store              = parser_material_store_var_name(node);
+		f32   strength               = 1.0;
+		f32   radius                 = 1.0;
+		f32   offset                 = 0.0;
+		char *store                  = parser_material_store_var_name(node);
 		parser_material_kong->frag_n = true;
-		parser_material_write(parser_material_kong, string_join(string_join("var ", store), "_dx: float3 = ddx3(n);"));
-		parser_material_write(parser_material_kong, string_join(string_join("var ", store), "_dy: float3 = ddy3(n);"));
-		parser_material_write(
-		    parser_material_kong,
-		    string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join("var ", store),
-		                                                                                                                "_curvature: float = max(dot("),
-		                                                                                                    store),
-		                                                                                        "_dx, "),
-		                                                                            store),
-		                                                                "_dx), dot("),
-		                                                    store),
-		                                        "_dy, "),
-		                            store),
-		                "_dy));"));
-		parser_material_write(
-		    parser_material_kong,
-		    string_join(
-		        string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(store, "_curvature = clamp(pow("), store),
-		                                                                                "_curvature, (1.0 / "),
-		                                                                    f32_to_string(radius)),
-		                                                        ") * 0.25) * "),
-		                                            f32_to_string(strength)),
-		                                " * 2.0 + "),
-		                    f32_to_string(offset)),
-		        " / 10.0, 0.0, 1.0);"));
-		return string_join(store, "_curvature");
+		parser_material_write(parser_material_kong, string("var %s_dx: float3 = ddx3(n);", store));
+		parser_material_write(parser_material_kong, string("var %s_dy: float3 = ddy3(n);", store));
+		parser_material_write(parser_material_kong,
+		                      string("var %s_curvature: float = max(dot(%s_dx, %s_dx), dot(%s_dy, %s_dy));", store, store, store, store, store));
+		parser_material_write(parser_material_kong, string("%s_curvature = clamp(pow(%s_curvature, (1.0 / %s) * 0.25) * %s * 2.0 + %s / 10.0, 0.0, 1.0);",
+		                                                   store, store, f32_to_string(radius), f32_to_string(strength), f32_to_string(offset)));
+		return string("%s_curvature", store);
 	}
 	else { // Random Per Island
 		return "0.0";

@@ -2,16 +2,16 @@
 #include "global.h"
 
 void box_projects_show_box() {
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	box_projects_align_to_fullscreen();
-	#endif
+#endif
 
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	box_projects_tab();
 	box_projects_get_started_tab();
-	#else
+#else
 	box_projects_recent_tab();
-	#endif
+#endif
 }
 
 void box_projects_show() {
@@ -26,16 +26,16 @@ void box_projects_show() {
 	}
 
 	bool draggable;
-	#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 	draggable = false;
-	#else
+#else
 	draggable = true;
-	#endif
+#endif
 
 	ui_box_show_custom(&box_projects_show_box, 600, 400, NULL, draggable, "");
 }
 
-void box_projects_tab_menu_on_next_frame(void * _) {
+void box_projects_tab_menu_on_next_frame(void *_) {
 	iron_delete_file(_box_projects_path);
 	iron_delete_file(_box_projects_icon_path);
 	char *data_path = substring(_box_projects_path, 0, string_length(_box_projects_path) - 4);
@@ -68,16 +68,16 @@ void box_projects_tab() {
 			project_new(true);
 			ui_box_hide();
 			// Pick unique name
-			i32       i     = 0;
-			i32       j     = 0;
-			char *title = string_join(string_join("", tr("untitled", NULL)), i32_to_string(i));
+			i32   i     = 0;
+			i32   j     = 0;
+			char *title = string("%s%s", tr("untitled", NULL), i32_to_string(i));
 			while (j < config_raw->recent_projects->length) {
 				char *base = config_raw->recent_projects->buffer[j];
-				base           = string_copy(substring(base, string_last_index_of(base, PATH_SEP) + 1, string_last_index_of(base, ".")));
+				base       = string_copy(substring(base, string_last_index_of(base, PATH_SEP) + 1, string_last_index_of(base, ".")));
 				j++;
 				if (string_equals(title, base)) {
 					i++;
-					title = string_join(string_join("", tr("untitled", NULL)), i32_to_string(i));
+					title = string("%s%s", tr("untitled", NULL), i32_to_string(i));
 					j     = 0;
 				}
 			}
@@ -119,15 +119,15 @@ void box_projects_tab() {
 					continue;
 				}
 
-				char *path               = recent_projects->buffer[i];
+				char *path = recent_projects->buffer[i];
 
-				#ifdef IRON_IOS
+#ifdef IRON_IOS
 				char *document_directory = iron_save_dialog("", "");
-				document_directory           = string_copy(substring(document_directory, 0, string_length(document_directory) - 8)); // Strip /"untitled"
-				path                         = string_join(document_directory, path);
-				#endif
+				document_directory       = string_copy(substring(document_directory, 0, string_length(document_directory) - 8)); // Strip /"untitled"
+				path                     = string("%s%s", document_directory, path);
+#endif
 
-				char *icon_path          = string_join(substring(path, 0, string_length(path) - 4), "_icon.png");
+				char *icon_path = string("%s_icon.png", substring(path, 0, string_length(path) - 4));
 				if (box_projects_icon_map == NULL) {
 					gc_unroot(box_projects_icon_map);
 					box_projects_icon_map = any_map_create();
@@ -150,9 +150,9 @@ void box_projects_tab() {
 						ui->_x   = uix;
 						ui_fill(0, 0, 128, 128, 0x66000000);
 						ui->_x = _uix;
-						#if defined(IRON_ANDROID) || defined(IRON_IOS)
+#if defined(IRON_ANDROID) || defined(IRON_IOS)
 						console_toast(tr("Opening project", NULL));
-						#endif
+#endif
 						sys_notify_on_next_frame(&box_projects_tab_on_next_frame, path);
 					}
 
@@ -205,11 +205,11 @@ void box_projects_recent_tab() {
 		ui->enabled                = true;
 		for (i32 i = 0; i < config_raw->recent_projects->length; ++i) {
 			char *path = config_raw->recent_projects->buffer[i];
-			#ifdef IRON_WINDOWS
-			path           = string_copy(string_replace_all(path, "/", "\\"));
-			#else
-			path           = string_copy(string_replace_all(path, "\\", "/"));
-			#endif
+#ifdef IRON_WINDOWS
+			path = string_copy(string_replace_all(path, "/", "\\"));
+#else
+			path = string_copy(string_replace_all(path, "\\", "/"));
+#endif
 			char *file = substring(path, string_last_index_of(path, PATH_SEP) + 1, string_length(path));
 
 			if (string_index_of(to_lower_case(file), to_lower_case(box_projects_hsearch->text)) < 0) {
@@ -261,13 +261,13 @@ void box_projects_get_started_tab() {
 		ui_separator(UI_ELEMENT_H(), false);
 
 		if (ui_icon_button(tr("Manual", NULL), ICON_HELP, UI_ALIGN_CENTER)) {
-			iron_load_url(string_join(manifest_url, "/manual"));
+			iron_load_url(string("%s/manual", manifest_url));
 		}
 		if (ui_icon_button(tr("How To", NULL), ICON_HELP, UI_ALIGN_CENTER)) {
-			iron_load_url(string_join(manifest_url, "/howto"));
+			iron_load_url(string("%s/howto", manifest_url));
 		}
 		if (ui_icon_button(tr("What's New", NULL), ICON_LINK, UI_ALIGN_CENTER)) {
-			iron_load_url(string_join(manifest_url, "/notes"));
+			iron_load_url(string("%s/notes", manifest_url));
 		}
 	}
 }

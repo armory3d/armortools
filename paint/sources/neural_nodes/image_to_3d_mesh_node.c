@@ -19,7 +19,7 @@ buffer_t *image_to_3d_mesh_node_remove_background(buffer_t *buffer) {
 void image_to_3d_mesh_node_button(i32 node_id) {
 	ui_node_canvas_t *canvas    = ui_nodes_get_canvas(true);
 	ui_node_t        *node      = ui_get_node(canvas->nodes, node_id);
-	char         *node_name = parser_material_node_name(node, NULL);
+	char             *node_name = parser_material_node_name(node, NULL);
 	ui_handle_t      *h         = ui_handle(node_name);
 	string_t_array_t *models    = any_array_create_from_raw(
         (void *[]){
@@ -33,29 +33,25 @@ void image_to_3d_mesh_node_button(i32 node_id) {
 		if (input != NULL) {
 			char *dir = neural_node_dir();
 
-			#ifdef IRON_BGRA
+#ifdef IRON_BGRA
 			buffer_t *input_buf = image_to_3d_mesh_node_remove_background(export_arm_bgra_swap(gpu_get_texture_pixels(input)));
-			#else
+#else
 			buffer_t *input_buf = image_to_3d_mesh_node_remove_background(gpu_get_texture_pixels(input));
-			#endif
-			iron_write_png(string_join(string_join(dir, PATH_SEP), "input.png"), input_buf, input->width, input->height, 0);
+#endif
+			iron_write_png(string("%s%sinput.png", dir, PATH_SEP), input_buf, input->width, input->height, 0);
 
 			dir                    = string_copy(string_replace_all(dir, "\\", "/"));
 			string_t_array_t *argv = any_array_create_from_raw(
 			    (void *[]){
-			        string_join(dir, "/Hunyuan3D_win64/python/python.exe"),
+			        string("%s/Hunyuan3D_win64/python/python.exe", dir),
 			        "-s",
 			        "-B",
 			        "-c",
-			        string_join(
-			            string_join(string_join(string_join(string_join(string_join("from hy3dshape.pipelines import Hunyuan3DDiTFlowMatchingPipeline; "
-			                                                                        "shape_pipeline = Hunyuan3DDiTFlowMatchingPipeline.from_pretrained('",
-			                                                                        dir),
-			                                                            "/Hunyuan3D_win64/Hunyuan3D-2.1'); mesh = shape_pipeline(image='"),
-			                                                dir),
-			                                    "/input.png', octree_resolution=512, num_chunks=64000)[0]; mesh.export('"),
-			                        dir),
-			            "/output.obj')"),
+			        string("from hy3dshape.pipelines import Hunyuan3DDiTFlowMatchingPipeline; "
+			               "shape_pipeline = Hunyuan3DDiTFlowMatchingPipeline.from_pretrained('%s/Hunyuan3D_win64/Hunyuan3D-2.1'); "
+			               "mesh = shape_pipeline(image='%s/input.png', octree_resolution=512, num_chunks=64000)[0]; "
+			               "mesh.export('%s/output.obj')",
+			               dir, dir, dir),
 			        NULL,
 			    },
 			    6);
@@ -72,7 +68,7 @@ void image_to_3d_mesh_node_check_result(ui_node_t *node) {
 	gc_root(neural_node_current);
 	iron_delay_idle_sleep();
 	if (iron_exec_async_done == 1) {
-		char *file = string_join(string_join(neural_node_dir(), PATH_SEP), "output.obj");
+		char *file = string("%s%soutput.obj", neural_node_dir(), PATH_SEP);
 		if (iron_file_exists(file)) {
 			// let result: gpu_texture_t = ;
 			// map_set(neural_node_results, node.id, result);

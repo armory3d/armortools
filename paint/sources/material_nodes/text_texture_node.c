@@ -8,12 +8,12 @@ void text_texture_node_init() {
 }
 
 void _parser_material_cache_tex_text_node_on_next_frame(char *text) {
-	char      *_text_tool_text  = context_raw->text_tool_text;
+	char          *_text_tool_text  = context_raw->text_tool_text;
 	gpu_texture_t *_text_tool_image = context_raw->text_tool_image;
 	context_raw->text_tool_text     = string_copy(text);
 	context_raw->text_tool_image    = NULL;
 	util_render_make_text_preview();
-	char *file = string_join("tex_text_", text);
+	char *file = string("tex_text_%s", text);
 	// TODO: remove old cache
 	any_map_set(data_cached_images, file, context_raw->text_tool_image);
 	context_raw->text_tool_text  = string_copy(_text_tool_text);
@@ -27,23 +27,23 @@ void _parser_material_cache_tex_text_node(char *file, char *text) {
 }
 
 char *text_texture_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
-	char *tex_name    = parser_material_node_name(node, NULL);
+	char     *tex_name    = parser_material_node_name(node, NULL);
 	buffer_t *text_buffer = node->buttons->buffer[0]->default_value;
-	char *text        = sys_buffer_to_string(text_buffer);
-	char *file        = string_join("tex_text_", text);
+	char     *text        = sys_buffer_to_string(text_buffer);
+	char     *file        = string("tex_text_%s", text);
 	_parser_material_cache_tex_text_node(file, text);
 	bind_tex_t *tex      = parser_material_make_bind_tex(tex_name, file);
-	char   *texstore = parser_material_texture_store(node, tex, tex_name, COLOR_SPACE_AUTO);
-	return string_join(texstore, ".rrr");
+	char       *texstore = parser_material_texture_store(node, tex, tex_name, COLOR_SPACE_AUTO);
+	return string("%s.rrr", texstore);
 }
 
 char *text_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
-	char *tex_name    = parser_material_node_name(node, NULL);
+	char     *tex_name    = parser_material_node_name(node, NULL);
 	buffer_t *text_buffer = node->buttons->buffer[0]->default_value;
-	char *text        = sys_buffer_to_string(text_buffer);
-	char *file        = string_join("tex_text_", text);
+	char     *text        = sys_buffer_to_string(text_buffer);
+	char     *file        = string("tex_text_%s", text);
 	_parser_material_cache_tex_text_node(file, text);
 	bind_tex_t *tex      = parser_material_make_bind_tex(tex_name, file);
-	char   *texstore = parser_material_texture_store(node, tex, tex_name, COLOR_SPACE_AUTO);
-	return string_join(texstore, ".r");
+	char       *texstore = parser_material_texture_store(node, tex, tex_name, COLOR_SPACE_AUTO);
+	return string("%s.r", texstore);
 }

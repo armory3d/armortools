@@ -5,7 +5,7 @@ void args_parse() {
 	if (iron_get_arg_count() > 1) {
 		args_use = true;
 
-		i32 i    = 0;
+		i32 i = 0;
 		while (i < iron_get_arg_count()) {
 			// Process each arg
 			char *current_arg = iron_get_arg(i);
@@ -110,18 +110,18 @@ void args_run_on_next_frame(void *_) {
 
 		// Get export preset and apply the correct one from args
 		gc_unroot(box_export_files);
-		box_export_files = file_read_directory(string_join(string_join(path_data(), PATH_SEP), "export_presets"));
+		box_export_files = file_read_directory(string("%s%sexport_presets", path_data(), PATH_SEP));
 		gc_root(box_export_files);
 		for (i32 i = 0; i < box_export_files->length; ++i) {
-			char *s                 = box_export_files->buffer[i];
+			char *s                     = box_export_files->buffer[i];
 			box_export_files->buffer[i] = substring(s, 0, string_length(s) - 5); // Strip .json
 		}
 
-		char *file = string_join(string_join("export_presets/", box_export_files->buffer[0]), ".json");
+		char *file = string("export_presets/%s.json", box_export_files->buffer[0]);
 		for (i32 i = 0; i < box_export_files->length; ++i) {
 			char *f = box_export_files->buffer[i];
 			if (string_equals(f, args_export_textures_preset)) {
-				file = string_join(string_join("export_presets/", box_export_files->buffer[array_index_of(box_export_files, f)]), ".json");
+				file = string("export_presets/%s.json", box_export_files->buffer[array_index_of(box_export_files, f)]);
 			}
 		}
 
@@ -129,7 +129,7 @@ void args_run_on_next_frame(void *_) {
 		gc_unroot(box_export_preset);
 		box_export_preset = json_parse(sys_buffer_to_string(blob));
 		gc_root(box_export_preset);
-		data_delete_blob(string_join("export_presets/", file));
+		data_delete_blob(string("export_presets/%s", file));
 
 		// Export queue
 		sys_notify_on_next_frame(&args_run_export_queue, NULL);
@@ -143,7 +143,7 @@ void args_run_on_next_frame(void *_) {
 		if (string_equals(f, "")) {
 			f = string_copy(tr("untitled", NULL));
 		}
-		export_mesh_run(string_join(string_join(args_export_mesh_path, PATH_SEP), f), NULL, false, true);
+		export_mesh_run(string("%s%s%s", args_export_mesh_path, PATH_SEP, f), NULL, false, true);
 	}
 	else if (args_export_material) {
 		context_raw->write_icon_on_export = true;

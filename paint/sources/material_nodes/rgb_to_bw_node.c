@@ -8,6 +8,5 @@ void rgb_to_bw_node_init() {
 
 char *rgb_to_bw_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 	char *col = parser_material_parse_vector_input(node->inputs->buffer[0]);
-	return string_join(string_join(string_join(string_join(string_join(string_join("(((", col), ".r * 0.3 + "), col), ".g * 0.59 + "), col),
-	                   ".b * 0.11) / 3.0) * 2.5)");
+	return string("(((%s.r * 0.3 + %s.g * 0.59 + %s.b * 0.11) / 3.0) * 2.5)", col, col, col);
 }

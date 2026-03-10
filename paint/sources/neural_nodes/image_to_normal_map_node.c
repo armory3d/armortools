@@ -10,7 +10,7 @@ void image_to_normal_map_node_init() {
 void image_to_normal_map_node_button(i32 node_id) {
 	ui_node_canvas_t *canvas    = ui_nodes_get_canvas(true);
 	ui_node_t        *node      = ui_get_node(canvas->nodes, node_id);
-	char         *node_name = parser_material_node_name(node, NULL);
+	char             *node_name = parser_material_node_name(node, NULL);
 	ui_handle_t      *h         = ui_handle(node_name);
 	string_t_array_t *models    = any_array_create_from_raw(
         (void *[]){
@@ -24,18 +24,18 @@ void image_to_normal_map_node_button(i32 node_id) {
 		if (input != NULL) {
 			char *dir = neural_node_dir();
 
-			#ifdef IRON_BGRA
+#ifdef IRON_BGRA
 			buffer_t *input_buf = export_arm_bgra_swap(gpu_get_texture_pixels(input)); // Vulkan non-rt textures need a flip
-			#else
+#else
 			buffer_t *input_buf = gpu_get_texture_pixels(input);
-			#endif
-			iron_write_png(string_join(string_join(dir, PATH_SEP), "input.png"), input_buf, input->width, input->height, 0);
+#endif
+			iron_write_png(string("%s%sinput.png", dir, PATH_SEP), input_buf, input->width, input->height, 0);
 
 			string_t_array_t *argv = any_array_create_from_raw(
 			    (void *[]){
-			        string_join(string_join(dir, "/"), neural_node_sd_bin()),
+			        string("%s/%s", dir, neural_node_sd_bin()),
 			        "-m",
-			        string_join(dir, "/marigold-normals-v1-1.q8_0.gguf"),
+			        string("%s/marigold-normals-v1-1.q8_0.gguf", dir),
 			        "--sampling-method",
 			        "ddim_trailing",
 			        "--steps",
@@ -49,9 +49,9 @@ void image_to_normal_map_node_button(i32 node_id) {
 			        "-p",
 			        "_normals",
 			        "-i",
-			        string_join(dir, "/input.png"),
+			        string("%s/input.png", dir),
 			        "-o",
-			        string_join(dir, "/output.png"),
+			        string("%s/output.png", dir),
 			        NULL,
 			    },
 			    20);

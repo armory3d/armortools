@@ -10,7 +10,7 @@ void image_texture_node_init() {
 char *parser_material_texture_store(ui_node_t *node, bind_tex_t *tex, char *tex_name, i32 color_space) {
 	any_array_push(parser_material_matcon->bind_textures, tex);
 	node_shader_context_add_elem(parser_material_kong->context, "tex", "short2norm");
-	node_shader_add_texture(parser_material_kong, string_join("", tex_name), NULL);
+	node_shader_add_texture(parser_material_kong, tex_name, NULL);
 	char *uv_name = "";
 	if (string_equals(node->type, "TEX_IMAGE") && parser_material_get_input_link(node->inputs->buffer[0]) != NULL) {
 		uv_name = string_copy(parser_material_parse_vector_input(node->inputs->buffer[0]));
@@ -20,102 +20,51 @@ char *parser_material_texture_store(ui_node_t *node, bind_tex_t *tex, char *tex_
 	}
 	char *tex_store = parser_material_store_var_name(node);
 	if (parser_material_sample_keep_aspect) {
-		node_shader_add_constant(parser_material_kong, string_join(tex_name, "_size: float2"), string_join(string_join("_size(", tex_name), ")"));
-		parser_material_write(parser_material_kong,
-		                      string_join(string_join(string_join(string_join("var ", tex_store), "_size: float2 = constants."), tex_name), "_size;"));
+		node_shader_add_constant(parser_material_kong, string("%s_size: float2", tex_name), string("_size(%s)", tex_name));
+		parser_material_write(parser_material_kong, string("var %s_size: float2 = constants.%s_size;", tex_store, tex_name));
+		parser_material_write(parser_material_kong, string("var %s_ax: float = %s_size.x / %s_size.y;", tex_store, tex_store, tex_store));
+		parser_material_write(parser_material_kong, string("var %s_ay: float = %s_size.y / %s_size.x;", tex_store, tex_store, tex_store));
 		parser_material_write(
 		    parser_material_kong,
-		    string_join(string_join(string_join(string_join(string_join(string_join("var ", tex_store), "_ax: float = "), tex_store), "_size.x / "), tex_store),
-		                "_size.y;"));
-		parser_material_write(
-		    parser_material_kong,
-		    string_join(string_join(string_join(string_join(string_join(string_join("var ", tex_store), "_ay: float = "), tex_store), "_size.y / "), tex_store),
-		                "_size.x;"));
-		parser_material_write(
-		    parser_material_kong,
-		    string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join("var ", tex_store),
-		                                                                                                                "_uv: float2 = (("),
-		                                                                                                    uv_name),
-		                                                                                        ".xy / float("),
-		                                                                            parser_material_sample_uv_scale),
-		                                                                ") - float2(0.5, 0.5)) * float2(max("),
-		                                                    tex_store),
-		                                        "_ay, 1.0), max("),
-		                            tex_store),
-		                "_ax, 1.0))) + float2(0.5, 0.5);"));
-		parser_material_write(
-		    parser_material_kong,
-		    string_join(string_join(string_join(string_join(string_join(string_join(string_join(string_join("if (", tex_store), "_uv.x < 0.0 || "), tex_store),
-		                                                                "_uv.y < 0.0 || "),
-		                                                    tex_store),
-		                                        "_uv.x > 1.0 || "),
-		                            tex_store),
-		                "_uv.y > 1.0) { discard; }"));
-		parser_material_write(parser_material_kong,
-		                      string_join(string_join(string_join(string_join(string_join(tex_store, "_uv = "), tex_store), "_uv * float("),
-		                                              parser_material_sample_uv_scale),
-		                                  ");"));
-		uv_name = string_join(tex_store, "_uv");
+		    string("var %s_uv: float2 = ((%s.xy / float(%s) - float2(0.5, 0.5)) * float2(max(%s_ay, 1.0), max(%s_ax, 1.0))) + float2(0.5, 0.5);", tex_store,
+		           uv_name, parser_material_sample_uv_scale, tex_store, tex_store));
+		parser_material_write(parser_material_kong, string("if (%s_uv.x < 0.0 || %s_uv.y < 0.0 || %s_uv.x > 1.0 || %s_uv.y > 1.0) { discard; }", tex_store,
+		                                                   tex_store, tex_store, tex_store));
+		parser_material_write(parser_material_kong, string("%s_uv = %s_uv * float(%s);", tex_store, tex_store, parser_material_sample_uv_scale));
+		uv_name = string("%s_uv", tex_store);
 	}
 	if (parser_material_triplanar) {
-		parser_material_write(parser_material_kong, string_join(string_join("var ", tex_store), ": float4 = float4(0.0, 0.0, 0.0, 0.0);"));
-		parser_material_write(
-		    parser_material_kong,
-		    string_join(string_join(string_join(string_join(string_join(string_join("if (tex_coord_blend.x > 0.0) {", tex_store), " += sample("), tex_name),
-		                                        ", sampler_linear, "),
-		                            uv_name),
-		                ".xy) * tex_coord_blend.x; }"));
-		parser_material_write(
-		    parser_material_kong,
-		    string_join(string_join(string_join(string_join(string_join(string_join("if (tex_coord_blend.y > 0.0) {", tex_store), " += sample("), tex_name),
-		                                        ", sampler_linear, "),
-		                            uv_name),
-		                "1.xy) * tex_coord_blend.y; }"));
-		parser_material_write(
-		    parser_material_kong,
-		    string_join(string_join(string_join(string_join(string_join(string_join("if (tex_coord_blend.z > 0.0) {", tex_store), " += sample("), tex_name),
-		                                        ", sampler_linear, "),
-		                            uv_name),
-		                "2.xy) * tex_coord_blend.z; }"));
+		parser_material_write(parser_material_kong, string("var %s: float4 = float4(0.0, 0.0, 0.0, 0.0);", tex_store));
+		parser_material_write(parser_material_kong, string("if (tex_coord_blend.x > 0.0) {%s += sample(%s, sampler_linear, %s.xy) * tex_coord_blend.x; }",
+		                                                   tex_store, tex_name, uv_name));
+		parser_material_write(parser_material_kong, string("if (tex_coord_blend.y > 0.0) {%s += sample(%s, sampler_linear, %s1.xy) * tex_coord_blend.y; }",
+		                                                   tex_store, tex_name, uv_name));
+		parser_material_write(parser_material_kong, string("if (tex_coord_blend.z > 0.0) {%s += sample(%s, sampler_linear, %s2.xy) * tex_coord_blend.z; }",
+		                                                   tex_store, tex_name, uv_name));
 	}
 	else {
 		if (parser_material_is_frag) {
-			any_map_set(parser_material_texture_map, tex_store,
-			            string_join(string_join(string_join(string_join("sample(", tex_name), ", sampler_linear, "), uv_name), ".xy)"));
-			parser_material_write(parser_material_kong,
-			                      string_join(string_join(string_join(string_join(string_join(string_join("var ", tex_store), ": float4 = sample("), tex_name),
-			                                                          ", sampler_linear, "),
-			                                              uv_name),
-			                                  ".xy);"));
+			any_map_set(parser_material_texture_map, tex_store, string("sample(%s, sampler_linear, %s.xy)", tex_name, uv_name));
+			parser_material_write(parser_material_kong, string("var %s: float4 = sample(%s, sampler_linear, %s.xy);", tex_store, tex_name, uv_name));
 		}
 		else {
-			any_map_set(parser_material_texture_map, tex_store,
-			            string_join(string_join(string_join(string_join("sample_lod(", tex_name), ", sampler_linear, "), uv_name), ".xy, 0.0)"));
-			parser_material_write(parser_material_kong,
-			                      string_join(string_join(string_join(string_join(string_join(string_join("var ", tex_store), ": float4 = sample_lod("),
-			                                                                      tex_name),
-			                                                          ", sampler_linear, "),
-			                                              uv_name),
-			                                  ".xy, 0.0);"));
+			any_map_set(parser_material_texture_map, tex_store, string("sample_lod(%s, sampler_linear, %s.xy, 0.0)", tex_name, uv_name));
+			parser_material_write(parser_material_kong, string("var %s: float4 = sample_lod(%s, sampler_linear, %s.xy, 0.0);", tex_store, tex_name, uv_name));
 		}
 		if (!ends_with(tex->file, ".jpg")) { // Pre-mult alpha
-			parser_material_write(parser_material_kong,
-			                      string_join(string_join(string_join(string_join(string_join(tex_store, ".rgb = "), tex_store), ".rgb * "), tex_store),
-			                                  ".a;"));
+			parser_material_write(parser_material_kong, string("%s.rgb = %s.rgb * %s.a;", tex_store, tex_store, tex_store));
 		}
 	}
 	if (parser_material_transform_color_space) {
 		// Base color socket auto-converts from sRGB to linear
 		if (color_space == COLOR_SPACE_LINEAR && parser_material_parsing_basecolor) { // Linear to sRGB
-			parser_material_write(parser_material_kong,
-			                      string_join(string_join(string_join(tex_store, ".rgb = pow3("), tex_store), ".rgb, float3(2.2, 2.2, 2.2));"));
+			parser_material_write(parser_material_kong, string("%s.rgb = pow3(%s.rgb, float3(2.2, 2.2, 2.2));", tex_store, tex_store));
 		}
 		else if (color_space == COLOR_SPACE_SRGB && !parser_material_parsing_basecolor) { // sRGB to linear
-			parser_material_write(parser_material_kong, string_join(string_join(string_join(tex_store, ".rgb = pow3("), tex_store),
-			                                                        ".rgb, float3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));"));
+			parser_material_write(parser_material_kong, string("%s.rgb = pow3(%s.rgb, float3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));", tex_store, tex_store));
 		}
 		else if (color_space == COLOR_SPACE_DIRECTX_NORMAL_MAP) { // DirectX normal map to OpenGL normal map
-			parser_material_write(parser_material_kong, string_join(string_join(string_join(tex_store, ".y = 1.0 - "), tex_store), ".y;"));
+			parser_material_write(parser_material_kong, string("%s.y = 1.0 - %s.y;", tex_store, tex_store));
 		}
 	}
 	return tex_store;
@@ -137,19 +86,19 @@ char *image_texture_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
 	// Already fetched
 	if (char_ptr_array_index_of(parser_material_parsed, parser_material_res_var_name(node, node->outputs->buffer[1])) >= 0) { // TODO: node.outputs[0]
 		char *varname = parser_material_store_var_name(node);
-		return string_join(varname, ".rgb");
+		return string("%s.rgb", varname);
 	}
-	char   *tex_name = parser_material_node_name(node, NULL);
+	char       *tex_name = parser_material_node_name(node, NULL);
 	bind_tex_t *tex      = parser_material_make_texture(node, tex_name);
 	if (tex != NULL) {
-		i32       color_space = node->buttons->buffer[1]->default_value->buffer[0];
+		i32   color_space = node->buttons->buffer[1]->default_value->buffer[0];
 		char *texstore    = parser_material_texture_store(node, tex, tex_name, color_space);
-		return string_join(texstore, ".rgb");
+		return string("%s.rgb", texstore);
 	}
 	else {
 		char *tex_store = parser_material_store_var_name(node); // Pink color for missing texture
-		parser_material_write(parser_material_kong, string_join(string_join("var ", tex_store), ": float4 = float4(1.0, 0.0, 1.0, 1.0);"));
-		return string_join(tex_store, ".rgb");
+		parser_material_write(parser_material_kong, string("var %s: float4 = float4(1.0, 0.0, 1.0, 1.0);", tex_store));
+		return string("%s.rgb", tex_store);
 	}
 }
 
@@ -157,14 +106,14 @@ char *image_texture_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 	// Already fetched
 	if (char_ptr_array_index_of(parser_material_parsed, parser_material_res_var_name(node, node->outputs->buffer[0])) >= 0) { // TODO: node.outputs[1]
 		char *varname = parser_material_store_var_name(node);
-		return string_join(varname, ".a");
+		return string("%s.a", varname);
 	}
-	char   *tex_name = parser_material_node_name(node, NULL);
+	char       *tex_name = parser_material_node_name(node, NULL);
 	bind_tex_t *tex      = parser_material_make_texture(node, tex_name);
 	if (tex != NULL) {
-		i32       color_space = node->buttons->buffer[1]->default_value->buffer[0];
+		i32   color_space = node->buttons->buffer[1]->default_value->buffer[0];
 		char *texstore    = parser_material_texture_store(node, tex, tex_name, color_space);
-		return string_join(texstore, ".a");
+		return string("%s.a", texstore);
 	}
 	return "0.0";
 }

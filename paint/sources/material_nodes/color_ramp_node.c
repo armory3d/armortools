@@ -8,94 +8,51 @@ void color_ramp_node_init() {
 }
 
 char *color_ramp_node_vector(ui_node_t *node, ui_node_socket_t *socket) {
-	char    *fac    = parser_material_parse_value_input(node->inputs->buffer[0], false);
+	char        *fac    = parser_material_parse_value_input(node->inputs->buffer[0], false);
 	i32          data0  = node->buttons->buffer[0]->data->buffer[0];
-	char    *interp = data0 == 0 ? "LINEAR" : "CONSTANT";
+	char        *interp = data0 == 0 ? "LINEAR" : "CONSTANT";
 	f32_array_t *elems  = node->buttons->buffer[0]->default_value;
 	i32          len    = elems->length / (float)5;
 	if (len == 1) {
 		return parser_material_vec3(elems);
 	}
 	// Write cols array
-	char *cols_var = string_join(parser_material_node_name(node, NULL), "_cols");
-	parser_material_write(parser_material_kong,
-	                      string_join(string_join(string_join(string_join("var ", cols_var), ": float3["), i32_to_string(len)), "];")); // TODO: Make const
+	char *cols_var = string("%s_cols", parser_material_node_name(node, NULL));
+	parser_material_write(parser_material_kong, string("var %s: float3[%s];", cols_var, i32_to_string(len))); // TODO: Make const
 	for (i32 i = 0; i < len; ++i) {
 		f32_array_t *tmp = f32_array_create_from_raw((f32[]){}, 0);
 		f32_array_push(tmp, elems->buffer[i * 5]);
 		f32_array_push(tmp, elems->buffer[i * 5 + 1]);
 		f32_array_push(tmp, elems->buffer[i * 5 + 2]);
-		parser_material_write(parser_material_kong, string_join(string_join(string_join(string_join(string_join(cols_var, "["), i32_to_string(i)), "] = "),
-		                                                                    parser_material_vec3(tmp)),
-		                                                        ";"));
+		parser_material_write(parser_material_kong, string("%s[%s] = %s;", cols_var, i32_to_string(i), parser_material_vec3(tmp)));
 	}
 	// Get index
-	char *fac_var = string_join(parser_material_node_name(node, NULL), "_fac");
-	parser_material_write(parser_material_kong, string_join(string_join(string_join(string_join("var ", fac_var), ": float = "), fac), ";"));
+	char *fac_var = string("%s_fac", parser_material_node_name(node, NULL));
+	parser_material_write(parser_material_kong, string("var %s: float = %s;", fac_var, fac));
 	char *index = "0";
 	for (i32 i = 1; i < len; ++i) {
 		f32 e = elems->buffer[i * 5 + 4];
-		index = string_join(index, string_join(string_join(string_join(string_join(" + (", fac_var), " > "), f32_to_string(e)), " ? 1 : 0)"));
+		index = string("%s + (%s > %s ? 1 : 0)", index, fac_var, f32_to_string(e));
 	}
 	// Write index
-	char *index_var = string_join(parser_material_node_name(node, NULL), "_i");
-	parser_material_write(parser_material_kong, string_join(string_join(string_join(string_join("var ", index_var), ": int = "), index), ";"));
+	char *index_var = string("%s_i", parser_material_node_name(node, NULL));
+	parser_material_write(parser_material_kong, string("var %s: int = %s;", index_var, index));
 	if (string_equals(interp, "CONSTANT")) {
-		return string_join(string_join(string_join(cols_var, "["), index_var), "]");
+		return string("%s[%s]", cols_var, index_var);
 	}
 	else { // Linear
 		// Write facs array
-		char *facs_var = string_join(parser_material_node_name(node, NULL), "_facs");
-		parser_material_write(parser_material_kong,
-		                      string_join(string_join(string_join(string_join("var ", facs_var), ": float["), i32_to_string(len)), "];")); // TODO: Make const
+		char *facs_var = string("%s_facs", parser_material_node_name(node, NULL));
+		parser_material_write(parser_material_kong, string("var %s: float[%s];", facs_var, i32_to_string(len))); // TODO: Make const
 		for (i32 i = 0; i < len; ++i) {
 			f32 e = elems->buffer[i * 5 + 4];
-			parser_material_write(parser_material_kong,
-			                      string_join(string_join(string_join(string_join(string_join(facs_var, "["), i32_to_string(i)), "] = "), f32_to_string(e)),
-			                                  ";"));
+			parser_material_write(parser_material_kong, string("%s[%s] = %s;", facs_var, i32_to_string(i), f32_to_string(e)));
 		}
 		// Mix color
 		// float f = (pos - start) * (1.0 / (finish - start))
 		// TODO: index_var + 1 out of bounds
-		return string_join(
-		    string_join(
-		        string_join(
-		            string_join(
-		                string_join(
-		                    string_join(
-		                        string_join(
-		                            string_join(
-		                                string_join(
-		                                    string_join(
-		                                        string_join(
-		                                            string_join(
-		                                                string_join(
-		                                                    string_join(
-		                                                        string_join(
-		                                                            string_join(
-		                                                                string_join(
-		                                                                    string_join(string_join(string_join(string_join(string_join("lerp3(", cols_var),
-		                                                                                                                    "["),
-		                                                                                                        index_var),
-		                                                                                            "], "),
-		                                                                                cols_var),
-		                                                                    "["),
-		                                                                index_var),
-		                                                            " + 1], ("),
-		                                                        fac_var),
-		                                                    " - "),
-		                                                facs_var),
-		                                            "["),
-		                                        index_var),
-		                                    "]) * (1.0 / ("),
-		                                facs_var),
-		                            "["),
-		                        index_var),
-		                    " + 1] - "),
-		                facs_var),
-		            "["),
-		        index_var),
-		    "]) ))");
+		return string("lerp3(%s[%s], %s[%s + 1], (%s - %s[%s]) * (1.0 / (%s[%s + 1] - %s[%s])) ))", cols_var, index_var, cols_var, index_var, fac_var, facs_var,
+		              index_var, facs_var, index_var, facs_var, index_var);
 	}
 }
 

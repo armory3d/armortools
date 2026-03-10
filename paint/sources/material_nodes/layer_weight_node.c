@@ -10,10 +10,10 @@ char *layer_weight_node_value(ui_node_t *node, ui_node_socket_t *socket) {
 	char *blend = parser_material_parse_value_input(node->inputs->buffer[0], false);
 	if (socket == node->outputs->buffer[0]) { // Fresnel
 		parser_material_kong->frag_dotnv = true;
-		return string_join(string_join("clamp(pow(1.0 - dotnv, (1.0 - ", blend), ") * 10.0), 0.0, 1.0)");
+		return string("clamp(pow(1.0 - dotnv, (1.0 - %s) * 10.0), 0.0, 1.0)", blend);
 	}
 	else { // Facing
 		parser_material_kong->frag_dotnv = true;
-		return string_join(string_join("((1.0 - dotnv) * ", blend), ")");
+		return string("((1.0 - dotnv) * %s)", blend);
 	}
 }

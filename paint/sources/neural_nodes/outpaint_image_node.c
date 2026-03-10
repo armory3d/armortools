@@ -12,10 +12,10 @@ void outpaint_image_node_button_on_next_frame(ui_node_t *node) {
 	gpu_texture_t *input     = ui_nodes_get_node_preview_image(from_node);
 	if (input != NULL) {
 
-		char    *node_name = parser_material_node_name(node, NULL);
+		char        *node_name = parser_material_node_name(node, NULL);
 		ui_handle_t *h         = ui_handle(node_name);
 		i32          model     = ui_nest(h, 0)->i;
-		char    *prompt    = ui_nest(h, 1)->text;
+		char        *prompt    = ui_nest(h, 1)->text;
 
 		if (string_equals(prompt, "")) {
 			prompt = ".";
@@ -39,17 +39,16 @@ void outpaint_image_node_button_on_next_frame(ui_node_t *node) {
 		// #endif
 
 		char *dir = neural_node_dir();
-		iron_write_png(string_join(string_join(dir, PATH_SEP), "input.png"), gpu_get_texture_pixels(input_scaled), input_scaled->width, input_scaled->height,
-		               0);
-		iron_write_png(string_join(string_join(dir, PATH_SEP), "mask.png"), gpu_get_texture_pixels(mask), mask->width, mask->height, 0);
+		iron_write_png(string("%s%sinput.png", dir, PATH_SEP), gpu_get_texture_pixels(input_scaled), input_scaled->width, input_scaled->height, 0);
+		iron_write_png(string("%s%smask.png", dir, PATH_SEP), gpu_get_texture_pixels(mask), mask->width, mask->height, 0);
 
 		string_t_array_t *argv;
 		if (model == 0) {
 			argv = any_array_create_from_raw(
 			    (void *[]){
-			        string_join(string_join(dir, "/"), neural_node_sd_bin()),
+			        string("%s/%s", dir, neural_node_sd_bin()),
 			        "-m",
-			        string_join(dir, "/v1-5-pruned-emaonly.safetensors"),
+			        string("%s/v1-5-pruned-emaonly.safetensors", dir),
 			        "--offload-to-cpu",
 			        "--steps",
 			        "30",
@@ -66,11 +65,11 @@ void outpaint_image_node_button_on_next_frame(ui_node_t *node) {
 			        "-p",
 			        prompt,
 			        "-i",
-			        string_join(dir, "/input.png"),
+			        string("%s/input.png", dir),
 			        "--mask",
-			        string_join(dir, "/mask.png"),
+			        string("%s/mask.png", dir),
 			        "-o",
-			        string_join(dir, "/output.png"),
+			        string("%s/output.png", dir),
 			        NULL,
 			    },
 			    25);
@@ -78,15 +77,15 @@ void outpaint_image_node_button_on_next_frame(ui_node_t *node) {
 		else {
 			argv = any_array_create_from_raw(
 			    (void *[]){
-			        string_join(string_join(dir, "/"), neural_node_sd_bin()),
+			        string("%s/%s", dir, neural_node_sd_bin()),
 			        "--diffusion-model",
-			        string_join(dir, "/qwen-image-edit-2511-Q4_K_S.gguf"),
+			        string("%s/qwen-image-edit-2511-Q4_K_S.gguf", dir),
 			        "--vae",
-			        string_join(dir, "/Qwen_Image-VAE.safetensors"),
+			        string("%s/Qwen_Image-VAE.safetensors", dir),
 			        "--llm",
-			        string_join(dir, "/Qwen2.5-VL-7B-Instruct-Q4_K_S.gguf"),
+			        string("%s/Qwen2.5-VL-7B-Instruct-Q4_K_S.gguf", dir),
 			        "--llm_vision",
-			        string_join(dir, "/mmproj-F16.gguf"),
+			        string("%s/mmproj-F16.gguf", dir),
 			        "--offload-to-cpu",
 			        "--diffusion-fa",
 			        "--qwen-image-zero-cond-t",
@@ -101,9 +100,9 @@ void outpaint_image_node_button_on_next_frame(ui_node_t *node) {
 			        "-p",
 			        "replace red squares by extending image contents", // prompt,
 			        "-r",
-			        string_join(dir, "/input.png"),
+			        string("%s/input.png", dir),
 			        "-o",
-			        string_join(dir, "/output.png"),
+			        string("%s/output.png", dir),
 			        NULL,
 			    },
 			    27);
@@ -117,7 +116,7 @@ void outpaint_image_node_button_on_next_frame(ui_node_t *node) {
 void outpaint_image_node_button(i32 node_id) {
 	ui_node_canvas_t *canvas    = ui_nodes_get_canvas(true);
 	ui_node_t        *node      = ui_get_node(canvas->nodes, node_id);
-	char         *node_name = parser_material_node_name(node, NULL);
+	char             *node_name = parser_material_node_name(node, NULL);
 	ui_handle_t      *h         = ui_handle(node_name);
 	string_t_array_t *models    = any_array_create_from_raw(
         (void *[]){
@@ -125,8 +124,8 @@ void outpaint_image_node_button(i32 node_id) {
             "Qwen Image Edit",
         },
         2);
-	i32       model                  = ui_combo(ui_nest(h, 0), models, tr("Model", NULL), false, UI_ALIGN_LEFT, true);
-	char *prompt                 = ui_text_area(ui_nest(h, 1), UI_ALIGN_LEFT, true, tr("prompt", NULL), true);
+	i32   model                      = ui_combo(ui_nest(h, 0), models, tr("Model", NULL), false, UI_ALIGN_LEFT, true);
+	char *prompt                     = ui_text_area(ui_nest(h, 1), UI_ALIGN_LEFT, true, tr("prompt", NULL), true);
 	node->buttons->buffer[0]->height = string_split(prompt, "\n")->length + 2;
 
 	if (neural_node_button(node, models->buffer[model])) {

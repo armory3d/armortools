@@ -22,11 +22,11 @@ void nodes_material_new_group_button(i32 node_id) {
 	ui_node_t *node = ui_get_node(ui_nodes_get_canvas(true)->nodes, node_id);
 	if (string_equals(node->name, "New Group")) {
 		for (i32 i = 1; i < 999; ++i) {
-			node->name = string_join(string_join(tr("Group", NULL), " "), i32_to_string(i));
+			node->name = string("%s %s", tr("Group", NULL), i32_to_string(i));
 			bool found = false;
 			for (i32 i = 0; i < project_material_groups->length; ++i) {
 				node_group_t *g     = project_material_groups->buffer[i];
-				char     *cname = g->canvas->name;
+				char         *cname = g->canvas->name;
 				if (string_equals(cname, node->name)) {
 					found = true;
 					break;
@@ -82,7 +82,7 @@ void nodes_material_new_group_button(i32 node_id) {
 	node_group_t *group = NULL;
 	for (i32 i = 0; i < project_material_groups->length; ++i) {
 		node_group_t *g     = project_material_groups->buffer[i];
-		char     *cname = g->canvas->name;
+		char         *cname = g->canvas->name;
 		if (string_equals(cname, node->name)) {
 			group = g;
 			break;
@@ -195,7 +195,7 @@ char *nodes_material_get_socket_name(char *type) {
 }
 
 ui_node_socket_t *nodes_material_create_socket(ui_nodes_t *nodes, ui_node_t *node, char *name, char *type, ui_node_canvas_t *canvas, f32 min, f32 max,
-                                               void * default_value) {
+                                               void *default_value) {
 	ui_node_socket_t *soc =
 	    GC_ALLOC_INIT(ui_node_socket_t, {.id            = ui_get_socket_id(canvas->nodes),
 	                                     .node_id       = node->id,
