@@ -308,7 +308,7 @@ world_data_t *world_data_parse(char *name, char *id) {
 		char *base = substring(raw->radiance, 0, dot);
 
 		for (i32 i = 0; i < raw->radiance_mipmaps; ++i) {
-			char          *mip_name             = string_join(string_join(base, string_join("_", i32_to_string(i))), ext);
+			char          *mip_name             = string("%s_%s%s", base, i32_to_string(i), ext);
 			gpu_texture_t *mipimg               = data_get_image(mip_name);
 			raw->_->radiance_mipmaps->buffer[i] = mipimg;
 		}
@@ -345,7 +345,7 @@ f32_array_t *world_data_set_irradiance(world_data_t *raw) {
 	if (raw->irradiance == NULL) {
 		return world_data_get_empty_irradiance();
 	}
-	buffer_t     *b                 = data_get_blob(string_join(raw->irradiance, ".arm"));
+	buffer_t     *b                 = data_get_blob(string("%s.arm", raw->irradiance));
 	irradiance_t *irradiance_parsed = (irradiance_t *)armpack_decode(b);
 	f32_array_t  *irr               = f32_array_create(28); // Align to mult of 4 - 27->28
 	for (i32 i = 0; i < 27; ++i) {
@@ -581,9 +581,9 @@ void shader_context_compile(shader_context_t *raw) {
 		raw->_->pipe->fragment_shader = sys_get_shader(raw->fragment_shader);
 		raw->_->pipe->vertex_shader   = sys_get_shader(raw->vertex_shader);
 #else
-		buffer_t *vs_buffer           = data_get_blob(string_join(raw->vertex_shader, shader_data_ext()));
+		buffer_t *vs_buffer           = data_get_blob(string("%s%s", raw->vertex_shader, shader_data_ext()));
 		raw->_->pipe->vertex_shader   = gpu_create_shader(vs_buffer, GPU_SHADER_TYPE_VERTEX);
-		buffer_t *fs_buffer           = data_get_blob(string_join(raw->fragment_shader, shader_data_ext()));
+		buffer_t *fs_buffer           = data_get_blob(string("%s%s", raw->fragment_shader, shader_data_ext()));
 		raw->_->pipe->fragment_shader = gpu_create_shader(fs_buffer, GPU_SHADER_TYPE_FRAGMENT);
 #endif
 	}
@@ -1892,7 +1892,7 @@ char *data_resolve_path(char *file) {
 	if (data_is_abs(file) || data_is_up(file)) {
 		return file;
 	}
-	return string_join(data_path(), file);
+	return string("%s%s", data_path(), file);
 }
 
 mesh_data_t *data_get_mesh(char *file, char *name) {
@@ -1900,7 +1900,7 @@ mesh_data_t *data_get_mesh(char *file, char *name) {
 		data_cached_meshes = any_map_create();
 		gc_root(data_cached_meshes);
 	}
-	char        *handle = string_join(file, name);
+	char        *handle = string("%s%s", file, name);
 	mesh_data_t *cached = (mesh_data_t *)any_map_get(data_cached_meshes, handle);
 	if (cached != NULL) {
 		return cached;
@@ -1916,7 +1916,7 @@ camera_data_t *data_get_camera(char *file, char *name) {
 		data_cached_cameras = any_map_create();
 		gc_root(data_cached_cameras);
 	}
-	char          *handle = string_join(file, name);
+	char          *handle = string("%s%s", file, name);
 	camera_data_t *cached = (camera_data_t *)any_map_get(data_cached_cameras, handle);
 	if (cached != NULL) {
 		return cached;
@@ -1931,7 +1931,7 @@ material_data_t *data_get_material(char *file, char *name) {
 		data_cached_materials = any_map_create();
 		gc_root(data_cached_materials);
 	}
-	char            *handle = string_join(file, name);
+	char            *handle = string("%s%s", file, name);
 	material_data_t *cached = (material_data_t *)any_map_get(data_cached_materials, handle);
 	if (cached != NULL) {
 		return cached;
@@ -1946,7 +1946,7 @@ world_data_t *data_get_world(char *file, char *name) {
 		data_cached_worlds = any_map_create();
 		gc_root(data_cached_worlds);
 	}
-	char         *handle = string_join(file, name);
+	char         *handle = string("%s%s", file, name);
 	world_data_t *cached = (world_data_t *)any_map_get(data_cached_worlds, handle);
 	if (cached != NULL) {
 		return cached;
@@ -1983,7 +1983,7 @@ scene_t *data_get_scene_raw(char *file) {
 	}
 	// If no extension specified, set to .arm
 	char     *ext    = ends_with(file, ".arm") ? "" : ".arm";
-	buffer_t *b      = data_get_blob(string_join(file, ext));
+	buffer_t *b      = data_get_blob(string("%s%s", file, ext));
 	scene_t  *parsed = (scene_t *)armpack_decode(b);
 	any_map_set(data_cached_scene_raws, file, parsed);
 	return parsed;
@@ -2029,7 +2029,7 @@ video_t *data_get_video(char *file) {
 	}
 	// Strip extension and use .webm
 	char    *base   = substring(file, 0, string_length(file) - 4);
-	char    *webm   = string_join(base, ".webm");
+	char    *webm   = string("%s.webm", base);
 	video_t *cached = (video_t *)any_map_get(data_cached_videos, webm);
 	if (cached != NULL) {
 		return cached;

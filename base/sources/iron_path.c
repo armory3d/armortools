@@ -4,9 +4,9 @@
 
 #include "iron_array.h"
 #include "iron_file.h"
+#include "iron_gc.h"
 #include "iron_map.h"
 #include "iron_string.h"
-#include "iron_gc.h"
 
 #ifdef IRON_LINUX
 bool path_is_protected_linux = false;
@@ -25,7 +25,7 @@ static char_ptr_array_t *_path_displacement_ext = NULL;
 char_ptr_array_t *path_mesh_formats(void) {
 	if (_path_mesh_formats == NULL) {
 		_path_mesh_formats = char_ptr_array_create(0);
-        gc_root(_path_mesh_formats);
+		gc_root(_path_mesh_formats);
 		char_ptr_array_push(_path_mesh_formats, "obj");
 		char_ptr_array_push(_path_mesh_formats, "blend");
 	}
@@ -35,7 +35,7 @@ char_ptr_array_t *path_mesh_formats(void) {
 char_ptr_array_t *path_texture_formats(void) {
 	if (_path_texture_formats == NULL) {
 		_path_texture_formats = char_ptr_array_create(0);
-        gc_root(_path_texture_formats);
+		gc_root(_path_texture_formats);
 		char_ptr_array_push(_path_texture_formats, "jpg");
 		char_ptr_array_push(_path_texture_formats, "jpeg");
 		char_ptr_array_push(_path_texture_formats, "png");
@@ -52,7 +52,7 @@ char_ptr_array_t *path_texture_formats(void) {
 char_ptr_array_t *path_base_color_ext(void) {
 	if (_path_base_color_ext == NULL) {
 		_path_base_color_ext = char_ptr_array_create(0);
-        gc_root(_path_base_color_ext);
+		gc_root(_path_base_color_ext);
 		char_ptr_array_push(_path_base_color_ext, "albedo");
 		char_ptr_array_push(_path_base_color_ext, "alb");
 		char_ptr_array_push(_path_base_color_ext, "basecol");
@@ -71,7 +71,7 @@ char_ptr_array_t *path_base_color_ext(void) {
 char_ptr_array_t *path_opacity_ext(void) {
 	if (_path_opacity_ext == NULL) {
 		_path_opacity_ext = char_ptr_array_create(0);
-        gc_root(_path_opacity_ext);
+		gc_root(_path_opacity_ext);
 		char_ptr_array_push(_path_opacity_ext, "opac");
 		char_ptr_array_push(_path_opacity_ext, "opacity");
 		char_ptr_array_push(_path_opacity_ext, "alpha");
@@ -82,7 +82,7 @@ char_ptr_array_t *path_opacity_ext(void) {
 char_ptr_array_t *path_normal_map_ext(void) {
 	if (_path_normal_map_ext == NULL) {
 		_path_normal_map_ext = char_ptr_array_create(0);
-        gc_root(_path_normal_map_ext);
+		gc_root(_path_normal_map_ext);
 		char_ptr_array_push(_path_normal_map_ext, "normal");
 		char_ptr_array_push(_path_normal_map_ext, "normals");
 		char_ptr_array_push(_path_normal_map_ext, "nor");
@@ -96,7 +96,7 @@ char_ptr_array_t *path_normal_map_ext(void) {
 char_ptr_array_t *path_occlusion_ext(void) {
 	if (_path_occlusion_ext == NULL) {
 		_path_occlusion_ext = char_ptr_array_create(0);
-        gc_root(_path_occlusion_ext);
+		gc_root(_path_occlusion_ext);
 		char_ptr_array_push(_path_occlusion_ext, "ao");
 		char_ptr_array_push(_path_occlusion_ext, "occlusion");
 		char_ptr_array_push(_path_occlusion_ext, "ambientOcclusion");
@@ -109,7 +109,7 @@ char_ptr_array_t *path_occlusion_ext(void) {
 char_ptr_array_t *path_roughness_ext(void) {
 	if (_path_roughness_ext == NULL) {
 		_path_roughness_ext = char_ptr_array_create(0);
-        gc_root(_path_roughness_ext);
+		gc_root(_path_roughness_ext);
 		char_ptr_array_push(_path_roughness_ext, "roughness");
 		char_ptr_array_push(_path_roughness_ext, "rough");
 		char_ptr_array_push(_path_roughness_ext, "r");
@@ -121,7 +121,7 @@ char_ptr_array_t *path_roughness_ext(void) {
 char_ptr_array_t *path_metallic_ext(void) {
 	if (_path_metallic_ext == NULL) {
 		_path_metallic_ext = char_ptr_array_create(0);
-        gc_root(_path_metallic_ext);
+		gc_root(_path_metallic_ext);
 		char_ptr_array_push(_path_metallic_ext, "metallic");
 		char_ptr_array_push(_path_metallic_ext, "metal");
 		char_ptr_array_push(_path_metallic_ext, "metalness");
@@ -134,7 +134,7 @@ char_ptr_array_t *path_metallic_ext(void) {
 char_ptr_array_t *path_displacement_ext(void) {
 	if (_path_displacement_ext == NULL) {
 		_path_displacement_ext = char_ptr_array_create(0);
-        gc_root(_path_displacement_ext);
+		gc_root(_path_displacement_ext);
 		char_ptr_array_push(_path_displacement_ext, "displacement");
 		char_ptr_array_push(_path_displacement_ext, "height");
 		char_ptr_array_push(_path_displacement_ext, "h");
@@ -152,7 +152,7 @@ static char *data_path(void) {
 }
 
 char *path_data(void) {
-	return string_join(iron_internal_files_location(), string_join(PATH_SEP, data_path()));
+	return string("%s%s%s", iron_internal_files_location(), PATH_SEP, data_path());
 }
 
 char *path_to_relative(char *from, char *to) {
@@ -171,9 +171,9 @@ char *path_to_relative(char *from, char *to) {
 	}
 	char *p = "";
 	for (uint32_t i = 0; i < a->length; ++i) {
-		p = string_join(p, ".." PATH_SEP);
+		p = string("%s.." PATH_SEP, p);
 	}
-	p = string_join(p, string_array_join(b, PATH_SEP));
+	p = string("%s%s", p, string_array_join(b, PATH_SEP));
 	return p;
 }
 
@@ -219,7 +219,7 @@ bool path_is_mesh(char *path) {
 	char_ptr_array_t *formats = path_mesh_formats();
 	for (uint32_t i = 0; i < formats->length; ++i) {
 		char *s   = formats->buffer[i];
-		char *ext = string_join(".", s);
+		char *ext = string(".%s", s);
 		if (ends_with(p, ext)) {
 			return true;
 		}
@@ -232,7 +232,7 @@ bool path_is_texture(char *path) {
 	char_ptr_array_t *formats = path_texture_formats();
 	for (uint32_t i = 0; i < formats->length; ++i) {
 		char *s   = formats->buffer[i];
-		char *ext = string_join(".", s);
+		char *ext = string(".%s", s);
 		if (ends_with(p, ext)) {
 			return true;
 		}
@@ -284,11 +284,11 @@ bool path_check_ext(char *p, char_ptr_array_t *exts) {
 	p = string_replace_all(p, "-", "_");
 	for (uint32_t i = 0; i < exts->length; ++i) {
 		char *ext            = exts->buffer[i];
-		char *ext_underscore = string_join("_", ext);
+		char *ext_underscore = string("_%s", ext);
 		if (ends_with(p, ext_underscore)) {
 			return true;
 		}
-		char *ext_underscore_mid = string_join("_", string_join(ext, "_"));
+		char *ext_underscore_mid = string("_%s_", ext);
 		if (string_index_of(p, ext_underscore_mid) >= 0 && !ends_with(p, "_preview") && !ends_with(p, "_icon")) {
 			return true;
 		}
@@ -348,8 +348,8 @@ bool path_is_protected(void) {
 char *path_join(char *a, char *b) {
 	char *path = a;
 	if (!ends_with(path, PATH_SEP)) {
-		path = string_join(path, PATH_SEP);
+		path = string("%s" PATH_SEP, path);
 	}
-	path = string_join(path, b);
+	path = string("%s%s", path, b);
 	return path;
 }

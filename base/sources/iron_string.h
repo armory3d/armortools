@@ -7,7 +7,6 @@
 
 char *string_alloc(int size);
 char *string(char *fmt, ...);
-char *string_join(char *a, char *b);
 char *string_copy(char *a);
 int   string_length(char *str);
 bool  string_equals(char *a, char *b);

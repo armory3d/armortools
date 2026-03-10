@@ -35,8 +35,8 @@ void _kickstart() {
 
 	gpu_vertex_structure_t *vs = GC_ALLOC_INIT(gpu_vertex_structure_t, {0});
 	gpu_vertex_struct_add(vs, "pos", GPU_VERTEX_DATA_F32_3X);
-	buffer_t     *vs_buffer         = iron_load_blob(string_join("./data/test.vert", sys_shader_ext()));
-	buffer_t     *fs_buffer         = iron_load_blob(string_join("./data/test.frag", sys_shader_ext()));
+	buffer_t     *vs_buffer         = iron_load_blob(string("./data/test.vert%s", sys_shader_ext()));
+	buffer_t     *fs_buffer         = iron_load_blob(string("./data/test.frag%s", sys_shader_ext()));
 	gpu_shader_t *vert              = gpu_create_shader(vs_buffer, GPU_SHADER_TYPE_VERTEX);
 	gpu_shader_t *frag              = gpu_create_shader(fs_buffer, GPU_SHADER_TYPE_FRAGMENT);
 	pipeline->vertex_shader         = vert;
@@ -95,8 +95,14 @@ void _kickstart() {
 any_map_t *ui_children;
 any_map_t *ui_nodes_custom_buttons;
 i32        pipes_offset;
-char *strings_check_internet_connection() { return ""; }
+char      *strings_check_internet_connection() {
+    return "";
+}
 void  console_error(char *s) {}
 void  console_info(char *s) {}
-char *tr(char *id, any_map_t *vars) { return id; }
-i32   pipes_get_constant_location(char * s) { return 0; }
+char *tr(char *id, any_map_t *vars) {
+	return id;
+}
+i32 pipes_get_constant_location(char *s) {
+	return 0;
+}

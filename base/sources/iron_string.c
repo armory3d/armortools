@@ -30,13 +30,6 @@ char *string(char *fmt, ...) {
     return str;
 }
 
-char *string_join(char *a, char *b) {
-	char *r = string_alloc(strlen(a) + strlen(b) + 1);
-	strcpy(r, a);
-	strcat(r, b);
-	return r;
-}
-
 char *string_copy(char *a) {
 	if (a == NULL) {
 		return NULL;

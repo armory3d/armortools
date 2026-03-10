@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 // #define STB_DS_IMPLEMENTATION
-#include "../../sources/libs/kong/libs/stb_ds.h"
+#include "../../sources/kong/libs/stb_ds.h"
 #ifdef WIN32
 #include <Windows.h>
 #endif

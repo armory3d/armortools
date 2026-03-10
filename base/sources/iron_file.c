@@ -7,7 +7,7 @@
 #include "iron_path.h"
 #include "iron_string.h"
 #include "iron_system.h"
-#include "libs/kong/dir.h"
+#include "kong/dir.h"
 #ifdef IRON_ANDROID
 #include <backends/android_system.h>
 #endif
@@ -628,7 +628,7 @@ void file_cache_cloud(char *path, void (*done)(char *dest), char *server) {
 #ifdef IRON_WINDOWS
 	path = string_replace_all(path, "\\", "/");
 #endif
-	char *url = string_join(string_join(server, "/"), path);
+	char *url = string("%s/%s", server, path);
 
 	file_cache_cloud_data_t *fccd = malloc(sizeof(file_cache_cloud_data_t));
 	strcpy(fccd->dest, dest);
@@ -697,13 +697,13 @@ static void _file_init_cloud_index_callback(char *url, buffer_t *buffer) {}
 
 void file_init_cloud_bytes(void (*done)(void), char *append, char *server) {
 	_file_init_cloud_bytes_done = done;
-	char *index_url             = string_join(string_join(server, "/index.txt"), append != NULL ? append : "");
+	char *index_url             = string("%s/index.txt%s", server, append != NULL ? append : "");
 	iron_file_download(index_url, _file_init_cloud_bytes_callback, 0, NULL);
 	iron_file_download("https://cloud-index.armory3d.workers.dev/", _file_init_cloud_index_callback, 0, NULL);
 }
 
 void file_init_cloud(void (*done)(void), char *server) {
-	file_cloud       = any_map_create();
+	file_cloud = any_map_create();
 	gc_root(file_cloud);
 	file_cloud_sizes = i32_map_create();
 	gc_root(file_cloud_sizes);

@@ -22,7 +22,7 @@ if (platform != "wasm") {
 	project.add_cfiles("sources/libs/gc.c");
 }
 
-project.add_cfiles("sources/libs/kong/dir.c");
+project.add_cfiles("sources/kong/dir.c");
 project.add_define("EMBED_H_PATH=\"" + os_cwd() + "/build/embed.h" +
                    "\"");
 
@@ -122,8 +122,8 @@ else if (platform == "wasm") {
 	project.add_define("IRON_WASM");
 	project.add_define("IRON_WEBGPU");
 	project.add_define("NO_GC");
-	project.add_cfiles("sources/libs/miniclib/**");
-	project.add_include_dir("sources/libs/miniclib");
+	project.add_cfiles("sources/miniclib/**");
+	project.add_include_dir("sources/miniclib");
 	project.add_assets("sources/backends/data/wasm/*");
 }
 
@@ -133,9 +133,9 @@ if (graphics == "metal" || (graphics == "vulkan" && platform != "android")) {
 
 if (flags.with_kong) {
 	project.add_define("WITH_KONG");
-	project.add_cfiles("sources/libs/kong/libs/*.c");
-	project.add_cfiles("sources/libs/kong/*.c");
-	project.add_cfiles("sources/libs/kong/backends/*.c");
+	project.add_cfiles("sources/kong/libs/*.c");
+	project.add_cfiles("sources/kong/*.c");
+	project.add_cfiles("sources/kong/backends/*.c");
 }
 
 if (flags.with_plugins) {
